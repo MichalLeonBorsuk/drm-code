@@ -33,26 +33,26 @@
 #include "../util/Utilities.h"
 #include "../resample/Resample.h"
 
-#ifdef HAVE_LIBFAAD
-# ifdef DYNAMIC_LINK_CODECS
-#  ifdef _WIN32
-#   include <windows.h>
-#   pragma pack(push, 8)
-#   ifndef NEAACDECAPI
-#    define NEAACDECAPI __cdecl
-#   endif
-#  else
-#   include <dlfcn.h>
-#   ifndef NEAACDECAPI
-#    define NEAACDECAPI
-#   endif
-#  endif
-#  define DRMCH_MONO          1
-#  define DRMCH_STEREO        2
-#  define DRMCH_SBR_MONO      3
-#  define DRMCH_SBR_STEREO    4
-#  define DRMCH_SBR_PS_STEREO 5
+#ifdef _WIN32
+# include <windows.h>
+# pragma pack(push, 8)
+# ifndef NEAACDECAPI
+#  define NEAACDECAPI __cdecl
+# endif
+#else
+# include <dlfcn.h>
+# ifndef NEAACDECAPI
+#  define NEAACDECAPI
+# endif
+#endif
+#define DRMCH_MONO          1
+#define DRMCH_STEREO        2
+#define DRMCH_SBR_MONO      3
+#define DRMCH_SBR_STEREO    4
+#define DRMCH_SBR_PS_STEREO 5
+
 typedef void *NeAACDecHandle;
+
 typedef struct NeAACDecFrameInfo
 {
     unsigned long bytesconsumed;
@@ -80,15 +80,11 @@ typedef struct NeAACDecFrameInfo
     /* PS: 0: off, 1: on */
     unsigned char ps;
 } NeAACDecFrameInfo;
-    typedef NeAACDecHandle NEAACDECAPI (NeAACDecOpen_t)(void);
-    typedef char NEAACDECAPI (NeAACDecInitDRM_t)(NeAACDecHandle*, unsigned long, unsigned char);
-    typedef void NEAACDECAPI (NeAACDecClose_t)(NeAACDecHandle);
-    typedef void* NEAACDECAPI (NeAACDecDecode_t)(NeAACDecHandle,NeAACDecFrameInfo*,unsigned char *,unsigned long);
-# else
-#  include "neaacdec.h"
-# endif
-#endif
 
+typedef NeAACDecHandle NEAACDECAPI (NeAACDecOpen_t)(void);
+typedef char NEAACDECAPI (NeAACDecInitDRM_t)(NeAACDecHandle*, unsigned long, unsigned char);
+typedef void NEAACDECAPI (NeAACDecClose_t)(NeAACDecHandle);
+typedef void* NEAACDECAPI (NeAACDecDecode_t)(NeAACDecHandle,NeAACDecFrameInfo*,unsigned char *,unsigned long);
 
 /* Definitions ****************************************************************/
 
@@ -232,7 +228,6 @@ protected:
 	CAudioParam::EAudCod	eAudioCoding;
 
 
-#ifdef HAVE_LIBFAAD /* AAC decoding */
 	NeAACDecHandle		HandleAACDecoder;
 
 	vector<_BYTE>		vecbyPrepAudioFrame;
@@ -248,19 +243,15 @@ protected:
 	int					iBadBlockCount;
 	int					iAudioPayloadLen;
 
-# ifdef DYNAMIC_LINK_CODECS
-#  ifdef _WIN32
+#ifdef _WIN32
     HINSTANCE hFaaDlib;
-#  else
+#else
     void* hFaaDlib;
-#  endif
+#endif
     NeAACDecOpen_t *NeAACDecOpen;
     NeAACDecInitDRM_t *NeAACDecInitDRM;
     NeAACDecClose_t *NeAACDecClose;
     NeAACDecDecode_t *NeAACDecDecode;
-# endif
-#endif
-
 
 	/* CELP decoding */
 	CMatrix<_BINARY>	celp_frame;

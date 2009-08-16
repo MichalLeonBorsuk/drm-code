@@ -34,20 +34,18 @@
 #include "../util/Utilities.h"
 #include "../resample/Resample.h"
 
-#ifdef HAVE_LIBFAAC
-# ifdef DYNAMIC_LINK_CODECS
-#  ifdef _WIN32
-#   include <windows.h>
-#   ifndef FAACAPI
-#    define FAACAPI __stdcall
-#   endif
-#  else
-#   include <dlfcn.h>
-#   ifndef FAACAPI
-#    define FAACAPI
-#   endif
-#  endif
-#  pragma pack(push, 1)
+#ifdef _WIN32
+# include <windows.h>
+# ifndef FAACAPI
+#  define FAACAPI __stdcall
+# endif
+#else
+# include <dlfcn.h>
+# ifndef FAACAPI
+#  define FAACAPI
+# endif
+#endif
+#pragma pack(push, 1)
 typedef struct {
   void *ptr;
   char *name;
@@ -172,11 +170,6 @@ typedef int FAACAPI (faacEncEncode_t)(faacEncHandle, int32_t *, unsigned int,
 
 typedef int FAACAPI (faacEncClose_t)(faacEncHandle);
 
-# else
-#  include "faac.h"
-# endif
-#endif
-
 /* Classes ********************************************************************/
 class CAudioSourceEncoderImplementation
 {
@@ -192,15 +185,13 @@ protected:
 	bool				    bUsingTextMessage;
 	int						iTotNumBitsForUsage;
 
-#ifdef HAVE_LIBFAAC
 	faacEncHandle			hEncoder;
 	faacEncConfigurationPtr CurEncFormat;
-# ifdef DYNAMIC_LINK_CODECS
-#  ifdef _WIN32
+#ifdef _WIN32
     HINSTANCE hlib;
-#  else
+#else
     void* hlib;
-#  endif
+#endif
     faacEncGetVersion_t*    faacEncGetVersion;
     faacEncGetCurrentConfiguration_t*
 			    faacEncGetCurrentConfiguration;
@@ -211,8 +202,6 @@ protected:
 			    faacEncGetDecoderSpecificInfo;
     faacEncEncode_t*        faacEncEncode;
     faacEncClose_t*         faacEncClose;
-# endif
-#endif
 	unsigned long			lNumSampEncIn;
 	unsigned long			lMaxBytesEncOut;
 	unsigned long			lEncSamprate;
