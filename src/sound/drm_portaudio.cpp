@@ -1,0 +1,454 @@
+/******************************************************************************\
+ * British Broadcasting Corporation
+ * Copyright (c) 2007
+ *
+ * Author(s):
+ *	Julian Cable
+ *
+ * Decription:
+ * PortAudio sound interface
+ *
+ ******************************************************************************
+ *
+ * This program is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License as published by the Free Software
+ * Foundation; either version 2 of the License, or (at your option) any later
+ * version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, write to the Free Software Foundation, Inc.,
+ * 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+\******************************************************************************/
+
+#include "drm_portaudio.h"
+#include <cstring>
+#include <iostream>
+
+/* This routine will be called by the PortAudio engine when audio is needed.
+ * It may called at interrupt level on some machines so don't do anything
+ * that could mess up the system like calling malloc() or free().
+ */
+static int
+captureCallback(const void *inputBuffer, void *outputBuffer,
+				unsigned long framesPerBuffer,
+				const PaStreamCallbackTimeInfo *,
+				PaStreamCallbackFlags statusFlags, void *userData)
+{
+	/* Cast data passed through stream to our structure. */
+	CPaCommon *This = (CPaCommon *) userData;
+	(void) outputBuffer;		/* Prevent unused variable warning. */
+	long bytes = framesPerBuffer*2*sizeof(_SAMPLE);
+	long avail = PaUtil_GetRingBufferWriteAvailable(&This->ringBuffer);
+	PaUtil_WriteRingBuffer(&This->ringBuffer, inputBuffer, (avail<bytes)?avail:bytes);
+	if(statusFlags&paInputOverflow)
+		This->xruns++;
+	return 0;
+}
+
+static int
+playbackCallback(const void *inputBuffer, void *outputBuffer,
+				 unsigned long framesPerBuffer,
+				 const PaStreamCallbackTimeInfo *,
+				 PaStreamCallbackFlags statusFlags, void *userData)
+{
+	CPaCommon *This = (CPaCommon *) userData;
+	(void) inputBuffer;			/* Prevent unused variable warning. */
+	long bytes = framesPerBuffer*2*sizeof(_SAMPLE);
+	long avail = PaUtil_GetRingBufferReadAvailable(&This->ringBuffer);
+	PaUtil_ReadRingBuffer(&This->ringBuffer, outputBuffer, (avail<bytes)?avail:bytes);
+	if(sizeof(_SAMPLE)==4)
+	{
+		_SAMPLE* b = (_SAMPLE*) outputBuffer;
+		for(size_t i=0; i<framesPerBuffer; i++)
+			b[i] = _SAMPLE(_REAL(b[i]) / 32768.0);
+	}
+	if(statusFlags&paOutputUnderflow)
+		This->xruns++;
+	return 0;
+}
+
+struct CPa_Static
+{
+	CPa_Static()
+	{
+		int err = Pa_Initialize();
+		if (err != paNoError)
+			throw string("PortAudio error: ") + Pa_GetErrorText(err);
+    	nApis = Pa_GetHostApiCount();
+	}
+
+	~CPa_Static()
+	{
+		int err = Pa_Terminate();
+		if (err != paNoError)
+			throw string("PortAudio error: ") + Pa_GetErrorText(err);
+	}
+
+    PaHostApiIndex nApis;
+};
+
+static CPa_Static Pa_Static;
+
+CPaCommon::CPaCommon(bool cap):ringBuffer(),xruns(0),stream(NULL),
+	dev(-1),
+	is_capture(cap), blocking(true), device_changed(true), xrun(false),
+	framesPerBuffer(0), ringBufferData(NULL), channels(2)
+{
+}
+
+CPaCommon::~CPaCommon()
+{
+	Close();
+    if (ringBufferData)
+        delete[] ringBufferData;
+}
+
+void
+CPaCommon::Enumerate(vector <string>& choices) const
+{
+	vector <string> tmp;
+	choices.clear();
+	int numDevices = Pa_GetDeviceCount();
+	if (numDevices < 0)
+		throw string("PortAudio error: ") + Pa_GetErrorText(numDevices);
+
+	for (int i = 0; i < numDevices; i++)
+	{
+		const PaDeviceInfo *deviceInfo = Pa_GetDeviceInfo(i);
+	    string api="";
+	    if(Pa_Static.nApis>1)
+	    {
+	    	const PaHostApiInfo* info = Pa_GetHostApiInfo(deviceInfo->hostApi);
+	    	if(info)
+	        	api = string(info->name)+":";
+		}
+		if(is_capture && (deviceInfo->maxInputChannels > 1))
+		{
+			choices.push_back(api+deviceInfo->name);
+		}
+		if(!is_capture && (deviceInfo->maxOutputChannels > 1))
+		{
+			choices.push_back(api+deviceInfo->name);
+		}
+	}
+}
+
+void
+CPaCommon::SetDev(int iNewDeviceNo)
+{
+	int numDevices = Pa_GetDeviceCount();
+	vector<int> devices;
+	if (numDevices < 0)
+		throw string("PortAudio error: ") + Pa_GetErrorText(numDevices);
+	for (int i = 0; i < numDevices; i++)
+	{
+		const PaDeviceInfo *deviceInfo = Pa_GetDeviceInfo(i);
+		if(is_capture && (deviceInfo->maxInputChannels > 1))
+		{
+			devices.push_back(i);
+		}
+		if(!is_capture && (deviceInfo->maxOutputChannels > 1))
+		{
+			devices.push_back(i);
+		}
+	}
+	int iNewDevice = devices[iNewDeviceNo];
+	if (dev != iNewDevice)
+	{
+		dev = iNewDevice;
+		device_changed = true;
+	}
+}
+
+int
+CPaCommon::GetDev() const
+{
+	int numDevices = Pa_GetDeviceCount();
+	vector<int> devices;
+	if (numDevices < 0)
+		throw string("PortAudio error: ") + Pa_GetErrorText(numDevices);
+	for (int i = 0; i < numDevices; i++)
+	{
+		const PaDeviceInfo *deviceInfo = Pa_GetDeviceInfo(i);
+		if(is_capture && (deviceInfo->maxInputChannels > 1))
+		{
+			devices.push_back(i);
+		}
+		if(!is_capture && (deviceInfo->maxOutputChannels > 1))
+		{
+			devices.push_back(i);
+		}
+	}
+	for(size_t i=0; i<devices.size(); i++)
+	{
+		if(devices[i]==dev)
+			return i;
+	}
+	return -1;
+}
+
+/* buffer_size is in samples - frames would be better */
+void
+CPaCommon::Init(int iNewBufferSize, bool bNewBlocking, int iChannels)
+{
+	if (device_changed == false)
+		return;
+
+	channels = iChannels;
+
+	if(is_capture)
+		framesPerBuffer = iNewBufferSize / channels;
+	else
+		framesPerBuffer = 256;
+
+	blocking = bNewBlocking; /* TODO honour this */
+	iBufferSize = iNewBufferSize;
+
+	ReInit();
+
+	if(stream)
+	{
+		const PaStreamInfo* info = Pa_GetStreamInfo( stream );
+		if(is_capture)
+			cout << "init capture ";
+		else
+			cout << "init play ";
+		cout << iNewBufferSize;
+		if(info)
+			cout << " latency " << info->outputLatency;
+		else
+			cout << " can't read latency";
+		cout << endl;
+	}
+	else
+	{
+		cerr << "portaudio can't open stream" << endl;
+		//throw "portaudio open error";
+	}
+}
+
+void
+CPaCommon::ReInit()
+{
+	Close();
+
+	PaStreamParameters pParameters;
+	memset(&pParameters, sizeof(pParameters), 0);
+	pParameters.channelCount = channels;
+	pParameters.hostApiSpecificStreamInfo = NULL;
+	pParameters.sampleFormat = fmt(_SAMPLE(0));
+
+	if(dev < 0 || dev >= Pa_GetDeviceCount())
+	//if(dev < 0 || dev >= int(devices.size()))
+	{
+		if(is_capture)
+			pParameters.device = Pa_GetDefaultInputDevice();
+		else
+			pParameters.device = Pa_GetDefaultOutputDevice();
+	}
+	else
+	{
+		//cout << "opening " << names[dev] << endl;
+		pParameters.device = dev;//devices[dev];
+	}
+
+ 	if(pParameters.device == paNoDevice)
+		return;
+
+
+	double srate = 48000;
+	unsigned long minRingBufferSize;
+	int err;
+	const PaDeviceInfo* info = Pa_GetDeviceInfo(pParameters.device);
+
+	if (is_capture)
+	{
+		pParameters.suggestedLatency = info->defaultLowInputLatency;
+		minRingBufferSize = 2*iBufferSize*sizeof(_SAMPLE);
+	}
+	else
+	{
+		pParameters.suggestedLatency = 0.8;
+		minRingBufferSize = 4*iBufferSize*sizeof(_SAMPLE);
+	}
+
+	/* See the specific host's API docs for info on using this field */
+	pParameters.hostApiSpecificStreamInfo = NULL;
+
+	/* flags that can be used to define dither, clip settings and more */
+	if (is_capture)
+	{
+		err = Pa_OpenStream(&stream, &pParameters, NULL, srate,
+							framesPerBuffer, paNoFlag, captureCallback,
+							(void *) this);
+
+		if (err != paNoError)
+			throw string("PortAudio error: ") + Pa_GetErrorText(err);
+		err = Pa_StartStream(stream);
+		if (err != paNoError)
+			throw string("PortAudio error: ") + Pa_GetErrorText(err);
+	}
+	else
+	{
+		err = Pa_OpenStream(&stream, NULL, &pParameters, srate,
+							framesPerBuffer, paNoFlag, playbackCallback,
+							(void *) this);
+
+		if (err != paNoError)
+		{
+			throw string("PortAudio error: ") + Pa_GetErrorText(err);
+		}
+	}
+
+	unsigned long n = 2;
+	while (n < minRingBufferSize)
+		n <<= 2;				/* smallest power of 2 >= requested */
+
+    if (ringBufferData)
+        delete[] ringBufferData;
+	ringBufferData = new char[n];
+	PaUtil_InitializeRingBuffer(&ringBuffer, n, ringBufferData);
+
+	device_changed = false;
+	xrun = false;
+}
+
+void
+CPaCommon::Close()
+{
+	if (stream)
+	{
+		int err = Pa_AbortStream(stream);
+		if (err != paNoError)
+		{
+			cout << "PortAudio error: " << Pa_GetErrorText(err) << endl;
+		}
+
+		err = Pa_CloseStream(stream);
+		if (err != paNoError)
+		{
+			cout << "PortAudio error: " << Pa_GetErrorText(err) << endl;
+		}
+
+		stream = NULL;
+		device_changed = true;
+	}
+}
+
+bool
+CPaCommon::Read(vector<_SAMPLE>& data)
+{
+	if (device_changed)
+		ReInit();
+
+	if(stream==NULL)
+		return true;
+
+	size_t bytes = data.size() * sizeof(_SAMPLE);
+
+	while(PaUtil_GetRingBufferReadAvailable(&ringBuffer)<int(bytes))
+	{
+		//cout << "Read: want " << bytes << " avail " << PaUtil_GetRingBufferReadAvailable(&ringBuffer) << endl;
+		Pa_Sleep(10);
+	}
+
+	PaUtil_ReadRingBuffer(&ringBuffer, &data[0], bytes);
+	if(xruns==0)
+		return false;
+	else
+		cout << "overrun" << endl;
+	xruns = 0;
+	return true;
+}
+
+bool
+CPaCommon::Write(vector<_SAMPLE>& data)
+{
+	if (device_changed)
+		ReInit();
+
+	if(stream==NULL)
+		return true;
+
+	size_t bytes = data.size() * sizeof(_SAMPLE);
+
+	//cout << "Write: got " << bytes << " can put " << PaUtil_GetRingBufferWriteAvailable(&ringBuffer) << endl;
+	if (PaUtil_GetRingBufferWriteAvailable(&ringBuffer) < int(bytes))
+		return false;			/* TODO use newer data in preference to draining old */
+
+	PaUtil_WriteRingBuffer(&ringBuffer, &data[0], bytes);
+	if(Pa_IsStreamStopped( stream ))
+	{
+		int err = Pa_StartStream(stream);
+		if (err != paNoError)
+			throw string("PortAudio error: ") + Pa_GetErrorText(err);
+	}
+	if(xruns==0)
+		return false;
+	else
+		cout << "underrun" << endl;
+	xruns = 0;
+	return true;
+}
+
+CPaIn::CPaIn():hw(true)
+{
+}
+
+CPaIn::~CPaIn()
+{
+	Close();
+}
+
+void
+CPaIn::Init(int iNewBufferSize, bool bNewBlocking, int iChannels)
+{
+	hw.Init(iNewBufferSize, bNewBlocking, iChannels);
+}
+
+bool
+CPaIn::Read(vector<_SAMPLE>& data)
+{
+	return hw.Read(data);
+}
+
+void
+CPaIn::Close()
+{
+	hw.Close();
+	cout << "capture close" << endl;
+}
+
+CPaOut::CPaOut():hw(false)
+{
+}
+
+CPaOut::~CPaOut()
+{
+	Close();
+}
+
+void
+CPaOut::Init(int iNewBufferSize, bool bNewBlocking, int iChannels)
+{
+	hw.Init(iNewBufferSize, bNewBlocking, iChannels);
+}
+
+bool
+CPaOut::Write(vector<_SAMPLE>& data)
+{
+	return hw.Write(data);
+}
+
+void
+CPaOut::Close()
+{
+	hw.Close();
+	cout << "play close" << endl;
+}

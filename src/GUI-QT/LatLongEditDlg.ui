@@ -1,0 +1,142 @@
+<ui version="4.0" >
+ <class>LatLongEditDlg</class>
+ <widget class="QDialog" name="LatLongEditDlg" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>196</width>
+    <height>122</height>
+   </rect>
+  </property>
+  <property name="windowTitle" >
+   <string>ChangeMeAtRunTime</string>
+  </property>
+  <widget class="QLabel" name="labelDegrees" >
+   <property name="geometry" >
+    <rect>
+     <x>11</x>
+     <y>11</y>
+     <width>38</width>
+     <height>30</height>
+    </rect>
+   </property>
+   <property name="text" >
+    <string>Degrees</string>
+   </property>
+   <property name="wordWrap" >
+    <bool>false</bool>
+   </property>
+  </widget>
+  <widget class="QLabel" name="TextLabel3" >
+   <property name="geometry" >
+    <rect>
+     <x>55</x>
+     <y>47</y>
+     <width>16</width>
+     <height>26</height>
+    </rect>
+   </property>
+   <property name="text" >
+    <string>°</string>
+   </property>
+   <property name="wordWrap" >
+    <bool>false</bool>
+   </property>
+  </widget>
+  <widget class="QLabel" name="TextLabel4" >
+   <property name="geometry" >
+    <rect>
+     <x>114</x>
+     <y>47</y>
+     <width>37</width>
+     <height>26</height>
+    </rect>
+   </property>
+   <property name="text" >
+    <string>'</string>
+   </property>
+   <property name="wordWrap" >
+    <bool>false</bool>
+   </property>
+  </widget>
+  <widget class="QLabel" name="labelMinutes" >
+   <property name="geometry" >
+    <rect>
+     <x>65</x>
+     <y>11</y>
+     <width>73</width>
+     <height>30</height>
+    </rect>
+   </property>
+   <property name="text" >
+    <string>Minutes</string>
+   </property>
+   <property name="wordWrap" >
+    <bool>false</bool>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="PushButtonCancel" >
+   <property name="geometry" >
+    <rect>
+     <x>10</x>
+     <y>80</y>
+     <width>80</width>
+     <height>32</height>
+    </rect>
+   </property>
+   <property name="text" >
+    <string>&amp;Cancel</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="PushButtonOK" >
+   <property name="geometry" >
+    <rect>
+     <x>100</x>
+     <y>80</y>
+     <width>88</width>
+     <height>32</height>
+    </rect>
+   </property>
+   <property name="text" >
+    <string>&amp;Ok</string>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="LineEditDegrees" >
+   <property name="geometry" >
+    <rect>
+     <x>11</x>
+     <y>47</y>
+     <width>38</width>
+     <height>26</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="LineEditMinutes" >
+   <property name="geometry" >
+    <rect>
+     <x>65</x>
+     <y>47</y>
+     <width>40</width>
+     <height>26</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QComboBox" name="ComboBoxNSEW" >
+   <property name="geometry" >
+    <rect>
+     <x>150</x>
+     <y>47</y>
+     <width>40</width>
+     <height>26</height>
+    </rect>
+   </property>
+   <property name="maxCount" >
+    <number>2</number>
+   </property>
+  </widget>
+ </widget>
+ <pixmapfunction>qPixmapFromMimeSource</pixmapfunction>
+ <resources/>
+ <connections/>
+</ui>

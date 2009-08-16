@@ -1,0 +1,31 @@
+<RCC>
+  <qresource prefix="/icons" >
+    <file>Home.png</file>
+    <file>CSAudSNRHist.png</file>
+    <file>CSChannel.png</file>
+    <file>CSConstellation.png</file>
+    <file>CSFAC.png</file>
+    <file>CSHistory.png</file>
+    <file>CSHistoryDelDopp.png</file>
+    <file>CSHistoryFreqSam.png</file>
+    <file>CSIR.png</file>
+    <file>CSMSC.png</file>
+    <file>CSSDC.png</file>
+    <file>CSSpectrum.png</file>
+    <file>CSSpectrumAudio.png</file>
+    <file>CSSpectrumInpPSD.png</file>
+    <file>CSSpectrumInpSpectr.png</file>
+    <file>CSSpectrumSNR.png</file>
+    <file>CSSpectrumShiftedPSD.png</file>
+    <file>CSSpectrumWaterf.png</file>
+    <file>CSTF.png</file>
+    <file>JumpBegin.png</file>
+    <file>JumpEnd.png</file>
+    <file>LogoJournaline.png</file>
+    <file>LogoSmall.png</file>
+    <file>MainIcon.png</file>
+    <file>StepBack.png</file>
+    <file>StepForw.png</file>
+    <file>fhgiis.bmp</file>
+  </qresource>
+</RCC>
