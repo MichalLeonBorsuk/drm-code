@@ -7,12 +7,10 @@ CONFIG += qt \
     thread \
     hamlib \
     portaudio
-INCLUDEPATH += ../libs
-INCLUDEPATH += src/GUI-QT
+INCLUDEPATH += ../include
+LIBS += -L../lib
 VPATH += src/GUI-QT
-LIBS += -L../libs
-DEFINES += HAVE_LIBFAAC \
-    HAVE_LIBFAAD
+INCLUDEPATH += src/GUI-QT
 FORMS += DRMMainWindow.ui \
     FMMainWindow.ui \
     AnalogMainWindow.ui \
@@ -40,11 +38,6 @@ debug:OBJECTS_DIR = Debug
 else:OBJECTS_DIR = Release
 macx {
     RC_FILE = src/GUI-QT/res/macicons.icns
-    INCLUDEPATH += /Developer/dream/include
-    INCLUDEPATH += /Developer/qwt-5.1.1/include
-    LIBS += -L/Developer/dream/lib
-    LIBS += -L/Developer/qwt-5.1.1/lib \
-	-lqwt
     LIBS += -framework \
 	CoreFoundation \
 	-framework \
@@ -61,8 +54,6 @@ unix {
     LIBS += -lsndfile \
 	-lpcap \
 	-lz \
-	-lfaac_drm \
-	-lfaad_drm \
 	-lrfftw \
 	-lfftw
     DEFINES += HAVE_RFFTW_H \
@@ -79,8 +70,10 @@ unix {
 	HAVE_SYS_STAT_H \
 	HAVE_SYS_TYPES_H \
 	HAVE_UNISTD_H
-    SOURCES +=
-    !macx {
+    macx {
+	LIBS += -lqwt
+    }
+    else {
 	INCLUDEPATH += /usr/include/qwt-qt4
 	LIBS += -lqwt-qt4
 	INCLUDEPATH += linux
@@ -95,7 +88,6 @@ unix {
 win32 {
     DEFINES -= UNICODE
     SOURCES +=
-    INCLUDEPATH += ../libs/qwt
     win32-g++ {
 	DEFINES += HAVE_STDINT_H \
 	    HAVE_STDLIB_H \
@@ -103,8 +95,6 @@ win32 {
 	LIBS += \
 	    -lsndfile \
 	    -lz \
-	    -lfaac \
-	    -lfaad \
 	    -lrfftw \
 	    -lfftw \
 	    -lqwt5
@@ -119,8 +109,6 @@ win32 {
 	LIBS += libsndfile-1.lib \
 	    zdll.lib \
 	    qwt5.lib
-	LIBS += libfaac.lib \
-	    libfaad.lib
 	LIBS += libfftw.lib \
 	    setupapi.lib \
 	    ws2_32.lib
@@ -147,7 +135,7 @@ portaudio {
 	src/sound/drm_portaudio.h
     SOURCES += src/sound/drm_portaudio.cpp \
 	src/sound/pa_ringbuffer.c
-    win32-g++:LIBS += ../libs/PortAudio.dll
+    win32-g++:LIBS += ../lib/PortAudio.dll
     else:LIBS += -lportaudio
 }
 

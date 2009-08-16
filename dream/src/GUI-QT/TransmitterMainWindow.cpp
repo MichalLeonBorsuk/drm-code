@@ -951,7 +951,7 @@ AudioComponentEditor::GetFrom(const CDRMTransmitterInterface& DRMTransmitter)
 	ui.ComboBoxAudioSource->clear();
 	for (size_t t = 0; t < vecAudioDevices.size(); t++)
 	{
-		ui.ComboBoxAudioSource->insertItem(t, QString(vecAudioDevices[t].c_str()), t);
+		ui.ComboBoxAudioSource->insertItem(t, QString(vecAudioDevices[t].c_str()), int(t));
 	}
 	ui.ComboBoxAudioSource->setCurrentIndex(0);
     string fn = DRMTransmitter.GetReadFromFile();

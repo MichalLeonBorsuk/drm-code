@@ -28,9 +28,6 @@
 
 #include "AudioSourceEncoder.h"
 
-#ifdef HAVE_LIBFAAC
-# ifdef DYNAMIC_LINK_CODECS
-
 int FAACAPI dummyfaacEncGetVersion(char **, char **) { return 0; }
 faacEncConfigurationPtr FAACAPI dummyfaacEncGetCurrentConfiguration(faacEncHandle) { return NULL; }
 
@@ -47,19 +44,12 @@ int FAACAPI dummyfaacEncGetDecoderSpecificInfo(faacEncHandle, unsigned char **,
 int FAACAPI dummyfaacEncEncode(faacEncHandle, int32_t *, unsigned int,
 			 unsigned char *,
 			 unsigned int) { return 0; }
-# endif
-#endif
 
 int FAACAPI dummyfaacEncClose(faacEncHandle) { return 0; }
 
 CAudioSourceEncoderImplementation::CAudioSourceEncoderImplementation()
-	 : bUsingTextMessage(false)
-#ifdef HAVE_LIBFAAC
-		, hEncoder(NULL)
-#endif
+	 : bUsingTextMessage(false), hEncoder(NULL)
 {
-#ifdef HAVE_LIBFAAD
-# ifdef DYNAMIC_LINK_CODECS
     faacEncGetVersion = dummyfaacEncGetVersion;
     faacEncGetCurrentConfiguration = dummyfaacEncGetCurrentConfiguration;
     faacEncSetConfiguration = dummyfaacEncSetConfiguration;
@@ -67,7 +57,7 @@ CAudioSourceEncoderImplementation::CAudioSourceEncoderImplementation()
     faacEncGetDecoderSpecificInfo = dummyfaacEncGetDecoderSpecificInfo;
     faacEncEncode = dummyfaacEncEncode;
     faacEncClose = dummyfaacEncClose;
-#  ifdef _WIN32
+#ifdef _WIN32
     hlib = LoadLibrary(TEXT("libfaac.dll"));
     if(hlib)
     {
@@ -79,12 +69,12 @@ CAudioSourceEncoderImplementation::CAudioSourceEncoderImplementation()
         faacEncEncode = (faacEncEncode_t*)GetProcAddress(hlib, TEXT("faacEncEncode"));
         faacEncClose = (faacEncClose_t*)GetProcAddress(hlib, TEXT("faacEncClose"));
     }
-#  else
-#   if defined(__APPLE__)
+#else
+# if defined(__APPLE__)
     hlib = dlopen("libfaac.dylib", RTLD_LOCAL | RTLD_NOW);
-#   else
+# else 
     hlib = dlopen("libfaac.so", RTLD_LOCAL | RTLD_NOW);
-#   endif
+# endif
     if(hlib)
     {
         faacEncGetVersion = (faacEncGetVersion_t*)dlsym(hlib, "faacEncGetVersion");
@@ -95,8 +85,6 @@ CAudioSourceEncoderImplementation::CAudioSourceEncoderImplementation()
         faacEncEncode = (faacEncEncode_t*)dlsym(hlib, "faacEncEncode");
         faacEncClose = (faacEncClose_t*)dlsym(hlib, "faacEncClose");
     }
-#  endif
-# endif
 #endif
 }
 
@@ -113,7 +101,6 @@ CAudioSourceEncoderImplementation::ProcessDataInternal
 	for (int i = 0; i < iOutputBlockSize; i++)
 		(*pvecOutputData)[i] = 0;
 
-#ifdef HAVE_LIBFAAC
 	/* AAC encoder ------------------------------------------------------ */
 	/* Resample data to encoder bit-rate */
 	/* Change type of data (short -> real), take left channel! */
@@ -219,7 +206,6 @@ CAudioSourceEncoderImplementation::ProcessDataInternal
 	static FILE *pFile = fopen("test/audbits.dat", "w");
 	fprintf(pFile, "%d %d\n", iAudioPayloadLen, iCurNumBytes);
 	fflush(pFile);
-#endif
 #endif
 
 	/* text message application ---------------------------- */
@@ -339,7 +325,6 @@ CAudioSourceEncoderImplementation::InitInternalTx
 		iBitRate = (int) (((_REAL) iActEncOutBytes * BITS_BINARY) / iTimeEachAudBloMS * 1000);
 	}
 
-#ifdef HAVE_LIBFAAC
 	/* Open encoder instance */
 	if (hEncoder != NULL)
 		faacEncClose(hEncoder);
@@ -355,7 +340,6 @@ CAudioSourceEncoderImplementation::InitInternalTx
 	CurEncFormat->bitRate = iBitRate;
 	CurEncFormat->bandWidth = 0;	/* Let the encoder choose the bandwidth */
 	faacEncSetConfiguration(hEncoder, CurEncFormat);
-#endif
 
 	/* Init storage for actual data, CRCs and frame lengths */
 	audio_frame.Init(iNumAACFrames, lMaxBytesEncOut);
@@ -415,7 +399,6 @@ CAudioSourceEncoderImplementation::InitInternalRx(CParameter & Param,
 
 	/* Audio service ---------------------------------------------------- */
 
-#ifdef HAVE_LIBFAAC
 	/* Total frame size is input block size minus the bytes for the text
 	   message (if text message is used) */
 	int iTotAudFraSizeBits = iTotNumBitsForUsage;
@@ -519,7 +502,6 @@ CAudioSourceEncoderImplementation::InitInternalRx(CParameter & Param,
 
 	/* Calculate number of bytes for higher protected blocks */
 	iNumHigherProtectedBytes = 0;
-#endif
 
 	/* Define input and output block size */
 	iOutputBlockSize = iTotNumBitsForUsage;
@@ -544,9 +526,7 @@ CAudioSourceEncoderImplementation::ClearTextMessage()
 
 CAudioSourceEncoderImplementation::~CAudioSourceEncoderImplementation()
 {
-#ifdef HAVE_LIBFAAC
 	/* Close encoder instance afterwards */
 	if (hEncoder != NULL)
 		faacEncClose(hEncoder);
-#endif
 }

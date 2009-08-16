@@ -31,8 +31,6 @@
 #include <fstream>
 #include <sstream>
 
-#ifdef HAVE_LIBFAAD
-# ifdef DYNAMIC_LINK_CODECS
 NeAACDecHandle NEAACDECAPI NeAACDecOpenDummy(void) { return NULL; }
 char NEAACDECAPI NeAACDecInitDRMDummy(NeAACDecHandle*, unsigned long, unsigned char) { return 0; }
 void NEAACDECAPI NeAACDecCloseDummy(NeAACDecHandle) {}
@@ -41,8 +39,6 @@ void* NEAACDECAPI NeAACDecDecodeDummy(NeAACDecHandle,NeAACDecFrameInfo* info,uns
     info->error = 1;
     return NULL;
 }
-# endif
-#endif
 
 // Store AAC-data in file
 static void WriteAACFrame(int iStreamID, CParameter& Parameters,
@@ -136,10 +132,8 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
 	bool bCurBlockOK;
 	bool bGoodValues;
 
-#ifdef HAVE_LIBFAAD
 	NeAACDecFrameInfo DecFrameInfo;
 	short *psDecOutSampleBuf;
-#endif
 
 #if 0
 ofstream f("audio.txt", ios::app);
@@ -194,7 +188,6 @@ f.close();
 	/* Check which audio coding type is used */
 	if (eAudioCoding == CAudioParam::AC_AAC)
 	{
-#ifdef HAVE_LIBFAAD
 		/* AAC super-frame-header ------------------------------------------- */
 		int iPrevBorder = 0;
 		for(int i = 0; i < (iNumAudioFrames-1); i++)
@@ -257,7 +250,6 @@ f.close();
 		{
 			cerr << "AAC Frame length out of bounds" << endl;
 		}
-#endif
 	}
 	else if (eAudioCoding == CAudioParam::AC_CELP)
 	{
@@ -293,7 +285,6 @@ f.close();
 	{
 		if (eAudioCoding == CAudioParam::AC_AAC)
 		{
-#ifdef HAVE_LIBFAAD
 			if (bGoodValues == true)
 			{
 				/* Prepare data vector with CRC at the beginning (the definition
@@ -373,7 +364,6 @@ f.close();
 				Parameters.Measurements.audioFrameStatus.set(true);
 				Parameters.Unlock();
 			}
-#endif
 		}
 		else if (eAudioCoding == CAudioParam::AC_CELP)
 		{
@@ -635,7 +625,6 @@ CAudioSourceDecoder::InitInternal(CParameter& Parameters)
 
 		if (eAudioCoding == CAudioParam::AC_AAC)
 		{
-#ifdef HAVE_LIBFAAD
 			/* Init for AAC decoding ---------------------------------------- */
 			int iAACSampleRate, iNumHeaderBytes, iDRMchanMode = DRMCH_MONO;
 
@@ -739,10 +728,6 @@ CAudioSourceDecoder::InitInternal(CParameter& Parameters)
             if(HandleAACDecoder)
                 NeAACDecInitDRM(&HandleAACDecoder,
                     iAACSampleRate, (unsigned char) iDRMchanMode);
-#else
-			/* No AAC decoder available */
-			throw CInitErr(ET_AUDDECODER);
-#endif
 		}
 		else if (eAudioCoding == CAudioParam::AC_CELP)
 		{
@@ -917,17 +902,13 @@ CAudioSourceDecoder::InitInternal(CParameter& Parameters)
 }
 
 CAudioSourceDecoder::CAudioSourceDecoder()
-#ifdef HAVE_LIBFAAD
 :	bUseReverbEffect(true), AudioRev((CReal) 1.0 /* seconds delay */ )
-#endif
 {
-#ifdef HAVE_LIBFAAD
-# ifdef DYNAMIC_LINK_CODECS
     NeAACDecOpen = NeAACDecOpenDummy;
     NeAACDecInitDRM = NeAACDecInitDRMDummy;
     NeAACDecClose = NeAACDecCloseDummy;
     NeAACDecDecode = NeAACDecDecodeDummy;
-#  ifdef _WIN32
+#ifdef _WIN32
     hFaaDlib = LoadLibrary(TEXT("libfaad2.dll"));
     if(hFaaDlib)
     {
@@ -936,12 +917,12 @@ CAudioSourceDecoder::CAudioSourceDecoder()
         NeAACDecClose = (NeAACDecClose_t*)GetProcAddress(hFaaDlib, TEXT("NeAACDecClose"));
         NeAACDecDecode = (NeAACDecDecode_t*)GetProcAddress(hFaaDlib, TEXT("NeAACDecDecode"));
     }
-#  else
-#   if defined(__APPLE__)
+#else
+# if defined(__APPLE__)
     hFaaDlib = dlopen("libfaad.dylib", RTLD_LOCAL | RTLD_NOW);
-#   else
+# else
     hFaaDlib = dlopen("libfaad2.so", RTLD_LOCAL | RTLD_NOW);
-#   endif
+# endif
     if(hFaaDlib)
     {
         NeAACDecOpen = (NeAACDecOpen_t*)dlsym(hFaaDlib, "NeAACDecOpen");
@@ -949,12 +930,11 @@ CAudioSourceDecoder::CAudioSourceDecoder()
         NeAACDecClose = (NeAACDecClose_t*)dlsym(hFaaDlib, "NeAACDecClose");
         NeAACDecDecode = (NeAACDecDecode_t*)dlsym(hFaaDlib,"NeAACDecDecode");
     }
-#  endif
+#endif
     if(NeAACDecInitDRM == NULL) // Might be non-DRM version of FAAD2
     {
         NeAACDecInitDRM = NeAACDecInitDRMDummy;
     }
-# endif
 	/* Open AACEncoder instance */
 	HandleAACDecoder = NeAACDecOpen();
 
@@ -964,15 +944,12 @@ CAudioSourceDecoder::CAudioSourceDecoder()
     {
         NeAACDecInitDRM(&HandleAACDecoder, 24000, DRMCH_MONO);
     }
-#endif
 }
 
 CAudioSourceDecoder::~CAudioSourceDecoder()
 {
-#ifdef HAVE_LIBFAAD
 	/* Close decoder handle */
 	NeAACDecClose(HandleAACDecoder);
-#endif
 }
 
 void CAudioSourceDecoder::dump(ostream& o)
@@ -999,13 +976,9 @@ void CAudioSourceDecoder::dump(ostream& o)
 
 	o << "eAudioCoding: " <<	int(eAudioCoding) << endl;
 
-
-#ifdef HAVE_LIBFAAD /* AAC decoding */
-
 	o << "iNumHigherProtectedBytes: " << 	iNumHigherProtectedBytes << endl;
 	o << "iMaxLenOneAudFrame: " <<			iMaxLenOneAudFrame << endl;
 
 	o << "iBadBlockCount: " <<				iBadBlockCount << endl;
 	o << "iAudioPayloadLen: " <<			iAudioPayloadLen << endl;
-#endif
 }

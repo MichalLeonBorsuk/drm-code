@@ -114,7 +114,7 @@ CPacer::CPacer(uint64_t ns)
 
 CPacer::~CPacer()
 {
-	cout << "CPacer destructor" << endl; cout.flush();
+	//cout << "CPacer destructor" << endl; cout.flush();
 }
 
 void CPacer::wait()
