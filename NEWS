@@ -1,0 +1,82 @@
+The Dream development team today releases Dream version 1.2.4.
+
+Dream is a DRM (Digital Radio Mondiale) software receiver and decoder. 
+It is a very complete receiver, featuring compliant decoding of HE AAC v2 
+audio streams, journaline decoding, a feature rich statistics section 
+providing invaluable information about the streams being received, and automatic 
+update of available stations from the web, among several other features.
+
+It also features a limited transmission mode, that uses the FAAC AAC encoder.
+
+Dream is multiplatform (GUI is done on Qt) and has already been tested on Win32 
+and Linux.
+
+Changes since version 1.2.2:
+
+  - added reverbration effect for masking audio drop-outs. A switch was 
+    added to the evaluation dialog to enable or disable this feature.
+  - added error detection for SDC channel (show yellow light (LED) if SDC data seems to be corrupted)
+  - bug fix: when SDC data was used completley the CRC was read as length
+    of entity data which was wrong. Now, the length of data read is checked
+    whether it has reached the total number of bits available
+  - do not show bit-rate in service selector label if bit-rate is zero
+  - apply hanning window to input spectrum plot
+  - use lower value of Doppler for initialization phase of Wiener filter in
+    time direction (aliasing peaks in impulse response are lower now are
+    re-synchronization)
+  - use shorter filter lengths for Wiener filtering for channel estimation 
+    in time direction
+  - improved initialization phase for DRM frame synchronization
+  - Only use DRM frame synchronization based on time pilots since the
+    algorithm based on the impulse response does not perform well in 
+    case of a very long IR
+  - added waterfall display for input spectrum
+  - use smaller buffers to speed up audio output after re-synchronization
+  - for long symbol interleaving, try to decode data before the whole 
+    interleaver buffer is filled by setting the uninitialized symbols 
+    to erasure
+  - bug fix for time-sync-acquisition initialization
+  - moved bandpass-filter and frequency offset correction from OFDM 
+    module in Frequency-Sync-Acquisition module,
+  - improved bandpass filter for receiver -> better interfere rejection 
+    BUT: under normal conditions, this filter will degrade the performance 
+    a little bit since it attenuates the OFDM carriers at the borders a bit
+  - store input data vector which is used for frequency offset acquisition 
+    and output entire data vector when acquisition was successful -> speeds 
+    up audio output when re-synchronization is needed
+  - fixed problem with high CPU utilization when no DRM signal was received
+  - WINDOWS: make the software more robust against high CPU utilization by
+    other applications by increasing the thread priority of the Dream signal
+    processing thread
+  - bug fix: time sync Hilbert filter must be shifted to virtual intermediate 
+    frequency
+  - added informations about robustness mode, MSC scheme, protection 
+    levels in log long (a log file which is generated parallel to the
+    standard log file (compatible to the DRM software radio))
+  - display sample rate offset in ppm, too
+  - do not show mode , protection levels and MSC constellation in log long 
+    until FAC CRC was correct
+  - resize windows fix for Linux by Andrea Russo
+  - add name of picture in tool-tip (in case a MOTSlideShow picture is shown).
+    The tool-tip is shown when the user moves the mouse over the picture
+  - Journaline pages can be saved as HTML (patch from Andrea Russo)
+  - added preview for stations dialog, thanks to Andrea Russo for his patch!
+    A new menu was added for setting the preview time. If a DRM transmitter
+    will transmit no later than the preview time but is not active, an orange
+    marker is shown next to this transmission (in the list)
+  - improved averaging of estimation of impulse response: the time shift is
+    considered more exactly (sample rate offset estimation should be 
+    improved, too)
+  - added new column to stations list showing the days the transmission is 
+    active. This code is based on a patch by Andrea Russo
+  - added Weighted Modulation Error Ratio (WMER) and MER calculation based
+    on the MSC cells. The values are shown in the evaluation dialog  
+  - added SDC data entity type 3 (information is not used right now) and some
+    more error checking
+  - added SDC data entity type 4 (information is not used right now)
+  - added SDC type 7 (not used right now)
+  - added class for storing alternative frequencies transmitted in SDC type 3
+  - store plot type selection for evaluation dialog
+
+The source files are available here:
+http://sourceforge.net/project/shownotes.php?release_id=335553
