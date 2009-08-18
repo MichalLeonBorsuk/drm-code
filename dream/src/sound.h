@@ -30,7 +30,7 @@
 #define _SOUND_H
 
 #if defined(_WIN32) && !defined(USE_PORTAUDIO)
-# include "../windows/Source/Sound.h"
+# include "sound/winmm.h"
 #endif
 
 #ifdef USE_PORTAUDIO
