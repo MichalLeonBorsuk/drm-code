@@ -6,7 +6,7 @@
  *	Volker Fischer
  *
  * Description:
- *	See Sound.cpp
+ *	See winmm.cpp
  *
  ******************************************************************************
  *
@@ -29,7 +29,7 @@
 #if !defined(AFX_SOUNDIN_H__9518A621_7F78_11D3_8C0D_EEBF182CF549__INCLUDED_)
 #define AFX_SOUNDIN_H__9518A621_7F78_11D3_8C0D_EEBF182CF549__INCLUDED_
 
-#include "../../common/soundinterface.h"
+#include "../soundinterface.h"
 #include <windows.h>
 #include <mmsystem.h>
 
