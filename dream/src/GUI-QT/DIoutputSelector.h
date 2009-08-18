@@ -59,7 +59,7 @@ public slots:
 	void OnItemClicked(const QModelIndex&);
 protected:
 	vector<CIpIf>       vecIpIf;
-	QStandardItemModel* destinations;
+	QStandardItemModel  destinations;
 };
 
 #endif
