@@ -6,7 +6,8 @@ CONFIG += qt \
     warn_on \
     thread \
     hamlib \
-    portaudio
+    portaudio \
+    pcap
 INCLUDEPATH += ../include
 LIBS += -L../lib
 VPATH += src/GUI-QT
@@ -34,8 +35,7 @@ TRANSLATIONS = src/GUI-QT/languages/drm.fr.ts \
     src/GUI-QT/languages/dreamtr.es.ts
 UI_DIR = moc
 MOC_DIR = moc
-debug:OBJECTS_DIR = Debug
-else:OBJECTS_DIR = Release
+
 macx {
     RC_FILE = src/GUI-QT/res/macicons.icns
     LIBS += -framework \
@@ -52,12 +52,10 @@ macx {
 
 unix {
     LIBS += -lsndfile \
-	-lpcap \
 	-lz \
 	-lrfftw \
 	-lfftw
-    DEFINES += HAVE_RFFTW_H \
-	HAVE_LIBPCAP
+    DEFINES += HAVE_RFFTW_H
     DEFINES += HAVE_DLFCN_H \
 	HAVE_MEMORY_H \
 	HAVE_STDINT_H \
@@ -87,21 +85,16 @@ unix {
 
 win32 {
     DEFINES -= UNICODE
-    SOURCES +=
+    LIBS += -lsetupapi -lqwt5 -lws2_32
     win32-g++ {
 	DEFINES += HAVE_STDINT_H \
-	    HAVE_STDLIB_H \
-	    HAVE_LIBPCAP
+	    HAVE_STDLIB_H
 	LIBS += \
 	    -lsndfile \
 	    -lz \
 	    -lrfftw \
 	    -lfftw \
-	    -lqwt5
-	LIBS += -lwpcap \
 	    -lstdc++
-	LIBS += -lsetupapi \
-	    -lws2_32
     }
     else {
 	DEFINES += NOMINMAX
@@ -109,9 +102,7 @@ win32 {
 	LIBS += libsndfile-1.lib \
 	    zdll.lib \
 	    qwt5.lib
-	LIBS += libfftw.lib \
-	    setupapi.lib \
-	    ws2_32.lib
+	LIBS += libfftw.lib
 	QMAKE_LFLAGS_RELEASE += /NODEFAULTLIB:"MSVCRTD, LIBCMT"
 	QMAKE_LFLAGS_DEBUG += /NODEFAULTLIB:msvcrtd.lib
     }
@@ -119,13 +110,23 @@ win32 {
 
 hamlib {
     DEFINES += HAVE_LIBHAMLIB HAVE_RIG_PARSE_MODE
-    HEADERS += src/util/Hamlib.h
+    HEADERS += src/util/Hamlib.h src/util/rigclass.h
     SOURCES += src/util/Hamlib.cpp src/util/rigclass.cc
     unix:LIBS += -lhamlib
     macx:LIBS += -framework IOKit
     win32 {
 	win32-g++:LIBS += -lhamlib
 	else:LIBS += libhamlib.lib
+    }
+}
+
+pcap {
+    DEFINES += HAVE_LIBPCAP
+    win32 {
+	LIBS += -lwpcap
+    }
+    else {
+	LIBS += -lpcap
     }
 }
 
