@@ -644,16 +644,16 @@ CMOTDABDec::AddDataUnit(CVector < _BINARY > &vecbiNewData)
 	vecbiNewData.ResetBitAccess();
 
 	/* Extension flag */
-	const _BINARY biExtensionFlag = (_BINARY) vecbiNewData.Separate(1);
+	bool biExtensionFlag = (vecbiNewData.Separate(1)==0)?false:true;
 
 	/* CRC flag */
-	const _BINARY biCRCFlag = (_BINARY) vecbiNewData.Separate(1);
+	bool biCRCFlag = (vecbiNewData.Separate(1))?false:true;
 
 	/* Segment flag */
-	const _BINARY biSegmentFlag = (_BINARY) vecbiNewData.Separate(1);
+	bool biSegmentFlag = (vecbiNewData.Separate(1))?false:true;
 
 	/* User access flag */
-	const _BINARY biUserAccFlag = (_BINARY) vecbiNewData.Separate(1);
+	bool biUserAccFlag = (vecbiNewData.Separate(1))?false:true;
 
 	/* Data group type */
 	const int iDataGroupType = (int) vecbiNewData.Separate(4);
