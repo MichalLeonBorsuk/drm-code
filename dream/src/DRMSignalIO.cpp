@@ -134,7 +134,7 @@ void CTransmitData::InitInternal(CParameter& TransmParam)
 	for(i=0; i<vecOutputs.size(); i++)
 	{
 
-        CSoundOutInterface* pSound;
+	CSoundOutInterface* pSound;
 		const string& s = vecOutputs[i];
 		string ext;
 		size_t p = s.rfind('.');
@@ -164,7 +164,8 @@ void CTransmitData::InitInternal(CParameter& TransmParam)
 
 	/* Init bandpass filter object */
 	BPFilter.Init(iSymbolBlockSize, rDefCarOffset,
-                    TransmParam.GetNominalBandwidth(), 300.0 /* Hz */);
+		TransmParam.Channel.eSpectrumOccupancy,
+		CDRMBandpassFilt::FT_TRANSMITTER);
 
 	/* All robustness modes and spectrum occupancies should have the same output
 	   power. Calculate the normalisation factor based on the average power of
@@ -218,8 +219,8 @@ void CReceiveData::ProcessDataInternal(CParameter& Parameter)
 			PutPSD(Parameter);
 
 		/* calculate the InputSpectrum once per frame for the charts */
-        if(bMeasureInputSpectrum)
-            PutInputSpec(Parameter);
+	if(bMeasureInputSpectrum)
+	    PutInputSpec(Parameter);
 	}
 
 	if(pSound == NULL)
@@ -425,55 +426,55 @@ CReceiveData::~CReceiveData()
 void CReceiveData::CalculatePSD(vector<_REAL>& vecrData,
     int iLenPSDAvEachBlock, int iNumAvBlocksPSD, int iPSDOverlap)
 {
-        /* Define a plan at the beginning. This should speed up the calls to fftw */
-        const CFftPlans FftPlans(iLenPSDAvEachBlock);
+	/* Define a plan at the beginning. This should speed up the calls to fftw */
+	const CFftPlans FftPlans(iLenPSDAvEachBlock);
 
-        /* Length of spectrum vector including Nyquist frequency */
-        const int iLenSpecWithNyFreq = iLenPSDAvEachBlock / 2 + 1;
-        /* Init input and output vectors */
-        vecrData.resize(iLenSpecWithNyFreq);
+	/* Length of spectrum vector including Nyquist frequency */
+	const int iLenSpecWithNyFreq = iLenPSDAvEachBlock / 2 + 1;
+	/* Init input and output vectors */
+	vecrData.resize(iLenSpecWithNyFreq);
 
-        /* Init the constants for scale and normalization */
+	/* Init the constants for scale and normalization */
        //_REAL rFactorScale = _REAL(SOUNDCRD_SAMPLE_RATE) / _REAL(iLenSpecWithNyFreq) / 2000.0;
 
-        const _REAL rNormData = (_REAL) max_sample * max_sample *
-                iLenPSDAvEachBlock * iLenPSDAvEachBlock *
-                iNumAvBlocksPSD * _REAL(PSD_WINDOW_GAIN);
+	const _REAL rNormData = (_REAL) max_sample * max_sample *
+		iLenPSDAvEachBlock * iLenPSDAvEachBlock *
+		iNumAvBlocksPSD * _REAL(PSD_WINDOW_GAIN);
 
-        /* Init intermediate vectors */
-        CRealVector vecrAvSqMagSpect(iLenSpecWithNyFreq, (CReal) 0.0);
-        CRealVector vecrFFTInput(iLenPSDAvEachBlock);
+	/* Init intermediate vectors */
+	CRealVector vecrAvSqMagSpect(iLenSpecWithNyFreq, (CReal) 0.0);
+	CRealVector vecrFFTInput(iLenPSDAvEachBlock);
 
-        /* Init Hamming window */
-        CRealVector vecrHammWin(Hamming(iLenPSDAvEachBlock));
+	/* Init Hamming window */
+	CRealVector vecrHammWin(Hamming(iLenPSDAvEachBlock));
 
-        /* Calculate FFT of each small block and average results (estimation
-           of PSD of input signal) */
+	/* Calculate FFT of each small block and average results (estimation
+	   of PSD of input signal) */
 
-        int i;
-        for (i = 0; i < iNumAvBlocksPSD; i++)
-        {
-                /* Copy data from shift register in Matlib vector */
-                for (int j = 0; j < iLenPSDAvEachBlock; j++)
-                        vecrFFTInput[j] = vecrInpData[j + i * (iLenPSDAvEachBlock - iPSDOverlap)];
+	int i;
+	for (i = 0; i < iNumAvBlocksPSD; i++)
+	{
+		/* Copy data from shift register in Matlib vector */
+		for (int j = 0; j < iLenPSDAvEachBlock; j++)
+			vecrFFTInput[j] = vecrInpData[j + i * (iLenPSDAvEachBlock - iPSDOverlap)];
 
-                /* Apply Hamming window */
-                vecrFFTInput *= vecrHammWin;
+		/* Apply Hamming window */
+		vecrFFTInput *= vecrHammWin;
 
-                /* Calculate squared magnitude of spectrum and average results */
-                vecrAvSqMagSpect += SqMag(rfft(vecrFFTInput)); //, FftPlans));
-        }
+		/* Calculate squared magnitude of spectrum and average results */
+		vecrAvSqMagSpect += SqMag(rfft(vecrFFTInput)); //, FftPlans));
+	}
 
-        /* Log power spectrum data */
-        for (i = 0; i <iLenSpecWithNyFreq; i++)
-        {
-                const _REAL rNormSqMag = vecrAvSqMagSpect[i] / rNormData;
+	/* Log power spectrum data */
+	for (i = 0; i <iLenSpecWithNyFreq; i++)
+	{
+		const _REAL rNormSqMag = vecrAvSqMagSpect[i] / rNormData;
 
-                if (rNormSqMag > 0)
-                        vecrData[i] = (_REAL) 10.0 * log10(rNormSqMag);
-                else
-                        vecrData[i] = RET_VAL_LOG_0;
-        }
+		if (rNormSqMag > 0)
+			vecrData[i] = (_REAL) 10.0 * log10(rNormSqMag);
+		else
+			vecrData[i] = RET_VAL_LOG_0;
+	}
 }
 
 /* Calculate PSD and put it into the CParameter class.
@@ -489,42 +490,42 @@ void CReceiveData::PutPSD(CParameter &ReceiverParam)
 
 	if(ReceiverParam.Measurements.bETSIPSD)
 	{
-        CalculatePSD(vecrData, LEN_PSD_AV_EACH_BLOCK_RSI, NUM_AV_BLOCKS_PSD_RSI, PSD_OVERLAP_RSI);
+	CalculatePSD(vecrData, LEN_PSD_AV_EACH_BLOCK_RSI, NUM_AV_BLOCKS_PSD_RSI, PSD_OVERLAP_RSI);
 
-        /* Data required for rpsd tag */
-        /* extract the values from -8kHz to +8kHz/18kHz relative to 12kHz, i.e. 4kHz to 20kHz */
-        /*const int startBin = 4000.0 * LEN_PSD_AV_EACH_BLOCK_RSI /SOUNDCRD_SAMPLE_RATE;
-        const int endBin = 20000.0 * LEN_PSD_AV_EACH_BLOCK_RSI /SOUNDCRD_SAMPLE_RATE;*/
-        /* The above calculation doesn't round in the way FhG expect. Probably better to specify directly */
+	/* Data required for rpsd tag */
+	/* extract the values from -8kHz to +8kHz/18kHz relative to 12kHz, i.e. 4kHz to 20kHz */
+	/*const int startBin = 4000.0 * LEN_PSD_AV_EACH_BLOCK_RSI /SOUNDCRD_SAMPLE_RATE;
+	const int endBin = 20000.0 * LEN_PSD_AV_EACH_BLOCK_RSI /SOUNDCRD_SAMPLE_RATE;*/
+	/* The above calculation doesn't round in the way FhG expect. Probably better to specify directly */
 
-        /* For 20k mode, we need -8/+18, which is more than the Nyquist rate of 24kHz. */
-        /* Assume nominal freq = 7kHz (i.e. 2k to 22k) and pad with zeroes (roughly 1kHz each side) */
+	/* For 20k mode, we need -8/+18, which is more than the Nyquist rate of 24kHz. */
+	/* Assume nominal freq = 7kHz (i.e. 2k to 22k) and pad with zeroes (roughly 1kHz each side) */
 
-        //_REAL rIFCentreFrequency = ReceiverParam.FrontEndParameters.rIFCentreFreq;
+	//_REAL rIFCentreFrequency = ReceiverParam.FrontEndParameters.rIFCentreFreq;
 
-        ESpecOcc eSpecOcc = ReceiverParam.Channel.eSpectrumOccupancy;
-        if (eSpecOcc == SO_4 || eSpecOcc == SO_5)
-        {
-            iStartBin = 0;
-            iEndBin = 127;
-            iVecSize = 139;
-        }
-        else
-        {
-            iStartBin = 22;
-            iEndBin = 106;
-            iVecSize = iEndBin - iStartBin + 1; //85
-        }
-        /* Line up the the middle of the vector with the quarter-Nyquist bin of FFT */
-        iStartIndex = iStartBin - (LEN_PSD_AV_EACH_BLOCK_RSI/4) + (iVecSize-1)/2;
+	ESpecOcc eSpecOcc = ReceiverParam.Channel.eSpectrumOccupancy;
+	if (eSpecOcc == SO_4 || eSpecOcc == SO_5)
+	{
+	    iStartBin = 0;
+	    iEndBin = 127;
+	    iVecSize = 139;
+	}
+	else
+	{
+	    iStartBin = 22;
+	    iEndBin = 106;
+	    iVecSize = iEndBin - iStartBin + 1; //85
+	}
+	/* Line up the the middle of the vector with the quarter-Nyquist bin of FFT */
+	iStartIndex = iStartBin - (LEN_PSD_AV_EACH_BLOCK_RSI/4) + (iVecSize-1)/2;
 	}
 	else
 	{
 	    // traditional dream values for plot in System Evaluation Dialog
-        CalculatePSD(vecrData, LEN_PSD_AV_EACH_BLOCK, NUM_AV_BLOCKS_PSD, 0);
-        iVecSize = vecrData.size();
-        iStartIndex = iStartBin = 0;
-        iEndBin = iVecSize-1;
+	CalculatePSD(vecrData, LEN_PSD_AV_EACH_BLOCK, NUM_AV_BLOCKS_PSD, 0);
+	iVecSize = vecrData.size();
+	iStartIndex = iStartBin = 0;
+	iEndBin = iVecSize-1;
 	}
 
 	vector<_REAL> psd(iVecSize);

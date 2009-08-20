@@ -33,7 +33,7 @@
 #if !defined(UTILITIES_H__3B0BA660_CA63_4344_B3452345D31912__INCLUDED_)
 #define UTILITIES_H__3B0BA660_CA63_4344_B3452345D31912__INCLUDED_
 
-#include "../GlobalDefinitions.h"
+#include "../Parameter.h"
 #include "Settings.h"
 #include "Vector.h"
 #include "../matlib/Matlib.h"
@@ -70,9 +70,10 @@ protected:
 class CDRMBandpassFilt
 {
 public:
+	enum EFiltType {FT_TRANSMITTER, FT_RECEIVER};
 
-	void Init(int iNewBlockSize, _REAL rOffsetHz, CReal rSignalBW,
-                CReal rMargin);
+	void Init(const int iNewBlockSize, const _REAL rOffsetHz,
+		const ESpecOcc eSpecOcc, const EFiltType eNFiTy);
 	void Process(CVector<_COMPLEX>& veccData);
 
 protected:
