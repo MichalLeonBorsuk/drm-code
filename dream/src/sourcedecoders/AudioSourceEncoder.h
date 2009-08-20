@@ -36,11 +36,14 @@
 
 #ifdef _WIN32
 # include <windows.h>
+#else
+# include <dlfcn.h>
+#endif
+#if defined(_WIN32) && !defined(__MINGW32__)
 # ifndef FAACAPI
 #  define FAACAPI __stdcall
 # endif
 #else
-# include <dlfcn.h>
 # ifndef FAACAPI
 #  define FAACAPI
 # endif
@@ -142,33 +145,34 @@ typedef struct faacEncConfiguration
 #define FAAC_INPUT_FLOAT   4
 
 typedef void *faacEncHandle;
-typedef int FAACAPI (faacEncGetVersion_t)(char **, char **);
+typedef int (FAACAPI faacEncGetVersion_t)(char **, char **);
 
 
-typedef faacEncConfigurationPtr FAACAPI
-  (faacEncGetCurrentConfiguration_t)(faacEncHandle);
+typedef faacEncConfigurationPtr
+  (FAACAPI faacEncGetCurrentConfiguration_t)(faacEncHandle);
 
 
-typedef int FAACAPI (faacEncSetConfiguration_t)(faacEncHandle,
+typedef int (FAACAPI faacEncSetConfiguration_t)(faacEncHandle,
 				    faacEncConfigurationPtr);
 
 
-typedef faacEncHandle FAACAPI (faacEncOpen_t)(unsigned long,
+typedef faacEncHandle (FAACAPI faacEncOpen_t)(unsigned long,
 				  unsigned int,
 				  unsigned long *,
 				  unsigned long *);
 
 
-typedef int FAACAPI (faacEncGetDecoderSpecificInfo_t)(faacEncHandle, unsigned char **,
+typedef int (FAACAPI faacEncGetDecoderSpecificInfo_t)(faacEncHandle, unsigned char **,
 					  unsigned long *);
 
 
-typedef int FAACAPI (faacEncEncode_t)(faacEncHandle, int32_t *, unsigned int,
+typedef int (FAACAPI faacEncEncode_t)(faacEncHandle, int32_t *, unsigned int,
 			 unsigned char *,
 			 unsigned int);
 
 
-typedef int FAACAPI (faacEncClose_t)(faacEncHandle);
+typedef int (FAACAPI faacEncClose_t)(faacEncHandle);
+
 
 /* Classes ********************************************************************/
 class CAudioSourceEncoderImplementation
@@ -192,7 +196,7 @@ protected:
 #else
     void* hlib;
 #endif
-    faacEncGetVersion_t*    faacEncGetVersion;
+    faacEncGetVersion_t*  faacEncGetVersion;
     faacEncGetCurrentConfiguration_t*
 			    faacEncGetCurrentConfiguration;
     faacEncSetConfiguration_t*

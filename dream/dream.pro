@@ -116,7 +116,7 @@ hamlib {
     macx:LIBS += -framework IOKit
     win32 {
 	win32-g++:LIBS += -lhamlib
-	else:LIBS += libhamlib.lib
+	else:LIBS += libhamlib-2.lib
     }
 }
 
@@ -137,7 +137,8 @@ portaudio {
     SOURCES += src/sound/drm_portaudio.cpp \
 	src/sound/pa_ringbuffer.c
     win32-g++:LIBS += ../lib/PortAudio.dll
-    else:LIBS += -lportaudio
+    win32-msvc2008:LIBS += ../lib/portaudio_x86.lib
+    unix:LIBS += -lportaudio
 }
 
 winmm {

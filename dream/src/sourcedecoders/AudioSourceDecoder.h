@@ -37,7 +37,11 @@
 # include <windows.h>
 # pragma pack(push, 8)
 # ifndef NEAACDECAPI
-#  define NEAACDECAPI __cdecl
+#  ifdef _MSC_VER
+#    define NEAACDECAPI
+#  else
+#   define NEAACDECAPI __cdecl
+#  endif
 # endif
 #else
 # include <dlfcn.h>
@@ -81,10 +85,10 @@ typedef struct NeAACDecFrameInfo
     unsigned char ps;
 } NeAACDecFrameInfo;
 
-typedef NeAACDecHandle NEAACDECAPI (NeAACDecOpen_t)(void);
-typedef char NEAACDECAPI (NeAACDecInitDRM_t)(NeAACDecHandle*, unsigned long, unsigned char);
-typedef void NEAACDECAPI (NeAACDecClose_t)(NeAACDecHandle);
-typedef void* NEAACDECAPI (NeAACDecDecode_t)(NeAACDecHandle,NeAACDecFrameInfo*,unsigned char *,unsigned long);
+typedef NeAACDecHandle (NEAACDECAPI NeAACDecOpen_t)(void);
+typedef char (NEAACDECAPI NeAACDecInitDRM_t)(NeAACDecHandle*, unsigned long, unsigned char);
+typedef void (NEAACDECAPI NeAACDecClose_t)(NeAACDecHandle);
+typedef void* (NEAACDECAPI NeAACDecDecode_t)(NeAACDecHandle,NeAACDecFrameInfo*,unsigned char *,unsigned long);
 
 /* Definitions ****************************************************************/
 
