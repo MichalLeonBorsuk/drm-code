@@ -27,6 +27,11 @@
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
 \******************************************************************************/
+#ifdef _WIN32
+# include <winsock2.h>
+#else
+# include <arpa/inet.h> // for ntohs, ntohl
+#endif
 
 #include "PacketSourceFile.h"
 #include <iostream>
@@ -34,9 +39,6 @@
 #include <QTimer>
 #include <QStringList>
 
-#ifndef _WIN32
-# include <arpa/inet.h> // for ntohs, ntohl
-#endif
 #ifdef HAVE_LIBPCAP
 # include <pcap.h>
 #endif
