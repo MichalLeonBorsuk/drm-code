@@ -159,9 +159,11 @@ CDRMBandpassFilt::Process(CVector < _COMPLEX > &veccData)
 }
 
 void
-CDRMBandpassFilt::Init(int iNewBlockSize, _REAL rOffsetHz,
-			CReal rSignalBW, CReal rMargin)
+CDRMBandpassFilt::Init(const int iNewBlockSize, const _REAL rOffsetHz,
+					   const ESpecOcc eSpecOcc, const EFiltType eNFiTy)
 {
+	CReal rMargin = 0.0;
+
 	/* Set internal parameter */
 	iBlockSize = iNewBlockSize;
 
@@ -172,38 +174,62 @@ CDRMBandpassFilt::Init(int iNewBlockSize, _REAL rOffsetHz,
 	   frequency for different modes. E.g., 5 kHz mode is on the right side
 	   of the DC frequency */
 	CReal rNormCurFreqOffset = rOffsetHz / SOUNDCRD_SAMPLE_RATE;
-
 	/* Band-pass filter bandwidth */
-	CReal rBPFiltBW = (rSignalBW + rMargin) / SOUNDCRD_SAMPLE_RATE;
+	CReal rBPFiltBW = ((CReal) 10000.0 + rMargin) / SOUNDCRD_SAMPLE_RATE;
 
-	if(rSignalBW < 4600.0)
+	/* Negative margin for receiver filter for better interferer rejection */
+	if (eNFiTy == FT_TRANSMITTER)
+		rMargin = (CReal) 300.0;	/* Hz */
+	else
+		rMargin = (CReal) - 200.0;	/* Hz */
+
+	switch (eSpecOcc)
 	{
+	case SO_0:
+		rBPFiltBW = ((CReal) 4500.0 + rMargin) / SOUNDCRD_SAMPLE_RATE;
+
 		/* Completely on the right side of DC */
 		rNormCurFreqOffset =
 			(rOffsetHz + (CReal) 2190.0) / SOUNDCRD_SAMPLE_RATE;
-	} else if(rSignalBW < 5100.0)
-	{
+		break;
+
+	case SO_1:
+		rBPFiltBW = ((CReal) 5000.0 + rMargin) / SOUNDCRD_SAMPLE_RATE;
+
 		/* Completely on the right side of DC */
 		rNormCurFreqOffset =
 			(rOffsetHz + (CReal) 2440.0) / SOUNDCRD_SAMPLE_RATE;
-	} else if(rSignalBW < 9100.0)
-	{
+		break;
+
+	case SO_2:
+		rBPFiltBW = ((CReal) 9000.0 + rMargin) / SOUNDCRD_SAMPLE_RATE;
+
 		/* Centered */
 		rNormCurFreqOffset = rOffsetHz / SOUNDCRD_SAMPLE_RATE;
-	} else if(rSignalBW < 1100.0)
-	{
+		break;
+
+	case SO_3:
+		rBPFiltBW = ((CReal) 10000.0 + rMargin) / SOUNDCRD_SAMPLE_RATE;
+
 		/* Centered */
 		rNormCurFreqOffset = rOffsetHz / SOUNDCRD_SAMPLE_RATE;
-	} else if(rSignalBW < 1900.0)
-	{
+		break;
+
+	case SO_4:
+		rBPFiltBW = ((CReal) 18000.0 + rMargin) / SOUNDCRD_SAMPLE_RATE;
+
 		/* Main part on the right side of DC */
 		rNormCurFreqOffset =
 			(rOffsetHz + (CReal) 4500.0) / SOUNDCRD_SAMPLE_RATE;
-	} else
-	{
+		break;
+
+	case SO_5:
+		rBPFiltBW = ((CReal) 20000.0 + rMargin) / SOUNDCRD_SAMPLE_RATE;
+
 		/* Main part on the right side of DC */
 		rNormCurFreqOffset =
 			(rOffsetHz + (CReal) 5000.0) / SOUNDCRD_SAMPLE_RATE;
+		break;
 	}
 
 	/* FFT plan is initialized with the long length */

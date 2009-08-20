@@ -34,10 +34,10 @@
 
 
 
-        /* Reset parameters used for averaging */
-        //iSymbolCount = 0;
-        //rSumDopplerHist = (_REAL) 0.0;
-        //rSumSNRHist = (_REAL) 0.0;
+	/* Reset parameters used for averaging */
+	//iSymbolCount = 0;
+	//rSumDopplerHist = (_REAL) 0.0;
+	//rSumSNRHist = (_REAL) 0.0;
 /* Implementation *************************************************************/
 void CFreqSyncAcq::ProcessDataInternal(CParameter& ReceiverParam)
 {
@@ -61,7 +61,7 @@ void CFreqSyncAcq::ProcessDataInternal(CParameter& ReceiverParam)
 		iFreeSymbolCounter = 0;
 	}
     ReceiverParam.Measurements.FrequencySyncValue.set(
-        ReceiverParam.rFreqOffsetTrack * SOUNDCRD_SAMPLE_RATE
+	ReceiverParam.rFreqOffsetTrack * SOUNDCRD_SAMPLE_RATE
     );
 
 	if (bAquisition == true)
@@ -469,6 +469,9 @@ void CFreqSyncAcq::InitInternal(CParameter& ReceiverParam)
 	cCurExp = (_REAL) 1.0;
 	rInternIFNorm = (_REAL) ReceiverParam.CellMappingTable.iIndexDCFreq / iFFTSize;
 
+	BPFilter.Init(ReceiverParam.CellMappingTable.iSymbolBlockSize, VIRTUAL_INTERMED_FREQ,
+		ReceiverParam.Channel.eSpectrumOccupancy, CDRMBandpassFilt::FT_RECEIVER);
+
 	/* Define block-sizes for input (The output block size is set inside
 	   the processing routine, therefore only a maximum block size is set
 	   here) */
@@ -486,18 +489,6 @@ void CFreqSyncAcq::InitInternal(CParameter& ReceiverParam)
 	/* Init bandpass filter object */
 	/* Negative margin for receiver filter for better interferer rejection */
 	CReal rMargin = -200.0 /* Hz */;
-    /* Choose correct filter for chosen DRM bandwidth. Also, adjust offset
-   frequency for different modes. E.g., 5 kHz mode is on the right side
-   of the DC frequency */
-	/* Band-pass filter bandwidth */
-	CReal rBPFiltBW = ((CReal) 10000.0 + rMargin) / SOUNDCRD_SAMPLE_RATE;
-
-	BPFilter.Init(
-        iInputBlockSize,
-        VIRTUAL_INTERMED_FREQ,
-        ReceiverParam.GetNominalBandwidth(),
-        rMargin
-    );
 
 	ReceiverParam.Unlock();
 }
