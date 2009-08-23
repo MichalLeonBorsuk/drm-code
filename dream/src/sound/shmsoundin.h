@@ -29,7 +29,7 @@
 #ifndef _SHMSOUNDIN_H
 #define _SHMSOUNDIN_H
 
-#include "../../common/soundinterface.h"
+#include "../soundinterface.h"
 #include "pa_shm_ringbuffer.h"
 
 class CShmSoundIn: public CSoundInInterface
