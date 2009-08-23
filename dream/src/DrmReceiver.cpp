@@ -43,7 +43,7 @@
 #include "sound.h"
 #include "sound/soundnull.h"
 #ifdef __linux__
-# include "source/shmsoundin.h"
+# include "sound/shmsoundin.h"
 #endif
 #include "sound/soundfile.h"
 #include <fstream>
