@@ -131,7 +131,7 @@ strPCMFile(),pHamlib(NULL),pRig(),soundIn(new CSoundIn())
 	downstreamRSCI.SetReceiver(this);
     DataDecoder.setApplication(CDataParam::AD_DAB_SPEC_APP, AT_MOTSLISHOW, new CMOTDABDecFactory());
     DataDecoder.setApplication(CDataParam::AD_DAB_SPEC_APP, AT_MOTBROADCASTWEBSITE, new CMOTDABDecFactory());
-    DataDecoder.setApplication(CDataParam::AD_DAB_SPEC_APP, AT_MOTTPEG, new EPGDecoderFactory());
+    DataDecoder.setApplication(CDataParam::AD_DAB_SPEC_APP, AT_MOTEPG, new EPGDecoderFactory());
     DataDecoder.setApplication(CDataParam::AD_DAB_SPEC_APP, AT_JOURNALINE, new JournalineFactory());
 }
 
@@ -1574,7 +1574,7 @@ CDRMReceiver::LoadSettings(CSettings& s)
 	case WBFM:
 	    AMDemodulation.SetDemodType(Parameters.eModulation);
 	    break;
-        default:;
+	default:;
     }
 	/* upstream RSCI */
     str = s.Get("command", "rsiin");

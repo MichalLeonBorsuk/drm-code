@@ -44,7 +44,7 @@ bool BWSBrowser::changed()
     {
         CMOTObject obj = decoder->GetObject(tid);
         pages[obj.strName.c_str()] = obj;
-cerr << tid << " " << obj.strName << endl;
+//cerr << tid << " " << obj.strName << endl;
         CMOTDirectory MOTDir;
 
         decoder->GetDirectory(MOTDir);

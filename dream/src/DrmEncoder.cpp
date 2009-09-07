@@ -43,7 +43,7 @@ CDRMEncoder::CDRMEncoder():
 	vecstrTexts(), vecstrPics(), vecstrPicTypes(),
 	iSoundInDev(-1), bUseUEP(false)
 {
-    cerr << "Encoder constructed" << endl;
+    //cerr << "Encoder constructed" << endl;
 }
 
 void

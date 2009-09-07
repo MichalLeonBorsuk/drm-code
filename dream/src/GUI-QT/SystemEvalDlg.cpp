@@ -488,8 +488,8 @@ void SystemEvalDlg::UpdateFAC(CParameter& Parameters)
 
 void SystemEvalDlg::InitialisePlots()
 {
-    plot = new CDRMPlot(MainPlot, Receiver.GetParameters());
-    plot->stop();
+	plot = new CDRMPlot(MainPlot, Receiver.GetParameters());
+	plot->stop();
 
 	/* Connect controls ----------------------------------------------------- */
 
@@ -499,7 +499,7 @@ void SystemEvalDlg::InitialisePlots()
 	connect(ChartSelector,
 		SIGNAL(customContextMenuRequested ( const QPoint&)),
 		this, SLOT(OnCustomContextMenuRequested ( const QPoint&)));
-    ChartSelector->hideColumn(1);
+	ChartSelector->hideColumn(1);
 }
 
 void SystemEvalDlg::showPlots()
@@ -514,26 +514,30 @@ void SystemEvalDlg::showPlots()
 	}
 	/* Restore main plot */
 	plot->load(Settings, "System Evaluation Dialog");
+	CDRMPlot::EPlotType pt = plot->GetChartType();
+	if(pt == CDRMPlot::NONE_OLD)
+	{
+		pt = CDRMPlot::INPUT_SIG_PSD;
+		plot->SetupChart(pt);
+	}
 	try {
 	    plot->start();
 	} catch(const char* e)
 	{
 	    QMessageBox::information(this, "Problem", e);
 	}
-	// TODO - make this work
-	int pt = int(plot->GetChartType());
-	QString plottype = QString("%1").arg(pt);
-    QList<QTreeWidgetItem *> l = ChartSelector->findItems(plottype, Qt::MatchRecursive, 1);
-    if(l.size()==1)
-    {
-	l[0]->setSelected(true);
-	ChartSelector->scrollToItem(l[0]);
-    }
+	QString pts = QString::number(int(pt));
+	QList<QTreeWidgetItem *> l = ChartSelector->findItems(pts, Qt::MatchRecursive|Qt::MatchFixedString, 1);
+	if(l.size()==1)
+	{
+		ChartSelector->scrollToItem(l[0]);
+		ChartSelector->setCurrentItem(l[0]);
+	}
 }
 
 void SystemEvalDlg::hidePlots()
 {
-    plot->stop();
+	plot->stop();
 	plot->save(Settings, "System Evaluation Dialog");
 
 	int n = Settings.Get("System Evaluation Dialog", "numchartwin", int(0));

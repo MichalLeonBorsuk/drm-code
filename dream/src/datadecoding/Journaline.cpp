@@ -76,9 +76,13 @@ void CJournaline::ResetOpenJournalineDecoder()
    Unlock();
 }
 
-void CJournaline::AddDataUnit(CVector<_BINARY>& vecbiNewData)
+void CJournaline::AddDataUnit(vector<uint8_t>& data)
 {
-	const int iSizeBytes = vecbiNewData.Size() / BITS_BINARY;
+	const int iSizeBytes = data.size();
+	CVector<_BINARY> vecbiNewData;
+	vecbiNewData.Init(data.size()*BITS_BINARY);
+	for(size_t i=0; i<data.size(); i++)
+		vecbiNewData.Enqueue(data[i], BITS_BINARY);
 
 	if (iSizeBytes > 0)
 	{

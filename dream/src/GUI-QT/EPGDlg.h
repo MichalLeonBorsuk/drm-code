@@ -54,20 +54,18 @@
 
 class EPGModel : public EPG, public QAbstractTableModel
 {
-	//Q_OBJECT
 public:
-	EPGModel(CParameter& p);
-	virtual ~EPGModel() {}
-
+    EPGModel(CParameter& p);
+    virtual ~EPGModel() {}
     int rowCount(const QModelIndex &parent = QModelIndex()) const;
     int columnCount(const QModelIndex &parent = QModelIndex()) const;
-	QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
-	QVariant headerData ( int section, Qt::Orientation orientation, int role) const;
+    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
+    QVariant headerData ( int section, Qt::Orientation orientation, int role) const;
 
-	void select (const uint32_t, const QDate&);
-	bool IsActive(const QString& start, const QString& duration, const tm& now);
+    void select (const uint32_t, const QDate&);
+    bool IsActive(const QString& start, const QString& duration, const tm& now);
 
-	QPixmap			BitmCubeGreen;
+    QPixmap BitmCubeGreen;
 };
 
 /* Classes ********************************************************************/
@@ -77,7 +75,7 @@ class EPGDlg : public QDialog, public Ui_EPGDlg
 
 public:
 
-        EPGDlg(ReceiverInterface&, CSettings&, QWidget* parent = 0, Qt::WFlags f = 0);
+	EPGDlg(ReceiverInterface&, CSettings&, QWidget* parent = 0, Qt::WFlags f = 0);
 	virtual ~EPGDlg();
 	/* dummy assignment operator to help MSVC8 */
 	EPGDlg& operator=(const EPGDlg&)

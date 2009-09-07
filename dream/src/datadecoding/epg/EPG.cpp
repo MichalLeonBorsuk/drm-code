@@ -1235,6 +1235,7 @@ EPG::EPG(CParameter& NParameters):Parameters(NParameters)
 
 	dir = (Parameters.sDataFilesDirectory + "/epg").c_str();
 	servicesFilename = dir + "/services.xml";
+	//cerr << servicesFilename.toStdString() << endl;
 	loadChannels (servicesFilename);
 	saveChannels (servicesFilename);
 }

@@ -67,7 +67,7 @@ public:
 	virtual ~CJournaline();
 
 	void GetNews(int iObjID, CNews& News);
-	void AddDataUnit(CVector<_BINARY>& vecbiNewData);
+	void AddDataUnit(vector<uint8_t>&);
 	void Reset() {ResetOpenJournalineDecoder();}
 
 protected:
