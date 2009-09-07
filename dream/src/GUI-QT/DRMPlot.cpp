@@ -55,6 +55,8 @@ Simone: - waterfall spectrum: could be improved, can´t see much of the signal it
 - plotstyle: does not work from settings menu, but is OK from command line
 
 
+Julian: horizontal scale seems wrong
+
  */
 
 /* Implementation *************************************************************/
@@ -884,6 +886,8 @@ void CDRMPlot::SetAvIR()
     plot->enableAxis(QwtPlot::yRight, false);
 
     grid = new QwtPlotGrid();
+    grid->setMajPen(QPen(MainGridColorPlot, 0, Qt::DotLine));
+    grid->setMinPen(QPen(MainGridColorPlot, 0, Qt::DotLine));
     grid->enableXMin(false);
     grid->enableYMin(false);
     grid->enableX(true);
@@ -1011,6 +1015,8 @@ void CDRMPlot::SetTranFct()
     plot->setTitle(tr("Channel Transfer Function / Group Delay"));
 
     grid = new QwtPlotGrid();
+    grid->setMajPen(QPen(MainGridColorPlot, 0, Qt::DotLine));
+    grid->setMinPen(QPen(MainGridColorPlot, 0, Qt::DotLine));
     grid->enableXMin(false);
     grid->enableYMin(false);
     grid->enableX(true);
@@ -1084,6 +1090,8 @@ void CDRMPlot::SetAudioSpectrum()
     plot->enableAxis(QwtPlot::yRight, false);
 
     grid = new QwtPlotGrid();
+    grid->setMajPen(QPen(MainGridColorPlot, 0, Qt::DotLine));
+    grid->setMinPen(QPen(MainGridColorPlot, 0, Qt::DotLine));
     grid->enableXMin(false);
     grid->enableYMin(false);
     grid->enableX(true);
@@ -1133,6 +1141,8 @@ void CDRMPlot::SetFreqSamOffsHist()
     plot->enableAxis(QwtPlot::yRight);
 
     grid = new QwtPlotGrid();
+    grid->setMajPen(QPen(MainGridColorPlot, 0, Qt::DotLine));
+    grid->setMinPen(QPen(MainGridColorPlot, 0, Qt::DotLine));
     grid->enableXMin(false);
     grid->enableYMin(false);
     grid->enableX(true);
@@ -1249,6 +1259,8 @@ void CDRMPlot::SetDopplerDelayHist()
     plot->enableAxis(QwtPlot::yRight);
 
     grid = new QwtPlotGrid();
+    grid->setMajPen(QPen(MainGridColorPlot, 0, Qt::DotLine));
+    grid->setMinPen(QPen(MainGridColorPlot, 0, Qt::DotLine));
     grid->enableXMin(false);
     grid->enableYMin(false);
     grid->enableX(true);
@@ -1304,6 +1316,8 @@ void CDRMPlot::SetSNRAudHist()
     plot->enableAxis(QwtPlot::yRight);
 
     grid = new QwtPlotGrid();
+    grid->setMajPen(QPen(MainGridColorPlot, 0, Qt::DotLine));
+    grid->setMinPen(QPen(MainGridColorPlot, 0, Qt::DotLine));
     grid->enableXMin(false);
     grid->enableYMin(false);
     grid->enableX(true);
@@ -1395,38 +1409,40 @@ void CDRMPlot::UpdateSNRAudHist()
 void CDRMPlot::SpectrumPlotDefaults(
     const QString& title, const QString& axistitle, uint penwidth)
 {
-	plot->setTitle(title);
-	plot->enableAxis(QwtPlot::yRight, false);
+    plot->setTitle(title);
+    plot->enableAxis(QwtPlot::yRight, false);
 
-	grid = new QwtPlotGrid();
-	grid->enableXMin(false);
-	grid->enableYMin(false);
-	grid->enableX(true);
-	grid->enableY(true);
-	grid->attach(plot);
+    grid = new QwtPlotGrid();
+    grid->setMajPen(QPen(MainGridColorPlot, 0, Qt::DotLine));
+    grid->setMinPen(QPen(MainGridColorPlot, 0, Qt::DotLine));
+    grid->enableXMin(false);
+    grid->enableYMin(false);
+    grid->enableX(true);
+    grid->enableY(true);
+    grid->attach(plot);
 
-	plot->setAxisTitle(QwtPlot::xBottom, tr("Frequency [kHz]"));
-	plot->enableAxis(QwtPlot::yLeft, true);
-	plot->setAxisTitle(QwtPlot::yLeft, axistitle+" [dB]");
+    plot->setAxisTitle(QwtPlot::xBottom, tr("Frequency [kHz]"));
+    plot->enableAxis(QwtPlot::yLeft, true);
+    plot->setAxisTitle(QwtPlot::yLeft, axistitle+" [dB]");
 
-	/* Fixed scale */
-	plot->setAxisScale(QwtPlot::xBottom,
-		(double) 0.0, (double) SOUNDCRD_SAMPLE_RATE / 2000);
+    /* Fixed scale */
+    plot->setAxisScale(QwtPlot::xBottom,
+	    (double) 0.0, (double) SOUNDCRD_SAMPLE_RATE / 2000);
 
-	plot->setAxisScale(QwtPlot::yLeft, MIN_VAL_INP_SPEC_Y_AXIS_DB,
-		MAX_VAL_INP_SPEC_Y_AXIS_DB);
+    plot->setAxisScale(QwtPlot::yLeft, MIN_VAL_INP_SPEC_Y_AXIS_DB,
+	    MAX_VAL_INP_SPEC_Y_AXIS_DB);
 
-	/* Insert line for DC carrier */
-	DCCarrierCurve = new QwtPlotCurve(tr("DC carrier"));
-	DCCarrierCurve->setPen(QPen(SpecLine1ColorPlot, 1, Qt::DotLine));
-	DCCarrierCurve->setItemAttribute(QwtPlotItem::Legend, false);
-	DCCarrierCurve->attach(plot);
+    /* Insert line for DC carrier */
+    DCCarrierCurve = new QwtPlotCurve(tr("DC carrier"));
+    DCCarrierCurve->setPen(QPen(SpecLine1ColorPlot, 1, Qt::DotLine));
+    DCCarrierCurve->setItemAttribute(QwtPlotItem::Legend, false);
+    DCCarrierCurve->attach(plot);
 
-	/* Add main curve */
-	main1curve = new QwtPlotCurve(axistitle);
-	main1curve->setPen(QPen(MainPenColorPlot, penwidth, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
-	main1curve->setItemAttribute(QwtPlotItem::Legend, false);
-	main1curve->attach(plot);
+    /* Add main curve */
+    main1curve = new QwtPlotCurve(axistitle);
+    main1curve->setPen(QPen(MainPenColorPlot, penwidth, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+    main1curve->setItemAttribute(QwtPlotItem::Legend, false);
+    main1curve->attach(plot);
 }
 
 void CDRMPlot::SetDCCarrier(double dVal)
@@ -1473,6 +1489,8 @@ void CDRMPlot::SetSNRSpectrum()
     plot->enableAxis(QwtPlot::yRight, false);
 
     grid = new QwtPlotGrid();
+    grid->setMajPen(QPen(MainGridColorPlot, 0, Qt::DotLine));
+    grid->setMinPen(QPen(MainGridColorPlot, 0, Qt::DotLine));
     grid->enableXMin(false);
     grid->enableYMin(false);
     grid->enableX(true);
@@ -1728,18 +1746,20 @@ void CDRMPlot::ConstellationPlotDefaults(const QString& title, double lim, int n
     plot->enableAxis(QwtPlot::yRight, false);
 
     grid = new QwtPlotGrid();
+    grid->setMajPen(QPen(MainGridColorPlot, 0, Qt::DotLine));
+    grid->setMinPen(QPen(MainGridColorPlot, 0, Qt::DotLine));
     grid->enableXMin(false);
     grid->enableYMin(false);
     grid->enableX(true);
     grid->enableY(true);
     grid->attach(plot);
 
-	plot->setAxisTitle(QwtPlot::xBottom, tr("Real"));
-	plot->enableAxis(QwtPlot::yLeft, true);
-	plot->setAxisTitle(QwtPlot::yLeft, tr("Imaginary"));
-	double step = limit/n;
-	plot->setAxisScale(QwtPlot::xBottom, -limit, limit, step);
-	plot->setAxisScale(QwtPlot::yLeft, -limit, limit, step);
+    plot->setAxisTitle(QwtPlot::xBottom, tr("Real"));
+    plot->enableAxis(QwtPlot::yLeft, true);
+    plot->setAxisTitle(QwtPlot::yLeft, tr("Imaginary"));
+    double step = limit/n;
+    plot->setAxisScale(QwtPlot::xBottom, -limit, limit, step);
+    plot->setAxisScale(QwtPlot::yLeft, -limit, limit, step);
 }
 
 QwtPlotCurve* CDRMPlot::ScatterCurve(const QString& title, const QwtSymbol& s)

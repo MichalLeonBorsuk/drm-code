@@ -45,7 +45,7 @@ public:
     {}
 	virtual ~DataApplication() {}
 
-	virtual void AddDataUnit(CVector<_BINARY>&) = 0;
+	virtual void AddDataUnit(vector<uint8_t>&) = 0;
 
     uint32_t serviceid;
 protected:

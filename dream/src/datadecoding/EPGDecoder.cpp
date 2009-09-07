@@ -31,21 +31,21 @@
 #include "epg/epgutil.h"
 #include "../Parameter.h"
 #include <iostream>
+#include <fstream>
 
 EPGDecoder::EPGDecoder(CParameter& p):DataApplication(p),motdecoder(p)
 {
     saveDir = p.sDataFilesDirectory + "/epg/";
-    cerr << "new EPG decoder" << endl;
+    //cerr << "new EPG decoder" << endl;
 }
 
 EPGDecoder::~EPGDecoder()
 {
 }
 
-void EPGDecoder::AddDataUnit(CVector<_BINARY>& vecbidata)
+void EPGDecoder::AddDataUnit(vector<uint8_t>& data)
 {
-    cerr << "EPG new data unit" << endl;
-    motdecoder.AddDataUnit(vecbidata);
+    motdecoder.AddDataUnit(data);
 	if (motdecoder.NewObjectAvailable())
 	{
 	    TTransportID tid = motdecoder.GetNextTid();
@@ -72,6 +72,7 @@ void EPGDecoder::AddDataUnit(CVector<_BINARY>& vecbidata)
 		}
 
 		string path = saveDir + fileName;
+		//cerr << "EPG new object available path " << path << endl;
 		mkdirs(path);
 		FILE *f = fopen(path.c_str(), "wb");
 		if (f)

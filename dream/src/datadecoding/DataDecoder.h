@@ -66,13 +66,13 @@ class CDataDecoder:public CReceiverModul < _BINARY, _BINARY >
     class CDataUnit
     {
       public:
-	CVector < _BINARY > vecbiData;
+	vector <uint8_t> data;
 	bool bOK;
 	bool bReady;
 
 	void Reset ()
 	{
-	    vecbiData.Init (0);
+	    data.resize(0);
 	    bOK = false;
 	    bReady = false;
 	}
@@ -80,9 +80,9 @@ class CDataDecoder:public CReceiverModul < _BINARY, _BINARY >
 
     int iTotalPacketSize;
     int iNumDataPackets;
-    int iMaxPacketDataSize;
+    size_t iMaxPacketDataSize;
     int iStreamID;
-    CVector < int >veciCRCOk;
+    vector<bool> vecCRCOk;
 
     int iContInd[MAX_NUM_PACK_PER_STREAM];
     CDataUnit DataUnit[MAX_NUM_PACK_PER_STREAM];

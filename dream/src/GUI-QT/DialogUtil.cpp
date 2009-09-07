@@ -43,12 +43,7 @@
 #ifdef USE_PORTAUDIO
 # include <portaudio.h>
 #endif
-#ifdef HAVE_LIBPCAP
-# include <pcap.h>
-#endif
-#ifdef HAVE_LIBWIRETAP
-# include <wtap.h>
-#endif
+#include <pcap.h>
 #ifdef HAVE_LIBFAAD
 # include "neaacdec.h"
 #endif
@@ -116,11 +111,9 @@ CAboutDlg::CAboutDlg(QWidget* parent, const char* name, bool modal, Qt::WFlags f
 #ifdef HAVE_LIBHAMLIB
 		"<li><b>Hamlib</b> (" + QString(hamlib_version) + ") <i>http://hamlib.sourceforge.net</i></li>"
 #endif
-#ifdef HAVE_LIBPCAP
 		"<li><b>LIBPCAP</b> (" + QString(pcap_lib_version()) + ") <i>http://www.tcpdump.org/ "
 		"This product includes software developed by the Computer Systems "
 		"Engineering Group at Lawrence Berkeley Laboratory.</i></li>"
-#endif
 #ifdef USE_OSS
 		"<li><b>OSS</b> (" + QString("Open Sound System version %1").arg(SOUND_VERSION, 0, 16) + ")</li>"
 #endif

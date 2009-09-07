@@ -375,7 +375,7 @@ class CMOTObject:public CMOTObjectBase
     }
 
     CMOTObject (const CMOTObject & nO):CMOTObjectBase (nO),
-	bComplete (nO.bComplete),
+	queued (nO.queued),
 	bHasHeader (nO.bHasHeader),
 	strName (nO.strName),
 	iBodySize(nO.iBodySize),
@@ -409,7 +409,7 @@ class CMOTObject:public CMOTObjectBase
 	TransportID = nO.TransportID;
 	ExpireTime = nO.ExpireTime;
 	bPermitOutdatedVersions = nO.bPermitOutdatedVersions;
-	bComplete = nO.bComplete;
+	queued = nO.queued;
 	bHasHeader = nO.bHasHeader;
 	strFormat = nO.strFormat;
 	strName = nO.strName;
@@ -441,7 +441,7 @@ class CMOTObject:public CMOTObjectBase
     void Reset ()
     {
 	vecbRawData.Init (0);
-	bComplete = false;
+	queued = false;
 	bHasHeader = false;
 	Body.Reset ();
 	strFormat = "";
@@ -471,7 +471,7 @@ class CMOTObject:public CMOTObjectBase
     /* for encoding */
     CVector < _BYTE > vecbRawData;
 
-    bool bComplete, bHasHeader;
+    bool queued, bHasHeader;
     CByteReassembler Body;
     string strName;
     int iBodySize;
@@ -606,7 +606,7 @@ class CMOTDABDec : public DataApplication
     }
 
     /* push from lower level */
-    void AddDataUnit (CVector < _BINARY > &vecbiNewData);
+    void AddDataUnit (vector <uint8_t>&);
 
   protected:
 

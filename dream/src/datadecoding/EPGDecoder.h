@@ -41,7 +41,7 @@ public:
 	EPGDecoder(CParameter&);
 	virtual ~EPGDecoder();
 
-	void AddDataUnit(CVector<_BINARY>&);
+	void AddDataUnit(vector<uint8_t>&);
 	void Reset();
 
 protected:
