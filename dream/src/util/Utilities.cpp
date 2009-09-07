@@ -62,9 +62,7 @@ typedef int SOCKET;
 # endif
 #endif
 
-#ifdef HAVE_LIBPCAP
-# include <pcap.h>
-#endif
+#include <pcap.h>
 
 #include <limits>
 
@@ -483,7 +481,6 @@ void GetNetworkInterfaces(vector<CIpIf>& vecIpIf)
 	i.name = "any";
 	i.addr = 0;
 	vecIpIf.push_back(i);
-#ifdef HAVE_LIBPCAP
 	pcap_if_t *alldevs;
 	pcap_if_t *d;
 	char errbuf[PCAP_ERRBUF_SIZE+1];
@@ -503,7 +500,6 @@ void GetNetworkInterfaces(vector<CIpIf>& vecIpIf)
 
 	/* Free the device list */
 	pcap_freealldevs(alldevs);
-#endif
 }
 
 #else

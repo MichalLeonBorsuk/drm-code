@@ -45,9 +45,7 @@ typedef int SOCKET;
 # define INVALID_SOCKET				(-1)
 #endif
 
-#ifdef HAVE_LIBPCAP
-# include <pcap.h>
-#endif
+#include <pcap.h>
 
 CPacketSinkFile::CPacketSinkFile()
 : pFile(0), bIsRecording(0), bChangeReceived(false)
@@ -212,33 +210,26 @@ CPacketSinkPcapFile::CPacketSinkPcapFile():CPacketSinkFile() {}
 
 CPacketSinkPcapFile::~CPacketSinkPcapFile()
 {
-#ifdef HAVE_LIBPCAP
 	if(pFile)
     	pcap_dump_close((pcap_dumper_t *)pFile);
-#endif
 }
 
 void
 CPacketSinkPcapFile::open()
 {
-#ifdef HAVE_LIBPCAP
     pcap_t *p = pcap_open_dead(DLT_RAW, 65536);
 	pFile = (FILE*)pcap_dump_open(p, strFileName.c_str());
-#endif
 }
 
 void
 CPacketSinkPcapFile::close()
 {
-#ifdef HAVE_LIBPCAP
     pcap_dump_close((pcap_dumper_t *)pFile);
-#endif
 }
 
 void
 CPacketSinkPcapFile::write(const vector<_BYTE>& vecbydata)
 {
-#ifdef HAVE_LIBPCAP
 	vector<_BYTE> out;
 	size_t u = vecbydata.size()+8;
 	size_t c = u+20;
@@ -272,8 +263,5 @@ CPacketSinkPcapFile::write(const vector<_BYTE>& vecbydata)
 	hdr.len = c;
     pcap_dump((u_char*)pFile, &hdr, (u_char*)&out[0]);
     pcap_dump_flush((pcap_dumper_t *)pFile);
-#else
-	(void)vecbydata;
-#endif
 }
 
