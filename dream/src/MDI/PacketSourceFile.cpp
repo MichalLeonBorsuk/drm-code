@@ -38,10 +38,7 @@
 #include <errno.h>
 #include <QTimer>
 #include <QStringList>
-
-#ifdef HAVE_LIBPCAP
-# include <pcap.h>
-#endif
+#include <pcap.h>
 
 const size_t iMaxPacketSize = 4096;
 const size_t iAFHeaderLen = 10;
@@ -58,13 +55,8 @@ CPacketSourceFile::SetOrigin(const string& str)
 {
 	if(str.rfind(".pcap") == str.length()-5)
 	{
-#ifdef HAVE_LIBPCAP
 		char errbuf[PCAP_ERRBUF_SIZE];
 		pf = pcap_open_offline(str.c_str(), errbuf);
-#else
-        cerr << "sorry - pcap files not supported in this build" << endl;
-        pf = NULL;
-#endif
 		bRaw = false;
 	}
 	else
@@ -84,9 +76,7 @@ CPacketSourceFile::~CPacketSourceFile()
 		fclose((FILE*)pf);
 	else if(pf)
 	{
-#ifdef HAVE_LIBPCAP
 		pcap_close((pcap_t*)pf);
-#endif
 	}
 }
 
@@ -240,7 +230,6 @@ CPacketSourceFile::readPcap(vector<_BYTE>& vecbydata, int& interval)
 	int link_len = 0;
 	const _BYTE* pkt_data = NULL;
 	timeval packet_time = { 0, 0 };
-#ifdef HAVE_LIBPCAP
 	struct pcap_pkthdr *header;
 	int res;
 	const u_char* data;
@@ -264,7 +253,6 @@ CPacketSourceFile::readPcap(vector<_BYTE>& vecbydata, int& interval)
 		link_len=0;
 	}
 	packet_time = header->ts;
-#endif
 	if(pkt_data == NULL)
 		return;
 
