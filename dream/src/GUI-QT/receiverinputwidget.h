@@ -43,16 +43,12 @@ public:
     explicit ReceiverInputWidget(QWidget *parent = 0);
     virtual ~ReceiverInputWidget();
 
-    QButtonGroup *bglr, *bgriq, *bglrm, *bgiq;
-    void load(const CSettings&);
+    QButtonGroup *bgrsf, *bgfriq, *bgflrm, *bgfiq, *bgsriq, *bgslrm, *bgsiq, *bgrh;
+    void load(CSettings&);
     void save(CSettings&) const;
 
 protected:
     virtual void changeEvent(QEvent *e);
-
-protected slots:
-    void OnRadioRealRigRSCI(int);
-    void OnRadioRealIQ(int);
 };
 
 #endif // RECEIVERINPUTWIDGET_H

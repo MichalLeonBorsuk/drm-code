@@ -300,11 +300,6 @@ CDRMReceiver::SetAnalogFilterBWHz(int iNew)
 	AMDemodulation.SetFilterBWHz(iNew);
 }
 
-void CDRMReceiver::SetAnalogFilterBWHz(EModulationType eNew, int iNew)
-{
-	AMDemodulation.SetFilterBWHz(eNew, iNew);
-}
-
 void
 CDRMReceiver::SetAnalogDemodAcq(_REAL rNewNorCen)
 {
@@ -1409,43 +1404,93 @@ CDRMReceiver::saveSDCtoFile()
 void
 CDRMReceiver::LoadSettings(CSettings& s)
 {
-	string strMode = s.Get("Receiver", "modulation", string("DRM"));
+    string strMode = s.Get("Receiver", "modulation", string("DRM"));
+    EModulationType modn=DRM;
+    string section = "Input-";
+    if(strMode=="DRM") modn = DRM;
+    if(strMode=="AM") modn = AM;
+    if(strMode=="FM") modn = WBFM;
+    if(strMode=="CW") modn = CW;
+    if(strMode=="USB") modn = USB;
+    if(strMode=="LSB") modn = LSB;
+    if(strMode=="NBFM") modn = NBFM;
 
-	/* Serial Number */
-	string sSerialNumber = s.Get("Receiver", "serialnumber", string(""));
+    int deffilterbw = 10000;
+    switch(modn)
+    {
+	case DRM:
+	    section += strMode;
+	    break;
+	case AM:
+	    section += strMode;
+	    break;
+	case WBFM:
+	    section += strMode;
+	    break;
+	case CW:
+	case USB:
+	case LSB:
+	case NBFM:
+	    section += "Ham";
+	    break;
+	case NONE:
+	    section += "None"; // shouldn't happen
+	    break;
+    }
 
-	Parameters.Lock();
+    switch(modn)
+    {
+	case AM:
+	case CW:
+	case USB:
+	case LSB:
+	case NBFM:
+	    AMDemodulation.SetDemodType(modn);
+	    AMDemodulation.SetAGCType(EType(s.Get(section, "agc", 0)));
+	    AMDemodulation.SetNoiRedType(ENoiRedType(s.Get(section, "noisered", 0)));
+	    AMDemodulation.EnablePLL(s.Get(section, "enablepll", 0));
+	    AMDemodulation.EnableAutoFreqAcq(s.Get(section, "autofreqacq", 0));
+	    AMDemodulation.SetFilterBWHz(s.Get(section, "filterbw", deffilterbw));
+	    break;
+	default:
+	    break;
+    }
 
-	if(sSerialNumber == "")
-	{
-		Parameters.GenerateRandomSerialNumber();
-	}
-	else
+    /* Serial Number */
+    string sSerialNumber = s.Get("Receiver", "serialnumber", string(""));
+
+    Parameters.Lock();
+
+    if(sSerialNumber == "")
+    {
+	    Parameters.GenerateRandomSerialNumber();
+	    s.Put("Receiver", "serialnumber", Parameters.sSerialNumber);
+    }
+    else
 	Parameters.sSerialNumber = sSerialNumber;
+
     /* Receiver ID */
-	s.Put("Receiver", "serialnumber", Parameters.sSerialNumber);
+    Parameters.GenerateReceiverID();
 
-	Parameters.GenerateReceiverID();
+    /* Data files directory */
+    string sDataFilesDirectory = s.Get(
+       "Receiver", "datafilesdirectory", Parameters.sDataFilesDirectory);
+    // remove trailing slash if there
+    size_t p = sDataFilesDirectory.find_last_not_of("/\\");
+    if(p != string::npos)
+	    sDataFilesDirectory.erase(p+1);
+    s.Put("Receiver", "datafilesdirectory", Parameters.sDataFilesDirectory);
 
-	/* Data files directory */
-	string sDataFilesDirectory = s.Get(
-	   "Receiver", "datafilesdirectory", Parameters.sDataFilesDirectory);
-	// remove trailing slash if there
-	size_t p = sDataFilesDirectory.find_last_not_of("/\\");
-	if(p != string::npos)
-		sDataFilesDirectory.erase(p+1);
-	s.Put("Receiver", "datafilesdirectory", Parameters.sDataFilesDirectory);
+    Parameters.sDataFilesDirectory = sDataFilesDirectory;
 
-	Parameters.sDataFilesDirectory = sDataFilesDirectory;
+    Parameters.Unlock();
 
-	Parameters.Unlock();
+    /* Sync */
+    SetFreqInt(ETypeIntFreq(s.Get("Receiver", "frequencyinterpolation", int(FWIENER))));
+    SetTimeInt(ETypeIntTime(s.Get("Receiver", "timeinterpolation", int(TWIENER))));
+    SetTiSyncTracType(ETypeTiSyncTrac(s.Get("Receiver", "tracking", 0)));
 
-	/* Sync */
-	SetFreqInt(ETypeIntFreq(s.Get("Receiver", "frequencyinterpolation", int(FWIENER))));
-	SetTimeInt(ETypeIntTime(s.Get("Receiver", "timeinterpolation", int(TWIENER))));
-	SetTiSyncTracType(ETypeTiSyncTrac(s.Get("Receiver", "tracking", 0)));
-
-	/* Receiver ------------------------------------------------------------- */
+    /* Receiver ------------------------------------------------------------- */
 
     vector<string> vs;
     int dev;
@@ -1541,41 +1586,6 @@ CDRMReceiver::LoadSettings(CSettings& s)
 		break;
 	}
 
-	/* AM Parameters */
-
-	/* AGC */
-	AMDemodulation.SetAGCType(EType(s.Get("AM Demodulation", "agc", 0)));
-
-	/* noise reduction */
-	AMDemodulation.SetNoiRedType(ENoiRedType(s.Get("AM Demodulation", "noisered", 0)));
-
-	/* pll enabled/disabled */
-	AMDemodulation.EnablePLL(s.Get("AM Demodulation", "enablepll", 0));
-
-	/* auto frequency acquisition */
-	AMDemodulation.EnableAutoFreqAcq(s.Get("AM Demodulation", "autofreqacq", 0));
-
-	AMDemodulation.SetFilterBWHz(AM, s.Get("AM Demodulation", "filterbwam", 10000));
-	AMDemodulation.SetFilterBWHz(LSB, s.Get("AM Demodulation", "filterbwlsb", 5000));
-	AMDemodulation.SetFilterBWHz(USB, s.Get("AM Demodulation", "filterbwusb", 5000));
-	AMDemodulation.SetFilterBWHz(CW, s.Get("AM Demodulation", "filterbwcw", 150));
-
-	/* FM Parameters */
-	AMDemodulation.SetFilterBWHz(NBFM, s.Get("FM Demodulation", "nbfilterbw", 6000));
-	AMDemodulation.SetFilterBWHz(WBFM, s.Get("FM Demodulation", "wbfilterbw", 80000));
-
-    switch(Parameters.eModulation)
-    {
-	case AM:
-	case LSB:
-	case USB:
-	case CW:
-	case NBFM:
-	case WBFM:
-	    AMDemodulation.SetDemodType(Parameters.eModulation);
-	    break;
-	default:;
-    }
 	/* upstream RSCI */
     str = s.Get("command", "rsiin");
 	if(str != "")
@@ -1711,22 +1721,7 @@ CDRMReceiver::LoadSettings(CSettings& s)
 
     // Put this right at the end so that eModulation is correct and Rx starts
     Parameters.Lock();
-	if (strMode == "DRM")
-		Parameters.eModulation = DRM;
-    else if (strMode == "AM")
-	Parameters.eModulation = AM;
-    else if (strMode == "USB")
-	Parameters.eModulation = USB;
-    else if (strMode == "LSB")
-	Parameters.eModulation = LSB;
-    else if (strMode == "CW")
-	Parameters.eModulation = CW;
-    else if (strMode == "NBFM")
-	Parameters.eModulation = NBFM;
-    else if (strMode == "WBFM")
-	Parameters.eModulation = WBFM;
-    else
-	Parameters.eModulation = NONE;
+    Parameters.eModulation = modn;
     Parameters.Unlock();
 }
 
@@ -1735,41 +1730,56 @@ CDRMReceiver::SaveSettings(CSettings& s)
 {
     s.Put("0", "mode", string("RX"));
     string modn;
+    string section = "Input-";
     Parameters.Lock();
 	switch(Parameters.eModulation)
 	{
 	case DRM:
-	modn = "DRM";
-		break;
+	    modn = "DRM";
+	    section+=modn;
+	    break;
 	case AM:
-	modn = "AM";
-		break;
+	    modn = "AM";
+	    section+=modn;
+	    s.Put("Input-AM", "filterbw", AMDemodulation.GetFilterBWHz());
+	    break;
 	case  USB:
-	modn = "USB";
-		break;
+	    modn = "USB";
+	    section+="Ham";
+	    s.Put(section, "filterbwusb", AMDemodulation.GetFilterBWHz());
+	    break;
 	case  LSB:
-	modn = "LSB";
-		break;
+	    modn = "LSB";
+	    s.Put(section, "filterbwlsb", AMDemodulation.GetFilterBWHz());
+	    section+="Ham";
+	    break;
 	case  CW:
-	modn = "CW";
-		break;
+	    modn = "CW";
+	    section+="Ham";
+	    s.Put(section, "filterbwcw", AMDemodulation.GetFilterBWHz());
+	    break;
 	case  NBFM:
-	modn = "NBFM";
-		break;
+	    modn = "NBFM";
+	    section+="Ham";
+	    s.Put(section, "filterbwfm", AMDemodulation.GetFilterBWHz());
+	    break;
 	case  WBFM:
-	modn = "WBFM";
-		break;
+	    modn = "WBFM";
+	    section+=modn;
+	    s.Put("Input-FM", "filterbw", AMDemodulation.GetFilterBWHz());
+	    break;
 	case NONE:
 		;
 	}
 	Parameters.Unlock();
 
-    s.Put("Receiver", "modulation", modn);
+	if(section=="Input-Ham")
+	    s.Put(section, "modulation", modn);
 
 	/* Receiver ------------------------------------------------------------- */
 
 	/* Flip spectrum flag */
-	s.Put("Receiver", "flipspectrum", ReceiveData.GetFlippedSpectrum());
+	s.Put(section, "flipspectrum", ReceiveData.GetFlippedSpectrum());
 
 	/* Mute audio flag */
 	s.Put("Receiver", "muteaudio", WriteData.GetMuteAudio());
@@ -1807,26 +1817,16 @@ CDRMReceiver::SaveSettings(CSettings& s)
 	/* AM Parameters */
 
 	/* AGC */
-	s.Put("AM Demodulation", "agc", AMDemodulation.GetAGCType());
+	s.Put("Input-AM", "agc", AMDemodulation.GetAGCType());
 
 	/* noise reduction */
-	s.Put("AM Demodulation", "noisered", AMDemodulation.GetNoiRedType());
+	s.Put("Input-AM", "noisered", AMDemodulation.GetNoiRedType());
 
 	/* pll enabled/disabled */
-	s.Put("AM Demodulation", "enablepll", AMDemodulation.PLLEnabled());
+	s.Put("Input-AM", "enablepll", AMDemodulation.PLLEnabled());
 
 	/* auto frequency acquisition */
-	s.Put("AM Demodulation", "autofreqacq", AMDemodulation.AutoFreqAcqEnabled());
-
-	s.Put("AM Demodulation", "filterbwam", AMDemodulation.GetFilterBWHz(AM));
-	s.Put("AM Demodulation", "filterbwlsb", AMDemodulation.GetFilterBWHz(LSB));
-	s.Put("AM Demodulation", "filterbwusb", AMDemodulation.GetFilterBWHz(USB));
-	s.Put("AM Demodulation", "filterbwcw", AMDemodulation.GetFilterBWHz(CW));
-
-	/* FM Parameters */
-
-	s.Put("FM Demodulation", "nbfilterbw", AMDemodulation.GetFilterBWHz(NBFM));
-	s.Put("FM Demodulation", "wbfilterbw", AMDemodulation.GetFilterBWHz(WBFM));
+	s.Put("Input-AM", "autofreqacq", AMDemodulation.AutoFreqAcqEnabled());
 
 	/* Front-end - combine into Hamlib? */
 	Parameters.Lock();

@@ -331,7 +331,7 @@ void CAMDemodulation::SetBPFilter(const CReal rNewBPNormBW)
 
 	/* Set filter coefficients ---------------------------------------------- */
 	/* Make sure that the phase in the middle of the filter is always the same
-	   to avaoid clicks when the filter coefficients are changed */
+	   to avoid clicks when the filter coefficients are changed */
 	const CReal rStartPhase = (CReal) iHilFiltBlLen * crPi * rBPNormCentOffsTot;
 
 	/* Copy actual filter coefficients. It is important to initialize the
@@ -365,11 +365,7 @@ CAMDemodulation::SetDemodType(const EModulationType eNewType)
 {
 	/* Lock resources */
 	Lock();
-	{
-		/* Init band-pass filter according to new demodulation method */
-		eDemodType = eNewType;
-		SetBPFilter(CReal(iFilterBWHz[eDemodType])/CReal(SOUNDCRD_SAMPLE_RATE));
-	}
+	eDemodType = eNewType;
 	Unlock();
 }
 
@@ -389,73 +385,55 @@ void CAMDemodulation::SetAcqFreq(const CReal rNewNormCenter)
 void
 CAMDemodulation::SetFilterBWHz(int iBw)
 {
-	Lock();
-	iFilterBWHz[eDemodType] = iBw;
-	SetBPFilter(CReal(iBw)/CReal(SOUNDCRD_SAMPLE_RATE));
-	Unlock();
-}
-
-void
-CAMDemodulation::SetFilterBWHz(EModulationType eType, int iBw)
-{
-	Lock();
-	iFilterBWHz[eType] = iBw;
-	if(eType == eDemodType) // otherwise it will be done when we change demod type
-        SetBPFilter(CReal(iBw)/CReal(SOUNDCRD_SAMPLE_RATE));
-	Unlock();
+    Lock();
+    iFilterBWHz = iBw;
+    SetBPFilter(CReal(iBw)/CReal(SOUNDCRD_SAMPLE_RATE));
+    Unlock();
 }
 
 int
 CAMDemodulation::GetFilterBWHz()
 {
-	return GetFilterBWHz(eDemodType);
-}
-
-int
-CAMDemodulation::GetFilterBWHz(EModulationType eType)
-{
-	Lock();
-	int v = iFilterBWHz[eType];
-	Unlock();
-	return v;
+    Lock();
+    int v = iFilterBWHz;
+    Unlock();
+    return v;
 }
 
 void CAMDemodulation::SetAGCType(const EType eNewType)
 {
-	/* Lock resources */
-	Lock();
-	{
-		AGC.SetType(eNewType);
-	}
-	Unlock();
+    /* Lock resources */
+    Lock();
+    AGC.SetType(eNewType);
+    Unlock();
 }
 
 void CAMDemodulation::SetNoiRedType(const ENoiRedType eNewType)
 {
-	/* Lock resources */
-	Lock();
+    /* Lock resources */
+    Lock();
+    {
+	NoiRedType = eNewType;
+
+	switch (NoiRedType)
 	{
-		NoiRedType = eNewType;
+	    case NR_LOW:
+		    NoiseReduction.SetNoiRedDegree(CNoiseReduction::NR_LOW);
+		    break;
 
-		switch (NoiRedType)
-		{
-			case NR_LOW:
-				NoiseReduction.SetNoiRedDegree(CNoiseReduction::NR_LOW);
-				break;
+	    case NR_MEDIUM:
+		    NoiseReduction.SetNoiRedDegree(CNoiseReduction::NR_MEDIUM);
+		    break;
 
-			case NR_MEDIUM:
-				NoiseReduction.SetNoiRedDegree(CNoiseReduction::NR_MEDIUM);
-				break;
+	    case NR_HIGH:
+		    NoiseReduction.SetNoiRedDegree(CNoiseReduction::NR_HIGH);
+		    break;
 
-			case NR_HIGH:
-				NoiseReduction.SetNoiRedDegree(CNoiseReduction::NR_HIGH);
-				break;
-
-			case NR_OFF:
-				break;
-		}
+	    case NR_OFF:
+		    break;
 	}
-	Unlock();
+    }
+    Unlock();
 }
 
 bool CAMDemodulation::GetPLLPhase(CReal& rPhaseOut)

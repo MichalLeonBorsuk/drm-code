@@ -64,10 +64,14 @@ DRMMainWindow::DRMMainWindow(ReceiverInterface& NDRMR, CSettings& NSettings,
 	liveScheduleDlg = new LiveScheduleDlg(Receiver, Settings, this, "", false, Qt::WindowMinMaxButtonsHint);
 
 	/* Programme Guide Window */
-        epgDlg = new EPGDlg(Receiver, Settings, this, Qt::WindowMinMaxButtonsHint);
+	epgDlg = new EPGDlg(Receiver, Settings, this, Qt::WindowMinMaxButtonsHint);
 
-    /* receiver settings window */
-	receiverSettingsDlg = new ReceiverSettingsDlg(Receiver, Settings, this, Qt::Dialog);
+	/* receiver settings window */
+	receiverSettingsDlg = new ReceiverSettingsDlg(Settings,
+			       Receiver.GetParameters()->GPSData,
+			       *Receiver.GetSoundInInterface(),
+			       *Receiver.GetSoundOutInterface(),
+				  this, Qt::Dialog);
 
 	/* Set Menu ***************************************************************/
 	/* View menu ------------------------------------------------------------ */

@@ -26,8 +26,9 @@
 \******************************************************************************/
 
 #include "../util/Settings.h"
-#include <../ReceiverInterface.h>
-
+#include "../util/Hamlib.h"
+#include "../selectioninterface.h"
+#include "../GPSData.h"
 #include "ui_ReceiverSettingsDlg.h"
 #include <QTimer>
 #include <QShowEvent>
@@ -55,7 +56,7 @@ public:
     QModelIndex index(int row, int column,
 		  const QModelIndex &parent = QModelIndex()) const;
     QModelIndex parent(const QModelIndex &child) const;
-    void load(ReceiverInterface&);
+    void load();
 
 protected:
 
@@ -66,6 +67,7 @@ protected:
 	vector<rig> model;
     };
     vector<make> rigs;
+    static int rig_enumerator(const rig_caps *, void *);
 
 public:
 
@@ -105,8 +107,8 @@ public:
     QModelIndex parent(const QModelIndex &child) const;
     void add(CRig*);
     void remove(int);
-    void load(const CSettings& settings, ReceiverInterface& Receiver);
-    void save(CSettings& settings);
+    void load(const CSettings&);
+    void save(CSettings&);
 
 //protected:
 
@@ -146,81 +148,84 @@ class ReceiverSettingsDlg : public QDialog, public Ui_ReceiverSettingsDlg
 
 public:
 
-	ReceiverSettingsDlg(ReceiverInterface& NRx, CSettings& NSettings,
-	QWidget* parent = 0, Qt::WFlags f = 0);
-	virtual ~ReceiverSettingsDlg();
+    ReceiverSettingsDlg(CSettings&, CGPSData&,
+			CSelectionInterface&, CSelectionInterface&,
+			QWidget* parent = 0, Qt::WFlags f = 0);
+    virtual ~ReceiverSettingsDlg();
 
 protected:
-	void		showEvent(QShowEvent* pEvent);
-	void		hideEvent(QHideEvent* pEvent);
+    void		showEvent(QShowEvent* pEvent);
+    void		hideEvent(QHideEvent* pEvent);
 
-	bool		ValidInput(const QLineEdit* le);
-	void		ExtractReceiverCoordinates();
-	void		setDefaults();
+    bool		ValidInput(const QLineEdit* le);
+    void		loadLogfileSettings();
+    void		saveLogfileSettings();
+    void		loadGPSSettings();
+    void		saveGPSSettings();
+    void		setLatLngDlg(double latitude, double longitude);
 
-	void		AddWhatsThisHelp();
+    void		AddWhatsThisHelp();
 
-	ReceiverInterface&	Receiver;
-	CSettings&	Settings;
-	bool		loading;
-	QTimer		TimerRig;
-	int		iWantedrigModel;
-	QButtonGroup	*bgTimeInterp, *bgFreqInterp, *bgTiSync;
-	QButtonGroup	*bgAMriq, *bgAMlrm, *bgAMiq;
-	QButtonGroup	*bgHamriq, *bgHamlrm, *bgHamiq;
+    CSettings&	Settings;
+    bool		loading;
+    QTimer		TimerRig;
+    int			iWantedrigModel;
+    QButtonGroup	*bgTimeInterp, *bgFreqInterp, *bgTiSync;
+    QButtonGroup	*bgAMriq, *bgAMlrm, *bgAMiq;
+    QButtonGroup	*bgHamriq, *bgHamlrm, *bgHamiq;
 
 #ifdef HAVE_LIBHAMLIB
-	RigTypesModel	RigTypes;
-	RigModel	Rigs;
-	SoundChoice*	soundcards;
+    RigTypesModel	RigTypes;
+    RigModel		Rigs;
+    CGPSData&		GPSData;
+    SoundChoice*	soundinputs;
 #endif
-	SoundChoice*	soundoutputs;
+    SoundChoice*	soundoutputs;
 
 signals:
-	void 		StartStopLog(bool);
-	void 		LogPosition(bool);
-	void 		LogSigStr(bool);
-	void 		SetLogStartDelay(long);
-	void 		StartStopGPS(bool);
-	void 		ShowHideGPS(bool);
+    void 		StartStopLog(bool);
+    void 		LogPosition(bool);
+    void 		LogSigStr(bool);
+    void 		SetLogStartDelay(long);
+    void 		StartStopGPS(bool);
+    void 		ShowHideGPS(bool);
 
 public slots:
-	void 		OnButtonClose();
-	void 		OnLineEditLatDegChanged(const QString& str);
-	void 		OnLineEditLatMinChanged(const QString& str);
-	void 		OnComboBoxNSHighlighted(int iID);
-	void 		OnLineEditLngDegChanged(const QString& str);
-	void 		OnLineEditLngMinChanged(const QString& str);
-	void 		OnComboBoxEWHighlighted(int iID);
-	void 		SetLatLng();
-	void 		OnCheckBoxUseGPS();
-	void 		OnCheckBoxDisplayGPS();
-	void 		OnSelTimeInterp(int);
-	void 		OnSelFrequencyInterp(int);
-	void 		OnSelTiSync(int);
-	void 		OnSliderIterChange(int value);
-	void 		OnRadioDRMRealIQ(int);
-	void 		OnRadioAMRealIQ(int);
-	void 		OnRadioHamRealIQ(int);
-	void 		OnButtonDRMApply();
-	void 		OnButtonAMApply();
-	void 		OnButtonFMApply();
-	void 		OnButtonHamApply();
-	void 		OnSliderLogStartDelayChange(int value);
-	void 		OnCheckWriteLog();
-	void 		OnCheckBoxLogLatLng();
-	void 		OnCheckBoxLogSigStr();
-	void 		OnCheckRecFilter();
-	void 		OnCheckModiMetric();
-	void 		OnTimerRig();
-	void 		OnRigTypeSelected(const QModelIndex&);
-	void 		OnRigSelected(const QModelIndex&);
-	void 		OnCheckEnableSMeterToggled(bool);
-	void 		OnButtonAddRig();
-	void 		OnButtonRemoveRig();
-	void		OnButtonConnectRig();
-	void		OnCheckBoxMuteAudio();
-	void		OnCheckSaveAudioWav();
-	void		OnCheckBoxReverb();
-	void		OnAudioSelected(const QModelIndex&);
+    void 		OnLineEditLatDegChanged(const QString& str);
+    void 		OnLineEditLatMinChanged(const QString& str);
+    void 		OnComboBoxNSHighlighted(int iID);
+    void 		OnLineEditLngDegChanged(const QString& str);
+    void 		OnLineEditLngMinChanged(const QString& str);
+    void 		OnComboBoxEWHighlighted(int iID);
+    void 		SetLatLng();
+    void 		OnCheckBoxUseGPS();
+    void 		OnCheckBoxDisplayGPS();
+    void 		OnSelTimeInterp(int);
+    void 		OnSelFrequencyInterp(int);
+    void 		OnSelTiSync(int);
+    void 		OnSliderIterChange(int value);
+    void 		OnRadioDRMRealIQ(int);
+    void 		OnRadioAMRealIQ(int);
+    void 		OnRadioHamRealIQ(int);
+    void 		OnButtonDRMApply();
+    void 		OnButtonAMApply();
+    void 		OnButtonFMApply();
+    void 		OnButtonHamApply();
+    void 		OnSliderLogStartDelayChange(int value);
+    void 		OnCheckWriteLog();
+    void 		OnCheckBoxLogLatLng();
+    void 		OnCheckBoxLogSigStr();
+    void 		OnCheckRecFilter();
+    void 		OnCheckModiMetric();
+    void 		OnTimerRig();
+    void 		OnRigTypeSelected(const QModelIndex&);
+    void 		OnRigSelected(const QModelIndex&);
+    void 		OnCheckEnableSMeterToggled(bool);
+    void 		OnButtonAddRig();
+    void 		OnButtonRemoveRig();
+    void		OnButtonConnectRig();
+    void		OnCheckBoxMuteAudio();
+    void		OnCheckSaveAudioWav();
+    void		OnCheckBoxReverb();
+    void		OnAudioSelected(const QModelIndex&);
 };

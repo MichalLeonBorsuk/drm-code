@@ -251,14 +251,11 @@ public:
 	void SetNoiRedType(const ENoiRedType eNewType);
 	ENoiRedType GetNoiRedType() {return NoiRedType;}
 
-
 	bool GetPLLPhase(CReal& rPhaseOut);
 
 	bool GetFrameBoundary() {return iFreeSymbolCounter==0;}
 
 	void SetFilterBWHz(int);
-	void SetFilterBWHz(EModulationType, int);
-	int GetFilterBWHz(EModulationType eType);
 	int GetFilterBWHz();
 
 	void SetDemodType(EModulationType);
@@ -268,19 +265,19 @@ protected:
 	void SetBPFilter(const CReal rNewBPNormBW);
 	void SetNormCurMixFreqOffs(const CReal rNewNormCurMixFreqOffs);
 
-	CComplexVector				cvecBReal;
-	CComplexVector				cvecBImag;
+	CComplexVector					cvecBReal;
+	CComplexVector					cvecBImag;
 	CRealVector					rvecZReal;
 	CRealVector					rvecZImag;
-	CComplexVector				cvecBAMAfterDem;
+	CComplexVector					cvecBAMAfterDem;
 	CRealVector					rvecZAMAfterDem;
 
 	CRealVector					rvecInpTmp;
-	CComplexVector				cvecHilbert;
-	int							iHilFiltBlLen;
+	CComplexVector					cvecHilbert;
+	int						iHilFiltBlLen;
 	CFftPlans					FftPlansHilFilt;
 
-	int							iFilterBWHz[NONE];
+	int						iFilterBWHz;
 	CReal						rBPNormBW;
 	CReal						rNormCurMixFreqOffs;
 	CReal						rBPNormCentOffsTot;
@@ -292,10 +289,10 @@ protected:
 	CRealVector					rvecAFM;
 	CRealVector					rvecBFM;
 
-	int							iSymbolBlockSize;
+	int						iSymbolBlockSize;
 
-	bool					bPLLIsEnabled;
-	bool					bAutoFreqAcquIsEnabled;
+	bool					        bPLLIsEnabled;
+	bool						bAutoFreqAcquIsEnabled;
 
 	CComplex					cOldVal;
 
@@ -303,15 +300,15 @@ protected:
 	/* Objects */
 	CPLL						PLL;
 	CMixer						Mixer;
-	CFreqOffsAcq				FreqOffsAcq;
+	CFreqOffsAcq					FreqOffsAcq;
 	CAGC						AGC;
-	CNoiseReduction				NoiseReduction;
+	CNoiseReduction					NoiseReduction;
 	ENoiRedType					NoiRedType;
-	EModulationType 			eDemodType;
+	EModulationType					eDemodType;
 
 	/* OPH: counter to count symbols within a frame in order to generate */
 	/* RSCI output */
-	int							iFreeSymbolCounter;
+	int						iFreeSymbolCounter;
 
 
 	virtual void InitInternal(CParameter& ReceiverParam);

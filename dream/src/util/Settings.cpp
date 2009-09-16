@@ -76,7 +76,7 @@ void CSettings::Clear(const string& section)
 {
     INIFile::iterator s = ini.find(section);
     if(s!=ini.end())
-        ini.erase(s);
+	ini.erase(s);
 }
 
 void CSettings::Clear(const string& section, const string& key)
@@ -84,9 +84,9 @@ void CSettings::Clear(const string& section, const string& key)
     INIFile::iterator s = ini.find(section);
     if(s!=ini.end())
     {
-        INISection::iterator k = s->second.find(key);
-        if(k!=s->second.end())
-            s->second.erase(k);
+	INISection::iterator k = s->second.find(key);
+	if(k!=s->second.end())
+	    s->second.erase(k);
     }
 }
 
@@ -361,7 +361,7 @@ CSettings::ParseArguments(int argc, char **argv)
 		if (GetStringArgument(argc, argv, i, "-a", "--latitude", strArgument)
 			== true)
 		{
-			Put("Logfile", "latitude", strArgument);
+			Put("GPS", "latitude", strArgument);
 			continue;
 		}
 
@@ -369,7 +369,7 @@ CSettings::ParseArguments(int argc, char **argv)
 		if (GetStringArgument(argc, argv, i, "-o", "--longitude", strArgument)
 			== true)
 		{
-			Put("Logfile", "longitude", strArgument);
+			Put("GPS", "longitude", strArgument);
 			continue;
 		}
 
@@ -487,7 +487,7 @@ CSettings::ParseArguments(int argc, char **argv)
 		if (GetNumericArgument(argc, argv, i, "-M", "--hamlib-model", 0,
 							   MAX_ID_HAMLIB, rArgument) == true)
 		{
-			Put("Hamlib", "model", (int)rArgument);
+			Put("command", "hamlib-model", (int)rArgument);
 			continue;
 		}
 #endif

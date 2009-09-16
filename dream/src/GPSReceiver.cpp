@@ -34,19 +34,15 @@ using namespace std;
 
 const unsigned short CGPSReceiver::c_usReconnectIntervalSeconds = 30;
 
-CGPSReceiver::CGPSReceiver(CParameter& p, CSettings& s):
-	Parameters(p),m_Settings(s),m_iCounter(0),
-	m_sHost("localhost"),m_iPort(2947)
+CGPSReceiver::CGPSReceiver(CParameter& p, const string& host, int port):
+	Parameters(p),m_iCounter(0),
+	m_sHost(host),m_iPort(port)
 {
 #ifdef QT_NETWORK_LIB
 	m_pSocket = NULL;
 	m_pTimer = new QTimer(this);
 	m_pTimerDataTimeout = new QTimer(this);
 #endif
-
-	m_sHost = m_Settings.Get("GPS", "host", m_sHost);
-	m_iPort = m_Settings.Get("GPS", "port", m_iPort);
-
 	open();
 }
 
