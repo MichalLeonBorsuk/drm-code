@@ -48,7 +48,7 @@ public:
 protected:
     ReceiverInterface&      Receiver;
     CSettings&              Settings;
-    ReceiverSettingsDlg*    pReceiverSettingsDlg;
+    ReceiverSettingsDlg*    receiverSettingsDlg;
     QDialog*                stationsDlg;
 
     QTimer                  Timer;
@@ -59,7 +59,6 @@ protected:
 
 public slots:
     void OnTimer();
-    void OnShowStations();
     void OnTune();
     void OnButtonAM();
     void OnButtonDRM();

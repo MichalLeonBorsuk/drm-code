@@ -20,7 +20,7 @@
    <item row="0" column="0">
     <widget class="QTabWidget" name="TabWidget">
      <property name="currentIndex">
-      <number>1</number>
+      <number>3</number>
      </property>
      <widget class="QWidget" name="Rig">
       <attribute name="title">

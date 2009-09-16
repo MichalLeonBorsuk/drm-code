@@ -54,94 +54,98 @@ AnalogMainWindow::AnalogMainWindow(ReceiverInterface& NDRMR, CSettings& NSetting
 {
     setupUi(this);
 
-	/* Set help text for the controls */
-	AddWhatsThisHelp();
+    /* Set help text for the controls */
+    AddWhatsThisHelp();
 
-    pReceiverSettingsDlg = new ReceiverSettingsDlg(Receiver, Settings, this);
+    pReceiverSettingsDlg = new ReceiverSettingsDlg(Settings,
+						   Receiver.GetParameters()->GPSData,
+						   *Receiver.GetSoundInInterface(),
+						   *Receiver.GetSoundOutInterface(),
+						   this);
 
-	/* Set Menu ***************************************************************/
-	/* View menu ------------------------------------------------------------ */
-	connect(actionExit, SIGNAL(triggered()), this, SLOT(close()));
+    /* Set Menu ***************************************************************/
+    /* View menu ------------------------------------------------------------ */
+    connect(actionExit, SIGNAL(triggered()), this, SLOT(close()));
 
-	/* Settings menu  ------------------------------------------------------- */
-	connect(actionFM, SIGNAL(triggered()), this, SLOT(OnSwitchToFM()));
-	connect(actionDRM, SIGNAL(triggered()), this, SLOT(OnSwitchToDRM()));
-	connect(actionAM, SIGNAL(triggered()), this, SLOT(OnNewAMAcquisition()));
-	connect(actionReceiver_Settings, SIGNAL(triggered()), pReceiverSettingsDlg, SLOT(show()));
+    /* Settings menu  ------------------------------------------------------- */
+    connect(actionFM, SIGNAL(triggered()), this, SLOT(OnSwitchToFM()));
+    connect(actionDRM, SIGNAL(triggered()), this, SLOT(OnSwitchToDRM()));
+    connect(actionAM, SIGNAL(triggered()), this, SLOT(OnNewAMAcquisition()));
+    connect(actionReceiver_Settings, SIGNAL(triggered()), pReceiverSettingsDlg, SLOT(show()));
 
-	/* Stations window */
-	stationsDlg = new StationsDlg(Receiver, Settings, false, this, "", false, Qt::WindowMinMaxButtonsHint);
-	connect(actionStations, SIGNAL(triggered()), stationsDlg, SLOT(show()));
+    /* Stations window */
+    stationsDlg = new StationsDlg(Receiver, Settings, false, this, "", false, Qt::WindowMinMaxButtonsHint);
+    connect(actionStations, SIGNAL(triggered()), stationsDlg, SLOT(show()));
 
-	/* Live Schedule window */
-	liveScheduleDlg = new LiveScheduleDlg(Receiver, Settings, this, "", false, Qt::WindowMinMaxButtonsHint);
-	connect(actionAFS, SIGNAL(triggered()), liveScheduleDlg, SLOT(show()));
+    /* Live Schedule window */
+    liveScheduleDlg = new LiveScheduleDlg(Receiver, Settings, this, "", false, Qt::WindowMinMaxButtonsHint);
+    connect(actionAFS, SIGNAL(triggered()), liveScheduleDlg, SLOT(show()));
 
-	/* Init main plot */
-	plot = new CDRMPlot(SpectrumPlot, Receiver.GetAnalogParameters());
-	plot->SetPlotStyle(Settings.Get("System Evaluation Dialog", "plotstyle", 0));
-	plot->SetupChart(CDRMPlot::INPUT_SIG_PSD_ANALOG);
-	connect(plot, SIGNAL(xAxisValSet(double)), this, SLOT(OnChartxAxisValSet(double)));
+    /* Init main plot */
+    plot = new CDRMPlot(SpectrumPlot, Receiver.GetAnalogParameters());
+    plot->SetPlotStyle(Settings.Get("System Evaluation Dialog", "plotstyle", 0));
+    plot->SetupChart(CDRMPlot::INPUT_SIG_PSD_ANALOG);
+    connect(plot, SIGNAL(xAxisValSet(double)), this, SLOT(OnChartxAxisValSet(double)));
 
-	SliderBandwidth->setRange(0, SOUNDCRD_SAMPLE_RATE / 2);
-	SliderBandwidth->setTickPosition(QSlider::TicksBothSides);
-	SliderBandwidth->setTickInterval(1000); /* Each kHz a tick */
-	SliderBandwidth->setPageStep(1000); /* Hz */
+    SliderBandwidth->setRange(0, SOUNDCRD_SAMPLE_RATE / 2);
+    SliderBandwidth->setTickPosition(QSlider::TicksBothSides);
+    SliderBandwidth->setTickInterval(1000); /* Each kHz a tick */
+    SliderBandwidth->setPageStep(1000); /* Hz */
 
-	/* Init PLL phase dial control */
-	PhaseDial->setMode(QwtDial::RotateNeedle);
-	PhaseDial->setWrapping(true);
-	PhaseDial->setReadOnly(true);
-	PhaseDial->setScale(0, 360, 45); /* Degrees */
-	PhaseDial->setOrigin(270);
-	PhaseDial->setNeedle(new QwtDialSimpleNeedle(QwtDialSimpleNeedle::Arrow));
-	PhaseDial->setFrameShadow(QwtDial::Plain);
-	PhaseDial->setScaleOptions(QwtDial::ScaleTicks);
+    /* Init PLL phase dial control */
+    PhaseDial->setMode(QwtDial::RotateNeedle);
+    PhaseDial->setWrapping(true);
+    PhaseDial->setReadOnly(true);
+    PhaseDial->setScale(0, 360, 45); /* Degrees */
+    PhaseDial->setOrigin(270);
+    PhaseDial->setNeedle(new QwtDialSimpleNeedle(QwtDialSimpleNeedle::Arrow));
+    PhaseDial->setFrameShadow(QwtDial::Plain);
+    PhaseDial->setScaleOptions(QwtDial::ScaleTicks);
 
-	/* Update controls */
-	UpdateControls();
+    /* Update controls */
+    UpdateControls();
 
-	/* Connect controls ----------------------------------------------------- */
-	connect(pushButtonFM, SIGNAL(clicked()), this, SLOT(OnSwitchToFM()));
-	connect(ButtonDRM, SIGNAL(clicked()), this, SLOT(OnSwitchToDRM()));
-	connect(ButtonAMSS, SIGNAL(clicked()), this, SLOT(OnButtonAMSS()));
-	connect(ButtonWaterfall, SIGNAL(clicked()), this, SLOT(OnButtonWaterfall()));
+    /* Connect controls ----------------------------------------------------- */
+    connect(pushButtonFM, SIGNAL(clicked()), this, SLOT(OnSwitchToFM()));
+    connect(ButtonDRM, SIGNAL(clicked()), this, SLOT(OnSwitchToDRM()));
+    connect(ButtonAMSS, SIGNAL(clicked()), this, SLOT(OnButtonAMSS()));
+    connect(ButtonWaterfall, SIGNAL(clicked()), this, SLOT(OnButtonWaterfall()));
 
-	/* Button groups */
-	bgDemod.addButton(RadioButtonDemNBFM, int(NBFM));
-	bgDemod.addButton(RadioButtonDemCW, int(CW));
-	bgDemod.addButton(RadioButtonDemUSB, int(USB));
-	bgDemod.addButton(RadioButtonDemLSB, int(LSB));
-	bgDemod.addButton(RadioButtonDemAM, int(AM));
-	bgAGC.addButton(RadioButtonAGCOff, int(AT_NO_AGC));
-	bgAGC.addButton(RadioButtonAGCSlow, int(AT_SLOW));
-	bgAGC.addButton(RadioButtonAGCMed, int(AT_MEDIUM));
-	bgAGC.addButton(RadioButtonAGCFast, int(AT_FAST));
-	bgNoiseRed.addButton(RadioButtonNoiRedOff, int(NR_OFF));
-	bgNoiseRed.addButton(RadioButtonNoiRedLow, int(NR_LOW));
-	bgNoiseRed.addButton(RadioButtonNoiRedMed, int(NR_MEDIUM));
-	bgNoiseRed.addButton(RadioButtonNoiRedHigh, int(NR_HIGH));
-	connect(&bgDemod, SIGNAL(buttonClicked(int)), this, SLOT(OnRadioDemodulation(int)));
-	connect(&bgAGC, SIGNAL(buttonClicked(int)), this, SLOT(OnRadioAGC(int)));
-	connect(&bgNoiseRed, SIGNAL(buttonClicked(int)), this, SLOT(OnRadioNoiRed(int)));
+    /* Button groups */
+    bgDemod.addButton(RadioButtonDemNBFM, int(NBFM));
+    bgDemod.addButton(RadioButtonDemCW, int(CW));
+    bgDemod.addButton(RadioButtonDemUSB, int(USB));
+    bgDemod.addButton(RadioButtonDemLSB, int(LSB));
+    bgDemod.addButton(RadioButtonDemAM, int(AM));
+    bgAGC.addButton(RadioButtonAGCOff, int(AT_NO_AGC));
+    bgAGC.addButton(RadioButtonAGCSlow, int(AT_SLOW));
+    bgAGC.addButton(RadioButtonAGCMed, int(AT_MEDIUM));
+    bgAGC.addButton(RadioButtonAGCFast, int(AT_FAST));
+    bgNoiseRed.addButton(RadioButtonNoiRedOff, int(NR_OFF));
+    bgNoiseRed.addButton(RadioButtonNoiRedLow, int(NR_LOW));
+    bgNoiseRed.addButton(RadioButtonNoiRedMed, int(NR_MEDIUM));
+    bgNoiseRed.addButton(RadioButtonNoiRedHigh, int(NR_HIGH));
+    connect(&bgDemod, SIGNAL(buttonClicked(int)), this, SLOT(OnRadioDemodulation(int)));
+    connect(&bgAGC, SIGNAL(buttonClicked(int)), this, SLOT(OnRadioAGC(int)));
+    connect(&bgNoiseRed, SIGNAL(buttonClicked(int)), this, SLOT(OnRadioNoiRed(int)));
 
-	/* Slider */
-	connect(SliderBandwidth, SIGNAL(valueChanged(int)),
-		this, SLOT(OnSliderBWChange(int)));
+    /* Slider */
+    connect(SliderBandwidth, SIGNAL(valueChanged(int)),
+	    this, SLOT(OnSliderBWChange(int)));
 
-	/* Check boxes */
-	connect(CheckBoxMuteAudio, SIGNAL(clicked()), this, SLOT(OnCheckBoxMuteAudio()));
-	connect(CheckBoxReverb, SIGNAL(clicked()), this, SLOT(OnCheckBoxReverb()));
-	connect(CheckBoxSaveAudioWave, SIGNAL(clicked()), this, SLOT(OnCheckSaveAudioWav()));
-	connect(CheckBoxAutoFreqAcq, SIGNAL(clicked()), this, SLOT(OnCheckAutoFreqAcq()));
+    /* Check boxes */
+    connect(CheckBoxMuteAudio, SIGNAL(clicked()), this, SLOT(OnCheckBoxMuteAudio()));
+    connect(CheckBoxReverb, SIGNAL(clicked()), this, SLOT(OnCheckBoxReverb()));
+    connect(CheckBoxSaveAudioWave, SIGNAL(clicked()), this, SLOT(OnCheckSaveAudioWav()));
+    connect(CheckBoxAutoFreqAcq, SIGNAL(clicked()), this, SLOT(OnCheckAutoFreqAcq()));
 
-	connect(PLLButton, SIGNAL(clicked ()), this, SLOT(OnCheckPLL()));
+    connect(PLLButton, SIGNAL(clicked ()), this, SLOT(OnCheckPLL()));
 
-	/* Timers */
-	connect(&Timer, SIGNAL(timeout()), this, SLOT(OnTimer()));
-	connect(&TimerPLLPhaseDial, SIGNAL(timeout()), this, SLOT(OnTimerPLLPhaseDial()));
+    /* Timers */
+    connect(&Timer, SIGNAL(timeout()), this, SLOT(OnTimer()));
+    connect(&TimerPLLPhaseDial, SIGNAL(timeout()), this, SLOT(OnTimerPLLPhaseDial()));
 
-	/* Don't activate real-time timers, wait for show event */
+    /* Don't activate real-time timers, wait for show event */
     Timer.stop();
     TimerPLLPhaseDial.stop();
     plot->stop();
@@ -178,7 +182,7 @@ void AnalogMainWindow::showEvent(QShowEvent*)
     PLLButton->setChecked(Settings.Get("AnalogGUI", "pll", true));
 
     try {
- 	plot->start();
+	plot->start();
     } catch(const char* e)
     {
 	QMessageBox::information(this, "Problem", e);
@@ -239,6 +243,7 @@ void AnalogMainWindow::OnSwitchToDRM()
 
 void AnalogMainWindow::OnSwitchToFM()
 {
+    QMessageBox::information(this, "Info", "switch to FM");
     CParameter& Parameter = *Receiver.GetAnalogParameters();
     Parameter.Lock();
     Parameter.eModulation = WBFM;
@@ -368,7 +373,7 @@ void AnalogMainWindow::OnTimer()
 	    quitWanted = false;
 	    close();
 		    break;
-	    case AM: case  USB: case  LSB: case  CW: case  NBFM: case  WBFM:
+	    case AM: case  USB: case  LSB: case  CW: case  NBFM:
 		    /* Carrier frequency of AM signal */
 	    b = Receiver.GetAnalogParameters()->Measurements.AnalogCurMixFreqOffs.get(r);
 	    if(b)
@@ -382,8 +387,12 @@ void AnalogMainWindow::OnTimer()
 	    }
 	    UpdateControls();
 	    break;
+	case  WBFM:
+	    quitWanted = false;
+	    close();
+	    break;
 	case NONE:
-		    break;
+	    break;
 	}
 	if(!AMSSDlg.isVisible())
 	ButtonAMSS->setChecked(false);

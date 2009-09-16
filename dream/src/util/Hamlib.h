@@ -93,7 +93,7 @@ class CRig: public Rig
 #endif
 {
 public:
-	CRig(CParameter&, rig_model_t);
+	CRig(/*CParameter&, */rig_model_t);
 	virtual ~CRig();
 
 	virtual void	run();
@@ -117,7 +117,7 @@ protected:
 #ifdef QT_CORE_LIB
 	QMutex			mutex;
 #endif
-	CParameter&		Parameters;
+	//CParameter&		Parameters;
 };
 
 class CHamlib
@@ -133,7 +133,7 @@ public:
 	void			SaveSettings(CSettings& s) const;
 
 	const rig_caps*		GetRigCaps(rig_model_t) const;
-	CRig*			GetRig(CParameter& p, rig_model_t m) { return new CRig(p,m); }
+	CRig*			GetRig(CParameter& p, rig_model_t m) { return new CRig(/*p,*/m); }
 
 	bool			GetRigSettings(CRigSettings&,
 					rig_model_t, EModulationType) const;

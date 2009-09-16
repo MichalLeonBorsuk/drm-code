@@ -49,7 +49,7 @@ class CGPSReceiver
 {
 #endif
 public:
-	CGPSReceiver(CParameter&, CSettings&);
+	CGPSReceiver(CParameter&, const string& host, int port);
 	virtual ~CGPSReceiver();
 	/* dummy assignment operator to help MSVC8 */
 	CGPSReceiver& operator=(const CGPSReceiver&)
@@ -68,15 +68,14 @@ protected:
 	static const unsigned short c_usReconnectIntervalSeconds;
 
 	CParameter&	Parameters;
-	CSettings&	m_Settings;
 #ifdef QT_NETWORK_LIB
 	QTcpSocket*	m_pSocket;
 	QTimer*		m_pTimer;
 	QTimer*		m_pTimerDataTimeout;
 #endif
-	int			m_iCounter;
+	int		m_iCounter;
 	string		m_sHost;
-	int			m_iPort;
+	int		m_iPort;
 
 public slots:
 

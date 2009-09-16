@@ -229,11 +229,18 @@ RigTypesModel::parent(const QModelIndex &child) const
     return QModelIndex();
 }
 
+int RigTypesModel::rig_enumerator(const rig_caps *caps, void *data)
+{
+    CRigMap& map = *(CRigMap *)data;
+    map.rigs[caps->mfg_name][caps->model_name] = caps->rig_model;
+    return 1;	/* !=0, we want them all! */
+}
+
 void
-RigTypesModel::load(ReceiverInterface& Receiver)
+RigTypesModel::load()
 {
     CRigMap r;
-    Receiver.GetRigList(r);
+    rig_list_foreach(rig_enumerator, &r);
     for(map<string,map<string,rig_model_t> >::const_iterator
 	i=r.rigs.begin(); i!=r.rigs.end(); i++)
     {
@@ -420,7 +427,7 @@ RigModel::remove(int id)
 }
 
 void
-RigModel::load(const CSettings& settings, ReceiverInterface& Receiver)
+RigModel::load(const CSettings& settings)
 {
     rigs.clear();
     QString rigids = settings.Get("Hamlib", "rigs", string("")).c_str();
@@ -438,21 +445,19 @@ RigModel::load(const CSettings& settings, ReceiverInterface& Receiver)
 
 	int model = settings.Get(sectitle, "model", int(RIG_MODEL_NONE));
 	r.id = l[i].toInt();
-	r.rig = Receiver.GetRig(r.id);
-	if(r.rig==NULL)
-	    r.rig = Receiver.CreateRig(model);
+	r.rig = new CRig(model);
 	if(r.rig)
 	{
 	    rmode_t mode_for_drm = rmode_t(settings.Get(sectitle, "mode_for_drm", int(RIG_MODE_NONE)));
 	    pbwidth_t width_for_drm = pbwidth_t(settings.Get(sectitle, "width", int(0)));
 	    if(mode_for_drm!=RIG_MODE_NONE)
 	    {
-	    	r.rig->SetModeForDRM(mode_for_drm, width_for_drm);
+		r.rig->SetModeForDRM(mode_for_drm, width_for_drm);
 	    }
 	    int offset = settings.Get(sectitle, "offset", int(0));
 	    if(offset != 0)
 	    {
-	    	r.rig->SetFrequencyOffset(offset);
+		r.rig->SetFrequencyOffset(offset);
 	    }
 	    INISection sec;
 	    settings.Get(sectitle+"-conf", sec);
@@ -513,7 +518,7 @@ RigModel::save(CSettings& settings)
 		settings.Put(sec+"-levels", keys[i], val);
 	    } catch(...)
 	    {
-	    	// skip
+		// skip
 	    }
 	}
 	pbwidth_t width;
@@ -549,35 +554,35 @@ void SoundChoice::update()
 	    size_t n = s[i].find(':');
 	    if(n==string::npos)
 	    {
-	    	card  c;
-	    	c.name = s[i];
+		card  c;
+		c.name = s[i];
 		c.parent = -1;
 		c.index = i;
-	    	cards.push_back(c);
+		cards.push_back(c);
 	    }
 	    else
 	    {
-	    	string api = s[i].substr(0,n);
-	    	map<string,int>::iterator it = apis.find(api);
-	    	size_t cn=0;
-	    	if(it==apis.end())
-	    	{
-	    		cn = cards.size();
-	    		apis[api] = cn;
-	    		card c;
-	    		c.name = api;
-	    		c.parent = -1;
-	    		c.index = -1;
-	    		cards.push_back(c);
-	    	}
-	    	else
-	    	{
-	    		cn = it->second;
-	    	}
-	    	port p;
-	    	p.name = s[i].substr(n+1);
-	    	p.index = i;
-	    	p.parent = cn;
+		string api = s[i].substr(0,n);
+		map<string,int>::iterator it = apis.find(api);
+		size_t cn=0;
+		if(it==apis.end())
+		{
+			cn = cards.size();
+			apis[api] = cn;
+			card c;
+			c.name = api;
+			c.parent = -1;
+			c.index = -1;
+			cards.push_back(c);
+		}
+		else
+		{
+			cn = it->second;
+		}
+		port p;
+		p.name = s[i].substr(n+1);
+		p.index = i;
+		p.parent = cn;
 		cards[cn].members.push_back(p);
 	    }
 	}
@@ -598,9 +603,9 @@ void SoundChoice::update()
     	cerr << "{" << cards[i].name << " " << cards[i].index << " " << cards[i].parent << endl;
     	for(size_t j=0; j<cards[i].members.size(); j++)
     	{
-    		cerr << "[" << cards[i].members[j].name
-    		<< " " << cards[i].members[j].index
-    		<< " " << cards[i].members[j].parent << "]" << endl;
+		cerr << "[" << cards[i].members[j].name
+		<< " " << cards[i].members[j].index
+		<< " " << cards[i].members[j].parent << "]" << endl;
     	}
     	cerr << "}" << endl;
     }
@@ -715,7 +720,7 @@ QModelIndex SoundChoice::index(int row, int column, const QModelIndex &parent) c
     int n = cards.size();
     if(n<=row)
     {
- 	return QModelIndex();
+	return QModelIndex();
     }
     QModelIndex r = createIndex(row, 0, (void*)&cards[row]);
     return r;
@@ -728,8 +733,8 @@ QModelIndex SoundChoice::parent(const QModelIndex& index) const
 	    const port* p = reinterpret_cast<const port*>(index.internalPointer());
 	    if (p)
 	    {
-	    	if(p->parent>=0)
-	    	{
+		if(p->parent>=0)
+		{
 		    return createIndex(p->parent, 0, (void*)&cards[p->parent]);
 		}
 	    }
@@ -740,41 +745,32 @@ QModelIndex SoundChoice::parent(const QModelIndex& index) const
 #endif
 
 ReceiverSettingsDlg::ReceiverSettingsDlg(
-    ReceiverInterface& NRx,
-    CSettings& NSettings,
+    CSettings& NSettings, CGPSData& GPSD,
+     CSelectionInterface& soundin,
+     CSelectionInterface& soundout,
 	QWidget* parent, Qt::WFlags f) :
 	QDialog(parent, f), Ui_ReceiverSettingsDlg(),
-	Receiver(NRx), Settings(NSettings), loading(true),
+	Settings(NSettings), loading(true),
 	TimerRig(),iWantedrigModel(0),
 	bgTimeInterp(NULL), bgFreqInterp(NULL), bgTiSync(NULL),
 	bgAMriq(NULL), bgAMlrm(NULL), bgAMiq(NULL),
 	bgHamriq(NULL), bgHamlrm(NULL), bgHamiq(NULL),
 #ifdef HAVE_LIBHAMLIB
-	RigTypes(),Rigs(),soundcards(),
+	RigTypes(),Rigs(),GPSData(GPSD),soundinputs(),
 #endif
 	soundoutputs()
 {
     setupUi(this);
 
-    bool bEnableRig = false;
 #ifdef HAVE_LIBHAMLIB
-    bEnableRig = true;
     treeViewRigTypes->setModel(&RigTypes);
-    RigTypes.load(Receiver);
+    RigTypes.load();
     treeViewRigs->setModel(&Rigs);
 #endif
 
-    if(Receiver.UpstreamDIInputEnabled())
-	bEnableRig = false;
-
-    if(bEnableRig == false)
-    {
-	    TabWidget->removeTab(TabWidget->indexOf(Rig));
-    }
-
     /* Connections */
 
-    connect(buttonClose, SIGNAL(clicked()), SLOT(OnButtonClose()) );
+    connect(buttonClose, SIGNAL(clicked()), this, SLOT(close()) );
     connect(LineEditLatDegrees, SIGNAL(textChanged(const QString&)), SLOT(OnLineEditLatDegChanged(const QString&)));
     connect(LineEditLatMinutes, SIGNAL(textChanged(const QString&)), SLOT(OnLineEditLatMinChanged(const QString&)));
     connect(ComboBoxNS, SIGNAL(highlighted(int)), SLOT(OnComboBoxNSHighlighted(int)) );
@@ -805,19 +801,19 @@ ReceiverSettingsDlg::ReceiverSettingsDlg(
     bgTiSync->addButton(RadioButtonTiSyncFirstPeak, TSFIRSTPEAK);
     connect(bgTiSync, SIGNAL(buttonClicked(int)), SLOT(OnSelTiSync(int)));
 
-    soundcards = new SoundChoice(*Receiver.GetSoundInInterface());
+    soundinputs = new SoundChoice(soundin);
     widgetDRMInput->comboBoxRig->setModel(treeViewRigs->model());
-    widgetDRMInput->comboBoxSound->setModel(soundcards);
+    widgetDRMInput->comboBoxSoundCard->setModel(soundinputs);
 
     widgetAMInput->comboBoxRig->setModel(treeViewRigs->model());
-    widgetAMInput->comboBoxSound->setModel(soundcards);
+    widgetAMInput->comboBoxSoundCard->setModel(soundinputs);
 
     widgetFMInput->comboBoxRig->setModel(treeViewRigs->model());
-    widgetFMInput->comboBoxSound->setModel(soundcards);
-    widgetFMInput->soundInputFrame->setEnabled(false);
+    widgetFMInput->comboBoxSoundCard->setModel(soundinputs);
+    //widgetFMInput->soundInputFrame->setEnabled(false);
 
     widgetHamInput->comboBoxRig->setModel(treeViewRigs->model());
-    widgetHamInput->comboBoxSound->setModel(soundcards);
+    widgetHamInput->comboBoxSoundCard->setModel(soundinputs);
 
     connect(pushButtonDRMApply, SIGNAL(clicked()), SLOT(OnButtonDRMApply()));
     connect(pushButtonAMApply, SIGNAL(clicked()), SLOT(OnButtonAMApply()));
@@ -850,7 +846,7 @@ ReceiverSettingsDlg::ReceiverSettingsDlg(
     //TimerRig.setSingleShot(true);
 #endif
 
-    soundoutputs = new SoundChoice(*Receiver.GetSoundOutInterface(), true);
+    soundoutputs = new SoundChoice(soundout, true);
     connect(CheckBoxMuteAudio, SIGNAL(clicked()), this, SLOT(OnCheckBoxMuteAudio()));
     connect(CheckBoxReverb, SIGNAL(clicked()), this, SLOT(OnCheckBoxReverb()));
     connect(CheckBoxRecordAudio, SIGNAL(clicked()), this, SLOT(OnCheckSaveAudioWav()));
@@ -860,27 +856,17 @@ ReceiverSettingsDlg::ReceiverSettingsDlg(
 
     /* Set help text for the controls */
     AddWhatsThisHelp();
-
-    setDefaults();
 }
 
 ReceiverSettingsDlg::~ReceiverSettingsDlg()
 {
-	double latitude, longitude;
-	Receiver.GetParameters()->GPSData.GetLatLongDegrees(latitude, longitude);
-	Settings.Put("Logfile", "latitude", latitude);
-	Settings.Put("Logfile", "longitude", longitude);
 }
 
 void ReceiverSettingsDlg::showEvent(QShowEvent*)
 {
     loading = true; // prevent executive actions during reading state
 
-    CParameter& Parameters = *Receiver.GetParameters();
-
-    Parameters.Lock();
-    EModulationType modn = Parameters.eModulation;
-    Parameters.Unlock();
+    EModulationType modn = EModulationType(Settings.Get("Receiver", "modulation", int(NONE)));
 
     switch(modn)
     {
@@ -911,22 +897,21 @@ void ReceiverSettingsDlg::showEvent(QShowEvent*)
 
     /* DRM ----------------------------------------------------------------- */
     QAbstractButton* button = NULL;
-    int n = Receiver.GetTimeInt();
-    button = bgTimeInterp->button(n);
+    button = bgTimeInterp->button(Settings.Get("Receiver", "timeinterpolation", 0));
     if(button) button->setChecked(true);
-    button = bgFreqInterp->button(int(Receiver.GetFreqInt()));
+    button = bgFreqInterp->button(Settings.Get("Receiver", "frequencyinterpolation", 0));
     if(button) button->setChecked(true);
-    button = bgTiSync->button(int(Receiver.GetTiSyncTracType()));
+    button = bgTiSync->button(Settings.Get("Receiver", "tracking", 0));
     if(button) button->setChecked(true);
 
-    CheckBoxRecFilter->setChecked(Receiver.GetRecFilter());
-    CheckBoxModiMetric->setChecked(Receiver.GetIntCons());
-    SliderNoOfIterations->setValue(Receiver.GetInitNumIterations());
+    CheckBoxRecFilter->setChecked(Settings.Get("Receiver", "filter", false));
+    CheckBoxModiMetric->setChecked(Settings.Get("Receiver", "modmetric", false));
+    SliderNoOfIterations->setValue(Settings.Get("Receiver", "mlciter", 0));
 
     /* Rig - need Rigs populated before input options */
 #ifdef HAVE_LIBHAMLIB
     stackedWidget->setEnabled(false);
-    Rigs.load(Settings, Receiver);
+    Rigs.load(Settings);
     CheckBoxEnableSMeter->setChecked(false);
 #endif
 
@@ -937,16 +922,18 @@ void ReceiverSettingsDlg::showEvent(QShowEvent*)
     widgetFMInput->load(Settings);
     widgetHamInput->load(Settings);
 
-
     /* Audio */
-    CheckBoxMuteAudio->setChecked(Receiver.GetMuteAudio());
-    CheckBoxRecordAudio->setChecked(Receiver.GetIsWriteWaveFile());
-    CheckBoxReverb->setChecked(Receiver.GetReverbEffect());
+    string wavfile = Settings.Get("command", "writewav", string(""));
+    CheckBoxMuteAudio->setChecked(Settings.Get("Receiver", "muteaudio", false));
+    lineEditAudioFile->setText(wavfile.c_str());
+    CheckBoxRecordAudio->setChecked(wavfile!="");
+    CheckBoxReverb->setChecked(Settings.Get("Receiver", "reverb", true));
 
     /* GPS */
-    ExtractReceiverCoordinates();
+    loadGPSSettings();
 
-    loading = false; // loading completed
+    /* Logfile */
+    loadLogfileSettings();
 }
 
 static RigData getRig(QComboBox* box)
@@ -964,96 +951,70 @@ void ReceiverSettingsDlg::hideEvent(QHideEvent*)
 	widgetFMInput->save(Settings);
 	widgetHamInput->save(Settings);
 	Rigs.save(Settings);
+	saveGPSSettings();
+	saveLogfileSettings();
 }
 
-/* this sets default values into the dialog and ini file for
- * items not covered in other places. It is currently called
- * from the constructor and contains items which can only
- * be modified in this dialog or on the command line.
- * (lat/long is still looking for a good home)
- */
-void ReceiverSettingsDlg::setDefaults()
-{
-    CParameter& Parameters = *(Receiver.GetParameters());
-
-    /* these won't get into the ini file unless we use GPS or have this: */
-    double latitude = Settings.Get("Logfile", "latitude", 100.0);
-    double longitude = Settings.Get("Logfile", "longitude", 0.0);
-    if(latitude<=90.0)
-    {
-	    Parameters.GPSData.SetPositionAvailable(true);
-	    Parameters.GPSData.SetGPSSource(CGPSData::GPS_SOURCE_MANUAL_ENTRY);
-	    Parameters.GPSData.SetLatLongDegrees(latitude, longitude);
-    }
-    else
-    {
-	    latitude = 0.0;
-	    Parameters.GPSData.SetPositionAvailable(false);
-    }
-
-    /* Start log file flag */
-    CheckBoxWriteLog->setChecked(Settings.Get("Logfile", "enablelog", false));
-
-    /* log file flag for storing signal strength in long log */
-    CheckBoxLogSigStr->setChecked(Settings.Get("Logfile", "enablerxl", false));
-
-    /* log file flag for storing lat/long in long log */
-    CheckBoxLogLatLng->setChecked(Settings.Get("Logfile", "enablepositiondata", false));
-
-    /* logging delay value */
-    int iLogDelay = Settings.Get("Logfile", "delay", 0);
-    SliderLogStartDelay->setValue(iLogDelay);
-
-    /* GPS ------------------------------------------------------------------- */
-    string host = Settings.Get("GPS", "host", string("localhost"));
-    LineEditGPSHost->setText(host.c_str());
-
-    int port = Settings.Get("GPS", "port", 2947);
-    LineEditGPSPort->setText(QString("%1").arg(port));
-
-    CheckBoxUseGPS->setChecked(Settings.Get("GPS", "usegpsd", false));
-    CheckBoxDisplayGPS->setChecked(Settings.Get("GPS", "showgps", false));
-
-
-    /* get the defaults into the ini file */
-    Settings.Put("Logfile", "latitude", latitude);
-    Settings.Put("Logfile", "longitude", longitude);
-    Settings.Put("Logfile", "enablelog", CheckBoxWriteLog->isChecked());
-    Settings.Put("Logfile", "enablerxl", CheckBoxLogSigStr->isChecked());
-    Settings.Put("Logfile", "enablepositiondata", CheckBoxLogLatLng->isChecked());
-    Settings.Put("Logfile", "delay", iLogDelay);
-    Settings.Put("GPS", "usegpsd", CheckBoxUseGPS->isChecked());
-    Settings.Put("GPS", "showgps", CheckBoxDisplayGPS->isChecked());
-    Settings.Put("GPS", "host", host);
-    Settings.Put("GPS", "port", port);
-}
 /* when the dialog closes save the contents of any controls which don't have
  * their own slot handlers
  */
 
-void ReceiverSettingsDlg::OnButtonClose()
-{
-	/* save current settings */
-	Settings.Put("GPS", "host", LineEditGPSHost->text().toStdString());
-	Settings.Put("GPS", "port", LineEditGPSPort->text().toInt());
+// = GPS Tab ==============================================================
 
-	accept(); /* close the dialog */
+void ReceiverSettingsDlg::loadGPSSettings()
+{
+    string host = Settings.Get("GPS", "host", string("localhost"));
+    LineEditGPSHost->setText(host.c_str());
+
+    int port = Settings.Get("GPS", "port", 2947);
+    LineEditGPSPort->setText(QString().number(port));
+
+    CheckBoxUseGPS->setChecked(Settings.Get("GPS", "usegpsd", false));
+    CheckBoxDisplayGPS->setChecked(Settings.Get("GPS", "showgps", false));
+
+    double latitude = Settings.Get("GPS", "latitude", 100.0);
+    double longitude = Settings.Get("GPS", "longitude", 0.0);
+
+    if(latitude<=90.0)
+    {
+	    GPSData.SetPositionAvailable(true);
+	    GPSData.SetGPSSource(CGPSData::GPS_SOURCE_MANUAL_ENTRY);
+	    GPSData.SetLatLongDegrees(latitude, longitude);
+    }
+    else
+    {
+	    latitude = 0.0;
+	    GPSData.SetPositionAvailable(false);
+    }
+
+    setLatLngDlg(latitude, longitude);
+
+    saveGPSSettings(); // in case were not in ini file and defaults used
 }
 
-// = GPS Tab ==============================================================
+void ReceiverSettingsDlg::saveGPSSettings()
+{
+    Settings.Put("GPS", "host", LineEditGPSHost->text().toStdString());
+    Settings.Put("GPS", "port", LineEditGPSPort->text().toInt());
+    Settings.Put("GPS", "usegpsd", CheckBoxUseGPS->isChecked());
+    Settings.Put("GPS", "showgps", CheckBoxDisplayGPS->isChecked());
+
+    double latitude, longitude;
+    GPSData.GetLatLongDegrees(latitude, longitude);
+    Settings.Put("GPS", "latitude", latitude);
+    Settings.Put("GPS", "longitude", longitude);
+}
 
 void ReceiverSettingsDlg::OnCheckBoxUseGPS()
 {
-	Settings.Put("GPS", "host", LineEditGPSHost->text().toStdString());
-	Settings.Put("GPS", "port", LineEditGPSPort->text().toInt());
-	Settings.Put("GPS", "usegpsd", CheckBoxUseGPS->isChecked());
-	emit StartStopGPS(CheckBoxUseGPS->isChecked());
+    saveGPSSettings();
+    emit StartStopGPS(CheckBoxUseGPS->isChecked());
 }
 
 void ReceiverSettingsDlg::OnCheckBoxDisplayGPS()
 {
-	Settings.Put("GPS", "showgps", CheckBoxDisplayGPS->isChecked());
-	emit ShowHideGPS(CheckBoxDisplayGPS->isChecked());
+    saveGPSSettings();
+    emit ShowHideGPS(CheckBoxDisplayGPS->isChecked());
 }
 
 void ReceiverSettingsDlg::OnLineEditLatDegChanged(const QString&)
@@ -1088,34 +1049,23 @@ void ReceiverSettingsDlg::OnComboBoxEWHighlighted(int)
 
 void ReceiverSettingsDlg::SetLatLng()
 {
-	CParameter& Parameters = *Receiver.GetParameters();
-	double latitude, longitude;
+    double latitude, longitude;
 
-	longitude = (LineEditLngDegrees->text().toDouble()
-				+ LineEditLngMinutes->text().toDouble()/60.0
-				)*((ComboBoxEW->currentText()=="E")?1:-1);
+    longitude = (LineEditLngDegrees->text().toDouble()
+			    + LineEditLngMinutes->text().toDouble()/60.0
+			    )*((ComboBoxEW->currentText()=="E")?1:-1);
 
-	latitude = (LineEditLatDegrees->text().toDouble()
-				+ LineEditLatMinutes->text().toDouble()/60.0
-				)*((ComboBoxNS->currentText()=="N")?1:-1);
+    latitude = (LineEditLatDegrees->text().toDouble()
+			    + LineEditLatMinutes->text().toDouble()/60.0
+			    )*((ComboBoxNS->currentText()=="N")?1:-1);
 
-	Parameters.Lock();
-	Parameters.GPSData.SetPositionAvailable(true);
-	Parameters.GPSData.SetLatLongDegrees(latitude, longitude);
-	Parameters.Unlock();
+    GPSData.SetPositionAvailable(true);
+    GPSData.SetLatLongDegrees(latitude, longitude);
 }
 
-void ReceiverSettingsDlg::ExtractReceiverCoordinates()
+void ReceiverSettingsDlg::setLatLngDlg(double latitude, double longitude)
 {
 	QString sVal, sDir;
-	CParameter& Parameters = *Receiver.GetParameters();
-
-	double latitude, longitude;
-
-	Parameters.Lock();
-	Parameters.GPSData.GetLatLongDegrees(latitude, longitude);
-	Parameters.Unlock();
-
 	if(latitude<0.0)
 	{
 		latitude = 0.0 - latitude;
@@ -1144,38 +1094,39 @@ void ReceiverSettingsDlg::ExtractReceiverCoordinates()
 
 void ReceiverSettingsDlg::OnSelTimeInterp(int iId)
 {
-   Receiver.SetTimeInt(ETypeIntTime(iId));
+    Settings.Put("Receiver", "timeinterpolation", iId);
 }
 
 void ReceiverSettingsDlg::OnSelFrequencyInterp(int iId)
 {
-    Receiver.SetFreqInt(ETypeIntFreq(iId));
+    Settings.Put("Receiver", "frequencyinterpolation", iId);
 }
 
 void ReceiverSettingsDlg::OnSelTiSync(int iId)
 {
-    Receiver.SetTiSyncTracType(ETypeTiSyncTrac(iId));
+    Settings.Put("Receiver", "tracking", iId);
 }
 
 void ReceiverSettingsDlg::OnSliderIterChange(int value)
 {
-	Receiver.SetNumIterations(value);
+     Settings.Put("Receiver", "mlciter", value);
 }
 
 // input TAB
 void 	ReceiverSettingsDlg::OnRadioDRMRealIQ(int i)
 {
-	widgetDRMInput->stackedWidgetip->setCurrentIndex(i);
+	//widgetDRMInput->stackedWidgetCard->setCurrentIndex(i);
+	//widgetDRMInput->stackedWidgetFile->setCurrentIndex(i);
 }
 
 void 	ReceiverSettingsDlg::OnRadioAMRealIQ(int i)
 {
-	widgetDRMInput->stackedWidgetip->setCurrentIndex(i);
+	//widgetDRMInput->stackedWidgetip->setCurrentIndex(i);
 }
 
 void 	ReceiverSettingsDlg::OnRadioHamRealIQ(int i)
 {
-	widgetHamInput->stackedWidgetip->setCurrentIndex(i);
+	//widgetHamInput->stackedWidgetip->setCurrentIndex(i);
 }
 
 void ReceiverSettingsDlg::OnButtonDRMApply()
@@ -1200,53 +1151,72 @@ void ReceiverSettingsDlg::OnButtonHamApply()
 
 void ReceiverSettingsDlg::OnCheckRecFilter()
 {
-	/* Set parameter in working thread module */
-	Receiver.SetRecFilter(CheckBoxRecFilter->isChecked());
-
-	/* If filter status is changed, a new aquisition is necessary */
-    CParameter& Parameters = *Receiver.GetParameters();
-    Parameters.Lock();
-    Parameters.RxEvent = Reinitialise;
-    Parameters.Unlock();
+    Settings.Put("Receiver", "filter", CheckBoxRecFilter->isChecked());
 }
 
 void ReceiverSettingsDlg::OnCheckModiMetric()
 {
-	/* Set parameter in working thread module */
-	Receiver.SetIntCons(CheckBoxModiMetric->isChecked());
+    Settings.Put("Receiver", "modmetric", CheckBoxModiMetric->isChecked());
+}
+
+// Logging Tab
+void ReceiverSettingsDlg::loadLogfileSettings()
+{
+    /* Start log file flag */
+    CheckBoxWriteLog->setChecked(Settings.Get("Logfile", "enablelog", false));
+
+    /* log file flag for storing signal strength in long log */
+    CheckBoxLogSigStr->setChecked(Settings.Get("Logfile", "enablerxl", false));
+
+    /* log file flag for storing lat/long in long log */
+    CheckBoxLogLatLng->setChecked(Settings.Get("Logfile", "enablepositiondata", false));
+
+    /* logging delay value */
+    int iLogDelay = Settings.Get("Logfile", "delay", 0);
+    SliderLogStartDelay->setValue(iLogDelay);
+
+    saveLogfileSettings(); // establish defaults in ini file
+}
+
+void ReceiverSettingsDlg::saveLogfileSettings()
+{
+    Settings.Put("Logfile", "enablelog", CheckBoxWriteLog->isChecked());
+    Settings.Put("Logfile", "enablerxl", CheckBoxLogSigStr->isChecked());
+    Settings.Put("Logfile", "enablepositiondata", CheckBoxLogLatLng->isChecked());
+    Settings.Put("Logfile", "delay", SliderLogStartDelay->value());
 }
 
 void ReceiverSettingsDlg::OnCheckWriteLog()
 {
-	emit StartStopLog(CheckBoxWriteLog->isChecked());
-	Settings.Put("Logfile", "enablelog", CheckBoxWriteLog->isChecked());
+    emit StartStopLog(CheckBoxWriteLog->isChecked());
+    Settings.Put("Logfile", "enablelog", CheckBoxWriteLog->isChecked());
 }
 
 void ReceiverSettingsDlg::OnCheckBoxLogLatLng()
 {
-	emit LogPosition(CheckBoxLogLatLng->isChecked());
-	Settings.Put("Logfile", "enablepositiondata", CheckBoxLogLatLng->isChecked());
+    emit LogPosition(CheckBoxLogLatLng->isChecked());
+    Settings.Put("Logfile", "enablepositiondata", CheckBoxLogLatLng->isChecked());
 }
 
 void ReceiverSettingsDlg::OnCheckBoxLogSigStr()
 {
-	emit LogSigStr(CheckBoxLogSigStr->isChecked());
-	Settings.Put("Logfile", "enablerxl", CheckBoxLogSigStr->isChecked());
+    emit LogSigStr(CheckBoxLogSigStr->isChecked());
+    Settings.Put("Logfile", "enablerxl", CheckBoxLogSigStr->isChecked());
 }
 
 void ReceiverSettingsDlg::OnSliderLogStartDelayChange(int value)
 {
-	emit SetLogStartDelay(value);
-	Settings.Put("Logfile", "delay", value);
+    emit SetLogStartDelay(value);
+    Settings.Put("Logfile", "delay", value);
 }
 
 void ReceiverSettingsDlg::OnCheckEnableSMeterToggled(bool on)
 {
-	if(loading)
-		return;
-	CRig* rig = Receiver.GetCurrentRig();
-	if(rig)
-		rig->SetEnableSMeter(on);
+    if(loading)
+	    return;
+    //CRig* rig = Receiver.GetCurrentRig();
+   // if(rig)
+//	    rig->SetEnableSMeter(on);
 }
 
 void
@@ -1254,7 +1224,7 @@ ReceiverSettingsDlg::OnRigTypeSelected(const QModelIndex& m)
 {
     QVariant var = m.data(Qt::UserRole);
     if(var.isValid()==false)
-        return;
+	return;
     rig_model_t model = var.toInt();
     if(RigTypes.modified.find(model)!=RigTypes.modified.end())
 	checkBoxModified->setEnabled(true);
@@ -1315,7 +1285,8 @@ void
 ReceiverSettingsDlg::OnButtonAddRig()
 {
     rig_model_t model = treeViewRigTypes->currentIndex().data(Qt::UserRole).toInt();
-    CRig* r = Receiver.CreateRig(model);
+
+    CRig* r = new CRig(model);
     if(r)
     {
     	bool parms;
@@ -1336,7 +1307,7 @@ ReceiverSettingsDlg::OnButtonAddRig()
 	    }
 	    if(p.mode_for_drm!=RIG_MODE_NONE)
 	    {
-	    	r->SetModeForDRM(p.mode_for_drm, p.width_for_drm);
+		r->SetModeForDRM(p.mode_for_drm, p.width_for_drm);
 	    }
 	    r->SetFrequencyOffset(p.offset);
     	}
@@ -1373,13 +1344,13 @@ ReceiverSettingsDlg::OnButtonConnectRig()
 		rig->setConf("rig_pathname", strPort.c_str());
 	    }
 	}
-        labelRigInfo->setText(tr("waiting"));
+	labelRigInfo->setText(tr("waiting"));
 	try
 	{
 	    rig->open();
 	} catch(RigException e)
 	{
-            labelRigInfo->setText(tr(e.message));
+	    labelRigInfo->setText(tr(e.message));
 	}
 #endif
 	labelRigInfo->setText(rig->getInfo());
@@ -1388,46 +1359,29 @@ ReceiverSettingsDlg::OnButtonConnectRig()
 
 void ReceiverSettingsDlg::OnTimerRig()
 {
-#ifdef HAVE_LIBHAMLIB
-    if(Receiver.GetRigChangeInProgress())
-    {
-	    labelRigInfo->setText(tr("still waiting"));
-    }
-    else
-    {
-	CRig* rig = Receiver.GetCurrentRig();
-	if(rig)
-	    labelRigInfo->setText(rig->getInfo());
-
-	TimerRig.stop();
-    }
-#endif
 }
-
 
 void ReceiverSettingsDlg::OnCheckBoxMuteAudio()
 {
-	/* Set parameter in working thread module */
-	Receiver.MuteAudio(CheckBoxMuteAudio->isChecked());
+    Settings.Put("Receiver", "muteaudio", CheckBoxMuteAudio->isChecked());
 }
 
 void ReceiverSettingsDlg::OnCheckSaveAudioWav()
 {
-	OnSaveAudio(this, CheckBoxRecordAudio, Receiver);
+    //OnSaveAudio(this, CheckBoxRecordAudio, Receiver);
 }
 
 void ReceiverSettingsDlg::OnCheckBoxReverb()
 {
-	/* Set parameter in working thread module */
-	Receiver.SetReverbEffect(CheckBoxReverb->isChecked());
+    Settings.Put("Receiver", "reverb", CheckBoxReverb->isChecked());
 }
 
 void ReceiverSettingsDlg::OnAudioSelected(const QModelIndex& m)
 {
     QVariant var = m.data(Qt::UserRole);
     if(var.isValid()==false)
-        return;
-    Receiver.GetSoundOutInterface()->SetDev(var.toInt());
+	return;
+    Settings.Put("Receiver", "snddevout", var.toInt());
 }
 
 void ReceiverSettingsDlg::AddWhatsThisHelp()
@@ -1460,14 +1414,6 @@ void ReceiverSettingsDlg::AddWhatsThisHelp()
 		"standard is one iteration (number of iterations = 1).");
 
 	SliderNoOfIterations->setWhatsThis( strNumOfIterations);
-
-	/* Flip Input Spectrum */
-	const QString s = tr("<b>Flip Input Spectrum:</b> Checking this box "
-		"will flip or invert the input spectrum. This is necessary if the "
-		"mixer in the front-end uses the lower side band.");
-	widgetDRMInput->CheckBoxFlipSpec->setWhatsThis(s);
-	widgetAMInput->CheckBoxFlipSpec->setWhatsThis(s);
-	widgetHamInput->CheckBoxFlipSpec->setWhatsThis(s);
 
 	/* Log File */
 	CheckBoxWriteLog->setWhatsThis(

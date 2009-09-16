@@ -157,25 +157,29 @@ void SystemEvalDlg::InitialiseGPS()
 
 void SystemEvalDlg::EnableGPS(bool b)
 {
-	CParameter& Parameters = *Receiver.GetParameters();
-	Parameters.Lock();
-	if(b)
+    CParameter& Parameters = *Receiver.GetParameters();
+    Parameters.Lock();
+    if(b)
+    {
+	Parameters.GPSData.SetGPSSource(CGPSData::GPS_SOURCE_GPS_RECEIVER);
+	Parameters.Unlock();
+	if(pGPSReceiver == NULL)
 	{
-		Parameters.GPSData.SetGPSSource(CGPSData::GPS_SOURCE_GPS_RECEIVER);
-		Parameters.Unlock();
-		if(pGPSReceiver == NULL)
-			pGPSReceiver = new CGPSReceiver(Parameters, Settings);
+	    string host = Settings.Get("GPS", "host", string("localhost"));
+	    int port = Settings.Get("GPS", "port", 2947);
+	    pGPSReceiver = new CGPSReceiver(Parameters, host, port);
 	}
-	else
+    }
+    else
+    {
+	Parameters.GPSData.SetGPSSource(CGPSData::GPS_SOURCE_MANUAL_ENTRY);
+	Parameters.Unlock();
+	if(pGPSReceiver)
 	{
-		Parameters.GPSData.SetGPSSource(CGPSData::GPS_SOURCE_MANUAL_ENTRY);
-		Parameters.Unlock();
-		if(pGPSReceiver)
-		{
-			delete pGPSReceiver;
-			pGPSReceiver = NULL;
-		}
+		delete pGPSReceiver;
+		pGPSReceiver = NULL;
 	}
+    }
 }
 
 void SystemEvalDlg::UpdateGPS(CParameter& Parameters)

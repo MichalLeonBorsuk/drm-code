@@ -194,9 +194,8 @@ public:
 
 	void					SetAnalogDemodType(EModulationType);
 	EModulationType		    GetAnalogDemodType() { return AMDemodulation.GetDemodType(); }
-	int						GetAnalogFilterBWHz();
+	int					GetAnalogFilterBWHz();
 	void					SetAnalogFilterBWHz(int);
-	void					SetAnalogFilterBWHz(EModulationType, int);
 
 	void					SetAnalogDemodAcq(_REAL rNewNorCen);
 
