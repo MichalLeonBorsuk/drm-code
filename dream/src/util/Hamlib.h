@@ -30,13 +30,15 @@
 #ifndef _HAMLIB_H
 #define _HAMLIB_H
 
-#include "../GlobalDefinitions.h"
 #include "../Parameter.h"
 #include "rigclass.h"
 #include <string>
 #include <map>
+#ifdef QT_CORE_LIB
+# include <QThread>
+# include <QMutex>
+#endif
 
-class CParameter;
 class CSettings;
 
 enum ESMeterState {SS_VALID, SS_NOTVALID, SS_TIMEOUT};
@@ -88,12 +90,12 @@ public:
 /* Hamlib interface --------------------------------------------------------- */
 
 class CRig: public Rig
-#ifdef QT_GUI_LIB
+#ifdef QT_CORE_LIB
 	, public QThread
 #endif
 {
 public:
-	CRig(/*CParameter&, */rig_model_t);
+	CRig(rig_model_t, CParameter* =NULL);
 	virtual ~CRig();
 
 	virtual void	run();
@@ -114,10 +116,10 @@ protected:
 	int iOffset;
 	rmode_t mode_for_drm;
 	pbwidth_t width_for_drm;
+	CParameter*		pParameters;
 #ifdef QT_CORE_LIB
 	QMutex			mutex;
 #endif
-	//CParameter&		Parameters;
 };
 
 class CHamlib

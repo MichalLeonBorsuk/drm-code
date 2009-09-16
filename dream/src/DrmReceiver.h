@@ -55,7 +55,7 @@
 #include "AMSSDemodulation.h"
 #include "soundinterface.h"
 
-#ifdef QT_GUI_LIB
+#ifdef QT_CORE_LIB
 # include <QThread>
 # include <QMutex>
 #endif
