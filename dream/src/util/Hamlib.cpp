@@ -27,12 +27,9 @@
 
 #include <cstdlib>
 #include "Hamlib.h"
-
-#include "../Parameter.h"
 #include "Settings.h"
 #include <sstream>
 #include <iostream>
-#include "../Parameter.h"
 
 /* Implementation *************************************************************/
 /*
@@ -165,13 +162,12 @@ void CRigSettings::apply(Rig& rig) const
     }
 }
 
-CRig::CRig(/*CParameter& p, */rig_model_t m):Rig(m),
+CRig::CRig(rig_model_t m, CParameter* p):Rig(m),
 bSMeterWanted(false), bEnableSMeter(false),iOffset(0),
-mode_for_drm(RIG_MODE_AM), width_for_drm(0)
+mode_for_drm(RIG_MODE_AM), width_for_drm(0), pParameters(p)
 #ifdef QT_CORE_LIB
-	,mutex()
+  ,mutex()
 #endif
-	//,Parameters(p)
 {
 }
 
@@ -242,14 +238,18 @@ bool CRig::GetEnableSMeter()
 
 void CRig::StopSMeter()
 {
-    //Parameters.Lock();
-    //Parameters.Measurements.SigStrstat.invalidate();
-    //Parameters.Unlock();
+    if(pParameters)
+    {
+	pParameters->Lock();
+	pParameters->Measurements.SigStrstat.invalidate();
+	pParameters->Unlock();
+    }
     bEnableSMeter = false;
 }
 
 void CRig::run()
 {
+    const _REAL S9_DBuV = 34.0; // S9 in dBuV for converting HamLib S-meter readings
     bEnableSMeter = true;
     while (bEnableSMeter)
     {
@@ -257,12 +257,13 @@ void CRig::run()
 	mutex.lock();
 	getLevel(RIG_LEVEL_STRENGTH, val);
 	mutex.unlock();
-	    //Parameters.Lock();
-	    // Apply any correction
-	    const _REAL S9_DBuV = 34.0; // S9 in dBuV for converting HamLib S-meter readings
-	    //Parameters.Measurements.SigStrstat.addSample(_REAL(val) + S9_DBuV + Parameters.rSigStrengthCorrection);
-	    //Parameters.Unlock();
-#ifdef QT_GUI_LIB
+	if(pParameters)
+	{
+	    pParameters->Lock();
+	    pParameters->Measurements.SigStrstat.addSample(_REAL(val) + S9_DBuV + pParameters->rSigStrengthCorrection);
+	    pParameters->Unlock();
+	}
+#ifdef QT_CORE_LIB
 	    msleep(400);
 #endif
     }
