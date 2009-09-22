@@ -107,7 +107,7 @@ const int
 	CDRMReceiver::MAX_UNLOCKED_COUNT = 2;
 
 /* Implementation *************************************************************/
-CDRMReceiver::CDRMReceiver():
+CDRMReceiver::CDRMReceiver(CSettings& s):
 pSoundOutInterface(new CSoundOut),
 ReceiveData(), WriteData(pSoundOutInterface),
 FreqSyncAcq(),
@@ -126,9 +126,10 @@ bDoInitRun(false), bRunning(false),
 rInitResampleOffset((_REAL) 0.0), iFreqkHz(0),time_keeper(0),
 onBoardDemod(false),pcmInput(SoundCard),
 rig(NULL),chanSel(CS_MIX_CHAN),
-strPCMFile(),pHamlib(NULL),pRig(),soundIn(new CSoundIn())
+strPCMFile(),pHamlib(NULL),pRig(),soundIn(new CSoundIn()),
+settings(s)
 {
-	downstreamRSCI.SetReceiver(this);
+    downstreamRSCI.SetReceiver(this);
     DataDecoder.setApplication(CDataParam::AD_DAB_SPEC_APP, AT_MOTSLISHOW, new CMOTDABDecFactory());
     DataDecoder.setApplication(CDataParam::AD_DAB_SPEC_APP, AT_MOTBROADCASTWEBSITE, new CMOTDABDecFactory());
     DataDecoder.setApplication(CDataParam::AD_DAB_SPEC_APP, AT_MOTEPG, new EPGDecoderFactory());
@@ -1009,7 +1010,7 @@ CDRMReceiver::SetInStartMode()
 	Parameters.rFreqOffsetTrack = (_REAL) 0.0;
 	Parameters.iTimingOffsTrack = 0;
 
-    EModulationType eModulation = Parameters.eModulation;
+	EModulationType eModulation = Parameters.eModulation;
 
 	Parameters.Unlock();
 
@@ -1402,9 +1403,9 @@ CDRMReceiver::saveSDCtoFile()
 }
 
 void
-CDRMReceiver::LoadSettings(CSettings& s)
+CDRMReceiver::LoadSettings()
 {
-    string strMode = s.Get("Receiver", "modulation", string("DRM"));
+    string strMode = settings.Get("Receiver", "modulation", string("DRM"));
     EModulationType modn=DRM;
     string section = "Input-";
     if(strMode=="DRM") modn = DRM;
@@ -1422,16 +1423,14 @@ CDRMReceiver::LoadSettings(CSettings& s)
 	    section += strMode;
 	    break;
 	case AM:
-	    section += strMode;
-	    break;
-	case WBFM:
-	    section += strMode;
-	    break;
 	case CW:
 	case USB:
 	case LSB:
 	case NBFM:
-	    section += "Ham";
+	    section += "AM";
+	    break;
+	case WBFM:
+	    section += "FM";
 	    break;
 	case NONE:
 	    section += "None"; // shouldn't happen
@@ -1446,25 +1445,25 @@ CDRMReceiver::LoadSettings(CSettings& s)
 	case LSB:
 	case NBFM:
 	    AMDemodulation.SetDemodType(modn);
-	    AMDemodulation.SetAGCType(EType(s.Get(section, "agc", 0)));
-	    AMDemodulation.SetNoiRedType(ENoiRedType(s.Get(section, "noisered", 0)));
-	    AMDemodulation.EnablePLL(s.Get(section, "enablepll", 0));
-	    AMDemodulation.EnableAutoFreqAcq(s.Get(section, "autofreqacq", 0));
-	    AMDemodulation.SetFilterBWHz(s.Get(section, "filterbw", deffilterbw));
+	    AMDemodulation.SetAGCType(EType(settings.Get(section, "agc", 0)));
+	    AMDemodulation.SetNoiRedType(ENoiRedType(settings.Get(section, "noisered", 0)));
+	    AMDemodulation.EnablePLL(settings.Get(section, "enablepll", 0));
+	    AMDemodulation.EnableAutoFreqAcq(settings.Get(section, "autofreqacq", 0));
+	    AMDemodulation.SetFilterBWHz(settings.Get(section, "filterbw", deffilterbw));
 	    break;
 	default:
 	    break;
     }
 
     /* Serial Number */
-    string sSerialNumber = s.Get("Receiver", "serialnumber", string(""));
+    string sSerialNumber = settings.Get("Receiver", "serialnumber", string(""));
 
     Parameters.Lock();
 
     if(sSerialNumber == "")
     {
 	    Parameters.GenerateRandomSerialNumber();
-	    s.Put("Receiver", "serialnumber", Parameters.sSerialNumber);
+	    settings.Put("Receiver", "serialnumber", Parameters.sSerialNumber);
     }
     else
 	Parameters.sSerialNumber = sSerialNumber;
@@ -1473,63 +1472,63 @@ CDRMReceiver::LoadSettings(CSettings& s)
     Parameters.GenerateReceiverID();
 
     /* Data files directory */
-    string sDataFilesDirectory = s.Get(
+    string sDataFilesDirectory = settings.Get(
        "Receiver", "datafilesdirectory", Parameters.sDataFilesDirectory);
     // remove trailing slash if there
     size_t p = sDataFilesDirectory.find_last_not_of("/\\");
     if(p != string::npos)
 	    sDataFilesDirectory.erase(p+1);
-    s.Put("Receiver", "datafilesdirectory", Parameters.sDataFilesDirectory);
+    settings.Put("Receiver", "datafilesdirectory", Parameters.sDataFilesDirectory);
 
     Parameters.sDataFilesDirectory = sDataFilesDirectory;
 
     Parameters.Unlock();
 
     /* Sync */
-    SetFreqInt(ETypeIntFreq(s.Get("Receiver", "frequencyinterpolation", int(FWIENER))));
-    SetTimeInt(ETypeIntTime(s.Get("Receiver", "timeinterpolation", int(TWIENER))));
-    SetTiSyncTracType(ETypeTiSyncTrac(s.Get("Receiver", "tracking", 0)));
+    SetFreqInt(ETypeIntFreq(settings.Get("Input-DRM", "frequencyinterpolation", int(FWIENER))));
+    SetTimeInt(ETypeIntTime(settings.Get("Input-DRM", "timeinterpolation", int(TWIENER))));
+    SetTiSyncTracType(ETypeTiSyncTrac(settings.Get("Input-DRM", "tracking", 0)));
 
     /* Receiver ------------------------------------------------------------- */
 
     vector<string> vs;
     int dev;
 
-	/* Sound In device */
-	dev = s.Get("Receiver", "snddevin", 0);
-	soundIn.real->Enumerate(vs);
-	if(vs.size()>0)
-	{
-	    if(dev>=int(vs.size()))
-	    dev = vs.size()-1;
+    /* Sound In device */
+    dev = settings.Get(section, "soundcard", 0);
+    soundIn.real->Enumerate(vs);
+    if(vs.size()>0)
+    {
+	if(dev>=int(vs.size()))
+	dev = vs.size()-1;
 	soundIn.real->SetDev(dev);
-	}
+    }
 
-	vs.clear();
+    vs.clear();
 
-	/* Sound Out device */
-	dev = s.Get("Receiver", "snddevout", 0);
-	pSoundOutInterface->Enumerate(vs);
-	if(vs.size()>0)
-	{
-	    if(dev>=int(vs.size()))
-	    dev = vs.size()-1;
+    /* Sound Out device */
+    dev = settings.Get("Receiver", "snddevout", 0);
+    pSoundOutInterface->Enumerate(vs);
+    if(vs.size()>0)
+    {
+	if(dev>=int(vs.size()))
+	dev = vs.size()-1;
 	pSoundOutInterface->SetDev(dev);
-	}
+    }
 
-	string str;
+    string str;
 
-	/* input from file (code for bare rs, pcap files moved to CSettings) */
-	str = s.Get("command", "fileio", string(""));
-	if(str != "")
-		SetReadPCMFromFile(str);
+    /* input from file (code for bare rs, pcap files moved to CSettings) */
+    str = settings.Get("command", "fileio", string(""));
+    if(str != "")
+	    SetReadPCMFromFile(str);
 
-	/* Flip spectrum flag */
-	ReceiveData.SetFlippedSpectrum(s.Get("Receiver", "flipspectrum", false));
+    /* Flip spectrum flag */
+    ReceiveData.SetFlippedSpectrum(settings.Get("Receiver", "flipspectrum", false));
 
-	int n = s.Get("command", "inchansel", -1);
-	switch (n)
-	{
+    int n = settings.Get("command", "inchansel", -1);
+    switch (n)
+    {
 	case 0:
 		ReceiveData.SetInChanSel(CS_LEFT_CHAN);
 		break;
@@ -1559,10 +1558,10 @@ CDRMReceiver::LoadSettings(CSettings& s)
 		break;
 	default:
 		break;
-	}
-	n = s.Get("command", "outchansel", -1);
-	switch (n)
-	{
+    }
+    n = settings.Get("command", "outchansel", -1);
+    switch (n)
+    {
 	case 0:
 		WriteData.SetOutChanSel(CWriteData::CS_BOTH_BOTH);
 		break;
@@ -1584,140 +1583,140 @@ CDRMReceiver::LoadSettings(CSettings& s)
 		break;
 	default:
 		break;
-	}
+    }
 
-	/* upstream RSCI */
-    str = s.Get("command", "rsiin");
-	if(str != "")
-	{
-		bool bOK = upstreamRSCI.SetOrigin(str); // its a port
-		if(!bOK)
-	    throw CGenErr(string("can't open RSCI input ")+str);
-		// disable sound input
-	pcmInput.current = pcmInput.wanted = RSCI;
-	SetHamlib(NULL);
-		Parameters.Measurements.bETSIPSD = true;
-	}
-
-	str = s.Get("command", "rciout");
-	if(str != "")
-		upstreamRSCI.SetDestination(str);
-
-	/* downstream RSCI */
-	for(int i = 0; i<MAX_NUM_RSI_SUBSCRIBERS; i++)
-	{
-		stringstream ss;
-		ss << "rsiout" << i;
-		str = s.Get("command", ss.str());
-		if(str != "")
-		{
-			ss.str("");
-			ss << "rsioutprofile" << i;
-			string profile = s.Get("command", ss.str(), string("A"));
+    /* upstream RSCI */
+    str = settings.Get("command", "rsiin");
+    if(str != "")
+    {
+	    bool bOK = upstreamRSCI.SetOrigin(str); // its a port
+	    if(!bOK)
+		throw CGenErr(string("can't open RSCI input ")+str);
+	    // disable sound input
+    pcmInput.current = pcmInput.wanted = RSCI;
+    SetHamlib(NULL);
 	    Parameters.Measurements.bETSIPSD = true;
+    }
 
-			// Check whether the profile has a subsampling ratio (e.g. --rsioutprofile A20)
-			int iSubsamplingFactor = 1;
-			if (profile.length() > 1)
-			{
-				iSubsamplingFactor = atoi(profile.substr(1).c_str());
-			}
+    str = settings.Get("command", "rciout");
+    if(str != "")
+	    upstreamRSCI.SetDestination(str);
 
-			ss.str("");
-			ss << "rciin" << i;
-			string origin = s.Get("command", ss.str());
-			downstreamRSCI.AddSubscriber(str, origin, profile[0], iSubsamplingFactor);
-		}
-	}
+    /* downstream RSCI */
+    for(int i = 0; i<MAX_NUM_RSI_SUBSCRIBERS; i++)
+    {
+	    stringstream ss;
+	    ss << "rsiout" << i;
+	    str = settings.Get("command", ss.str());
+	    if(str != "")
+	    {
+		    ss.str("");
+		    ss << "rsioutprofile" << i;
+		    string profile = settings.Get("command", ss.str(), string("A"));
+		    Parameters.Measurements.bETSIPSD = true;
 
-	for (int i=1; i<=MAX_NUM_RSI_PRESETS; i++)
-	{
-		// define presets in same format as --rsioutprofile
-		stringstream ss;
-		ss << "rsioutpreset" << i;
-		str = s.Get("RSCI", ss.str());
-		if(str != "")
-		{
-			// Check whether the preset has a subsampling ratio (e.g. A20)
-			int iSubsamplingFactor = 1;
-			if (str.length() > 1)
-			{
-				iSubsamplingFactor = atoi(str.substr(1).c_str());
-			}
-			downstreamRSCI.DefineRSIPreset(i, str[0], iSubsamplingFactor);
-		}
-	}
-	/* RSCI File Recording */
-	str = s.Get("command", "rsirecordprofile");
-	string s2 = s.Get("command", "rsirecordtype");
-	if(str != "" || s2 != "")
-		downstreamRSCI.SetRSIRecording(Parameters, true, str[0], s2);
+		    // Check whether the profile has a subsampling ratio (e.g. --rsioutprofile A20)
+		    int iSubsamplingFactor = 1;
+		    if (profile.length() > 1)
+		    {
+			    iSubsamplingFactor = atoi(profile.substr(1).c_str());
+		    }
 
-	/* IQ File Recording */
-	if(s.Get("command", "recordiq", false))
-		WriteIQFile.StartRecording(Parameters);
+		    ss.str("");
+		    ss << "rciin" << i;
+		    string origin = settings.Get("command", ss.str());
+		    downstreamRSCI.AddSubscriber(str, origin, profile[0], iSubsamplingFactor);
+	    }
+    }
 
-	/* Mute audio flag */
-	WriteData.MuteAudio(s.Get("Receiver", "muteaudio", false));
+    for (int i=1; i<=MAX_NUM_RSI_PRESETS; i++)
+    {
+	    // define presets in same format as --rsioutprofile
+	    stringstream ss;
+	    ss << "rsioutpreset" << i;
+	    str = settings.Get("RSCI", ss.str());
+	    if(str != "")
+	    {
+		    // Check whether the preset has a subsampling ratio (e.g. A20)
+		    int iSubsamplingFactor = 1;
+		    if (str.length() > 1)
+		    {
+			    iSubsamplingFactor = atoi(str.substr(1).c_str());
+		    }
+		    downstreamRSCI.DefineRSIPreset(i, str[0], iSubsamplingFactor);
+	    }
+    }
+    /* RSCI File Recording */
+    str = settings.Get("command", "rsirecordprofile");
+    string s2 = settings.Get("command", "rsirecordtype");
+    if(str != "" || s2 != "")
+	    downstreamRSCI.SetRSIRecording(Parameters, true, str[0], s2);
 
-	/* Output to File */
-	str = s.Get("command", "writewav");
-	if(str != "")
-		WriteData.StartWriteWaveFile(str);
+    /* IQ File Recording */
+    if(settings.Get("command", "recordiq", false))
+	    WriteIQFile.StartRecording(Parameters);
 
-	/* Reverberation flag */
-	AudioSourceDecoder.SetReverbEffect(s.Get("Receiver", "reverb", true));
+    /* Mute audio flag */
+    WriteData.MuteAudio(settings.Get("Receiver", "muteaudio", false));
 
-	/* Bandpass filter flag */
-	FreqSyncAcq.SetRecFilter(s.Get("Receiver", "filter", false));
+    /* Output to File */
+    str = settings.Get("command", "writewav");
+    if(str != "")
+	    WriteData.StartWriteWaveFile(str);
 
-	/* Set parameters for frequency acquisition search window if needed */
-	 _REAL rFreqAcSeWinSize = s.Get("command", "fracwinsize", _REAL(SOUNDCRD_SAMPLE_RATE / 2));
-	 _REAL rFreqAcSeWinCenter = s.Get("command", "fracwincent", _REAL(SOUNDCRD_SAMPLE_RATE / 4));
-	/* Set new parameters */
-	FreqSyncAcq.SetSearchWindow(rFreqAcSeWinCenter, rFreqAcSeWinSize);
+    /* Reverberation flag */
+    AudioSourceDecoder.SetReverbEffect(settings.Get("Receiver", "reverb", true));
 
-	/* Modified metrics flag */
-	ChannelEstimation.SetIntCons(s.Get("Receiver", "modmetric", false));
+    /* Bandpass filter flag */
+    FreqSyncAcq.SetRecFilter(settings.Get(section, "filter", false));
 
-	/* Number of iterations for MLC setting */
-	MSCMLCDecoder.SetNumIterations(s.Get("Receiver", "mlciter", 0));
+    /* Set parameters for frequency acquisition search window if needed */
+     _REAL rFreqAcSeWinSize = settings.Get("command", "fracwinsize", _REAL(SOUNDCRD_SAMPLE_RATE / 2));
+     _REAL rFreqAcSeWinCenter = settings.Get("command", "fracwincent", _REAL(SOUNDCRD_SAMPLE_RATE / 4));
+    /* Set new parameters */
+    FreqSyncAcq.SetSearchWindow(rFreqAcSeWinCenter, rFreqAcSeWinSize);
 
-	/* Activate/Deactivate EPG decoding */
-	//DataDecoder.SetDecodeEPG(s.Get("EPG", "decodeepg", true));
-	// TODO epg option
+    /* Modified metrics flag */
+    ChannelEstimation.SetIntCons(settings.Get("Input-DRM", "modmetric", false));
+
+    /* Number of iterations for MLC setting */
+    MSCMLCDecoder.SetNumIterations(settings.Get("Input-DRM", "mlciter", 0));
+
+    /* Activate/Deactivate EPG decoding */
+    //DataDecoder.SetDecodeEPG(settings.Get("EPG", "decodeepg", true));
+    // TODO epg option
 
 
 #ifdef HAVE_LIBHAMLIB
     if(pHamlib)
-	pHamlib->LoadSettings(s);
+	pHamlib->LoadSettings(settings);
 #endif
 
-	/* Front-end - combine into Hamlib? */
-	Parameters.Lock();
+    /* Front-end - combine into Hamlib? */
+    Parameters.Lock();
 
-	CFrontEndParameters& FrontEndParameters = Parameters.FrontEndParameters;
+    CFrontEndParameters& FrontEndParameters = Parameters.FrontEndParameters;
 
-	FrontEndParameters.eSMeterCorrectionType =
-		CFrontEndParameters::ESMeterCorrectionType(s.Get("FrontEnd", "smetercorrectiontype", 0));
+    FrontEndParameters.eSMeterCorrectionType =
+	    CFrontEndParameters::ESMeterCorrectionType(settings.Get("FrontEnd", "smetercorrectiontype", 0));
 
-	FrontEndParameters.rSMeterBandwidth = s.Get("FrontEnd", "smeterbandwidth", 0.0);
+    FrontEndParameters.rSMeterBandwidth = settings.Get("FrontEnd", "smeterbandwidth", 0.0);
 
-	FrontEndParameters.rDefaultMeasurementBandwidth = s.Get("FrontEnd", "defaultmeasurementbandwidth", 0);
+    FrontEndParameters.rDefaultMeasurementBandwidth = settings.Get("FrontEnd", "defaultmeasurementbandwidth", 0);
 
-	FrontEndParameters.bAutoMeasurementBandwidth = s.Get("FrontEnd", "automeasurementbandwidth", true);
+    FrontEndParameters.bAutoMeasurementBandwidth = settings.Get("FrontEnd", "automeasurementbandwidth", true);
 
-	FrontEndParameters.rCalFactorDRM = s.Get("FrontEnd", "calfactordrm", 0.0);
+    FrontEndParameters.rCalFactorDRM = settings.Get("FrontEnd", "calfactordrm", 0.0);
 
-	FrontEndParameters.rCalFactorAM = s.Get("FrontEnd", "calfactoram", 0.0);
+    FrontEndParameters.rCalFactorAM = settings.Get("FrontEnd", "calfactoram", 0.0);
 
-	FrontEndParameters.rIFCentreFreq = s.Get("FrontEnd", "ifcentrefrequency", SOUNDCRD_SAMPLE_RATE / 4);
+    FrontEndParameters.rIFCentreFreq = settings.Get("FrontEnd", "ifcentrefrequency", SOUNDCRD_SAMPLE_RATE / 4);
 
     Parameters.Unlock();
 
-	/* Wanted RF Frequency */
-	iFreqkHz = s.Get("Receiver", "frequency", 0);
-	doSetFrequency();
+    /* Wanted RF Frequency */
+    iFreqkHz = settings.Get("Receiver", "frequency", 0);
+    doSetFrequency();
 
     // Put this right at the end so that eModulation is correct and Rx starts
     Parameters.Lock();
@@ -1726,9 +1725,9 @@ CDRMReceiver::LoadSettings(CSettings& s)
 }
 
 void
-CDRMReceiver::SaveSettings(CSettings& s)
+CDRMReceiver::SaveSettings()
 {
-    s.Put("0", "mode", string("RX"));
+    settings.Put("0", "mode", string("RX"));
     string modn;
     string section = "Input-";
     Parameters.Lock();
@@ -1741,32 +1740,32 @@ CDRMReceiver::SaveSettings(CSettings& s)
 	case AM:
 	    modn = "AM";
 	    section+=modn;
-	    s.Put("Input-AM", "filterbw", AMDemodulation.GetFilterBWHz());
+	    settings.Put("Input-AM", "filterbw", AMDemodulation.GetFilterBWHz());
 	    break;
 	case  USB:
 	    modn = "USB";
-	    section+="Ham";
-	    s.Put(section, "filterbwusb", AMDemodulation.GetFilterBWHz());
+	    section+="AM";
+	    settings.Put(section, "filterbwusb", AMDemodulation.GetFilterBWHz());
 	    break;
 	case  LSB:
 	    modn = "LSB";
-	    s.Put(section, "filterbwlsb", AMDemodulation.GetFilterBWHz());
-	    section+="Ham";
+	    settings.Put(section, "filterbwlsb", AMDemodulation.GetFilterBWHz());
+	    section+="AM";
 	    break;
 	case  CW:
 	    modn = "CW";
-	    section+="Ham";
-	    s.Put(section, "filterbwcw", AMDemodulation.GetFilterBWHz());
+	    section+="AM";
+	    settings.Put(section, "filterbwcw", AMDemodulation.GetFilterBWHz());
 	    break;
 	case  NBFM:
 	    modn = "NBFM";
-	    section+="Ham";
-	    s.Put(section, "filterbwfm", AMDemodulation.GetFilterBWHz());
+	    section+="AM";
+	    settings.Put(section, "filterbwfm", AMDemodulation.GetFilterBWHz());
 	    break;
 	case  WBFM:
-	    modn = "WBFM";
+	    modn = "FM";
 	    section+=modn;
-	    s.Put("Input-FM", "filterbw", AMDemodulation.GetFilterBWHz());
+	    settings.Put(section, "filterbw", AMDemodulation.GetFilterBWHz());
 	    break;
 	case NONE:
 		;
@@ -1774,72 +1773,77 @@ CDRMReceiver::SaveSettings(CSettings& s)
 	Parameters.Unlock();
 
 	if(section=="Input-Ham")
-	    s.Put(section, "modulation", modn);
+	    settings.Put(section, "modulation", modn);
 
 	/* Receiver ------------------------------------------------------------- */
 
 	/* Flip spectrum flag */
-	s.Put(section, "flipspectrum", ReceiveData.GetFlippedSpectrum());
-
-	/* Mute audio flag */
-	s.Put("Receiver", "muteaudio", WriteData.GetMuteAudio());
-
-	/* Reverberation */
-	s.Put("Receiver", "reverb", AudioSourceDecoder.GetReverbEffect());
+	settings.Put(section, "flipspectrum", ReceiveData.GetFlippedSpectrum());
 
 	/* Bandpass filter flag */
-	s.Put("Receiver", "filter", FreqSyncAcq.GetRecFilter());
+	settings.Put(section, "filter", FreqSyncAcq.GetRecFilter());
 
-	/* Modified metrics flag */
-	s.Put("Receiver", "modmetric", ChannelEstimation.GetIntCons());
-
-	/* Sync */
-	s.Put("Receiver", "frequencyinterpolation", int(GetFreqInt()));
-	s.Put("Receiver", "timeinterpolation", int(GetTimeInt()));
-	s.Put("Receiver", "tracking", int(GetTiSyncTracType()));
+	/* Mute audio flag */
+	settings.Put("Receiver", "muteaudio", WriteData.GetMuteAudio());
 
 	/* Sound In device */
-	s.Put("Receiver", "snddevin", pSoundOutInterface->GetDev());
+	settings.Put(section, "soundcard", pSoundOutInterface->GetDev());
+
+	/* Modified metrics flag */
+	settings.Put("Input-DRM", "modmetric", ChannelEstimation.GetIntCons());
+
+	/* Sync */
+	settings.Put("Input-DRM", "frequencyinterpolation", int(GetFreqInt()));
+	settings.Put("Input-DRM", "timeinterpolation", int(GetTimeInt()));
+	settings.Put("Input-DRM", "tracking", int(GetTiSyncTracType()));
+	/* Number of iterations for MLC setting */
+	settings.Put("Input-DRM", "mlciter", MSCMLCDecoder.GetInitNumIterations());
 
 	/* Sound Out device */
-	s.Put("Receiver", "snddevout", pSoundOutInterface->GetDev());
+	settings.Put("Receiver", "snddevout", pSoundOutInterface->GetDev());
 
-	/* Number of iterations for MLC setting */
-	s.Put("Receiver", "mlciter", MSCMLCDecoder.GetInitNumIterations());
+	/* Reverberation */
+	settings.Put("Receiver", "reverb", AudioSourceDecoder.GetReverbEffect());
 
 	/* Tuned Frequency */
-	s.Put("Receiver", "frequency", iFreqkHz);
+	settings.Put("Receiver", "frequency", iFreqkHz);
 
 	/* Active/Deactivate EPG decoding */
 	//s.Put("EPG", "decodeepg", DataDecoder.GetDecodeEPG());
 
-
 	/* AM Parameters */
 
 	/* AGC */
-	s.Put("Input-AM", "agc", AMDemodulation.GetAGCType());
-
+	settings.Put("Input-AM", "agc", AMDemodulation.GetAGCType());
 	/* noise reduction */
-	s.Put("Input-AM", "noisered", AMDemodulation.GetNoiRedType());
-
+	settings.Put("Input-AM", "noisered", AMDemodulation.GetNoiRedType());
 	/* pll enabled/disabled */
-	s.Put("Input-AM", "enablepll", AMDemodulation.PLLEnabled());
-
+	settings.Put("Input-AM", "enablepll", AMDemodulation.PLLEnabled());
 	/* auto frequency acquisition */
-	s.Put("Input-AM", "autofreqacq", AMDemodulation.AutoFreqAcqEnabled());
+	settings.Put("Input-AM", "autofreqacq", AMDemodulation.AutoFreqAcqEnabled());
+
+	/* Ham modes */
+	/* AGC */
+	settings.Put("Input-Ham", "agc", AMDemodulation.GetAGCType());
+	/* noise reduction */
+	settings.Put("Input-Ham", "noisered", AMDemodulation.GetNoiRedType());
+	/* pll enabled/disabled */
+	settings.Put("Input-Ham", "enablepll", AMDemodulation.PLLEnabled());
+	/* auto frequency acquisition */
+	settings.Put("Input-Ham", "autofreqacq", AMDemodulation.AutoFreqAcqEnabled());
 
 	/* Front-end - combine into Hamlib? */
 	Parameters.Lock();
-	s.Put("FrontEnd", "smetercorrectiontype", int(Parameters.FrontEndParameters.eSMeterCorrectionType));
-	s.Put("FrontEnd", "smeterbandwidth", int(Parameters.FrontEndParameters.rSMeterBandwidth));
-	s.Put("FrontEnd", "defaultmeasurementbandwidth", int(Parameters.FrontEndParameters.rDefaultMeasurementBandwidth));
-	s.Put("FrontEnd", "automeasurementbandwidth", Parameters.FrontEndParameters.bAutoMeasurementBandwidth);
-	s.Put("FrontEnd", "calfactordrm", int(Parameters.FrontEndParameters.rCalFactorDRM));
-	s.Put("FrontEnd", "calfactoram", int(Parameters.FrontEndParameters.rCalFactorAM));
-	s.Put("FrontEnd", "ifcentrefrequency", int(Parameters.FrontEndParameters.rIFCentreFreq));
+	settings.Put("FrontEnd", "smetercorrectiontype", int(Parameters.FrontEndParameters.eSMeterCorrectionType));
+	settings.Put("FrontEnd", "smeterbandwidth", int(Parameters.FrontEndParameters.rSMeterBandwidth));
+	settings.Put("FrontEnd", "defaultmeasurementbandwidth", int(Parameters.FrontEndParameters.rDefaultMeasurementBandwidth));
+	settings.Put("FrontEnd", "automeasurementbandwidth", Parameters.FrontEndParameters.bAutoMeasurementBandwidth);
+	settings.Put("FrontEnd", "calfactordrm", int(Parameters.FrontEndParameters.rCalFactorDRM));
+	settings.Put("FrontEnd", "calfactoram", int(Parameters.FrontEndParameters.rCalFactorAM));
+	settings.Put("FrontEnd", "ifcentrefrequency", int(Parameters.FrontEndParameters.rIFCentreFreq));
 
 	/* Serial Number */
-	s.Put("Receiver", "serialnumber", Parameters.sSerialNumber);
-	s.Put("Receiver", "datafilesdirectory", Parameters.sDataFilesDirectory);
+	settings.Put("Receiver", "serialnumber", Parameters.sSerialNumber);
+	settings.Put("Receiver", "datafilesdirectory", Parameters.sDataFilesDirectory);
 	Parameters.Unlock();
 }

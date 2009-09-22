@@ -131,7 +131,7 @@ main(int argc, char **argv)
 		m.Receiver.SetHamlib(pHamlib);
 	    }
 #endif
-	    m.Receiver.LoadSettings(m.Settings);
+	    m.Receiver.LoadSettings();
 
 	    m.doNewMainWindow();
 
@@ -149,7 +149,7 @@ main(int argc, char **argv)
 				pHamlib->SaveSettings(m.Settings);
 			}
 #endif
-			m.Receiver.SaveSettings(m.Settings);
+			m.Receiver.SaveSettings();
 		}
 		else if (strMode == "TX" || strMode == "ENC" || strMode == "MOD")
 		{
