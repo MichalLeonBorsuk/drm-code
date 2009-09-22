@@ -481,13 +481,17 @@ RigModel::save(CSettings& settings)
 {
     stringstream rigids;
     string sep="";
+    cerr << "No Rigs: " << rigs.size() << endl;
     for(size_t i=0; i<rigs.size(); i++)
     {
 	const RigData& r = rigs[i];
 	// save rig attributes including com port
 	// save by index - allows two or more rigs of same type
 	if(r.rig==NULL)
+	{
+	    cerr << "rig " << i << " is null" << endl;
 		continue; // should not happen
+	}
 	stringstream s;
 	s << "Rig-" << r.id;
 	rigids << sep << r.id;
@@ -495,42 +499,64 @@ RigModel::save(CSettings& settings)
 	string sec = s.str();
 	s.str("");
 	s << r.rig->caps->rig_model;
+	cerr << "rig " << i << " " << sec << " " << s.str() << endl;
 	settings.Put(sec, "model", s.str());
 	vector<string> keys;
 	keys.push_back("rig_pathname"); // TODO
-	for(size_t i=0; i<keys.size(); i++)
+	for(size_t j=0; j<keys.size(); j++)
 	{
-	    char val[200];
-	    r.rig->getConf(keys[i].c_str(), val);
-	    if(strlen(val)>0)
-		settings.Put(sec+"-conf", keys[i], string(val));
+	    try {
+		char val[200];
+		r.rig->getConf(keys[j].c_str(), val);
+		if(strlen(val)>0)
+		{
+		    settings.Put(sec+"-conf", keys[j], string(val));
+		}
+	    } catch(...)
+	    {
+		stringstream err;
+		cerr << "error for rig " << i << " config " << j << endl;
+		//QMessageBox::information(NULL, "1", err.str().c_str());
+		// skip
+	    }
 	}
 	keys.clear();
 	keys.push_back("ATT");
 	keys.push_back("AGC");
 	keys.push_back("IF");
 	keys.push_back("CWPITCH");
-	for(size_t i=0; i<keys.size(); i++)
+	for(size_t j=0; j<keys.size(); j++)
 	{
 	    try {
 		int val;
-		r.rig->getLevel(rig_parse_mode(keys[i].c_str()), val);
-		settings.Put(sec+"-levels", keys[i], val);
+		r.rig->getLevel(rig_parse_mode(keys[j].c_str()), val);
+		settings.Put(sec+"-levels", keys[j], val);
 	    } catch(...)
 	    {
 		// skip
+		stringstream err;
+		cerr << "error for rig " << i << " level " << j << endl;
+		//QMessageBox::information(NULL, "2", err.str().c_str());
 	    }
 	}
-	pbwidth_t width;
-	rmode_t m = r.rig->getMode(width);
-	if(m!=RIG_MODE_NONE)
+	try {
+	    pbwidth_t width;
+	    rmode_t m = r.rig->getMode(width);
+	    if(m!=RIG_MODE_NONE)
+	    {
+		settings.Put(sec, "mode_for_drm", int(m));
+		settings.Put(sec, "width", int(width));
+	    }
+	    int offset = r.rig->GetFrequencyOffset();
+	    if(offset!=0)
+		settings.Put(sec, "offset", offset);
+	} catch(...)
 	{
-	    settings.Put(sec, "mode_for_drm", int(m));
-	    settings.Put(sec, "width", int(width));
+	    // skip
+	    stringstream err;
+	    cerr << "error for rig " << i << " mode or offset" << endl;
+	    //QMessageBox::information(NULL, "3", err.str().c_str());
 	}
-	int offset = r.rig->GetFrequencyOffset();
-	if(offset!=0)
-	    settings.Put(sec, "offset", offset);
     }
     settings.Put("Hamlib", "rigs", rigids.str());
 }
@@ -753,8 +779,7 @@ ReceiverSettingsDlg::ReceiverSettingsDlg(
 	Settings(NSettings), loading(true),
 	TimerRig(),iWantedrigModel(0),
 	bgTimeInterp(NULL), bgFreqInterp(NULL), bgTiSync(NULL),
-	bgAMriq(NULL), bgAMlrm(NULL), bgAMiq(NULL),
-	bgHamriq(NULL), bgHamlrm(NULL), bgHamiq(NULL),
+	bgriq(NULL), bglrm(NULL), bgiq(NULL),
 #ifdef HAVE_LIBHAMLIB
 	RigTypes(),Rigs(),GPSData(GPSD),soundinputs(),
 #endif
@@ -812,19 +837,14 @@ ReceiverSettingsDlg::ReceiverSettingsDlg(
     widgetFMInput->comboBoxSoundCard->setModel(soundinputs);
     //widgetFMInput->soundInputFrame->setEnabled(false);
 
-    widgetHamInput->comboBoxRig->setModel(treeViewRigs->model());
-    widgetHamInput->comboBoxSoundCard->setModel(soundinputs);
-
     connect(pushButtonDRMApply, SIGNAL(clicked()), SLOT(OnButtonDRMApply()));
     connect(pushButtonAMApply, SIGNAL(clicked()), SLOT(OnButtonAMApply()));
     connect(pushButtonFMApply, SIGNAL(clicked()), SLOT(OnButtonFMApply()));
-    connect(pushButtonHamApply, SIGNAL(clicked()), SLOT(OnButtonHamApply()));
 
     /* Check boxes */
     connect(CheckBoxUseGPS, SIGNAL(clicked()), SLOT(OnCheckBoxUseGPS()) );
     connect(CheckBoxDisplayGPS, SIGNAL(clicked()), SLOT(OnCheckBoxDisplayGPS()) );
     connect(CheckBoxWriteLog, SIGNAL(clicked()), this, SLOT(OnCheckWriteLog()));
-    connect(CheckBoxRecFilter, SIGNAL(clicked()), this, SLOT(OnCheckRecFilter()));
     connect(CheckBoxModiMetric, SIGNAL(clicked()), this, SLOT(OnCheckModiMetric()));
     connect(CheckBoxLogLatLng, SIGNAL(clicked()), this, SLOT(OnCheckBoxLogLatLng()));
     connect(CheckBoxLogSigStr, SIGNAL(clicked()), this, SLOT(OnCheckBoxLogSigStr()));
@@ -874,39 +894,29 @@ void ReceiverSettingsDlg::showEvent(QShowEvent*)
 	    pushButtonDRMApply->setText(tr("Apply"));
 	    pushButtonAMApply->setText(tr("Save"));
 	    pushButtonFMApply->setText(tr("Save"));
-	    pushButtonHamApply->setText(tr("Save"));
-	    break;
-	case AM:
-	    pushButtonDRMApply->setText(tr("Save"));
-	    pushButtonAMApply->setText(tr("Apply"));
-	    pushButtonFMApply->setText(tr("Save"));
-	    pushButtonHamApply->setText(tr("Save"));
 	    break;
 	case WBFM:
 	    pushButtonDRMApply->setText(tr("Save"));
 	    pushButtonAMApply->setText(tr("Save"));
 	    pushButtonFMApply->setText(tr("Apply"));
-	    pushButtonHamApply->setText(tr("Save"));
 	    break;
 	default:
 	    pushButtonDRMApply->setText(tr("Save"));
-	    pushButtonAMApply->setText(tr("Save"));
+	    pushButtonAMApply->setText(tr("Apply"));
 	    pushButtonFMApply->setText(tr("Save"));
-	    pushButtonHamApply->setText(tr("Apply"));
     }
 
     /* DRM ----------------------------------------------------------------- */
     QAbstractButton* button = NULL;
-    button = bgTimeInterp->button(Settings.Get("Receiver", "timeinterpolation", 0));
+    button = bgTimeInterp->button(Settings.Get("Input-DRM", "timeinterpolation", 0));
     if(button) button->setChecked(true);
-    button = bgFreqInterp->button(Settings.Get("Receiver", "frequencyinterpolation", 0));
+    button = bgFreqInterp->button(Settings.Get("Input-DRM", "frequencyinterpolation", 0));
     if(button) button->setChecked(true);
-    button = bgTiSync->button(Settings.Get("Receiver", "tracking", 0));
+    button = bgTiSync->button(Settings.Get("Input-DRM", "tracking", 0));
     if(button) button->setChecked(true);
 
-    CheckBoxRecFilter->setChecked(Settings.Get("Receiver", "filter", false));
-    CheckBoxModiMetric->setChecked(Settings.Get("Receiver", "modmetric", false));
-    SliderNoOfIterations->setValue(Settings.Get("Receiver", "mlciter", 0));
+    CheckBoxModiMetric->setChecked(Settings.Get("Input-DRM", "modmetric", false));
+    SliderNoOfIterations->setValue(Settings.Get("Input-DRM", "mlciter", 0));
 
     /* Rig - need Rigs populated before input options */
 #ifdef HAVE_LIBHAMLIB
@@ -920,7 +930,6 @@ void ReceiverSettingsDlg::showEvent(QShowEvent*)
     widgetDRMInput->load(Settings);
     widgetAMInput->load(Settings);
     widgetFMInput->load(Settings);
-    widgetHamInput->load(Settings);
 
     /* Audio */
     string wavfile = Settings.Get("command", "writewav", string(""));
@@ -949,7 +958,6 @@ void ReceiverSettingsDlg::hideEvent(QHideEvent*)
 	widgetDRMInput->save(Settings);
 	widgetAMInput->save(Settings);
 	widgetFMInput->save(Settings);
-	widgetHamInput->save(Settings);
 	Rigs.save(Settings);
 	saveGPSSettings();
 	saveLogfileSettings();
@@ -1094,39 +1102,22 @@ void ReceiverSettingsDlg::setLatLngDlg(double latitude, double longitude)
 
 void ReceiverSettingsDlg::OnSelTimeInterp(int iId)
 {
-    Settings.Put("Receiver", "timeinterpolation", iId);
+    Settings.Put("Input-DRM", "timeinterpolation", iId);
 }
 
 void ReceiverSettingsDlg::OnSelFrequencyInterp(int iId)
 {
-    Settings.Put("Receiver", "frequencyinterpolation", iId);
+    Settings.Put("Input-DRM", "frequencyinterpolation", iId);
 }
 
 void ReceiverSettingsDlg::OnSelTiSync(int iId)
 {
-    Settings.Put("Receiver", "tracking", iId);
+    Settings.Put("Input-DRM", "tracking", iId);
 }
 
 void ReceiverSettingsDlg::OnSliderIterChange(int value)
 {
-     Settings.Put("Receiver", "mlciter", value);
-}
-
-// input TAB
-void 	ReceiverSettingsDlg::OnRadioDRMRealIQ(int i)
-{
-	//widgetDRMInput->stackedWidgetCard->setCurrentIndex(i);
-	//widgetDRMInput->stackedWidgetFile->setCurrentIndex(i);
-}
-
-void 	ReceiverSettingsDlg::OnRadioAMRealIQ(int i)
-{
-	//widgetDRMInput->stackedWidgetip->setCurrentIndex(i);
-}
-
-void 	ReceiverSettingsDlg::OnRadioHamRealIQ(int i)
-{
-	//widgetHamInput->stackedWidgetip->setCurrentIndex(i);
+     Settings.Put("Input-DRM", "mlciter", value);
 }
 
 void ReceiverSettingsDlg::OnButtonDRMApply()
@@ -1144,21 +1135,19 @@ void ReceiverSettingsDlg::OnButtonFMApply()
     widgetFMInput->save(Settings);
 }
 
-void ReceiverSettingsDlg::OnButtonHamApply()
-{
-    widgetHamInput->save(Settings);
-}
-
-void ReceiverSettingsDlg::OnCheckRecFilter()
-{
-    Settings.Put("Receiver", "filter", CheckBoxRecFilter->isChecked());
-}
-
 void ReceiverSettingsDlg::OnCheckModiMetric()
 {
-    Settings.Put("Receiver", "modmetric", CheckBoxModiMetric->isChecked());
+    Settings.Put("Input-DRM", "modmetric", CheckBoxModiMetric->isChecked());
 }
-
+/*
+.Get("FrontEnd", "smetercorrectiontype", 0));
+.Get("FrontEnd", "smeterbandwidth", 0.0);
+.Get("FrontEnd", "defaultmeasurementbandwidth", 0);
+.Get("FrontEnd", "automeasurementbandwidth", true);
+.Get("FrontEnd", "calfactordrm", 0.0);
+.Get("FrontEnd", "calfactoram", 0.0);
+.Get("FrontEnd", "ifcentrefrequency", SOUNDCRD_SAMPLE_RATE / 4);
+*/
 // Logging Tab
 void ReceiverSettingsDlg::loadLogfileSettings()
 {
@@ -1255,7 +1244,6 @@ ReceiverSettingsDlg::OnRigSelected(const QModelIndex& index)
 	{
 	    comboBoxComPort->addItem(i->first.c_str(), i->second.c_str());
 	}
-	int row = index.row();
 	char port[200];
 	r.rig->getConf("rig_pathname", port);
 	if(port[0] != 0)
@@ -1532,6 +1520,5 @@ void ReceiverSettingsDlg::AddWhatsThisHelp()
 		"and no interferer are present since the SNR estimation may be "
 		"not correct.</li></ul>");
 
-	CheckBoxRecFilter->setWhatsThis( strInterfRej);
 	CheckBoxModiMetric->setWhatsThis( strInterfRej);
 }

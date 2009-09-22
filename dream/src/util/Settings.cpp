@@ -231,7 +231,7 @@ CSettings::ParseArguments(int argc, char **argv)
 		/* Modified metrics flag -------------------------------------------- */
 		if (GetFlagArgument(argc, argv, i, "-D", "--modmetric") == true)
 		{
-			Put("Receiver", "modmetric", 1);
+			Put("Input-DRM", "modmetric", 1);
 			continue;
 		}
 
@@ -271,7 +271,7 @@ CSettings::ParseArguments(int argc, char **argv)
 		if (GetNumericArgument(argc, argv, i, "-i", "--mlciter", 0,
 							   MAX_NUM_MLC_IT, rArgument) == true)
 		{
-			Put("Receiver", "mlciter", int (rArgument));
+			Put("Input-DRM", "mlciter", int (rArgument));
 			continue;
 		}
 

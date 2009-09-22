@@ -220,6 +220,8 @@ void ReceiverInputWidget::load(CSettings& settings)
 	    }
 	}
     }
+    checkBoxBPFFile->setChecked(settings.Get(sec, "BPFfile", false));
+    checkBoxBPFSound->setChecked(settings.Get(sec, "BPFsound", false));
 }
 
 void ReceiverInputWidget::save(CSettings& settings) const
@@ -260,4 +262,6 @@ void ReceiverInputWidget::save(CSettings& settings) const
 	RigData r = var.value<RigData>();
 	settings.Put(sec, "rig", r.id);
     }
+    settings.Put(sec, "BPFfile", checkBoxBPFFile->isChecked());
+    settings.Put(sec, "BPFsound", checkBoxBPFSound->isChecked());
 }

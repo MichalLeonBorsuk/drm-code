@@ -171,8 +171,7 @@ protected:
     QTimer		TimerRig;
     int			iWantedrigModel;
     QButtonGroup	*bgTimeInterp, *bgFreqInterp, *bgTiSync;
-    QButtonGroup	*bgAMriq, *bgAMlrm, *bgAMiq;
-    QButtonGroup	*bgHamriq, *bgHamlrm, *bgHamiq;
+    QButtonGroup	*bgriq, *bglrm, *bgiq;
 
 #ifdef HAVE_LIBHAMLIB
     RigTypesModel	RigTypes;
@@ -204,18 +203,13 @@ public slots:
     void 		OnSelFrequencyInterp(int);
     void 		OnSelTiSync(int);
     void 		OnSliderIterChange(int value);
-    void 		OnRadioDRMRealIQ(int);
-    void 		OnRadioAMRealIQ(int);
-    void 		OnRadioHamRealIQ(int);
     void 		OnButtonDRMApply();
     void 		OnButtonAMApply();
     void 		OnButtonFMApply();
-    void 		OnButtonHamApply();
     void 		OnSliderLogStartDelayChange(int value);
     void 		OnCheckWriteLog();
     void 		OnCheckBoxLogLatLng();
     void 		OnCheckBoxLogSigStr();
-    void 		OnCheckRecFilter();
     void 		OnCheckModiMetric();
     void 		OnTimerRig();
     void 		OnRigTypeSelected(const QModelIndex&);

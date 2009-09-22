@@ -20,7 +20,7 @@
    <item row="0" column="0">
     <widget class="QTabWidget" name="TabWidget">
      <property name="currentIndex">
-      <number>3</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="Rig">
       <attribute name="title">
@@ -187,11 +187,63 @@
        <item row="0" column="0">
         <widget class="QTabWidget" name="tabWidget">
          <property name="accessibleName">
-          <string>Input-DRM</string>
+          <string/>
          </property>
          <property name="currentIndex">
-          <number>0</number>
+          <number>2</number>
          </property>
+         <widget class="QWidget" name="am">
+          <attribute name="title">
+           <string>AM</string>
+          </attribute>
+          <layout class="QGridLayout" name="gridLayout_12">
+           <item row="0" column="0" colspan="2">
+            <widget class="ReceiverInputWidget" name="widgetAMInput" native="true">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>250</width>
+               <height>100</height>
+              </size>
+             </property>
+             <property name="accessibleName">
+              <string>Input-AM</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <spacer name="horizontalSpacer_4">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item row="1" column="1">
+            <widget class="QPushButton" name="pushButtonAMApply">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="text">
+              <string>Apply</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
          <widget class="QWidget" name="drm">
           <attribute name="title">
            <string>DRM</string>
@@ -252,58 +304,6 @@
            </item>
           </layout>
          </widget>
-         <widget class="QWidget" name="am">
-          <attribute name="title">
-           <string>AM</string>
-          </attribute>
-          <layout class="QGridLayout" name="gridLayout_12">
-           <item row="0" column="0" colspan="2">
-            <widget class="ReceiverInputWidget" name="widgetAMInput" native="true">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>250</width>
-               <height>100</height>
-              </size>
-             </property>
-             <property name="accessibleName">
-              <string>Input-AM</string>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="0">
-            <spacer name="horizontalSpacer_4">
-             <property name="orientation">
-              <enum>Qt::Horizontal</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>40</width>
-               <height>20</height>
-              </size>
-             </property>
-            </spacer>
-           </item>
-           <item row="1" column="1">
-            <widget class="QPushButton" name="pushButtonAMApply">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="text">
-              <string>Apply</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </widget>
          <widget class="QWidget" name="fm">
           <attribute name="title">
            <string>FM</string>
@@ -324,7 +324,7 @@
               </size>
              </property>
              <property name="accessibleName">
-              <string>Input-Ham</string>
+              <string>Input-FM</string>
              </property>
             </widget>
            </item>
@@ -343,58 +343,6 @@
            </item>
            <item row="1" column="1">
             <widget class="QPushButton" name="pushButtonFMApply">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="text">
-              <string>Apply</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </widget>
-         <widget class="QWidget" name="ham">
-          <attribute name="title">
-           <string>HAM Modes</string>
-          </attribute>
-          <layout class="QGridLayout" name="gridLayout_11">
-           <item row="0" column="0" colspan="2">
-            <widget class="ReceiverInputWidget" name="widgetHamInput" native="true">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>250</width>
-               <height>100</height>
-              </size>
-             </property>
-             <property name="accessibleName">
-              <string>Input-Ham</string>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="0">
-            <spacer name="horizontalSpacer_2">
-             <property name="orientation">
-              <enum>Qt::Horizontal</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>40</width>
-               <height>20</height>
-              </size>
-             </property>
-            </spacer>
-           </item>
-           <item row="1" column="1">
-            <widget class="QPushButton" name="pushButtonHamApply">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                <horstretch>0</horstretch>
@@ -604,13 +552,6 @@
            <widget class="QCheckBox" name="CheckBoxModiMetric">
             <property name="text">
              <string>Modified &amp;Metrics</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QCheckBox" name="CheckBoxRecFilter">
-            <property name="text">
-             <string>&amp;Bandpass Filter</string>
             </property>
            </widget>
           </item>
@@ -1106,7 +1047,6 @@
   <tabstop>CheckBoxUseGPS</tabstop>
   <tabstop>LineEditGPSHost</tabstop>
   <tabstop>LineEditGPSPort</tabstop>
-  <tabstop>CheckBoxRecFilter</tabstop>
   <tabstop>CheckBoxModiMetric</tabstop>
   <tabstop>CheckBoxWriteLog</tabstop>
   <tabstop>CheckBoxLogLatLng</tabstop>

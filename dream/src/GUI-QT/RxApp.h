@@ -38,11 +38,11 @@ class RxApp : public QObject
     Q_OBJECT
 
 public:
-    RxApp():Receiver(),Settings(){}
+    RxApp():Settings(),Receiver(Settings){}
     ~RxApp(){}
 
-    CDRMReceiver Receiver;
     CSettings Settings;
+    CDRMReceiver Receiver;
 
 public slots:
 

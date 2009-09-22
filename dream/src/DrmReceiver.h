@@ -172,7 +172,7 @@ class CDRMReceiver : public ReceiverInterface
 {
 public:
 
-	CDRMReceiver();
+	CDRMReceiver(CSettings&);
 	virtual ~CDRMReceiver();
 
 	/* For GUI */
@@ -182,8 +182,8 @@ public:
 	int						wait(int) { return 0;}
 	bool					finished() { return true; }
 #endif
-	void					LoadSettings(CSettings&); // can write to settings to set defaults
-	void					SaveSettings(CSettings&);
+	void					LoadSettings(); // can write to settings to set defaults
+	void					SaveSettings();
 	//void					Init();
 	void					Start();
 	void					Stop();
@@ -436,6 +436,7 @@ protected:
     map<int,CRig*>	rigs;
     CRig*     		      pRig;
     CSoundInProxy		soundIn;
+    CSettings&		      settings;
 };
 
 #endif // !defined(DRMRECEIVER_H__3B0BA660_CA63_4344_BB2B_23E7A0D31912__INCLUDED_)
