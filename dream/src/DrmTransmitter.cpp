@@ -76,11 +76,11 @@ CDRMTransmitter::SetOperatingMode(const ETxOpMode eNewOpMode)
     switch(eOpMode)
     {
     case T_TX:
- 		if(pMDIIn)
- 		{
+		if(pMDIIn)
+		{
 			delete pMDIIn;
 			pMDIIn = NULL;
- 		}
+		}
 		if(pDecodeMDI)
 		{
 			delete pDecodeMDI;
@@ -95,13 +95,13 @@ CDRMTransmitter::SetOperatingMode(const ETxOpMode eNewOpMode)
 			pEncoder = new CDRMEncoder();
 		if(pModulator == NULL)
 			pModulator = new CDRMModulator();
-        break;
+	break;
     case T_ENC:
- 		if(pMDIIn)
- 		{
+		if(pMDIIn)
+		{
 			delete pMDIIn;
 			pMDIIn = NULL;
- 		}
+		}
 		if(pDecodeMDI)
 		{
 			delete pDecodeMDI;
@@ -116,7 +116,7 @@ CDRMTransmitter::SetOperatingMode(const ETxOpMode eNewOpMode)
 			pEncoder = new CDRMEncoder();
 		if(pMDIOut == NULL)
 			pMDIOut = new CMDIOut();
-        break;
+	break;
     case T_MOD:
 		if(pEncoder)
 		{
@@ -148,9 +148,9 @@ CDRMTransmitter::
 GetSoundInChoices(vector<string>& v) const
 {
     if(pEncoder)
-        pEncoder->GetSoundInChoices(v);
+	pEncoder->GetSoundInChoices(v);
     else
-        v.clear();
+	v.clear();
 }
 
 void
@@ -158,9 +158,9 @@ CDRMTransmitter::
 GetSoundOutChoices(vector<string>& v) const
 {
     if(pModulator)
-        pModulator->GetSoundOutChoices(v);
+	pModulator->GetSoundOutChoices(v);
     else
-        v.clear();
+	v.clear();
 }
 
 int
@@ -168,9 +168,9 @@ CDRMTransmitter::
 GetSoundInInterface() const
 {
     if(pEncoder)
-        return pEncoder->GetSoundInInterface();
+	return pEncoder->GetSoundInInterface();
     else
-        return -1;
+	return -1;
 }
 
 void
@@ -178,39 +178,39 @@ CDRMTransmitter::
 SetSoundInInterface(int i)
 {
     if(pEncoder)
-        pEncoder->SetSoundInInterface(i);
+	pEncoder->SetSoundInInterface(i);
 }
 
 
 _REAL CDRMTransmitter::GetLevelMeter() const
 {
     if(pEncoder)
-        return pEncoder->GetLevelMeter();
+	return pEncoder->GetLevelMeter();
     else
-        return 0.0;
+	return 0.0;
 }
 
 void
 CDRMTransmitter::AddTextMessage(const string& strText)
 {
     if(pEncoder)
-        pEncoder->AddTextMessage(strText);
+	pEncoder->AddTextMessage(strText);
 }
 
 void
 CDRMTransmitter::ClearTextMessages()
 {
     if(pEncoder)
-        pEncoder->ClearTextMessages();
+	pEncoder->ClearTextMessages();
 }
 
 void
 CDRMTransmitter::GetTextMessages(vector<string>& v) const
 {
     if(pEncoder)
-        pEncoder->GetTextMessages(v);
+	pEncoder->GetTextMessages(v);
     else
-        v.clear();
+	v.clear();
 }
 
 
@@ -218,30 +218,30 @@ void
 CDRMTransmitter::AddPic(const string& strFileName, const string& strFormat)
 {
     if(pEncoder)
-        pEncoder->AddPic(strFileName, strFormat);
+	pEncoder->AddPic(strFileName, strFormat);
 }
 
 void
 CDRMTransmitter::ClearPics()
 {
     if(pEncoder)
-        pEncoder->ClearPics();
+	pEncoder->ClearPics();
 }
 
 void
 CDRMTransmitter::GetPics(map<string,string>& m) const
 {
     if(pEncoder)
-        pEncoder->GetPics(m);
+	pEncoder->GetPics(m);
 }
 
 bool
 CDRMTransmitter::GetTransStat(string& strCPi, _REAL& rCPe) const
 {
     if(pEncoder)
-        return pEncoder->GetTransStat(strCPi, rCPe);
+	return pEncoder->GetTransStat(strCPi, rCPe);
     else
-        return false;
+	return false;
 }
 
 void
@@ -260,16 +260,16 @@ void
 CDRMTransmitter::SetReadFromFile(const string & strNFN)
 {
     if(pEncoder)
-        pEncoder->SetReadFromFile(strNFN);
+	pEncoder->SetReadFromFile(strNFN);
 }
 
 string
 CDRMTransmitter::GetReadFromFile() const
 {
     if(pEncoder)
-        return pEncoder->GetReadFromFile();
+	return pEncoder->GetReadFromFile();
     else
-        return "";
+	return "";
 }
 
 void
@@ -288,16 +288,16 @@ void
 CDRMTransmitter::SetCOFDMOutputs(const vector<string>& o)
 {
     if(pModulator)
-        pModulator->SetOutputs(o);
+	pModulator->SetOutputs(o);
 }
 
 void
 CDRMTransmitter::GetCOFDMOutputs(vector<string>& o) const
 {
     if(pModulator)
-        pModulator->GetOutputs(o);
+	pModulator->GetOutputs(o);
     else
-        o.clear();
+	o.clear();
 }
 
 void
@@ -339,51 +339,51 @@ void CDRMTransmitter::Start()
 
 	try
 	{
-        switch(eOpMode)
-        {
-        case T_TX:
-            Parameters.ReceiveStatus.FAC.SetStatus(RX_OK);
-            Parameters.ReceiveStatus.SDC.SetStatus(RX_OK);
-            pEncoder->Init(Parameters, FACBuf, SDCBuf, MSCBuf);
-            pModulator->Init(Parameters);
-            break;
-        case T_ENC:
-            if(MDIoutAddr.size()==0)
-                throw CGenErr("Encoder with no outputs");
-            Parameters.ReceiveStatus.FAC.SetStatus(RX_OK);
-            Parameters.ReceiveStatus.SDC.SetStatus(RX_OK);
-            pEncoder->Init(Parameters, FACBuf, SDCBuf, MSCBuf);
-            /* set the output address */
-            for(vector<string>::const_iterator s = MDIoutAddr.begin(); s!=MDIoutAddr.end(); s++)
-            {
-                pMDIOut->AddSubscriber(*s, "", 'M');
-            }
-            pMDIOut->Init(Parameters);
-            break;
-        case T_MOD:
-            if(strMDIinAddr == "")
-            {
-                throw CGenErr("Modulator with no input");
-            }
-            pMDIIn->SetOrigin(strMDIinAddr);
-            bInSync = false;
-            pMDIIn->Init(Parameters, MDIPacketBuf);
-            pDecodeMDI->Init(Parameters, FACBuf, SDCBuf, MSCBuf);
-        }
+	switch(eOpMode)
+	{
+	case T_TX:
+	    Parameters.ReceiveStatus.FAC.SetStatus(RX_OK);
+	    Parameters.ReceiveStatus.SDC.SetStatus(RX_OK);
+	    pEncoder->Init(Parameters, FACBuf, SDCBuf, MSCBuf);
+	    pModulator->Init(Parameters);
+	    break;
+	case T_ENC:
+	    if(MDIoutAddr.size()==0)
+		throw CGenErr("Encoder with no outputs");
+	    Parameters.ReceiveStatus.FAC.SetStatus(RX_OK);
+	    Parameters.ReceiveStatus.SDC.SetStatus(RX_OK);
+	    pEncoder->Init(Parameters, FACBuf, SDCBuf, MSCBuf);
+	    /* set the output address */
+	    for(vector<string>::const_iterator s = MDIoutAddr.begin(); s!=MDIoutAddr.end(); s++)
+	    {
+		pMDIOut->AddSubscriber(*s, 'M');
+	    }
+	    pMDIOut->Init(Parameters);
+	    break;
+	case T_MOD:
+	    if(strMDIinAddr == "")
+	    {
+		throw CGenErr("Modulator with no input");
+	    }
+	    pMDIIn->SetOrigin(strMDIinAddr);
+	    bInSync = false;
+	    pMDIIn->Init(Parameters, MDIPacketBuf);
+	    pDecodeMDI->Init(Parameters, FACBuf, SDCBuf, MSCBuf);
+	}
 
-        /* Set run flag */
-        bRunning = true;
-        switch(eOpMode)
-        {
-        case T_TX:
-            cout << "Tx: starting, in: Encoder, out: COFDM" << endl;
-            break;
-        case T_ENC:
-            cout << "Tx: starting, in: Encoder, out: MDI" << endl;
-            break;
-        case T_MOD:
-            cout << "Tx: starting, in: MDI, out: COFDM" << endl;
-        }
+	/* Set run flag */
+	bRunning = true;
+	switch(eOpMode)
+	{
+	case T_TX:
+	    cout << "Tx: starting, in: Encoder, out: COFDM" << endl;
+	    break;
+	case T_ENC:
+	    cout << "Tx: starting, in: Encoder, out: MDI" << endl;
+	    break;
+	case T_MOD:
+	    cout << "Tx: starting, in: MDI, out: COFDM" << endl;
+	}
 
 		while (bRunning)
 		{
@@ -425,7 +425,7 @@ void CDRMTransmitter::Start()
 							for(size_t i=0; i<MAX_NUM_STREAMS; i++)
 							{
 								(void)MSCBuf[i].Get(MSCBuf[i].GetFillLevel());
-                            }
+			    }
 						}
 					}
 					else
@@ -465,29 +465,29 @@ CDRMTransmitter::LoadSettings(CSettings& s)
 	string mode = s.Get("0", "mode", string("TX"));
 	if(mode == "TX")
 	{
-        SetOperatingMode(T_TX);
-        pEncoder->LoadSettings(s, Parameters);
-        pModulator->LoadSettings(s, Parameters);
+	SetOperatingMode(T_TX);
+	pEncoder->LoadSettings(s, Parameters);
+	pModulator->LoadSettings(s, Parameters);
 	}
 	if(mode == "ENC")
 	{
-        SetOperatingMode(T_ENC);
-        pEncoder->LoadSettings(s, Parameters);
-        for(size_t i=0; i<100; i++)
-        {
-            stringstream ss;
-            ss << "MDIout" << i;
-            string addr = s.Get("Transmitter", ss.str(), string("[none]"));
-            if(addr == "[none]")
-                break;
-            MDIoutAddr.push_back(addr);
-        }
+	SetOperatingMode(T_ENC);
+	pEncoder->LoadSettings(s, Parameters);
+	for(size_t i=0; i<100; i++)
+	{
+	    stringstream ss;
+	    ss << "MDIout" << i;
+	    string addr = s.Get("Transmitter", ss.str(), string("[none]"));
+	    if(addr == "[none]")
+		break;
+	    MDIoutAddr.push_back(addr);
+	}
 	}
 	if(mode == "MOD")
 	{
-        SetOperatingMode(T_MOD);
-        pModulator->LoadSettings(s, Parameters);
-        strMDIinAddr = s.Get("Transmitter", "MDIin", string(""));
+	SetOperatingMode(T_MOD);
+	pModulator->LoadSettings(s, Parameters);
+	strMDIinAddr = s.Get("Transmitter", "MDIin", string(""));
 	}
 }
 
@@ -498,23 +498,23 @@ CDRMTransmitter::SaveSettings(CSettings& s) const
 	{
 	case T_TX:
 		s.Put("0", "mode", string("TX"));
-        pEncoder->SaveSettings(s, Parameters);
-        pModulator->SaveSettings(s, Parameters);
+	pEncoder->SaveSettings(s, Parameters);
+	pModulator->SaveSettings(s, Parameters);
 		break;
 	case T_ENC:
 		s.Put("0", "mode", string("ENC"));
-        pEncoder->SaveSettings(s, Parameters);
-        for(size_t i=0; i<MDIoutAddr.size(); i++)
-        {
-            stringstream ss;
-            ss << "MDIout" << i;
-            s.Put("Transmitter", ss.str(), MDIoutAddr[i]);
-        }
+	pEncoder->SaveSettings(s, Parameters);
+	for(size_t i=0; i<MDIoutAddr.size(); i++)
+	{
+	    stringstream ss;
+	    ss << "MDIout" << i;
+	    s.Put("Transmitter", ss.str(), MDIoutAddr[i]);
+	}
 		break;
 	case T_MOD:
 		s.Put("0", "mode", string("MOD"));
-        pModulator->SaveSettings(s, Parameters);
-        s.Put("Transmitter", "MDIin", strMDIinAddr);
+	pModulator->SaveSettings(s, Parameters);
+	s.Put("Transmitter", "MDIin", strMDIinAddr);
 		break;
 	}
 }

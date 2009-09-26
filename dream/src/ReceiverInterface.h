@@ -58,15 +58,12 @@ public:
 	virtual ENoiRedType             GetAnalogNoiseReductionType()=0;
 	virtual EInChanSel		GetChannelSelection()=0;
 	virtual void			SetChannelSelection(EInChanSel)=0;
-	virtual void			SetUseAnalogHWDemod(bool)=0;
-	virtual bool			GetUseAnalogHWDemod()=0;
 	virtual int			GetAnalogFilterBWHz()=0;
 	virtual bool			AnalogAutoFreqAcqEnabled()=0;
 	virtual bool			AnalogPLLEnabled()=0;
 	virtual bool			GetAnalogPLLPhase(_REAL&)=0;
 	virtual void			SetAnalogAGCType(const EType)=0;
 	virtual void			SetAnalogNoiseReductionType(const ENoiRedType)=0;
-	virtual void			SetAnalogFilterBWHz(int)=0;
 	virtual void			EnableAnalogAutoFreqAcq(const bool)=0;
 	virtual void			EnableAnalogPLL(const bool)=0;
 
@@ -98,7 +95,8 @@ public:
 	virtual ETypeIntTime            GetTimeInt() const =0;
 	virtual void                    SetIntCons(const bool)=0;
 	virtual bool                    GetIntCons()=0;
-
+	virtual int			GetAnalogFilterBWHz()=0;
+	virtual void			SetAnalogFilterBWHz(int)=0;
 	virtual void                    SetTiSyncTracType(ETypeTiSyncTrac)=0;
 	virtual ETypeTiSyncTrac         GetTiSyncTracType()=0;
 	virtual void                    SetRecFilter(bool)=0;
@@ -110,22 +108,11 @@ public:
 	virtual void                    SetNumIterations(int)=0;
 	virtual int                     GetInitNumIterations()=0;
 
-	virtual void			GetRigList(CRigMap&) const = 0;
-	virtual void			GetRigSettings(CRigSettings&,
-							int, EModulationType) const = 0;
-	virtual CRig*			CreateRig(int) const=0;
-	virtual CRig*			GetRig(int) const=0;
-	virtual void			SetRig(int, CRig*)=0;
-	virtual void			SetRig(EModulationType, int)=0;
-	virtual bool			GetRigChangeInProgress()=0;
-	virtual const rig_caps*		GetRigCaps(int) const = 0;
-	virtual CRig*			GetCurrentRig() const = 0;
 	virtual bool			UpstreamDIInputEnabled()=0;
-	virtual void			SetIQRecording(bool)=0;
-	virtual void			SetRSIRecording(bool, const char)=0;
 
 	virtual CDataDecoder*		GetDataDecoder()=0;
-
+	virtual void			SetIQRecording(bool)=0;
+	virtual void			SetRSIRecording(bool, char)=0;
 };
 
 #endif

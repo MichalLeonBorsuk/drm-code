@@ -101,7 +101,7 @@ enum ESymIntMod { SI_LONG, SI_SHORT };
 
 enum ERxEvent {
     ServiceReconfiguration, ChannelReconfiguration, Tune, Reinitialise,
-    SelectAudioComponent, SelectDataComponent, None
+    ReLoadSettings, SelectAudioComponent, SelectDataComponent, None
 };
 
 /* AMSS status */

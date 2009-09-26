@@ -96,7 +96,7 @@ DRMMainWindow::DRMMainWindow(ReceiverInterface& NDRMR, CSettings& NSettings,
 
 	/* Digi controls */
 	/* Set display color */
-	SetDisplayColor(CRGBConversion::int2RGB(Settings.Get("DRMGUI", "colorscheme", 0xff0000)));
+	SetDisplayColor(CRGBConversion::int2RGB(Settings.Get("GUI DRM", "colorscheme", 0xff0000)));
 
 	/* Reset text */
 	LabelBitrate->setText("");
@@ -628,7 +628,7 @@ bool DRMMainWindow::TryShowDataWindow(int shortID)
 	switch(eAppIdent)
 	{
 		case AT_MOTEPG:
-			Settings.Put("EPG Dialog", "serviceid", sid.toStdString());
+			Settings.Put("GUI EPG", "serviceid", sid.toStdString());
 			epgDlg->show();
 			break;
 		case AT_MOTBROADCASTWEBSITE:
@@ -666,13 +666,13 @@ void DRMMainWindow::OnMenuDataApplication()
 
 void DRMMainWindow::OnMenuSetDisplayColor()
 {
-    const QColor color = CRGBConversion::int2RGB(Settings.Get("DRMGUI", "colorscheme", 0xff0000));
+    const QColor color = CRGBConversion::int2RGB(Settings.Get("GUI DRM", "colorscheme", 0xff0000));
     const QColor newColor = QColorDialog::getColor( color, this);
     if (newColor.isValid())
 	{
 		/* Store new color and update display */
 		SetDisplayColor(newColor);
-    	Settings.Put("DRMGUI", "colorscheme", CRGBConversion::RGB2int(newColor));
+    	Settings.Put("GUI DRM", "colorscheme", CRGBConversion::RGB2int(newColor));
 	}
 }
 
@@ -682,17 +682,17 @@ void DRMMainWindow::showEvent(QShowEvent*)
     quitWanted = true;
 	/* recover window size and position */
 	CWinGeom s;
-	Settings.Get("DRMGUI", s);
+	Settings.Get("GUI DRM", s);
 	const QRect WinGeom(s.iXPos, s.iYPos, s.iWSize, s.iHSize);
 	if (WinGeom.isValid() && !WinGeom.isEmpty() && !WinGeom.isNull())
 			setGeometry(WinGeom);
-	if(Settings.Get("DRMGUI", "SEDvisible", false))
+	if(Settings.Get("GUI DRM", "SEDvisible", false))
 	sysEvalDlg->show();
-	if(Settings.Get("DRMGUI", "Stationsvisible", false))
+	if(Settings.Get("GUI DRM", "Stationsvisible", false))
 	stationsDlg->show();
-	if(Settings.Get("DRMGUI", "AFSvisible", false))
+	if(Settings.Get("GUI DRM", "AFSvisible", false))
 	liveScheduleDlg->show();
-	if(Settings.Get("DRMGUI", "EPGvisible", false))
+	if(Settings.Get("GUI DRM", "EPGvisible", false))
 	epgDlg->show();
 
 	CParameter& Parameters = *Receiver.GetParameters();
@@ -711,10 +711,10 @@ void DRMMainWindow::showEvent(QShowEvent*)
 void DRMMainWindow::hideEvent(QHideEvent*)
 {
     /* remember the state of the windows */
-    Settings.Put("DRMGUI", "AFSvisible", liveScheduleDlg->isVisible());
-    Settings.Put("DRMGUI", "SEDvisible", sysEvalDlg->isVisible());
-    Settings.Put("DRMGUI", "Stationsvisible", stationsDlg->isVisible());
-    Settings.Put("DRMGUI", "EPGvisible", epgDlg->isVisible());
+    Settings.Put("GUI DRM", "AFSvisible", liveScheduleDlg->isVisible());
+    Settings.Put("GUI DRM", "SEDvisible", sysEvalDlg->isVisible());
+    Settings.Put("GUI DRM", "Stationsvisible", stationsDlg->isVisible());
+    Settings.Put("GUI DRM", "EPGvisible", epgDlg->isVisible());
     /* stop any asynchronous GUI actions */
     loghelper.EnableLog(false);
     Timer.stop();
@@ -725,17 +725,17 @@ void DRMMainWindow::hideEvent(QHideEvent*)
     stationsDlg->hide();
     if(jlViewer)
     {
-	Settings.Put("DRMGUI", "JLvisible", jlViewer->isVisible());
+	Settings.Put("GUI DRM", "JLvisible", jlViewer->isVisible());
 	jlViewer->close();
     }
     if(bwsViewer)
     {
-	Settings.Put("DRMGUI", "BWSvisible", bwsViewer->isVisible());
+	Settings.Put("GUI DRM", "BWSvisible", bwsViewer->isVisible());
 	bwsViewer->close();
     }
     if(slideShowViewer)
     {
-	Settings.Put("DRMGUI", "SSvisible", slideShowViewer->isVisible());
+	Settings.Put("GUI DRM", "SSvisible", slideShowViewer->isVisible());
 	slideShowViewer->close();
     }
 
@@ -745,7 +745,7 @@ void DRMMainWindow::hideEvent(QHideEvent*)
 	s.iYPos = WinGeom.y();
 	s.iHSize = WinGeom.height();
 	s.iWSize = WinGeom.width();
-	Settings.Put("DRMGUI", s);
+	Settings.Put("GUI DRM", s);
 }
 
 void DRMMainWindow::closeEvent(QCloseEvent* ce)

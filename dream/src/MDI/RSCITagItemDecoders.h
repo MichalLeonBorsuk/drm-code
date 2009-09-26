@@ -126,18 +126,16 @@ public:
 	virtual void DecodeTag(CVector<_BINARY>& vecbiTag, const int iLenDataBits);
 };*/
 
-
 // RSCI control
-
 class CTagItemDecoderRCI : public CTagItemDecoder
 {
 public:
-	CTagItemDecoderRCI(const string& s) : pDRMReceiver(NULL),tag(s) {}
-	void SetReceiver(ReceiverInterface *pReceiver) {pDRMReceiver = pReceiver;}
-	virtual string GetTagName() { return tag; }
+    CTagItemDecoderRCI(const string& s):pRSISubscriber(NULL),tag(s) {}
+    virtual string GetTagName() { return tag; }
+    void SetSubscriber(CRSISubscriber *pSubscriber) {pRSISubscriber = pSubscriber;}
 protected:
-	ReceiverInterface *pDRMReceiver;
-	string tag;
+    CRSISubscriber* pRSISubscriber;
+    string tag;
 };
 
 class CTagItemDecoderCact : public CTagItemDecoderRCI
@@ -178,11 +176,8 @@ public:
 class CTagItemDecoderCpro : public CTagItemDecoderRCI
 {
 public:
-	CTagItemDecoderCpro() : CTagItemDecoderRCI("cpro"), pRSISubscriber(NULL) {}
+	CTagItemDecoderCpro() : CTagItemDecoderRCI("cpro") {}
 	virtual void DecodeTag(CVector<_BINARY>& vecbiTag, const int iLenDataBits);
-	void SetSubscriber(CRSISubscriber *pSubscriber) {pRSISubscriber = pSubscriber;}
-private:
-	CRSISubscriber* pRSISubscriber;
 };
 
 #endif

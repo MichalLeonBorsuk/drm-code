@@ -39,15 +39,17 @@
 #include "TagPacketDecoderRSCIControl.h"
 
 // constructor: adds all of the decoders in the vocabulary to the list
-CTagPacketDecoderRSCIControl::CTagPacketDecoderRSCIControl(void)
-: pDRMReceiver(NULL)
-, TagItemDecoderCact()
+CTagPacketDecoderRSCIControl::CTagPacketDecoderRSCIControl(CRSISubscriber *pSubscriber)
+: TagItemDecoderCact()
 , TagItemDecoderCfre()
 , TagItemDecoderCdmo()
 , TagItemDecoderCrec()
 , TagItemDecoderCpro()
 , TagItemDecoderCser()
 {
+	TagItemDecoderCrec.SetSubscriber(pSubscriber);
+	TagItemDecoderCpro.SetSubscriber(pSubscriber);
+
 	// Add each tag item decoder to the vocabulary
 	AddTagItemDecoder(&TagItemDecoderCact);
 	AddTagItemDecoder(&TagItemDecoderCfre);
@@ -55,20 +57,4 @@ CTagPacketDecoderRSCIControl::CTagPacketDecoderRSCIControl(void)
 	AddTagItemDecoder(&TagItemDecoderCrec);
 	AddTagItemDecoder(&TagItemDecoderCpro);
 	AddTagItemDecoder(&TagItemDecoderCser);
-}
-
-
-void CTagPacketDecoderRSCIControl::SetReceiver(ReceiverInterface *pReceiver)
-{
-	pDRMReceiver = pReceiver;
-	TagItemDecoderCact.SetReceiver(pReceiver);
-	TagItemDecoderCfre.SetReceiver(pReceiver);
-	TagItemDecoderCdmo.SetReceiver(pReceiver);
-	TagItemDecoderCrec.SetReceiver(pReceiver);
-	TagItemDecoderCser.SetReceiver(pReceiver);
-}
-
-void CTagPacketDecoderRSCIControl::SetSubscriber(CRSISubscriber *pSubscriber)
-{
-	TagItemDecoderCpro.SetSubscriber(pSubscriber);
 }

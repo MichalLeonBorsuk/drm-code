@@ -202,7 +202,7 @@ EPGModel::select (const uint32_t chan, const QDate & date)
     max_time = min_time+86400;
     for(int i=-1; i<=1; i++)
     {
-        QDomDocument doc;
+	QDomDocument doc;
 	QDate o = date.addDays(i);
 	doc = getFile (o, chan, false);
 	parseDoc(doc);
@@ -274,22 +274,22 @@ void EPGDlg::showEvent(QShowEvent *)
 
 	/* recover window size and position */
 	CWinGeom s;
-	Settings.Get("EPG Dialog", s);
+	Settings.Get("GUI EPG", s);
 	const QRect WinGeom(s.iXPos, s.iYPos, s.iWSize, s.iHSize);
 	if (WinGeom.isValid() && !WinGeom.isEmpty() && !WinGeom.isNull())
 		setGeometry(WinGeom);
 
     /* restore selected service */
     bool ok=false;
-    currentSID = QString(Settings.Get("EPG Dialog", "serviceid", string("0")).c_str()).toULong(&ok, 16);
+    currentSID = QString(Settings.Get("GUI EPG", "serviceid", string("0")).c_str()).toULong(&ok, 16);
     if(!ok)
-        currentSID=0;
+	currentSID=0;
     // update the channels combobox from the epg
     channel->clear();
     int n = -1, m = -1;
 	Parameters.Lock();
     for (map < uint32_t, CServiceInformation >::const_iterator i = Parameters.ServiceInformation.begin();
-         i != Parameters.ServiceInformation.end(); i++) {
+	 i != Parameters.ServiceInformation.end(); i++) {
 		QString channel_label = QString().fromUtf8(i->second.label.begin()->c_str());
 		uint32_t channel_id = i->second.id;
     	channel->insertItem(++n, channel_label, channel_id);
@@ -300,7 +300,7 @@ void EPGDlg::showEvent(QShowEvent *)
     }
 	Parameters.Unlock();
 	if(m>=0)
-        channel->setCurrentIndex(m);
+	channel->setCurrentIndex(m);
 
     date = QDate::currentDate();
     dateEdit->setDate(date);
@@ -323,8 +323,8 @@ void EPGDlg::hideEvent(QHideEvent*)
 	s.iYPos = WinGeom.y();
 	s.iHSize = WinGeom.height();
 	s.iWSize = WinGeom.width();
-	Settings.Put("EPG Dialog", s);
-    Settings.Put("EPG Dialog", "serviceid", QString("%1").arg(currentSID, 16).toStdString());
+	Settings.Put("GUI EPG", s);
+    Settings.Put("GUI EPG", "serviceid", QString("%1").arg(currentSID, 16).toStdString());
 }
 
 void EPGDlg::setDate(const QDate& d)
@@ -478,7 +478,7 @@ void EPGDlg::updateXML(const QDate& date, uint32_t sid, bool adv)
     xml = doc.toString();
     if (xml.length() > 0)
     {
-        browser->setText(xml);
+	browser->setText(xml);
     }
     else
     {
