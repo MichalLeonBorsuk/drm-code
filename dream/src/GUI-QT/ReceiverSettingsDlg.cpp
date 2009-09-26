@@ -900,6 +900,11 @@ void ReceiverSettingsDlg::showEvent(QShowEvent*)
 	    pushButtonAMApply->setText(tr("Save"));
 	    pushButtonFMApply->setText(tr("Apply"));
 	    break;
+	case NONE:
+	    pushButtonDRMApply->setText(tr("Save"));
+	    pushButtonAMApply->setText(tr("Save"));
+	    pushButtonFMApply->setText(tr("Save"));
+	    break;
 	default:
 	    pushButtonDRMApply->setText(tr("Save"));
 	    pushButtonAMApply->setText(tr("Apply"));
@@ -932,7 +937,7 @@ void ReceiverSettingsDlg::showEvent(QShowEvent*)
     widgetFMInput->load(Settings);
 
     /* Audio */
-    string wavfile = Settings.Get("command", "writewav", string(""));
+    string wavfile = Settings.Get("Receiver", "writewav", string(""));
     CheckBoxMuteAudio->setChecked(Settings.Get("Receiver", "muteaudio", false));
     lineEditAudioFile->setText(wavfile.c_str());
     CheckBoxRecordAudio->setChecked(wavfile!="");

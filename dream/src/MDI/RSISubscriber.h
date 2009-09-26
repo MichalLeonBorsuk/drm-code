@@ -61,6 +61,13 @@ public:
 	void SetProfile(const char c);
 	char GetProfile(void) const {return cProfile;}
 
+	void SetService(int);
+	void SetRSIRecording(bool, char);
+	void SetIQRecording(bool);
+	void EnableReceiver(bool);
+	void SetFrequency(int);
+	void SetMode(string);
+
 	/* Each subscriber can also do subsampling, i.e. only transmit one in N frames. This sets the ratio */
 	void SetSubsamplingFactor(const int i);
 
@@ -83,7 +90,7 @@ protected:
 	char cProfile;
 	int iSubsamplingFactor;
 	bool bNeedPft;
-    size_t fragment_size;
+	size_t fragment_size;
 
 	CTagPacketDecoderRSCIControl TagPacketDecoderRSCIControl;
 

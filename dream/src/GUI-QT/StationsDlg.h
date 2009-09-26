@@ -84,18 +84,17 @@ protected:
 	void    showEvent(QShowEvent* pEvent);
 	void	hideEvent(QHideEvent* pEvent);
 	void	AddWhatsThisHelp();
-	void	EnableSMeter(const bool bStatus);
 
 	ReceiverInterface&	Receiver;
 	CSettings&		Settings;
-	CTxSchedule	    Schedule;
+	CTxSchedule		Schedule;
 	QTimer			TimerClock;
 	QTimer			TimerSMeter;
 	QTimer			TimerEditFrequency;
 	QTimer			TimerMonitorFrequency;
 	QTimer			TimerTuning;
 
-	bool		    bTuningInProgress;
+	bool			bTuningInProgress;
 	bool			bReInitOnFrequencyChange;
 	QString			ScheduleFile;
 
@@ -114,9 +113,6 @@ public slots:
 	void OnUrlFinished(QNetworkReply*);
 
 	void OnTimerClock();
-
-	void OnTimerSMeter();
-
 	void OnTimerEditFrequency();
 	void OnTimerMonitorFrequency();
 	void OnTimerTuning();

@@ -263,7 +263,7 @@ CSettings::ParseArguments(int argc, char **argv)
 		if (GetStringArgument(argc, argv, i, "-w", "--writewav",
 							  strArgument) == true)
 		{
-			Put("command", "writewav", strArgument);
+			Put("Receiver", "writewav", strArgument);
 			continue;
 		}
 
@@ -312,7 +312,7 @@ CSettings::ParseArguments(int argc, char **argv)
 		if (GetNumericArgument(argc, argv, i, "-u", "--outchansel", 0,
 							   MAX_VAL_OUT_CHAN_SEL, rArgument) == true)
 		{
-			Put("command", "outchansel", (int) rArgument);
+			Put("Receiver", "outchansel", (int) rArgument);
 			continue;
 		}
 
@@ -378,7 +378,7 @@ CSettings::ParseArguments(int argc, char **argv)
 		if (GetNumericArgument(argc, argv, i, "-y", "--sysevplotstyle", 0,
 							   MAX_COLOR_SCHEMES_VAL, rArgument) == true)
 		{
-			Put("System Evaluation Dialog", "plotstyle", (int) rArgument);
+			Put("GUI System Evaluation", "plotstyle", (int) rArgument);
 			continue;
 		}
 #endif
@@ -452,24 +452,10 @@ CSettings::ParseArguments(int argc, char **argv)
 			continue;
 		}
 
-		if (GetStringArgument (argc, argv, i,
-				"--rsirecordprofile", "--rsirecordprofile", strArgument) == true)
-		{
-			Put("command", "rsirecordprofile", strArgument);
-			continue;
-		}
-
-		if (GetStringArgument (argc, argv, i,
-				"--rsirecordtype", "--rsirecordtype", strArgument) == true)
-		{
-			Put("command", "rsirecordtype", strArgument);
-			continue;
-		}
-
 		if (GetNumericArgument (argc, argv, i,
 				"--recordiq", "--recordiq", 0, 1, rArgument) == true)
 		{
-			Put("command", "recordiq", int (rArgument));
+			Put("Receiver", "writeiq", int (rArgument));
 			continue;
 		}
 
@@ -577,13 +563,10 @@ CSettings::UsageArguments(char **argv)
 		"  --mdiout <s>                MDI out address format [IP#:]IP#:port (for Content Server)\n"
 		"  --mdiin  <s>                MDI in address (for modulator) [[IP#:]IP:]port\n"
 		"  --rsioutprofile <s>         MDI/RSCI output profile: A|B|C|D|Q|M\n"
-		"  --rsiout <s>                MDI/RSCI output address format [IP#:]IP#:port (prefix address with 'p' to enable the simple PFT)\n"
+		"  --rsiout <s>                MDI/RSCI output address format file or [IP#:]IP#:port (prefix address with 'p' to enable the simple PFT)\n"
 		"  --rsiin <s>                 RSCI/MDI status input address format [[IP#:]IP#:]port\n"
 		"  --rciout <s>                RSCI Control output format IP#:port\n"
-		"  --rciin <s>                 RSCI Control input address number format [IP#:]port\n"
-		"  --rsirecordprofile <s>      RSCI recording profile: A|B|C|D|Q|M\n"
-		"  --rsirecordtype <s>         RSCI recording file type: raw|ff|pcap\n"
-		"  --recordiq <n>              enable/disable recording an I/Q file\n"
+		"  --rciin <n>                 RSCI Control input listening port\n"
 		"  -I <n>, --snddevin <n>      set sound in device\n"
 		"  -O <n>, --snddevout <n>     set sound out device\n"
 #ifdef HAVE_LIBHAMLIB

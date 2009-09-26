@@ -121,35 +121,10 @@ main(int argc, char **argv)
 
 		if (strMode == "RX")
 		{
-#ifdef HAVE_LIBHAMLIB
-	    CHamlib *pHamlib = NULL;
-	    string rsi = m.Settings.Get("command", "rsiin", string(""));
-	    string fio = m.Settings.Get("command", "fileio", string(""));
-	    if(rsi == "" && fio == "") /* don't initialise hamlib if RSCI or file input is requested */
-	    {
-		pHamlib = new CHamlib();
-		m.Receiver.SetHamlib(pHamlib);
-	    }
-#endif
-	    m.Receiver.LoadSettings();
-
-	    m.doNewMainWindow();
-
-	    /* Start working thread */
-	    m.Receiver.start();
-
-	    app.exec();
-
-#if 0 //def HAVE_LIBHAMLIB
-			if(pHamlib)
-			{
-				pHamlib->StopSMeter();
-				if (pHamlib->wait(1000) == false)
-					cout << "error terminating rig polling thread" << endl;
-				pHamlib->SaveSettings(m.Settings);
-			}
-#endif
-			m.Receiver.SaveSettings();
+		    m.doNewMainWindow();
+		    m.Receiver.start();
+		    app.exec();
+		    m.Receiver.SaveSettings();
 		}
 		else if (strMode == "TX" || strMode == "ENC" || strMode == "MOD")
 		{
@@ -242,23 +217,34 @@ main(int argc, char **argv)
 	{
 		CSettings Settings;
 		Settings.Load(argc, argv);
-		if (Settings.Get("command", "isreceiver", true))
+		string strMode = m.Settings.Get("0", "mode", string("RX"));
+		if (strMode == "RX")
 		{
-			CDRMSimulation DRMSimulation;
 			CDRMReceiver DRMReceiver;
-
-			DRMSimulation.SimScript();
 			DRMReceiver.LoadSettings(Settings);
-			DRMReceiver.SetReceiverMode(DRM);
 			DRMReceiver.Start();
 			DRMReceiver.SaveSettings(Settings);
 		}
-		else
+		else if (strMode == "TX" || strMode == "ENC" || strMode == "MOD")
 		{
 			CDRMTransmitter DRMTransmitter;
 			DRMTransmitter.LoadSettings(Settings);
 			DRMTransmitter.Start();
 			DRMTransmitter.SaveSettings(Settings);
+		}
+		else if (strMode == "SIM")
+		{
+
+			CDRMSimulation DRMSimulation;
+			CDRMReceiver DRMReceiver;
+			DRMSimulation.SimScript();
+			//DRMReceiver.LoadSettings(Settings);
+			//DRMReceiver.Start();
+			//DRMReceiver.SaveSettings(Settings);
+		}
+		else
+		{
+			ErrorMessage(m.Settings.UsageArguments(argv).c_str());
 		}
 	}
 	catch(CGenErr GenErr)

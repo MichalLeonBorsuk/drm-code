@@ -154,7 +154,7 @@ AnalogMainWindow::AnalogMainWindow(ReceiverInterface& NDRMR, CSettings& NSetting
 void AnalogMainWindow::showEvent(QShowEvent*)
 {
 	CWinGeom s;
-	Settings.Get("AnalogGUI", s);
+	Settings.Get("GUI Analog", s);
 	const QRect WinGeom(s.iXPos, s.iYPos, s.iWSize, s.iHSize);
 	if (WinGeom.isValid() && !WinGeom.isEmpty() && !WinGeom.isNull())
 			setGeometry(WinGeom);
@@ -168,18 +168,18 @@ void AnalogMainWindow::showEvent(QShowEvent*)
 	Timer.start(GUI_CONTROL_UPDATE_TIME);
 
 	/* Open AMSS window */
-	if (Settings.Get("AnalogGUI", "AMSSvisible", false) == true)
+	if (Settings.Get("GUI Analog", "AMSSvisible", false) == true)
 		AMSSDlg.show();
 	else
 		AMSSDlg.hide();
 
-	if(Settings.Get("AnalogGUI", "Stationsvisible", false))
+	if(Settings.Get("GUI Analog", "Stationsvisible", false))
 	stationsDlg->show();
 
-	if(Settings.Get("AnalogGUI", "AFSvisible", false))
+	if(Settings.Get("GUI Analog", "AFSvisible", false))
 	liveScheduleDlg->show();
 
-    PLLButton->setChecked(Settings.Get("AnalogGUI", "pll", true));
+    PLLButton->setChecked(Settings.Get("GUI Analog", "pll", true));
 
     try {
 	plot->start();
@@ -198,14 +198,14 @@ void AnalogMainWindow::hideEvent(QHideEvent*)
 	TimerPLLPhaseDial.stop();
 
 	/* Close windows */
-	Settings.Put("AnalogGUI", "AMSSvisible", AMSSDlg.isVisible());
+	Settings.Put("GUI Analog", "AMSSvisible", AMSSDlg.isVisible());
 	AMSSDlg.hide();
-	Settings.Put("AnalogGUI", "Stationsvisible", stationsDlg->isVisible());
+	Settings.Put("GUI Analog", "Stationsvisible", stationsDlg->isVisible());
 	stationsDlg->hide();
-	Settings.Put("AnalogGUI", "AFSvisible", liveScheduleDlg->isVisible());
+	Settings.Put("GUI Analog", "AFSvisible", liveScheduleDlg->isVisible());
 	liveScheduleDlg->hide();
 
-    Settings.Put("AnalogGUI", "pll", PLLButton->isChecked());
+    Settings.Put("GUI Analog", "pll", PLLButton->isChecked());
 
     plot->stop();
 
@@ -216,7 +216,7 @@ void AnalogMainWindow::hideEvent(QHideEvent*)
 	s.iYPos = WinGeom.y();
 	s.iHSize = WinGeom.height();
 	s.iWSize = WinGeom.width();
-	Settings.Put("AnalogGUI", s);
+	Settings.Put("GUI Analog", s);
 }
 
 void AnalogMainWindow::closeEvent(QCloseEvent* ce)
@@ -355,7 +355,7 @@ void AnalogMainWindow::UpdateControls()
 void AnalogMainWindow::UpdatePlotStyle()
 {
 	/* Update main plot window */
-	plot->SetPlotStyle(Settings.Get("System Evaluation Dialog", "plotstyle", 0));
+	plot->SetPlotStyle(Settings.Get("GUI System Evaluation", "plotstyle", 0));
 }
 
 void AnalogMainWindow::OnTimer()
@@ -733,13 +733,13 @@ void CAMSSDlg::hideEvent(QHideEvent*)
 	s.iYPos = WinGeom.y();
 	s.iHSize = WinGeom.height();
 	s.iWSize = WinGeom.width();
-	Settings.Put("AMSS Dialog", s);
+	Settings.Put("GUI AMSS", s);
 }
 
 void CAMSSDlg::showEvent(QShowEvent*)
 {
 	CWinGeom s;
-	Settings.Get("AMSS Dialog", s);
+	Settings.Get("GUI AMSS", s);
 	const QRect WinGeom(s.iXPos, s.iYPos, s.iWSize, s.iHSize);
 	if (WinGeom.isValid() && !WinGeom.isEmpty() && !WinGeom.isNull())
 			setGeometry(WinGeom);

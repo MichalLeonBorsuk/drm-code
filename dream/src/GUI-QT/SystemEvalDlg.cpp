@@ -509,7 +509,7 @@ void SystemEvalDlg::InitialisePlots()
 void SystemEvalDlg::showPlots()
 {
 	/* Restore chart windows */
-	const size_t iNumChartWin = Settings.Get("System Evaluation Dialog", "numchartwin", 0);
+	const size_t iNumChartWin = Settings.Get("GUI System Evaluation", "numchartwin", 0);
 	for (size_t i = 0; i < iNumChartWin; i++)
 	{
 		stringstream s;
@@ -517,7 +517,7 @@ void SystemEvalDlg::showPlots()
 		newPlot(0, s.str());
 	}
 	/* Restore main plot */
-	plot->load(Settings, "System Evaluation Dialog");
+	plot->load(Settings, "GUI System Evaluation");
 	CDRMPlot::EPlotType pt = plot->GetChartType();
 	if(pt == CDRMPlot::NONE_OLD)
 	{
@@ -542,9 +542,9 @@ void SystemEvalDlg::showPlots()
 void SystemEvalDlg::hidePlots()
 {
 	plot->stop();
-	plot->save(Settings, "System Evaluation Dialog");
+	plot->save(Settings, "GUI System Evaluation");
 
-	int n = Settings.Get("System Evaluation Dialog", "numchartwin", int(0));
+	int n = Settings.Get("GUI System Evaluation", "numchartwin", int(0));
 	for (int i = 0; i < n; i++)
 	{
 	stringstream s;
@@ -562,7 +562,7 @@ void SystemEvalDlg::hidePlots()
 	    n++;
 	plots[i]->stop();
 	}
-	Settings.Put("System Evaluation Dialog", "numchartwin", n);
+	Settings.Put("GUI System Evaluation", "numchartwin", n);
 
 	/* We do not need the pointers anymore, reset vector */
 	plots.clear();

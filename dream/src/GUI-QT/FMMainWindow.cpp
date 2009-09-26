@@ -67,7 +67,7 @@ void
 FMMainWindow::showEvent(QShowEvent* pEvent)
 {
     CWinGeom s;
-    Settings.Get("FMgGUI", s);
+    Settings.Get("GUI FM", s);
     const QRect WinGeom(s.iXPos, s.iYPos, s.iWSize, s.iHSize);
     if (WinGeom.isValid() && !WinGeom.isEmpty() && !WinGeom.isNull())
 	    setGeometry(WinGeom);
@@ -80,7 +80,7 @@ FMMainWindow::showEvent(QShowEvent* pEvent)
     /* Activate real-time timer */
     Timer.start(GUI_CONTROL_UPDATE_TIME);
 
-    if(Settings.Get("FMGUI", "Stationsvisible", false))
+    if(Settings.Get("GUI FM", "Stationsvisible", false))
 	stationsDlg->show();
 
     //UpdateControls();
@@ -93,7 +93,7 @@ FMMainWindow::hideEvent(QHideEvent* pEvent)
     Timer.stop();
 
     /* Close windows */
-    Settings.Put("FMGUI", "Stationsvisible", stationsDlg->isVisible());
+    Settings.Put("GUI FM", "Stationsvisible", stationsDlg->isVisible());
     stationsDlg->hide();
 
     /* Save window geometry data */
@@ -103,7 +103,7 @@ FMMainWindow::hideEvent(QHideEvent* pEvent)
     s.iYPos = WinGeom.y();
     s.iHSize = WinGeom.height();
     s.iWSize = WinGeom.width();
-    Settings.Put("FMGUI", s);
+    Settings.Put("GUI FM", s);
 }
 
 void

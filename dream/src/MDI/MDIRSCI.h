@@ -55,189 +55,191 @@
 class CDIIn : public CPacketSink
 {
 public:
-	CDIIn();
-	virtual ~CDIIn();
-	bool SetOrigin(const string& strAddr);
-	bool GetInEnabled() {return bDIInEnabled;}
-	virtual void SendPacket(const vector<_BYTE>& vecbydata, uint32_t addr=0, uint16_t port=0);
-	void ProcessData(CParameter& Parameter, CVectorEx<_BINARY>& vecOutputData, int& iOutputBlockSize);
+    CDIIn();
+    virtual ~CDIIn();
+    bool SetOrigin(const string& strAddr);
+    bool GetInEnabled() {return bDIInEnabled;}
+    virtual void SendPacket(const vector<_BYTE>& vecbydata, uint32_t addr=0, uint16_t port=0);
+    void ProcessData(CParameter& Parameter, CVectorEx<_BINARY>& vecOutputData, int& iOutputBlockSize);
 
 protected:
 
-	string					strOrigin;
-	CMDIInBuffer	  		queue;
-	CPacketSource*			source;
-	CPft					Pft;
+    string					strOrigin;
+    CMDIInBuffer	  		queue;
+    CPacketSource*			source;
+    CPft					Pft;
 
-	bool					bDIInEnabled;
+    bool					bDIInEnabled;
 };
 
 //class CMDIIn :  public CTransmitterModul<_BYTE, _BINARY, 0, 1>, public CDIIn
 class CMDIIn :  public CTransmitterModul<_BYTE, _BINARY>, public CDIIn
 {
 public:
-	//CMDIIn() : CTransmitterModul<_BYTE, _BINARY, 0, 1>(), CDIIn() {}
-	CMDIIn() : CTransmitterModul<_BYTE, _BINARY>(), CDIIn() {}
-	virtual ~CMDIIn() {}
-	void InitInternal(CParameter& Parameter);
-	void ProcessDataInternal(CParameter& Parameter);
-	virtual bool SetDestination(const string&) { return false; }
-	virtual bool GetDestination(string&) { return false; }
+    //CMDIIn() : CTransmitterModul<_BYTE, _BINARY, 0, 1>(), CDIIn() {}
+    CMDIIn() : CTransmitterModul<_BYTE, _BINARY>(), CDIIn() {}
+    virtual ~CMDIIn() {}
+    void InitInternal(CParameter& Parameter);
+    void ProcessDataInternal(CParameter& Parameter);
+    virtual bool SetDestination(const string&) { return false; }
+    virtual bool GetDestination(string&) { return false; }
 };
 
 class CUpstreamDI : public CReceiverModul<_BINARY, _BINARY>, public CDIIn
 {
 public:
-	CUpstreamDI();
-	virtual ~CUpstreamDI();
+    CUpstreamDI();
+    virtual ~CUpstreamDI();
 
-	/* CRSIMDIInInterface */
-	// inherited from CDIIn
+    /* CRSIMDIInInterface */
+    // inherited from CDIIn
 
-	/* CRCIOutInterface */
-	bool SetDestination(const string& strArgument);
-	bool GetOutEnabled() {return bMDIOutEnabled;}
-	void SetAFPktCRC(const bool bNAFPktCRC) {bUseAFCRC=bNAFPktCRC;}
-	void SetFrequency(int iNewFreqkHz);
-	void SetReceiverMode(EModulationType eNewMode);
-	void SetService(int iServiceID);
+    /* CRCIOutInterface */
+    bool SetDestination(const string& strArgument);
+    bool GetOutEnabled() {return bMDIOutEnabled;}
+    void SetAFPktCRC(const bool bNAFPktCRC) {bUseAFCRC=bNAFPktCRC;}
+    void SetFrequency(int iNewFreqkHz);
+    void SetReceiverMode(EModulationType eNewMode);
+    void SetService(int iServiceID);
 
-	bool GetDestination(string& strArgument);
+    bool GetDestination(string& strArgument);
 
-	/* CReceiverModul */
-	void InitInternal(CParameter& Parameter);
-	void ProcessDataInternal(CParameter& Parameter);
+    /* CReceiverModul */
+    void InitInternal(CParameter& Parameter);
+    void ProcessDataInternal(CParameter& Parameter);
 
 protected:
 
-	string					strDestination;
-	CRSISubscriberSocket	sink;
+    string					strDestination;
+    CRSISubscriberSocket	sink;
 
-	bool					bUseAFCRC;
+    bool					bUseAFCRC;
 
-	bool					bMDIOutEnabled;
-	bool					bNeedPft;
+    bool					bMDIOutEnabled;
+    bool					bNeedPft;
 
-	/* Tag Item Generators */
+    /* Tag Item Generators */
 
-	CTagItemGeneratorProTyRSCI TagItemGeneratorProTyRSCI; /* *ptr tag */
-	CTagItemGeneratorCfre TagItemGeneratorCfre;
-	CTagItemGeneratorCdmo TagItemGeneratorCdmo;
-	CTagItemGeneratorCser TagItemGeneratorCser;
+    CTagItemGeneratorProTyRSCI TagItemGeneratorProTyRSCI; /* *ptr tag */
+    CTagItemGeneratorCfre TagItemGeneratorCfre;
+    CTagItemGeneratorCdmo TagItemGeneratorCdmo;
+    CTagItemGeneratorCser TagItemGeneratorCser;
 
-	/* TAG Packet generator */
-	CTagPacketGenerator TagPacketGenerator;
-	CAFPacketGenerator AFPacketGenerator;
+    /* TAG Packet generator */
+    CTagPacketGenerator TagPacketGenerator;
+    CAFPacketGenerator AFPacketGenerator;
 
 };
 
 class CDownstreamDI: public CPacketSink
 {
 public:
-	CDownstreamDI();
-	virtual ~CDownstreamDI();
+    CDownstreamDI();
+    virtual ~CDownstreamDI();
 
-	void GenDIPacket();
+    void GenDIPacket();
 
-	void SendLockedFrame(CParameter& Parameter,
-						CSingleBuffer<_BINARY>& FACData,
-						CSingleBuffer<_BINARY>& SDCData,
-						vector<CSingleBuffer<_BINARY> >& vecMSCData
-	);
-	void SendLockedFrame(CParameter& Parameter,
-						CVectorEx<_BINARY>* pFACData,
-						CVectorEx<_BINARY>* pSDCData,
-						vector<CVectorEx<_BINARY>*>& vecMSCData
-	);
-	void SendLockedFrame(CParameter& Parameter);
-	void SendUnlockedFrame(CParameter& Parameter); /* called once per frame even if the Rx isn't synchronised */
-	void SendAMFrame(CParameter& Parameter, CSingleBuffer<_BINARY>& CodedAudioData);
+    void SendLockedFrame(CParameter& Parameter,
+			 CSingleBuffer<_BINARY>& FACData,
+			 CSingleBuffer<_BINARY>& SDCData,
+			 vector<CSingleBuffer<_BINARY> >& vecMSCData
+			 );
+    void SendLockedFrame(CParameter& Parameter,
+			 CVectorEx<_BINARY>* pFACData,
+			 CVectorEx<_BINARY>* pSDCData,
+			 vector<CVectorEx<_BINARY>*>& vecMSCData
+			 );
+    void SendLockedFrame(CParameter& Parameter);
+    void SendUnlockedFrame(CParameter& Parameter); /* called once per frame even if the Rx isn't synchronised */
+    void SendAMFrame(CParameter& Parameter, CSingleBuffer<_BINARY>& CodedAudioData);
 
-	void SetAFPktCRC(const bool bNAFPktCRC);
+    void SetAFPktCRC(const bool bNAFPktCRC);
 
-	bool AddSubscriber(const string& dest, const string& origin, const char profile, const int iSubsamplingFactor=1);
-	void DefineRSIPreset(const int iPresetNum, const int cPro, const int iFactor);
+    bool AddSubscriber(const string& dest, const char profile, const int iSubsamplingFactor=1);
+    void DefineRSIPreset(const int iPresetNum, const int cPro, const int iFactor);
 
-	bool SetOrigin(const string& strAddr);
-	void SetRSIRecording(CParameter& Parameter, bool bOn, char cPro, const string& type="");
-	void NewFrequency(CParameter& Parameter); /* needs to be called in case a new RSCI file needs to be started */
+    bool SetOrigin(const string& strAddr);
 
-	virtual bool GetOutEnabled() {return bMDIOutEnabled;}
-	virtual bool GetInEnabled() {return bMDIInEnabled;}
-	void GetNextPacket(CSingleBuffer<_BINARY>&	buf);
-	void SetReceiver(ReceiverInterface *pReceiver);
+    virtual bool GetOutEnabled() {return bMDIOutEnabled;}
+    virtual bool GetInEnabled() {return bMDIInEnabled;}
+    void GetNextPacket(CSingleBuffer<_BINARY>&	buf);
+    void SetReceiver(ReceiverInterface *pReceiver);
 
-	/* CPacketSink */
-	virtual void SendPacket(const vector<_BYTE>& vecbydata, uint32_t addr=0, uint16_t port=0);
-	bool SetDestination(const string& strArgument);
-	bool GetDestination(string& strArgument);
+    /* CPacketSink */
+    virtual void SendPacket(const vector<_BYTE>& vecbydata, uint32_t addr=0, uint16_t port=0);
+    bool SetDestination(const string& strArgument);
+    bool GetDestination(string& strArgument);
 
-	string GetRSIfilename(CParameter& Parameter, const char cProfile);
+    void StartRSIRecording(CParameter& Parameter, char cPro);
+    void StopRSIRecording();
+    void NewFrequency(CParameter& Parameter); /* needs to be called in case a new RSCI file needs to be started */
+    string GetRSIfilename(CParameter& Parameter, const char cProfile);
+    void SetRSIRecordType(string s) { strRecordType = s; }
 
 protected:
 
-	void ResetTags();
+    void ResetTags();
 
-	uint32_t				iLogFraCnt;
-	ReceiverInterface*	pDrmReceiver;
+    uint32_t					iLogFraCnt;
+    ReceiverInterface*				pDrmReceiver;
 
-	bool					bMDIOutEnabled;
-	bool					bMDIInEnabled;
-	bool					bNeedPft;
+    bool					bMDIOutEnabled;
+    bool					bMDIInEnabled;
+    bool					bNeedPft;
 
-	bool					bIsRecording;
-	int							iFrequency;
-	string						strRecordType;
+    bool					bIsRecording;
+    int						iFrequency;
+    string					strRecordType;
 
 
-	/* Generators for all of the MDI and RSCI tags */
+    /* Generators for all of the MDI and RSCI tags */
 
-	CTagItemGeneratorProTyMDI TagItemGeneratorProTyMDI; /* *ptr tag */
-	CTagItemGeneratorProTyRSCI TagItemGeneratorProTyRSCI; /* *ptr tag */
-	CTagItemGeneratorLoFrCnt TagItemGeneratorLoFrCnt ; /* dlfc tag */
-	CTagItemGeneratorFAC TagItemGeneratorFAC; /* fac_ tag */
-	CTagItemGeneratorSDC TagItemGeneratorSDC; /* sdc_ tag */
-	CTagItemGeneratorSDC TagItemGeneratorSDCEmpty; /* empty sdc_ tag for use in non-SDC frames */
-	CTagItemGeneratorSDCChanInf TagItemGeneratorSDCChanInf; /* sdci tag */
-	CTagItemGeneratorRobMod TagItemGeneratorRobMod; /* robm tag */
-	CTagItemGeneratorRINF TagItemGeneratorRINF; /* info tag */
-	CTagItemGeneratorRWMF TagItemGeneratorRWMF; /* RWMF tag */
-	CTagItemGeneratorRWMM TagItemGeneratorRWMM; /* RWMM tag */
-	CTagItemGeneratorRMER TagItemGeneratorRMER; /* RMER tag */
-	CTagItemGeneratorRDOP TagItemGeneratorRDOP; /* RDOP tag */
-	CTagItemGeneratorRDEL TagItemGeneratorRDEL; /* RDEL tag */
-	CTagItemGeneratorRAFS TagItemGeneratorRAFS; /* RAFS tag */
-	CTagItemGeneratorRINT TagItemGeneratorRINT; /* RINT tag */
-	CTagItemGeneratorRNIP TagItemGeneratorRNIP; /* RNIP tag */
-	CTagItemGeneratorSignalStrength TagItemGeneratorSignalStrength; /* rdbv tag */
-	CTagItemGeneratorReceiverStatus TagItemGeneratorReceiverStatus; /* rsta tag */
+    CTagItemGeneratorProTyMDI TagItemGeneratorProTyMDI; /* *ptr tag */
+    CTagItemGeneratorProTyRSCI TagItemGeneratorProTyRSCI; /* *ptr tag */
+    CTagItemGeneratorLoFrCnt TagItemGeneratorLoFrCnt ; /* dlfc tag */
+    CTagItemGeneratorFAC TagItemGeneratorFAC; /* fac_ tag */
+    CTagItemGeneratorSDC TagItemGeneratorSDC; /* sdc_ tag */
+    CTagItemGeneratorSDC TagItemGeneratorSDCEmpty; /* empty sdc_ tag for use in non-SDC frames */
+    CTagItemGeneratorSDCChanInf TagItemGeneratorSDCChanInf; /* sdci tag */
+    CTagItemGeneratorRobMod TagItemGeneratorRobMod; /* robm tag */
+    CTagItemGeneratorRINF TagItemGeneratorRINF; /* info tag */
+    CTagItemGeneratorRWMF TagItemGeneratorRWMF; /* RWMF tag */
+    CTagItemGeneratorRWMM TagItemGeneratorRWMM; /* RWMM tag */
+    CTagItemGeneratorRMER TagItemGeneratorRMER; /* RMER tag */
+    CTagItemGeneratorRDOP TagItemGeneratorRDOP; /* RDOP tag */
+    CTagItemGeneratorRDEL TagItemGeneratorRDEL; /* RDEL tag */
+    CTagItemGeneratorRAFS TagItemGeneratorRAFS; /* RAFS tag */
+    CTagItemGeneratorRINT TagItemGeneratorRINT; /* RINT tag */
+    CTagItemGeneratorRNIP TagItemGeneratorRNIP; /* RNIP tag */
+    CTagItemGeneratorSignalStrength TagItemGeneratorSignalStrength; /* rdbv tag */
+    CTagItemGeneratorReceiverStatus TagItemGeneratorReceiverStatus; /* rsta tag */
 
-	CTagItemGeneratorProfile TagItemGeneratorProfile; /* rpro */
-	CTagItemGeneratorRxDemodMode TagItemGeneratorRxDemodMode; /* rdmo */
-	CTagItemGeneratorRxFrequency TagItemGeneratorRxFrequency; /* rfre */
-	CTagItemGeneratorRxActivated TagItemGeneratorRxActivated; /* ract */
-	CTagItemGeneratorRxBandwidth TagItemGeneratorRxBandwidth; /* rbw_ */
-	CTagItemGeneratorRxService TagItemGeneratorRxService; /* rser */
+    CTagItemGeneratorProfile TagItemGeneratorProfile; /* rpro */
+    CTagItemGeneratorRxDemodMode TagItemGeneratorRxDemodMode; /* rdmo */
+    CTagItemGeneratorRxFrequency TagItemGeneratorRxFrequency; /* rfre */
+    CTagItemGeneratorRxActivated TagItemGeneratorRxActivated; /* ract */
+    CTagItemGeneratorRxBandwidth TagItemGeneratorRxBandwidth; /* rbw_ */
+    CTagItemGeneratorRxService TagItemGeneratorRxService; /* rser */
 
-	CTagItemGeneratorGPS TagItemGeneratorGPS; /* rgps */
-	CTagItemGeneratorPowerSpectralDensity TagItemGeneratorPowerSpectralDensity; /* rpsd */
-	CTagItemGeneratorPowerImpulseResponse TagItemGeneratorPowerImpulseResponse; /* rpir */
-	CTagItemGeneratorPilots TagItemGeneratorPilots; /* rpil */
+    CTagItemGeneratorGPS TagItemGeneratorGPS; /* rgps */
+    CTagItemGeneratorPowerSpectralDensity TagItemGeneratorPowerSpectralDensity; /* rpsd */
+    CTagItemGeneratorPowerImpulseResponse TagItemGeneratorPowerImpulseResponse; /* rpir */
+    CTagItemGeneratorPilots TagItemGeneratorPilots; /* rpil */
 
-	CVector<CTagItemGeneratorStr>	vecTagItemGeneratorStr; /* strx tag */
-	CTagItemGeneratorAMAudio TagItemGeneratorAMAudio; /* rama tag */
+    CVector<CTagItemGeneratorStr>	vecTagItemGeneratorStr; /* strx tag */
+    CTagItemGeneratorAMAudio TagItemGeneratorAMAudio; /* rama tag */
 
-	/* Mandatory tags but not implemented yet */
-	CVector<CTagItemGeneratorRBP>	vecTagItemGeneratorRBP;
+    /* Mandatory tags but not implemented yet */
+    CVector<CTagItemGeneratorRBP>	vecTagItemGeneratorRBP;
 
-	/* TAG Packet generator */
-	CTagPacketGeneratorWithProfiles TagPacketGenerator;
+    /* TAG Packet generator */
+    CTagPacketGeneratorWithProfiles TagPacketGenerator;
 
-	vector< CRSISubscriber *>		RSISubscribers;
-	CRSISubscriberFile*				pRSISubscriberFile;
-	CPacketSource*					source;
-	CPacketSink*					sink;
-	CSingleBuffer<_BINARY>			MDIInBuffer;
+    vector< CRSISubscriber *>		RSISubscribers;
+    CRSISubscriberFile*				pRSISubscriberFile;
+    CPacketSource*					source;
+    CPacketSink*					sink;
+    CSingleBuffer<_BINARY>			MDIInBuffer;
 
 };
 
@@ -247,14 +249,14 @@ class CMDIOut:
 	public CDownstreamDI
 {
 public:
-	//CMDIOut() : CTransmitterModul<_BINARY, _BINARY, 2+MAX_NUM_STREAMS,1>(),
-	CMDIOut() : CTransmitterModul<_BINARY, _BINARY>(),
-		CDownstreamDI(), iFrameCount(0) {}
-	virtual ~CMDIOut() {}
-	void InitInternal(CParameter& Parameter);
-	void ProcessDataInternal(CParameter& Parameter);
+    //CMDIOut() : CTransmitterModul<_BINARY, _BINARY, 2+MAX_NUM_STREAMS,1>(),
+    CMDIOut() : CTransmitterModul<_BINARY, _BINARY>(),
+    CDownstreamDI(), iFrameCount(0) {}
+    virtual ~CMDIOut() {}
+    void InitInternal(CParameter& Parameter);
+    void ProcessDataInternal(CParameter& Parameter);
 protected:
-	int iFrameCount;
+    int iFrameCount;
 };
 
 #endif // !defined(MDI_H__3B0346264660_CA63_3452345DGERH31912__INCLUDED_)

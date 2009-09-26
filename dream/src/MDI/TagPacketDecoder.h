@@ -31,7 +31,7 @@
 
 #include "../GlobalDefinitions.h"
 #include "MDIDefinitions.h"
-#include "../util/Vector.h"
+#include <vector>
 #include "PacketInOut.h"
 
 class CTagItemDecoder;
@@ -42,11 +42,11 @@ public:
 	CTagPacketDecoder();
 	enum Error { E_OK, E_CRC, E_VERSION, E_LENGTH, E_SYNC, E_PROTO };
 	// This should be in its own class
-	virtual Error DecodeAFPacket(CVectorEx<_BINARY>& vecbiAFPkt); 
+	virtual Error DecodeAFPacket(CVectorEx<_BINARY>& vecbiAFPkt);
 
 	// Decode all the tags in the tag packet. To do things before or after the decoding,
 	// override this and call the base class function to do the decoding
-	virtual void DecodeTagPacket(CVectorEx<_BINARY>& vecbiPkt, int iPayloadLen); 
+	virtual void DecodeTagPacket(CVectorEx<_BINARY>& vecbiPkt, int iPayloadLen);
 	virtual ~CTagPacketDecoder() {}
 
 protected:
@@ -57,7 +57,7 @@ protected:
 
 	void InitTagItemDecoders(void);
 private:
-	CVector<CTagItemDecoder *> vecpTagItemDecoders;
+	vector<CTagItemDecoder *> vecpTagItemDecoders;
 };
 
 #endif

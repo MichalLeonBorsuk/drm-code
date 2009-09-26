@@ -131,7 +131,7 @@ void StationsDlg::showEvent(QShowEvent*)
 {
     /* recover window size and position */
     CWinGeom s;
-    Settings.Get("Stations Dialog", s);
+    Settings.Get("GUI Stations", s);
     const QRect WinGeom(s.iXPos, s.iYPos, s.iWSize, s.iHSize);
     if (WinGeom.isValid() && !WinGeom.isEmpty() && !WinGeom.isNull())
 	setGeometry(WinGeom);
@@ -139,7 +139,7 @@ void StationsDlg::showEvent(QShowEvent*)
     QwtCounterFrequency->setValue(Receiver.GetFrequency());
 
     /* Retrieve the setting saved into the .ini file */
-    int seconds = Settings.Get("Stations Dialog", "preview", NUM_SECONDS_PREV_5MIN);
+    int seconds = Settings.Get("GUI Stations", "preview", NUM_SECONDS_PREV_5MIN);
     int index = comboBoxPreview->findData(seconds);
     if(index == -1)
     {
@@ -184,7 +184,6 @@ void StationsDlg::hideEvent(QHideEvent*)
     /* Deactivate real-time timers */
     TimerClock.stop();
     TimerSMeter.stop();
-    EnableSMeter(false);
 
     /* Set window geometry data in DRMReceiver module */
     QRect WinGeom = geometry();
@@ -194,25 +193,25 @@ void StationsDlg::hideEvent(QHideEvent*)
     c.iYPos = WinGeom.y();
     c.iHSize = WinGeom.height();
     c.iWSize = WinGeom.width();
-    Settings.Put("Stations Dialog", c);
+    Settings.Put("GUI Stations", c);
 
     /* Store preview settings */
-    Settings.Put("Stations Dialog", "preview", Schedule.GetSecondsPreview());
+    Settings.Put("GUI Stations", "preview", Schedule.GetSecondsPreview());
 #if 0 //TODO get from view
     /* Store sort settings */
     switch (eModulation)
     {
     case DRM:
-	    Settings.Put("Stations Dialog", "sortcolumndrm", iCurrentSortColumn);
-	    Settings.Put("Stations Dialog", "sortascendingdrm", bCurrentSortAscending);
+	    Settings.Put("GUI Stations", "sortcolumndrm", iCurrentSortColumn);
+	    Settings.Put("GUI Stations", "sortascendingdrm", bCurrentSortAscending);
 	    break;
 
     case NONE: // not really likely
     break;
 
     default:
-	    Settings.Put("Stations Dialog", "sortcolumnanalog", iCurrentSortColumn);
-	    Settings.Put("Stations Dialog", "sortascendinganalog", bCurrentSortAscending);
+	    Settings.Put("GUI Stations", "sortcolumnanalog", iCurrentSortColumn);
+	    Settings.Put("GUI Stations", "sortascendinganalog", bCurrentSortAscending);
 	    break;
     }
 #endif
@@ -441,44 +440,6 @@ void StationsDlg::OnItemClicked(const QModelIndex& item)
 	   Therefore, here no call to "SetFrequency()" is needed.*/
 	QModelIndex selection = item.sibling(item.row(), 2);
 	QwtCounterFrequency->setValue(selection.data().toInt());
-}
-
-void StationsDlg::OnTimerSMeter()
-{
-	CRig* rig = Receiver.GetCurrentRig();
-	if(rig)
-	{
-		EnableSMeter(rig->GetEnableSMeter());
-	}
-}
-
-void StationsDlg::EnableSMeter(const bool bStatus)
-{
-	/* Need both, GUI "enabled" and signal strength valid before s-meter is used */
-	_REAL rSigStr;
-	Receiver.GetParameters()->Lock();
-	bool bValid = Receiver.GetParameters()->Measurements.SigStrstat.getCurrent(rSigStr);
-	Receiver.GetParameters()->Unlock();
-
-	if((bStatus == true) && (bValid == true))
-	{
-	    /* Init progress bar for input s-meter */
-	    ProgrSigStrength->setValue(rSigStr);
-	    ProgrSigStrength->setEnabled(true);
-	    ProgrSigStrength->show();
-	    TextLabelSMeter->setEnabled(true);
-	    TextLabelSMeter->show();
-	}
-	else
-	{
-	    /* Set s-meter control in "disabled" status */
-	    ProgrSigStrength->setAlarmEnabled(false);
-	    ProgrSigStrength->setValue(0.0);
-	    ProgrSigStrength->setEnabled(false);
-	    ProgrSigStrength->hide();
-	    TextLabelSMeter->setEnabled(false);
-	    TextLabelSMeter->hide();
-	}
 }
 
 void StationsDlg::AddWhatsThisHelp()
