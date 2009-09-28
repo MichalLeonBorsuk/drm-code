@@ -132,6 +132,7 @@ onBoardDemod(false), inChanSel(CS_MIX_CHAN)
     DataDecoder.setApplication(CDataParam::AD_DAB_SPEC_APP, AT_MOTBROADCASTWEBSITE, new CMOTDABDecFactory());
     DataDecoder.setApplication(CDataParam::AD_DAB_SPEC_APP, AT_MOTEPG, new EPGDecoderFactory());
     DataDecoder.setApplication(CDataParam::AD_DAB_SPEC_APP, AT_JOURNALINE, new JournalineFactory());
+    LoadSettings();
 }
 
 CDRMReceiver::~CDRMReceiver()
@@ -254,6 +255,10 @@ CDRMReceiver::Run()
     EAcqStat eAcquiState = Parameters.eAcquiState;
     EModulationType eModulation = Parameters.eModulation;
     ERxEvent RxEvent = Parameters.RxEvent;
+    if(eModulation == NONE)
+    {
+        Parameters.eModulation = eModulation = DRM; // right place for default ??? TODO !!!
+    }
     Parameters.RxEvent = None;
     Parameters.Unlock();
 
@@ -302,7 +307,7 @@ CDRMReceiver::Run()
 	   signal. If we are correct with our assumptions, the receiver does not
 	   need to reinitialize */
 	Parameters.Lock();
-	Parameters.Channel.eRobustness = RM_ROBUSTNESS_MODE_A;
+        Parameters.Channel.eRobustness = RM_ROBUSTNESS_MODE_A;
 	Parameters.Channel.eSpectrumOccupancy = SO_3;
 
 	/* Set initial MLC parameters */
