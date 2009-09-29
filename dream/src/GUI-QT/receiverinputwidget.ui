@@ -6,20 +6,20 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>457</width>
-    <height>343</height>
+    <width>378</width>
+    <height>323</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QGridLayout" name="gridLayout_3">
+  <layout class="QGridLayout" name="gridLayout_7">
    <item row="0" column="0">
     <widget class="QGroupBox" name="groupBox">
      <property name="title">
       <string>Input (Status)</string>
      </property>
-     <layout class="QGridLayout" name="gridLayout_2">
+     <layout class="QGridLayout" name="gridLayout_6">
       <item row="0" column="0">
        <layout class="QHBoxLayout" name="horizontalLayout_8">
         <item>
@@ -37,7 +37,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QRadioButton" name="radioButtonSoundCard">
+         <widget class="QRadioButton" name="radioButtonCard">
           <property name="text">
            <string>Sound Card</string>
           </property>
@@ -49,12 +49,12 @@
        </layout>
       </item>
       <item row="1" column="0">
-       <widget class="QStackedWidget" name="stackedWidgetStatus">
+       <widget class="QStackedWidget" name="stackedWidgetCardFileNet">
         <property name="currentIndex">
          <number>0</number>
         </property>
-        <widget class="QWidget" name="pageSound">
-         <layout class="QGridLayout" name="gridLayout_9">
+        <widget class="QWidget" name="pageCard">
+         <layout class="QGridLayout" name="gridLayout_2">
           <item row="0" column="0">
            <layout class="QHBoxLayout" name="horizontalLayout_6">
             <item>
@@ -65,134 +65,63 @@
              </widget>
             </item>
             <item>
-             <widget class="QComboBox" name="comboBoxSoundCard"/>
+             <widget class="QComboBox" name="comboBoxCard"/>
             </item>
            </layout>
-          </item>
-          <item row="1" column="0">
-           <layout class="QHBoxLayout" name="horizontalLayout_5">
-            <item>
-             <widget class="QRadioButton" name="radioButtonRealCard">
-              <property name="text">
-               <string>Real</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QRadioButton" name="radioButtonIQCard">
-              <property name="text">
-               <string>I/Q</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QCheckBox" name="CheckBoxFlipSpecCard">
-              <property name="text">
-               <string>&amp;Flip Input Spectrum</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-          <item row="2" column="0">
-           <layout class="QHBoxLayout" name="horizontalLayout_7"/>
-          </item>
-          <item row="3" column="0">
-           <widget class="QStackedWidget" name="stackedWidgetCard">
-            <property name="currentIndex">
-             <number>0</number>
-            </property>
-            <widget class="QWidget" name="pagereal">
-             <layout class="QGridLayout" name="gridLayout_7">
-              <item row="0" column="0">
-               <widget class="QRadioButton" name="radioButtonLeftCard">
-                <property name="text">
-                 <string>Left channel</string>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="1">
-               <widget class="QRadioButton" name="radioButtonRightCard">
-                <property name="text">
-                 <string>Right channel</string>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="2">
-               <widget class="QRadioButton" name="radioButtonMixCard">
-                <property name="text">
-                 <string>Mix</string>
-                </property>
-                <property name="checked">
-                 <bool>true</bool>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </widget>
-            <widget class="QWidget" name="pageiq">
-             <layout class="QGridLayout" name="gridLayout_8">
-              <item row="0" column="0">
-               <widget class="QRadioButton" name="radioButtonIQPosCard">
-                <property name="text">
-                 <string>Positive</string>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="1">
-               <widget class="QRadioButton" name="radioButtonIQNegCard">
-                <property name="text">
-                 <string>Negative</string>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="2">
-               <widget class="QCheckBox" name="checkBoxzifCard">
-                <property name="text">
-                 <string>Zero I/F</string>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </widget>
-           </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="QCheckBox" name="checkBoxBPFSound">
-            <property name="text">
-             <string>Band Pass Filter</string>
-            </property>
-           </widget>
           </item>
          </layout>
         </widget>
         <widget class="QWidget" name="pageFile">
-         <layout class="QGridLayout" name="gridLayout_6">
+         <widget class="QPushButton" name="pushButtonChooseFile">
+          <property name="geometry">
+           <rect>
+            <x>254</x>
+            <y>9</y>
+            <width>75</width>
+            <height>24</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Choose</string>
+          </property>
+         </widget>
+         <widget class="QWidget" name="layoutWidget">
+          <property name="geometry">
+           <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>100</width>
+            <height>30</height>
+           </rect>
+          </property>
+          <layout class="QHBoxLayout" name="horizontalLayout_3">
+           <item>
+            <widget class="QLabel" name="label_5">
+             <property name="text">
+              <string>File</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="lineEditFile"/>
+           </item>
+          </layout>
+         </widget>
+        </widget>
+        <widget class="QWidget" name="pageRSCIStatus"/>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QStackedWidget" name="stackedWidgetNetAudio">
+        <property name="currentIndex">
+         <number>0</number>
+        </property>
+        <widget class="QWidget" name="pageAudio">
+         <layout class="QGridLayout" name="gridLayout_5">
           <item row="0" column="0">
-           <layout class="QHBoxLayout" name="horizontalLayout_3">
+           <layout class="QHBoxLayout" name="horizontalLayout_5">
             <item>
-             <widget class="QLabel" name="label_5">
-              <property name="text">
-               <string>File</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLineEdit" name="lineEditFile"/>
-            </item>
-           </layout>
-          </item>
-          <item row="1" column="0">
-           <layout class="QHBoxLayout" name="horizontalLayout_2">
-            <item>
-             <widget class="QRadioButton" name="radioButtonIQFile">
-              <property name="text">
-               <string>I/Q</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QRadioButton" name="radioButtonRealFile">
+             <widget class="QRadioButton" name="radioButtonReal">
               <property name="text">
                <string>Real</string>
               </property>
@@ -202,7 +131,14 @@
              </widget>
             </item>
             <item>
-             <widget class="QCheckBox" name="CheckBoxFlipSpecFile">
+             <widget class="QRadioButton" name="radioButtonIQ">
+              <property name="text">
+               <string>I/Q</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QCheckBox" name="CheckBoxFlipSpec">
               <property name="text">
                <string>&amp;Flip Input Spectrum</string>
               </property>
@@ -210,43 +146,60 @@
             </item>
            </layout>
           </item>
-          <item row="2" column="0">
-           <widget class="QStackedWidget" name="stackedWidgetFile">
+          <item row="0" column="1">
+           <widget class="QCheckBox" name="checkBoxBPF">
+            <property name="text">
+             <string>Band Pass Filter</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0" colspan="2">
+           <widget class="QStackedWidget" name="stackedWidgetRealIQ">
             <property name="currentIndex">
              <number>0</number>
             </property>
-            <widget class="QWidget" name="pagerealFile">
-             <layout class="QGridLayout" name="gridLayout_10">
-              <item row="0" column="0">
-               <widget class="QRadioButton" name="radioButtonLeftFile">
-                <property name="text">
-                 <string>Left channel</string>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="1">
-               <widget class="QRadioButton" name="radioButtonRightFile">
-                <property name="text">
-                 <string>Right channel</string>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="2">
-               <widget class="QRadioButton" name="radioButtonMixFile">
-                <property name="text">
-                 <string>Mix</string>
-                </property>
-                <property name="checked">
-                 <bool>true</bool>
-                </property>
-               </widget>
-              </item>
-             </layout>
+            <widget class="QWidget" name="pageReal">
+             <widget class="QWidget" name="layoutWidget">
+              <property name="geometry">
+               <rect>
+                <x>9</x>
+                <y>9</y>
+                <width>223</width>
+                <height>21</height>
+               </rect>
+              </property>
+              <layout class="QHBoxLayout" name="horizontalLayout">
+               <item>
+                <widget class="QRadioButton" name="radioButtonLeft">
+                 <property name="text">
+                  <string>Left channel</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QRadioButton" name="radioButtonRight">
+                 <property name="text">
+                  <string>Right channel</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QRadioButton" name="radioButtonMix">
+                 <property name="text">
+                  <string>Mix</string>
+                 </property>
+                 <property name="checked">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
             </widget>
-            <widget class="QWidget" name="pageiqFile">
-             <layout class="QGridLayout" name="gridLayout_11">
+            <widget class="QWidget" name="pageIQ">
+             <layout class="QGridLayout" name="gridLayout_8">
               <item row="0" column="0">
-               <widget class="QRadioButton" name="radioButtonIQPosFile">
+               <widget class="QRadioButton" name="radioButtonIQPos">
                 <property name="text">
                  <string>Positive</string>
                 </property>
@@ -256,14 +209,14 @@
                </widget>
               </item>
               <item row="0" column="1">
-               <widget class="QRadioButton" name="radioButtonIQNegFile">
+               <widget class="QRadioButton" name="radioButtonIQNeg">
                 <property name="text">
                  <string>Negative</string>
                 </property>
                </widget>
               </item>
               <item row="0" column="2">
-               <widget class="QCheckBox" name="checkBoxzifFile">
+               <widget class="QCheckBox" name="checkBoxZIF">
                 <property name="text">
                  <string>Zero I/F</string>
                 </property>
@@ -273,28 +226,39 @@
             </widget>
            </widget>
           </item>
-          <item row="1" column="1">
-           <widget class="QCheckBox" name="checkBoxBPFFile">
-            <property name="text">
-             <string>Band Pass Filter</string>
-            </property>
-           </widget>
-          </item>
          </layout>
         </widget>
-        <widget class="QWidget" name="pageRSCIStatus">
-         <layout class="QGridLayout" name="gridLayout_5">
+        <widget class="QWidget" name="pageNet">
+         <layout class="QGridLayout" name="gridLayout_3">
           <item row="0" column="0">
-           <widget class="QRadioButton" name="radioButton">
-            <property name="text">
-             <string>UDP</string>
-            </property>
-            <property name="checked">
-             <bool>true</bool>
-            </property>
-           </widget>
+           <layout class="QVBoxLayout" name="verticalLayout">
+            <item>
+             <widget class="QRadioButton" name="radioButtonUDP">
+              <property name="text">
+               <string>UDP</string>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QRadioButton" name="radioButtonTCP">
+              <property name="text">
+               <string>TCP</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QRadioButton" name="radioButtonHTTP">
+              <property name="text">
+               <string>HTTP</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </item>
-          <item row="0" column="1" rowspan="2">
+          <item row="0" column="1">
            <layout class="QGridLayout" name="gridLayout_4">
             <item row="0" column="0">
              <widget class="QLabel" name="label_7">
@@ -317,20 +281,6 @@
              <widget class="QLineEdit" name="lineEditStatusPort"/>
             </item>
            </layout>
-          </item>
-          <item row="1" column="0">
-           <widget class="QRadioButton" name="radioButton_2">
-            <property name="text">
-             <string>TCP</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="0">
-           <widget class="QRadioButton" name="radioButton_3">
-            <property name="text">
-             <string>HTTP</string>
-            </property>
-           </widget>
           </item>
          </layout>
         </widget>
@@ -372,29 +322,18 @@
          <number>0</number>
         </property>
         <widget class="QWidget" name="pageHamlib">
-         <widget class="QLabel" name="label">
-          <property name="geometry">
-           <rect>
-            <x>11</x>
-            <y>31</y>
-            <width>16</width>
-            <height>16</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>Rig</string>
-          </property>
-         </widget>
-         <widget class="QComboBox" name="comboBoxRig">
-          <property name="geometry">
-           <rect>
-            <x>32</x>
-            <y>31</y>
-            <width>361</width>
-            <height>20</height>
-           </rect>
-          </property>
-         </widget>
+         <layout class="QGridLayout" name="gridLayout_9">
+          <item row="0" column="0">
+           <widget class="QLabel" name="label">
+            <property name="text">
+             <string>Rig</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QComboBox" name="comboBoxRig"/>
+          </item>
+         </layout>
         </widget>
         <widget class="QWidget" name="pageRSCIControl">
          <widget class="QLabel" name="label_2">
@@ -451,6 +390,34 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>radioButtonRSCI</tabstop>
+  <tabstop>radioButtonFile</tabstop>
+  <tabstop>radioButtonCard</tabstop>
+  <tabstop>comboBoxCard</tabstop>
+  <tabstop>radioButtonReal</tabstop>
+  <tabstop>radioButtonIQ</tabstop>
+  <tabstop>CheckBoxFlipSpec</tabstop>
+  <tabstop>checkBoxBPF</tabstop>
+  <tabstop>radioButtonLeft</tabstop>
+  <tabstop>radioButtonRight</tabstop>
+  <tabstop>radioButtonMix</tabstop>
+  <tabstop>radioButtonIQPos</tabstop>
+  <tabstop>radioButtonIQNeg</tabstop>
+  <tabstop>checkBoxZIF</tabstop>
+  <tabstop>lineEditFile</tabstop>
+  <tabstop>pushButtonChooseFile</tabstop>
+  <tabstop>radioButtonUDP</tabstop>
+  <tabstop>radioButtonTCP</tabstop>
+  <tabstop>radioButtonHTTP</tabstop>
+  <tabstop>lineEditStatusAddress</tabstop>
+  <tabstop>lineEditStatusPort</tabstop>
+  <tabstop>radioButtonRSCIControl</tabstop>
+  <tabstop>radioButtonHamlib</tabstop>
+  <tabstop>comboBoxRig</tabstop>
+  <tabstop>lineEditControlAddress</tabstop>
+  <tabstop>lineEditControlPort</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

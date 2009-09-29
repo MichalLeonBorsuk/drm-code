@@ -20,7 +20,7 @@
    <item row="0" column="0">
     <widget class="QTabWidget" name="TabWidget">
      <property name="currentIndex">
-      <number>1</number>
+      <number>3</number>
      </property>
      <widget class="QWidget" name="Rig">
       <attribute name="title">
@@ -578,16 +578,6 @@
             </property>
            </widget>
           </item>
-          <item row="0" column="1">
-           <widget class="QLineEdit" name="lineEditIQFile"/>
-          </item>
-          <item row="0" column="2">
-           <widget class="QPushButton" name="pushButtonChooseIQFile">
-            <property name="text">
-             <string>Choose</string>
-            </property>
-           </widget>
-          </item>
          </layout>
         </widget>
        </item>
@@ -596,39 +586,72 @@
          <property name="title">
           <string>Audio</string>
          </property>
-         <layout class="QGridLayout" name="gridLayout_16">
-          <item row="0" column="0" colspan="2">
-           <widget class="QCheckBox" name="CheckBoxReverb">
-            <property name="text">
-             <string>&amp;Reverberation</string>
-            </property>
-           </widget>
+         <layout class="QGridLayout" name="gridLayout_11">
+          <item row="0" column="0">
+           <layout class="QHBoxLayout" name="horizontalLayout_9">
+            <item>
+             <widget class="QCheckBox" name="CheckBoxReverb">
+              <property name="text">
+               <string>&amp;Reverberation</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QCheckBox" name="CheckBoxMuteAudio">
+              <property name="text">
+               <string>Mute</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </item>
           <item row="1" column="0">
-           <widget class="QCheckBox" name="CheckBoxMuteAudio">
-            <property name="text">
-             <string>Mute</string>
-            </property>
-           </widget>
+           <layout class="QHBoxLayout" name="horizontalLayout_6">
+            <item>
+             <widget class="QRadioButton" name="radioButtonLeft">
+              <property name="text">
+               <string>Left</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QRadioButton" name="radioButtonMix">
+              <property name="text">
+               <string>Right</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QRadioButton" name="radioButtonRight">
+              <property name="text">
+               <string>Mix</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </item>
           <item row="2" column="0">
-           <widget class="QCheckBox" name="CheckBoxRecordAudio">
-            <property name="text">
-             <string>Record to File</string>
-            </property>
-           </widget>
+           <layout class="QHBoxLayout" name="horizontalLayout_10">
+            <item>
+             <widget class="QCheckBox" name="CheckBoxRecordAudio">
+              <property name="text">
+               <string>Record to File</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="lineEditAudioFile"/>
+            </item>
+            <item>
+             <widget class="QPushButton" name="pushButtonChooseAudioFile">
+              <property name="text">
+               <string>Choose</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </item>
-          <item row="2" column="1">
-           <widget class="QLineEdit" name="lineEditAudioFile"/>
-          </item>
-          <item row="2" column="2">
-           <widget class="QPushButton" name="pushButtonChooseAudioFile">
-            <property name="text">
-             <string>Choose</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="0" colspan="3">
+          <item row="3" column="0">
            <widget class="QTreeView" name="treeViewAudio">
             <property name="headerHidden">
              <bool>true</bool>

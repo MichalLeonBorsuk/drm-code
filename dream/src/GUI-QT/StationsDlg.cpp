@@ -98,7 +98,7 @@ StationsDlg::StationsDlg(ReceiverInterface& NDRMR, CSettings& NSettings, bool dr
     connect(checkBoxShowActive, SIGNAL(stateChanged(int)), this, SLOT(OnShowActive(int)));
 
     connect(&TimerClock, SIGNAL(timeout()), this, SLOT(OnTimerClock()));
-    connect(&TimerSMeter, SIGNAL(timeout()), this, SLOT(OnTimerSMeter()));
+    //connect(&TimerSMeter, SIGNAL(timeout()), this, SLOT(OnTimerSMeter()));
     connect(&TimerEditFrequency, SIGNAL(timeout()), this, SLOT(OnTimerEditFrequency()));
     connect(&TimerMonitorFrequency, SIGNAL(timeout()), this, SLOT(OnTimerMonitorFrequency()));
     connect(&TimerTuning, SIGNAL(timeout()), this, SLOT(OnTimerTuning()));

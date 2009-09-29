@@ -255,10 +255,12 @@ CDRMReceiver::Run()
     EAcqStat eAcquiState = Parameters.eAcquiState;
     EModulationType eModulation = Parameters.eModulation;
     ERxEvent RxEvent = Parameters.RxEvent;
+    /*
     if(eModulation == NONE)
     {
-        Parameters.eModulation = eModulation = DRM; // right place for default ??? TODO !!!
+	Parameters.eModulation = eModulation = DRM; // right place for default ??? TODO !!!
     }
+    */
     Parameters.RxEvent = None;
     Parameters.Unlock();
 
@@ -272,6 +274,7 @@ CDRMReceiver::Run()
 	Parameters.Lock();
 	Parameters.Channel = Parameters.NextConfig.Channel;
 	Parameters.Unlock();
+	LoadSettings();
 	initNeeded = true;
 	break;
     case ServiceReconfiguration:
@@ -298,16 +301,12 @@ CDRMReceiver::Run()
     case Tune: // TODO - is this right ? Is this actually used ?
 	initNeeded = true;
 	break;
-    case ReLoadSettings: // TODO - Test this
-	//LoadSettings();
-	//initNeeded = true;
-	break;
     case Reinitialise: // TODO - Test this
 	/* Define with which parameters the receiver should try to decode the
 	   signal. If we are correct with our assumptions, the receiver does not
 	   need to reinitialize */
 	Parameters.Lock();
-        Parameters.Channel.eRobustness = RM_ROBUSTNESS_MODE_A;
+	Parameters.Channel.eRobustness = RM_ROBUSTNESS_MODE_A;
 	Parameters.Channel.eSpectrumOccupancy = SO_3;
 
 	/* Set initial MLC parameters */
@@ -340,8 +339,11 @@ CDRMReceiver::Run()
     {
 	    switch(eModulation)
 	    {
-	    case AM: case  USB: case  LSB: case  CW: case  NBFM: case  WBFM:
-
+	    case  USB: case  LSB: case  CW: case  NBFM: case  WBFM:
+		    /* set stream */
+		    iAudioStreamID = 0;
+		    break;
+	    case AM:
 		    /* Tell the SDC decoder that it's AMSS to decode (no AFS index) */
 		    UtilizeSDCData.SetSDCType(SDC_AMSS);
 		    /* set stream */
@@ -1132,11 +1134,14 @@ CDRMReceiver::saveSDCtoFile()
 void
 CDRMReceiver::LoadSettings()
 {
+cerr << "LoadSettings" << endl;
     vector<string> vs;
     int dev;
-    EModulationType modn = EModulationType(settings.Get("Receiver", "modulation", int(NONE)));
+
     string section = "Input-";
     int deffilterbw = 10000;
+
+    EModulationType modn = EModulationType(settings.Get("Receiver", "modulation", int(DRM)));
     switch(modn)
     {
 	case DRM:
@@ -1155,6 +1160,29 @@ CDRMReceiver::LoadSettings()
 	case NONE:
 	    section += "None"; // shouldn't happen
 	    break;
+    }
+
+    // Input (Status)
+    string str = settings.Get("command", "rsiin", string(""));
+    if(str!="")
+    {
+	size_t p = str.rfind('.');
+	if (p == string::npos)
+	{
+	    settings.Put(section, "rsiin", str);
+	    settings.Put(section, "input", string("net"));
+	}
+	else
+	{
+	    settings.Put(section, "file", str);
+	    settings.Put(section, "input", string("file"));
+	}
+    }
+    str = settings.Get("command", "fileio", string(""));
+    if(str!="")
+    {
+	settings.Put(section, "file", str);
+	settings.Put(section, "input", string("file"));
     }
 
     switch(modn)
@@ -1210,12 +1238,18 @@ CDRMReceiver::LoadSettings()
     SetTiSyncTracType(ETypeTiSyncTrac(settings.Get("Input-DRM", "tracking", 0)));
 
     // Input / Status
+    int n = settings.Get("command", "inchansel", -1);
+    if(n != -1)
+	settings.Put(section, "channels", n);
+    n = settings.Get("command", "flipspectrum", -1);
+    if(n != -1)
+	settings.Put(section, "flipspectrum", n);
 
     // input can be from RSCI or sound card or file
-    string file = settings.Get(section, "file", string(""));
-    if(file == "")
+    string inp = settings.Get(section, "input", string("card"));
+    cerr << section << ":" << inp << endl;
+    if(inp == "RSCI")
     {
-	/* upstream RSCI */
 	string str = settings.Get(section, "rsiin");
 	if(str != "")
 	{
@@ -1225,34 +1259,40 @@ CDRMReceiver::LoadSettings()
 
 	    Parameters.Measurements.bETSIPSD = true;
 	}
-	else
-	{
-	    /* Sound In device */
-	    dev = settings.Get(section, "soundcard", 0);
-	    pSoundInInterface->Enumerate(vs);
-	    if(vs.size()>0)
-	    {
-		if(dev>=int(vs.size()))
-		dev = vs.size()-1;
-		pSoundInInterface->SetDev(dev);
-	    }
-	    vs.clear();
-
-	    int riq = settings.Get(section, "mode", 0);
-	    int channels = settings.Get(section, "channels", 0);
-	    int sign = settings.Get(section, "sign", 0);
-	    int flip = settings.Get(section, "flipspectrum", 0);
-	    // TODO
-	}
     }
     else
     {
-	// file input
-	int riq = settings.Get(section, "mode", 0);
-	int channels = settings.Get(section, "channels", 0);
-	int sign = settings.Get(section, "sign", 0);
-	int flip = settings.Get(section, "flipspectrum", 0);
-	// TODO set inChanSel, read from file, ...
+	ReceiveData.SetFlippedSpectrum(settings.Get(section, "flipspectrum", false));
+	ReceiveData.SetInChanSel(EInChanSel(settings.Get(section, "channels", CS_MIX_CHAN)));
+    }
+    if(inp == "card")
+    {
+	delete pSoundInInterface;
+	pSoundInInterface = new CSoundIn;
+	dev = settings.Get(section, "soundcard", 0);
+	pSoundInInterface->Enumerate(vs);
+	if(vs.size()>0)
+	{
+	    if(dev>=int(vs.size()))
+	    dev = vs.size()-1;
+	    pSoundInInterface->SetDev(dev);
+	}
+	vs.clear();
+    }
+    if(inp == "file")
+    {
+	string file = settings.Get(section, "file", string(""));
+	cerr << file << endl;
+	if(file != "")
+	{
+	    CSoundFileIn* sfi = new CSoundFileIn();
+	    if(sfi)
+	    {
+		sfi->SetFileName(file);
+		delete pSoundInInterface;
+		pSoundInInterface = sfi;
+	    }
+	}
     }
 
     /* Receiver ------------------------------------------------------------- */
@@ -1267,43 +1307,6 @@ CDRMReceiver::LoadSettings()
 	pSoundOutInterface->SetDev(dev);
     }
 
-
-    /* Flip spectrum flag */
-    ReceiveData.SetFlippedSpectrum(settings.Get(section, "flipspectrum", false));
-
-    int n = settings.Get("command", "inchansel", -1);
-    switch (n)
-    {
-	case 0:
-		ReceiveData.SetInChanSel(CS_LEFT_CHAN);
-		break;
-
-	case 1:
-		ReceiveData.SetInChanSel(CS_RIGHT_CHAN);
-		break;
-
-	case 2:
-		ReceiveData.SetInChanSel(CS_MIX_CHAN);
-		break;
-
-	case 3:
-		ReceiveData.SetInChanSel(CS_IQ_POS);
-		break;
-
-	case 4:
-		ReceiveData.SetInChanSel(CS_IQ_NEG);
-		break;
-
-	case 5:
-		ReceiveData.SetInChanSel(CS_IQ_POS_ZERO);
-		break;
-
-	case 6:
-		ReceiveData.SetInChanSel(CS_IQ_NEG_ZERO);
-		break;
-	default:
-		break;
-    }
     n = settings.Get("Receiver", "outchansel", -1);
     switch (n)
     {
@@ -1335,7 +1338,7 @@ CDRMReceiver::LoadSettings()
     // set RSI recording format. Default is ff according to TS 102 349
     downstreamRSCI.SetRSIRecordType(settings.Get("Receiver", "rsirecordprofile", string("ff")));
 
-    string str = settings.Get("Receiver", "rsirecordprofile", string(""));
+    str = settings.Get("Receiver", "rsirecordprofile", string(""));
     if(str == "")
     {
 	downstreamRSCI.StopRSIRecording();
@@ -1346,11 +1349,27 @@ CDRMReceiver::LoadSettings()
     }
 
     // Control Interface
-    str = settings.Get("command", "rciout");
+    str = settings.Get("command", "rciout", string(""));
     if(str == "")
     {
-	// look for rig
-	string r = settings.Get(section, "rig", string(""));
+	settings.Put(section, "control", string("Hamlib"));
+	// look for rig - override Rig-0 from the command line
+	str = settings.Get("command", "hamlib-model", string(""));
+	settings.Put("Rig-0", "model", str);
+	str = settings.Get("command", "hamlib-config", string(""));
+	settings.Put("Rig-0", "config", str);
+	settings.Put(section, "rig", 0);
+    }
+    else
+    {
+	settings.Put(section, "control", string("RSCI"));
+	settings.Put(section, "rciout", str);
+    }
+
+    str = settings.Get(section, "control", string("Hamlib"));
+    if(str=="Hamlib")
+    {
+    	string r = settings.Get(section, "rig", string(""));
 	if(r!="")
 	{
 	    r = "Rig-"+r;
@@ -1426,7 +1445,7 @@ CDRMReceiver::LoadSettings()
 	    WriteIQFile.StartRecording(Parameters);
 
     /* Mute audio flag */
-    WriteData.MuteAudio(settings.Get("Receiver", "muteaudio", false));
+    WriteData.MuteAudio(settings.Get("Receiver", "mute", false));
 
     /* Output to File */
     str = settings.Get("command", "writewav");
@@ -1469,9 +1488,9 @@ CDRMReceiver::LoadSettings()
 
     FrontEndParameters.bAutoMeasurementBandwidth = settings.Get("FrontEnd", "automeasurementbandwidth", true);
 
-    FrontEndParameters.rCalFactorDRM = settings.Get("FrontEnd", "calfactordrm", 0.0);
+    FrontEndParameters.rCalFactorDRM = settings.Get("Input-DRM", "calfactor", 0.0);
 
-    FrontEndParameters.rCalFactorAM = settings.Get("FrontEnd", "calfactoram", 0.0);
+    FrontEndParameters.rCalFactorAM = settings.Get("Input-AM", "calfactor", 0.0);
 
     FrontEndParameters.rIFCentreFreq = settings.Get("FrontEnd", "ifcentrefrequency", SOUNDCRD_SAMPLE_RATE / 4);
 
@@ -1484,7 +1503,7 @@ CDRMReceiver::LoadSettings()
     // Put this right at the end so that eModulation is correct and Rx starts
     Parameters.Lock();
     Parameters.eModulation = modn;
-    Parameters.RxEvent = ChannelReconfiguration; // trigger an update!
+    //Parameters.RxEvent = ChannelReconfiguration; // trigger an update!
     Parameters.Unlock();
 }
 
@@ -1537,9 +1556,6 @@ CDRMReceiver::SaveSettings()
 	settings.Put("Receiver", "modulation", int(Parameters.eModulation));
 	Parameters.Unlock();
 
-	if(section=="Input-Ham")
-	    settings.Put(section, "modulation", modn);
-
 	/* Receiver ------------------------------------------------------------- */
 
 	/* Flip spectrum flag */
@@ -1549,7 +1565,7 @@ CDRMReceiver::SaveSettings()
 	settings.Put(section, "filter", FreqSyncAcq.GetRecFilter());
 
 	/* Mute audio flag */
-	settings.Put("Receiver", "muteaudio", WriteData.GetMuteAudio());
+	settings.Put("Receiver", "mute", WriteData.GetMuteAudio());
 
 	/* Sound In device */
 	settings.Put(section, "soundcard", pSoundOutInterface->GetDev());
@@ -1593,8 +1609,8 @@ CDRMReceiver::SaveSettings()
 	settings.Put("FrontEnd", "smeterbandwidth", int(Parameters.FrontEndParameters.rSMeterBandwidth));
 	settings.Put("FrontEnd", "defaultmeasurementbandwidth", int(Parameters.FrontEndParameters.rDefaultMeasurementBandwidth));
 	settings.Put("FrontEnd", "automeasurementbandwidth", Parameters.FrontEndParameters.bAutoMeasurementBandwidth);
-	settings.Put("FrontEnd", "calfactordrm", int(Parameters.FrontEndParameters.rCalFactorDRM));
-	settings.Put("FrontEnd", "calfactoram", int(Parameters.FrontEndParameters.rCalFactorAM));
+	settings.Put("Input-DRM", "calfactor", int(Parameters.FrontEndParameters.rCalFactorDRM));
+	settings.Put("Input-AM", "calfactor", int(Parameters.FrontEndParameters.rCalFactorAM));
 	settings.Put("FrontEnd", "ifcentrefrequency", int(Parameters.FrontEndParameters.rIFCentreFreq));
 
 	/* Serial Number */

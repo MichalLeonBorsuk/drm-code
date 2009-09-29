@@ -158,6 +158,8 @@ protected:
     void		hideEvent(QHideEvent* pEvent);
 
     bool		ValidInput(const QLineEdit* le);
+    void		loadOutputSettings();
+    void		saveOutputSettings();
     void		loadLogfileSettings();
     void		saveLogfileSettings();
     void		loadGPSSettings();
@@ -218,6 +220,7 @@ public slots:
     void 		OnButtonAddRig();
     void 		OnButtonRemoveRig();
     void		OnButtonConnectRig();
+    void		OnButtonChooseAudioFile();
     void		OnCheckBoxMuteAudio();
     void		OnCheckSaveAudioWav();
     void		OnCheckBoxReverb();

@@ -43,9 +43,13 @@ public:
     explicit ReceiverInputWidget(QWidget *parent = 0);
     virtual ~ReceiverInputWidget();
 
-    QButtonGroup *bgrsf, *bgfriq, *bgflrm, *bgfiq, *bgsriq, *bgslrm, *bgsiq, *bgrh;
+    QButtonGroup *bgrsf, *bgriq, *bglrm, *bgiq, *bgrh;
     void load(CSettings&);
     void save(CSettings&) const;
+
+public slots:
+    void onChooseFile();
+    void onBGriq(int);
 
 protected:
     virtual void changeEvent(QEvent *e);

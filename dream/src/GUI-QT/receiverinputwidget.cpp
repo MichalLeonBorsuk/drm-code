@@ -29,49 +29,40 @@
 #include "receiverinputwidget.h"
 #include "../util/Settings.h"
 #include "ReceiverSettingsDlg.h"
+#include <QFileDialog>
 
 ReceiverInputWidget::ReceiverInputWidget(QWidget *parent) :
     QWidget(parent),
     bgrsf(new QButtonGroup(this)),
-    bgfriq(new QButtonGroup(this)),
-    bgflrm(new QButtonGroup(this)),
-    bgfiq(new QButtonGroup(this)),
-    bgsriq(new QButtonGroup(this)),
-    bgslrm(new QButtonGroup(this)),
-    bgsiq(new QButtonGroup(this)),
+    bgriq(new QButtonGroup(this)),
+    bglrm(new QButtonGroup(this)),
+    bgiq(new QButtonGroup(this)),
     bgrh(new QButtonGroup(this))
 {
     setupUi(this);
-    bgrsf->addButton(radioButtonSoundCard, stackedWidgetStatus->indexOf(pageSound));
-    bgrsf->addButton(radioButtonFile, stackedWidgetStatus->indexOf(pageFile));
-    bgrsf->addButton(radioButtonRSCI, stackedWidgetStatus->indexOf(pageRSCIStatus));
-    bgfriq->addButton(radioButtonRealFile, stackedWidgetFile->indexOf(pagerealFile));
-    bgfriq->addButton(radioButtonIQFile, stackedWidgetFile->indexOf(pageiqFile));
-    bgslrm->addButton(radioButtonLeftFile, 0);
-    bgslrm->addButton(radioButtonRightFile, 1);
-    bgslrm->addButton(radioButtonMixFile, 2);
-    bgfiq->addButton(radioButtonIQPosFile, 0);
-    bgfiq->addButton(radioButtonIQNegFile, 1);
-    bgsriq->addButton(radioButtonRealCard, stackedWidgetCard->indexOf(pagereal));
-    bgsriq->addButton(radioButtonIQCard, stackedWidgetCard->indexOf(pageiq));
-    bgslrm->addButton(radioButtonLeftCard, 0);
-    bgslrm->addButton(radioButtonRightCard, 1);
-    bgslrm->addButton(radioButtonMixCard, 2);
-    bgsiq->addButton(radioButtonIQPosCard, 0);
-    bgsiq->addButton(radioButtonIQNegCard, 1);
+    bgrsf->addButton(radioButtonCard, stackedWidgetCardFileNet->indexOf(pageCard));
+    bgrsf->addButton(radioButtonFile, stackedWidgetCardFileNet->indexOf(pageFile));
+    bgrsf->addButton(radioButtonRSCI, stackedWidgetCardFileNet->indexOf(pageRSCIStatus));
+
+    bgriq->addButton(radioButtonReal, stackedWidgetRealIQ->indexOf(pageReal));
+    bgriq->addButton(radioButtonIQ, stackedWidgetRealIQ->indexOf(pageIQ));
+
+    bglrm->addButton(radioButtonLeft, CS_LEFT_CHAN);
+    bglrm->addButton(radioButtonRight, CS_RIGHT_CHAN);
+    bglrm->addButton(radioButtonMix, CS_MIX_CHAN);
+
     bgrh->addButton(radioButtonRSCIControl, 1);
     bgrh->addButton(radioButtonHamlib, 0);
 
-    connect(bgrsf, SIGNAL(buttonClicked(int)), stackedWidgetStatus, SLOT(setCurrentIndex(int)));
-    connect(bgfriq, SIGNAL(buttonClicked(int)), stackedWidgetFile, SLOT(setCurrentIndex(int)));
-    connect(bgsriq, SIGNAL(buttonClicked(int)), stackedWidgetCard, SLOT(setCurrentIndex(int)));
+    connect(bgrsf, SIGNAL(buttonClicked(int)), stackedWidgetCardFileNet, SLOT(setCurrentIndex(int)));
+    connect(bgriq, SIGNAL(buttonClicked(int)), this, SLOT(onBGriq(int)));
     connect(bgrh, SIGNAL(buttonClicked(int)), stackedWidgetControl, SLOT(setCurrentIndex(int)));
+    connect(pushButtonChooseFile, SIGNAL(clicked()), this, SLOT(onChooseFile()));
 
     const QString s = tr("<b>Flip Input Spectrum:</b> Checking this box "
 	    "will flip or invert the input spectrum. This is necessary if the "
 	    "mixer in the front-end uses the lower side band.");
-    CheckBoxFlipSpecFile->setWhatsThis(s);
-    CheckBoxFlipSpecCard->setWhatsThis(s);
+    CheckBoxFlipSpec->setWhatsThis(s);
 }
 
 ReceiverInputWidget::~ReceiverInputWidget()
@@ -94,40 +85,27 @@ void ReceiverInputWidget::load(CSettings& settings)
 {
     string sec = accessibleName().toStdString();
     // input can either be RSCI or local
-    // if RSCI it can be a mode specific RSCI spec (in the section)
-    // or a global RSCI spec in the command section
     // an RSCI spec can be either a network port or a file (.rsM, .rsA ...)
     // If local it can be a rig+soundcard or an iq file or a wav file
     // this can either be mode specific or global
     // first look for global specific settings then specific ones.
     // global settings will be turned into mode specific settings ???
 
-    // Input (Status)
-    string str = settings.Get("command", "rsiin", string(""));
-    if(str!="")
+    string inp = settings.Get(sec, "input", string("card"));
+    if(inp == "card")
+	radioButtonCard->setChecked(true);
+    if(inp == "file")
+	radioButtonFile->setChecked(true);
+    if(inp == "net")
+	radioButtonRSCI->setChecked(true);
+
+    string str = settings.Get(sec, "rsiin", string(""));
+    if(str=="")
     {
-	size_t p = str.rfind('.');
-	if (p == string::npos)
-	{
-	    settings.Put(sec, "rsiin", str);
-	}
-	else
-	{
-	    settings.Put(sec, "file", str);
-	}
+	lineEditStatusAddress->setText("");
+	lineEditStatusPort->setText("");
     }
-    str = settings.Get("command", "fileio", string(""));
-    if(str!="")
-    {
-	settings.Put(sec, "file", str);
-    }
-    int dev = settings.Get("Receiver", "snddevin", -1);
-    if(dev!=-1)
-    {
-	settings.Put(sec, "soundcard", dev);
-    }
-    str = settings.Get(sec, "rsiin", string(""));
-    if(str!="")
+    else
     {
 	string addr, port;
 	size_t p = str.find(':');
@@ -140,51 +118,70 @@ void ReceiverInputWidget::load(CSettings& settings)
 	    addr = str.substr(0, p);
 	    port = str.substr(p+1);
 	}
-	radioButtonRSCI->setChecked(true);
 	lineEditStatusAddress->setText(addr.c_str());
 	lineEditStatusPort->setText(port.c_str());
     }
-    str = settings.Get(sec, "file", string(""));
-    if(str!="")
+    lineEditFile->setText(settings.Get(sec, "file", string("")).c_str());
+    if(settings.Get(sec, "iq", true))
+	radioButtonIQ->setChecked(true);
+    else
+	radioButtonReal->setChecked(true);
+    EInChanSel inChanSel = EInChanSel(settings.Get(sec, "channels", CS_MIX_CHAN));
+    switch(inChanSel)
     {
-	radioButtonFile->setChecked(true);
-	lineEditFile->setText(str.c_str());
-	int riq = settings.Get(sec, "mode", int(0));
-	QAbstractButton* button = bgfriq->button(riq);
-	if(button) button->setChecked(true);
-	button = bgflrm->button(settings.Get(sec, "channels", int(0)));
-	if(button) button->setChecked(true);
-	button = bgfiq->button(settings.Get(sec, "sign", int(0)));
-	if(button) button->setChecked(true);
-	CheckBoxFlipSpecFile->setChecked(settings.Get(sec, "flipspectrum", int(0)));
+	case CS_LEFT_CHAN:
+	    radioButtonReal->setChecked(true);
+	    radioButtonLeft->setChecked(true);
+	    break;
+	case CS_RIGHT_CHAN:
+	    radioButtonReal->setChecked(true);
+	    radioButtonRight->setChecked(true);
+	    break;
+	case CS_MIX_CHAN:
+	    radioButtonReal->setChecked(true);
+	    radioButtonMix->setChecked(true);
+	    break;
+	case CS_IQ_POS:
+	    radioButtonIQ->setChecked(true);
+	    radioButtonIQPos->setChecked(true);
+	    checkBoxZIF->setChecked(false);
+	    break;
+	case CS_IQ_NEG:
+	    radioButtonIQ->setChecked(true);
+	    radioButtonIQNeg->setChecked(true);
+	    checkBoxZIF->setChecked(false);
+	    break;
+	case CS_IQ_POS_ZERO:
+	    radioButtonIQ->setChecked(true);
+	    radioButtonIQPos->setChecked(true);
+	    checkBoxZIF->setChecked(true);
+	    break;
+	case CS_IQ_NEG_ZERO:
+	    radioButtonIQ->setChecked(true);
+	    radioButtonIQNeg->setChecked(true);
+	    checkBoxZIF->setChecked(true);
     }
-    dev = settings.Get(sec, "soundcard", -1);
-    if(dev!=-1)
+    CheckBoxFlipSpec->setChecked(settings.Get(sec, "flipspectrum", false));
+    checkBoxBPF->setChecked(settings.Get(sec, "BPF", false));
+
+    int dev = settings.Get(sec, "soundcard", -1);
+    if(dev==-1)
     {
-	radioButtonSoundCard->setChecked(true);
-	comboBoxSoundCard->setCurrentIndex(dev);
-	int riq = settings.Get(sec, "mode", int(0));
-	stackedWidgetCard->setCurrentIndex(riq);
-	QAbstractButton* button = bgsriq->button(riq);
-	if(button) button->setChecked(true);
-	button = bgslrm->button(settings.Get(sec, "channels", stackedWidgetFile->indexOf(pagereal)));
-	if(button) button->setChecked(true);
-	button = bgsiq->button(settings.Get(sec, "sign", int(0)));
-	if(button) button->setChecked(true);
-	CheckBoxFlipSpecCard->setChecked(settings.Get(sec, "flipspectrum", int(0)));
+	comboBoxCard->clearFocus();
+    }
+    else
+    {
+	comboBoxCard->setCurrentIndex(dev);
     }
 
     // Control
-    str = settings.Get("command", "rciout", string(""));
-    if(str!="")
-    {
-	settings.Put(sec, "rciout", str);
-    }
-    dev = settings.Get("command", "hamlib-model", -1);
-    if(dev!=-1)
-    {
-	settings.Put(sec, "rig", str);
-    }
+
+    str = settings.Get(sec, "control", string("Hamlib"));
+    if(str=="Hamlib")
+	radioButtonHamlib->setChecked(true);
+    else
+	radioButtonRSCIControl->setChecked(true);
+
     str = settings.Get(sec, "rciout", string(""));
     if(str!="")
     {
@@ -220,8 +217,6 @@ void ReceiverInputWidget::load(CSettings& settings)
 	    }
 	}
     }
-    checkBoxBPFFile->setChecked(settings.Get(sec, "BPFfile", false));
-    checkBoxBPFSound->setChecked(settings.Get(sec, "BPFsound", false));
 }
 
 void ReceiverInputWidget::save(CSettings& settings) const
@@ -229,39 +224,78 @@ void ReceiverInputWidget::save(CSettings& settings) const
     string sec = accessibleName().toStdString();
     // Status
     if(radioButtonRSCI->isChecked())
-    {
-	settings.Put(sec, "rsiin_group", lineEditStatusAddress->text().toStdString());
-	settings.Put(sec, "rsiin_port", lineEditStatusPort->text().toStdString());
-	settings.Put(sec, "rciout_host", lineEditControlAddress->text().toStdString());
-	settings.Put(sec, "rciout_port", lineEditControlPort->text().toStdString());
-    }
+	settings.Put(sec, "input", "net");
     if(radioButtonFile->isChecked())
+	settings.Put(sec, "input", "file");
+    if(radioButtonCard->isChecked())
+	settings.Put(sec, "input", "card");
+
+    if(radioButtonReal->isChecked())
     {
-	settings.Put(sec, "file", lineEditFile->text().toStdString());
-	settings.Put(sec, "mode", stackedWidgetFile->currentIndex());
-	settings.Put(sec, "channels", bgflrm->checkedId());
-	settings.Put(sec, "sign", bgfiq->checkedId());
-	settings.Put(sec, "flipspectrum", CheckBoxFlipSpecFile->isChecked());
+	settings.Put(sec, "channels", bglrm->checkedId());
     }
-    if(radioButtonSoundCard->isChecked())
+    else
     {
-	settings.Put(sec, "soundcard", comboBoxSoundCard->currentIndex());
-	settings.Put(sec, "mode", stackedWidgetCard->currentIndex());
-	settings.Put(sec, "channels", bgslrm->checkedId());
-	settings.Put(sec, "sign", bgsiq->checkedId());
-	settings.Put(sec, "flipspectrum", CheckBoxFlipSpecCard->isChecked());
+	if(radioButtonIQPos->isChecked())
+	{
+	    if(checkBoxZIF->isChecked())
+	    {
+		settings.Put(sec, "channels", CS_IQ_POS_ZERO);
+	    }
+	    else
+	    {
+		settings.Put(sec, "channels", CS_IQ_POS);
+	    }
+	}
+	else
+	{
+	    if(checkBoxZIF->isChecked())
+	    {
+		settings.Put(sec, "channels", CS_IQ_NEG_ZERO);
+	    }
+	    else
+	    {
+		settings.Put(sec, "channels", CS_IQ_NEG);
+	    }
+	}
     }
+    settings.Put(sec, "rsiin_group", lineEditStatusAddress->text().toStdString());
+    settings.Put(sec, "rsiin_port", lineEditStatusPort->text().toStdString());
+    settings.Put(sec, "file", lineEditFile->text().toStdString());
+    settings.Put(sec, "sign", bgiq->checkedId());
+    settings.Put(sec, "flipspectrum", CheckBoxFlipSpec->isChecked());
+    settings.Put(sec, "soundcard", comboBoxCard->currentIndex());
+    settings.Put(sec, "BPF", checkBoxBPF->isChecked());
+
     // Control
     if(radioButtonRSCIControl->isChecked())
     {
+	settings.Put(sec, "control", string("RSCI"));
     }
-    if(radioButtonHamlib->isChecked())
+    else
     {
-	int i = comboBoxRig->currentIndex();
-	QVariant var =comboBoxRig->itemData(i);
-	RigData r = var.value<RigData>();
-	settings.Put(sec, "rig", r.id);
+	settings.Put(sec, "control", string("Hamlib"));
     }
-    settings.Put(sec, "BPFfile", checkBoxBPFFile->isChecked());
-    settings.Put(sec, "BPFsound", checkBoxBPFSound->isChecked());
+    settings.Put(sec, "rciout_host", lineEditControlAddress->text().toStdString());
+    settings.Put(sec, "rciout_port", lineEditControlPort->text().toStdString());
+    int i = comboBoxRig->currentIndex();
+    QVariant var =comboBoxRig->itemData(i);
+    RigData r = var.value<RigData>();
+    settings.Put(sec, "rig", r.id);
+}
+
+void ReceiverInputWidget::onChooseFile()
+{
+    QString fileName = QFileDialog::getOpenFileName(
+	    this,
+	    tr("Open File"),
+	     ".",
+	     tr("Audio (*.wav *.flac);;RSCI (*.rs* *.pcap);;IQ(*.iq*) (*.IQ*)")
+     );
+    if(fileName!="")
+	lineEditFile->setText(fileName);
+}
+
+void ReceiverInputWidget::onBGriq(int id)
+{
 }

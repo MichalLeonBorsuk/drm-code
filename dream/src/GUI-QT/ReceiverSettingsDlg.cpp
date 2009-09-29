@@ -36,6 +36,7 @@
 #include "DialogUtil.h"
 #include <QMessageBox>
 #include <QButtonGroup>
+#include <QFileDialog>
 #include <algorithm>
 #include <iostream>
 
@@ -803,6 +804,8 @@ ReceiverSettingsDlg::ReceiverSettingsDlg(
     connect(LineEditLngMinutes, SIGNAL(textChanged(const QString&)), SLOT(OnLineEditLngMinChanged(const QString&)));
     connect(ComboBoxEW, SIGNAL(highlighted(int)), SLOT(OnComboBoxEWHighlighted(int)) );
 
+    connect(pushButtonChooseAudioFile, SIGNAL(clicked()), this, SLOT(OnButtonChooseAudioFile()) );
+
     connect(SliderLogStartDelay, SIGNAL(valueChanged(int)),
 	    this, SLOT(OnSliderLogStartDelayChange(int)));
 
@@ -828,13 +831,13 @@ ReceiverSettingsDlg::ReceiverSettingsDlg(
 
     soundinputs = new SoundChoice(soundin);
     widgetDRMInput->comboBoxRig->setModel(treeViewRigs->model());
-    widgetDRMInput->comboBoxSoundCard->setModel(soundinputs);
+    widgetDRMInput->comboBoxCard->setModel(soundinputs);
 
     widgetAMInput->comboBoxRig->setModel(treeViewRigs->model());
-    widgetAMInput->comboBoxSoundCard->setModel(soundinputs);
+    widgetAMInput->comboBoxCard->setModel(soundinputs);
 
     widgetFMInput->comboBoxRig->setModel(treeViewRigs->model());
-    widgetFMInput->comboBoxSoundCard->setModel(soundinputs);
+    widgetFMInput->comboBoxCard->setModel(soundinputs);
     //widgetFMInput->soundInputFrame->setEnabled(false);
 
     connect(pushButtonDRMApply, SIGNAL(clicked()), SLOT(OnButtonDRMApply()));
@@ -936,13 +939,9 @@ void ReceiverSettingsDlg::showEvent(QShowEvent*)
     widgetAMInput->load(Settings);
     widgetFMInput->load(Settings);
 
-    /* Audio */
-    string wavfile = Settings.Get("Receiver", "writewav", string(""));
-    CheckBoxMuteAudio->setChecked(Settings.Get("Receiver", "muteaudio", false));
-    lineEditAudioFile->setText(wavfile.c_str());
-    CheckBoxRecordAudio->setChecked(wavfile!="");
-    CheckBoxReverb->setChecked(Settings.Get("Receiver", "reverb", true));
+    /* Output */
 
+    loadOutputSettings();
     /* GPS */
     loadGPSSettings();
 
@@ -959,13 +958,21 @@ static RigData getRig(QComboBox* box)
 
 void ReceiverSettingsDlg::hideEvent(QHideEvent*)
 {
-	// input
-	widgetDRMInput->save(Settings);
-	widgetAMInput->save(Settings);
-	widgetFMInput->save(Settings);
-	Rigs.save(Settings);
-	saveGPSSettings();
-	saveLogfileSettings();
+    // Rig tab
+    Rigs.save(Settings);
+    // input tab
+    widgetDRMInput->save(Settings);
+    widgetAMInput->save(Settings);
+    widgetFMInput->save(Settings);
+
+    // output tab
+    saveOutputSettings();
+
+    // GPS Tab
+    saveGPSSettings();
+
+    // Log Tab
+    saveLogfileSettings();
 }
 
 /* when the dialog closes save the contents of any controls which don't have
@@ -1354,6 +1361,75 @@ void ReceiverSettingsDlg::OnTimerRig()
 {
 }
 
+void ReceiverSettingsDlg::loadOutputSettings()
+{
+    /* Output - IQ */
+    CheckBoxRecordIQ->setChecked(Settings.Get("Receiver", "writeiq", false));
+
+    /* Output - Audio */
+    string audiofile = Settings.Get("Receiver", "writewav", string(""));
+    lineEditAudioFile->setText(audiofile.c_str());
+    CheckBoxRecordAudio->setChecked(audiofile!="");
+    CheckBoxReverb->setChecked(Settings.Get("Receiver", "reverb", true));
+    CheckBoxMuteAudio->setChecked(Settings.Get("Receiver", "mute", false));
+    switch(EInChanSel(Settings.Get("Receiver", "outchansel", CS_MIX_CHAN)))
+    {
+	case CS_LEFT_CHAN:
+	    radioButtonLeft->setChecked(true);
+	    break;
+	case CS_RIGHT_CHAN:
+	    radioButtonRight->setChecked(true);
+	    break;
+	case CS_MIX_CHAN:
+	    radioButtonMix->setChecked(true);
+	    break;
+	default:
+	    break;
+    }
+    int dev = Settings.Get("Receiver", "snddevout", int(-1));
+    if(dev == -1)
+    {
+	treeViewAudio->setCurrentIndex(treeViewAudio->rootIndex()); // invalidate
+    }
+    else
+    {
+	treeViewAudio->setCurrentIndex((treeViewAudio->rootIndex()).child(dev,0));
+    }
+
+    /* Output - RSCI */
+
+}
+
+void ReceiverSettingsDlg::saveOutputSettings()
+{
+    /* Output - IQ */
+    Settings.Put("Receiver", "writeiq", CheckBoxRecordIQ->isChecked());
+
+    /* Output - Audio */
+    Settings.Put("Receiver", "mute", CheckBoxMuteAudio->isChecked());
+    Settings.Put("Receiver", "reverb", CheckBoxReverb->isChecked());
+    if(radioButtonLeft->isChecked())
+	Settings.Put("Receiver", "outchansel", CS_LEFT_CHAN);
+    if(radioButtonRight->isChecked())
+	Settings.Put("Receiver", "outchansel", CS_RIGHT_CHAN);
+    if(radioButtonMix->isChecked())
+	Settings.Put("Receiver", "outchansel", CS_MIX_CHAN);
+
+    if(CheckBoxRecordAudio->isChecked())
+    {
+	Settings.Put("Receiver", "writewav", lineEditAudioFile->text().toStdString());
+    }
+    else
+    {
+	Settings.Put("Receiver", "writewav", string(""));
+    }
+    int dev = (treeViewAudio->currentIndex()).data(Qt::UserRole).toInt();
+    Settings.Put("Receiver", "snddevout", dev);
+
+    /* Output - RSCI */
+
+}
+
 void ReceiverSettingsDlg::OnCheckBoxMuteAudio()
 {
     Settings.Put("Receiver", "muteaudio", CheckBoxMuteAudio->isChecked());
@@ -1362,6 +1438,18 @@ void ReceiverSettingsDlg::OnCheckBoxMuteAudio()
 void ReceiverSettingsDlg::OnCheckSaveAudioWav()
 {
     //OnSaveAudio(this, CheckBoxRecordAudio, Receiver);
+}
+
+void ReceiverSettingsDlg::OnButtonChooseAudioFile()
+{
+    QString fileName = QFileDialog::getSaveFileName(
+	    this,
+	    tr("Open File"),
+	     ".",
+	     tr("Audio (*.wav *.flac *.mp3)")
+     );
+    if(fileName!="")
+	lineEditAudioFile->setText(fileName);
 }
 
 void ReceiverSettingsDlg::OnCheckBoxReverb()
