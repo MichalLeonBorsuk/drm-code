@@ -593,7 +593,6 @@ CDRMReceiver::DemodulateDRM(bool& bFrameToSend)
 	if (TimeSync.ProcessData(Parameters, FreqSyncAcqBuf, TimeSyncBuf))
 	{
 		bEnoughData = true;
-		//cerr << "TimeSync OK" << endl;
 		/* Use count of OFDM-symbols for detecting
 		 * aquisition state for acquisition detection
 		 * only if no signal was decoded before */
@@ -1134,7 +1133,6 @@ CDRMReceiver::saveSDCtoFile()
 void
 CDRMReceiver::LoadSettings()
 {
-cerr << "LoadSettings" << endl;
     vector<string> vs;
     int dev;
 
@@ -1247,7 +1245,6 @@ cerr << "LoadSettings" << endl;
 
     // input can be from RSCI or sound card or file
     string inp = settings.Get(section, "input", string("card"));
-    cerr << section << ":" << inp << endl;
     if(inp == "RSCI")
     {
 	string str = settings.Get(section, "rsiin");
@@ -1282,7 +1279,6 @@ cerr << "LoadSettings" << endl;
     if(inp == "file")
     {
 	string file = settings.Get(section, "file", string(""));
-	cerr << file << endl;
 	if(file != "")
 	{
 	    CSoundFileIn* sfi = new CSoundFileIn();

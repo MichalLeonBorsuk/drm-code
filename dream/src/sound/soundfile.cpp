@@ -286,7 +286,6 @@ CSoundFileOut::SetDev(const string& s)
 void
 CSoundFileOut::Init(int, bool, int iChannels)
 {
-	cerr << "CSoundFileOut::Init " << iChannels << endl;
 	string s = files[dev];
 	string ext;
 	size_t p = s.rfind('.');
@@ -309,10 +308,6 @@ CSoundFileOut::Init(int, bool, int iChannels)
 		sfinfo.format = SF_FORMAT_RAW | SF_FORMAT_PCM_16;
 	}
 	pFile = sf_open(s.c_str(), SFM_WRITE, &sfinfo);
-	if(pFile)
-		cerr << "openned " << s << " OK" << endl;
-	else
-		cerr << "failed to open " << s << endl;
 }
 
 void
