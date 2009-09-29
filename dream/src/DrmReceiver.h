@@ -167,7 +167,7 @@ public:
 #ifdef QT_GUI_LIB
 	virtual void			run();
 #else /* keep the windows builds happy when compiling without the GUI */
-	int						wait(int) { return 0;}
+	int					wait(int) { return 0;}
 	bool					finished() { return true; }
 #endif
 	void					LoadSettings(); // can write to settings to set defaults

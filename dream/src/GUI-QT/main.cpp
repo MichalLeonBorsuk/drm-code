@@ -121,6 +121,9 @@ main(int argc, char **argv)
 
 		if (strMode == "RX")
 		{
+		    m.Receiver.LoadSettings();
+		    CParameter* Parameters = m.Receiver.GetParameters();
+		    Parameters->RxEvent = ChannelReconfiguration;
 		    m.doNewMainWindow();
 		    m.Receiver.start();
 		    app.exec();
