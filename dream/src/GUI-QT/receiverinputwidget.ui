@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>378</width>
-    <height>323</height>
+    <width>380</width>
+    <height>346</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -61,6 +61,9 @@
              <widget class="QLabel" name="label_4">
               <property name="text">
                <string>Sound Card</string>
+              </property>
+              <property name="buddy">
+               <cstring>comboBoxCard</cstring>
               </property>
              </widget>
             </item>
@@ -119,41 +122,62 @@
         <widget class="QWidget" name="pageAudio">
          <layout class="QGridLayout" name="gridLayout_5">
           <item row="0" column="0">
-           <layout class="QHBoxLayout" name="horizontalLayout_5">
+           <layout class="QHBoxLayout" name="horizontalLayout_4">
             <item>
-             <widget class="QRadioButton" name="radioButtonReal">
-              <property name="text">
-               <string>Real</string>
-              </property>
-              <property name="checked">
-               <bool>true</bool>
-              </property>
-             </widget>
+             <layout class="QHBoxLayout" name="horizontalLayout_5">
+              <item>
+               <widget class="QRadioButton" name="radioButtonReal">
+                <property name="text">
+                 <string>Real</string>
+                </property>
+                <property name="checked">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QRadioButton" name="radioButtonIQ">
+                <property name="text">
+                 <string>I/Q</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QCheckBox" name="CheckBoxFlipSpec">
+                <property name="text">
+                 <string>&amp;Flip Input Spectrum</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
             </item>
             <item>
-             <widget class="QRadioButton" name="radioButtonIQ">
+             <widget class="QCheckBox" name="checkBoxBPF">
               <property name="text">
-               <string>I/Q</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QCheckBox" name="CheckBoxFlipSpec">
-              <property name="text">
-               <string>&amp;Flip Input Spectrum</string>
+               <string>Band Pass Filter</string>
               </property>
              </widget>
             </item>
            </layout>
           </item>
-          <item row="0" column="1">
-           <widget class="QCheckBox" name="checkBoxBPF">
-            <property name="text">
-             <string>Band Pass Filter</string>
-            </property>
-           </widget>
+          <item row="1" column="0">
+           <layout class="QHBoxLayout" name="horizontalLayout_2">
+            <item>
+             <widget class="QLabel" name="label_8">
+              <property name="text">
+               <string>Calibration Factor</string>
+              </property>
+              <property name="buddy">
+               <cstring>lineEditCalFactor</cstring>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="lineEditCalFactor"/>
+            </item>
+           </layout>
           </item>
-          <item row="1" column="0" colspan="2">
+          <item row="2" column="0">
            <widget class="QStackedWidget" name="stackedWidgetRealIQ">
             <property name="currentIndex">
              <number>0</number>
@@ -289,7 +313,7 @@
      </layout>
     </widget>
    </item>
-   <item row="1" column="0">
+   <item row="2" column="0">
     <widget class="QGroupBox" name="groupBox_2">
      <property name="title">
       <string>Control</string>
@@ -327,6 +351,9 @@
            <widget class="QLabel" name="label">
             <property name="text">
              <string>Rig</string>
+            </property>
+            <property name="buddy">
+             <cstring>comboBoxRig</cstring>
             </property>
            </widget>
           </item>

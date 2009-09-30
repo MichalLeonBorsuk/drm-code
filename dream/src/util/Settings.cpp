@@ -459,7 +459,6 @@ CSettings::ParseArguments(int argc, char **argv)
 			continue;
 		}
 
-#ifdef HAVE_LIBHAMLIB
 		/* Hamlib config string --------------------------------------------- */
 		// command line only - will be converted and saved in Dream.ini by CHamlib
 		if (GetStringArgument(argc, argv, i, "-C", "--hamlib-config",
@@ -476,7 +475,7 @@ CSettings::ParseArguments(int argc, char **argv)
 			Put("command", "hamlib-model", (int)rArgument);
 			continue;
 		}
-#endif
+
 		/* Enable s-meter flag ---------------------------------------------- */
 		if (GetFlagArgument(argc, argv, i, "-T", "--ensmeter") == true)
 		{

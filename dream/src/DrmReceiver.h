@@ -76,7 +76,6 @@
 
 /* Classes ********************************************************************/
 class CSettings;
-class CHamlib;
 class CRig;
 
 template<typename T>

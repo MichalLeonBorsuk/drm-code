@@ -144,19 +144,15 @@ CDRMReceiver::~CDRMReceiver()
 void
 CDRMReceiver::SetEnableSMeter(bool bNew)
 {
-#ifdef HAVE_LIBHAMLIB
     if(pRig)
 	pRig->SetEnableSMeter(bNew);
-#endif
 }
 
 bool
 CDRMReceiver::GetEnableSMeter()
 {
-#ifdef HAVE_LIBHAMLIB
     if(pRig)
 	return pRig->GetEnableSMeter();
-#endif
     return false;
 }
 
@@ -1101,10 +1097,8 @@ bool CDRMReceiver::doSetFrequency()
 	}
 	else
 	{
-#ifdef HAVE_LIBHAMLIB
 		if(pRig)
 			result = pRig->SetFrequency(iFreqkHz);
-#endif
 	}
 
 	/* tell the RSCI and IQ file writer that freq has changed in case it needs to start a new file */
@@ -1375,6 +1369,7 @@ CDRMReceiver::LoadSettings()
 		if(pRig)
 		    delete pRig;
 		pRig = new CRig(model, &Parameters);
+		cerr << "set rig model " << model << endl;
 		// TODO configure rig
 	    }
 	}
@@ -1484,9 +1479,7 @@ CDRMReceiver::LoadSettings()
 
     FrontEndParameters.bAutoMeasurementBandwidth = settings.Get("FrontEnd", "automeasurementbandwidth", true);
 
-    FrontEndParameters.rCalFactorDRM = settings.Get("Input-DRM", "calfactor", 0.0);
-
-    FrontEndParameters.rCalFactorAM = settings.Get("Input-AM", "calfactor", 0.0);
+    FrontEndParameters.rCalFactor = settings.Get(section, "calfactor", 0.0);
 
     FrontEndParameters.rIFCentreFreq = settings.Get("FrontEnd", "ifcentrefrequency", SOUNDCRD_SAMPLE_RATE / 4);
 
@@ -1499,7 +1492,6 @@ CDRMReceiver::LoadSettings()
     // Put this right at the end so that eModulation is correct and Rx starts
     Parameters.Lock();
     Parameters.eModulation = modn;
-    //Parameters.RxEvent = ChannelReconfiguration; // trigger an update!
     Parameters.Unlock();
 }
 
@@ -1605,8 +1597,6 @@ CDRMReceiver::SaveSettings()
 	settings.Put("FrontEnd", "smeterbandwidth", int(Parameters.FrontEndParameters.rSMeterBandwidth));
 	settings.Put("FrontEnd", "defaultmeasurementbandwidth", int(Parameters.FrontEndParameters.rDefaultMeasurementBandwidth));
 	settings.Put("FrontEnd", "automeasurementbandwidth", Parameters.FrontEndParameters.bAutoMeasurementBandwidth);
-	settings.Put("Input-DRM", "calfactor", int(Parameters.FrontEndParameters.rCalFactorDRM));
-	settings.Put("Input-AM", "calfactor", int(Parameters.FrontEndParameters.rCalFactorAM));
 	settings.Put("FrontEnd", "ifcentrefrequency", int(Parameters.FrontEndParameters.rIFCentreFreq));
 
 	/* Serial Number */

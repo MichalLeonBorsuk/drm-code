@@ -479,7 +479,6 @@ void StationsDlg::AddWhatsThisHelp()
 		"Universal Time (UTC) which is nearly the same as Greenwich Mean Time "
 		"(GMT)."));
 
-#ifdef HAVE_LIBHAMLIB
 	/* S-meter */
 	const QString strSMeter =
 		tr("<b>Signal-Meter:</b> Shows the signal strength "
@@ -489,5 +488,4 @@ void StationsDlg::AddWhatsThisHelp()
 
 	TextLabelSMeter->setWhatsThis(strSMeter);
 	ProgrSigStrength->setWhatsThis(strSMeter);
-#endif
 }
