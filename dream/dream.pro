@@ -53,7 +53,8 @@ unix {
     LIBS += -lsndfile \
         -lz \
         -lrfftw \
-        -lfftw
+        -lfftw \
+        -lqwt
     DEFINES += HAVE_RFFTW_H
     DEFINES += HAVE_DLFCN_H \
         HAVE_MEMORY_H \
@@ -67,10 +68,8 @@ unix {
         HAVE_SYS_STAT_H \
         HAVE_SYS_TYPES_H \
         HAVE_UNISTD_H
-    macx:LIBS += -lqwt
-    else { 
-        INCLUDEPATH += /usr/include/qwt-qt4
-        LIBS += -lqwt-qt4
+    !macx {
+        INCLUDEPATH += /usr/local/qwt-5.2.0/include/
         INCLUDEPATH += linux
         LIBS += -lrt
         SOURCES += src/sound/shmsoundin.cpp \
