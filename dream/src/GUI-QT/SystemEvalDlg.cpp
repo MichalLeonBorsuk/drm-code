@@ -37,7 +37,7 @@
 #include <iostream>
 
 SystemEvalDlg::SystemEvalDlg(ReceiverInterface& NDRMR, CSettings& NSettings,
-    QWidget* parent, const char* name, bool modal, Qt::WFlags f)
+    QWidget* parent, const char*, bool, Qt::WFlags f)
 : QDialog(parent, f), Ui_SystemEvalDlg(),
     Receiver(NDRMR), Settings(NSettings), pGPSReceiver(NULL),
     plot(NULL),plots(),
