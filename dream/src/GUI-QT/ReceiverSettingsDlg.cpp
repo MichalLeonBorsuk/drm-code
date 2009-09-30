@@ -440,11 +440,19 @@ RigModel::load(const CSettings& settings)
     for(size_t i=0; int(i)<l.size(); i++)
     {
 	RigData r;
-    	string sectitle = (QString("Rig-")+l.at(i)).toStdString();
+        QString s = QString("Rig-")+l.at(i);
+        string sectitle = s.toStdString();
 
 	int model = settings.Get(sectitle, "model", int(RIG_MODEL_NONE));
+        if(model == RIG_MODEL_NONE)
+            continue;
 	r.id = l[i].toInt();
-	r.rig = new CRig(model);
+        try {
+            r.rig = new CRig(model);
+        } catch(RigException e)
+        {
+            r.rig = NULL;
+        }
 	if(r.rig)
 	{
 	    rmode_t mode_for_drm = rmode_t(settings.Get(sectitle, "mode_for_drm", int(RIG_MODE_NONE)));
