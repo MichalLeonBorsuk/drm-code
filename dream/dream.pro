@@ -17,7 +17,8 @@ FORMS += DRMMainWindow.ui \
     AnalogMainWindow.ui \
     TransmitterMainWindow.ui \
     src/GUI-QT/receiverinputwidget.ui \
-    src/GUI-QT/DIoutputSelector.ui
+    src/GUI-QT/DIoutputSelector.ui \
+    src/GUI-QT/rigconfigurationdialog.ui
 FORMS += AMSSDlg.ui \
     SystemEvalDlg.ui \
     JLViewer.ui \
@@ -35,120 +36,111 @@ TRANSLATIONS = src/GUI-QT/languages/drm.fr.ts \
     src/GUI-QT/languages/dreamtr.es.ts
 UI_DIR = moc
 MOC_DIR = moc
-
-macx {
+macx { 
     RC_FILE = src/GUI-QT/res/macicons.icns
     LIBS += -framework \
-	CoreFoundation \
-	-framework \
-	CoreServices
+        CoreFoundation \
+        -framework \
+        CoreServices
     LIBS += -framework \
-	CoreAudio \
-	-framework \
-	AudioToolbox \
-	-framework \
-	AudioUnit
+        CoreAudio \
+        -framework \
+        AudioToolbox \
+        -framework \
+        AudioUnit
 }
-
-unix {
+unix { 
     LIBS += -lsndfile \
-	-lz \
-	-lrfftw \
-	-lfftw
+        -lz \
+        -lrfftw \
+        -lfftw
     DEFINES += HAVE_RFFTW_H
     DEFINES += HAVE_DLFCN_H \
-	HAVE_MEMORY_H \
-	HAVE_STDINT_H \
-	HAVE_STDLIB_H
+        HAVE_MEMORY_H \
+        HAVE_STDINT_H \
+        HAVE_STDLIB_H
     DEFINES += HAVE_STRINGS_H \
-	HAVE_STRING_H \
-	STDC_HEADERS
+        HAVE_STRING_H \
+        STDC_HEADERS
     DEFINES += HAVE_INTTYPES_H \
-	HAVE_STDINT_H \
-	HAVE_SYS_STAT_H \
-	HAVE_SYS_TYPES_H \
-	HAVE_UNISTD_H
-    macx {
-	LIBS += -lqwt
-    }
-    else {
-	INCLUDEPATH += /usr/include/qwt-qt4
-	LIBS += -lqwt-qt4
-	INCLUDEPATH += linux
-	LIBS += -lrt
-	SOURCES += src/sound/shmsoundin.cpp \
-	    src/sound/pa_shm_ringbuffer.c
-	HEADERS += src/sound/shmsoundin.h \
-	    src/sound/pa_shm_ringbuffer.h
+        HAVE_STDINT_H \
+        HAVE_SYS_STAT_H \
+        HAVE_SYS_TYPES_H \
+        HAVE_UNISTD_H
+    macx:LIBS += -lqwt
+    else { 
+        INCLUDEPATH += /usr/include/qwt-qt4
+        LIBS += -lqwt-qt4
+        INCLUDEPATH += linux
+        LIBS += -lrt
+        SOURCES += src/sound/shmsoundin.cpp \
+            src/sound/pa_shm_ringbuffer.c
+        HEADERS += src/sound/shmsoundin.h \
+            src/sound/pa_shm_ringbuffer.h
     }
 }
-
-win32 {
+win32 { 
     DEFINES -= UNICODE
-    LIBS += -lsetupapi -lqwt5 -lws2_32
-    win32-g++ {
-	DEFINES += HAVE_STDINT_H \
-	    HAVE_STDLIB_H
-	LIBS += \
-	    -lsndfile \
-	    -lz \
-	    -lrfftw \
-	    -lfftw \
-	    -lstdc++
+    LIBS += -lsetupapi \
+        -lqwt5 \
+        -lws2_32
+    win32-g++ { 
+        DEFINES += HAVE_STDINT_H \
+            HAVE_STDLIB_H
+        LIBS += -lsndfile \
+            -lz \
+            -lrfftw \
+            -lfftw \
+            -lstdc++
     }
-    else {
-	DEFINES += NOMINMAX
-	TEMPLATE = vcapp
-	LIBS += libsndfile-1.lib \
-	    zdll.lib \
-	    qwt5.lib
-	LIBS += libfftw.lib
-	QMAKE_LFLAGS_RELEASE += /NODEFAULTLIB:"MSVCRTD, LIBCMT"
-	QMAKE_LFLAGS_DEBUG += /NODEFAULTLIB:msvcrtd.lib
+    else { 
+        DEFINES += NOMINMAX
+        TEMPLATE = vcapp
+        LIBS += libsndfile-1.lib \
+            zdll.lib \
+            qwt5.lib
+        LIBS += libfftw.lib
+        QMAKE_LFLAGS_RELEASE += /NODEFAULTLIB:"MSVCRTD, LIBCMT"
+        QMAKE_LFLAGS_DEBUG += /NODEFAULTLIB:msvcrtd.lib
     }
 }
-
-hamlib {
-    DEFINES += HAVE_LIBHAMLIB HAVE_RIG_PARSE_MODE
-    HEADERS += src/util/Hamlib.h src/util/rigclass.h
-    SOURCES += src/util/Hamlib.cpp src/util/rigclass.cc
+hamlib { 
+    DEFINES += HAVE_LIBHAMLIB \
+        HAVE_RIG_PARSE_MODE
+    HEADERS += src/util/Hamlib.h \
+        src/util/rigclass.h
+    SOURCES += src/util/Hamlib.cpp \
+        src/util/rigclass.cc
     unix:LIBS += -lhamlib
-    macx:LIBS += -framework IOKit
-    win32 {
-	win32-g++:LIBS += -lhamlib
-	else:LIBS += libhamlib-2.lib
+    macx:LIBS += -framework \
+        IOKit
+    win32 { 
+        win32-g++:LIBS += -lhamlib
+        else:LIBS += libhamlib-2.lib
     }
 }
-
-pcap {
+pcap { 
     DEFINES += HAVE_LIBPCAP
-    win32 {
-	LIBS += -lwpcap
-    }
-    else {
-	LIBS += -lpcap
-    }
+    win32:LIBS += -lwpcap
+    else:LIBS += -lpcap
 }
-
-portaudio {
+portaudio { 
     DEFINES += USE_PORTAUDIO
     HEADERS += src/sound/pa_ringbuffer.h \
-	src/sound/drm_portaudio.h
+        src/sound/drm_portaudio.h
     SOURCES += src/sound/drm_portaudio.cpp \
-	src/sound/pa_ringbuffer.c
+        src/sound/pa_ringbuffer.c
     win32-g++:LIBS += ../lib/PortAudio.dll
     win32-msvc2008:LIBS += ../lib/portaudio_x86.lib
     unix:LIBS += -lportaudio
 }
-
-winmm {
+winmm { 
     CONFIG -= portaudio
     HEADERS += src/sound/winmm.h \
-	src/sound/SoundWin.h
+        src/sound/SoundWin.h
     SOURCES += src/sound/winmm.cpp
     LIBS += -lwinmm
 }
-
 HEADERS += src/Measurements.h \
     src/AMDemodulation.h \
     src/AMSSDemodulation.h \
@@ -296,7 +288,8 @@ HEADERS += src/Measurements.h \
     src/util/Vector.h \
     src/Version.h \
     src/GUI-QT/receiverinputwidget.h \
-    src/GUI-QT/DIoutputSelector.h
+    src/GUI-QT/DIoutputSelector.h \
+    src/GUI-QT/rigconfigurationdialog.h
 SOURCES += src/Measurements.cpp \
     src/AMDemodulation.cpp \
     src/AMSSDemodulation.cpp \
@@ -420,4 +413,5 @@ SOURCES += src/Measurements.cpp \
     src/util/Utilities.cpp \
     src/Version.cpp \
     src/GUI-QT/receiverinputwidget.cpp \
-    src/GUI-QT/DIoutputSelector.cpp
+    src/GUI-QT/DIoutputSelector.cpp \
+    src/GUI-QT/rigconfigurationdialog.cpp

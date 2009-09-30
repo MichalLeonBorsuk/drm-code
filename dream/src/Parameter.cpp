@@ -1020,8 +1020,8 @@ string CServiceDefinition::System() const
 
 CFrontEndParameters::CFrontEndParameters():CDumpable(),
 eSMeterCorrectionType(S_METER_CORRECTION_TYPE_CAL_FACTOR_ONLY), rSMeterBandwidth(10000.0),
-rDefaultMeasurementBandwidth(10000.0), bAutoMeasurementBandwidth(true), rCalFactorAM(0.0),
-rCalFactorDRM(0.0), rIFCentreFreq(12000.0)
+rDefaultMeasurementBandwidth(10000.0), bAutoMeasurementBandwidth(true), rCalFactor(0.0),
+rIFCentreFreq(12000.0)
 {
 }
 
@@ -1202,8 +1202,7 @@ CFrontEndParameters::dump(ostream& out) const
     out << "SMeterBandwidth: " << rSMeterBandwidth << "," << endl;
     out << "DefaultMeasurementBandwidth: " << rDefaultMeasurementBandwidth << "," << endl;
     out << "AutoMeasurementBandwidth: " << bAutoMeasurementBandwidth << "," << endl;
-    out << "CalFactorAM: " << rCalFactorAM << "," << endl;
-    out << "CalFactorDRM: " << rCalFactorDRM << "," << endl;
+    out << "CalFactor: " << rCalFactor << "," << endl;
     out << "IFCentreFreq: " << rIFCentreFreq << "}" << endl;
 }
 

@@ -40,9 +40,7 @@
 #include "../DrmTransmitter.h"
 #include "../DrmSimulation.h"
 #include "../util/Settings.h"
-#ifdef HAVE_LIBHAMLIB
-# include "../util/Hamlib.h"
-#endif
+#include "../util/Hamlib.h"
 #ifdef QT_GUI_LIB
 # include <QApplication>
 # include <QThread>
@@ -58,7 +56,6 @@
 /******************************************************************************\
 * Using GUI with QT                                                            *
 \******************************************************************************/
-
 
 int
 main(int argc, char **argv)
@@ -121,6 +118,7 @@ main(int argc, char **argv)
 
 		if (strMode == "RX")
 		{
+		    rig_load_all_backends();
 		    m.Receiver.LoadSettings();
 		    CParameter* Parameters = m.Receiver.GetParameters();
 		    Parameters->RxEvent = ChannelReconfiguration;

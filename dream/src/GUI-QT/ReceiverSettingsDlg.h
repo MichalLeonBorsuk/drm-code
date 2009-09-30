@@ -39,8 +39,7 @@
 
 /* Classes ********************************************************************/
 
-#ifdef HAVE_LIBHAMLIB
-# include "../util/Hamlib.h"
+#include "../util/Hamlib.h"
 
 class RigTypesModel : public QAbstractItemModel
 {
@@ -140,7 +139,7 @@ protected:
     struct card : public port { vector<port> members;};
     vector<card> cards;
 };
-#endif
+
 
 class ReceiverSettingsDlg : public QDialog, public Ui_ReceiverSettingsDlg
 {
@@ -175,12 +174,10 @@ protected:
     QButtonGroup	*bgTimeInterp, *bgFreqInterp, *bgTiSync;
     QButtonGroup	*bgriq, *bglrm, *bgiq;
 
-#ifdef HAVE_LIBHAMLIB
     RigTypesModel	RigTypes;
     RigModel		Rigs;
     CGPSData&		GPSData;
     SoundChoice*	soundinputs;
-#endif
     SoundChoice*	soundoutputs;
 
 signals:
@@ -213,13 +210,12 @@ public slots:
     void 		OnCheckBoxLogLatLng();
     void 		OnCheckBoxLogSigStr();
     void 		OnCheckModiMetric();
-    void 		OnTimerRig();
     void 		OnRigTypeSelected(const QModelIndex&);
     void 		OnRigSelected(const QModelIndex&);
     void 		OnCheckEnableSMeterToggled(bool);
     void 		OnButtonAddRig();
-    void 		OnButtonRemoveRig();
-    void		OnButtonConnectRig();
+    void		OnButtonRemoveRig();
+    void		OnButtonConfigureRig();
     void		OnButtonChooseAudioFile();
     void		OnCheckBoxMuteAudio();
     void		OnCheckSaveAudioWav();

@@ -30,8 +30,6 @@
 #ifndef _HAMLIB_H
 #define _HAMLIB_H
 
-#include "../Parameter.h"
-#include "rigclass.h"
 #include <string>
 #include <map>
 #ifdef QT_CORE_LIB
@@ -39,55 +37,24 @@
 # include <QMutex>
 #endif
 
-class CSettings;
+#ifdef HAVE_LIBHAMLIB
+# include "rigclass.h"
+#else
+ typedef int rig_model_t;
+ typedef int rmode_t;
+ typedef int pbwidth_t;
+ class Rig {};
+#endif
 
 enum ESMeterState {SS_VALID, SS_NOTVALID, SS_TIMEOUT};
 
-class CRigSettings
-{
-public:
-	CRigSettings():modes(),ilevels(),flevels(),functions(),
-	iparameters(),fparameters(),config(),attributes()
-	{}
-	CRigSettings(const CRigSettings& c):
-	modes(c.modes),ilevels(c.ilevels),flevels(c.flevels),functions(c.functions),
-	iparameters(c.iparameters),fparameters(c.fparameters),
-	config(c.config),attributes(c.attributes)
-	{}
-	CRigSettings& operator=(const CRigSettings& c)
-	{
-		modes = c.modes;
-		ilevels = c.ilevels;
-		flevels = c.flevels;
-		functions = c.functions;
-		iparameters = c.iparameters;
-		fparameters = c.fparameters;
-		config = c.config;
-		attributes = c.attributes;
-		return *this;
-	}
-
-	void	LoadSettings(CSettings& s, const string&);
-	void	SaveSettings(CSettings& s, const string&) const;
-	void	apply(Rig&) const;
-
-	map<string,int> modes;
-	map<string,int> ilevels;
-	map<string,float> flevels;
-	map<string,string> functions;
-	map<string,int> iparameters;
-	map<string,float> fparameters;
-	map<string,string> config;
-	map<string,string> attributes;
-};
+class CParameter;
 
 class CRigMap
 {
 public:
-    map<string,map<string,rig_model_t> > rigs;
+    std::map<std::string,std::map<std::string,rig_model_t> > rigs;
 };
-
-/* Hamlib interface --------------------------------------------------------- */
 
 class CRig: public Rig
 #ifdef QT_CORE_LIB
@@ -98,7 +65,7 @@ public:
 	CRig(rig_model_t, CParameter* =NULL);
 	virtual ~CRig();
 
-	virtual void	run();
+	virtual void		run();
 
 	bool			SetFrequency(const int iFreqkHz);
 	void			SetFrequencyOffset(const int iOffkHz) { iOffset = iOffkHz; }
@@ -106,8 +73,8 @@ public:
 	void 			SetEnableSMeter(const bool bStatus); // sets/clears wanted flag and starts/stops
 	bool			GetEnableSMeter(); // returns wanted flag
 	void 			StopSMeter(); // stops (clears run flag) but leaves wanted flag alone
-	void			SetComPort(const string&);
-	string			GetComPort() const;
+	void			SetComPort(const std::string&);
+	std::string		GetComPort() const;
 	void			SetDRMMode();
 	void			SetModeForDRM(rmode_t, pbwidth_t);
 
@@ -117,38 +84,6 @@ protected:
 	rmode_t mode_for_drm;
 	pbwidth_t width_for_drm;
 	CParameter*		pParameters;
-#ifdef QT_CORE_LIB
-	QMutex			mutex;
-#endif
-};
-
-class CHamlib
-{
-public:
-	CHamlib();
-	virtual ~CHamlib();
-
-	/* backend selection */
-	void			GetRigList(CRigMap&) const;
-
-	void			LoadSettings(CSettings& s);
-	void			SaveSettings(CSettings& s) const;
-
-	const rig_caps*		GetRigCaps(rig_model_t) const;
-	CRig*			GetRig(CParameter& p, rig_model_t m) { return new CRig(/*p,*/m); }
-
-	bool			GetRigSettings(CRigSettings&,
-					rig_model_t, EModulationType) const;
-	void set_attribute(rig_model_t, EModulationType, const string&, const string&);
-
-protected:
-
-	static int		rig_enumerator(const rig_caps* caps, void* data);
-	static int		rig_enumerator1(const rig_caps* caps, void* data);
-
-	map<rig_model_t,
-		map<EModulationType, CRigSettings >
-		>		rigmodemap;
 #ifdef QT_CORE_LIB
 	QMutex			mutex;
 #endif

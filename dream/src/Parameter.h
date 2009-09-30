@@ -453,8 +453,7 @@ enum EAMSSBlockLockStat {
 		_REAL rSMeterBandwidth; // The bandwidth the S-meter uses to do the measurement
 		_REAL rDefaultMeasurementBandwidth; // Bandwidth to do measurement if not synchronised
 		bool bAutoMeasurementBandwidth; // true: use the current FAC bandwidth if locked, false: use default bandwidth always
-		_REAL rCalFactorAM;
-		_REAL rCalFactorDRM;
+		_REAL rCalFactor;
 		_REAL rIFCentreFreq;
 
 	};

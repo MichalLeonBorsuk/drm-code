@@ -163,6 +163,7 @@ void ReceiverInputWidget::load(CSettings& settings)
     }
     CheckBoxFlipSpec->setChecked(settings.Get(sec, "flipspectrum", false));
     checkBoxBPF->setChecked(settings.Get(sec, "BPF", false));
+    lineEditCalFactor->setText(settings.Get(sec, "calfactor", string("0.0")).c_str());
 
     int dev = settings.Get(sec, "soundcard", -1);
     if(dev==-1)
@@ -262,10 +263,10 @@ void ReceiverInputWidget::save(CSettings& settings) const
     settings.Put(sec, "rsiin_group", lineEditStatusAddress->text().toStdString());
     settings.Put(sec, "rsiin_port", lineEditStatusPort->text().toStdString());
     settings.Put(sec, "file", lineEditFile->text().toStdString());
-    settings.Put(sec, "sign", bgiq->checkedId());
     settings.Put(sec, "flipspectrum", CheckBoxFlipSpec->isChecked());
     settings.Put(sec, "soundcard", comboBoxCard->currentIndex());
     settings.Put(sec, "BPF", checkBoxBPF->isChecked());
+    settings.Put(sec, "calfactor", lineEditCalFactor->text().toStdString());
 
     // Control
     if(radioButtonRSCIControl->isChecked())

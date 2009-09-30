@@ -34,7 +34,6 @@
 
 class CSelectionInterface;
 class CDataDecoder;
-class CRigSettings;
 class CRigMap;
 class CRig;
 struct rig_caps;

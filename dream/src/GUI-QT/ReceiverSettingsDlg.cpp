@@ -42,8 +42,6 @@
 
 /* Implementation *************************************************************/
 
-#ifdef HAVE_LIBHAMLIB
-
 RigTypesModel::RigTypesModel():QAbstractItemModel(),rigs(),unmodified(),modified()
 {
 	unmodified[RIG_MODEL_G303].levels["ATT"]=0;
@@ -769,8 +767,6 @@ QModelIndex SoundChoice::parent(const QModelIndex& index) const
 	return QModelIndex();
 }
 
-#endif
-
 ReceiverSettingsDlg::ReceiverSettingsDlg(
     CSettings& NSettings, CGPSData& GPSD,
      CSelectionInterface& soundin,
@@ -781,18 +777,15 @@ ReceiverSettingsDlg::ReceiverSettingsDlg(
 	TimerRig(),iWantedrigModel(0),
 	bgTimeInterp(NULL), bgFreqInterp(NULL), bgTiSync(NULL),
 	bgriq(NULL), bglrm(NULL), bgiq(NULL),
-#ifdef HAVE_LIBHAMLIB
+
 	RigTypes(),Rigs(),GPSData(GPSD),soundinputs(),
-#endif
 	soundoutputs()
 {
     setupUi(this);
 
-#ifdef HAVE_LIBHAMLIB
     treeViewRigTypes->setModel(&RigTypes);
     RigTypes.load();
     treeViewRigs->setModel(&Rigs);
-#endif
 
     /* Connections */
 
@@ -852,22 +845,17 @@ ReceiverSettingsDlg::ReceiverSettingsDlg(
     connect(CheckBoxLogLatLng, SIGNAL(clicked()), this, SLOT(OnCheckBoxLogLatLng()));
     connect(CheckBoxLogSigStr, SIGNAL(clicked()), this, SLOT(OnCheckBoxLogSigStr()));
 
-#ifdef HAVE_LIBHAMLIB
     connect(pushButtonAddRig, SIGNAL(clicked()), this, SLOT(OnButtonAddRig()));
+    connect(pushButtonConfigureRig, SIGNAL(clicked()), this, SLOT(OnButtonConfigureRig()));
+
     connect(pushButtonRemoveRig, SIGNAL(clicked()), this, SLOT(OnButtonRemoveRig()));
-    //connect(CheckBoxEnableSMeter, SIGNAL(toggled(bool)), this, SLOT(OnCheckEnableSMeterToggled(bool)));
+
     connect(treeViewRigTypes, SIGNAL(clicked (const QModelIndex&)),
 	    this, SLOT(OnRigTypeSelected(const QModelIndex&)));
     connect(treeViewRigs, SIGNAL(clicked (const QModelIndex&)),
 	    this, SLOT(OnRigSelected(const QModelIndex&)));
 
-    connect(&TimerRig, SIGNAL(timeout()), this, SLOT(OnTimerRig()));
-
-    connect(pushButtonConnectRig, SIGNAL(clicked()), this, SLOT(OnButtonConnectRig()));
     checkBoxModified->setEnabled(false);
-    TimerRig.stop();
-    //TimerRig.setSingleShot(true);
-#endif
 
     soundoutputs = new SoundChoice(soundout, true);
     connect(CheckBoxMuteAudio, SIGNAL(clicked()), this, SLOT(OnCheckBoxMuteAudio()));
@@ -927,11 +915,9 @@ void ReceiverSettingsDlg::showEvent(QShowEvent*)
     SliderNoOfIterations->setValue(Settings.Get("Input-DRM", "mlciter", 0));
 
     /* Rig - need Rigs populated before input options */
-#ifdef HAVE_LIBHAMLIB
-    stackedWidget->setEnabled(false);
     Rigs.load(Settings);
-    CheckBoxEnableSMeter->setChecked(false);
-#endif
+
+    pushButtonConfigureRig->setEnabled(false);
 
     /* Input ----------------------------------------------------------------- */
 
@@ -1236,7 +1222,6 @@ ReceiverSettingsDlg::OnRigTypeSelected(const QModelIndex& m)
 void
 ReceiverSettingsDlg::OnRigSelected(const QModelIndex& index)
 {
-#ifdef HAVE_LIBHAMLIB
     QVariant var = index.data(Qt::UserRole);
     RigData r = var.value<RigData>();
     if(r.rig==NULL)
@@ -1244,41 +1229,7 @@ ReceiverSettingsDlg::OnRigSelected(const QModelIndex& index)
     	QMessageBox::information(this, tr("Hamlib"), tr("Rig not created error"), QMessageBox::Ok);
     	return;
     }
-    if(r.rig->caps->port_type == RIG_PORT_SERIAL)
-    {
-	stackedWidget->setEnabled(true);
-	//stackedWidget->setpage(0);
-	comboBoxComPort->clear();
-	map<string,string> ports;
-	GetComPortList(ports);
-	for(map<string,string>::const_iterator i=ports.begin();
-		i!=ports.end(); i++)
-	{
-	    comboBoxComPort->addItem(i->first.c_str(), i->second.c_str());
-	}
-	char port[200];
-	r.rig->getConf("rig_pathname", port);
-	if(port[0] != 0)
-	{
-		int n = comboBoxComPort->findData(port);
-		comboBoxComPort->setCurrentIndex(n);
-	}
-    }
-    else
-    {
-	comboBoxComPort->clear();
-    	if(r.rig->caps->port_type == RIG_PORT_USB)
-	{
-	    stackedWidget->setEnabled(true);
-	    //stackedWidget->setpage(1);
-	}
-	else
-	{
-	    stackedWidget->setEnabled(false);
-	    //stackedWidget->setpage(0);
-	}
-    }
-#endif
+    pushButtonConfigureRig->setEnabled(true);
 }
 
 void
@@ -1324,41 +1275,9 @@ ReceiverSettingsDlg::OnButtonRemoveRig()
     Rigs.remove(treeViewRigs->currentIndex().internalId());
 }
 
-void
-ReceiverSettingsDlg::OnButtonConnectRig()
+void ReceiverSettingsDlg::OnButtonConfigureRig()
 {
-    if(loading)
-	    return;
-
-#ifdef HAVE_LIBHAMLIB
-	int n = treeViewRigs->currentIndex().row();
-	CRig* rig = Rigs.rigs[n].rig;
-	if(rig==NULL)
-		return;
-	if(rig->caps && rig->caps->port_type == RIG_PORT_SERIAL)
-	{
-	    int index = comboBoxComPort->currentIndex();
-	    string strPort = comboBoxComPort->itemData(index).toString().toStdString();
-	    if(strPort!="")
-	    {
-		rig->setConf("rig_pathname", strPort.c_str());
-	    }
-	}
-	labelRigInfo->setText(tr("waiting"));
-	try
-	{
-	    rig->open();
-	} catch(RigException e)
-	{
-	    labelRigInfo->setText(tr(e.message));
-	}
-#endif
-	labelRigInfo->setText(rig->getInfo());
-//	TimerRig.start(500);
-}
-
-void ReceiverSettingsDlg::OnTimerRig()
-{
+    QMessageBox::information(this, tr("Configure Rig"), tr("Not done"), QMessageBox::Ok);
 }
 
 void ReceiverSettingsDlg::loadOutputSettings()
@@ -1432,7 +1351,7 @@ void ReceiverSettingsDlg::saveOutputSettings()
 
 void ReceiverSettingsDlg::OnCheckBoxMuteAudio()
 {
-    Settings.Put("Receiver", "muteaudio", CheckBoxMuteAudio->isChecked());
+    Settings.Put("Receiver", "mute", CheckBoxMuteAudio->isChecked());
 }
 
 void ReceiverSettingsDlg::OnCheckSaveAudioWav()

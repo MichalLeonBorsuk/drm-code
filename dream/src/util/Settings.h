@@ -77,10 +77,8 @@
 
 #endif
 
-#ifdef HAVE_LIBHAMLIB
 /* Maximum ID number for hamlib library */
 # define MAX_ID_HAMLIB				32768
-#endif
 
 /* max magnitude of front-end cal factor */
 #define MAX_CAL_FACTOR				200

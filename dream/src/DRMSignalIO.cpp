@@ -630,17 +630,7 @@ void CReceiveData::CalculateSigStrengthCorrection(CParameter &ReceiverParam,
 	}
 
 	/* Add on the calibration factor for the current mode */
-	switch(ReceiverParam.eModulation)
-	{
-	case DRM:
-		rCorrection += ReceiverParam.FrontEndParameters.rCalFactorDRM;
-		break;
-	case AM: case  USB: case  LSB: case  CW: case  NBFM: case  WBFM:
-		rCorrection += ReceiverParam.FrontEndParameters.rCalFactorAM;
-		break;
-	case NONE:
-		;
-	}
+	rCorrection += ReceiverParam.FrontEndParameters.rCalFactor;
 
 	ReceiverParam.rSigStrengthCorrection = rCorrection;
 
