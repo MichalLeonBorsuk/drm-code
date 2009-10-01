@@ -459,20 +459,11 @@ CSettings::ParseArguments(int argc, char **argv)
 			continue;
 		}
 
-		/* Hamlib config string --------------------------------------------- */
-		// command line only - will be converted and saved in Dream.ini by CHamlib
-		if (GetStringArgument(argc, argv, i, "-C", "--hamlib-config",
-							  strArgument) == true)
-		{
-			Put("command", "hamlib-config", strArgument);
-			continue;
-		}
-
-		/* Hamlib Model ID -------------------------------------------------- */
-		if (GetNumericArgument(argc, argv, i, "-M", "--hamlib-model", 0,
+                /* Hamlib Rig ID -------------------------------------------------- */
+                if (GetNumericArgument(argc, argv, i, "-R", "--rig", 0,
 							   MAX_ID_HAMLIB, rArgument) == true)
 		{
-			Put("command", "hamlib-model", (int)rArgument);
+                        Put("command", "rig", (int)rArgument);
 			continue;
 		}
 
@@ -569,8 +560,7 @@ CSettings::UsageArguments(char **argv)
 		"  -I <n>, --snddevin <n>      set sound in device\n"
 		"  -O <n>, --snddevout <n>     set sound out device\n"
 #ifdef HAVE_LIBHAMLIB
-		"  -M <n>, --hamlib-model <n>  set Hamlib radio model ID\n"
-		"  -C <s>, --hamlib-config <s> set Hamlib config parameter\n"
+                "  -R <n>, --rig <n> choose a rig from those defined in Dream.ini\n"
 #endif
 		"  -T, --ensmeter              enable S-Meter\n"
 #ifdef WIN32
