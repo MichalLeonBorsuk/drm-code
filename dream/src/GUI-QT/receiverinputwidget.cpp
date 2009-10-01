@@ -54,8 +54,8 @@ ReceiverInputWidget::ReceiverInputWidget(QWidget *parent) :
     bgrh->addButton(radioButtonRSCIControl, 1);
     bgrh->addButton(radioButtonHamlib, 0);
 
-    connect(bgrsf, SIGNAL(buttonClicked(int)), stackedWidgetCardFileNet, SLOT(setCurrentIndex(int)));
-    connect(bgriq, SIGNAL(buttonClicked(int)), this, SLOT(onBGriq(int)));
+    connect(bgrsf, SIGNAL(buttonClicked(int)), this, SLOT(onbgrsf(int)));
+    connect(bgriq, SIGNAL(buttonClicked(int)), stackedWidgetRealIQ, SLOT(setCurrentIndex(int)));
     connect(bgrh, SIGNAL(buttonClicked(int)), stackedWidgetControl, SLOT(setCurrentIndex(int)));
     connect(pushButtonChooseFile, SIGNAL(clicked()), this, SLOT(onChooseFile()));
 
@@ -225,11 +225,11 @@ void ReceiverInputWidget::save(CSettings& settings) const
     string sec = accessibleName().toStdString();
     // Status
     if(radioButtonRSCI->isChecked())
-	settings.Put(sec, "input", "net");
+	settings.Put(sec, "input", string("net"));
     if(radioButtonFile->isChecked())
-	settings.Put(sec, "input", "file");
+	settings.Put(sec, "input", string("file"));
     if(radioButtonCard->isChecked())
-	settings.Put(sec, "input", "card");
+	settings.Put(sec, "input", string("card"));
 
     if(radioButtonReal->isChecked())
     {
@@ -297,6 +297,11 @@ void ReceiverInputWidget::onChooseFile()
 	lineEditFile->setText(fileName);
 }
 
-void ReceiverInputWidget::onBGriq(int id)
+void ReceiverInputWidget::onbgrsf(int id)
 {
+    stackedWidgetCardFileNet->setCurrentIndex(id);
+    if(id == stackedWidgetCardFileNet->indexOf(pageRSCIStatus))
+	stackedWidgetNetAudio->setCurrentIndex(stackedWidgetNetAudio->indexOf(pageNet));
+    else
+	stackedWidgetNetAudio->setCurrentIndex(stackedWidgetNetAudio->indexOf(pageAudio));
 }

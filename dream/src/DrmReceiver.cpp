@@ -1368,9 +1368,15 @@ CDRMReceiver::LoadSettings()
 	    {
 		if(pRig)
 		    delete pRig;
-		pRig = new CRig(model, &Parameters);
-		cerr << "set rig model " << model << endl;
-		// TODO configure rig
+		pRig = NULL;
+		try {
+		    pRig = new CRig(model, &Parameters);
+		    cerr << "set rig model " << model << endl;
+		    pRig->LoadSettings(r, settings);
+		} catch(RigException e)
+		{
+		    cerr << "can't set rig model " << model << endl;
+		}
 	    }
 	}
     }
