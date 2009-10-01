@@ -49,6 +49,7 @@
 enum ESMeterState {SS_VALID, SS_NOTVALID, SS_TIMEOUT};
 
 class CParameter;
+class CSettings;
 
 class CRigMap
 {
@@ -77,6 +78,8 @@ public:
 	std::string		GetComPort() const;
 	void			SetDRMMode();
 	void			SetModeForDRM(rmode_t, pbwidth_t);
+	void			LoadSettings(const std::string&, const CSettings&);
+	void			SaveSettings(const std::string&, CSettings&) const;
 
 protected:
 	bool			bSMeterWanted, bEnableSMeter;

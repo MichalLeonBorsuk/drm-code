@@ -49,7 +49,7 @@ public:
 
 public slots:
     void onChooseFile();
-    void onBGriq(int);
+    void onbgrsf(int);
 
 protected:
     virtual void changeEvent(QEvent *e);

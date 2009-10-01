@@ -30,6 +30,7 @@
 #include <sstream>
 #include <iostream>
 #include "../Parameter.h"
+#include "Settings.h"
 
 CRig::CRig(rig_model_t m, CParameter* p):Rig(m),
 bSMeterWanted(false), bEnableSMeter(false),iOffset(0),
@@ -135,5 +136,88 @@ void CRig::run()
 #ifdef QT_CORE_LIB
 	    msleep(400);
 #endif
+    }
+}
+
+void CRig::LoadSettings(const std::string& sectitle, const CSettings& settings)
+{
+    rmode_t mode_for_drm = rmode_t(settings.Get(sectitle, "mode_for_drm", int(RIG_MODE_NONE)));
+    pbwidth_t width_for_drm = pbwidth_t(settings.Get(sectitle, "width", int(0)));
+    if(mode_for_drm!=RIG_MODE_NONE)
+    {
+	SetModeForDRM(mode_for_drm, width_for_drm);
+    }
+    int offset = settings.Get(sectitle, "offset", int(0));
+    if(offset != 0)
+    {
+	SetFrequencyOffset(offset);
+    }
+    INISection sec;
+    settings.Get(sectitle+"-conf", sec);
+    for(INISection::const_iterator j=sec.begin(); j!=sec.end(); j++)
+    {
+	setConf(j->first.c_str(), j->second.c_str());
+    }
+    settings.Get(sectitle+"-levels", sec);
+    for(INISection::const_iterator j=sec.begin(); j!=sec.end(); j++)
+    {
+	setLevel(rig_parse_level(j->first.c_str()), atoi(j->second.c_str()));
+    }
+}
+
+void CRig::SaveSettings(const std::string& sec, CSettings& settings) const
+{
+    CRig* rig = const_cast<CRig*>(this);
+    vector<string> keys;
+    keys.push_back("rig_pathname"); // TODO
+    for(size_t j=0; j<keys.size(); j++)
+    {
+	try {
+	    char val[200];
+	    rig->getConf(keys[j].c_str(), val);
+	    if(strlen(val)>0)
+	    {
+		settings.Put(sec+"-conf", keys[j], string(val));
+	    }
+	} catch(...)
+	{
+	    stringstream err;
+	    cerr << "error for rig " << " config " << j << endl;
+	}
+    }
+    keys.clear();
+    keys.push_back("ATT");
+    keys.push_back("AGC");
+    keys.push_back("IF");
+    keys.push_back("CWPITCH");
+    for(size_t j=0; j<keys.size(); j++)
+    {
+	try {
+	    int val;
+	    rig->getLevel(rig_parse_mode(keys[j].c_str()), val);
+	    settings.Put(sec+"-levels", keys[j], val);
+	} catch(...)
+	{
+	    // skip
+	    stringstream err;
+	    cerr << "error for rig " << " level " << j << endl;
+	}
+    }
+    try {
+	pbwidth_t width;
+	rmode_t m = rig->getMode(width);
+	if(m!=RIG_MODE_NONE)
+	{
+	    settings.Put(sec, "mode_for_drm", int(m));
+	    settings.Put(sec, "width", int(width));
+	}
+	int offset = rig->GetFrequencyOffset();
+	if(offset!=0)
+	    settings.Put(sec, "offset", offset);
+    } catch(...)
+    {
+	// skip
+	stringstream err;
+	cerr << "error for rig " << " mode or offset" << endl;
     }
 }

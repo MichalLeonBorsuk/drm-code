@@ -440,43 +440,22 @@ RigModel::load(const CSettings& settings)
     for(size_t i=0; int(i)<l.size(); i++)
     {
 	RigData r;
-        QString s = QString("Rig-")+l.at(i);
-        string sectitle = s.toStdString();
+	QString s = QString("Rig-")+l.at(i);
+	string sectitle = s.toStdString();
 
 	int model = settings.Get(sectitle, "model", int(RIG_MODEL_NONE));
-        if(model == RIG_MODEL_NONE)
-            continue;
+	if(model == RIG_MODEL_NONE)
+	    continue;
 	r.id = l[i].toInt();
-        try {
-            r.rig = new CRig(model);
-        } catch(RigException e)
-        {
-            r.rig = NULL;
-        }
+	try {
+	    r.rig = new CRig(model);
+	} catch(RigException e)
+	{
+	    r.rig = NULL;
+	}
 	if(r.rig)
 	{
-	    rmode_t mode_for_drm = rmode_t(settings.Get(sectitle, "mode_for_drm", int(RIG_MODE_NONE)));
-	    pbwidth_t width_for_drm = pbwidth_t(settings.Get(sectitle, "width", int(0)));
-	    if(mode_for_drm!=RIG_MODE_NONE)
-	    {
-		r.rig->SetModeForDRM(mode_for_drm, width_for_drm);
-	    }
-	    int offset = settings.Get(sectitle, "offset", int(0));
-	    if(offset != 0)
-	    {
-		r.rig->SetFrequencyOffset(offset);
-	    }
-	    INISection sec;
-	    settings.Get(sectitle+"-conf", sec);
-	    for(INISection::const_iterator j=sec.begin(); j!=sec.end(); j++)
-	    {
-		r.rig->setConf(j->first.c_str(), j->second.c_str());
-	    }
-	    settings.Get(sectitle+"-levels", sec);
-	    for(INISection::const_iterator j=sec.begin(); j!=sec.end(); j++)
-	    {
-		r.rig->setLevel(rig_parse_level(j->first.c_str()), atoi(j->second.c_str()));
-	    }
+	    r.rig->LoadSettings(sectitle, settings);
 	    rigs[i] = r;
 	}
     }
@@ -506,64 +485,8 @@ RigModel::save(CSettings& settings)
 	string sec = s.str();
 	s.str("");
 	s << r.rig->caps->rig_model;
-	cerr << "rig " << i << " " << sec << " " << s.str() << endl;
 	settings.Put(sec, "model", s.str());
-	vector<string> keys;
-	keys.push_back("rig_pathname"); // TODO
-	for(size_t j=0; j<keys.size(); j++)
-	{
-	    try {
-		char val[200];
-		r.rig->getConf(keys[j].c_str(), val);
-		if(strlen(val)>0)
-		{
-		    settings.Put(sec+"-conf", keys[j], string(val));
-		}
-	    } catch(...)
-	    {
-		stringstream err;
-		cerr << "error for rig " << i << " config " << j << endl;
-		//QMessageBox::information(NULL, "1", err.str().c_str());
-		// skip
-	    }
-	}
-	keys.clear();
-	keys.push_back("ATT");
-	keys.push_back("AGC");
-	keys.push_back("IF");
-	keys.push_back("CWPITCH");
-	for(size_t j=0; j<keys.size(); j++)
-	{
-	    try {
-		int val;
-		r.rig->getLevel(rig_parse_mode(keys[j].c_str()), val);
-		settings.Put(sec+"-levels", keys[j], val);
-	    } catch(...)
-	    {
-		// skip
-		stringstream err;
-		cerr << "error for rig " << i << " level " << j << endl;
-		//QMessageBox::information(NULL, "2", err.str().c_str());
-	    }
-	}
-	try {
-	    pbwidth_t width;
-	    rmode_t m = r.rig->getMode(width);
-	    if(m!=RIG_MODE_NONE)
-	    {
-		settings.Put(sec, "mode_for_drm", int(m));
-		settings.Put(sec, "width", int(width));
-	    }
-	    int offset = r.rig->GetFrequencyOffset();
-	    if(offset!=0)
-		settings.Put(sec, "offset", offset);
-	} catch(...)
-	{
-	    // skip
-	    stringstream err;
-	    cerr << "error for rig " << i << " mode or offset" << endl;
-	    //QMessageBox::information(NULL, "3", err.str().c_str());
-	}
+	r.rig->SaveSettings(sec, settings);
     }
     settings.Put("Hamlib", "rigs", rigids.str());
 }
