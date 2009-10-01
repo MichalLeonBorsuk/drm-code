@@ -11,8 +11,6 @@
  * convention is always "input-buffer, output-buffer". Additionally, the
  * DRM-parameters are fed to the function.
  *
- * 11/21/2005 Andrew Murphy, BBC Research & Development, 2005
- *	- Additions to include AMSS demodulation
  *
  ******************************************************************************
  *
@@ -1098,10 +1096,19 @@ bool CDRMReceiver::doSetFrequency()
 	else
 	{
 		if(pRig)
+                    try
+                    {
 			result = pRig->SetFrequency(iFreqkHz);
+                    }
+                catch(RigException e)
+                {
+                    const char* msg = e.message;
+                    cerr << "problem setting frequency " << iFreqkHz << " kHz " << msg << endl;
+                    result = false;
+                }
 	}
 
-	/* tell the RSCI and IQ file writer that freq has changed in case it needs to start a new file */
+        /* tell the RSCI and IQ file writers that freq has changed in case it needs to start a new file */
 	if (downstreamRSCI.GetOutEnabled() == true)
 		downstreamRSCI.NewFrequency(Parameters);
 
@@ -1285,6 +1292,52 @@ CDRMReceiver::LoadSettings()
 	}
     }
 
+    // Control Interface
+    dev = settings.Get("command", "rig", -1);
+    if(dev != -1)
+    {
+        settings.Put(section, "control", string("Hamlib"));
+        settings.Put(section, "rig", dev);
+    }
+    str = settings.Get("command", "rciout", string(""));
+    if(str != "")
+    {
+        settings.Put(section, "control", string("RSCI"));
+        settings.Put(section, "rciout", str);
+    }
+
+    str = settings.Get(section, "control", string("Hamlib"));
+    if(str=="Hamlib")
+    {
+        string r = settings.Get(section, "rig", string(""));
+        if(r!="")
+        {
+            r = "Rig-"+r;
+            rig_model_t model = settings.Get(r, "model", -1);
+            if(model != -1)
+            {
+                if(pRig)
+                    delete pRig;
+                pRig = NULL;
+                try {
+                    pRig = new CRig(model, &Parameters);
+                    cerr << "set rig model " << model << endl;
+                    pRig->LoadSettings(r, settings);
+                } catch(RigException e)
+                {
+                    cerr << "can't set rig model " << model << endl;
+                }
+            }
+        }
+    }
+    else
+    {
+        upstreamRSCI.SetDestination(str);
+        if(pRig)
+            delete pRig;
+        pRig = NULL;
+    }
+
     /* Receiver ------------------------------------------------------------- */
 
     /* Sound Out device */
@@ -1336,56 +1389,6 @@ CDRMReceiver::LoadSettings()
     else
     {
 	downstreamRSCI.StartRSIRecording(Parameters, str[0]);
-    }
-
-    // Control Interface
-    str = settings.Get("command", "rciout", string(""));
-    if(str == "")
-    {
-	settings.Put(section, "control", string("Hamlib"));
-	// look for rig - override Rig-0 from the command line
-	str = settings.Get("command", "hamlib-model", string(""));
-	settings.Put("Rig-0", "model", str);
-	str = settings.Get("command", "hamlib-config", string(""));
-	settings.Put("Rig-0", "config", str);
-	settings.Put(section, "rig", 0);
-    }
-    else
-    {
-	settings.Put(section, "control", string("RSCI"));
-	settings.Put(section, "rciout", str);
-    }
-
-    str = settings.Get(section, "control", string("Hamlib"));
-    if(str=="Hamlib")
-    {
-    	string r = settings.Get(section, "rig", string(""));
-	if(r!="")
-	{
-	    r = "Rig-"+r;
-	    rig_model_t model = settings.Get(r, "model", -1);
-	    if(model != -1)
-	    {
-		if(pRig)
-		    delete pRig;
-		pRig = NULL;
-		try {
-		    pRig = new CRig(model, &Parameters);
-		    cerr << "set rig model " << model << endl;
-		    pRig->LoadSettings(r, settings);
-		} catch(RigException e)
-		{
-		    cerr << "can't set rig model " << model << endl;
-		}
-	    }
-	}
-    }
-    else
-    {
-	upstreamRSCI.SetDestination(str);
-	if(pRig)
-	    delete pRig;
-	pRig = NULL;
     }
 
     /* downstream RSCI (network or file) */
