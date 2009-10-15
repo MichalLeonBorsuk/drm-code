@@ -459,18 +459,18 @@ CSettings::ParseArguments(int argc, char **argv)
 			continue;
 		}
 
-                /* Hamlib Rig ID -------------------------------------------------- */
-                if (GetNumericArgument(argc, argv, i, "-R", "--rig", 0,
+		/* Hamlib Rig ID -------------------------------------------------- */
+		if (GetNumericArgument(argc, argv, i, "-R", "--rig", 0,
 							   MAX_ID_HAMLIB, rArgument) == true)
 		{
-                        Put("command", "rig", (int)rArgument);
+			Put("command", "rig", (int)rArgument);
 			continue;
 		}
 
 		/* Enable s-meter flag ---------------------------------------------- */
 		if (GetFlagArgument(argc, argv, i, "-T", "--ensmeter") == true)
 		{
-			Put("Hamlib", "smeter", (int)rArgument);
+			Put("Receiver", "smeter", (int)rArgument);
 			continue;
 		}
 
@@ -560,7 +560,7 @@ CSettings::UsageArguments(char **argv)
 		"  -I <n>, --snddevin <n>      set sound in device\n"
 		"  -O <n>, --snddevout <n>     set sound out device\n"
 #ifdef HAVE_LIBHAMLIB
-                "  -R <n>, --rig <n> choose a rig from those defined in Dream.ini\n"
+		"  -R <n>, --rig <n> choose a rig from those defined in Dream.ini\n"
 #endif
 		"  -T, --ensmeter              enable S-Meter\n"
 #ifdef WIN32

@@ -1096,16 +1096,7 @@ bool CDRMReceiver::doSetFrequency()
 	else
 	{
 		if(pRig)
-                    try
-                    {
 			result = pRig->SetFrequency(iFreqkHz);
-                    }
-                catch(RigException e)
-                {
-                    const char* msg = e.message;
-                    cerr << "problem setting frequency " << iFreqkHz << " kHz " << msg << endl;
-                    result = false;
-                }
 	}
 
         /* tell the RSCI and IQ file writers that freq has changed in case it needs to start a new file */
@@ -1318,15 +1309,7 @@ CDRMReceiver::LoadSettings()
             {
                 if(pRig)
                     delete pRig;
-                pRig = NULL;
-                try {
-                    pRig = new CRig(model, &Parameters);
-                    cerr << "set rig model " << model << endl;
-                    pRig->LoadSettings(r, settings);
-                } catch(RigException e)
-                {
-                    cerr << "can't set rig model " << model << endl;
-                }
+		pRig = new CRig(model, &Parameters);
             }
         }
     }

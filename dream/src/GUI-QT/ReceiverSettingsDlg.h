@@ -40,6 +40,7 @@
 /* Classes ********************************************************************/
 
 #include "../util/Hamlib.h"
+#include <set>
 
 class RigTypesModel : public QAbstractItemModel
 {
@@ -67,34 +68,13 @@ protected:
     };
     vector<make> rigs;
     static int rig_enumerator(const rig_caps *, void *);
-
-public:
-
-    struct parms
-    {
-    	parms():levels(),mode_for_drm(RIG_MODE_NONE),width_for_drm(0),offset(0){}
-    	map<string,int> levels;
-    	rmode_t mode_for_drm;
-    	pbwidth_t width_for_drm;
-    	int offset;
-    };
-    map<rig_model_t,parms> unmodified, modified;
 };
-
-struct RigData
-{
-  RigData():id(next_id++),rig(NULL){}
-  int id; // persistent id to allow deletes without breaking links
-  CRig* rig;
-  static int next_id;
-};
-Q_DECLARE_METATYPE(RigData)
 
 class RigModel : public QAbstractItemModel
 {
 public:
 
-    RigModel();
+    RigModel(CSettings& s);
     virtual ~RigModel() {}
 
     int rowCount ( const QModelIndex & parent = QModelIndex() ) const;
@@ -104,15 +84,23 @@ public:
     QModelIndex index(int row, int column,
 		  const QModelIndex &parent = QModelIndex()) const;
     QModelIndex parent(const QModelIndex &child) const;
-    void add(CRig*);
+    void add(rig_model_t, bool=false);
     void remove(int);
-    void load(const CSettings&);
-    void save(CSettings&);
 
-//protected:
+    struct parms
+    {
+    	parms():levels(),mode_for_drm(RIG_MODE_NONE),width_for_drm(0),offset(0){}
+    	map<string,int> levels;
+    	rmode_t mode_for_drm;
+    	pbwidth_t width_for_drm;
+    	int offset;
+    };
 
-    QPixmap	BitmLittleGreenSquare;
-    vector<RigData> rigs;
+protected:
+
+    CSettings&  settings;
+    set<int> rigs;
+    map<rig_model_t,parms> unmodified, modified;
 };
 
 class SoundChoice : public QAbstractItemModel

@@ -210,8 +210,8 @@ void ReceiverInputWidget::load(CSettings& settings)
 	for(int i=0; i<comboBoxRig->count(); i++)
 	{
 	    QVariant var = comboBoxRig->itemData(i);
-	    RigData r = var.value<RigData>();
-	    if(r.id==rig)
+	    int r = var.toInt();
+	    if(r==rig)
 	    {
 		comboBoxRig->setCurrentIndex(i);
 		break;
@@ -280,9 +280,7 @@ void ReceiverInputWidget::save(CSettings& settings) const
     settings.Put(sec, "rciout_host", lineEditControlAddress->text().toStdString());
     settings.Put(sec, "rciout_port", lineEditControlPort->text().toStdString());
     int i = comboBoxRig->currentIndex();
-    QVariant var =comboBoxRig->itemData(i);
-    RigData r = var.value<RigData>();
-    settings.Put(sec, "rig", r.id);
+    settings.Put(sec, "rig", comboBoxRig->itemData(i).toInt());
 }
 
 void ReceiverInputWidget::onChooseFile()
