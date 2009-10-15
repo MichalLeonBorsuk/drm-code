@@ -52,11 +52,11 @@ private:
     void readRawOrFF(vector<_BYTE>& vecbydata, int& interval);
     void readPcap(vector<_BYTE>& vecbydata, int& interval);
 
-	CPacketSink*	pPacketSink;
-	CPacer*			pacer;
-	uint64_t        last_packet_time;
-    void*			pf;
-	bool		    bRaw;
+    CPacketSink*    pPacketSink;
+    CPacer*	    pacer;
+    uint64_t        last_packet_time;
+    void*	    pf;
+    bool	    bRaw;
 };
 
 #endif

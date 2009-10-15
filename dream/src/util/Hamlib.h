@@ -38,7 +38,7 @@
 #endif
 
 #ifdef HAVE_LIBHAMLIB
-# include "rigclass.h"
+# include <hamlib/rig.h>
 #else
  typedef int rig_model_t;
  typedef int rmode_t;
@@ -57,9 +57,9 @@ public:
     std::map<std::string,std::map<std::string,rig_model_t> > rigs;
 };
 
-class CRig: public Rig
+class CRig
 #ifdef QT_CORE_LIB
-	, public QThread
+	: public QThread
 #endif
 {
 public:
@@ -74,18 +74,20 @@ public:
 	void 			SetEnableSMeter(const bool bStatus); // sets/clears wanted flag and starts/stops
 	bool			GetEnableSMeter(); // returns wanted flag
 	void 			StopSMeter(); // stops (clears run flag) but leaves wanted flag alone
-	void			SetComPort(const std::string&);
-	std::string		GetComPort() const;
 	void			SetDRMMode();
 	void			SetModeForDRM(rmode_t, pbwidth_t);
 	void			LoadSettings(const std::string&, const CSettings&);
 	void			SaveSettings(const std::string&, CSettings&) const;
 
+	const char *		model_name;
+	rig_model_t		rig_model;
+	rig_status_e		status;
 protected:
 	bool			bSMeterWanted, bEnableSMeter;
-	int iOffset;
-	rmode_t mode_for_drm;
-	pbwidth_t width_for_drm;
+	int			iOffset;
+	rmode_t			mode_for_drm;
+	pbwidth_t		width_for_drm;
+	RIG*			the_rig;
 	CParameter*		pParameters;
 #ifdef QT_CORE_LIB
 	QMutex			mutex;

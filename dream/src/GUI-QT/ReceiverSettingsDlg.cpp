@@ -42,54 +42,8 @@
 
 /* Implementation *************************************************************/
 
-RigTypesModel::RigTypesModel():QAbstractItemModel(),rigs(),unmodified(),modified()
+RigTypesModel::RigTypesModel():QAbstractItemModel(),rigs()
 {
-	unmodified[RIG_MODEL_G303].levels["ATT"]=0;
-	unmodified[RIG_MODEL_G303].levels["AGC"]=3;
-
-	modified[RIG_MODEL_G303].levels["ATT"]=0;
-	modified[RIG_MODEL_G303].levels["AGC"]=3;
-
-	unmodified[RIG_MODEL_G313].levels["ATT"]=0;
-	unmodified[RIG_MODEL_G313].levels["AGC"]=3;
-
-	modified[RIG_MODEL_G313].levels["ATT"]=0;
-	modified[RIG_MODEL_G313].levels["AGC"]=3;
-
-	unmodified[RIG_MODEL_AR7030].mode_for_drm = RIG_MODE_AM;
-	unmodified[RIG_MODEL_AR7030].width_for_drm = 3000;
-	unmodified[RIG_MODEL_AR7030].levels["AGC"]=5;
-
-	modified[RIG_MODEL_AR7030].mode_for_drm = RIG_MODE_AM;
-	modified[RIG_MODEL_AR7030].width_for_drm = 6000;
-	modified[RIG_MODEL_AR7030].levels["AGC"]=5;
-
-	unmodified[RIG_MODEL_NRD535].mode_for_drm = RIG_MODE_CW;
-	unmodified[RIG_MODEL_NRD535].width_for_drm = 12000;
-	unmodified[RIG_MODEL_NRD535].levels["CWPITCH"]=-5000;
-	unmodified[RIG_MODEL_NRD535].levels["IF"]=-2000;
-	unmodified[RIG_MODEL_NRD535].levels["AGC"]=3;
-	unmodified[RIG_MODEL_NRD535].offset=3;
-
-	modified[RIG_MODEL_NRD535].levels["AGC"]=3;
-	modified[RIG_MODEL_NRD535].offset=3;
-
-	unmodified[RIG_MODEL_RX320].mode_for_drm = RIG_MODE_AM;
-	unmodified[RIG_MODEL_RX320].width_for_drm = 6000;
-	unmodified[RIG_MODEL_RX320].levels["AF"]=1;
-	unmodified[RIG_MODEL_RX320].levels["AGC"]=3;
-
-	modified[RIG_MODEL_RX320].levels["AGC"]=3;
-
-	unmodified[RIG_MODEL_RX340].mode_for_drm = RIG_MODE_USB;
-	unmodified[RIG_MODEL_RX340].width_for_drm = 16000;
-	unmodified[RIG_MODEL_RX340].levels["AF"]=1;
-	unmodified[RIG_MODEL_RX340].levels["IF"]=2000;
-	unmodified[RIG_MODEL_RX340].levels["AGC"]=3;
-	unmodified[RIG_MODEL_RX340].offset=-12;
-
-	modified[RIG_MODEL_RX340].levels["AGC"]=3;
-	modified[RIG_MODEL_RX340].offset=-12;
 }
 
 int
@@ -261,11 +215,67 @@ RigTypesModel::load()
     reset();
 }
 
-int RigData::next_id = 0;
-
-RigModel::RigModel() : QAbstractItemModel(),BitmLittleGreenSquare(5,5),rigs()
+RigModel::RigModel(CSettings& ns) : QAbstractItemModel(), settings(ns),
+rigs(),unmodified(),modified()
 {
-    BitmLittleGreenSquare.fill(QColor(0, 255, 0));
+	unmodified[RIG_MODEL_G303].levels["ATT"]=0;
+	unmodified[RIG_MODEL_G303].levels["AGC"]=3;
+
+	modified[RIG_MODEL_G303].levels["ATT"]=0;
+	modified[RIG_MODEL_G303].levels["AGC"]=3;
+
+	unmodified[RIG_MODEL_G313].levels["ATT"]=0;
+	unmodified[RIG_MODEL_G313].levels["AGC"]=3;
+
+	modified[RIG_MODEL_G313].levels["ATT"]=0;
+	modified[RIG_MODEL_G313].levels["AGC"]=3;
+
+	unmodified[RIG_MODEL_AR7030].mode_for_drm = RIG_MODE_AM;
+	unmodified[RIG_MODEL_AR7030].width_for_drm = 3000;
+	unmodified[RIG_MODEL_AR7030].levels["AGC"]=5;
+
+	modified[RIG_MODEL_AR7030].mode_for_drm = RIG_MODE_AM;
+	modified[RIG_MODEL_AR7030].width_for_drm = 6000;
+	modified[RIG_MODEL_AR7030].levels["AGC"]=5;
+
+	unmodified[RIG_MODEL_NRD535].mode_for_drm = RIG_MODE_CW;
+	unmodified[RIG_MODEL_NRD535].width_for_drm = 12000;
+	unmodified[RIG_MODEL_NRD535].levels["CWPITCH"]=-5000;
+	unmodified[RIG_MODEL_NRD535].levels["IF"]=-2000;
+	unmodified[RIG_MODEL_NRD535].levels["AGC"]=3;
+	unmodified[RIG_MODEL_NRD535].offset=3;
+
+	modified[RIG_MODEL_NRD535].levels["AGC"]=3;
+	modified[RIG_MODEL_NRD535].offset=3;
+
+	unmodified[RIG_MODEL_RX320].mode_for_drm = RIG_MODE_AM;
+	unmodified[RIG_MODEL_RX320].width_for_drm = 6000;
+	unmodified[RIG_MODEL_RX320].levels["AF"]=1;
+	unmodified[RIG_MODEL_RX320].levels["AGC"]=3;
+
+	modified[RIG_MODEL_RX320].levels["AGC"]=3;
+
+	unmodified[RIG_MODEL_RX340].mode_for_drm = RIG_MODE_USB;
+	unmodified[RIG_MODEL_RX340].width_for_drm = 16000;
+	unmodified[RIG_MODEL_RX340].levels["AF"]=1;
+	unmodified[RIG_MODEL_RX340].levels["IF"]=2000;
+	unmodified[RIG_MODEL_RX340].levels["AGC"]=3;
+	unmodified[RIG_MODEL_RX340].offset=-12;
+
+	modified[RIG_MODEL_RX340].levels["AGC"]=3;
+	modified[RIG_MODEL_RX340].offset=-12;
+
+	string s = settings.Get("Receiver", "rigs", string(""));
+	if(s!="")
+	{
+	    stringstream ss(s);
+	    while(ss)
+	    {
+		int i;
+		ss >> i;
+		rigs.insert(i);
+	    }
+	}
 }
 
 QModelIndex RigModel::index(int row, int column,
@@ -276,8 +286,13 @@ QModelIndex RigModel::index(int row, int column,
     }
     else
     {
-    	if((row>=0) && (row<int(rigs.size())))
-	    return createIndex(row, column, rigs[row].id);
+	int n = 0;
+	for(set<int>::const_iterator i=rigs.begin(); i!=rigs.end(); i++)
+	{
+	    if(n==row)
+		return createIndex(row, column, *i);
+	    n++;
+	}
     }
     return QModelIndex();
 }
@@ -307,23 +322,14 @@ int RigModel::columnCount (const QModelIndex& parent) const
 QVariant RigModel::data (const QModelIndex& index, int role) const
 {
     int id = int(index.internalId());
-    int i=-1;
-    for(size_t j=0; j<rigs.size(); j++)
-    {
-	if(rigs[j].id==id)
-	{
-	    i=j;
-	    break;
-	}
-    }
-    if(i==-1)
+    if(rigs.count(id)==0)
 	return QVariant();
 
     if(true) // no structure visible at the moment
     {
-    	CRig* r = rigs[i].rig;
-    	if(r==NULL)
-	    return QVariant();
+    	stringstream sec;
+    	sec << "Rig-" << id;
+    	string name;
 	switch(role)
 	{
 	case Qt::DecorationRole:
@@ -332,20 +338,26 @@ QVariant RigModel::data (const QModelIndex& index, int role) const
 	    switch(index.column())
 	    {
 		case 0:
-		    return r->caps->model_name;
+		    name = settings.Get(sec.str(), "model_name", string(""));
+		    if(name != "")
+			return name.c_str();
 		break;
 		case 1:
-		    return r->caps->rig_model;
+		    int model = settings.Get(sec.str(), "model", -1);
+		    if(model != -1)
+			return model;
 		    break;
 		case 2:
-		    return rig_strstatus(r->caps->status);
+		    name = settings.Get(sec.str(), "status", string(""));
+		    if(name != "")
+			return name.c_str();
 		    break;
 	    }
 	    break;
 	case Qt::UserRole:
 	    {
 		QVariant var;
-		var.setValue(rigs[i]);
+		var.setValue(id);
 		return var;
 	    }
 	    break;
@@ -402,93 +414,52 @@ QVariant RigModel::headerData ( int section, Qt::Orientation orientation, int ro
 }
 
 void
-RigModel::add(CRig* rig)
+RigModel::add(rig_model_t m, bool modified_for_drm)
 {
-    RigData r;
-    r.rig = rig;
-    rigs.push_back(r);
-    cerr << "add rig " << r.id << " at " << rigs.size() << " model " << r.rig->caps->rig_model << endl;
+    CRig r(m);
+    int n = 0;
+    for(size_t i=0; i<100; i++)
+    {
+    	if(rigs.count(i) == 0)
+	{
+	    n = i;
+	    break;
+	}
+    }
+    rigs.insert(n);
+    struct scollect {
+	scollect():sep(""),riglist(){}
+	void operator() (int i) {riglist << sep << i; sep = ",";}
+	string sep;
+	stringstream riglist;
+    } collect;
+
+    //for_each(rigs.begin(), rigs.end(), collect);
+    for(set<int>::const_iterator i=rigs.begin(); i!=rigs.end(); i++)
+    {
+	collect(*i);
+    }
+    settings.Put("Receiver", "rigs", collect.riglist.str());
+    stringstream sec;
+    sec << "Rig-" << n;
+    settings.Put(sec.str(), "model", m);
+    settings.Put(sec.str(), "model_name", string(r.model_name));
+    settings.Put(sec.str(), "status", string(rig_strstatus(r.status)));
     reset();
 }
 
 void
 RigModel::remove(int id)
 {
-    for(vector<RigData>::iterator i=rigs.begin(); i!=rigs.end(); i++)
+    for(set<int>::iterator i=rigs.begin(); i!=rigs.end(); i++)
     {
-    	if(i->id == id)
+    	if((*i) == id)
     	{
 		rigs.erase(i); // rig is still stored in receiver TODO
 		break;
     	}
     }
     reset();
-}
-
-void
-RigModel::load(const CSettings& settings)
-{
-    rigs.clear();
-    QString rigids = settings.Get("Hamlib", "rigs", string("")).c_str();
-    if(rigids=="")
-    {
-    	reset();
-	return;
-    }
-    QStringList l = rigids.split(",");
-    rigs.resize(l.size());
-    for(size_t i=0; int(i)<l.size(); i++)
-    {
-	RigData r;
-	QString s = QString("Rig-")+l.at(i);
-	string sectitle = s.toStdString();
-
-	int model = settings.Get(sectitle, "model", int(RIG_MODEL_NONE));
-	if(model == RIG_MODEL_NONE)
-	    continue;
-	r.id = l[i].toInt();
-	try {
-	    r.rig = new CRig(model);
-	} catch(RigException e)
-	{
-	    r.rig = NULL;
-	}
-	if(r.rig)
-	{
-	    r.rig->LoadSettings(sectitle, settings);
-	    rigs[i] = r;
-	}
-    }
-    reset();
-}
-
-void
-RigModel::save(CSettings& settings)
-{
-    stringstream rigids;
-    string sep="";
-    cerr << "No Rigs: " << rigs.size() << endl;
-    for(size_t i=0; i<rigs.size(); i++)
-    {
-	const RigData& r = rigs[i];
-	// save rig attributes including com port
-	// save by index - allows two or more rigs of same type
-	if(r.rig==NULL)
-	{
-	    cerr << "rig " << i << " is null" << endl;
-		continue; // should not happen
-	}
-	stringstream s;
-	s << "Rig-" << r.id;
-	rigids << sep << r.id;
-	sep = ",";
-	string sec = s.str();
-	s.str("");
-	s << r.rig->caps->rig_model;
-	settings.Put(sec, "model", s.str());
-	r.rig->SaveSettings(sec, settings);
-    }
-    settings.Put("Hamlib", "rigs", rigids.str());
 }
 
 SoundChoice::SoundChoice(const CSelectionInterface& s, bool t)
@@ -709,7 +680,7 @@ ReceiverSettingsDlg::ReceiverSettingsDlg(
 	bgTimeInterp(NULL), bgFreqInterp(NULL), bgTiSync(NULL),
 	bgriq(NULL), bglrm(NULL), bgiq(NULL),
 
-	RigTypes(),Rigs(),GPSData(GPSD),soundinputs(),
+	RigTypes(),Rigs(NSettings),GPSData(GPSD),soundinputs(),
 	soundoutputs()
 {
     setupUi(this);
@@ -845,9 +816,6 @@ void ReceiverSettingsDlg::showEvent(QShowEvent*)
     CheckBoxModiMetric->setChecked(Settings.Get("Input-DRM", "modmetric", false));
     SliderNoOfIterations->setValue(Settings.Get("Input-DRM", "mlciter", 0));
 
-    /* Rig - need Rigs populated before input options */
-    Rigs.load(Settings);
-
     pushButtonConfigureRig->setEnabled(false);
 
     /* Input ----------------------------------------------------------------- */
@@ -866,17 +834,9 @@ void ReceiverSettingsDlg::showEvent(QShowEvent*)
     loadLogfileSettings();
 }
 
-static RigData getRig(QComboBox* box)
-{
-    int i = box->currentIndex();
-    QVariant var = box->itemData(i);
-    return var.value<RigData>();
-}
-
 void ReceiverSettingsDlg::hideEvent(QHideEvent*)
 {
-    // Rig tab
-    Rigs.save(Settings);
+    // Rig tab - TODO
     // input tab
     widgetDRMInput->save(Settings);
     widgetAMInput->save(Settings);
@@ -1144,18 +1104,14 @@ ReceiverSettingsDlg::OnRigTypeSelected(const QModelIndex& m)
     if(var.isValid()==false)
 	return;
     rig_model_t model = var.toInt();
-    if(RigTypes.modified.find(model)!=RigTypes.modified.end())
-	checkBoxModified->setEnabled(true);
-    else
-	checkBoxModified->setEnabled(false);
 }
 
 void
 ReceiverSettingsDlg::OnRigSelected(const QModelIndex& index)
 {
     QVariant var = index.data(Qt::UserRole);
-    RigData r = var.value<RigData>();
-    if(r.rig==NULL)
+    //int r = var.value();
+    if(false)
     {
     	QMessageBox::information(this, tr("Hamlib"), tr("Rig not created error"), QMessageBox::Ok);
     	return;
@@ -1168,36 +1124,27 @@ ReceiverSettingsDlg::OnButtonAddRig()
 {
     rig_model_t model = treeViewRigTypes->currentIndex().data(Qt::UserRole).toInt();
 
-    CRig* r = new CRig(model);
-    if(r)
+    bool parms=false;
+    if(parms)
     {
-    	bool parms;
-    	map<rig_model_t,RigTypesModel::parms>::const_iterator pp = RigTypes.unmodified.find(model);
-    	if(checkBoxModified->isChecked())
-    	{
-	    pp=RigTypes.modified.find(model);
-	    parms = (pp!=RigTypes.modified.end());
-    	}
-    	else
-	    parms = (pp!=RigTypes.unmodified.end());
-    	if(parms)
-    	{
-	    const RigTypesModel::parms& p = pp->second;
-	    for(map<string,int>::const_iterator i=p.levels.begin(); i!=p.levels.end(); i++)
-	    {
-		r->setLevel(rig_parse_level(i->first.c_str()), i->second);
-	    }
-	    if(p.mode_for_drm!=RIG_MODE_NONE)
-	    {
-		r->SetModeForDRM(p.mode_for_drm, p.width_for_drm);
-	    }
-	    r->SetFrequencyOffset(p.offset);
-    	}
-    	else
-	    r->SetFrequencyOffset(0);
-	Rigs.add(r);
-	//treeViewRigs->setCurrentIndex(Rigs.rowCount()-1);
+	//const RigTypesModel::parms& p = pp->second;
+	/*
+	for(map<string,int>::const_iterator i=p.levels.begin(); i!=p.levels.end(); i++)
+	{
+	    r->setLevel(rig_parse_level(i->first.c_str()), i->second);
+	}
+	if(p.mode_for_drm!=RIG_MODE_NONE)
+	{
+	    r->SetModeForDRM(p.mode_for_drm, p.width_for_drm);
+	}
+	r->SetFrequencyOffset(p.offset);
+	*/
+	// TODO set these in settings
     }
+    //else
+	//r->SetFrequencyOffset(0);
+    Rigs.add(model);
+    //treeViewRigs->setCurrentIndex(Rigs.rowCount()-1);
 }
 
 void

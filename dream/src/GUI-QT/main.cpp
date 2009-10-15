@@ -118,6 +118,7 @@ main(int argc, char **argv)
 
 		if (strMode == "RX")
 		{
+		    rig_set_debug_level(RIG_DEBUG_TRACE);//RIG_DEBUG_VERBOSE);
 		    rig_load_all_backends();
 		    m.Receiver.LoadSettings();
 		    CParameter* Parameters = m.Receiver.GetParameters();
