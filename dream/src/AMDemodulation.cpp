@@ -408,6 +408,12 @@ void CAMDemodulation::SetAGCType(const EType eNewType)
     Unlock();
 }
 
+#ifdef USE_SPEEX_DENOISE
+#include <speex/speex_preprocess.h>
+static SpeexPreprocessState *preprocess_state = {NULL};
+spx_int32_t SupressionLevel;
+#endif
+
 void CAMDemodulation::SetNoiRedType(const ENoiRedType eNewType)
 {
     /* Lock resources */
@@ -418,15 +424,39 @@ void CAMDemodulation::SetNoiRedType(const ENoiRedType eNewType)
 	switch (NoiRedType)
 	{
 	    case NR_LOW:
+#ifdef USE_SPEEX_DENOISE
+		if (preprocess_state != NULL)
+			{
+			SupressionLevel = -10;
+			speex_preprocess_ctl(preprocess_state, SPEEX_PREPROCESS_SET_NOISE_SUPPRESS, &SupressionLevel);
+			}
+#else
 		    NoiseReduction.SetNoiRedDegree(CNoiseReduction::NR_LOW);
+#endif
 		    break;
 
 	    case NR_MEDIUM:
+#ifdef USE_SPEEX_DENOISE
+		if (preprocess_state != NULL)
+			{
+			SupressionLevel = -15;
+			speex_preprocess_ctl(preprocess_state, SPEEX_PREPROCESS_SET_NOISE_SUPPRESS, &SupressionLevel);
+			}
+#else
 		    NoiseReduction.SetNoiRedDegree(CNoiseReduction::NR_MEDIUM);
+#endif
 		    break;
 
 	    case NR_HIGH:
+#ifdef USE_SPEEX_DENOISE
+		if (preprocess_state != NULL)
+			{
+			SupressionLevel = -20;
+			speex_preprocess_ctl(preprocess_state, SPEEX_PREPROCESS_SET_NOISE_SUPPRESS, &SupressionLevel);
+			}
+#else
 		    NoiseReduction.SetNoiRedDegree(CNoiseReduction::NR_HIGH);
+#endif
 		    break;
 
 	    case NR_OFF:
@@ -735,6 +765,34 @@ void CFreqOffsAcq::Start(const CReal rNewNormCenter)
 */
 void CNoiseReduction::Process(CRealVector& vecrIn)
 {
+#ifdef USE_SPEEX_DENOISE
+	#define SAMPLE_RATE 48000
+	static spx_int16_t* speexData = {NULL};
+	int i;
+
+	double* vectorData = &( vecrIn[0] );
+	int vectorSz = vecrIn.GetSize();
+	
+	if (preprocess_state == NULL)
+		{
+		preprocess_state = speex_preprocess_state_init(vectorSz, SAMPLE_RATE);
+		speexData = (spx_int16_t*)malloc(vectorSz*sizeof(spx_int16_t));
+		}
+
+	for (i=0; i<vectorSz; i++)
+		{
+		speexData[i] = (spx_int16_t)vectorData[i];
+		}
+
+	speex_preprocess(preprocess_state, speexData, NULL);
+
+	for (i=0; i<vectorSz; i++)
+		{
+		vectorData[i] = (double)speexData[i];
+		}
+
+	
+#else
 	/* Regular block (updates the noise estimate) --------------------------- */
 	/* Update history of input signal */
 	vecrLongSignal.Merge(vecrOldSignal, vecrIn);
@@ -784,8 +842,10 @@ void CNoiseReduction::Process(CRealVector& vecrIn)
 
 	/* Overlap and add operation */
 	vecrIn = vecrFiltResult + vecrOutSig1;
+#endif
 }
 
+#ifndef USE_SPEEX_DENOISE
 CRealVector CNoiseReduction::OptimalFilter(const CComplexVector& veccSigFreq,
 										   const CRealVector& vecrSqMagSigFreq,
 										   const CRealVector& vecrNoisePSD)
@@ -849,8 +909,10 @@ void CNoiseReduction::UpdateNoiseEst(CRealVector& vecrNoisePSD,
 	}
 }
 
+#endif
 void CNoiseReduction::Init(const int iNewBlockLen)
 {
+#ifndef SPEEX_DENOISE
 	iBlockLen = iNewBlockLen;
 	iHalfBlockLen = iBlockLen / 2;
 	iBlockLenLong = 2 * iBlockLen;
@@ -894,4 +956,5 @@ void CNoiseReduction::Init(const int iNewBlockLen)
 	/* Init window for overlap and add */
 	vecrTriangWin.Init(iBlockLen);
 	vecrTriangWin = Triang(iBlockLen);
+#endif
 }
