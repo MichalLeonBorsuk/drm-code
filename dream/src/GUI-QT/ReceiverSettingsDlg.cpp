@@ -343,10 +343,13 @@ QVariant RigModel::data (const QModelIndex& index, int role) const
 			return name.c_str();
 		break;
 		case 1:
+		    {
 		    int model = settings.Get(sec.str(), "model", -1);
 		    if(model != -1)
 			return model;
+		    }
 		    break;
+
 		case 2:
 		    name = settings.Get(sec.str(), "status", string(""));
 		    if(name != "")
