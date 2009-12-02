@@ -239,7 +239,7 @@ CPaCommon::ReInit()
 	Close();
 
 	PaStreamParameters pParameters;
-	memset(&pParameters, sizeof(pParameters), 0);
+	memset(&pParameters, 0, sizeof(pParameters));
 	pParameters.channelCount = channels;
 	pParameters.hostApiSpecificStreamInfo = NULL;
 	pParameters.sampleFormat = fmt(_SAMPLE(0));
