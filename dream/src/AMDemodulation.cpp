@@ -771,7 +771,7 @@ void CNoiseReduction::Process(CRealVector& vecrIn)
 	int i;
 
 	double* vectorData = &( vecrIn[0] );
-	int vectorSz = vecrIn.GetSize();
+	int vectorSz = vecrIn.Size();
 	
 	if (preprocess_state == NULL)
 		{
