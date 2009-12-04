@@ -925,10 +925,15 @@ CAudioSourceDecoder::CAudioSourceDecoder()
 # endif
     if(hFaaDlib)
     {
+	cerr << "loaded aac decoder library OK" << endl;
 	NeAACDecOpen = (NeAACDecOpen_t*)dlsym(hFaaDlib, "NeAACDecOpen");
 	NeAACDecInitDRM = (NeAACDecInitDRM_t*)dlsym(hFaaDlib, "NeAACDecInitDRM");
 	NeAACDecClose = (NeAACDecClose_t*)dlsym(hFaaDlib, "NeAACDecClose");
 	NeAACDecDecode = (NeAACDecDecode_t*)dlsym(hFaaDlib,"NeAACDecDecode");
+    }
+    else
+    {
+	cerr << "No aac decoder library - audio will not be decoded" << endl;
     }
 #endif
     if(NeAACDecInitDRM == NULL) // Might be non-DRM version of FAAD2
