@@ -58,32 +58,32 @@ CAudioSourceEncoderImplementation::CAudioSourceEncoderImplementation()
     faacEncEncode = dummyfaacEncEncode;
     faacEncClose = dummyfaacEncClose;
 #ifdef _WIN32
-    hlib = LoadLibrary(TEXT("libfaac.dll"));
+    hlib = LoadLibrary(TEXT("libfaac_drm.dll"));
     if(hlib)
     {
-        faacEncGetVersion = (faacEncGetVersion_t*)GetProcAddress(hlib, TEXT("faacEncGetVersion"));
-        faacEncGetCurrentConfiguration = (faacEncGetCurrentConfiguration_t*)GetProcAddress(hlib, TEXT("faacEncGetCurrentConfiguration"));
-        faacEncSetConfiguration = (faacEncSetConfiguration_t*)GetProcAddress(hlib, TEXT("faacEncSetConfiguration"));
-        faacEncOpen = (faacEncOpen_t*)GetProcAddress(hlib, TEXT("faacEncOpen"));
-        faacEncGetDecoderSpecificInfo = (faacEncGetDecoderSpecificInfo_t*)GetProcAddress(hlib, TEXT("faacEncGetDecoderSpecificInfo"));
-        faacEncEncode = (faacEncEncode_t*)GetProcAddress(hlib, TEXT("faacEncEncode"));
-        faacEncClose = (faacEncClose_t*)GetProcAddress(hlib, TEXT("faacEncClose"));
+	faacEncGetVersion = (faacEncGetVersion_t*)GetProcAddress(hlib, TEXT("faacEncGetVersion"));
+	faacEncGetCurrentConfiguration = (faacEncGetCurrentConfiguration_t*)GetProcAddress(hlib, TEXT("faacEncGetCurrentConfiguration"));
+	faacEncSetConfiguration = (faacEncSetConfiguration_t*)GetProcAddress(hlib, TEXT("faacEncSetConfiguration"));
+	faacEncOpen = (faacEncOpen_t*)GetProcAddress(hlib, TEXT("faacEncOpen"));
+	faacEncGetDecoderSpecificInfo = (faacEncGetDecoderSpecificInfo_t*)GetProcAddress(hlib, TEXT("faacEncGetDecoderSpecificInfo"));
+	faacEncEncode = (faacEncEncode_t*)GetProcAddress(hlib, TEXT("faacEncEncode"));
+	faacEncClose = (faacEncClose_t*)GetProcAddress(hlib, TEXT("faacEncClose"));
     }
 #else
 # if defined(__APPLE__)
-    hlib = dlopen("libfaac.dylib", RTLD_LOCAL | RTLD_NOW);
-# else 
-    hlib = dlopen("libfaac.so", RTLD_LOCAL | RTLD_NOW);
+    hlib = dlopen("libfaac_drm.dylib", RTLD_LOCAL | RTLD_NOW);
+# else
+    hlib = dlopen("libfaac_drm.so", RTLD_LOCAL | RTLD_NOW);
 # endif
     if(hlib)
     {
-        faacEncGetVersion = (faacEncGetVersion_t*)dlsym(hlib, "faacEncGetVersion");
-        faacEncGetCurrentConfiguration = (faacEncGetCurrentConfiguration_t*)dlsym(hlib, "faacEncGetCurrentConfiguration");
-        faacEncSetConfiguration = (faacEncSetConfiguration_t*)dlsym(hlib, "faacEncSetConfiguration");
-        faacEncOpen = (faacEncOpen_t*)dlsym(hlib, "faacEncOpen");
-        faacEncGetDecoderSpecificInfo = (faacEncGetDecoderSpecificInfo_t*)dlsym(hlib, "faacEncGetDecoderSpecificInfo");
-        faacEncEncode = (faacEncEncode_t*)dlsym(hlib, "faacEncEncode");
-        faacEncClose = (faacEncClose_t*)dlsym(hlib, "faacEncClose");
+	faacEncGetVersion = (faacEncGetVersion_t*)dlsym(hlib, "faacEncGetVersion");
+	faacEncGetCurrentConfiguration = (faacEncGetCurrentConfiguration_t*)dlsym(hlib, "faacEncGetCurrentConfiguration");
+	faacEncSetConfiguration = (faacEncSetConfiguration_t*)dlsym(hlib, "faacEncSetConfiguration");
+	faacEncOpen = (faacEncOpen_t*)dlsym(hlib, "faacEncOpen");
+	faacEncGetDecoderSpecificInfo = (faacEncGetDecoderSpecificInfo_t*)dlsym(hlib, "faacEncGetDecoderSpecificInfo");
+	faacEncEncode = (faacEncEncode_t*)dlsym(hlib, "faacEncEncode");
+	faacEncClose = (faacEncClose_t*)dlsym(hlib, "faacEncClose");
     }
 #endif
 }
@@ -247,7 +247,7 @@ CAudioSourceEncoderImplementation::InitInternalTx
 	for(size_t i=0; i<TransmParam.Service.size(); i++)
 	{
 	    if(TransmParam.Service[i].eAudDataFlag==SF_AUDIO)
-            iCurStreamID = TransmParam.Service[i].iAudioStream;
+	    iCurStreamID = TransmParam.Service[i].iAudioStream;
 	}
 
 	/* Set the total available number of bits, byte aligned */
@@ -256,13 +256,13 @@ CAudioSourceEncoderImplementation::InitInternalTx
 	CAudioParam::EAudSamRat sampleRate = TransmParam.AudioParam[iCurStreamID].eAudioSamplRate;
 
 	if(TransmParam.AudioParam[iCurStreamID].eAudioMode != CAudioParam::AM_MONO)
-        throw CGenErr("Audio - can only do mono, but stereo selected");
+	throw CGenErr("Audio - can only do mono, but stereo selected");
 
     int iLenPartA = TransmParam.MSCParameters.Stream[iCurStreamID].iLenPartA;
     int iLenPartB = TransmParam.MSCParameters.Stream[iCurStreamID].iLenPartB;
 
     if(iLenPartB == 0)
-        throw CGenErr("Audio - requested block length is zero");
+	throw CGenErr("Audio - requested block length is zero");
 
     bUsingTextMessage = TransmParam.AudioParam[iCurStreamID].bTextflag;
 
@@ -369,7 +369,7 @@ CAudioSourceEncoderImplementation::InitInternalTx
 	/* Calculate number of bytes for higher protected blocks */
 
 	iNumHigherProtectedBytes = (iLenPartA - iNumHeaderBytes - iNumAACFrames /* CRC bytes */ )
-                                / iNumAACFrames;
+				/ iNumAACFrames;
 
 	if (iNumHigherProtectedBytes < 0)
 		iNumHigherProtectedBytes = 0;

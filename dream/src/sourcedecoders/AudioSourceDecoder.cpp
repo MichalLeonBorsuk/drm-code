@@ -725,9 +725,9 @@ CAudioSourceDecoder::InitInternal(CParameter& Parameters)
 			veciFrameLength.resize(iNumAudioFrames);
 
 			/* Init AAC-decoder */
-            if(HandleAACDecoder)
-                NeAACDecInitDRM(&HandleAACDecoder,
-                    iAACSampleRate, (unsigned char) iDRMchanMode);
+	    if(HandleAACDecoder)
+		NeAACDecInitDRM(&HandleAACDecoder,
+		    iAACSampleRate, (unsigned char) iDRMchanMode);
 		}
 		else if (eAudioCoding == CAudioParam::AC_CELP)
 		{
@@ -868,10 +868,10 @@ CAudioSourceDecoder::InitInternal(CParameter& Parameters)
 		   Maybe TODO: sample rate correction to avoid audio dropouts */
 		iMaxOutputBlockSize = iMaxLenResamplerOutput;
 
-        /* Reset value used for the history because if an audio service was selected
-           but then only a data service is selected, the value would remain with the
-           last state */
-        Parameters.Measurements.CDAudHist.invalidate();
+	/* Reset value used for the history because if an audio service was selected
+	   but then only a data service is selected, the value would remain with the
+	   last state */
+	Parameters.Measurements.CDAudHist.invalidate();
 
 		Parameters.Unlock();
 	}
@@ -909,31 +909,31 @@ CAudioSourceDecoder::CAudioSourceDecoder()
     NeAACDecClose = NeAACDecCloseDummy;
     NeAACDecDecode = NeAACDecDecodeDummy;
 #ifdef _WIN32
-    hFaaDlib = LoadLibrary(TEXT("libfaad2.dll"));
+    hFaaDlib = LoadLibrary(TEXT("libfaad2_drm.dll"));
     if(hFaaDlib)
     {
-        NeAACDecOpen = (NeAACDecOpen_t*)GetProcAddress(hFaaDlib, TEXT("NeAACDecOpen"));
-        NeAACDecInitDRM = (NeAACDecInitDRM_t*)GetProcAddress(hFaaDlib, TEXT("NeAACDecInitDRM"));
-        NeAACDecClose = (NeAACDecClose_t*)GetProcAddress(hFaaDlib, TEXT("NeAACDecClose"));
-        NeAACDecDecode = (NeAACDecDecode_t*)GetProcAddress(hFaaDlib, TEXT("NeAACDecDecode"));
+	NeAACDecOpen = (NeAACDecOpen_t*)GetProcAddress(hFaaDlib, TEXT("NeAACDecOpen"));
+	NeAACDecInitDRM = (NeAACDecInitDRM_t*)GetProcAddress(hFaaDlib, TEXT("NeAACDecInitDRM"));
+	NeAACDecClose = (NeAACDecClose_t*)GetProcAddress(hFaaDlib, TEXT("NeAACDecClose"));
+	NeAACDecDecode = (NeAACDecDecode_t*)GetProcAddress(hFaaDlib, TEXT("NeAACDecDecode"));
     }
 #else
 # if defined(__APPLE__)
-    hFaaDlib = dlopen("libfaad.dylib", RTLD_LOCAL | RTLD_NOW);
+    hFaaDlib = dlopen("libfaad_drm.dylib", RTLD_LOCAL | RTLD_NOW);
 # else
-    hFaaDlib = dlopen("libfaad2.so", RTLD_LOCAL | RTLD_NOW);
+    hFaaDlib = dlopen("libfaad2_drm.so", RTLD_LOCAL | RTLD_NOW);
 # endif
     if(hFaaDlib)
     {
-        NeAACDecOpen = (NeAACDecOpen_t*)dlsym(hFaaDlib, "NeAACDecOpen");
-        NeAACDecInitDRM = (NeAACDecInitDRM_t*)dlsym(hFaaDlib, "NeAACDecInitDRM");
-        NeAACDecClose = (NeAACDecClose_t*)dlsym(hFaaDlib, "NeAACDecClose");
-        NeAACDecDecode = (NeAACDecDecode_t*)dlsym(hFaaDlib,"NeAACDecDecode");
+	NeAACDecOpen = (NeAACDecOpen_t*)dlsym(hFaaDlib, "NeAACDecOpen");
+	NeAACDecInitDRM = (NeAACDecInitDRM_t*)dlsym(hFaaDlib, "NeAACDecInitDRM");
+	NeAACDecClose = (NeAACDecClose_t*)dlsym(hFaaDlib, "NeAACDecClose");
+	NeAACDecDecode = (NeAACDecDecode_t*)dlsym(hFaaDlib,"NeAACDecDecode");
     }
 #endif
     if(NeAACDecInitDRM == NULL) // Might be non-DRM version of FAAD2
     {
-        NeAACDecInitDRM = NeAACDecInitDRMDummy;
+	NeAACDecInitDRM = NeAACDecInitDRMDummy;
     }
 	/* Open AACEncoder instance */
 	HandleAACDecoder = NeAACDecOpen();
@@ -942,7 +942,7 @@ CAudioSourceDecoder::CAudioSourceDecoder()
 	   constructor with arbitrary values to be sure that this is satisfied */
     if(HandleAACDecoder)
     {
-        NeAACDecInitDRM(&HandleAACDecoder, 24000, DRMCH_MONO);
+	NeAACDecInitDRM(&HandleAACDecoder, 24000, DRMCH_MONO);
     }
 }
 
