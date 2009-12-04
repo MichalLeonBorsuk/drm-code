@@ -145,7 +145,7 @@ unsigned long DAB_DATAGROUP_DECODER_putData(
 	const unsigned char *data_field;
 	unsigned long data_len;
 	unsigned short crc_field;
-	unsigned char c;
+	unsigned char c;
  
 
 #if 0
@@ -281,9 +281,9 @@ int DAB_DGDEC_IMPL_extractMscDatagroupHeader(
 
 		c=buf[2];
 		header->extension_field=(unsigned short)(c<<8);
-		c=buf[3];
-    /* type behaviour of vc6.0 is not conformant to */
-    /* header->extension_field+=(unsigned short)c; */
+		c=buf[3];
+    /* type behaviour of vc6.0 is not conformant to */
+    /* header->extension_field+=(unsigned short)c; */
     /* Therefore the uncommon syntax is used here. */
 		header->extension_field=(unsigned short)(header->extension_field+c);
 	}
