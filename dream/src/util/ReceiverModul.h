@@ -36,81 +36,104 @@ template<class TInput, class TOutput>
 class CReceiverModul : public CModul<TInput, TOutput>
 {
 public:
-	CReceiverModul();
-	virtual ~CReceiverModul() {}
 
-	void				SetInitFlag() {bDoInit = true;}
-	virtual void		Init(CParameter& Parameter);
-	virtual void		Init(CParameter& Parameter,
-							 CBuffer<TOutput>& OutputBuffer);
-	virtual void		Init(CParameter& Parameter,
-							 CBuffer<TOutput>& OutputBuffer,
-							 CBuffer<TOutput>& OutputBuffer2);
-	virtual void		Init(CParameter& Parameter,
-							 CBuffer<TOutput>& OutputBuffer,
-							 CBuffer<TOutput>& OutputBuffer2,
-							 CBuffer<TOutput>& OutputBuffer3);
-	virtual void		Init(CParameter& Parameter,
-							 CBuffer<TOutput>& OutputBuffer,
-							 CBuffer<TOutput>& OutputBuffer2,
-							 vector< CSingleBuffer<TOutput> >& vecOutputBuffer);
-	virtual void		Init(CParameter& Parameter,
-							 vector< CSingleBuffer<TOutput> >& vecOutputBuffer);
-	virtual void		ReadData(CParameter& Parameter,
-								 CBuffer<TOutput>& OutputBuffer);
-	virtual bool	ProcessData(CParameter& Parameter,
-									CBuffer<TInput>& InputBuffer,
-									CBuffer<TOutput>& OutputBuffer);
-	virtual bool	ProcessData(CParameter& Parameter,
-									CBuffer<TInput>& InputBuffer,
-									CBuffer<TOutput>& OutputBuffer,
-									CBuffer<TOutput>& OutputBuffer2);
-	virtual bool	ProcessData(CParameter& Parameter,
-									CBuffer<TInput>& InputBuffer,
-									CBuffer<TOutput>& OutputBuffer,
-									CBuffer<TOutput>& OutputBuffer2,
-									CBuffer<TOutput>& OutputBuffer3);
-	virtual bool	ProcessData(CParameter& Parameter,
-									CBuffer<TInput>& InputBuffer,
-									CBuffer<TOutput>& OutputBuffer,
-									CBuffer<TOutput>& OutputBuffer2,
-									vector< CSingleBuffer<TOutput> >& vecOutputBuffer);
-	virtual bool	ProcessData(CParameter& Parameter,
-									CBuffer<TInput>& InputBuffer,
-									vector< CSingleBuffer<TOutput> >& vecOutputBuffer);
-	virtual bool	WriteData(CParameter& Parameter,
-								  CBuffer<TInput>& InputBuffer);
+    CReceiverModul()
+            :CModul<TInput, TOutput>(),
+            pvecOutputData2(NULL),pvecOutputData3(NULL),vecpvecOutputData(),
+            iMaxOutputBlockSize2(0),iMaxOutputBlockSize3(0),veciMaxOutputBlockSize(),
+            iOutputBlockSize2(0),iOutputBlockSize3(0),veciOutputBlockSize(),
+            bDoInit(false),bResetBuf(false),bResetBuf2(false),bResetBuf3(false),vecbResetBuf()
+    {
+    }
+    virtual ~CReceiverModul() {}
+
+    void				SetInitFlag()
+    {
+        bDoInit = true;
+    }
+    virtual void		Init(CParameter& Parameter);
+    virtual void		Init(CParameter& Parameter,
+                       CBuffer<TOutput>& OutputBuffer);
+    virtual void		Init(CParameter& Parameter,
+                       CBuffer<TOutput>& OutputBuffer,
+                       CBuffer<TOutput>& OutputBuffer2);
+    virtual void		Init(CParameter& Parameter,
+                       CBuffer<TOutput>& OutputBuffer,
+                       CBuffer<TOutput>& OutputBuffer2,
+                       CBuffer<TOutput>& OutputBuffer3);
+    virtual void		Init(CParameter& Parameter,
+                       CBuffer<TOutput>& OutputBuffer,
+                       CBuffer<TOutput>& OutputBuffer2,
+                       vector< CSingleBuffer<TOutput> >& vecOutputBuffer);
+    virtual void		Init(CParameter& Parameter,
+                       vector< CSingleBuffer<TOutput> >& vecOutputBuffer);
+    virtual void		ReadData(CParameter& Parameter,
+                           CBuffer<TOutput>& OutputBuffer);
+    virtual bool	ProcessData(CParameter& Parameter,
+                             CBuffer<TInput>& InputBuffer,
+                             CBuffer<TOutput>& OutputBuffer);
+    virtual bool	ProcessData(CParameter& Parameter,
+                             CBuffer<TInput>& InputBuffer,
+                             CBuffer<TOutput>& OutputBuffer,
+                             CBuffer<TOutput>& OutputBuffer2);
+    virtual bool	ProcessData(CParameter& Parameter,
+                             CBuffer<TInput>& InputBuffer,
+                             CBuffer<TOutput>& OutputBuffer,
+                             CBuffer<TOutput>& OutputBuffer2,
+                             CBuffer<TOutput>& OutputBuffer3);
+    virtual bool	ProcessData(CParameter& Parameter,
+                             CBuffer<TInput>& InputBuffer,
+                             CBuffer<TOutput>& OutputBuffer,
+                             CBuffer<TOutput>& OutputBuffer2,
+                             vector< CSingleBuffer<TOutput> >& vecOutputBuffer);
+    virtual bool	ProcessData(CParameter& Parameter,
+                             CBuffer<TInput>& InputBuffer,
+                             vector< CSingleBuffer<TOutput> >& vecOutputBuffer);
+    virtual bool	WriteData(CParameter& Parameter,
+                           CBuffer<TInput>& InputBuffer);
 
 protected:
-	void SetBufReset1() {bResetBuf = true;}
-	void SetBufReset2() {bResetBuf2 = true;}
-	void SetBufReset3() {bResetBuf3 = true;}
-	void SetBufResetN() {for(size_t i=0; i<vecbResetBuf.size(); i++)
-     vecbResetBuf[i] = true;}
+    void SetBufReset1()
+    {
+        bResetBuf = true;
+    }
+    void SetBufReset2()
+    {
+        bResetBuf2 = true;
+    }
+    void SetBufReset3()
+    {
+        bResetBuf3 = true;
+    }
+    void SetBufResetN()
+    {
+        for (size_t i=0; i<vecbResetBuf.size(); i++)
+            vecbResetBuf[i] = true;
+    }
 
-	/* Additional buffers if the derived class has multiple output streams */
-	CVectorEx<TOutput>*	pvecOutputData2;
-	CVectorEx<TOutput>*	pvecOutputData3;
-	vector<CVectorEx<TOutput>*>	vecpvecOutputData;
+    /* Additional buffers if the derived class has multiple output streams */
+    CVectorEx<TOutput>*	pvecOutputData2;
+    CVectorEx<TOutput>*	pvecOutputData3;
+    vector<CVectorEx<TOutput>*>	vecpvecOutputData;
 
-	/* Max block-size are used to determine the size of the required buffer */
-	int					iMaxOutputBlockSize2;
-	int					iMaxOutputBlockSize3;
-	vector<int>			veciMaxOutputBlockSize;
-	/* Actual read (or written) size of the data */
-	int					iOutputBlockSize2;
-	int					iOutputBlockSize3;
-	vector<int>			veciOutputBlockSize;
+    /* Max block-size are used to determine the size of the required buffer */
+    int					iMaxOutputBlockSize2;
+    int					iMaxOutputBlockSize3;
+    vector<int>			veciMaxOutputBlockSize;
+    /* Actual read (or written) size of the data */
+    int					iOutputBlockSize2;
+    int					iOutputBlockSize3;
+    vector<int>			veciOutputBlockSize;
 
 private:
-	/* Init flag */
-	bool			bDoInit;
+    /* Init flag */
+    bool			bDoInit;
 
-	/* Reset flags for output cyclic-buffers */
-	bool			bResetBuf;
-	bool			bResetBuf2;
-	bool			bResetBuf3;
-	vector<bool>	vecbResetBuf;
+    /* Reset flags for output cyclic-buffers */
+    bool			bResetBuf;
+    bool			bResetBuf2;
+    bool			bResetBuf3;
+    vector<bool>	vecbResetBuf;
 };
 
 /* Take an input buffer and split it 2 ways */
@@ -119,24 +142,24 @@ template<class TInput>
 class CSplitModul: public CReceiverModul<TInput, TInput>
 {
 protected:
-	virtual void SetInputBlockSize(CParameter& ReceiverParam) = 0;
+    virtual void SetInputBlockSize(CParameter& ReceiverParam) = 0;
 
-	virtual void InitInternal(CParameter& ReceiverParam)
-	{
-		this->SetInputBlockSize(ReceiverParam);
-		this->iOutputBlockSize = this->iInputBlockSize;
-		this->iOutputBlockSize2 = this->iInputBlockSize;
-	}
+    virtual void InitInternal(CParameter& ReceiverParam)
+    {
+        this->SetInputBlockSize(ReceiverParam);
+        this->iOutputBlockSize = this->iInputBlockSize;
+        this->iOutputBlockSize2 = this->iInputBlockSize;
+    }
 
-	virtual void ProcessDataInternal(CParameter&)
-	{
-		for (int i = 0; i < this->iInputBlockSize; i++)
-		{
-			TInput n = (*(this->pvecInputData))[i];
-			(*this->pvecOutputData)[i] = n;
-			(*this->pvecOutputData2)[i] = n;
-		}
-	}
+    virtual void ProcessDataInternal(CParameter&)
+    {
+        for (int i = 0; i < this->iInputBlockSize; i++)
+        {
+            TInput n = (*(this->pvecInputData))[i];
+            (*this->pvecOutputData)[i] = n;
+            (*this->pvecOutputData2)[i] = n;
+        }
+    }
 };
 
 #endif
