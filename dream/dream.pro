@@ -36,107 +36,105 @@ TRANSLATIONS = src/GUI-QT/languages/drm.fr.ts \
     src/GUI-QT/languages/dreamtr.es.ts
 UI_DIR = moc
 MOC_DIR = moc
-macx { 
+macx {
     RC_FILE = src/GUI-QT/res/macicons.icns
     LIBS += -framework \
-        CoreFoundation \
-        -framework \
-        CoreServices
+	CoreFoundation \
+	-framework \
+	CoreServices
     LIBS += -framework \
-        CoreAudio \
-        -framework \
-        AudioToolbox \
-        -framework \
-        AudioUnit
+	CoreAudio \
+	-framework \
+	AudioToolbox \
+	-framework \
+	AudioUnit
 }
-unix { 
+unix {
     LIBS += -lsndfile \
-        -lz \
-        -lrfftw \
-        -lfftw \
-        -lqwt
+	-lz \
+	-lrfftw \
+	-lfftw \
+	-lqwt
     DEFINES += HAVE_RFFTW_H
     DEFINES += HAVE_DLFCN_H \
-        HAVE_MEMORY_H \
-        HAVE_STDINT_H \
-        HAVE_STDLIB_H
+	HAVE_MEMORY_H \
+	HAVE_STDINT_H \
+	HAVE_STDLIB_H
     DEFINES += HAVE_STRINGS_H \
-        HAVE_STRING_H \
-        STDC_HEADERS
+	HAVE_STRING_H \
+	STDC_HEADERS
     DEFINES += HAVE_INTTYPES_H \
-        HAVE_STDINT_H \
-        HAVE_SYS_STAT_H \
-        HAVE_SYS_TYPES_H \
-        HAVE_UNISTD_H
+	HAVE_STDINT_H \
+	HAVE_SYS_STAT_H \
+	HAVE_SYS_TYPES_H \
+	HAVE_UNISTD_H
     !macx {
-        INCLUDEPATH += /usr/local/qwt-5.2.0/include/
-        INCLUDEPATH += linux
-        LIBS += -lrt
-        SOURCES += src/sound/shmsoundin.cpp \
-            src/sound/pa_shm_ringbuffer.c
-        HEADERS += src/sound/shmsoundin.h \
-            src/sound/pa_shm_ringbuffer.h
+	INCLUDEPATH += /usr/local/qwt-5.2.0/include/
+	INCLUDEPATH += linux
+	LIBS += -lrt
+	SOURCES += src/sound/shmsoundin.cpp \
+	    src/sound/pa_shm_ringbuffer.c
+	HEADERS += src/sound/shmsoundin.h \
+	    src/sound/pa_shm_ringbuffer.h
     }
 }
-win32 { 
+
+win32 {
     DEFINES -= UNICODE
+    INCLUDEPATH += ../include/qwt
     LIBS += -lsetupapi \
-        -lqwt5 \
-        -lws2_32
-    win32-g++ { 
-        DEFINES += HAVE_STDINT_H \
-            HAVE_STDLIB_H
-        LIBS += -lsndfile \
-            -lz \
-            -lrfftw \
-            -lfftw \
-            -lstdc++
+	-lqwt5 \
+	-lws2_32
+    win32-g++ {
+	DEFINES += HAVE_STDINT_H \
+	    HAVE_STDLIB_H
+	LIBS += -lz \
+	    -lrfftw \
+	    -lfftw \
+	    -lstdc++ -lsndfile.dll
     }
-    else { 
-        DEFINES += NOMINMAX
-        TEMPLATE = vcapp
-        LIBS += libsndfile-1.lib \
-            zdll.lib \
-            qwt5.lib
-        LIBS += libfftw.lib
-        QMAKE_LFLAGS_RELEASE += /NODEFAULTLIB:"MSVCRTD, LIBCMT"
-        QMAKE_LFLAGS_DEBUG += /NODEFAULTLIB:msvcrtd.lib
+    else {
+	DEFINES += NOMINMAX
+	TEMPLATE = vcapp
+	LIBS += zdll.lib qwt5.lib libfftw.lib libsndfile-1.lib
+	QMAKE_LFLAGS_RELEASE += /NODEFAULTLIB:"MSVCRTD, LIBCMT"
+	QMAKE_LFLAGS_DEBUG += /NODEFAULTLIB:msvcrtd.lib
     }
 }
-hamlib { 
+hamlib {
     DEFINES += HAVE_LIBHAMLIB \
-        HAVE_RIG_PARSE_MODE
+	HAVE_RIG_PARSE_MODE
     HEADERS += src/util/Hamlib.h \
-        src/util/rigclass.h
+	src/util/rigclass.h
     SOURCES += src/util/Hamlib.cpp \
-        src/util/rigclass.cc
+	src/util/rigclass.cc
     unix:LIBS += -lhamlib
     macx:LIBS += -framework \
-        IOKit
-    win32 { 
-        win32-g++:LIBS += -lhamlib
-        else:LIBS += libhamlib-2.lib
+	IOKit
+    win32 {
+	win32-g++:LIBS += -lhamlib
+	else:LIBS += libhamlib-2.lib
     }
 }
-pcap { 
+pcap {
     DEFINES += HAVE_LIBPCAP
     win32:LIBS += -lwpcap
     else:LIBS += -lpcap
 }
-portaudio { 
+portaudio {
     DEFINES += USE_PORTAUDIO
     HEADERS += src/sound/pa_ringbuffer.h \
-        src/sound/drm_portaudio.h
+	src/sound/drm_portaudio.h
     SOURCES += src/sound/drm_portaudio.cpp \
-        src/sound/pa_ringbuffer.c
-    win32-g++:LIBS += ../lib/PortAudio.dll
+	src/sound/pa_ringbuffer.c
+    win32-g++:LIBS += -lportaudio_x86
     win32-msvc2008:LIBS += ../lib/portaudio_x86.lib
     unix:LIBS += -lportaudio
 }
-winmm { 
+winmm {
     CONFIG -= portaudio
     HEADERS += src/sound/winmm.h \
-        src/sound/SoundWin.h
+	src/sound/SoundWin.h
     SOURCES += src/sound/winmm.cpp
     LIBS += -lwinmm
 }
