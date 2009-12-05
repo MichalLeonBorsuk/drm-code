@@ -766,7 +766,6 @@ void CFreqOffsAcq::Start(const CReal rNewNormCenter)
 void CNoiseReduction::Process(CRealVector& vecrIn)
 {
 #ifdef USE_SPEEX_DENOISE
-	#define SAMPLE_RATE 48000
 	static spx_int16_t* speexData = {NULL};
 	int i;
 
@@ -775,7 +774,7 @@ void CNoiseReduction::Process(CRealVector& vecrIn)
 	
 	if (preprocess_state == NULL)
 		{
-		preprocess_state = speex_preprocess_state_init(vectorSz, SAMPLE_RATE);
+		preprocess_state = speex_preprocess_state_init(vectorSz, SOUNDCRD_SAMPLE_RATE);
 		speexData = (spx_int16_t*)malloc(vectorSz*sizeof(spx_int16_t));
 		}
 
