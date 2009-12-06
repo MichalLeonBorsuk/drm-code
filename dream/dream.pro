@@ -135,6 +135,10 @@ portaudio {
     win32-msvc2008:LIBS += ../lib/portaudio_x86.lib
     unix:LIBS += -lportaudio
 }
+speexdenoise {
+    DEFINES += USE_SPEEX_DENOISE
+    LIBS += -lspeexdsp
+}
 winmm {
     CONFIG -= portaudio
     HEADERS += src/sound/winmm.h \
