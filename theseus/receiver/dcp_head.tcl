@@ -1,3 +1,5 @@
+#!/usr/bin/tclsh
+
 # Writes the first n AF frames from the input file into the output file.
 
 # Read global variables
