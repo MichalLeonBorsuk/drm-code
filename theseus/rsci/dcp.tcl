@@ -1,6 +1,6 @@
 
 package provide dcp 1.0
-package require crc 1.0
+package require rsci_crc 1.0
 
 # Create the namespace
 namespace eval ::dcp {
