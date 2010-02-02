@@ -1,7 +1,8 @@
+
 package provide rsci 1.0
 
 if ![info exists SE127_PROTOCOL] {
-    puts "SE127_PROTOCOL undefined, defaulting to DCP!\n\r"
+    #puts "SE127_PROTOCOL undefined, defaulting to DCP!\n\r"
 	set SE127_PROTOCOL DCP
 }
 
