@@ -1,0 +1,408 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <link rel="shortcut icon" href="favicon.ico" type="image/vnd.microsoft.icon">
+    <link rel=StyleSheet href="style.css" type="text/css">
+    <title>THESEUS Remote Monitoring System</title>
+    <script type="text/javascript" src="/mochikit/MochiKit.js"></script>
+    <script type="text/javascript" src="/plotkit/Base.js"></script>
+    <script type="text/javascript" src="/plotkit/Layout.js"></script>
+    <script type="text/javascript" src="/plotkit/Canvas.js"></script>
+    <script type="text/javascript" src="/plotkit/SweetCanvas.js"></script>
+    <script type="text/javascript" src="/plotkit/excanvas.js"></script>
+    <script type="text/javascript" src="/theseus/Graph.js"></script>
+    <script type="text/javascript" src="/theseus/DisplayGroup.js"></script>
+    <script type="text/javascript" src="/theseus/XmlUtils.js"></script>
+    <script type="text/javascript" src="/theseus/MonitoringItemData.js"></script>
+
+    <script type="text/javascript">
+
+    var xmlUrl = "/cgi-bin/theseus/xml.pl";
+    var xmlDate = "";
+    var updateAuto = true;
+    var updateTimems = 3000;
+
+    //check for canvas support (only FireFox > 1.5)
+    var hasCanvas = CanvasRenderer.isSupported();
+
+    //array for PSD
+    var receiversList = new Object();
+
+    var displayGroup = new DisplayGroup("displayGroup", "/images", receiversList);
+    displayGroup.setUpdateDisplayFunction(function() {
+      for (var name in receiversList) {
+        if (receiversList[name].display) {
+          if (!receiversList[name].hasTableRow) {
+            createTableRow(name);
+            updateEntry(name);
+          }
+
+          receiversList[name].hasTableRow = true;
+        } else {
+          if (receiversList[name].hasTableRow) {
+            deleteTableRow(name);
+          }
+
+          receiversList[name].hasTableRow = false;
+        }
+      }
+    });
+
+    function makeRequest(url, func) {
+      httpRequest = false;
+
+      if (window.XMLHttpRequest) { // Mozilla, Safari,...
+        httpRequest = new XMLHttpRequest();
+        if (httpRequest.overrideMimeType) {
+          httpRequest.overrideMimeType('text/xml');
+        }
+      } else if (window.ActiveXObject) { // IE
+        try {
+          httpRequest = new ActiveXObject("Msxml2.XMLHTTP");
+        } catch (e) {
+          try {
+            httpRequest = new ActiveXObject("Microsoft.XMLHTTP");
+          } catch (e) {}
+        }
+      } 
+
+      if (!httpRequest) {
+        alert('Giving up :( Cannot create an XMLHTTP instance');
+        return false;
+      }
+
+      if (typeof(func) != 'undefined')
+        httpRequest.onreadystatechange = func;
+
+      httpRequest.open('GET', url, true);
+      httpRequest.send(null);
+    }
+
+    function createTableRow(name) {
+      // generate the table cells 'properly' by inserting into DOM
+      // rather than using innerHTML which crashes in IE due to block tags
+      var newTR = createTag("tr", {"id":name + "_entry"}, "");
+      document.getElementById("table_data").appendChild(newTR);
+
+      var newTD = createTag("td", {"id":name + "_rx"}, "");
+      var newTD2 = createTag("a", {"href":"/cgi-bin/theseus/serve_rul_http.pl?receiver=" + name}, "");
+
+      newTD.appendChild(newTD2);
+      newTD.appendChild(document.createTextNode("\u00A0\u00A0" + name));
+      newTD2.appendChild(createTag("img", {"border":"0", "align":"bottom", "width":"17", "height":13, "src":"/images/listen_icon.gif"}, ""));
+      newTR.appendChild(newTD);
+
+      newTR.appendChild(createTag("td", {"id":name + "_last_update"}, ""));
+//        newTR.appendChild(createTag("td", {"id":name + "_latlong"}, ""));
+      newTR.appendChild(createTag("td", {"id":name + "_mode"}, ""));
+      newTR.appendChild(createTag("td", {"id":name + "_frequency"}, ""));
+      newTR.appendChild(createTag("td", {"id":name + "_label"}, ""));
+      newTR.appendChild(createTag("td", {"id":name + "_wmm"}, ""));
+      newTR.appendChild(createTag("td", {"id":name + "_rf"}, ""));
+      newTR.appendChild(createTag("td", {"id":name + "_audio"}, ""));
+
+      if (hasCanvas) {
+        newTD = createTag("td", {}, "");
+        var newTD2 = newTD.appendChild(createTag("div", {}, ""));
+        newTD2.appendChild(createTag("canvas", {"id":name+"_psd", "height":"70", "width":"150"}, ""));
+        newTR.appendChild(newTD);
+
+        newTD = createTag("td", {}, "");
+        var newTD2 = newTD.appendChild(createTag("div", {}, ""));
+        newTD2.appendChild(createTag("canvas", {"id":name+"_imp", "height":"70", "width":"150"}, ""));
+        newTR.appendChild(newTD);
+
+        newTD = createTag("td", {}, "");
+        var newTD2 = newTD.appendChild(createTag("div", {}, ""));
+        newTD2.appendChild(createTag("canvas", {"id":name+"_rdbv_history", "height":"70", "width":"150"}, ""));
+        newTR.appendChild(newTD);
+
+        newTD = createTag("td", {}, "");
+        var newTD2 = newTD.appendChild(createTag("div", {}, ""));
+        newTD2.appendChild(createTag("canvas", {"id":name+"_rwmm_history", "height":"70", "width":"150"}, ""));
+        newTR.appendChild(newTD);
+
+        receiversList[name].psdGraph = new Graph(name + "_psd", Color.redColor());
+        receiversList[name].impGraph = new Graph(name +"_imp", Color.blueColor());
+        receiversList[name].rdbvHistoryGraph = new Graph(name +"_rdbv_history", Color.greenColor());
+        receiversList[name].rwmmHistoryGraph = new Graph(name +"_rwmm_history", Color.orangeColor());
+      }
+    }
+
+    function deleteTableRow(name) {
+      delete receiversList[name].psdGraph;
+      delete receiversList[name].impGraph;
+      delete receiversList[name].rdbvHistoryGraph;
+      delete receiversList[name].rwmmHistoryGraph;
+
+      removeEntry(name);
+    }
+
+    function removeEntry(name) {
+      var node = document.getElementById(name + "_entry");
+      if (node != null)
+        document.getElementById("table_data").removeChild(node);
+    }
+
+    function updateEntry(name) {
+      receiverData = receiversList[name].data;
+
+//    document.getElementById (name + "_latlong").innerHTML = receiverData.latitude + ", " + receiverData.longitude;
+      document.getElementById (name + "_last_update").innerHTML = receiverData.lastUpdate;
+
+      document.getElementById (name + "_mode").innerHTML = receiverData.mode;
+
+      document.getElementById (name + "_frequency").innerHTML = receiverData.frequency;
+      document.getElementById (name + "_label").innerHTML = receiverData.stationLabel;
+
+      if (receiverData.rdmo == "drm_")
+        if (receiverData.wmm != "")
+          document.getElementById (name + "_wmm").innerHTML = receiverData.wmm;
+        else
+         document.getElementById (name + "_wmm").innerHTML = "\u00A0";
+
+      document.getElementById (name + "_rf").innerHTML = receiverData.rfLevel;
+
+      if (receiverData.rdmo == "drm_")
+        if (receiverData.audioStatus != "")
+          document.getElementById (name + "_audio").innerHTML = receiverData.audioStatus;
+      else
+        document.getElementById (name + "_audio").innerHTML = "\u00A0";
+
+      if (hasCanvas) {
+        if (receiverData.psdPresent) {
+          var graph = receiverData.psdGraphData
+          receiversList[name].psdGraph.draw(graph.points, graph.start, graph.end, 7, "kHz", -128, 0, 40, "dB");
+        } else {
+          receiversList[name].psdGraph.clear();
+        }
+        if (receiverData.impPresent) {
+          var graph = receiverData.impGraphData;
+          receiversList[name].impGraph.draw(graph.points, graph.start, graph.end, 3, "ms", -128, 0, 40, "dB");
+        } else {
+          receiversList[name].impGraph.clear();
+        }
+        if (receiverData.rdbvHistoryPresent) {
+          var graph = receiverData.rdbvHistoryGraphData;
+          receiversList[name].rdbvHistoryGraph.draw(graph.points, graph.start, graph.end, 10, "s", -20, 100, 40, "dBuV");
+        } else {
+          receiversList[name].rdbvHistoryGraph.clear();
+        }
+        if (receiverData.rwmmHistoryPresent) { 
+          var graph = receiverData.rwmmHistoryGraphData;
+          receiversList[name].rwmmHistoryGraph.draw(graph.points, graph.start, graph.end, 10, "s", 0, 40, 10, "dB");
+        } else {
+          receiversList[name].rwmmHistoryGraph.clear();
+        }
+      }
+
+      // colour the row if the data is old
+      var node = document.getElementById(name + "_entry");
+
+      if (receiverData.lastUpdate <= 3) {
+        node.style.color = "#000000";
+      } else if (receiverData.lastUpdate > 3 && receiverData.lastUpdate <= 10) {
+        node.style.color = "#606060";
+      } else if (receiverData.lastUpdate > 10 && receiverData.lastUpdate <= 20) {
+        node.style.color = "#909090";
+      } else if (receiverData.lastUpdate > 20 && receiverData.lastUpdate <= 30) {
+        node.style.color = "#A0A0A0";
+      } else if (receiverData.lastUpdate > 30 && receiverData.lastUpdate <= 50) {
+        node.style.color = "#C0C0C0";
+      } else {
+       node.style.color = "#D0D0D0";
+      }
+    }
+
+    function alertContents() {
+      if (httpRequest.readyState == 4) {
+        if (httpRequest.status == 200) {
+          updateTable(httpRequest.responseXML);
+
+          if (updateAuto)
+            setTimeout("updateData()", updateTimems);
+        } else {
+          alert("ERROR: Couldn't open XML file (" + xmlUrl + ").");
+        }
+      }
+    }
+
+    function updateData()
+    {
+      makeRequest(xmlUrl, alertContents);
+    }	
+
+    function load()
+    {
+      if (!hasCanvas) {
+        alert("WARNING: Browser does not support Canvas, therefore no Spectrum (PSD) plots will be displayed. Try IE6+ and Firefox 2+.");
+      }
+
+      // read URL options
+      urlquery = location.href.split("?");
+
+      if (urlquery.length > 1) {
+        urlterms = urlquery[1].split("&");
+        for (var term in urlterms) {
+          var urlterm = urlterms[term].split("=");
+          if (urlterm.length > 1) {
+            if (urlterm[0] == "update") {
+              if (urlterm[1] == "auto")
+                updateAuto = true;
+              else
+                updateAuto = false;
+            }
+            if (urlterm[0] == "xml") {
+              xmlUrl = urlterm[1];
+            }
+          }
+        }
+      }
+
+      displayGroup.create("display_group", [ "Frequency", "Label" ]);
+
+      generateTable();
+
+      displayGroup.defaultShow("Frequency", { "Frequency": ["855 kHz", "846 kHz"],
+                                              "Label": [ "BBC Devon Trial" ],
+                                              "None": [ "m_CNH_", "m_MTY_", "m_NFR_", "m_NHT_", "m_PYZ_", "m_PY__"] });
+
+      updateData();
+    }
+
+    function generateTable()
+    {
+      var newTableBody = createTag("tbody", { "id":"table_data" }, "");
+
+      document.getElementById('rx_data').appendChild(newTableBody);
+      var newTR = createTag("tr", { "id":name + "_entry", "valign":"top" }, "");
+
+      var newTH = createTag("th", {}, "");
+      newTH.innerHTML = "Rx ID";
+      newTR.appendChild(newTH);
+
+      newTH = createTag("th", {}, "");
+      newTH.innerHTML = "Update<br>s ago";
+      newTR.appendChild(newTH);
+
+//      newTR.appendChild(createTag("th", {}, "Location"));
+
+      newTR.appendChild(createTag("th", {}, "Mode"));
+
+      newTH = createTag("th", {}, "");
+      newTH.innerHTML = "Freq<br>kHz";
+      newTR.appendChild(newTH);
+
+      newTR.appendChild(createTag("th", {}, "Label"));
+
+      newTH = createTag("th", {}, "");
+      newTH.innerHTML = "WMER<br>dB";
+      newTR.appendChild(newTH);
+
+      newTH = createTag("th", {}, "");
+      newTH.innerHTML = "RF<br>dBuV";
+      newTR.appendChild(newTH);
+
+      newTH = createTag("th", {}, "");
+      newTH.innerHTML = "Audio<br>%";
+      newTR.appendChild(newTH);
+
+      if (hasCanvas) {
+        newTR.appendChild(createTag("th", {}, "PSD"));
+        newTR.appendChild(createTag("th", {}, "Impulse Resp."));
+        newTR.appendChild(createTag("th", {}, "RF history"));
+        newTR.appendChild(createTag("th", {}, "WMER history"));
+      }
+
+      newTableBody.appendChild(newTR);
+    }
+
+    function createTag(tag, attributes, text)
+    {
+      var td = document.createElement(tag);
+      for (attribute in attributes) {
+        td.setAttribute(attribute, attributes[attribute]);
+      }
+      if (text != "") {
+        td.appendChild(document.createTextNode(text));
+      }
+      return td;
+    }
+
+    function updateTable(xml)
+    {
+      var receiversListNew = new Object();
+
+      var receivers = xml.documentElement.getElementsByTagName("receiver");
+
+      xmlDate = findText(xml , "date");
+      if (xmlDate != "")
+        document.getElementById("xml_date").innerHTML = "Last updated: " + xmlDate;
+
+      var updateDisplayGroups = false;
+
+      for (var index = 0; index < receivers.length; index++) {
+        var receiverData = new MonitoringItemData("Rx");
+        receiverData.parse(receivers[index]);
+        var name = receiverData.name;
+
+        //check to see if receiver already exists
+        if (typeof(receiversList[name]) == "undefined") {
+          receiversList[name] = new Object();
+          receiversList[name].attributes = new Object();
+          receiversList[name].hasTableRow = false;
+          updateDisplayGroups = true;
+        }
+
+        receiversList[name].data = receiverData;
+
+        receiversList[name].attributes["Frequency"] = receiverData.frequency + " kHz";
+        receiversList[name].attributes["Label"] = receiverData.stationLabel;
+
+        receiversListNew[name] = "defined";
+
+        if (receiversList[name].display) {
+          updateEntry(name);
+        }
+      }
+     
+      // now garbage collect any PSD graphs no longer present
+      for (var rxID in receiversList) {
+        if (typeof(receiversListNew[rxID]) == "undefined") {
+          delete receiversList[rxID];
+          removeEntry(rxID); 
+          updateDisplayGroups = true;
+        }
+      }
+
+      displayGroup.update(updateDisplayGroups);
+    }
+
+    </script>
+  </head>
+
+  <body onload="load()">
+    <center>
+    <p><img src="/images/banner.png" width="990" height="40" border="0" vspace="0" hspace="0">
+    <P><A HREF="/theseus/map.html">Map view</A>&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="/theseus/list.html">List view</A>&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="/rsci/">RSCI archive</A>
+    <p><table border=0 width="100%">
+    <tr>
+    <td valign="top"><div style="width: 150px" id="display_group" class="checklist"></td>
+    <td valign="top"><table width="100%" id="rx_data" border="1" cellspacing="1" cellpadding="3"></table></td>
+    </tr>
+    <tr>
+    <td></td>
+    <td>
+      <div id="xml_date" class="last_update"></div>
+    </td>
+    </tr>
+    </table>
+    <p>Download Dream streaming software <A HREF="/files/DreamHelper.exe">DreamHelper</A>
+    <p><IMG height=12 alt=BBC src="/images/bbcFooterLogo.gif" width=40 vspace=0>
+    <br /><font size="1">&copy; MMVII</font>
+    </center>
+  </body>
+</html>
+
+
