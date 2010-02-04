@@ -21,6 +21,242 @@ proc DisplayData {dataString} {
 #   puts $dataString
 }
 
+proc ProcessTagItem {tagName byteLength data} {
+      global SE127_VERSION 
+
+	if {[string range $tagName 0 0] == "x"} {
+		# Process statistics tag - output is list of alternating statistic and value (e.g. 0 19.8 50 20.3 100 21.9)
+		set baseTagName "r[string range $tagName 1 3]"
+puts "basename $baseTagName"
+		binary scan $data "Sc" nFrames nStats
+puts "length of data [string length $data] nFrames $nFrames nStats $nStats"
+		set decodedTag [list $nFrames]
+		set byteLenPerStat [expr ($byteLength - 3) / $nStats]
+		set tag [list]
+            for {set i 3} {$i<$byteLength} {incr i $byteLenPerStat} {
+			binary scan [string range $data $i $i] "c" statistic
+			lappend decodedTag $statistic
+			set subTag [ProcessTagItem $baseTagName [expr $byteLenPerStat - 1] [string range $data [expr $i + 1] [expr $i + $byteLenPerStat - 1]]]
+puts "subtag $subTag length [llength $subTag] stringlen [string length $subTag]"
+			lappend decodedTag $subTag
+		}
+puts "final list length [llength $decodedTag] first ele [lindex $decodedTag 0] second ele [lindex $decodedTag 1] then [lindex $decodedTag 2]"
+		return $decodedTag 
+	}
+	if {$tagName == "rast"} {
+	    binary scan $data "SS" totalFrames correctFrames
+            return [list $totalFrames $correctFrames]
+	}
+
+	if {$tagName == "dlfc"} {
+	    binary scan $data "I"  decodedTag
+	    return $decodedTag
+	}
+	
+	if {$tagName == "robm"} {
+	    binary scan $data "c" decodedTag 
+	    set decodedTag [expr ($decodedTag + 0x100)%0x100]
+	    return $decodedTag
+	}
+
+	if {$tagName == "rdmo"} {
+	    binary scan $data "a4" decodedTag
+          return $decodedTag
+      }
+
+	if {$tagName == "fmjd"} {
+	    binary scan $data "II" mjd tms 
+	    set decodedTag [list $mjd $tms]
+	    return $decodedTag
+	}
+
+	# andrewm - 20070228 - GPS TAG decode
+	if {$tagName == "rgps"} {
+		set decodedTag [list]
+	    set count [binary scan $data "ccScSScSSccccSccSS" source satellites latDD latM \
+			latmm longDD longM longmm altAA alta timeH timeM timeS dateYY dateM dateD speed heading]
+        if {$count == 18} {
+		
+	      set latM [expr { $latM & 0xff }]
+	      set latmm [expr { $latmm & 0xffff }]
+
+	      set latDeg [expr { ( $latDD + ( $latM + $latmm/65536.0) / 60.0 ) }]
+
+	      set longM [expr { $longM & 0xff }]
+	      set longmm [expr { $longmm & 0xffff }]
+	      set longDeg [expr { ( $longDD + ( $longM + $longmm/65536.0) / 60.0 ) }]
+
+          set alta [expr { $alta & 0xff }]
+          set altMetres [expr { $altAA + ( $alta / 60.0 ) }]
+
+	      set speed [expr { $speed & 0xffff }]
+	      set heading [expr { $heading & 0xffff }]
+
+	      set decodedTag [list $latDeg $longDeg $altMetres $dateYY $dateM $dateD $timeH $timeM $timeS $speed $heading]
+        } 
+
+	    return $decodedTag
+	}
+
+	if {$tagName == "rfre"} {
+	    binary scan $data "I" decodedTag
+	    return $decodedTag
+	}		
+
+	if {$tagName == "rmer"} {
+
+	    # Init list
+	    set decodedTag [list]
+
+	    # Go though every value and store
+	    for {set i 0} {$i<$byteLength} {incr i 2} {
+		set subData [string range $data $i [expr $i+1]]
+		binary scan $subData "cc" byte1 byte2
+		set byte2 [expr ($byte2 + 0x100)%0x100]
+		lappend decodedTag [format "%.0f" [expr $byte1+$byte2/256.0]]
+	    }
+
+	    # In case that we are using se127 v2 or lower, copy rmer value to rwmf
+	    if {$SE127_VERSION <3} {
+		set tags(rwmf) $tags(rmer)
+	    }
+
+	    return $decodedTag
+	}	
+
+	if {$tagName == "rwmf"} {
+
+	    # Init list
+	    set decodedTag [list]
+
+	    # Go though every value and store
+	    for {set i 0} {$i<$byteLength} {incr i 2} {
+		set subData [string range $data $i [expr $i+1]]
+		binary scan $subData "cc" byte1 byte2
+		set byte2 [expr ($byte2 + 0x100)%0x100]
+		lappend decodedTag [format "%.0f" [expr $byte1+$byte2/256.0]]
+	    }
+	    return $decodedTag
+	}	
+
+	if {$tagName == "rwmm"} {
+
+	    # Init list
+	    set decodedTag [list]
+
+	    # Go though every value and store
+	    for {set i 0} {$i<$byteLength} {incr i 2} {
+		set subData [string range $data $i [expr $i+1]]
+		binary scan $subData "cc" byte1 byte2
+		set byte2 [expr ($byte2 + 0x100)%0x100]
+		lappend decodedTag [format "%.0f" [expr $byte1+$byte2/256.0]]
+	    }
+	    return $decodedTag
+	}	
+
+
+
+	if {$tagName == "rser"} {
+	    binary scan $data "c" decodedTag 
+	    return $decodedTag
+	}
+
+	if {$tagName == "rdel"} {
+	    # Init list
+	    set decodedTag [list]
+
+	    # Go though every value and store
+	    for {set i 0} {$i<$byteLength} {incr i 3} {
+		set subData [string range $data $i [expr $i+2]]
+		binary scan $subData "ccc" percentage byte1 byte2
+		set byte2 [expr ($byte2 + 0x100)%0x100]
+		lappend decodedTag [list $percentage [format "%.1f" [expr $byte1+$byte2/256.0]]]
+	    }
+	    return $decodedTag
+	}
+
+	if {$tagName == "Bdia"} {
+		binary scan $data "cB8SScccB8a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4Sca4" \
+	       dummy rxStat dspStat mlcStat audioStat cpuLoad drmMode stickyFlags \
+	       minFP maxFP minTCS maxTCS minSe maxSe \
+	       csiMean csiPeak csiPos csiPk2Mn \
+	       cirPeak cirPos \
+	       mass1 mass1Pos mass2 doppler \
+	       cwPos attenuation bufferFP
+
+		# Use Bdiag doppler if we are in version 2 or lower of the se127 protocol
+		if {$SE127_VERSION < 3} {
+			set tags(rdop) [format "%.1f" [IEEE2float $doppler 0]]
+		}
+	}
+
+	if {$tagName == "rdbv"} {
+
+	    # Init list
+	    set decodedTag [list]
+
+	    # Go though every value and store
+	    for {set i 0} {$i<$byteLength} {incr i 2} {
+		set subData [string range $data $i [expr $i+1]]
+		binary scan $subData "cc" byte1 byte2
+		set byte2 [expr ($byte2 + 0x100)%0x100]
+		lappend decodedTag [format "%.0f" [expr $byte1+$byte2/256.0]]
+	    }
+	    return $decodedTag
+	}	
+
+	if {$tagName == "rsta"} {
+	    binary scan $data "cccc" byte0 byte1 byte2 byte3
+	    set byte0 [expr ($byte0 + 0x100)%0x100]
+	    set byte1 [expr ($byte1 + 0x100)%0x100]
+	    set byte2 [expr ($byte2 + 0x100)%0x100]
+	    set byte3 [expr ($byte3 + 0x100)%0x100]
+	    set decodedTag [list $byte0 $byte1 $byte2 $byte3]
+	    return $decodedTag
+	}
+
+	if {$tagName == "rbp0" || $tagName == "rbp1" || $tagName == "rbp2" || $tagName == "rbp3"} {
+	    binary scan $data "SS" byte0 byte1
+	    set byte0 [expr ($byte0 + 0x10000)%0x10000]
+	    set byte1 [expr ($byte1 + 0x10000)%0x10000]
+	    set decodedTag [list $byte0 $byte1]
+	    return $decodedTag
+	}
+
+	if {$tagName == "rbw_"} {
+	    binary scan $data "cc" byte1 byte2
+	    set byte2 [expr ($byte2 + 0x100)%0x100]
+	    set decodedTag [format "%.2f" [expr $byte1+$byte2/256.0]]
+	    return $decodedTag
+	}	
+
+
+	if {$tagName == "rafs"} {
+	    binary scan $data "cB8B8B8B8B8" noOfFrames b1 b2 b3 b4 b5
+	    set bitString [string range $b1$b2$b3$b4$b5 0 [expr $noOfFrames-1]]
+	    set decodedTag $bitString
+	    return $decodedTag
+	}	
+
+
+	if {$tagName == "rdop"} {
+	    binary scan $data "cc" byte1 byte2
+	    set byte2 [expr ($byte2 + 0x100)%0x100]
+	    set decodedTag [format "%.2f" [expr $byte1+$byte2/256.0]]
+	    return $decodedTag
+	}	
+
+#	if {$tagName == "str0"} {
+#	    set decodedTag ""
+#	    return $decodedTag
+#	}
+
+	# All other tags: Use data as it is
+	set decodedTag $data
+
+	return $decodedTag
+}
+
 proc ProcessTagContent {tagContent tagsVar} {
 
     # Expects binary string with tag content and returns array <tags>
@@ -85,210 +321,8 @@ proc ProcessTagContent {tagContent tagsVar} {
 	# Advance pointer
 	set pointer [expr $pointer+8+$byteLength]
 
-	if {$tagName == "dlfc"} {
-	    binary scan $data "I"  tags($tagName)
-	    continue
-	}
-	
-	if {$tagName == "robm"} {
-	    binary scan $data "c" tags($tagName) 
-	    set tags($tagName) [expr ($tags($tagName) + 0x100)%0x100]
-	    continue
-	}
-
-	if {$tagName == "rdmo"} {
-	    binary scan $data "a4" tags($tagName)
-          continue
-      }
-
-	if {$tagName == "fmjd"} {
-	    binary scan $data "II" mjd tms 
-	    set tags($tagName) [list $mjd $tms]
-	    continue
-	}
-
-	# andrewm - 20070228 - GPS TAG decode
-	if {$tagName == "rgps"} {
-	    set count [binary scan $data "ccScSScSSccccSccSS" source satellites latDD latM \
-			latmm longDD longM longmm altAA alta timeH timeM timeS dateYY dateM dateD speed heading]
-        if {$count == 18} {
-		
-	      set latM [expr { $latM & 0xff }]
-	      set latmm [expr { $latmm & 0xffff }]
-
-	      set latDeg [expr { ( $latDD + ( $latM + $latmm/65536.0) / 60.0 ) }]
-
-	      set longM [expr { $longM & 0xff }]
-	      set longmm [expr { $longmm & 0xffff }]
-	      set longDeg [expr { ( $longDD + ( $longM + $longmm/65536.0) / 60.0 ) }]
-
-          set alta [expr { $alta & 0xff }]
-          set altMetres [expr { $altAA + ( $alta / 60.0 ) }]
-
-	      set speed [expr { $speed & 0xffff }]
-	      set heading [expr { $heading & 0xffff }]
-
-	      set tags($tagName) [list $latDeg $longDeg $altMetres $dateYY $dateM $dateD $timeH $timeM $timeS $speed $heading]
-        } 
-
-	    continue
-	}
-
-	if {$tagName == "rfre"} {
-	    binary scan $data "I" tags($tagName)
-	    continue
-	}		
-
-	if {$tagName == "rmer"} {
-
-	    # Init list
-	    set tags($tagName) [list]
-
-	    # Go though every value and store
-	    for {set i 0} {$i<$byteLength} {incr i 2} {
-		set subData [string range $data $i [expr $i+1]]
-		binary scan $subData "cc" byte1 byte2
-		set byte2 [expr ($byte2 + 0x100)%0x100]
-		lappend tags($tagName) [format "%.0f" [expr $byte1+$byte2/256.0]]
-	    }
-
-	    # In case that we are using se127 v2 or lower, copy rmer value to rwmf
-	    if {$SE127_VERSION <3} {
-		set tags(rwmf) $tags(rmer)
-	    }
-
-	    continue
-	}	
-
-	if {$tagName == "rwmf"} {
-
-	    # Init list
-	    set tags($tagName) [list]
-
-	    # Go though every value and store
-	    for {set i 0} {$i<$byteLength} {incr i 2} {
-		set subData [string range $data $i [expr $i+1]]
-		binary scan $subData "cc" byte1 byte2
-		set byte2 [expr ($byte2 + 0x100)%0x100]
-		lappend tags($tagName) [format "%.0f" [expr $byte1+$byte2/256.0]]
-	    }
-	    continue
-	}	
-
-	if {$tagName == "rwmm"} {
-
-	    # Init list
-	    set tags($tagName) [list]
-
-	    # Go though every value and store
-	    for {set i 0} {$i<$byteLength} {incr i 2} {
-		set subData [string range $data $i [expr $i+1]]
-		binary scan $subData "cc" byte1 byte2
-		set byte2 [expr ($byte2 + 0x100)%0x100]
-		lappend tags($tagName) [format "%.0f" [expr $byte1+$byte2/256.0]]
-	    }
-	    continue
-	}	
-
-
-
-	if {$tagName == "rser"} {
-	    binary scan $data "c" tags($tagName) 
-	    continue
-	}
-
-	if {$tagName == "rdel"} {
-	    # Init list
-	    set tags($tagName) [list]
-
-	    # Go though every value and store
-	    for {set i 0} {$i<$byteLength} {incr i 3} {
-		set subData [string range $data $i [expr $i+2]]
-		binary scan $subData "ccc" percentage byte1 byte2
-		set byte2 [expr ($byte2 + 0x100)%0x100]
-		lappend tags($tagName) [list $percentage [format "%.1f" [expr $byte1+$byte2/256.0]]]
-	    }
-	    continue
-	}
-
-	if {$tagName == "Bdia"} {
-		binary scan $data "cB8SScccB8a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4Sca4" \
-	       dummy rxStat dspStat mlcStat audioStat cpuLoad drmMode stickyFlags \
-	       minFP maxFP minTCS maxTCS minSe maxSe \
-	       csiMean csiPeak csiPos csiPk2Mn \
-	       cirPeak cirPos \
-	       mass1 mass1Pos mass2 doppler \
-	       cwPos attenuation bufferFP
-
-		# Use Bdiag doppler if we are in version 2 or lower of the se127 protocol
-		if {$SE127_VERSION < 3} {
-			set tags(rdop) [format "%.1f" [IEEE2float $doppler 0]]
-		}
-	}
-
-	if {$tagName == "rdbv"} {
-
-	    # Init list
-	    set tags($tagName) [list]
-
-	    # Go though every value and store
-	    for {set i 0} {$i<$byteLength} {incr i 2} {
-		set subData [string range $data $i [expr $i+1]]
-		binary scan $subData "cc" byte1 byte2
-		set byte2 [expr ($byte2 + 0x100)%0x100]
-		lappend tags($tagName) [format "%.0f" [expr $byte1+$byte2/256.0]]
-	    }
-	    continue
-	}	
-
-	if {$tagName == "rsta"} {
-	    binary scan $data "cccc" byte0 byte1 byte2 byte3
-	    set byte0 [expr ($byte0 + 0x100)%0x100]
-	    set byte1 [expr ($byte1 + 0x100)%0x100]
-	    set byte2 [expr ($byte2 + 0x100)%0x100]
-	    set byte3 [expr ($byte3 + 0x100)%0x100]
-	    set tags($tagName) [list $byte0 $byte1 $byte2 $byte3]
-	    continue
-	}
-
-	if {$tagName == "rbp0" || $tagName == "rbp1" || $tagName == "rbp2" || $tagName == "rbp3"} {
-	    binary scan $data "SS" byte0 byte1
-	    set byte0 [expr ($byte0 + 0x10000)%0x10000]
-	    set byte1 [expr ($byte1 + 0x10000)%0x10000]
-	    set tags($tagName) [list $byte0 $byte1]
-	    continue
-	}
-
-	if {$tagName == "rbw_"} {
-	    binary scan $data "cc" byte1 byte2
-	    set byte2 [expr ($byte2 + 0x100)%0x100]
-	    set tags($tagName) [format "%.2f" [expr $byte1+$byte2/256.0]]
-	    continue
-	}	
-
-
-	if {$tagName == "rafs"} {
-	    binary scan $data "cB8B8B8B8B8" noOfFrames b1 b2 b3 b4 b5
-	    set bitString [string range $b1$b2$b3$b4$b5 0 [expr $noOfFrames-1]]
-	    set tags($tagName) $bitString
-	    continue
-	}	
-
-
-	if {$tagName == "rdop"} {
-	    binary scan $data "cc" byte1 byte2
-	    set byte2 [expr ($byte2 + 0x100)%0x100]
-	    set tags($tagName) [format "%.2f" [expr $byte1+$byte2/256.0]]
-	    continue
-	}	
-
-#	if {$tagName == "str0"} {
-#	    set tags($tagName) ""
-#	    continue
-#	}
-
-	# All other tags: Use data as it is
-	set tags($tagName) $data
+	# Process the tag item body according to the tag name
+	set tags($tagName) [ProcessTagItem $tagName $byteLength $data]
     }
 
     ########### Put this in since the receiver occasionally seems to forget to send AFS 
@@ -301,6 +335,7 @@ proc ProcessTagContent {tagContent tagsVar} {
     	return -1
     }
 }
+
 
 proc GetTagInfo {tty tagsVar binaryFrameVar} {
     global SE127_PROTOCOL
@@ -949,3 +984,5 @@ proc BuildTagItemAudioStats {audioStats} {
       set tagBody [binary format "SS" [lindex $audioStats 0] [lindex $audioStats 1]]
       return [BuildTagLayer "rast" $tagBody]
 }
+
+
