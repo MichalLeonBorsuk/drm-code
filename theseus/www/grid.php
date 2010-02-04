@@ -1,6 +1,6 @@
 <html>
 <head>
-<link rel="shortcut icon" href="http://132.185.142.42/favicon.ico" type="image/vnd.microsoft.icon">
+<link rel="shortcut icon" href="/images/favicon.ico" type="image/vnd.microsoft.icon">
 <link rel=StyleSheet href="/style.css" type="text/css">
 <title>THESEUS Remote Monitoring System</title>
 </head>
