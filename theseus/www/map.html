@@ -1,0 +1,647 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <link rel="shortcut icon" href="http://132.185.142.42/favicon.ico" type="image/vnd.microsoft.icon">
+    <link rel=StyleSheet href="style.css" type="text/css">
+    <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+    <title>THESEUS Remote Monitoring System</title>
+    <script type="text/javascript" src="/mochikit/MochiKit.js"></script>
+    <script type="text/javascript" src="/plotkit/Base.js"></script>
+    <script type="text/javascript" src="/plotkit/Layout.js"></script>
+    <script type="text/javascript" src="/plotkit/Canvas.js"></script>
+    <script type="text/javascript" src="/plotkit/SweetCanvas.js"></script>
+    <script type="text/javascript" src="/plotkit/excanvas.js"></script>
+    <script type="text/javascript" src="/theseus/Graph.js"></script>
+    <script type="text/javascript" src="/theseus/XmlUtils.js"></script>
+    <script type="text/javascript" src="/theseus/MonitoringItemData.js"></script>
+    <script type="text/javascript" src="/theseus/DisplayGroup.js"></script>
+
+    <style type="text/css">
+      v\:* {
+        behavior:url(#default#VML);
+      }
+      html, body {
+        height: 98%; width: 98%;
+      }
+    </style>
+
+    <script type="text/javascript">
+    var gMapKey = new Object();
+    gMapKey["132.185.142.42"] = "ABQIAAAAqLi7vCIwWSg-FQaVfxNQ9BS4dTprouLBZVEVEZ4J3uqWVkUhExTo8wA1tdjy7u5n1rqDM0bYA8qNRg";
+    gMapKey["theseus.kw.bbc.co.uk"] = "ABQIAAAAWU-vbe3V_-aNIFpJhqsfHhRDnQHB5HIN4Vn5logD_9do-8vGbxSk2nEWN_PBZ5wofc2Wh63s6LO6FA";
+    gMapKey["theseus.dyndns.ws"] = "ABQIAAAAC8cA3g86C3NrkisfLHAJBRQSDP7JqhIWfE6k1-oAPnxvuS-LkRT3bnoxfroMsAZG8sDuaKIYX4ZIUA";
+    document.write('<script src="http://maps.google.com/maps?file=api&amp;v=2&amp;key=' +
+      gMapKey[document.location.host] + 
+      '" type="text\/javascript"><\/script>');
+    </script>
+
+    <script type="text/javascript">
+
+    //<![CDATA[
+
+    var xmlUrl = "/cgi-bin/theseus/xml.pl";
+
+    var xmlDate = "";
+
+    var updateAuto = true;
+    var updateTimems = 3000;
+    var map;
+    var receivers = new Object();    // global associative array for the markers
+    var polylineArray = new Array(); // global array of tx to rx lines
+
+    var displayGroup = new DisplayGroup("displayGroup", "/images", receivers);
+    
+    var oldGroupHtml = "";
+    var infoWindowCurrentlyOpen = "";
+    var iconMarkerBase;
+    var iconMarkerTransmitter;
+
+    displayGroup.setUpdateDisplayFunction(function() {
+      for (receiver in receivers) {
+        if (receivers[receiver].display)
+          receivers[receiver].marker.show();
+        else
+          receivers[receiver].marker.hide();
+      }
+    });
+
+    //check for canvas support (only FireFox > 1.5)
+    var hasCanvas = CanvasRenderer.isSupported();
+
+    //this function needed so that we don't 'unroll' GMarker
+    //and end up with only one marker variable instance
+    function createInfoWindowMarker(point, icon, html) {
+      var marker = new GMarker(point, icon);
+      GEvent.addListener(marker, "click", function() {
+        marker.openInfoWindowHtml(html);
+      });
+      return marker;
+    }
+
+    function createListener(receiver, infoTabs) {
+      GEvent.addListener(receiver.marker, "click", function() {
+
+        if (infoWindowCurrentlyOpen != "") {
+          //this is needed since open of new happens before close 
+          //of old and graphs get created and then deleted immediately!
+          //(think this is a Google Maps limitation)
+          map.closeInfoWindow();
+        }
+
+        infoWindowCurrentlyOpen = receiver.data.name;
+        map.openInfoWindowTabsHtml(receiver.marker.getLatLng(), infoTabs, { onOpenFn: function() { updateBubble(receiver.data.name);} } );
+
+        if (hasCanvas) {
+          receiver.psdGraph = new Graph("psd_graph", Color.redColor());
+          receiver.impGraph = new Graph("imp_graph", Color.blueColor());
+          receiver.rdbvHistoryGraph = new Graph("rdbv_history_graph", Color.greenColor());
+          receiver.rwmmHistoryGraph = new Graph("rwmm_history_graph", Color.orangeColor());
+        }
+//        updateBubble(receiver.data.name); // This is the call that results in the error
+      });
+
+      GEvent.addListener(receiver.marker, "infowindowopen", function() {
+        infoWindowCurrentlyOpen = receiver.data.name;
+        });
+
+      GEvent.addListener(receiver.marker, "infowindowclose", function() {
+        infoWindowCurrentlyOpen = "";
+
+        if (hasCanvas) {
+          delete receiver.psdGraph;
+          delete receiver.impGraph;
+          delete receiver.rdbvHistoryGraph;
+          delete receiver.rwmmHistoryGraph;
+        }
+
+      }); 
+    }
+
+    function GenerateStatsHtml(data, tagList) {
+
+      statsHtml = "";
+      for (i in tagList) {
+        var tag = tagList[i];
+        if (data[tag+"StatsPresent"])
+        {
+          var statsData = data[tag+"Stats"];
+          statsHtml += "<p><table style=\"width: 240px;\" class=\"stats\"><tr><th>Percentile</th>";
+          for (percentile in statsData.stats)
+            statsHtml += "<td style=\"width: 70px;\">"+percentile+"</td>";
+          statsHtml += "<td>Frames</td>";
+          statsHtml += "</tr><tr><th>"+tag+"</th>";
+          for (percentile in statsData.stats)
+            statsHtml += "<td>"+statsData.stats[percentile]+"</td>";
+          statsHtml += "<td>"+statsData.numFrames+"</td>";
+          statsHtml += "</tr></table>";
+        }
+      }
+      return statsHtml;
+    }
+
+
+    //update info bubble (info window)
+    function updateBubble(name) {
+      var receiver = receivers[name];
+      if (receiver.type != "receiver")
+        return;
+      var data = receivers[name].data;
+      var html = "";
+      html += "<div class=\"bubble\" ";
+      html += "style=\"color: " + determineTextColour(data);
+      html += "\">";
+
+      if (updateAuto)
+      {
+        html += "<a href=\"/cgi-bin/theseus/serve_rul_http.pl?receiver=" + name + "\">" ;
+      } else {
+        html += "<a href=\"/cgi-bin/theseus/get_rsci.pl?rxID=" + name + "&date=" + xmlDate +"\">" ;
+      }
+
+        html += "<img name=\"listenIcon\" border=0 align=bottom width=17 height=13 src=\"/images/listen_icon.gif\">" +
+              "</a>" +
+              "&nbsp;&nbsp;" + name + "&nbsp;&nbsp;(" + data.lastUpdate + "s ago)";
+
+      html += "<p class=\"bubble\" style=\"color: " + determineTextColour(data) + "\">";
+
+      if (data.rdmo == "drm_")
+      {
+        html +=  "<b> " + data.stationLabel + "</b>, " + data.frequency + "kHz, " + data.mode + "<br>" +
+                 "RF: " + data.rfLevel + "dBuV";
+        if (data.wmm != "")
+          html += ", WMER: " + data.wmm + "dB";
+
+        html += "<br>";
+
+        if (data.audioStatus != "")
+          html += "Audio: " + data.audioStatus + "%";
+
+        html += "<br>";
+        
+      } else {
+        html +=  "Freq: " + data.frequency + "kHz " + data.mode + "<br>" +
+                 "RF: " + data.rfLevel + "dBuV" + "<br>";
+      }
+
+      html += "<hr>";
+
+      document.getElementById("bubble_data").innerHTML = html;
+      document.getElementById("bubble_data2").innerHTML = html;
+      document.getElementById("bubble_data3").innerHTML = html;
+
+      statsHtml = "Audio stats: ";
+      if (data.audioStatsPresent)
+        statsHtml += data.audioStats.percentCorrect + "% (of "+data.audioStats.totalAudioFrames+" audio frames)";
+      statsHtml += "<br>";
+      statsHtml += GenerateStatsHtml(data, new Array("wmf","wmm","mer","dbv"));
+
+      document.getElementById("stats_data").innerHTML = statsHtml;
+
+      if (hasCanvas) {
+          if (receiver.data.psdPresent) {
+            var graph = receiver.data.psdGraphData;
+            receiver.psdGraph.draw(graph.points, graph.start, graph.end, 7, "kHz", -120, 0, 40, "dB");
+          } else
+            receiver.psdGraph.clear();
+
+          if (receiver.data.impPresent) {
+            var graph = receiver.data.impGraphData;
+            receiver.impGraph.draw(graph.points, graph.start, graph.end, 3, "ms", -120, 0, 40, "dB");
+          } else
+            receiver.impGraph.clear();
+
+          if (receiver.data.rdbvHistoryPresent) {
+            var graph = receiver.data.rdbvHistoryGraphData;
+            receiver.rdbvHistoryGraph.draw(graph.points, graph.start, graph.end, 10, "s", -20, 100, 40, "dBuV");
+          } else
+            receiver.rdbvHistoryGraph.clear();
+
+          if (receiver.data.rwmmHistoryPresent) {
+            var graph = receiver.data.rwmmHistoryGraphData;
+            receiver.rwmmHistoryGraph.draw(graph.points, graph.start, graph.end, 10, "s", 0, 40, 10, "dB");
+          } else
+            receiver.rwmmHistoryGraph.clear();
+        }
+    }
+
+    function updateMap() {
+      addReceivers();
+    }
+
+
+    function addTransmitters() {
+      GDownloadUrl("/cgi-bin/theseus/get_transmitters.pl", function(data, responseCode) {
+        if (responseCode == 200) {
+          var xml = GXml.parse(data);
+          transmitters = xml.documentElement.getElementsByTagName("transmitter");
+
+          for (var index = 0; index < transmitters.length; index++) {
+            var point = new GLatLng(parseFloat(transmitters[index].getAttribute("latitude")),
+                                    parseFloat(transmitters[index].getAttribute("longitude")));
+
+            var code = transmitters[index].getAttribute("code");
+            var name = transmitters[index].getAttribute("name");
+            var power = transmitters[index].getAttribute("power");
+            var frequency = transmitters[index].getAttribute("frequency");
+            var programme = transmitters[index].getAttribute("programme");
+            if (programme == null)
+              programme = "N/A";
+
+            var html = "<p class=bubble>Transmitter: " + name + " (" + code + ")" +
+                       "<br>Power: " + power + " kW" +
+                       "<br>Frequency: " + frequency + "kHz";
+            if (typeof(receivers[name]) == "undefined") {
+              receivers[name] = new Object();
+              receivers[name].type = "transmitter";
+              receivers[name].name = name;
+              receivers[name].point = point;
+              receivers[name].attributes = new Object();
+              needToUpdateGroups = true;
+              receivers[name].marker = createInfoWindowMarker(point, iconMarkerTransmitter, html);
+              map.addOverlay(receivers[name].marker);
+            } else { // just update position
+              receivers[name].marker.setPoint(point);
+            }
+
+            receivers[name].nodeActionHtml = "<img src=\"/images/marker_transmitter.png\" width=\"10\" height=\"15\" align=\"bottom\" border=\"0\">";
+
+            // setup sort attributes
+            receivers[name].attributes["Frequency"] = frequency + " kHz";
+            receivers[name].attributes["Label"] = programme;
+            receivers[name].attributes["Demod. Mode"] = "Drm";
+
+          }
+        } else if (responseCode == -1) {
+          alert("Data request timed out. Please try later.");
+        } else {
+          alert("Request resulted in error. Check Tx XML file is accessible.");
+        }
+      });
+    }
+
+    function flyToMarker(name) {
+      map.panTo(receivers[name].marker.getPoint());
+    }
+
+    function joinDots(names) {
+      if (polylineArray.length != 0) {
+        for (var polylineNum in polylineArray) {
+          map.removeOverlay(polylineArray[polylineNum]);
+        }
+      }
+
+      // clear array
+      polylineArray.length = 0;
+
+      var polylineCount = 0;
+      for (var txNum in names) {
+        var txName = names[txNum];
+        if (receivers[txName].type == "transmitter") {
+          for (var rxNum in names) {
+            var rxName = names[rxNum];
+            if (receivers[rxName].type == "receiver") {
+              polylineArray[polylineCount] = createDistanceLine(rxName, txName);
+              polylineCount++;
+            }
+          }
+        }
+      }
+
+      for (var polylineNum in polylineArray) {
+        map.addOverlay(polylineArray[polylineNum]);
+      }
+    }
+
+    function createDistanceLine(rxName, txName) {
+      var polyline = new GPolyline([receivers[rxName].marker.getPoint(),
+                                receivers[txName].marker.getPoint()],
+                                "#FF00FF", 5, 0.7, {clickable:true, geodesic:true});
+      GEvent.addListener(polyline, "click", function(latlng) {
+        var distanceKm = polyline.getLength()/1000;
+        map.openInfoWindowHtml(latlng, "" + rxName + " to " + txName + "<br>" +
+                                       "Distance:" + distanceKm.toFixed(1) + "km");
+      });
+
+      return polyline;
+    }
+
+    function determineTextColour(data) {
+      var html = "";
+ 
+      if (data.lastUpdate <= 3) {
+        html = "#000000";
+      } else if (data.lastUpdate > 3 && data.lastUpdate <= 10) {
+        html = "#606060";
+      } else if (data.lastUpdate > 10 && data.lastUpdate <= 20) {
+        html = "#909090";
+      } else if (data.lastUpdate > 20 && data.lastUpdate <= 30) {
+        html = "#A0A0A0";
+      } else if (data.lastUpdate > 30 && data.lastUpdate <= 50) {
+        html = "#C0C0C0";
+      } else {
+       html = "#D0D0D0";
+      }
+
+     return html;
+   }
+
+    function determineMarkerImage(data) {
+      // use markers to indicate last update time
+      var markerSuffix = "";
+      if (data.lastUpdate <= 3)
+        markerSuffix = "";
+      else if (data.lastUpdate > 3 && data.lastUpdate <= 10)
+        markerSuffix = "_1";
+      else if (data.lastUpdate > 10 && data.lastUpdate <= 30)
+        markerSuffix = "_2";
+      else
+        markerSuffix = "_3";
+
+      if (data.rdmo == "drm_") {
+        var audioStatusFloat = parseFloat(data.audioStatus);
+        var wmmFloat = parseFloat(data.wmm);
+        var lastUpdateFloat = parseFloat(data.lastUpdate);
+
+        var markerName = "";
+        if (audioStatusFloat == 100) {
+          if (wmmFloat > 21) {
+            markerName = "/images/marker_good" + markerSuffix + ".png";
+          } else {
+            markerName = "/images/marker_marginal" + markerSuffix + ".png";
+          }
+        } else {
+           markerName = "/images/marker_bad" + markerSuffix + ".png";
+        }
+      } else if (data.rdmo == "am__") {
+        markerName = "/images/marker_AM" + markerSuffix + ".png";
+      } else if (data.rdmo == "wbfm") {
+        markerName = "/images/marker_FM" + markerSuffix + ".png";
+      }
+
+      return markerName;
+    }
+
+    function seeAllGroups() {
+      map.setCenter(new GLatLng(52, 0), 5);
+    }
+
+    function addReceivers() {
+      GDownloadUrl(xmlUrl, function(data, responseCode) {
+        if (responseCode == 200) {
+          readReceiverXml(data);
+
+          // only try to re-request XML if we were successful this time
+          // (otherwise hunderds of 'alert' boxes can build up!)
+          if (updateAuto) {
+            setTimeout("updateMap()", updateTimems);
+          }
+        } else if (responseCode == -1) {
+          // this error seems to occur if browser is downloading another URL when this fires.
+          // just try again silently
+          if (updateAuto) {
+            setTimeout("updateMap()", updateTimems);
+          }
+//          alert("Data request timed out. Please try later.");
+        } else {
+          alert("Request resulted in error. Check XML file (" + xmlUrl + ") is accessible and reload page.");
+        }
+      });
+    }
+
+    function markerFactory(receiver, point) {
+      receiver.marker = new GMarker(point, iconMarkerBase);
+      map.addOverlay(receiver.marker);
+
+      // need to put <BR>s in here to pad bubble so that it opens at the correct size before the 
+      // div tag is replaced with the actual reception data.
+      var htmlCurrent = ""
+      htmlCurrent += "<div id=\"bubble_data\" style=\"width:270px\"><BR><BR><BR><BR><BR><BR><BR></div>";
+
+      if (receiver.type == "receiver") {
+        htmlCurrent += "<form action=\"/cgi-bin/theseus/change_freq.pl\" method=\"GET\">";
+        htmlCurrent += "<input type=\"hidden\" name=\"rxID\" value=\"" + receiver.name + "\">";
+        htmlCurrent += "<input type=\"text\" name=\"freq\" size=\"4\"> kHz";
+        htmlCurrent += "<input type=\"radio\" name=\"mode\" value=\"drm_\" checked=\"checked\">Drm";
+        htmlCurrent += "<input type=\"radio\" name=\"mode\" value=\"am__\">AM&nbsp;";
+        htmlCurrent += "<input type=\"radio\" name=\"mode\" value=\"fm__\">FM&nbsp;";
+        htmlCurrent += "<input type=\"submit\" value=\"tune\">"
+        htmlCurrent += "</form><p>";
+      }
+
+      htmlCurrent += "<div style=\"text-align: left\"><canvas id=\"psd_graph\" height=\"70\" width=\"150\"></canvas></div><br>";
+      htmlCurrent += "<div style=\"text-align: left\"><canvas id=\"imp_graph\" height=\"70\" width=\"150\"></canvas></div>";
+
+      htmlHistory = "";
+      htmlHistory += "<div id=\"bubble_data2\"><BR><BR><BR><BR><BR></div>";
+      htmlHistory += "<div style=\"text-align: left\"><canvas id=\"rdbv_history_graph\" height=\"70\" width=\"170\"></canvas></div><br>";
+      htmlHistory += "<div style=\"text-align: left; position: absolute; left: 20px\"><canvas id=\"rwmm_history_graph\" height=\"70\" width=\"150\"></canvas></div>";
+
+      var htmlStatistics = "";
+      htmlStatistics += "<div id=\"bubble_data3\"><BR><BR><BR><BR><BR></div>";
+      htmlStatistics += "<div id=\"stats_data\"><BR><BR><BR><BR><BR></div>";
+
+      var infoTabs = [
+        new GInfoWindowTab("Current", htmlCurrent),
+        new GInfoWindowTab("History", htmlHistory),
+        new GInfoWindowTab("Stats", htmlStatistics)
+      ];
+
+      createListener(receiver, infoTabs);
+    }
+
+    function readReceiverXml(data) {
+      var needToUpdateGroups = false;
+
+      var xml = GXml.parse(data);
+      recs = xml.documentElement.getElementsByTagName("receiver");
+
+      xmlDate = findText(xml , "date");
+      if (xmlDate != "")
+        document.getElementById("xml_date").innerHTML = "Last updated: " + xmlDate;
+
+      var newReceivers = new Object();
+
+      //read data from XML file
+      for (var index = 0; index < recs.length; index++) {
+        var receiverData = new MonitoringItemData("Rx");
+        receiverData.parse(recs[index]);
+        var name = receiverData.name;
+
+        var point = new GLatLng(parseFloat(receiverData.latitude), parseFloat(receiverData.longitude));
+
+        if (typeof(receivers[name]) == "undefined") {
+          receivers[name] = new Object();
+          receivers[name].name = name;
+          receivers[name].attributes = new Object();
+          receivers[name].type = "receiver";
+          markerFactory(receivers[name], point);
+          needToUpdateGroups = true;
+        } else { // just update position
+          receivers[name].marker.setPoint(point);
+        }
+
+        receivers[name].data = receiverData;
+
+        newReceivers[name] = "defined";
+
+        // setup sort attributes
+        receivers[name].attributes["Frequency"] = receivers[name].data.frequency + " kHz";
+        receivers[name].attributes["Label"] = receivers[name].data.stationLabel;
+        receivers[name].attributes["Demod. Mode"] = receivers[name].data.mode;
+
+        receivers[name].marker.setImage(determineMarkerImage(receivers[name].data));
+
+      }
+
+      // now garbage collect any markers no longer present
+      for (rxID in receivers) {
+        if (typeof(newReceivers[rxID]) == "undefined" && receivers[rxID].type == "receiver") {
+          GEvent.clearListeners(receivers[rxID].marker, "click");
+          map.removeOverlay(receivers[rxID].marker);
+          if (infoWindowCurrentlyOpen == rxID)
+            map.closeInfoWindow();
+
+          delete receivers[rxID];
+          needToUpdateGroups = true;
+        }
+      }
+
+//      if (needToUpdateGroups) {
+//        if (polylineArray.length != 0) {
+//          for (var polylineNum in polylineArray) {
+//            map.removeOverlay(polylineArray[polylineNum]);
+//          }
+//        }
+//      }
+
+      displayGroup.update(needToUpdateGroups);
+
+      for (name in receivers) {
+        if (infoWindowCurrentlyOpen == name)
+          updateBubble(name);
+      }
+    }
+
+    function load() {
+      if (!hasCanvas) {
+        alert("WARNING: Browser does not support Canvas, therefore no Spectrum (PSD) plots will be displayed. Try IE6+ and Firefox 1.5+.");
+      }
+
+      // preload icons
+      // this avoids flickering when we insert html with img tags into the DOM
+      if (document.images) {
+        nodeImage = new Image(16, 22);
+        nodeImage.src = "/images/node.png";
+
+        nodeLastImage = new Image(16,22);
+        nodeLastImage.src = "/images/node_last.png";
+
+        listenImage = new Image(17, 13);
+        listenImage.src = "/images/listen_icon.gif";
+
+        zoomToImage = new Image(10, 10);
+        zoomToImage.src = "/images/zoom_to_icon.png";
+
+        linesImage = new Image(10, 10);
+        linesImage.src = "/images/lines.png";
+      }
+
+      displayGroup.setNodeActionHtml(
+            "<img src=\"/images/zoom_to_icon.png\" width=\"10\" height=\"10\" align=\"bottom\" border=\"0\">");
+
+      displayGroup.setNodeActionFunctionName("flyToMarker");
+
+      displayGroup.setGroupActionHtml(
+            "<img src=\"/images/lines.png\" width=\"10\" height=\"10\" align=\"bottom\" border=\"0\">");
+
+      displayGroup.setGroupActionFunctionName("joinDots");
+
+      // read URL options
+      urlquery = location.href.split("?");
+
+      if (urlquery.length > 1) {
+        urlterms = urlquery[1].split("&");
+        for (var term in urlterms) {
+          var urlterm = urlterms[term].split("=");
+          if (urlterm.length > 1) {
+            if (urlterm[0] == "update") {
+              if (urlterm[1] == "auto")
+                updateAuto = true;
+              else
+                updateAuto = false;
+            }
+            if (urlterm[0] == "xml") {
+              xmlUrl = urlterm[1];
+            }
+          }
+        }
+      }
+      if (GBrowserIsCompatible()) {
+        map = new GMap2(document.getElementById("map"));
+        map.setCenter(new GLatLng(54.00, 5.126643), 5);
+        map.setMapType(G_HYBRID_MAP);
+        map.addControl(new GMapTypeControl());
+        map.addControl(new GLargeMapControl());
+        map.addControl(new GOverviewMapControl());
+        map.addControl(new GScaleControl());
+        map.enableScrollWheelZoom();
+
+        iconMarkerBase = new GIcon();
+        iconMarkerBase.image = "/images/marker_AM.png";
+        iconMarkerBase.shadow = "/images/marker_shadow.png";
+        iconMarkerBase.iconSize = new GSize(20, 34);
+        iconMarkerBase.shadowSize = new GSize(37, 34);
+        iconMarkerBase.iconAnchor = new GPoint(9, 34);
+        iconMarkerBase.infoWindowAnchor = new GPoint(9, 2);
+        iconMarkerBase.infoShadowAnchor = new GPoint(18, 25);
+
+        iconMarkerTransmitter = new GIcon();
+        iconMarkerTransmitter.image = "/images/marker_transmitter.png";
+        iconMarkerTransmitter.shadow = "/images/marker_transmitter_shadow.png";
+        iconMarkerTransmitter.iconSize = new GSize(20, 33);
+        iconMarkerTransmitter.shadowSize = new GSize(34, 33);
+        iconMarkerTransmitter.iconAnchor = new GPoint(10, 33);
+        iconMarkerTransmitter.infoWindowAnchor = new GPoint(10, 33);
+        iconMarkerTransmitter.infoShadowAnchor = new GPoint(10, 33);
+
+        addTransmitters();
+        displayGroup.create("display_group", [ "Frequency", "Label", "Demod. Mode" ]);
+        addReceivers();
+        displayGroup.defaultShow("Frequency"); //  , { "Frequency": ["855"]}); //, { "Frequency": ["855"],
+//                                                "Label": [ "BBC Devon Trial" ],
+//                                                "None": [ "m_CNH_", "m_MTY_", "m_NFR_", "m_NHT_", "m_PYZ_", "m_PY__"] });
+      }
+    }
+
+    //]]>
+    </script>
+  </head>
+  <body onload="load()" onunload="GUnload()">
+    <div style="height: 100%; text-align:center">
+    <p><img src="/images/banner.png" width="990" height="40" border="0" vspace="0" hspace="0">
+    <P><A HREF="/map.html">Map view</A>&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="/list.html">List view</A>&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="/rsci/">RSCI archive</A>
+    <table cellpadding="2" align="center" height="75%" cellspacing="10" width="95%" border="0">
+    <tr style="">
+      <td class="group" style="border:solid 1px" valign="top" width="25%" height="100%">
+        <div id="display_group" class="checklist" style="height: 100%"></div>
+      </td>
+      <td valign="top" width="75%" height="100%" style="border:solid 1px">
+        <div id="map" style="width: 100%; height: 100%; margin: auto"></div>
+      </td>
+    </tr>    
+    <tr>
+    <td></td>
+    <td>
+      <div id="xml_date" class="last_update"></div>
+    </td>
+    </tr>
+    </table>
+    <P>Download Dream streaming software <A HREF="/files/DreamHelperInstall.zip">manual install</A> or <A HREF="/files/DreamHelperInstall.msi">Windows installer</A>
+    <p><IMG height=12 alt=BBC src="/images/bbcFooterLogo.gif" width=40 vspace=0 align=bottom><font size="1">
+    <br />&copy; MMVII</font>
+    </div>
+    <p>
+  </body>
+</html>
+

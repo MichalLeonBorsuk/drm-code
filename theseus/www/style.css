@@ -1,0 +1,46 @@
+table {font-family: sans-serif; text-align: left; font-size: 11pt}
+P {font-family: sans-serif}
+H1 {font-family: sans-serif}
+P.bubble {font-size: small; text-align: left}
+div.bubble {font-size: small; text-align: left}
+P.center { text-align: center}
+div.bubble {text-align: left}
+div.center {text-align: center}
+div.last_update {font-size: 8pt; text-align: right; font-family: sans-serif}
+td.group {font-size: 10pt}
+div.checklist {font-size: 10pt; line-height: 10pt; font-family: sans-serif}
+table.stats {
+	border-width: 1px 1px 1px 1px;
+	border-spacing: 2px;
+	border-style: outset outset outset outset;
+	border-color: black black black black;
+	border-collapse: collapse;
+	background-color: white;
+}
+table.stats th {
+	border-width: 1px 1px 1px 1px;
+	padding: 1px 1px 1px 1px;
+	border-style: inset inset inset inset;
+	border-color: black black black black;
+	background-color: white;
+	-moz-border-radius: 0px 0px 0px 0px;
+}
+table.stats td {
+	border-width: 1px 1px 1px 1px;
+	padding: 1px 1px 1px 1px;
+	border-style: inset inset inset inset;
+	border-color: black black black black;
+	background-color: white;
+	-moz-border-radius: 0px 0px 0px 0px;
+}
+
+table.calendar {border: 0}
+table.calendar td, th {text-align: center; border: 0}
+table.calendar th {height: 10px; font-size: 7pt;}
+table.calendar td {width: 19px; height: 10px; font-size: 9pt;}
+table.calendar .calendar-month {font-weight: bold; margin-top: 3px; font-size: 12pt; text-align: center}
+table.calendar .calendar-month a{text-decoration: none}
+table.calendar .calendar-prev, table.calendar .calendar-next {font-weight: normal;}
+table.calendar th {color: green; text-align: center;}
+table.calendar td.linked-day {font-size: 9pt}
+
