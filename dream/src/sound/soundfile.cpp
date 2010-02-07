@@ -30,7 +30,9 @@
 #include "../GlobalDefinitions.h"
 #include <cstdlib>
 #include <cstring>
+#include <cctype>
 #include <iostream>
+#include <algorithm>
 
 /* Implementation *************************************************************/
 
@@ -55,32 +57,25 @@ CSoundFileIn::Enumerate(vector<string>& c) const
 void
 CSoundFileIn::SetFileName(const string& strFileName)
 {
-	strInFileName = strFileName;
-	string ext;
-	size_t p = strInFileName.rfind('.');
-	if(p != string::npos)
-		ext = strInFileName.substr(p+1);
-	if(ext == "txt") eFmt = fmt_txt;
-	if(ext == "TXT") eFmt = fmt_txt;
-	if(ext.substr(0,2) == "iq") eFmt = fmt_raw_stereo;
-	if(ext.substr(0,2) == "IQ") eFmt = fmt_raw_stereo;
-	if(ext.substr(0,2) == "if") eFmt = fmt_raw_stereo;
-	if(ext.substr(0,2) == "IF") eFmt = fmt_raw_stereo;
-	if(ext == "pcm") eFmt = fmt_raw_mono;
-	if(ext == "PCM") eFmt = fmt_raw_mono;
-	switch(eFmt)
-	{
-	case fmt_raw_stereo:
-		iFileChannels = 2;
-		if(ext.length() == 4)
-			iFileSampleRate = 1000*atoi(ext.substr(2).c_str());
-		else
-			iFileSampleRate = 48000; /* not SOUNDCRD_SAMPLE_RATE */
-		break;
-	default:
-		iFileChannels = 1;
-		iFileSampleRate = 48000; /* not SOUNDCRD_SAMPLE_RATE */
-	}
+    strInFileName = strFileName;
+    string ext;
+    size_t p = strInFileName.rfind('.');
+    if(p != string::npos)
+	    ext = strInFileName.substr(p+1);
+    transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
+    eFmt = fmt_other;
+    if(ext == "txt") eFmt = fmt_txt;
+    if(ext.substr(0,2) == "iq") eFmt = fmt_raw_stereo;
+    if(ext.substr(0,2) == "if") eFmt = fmt_raw_stereo;
+    if(ext == "pcm") eFmt = fmt_raw_mono;
+    iFileChannels = 1;
+    iFileSampleRate = 48000; /* not SOUNDCRD_SAMPLE_RATE */
+    if(eFmt == fmt_raw_stereo)
+    {
+	iFileChannels = 2;
+	if(ext.length() == 4)
+	    iFileSampleRate = 1000*atoi(ext.substr(2).c_str());
+    }
 }
 
 void
@@ -100,19 +95,19 @@ CSoundFileIn::Init(int iNewBufferSize, bool bNewBlocking, int iChannels)
 	switch(eFmt)
 	{
 	case fmt_txt:
-		pFile = fopen(strInFileName.c_str(), "r");
+		pFile = (SNDFILE*)fopen(strInFileName.c_str(), "r");
 		break;
 	case fmt_raw_mono:
 	case fmt_raw_stereo:
 		sfinfo.samplerate = iFileSampleRate;
 		sfinfo.channels = iFileChannels;
 		sfinfo.format = SF_FORMAT_RAW|SF_FORMAT_PCM_16|SF_ENDIAN_LITTLE;
-		pFile = (FILE*)sf_open(strInFileName.c_str(), SFM_READ, &sfinfo);
+		pFile = sf_open(strInFileName.c_str(), SFM_READ, &sfinfo);
 		if(pFile==NULL)
 			throw CGenErr(sf_strerror(0));
 		break;
 	case fmt_other:
-		pFile = (FILE*)sf_open(strInFileName.c_str(), SFM_READ, &sfinfo);
+		pFile = sf_open(strInFileName.c_str(), SFM_READ, &sfinfo);
 		if (pFile != NULL)
 		{
 			iFileChannels = sfinfo.channels;
@@ -140,8 +135,7 @@ CSoundFileIn::Init(int iNewBufferSize, bool bNewBlocking, int iChannels)
 bool
 CSoundFileIn::Read(vector<_SAMPLE>& data)
 {
-	int iFrames = data.size()/2;
-	int i;
+	size_t iFrames = data.size()/2;
 	if(pacer) pacer->wait();
 
 	if (pFile == NULL)
@@ -151,10 +145,10 @@ CSoundFileIn::Read(vector<_SAMPLE>& data)
 
 	if(eFmt==fmt_txt)
 	{
-		for (i = 0; i < iFrames; i++)
+		for (size_t i = 0; i < iFrames; i++)
 		{
 			float tIn;
-			if (fscanf(pFile , "%e\n", &tIn) == EOF)
+			if (fscanf((FILE*)pFile , "%e\n", &tIn) == EOF)
 			{
 				/* If end-of-file is reached, stop simulation */
 				return false;
@@ -164,38 +158,37 @@ CSoundFileIn::Read(vector<_SAMPLE>& data)
 		}
 		return false;
 	}
-	short *buffer = new short[iFileChannels*iFrames];
-	sf_count_t c = sf_readf_short((SNDFILE*)pFile, buffer, iFrames);
+	short buffer[iFileChannels*iFrames];
+	sf_count_t c = sf_readf_short(pFile, buffer, iFrames);
 	if(c!=iFrames)
 	{
 		/* rewind */
-		sf_seek((SNDFILE*)pFile, 0, SEEK_SET);
-		c = sf_readf_short((SNDFILE*)pFile, buffer, iFrames);
+		sf_seek(pFile, 0, SEEK_SET);
+		c = sf_readf_short(pFile, buffer, iFrames);
 	}
-	int oversample_factor = SOUNDCRD_SAMPLE_RATE / iFileSampleRate;
+	size_t oversample_factor = SOUNDCRD_SAMPLE_RATE / iFileSampleRate;
 	if(iFileChannels==2)
 	{
-		for (i = 0; i < iFrames/oversample_factor; i++)
+		for (size_t i = 0; i < iFrames/oversample_factor; i++)
 		{
-			for (int j = 0; j < oversample_factor; j++)
+			for (size_t j = 0; j < oversample_factor; j++)
 			{
-				data[2*(i+j)] = _SAMPLE(buffer[2*i]);
-				data[2*(i+j)+1] = _SAMPLE(buffer[2*i+1]);
+				data[2*i+j] = _SAMPLE(buffer[2*i]);
+				data[2*i+1+j] = _SAMPLE(buffer[2*i+1]);
 			}
 		}
 	}
 	else
 	{
-		for (i = 0; i < iFrames/oversample_factor; i++)
+		for (size_t i = 0; i < iFrames/oversample_factor; i++)
 		{
-			for (int j = 0; j < oversample_factor; j++)
+			for (size_t j = 0; j < oversample_factor; j++)
 			{
-				data[2*(i+j)] = _SAMPLE(buffer[i]);
-				data[2*(i+j)+1] = _SAMPLE(buffer[i]);
+				data[2*i+j] = _SAMPLE(buffer[i]);
+				data[2*i+1+j] = _SAMPLE(buffer[i]);
 			}
 		}
 	}
-	delete[] buffer;
 
 	return false;
 }
@@ -207,32 +200,15 @@ CSoundFileIn::Close()
 	if (pFile != NULL)
 	{
 		if(eFmt==fmt_txt)
-			fclose(pFile);
+			fclose((FILE*)pFile);
 		else
-			sf_close((SNDFILE*)pFile);
+			sf_close(pFile);
 		pFile = NULL;
 	}
 	if(pacer)
 		delete pacer;
 	pacer = NULL;
 }
-struct CWaveHdr
-{
-	/* Wave header struct */
-	char cMainChunk[4]; /* "RIFF" */
-	uint32_t length; /* Length of file */
-	char cChunkType[4]; /* "WAVE" */
-	char cSubChunk[4]; /* "fmt " */
-	uint32_t cLength; /* Length of cSubChunk (always 16 bytes) */
-	uint16_t iFormatTag; /* waveform code: PCM */
-	uint16_t iChannels; /* Number of channels */
-	uint32_t iSamplesPerSec; /* Sample-rate */
-	uint32_t iAvgBytesPerSec;
-	uint16_t iBlockAlign; /* Bytes per sample */
-	uint16_t iBitsPerSample;
-	char cDataChunk[4]; /* "data" */
-	uint32_t iDataLength; /* Length of data */
-};
 
 sf_count_t  sf_writef(SNDFILE *sndfile, short *ptr, sf_count_t frames)
 {

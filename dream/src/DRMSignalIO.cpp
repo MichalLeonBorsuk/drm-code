@@ -51,15 +51,12 @@ void CTransmitData::GetOutputs(vector<string>& o) const
 
 void CTransmitData::ProcessDataInternal(CParameter&)
 {
-	int i;
-
 	/* Apply bandpass filter */
-	//BPFilter.Process(*pvecInputData);
 	BPFilter.Process(*pvecInputData);
 
 	/* Convert vector type. Fill vector with symbols (collect them) */
 	const int iNs2 = iInputBlockSize * 2;
-	for (i = 0; i < iNs2; i += 2)
+	for (int i = 0; i < iNs2; i += 2)
 	{
 		const int iCurIndex = iBlockCnt * iNs2 + i;
 
@@ -120,7 +117,6 @@ void CTransmitData::ProcessDataInternal(CParameter&)
 void CTransmitData::InitInternal(CParameter& TransmParam)
 {
 	const int iSymbolBlockSize = TransmParam.CellMappingTable.iSymbolBlockSize;
-	size_t i;
 
 	/* Init vector for storing a complete DRM frame number of OFDM symbols */
 	iBlockCnt = 0;
@@ -131,10 +127,9 @@ void CTransmitData::InitInternal(CParameter& TransmParam)
 	vecsDataOut.resize(iBigBlockSize);
 
 	vecpSound.clear();
-	for(i=0; i<vecOutputs.size(); i++)
+	for(size_t i=0; i<vecOutputs.size(); i++)
 	{
-
-	CSoundOutInterface* pSound;
+		CSoundOutInterface* pSound;
 		const string& s = vecOutputs[i];
 		string ext;
 		size_t p = s.rfind('.');
@@ -164,8 +159,8 @@ void CTransmitData::InitInternal(CParameter& TransmParam)
 
 	/* Init bandpass filter object */
 	BPFilter.Init(iSymbolBlockSize, rDefCarOffset,
-		TransmParam.Channel.eSpectrumOccupancy,
-		CDRMBandpassFilt::FT_TRANSMITTER);
+	TransmParam.Channel.eSpectrumOccupancy,
+	CDRMBandpassFilt::FT_TRANSMITTER);
 
 	/* All robustness modes and spectrum occupancies should have the same output
 	   power. Calculate the normalisation factor based on the average power of
@@ -178,8 +173,7 @@ void CTransmitData::InitInternal(CParameter& TransmParam)
 
 void CTransmitData::Stop()
 {
-	size_t i;
-	for(i=0; i<vecpSound.size(); i++)
+	for(size_t i=0; i<vecpSound.size(); i++)
 	{
 		if(vecpSound[i])
 		{
@@ -349,7 +343,6 @@ void CReceiveData::ProcessDataInternal(CParameter& Parameter)
 	Parameter.Lock();
 	Parameter.SetIFSignalLevel(SignalLevelMeter.Level());
 	Parameter.Unlock();
-
 }
 
 void CReceiveData::InitInternal(CParameter& Parameter)
@@ -387,36 +380,33 @@ void CReceiveData::InitInternal(CParameter& Parameter)
 
 	cExpStep = _COMPLEX(cos(rNormCurFreqOffsetIQ), sin(rNormCurFreqOffsetIQ));
 
-
 	/* OPH: init free-running symbol counter */
 	iFreeSymbolCounter = 0;
-
 }
 
 _REAL CReceiveData::HilbertFilt(const _REAL rRe, const _REAL rIm)
 {
-/*
+    /*
 	Hilbert filter for I / Q input data. This code is based on code written
 	by Cesco (HB9TLK)
-*/
-    int i;
+    */
 
-	/* Move old data */
-    for (i = 0; i < NUM_TAPS_IQ_INPUT_FILT - 1; i++)
-	{
-		vecrReHist[i] = vecrReHist[i + 1];
-		vecrImHist[i] = vecrImHist[i + 1];
-	}
+    /* Move old data */
+    for (int i = 0; i < NUM_TAPS_IQ_INPUT_FILT - 1; i++)
+    {
+	vecrReHist[i] = vecrReHist[i + 1];
+	vecrImHist[i] = vecrImHist[i + 1];
+    }
 
     vecrReHist[NUM_TAPS_IQ_INPUT_FILT - 1] = rRe;
     vecrImHist[NUM_TAPS_IQ_INPUT_FILT - 1] = rIm;
 
-	/* Filter */
+    /* Filter */
     _REAL rSum = (_REAL) 0.0;
-    for (i = 1; i < NUM_TAPS_IQ_INPUT_FILT; i += 2)
-		rSum += fHilFiltIQ[i] * vecrImHist[i];
+    for (int i = 1; i < NUM_TAPS_IQ_INPUT_FILT; i += 2)
+	rSum += fHilFiltIQ[i] * vecrImHist[i];
 
-	return (rSum + vecrReHist[IQ_INP_HIL_FILT_DELAY]) / 2;
+    return (rSum + vecrReHist[IQ_INP_HIL_FILT_DELAY]) / 2;
 }
 
 CReceiveData::~CReceiveData()
