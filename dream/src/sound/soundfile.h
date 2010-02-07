@@ -50,7 +50,7 @@ public:
 	virtual void 		Close();
 
 protected:
-	FILE*			pFile;
+	SNDFILE*		pFile;
 	string			strInFileName;
 	enum {
 		fmt_txt, fmt_raw_mono, fmt_raw_stereo, fmt_other
