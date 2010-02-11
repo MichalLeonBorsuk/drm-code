@@ -1,8 +1,6 @@
 <?php
 try {
-    $user = "root";
-    $pass = "bbc";
-    $dbh = new PDO('mysql:host=localhost;dbname=theseus', $user, $pass);
+    require_once("../connect.php");
     $stmt = $dbh->prepare("SELECT * FROM available");
     $stmt->setFetchMode(PDO::FETCH_ASSOC);
     $stmt->execute();

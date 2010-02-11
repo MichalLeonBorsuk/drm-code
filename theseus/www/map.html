@@ -2,7 +2,7 @@
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <link rel="shortcut icon" href="/images/favicon.ico" type="image/vnd.microsoft.icon">
+    <link rel="shortcut icon" href="images/favicon.ico" type="image/vnd.microsoft.icon">
     <link rel=StyleSheet href="style.css" type="text/css">
     <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
     <title>THESEUS Remote Monitoring System</title>
@@ -12,10 +12,10 @@
     <script type="text/javascript" src="/plotkit/Canvas.js"></script>
     <script type="text/javascript" src="/plotkit/SweetCanvas.js"></script>
     <script type="text/javascript" src="/plotkit/excanvas.js"></script>
-    <script type="text/javascript" src="/theseus/Graph.js"></script>
-    <script type="text/javascript" src="/theseus/XmlUtils.js"></script>
-    <script type="text/javascript" src="/theseus/MonitoringItemData.js"></script>
-    <script type="text/javascript" src="/theseus/DisplayGroup.js"></script>
+    <script type="text/javascript" src="js/Graph.js"></script>
+    <script type="text/javascript" src="js/XmlUtils.js"></script>
+    <script type="text/javascript" src="js/MonitoringItemData.js"></script>
+    <script type="text/javascript" src="js/DisplayGroup.js"></script>
 
     <style type="text/css">
       v\:* {
@@ -28,8 +28,6 @@
 
     <script type="text/javascript">
     var gMapKey = new Object();
-    gMapKey["132.185.142.42"] = "ABQIAAAAqLi7vCIwWSg-FQaVfxNQ9BS4dTprouLBZVEVEZ4J3uqWVkUhExTo8wA1tdjy7u5n1rqDM0bYA8qNRg";
-    gMapKey["theseus.kw.bbc.co.uk"] = "ABQIAAAAWU-vbe3V_-aNIFpJhqsfHhRDnQHB5HIN4Vn5logD_9do-8vGbxSk2nEWN_PBZ5wofc2Wh63s6LO6FA";
     gMapKey["theseus.dyndns.ws"] = "ABQIAAAAC8cA3g86C3NrkisfLHAJBRQSDP7JqhIWfE6k1-oAPnxvuS-LkRT3bnoxfroMsAZG8sDuaKIYX4ZIUA";
     document.write('<script src="http://maps.google.com/maps?file=api&amp;v=2&amp;key=' +
       gMapKey[document.location.host] + 
@@ -40,7 +38,7 @@
 
     //<![CDATA[
 
-    var xmlUrl = "/cgi-bin/theseus/xml.pl";
+    var xmlUrl = "xml.php";
 
     var xmlDate = "";
 
@@ -50,7 +48,7 @@
     var receivers = new Object();    // global associative array for the markers
     var polylineArray = new Array(); // global array of tx to rx lines
 
-    var displayGroup = new DisplayGroup("displayGroup", "/images", receivers);
+    var displayGroup = new DisplayGroup("displayGroup", "images", receivers);
     
     var oldGroupHtml = "";
     var infoWindowCurrentlyOpen = "";
@@ -154,12 +152,12 @@
 
       if (updateAuto)
       {
-        html += "<a href=\"/cgi-bin/theseus/serve_rul_http.pl?receiver=" + name + "\">" ;
+        html += "<a href=\"serve_rul_http.php?receiver=" + name + "\">" ;
       } else {
-        html += "<a href=\"/cgi-bin/theseus/get_rsci.pl?rxID=" + name + "&date=" + xmlDate +"\">" ;
+        html += "<a href=\"get_rsci.php?rxID=" + name + "&date=" + xmlDate +"\">" ;
       }
 
-        html += "<img name=\"listenIcon\" border=0 align=bottom width=17 height=13 src=\"/images/listen_icon.gif\">" +
+        html += "<img name=\"listenIcon\" border=0 align=bottom width=17 height=13 src=\"images/listen_icon.gif\">" +
               "</a>" +
               "&nbsp;&nbsp;" + name + "&nbsp;&nbsp;(" + data.lastUpdate + "s ago)";
 
@@ -231,7 +229,7 @@
 
 
     function addTransmitters() {
-      GDownloadUrl("/cgi-bin/theseus/get_transmitters.pl", function(data, responseCode) {
+      GDownloadUrl("get_transmitters.php", function(data, responseCode) {
         if (responseCode == 200) {
           var xml = GXml.parse(data);
           transmitters = xml.documentElement.getElementsByTagName("transmitter");
@@ -264,7 +262,7 @@
               receivers[name].marker.setPoint(point);
             }
 
-            receivers[name].nodeActionHtml = "<img src=\"/images/marker_transmitter.png\" width=\"10\" height=\"15\" align=\"bottom\" border=\"0\">";
+            receivers[name].nodeActionHtml = "<img src=\"images/marker_transmitter.png\" width=\"10\" height=\"15\" align=\"bottom\" border=\"0\">";
 
             // setup sort attributes
             receivers[name].attributes["Frequency"] = frequency + " kHz";
@@ -366,17 +364,17 @@
         var markerName = "";
         if (audioStatusFloat == 100) {
           if (wmmFloat > 21) {
-            markerName = "/images/marker_good" + markerSuffix + ".png";
+            markerName = "images/marker_good" + markerSuffix + ".png";
           } else {
-            markerName = "/images/marker_marginal" + markerSuffix + ".png";
+            markerName = "images/marker_marginal" + markerSuffix + ".png";
           }
         } else {
-           markerName = "/images/marker_bad" + markerSuffix + ".png";
+           markerName = "images/marker_bad" + markerSuffix + ".png";
         }
       } else if (data.rdmo == "am__") {
-        markerName = "/images/marker_AM" + markerSuffix + ".png";
+        markerName = "images/marker_AM" + markerSuffix + ".png";
       } else if (data.rdmo == "wbfm") {
-        markerName = "/images/marker_FM" + markerSuffix + ".png";
+        markerName = "images/marker_FM" + markerSuffix + ".png";
       }
 
       return markerName;
@@ -419,7 +417,7 @@
       htmlCurrent += "<div id=\"bubble_data\" style=\"width:270px\"><BR><BR><BR><BR><BR><BR><BR></div>";
 
       if (receiver.type == "receiver") {
-        htmlCurrent += "<form action=\"/cgi-bin/theseus/change_freq.pl\" method=\"GET\">";
+        htmlCurrent += "<form action=\"change_freq.php\" method=\"GET\">";
         htmlCurrent += "<input type=\"hidden\" name=\"rxID\" value=\"" + receiver.name + "\">";
         htmlCurrent += "<input type=\"text\" name=\"freq\" size=\"4\"> kHz";
         htmlCurrent += "<input type=\"radio\" name=\"mode\" value=\"drm_\" checked=\"checked\">Drm";
@@ -532,28 +530,28 @@
       // this avoids flickering when we insert html with img tags into the DOM
       if (document.images) {
         nodeImage = new Image(16, 22);
-        nodeImage.src = "/images/node.png";
+        nodeImage.src = "images/node.png";
 
         nodeLastImage = new Image(16,22);
-        nodeLastImage.src = "/images/node_last.png";
+        nodeLastImage.src = "images/node_last.png";
 
         listenImage = new Image(17, 13);
-        listenImage.src = "/images/listen_icon.gif";
+        listenImage.src = "images/listen_icon.gif";
 
         zoomToImage = new Image(10, 10);
-        zoomToImage.src = "/images/zoom_to_icon.png";
+        zoomToImage.src = "images/zoom_to_icon.png";
 
         linesImage = new Image(10, 10);
-        linesImage.src = "/images/lines.png";
+        linesImage.src = "images/lines.png";
       }
 
       displayGroup.setNodeActionHtml(
-            "<img src=\"/images/zoom_to_icon.png\" width=\"10\" height=\"10\" align=\"bottom\" border=\"0\">");
+            "<img src=\"images/zoom_to_icon.png\" width=\"10\" height=\"10\" align=\"bottom\" border=\"0\">");
 
       displayGroup.setNodeActionFunctionName("flyToMarker");
 
       displayGroup.setGroupActionHtml(
-            "<img src=\"/images/lines.png\" width=\"10\" height=\"10\" align=\"bottom\" border=\"0\">");
+            "<img src=\"images/lines.png\" width=\"10\" height=\"10\" align=\"bottom\" border=\"0\">");
 
       displayGroup.setGroupActionFunctionName("joinDots");
 
@@ -588,8 +586,8 @@
         map.enableScrollWheelZoom();
 
         iconMarkerBase = new GIcon();
-        iconMarkerBase.image = "/images/marker_AM.png";
-        iconMarkerBase.shadow = "/images/marker_shadow.png";
+        iconMarkerBase.image = "images/marker_AM.png";
+        iconMarkerBase.shadow = "images/marker_shadow.png";
         iconMarkerBase.iconSize = new GSize(20, 34);
         iconMarkerBase.shadowSize = new GSize(37, 34);
         iconMarkerBase.iconAnchor = new GPoint(9, 34);
@@ -597,8 +595,8 @@
         iconMarkerBase.infoShadowAnchor = new GPoint(18, 25);
 
         iconMarkerTransmitter = new GIcon();
-        iconMarkerTransmitter.image = "/images/marker_transmitter.png";
-        iconMarkerTransmitter.shadow = "/images/marker_transmitter_shadow.png";
+        iconMarkerTransmitter.image = "images/marker_transmitter.png";
+        iconMarkerTransmitter.shadow = "images/marker_transmitter_shadow.png";
         iconMarkerTransmitter.iconSize = new GSize(20, 33);
         iconMarkerTransmitter.shadowSize = new GSize(34, 33);
         iconMarkerTransmitter.iconAnchor = new GPoint(10, 33);
@@ -619,7 +617,7 @@
   </head>
   <body onload="load()" onunload="GUnload()">
     <div style="height: 100%; text-align:center">
-    <p><img src="/images/banner.png" width="990" height="40" border="0" vspace="0" hspace="0">
+    <p><img src="images/banner.png" width="990" height="40" border="0" vspace="0" hspace="0">
     <P><A HREF="/map.html">Map view</A>&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="/list.html">List view</A>&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="/rsci/">RSCI archive</A>
     <table cellpadding="2" align="center" height="75%" cellspacing="10" width="95%" border="0">
     <tr style="">
@@ -638,8 +636,8 @@
     </tr>
     </table>
     <P>Download Dream streaming software <A HREF="/files/DreamHelperInstall.zip">manual install</A> or <A HREF="/files/DreamHelperInstall.msi">Windows installer</A>
-    <p><IMG height=12 alt=BBC src="/images/bbcFooterLogo.gif" width=40 vspace=0 align=bottom><font size="1">
-    <br />&copy; MMVII</font>
+    <p>
+    <br />&copy; BBC MMVII</font>
     </div>
     <p>
   </body>

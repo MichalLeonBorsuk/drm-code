@@ -3,12 +3,9 @@
 try {
 	header('Content-type: text/plain');
 
-	$user = "root";
-	$pass = "bbc";
+	require_once("../connect.php");
 	
 	$putdata = fopen("php://input", "r");
-
-	$dbh = new PDO('mysql:host=localhost;dbname=theseus', $user, $pass);
 
 	while (!feof($putdata)) {
 		$line_of_text = trim(fgets($putdata));

@@ -2,7 +2,7 @@
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <link rel="shortcut icon" href="/images/favicon.ico" type="image/vnd.microsoft.icon">
+    <link rel="shortcut icon" href="images/favicon.ico" type="image/vnd.microsoft.icon">
     <link rel=StyleSheet href="style.css" type="text/css">
     <title>THESEUS Remote Monitoring System</title>
     <script type="text/javascript" src="/mochikit/MochiKit.js"></script>
@@ -11,14 +11,14 @@
     <script type="text/javascript" src="/plotkit/Canvas.js"></script>
     <script type="text/javascript" src="/plotkit/SweetCanvas.js"></script>
     <script type="text/javascript" src="/plotkit/excanvas.js"></script>
-    <script type="text/javascript" src="/theseus/Graph.js"></script>
-    <script type="text/javascript" src="/theseus/DisplayGroup.js"></script>
-    <script type="text/javascript" src="/theseus/XmlUtils.js"></script>
-    <script type="text/javascript" src="/theseus/MonitoringItemData.js"></script>
+    <script type="text/javascript" src="js/Graph.js"></script>
+    <script type="text/javascript" src="js/DisplayGroup.js"></script>
+    <script type="text/javascript" src="js/XmlUtils.js"></script>
+    <script type="text/javascript" src="js/MonitoringItemData.js"></script>
 
     <script type="text/javascript">
 
-    var xmlUrl = "/cgi-bin/theseus/xml.pl";
+    var xmlUrl = "xml.php";
     var xmlDate = "";
     var updateAuto = true;
     var updateTimems = 3000;
@@ -29,7 +29,7 @@
     //array for PSD
     var receiversList = new Object();
 
-    var displayGroup = new DisplayGroup("displayGroup", "/images", receiversList);
+    var displayGroup = new DisplayGroup("displayGroup", "images", receiversList);
     displayGroup.setUpdateDisplayFunction(function() {
       for (var name in receiversList) {
         if (receiversList[name].display) {
@@ -86,11 +86,11 @@
       document.getElementById("table_data").appendChild(newTR);
 
       var newTD = createTag("td", {"id":name + "_rx"}, "");
-      var newTD2 = createTag("a", {"href":"/cgi-bin/theseus/serve_rul_http.pl?receiver=" + name}, "");
+      var newTD2 = createTag("a", {"href":"serve_rul_http.php?receiver=" + name}, "");
 
       newTD.appendChild(newTD2);
       newTD.appendChild(document.createTextNode("\u00A0\u00A0" + name));
-      newTD2.appendChild(createTag("img", {"border":"0", "align":"bottom", "width":"17", "height":13, "src":"/images/listen_icon.gif"}, ""));
+      newTD2.appendChild(createTag("img", {"border":"0", "align":"bottom", "width":"17", "height":13, "src":"images/listen_icon.gif"}, ""));
       newTR.appendChild(newTD);
 
       newTR.appendChild(createTag("td", {"id":name + "_last_update"}, ""));
@@ -264,10 +264,6 @@
 
       generateTable();
 
-      displayGroup.defaultShow("Frequency", { "Frequency": ["855 kHz", "846 kHz"],
-                                              "Label": [ "BBC Devon Trial" ],
-                                              "None": [ "m_CNH_", "m_MTY_", "m_NFR_", "m_NHT_", "m_PYZ_", "m_PY__"] });
-
       updateData();
     }
 
@@ -384,8 +380,8 @@
 
   <body onload="load()">
     <center>
-    <p><img src="/images/banner.png" width="990" height="40" border="0" vspace="0" hspace="0">
-    <P><A HREF="/theseus/map.html">Map view</A>&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="/theseus/list.html">List view</A>&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="/rsci/">RSCI archive</A>
+    <p><img src="images/banner.png" width="990" height="40" border="0" vspace="0" hspace="0">
+    <P><A HREF="map.html">Map view</A>&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="list.html">List view</A>&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="/rsci/">RSCI archive</A>
     <p><table border=0 width="100%">
     <tr>
     <td valign="top"><div style="width: 150px" id="display_group" class="checklist"></td>
@@ -399,8 +395,8 @@
     </tr>
     </table>
     <p>Download Dream streaming software <A HREF="/files/DreamHelper.exe">DreamHelper</A>
-    <p><IMG height=12 alt=BBC src="/images/bbcFooterLogo.gif" width=40 vspace=0>
-    <br /><font size="1">&copy; MMVII</font>
+    <p>
+    <br /><font size="1">&copy; BBC MMVII</font>
     </center>
   </body>
 </html>
