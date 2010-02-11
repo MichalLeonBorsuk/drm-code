@@ -13,9 +13,7 @@
 
    echo "<CENTER><P><h2>Archive ($date)</h2><CENTER>";
 
-   $user = "root";
-   $pass = "bbc";
-   $dbh = new PDO('mysql:host=localhost;dbname=theseus', $user, $pass);
+   require_once("../connect.php");
 
    $stmt = $dbh->prepare("SELECT DISTINCT rx_id FROM available WHERE CAST(recording_start AS DATE) = '$date'");
    $stmt->setFetchMode(PDO::FETCH_ASSOC);

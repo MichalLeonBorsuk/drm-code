@@ -9,10 +9,7 @@
 
 <?php
     include("lib/calendar.php");
-
-    $user = "root";
-    $pass = "bbc";
-    $dbh = new PDO('mysql:host=localhost;dbname=theseus', $user, $pass);
+    require_once("../connect.php");
 
     // go through a month at a time
     echo "<p><table align=center>";
