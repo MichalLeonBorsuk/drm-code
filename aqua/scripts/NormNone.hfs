@@ -1,0 +1,20 @@
+[HarddiskOgg Settings]
+Content=Filter Preset All
+Version=1
+[Filter Settings]
+Count=2
+Slot 0=0
+Slot 1=1
+[Filter Settings Slot 0]
+Class=STATS
+[Filter Settings Slot 0 STATS]
+Enabled=1
+[Filter Settings Slot 1]
+Class=NORM
+[Filter Settings Slot 1 NORM]
+Enabled=1
+Factor=2.620664
+Bias=0
+Mode=off
+DeadInterval=10.000000
+Slope=5000.000000
