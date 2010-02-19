@@ -1,0 +1,13 @@
+[HarddiskOgg Settings]
+Content=Encoder Preset
+Version=1
+[Encoder Settings]
+Active=WACM
+[Encoder Settings WACM]
+Rate=48000
+Channels=1
+BPS=16
+InSize=18
+In=SAAABAQAAA4uAAAA3FAACAAEAAAA
+OutSize=18
+Out=SAAABAQAAA4uAAAA3FAACAAEAAAA
