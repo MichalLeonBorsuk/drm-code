@@ -91,6 +91,7 @@ void CPacer::wait()
 
 #else
 
+#include <sys/time.h>
 #include <signal.h>
 #include <unistd.h>
 
