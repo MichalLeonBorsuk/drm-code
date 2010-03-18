@@ -38,8 +38,8 @@ UI_DIR = moc
 MOC_DIR = moc
 macx {
     RC_FILE = src/GUI-QT/res/macicons.icns
-    LIBS += -L/usr/local/qwt-5.2.1-svn/lib
-    INCLUDEPATH += /usr/local/qwt-5.2.1-svn/include
+    LIBS += -L/opt/local/lib
+    INCLUDEPATH += /opt/local/include
 
     LIBS += -framework \
 	CoreFoundation \
