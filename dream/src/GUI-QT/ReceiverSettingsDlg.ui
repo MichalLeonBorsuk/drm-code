@@ -992,7 +992,7 @@
   <customwidget>
    <class>ReceiverInputWidget</class>
    <extends>QWidget</extends>
-   <header>receiverinputwidget.h</header>
+   <header location="global">receiverinputwidget.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
