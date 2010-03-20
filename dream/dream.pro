@@ -1,7 +1,6 @@
 TEMPLATE = app
 TARGET = dream
-QT += network \
-    xml
+QT += network xml
 CONFIG += qt \
     warn_on \
     thread \
@@ -39,7 +38,9 @@ MOC_DIR = moc
 macx {
     RC_FILE = src/GUI-QT/res/macicons.icns
     LIBS += -L/opt/local/lib
+    LIBS += -L/Developer/dream/usr/local/lib
     INCLUDEPATH += /opt/local/include
+    INCLUDEPATH += /Developer/dream/usr/local/include
 
     LIBS += -framework \
 	CoreFoundation \
@@ -51,13 +52,11 @@ macx {
 	AudioToolbox \
 	-framework \
 	AudioUnit
+    DEFINES += HAVE_DFFTW_H HAVE_DRFFTW_H
+    LIBS += -ldrfftw -ldfftw
 }
 unix {
-    LIBS += -lsndfile \
-	-lz \
-	-lrfftw \
-	-lfftw
-    DEFINES += HAVE_RFFTW_H
+    LIBS += -lsndfile -lz
     DEFINES += HAVE_DLFCN_H \
 	HAVE_MEMORY_H \
 	HAVE_STDINT_H \
@@ -77,6 +76,8 @@ unix {
 	    src/sound/pa_shm_ringbuffer.c
 	HEADERS += src/sound/shmsoundin.h \
 	    src/sound/pa_shm_ringbuffer.h
+    	DEFINES += HAVE_RFFTW_H
+    	LIBS += -lrfftw -lfftw
     }
     debian {
 	INCLUDEPATH += /usr/include/qwt-qt4
