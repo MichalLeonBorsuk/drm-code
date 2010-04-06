@@ -1548,7 +1548,7 @@ CDRMReceiver::SaveSettings()
 	settings.Put("Receiver", "mute", WriteData.GetMuteAudio());
 
 	/* Sound In device */
-	settings.Put(section, "soundcard", pSoundOutInterface->GetDev());
+	settings.Put(section, "soundcard", pSoundInInterface->GetDev());
 
 	/* Modified metrics flag */
 	settings.Put("Input-DRM", "modmetric", ChannelEstimation.GetIntCons());
