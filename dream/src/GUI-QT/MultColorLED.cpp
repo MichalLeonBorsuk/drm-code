@@ -35,8 +35,8 @@
 /* Implementation *************************************************************/
 CMultColorLED::CMultColorLED(QWidget * parent, const char * name, Qt::WFlags f) :
 	QLabel(parent, f),
-	BitmCubeGreen(13, 13),BitmCubeRed(13, 13),
-	BitmCubeGrey(13, 13),BitmCubeYellow(13, 13)
+	BitmCubeGreen(13, 13),BitmCubeYellow(13,13),
+	BitmCubeRed(13, 13), BitmCubeGrey(13, 13)
 
 {
 

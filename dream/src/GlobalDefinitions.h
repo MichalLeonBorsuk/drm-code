@@ -92,7 +92,7 @@ using namespace std; /* Because of the library: "complex" */
    are used as new pilots, too */
 #undef USE_DD_WIENER_FILT_TIME
 
-#if HAVE_STDINT_H
+#if HAVE_STDINT_H || defined(__MINGW32_VERSION)
 # include <stdint.h>
 #elif HAVE_INTTYPES_H
 # include <inttypes.h>

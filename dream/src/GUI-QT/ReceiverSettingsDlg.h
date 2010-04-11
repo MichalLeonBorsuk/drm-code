@@ -25,6 +25,9 @@
  *
 \******************************************************************************/
 
+#ifndef __RECEIVERSETTINGSDLG_H
+#define __RECEIVERSETTINGSDLG_H
+
 #include "../util/Settings.h"
 #include "../util/Hamlib.h"
 #include "../selectioninterface.h"
@@ -145,6 +148,8 @@ protected:
     void		hideEvent(QHideEvent* pEvent);
 
     bool		ValidInput(const QLineEdit* le);
+    void		loadDRMSettings();
+    void		saveDRMSettings();
     void		loadOutputSettings();
     void		saveOutputSettings();
     void		loadLogfileSettings();
@@ -210,3 +215,5 @@ public slots:
     void		OnCheckBoxReverb();
     void		OnAudioSelected(const QModelIndex&);
 };
+
+#endif
