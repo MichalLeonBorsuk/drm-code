@@ -70,7 +70,7 @@ public:
 
 	bool			SetFrequency(const int iFreqkHz);
 	void			SetFrequencyOffset(const int iOffkHz) { iOffset = iOffkHz; }
-	int			GetFrequencyOffset() { return iOffset; }
+	int				GetFrequencyOffset() { return iOffset; }
 	void 			SetEnableSMeter(const bool bStatus); // sets/clears wanted flag and starts/stops
 	bool			GetEnableSMeter(); // returns wanted flag
 	void 			StopSMeter(); // stops (clears run flag) but leaves wanted flag alone
@@ -82,6 +82,7 @@ public:
 	const char *		model_name;
 	rig_model_t		rig_model;
 	rig_status_e		status;
+	rig_port_e		port_type() const { return (the_rig)?the_rig->caps->port_type:RIG_PORT_NONE; }
 protected:
 	bool			bSMeterWanted, bEnableSMeter;
 	int			iOffset;

@@ -1,12 +1,60 @@
 #include "rigconfigurationdialog.h"
 #include "ui_rigconfigurationdialog.h"
+#include "../util/Utilities.h"
+#include <map>
+#include "ReceiverSettingsDlg.h"
+#include <QMessageBox>
+using namespace std;
 
-RigConfigurationDialog::RigConfigurationDialog(QWidget *parent) :
-    QDialog(parent),
+RigConfigurationDialog::RigConfigurationDialog(CSettings& s, const string& sec, QWidget *parent) :
+    QDialog(parent), section(sec), settings(s),
     m_ui(new Ui::RigConfigurationDialog)
 {
     m_ui->setupUi(this);
+    connect(m_ui->buttonBox, SIGNAL(accepted()), this, SLOT(OnSubmit()));
     connect(m_ui->pushButtonTestRig, SIGNAL(clicked()), this, SLOT(OnButtonTestRig()));
+    // TODO:
+    m_ui->pushButtonTestRig->setEnabled(false);
+    m_ui->CheckBoxEnableSMeter->setEnabled(false);
+}
+
+void RigConfigurationDialog::showEvent(QShowEvent *)
+{
+    m_ui->comboBoxPort->clear();
+    rig_model_t model = settings.Get(section, "model", int(0));
+	string port = settings.Get(section+"-conf", "rig_pathname", string(""));
+	cout << "rig_pathname: " << port << endl;
+    CRig rig(model);
+    //rig.LoadSettings(section, settings);
+	if(rig.port_type() == RIG_PORT_SERIAL)
+	{
+		m_ui->labelPort->setText(tr("Com Port"));
+		map<string,string> ports;
+		GetComPortList(ports);
+		for(map<string,string>::const_iterator i=ports.begin();
+			i!=ports.end(); i++)
+		{
+			m_ui->comboBoxPort->addItem(i->first.c_str(), i->second.c_str());
+		}
+    }
+    else if(rig.port_type() == RIG_PORT_USB)
+	{
+		m_ui->labelPort->setText(tr("USB Port"));
+		// TODO - populate USB list
+	}
+	else
+	{
+		m_ui->comboBoxPort->hide();
+		m_ui->labelPort->hide();
+	}
+	m_ui->comboBoxPort->setCurrentIndex(0);
+	if(port != "")
+	{
+		int n = m_ui->comboBoxPort->findData(port.c_str());
+	cout << "rig_pathname index: " << n << endl;
+		if(n>=0)
+			m_ui->comboBoxPort->setCurrentIndex(n);
+	}
 }
 
 RigConfigurationDialog::~RigConfigurationDialog()
@@ -25,51 +73,23 @@ void RigConfigurationDialog::changeEvent(QEvent *e)
 	break;
     }
 }
-/*
-    if(r.rig->caps->port_type == RIG_PORT_SERIAL)
-    {
-	// TODO
-    }
-	stackedWidget->setEnabled(true);
-	//stackedWidget->setpage(0);
-	comboBoxComPort->clear();
-	map<string,string> ports;
-	GetComPortList(ports);
-	for(map<string,string>::const_iterator i=ports.begin();
-		i!=ports.end(); i++)
-	{
-	    comboBoxComPort->addItem(i->first.c_str(), i->second.c_str());
-	}
-	char port[200];
-	r.rig->getConf("rig_pathname", port);
-	if(port[0] != 0)
-	{
-		int n = comboBoxComPort->findData(port);
-		comboBoxComPort->setCurrentIndex(n);
-	}
-    }
-    else
-    {
-	comboBoxComPort->clear();
-    	if(r.rig->caps->port_type == RIG_PORT_USB)
-	{
-	    stackedWidget->setEnabled(true);
-	    //stackedWidget->setpage(1);
-	}
-	else
-	{
-	    stackedWidget->setEnabled(false);
-	    //stackedWidget->setpage(0);
-	}
-*/
 
 void RigConfigurationDialog::OnTimerRig()
 {
 }
 
 void
+RigConfigurationDialog::OnSubmit()
+{
+	int n = m_ui->comboBoxPort->currentIndex();
+	QString data = m_ui->comboBoxPort->itemData(n).toString();
+	settings.Put(section+"-conf", "rig_pathname", string(data.toUtf8()));
+}
+
+void
 RigConfigurationDialog::OnButtonTestRig()
 {
+    QMessageBox::information(this, tr("Test Rig"), tr("Not done"), QMessageBox::Ok);
 
 #if 0
 	int n = treeViewRigs->currentIndex().row();

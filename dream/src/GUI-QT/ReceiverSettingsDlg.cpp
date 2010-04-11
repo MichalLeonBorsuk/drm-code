@@ -30,6 +30,7 @@
 \******************************************************************************/
 
 #include "ReceiverSettingsDlg.h"
+#include "rigconfigurationdialog.h"
 #include "../GlobalDefinitions.h"
 #include "../selectioninterface.h"
 #include "../util/Utilities.h"
@@ -827,9 +828,12 @@ void ReceiverSettingsDlg::showEvent(QShowEvent*)
     widgetAMInput->load(Settings);
     widgetFMInput->load(Settings);
 
-    /* Output */
+    /* DRM tab */
+    loadDRMSettings();
 
+    /* Output */
     loadOutputSettings();
+
     /* GPS */
     loadGPSSettings();
 
@@ -844,6 +848,9 @@ void ReceiverSettingsDlg::hideEvent(QHideEvent*)
     widgetDRMInput->save(Settings);
     widgetAMInput->save(Settings);
     widgetFMInput->save(Settings);
+
+    // DRM tab
+    saveDRMSettings();
 
     // output tab
     saveOutputSettings();
@@ -991,6 +998,23 @@ void ReceiverSettingsDlg::setLatLngDlg(double latitude, double longitude)
 }
 
 // = DRM Tab ==============================================================
+void ReceiverSettingsDlg::loadDRMSettings()
+{
+    bgTimeInterp->button(Settings.Get("Input-DRM", "timeinterpolation", 0))->setChecked(true);
+    bgFreqInterp->button(Settings.Get("Input-DRM", "frequencyinterpolation", 0))->setChecked(true);
+    bgTiSync->button(Settings.Get("Input-DRM", "tracking", 0))->setChecked(true);
+	SliderNoOfIterations->setValue(Settings.Get("Input-DRM", "mlciter", 1));
+    CheckBoxModiMetric->setChecked(Settings.Get("Input-DRM", "modmetric", 0)==1);
+}
+
+void ReceiverSettingsDlg::saveDRMSettings()
+{
+    Settings.Put("Input-DRM", "timeinterpolation", bgTimeInterp->checkedId());
+    Settings.Put("Input-DRM", "frequencyinterpolation", bgFreqInterp->checkedId());
+    Settings.Put("Input-DRM", "tracking", bgTiSync->checkedId());
+	Settings.Put("Input-DRM", "mlciter", SliderNoOfIterations->value());
+    Settings.Put("Input-DRM", "modmetric", CheckBoxModiMetric->isChecked()?1:0);
+}
 
 void ReceiverSettingsDlg::OnSelTimeInterp(int iId)
 {
@@ -1012,6 +1036,11 @@ void ReceiverSettingsDlg::OnSliderIterChange(int value)
      Settings.Put("Input-DRM", "mlciter", value);
 }
 
+void ReceiverSettingsDlg::OnCheckModiMetric()
+{
+    Settings.Put("Input-DRM", "modmetric", CheckBoxModiMetric->isChecked());
+}
+
 void ReceiverSettingsDlg::OnButtonDRMApply()
 {
     widgetDRMInput->save(Settings);
@@ -1027,10 +1056,6 @@ void ReceiverSettingsDlg::OnButtonFMApply()
     widgetFMInput->save(Settings);
 }
 
-void ReceiverSettingsDlg::OnCheckModiMetric()
-{
-    Settings.Put("Input-DRM", "modmetric", CheckBoxModiMetric->isChecked());
-}
 /*
 .Get("FrontEnd", "smetercorrectiontype", 0));
 .Get("FrontEnd", "smeterbandwidth", 0.0);
@@ -1158,7 +1183,11 @@ ReceiverSettingsDlg::OnButtonRemoveRig()
 
 void ReceiverSettingsDlg::OnButtonConfigureRig()
 {
-    QMessageBox::information(this, tr("Configure Rig"), tr("Not done"), QMessageBox::Ok);
+    stringstream sec;
+    sec << "Rig-" << treeViewRigs->currentIndex().internalId();
+    //QMessageBox::information(this, tr("Configure Rig"), tr("Not done"), QMessageBox::Ok);
+    RigConfigurationDialog* dlg = new RigConfigurationDialog(Settings, sec.str(), this);
+    dlg->show();
 }
 
 void ReceiverSettingsDlg::loadOutputSettings()
