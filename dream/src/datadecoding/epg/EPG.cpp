@@ -30,6 +30,8 @@
 #include "EPG.h"
 #include "epgutil.h"
 #include <QFile>
+#include <QFileInfo>
+#include <QDir>
 #include <QTextStream>
 #include <QStringList>
 #include <QRegExp>
@@ -1234,6 +1236,8 @@ EPG::EPG(CParameter& NParameters):Parameters(NParameters)
 	}
 
 	dir = (Parameters.sDataFilesDirectory + "/epg").c_str();
+	if (!QFileInfo(dir).exists())
+		QDir().mkdir(dir);
 	servicesFilename = dir + "/services.xml";
 	//cerr << servicesFilename.toStdString() << endl;
 	loadChannels (servicesFilename);

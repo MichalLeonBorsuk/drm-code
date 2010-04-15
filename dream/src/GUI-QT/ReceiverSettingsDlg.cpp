@@ -1044,16 +1044,25 @@ void ReceiverSettingsDlg::OnCheckModiMetric()
 void ReceiverSettingsDlg::OnButtonDRMApply()
 {
     widgetDRMInput->save(Settings);
+    EModulationType modn = EModulationType(Settings.Get("Receiver", "modulation", int(NONE)));
+    if(modn==DRM)
+	emit ReConfigureReceiver();
 }
 
 void ReceiverSettingsDlg::OnButtonAMApply()
 {
     widgetAMInput->save(Settings);
+    EModulationType modn = EModulationType(Settings.Get("Receiver", "modulation", int(NONE)));
+    if(modn==AM)
+	emit ReConfigureReceiver();
 }
 
 void ReceiverSettingsDlg::OnButtonFMApply()
 {
     widgetFMInput->save(Settings);
+    EModulationType modn = EModulationType(Settings.Get("Receiver", "modulation", int(NONE)));
+    if(modn==WBFM)
+	emit ReConfigureReceiver();
 }
 
 /*
