@@ -89,6 +89,7 @@ protected:
 public slots:
 
 	void OnTimer();
+	void OnReConfigureReceiver();
 	void OnNewDRMAcquisition();
 	void OnMenuSetDisplayColor();
 	void OnMenuDataApplication();

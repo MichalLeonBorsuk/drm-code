@@ -74,6 +74,9 @@ public:
 	virtual int			GetPercentageAMSSDataEntityGroupComplete()=0;
 	virtual bool			GetAMSSPLLPhase(_REAL&) =0;
 	virtual bool                    End()=0;
+	virtual void			LoadSettings()=0;
+	virtual void			SaveSettings()=0;
+
 };
 
 class ReceiverInterface : public AnalogReceiverInterface

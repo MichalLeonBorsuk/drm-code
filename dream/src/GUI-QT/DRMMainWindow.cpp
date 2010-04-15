@@ -89,6 +89,8 @@ DRMMainWindow::DRMMainWindow(ReceiverInterface& NDRMR, CSettings& NSettings,
 	connect(actionData_Application, SIGNAL(triggered()), this, SLOT(OnMenuDataApplication()));
 	connect(actionSettings, SIGNAL(triggered()), receiverSettingsDlg, SLOT(show()));
 
+	connect(receiverSettingsDlg, SIGNAL(ReConfigureReceiver()), this, SLOT(OnReConfigureReceiver()));
+
     /* Help Menu */
     CAboutDlg* pAboutDlg = new CAboutDlg(this);
 	connect(actionWhatsThis, SIGNAL(triggered()), this, SLOT(OnHelpWhatsThis()));
@@ -553,6 +555,12 @@ void DRMMainWindow::ClearDisplay()
 	TextTextMessage->setText("");
 
 	LabelServiceLabel->setText(tr("Scanning..."));
+}
+
+void DRMMainWindow::OnReConfigureReceiver()
+{
+    Receiver.LoadSettings();
+    OnNewDRMAcquisition();
 }
 
 void DRMMainWindow::OnNewDRMAcquisition()

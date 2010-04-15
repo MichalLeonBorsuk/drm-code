@@ -180,6 +180,7 @@ signals:
     void 		SetLogStartDelay(long);
     void 		StartStopGPS(bool);
     void 		ShowHideGPS(bool);
+    void 		ReConfigureReceiver();
 
 public slots:
     void 		OnLineEditLatDegChanged(const QString& str);
