@@ -22,7 +22,7 @@
 
    $numRxs = count($rxValues);
 
-   $stmt = $dbh->prepare("SELECT recording_start, state, rx_id FROM rsci_recordings WHERE CAST(recording_start AS DATE) = '$date'");
+   $stmt = $dbh->prepare("SELECT recording_start, state, rx_id, filename FROM rsci_recordings WHERE CAST(recording_start AS DATE) = '$date'");
    $stmt->setFetchMode(PDO::FETCH_ASSOC);
    $stmt->execute();
    $timeValues = $stmt->fetchAll();
@@ -52,15 +52,30 @@
      $hour = substr($row["recording_start"], 11, 2);
      $min = substr($row["recording_start"], 14, 2);
      $time = "$hour:$min";
+     $recDate = substr($row["recording_start"], 0, 10);
 
      $state = $row["state"];
      $id = $row["rx_id"];
+     $fileName = $row["filename"];
 
      if (!isset($table[$time])) {
        $table[$time] = array();
      }
+     
+     $tdString = "";
+     switch ($state) {
+       case "R":
+         $tdString = "R";
+         break;
+       case "Q":
+         $tdString = "Q";
+         break;
+       case "A":
+         $tdString = "<A href=\"/rsci/$id/$recDate/$fileName\"><img src=\"images/listen_icon.gif\"/></A>";
+         break;
+     }
 
-     $table[$time][$id] = $state;
+     $table[$time][$id] = $tdString;
    }
 
    foreach($table as $key => $value) {
