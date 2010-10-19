@@ -1,3 +1,4 @@
+#!/usr/bin/tclsh
 # Read common code and global variables
 source SettingsRemoteMonitoring.tcl
 
@@ -53,7 +54,7 @@ proc ProcessSiteInput {socket addr port} {
 
 	# This function is called when data is sent on TCP socket 
 
-	puts "Received stuff on socket $socket $addr:$port"
+	#puts "Received stuff on socket $socket $addr:$port"
 
 	if [eof $socket] {
 		puts "EOF"
@@ -267,7 +268,7 @@ proc ForwardToSubscribers {rxID packet} {
 	global subscriberPacketCount
 
 	foreach socket [array names subscribers] {
-		puts "Iffing $subscribers($socket) against $rxID"
+		#puts "Iffing $subscribers($socket) against $rxID"
 		if {$subscribers($socket) == $rxID} {
 			puts "Forwarding to $socket length [string length $packet]"
 			puts -nonewline $socket $packet

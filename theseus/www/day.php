@@ -15,14 +15,14 @@
 
    require_once("../connect.php");
 
-   $stmt = $dbh->prepare("SELECT DISTINCT rx_id FROM available WHERE CAST(recording_start AS DATE) = '$date'");
+   $stmt = $dbh->prepare("SELECT DISTINCT rx_id FROM rsci_recordings WHERE CAST(recording_start AS DATE) = '$date'");
    $stmt->setFetchMode(PDO::FETCH_ASSOC);
    $stmt->execute();
    $rxValues = $stmt->fetchAll();
 
    $numRxs = count($rxValues);
 
-   $stmt = $dbh->prepare("SELECT recording_start, state, rx_id FROM available WHERE CAST(recording_start AS DATE) = '$date'");
+   $stmt = $dbh->prepare("SELECT recording_start, state, rx_id FROM rsci_recordings WHERE CAST(recording_start AS DATE) = '$date'");
    $stmt->setFetchMode(PDO::FETCH_ASSOC);
    $stmt->execute();
    $timeValues = $stmt->fetchAll();

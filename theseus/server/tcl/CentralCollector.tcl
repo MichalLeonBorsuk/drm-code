@@ -127,7 +127,7 @@ proc InformationCollector {inDataId} {
 
 	upvar receptionInfo$rxID receptionInfo
 
-	puts "Got a packet from $rxID"
+	#puts "Got a packet from $rxID"
  
 	set rxIDCounters($rxID) 0
 
@@ -251,7 +251,7 @@ proc InformationCollector {inDataId} {
 
 
     # Only decode if there is no problem
-    if {[lindex $tags(rsta) 2] == 0} {
+    if {[lindex $tags(rsta) 2] == 0 && [info exists receptionInfo(sdc_)]} {
 
 	set tagName "sdc_"
 	if {[string length $tags($tagName)] > 0} {    
