@@ -1,7 +1,7 @@
 <html>
 <head>
 <link rel="shortcut icon" href="/images/favicon.ico" type="image/vnd.microsoft.icon">
-<link rel=StyleSheet href="/style.css" type="text/css">
+<link rel=StyleSheet href="style.css" type="text/css">
 <title>THESEUS Remote Monitoring System</title>
 </head>
 <body>
@@ -19,7 +19,7 @@
         if ($month == 1 || $month == 7) { echo "<tr>"; }
         echo "<td valign=top>";
 
-       $stmt = $dbh->prepare("SELECT DISTINCT EXTRACT(DAY FROM recording_start) FROM available WHERE Year(recording_start) = $year AND MONTH(recording_start) = $month");
+       $stmt = $dbh->prepare("SELECT DISTINCT EXTRACT(DAY FROM recording_start) FROM rsci_recordings WHERE Year(recording_start) = $year AND MONTH(recording_start) = $month");
 
        $stmt->setFetchMode(PDO::FETCH_ASSOC);
        $stmt->execute();

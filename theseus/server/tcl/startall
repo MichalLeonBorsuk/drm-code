@@ -1,0 +1,5 @@
+#! /bin/bash
+cd /home/drm/monitoring/theseus/server/tcl
+/usr/bin/tclsh Mediator.tcl &
+/usr/bin/tclsh CentralCollector.tcl &
+
