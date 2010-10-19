@@ -65,7 +65,7 @@
      $tdString = "";
      switch ($state) {
        case "R":
-         $tdString = "R";
+         $tdString = "<A href=\"request_rsci_recording.php?filename=$fileName\"><img src=\"images/requestFile.gif\"/></A>";
          break;
        case "Q":
          $tdString = "Q";
