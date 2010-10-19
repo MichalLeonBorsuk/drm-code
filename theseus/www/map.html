@@ -346,15 +346,16 @@
 
     function determineMarkerImage(data) {
       // use markers to indicate last update time
-      var markerSuffix = "";
+      var markerSaturation = "";
+
       if (data.lastUpdate <= 3)
-        markerSuffix = "";
+        markerSaturation = "FF";
       else if (data.lastUpdate > 3 && data.lastUpdate <= 10)
-        markerSuffix = "_1";
+        markerSaturation = "A0";
       else if (data.lastUpdate > 10 && data.lastUpdate <= 30)
-        markerSuffix = "_2";
+        markerSaturation = "80";
       else
-        markerSuffix = "_3";
+        markerSaturation = "30";
 
       if (data.rdmo == "drm_") {
         var audioStatusFloat = parseFloat(data.audioStatus);
@@ -364,17 +365,22 @@
         var markerName = "";
         if (audioStatusFloat == 100) {
           if (wmmFloat > 21) {
-            markerName = "images/marker_good" + markerSuffix + ".png";
+            markerName = "http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=D|00" + markerSaturation + "00|000000";
+//            markerName = "images/marker_good" + markerSuffix + ".png";
           } else {
-            markerName = "images/marker_marginal" + markerSuffix + ".png";
+            markerName = "http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=D|" + markerSaturation + markerSaturation + "00|000000";
+//            markerName = "images/marker_marginal" + markerSuffix + ".png";
           }
         } else {
-           markerName = "images/marker_bad" + markerSuffix + ".png";
+            markerName = "http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=D|" + markerSaturation + "0000|000000";
+//           markerName = "images/marker_bad" + markerSuffix + ".png";
         }
       } else if (data.rdmo == "am__") {
-        markerName = "images/marker_AM" + markerSuffix + ".png";
+        markerName = "http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=A|0000" + markerSaturation + "|000000";
+//        markerName = "images/marker_AM" + markerSuffix + ".png";
       } else if (data.rdmo == "wbfm") {
-        markerName = "images/marker_FM" + markerSuffix + ".png";
+            markerName = "http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=F|0000" + $arkerSaturation + "|000000";
+//        markerName = "images/marker_FM" + markerSuffix + ".png";
       }
 
       return markerName;
@@ -618,7 +624,7 @@
   <body onload="load()" onunload="GUnload()">
     <div style="height: 100%; text-align:center">
     <p><img src="images/banner.png" width="990" height="40" border="0" vspace="0" hspace="0">
-    <P><A HREF="/map.html">Map view</A>&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="/list.html">List view</A>&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="/rsci/">RSCI archive</A>
+    <P><A HREF="/map.html">Map view</A>&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="list.html">List view</A>&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="/rsci/">RSCI archive</A>
     <table cellpadding="2" align="center" height="75%" cellspacing="10" width="95%" border="0">
     <tr style="">
       <td class="group" style="border:solid 1px" valign="top" width="25%" height="100%">
