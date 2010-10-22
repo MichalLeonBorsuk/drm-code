@@ -1,5 +1,5 @@
 package require http ;
-
+package require json
 source settings.tcl
 
 set ext ".rs*"
@@ -7,19 +7,23 @@ set typedir "RSCI"
 #set ext ".IQ*"
 #set typedir "IQ"
 
-set sourcedir [file join $ROOT_DIR2 $RX_NAME]
-set destdir [file join $ROOT_DIR2 $RX_NAME]
+set sourcedir "F:/datafiles/$RX_NAME"
+set destdir "F:/datafiles/$RX_NAME"
 set destURL "/$RX_NAME"
 set gzCmdName [file join $ROOT_DIR gzip]  
-set pscpCmdName [file join $PUTTY_DIR "pscp" $EXE_SUFFIX]
-set puttyCmdName [file join $PUTTY_DIR "putty" $EXE_SUFFIX]
-set plinkCmdName [file join $PUTTY_DIR "plink" $EXE_SUFFIX]
+set pscpCmdName "C:/Program Files/putty/pscp.exe"
+set puttyCmdName "C:/Program Files/putty/putty.exe"
+set plinkCmdName "C:/Program Files/putty/plink.exe"
 
-set serverURL "http://192.168.11.201/inform.php"
+set serverAddress "192.168.11.201"
+set informURL "http://$serverAddress/theseus/inform.php"
+set requestURL "http://$serverAddress/theseus/rsci_recordings.php?rx_id=$RX_NAME&state=Q&fmt=json"
+set putfileURL "http://$serverAddress/theseus/put_rsci_file.php"
 
+#set serverURL "http://192.168.11.201/nonexistent.php"
 set HTTP_TIMEOUT 10000
 
-set undeclaredRecordingsFileName [file join $ROOT_DIR2 undeclared.txt]
+set undeclaredRecordingsFileName "F:/datafiles/undeclared.txt"
 
 proc MakeRemoteDir {dirName} {
   global serverAddress
@@ -73,7 +77,7 @@ while 1 {
   #transfer the list
 set undeclaredRecordingsFile [open $undeclaredRecordingsFileName r]
 #catch {set token [http::geturl $serverURL -method PUT -querychannel $undeclaredRecordingsFile -timeout $HTTP_TIMEOUT]}
-set token [http::geturl $serverURL -querychannel $undeclaredRecordingsFile -type "text/plain" -timeout $HTTP_TIMEOUT]
+set token [http::geturl $informURL -querychannel $undeclaredRecordingsFile -type "text/plain" -timeout $HTTP_TIMEOUT]
 puts "about to do the post"
 #set token [http::geturl $serverURL -method PUT -timeout $HTTP_TIMEOUT]
 #check what happened
@@ -105,6 +109,37 @@ set undeclaredRecordingsFile [open $undeclaredRecordingsFileName w]
 puts -nonewline $undeclaredRecordingsFile [join $undeclaredRecordings "\n"]
 close $undeclaredRecordingsFile
 puts [join $undeclaredRecordings "\n"]
+
+# Get list of requested rsci files
+set token [http::geturl $requestURL -type "text/plain" -timeout $HTTP_TIMEOUT]
+upvar #0 $token state
+set requests [json::json2dict $state(body)]
+#puts $state(body)
+puts "requests:"
+foreach request $requests {
+	set fileTail [dict get $request filename]
+	if {[regexp {.*_(....)-(..)-(..)_} $fileTail match year month day]} {
+		set filename [file join $destdir $typedir "${year}-${month}-${day}" $fileTail]
+		if [file exists $filename] {
+		set url "$putfileURL?filename=$fileTail"
+
+		set rsciFile [open $filename "r"]
+		puts "putfileURL=$putfileURL"
+		puts "about to put $fileTail to $url"
+		set token [http::geturl $url -querychannel $rsciFile -type "text/plain" -timeout $HTTP_TIMEOUT]
+		puts [http::status $token]
+		upvar #0 $token state
+		puts $state(body)
+
+		close $rsciFile
+
+			puts -nonewline "File: $filename Size:" 
+			puts [file size $filename]
+		} else {
+			#puts "file $filename n'existe pas"
+		}
+	}
+}
   
   set waitVar 0
   puts "Waiting..."
