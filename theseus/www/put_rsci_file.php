@@ -48,6 +48,18 @@ try {
 
 	fclose($putdata);
 	fclose($rsciFile);
+
+
+        $putdata = fopen("php://input", "r");
+
+        $query = "UPDATE rsci_recordings SET state='A' WHERE filename='$filename'";
+
+        $count = $dbh->exec($query);
+
+        print "Affected rows: $count<BR>";
+
+        $dbh = null;
+
 } catch (PDOException $e) {
     print "Error!: " . $e->getMessage() . "<br/>";
     die();
