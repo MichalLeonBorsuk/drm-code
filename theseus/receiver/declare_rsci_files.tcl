@@ -74,6 +74,9 @@ while 1 {
 	}
   }
 
+# create the undeclared recordings file if it doesn't exist
+close [open $undeclaredRecordingsFileName a]
+
   #transfer the list
 set undeclaredRecordingsFile [open $undeclaredRecordingsFileName r]
 #catch {set token [http::geturl $serverURL -method PUT -querychannel $undeclaredRecordingsFile -timeout $HTTP_TIMEOUT]}
