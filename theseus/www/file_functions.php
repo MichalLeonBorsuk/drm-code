@@ -1,6 +1,31 @@
 <?php
+function theseus_header($redirect_content)
+{
+?>
+<html>
+<head>
+<meta http-equiv="refresh" content="<?php print $redirect_content; ?>">
+<link rel="shortcut icon" href="images/favicon.ico" type="image/vnd.microsoft.icon">
+<link rel=StyleSheet href="/style.css" type="text/css">
+<title>THESEUS Remote Monitoring System</title>
+</head>
+<body>
+<center><img src="images/banner.png" width="990" height="40" border="0" vspace="0" hspace="0"></center>
+<?php
+}
+
+function theseus_footer()
+{
+?>
+</body>
+</html>
+<?php
+}
+
+
 function show_archive($dbh, $date)
 {
+   theseus_header("10");
    echo "<CENTER><P><h2>Archive ($date)</h2><CENTER>";
 
    $stmt = $dbh->prepare("SELECT DISTINCT rx_id FROM rsci_recordings WHERE CAST(recording_start AS DATE) = ?");
@@ -54,7 +79,7 @@ function show_archive($dbh, $date)
      switch ($state) {
        case "R":
          $tdString = "<A title=\"click to request upload from receiver\""
-		." href=\"day.php?action=request&amp;filename=$fileName\">"
+		." href=\"day.php?action=request&amp;filename=$fileName&amp;date=$date\">"
 		."<img src=\"images/requestFile.gif\"/></A>";
          break;
        case "Q":
@@ -87,18 +112,21 @@ function show_archive($dbh, $date)
    }
 
    echo "</table>";
+   theseus_footer();
 }
 
 
 /* Change the state of an entry in 'rsci_recordings' table of the theseus database from "Remote" to "reQuested" */
-function request_file($dbh, $fileName)
+function request_file($dbh, $date, $fileName)
 {
+   theseus_header("0,day.php?date=$date");
     try {
 	$stmt = $dbh->prepare("UPDATE rsci_recordings SET state='Q' WHERE filename=?"); 
 	$stmt->execute(array($fileName));
     } catch (PDOException $e) {
         print "Error!: " . $e->getMessage() . "<br/>";
     }
+   theseus_footer();
 }
 
 ?>
