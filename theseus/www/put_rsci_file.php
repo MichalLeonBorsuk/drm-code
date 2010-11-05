@@ -8,9 +8,10 @@ try {
 
 	require_once("../connect.php");
 
-	if(isset($_GET['filename']))
+	if(isset($_REQUEST['filename']))
 	{
-      	 $filename = $_GET['filename'];
+      	 //$filename = $_GET['filename'];
+      	 $filename = $_REQUEST['filename'];
 	}
 	else
 	{
