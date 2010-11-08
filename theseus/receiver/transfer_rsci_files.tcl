@@ -11,13 +11,12 @@ set gzCmdName [file join $ROOT_DIR gzip]
 set pscpCmdName "C:/Program Files/putty/pscp.exe"
 set puttyCmdName "C:/Program Files/putty/putty.exe"
 set plinkCmdName "C:/Program Files/putty/plink.exe"
-set serverAddress 132.185.142.42
 set serverUser drm
 set serverPassword 5au5age5
 set shortFileLength 75
 
 proc MakeRemoteDir {dirName} {
-  global serverAddress
+  global SERVER_ADDRESS
   global serverUser
   global serverPassword
   global plinkCmdName
@@ -26,8 +25,8 @@ proc MakeRemoteDir {dirName} {
   puts $tty "mkdir $dirName"
   close $tty
 
-  puts "$plinkCmdName -ssh ${serverUser}@$serverAddress -pw $serverPassword mkdir $dirName"
-  set errorFlag [catch {exec $plinkCmdName -ssh ${serverUser}@$serverAddress -pw $serverPassword mkdir $dirName} response]
+  puts "$plinkCmdName -ssh ${serverUser}@$SERVER_ADDRESS -pw $serverPassword mkdir $dirName"
+  set errorFlag [catch {exec $plinkCmdName -ssh ${serverUser}@$SERVER_ADDRESS -pw $serverPassword mkdir $dirName} response]
   if {$errorFlag} {
     puts "Making directory failed with $response"
   }

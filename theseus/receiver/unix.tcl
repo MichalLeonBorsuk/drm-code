@@ -1,3 +1,9 @@
+#** Path to where you copied the TCL-files, remember to user "/" instead of "\" !
+set ROOT_DIR "/logging/$RX_NAME"
+set ROOT_DIR2 "F:/datafiles"
+set PUTTY_DIR "C:/Program Files/putty/"
+set EXE_SUFFIX ""
+
 # This is needed to adjust the different <clock clicks> resolutions
 set CLICKS_PER_MS 1000;
 

@@ -8,11 +8,7 @@ source settings.tcl
 
 package require rsciUtil
 package require rsci
-
-# Include support for UDP
-if {$CONTROL_PROTOCOL == "UDP" || $STATUS_PROTOCOL == "UDP"} {
-	package require udp
-}
+package require udp
 
 # Variables
 set receivedAFS ""; # Received audio frame status
@@ -31,52 +27,48 @@ proc AcceptConnection {socket addr port} {
 }
 
 
-proc ConfigureStatusPort {} {
+proc ConfigureStatusPort {addr port protocol} {
 
     # Configures connection for incoming data.
     # File id is returned
-
-	global DRM_RX_STATUS_IP_ADDRESS
-    global STATUS_PORT
-    global STATUS_PROTOCOL
 
 #    set tty [open /dev/ttyb r+]
 #    fconfigure $tty -mode 115200,n,8,1 -translation binary
 
 	# For receivers that support the UDP protocol
-	if {$STATUS_PROTOCOL == "UDP"} {
-		set tty [udp_open $STATUS_PORT]
+	if {$protocol == "UDP"} {
+		set tty [udp_open $port]
 		fconfigure $tty -buffering none -translation binary
+		puts "recording RSCI from UDP port $port"
 	}	
 
 	# For receivers that support the TCP protocol
-	if {$STATUS_PROTOCOL == "TCP"} {
-		set tty [socket $DRM_RX_STATUS_IP_ADDRESS $STATUS_PORT]
+	if {$protocol == "TCP"} {
+		set tty [socket $addr $port]
 		fconfigure $tty -translation binary 
 		fconfigure $tty -blocking 1
+		puts "recording RSCI from TCP addr $addr port $port"
 	}
 
     return $tty
 }
 
-proc ConfigureCmdPort {} {
+proc ConfigureCmdPort {addr port protocol} {
 
     # Configures connection for outgoing data.
     # File id is returned
 
-    global CONTROL_PORT
-    global CONTROL_PROTOCOL
-    global DRM_RX_CTRL_IP_ADDRESS
-
     # For receivers using the UDP protocol for status
-    if {$CONTROL_PROTOCOL == "UDP"} {
+    if {$protocol == "UDP"} {
 		set tty [udp_open]
-		fconfigure $tty -remote [list $DRM_RX_CTRL_IP_ADDRESS $CONTROL_PORT]
+		fconfigure $tty -remote [list $addr $port]
+		puts "controlling receiver on addr $addr UDP port $port"
     } 
 
     # For receivers using the UDP protocol for status
-    if {$CONTROL_PROTOCOL == "TCP"} {
-	    set tty [socket $DRM_RX_CTRL_IP_ADDRESS $CONTROL_PORT]
+    if {$protocol == "TCP"} {
+	    set tty [socket $addr $port]
+	puts "controlling receiver on addr $addr TCP port $port"
     }
 
     fconfigure $tty -translation binary 
@@ -112,7 +104,7 @@ proc CommandReader {socket} {
 	global currentStatus frequency mode modelogFileId binaryLogFileId
 	global REAL_TIME_LOG
 	global BINARY_RECORDING
-	global COMMAND_PORT
+	global commandPort
 	global IQ_RECORD
 	global previousProfiles
 	global bsSummary
@@ -131,7 +123,7 @@ proc CommandReader {socket} {
 	# Start; Read frequency from command
         if {[regexp {start ([A-Z]*)( )*([0-9]+)(\.0)*( )*([a-z]*)} $line match demod dummy arg1 dummy dummy arg2]} {
 		# Activate receiver
-		CmdActivate $COMMAND_PORT "1" 0x0002 0x0001
+		CmdActivate $commandPort "1" 0x0002 0x0001
 
 		#andrewm 19/01/07, 
 		# Make new mode public
@@ -151,7 +143,7 @@ proc CommandReader {socket} {
 		set frequency $arg1
 		
 		# Set frequency on receiver (starting freq in case of bandscan)
-		CmdSetFrequency $COMMAND_PORT $frequency $mode 0x0002 0x0001
+		CmdSetFrequency $commandPort $frequency $mode 0x0002 0x0001
 
 
 		# Start real time log
@@ -166,7 +158,7 @@ proc CommandReader {socket} {
 
 		# Start IQ file recording if the option is set in settings.tcl
 		if {$IQ_RECORD == 1} {
-		   CmdStartRecording $COMMAND_PORT "i" 0x0002 0x0001
+		   CmdStartRecording $commandPort "i" 0x0002 0x0001
 		}
 
 		# Start recording of binary recording
@@ -200,12 +192,12 @@ proc CommandReader {socket} {
 				set stopProfiles [join $stopProfilesList ""]
 
 #				puts "stop: $stopProfiles"
-				CmdStopRecording $COMMAND_PORT $stopProfiles 0x0002 0x0001
+				CmdStopRecording $commandPort $stopProfiles 0x0002 0x0001
 			}
 		}
 
 		if {![string equal $profile ""]} {
-			CmdStartRecording $COMMAND_PORT $profile 0x0002 0x0001
+			CmdStartRecording $commandPort $profile 0x0002 0x0001
 			puts "\nRecording of datafile started."
 		}
 
@@ -257,7 +249,7 @@ proc CommandReader {socket} {
 		}
 
 		# Stop IQ file recording if the option is set in settings.tcl
-		CmdStopRecording $COMMAND_PORT "abcdqri" 0x0002 0x0001
+		CmdStopRecording $commandPort "abcdqri" 0x0002 0x0001
 		puts "Recording at receiver stopped (if there was any)."
 		
 		# Close binary file if it exists
@@ -268,7 +260,7 @@ proc CommandReader {socket} {
 		}
 
 		# Deactivate receiver
-		CmdActivate $COMMAND_PORT "0" 0x0002 0x0001
+		CmdActivate $commandPort "0" 0x0002 0x0001
 
 
 		puts "Recording of datafile stopped"
@@ -277,7 +269,7 @@ proc CommandReader {socket} {
 
 	#Reset
 	if {[regexp {reset.*} $line match arg1]} {
-		CmdStopRecording $COMMAND_PORT "abcdqri" 0x0002 0x0001
+		CmdStopRecording $commandPort "abcdqri" 0x0002 0x0001
 		puts "Reset: Recording at receiver stopped (if there was any)."
 	}
 
@@ -1203,15 +1195,15 @@ if {[string length [lindex $argv 0]] > 0} {
 StartServer $TCP_PORT_RECORDER
 
 # Configure connection for incoming data
-set statusPort [ConfigureStatusPort]
+set statusPort [ConfigureStatusPort $RECEIVER_ADDRESS $RECORD_STATUS_PORT $STATUS_PROTOCOL]
 fileevent $statusPort readable [list InformationCollector $statusPort] 
 
 # Configure conenction for outgoing data
-set COMMAND_PORT [ConfigureCmdPort]
+set commandPort [ConfigureCmdPort $RECEIVER_ADDRESS $RECORD_CONTROL_PORT $CONTROL_PROTOCOL]
 
-#CmdSetFrequency $COMMAND_PORT 243 "am__" 0x01 0x02
+#CmdSetFrequency $commandPort 243 "am__" 0x01 0x02
 
-#CmdSetAMFilter $COMMAND_PORT 5 "upper" 0x01 0x02
+#CmdSetAMFilter $commandPort 5 "upper" 0x01 0x02
 
 
 # Needed for periodic update of the receiver time
@@ -1225,7 +1217,7 @@ while {1} {
 
 	    set currentDate [clock format [clock seconds] -format "%Y-%m-%d" -gmt 1]
 	    set currenthhmmss [clock format [clock seconds] -format "%H:%M:%S" -gmt 1]
-    	    CmdSetTime $COMMAND_PORT $currentDate $currenthhmmss 1 0x01 0x02
+    	    CmdSetTime $commandPort $currentDate $currenthhmmss 1 0x01 0x02
 	
             puts "\nReceiver time adjusted at $currentDate $currenthhmmss"
     }
@@ -1243,7 +1235,7 @@ while {1} {
         set collectionTime [expr round($DATA_BLOCK_LENGTH-$currentSec)]
 	
         # Read <collectionTime> of data from receiver. Returns list with contents of the data block
-        set dataBlock [AssembleDatablock $COMMAND_PORT $collectionTime $frequency $mode]
+        set dataBlock [AssembleDatablock $commandPort $collectionTime $frequency $mode]
 
         # Write total data block (tdb) to disk 
         if {$dataBlock != -1} {
