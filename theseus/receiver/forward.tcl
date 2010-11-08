@@ -1,14 +1,13 @@
 # Include support for UDP
 package require udp
 
-set SERVER_ADDRESS 132.185.142.42
+set SERVER_ADDRESS theseus.dyndns.ws
 set SERVER_PORT 12001
-#set PROXY_ADDRESS gateb.rd.bbc.co.uk
+#set PROXY_ADDRESS somehost
 #set PROXY_PORT 1085
 
 #set SERVER_ADDRESS 127.0.0.1
 #set SERVER_PORT 23001
-
 
 set RECEIVER_ADDRESS 127.0.0.1
 set RECEIVER_STATUS_PORT 60001
@@ -121,7 +120,6 @@ proc ProcessControl {rxControlPort} {
 		fileevent $serverPort readable [list ProcessControl $rxControlPort]
 		return
 	}
-puts "got past the EOF if"
 	if {[catch {set packet [read $serverPort]}] != 0} {
 		puts "server port can't be read - trying to reconnect"
 		catch {close $serverPort}
