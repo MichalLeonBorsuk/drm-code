@@ -17,20 +17,6 @@ set SE127_PROTOCOL DCP
 set USE_AF_CRC 0
 
 
-#** Path to where you copied the TCL-files, remember to user "/" instead of "\" !
-set ROOT_DIR "F:/logging/$RX_NAME"
-set ROOT_DIR2 "F:/datafiles"
-set PUTTY_DIR "C:/Program Files/putty/"
-set EXE_SUFFIX ".exe"
-
-set PORT_BASE 30000
-
-# Set IP address of DRM receiver
-#set DRM_RX_IP_ADDRESS 132.185.130.104
-#set DRM_RX_IP_ADDRESS localhost
-set DRM_RX_CTRL_IP_ADDRESS localhost
-set DRM_RX_STATUS_IP_ADDRESS localhost
-              
 #specifies whether to gzip dt2 files before sending    
 set GZIP_DT2_FILES 0
 
@@ -76,12 +62,19 @@ set CONTROL_PROTOCOL UDP
 set STATUS_PROTOCOL UDP
 
 
-# Setting for communication with TC_SE127-compliant DRM receiver
-set STATUS_PORT [expr $PORT_BASE + 1]
-set CONTROL_PORT [expr $PORT_BASE + 2]
+# Setting for communication with RSCI-compliant DRM receiver
+set RECEIVER_ADDRESS 127.0.0.1
+set PORT_BASE 30000
+set RECORD_STATUS_PORT [expr $PORT_BASE + 1]
+set RECORD_CONTROL_PORT [expr $PORT_BASE + 2]
+set FORWARD_STATUS_PORT [expr $PORT_BASE + 101]
+set FORWARD_CONTROL_PORT [expr $PORT_BASE + 102]
 
-#** Windows Time Server - Specify hostname to synchronise time to DCF-clock using NTP
-# set TIME_SERVER "ntsvr"
+# Setting for communication with Theseus server
+set SERVER_ADDRESS theseus.dyndns.ws
+set SERVER_PORT 12001
+#set PROXY_ADDRESS somehost
+#set PROXY_PORT 1085
 
 #** Process data on each program startup
 #set PROCESS_ON_STARTUP 1
@@ -115,8 +108,8 @@ set INTERNET_CONNECTION_END "23:59:00";# default is "23:59:00"
 # Select the OS by uncommenting the source
 #***************************************************************************************
 
-set OS_CODE windows.tcl
-#set OS_CODE unix.tcl
+#set OS_CODE windows.tcl
+set OS_CODE unix.tcl
 
 #***************************************************************************************
 # Receiver-specific functions
@@ -169,18 +162,16 @@ set USE_EXTERNAL_SIGNAL_STRENGTH 0
 set ENABLE_EMAIL 0
 
 # Name of the email program to be used
-set EMAIL_CLIENT "postie";# For Windows
-#set EMAIL_CLIENT "mpack";# For Unix
+#set EMAIL_CLIENT "postie";# For Windows
+set EMAIL_CLIENT "mpack";# For Unix
 
 #** SMTP-server IP-address
 set MAIL_SMTP pop3.rd.bbc.co.uk
 
 #** Your e-mail address
-set MAIL_FROM andrewm@rd.bbc.co.uk
+set MAIL_FROM wsaudibility@gmail.com
 
 #** Don't change this, destination e-mail address
-#set MAIL_TO drmdata@pdis.rnw.nl
-#set MAIL_TO drmdb@bips78.bi.ehu.es
 set MAIL_TO drmdata@rd.bbc.co.uk
 
 if {$USE_EXTERNAL_SIGNAL_STRENGTH == "1"} {
