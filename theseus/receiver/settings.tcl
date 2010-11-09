@@ -15,6 +15,7 @@ set LONGITUDE -0.119690
 set SE127_VERSION 3
 set SE127_PROTOCOL DCP
 set USE_AF_CRC 0
+set UDP_PACKAGE UDP
 
 
 #specifies whether to gzip dt2 files before sending    
