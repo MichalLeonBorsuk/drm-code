@@ -1,4 +1,4 @@
-package require http ;
+package require http
 package require json
 source settings.tcl
 
@@ -7,43 +7,21 @@ set typedir "RSCI"
 #set ext ".IQ*"
 #set typedir "IQ"
 
-set sourcedir "F:/datafiles/$RX_NAME"
-set destdir "F:/datafiles/$RX_NAME"
-set destURL "/$RX_NAME"
-set gzCmdName [file join $ROOT_DIR gzip]  
-set pscpCmdName "C:/Program Files/putty/pscp.exe"
-set puttyCmdName "C:/Program Files/putty/putty.exe"
-set plinkCmdName "C:/Program Files/putty/plink.exe"
+set sourcedir [file join $DATA_DIR $RX_NAME]
+set destdir $sourcedir
 
-set serverAddress "192.168.11.201"
-set informURL "http://$serverAddress/theseus/inform.php"
-set requestURL "http://$serverAddress/theseus/rsci_recordings.php?rx_id=$RX_NAME&state=Q&fmt=json"
-set putfileURL "http://$serverAddress/theseus/put_rsci_file.php"
+set informURL "http://$SERVER_ADDRESS/theseus/inform.php"
+set requestURL "http://$SERVER_ADDRESS/theseus/rsci_recordings.php?rx_id=$RX_NAME&state=Q&fmt=json"
+set putfileURL "http://$SERVER_ADDRESS/theseus/put_rsci_file.php"
 
-#set serverURL "http://192.168.11.201/nonexistent.php"
 set HTTP_TIMEOUT 10000
 
-set undeclaredRecordingsFileName "F:/datafiles/undeclared.txt"
-
-proc MakeRemoteDir {dirName} {
-  global serverAddress
-  global serverUser
-  global serverPassword
-  global plinkCmdName
-
-  set tty [open "putty_commands.scr" w]
-  puts $tty "mkdir $dirName"
-  close $tty
-
-  puts "$plinkCmdName -ssh ${serverUser}@$serverAddress -pw $serverPassword mkdir $dirName"
-  set errorFlag [catch {exec $plinkCmdName -ssh ${serverUser}@$serverAddress -pw $serverPassword mkdir $dirName} response]
-  if {$errorFlag} {
-    puts "Making directory failed with $response"
-  }
-}
-
+set undeclaredRecordingsFileName [file join $DATA_DIR "undeclared.txt"]
 
 # Main program
+if ![file exists $DATA_DIR] {
+ file mkdir $DATA_DIR
+}
 
 while 1 {
   if ![catch {set filelist [lsort [glob [file join $sourcedir "*$ext"]]]}] {
