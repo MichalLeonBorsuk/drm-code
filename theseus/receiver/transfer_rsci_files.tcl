@@ -5,33 +5,7 @@ set typedir "RSCI"
 #set ext ".IQ*"
 #set typedir "IQ"
 
-set sourcedir "F:/datafiles/$RX_NAME"
-set destdir "F:/datafiles/$RX_NAME/organised"
-set gzCmdName [file join $ROOT_DIR gzip]  
-set pscpCmdName "C:/Program Files/putty/pscp.exe"
-set puttyCmdName "C:/Program Files/putty/putty.exe"
-set plinkCmdName "C:/Program Files/putty/plink.exe"
-set serverUser drm
-set serverPassword 5au5age5
 set shortFileLength 75
-
-proc MakeRemoteDir {dirName} {
-  global SERVER_ADDRESS
-  global serverUser
-  global serverPassword
-  global plinkCmdName
-
-  set tty [open "putty_commands.scr" w]
-  puts $tty "mkdir $dirName"
-  close $tty
-
-  puts "$plinkCmdName -ssh ${serverUser}@$SERVER_ADDRESS -pw $serverPassword mkdir $dirName"
-  set errorFlag [catch {exec $plinkCmdName -ssh ${serverUser}@$SERVER_ADDRESS -pw $serverPassword mkdir $dirName} response]
-  if {$errorFlag} {
-    puts "Making directory failed with $response"
-  }
-}
-
 
 # Main program
 
@@ -73,9 +47,9 @@ while 1 {
 
         # puts "$file $year $month $day"
         # ZIP it
-        set gzCommand "$gzCmdName --force $headFileName"
+        set gzCommand "gzip --force $headFileName"
         puts "$gzCommand"
-        set errorFlag [catch {exec $gzCmdName --force $headFileName} response ]
+        set errorFlag [catch {exec $gzCommand} response ]
         puts "returned $errorFlag $response"
         set gzFileName "$headFileName.gz"
       }
@@ -83,17 +57,10 @@ while 1 {
       if [file exists $gzFileName] {
  
         # transfer it
-        set remoteFileName "mayflower/www/rsci/$RX_NAME/${year}-${month}-${day}/[file tail $gzFileName]"
-        MakeRemoteDir mayflower/www/rsci/$RX_NAME
-        MakeRemoteDir mayflower/www/rsci/$RX_NAME/${year}-${month}-${day}
-       
-        set pscpCommand "$pscpCmdName -pw 5au5age5 $gzFileName drm@132.185.142.42:$remoteFileName"
-        puts $pscpCommand
-        set errorFlag [catch {exec $pscpCmdName -pw 5au5age5 $gzFileName drm@132.185.142.42:$remoteFileName} response]
-        puts "returned $errorFlag $response"
-        if {!$errorFlag} {
-          catch {file delete $gzFileName}
-        }
+        set remoteDir "/www/rsci/$RX_NAME/${year}-${month}-${day}"
+        set remoteFileName "$remoteDir/[file tail $gzFileName]"
+        MakeRemoteDir $remoteDir
+	PutFile $gzFileName $remoteFileName
  
       }
     }

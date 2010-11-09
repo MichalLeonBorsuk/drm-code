@@ -73,23 +73,20 @@ set FORWARD_CONTROL_PORT [expr $PORT_BASE + 102]
 # Setting for communication with Theseus server
 set SERVER_ADDRESS theseus.dyndns.ws
 set SERVER_PORT 12001
+set serverUser drm
 #set PROXY_ADDRESS somehost
 #set PROXY_PORT 1085
 
 #** Process data on each program startup
 #set PROCESS_ON_STARTUP 1
 
-#** TCP/IP port numbers for communication between the scripts. Don't  change unless you change it in schedule.tcl as well!
+#** TCP/IP port numbers for communication between the scripts.
 set TCP_PORT_RECORDER [expr $PORT_BASE + 0]
 
 #** Settings controlling the download for latest schedule.txt or even <RX_NAME>_schedule.txt
 set AUTOMATIC_SCHEDULE_DOWNLOAD 0    		;# set to '1' to activate, '0' otherwise
 set HTTP_PROXY_HOST "www-cache.rd.bbc.co.uk"    ;# adjust to your local network
 set HTTP_PROXY_PORT 80				;# adjust to your local network
-# set SCHEDULE_URL "http://pdis.rnw.nl/drm" ;# don't touch
-#set SCHEDULE_URL "http://www.oliver.haffenden.dsl.pipex.com/drm" ;# don't touch
-# set SCHEDULE_URL "http://www.geocities.com/bbcdrm/drm" ;# don't touch
-#set SCHEDULE_URL "http://158.227.74.68/drm" ;# UPV
 set SCHEDULE_URL "http://www.geocities.com/bbcdrm/mayflower" ;# don't touch
 
 set SCHEDULE_FORMAT IBB

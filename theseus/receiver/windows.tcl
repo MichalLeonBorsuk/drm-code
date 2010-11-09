@@ -1,6 +1,6 @@
 #** Path to where you copied the TCL-files, remember to user "/" instead of "\" !
-set ROOT_DIR "/logging/$RX_NAME"
-set ROOT_DIR2 "F:/datafiles"
+set DATA_DIR "F:/datafiles"
+set LOG_DIR "F:/logging"
 set PUTTY_DIR "C:/Program Files/putty/"
 set EXE_SUFFIX ".exe"
 
@@ -43,3 +43,32 @@ proc SynchoniseWithTimeServer {time_server} {
     catch {set id [exec net time \\\\$time_server /set /y]}
 }
 
+proc MakeRemoteDir {dirName} {
+  global SERVER_ADDRESS
+  global serverUser
+  global serverPassword
+  global PUTTY_DIR
+  set plinkCmdName [file join $PUTTY_DIR "plink.exe"]
+
+  puts "$plinkCmdName -ssh ${serverUser}@$SERVER_ADDRESS -pw $serverPassword mkdir -p $dirName"
+  set errorFlag [catch {exec $plinkCmdName -ssh ${serverUser}@$SERVER_ADDRESS -pw $serverPassword mkdir -p $dirName} response]
+  if {$errorFlag} {
+    puts "Making directory failed with $response"
+  }
+}
+
+proc PutFile {gzFileName remoteFileName} {
+  global SERVER_ADDRESS
+  global serverUser
+  global serverPassword
+  global PUTTY_DIR
+  set pscpCommand [file join $PUTTY_DIR "pscp.exe"]
+
+  set pscpCommand "$pscpCmdName -pw $serverPassword $gzFileName $serverUser@$SERVER_ADDRESS:$remoteFileName"
+  puts $pscpCommand
+  set errorFlag [catch {exec $pscpCmdName -pw $serverPassword $gzFileName $serverUser@$SERVER_ADDRESS:$remoteFileName} response]
+  puts "returned $errorFlag $response"
+  if {!$errorFlag} {
+    catch {file delete $gzFileName}
+  }
+}

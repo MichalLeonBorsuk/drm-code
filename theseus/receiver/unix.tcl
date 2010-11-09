@@ -1,7 +1,6 @@
 #** Path to where you copied the TCL-files, remember to user "/" instead of "\" !
-set ROOT_DIR "/logging/$RX_NAME"
-set ROOT_DIR2 "F:/datafiles"
-set PUTTY_DIR "C:/Program Files/putty/"
+set DATA_DIR "/data/datafiles"
+set LOG_DIR "/data/logging"
 set EXE_SUFFIX ""
 
 # This is needed to adjust the different <clock clicks> resolutions
@@ -33,4 +32,29 @@ proc SynchoniseWithTimeServer {time_server} {
 
 }
 
-    
+proc MakeRemoteDir {dirName} {
+  global SERVER_ADDRESS
+  global serverUser
+
+  puts "ssh ${serverUser}@$SERVER_ADDRESS mkdir -p $dirName"
+  set errorFlag [catch {exec ssh ${serverUser}@${SERVER_ADDRESS} mkdir -p $dirName} response]
+  if {$errorFlag} {
+    puts "Making directory failed with $response"
+  }
+}
+
+proc PutFile {gzFileName remoteFileName} {
+  global SERVER_ADDRESS
+  global serverUser
+  global PUTTY_DIR
+  set pscpCommand [file join $PUTTY_DIR "pscp.exe"]
+
+  set pscpCommand "scp $gzFileName ${serverUser}@${SERVER_ADDRESS}:${remoteFileName}"
+  puts $pscpCommand
+  set errorFlag [catch {exec scp ${gzFileName} ${serverUser}@${SERVER_ADDRESS}:${remoteFileName}} response]
+  puts "returned $errorFlag $response"
+  if {!$errorFlag} {
+    catch {file delete $gzFileName}
+  }
+}
+
