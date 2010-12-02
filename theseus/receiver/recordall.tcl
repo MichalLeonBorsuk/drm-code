@@ -4,11 +4,13 @@
 
 
 # Read common code and global variables
-source settings.tcl
+set config_dir [file dirname $argv0]
+source [file join $config_dir "settings.tcl"]
 
 package require rsciUtil
 package require rsci
 package require udp
+package require syslog
 
 # Variables
 set receivedAFS ""; # Received audio frame status
@@ -17,13 +19,13 @@ set receivedAFS ""; # Received audio frame status
 # server to receive commands
 proc StartServer {port} {
 	socket -server AcceptConnection $port
-	puts "Server started on port $port."
+	syslog "notice" "Server started on port $port."
 }
 
 proc AcceptConnection {socket addr port} {
 	fconfigure stdin -blocking 0
 	fileevent $socket readable [list CommandReader $socket]
-	puts "\nConnection established with $addr:$port"
+	syslog "notice" "Connection established with $addr:$port"
 }
 
 
@@ -39,7 +41,7 @@ proc ConfigureStatusPort {addr port protocol} {
 	if {$protocol == "UDP"} {
 		set tty [udp_open $port]
 		fconfigure $tty -buffering none -translation binary
-		puts "recording RSCI from UDP port $port"
+		syslog "notice" "recording RSCI from UDP port $port"
 	}	
 
 	# For receivers that support the TCP protocol
@@ -47,7 +49,7 @@ proc ConfigureStatusPort {addr port protocol} {
 		set tty [socket $addr $port]
 		fconfigure $tty -translation binary 
 		fconfigure $tty -blocking 1
-		puts "recording RSCI from TCP addr $addr port $port"
+		syslog "notice" "recording RSCI from TCP addr $addr port $port"
 	}
 
     return $tty
@@ -62,13 +64,13 @@ proc ConfigureCmdPort {addr port protocol} {
     if {$protocol == "UDP"} {
 		set tty [udp_open]
 		fconfigure $tty -remote [list $addr $port]
-		puts "controlling receiver on addr $addr UDP port $port"
+		syslog "notice" "controlling receiver on addr $addr UDP port $port"
     } 
 
     # For receivers using the UDP protocol for status
     if {$protocol == "TCP"} {
 	    set tty [socket $addr $port]
-	puts "controlling receiver on addr $addr TCP port $port"
+	syslog "notice" "controlling receiver on addr $addr TCP port $port"
     }
 
     fconfigure $tty -translation binary 
@@ -116,10 +118,10 @@ proc CommandReader {socket} {
 	# Close socket if connection breaks
 	if [eof $socket] {
 		catch {close $socket} 
-		PutLog "Control connection lost"
+		syslog "notice" "recordall: Control connection lost"
 	}
 
-	PutLog "\nCommand received: $line"
+	syslog "info" "recordall: Command received: $line"
 	# Start; Read frequency from command
         if {[regexp {start ([A-Z]*)( )*([0-9]+)(\.0)*( )*([a-z]*)} $line match demod dummy arg1 dummy dummy arg2]} {
 		# Activate receiver
@@ -153,7 +155,7 @@ proc CommandReader {socket} {
 		    set fileName [file join log $date $fileName]
 		    file mkdir [file dirname $fileName]
 		    set logFileId [open $fileName w]
-		    puts "\nFrame-based data log started. Watch your diskspace!"
+		    syslog "notice" "Frame-based data log started. Watch your diskspace!"
 		}				 
 
 		# Start IQ file recording if the option is set in settings.tcl
@@ -169,7 +171,7 @@ proc CommandReader {socket} {
 		    file mkdir [file dirname $fileName]
 		    set binaryLogFileId [open $fileName w]
 		    fconfigure $binaryLogFileId -translation binary 
-		    puts "\nBinary data log started. Watch your diskspace!"
+		    syslog "notice" "Binary data log started. Watch your diskspace!"
 		}	
 
 		# Start recording of specific profile at the receiver
@@ -181,7 +183,7 @@ proc CommandReader {socket} {
 				set profilesList [split $profile {}]
 				set previousProfilesList [split $previousProfiles {}]
 
-#				puts "previous: $previousProfilesList, current: $profilesList"
+#				syslog "info" "previous: $previousProfilesList, current: $profilesList"
 				set stopProfilesList [list]
 			    	foreach prePro $previousProfilesList {
 					if {[lsearch $profilesList $prePro] == -1} {
@@ -191,14 +193,14 @@ proc CommandReader {socket} {
 
 				set stopProfiles [join $stopProfilesList ""]
 
-#				puts "stop: $stopProfiles"
+				syslog "info" "stop recording profiles $stopProfiles"
 				CmdStopRecording $commandPort $stopProfiles 0x0002 0x0001
 			}
 		}
 
 		if {![string equal $profile ""]} {
 			CmdStartRecording $commandPort $profile 0x0002 0x0001
-			puts "\nRecording of datafile started."
+			syslog "info" "Recording of datafile started."
 		}
 
 		set previousProfiles $profile
@@ -213,7 +215,7 @@ proc CommandReader {socket} {
 		if [info exists bsSummary] {
 			unset bsSummary
 	 	}
-		puts "starting bandscan from $startFreq to $stopFreq"
+		syslog "notice" "starting bandscan from $startFreq to $stopFreq"
 		set bsSummary(time) $startTime
 		set bsSummary(startFreq) $startFreq
 		set bsSummary(stopFreq) $stopFreq
@@ -245,32 +247,32 @@ proc CommandReader {socket} {
 		if [info exists logFileId] {
 		    close $logFileId
 		    unset logFileId
-		    puts "Frame-based data log stopped."
+		    syslog "notice" "Frame-based data log stopped."
 		}
 
 		# Stop IQ file recording if the option is set in settings.tcl
 		CmdStopRecording $commandPort "abcdqri" 0x0002 0x0001
-		puts "Recording at receiver stopped (if there was any)."
+		syslog "info" "Recording at receiver stopped (if there was any)."
 		
 		# Close binary file if it exists
 		if [info exists binaryLogFileId] {
 		    close $binaryLogFileId
 		    unset binaryLogFileId
-		    puts "Binary data recording stopped."
+		    syslog "notice" "Binary data recording stopped."
 		}
 
 		# Deactivate receiver
 		CmdActivate $commandPort "0" 0x0002 0x0001
 
 
-		puts "Recording of datafile stopped"
+		syslog "notice" "Recording of datafile stopped"
 	}
 		
 
 	#Reset
 	if {[regexp {reset.*} $line match arg1]} {
 		CmdStopRecording $commandPort "abcdqri" 0x0002 0x0001
-		puts "Reset: Recording at receiver stopped (if there was any)."
+		syslog "notice" "Reset: Recording at receiver stopped (if there was any)."
 	}
 
 
@@ -310,7 +312,7 @@ proc InformationCollector {inDataId} {
     }
 
     if {$errorFlag == -1} {
-	puts "Receiver error!"
+	syslog "notice" "recordall Receiver error!"
 	return
     }	
 
@@ -409,7 +411,7 @@ proc InformationCollector {inDataId} {
 			set freq [expr round($tags(rfre)/1000)]
 		} else {
 
-			puts "rfre tag is empty!"
+			syslog "warn" "rfre tag is empty!"
 
 			# Use global frequency if it exists
 			if [info exists frequency] {
@@ -454,7 +456,7 @@ proc InformationCollector {inDataId} {
 		set facContentList [list]
 	}
     } else {
-#    	puts "\nFAC Ignored."
+#    	syslog "info" "FAC Ignored."
 	set facContentList "ignored."
     }
  
@@ -526,7 +528,7 @@ proc InformationCollector {inDataId} {
 
     # Process private BBC tags
     if [info exists tags(Bstr)] {
-	puts \n\n$tags(Bstr)\n
+	#puts \n\n$tags(Bstr)\n
     }
 
     if [info exists tags(Bdia)] {
@@ -1219,7 +1221,7 @@ while {1} {
 	    set currenthhmmss [clock format [clock seconds] -format "%H:%M:%S" -gmt 1]
     	    CmdSetTime $commandPort $currentDate $currenthhmmss 1 0x01 0x02
 	
-            puts "\nReceiver time adjusted at $currentDate $currenthhmmss"
+            syslog "notice" "Receiver time adjusted at $currentDate $currenthhmmss"
     }
 
        # Call Reader if the frequency is set

@@ -2,6 +2,18 @@
 # General settings
 #***************************************************************************************
 
+package require platform
+
+set config_dir [file dirname $argv0]
+
+proc source_if_exists { dir var } {
+	upvar 1 $var name
+	if {[info exists name]} { 
+		set file [file join $dir $name]
+		source $file
+	}
+}
+
 #** Receiver name
 set RX_NAME "BBCtst"
 
@@ -103,11 +115,14 @@ set INTERNET_CONNECTION_END "23:59:00";# default is "23:59:00"
 
 #***************************************************************************************
 # OS-specific functions
-# Select the OS by uncommenting the source
 #***************************************************************************************
 
-#set OS_CODE windows.tcl
-set OS_CODE unix.tcl
+if { [string first "windows" [string tolower platform::generic]] != -1 } {
+	set OS_CODE windows.tcl
+} else {
+	set OS_CODE unix.tcl
+}
+
 
 #***************************************************************************************
 # Receiver-specific functions
@@ -174,12 +189,12 @@ set MAIL_TO drmdata@rd.bbc.co.uk
 
 if {$USE_EXTERNAL_SIGNAL_STRENGTH == "1"} {
 	if {$RECEIVER_CODE==""} { puts "No receiver specified... Exiting."; exit }
-	if {[info exists RECEIVER_CODE]} { source $RECEIVER_CODE }
-	if {[info exists THOMCAST_CTRL]} { source $THOMCAST_CTRL }
+	source_if_exists $config_dir "RECEIVER_CODE"
+	source_if_exists $config_dir "THOMCAST_CTRL"
 }
 
 if {$OS_CODE==""} { puts "No operating system specified... Exiting."; exit }
-if {[info exists OS_CODE]} { source $OS_CODE }
+source_if_exists $config_dir "OS_CODE"
 
 
 # Constants

@@ -1,5 +1,6 @@
 
-source settings.tcl
+set config_dir [file dirname $argv0]
+source [file join $config_dir "settings.tcl"]
 
 package require rsciUtil
 package require http ;# needed for download of current schedule
@@ -71,7 +72,7 @@ proc FindNextScheduleEntry {schedule} {
 		}
 		
 	}
-puts "chosenStartTime $chosenStartTime nowTcl $nowTcl"
+	syslog "debug" "chosenStartTime $chosenStartTime nowTcl $nowTcl"
 	set previousStopTcl [lindex $nextEntry 1]
 
 	set gap "gap"
@@ -107,7 +108,7 @@ puts "chosenStartTime $chosenStartTime nowTcl $nowTcl"
 		while {[expr $a < 7]} {
 	
 			if {$startTcl == $previousStopTcl} {	# possible match, so check the dow
-#				puts "Possible match: $startTcl  $previousStopTcl"
+#				syslog "info" "Possible match: $startTcl  $previousStopTcl"
 				set dow [clock format $startTcl -format "%w" -gmt 1]
 				if {[lsearch $dowList $dow] != -1} {
 					break
@@ -162,7 +163,7 @@ proc WaitForNextEvent {} {
 
 	# Retry after timeout, if no schedule entry is available
 		while {$schedule == ""} {
-			PutLog "No schedule entry available! Waiting for retry...."
+			syslog "info" "No schedule entry available! Waiting for retry...."
 
 			set RETRY_TIMEOUT 20
 
@@ -237,7 +238,7 @@ proc sendToCom {string} {
 	global comId
 	puts $comId $string
 	if [catch {flush $comId} result] {
-		puts $result
+		syslog "warn" $result
 	}
 
 }
@@ -257,7 +258,7 @@ proc DoBandScan {entry} {
 	set startFreq [expr [lindex $freqlist 0] / 1000]
 	set stopFreq [expr [lindex $freqlist 1] / 1000]
 	
-	puts "Band scan from $startFreq to $stopFreq in $freqStep"
+	syslog "info" "Band scan from $startFreq to $stopFreq in $freqStep"
 
 	# Memorise start time
 	set targetTime $timeStamp
@@ -392,11 +393,11 @@ proc SendData {dateString} {
     set sndFileName "[file root $fileName].snd"
     set gzFileName "$fileName.gz"
 
-    puts $sndFileName
+    syslog "debug" "schedule: $sndFileName"
 
     # Has an email alread been sent?
     if [file exists $sndFileName] {
-	# PutLog "Datafile for $dateString has already been sent!"
+	# syslog "info" "Datafile for $dateString has already been sent!"
     } else {
 	
       ### Establish connection with internet
@@ -429,9 +430,9 @@ proc SendData {dateString} {
 	    set fid [open $sndFileName w]
 	    puts $fid [clock format [clock seconds] -gmt 1]
 	    close $fid
-	    PutLog "Data file $attachmentName (for $dateString) sent"
+	    syslog "info" "Data file $attachmentName (for $dateString) sent"
 	} else {
-	    PutLog "Failed to send data file $attachmentName: $response"
+	    syslog "info" "Failed to send data file $attachmentName: $response"
 	}
 
 	### Terminate connection to the internet
@@ -482,14 +483,14 @@ proc GetLatestSchedule {} {
 
 	# If the geturl failed due to a bad network connection, return
 	if ![info exists token] {
-		puts "Attempt to download receiver-spedific schedule aborted at $timeString due to network problems."
+		syslog "warn" "Attempt to download receiver-spedific schedule aborted at $timeString due to network problems."
 		return
 	}
 
         if { [::http::status $token] == "ok"} {
 		# puts "File retrieved succesfully\r"
 		} else {
-		puts "Timeout or network error occurred!\r"
+		syslog "warn" "Timeout or network error occurred"
 		return
 	      }
 
@@ -509,27 +510,27 @@ proc GetLatestSchedule {} {
 		close $outId
 
 		if ![info exists token] {
-			puts "Attempt to download general-purpose schedule aborted at $timeString due to network problems."
+			syslog "warn" "Attempt to download general-purpose schedule aborted at $timeString due to network problems."
 			return
 		}
 
 	        if { [::http::status $token] == "ok"} {
        	        # puts "File retrieved succesfully\r"
        		  } else {
-	              puts "Timeout or network error occurred!\r"
+	              syslog "warn" "schedule" Timeout or network error occurred!\r"
         	        return
 		        }
 
-		puts -nonewline "\t\t\tLatest general-purpose schedule downloaded at $timeString\r"
+		 syslog "info" "Latest general-purpose schedule downloaded"
 	} else {
-		puts -nonewline "\t\t\tLatest receiver-specific schedule downloaded for receiver $RX_NAME at $timeString\r"
+		syslog "info" "Latest receiver-specific schedule downloaded for receiver $RX_NAME"
 	}	
 
 	# Rename new file to schedule.txt if successful
 	if {[regexp {OK} [http::code $token]] == 1} {
 		file rename -force "new_schedule.txt" "schedule.txt"
 	} else {
-		puts "Error! Could not retrieve schedule at $timeString!                       "
+		syslog "warn" "Error! Could not retrieve schedule"                      "
 	}
 
 	# Cleanup won't work with versions of tcl http client package <= 2.0  
@@ -580,7 +581,7 @@ while {1} {
 	
 	# If not entry is given, quit
 	if {$entry == ""} {
-		PutLog "No more entries in schedule"
+		syslog "info" "No more entries in schedule"
 		break
 	}
 
@@ -592,19 +593,19 @@ while {1} {
 	set mode [lindex $entry 5]
 	set gap [lindex $entry 6]
 
-	puts "\nNext event:\t[DisplayTime $startTcl] to [DisplayTime $stopTcl]\t$frequency Hz $mode\t$deList\t$recProfile\t$gap"
+	syslog "info" "Next event:\t[DisplayTime $startTcl] to [DisplayTime $stopTcl]\t$frequency Hz $mode\t$deList\t$recProfile\t$gap"
 	
 	# Wait until start
 	Wait $startTcl
-	puts "Start:\t\t[DisplayTime [clock seconds]]"
+	syslog "info" "Start:\t\t[DisplayTime [clock seconds]]"
 	StartDeRecording $entry
 	
 	Wait $stopTcl
 	if { [lsearch $entry "gap"] != -1 } {		# if gap found, then send stop
-		puts "Stop:\t\t[DisplayTime [clock seconds]]"
+		syslog "info" "Stop:\t\t[DisplayTime [clock seconds]]"
 		StopDeRecording $entry
 	} else {
-		puts "Gapless:\t[DisplayTime [clock seconds]]"
+		syslog "info" "Gapless:\t[DisplayTime [clock seconds]]"
 	}
 }
 

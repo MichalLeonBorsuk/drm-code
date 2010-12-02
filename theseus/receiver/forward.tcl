@@ -1,6 +1,9 @@
-source settings.tcl
+set config_dir [file dirname $argv0]
+source [file join $config_dir "settings.tcl"]
+
 # Include support for UDP
 package require udp
+
 
 
 # connect to host or ip on port through the SOCKS4(a) proxy. authenticate with username (default empty)
@@ -50,7 +53,7 @@ proc ConnectToServer {} {
 	} else {
 		set result [catch {set tty [socket $SERVER_ADDRESS $SERVER_PORT]}]
 	}
-	puts "socket returned $result"
+	syslog "info" "socket returned $result"
  
     }
 	
@@ -68,7 +71,7 @@ proc ConfigureStatusPort {port} {
     set tty [udp_open $port]
     fconfigure $tty -buffering none -translation binary
     fconfigure $tty -blocking 1
-    puts "fetching RSCI from UDP port $port"
+    syslog "info" "fetching RSCI from UDP port $port"
     return $tty
 }
 
@@ -76,15 +79,15 @@ proc ConfigureControlPort {addr port} {
 	set tty [udp_open]
 	fconfigure $tty -remote [list $addr $port]
 	fconfigure $tty -buffering none -translation binary
-	puts "controlling receiver on addr $addr UDP port $port"
+	syslog "info" "controlling receiver on addr $addr UDP port $port"
 	return $tty
 }
 
 proc ProcessStatus {serverPort rxStatusPort} {
 	set packet [read $rxStatusPort]
-	puts "got status packet length [string length $packet]"
+	syslog "info" "got status packet length [string length $packet]"
 	if [catch {puts -nonewline $serverPort $packet}] {
-		puts "server port can't be written to - trying to reconnect"
+		syslog "notice" "server port can't be written to - trying to reconnect"
 		catch {close $serverPort}
 		set serverPort [ConnectToServer]	
 		fileevent $serverPort readable [list ProcessControl $serverPort $rxControlPort]
@@ -93,28 +96,28 @@ proc ProcessStatus {serverPort rxStatusPort} {
 }
 
 proc ProcessControl {serverPort rxControlPort} {
-	puts "server readable"
+	syslog "info" "server readable"
 	if {[eof $serverPort]} {
-		puts "EOF on server port - trying to reconnect"
+		syslog "notice" "EOF on server port - trying to reconnect"
 		catch {close $serverPort}
 		set serverPort [ConnectToServer]
 		fileevent $serverPort readable [list ProcessControl $serverPort $rxControlPort]
 		return
 	}
 	if {[catch {set packet [read $serverPort]}] != 0} {
-		puts "server port can't be read - trying to reconnect"
+		syslog "notice" "server port can't be read - trying to reconnect"
 		catch {close $serverPort}
 		set serverPort [ConnectToServer]
 		fileevent $serverPort readable [list ProcessControl $serverPort $rxControlPort]
 		return
 	}
-	puts "got control packet length [string length $packet]"	
+	syslog "info" "got control packet length [string length $packet]"	
 	puts -nonewline $rxControlPort $packet
 }
 
 proc ServerWritable {serverPort} {
 
-	puts "Server port became writeable"
+	syslog "notice" "Server port became writeable"
 	set serverPortReady 1
 	# don't call me again!
 	fileevent $serverPort writable ""
@@ -122,11 +125,11 @@ proc ServerWritable {serverPort} {
 
 # main program
 
-puts "configuring status port"
+syslog "notice" "configuring status port"
 set rxStatusPort [ConfigureStatusPort $FORWARD_STATUS_PORT]
-puts "configuring control port"
+syslog "notice" "configuring control port"
 set rxControlPort [ConfigureControlPort $RECEIVER_ADDRESS $FORWARD_CONTROL_PORT]
-puts "connecting to server"
+syslog "notice" "connecting to server"
 set serverPort [ConnectToServer]
 set serverPortReady 0
 

@@ -1,4 +1,7 @@
-source settings.tcl
+set config_dir [file dirname $argv0]
+source [file join $config_dir "settings.tcl"]
+
+package require syslog
 
 set ext ".rs*"
 set typedir "RSCI"
@@ -19,20 +22,20 @@ while 1 {
       # Parse file name into YMD
       regexp {.*_(....)-(..)-(..)_} $file match year month day
 
-      puts "considering $file"
+      syslog "info" "considering $file"
       # crop the first N frames    
       if {[file extension $file]==".gz"} {
-        puts "file $file already zipped"
+        syslog "info" "file $file already zipped"
         # it's already zipped
         set gzFileName $file
       } else {
         if [regexp {.*_short.*} $file] {
-          puts "file $file already headed"
+          syslog "info" "file $file already headed"
           # It's already been headed
           set headFileName $file
         } else {
           set headFileName "[file root $file]_short[file extension $file]"
-          puts "tclsh dcp_head.tcl $file $headFileName $shortFileLength"
+          syslog "debug" "tclsh dcp_head.tcl $file $headFileName $shortFileLength"
           set errorFlag [catch {exec tclsh dcp_head.tcl $file $headFileName $shortFileLength} response]
 
           if {!$errorFlag && [file exists $headFileName]} {
@@ -48,9 +51,9 @@ while 1 {
         # puts "$file $year $month $day"
         # ZIP it
         set gzCommand "gzip --force $headFileName"
-        puts "$gzCommand"
+        syslog "debug" "$gzCommand"
         set errorFlag [catch {exec $gzCommand} response ]
-        puts "returned $errorFlag $response"
+        syslog "debug" "returned $errorFlag $response"
         set gzFileName "$headFileName.gz"
       }
 
@@ -67,7 +70,7 @@ while 1 {
   }
 
   set waitVar 0
-  puts "Waiting..."
+  syslog "notice" "theseus transfer daemon Waiting..."
   after 5000 {set waitVar 1}
   vwait waitVar
 }
