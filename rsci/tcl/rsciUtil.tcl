@@ -59,7 +59,7 @@ proc CmdArg2FileName {argv} {
 
 	if {$dateString == "" || $timeString == "" || $type == ""} {
 	
-		puts "Error! Three arguments required: <YYYY-MM-DD> <HH-MM-SS> <type>"
+		syslog "warn" "Error! Three arguments required: <YYYY-MM-DD> <HH-MM-SS> <type>"
 		exit
 	}
 
@@ -200,7 +200,7 @@ proc WriteDataBlock {dataBlock type} {
 				append dataBin [binary format "I" $dataEntry]
 				
 			} else {
-				puts "Error in WriteDataBlock! Field size $itemSize is not yet defined!"
+				syslog "warn" "Error in WriteDataBlock! Field size $itemSize is not yet defined!"
 				exit
 			}
 		}
@@ -215,7 +215,7 @@ proc WriteDataBlock {dataBlock type} {
 	if [info exists timeStamp] {
 	    set fileName [GenerateFileName $timeStamp $type]
 	} else {
-	    puts "Error in WriteDataBlock! Data block does not contain time stamp"
+	    syslog "warn" "Error in WriteDataBlock! Data block does not contain time stamp"
 	    exit
 	}
 
@@ -249,9 +249,9 @@ proc DisplayBinaryString {binString} {
 		binary scan $byteBin "H2" byte
 		
 		# Display
-		puts -nonewline "$byte  "
+		syslog "warn" -nonewline "$byte  "
 	}
-	puts ""
+	syslog "warn" ""
 }
 
 proc GetDEInfo {ID} {
@@ -329,7 +329,7 @@ proc ExtractBinaryData {binaryStringVar length} {
 	}
 
 	if {$length > 4} {
-		puts "$error! Length > 4 bytes not yet defined!"
+		syslog "warn" "$error! Length > 4 bytes not yet defined!"
 		exit
 	}
 	
@@ -359,7 +359,7 @@ proc ReadDataBlock {binaryContentVar} {
 		# Read ID
 		set ID [ExtractBinaryData binaryContent 1]
 		
-		#puts $ID\n\n
+		#syslog "warn" $ID\n\n
 
 		# If it the time stamp...
 		if {$ID == 0x00} {
@@ -388,7 +388,7 @@ proc ReadDataBlock {binaryContentVar} {
 		set itemSize [ExtractBinaryData binaryContent 1]
 		set itemSize [expr ($itemSize+0x100)%0x100]
 
-		puts "$ID\t$noOfEntries\t$itemSize"
+		syslog "warn" "$ID\t$noOfEntries\t$itemSize"
 
 
 		# Read each data entry and store in list deContent
@@ -549,7 +549,7 @@ proc CalcDistribution {valueList} {
 		set share [expr 100*$agcDist($p)/double($sum)]
 		set shareSum [expr $shareSum + $share]
 			
-		# puts $p\t$share\t$shareSum
+		# syslog "warn" $p\t$share\t$shareSum
 
 		# dist10
 		if {$shareSum <= 10.0} {
@@ -613,7 +613,7 @@ proc SendSqlQuery {db query} {
 
 proc ReadScheduleIBB {fileName} {
 
-puts "reading schedule $fileName"
+	syslog "info" "reading schedule $fileName"
 	# Read schedule stored in ASCII file <fileName>
 	# and returns list with its content
 	# Format {entry1} {entry 2} ...
@@ -642,7 +642,7 @@ puts "reading schedule $fileName"
 		# Convert to lower case
 		set line [string tolower $line]
 
-		#puts $line
+		syslog "debug" $line
 		
 		# Ignore comments
 		if [regexp {^\*} $line] {
@@ -651,12 +651,12 @@ puts "reading schedule $fileName"
 
 		# Ignore empty lines
 		if [regexp "^\[ \t]*$" $line] {
-			#puts "skipping empty line"
+			syslog "debug" "skipping empty line"
 			continue
 		}
 
 		if [regexp "^VOA" $line] {
-			#puts "skipping VOA line"
+			syslog "debug" "skipping VOA line"
 			continue
 		}
 
@@ -671,7 +671,7 @@ puts "reading schedule $fileName"
 		# Ignore all except normal schedule entries.
 		set entryType [lindex $fieldList 2]
 		if {$entryType != "s" && $entryType != "b"} {
-			#puts "skipping non-service entry"
+			syslog "debug" "skipping non-service entry"
 			continue
 		}
 
@@ -679,7 +679,7 @@ puts "reading schedule $fileName"
 		
 		# Start
 		set startTcl [clock scan "01/01/1970 [lindex $fieldList 1]" -gmt 1]
-		#puts [clock format $startTcl -gmt 1]		
+		syslog "debug" [clock format $startTcl -gmt 1]		
 
 
 		# Days of the week
@@ -701,7 +701,7 @@ puts "reading schedule $fileName"
 		}
 
 		set dowList [lsort -integer $dowList]
-		#puts [join $dowList ""]
+		#syslog "warn" [join $dowList ""]
 
 		if {$entryType == "s"} {
 			# Stop - add on the length to the start time
@@ -711,7 +711,7 @@ puts "reading schedule $fileName"
 				set stopTcl [expr $stopTcl - 86400]
 			}
 
-			#puts [clock format $stopTcl -gmt 1]
+			#syslog "warn" [clock format $stopTcl -gmt 1]
 
 			# Frequency in Hz
 			set frequency [expr [lindex $fieldList 5] \* 1000]
@@ -725,7 +725,7 @@ puts "reading schedule $fileName"
 				set stopTcl [expr $stopTcl - 86400]
 			}
 
-			#puts [clock format $stopTcl -gmt 1]
+			#syslog "warn" [clock format $stopTcl -gmt 1]
 			set mode "BS"
 			set recProfile ""
 
@@ -785,7 +785,7 @@ proc ReadSchedule {fileName} {
 		# Convert to lower case
 		set line [string tolower $line]
 
-		# puts $line
+		# syslog "warn" $line
 		
 		# Ignore comments
 		if [regexp {^#} $line] {
@@ -809,11 +809,11 @@ proc ReadSchedule {fileName} {
 		
 		# Start
 		set startTcl [clock scan "01/01/1970 [lindex $fieldList 0]" -gmt 1]
-		#puts [clock format $startTcl]
+		#syslog "warn" [clock format $startTcl]
 
 		# Stop
 		set stopTcl [clock scan "01/01/1970 [lindex $fieldList 1]" -gmt 1]
-		#puts [clock format $stopTcl]
+		#syslog "warn" [clock format $stopTcl]
 
 		# Frequency in Hz
 		set frequency [expr [lindex $fieldList 2] * 1000]
@@ -921,8 +921,8 @@ proc Wait {tclTime} {
 	while {$waitTime > 0} {
 		
 		# Output time
-		puts -nonewline "CountDown:\t[format "%4d" $waitTime]\r"
-		flush stdout
+		#syslog "warn" -nonewline "CountDown:\t[format "%4d" $waitTime]\r"
+		#flush stdout
 		
 		# Wait 1 s
 		set flag 0
@@ -932,7 +932,7 @@ proc Wait {tclTime} {
 		# Update wait time
 		set waitTime [expr ($tclTime - [clock seconds])]
 	}
-	# puts ""
+	# syslog "warn" ""
 }
 	
 
