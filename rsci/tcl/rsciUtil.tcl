@@ -1,6 +1,8 @@
 
 package provide rsciUtil 1.0
 
+package require syslog
+
 # Common code
 proc GenerateFileName {time type} {
 	
@@ -570,11 +572,6 @@ proc CalcDistribution {valueList} {
 	return [list $min $dist90 $dist50 $dist10 $max]
 }
 
-proc PutLog {text} {
-
-	puts $text
-}
-
 proc ReadBinaryFile {fileName} {
 
 	# Open file
@@ -690,7 +687,7 @@ puts "reading schedule $fileName"
 
 		set recProfile "a"
 		if {[regexp {^[a-z]$} $recProfile] == -1} {
-			PutLog "Invalid profile: $recProfile"
+			syslog "warn" "Invalid profile: $recProfile"
 		}
 
 		set mode [string toupper $mode]
@@ -827,31 +824,31 @@ proc ReadSchedule {fileName} {
 			set mode [lindex $fieldList 3];
 
 			if {($mode != "am") && ($mode != "drm")} {
-				PutLog "Invalid mode, $mode, in schedule. Default to drm"
+				syslog "warn" "Invalid mode, $mode, in schedule. Default to drm"
 				set mode "drm"
 			}
 
 			# Days of the week
 			set doW [lindex $fieldList 4]
 			if {[regexp {^[0123456]$} $doW] == -1} {
-				PutLog "Invalid day of the week in schedule: $doW"
+				syslog "warn" "Invalid day of the week in schedule: $doW"
 			}
 
 			set recProfile [lindex $fieldList 5]
 			if {[regexp {^[a-z]$} $recProfile] == -1} {
-				PutLog "Invalid profile: $recProfile"
+				syslog "warn" "Invalid profile: $recProfile"
 			}
 
 		} else {
 			# Days of the week
 			set doW [lindex $fieldList 3]
 			if {[regexp {^[0123456]$} $doW] == -1} {
-				PutLog "Invalid day of the week in schedule: $doW"
+				syslog "warn" "Invalid day of the week in schedule: $doW"
 			}
 
 			set recProfile [lindex $fieldList 4]
 			if {[regexp {^[a-z]$} $recProfile] == -1} {
-				PutLog "Invalid profile: $recProfile"
+				syslog "warn" "Invalid profile: $recProfile"
 			}
 
 		}
@@ -876,7 +873,7 @@ proc ReadSchedule {fileName} {
 #			set scheduleArray($startTcl) $entry
 #		} else {
 #			# startTcl exists several times
-#			PutLog "Identified multiple schedule entries with same start time"
+#			syslog "warn" "Identified multiple schedule entries with same start time"
 #			exit
 #		}
 	}
@@ -906,7 +903,7 @@ proc CheckSchedule {schedule} {
 		set startTcl [lindex $entry 2]
 		
 		if {$startTcl < $lastStopTcl} {
-			PutLog "Time overlap in schedule!"
+			syslog "warn" "Time overlap in schedule!"
 			set result 0
 		}
 
