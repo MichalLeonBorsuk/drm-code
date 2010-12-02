@@ -58,3 +58,4 @@ proc PutFile {gzFileName remoteFileName} {
   }
 }
 
+package require syslog

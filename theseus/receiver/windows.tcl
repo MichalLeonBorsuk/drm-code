@@ -72,3 +72,9 @@ proc PutFile {gzFileName remoteFileName} {
     catch {file delete $gzFileName}
   }
 }
+
+proc syslog {priority message} {
+	puts $message
+}
+
+package provide syslog
