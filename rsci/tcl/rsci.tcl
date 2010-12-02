@@ -556,8 +556,6 @@ proc CmdStopRecording {tty profile source destination} {
 	# Send over to control port
 	puts -nonewline $tty $protLayer
 	flush $tty
-
-	puts "Stopped recording of profile $profilename at the receiver..."
     }
 }
 
