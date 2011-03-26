@@ -5,35 +5,8 @@ Installation Instructions for the Dream Software
 
 Necessary software: 
 
-* Microsoft Visual C++ 6.0 (minimum requirement: Service Pack 5 / recommended: Service Pack 5 
-  with Processor Pack 5 or Service Pack 6). 
-  http://www.microsoft.com/
-
-  Trolltech QT 2.x.
-  http://www.trolltech.com/
-  ftp://ftp.trolltech.com/qt/non-commercial/QtWin230-NonCommercial.exe
-
-OR
-
-* Microsoft Visual C++ 2005 Express Edition that is free (also install the
-  Microsoft Platform SDK).
+* Microsoft Visual C++ (including Express Edition)
   http://msdn.microsoft.com/vstudio/express/visualc/
-
-  Q../Free for Windows
-  http://sourceforge.net/projects/qtwin/
-
-  Use Q../Free for Windows 3.3.4-3 that is available from here:
-  http://prdownloads.sourceforge.net/qtwin/qt-win-free-3.3.4-3-src.tar.bz2?download
-  (to compile Q../Free with Visual C++ 2005 Express Edition read this
-  tutorial: http://qtwin.sourceforge.net/qt3-win32/compile-msvc-2005.php ).
-
-  http://drm.sourceforge.net/download/ProjectExpress2005.zip is a zip file that contains
-  the project files for compile with Visual C++ Express Edition the libraries that are needed.
-
-OR
-
-* For information about how to compile Dream with MinGW read this document
-  http://217.35.80.115/mediawiki/index.php/Building_on_Windows_with_Mingw
 
 The following libraries are needed: 
 
@@ -49,22 +22,6 @@ The following libraries are needed:
   files for building this library and the compiled library with all necessary header files in 
   http://drm.sf.net/download/WinQWTInst.zip ). 
   
-* FhG IIS Journaline Decoder: Download http://drm.sf.net/download/WinFhGJourLib.zip and 
-  create a static library libfhgjournaline.lib with the sources. Copy this library together 
-  with all required header files in the drm/libs directory (The file WinFhGJourLib.zip 
-  contains the Microsoft Visual C++ 6.0 project files for building this library and the 
-  compiled library with all necessary header files). 
-
-* FreeImage: Download the sources from http://freeimage.sourceforge.net and create a static 
-  library FreeImage.lib with the sources (Make sure to change the code generation to 
-  multithreaded DLL!). Copy this library together with the header file FreeImage.h in the 
-  drm/libs directory (We prepared the compiled library with all necessary header files in 
-  http://drm.sf.net/download/WinFreeImageInst.zip).
-  With Qt3 or Q../Free for Windows Freeimage is not needed, but in this case is required
-  the zlib library (a compiled version for Windows is available from here:
-  http://www.zlib.net/zlib123-dll.zip ).
-
-
 * FAAD2: Download the sources from http://www.audiocoding.com and create a static library 
   libfaad.lib with the sources. IMPORTANT: Make sure to define the macros DRM and DRM_PS! 
   Copy this library together with the header file neaacdec.h in the drm/libs directory.
@@ -132,14 +89,6 @@ Dream installation:
 - Type ./configure from the drm directory. That script will determine how your system is set up, 
   and figure out how to compile Dream. 
   
-- At this point you can choose the type of sound interface you intend use. The standard setting 
-  is OSS. To activate the ALSA sound interface, type 
-  ./configure --enable-alsa.
-  For more help type ./configure --help.
-  To enable Journaline, Hamlib and Freeimage libraries, type 
-  ./configure --with-journaline --with-hamlib --with-freeimage
-  (these libraries are disabled by default). 
-  
 - Type make from the drm or drm/linux directory.
 
-                                                               Last modified: 08/25/2006
+                                                               Last modified: 26/03/2011
