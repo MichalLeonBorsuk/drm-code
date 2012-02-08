@@ -1,0 +1,8 @@
+LIBS=-ldl -lc `pkg-config glib-2.0 --libs`
+CFLAGS+=-DHAVE_CONFIG_H -fpic -Wall -g 
+CFLAGS+=`pkg-config glib-2.0 --cflags` -I/usr/src/wireshark
+OBJS=packet-drm-di.o crcdrm.o packet-drm-fac.o packet-drm-msc.o packet-drm-sdc.o packet-drm-packet-mode.o packet-drm-rsci.o plugin.o reassemble2.o
+drm_di.so : $(OBJS)
+	$(CC) -shared -Wl,-soname,$@ -Wl,-export-dynamic  -Wl,--discard-none -o $@ $(LIBS) $^
+clean:
+	rm drm_di.so *.o
