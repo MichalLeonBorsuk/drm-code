@@ -41,30 +41,10 @@
 # include "AboutDlgbase.h"
 #else
 # include "ui_AboutDlgbase.h"
-# include <QDialog>
 # include <QMenu>
-# include <QSignalMapper>
+# include <QDialog>
 # include <QAction>
-# include <QActionGroup>
 #endif
-
-inline string toStdString(QString s)
-{
-#if QT_VERSION < 0x040000
-	return s.latin1();
-#else
-	return s.toUtf8().constData();
-#endif
-}
-
-inline QString asHex(long n)
-{
-#if QT_VERSION < 0x040000
-	return QString().setNum(n, 16).upper();
-#else
-	return QString().setNum(n, 16).toUpper();
-#endif
-}
 
 class CRig;
 typedef int rig_model_t;
@@ -89,6 +69,7 @@ public:
 	virtual ~CAboutDlgBase() {}
 };
 #endif
+
 class CAboutDlg : public CAboutDlgBase
 {
 	Q_OBJECT
@@ -98,14 +79,9 @@ public:
 		Qt::WFlags f = 0);
 };
 
-#if QT_VERSION >= 0x040000
-typedef QMenu MyMenu;
-#else
-typedef QPopupMenu MyMenu;
-#endif
-
+#if QT_VERSION < 0x040000
 /* Help menu ---------------------------------------------------------------- */
-class CDreamHelpMenu : public MyMenu
+class CDreamHelpMenu : public QPopupMenu
 {
 	Q_OBJECT
 
@@ -120,9 +96,8 @@ public slots:
 	void OnHelpAbout() {AboutDlg.exec();}
 };
 
-
 /* Sound card selection menu ------------------------------------------------ */
-class CSoundCardSelMenu : public MyMenu
+class CSoundCardSelMenu : public QPopupMenu
 {
 	Q_OBJECT
 
@@ -134,21 +109,18 @@ protected:
 	CSelectionInterface*	pSoundInIF;
 	CSelectionInterface*	pSoundOutIF;
 
-#if QT_VERSION >= 0x040000
-	QSignalMapper* Init(const QString& text, CSelectionInterface* intf);
-#else
         vector<string>          vecSoundInNames;
         vector<string>          vecSoundOutNames;
         int                     iNumSoundInDev;
         int                     iNumSoundOutDev;
         QPopupMenu*             pSoundInMenu;
         QPopupMenu*             pSoundOutMenu;
-#endif
 
 public slots:
 	void OnSoundInDevice(int id);
 	void OnSoundOutDevice(int id);
 };
+#endif
 
 /* GUI help functions ------------------------------------------------------- */
 /* Converts from RGB to integer and back */
@@ -200,7 +172,12 @@ class RemoteMenu : public QObject
 
 public:
 	RemoteMenu(QWidget*, CRig&);
-	MyMenu* menu(){ return pRemoteMenu; }
+# if QT_VERSION < 0x040000
+	QPopupMenu
+#else
+	QMenu
+#endif
+	* menu(){ return pRemoteMenu; }
 
 public slots:
 	void OnModRigMenu(int iID);
@@ -212,13 +189,25 @@ signals:
 
 protected:
 #ifdef HAVE_LIBHAMLIB
-	struct Rigmenu {std::string mfr; MyMenu* pMenu;};
+	struct Rigmenu {
+		std::string mfr;
+# if QT_VERSION < 0x040000
+	QPopupMenu
+#else
+	QMenu
+#endif
+		* pMenu;
+	};
 	std::map<int,Rigmenu> rigmenus;
 	std::vector<rig_model_t> specials;
 	CRig&	rig;
 #endif
-	MyMenu* pRemoteMenu;
-	MyMenu* pRemoteMenuOther;
+# if QT_VERSION < 0x040000
+	QPopupMenu
+#else
+	QMenu
+#endif
+	* pRemoteMenu, *pRemoteMenuOther;
 };
 
 #define OTHER_MENU_ID (666)
