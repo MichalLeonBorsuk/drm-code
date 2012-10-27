@@ -306,7 +306,6 @@ CSoundCardSelMenu::CSoundCardSelMenu(
         /* Get sound device names */
         pSoundInIF->Enumerate(vecSoundInNames);
         iNumSoundInDev = vecSoundInNames.size();
-//QMessageBox::information(this, "Dream", tr("got %1 sound sources").arg(iNumSoundInDev), QMessageBox::Ok);
 
         for (i = 0; i < iNumSoundInDev; i++)
         {
@@ -320,7 +319,6 @@ CSoundCardSelMenu::CSoundCardSelMenu(
 
         pSoundOutIF->Enumerate(vecSoundOutNames);
         iNumSoundOutDev = vecSoundOutNames.size();
-//QMessageBox::information(this, "Dream", tr("got %1 sound outputs").arg(iNumSoundOutDev), QMessageBox::Ok);
         for (i = 0; i < iNumSoundOutDev; i++)
         {
                 pSoundOutMenu->insertItem(QString(vecSoundOutNames[i].c_str()), this,
@@ -358,19 +356,6 @@ void CSoundCardSelMenu::OnSoundOutDevice(int id)
     for (int i = 0; i < iNumSoundOutDev + 1; i++)
         pSoundOutMenu->setItemChecked(i, i == id);
 }
-
-#else
-#if 0
-CSoundCardSelMenu::CSoundCardSelMenu(
-    CSelectionInterface* pNSIn, CSelectionInterface* pNSOut, QWidget* parent) :
-    QMenu(parent), pSoundInIF(pNSIn), pSoundOutIF(pNSOut)
-{
-    setTitle("Sound Card Selection");
-    connect(Init("Sound In", pSoundInIF), SIGNAL(mapped(int)), this, SLOT(OnSoundInDevice(int)));
-    connect(Init("Sound Out", pSoundOutIF), SIGNAL(mapped(int)), this, SLOT(OnSoundOutDevice(int)));
-}
-#endif
-
 #endif
 
 RemoteMenu::RemoteMenu(QWidget* parent, CRig& nrig)

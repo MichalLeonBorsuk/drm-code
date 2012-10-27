@@ -118,6 +118,7 @@ public slots:
 	void OnMenuSetDisplayColor();
 	void OnSwitchToDRM();
 	void OnSwitchToAM();
+	void on_actionWhats_This();
 
 signals:
 	void SwitchMode(int);

@@ -154,6 +154,7 @@ public slots:
 	void OnButtonAMSS();
 	void OnSwitchToDRM();
 	void OnSwitchToFM();
+	void on_actionWhats_This();
 
 signals:
 	void SwitchMode(int);
