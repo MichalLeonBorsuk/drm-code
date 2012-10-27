@@ -54,7 +54,7 @@
 # include <qmotifstyle.h>
 #else
 # include "DRMPlot-qwt6.h"
-# include "CSoundCardSelMenu.h"
+# include "SoundCardSelMenu.h"
 # include <QDateTime>
 # include <QCloseEvent>
 # include <qwt_plot_layout.h>

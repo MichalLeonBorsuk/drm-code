@@ -39,7 +39,7 @@
 # include <QEvent>
 # include <QShowEvent>
 # include <QCloseEvent>
-# include "CSoundCardSelMenu.h"
+# include "SoundCardSelMenu.h"
 # include "BWSViewer.h"
 # include "SlideShowViewer.h"
 # include "JLViewer.h"
