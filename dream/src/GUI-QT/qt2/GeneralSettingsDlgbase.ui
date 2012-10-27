@@ -1,0 +1,713 @@
+<!DOCTYPE UI><UI>
+<class>CGeneralSettingsDlgBase</class>
+<widget>
+    <class>QDialog</class>
+    <property stdset="1">
+        <name>name</name>
+        <cstring>CGeneralSettingsDlgBase</cstring>
+    </property>
+    <property stdset="1">
+        <name>geometry</name>
+        <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>270</width>
+            <height>230</height>
+        </rect>
+    </property>
+    <property stdset="1">
+        <name>sizePolicy</name>
+        <sizepolicy>
+            <hsizetype>5</hsizetype>
+            <vsizetype>5</vsizetype>
+        </sizepolicy>
+    </property>
+    <property stdset="1">
+        <name>cursor</name>
+        <cursor>0</cursor>
+    </property>
+    <property stdset="1">
+        <name>caption</name>
+        <string>General settings</string>
+    </property>
+    <property stdset="1">
+        <name>icon</name>
+        <pixmap>image0</pixmap>
+    </property>
+    <property stdset="1">
+        <name>sizeGripEnabled</name>
+        <bool>true</bool>
+    </property>
+    <property>
+        <name>layoutMargin</name>
+    </property>
+    <property>
+        <name>layoutSpacing</name>
+    </property>
+    <vbox>
+        <property stdset="1">
+            <name>margin</name>
+            <number>11</number>
+        </property>
+        <property stdset="1">
+            <name>spacing</name>
+            <number>6</number>
+        </property>
+        <widget>
+            <class>QGroupBox</class>
+            <property stdset="1">
+                <name>name</name>
+                <cstring>GroupReceiverCoord</cstring>
+            </property>
+            <property stdset="1">
+                <name>sizePolicy</name>
+                <sizepolicy>
+                    <hsizetype>5</hsizetype>
+                    <vsizetype>7</vsizetype>
+                </sizepolicy>
+            </property>
+            <property stdset="1">
+                <name>minimumSize</name>
+                <size>
+                    <width>0</width>
+                    <height>0</height>
+                </size>
+            </property>
+            <property stdset="1">
+                <name>title</name>
+                <string>Default Receiver coordinates</string>
+            </property>
+            <grid>
+                <property stdset="1">
+                    <name>margin</name>
+                    <number>11</number>
+                </property>
+                <property stdset="1">
+                    <name>spacing</name>
+                    <number>6</number>
+                </property>
+                <widget row="0"  column="0" >
+                    <class>QLayoutWidget</class>
+                    <property stdset="1">
+                        <name>name</name>
+                        <cstring>Layout14</cstring>
+                    </property>
+                    <hbox>
+                        <property stdset="1">
+                            <name>margin</name>
+                            <number>0</number>
+                        </property>
+                        <property stdset="1">
+                            <name>spacing</name>
+                            <number>6</number>
+                        </property>
+                        <widget>
+                            <class>QLabel</class>
+                            <property stdset="1">
+                                <name>name</name>
+                                <cstring>TextLatitude</cstring>
+                            </property>
+                            <property stdset="1">
+                                <name>text</name>
+                                <string>Latitude   </string>
+                            </property>
+                        </widget>
+                        <widget>
+                            <class>QLineEdit</class>
+                            <property stdset="1">
+                                <name>name</name>
+                                <cstring>EdtLatitudeDegrees</cstring>
+                            </property>
+                            <property stdset="1">
+                                <name>sizePolicy</name>
+                                <sizepolicy>
+                                    <hsizetype>0</hsizetype>
+                                    <vsizetype>0</vsizetype>
+                                </sizepolicy>
+                            </property>
+                            <property stdset="1">
+                                <name>maximumSize</name>
+                                <size>
+                                    <width>30</width>
+                                    <height>32767</height>
+                                </size>
+                            </property>
+                            <property stdset="1">
+                                <name>text</name>
+                                <string></string>
+                            </property>
+                            <property stdset="1">
+                                <name>maxLength</name>
+                                <number>2</number>
+                            </property>
+                        </widget>
+                        <widget>
+                            <class>QLabel</class>
+                            <property stdset="1">
+                                <name>name</name>
+                                <cstring>TextDegLat</cstring>
+                            </property>
+                            <property stdset="1">
+                                <name>font</name>
+                                <font>
+                                    <pointsize>12</pointsize>
+                                </font>
+                            </property>
+                            <property stdset="1">
+                                <name>text</name>
+                                <string>°</string>
+                            </property>
+                        </widget>
+                        <widget>
+                            <class>QLineEdit</class>
+                            <property stdset="1">
+                                <name>name</name>
+                                <cstring>EdtLatitudeMinutes</cstring>
+                            </property>
+                            <property stdset="1">
+                                <name>sizePolicy</name>
+                                <sizepolicy>
+                                    <hsizetype>1</hsizetype>
+                                    <vsizetype>1</vsizetype>
+                                </sizepolicy>
+                            </property>
+                            <property stdset="1">
+                                <name>maximumSize</name>
+                                <size>
+                                    <width>30</width>
+                                    <height>32767</height>
+                                </size>
+                            </property>
+                            <property stdset="1">
+                                <name>text</name>
+                                <string></string>
+                            </property>
+                            <property stdset="1">
+                                <name>maxLength</name>
+                                <number>2</number>
+                            </property>
+                        </widget>
+                        <widget>
+                            <class>QLabel</class>
+                            <property stdset="1">
+                                <name>name</name>
+                                <cstring>TextMinutesLat</cstring>
+                            </property>
+                            <property stdset="1">
+                                <name>font</name>
+                                <font>
+                                    <pointsize>12</pointsize>
+                                </font>
+                            </property>
+                            <property stdset="1">
+                                <name>text</name>
+                                <string>'</string>
+                            </property>
+                        </widget>
+                        <widget>
+                            <class>QLineEdit</class>
+                            <property stdset="1">
+                                <name>name</name>
+                                <cstring>EdtLatitudeNS</cstring>
+                            </property>
+                            <property stdset="1">
+                                <name>sizePolicy</name>
+                                <sizepolicy>
+                                    <hsizetype>1</hsizetype>
+                                    <vsizetype>1</vsizetype>
+                                </sizepolicy>
+                            </property>
+                            <property stdset="1">
+                                <name>maximumSize</name>
+                                <size>
+                                    <width>20</width>
+                                    <height>32767</height>
+                                </size>
+                            </property>
+                            <property stdset="1">
+                                <name>text</name>
+                                <string></string>
+                            </property>
+                            <property stdset="1">
+                                <name>maxLength</name>
+                                <number>1</number>
+                            </property>
+                        </widget>
+                        <widget>
+                            <class>QLabel</class>
+                            <property stdset="1">
+                                <name>name</name>
+                                <cstring>TextNS</cstring>
+                            </property>
+                            <property stdset="1">
+                                <name>text</name>
+                                <string>N/S</string>
+                            </property>
+                        </widget>
+                        <spacer>
+                            <property>
+                                <name>name</name>
+                                <cstring>Spacer10_2</cstring>
+                            </property>
+                            <property>
+                                <name>orientation</name>
+                                <enum>Horizontal</enum>
+                            </property>
+                            <property>
+                                <name>sizeType</name>
+                                <enum>Expanding</enum>
+                            </property>
+                            <property>
+                                <name>sizeHint</name>
+                                <size>
+                                    <width>20</width>
+                                    <height>20</height>
+                                </size>
+                            </property>
+                        </spacer>
+                    </hbox>
+                </widget>
+                <widget row="1"  column="0" >
+                    <class>QLayoutWidget</class>
+                    <property stdset="1">
+                        <name>name</name>
+                        <cstring>Layout15</cstring>
+                    </property>
+                    <hbox>
+                        <property stdset="1">
+                            <name>margin</name>
+                            <number>0</number>
+                        </property>
+                        <property stdset="1">
+                            <name>spacing</name>
+                            <number>6</number>
+                        </property>
+                        <widget>
+                            <class>QLabel</class>
+                            <property stdset="1">
+                                <name>name</name>
+                                <cstring>TextLongitude</cstring>
+                            </property>
+                            <property stdset="1">
+                                <name>text</name>
+                                <string>Longitude</string>
+                            </property>
+                        </widget>
+                        <widget>
+                            <class>QLineEdit</class>
+                            <property stdset="1">
+                                <name>name</name>
+                                <cstring>EdtLongitudeDegrees</cstring>
+                            </property>
+                            <property stdset="1">
+                                <name>sizePolicy</name>
+                                <sizepolicy>
+                                    <hsizetype>1</hsizetype>
+                                    <vsizetype>1</vsizetype>
+                                </sizepolicy>
+                            </property>
+                            <property stdset="1">
+                                <name>maximumSize</name>
+                                <size>
+                                    <width>30</width>
+                                    <height>32767</height>
+                                </size>
+                            </property>
+                            <property stdset="1">
+                                <name>text</name>
+                                <string></string>
+                            </property>
+                            <property stdset="1">
+                                <name>maxLength</name>
+                                <number>3</number>
+                            </property>
+                        </widget>
+                        <widget>
+                            <class>QLabel</class>
+                            <property stdset="1">
+                                <name>name</name>
+                                <cstring>TextDegLong</cstring>
+                            </property>
+                            <property stdset="1">
+                                <name>font</name>
+                                <font>
+                                    <pointsize>12</pointsize>
+                                </font>
+                            </property>
+                            <property stdset="1">
+                                <name>text</name>
+                                <string>°</string>
+                            </property>
+                        </widget>
+                        <widget>
+                            <class>QLineEdit</class>
+                            <property stdset="1">
+                                <name>name</name>
+                                <cstring>EdtLongitudeMinutes</cstring>
+                            </property>
+                            <property stdset="1">
+                                <name>sizePolicy</name>
+                                <sizepolicy>
+                                    <hsizetype>1</hsizetype>
+                                    <vsizetype>1</vsizetype>
+                                </sizepolicy>
+                            </property>
+                            <property stdset="1">
+                                <name>maximumSize</name>
+                                <size>
+                                    <width>30</width>
+                                    <height>32767</height>
+                                </size>
+                            </property>
+                            <property stdset="1">
+                                <name>text</name>
+                                <string></string>
+                            </property>
+                            <property stdset="1">
+                                <name>maxLength</name>
+                                <number>2</number>
+                            </property>
+                        </widget>
+                        <widget>
+                            <class>QLabel</class>
+                            <property stdset="1">
+                                <name>name</name>
+                                <cstring>TextMinutesLong</cstring>
+                            </property>
+                            <property stdset="1">
+                                <name>font</name>
+                                <font>
+                                    <pointsize>12</pointsize>
+                                </font>
+                            </property>
+                            <property stdset="1">
+                                <name>text</name>
+                                <string>'</string>
+                            </property>
+                        </widget>
+                        <widget>
+                            <class>QLineEdit</class>
+                            <property stdset="1">
+                                <name>name</name>
+                                <cstring>EdtLongitudeEW</cstring>
+                            </property>
+                            <property stdset="1">
+                                <name>sizePolicy</name>
+                                <sizepolicy>
+                                    <hsizetype>1</hsizetype>
+                                    <vsizetype>1</vsizetype>
+                                </sizepolicy>
+                            </property>
+                            <property stdset="1">
+                                <name>maximumSize</name>
+                                <size>
+                                    <width>20</width>
+                                    <height>32767</height>
+                                </size>
+                            </property>
+                            <property stdset="1">
+                                <name>text</name>
+                                <string></string>
+                            </property>
+                            <property stdset="1">
+                                <name>maxLength</name>
+                                <number>1</number>
+                            </property>
+                        </widget>
+                        <widget>
+                            <class>QLabel</class>
+                            <property stdset="1">
+                                <name>name</name>
+                                <cstring>TextEW</cstring>
+                            </property>
+                            <property stdset="1">
+                                <name>text</name>
+                                <string>E/W</string>
+                            </property>
+                        </widget>
+                        <spacer>
+                            <property>
+                                <name>name</name>
+                                <cstring>Spacer10</cstring>
+                            </property>
+                            <property>
+                                <name>orientation</name>
+                                <enum>Horizontal</enum>
+                            </property>
+                            <property>
+                                <name>sizeType</name>
+                                <enum>Expanding</enum>
+                            </property>
+                            <property>
+                                <name>sizeHint</name>
+                                <size>
+                                    <width>20</width>
+                                    <height>20</height>
+                                </size>
+                            </property>
+                        </spacer>
+                    </hbox>
+                </widget>
+            </grid>
+        </widget>
+        <widget>
+            <class>QGroupBox</class>
+            <property stdset="1">
+                <name>name</name>
+                <cstring>GroupGPS</cstring>
+            </property>
+            <property stdset="1">
+                <name>title</name>
+                <string>GPS</string>
+            </property>
+            <grid>
+                <property stdset="1">
+                    <name>margin</name>
+                    <number>11</number>
+                </property>
+                <property stdset="1">
+                    <name>spacing</name>
+                    <number>6</number>
+                </property>
+                <widget row="0"  column="0" >
+                    <class>QLayoutWidget</class>
+                    <property stdset="1">
+                        <name>name</name>
+                        <cstring>Layout10</cstring>
+                    </property>
+                    <grid>
+                        <property stdset="1">
+                            <name>margin</name>
+                            <number>0</number>
+                        </property>
+                        <property stdset="1">
+                            <name>spacing</name>
+                            <number>6</number>
+                        </property>
+                        <widget row="0"  column="0" >
+                            <class>QCheckBox</class>
+                            <property stdset="1">
+                                <name>name</name>
+                                <cstring>CheckBoxUseGPS</cstring>
+                            </property>
+                            <property stdset="1">
+                                <name>text</name>
+                                <string>Use GPS</string>
+                            </property>
+                        </widget>
+                        <widget row="1"  column="2" >
+                            <class>QLineEdit</class>
+                            <property stdset="1">
+                                <name>name</name>
+                                <cstring>LineEditGPSPort</cstring>
+                            </property>
+                        </widget>
+                        <widget row="0"  column="2" >
+                            <class>QLineEdit</class>
+                            <property stdset="1">
+                                <name>name</name>
+                                <cstring>LineEditGPSHost</cstring>
+                            </property>
+                        </widget>
+                        <spacer row="1"  column="3" >
+                            <property>
+                                <name>name</name>
+                                <cstring>Spacer6</cstring>
+                            </property>
+                            <property>
+                                <name>orientation</name>
+                                <enum>Horizontal</enum>
+                            </property>
+                            <property>
+                                <name>sizeType</name>
+                                <enum>Expanding</enum>
+                            </property>
+                            <property>
+                                <name>sizeHint</name>
+                                <size>
+                                    <width>20</width>
+                                    <height>20</height>
+                                </size>
+                            </property>
+                        </spacer>
+                        <spacer row="1"  column="0" >
+                            <property>
+                                <name>name</name>
+                                <cstring>Spacer4</cstring>
+                            </property>
+                            <property>
+                                <name>orientation</name>
+                                <enum>Horizontal</enum>
+                            </property>
+                            <property>
+                                <name>sizeType</name>
+                                <enum>Expanding</enum>
+                            </property>
+                            <property>
+                                <name>sizeHint</name>
+                                <size>
+                                    <width>20</width>
+                                    <height>20</height>
+                                </size>
+                            </property>
+                        </spacer>
+                        <spacer row="0"  column="3" >
+                            <property>
+                                <name>name</name>
+                                <cstring>Spacer5_2</cstring>
+                            </property>
+                            <property>
+                                <name>orientation</name>
+                                <enum>Horizontal</enum>
+                            </property>
+                            <property>
+                                <name>sizeType</name>
+                                <enum>Expanding</enum>
+                            </property>
+                            <property>
+                                <name>sizeHint</name>
+                                <size>
+                                    <width>20</width>
+                                    <height>20</height>
+                                </size>
+                            </property>
+                        </spacer>
+                        <widget row="0"  column="1" >
+                            <class>QLabel</class>
+                            <property stdset="1">
+                                <name>name</name>
+                                <cstring>GPSHost</cstring>
+                            </property>
+                            <property stdset="1">
+                                <name>text</name>
+                                <string>Host</string>
+                            </property>
+                        </widget>
+                        <widget row="1"  column="1" >
+                            <class>QLabel</class>
+                            <property stdset="1">
+                                <name>name</name>
+                                <cstring>GPSPort</cstring>
+                            </property>
+                            <property stdset="1">
+                                <name>text</name>
+                                <string>Port</string>
+                            </property>
+                        </widget>
+                    </grid>
+                </widget>
+            </grid>
+        </widget>
+        <widget>
+            <class>QLayoutWidget</class>
+            <property stdset="1">
+                <name>name</name>
+                <cstring>Layout57</cstring>
+            </property>
+            <property stdset="1">
+                <name>sizePolicy</name>
+                <sizepolicy>
+                    <hsizetype>7</hsizetype>
+                    <vsizetype>0</vsizetype>
+                </sizepolicy>
+            </property>
+            <property stdset="1">
+                <name>minimumSize</name>
+                <size>
+                    <width>0</width>
+                    <height>0</height>
+                </size>
+            </property>
+            <property stdset="1">
+                <name>maximumSize</name>
+                <size>
+                    <width>32767</width>
+                    <height>32767</height>
+                </size>
+            </property>
+            <hbox>
+                <property stdset="1">
+                    <name>margin</name>
+                    <number>0</number>
+                </property>
+                <property stdset="1">
+                    <name>spacing</name>
+                    <number>6</number>
+                </property>
+                <spacer>
+                    <property>
+                        <name>name</name>
+                        <cstring>Spacer5</cstring>
+                    </property>
+                    <property>
+                        <name>orientation</name>
+                        <enum>Horizontal</enum>
+                    </property>
+                    <property>
+                        <name>sizeType</name>
+                        <enum>Expanding</enum>
+                    </property>
+                    <property>
+                        <name>sizeHint</name>
+                        <size>
+                            <width>20</width>
+                            <height>20</height>
+                        </size>
+                    </property>
+                </spacer>
+                <widget>
+                    <class>QLayoutWidget</class>
+                    <property stdset="1">
+                        <name>name</name>
+                        <cstring>Layout6</cstring>
+                    </property>
+                    <vbox>
+                        <property stdset="1">
+                            <name>margin</name>
+                            <number>0</number>
+                        </property>
+                        <property stdset="1">
+                            <name>spacing</name>
+                            <number>6</number>
+                        </property>
+                        <widget>
+                            <class>QPushButton</class>
+                            <property stdset="1">
+                                <name>name</name>
+                                <cstring>buttonOk</cstring>
+                            </property>
+                            <property stdset="1">
+                                <name>text</name>
+                                <string>&amp;OK</string>
+                            </property>
+                            <property stdset="1">
+                                <name>autoDefault</name>
+                                <bool>false</bool>
+                            </property>
+                            <property stdset="1">
+                                <name>default</name>
+                                <bool>true</bool>
+                            </property>
+                        </widget>
+                    </vbox>
+                </widget>
+            </hbox>
+        </widget>
+    </vbox>
+</widget>
+<images>
+    <image>
+        <name>image0</name>
+        <data format="XPM.GZ" length="668">789c75d0cd4ac4301007f07b9f226c6f45bab6ddb45bc447103c0ae22199ccf46337bbdbba1e447c773b49aa28710894dfbf1992cc36134f8f0f22db26af57751d4040af669199376bdf9f5fee3f924d518b6595b7a2d8dc249b5c804877a52cf6c04c03a527382a29db1df312d87a2aa62ca5f19c3ceba275bd4747b5d2044a4fcbacabda28c9d48eba919e1d730f6da90df3c4841ab441263a2290e7792536cc8169102b24e6cc44424dee6f1f489e07263554798e810db95e7274e566f5a7d62ccd95d66af9fc646090bbd0c077065d3f2cd5d3d841c852331e8edcd50da349c33ea425b3d6e61d61d8a788b3139d2f1391f2990ed93ca99ef4ff59ac377646f42e913b47df169dc1ef597dde255fbf0ea69a</data>
+    </image>
+</images>
+<tabstops>
+    <tabstop>EdtLatitudeDegrees</tabstop>
+    <tabstop>EdtLatitudeMinutes</tabstop>
+    <tabstop>EdtLatitudeNS</tabstop>
+    <tabstop>EdtLongitudeDegrees</tabstop>
+    <tabstop>EdtLongitudeMinutes</tabstop>
+    <tabstop>EdtLongitudeEW</tabstop>
+    <tabstop>buttonOk</tabstop>
+</tabstops>
+</UI>
