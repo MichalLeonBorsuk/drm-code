@@ -39,6 +39,7 @@
 # include <QEvent>
 # include <QShowEvent>
 # include <QCloseEvent>
+# include "CSoundCardSelMenu.h"
 # include "BWSViewer.h"
 # include "SlideShowViewer.h"
 # include "JLViewer.h"
@@ -233,12 +234,10 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& NSettings, CRig& rig,
     action_Multimedia_Dialog->setEnabled(false); // and don't connect slots until app type decoded
     action_Programme_Guide_Dialog->setEnabled(false);
 
-#if 0
     menu_Settings->addMenu( new CSoundCardSelMenu(
 		DRMReceiver.GetSoundInInterface(),
 		DRMReceiver.GetSoundOutInterface(),
     this));
-#endif
 
     connect(actionMultimediaSettings, SIGNAL(triggered()), pMultSettingsDlg, SLOT(show()));
     connect(actionGeneralSettings, SIGNAL(triggered()), pGeneralSettingsDlg, SLOT(show()));
@@ -269,8 +268,8 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& NSettings, CRig& rig,
     case 2: actionBlackGrey->setChecked(true);break;
     }
 
-    //menubar->addMenu(new CDreamHelpMenu(this));
     connect(actionAbout_Dream, SIGNAL(triggered()), &AboutDlg, SLOT(show()));
+    connect(actionWhats_This, SIGNAL(triggered()), this, SLOT(on_actionWhats_This()));
 
     connect(this, SIGNAL(plotStyleChanged(int)), pSysEvalDlg, SLOT(UpdatePlotStyle(int)));
     connect(this, SIGNAL(plotStyleChanged(int)), pAnalogDemDlg, SLOT(UpdatePlotStyle(int)));
@@ -347,6 +346,11 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& NSettings, CRig& rig,
 FDRMDialog::~FDRMDialog()
 {
     delete pLogging;
+}
+
+void FDRMDialog::on_actionWhats_This()
+{
+	QWhatsThis::enterWhatsThisMode();
 }
 
 #if QT_VERSION < 0x040000

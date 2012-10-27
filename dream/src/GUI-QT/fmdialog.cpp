@@ -41,6 +41,7 @@
 # include <QCustomEvent>
 # include <QCloseEvent>
 # include <QEvent>
+# include "CSoundCardSelMenu.h"
 # define CHECK_PTR(x) Q_CHECK_PTR(x)
 #endif
 
@@ -108,16 +109,14 @@ FMDialog::FMDialog(CDRMReceiver& NDRMR, CSettings& NSettings, CRig& rig,
 	connect(actionDRM, SIGNAL(triggered()), this, SLOT(OnSwitchToDRM()));
 	connect(actionDisplayColor, SIGNAL(triggered()), this, SLOT(OnMenuSetDisplayColor()));
 
-#if 0
 	menu_Settings->addMenu(
 		new CSoundCardSelMenu(
 			DRMReceiver.GetSoundInInterface(), DRMReceiver.GetSoundOutInterface(), this
 		)
 	);
 	//menu_Settings->addMenu(pRemoteMenu->menu());
-	menubar->addMenu(new CDreamHelpMenu(this));
-#endif
 	connect(actionAbout_Dream, SIGNAL(triggered()), &AboutDlg, SLOT(show()));
+	connect(actionWhats_This, SIGNAL(triggered()), this, SLOT(on_actionWhats_This()));
 #endif
 
 	/* Digi controls */
@@ -162,6 +161,11 @@ FMDialog::FMDialog(CDRMReceiver& NDRMR, CSettings& NSettings, CRig& rig,
 
 FMDialog::~FMDialog()
 {
+}
+
+void FMDialog::on_actionWhats_This()
+{
+        QWhatsThis::enterWhatsThisMode();
 }
 
 void FMDialog::OnSwitchToDRM()
