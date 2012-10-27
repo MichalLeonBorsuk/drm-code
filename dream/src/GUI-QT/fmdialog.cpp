@@ -41,7 +41,7 @@
 # include <QCustomEvent>
 # include <QCloseEvent>
 # include <QEvent>
-# include "CSoundCardSelMenu.h"
+# include "SoundCardSelMenu.h"
 # define CHECK_PTR(x) Q_CHECK_PTR(x)
 #endif
 
