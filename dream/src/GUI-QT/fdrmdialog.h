@@ -123,31 +123,32 @@ protected:
     QMenuBar*			pMenu;
     QButtonGroup*		pButtonGroup;
 #if QT_VERSION < 0x040000
-    QPopupMenu*			pReceiverModeMenu;
-    QPopupMenu*			pSettingsMenu;
-    QPopupMenu*			pPlotStyleMenu;
+    QPopupMenu*		pReceiverModeMenu;
+    QPopupMenu*		pSettingsMenu;
+    QPopupMenu*		pPlotStyleMenu;
 #else
-    QMenu*				pReceiverModeMenu;
-    QMenu*				pSettingsMenu;
-    QMenu*				pPlotStyleMenu;
-    QSignalMapper*		plotStyleMapper;
-    QActionGroup*		plotStyleGroup;
+    QMenu*		pReceiverModeMenu;
+    QMenu*		pSettingsMenu;
+    QMenu*		pPlotStyleMenu;
+    QSignalMapper*	plotStyleMapper;
+    QActionGroup*	plotStyleGroup;
+    CAboutDlg		AboutDlg;
 #endif
 
     void SetStatus(CMultColorLED* LED, ETypeRxStatus state);
     virtual void	closeEvent(QCloseEvent* ce);
     virtual void	showEvent(QShowEvent* pEvent);
-    void			hideEvent(QHideEvent* pEvent);
-    void			AddWhatsThisHelp();
-    void			UpdateDisplay();
-    void			ClearDisplay();
+    void		hideEvent(QHideEvent* pEvent);
+    void		AddWhatsThisHelp();
+    void		UpdateDisplay();
+    void		ClearDisplay();
 
 
-    void			SetDisplayColor(const QColor newColor);
+    void		SetDisplayColor(const QColor newColor);
 
-    void			ChangeGUIModeToDRM();
-    void			ChangeGUIModeToAM();
-    void			ChangeGUIModeToFM();
+    void		ChangeGUIModeToDRM();
+    void		ChangeGUIModeToAM();
+    void		ChangeGUIModeToFM();
 
     QString	GetCodecString(const CService&);
     QString	GetTypeString(const CService&);

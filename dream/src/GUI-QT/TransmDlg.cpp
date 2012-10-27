@@ -315,8 +315,7 @@ TransmDialog::TransmDialog(CSettings& NSettings,
 	CheckBoxEnableTextMessage->setChecked(TRUE);
 
 	/* Add example text in internal container */
-	vecstrTextMessage.Add(
-		toStdString(tr("Dream DRM Transmitter\x0B\x0AThis is a test transmission")));
+	vecstrTextMessage.Add(tr("Dream DRM Transmitter\x0B\x0AThis is a test transmission").latin1());
 
 	/* Insert item in combo box, display text and set item to our text */
 #if QT_VERSION < 0x040000

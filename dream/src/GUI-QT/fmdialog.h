@@ -86,6 +86,7 @@ protected:
 	QMenu*				pReceiverModeMenu;
 	QMenu*				pSettingsMenu;
 	QMenu*				pPlotStyleMenu;
+	CAboutDlg			AboutDlg;
 #endif
 	QTimer				Timer;
 	QBrush				alarmBrush;

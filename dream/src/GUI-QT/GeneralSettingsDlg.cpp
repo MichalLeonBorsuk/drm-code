@@ -217,11 +217,11 @@ void GeneralSettingsDlg::ButtonOkClicked()
             Parameters.gps_data.set &= ~LATLON_SET;
         }
 
-        string host =  toStdString(LineEditGPSHost->text());
+        string host =  LineEditGPSHost->text().latin1();
         if(Parameters.gps_host != host)
             Parameters.restart_gpsd = true;
         Parameters.gps_host=host;
-        string port = toStdString(LineEditGPSPort->text());
+        string port = LineEditGPSPort->text().latin1();
         if(Parameters.gps_port != port)
             Parameters.restart_gpsd = true;
         Parameters.gps_port=port;

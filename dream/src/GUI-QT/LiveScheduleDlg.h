@@ -38,6 +38,7 @@
 # include <qurloperator.h>
 # include <qlistview.h>
 #else
+# include <QSignalMapper>
 # include <QDialog>
 # include <QTreeWidget>
 # include "ui_LiveScheduleWindow.h"

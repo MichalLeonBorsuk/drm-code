@@ -83,6 +83,7 @@ public:
 protected:
     CDRMPlot*           MainPlot;
     QButtonGroup        ButtonGroupDemodulation, ButtonGroupAGC, ButtonGroupNoiseReduction;
+    CAboutDlg		AboutDlg;
 };
 #endif
 

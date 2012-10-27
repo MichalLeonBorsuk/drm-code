@@ -29,6 +29,7 @@
 #include <qmenubar.h>
 #include <qlabel.h>
 #include <qaction.h>
+#include <qmessagebox.h>
 #ifdef _WIN32
 # include <winsock2.h>
 #endif
@@ -245,8 +246,14 @@ CDreamHelpMenu::CDreamHelpMenu(QWidget* parent) : QPopupMenu(parent)
         insertSeparator();
         insertItem(tr("&About..."), this, SLOT(OnHelpAbout()));
 }
+
+void CDreamHelpMenu::OnHelpWhatsThis()
+{
+    QWhatsThis::enterWhatsThisMode();
+}
 #else
-CDreamHelpMenu::CDreamHelpMenu(QWidget* parent) : QMenu(parent)
+#if 0
+CDreamHelpMenu::CDreamHelpMenu(QWidget* parent) : QPopupMenu(parent)
 {
     /* Standard help menu consists of about and what's this help */
     setTitle("?");
@@ -255,13 +262,9 @@ CDreamHelpMenu::CDreamHelpMenu(QWidget* parent) : QMenu(parent)
     addAction(tr("About..."), this, SLOT(OnHelpAbout()));
 }
 #endif
+#endif
 
-void CDreamHelpMenu::OnHelpWhatsThis()
-{
-    QWhatsThis::enterWhatsThisMode();
-}
-
-#if QT_VERSION >= 0x040000
+#if 0 // QT_VERSION >= 0x040000
 QSignalMapper* CSoundCardSelMenu::Init(const QString& text, CSelectionInterface* intf)
 {
     QMenu* menu = addMenu(text);
@@ -303,6 +306,8 @@ CSoundCardSelMenu::CSoundCardSelMenu(
         /* Get sound device names */
         pSoundInIF->Enumerate(vecSoundInNames);
         iNumSoundInDev = vecSoundInNames.size();
+//QMessageBox::information(this, "Dream", tr("got %1 sound sources").arg(iNumSoundInDev), QMessageBox::Ok);
+
         for (i = 0; i < iNumSoundInDev; i++)
         {
                 QString name(vecSoundInNames[i].c_str());
@@ -315,6 +320,7 @@ CSoundCardSelMenu::CSoundCardSelMenu(
 
         pSoundOutIF->Enumerate(vecSoundOutNames);
         iNumSoundOutDev = vecSoundOutNames.size();
+//QMessageBox::information(this, "Dream", tr("got %1 sound outputs").arg(iNumSoundOutDev), QMessageBox::Ok);
         for (i = 0; i < iNumSoundOutDev; i++)
         {
                 pSoundOutMenu->insertItem(QString(vecSoundOutNames[i].c_str()), this,
@@ -336,7 +342,25 @@ CSoundCardSelMenu::CSoundCardSelMenu(
         insertItem(tr("Sound &In"), pSoundInMenu);
         insertItem(tr("Sound &Out"), pSoundOutMenu);
 }
+
+void CSoundCardSelMenu::OnSoundInDevice(int id)
+{
+    pSoundInIF->SetDev(id);
+    /* Take care of checks in the menu. "+ 1" because of wave mapper entry */
+    for (int i = 0; i < iNumSoundInDev + 1; i++)
+        pSoundInMenu->setItemChecked(i, i == id);
+}
+
+void CSoundCardSelMenu::OnSoundOutDevice(int id)
+{
+    pSoundOutIF->SetDev(id);
+    /* Take care of checks in the menu. "+ 1" because of wave mapper entry */
+    for (int i = 0; i < iNumSoundOutDev + 1; i++)
+        pSoundOutMenu->setItemChecked(i, i == id);
+}
+
 #else
+#if 0
 CSoundCardSelMenu::CSoundCardSelMenu(
     CSelectionInterface* pNSIn, CSelectionInterface* pNSOut, QWidget* parent) :
     QMenu(parent), pSoundInIF(pNSIn), pSoundOutIF(pNSOut)
@@ -347,25 +371,22 @@ CSoundCardSelMenu::CSoundCardSelMenu(
 }
 #endif
 
-void CSoundCardSelMenu::OnSoundInDevice(int id)
-{
-    pSoundInIF->SetDev(id);
-}
-
-void CSoundCardSelMenu::OnSoundOutDevice(int id)
-{
-    pSoundOutIF->SetDev(id);
-}
+#endif
 
 RemoteMenu::RemoteMenu(QWidget* parent, CRig& nrig)
 #ifdef HAVE_LIBHAMLIB
     :rigmenus(),specials(),rig(nrig)
 #endif
 {
-    pRemoteMenu = new MyMenu(parent);
+#if QT_VERSION < 0x040000
+    pRemoteMenu = new QPopupMenu(parent);
+    pRemoteMenuOther = new QPopupMenu(parent);
+#else
+    pRemoteMenu = new QMenu(parent);
+    pRemoteMenuOther = new QMenu(parent);
+#endif
     CHECK_PTR(pRemoteMenu);
 
-    pRemoteMenuOther = new MyMenu(parent);
     CHECK_PTR(pRemoteMenuOther);
 
 #ifdef HAVE_LIBHAMLIB
@@ -401,7 +422,11 @@ RemoteMenu::RemoteMenu(QWidget* parent, CRig& nrig)
         if(k == rigmenus.end())
         {
             m.mfr = rig.strManufacturer;
-            m.pMenu = new MyMenu(pRemoteMenuOther);
+#if QT_VERSION < 0x040000
+            m.pMenu = new QPopupMenu(pRemoteMenuOther);
+#else
+            m.pMenu = new QMenu(pRemoteMenuOther);
+#endif
             CHECK_PTR(m.pMenu);
         }
         else
@@ -561,7 +586,7 @@ void RemoteMenu::OnRemoteMenu(int iID)
     // if an "others" rig was selected add it to the specials list
     for (map<int,Rigmenu>::iterator i=rigmenus.begin(); i!=rigmenus.end(); i++)
     {
-        MyMenu* pMenu = i->second.pMenu;
+        QPopupMenu* pMenu = i->second.pMenu;
         for(size_t j=0; j<pMenu->count(); j++)
         {
             int mID = pMenu->idAt(j);
@@ -612,6 +637,6 @@ void RemoteMenu::OnRemoteMenu(int iID)
 void RemoteMenu::OnComPortMenu(QAction* action)
 {
 #ifdef HAVE_LIBHAMLIB
-    rig.SetComPort(toStdString(action->text()));
+    rig.SetComPort(action->text().utf8().data());
 #endif
 }
