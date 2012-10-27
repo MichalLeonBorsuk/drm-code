@@ -28,7 +28,7 @@
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-IDI_MAINICON            ICON    DISCARDABLE     "..\\common\\GUI-QT\\res\\MainIcon.ico"
+IDI_MAINICON            ICON    DISCARDABLE     "..\\src\\GUI-QT\\res\\MainIcon.ico"
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////
