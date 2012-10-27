@@ -5,28 +5,29 @@ console {
 }
 else {
     DEFINES += USE_QT_GUI
-    RESOURCES = common/GUI-QT/res/icons.qrc
+    RESOURCES = src/GUI-QT/res/icons.qrc
 }
 TEMPLATE = app
 TARGET = dream
-CONFIG += qt warn_on debug thread qt3support
-INCLUDEPATH += common/GUI-QT
+CONFIG += qt warn_on debug thread
+INCLUDEPATH += src/GUI-QT
 INCLUDEPATH += libs
+OBJECTS_DIR = obj
 #LIBS += -L$$PWD/libs
 macx:QMAKE_LFLAGS += -F$$PWD/libs
 contains(QT_VERSION, ^4\\..*) {
     message("Qt 4")
     QT += network xml qt3support
-    VPATH += common/GUI-QT
+    VPATH += src/GUI-QT
     !console {
-        HEADERS += common/GUI-QT/DRMPlot-qwt6.h common/GUI-QT/EvaluationDlg.h
-        HEADERS += common/GUI-QT/SlideShowViewer.h common/GUI-QT/JLViewer.h common/GUI-QT/BWSViewer.h
-	HEADERS += common/GUI-QT/bwsbrowser.h common/GUI-QT/jlbrowser.h
-        SOURCES += common/GUI-QT/DRMPlot-qwt6.cpp common/GUI-QT/EvaluationDlg.cpp
-        SOURCES += common/GUI-QT/SlideShowViewer.cpp common/GUI-QT/JLViewer.cpp common/GUI-QT/BWSViewer.cpp
-	SOURCES += common/GUI-QT/bwsbrowser.cpp common/GUI-QT/jlbrowser.cpp
-        HEADERS += common/GUI-QT/CSoundCardSelMenu.h
-        SOURCES += common/GUI-QT/CSoundCardSelMenu.cpp
+        HEADERS += src/GUI-QT/DRMPlot-qwt6.h src/GUI-QT/EvaluationDlg.h
+        HEADERS += src/GUI-QT/SlideShowViewer.h src/GUI-QT/JLViewer.h src/GUI-QT/BWSViewer.h
+	HEADERS += src/GUI-QT/bwsbrowser.h src/GUI-QT/jlbrowser.h
+	HEADERS += src/GUI-QT/SoundCardSelMenu.h
+        SOURCES += src/GUI-QT/DRMPlot-qwt6.cpp src/GUI-QT/EvaluationDlg.cpp
+        SOURCES += src/GUI-QT/SlideShowViewer.cpp src/GUI-QT/JLViewer.cpp src/GUI-QT/BWSViewer.cpp
+	SOURCES += src/GUI-QT/bwsbrowser.cpp src/GUI-QT/jlbrowser.cpp
+	SOURCES += src/GUI-QT/SoundCardSelMenu.cpp
         FORMS += DRMMainWindow.ui FMMainWindow.ui AMMainWindow.ui LiveScheduleWindow.ui
         FORMS += JLViewer.ui BWSViewer.ui SlideShowViewer.ui
         unix {
@@ -94,10 +95,10 @@ contains(QT_VERSION, ^4\\..*) {
 count(QT_VERSION, 0) {
     message("Qt 3")
     CONFIG += old
-    VPATH += common/GUI-QT/qt2
+    VPATH += src/GUI-QT/qt2
     !console {
-        HEADERS += common/GUI-QT/DRMPlot.h common/GUI-QT/systemevalDlg.h common/GUI-QT/MultimediaDlg.h
-        SOURCES += common/GUI-QT/DRMPlot.cpp common/GUI-QT/systemevalDlg.cpp common/GUI-QT/MultimediaDlg.cpp
+        HEADERS += src/GUI-QT/DRMPlot.h src/GUI-QT/systemevalDlg.h src/GUI-QT/MultimediaDlg.h
+        SOURCES += src/GUI-QT/DRMPlot.cpp src/GUI-QT/systemevalDlg.cpp src/GUI-QT/MultimediaDlg.cpp
         FORMS += fdrmdialogbase.ui fmdialogbase.ui AnalogDemDlgbase.ui LiveScheduleDlgbase.ui
         FORMS += MultimediaDlgbase.ui
         unix {
@@ -126,15 +127,13 @@ count(QT_VERSION, 0) {
     AboutDlgbase.ui
 }
 macx {
-    OBJECTS_DIR = darwin
-    INCLUDEPATH += darwin
     INCLUDEPATH += /Developer/dream/include /opt/local/include
     LIBS += -L/Developer/dream/lib -L/opt/local/lib
     LIBS += -framework CoreFoundation -framework CoreServices
     LIBS += -framework CoreAudio -framework AudioToolbox -framework AudioUnit
-    UI_DIR = darwin/moc
-    MOC_DIR = darwin/moc
-    RC_FILE = common/GUI-QT/res/macicons.icns
+    UI_DIR = moc
+    MOC_DIR = moc
+    RC_FILE = src/GUI-QT/res/macicons.icns
 }
 exists(libs/faac.h) {
     CONFIG += faac
@@ -185,30 +184,27 @@ unix {
 	message("with fftw2")
         LIBS += -lfftw
         exists(/usr/include/rfftw.h):LIBS += -lrfftw
+        exists(/opt/local/include/dfftw.h) {
+            DEFINES += HAVE_DFFTW_H
+            LIBS += -ldfftw
+        }
+        exists(/opt/local/include/drfftw.h) {
+           DEFINES += HAVE_DRFFTW_H
+           LIBS += -ldrfftw
+        }
         DEFINES += HAVE_FFTW_H HAVE_RFFTW_H
       }
       else {
-        exists(/opt/local/include/dfftw.h) {
-	  message("with fftw2")
-          DEFINES += HAVE_DFFTW_H
-          LIBS += -ldfftw
-          exists(/opt/local/include/drfftw.h) {
-           DEFINES += HAVE_DRFFTW_H
-           LIBS += -ldrfftw
-          }
-        }
-        else {
-          error("no usable fftw library found - install fftw dev package")
-        }
+        error("no usable fftw library found - install fftw dev package")
       }
     }
     LIBS += -lz \
             -ldl
-    SOURCES += linux/source/Pacer.cpp
-    HEADERS += linux/source/shmsoundin.h \
-        linux/source/pa_shm_ringbuffer.h
-    SOURCES += linux/source/shmsoundin.cpp \
-	  linux/source/pa_shm_ringbuffer.c
+    SOURCES += src/linux/Pacer.cpp
+    HEADERS += src/linux/shmsoundin.h \
+        src/linux/pa_shm_ringbuffer.h
+    SOURCES += src/linux/shmsoundin.cpp \
+	  src/linux/pa_shm_ringbuffer.c
       DEFINES += HAVE_DLFCN_H \
               HAVE_MEMORY_H \
               HAVE_STDINT_H \
@@ -224,12 +220,9 @@ unix {
       DEFINES += HAVE_LIBZ
     !macx {
         MAKEFILE = Makefile
-        INCLUDEPATH += linux
         LIBS += -lrt
-        OBJECTS_DIR = linux
-        UI_DIR = linux/moc
-        UI_DIR = linux/moc
-        MOC_DIR = linux/moc
+        UI_DIR = moc
+        MOC_DIR = moc
     }
 }
 msvc2008 {
@@ -286,17 +279,16 @@ win32 {
         CONFIG += sndfile
         message("with libsndfile")
     }
-    OBJECTS_DIR = windows
-    UI_DIR = windows/moc
-    MOC_DIR = windows/moc
+    UI_DIR = moc
+    MOC_DIR = moc
     LIBS += -lsetupapi \
     -lwinmm \
     -lwsock32
     DEFINES += HAVE_SETUPAPI \
     HAVE_LIBZ
     DEFINES -= UNICODE
-    HEADERS += windows/Source/Sound.h windows/Source/SoundWin.h
-    SOURCES += windows/Source/Pacer.cpp windows/Source/Sound.cpp
+    HEADERS += src/windows/Sound.h src/windows/SoundWin.h
+    SOURCES += src/windows/Pacer.cpp src/windows/Sound.cpp
 }
 faad {
     DEFINES += HAVE_LIBFAAD \
@@ -329,260 +321,260 @@ hamlib {
     unix:LIBS += -lhamlib
     win32:LIBS += libhamlib-2.lib
     !console:!old {
-        HEADERS += common/GUI-QT/RigDlg.h
-        SOURCES += common/GUI-QT/RigDlg.cpp
+        HEADERS += src/GUI-QT/RigDlg.h
+        SOURCES += src/GUI-QT/RigDlg.cpp
         FORMS += RigDlg.ui
     }
 }
 alsa {
     DEFINES += USE_ALSA
-    HEADERS += linux/source/soundcommon.h \
-    linux/source/soundin.h \
-    linux/source/soundout.h
-    SOURCES += linux/source/alsa.cpp \
-    linux/source/soundcommon.cpp
+    HEADERS += src/linux/soundsrc.h \
+    src/linux/soundin.h \
+    src/linux/soundout.h
+    SOURCES += src/linux/alsa.cpp \
+    src/linux/soundsrc.cpp
 }
 portaudio {
     DEFINES += USE_PORTAUDIO
-    HEADERS += common/sound/pa_ringbuffer.h \
-    common/sound/drm_portaudio.h
-    SOURCES += common/sound/drm_portaudio.cpp \
-    common/sound/pa_ringbuffer.c
+    HEADERS += src/sound/pa_ringbuffer.h \
+    src/sound/drm_portaudio.h
+    SOURCES += src/sound/drm_portaudio.cpp \
+    src/sound/pa_ringbuffer.c
     LIBS += -lportaudio
 }
-HEADERS += common/AMDemodulation.h \
-   common/AMSSDemodulation.h \
-   common/audiofilein.h \
-   common/chanest/ChanEstTime.h \
-   common/chanest/ChannelEstimation.h \
-   common/chanest/IdealChannelEstimation.h \
-   common/chanest/TimeLinear.h \
-   common/chanest/TimeWiener.h \
-   common/datadecoding/DABMOT.h \
-   common/datadecoding/DataDecoder.h \
-   common/datadecoding/DataEncoder.h \
-   common/datadecoding/epg/EPG.h \
-   common/datadecoding/epg/epgdec.h \
-   common/datadecoding/epg/epgutil.h \
-   common/datadecoding/journaline/NML.h \
-   common/datadecoding/journaline/Splitter.h \
-   common/datadecoding/journaline/cpplog.h \
-   common/datadecoding/journaline/crc_8_16.h \
-   common/datadecoding/journaline/dabdatagroupdecoder.h \
-   common/datadecoding/journaline/dabdgdec_impl.h \
-   common/datadecoding/journaline/log.h \
-   common/datadecoding/journaline/newsobject.h \
-   common/datadecoding/journaline/newssvcdec.h \
-   common/datadecoding/journaline/newssvcdec_impl.h \
-   common/datadecoding/Experiment.h \
-   common/datadecoding/Journaline.h \
-   common/datadecoding/MOTSlideShow.h \
-   common/DataIO.h \
-   common/drmchannel/ChannelSimulation.h \
-   common/ReceptLog.h \
-   common/PlotManager.h \
-   common/ServiceInformation.h \
-   common/DrmReceiver.h \
-   common/DRMSignalIO.h \
-   common/DrmSimulation.h \
-   common/DrmTransmitter.h \
-   common/FAC/FAC.h \
-   common/GlobalDefinitions.h \
-   common/InputResample.h \
-   common/interleaver/BlockInterleaver.h \
-   common/interleaver/SymbolInterleaver.h \
-   common/IQInputFilter.h \
-   common/matlib/Matlib.h \
-   common/matlib/MatlibSigProToolbox.h \
-   common/matlib/MatlibStdToolbox.h \
-   common/MDI/AFPacketGenerator.h \
-   common/MDI/MDIDecode.h \
-   common/MDI/MDIDefinitions.h \
-   common/MDI/MDIInBuffer.h \
-   common/MDI/MDIRSCI.h \
-   common/MDI/MDITagItemDecoders.h \
-   common/MDI/MDITagItems.h \
-   common/MDI/PacketInOut.h \
-   common/MDI/PacketSinkFile.h \
-   common/MDI/PacketSourceFile.h \
-   common/MDI/PacketSocketNull.h \
-   common/MDI/PacketSocketQT.h \
-   common/MDI/Pft.h \
-   common/MDI/RCITagItems.h \
-   common/MDI/RSCITagItemDecoders.h \
-   common/MDI/RSISubscriber.h \
-   common/MDI/TagItemDecoder.h \
-   common/MDI/TagPacketDecoder.h \
-   common/MDI/TagPacketDecoderMDI.h \
-   common/MDI/TagPacketDecoderRSCIControl.h \
-   common/MDI/TagPacketGenerator.h \
-   common/mlc/BitInterleaver.h \
-   common/mlc/ChannelCode.h \
-   common/mlc/ConvEncoder.h \
-   common/mlc/EnergyDispersal.h \
-   common/mlc/Metric.h \
-   common/mlc/MLC.h \
-   common/mlc/QAMMapping.h \
-   common/mlc/ViterbiDecoder.h \
-   common/MSCMultiplexer.h \
-   common/OFDM.h \
-   common/ofdmcellmapping/CellMappingTable.h \
-   common/ofdmcellmapping/OFDMCellMapping.h \
-   common/Parameter.h \
-   common/resample/Resample.h \
-   common/resample/ResampleFilter.h \
-   common/SDC/SDC.h \
-   common/selectioninterface.h \
-   common/soundinterface.h \
-   common/sound.h \
-   common/sound/soundnull.h \
-   common/sourcedecoders/AudioSourceDecoder.h \
-   common/sourcedecoders/AudioSourceEncoder.h \
-   common/sync/FreqSyncAcq.h \
-   common/sync/SyncUsingPil.h \
-   common/sync/TimeSync.h \
-   common/sync/TimeSyncFilter.h \
-   common/sync/TimeSyncTrack.h \
-   common/tables/TableAMSS.h \
-   common/tables/TableCarMap.h \
-   common/tables/TableDRMGlobal.h \
-   common/tables/TableFAC.h \
-   common/tables/TableMLC.h \
-   common/tables/TableQAMMapping.h \
-   common/tables/TableStations.h \
-   common/TextMessage.h \
-   common/util/AudioFile.h \
-   common/util/Buffer.h \
-   common/util/CRC.h \
-   common/util/LogPrint.h \
-   common/util/Modul.h \
-   common/util/Pacer.h \
-   common/util/Reassemble.h \
-   common/util/Settings.h \
-   common/util/Utilities.h \
-   common/util/Vector.h \
-   common/GUI-QT/Rig.h \
-   common/GUI-QT/Logging.h \
-   common/Version.h
-SOURCES += common/AMDemodulation.cpp \
-      common/AMSSDemodulation.cpp \
-      common/audiofilein.cpp \
-      common/chanest/ChanEstTime.cpp \
-      common/chanest/ChannelEstimation.cpp \
-      common/chanest/IdealChannelEstimation.cpp \
-      common/chanest/TimeLinear.cpp \
-      common/chanest/TimeWiener.cpp \
-      common/datadecoding/DABMOT.cpp \
-      common/datadecoding/DataDecoder.cpp \
-      common/datadecoding/DataEncoder.cpp \
-      common/datadecoding/epg/EPG.cpp \
-      common/datadecoding/epg/epgdec.cpp \
-      common/datadecoding/epg/epgutil.cpp \
-      common/datadecoding/journaline/NML.cpp \
-      common/datadecoding/journaline/dabdgdec_impl.c \
-      common/datadecoding/journaline/Splitter.cpp \
-      common/datadecoding/journaline/newsobject.cpp \
-      common/datadecoding/journaline/newssvcdec_impl.cpp \
-      common/datadecoding/journaline/crc_8_16.c \
-      common/datadecoding/journaline/log.c \
-      common/datadecoding/Experiment.cpp \
-      common/datadecoding/Journaline.cpp \
-      common/datadecoding/MOTSlideShow.cpp \
-      common/DataIO.cpp \
-      common/drmchannel/ChannelSimulation.cpp \
-      common/ReceptLog.cpp \
-      common/PlotManager.cpp \
-      common/ServiceInformation.cpp \
-      common/DrmReceiver.cpp \
-      common/DRMSignalIO.cpp \
-      common/DrmSimulation.cpp \
-      common/DrmTransmitter.cpp \
-      common/FAC/FAC.cpp \
-      common/InputResample.cpp \
-      common/interleaver/BlockInterleaver.cpp \
-      common/interleaver/SymbolInterleaver.cpp \
-      common/IQInputFilter.cpp \
-      common/matlib/MatlibSigProToolbox.cpp \
-      common/matlib/MatlibStdToolbox.cpp \
-      common/MDI/AFPacketGenerator.cpp \
-      common/MDI/MDIDecode.cpp \
-      common/MDI/MDIInBuffer.cpp \
-      common/MDI/MDIRSCI.cpp \
-      common/MDI/MDITagItemDecoders.cpp \
-      common/MDI/MDITagItems.cpp \
-      common/MDI/PacketSinkFile.cpp \
-      common/MDI/PacketSourceFile.cpp \
-      common/MDI/PacketSocketNull.cpp \
-      common/MDI/PacketSocketQT.cpp \
-      common/MDI/Pft.cpp \
-      common/MDI/RCITagItems.cpp \
-      common/MDI/RSCITagItemDecoders.cpp \
-      common/MDI/RSISubscriber.cpp \
-      common/MDI/TagPacketDecoder.cpp \
-      common/MDI/TagPacketDecoderMDI.cpp \
-      common/MDI/TagPacketDecoderRSCIControl.cpp \
-      common/MDI/TagPacketGenerator.cpp \
-      common/mlc/BitInterleaver.cpp \
-      common/mlc/ChannelCode.cpp \
-      common/mlc/ConvEncoder.cpp \
-      common/mlc/EnergyDispersal.cpp \
-      common/mlc/Metric.cpp \
-      common/mlc/MLC.cpp \
-      common/mlc/QAMMapping.cpp \
-      common/mlc/TrellisUpdateMMX.cpp \
-      common/mlc/TrellisUpdateSSE2.cpp \
-      common/mlc/ViterbiDecoder.cpp \
-      common/MSCMultiplexer.cpp \
-      common/OFDM.cpp \
-      common/ofdmcellmapping/CellMappingTable.cpp \
-      common/ofdmcellmapping/OFDMCellMapping.cpp \
-      common/Parameter.cpp \
-      common/resample/Resample.cpp \
-      common/resample/ResampleFilter.cpp \
-      common/SDC/SDCReceive.cpp \
-      common/SDC/SDCTransmit.cpp \
-      common/SimulationParameters.cpp \
-      common/sourcedecoders/AudioSourceDecoder.cpp \
-      common/sourcedecoders/AudioSourceEncoder.cpp \
-      common/sync/FreqSyncAcq.cpp \
-      common/sync/SyncUsingPil.cpp \
-      common/sync/TimeSync.cpp \
-      common/sync/TimeSyncFilter.cpp \
-      common/sync/TimeSyncTrack.cpp \
-      common/tables/TableCarMap.cpp \
-      common/tables/TableFAC.cpp \
-      common/tables/TableStations.cpp \
-      common/TextMessage.cpp \
-      common/util/CRC.cpp \
-      common/util/LogPrint.cpp \
-      common/util/Reassemble.cpp \
-      common/util/Settings.cpp \
-      common/util/Utilities.cpp \
-      common/Version.cpp \
-      common/GUI-QT/Rig.cpp \
-      common/GUI-QT/Logging.cpp \
-      common/GUI-QT/main.cpp
+HEADERS += src/AMDemodulation.h \
+   src/AMSSDemodulation.h \
+   src/audiofilein.h \
+   src/chanest/ChanEstTime.h \
+   src/chanest/ChannelEstimation.h \
+   src/chanest/IdealChannelEstimation.h \
+   src/chanest/TimeLinear.h \
+   src/chanest/TimeWiener.h \
+   src/datadecoding/DABMOT.h \
+   src/datadecoding/DataDecoder.h \
+   src/datadecoding/DataEncoder.h \
+   src/datadecoding/epg/EPG.h \
+   src/datadecoding/epg/epgdec.h \
+   src/datadecoding/epg/epgutil.h \
+   src/datadecoding/journaline/NML.h \
+   src/datadecoding/journaline/Splitter.h \
+   src/datadecoding/journaline/cpplog.h \
+   src/datadecoding/journaline/crc_8_16.h \
+   src/datadecoding/journaline/dabdatagroupdecoder.h \
+   src/datadecoding/journaline/dabdgdec_impl.h \
+   src/datadecoding/journaline/log.h \
+   src/datadecoding/journaline/newsobject.h \
+   src/datadecoding/journaline/newssvcdec.h \
+   src/datadecoding/journaline/newssvcdec_impl.h \
+   src/datadecoding/Experiment.h \
+   src/datadecoding/Journaline.h \
+   src/datadecoding/MOTSlideShow.h \
+   src/DataIO.h \
+   src/drmchannel/ChannelSimulation.h \
+   src/ReceptLog.h \
+   src/PlotManager.h \
+   src/ServiceInformation.h \
+   src/DrmReceiver.h \
+   src/DRMSignalIO.h \
+   src/DrmSimulation.h \
+   src/DrmTransmitter.h \
+   src/FAC/FAC.h \
+   src/GlobalDefinitions.h \
+   src/InputResample.h \
+   src/interleaver/BlockInterleaver.h \
+   src/interleaver/SymbolInterleaver.h \
+   src/IQInputFilter.h \
+   src/matlib/Matlib.h \
+   src/matlib/MatlibSigProToolbox.h \
+   src/matlib/MatlibStdToolbox.h \
+   src/MDI/AFPacketGenerator.h \
+   src/MDI/MDIDecode.h \
+   src/MDI/MDIDefinitions.h \
+   src/MDI/MDIInBuffer.h \
+   src/MDI/MDIRSCI.h \
+   src/MDI/MDITagItemDecoders.h \
+   src/MDI/MDITagItems.h \
+   src/MDI/PacketInOut.h \
+   src/MDI/PacketSinkFile.h \
+   src/MDI/PacketSourceFile.h \
+   src/MDI/PacketSocketNull.h \
+   src/MDI/PacketSocketQT.h \
+   src/MDI/Pft.h \
+   src/MDI/RCITagItems.h \
+   src/MDI/RSCITagItemDecoders.h \
+   src/MDI/RSISubscriber.h \
+   src/MDI/TagItemDecoder.h \
+   src/MDI/TagPacketDecoder.h \
+   src/MDI/TagPacketDecoderMDI.h \
+   src/MDI/TagPacketDecoderRSCIControl.h \
+   src/MDI/TagPacketGenerator.h \
+   src/mlc/BitInterleaver.h \
+   src/mlc/ChannelCode.h \
+   src/mlc/ConvEncoder.h \
+   src/mlc/EnergyDispersal.h \
+   src/mlc/Metric.h \
+   src/mlc/MLC.h \
+   src/mlc/QAMMapping.h \
+   src/mlc/ViterbiDecoder.h \
+   src/MSCMultiplexer.h \
+   src/OFDM.h \
+   src/ofdmcellmapping/CellMappingTable.h \
+   src/ofdmcellmapping/OFDMCellMapping.h \
+   src/Parameter.h \
+   src/resample/Resample.h \
+   src/resample/ResampleFilter.h \
+   src/SDC/SDC.h \
+   src/selectioninterface.h \
+   src/soundinterface.h \
+   src/sound.h \
+   src/sound/soundnull.h \
+   src/sourcedecoders/AudioSourceDecoder.h \
+   src/sourcedecoders/AudioSourceEncoder.h \
+   src/sync/FreqSyncAcq.h \
+   src/sync/SyncUsingPil.h \
+   src/sync/TimeSync.h \
+   src/sync/TimeSyncFilter.h \
+   src/sync/TimeSyncTrack.h \
+   src/tables/TableAMSS.h \
+   src/tables/TableCarMap.h \
+   src/tables/TableDRMGlobal.h \
+   src/tables/TableFAC.h \
+   src/tables/TableMLC.h \
+   src/tables/TableQAMMapping.h \
+   src/tables/TableStations.h \
+   src/TextMessage.h \
+   src/util/AudioFile.h \
+   src/util/Buffer.h \
+   src/util/CRC.h \
+   src/util/LogPrint.h \
+   src/util/Modul.h \
+   src/util/Pacer.h \
+   src/util/Reassemble.h \
+   src/util/Settings.h \
+   src/util/Utilities.h \
+   src/util/Vector.h \
+   src/GUI-QT/Rig.h \
+   src/GUI-QT/Logging.h \
+   src/Version.h
+SOURCES += src/AMDemodulation.cpp \
+      src/AMSSDemodulation.cpp \
+      src/audiofilein.cpp \
+      src/chanest/ChanEstTime.cpp \
+      src/chanest/ChannelEstimation.cpp \
+      src/chanest/IdealChannelEstimation.cpp \
+      src/chanest/TimeLinear.cpp \
+      src/chanest/TimeWiener.cpp \
+      src/datadecoding/DABMOT.cpp \
+      src/datadecoding/DataDecoder.cpp \
+      src/datadecoding/DataEncoder.cpp \
+      src/datadecoding/epg/EPG.cpp \
+      src/datadecoding/epg/epgdec.cpp \
+      src/datadecoding/epg/epgutil.cpp \
+      src/datadecoding/journaline/NML.cpp \
+      src/datadecoding/journaline/dabdgdec_impl.c \
+      src/datadecoding/journaline/Splitter.cpp \
+      src/datadecoding/journaline/newsobject.cpp \
+      src/datadecoding/journaline/newssvcdec_impl.cpp \
+      src/datadecoding/journaline/crc_8_16.c \
+      src/datadecoding/journaline/log.c \
+      src/datadecoding/Experiment.cpp \
+      src/datadecoding/Journaline.cpp \
+      src/datadecoding/MOTSlideShow.cpp \
+      src/DataIO.cpp \
+      src/drmchannel/ChannelSimulation.cpp \
+      src/ReceptLog.cpp \
+      src/PlotManager.cpp \
+      src/ServiceInformation.cpp \
+      src/DrmReceiver.cpp \
+      src/DRMSignalIO.cpp \
+      src/DrmSimulation.cpp \
+      src/DrmTransmitter.cpp \
+      src/FAC/FAC.cpp \
+      src/InputResample.cpp \
+      src/interleaver/BlockInterleaver.cpp \
+      src/interleaver/SymbolInterleaver.cpp \
+      src/IQInputFilter.cpp \
+      src/matlib/MatlibSigProToolbox.cpp \
+      src/matlib/MatlibStdToolbox.cpp \
+      src/MDI/AFPacketGenerator.cpp \
+      src/MDI/MDIDecode.cpp \
+      src/MDI/MDIInBuffer.cpp \
+      src/MDI/MDIRSCI.cpp \
+      src/MDI/MDITagItemDecoders.cpp \
+      src/MDI/MDITagItems.cpp \
+      src/MDI/PacketSinkFile.cpp \
+      src/MDI/PacketSourceFile.cpp \
+      src/MDI/PacketSocketNull.cpp \
+      src/MDI/PacketSocketQT.cpp \
+      src/MDI/Pft.cpp \
+      src/MDI/RCITagItems.cpp \
+      src/MDI/RSCITagItemDecoders.cpp \
+      src/MDI/RSISubscriber.cpp \
+      src/MDI/TagPacketDecoder.cpp \
+      src/MDI/TagPacketDecoderMDI.cpp \
+      src/MDI/TagPacketDecoderRSCIControl.cpp \
+      src/MDI/TagPacketGenerator.cpp \
+      src/mlc/BitInterleaver.cpp \
+      src/mlc/ChannelCode.cpp \
+      src/mlc/ConvEncoder.cpp \
+      src/mlc/EnergyDispersal.cpp \
+      src/mlc/Metric.cpp \
+      src/mlc/MLC.cpp \
+      src/mlc/QAMMapping.cpp \
+      src/mlc/TrellisUpdateMMX.cpp \
+      src/mlc/TrellisUpdateSSE2.cpp \
+      src/mlc/ViterbiDecoder.cpp \
+      src/MSCMultiplexer.cpp \
+      src/OFDM.cpp \
+      src/ofdmcellmapping/CellMappingTable.cpp \
+      src/ofdmcellmapping/OFDMCellMapping.cpp \
+      src/Parameter.cpp \
+      src/resample/Resample.cpp \
+      src/resample/ResampleFilter.cpp \
+      src/SDC/SDCReceive.cpp \
+      src/SDC/SDCTransmit.cpp \
+      src/SimulationParameters.cpp \
+      src/sourcedecoders/AudioSourceDecoder.cpp \
+      src/sourcedecoders/AudioSourceEncoder.cpp \
+      src/sync/FreqSyncAcq.cpp \
+      src/sync/SyncUsingPil.cpp \
+      src/sync/TimeSync.cpp \
+      src/sync/TimeSyncFilter.cpp \
+      src/sync/TimeSyncTrack.cpp \
+      src/tables/TableCarMap.cpp \
+      src/tables/TableFAC.cpp \
+      src/tables/TableStations.cpp \
+      src/TextMessage.cpp \
+      src/util/CRC.cpp \
+      src/util/LogPrint.cpp \
+      src/util/Reassemble.cpp \
+      src/util/Settings.cpp \
+      src/util/Utilities.cpp \
+      src/Version.cpp \
+      src/GUI-QT/Rig.cpp \
+      src/GUI-QT/Logging.cpp \
+      src/GUI-QT/main.cpp
 !console {
-    HEADERS += common/GUI-QT/AnalogDemDlg.h \
-    common/GUI-QT/DialogUtil.h \
-    common/GUI-QT/EPGDlg.h \
-    common/GUI-QT/fdrmdialog.h \
-    common/GUI-QT/fmdialog.h \
-    common/GUI-QT/GeneralSettingsDlg.h \
-    common/GUI-QT/LiveScheduleDlg.h \
-    common/GUI-QT/MultColorLED.h \
-    common/GUI-QT/MultSettingsDlg.h \
-    common/GUI-QT/StationsDlg.h \
-    common/GUI-QT/TransmDlg.h
-    SOURCES += common/GUI-QT/AnalogDemDlg.cpp \
-    common/GUI-QT/DialogUtil.cpp \
-    common/GUI-QT/EPGDlg.cpp \
-    common/GUI-QT/fmdialog.cpp \
-    common/GUI-QT/fdrmdialog.cpp \
-    common/GUI-QT/GeneralSettingsDlg.cpp \
-    common/GUI-QT/LiveScheduleDlg.cpp \
-    common/GUI-QT/MultColorLED.cpp \
-    common/GUI-QT/MultSettingsDlg.cpp \
-    common/GUI-QT/StationsDlg.cpp \
-    common/GUI-QT/TransmDlg.cpp
+    HEADERS += src/GUI-QT/AnalogDemDlg.h \
+    src/GUI-QT/DialogUtil.h \
+    src/GUI-QT/EPGDlg.h \
+    src/GUI-QT/fdrmdialog.h \
+    src/GUI-QT/fmdialog.h \
+    src/GUI-QT/GeneralSettingsDlg.h \
+    src/GUI-QT/LiveScheduleDlg.h \
+    src/GUI-QT/MultColorLED.h \
+    src/GUI-QT/MultSettingsDlg.h \
+    src/GUI-QT/StationsDlg.h \
+    src/GUI-QT/TransmDlg.h
+    SOURCES += src/GUI-QT/AnalogDemDlg.cpp \
+    src/GUI-QT/DialogUtil.cpp \
+    src/GUI-QT/EPGDlg.cpp \
+    src/GUI-QT/fmdialog.cpp \
+    src/GUI-QT/fdrmdialog.cpp \
+    src/GUI-QT/GeneralSettingsDlg.cpp \
+    src/GUI-QT/LiveScheduleDlg.cpp \
+    src/GUI-QT/MultColorLED.cpp \
+    src/GUI-QT/MultSettingsDlg.cpp \
+    src/GUI-QT/StationsDlg.cpp \
+    src/GUI-QT/TransmDlg.cpp
 }
