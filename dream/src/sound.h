@@ -30,21 +30,21 @@
 #define _SOUND_H
 
 #if defined(_WIN32) && !defined(USE_PORTAUDIO) && !defined(USE_JACK)
-# include "../windows/Source/Sound.h"
+# include "windows/Sound.h"
 #endif
 
 #ifdef USE_OSS
-# include "../linux/source/soundin.h"
-# include "../linux/source/soundout.h"
+# include "linux/soundin.h"
+# include "linux/soundout.h"
 #endif
 
 #ifdef USE_ALSA
-# include "../linux/source/soundin.h"
-# include "../linux/source/soundout.h"
+# include "linux/soundin.h"
+# include "linux/soundout.h"
 #endif
 
 #ifdef USE_JACK
-# include "../linux/source/jack.h"
+# include "linux/jack.h"
 typedef CSoundInJack CSoundIn;
 typedef CSoundOutJack CSoundOut;
 #endif
