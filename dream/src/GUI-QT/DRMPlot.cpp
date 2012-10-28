@@ -521,7 +521,9 @@ void CDRMPlot::SetPlotStyle(const int iNewStyleID)
 
 void CDRMPlot::SetData(CVector<_REAL>& vecrData, CVector<_REAL>& vecrScale)
 {
-//	main1curve.SETDATA(&vecrScale[0], &vecrData[0], vecrData.Size());
+#if defined(__GNUC__) && defined(__linux__)
+	main1curve.SETDATA(&vecrScale[0], &vecrData[0], vecrData.Size());
+#else
 
 	double* pdData = new double[vecrData.Size()];
 	double* pdScale = new double[vecrScale.Size()];
@@ -538,13 +540,17 @@ void CDRMPlot::SetData(CVector<_REAL>& vecrData, CVector<_REAL>& vecrScale)
 
 	delete[] pdData;
 	delete[] pdScale;
+
+#endif
 }
 
 void CDRMPlot::SetData(CVector<_REAL>& vecrData1, CVector<_REAL>& vecrData2,
                        CVector<_REAL>& vecrScale)
 {
-//	main1curve.SETDATA(&vecrScale[0], &vecrData1[0], vecrData1.Size());
-//	main2curve.SETDATA(&vecrScale[0], &vecrData2[0], vecrData2.Size());
+#if defined(__GNUC__) && defined(__linux__)
+	main1curve.SETDATA(&vecrScale[0], &vecrData1[0], vecrData1.Size());
+	main2curve.SETDATA(&vecrScale[0], &vecrData2[0], vecrData2.Size());
+#else
 
 	double* pdData1 = new double[vecrData1.Size()];
 	double* pdData2 = new double[vecrData2.Size()];
@@ -558,18 +564,21 @@ void CDRMPlot::SetData(CVector<_REAL>& vecrData1, CVector<_REAL>& vecrData2,
 		pdData2[i] = vecrData2[i];
 		pdScale[i] = vecrScale[i];
 	}
-
 	main1curve.SETDATA(pdScale, pdData1, vecrData1.Size());
 	main2curve.SETDATA(pdScale, pdData2, vecrData2.Size());
 
 	delete[] pdData1;
 	delete[] pdData2;
 	delete[] pdScale;
+
+#endif
 }
 
 void CDRMPlot::SetData(CVector<_COMPLEX>& veccData)
 {
-//	curve1.SETDATA(&veccData[0].real(), &veccData[0].imag(), veccData.Size());
+#if defined(__GNUC__) && defined(__linux__)
+	curve1.SETDATA(&veccData[0].real(), &veccData[0].imag(), veccData.Size());
+#else
 
 	double* pdDataR = new double[veccData.Size()];
 	double* pdDataI = new double[veccData.Size()];
@@ -581,26 +590,29 @@ void CDRMPlot::SetData(CVector<_COMPLEX>& veccData)
 		pdDataR[i] = veccData[i].real();
 		pdDataI[i] = veccData[i].imag();
 	}
-
 	curve1.SETDATA(pdDataR, pdDataI, veccData.Size());
 
 	delete[] pdDataR;
 	delete[] pdDataI;
+
+#endif
 }
 
 void CDRMPlot::SetData(CVector<_COMPLEX>& veccMSCConst,
                        CVector<_COMPLEX>& veccSDCConst,
                        CVector<_COMPLEX>& veccFACConst)
 {
-//	curve1.SETDATA(&veccMSCConst[0].real(), &veccMSCConst[0].imag(), veccMSCConst.Size());
-//	curve2.SETDATA(&veccSDCConst[0].real(), &veccSDCConst[0].imag(), veccSDCConst.Size());
-//	curve3.SETDATA(&veccFACConst[0].real(), &veccFACConst[0].imag(), veccFACConst.Size());
+#if defined(__GNUC__) && defined(__linux__)
+	curve1.SETDATA(&veccMSCConst[0].real(), &veccMSCConst[0].imag(), veccMSCConst.Size());
+	curve2.SETDATA(&veccSDCConst[0].real(), &veccSDCConst[0].imag(), veccSDCConst.Size());
+	curve3.SETDATA(&veccFACConst[0].real(), &veccFACConst[0].imag(), veccFACConst.Size());
+#else
 
 	int iScaleSize;
 	iScaleSize = veccMSCConst.Size();
 	if (veccSDCConst.Size() > iScaleSize)
 		iScaleSize = veccSDCConst.Size();
-	else if (veccFACConst.Size() > iScaleSize)
+	if (veccFACConst.Size() > iScaleSize)
 		iScaleSize = veccFACConst.Size();
 
 	double* pdDataR = new double[iScaleSize];
@@ -635,6 +647,8 @@ void CDRMPlot::SetData(CVector<_COMPLEX>& veccMSCConst,
 
 	delete[] pdDataR;
 	delete[] pdDataI;
+
+#endif
 }
 
 void CDRMPlot::PlotDefaults()
