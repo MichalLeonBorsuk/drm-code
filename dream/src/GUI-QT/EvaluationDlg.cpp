@@ -42,7 +42,7 @@ systemevalDlg::systemevalDlg(CDRMReceiver& NDRMR, CSettings& NSettings,
     systemevalDlgBase(parent, name, modal, f),
     DRMReceiver(NDRMR),
     Settings(NSettings),
-    Timer(), TimerInterDigit(), TimerChart()
+    Timer(), TimerInterDigit()
 {
     /* Get window geometry data and apply it */
     CWinGeom s;
@@ -56,7 +56,6 @@ systemevalDlg::systemevalDlg(CDRMReceiver& NDRMR, CSettings& NSettings,
     AddWhatsThisHelp();
 
     MainPlot = new CDRMPlot(plot);
-    connect(&TimerChart, SIGNAL(timeout()), MainPlot, SLOT(OnTimerChart()));
 
     /* Init controls -------------------------------------------------------- */
     /* Init main plot */
@@ -172,6 +171,9 @@ systemevalDlg::systemevalDlg(CDRMReceiver& NDRMR, CSettings& NSettings,
         }
         ++it;
     }
+
+    /* Expand all items */
+    chartSelector->expandAll();
 
     string  plotType = Settings.Get("System Evaluation Dialog", "sysevplottype", string("Audio Spectrum"));
     /* If MDI in is enabled, disable some of the controls and use different
@@ -380,15 +382,19 @@ void systemevalDlg::showEvent(QShowEvent*)
 
     /* Activate real-time timer */
     Timer.start(GUI_CONTROL_UPDATE_TIME);
-    TimerChart.start(100);
     setIconSize(QSize(16,16));
+
+    /* Notify the MainPlot of showEvent */
+    MainPlot->activate();
 }
 
 void systemevalDlg::hideEvent(QHideEvent*)
 {
+    /* Notify the MainPlot of hideEvent */
+    MainPlot->deactivate();
+
     /* Stop the real-time timer */
     Timer.stop();
-    TimerChart.stop();
 
     /* Store size and position of all additional chart windows */
     int iNumOpenCharts = 0;
@@ -413,11 +419,10 @@ void systemevalDlg::hideEvent(QHideEvent*)
             /* Convert plot type into an integer type. TODO: better solution */
             Settings.Put(s.str(), "type", (int) vecpDRMPlots[i]->GetChartType());
 
-            /* Close window afterwards */
-            vecpDRMPlots[i]->close();
-
             iNumOpenCharts++;
         }
+        /* Close window afterwards */
+        vecpDRMPlots[i]->close();
     }
     Settings.Put("System Evaluation Dialog", "numchartwin", iNumOpenCharts);
 
@@ -462,10 +467,8 @@ void systemevalDlg::UpdatePlotStyle(int iPlotStyle)
 CDRMPlot* systemevalDlg::OpenChartWin(CDRMPlot::ECharType eNewType)
 {
     /* Create new chart window */
-    CDRMPlot* pNewChartWin = new CDRMPlot(new QwtPlot(NULL));
+    CDRMPlot* pNewChartWin = new CDRMPlot(NULL);
     pNewChartWin->setCaption(tr("Chart Window"));
-
-    connect(&TimerChart, SIGNAL(timeout()), pNewChartWin, SLOT(OnTimerChart()));
 
     /* Set plot style*/
     pNewChartWin->SetPlotStyle(Settings.Get("System Evaluation Dialog", "plotstyle", 0));

@@ -402,7 +402,7 @@ void CDRMPlot::SetupChart(const ECharType eNewType)
 		AddWhatsThisHelpChar(eNewType);
 
 		/* Update chart */
-//		if (bActive)
+		if (bActive)
 			OnTimerChart();
 
 		/* Set up timer */
@@ -445,26 +445,26 @@ void CDRMPlot::SetupChart(const ECharType eNewType)
 void CDRMPlot::activate()
 {
 	/* Set active flag */
-//	bActive = TRUE;
+	bActive = TRUE;
 
 	/* Force re-initialization */
 	InitCharType = NONE_OLD;
 	SetupChart(CurCharType);
 
 	/* Activate real-time timers when window is shown */
-//	TimerChart.start();
+	TimerChart.start();
 }
 
 void CDRMPlot::deactivate()
 {
 	/* Deactivate real-time timers when window is hide to save CPU power */
-//	TimerChart.stop();
+	TimerChart.stop();
 
 	/* Free some resources */
 	PlotDefaults();
 
 	/* Clear active flag */
-//	bActive = FALSE;
+	bActive = FALSE;
 }
 
 void CDRMPlot::SetPlotStyle(const int iNewStyleID)

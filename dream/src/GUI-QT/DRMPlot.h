@@ -171,9 +171,9 @@ public:
 		setWindowFlags(Qt::Window);
 		resize(256, 256);
 		plot = new QwtPlot(this);
-		/*printf("QwtPlotDialog()\n");*/
+		printf("QwtPlotDialog()\n");
 	}
-	~QwtPlotDialog() { /*printf("~QwtPlotDialog()\n");*/ delete plot; }
+	~QwtPlotDialog() { printf("~QwtPlotDialog()\n"); delete plot; }
 	QwtPlot *GetPlot() { return plot; }
 	void show() { QDialog::show(); emit activate(); }
 	void hide() { emit deactivate(); QDialog::hide(); }
@@ -297,7 +297,7 @@ protected:
 	QwtPlot         *SuppliedPlot/*, *plot*/;
 	QwtPlotDialog   *DialogPlot;
 
-//	bool            bActive;
+	bool            bActive;
 
     /* Colors */
 	QColor			MainPenColorPlot;
