@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>744</width>
-    <height>286</height>
+    <height>301</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -18,6 +18,10 @@
   </property>
   <property name="windowTitle">
    <string>AMSS</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="res/icons.qrc">
+    <normaloff>:/icons/MainIcon.png</normaloff>:/icons/MainIcon.png</iconset>
   </property>
   <property name="sizeGripEnabled">
    <bool>true</bool>
@@ -3703,7 +3707,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QwtDial" name="PhaseDialAMSS" native="true">
+         <widget class="QwtDial" name="PhaseDialAMSS">
           <property name="minimumSize">
            <size>
             <width>0</width>
@@ -3726,6 +3730,8 @@
    <header>qwt_dial.h</header>
   </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="res/icons.qrc"/>
+ </resources>
  <connections/>
 </ui>
