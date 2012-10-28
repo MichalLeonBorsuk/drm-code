@@ -282,7 +282,7 @@ SOURCE="..\src\GUI-QT\DialogUtil.cpp"
 # End Source File
 # Begin Source File
 
-SOURCE="..\src\GUI-QT\DRMPlot.cpp"
+SOURCE="..\src\GUI-QT\qt2\DRMPlot.cpp"
 # End Source File
 # Begin Source File
 
@@ -829,7 +829,7 @@ SOURCE="..\src\GUI-QT\DialogUtil.h"
 # End Source File
 # Begin Source File
 
-SOURCE="..\src\GUI-QT\DRMPlot.h"
+SOURCE="..\src\GUI-QT\qt2\DRMPlot.h"
 # End Source File
 # Begin Source File
 

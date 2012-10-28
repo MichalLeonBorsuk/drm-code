@@ -299,7 +299,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\src\GUI-QT\DRMPlot.cpp"
+				RelativePath="..\src\GUI-QT\qt2\DRMPlot.cpp"
 				>
 			</File>
 			<File
@@ -820,15 +820,15 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\src\GUI-QT\DRMPlot.h"
+				RelativePath="..\src\GUI-QT\qt2\DRMPlot.h"
 				>
 				<FileConfiguration
 					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						Description="Moc&apos;ing ..\src\GUI-QT\DRMPlot.h..."
-						CommandLine="$(QTDIR)\bin\moc.exe ..\src\GUI-QT\DRMPlot.h -o moc\moc_DRMPlot.cpp&#x0D;&#x0A;"
+						Description="Moc&apos;ing ..\src\GUI-QT\qt2\DRMPlot.h..."
+						CommandLine="$(QTDIR)\bin\moc.exe ..\src\GUI-QT\qt2\DRMPlot.h -o moc\moc_DRMPlot.cpp&#x0D;&#x0A;"
 						AdditionalDependencies="$(QTDIR)\bin\moc.exe"
 						Outputs="moc\moc_DRMPlot.cpp"
 					/>
@@ -838,8 +838,8 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						Description="Moc&apos;ing ..\src\GUI-QT\DRMPlot.h..."
-						CommandLine="$(QTDIR)\bin\moc.exe ..\src\GUI-QT\DRMPlot.h -o moc\moc_DRMPlot.cpp&#x0D;&#x0A;"
+						Description="Moc&apos;ing ..\src\GUI-QT\qt2\DRMPlot.h..."
+						CommandLine="$(QTDIR)\bin\moc.exe ..\src\GUI-QT\qt2\DRMPlot.h -o moc\moc_DRMPlot.cpp&#x0D;&#x0A;"
 						AdditionalDependencies="$(QTDIR)\bin\moc.exe"
 						Outputs="moc\moc_DRMPlot.cpp"
 					/>
