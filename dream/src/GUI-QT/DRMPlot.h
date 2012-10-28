@@ -260,6 +260,7 @@ protected:
 	void SetData(CVector<_REAL>& vecrData, CVector<_REAL>& vecrScale);
 	void SetData(CVector<_REAL>& vecrData1, CVector<_REAL>& vecrData2,
 		CVector<_REAL>& vecrScale);
+	void SetData(QwtPlotCurve& curve, CVector<_COMPLEX>& veccData);
 	void SetData(CVector<_COMPLEX>& veccData);
 	void SetData(CVector<_COMPLEX>& veccMSCConst,
 		CVector<_COMPLEX>& veccSDCConst,
