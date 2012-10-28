@@ -211,7 +211,7 @@ CAboutDlg::CAboutDlg(QWidget* parent, const char* name, bool modal, Qt::WFlags f
         "</center>"
         "<br><b>Supporters</b>"
         "<center>"
-        "<p>Amorim, Roberto José de</p>"
+        "<p>Amorim, Roberto JosÃ© de</p>"
         "<p>Kainka, Burkhard</p>"
         "<p>Keil, Jens</p>"
         "<p>Kilian, Gerd</p>"
