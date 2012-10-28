@@ -34,9 +34,11 @@
 #include <qcheckbox.h>
 #if QT_VERSION < 0x040000
 # include <qwhatsthis.h>
+# define toString(s) s.latin1()
 #else
 # include <QShowEvent>
 # include <QHideEvent>
+# define toString(s) s.toUtf8().constData()
 #endif
 
 
@@ -217,11 +219,11 @@ void GeneralSettingsDlg::ButtonOkClicked()
             Parameters.gps_data.set &= ~LATLON_SET;
         }
 
-        string host =  LineEditGPSHost->text().latin1();
+        string host =  toString(LineEditGPSHost->text());
         if(Parameters.gps_host != host)
             Parameters.restart_gpsd = true;
         Parameters.gps_host=host;
-        string port = LineEditGPSPort->text().latin1();
+        string port = toString(LineEditGPSPort->text());
         if(Parameters.gps_port != port)
             Parameters.restart_gpsd = true;
         Parameters.gps_port=port;
