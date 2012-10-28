@@ -34,7 +34,7 @@
 
 /* Implementation *************************************************************/
 CDRMPlot::CDRMPlot(QwtPlot* SuppliedPlot) :
-	SuppliedPlot(SuppliedPlot), DialogPlot(NULL), /*bActive(FALSE),*/
+	SuppliedPlot(SuppliedPlot), DialogPlot(NULL), bActive(FALSE),
 	CurCharType(NONE_OLD), InitCharType(NONE_OLD),
 	eLastSDCCodingScheme((ECodScheme)-1), eLastMSCCodingScheme((ECodScheme)-1),
 	bLastAudioDecoder(FALSE), bOnTimerCharMutexFlag(FALSE), pDRMRec(NULL)

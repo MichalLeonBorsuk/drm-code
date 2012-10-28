@@ -384,14 +384,18 @@ void systemevalDlg::showEvent(QShowEvent*)
     Timer.start(GUI_CONTROL_UPDATE_TIME);
     setIconSize(QSize(16,16));
 
+#if QT_VERSION >= 0x040000  
     /* Notify the MainPlot of showEvent */
     MainPlot->activate();
+#endif
 }
 
 void systemevalDlg::hideEvent(QHideEvent*)
 {
+#if QT_VERSION >= 0x040000  
     /* Notify the MainPlot of hideEvent */
     MainPlot->deactivate();
+#endif
 
     /* Stop the real-time timer */
     Timer.stop();

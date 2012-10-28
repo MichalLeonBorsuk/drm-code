@@ -267,14 +267,18 @@ void AnalogDemDlg::showEvent(QShowEvent*)
 	else
 		AMSSDlg.hide();
 
+#if QT_VERSION >= 0x040000  
     /* Notify the MainPlot of showEvent */
     MainPlot->activate();
+#endif
 }
 
 void AnalogDemDlg::hideEvent(QHideEvent*)
 {
+#if QT_VERSION >= 0x040000  
     /* Notify the MainPlot of hideEvent */
     MainPlot->deactivate();
+#endif
 
 	/* stop real-time timers */
 	Timer.stop();
