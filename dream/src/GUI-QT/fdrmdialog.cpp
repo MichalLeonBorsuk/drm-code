@@ -34,6 +34,7 @@
 # include <qwhatsthis.h>
 # include <qcstring.h>
 # include "MultimediaDlg.h"
+# define toUpper(s) s.upper()
 #else
 # include <QWhatsThis>
 # include <QHideEvent>
@@ -45,6 +46,7 @@
 # include "SlideShowViewer.h"
 # include "JLViewer.h"
 # define CHECK_PTR(x) Q_CHECK_PTR(x)
+# define toUpper(s) s.toUpper()
 #endif
 #include "Rig.h"
 
@@ -500,7 +502,7 @@ void FDRMDialog::showServiceInfo(const CService& service)
 
     if (iServiceID != 0)
     {
-	LabelServiceID->setText(QString("ID:%1").arg(iServiceID,4,16));
+	LabelServiceID->setText(toUpper(QString("ID:%1").arg(iServiceID,4,16)));
     }
     else
         LabelServiceID->setText("");
