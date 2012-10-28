@@ -289,7 +289,7 @@ protected:
 
 	void AddWhatsThisHelpChar(const ECharType NCharType);
 
-	QwtPlot         *SuppliedPlot/*, *plot*/;
+	QwtPlot         *SuppliedPlot;
 	QwtPlotDialog   *DialogPlot;
 
 	bool            bActive;
