@@ -82,6 +82,7 @@ BSC32=bscmake.exe
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /debug /machine:I386 /pdbtype:sept
 # ADD LINK32 libhamlib-2.lib FreeImage.lib kernel32.lib user32.lib gdi32.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib imm32.lib wsock32.lib winspool.lib winmm.lib $(QTDIR)\lib\qt-mt230nc.lib $(QTDIR)\lib\qtmain.lib libfftw.lib libqwt.lib setupapi.lib /nologo /subsystem:windows /debug /machine:I386 /out:"Debug/Dream.exe" /pdbtype:sept /libpath:"../libs"
+# SUBTRACT LINK32 /pdb:none
 
 !ENDIF 
 
@@ -188,15 +189,15 @@ SOURCE=.\moc\moc_GeneralSettingsDlgbase.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\moc\moc_GPSReceiver.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\moc\moc_LiveScheduleDlg.cpp
 # End Source File
 # Begin Source File
 
 SOURCE=.\moc\moc_LiveScheduleDlgbase.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\moc\moc_Logging.cpp
 # End Source File
 # Begin Source File
 
@@ -224,7 +225,7 @@ SOURCE=.\moc\moc_PacketSocketQT.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\moc\moc_PacketSourceFile.cpp
+SOURCE=.\moc\moc_Rig.cpp
 # End Source File
 # Begin Source File
 
@@ -314,6 +315,10 @@ SOURCE="..\src\GUI-QT\LiveScheduleDlg.cpp"
 # End Source File
 # Begin Source File
 
+SOURCE="..\src\GUI-QT\Logging.cpp"
+# End Source File
+# Begin Source File
+
 SOURCE="..\src\GUI-QT\main.cpp"
 # End Source File
 # Begin Source File
@@ -331,6 +336,10 @@ SOURCE="..\src\GUI-QT\MultimediaDlg.cpp"
 # Begin Source File
 
 SOURCE="..\src\GUI-QT\MultSettingsDlg.cpp"
+# End Source File
+# Begin Source File
+
+SOURCE="..\src\GUI-QT\Rig.cpp"
 # End Source File
 # Begin Source File
 
@@ -576,15 +585,15 @@ SOURCE=..\src\datadecoding\DataEncoder.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=..\src\datadecoding\Experiment.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=..\src\datadecoding\Journaline.cpp
 # End Source File
 # Begin Source File
 
 SOURCE=..\src\datadecoding\MOTSlideShow.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\src\datadecoding\Experiment.cpp
 # End Source File
 # End Group
 # Begin Group "Source Utilities"
@@ -737,14 +746,6 @@ SOURCE=..\src\DrmTransmitter.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\src\GPSData.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\src\GPSReceiver.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=..\src\InputResample.cpp
 # End Source File
 # Begin Source File
@@ -801,6 +802,10 @@ SOURCE=..\src\interleaver\SymbolInterleaver.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=..\src\tables\TableStations.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=..\src\TextMessage.cpp
 # End Source File
 # Begin Source File
@@ -848,6 +853,10 @@ SOURCE="..\src\GUI-QT\LiveScheduleDlg.h"
 # End Source File
 # Begin Source File
 
+SOURCE="..\src\GUI-QT\Logging.h"
+# End Source File
+# Begin Source File
+
 SOURCE="..\src\GUI-QT\MultColorLED.h"
 # End Source File
 # Begin Source File
@@ -857,6 +866,10 @@ SOURCE="..\src\GUI-QT\MultimediaDlg.h"
 # Begin Source File
 
 SOURCE="..\src\GUI-QT\MultSettingsDlg.h"
+# End Source File
+# Begin Source File
+
+SOURCE="..\src\GUI-QT\Rig.h"
 # End Source File
 # Begin Source File
 
@@ -933,6 +946,10 @@ SOURCE=..\src\tables\TableMLC.h
 # Begin Source File
 
 SOURCE=..\src\tables\TableQAMMapping.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\tables\TableStations.h
 # End Source File
 # End Group
 # Begin Group "Header FAC"
@@ -1104,15 +1121,15 @@ SOURCE=..\src\datadecoding\DataEncoder.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\src\datadecoding\Experiment.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\src\datadecoding\Journaline.h
 # End Source File
 # Begin Source File
 
 SOURCE=..\src\datadecoding\MOTSlideShow.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\src\datadecoding\Experiment.h
 # End Source File
 # End Group
 # Begin Group "Header Utilities"
@@ -1294,14 +1311,6 @@ SOURCE=..\src\DrmTransmitter.h
 # Begin Source File
 
 SOURCE=..\src\GlobalDefinitions.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\src\GPSData.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\src\GPSReceiver.h
 # End Source File
 # Begin Source File
 
