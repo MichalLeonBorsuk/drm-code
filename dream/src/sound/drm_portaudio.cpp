@@ -215,7 +215,7 @@ CPaCommon::ReInit()
     if (pParameters.device == paNoDevice)
         return;
 
-    double srate = 48000;
+    double srate = (double)SOUNDCRD_SAMPLE_RATE;
     unsigned long minRingBufferSize;
     int err;
 
