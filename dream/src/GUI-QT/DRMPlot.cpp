@@ -30,12 +30,12 @@
 \******************************************************************************/
 
 #include "DRMPlot.h"
+#include <cmath>
+#include <algorithm>
 
 #ifdef _MSC_VER
-template
-<typename T> int round(T x) { return floor(x+0.5); }
+template<typename T> int round(T x) { return floor(x+0.5); }
 #endif
-
 
 /* Implementation *************************************************************/
 CDRMPlot::CDRMPlot(QwtPlot* SuppliedPlot) :
@@ -521,134 +521,40 @@ void CDRMPlot::SetPlotStyle(const int iNewStyleID)
 
 void CDRMPlot::SetData(CVector<_REAL>& vecrData, CVector<_REAL>& vecrScale)
 {
-#if defined(__GNUC__) && defined(__linux__)
 	main1curve.SETDATA(&vecrScale[0], &vecrData[0], vecrData.Size());
-#else
-
-	double* pdData = new double[vecrData.Size()];
-	double* pdScale = new double[vecrScale.Size()];
-
-	/* Copy data from vectors in temporary arrays */
-	const int iScaleSize = vecrScale.Size();
-	for (int i = 0; i < iScaleSize; i++)
-	{
-		pdData[i] = vecrData[i];
-		pdScale[i] = vecrScale[i];
-	}
-
-	main1curve.SETDATA(pdScale, pdData, vecrData.Size());
-
-	delete[] pdData;
-	delete[] pdScale;
-
-#endif
 }
 
 void CDRMPlot::SetData(CVector<_REAL>& vecrData1, CVector<_REAL>& vecrData2,
                        CVector<_REAL>& vecrScale)
 {
-#if defined(__GNUC__) && defined(__linux__)
 	main1curve.SETDATA(&vecrScale[0], &vecrData1[0], vecrData1.Size());
 	main2curve.SETDATA(&vecrScale[0], &vecrData2[0], vecrData2.Size());
-#else
+}
 
-	double* pdData1 = new double[vecrData1.Size()];
-	double* pdData2 = new double[vecrData2.Size()];
-	double* pdScale = new double[vecrScale.Size()];
-
-	/* Copy data from vectors in temporary arrays */
-	const int iScaleSize = vecrScale.Size();
-	for (int i = 0; i < iScaleSize; i++)
+void CDRMPlot::SetData(QwtPlotCurve& curve, CVector<_COMPLEX>& veccData)
+{
+	size_t size = veccData.Size();
+	vector<double> r(size), im(size);
+	for(size_t i=0; i<size; i++)
 	{
-		pdData1[i] = vecrData1[i];
-		pdData2[i] = vecrData2[i];
-		pdScale[i] = vecrScale[i];
+		r[i] = veccData[i].real();
+		im[i] = veccData[i].imag();
 	}
-	main1curve.SETDATA(pdScale, pdData1, vecrData1.Size());
-	main2curve.SETDATA(pdScale, pdData2, vecrData2.Size());
-
-	delete[] pdData1;
-	delete[] pdData2;
-	delete[] pdScale;
-
-#endif
+	curve.SETDATA(&r[0], &im[0], size);
 }
 
 void CDRMPlot::SetData(CVector<_COMPLEX>& veccData)
 {
-#if defined(__GNUC__) && defined(__linux__)
-	curve1.SETDATA(&veccData[0].real(), &veccData[0].imag(), veccData.Size());
-#else
-
-	double* pdDataR = new double[veccData.Size()];
-	double* pdDataI = new double[veccData.Size()];
-
-	/* Copy data from vectors in temporary arrays */
-	const int iScaleSize = veccData.Size();
-	for (int i = 0; i < iScaleSize; i++)
-	{
-		pdDataR[i] = veccData[i].real();
-		pdDataI[i] = veccData[i].imag();
-	}
-	curve1.SETDATA(pdDataR, pdDataI, veccData.Size());
-
-	delete[] pdDataR;
-	delete[] pdDataI;
-
-#endif
+	SetData(curve1, veccData);
 }
 
 void CDRMPlot::SetData(CVector<_COMPLEX>& veccMSCConst,
                        CVector<_COMPLEX>& veccSDCConst,
                        CVector<_COMPLEX>& veccFACConst)
 {
-#if defined(__GNUC__) && defined(__linux__)
-	curve1.SETDATA(&veccMSCConst[0].real(), &veccMSCConst[0].imag(), veccMSCConst.Size());
-	curve2.SETDATA(&veccSDCConst[0].real(), &veccSDCConst[0].imag(), veccSDCConst.Size());
-	curve3.SETDATA(&veccFACConst[0].real(), &veccFACConst[0].imag(), veccFACConst.Size());
-#else
-
-	int iScaleSize;
-	iScaleSize = veccMSCConst.Size();
-	if (veccSDCConst.Size() > iScaleSize)
-		iScaleSize = veccSDCConst.Size();
-	if (veccFACConst.Size() > iScaleSize)
-		iScaleSize = veccFACConst.Size();
-
-	double* pdDataR = new double[iScaleSize];
-	double* pdDataI = new double[iScaleSize];
-
-	/* Copy data from vectors in temporary arrays */
-	iScaleSize = veccMSCConst.Size();
-	for (int i = 0; i < iScaleSize; i++)
-	{
-		pdDataR[i] = veccMSCConst[i].real();
-		pdDataI[i] = veccMSCConst[i].imag();
-	}
-	curve1.SETDATA(pdDataR, pdDataI, iScaleSize);
-
-	/* Copy data from vectors in temporary arrays */
-	iScaleSize = veccSDCConst.Size();
-	for (int i = 0; i < iScaleSize; i++)
-	{
-		pdDataR[i] = veccSDCConst[i].real();
-		pdDataI[i] = veccSDCConst[i].imag();
-	}
-	curve2.SETDATA(pdDataR, pdDataI, iScaleSize);
-
-	/* Copy data from vectors in temporary arrays */
-	iScaleSize = veccFACConst.Size();
-	for (int i = 0; i < iScaleSize; i++)
-	{
-		pdDataR[i] = veccFACConst[i].real();
-		pdDataI[i] = veccFACConst[i].imag();
-	}
-	curve3.SETDATA(pdDataR, pdDataI, iScaleSize);
-
-	delete[] pdDataR;
-	delete[] pdDataI;
-
-#endif
+	SetData(curve1, veccMSCConst);
+	SetData(curve2, veccSDCConst);
+	SetData(curve3, veccFACConst);
 }
 
 void CDRMPlot::PlotDefaults()
