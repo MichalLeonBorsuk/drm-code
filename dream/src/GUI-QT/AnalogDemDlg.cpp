@@ -48,13 +48,14 @@
 #include <qcombobox.h>
 
 #if QT_VERSION < 0x040000
-# include "DRMPlot.h"
+# include "qt2/DRMPlot.h"
 # include <qlistbox.h>
   /* This include is for setting the progress bar style */
 # include <qmotifstyle.h>
 #else
-# include "DRMPlot-qwt6.h"
+# include "DRMPlot.h"
 # include "SoundCardSelMenu.h"
+# include <QWhatsThis>
 # include <QDateTime>
 # include <QCloseEvent>
 # include <qwt_plot_layout.h>

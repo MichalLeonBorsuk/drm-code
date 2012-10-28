@@ -45,11 +45,7 @@
 #include <qpopupmenu.h>
 #include <qlistview.h>
 #include "systemevalDlgbase.h"
-#if QWT_VERSION > 0x050200
-# include "DRMPlot-qwt6.h"
-#else
-# include "DRMPlot.h"
-#endif
+#include "qt2/DRMPlot.h"
 #include "MultColorLED.h"
 #include "../GlobalDefinitions.h"
 #include "../util/Vector.h"

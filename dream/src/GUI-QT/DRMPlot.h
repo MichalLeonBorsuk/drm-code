@@ -2,39 +2,70 @@
  * Technische Universitaet Darmstadt, Institut fuer Nachrichtentechnik
  * Copyright (c) 2001
  *
- * Author(s):
+ * Original Author(s):
  *	Volker Fischer
  *
+ * Qwt 5-6 conversion Author(s):
+ *  David Flamand
+ *
  * Description:
- *	
+ *	Custom settings of the qwt-plot, Support Qwt version 5.0.0 to 6.0.1(+)
  *
  ******************************************************************************
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
- * Foundation; either version 2 of the License, or (at your option) any later 
+ * Foundation; either version 2 of the License, or (at your option) any later
  * version.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT 
+ * This program is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more 
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
  *
  * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc., 
+ * this program; if not, write to the Free Software Foundation, Inc.,
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
 \******************************************************************************/
 
-#if !defined(DRMPLOT_H__FD6B2345234523453_804E1606C2AC__INCLUDED_)
-#define DRMPLOT_H__FD6B2345234523453_804E1606C2AC__INCLUDED_
+#ifndef __DRMPLOT_QWT5_H
+#define __DRMPLOT_QWT5_H
 
+/* Qt includes */
+#include <qobject.h>
+#if QT_VERSION < 0x040000
+# error QT_VERSION < 0x040000
+#endif
+#include <QPainter>
+#include <QTimer>
+#include <QDialog>
+#include <QResizeEvent>
+#include <QPixmap>
+#include <QHideEvent>
+#include <QMouseEvent>
+#include <QShowEvent>
+#include <QIcon>
+
+/* Qwt includes */
+#include <qwt_global.h>
+#if QWT_VERSION < 0x050000
+# error QWT_VERSION < 0x050000
+#endif
+#include <qwt_legend.h>
 #include <qwt_plot.h>
 #include <qwt_plot_canvas.h>
-#include <qwt_scldraw.h>
-#include <qpainter.h>
-#include <qtimer.h>
-#include <qwhatsthis.h>
+#include <qwt_plot_curve.h>
+#include <qwt_plot_grid.h>
+#include <qwt_plot_marker.h>
+#include <qwt_plot_picker.h>
+#include <qwt_scale_draw.h>
+#include <qwt_symbol.h>
+#if QWT_VERSION >= 0x060000
+# include <qwt_picker_machine.h>
+#endif
+
+/* Other includes */
 #include "../util/Vector.h"
 #include "../Parameter.h"
 #include "../DrmReceiver.h"
@@ -46,30 +77,30 @@
 
 /* Define the plot color profiles */
 /* BLUEWHITE */
-#define BLUEWHITE_MAIN_PEN_COLOR_PLOT			blue
-#define BLUEWHITE_MAIN_PEN_COLOR_CONSTELLATION	blue
-#define BLUEWHITE_BCKGRD_COLOR_PLOT				white
-#define BLUEWHITE_MAIN_GRID_COLOR_PLOT			gray
-#define BLUEWHITE_SPEC_LINE1_COLOR_PLOT			red
-#define BLUEWHITE_SPEC_LINE2_COLOR_PLOT			black
+#define BLUEWHITE_MAIN_PEN_COLOR_PLOT			Qt::blue
+#define BLUEWHITE_MAIN_PEN_COLOR_CONSTELLATION	Qt::blue
+#define BLUEWHITE_BCKGRD_COLOR_PLOT				Qt::white
+#define BLUEWHITE_MAIN_GRID_COLOR_PLOT			Qt::gray
+#define BLUEWHITE_SPEC_LINE1_COLOR_PLOT			Qt::red
+#define BLUEWHITE_SPEC_LINE2_COLOR_PLOT			Qt::black
 #define BLUEWHITE_PASS_BAND_COLOR_PLOT			QColor(192, 192, 255)
 
 /* GREENBLACK */
-#define GREENBLACK_MAIN_PEN_COLOR_PLOT			green
-#define GREENBLACK_MAIN_PEN_COLOR_CONSTELLATION	red
-#define GREENBLACK_BCKGRD_COLOR_PLOT			black
+#define GREENBLACK_MAIN_PEN_COLOR_PLOT			Qt::green
+#define GREENBLACK_MAIN_PEN_COLOR_CONSTELLATION	Qt::red
+#define GREENBLACK_BCKGRD_COLOR_PLOT			Qt::black
 #define GREENBLACK_MAIN_GRID_COLOR_PLOT			QColor(128, 0, 0)
-#define GREENBLACK_SPEC_LINE1_COLOR_PLOT		yellow
-#define GREENBLACK_SPEC_LINE2_COLOR_PLOT		blue
+#define GREENBLACK_SPEC_LINE1_COLOR_PLOT		Qt::yellow
+#define GREENBLACK_SPEC_LINE2_COLOR_PLOT		Qt::blue
 #define GREENBLACK_PASS_BAND_COLOR_PLOT			QColor(0, 96, 0)
 
 /* BLACKGREY */
-#define BLACKGREY_MAIN_PEN_COLOR_PLOT			black
-#define BLACKGREY_MAIN_PEN_COLOR_CONSTELLATION	green
-#define BLACKGREY_BCKGRD_COLOR_PLOT				gray
-#define BLACKGREY_MAIN_GRID_COLOR_PLOT			white
-#define BLACKGREY_SPEC_LINE1_COLOR_PLOT			blue
-#define BLACKGREY_SPEC_LINE2_COLOR_PLOT			yellow
+#define BLACKGREY_MAIN_PEN_COLOR_PLOT			Qt::black
+#define BLACKGREY_MAIN_PEN_COLOR_CONSTELLATION	Qt::green
+#define BLACKGREY_BCKGRD_COLOR_PLOT				Qt::gray
+#define BLACKGREY_MAIN_GRID_COLOR_PLOT			Qt::white
+#define BLACKGREY_SPEC_LINE1_COLOR_PLOT			Qt::blue
+#define BLACKGREY_SPEC_LINE2_COLOR_PLOT			Qt::yellow
 #define BLACKGREY_PASS_BAND_COLOR_PLOT			QColor(128, 128, 128)
 
 
@@ -86,10 +117,86 @@
 #define MAX_VAL_SNR_SPEC_Y_AXIS_DB				((double) 35.0)
 
 
+/* Define the FAC/SDC/MSC Symbol size */
+#if QWT_VERSION < 0x060000
+# define FAC_SYMBOL_SIZE 5
+# define SDC_SYMBOL_SIZE 5
+# define MSC_SYMBOL_SIZE 2
+# define ALL_FAC_SYMBOL_SIZE 5
+# define ALL_SDC_SYMBOL_SIZE 4
+# define ALL_MSC_SYMBOL_SIZE 2
+#else
+# define FAC_SYMBOL_SIZE 4
+# define SDC_SYMBOL_SIZE 4
+# define MSC_SYMBOL_SIZE 2
+# define ALL_FAC_SYMBOL_SIZE 4
+# define ALL_SDC_SYMBOL_SIZE 4
+# define ALL_MSC_SYMBOL_SIZE 2
+#endif
+
+
+/* Sometime between Qwt version some name may change, we fix this */
+#if QWT_VERSION < 0x050200
+# define LOWERBOUND lBound
+# define UPPERBOUND hBound
+#else
+# define LOWERBOUND lowerBound
+# define UPPERBOUND upperBound
+#endif
+#if QWT_VERSION < 0x060000
+# define SETDATA setData
+#else
+# define SETDATA setSamples
+#endif
+
+
+/* Set workaround flag for Qwt version 5.0.0 and 5.0.1 */
+/* QwtPlotCurve::Xfy seems broken on these versions */
+#if QWT_VERSION < 0x050002
+# define QWT_WORKAROUND_XFY
+#endif
+
+
 /* Classes ********************************************************************/
-class CDRMPlot : public QwtPlot
+
+
+/* This class is needed to handle events for standalone window chart */
+class QwtPlotDialog : public QDialog
 {
-    Q_OBJECT
+	Q_OBJECT
+
+public:
+	QwtPlotDialog()
+	{
+		setWindowFlags(Qt::Window);
+		resize(256, 256);
+		plot = new QwtPlot(this);
+		/*printf("QwtPlotDialog()\n");*/
+	}
+	~QwtPlotDialog() { /*printf("~QwtPlotDialog()\n");*/ delete plot; }
+	QwtPlot *GetPlot() { return plot; }
+	void show() { QDialog::show(); emit activate(); }
+	void hide() { emit deactivate(); QDialog::hide(); }
+
+protected:
+	QwtPlot *plot;
+	QDialog Dialog;
+	void reject() { emit deactivate(); QDialog::reject(); }
+	void resizeEvent(QResizeEvent *e)
+	{
+		QRect g(0, 0, e->size().width(), e->size().height());
+		plot->setGeometry(g);
+	}
+
+signals:
+	void activate();
+	void deactivate();
+};
+
+
+class CDRMPlot : public QObject
+{
+	Q_OBJECT
 
 public:
 	enum ECharType
@@ -113,63 +220,65 @@ public:
 		NONE_OLD = 16 /* None must always be the last element! (see settings) */
 	};
 
-	CDRMPlot(QWidget *p = 0, const char *name = 0);
-	virtual ~CDRMPlot() {}
+	CDRMPlot(QwtPlot*);
+	~CDRMPlot();
+
+	QwtPlot         *plot;
 
 	/* This function has to be called before chart can be used! */
 	void SetRecObj(CDRMReceiver* pNDRMRec) {pDRMRec = pNDRMRec;}
 
 	void SetupChart(const ECharType eNewType);
-	ECharType GetChartType() const {return CurCharType;}
-	void Update() {OnTimerChart();}
-
-	void SetAvIR(CVector<_REAL>& vecrData, CVector<_REAL>& vecrScale, 
-				 _REAL rLowerB, _REAL rHigherB,
-				 const _REAL rStartGuard, const _REAL rEndGuard, 
-				 const _REAL rBeginIR, const _REAL rEndIR);
-	void SetTranFct(CVector<_REAL>& vecrData, CVector<_REAL>& vecrData2,
-					CVector<_REAL>& vecrScale);
-	void SetAudioSpec(CVector<_REAL>& vecrData, CVector<_REAL>& vecrScale);
-	void SetPSD(CVector<_REAL>& vecrData, CVector<_REAL>& vecrScale);
-	void SetSNRSpectrum(CVector<_REAL>& vecrData, CVector<_REAL>& vecrScale);
-	void SetInpSpec(CVector<_REAL>& vecrData, CVector<_REAL>& vecrScale,
-					const _REAL rDCFreq);
-	void SetInpPSD(CVector<_REAL>& vecrData, CVector<_REAL>& vecrScale,
-				   const _REAL rDCFreq, const _REAL rBWCenter = (_REAL) 0.0,
-				   const _REAL rBWWidth = (_REAL) 0.0);
-	void SetInpSpecWaterf(CVector<_REAL>& vecrData, CVector<_REAL>& vecrScale);
-	void SetFreqSamOffsHist(CVector<_REAL>& vecrData, CVector<_REAL>& vecrData2,
-							CVector<_REAL>& vecrScale,
-							const _REAL rFreqOffAcquVal);
-	void SetDopplerDelayHist(CVector<_REAL>& vecrData,
-							 CVector<_REAL>& vecrData2,
-							 CVector<_REAL>& vecrScale);
-	void SetSNRAudHist(CVector<_REAL>& vecrData,
-					   CVector<_REAL>& vecrData2,
-					   CVector<_REAL>& vecrScale);
-	void SetFACConst(CVector<_COMPLEX>& veccData);
-	void SetSDCConst(CVector<_COMPLEX>& veccData, ECodScheme eNewCoSc);
-	void SetMSCConst(CVector<_COMPLEX>& veccData, ECodScheme eNewCoSc);
-	void SetAllConst(CVector<_COMPLEX>& veccMSC,
-					 CVector<_COMPLEX>& veccSDC,
-					 CVector<_COMPLEX>& veccFAC);
+	ECharType GetChartType() const { return CurCharType; }
+	void Update() { OnTimerChart(); }
 	void SetPlotStyle(const int iNewStyleID);
 
+#ifdef QT3_SUPPORT
+	void setCaption(const QString& s) { if (DialogPlot) DialogPlot->setCaption(s); }
+	void setIcon(const QIcon& s) { if (DialogPlot) DialogPlot->setIcon(s.pixmap(32)); }
+#else
+	void setCaption(const QString& s) { if (DialogPlot) DialogPlot->setWindowTitle(s); }
+	void setIcon(const QIcon& s) { if (DialogPlot) DialogPlot->setWindowIcon(s); }
+#endif
+	void setGeometry(const QRect& g) { if (DialogPlot) DialogPlot->setGeometry(g); }
+	bool isVisible() { if (DialogPlot) return DialogPlot->isVisible(); else return FALSE; }
+	const QRect geometry() { if (DialogPlot) return DialogPlot->geometry(); else return QRect(); }
+	void close() { if (DialogPlot) delete this; }
+	void hide() { if (DialogPlot) DialogPlot->hide(); }
+	void show() { if (DialogPlot) DialogPlot->show(); }
+
+
 protected:
+	void SetVerticalBounds(
+		const _REAL rStartGuard, const _REAL rEndGuard,
+		const _REAL rBeginIR, const _REAL rEndIR);
+	void SetHorizontalBounds( _REAL rScaleMin, _REAL rScaleMax, _REAL rLowerB, _REAL rHigherB);
+	void SetInpSpecWaterf(CVector<_REAL>& vecrData, CVector<_REAL>& vecrScale);
+	void SetDCCarrier(const _REAL rDCFreq);
+	void SetBWMarker(const _REAL rBWCenter, const _REAL rBWWidth);
+	void AutoScale(CVector<_REAL>& vecrData, CVector<_REAL>& vecrData2,
+		CVector<_REAL>& vecrScale);
+    void AutoScale2(CVector<_REAL>& vecrData,
+		CVector<_REAL>& vecrData2,
+		CVector<_REAL>& vecrScale);
+	void AutoScale3(CVector<_REAL>& vecrData, CVector<_REAL>& vecrScale);
 	void SetData(CVector<_REAL>& vecrData, CVector<_REAL>& vecrScale);
 	void SetData(CVector<_REAL>& vecrData1, CVector<_REAL>& vecrData2,
-				 CVector<_REAL>& vecrScale);
+		CVector<_REAL>& vecrScale);
 	void SetData(CVector<_COMPLEX>& veccData);
 	void SetData(CVector<_COMPLEX>& veccMSCConst,
-				 CVector<_COMPLEX>& veccSDCConst,
-				 CVector<_COMPLEX>& veccFACConst);
-	void SetQAM4Grid();
-	void SetQAM16Grid();
-	void SetQAM64Grid();
+		CVector<_COMPLEX>& veccSDCConst,
+		CVector<_COMPLEX>& veccFACConst);
+	void SetGrid(double div, int step, int substep);
+	void SetQAMGrid(const ECodScheme eCoSc);
+	void SetCurveGrid();
+
+	void PlotDefaults();
+	bool PlotForceUpdate(QColor BackgroundColor);
 
 	void SetupAvIR();
 	void SetupTranFct();
-	void SetupAudioSpec();
+	void SetupAudioSpec(_BOOLEAN bAudioDecoder);
 	void SetupFreqSamOffsHist();
 	void SetupDopplerDelayHist();
 	void SetupSNRAudHist();
@@ -180,14 +289,17 @@ protected:
 	void SetupSDCConst(const ECodScheme eNewCoSc);
 	void SetupMSCConst(const ECodScheme eNewCoSc);
 	void SetupAllConst();
-	void SetupInpPSD();
+	void SetupInpPSD(_BOOLEAN bAnalog = FALSE);
 	void SetupInpSpecWaterf();
 
 	void AddWhatsThisHelpChar(const ECharType NCharType);
-    virtual void showEvent(QShowEvent* pEvent);
-	virtual void hideEvent(QHideEvent* pEvent);
 
-	/* Colors */
+	QwtPlot         *SuppliedPlot/*, *plot*/;
+	QwtPlotDialog   *DialogPlot;
+
+//	bool            bActive;
+
+    /* Colors */
 	QColor			MainPenColorPlot;
 	QColor			MainPenColorConst;
 	QColor			MainGridColorPlot;
@@ -196,26 +308,44 @@ protected:
 	QColor			PassBandColorPlot;
 	QColor			BckgrdColorPlot;
 
-	QSize			LastCanvasSize;
-
 	ECharType		CurCharType;
 	ECharType		InitCharType;
-	long			main1curve, main2curve;
-	long			curve1, curve2, curve3, curve4, curve5, curve6;
+	ECodScheme		eLastSDCCodingScheme;
+	ECodScheme		eLastMSCCodingScheme;
+	_BOOLEAN		bLastAudioDecoder;
+
+	QwtText			leftTitle, rightTitle, bottomTitle;
+
+	QPixmap			Canvas;
+
+	QwtPlotCurve	main1curve, main2curve;
+	QwtPlotCurve	curve1, curve2, curve3, curve4, curve5;
+	QwtPlotCurve	hcurvegrid, vcurvegrid;
+	QwtPlotGrid		grid;
+#if QWT_VERSION < 0x060000
 	QwtSymbol		MarkerSym1, MarkerSym2, MarkerSym3;
+#endif
+	QwtPlotPicker	*picker;
+	QwtLegend		*legend;
 
 	_BOOLEAN		bOnTimerCharMutexFlag;
 	QTimer			TimerChart;
 
-	CDRMReceiver*	pDRMRec;
+	CDRMReceiver	*pDRMRec;
 
 public slots:
-	void OnClicked(const QMouseEvent& e);
+#if QWT_VERSION < 0x060000
+	void OnSelected(const QwtDoublePoint &pos);
+#else
+	void OnSelected(const QPointF &pos);
+#endif
 	void OnTimerChart();
+	void activate();
+	void deactivate();
 
 signals:
 	void xAxisValSet(double);
 };
 
 
-#endif // DRMPLOT_H__FD6B2345234523453_804E1606C2AC__INCLUDED_
+#endif
