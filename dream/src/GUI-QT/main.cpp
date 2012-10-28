@@ -106,6 +106,7 @@ int isTransmitter(const char *argv0)
 	const char *str = strrchr(argv0, pathseparator);
 	return !strcmp(str ? str+1 : argv0, _xstr(EXECUTABLE_NAME) "t");
 #else
+	(void)argv0;
 	return 0;
 #endif
 }
