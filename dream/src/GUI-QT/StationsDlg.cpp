@@ -798,16 +798,22 @@ StationsDlg::StationsDlg(CDRMReceiver& NDRMR, CSettings& NSettings, CRig& rig,
     ProgrSigStrength->setOrientation(Qt::Horizontal, QwtThermo::TopScale);
 #endif
     ProgrSigStrength->setAlarmLevel(S_METER_THERMO_ALARM);
-    QBrush alarmBrush(QColor(255, 0, 0));
-    ProgrSigStrength->setAlarmBrush(alarmBrush);
     ProgrSigStrength->setAlarmLevel(-12.5);
 
     ProgrSigStrength->setScale(S_METER_THERMO_MIN, S_METER_THERMO_MAX, 10.0);
 
     ProgrSigStrength->setAlarmEnabled(TRUE);
     ProgrSigStrength->setValue(S_METER_THERMO_MIN);
-    QBrush fillBrush(QColor(0, 190, 0));
-    ProgrSigStrength->setFillBrush(fillBrush);
+#if QWT_VERSION < 0x060000
+    ProgrSigStrength->setAlarmColor(QColor(255, 0, 0));
+    ProgrSigStrength->setFillColor(QColor(0, 190, 0));
+#else
+    QPalette newPalette = palette();
+    newPalette.setColor(QPalette::Base, newPalette.color(QPalette::Window));
+    newPalette.setColor(QPalette::ButtonText, QColor(0, 190, 0));
+    newPalette.setColor(QPalette::Highlight,  QColor(255, 0, 0));
+    ProgrSigStrength->setPalette(newPalette);
+#endif
 
 #if QT_VERSION < 0x040000
     /* Register the network protocol (ftp). This is needed for the DRMSchedule download */
