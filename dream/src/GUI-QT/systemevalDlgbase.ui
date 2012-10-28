@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>778</width>
-    <height>449</height>
+    <width>968</width>
+    <height>659</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -918,7 +918,14 @@
        </widget>
       </item>
       <item>
-       <widget class="QwtPlot" name="plot"/>
+       <widget class="QwtPlot" name="plot">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+       </widget>
       </item>
      </layout>
     </item>
@@ -937,6 +944,12 @@
         </property>
         <item>
          <widget class="QGroupBox" name="ButtonGroupChanEstFreqInt">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
           <property name="title">
            <string>Channel Estimation: Frequency Interpolation</string>
           </property>
@@ -994,6 +1007,12 @@
         </item>
         <item>
          <widget class="QGroupBox" name="ButtonGroupChanEstTimeInt">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
           <property name="title">
            <string>Channel Estimation: Time Interpolation</string>
           </property>
@@ -1038,6 +1057,12 @@
         </item>
         <item>
          <widget class="QGroupBox" name="ButtonGroupTimeSyncTrack">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
           <property name="title">
            <string>Time Sync Tracking</string>
           </property>
@@ -1092,6 +1117,12 @@
         </property>
         <item>
          <widget class="QGroupBox" name="GroupBoxMiscSettings">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
           <property name="title">
            <string>Misc Settings</string>
           </property>
@@ -1191,6 +1222,12 @@
         </item>
         <item>
          <widget class="QGroupBox" name="GroupBoxLogFileSaveData">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
           <property name="title">
            <string>Log File, Audio</string>
           </property>
@@ -1276,6 +1313,12 @@
         </property>
         <item>
          <widget class="QGroupBox" name="GroupBoxInterfRej">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
           <property name="title">
            <string>Interferer Rejection</string>
           </property>
@@ -1308,6 +1351,12 @@
         </item>
         <item>
          <widget class="QGroupBox" name="GroupBoxGPSStatus">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
           <property name="title">
            <string>GPS</string>
           </property>
@@ -1396,7 +1445,7 @@
                   <enum>Qt::Vertical</enum>
                  </property>
                  <property name="sizeType">
-                  <enum>QSizePolicy::Expanding</enum>
+                  <enum>QSizePolicy::MinimumExpanding</enum>
                  </property>
                  <property name="sizeHint" stdset="0">
                   <size>
@@ -1425,22 +1474,6 @@
               </layout>
              </item>
             </layout>
-           </item>
-           <item>
-            <spacer name="Spacer36">
-             <property name="orientation">
-              <enum>Qt::Vertical</enum>
-             </property>
-             <property name="sizeType">
-              <enum>QSizePolicy::Expanding</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>20</width>
-               <height>20</height>
-              </size>
-             </property>
-            </spacer>
            </item>
           </layout>
          </widget>
@@ -1498,16 +1531,16 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>778</width>
-     <height>17</height>
+     <width>968</width>
+     <height>25</height>
     </rect>
    </property>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
  <customwidgets>
-   <customwidget>
-     <class>QwtPlot</class>
+  <customwidget>
+   <class>QwtPlot</class>
    <extends>QFrame</extends>
    <header>qwt_plot.h</header>
    <container>1</container>
