@@ -31,7 +31,7 @@
 
 #include <QMainWindow>
 #include "ui_systemevalDlgbase.h"
-#include "DRMPlot-qwt6.h"
+#include "DRMPlot.h"
 
 #include "MultColorLED.h"
 #include "../GlobalDefinitions.h"

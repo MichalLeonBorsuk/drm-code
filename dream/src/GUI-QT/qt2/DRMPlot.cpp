@@ -26,28 +26,12 @@
  *
 \******************************************************************************/
 
-#include <qwt_plot_canvas.h>
-#include <qwt_symbol.h>
-#include <qwt_scldraw.h>
-#include <qpainter.h>
-
-#if QT_VERSION < 0x040000
-# include <qwhatsthis.h>
-#define Q3Frame QFrame
-#define Q3WhatsThis QWhatsThis
-#else
-# include <Q3WhatsThis>
-# include <QPixmap>
-# include <Q3Frame>
-# include <QHideEvent>
-# include <QMouseEvent>
-# include <QShowEvent>
-#endif
+#include "DRMPlot.h"
 
 
 /* Implementation *************************************************************/
 CDRMPlot::CDRMPlot(QWidget *p, const char *name) :
-	QwtPlot (p), CurCharType(NONE_OLD), InitCharType(NONE_OLD),
+	QwtPlot (p, name), CurCharType(NONE_OLD), InitCharType(NONE_OLD),
 	bOnTimerCharMutexFlag(FALSE), pDRMRec(NULL)
 {
 	/* Grid defaults */
@@ -70,7 +54,7 @@ CDRMPlot::CDRMPlot(QWidget *p, const char *name) :
 	setAxisTitleFont(QwtPlot::yRight, QFont("SansSerif", 8));
 
 	/* Global frame */
-	setFrameStyle(Q3Frame::Panel|Q3Frame::Sunken);
+	setFrameStyle(QFrame::Panel|QFrame::Sunken);
 	setLineWidth(2);
 	setMargin(10);
 
@@ -87,21 +71,6 @@ CDRMPlot::CDRMPlot(QWidget *p, const char *name) :
 		this, SLOT(OnTimerChart()));
 
 	TimerChart.stop();
-}
-
-void CDRMPlot::SetRecObj(CDRMReceiver* pNDRMRec)
-{
-	pDRMRec = pNDRMRec;
-}
-
-CDRMPlot::ECharType CDRMPlot::GetChartType() const
-{
-	return CurCharType;
-}
-
-void CDRMPlot::Update()
-{
-	OnTimerChart();
 }
 
 void CDRMPlot::OnTimerChart()
@@ -592,8 +561,8 @@ void CDRMPlot::SetAvIR(CVector<_REAL>& vecrData, CVector<_REAL>& vecrScale,
 #else
 		/* Only include highest bound */
 		dY[0] = dY[1] = Max(rHigherB, rLowerB);
-		setCurveData(curve5, dX, dY, 2);
 #endif
+		setCurveData(curve5, dX, dY, 2);
 
 		/* Adjust scale for x-axis */
 		setAxisScale(QwtPlot::xBottom, (double) vecrScale[0],
@@ -1867,5 +1836,5 @@ void CDRMPlot::AddWhatsThisHelpChar(const ECharType NCharType)
 	}
 
 	/* Main plot */
-	Q3WhatsThis::add(this, strCurPlotHelp);
+	QWhatsThis::add(this, strCurPlotHelp);
 }

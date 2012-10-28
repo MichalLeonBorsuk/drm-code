@@ -735,7 +735,7 @@ Phase Offset</string>
 <customwidgets>
     <customwidget>
         <class>CDRMPlot</class>
-        <header location="local">DRMPlot.h</header>
+        <header location="local">qt2/DRMPlot.h</header>
         <sizehint>
             <width>-1</width>
             <height>-1</height>

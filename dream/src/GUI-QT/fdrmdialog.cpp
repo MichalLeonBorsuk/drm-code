@@ -35,6 +35,7 @@
 # include <qcstring.h>
 # include "MultimediaDlg.h"
 #else
+# include <QWhatsThis>
 # include <QHideEvent>
 # include <QEvent>
 # include <QShowEvent>

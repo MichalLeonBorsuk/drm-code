@@ -20,11 +20,11 @@ contains(QT_VERSION, ^4\\..*) {
     QT += network xml qt3support
     VPATH += src/GUI-QT
     !console {
-        HEADERS += src/GUI-QT/DRMPlot-qwt6.h src/GUI-QT/EvaluationDlg.h
+        HEADERS += src/GUI-QT/DRMPlot.h src/GUI-QT/EvaluationDlg.h
         HEADERS += src/GUI-QT/SlideShowViewer.h src/GUI-QT/JLViewer.h src/GUI-QT/BWSViewer.h
 	HEADERS += src/GUI-QT/bwsbrowser.h src/GUI-QT/jlbrowser.h
 	HEADERS += src/GUI-QT/SoundCardSelMenu.h
-        SOURCES += src/GUI-QT/DRMPlot-qwt6.cpp src/GUI-QT/EvaluationDlg.cpp
+        SOURCES += src/GUI-QT/DRMPlot.cpp src/GUI-QT/EvaluationDlg.cpp
         SOURCES += src/GUI-QT/SlideShowViewer.cpp src/GUI-QT/JLViewer.cpp src/GUI-QT/BWSViewer.cpp
 	SOURCES += src/GUI-QT/bwsbrowser.cpp src/GUI-QT/jlbrowser.cpp
 	SOURCES += src/GUI-QT/SoundCardSelMenu.cpp
@@ -97,8 +97,8 @@ count(QT_VERSION, 0) {
     CONFIG += old
     VPATH += src/GUI-QT/qt2
     !console {
-        HEADERS += src/GUI-QT/DRMPlot.h src/GUI-QT/systemevalDlg.h src/GUI-QT/MultimediaDlg.h
-        SOURCES += src/GUI-QT/DRMPlot.cpp src/GUI-QT/systemevalDlg.cpp src/GUI-QT/MultimediaDlg.cpp
+        HEADERS += src/GUI-QT/qt2/DRMPlot.h src/GUI-QT/systemevalDlg.h src/GUI-QT/MultimediaDlg.h
+        SOURCES += src/GUI-QT/qt2/DRMPlot.cpp src/GUI-QT/systemevalDlg.cpp src/GUI-QT/MultimediaDlg.cpp
         FORMS += fdrmdialogbase.ui fmdialogbase.ui AnalogDemDlgbase.ui LiveScheduleDlgbase.ui
         FORMS += MultimediaDlgbase.ui
         unix {
