@@ -37,7 +37,7 @@ JLBrowser::JLBrowser(QWidget * parent)
 
     /* Set FhG IIS text */
     strFhGIISText =
-        "<table><tr><td><img src=\":/icons/fhgiis.bmp\"></td>"
+        "<table><tr><td><img src=\":/icons/LogoFhGIIS.png\"></td>"
         "<td><font face=\"Courier\" size=\"-1\">Features NewsService "
         "Journaline(R) decoder technology by Fraunhofer IIS, Erlangen, "
         "Germany. For more information visit http://www.iis.fhg.de/dab"
