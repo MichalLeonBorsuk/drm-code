@@ -635,7 +635,10 @@ QImage* JL2Image(CVector<_BYTE>& imagedata)
     if(pNewImage->loadFromData(&imagedata[0], imagedata.size()))
         return pNewImage;
     else
+    {
+        delete pNewImage;
         return NULL;
+    }
 }
 
 void MultimediaDlg::SetSlideShowPicture()
@@ -666,6 +669,7 @@ void MultimediaDlg::SetSlideShowPicture()
         /* Set new picture in source factory and set it in text control */
         QMimeSourceFactory::defaultFactory()->setImage("MOTSlideShowimage", *pImage);
         TextBrowser->setText("<center><img source=\"MOTSlideShowimage\"></center>");
+        delete pImage;
     }
     else
     {
