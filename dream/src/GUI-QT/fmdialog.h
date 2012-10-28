@@ -89,7 +89,6 @@ protected:
 	CAboutDlg			AboutDlg;
 #endif
 	QTimer				Timer;
-	QBrush				alarmBrush;
 
 	_BOOLEAN		bSysEvalDlgWasVis;
 	_BOOLEAN		bMultMedDlgWasVis;
