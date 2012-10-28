@@ -50,7 +50,6 @@ FMDialog::FMDialog(CDRMReceiver& NDRMR, CSettings& NSettings, CRig& rig,
 	QWidget* parent, const char* name, bool modal, Qt::WFlags f):
 	FMDialogBase(parent, name, modal, f),
 	DRMReceiver(NDRMR), Settings(NSettings),
-	alarmBrush(QColor(255, 0, 0)),
 	eReceiverMode(RM_NONE)
 {
 	(void)rig; // TODO
@@ -135,15 +134,24 @@ FMDialog::FMDialog(CDRMReceiver& NDRMR, CSettings& NSettings, CRig& rig,
 
 	/* Init progress bar for input signal level */
 	ProgrInputLevel->setRange(-50.0, 0.0);
+	ProgrInputLevel->setAlarmLevel(-12.5);
+	QColor alarmColor(QColor(255, 0, 0));
+	QColor fillColor(QColor(0, 190, 0));
 #if QWT_VERSION < 0x050000
 	ProgrInputLevel->setOrientation(QwtThermo::Vertical, QwtThermo::Left);
 #else
 	ProgrInputLevel->setOrientation(Qt::Vertical, QwtThermo::LeftScale);
 #endif
-        QBrush fillBrush(QColor(0, 190, 0));
-	ProgrInputLevel->setFillBrush(fillBrush);
-	ProgrInputLevel->setAlarmLevel(-12.5);
-	ProgrInputLevel->setAlarmBrush(alarmBrush);
+#if QWT_VERSION < 0x060000
+	ProgrInputLevel->setAlarmColor(alarmColor);
+	ProgrInputLevel->setFillColor(fillColor);
+#else
+	QPalette newPalette = FrameMainDisplay->palette();
+	newPalette.setColor(QPalette::Base, newPalette.color(QPalette::Window));
+	newPalette.setColor(QPalette::ButtonText, fillColor);
+	newPalette.setColor(QPalette::Highlight, alarmColor);
+	ProgrInputLevel->setPalette(newPalette);
+#endif
 
 	/* Update times for color LEDs */
 	CLED_FAC->SetUpdateTime(1500);

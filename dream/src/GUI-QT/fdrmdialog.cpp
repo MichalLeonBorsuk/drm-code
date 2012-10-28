@@ -184,9 +184,6 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& NSettings, CRig& rig,
     /* Set display color */
     SetDisplayColor(CRGBConversion::int2RGB(Settings.Get("DRM Dialog", "colorscheme", 0xff0000)));
 
-    /* Init progress bar for input signal level */
-    ProgrInputLevel->setRange(-50.0, 0.0);
-    ProgrInputLevel->setOrientation(QwtThermo::Vertical, QwtThermo::Left);
     pButtonGroup = new QButtonGroup(this);
     pButtonGroup->hide();
     pButtonGroup->setExclusive(true);
@@ -279,10 +276,6 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& NSettings, CRig& rig,
     /* Set display color */
     SetDisplayColor(CRGBConversion::int2RGB(Settings.Get("DRM Dialog", "colorscheme", 0xff0000)));
 
-    /* Init progress bar for input signal level */
-    ProgrInputLevel->setRange(-50.0, 0.0);
-
-    ProgrInputLevel->setOrientation(Qt::Vertical, QwtThermo::LeftScale);
     pButtonGroup = new QButtonGroup(this);
     pButtonGroup->setExclusive(true);
     pButtonGroup->addButton(PushButtonService1, 0);
@@ -292,6 +285,27 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& NSettings, CRig& rig,
     connect(pButtonGroup, SIGNAL(buttonClicked(int)), this, SLOT(OnSelectAudioService(int)));
     connect(pButtonGroup, SIGNAL(buttonClicked(int)), this, SLOT(OnSelectDataService(int)));
 
+#endif
+
+	/* Init progress bar for input signal level */
+	ProgrInputLevel->setRange(-50.0, 0.0);
+    ProgrInputLevel->setAlarmLevel(-12.5);
+	QColor alarmColor(QColor(255, 0, 0));
+	QColor fillColor(QColor(0, 190, 0));
+#if QWT_VERSION < 0x050000
+	ProgrInputLevel->setOrientation(QwtThermo::Vertical, QwtThermo::Left);
+#else
+	ProgrInputLevel->setOrientation(Qt::Vertical, QwtThermo::LeftScale);
+#endif
+#if QWT_VERSION < 0x060000
+	ProgrInputLevel->setAlarmColor(alarmColor);
+	ProgrInputLevel->setFillColor(fillColor);
+#else
+	QPalette newPalette = FrameMainDisplay->palette();
+	newPalette.setColor(QPalette::Base, newPalette.color(QPalette::Window));
+	newPalette.setColor(QPalette::ButtonText, fillColor);
+	newPalette.setColor(QPalette::Highlight, alarmColor);
+	ProgrInputLevel->setPalette(newPalette);
 #endif
 
 	connect(pStationsDlg, SIGNAL(subscribeRig()), &rig, SLOT(subscribe()));
@@ -305,11 +319,6 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& NSettings, CRig& rig,
 	bool enablelog = Settings.Get("Logfile", "enablelog", FALSE);
 	if(enablelog)
 		pLogging->start();
-
-    ProgrInputLevel->setAlarmLevel(-12.5);
-    QBrush fillBrush(QColor(0, 190, 0));
-    ProgrInputLevel->setFillBrush(fillBrush);
-    ProgrInputLevel->setAlarmLevel(-12.5);
 
     /* Update times for color LEDs */
     CLED_FAC->SetUpdateTime(1500);
