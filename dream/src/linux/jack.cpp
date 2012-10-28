@@ -265,7 +265,7 @@ void CJackCommon::initialise()
 
     jack_on_shutdown(client, jack_shutdown, 0);
 
-    if (jack_get_sample_rate(client) != 48000)
+    if (jack_get_sample_rate(client) != SOUNDCRD_SAMPLE_RATE)
     {
         throw "Jack: jack is running with the wrong sample rate";
     }
