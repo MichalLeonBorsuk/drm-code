@@ -40,27 +40,27 @@
    must fit into the range of the FFT-size. Therefore 6000 Hz was chosen */
 #define VIRTUAL_INTERMED_FREQ			6000	// Hz
 
-#define SOUNDCRD_SAMPLE_RATE			48000	// Hz
+#define SOUNDCRD_SAMPLE_RATE			48000	// Hz, must be a multiple of 750
 
 /* DRM parameters */
 #define NUM_FRAMES_IN_SUPERFRAME		3
 
-#define RMA_FFT_SIZE_N					1152	// RMB: Robustness Mode A
+#define RMA_FFT_SIZE_N					(1152*SOUNDCRD_SAMPLE_RATE/48000)	// RMB: Robustness Mode A
 #define RMA_NUM_SYM_PER_FRAME			15
 #define RMA_ENUM_TG_TU					1
 #define RMA_DENOM_TG_TU					9
 
-#define RMB_FFT_SIZE_N					1024	// RMA: Robustness Mode B
+#define RMB_FFT_SIZE_N					(1024*SOUNDCRD_SAMPLE_RATE/48000)	// RMA: Robustness Mode B
 #define RMB_NUM_SYM_PER_FRAME			15
 #define RMB_ENUM_TG_TU					1
 #define RMB_DENOM_TG_TU					4
 
-#define RMC_FFT_SIZE_N					704		// RMC: Robustness Mode C
+#define RMC_FFT_SIZE_N					(704*SOUNDCRD_SAMPLE_RATE/48000)	// RMC: Robustness Mode C
 #define RMC_NUM_SYM_PER_FRAME			20
 #define RMC_ENUM_TG_TU					4
 #define RMC_DENOM_TG_TU					11
 
-#define RMD_FFT_SIZE_N					448		// RMD: Robustness Mode D
+#define RMD_FFT_SIZE_N					(448*SOUNDCRD_SAMPLE_RATE/48000)	// RMD: Robustness Mode D
 #define RMD_NUM_SYM_PER_FRAME			24
 #define RMD_ENUM_TG_TU					11
 #define RMD_DENOM_TG_TU					14
