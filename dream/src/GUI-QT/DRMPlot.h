@@ -171,9 +171,9 @@ public:
 		setWindowFlags(Qt::Window);
 		resize(256, 256);
 		plot = new QwtPlot(this);
-		printf("QwtPlotDialog()\n");
+		/*printf("QwtPlotDialog()\n");*/
 	}
-	~QwtPlotDialog() { printf("~QwtPlotDialog()\n"); delete plot; }
+	~QwtPlotDialog() { /*printf("~QwtPlotDialog()\n");*/ delete plot; }
 	QwtPlot *GetPlot() { return plot; }
 	void show() { QDialog::show(); emit activate(); }
 	void hide() { emit deactivate(); QDialog::hide(); }
@@ -233,13 +233,8 @@ public:
 	void Update() { OnTimerChart(); }
 	void SetPlotStyle(const int iNewStyleID);
 
-#ifdef QT3_SUPPORT
-	void setCaption(const QString& s) { if (DialogPlot) DialogPlot->setCaption(s); }
-	void setIcon(const QIcon& s) { if (DialogPlot) DialogPlot->setIcon(s.pixmap(32)); }
-#else
 	void setCaption(const QString& s) { if (DialogPlot) DialogPlot->setWindowTitle(s); }
 	void setIcon(const QIcon& s) { if (DialogPlot) DialogPlot->setWindowIcon(s); }
-#endif
 	void setGeometry(const QRect& g) { if (DialogPlot) DialogPlot->setGeometry(g); }
 	bool isVisible() { if (DialogPlot) return DialogPlot->isVisible(); else return FALSE; }
 	const QRect geometry() { if (DialogPlot) return DialogPlot->geometry(); else return QRect(); }
