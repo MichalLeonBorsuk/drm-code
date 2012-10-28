@@ -50,7 +50,11 @@
 
 /* TODO to be moved in DialogUtil.h */
 #if QT_VERSION < 0x040000
-# define ButtonGroupGetCurrentId(c) (c)->selectedId()
+# if QT_VERSION < 0x030000
+#  define ButtonGroupGetCurrentId(c) (c->selected()?c->id(c->selected()):int(-1))
+# else
+#  define ButtonGroupGetCurrentId(c) (c)->selectedId()
+#endif
 # define ComboBoxClear(c) (c)->clear()
 # define ComboBoxInsertItem(c, t, i) (c)->insertItem(t, i)
 # define ComboBoxSetCurrentItem(c, i) (c)->setCurrentItem(i)
