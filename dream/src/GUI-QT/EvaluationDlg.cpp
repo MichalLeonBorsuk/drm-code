@@ -85,91 +85,40 @@ systemevalDlg::systemevalDlg(CDRMReceiver& NDRMR, CSettings& NSettings,
     /* Update controls */
     UpdateControls();
 
-    // disable the top level items
-    QList<QTreeWidgetItem *> l = chartSelector->findItems("*", Qt::MatchWildcard);
-    for(QList<QTreeWidgetItem *>::iterator i = l.begin(); i!=l.end(); i++)
-    {
-        //(*i)->setDisabled(true); TODO - we don't want them selectable!
-    }
-
+    /* Set the Char Type of each selectable item */
     QTreeWidgetItemIterator it(chartSelector, QTreeWidgetItemIterator::NoChildren);
-    while (*it) {
+    for (; *it; it++)
+    {
         if ((*it)->text(0) == tr("SNR Spectrum"))
-        {
             (*it)->setData(0,  Qt::UserRole, CDRMPlot::SNR_SPECTRUM);
-            (*it)->setDisabled(false);
-        }
         if ((*it)->text(0) == tr("Audio Spectrum"))
-        {
             (*it)->setData(0,  Qt::UserRole, CDRMPlot::AUDIO_SPECTRUM);
-            (*it)->setDisabled(false);
-        }
         if ((*it)->text(0) == tr("Shifted PSD"))
-        {
             (*it)->setData(0,  Qt::UserRole, CDRMPlot::POWER_SPEC_DENSITY);
-            (*it)->setDisabled(false);
-        }
         if ((*it)->text(0) == tr("Waterfall Input Spectrum"))
-        {
             (*it)->setData(0,  Qt::UserRole, CDRMPlot::INP_SPEC_WATERF);
-            (*it)->setDisabled(false);
-        }
         if ((*it)->text(0) == tr("Input Spectrum"))
-        {
             (*it)->setData(0,  Qt::UserRole, CDRMPlot::INPUTSPECTRUM_NO_AV);
-            (*it)->setDisabled(false);
-        }
         if ((*it)->text(0) == tr("Input PSD"))
-        {
             (*it)->setData(0,  Qt::UserRole, CDRMPlot::INPUT_SIG_PSD);
-            (*it)->setDisabled(false);
-        }
         if ((*it)->text(0) == tr("MSC"))
-        {
             (*it)->setData(0,  Qt::UserRole, CDRMPlot::MSC_CONSTELLATION);
-            (*it)->setDisabled(false);
-        }
         if ((*it)->text(0) == tr("SDC"))
-        {
             (*it)->setData(0,  Qt::UserRole, CDRMPlot::SDC_CONSTELLATION);
-            (*it)->setDisabled(false);
-        }
         if ((*it)->text(0) == tr("FAC"))
-        {
             (*it)->setData(0,  Qt::UserRole, CDRMPlot::FAC_CONSTELLATION);
-            (*it)->setDisabled(false);
-        }
         if ((*it)->text(0) == tr("FAC / SDC / MSC"))
-        {
             (*it)->setData(0,  Qt::UserRole, CDRMPlot::ALL_CONSTELLATION);
-            (*it)->setDisabled(false);
-        }
         if ((*it)->text(0) == tr("Frequency / Sample Rate"))
-        {
             (*it)->setData(0,  Qt::UserRole, CDRMPlot::FREQ_SAM_OFFS_HIST);
-            (*it)->setDisabled(false);
-        }
         if ((*it)->text(0) == tr("Delay / Doppler"))
-        {
             (*it)->setData(0,  Qt::UserRole, CDRMPlot::DOPPLER_DELAY_HIST);
-            (*it)->setDisabled(false);
-        }
         if ((*it)->text(0) == tr("SNR / Audio"))
-        {
             (*it)->setData(0,  Qt::UserRole, CDRMPlot::SNR_AUDIO_HIST);
-            (*it)->setDisabled(false);
-        }
         if ((*it)->text(0) == tr("Transfer Function"))
-        {
             (*it)->setData(0,  Qt::UserRole, CDRMPlot::TRANSFERFUNCTION);
-            (*it)->setDisabled(false);
-        }
         if ((*it)->text(0) == tr("Impulse Response"))
-        {
             (*it)->setData(0,  Qt::UserRole, CDRMPlot::AVERAGED_IR);
-            (*it)->setDisabled(false);
-        }
-        ++it;
     }
 
     /* Expand all items */
@@ -264,6 +213,7 @@ systemevalDlg::~systemevalDlg()
 {
     if(DRMReceiver.GetWriteData()->GetIsWriteWaveFile())
         DRMReceiver.GetWriteData()->StopWriteWaveFile();
+    delete MainPlot;
 }
 
 void systemevalDlg::UpdateControls()
