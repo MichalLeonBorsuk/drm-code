@@ -267,10 +267,15 @@ void AnalogDemDlg::showEvent(QShowEvent*)
 	else
 		AMSSDlg.hide();
 
+    /* Notify the MainPlot of showEvent */
+    MainPlot->activate();
 }
 
 void AnalogDemDlg::hideEvent(QHideEvent*)
 {
+    /* Notify the MainPlot of hideEvent */
+    MainPlot->deactivate();
+
 	/* stop real-time timers */
 	Timer.stop();
 	TimerPLLPhaseDial.stop();

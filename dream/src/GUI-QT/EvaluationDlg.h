@@ -74,7 +74,6 @@ protected:
 
 	QTimer			Timer;
 	QTimer			TimerInterDigit;
-	QTimer			TimerChart;
 
 	CDRMPlot*		MainPlot;
 
