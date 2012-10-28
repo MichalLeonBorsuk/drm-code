@@ -25,11 +25,11 @@
     <file>CSTF.png</file>
     <file>JumpBegin.png</file>
     <file>JumpEnd.png</file>
+    <file>LogoFhGIIS.png</file>
     <file>LogoJournaline.png</file>
     <file>LogoSmall.png</file>
     <file>MainIcon.png</file>
     <file>StepBack.png</file>
     <file>StepForw.png</file>
-    <file>fhgiis.bmp</file>
   </qresource>
 </RCC>
