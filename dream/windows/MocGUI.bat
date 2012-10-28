@@ -35,7 +35,7 @@ md moc
 %qtdir%\bin\moc.exe ..\src\GUI-QT\fmdialog.h -o moc\moc_fmdialog.cpp
 %qtdir%\bin\moc.exe ..\src\GUI-QT\fdrmdialog.h -o moc\moc_fdrmdialog.cpp
 %qtdir%\bin\moc.exe ..\src\GUI-QT\TransmDlg.h -o moc\moc_TransmDlg.cpp
-%qtdir%\bin\moc.exe ..\src\GUI-QT\DRMPlot.h -o moc\moc_DRMPlot.cpp
+%qtdir%\bin\moc.exe ..\src\GUI-QT\qt2\DRMPlot.h -o moc\moc_DRMPlot.cpp
 %qtdir%\bin\moc.exe ..\src\GUI-QT\MultimediaDlg.h -o moc\moc_MultimediaDlg.cpp
 %qtdir%\bin\moc.exe ..\src\GUI-QT\StationsDlg.h -o moc\moc_StationsDlg.cpp
 %qtdir%\bin\moc.exe ..\src\GUI-QT\LiveScheduleDlg.h -o moc\moc_LiveScheduleDlg.cpp
