@@ -1303,7 +1303,9 @@ void CDRMPlot::SetInpSpecWaterf(CVector<_REAL>& vecrData, CVector<_REAL>&)
 			iFinalCol = 0;
 
 		/* Also change saturation to get dark colors when low level */
-		const int iCurSat = (int) ((1 - (_REAL) iFinalCol / iMaxHue) * iMaxSat);
+		int iCurSat = (int) ((1 - (_REAL) iFinalCol / iMaxHue) * iMaxSat);
+		if (iCurSat < 0) /* Prevent from out-of-range */
+			iCurSat = 0;
 
 		/* Generate pixel */
 		Painter.setPen(QColor(iFinalCol, iCurSat, iCurSat, QColor::Hsv));
