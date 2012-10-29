@@ -178,7 +178,11 @@ unix {
         DEFINES += HAVE_FFTW3_H
                    LIBS += -lfftw3
                            message("with fftw3")
-                       }
+        exists(/usr/include/pthread.h) {
+                DEFINES += HAVE_PTHREAD_H
+                LIBS += -lpthread
+                        }
+              }
     else {
       exists(/usr/include/fftw.h) {
 	message("with fftw2")
