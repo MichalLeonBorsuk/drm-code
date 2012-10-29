@@ -1448,6 +1448,7 @@ void CDRMPlot::SetQAMGrid(const ECodScheme eCoSc)
 
 void CDRMPlot::SetCurveGrid()
 {
+#if 0
 	int i;
 	double dX[2], dY[2];
 #if QWT_VERSION < 0x060000
@@ -1464,8 +1465,8 @@ void CDRMPlot::SetCurveGrid()
 #endif
 
 	/* Disable the normal grid */
-	grid.enableX(FALSE);
-	grid.enableY(FALSE);
+//	grid.enableX(FALSE);
+//	grid.enableY(FALSE);
 
 	/* y-axis: get major ticks */
 	const QwtScaleDraw *scaleDrawY = plot->axisScaleDraw(QwtPlot::yLeft);
@@ -1526,6 +1527,7 @@ void CDRMPlot::SetCurveGrid()
 	}
 	vcurvegrid.SETDATA(&xData[0], &yData[0], xData.size());
 	vcurvegrid.attach(plot);
+#endif
 }
 
 #if QWT_VERSION < 0x060000
