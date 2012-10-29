@@ -74,6 +74,12 @@
 # include "../sourcedecoders/neaacdec_dll.h"
 #endif
 
+#ifdef HAVE_FFTW3_H
+# include <fftw3.h> /* to extract the library version */
+#else
+# include <fftw.h> /* to extract the library version */
+#endif
+
 /* Implementation *************************************************************/
 /* About dialog ------------------------------------------------------------- */
 CAboutDlg::CAboutDlg(QWidget* parent, const char* name, bool modal, Qt::WFlags f):
@@ -117,7 +123,7 @@ CAboutDlg::CAboutDlg(QWidget* parent, const char* name, bool modal, Qt::WFlags f
         "<b>" + tr("This compilation of Dream uses the following libraries:") +
         "</b></p>"
         "<ul>"
-        "<li><b>FFTW</b> <i>http://www.fftw.org</i></li>"
+        "<li><b>FFTW</b> (" + QString(fftw_version) + ") <i>http://www.fftw.org</i></li>"
 #if USE_FAAD2_LIBRARY
         "<li><b>FAAD2</b> (" + QString(FAAD2_VERSION) + ") <i>AAC/HE-AAC/HE-AACv2/DRM decoder "
         "(c) Ahead Software, www.nero.com (http://faac.sf.net)</i></li>"
