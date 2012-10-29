@@ -110,7 +110,7 @@ public slots:
 	void OnCheckModiMetric();
 	void OnFrequencyEdited (const QString&);
 	void OnListSelChanged(QTreeWidgetItem*, QTreeWidgetItem*);
-	void OnOpenNewChart(QTreeWidgetItem*, int);
+	void OnCustomContextMenuRequested(const QPoint&);
 	void UpdatePlotStyle(int);
 signals:
 	void startLogging();

@@ -173,8 +173,9 @@ systemevalDlg::systemevalDlg(CDRMReceiver& NDRMR, CSettings& NSettings,
     /* Char selector list view */
     connect(chartSelector, SIGNAL(currentItemChanged(QTreeWidgetItem *, QTreeWidgetItem *)),
             this, SLOT(OnListSelChanged( QTreeWidgetItem *, QTreeWidgetItem *)));
-    connect(chartSelector, SIGNAL(itemDoubleClicked( QTreeWidgetItem *, int)),
-            this, SLOT(OnOpenNewChart(QTreeWidgetItem *, int)));
+	chartSelector->setContextMenuPolicy(Qt::CustomContextMenu);
+	connect(chartSelector, SIGNAL(customContextMenuRequested ( const QPoint&  )),
+		this, SLOT(OnCustomContextMenuRequested(const QPoint&)));
 
     /* Buttons */
     connect(buttonOk, SIGNAL(clicked()), this, SLOT(close()));
@@ -416,6 +417,12 @@ void systemevalDlg::UpdatePlotStyle(int iPlotStyle)
 
     /* Update main plot window */
     MainPlot->SetPlotStyle(iPlotStyle);
+}
+
+void systemevalDlg::OnCustomContextMenuRequested(const QPoint& p)
+{
+	QModelIndex index = chartSelector->indexAt(p);
+    vecpDRMPlots.push_back(OpenChartWin(CDRMPlot::ECharType(index.data(Qt::UserRole).toInt())));
 }
 
 CDRMPlot* systemevalDlg::OpenChartWin(CDRMPlot::ECharType eNewType)
@@ -850,12 +857,6 @@ void systemevalDlg::OnListSelChanged(QTreeWidgetItem *curr, QTreeWidgetItem *)
 {
     /* Get char type from selected item and setup chart */
     MainPlot->SetupChart(CDRMPlot::ECharType(curr->data(0, Qt::UserRole).toInt()));
-}
-
-void systemevalDlg::OnOpenNewChart(QTreeWidgetItem* item, int)
-{
-    if (item != NULL)
-        vecpDRMPlots.push_back(OpenChartWin(CDRMPlot::ECharType(item->data(0, Qt::UserRole).toInt())));
 }
 
 void systemevalDlg::OnCheckFlipSpectrum()
