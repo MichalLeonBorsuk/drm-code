@@ -42,7 +42,8 @@ systemevalDlg::systemevalDlg(CDRMReceiver& NDRMR, CSettings& NSettings,
     systemevalDlgBase(parent, name, modal, f),
     DRMReceiver(NDRMR),
     Settings(NSettings),
-    Timer(), TimerInterDigit()
+    Timer(), TimerInterDigit(),
+    eNewCharType(CDRMPlot::NONE_OLD)
 {
     /* Get window geometry data and apply it */
     CWinGeom s;
@@ -149,6 +150,11 @@ systemevalDlg::systemevalDlg(CDRMReceiver& NDRMR, CSettings& NSettings,
         chartSelector->setCurrentItem(i, 0);
         OnListSelChanged(i, NULL); // TODO why doesn't setCurrentItem send signal ?
     }
+
+    /* Init context menu for tree widget */
+    pTreeWidgetContextMenu = new QMenu(tr("Chart Selector context menu"), this);
+    pTreeWidgetContextMenu->addAction(tr("&Open in separate window"),
+            this, SLOT(OnTreeWidgetContMenu(bool)));
 
     /* Connect controls ----------------------------------------------------- */
     connect(SliderNoOfIterations, SIGNAL(valueChanged(int)),
@@ -419,10 +425,26 @@ void systemevalDlg::UpdatePlotStyle(int iPlotStyle)
     MainPlot->SetPlotStyle(iPlotStyle);
 }
 
+void systemevalDlg::OnTreeWidgetContMenu(bool)
+{
+    if (eNewCharType != CDRMPlot::NONE_OLD)
+    {
+        /* Open the new chart */
+        vecpDRMPlots.push_back(OpenChartWin(eNewCharType));
+        eNewCharType = CDRMPlot::NONE_OLD;
+    }
+}
+
 void systemevalDlg::OnCustomContextMenuRequested(const QPoint& p)
 {
 	QModelIndex index = chartSelector->indexAt(p);
-    vecpDRMPlots.push_back(OpenChartWin(CDRMPlot::ECharType(index.data(Qt::UserRole).toInt())));
+    /* Make sure we have a non root item */
+    if (index.parent() != QModelIndex())
+    {
+        /* Popup the context menu */
+        eNewCharType = CDRMPlot::ECharType(index.data(Qt::UserRole).toInt());
+        pTreeWidgetContextMenu->exec(QCursor::pos());
+    }
 }
 
 CDRMPlot* systemevalDlg::OpenChartWin(CDRMPlot::ECharType eNewType)

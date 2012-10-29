@@ -87,7 +87,8 @@ protected:
 	QString			GetRobModeStr();
 	QString			GetSpecOccStr();
 
-	QMenu*			pListViewContextMenu;
+	QMenu*			pTreeWidgetContextMenu;
+	CDRMPlot::ECharType eNewCharType;
 	vector<CDRMPlot*>	vecpDRMPlots;
 
 public slots:
@@ -110,6 +111,7 @@ public slots:
 	void OnCheckModiMetric();
 	void OnFrequencyEdited (const QString&);
 	void OnListSelChanged(QTreeWidgetItem*, QTreeWidgetItem*);
+	void OnTreeWidgetContMenu(bool);
 	void OnCustomContextMenuRequested(const QPoint&);
 	void UpdatePlotStyle(int);
 signals:
