@@ -28,6 +28,23 @@
 #include "MatlibStdToolbox.h"
 
 
+#ifdef HAVE_FFTW3_H
+
+# ifdef HAVE_PTHREAD_H
+static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+#  define MUTEX_LOCK() pthread_mutex_lock(&mutex);
+#  define MUTEX_UNLOCK() pthread_mutex_unlock(&mutex);
+# else
+#  error TODO
+# endif
+
+# define PLANNER_FLAGS (FFTW_ESTIMATE | FFTW_DESTROY_INPUT)
+/* For testing purpose */
+//# define PLANNER_FLAGS FFTW_EXHAUSTIVE
+
+#endif
+
+
 /* Implementation *************************************************************/
 CReal Min(const CMatlibVector<CReal>& rvI)
 {
@@ -499,9 +516,14 @@ CMatlibVector<CComplex> Fft(const CMatlibVector<CComplex>& cvI,
 
 	/* Actual fftw call */
 #ifdef HAVE_FFTW3_H
-	pCurPlan->FFTPlForw = fftw_plan_dft_1d (pCurPlan->fftw_n, pFftwComplexIn, pFftwComplexOut, FFTW_FORWARD, FFTW_ESTIMATE);
-	fftw_execute(pCurPlan->FFTPlForw);
-
+	if (!pCurPlan->FFTPlForw)
+	{
+		MUTEX_LOCK();
+		pCurPlan->FFTPlForw = fftw_plan_dft_1d(pCurPlan->fftw_n, pFftwComplexIn, pFftwComplexOut, FFTW_FORWARD, PLANNER_FLAGS);
+		MUTEX_UNLOCK();
+	}
+	if (pCurPlan->FFTPlForw)
+		fftw_execute(pCurPlan->FFTPlForw);
 #else
 	fftw_one(pCurPlan->FFTPlForw, pFftwComplexIn, pFftwComplexOut);
 #endif
@@ -566,8 +588,14 @@ CMatlibVector<CComplex> Ifft(const CMatlibVector<CComplex>& cvI,
 
 	/* Actual fftw call */
 #ifdef HAVE_FFTW3_H
-	pCurPlan->FFTPlBackw = fftw_plan_dft_1d (pCurPlan->fftw_n, pFftwComplexIn, pFftwComplexOut, FFTW_FORWARD, FFTW_ESTIMATE);
-	fftw_execute(pCurPlan->FFTPlBackw);
+	if (!pCurPlan->FFTPlBackw)
+	{
+		MUTEX_LOCK();
+		pCurPlan->FFTPlBackw = fftw_plan_dft_1d(pCurPlan->fftw_n, pFftwComplexIn, pFftwComplexOut, FFTW_BACKWARD, PLANNER_FLAGS);
+		MUTEX_UNLOCK();
+	}
+	if (pCurPlan->FFTPlBackw)
+		fftw_execute(pCurPlan->FFTPlBackw);
 #else
 	fftw_one(pCurPlan->FFTPlBackw, pFftwComplexIn, pFftwComplexOut);
 #endif
@@ -638,8 +666,14 @@ CMatlibVector<CComplex> rfft(const CMatlibVector<CReal>& fvI,
 
 	/* Actual fftw call */
 #ifdef HAVE_FFTW3_H
-	pCurPlan->RFFTPlForw = fftw_plan_r2r_1d(pCurPlan->fftw_n, pFftwRealIn, pFftwRealOut, FFTW_R2HC, FFTW_ESTIMATE);
-	fftw_execute(pCurPlan->RFFTPlForw);
+	if (!pCurPlan->RFFTPlForw)
+	{
+		MUTEX_LOCK();
+		pCurPlan->RFFTPlForw = fftw_plan_r2r_1d(pCurPlan->fftw_n, pFftwRealIn, pFftwRealOut, FFTW_R2HC, PLANNER_FLAGS);
+		MUTEX_UNLOCK();
+	}
+	if (pCurPlan->RFFTPlForw)
+		fftw_execute(pCurPlan->RFFTPlForw);
 #else
 	rfftw_one(pCurPlan->RFFTPlForw, pFftwRealIn, pFftwRealOut);
 #endif
@@ -651,7 +685,7 @@ CMatlibVector<CComplex> rfft(const CMatlibVector<CReal>& fvI,
 		cvReturn[i] = CComplex(pFftwRealOut[i], pFftwRealOut[iLongLength - i]);
 
 	/* If N is even, include Nyquist frequency */
-	if (iLongLength % 2 == 0)
+	if ((iLongLength & 1) == 0)
 		cvReturn[iShortLength] = pFftwRealOut[iShortLength];
 
 	if (!FftPlans.IsInitialized())
@@ -714,8 +748,14 @@ CMatlibVector<CReal> rifft(const CMatlibVector<CComplex>& cvI,
 
 	/* Actual fftw call */
 #ifdef HAVE_FFTW3_H
-        pCurPlan->RFFTPlBackw = fftw_plan_r2r_1d(pCurPlan->fftw_n, pFftwRealIn, pFftwRealOut, FFTW_HC2R, FFTW_ESTIMATE);
-	fftw_execute(pCurPlan->RFFTPlBackw);
+	if (!pCurPlan->RFFTPlBackw)
+	{
+		MUTEX_LOCK();
+		pCurPlan->RFFTPlBackw = fftw_plan_r2r_1d(pCurPlan->fftw_n, pFftwRealIn, pFftwRealOut, FFTW_HC2R, PLANNER_FLAGS);
+		MUTEX_UNLOCK();
+	}
+	if (pCurPlan->RFFTPlBackw)
+		fftw_execute(pCurPlan->RFFTPlBackw);
 #else
 	rfftw_one(pCurPlan->RFFTPlBackw, pFftwRealIn, pFftwRealOut);
 #endif
@@ -780,14 +820,18 @@ CFftPlans::~CFftPlans()
 	{
 		/* Delete old plans and intermediate buffers */
 #ifdef HAVE_FFTW3_H
+		MUTEX_LOCK();
 		fftw_destroy_plan(RFFTPlForw);
 		fftw_destroy_plan(RFFTPlBackw);
+		fftw_destroy_plan(FFTPlForw);
+		fftw_destroy_plan(FFTPlBackw);
+		MUTEX_UNLOCK();
 #else
 		rfftw_destroy_plan(RFFTPlForw);
 		rfftw_destroy_plan(RFFTPlBackw);
-#endif
 		fftw_destroy_plan(FFTPlForw);
 		fftw_destroy_plan(FFTPlBackw);
+#endif
 
 		delete[] pFftwRealIn;
 		delete[] pFftwRealOut;
@@ -802,14 +846,18 @@ void CFftPlans::Init(const int iFSi)
 	{
 		/* Delete old plans and intermediate buffers */
 #ifdef HAVE_FFTW3_H
-	        fftw_destroy_plan(RFFTPlForw);
+		MUTEX_LOCK();
+		fftw_destroy_plan(RFFTPlForw);
 		fftw_destroy_plan(RFFTPlBackw);
+		fftw_destroy_plan(FFTPlForw);
+		fftw_destroy_plan(FFTPlBackw);
+		MUTEX_UNLOCK();
 #else
 		rfftw_destroy_plan(RFFTPlForw);
 		rfftw_destroy_plan(RFFTPlBackw);
-#endif
 		fftw_destroy_plan(FFTPlForw);
 		fftw_destroy_plan(FFTPlBackw);
+#endif
 
 		delete[] pFftwRealIn;
 		delete[] pFftwRealOut;
