@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>Analog Demodulation</string>
   </property>
   <property name="windowIcon">
    <iconset resource="res/icons.qrc">
