@@ -113,11 +113,9 @@ CDRMPlot::CDRMPlot(QwtPlot* SuppliedPlot) :
 	plot->setAxisTitle(QwtPlot::yRight, rightTitle);
 
 	/* Global frame */
-	plot->setFrameStyle(QFrame::Panel|QFrame::Sunken);
-	plot->setLineWidth(2);
-#if QWT_VERSION < 0x060000
-	plot->setMargin(10);
-#endif
+	plot->setContentsMargins(
+		WINDOW_MARGIN, WINDOW_MARGIN,
+		WINDOW_MARGIN, WINDOW_MARGIN);
 
 	/* Canvas */
 	plot->setCanvasLineWidth(0);
@@ -1399,7 +1397,7 @@ void CDRMPlot::SetGrid(double div, int step, int substep)
 	QList <double> ticks[3];
 #endif
 
-	for (i=0; i<=(int)step*2.0; i++)
+	for (i=0; i<=step*2; i++)
 	{
 		pos = -div + div / step * i;
 		/* Keep 2 digit after the point */
@@ -1408,7 +1406,7 @@ void CDRMPlot::SetGrid(double div, int step, int substep)
 	}
 
 	substep *= step;
-	for (i=0; i<=(int)substep*2.0; i++)
+	for (i=0; i<=substep*2; i++)
 	{
 		pos = -div + div / substep * i;
 		/* Keep 2 digit after the point */
@@ -1423,9 +1421,6 @@ void CDRMPlot::SetGrid(double div, int step, int substep)
 	QwtScaleDiv scaleDiv(-div, div, ticks);
 	plot->setAxisScaleDiv(QwtPlot::xBottom, scaleDiv);
 	plot->setAxisScaleDiv(QwtPlot::yLeft, scaleDiv);
-
-	/* Convert the grid into a curve grid */
-	SetCurveGrid();
 }
 
 void CDRMPlot::SetQAMGrid(const ECodScheme eCoSc)
@@ -1448,7 +1443,6 @@ void CDRMPlot::SetQAMGrid(const ECodScheme eCoSc)
 
 void CDRMPlot::SetCurveGrid()
 {
-#if 0
 	int i;
 	double dX[2], dY[2];
 #if QWT_VERSION < 0x060000
@@ -1465,8 +1459,8 @@ void CDRMPlot::SetCurveGrid()
 #endif
 
 	/* Disable the normal grid */
-//	grid.enableX(FALSE);
-//	grid.enableY(FALSE);
+	grid.enableX(FALSE);
+	grid.enableY(FALSE);
 
 	/* y-axis: get major ticks */
 	const QwtScaleDraw *scaleDrawY = plot->axisScaleDraw(QwtPlot::yLeft);
@@ -1527,7 +1521,6 @@ void CDRMPlot::SetCurveGrid()
 	}
 	vcurvegrid.SETDATA(&xData[0], &yData[0], xData.size());
 	vcurvegrid.attach(plot);
-#endif
 }
 
 #if QWT_VERSION < 0x060000
