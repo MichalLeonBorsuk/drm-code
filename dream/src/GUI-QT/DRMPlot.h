@@ -157,6 +157,15 @@
 #endif
 
 
+/* Window margin for chart */
+#define WINDOW_MARGIN 10
+
+
+/* Window size for standalone chart */
+#define WINDOW_CHART_WIDTH 256
+#define WINDOW_CHART_HEIGHT 256
+
+
 /* Classes ********************************************************************/
 
 
@@ -169,23 +178,28 @@ public:
 	QwtPlotDialog()
 	{
 		setWindowFlags(Qt::Window);
-		resize(256, 256);
-		plot = new QwtPlot(this);
+		resize(WINDOW_CHART_WIDTH, WINDOW_CHART_HEIGHT);
+		Frame = new QFrame(this);
+		Frame->setFrameStyle(QFrame::Panel|QFrame::Sunken);
+		Frame->setLineWidth(1);
+		Plot = new QwtPlot(Frame);
 		/*printf("QwtPlotDialog()\n");*/
 	}
-	~QwtPlotDialog() { /*printf("~QwtPlotDialog()\n");*/ delete plot; }
-	QwtPlot *GetPlot() { return plot; }
+	~QwtPlotDialog() { /*printf("~QwtPlotDialog()\n");*/ }
+	QwtPlot *GetPlot() { return Plot; }
 	void show() { QDialog::show(); emit activate(); }
 	void hide() { emit deactivate(); QDialog::hide(); }
 
 protected:
-	QwtPlot *plot;
 	QDialog Dialog;
+	QFrame *Frame;
+	QwtPlot *Plot;
 	void reject() { emit deactivate(); QDialog::reject(); }
 	void resizeEvent(QResizeEvent *e)
 	{
 		QRect g(0, 0, e->size().width(), e->size().height());
-		plot->setGeometry(g);
+		Frame->setGeometry(g);
+		Plot->setGeometry(g);
 	}
 
 signals:
