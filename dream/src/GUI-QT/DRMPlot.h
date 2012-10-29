@@ -160,10 +160,12 @@
 /* Window margin for chart */
 #define WINDOW_MARGIN 10
 
-
 /* Window size for standalone chart */
 #define WINDOW_CHART_WIDTH 256
 #define WINDOW_CHART_HEIGHT 256
+
+/* Window border for standalone chart */
+#define WINDOW_BORDER 1
 
 
 /* Classes ********************************************************************/
@@ -181,7 +183,7 @@ public:
 		resize(WINDOW_CHART_WIDTH, WINDOW_CHART_HEIGHT);
 		Frame = new QFrame(this);
 		Frame->setFrameStyle(QFrame::Panel|QFrame::Sunken);
-		Frame->setLineWidth(1);
+		Frame->setLineWidth(WINDOW_BORDER);
 		Plot = new QwtPlot(Frame);
 		/*printf("QwtPlotDialog()\n");*/
 	}
@@ -197,9 +199,12 @@ protected:
 	void reject() { emit deactivate(); QDialog::reject(); }
 	void resizeEvent(QResizeEvent *e)
 	{
-		QRect g(0, 0, e->size().width(), e->size().height());
-		Frame->setGeometry(g);
-		Plot->setGeometry(g);
+		QRect rf(0, 0, e->size().width(), e->size().height());
+		Frame->setGeometry(rf);
+		QRect rp(rf.x()+WINDOW_BORDER, rf.y()+WINDOW_BORDER,
+			rf.width()-WINDOW_BORDER*2,
+			rf.height()-WINDOW_BORDER*2);
+		Plot->setGeometry(rp);
 	}
 
 signals:
