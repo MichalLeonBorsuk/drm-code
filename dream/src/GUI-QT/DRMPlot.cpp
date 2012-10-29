@@ -113,6 +113,8 @@ CDRMPlot::CDRMPlot(QwtPlot* SuppliedPlot) :
 	plot->setAxisTitle(QwtPlot::yRight, rightTitle);
 
 	/* Global frame */
+	plot->setFrameStyle(QFrame::Plain|QFrame::NoFrame);
+	plot->setLineWidth(0);
 	plot->setContentsMargins(
 		WINDOW_MARGIN, WINDOW_MARGIN,
 		WINDOW_MARGIN, WINDOW_MARGIN);
@@ -1163,8 +1165,12 @@ void CDRMPlot::SetInpSpecWaterf(CVector<_REAL>& vecrData, CVector<_REAL>&)
 		iLenScale = CanvSize.width();
 	}
 
+#if QT_VERSION >= 0x040600
 	/* Scroll Canvas */
 	Canvas.scroll(0, 1, 0, 0, CanvSize.width(), CanvSize.height(), 0);
+#else
+	// TODO
+#endif
 
 	/* Paint new line (top line) */
 	QPainter Painter;
