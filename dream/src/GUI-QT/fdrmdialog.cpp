@@ -87,7 +87,7 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& NSettings, CRig& rig,
     pMultiMediaDlg->LoadSettings(Settings);
 
     /* Stations window */
-    pStationsDlg = new StationsDlg(DRMReceiver, Settings, rig, this, "", FALSE, Qt::WStyle_MinMax);
+    pStationsDlg = new StationsDlg(DRMReceiver, /*Settings,*/ rig, this, "", FALSE, Qt::WStyle_MinMax);
 
     /* Live Schedule window */
     pLiveScheduleDlg = new LiveScheduleDlg(DRMReceiver, NULL, "", FALSE, Qt::WType_TopLevel);

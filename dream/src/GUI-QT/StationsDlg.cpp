@@ -1147,6 +1147,7 @@ void StationsDlg::OnUrlFinished(QNetworkOperation* pNetwOp)
         {
             if (pNetwOp->state() == QNetworkProtocol::StDone)
             {
+#if 0 // TODO
                 string url = Settings.Get("Stations Dialog", "DRM URL", string(DRM_SCHEDULE_URL));
                 QString f = QUrl(url.c_str()).fileName();
                 QDir d;
@@ -1158,6 +1159,7 @@ void StationsDlg::OnUrlFinished(QNetworkOperation* pNetwOp)
 				LoadSchedule(DRMSchedule.GetSchedMode());
 				/* add last update information on menu item */
 				AddUpdateDateTime();
+#endif
             }
         }
     }
