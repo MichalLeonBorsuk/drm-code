@@ -30,12 +30,12 @@
 #if QT_VERSION < 0x040000
 # include <qpopupmenu.h>
 # include <qbuttongroup.h>
-# include <qwhatsthis.h>
 # include <qmultilineedit.h>
 # include <qlistview.h>
 # include <qfiledialog.h>
 # include <qpopupmenu.h>
 # include <qprogressbar.h>
+# include <qwhatsthis.h>
 #else
 # include <QCustomEvent>
 # include <QHideEvent>
@@ -44,7 +44,9 @@
 # include <QTextEdit>
 # include <QProgressBar>
 # include <QHeaderView>
+# include <QWhatsThis>
 # define CHECK_PTR(x) Q_CHECK_PTR(x)
+# include "SoundCardSelMenu.h"
 #endif
 
 
@@ -459,19 +461,18 @@ TransmDialog::TransmDialog(CSettings& NSettings,
 	EnableAllControlsForSet();
 
 
-//TODO to be enabled and modified when the menu code will be ready
-#if 0
 	/* Set Menu ***************************************************************/
-	/* Settings menu  ------------------------------------------------------- */
 #if QT_VERSION < 0x040000
+	/* Settings menu  ------------------------------------------------------- */
 	pSettingsMenu = new QPopupMenu(this);
 	CHECK_PTR(pSettingsMenu);
 	pSettingsMenu->insertItem(tr("&Sound Card Selection"),
 		new CSoundCardSelMenu(
-			TransThread.DRMTransmitter.GetSoundInInterface(),
-			TransThread.DRMTransmitter.GetSoundOutInterface(), this)
-	);
-	/* Main menu bar */
+		DRMTransmitter.GetSoundInInterface(),
+		DRMTransmitter.GetSoundOutInterface(),
+		this));
+
+	/* Main menu bar -------------------------------------------------------- */
 	pMenu = new QMenuBar(this);
 	CHECK_PTR(pMenu);
 	pMenu->insertItem(tr("&Settings"), pSettingsMenu);
@@ -479,17 +480,19 @@ TransmDialog::TransmDialog(CSettings& NSettings,
 	pMenu->setSeparator(QMenuBar::InWindowsStyle);
 
 	/* Now tell the layout about the menu */
-	QLayout *l = layout();
-	CHECK_PTR(l);
-	l->setMenuBar(pMenu);
+	TransmDlgBaseLayout->setMenuBar(pMenu);
+
 #else
-	menu_Settings->addMenu(new CSoundCardSelMenu(
+
+	menu_Settings->addMenu( new CSoundCardSelMenu(
 		DRMTransmitter.GetSoundInInterface(),
 		DRMTransmitter.GetSoundOutInterface(),
 		this));
-	menubar->addMenu(new CDreamHelpMenu(this));
+
+	connect(actionAbout_Dream, SIGNAL(triggered()), &AboutDlg, SLOT(show()));
+	connect(actionWhats_This, SIGNAL(triggered()), this, SLOT(on_actionWhats_This()));
 #endif
-#endif
+
 
 	/* Connections ---------------------------------------------------------- */
 	connect(ButtonStartStop, SIGNAL(clicked()),
@@ -614,11 +617,9 @@ TransmDialog::~TransmDialog()
 	Parameters.Unlock();
 }
 
-void TransmDialog::OnHelpWhatsThis()
+void TransmDialog::on_actionWhats_This()
 {
-#if QT_VERSION < 0x040000
 	QWhatsThis::enterWhatsThisMode();
-#endif
 }
 
 void TransmDialog::OnTimer()

@@ -1280,8 +1280,30 @@ Institute for Communication Technology</string>
      <string>&amp;Settings</string>
     </property>
    </widget>
+   <widget class="QMenu" name="menuHelp">
+    <property name="title">
+     <string>Help</string>
+    </property>
+    <addaction name="actionWhats_This"/>
+    <addaction name="separator"/>
+    <addaction name="actionAbout_Dream"/>
+   </widget>
    <addaction name="menu_Settings"/>
+   <addaction name="menuHelp"/>
   </widget>
+  <action name="actionWhats_This">
+   <property name="text">
+    <string>Whats This</string>
+   </property>
+   <property name="shortcut">
+    <string>Shift+F1</string>
+   </property>
+  </action>
+  <action name="actionAbout_Dream">
+   <property name="text">
+    <string>About Dream...</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
