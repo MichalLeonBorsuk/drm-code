@@ -913,22 +913,6 @@ StationsDlg::~StationsDlg()
 {
 }
 
-void StationsDlg::OnTimerUTCLabel()
-{
-    /* Get current UTC time */
-    time_t ltime;
-    time(&ltime);
-    struct tm* gmtCur = gmtime(&ltime);
-
-    /* Generate time in format "UTC 12:00" */
-    QString strUTCTime = QString().sprintf("%02d:%02d UTC",
-                                           gmtCur->tm_hour, gmtCur->tm_min);
-
-    /* Only apply if time label does not show the correct time */
-    if (TextLabelUTCTime->text().compare(strUTCTime))
-        TextLabelUTCTime->setText(strUTCTime);
-}
-
 void StationsDlg::OnShowStationsMenu(int iID)
 {
 #if QT_VERSION < 0x040000
@@ -1171,7 +1155,9 @@ void StationsDlg::OnUrlFinished(QNetworkOperation* pNetwOp)
                 /* Notify the user that update was successful */
                 QMessageBox::information(this, "Dream", okMessage, QMessageBox::Ok);
                 /* Read updated ini-file */
-		LoadSchedule(DRMSchedule.GetSchedMode());
+				LoadSchedule(DRMSchedule.GetSchedMode());
+				/* add last update information on menu item */
+				AddUpdateDateTime();
             }
         }
     }
@@ -1188,7 +1174,9 @@ void StationsDlg::OnUrlFinished(QNetworkReply* reply)
             /* Notify the user that update was successful */
             QMessageBox::information(this, "Dream", okMessage, QMessageBox::Ok);
             /* Read updated ini-file */
-	    LoadSchedule(DRMSchedule.GetSchedMode());
+		    LoadSchedule(DRMSchedule.GetSchedMode());
+		    /* add last update information on menu item */
+		    AddUpdateDateTime();
         } else {
             QMessageBox::information(this, "Dream", tr("Can't save new schedule"), QMessageBox::Ok);
         }
@@ -1269,63 +1257,10 @@ void StationsDlg::hideEvent(QHideEvent*)
     DisableSMeter();
 }
 
-void StationsDlg::on_loadSchedule()
-{
-    LoadSchedule(DRMSchedule.GetSchedMode());
-
-    /* If number of stations is zero, we assume that the ini file is missing */
-    if (DRMSchedule.GetStationNumber() == 0)
-    {
-        if (DRMSchedule.GetSchedMode() == CDRMSchedule::SM_DRM)
-        {
-            QMessageBox::information(this, "Dream", tr("The file "
-                                     DRMSCHEDULE_INI_FILE_NAME
-                                     " could not be found or contains no data.\n"
-                                     "No stations can be displayed.\n"
-                                     "Try to download this file by using the 'Update' menu."),
-                                     QMessageBox::Ok);
-        }
-        else
-        {
-            QMessageBox::information(this, "Dream", tr("The file "
-                                     AMSCHEDULE_CSV_FILE_NAME
-                                     " could not be found or contains no data.\n"
-                                     "No stations can be displayed.\n"
-                                     "Try to download this file by using the 'Update' menu."),
-                                     QMessageBox::Ok);
-        }
-    }
-
-    /* add last update information on menu item */
-    AddUpdateDateTime();
-
-    OnTimerList();
-
-    /* Activate real-time timer when window is shown */
-    TimerList.start(GUI_TIMER_LIST_VIEW_STAT); /* Stations list */
-}
-
 void StationsDlg::showEvent(QShowEvent*)
 {
-    /* Load the schedule if necessary */
-	CDRMSchedule::ESchedMode eSchedM = DRMSchedule.GetSchedMode();
-	ERecMode eRecM = DRMReceiver.GetReceiverMode();
-	bool load = false;
-	if (eSchedM == CDRMSchedule::SM_DRM &&  eRecM != RM_DRM)
-	{
-		DRMSchedule.SetSchedMode(CDRMSchedule::SM_ANALOG);
-		load = true;
-	}
-	if (eSchedM == CDRMSchedule::SM_ANALOG &&  eRecM == RM_DRM)
-	{
-		DRMSchedule.SetSchedMode(CDRMSchedule::SM_DRM);
-		load = true;
-	}
-    if (load || DRMSchedule.GetStationNumber() == 0)
-        QTimer::singleShot(1, this, SLOT(on_loadSchedule()));
-
-    /* Update window */
-    OnTimerUTCLabel();
+    /* Activate real-time timer when window is shown */
+    TimerList.start(GUI_TIMER_LIST_VIEW_STAT); /* Stations list */
     TimerUTCLabel.start(GUI_TIMER_UTC_TIME_LABEL);
 
 	bool ensmeter = false;
@@ -1339,6 +1274,56 @@ void StationsDlg::showEvent(QShowEvent*)
         EnableSMeter();
     else
         DisableSMeter();
+
+	bool haveSchedule = true;
+	if (DRMSchedule.GetSchedMode() == CDRMSchedule::SM_DRM)
+	{
+		haveSchedule = QFile::exists(DRMSCHEDULE_INI_FILE_NAME);
+	}
+	else
+	{
+		haveSchedule = QFile::exists(AMSCHEDULE_CSV_FILE_NAME);
+	}
+	if(!haveSchedule)
+			QMessageBox::information(this, "Dream", tr("The schedule file "
+										" could not be found or contains no data.\n"
+										"No stations can be displayed.\n"
+										"Try to download this file by using the 'Update' menu."),
+										QMessageBox::Ok);
+}
+
+void StationsDlg::OnTimerUTCLabel()
+{
+    /* Get current UTC time */
+    time_t ltime;
+    time(&ltime);
+    struct tm* gmtCur = gmtime(&ltime);
+
+    /* Generate time in format "UTC 12:00" */
+    QString strUTCTime = QString().sprintf("%02d:%02d UTC",
+                                           gmtCur->tm_hour, gmtCur->tm_min);
+
+    /* Only apply if time label does not show the correct time */
+    if (TextLabelUTCTime->text().compare(strUTCTime))
+        TextLabelUTCTime->setText(strUTCTime);
+
+    /* Load the schedule if necessary
+	 * do this here because the timer interval is short enough
+	*/
+	CDRMSchedule::ESchedMode eSchedM = DRMSchedule.GetSchedMode();
+	ERecMode eRecM = DRMReceiver.GetReceiverMode();
+	if (eSchedM == CDRMSchedule::SM_DRM &&  eRecM != RM_DRM)
+	{
+		DRMSchedule.SetSchedMode(CDRMSchedule::SM_ANALOG);
+	}
+	if (eSchedM == CDRMSchedule::SM_ANALOG &&  eRecM == RM_DRM)
+	{
+		DRMSchedule.SetSchedMode(CDRMSchedule::SM_DRM);
+	}
+    if (DRMSchedule.GetStationNumber() == 0)
+	{
+		LoadSchedule(DRMSchedule.GetSchedMode());
+	}
 }
 
 void StationsDlg::OnTimerList()
@@ -1426,13 +1411,12 @@ void StationsDlg::LoadSettings(const CSettings& Settings)
     }
 #endif
     /* get sorting and filtering behaviour */
-    int sortColumn = 0;
 	ERecMode eRecSM = DRMReceiver.GetReceiverMode();
     switch (eRecSM)
     {
     case RM_DRM:
 		DRMSchedule.SetSchedMode(CDRMSchedule::SM_DRM);
-        sortColumn = Settings.Get("Stations Dialog", "sortcolumndrm", 0);
+        iSortColumn = Settings.Get("Stations Dialog", "sortcolumndrm", 0);
         bCurrentSortAscending = Settings.Get("Stations Dialog", "sortascendingdrm", TRUE);
 		targetFilter = Settings.Get("Stations Dialog", "targetfilterdrm", string("")).c_str();
 		countryFilter = Settings.Get("Stations Dialog", "countryfilterdrm", string("")).c_str();
@@ -1448,7 +1432,7 @@ void StationsDlg::LoadSettings(const CSettings& Settings)
 
     case RM_AM:
 		DRMSchedule.SetSchedMode(CDRMSchedule::SM_ANALOG);
-        sortColumn = Settings.Get("Stations Dialog", "sortcolumnanalog", 0);
+        iSortColumn = Settings.Get("Stations Dialog", "sortcolumnanalog", 0);
         bCurrentSortAscending = Settings.Get("Stations Dialog", "sortascendinganalog", TRUE);
 		targetFilter = Settings.Get("Stations Dialog", "targetfilteranalog", string("")).c_str();
 		countryFilter = Settings.Get("Stations Dialog", "countryfilteranalog", string("")).c_str();
@@ -1458,37 +1442,6 @@ void StationsDlg::LoadSettings(const CSettings& Settings)
 	default: // can't happen!
 		;
     }
-
-#if QT_VERSION < 0x040000
-    ListViewStations->setSorting(sortColumn, bCurrentSortAscending);
-# if QT_VERSION < 0x030000
-    iSortColumn = sortColumn;
-# else
-    if(targetFilter!="") {
-        for(int i=0; i<ComboBoxFilterTarget->count(); i++) {
-            if(ComboBoxFilterTarget->text(i) == targetFilter)
-                ComboBoxFilterTarget->setCurrentItem(i);
-		}
-	}
-    if(countryFilter!="") {
-        for(int i=0; i<ComboBoxFilterCountry->count(); i++) {
-            if(ComboBoxFilterCountry->text(i) == countryFilter)
-                ComboBoxFilterCountry->setCurrentItem(i);
-		}
-	}
-    if(languageFilter!="") {
-        for(int i=0; i<ComboBoxFilterLanguage->count(); i++) {
-            if(ComboBoxFilterLanguage->text(i) == languageFilter)
-                ComboBoxFilterLanguage->setCurrentItem(i);
-		}
-	}
-# endif
-#else
-    ListViewStations->sortByColumn(sortColumn, bCurrentSortAscending?Qt::AscendingOrder:Qt::DescendingOrder);
-	ComboBoxFilterLanguage->setEditText(targetFilter);
-	ComboBoxFilterLanguage->setEditText(countryFilter);
-	ComboBoxFilterLanguage->setEditText(languageFilter);
-#endif
 }
 
 void StationsDlg::SaveSettings(CSettings& Settings)
@@ -1618,12 +1571,37 @@ void StationsDlg::LoadSchedule(CDRMSchedule::ESchedMode eNewSchM)
 #endif
     }
 
+#if QT_VERSION < 0x040000
+    ListViewStations->setSorting(iSortColumn, bCurrentSortAscending);
+# if QT_VERSION >= 0x030000
+    if(targetFilter!="") {
+        for(int i=0; i<ComboBoxFilterTarget->count(); i++) {
+            if(ComboBoxFilterTarget->text(i) == targetFilter)
+                ComboBoxFilterTarget->setCurrentItem(i);
+		}
+	}
+    if(countryFilter!="") {
+        for(int i=0; i<ComboBoxFilterCountry->count(); i++) {
+            if(ComboBoxFilterCountry->text(i) == countryFilter)
+                ComboBoxFilterCountry->setCurrentItem(i);
+		}
+	}
+    if(languageFilter!="") {
+        for(int i=0; i<ComboBoxFilterLanguage->count(); i++) {
+            if(ComboBoxFilterLanguage->text(i) == languageFilter)
+                ComboBoxFilterLanguage->setCurrentItem(i);
+		}
+	}
+# endif
+#else
+    ListViewStations->sortByColumn(iSortColumn, bCurrentSortAscending?Qt::AscendingOrder:Qt::DescendingOrder);
+	ComboBoxFilterLanguage->setEditText(targetFilter);
+	ComboBoxFilterLanguage->setEditText(countryFilter);
+	ComboBoxFilterLanguage->setEditText(languageFilter);
+#endif
+
     /* Update list view */
     SetStationsView();
-
-    /* Add last update information on menu item if the dialog is visible */
-    if (this->isVisible())
-        AddUpdateDateTime();
 }
 
 void StationsDlg::ClearStationsView()
