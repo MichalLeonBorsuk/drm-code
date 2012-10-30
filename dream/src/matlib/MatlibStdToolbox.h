@@ -47,15 +47,6 @@
 # endif
 #endif
 
-#ifdef HAVE_FFTW3_H
-# ifdef HAVE_PTHREAD_H
-#  include <pthread.h>
-# else
-#  error TODO
-# endif
-#endif
-
-
 /* Classes ********************************************************************/
 class CFftPlans
 {
