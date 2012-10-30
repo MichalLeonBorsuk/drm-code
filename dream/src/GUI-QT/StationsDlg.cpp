@@ -668,11 +668,10 @@ void CStationsItem::SetDaysFlagString(const QString& strNewDaysFlags)
     }
 }
 
-StationsDlg::StationsDlg(CDRMReceiver& NDRMR, CSettings& NSettings, CRig& rig,
+StationsDlg::StationsDlg(CDRMReceiver& NDRMR, CRig& rig,
                          QWidget* parent, const char* name, bool modal, Qt::WFlags f) :
     CStationsDlgBase(parent, name, modal, f),
     DRMReceiver(NDRMR),
-    Settings(NSettings),
 #if QT_VERSION < 0x040000
     vecpListItems(0),
 #else
@@ -687,14 +686,6 @@ StationsDlg::StationsDlg(CDRMReceiver& NDRMR, CSettings& NSettings, CRig& rig,
     setupUi(this);
     /* Set help text for the controls */
     AddWhatsThisHelp();
-
-    /* recover window size and position */
-    CWinGeom s;
-    Settings.Get("Stations Dialog", s);
-    const QRect WinGeom(s.iXPos, s.iYPos, s.iWSize, s.iHSize);
-    if (WinGeom.isValid() && !WinGeom.isEmpty() && !WinGeom.isNull())
-        setGeometry(WinGeom);
-
 
     ProgrSigStrength->hide();
     TextLabelSMeter->hide();
@@ -741,10 +732,6 @@ StationsDlg::StationsDlg(CDRMReceiver& NDRMR, CSettings& NSettings, CRig& rig,
     connect(actionShowAllStations, SIGNAL(triggered()), showMapper, SLOT(map()));
     connect(actionShowOnlyActiveStations, SIGNAL(triggered()), showMapper, SLOT(map()));
     connect(showMapper, SIGNAL(mapped(int)), this, SLOT(OnShowStationsMenu(int)));
-    if(Settings.Get("Stations Dialog", "showall", true))
-        actionShowAllStations->setChecked(true);
-    else
-        actionShowOnlyActiveStations->setChecked(true);
     previewGroup->addAction(actionDisabled);
     previewMapper->setMapping(actionDisabled, 0);
     previewGroup->addAction(action5minutes);
@@ -758,26 +745,6 @@ StationsDlg::StationsDlg(CDRMReceiver& NDRMR, CSettings& NSettings, CRig& rig,
     connect(action15minutes, SIGNAL(triggered()), previewMapper, SLOT(map()));
     connect(action30minutes, SIGNAL(triggered()), previewMapper, SLOT(map()));
     connect(previewMapper, SIGNAL(mapped(int)), this, SLOT(OnShowPreviewMenu(int)));
-    int iPrevSecs = Settings.Get("Stations Dialog", "preview", NUM_SECONDS_PREV_5MIN);
-    DRMSchedule.SetSecondsPreview(iPrevSecs);
-    switch (iPrevSecs)
-    {
-    case NUM_SECONDS_PREV_5MIN:
-        action5minutes->setChecked(true);
-        break;
-
-    case NUM_SECONDS_PREV_15MIN:
-        action5minutes->setChecked(true);
-        break;
-
-    case NUM_SECONDS_PREV_30MIN:
-        action30minutes->setChecked(true);
-        break;
-
-    default: /* case 0, also takes care of out of value parameters */
-        actionDisabled->setChecked(true);
-        break;
-    }
 
     //connect(actionGetUpdate, SIGNAL(triggered()), this, SLOT(OnGetUpdate()));
 # ifdef HAVE_LIBHAMLIB
@@ -910,30 +877,6 @@ void StationsDlg::setupUi(QObject*)
                              SLOT(OnShowPreviewMenu(int)), 0, 2);
     pPreviewMenu->insertItem(tr("&30 minutes"), this,
                              SLOT(OnShowPreviewMenu(int)), 0, 3);
-    /* Set stations preview */
-    /* Retrieve the setting saved into the .ini file */
-    switch (Settings.Get("Stations Dialog", "preview", NUM_SECONDS_PREV_5MIN))
-    {
-    case NUM_SECONDS_PREV_5MIN:
-        pPreviewMenu->setItemChecked(1, TRUE);
-        DRMSchedule.SetSecondsPreview(NUM_SECONDS_PREV_5MIN);
-        break;
-
-    case NUM_SECONDS_PREV_15MIN:
-        pPreviewMenu->setItemChecked(2, TRUE);
-        DRMSchedule.SetSecondsPreview(NUM_SECONDS_PREV_15MIN);
-        break;
-
-    case NUM_SECONDS_PREV_30MIN:
-        pPreviewMenu->setItemChecked(3, TRUE);
-        DRMSchedule.SetSecondsPreview(NUM_SECONDS_PREV_30MIN);
-        break;
-
-    default: /* case 0, also takes care of out of value parameters */
-        pPreviewMenu->setItemChecked(0, TRUE);
-        DRMSchedule.SetSecondsPreview(0);
-        break;
-    }
 
     pViewMenu->insertSeparator();
     pViewMenu->insertItem(tr("Stations &preview"),pPreviewMenu);
@@ -1168,80 +1111,6 @@ void StationsDlg::httpError(int n)
 
 void StationsDlg::on_actionGetUpdate_triggered()
 {
-    switch (DRMSchedule.GetSchedMode())
-    {
-    case CDRMSchedule::SM_DRM:
-    {
-        string url = Settings.Get("Stations Dialog", "DRM URL", string(DRM_SCHEDULE_URL));
-        qurl = new QUrl(QString(url.c_str()));
-        Settings.Put("Stations Dialog", "DRM URL", url);
-#if QT_VERSION < 0x040000
-        schedFileName = DRMSCHEDULE_INI_FILE_NAME;
-#endif
-    }
-    break;
-
-    case CDRMSchedule::SM_ANALOG:
-    {
-        QDate d = QDate::currentDate();
-        int month = d.month();
-        int year;
-        char season;
-
-// transitions last sunday in March and October
-        switch(month) {
-        case 1:
-        case 2:
-            year = d.year()-1;
-            season = 'b';
-            break;
-        case 3: {
-            QDate s = d;
-            s.setYMD(d.year(), month+1, 1);
-            s = s.addDays(0-s.dayOfWeek());
-            if(d<s) {
-                year = d.year()-1;
-                season = 'b';
-            } else {
-                year = d.year();
-                season = 'a';
-            }
-        }
-        break;
-        case 4:
-        case 5:
-        case 6:
-        case 7:
-        case 8:
-        case 9:
-            year = d.year();
-            season = 'a';
-            break;
-        case 10: {
-            QDate s = d;
-            s.setYMD(d.year(), month+1, 1);
-	    int n = s.dayOfWeek();
-            s = s.addDays(0-n);
-            if(d<s) {
-                year = d.year();
-                season = 'a';
-            } else {
-                year = d.year();
-                season = 'b';
-            }
-        }
-        break;
-        case 11:
-        case 12:
-            year = d.year();
-            season = 'b';
-        }
-        qurl = new QUrl(QString("http://eibispace.de/dx/sked-%1%2.csv").arg(season).arg(year-2000,2));
-#if QT_VERSION < 0x040000
-        schedFileName = AMSCHEDULE_CSV_FILE_NAME;
-#endif
-    }
-    }
     if (QMessageBox::information(this, tr("Dream Schedule Update"),
                                  tr("Dream tries to download the newest schedule\n"
                                     "Your computer must be connected to the internet.\n\n"
@@ -1331,44 +1200,73 @@ void StationsDlg::OnUrlFinished(QNetworkReply* reply)
 }
 #endif
 
+void StationsDlg::SetAnalogUrl()
+{
+        QDate d = QDate::currentDate();
+        int month = d.month();
+        int year;
+        char season;
+
+// transitions last sunday in March and October
+        switch(month) {
+        case 1:
+        case 2:
+            year = d.year()-1;
+            season = 'b';
+            break;
+        case 3: {
+            QDate s = d;
+            s.setYMD(d.year(), month+1, 1);
+            s = s.addDays(0-s.dayOfWeek());
+            if(d<s) {
+                year = d.year()-1;
+                season = 'b';
+            } else {
+                year = d.year();
+                season = 'a';
+            }
+        }
+        break;
+        case 4:
+        case 5:
+        case 6:
+        case 7:
+        case 8:
+        case 9:
+            year = d.year();
+            season = 'a';
+            break;
+        case 10: {
+            QDate s = d;
+            s.setYMD(d.year(), month+1, 1);
+	    int n = s.dayOfWeek();
+            s = s.addDays(0-n);
+            if(d<s) {
+                year = d.year();
+                season = 'a';
+            } else {
+                year = d.year();
+                season = 'b';
+            }
+        }
+        break;
+        case 11:
+        case 12:
+            year = d.year();
+            season = 'b';
+        }
+        qurl = new QUrl(QString("http://eibispace.de/dx/sked-%1%2.csv").arg(season).arg(year-2000,2));
+#if QT_VERSION < 0x040000
+        schedFileName = AMSCHEDULE_CSV_FILE_NAME;
+#endif
+}
+
 void StationsDlg::hideEvent(QHideEvent*)
 {
     /* Deactivate real-time timers */
     TimerList.stop();
     TimerUTCLabel.stop();
     DisableSMeter();
-#if QT_VERSION < 0x040000
-    Settings.Put("Hamlib", "ensmeter", (pRemoteMenu==NULL)?false:pRemoteMenu->menu()->isItemChecked(SMETER_MENU_ID));
-#else
-    Settings.Put("Hamlib", "ensmeter", actionEnable_S_Meter->isChecked());
-#endif
-
-    /* Set window geometry data in DRMReceiver module */
-    QRect WinGeom = geometry();
-
-    CWinGeom c;
-    c.iXPos = WinGeom.x();
-    c.iYPos = WinGeom.y();
-    c.iHSize = WinGeom.height();
-    c.iWSize = WinGeom.width();
-    Settings.Put("Stations Dialog", c);
-
-    /* Store preview settings */
-    Settings.Put("Stations Dialog", "preview", DRMSchedule.GetSecondsPreview());
-
-    /* Store sort settings */
-    switch (DRMSchedule.GetSchedMode())
-    {
-    case CDRMSchedule::SM_DRM:
-        Settings.Put("Stations Dialog", "sortcolumndrm", currentSortColumn());
-        Settings.Put("Stations Dialog", "sortascendingdrm", bCurrentSortAscending);
-        break;
-
-    case CDRMSchedule::SM_ANALOG:
-        Settings.Put("Stations Dialog", "sortcolumnanalog", currentSortColumn());
-        Settings.Put("Stations Dialog", "sortascendinganalog", bCurrentSortAscending);
-        break;
-    }
 }
 
 void StationsDlg::on_loadSchedule()
@@ -1401,41 +1299,6 @@ void StationsDlg::on_loadSchedule()
     /* add last update information on menu item */
     AddUpdateDateTime();
 
-#if QT_VERSION >= 0x030000
-    if(targetFilter!="") {
-        for(int i=0; i<ComboBoxFilterTarget->count(); i++) {
-#if QT_VERSION < 0x040000
-            if(ComboBoxFilterTarget->text(i) == targetFilter)
-                ComboBoxFilterTarget->setCurrentItem(i);
-#else
-            if(ComboBoxFilterTarget->itemText(i) == targetFilter)
-                ComboBoxFilterTarget->setCurrentIndex(i);
-#endif
-        }
-    }
-    if(countryFilter!="") {
-        for(int i=0; i<ComboBoxFilterCountry->count(); i++) {
-#if QT_VERSION < 0x040000
-            if(ComboBoxFilterCountry->text(i) == countryFilter)
-                ComboBoxFilterCountry->setCurrentItem(i);
-#else
-            if(ComboBoxFilterCountry->itemText(i) == countryFilter)
-                ComboBoxFilterCountry->setCurrentIndex(i);
-#endif
-        }
-    }
-    if(languageFilter!="") {
-        for(int i=0; i<ComboBoxFilterLanguage->count(); i++) {
-#if QT_VERSION < 0x040000
-            if(ComboBoxFilterLanguage->text(i) == languageFilter)
-                ComboBoxFilterLanguage->setCurrentItem(i);
-#else
-            if(ComboBoxFilterLanguage->itemText(i) == languageFilter)
-                ComboBoxFilterLanguage->setCurrentIndex(i);
-#endif
-        }
-    }
-#endif
     OnTimerList();
 
     /* Activate real-time timer when window is shown */
@@ -1445,25 +1308,37 @@ void StationsDlg::on_loadSchedule()
 void StationsDlg::showEvent(QShowEvent*)
 {
     /* Load the schedule if necessary */
-    if (DRMSchedule.GetStationNumber() == 0)
+	CDRMSchedule::ESchedMode eSchedM = DRMSchedule.GetSchedMode();
+	ERecMode eRecM = DRMReceiver.GetReceiverMode();
+	bool load = false;
+	if (eSchedM == CDRMSchedule::SM_DRM &&  eRecM != RM_DRM)
+	{
+		DRMSchedule.SetSchedMode(CDRMSchedule::SM_ANALOG);
+		load = true;
+	}
+	if (eSchedM == CDRMSchedule::SM_ANALOG &&  eRecM == RM_DRM)
+	{
+		DRMSchedule.SetSchedMode(CDRMSchedule::SM_DRM);
+		load = true;
+	}
+    if (load || DRMSchedule.GetStationNumber() == 0)
         QTimer::singleShot(1, this, SLOT(on_loadSchedule()));
 
     /* Update window */
     OnTimerUTCLabel();
     TimerUTCLabel.start(GUI_TIMER_UTC_TIME_LABEL);
 
-    /* S-meter settings */
-    bool ensmeter = Settings.Get("Hamlib", "ensmeter", false);
-    if(ensmeter)
+	bool ensmeter = false;
+#if QT_VERSION < 0x040000
+    if(pRemoteMenu && pRemoteMenu->menu()->isItemChecked(SMETER_MENU_ID))
+		ensmeter = true;
+#else
+    ensmeter = actionEnable_S_Meter->isChecked();
+#endif
+	if(ensmeter)
         EnableSMeter();
     else
         DisableSMeter();
-
-#if QT_VERSION < 0x040000
-    if(pRemoteMenu) pRemoteMenu->menu()->setItemChecked(SMETER_MENU_ID, ensmeter);
-#else
-    actionEnable_S_Meter->setChecked(ensmeter);
-#endif
 }
 
 void StationsDlg::OnTimerList()
@@ -1481,67 +1356,186 @@ void StationsDlg::OnTimerList()
     SetStationsView();
 }
 
-void StationsDlg::SetSortSettings(const CDRMSchedule::ESchedMode eNewSchM)
+void StationsDlg::LoadSettings(const CSettings& Settings)
 {
-    /* Store the current sort settings before switching */
-    if (eNewSchM != DRMSchedule.GetSchedMode())
-    {
-        switch (DRMSchedule.GetSchedMode())
-        {
-        case CDRMSchedule::SM_DRM:
-            Settings.Put("Stations Dialog", "sortcolumndrm", currentSortColumn());
-            Settings.Put("Stations Dialog", "sortascendingdrm", bCurrentSortAscending);
-            break;
+    /* recover window size and position */
+    CWinGeom s;
+    Settings.Get("Stations Dialog", s);
+    const QRect WinGeom(s.iXPos, s.iYPos, s.iWSize, s.iHSize);
+    if (WinGeom.isValid() && !WinGeom.isEmpty() && !WinGeom.isNull())
+        setGeometry(WinGeom);
 
-        case CDRMSchedule::SM_ANALOG:
-            Settings.Put("Stations Dialog", "sortcolumnanalog", currentSortColumn());
-            Settings.Put("Stations Dialog", "sortascendinganalog", bCurrentSortAscending);
-            break;
-        }
+    /* S-meter settings */
+    bool ensmeter = Settings.Get("Hamlib", "ensmeter", false);
+
+#if QT_VERSION < 0x040000
+    if(pRemoteMenu) pRemoteMenu->menu()->setItemChecked(SMETER_MENU_ID, ensmeter);
+#else
+    actionEnable_S_Meter->setChecked(ensmeter);
+#endif
+
+#if QT_VERSION < 0x040000
+    /* Set stations preview */
+    /* Retrieve the setting saved into the .ini file */
+    switch (Settings.Get("Stations Dialog", "preview", NUM_SECONDS_PREV_5MIN))
+    {
+    case NUM_SECONDS_PREV_5MIN:
+        pPreviewMenu->setItemChecked(1, TRUE);
+        DRMSchedule.SetSecondsPreview(NUM_SECONDS_PREV_5MIN);
+        break;
+
+    case NUM_SECONDS_PREV_15MIN:
+        pPreviewMenu->setItemChecked(2, TRUE);
+        DRMSchedule.SetSecondsPreview(NUM_SECONDS_PREV_15MIN);
+        break;
+
+    case NUM_SECONDS_PREV_30MIN:
+        pPreviewMenu->setItemChecked(3, TRUE);
+        DRMSchedule.SetSecondsPreview(NUM_SECONDS_PREV_30MIN);
+        break;
+
+    default: /* case 0, also takes care of out of value parameters */
+        pPreviewMenu->setItemChecked(0, TRUE);
+        DRMSchedule.SetSecondsPreview(0);
+        break;
     }
-
-    /* Set sorting behaviour of the list */
-    int sortColumn = 0;
-    switch (eNewSchM)
+#else
+    if(Settings.Get("Stations Dialog", "showall", true))
+        actionShowAllStations->setChecked(true);
+    else
+        actionShowOnlyActiveStations->setChecked(true);
+    int iPrevSecs = Settings.Get("Stations Dialog", "preview", NUM_SECONDS_PREV_5MIN);
+    DRMSchedule.SetSecondsPreview(iPrevSecs);
+    switch (iPrevSecs)
     {
-    case CDRMSchedule::SM_DRM:
+    case NUM_SECONDS_PREV_5MIN:
+        action5minutes->setChecked(true);
+        break;
+
+    case NUM_SECONDS_PREV_15MIN:
+        action5minutes->setChecked(true);
+        break;
+
+    case NUM_SECONDS_PREV_30MIN:
+        action30minutes->setChecked(true);
+        break;
+
+    default: /* case 0, also takes care of out of value parameters */
+        actionDisabled->setChecked(true);
+        break;
+    }
+#endif
+    /* get sorting and filtering behaviour */
+    int sortColumn = 0;
+	ERecMode eRecSM = DRMReceiver.GetReceiverMode();
+    switch (eRecSM)
+    {
+    case RM_DRM:
+		DRMSchedule.SetSchedMode(CDRMSchedule::SM_DRM);
         sortColumn = Settings.Get("Stations Dialog", "sortcolumndrm", 0);
         bCurrentSortAscending = Settings.Get("Stations Dialog", "sortascendingdrm", TRUE);
+		targetFilter = Settings.Get("Stations Dialog", "targetfilterdrm", string("")).c_str();
+		countryFilter = Settings.Get("Stations Dialog", "countryfilterdrm", string("")).c_str();
+		languageFilter = Settings.Get("Stations Dialog", "languagefilterdrm", string("")).c_str();
+		{
+			string url = Settings.Get("Stations Dialog", "DRM URL", string(DRM_SCHEDULE_URL));
+			qurl = new QUrl(QString(url.c_str()));
+		}
+#if QT_VERSION < 0x040000
+        schedFileName = DRMSCHEDULE_INI_FILE_NAME;
+#endif
         break;
 
-    case CDRMSchedule::SM_ANALOG:
+    case RM_AM:
+		DRMSchedule.SetSchedMode(CDRMSchedule::SM_ANALOG);
         sortColumn = Settings.Get("Stations Dialog", "sortcolumnanalog", 0);
         bCurrentSortAscending = Settings.Get("Stations Dialog", "sortascendinganalog", TRUE);
-        break;
+		targetFilter = Settings.Get("Stations Dialog", "targetfilteranalog", string("")).c_str();
+		countryFilter = Settings.Get("Stations Dialog", "countryfilteranalog", string("")).c_str();
+		languageFilter = Settings.Get("Stations Dialog", "languagefilteranalog", string("")).c_str();
+		SetAnalogUrl();
+		break;
+	default: // can't happen!
+		;
     }
+
 #if QT_VERSION < 0x040000
     ListViewStations->setSorting(sortColumn, bCurrentSortAscending);
 # if QT_VERSION < 0x030000
     iSortColumn = sortColumn;
+# else
+    if(targetFilter!="") {
+        for(int i=0; i<ComboBoxFilterTarget->count(); i++) {
+            if(ComboBoxFilterTarget->text(i) == targetFilter)
+                ComboBoxFilterTarget->setCurrentItem(i);
+		}
+	}
+    if(countryFilter!="") {
+        for(int i=0; i<ComboBoxFilterCountry->count(); i++) {
+            if(ComboBoxFilterCountry->text(i) == countryFilter)
+                ComboBoxFilterCountry->setCurrentItem(i);
+		}
+	}
+    if(languageFilter!="") {
+        for(int i=0; i<ComboBoxFilterLanguage->count(); i++) {
+            if(ComboBoxFilterLanguage->text(i) == languageFilter)
+                ComboBoxFilterLanguage->setCurrentItem(i);
+		}
+	}
 # endif
 #else
     ListViewStations->sortByColumn(sortColumn, bCurrentSortAscending?Qt::AscendingOrder:Qt::DescendingOrder);
+	ComboBoxFilterLanguage->setEditText(targetFilter);
+	ComboBoxFilterLanguage->setEditText(countryFilter);
+	ComboBoxFilterLanguage->setEditText(languageFilter);
 #endif
 }
 
-void StationsDlg::SetCurrentSchedule(const CDRMSchedule::ESchedMode eNewSchM)
+void StationsDlg::SaveSettings(CSettings& Settings)
 {
-    SetSortSettings(eNewSchM);
+    Settings.Put("Stations Dialog", "DRM URL", string(qurl->toString().latin1()));
+    switch (DRMSchedule.GetSchedMode())
+    {
+    case CDRMSchedule::SM_DRM:
+        Settings.Put("Stations Dialog", "sortcolumndrm", currentSortColumn());
+        Settings.Put("Stations Dialog", "sortascendingdrm", bCurrentSortAscending);
+		Settings.Put("Stations Dialog", "targetfilterdrm", targetFilter.latin1());
+		Settings.Put("Stations Dialog", "countryfilterdrm", countryFilter.latin1());
+		Settings.Put("Stations Dialog", "languagefilterdrm", languageFilter.latin1());
+        break;
 
-    /* Save new mode */
-    DRMSchedule.SetSchedMode(eNewSchM);
+    case CDRMSchedule::SM_ANALOG:
+        Settings.Put("Stations Dialog", "sortcolumnanalog", currentSortColumn());
+        Settings.Put("Stations Dialog", "sortascendinganalog", bCurrentSortAscending);
+		Settings.Put("Stations Dialog", "targetfilteranalog", targetFilter.latin1());
+		Settings.Put("Stations Dialog", "countryfilteranalog", countryFilter.latin1());
+		Settings.Put("Stations Dialog", "languagefilteranalog", languageFilter.latin1());
+        break;
+    }
+#if QT_VERSION < 0x040000
+    Settings.Put("Hamlib", "ensmeter", (pRemoteMenu==NULL)?false:pRemoteMenu->menu()->isItemChecked(SMETER_MENU_ID));
+#else
+    Settings.Put("Hamlib", "ensmeter", actionEnable_S_Meter->isChecked());
+#endif
+
+    /* Set window geometry data in DRMReceiver module */
+    QRect WinGeom = geometry();
+
+    CWinGeom c;
+    c.iXPos = WinGeom.x();
+    c.iYPos = WinGeom.y();
+    c.iHSize = WinGeom.height();
+    c.iWSize = WinGeom.width();
+    Settings.Put("Stations Dialog", c);
+
+    /* Store preview settings */
+    Settings.Put("Stations Dialog", "preview", DRMSchedule.GetSecondsPreview());
 }
 
 void StationsDlg::LoadSchedule(CDRMSchedule::ESchedMode eNewSchM)
 {
-    SetSortSettings(eNewSchM);
-
     ClearStationsView();
     /* Empty the string lists for combos filter */
-
-    targetFilter="";
-    countryFilter="";
-    languageFilter="";
 
     DRMSchedule.ListTargets = QStringList("");
     DRMSchedule.ListCountries = QStringList("");
@@ -1557,7 +1551,6 @@ void StationsDlg::LoadSchedule(CDRMSchedule::ESchedMode eNewSchM)
     DRMSchedule.ListTargets.sort();
     DRMSchedule.ListCountries.sort();
     DRMSchedule.ListLanguages.sort();
-
 
     int i;
 #if QT_VERSION < 0x040000
