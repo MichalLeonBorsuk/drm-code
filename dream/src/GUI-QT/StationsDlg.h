@@ -58,6 +58,7 @@ typedef QNetworkOperation QNetworkReply; // needed to keep moc happy
 # include "ui_StationsDlgbase.h"
 #endif
 
+#include "DialogUtil.h"
 #include "../DrmReceiver.h"
 #include "../util/Vector.h"
 #include "../util/Settings.h"
@@ -317,6 +318,7 @@ protected:
 	RemoteMenu*		pRemoteMenu;
 	QString		okMessage, badMessage;
 	QString		languageFilter,targetFilter,countryFilter;
+	CEventFilter	ef;
 
 signals:
 	void subscribeRig();

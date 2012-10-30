@@ -1249,16 +1249,18 @@ void StationsDlg::SetAnalogUrl()
 #endif
 }
 
-void StationsDlg::hideEvent(QHideEvent*)
+void StationsDlg::hideEvent(QHideEvent* e)
 {
+    EVENT_FILTER(e);
     /* Deactivate real-time timers */
     TimerList.stop();
     TimerUTCLabel.stop();
     DisableSMeter();
 }
 
-void StationsDlg::showEvent(QShowEvent*)
+void StationsDlg::showEvent(QShowEvent* e)
 {
+    EVENT_FILTER(e);
     /* Activate real-time timer when window is shown */
     TimerList.start(GUI_TIMER_LIST_VIEW_STAT); /* Stations list */
     TimerUTCLabel.start(GUI_TIMER_UTC_TIME_LABEL);
