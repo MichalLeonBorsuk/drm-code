@@ -795,8 +795,9 @@ void FDRMDialog::ChangeGUIModeToFM()
     pFMDlg->show();
 }
 
-void FDRMDialog::showEvent(QShowEvent*)
+void FDRMDialog::showEvent(QShowEvent* e)
 {
+	EVENT_FILTER(e);
     if (Settings.Get("DRM Dialog", "Stations Dialog visible", false))
         OnViewStationsDlg();
     else
@@ -833,8 +834,9 @@ void FDRMDialog::showEvent(QShowEvent*)
     Timer.start(GUI_CONTROL_UPDATE_TIME);
 }
 
-void FDRMDialog::hideEvent(QHideEvent*)
+void FDRMDialog::hideEvent(QHideEvent* e)
 {
+	EVENT_FILTER(e);
     /* Deactivate real-time timers */
     Timer.stop();
 

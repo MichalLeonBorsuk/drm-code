@@ -100,6 +100,7 @@ public:
 protected:
 	CDRMReceiver&	DRMReceiver;
 	CSettings&	Settings;
+	CEventFilter	ef;
 
 	QTimer	Timer;
 	QTimer	TimerPLLPhaseDial;
@@ -130,6 +131,7 @@ protected:
 	QTimer			Timer;
 	QTimer			TimerPLLPhaseDial;
 	CAMSSDlg		AMSSDlg;
+	CEventFilter	ef;
 
 	void UpdateControls();
 	void AddWhatsThisHelp();

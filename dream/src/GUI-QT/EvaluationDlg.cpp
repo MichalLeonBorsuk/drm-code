@@ -304,8 +304,9 @@ void systemevalDlg::UpdateControls()
     }
 }
 
-void systemevalDlg::showEvent(QShowEvent*)
+void systemevalDlg::showEvent(QShowEvent* e)
 {
+	EVENT_FILTER(e);
     /* Restore chart windows */
     const size_t iNumChartWin = Settings.Get("System Evaluation Dialog", "numchartwin", 0);
     for (size_t i = 0; i < iNumChartWin; i++)
@@ -347,8 +348,9 @@ void systemevalDlg::showEvent(QShowEvent*)
 #endif
 }
 
-void systemevalDlg::hideEvent(QHideEvent*)
+void systemevalDlg::hideEvent(QHideEvent* e)
 {
+	EVENT_FILTER(e);
 #if QT_VERSION >= 0x040000  
     /* Notify the MainPlot of hideEvent */
     MainPlot->deactivate();

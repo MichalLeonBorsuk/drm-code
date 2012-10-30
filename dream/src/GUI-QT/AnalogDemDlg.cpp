@@ -246,8 +246,9 @@ void AnalogDemDlg::OnSwitchToFM()
 	emit SwitchMode(RM_FM);
 }
 
-void AnalogDemDlg::showEvent(QShowEvent*)
+void AnalogDemDlg::showEvent(QShowEvent* e)
 {
+	EVENT_FILTER(e);
 	OnTimer();
 	OnTimerPLLPhaseDial();
 	/* Set correct schedule */
@@ -273,8 +274,9 @@ void AnalogDemDlg::showEvent(QShowEvent*)
 #endif
 }
 
-void AnalogDemDlg::hideEvent(QHideEvent*)
+void AnalogDemDlg::hideEvent(QHideEvent* e)
 {
+	EVENT_FILTER(e);
 #if QT_VERSION >= 0x040000  
     /* Notify the MainPlot of hideEvent */
     MainPlot->deactivate();
@@ -874,8 +876,9 @@ CAMSSDlg::CAMSSDlg(CDRMReceiver& NDRMR, CSettings& NSettings,
 
 }
 
-void CAMSSDlg::hideEvent(QHideEvent*)
+void CAMSSDlg::hideEvent(QHideEvent* e)
 {
+	EVENT_FILTER(e);
 	/* stop real-time timers */
 	Timer.stop();
 	TimerPLLPhaseDial.stop();
@@ -890,8 +893,9 @@ void CAMSSDlg::hideEvent(QHideEvent*)
 	Settings.Put("AMSS Dialog", s);
 }
 
-void CAMSSDlg::showEvent(QShowEvent*)
+void CAMSSDlg::showEvent(QShowEvent* e)
 {
+	EVENT_FILTER(e);
 	OnTimer();
 	OnTimerPLLPhaseDial();
 
