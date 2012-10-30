@@ -26,22 +26,17 @@
 \******************************************************************************/
 
 #include "MatlibStdToolbox.h"
-
+#include "../GlobalDefinitions.h"
 
 #ifdef HAVE_FFTW3_H
-
-# ifdef HAVE_PTHREAD_H
-static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
-#  define MUTEX_LOCK() pthread_mutex_lock(&mutex);
-#  define MUTEX_UNLOCK() pthread_mutex_unlock(&mutex);
-# else
-#  error TODO
-# endif
-
+/* The mutex need to be application wide,
+   only fftw_execute() is thread safe */
+static CMutex mutex;
+# define MUTEX_LOCK() mutex.Lock()
+# define MUTEX_UNLOCK() mutex.Unlock()
 # define PLANNER_FLAGS (FFTW_ESTIMATE | FFTW_DESTROY_INPUT)
-/* For testing purpose */
+/* Warning: for testing purpose only */
 //# define PLANNER_FLAGS FFTW_EXHAUSTIVE
-
 #endif
 
 
