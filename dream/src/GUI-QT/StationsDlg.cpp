@@ -1450,6 +1450,9 @@ void StationsDlg::LoadSettings(const CSettings& Settings)
 
 void StationsDlg::SaveSettings(CSettings& Settings)
 {
+#if QT_VERSION < 0x040000
+	return; // TODO remove me
+#endif
     Settings.Put("Stations Dialog", "DRM URL", string(qurl->toString().latin1()));
     switch (DRMSchedule.GetSchedMode())
     {
