@@ -511,8 +511,8 @@ void CDRMPlot::SetPlotStyle(const int iNewStyleID)
 	/* Apply colors */
 	grid.setMajPen(QPen(MainGridColorPlot, 0, Qt::DotLine));
 	grid.setMinPen(QPen(MainGridColorPlot, 0, Qt::DotLine));
-	vcurvegrid.setPen(QPen(MainGridColorPlot, 0, Qt::DotLine));
-	hcurvegrid.setPen(QPen(MainGridColorPlot, 0, Qt::DotLine));
+	vcurvegrid.setPen(QPen(MainGridColorPlot, 5, Qt::DotLine));
+	hcurvegrid.setPen(QPen(MainGridColorPlot, 5, Qt::DotLine));
 	plot->setCanvasBackground(QColor(BckgrdColorPlot));
 
 	/* Make sure that plot are being initialized again */
