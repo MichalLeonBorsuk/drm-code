@@ -1004,7 +1004,11 @@ Institute for Communication Technology</string>
                <widget class="QComboBox" name="ComboBoxTextMessage"/>
               </item>
               <item>
-               <widget class="QTextEdit" name="MultiLineEditTextMessage"/>
+               <widget class="QTextEdit" name="MultiLineEditTextMessage">
+                <property name="acceptRichText">
+                 <bool>false</bool>
+                </property>
+               </widget>
               </item>
               <item>
                <layout class="QHBoxLayout">

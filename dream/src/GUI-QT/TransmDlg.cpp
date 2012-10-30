@@ -54,13 +54,16 @@
 #  define ButtonGroupGetCurrentId(c) (c->selected()?c->id(c->selected()):int(-1))
 # else
 #  define ButtonGroupGetCurrentId(c) (c)->selectedId()
-#endif
+# endif
 # define ComboBoxClear(c) (c)->clear()
 # define ComboBoxInsertItem(c, t, i) (c)->insertItem(t, i)
 # define ComboBoxSetCurrentItem(c, i) (c)->setCurrentItem(i)
 # define ProgressBarSetRange(c, r) (c)->setTotalSteps(r)
 # define ProgressBarSetValue(c, v) (c)->setProgress(v)
 # define FromUtf8(s) QString::fromUtf8(s)
+# define TextEditClear(c) (c)->clear()
+# define TextEditClearModified(c) (c)->setEdited(FALSE)
+# define TextEditIsModified(c) (c)->edited()
 # define ToUtf8(s) (s).latin1()
 # define WhatsThis(c, s) QWhatsThis::add(c ,s)
 #else
@@ -71,6 +74,9 @@
 # define ProgressBarSetRange(c, r) (c)->setRange(0, r)
 # define ProgressBarSetValue(c, v) (c)->setValue(v)
 # define FromUtf8(s) QString::fromUtf8(s)
+# define TextEditClear(c) (c)->clear()
+# define TextEditClearModified(c) (c)->setModified(FALSE)
+# define TextEditIsModified(c) (c)->isModified()
 # define ToUtf8(s) (s).toUtf8().constData()
 # define WhatsThis(c, s) (c)->setWhatsThis(s)
 #endif
@@ -288,7 +294,7 @@ TransmDialog::TransmDialog(CSettings& NSettings,
 	ComboBoxInsertItem(ComboBoxMSCConstellation, tr("SM 64-QAM"), 1);
 
 // These modes should not be used right now, TODO
-// (DF) I reenabled these, seems to work, at least with dream
+// DF: I reenabled those, because it seems to work, at least with dream
 	ComboBoxInsertItem(ComboBoxMSCConstellation, tr("HMsym 64-QAM"), 2);
 	ComboBoxInsertItem(ComboBoxMSCConstellation, tr("HMmix 64-QAM"), 3);
 
@@ -441,12 +447,9 @@ TransmDialog::TransmDialog(CSettings& NSettings,
 	/* Insert item in combo box, display text and set item to our text */
 	ComboBoxInsertItem(ComboBoxTextMessage, QString().setNum(1), 1);
 	ComboBoxSetCurrentItem(ComboBoxTextMessage, 1);
-#if QT_VERSION < 0x040000
-	MultiLineEditTextMessage->insertLine(FromUtf8(vecstrTextMessage[1].c_str()));
-#else
-	MultiLineEditTextMessage->append(FromUtf8(vecstrTextMessage[1].c_str()));
-#endif
-	iIDCurrentText = 1;
+
+	/* Update the TextEdit with the default text */
+	OnComboBoxTextMessageActivated(1);
 
 	/* Now make sure that the text message flag is activated in global struct */
 	Service.AudioParam.bTextflag = TRUE;
@@ -911,16 +914,18 @@ void TransmDialog::EnableData(const _BOOLEAN bFlag)
 
 _BOOLEAN TransmDialog::GetMessageText(const int iID)
 {
-#if QT_VERSION < 0x040000
 	_BOOLEAN bTextIsNotEmpty = TRUE;
 
 	/* Check if text control is not empty */
-	if (MultiLineEditTextMessage->edited())
+	if (TextEditIsModified(MultiLineEditTextMessage))
 	{
 		/* Check size of container. If not enough space, enlarge */
 		if (iID == vecstrTextMessage.Size())
 			vecstrTextMessage.Enlarge(1);
 
+		/* DF: I did some test on both Qt3 and Qt4, and
+		   UTF8 char are well preserved */
+#if QT_VERSION < 0x040000
 		/* First line */
 		vecstrTextMessage[iID] = MultiLineEditTextMessage->textLine(0).utf8().data();
 		/* Other lines */
@@ -935,28 +940,20 @@ _BOOLEAN TransmDialog::GetMessageText(const int iID)
 			vecstrTextMessage[iID].
 				append(MultiLineEditTextMessage->textLine(i).utf8());
 		}
-	}
-	else
-		bTextIsNotEmpty = FALSE;
 #else
-	/* Get the text */
-	QString text = MultiLineEditTextMessage->toPlainText();
+		/* Get the text from MultiLineEditTextMessage */
+		QString text = MultiLineEditTextMessage->toPlainText();
 
-	/* Check if text is not empty */
-	_BOOLEAN bTextIsNotEmpty = !text.isEmpty();
-	if (bTextIsNotEmpty)
-	{
-		/* Check size of container. If not enough space, enlarge */
-		if (iID == vecstrTextMessage.Size())
-			vecstrTextMessage.Enlarge(1);
-
-		/* Replace the Line Feed with a Vertical Tab and a Line Feed */
-		text.replace("\x0A", "\x0B\x0A");
+		/* Each line is already separated by a newline char,
+		   so no special processing is further required */
 
 		/* Save the text */
 		vecstrTextMessage[iID] = ToUtf8(text);
-	}
 #endif
+
+	}
+	else
+		bTextIsNotEmpty = FALSE;
 	return bTextIsNotEmpty;
 }
 
@@ -971,10 +968,8 @@ void TransmDialog::OnPushButtonAddText()
 			const int iNewID = vecstrTextMessage.Size() - 1;
 			ComboBoxInsertItem(ComboBoxTextMessage, QString().setNum(iNewID), iNewID);
 			/* Clear added text */
-			MultiLineEditTextMessage->clear();
-#if QT_VERSION < 0x040000
-			MultiLineEditTextMessage->setEdited(FALSE);
-#endif
+			TextEditClear(MultiLineEditTextMessage);
+			TextEditClearModified(MultiLineEditTextMessage);
 		}
 	}
 	else
@@ -994,10 +989,8 @@ void TransmDialog::OnButtonClearAllText()
 	ComboBoxClear(ComboBoxTextMessage);
 	ComboBoxInsertItem(ComboBoxTextMessage, "new", 0);
 	/* Clear multi line edit */
-	MultiLineEditTextMessage->clear();
-#if QT_VERSION < 0x040000
-	MultiLineEditTextMessage->setEdited(FALSE);
-#endif
+	TextEditClear(MultiLineEditTextMessage);
+	TextEditClearModified(MultiLineEditTextMessage);
 }
 
 void TransmDialog::OnPushButtonAddFileName()
@@ -1089,18 +1082,15 @@ void TransmDialog::OnComboBoxTextMessageActivated(int iID)
 	iIDCurrentText = iID;
 
 	/* Set text control with selected message */
-	MultiLineEditTextMessage->clear();
-#if QT_VERSION < 0x040000
-	MultiLineEditTextMessage->setEdited(FALSE);
-#endif
+	TextEditClear(MultiLineEditTextMessage);
+	TextEditClearModified(MultiLineEditTextMessage);
 	if (iID != 0)
 	{
+		/* Get the text */
+		QString text = FromUtf8(vecstrTextMessage[iID].c_str());
+
 		/* Write stored text in multi line edit control */
-#if QT_VERSION < 0x040000
-		MultiLineEditTextMessage->insertLine(FromUtf8(vecstrTextMessage[iID].c_str()));
-#else
-		MultiLineEditTextMessage->append(FromUtf8(vecstrTextMessage[iID].c_str()));
-#endif
+		MultiLineEditTextMessage->setText(text);
 	}
 }
 
@@ -1677,11 +1667,11 @@ void TransmDialog::AddWhatsThisHelp()
 		"<li><i>UTC+Offset:</i> Same as UTC but with the addition of an offset "
 		"in hours from local time</li></ul>");
 
-#if QT_VERSION < 0x040000
+# if QT_VERSION < 0x040000
 	WhatsThis(ButtonGroupCurrentTime, strCurrentTime);
-#else
+# else
 	WhatsThis(GroupBoxCurrentTime, strCurrentTime);
-#endif
+# endif
 	WhatsThis(RadioButtonCurTimeOff, strCurrentTime);
 	WhatsThis(RadioButtonCurTimeLocal, strCurrentTime);
 	WhatsThis(RadioButtonCurTimeUTC, strCurrentTime);
