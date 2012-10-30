@@ -155,6 +155,7 @@ protected:
     QString serviceSelector(CParameter&, int);
     void showTextMessage(const QString&);
     void showServiceInfo(const CService&);
+	CEventFilter ef;
 
 public slots:
     void OnTimer();

@@ -447,15 +447,17 @@ void FMDialog::ClearDisplay()
 	//LabelServiceLabel->setText(tr("Scanning..."));
 }
 
-void FMDialog::showEvent(QShowEvent*)
+void FMDialog::showEvent(QShowEvent* e)
 {
+	EVENT_FILTER(e);
 	/* Set timer for real-time controls */
 	OnTimer();
  	Timer.start(GUI_CONTROL_UPDATE_TIME);
 }
 
-void FMDialog::hideEvent(QHideEvent*)
+void FMDialog::hideEvent(QHideEvent* e)
 {
+	EVENT_FILTER(e);
 	/* Deactivate real-time timer */
 	Timer.stop();
 }

@@ -96,6 +96,7 @@ protected:
 	_BOOLEAN		bStationsDlgWasVis;
 	_BOOLEAN		bEPGDlgWasVis;
 	ERecMode		eReceiverMode;
+    CEventFilter	ef;
 
 	void SetStatus(CMultColorLED* LED, ETypeRxStatus state);
 	virtual void	closeEvent(QCloseEvent* ce);

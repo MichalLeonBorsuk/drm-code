@@ -33,6 +33,7 @@
 #include "ui_systemevalDlgbase.h"
 #include "DRMPlot.h"
 
+#include "DialogUtil.h"
 #include "MultColorLED.h"
 #include "../GlobalDefinitions.h"
 #include "../util/Vector.h"
@@ -90,6 +91,7 @@ protected:
 	QMenu*			pTreeWidgetContextMenu;
 	CDRMPlot::ECharType eNewCharType;
 	vector<CDRMPlot*>	vecpDRMPlots;
+	CEventFilter	ef;
 
 public slots:
 	void OnTimer();

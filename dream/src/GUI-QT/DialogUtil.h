@@ -38,12 +38,14 @@
 #if QT_VERSION < 0x040000
 # include <qaction.h>
 # include <qpopupmenu.h>
+# include <qevent.h>
 # include "AboutDlgbase.h"
 #else
 # include "ui_AboutDlgbase.h"
 # include <QMenu>
 # include <QDialog>
 # include <QAction>
+# include <QEvent>
 #endif
 
 class CRig;
@@ -143,6 +145,41 @@ public:
 		return QColor((iValue >> 16) & 255, (iValue >> 8) & 255, iValue & 255);
 	}
 };
+
+/* The purpose of this class is to prevent showEvent and
+   hideEvent from spurious event like unmatched show/hide,
+   which cause some problem for window save and restore.
+   The class may be adapted for other type of filtering
+   as well. The member isValid() return FALSE when the
+   event must be ignored. */
+class CEventFilter
+{
+public:
+	CEventFilter() : eLastEventType(QEvent::Hide) {}
+	~CEventFilter() {}
+	bool isValid(const QEvent* event)
+	{
+		bool bValid = FALSE;
+		QEvent::Type eEventType = event->type();
+		switch (eEventType)
+		{
+		case QEvent::Hide:
+			bValid = eLastEventType == QEvent::Show;
+			eLastEventType = eEventType;
+			break;
+		case QEvent::Show:
+			bValid = eLastEventType == QEvent::Hide;
+			eLastEventType = eEventType;
+			break;
+		default:
+			break;
+		}
+		return bValid;
+	}
+protected:
+	QEvent::Type eLastEventType; 
+};
+#define EVENT_FILTER(e) do { if (!ef.isValid(e)) return; } while(0)
 
 
 inline void SetDialogCaption(QDialog* pDlg, const QString sCap)
