@@ -201,7 +201,8 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& NSettings, CRig& rig,
     pSlideShowDlg = new SlideShowViewer(DRMReceiver, Settings);
 
     /* Stations window */
-    pStationsDlg = new StationsDlg(DRMReceiver, Settings, rig, this);
+    pStationsDlg = new StationsDlg(DRMReceiver, rig, this);
+	pStationsDlg->LoadSettings(Settings);
 
     /* Live Schedule window */
     pLiveScheduleDlg = new LiveScheduleDlg(DRMReceiver, NULL);
@@ -417,6 +418,7 @@ void FDRMDialog::OnTimer()
     case RM_DRM:
         if(isVisible()==false)
         {
+			pStationsDlg->SaveSettings(Settings);
             ChangeGUIModeToDRM();
         }
         Parameters.Lock();
@@ -436,9 +438,11 @@ void FDRMDialog::OnTimer()
             ClearDisplay();
         break;
     case RM_AM:
+		pStationsDlg->SaveSettings(Settings);
         ChangeGUIModeToAM();
         break;
     case RM_FM:
+		pStationsDlg->SaveSettings(Settings);
         pStationsDlg->hide(); // in case open in AM mode - AM dialog can't hide this
         pLiveScheduleDlg->hide(); // in case open in AM mode - AM dialog can't hide this
         ChangeGUIModeToFM();
@@ -863,6 +867,7 @@ void FDRMDialog::hideEvent(QHideEvent* e)
     pEPGDlg->hide();
     pStationsDlg->hide();
 
+	pStationsDlg->SaveSettings(Settings);
     pLiveScheduleDlg->SaveSettings(Settings);
     pLogging->SaveSettings(Settings);
 
@@ -979,20 +984,15 @@ void FDRMDialog::OnSelectDataService(int shortId)
 
 void FDRMDialog::OnViewStationsDlg()
 {
-    /* Set correct schedule */
     if(DRMReceiver.GetReceiverMode() == RM_DRM)
     {
-        pStationsDlg->SetCurrentSchedule(CDRMSchedule::SM_DRM);
         Settings.Put("DRM Dialog", "Stations Dialog visible", TRUE);
     }
     else
     {
-        pStationsDlg->SetCurrentSchedule(CDRMSchedule::SM_ANALOG);
         Settings.Put("AM Dialog", "Stations Dialog visible", TRUE);
     }
 
-    if(pStationsDlg->isVisible()) // show gets optioised out and we want to make sure the schedule is loaded
-        pStationsDlg->hide();
     /* Show stations window */
     pStationsDlg->show();
 }

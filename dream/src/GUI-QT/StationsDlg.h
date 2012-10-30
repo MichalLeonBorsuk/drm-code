@@ -254,19 +254,15 @@ class StationsDlg : public CStationsDlgBase
 
 public:
 
-	StationsDlg(CDRMReceiver&, CSettings&, CRig&, QWidget* parent = 0,
+	StationsDlg(CDRMReceiver&, CRig&, QWidget* parent = 0,
 		const char* name = 0, bool modal = FALSE, Qt::WFlags f = 0);
 	virtual ~StationsDlg();
-
-	void LoadSchedule(CDRMSchedule::ESchedMode eNewSchM);
-	void SetCurrentSchedule(const CDRMSchedule::ESchedMode eNewSchM);
-
 
 	void LoadSettings(const CSettings&);
 	void SaveSettings(CSettings&);
 
-
 protected:
+	void			LoadSchedule(CDRMSchedule::ESchedMode eNewSchM);
 	void			SetFrequencyFromGUI(int);
 	void			SetStationsView();
 	void			ClearStationsView();
@@ -276,17 +272,15 @@ protected:
 	void			EnableSMeter();
 	void			DisableSMeter();
 	void			AddUpdateDateTime();
-	void			SetSortSettings(const CDRMSchedule::ESchedMode eNewSchM);
 	_BOOLEAN		showAll();
-	int			currentSortColumn();
+	int				currentSortColumn();
+	void			SetAnalogUrl();
 	_BOOLEAN		bCurrentSortAscending;
 #if QT_VERSION < 0x030000
 	int iSortColumn;
 #endif
 
 	CDRMReceiver&		DRMReceiver;
-	CSettings&		Settings;
-
 	CDRMSchedule		DRMSchedule;
 #if QT_VERSION < 0x040000
 	void			setupUi(QObject*);
