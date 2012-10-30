@@ -276,9 +276,7 @@ protected:
 	int				currentSortColumn();
 	void			SetAnalogUrl();
 	_BOOLEAN		bCurrentSortAscending;
-#if QT_VERSION < 0x030000
-	int iSortColumn;
-#endif
+	int				iSortColumn;
 
 	CDRMReceiver&		DRMReceiver;
 	CDRMSchedule		DRMSchedule;
@@ -323,7 +321,6 @@ protected:
 signals:
 	void subscribeRig();
 	void unsubscribeRig();
-	void loadSchedule();
 public slots:
 	void OnSigStr(double);
 	void OnTimerList();
@@ -349,6 +346,5 @@ public slots:
 	void on_ComboBoxFilterTarget_activated(const QString&);
 	void on_ComboBoxFilterCountry_activated(const QString&);
 	void on_ComboBoxFilterLanguage_activated(const QString&);
-	void on_loadSchedule();
 };
 #endif
