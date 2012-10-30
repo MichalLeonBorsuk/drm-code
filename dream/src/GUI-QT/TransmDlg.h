@@ -133,11 +133,12 @@ protected:
 
 	CSettings&			Settings;
 	CDRMTransmitter&	DRMTransmitter;
-	QMenuBar*			pMenu;
 #if QT_VERSION < 0x040000
+	QMenuBar*			pMenu;
 	QPopupMenu*			pSettingsMenu;
 #else
 	QMenu*				pSettingsMenu;
+	CAboutDlg			AboutDlg;
 #endif
 	QTimer				Timer;
 #ifdef ENABLE_TRANSM_CODECPARAMS
@@ -193,6 +194,6 @@ public slots:
 	void OnTextChangedServiceID(const QString& strID);
 	void OnTextChangedSndCrdIF(const QString& strIF);
 	void OnTimer();
-	void OnHelpWhatsThis();
+	void on_actionWhats_This();
 };
 #endif
