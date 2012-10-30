@@ -180,7 +180,7 @@ CAboutDlg::CAboutDlg(QWidget* parent, const char* name, bool modal, Qt::WFlags f
         "<i>Julian Cable</i> and the Broadcast Website and AFS features as well as many "
         "other GUI improvements were implemented by <i>Andrea Russo</i>."
         "<br>Right now the code is mainly maintained by <i>Julian Cable</i>."
-        "Quality Assurance and user testing is provided by <i>Simone St&ouml;ppler</i>"
+        " Quality Assurance and user testing is provided by <i>Simone St&ouml;ppler.</i>"
         "<br><br><br>"
         "<center><b>CREDITS</b></center><br>"
         +tr("We want to thank all the contributors to the Dream software (in "
