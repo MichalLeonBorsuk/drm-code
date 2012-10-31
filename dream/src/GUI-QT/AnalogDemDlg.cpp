@@ -131,7 +131,7 @@ AnalogDemDlg::AnalogDemDlg(CDRMReceiver& NDRMR, CSettings& NSettings,
 	/* Init main plot */
 	bool waterfall = Settings.Get("AM Dialog", "waterfall", false);
 #if QT_VERSION < 0x040000
-	ButtonWaterfall->setState(waterfall?QButton::On:QButton::Off);
+	ButtonWaterfall->setOn(waterfall);
 #else
 	ButtonWaterfall->setChecked(waterfall);
 #endif
@@ -172,7 +172,7 @@ AnalogDemDlg::AnalogDemDlg(CDRMReceiver& NDRMR, CSettings& NSettings,
 	PhaseDial->setOrigin(270);
 	PhaseDial->setNeedle(new QwtDialSimpleNeedle(QwtDialSimpleNeedle::Arrow));
 	PhaseDial->setFrameShadow(QwtDial::Plain);
-#if QT_VERSION < 0x040000
+#if QWT_VERSION < 0x060000
 	PhaseDial->setScaleOptions(QwtDial::ScaleTicks);
 #else
 	PhaseDial->setScaleComponents(QwtAbstractScaleDraw::Ticks);
@@ -864,7 +864,7 @@ CAMSSDlg::CAMSSDlg(CDRMReceiver& NDRMR, CSettings& NSettings,
 	PhaseDialAMSS->setOrigin(270);
 	PhaseDialAMSS->setNeedle(new QwtDialSimpleNeedle(QwtDialSimpleNeedle::Arrow));
 	PhaseDialAMSS->setFrameShadow(QwtDial::Plain);
-#if QT_VERSION < 0x040000
+#if QWT_VERSION < 0x600000
 	PhaseDialAMSS->setScaleOptions(QwtDial::ScaleTicks);
 #else
 	PhaseDialAMSS->setScaleComponents(QwtAbstractScaleDraw::Ticks);
