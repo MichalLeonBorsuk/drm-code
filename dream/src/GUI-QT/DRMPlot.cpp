@@ -1075,13 +1075,14 @@ void CDRMPlot::SetupInpPSD(_BOOLEAN bAnalog)
 	{
 		/* Make sure that line is bigger than the current plots height. Do this by
 		   setting the width to a very large value. TODO: better solution */
+#ifndef _MSC_VER
 		curve2.setPen(QPen(PassBandColorPlot, 10000, Qt::SolidLine, Qt::FlatCap));
 		curve2.attach(plot);
-
+#endif
 		/* Since we want to have the "filter bandwidth" bar behind the grid, we have
 		   to draw our own grid after the previous curve was inserted. TODO: better
 		   solution */
-		SetCurveGrid();
+		//SetCurveGrid();
 	}
 
 	/* Insert line for DC carrier */
@@ -1089,8 +1090,7 @@ void CDRMPlot::SetupInpPSD(_BOOLEAN bAnalog)
 	curve1.attach(plot);
 
 	/* Curve color */
-	main1curve.setPen(QPen(MainPenColorPlot, 2, Qt::SolidLine, Qt::RoundCap,
-	Qt::RoundJoin));
+	main1curve.setPen(QPen(MainPenColorPlot, 2, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
 
 	/* Add main curve */
 	main1curve.setTitle(tr("Input PSD"));
