@@ -50,24 +50,43 @@ contains(QT_VERSION, ^4\\..*) {
             }
             else {
               exists(/usr/lib/libqwt.so.6) {
-	        message("with qwt6")
+		message("with qwt6")
                 LIBS += /usr/lib/libqwt.so.6
                 exists(/usr/include/qwt6) {
                   INCLUDEPATH += /usr/include/qwt6
                 }
                 else {
-                  exists(libs/qwt) {
-                    INCLUDEPATH += libs/qwt
-                  } else {
-                    INCLUDEPATH += /usr/include/qwt
+                  else {
+                    exists(libs/qwt) {
+                      INCLUDEPATH += libs/qwt
+                    } else {
+                      INCLUDEPATH += /usr/include/qwt
+                    }
                   }
                 }
               }
               else {
-                error("no usable qwt version 6 found")
+                exists(/usr/lib/libqwt-qt4.so.5) {
+		  message("with qwt5")
+		  LIBS += /usr/lib/libqwt-qt4.so.5
+                  exists(/usr/include/qwt-qt4) {
+                      INCLUDEPATH += /usr/include/qwt-qt4
+		      message("with qwt5")
+		  } 
+		  else {
+                    exists(libs/qwt) {
+                      INCLUDEPATH += libs/qwt
+                    } else {
+                      INCLUDEPATH += /usr/include/qwt
+                    }
+                  }
+                }
+                else {
+                  error("no usable qwt version found")
               }
             }
           }
+         }
         }
         win32 {
             exists($$(QWT)) {
