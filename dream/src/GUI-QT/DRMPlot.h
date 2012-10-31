@@ -135,6 +135,10 @@
 #endif
 
 
+/* Define the style of marker */
+#define MARKER_STYLE Qt::DashLine
+
+
 /* Sometime between Qwt version some name may change, we fix this */
 #if QWT_VERSION < 0x050200
 # define LOWERBOUND lBound
