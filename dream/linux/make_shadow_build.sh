@@ -17,4 +17,5 @@ s:/usr/share/qt3:\$(QTDIR):
 s/dream-qt3/dream-qt2/g
 s:\.\./\.\./\.\./\.\./include/qt3:\$(QTDIR)/include:g
 s:/usr/lib/libqwt.so.4:/usr/lib/qt2/libqwt.so.4:
+cd ../dream
 EOT
