@@ -151,7 +151,8 @@ CDataEncoder::Init(CParameter & Param)
 // TODO we only use always the first service right now
 	const int iCurSelDataServ = 0;
 
-	Param.Lock();
+// CAudioSourceEncoderImplementation::InitInternalTx already have the lock
+//	Param.Lock();
 
 	iPacketLen =
 		Param.Service[iCurSelDataServ].DataParam.iPacketLen * SIZEOF__BYTE;
@@ -159,7 +160,8 @@ CDataEncoder::Init(CParameter & Param)
 
 	iPacketID = Param.Service[iCurSelDataServ].DataParam.iPacketID;
 
-	Param.Unlock();
+// CAudioSourceEncoderImplementation::InitInternalTx already have the lock
+//	Param.Unlock();
 
 	/* Init DAB MOT encoder object */
 	MOTSlideShowEncoder.Init();

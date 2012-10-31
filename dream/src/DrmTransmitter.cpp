@@ -44,10 +44,8 @@ void CDRMTransmitter::Start()
 
 void CDRMTransmitter::Stop()
 {
+    /* Set flag to request stop */
     TransmParam.eRunState = CParameter::STOP_REQUESTED;
-
-    if (pSoundInInterface) pSoundInInterface->Close();
-    if (pSoundOutInterface) pSoundOutInterface->Close();
 }
 
 void CDRMTransmitter::Run()
@@ -95,11 +93,29 @@ void CDRMTransmitter::Run()
         /* Transmit the signal ************************************************/
         TransmitData.WriteData(TransmParam, OFDMModBuf);
     }
+
+    /* Closing the sound interfaces */
+    if (pSoundInInterface) pSoundInInterface->Close();
+    if (pSoundOutInterface) pSoundOutInterface->Close();
+
+    /* Set flag to stopped */
     TransmParam.eRunState = CParameter::STOPPED;
 }
 
 void CDRMTransmitter::Init()
 {
+    /* (Re)Initialization of the buffers */
+    CarMapBuf.Clear();
+    SDCMapBuf.Clear();
+    MLCEncBuf.Clear();
+    IntlBuf.Clear();
+    GenFACDataBuf.Clear();
+    FACMapBuf.Clear();
+    GenSDCDataBuf.Clear();
+    OFDMModBuf.Clear();
+    AudSrcBuf.Clear();
+    DataBuf.Clear();
+
     /* Defines number of cells, important! */
     OFDMCellMapping.Init(TransmParam, CarMapBuf);
 
