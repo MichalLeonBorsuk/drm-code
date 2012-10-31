@@ -129,19 +129,31 @@ AnalogDemDlg::AnalogDemDlg(CDRMReceiver& NDRMR, CSettings& NSettings,
 #endif
 
 	/* Init main plot */
-	MainPlot->SetRecObj(&DRMReceiver);
-	MainPlot->SetPlotStyle(Settings.Get("System Evaluation Dialog", "plotstyle", 0));
-	MainPlot->SetupChart(CDRMPlot::INPUT_SIG_PSD_ANALOG);
+	bool waterfall = Settings.Get("AM Dialog", "waterfall", false);
+#if QT_VERSION < 0x040000
+	ButtonWaterfall->setState(waterfall?QButton::On:QButton::Off);
+#else
+	ButtonWaterfall->setChecked(waterfall);
+#endif
+	if(MainPlot)
+	{
+		MainPlot->SetRecObj(&DRMReceiver);
+		MainPlot->SetPlotStyle(Settings.Get("System Evaluation Dialog", "plotstyle", 0));
+		MainPlot->SetupChart(waterfall?CDRMPlot::INP_SPEC_WATERF:CDRMPlot::INPUT_SIG_PSD_ANALOG);
+	}
 
 	/* Add tool tip to show the user the possibility of choosing the AM IF */
         QString ptt = tr("Click on the plot to set the demodulation frequency");
+	if(MainPlot)
+	{
 #if QT_VERSION < 0x040000
-	MainPlot->setMargin(1);
+		MainPlot->setMargin(1);
         QToolTip::add(MainPlot, ptt);
 #else
+		MainPlot->plot->plotLayout()->setCanvasMargin(1);
         MainPlot->plot->setToolTip(ptt);
-	MainPlot->plot->plotLayout()->setCanvasMargin(1);
 #endif
+	}
 
 	SliderBandwidth->setRange(0, SOUNDCRD_SAMPLE_RATE / 2);
 #if QT_VERSION < 0x040000
@@ -270,7 +282,7 @@ void AnalogDemDlg::showEvent(QShowEvent* e)
 
 #if QT_VERSION >= 0x040000  
     /* Notify the MainPlot of showEvent */
-    MainPlot->activate();
+    if(MainPlot) MainPlot->activate();
 #endif
 }
 
@@ -279,7 +291,7 @@ void AnalogDemDlg::hideEvent(QHideEvent* e)
 	EVENT_FILTER(e);
 #if QT_VERSION >= 0x040000  
     /* Notify the MainPlot of hideEvent */
-    MainPlot->deactivate();
+    if(MainPlot) MainPlot->deactivate();
 #endif
 
 	/* stop real-time timers */
@@ -298,6 +310,13 @@ void AnalogDemDlg::hideEvent(QHideEvent* e)
 	s.iHSize = WinGeom.height();
 	s.iWSize = WinGeom.width();
 	Settings.Put("AM Dialog", s);
+	bool waterfall;
+#if QT_VERSION < 0x040000
+	waterfall = ButtonWaterfall->state() == QButton::On;
+#else
+	waterfall = ButtonWaterfall->isChecked();
+#endif
+	Settings.Put("AM Dialog", "waterfall", waterfall);
 }
 
 void AnalogDemDlg::closeEvent(QCloseEvent* ce)
@@ -555,7 +574,7 @@ void AnalogDemDlg::OnSliderBWChange(int value)
 	TextLabelBandWidth->setText(QString().setNum(value) + tr(" Hz"));
 
 	/* Update chart */
-	MainPlot->Update();
+	if(MainPlot) MainPlot->Update();
 }
 
 void AnalogDemDlg::OnCheckAutoFreqAcq()
@@ -618,16 +637,16 @@ void AnalogDemDlg::OnChartxAxisValSet(double dVal)
 	DRMReceiver.SetAMDemodAcq(dVal);
 
 	/* Update chart */
-	MainPlot->Update();
+	if(MainPlot) MainPlot->Update();
 }
 
 void AnalogDemDlg::OnButtonWaterfall()
 {
 	/* Toggle between normal spectrum plot and waterfall spectrum plot */
 #if QT_VERSION < 0x040000
-	if (ButtonWaterfall->state() == QButton::On)
+	if (MainPlot && ButtonWaterfall->state() == QButton::On)
 #else
-	if (ButtonWaterfall->isChecked())
+	if (MainPlot && ButtonWaterfall->isChecked())
 #endif
 		MainPlot->SetupChart(CDRMPlot::INP_SPEC_WATERF);
 	else
