@@ -634,11 +634,11 @@ void CDRMPlot::SetupAvIR()
 	plot->setAxisTitle(QwtPlot::yLeft, tr("IR [dB]"));
 
 	/* Curves color */
-	curve1.setPen(QPen(SpecLine1ColorPlot, 1, Qt::DotLine));
-	curve2.setPen(QPen(SpecLine1ColorPlot, 1, Qt::DotLine));
-	curve3.setPen(QPen(SpecLine2ColorPlot, 1, Qt::DotLine));
-	curve4.setPen(QPen(SpecLine2ColorPlot, 1, Qt::DotLine));
-	curve5.setPen(QPen(SpecLine1ColorPlot, 1, Qt::DotLine));
+	curve1.setPen(QPen(SpecLine1ColorPlot, 1, MARKER_STYLE));
+	curve2.setPen(QPen(SpecLine1ColorPlot, 1, MARKER_STYLE));
+	curve3.setPen(QPen(SpecLine2ColorPlot, 1, MARKER_STYLE));
+	curve4.setPen(QPen(SpecLine2ColorPlot, 1, MARKER_STYLE));
+	curve5.setPen(QPen(SpecLine1ColorPlot, 1, MARKER_STYLE));
 	main1curve.setPen(QPen(MainPenColorPlot, 2, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
 
 	/* Curves title */
@@ -982,7 +982,7 @@ void CDRMPlot::SetupPSD()
 	curve1.SETDATA(dX, dY, 2);
 
 	/* Insert line for DC carrier */
-	curve1.setPen(QPen(SpecLine1ColorPlot, 1, Qt::DotLine));
+	curve1.setPen(QPen(SpecLine1ColorPlot, 1, MARKER_STYLE));
 	curve1.attach(plot);
 
 	/* Curve color */
@@ -1029,7 +1029,7 @@ void CDRMPlot::SetupInpSpec()
 		MAX_VAL_INP_SPEC_Y_AXIS_DB);
 
 	/* Insert line for DC carrier */
-	curve1.setPen(QPen(SpecLine1ColorPlot, 1, Qt::DotLine));
+	curve1.setPen(QPen(SpecLine1ColorPlot, 1, MARKER_STYLE));
 	curve1.attach(plot);
 
 	/* Curve color */
@@ -1085,7 +1085,7 @@ void CDRMPlot::SetupInpPSD(_BOOLEAN bAnalog)
 	}
 
 	/* Insert line for DC carrier */
-	curve1.setPen(QPen(SpecLine1ColorPlot, 1, Qt::DotLine));
+	curve1.setPen(QPen(SpecLine1ColorPlot, 1, MARKER_STYLE));
 	curve1.attach(plot);
 
 	/* Curve color */
