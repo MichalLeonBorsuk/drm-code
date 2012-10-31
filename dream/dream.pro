@@ -13,6 +13,7 @@ CONFIG += qt warn_on debug thread
 INCLUDEPATH += src/GUI-QT
 INCLUDEPATH += libs
 OBJECTS_DIR = obj
+DEFINES += EXECUTABLE_NAME=$$TARGET
 #LIBS += -L$$PWD/libs
 macx:QMAKE_LFLAGS += -F$$PWD/libs
 contains(QT_VERSION, ^4\\..*) {
