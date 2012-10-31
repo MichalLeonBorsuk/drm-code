@@ -215,13 +215,13 @@ public:
 	void SetSecondsPreview(int iSec) {iSecondsPreview = iSec;}
 	int GetSecondsPreview() {return iSecondsPreview;}
 	void UpdateStringListForFilter(const CStationsItem& StationsItem);
-	void SetTargetFilter(QString s) {targetFilter = s;}
-	void SetLanguageFilter(QString s) {languageFilter = s;}
-	void SetCountryFilter(QString s) {countryFilter = s;}
 
 	QStringList			ListTargets;
 	QStringList			ListCountries;
 	QStringList			ListLanguages;
+
+	QString countryFilterdrm, targetFilterdrm, languageFilterdrm;
+	QString countryFilteranalog, targetFilteranalog, languageFilteranalog;
 
 protected:
 	_BOOLEAN IsActive(const int iPos, const time_t ltime);
@@ -231,7 +231,6 @@ protected:
 
 	/* Minutes for stations preview in seconds if zero then only show active */
 	int iSecondsPreview;
-	QString countryFilter, targetFilter, languageFilter;
 };
 
 
@@ -294,7 +293,6 @@ protected:
 	vector<MyListViewItem*>	vecpListItems;
 	QUrlOperator	UrlUpdateSchedule;
 	QFile *schedFile;
-	QString schedFileName;
 	QSocket *httpSocket;
 	bool httpHeader;
 #else
@@ -308,7 +306,8 @@ protected:
 	QActionGroup* showGroup;
 	QNetworkAccessManager *manager;
 #endif
-	QUrl *qurl;
+	QString schedFileNamedrm, schedFileNameanalog;
+	QUrl *qurldrm, *qurlanalog;
 	QTimer			TimerList;
 	QTimer			TimerUTCLabel;
 	_BOOLEAN		bReInitOnFrequencyChange;
@@ -317,7 +316,6 @@ protected:
 
 	RemoteMenu*		pRemoteMenu;
 	QString		okMessage, badMessage;
-	QString		languageFilter,targetFilter,countryFilter;
 	CEventFilter	ef;
 
 signals:
