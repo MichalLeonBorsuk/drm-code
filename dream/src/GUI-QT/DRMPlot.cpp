@@ -1136,16 +1136,32 @@ void CDRMPlot::SetInpSpecWaterf(CVector<_REAL>& vecrData, CVector<_REAL>&)
 #ifdef QT3_SUPPORT
 // TODO Resampling input data, instead of taking nearest data
 	int i, iStartScale, iEndScale;
+	_BOOLEAN bWidthChanged, bHeightChanged;
 
 	/* Check if the canvas size has changed */
 	QSize CanvSize = plot->canvas()->size();
-	if (Canvas.size().isEmpty() || Canvas.size() != CanvSize)
+	bWidthChanged = Canvas.size().width() != CanvSize.width();
+	bHeightChanged = Canvas.size().height() != CanvSize.height();
+	if (Canvas.size().isEmpty() || bWidthChanged)
 	{
 		/* Force plot update */
 		if (PlotForceUpdate(plot->backgroundColor()))
-			return;
+			return; /* The canvas is not ready so return */
 		/* Update current canvas size */
 		CanvSize = Canvas.size();
+	}
+
+	/* If only the height has changed, then copy the content
+	   to the newly allocated Canvas */
+	if (!bWidthChanged && bHeightChanged)
+	{
+		QPixmap tmpPixmap = QPixmap(Canvas);
+		Canvas = QPixmap(CanvSize);
+		Canvas.fill(plot->backgroundColor());
+		QPainter p(&Canvas);
+		int width = CanvSize.width();
+		int height = CanvSize.height();
+		p.drawPixmap(0, 0, width, height, tmpPixmap, 0, 0, width, height);
 	}
 
 	/* Calculate sizes */
