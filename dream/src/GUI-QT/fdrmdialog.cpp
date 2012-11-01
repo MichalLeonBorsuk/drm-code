@@ -346,9 +346,10 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& NSettings, CRig& rig,
     serviceLabels[2] = TextMiniService3;
     serviceLabels[3] = TextMiniService4;
 
-#if QT_VERSION >= 0x040000
-	TextTextMessage->setWordWrap(true);
-#endif
+// DF: Not needed set at ui file level
+//#if QT_VERSION >= 0x040000
+//	TextTextMessage->setWordWrap(true);
+//#endif
 
     ClearDisplay();
 
