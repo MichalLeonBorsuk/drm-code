@@ -1073,15 +1073,13 @@ void CDRMPlot::SetupInpPSD(_BOOLEAN bAnalog)
 	/* Insert line for bandwidth marker */
 	if (bAnalog)
 	{
-		/* Make sure that line is bigger than the current plots height. Do this by
-		   setting the width to a very large value. TODO: better solution */
-		curve2.setPen(QPen(PassBandColorPlot, 10000, Qt::SolidLine, Qt::FlatCap));
+		QColor color = PassBandColorPlot;
+		color.setAlpha(125);
+		QBrush brush(color);
+		brush.setStyle(Qt::SolidPattern);
+		curve2.setBrush(QBrush(color));
+		curve2.setBaseline(MIN_VAL_INP_SPEC_Y_AXIS_DB);
 		curve2.attach(plot);
-
-		/* Since we want to have the "filter bandwidth" bar behind the grid, we have
-		   to draw our own grid after the previous curve was inserted. TODO: better
-		   solution */
-		SetCurveGrid();
 	}
 
 	/* Insert line for DC carrier */
@@ -1106,8 +1104,8 @@ void CDRMPlot::SetBWMarker(const _REAL rBWCenter, const _REAL rBWWidth)
 		dX[1] = (rBWCenter + rBWWidth / 2) * (double)SOUNDCRD_SAMPLE_RATE / 1000.0;
 
 		/* Take the min-max values from scale to get vertical line */
-		dY[0] = MIN_VAL_INP_SPEC_Y_AXIS_DB;
-		dY[1] = MIN_VAL_INP_SPEC_Y_AXIS_DB;
+		dY[0] = MAX_VAL_INP_SPEC_Y_AXIS_DB;//MIN_VAL_INP_SPEC_Y_AXIS_DB;
+		dY[1] = MAX_VAL_INP_SPEC_Y_AXIS_DB;//MIN_VAL_INP_SPEC_Y_AXIS_DB;
 
 		curve2.SETDATA(dX, dY, 2);
 	}
@@ -1460,92 +1458,6 @@ void CDRMPlot::SetQAMGrid(const ECodScheme eCoSc)
 		SetGrid(8.0 / sqrt(42.0), 4, 4); /* QAM64 */
 		break;
 	}
-}
-
-void CDRMPlot::SetCurveGrid()
-{
-	int i;
-	double dX[2], dY[2];
-#if QWT_VERSION < 0x060000
-	QwtArray <double> xData, yData;
-#else
-	QList <double> xData, yData;
-#endif
-
-	/* Update grid scale */
-#if QWT_VERSION >= 0x050200
-	plot->updateAxes();
-#else
-	plot->replot();
-#endif
-
-	/* Disable the normal grid */
-	grid.enableX(FALSE);
-	grid.enableY(FALSE);
-
-	/* y-axis: get major ticks */
-	const QwtScaleDraw *scaleDrawY = plot->axisScaleDraw(QwtPlot::yLeft);
-	const QwtScaleDiv &scaleDivY = scaleDrawY->scaleDiv();
-	const QList<double> ticksY = scaleDivY.ticks(QwtScaleDiv::MajorTick);
-	const int iNumMajTicksYAx = ticksY.size();
-
-	/* x-axis: get major ticks */
-	const QwtScaleDraw *scaleDrawX = plot->axisScaleDraw(QwtPlot::xBottom);
-	const QwtScaleDiv &scaleDivX = scaleDrawX->scaleDiv();
-	const QList<double> ticksX = scaleDivX.ticks(QwtScaleDiv::MajorTick);
-	const int iNumMajTicksXAx = ticksX.size();
-
-	/* Set bounds, make sure we are outside the bounds, +/- 1/2 of the full scale */
-//	const double xadj = abs(scaleDivX.UPPERBOUND() - scaleDivX.LOWERBOUND()) / 2.0;
-	dX[0] = scaleDivX.LOWERBOUND();// - xadj;
-	dX[1] = scaleDivX.UPPERBOUND();// + xadj;
-
-	/* 'Draw' the grid for y-axis */
-	for (i = 0; i < iNumMajTicksYAx; i++)
-	{
-		dY[0] = dY[1] = ticksY.at(i);
-		xData.push_back(dX[0]);
-		xData.push_back(dX[1]);
-		yData.push_back(dY[0]);
-		yData.push_back(dY[1]);
-#ifdef QWT_WORKAROUND_XFY
-		double tmp = dX[0];
-		dX[0] = dX[1];
-		dX[1] = tmp;
-#endif
-	}
-	hcurvegrid.SETDATA(&xData[0], &yData[0], xData.size());
-	hcurvegrid.attach(plot);
-
-	/* Clear the arrays */
-	xData.clear();
-	yData.clear();
-
-	/* Set bounds, make sure we are outside the bounds, +/- 1/2 of the full scale */
-//	const double yadj = abs(scaleDivY.UPPERBOUND() - scaleDivY.LOWERBOUND()) / 2.0;
-	dY[0] = scaleDivY.LOWERBOUND();// - yadj;
-	dY[1] = scaleDivY.UPPERBOUND();// + yadj;
-
-	/* 'Draw' the grid for x-axis */
-	for (i = 0; i < iNumMajTicksXAx; i++)
-	{
-		dX[0] = dX[1] = ticksX.at(i);
-		xData.push_back(dX[0]);
-		xData.push_back(dX[1]);
-		yData.push_back(dY[0]);
-		yData.push_back(dY[1]);
-#ifdef QWT_WORKAROUND_XFY
-		double tmp = dY[0];
-		dY[0] = dY[1];
-		dY[1] = tmp;
-#endif
-	}
-	vcurvegrid.SETDATA(&xData[0], &yData[0], xData.size());
-//#ifdef _MSC_VER
-	//TODO
-//#else
-	vcurvegrid.attach(plot);
-//#endif
 }
 
 #if QWT_VERSION < 0x060000
