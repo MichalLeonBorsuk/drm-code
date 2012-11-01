@@ -511,8 +511,8 @@ void CDRMPlot::SetPlotStyle(const int iNewStyleID)
 	/* Apply colors */
 	grid.setMajPen(QPen(MainGridColorPlot, 0, Qt::DotLine));
 	grid.setMinPen(QPen(MainGridColorPlot, 0, Qt::DotLine));
-	vcurvegrid.setPen(QPen(MainGridColorPlot, 5, Qt::DotLine));
-	hcurvegrid.setPen(QPen(MainGridColorPlot, 5, Qt::DotLine));
+	vcurvegrid.setPen(QPen(MainGridColorPlot, 1, Qt::DotLine));
+	hcurvegrid.setPen(QPen(MainGridColorPlot, 1, Qt::DotLine));
 	plot->setCanvasBackground(QColor(BckgrdColorPlot));
 
 	/* Make sure that plot are being initialized again */
@@ -1078,11 +1078,12 @@ void CDRMPlot::SetupInpPSD(_BOOLEAN bAnalog)
 #ifndef _MSC_VER
 		curve2.setPen(QPen(PassBandColorPlot, 10000, Qt::SolidLine, Qt::FlatCap));
 		curve2.attach(plot);
-#endif
+
 		/* Since we want to have the "filter bandwidth" bar behind the grid, we have
 		   to draw our own grid after the previous curve was inserted. TODO: better
 		   solution */
-		//SetCurveGrid();
+		SetCurveGrid();
+#endif
 	}
 
 	/* Insert line for DC carrier */
