@@ -63,9 +63,9 @@ CPacketSourceFile::CPacketSourceFile():pPacketSink(NULL),
     pF(NULL), wanted_dest_port(-1), eFileType(pcap)
 {
 #if defined(_MSC_VER) && (_MSC_VER < 1400)
-	pacer = new CPacer(400000000);
+    pacer = new CPacer(400000000);
 #else
-	pacer = new CPacer(400000000ULL);
+    pacer = new CPacer(400000000ULL);
 #endif
 }
 
@@ -120,15 +120,15 @@ CPacketSourceFile::SetOrigin(const string& origin)
     else
     {
         pF = fopen(str.c_str(), "rb");
-    }
-    if ( pF != NULL)
-    {
-        char c;
-        (void)fread(&c, sizeof(c), 1, (FILE *) pF);
-        fseek ( (FILE *) pF , 0 , SEEK_SET );
-        if(c=='A') eFileType = af;
-        if(c=='P') eFileType = pf;
-        if(c=='f') eFileType = ff;
+        if ( pF != NULL)
+        {
+            char c;
+            (void)fread(&c, sizeof(c), 1, (FILE *) pF);
+            fseek ( (FILE *) pF , 0 , SEEK_SET );
+            if(c=='A') eFileType = af;
+            if(c=='P') eFileType = pf;
+            if(c=='f') eFileType = ff;
+        }
     }
     return pF != NULL;
 }
@@ -199,8 +199,8 @@ CPacketSourceFile::readFF(vector<_BYTE>& vecbydata, int& interval)
     while(remaining>0)
     {
         readTagPacketHeader(tag, len);
-	remaining -= 64; // 4*8 nits tag, 4*8 bytes length;
-	remaining -= len;
+        remaining -= 64; // 4*8 nits tag, 4*8 bytes length;
+        remaining -= len;
 
         if(tag=="time")
         {
@@ -215,7 +215,7 @@ CPacketSourceFile::readFF(vector<_BYTE>& vecbydata, int& interval)
             uint32_t s,ns;
             size_t n = fread(&s, sizeof(s), 1, (FILE *) pF);
             n = fread(&ns, sizeof(ns), 1, (FILE *) pF);
-	    //TODO update last packet and interval times
+            //TODO update last packet and interval times
         }
 
         if(tag=="afpf")
@@ -284,22 +284,22 @@ CPacketSourceFile::readRawPFT(vector<_BYTE>& vecbydata, int& interval)
         pF = 0;
         return;
     }
-    vecbydata.resize(0); 
+    vecbydata.resize(0);
     vecbydata.push_back(sync[0]);
     vecbydata.push_back(sync[1]);
     char prev = '\0';;
     while(true)
     {
-	char c;
+        char c;
         n = fread(&c, 1, 1, (FILE *) pF);
-	if(prev == 'P' && c == 'F')
-	{
-    	    fseek((FILE*)pF, -2, SEEK_CUR);
-	    vecbydata.pop_back();
-	    break;
-	}
-	prev = c;
-    	vecbydata.push_back(c);
+        if(prev == 'P' && c == 'F')
+        {
+            fseek((FILE*)pF, -2, SEEK_CUR);
+            vecbydata.pop_back();
+            break;
+        }
+        prev = c;
+        vecbydata.push_back(c);
     }
 }
 
