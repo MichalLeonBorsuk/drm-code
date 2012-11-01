@@ -23,91 +23,88 @@ contains(QT_VERSION, ^4\\..*) {
     !console {
         HEADERS += src/GUI-QT/DRMPlot.h src/GUI-QT/EvaluationDlg.h
         HEADERS += src/GUI-QT/SlideShowViewer.h src/GUI-QT/JLViewer.h src/GUI-QT/BWSViewer.h
-	HEADERS += src/GUI-QT/bwsbrowser.h src/GUI-QT/jlbrowser.h
-	HEADERS += src/GUI-QT/SoundCardSelMenu.h
+        HEADERS += src/GUI-QT/bwsbrowser.h src/GUI-QT/jlbrowser.h
+        HEADERS += src/GUI-QT/SoundCardSelMenu.h
         SOURCES += src/GUI-QT/DRMPlot.cpp src/GUI-QT/EvaluationDlg.cpp
         SOURCES += src/GUI-QT/SlideShowViewer.cpp src/GUI-QT/JLViewer.cpp src/GUI-QT/BWSViewer.cpp
-	SOURCES += src/GUI-QT/bwsbrowser.cpp src/GUI-QT/jlbrowser.cpp
-	SOURCES += src/GUI-QT/SoundCardSelMenu.cpp
+        SOURCES += src/GUI-QT/bwsbrowser.cpp src/GUI-QT/jlbrowser.cpp
+        SOURCES += src/GUI-QT/SoundCardSelMenu.cpp
         FORMS += DRMMainWindow.ui FMMainWindow.ui AMMainWindow.ui LiveScheduleWindow.ui
         FORMS += JLViewer.ui BWSViewer.ui SlideShowViewer.ui
         unix {
-	  macx {
-            exists(libs/qwt.framework) {
-	      message("with qwt6")
-              INCLUDEPATH += libs/qwt
-              LIBS += -framework qwt
-            }
-            else {
-              error("no usable qwt version 6 found")
-            }
-          }
-          else {
-            exists($$(QWT)) {
-	      message("with qwt6")
-              INCLUDEPATH += $$(QWT)/include
-              LIBS += $$(QWT)/lib/libqwt.so
-            }
-            else {
-              exists(/usr/lib/libqwt.so.6) {
-		message("with qwt6")
-                LIBS += /usr/lib/libqwt.so.6
-                exists(/usr/include/qwt6) {
-                  INCLUDEPATH += /usr/include/qwt6
+            macx {
+                exists(libs/qwt.framework) {
+                    message("with qwt6")
+                    INCLUDEPATH += libs/qwt
+                    LIBS += -framework qwt
                 }
                 else {
-                  else {
-                    exists(libs/qwt) {
-                      INCLUDEPATH += libs/qwt
-                    } else {
-                      INCLUDEPATH += /usr/include/qwt
-                    }
-                  }
+                    error("no usable qwt version 6 found")
                 }
-              }
-              else {
-                exists(/usr/lib/libqwt-qt4.so.5) {
-		  message("with qwt5")
-		  LIBS += /usr/lib/libqwt-qt4.so.5
-                  exists(/usr/include/qwt-qt4) {
-                      INCLUDEPATH += /usr/include/qwt-qt4
-		      message("with qwt5")
-		  } 
-		  else {
-                    exists(libs/qwt) {
-                      INCLUDEPATH += libs/qwt
-                    } else {
-                      INCLUDEPATH += /usr/include/qwt
-                    }
-                  }
+            }
+            else {
+                exists($$(QWT)) {
+                    message("with qwt6")
+                    INCLUDEPATH += $$(QWT)/include
+                    LIBS += $$(QWT)/lib/libqwt.so
                 }
                 else {
-                  error("no usable qwt version found")
-              }
+                    exists(/usr/lib/libqwt.so.6) {
+                        message("with qwt6")
+                        LIBS += /usr/lib/libqwt.so.6
+                        exists(/usr/include/qwt6) {
+                            INCLUDEPATH += /usr/include/qwt6
+                        }
+                        else {
+                            exists(libs/qwt) {
+                                INCLUDEPATH += libs/qwt
+                            } else {
+                                INCLUDEPATH += /usr/include/qwt
+                            }
+                        }
+                    }
+                    else {
+                        exists(/usr/lib/libqwt-qt4.so.5) {
+                            message("with qwt5")
+                            LIBS += /usr/lib/libqwt-qt4.so.5
+                            exists(/usr/include/qwt-qt4) {
+                                INCLUDEPATH += /usr/include/qwt-qt4
+                            } 
+                            else {
+                                exists(libs/qwt) {
+                                    INCLUDEPATH += libs/qwt
+                                } else {
+                                    INCLUDEPATH += /usr/include/qwt
+                                }
+                            }
+                        }
+                        else {
+                            error("no usable qwt version found")
+                        }
+                    }
+                }
             }
-          }
-         }
         }
         win32 {
             exists($$(QWT)) {
-	      message("with qwt6")
-              INCLUDEPATH += $$(QWT)/include
-              LIBS += $$(QWT)/lib/libqwt.so
+                message("with qwt6")
+                INCLUDEPATH += $$(QWT)/include
+                LIBS += $$(QWT)/lib/libqwt.so
             }
             else {
-              exists(libs/qwt) {
-                INCLUDEPATH += libs/qwt
-                CONFIG( debug, debug|release ) {
-                    # debug
-                    LIBS += -lqwtd
-                } else {
-                    # release
-                    LIBS += -lqwt
+                exists(libs/qwt) {
+                    INCLUDEPATH += libs/qwt
+                    CONFIG( debug, debug|release ) {
+                        # debug
+                        LIBS += -lqwtd
+                    } else {
+                        # release
+                        LIBS += -lqwt
+                    }
                 }
-              }
-              else {
-                error("no usable qwt version found")
-              }
+                else {
+                    error("no usable qwt version found")
+                }
             }
         }
     }
@@ -122,14 +119,14 @@ count(QT_VERSION, 0) {
         FORMS += fdrmdialogbase.ui fmdialogbase.ui AnalogDemDlgbase.ui LiveScheduleDlgbase.ui
         FORMS += MultimediaDlgbase.ui
         unix {
-              exists(/usr/lib/libqwt.so.4) {
-	        message("with qwt4")
+            exists(/usr/lib/libqwt.so.4) {
+    	        message("with qwt4")
                 INCLUDEPATH += /usr/include/qwt
                 LIBS += /usr/lib/libqwt.so.4
-              }
-              else {
+            }
+            else {
                 error("no usable qwt version found")
-              }
+            }
         }
         win32 {
             INCLUDEPATH += libs/qwt
@@ -167,9 +164,16 @@ unix {
     target.path = /usr/bin
     INSTALLS += target
     CONFIG += link_pkgconfig
+#    packagesExist(libpulse) {
+#        CONFIG += pulseaudio
+#                  message("with pulseaudio")
+#              }
+#    else {
     #packagesExist(portaudio-2.0) {
-      CONFIG += portaudio
-      PKGCONFIG += portaudio-2.0
+        CONFIG += portaudio
+     PKGCONFIG += portaudio-2.0
+                  message("with portaudio")
+#              }
     exists(/usr/include/hamlib/rig.h) {
         CONFIG += hamlib
                   message("with hamlib")
@@ -361,6 +365,12 @@ portaudio {
     SOURCES += src/sound/drm_portaudio.cpp \
     src/sound/pa_ringbuffer.c
     LIBS += -lportaudio
+}
+pulseaudio {
+    DEFINES += USE_PULSEAUDIO
+    HEADERS += src/sound/drm_pulseaudio.h
+    SOURCES += src/sound/drm_pulseaudio.cpp
+    LIBS += -lpulse
 }
 HEADERS += src/AMDemodulation.h \
    src/AMSSDemodulation.h \
