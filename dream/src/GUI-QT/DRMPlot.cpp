@@ -1079,6 +1079,7 @@ void CDRMPlot::SetupInpPSD(_BOOLEAN bAnalog)
 		brush.setStyle(Qt::SolidPattern);
 		curve2.setBrush(QBrush(color));
 		curve2.setBaseline(MIN_VAL_INP_SPEC_Y_AXIS_DB);
+		curve2.setPen(QPen(Qt::NoPen));
 		curve2.attach(plot);
 	}
 
