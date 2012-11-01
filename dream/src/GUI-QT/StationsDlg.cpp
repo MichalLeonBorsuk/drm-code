@@ -1084,7 +1084,10 @@ void StationsDlg::httpRead()
             //qDebug("header %s", buf);
         } while(strcmp(buf, "\r\n")!=0);
         httpHeader=false;
-        schedFile = new QFile(schedFileName);
+	if(DRMSchedule.GetSchedMode()==CDRMSchedule::SM_DRM)
+            schedFile = new QFile(schedFileNamedrm);
+        else
+            schedFile = new QFile(schedFileNameanalog);
         if(!schedFile->open(IO_WriteOnly)) {
             QMessageBox::information(this, "Dream", "can't open schedule file for writing", QMessageBox::Ok);
             httpSocket->close();
@@ -1598,6 +1601,19 @@ void StationsDlg::LoadSchedule(CDRMSchedule::ESchedMode eNewSchM)
 #endif
     }
 
+    QString targetFilter,countryFilter,languageFilter;
+    if(DRMSchedule.GetSchedMode()==CDRMSchedule::SM_DRM)
+    {
+	targetFilter=DRMSchedule.targetFilterdrm;
+	countryFilter=DRMSchedule.countryFilterdrm;
+	languageFilter=DRMSchedule.languageFilterdrm;
+    }
+    else
+    {
+	targetFilter=DRMSchedule.targetFilteranalog;
+	countryFilter=DRMSchedule.countryFilteranalog;
+	languageFilter=DRMSchedule.languageFilteranalog;
+    }
 #if QT_VERSION < 0x040000
     ListViewStations->setSorting(iSortColumn, bCurrentSortAscending);
 # if QT_VERSION >= 0x030000
@@ -1622,18 +1638,9 @@ void StationsDlg::LoadSchedule(CDRMSchedule::ESchedMode eNewSchM)
 # endif
 #else
     ListViewStations->sortByColumn(iSortColumn, bCurrentSortAscending?Qt::AscendingOrder:Qt::DescendingOrder);
-    if(DRMSchedule.GetSchedMode()==CDRMSchedule::SM_DRM)
-    {
-	ComboBoxFilterLanguage->setEditText(DRMSchedule.targetFilterdrm);
-	ComboBoxFilterLanguage->setEditText(DRMSchedule.countryFilterdrm);
-	ComboBoxFilterLanguage->setEditText(DRMSchedule.languageFilterdrm);
-    }
-    else
-    {
-	ComboBoxFilterLanguage->setEditText(DRMSchedule.targetFilteranalog);
-	ComboBoxFilterLanguage->setEditText(DRMSchedule.countryFilteranalog);
-	ComboBoxFilterLanguage->setEditText(DRMSchedule.languageFilteranalog);
-    }
+    ComboBoxFilterLanguage->setEditText(targetFilter);
+    ComboBoxFilterLanguage->setEditText(countryFilter);
+    ComboBoxFilterLanguage->setEditText(languageFilter);
 #endif
 
     /* Update list view */
