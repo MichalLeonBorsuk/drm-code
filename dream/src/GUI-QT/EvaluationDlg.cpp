@@ -45,6 +45,9 @@ systemevalDlg::systemevalDlg(CDRMReceiver& NDRMR, CSettings& NSettings,
     Timer(), TimerInterDigit(),
     eNewCharType(CDRMPlot::NONE_OLD)
 {
+    /* Enable minimize and maximize box for QDialog */
+    setWindowFlags(Qt::Window);
+
     /* Get window geometry data and apply it */
     CWinGeom s;
     Settings.Get("System Evaluation Dialog", s);
@@ -340,7 +343,7 @@ void systemevalDlg::showEvent(QShowEvent* e)
 
     /* Activate real-time timer */
     Timer.start(GUI_CONTROL_UPDATE_TIME);
-    setIconSize(QSize(16,16));
+//    setIconSize(QSize(16,16));
 
 #if QT_VERSION >= 0x040000  
     /* Notify the MainPlot of showEvent */
