@@ -1075,7 +1075,6 @@ void CDRMPlot::SetupInpPSD(_BOOLEAN bAnalog)
 	{
 		/* Make sure that line is bigger than the current plots height. Do this by
 		   setting the width to a very large value. TODO: better solution */
-#ifndef _MSC_VER
 		curve2.setPen(QPen(PassBandColorPlot, 10000, Qt::SolidLine, Qt::FlatCap));
 		curve2.attach(plot);
 
@@ -1083,7 +1082,6 @@ void CDRMPlot::SetupInpPSD(_BOOLEAN bAnalog)
 		   to draw our own grid after the previous curve was inserted. TODO: better
 		   solution */
 		SetCurveGrid();
-#endif
 	}
 
 	/* Insert line for DC carrier */
@@ -1543,7 +1541,11 @@ void CDRMPlot::SetCurveGrid()
 #endif
 	}
 	vcurvegrid.SETDATA(&xData[0], &yData[0], xData.size());
+#ifdef _MSC_VER
+	//TODO
+#else
 	vcurvegrid.attach(plot);
+#endif
 }
 
 #if QWT_VERSION < 0x060000
