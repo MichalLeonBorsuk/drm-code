@@ -864,7 +864,7 @@ CAMSSDlg::CAMSSDlg(CDRMReceiver& NDRMR, CSettings& NSettings,
 	PhaseDialAMSS->setOrigin(270);
 	PhaseDialAMSS->setNeedle(new QwtDialSimpleNeedle(QwtDialSimpleNeedle::Arrow));
 	PhaseDialAMSS->setFrameShadow(QwtDial::Plain);
-#if QWT_VERSION < 0x600000
+#if QWT_VERSION < 0x060000
 	PhaseDialAMSS->setScaleOptions(QwtDial::ScaleTicks);
 #else
 	PhaseDialAMSS->setScaleComponents(QwtAbstractScaleDraw::Ticks);
