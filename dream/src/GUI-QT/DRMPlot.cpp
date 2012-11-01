@@ -1496,9 +1496,9 @@ void CDRMPlot::SetCurveGrid()
 	const int iNumMajTicksXAx = ticksX.size();
 
 	/* Set bounds, make sure we are outside the bounds, +/- 1/2 of the full scale */
-	const double xadj = abs(scaleDivX.UPPERBOUND() - scaleDivX.LOWERBOUND()) / 2.0;
-	dX[0] = scaleDivX.LOWERBOUND() - xadj;
-	dX[1] = scaleDivX.UPPERBOUND() + xadj;
+//	const double xadj = abs(scaleDivX.UPPERBOUND() - scaleDivX.LOWERBOUND()) / 2.0;
+	dX[0] = scaleDivX.LOWERBOUND();// - xadj;
+	dX[1] = scaleDivX.UPPERBOUND();// + xadj;
 
 	/* 'Draw' the grid for y-axis */
 	for (i = 0; i < iNumMajTicksYAx; i++)
@@ -1522,9 +1522,9 @@ void CDRMPlot::SetCurveGrid()
 	yData.clear();
 
 	/* Set bounds, make sure we are outside the bounds, +/- 1/2 of the full scale */
-	const double yadj = abs(scaleDivY.UPPERBOUND() - scaleDivY.LOWERBOUND()) / 2.0;
-	dY[0] = scaleDivY.LOWERBOUND() - yadj;
-	dY[1] = scaleDivY.UPPERBOUND() + yadj;
+//	const double yadj = abs(scaleDivY.UPPERBOUND() - scaleDivY.LOWERBOUND()) / 2.0;
+	dY[0] = scaleDivY.LOWERBOUND();// - yadj;
+	dY[1] = scaleDivY.UPPERBOUND();// + yadj;
 
 	/* 'Draw' the grid for x-axis */
 	for (i = 0; i < iNumMajTicksXAx; i++)
@@ -1541,11 +1541,11 @@ void CDRMPlot::SetCurveGrid()
 #endif
 	}
 	vcurvegrid.SETDATA(&xData[0], &yData[0], xData.size());
-#ifdef _MSC_VER
+//#ifdef _MSC_VER
 	//TODO
-#else
+//#else
 	vcurvegrid.attach(plot);
-#endif
+//#endif
 }
 
 #if QWT_VERSION < 0x060000
