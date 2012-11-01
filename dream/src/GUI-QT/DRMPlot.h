@@ -290,7 +290,6 @@ protected:
 		CVector<_COMPLEX>& veccFACConst);
 	void SetGrid(double div, int step, int substep);
 	void SetQAMGrid(const ECodScheme eCoSc);
-	void SetCurveGrid();
 
 	void PlotDefaults();
 	bool PlotForceUpdate(QColor BackgroundColor);
