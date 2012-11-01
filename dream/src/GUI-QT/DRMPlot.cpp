@@ -521,26 +521,34 @@ void CDRMPlot::SetPlotStyle(const int iNewStyleID)
 
 void CDRMPlot::SetData(CVector<_REAL>& vecrData, CVector<_REAL>& vecrScale)
 {
-	main1curve.SETDATA(&vecrScale[0], &vecrData[0], vecrData.Size());
+	const int size = vecrData.Size();
+	main1curve.SETDATA(size ? &vecrScale[0] : NULL, size ? &vecrData[0] : NULL, size);
 }
 
 void CDRMPlot::SetData(CVector<_REAL>& vecrData1, CVector<_REAL>& vecrData2,
                        CVector<_REAL>& vecrScale)
 {
-	main1curve.SETDATA(&vecrScale[0], &vecrData1[0], vecrData1.Size());
-	main2curve.SETDATA(&vecrScale[0], &vecrData2[0], vecrData2.Size());
+	const int size1 = vecrData1.Size();
+	main1curve.SETDATA(size1 ? &vecrScale[0] : NULL, size1 ? &vecrData1[0] : NULL, size1);
+	const int size2 = vecrData2.Size();
+	main2curve.SETDATA(size2 ? &vecrScale[0] : NULL, size2 ? &vecrData2[0] : NULL, size2);
 }
 
 void CDRMPlot::SetData(QwtPlotCurve& curve, CVector<_COMPLEX>& veccData)
 {
-	size_t size = veccData.Size();
-	vector<double> r(size), im(size);
-	for(size_t i=0; i<size; i++)
+	const int size = veccData.Size();
+	if (size)
 	{
-		r[i] = veccData[i].real();
-		im[i] = veccData[i].imag();
+		vector<double> r(size), im(size);
+		for(int i=0; i<size; i++)
+		{
+			r[i] = veccData[i].real();
+			im[i] = veccData[i].imag();
+		}
+		curve.SETDATA(&r[0], &im[0], size);
 	}
-	curve.SETDATA(&r[0], &im[0], size);
+	else
+		curve.SETDATA(NULL, NULL, 0);
 }
 
 void CDRMPlot::SetData(CVector<_COMPLEX>& veccData)
