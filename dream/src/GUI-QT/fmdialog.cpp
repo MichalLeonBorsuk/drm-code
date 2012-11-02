@@ -158,10 +158,11 @@ FMDialog::FMDialog(CDRMReceiver& NDRMR, CSettings& NSettings, CRig& rig,
 	CLED_SDC->SetUpdateTime(1500);
 	CLED_MSC->SetUpdateTime(600);
 
-	/* Connect buttons */
-
+	/* Connect timers */
 	connect(&Timer, SIGNAL(timeout()),
 		this, SLOT(OnTimer()));
+	connect(&TimerClose, SIGNAL(timeout()),
+		this, SLOT(OnTimerClose()));
 
 	/* Activate real-time timers */
  	Timer.start(GUI_CONTROL_UPDATE_TIME);
@@ -263,6 +264,12 @@ void FMDialog::OnTimer()
 	default: // wait until working thread starts operating
 		break;
 	}
+}
+
+void FMDialog::OnTimerClose()
+{
+	if(DRMReceiver.GetParameters()->eRunState == CParameter::STOPPED)
+		close();
 }
 
 void FMDialog::UpdateDisplay()
@@ -484,22 +491,29 @@ void FMDialog::OnMenuSetDisplayColor()
 
 void FMDialog::closeEvent(QCloseEvent* ce)
 {
-	/* stop real-time timers */
-	Timer.stop();
+	if (!TimerClose.isActive())
+	{
+		/* stop real-time timers */
+		Timer.stop();
 
-	/* Save window geometry data */
-	CWinGeom s;
-	QRect WinGeom = geometry();
-	s.iXPos = WinGeom.x();
-	s.iYPos = WinGeom.y();
-	s.iHSize = WinGeom.height();
-	s.iWSize = WinGeom.width();
-	Settings.Put("FM Dialog", s);
+		/* Save window geometry data */
+		CWinGeom s;
+		QRect WinGeom = geometry();
+		s.iXPos = WinGeom.x();
+		s.iYPos = WinGeom.y();
+		s.iHSize = WinGeom.height();
+		s.iWSize = WinGeom.width();
+		Settings.Put("FM Dialog", s);
 
-	/* tell every other window to close too */
-	emit Closed();
-	// stay open until working thread is done
-	if(DRMReceiver.GetParameters()->eRunState==CParameter::STOPPED)
+		/* tell every other window to close too */
+		emit Closed();
+
+		/* Set the timer for polling the working thread state */
+		TimerClose.start(50);
+	}
+
+	/* Stay open until working thread is done */
+	if (DRMReceiver.GetParameters()->eRunState == CParameter::STOPPED)
 		ce->accept();
 	else
 		ce->ignore();
