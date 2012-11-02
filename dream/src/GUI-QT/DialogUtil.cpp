@@ -74,10 +74,16 @@
 # include "../sourcedecoders/neaacdec_dll.h"
 #endif
 
-#ifdef HAVE_FFTW3_H
-# include <fftw3.h> /* to extract the library version */
-#else
-# include <fftw.h> /* to extract the library version */
+/* fftw 3.3.2 doesn't export the symbol fftw_version
+ * for windows in libfftw3-3.def
+ * You can add it regenerate the lib file and it's supposed to work,
+ * but for now the version string is disabled for windows. */
+#ifndef _WIN32
+# ifdef HAVE_FFTW3_H
+#  include <fftw3.h> /* to extract the library version */
+# else
+#  include <fftw.h> /* to extract the library version */
+# endif
 #endif
 
 /* Implementation *************************************************************/
@@ -123,7 +129,11 @@ CAboutDlg::CAboutDlg(QWidget* parent, const char* name, bool modal, Qt::WFlags f
         "<b>" + tr("This compilation of Dream uses the following libraries:") +
         "</b></p>"
         "<ul>"
+#ifndef _WIN32
         "<li><b>FFTW</b> (" + QString(fftw_version) + ") <i>http://www.fftw.org</i></li>"
+#else
+        "<li><b>FFTW</b> <i>http://www.fftw.org</i></li>"
+#endif
 #if USE_FAAD2_LIBRARY
         "<li><b>FAAD2</b> (" + QString(FAAD2_VERSION) + ") <i>AAC/HE-AAC/HE-AACv2/DRM decoder "
         "(c) Ahead Software, www.nero.com (http://faac.sf.net)</i></li>"
@@ -240,6 +250,12 @@ CAboutDlg::CAboutDlg(QWidget* parent, const char* name, bool modal, Qt::WFlags f
     strVersionText += tr("Under the GNU General Public License (GPL)") +
                       "</center>";
     TextLabelVersion->setText(strVersionText);
+
+    /* Set author names in about dialog */
+    TextLabelAuthorNames->setText("Volker Fischer, Alexander Kurpiers, Andrea Russo\nJulian Cable, Andrew Murphy, Oliver Haffenden");
+
+    /* Set copyright year in about dialog */
+    TextLabelCopyright->setText("Copyright (C) 2001 - 2012");
 }
 
 
