@@ -89,6 +89,7 @@ protected:
 	CAboutDlg			AboutDlg;
 #endif
 	QTimer				Timer;
+	QTimer				TimerClose;
 
 	_BOOLEAN		bSysEvalDlgWasVis;
 	_BOOLEAN		bMultMedDlgWasVis;
@@ -115,6 +116,7 @@ protected:
 public slots:
 	void OnTune();
 	void OnTimer();
+	void OnTimerClose();
 	void OnMenuSetDisplayColor();
 	void OnSwitchToDRM();
 	void OnSwitchToAM();
