@@ -611,6 +611,7 @@ QString FDRMDialog::serviceSelector(CParameter& Parameters, int i)
             if (service.DataParam.iUserAppIdent == DAB_AT_EPG)
             {
                 text += tr(" + EPG"); /* EPG service */
+		action_Programme_Guide_Dialog->setEnabled(true);
             }
             else
                 text += tr(" + MM"); /* other multimedia service */

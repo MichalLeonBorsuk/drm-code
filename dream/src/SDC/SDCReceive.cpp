@@ -1233,6 +1233,7 @@ _BOOLEAN CSDCReceive::DataEntityType11(CVector<_BINARY>* pbiData,
 
     OtherService.veciFrequencies.resize(iNumFreq);
 
+cerr << "AFS ";
     for (i = 0; i < iNumFreq; i++)
     {
         /* Frequency value iFrequencyEntryLength*8 bits. This field is coded as
@@ -1241,9 +1242,10 @@ _BOOLEAN CSDCReceive::DataEntityType11(CVector<_BINARY>* pbiData,
 
         if (iFrequencyEntryLength == 2) // mask off top bit, undefined
             iFrequency &= (unsigned short) 0x7fff;
-
+cerr << iFrequency << " kHz ";
         OtherService.veciFrequencies[i] = iFrequency;
     }
+cerr << endl;
 
     if (iShortIDAnnounceFlag != 0)
         return FALSE; // no error, but we don't support announcements
