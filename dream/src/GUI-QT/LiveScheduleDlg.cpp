@@ -346,7 +346,7 @@ redCube(":/icons/redCube.png"),orangeCube(":/icons/organgeCube.png"),pinkCube(":
 #endif
     vecpListItems(),
     strCurrentSavePath("."),
-    iColStationID(0),
+    iColStationID(1),
     iWidthColStationID(0)
 {
     setupUi(this);
