@@ -501,8 +501,10 @@ void AnalogDemDlg::OnTimerPLLPhaseDial()
 
 void AnalogDemDlg::OnTimerClose()
 {
+#if QT_VERSION >= 0x040000
 	if(DRMReceiver.GetParameters()->eRunState == CParameter::STOPPED)
 		close();
+#endif
 }
 
 void AnalogDemDlg::OnRadioDemodulation(int iID)
