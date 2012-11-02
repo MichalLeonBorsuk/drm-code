@@ -68,8 +68,7 @@
        <item>
         <widget class="QLabel" name="TextLabelAuthorNames">
          <property name="text">
-          <string>Volker Fischer, Alexander Kurpiers, Andrea Russo
-Julian Cable, Andrew Murphy, Oliver Haffenden</string>
+          <string>TextLabelAuthorNames</string>
          </property>
          <property name="wordWrap">
           <bool>false</bool>
@@ -79,7 +78,7 @@ Julian Cable, Andrew Murphy, Oliver Haffenden</string>
        <item>
         <widget class="QLabel" name="TextLabelCopyright">
          <property name="text">
-          <string>Copyright (C) 2001 - 2010</string>
+          <string>TextLabelCopyright</string>
          </property>
          <property name="wordWrap">
           <bool>false</bool>

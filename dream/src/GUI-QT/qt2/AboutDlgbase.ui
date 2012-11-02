@@ -11,7 +11,7 @@
         <rect>
             <x>0</x>
             <y>0</y>
-            <width>550</width>
+            <width>546</width>
             <height>423</height>
         </rect>
     </property>
@@ -66,6 +66,10 @@
                 <name>text</name>
                 <string>TextLabelVersion</string>
             </property>
+            <property stdset="1">
+                <name>alignment</name>
+                <set>AlignVCenter|AlignLeft</set>
+            </property>
             <property>
                 <name>hAlign</name>
             </property>
@@ -108,8 +112,7 @@
                             </property>
                             <property stdset="1">
                                 <name>text</name>
-                                <string>Volker Fischer, Alexander Kurpiers, Andrea Russo
-Julian Cable, Andrew Murphy, Oliver Haffenden</string>
+                                <string>TextLabelAuthorNames</string>
                             </property>
                         </widget>
                         <widget>
@@ -120,7 +123,7 @@ Julian Cable, Andrew Murphy, Oliver Haffenden</string>
                             </property>
                             <property stdset="1">
                                 <name>text</name>
-                                <string>Copyright (C) 2001 - 2010</string>
+                                <string>TextLabelCopyright</string>
                             </property>
                         </widget>
                     </vbox>
@@ -130,11 +133,11 @@ Julian Cable, Andrew Murphy, Oliver Haffenden</string>
                         <name>name</name>
                         <cstring>Spacer10</cstring>
                     </property>
-                    <property>
+                    <property stdset="1">
                         <name>orientation</name>
                         <enum>Horizontal</enum>
                     </property>
-                    <property>
+                    <property stdset="1">
                         <name>sizeType</name>
                         <enum>Expanding</enum>
                     </property>
@@ -201,11 +204,11 @@ Julian Cable, Andrew Murphy, Oliver Haffenden</string>
                         <name>name</name>
                         <cstring>Spacer12</cstring>
                     </property>
-                    <property>
+                    <property stdset="1">
                         <name>orientation</name>
                         <enum>Horizontal</enum>
                     </property>
-                    <property>
+                    <property stdset="1">
                         <name>sizeType</name>
                         <enum>Expanding</enum>
                     </property>
@@ -243,7 +246,7 @@ Julian Cable, Andrew Murphy, Oliver Haffenden</string>
 <images>
     <image>
         <name>image0</name>
-        <data format="XPM.GZ" length="788">789c6dd1c96e83301006e03b4f61855b54256c3658551fa1528f95aa1ebc0d26094948c85af5ddcb0c346d226c2edf0f8367603e65ef6faf6c3a0ff6ad6a2bc38c573b36b587babe7c7cbe7c059358b0ee4a0a164f9e82c98c1916669c2785432a62ced30290e1c0aca7254a2e24d5b644c3a54c911ac9236e24475e8831b73dcfc4948314c8133113912c9007a21071cfebc0444ae4965888542aa4232ac1a5463648910a50d49521ca3c5319b2421652269adebc439ad414966a81288db534e09e680cb808b9445ae722470f1f914e390d097245ec6e031db4180840f36e9010430239b226f26ed3446ba2801c68a292e8ba4d6d78222dfa470feb370b953646abf05fd61d5f7a5f82b3b7cc568b65b756beaeec90856ebdd96255b5ac5dd8670a7c97354d33ab3ca83ed325663bbf6f0f65a9fbccf83e3b9ece2b6f1eb3cb2dfbabbdde6ac7ce18eb65ace7d1d946bfc1fdb7fa7e0e7e007dbfc31f</data>
+        <data format="XPM.GZ" length="800">789c6dd1c94ec3301006e07b9e226a6e15826c7662210e7d00104724c4c1dbc4699b2e69ba22de1dcf2414a862e7e0ef4fbc8cf3300ddf5e9fc3e943b0eb6457eb503bd98653b36f9af3fbc7d367304978e89f5484c9e42e98dc873a7c59af2c8eb77e1ce58ca52551120b9695808c06e63d0d51302e689d3d51332132a442b29869c1901762c24ccf3331632038f244cc792c4ae481c879d27336301502b921963c131269899233a1902d92671c249d4a134591cb1c59234b2152452bef903ad3a5a1b94014da182ab0236a0d36462e90c6dad8d2c747a49556418a5c12fd6ba08de60301a8de35121248a1403644e63b55b4227228802aaa88d6773a862352a3ff75d37eb2482aad958cfe647efbcab90aacb966a69e2f7c5bbaa6364316d9d57ab3f5ad5e3436ea3309ce676ddb6e6b07b2cf5485d9ce75fb4355a93ed3aecf8ea7f3d2e9dbec72cd7ee7ceae73c7f6183bcbd899476b1bbd83ff77f5f5187c035969ca1a</data>
     </image>
     <image>
         <name>image1</name>
