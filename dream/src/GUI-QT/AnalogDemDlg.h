@@ -130,6 +130,7 @@ protected:
 
 	QTimer			Timer;
 	QTimer			TimerPLLPhaseDial;
+	QTimer			TimerClose;
 	CAMSSDlg		AMSSDlg;
 	CEventFilter	ef;
 
@@ -143,6 +144,7 @@ public slots:
 	void UpdatePlotStyle(int);
 	void OnTimer();
 	void OnTimerPLLPhaseDial();
+	void OnTimerClose();
 	void OnRadioDemodulation(int iID);
 	void OnRadioAGC(int iID);
 	void OnCheckBoxMuteAudio();
