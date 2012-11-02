@@ -55,7 +55,7 @@ void CDRMTransmitter::Run()
     	convention is always "input-buffer, output-buffer". Additional, the
     	DRM-parameters are fed to the function
     */
-    while (TransmParam.eRunState == CParameter::RUNNING)
+    for (;;)
     {
         /* MSC ****************************************************************/
         /* Read the source signal */
@@ -90,6 +90,10 @@ void CDRMTransmitter::Run()
         OFDMModulation.ProcessData(TransmParam, CarMapBuf, OFDMModBuf);
 
 
+        /* Soft stop **********************************************************/
+        if (CanSoftStopExit())
+            break;
+
         /* Transmit the signal ************************************************/
         TransmitData.WriteData(TransmParam, OFDMModBuf);
     }
@@ -101,6 +105,93 @@ void CDRMTransmitter::Run()
     /* Set flag to stopped */
     TransmParam.eRunState = CParameter::STOPPED;
 }
+
+#if 1
+/* Flavour 1: Stop at the frame boundary (worst case delay one frame) */
+_BOOLEAN CDRMTransmitter::CanSoftStopExit()
+{
+    /* Set new symbol flag */
+    const _BOOLEAN bNewSymbol = OFDMModBuf.GetFillLevel() != 0;
+
+    if (bNewSymbol)
+    {
+        /* Number of symbol by frame */
+        const int iSymbolPerFrame = TransmParam.CellMappingTable.iNumSymPerFrame;
+
+        /* Set stop requested flag */
+        const _BOOLEAN bStopRequested = TransmParam.eRunState != CParameter::RUNNING;
+
+        /* The soft stop is always started at the beginning of a new frame */
+        if ((bStopRequested && iSoftStopSymbolCount == 0) || iSoftStopSymbolCount < 0)
+        {
+            /* Data in OFDM buffer are set to zero */
+            OFDMModBuf.QueryWriteBuffer()->Reset(_COMPLEX());
+
+            /* The zeroing will continue until the frame end */
+            if (--iSoftStopSymbolCount < -iSymbolPerFrame)
+                return TRUE; /* End of frame reached, signal that loop exit must be done */
+        }
+        else
+        {
+            /* Update the symbol counter to keep track of frame beginning */
+            if (++iSoftStopSymbolCount >= iSymbolPerFrame)
+                iSoftStopSymbolCount = 0;
+        }
+    }
+    return FALSE; /* Signal to continue the normal operation */
+}
+#endif
+#if 0
+/* Flavour 2: Stop at the symbol boundary (worst case delay two frame) */
+_BOOLEAN CDRMTransmitter::CanSoftStopExit()
+{
+    /* Set new symbol flag */
+    const _BOOLEAN bNewSymbol = OFDMModBuf.GetFillLevel() != 0;
+
+    if (bNewSymbol)
+    {
+        /* Set stop requested flag */
+        const _BOOLEAN bStopRequested = TransmParam.eRunState != CParameter::RUNNING;
+
+        /* Check if stop is requested */
+        if (bStopRequested || iSoftStopSymbolCount < 0)
+        {
+            /* Reset the counter if positif */
+            if (iSoftStopSymbolCount > 0)
+                iSoftStopSymbolCount = 0;
+
+            /* Data in OFDM buffer are set to zero */
+            OFDMModBuf.QueryWriteBuffer()->Reset(_COMPLEX());
+
+            /* Zeroing only this symbol, the next symbol will be an exiting one */
+            if (--iSoftStopSymbolCount < -1)
+            {
+                TransmitData.FlushData();
+                return TRUE; /* Signal that a loop exit must be done */
+            }
+        }
+        else
+        {
+            /* Number of symbol by frame */
+            const int iSymbolPerFrame = TransmParam.CellMappingTable.iNumSymPerFrame;
+
+            /* Update the symbol counter to keep track of frame beginning */
+            if (++iSoftStopSymbolCount >= iSymbolPerFrame)
+                iSoftStopSymbolCount = 0;
+        }
+    }
+    return FALSE; /* Signal to continue the normal operation */
+}
+#endif
+#if 0
+/* Flavour 3: The original behaviour: stop at the symbol boundary,
+   without zeroing any symbol. Cause spreading of the spectrum on the
+   entire bandwidth for the last symbol. */
+_BOOLEAN CDRMTransmitter::CanSoftStopExit()
+{
+    return TransmParam.eRunState != CParameter::RUNNING;
+}
+#endif
 
 void CDRMTransmitter::Init()
 {
@@ -131,6 +222,9 @@ void CDRMTransmitter::Init()
     AudioSourceEncoder.Init(TransmParam, AudSrcBuf);
     ReadData.Init(TransmParam, DataBuf);
     TransmitData.Init(TransmParam);
+
+    /* Initialize the soft stop */
+    InitSoftStop();
 }
 
 CDRMTransmitter::CDRMTransmitter() :

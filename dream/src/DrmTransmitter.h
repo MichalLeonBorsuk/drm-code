@@ -86,6 +86,8 @@ public:
 
 protected:
     void Run();
+    void InitSoftStop() { iSoftStopSymbolCount=0; };
+    _BOOLEAN CanSoftStopExit();
 
     /* Parameters */
     CParameter				TransmParam;
@@ -124,6 +126,7 @@ protected:
 
     _REAL					rDefCarOffset;
     _BOOLEAN				bUseUEP;
+    int						iSoftStopSymbolCount;
 };
 
 
