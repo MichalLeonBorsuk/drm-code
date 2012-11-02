@@ -191,7 +191,11 @@ main(int argc, char **argv)
 				rig.subscribe();
 			}
 #endif
-			FDRMDialog MainDlg(DRMReceiver, Settings, rig);
+			FDRMDialog MainDlg(DRMReceiver, Settings, rig
+#if QT_VERSION < 0x040000
+				, NULL, NULL, FALSE, Qt::WStyle_MinMax
+#endif
+				);
 
 			/* Start working thread */
 			CRx rx(DRMReceiver);
