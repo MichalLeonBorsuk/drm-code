@@ -233,7 +233,6 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& NSettings, CRig& rig,
     connect(actionExit, SIGNAL(triggered()), this, SLOT(close()));
 
     action_Multimedia_Dialog->setEnabled(false); // and don't connect slots until app type decoded
-    action_Programme_Guide_Dialog->setEnabled(false);
 
     menu_Settings->addMenu( new CSoundCardSelMenu(
 		DRMReceiver.GetSoundInInterface(),
@@ -618,9 +617,6 @@ QString FDRMDialog::serviceSelector(CParameter& Parameters, int i)
             if (service.DataParam.iUserAppIdent == DAB_AT_EPG)
             {
                 text += tr(" + EPG"); /* EPG service */
-#if QT_VERSION >= 0x040000 // TODO
-                action_Programme_Guide_Dialog->setEnabled(true);
-#endif
             }
             else
                 text += tr(" + MM"); /* other multimedia service */
