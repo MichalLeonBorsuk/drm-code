@@ -88,12 +88,10 @@ EPGDlg::EPGDlg(CDRMReceiver& NDRMR, CSettings& NSettings, QWidget* parent,
     year->setMaxValue(3000);
 #else
     dateEdit->setDate(QDate::currentDate());
-#endif
-    connect(&Timer, SIGNAL(timeout()), this, SLOT(OnTimer()));
     connect(channel, SIGNAL(activated(const QString&)), this , SLOT(on_channel_activated(const QString&)));
-#if QT_VERSION >= 0x040000 // TODO
     connect(dateEdit, SIGNAL(dateChanged(const QDate&)), this , SLOT(on_dateEdit_dateChanged(const QDate&)));
 #endif
+    connect(&Timer, SIGNAL(timeout()), this, SLOT(OnTimer()));
 
     /* Deactivate real-time timer */
     Timer.stop();
