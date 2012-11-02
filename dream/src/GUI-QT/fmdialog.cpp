@@ -495,7 +495,7 @@ void FMDialog::closeEvent(QCloseEvent* ce)
 {
 	if (!TimerClose.isActive())
 	{
-		/* stop real-time timers */
+		/* Stop real-time timer */
 		Timer.stop();
 
 		/* Save window geometry data */
@@ -507,7 +507,7 @@ void FMDialog::closeEvent(QCloseEvent* ce)
 		s.iWSize = WinGeom.width();
 		Settings.Put("FM Dialog", s);
 
-		/* tell every other window to close too */
+		/* Tell every other window to close too */
 		emit Closed();
 
 		/* Set the timer for polling the working thread state */
@@ -516,7 +516,13 @@ void FMDialog::closeEvent(QCloseEvent* ce)
 
 	/* Stay open until working thread is done */
 	if (DRMReceiver.GetParameters()->eRunState == CParameter::STOPPED)
+	{
+        TimerClose.stop();
+#if QT_VERSION >= 0x040000
+        AboutDlg.reject();
+#endif
 		ce->accept();
+	}
 	else
 		ce->ignore();
 }
