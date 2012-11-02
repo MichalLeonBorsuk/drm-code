@@ -818,10 +818,10 @@ CDRMReceiver::Start()
     }
     while (pReceiverParam->eRunState == CParameter::RUNNING);
 
-    pReceiverParam->eRunState = CParameter::STOPPED;
-
     pSoundInInterface->Close();
     pSoundOutInterface->Close();
+
+    pReceiverParam->eRunState = CParameter::STOPPED;
 }
 
 void
