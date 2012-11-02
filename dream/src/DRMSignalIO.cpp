@@ -91,34 +91,49 @@ void CTransmitData::ProcessDataInternal(CParameter&)
 
     iBlockCnt++;
     if (iBlockCnt == iNumBlocks)
+        FlushData();
+}
+
+void CTransmitData::FlushData()
+{
+    int i;
+
+    /* Zero the remain of the buffer, if incomplete */
+    if (iBlockCnt != iNumBlocks)
     {
-        iBlockCnt = 0;
+        const int iSize = vecsDataOut.Size();
+        const int iStart = iSize * iBlockCnt / iNumBlocks;
+        short* data = &vecsDataOut[0];
+        for (i = iStart; i < iSize; i++)
+            vecsDataOut[i] = 0;
+    }
 
-        if (bUseSoundcard == TRUE)
+    iBlockCnt = 0;
+
+    if (bUseSoundcard == TRUE)
+    {
+        /* Write data to sound card. Must be a blocking function */
+        pSound->Write(vecsDataOut);
+    }
+    else
+    {
+        /* Write data to file */
+        for (i = 0; i < iBigBlockSize; i++)
         {
-            /* Write data to sound card. Must be a blocking function */
-            pSound->Write(vecsDataOut);
-        }
-        else
-        {
-            /* Write data to file */
-            for (i = 0; i < iBigBlockSize; i++)
-            {
 #ifdef FILE_DRM_USING_RAW_DATA
-                const short sOut = vecsDataOut[i];
+            const short sOut = vecsDataOut[i];
 
-                /* Write 2 bytes, 1 piece */
-                fwrite((const void*) &sOut, size_t(2), size_t(1),
-                       pFileTransmitter);
+            /* Write 2 bytes, 1 piece */
+            fwrite((const void*) &sOut, size_t(2), size_t(1),
+                   pFileTransmitter);
 #else
-                /* This can be read with Matlab "load" command */
-                fprintf(pFileTransmitter, "%d\n", vecsDataOut[i]);
+            /* This can be read with Matlab "load" command */
+            fprintf(pFileTransmitter, "%d\n", vecsDataOut[i]);
 #endif
-            }
-
-            /* Flush the file buffer */
-            fflush(pFileTransmitter);
         }
+
+        /* Flush the file buffer */
+        fflush(pFileTransmitter);
     }
 }
 

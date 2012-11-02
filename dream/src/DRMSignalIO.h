@@ -102,6 +102,8 @@ public:
         bUseSoundcard = FALSE;
     }
 
+    void FlushData();
+
 protected:
     FILE*				pFileTransmitter;
     CSoundOutInterface*	pSound;
