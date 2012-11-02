@@ -340,6 +340,7 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& NSettings, CRig& rig,
     connect(pFMDlg, SIGNAL(ViewLiveScheduleDlg()), pLiveScheduleDlg, SLOT(show()));
 
     connect(&Timer, SIGNAL(timeout()), this, SLOT(OnTimer()));
+    connect(&TimerClose, SIGNAL(timeout()), this, SLOT(OnTimerClose()));
 
     serviceLabels[0] = TextMiniService1;
     serviceLabels[1] = TextMiniService2;
@@ -451,6 +452,12 @@ void FDRMDialog::OnTimer()
     case RM_NONE: // wait until working thread starts operating
         break;
     }
+}
+
+void FDRMDialog::OnTimerClose()
+{
+    if (DRMReceiver.GetParameters()->eRunState == CParameter::STOPPED)
+        close();
 }
 
 void FDRMDialog::showTextMessage(const QString& textMessage)
@@ -611,7 +618,9 @@ QString FDRMDialog::serviceSelector(CParameter& Parameters, int i)
             if (service.DataParam.iUserAppIdent == DAB_AT_EPG)
             {
                 text += tr(" + EPG"); /* EPG service */
-		action_Programme_Guide_Dialog->setEnabled(true);
+#if QT_VERSION >= 0x040000 // TODO
+                action_Programme_Guide_Dialog->setEnabled(true);
+#endif
             }
             else
                 text += tr(" + MM"); /* other multimedia service */
@@ -1013,38 +1022,50 @@ void FDRMDialog::OnMenuSetDisplayColor()
 
 void FDRMDialog::closeEvent(QCloseEvent* ce)
 {
-    /* the close event has been actioned and we want to shut
+    /* The close event has been actioned and we want to shut
      * down, but the main window should be the last thing to
      * close so that the user knows the program has completed
      * when the window closes
      */
-    CParameter& Parameters = *DRMReceiver.GetParameters();
-    switch(Parameters.eRunState)
+    if (!TimerClose.isActive())
     {
-    case CParameter::RUNNING:
-        // request that the working thread stops
+        /* Request that the working thread stops */
         DRMReceiver.Stop();
-        QTimer::singleShot(1000, this, SLOT(close()));
-        if(DRMReceiver.GetReceiverMode() == RM_DRM)
+
+        /* Stop real-time timer */
+        Timer.stop();
+
+        /* Save the station dialog visibility state */
+        switch (DRMReceiver.GetReceiverMode())
         {
+        case RM_DRM:
             Settings.Put("DRM Dialog", "Stations Dialog visible", pStationsDlg->isVisible());
-        }
-        else
-        {
+            break;
+        case RM_AM:
             Settings.Put("AM Dialog", "Stations Dialog visible", pStationsDlg->isVisible());
+            break;
+        default:
+            break;
         }
-        ce->ignore();
-        break;
-    case CParameter::STOP_REQUESTED:
-        QMessageBox::critical(this, "Dream", "Exit\n",
-                              "Termination of working thread failed");
-        ce->accept();
-        break;
-    case CParameter::STOPPED:
-        /* now let QT close us */
-        ce->accept();
-        break;
+
+        /* Set the timer for polling the working thread state */
+        TimerClose.start(50);
     }
+
+    /* Wait indefinitely until the working thread is stopped,
+     * so if the window never close it mean there is a bug
+     * somewhere, a fix is needed
+     */
+    if (DRMReceiver.GetParameters()->eRunState == CParameter::STOPPED)
+    {
+        TimerClose.stop();
+#if QT_VERSION >= 0x040000
+        AboutDlg.reject();
+#endif
+        ce->accept();
+    }
+    else
+        ce->ignore();
 }
 
 QString FDRMDialog::GetCodecString(const CService& service)

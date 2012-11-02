@@ -325,12 +325,13 @@ void AnalogDemDlg::closeEvent(QCloseEvent* ce)
 {
 	if (!TimerClose.isActive())
 	{
+		/* Stop real-time timers */
+		Timer.stop();
+		TimerPLLPhaseDial.stop();
+
 		/* Close AMSS window */
 		Settings.Put("AMSS Dialog", "visible", AMSSDlg.isVisible());
 		AMSSDlg.hide();
-
-		/* tell every other window to close too */
-		emit Closed();
 
 		/* Save window geometry data */
 		CWinGeom s;
@@ -341,13 +342,22 @@ void AnalogDemDlg::closeEvent(QCloseEvent* ce)
 		s.iWSize = WinGeom.width();
 		Settings.Put("AM Dialog", s);
 
+		/* Tell every other window to close too */
+		emit Closed();
+
 		/* Set the timer for polling the working thread state */
 		TimerClose.start(50);
 	}
 
 	/* Stay open until working thread is done */
 	if (DRMReceiver.GetParameters()->eRunState == CParameter::STOPPED)
+	{
+        TimerClose.stop();
+#if QT_VERSION >= 0x040000
+        AboutDlg.reject();
+#endif
 		ce->accept();
+	}
 	else
 		ce->ignore();
 }

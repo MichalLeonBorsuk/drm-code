@@ -101,7 +101,8 @@ public:
 protected:
     CDRMReceiver&		DRMReceiver;
     CSettings&			Settings;
-    QTimer			Timer;
+    QTimer				Timer;
+    QTimer				TimerClose;
     vector<QLabel*>		serviceLabels;
 
     CLogging*			pLogging;
@@ -159,6 +160,7 @@ protected:
 
 public slots:
     void OnTimer();
+    void OnTimerClose();
     void OnSelectAudioService(int);
     void OnSelectDataService(int);
     void OnViewStationsDlg();
