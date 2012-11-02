@@ -76,7 +76,7 @@ EPGDlg::EPGDlg(CDRMReceiver& NDRMR, CSettings& NSettings, QWidget* parent,
     connect(Prev, SIGNAL(clicked()), this, SLOT(previousDay()));
     connect(Next, SIGNAL(clicked()), this, SLOT(nextDay()));
     connect(channel, SIGNAL(activated(const QString&)), this
-            , SLOT(selectChannel(const QString&)));
+            , SLOT(on_channel_activated(const QString&)));
     connect(day, SIGNAL(valueChanged(int)), this, SLOT(setDay(int)));
     connect(month, SIGNAL(valueChanged(int)), this, SLOT(setMonth(int)));
     connect(year, SIGNAL(valueChanged(int)), this, SLOT(setYear(int)));
@@ -90,6 +90,8 @@ EPGDlg::EPGDlg(CDRMReceiver& NDRMR, CSettings& NSettings, QWidget* parent,
     dateEdit->setDate(QDate::currentDate());
 #endif
     connect(&Timer, SIGNAL(timeout()), this, SLOT(OnTimer()));
+    connect(channel, SIGNAL(activated(const QString&)), this , SLOT(on_channel_activated(const QString&)));
+    connect(dateEdit, SIGNAL(dateChanged(const QDate&)), this , SLOT(on_dateEdit_dateChanged(const QDate&)));
 
     /* Deactivate real-time timer */
     Timer.stop();
@@ -292,13 +294,12 @@ void EPGDlg::setYear(int n)
 }
 #endif
 
-void EPGDlg::on_dateChanged(const QDate&)
+void EPGDlg::on_dateEdit_dateChanged(const QDate&)
 {
-qDebug("on_dateChanged");
     select();
 }
 
-void EPGDlg::selectChannel(const QString &)
+void EPGDlg::on_channel_activated(const QString&)
 {
     epg.progs.clear ();
     select();

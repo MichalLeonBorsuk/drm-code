@@ -1575,6 +1575,8 @@ time_t EPG::parseTime(const QString & time)
 
 int EPG::parseDuration (const QString& duration)
 {
+    if(duration.length()==0)
+        return 0;
     if (duration[0]=='P')
     {
         int yy=0,mo=0,dd=0,hh=0,mi=0,ss=0;

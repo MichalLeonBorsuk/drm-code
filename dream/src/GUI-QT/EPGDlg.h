@@ -146,7 +146,8 @@ signals:
     void NowNext(QString);
 
 public slots:
-    void selectChannel(const QString&);
+    void on_channel_activated(const QString&);
+    void on_dateEdit_dateChanged(const QDate&);
     void OnTimer();
 #if QT_VERSION < 0x040000
     void nextDay();
@@ -155,7 +156,6 @@ public slots:
     void setMonth(int);
     void setYear(int);
 #endif
-    void on_dateChanged(const QDate&);
 };
 
 #endif
