@@ -168,7 +168,7 @@ void CChannelEstimation::ProcessDataInternal(CParameter& ReceiverParam)
         /* Special case with robustness mode D: pilots in all carriers!
            so no processing is required, the channel estimation is
            simply the pilots */
-        if (iDCPos != 0)
+        if (iNumIntpFreqPil == iNumCarrier)
         {
             veccChanEst = veccPilots;
             break;
