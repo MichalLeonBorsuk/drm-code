@@ -165,6 +165,14 @@ void CChannelEstimation::ProcessDataInternal(CParameter& ReceiverParam)
         /**********************************************************************\
          * DFT based algorithm												  *
         \**********************************************************************/
+        /* Special case with robustness mode D: pilots in all carriers!
+           so no processing is required, the channel estimation is
+           simply the pilots */
+        if (iDCPos != 0)
+        {
+            veccChanEst = veccPilots;
+            break;
+        }
         /* ---------------------------------------------------------------------
            Put all pilots at the beginning of the vector. The "real" length of
            the input vector is longer than the number of pilots, but we
