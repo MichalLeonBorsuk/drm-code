@@ -103,10 +103,9 @@ void JLViewer::showEvent(QShowEvent*)
     Parameters.Unlock();
 
     CDataDecoder* dec = receiver.GetDataDecoder();
-    CJournaline *decoder = (CJournaline*)dec->getApplication(service.DataParam.iPacketID);
-    if(decoder)
+    if(dec)
     {
-        textBrowser->setDecoder(decoder);
+        textBrowser->setDecoder(dec);
         decoderSet = true;
     }
     textBrowser->setSource(QUrl("0"));
@@ -186,10 +185,9 @@ void JLViewer::OnTimer()
     if(!decoderSet)
     {
         CDataDecoder* dec = receiver.GetDataDecoder();
-        CJournaline *decoder = (CJournaline*)dec->getApplication(service.DataParam.iPacketID);
-        if(decoder)
+        if(dec)
         {
-            textBrowser->setDecoder(decoder);
+            textBrowser->setDecoder(dec);
             decoderSet = true;
         }
     }

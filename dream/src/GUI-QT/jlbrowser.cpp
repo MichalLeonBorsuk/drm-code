@@ -27,7 +27,8 @@
 \******************************************************************************/
 
 #include "jlbrowser.h"
-#include "../datadecoding/Journaline.h"
+#include "../datadecoding/DataDecoder.h"
+#include "../dream/src/datadecoding/Journaline.h"
 #include <iostream>
 
 JLBrowser::JLBrowser(QWidget * parent)
@@ -56,7 +57,6 @@ bool JLBrowser::changed()
     {
         return false;
     }
-
     int JourID = source().toString().toInt();
 
     CNews News;
@@ -145,7 +145,7 @@ QVariant JLBrowser::loadResource( int, const QUrl & name )
         + strFhGIISText;
 }
 
-void JLBrowser::setDecoder(CJournaline* d)
+void JLBrowser::setDecoder(CDataDecoder* d)
 {
     decoder = d;
 }
