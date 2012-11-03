@@ -200,11 +200,10 @@ public:
 	enum ESchedMode {SM_DRM, SM_ANALOG};
 	enum StationState {IS_ACTIVE, IS_INACTIVE, IS_PREVIEW, IS_SOON_INACTIVE};
 
-	void ReadStatTabFromFile(const ESchedMode eNewSchM);
 	void ReadINIFile(FILE* pFile);
 	void ReadCSVFile(FILE* pFile);
 	ESchedMode GetSchedMode() {return eSchedMode;}
-	void SetSchedMode(const ESchedMode eNewSchM) {eSchedMode = eNewSchM; StationsTable.clear();};
+	void SetSchedMode(const ESchedMode);
 
 	int GetStationNumber() {return StationsTable.size();}
 	CStationsItem& GetItem(const int iPos) {return StationsTable[iPos];}
@@ -215,6 +214,7 @@ public:
 	void SetSecondsPreview(int iSec) {iSecondsPreview = iSec;}
 	int GetSecondsPreview() {return iSecondsPreview;}
 	void UpdateStringListForFilter(const CStationsItem& StationsItem);
+	void LoadSchedule();
 
 	QStringList			ListTargets;
 	QStringList			ListCountries;
@@ -222,9 +222,12 @@ public:
 
 	QString countryFilterdrm, targetFilterdrm, languageFilterdrm;
 	QString countryFilteranalog, targetFilteranalog, languageFilteranalog;
+	QString schedFileName;
+	QUrl *qurldrm, *qurlanalog;
 
 protected:
 	_BOOLEAN IsActive(const int iPos, const time_t ltime);
+	void			SetAnalogUrl();
 
 	vector<CStationsItem>	StationsTable;
 	ESchedMode		eSchedMode;
@@ -262,7 +265,7 @@ public:
 	void SaveSettings(CSettings&);
 
 protected:
-	void			LoadSchedule(CDRMSchedule::ESchedMode eNewSchM);
+	void			LoadSchedule();
 	void			SetFrequencyFromGUI(int);
 	void			SetStationsView();
 	void			ClearStationsView();
@@ -274,7 +277,6 @@ protected:
 	void			AddUpdateDateTime();
 	_BOOLEAN		showAll();
 	int				currentSortColumn();
-	void			SetAnalogUrl();
 	_BOOLEAN		bCurrentSortAscending;
 	int				iSortColumn;
 
@@ -306,8 +308,6 @@ protected:
 	QActionGroup* showGroup;
 	QNetworkAccessManager *manager;
 #endif
-	QString schedFileNamedrm, schedFileNameanalog;
-	QUrl *qurldrm, *qurlanalog;
 	QTimer			TimerList;
 	QTimer			TimerUTCLabel;
 	_BOOLEAN		bReInitOnFrequencyChange;
