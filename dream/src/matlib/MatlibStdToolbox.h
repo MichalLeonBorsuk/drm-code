@@ -51,8 +51,7 @@
 class CFftPlans
 {
 public:
-	CFftPlans() : RFFTPlForw(NULL), RFFTPlBackw(NULL), bInitialized(false) {}
-	CFftPlans(const int iFftSize) : RFFTPlForw(NULL), RFFTPlBackw(NULL), bInitialized(false) {Init(iFftSize);}
+	CFftPlans(const int iFftSize = 0);
 	virtual ~CFftPlans();
 
 	void Init(const int iFSi);

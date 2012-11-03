@@ -31,9 +31,9 @@
 #ifdef HAVE_FFTW3_H
 /* The mutex need to be application wide,
    only fftw_execute() is thread safe */
-static CMutex mutex;
-# define MUTEX_LOCK() mutex.Lock()
-# define MUTEX_UNLOCK() mutex.Unlock()
+static CMutex* mutex;
+# define MUTEX_LOCK() mutex->Lock()
+# define MUTEX_UNLOCK() mutex->Unlock()
 # define PLANNER_FLAGS (FFTW_ESTIMATE | FFTW_DESTROY_INPUT)
 /* Warning: for testing purpose only */
 //# define PLANNER_FLAGS FFTW_EXHAUSTIVE
@@ -809,6 +809,17 @@ CMatlibVector<CReal> FftFilt(const CMatlibVector<CComplex>& rvH,
 
 
 /* FftPlans implementation -------------------------------------------------- */
+CFftPlans::CFftPlans(const int iFftSize)
+{
+#ifdef HAVE_FFTW3_H
+	/* Static initialization of CMutex not working on Mac OS X */
+	if (!mutex)
+		mutex = new CMutex();
+#endif
+	if (iFftSize)
+		Init(iFftSize);
+}
+
 CFftPlans::~CFftPlans()
 {
 	if (bInitialized)
