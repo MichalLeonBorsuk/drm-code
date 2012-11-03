@@ -809,7 +809,8 @@ CMatlibVector<CReal> FftFilt(const CMatlibVector<CComplex>& rvH,
 
 
 /* FftPlans implementation -------------------------------------------------- */
-CFftPlans::CFftPlans(const int iFftSize)
+CFftPlans::CFftPlans(const int iFftSize) :
+	RFFTPlForw(NULL), RFFTPlBackw(NULL), bInitialized(false)
 {
 #ifdef HAVE_FFTW3_H
 	/* Static initialization of CMutex not working on Mac OS X */
