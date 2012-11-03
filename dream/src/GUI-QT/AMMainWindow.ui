@@ -202,6 +202,9 @@ Phase Offset</string>
            <property name="text">
             <string>AM</string>
            </property>
+           <attribute name="buttonGroup">
+            <string notr="true">ButtonGroupDemodulation</string>
+           </attribute>
           </widget>
          </item>
          <item>
@@ -209,6 +212,9 @@ Phase Offset</string>
            <property name="text">
             <string>LSB</string>
            </property>
+           <attribute name="buttonGroup">
+            <string notr="true">ButtonGroupDemodulation</string>
+           </attribute>
           </widget>
          </item>
          <item>
@@ -216,6 +222,9 @@ Phase Offset</string>
            <property name="text">
             <string>USB</string>
            </property>
+           <attribute name="buttonGroup">
+            <string notr="true">ButtonGroupDemodulation</string>
+           </attribute>
           </widget>
          </item>
          <item>
@@ -223,6 +232,9 @@ Phase Offset</string>
            <property name="text">
             <string>CW</string>
            </property>
+           <attribute name="buttonGroup">
+            <string notr="true">ButtonGroupDemodulation</string>
+           </attribute>
           </widget>
          </item>
          <item>
@@ -230,6 +242,9 @@ Phase Offset</string>
            <property name="text">
             <string>FM</string>
            </property>
+           <attribute name="buttonGroup">
+            <string notr="true">ButtonGroupDemodulation</string>
+           </attribute>
           </widget>
          </item>
         </layout>
@@ -252,6 +267,9 @@ Phase Offset</string>
            <property name="text">
             <string>Off</string>
            </property>
+           <attribute name="buttonGroup">
+            <string notr="true">ButtonGroupAGC</string>
+           </attribute>
           </widget>
          </item>
          <item>
@@ -259,6 +277,9 @@ Phase Offset</string>
            <property name="text">
             <string>Slow</string>
            </property>
+           <attribute name="buttonGroup">
+            <string notr="true">ButtonGroupAGC</string>
+           </attribute>
           </widget>
          </item>
          <item>
@@ -266,6 +287,9 @@ Phase Offset</string>
            <property name="text">
             <string>Med</string>
            </property>
+           <attribute name="buttonGroup">
+            <string notr="true">ButtonGroupAGC</string>
+           </attribute>
           </widget>
          </item>
          <item>
@@ -273,6 +297,9 @@ Phase Offset</string>
            <property name="text">
             <string>Fast</string>
            </property>
+           <attribute name="buttonGroup">
+            <string notr="true">ButtonGroupAGC</string>
+           </attribute>
           </widget>
          </item>
         </layout>
@@ -295,6 +322,9 @@ Phase Offset</string>
            <property name="text">
             <string>Off</string>
            </property>
+           <attribute name="buttonGroup">
+            <string notr="true">ButtonGroupNoiseReduction</string>
+           </attribute>
           </widget>
          </item>
          <item>
@@ -302,6 +332,9 @@ Phase Offset</string>
            <property name="text">
             <string>Low</string>
            </property>
+           <attribute name="buttonGroup">
+            <string notr="true">ButtonGroupNoiseReduction</string>
+           </attribute>
           </widget>
          </item>
          <item>
@@ -309,6 +342,9 @@ Phase Offset</string>
            <property name="text">
             <string>Med</string>
            </property>
+           <attribute name="buttonGroup">
+            <string notr="true">ButtonGroupNoiseReduction</string>
+           </attribute>
           </widget>
          </item>
          <item>
@@ -316,6 +352,9 @@ Phase Offset</string>
            <property name="text">
             <string>High</string>
            </property>
+           <attribute name="buttonGroup">
+            <string notr="true">ButtonGroupNoiseReduction</string>
+           </attribute>
           </widget>
          </item>
         </layout>
@@ -601,4 +640,9 @@ Phase Offset</string>
   <include location="res/icons.qrc"/>
  </resources>
  <connections/>
+ <buttongroups>
+  <buttongroup name="ButtonGroupDemodulation"/>
+  <buttongroup name="ButtonGroupAGC"/>
+  <buttongroup name="ButtonGroupNoiseReduction"/>
+ </buttongroups>
 </ui>

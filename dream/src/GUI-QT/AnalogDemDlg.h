@@ -72,8 +72,7 @@ class AnalogDemDlgBase : public QMainWindow, public Ui_AMMainWindow
 public:
     AnalogDemDlgBase(QWidget* parent = 0,
                      const char* name = 0, bool modal=false, Qt::WFlags f = 0):
-        QMainWindow(parent,f), MainPlot(NULL),
-	ButtonGroupDemodulation(), ButtonGroupAGC(), ButtonGroupNoiseReduction()
+        QMainWindow(parent,f), MainPlot(NULL)
     {
         (void)name;
         (void)modal;
@@ -82,7 +81,6 @@ public:
     virtual ~AnalogDemDlgBase() {}
 protected:
     CDRMPlot*           MainPlot;
-    QButtonGroup        ButtonGroupDemodulation, ButtonGroupAGC, ButtonGroupNoiseReduction;
     CAboutDlg		AboutDlg;
 };
 #endif

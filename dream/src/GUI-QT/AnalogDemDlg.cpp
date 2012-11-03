@@ -202,22 +202,12 @@ AnalogDemDlg::AnalogDemDlg(CDRMReceiver& NDRMR, CSettings& NSettings,
 	connect(ButtonGroupNoiseReduction, SIGNAL(clicked(int)),
 		this, SLOT(OnRadioNoiRed(int)));
 #else
-        QList<QRadioButton*> buttons = groupBoxDemodulation->findChildren<QRadioButton*>();
-        for (int i = 0; i < buttons.size(); ++i) {
-                ButtonGroupDemodulation.addButton(buttons[i]);
-        }
-    connect(&ButtonGroupDemodulation, SIGNAL(buttonClicked(int)), this, SLOT(OnRadioDemodulation(int)));
-        buttons = groupBoxAGC->findChildren<QRadioButton*>();
-        for (int i = 0; i < buttons.size(); ++i) {
-                ButtonGroupAGC.addButton(buttons[i]);
-        }
-    connect(&ButtonGroupAGC, SIGNAL(buttonClicked(int)), this, SLOT(OnRadioAGC(int)));
-        buttons = groupBoxNoiseReduction->findChildren<QRadioButton*>();
-        for (int i = 0; i < buttons.size(); ++i) {
-                ButtonGroupNoiseReduction.addButton(buttons[i]);
-        }
-    connect(&ButtonGroupNoiseReduction, SIGNAL(buttonClicked(int)), this, SLOT(OnRadioNoiRed(int)));
-
+	connect(ButtonGroupDemodulation, SIGNAL(buttonClicked(int)),
+		this, SLOT(OnRadioDemodulation(int)));
+	connect(ButtonGroupAGC, SIGNAL(buttonClicked(int)),
+		this, SLOT(OnRadioAGC(int)));
+	connect(ButtonGroupNoiseReduction, SIGNAL(buttonClicked(int)),
+		this, SLOT(OnRadioNoiRed(int)));
 #endif
 
 	/* Slider */
@@ -519,6 +509,9 @@ void AnalogDemDlg::OnTimerClose()
 
 void AnalogDemDlg::OnRadioDemodulation(int iID)
 {
+#if QT_VERSION >= 0x040000
+	iID = -iID - 2; // TODO understand why
+#endif
 	/* DRMReceiver takes care of setting appropriate filter BW */
 	switch (iID)
 	{
@@ -549,6 +542,9 @@ void AnalogDemDlg::OnRadioDemodulation(int iID)
 
 void AnalogDemDlg::OnRadioAGC(int iID)
 {
+#if QT_VERSION >= 0x040000
+	iID = -iID - 2; // TODO understand why
+#endif
 	switch (iID)
 	{
 	case 0:
@@ -571,6 +567,9 @@ void AnalogDemDlg::OnRadioAGC(int iID)
 
 void AnalogDemDlg::OnRadioNoiRed(int iID)
 {
+#if QT_VERSION >= 0x040000
+	iID = -iID - 2; // TODO understand why
+#endif
 	switch (iID)
 	{
 	case 0:
