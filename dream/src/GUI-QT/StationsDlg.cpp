@@ -3,12 +3,8 @@
  * Copyright (c) 2004
  *
  * Author(s):
- *	Volker Fischer, Stephane Fillod, Tomi Manninen
- *
- * 5/15/2005 Andrea Russo
- *	- added preview
- * 5/25/2005 Andrea Russo
- *	- added "days" column in stations list view
+ *	Volker Fischer, Stephane Fillod, Tomi Manninen, Andrea Russo,
+ *      Julian Cable
  *
  ******************************************************************************
  *
@@ -165,7 +161,7 @@ void CDRMSchedule::ReadINIFile(FILE* pFile)
     int		iFileStat;
     _BOOLEAN	bReadOK = TRUE;
 
-    fgets(cName, iMaxLenName, pFile); /* Remove "[DRMSchedule]" */
+    fgets(cName, iMaxLenName, pFile); /* [DRMSchedule] */
     do
     {
         CStationsItem StationsItem;
@@ -703,9 +699,6 @@ StationsDlg::StationsDlg(CDRMReceiver& NDRMR, CRig& rig,
     QwtCounterFrequency->setIncSteps(QwtCounter::Button3, 100);
     QwtCounterFrequency->setValue(DRMReceiver.GetFrequency());
 
-    /* Init UTC time shown with a label control */
-    OnTimerUTCLabel();
-
 #if QT_VERSION >= 0x040000
 
     ListViewStations->setColumnCount(9);
@@ -757,7 +750,6 @@ StationsDlg::StationsDlg(CDRMReceiver& NDRMR, CRig& rig,
 # endif
     connect(buttonOk, SIGNAL(clicked()), this, SLOT(close()));
 #endif
-    SetStationsView();
 
     /* Init progress bar for input s-meter */
 
@@ -1454,12 +1446,12 @@ void StationsDlg::SaveSettings(CSettings& Settings)
         Settings.Put("Stations Dialog", "sortascendinganalog", bCurrentSortAscending);
         break;
     }
-    Settings.Put("Stations Dialog", "targetfilterdrm", DRMSchedule.targetFilterdrm.latin1());
-    Settings.Put("Stations Dialog", "countryfilterdrm", DRMSchedule.countryFilterdrm.latin1());
-    Settings.Put("Stations Dialog", "languagefilterdrm", DRMSchedule.languageFilterdrm.latin1());
-    Settings.Put("Stations Dialog", "targetfilteranalog", DRMSchedule.targetFilteranalog.latin1());
-    Settings.Put("Stations Dialog", "countryfilteranalog", DRMSchedule.countryFilteranalog.latin1());
-    Settings.Put("Stations Dialog", "languagefilteranalog", DRMSchedule.languageFilteranalog.latin1());
+    Settings.Put("Stations Dialog", "targetfilterdrm", string(DRMSchedule.targetFilterdrm.latin1()));
+    Settings.Put("Stations Dialog", "countryfilterdrm", string(DRMSchedule.countryFilterdrm.latin1()));
+    Settings.Put("Stations Dialog", "languagefilterdrm", string(DRMSchedule.languageFilterdrm.latin1()));
+    Settings.Put("Stations Dialog", "targetfilteranalog", string(DRMSchedule.targetFilteranalog.latin1()));
+    Settings.Put("Stations Dialog", "countryfilteranalog", string(DRMSchedule.countryFilteranalog.latin1()));
+    Settings.Put("Stations Dialog", "languagefilteranalog", string(DRMSchedule.languageFilteranalog.latin1()));
 #if QT_VERSION < 0x040000
     Settings.Put("Hamlib", "ensmeter", (pRemoteMenu==NULL)?false:pRemoteMenu->menu()->isItemChecked(SMETER_MENU_ID));
 #else
@@ -1552,7 +1544,7 @@ void StationsDlg::LoadSchedule()
         item->setText(6, station.strSite     /* site */);
         item->setText(7, station.strLanguage /* language */);
         item->setText(8, station.strDaysShow);
-        DRMSchedule.GetItem(i).item = item;
+	item->setData(0, Qt::UserRole, i);
 #endif
     }
 
@@ -1593,6 +1585,7 @@ void StationsDlg::LoadSchedule()
 # endif
 #else
     ListViewStations->sortByColumn(iSortColumn, bCurrentSortAscending?Qt::AscendingOrder:Qt::DescendingOrder);
+qDebug("filters %s %s %s", targetFilter.latin1(), countryFilter.toStdString().c_str(), languageFilter.toStdString().c_str());
     ComboBoxFilterLanguage->setEditText(targetFilter);
     ComboBoxFilterLanguage->setEditText(countryFilter);
     ComboBoxFilterLanguage->setEditText(languageFilter);
@@ -1609,7 +1602,6 @@ void StationsDlg::ClearStationsView()
         ListViewStations->takeItem(ListViewStations->firstChild());
 #else
     ListViewStations->clear();
-    DRMSchedule.clear();
 #endif
 }
 
@@ -1678,10 +1670,12 @@ void StationsDlg::SetStationsView()
 
 #else
     ListViewStations->setSortingEnabled(false);
-    for (int i = 0; i < DRMSchedule.GetStationNumber(); i++)
+    for (int i = 0; i < ListViewStations->topLevelItemCount(); i++)
     {
-        CDRMSchedule::StationState iState = DRMSchedule.CheckState(i);
-        QTreeWidgetItem* item = DRMSchedule.GetItem(i).item; //ListViewStations->topLevelItem(i);
+        QTreeWidgetItem* item = ListViewStations->topLevelItem(i);
+	int scheduleItem = item->data(0, Qt::UserRole).toInt();
+
+        CDRMSchedule::StationState iState = DRMSchedule.CheckState(scheduleItem);
 
         switch (iState)
         {
@@ -1701,7 +1695,7 @@ void StationsDlg::SetStationsView()
             item->setIcon(0, redCube);
             break;
         }
-        if(DRMSchedule.CheckFilter(i) && (bShowAll || (iState != CDRMSchedule::IS_INACTIVE)))
+        if(DRMSchedule.CheckFilter(scheduleItem) && (bShowAll || (iState != CDRMSchedule::IS_INACTIVE)))
         {
             item->setHidden(false);
         }
@@ -1732,7 +1726,6 @@ void StationsDlg::OnHeaderClicked(int c)
     else
         bCurrentSortAscending = TRUE;
 }
-
 
 void StationsDlg::SetFrequencyFromGUI(int iFreq)
 {
