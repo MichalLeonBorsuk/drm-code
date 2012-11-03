@@ -31,21 +31,21 @@
 
 #include <QTextBrowser>
 
-class CJournaline;
+class CDataDecoder;
 
 class JLBrowser : public QTextBrowser
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
     JLBrowser(QWidget * parent = 0 );
     ~JLBrowser() {}
     QVariant loadResource ( int type, const QUrl & name );
     bool changed();
-    void setDecoder(CJournaline* d);
+    void setDecoder(CDataDecoder* d);
 
 protected:
 
-    CJournaline*    decoder;
+    CDataDecoder*   decoder;
     QString         strFhGIISText;
     QString         strJournalineHeadText;
     int             total;

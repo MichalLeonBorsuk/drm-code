@@ -504,7 +504,9 @@ CDataDecoder::GetNews(const int iObjID, CNews & News)
 	/* Check if data service is Journaline application */
 	if ((DoNotProcessData == FALSE)
 		&& (eAppType[iServPacketID] == AT_JOURNALINE))
+	{
 		Journaline.GetNews(iObjID, News);
+	}
 
 	/* Release resources */
 	Unlock();

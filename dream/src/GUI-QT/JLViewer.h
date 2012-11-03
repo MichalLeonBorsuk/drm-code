@@ -38,29 +38,29 @@ class CSettings;
 
 class JLViewer : public QMainWindow, Ui_JLViewer
 {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
-	JLViewer(CDRMReceiver&, CSettings&, QWidget* parent = 0,
-		const char* name = 0, Qt::WFlags f = 0);
-	virtual ~JLViewer();
+    JLViewer(CDRMReceiver&, CSettings&, QWidget* parent = 0,
+             const char* name = 0, Qt::WFlags f = 0);
+    virtual ~JLViewer();
 
 protected:
 
     QTimer Timer;
-	QTextDocument           document;
-	std::string             strCurrentSavePath;
-	CDRMReceiver&			receiver;
-	CSettings&              settings;
-	bool                    decoderSet;
+    QTextDocument           document;
+    std::string             strCurrentSavePath;
+    CDRMReceiver&		receiver;
+    CSettings&              settings;
+    bool                    decoderSet;
 
 public slots:
-	void OnTimer();
-	void OnButtonStepBack();
-	void OnSave();
-	void OnSaveAll();
-	void OnClearAll();
-	void OnSetFont();
+    void OnTimer();
+    void OnButtonStepBack();
+    void OnSave();
+    void OnSaveAll();
+    void OnClearAll();
+    void OnSetFont();
     void showEvent(QShowEvent*);
     void hideEvent(QHideEvent*);
 };
