@@ -33,33 +33,33 @@
 #include <QFileDialog>
 
 SlideShowViewer::SlideShowViewer(CDRMReceiver& rec, CSettings& s, QWidget* parent):
-		QMainWindow(parent), Timer(), strCurrentSavePath("."),
-		receiver(rec), settings(s),vecImages(),vecImageNames(),iCurImagePos(-1)
+    QMainWindow(parent), Timer(), strCurrentSavePath("."),
+    receiver(rec), settings(s),vecImages(),vecImageNames(),iCurImagePos(-1)
 {
-	ui = new Ui_SlideShowViewer();
+    ui = new Ui_SlideShowViewer();
     ui->setupUi(this);
 
     connect(ui->buttonOk, SIGNAL(clicked()), this, SLOT(close()));
 
-	connect(ui->actionClear_All, SIGNAL(triggered()), SLOT(OnClearAll()));
-	connect(ui->actionSave, SIGNAL(triggered()), SLOT(OnSave()));
-	connect(ui->actionSave_All, SIGNAL(triggered()), SLOT(OnSaveAll()));
-	connect(ui->actionClose, SIGNAL(triggered()), SLOT(close()));
+    connect(ui->actionClear_All, SIGNAL(triggered()), SLOT(OnClearAll()));
+    connect(ui->actionSave, SIGNAL(triggered()), SLOT(OnSave()));
+    connect(ui->actionSave_All, SIGNAL(triggered()), SLOT(OnSaveAll()));
+    connect(ui->actionClose, SIGNAL(triggered()), SLOT(close()));
 
-	/* Update time for color LED */
-	ui->LEDStatus->SetUpdateTime(1000);
+    /* Update time for color LED */
+    ui->LEDStatus->SetUpdateTime(1000);
 
-	/* Connect controls */
-	connect(ui->ButtonStepBack, SIGNAL(clicked()), this, SLOT(OnButtonStepBack()));
-	connect(ui->ButtonStepForward, SIGNAL(clicked()), this, SLOT(OnButtonStepForward()));
-	connect(ui->ButtonJumpBegin, SIGNAL(clicked()), this, SLOT(OnButtonJumpBegin()));
-	connect(ui->ButtonJumpEnd, SIGNAL(clicked()), this, SLOT(OnButtonJumpEnd()));
+    /* Connect controls */
+    connect(ui->ButtonStepBack, SIGNAL(clicked()), this, SLOT(OnButtonStepBack()));
+    connect(ui->ButtonStepForward, SIGNAL(clicked()), this, SLOT(OnButtonStepForward()));
+    connect(ui->ButtonJumpBegin, SIGNAL(clicked()), this, SLOT(OnButtonJumpBegin()));
+    connect(ui->ButtonJumpEnd, SIGNAL(clicked()), this, SLOT(OnButtonJumpEnd()));
 
-	connect(&Timer, SIGNAL(timeout()), this, SLOT(OnTimer()));
+    connect(&Timer, SIGNAL(timeout()), this, SLOT(OnTimer()));
 
     OnClearAll();
 
-	Timer.stop();
+    Timer.stop();
 }
 
 SlideShowViewer::~SlideShowViewer()
@@ -69,57 +69,51 @@ SlideShowViewer::~SlideShowViewer()
 void SlideShowViewer::OnTimer()
 {
     CParameter& Parameters = *receiver.GetParameters();
-	Parameters.Lock();
-	ETypeRxStatus status = Parameters.ReceiveStatus.MOT.GetStatus();
-	int shortID = Parameters.GetCurSelDataService();
-	CDataParam dp = Parameters.GetDataParam(shortID);
-	Parameters.Unlock();
+    Parameters.Lock();
+    ETypeRxStatus status = Parameters.ReceiveStatus.MOT.GetStatus();
+    int shortID = Parameters.GetCurSelDataService();
+    CDataParam dp = Parameters.GetDataParam(shortID);
+    Parameters.Unlock();
 
-	switch(status)
-	{
-	case NOT_PRESENT:
-		ui->LEDStatus->Reset(); /* GREY */
-		break;
+    switch(status)
+    {
+    case NOT_PRESENT:
+        ui->LEDStatus->Reset(); /* GREY */
+        break;
 
-	case CRC_ERROR:
-		ui->LEDStatus->SetLight(CMultColorLED::RL_RED);
-		break;
+    case CRC_ERROR:
+        ui->LEDStatus->SetLight(CMultColorLED::RL_RED);
+        break;
 
-	case DATA_ERROR:
-		ui->LEDStatus->SetLight(CMultColorLED::RL_YELLOW);
-		break;
+    case DATA_ERROR:
+        ui->LEDStatus->SetLight(CMultColorLED::RL_YELLOW);
+        break;
 
-	case RX_OK:
-		ui->LEDStatus->SetLight(CMultColorLED::RL_GREEN);
-		break;
-	}
+    case RX_OK:
+        ui->LEDStatus->SetLight(CMultColorLED::RL_GREEN);
+        break;
+    }
 
-	CDataDecoder* DataDecoder = receiver.GetDataDecoder();
-	if(DataDecoder == NULL)
-	{
-		qDebug("can't get data decoder from receiver");
-		return;
-	}
-	CMOTDABDec *motdec = DataDecoder->getApplication(dp.iPacketID);
-
-	if(motdec==NULL)
-	{
-		qDebug("can't get MOT decoder for short id %d, packetId %d", shortID, dp.iPacketID);
+    CDataDecoder* DataDecoder = receiver.GetDataDecoder();
+    if(DataDecoder == NULL)
+    {
+        qDebug("can't get data decoder from receiver");
         return;
-	}
+    }
+    CMOTDABDec *motdec = DataDecoder->getApplication(dp.iPacketID);
+
+    if(motdec==NULL)
+    {
+        qDebug("can't get MOT decoder for short id %d, packetId %d", shortID, dp.iPacketID);
+        return;
+    }
 
     /* Poll the data decoder module for new picture */
-#if 0
-    TTransportID tid = motdec->GetNextTid();
-    if (tid>=0)
+    if(motdec->NewObjectAvailable())
     {
-        CMOTObject	NewObj = motdec->GetObject(tid);
-#else
-	if(motdec->NewObjectAvailable())
-	{
-	    CMOTObject	NewObj;
-		motdec->GetNextObject(NewObj);
-#endif
+        CMOTObject	NewObj;
+        motdec->GetNextObject(NewObj);
+
         /* Store received picture */
         int iCurNumPict = vecImageNames.size();
         CVector<_BYTE>& imagedata = NewObj.Body.vecData;
@@ -166,8 +160,8 @@ void SlideShowViewer::OnSave()
 {
     QString fileName = QString(strCurrentSavePath.c_str()) + "/" + vecImageNames[iCurImagePos];
     fileName = QFileDialog::getSaveFileName(this, tr("Save File"),
-                            fileName,
-                            tr("Images (*.png *.jpg)"));
+                                            fileName,
+                                            tr("Images (*.png *.jpg)"));
     vecImages[iCurImagePos].save(fileName);
     strCurrentSavePath = QDir(fileName).path().toUtf8().data();
 }
@@ -187,20 +181,20 @@ void SlideShowViewer::OnClearAll()
     vecImages.clear();
     vecImageNames.clear();
     iCurImagePos = -1;
-	UpdateButtons();
+    UpdateButtons();
 }
 
 void SlideShowViewer::showEvent(QShowEvent*)
 {
-	/* Get window geometry data and apply it */
-	CWinGeom g;
-	settings.Get("SlideShow", g);
-	const QRect WinGeom(g.iXPos, g.iYPos, g.iWSize, g.iHSize);
+    /* Get window geometry data and apply it */
+    CWinGeom g;
+    settings.Get("SlideShow", g);
+    const QRect WinGeom(g.iXPos, g.iYPos, g.iWSize, g.iHSize);
 
-	if (WinGeom.isValid() && !WinGeom.isEmpty() && !WinGeom.isNull())
-		setGeometry(WinGeom);
+    if (WinGeom.isValid() && !WinGeom.isEmpty() && !WinGeom.isNull())
+        setGeometry(WinGeom);
 
-	strCurrentSavePath = settings.Get("SlideShow", "storagepath", strCurrentSavePath);
+    strCurrentSavePath = settings.Get("SlideShow", "storagepath", strCurrentSavePath);
 
     CParameter& Parameters = *receiver.GetParameters();
     Parameters.Lock();
@@ -212,8 +206,8 @@ void SlideShowViewer::showEvent(QShowEvent*)
     CService service = Parameters.Service[iCurSelDataServ];
     Parameters.Unlock();
 
-	/* Add the service description into the dialog caption */
-	QString strTitle = tr("MOT Slide Show");
+    /* Add the service description into the dialog caption */
+    QString strTitle = tr("MOT Slide Show");
 
     if (service.IsActive())
     {
@@ -230,39 +224,39 @@ void SlideShowViewer::showEvent(QShowEvent*)
                 strLabel += " ";
 
             strServiceID = "- ID:" +
-                QString().setNum(long(service.iServiceID), 16).toUpper();
+                           QString().setNum(long(service.iServiceID), 16).toUpper();
         }
 
         /* add the description on the title of the dialog */
         if (strLabel != "" || strServiceID != "")
             strTitle += " [" + strLabel + strServiceID + "]";
     }
-	setWindowTitle(strTitle);
+    setWindowTitle(strTitle);
 
-	/* Update window */
-	OnTimer();
+    /* Update window */
+    OnTimer();
 
-	/* Activate real-time timer when window is shown */
-	Timer.start(GUI_CONTROL_UPDATE_TIME);
+    /* Activate real-time timer when window is shown */
+    Timer.start(GUI_CONTROL_UPDATE_TIME);
 }
 
 void SlideShowViewer::hideEvent(QHideEvent*)
 {
-	/* Deactivate real-time timer so that it does not get new pictures */
-	Timer.stop();
+    /* Deactivate real-time timer so that it does not get new pictures */
+    Timer.stop();
 
-	/* Save window geometry data */
-	QRect WinGeom = geometry();
+    /* Save window geometry data */
+    QRect WinGeom = geometry();
 
-	CWinGeom c;
-	c.iXPos = WinGeom.x();
-	c.iYPos = WinGeom.y();
-	c.iHSize = WinGeom.height();
-	c.iWSize = WinGeom.width();
-	settings.Put("SlideShow", c);
+    CWinGeom c;
+    c.iXPos = WinGeom.x();
+    c.iYPos = WinGeom.y();
+    c.iHSize = WinGeom.height();
+    c.iWSize = WinGeom.width();
+    settings.Put("SlideShow", c);
 
-	/* Store save path */
-	settings.Put("SlideShow ","storagepath", strCurrentSavePath);
+    /* Store save path */
+    settings.Put("SlideShow ","storagepath", strCurrentSavePath);
 }
 
 void SlideShowViewer::SetImage(int pos)
@@ -275,67 +269,67 @@ void SlideShowViewer::SetImage(int pos)
         pos = vecImages.size()-1;
     iCurImagePos = pos;
     ui->image->setPixmap(vecImages[pos]);
-	const QString& imagename = vecImageNames[pos];
-	if (imagename.length() > 0)
-		ui->image->setToolTip(imagename);
-	UpdateButtons();
+    const QString& imagename = vecImageNames[pos];
+    if (imagename.length() > 0)
+        ui->image->setToolTip(imagename);
+    UpdateButtons();
 }
 
 void SlideShowViewer::UpdateButtons()
 {
-	/* Set enable menu entry for saving a picture */
-	if (iCurImagePos < 0)
-	{
-		ui->actionClear_All->setEnabled(false);
-		ui->actionSave->setEnabled(false);
-		ui->actionSave_All->setEnabled(false);
-	}
-	else
-	{
-		ui->actionClear_All->setEnabled(true);
-		ui->actionSave->setEnabled(true);
-		ui->actionSave_All->setEnabled(true);
-	}
+    /* Set enable menu entry for saving a picture */
+    if (iCurImagePos < 0)
+    {
+        ui->actionClear_All->setEnabled(false);
+        ui->actionSave->setEnabled(false);
+        ui->actionSave_All->setEnabled(false);
+    }
+    else
+    {
+        ui->actionClear_All->setEnabled(true);
+        ui->actionSave->setEnabled(true);
+        ui->actionSave_All->setEnabled(true);
+    }
 
-	if (iCurImagePos <= 0)
-	{
-		/* We are already at the beginning */
-		ui->ButtonStepBack->setEnabled(false);
-		ui->ButtonJumpBegin->setEnabled(false);
-	}
-	else
-	{
-		ui->ButtonStepBack->setEnabled(true);
-		ui->ButtonJumpBegin->setEnabled(true);
-	}
+    if (iCurImagePos <= 0)
+    {
+        /* We are already at the beginning */
+        ui->ButtonStepBack->setEnabled(false);
+        ui->ButtonJumpBegin->setEnabled(false);
+    }
+    else
+    {
+        ui->ButtonStepBack->setEnabled(true);
+        ui->ButtonJumpBegin->setEnabled(true);
+    }
 
-	if (iCurImagePos == int(vecImages.size()-1))
-	{
-		/* We are already at the end */
-		ui->ButtonStepForward->setEnabled(false);
-		ui->ButtonJumpEnd->setEnabled(false);
-	}
-	else
-	{
-		ui->ButtonStepForward->setEnabled(true);
-		ui->ButtonJumpEnd->setEnabled(true);
-	}
+    if (iCurImagePos == int(vecImages.size()-1))
+    {
+        /* We are already at the end */
+        ui->ButtonStepForward->setEnabled(false);
+        ui->ButtonJumpEnd->setEnabled(false);
+    }
+    else
+    {
+        ui->ButtonStepForward->setEnabled(true);
+        ui->ButtonJumpEnd->setEnabled(true);
+    }
 
-	QString strTotImages = QString().setNum(vecImages.size());
-	QString strNumImage = QString().setNum(iCurImagePos + 1);
+    QString strTotImages = QString().setNum(vecImages.size());
+    QString strNumImage = QString().setNum(iCurImagePos + 1);
 
-	QString strSep("");
+    QString strSep("");
 
-	for (int i = 0; i < (strTotImages.length() - strNumImage.length()); i++)
-		strSep += " ";
+    for (int i = 0; i < (strTotImages.length() - strNumImage.length()); i++)
+        strSep += " ";
 
-	ui->LabelCurPicNum->setText(strSep + strNumImage + "/" + strTotImages);
+    ui->LabelCurPicNum->setText(strSep + strNumImage + "/" + strTotImages);
 
-	/* If no picture was received, show the following text */
-	if (iCurImagePos < 0)
-	{
-		/* Init text browser window */
-		ui->image->setText("<center>" + tr("MOT Slideshow Viewer") + "</center>");
-	}
+    /* If no picture was received, show the following text */
+    if (iCurImagePos < 0)
+    {
+        /* Init text browser window */
+        ui->image->setText("<center>" + tr("MOT Slideshow Viewer") + "</center>");
+    }
 }
 
