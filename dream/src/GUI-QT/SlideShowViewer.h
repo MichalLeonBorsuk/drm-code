@@ -35,34 +35,34 @@ class CSettings;
 
 class SlideShowViewer : public QMainWindow
 {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
-	SlideShowViewer(CDRMReceiver&, CSettings&, QWidget* parent = 0);
-	virtual ~SlideShowViewer();
+    SlideShowViewer(CDRMReceiver&, CSettings&, QWidget* parent = 0);
+    virtual ~SlideShowViewer();
 
 protected:
 
     void                    SetImage(int);
     void                    UpdateButtons();
     QTimer Timer;
-	std::string             strCurrentSavePath;
-	CDRMReceiver&			receiver;
-	CSettings&              settings;
-	std::vector<QPixmap>    vecImages;
-	std::vector<QString>    vecImageNames;
-	int						iCurImagePos;
-	Ui_SlideShowViewer*		ui;
+    std::string             strCurrentSavePath;
+    CDRMReceiver&	    receiver;
+    CSettings&              settings;
+    std::vector<QPixmap>    vecImages;
+    std::vector<QString>    vecImageNames;
+    int			    iCurImagePos;
+    Ui_SlideShowViewer*	    ui;
 
 public slots:
-	void OnTimer();
-	void OnButtonStepBack();
-	void OnButtonStepForward();
-	void OnButtonJumpBegin();
-	void OnButtonJumpEnd();
-	void OnSave();
-	void OnSaveAll();
-	void OnClearAll();
+    void OnTimer();
+    void OnButtonStepBack();
+    void OnButtonStepForward();
+    void OnButtonJumpBegin();
+    void OnButtonJumpEnd();
+    void OnSave();
+    void OnSaveAll();
+    void OnClearAll();
     void showEvent(QShowEvent*);
     void hideEvent(QHideEvent*);
 };
