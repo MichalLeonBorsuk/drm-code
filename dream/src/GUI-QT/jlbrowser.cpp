@@ -28,7 +28,7 @@
 
 #include "jlbrowser.h"
 #include "../datadecoding/DataDecoder.h"
-#include "../dream/src/datadecoding/Journaline.h"
+#include "../datadecoding/Journaline.h"
 #include <iostream>
 
 JLBrowser::JLBrowser(QWidget * parent)
