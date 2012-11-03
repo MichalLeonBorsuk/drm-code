@@ -185,8 +185,6 @@ public:
 	_REAL	rPower;
 #if QT_VERSION < 0x040000
 	QListViewItem* item;
-#else
-	QTreeWidgetItem* item; // for manipulating the display
 #endif
 };
 
@@ -209,7 +207,6 @@ public:
 	CStationsItem& GetItem(const int iPos) {return StationsTable[iPos];}
 	StationState CheckState(const int iPos);
 	bool CheckFilter(const int iPos);
-	void clear() { StationsTable.clear(); }
 
 	void SetSecondsPreview(int iSec) {iSecondsPreview = iSec;}
 	int GetSecondsPreview() {return iSecondsPreview;}
