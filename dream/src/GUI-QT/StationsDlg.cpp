@@ -747,6 +747,8 @@ StationsDlg::StationsDlg(CDRMReceiver& NDRMR, CRig& rig,
     RigDlg *pRigDlg = new RigDlg(rig, this);
     connect(actionChooseRig, SIGNAL(triggered()), pRigDlg, SLOT(show()));
     connect(actionEnable_S_Meter, SIGNAL(triggered()), this, SLOT(OnSMeterMenu()));
+#else
+    actionChooseRig->setEnabled(false);
 # endif
     connect(buttonOk, SIGNAL(clicked()), this, SLOT(close()));
 #endif
@@ -857,9 +859,6 @@ void StationsDlg::setupUi(QObject*)
                           SLOT(OnShowStationsMenu(int)), 0, 0);
     pViewMenu->insertItem(tr("Show &all stations"), this,
                           SLOT(OnShowStationsMenu(int)), 0, 1);
-
-    /* Set stations in list view which are active right now */
-    pViewMenu->setItemChecked(0, TRUE);
 
     /* Stations Preview menu ------------------------------------------------ */
     pPreviewMenu = new QPopupMenu(this);
@@ -1346,38 +1345,39 @@ void StationsDlg::LoadSettings(const CSettings& Settings)
     actionEnable_S_Meter->setChecked(ensmeter);
 #endif
 
+    bool showAll = Settings.Get("Stations Dialog", "showall", false);
+    int iPrevSecs = Settings.Get("Stations Dialog", "preview", NUM_SECONDS_PREV_5MIN);
+    DRMSchedule.SetSecondsPreview(iPrevSecs);
+
 #if QT_VERSION < 0x040000
+    /* Set stations in list view which are active right now */
+    pViewMenu->setItemChecked(1, showAll);
+
     /* Set stations preview */
-    /* Retrieve the setting saved into the .ini file */
-    switch (Settings.Get("Stations Dialog", "preview", NUM_SECONDS_PREV_5MIN))
+    switch (iPrevSecs)
     {
     case NUM_SECONDS_PREV_5MIN:
         pPreviewMenu->setItemChecked(1, TRUE);
-        DRMSchedule.SetSecondsPreview(NUM_SECONDS_PREV_5MIN);
         break;
 
     case NUM_SECONDS_PREV_15MIN:
         pPreviewMenu->setItemChecked(2, TRUE);
-        DRMSchedule.SetSecondsPreview(NUM_SECONDS_PREV_15MIN);
         break;
 
     case NUM_SECONDS_PREV_30MIN:
         pPreviewMenu->setItemChecked(3, TRUE);
-        DRMSchedule.SetSecondsPreview(NUM_SECONDS_PREV_30MIN);
         break;
 
     default: /* case 0, also takes care of out of value parameters */
         pPreviewMenu->setItemChecked(0, TRUE);
-        DRMSchedule.SetSecondsPreview(0);
         break;
     }
 #else
-    if(Settings.Get("Stations Dialog", "showall", true))
+    if(showAll)
         actionShowAllStations->setChecked(true);
     else
         actionShowOnlyActiveStations->setChecked(true);
-    int iPrevSecs = Settings.Get("Stations Dialog", "preview", NUM_SECONDS_PREV_5MIN);
-    DRMSchedule.SetSecondsPreview(iPrevSecs);
+
     switch (iPrevSecs)
     {
     case NUM_SECONDS_PREV_5MIN:
@@ -1385,7 +1385,7 @@ void StationsDlg::LoadSettings(const CSettings& Settings)
         break;
 
     case NUM_SECONDS_PREV_15MIN:
-        action5minutes->setChecked(true);
+        action15minutes->setChecked(true);
         break;
 
     case NUM_SECONDS_PREV_30MIN:
@@ -1405,8 +1405,6 @@ void StationsDlg::LoadSettings(const CSettings& Settings)
         DRMSchedule.SetSchedMode(CDRMSchedule::SM_DRM);
         iSortColumn = Settings.Get("Stations Dialog", "sortcolumndrm", 0);
         bCurrentSortAscending = Settings.Get("Stations Dialog", "sortascendingdrm", TRUE);
-#if QT_VERSION < 0x040000
-#endif
         break;
 
     case RM_AM:
@@ -1430,7 +1428,11 @@ void StationsDlg::LoadSettings(const CSettings& Settings)
 void StationsDlg::SaveSettings(CSettings& Settings)
 {
 #if QT_VERSION < 0x040000
-    return; // TODO remove me
+    Settings.Put("Hamlib", "ensmeter", (pRemoteMenu==NULL)?false:pRemoteMenu->menu()->isItemChecked(SMETER_MENU_ID));
+    Settings.Put("Stations Dialog", "showall", pViewMenu->isItemChecked(1));
+#else
+    Settings.Put("Hamlib", "ensmeter", actionEnable_S_Meter->isChecked());
+    Settings.Put("Stations Dialog", "showall", actionShowAllStations->isChecked());
 #endif
     Settings.Put("Stations Dialog", "DRM URL", string(DRMSchedule.qurldrm->toString().latin1()));
     Settings.Put("Stations Dialog", "ANALOG URL", string(DRMSchedule.qurlanalog->toString().latin1()));
@@ -1452,11 +1454,6 @@ void StationsDlg::SaveSettings(CSettings& Settings)
     Settings.Put("Stations Dialog", "targetfilteranalog", string(DRMSchedule.targetFilteranalog.latin1()));
     Settings.Put("Stations Dialog", "countryfilteranalog", string(DRMSchedule.countryFilteranalog.latin1()));
     Settings.Put("Stations Dialog", "languagefilteranalog", string(DRMSchedule.languageFilteranalog.latin1()));
-#if QT_VERSION < 0x040000
-    Settings.Put("Hamlib", "ensmeter", (pRemoteMenu==NULL)?false:pRemoteMenu->menu()->isItemChecked(SMETER_MENU_ID));
-#else
-    Settings.Put("Hamlib", "ensmeter", actionEnable_S_Meter->isChecked());
-#endif
 
     /* Set window geometry data in DRMReceiver module */
     QRect WinGeom = geometry();
@@ -1472,22 +1469,68 @@ void StationsDlg::SaveSettings(CSettings& Settings)
     Settings.Put("Stations Dialog", "preview", DRMSchedule.GetSecondsPreview());
 }
 
+void StationsDlg::LoadFilters()
+{
+    ComboBoxFilterTarget->clear();
+    ComboBoxFilterCountry->clear();
+    ComboBoxFilterLanguage->clear();
+#if QT_VERSION < 0x040000
+    ComboBoxFilterTarget->insertStringList(DRMSchedule.ListTargets);
+    ComboBoxFilterCountry->insertStringList(DRMSchedule.ListCountries);
+    ComboBoxFilterLanguage->insertStringList(DRMSchedule.ListLanguages);
+#else
+    ComboBoxFilterTarget->addItems(DRMSchedule.ListTargets);
+    ComboBoxFilterCountry->addItems(DRMSchedule.ListCountries);
+    ComboBoxFilterLanguage->addItems(DRMSchedule.ListLanguages);
+#endif
+
+    QString targetFilter,countryFilter,languageFilter;
+    if(DRMSchedule.GetSchedMode()==CDRMSchedule::SM_DRM)
+    {
+        targetFilter=DRMSchedule.targetFilterdrm;
+        countryFilter=DRMSchedule.countryFilterdrm;
+        languageFilter=DRMSchedule.languageFilterdrm;
+    }
+    else
+    {
+        targetFilter=DRMSchedule.targetFilteranalog;
+        countryFilter=DRMSchedule.countryFilteranalog;
+        languageFilter=DRMSchedule.languageFilteranalog;
+    }
+#if QT_VERSION < 0x040000
+    if(targetFilter!="") {
+        for(int i=0; i<ComboBoxFilterTarget->count(); i++) {
+            if(ComboBoxFilterTarget->text(i) == targetFilter)
+                ComboBoxFilterTarget->setCurrentItem(i);
+        }
+    }
+    if(countryFilter!="") {
+        for(int i=0; i<ComboBoxFilterCountry->count(); i++) {
+            if(ComboBoxFilterCountry->text(i) == countryFilter)
+                ComboBoxFilterCountry->setCurrentItem(i);
+        }
+    }
+    if(languageFilter!="") {
+        for(int i=0; i<ComboBoxFilterLanguage->count(); i++) {
+            if(ComboBoxFilterLanguage->text(i) == languageFilter)
+                ComboBoxFilterLanguage->setCurrentItem(i);
+        }
+    }
+#else
+    ComboBoxFilterTarget->setCurrentIndex(ComboBoxFilterTarget->findText(targetFilter));
+    ComboBoxFilterCountry->setCurrentIndex(ComboBoxFilterCountry->findText(countryFilter));
+    ComboBoxFilterLanguage->setCurrentIndex(ComboBoxFilterLanguage->findText(languageFilter));
+#endif
+}
+
 void StationsDlg::LoadSchedule()
 {
     ClearStationsView();
 
     DRMSchedule.LoadSchedule();
 
-    ComboBoxFilterTarget->clear();
-    ComboBoxFilterCountry->clear();
-    ComboBoxFilterLanguage->clear();
-
     int i;
 #if QT_VERSION < 0x040000
-    ComboBoxFilterTarget->insertStringList(DRMSchedule.ListTargets);
-    ComboBoxFilterCountry->insertStringList(DRMSchedule.ListCountries);
-    ComboBoxFilterLanguage->insertStringList(DRMSchedule.ListLanguages);
-
     // delete all previous list items
     for (i = 0; i < int(vecpListItems.size()); i++)
     {
@@ -1496,11 +1539,8 @@ void StationsDlg::LoadSchedule()
     }
     // fill the vector just once, then add and remove items from the View
     vecpListItems.resize( DRMSchedule.GetStationNumber());
-#else
-    ComboBoxFilterTarget->addItems(DRMSchedule.ListTargets);
-    ComboBoxFilterCountry->addItems(DRMSchedule.ListCountries);
-    ComboBoxFilterLanguage->addItems(DRMSchedule.ListLanguages);
 #endif
+
     for (i = 0; i < DRMSchedule.GetStationNumber(); i++)
     {
         const CStationsItem& station = DRMSchedule.GetItem(i);
@@ -1547,49 +1587,12 @@ void StationsDlg::LoadSchedule()
 	item->setData(0, Qt::UserRole, i);
 #endif
     }
-
-    QString targetFilter,countryFilter,languageFilter;
-    if(DRMSchedule.GetSchedMode()==CDRMSchedule::SM_DRM)
-    {
-        targetFilter=DRMSchedule.targetFilterdrm;
-        countryFilter=DRMSchedule.countryFilterdrm;
-        languageFilter=DRMSchedule.languageFilterdrm;
-    }
-    else
-    {
-        targetFilter=DRMSchedule.targetFilteranalog;
-        countryFilter=DRMSchedule.countryFilteranalog;
-        languageFilter=DRMSchedule.languageFilteranalog;
-    }
 #if QT_VERSION < 0x040000
     ListViewStations->setSorting(iSortColumn, bCurrentSortAscending);
-# if QT_VERSION >= 0x030000
-    if(targetFilter!="") {
-        for(int i=0; i<ComboBoxFilterTarget->count(); i++) {
-            if(ComboBoxFilterTarget->text(i) == targetFilter)
-                ComboBoxFilterTarget->setCurrentItem(i);
-        }
-    }
-    if(countryFilter!="") {
-        for(int i=0; i<ComboBoxFilterCountry->count(); i++) {
-            if(ComboBoxFilterCountry->text(i) == countryFilter)
-                ComboBoxFilterCountry->setCurrentItem(i);
-        }
-    }
-    if(languageFilter!="") {
-        for(int i=0; i<ComboBoxFilterLanguage->count(); i++) {
-            if(ComboBoxFilterLanguage->text(i) == languageFilter)
-                ComboBoxFilterLanguage->setCurrentItem(i);
-        }
-    }
-# endif
 #else
     ListViewStations->sortByColumn(iSortColumn, bCurrentSortAscending?Qt::AscendingOrder:Qt::DescendingOrder);
-qDebug("filters %s %s %s", targetFilter.latin1(), countryFilter.toStdString().c_str(), languageFilter.toStdString().c_str());
-    ComboBoxFilterLanguage->setEditText(targetFilter);
-    ComboBoxFilterLanguage->setEditText(countryFilter);
-    ComboBoxFilterLanguage->setEditText(languageFilter);
 #endif
+    LoadFilters();
 
     /* Update list view */
     SetStationsView();
@@ -1802,13 +1805,9 @@ void StationsDlg::OnSMeterMenu()
 {
 #if QT_VERSION >= 0x040000
     if(actionEnable_S_Meter->isChecked())
-    {
         EnableSMeter();
-    }
     else
-    {
         DisableSMeter();
-    }
 #endif
 }
 

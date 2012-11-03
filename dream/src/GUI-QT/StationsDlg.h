@@ -263,6 +263,7 @@ public:
 
 protected:
 	void			LoadSchedule();
+	void			LoadFilters();
 	void			SetFrequencyFromGUI(int);
 	void			SetStationsView();
 	void			ClearStationsView();
