@@ -103,7 +103,7 @@ CAudioSourceDecoder::CELPFileName(CParameter & ReceiverParam)
 {
     stringstream ss;
     ss << "test/celp_";
-    ReceiverParam.Lock();
+//    ReceiverParam.Lock(); // TODO CAudioSourceDecoder::InitInternal() already have the lock
     if (ReceiverParam.Service[ReceiverParam.GetCurSelAudioService()].
             AudioParam.eAudioSamplRate == CAudioParam::AS_8_KHZ)
     {
@@ -128,7 +128,7 @@ CAudioSourceDecoder::CELPFileName(CParameter & ReceiverParam)
     {
         ss << "_sbr";
     }
-    ReceiverParam.Unlock();
+//    ReceiverParam.Unlock(); // TODO CAudioSourceDecoder::InitInternal() already have the lock
     ss << ".dat";
 
     return ss.str();
@@ -139,7 +139,7 @@ CAudioSourceDecoder::HVXCFileName(CParameter & ReceiverParam)
 {
     stringstream ss;
     ss << "test/hvxc_";
-    ReceiverParam.Lock();
+//    ReceiverParam.Lock(); // TODO CAudioSourceDecoder::InitInternal() already have the lock
     if (ReceiverParam.Service[ReceiverParam.GetCurSelAudioService()].
             AudioParam.eAudioSamplRate == CAudioParam::AS_8_KHZ)
     {
@@ -176,7 +176,7 @@ CAudioSourceDecoder::HVXCFileName(CParameter & ReceiverParam)
     {
         ss << "_sbr";
     }
-    ReceiverParam.Unlock();
+//    ReceiverParam.Unlock(); // TODO CAudioSourceDecoder::InitInternal() already have the lock
     ss << ".dat";
 
     return ss.str();
@@ -353,7 +353,7 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & ReceiverParam)
                 for (i = 0; i < int(audio_frame[j].size()); i++)
                     vecbyPrepAudioFrame[i + 1] = audio_frame[j][i];
 
-                if(bWriteToFile)
+                if (bWriteToFile && pFile!=NULL)
                 {
                     int iNewFrL = audio_frame[j].size() + 1;
                     fwrite((void *) &iNewFrL, size_t(4), size_t(1), pFile);	// frame length
@@ -455,9 +455,9 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & ReceiverParam)
 
             int iTotNumBits =
                 iNumHigherProtectedBits + iNumLowerProtectedBits;
-            if(bWriteToFile)
+            if (bWriteToFile && pFile!=NULL)
             {
-                int iNewFrL = (int) Ceil((CReal) iTotNumBits / 8);
+                int iNewFrL = (iTotNumBits + 7) / 8; //(int) Ceil((CReal) iTotNumBits / 8);
                 fwrite((void *) &iNewFrL, size_t(4), size_t(1), pFile);	// frame length
                 celp_frame[j].ResetBitAccess();
                 for (i = 0; i < iNewFrL; i++)
@@ -486,9 +486,9 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & ReceiverParam)
 
             bCurBlockOK = TRUE; /* CRC always ignored */
 
-            if(bWriteToFile)
+            if (bWriteToFile && pFile!=NULL)
             {
-                int iNewFrL = (int) Ceil((CReal) iNumHvxcBits / 8);
+                int iNewFrL = (iNumHvxcBits + 7) / 8; //(int) Ceil((CReal) iNumHvxcBits / 8);
                 fwrite((void *) &iNewFrL, size_t(4), size_t(1), pFile);	// frame length
                 hvxc_frame[j].ResetBitAccess();
                 for (i = 0; i < iNewFrL; i++)
