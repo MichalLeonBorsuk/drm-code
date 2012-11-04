@@ -47,7 +47,6 @@ public:
 protected:
 
     QTimer Timer;
-    std::string             strCurrentSavePath;
     CDRMReceiver&			receiver;
     CSettings&              settings;
     bool                    decoderSet;
