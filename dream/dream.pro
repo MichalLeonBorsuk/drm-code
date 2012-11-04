@@ -119,13 +119,20 @@ count(QT_VERSION, 0) {
         FORMS += fdrmdialogbase.ui fmdialogbase.ui AnalogDemDlgbase.ui LiveScheduleDlgbase.ui
         FORMS += MultimediaDlgbase.ui
         unix {
-            exists(/usr/lib/libqwt.so.4) {
+            exists(/usr/local/lib/libqwt.so.4) {
     	        message("with qwt4")
-                INCLUDEPATH += /usr/include/qwt
-                LIBS += /usr/lib/libqwt.so.4
+                INCLUDEPATH += /usr/local/include/qwt
+                LIBS += /usr/local/lib/libqwt.so.4
             }
             else {
-                error("no usable qwt version found")
+                exists(/usr/lib/libqwt.so.4) {
+        	        message("with qwt4")
+                    INCLUDEPATH += /usr/include/qwt
+                    LIBS += /usr/lib/libqwt.so.4
+                }
+                else {
+                    error("no usable qwt version found")
+                }
             }
         }
         win32 {
@@ -164,7 +171,7 @@ unix {
     target.path = /usr/bin
     INSTALLS += target
     CONFIG += link_pkgconfig
-#    packagesExist(libpulse) {
+#    exists(/usr/include/pulse/pulseaudio.h) {
 #        CONFIG += pulseaudio
 #                  message("with pulseaudio")
 #              }
@@ -173,7 +180,7 @@ unix {
         CONFIG += portaudio
      PKGCONFIG += portaudio-2.0
                   message("with portaudio")
-#              }
+              }
     exists(/usr/include/hamlib/rig.h) {
         CONFIG += hamlib
                   message("with hamlib")
