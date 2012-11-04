@@ -1708,7 +1708,7 @@ CMOTDirectory::dump(ostream & out)
 	for (map < _BYTE, string >::iterator di = DirectoryIndex.begin();
 		 di != DirectoryIndex.end(); di++)
     {
-		out << hex << di->first << dec << " => " << di->second;
+		out << hex << int(di->first) << dec << " => " << di->second;
 		out.flush();
     }
 	out << " }";
