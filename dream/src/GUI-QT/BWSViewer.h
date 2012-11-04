@@ -35,6 +35,7 @@
 #include "../DrmReceiver.h"
 
 class CSettings;
+class CDataDecoder;
 
 class BWSViewer : public QMainWindow, Ui_BWSViewer
 {
@@ -47,15 +48,19 @@ public:
 protected:
 
     QTimer Timer;
-    CDRMReceiver&			receiver;
-    CSettings&              settings;
-    bool                    decoderSet;
+    CDRMReceiver&	receiver;
+    CSettings&          settings;
+    bool                decoderSet;
+    bool                initialised;
+    QString		strCurrentSavePath;
+    bool changed();
+    void CreateDirectories(const QString& filename);
+    void SaveMOTObject(const CVector<_BYTE>& vecbRawData, const QString& strFileName);
+    CDataDecoder*   decoder;
+    std::map<QString,QVariant> pages;
 
 public slots:
     void OnTimer();
-    void OnButtonStepBack();
-    void OnButtonStepForward();
-    void OnButtonHome();
     void OnSave();
     void OnSaveAll();
     void OnClearAll();
