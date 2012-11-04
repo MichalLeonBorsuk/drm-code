@@ -38,30 +38,29 @@ class CSettings;
 
 class BWSViewer : public QMainWindow, Ui_BWSViewer
 {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
-	BWSViewer(CDRMReceiver&, CSettings&, QWidget* parent = 0, Qt::WFlags f = 0);
-	virtual ~BWSViewer();
+    BWSViewer(CDRMReceiver&, CSettings&, QWidget* parent = 0, Qt::WFlags f = 0);
+    virtual ~BWSViewer();
 
 protected:
 
     QTimer Timer;
-	std::string             strCurrentSavePath;
-	CDRMReceiver&			receiver;
-	CSettings&              settings;
-	QString                 homeUrl;
-	bool                    decoderSet;
+    std::string             strCurrentSavePath;
+    CDRMReceiver&			receiver;
+    CSettings&              settings;
+    bool                    decoderSet;
 
 public slots:
-	void OnTimer();
-	void OnButtonStepBack();
-	void OnButtonStepForward();
-	void OnButtonHome();
-	void OnSave();
-	void OnSaveAll();
-	void OnClearAll();
-	void onSetProfile(bool);
+    void OnTimer();
+    void OnButtonStepBack();
+    void OnButtonStepForward();
+    void OnButtonHome();
+    void OnSave();
+    void OnSaveAll();
+    void OnClearAll();
+    void onSetProfile(bool);
     void showEvent(QShowEvent*);
     void hideEvent(QHideEvent*);
 };

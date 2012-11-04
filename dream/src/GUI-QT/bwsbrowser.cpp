@@ -27,50 +27,52 @@
 \******************************************************************************/
 
 #include "bwsbrowser.h"
+#include <QDir>
 
 BWSBrowser::BWSBrowser(QWidget * parent)
-: QTextBrowser(parent),decoder(NULL), shomeUrl(""), restricted(false)
+    : QTextBrowser(parent),decoder(NULL), sPath("."), restricted(false)
 {
 }
 
 bool BWSBrowser::changed()
 {
-	if(decoder==NULL)
+    if(decoder==NULL)
         return false;
+    CMOTObject obj;
 
-#if 0
-    TTransportID tid = decoder->GetNextTid();
-    if (tid>=0)
+    /* Poll the data decoder module for new object */
+    if (decoder->GetMOTObject(obj, CDataDecoder::AT_BROADCASTWEBSITE) == TRUE)
     {
-        CMOTObject	obj = decoder->GetObject(tid);
-#else
-	if(decoder->NewObjectAvailable())
-	{
-	    CMOTObject	obj;
-		decoder->GetNextObject(obj);
-#endif
-        pages[obj.strName.c_str()] = obj;
-        CMOTDirectory MOTDir;
+        /* Store received MOT object on disk */
+        const QString strObjName = obj.strName.c_str();
+        const QString strFileName = sPath + "/" + strObjName;
 
-        decoder->GetDirectory(MOTDir);
+        SaveMOTObject(obj.Body.vecData, strFileName);
+	pages[strObjName] = obj;
 
-        /* Checks if the DirectoryIndex has values */
-        if (MOTDir.DirectoryIndex.size() > 0)
+        if (strObjName.contains('/') == 0) /* if has a path is not the main page */
         {
-            if(restricted)
+            /* Get the current directory */
+            CMOTDirectory MOTDir;
+
+            if (decoder->GetMOTDirectory(MOTDir, CDataDecoder::AT_BROADCASTWEBSITE) == TRUE)
             {
-                if(MOTDir.DirectoryIndex.find(BASIC_PROFILE) != MOTDir.DirectoryIndex.end())
-                    shomeUrl = MOTDir.DirectoryIndex[BASIC_PROFILE].c_str();
-            }
-            else
-            {
-                if(MOTDir.DirectoryIndex.find(UNRESTRICTED_PC_PROFILE) != MOTDir.DirectoryIndex.end())
-                    shomeUrl = MOTDir.DirectoryIndex[UNRESTRICTED_PC_PROFILE].c_str();
-                else if(MOTDir.DirectoryIndex.find(BASIC_PROFILE) != MOTDir.DirectoryIndex.end())
-                    shomeUrl = MOTDir.DirectoryIndex[BASIC_PROFILE].c_str();
+                /* Checks if the DirectoryIndex has values */
+                if (MOTDir.DirectoryIndex.size() > 0)
+                {
+		    QString shomeUrl;
+                    if(MOTDir.DirectoryIndex.find(UNRESTRICTED_PC_PROFILE) != MOTDir.DirectoryIndex.end())
+                        shomeUrl =
+                            MOTDir.DirectoryIndex[UNRESTRICTED_PC_PROFILE].c_str();
+                    else if(MOTDir.DirectoryIndex.find(BASIC_PROFILE) != MOTDir.DirectoryIndex.end())
+                        shomeUrl =
+                            MOTDir.DirectoryIndex[BASIC_PROFILE].c_str();
+		    if(shomeUrl!="")
+			setSource(QUrl(shomeUrl));
+                }
             }
         }
-		return true;
+	return true;
     }
     return false;
 }
@@ -78,7 +80,7 @@ bool BWSBrowser::changed()
 QVariant BWSBrowser::loadResource( int, const QUrl & name )
 {
     map<QString,CMOTObject>::const_iterator i = pages.find(name.toString());
-	if(i == pages.end())
+    if(i == pages.end())
         return QVariant::Invalid;
 
     const CVector < _BYTE >& vecData = i->second.Body.vecData;
@@ -86,5 +88,60 @@ QVariant BWSBrowser::loadResource( int, const QUrl & name )
     for(int i=0; i<vecData.Size(); i++)
         r += vecData[i];
     return r;
+}
+
+void BWSBrowser::SaveMOTObject(const CVector<_BYTE>& vecbRawData,
+                                  const QString& strFileName)
+{
+    /* First, create directory for storing the file (if not exists) */
+    CreateDirectories(strFileName.latin1());
+
+    /* Data size in bytes */
+    const int iSize = vecbRawData.Size();
+
+    /* Open file */
+    FILE* pFiBody = fopen(strFileName.latin1(), "wb");
+
+    if (pFiBody != NULL)
+    {
+        /* Write data byte-wise */
+        for (int i = 0; i < iSize; i++)
+        {
+            const _BYTE b = vecbRawData[i];
+            fwrite(&b, size_t(1), size_t(1), pFiBody);
+        }
+
+        /* Close the file afterwards */
+        fclose(pFiBody);
+    }
+}
+
+void BWSBrowser::CreateDirectories(const QString& filename)
+{
+    int i = 0;
+
+    while (i < filename.length())
+    {
+        _BOOLEAN bFound = FALSE;
+
+        while ((i < filename.length()) && (bFound == FALSE))
+        {
+            if (filename[i] == '/')
+                bFound = TRUE;
+            else
+                i++;
+        }
+
+        if (bFound == TRUE)
+        {
+            /* create directory */
+            const QString sDirName = filename.left(i);
+
+            if (!QFileInfo(sDirName).exists())
+                QDir().mkdir(sDirName);
+        }
+
+        i++;
+    }
 }
 
