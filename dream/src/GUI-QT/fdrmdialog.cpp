@@ -83,7 +83,7 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& NSettings, CRig& rig,
 
 #if QT_VERSION < 0x040000
     /* Multimedia window */
-    pMultiMediaDlg = new MultimediaDlg(DRMReceiver, this);
+    pMultiMediaDlg = new MultimediaDlg(DRMReceiver, this, "", FALSE, Qt::WStyle_MinMax);
     pMultiMediaDlg->LoadSettings(Settings);
 
     /* Stations window */
