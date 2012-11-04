@@ -161,7 +161,8 @@ void BWSViewer::showEvent(QShowEvent*)
     if (WinGeom.isValid() && !WinGeom.isEmpty() && !WinGeom.isNull())
         setGeometry(WinGeom);
 
-    strCurrentSavePath = settings.Get("BWS", "storagepath", "MOT");
+    string strCurrentSavePath = settings.Get("BWS", "storagepath", string("MOT"));
+    settings.Put("BWS", "storagepath", strCurrentSavePath);
 
     QString StrCurrentSavePath(strCurrentSavePath.c_str());
     /* Create the cache directory if not exist */
@@ -227,8 +228,6 @@ void BWSViewer::hideEvent(QHideEvent*)
     c.iWSize = WinGeom.width();
     settings.Put("BWS", c);
 
-    /* Store save path */
-    settings.Put("BWS", "storagepath", strCurrentSavePath);
 }
 
 
