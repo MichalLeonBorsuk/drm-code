@@ -30,10 +30,11 @@
 #include "../util/Settings.h"
 #include "../datadecoding/DataDecoder.h"
 #include <QDir>
+#include <QWebHistory>
 
 BWSViewer::BWSViewer(CDRMReceiver& rec, CSettings& s,QWidget* parent, Qt::WFlags f):
     QMainWindow(parent, f), Ui_BWSViewer(), Timer(),
-    receiver(rec), settings(s), decoderSet(false)
+    receiver(rec), settings(s), decoderSet(false), initialised(false)
 {
     setupUi(this);
 
@@ -49,9 +50,9 @@ BWSViewer::BWSViewer(CDRMReceiver& rec, CSettings& s,QWidget* parent, Qt::WFlags
     LEDStatus->SetUpdateTime(1000);
 
     /* Connect controls */
-    connect(ButtonStepBack, SIGNAL(clicked()), textBrowser, SLOT(backward()));
-    connect(ButtonStepForward, SIGNAL(clicked()), textBrowser, SLOT(forward()));
-    connect(ButtonHome, SIGNAL(clicked()), textBrowser, SLOT(home()));
+    connect(ButtonStepBack, SIGNAL(clicked()), webView, SLOT(back()));
+    connect(ButtonStepForward, SIGNAL(clicked()), webView, SLOT(forward()));
+    connect(ButtonHome, SIGNAL(clicked()), webView, SLOT(home()));
 
     OnClearAll();
 
@@ -80,12 +81,7 @@ void BWSViewer::OnTimer()
 
     if(!decoderSet)
     {
-        CDataDecoder* dec = receiver.GetDataDecoder();
-        if(dec)
-        {
-            textBrowser->setDecoder(dec);
-            decoderSet = true;
-        }
+        decoder = receiver.GetDataDecoder();
     }
 
     switch(status)
@@ -107,25 +103,10 @@ void BWSViewer::OnTimer()
         break;
     }
 
-    if(textBrowser->changed())
+    if(changed())
     {
-        textBrowser->reload();
+        webView->reload();
     }
-}
-
-void BWSViewer::OnButtonStepBack()
-{
-    textBrowser->backward();
-}
-
-void BWSViewer::OnButtonStepForward()
-{
-    textBrowser->forward();
-}
-
-void BWSViewer::OnButtonHome()
-{
-    textBrowser->home();
 }
 
 void BWSViewer::OnSave()
@@ -138,9 +119,9 @@ void BWSViewer::OnSaveAll()
 
 void BWSViewer::OnClearAll()
 {
-    textBrowser->clear();
-    textBrowser->clearHistory();
-    textBrowser->setToolTip("");
+    webView->history()->clear();
+    webView->setHtml("");
+    webView->setToolTip("");
 
     actionClear_All->setEnabled(false);
     actionSave->setEnabled(false);
@@ -152,7 +133,6 @@ void BWSViewer::OnClearAll()
 
 void BWSViewer::onSetProfile(bool isChecked)
 {
-    textBrowser->setRestrictedProfile(isChecked);
 }
 
 void BWSViewer::showEvent(QShowEvent*)
@@ -165,14 +145,12 @@ void BWSViewer::showEvent(QShowEvent*)
     if (WinGeom.isValid() && !WinGeom.isEmpty() && !WinGeom.isNull())
         setGeometry(WinGeom);
 
-    string strCurrentSavePath = settings.Get("BWS", "storagepath", string("MOT"));
-    settings.Put("BWS", "storagepath", strCurrentSavePath);
+    strCurrentSavePath = QString(settings.Get("BWS", "storagepath", string("MOT")).c_str());
+    settings.Put("BWS", "storagepath", string(strCurrentSavePath.latin1()));
 
-    QString StrCurrentSavePath(strCurrentSavePath.c_str());
     /* Create the cache directory if not exist */
-    if (!QFileInfo(StrCurrentSavePath).exists())
-        QDir().mkdir(StrCurrentSavePath);
-    textBrowser->setSavePath(StrCurrentSavePath);
+    if (!QFileInfo(strCurrentSavePath).exists())
+        QDir().mkdir(strCurrentSavePath);
 
     CParameter& Parameters = *receiver.GetParameters();
     Parameters.Lock();
@@ -234,4 +212,122 @@ void BWSViewer::hideEvent(QHideEvent*)
 
 }
 
+bool BWSViewer::changed()
+{
+    if(decoder==NULL)
+        return false;
+    CMOTObject obj;
+
+    /* Poll the data decoder module for new object */
+    if (decoder->GetMOTObject(obj, CDataDecoder::AT_BROADCASTWEBSITE) == TRUE)
+    {
+        const QString strObjName = obj.strName.c_str();
+
+        /* Store received MOT object on disk */
+        const QString strFileName = strCurrentSavePath + "/" + strObjName;
+        SaveMOTObject(obj.Body.vecData, strFileName);
+
+	/* Store it in the internal map */
+	if(strObjName.endsWith("html") || strObjName.endsWith("stm")){
+	QString s;
+	for(int i=0; i<obj.Body.vecData.Size(); i++)
+		s += obj.Body.vecData[i];
+	s = s.replace(QRegExp("color=([0-9a-fA-F])"), "color=#\\1"); 
+	
+	pages[strObjName] = s;
+	}
+	else
+	{
+	QByteArray ba(obj.Body.vecData.Size());
+	for(int i=0; i<obj.Body.vecData.Size(); i++)
+		ba[i] = obj.Body.vecData[i];
+	pages[strObjName] = ba;
+	}
+
+        if (strObjName.contains('/') == 0) /* if has a path is not the main page */
+        {
+            /* Get the current directory */
+            CMOTDirectory MOTDir;
+
+            if (decoder->GetMOTDirectory(MOTDir, CDataDecoder::AT_BROADCASTWEBSITE) == TRUE)
+            {
+                /* Checks if the DirectoryIndex has values */
+                if (MOTDir.DirectoryIndex.size() > 0)
+                {
+		    QString shomeUrl;
+                    if(MOTDir.DirectoryIndex.find(UNRESTRICTED_PC_PROFILE) != MOTDir.DirectoryIndex.end())
+                        shomeUrl =
+                            MOTDir.DirectoryIndex[UNRESTRICTED_PC_PROFILE].c_str();
+                    else if(MOTDir.DirectoryIndex.find(BASIC_PROFILE) != MOTDir.DirectoryIndex.end())
+                        shomeUrl =
+                            MOTDir.DirectoryIndex[BASIC_PROFILE].c_str();
+		    if(shomeUrl == "not_here.html") // this is a hack
+			shomeUrl = "index.html";
+		    if(!initialised && shomeUrl!="")
+		    {
+			webView->setUrl(QUrl(strCurrentSavePath+"/"+shomeUrl));
+			initialised = true;
+		    }
+                }
+            }
+        }
+	return true;
+    }
+    return false;
+}
+
+void BWSViewer::SaveMOTObject(const CVector<_BYTE>& vecbRawData,
+                                  const QString& strFileName)
+{
+    /* First, create directory for storing the file (if not exists) */
+    CreateDirectories(strFileName.latin1());
+
+    /* Data size in bytes */
+    const int iSize = vecbRawData.Size();
+
+    /* Open file */
+    FILE* pFiBody = fopen(strFileName.latin1(), "wb");
+
+    if (pFiBody != NULL)
+    {
+        /* Write data byte-wise */
+        for (int i = 0; i < iSize; i++)
+        {
+            const _BYTE b = vecbRawData[i];
+            fwrite(&b, size_t(1), size_t(1), pFiBody);
+        }
+
+        /* Close the file afterwards */
+        fclose(pFiBody);
+    }
+}
+
+void BWSViewer::CreateDirectories(const QString& filename)
+{
+    int i = 0;
+
+    while (i < filename.length())
+    {
+        _BOOLEAN bFound = FALSE;
+
+        while ((i < filename.length()) && (bFound == FALSE))
+        {
+            if (filename[i] == '/')
+                bFound = TRUE;
+            else
+                i++;
+        }
+
+        if (bFound == TRUE)
+        {
+            /* create directory */
+            const QString sDirName = filename.left(i);
+
+            if (!QFileInfo(sDirName).exists())
+                QDir().mkdir(sDirName);
+        }
+
+        i++;
+    }
+}
 
