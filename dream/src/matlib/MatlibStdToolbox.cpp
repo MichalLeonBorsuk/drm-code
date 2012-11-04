@@ -28,15 +28,18 @@
 #include "MatlibStdToolbox.h"
 #include "../GlobalDefinitions.h"
 
-#ifdef HAVE_FFTW3_H
 /* The mutex need to be application wide,
-   only fftw_execute() is thread safe */
-static CMutex* mutex;
-# define MUTEX_LOCK() mutex->Lock()
-# define MUTEX_UNLOCK() mutex->Unlock()
+   only the execution routines are thread-safe */
+static CMutex* mutex = NULL;
+#define MUTEX_LOCK() mutex->Lock()
+#define MUTEX_UNLOCK() mutex->Unlock()
+
+#ifdef HAVE_FFTW3_H
 # define PLANNER_FLAGS (FFTW_ESTIMATE | FFTW_DESTROY_INPUT)
 /* Warning: for testing purpose only */
 //# define PLANNER_FLAGS FFTW_EXHAUSTIVE
+#else
+# define PLANNER_FLAGS FFTW_ESTIMATE
 #endif
 
 
@@ -465,10 +468,9 @@ CComplex Quad(MATLIB_CALLBACK_QAUD f, const CReal a, const CReal b,
 }
 
 CMatlibVector<CComplex> Fft(const CMatlibVector<CComplex>& cvI,
-							const CFftPlans& FftPlans)
+							CFftPlans& FftPlans)
 {
 	int				i;
-	CFftPlans*		pCurPlan;
 	fftw_complex*	pFftwComplexIn;
 	fftw_complex*	pFftwComplexOut;
 
@@ -480,22 +482,11 @@ CMatlibVector<CComplex> Fft(const CMatlibVector<CComplex>& cvI,
 	if (n == 0)
 		return cvReturn;
 
-	/* Check, if plans are already created, else: create it */
-	if (!FftPlans.IsInitialized())
-	{
-		pCurPlan = new CFftPlans;
-		pCurPlan->Init(n);
-	}
-	else
-	{
-		/* Ugly, but ok: We transform "const" object in "non constant" object
-		   since we KNOW that the original object is not constant since it
-		   was already initialized! */
-		pCurPlan = (CFftPlans*) &FftPlans;
-	}
+	/* Init the plan */
+	FftPlans.Init(n, CFftPlans::FP_FFTPlForw);
 
-	pFftwComplexIn = pCurPlan->pFftwComplexIn;
-	pFftwComplexOut = pCurPlan->pFftwComplexOut;
+	pFftwComplexIn = FftPlans.pFftwComplexIn;
+	pFftwComplexOut = FftPlans.pFftwComplexOut;
 
 	/* fftw (Homepage: http://www.fftw.org/) */
 	for (i = 0; i < n; i++)
@@ -511,16 +502,9 @@ CMatlibVector<CComplex> Fft(const CMatlibVector<CComplex>& cvI,
 
 	/* Actual fftw call */
 #ifdef HAVE_FFTW3_H
-	if (!pCurPlan->FFTPlForw)
-	{
-		MUTEX_LOCK();
-		pCurPlan->FFTPlForw = fftw_plan_dft_1d(pCurPlan->fftw_n, pFftwComplexIn, pFftwComplexOut, FFTW_FORWARD, PLANNER_FLAGS);
-		MUTEX_UNLOCK();
-	}
-	if (pCurPlan->FFTPlForw)
-		fftw_execute(pCurPlan->FFTPlForw);
+	fftw_execute(FftPlans.FFTPlForw);
 #else
-	fftw_one(pCurPlan->FFTPlForw, pFftwComplexIn, pFftwComplexOut);
+	fftw_one(FftPlans.FFTPlForw, pFftwComplexIn, pFftwComplexOut);
 #endif
 
 	for (i = 0; i < n; i++)
@@ -530,17 +514,13 @@ CMatlibVector<CComplex> Fft(const CMatlibVector<CComplex>& cvI,
 		cvReturn[i] = CComplex(pFftwComplexOut[i].re, pFftwComplexOut[i].im);
 #endif
 
-	if (!FftPlans.IsInitialized())
-		delete pCurPlan;
-
 	return cvReturn;
 }
 
 CMatlibVector<CComplex> Ifft(const CMatlibVector<CComplex>& cvI,
-							 const CFftPlans& FftPlans)
+							 CFftPlans& FftPlans)
 {
 	int				i;
-	CFftPlans*		pCurPlan;
 	fftw_complex*	pFftwComplexIn;
 	fftw_complex*	pFftwComplexOut;
 
@@ -552,22 +532,11 @@ CMatlibVector<CComplex> Ifft(const CMatlibVector<CComplex>& cvI,
 	if (n == 0)
 		return cvReturn;
 
-	/* Check, if plans are already created, else: create it */
-	if (!FftPlans.IsInitialized())
-	{
-		pCurPlan = new CFftPlans;
-		pCurPlan->Init(n);
-	}
-	else
-	{
-		/* Ugly, but ok: We transform "const" object in "non constant" object
-		   since we KNOW that the original object is not constant since it
-		   was already initialized! */
-		pCurPlan = (CFftPlans*) &FftPlans;
-	}
+	/* Init the plan */
+	FftPlans.Init(n, CFftPlans::FP_FFTPlBackw);
 
-	pFftwComplexIn = pCurPlan->pFftwComplexIn;
-	pFftwComplexOut = pCurPlan->pFftwComplexOut;
+	pFftwComplexIn = FftPlans.pFftwComplexIn;
+	pFftwComplexOut = FftPlans.pFftwComplexOut;
 
 	/* fftw (Homepage: http://www.fftw.org/) */
 	for (i = 0; i < n; i++)
@@ -583,16 +552,9 @@ CMatlibVector<CComplex> Ifft(const CMatlibVector<CComplex>& cvI,
 
 	/* Actual fftw call */
 #ifdef HAVE_FFTW3_H
-	if (!pCurPlan->FFTPlBackw)
-	{
-		MUTEX_LOCK();
-		pCurPlan->FFTPlBackw = fftw_plan_dft_1d(pCurPlan->fftw_n, pFftwComplexIn, pFftwComplexOut, FFTW_BACKWARD, PLANNER_FLAGS);
-		MUTEX_UNLOCK();
-	}
-	if (pCurPlan->FFTPlBackw)
-		fftw_execute(pCurPlan->FFTPlBackw);
+	fftw_execute(FftPlans.FFTPlBackw);
 #else
-	fftw_one(pCurPlan->FFTPlBackw, pFftwComplexIn, pFftwComplexOut);
+	fftw_one(FftPlans.FFTPlBackw, pFftwComplexIn, pFftwComplexOut);
 #endif
 	
 	const CReal scale = (CReal) 1.0 / n;
@@ -607,17 +569,13 @@ CMatlibVector<CComplex> Ifft(const CMatlibVector<CComplex>& cvI,
 #endif
 	}
 
-	if (!FftPlans.IsInitialized())
-		delete pCurPlan;
-
 	return cvReturn;
 }
 
 CMatlibVector<CComplex> rfft(const CMatlibVector<CReal>& fvI,
-							 const CFftPlans& FftPlans)
+							 CFftPlans& FftPlans)
 {
 	int			i;
-	CFftPlans*	pCurPlan;
 #ifdef HAVE_FFTW3_H
 	double* 	pFftwRealIn;
 	double* 	pFftwRealOut;
@@ -638,22 +596,11 @@ CMatlibVector<CComplex> rfft(const CMatlibVector<CReal>& fvI,
 	if (iLongLength == 0)
 		return cvReturn;
 
-	/* Check, if plans are already created, else: create it */
-	if (!FftPlans.IsInitialized())
-	{
-		pCurPlan = new CFftPlans;
-		pCurPlan->Init(iLongLength);
-	}
-	else
-	{
-		/* Ugly, but ok: We transform "const" object in "non constant" object
-		   since we KNOW that the original object is not constant since it
-		   was already initialized! */
-		pCurPlan = (CFftPlans*) &FftPlans;
-	}
+	/* Init the plan */
+	FftPlans.Init(iLongLength, CFftPlans::FP_RFFTPlForw);
 
-	pFftwRealIn = pCurPlan->pFftwRealIn;
-	pFftwRealOut = pCurPlan->pFftwRealOut;
+	pFftwRealIn = FftPlans.pFftwRealIn;
+	pFftwRealOut = FftPlans.pFftwRealOut;
 
 	/* fftw (Homepage: http://www.fftw.org/) */
 	for (i = 0; i < iSizeI; i++)
@@ -661,16 +608,9 @@ CMatlibVector<CComplex> rfft(const CMatlibVector<CReal>& fvI,
 
 	/* Actual fftw call */
 #ifdef HAVE_FFTW3_H
-	if (!pCurPlan->RFFTPlForw)
-	{
-		MUTEX_LOCK();
-		pCurPlan->RFFTPlForw = fftw_plan_r2r_1d(pCurPlan->fftw_n, pFftwRealIn, pFftwRealOut, FFTW_R2HC, PLANNER_FLAGS);
-		MUTEX_UNLOCK();
-	}
-	if (pCurPlan->RFFTPlForw)
-		fftw_execute(pCurPlan->RFFTPlForw);
+	fftw_execute(FftPlans.RFFTPlForw);
 #else
-	rfftw_one(pCurPlan->RFFTPlForw, pFftwRealIn, pFftwRealOut);
+	rfftw_one(FftPlans.RFFTPlForw, pFftwRealIn, pFftwRealOut);
 #endif
 
 	/* Now build complex output vector */
@@ -683,20 +623,16 @@ CMatlibVector<CComplex> rfft(const CMatlibVector<CReal>& fvI,
 	if ((iLongLength & 1) == 0)
 		cvReturn[iShortLength] = pFftwRealOut[iShortLength];
 
-	if (!FftPlans.IsInitialized())
-		delete pCurPlan;
-
 	return cvReturn;
 }
 
 CMatlibVector<CReal> rifft(const CMatlibVector<CComplex>& cvI,
-						   const CFftPlans& FftPlans)
+						   CFftPlans& FftPlans)
 {
 /*
 	This function only works with EVEN N!
 */
 	int			i;
-	CFftPlans*	pCurPlan;
 #ifdef HAVE_FFTW3_H
 	double*		pFftwRealIn;
 	double*		pFftwRealOut;
@@ -714,22 +650,11 @@ CMatlibVector<CReal> rifft(const CMatlibVector<CComplex>& cvI,
 	if (iShortLength <= 0)
 		return fvReturn;
 
-	/* Check, if plans are already created, else: create it */
-	if (!FftPlans.IsInitialized())
-	{
-		pCurPlan = new CFftPlans;
-		pCurPlan->Init(iLongLength);
-	}
-	else
-	{
-		/* Ugly, but ok: We transform "const" object in "non constant" object
-		   since we KNOW that the original object is not constant since it
-		   was already initialized! */
-		pCurPlan = (CFftPlans*) &FftPlans;
-	}
+	/* Init the plan */
+	FftPlans.Init(iLongLength, CFftPlans::FP_RFFTPlBackw);
 
-	pFftwRealIn = pCurPlan->pFftwRealIn;
-	pFftwRealOut = pCurPlan->pFftwRealOut;
+	pFftwRealIn = FftPlans.pFftwRealIn;
+	pFftwRealOut = FftPlans.pFftwRealOut;
 
 	/* Now build half-complex-vector */
 	pFftwRealIn[0] = cvI[0].real();
@@ -743,16 +668,9 @@ CMatlibVector<CReal> rifft(const CMatlibVector<CComplex>& cvI,
 
 	/* Actual fftw call */
 #ifdef HAVE_FFTW3_H
-	if (!pCurPlan->RFFTPlBackw)
-	{
-		MUTEX_LOCK();
-		pCurPlan->RFFTPlBackw = fftw_plan_r2r_1d(pCurPlan->fftw_n, pFftwRealIn, pFftwRealOut, FFTW_HC2R, PLANNER_FLAGS);
-		MUTEX_UNLOCK();
-	}
-	if (pCurPlan->RFFTPlBackw)
-		fftw_execute(pCurPlan->RFFTPlBackw);
+	fftw_execute(FftPlans.RFFTPlBackw);
 #else
-	rfftw_one(pCurPlan->RFFTPlBackw, pFftwRealIn, pFftwRealOut);
+	rfftw_one(FftPlans.RFFTPlBackw, pFftwRealIn, pFftwRealOut);
 #endif
 
 	/* Scale output vector */
@@ -760,39 +678,24 @@ CMatlibVector<CReal> rifft(const CMatlibVector<CComplex>& cvI,
 	for (i = 0; i < iLongLength; i++) 
 		fvReturn[i] = pFftwRealOut[i] * scale;
 
-	if (!FftPlans.IsInitialized())
-		delete pCurPlan;
-
 	return fvReturn;
 }
 
 CMatlibVector<CReal> FftFilt(const CMatlibVector<CComplex>& rvH,
 							 const CMatlibVector<CReal>& rvI,
 							 CMatlibVector<CReal>& rvZ,
-							 const CFftPlans& FftPlans)
+							 CFftPlans& FftPlans)
 {
 /*
 	This function only works with EVEN N!
 */
-	CFftPlans*				pCurPlan;
 	const int				iL(rvH.GetSize() - 1); /* Nyquist frequency! */
 	const int				iL2(2 * iL);
 	CMatlibVector<CReal>	rvINew(iL2);
 	CMatlibVector<CReal>	rvOutTMP(iL2);
 
-	/* Check, if plans are already created, else: create it */
-	if (!FftPlans.IsInitialized())
-	{
-		pCurPlan = new CFftPlans;
-		pCurPlan->Init(iL2);
-	}
-	else
-	{
-		/* Ugly, but ok: We transform "const" object in "non constant" object
-		   since we KNOW that the original object is not constant since it
-		   was already initialized! */
-		pCurPlan = (CFftPlans*) &FftPlans;
-	}
+	/* Init the plan */
+	FftPlans.Init(iL2);
 
 	/* Update history of input signal */
 	rvINew.Merge(rvZ, rvI);
@@ -810,69 +713,112 @@ CMatlibVector<CReal> FftFilt(const CMatlibVector<CComplex>& rvH,
 
 /* FftPlans implementation -------------------------------------------------- */
 CFftPlans::CFftPlans(const int iFftSize) :
-	RFFTPlForw(NULL), RFFTPlBackw(NULL), bInitialized(false)
+	RFFTPlForw(NULL), RFFTPlBackw(NULL), pFftwRealIn(NULL), pFftwRealOut(NULL),
+	FFTPlForw(NULL), FFTPlBackw(NULL), pFftwComplexIn(NULL), pFftwComplexOut(NULL),
+	bInitialized(FALSE), bFixedSizeInit(FALSE), fftw_n(0)
 {
-#ifdef HAVE_FFTW3_H
 	/* Static initialization of CMutex not working on Mac OS X */
 	if (!mutex)
 		mutex = new CMutex();
-#endif
+
+	/* If iFftSize is non zero then proceed to initialization */
 	if (iFftSize)
 		Init(iFftSize);
 }
 
 CFftPlans::~CFftPlans()
 {
-	if (bInitialized)
-	{
-		/* Delete old plans and intermediate buffers */
-#ifdef HAVE_FFTW3_H
-		MUTEX_LOCK();
-		fftw_destroy_plan(RFFTPlForw);
-		fftw_destroy_plan(RFFTPlBackw);
-		fftw_destroy_plan(FFTPlForw);
-		fftw_destroy_plan(FFTPlBackw);
-		MUTEX_UNLOCK();
-#else
-		rfftw_destroy_plan(RFFTPlForw);
-		rfftw_destroy_plan(RFFTPlBackw);
-		fftw_destroy_plan(FFTPlForw);
-		fftw_destroy_plan(FFTPlBackw);
-#endif
+	/* This one is obvious, no need to comment! */
+	Clean();
+}
 
-		delete[] pFftwRealIn;
-		delete[] pFftwRealOut;
-		delete[] pFftwComplexIn;
-		delete[] pFftwComplexOut;
+void CFftPlans::Init(const int iFSi, EFFTPlan eFFTPlan)
+{
+	/* Init some flags */
+	_BOOLEAN bNeedPlanInit = FALSE;
+	_BOOLEAN bSizeChanged = FALSE;
+
+	/* If Init(const int iFSi) as been previously called
+	   then the fft size can't be changed here
+	   (not reelly needed but keep the original behaviour) */
+	if (!bFixedSizeInit)
+		bSizeChanged = InitInternal(iFSi);
+
+	/* The fft size has changed so we don't need to check for plan init */
+	if (!bSizeChanged)
+	{
+		/* Check if the requested plan need an initialization */
+		switch (eFFTPlan)
+		{
+		case FP_RFFTPlForw:  bNeedPlanInit = !RFFTPlForw;  break;
+		case FP_RFFTPlBackw: bNeedPlanInit = !RFFTPlBackw; break;
+		case FP_FFTPlForw:   bNeedPlanInit = !FFTPlForw;   break;
+		case FP_FFTPlBackw:  bNeedPlanInit = !FFTPlBackw;  break;
+		}
+	}
+
+	/* The following fftw_ call might be cpu intensive, they must be called only when needed */
+	if (bSizeChanged || bNeedPlanInit)
+	{
+//		printf("CFftPlans::Init() bSizeChanged=%i bNeedPlanInit=%i iFSi=%i fftw_n=%i\n", bSizeChanged, bNeedPlanInit, iFSi, fftw_n);
+		MUTEX_LOCK();
+		switch (eFFTPlan)
+		{
+		case FP_RFFTPlForw:
+#ifdef HAVE_FFTW3_H
+			RFFTPlForw = fftw_plan_r2r_1d(fftw_n, pFftwRealIn, pFftwRealOut, FFTW_R2HC, PLANNER_FLAGS);
+#else
+			RFFTPlForw = rfftw_create_plan(fftw_n, FFTW_REAL_TO_COMPLEX, PLANNER_FLAGS);
+#endif
+			break;
+		case FP_RFFTPlBackw:
+#ifdef HAVE_FFTW3_H
+			RFFTPlBackw = fftw_plan_r2r_1d(fftw_n, pFftwRealIn, pFftwRealOut, FFTW_HC2R, PLANNER_FLAGS);
+#else
+			RFFTPlBackw = rfftw_create_plan(fftw_n, FFTW_COMPLEX_TO_REAL, PLANNER_FLAGS);
+#endif
+			break;
+		case FP_FFTPlForw:
+#ifdef HAVE_FFTW3_H
+			FFTPlForw = fftw_plan_dft_1d(fftw_n, pFftwComplexIn, pFftwComplexOut, FFTW_FORWARD, PLANNER_FLAGS);
+#else
+			FFTPlForw = fftw_create_plan(fftw_n, FFTW_FORWARD, PLANNER_FLAGS);
+#endif
+			break;
+		case FP_FFTPlBackw:
+#ifdef HAVE_FFTW3_H
+			FFTPlBackw = fftw_plan_dft_1d(fftw_n, pFftwComplexIn, pFftwComplexOut, FFTW_BACKWARD, PLANNER_FLAGS);
+#else
+			FFTPlBackw = fftw_create_plan(fftw_n, FFTW_BACKWARD, PLANNER_FLAGS);
+#endif
+			break;
+		}
+		MUTEX_UNLOCK();
 	}
 }
 
 void CFftPlans::Init(const int iFSi)
 {
+	/* The bFixedSizeInit flag isn't really needed,
+	   it only keep the original Init() behaviour */
+	bFixedSizeInit = TRUE;
+	InitInternal(iFSi);
+}
+
+_BOOLEAN CFftPlans::InitInternal(const int iFSi)
+{
 	if (bInitialized)
 	{
-		/* Delete old plans and intermediate buffers */
-#ifdef HAVE_FFTW3_H
-		MUTEX_LOCK();
-		fftw_destroy_plan(RFFTPlForw);
-		fftw_destroy_plan(RFFTPlBackw);
-		fftw_destroy_plan(FFTPlForw);
-		fftw_destroy_plan(FFTPlBackw);
-		MUTEX_UNLOCK();
-#else
-		rfftw_destroy_plan(RFFTPlForw);
-		rfftw_destroy_plan(RFFTPlBackw);
-		fftw_destroy_plan(FFTPlForw);
-		fftw_destroy_plan(FFTPlBackw);
-#endif
+		/* No change, so return */
+		if (fftw_n == iFSi)
+			return FALSE; /* The fft size is the same */
 
-		delete[] pFftwRealIn;
-		delete[] pFftwRealOut;
-		delete[] pFftwComplexIn;
-		delete[] pFftwComplexOut;
+		/* Delete old plans and intermediate buffers */
+		Clean();
 	}
 
-	/* Create new plans and intermediate buffers */
+// TODO intermediate buffers should be created only when needed
+	/* Create new intermediate buffers */
 #ifdef HAVE_FFTW3_H
 	pFftwRealIn = new double[iFSi];
 	pFftwRealOut = new double[iFSi];
@@ -883,19 +829,46 @@ void CFftPlans::Init(const int iFSi)
 	pFftwComplexIn = new fftw_complex[iFSi];
 	pFftwComplexOut = new fftw_complex[iFSi];
 
-#ifdef HAVE_FFTW3_H
 	fftw_n = iFSi;
-
-	RFFTPlForw = NULL;
-	RFFTPlBackw = NULL;
-	FFTPlForw = NULL;
-	FFTPlBackw = NULL;
-#else
-	RFFTPlForw = rfftw_create_plan(iFSi, FFTW_REAL_TO_COMPLEX, FFTW_ESTIMATE);
-	RFFTPlBackw = rfftw_create_plan(iFSi, FFTW_COMPLEX_TO_REAL, FFTW_ESTIMATE);
-	FFTPlForw = fftw_create_plan(iFSi, FFTW_FORWARD, FFTW_ESTIMATE);
-	FFTPlBackw = fftw_create_plan(iFSi, FFTW_BACKWARD, FFTW_ESTIMATE);
-#endif
-
-	bInitialized = true;
+	bInitialized = TRUE;
+	return TRUE; /* The fft size has changed */
 }
+
+void CFftPlans::Clean()
+{
+	if (bInitialized)
+	{
+		/* Delete old plans and intermediate buffers */
+		MUTEX_LOCK();
+#ifdef HAVE_FFTW3_H
+		if (RFFTPlForw)  fftw_destroy_plan(RFFTPlForw);
+		if (RFFTPlBackw) fftw_destroy_plan(RFFTPlBackw);
+#else
+		if (RFFTPlForw)  rfftw_destroy_plan(RFFTPlForw);
+		if (RFFTPlBackw) rfftw_destroy_plan(RFFTPlBackw);
+#endif
+		if (FFTPlForw)   fftw_destroy_plan(FFTPlForw);
+		if (FFTPlBackw)  fftw_destroy_plan(FFTPlBackw);
+		MUTEX_UNLOCK();
+
+		delete[] pFftwRealIn;
+		delete[] pFftwRealOut;
+		delete[] pFftwComplexIn;
+		delete[] pFftwComplexOut;
+
+		pFftwRealIn = NULL;
+		pFftwRealOut = NULL;
+		pFftwComplexIn = NULL;
+		pFftwComplexOut = NULL;
+
+		RFFTPlForw = NULL;
+		RFFTPlBackw = NULL;
+		FFTPlForw = NULL;
+		FFTPlBackw = NULL;
+
+		fftw_n = 0;
+
+		bInitialized = FALSE;
+	}
+}
+

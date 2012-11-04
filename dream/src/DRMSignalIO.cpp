@@ -103,7 +103,6 @@ void CTransmitData::FlushData()
     {
         const int iSize = vecsDataOut.Size();
         const int iStart = iSize * iBlockCnt / iNumBlocks;
-        short* data = &vecsDataOut[0];
         for (i = iStart; i < iSize; i++)
             vecsDataOut[i] = 0;
     }
@@ -467,8 +466,9 @@ void CReceiveData::GetInputSpec(CVector<_REAL>& vecrData,
 
     /* Get squared magnitude of spectrum */
     CRealVector vecrSqMagSpect(iLenSpecWithNyFreq);
+    CFftPlans FftPlans; // TODO remove from stack
     vecrSqMagSpect =
-        SqMag(rfft(vecrFFTInput * Hann(NUM_SMPLS_4_INPUT_SPECTRUM)));
+        SqMag(rfft(vecrFFTInput * Hann(NUM_SMPLS_4_INPUT_SPECTRUM), FftPlans));
 
     /* Log power spectrum data */
     for (i = 0; i < iLenSpecWithNyFreq; i++)
@@ -530,6 +530,7 @@ void CReceiveData::CalculatePSD(CVector<_REAL>& vecrData,
     /* Calculate FFT of each small block and average results (estimation
        of PSD of input signal) */
 
+    CFftPlans FftPlans; // TODO remove from stack
     int i;
     for (i = 0; i < iNumAvBlocksPSD; i++)
     {
@@ -541,7 +542,7 @@ void CReceiveData::CalculatePSD(CVector<_REAL>& vecrData,
         vecrFFTInput *= vecrHammWin;
 
         /* Calculate squared magnitude of spectrum and average results */
-        vecrAvSqMagSpect += SqMag(rfft(vecrFFTInput));
+        vecrAvSqMagSpect += SqMag(rfft(vecrFFTInput, FftPlans));
     }
 
     /* Log power spectrum data */
