@@ -31,26 +31,36 @@
 
 #include <map>
 #include <QTextBrowser>
-#include "../datadecoding/DABMOT.h"
+#include "../datadecoding/DataDecoder.h"
 
 class BWSBrowser : public QTextBrowser
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
-    BWSBrowser(QWidget * parent = 0 );
+    BWSBrowser(QWidget * parent = 0);
     ~BWSBrowser() {}
     QVariant loadResource ( int type, const QUrl & name );
     bool changed();
-    void setDecoder(CMOTDABDec *d) { decoder = d; }
-    void setRestrictedProfile(bool b) { restricted = b; }
-    bool restrictedProfile() { return restricted; }
-    QString homeUrl() const { return shomeUrl; }
+    void setDecoder(CDataDecoder *d) {
+        decoder = d;
+    }
+    void setSavePath(const QString& path) {
+        sPath = path;
+    }
+    void setRestrictedProfile(bool b) {
+        restricted = b;
+    }
+    bool restrictedProfile() {
+        return restricted;
+    }
 
 protected:
 
-    CMOTDABDec*   decoder;
+    void CreateDirectories(const QString& filename);
+    void SaveMOTObject(const CVector<_BYTE>& vecbRawData, const QString& strFileName);
+    CDataDecoder*   decoder;
     std::map<QString,CMOTObject> pages;
-    QString shomeUrl;
+    QString sPath;
     bool restricted;
 };
 

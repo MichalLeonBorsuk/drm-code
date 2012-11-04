@@ -29,34 +29,35 @@
 #include "BWSViewer.h"
 #include "../util/Settings.h"
 #include "../datadecoding/DataDecoder.h"
+#include <QDir>
 
 BWSViewer::BWSViewer(CDRMReceiver& rec, CSettings& s,QWidget* parent, Qt::WFlags f):
-		QMainWindow(parent, f), Ui_BWSViewer(), Timer(),
-		receiver(rec), settings(s), homeUrl(""), decoderSet(false)
+    QMainWindow(parent, f), Ui_BWSViewer(), Timer(),
+    receiver(rec), settings(s), decoderSet(false)
 {
     setupUi(this);
 
     connect(buttonOk, SIGNAL(clicked()), this, SLOT(close()));
 
-	connect(actionClear_All, SIGNAL(triggered()), SLOT(OnClearAll()));
-	connect(actionSave, SIGNAL(triggered()), SLOT(OnSave()));
-	connect(actionSave_All, SIGNAL(triggered()), SLOT(OnSaveAll()));
-	connect(actionClose, SIGNAL(triggered()), SLOT(close()));
-	connect(actionRestricted_Profile_Only, SIGNAL(triggered(bool)), SLOT(onSetProfile(bool)));
+    connect(actionClear_All, SIGNAL(triggered()), SLOT(OnClearAll()));
+    connect(actionSave, SIGNAL(triggered()), SLOT(OnSave()));
+    connect(actionSave_All, SIGNAL(triggered()), SLOT(OnSaveAll()));
+    connect(actionClose, SIGNAL(triggered()), SLOT(close()));
+    connect(actionRestricted_Profile_Only, SIGNAL(triggered(bool)), SLOT(onSetProfile(bool)));
 
-	/* Update time for color LED */
-	LEDStatus->SetUpdateTime(1000);
+    /* Update time for color LED */
+    LEDStatus->SetUpdateTime(1000);
 
-	/* Connect controls */
-	connect(ButtonStepBack, SIGNAL(clicked()), this, SLOT(OnButtonStepBack()));
-	connect(ButtonStepForward, SIGNAL(clicked()), this, SLOT(OnButtonStepForward()));
-	connect(ButtonHome, SIGNAL(clicked()), this, SLOT(OnButtonHome()));
+    /* Connect controls */
+    connect(ButtonStepBack, SIGNAL(clicked()), this, SLOT(OnButtonStepBack()));
+    connect(ButtonStepForward, SIGNAL(clicked()), this, SLOT(OnButtonStepForward()));
+    connect(ButtonHome, SIGNAL(clicked()), this, SLOT(OnButtonHome()));
 
     OnClearAll();
 
-	connect(&Timer, SIGNAL(timeout()), this, SLOT(OnTimer()));
+    connect(&Timer, SIGNAL(timeout()), this, SLOT(OnTimer()));
 
-	Timer.stop();
+    Timer.stop();
 }
 
 BWSViewer::~BWSViewer()
@@ -66,54 +67,45 @@ BWSViewer::~BWSViewer()
 void BWSViewer::OnTimer()
 {
     CParameter& Parameters = *receiver.GetParameters();
-	Parameters.Lock();
-	ETypeRxStatus status = Parameters.ReceiveStatus.MOT.GetStatus();
+    Parameters.Lock();
+    ETypeRxStatus status = Parameters.ReceiveStatus.MOT.GetStatus();
     /* Get current data service */
     const int iCurSelDataServ = Parameters.GetCurSelDataService();
     CService service = Parameters.Service[iCurSelDataServ];
-	Parameters.Unlock();
+    Parameters.Unlock();
 
     if(!decoderSet)
     {
         CDataDecoder* dec = receiver.GetDataDecoder();
-        CMOTDABDec *decoder = (CMOTDABDec*)dec->getApplication(service.DataParam.iPacketID);
-
-        if(decoder)
+        if(dec)
         {
-            textBrowser->setDecoder(decoder);
+            textBrowser->setDecoder(dec);
             decoderSet = true;
         }
     }
 
-	switch(status)
-	{
-	case NOT_PRESENT:
-		LEDStatus->Reset();
-		break;
+    switch(status)
+    {
+    case NOT_PRESENT:
+        LEDStatus->Reset();
+        break;
 
-	case CRC_ERROR:
-		LEDStatus->SetLight(CMultColorLED::RL_RED);
-		break;
+    case CRC_ERROR:
+        LEDStatus->SetLight(CMultColorLED::RL_RED);
+        break;
 
-	case DATA_ERROR:
-		LEDStatus->SetLight(CMultColorLED::RL_YELLOW);
-		break;
+    case DATA_ERROR:
+        LEDStatus->SetLight(CMultColorLED::RL_YELLOW);
+        break;
 
-	case RX_OK:
-		LEDStatus->SetLight(CMultColorLED::RL_GREEN);
-		break;
-	}
+    case RX_OK:
+        LEDStatus->SetLight(CMultColorLED::RL_GREEN);
+        break;
+    }
 
     if(textBrowser->changed())
     {
         textBrowser->reload();
-    }
-
-    if(homeUrl=="")
-    {
-        homeUrl = textBrowser->homeUrl();
-        if(homeUrl!="")
-            textBrowser->setSource(QUrl(homeUrl));
     }
 }
 
@@ -144,7 +136,7 @@ void BWSViewer::OnClearAll()
 {
     textBrowser->clear();
     textBrowser->clearHistory();
-	textBrowser->setToolTip("");
+    textBrowser->setToolTip("");
 
     actionClear_All->setEnabled(false);
     actionSave->setEnabled(false);
@@ -161,15 +153,21 @@ void BWSViewer::onSetProfile(bool isChecked)
 
 void BWSViewer::showEvent(QShowEvent*)
 {
-	/* Get window geometry data and apply it */
-	CWinGeom g;
-	settings.Get("BWS", g);
-	const QRect WinGeom(g.iXPos, g.iYPos, g.iWSize, g.iHSize);
+    /* Get window geometry data and apply it */
+    CWinGeom g;
+    settings.Get("BWS", g);
+    const QRect WinGeom(g.iXPos, g.iYPos, g.iWSize, g.iHSize);
 
-	if (WinGeom.isValid() && !WinGeom.isEmpty() && !WinGeom.isNull())
-		setGeometry(WinGeom);
+    if (WinGeom.isValid() && !WinGeom.isEmpty() && !WinGeom.isNull())
+        setGeometry(WinGeom);
 
-	strCurrentSavePath = settings.Get("BWS", "storagepath", strCurrentSavePath);
+    strCurrentSavePath = settings.Get("BWS", "storagepath", "MOT");
+
+    QString StrCurrentSavePath(strCurrentSavePath.c_str());
+    /* Create the cache directory if not exist */
+    if (!QFileInfo(StrCurrentSavePath).exists())
+        QDir().mkdir(StrCurrentSavePath);
+    textBrowser->setSavePath(StrCurrentSavePath);
 
     CParameter& Parameters = *receiver.GetParameters();
     Parameters.Lock();
@@ -198,39 +196,39 @@ void BWSViewer::showEvent(QShowEvent*)
                 strLabel += " ";
 
             strServiceID = "- ID:" +
-                QString().setNum(long(service.iServiceID), 16).toUpper();
+                           QString().setNum(long(service.iServiceID), 16).toUpper();
         }
 
         /* add the description on the title of the dialog */
         if (strLabel != "" || strServiceID != "")
             strTitle += " [" + strLabel + strServiceID + "]";
     }
-	setWindowTitle(strTitle);
+    setWindowTitle(strTitle);
 
-	/* Update window */
-	OnTimer();
+    /* Update window */
+    OnTimer();
 
-	/* Activate real-time timer when window is shown */
-	Timer.start(GUI_CONTROL_UPDATE_TIME);
+    /* Activate real-time timer when window is shown */
+    Timer.start(GUI_CONTROL_UPDATE_TIME);
 }
 
 void BWSViewer::hideEvent(QHideEvent*)
 {
-	/* Deactivate real-time timer so that it does not get new pictures */
-	Timer.stop();
+    /* Deactivate real-time timer so that it does not get new pictures */
+    Timer.stop();
 
-	/* Save window geometry data */
-	QRect WinGeom = geometry();
+    /* Save window geometry data */
+    QRect WinGeom = geometry();
 
-	CWinGeom c;
-	c.iXPos = WinGeom.x();
-	c.iYPos = WinGeom.y();
-	c.iHSize = WinGeom.height();
-	c.iWSize = WinGeom.width();
-	settings.Put("BWS", c);
+    CWinGeom c;
+    c.iXPos = WinGeom.x();
+    c.iYPos = WinGeom.y();
+    c.iHSize = WinGeom.height();
+    c.iWSize = WinGeom.width();
+    settings.Put("BWS", c);
 
-	/* Store save path */
-	settings.Put("BWS ","storagepath", strCurrentSavePath);
+    /* Store save path */
+    settings.Put("BWS", "storagepath", strCurrentSavePath);
 }
 
 
