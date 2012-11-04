@@ -49,15 +49,19 @@ BWSViewer::BWSViewer(CDRMReceiver& rec, CSettings& s,QWidget* parent, Qt::WFlags
     LEDStatus->SetUpdateTime(1000);
 
     /* Connect controls */
-    connect(ButtonStepBack, SIGNAL(clicked()), this, SLOT(OnButtonStepBack()));
-    connect(ButtonStepForward, SIGNAL(clicked()), this, SLOT(OnButtonStepForward()));
-    connect(ButtonHome, SIGNAL(clicked()), this, SLOT(OnButtonHome()));
+    connect(ButtonStepBack, SIGNAL(clicked()), textBrowser, SLOT(backward()));
+    connect(ButtonStepForward, SIGNAL(clicked()), textBrowser, SLOT(forward()));
+    connect(ButtonHome, SIGNAL(clicked()), textBrowser, SLOT(home()));
 
     OnClearAll();
 
     connect(&Timer, SIGNAL(timeout()), this, SLOT(OnTimer()));
 
     Timer.stop();
+
+ButtonStepBack->setEnabled(true);
+ButtonStepForward->setEnabled(true);
+ButtonHome->setEnabled(true);
 }
 
 BWSViewer::~BWSViewer()

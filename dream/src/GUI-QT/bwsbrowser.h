@@ -59,9 +59,9 @@ protected:
     void CreateDirectories(const QString& filename);
     void SaveMOTObject(const CVector<_BYTE>& vecbRawData, const QString& strFileName);
     CDataDecoder*   decoder;
-    std::map<QString,CMOTObject> pages;
+    std::map<QString,QVariant> pages;
     QString sPath;
-    bool restricted;
+    bool restricted, initialised;
 };
 
 #endif

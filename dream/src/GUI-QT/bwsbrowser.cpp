@@ -30,7 +30,7 @@
 #include <QDir>
 
 BWSBrowser::BWSBrowser(QWidget * parent)
-    : QTextBrowser(parent),decoder(NULL), sPath("."), restricted(false)
+    : QTextBrowser(parent),decoder(NULL), sPath("."), restricted(false), initialised(false)
 {
 }
 
@@ -43,12 +43,28 @@ bool BWSBrowser::changed()
     /* Poll the data decoder module for new object */
     if (decoder->GetMOTObject(obj, CDataDecoder::AT_BROADCASTWEBSITE) == TRUE)
     {
-        /* Store received MOT object on disk */
         const QString strObjName = obj.strName.c_str();
-        const QString strFileName = sPath + "/" + strObjName;
 
+        /* Store received MOT object on disk */
+        const QString strFileName = sPath + "/" + strObjName;
         SaveMOTObject(obj.Body.vecData, strFileName);
-	pages[strObjName] = obj;
+
+	/* Store it in the internal map */
+	if(strObjName.endsWith("html") || strObjName.endsWith("stm")){
+	QString s;
+	for(int i=0; i<obj.Body.vecData.Size(); i++)
+		s += obj.Body.vecData[i];
+	s = s.replace(QRegExp("color=([0-9a-fA-F])"), "color=#\\1"); 
+	
+	pages[strObjName] = s;
+	}
+	else
+	{
+	QByteArray ba(obj.Body.vecData.Size());
+	for(int i=0; i<obj.Body.vecData.Size(); i++)
+		ba[i] = obj.Body.vecData[i];
+	pages[strObjName] = ba;
+	}
 
         if (strObjName.contains('/') == 0) /* if has a path is not the main page */
         {
@@ -67,8 +83,13 @@ bool BWSBrowser::changed()
                     else if(MOTDir.DirectoryIndex.find(BASIC_PROFILE) != MOTDir.DirectoryIndex.end())
                         shomeUrl =
                             MOTDir.DirectoryIndex[BASIC_PROFILE].c_str();
-		    if(shomeUrl!="")
+		    if(shomeUrl == "not_here.html") // this is a hack
+			shomeUrl = "index.html";
+		    if(!initialised && shomeUrl!="")
+		    {
 			setSource(QUrl(shomeUrl));
+			initialised = true;
+		    }
                 }
             }
         }
@@ -79,15 +100,10 @@ bool BWSBrowser::changed()
 
 QVariant BWSBrowser::loadResource( int, const QUrl & name )
 {
-    map<QString,CMOTObject>::const_iterator i = pages.find(name.toString());
+    map<QString,QVariant>::const_iterator i = pages.find(name.toString());
     if(i == pages.end())
         return QVariant::Invalid;
-
-    const CVector < _BYTE >& vecData = i->second.Body.vecData;
-    QString r;
-    for(int i=0; i<vecData.Size(); i++)
-        r += vecData[i];
-    return r;
+    return i->second;
 }
 
 void BWSBrowser::SaveMOTObject(const CVector<_BYTE>& vecbRawData,
