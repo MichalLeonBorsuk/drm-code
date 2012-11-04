@@ -28,6 +28,7 @@
 
 #include "TransmDlg.h"
 #if QT_VERSION < 0x040000
+# include <qevent.h>
 # include <qpopupmenu.h>
 # include <qbuttongroup.h>
 # include <qmultilineedit.h>
@@ -37,8 +38,7 @@
 # include <qprogressbar.h>
 # include <qwhatsthis.h>
 #else
-# include <QCustomEvent>
-# include <QHideEvent>
+# include <QCloseEvent>
 # include <QTreeWidget>
 # include <QFileDialog>
 # include <QTextEdit>
@@ -95,7 +95,7 @@ TransmDialog::TransmDialog(CSettings& NSettings,
 #endif
 	bIsStarted(FALSE),
 	vecstrTextMessage(1) /* 1 for new text */,
-	iIDCurrentText(0), iServiceDescr(0)
+	iIDCurrentText(0), iServiceDescr(0), bCloseRequested(FALSE)
 #ifdef ENABLE_TRANSM_CODECPARAMS
 	, iButtonCodecState(0)
 #endif
@@ -575,6 +575,8 @@ TransmDialog::TransmDialog(CSettings& NSettings,
 
 	connect(&Timer, SIGNAL(timeout()),
 		this, SLOT(OnTimer()));
+	connect(&TimerStop, SIGNAL(timeout()),
+		this, SLOT(OnTimerStop()));
 
 
 	/* Set timer for real-time controls */
@@ -615,6 +617,18 @@ TransmDialog::~TransmDialog()
 #endif
 
 	Parameters.Unlock();
+}
+
+void TransmDialog::closeEvent(QCloseEvent* ce)
+{
+	bCloseRequested = TRUE;
+	if (bIsStarted == TRUE)
+	{
+		OnButtonStartStop();
+		ce->ignore();
+	}
+	else
+		ce->accept();
 }
 
 void TransmDialog::on_actionWhats_This()
@@ -660,81 +674,108 @@ void TransmDialog::OnTimer()
 	}
 }
 
-void TransmDialog::OnButtonStartStop()
+void TransmDialog::OnTimerStop()
 {
-	int i;
-
-	if (bIsStarted == TRUE)
+#if QT_VERSION < 0x040000
+	if (!TransThread.running())
+#else
+	if (!TransThread.isRunning())
+#endif
 	{
-		/* Stop transmitter */
-		TransThread.Stop();
-
-		ButtonStartStop->setText(tr("&Start"));
-
-		EnableAllControlsForSet();
+		TimerStop.stop();
 
 		bIsStarted = FALSE;
+
+		if (bCloseRequested)
+		{
+			close();
+		}
+		else
+		{
+			ButtonStartStop->setText(tr("&Start"));
+
+			EnableAllControlsForSet();
+		}
 	}
-	else
+}
+
+void TransmDialog::OnButtonStartStop()
+{
+	if (!TimerStop.isActive())
 	{
-		/* Start transmitter */
-		/* Set text message */
-		TransThread.DRMTransmitter.GetAudSrcEnc()->ClearTextMessage();
+		if (bIsStarted == TRUE)
+		{
+			ButtonStartStop->setText(tr("Stopping..."));
 
-		for (i = 1; i < vecstrTextMessage.Size(); i++)
-			TransThread.DRMTransmitter.GetAudSrcEnc()->
-				SetTextMessage(vecstrTextMessage[i]);
+			/* Request a transmitter stop */
+			TransThread.Stop();
 
-		/* Set file names for data application */
-		TransThread.DRMTransmitter.GetAudSrcEnc()->ClearPicFileNames();
+			/* Start the timer for polling the thread state */
+			TimerStop.start(50);
+		}
+		else
+		{
+			int i, count;
+
+			/* Start transmitter */
+			/* Set text message */
+			TransThread.DRMTransmitter.GetAudSrcEnc()->ClearTextMessage();
+
+			for (i = 1; i < vecstrTextMessage.Size(); i++)
+				TransThread.DRMTransmitter.GetAudSrcEnc()->
+					SetTextMessage(vecstrTextMessage[i]);
+
+			/* Set file names for data application */
+			TransThread.DRMTransmitter.GetAudSrcEnc()->ClearPicFileNames();
 
 #if QT_VERSION < 0x040000
-		/* Iteration through list view items. Code based on QT sample code for
-		   list view items */
-		QListViewItemIterator it(ListViewFileNames);
+			/* Iteration through list view items. Code based on QT sample code for
+			   list view items */
+			QListViewItemIterator it(ListViewFileNames);
 
-		for (; it.current(); it++)
-		{
-			/* Complete file path is in third column */
-			const QString strFileName = it.current()->text(2);
-
-			/* Extract format string */
-			QFileInfo FileInfo(strFileName);
-			const QString strFormat = FileInfo.extension(FALSE);
-
-			TransThread.DRMTransmitter.GetAudSrcEnc()->
-				SetPicFileName(ToUtf8(strFileName), ToUtf8(strFormat));
-		}
-#else
-		/* Iteration through table widget items */
-		int i, count = TreeWidgetFileNames->topLevelItemCount();
-
-		for (i = 0; i <count; i++)
-		{
-			/* Complete file path is in third column */
-			QTreeWidgetItem* item = TreeWidgetFileNames->topLevelItem(i);
-			if (item)
+			for (; it.current(); it++)
 			{
-				/* Get the file path  */
-				const QString strFileName = item->text(2);
+				/* Complete file path is in third column */
+				const QString strFileName = it.current()->text(2);
 
 				/* Extract format string */
 				QFileInfo FileInfo(strFileName);
-				const QString strFormat = FileInfo.suffix();
+				const QString strFormat = FileInfo.extension(FALSE);
 
 				TransThread.DRMTransmitter.GetAudSrcEnc()->
 					SetPicFileName(ToUtf8(strFileName), ToUtf8(strFormat));
 			}
-		}
+#else
+			/* Iteration through table widget items */
+			count = TreeWidgetFileNames->topLevelItemCount();
+
+			for (i = 0; i <count; i++)
+			{
+				/* Complete file path is in third column */
+				QTreeWidgetItem* item = TreeWidgetFileNames->topLevelItem(i);
+				if (item)
+				{
+					/* Get the file path  */
+					const QString strFileName = item->text(2);
+
+					/* Extract format string */
+					QFileInfo FileInfo(strFileName);
+					const QString strFormat = FileInfo.suffix();
+
+					TransThread.DRMTransmitter.GetAudSrcEnc()->
+						SetPicFileName(ToUtf8(strFileName), ToUtf8(strFormat));
+				}
+			}
 #endif
 
-		TransThread.start();
+			TransThread.start();
 
-		ButtonStartStop->setText(tr("&Stop"));
+			ButtonStartStop->setText(tr("&Stop"));
 
-		DisableAllControlsForSet();
+			DisableAllControlsForSet();
 
-		bIsStarted = TRUE;
+			bIsStarted = TRUE;
+		}
 	}
 }
 
