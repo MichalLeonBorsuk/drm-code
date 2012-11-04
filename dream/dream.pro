@@ -171,11 +171,11 @@ unix {
     target.path = /usr/bin
     INSTALLS += target
     CONFIG += link_pkgconfig
-#    exists(/usr/include/pulse/pulseaudio.h) {
-#        CONFIG += pulseaudio
-#                  message("with pulseaudio")
-#              }
-#    else {
+    exists(/usr/include/pulse/pulseaudio.h) {
+        CONFIG += pulseaudio
+                  message("with pulseaudio")
+              }
+    else {
     #packagesExist(portaudio-2.0) {
         CONFIG += portaudio
      PKGCONFIG += portaudio-2.0
