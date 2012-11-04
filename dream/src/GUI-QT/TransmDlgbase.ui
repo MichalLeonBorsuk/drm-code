@@ -1250,7 +1250,7 @@ Institute for Communication Technology</string>
        </spacer>
       </item>
       <item>
-       <widget class="QPushButton" name="buttonOk">
+       <widget class="QPushButton" name="ButtonClose">
         <property name="text">
          <string>&amp;Close</string>
         </property>
@@ -1355,14 +1355,14 @@ Institute for Communication Technology</string>
   <tabstop>PushButtonAddFile</tabstop>
   <tabstop>ButtonStartStop</tabstop>
   <tabstop>ButtonCodec</tabstop>
-  <tabstop>buttonOk</tabstop>
+  <tabstop>ButtonClose</tabstop>
  </tabstops>
  <resources>
   <include location="res/icons.qrc"/>
  </resources>
  <connections>
   <connection>
-   <sender>buttonOk</sender>
+   <sender>ButtonClose</sender>
    <signal>clicked()</signal>
    <receiver>TransmDlgBase</receiver>
    <slot>close()</slot>

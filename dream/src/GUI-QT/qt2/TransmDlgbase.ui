@@ -1910,7 +1910,7 @@ Institute for Communication Technology</string>
                     <class>QPushButton</class>
                     <property stdset="1">
                         <name>name</name>
-                        <cstring>buttonOk</cstring>
+                        <cstring>ButtonClose</cstring>
                     </property>
                     <property stdset="1">
                         <name>text</name>
@@ -1961,10 +1961,10 @@ Institute for Communication Technology</string>
 </images>
 <connections>
     <connection>
-        <sender>buttonOk</sender>
+        <sender>ButtonClose</sender>
         <signal>clicked()</signal>
         <receiver>TransmDlgBase</receiver>
-        <slot>accept()</slot>
+        <slot>close()</slot>
     </connection>
 </connections>
 </UI>

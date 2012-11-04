@@ -77,12 +77,8 @@ class CTransmitterThread : public QThread
 public:
 	void Stop()
 	{
-		/* Stop working thread and wait until it is ready for terminating. We
-		   set a time-out of 5 seconds */
+		/* Stop working thread */
 		DRMTransmitter.Stop();
-
-		if (wait(5000) == FALSE)
-			ErrorMessage("Termination of working thread failed.");
 	}
 
 	virtual void run()
@@ -128,6 +124,7 @@ public:
 	virtual ~TransmDialog();
 
 protected:
+	void closeEvent(QCloseEvent*);
 	void DisableAllControlsForSet();
 	void EnableAllControlsForSet();
 
@@ -141,6 +138,7 @@ protected:
 	CAboutDlg			AboutDlg;
 #endif
 	QTimer				Timer;
+	QTimer				TimerStop;
 #ifdef ENABLE_TRANSM_CODECPARAMS
 	CodecParams*		CodecDlg;
 #endif
@@ -150,6 +148,7 @@ protected:
 	CVector<string>		vecstrTextMessage;
 	int					iIDCurrentText;
 	int					iServiceDescr;
+	_BOOLEAN			bCloseRequested;
 #ifdef ENABLE_TRANSM_CODECPARAMS
 	int					iButtonCodecState;
 	void				ShowButtonCodec(_BOOLEAN bShow, int iKey);
@@ -194,6 +193,7 @@ public slots:
 	void OnTextChangedServiceID(const QString& strID);
 	void OnTextChangedSndCrdIF(const QString& strIF);
 	void OnTimer();
+	void OnTimerStop();
 	void on_actionWhats_This();
 };
 #endif
