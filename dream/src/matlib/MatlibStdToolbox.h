@@ -52,17 +52,18 @@ class CFftPlans
 {
 public:
 	CFftPlans(const int iFftSize = 0);
-	virtual ~CFftPlans();
+	~CFftPlans();
+
+	enum EFFTPlan { FP_RFFTPlForw, FP_RFFTPlBackw, FP_FFTPlForw, FP_FFTPlBackw };
 
 	void Init(const int iFSi);
-	inline bool IsInitialized() const {return bInitialized;}
+	void Init(const int iFSi, EFFTPlan eFFTPlan);
 
 #ifdef HAVE_FFTW3_H
 	fftw_plan	RFFTPlForw;
 	fftw_plan	RFFTPlBackw;
 	double*		pFftwRealIn;
 	double*		pFftwRealOut;
-	int             fftw_n;
 #else
 	rfftw_plan	RFFTPlForw;
 	rfftw_plan	RFFTPlBackw;
@@ -76,8 +77,11 @@ public:
 	fftw_complex*	pFftwComplexOut;
 
 protected:
-	void Clean();
-	bool bInitialized;
+	void			Clean();
+	_BOOLEAN		InitInternal(const int iFSi);
+	_BOOLEAN		bInitialized;
+	_BOOLEAN		bFixedSizeInit;
+	int				fftw_n;
 };
 
 
@@ -261,15 +265,15 @@ CMatlibMatrix<CComplex>		TranspH(const CMatlibMatrix<CComplex>& cmI)
 								{return Conj(Transp(cmI));} /* With conjugate complex */
 
 /* Fourier transformations (also included: real FFT) */
-CMatlibVector<CComplex>		Fft(const CMatlibVector<CComplex>& cvI, const CFftPlans& FftPlans = CFftPlans());
-CMatlibVector<CComplex>		Ifft(const CMatlibVector<CComplex>& cvI, const CFftPlans& FftPlans = CFftPlans());
-CMatlibVector<CComplex>		rfft(const CMatlibVector<CReal>& fvI, const CFftPlans& FftPlans = CFftPlans());
-CMatlibVector<CReal>		rifft(const CMatlibVector<CComplex>& cvI, const CFftPlans& FftPlans = CFftPlans());
+CMatlibVector<CComplex>		Fft(const CMatlibVector<CComplex>& cvI, CFftPlans& FftPlans);
+CMatlibVector<CComplex>		Ifft(const CMatlibVector<CComplex>& cvI, CFftPlans& FftPlans);
+CMatlibVector<CComplex>		rfft(const CMatlibVector<CReal>& fvI, CFftPlans& FftPlans);
+CMatlibVector<CReal>		rifft(const CMatlibVector<CComplex>& cvI, CFftPlans& FftPlans);
 
 CMatlibVector<CReal>		FftFilt(const CMatlibVector<CComplex>& rvH,
 									const CMatlibVector<CReal>& rvI,
 									CMatlibVector<CReal>& rvZ,
-									const CFftPlans& FftPlans = CFftPlans());
+									CFftPlans& FftPlans);
 
 
 /* Numerical integration */
