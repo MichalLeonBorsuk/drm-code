@@ -1554,11 +1554,15 @@ void TransmDialog::EnableAllControlsForSet()
 
 void TransmDialog::TabWidgetEnableTabs(QTabWidget *tabWidget, bool enable)
 {
+#if QT_VERSION < 0x030000
+	tabWidget->setEnabled(enable);
+#else
 	for (int i = 0; i < tabWidget->count(); i++)
 # if QT_VERSION < 0x040000
 		tabWidget->page(i)->setEnabled(enable);
-#else
+# else
 		tabWidget->widget(i)->setEnabled(enable);
+# endif
 #endif
 }
 
