@@ -560,7 +560,6 @@ Phase Offset</string>
    <addaction name="menu_Settings"/>
    <addaction name="menuHelp"/>
   </widget>
-  <widget class="QStatusBar" name="statusbar"/>
   <action name="action_Stations_Dialog">
    <property name="text">
     <string>S&amp;tations Dialog...</string>

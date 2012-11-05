@@ -6760,7 +6760,6 @@
    <addaction name="menu_Settings"/>
    <addaction name="menuHelp"/>
   </widget>
-  <widget class="QStatusBar" name="statusbar"/>
   <action name="actionTune">
    <property name="text">
     <string>Tune...</string>

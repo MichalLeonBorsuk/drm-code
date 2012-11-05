@@ -33,7 +33,7 @@
 #include "../DrmReceiver.h"
 class CSettings;
 
-class SlideShowViewer : public QMainWindow
+class SlideShowViewer : public QDialog
 {
     Q_OBJECT
 
