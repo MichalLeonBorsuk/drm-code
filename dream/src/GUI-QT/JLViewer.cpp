@@ -40,6 +40,7 @@ JLViewer::JLViewer(CDRMReceiver& rec, CSettings& s, QWidget* parent,
     (void)name; (void)f;
     /* Enable minimize and maximize box for QDialog */
 	setWindowFlags(Qt::Window);
+
     setupUi(this);
 
     connect(buttonOk, SIGNAL(clicked()), this, SLOT(close()));

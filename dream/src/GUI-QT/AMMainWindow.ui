@@ -375,18 +375,18 @@ Phase Offset</string>
         <property name="title">
          <string>Audio</string>
         </property>
-        <layout class="QVBoxLayout" name="verticalLayout_3">
+        <layout class="QHBoxLayout" name="horizontalLayout_8">
          <item>
           <widget class="QCheckBox" name="CheckBoxMuteAudio">
            <property name="text">
-            <string>Mute Audio</string>
+            <string>Mute</string>
            </property>
           </widget>
          </item>
          <item>
           <widget class="QCheckBox" name="CheckBoxSaveAudioWave">
            <property name="text">
-            <string>Save Audio</string>
+            <string>Save</string>
            </property>
           </widget>
          </item>
@@ -640,8 +640,8 @@ Phase Offset</string>
  </resources>
  <connections/>
  <buttongroups>
-  <buttongroup name="ButtonGroupDemodulation"/>
   <buttongroup name="ButtonGroupAGC"/>
+  <buttongroup name="ButtonGroupDemodulation"/>
   <buttongroup name="ButtonGroupNoiseReduction"/>
  </buttongroups>
 </ui>

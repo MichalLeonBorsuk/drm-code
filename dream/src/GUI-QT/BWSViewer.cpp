@@ -32,10 +32,13 @@
 #include <QDir>
 #include <QWebHistory>
 
-BWSViewer::BWSViewer(CDRMReceiver& rec, CSettings& s,QWidget* parent, Qt::WFlags f):
-    QMainWindow(parent, f), Ui_BWSViewer(), Timer(),
+BWSViewer::BWSViewer(CDRMReceiver& rec, CSettings& s, QWidget* parent, Qt::WFlags):
+    QDialog(parent), Ui_BWSViewer(), Timer(),
     receiver(rec), settings(s), decoderSet(false), initialised(false)
 {
+    /* Enable minimize and maximize box for QDialog */
+	setWindowFlags(Qt::Window);
+
     setupUi(this);
 
     connect(buttonOk, SIGNAL(clicked()), this, SLOT(close()));
@@ -133,6 +136,7 @@ void BWSViewer::OnClearAll()
 
 void BWSViewer::onSetProfile(bool isChecked)
 {
+	(void)isChecked;
 }
 
 void BWSViewer::showEvent(QShowEvent*)

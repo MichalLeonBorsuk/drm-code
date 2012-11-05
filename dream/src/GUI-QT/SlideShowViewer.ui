@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>397</width>
-    <height>328</height>
+    <height>326</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -20,7 +20,7 @@
   <property name="sizeGripEnabled">
    <bool>true</bool>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_2">
+  <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <widget class="QMenuBar" name="menubar">
      <widget class="QMenu" name="menuFile">
@@ -38,208 +38,186 @@
     </widget>
    </item>
    <item>
-    <layout class="QVBoxLayout" name="verticalLayout">
+    <widget class="QLabel" name="image">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>320</width>
+       <height>240</height>
+      </size>
+     </property>
+     <property name="baseSize">
+      <size>
+       <width>320</width>
+       <height>240</height>
+      </size>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background: white</string>
+     </property>
+     <property name="frameShape">
+      <enum>QFrame::StyledPanel</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Sunken</enum>
+     </property>
+     <property name="text">
+      <string>MOT Slideshow Viewer</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="_2">
+     <property name="spacing">
+      <number>6</number>
+     </property>
+     <property name="margin">
+      <number>0</number>
+     </property>
      <item>
-      <widget class="QFrame" name="frame">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
+      <widget class="QLabel" name="TextLabel1">
+       <property name="text">
+        <string>Receiving Status:</string>
        </property>
-       <property name="frameShape">
-        <enum>QFrame::StyledPanel</enum>
+       <property name="wordWrap">
+        <bool>false</bool>
        </property>
-       <property name="frameShadow">
-        <enum>QFrame::Raised</enum>
-       </property>
-       <layout class="QVBoxLayout" name="verticalLayout_3">
-        <property name="spacing">
-         <number>0</number>
-        </property>
-        <property name="margin">
-         <number>0</number>
-        </property>
-        <item>
-         <widget class="QLabel" name="image">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="minimumSize">
-           <size>
-            <width>320</width>
-            <height>240</height>
-           </size>
-          </property>
-          <property name="baseSize">
-           <size>
-            <width>320</width>
-            <height>240</height>
-           </size>
-          </property>
-          <property name="styleSheet">
-           <string notr="true">background: white</string>
-          </property>
-          <property name="text">
-           <string>MOT Slideshow Viewer</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignCenter</set>
-          </property>
-         </widget>
-        </item>
-       </layout>
       </widget>
      </item>
      <item>
-      <layout class="QHBoxLayout" name="_2">
-       <property name="spacing">
-        <number>6</number>
+      <widget class="CMultColorLED" name="LEDStatus" native="true">
+       <property name="minimumSize">
+        <size>
+         <width>13</width>
+         <height>13</height>
+        </size>
        </property>
-       <property name="margin">
-        <number>0</number>
+       <property name="maximumSize">
+        <size>
+         <width>13</width>
+         <height>13</height>
+        </size>
        </property>
-       <item>
-        <widget class="QLabel" name="TextLabel1">
-         <property name="text">
-          <string>Receiving Status:</string>
-         </property>
-         <property name="wordWrap">
-          <bool>false</bool>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="CMultColorLED" name="LEDStatus" native="true">
-         <property name="minimumSize">
-          <size>
-           <width>13</width>
-           <height>13</height>
-          </size>
-         </property>
-         <property name="maximumSize">
-          <size>
-           <width>13</width>
-           <height>13</height>
-          </size>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <spacer name="Spacer5">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="sizeType">
-          <enum>QSizePolicy::Expanding</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>20</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item>
-        <widget class="QToolButton" name="ButtonJumpBegin">
-         <property name="text">
-          <string/>
-         </property>
-         <property name="icon">
-          <iconset resource="res/icons.qrc">
-           <normaloff>:/icons/JumpBegin.png</normaloff>:/icons/JumpBegin.png</iconset>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QToolButton" name="ButtonStepBack">
-         <property name="text">
-          <string/>
-         </property>
-         <property name="icon">
-          <iconset resource="res/icons.qrc">
-           <normaloff>:/icons/StepBack.png</normaloff>:/icons/StepBack.png</iconset>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="LabelCurPicNum">
-         <property name="font">
-          <font>
-           <family>Arial Black</family>
-           <pointsize>14</pointsize>
-          </font>
-         </property>
-         <property name="frameShadow">
-          <enum>QFrame::Sunken</enum>
-         </property>
-         <property name="text">
-          <string>0/0</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignCenter</set>
-         </property>
-         <property name="wordWrap">
-          <bool>false</bool>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QToolButton" name="ButtonStepForward">
-         <property name="text">
-          <string/>
-         </property>
-         <property name="icon">
-          <iconset resource="res/icons.qrc">
-           <normaloff>:/icons/StepForw.png</normaloff>:/icons/StepForw.png</iconset>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QToolButton" name="ButtonJumpEnd">
-         <property name="text">
-          <string/>
-         </property>
-         <property name="icon">
-          <iconset resource="res/icons.qrc">
-           <normaloff>:/icons/JumpEnd.png</normaloff>:/icons/JumpEnd.png</iconset>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <spacer name="Spacer5_2">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="sizeType">
-          <enum>QSizePolicy::Expanding</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>20</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item>
-        <widget class="QPushButton" name="buttonOk">
-         <property name="text">
-          <string>&amp;Close</string>
-         </property>
-         <property name="autoDefault">
-          <bool>true</bool>
-         </property>
-         <property name="default">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-      </layout>
+      </widget>
+     </item>
+     <item>
+      <spacer name="Spacer5">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeType">
+        <enum>QSizePolicy::Expanding</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QToolButton" name="ButtonJumpBegin">
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="res/icons.qrc">
+         <normaloff>:/icons/JumpBegin.png</normaloff>:/icons/JumpBegin.png</iconset>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="ButtonStepBack">
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="res/icons.qrc">
+         <normaloff>:/icons/StepBack.png</normaloff>:/icons/StepBack.png</iconset>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="LabelCurPicNum">
+       <property name="font">
+        <font>
+         <family>Arial Black</family>
+         <pointsize>14</pointsize>
+        </font>
+       </property>
+       <property name="frameShadow">
+        <enum>QFrame::Sunken</enum>
+       </property>
+       <property name="text">
+        <string>0/0</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+       <property name="wordWrap">
+        <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="ButtonStepForward">
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="res/icons.qrc">
+         <normaloff>:/icons/StepForw.png</normaloff>:/icons/StepForw.png</iconset>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="ButtonJumpEnd">
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="res/icons.qrc">
+         <normaloff>:/icons/JumpEnd.png</normaloff>:/icons/JumpEnd.png</iconset>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="Spacer5_2">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeType">
+        <enum>QSizePolicy::Expanding</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="buttonOk">
+       <property name="text">
+        <string>&amp;Close</string>
+       </property>
+       <property name="autoDefault">
+        <bool>true</bool>
+       </property>
+       <property name="default">
+        <bool>true</bool>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>
