@@ -37,7 +37,7 @@
 class CSettings;
 class CDataDecoder;
 
-class BWSViewer : public QMainWindow, Ui_BWSViewer
+class BWSViewer : public QDialog, Ui_BWSViewer
 {
     Q_OBJECT
 
