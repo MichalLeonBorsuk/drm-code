@@ -266,7 +266,7 @@ CDreamHelpMenu::CDreamHelpMenu(QWidget* parent) : QPopupMenu(parent)
     /* Standard help menu consists of about and what's this help */
         insertItem(tr("What's &This"), this, SLOT(OnHelpWhatsThis()), Qt::SHIFT+Qt::Key_F1);
         insertSeparator();
-        insertItem(tr("&About..."), this, SLOT(OnHelpAbout()));
+        insertItem(tr("&About..."), parent, SLOT(OnHelpAbout()));
 }
 
 void CDreamHelpMenu::OnHelpWhatsThis()
@@ -281,7 +281,7 @@ CDreamHelpMenu::CDreamHelpMenu(QWidget* parent) : QPopupMenu(parent)
     setTitle("?");
     addAction(tr("What's This"), this , SLOT(OnHelpWhatsThis()), Qt::SHIFT+Qt::Key_F1);
     addSeparator();
-    addAction(tr("About..."), this, SLOT(OnHelpAbout()));
+    addAction(tr("About..."), parent, SLOT(OnHelpAbout()));
 }
 #endif
 #endif

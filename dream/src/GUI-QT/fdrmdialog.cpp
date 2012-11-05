@@ -269,7 +269,7 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& NSettings, CRig& rig,
     case 2: actionBlackGrey->setChecked(true);break;
     }
 
-    connect(actionAbout_Dream, SIGNAL(triggered()), &AboutDlg, SLOT(show()));
+    connect(actionAbout_Dream, SIGNAL(triggered()), this, SLOT(OnHelpAbout()));
     connect(actionWhats_This, SIGNAL(triggered()), this, SLOT(on_actionWhats_This()));
 
     connect(this, SIGNAL(plotStyleChanged(int)), pSysEvalDlg, SLOT(UpdatePlotStyle(int)));
@@ -289,6 +289,9 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& NSettings, CRig& rig,
     connect(pButtonGroup, SIGNAL(buttonClicked(int)), this, SLOT(OnSelectDataService(int)));
 
 #endif
+
+    connect(pFMDlg, SIGNAL(About()), this, SLOT(OnHelpAbout()));
+    connect(pAnalogDemDlg, SIGNAL(About()), this, SLOT(OnHelpAbout()));
 
 	/* Init progress bar for input signal level */
 	ProgrInputLevel->setRange(-50.0, 0.0);

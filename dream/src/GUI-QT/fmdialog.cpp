@@ -114,7 +114,7 @@ FMDialog::FMDialog(CDRMReceiver& NDRMR, CSettings& NSettings, CRig& rig,
 		)
 	);
 	//menu_Settings->addMenu(pRemoteMenu->menu());
-	connect(actionAbout_Dream, SIGNAL(triggered()), &AboutDlg, SLOT(show()));
+	connect(actionAbout_Dream, SIGNAL(triggered()), this, SLOT(OnHelpAbout()));
 	connect(actionWhats_This, SIGNAL(triggered()), this, SLOT(on_actionWhats_This()));
 #endif
 
@@ -518,9 +518,6 @@ void FMDialog::closeEvent(QCloseEvent* ce)
 	if (DRMReceiver.GetParameters()->eRunState == CParameter::STOPPED)
 	{
         TimerClose.stop();
-#if QT_VERSION >= 0x040000
-        AboutDlg.reject();
-#endif
 		ce->accept();
 	}
 	else

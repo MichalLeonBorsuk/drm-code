@@ -133,8 +133,8 @@ protected:
     QMenu*		pPlotStyleMenu;
     QSignalMapper*	plotStyleMapper;
     QActionGroup*	plotStyleGroup;
-    CAboutDlg		AboutDlg;
 #endif
+    CAboutDlg		AboutDlg;
 
     void SetStatus(CMultColorLED* LED, ETypeRxStatus state);
     virtual void	closeEvent(QCloseEvent* ce);
@@ -169,6 +169,7 @@ public slots:
     void OnSwitchMode(int);
     void OnSwitchToFM();
     void OnSwitchToAM();
+    void OnHelpAbout() {AboutDlg.show();}
     void on_actionWhats_This();
 #if QT_VERSION < 0x040000
     void OnMenuPlotStyle(int);
