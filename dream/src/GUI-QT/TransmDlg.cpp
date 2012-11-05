@@ -1533,16 +1533,16 @@ void TransmDialog::OnRadioCodec(int iID) {(void)iID;}
 
 void TransmDialog::DisableAllControlsForSet()
 {
-	TabWidgetParam->setEnabled(FALSE);
-	TabWidgetServices->setEnabled(FALSE);
+	TabWidgetEnableTabs(TabWidgetParam, FALSE);
+	TabWidgetEnableTabs(TabWidgetServices, FALSE);
 
 	GroupInput->setEnabled(TRUE); /* For run-mode */
 }
 
 void TransmDialog::EnableAllControlsForSet()
 {
-	TabWidgetParam->setEnabled(TRUE);
-	TabWidgetServices->setEnabled(TRUE);
+	TabWidgetEnableTabs(TabWidgetParam, TRUE);
+	TabWidgetEnableTabs(TabWidgetServices, TRUE);
 
 	GroupInput->setEnabled(FALSE); /* For run-mode */
 
@@ -1550,6 +1550,16 @@ void TransmDialog::EnableAllControlsForSet()
 	ProgrInputLevel->setValue(RET_VAL_LOG_0);
 	ProgressBarSetValue(ProgressBarCurPict, 0);
 	TextLabelCurPict->setText("");
+}
+
+void TransmDialog::TabWidgetEnableTabs(QTabWidget *tabWidget, bool enable)
+{
+	for (int i = 0; i < tabWidget->count(); i++)
+# if QT_VERSION < 0x040000
+		tabWidget->page(i)->setEnabled(enable);
+#else
+		tabWidget->widget(i)->setEnabled(enable);
+#endif
 }
 
 #ifdef ENABLE_TRANSM_CODECPARAMS
