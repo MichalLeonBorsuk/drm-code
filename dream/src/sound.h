@@ -49,13 +49,19 @@ typedef CSoundInJack CSoundIn;
 typedef CSoundOutJack CSoundOut;
 #endif
 
+#ifdef USE_PULSEAUDIO
+# include "sound/drm_pulseaudio.h"
+typedef CSoundInPulse CSoundIn;
+typedef CSoundOutPulse CSoundOut;
+#endif
+
 #ifdef USE_PORTAUDIO
 # include "sound/drm_portaudio.h"
 typedef CPaIn CSoundIn;
 typedef CPaOut CSoundOut;
 #endif
 
-#if !defined(_WIN32) &&!defined(USE_OSS) && !defined(USE_ALSA) && !defined(USE_JACK) && !defined(USE_PORTAUDIO)
+#if !defined(_WIN32) &&!defined(USE_OSS) && !defined(USE_ALSA) && !defined(USE_JACK) && !defined(USE_PULSEAUDIO) && !defined(USE_PORTAUDIO)
 # include "sound/soundnull.h"
 typedef CSoundInNull CSoundIn;
 typedef CSoundOutNull CSoundOut;
