@@ -127,6 +127,7 @@ protected:
 	void closeEvent(QCloseEvent*);
 	void DisableAllControlsForSet();
 	void EnableAllControlsForSet();
+	void TabWidgetEnableTabs(QTabWidget* tabWidget, bool enable);
 
 	CSettings&			Settings;
 	CDRMTransmitter&	DRMTransmitter;
