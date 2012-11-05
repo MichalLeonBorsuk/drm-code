@@ -33,9 +33,12 @@
 #include <QFileDialog>
 
 SlideShowViewer::SlideShowViewer(CDRMReceiver& rec, CSettings& s, QWidget* parent):
-    QMainWindow(parent), Timer(), strCurrentSavePath("."),
+    QDialog(parent), Timer(), strCurrentSavePath("."),
     receiver(rec), settings(s),vecImages(),vecImageNames(),iCurImagePos(-1)
 {
+    /* Enable minimize and maximize box for QDialog */
+	setWindowFlags(Qt::Window);
+
     ui = new Ui_SlideShowViewer();
     ui->setupUi(this);
 

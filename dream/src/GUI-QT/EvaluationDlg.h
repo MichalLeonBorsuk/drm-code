@@ -52,7 +52,7 @@ class systemevalDlgBase : public QDialog, public Ui::SystemEvaluationWindow
 public:
 	systemevalDlgBase(QWidget* parent = 0, const char* name = 0,
 		bool modal = FALSE, Qt::WFlags f = 0):
-		QDialog(parent,f){(void)name;(void)modal;setupUi(this);}
+		QDialog(parent) {(void)name;(void)modal;(void)f; setWindowFlags(Qt::Window); setupUi(this);}
 	virtual ~systemevalDlgBase() {}
 };
 

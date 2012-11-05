@@ -163,11 +163,11 @@ public:
 #endif
 
 #if QT_VERSION >= 0x040000
-class CLiveScheduleDlgBase : public QMainWindow, public Ui_LiveScheduleWindow
+class CLiveScheduleDlgBase : public QDialog, public Ui_LiveScheduleWindow
 {
 public:
-	CLiveScheduleDlgBase(QWidget* parent, const char*, bool, Qt::WFlags f = 0):
-		QMainWindow(parent,f){}
+	CLiveScheduleDlgBase(QWidget* parent, const char*, bool, Qt::WFlags):
+		QDialog(parent) {setWindowFlags(Qt::Window);}
 	virtual ~CLiveScheduleDlgBase() {}
 };
 #endif

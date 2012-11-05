@@ -239,12 +239,12 @@ class RemoteMenu;
 class QSocket;
 
 #if QT_VERSION >= 0x040000
-class CStationsDlgBase : public QMainWindow, public Ui_StationsDlgbase
+class CStationsDlgBase : public QDialog, public Ui_StationsDlgbase
 {
 public:
 	CStationsDlgBase(QWidget* parent = 0, const char* name = 0,
 		bool modal = FALSE, Qt::WFlags f = 0):
-		QMainWindow(parent,f){(void)name;(void)modal;}
+		QDialog(parent) {(void)name;(void)modal;(void)f; setWindowFlags(Qt::Window);}
 	virtual ~CStationsDlgBase() {}
 };
 #endif

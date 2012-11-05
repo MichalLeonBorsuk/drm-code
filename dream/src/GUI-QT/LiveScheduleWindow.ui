@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>LiveScheduleWindow</class>
- <widget class="QMainWindow" name="LiveScheduleWindow">
+ <widget class="QDialog" name="LiveScheduleWindow">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -17,174 +17,172 @@
    <iconset resource="res/icons.qrc">
     <normaloff>:/icons/MainIcon.png</normaloff>:/icons/MainIcon.png</iconset>
   </property>
-  <widget class="QWidget" name="centralwidget">
-   <layout class="QGridLayout" name="gridLayout">
-    <item row="0" column="0" colspan="4">
-     <widget class="QTreeWidget" name="ListViewStations">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
+  <property name="sizeGripEnabled">
+   <bool>true</bool>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QMenuBar" name="menubar">
+     <widget class="QMenu" name="menuFile">
+      <property name="title">
+       <string>&amp;File</string>
       </property>
-      <column>
-       <property name="text">
-        <string>Frequency [kHz/MHz]</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>Station Name/Id</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>System</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>Time [UTC]</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>Target</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>Start Day</string>
-       </property>
-      </column>
+      <addaction name="actionSave"/>
      </widget>
-    </item>
-    <item row="1" column="0">
-     <layout class="QVBoxLayout" name="_2">
-      <property name="spacing">
-       <number>6</number>
+     <widget class="QMenu" name="menu_View">
+      <property name="title">
+       <string>&amp;View</string>
       </property>
-      <property name="margin">
-       <number>0</number>
-      </property>
-      <item>
-       <layout class="QHBoxLayout" name="_3">
-        <property name="spacing">
-         <number>6</number>
-        </property>
-        <property name="margin">
-         <number>0</number>
-        </property>
-        <item>
-         <widget class="QLabel" name="TextLabelUTCTime">
-          <property name="frameShape">
-           <enum>QFrame::Panel</enum>
-          </property>
-          <property name="frameShadow">
-           <enum>QFrame::Sunken</enum>
-          </property>
-          <property name="text">
-           <string>TextLabelUTCTime</string>
-          </property>
-          <property name="wordWrap">
-           <bool>false</bool>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <layout class="QHBoxLayout" name="_4">
-          <property name="spacing">
-           <number>6</number>
-          </property>
-          <property name="margin">
-           <number>0</number>
-          </property>
-         </layout>
-        </item>
-       </layout>
-      </item>
-     </layout>
-    </item>
-    <item row="1" column="1">
-     <widget class="QCheckBox" name="CheckBoxFreeze">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="text">
-       <string>F&amp;reeze</string>
-      </property>
+      <widget class="QMenu" name="menuStations_preview">
+       <property name="title">
+        <string>Stations &amp;preview</string>
+       </property>
+       <addaction name="actionDisabled"/>
+       <addaction name="action5minutes"/>
+       <addaction name="action15minutes"/>
+       <addaction name="action30minutes"/>
+      </widget>
+      <addaction name="actionShowOnlyActiveStations"/>
+      <addaction name="actionShowAllStations"/>
+      <addaction name="menuStations_preview"/>
      </widget>
-    </item>
-    <item row="1" column="2">
-     <spacer name="Spacer4">
-      <property name="orientation">
-       <enum>Qt::Horizontal</enum>
-      </property>
-      <property name="sizeType">
-       <enum>QSizePolicy::Minimum</enum>
-      </property>
-      <property name="sizeHint" stdset="0">
-       <size>
-        <width>328</width>
-        <height>20</height>
-       </size>
-      </property>
-     </spacer>
-    </item>
-    <item row="1" column="3">
-     <widget class="QPushButton" name="buttonOk">
-      <property name="text">
-       <string>&amp;Close</string>
-      </property>
-      <property name="autoDefault">
-       <bool>true</bool>
-      </property>
-      <property name="default">
-       <bool>true</bool>
-      </property>
-     </widget>
-    </item>
-   </layout>
-  </widget>
-  <widget class="QMenuBar" name="menubar">
-   <property name="geometry">
-    <rect>
-     <x>0</x>
-     <y>0</y>
-     <width>629</width>
-     <height>17</height>
-    </rect>
-   </property>
-   <widget class="QMenu" name="menuFile">
-    <property name="title">
-     <string>&amp;File</string>
-    </property>
-    <addaction name="actionSave"/>
-   </widget>
-   <widget class="QMenu" name="menu_View">
-    <property name="title">
-     <string>&amp;View</string>
-    </property>
-    <widget class="QMenu" name="menuStations_preview">
-     <property name="title">
-      <string>Stations &amp;preview</string>
-     </property>
-     <addaction name="actionDisabled"/>
-     <addaction name="action5minutes"/>
-     <addaction name="action15minutes"/>
-     <addaction name="action30minutes"/>
+     <addaction name="menuFile"/>
+     <addaction name="menu_View"/>
     </widget>
-    <addaction name="actionShowOnlyActiveStations"/>
-    <addaction name="actionShowAllStations"/>
-    <addaction name="menuStations_preview"/>
-   </widget>
-   <addaction name="menuFile"/>
-   <addaction name="menu_View"/>
-  </widget>
-  <widget class="QStatusBar" name="statusbar"/>
+   </item>
+   <item>
+    <layout class="QGridLayout" name="gridLayout">
+     <item row="0" column="0" colspan="4">
+      <widget class="QTreeWidget" name="ListViewStations">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <column>
+        <property name="text">
+         <string>Frequency [kHz/MHz]</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Station Name/Id</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>System</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Time [UTC]</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Target</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Start Day</string>
+        </property>
+       </column>
+      </widget>
+     </item>
+     <item row="1" column="0">
+      <layout class="QVBoxLayout" name="_2">
+       <property name="spacing">
+        <number>6</number>
+       </property>
+       <property name="margin">
+        <number>0</number>
+       </property>
+       <item>
+        <layout class="QHBoxLayout" name="_3">
+         <property name="spacing">
+          <number>6</number>
+         </property>
+         <property name="margin">
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QLabel" name="TextLabelUTCTime">
+           <property name="frameShape">
+            <enum>QFrame::Panel</enum>
+           </property>
+           <property name="frameShadow">
+            <enum>QFrame::Sunken</enum>
+           </property>
+           <property name="text">
+            <string>TextLabelUTCTime</string>
+           </property>
+           <property name="wordWrap">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="_4">
+           <property name="spacing">
+            <number>6</number>
+           </property>
+           <property name="margin">
+            <number>0</number>
+           </property>
+          </layout>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </item>
+     <item row="1" column="1">
+      <widget class="QCheckBox" name="CheckBoxFreeze">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="text">
+        <string>F&amp;reeze</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="2">
+      <spacer name="Spacer4">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeType">
+        <enum>QSizePolicy::Minimum</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>328</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item row="1" column="3">
+      <widget class="QPushButton" name="buttonOk">
+       <property name="text">
+        <string>&amp;Close</string>
+       </property>
+       <property name="autoDefault">
+        <bool>true</bool>
+       </property>
+       <property name="default">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
   <action name="actionShowOnlyActiveStations">
    <property name="checkable">
     <bool>true</bool>

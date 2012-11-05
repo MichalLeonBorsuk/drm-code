@@ -36,7 +36,7 @@
 
 class CSettings;
 
-class JLViewer : public QMainWindow, Ui_JLViewer
+class JLViewer : public QDialog, Ui_JLViewer
 {
     Q_OBJECT
 

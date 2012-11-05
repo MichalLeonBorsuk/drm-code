@@ -86,9 +86,7 @@ class CEPGDlgbase : public QDialog, public Ui_CEPGDlgbase
 {
 public:
     CEPGDlgbase(QWidget* parent, const char*, bool, Qt::WFlags f = 0):
-        QDialog(parent,f) {
-        setupUi(this);
-    }
+        QDialog(parent,f) {setWindowFlags(Qt::Window); setupUi(this);}
     virtual ~CEPGDlgbase() {}
 };
 #endif
