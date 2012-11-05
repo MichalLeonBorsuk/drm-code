@@ -266,7 +266,7 @@ CMatlibVector<CReal> Filter(const CMatlibVector<CReal>& fvB,
 			fvY[m] = (CReal) 0.0;
 
 			for (n = 0; n < iSizeB; n++)
-				fvY[m] += fvB[n] * rvXNew[m + iSizeB - n - 1];
+				fvY[m] += fvB[n] * rvXNew[m + iSizeB - n];
 		}
 
 		/* Save last samples in state vector */
