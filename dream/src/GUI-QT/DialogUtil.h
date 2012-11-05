@@ -88,14 +88,10 @@ class CDreamHelpMenu : public QPopupMenu
 	Q_OBJECT
 
 public:
-	CDreamHelpMenu(QWidget* parent = 0);
-
-protected:
-	CAboutDlg AboutDlg;
+	CDreamHelpMenu(QWidget* parent);
 
 public slots:
 	void OnHelpWhatsThis();
-	void OnHelpAbout() {AboutDlg.exec();}
 };
 
 /* Sound card selection menu ------------------------------------------------ */

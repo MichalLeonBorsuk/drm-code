@@ -81,7 +81,6 @@ public:
     virtual ~AnalogDemDlgBase() {}
 protected:
     CDRMPlot*           MainPlot;
-    CAboutDlg		AboutDlg;
 };
 #endif
 
@@ -134,7 +133,7 @@ protected:
 
 	void UpdateControls();
 	void AddWhatsThisHelp();
-        void showEvent(QShowEvent* pEvent);
+	void showEvent(QShowEvent* pEvent);
 	void hideEvent(QHideEvent* pEvent);
 
 public slots:
@@ -156,6 +155,7 @@ public slots:
 	void OnButtonAMSS();
 	void OnSwitchToDRM();
 	void OnSwitchToFM();
+	void OnHelpAbout() {emit About();}
 	void on_actionWhats_This();
 
 signals:
@@ -164,4 +164,5 @@ signals:
 	void ViewStationsDlg();
 	void ViewLiveScheduleDlg();
 	void Closed();
+	void About();
 };

@@ -122,7 +122,7 @@ AnalogDemDlg::AnalogDemDlg(CDRMReceiver& NDRMR, CSettings& NSettings,
 		DRMReceiver.GetSoundInInterface(),
 		DRMReceiver.GetSoundOutInterface(),
 	this));
-    connect(actionAbout_Dream, SIGNAL(triggered()), &AboutDlg, SLOT(show()));
+    connect(actionAbout_Dream, SIGNAL(triggered()), this, SLOT(OnHelpAbout()));
     connect(actionWhats_This, SIGNAL(triggered()), this, SLOT(on_actionWhats_This()));
     SliderBandwidth->setTickPosition(QSlider::TicksBothSides);
     MainPlot = new CDRMPlot(plot);
@@ -343,9 +343,6 @@ void AnalogDemDlg::closeEvent(QCloseEvent* ce)
 	if (DRMReceiver.GetParameters()->eRunState == CParameter::STOPPED)
 	{
         TimerClose.stop();
-#if QT_VERSION >= 0x040000
-        AboutDlg.reject();
-#endif
 		ce->accept();
 	}
 	else

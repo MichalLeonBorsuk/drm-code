@@ -86,7 +86,6 @@ protected:
 	QMenu*				pReceiverModeMenu;
 	QMenu*				pSettingsMenu;
 	QMenu*				pPlotStyleMenu;
-	CAboutDlg			AboutDlg;
 #endif
 	QTimer				Timer;
 	QTimer				TimerClose;
@@ -120,6 +119,7 @@ public slots:
 	void OnMenuSetDisplayColor();
 	void OnSwitchToDRM();
 	void OnSwitchToAM();
+	void OnHelpAbout() {emit About();}
 	void on_actionWhats_This();
 
 signals:
@@ -127,6 +127,7 @@ signals:
 	void ViewStationsDlg();
 	void ViewLiveScheduleDlg();
 	void Closed();
+	void About();
 };
 
 #endif
