@@ -1840,7 +1840,7 @@ void StationsDlg::AddWhatsThisHelp()
            "setting in the 'view' menu. The color of the cube on the left of a "
            "menu item shows the current status of the DRM transmission. A green "
            "box shows that the transmission takes place right now, a "
-           "yellow cube shows that this is a test transmission and with a "
+//           "yellow cube shows that this is a test transmission and with a "
            "red cube it is shown that the transmission is offline, "
            "a pink cube shown that the transmission soon will be offline.<br>"
            "If the stations preview is active an orange box shows the stations "
