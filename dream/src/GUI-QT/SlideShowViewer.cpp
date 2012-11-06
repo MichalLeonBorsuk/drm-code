@@ -133,9 +133,9 @@ void SlideShowViewer::OnTimer()
         /* If the last received picture was selected, automatically show
            new picture */
         if (iCurImagePos == iCurNumPict - 1)
-        {
             SetImage(iCurNumPict);
-        }
+        else
+            UpdateButtons();
     }
 }
 
