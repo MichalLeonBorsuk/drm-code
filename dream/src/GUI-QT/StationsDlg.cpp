@@ -677,7 +677,7 @@ StationsDlg::StationsDlg(CDRMReceiver& NDRMR, CRig& rig,
     vecpListItems(0),
 #else
     greenCube(":/icons/greenCube.png"),redCube(":/icons/redCube.png"),
-    orangeCube(":/icons/organgeCube.png"),pinkCube(":/icons/pinkCube.png"),
+    orangeCube(":/icons/orangeCube.png"),pinkCube(":/icons/pinkCube.png"),
 #endif
     bReInitOnFrequencyChange(FALSE)
 {
