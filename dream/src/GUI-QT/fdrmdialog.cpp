@@ -64,7 +64,9 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& NSettings, CRig& rig,
     :
     FDRMDialogBase(parent, name, modal, f),
     DRMReceiver(NDRMR),Settings(NSettings),
-	Timer(),serviceLabels(4),pLogging(NULL)
+    Timer(),serviceLabels(4),pLogging(NULL),
+    iMultimediaServiceBit(0),
+    iLastMultimediaServiceSelected(-1)
 {
     /* recover window size and position */
     CWinGeom s;
@@ -228,12 +230,13 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& NSettings, CRig& rig,
     pMultSettingsDlg = new MultSettingsDlg(Parameters, Settings, this);
 
     connect(action_Evaluation_Dialog, SIGNAL(triggered()), pSysEvalDlg, SLOT(show()));
+    connect(action_Multimedia_Dialog, SIGNAL(triggered()), this, SLOT(OnViewMultimediaDlg()));
     connect(action_Stations_Dialog, SIGNAL(triggered()), this, SLOT(OnViewStationsDlg()));
     connect(action_Live_Schedule_Dialog, SIGNAL(triggered()), pLiveScheduleDlg, SLOT(show()));
     connect(action_Programme_Guide_Dialog, SIGNAL(triggered()), pEPGDlg, SLOT(show()));
     connect(actionExit, SIGNAL(triggered()), this, SLOT(close()));
 
-    action_Multimedia_Dialog->setEnabled(false); // and don't connect slots until app type decoded
+    action_Multimedia_Dialog->setEnabled(false);
 
     menu_Settings->addMenu( new CSoundCardSelMenu(
 		DRMReceiver.GetSoundInInterface(),
@@ -414,33 +417,56 @@ void FDRMDialog::SetStatus(CMultColorLED* LED, ETypeRxStatus state)
     }
 }
 
+void FDRMDialog::UpdateDRM_GUI()
+{
+#if QT_VERSION >= 0x040000
+    _BOOLEAN bMultimediaServiceAvailable;
+#endif
+    CParameter& Parameters = *DRMReceiver.GetParameters();
+    if(isVisible()==false)
+    {
+        pStationsDlg->SaveSettings(Settings);
+        ChangeGUIModeToDRM();
+    }
+    Parameters.Lock();
+
+    /* Input level meter */
+    ProgrInputLevel->setValue(Parameters.GetIFSignalLevel());
+    SetStatus(CLED_MSC, Parameters.ReceiveStatus.Audio.GetStatus());
+    SetStatus(CLED_SDC, Parameters.ReceiveStatus.SDC.GetStatus());
+    SetStatus(CLED_FAC, Parameters.ReceiveStatus.FAC.GetStatus());
+
+    Parameters.Unlock();
+
+    /* Clear the multimedia service bit */
+    iMultimediaServiceBit = 0;
+
+    /* Check if receiver does receive a signal */
+    if(DRMReceiver.GetAcquiState() == AS_WITH_SIGNAL)
+        UpdateDisplay();
+    else
+    {
+        ClearDisplay();
+        /* No signal then set the last
+           multimedia service selected to none */
+        iLastMultimediaServiceSelected = -1;
+    }
+#if QT_VERSION >= 0x040000
+    /* If multimedia service availability has changed
+       then update the menu */
+    bMultimediaServiceAvailable = iMultimediaServiceBit != 0;
+    if (bMultimediaServiceAvailable != action_Multimedia_Dialog->isEnabled())
+        action_Multimedia_Dialog->setEnabled(bMultimediaServiceAvailable);
+#endif
+}
+
 void FDRMDialog::OnTimer()
 {
     ERecMode eNewReceiverMode = DRMReceiver.GetReceiverMode();
-    CParameter& Parameters = *DRMReceiver.GetParameters();
     switch(eNewReceiverMode)
     {
     case RM_DRM:
-        if(isVisible()==false)
-        {
-			pStationsDlg->SaveSettings(Settings);
-            ChangeGUIModeToDRM();
-        }
-        Parameters.Lock();
-
-        /* Input level meter */
-        ProgrInputLevel->setValue(Parameters.GetIFSignalLevel());
-	    SetStatus(CLED_MSC, Parameters.ReceiveStatus.Audio.GetStatus());
-        SetStatus(CLED_SDC, Parameters.ReceiveStatus.SDC.GetStatus());
-        SetStatus(CLED_FAC, Parameters.ReceiveStatus.FAC.GetStatus());
-
-        Parameters.Unlock();
-
-        /* Check if receiver does receive a signal */
-        if(DRMReceiver.GetAcquiState() == AS_WITH_SIGNAL)
-            UpdateDisplay();
-        else
-            ClearDisplay();
+        UpdateDRM_GUI();
         break;
     case RM_AM:
 		pStationsDlg->SaveSettings(Settings);
@@ -613,20 +639,43 @@ QString FDRMDialog::serviceSelector(CParameter& Parameters, int i)
             text += " (" + QString().setNum(rAudioBitRate, 'f', 2) + " kbps)";
         }
 
-        /* Show, if a multimedia stream is connected to this service */
-        if ((service.eAudDataFlag == CService::SF_AUDIO) &&
-                (service.DataParam.iStreamID != STREAM_ID_NOT_USED))
+        /* Audio service */
+        if ((service.eAudDataFlag == CService::SF_AUDIO))
         {
-
-            if (service.DataParam.iUserAppIdent == DAB_AT_EPG)
+            /* Show, if a multimedia stream is connected to this service */
+            if (service.DataParam.iStreamID != STREAM_ID_NOT_USED)
             {
-                text += tr(" + EPG"); /* EPG service */
-            }
-            else
-                text += tr(" + MM"); /* other multimedia service */
+                if (service.DataParam.iUserAppIdent == DAB_AT_EPG)
+                    text += tr(" + EPG"); /* EPG service */
+                else
+                {
+                    text += tr(" + MM"); /* other multimedia service */
+                    /* Set multimedia service bit */
+                    iMultimediaServiceBit |= 1 << i;
+                }
 
-            /* Bit-rate of connected data stream */
-            text += " (" + QString().setNum(rDataBitRate, 'f', 2) + " kbps)";
+                /* Bit-rate of connected data stream */
+                text += " (" + QString().setNum(rDataBitRate, 'f', 2) + " kbps)";
+            }
+        }
+        /* Data service */
+        else
+        {
+            if (service.DataParam.ePacketModInd == CDataParam::PM_PACKET_MODE)
+            {
+                if (service.DataParam.eAppDomain == CDataParam::AD_DAB_SPEC_APP)
+                {
+                    switch (service.DataParam.iUserAppIdent)
+                    {
+                    case DAB_AT_BROADCASTWEBSITE:
+                    case DAB_AT_JOURNALINE:
+                    case DAB_AT_MOTSLIDESHOW:
+                        /* Set multimedia service bit */
+                        iMultimediaServiceBit |= 1 << i;
+                        break;
+                    }
+                }
+            }
         }
 
         if(bAFS)
@@ -672,6 +721,7 @@ void FDRMDialog::UpdateDisplay()
     bool bServiceIsValid = audioService.IsActive()
                            && (audioService.AudioParam.iStreamID != STREAM_ID_NOT_USED)
                            && (audioService.eAudDataFlag == CService::SF_AUDIO);
+
     int i;
     for(i=0; i < MAX_NUM_SERVICES; i++)
     {
@@ -928,13 +978,11 @@ void FDRMDialog::OnSelectDataService(int shortId)
     {
     case DAB_AT_EPG:
         pDlg = pEPGDlg;
-        Parameters.SetCurSelDataService(shortId);
         break;
     case DAB_AT_BROADCASTWEBSITE:
     case DAB_AT_JOURNALINE:
     case DAB_AT_MOTSLIDESHOW:
         pDlg = pMultiMediaDlg;
-        Parameters.SetCurSelDataService(shortId);
         break;
     default:
 	;
@@ -944,37 +992,21 @@ void FDRMDialog::OnSelectDataService(int shortId)
     {
     case DAB_AT_EPG:
         pDlg = pEPGDlg;
-        Parameters.SetCurSelDataService(shortId);
-	action_Programme_Guide_Dialog->setEnabled(true);
         break;
     case DAB_AT_BROADCASTWEBSITE:
         pDlg = pBWSDlg;
-	connect(action_Multimedia_Dialog, SIGNAL(triggered()), pBWSDlg, SLOT(show()));
-	disconnect(action_Multimedia_Dialog, SIGNAL(triggered()), pJLDlg, SLOT(show()));
-	disconnect(action_Multimedia_Dialog, SIGNAL(triggered()), pSlideShowDlg, SLOT(show()));
-        Parameters.SetCurSelDataService(shortId);
-	action_Multimedia_Dialog->setEnabled(true);
         break;
     case DAB_AT_JOURNALINE:
         pDlg = pJLDlg;
-	connect(action_Multimedia_Dialog, SIGNAL(triggered()), pJLDlg, SLOT(show()));
-	disconnect(action_Multimedia_Dialog, SIGNAL(triggered()), pSlideShowDlg, SLOT(show()));
-	disconnect(action_Multimedia_Dialog, SIGNAL(triggered()), pBWSDlg, SLOT(show()));
-        Parameters.SetCurSelDataService(shortId);
-	action_Multimedia_Dialog->setEnabled(true);
         break;
     case DAB_AT_MOTSLIDESHOW:
         pDlg = pSlideShowDlg;
-	connect(action_Multimedia_Dialog, SIGNAL(triggered()), pSlideShowDlg, SLOT(show()));
-	disconnect(action_Multimedia_Dialog, SIGNAL(triggered()), pJLDlg, SLOT(show()));
-	disconnect(action_Multimedia_Dialog, SIGNAL(triggered()), pBWSDlg, SLOT(show()));
-        Parameters.SetCurSelDataService(shortId);
-	action_Multimedia_Dialog->setEnabled(true);
         break;
-    default:
-	action_Multimedia_Dialog->setEnabled(false);
     }
 #endif
+
+    if(pDlg != NULL)
+        Parameters.SetCurSelDataService(shortId);
 
     CService::ETyOServ eAudDataFlag = Parameters.Service[shortId].eAudDataFlag;
 
@@ -982,6 +1014,8 @@ void FDRMDialog::OnSelectDataService(int shortId)
 
     if(pDlg != NULL)
     {
+        if (pDlg != pEPGDlg)
+            iLastMultimediaServiceSelected = shortId;
         pDlg->show();
     }
     else
@@ -990,6 +1024,44 @@ void FDRMDialog::OnSelectDataService(int shortId)
         {
             QMessageBox::information(this, "Dream", tr("unsupported data application"));
         }
+    }
+}
+
+void FDRMDialog::OnViewMultimediaDlg()
+{
+    /* Check if multimedia service is available */
+    if (iMultimediaServiceBit != 0)
+    {
+        /* Initialize the multimedia service to show, -1 mean none */
+        int iMultimediaServiceToShow = -1;
+
+		/* Check the validity of iLastMultimediaServiceSelected,
+		   if invalid set it to none */
+		if (((1<<iLastMultimediaServiceSelected) & iMultimediaServiceBit) == 0)
+			iLastMultimediaServiceSelected = -1;
+
+        /* Simply set to the last selected multimedia if any */
+        if (iLastMultimediaServiceSelected != -1)
+            iMultimediaServiceToShow = iLastMultimediaServiceSelected;
+
+        else
+        {
+            /* Select the first multimedia found */
+            for (int i = 0; i < MAX_NUM_SERVICES; i++)
+            {
+                /* A bit is set when a service is available,
+                   the position of the bit is the service number */
+                if ((1<<i) & iMultimediaServiceBit)
+                {
+                    /* Service found! */
+                    iMultimediaServiceToShow = i;
+                    break;
+                }
+            }
+        }
+        /* If we have a service then show it */
+        if (iMultimediaServiceToShow != -1)
+            OnSelectDataService(iMultimediaServiceToShow);
     }
 }
 
