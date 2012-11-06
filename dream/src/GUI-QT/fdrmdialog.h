@@ -135,15 +135,17 @@ protected:
     QActionGroup*	plotStyleGroup;
 #endif
     CAboutDlg		AboutDlg;
+    int			iMultimediaServiceBit;
+    int			iLastMultimediaServiceSelected;
 
     void SetStatus(CMultColorLED* LED, ETypeRxStatus state);
     virtual void	closeEvent(QCloseEvent* ce);
     virtual void	showEvent(QShowEvent* pEvent);
     void		hideEvent(QHideEvent* pEvent);
     void		AddWhatsThisHelp();
+    void		UpdateDRM_GUI();
     void		UpdateDisplay();
     void		ClearDisplay();
-
 
     void		SetDisplayColor(const QColor newColor);
 
@@ -163,6 +165,7 @@ public slots:
     void OnTimerClose();
     void OnSelectAudioService(int);
     void OnSelectDataService(int);
+    void OnViewMultimediaDlg();
     void OnViewStationsDlg();
     void OnMenuSetDisplayColor();
     void OnNewAcquisition();
