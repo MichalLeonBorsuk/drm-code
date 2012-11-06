@@ -815,9 +815,9 @@ void systemevalDlg::UpdateGPS(CParameter& ReceiverParam)
 	qStrTime = "UTC: ?";
     QString qStrSat;
     if (gps.set&SATELLITE_SET)
-        qStrSat = tr("Satellites: ") + QString().setNum(gps.satellites_used);
+        qStrSat = tr("  Satellites: ") + QString().setNum(gps.satellites_used);
     else
-        qStrSat = tr("Satellites: ?");
+        qStrSat = tr("  Satellites: ?");
 
     TextLabelGPSPosition->setText(qStrPosition+qStrAltitude);
     TextLabelGPSSpeedHeading->setText(qStrSpeed+qStrTrack);
