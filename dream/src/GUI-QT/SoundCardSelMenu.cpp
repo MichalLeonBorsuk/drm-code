@@ -66,7 +66,7 @@ QMenu* CSoundCardSelMenu::Init(const QString& text, CSelectionInterface* intf)
         m->setData(i);
         if(i==iDefaultDev)
 	{
-	    menu->setDefaultAction(m);
+//	    menu->setDefaultAction(m); TODO
 	    m->setChecked(true);
 	}
     }
