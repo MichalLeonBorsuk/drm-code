@@ -42,7 +42,6 @@ systemevalDlg::systemevalDlg(CDRMReceiver& NDRMR, CSettings& NSettings,
     systemevalDlgBase(parent, name, modal, f),
     DRMReceiver(NDRMR),
     Settings(NSettings),
-    Timer(), TimerInterDigit(),
     eNewCharType(CDRMPlot::NONE_OLD)
 {
     /* Get window geometry data and apply it */
@@ -294,13 +293,16 @@ void systemevalDlg::UpdateControls()
 
     /* Update frequency edit control (frequency could be changed by
        schedule dialog */
-    int iFrequency = DRMReceiver.GetFrequency();
-    int iCurFrequency = EdtFrequency->text().toInt();
-
-    if (iFrequency != iCurFrequency)
+    if (!TimerInterDigit.isActive())
     {
-        EdtFrequency->setText(QString().setNum(iFrequency));
-        iCurFrequency = iFrequency;
+        int iFrequency = DRMReceiver.GetFrequency();
+        int iCurFrequency = EdtFrequency->text().toInt();
+
+        if (iFrequency != iCurFrequency)
+        {
+            EdtFrequency->setText(QString().setNum(iFrequency));
+            iCurFrequency = iFrequency;
+        }
     }
 }
 
@@ -409,12 +411,15 @@ void systemevalDlg::hideEvent(QHideEvent* e)
 void systemevalDlg::OnTimerInterDigit()
 {
     TimerInterDigit.stop();
-    DRMReceiver.SetFrequency(EdtFrequency->text().toInt());
+    int freq = EdtFrequency->text().toInt();
+    EdtFrequency->setText(QString::number(freq));
+    DRMReceiver.SetFrequency(freq);
 }
 
-void systemevalDlg::OnFrequencyEdited ( const QString & )
+void systemevalDlg::OnFrequencyEdited(const QString &)
 {
-    TimerInterDigit.setInterval(100);
+    TimerInterDigit.stop();
+    TimerInterDigit.start(1000);
 }
 
 void systemevalDlg::UpdatePlotStyle(int iPlotStyle)
