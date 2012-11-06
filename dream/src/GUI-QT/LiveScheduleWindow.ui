@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>629</width>
+    <width>653</width>
     <height>223</height>
    </rect>
   </property>
@@ -21,6 +21,9 @@
    <bool>true</bool>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
+   <property name="topMargin">
+    <number>0</number>
+   </property>
    <item>
     <widget class="QMenuBar" name="menubar">
      <widget class="QMenu" name="menuFile">
