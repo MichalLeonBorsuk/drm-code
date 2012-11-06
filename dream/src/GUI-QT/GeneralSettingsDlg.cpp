@@ -35,10 +35,12 @@
 #if QT_VERSION < 0x040000
 # include <qwhatsthis.h>
 # define toString(s) s.latin1()
+# define toUpper(s) s.upper()
 #else
 # include <QShowEvent>
 # include <QHideEvent>
 # define toString(s) s.toUtf8().constData()
+# define toUpper(s) s.toUpper()
 #endif
 
 
@@ -102,20 +104,24 @@ void GeneralSettingsDlg::CheckSN(const QString& NewText)
 {
     /* Only S or N char are accepted */
 
-    const QString sVal = NewText;
+    const QString sVal = toUpper(NewText);
 
     if (sVal != "S" && sVal != "N" && sVal != "")
         EdtLatitudeNS->setText("");
+    else
+        EdtLatitudeNS->setText(sVal);
 }
 
 void GeneralSettingsDlg::CheckEW(const QString& NewText)
 {
     /* Only E or W char are accepted */
 
-    const QString sVal = NewText;
+    const QString sVal = toUpper(NewText);
 
     if (sVal != "E" && sVal != "W" && sVal != "")
         EdtLongitudeEW->setText("");
+    else
+        EdtLongitudeEW->setText(sVal);
 }
 
 void GeneralSettingsDlg::OnCheckBoxUseGPS()
