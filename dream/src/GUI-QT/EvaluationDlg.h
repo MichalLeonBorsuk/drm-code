@@ -93,6 +93,8 @@ protected:
 	vector<CDRMPlot*>	vecpDRMPlots;
 	CEventFilter	ef;
 
+	_BOOLEAN		bEdtFrequencyMutex;
+
 public slots:
 	void OnTimer();
 	void OnTimerInterDigit();
