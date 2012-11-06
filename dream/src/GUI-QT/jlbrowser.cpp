@@ -39,14 +39,17 @@ JLBrowser::JLBrowser(QWidget * parent)
     /* Set FhG IIS text */
     strFhGIISText =
         "<table><tr><td><img src=\":/icons/LogoFhGIIS.png\"></td>"
+        "<td width=\"4\"></td>"
         "<td><font face=\"Courier\" size=\"-1\">Features NewsService "
-        "Journaline(R) decoder technology by Fraunhofer IIS, Erlangen, "
+        "Journaline" + QString(QChar(174)) /* (R) */ +
+        " decoder technology by Fraunhofer IIS, Erlangen, "
         "Germany. For more information visit http://www.iis.fhg.de/dab"
         "</font></td></tr></table>";
 
     /* Set Journaline headline text */
     strJournalineHeadText =
         "<table><tr><td><img src=\":/icons/LogoJournaline.png\"></td>"
+        "<td width=\"4\"></td>"
         "<td valign=\"middle\"><h2>NewsService Journaline" + QString(QChar(174)) /* (R) */ +
         "</h2></td></tr></table>";
 }
@@ -136,11 +139,11 @@ QVariant JLBrowser::loadResource( int, const QUrl & name )
     return
         strJournalineHeadText +
         "<table>"
-        "<tr><td><hr></td></tr>" /* horizontial line */
+        "<tr><td width=\"100%\"><hr></td></tr>" /* horizontial line */
         "<tr><td><stylebody><b><center>" + strTitle + "</center></b></stylebody></td></tr>"
         "<tr><td><stylebody><ul type=\"square\">" + strItems +
         "</ul></stylebody></td></tr>"
-        "<tr><td><hr></td></tr>" /* horizontial line */
+        "<tr><td width=\"100%\"><hr></td></tr>" /* horizontial line */
         "</table>"
         + strFhGIISText;
 }
