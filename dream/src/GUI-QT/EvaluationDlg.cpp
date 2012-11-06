@@ -42,7 +42,8 @@ systemevalDlg::systemevalDlg(CDRMReceiver& NDRMR, CSettings& NSettings,
     systemevalDlgBase(parent, name, modal, f),
     DRMReceiver(NDRMR),
     Settings(NSettings),
-    eNewCharType(CDRMPlot::NONE_OLD)
+    eNewCharType(CDRMPlot::NONE_OLD),
+    bEdtFrequencyMutex(FALSE)
 {
     /* Get window geometry data and apply it */
     CWinGeom s;
@@ -300,7 +301,9 @@ void systemevalDlg::UpdateControls()
 
         if (iFrequency != iCurFrequency)
         {
+            bEdtFrequencyMutex = TRUE;
             EdtFrequency->setText(QString().setNum(iFrequency));
+            bEdtFrequencyMutex = FALSE;
             iCurFrequency = iFrequency;
         }
     }
@@ -412,14 +415,19 @@ void systemevalDlg::OnTimerInterDigit()
 {
     TimerInterDigit.stop();
     int freq = EdtFrequency->text().toInt();
+    bEdtFrequencyMutex = TRUE;
     EdtFrequency->setText(QString::number(freq));
+    bEdtFrequencyMutex = FALSE;
     DRMReceiver.SetFrequency(freq);
 }
 
 void systemevalDlg::OnFrequencyEdited(const QString &)
 {
-    TimerInterDigit.stop();
-    TimerInterDigit.start(1000);
+    if (!bEdtFrequencyMutex)
+    {
+        TimerInterDigit.stop();
+        TimerInterDigit.start(1000);
+    }
 }
 
 void systemevalDlg::UpdatePlotStyle(int iPlotStyle)
