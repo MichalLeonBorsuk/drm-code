@@ -59,7 +59,7 @@ CAudioSourceDecoder::AACFileName(CParameter & ReceiverParam)
     stringstream ss;
     ss << "test/aac_";
 
-    ReceiverParam.Lock();
+//    ReceiverParam.Lock(); // TODO CAudioSourceDecoder::InitInternal() already have the lock
     if (ReceiverParam.
             Service[ReceiverParam.GetCurSelAudioService()].AudioParam.
             eAudioSamplRate == CAudioParam::AS_12KHZ)
@@ -92,7 +92,7 @@ CAudioSourceDecoder::AACFileName(CParameter & ReceiverParam)
     {
         ss << "_sbr";
     }
-    ReceiverParam.Unlock();
+//    ReceiverParam.Unlock(); // TODO CAudioSourceDecoder::InitInternal() already have the lock
     ss << ".dat";
 
     return ss.str();
