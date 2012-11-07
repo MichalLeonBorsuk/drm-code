@@ -237,7 +237,7 @@ protected:
 
 public slots:
 	void OnTimerList();
-	void OnTimerUTCLabel() {SetUTCTimeLabel();}
+	void OnTimerUTCLabel();
 	void OnShowStationsMenu(int iID);
 	void OnShowPreviewMenu(int iID);
 	void OnHeaderClicked(int c);

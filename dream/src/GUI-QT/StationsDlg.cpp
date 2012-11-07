@@ -791,10 +791,6 @@ StationsDlg::StationsDlg(CDRMReceiver& NDRMR, CRig& rig,
     connect(&TimerList, SIGNAL(timeout()), this, SLOT(OnTimerList()));
     connect(&TimerUTCLabel, SIGNAL(timeout()), this, SLOT(OnTimerUTCLabel()));
 
-
-    TimerList.stop();
-    TimerUTCLabel.stop();
-
 #if QT_VERSION < 0x040000
     connect(ListViewStations, SIGNAL(selectionChanged(QListViewItem*)),
             this, SLOT(OnListItemClicked(QListViewItem*)));
@@ -817,6 +813,9 @@ StationsDlg::StationsDlg(CDRMReceiver& NDRMR, CRig& rig,
            "\t- the internet connection was not set up properly\n"
            "\t- the server is currently not available\n"
            "\t- the file 'DRMSchedule.ini' could not be written");
+
+    /* Init UTC time shown with a label control */
+    OnTimerUTCLabel();
 }
 
 #if QT_VERSION < 0x040000
