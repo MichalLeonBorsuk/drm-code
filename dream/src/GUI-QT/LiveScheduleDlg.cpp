@@ -424,19 +424,16 @@ redCube(":/icons/redCube.png"),orangeCube(":/icons/organgeCube.png"),pinkCube(":
 
     connect(buttonOk,  SIGNAL(clicked()), this, SLOT(close()));
     //connect(actionGetUpdate, SIGNAL(triggered()), this, SLOT(OnGetUpdate()));
-    /* Init UTC time shown with a label control */
-    SetUTCTimeLabel();
 
     /* Connections ---------------------------------------------------------- */
     connect(&TimerList, SIGNAL(timeout()), this, SLOT(OnTimerList()));
     connect(&TimerUTCLabel, SIGNAL(timeout()), this, SLOT(OnTimerUTCLabel()));
 
-
     /* Check boxes */
     connect(CheckBoxFreeze, SIGNAL(clicked()), this, SLOT(OnCheckFreeze()));
 
-    TimerList.stop();
-    TimerUTCLabel.stop();
+    /* Init UTC time shown with a label control */
+    OnTimerUTCLabel();
 }
 
 LiveScheduleDlg::~LiveScheduleDlg()
@@ -633,7 +630,7 @@ _BOOLEAN LiveScheduleDlg::showAll()
 }
 
 void
-LiveScheduleDlg::SetUTCTimeLabel()
+LiveScheduleDlg::OnTimerUTCLabel()
 {
     /* Get current UTC time */
     time_t ltime;
