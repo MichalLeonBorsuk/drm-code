@@ -27,6 +27,7 @@
 \******************************************************************************/
 
 #include "SlideShowViewer.h"
+#include "DialogUtil.h"
 #include "../util/Settings.h"
 #include "../datadecoding/DABMOT.h"
 #include "../datadecoding/DataDecoder.h"
@@ -161,7 +162,7 @@ void SlideShowViewer::OnButtonJumpEnd()
 
 void SlideShowViewer::OnSave()
 {
-    QString fileName = QString(strCurrentSavePath.c_str()) + "/" + vecImageNames[iCurImagePos];
+    QString fileName = QString(strCurrentSavePath.c_str()) + "/" + VerifyFilename(vecImageNames[iCurImagePos]);
     fileName = QFileDialog::getSaveFileName(this, tr("Save File"),
                                             fileName,
                                             tr("Images (*.png *.jpg)"));
@@ -174,7 +175,7 @@ void SlideShowViewer::OnSaveAll()
     QString dir = QFileDialog::getExistingDirectory(this, tr("Open Directory"), strCurrentSavePath.c_str());
     for(size_t i=0; i<vecImages.size(); i++)
     {
-        vecImages[i].save(dir+"/"+vecImageNames[i]);
+        vecImages[i].save(dir + "/" + VerifyFilename(vecImageNames[i]));
     }
     strCurrentSavePath = dir.toUtf8().data();
 }

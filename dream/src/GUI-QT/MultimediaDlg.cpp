@@ -783,7 +783,7 @@ void MultimediaDlg::OnSave()
 
         /* Show "save file" dialog */
         /* Set file name */
-        strDefFileName = vecRawImages[iCurImagePos].strName.c_str();
+        strDefFileName = VerifyFilename(vecRawImages[iCurImagePos].strName.c_str());
 
         /* Use default file name if no file name was transmitted */
         if (strDefFileName.length() == 0)
@@ -864,7 +864,7 @@ void MultimediaDlg::OnSaveAll()
         for (int j = 0; j < GetIDLastPicture() + 1; j++)
         {
             const CMOTObject& o = vecRawImages[j];
-            QString strFileName = o.strName.c_str();
+            QString strFileName = VerifyFilename(o.strName.c_str());
             QString strExt = QString(o.strFormat.c_str());
 
             if (strFileName.length() == 0)
