@@ -647,3 +647,12 @@ void RemoteMenu::OnComPortMenu(QAction* action)
     rig.SetComPort(action->text().utf8().data());
 #endif
 }
+
+/* Make sure that the given filename is secure */
+QString VerifyFilename(QString filename)
+{
+	filename.replace("/", "_");  /* replace unix-like path separator */
+	filename.replace("\\", "_"); /* replace windows path separator */
+	return filename;
+}
+
