@@ -33,9 +33,6 @@
 #include <cmath>
 #include <algorithm>
 
-#ifdef _MSC_VER
-template<typename T> int round(T x) { return floor(x+0.5); }
-#endif
 
 /* Implementation *************************************************************/
 CDRMPlot::CDRMPlot(QwtPlot* SuppliedPlot) :
@@ -1140,7 +1137,6 @@ void CDRMPlot::SetupInpSpecWaterf()
 void CDRMPlot::SetInpSpecWaterf(CVector<_REAL>& vecrData, CVector<_REAL>&)
 {
 #ifdef QT3_SUPPORT
-// TODO Resampling input data, instead of taking nearest data
 	int i, iStartScale, iEndScale;
 	_BOOLEAN bWidthChanged, bHeightChanged;
 
@@ -1175,36 +1171,36 @@ void CDRMPlot::SetInpSpecWaterf(CVector<_REAL>& vecrData, CVector<_REAL>&)
 	if ((iLenScale > 0) && (iLenScale < CanvSize.width()))
 	{
 		/* Calculate start and end of scale (needed for the borders) */
-		iStartScale =
-			(int) Floor(((_REAL) CanvSize.width() - iLenScale) / 2) - 1;
+		iStartScale = (CanvSize.width() - iLenScale) / 2;
 		iEndScale = iLenScale + iStartScale;
 	}
 	else
 	{
 		/* Something went wrong, use safe parameters */
 		iStartScale = 0;
-		iEndScale = CanvSize.width();
-		iLenScale = CanvSize.width();
+		iEndScale = iLenScale = CanvSize.width();
 	}
 
 #if QT_VERSION >= 0x040600
 	/* Scroll Canvas */
 	Canvas.scroll(0, 1, 0, 0, CanvSize.width(), CanvSize.height(), 0);
-#else
-	// TODO
 #endif
 
 	/* Paint new line (top line) */
 	QPainter Painter;
 	if (Painter.begin(&Canvas)) {
-
-		/* Left of the scale (left border) */
+#if QT_VERSION < 0x040600
+		/* Scroll Canvas */
+		QPixmap tmpCanvas = Canvas;
+		Painter.drawPixmap(0, 1, tmpCanvas, 0, 0, CanvSize.width(), CanvSize.height()-1);
+#endif
+		/* Generate pixel, left of the scale (left border) */
+		Painter.setPen(plot->backgroundColor());
 		for (i = 0; i < iStartScale; i++)
-		{
-			/* Generate pixel */
-			Painter.setPen(plot->backgroundColor());
 			Painter.drawPoint(i, 0); /* line 0 -> top line */
-		}
+
+		/* The scaling factor */
+		const _REAL rScale = _REAL(vecrData.Size()) / iLenScale;
 
 		/* Actual waterfall data */
 		for (i = iStartScale; i < iEndScale; i++)
@@ -1215,7 +1211,7 @@ void CDRMPlot::SetInpSpecWaterf(CVector<_REAL>& vecrData, CVector<_REAL>&)
 
 			/* Stretch width to entire canvas width */
 			const int iCurIdx =
-				(int) Round((_REAL) (i - iStartScale) / iLenScale * vecrData.Size());
+				(int) Round(_REAL(i - iStartScale) * rScale);
 
 			/* Translate dB-values in colors */
 			const int iCurCol =
@@ -1239,13 +1235,10 @@ void CDRMPlot::SetInpSpecWaterf(CVector<_REAL>& vecrData, CVector<_REAL>&)
 			Painter.drawPoint(i, 0); /* line 0 -> top line */
 		}
 
-		/* Right of scale (right border) */
+		/* Generate pixel, right of scale (right border) */
+		Painter.setPen(plot->backgroundColor());
 		for (i = iEndScale; i < CanvSize.width(); i++)
-		{
-			/* Generate pixel */
-			Painter.setPen(plot->backgroundColor());
 			Painter.drawPoint(i, 0); /* line 0 -> top line */
-		}
 
 		Painter.end();
 
@@ -1418,7 +1411,7 @@ void CDRMPlot::SetupAllConst()
 void CDRMPlot::SetGrid(double div, int step, int substep)
 {
 	int i;
-	double pos;
+	_REAL pos;
 #if QWT_VERSION < 0x060000
 	QwtValueList ticks[3];
 #else
@@ -1429,8 +1422,8 @@ void CDRMPlot::SetGrid(double div, int step, int substep)
 	{
 		pos = -div + div / step * i;
 		/* Keep 2 digit after the point */
-		pos = round(pos * 100.0) / 100.0;
-		ticks[2].push_back(pos);
+		pos = Round(pos * 100.0) / 100.0;
+		ticks[2].push_back((double)pos);
 	}
 
 	substep *= step;
@@ -1438,12 +1431,12 @@ void CDRMPlot::SetGrid(double div, int step, int substep)
 	{
 		pos = -div + div / substep * i;
 		/* Keep 2 digit after the point */
-		pos = round(pos * 100.0) / 100.0;
-		ticks[1].push_back(pos);
+		pos = Round(pos * 100.0) / 100.0;
+		ticks[1].push_back((double)pos);
 	}
 
 	/* Keep 2 digit after the point */
-	div = round(div * 100.0) / 100.0;
+	div = (double)Round(div * 100.0) / 100.0;
 
 	/* Set the scale */
 	QwtScaleDiv scaleDiv(-div, div, ticks);

@@ -150,7 +150,6 @@ AnalogDemDlg::AnalogDemDlg(CDRMReceiver& NDRMR, CSettings& NSettings,
 		MainPlot->setMargin(1);
         QToolTip::add(MainPlot, ptt);
 #else
-		MainPlot->plot->plotLayout()->setCanvasMargin(1);
         MainPlot->plot->setToolTip(ptt);
 #endif
 	}
