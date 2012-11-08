@@ -1220,21 +1220,17 @@ void CDRMPlot::SetInpSpecWaterf(CVector<_REAL>& vecrData, CVector<_REAL>&)
 	/* Calculate sizes */
 	const QSize CanvSize = canvas()->size();
 	int iLenScale = axisScaleDraw(QwtPlot::xBottom)->length();
-
 	if ((iLenScale > 0) && (iLenScale < CanvSize.width()))
 	{
 		/* Calculate start and end of scale (needed for the borders) */
-		iStartScale =
-			(int) Floor(((_REAL) CanvSize.width() - iLenScale) / 2) - 1;
-
+		iStartScale = (CanvSize.width() - iLenScale) / 2 - frameWidth();
 		iEndScale = iLenScale + iStartScale;
 	}
 	else
 	{
 		/* Something went wrong, use safe parameters */
 		iStartScale = 0;
-		iEndScale = CanvSize.width();
-		iLenScale = CanvSize.width();
+		iEndScale = iLenScale = CanvSize.width();
 	}
 
 	const QPixmap* pBPixmap = canvas()->backgroundPixmap();
@@ -1271,13 +1267,13 @@ void CDRMPlot::SetInpSpecWaterf(CVector<_REAL>& vecrData, CVector<_REAL>&)
 	QPainter Painter;
 	Painter.begin(&Canvas);
 
-	/* Left of the scale (left border) */
+	/* Generate pixel, left of the scale (left border) */
+	Painter.setPen(backgroundColor());
 	for (i = 0; i < iStartScale; i++)
-	{
-		/* Generate pixel */
-		Painter.setPen(backgroundColor());
 		Painter.drawPoint(i, 0); /* line 0 -> top line */
-	}
+
+	/* The scaling factor */
+	const _REAL rScale = _REAL(vecrData.Size()) / iLenScale;
 
 	/* Actual waterfall data */
 	for (i = iStartScale; i < iEndScale; i++)
@@ -1288,7 +1284,7 @@ void CDRMPlot::SetInpSpecWaterf(CVector<_REAL>& vecrData, CVector<_REAL>&)
 
 		/* Stretch width to entire canvas width */
 		const int iCurIdx =
-			(int) Round((_REAL) (i - iStartScale) / iLenScale * vecrData.Size());
+			(int) Round(_REAL(i - iStartScale) * rScale);
 
 		/* Translate dB-values in colors */
 		const int iCurCol =
@@ -1312,13 +1308,10 @@ void CDRMPlot::SetInpSpecWaterf(CVector<_REAL>& vecrData, CVector<_REAL>&)
 		Painter.drawPoint(i, 0); /* line 0 -> top line */
 	}
 
-	/* Right of scale (right border) */
+	/* Generate pixel, right of scale (right border) */
+	Painter.setPen(backgroundColor());
 	for (i = iEndScale; i < CanvSize.width(); i++)
-	{
-		/* Generate pixel */
-		Painter.setPen(backgroundColor());
 		Painter.drawPoint(i, 0); /* line 0 -> top line */
-	}
 
 	Painter.end();
 
