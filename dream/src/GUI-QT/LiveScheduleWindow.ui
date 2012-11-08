@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>621</width>
-    <height>333</height>
+    <width>622</width>
+    <height>392</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -104,10 +104,16 @@
      <item>
       <widget class="QLabel" name="TextLabelUTCTime">
        <property name="sizePolicy">
-        <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+        <sizepolicy hsizetype="Minimum" vsizetype="Maximum">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>23</height>
+        </size>
        </property>
        <property name="frameShape">
         <enum>QFrame::Panel</enum>
