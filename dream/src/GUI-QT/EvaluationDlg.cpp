@@ -645,6 +645,9 @@ void systemevalDlg::OnTimer()
         case CParameter::SI_SHORT:
             strFACInfo = tr("400 ms (Short Interleaving)");
             break;
+
+        default:
+            strFACInfo = "?";
         }
 
         FACInterleaverDepthL->setText(tr("Interleaver Depth:")); /* Label */
@@ -664,7 +667,7 @@ void systemevalDlg::OnTimer()
             break;
 
         default:
-            break;
+            strFACInfo = "? / ";
         }
 
         /* MSC */
@@ -687,7 +690,7 @@ void systemevalDlg::OnTimer()
             break;
 
         default:
-            break;
+            strFACInfo += "?";
         }
 
         FACSDCMSCModeL->setText(tr("SDC / MSC Mode:")); /* Label */
@@ -707,7 +710,7 @@ void systemevalDlg::OnTimer()
         strFACInfo = tr("Audio: ");
         strFACInfo += QString().setNum(ReceiverParam.iNumAudioService);
         strFACInfo += tr(" / Data: ");
-        strFACInfo +=QString().setNum(ReceiverParam.iNumDataService);
+        strFACInfo += QString().setNum(ReceiverParam.iNumDataService);
 
         FACNumServicesL->setText(tr("Number of Services:")); /* Label */
         FACNumServicesV->setText(strFACInfo); /* Value */
@@ -971,11 +974,12 @@ void systemevalDlg::OnCheckWriteLog()
 		emit stopLogging();
     }
 
-    /* set the focus */
-    if (EdtFrequency->isEnabled())
-    {
-        EdtFrequency->setFocus();
-    }
+// DF: disabled for compatibility with DRMLogger
+//    /* set the focus */
+//    if (EdtFrequency->isEnabled())
+//    {
+//        EdtFrequency->setFocus();
+//    }
 }
 
 QString	systemevalDlg::GetRobModeStr()
@@ -1000,7 +1004,7 @@ QString	systemevalDlg::GetRobModeStr()
         break;
 
     default:
-        return "A";
+        return "?";
     }
 }
 
@@ -1033,7 +1037,7 @@ QString	systemevalDlg::GetSpecOccStr()
         break;
 
     default:
-        return "10 kHz";
+        return "?";
     }
 }
 
