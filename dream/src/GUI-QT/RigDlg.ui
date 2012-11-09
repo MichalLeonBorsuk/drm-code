@@ -67,9 +67,9 @@
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout_3">
       <item>
-       <widget class="QProgressBar" name="sMeter">
-        <property name="value">
-         <number>24</number>
+       <widget class="QwtThermo" name="sMeter">
+        <property name="scalePosition">
+         <enum>QwtThermo::TopScale</enum>
         </property>
        </widget>
       </item>
@@ -102,6 +102,13 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>QwtThermo</class>
+   <extends>QWidget</extends>
+   <header>qwt_thermo.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

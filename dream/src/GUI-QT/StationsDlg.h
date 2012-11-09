@@ -74,10 +74,6 @@ typedef QNetworkOperation QNetworkReply; // needed to keep moc happy
 /* Define the timer interval of updating s-meter */
 #define GUI_TIMER_S_METER				300 /* ms (0.3 seconds) */
 
-/* s-meter thermo parameters */
-#define S_METER_THERMO_MIN				((_REAL) -60.0) /* dB */
-#define S_METER_THERMO_MAX				((_REAL) 60.0) /* dB */
-#define S_METER_THERMO_ALARM			((_REAL) 0.0) /* dB */
 
 #define DRM_SCHEDULE_URL	"http://www.baseportal.com/cgi-bin/baseportal.pl?htx=/drmdx/scheduleini2"
 

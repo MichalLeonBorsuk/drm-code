@@ -76,6 +76,7 @@ void CRig::unsubscribe()
     {
 #ifdef HAVE_LIBHAMLIB
         timer->stop();
+        emit sigstr(-1000.0);
 #endif
     }
 }
@@ -93,7 +94,7 @@ void CRig::onTimer()
         emit sigstr(r);
     }
     else
-        emit sigstr(0.0);
+        emit sigstr(-1000.0);
 #endif
 }
 
