@@ -30,6 +30,9 @@
 #include <qlabel.h>
 #include <qaction.h>
 #include <qmessagebox.h>
+#if QT_VERSION < 0x030000
+# include <qregexp.h>
+#endif
 #ifdef _WIN32
 # include <winsock2.h>
 #endif
@@ -651,8 +654,13 @@ void RemoteMenu::OnComPortMenu(QAction* action)
 /* Make sure that the given filename is secure */
 QString VerifyFilename(QString filename)
 {
+#if QT_VERSION < 0x030000
+	filename.replace(QRegExp("/"), "_");  /* replace unix-like path separator */
+	filename.replace(QRegExp("\\"), "_"); /* replace windows path separator */
+#else
 	filename.replace("/", "_");  /* replace unix-like path separator */
 	filename.replace("\\", "_"); /* replace windows path separator */
+#endif
 	return filename;
 }
 
