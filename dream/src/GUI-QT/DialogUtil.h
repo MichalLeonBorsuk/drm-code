@@ -48,6 +48,8 @@
 # include <QEvent>
 #endif
 
+#include <qwt_thermo.h> /* S-Meter */
+
 class CRig;
 typedef int rig_model_t;
 
@@ -247,5 +249,12 @@ protected:
 #define SMETER_MENU_ID (667)
 
 QString VerifyFilename(QString filename);
+
+/* s-meter thermo parameters */
+#define S_METER_THERMO_MIN				((_REAL) -60.0) /* dB */
+#define S_METER_THERMO_MAX				((_REAL) 60.0) /* dB */
+#define S_METER_THERMO_ALARM			((_REAL) 0.0) /* dB */
+
+void InitSMeter(QWidget* parent, QwtThermo* sMeter);
 
 #endif // DIALOGUTIL_H__FD6B23452398345OIJ9453_804E1606C2AC__INCLUDED_

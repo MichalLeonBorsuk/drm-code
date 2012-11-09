@@ -30,6 +30,7 @@
 \******************************************************************************/
 
 #include "RigDlg.h"
+#include "DialogUtil.h"
 #include <QTreeWidgetItem>
 
 /* Implementation *************************************************************/
@@ -48,6 +49,9 @@ RigDlg::RigDlg(
     modified->setEnabled(false);
     //rigTypes->setColumnCount(2);
     rigTypes->setSortingEnabled(false);
+    QTreeWidgetItem* none = new QTreeWidgetItem(rigTypes);
+	none->setText(0, "None");
+	none->setData(0, Qt::UserRole, RIG_MODEL_NONE);
     for(map<rig_model_t,CHamlib::SDrRigCaps>::const_iterator i=r.begin(); i!=r.end(); i++)
     {
 		rig_model_t model_num = i->first;
@@ -62,6 +66,7 @@ RigDlg::RigDlg(
         {
             mfr = new QTreeWidgetItem(rigTypes);
             mfr->setText(0,rc.strManufacturer.c_str());
+			mfr->setFlags(mfr->flags() & ~Qt::ItemIsSelectable);
         }
         else
         {
@@ -75,6 +80,7 @@ RigDlg::RigDlg(
     rigTypes->setSortingEnabled(false);
     rigTypes->sortItems(9, Qt::AscendingOrder);
 
+   	InitSMeter(this, sMeter);
 }
 
 RigDlg::~RigDlg()
@@ -97,15 +103,22 @@ void RigDlg::showEvent(QShowEvent*)
 	comboBoxPort->setCurrentIndex(index);
 
     prev_rig_model = rig.GetHamlibModelID();
-    map<rig_model_t,string>::const_iterator m = rigmap.find(prev_rig_model);
-    if(m!=rigmap.end())
+    if (prev_rig_model == RIG_MODEL_NONE)
     {
-		QString name(m->second.c_str());
-		QList<QTreeWidgetItem *> l = rigTypes->findItems(name, Qt::MatchExactly);
-		if(l.size()>0) {
-			rigTypes->setCurrentItem(l.front());
-			selectedRigType->setText(name);
-		}
+        rigTypes->setCurrentItem(rigTypes->topLevelItem(0)); /* None */
+    }
+    else
+    {
+        map<rig_model_t,string>::const_iterator m = rigmap.find(prev_rig_model);
+        if(m!=rigmap.end())
+        {
+            QString name(m->second.c_str());
+            QList<QTreeWidgetItem *> l = rigTypes->findItems(name, Qt::MatchExactly | Qt::MatchRecursive);
+            if(l.size()>0) {
+                rigTypes->setCurrentItem(l.front());
+                selectedRigType->setText(name);
+            }
+        }
     }
 
     prev_port = rig.GetComPort();
@@ -171,5 +184,5 @@ RigDlg::on_comboBoxPort_currentIndexChanged(int index)
 void
 RigDlg::onSigstr(double r)
 {
-	sMeter->setValue(int(100*r));
+	sMeter->setValue(r);
 }
