@@ -1154,10 +1154,10 @@ void systemevalDlg::OnCheckWriteLog()
     }
 
     /* set the focus */
-    if(EdtFrequency->isEnabled())
-    {
-        EdtFrequency->setFocus();
-    }
+//    if(EdtFrequency->isEnabled())
+//    {
+//        EdtFrequency->setFocus();
+//    }
 }
 
 QString	systemevalDlg::GetRobModeStr()
