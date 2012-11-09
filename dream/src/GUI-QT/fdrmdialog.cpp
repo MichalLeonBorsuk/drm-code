@@ -722,7 +722,7 @@ void FDRMDialog::UpdateDisplay()
                            && (audioService.AudioParam.iStreamID != STREAM_ID_NOT_USED)
                            && (audioService.eAudDataFlag == CService::SF_AUDIO);
 
-    int i;
+    int i, iFirstAudioService=-1, iFirstDataService=-1;
     for(i=0; i < MAX_NUM_SERVICES; i++)
     {
         QString label = serviceSelector(Parameters, i);
@@ -732,26 +732,52 @@ void FDRMDialog::UpdateDisplay()
 #else
         pButtonGroup->button(i)->setEnabled(label != "");
 #endif
-        /* If the current audio service is not active or is an only data service
-        	select the first audio service available */
-        if(bServiceIsValid==false)
+        if (!bServiceIsValid && (iFirstAudioService == -1 || iFirstDataService == -1))
         {
             Parameters.Lock();
             audioService = Parameters.Service[i];
             Parameters.Unlock();
-
-            if (audioService.IsActive()
+            /* If the current audio service is not valid
+            	find the first audio service available */
+            if (iFirstAudioService == -1
+                    && audioService.IsActive()
                     && (audioService.AudioParam.iStreamID != STREAM_ID_NOT_USED)
                     && (audioService.eAudDataFlag == CService::SF_AUDIO))
             {
-                iCurSelAudioServ = i;
-                bServiceIsValid = true;
+                iFirstAudioService = i;
             }
+            /* If the current audio service is not valid
+            	find the first data service available */
+            if (iFirstDataService == -1
+                    && audioService.IsActive()
+                    && (audioService.eAudDataFlag == CService::SF_DATA))
+            {
+                iFirstDataService = i;
+            }
+        }
+    }
+
+    /* Select a valid service, priority to audio service */
+    if (iFirstAudioService != -1)
+    {
+        iCurSelAudioServ = iFirstAudioService;
+        bServiceIsValid = true;
+    }
+    else
+    {
+        if (iFirstDataService != -1)
+        {
+            iCurSelAudioServ = iFirstDataService;
+            bServiceIsValid = true;
         }
     }
 
     if(bServiceIsValid)
     {
+        /* Get selected service */
+        Parameters.Lock();
+        audioService = Parameters.Service[iCurSelAudioServ];
+        Parameters.Unlock();
 
 #if QT_VERSION < 0x040000
         pButtonGroup->setButton(iCurSelAudioServ);
