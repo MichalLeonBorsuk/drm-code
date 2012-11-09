@@ -1223,7 +1223,7 @@ void CDRMPlot::SetInpSpecWaterf(CVector<_REAL>& vecrData, CVector<_REAL>&)
 	if ((iLenScale > 0) && (iLenScale < CanvSize.width()))
 	{
 		/* Calculate start and end of scale (needed for the borders) */
-		iStartScale = (CanvSize.width() - iLenScale) / 2 - frameWidth();
+		iStartScale = (CanvSize.width() - iLenScale) / 2 - lineWidth();
 		iEndScale = iLenScale + iStartScale;
 	}
 	else
