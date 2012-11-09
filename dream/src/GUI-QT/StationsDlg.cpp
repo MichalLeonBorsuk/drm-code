@@ -746,11 +746,11 @@ StationsDlg::StationsDlg(CDRMReceiver& NDRMR, CRig& rig,
 # ifdef HAVE_LIBHAMLIB
     RigDlg *pRigDlg = new RigDlg(rig, this);
     connect(actionChooseRig, SIGNAL(triggered()), pRigDlg, SLOT(show()));
-    connect(actionEnable_S_Meter, SIGNAL(triggered()), this, SLOT(OnSMeterMenu()));
-#else
+# else
     actionChooseRig->setEnabled(false);
 # endif
     connect(buttonOk, SIGNAL(clicked()), this, SLOT(close()));
+    connect(actionEnable_S_Meter, SIGNAL(triggered()), this, SLOT(OnSMeterMenu()));
 #endif
 
     /* Init progress bar for input s-meter */
@@ -758,8 +758,8 @@ StationsDlg::StationsDlg(CDRMReceiver& NDRMR, CRig& rig,
     ProgrSigStrength->setRange(S_METER_THERMO_MIN, S_METER_THERMO_MAX);
 #if QT_VERSION < 0x040000
     ProgrSigStrength->setOrientation(QwtThermo::Horizontal, QwtThermo::Top);
-#else
-    ProgrSigStrength->setOrientation(Qt::Horizontal, QwtThermo::TopScale);
+//#else
+//    ProgrSigStrength->setOrientation(Qt::Horizontal, QwtThermo::TopScale); // Set via ui file
 #endif
     ProgrSigStrength->setAlarmLevel(S_METER_THERMO_ALARM);
     ProgrSigStrength->setAlarmLevel(-12.5);
@@ -1812,14 +1812,16 @@ void StationsDlg::OnSMeterMenu()
 
 void StationsDlg::EnableSMeter()
 {
-    ProgrSigStrength->setEnabled(TRUE);
     TextLabelSMeter->setEnabled(TRUE);
+    ProgrSigStrength->setEnabled(TRUE);
+    TextLabelSMeter->show();
     ProgrSigStrength->show();
     emit subscribeRig();
 }
 
 void StationsDlg::DisableSMeter()
 {
+    TextLabelSMeter->hide();
     ProgrSigStrength->hide();
     emit unsubscribeRig();
 }
