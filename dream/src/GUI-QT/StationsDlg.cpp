@@ -71,9 +71,25 @@ QString MyListViewItem::key(int column, bool ascending) const
 
 CDRMSchedule::CDRMSchedule():
     ListTargets(), ListCountries(), ListLanguages(),
-    StationsTable(),eSchedMode(SM_DRM),iSecondsPreview(0)
+    StationsTable(),eSchedMode(SM_DRM),iSecondsPreviewdrm(0),iSecondsPreviewanalog(0)
 {
     SetAnalogUrl();
+}
+
+void CDRMSchedule::SetSecondsPreview(int iSec)
+{
+    if(eSchedMode==SM_DRM)
+	iSecondsPreviewdrm = iSec;
+    else
+	iSecondsPreviewanalog = iSec;
+}
+
+int CDRMSchedule::GetSecondsPreview()
+{
+    if(eSchedMode==SM_DRM)
+	return iSecondsPreviewdrm;
+    else
+	return iSecondsPreviewanalog;
 }
 
 void CDRMSchedule::SetSchedMode(const ESchedMode eNewSchM)
@@ -517,9 +533,9 @@ CDRMSchedule::StationState CDRMSchedule::CheckState(const int iPos)
     else
     {
         /* Station is not active, check preview condition */
-        if (iSecondsPreview > 0)
+        if (GetSecondsPreview() > 0)
         {
-            if (IsActive(iPos, ltime + iSecondsPreview) == TRUE)
+            if (IsActive(iPos, ltime + GetSecondsPreview()) == TRUE)
                 return IS_PREVIEW;
             else
                 return IS_INACTIVE;
@@ -1383,18 +1399,19 @@ void StationsDlg::LoadSettings(const CSettings& Settings)
     {
     case RM_DRM:
         DRMSchedule.SetSchedMode(CDRMSchedule::SM_DRM);
-        iSortColumn = Settings.Get("Stations Dialog", "sortcolumndrm", 0);
-        bCurrentSortAscending = Settings.Get("Stations Dialog", "sortascendingdrm", TRUE);
         break;
 
     case RM_AM:
         DRMSchedule.SetSchedMode(CDRMSchedule::SM_ANALOG);
-        iSortColumn = Settings.Get("Stations Dialog", "sortcolumnanalog", 0);
-        bCurrentSortAscending = Settings.Get("Stations Dialog", "sortascendinganalog", TRUE);
         break;
     default: // can't happen!
         ;
     }
+    iSortColumndrm = Settings.Get("Stations Dialog", "sortcolumndrm", 0);
+    bCurrentSortAscendingdrm = Settings.Get("Stations Dialog", "sortascendingdrm", TRUE);
+    iSortColumnanalog = Settings.Get("Stations Dialog", "sortcolumnanalog", 0);
+    bCurrentSortAscendinganalog = Settings.Get("Stations Dialog", "sortascendinganalog", TRUE);
+
     string url = Settings.Get("Stations Dialog", "DRM URL", string(DRM_SCHEDULE_URL));
     DRMSchedule.qurldrm = new QUrl(QString(url.c_str()));
     DRMSchedule.targetFilterdrm = Settings.Get("Stations Dialog", "targetfilterdrm", string("")).c_str();
@@ -1416,18 +1433,10 @@ void StationsDlg::SaveSettings(CSettings& Settings)
 #endif
     Settings.Put("Stations Dialog", "DRM URL", string(DRMSchedule.qurldrm->toString().latin1()));
     Settings.Put("Stations Dialog", "ANALOG URL", string(DRMSchedule.qurlanalog->toString().latin1()));
-    switch (DRMSchedule.GetSchedMode())
-    {
-    case CDRMSchedule::SM_DRM:
-        Settings.Put("Stations Dialog", "sortcolumndrm", currentSortColumn());
-        Settings.Put("Stations Dialog", "sortascendingdrm", bCurrentSortAscending);
-        break;
-
-    case CDRMSchedule::SM_ANALOG:
-        Settings.Put("Stations Dialog", "sortcolumnanalog", currentSortColumn());
-        Settings.Put("Stations Dialog", "sortascendinganalog", bCurrentSortAscending);
-        break;
-    }
+    Settings.Put("Stations Dialog", "sortcolumndrm", iSortColumndrm);
+    Settings.Put("Stations Dialog", "sortascendingdrm", bCurrentSortAscendingdrm);
+    Settings.Put("Stations Dialog", "sortcolumnanalog", iSortColumnanalog);
+    Settings.Put("Stations Dialog", "sortascendinganalog", bCurrentSortAscendinganalog);
     Settings.Put("Stations Dialog", "targetfilterdrm", string(DRMSchedule.targetFilterdrm.latin1()));
     Settings.Put("Stations Dialog", "countryfilterdrm", string(DRMSchedule.countryFilterdrm.latin1()));
     Settings.Put("Stations Dialog", "languagefilterdrm", string(DRMSchedule.languageFilterdrm.latin1()));
@@ -1567,10 +1576,22 @@ void StationsDlg::LoadSchedule()
 	item->setData(0, Qt::UserRole, i);
 #endif
     }
+    int c;
+    bool b;
+    if(DRMSchedule.GetSchedMode()==CDRMSchedule::SM_DRM)
+    {
+	b = bCurrentSortAscendingdrm;
+	c = iSortColumndrm;
+    }
+    else
+    {
+	b = bCurrentSortAscendinganalog;
+	c = iSortColumnanalog;
+    }
 #if QT_VERSION < 0x040000
-    ListViewStations->setSorting(iSortColumn, bCurrentSortAscending);
+    ListViewStations->setSorting(c, b);
 #else
-    ListViewStations->sortByColumn(iSortColumn, bCurrentSortAscending?Qt::AscendingOrder:Qt::DescendingOrder);
+    ListViewStations->sortByColumn(c, b?Qt::AscendingOrder:Qt::DescendingOrder);
 #endif
     LoadFilters();
 
@@ -1688,7 +1709,7 @@ void StationsDlg::SetStationsView()
         }
     }
     ListViewStations->setSortingEnabled(true);
-    ListViewStations->sortItems(ListViewStations->sortColumn(), bCurrentSortAscending?Qt::AscendingOrder:Qt::DescendingOrder);
+    ListViewStations->sortItems(ListViewStations->sortColumn(), GetSortAscending()?Qt::AscendingOrder:Qt::DescendingOrder);
     ListViewStations->setFocus();
 #endif
     ListItemsMutex.unlock();
@@ -1705,9 +1726,25 @@ void StationsDlg::OnHeaderClicked(int c)
 {
     /* Store the "direction" of sorting */
     if (currentSortColumn() == c)
-        bCurrentSortAscending = !bCurrentSortAscending;
+        SetSortAscending(!GetSortAscending());
     else
-        bCurrentSortAscending = TRUE;
+        SetSortAscending(true);
+}
+
+void StationsDlg::SetSortAscending(_BOOLEAN b)
+{
+    if(DRMSchedule.GetSchedMode()==CDRMSchedule::SM_DRM)
+	bCurrentSortAscendingdrm = b;
+    else
+        bCurrentSortAscendinganalog = b;
+}
+
+_BOOLEAN StationsDlg::GetSortAscending()
+{
+    if(DRMSchedule.GetSchedMode()==CDRMSchedule::SM_DRM)
+	return bCurrentSortAscendingdrm;
+    else
+        return bCurrentSortAscendinganalog;
 }
 
 void StationsDlg::SetFrequencyFromGUI(int iFreq)
@@ -1874,7 +1911,10 @@ void StationsDlg::AddWhatsThisHelp()
 int StationsDlg::currentSortColumn()
 {
 #if QT_VERSION < 0x030000
-    return iSortColumn;
+    if(DRMReceiver.GetReceiverMode()==SM_DRM)
+	return iSortColumndrm;
+    else
+	return iSortColumnanalog;
 #else
     return ListViewStations->sortColumn();
 #endif

@@ -204,8 +204,8 @@ public:
 	StationState CheckState(const int iPos);
 	bool CheckFilter(const int iPos);
 
-	void SetSecondsPreview(int iSec) {iSecondsPreview = iSec;}
-	int GetSecondsPreview() {return iSecondsPreview;}
+	void SetSecondsPreview(int iSec);
+	int GetSecondsPreview();
 	void UpdateStringListForFilter(const CStationsItem& StationsItem);
 	void LoadSchedule();
 
@@ -226,7 +226,8 @@ protected:
 	ESchedMode		eSchedMode;
 
 	/* Minutes for stations preview in seconds if zero then only show active */
-	int iSecondsPreview;
+	int iSecondsPreviewdrm;
+	int iSecondsPreviewanalog;
 };
 
 
@@ -270,9 +271,13 @@ protected:
 	void			DisableSMeter();
 	void			AddUpdateDateTime();
 	_BOOLEAN		showAll();
-	int				currentSortColumn();
-	_BOOLEAN		bCurrentSortAscending;
-	int				iSortColumn;
+	_BOOLEAN		GetSortAscending();
+	void			SetSortAscending(_BOOLEAN b);
+	int			currentSortColumn();
+	_BOOLEAN		bCurrentSortAscendingdrm;
+	_BOOLEAN		bCurrentSortAscendinganalog;
+	int			iSortColumndrm;
+	int			iSortColumnanalog;
 
 	CDRMReceiver&		DRMReceiver;
 	CDRMSchedule		DRMSchedule;
