@@ -162,3 +162,55 @@ void CAudioResample::Init(int iNewInputBlockSize, _REAL rNewRation)
 	vecrIntBuff.Init(iInputBlockSize + RES_FILT_NUM_TAPS_PER_PHASE,
 		(_REAL) 0.0);
 }
+
+void CSpectrumResample::Resample(CVector<_REAL>* prInput, CVector<_REAL>** pprOutput,
+	int iNewOutputBlockSize, _BOOLEAN bResample)
+{
+	if (!bResample)
+		iNewOutputBlockSize = 0;
+
+	if (iNewOutputBlockSize != iOutputBlockSize)
+	{
+		iOutputBlockSize = iNewOutputBlockSize;
+
+		/* Allocate memory for internal buffer */
+		vecrIntBuff.Init(iNewOutputBlockSize);
+	}
+
+	int iInputBlockSize = prInput->Size();
+	_REAL rRation = _REAL(iInputBlockSize) / _REAL(iOutputBlockSize);
+
+	if (!bResample || rRation <= (_REAL) 1.0)
+	{
+		/* If ratio is 1 or less, no resampling is needed */
+		*pprOutput = prInput;
+	}
+	else
+	{
+		int j, i;
+		CVector<_REAL>* prOutput;
+		prOutput = &vecrIntBuff;
+		_REAL rBorder = rRation;
+		_REAL rMax = -1.0e10;
+		_REAL rValue;
+
+		/* Main loop */
+		for (j = 0, i = 0; j < iInputBlockSize && i < iOutputBlockSize; j++)
+		{
+			rValue = (*prInput)[j];
+			/* We only take the maximum value within the interval,
+			   because what is important it's the signal
+			   and not the lack of signal */
+			if (rValue > rMax) rMax = rValue;
+			if (j > (int)floor(rBorder))
+			{
+				(*prOutput)[i++] = rMax - 6.0;
+				rMax = -1.0e10;
+				rBorder = rRation * i;
+			}
+		}
+		if (i < iOutputBlockSize)
+			(*prOutput)[i] = rMax - 6.0;
+		*pprOutput = prOutput;
+	}
+}

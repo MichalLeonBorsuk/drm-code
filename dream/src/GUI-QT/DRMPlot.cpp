@@ -1139,6 +1139,7 @@ void CDRMPlot::SetInpSpecWaterf(CVector<_REAL>& vecrData, CVector<_REAL>&)
 #ifdef QT3_SUPPORT
 	int i, iStartScale, iEndScale;
 	_BOOLEAN bWidthChanged, bHeightChanged;
+	CVector<_REAL> *pvecrResampledData;
 
 	/* Check if the canvas size has changed */
 	QSize CanvSize = plot->canvas()->size();
@@ -1181,6 +1182,9 @@ void CDRMPlot::SetInpSpecWaterf(CVector<_REAL>& vecrData, CVector<_REAL>&)
 		iEndScale = iLenScale = CanvSize.width();
 	}
 
+	/* Resample input data */
+	Resample.Resample(&vecrData, &pvecrResampledData, iLenScale, TRUE);
+
 #if QT_VERSION >= 0x040600
 	/* Scroll Canvas */
 	Canvas.scroll(0, 1, 0, 0, CanvSize.width(), CanvSize.height(), 0);
@@ -1200,7 +1204,7 @@ void CDRMPlot::SetInpSpecWaterf(CVector<_REAL>& vecrData, CVector<_REAL>&)
 			Painter.drawPoint(i, 0); /* line 0 -> top line */
 
 		/* The scaling factor */
-		const _REAL rScale = _REAL(vecrData.Size()) / iLenScale;
+		const _REAL rScale = _REAL(pvecrResampledData->Size()) / iLenScale;
 
 		/* Actual waterfall data */
 		for (i = iStartScale; i < iEndScale; i++)
@@ -1215,7 +1219,7 @@ void CDRMPlot::SetInpSpecWaterf(CVector<_REAL>& vecrData, CVector<_REAL>&)
 
 			/* Translate dB-values in colors */
 			const int iCurCol =
-				(int) Round((vecrData[iCurIdx] - MIN_VAL_INP_SPEC_Y_AXIS_DB) /
+				(int) Round(((*pvecrResampledData)[iCurIdx] - MIN_VAL_INP_SPEC_Y_AXIS_DB) /
 				(MAX_VAL_INP_SPEC_Y_AXIS_DB - MIN_VAL_INP_SPEC_Y_AXIS_DB) *
 				iMaxHue);
 
