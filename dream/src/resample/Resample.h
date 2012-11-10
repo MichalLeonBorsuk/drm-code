@@ -75,5 +75,17 @@ protected:
 	int						iOutputBlockSize;
 };
 
+class CSpectrumResample
+{
+public:
+	CSpectrumResample() : iOutputBlockSize(0) {}
+	virtual ~CSpectrumResample() {}
+
+	void Resample(CVector<_REAL>* prInput, CVector<_REAL>** pprOutput, int iNewOutputBlockSize, _BOOLEAN bResample);
+
+protected:
+	CVector<_REAL>			vecrIntBuff;
+	int						iOutputBlockSize;
+};
 
 #endif // !defined(RESAMPLE_H__3B0FEUFE7876F_FE8FE_CA63_4344_1912__INCLUDED_)

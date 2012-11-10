@@ -1209,6 +1209,7 @@ void CDRMPlot::SetupInpSpecWaterf()
 void CDRMPlot::SetInpSpecWaterf(CVector<_REAL>& vecrData, CVector<_REAL>&)
 {
 	int i, iStartScale, iEndScale;
+	CVector<_REAL> *pvecrResampledData;
 
 	/* First check if plot must be set up */
 	if (InitCharType != INP_SPEC_WATERF)
@@ -1232,6 +1233,9 @@ void CDRMPlot::SetInpSpecWaterf(CVector<_REAL>& vecrData, CVector<_REAL>&)
 		iStartScale = 0;
 		iEndScale = iLenScale = CanvSize.width();
 	}
+
+	/* Resample input data */
+	Resample.Resample(&vecrData, &pvecrResampledData, iLenScale, TRUE);
 
 	const QPixmap* pBPixmap = canvas()->backgroundPixmap();
 
@@ -1273,7 +1277,7 @@ void CDRMPlot::SetInpSpecWaterf(CVector<_REAL>& vecrData, CVector<_REAL>&)
 		Painter.drawPoint(i, 0); /* line 0 -> top line */
 
 	/* The scaling factor */
-	const _REAL rScale = _REAL(vecrData.Size()) / iLenScale;
+	const _REAL rScale = _REAL(pvecrResampledData->Size()) / iLenScale;
 
 	/* Actual waterfall data */
 	for (i = iStartScale; i < iEndScale; i++)
@@ -1288,7 +1292,7 @@ void CDRMPlot::SetInpSpecWaterf(CVector<_REAL>& vecrData, CVector<_REAL>&)
 
 		/* Translate dB-values in colors */
 		const int iCurCol =
-			(int) Round((vecrData[iCurIdx] - MIN_VAL_INP_SPEC_Y_AXIS_DB) /
+			(int) Round(((*pvecrResampledData)[iCurIdx] - MIN_VAL_INP_SPEC_Y_AXIS_DB) /
 			(MAX_VAL_INP_SPEC_Y_AXIS_DB - MIN_VAL_INP_SPEC_Y_AXIS_DB) *
 			iMaxHue);
 

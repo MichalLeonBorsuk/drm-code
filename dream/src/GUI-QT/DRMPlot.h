@@ -66,6 +66,7 @@
 #endif
 
 /* Other includes */
+#include "../resample/Resample.h"
 #include "../util/Vector.h"
 #include "../Parameter.h"
 #include "../DrmReceiver.h"
@@ -348,6 +349,8 @@ protected:
 
 	_BOOLEAN		bOnTimerCharMutexFlag;
 	QTimer			TimerChart;
+
+	CSpectrumResample Resample;
 
 	CDRMReceiver	*pDRMRec;
 
