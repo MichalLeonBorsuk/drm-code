@@ -129,8 +129,8 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& NSettings, CRig& rig,
                 SLOT(show()), Qt::CTRL+Qt::Key_E, 0);
         EvalWinMenu->insertItem(tr("M&ultimedia Dialog..."), pMultiMediaDlg,
                 SLOT(show()), Qt::CTRL+Qt::Key_U, 1);
-        EvalWinMenu->insertItem(tr("S&tations Dialog..."), this,
-                SLOT(OnViewStationsDlg()), Qt::CTRL+Qt::Key_T, 2);
+        EvalWinMenu->insertItem(tr("S&tations Dialog..."), pStationsDlg,
+                SLOT(show()), Qt::CTRL+Qt::Key_T, 2);
         EvalWinMenu->insertItem(tr("&Live Schedule Dialog..."), pLiveScheduleDlg,
                 SLOT(show()), Qt::CTRL+Qt::Key_L, 3);
         EvalWinMenu->insertItem(tr("&Programme Guide..."), pEPGDlg,
@@ -231,7 +231,7 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& NSettings, CRig& rig,
 
     connect(action_Evaluation_Dialog, SIGNAL(triggered()), pSysEvalDlg, SLOT(show()));
     connect(action_Multimedia_Dialog, SIGNAL(triggered()), this, SLOT(OnViewMultimediaDlg()));
-    connect(action_Stations_Dialog, SIGNAL(triggered()), this, SLOT(OnViewStationsDlg()));
+    connect(action_Stations_Dialog, SIGNAL(triggered()), pStationsDlg, SLOT(show()));
     connect(action_Live_Schedule_Dialog, SIGNAL(triggered()), pLiveScheduleDlg, SLOT(show()));
     connect(action_Programme_Guide_Dialog, SIGNAL(triggered()), pEPGDlg, SLOT(show()));
     connect(actionExit, SIGNAL(triggered()), this, SLOT(close()));
@@ -336,13 +336,13 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& NSettings, CRig& rig,
 
     connect(pAnalogDemDlg, SIGNAL(SwitchMode(int)), this, SLOT(OnSwitchMode(int)));
     connect(pAnalogDemDlg, SIGNAL(NewAMAcquisition()), this, SLOT(OnNewAcquisition()));
-    connect(pAnalogDemDlg, SIGNAL(ViewStationsDlg()), this, SLOT(OnViewStationsDlg()));
+    connect(pAnalogDemDlg, SIGNAL(ViewStationsDlg()), pStationsDlg, SLOT(show()));
     connect(pAnalogDemDlg, SIGNAL(ViewLiveScheduleDlg()), pLiveScheduleDlg, SLOT(show()));
     connect(pAnalogDemDlg, SIGNAL(Closed()), this, SLOT(close()));
 
     connect(pFMDlg, SIGNAL(SwitchMode(int)), this, SLOT(OnSwitchMode(int)));
     connect(pFMDlg, SIGNAL(Closed()), this, SLOT(close()));
-    connect(pFMDlg, SIGNAL(ViewStationsDlg()), this, SLOT(OnViewStationsDlg()));
+    connect(pFMDlg, SIGNAL(ViewStationsDlg()), pStationsDlg, SLOT(show()));
     connect(pFMDlg, SIGNAL(ViewLiveScheduleDlg()), pLiveScheduleDlg, SLOT(show()));
 
     connect(&Timer, SIGNAL(timeout()), this, SLOT(OnTimer()));
@@ -425,7 +425,6 @@ void FDRMDialog::UpdateDRM_GUI()
     CParameter& Parameters = *DRMReceiver.GetParameters();
     if(isVisible()==false)
     {
-        pStationsDlg->SaveSettings(Settings);
         ChangeGUIModeToDRM();
     }
     Parameters.Lock();
@@ -469,11 +468,9 @@ void FDRMDialog::OnTimer()
         UpdateDRM_GUI();
         break;
     case RM_AM:
-		pStationsDlg->SaveSettings(Settings);
         ChangeGUIModeToAM();
         break;
     case RM_FM:
-		pStationsDlg->SaveSettings(Settings);
         pStationsDlg->hide(); // in case open in AM mode - AM dialog can't hide this
         pLiveScheduleDlg->hide(); // in case open in AM mode - AM dialog can't hide this
         ChangeGUIModeToFM();
@@ -890,7 +887,7 @@ void FDRMDialog::showEvent(QShowEvent* e)
 {
 	EVENT_FILTER(e);
     if (Settings.Get("DRM Dialog", "Stations Dialog visible", false))
-        OnViewStationsDlg();
+	pStationsDlg->show();
     else
         pStationsDlg->hide(); // in case AM had it open
 
@@ -953,10 +950,6 @@ void FDRMDialog::hideEvent(QHideEvent* e)
     pLiveScheduleDlg->hide();
     pEPGDlg->hide();
     pStationsDlg->hide();
-
-	pStationsDlg->SaveSettings(Settings);
-    pLiveScheduleDlg->SaveSettings(Settings);
-    pLogging->SaveSettings(Settings);
 
     CWinGeom s;
     QRect WinGeom = geometry();
@@ -1091,21 +1084,6 @@ void FDRMDialog::OnViewMultimediaDlg()
     }
 }
 
-void FDRMDialog::OnViewStationsDlg()
-{
-    if(DRMReceiver.GetReceiverMode() == RM_DRM)
-    {
-        Settings.Put("DRM Dialog", "Stations Dialog visible", TRUE);
-    }
-    else
-    {
-        Settings.Put("AM Dialog", "Stations Dialog visible", TRUE);
-    }
-
-    /* Show stations window */
-    pStationsDlg->show();
-}
-
 void FDRMDialog::OnMenuSetDisplayColor()
 {
     const QColor color = CRGBConversion::int2RGB(Settings.Get("DRM Dialog", "colorscheme", 0xff0000));
@@ -1132,6 +1110,10 @@ void FDRMDialog::closeEvent(QCloseEvent* ce)
 
         /* Stop real-time timer */
         Timer.stop();
+
+	pStationsDlg->SaveSettings(Settings);
+	pLiveScheduleDlg->SaveSettings(Settings);
+	pLogging->SaveSettings(Settings);
 
         /* Save the station dialog visibility state */
         switch (DRMReceiver.GetReceiverMode())

@@ -166,7 +166,6 @@ public slots:
     void OnSelectAudioService(int);
     void OnSelectDataService(int);
     void OnViewMultimediaDlg();
-    void OnViewStationsDlg();
     void OnMenuSetDisplayColor();
     void OnNewAcquisition();
     void OnSwitchMode(int);
