@@ -853,7 +853,8 @@ _BOOLEAN CSDCReceive::DataEntityType8(CVector<_BINARY>* pbiData,
     /* UTC (hours and minutes) */
     Parameter.iUTCHour = (*pbiData).Separate(5);
     Parameter.iUTCMin = (*pbiData).Separate(6);
-	
+
+    Parameter.bValidUTCOffsetAndSense = FALSE;
     }
 
     if (iLengthOfBody == 4)
