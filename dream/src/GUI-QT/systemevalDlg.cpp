@@ -487,6 +487,9 @@ void systemevalDlg::UpdateControls()
         break;
     }
 
+    if(!TimerInterDigit.isActive())
+	EdtFrequency->setText(QString().setNum(DRMReceiver.GetFrequency()));
+
     /* Update settings checkbuttons */
     CheckBoxReverb->setChecked(DRMReceiver.GetAudSorceDec()->GetReverbEffect());
     CheckBoxRecFilter->setChecked(DRMReceiver.GetFreqSyncAcq()->GetRecFilter());
@@ -497,18 +500,6 @@ void systemevalDlg::UpdateControls()
 
     CheckBoxSaveAudioWave->
     setChecked(DRMReceiver.GetWriteData()->GetIsWriteWaveFile());
-
-
-    /* Update frequency edit control (frequency could be changed by
-       schedule dialog */
-    int iFrequency = DRMReceiver.GetFrequency();
-    int iCurFrequency = EdtFrequency->text().toInt();
-
-    if (iFrequency != iCurFrequency)
-    {
-        EdtFrequency->setText(QString().setNum(iFrequency));
-        iCurFrequency = iFrequency;
-    }
 }
 
 void systemevalDlg::showEvent(QShowEvent*)
@@ -546,6 +537,10 @@ void systemevalDlg::showEvent(QShowEvent*)
 
     /* Activate real-time timer */
     Timer.start(GUI_CONTROL_UPDATE_TIME);
+    TimerInterDigit.stop();
+
+    // compatibility with DRMLogger
+    CheckBoxWriteLog->setFocus();
 }
 
 void systemevalDlg::hideEvent(QHideEvent*)
@@ -606,11 +601,13 @@ void systemevalDlg::OnTimerInterDigit()
 {
     TimerInterDigit.stop();
     DRMReceiver.SetFrequency(EdtFrequency->text().toInt());
+    // compatibility with DRMLogger
+    CheckBoxWriteLog->setFocus();
 }
 
-void systemevalDlg::OnFrequencyEdited ( const QString & )
+void systemevalDlg::OnFrequencyEdited ( const QString& s)
 {
-    TimerInterDigit.changeInterval(100);
+    TimerInterDigit.changeInterval(1000);
 }
 
 void systemevalDlg::UpdatePlotStyle(int iPlotStyle)
@@ -1162,13 +1159,6 @@ void systemevalDlg::OnCheckWriteLog()
     {
         emit stopLogging();
     }
-
-// DF: disabled for compatibility with DRMLogger
-//    /* set the focus */
-//    if(EdtFrequency->isEnabled())
-//    {
-//        EdtFrequency->setFocus();
-//    }
 }
 
 QString	systemevalDlg::GetRobModeStr()

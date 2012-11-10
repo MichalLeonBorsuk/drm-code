@@ -717,7 +717,6 @@ StationsDlg::StationsDlg(CDRMReceiver& NDRMR, CRig& rig,
     QwtCounterFrequency->setIncSteps(QwtCounter::Button1, 1); /* Increment */
     QwtCounterFrequency->setIncSteps(QwtCounter::Button2, 10);
     QwtCounterFrequency->setIncSteps(QwtCounter::Button3, 100);
-    QwtCounterFrequency->setValue(DRMReceiver.GetFrequency());
 
 #if QT_VERSION >= 0x040000
 
@@ -1254,6 +1253,8 @@ void StationsDlg::showEvent(QShowEvent* e)
     TimerList.start(GUI_TIMER_LIST_VIEW_STAT); /* Stations list */
     TimerUTCLabel.start(GUI_TIMER_UTC_TIME_LABEL);
 
+    QwtCounterFrequency->setValue(DRMReceiver.GetFrequency());
+
     bool ensmeter = false;
 #if QT_VERSION < 0x040000
     if(pRemoteMenu && pRemoteMenu->menu()->isItemChecked(SMETER_MENU_ID))
@@ -1718,8 +1719,7 @@ void StationsDlg::SetStationsView()
 
 void StationsDlg::OnFreqCntNewValue(double dVal)
 {
-    /* Set frequency to front-end */
-    DRMReceiver.SetFrequency((int) dVal);
+    DRMReceiver.SetFrequency(int(dVal));
 }
 
 void StationsDlg::OnHeaderClicked(int c)

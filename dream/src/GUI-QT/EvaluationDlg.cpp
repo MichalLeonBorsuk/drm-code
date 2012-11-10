@@ -80,8 +80,6 @@ systemevalDlg::systemevalDlg(CDRMReceiver& NDRMR, CSettings& NSettings,
     LEDTimeSync->SetUpdateTime(600);
     LEDIOInterface->SetUpdateTime(2000); /* extra long -> red light stays long */
 
-    /* Init parameter for frequency edit for log file */
-    EdtFrequency->setText(QString().setNum(DRMReceiver.GetFrequency()));
 
     /* Update controls */
     UpdateControls();
@@ -351,6 +349,8 @@ void systemevalDlg::showEvent(QShowEvent* e)
     /* Notify the MainPlot of showEvent */
     MainPlot->activate();
 #endif
+    // compatibility with DRMLogger
+    CheckBoxWriteLog->setFocus();
 }
 
 void systemevalDlg::hideEvent(QHideEvent* e)
@@ -419,6 +419,8 @@ void systemevalDlg::OnTimerInterDigit()
     EdtFrequency->setText(QString::number(freq));
     bEdtFrequencyMutex = FALSE;
     DRMReceiver.SetFrequency(freq);
+    // compatibility with DRMLogger
+    CheckBoxWriteLog->setFocus();
 }
 
 void systemevalDlg::OnFrequencyEdited(const QString &)
