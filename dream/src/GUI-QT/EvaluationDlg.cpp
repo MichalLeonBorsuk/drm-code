@@ -760,6 +760,13 @@ void systemevalDlg::OnTimer()
                 QString().setNum(ReceiverParam.iDay) + "/" +
                 QString().setNum(ReceiverParam.iYear);
 #endif
+            /* Add UTC offset if available */
+            if (ReceiverParam.bValidUTCOffsetAndSense)
+                strFACInfo += QString(" %1%2%3%4")
+                    .arg(tr("UTC"))
+                    .arg(ReceiverParam.iUTCSense ? "-" : "+")
+                    .arg(ReceiverParam.iUTCOff / 2, 0, 10)
+                    .arg(ReceiverParam.iUTCOff & 1 ? ".5" : "");
         }
 
         FACTimeDateL->setText(tr("Received time - date:")); /* Label */

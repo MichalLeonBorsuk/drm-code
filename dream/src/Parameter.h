@@ -1099,6 +1099,7 @@ public:
     int iUTCMin;
     int iUTCOff;
     int iUTCSense;
+    _BOOLEAN bValidUTCOffsetAndSense;
 
     /* Identifies the current frame. This parameter is set by FAC */
     int iFrameIDTransm;

@@ -164,6 +164,7 @@ CParameter::CParameter(const CParameter& p):
     iUTCMin(p.iUTCMin),
     iUTCOff(p.iUTCOff),
     iUTCSense(p.iUTCSense),
+    bValidUTCOffsetAndSense(p.bValidUTCOffsetAndSense),
     iFrameIDTransm(p.iFrameIDTransm),
     iFrameIDReceiv(p.iFrameIDReceiv),
     rFreqOffsetAcqui(p.rFreqOffsetAcqui),
@@ -429,6 +430,7 @@ void CParameter::ResetServicesStreams()
     iUTCMin = 0;
     iUTCOff = 0;
     iUTCSense = 0;
+    bValidUTCOffsetAndSense = FALSE;
 }
 
 void CParameter::GetActiveServices(set<int>& actServ)
