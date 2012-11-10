@@ -127,31 +127,35 @@ void CDRMSchedule::UpdateStringListForFilter(const CStationsItem& StationsItem)
 
 void CDRMSchedule::LoadSchedule()
 {
-    QApplication::setOverrideCursor(
-#if QT_VERSION < 0x040000
-        Qt::waitCursor
-#else
-        Qt::BusyCursor
-#endif
-    );
-
-    ListTargets = QStringList("");
-    ListCountries = QStringList("");
-    ListLanguages = QStringList("");
-    StationsTable.clear();
-    FILE* pFile = fopen(schedFileName.latin1(), "r");
-    if(pFile)
+    const char *filename = schedFileName.latin1();
+    if (filename != NULL) /* Needed for Qt3 windows */
     {
-        if(schedFileName.contains("ini"))
-            ReadINIFile(pFile);
-        else
-            ReadCSVFile(pFile);
-        fclose(pFile);
+        QApplication::setOverrideCursor(
+#if QT_VERSION < 0x040000
+            Qt::waitCursor
+#else
+            Qt::BusyCursor
+#endif
+        );
+
+        ListTargets = QStringList("");
+        ListCountries = QStringList("");
+        ListLanguages = QStringList("");
+        StationsTable.clear();
+        FILE* pFile = fopen(filename, "r");
+        if(pFile)
+        {
+            if(schedFileName.contains("ini"))
+                ReadINIFile(pFile);
+            else
+                ReadCSVFile(pFile);
+            fclose(pFile);
+        }
+        ListTargets.sort();
+        ListCountries.sort();
+        ListLanguages.sort();
+        QApplication::restoreOverrideCursor();
     }
-    ListTargets.sort();
-    ListCountries.sort();
-    ListLanguages.sort();
-    QApplication::restoreOverrideCursor();
 }
 
 void CDRMSchedule::ReadINIFile(FILE* pFile)
