@@ -523,64 +523,60 @@ Institute for Communication Technology</string>
             <property name="title">
              <string>Intermediate Frequency</string>
             </property>
-            <layout class="QVBoxLayout" name="verticalLayout_7">
+            <layout class="QHBoxLayout" name="horizontalLayout_2">
              <item>
-              <layout class="QHBoxLayout" name="horizontalLayout_2">
-               <item>
-                <widget class="QLineEdit" name="LineEditSndCrdIF">
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-                   <horstretch>0</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
-                 </property>
-                 <property name="minimumSize">
-                  <size>
-                   <width>90</width>
-                   <height>0</height>
-                  </size>
-                 </property>
-                 <property name="maxLength">
-                  <number>24</number>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QLabel" name="TextLabelIFUnit">
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-                   <horstretch>0</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
-                 </property>
-                 <property name="text">
-                  <string> Hz</string>
-                 </property>
-                 <property name="wordWrap">
-                  <bool>false</bool>
-                 </property>
-                 <property name="indent">
-                  <number>-1</number>
-                 </property>
-                </widget>
-               </item>
-              </layout>
-             </item>
-             <item>
-              <spacer name="verticalSpacer_2">
-               <property name="orientation">
-                <enum>Qt::Vertical</enum>
+              <widget class="QLineEdit" name="LineEditSndCrdIF">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
                </property>
-               <property name="sizeHint" stdset="0">
+               <property name="minimumSize">
                 <size>
-                 <width>20</width>
-                 <height>40</height>
+                 <width>90</width>
+                 <height>0</height>
                 </size>
                </property>
-              </spacer>
+               <property name="maxLength">
+                <number>24</number>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="TextLabelIFUnit">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="text">
+                <string> Hz</string>
+               </property>
+               <property name="wordWrap">
+                <bool>false</bool>
+               </property>
+               <property name="indent">
+                <number>-1</number>
+               </property>
+              </widget>
              </item>
             </layout>
            </widget>
+          </item>
+          <item>
+           <spacer name="verticalSpacer_2">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>40</height>
+             </size>
+            </property>
+           </spacer>
           </item>
           <item>
            <widget class="QGroupBox" name="GroupBoxOutput">
@@ -590,90 +586,86 @@ Institute for Communication Technology</string>
             <property name="radioButtonExclusive" stdset="0">
              <bool>true</bool>
             </property>
-            <layout class="QVBoxLayout" name="verticalLayout_6">
+            <layout class="QHBoxLayout" name="horizontalLayout_3">
              <item>
-              <layout class="QHBoxLayout" name="horizontalLayout_3">
-               <item>
-                <widget class="QRadioButton" name="RadioButtonOutReal">
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-                   <horstretch>0</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
-                 </property>
-                 <property name="text">
-                  <string>Real val.</string>
-                 </property>
-                 <attribute name="buttonGroup">
-                  <string notr="true">ButtonGroupOutput</string>
-                 </attribute>
-                </widget>
-               </item>
-               <item>
-                <widget class="QRadioButton" name="RadioButtonOutIQPos">
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-                   <horstretch>0</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
-                 </property>
-                 <property name="text">
-                  <string>I / Q (pos)</string>
-                 </property>
-                 <attribute name="buttonGroup">
-                  <string notr="true">ButtonGroupOutput</string>
-                 </attribute>
-                </widget>
-               </item>
-               <item>
-                <widget class="QRadioButton" name="RadioButtonOutIQNeg">
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-                   <horstretch>0</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
-                 </property>
-                 <property name="text">
-                  <string>I / Q (neg)</string>
-                 </property>
-                 <attribute name="buttonGroup">
-                  <string notr="true">ButtonGroupOutput</string>
-                 </attribute>
-                </widget>
-               </item>
-               <item>
-                <widget class="QRadioButton" name="RadioButtonOutEP">
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-                   <horstretch>0</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
-                 </property>
-                 <property name="text">
-                  <string>E / P</string>
-                 </property>
-                 <attribute name="buttonGroup">
-                  <string notr="true">ButtonGroupOutput</string>
-                 </attribute>
-                </widget>
-               </item>
-              </layout>
+              <widget class="QRadioButton" name="RadioButtonOutReal">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="text">
+                <string>Real val.</string>
+               </property>
+               <attribute name="buttonGroup">
+                <string notr="true">ButtonGroupOutput</string>
+               </attribute>
+              </widget>
              </item>
              <item>
-              <spacer name="verticalSpacer_3">
-               <property name="orientation">
-                <enum>Qt::Vertical</enum>
+              <widget class="QRadioButton" name="RadioButtonOutIQPos">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
                </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>20</width>
-                 <height>44</height>
-                </size>
+               <property name="text">
+                <string>I / Q (pos)</string>
                </property>
-              </spacer>
+               <attribute name="buttonGroup">
+                <string notr="true">ButtonGroupOutput</string>
+               </attribute>
+              </widget>
+             </item>
+             <item>
+              <widget class="QRadioButton" name="RadioButtonOutIQNeg">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="text">
+                <string>I / Q (neg)</string>
+               </property>
+               <attribute name="buttonGroup">
+                <string notr="true">ButtonGroupOutput</string>
+               </attribute>
+              </widget>
+             </item>
+             <item>
+              <widget class="QRadioButton" name="RadioButtonOutEP">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="text">
+                <string>E / P</string>
+               </property>
+               <attribute name="buttonGroup">
+                <string notr="true">ButtonGroupOutput</string>
+               </attribute>
+              </widget>
              </item>
             </layout>
            </widget>
+          </item>
+          <item>
+           <spacer name="verticalSpacer_3">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>44</height>
+             </size>
+            </property>
+           </spacer>
           </item>
          </layout>
         </widget>
@@ -693,66 +685,62 @@ Institute for Communication Technology</string>
             <property name="title">
              <string>Current Time Transmission</string>
             </property>
-            <layout class="QVBoxLayout" name="verticalLayout_8">
+            <layout class="QHBoxLayout" name="horizontalLayout_4">
              <item>
-              <layout class="QHBoxLayout" name="horizontalLayout_4">
-               <item>
-                <widget class="QRadioButton" name="RadioButtonCurTimeOff">
-                 <property name="text">
-                  <string>Off</string>
-                 </property>
-                 <attribute name="buttonGroup">
-                  <string notr="true">ButtonGroupCurrentTime</string>
-                 </attribute>
-                </widget>
-               </item>
-               <item>
-                <widget class="QRadioButton" name="RadioButtonCurTimeLocal">
-                 <property name="text">
-                  <string>Local</string>
-                 </property>
-                 <attribute name="buttonGroup">
-                  <string notr="true">ButtonGroupCurrentTime</string>
-                 </attribute>
-                </widget>
-               </item>
-               <item>
-                <widget class="QRadioButton" name="RadioButtonCurTimeUTC">
-                 <property name="text">
-                  <string>UTC</string>
-                 </property>
-                 <attribute name="buttonGroup">
-                  <string notr="true">ButtonGroupCurrentTime</string>
-                 </attribute>
-                </widget>
-               </item>
-               <item>
-                <widget class="QRadioButton" name="RadioButtonCurTimeUTCOffset">
-                 <property name="text">
-                  <string>UTC+Offset</string>
-                 </property>
-                 <attribute name="buttonGroup">
-                  <string notr="true">ButtonGroupCurrentTime</string>
-                 </attribute>
-                </widget>
-               </item>
-              </layout>
+              <widget class="QRadioButton" name="RadioButtonCurTimeOff">
+               <property name="text">
+                <string>Off</string>
+               </property>
+               <attribute name="buttonGroup">
+                <string notr="true">ButtonGroupCurrentTime</string>
+               </attribute>
+              </widget>
              </item>
              <item>
-              <spacer name="verticalSpacer_4">
-               <property name="orientation">
-                <enum>Qt::Vertical</enum>
+              <widget class="QRadioButton" name="RadioButtonCurTimeLocal">
+               <property name="text">
+                <string>Local</string>
                </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>20</width>
-                 <height>162</height>
-                </size>
+               <attribute name="buttonGroup">
+                <string notr="true">ButtonGroupCurrentTime</string>
+               </attribute>
+              </widget>
+             </item>
+             <item>
+              <widget class="QRadioButton" name="RadioButtonCurTimeUTC">
+               <property name="text">
+                <string>UTC</string>
                </property>
-              </spacer>
+               <attribute name="buttonGroup">
+                <string notr="true">ButtonGroupCurrentTime</string>
+               </attribute>
+              </widget>
+             </item>
+             <item>
+              <widget class="QRadioButton" name="RadioButtonCurTimeUTCOffset">
+               <property name="text">
+                <string>UTC+Offset</string>
+               </property>
+               <attribute name="buttonGroup">
+                <string notr="true">ButtonGroupCurrentTime</string>
+               </attribute>
+              </widget>
              </item>
             </layout>
            </widget>
+          </item>
+          <item>
+           <spacer name="verticalSpacer_4">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>162</height>
+             </size>
+            </property>
+           </spacer>
           </item>
          </layout>
         </widget>
@@ -775,19 +763,19 @@ Institute for Communication Technology</string>
        <attribute name="title">
         <string>Service 1</string>
        </attribute>
-       <layout class="QHBoxLayout" name="horizontalLayout_7">
+       <layout class="QHBoxLayout" name="horizontalLayout_5">
         <item>
-         <layout class="QVBoxLayout">
-          <property name="spacing">
-           <number>6</number>
-          </property>
-          <property name="margin">
-           <number>11</number>
-          </property>
+         <layout class="QVBoxLayout" name="verticalLayout_6">
           <item>
            <widget class="QCheckBox" name="CheckBoxEnableService">
             <property name="enabled">
              <bool>true</bool>
+            </property>
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
             </property>
             <property name="text">
              <string>Enable</string>
@@ -795,106 +783,119 @@ Institute for Communication Technology</string>
             <property name="checked">
              <bool>false</bool>
             </property>
+            <property name="tristate">
+             <bool>false</bool>
+            </property>
            </widget>
           </item>
           <item>
-           <layout class="QHBoxLayout">
+           <layout class="QVBoxLayout">
             <property name="spacing">
              <number>6</number>
             </property>
             <property name="margin">
-             <number>0</number>
+             <number>11</number>
             </property>
             <item>
-             <widget class="QLabel" name="TextLabelServiceLabel">
-              <property name="text">
-               <string>Label:</string>
+             <layout class="QHBoxLayout">
+              <property name="spacing">
+               <number>6</number>
               </property>
-              <property name="wordWrap">
-               <bool>false</bool>
+              <property name="margin">
+               <number>0</number>
               </property>
-             </widget>
+              <item>
+               <widget class="QLabel" name="TextLabelServiceLabel">
+                <property name="text">
+                 <string>Label:</string>
+                </property>
+                <property name="wordWrap">
+                 <bool>false</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="LineEditServiceLabel">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+               </widget>
+              </item>
+             </layout>
             </item>
             <item>
-             <widget class="QLineEdit" name="LineEditServiceLabel">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
+             <layout class="QHBoxLayout">
+              <property name="spacing">
+               <number>6</number>
               </property>
-             </widget>
+              <property name="margin">
+               <number>0</number>
+              </property>
+              <item>
+               <widget class="QLabel" name="TextLabelServiceID">
+                <property name="text">
+                 <string>Service ID:</string>
+                </property>
+                <property name="wordWrap">
+                 <bool>false</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="LineEditServiceID">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout">
+              <property name="spacing">
+               <number>6</number>
+              </property>
+              <property name="margin">
+               <number>0</number>
+              </property>
+              <item>
+               <widget class="QLabel" name="TextLabelServiceLanguage">
+                <property name="text">
+                 <string>Language:</string>
+                </property>
+                <property name="wordWrap">
+                 <bool>false</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QComboBox" name="ComboBoxLanguage"/>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <spacer name="Spacer3">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeType">
+               <enum>QSizePolicy::MinimumExpanding</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
             </item>
            </layout>
-          </item>
-          <item>
-           <layout class="QHBoxLayout">
-            <property name="spacing">
-             <number>6</number>
-            </property>
-            <property name="margin">
-             <number>0</number>
-            </property>
-            <item>
-             <widget class="QLabel" name="TextLabelServiceID">
-              <property name="text">
-               <string>Service ID:</string>
-              </property>
-              <property name="wordWrap">
-               <bool>false</bool>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLineEdit" name="LineEditServiceID">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-          <item>
-           <layout class="QHBoxLayout">
-            <property name="spacing">
-             <number>6</number>
-            </property>
-            <property name="margin">
-             <number>0</number>
-            </property>
-            <item>
-             <widget class="QLabel" name="TextLabelServiceLanguage">
-              <property name="text">
-               <string>Language:</string>
-              </property>
-              <property name="wordWrap">
-               <bool>false</bool>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QComboBox" name="ComboBoxLanguage"/>
-            </item>
-           </layout>
-          </item>
-          <item>
-           <spacer name="Spacer3">
-            <property name="orientation">
-             <enum>Qt::Vertical</enum>
-            </property>
-            <property name="sizeType">
-             <enum>QSizePolicy::MinimumExpanding</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>20</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
           </item>
          </layout>
         </item>
@@ -972,6 +973,22 @@ Institute for Communication Technology</string>
                 </attribute>
                </widget>
               </item>
+              <item>
+               <spacer name="horizontalSpacer_2">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeType">
+                 <enum>QSizePolicy::Minimum</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>0</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
              </layout>
             </widget>
            </item>
@@ -1005,6 +1022,9 @@ Institute for Communication Technology</string>
               </item>
               <item>
                <widget class="QTextEdit" name="MultiLineEditTextMessage">
+                <property name="tabChangesFocus">
+                 <bool>true</bool>
+                </property>
                 <property name="acceptRichText">
                  <bool>false</bool>
                 </property>
@@ -1345,7 +1365,6 @@ Institute for Communication Technology</string>
   <tabstop>RadioButtonCurTimeUTC</tabstop>
   <tabstop>RadioButtonCurTimeUTCOffset</tabstop>
   <tabstop>TabWidgetServices</tabstop>
-  <tabstop>CheckBoxEnableService</tabstop>
   <tabstop>LineEditServiceLabel</tabstop>
   <tabstop>LineEditServiceID</tabstop>
   <tabstop>ComboBoxLanguage</tabstop>
@@ -1355,9 +1374,12 @@ Institute for Communication Technology</string>
   <tabstop>RadioButtonOPUS</tabstop>
   <tabstop>CheckBoxEnableTextMessage</tabstop>
   <tabstop>ComboBoxTextMessage</tabstop>
+  <tabstop>MultiLineEditTextMessage</tabstop>
   <tabstop>PushButtonClearAllText</tabstop>
   <tabstop>PushButtonAddText</tabstop>
   <tabstop>CheckBoxEnableData</tabstop>
+  <tabstop>CheckBoxRemovePath</tabstop>
+  <tabstop>TreeWidgetFileNames</tabstop>
   <tabstop>PushButtonClearAllFileNames</tabstop>
   <tabstop>PushButtonAddFile</tabstop>
   <tabstop>ButtonStartStop</tabstop>
