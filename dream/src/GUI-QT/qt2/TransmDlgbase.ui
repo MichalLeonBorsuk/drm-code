@@ -464,7 +464,7 @@ Institute for Communication Technology</string>
                                                         </property>
                                                         <property stdset="1">
                                                             <name>text</name>
-                                                            <string>4,5 kHz</string>
+                                                            <string>4.5 kHz</string>
                                                         </property>
                                                         <property stdset="1">
                                                             <name>buttonGroupId</name>
