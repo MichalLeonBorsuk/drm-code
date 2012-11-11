@@ -758,9 +758,8 @@ CHamlib::LoadSettings(CSettings & s)
 			string kwd, val;
 #ifdef __linux__
 			kwd = "if_path";
-			val = "/dreamg313if";
-			s.Put("Hamlib", "sound-name", string("WinRadio G313"));
-			s.Put("Hamlib", "shm-path", val);
+			val = "/tmp/g313";
+			s.Put("Hamlib", kwd, val);
 #endif
 #ifdef _WIN32
 			kwd = "wodeviceid";

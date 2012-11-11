@@ -232,11 +232,7 @@ unix {
     LIBS += -lz \
             -ldl
     SOURCES += src/linux/Pacer.cpp
-    HEADERS += src/linux/shmsoundin.h \
-        src/linux/pa_shm_ringbuffer.h
-    SOURCES += src/linux/shmsoundin.cpp \
-	  src/linux/pa_shm_ringbuffer.c
-      DEFINES += HAVE_DLFCN_H \
+    DEFINES += HAVE_DLFCN_H \
               HAVE_MEMORY_H \
               HAVE_STDINT_H \
               HAVE_STDLIB_H
