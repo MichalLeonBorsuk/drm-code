@@ -1392,6 +1392,15 @@ CDRMReceiver::LoadSettings(CSettings& s)
         }
     }
 
+    /* Channel Estimation: Frequency Interpolation */
+    SetFreqInt((CChannelEstimation::ETypeIntFreq)s.Get("Receiver", "freqint", int(CChannelEstimation::FWIENER)));
+
+    /* Channel Estimation: Time Interpolation */
+    SetTimeInt((CChannelEstimation::ETypeIntTime)s.Get("Receiver", "timeint", int(CChannelEstimation::TWIENER)));
+
+    /* Time Sync Tracking */
+    SetTiSyncTracType((CTimeSyncTrack::ETypeTiSyncTrac)s.Get("Receiver", "timesync", int(CTimeSyncTrack::TSENERGY)));
+
     /* Flip spectrum flag */
     ReceiveData.SetFlippedSpectrum(s.Get("Receiver", "flipspectrum", FALSE));
 
@@ -1575,6 +1584,15 @@ CDRMReceiver::SaveSettings(CSettings& s)
 
     /* if 0 then only measure PSD when RSCI in use otherwise always measure it */
     s.Put("Receiver", "measurepsdalways", pReceiverParam->bMeasurePSDAlways);
+
+    /* Channel Estimation: Frequency Interpolation */
+    s.Put("Receiver", "freqint", GetFreqInt());
+
+    /* Channel Estimation: Time Interpolation */
+    s.Put("Receiver", "timeint", GetTimeInt());
+
+    /* Time Sync Tracking */
+    s.Put("Receiver", "timesync", GetTiSyncTracType());
 
     /* Flip spectrum flag */
     s.Put("Receiver", "flipspectrum", ReceiveData.GetFlippedSpectrum());
