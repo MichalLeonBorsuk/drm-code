@@ -596,7 +596,7 @@ _BOOLEAN CStationsItem::activeAt(time_t wantedTime) const
                that these stations are transmitting every day */
             (strDaysFlags == FLAG_STR_IRREGULAR_TRANSM))
     {
-	return (lStartTime <= wantedTime) && (wantedTime < lStopTime);
+	return ((lStartTime <= wantedTime) && (wantedTime < lStopTime))?TRUE:FALSE;
     }
     return FALSE;
 }
