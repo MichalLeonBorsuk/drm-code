@@ -1687,6 +1687,17 @@ Institute for Communication Technology</string>
                                 </property>
                             </widget>
                             <widget>
+                                <class>QCheckBox</class>
+                                <property stdset="1">
+                                    <name>name</name>
+                                    <cstring>CheckBoxRemovePath</cstring>
+                                </property>
+                                <property stdset="1">
+                                    <name>text</name>
+                                    <string>Remove path from filename</string>
+                                </property>
+                            </widget>
+                            <widget>
                                 <class>QListView</class>
                                 <column>
                                     <property>

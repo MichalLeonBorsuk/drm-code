@@ -515,6 +515,8 @@ TransmDialog::TransmDialog(CSettings& NSettings,
 		this, SLOT(OnToggleCheckBoxEnableAudio(bool)));
 	connect(CheckBoxEnableData, SIGNAL(toggled(bool)),
 		this, SLOT(OnToggleCheckBoxEnableData(bool)));
+	connect(CheckBoxRemovePath, SIGNAL(toggled(bool)),
+		this, SLOT(OnToggleCheckBoxRemovePath(bool)));
 
 	/* Combo boxes */
 	connect(ComboBoxMSCInterleaver, SIGNAL(activated(int)),
@@ -905,17 +907,18 @@ void TransmDialog::OnToggleCheckBoxEnableData(bool bState)
 
 void TransmDialog::EnableData(const _BOOLEAN bFlag)
 {
+	/* Enable/Disable data controls */
+	CheckBoxRemovePath->setEnabled(bFlag);
+#if QT_VERSION < 0x040000
+	ListViewFileNames->setEnabled(bFlag);
+#else
+	TreeWidgetFileNames->setEnabled(bFlag);
+#endif
+	PushButtonClearAllFileNames->setEnabled(bFlag);
+	PushButtonAddFile->setEnabled(bFlag);
+
 	if (bFlag == TRUE)
 	{
-		/* Enable data controls */
-#if QT_VERSION < 0x040000
-		ListViewFileNames->setEnabled(TRUE);
-#else
-		TreeWidgetFileNames->setEnabled(TRUE);
-#endif
-		PushButtonClearAllFileNames->setEnabled(TRUE);
-		PushButtonAddFile->setEnabled(TRUE);
-
 		CParameter& Parameters = *TransThread.DRMTransmitter.GetParameters();
 
 		Parameters.Lock();
@@ -940,17 +943,6 @@ void TransmDialog::EnableData(const _BOOLEAN bFlag)
 		Parameters.Service[0].iServiceDescr = 0;
 
 		Parameters.Unlock();
-	}
-	else
-	{
-		/* Disable data controls */
-#if QT_VERSION < 0x040000
-		ListViewFileNames->setEnabled(FALSE);
-#else
-		TreeWidgetFileNames->setEnabled(FALSE);
-#endif
-		PushButtonClearAllFileNames->setEnabled(FALSE);
-		PushButtonAddFile->setEnabled(FALSE);
 	}
 }
 
@@ -1033,6 +1025,11 @@ void TransmDialog::OnButtonClearAllText()
 	/* Clear multi line edit */
 	TextEditClear(MultiLineEditTextMessage);
 	TextEditClearModified(MultiLineEditTextMessage);
+}
+
+void TransmDialog::OnToggleCheckBoxRemovePath(bool bState)
+{
+	TransThread.DRMTransmitter.GetAudSrcEnc()->SetPathRemoval(bState);
 }
 
 void TransmDialog::OnPushButtonAddFileName()
@@ -1736,4 +1733,12 @@ void TransmDialog::AddWhatsThisHelp()
 
 	/* TODO: Services... */
 
+	/* Data (SlideShow Application) */
+
+	/* Remove path from filename */
+	const QString strRemovePath =
+		tr("<b>Remove path from filename:</b> The path is removed from "
+		"the filename because it can reveal some sensitive information.");
+
+	WhatsThis(CheckBoxRemovePath, strRemovePath);
 }

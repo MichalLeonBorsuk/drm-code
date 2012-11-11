@@ -55,6 +55,8 @@ public:
 		{DataEncoder.GetSliShowEnc()->AddFileName(strFileName, strFormat);}
 	void ClearPicFileNames()
 		{DataEncoder.GetSliShowEnc()->ClearAllFileNames();}
+	void SetPathRemoval(_BOOLEAN bRemovePath)
+		{DataEncoder.GetSliShowEnc()->SetPathRemoval(bRemovePath);}
 	_BOOLEAN GetTransStat(string& strCPi, _REAL& rCPe)
 		{return DataEncoder.GetSliShowEnc()->GetTransStat(strCPi, rCPe);}
 
@@ -141,6 +143,9 @@ public:
 			{AudioSourceEncoderImpl.SetPicFileName(strFileName, strFormat);}
 
 	void ClearPicFileNames() {AudioSourceEncoderImpl.ClearPicFileNames();}
+
+	void SetPathRemoval(_BOOLEAN bRemovePath)
+			{AudioSourceEncoderImpl.SetPathRemoval(bRemovePath);}
 
 	_BOOLEAN GetTransStat(string& strCPi, _REAL& rCPe)
 			{return AudioSourceEncoderImpl.GetTransStat(strCPi, rCPe);}

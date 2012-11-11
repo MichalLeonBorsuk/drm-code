@@ -174,6 +174,7 @@ public slots:
 	void OnToggleCheckBoxEnableData(bool bState);
 	void OnToggleCheckBoxEnableAudio(bool bState);
 	void OnToggleCheckBoxEnableTextMessage(bool bState);
+	void OnToggleCheckBoxRemovePath(bool bState);
 	void OnComboBoxMSCInterleaverActivated(int iID);
 	void OnComboBoxMSCConstellationActivated(int iID);
 	void OnComboBoxSDCConstellationActivated(int iID);
