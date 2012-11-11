@@ -153,7 +153,7 @@ public:
 		strCountry(""), strDaysFlags(""), strDaysShow(""),
 		rPower((_REAL) 0.0) { }
 
-	Station::EState stateAt(const time_t ltime) const;
+	Station::EState stateAt(time_t, int) const;
 	_BOOLEAN activeAt(const time_t ltime) const;
 	int StartTime() const {return iStartHour * 100 + iStartMinute;}
 	int StopTime() const{return iStopHour * 100 + iStopMinute;}
