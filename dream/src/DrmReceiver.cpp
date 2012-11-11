@@ -1388,6 +1388,7 @@ CDRMReceiver::LoadSettings(CSettings& s)
             /* Sound In device */
             delete pSoundInInterface;
             pSoundInInterface = new CSoundIn;
+            pSoundInInterface->SetDev(s.Get("Receiver", "snddevin", int(0)));
         }
     }
 
