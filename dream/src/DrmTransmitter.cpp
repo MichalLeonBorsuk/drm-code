@@ -445,7 +445,7 @@ void CDRMTransmitter::LoadSettings(CSettings& s)
     for (int i=0; i<1/*MAX_NUM_SERVICES*/; i++) // TODO
     {
         oss << Transmitter << " Service " << i+1;
-        string service = oss.str();
+        service = oss.str();
 
         CService& Service = TransmParam.Service[i];
 
@@ -584,7 +584,7 @@ void CDRMTransmitter::SaveSettings(CSettings& s)
     for (int i=0; i<1/*MAX_NUM_SERVICES*/; i++) // TODO
     {
         oss << Transmitter << " Service " << i+1;
-        string service = oss.str();
+        service = oss.str();
 
         CService& Service = TransmParam.Service[i];
 
