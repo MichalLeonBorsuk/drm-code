@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>841</width>
+    <width>967</width>
     <height>803</height>
    </rect>
   </property>
@@ -1082,6 +1082,13 @@ Institute for Communication Technology</string>
             </widget>
            </item>
            <item>
+            <widget class="QCheckBox" name="CheckBoxRemovePath">
+             <property name="text">
+              <string>Remove path from filename</string>
+             </property>
+            </widget>
+           </item>
+           <item>
             <widget class="QTreeWidget" name="TreeWidgetFileNames">
              <property name="autoScroll">
               <bool>false</bool>
@@ -1271,7 +1278,7 @@ Institute for Communication Technology</string>
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>841</width>
+     <width>967</width>
      <height>25</height>
     </rect>
    </property>

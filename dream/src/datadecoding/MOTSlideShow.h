@@ -38,7 +38,7 @@
 class CMOTSlideShowEncoder
 {
   public:
-    CMOTSlideShowEncoder ():vecPicFileNames (0)
+    CMOTSlideShowEncoder (): vecPicFileNames(0), bRemovePath(FALSE)
     {
     }
     virtual ~ CMOTSlideShowEncoder ()
@@ -49,12 +49,10 @@ class CMOTSlideShowEncoder
 
     void GetDataUnit (CVector < _BINARY > &vecbiNewData);
 
-    void AddFileName (const string & strFileName, const string & strFormat);
-    void ClearAllFileNames ()
-    {
-	vecPicFileNames.Init (0);
-    }
-    _BOOLEAN GetTransStat (string & strCurPict, _REAL & rCurPerc) const;
+    void AddFileName(const string & strFileName, const string & strFormat);
+    void ClearAllFileNames() {vecPicFileNames.Init(0);}
+    void SetPathRemoval(_BOOLEAN bNewRemovePath) {bRemovePath=bNewRemovePath;}
+    _BOOLEAN GetTransStat(string & strCurPict, _REAL & rCurPerc) const;
 
   protected:
     struct SPicDescr
@@ -62,6 +60,7 @@ class CMOTSlideShowEncoder
 	string strName, strFormat;
     };
     void AddNextPicture ();
+    string TransformFilename(const string strFileName);
 
     CMOTDABEnc MOTDAB;
 
@@ -69,6 +68,8 @@ class CMOTSlideShowEncoder
     int iPictureCnt;
 
     string strCurObjName;
+
+    _BOOLEAN bRemovePath;
 };
 
 #endif // !defined(MOTSLIDESHOW_H__3B0UBVE98732KJVEW363LIHGEW982__INCLUDED_)
