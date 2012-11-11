@@ -539,8 +539,10 @@ void systemevalDlg::showEvent(QShowEvent*)
     Timer.start(GUI_CONTROL_UPDATE_TIME);
     TimerInterDigit.stop();
 
-    // compatibility with DRMLogger
+#ifdef _WIN32
+    /* Compatibility with DRMLogger */
     CheckBoxWriteLog->setFocus();
+#endif
 }
 
 void systemevalDlg::hideEvent(QHideEvent*)
@@ -601,8 +603,10 @@ void systemevalDlg::OnTimerInterDigit()
 {
     TimerInterDigit.stop();
     DRMReceiver.SetFrequency(EdtFrequency->text().toInt());
-    // compatibility with DRMLogger
+#ifdef _WIN32
+    /* Compatibility with DRMLogger */
     CheckBoxWriteLog->setFocus();
+#endif
 }
 
 void systemevalDlg::OnFrequencyEdited ( const QString& s)
@@ -706,7 +710,7 @@ void systemevalDlg::OnTimer()
             }
             else
             {
-                ValueMERWMER->setText("<b>---</b>");
+                ValueMERWMER->setText("---");
             }
 
             /* Doppler estimation (assuming Gaussian doppler spectrum) */
@@ -737,7 +741,7 @@ void systemevalDlg::OnTimer()
         else
         {
             ValueSNR->setText("<b>---</b>");
-            ValueMERWMER->setText("<b>---</b>");
+            ValueMERWMER->setText("---");
             ValueWiener->setText("--- / ---");
             ValueSampFreqOffset->setText("---");
         }

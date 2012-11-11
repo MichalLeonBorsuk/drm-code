@@ -212,6 +212,9 @@ systemevalDlg::systemevalDlg(CDRMReceiver& NDRMR, CSettings& NSettings,
 
     /* Start log file flag */
     CheckBoxWriteLog->setChecked(Settings.Get("Logfile", "enablelog", FALSE));
+
+    /* Force update */
+    OnTimer();
 }
 
 systemevalDlg::~systemevalDlg()
@@ -343,14 +346,15 @@ void systemevalDlg::showEvent(QShowEvent* e)
 
     /* Activate real-time timer */
     Timer.start(GUI_CONTROL_UPDATE_TIME);
-//    setIconSize(QSize(16,16));
 
 #if QT_VERSION >= 0x040000  
     /* Notify the MainPlot of showEvent */
     MainPlot->activate();
 #endif
-    // compatibility with DRMLogger
+#ifdef _WIN32
+    /* Compatibility with DRMLogger */
     CheckBoxWriteLog->setFocus();
+#endif
 }
 
 void systemevalDlg::hideEvent(QHideEvent* e)
@@ -414,13 +418,21 @@ void systemevalDlg::hideEvent(QHideEvent* e)
 void systemevalDlg::OnTimerInterDigit()
 {
     TimerInterDigit.stop();
-    int freq = EdtFrequency->text().toInt();
+    QString strFreq = EdtFrequency->text();
+    int len = strFreq.size();
+    /* Keep only characters 0 to 9 */
+    for (int i = 0; i < len; i++)
+        if (!(strFreq[i]>=QChar('0') && strFreq[i]<=QChar('9')))
+            { strFreq.remove(i, 1); len--; i--; }
+    int freq = strFreq.toInt();
     bEdtFrequencyMutex = TRUE;
     EdtFrequency->setText(QString::number(freq));
     bEdtFrequencyMutex = FALSE;
     DRMReceiver.SetFrequency(freq);
-    // compatibility with DRMLogger
+#ifdef _WIN32
+    /* Compatibility with DRMLogger */
     CheckBoxWriteLog->setFocus();
+#endif
 }
 
 void systemevalDlg::OnFrequencyEdited(const QString &)
@@ -474,7 +486,7 @@ CDRMPlot* systemevalDlg::OpenChartWin(CDRMPlot::ECharType eNewType)
     pNewChartWin->SetPlotStyle(Settings.Get("System Evaluation Dialog", "plotstyle", 0));
 
     /* Set correct icon (use the same as this dialog) */
-    const QIcon& icon = this->windowIcon();
+    const QIcon& icon = windowIcon();
     pNewChartWin->setIcon(icon);
 
     /* Set receiver object and correct chart type */
@@ -515,9 +527,6 @@ void systemevalDlg::OnTimer()
 
     ReceiverParam.Lock();
 
-    if (this->isVisible())
-    {
-
         SetStatus(LEDMSC, ReceiverParam.ReceiveStatus.Audio.GetStatus());
         SetStatus(LEDSDC, ReceiverParam.ReceiveStatus.SDC.GetStatus());
         SetStatus(LEDFAC, ReceiverParam.ReceiveStatus.FAC.GetStatus());
@@ -552,7 +561,7 @@ void systemevalDlg::OnTimer()
             }
             else
             {
-                ValueMERWMER->setText("<b>---</b>");
+                ValueMERWMER->setText("---");
             }
 
             /* Doppler estimation (assuming Gaussian doppler spectrum) */
@@ -583,7 +592,7 @@ void systemevalDlg::OnTimer()
         else
         {
             ValueSNR->setText("<b>---</b>");
-            ValueMERWMER->setText("<b>---</b>");
+            ValueMERWMER->setText("---");
             ValueWiener->setText("--- / ---");
             ValueSampFreqOffset->setText("---");
         }
@@ -633,7 +642,7 @@ void systemevalDlg::OnTimer()
         /* Robustness mode #################### */
         strFACInfo = GetRobModeStr() + " / " + GetSpecOccStr();
 
-        FACDRMModeBWL->setText(tr("DRM Mode / Bandwidth:")); /* Label */
+        //FACDRMModeBWL->setText(tr("DRM Mode / Bandwidth:")); /* Label */
         FACDRMModeBWV->setText(strFACInfo); /* Value */
 
 
@@ -652,7 +661,7 @@ void systemevalDlg::OnTimer()
             strFACInfo = "?";
         }
 
-        FACInterleaverDepthL->setText(tr("Interleaver Depth:")); /* Label */
+        //FACInterleaverDepthL->setText(tr("Interleaver Depth:")); /* Label */
         FACInterleaverDepthV->setText(strFACInfo); /* Value */
 
 
@@ -695,7 +704,7 @@ void systemevalDlg::OnTimer()
             strFACInfo += "?";
         }
 
-        FACSDCMSCModeL->setText(tr("SDC / MSC Mode:")); /* Label */
+        //FACSDCMSCModeL->setText(tr("SDC / MSC Mode:")); /* Label */
         FACSDCMSCModeV->setText(strFACInfo); /* Value */
 
 
@@ -704,7 +713,7 @@ void systemevalDlg::OnTimer()
         strFACInfo += " / ";
         strFACInfo += QString().setNum(ReceiverParam.MSCPrLe.iPartA);
 
-        FACCodeRateL->setText(tr("Prot. Level (B / A):")); /* Label */
+        //FACCodeRateL->setText(tr("Prot. Level (B / A):")); /* Label */
         FACCodeRateV->setText(strFACInfo); /* Value */
 
 
@@ -714,7 +723,7 @@ void systemevalDlg::OnTimer()
         strFACInfo += tr(" / Data: ");
         strFACInfo += QString().setNum(ReceiverParam.iNumDataService);
 
-        FACNumServicesL->setText(tr("Number of Services:")); /* Label */
+        //FACNumServicesL->setText(tr("Number of Services:")); /* Label */
         FACNumServicesV->setText(strFACInfo); /* Value */
 
 
@@ -771,13 +780,13 @@ void systemevalDlg::OnTimer()
                     .arg(ReceiverParam.iUTCOff & 1 ? ".5" : "");
         }
 
-        FACTimeDateL->setText(tr("Received time - date:")); /* Label */
+        //FACTimeDateL->setText(tr("Received time - date:")); /* Label */
         FACTimeDateV->setText(strFACInfo); /* Value */
 
         UpdateGPS(ReceiverParam);
 
         UpdateControls();
-    }
+
     ReceiverParam.Unlock();
 }
 
@@ -904,8 +913,12 @@ void systemevalDlg::OnSliderIterChange(int value)
 
 void systemevalDlg::OnListSelChanged(QTreeWidgetItem *curr, QTreeWidgetItem *)
 {
-    /* Get char type from selected item and setup chart */
-    MainPlot->SetupChart(CDRMPlot::ECharType(curr->data(0, Qt::UserRole).toInt()));
+    /* Make sure we have a non root item */
+    if (curr && curr->parent())
+    {
+        /* Get char type from selected item and setup chart */
+        MainPlot->SetupChart(CDRMPlot::ECharType(curr->data(0, Qt::UserRole).toInt()));
+    }
 }
 
 void systemevalDlg::OnCheckFlipSpectrum()
@@ -982,13 +995,6 @@ void systemevalDlg::OnCheckWriteLog()
     {
 		emit stopLogging();
     }
-
-// DF: disabled for compatibility with DRMLogger
-//    /* set the focus */
-//    if (EdtFrequency->isEnabled())
-//    {
-//        EdtFrequency->setFocus();
-//    }
 }
 
 QString	systemevalDlg::GetRobModeStr()
