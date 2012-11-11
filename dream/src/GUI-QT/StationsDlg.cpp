@@ -1874,7 +1874,7 @@ void StationsDlg::AddWhatsThisHelp()
 int StationsDlg::currentSortColumn()
 {
 #if QT_VERSION < 0x030000
-    if(DRMReceiver.GetReceiverMode()==SM_DRM)
+    if (DRMSchedule.GetSchedMode() == CDRMSchedule::SM_DRM)
 	return iSortColumndrm;
     else
 	return iSortColumnanalog;
