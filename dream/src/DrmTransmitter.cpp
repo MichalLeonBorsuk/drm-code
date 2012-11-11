@@ -28,7 +28,7 @@
 
 #include "DrmTransmitter.h"
 #include "sound.h"
-#include <stdio.h>
+#include <sstream>
 
 /* Implementation *************************************************************/
 void CDRMTransmitter::Start()
@@ -371,7 +371,8 @@ CDRMTransmitter::CDRMTransmitter() :
 void CDRMTransmitter::LoadSettings(CSettings& s)
 {
     const char *Transmitter = "Transmitter";
-    string value;
+    std::ostringstream oss;
+    string value, service;
 
     /* Sound card input device id */
     pSoundInInterface->SetDev(s.Get(Transmitter, "snddevin", int(0)));
@@ -443,64 +444,64 @@ void CDRMTransmitter::LoadSettings(CSettings& s)
     /* Service parameters */
     for (int i=0; i<1/*MAX_NUM_SERVICES*/; i++) // TODO
     {
-        char service[64];
-        if (snprintf(service, sizeof(service), "%s Service %i", Transmitter, i+1) > 0)
-        {
-            CService& Service = TransmParam.Service[i];
+        oss << Transmitter << " Service " << i+1;
+        string service = oss.str();
 
-            /* Service ID */
-            Service.iServiceID = s.Get(service, "id", int(Service.iServiceID));
+        CService& Service = TransmParam.Service[i];
 
-            /* Service label data */
-            Service.strLabel = s.Get(service, "label", string(Service.strLabel));
+        /* Service ID */
+        Service.iServiceID = s.Get(service, "id", int(Service.iServiceID));
 
-            /* Service description */
-            Service.iServiceDescr = s.Get(service, "description", int(Service.iServiceDescr));
+        /* Service label data */
+        Service.strLabel = s.Get(service, "label", string(Service.strLabel));
 
-            /* Language */
-            Service.iLanguage = s.Get(service, "language", int(Service.iLanguage));
+        /* Service description */
+        Service.iServiceDescr = s.Get(service, "description", int(Service.iServiceDescr));
+
+        /* Language */
+        Service.iLanguage = s.Get(service, "language", int(Service.iLanguage));
 #if 0 // TODO
-            /* Audio codec */
-            value = s.Get(service, "codec", string("faac"));
-            if      (value == "faac") { Service.AudioParam.eAudioCoding = CAudioParam::AC_AAC;  }
-            else if (value == "Opus") { Service.AudioParam.eAudioCoding = CAudioParam::AC_OPUS; }
+        /* Audio codec */
+        value = s.Get(service, "codec", string("faac"));
+        if      (value == "faac") { Service.AudioParam.eAudioCoding = CAudioParam::AC_AAC;  }
+        else if (value == "Opus") { Service.AudioParam.eAudioCoding = CAudioParam::AC_OPUS; }
 
-            /* Opus Codec Channels */
-            value = s.Get(service, "Opus_Channels", string("OC_STEREO"));
-            if      (value == "OC_MONO")   { Service.AudioParam.eOPUSChan = CAudioParam::OC_MONO;   }
-            else if (value == "OC_STEREO") { Service.AudioParam.eOPUSChan = CAudioParam::OC_STEREO; }
+        /* Opus Codec Channels */
+        value = s.Get(service, "Opus_Channels", string("OC_STEREO"));
+        if      (value == "OC_MONO")   { Service.AudioParam.eOPUSChan = CAudioParam::OC_MONO;   }
+        else if (value == "OC_STEREO") { Service.AudioParam.eOPUSChan = CAudioParam::OC_STEREO; }
 
-            /* Opus Codec Bandwith */
-            value = s.Get(service, "Opus_Bandwith", string("OB_FB"));
-            if      (value == "OB_NB")  { Service.AudioParam.eOPUSBandwidth = CAudioParam::OB_NB;  }
-            else if (value == "OB_MB")  { Service.AudioParam.eOPUSBandwidth = CAudioParam::OB_MB;  }
-            else if (value == "OB_WB")  { Service.AudioParam.eOPUSBandwidth = CAudioParam::OB_WB;  }
-            else if (value == "OB_SWB") { Service.AudioParam.eOPUSBandwidth = CAudioParam::OB_SWB; }
-            else if (value == "OB_FB")  { Service.AudioParam.eOPUSBandwidth = CAudioParam::OB_FB;  }
+        /* Opus Codec Bandwith */
+        value = s.Get(service, "Opus_Bandwith", string("OB_FB"));
+        if      (value == "OB_NB")  { Service.AudioParam.eOPUSBandwidth = CAudioParam::OB_NB;  }
+        else if (value == "OB_MB")  { Service.AudioParam.eOPUSBandwidth = CAudioParam::OB_MB;  }
+        else if (value == "OB_WB")  { Service.AudioParam.eOPUSBandwidth = CAudioParam::OB_WB;  }
+        else if (value == "OB_SWB") { Service.AudioParam.eOPUSBandwidth = CAudioParam::OB_SWB; }
+        else if (value == "OB_FB")  { Service.AudioParam.eOPUSBandwidth = CAudioParam::OB_FB;  }
 
-            /* Opus Forward Error Correction */
-            value = s.Get(service, "Opus_FEC", string("0"));
-            if      (value == "0") { Service.AudioParam.bOPUSForwardErrorCorrection = FALSE; }
-            else if (value == "1") { Service.AudioParam.bOPUSForwardErrorCorrection = TRUE;  }
+        /* Opus Forward Error Correction */
+        value = s.Get(service, "Opus_FEC", string("0"));
+        if      (value == "0") { Service.AudioParam.bOPUSForwardErrorCorrection = FALSE; }
+        else if (value == "1") { Service.AudioParam.bOPUSForwardErrorCorrection = TRUE;  }
 
-            /* Opus encoder signal type */
-            value = s.Get(service, "Opus_Signal", string("OG_MUSIC"));
-            if      (value == "OG_VOICE") { Service.AudioParam.eOPUSSignal = CAudioParam::OG_VOICE; }
-            else if (value == "OG_MUSIC") { Service.AudioParam.eOPUSSignal = CAudioParam::OG_MUSIC; }
+        /* Opus encoder signal type */
+        value = s.Get(service, "Opus_Signal", string("OG_MUSIC"));
+        if      (value == "OG_VOICE") { Service.AudioParam.eOPUSSignal = CAudioParam::OG_VOICE; }
+        else if (value == "OG_MUSIC") { Service.AudioParam.eOPUSSignal = CAudioParam::OG_MUSIC; }
 
-            /* Opus encoder intended application */
-            value = s.Get(service, "Opus_Application", string("OA_AUDIO"));
-            if      (value == "OA_VOIP")  { Service.AudioParam.eOPUSApplication = CAudioParam::OA_VOIP;  }
-            else if (value == "OA_AUDIO") { Service.AudioParam.eOPUSApplication = CAudioParam::OA_AUDIO; }
+        /* Opus encoder intended application */
+        value = s.Get(service, "Opus_Application", string("OA_AUDIO"));
+        if      (value == "OA_VOIP")  { Service.AudioParam.eOPUSApplication = CAudioParam::OA_VOIP;  }
+        else if (value == "OA_AUDIO") { Service.AudioParam.eOPUSApplication = CAudioParam::OA_AUDIO; }
 #endif
-        }
     }
 }
 
 void CDRMTransmitter::SaveSettings(CSettings& s)
 {
     const char *Transmitter = "Transmitter";
-    string value;
+    std::ostringstream oss;
+    string value, service;
 
     /* Sound card input device id */
     s.Put(Transmitter, "snddevin", int(pSoundInInterface->GetDev()));
@@ -582,68 +583,67 @@ void CDRMTransmitter::SaveSettings(CSettings& s)
     /* Service parameters */
     for (int i=0; i<1/*MAX_NUM_SERVICES*/; i++) // TODO
     {
-        char service[64];
-        if (snprintf(service, sizeof(service), "%s Service %i", Transmitter, i+1) > 0)
-        {
-            CService& Service = TransmParam.Service[i];
+        oss << Transmitter << " Service " << i+1;
+        string service = oss.str();
 
-            /* Service ID */
-            s.Put(service, "id", int(Service.iServiceID));
+        CService& Service = TransmParam.Service[i];
 
-            /* Service label data */
-            s.Put(service, "label", string(Service.strLabel));
+        /* Service ID */
+        s.Put(service, "id", int(Service.iServiceID));
 
-            /* Service description */
-            s.Put(service, "description", int(Service.iServiceDescr));
+        /* Service label data */
+        s.Put(service, "label", string(Service.strLabel));
 
-            /* Language */
-            s.Put(service, "language", int(Service.iLanguage));
+        /* Service description */
+        s.Put(service, "description", int(Service.iServiceDescr));
+
+        /* Language */
+        s.Put(service, "language", int(Service.iLanguage));
 #if 0 // TODO
-            /* Audio codec */
-            switch (Service.AudioParam.eAudioCoding) {
-            case CAudioParam::AC_AAC:  value = "faac"; break;
-            case CAudioParam::AC_OPUS: value = "Opus"; break;
-            default: value = ""; }
-            s.Put(service, "codec", value);
+        /* Audio codec */
+        switch (Service.AudioParam.eAudioCoding) {
+        case CAudioParam::AC_AAC:  value = "faac"; break;
+        case CAudioParam::AC_OPUS: value = "Opus"; break;
+        default: value = ""; }
+        s.Put(service, "codec", value);
 
-            /* Opus Codec Channels */
-            switch (Service.AudioParam.eOPUSChan) {
-            case CAudioParam::OC_MONO:   value = "OC_MONO";   break;
-            case CAudioParam::OC_STEREO: value = "OC_STEREO"; break;
-            default: value = ""; }
-            s.Put(service, "Opus_Channels", value);
+        /* Opus Codec Channels */
+        switch (Service.AudioParam.eOPUSChan) {
+        case CAudioParam::OC_MONO:   value = "OC_MONO";   break;
+        case CAudioParam::OC_STEREO: value = "OC_STEREO"; break;
+        default: value = ""; }
+        s.Put(service, "Opus_Channels", value);
 
-            /* Opus Codec Bandwith */
-            switch (Service.AudioParam.eOPUSBandwidth) {
-            case CAudioParam::OB_NB:  value = "OB_NB";  break;
-            case CAudioParam::OB_MB:  value = "OB_MB";  break;
-            case CAudioParam::OB_WB:  value = "OB_WB";  break;
-            case CAudioParam::OB_SWB: value = "OB_SWB"; break;
-            case CAudioParam::OB_FB:  value = "OB_FB";  break;
-            default: value = ""; }
-            s.Put(service, "Opus_Bandwith", value);
+        /* Opus Codec Bandwith */
+        switch (Service.AudioParam.eOPUSBandwidth) {
+        case CAudioParam::OB_NB:  value = "OB_NB";  break;
+        case CAudioParam::OB_MB:  value = "OB_MB";  break;
+        case CAudioParam::OB_WB:  value = "OB_WB";  break;
+        case CAudioParam::OB_SWB: value = "OB_SWB"; break;
+        case CAudioParam::OB_FB:  value = "OB_FB";  break;
+        default: value = ""; }
+        s.Put(service, "Opus_Bandwith", value);
 
-            /* Opus Forward Error Correction */
-            switch (Service.AudioParam.bOPUSForwardErrorCorrection) {
-            case FALSE: value = "0"; break;
-            case TRUE:  value = "1"; break;
-            default: value = ""; }
-            s.Put(service, "Opus_FEC", value);
+        /* Opus Forward Error Correction */
+        switch (Service.AudioParam.bOPUSForwardErrorCorrection) {
+        case FALSE: value = "0"; break;
+        case TRUE:  value = "1"; break;
+        default: value = ""; }
+        s.Put(service, "Opus_FEC", value);
 
-            /* Opus encoder signal type */
-            switch (Service.AudioParam.eOPUSSignal) {
-            case CAudioParam::OG_VOICE: value = "OG_VOICE"; break;
-            case CAudioParam::OG_MUSIC: value = "OG_MUSIC"; break;
-            default: value = ""; }
-            s.Put(service, "Opus_Signal", value);
+        /* Opus encoder signal type */
+        switch (Service.AudioParam.eOPUSSignal) {
+        case CAudioParam::OG_VOICE: value = "OG_VOICE"; break;
+        case CAudioParam::OG_MUSIC: value = "OG_MUSIC"; break;
+        default: value = ""; }
+        s.Put(service, "Opus_Signal", value);
 
-            /* Opus encoder intended application */
-            switch (Service.AudioParam.eOPUSApplication) {
-            case CAudioParam::OA_VOIP:  value = "OA_VOIP";  break;
-            case CAudioParam::OA_AUDIO: value = "OA_AUDIO"; break;
-            default: value = ""; }
-            s.Put(service, "Opus_Application", value);
+        /* Opus encoder intended application */
+        switch (Service.AudioParam.eOPUSApplication) {
+        case CAudioParam::OA_VOIP:  value = "OA_VOIP";  break;
+        case CAudioParam::OA_AUDIO: value = "OA_AUDIO"; break;
+        default: value = ""; }
+        s.Put(service, "Opus_Application", value);
 #endif
-        }
     }
 }
