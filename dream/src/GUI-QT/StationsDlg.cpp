@@ -521,13 +521,7 @@ Station::EState CDRMSchedule::GetState(const int iPos)
     /* Get system time */
     time_t ltime = time(NULL);
 
-    const CStationsItem& item = StationsTable[iPos];
-
-    Station::EState state = item.stateAt(ltime);
-    if(state != Station::IS_INACTIVE)
-	return state;
-    else
-	return item.stateAt(ltime + GetSecondsPreview());
+    return StationsTable[iPos].stateAt(ltime, GetSecondsPreview());
 }
 
 bool CDRMSchedule::CheckFilter(const int iPos)
@@ -548,7 +542,7 @@ bool CDRMSchedule::CheckFilter(const int iPos)
     return true;
 }
 
-Station::EState CStationsItem::stateAt(time_t ltime) const
+Station::EState CStationsItem::stateAt(time_t ltime, int previewSeconds) const
 {
     if (activeAt(ltime) == TRUE)
     {
@@ -558,7 +552,14 @@ Station::EState CStationsItem::stateAt(time_t ltime) const
         else
             return Station::IS_SOON_INACTIVE;
     }
-    return Station::IS_INACTIVE;
+    else
+    {
+	if (activeAt(ltime+previewSeconds) == TRUE)
+	{
+            return Station::IS_PREVIEW;
+	}
+	return Station::IS_INACTIVE;
+    }
 }
 
 _BOOLEAN CStationsItem::activeAt(time_t wantedTime) const
@@ -1229,7 +1230,6 @@ void StationsDlg::showEvent(QShowEvent* e)
         EnableSMeter();
     else
         DisableSMeter();
-
     if(!QFile::exists(DRMSchedule.schedFileName))
         QMessageBox::information(this, "Dream", tr("The schedule file "
                                  " could not be found or contains no data.\n"
