@@ -325,7 +325,7 @@ main(int argc, char **argv)
 		else if(transmitter || mode == "transmit")
 		{
 			CDRMTransmitter DRMTransmitter;
-//TODO			DRMTransmitter.LoadSettings(Settings);
+			DRMTransmitter.LoadSettings(Settings);
 			DRMTransmitter.Start();
 		}
 		else

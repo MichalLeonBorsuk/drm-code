@@ -100,10 +100,8 @@ TransmDialog::TransmDialog(CSettings& NSettings,
 	, iButtonCodecState(0)
 #endif
 {
-#ifdef ENABLE_TRANSM_SETTINGS
 	/* Load transmitter settings */
 	DRMTransmitter.LoadSettings(Settings);
-#endif
 
 	/* Recover window size and position */
 	CWinGeom s;
@@ -618,10 +616,8 @@ TransmDialog::~TransmDialog()
 	CService& Service = Parameters.Service[0]; // TODO
 	Service.iServiceDescr = iServiceDescr;
 
-#ifdef ENABLE_TRANSM_SETTINGS
 	/* Save transmitter settings */
 	DRMTransmitter.SaveSettings(Settings);
-#endif
 
 	Parameters.Unlock();
 }
