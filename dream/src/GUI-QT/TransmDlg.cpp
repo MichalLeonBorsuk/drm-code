@@ -717,7 +717,7 @@ void TransmDialog::OnButtonStartStop()
 		}
 		else
 		{
-			int i, count;
+			int i;
 
 			/* Start transmitter */
 			/* Set text message */
@@ -749,7 +749,7 @@ void TransmDialog::OnButtonStartStop()
 			}
 #else
 			/* Iteration through table widget items */
-			count = TreeWidgetFileNames->topLevelItemCount();
+			int count = TreeWidgetFileNames->topLevelItemCount();
 
 			for (i = 0; i <count; i++)
 			{

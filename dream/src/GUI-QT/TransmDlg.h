@@ -136,8 +136,8 @@ protected:
 	QPopupMenu*			pSettingsMenu;
 #else
 	QMenu*				pSettingsMenu;
-	CAboutDlg			AboutDlg;
 #endif
+	CAboutDlg			AboutDlg;
 	QTimer				Timer;
 	QTimer				TimerStop;
 #ifdef ENABLE_TRANSM_CODECPARAMS
@@ -197,5 +197,8 @@ public slots:
 	void OnTimer();
 	void OnTimerStop();
 	void on_actionWhats_This();
+#if QT_VERSION < 0x040000
+	void OnHelpAbout() {AboutDlg.show();}
+#endif
 };
 #endif

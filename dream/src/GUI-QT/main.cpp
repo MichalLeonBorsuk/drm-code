@@ -219,7 +219,11 @@ main(int argc, char **argv)
 		}
 		else if(transmitter || mode == "transmit")
 		{
-			TransmDialog MainDlg(Settings);
+			TransmDialog MainDlg(Settings
+#if QT_VERSION < 0x040000
+				, NULL, NULL, FALSE, Qt::WStyle_MinMax
+#endif
+				);
 
 			/* Set main window */
 #if QT_VERSION < 0x040000
