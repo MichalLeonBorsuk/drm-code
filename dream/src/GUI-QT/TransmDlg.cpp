@@ -461,6 +461,11 @@ TransmDialog::TransmDialog(CSettings& NSettings,
 	EnableAllControlsForSet();
 
 
+	/* Set check box remove path */
+	CheckBoxRemovePath->setChecked(TRUE);
+	OnToggleCheckBoxRemovePath(TRUE);
+
+
 	/* Set Menu ***************************************************************/
 #if QT_VERSION < 0x040000
 	/* Settings menu  ------------------------------------------------------- */
@@ -1737,8 +1742,9 @@ void TransmDialog::AddWhatsThisHelp()
 
 	/* Remove path from filename */
 	const QString strRemovePath =
-		tr("<b>Remove path from filename:</b> The path is removed from "
-		"the filename because it can reveal some sensitive information.");
+		tr("<b>Remove path from filename:</b> Un-checking this box will "
+		"transmit the full path of the image location on your computer. "
+		"This might not be what you want.");
 
 	WhatsThis(CheckBoxRemovePath, strRemovePath);
 }
