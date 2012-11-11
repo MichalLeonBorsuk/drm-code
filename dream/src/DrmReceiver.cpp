@@ -38,9 +38,6 @@
 
 #include "sound.h"
 #include "sound/soundnull.h"
-#ifdef __linux__
-# include "linux/shmsoundin.h"
-#endif
 #include "audiofilein.h"
 #include "GUI-QT/Rig.h"
 
@@ -1390,28 +1387,7 @@ CDRMReceiver::LoadSettings(CSettings& s)
         {
             /* Sound In device */
             delete pSoundInInterface;
-
-            // check if we need to do something special for the rig
-            string soundName = s.Get("Hamlib", "sound-name", string(""));
-            string shmPath = s.Get("Hamlib", "shm-path", string(""));
-            if(soundName == "")
-            {
-                pSoundInInterface = new CSoundIn;
-            }
-            else
-            {
-#ifdef __linux__
-                CShmSoundIn* ShmSoundIn = new CShmSoundIn;
-                ShmSoundIn->SetShmPath(shmPath);
-                ShmSoundIn->SetName(soundName);
-                ShmSoundIn->SetShmChannels(1);
-                ShmSoundIn->SetWantedChannels(2);
-                pSoundInInterface = ShmSoundIn;
-#else
-                pSoundInInterface = new CSoundIn;
-#endif
-            }
-            pSoundInInterface->SetDev(s.Get("Receiver", "snddevin", int(0)));
+            pSoundInInterface = new CSoundIn;
         }
     }
 
