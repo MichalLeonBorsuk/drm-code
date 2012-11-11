@@ -103,6 +103,10 @@ typedef QNetworkOperation QNetworkReply; // needed to keep moc happy
 
 #include <iostream>
 
+namespace Station {
+	enum EState {IS_ACTIVE, IS_INACTIVE, IS_PREVIEW, IS_SOON_INACTIVE};
+};
+
 /* Classes ********************************************************************/
 #if QT_VERSION < 0x040000
 class MyListViewItem : public QListViewItem
@@ -149,6 +153,8 @@ public:
 		strCountry(""), strDaysFlags(""), strDaysShow(""),
 		rPower((_REAL) 0.0) { }
 
+	Station::EState stateAt(const time_t ltime) const;
+	_BOOLEAN activeAt(const time_t ltime) const;
 	int StartTime() const {return iStartHour * 100 + iStartMinute;}
 	int StopTime() const{return iStopHour * 100 + iStopMinute;}
 	void SetStartTime(const int iStartTime)
@@ -192,7 +198,6 @@ public:
 	virtual ~CDRMSchedule() {}
 
 	enum ESchedMode {SM_DRM, SM_ANALOG};
-	enum StationState {IS_ACTIVE, IS_INACTIVE, IS_PREVIEW, IS_SOON_INACTIVE};
 
 	void ReadINIFile(FILE* pFile);
 	void ReadCSVFile(FILE* pFile);
@@ -201,7 +206,7 @@ public:
 
 	int GetStationNumber() {return StationsTable.size();}
 	CStationsItem& GetItem(const int iPos) {return StationsTable[iPos];}
-	StationState CheckState(const int iPos);
+	Station::EState GetState(const int iPos);
 	bool CheckFilter(const int iPos);
 
 	void SetSecondsPreview(int iSec);
@@ -219,7 +224,6 @@ public:
 	QUrl *qurldrm, *qurlanalog;
 
 protected:
-	_BOOLEAN IsActive(const int iPos, const time_t ltime);
 	void			SetAnalogUrl();
 
 	vector<CStationsItem>	StationsTable;
