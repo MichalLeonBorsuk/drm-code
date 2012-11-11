@@ -516,33 +516,18 @@ void CDRMSchedule::ReadCSVFile(FILE* pFile)
     } while(!feof(pFile));
 }
 
-CDRMSchedule::StationState CDRMSchedule::CheckState(const int iPos)
+Station::EState CDRMSchedule::GetState(const int iPos)
 {
     /* Get system time */
-    time_t ltime;
-    time(&ltime);
+    time_t ltime = time(NULL);
 
-    if (IsActive(iPos, ltime) == TRUE)
-    {
-        /* Check if the station soon will be inactive */
-        if (IsActive(iPos, ltime + NUM_SECONDS_SOON_INACTIVE) == TRUE)
-            return IS_ACTIVE;
-        else
-            return IS_SOON_INACTIVE;
-    }
+    const CStationsItem& item = StationsTable[iPos];
+
+    Station::EState state = item.stateAt(ltime);
+    if(state != Station::IS_INACTIVE)
+	return state;
     else
-    {
-        /* Station is not active, check preview condition */
-        if (GetSecondsPreview() > 0)
-        {
-            if (IsActive(iPos, ltime + GetSecondsPreview()) == TRUE)
-                return IS_PREVIEW;
-            else
-                return IS_INACTIVE;
-        }
-        else
-            return IS_INACTIVE;
-    }
+	return item.stateAt(ltime + GetSecondsPreview());
 }
 
 bool CDRMSchedule::CheckFilter(const int iPos)
@@ -563,78 +548,56 @@ bool CDRMSchedule::CheckFilter(const int iPos)
     return true;
 }
 
-_BOOLEAN CDRMSchedule::IsActive(const int iPos, const time_t ltime)
+Station::EState CStationsItem::stateAt(time_t ltime) const
 {
-    const CStationsItem& item = StationsTable[iPos];
-    /* Calculate time in UTC */
-    struct tm* gmtCur = gmtime(&ltime);
-    const time_t lCurTime = mktime(gmtCur);
+    if (activeAt(ltime) == TRUE)
+    {
+        /* Check if the station soon will be inactive */
+        if (activeAt(ltime + NUM_SECONDS_SOON_INACTIVE) == TRUE)
+            return Station::IS_ACTIVE;
+        else
+            return Station::IS_SOON_INACTIVE;
+    }
+    return Station::IS_INACTIVE;
+}
 
-    /* Get stop time */
-    struct tm* gmtStop = gmtime(&ltime);
-    gmtStop->tm_hour = item.iStopHour;
-    gmtStop->tm_min = item.iStopMinute;
-    const time_t lStopTime = mktime(gmtStop);
+_BOOLEAN CStationsItem::activeAt(time_t wantedTime) const
+{
+    /* Calculate start of UTC day */
+    time_t today = wantedTime;
+    struct tm today_tm = *gmtime(&today);
+    today_tm.tm_hour = 0;
+    today_tm.tm_min = 0;
+    today = mktime(&today_tm);
 
     /* Get start time */
-    struct tm* gmtStart = gmtime(&ltime);
-    gmtStart->tm_hour = item.iStartHour;
-    gmtStart->tm_min = item.iStartMinute;
-    const time_t lStartTime = mktime(gmtStart);
+    struct tm gmtStart = *gmtime(&today);
+    gmtStart.tm_hour = iStartHour;
+    gmtStart.tm_min = iStartMinute;
+    time_t lStartTime = mktime(&gmtStart);
+
+    /* Get stop time */
+    struct tm gmtStop = *gmtime(&today);
+    gmtStop.tm_hour = iStopHour;
+    gmtStop.tm_min = iStopMinute;
+    time_t lStopTime = mktime(&gmtStop);
 
     /* Check, if stop time is on next day */
-    _BOOLEAN bSecondDay = FALSE;
-    if (lStopTime < lStartTime)
-    {
-        /* Check, if we are at the first or the second day right now */
-        if (lCurTime < lStopTime)
-        {
-            /* Second day. Increase day count */
-            gmtCur->tm_wday++;
-
-            /* Check that value is valid (range 0 - 6) */
-            if (gmtCur->tm_wday > 6)
-                gmtCur->tm_wday = 0;
-
-            /* Set flag */
-            bSecondDay = TRUE;
-        }
-    }
+    if(lStopTime < lStartTime)
+	lStopTime += 86400;
 
     /* Check day
        tm_wday: day of week (0 - 6; Sunday = 0). "strDaysFlags" are coded with
-       pseudo binary representation. A one signalls that day is active. The most
+       pseudo binary representation. A one signals that day is active. The most
        significant 1 is the sunday, then followed the monday and so on. */
-    QString strDaysFlags = item.strDaysFlags;
-    if ((strDaysFlags[gmtCur->tm_wday] == CHR_ACTIVE_DAY_MARKER) ||
+    if ((strDaysFlags[gmtStart.tm_wday] == CHR_ACTIVE_DAY_MARKER) ||
             /* Check also for special case: days are 0000000. This is reserved for
                DRM test transmissions or irregular transmissions. We define here
                that these stations are transmitting every day */
             (strDaysFlags == FLAG_STR_IRREGULAR_TRANSM))
     {
-        /* Check time interval */
-        if (lStopTime > lStartTime)
-        {
-            if ((lCurTime >= lStartTime) && (lCurTime < lStopTime))
-                return TRUE;
-        }
-        else
-        {
-            if (bSecondDay == FALSE)
-            {
-                /* First day. Only check if we are after start time */
-                if (lCurTime >= lStartTime)
-                    return TRUE;
-            }
-            else
-            {
-                /* Second day. Only check if we are before stop time */
-                if (lCurTime < lStopTime)
-                    return TRUE;
-            }
-        }
+	return (lStartTime <= wantedTime) && (wantedTime < lStopTime);
     }
-
     return FALSE;
 }
 
@@ -1633,22 +1596,22 @@ void StationsDlg::SetStationsView()
 
         MyListViewItem* item = vecpListItems[i];
         /* Check, if station is currently transmitting. If yes, set special pixmap */
-        CDRMSchedule::StationState iState = DRMSchedule.CheckState(i);
-        if(DRMSchedule.CheckFilter(i) && (bShowAll || (iState != CDRMSchedule::IS_INACTIVE)))
+        Station::EState iState = DRMSchedule.GetState(i);
+        if(DRMSchedule.CheckFilter(i) && (bShowAll || (iState != Station::IS_INACTIVE)))
         {
             ListViewStations->insertItem(item);
             switch (iState)
             {
-            case CDRMSchedule::IS_ACTIVE:
+            case Station::IS_ACTIVE:
                 item->setPixmap(0, BitmCubeGreen);
                 break;
-            case CDRMSchedule::IS_PREVIEW:
+            case Station::IS_PREVIEW:
                 item->setPixmap(0, BitmCubeOrange);
                 break;
-            case CDRMSchedule::IS_SOON_INACTIVE:
+            case Station::IS_SOON_INACTIVE:
                 item->setPixmap(0, BitmCubePink);
                 break;
-            case CDRMSchedule::IS_INACTIVE:
+            case Station::IS_INACTIVE:
                 item->setPixmap(0, BitmCubeRed);
                 break;
             default:
@@ -1680,27 +1643,27 @@ void StationsDlg::SetStationsView()
         QTreeWidgetItem* item = ListViewStations->topLevelItem(i);
 	int scheduleItem = item->data(0, Qt::UserRole).toInt();
 
-        CDRMSchedule::StationState iState = DRMSchedule.CheckState(scheduleItem);
+        Station::EState iState = DRMSchedule.GetState(scheduleItem);
 
         switch (iState)
         {
-        case CDRMSchedule::IS_ACTIVE:
+        case Station::IS_ACTIVE:
             item->setIcon(0, greenCube);
             break;
-        case CDRMSchedule::IS_PREVIEW:
+        case Station::IS_PREVIEW:
             item->setIcon(0, orangeCube);
             break;
-        case CDRMSchedule::IS_SOON_INACTIVE:
+        case Station::IS_SOON_INACTIVE:
             item->setIcon(0, pinkCube);
             break;
-        case CDRMSchedule::IS_INACTIVE:
+        case Station::IS_INACTIVE:
             item->setIcon(0, redCube);
             break;
         default:
             item->setIcon(0, redCube);
             break;
         }
-        if(DRMSchedule.CheckFilter(scheduleItem) && (bShowAll || (iState != CDRMSchedule::IS_INACTIVE)))
+        if(DRMSchedule.CheckFilter(scheduleItem) && (bShowAll || (iState != Station::IS_INACTIVE)))
         {
             item->setHidden(false);
         }
