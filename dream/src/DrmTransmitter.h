@@ -48,6 +48,8 @@ public:
     CDRMTransmitter();
     virtual ~CDRMTransmitter() {}
 
+    void LoadSettings(CSettings&);
+    void SaveSettings(CSettings&);
     void Init();
     void Start();
     void Stop();

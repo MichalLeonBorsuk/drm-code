@@ -28,7 +28,6 @@
 #ifndef __TransmDlg_H
 #define __TransmDlg_H
 // (DF) TODO: to be enabled and removed in a future release
-//#define ENABLE_TRANSM_SETTINGS
 //#define ENABLE_TRANSM_CODECPARAMS
 //#define ENABLE_TRANSM_CURRENTTIME
 
