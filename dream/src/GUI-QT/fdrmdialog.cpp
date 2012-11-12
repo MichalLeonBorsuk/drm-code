@@ -525,6 +525,7 @@ void FDRMDialog::showTextMessage(const QString& textMessage)
             formattedMessage += textMessage[int(i)];
         }
     }
+    Linkify(formattedMessage);
     formattedMessage = "<center>" + formattedMessage + "</center>";
     TextTextMessage->setText(formattedMessage);
 

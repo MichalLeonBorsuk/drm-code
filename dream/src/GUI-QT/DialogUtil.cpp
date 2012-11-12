@@ -689,3 +689,68 @@ void InitSMeter(QWidget* parent, QwtThermo* sMeter)
     sMeter->setPalette(newPalette);
 #endif
 }
+
+/* Convert all www. or http:// or email to real
+   clickable link, for use with QLabel and such.
+   Code by David Flamand */
+void Linkify(QString& text)
+{
+#if QT_VERSION >= 0x040000
+    int i, j, posWWW=-2, posHTTP=-2, posMAIL=-2, posBegin, posEnd, size;
+    size = text.size();
+    for (i = 0; i < size;)
+    {
+        if (posWWW != -1 && posWWW < i)
+            posWWW  = text.indexOf("www.", i, Qt::CaseInsensitive);
+        if (posHTTP != -1 && posHTTP < i)
+            posHTTP = text.indexOf("http://", i, Qt::CaseInsensitive);
+#if QT_VERSION >= 0x040500
+        if (posMAIL != -1 && posMAIL < i)
+            posMAIL = text.indexOf(QRegExp("\\b[0-9a-z._-]+@[0-9a-z.-]+\\.[a-z]{2,4}\\b", Qt::CaseInsensitive), i);
+#else
+        posMAIL = -1;
+#endif
+        if (posMAIL>=0 && (posMAIL<=posWWW || posWWW<0) && (posMAIL<posHTTP || posHTTP<0))
+            posBegin = posMAIL;
+        else if (posWWW>=0 && (posWWW<posHTTP || posHTTP<0))
+            posBegin = posWWW;
+        else
+            posBegin = posHTTP;
+        if (posBegin >= 0)
+        {
+            posEnd = size;
+            for (j = posBegin; j < size; j++)
+            {
+                int chr = text[j].unicode();
+                if (!((chr=='@' && posBegin==posMAIL) ||
+                      chr=='.' || chr=='/' ||
+                      chr=='~' || chr=='-' ||
+                      chr=='_' || chr==':' ||
+                     (chr>='a' && chr<='z') ||
+                     (chr>='A' && chr<='Z') ||
+                     (chr>='0' && chr<='9')))
+                {
+                    posEnd = j;
+                    break;
+                }
+            }
+            int rawLinkSize = posEnd-posBegin;
+            QStringRef rawLink(&text, posBegin, rawLinkSize);
+            QString newLink;
+            if (posBegin == posMAIL)
+                newLink = "<a href=\"mailto:%1\">%1</a>";
+            else if (posBegin == posWWW)
+                newLink = "<a href=\"http://%1\">%1</a>";
+            else /* posBegin == posHTTP */
+                newLink = "<a href=\"%1\">%1</a>";
+            newLink = newLink.arg(rawLink.toString());
+            int newLinkSize = newLink.size();
+            text.replace(posBegin, rawLinkSize, newLink);
+            i = posEnd + newLinkSize - rawLinkSize;
+            size += newLinkSize - rawLinkSize;
+        }
+        else
+            break;
+    }
+#endif
+}
