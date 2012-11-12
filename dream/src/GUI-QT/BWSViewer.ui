@@ -50,11 +50,17 @@
    </item>
    <item>
     <widget class="QFrame" name="frame">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <property name="frameShape">
       <enum>QFrame::StyledPanel</enum>
      </property>
      <property name="frameShadow">
-      <enum>QFrame::Raised</enum>
+      <enum>QFrame::Sunken</enum>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_2">
       <property name="spacing">
@@ -79,6 +85,12 @@
      </property>
      <item>
       <widget class="QLabel" name="TextLabel1">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="text">
         <string>Receiving Status:</string>
        </property>
@@ -136,7 +148,7 @@
         <string/>
        </property>
        <property name="icon">
-        <iconset>
+        <iconset resource="res/icons.qrc">
          <normaloff>:/icons/Home.png</normaloff>:/icons/Home.png</iconset>
        </property>
       </widget>
@@ -170,6 +182,12 @@
      </item>
      <item>
       <widget class="QPushButton" name="pushButtonClearCache">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Minimum" vsizetype="Maximum">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="text">
         <string>Clear Cache</string>
        </property>
@@ -177,6 +195,12 @@
      </item>
      <item>
       <widget class="QPushButton" name="buttonOk">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Minimum" vsizetype="Maximum">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="text">
         <string>&amp;Close</string>
        </property>
