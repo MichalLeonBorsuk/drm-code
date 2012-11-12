@@ -64,6 +64,7 @@ public slots:
     void OnSave();
     void OnSaveAll();
     void OnClearAll();
+    void OnHome();
     void onSetProfile(bool);
     void showEvent(QShowEvent*);
     void hideEvent(QHideEvent*);
