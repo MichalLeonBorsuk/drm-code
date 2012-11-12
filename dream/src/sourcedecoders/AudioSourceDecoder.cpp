@@ -33,22 +33,24 @@
 #include <algorithm>
 
 // dummy AAC Decoder implementation if dll not found
-
-NeAACDecHandle NEAACDECAPI NeAACDecOpenDummy(void) {
+#ifndef USE_FAAD2_LIBRARY
+static NeAACDecHandle NEAACDECAPI NeAACDecOpenDummy(void)
+{
     return NULL;
 }
-void NEAACDECAPI NeAACDecCloseDummy(NeAACDecHandle) { }
-
-char NEAACDECAPI NeAACDecInitDRMDummy(NeAACDecHandle*, unsigned long, unsigned char)
+static void NEAACDECAPI NeAACDecCloseDummy(NeAACDecHandle)
+{
+}
+static char NEAACDECAPI NeAACDecInitDRMDummy(NeAACDecHandle*, unsigned long, unsigned char)
 {
     return 1; /* error */
 }
-
-void* NEAACDECAPI NeAACDecDecodeDummy(NeAACDecHandle,NeAACDecFrameInfo* hInfo, unsigned char*, unsigned long)
+static void* NEAACDECAPI NeAACDecDecodeDummy(NeAACDecHandle,NeAACDecFrameInfo* hInfo, unsigned char*, unsigned long)
 {
     hInfo->error = 1;
     return NULL;
 }
+#endif
 
 /* Implementation *************************************************************/
 
@@ -1133,23 +1135,26 @@ CAudioSourceDecoder::GetNumCorDecAudio()
 
 CAudioSourceDecoder::CAudioSourceDecoder()
     :	bWriteToFile(FALSE), bUseReverbEffect(TRUE), AudioRev((CReal) 1.0 /* seconds delay */ ),
+        HandleAACDecoder(NULL),
 #ifndef USE_FAAD2_LIBRARY
-        NeAACDecOpen (NULL), NeAACDecInitDRM(NULL), NeAACDecClose(NULL), NeAACDecDecode(NULL) ,
+        NeAACDecOpen(NULL), NeAACDecInitDRM(NULL), NeAACDecClose(NULL), NeAACDecDecode(NULL),
+		canDecodeAAC(FALSE),
+#else
+		canDecodeAAC(TRUE),
 #endif
-        canDecodeAAC(false),canDecodeCELP(false),canDecodeHVXC(false),
+        canDecodeCELP(FALSE), canDecodeHVXC(FALSE),
         pFile(NULL)
 {
-    HandleAACDecoder = NULL;
+#ifndef USE_FAAD2_LIBRARY
     cerr << "looking for FAAD2" << endl;
-#ifdef USE_FAAD2_LIBRARY
-    canDecodeAAC = true;
-#else
 # ifdef _WIN32
     hFaaDlib = LoadLibrary(TEXT("faad2_drmd"));
-    if(hFaaDlib==NULL)hFaaDlib = LoadLibrary(TEXT("faad2_drm"));
+    if (hFaaDlib == NULL)
+		hFaaDlib = LoadLibrary(TEXT("faad2_drm"));
 # else
-# define GetProcAddress(a, b) dlsym(a, b)
-# define TEXT(a) (a)
+#  define GetProcAddress(a, b) dlsym(a, b)
+#  define FreeLibrary(a) dlclose(a)
+#  define TEXT(a) (a)
 #  if defined(__APPLE__)
 #   define SO_NAME "libfaad2_drm.dylib"
 #  else
@@ -1157,45 +1162,35 @@ CAudioSourceDecoder::CAudioSourceDecoder()
 #  endif
     hFaaDlib = dlopen(SO_NAME, RTLD_LOCAL | RTLD_NOW);
 # endif
-    if(hFaaDlib)
+    if (hFaaDlib)
     {
         NeAACDecOpen = (NeAACDecOpen_t*)GetProcAddress(hFaaDlib, TEXT("NeAACDecOpen"));
         NeAACDecInitDRM = (NeAACDecInitDRM_t*)GetProcAddress(hFaaDlib, TEXT("NeAACDecInitDRM"));
         NeAACDecClose = (NeAACDecClose_t*)GetProcAddress(hFaaDlib, TEXT("NeAACDecClose"));
         NeAACDecDecode = (NeAACDecDecode_t*)GetProcAddress(hFaaDlib, TEXT("NeAACDecDecode"));
     }
-    canDecodeAAC = true;
-    if(NeAACDecOpen == NULL)
+    canDecodeAAC = NeAACDecOpen && NeAACDecInitDRM && NeAACDecClose && NeAACDecDecode;
+    if (!canDecodeAAC)
     {
-        canDecodeAAC = false;
         NeAACDecOpen = NeAACDecOpenDummy;
-    }
-    if(NeAACDecInitDRM == NULL)
-    {
-        canDecodeAAC = false;
         NeAACDecInitDRM = NeAACDecInitDRMDummy;
-    }
-    if(NeAACDecClose == NULL)
-    {
-        canDecodeAAC = false;
         NeAACDecClose = NeAACDecCloseDummy;
-    }
-    if(NeAACDecDecode == NULL)
-    {
-        canDecodeAAC = false;
         NeAACDecDecode = NeAACDecDecodeDummy;
-    }
-#endif
-    if(    canDecodeAAC) {
-        cerr << "AAC decoder lib found" << endl;
-        audiodecoder = string("Nero AAC Version ")+FAAD2_VERSION;
-	} else {
+        if (hFaaDlib)
+        {
+            FreeLibrary(hFaaDlib);
+            hFaaDlib = NULL;
+        }
         cerr << "no usable AAC lib found" << endl;
-	}
+    }
+    else
+        cerr << "AAC decoder lib found" << endl;
+#endif
 }
 
 CAudioSourceDecoder::~CAudioSourceDecoder()
 {
-    /* Close decoder handle */
-    if(HandleAACDecoder!=NULL) NeAACDecClose(HandleAACDecoder);
+    /* Close decoders instance */
+    if (HandleAACDecoder != NULL)
+        NeAACDecClose(HandleAACDecoder);
 }
