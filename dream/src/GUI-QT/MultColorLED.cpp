@@ -39,13 +39,13 @@ CMultColorLED::CMultColorLED(QWidget * parent, const char * name, Qt::WFlags f) 
 	TimerRedLight(), TimerGreenLight(), TimerYellowLight(),
 	bFlagRedLi(false), bFlagGreenLi(false), bFlagYellowLi(false),
 	iUpdateTime(DEFAULT_UPDATE_TIME),
-	green(13,13),yellow(13,13),red(13,13),grey(13,13)
+	green(13,13),yellow(13,13),red(13,13)//,grey(13,13)
 {
 	(void)name;
 	(void)f;
 	green.fill(QColor(0, 255, 0));
 	red.fill(QColor(255, 0, 0));
-	grey.fill(QColor(192, 192, 192));
+//	grey.fill(QColor(192, 192, 192));
 	yellow.fill(QColor(255, 255, 0));
 
 	/* Set modified style */
@@ -56,7 +56,7 @@ CMultColorLED::CMultColorLED(QWidget * parent, const char * name, Qt::WFlags f) 
 	Reset();
 
 	/* Set init-bitmap */
-	setPixmap(grey);
+//	setPixmap(grey);
 
 
 	/* Connect timer events to the desired slots */
@@ -141,7 +141,7 @@ void CMultColorLED::UpdateColor()
 	/* If no color is active, set control to grey light */
 	if (eColorFlag != RL_GREY)
 	{
-		setPixmap(grey);
+		setPixmap(NULL/*grey*/);
 		eColorFlag = RL_GREY;
 	}
 }

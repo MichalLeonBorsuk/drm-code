@@ -78,7 +78,7 @@ protected:
 	QPixmap			green;
 	QPixmap			yellow;
 	QPixmap			red;
-	QPixmap			grey;
+//	QPixmap			grey;
 
 	void			UpdateColor();
 
