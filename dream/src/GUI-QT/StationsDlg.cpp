@@ -519,9 +519,31 @@ void CDRMSchedule::ReadCSVFile(FILE* pFile)
 Station::EState CDRMSchedule::GetState(const int iPos)
 {
     /* Get system time */
-    time_t ltime = time(NULL);
+#if QT_VERSION < 0x040000
+        char tz[70];
+        strcpy(tz, getenv("TZ"));
+#ifdef _WIN32
+        _putenv("TZ=UTC");
+	QDateTime dt = QDateTime::currentDateTime();
+        _tzset();
+	stringstream ss;
+	ss << "TZ=" << tz;
+        _putenv(ss.str().c_str());
+#else
+        setenv("TZ", "UTC", 1);
+        tzset();
+	QDateTime dt = QDateTime::currentDateTime();
+        if(tz[0])
+            setenv("TZ", tz, 1);
+        else
+            unsetenv("TZ");
+#endif
+#else
+    QDateTime dt = QDateTime::currentDateTime();
+    dt.setTimeSpec(Qt::UTC);
+#endif
 
-    return StationsTable[iPos].stateAt(ltime, GetSecondsPreview());
+    return StationsTable[iPos].stateAt(dt, GetSecondsPreview());
 }
 
 bool CDRMSchedule::CheckFilter(const int iPos)
@@ -542,19 +564,22 @@ bool CDRMSchedule::CheckFilter(const int iPos)
     return true;
 }
 
-Station::EState CStationsItem::stateAt(time_t ltime, int previewSeconds) const
+Station::EState CStationsItem::stateAt(const QDateTime& ltime, int previewSeconds) const
 {
     if (activeAt(ltime) == TRUE)
     {
+	QDateTime dt = ltime.addSecs(NUM_SECONDS_SOON_INACTIVE);
+	
         /* Check if the station soon will be inactive */
-        if (activeAt(ltime + NUM_SECONDS_SOON_INACTIVE) == TRUE)
+        if (activeAt(dt) == TRUE)
             return Station::IS_ACTIVE;
         else
             return Station::IS_SOON_INACTIVE;
     }
     else
     {
-	if (activeAt(ltime+previewSeconds) == TRUE)
+	QDateTime dt = ltime.addSecs(previewSeconds);
+	if (activeAt(dt) == TRUE)
 	{
             return Station::IS_PREVIEW;
 	}
@@ -562,42 +587,33 @@ Station::EState CStationsItem::stateAt(time_t ltime, int previewSeconds) const
     }
 }
 
-_BOOLEAN CStationsItem::activeAt(time_t wantedTime) const
+_BOOLEAN CStationsItem::activeAt(const QDateTime& wantedTime) const
 {
-    /* Calculate start of UTC day */
-    time_t today = wantedTime;
-    struct tm today_tm = *gmtime(&today);
-    today_tm.tm_hour = 0;
-    today_tm.tm_min = 0;
-    today = mktime(&today_tm);
-
+    QDateTime today = QDateTime(wantedTime.date());
+    
     /* Get start time */
-    struct tm gmtStart = *gmtime(&today);
-    gmtStart.tm_hour = iStartHour;
-    gmtStart.tm_min = iStartMinute;
-    time_t lStartTime = mktime(&gmtStart);
+    QDateTime start = today.addSecs(60*(60*iStartHour+iStartMinute));
 
     /* Get stop time */
-    struct tm gmtStop = *gmtime(&today);
-    gmtStop.tm_hour = iStopHour;
-    gmtStop.tm_min = iStopMinute;
-    time_t lStopTime = mktime(&gmtStop);
+    QDateTime stop = today.addSecs(60*(60*iStopHour+iStopMinute));
 
     /* Check, if stop time is on next day */
-    if(lStopTime < lStartTime)
-	lStopTime += 86400;
+    if(stop < start)
+	stop = stop.addDays(1);
 
     /* Check day
        tm_wday: day of week (0 - 6; Sunday = 0). "strDaysFlags" are coded with
        pseudo binary representation. A one signals that day is active. The most
        significant 1 is the sunday, then followed the monday and so on. */
-    if ((strDaysFlags[gmtStart.tm_wday] == CHR_ACTIVE_DAY_MARKER) ||
+    int wday = start.date().dayOfWeek(); // 1=Monday, 7=Sunday
+    if(wday==7) wday=0;
+    if ((strDaysFlags[wday] == CHR_ACTIVE_DAY_MARKER) ||
             /* Check also for special case: days are 0000000. This is reserved for
                DRM test transmissions or irregular transmissions. We define here
                that these stations are transmitting every day */
             (strDaysFlags == FLAG_STR_IRREGULAR_TRANSM))
     {
-	return ((lStartTime <= wantedTime) && (wantedTime < lStopTime))?TRUE:FALSE;
+	return ((start <= wantedTime) && (wantedTime < stop))?TRUE:FALSE;
     }
     return FALSE;
 }

@@ -28,6 +28,7 @@
 #ifndef __StationsDlg_H
 #define __StationsDlg_H
 
+#include <qdatetime.h>
 #include <qpixmap.h>
 #include <qradiobutton.h>
 #include <qtimer.h>
@@ -153,8 +154,8 @@ public:
 		strCountry(""), strDaysFlags(""), strDaysShow(""),
 		rPower((_REAL) 0.0) { }
 
-	Station::EState stateAt(time_t, int) const;
-	_BOOLEAN activeAt(const time_t ltime) const;
+	Station::EState stateAt(const QDateTime&, int) const;
+	_BOOLEAN activeAt(const QDateTime&) const;
 	int StartTime() const {return iStartHour * 100 + iStartMinute;}
 	int StopTime() const{return iStopHour * 100 + iStopMinute;}
 	void SetStartTime(const int iStartTime)
