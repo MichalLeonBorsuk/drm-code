@@ -33,7 +33,7 @@
 #include <QWebHistory>
 
 BWSViewer::BWSViewer(CDRMReceiver& rec, CSettings& s, QWidget* parent, Qt::WFlags):
-    QDialog(parent), Ui_BWSViewer(), Timer(),
+    QDialog(parent), Ui_BWSViewer(),
     receiver(rec), settings(s), decoderSet(false), initialised(false)
 {
     /* Enable minimize and maximize box for QDialog */
@@ -55,17 +55,15 @@ BWSViewer::BWSViewer(CDRMReceiver& rec, CSettings& s, QWidget* parent, Qt::WFlag
     /* Connect controls */
     connect(ButtonStepBack, SIGNAL(clicked()), webView, SLOT(back()));
     connect(ButtonStepForward, SIGNAL(clicked()), webView, SLOT(forward()));
-    connect(ButtonHome, SIGNAL(clicked()), webView, SLOT(home()));
+    connect(ButtonHome, SIGNAL(clicked()), this, SLOT(OnHome()));
 
     OnClearAll();
 
     connect(&Timer, SIGNAL(timeout()), this, SLOT(OnTimer()));
 
-    Timer.stop();
-
-ButtonStepBack->setEnabled(true);
-ButtonStepForward->setEnabled(true);
-ButtonHome->setEnabled(true);
+    ButtonStepBack->setEnabled(true);
+    ButtonStepForward->setEnabled(true);
+    ButtonHome->setEnabled(true);
 }
 
 BWSViewer::~BWSViewer()
@@ -132,6 +130,11 @@ void BWSViewer::OnClearAll()
     ButtonStepBack->setEnabled(false);
     ButtonStepForward->setEnabled(false);
     ButtonHome->setEnabled(false);
+}
+
+void BWSViewer::OnHome()
+{
+    // TODO
 }
 
 void BWSViewer::onSetProfile(bool isChecked)
