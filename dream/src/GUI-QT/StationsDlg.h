@@ -264,6 +264,7 @@ public:
 	void SaveSettings(CSettings&);
 
 protected:
+	void			CheckMode();
 	void			LoadSchedule();
 	void			LoadFilters();
 	void			SetFrequencyFromGUI(int);
