@@ -939,7 +939,7 @@ void StationsDlg::OnShowPreviewMenu(int iID)
 void StationsDlg::AddUpdateDateTime()
 {
     /*
-    	Set time and date of current DRM schedule in the menu text for
+    	Set time and date of current schedule in the menu text for
     	querying a new schedule (online schedule update).
     	If no schedule file exists, do not show any time and date.
     */
@@ -1246,12 +1246,29 @@ void StationsDlg::showEvent(QShowEvent* e)
         EnableSMeter();
     else
         DisableSMeter();
+    CheckMode();
     if(!QFile::exists(DRMSchedule.schedFileName))
         QMessageBox::information(this, "Dream", tr("The schedule file "
                                  " could not be found or contains no data.\n"
                                  "No stations can be displayed.\n"
                                  "Try to download this file by using the 'Update' menu."),
                                  QMessageBox::Ok);
+}
+
+void StationsDlg::CheckMode()
+{
+    CDRMSchedule::ESchedMode eSchedM = DRMSchedule.GetSchedMode();
+    ERecMode eRecM = DRMReceiver.GetReceiverMode();
+    if (eSchedM == CDRMSchedule::SM_DRM &&  eRecM != RM_DRM)
+    {
+        DRMSchedule.SetSchedMode(CDRMSchedule::SM_ANALOG);
+	AddUpdateDateTime();
+    }
+    if (eSchedM == CDRMSchedule::SM_ANALOG &&  eRecM == RM_DRM)
+    {
+        DRMSchedule.SetSchedMode(CDRMSchedule::SM_DRM);
+	AddUpdateDateTime();
+    }
 }
 
 void StationsDlg::OnTimerUTCLabel()
@@ -1272,16 +1289,7 @@ void StationsDlg::OnTimerUTCLabel()
     /* Load the schedule if necessary
      * do this here because the timer interval is short enough
     */
-    CDRMSchedule::ESchedMode eSchedM = DRMSchedule.GetSchedMode();
-    ERecMode eRecM = DRMReceiver.GetReceiverMode();
-    if (eSchedM == CDRMSchedule::SM_DRM &&  eRecM != RM_DRM)
-    {
-        DRMSchedule.SetSchedMode(CDRMSchedule::SM_ANALOG);
-    }
-    if (eSchedM == CDRMSchedule::SM_ANALOG &&  eRecM == RM_DRM)
-    {
-        DRMSchedule.SetSchedMode(CDRMSchedule::SM_DRM);
-    }
+    CheckMode();
     if (DRMSchedule.GetStationNumber() == 0)
     {
         LoadSchedule();
