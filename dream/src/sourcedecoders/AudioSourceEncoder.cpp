@@ -60,9 +60,9 @@ static int FAACAPI dummyfaacEncClose(faacEncHandle) {
 /* Implementation *************************************************************/
 
 CAudioSourceEncoderImplementation::CAudioSourceEncoderImplementation()
-    : bUsingTextMessage(FALSE), hEncoder(NULL),
+    : bUsingTextMessage(FALSE), hEncoder(NULL)
 #ifndef USE_FAAC_LIBRARY
-        faacEncGetVersion(NULL), faacEncGetCurrentConfiguration(NULL), faacEncSetConfiguration(NULL), faacEncOpen(NULL),
+        ,faacEncGetVersion(NULL), faacEncGetCurrentConfiguration(NULL), faacEncSetConfiguration(NULL), faacEncOpen(NULL),
         /*faacEncGetDecoderSpecificInfo(NULL), */faacEncEncode(NULL), faacEncClose(NULL)
 #endif
 {
