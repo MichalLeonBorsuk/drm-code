@@ -1430,7 +1430,7 @@
             <item>
              <widget class="QCheckBox" name="CheckBoxWriteLog">
               <property name="text">
-               <string>Log File, Freq:</string>
+               <string>&amp;Log File, Freq:</string>
               </property>
              </widget>
             </item>
