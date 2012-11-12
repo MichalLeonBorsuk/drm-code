@@ -33,6 +33,7 @@
 #include <string>
 
 #include "../DrmReceiver.h"
+#include "DialogUtil.h"
 
 class CSettings;
 class CDataDecoder;
@@ -58,6 +59,7 @@ protected:
     void SaveMOTObject(const CVector<_BYTE>& vecbRawData, const QString& strFileName);
     CDataDecoder*   decoder;
     std::map<QString,QVariant> pages;
+    CEventFilter    ef;
 
 public slots:
     void OnTimer();

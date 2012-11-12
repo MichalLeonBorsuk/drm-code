@@ -134,7 +134,8 @@ void BWSViewer::OnClearAll()
 
 void BWSViewer::OnHome()
 {
-    // TODO
+    QString shomeUrl("index.html");
+    webView->setUrl(QUrl(strCurrentSavePath+"/"+shomeUrl));
 }
 
 void BWSViewer::onSetProfile(bool isChecked)
@@ -142,8 +143,9 @@ void BWSViewer::onSetProfile(bool isChecked)
 	(void)isChecked;
 }
 
-void BWSViewer::showEvent(QShowEvent*)
+void BWSViewer::showEvent(QShowEvent* e)
 {
+	EVENT_FILTER(e);
     /* Get window geometry data and apply it */
     CWinGeom g;
     settings.Get("BWS", g);
@@ -202,8 +204,9 @@ void BWSViewer::showEvent(QShowEvent*)
     Timer.start(GUI_CONTROL_UPDATE_TIME);
 }
 
-void BWSViewer::hideEvent(QHideEvent*)
+void BWSViewer::hideEvent(QHideEvent* e)
 {
+	EVENT_FILTER(e);
     /* Deactivate real-time timer so that it does not get new pictures */
     Timer.stop();
 
@@ -221,8 +224,9 @@ void BWSViewer::hideEvent(QHideEvent*)
 
 bool BWSViewer::changed()
 {
-    if(decoder==NULL)
+    if (decoder==NULL)
         return false;
+
     CMOTObject obj;
 
     /* Poll the data decoder module for new object */
@@ -234,22 +238,23 @@ bool BWSViewer::changed()
         const QString strFileName = strCurrentSavePath + "/" + strObjName;
         SaveMOTObject(obj.Body.vecData, strFileName);
 
-	/* Store it in the internal map */
-	if(strObjName.endsWith("html") || strObjName.endsWith("stm")){
-	QString s;
-	for(int i=0; i<obj.Body.vecData.Size(); i++)
-		s += obj.Body.vecData[i];
-	s = s.replace(QRegExp("color=([0-9a-fA-F])"), "color=#\\1"); 
+	    /* Store it in the internal map */
+	    if (strObjName.endsWith("html") || strObjName.endsWith("stm"))
+        {
+	        QString s;
+	        for(int i=0; i<obj.Body.vecData.Size(); i++)
+		        s += obj.Body.vecData[i];
+	        s = s.replace(QRegExp("color=([0-9a-fA-F])"), "color=#\\1"); 
 	
-	pages[strObjName] = s;
-	}
-	else
-	{
-	QByteArray ba(obj.Body.vecData.Size());
-	for(int i=0; i<obj.Body.vecData.Size(); i++)
-		ba[i] = obj.Body.vecData[i];
-	pages[strObjName] = ba;
-	}
+	        pages[strObjName] = s;
+	    }
+	    else
+	    {
+	        QByteArray ba(obj.Body.vecData.Size());
+	        for(int i=0; i<obj.Body.vecData.Size(); i++)
+		        ba[i] = obj.Body.vecData[i];
+	        pages[strObjName] = ba;
+	    }
 
         if (strObjName.contains('/') == 0) /* if has a path is not the main page */
         {
@@ -261,24 +266,24 @@ bool BWSViewer::changed()
                 /* Checks if the DirectoryIndex has values */
                 if (MOTDir.DirectoryIndex.size() > 0)
                 {
-		    QString shomeUrl;
+		            QString shomeUrl;
                     if(MOTDir.DirectoryIndex.find(UNRESTRICTED_PC_PROFILE) != MOTDir.DirectoryIndex.end())
                         shomeUrl =
                             MOTDir.DirectoryIndex[UNRESTRICTED_PC_PROFILE].c_str();
                     else if(MOTDir.DirectoryIndex.find(BASIC_PROFILE) != MOTDir.DirectoryIndex.end())
                         shomeUrl =
                             MOTDir.DirectoryIndex[BASIC_PROFILE].c_str();
-		    if(shomeUrl == "not_here.html") // this is a hack
-			shomeUrl = "index.html";
-		    if(!initialised && shomeUrl!="")
-		    {
-			webView->setUrl(QUrl(strCurrentSavePath+"/"+shomeUrl));
-			initialised = true;
-		    }
+        		    if (shomeUrl == "not_here.html") // this is a hack
+            			shomeUrl = "index.html";
+        		    if (!initialised && shomeUrl!="")
+        		    {
+            			webView->setUrl(QUrl(strCurrentSavePath+"/"+shomeUrl));
+            			initialised = true;
+        		    }
                 }
             }
         }
-	return true;
+    	return true;
     }
     return false;
 }
