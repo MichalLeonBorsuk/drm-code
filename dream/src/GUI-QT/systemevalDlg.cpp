@@ -602,7 +602,15 @@ void systemevalDlg::hideEvent(QHideEvent*)
 void systemevalDlg::OnTimerInterDigit()
 {
     TimerInterDigit.stop();
-    DRMReceiver.SetFrequency(EdtFrequency->text().toInt());
+    QString strFreq = EdtFrequency->text();
+    int len = strFreq.length();
+    /* Keep only characters 0 to 9 */
+    for (int i = 0; i < len; i++)
+        if (!(strFreq[i]>=QChar('0') && strFreq[i]<=QChar('9')))
+            { strFreq.remove(i, 1); len--; i--; }
+    int freq = strFreq.toInt();
+    EdtFrequency->setText(QString::number(freq));
+    DRMReceiver.SetFrequency(freq);
 #ifdef _WIN32
     /* Compatibility with DRMLogger */
     CheckBoxWriteLog->setFocus();
