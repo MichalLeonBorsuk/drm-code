@@ -80,6 +80,9 @@ protected:
 
 	virtual void	showEvent(QShowEvent* pEvent);
 	virtual void	hideEvent(QHideEvent* pEvent);
+#ifdef _WIN32
+	virtual bool	winEvent(MSG *message, long *result);
+#endif
 	void			UpdateGPS(CParameter&);
 	void			UpdateControls();
 	void			AddWhatsThisHelp();

@@ -310,6 +310,22 @@ void systemevalDlg::UpdateControls()
     }
 }
 
+#ifdef _WIN32
+/* Compatibility with DRMLogger */
+bool systemevalDlg::winEvent(MSG *msg, long *result)
+{
+	(void)result;
+	if (msg->message == WM_ACTIVATE && msg->wParam == WA_ACTIVE)
+	{
+		if (CheckBoxWriteLog->isChecked())
+			EdtFrequency->setFocus();
+		else
+			CheckBoxWriteLog->setFocus();
+	}
+	return false;
+}
+#endif
+
 void systemevalDlg::showEvent(QShowEvent* e)
 {
 	EVENT_FILTER(e);
@@ -351,10 +367,10 @@ void systemevalDlg::showEvent(QShowEvent* e)
     /* Notify the MainPlot of showEvent */
     MainPlot->activate();
 #endif
-#ifdef _WIN32
-    /* Compatibility with DRMLogger */
-    CheckBoxWriteLog->setFocus();
-#endif
+//#ifdef _WIN32
+//    /* Compatibility with DRMLogger */
+//    CheckBoxWriteLog->setFocus();
+//#endif
 }
 
 void systemevalDlg::hideEvent(QHideEvent* e)
@@ -429,17 +445,30 @@ void systemevalDlg::OnTimerInterDigit()
     EdtFrequency->setText(QString::number(freq));
     bEdtFrequencyMutex = FALSE;
     DRMReceiver.SetFrequency(freq);
-#ifdef _WIN32
-    /* Compatibility with DRMLogger */
-    CheckBoxWriteLog->setFocus();
-#endif
+//#ifdef _WIN32
+//    /* Compatibility with DRMLogger */
+//    CheckBoxWriteLog->setFocus();
+//#endif
 }
 
-void systemevalDlg::OnFrequencyEdited(const QString &)
+void systemevalDlg::OnFrequencyEdited(const QString&)
 {
     if (!bEdtFrequencyMutex)
     {
-        TimerInterDigit.stop();
+#ifdef _WIN32
+		/* Compatibility with DRMLogger */
+		QString strFreq = EdtFrequency->text();
+		int pos = strFreq.lastIndexOf(QChar('L'), -1, Qt::CaseInsensitive);
+		if (pos >= 0 && (pos+1) == strFreq.length())
+		{
+			strFreq.remove(pos, 1);
+			bEdtFrequencyMutex = TRUE;
+			EdtFrequency->setText(strFreq);
+			bEdtFrequencyMutex = FALSE;
+			CheckBoxWriteLog->toggle();
+		}
+#endif
+		TimerInterDigit.stop();
         TimerInterDigit.start(1000);
     }
 }
