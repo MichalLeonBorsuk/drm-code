@@ -125,7 +125,7 @@ AnalogDemDlg::AnalogDemDlg(CDRMReceiver& NDRMR, CSettings& NSettings,
     connect(actionAbout_Dream, SIGNAL(triggered()), this, SLOT(OnHelpAbout()));
     connect(actionWhats_This, SIGNAL(triggered()), this, SLOT(on_actionWhats_This()));
     SliderBandwidth->setTickPosition(QSlider::TicksBothSides);
-    MainPlot = new CDRMPlot(plot);
+    MainPlot = new CDRMPlot(NULL, plot);
 #endif
 
 	/* Init main plot */

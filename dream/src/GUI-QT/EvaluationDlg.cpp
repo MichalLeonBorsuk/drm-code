@@ -59,7 +59,7 @@ systemevalDlg::systemevalDlg(CDRMReceiver& NDRMR, CSettings& NSettings,
     /* Init controls -------------------------------------------------------- */
 
     /* Init main plot */
-    MainPlot = new CDRMPlot(plot);
+    MainPlot = new CDRMPlot(NULL, plot);
     MainPlot->SetRecObj(&DRMReceiver);
 
     /* Init slider control */
@@ -492,7 +492,7 @@ void systemevalDlg::OnCustomContextMenuRequested(const QPoint& p)
 CDRMPlot* systemevalDlg::OpenChartWin(CDRMPlot::ECharType eNewType)
 {
     /* Create new chart window */
-    CDRMPlot* pNewChartWin = new CDRMPlot(NULL);
+    CDRMPlot* pNewChartWin = new CDRMPlot(this, NULL);
     pNewChartWin->setCaption(tr("Chart Window"));
 
     /* Set correct icon (use the same as this dialog) */

@@ -182,7 +182,7 @@ class QwtPlotDialog : public QDialog
 	Q_OBJECT
 
 public:
-	QwtPlotDialog()
+	QwtPlotDialog(QWidget* parent) : QDialog(parent)
 	{
 		setWindowFlags(Qt::Window);
 		resize(WINDOW_CHART_WIDTH, WINDOW_CHART_HEIGHT);
@@ -198,7 +198,6 @@ public:
 	void hide() { emit deactivate(); QDialog::hide(); }
 
 protected:
-	QDialog Dialog;
 	QFrame *Frame;
 	QwtPlot *Plot;
 	void reject() { emit deactivate(); QDialog::reject(); }
@@ -244,7 +243,7 @@ public:
 		NONE_OLD = 16 /* None must always be the last element! (see settings) */
 	};
 
-	CDRMPlot(QwtPlot*);
+	CDRMPlot(QWidget*, QwtPlot*);
 	~CDRMPlot();
 
 	QwtPlot         *plot;
