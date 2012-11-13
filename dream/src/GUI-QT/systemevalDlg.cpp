@@ -1204,7 +1204,7 @@ QString	systemevalDlg::GetSpecOccStr()
     switch (DRMReceiver.GetParameters()->GetSpectrumOccup())
     {
     case SO_0:
-        return "4,5 kHz";
+        return "4.5 kHz";
         break;
 
     case SO_1:
