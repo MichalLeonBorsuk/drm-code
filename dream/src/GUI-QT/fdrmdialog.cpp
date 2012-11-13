@@ -848,11 +848,13 @@ void FDRMDialog::ClearDisplay()
     for(size_t i=0; i<serviceLabels.size(); i++)
     {
 #if QT_VERSION < 0x040000
-        pButtonGroup->find(i)->setEnabled(FALSE);
-        pButtonGroup->find(i)->setChecked(FALSE);
+        QPushButton* button = (QPushButton*)pButtonGroup->find(i);
+        if (button && button->isEnabled()) button->setEnabled(FALSE);
+        if (button && button->isOn())      button->setOn(FALSE);
 #else
-        pButtonGroup->button(i)->setEnabled(FALSE);
-        pButtonGroup->button(i)->setChecked(FALSE);
+        QPushButton* button = (QPushButton*)pButtonGroup->button(i);
+        if (button && button->isEnabled()) button->setEnabled(FALSE);
+        if (button && button->isChecked()) button->setChecked(FALSE);
 #endif
         serviceLabels[i]->setText("");
     }
