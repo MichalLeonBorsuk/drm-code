@@ -928,6 +928,9 @@ CDRMReceiver::SetInStartMode()
     ReceiverParam.ReceiveStatus.Audio.SetStatus(NOT_PRESENT);
     ReceiverParam.ReceiveStatus.MOT.SetStatus(NOT_PRESENT);
 
+    /* Clear audio decoder string */
+    ReceiverParam.audiodecoder.clear();
+
     ReceiverParam.Unlock();
 
     /* In case upstreamRSCI is enabled, go directly to tracking mode, do not activate the

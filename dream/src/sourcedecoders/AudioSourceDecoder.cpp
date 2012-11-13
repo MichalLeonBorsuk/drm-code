@@ -697,6 +697,9 @@ CAudioSourceDecoder::InitInternal(CParameter & ReceiverParam)
     DoNotProcessData = FALSE;
     iOutputBlockSize = 0;
 
+    /* Set audiodecoder to empty string - means "unknown" and "can't decode" to GUI */
+    audiodecoder.clear();
+
     try
     {
 
@@ -755,7 +758,6 @@ CAudioSourceDecoder::InitInternal(CParameter & ReceiverParam)
         }
 
         /* Get audio coding type */
-        audiodecoder = ""; // set to empty string - means "unknown" and "can't decode" to GUI
         eAudioCoding =
             ReceiverParam.Service[iCurSelServ].AudioParam.eAudioCoding;
 
@@ -883,8 +885,6 @@ CAudioSourceDecoder::InitInternal(CParameter & ReceiverParam)
             /* Init for CELP decoding --------------------------------------- */
             if(canDecodeCELP)
                 audiodecoder = string("CELP Codec");
-			else
-                audiodecoder = "";
 
             int iCurCelpIdx, iCelpFrameLength;
 
@@ -991,8 +991,6 @@ CAudioSourceDecoder::InitInternal(CParameter & ReceiverParam)
         {
             if(canDecodeHVXC)
                 audiodecoder = string("HVXC Codec");
-			else
-                audiodecoder = "";
 
 			iAudioSampleRate = 8000;
             iNumAudioFrames = 400 / 20;
