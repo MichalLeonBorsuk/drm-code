@@ -68,7 +68,7 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& NSettings, CRig& rig,
     iMultimediaServiceBit(0),
     iLastMultimediaServiceSelected(-1)
 {
-    /* recover window size and position */
+    /* Recover window size and position */
     CWinGeom s;
     Settings.Get("DRM Dialog", s);
     const QRect WinGeom(s.iXPos, s.iYPos, s.iWSize, s.iHSize);
@@ -87,14 +87,17 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& NSettings, CRig& rig,
     /* Multimedia window */
     pMultiMediaDlg = new MultimediaDlg(DRMReceiver, this, "", FALSE, Qt::WStyle_MinMax);
     pMultiMediaDlg->LoadSettings(Settings);
+    SetDialogCaption(pMultiMediaDlg, tr("Multimedia"));
 
     /* Stations window */
     pStationsDlg = new StationsDlg(DRMReceiver, /*Settings,*/ rig, this, "", FALSE, Qt::WStyle_MinMax);
     pStationsDlg->LoadSettings(Settings);
+    SetDialogCaption(pStationsDlg, tr("Stations"));
 
     /* Live Schedule window */
     pLiveScheduleDlg = new LiveScheduleDlg(DRMReceiver, NULL, "", FALSE, Qt::WType_TopLevel);
     pLiveScheduleDlg->LoadSettings(Settings);
+    SetDialogCaption(pLiveScheduleDlg, tr("Live Schedule"));
 
     /* Programme Guide Window */
     pEPGDlg = new EPGDlg(DRMReceiver, Settings, this, "", FALSE, Qt::WStyle_MinMax);
@@ -102,12 +105,15 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& NSettings, CRig& rig,
 
     /* Evaluation window */
     pSysEvalDlg = new systemevalDlg(DRMReceiver, Settings, this, "", FALSE, Qt::WStyle_MinMax);
+    SetDialogCaption(pSysEvalDlg, tr("System Evaluation"));
 
 	/* Analog demodulation window */
-    pAnalogDemDlg = new AnalogDemDlg(DRMReceiver, Settings, NULL, "Analog Demodulation", FALSE, Qt::WStyle_MinMax);
+    pAnalogDemDlg = new AnalogDemDlg(DRMReceiver, Settings, NULL, "", FALSE, Qt::WStyle_MinMax);
+    SetDialogCaption(pAnalogDemDlg, tr("Analog Demodulation"));
 
     /* FM window */
-    pFMDlg = new FMDialog(DRMReceiver, Settings, rig, NULL, "FM Receiver", FALSE, Qt::WStyle_MinMax);
+    pFMDlg = new FMDialog(DRMReceiver, Settings, rig, NULL, "", FALSE, Qt::WStyle_MinMax);
+    SetDialogCaption(pFMDlg, tr("FM Receiver"));
 
 	/* general settings window */
     pGeneralSettingsDlg = new GeneralSettingsDlg(Parameters, Settings, this, "", TRUE, Qt::WStyle_Dialog);
@@ -117,71 +123,68 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& NSettings, CRig& rig,
     pMultSettingsDlg = new MultSettingsDlg(Parameters, Settings, this, "", TRUE, Qt::WStyle_Dialog);
     SetDialogCaption(pMultSettingsDlg, tr("Multimedia settings"));
 
-    SetDialogCaption(pMultiMediaDlg, tr("Multimedia"));
-    SetDialogCaption(pSysEvalDlg, tr("System Evaluation"));
-    SetDialogCaption(pStationsDlg, tr("Stations"));
-    SetDialogCaption(pLiveScheduleDlg, tr("Live Schedule"));
-        /* Set Menu ***************************************************************/
-        /* View menu ------------------------------------------------------------ */
-        QPopupMenu* EvalWinMenu = new QPopupMenu(this);
-        CHECK_PTR(EvalWinMenu);
-        EvalWinMenu->insertItem(tr("&Evaluation Dialog..."), pSysEvalDlg,
-                SLOT(show()), Qt::CTRL+Qt::Key_E, 0);
-        EvalWinMenu->insertItem(tr("M&ultimedia Dialog..."), pMultiMediaDlg,
-                SLOT(show()), Qt::CTRL+Qt::Key_U, 1);
-        EvalWinMenu->insertItem(tr("S&tations Dialog..."), pStationsDlg,
-                SLOT(show()), Qt::CTRL+Qt::Key_T, 2);
-        EvalWinMenu->insertItem(tr("&Live Schedule Dialog..."), pLiveScheduleDlg,
-                SLOT(show()), Qt::CTRL+Qt::Key_L, 3);
-        EvalWinMenu->insertItem(tr("&Programme Guide..."), pEPGDlg,
-                SLOT(show()), Qt::CTRL+Qt::Key_P, 4);
-        EvalWinMenu->insertSeparator();
-        EvalWinMenu->insertItem(tr("E&xit"), this, SLOT(close()), Qt::CTRL+Qt::Key_Q, 5);
+    /* Set Menu ***************************************************************/
+    /* View menu ------------------------------------------------------------ */
+    QPopupMenu* EvalWinMenu = new QPopupMenu(this);
+    CHECK_PTR(EvalWinMenu);
+    EvalWinMenu->insertItem(tr("&Evaluation Dialog..."), pSysEvalDlg,
+            SLOT(show()), Qt::CTRL+Qt::Key_E, 0);
+    EvalWinMenu->insertItem(tr("M&ultimedia Dialog..."), pMultiMediaDlg,
+            SLOT(show()), Qt::CTRL+Qt::Key_U, 1);
+    EvalWinMenu->insertItem(tr("S&tations Dialog..."), pStationsDlg,
+            SLOT(show()), Qt::CTRL+Qt::Key_T, 2);
+    EvalWinMenu->insertItem(tr("&Live Schedule Dialog..."), pLiveScheduleDlg,
+            SLOT(show()), Qt::CTRL+Qt::Key_L, 3);
+    EvalWinMenu->insertItem(tr("&Programme Guide..."), pEPGDlg,
+            SLOT(show()), Qt::CTRL+Qt::Key_P, 4);
+    EvalWinMenu->insertSeparator();
+    EvalWinMenu->insertItem(tr("E&xit"), this, SLOT(close()), Qt::CTRL+Qt::Key_Q, 5);
 
-        /* Settings menu  ------------------------------------------------------- */
-        pSettingsMenu = new QPopupMenu(this);
-        CHECK_PTR(pSettingsMenu);
-        pSettingsMenu->insertItem(tr("&Sound Card Selection"),
-                new CSoundCardSelMenu(DRMReceiver.GetSoundInInterface(),
-                DRMReceiver.GetSoundOutInterface(), this));
+    /* Settings menu  ------------------------------------------------------- */
+    pSettingsMenu = new QPopupMenu(this);
+    CHECK_PTR(pSettingsMenu);
+    pSettingsMenu->insertItem(tr("&Sound Card Selection"),
+            new CSoundCardSelMenu(DRMReceiver.GetSoundInInterface(),
+            DRMReceiver.GetSoundOutInterface(), this));
 
-        pSettingsMenu->insertItem(tr("&AM (analog)"), this,
-                SLOT(OnSwitchToAM()), Qt::CTRL+Qt::Key_A);
-        pSettingsMenu->insertItem(tr("&FM (analog)"), this,
-                SLOT(OnSwitchToFM()), Qt::CTRL+Qt::Key_F);
-        pSettingsMenu->insertItem(tr("New &DRM Acquisition"), this,
-                SLOT(OnNewAcquisition()), Qt::CTRL+Qt::Key_D);
-        pSettingsMenu->insertSeparator();
-        pSettingsMenu->insertItem(tr("Set D&isplay Color..."), this,
-                SLOT(OnMenuSetDisplayColor()));
-        /* Plot style settings */
-        pPlotStyleMenu = new QPopupMenu(this);
-        pPlotStyleMenu->insertItem(tr("&Blue / White"), this, SLOT(OnMenuPlotStyle(int)), 0, 0);
-        pPlotStyleMenu->insertItem(tr("&Green / Black"), this, SLOT(OnMenuPlotStyle(int)), 0, 1);
-        pPlotStyleMenu->insertItem(tr("B&lack / Grey"), this, SLOT(OnMenuPlotStyle(int)), 0, 2);
-        pSettingsMenu->insertItem(tr("&Plot Style"), pPlotStyleMenu);
+    pSettingsMenu->insertItem(tr("&AM (analog)"), this,
+            SLOT(OnSwitchToAM()), Qt::CTRL+Qt::Key_A);
+    pSettingsMenu->insertItem(tr("&FM (analog)"), this,
+            SLOT(OnSwitchToFM()), Qt::CTRL+Qt::Key_F);
+    pSettingsMenu->insertItem(tr("New &DRM Acquisition"), this,
+            SLOT(OnNewAcquisition()), Qt::CTRL+Qt::Key_D);
+    pSettingsMenu->insertSeparator();
+    pSettingsMenu->insertItem(tr("Set D&isplay Color..."), this,
+            SLOT(OnMenuSetDisplayColor()));
+    /* Plot style settings */
+    pPlotStyleMenu = new QPopupMenu(this);
+    pPlotStyleMenu->insertItem(tr("&Blue / White"), this, SLOT(OnMenuPlotStyle(int)), 0, 0);
+    pPlotStyleMenu->insertItem(tr("&Green / Black"), this, SLOT(OnMenuPlotStyle(int)), 0, 1);
+    pPlotStyleMenu->insertItem(tr("B&lack / Grey"), this, SLOT(OnMenuPlotStyle(int)), 0, 2);
+    pSettingsMenu->insertItem(tr("&Plot Style"), pPlotStyleMenu);
 
-        /* Set check */
-        pPlotStyleMenu->setItemChecked(Settings.Get("System Evaluation Dialog", "plotstyle", 0), TRUE);
+    /* Set check */
+    pPlotStyleMenu->setItemChecked(Settings.Get("System Evaluation Dialog", "plotstyle", 0), TRUE);
 
-        /* multimedia settings */
-        pSettingsMenu->insertSeparator();
-        pSettingsMenu->insertItem(tr("&Multimedia settings..."), pMultSettingsDlg,
-                SLOT(show()));
+    /* Multimedia settings */
+    pSettingsMenu->insertSeparator();
+    pSettingsMenu->insertItem(tr("&Multimedia settings..."), pMultSettingsDlg,
+            SLOT(show()));
 
-        pSettingsMenu->insertItem(tr("&General settings..."), pGeneralSettingsDlg,
-                SLOT(show()));
+    pSettingsMenu->insertItem(tr("&General settings..."), pGeneralSettingsDlg,
+            SLOT(show()));
 
-        /* Main menu bar -------------------------------------------------------- */
-        pMenu = new QMenuBar(this);
-        CHECK_PTR(pMenu);
-        pMenu->insertItem(tr("&View"), EvalWinMenu);
-        pMenu->insertItem(tr("&Settings"), pSettingsMenu);
-        pMenu->insertItem(tr("&?"), new CDreamHelpMenu(this));
-        pMenu->setSeparator(QMenuBar::InWindowsStyle);
+    /* Main menu bar -------------------------------------------------------- */
+    pMenu = new QMenuBar(this);
+    CHECK_PTR(pMenu);
+    pMenu->insertItem(tr("&View"), EvalWinMenu);
+    pMenu->insertItem(tr("&Settings"), pSettingsMenu);
+    pMenu->insertItem(tr("&?"), new CDreamHelpMenu(this));
+    pMenu->setSeparator(QMenuBar::InWindowsStyle);
 
-        /* Now tell the layout about the menu */
-        FDRMDialogBaseLayout->setMenuBar(pMenu);
+    /* Now tell the layout about the menu */
+    FDRMDialogBaseLayout->setMenuBar(pMenu);
+
     connect(this, SIGNAL(plotStyleChanged(int)), pSysEvalDlg, SLOT(UpdatePlotStyle(int)));
     connect(this, SIGNAL(plotStyleChanged(int)), pAnalogDemDlg, SLOT(UpdatePlotStyle(int)));
 
@@ -352,11 +355,6 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& NSettings, CRig& rig,
     serviceLabels[1] = TextMiniService2;
     serviceLabels[2] = TextMiniService3;
     serviceLabels[3] = TextMiniService4;
-
-// DF: Not needed set at ui file level
-//#if QT_VERSION >= 0x040000
-//	TextTextMessage->setWordWrap(true);
-//#endif
 
     ClearDisplay();
 
