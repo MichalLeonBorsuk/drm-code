@@ -547,7 +547,7 @@ Station::EState CDRMSchedule::GetState(const int iPos)
             unsetenv("TZ");
 #endif
 #else
-    QDateTime dt = QDateTime::currentDateTime()toUtc();
+    QDateTime dt = QDateTime::currentDateTime().toUTC();
 #endif
 
     return StationsTable[iPos].stateAt(dt, GetSecondsPreview());
