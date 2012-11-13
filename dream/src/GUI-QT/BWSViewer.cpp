@@ -41,6 +41,8 @@ BWSViewer::BWSViewer(CDRMReceiver& rec, CSettings& s, QWidget* parent, Qt::WFlag
 
     setupUi(this);
 
+    webView->page()->setLinkDelegationPolicy(QWebPage::DelegateAllLinks);
+
     connect(buttonOk, SIGNAL(clicked()), this, SLOT(close()));
 
     connect(actionClear_All, SIGNAL(triggered()), SLOT(OnClearAll()));
@@ -55,6 +57,7 @@ BWSViewer::BWSViewer(CDRMReceiver& rec, CSettings& s, QWidget* parent, Qt::WFlag
     /* Connect controls */
     connect(ButtonStepBack, SIGNAL(clicked()), webView, SLOT(back()));
     connect(ButtonStepForward, SIGNAL(clicked()), webView, SLOT(forward()));
+    connect(webView, SIGNAL(linkClicked(const QUrl &)), this, SLOT(OnlinkClicked(const QUrl &)));
     connect(ButtonHome, SIGNAL(clicked()), this, SLOT(OnHome()));
 
     OnClearAll();
@@ -134,8 +137,21 @@ void BWSViewer::OnClearAll()
 
 void BWSViewer::OnHome()
 {
-    QString shomeUrl("index.html");
-    webView->setUrl(QUrl(strCurrentSavePath+"/"+shomeUrl));
+    if (!sHomeUrl.isEmpty())
+    {
+	    QUrl url(strCurrentSavePath + "/" + sHomeUrl);
+        webView->setUrl(url);
+    }
+    else
+        webView->setHtml("");
+}
+
+void BWSViewer::OnlinkClicked(const QUrl & url)
+{
+    QString file(url.toLocalFile());
+    if (file.endsWith(".stm")) // TODO hack
+        file.append(".html");
+    webView->setUrl(QUrl(file));
 }
 
 void BWSViewer::onSetProfile(bool isChecked)
@@ -224,7 +240,7 @@ void BWSViewer::hideEvent(QHideEvent* e)
 
 bool BWSViewer::changed()
 {
-    if (decoder==NULL)
+    if (decoder == NULL)
         return false;
 
     CMOTObject obj;
@@ -232,14 +248,16 @@ bool BWSViewer::changed()
     /* Poll the data decoder module for new object */
     if (decoder->GetMOTObject(obj, CDataDecoder::AT_BROADCASTWEBSITE) == TRUE)
     {
-        const QString strObjName = obj.strName.c_str();
+        QString strObjName = obj.strName.c_str();
+		if (strObjName.endsWith(".stm")) // TODO hack
+			strObjName.append(".html");
 
         /* Store received MOT object on disk */
         const QString strFileName = strCurrentSavePath + "/" + strObjName;
         SaveMOTObject(obj.Body.vecData, strFileName);
 
 	    /* Store it in the internal map */
-	    if (strObjName.endsWith("html") || strObjName.endsWith("stm"))
+	    if (strObjName.endsWith(".html") /*|| strObjName.endsWith(".stm")*/)
         {
 	        QString s;
 	        for(int i=0; i<obj.Body.vecData.Size(); i++)
@@ -266,19 +284,20 @@ bool BWSViewer::changed()
                 /* Checks if the DirectoryIndex has values */
                 if (MOTDir.DirectoryIndex.size() > 0)
                 {
-		            QString shomeUrl;
+		            QString sNewHomeUrl;
                     if(MOTDir.DirectoryIndex.find(UNRESTRICTED_PC_PROFILE) != MOTDir.DirectoryIndex.end())
-                        shomeUrl =
+                        sNewHomeUrl =
                             MOTDir.DirectoryIndex[UNRESTRICTED_PC_PROFILE].c_str();
                     else if(MOTDir.DirectoryIndex.find(BASIC_PROFILE) != MOTDir.DirectoryIndex.end())
-                        shomeUrl =
+                        sNewHomeUrl =
                             MOTDir.DirectoryIndex[BASIC_PROFILE].c_str();
-        		    if (shomeUrl == "not_here.html") // this is a hack
-            			shomeUrl = "index.html";
-        		    if (!initialised && shomeUrl!="")
+        		    if (sNewHomeUrl == "not_here.html") // this is a hack
+            			sNewHomeUrl = "index.html";
+        		    if (!initialised && !sNewHomeUrl.isEmpty())
         		    {
-            			webView->setUrl(QUrl(strCurrentSavePath+"/"+shomeUrl));
+                        sHomeUrl = sNewHomeUrl;
             			initialised = true;
+                        OnHome();
         		    }
                 }
             }

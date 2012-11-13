@@ -59,6 +59,7 @@ protected:
     void SaveMOTObject(const CVector<_BYTE>& vecbRawData, const QString& strFileName);
     CDataDecoder*   decoder;
     std::map<QString,QVariant> pages;
+    QString         sHomeUrl;
     CEventFilter    ef;
 
 public slots:
@@ -68,6 +69,7 @@ public slots:
     void OnClearAll();
     void OnHome();
     void onSetProfile(bool);
+    void OnlinkClicked(const QUrl & url);
     void showEvent(QShowEvent*);
     void hideEvent(QHideEvent*);
 };
