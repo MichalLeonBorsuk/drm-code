@@ -528,6 +528,7 @@ QTreeWidgetItem* systemevalDlg::FindItemByECharType(CDRMPlot::ECharType eCharTyp
 
 CDRMPlot::ECharType systemevalDlg::PlotNameToECharType(const string& PlotName)
 {
+    QString plotName(PlotName.c_str());
     for (int i = 0;; i++)
     {
         QTreeWidgetItem* item = chartSelector->topLevelItem(i);
@@ -536,7 +537,7 @@ CDRMPlot::ECharType systemevalDlg::PlotNameToECharType(const string& PlotName)
         for (int j = 0; j < item->childCount(); j++)
         {
             QTreeWidgetItem* subitem = item->child(j);
-            if (QString(PlotName.c_str()) == subitem->text(0))
+            if (plotName == subitem->text(0))
                 return CDRMPlot::ECharType(subitem->data(0, Qt::UserRole).toInt());
         }
     }
