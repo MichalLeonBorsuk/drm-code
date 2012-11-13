@@ -11,10 +11,10 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>Dream</string>
   </property>
   <property name="windowIcon">
-   <iconset>
+   <iconset resource="res/icons.qrc">
     <normaloff>:/icons/MainIcon.png</normaloff>:/icons/MainIcon.png</iconset>
   </property>
   <widget class="QWidget" name="centralwidget">
@@ -6392,6 +6392,8 @@
    <header location="global">MultColorLED.h</header>
   </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="res/icons.qrc"/>
+ </resources>
  <connections/>
 </ui>

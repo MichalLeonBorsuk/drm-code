@@ -520,6 +520,12 @@ Institute for Communication Technology</string>
           </property>
           <item>
            <widget class="QGroupBox" name="ButtonGroupIF">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
             <property name="title">
              <string>Intermediate Frequency</string>
             </property>
@@ -566,20 +572,13 @@ Institute for Communication Technology</string>
            </widget>
           </item>
           <item>
-           <spacer name="verticalSpacer_2">
-            <property name="orientation">
-             <enum>Qt::Vertical</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>20</width>
-              <height>40</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item>
            <widget class="QGroupBox" name="GroupBoxOutput">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
             <property name="title">
              <string>Format</string>
             </property>
@@ -662,7 +661,7 @@ Institute for Communication Technology</string>
             <property name="sizeHint" stdset="0">
              <size>
               <width>20</width>
-              <height>44</height>
+              <height>0</height>
              </size>
             </property>
            </spacer>
@@ -682,12 +681,24 @@ Institute for Communication Technology</string>
           </property>
           <item>
            <widget class="QGroupBox" name="GroupBoxCurrentTime">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
             <property name="title">
              <string>Current Time Transmission</string>
             </property>
             <layout class="QHBoxLayout" name="horizontalLayout_4">
              <item>
               <widget class="QRadioButton" name="RadioButtonCurTimeOff">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
                <property name="text">
                 <string>Off</string>
                </property>
@@ -698,6 +709,12 @@ Institute for Communication Technology</string>
              </item>
              <item>
               <widget class="QRadioButton" name="RadioButtonCurTimeLocal">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
                <property name="text">
                 <string>Local</string>
                </property>
@@ -708,6 +725,12 @@ Institute for Communication Technology</string>
              </item>
              <item>
               <widget class="QRadioButton" name="RadioButtonCurTimeUTC">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
                <property name="text">
                 <string>UTC</string>
                </property>
@@ -718,6 +741,12 @@ Institute for Communication Technology</string>
              </item>
              <item>
               <widget class="QRadioButton" name="RadioButtonCurTimeUTCOffset">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
                <property name="text">
                 <string>UTC+Offset</string>
                </property>
