@@ -35,7 +35,7 @@
 
 
 /* Implementation *************************************************************/
-CDRMPlot::CDRMPlot(QwtPlot* SuppliedPlot) :
+CDRMPlot::CDRMPlot(QWidget* parent, QwtPlot* SuppliedPlot) :
 	SuppliedPlot(SuppliedPlot), DialogPlot(NULL), bActive(FALSE),
 	CurCharType(NONE_OLD), InitCharType(NONE_OLD),
 	eLastSDCCodingScheme((ECodScheme)-1), eLastMSCCodingScheme((ECodScheme)-1),
@@ -44,7 +44,7 @@ CDRMPlot::CDRMPlot(QwtPlot* SuppliedPlot) :
 	/* Create new plot if none is supplied */
 	if (SuppliedPlot == NULL)
 	{
-		DialogPlot = new QwtPlotDialog();
+		DialogPlot = new QwtPlotDialog(parent);
 		plot = DialogPlot->GetPlot();
 	}
 	else
