@@ -698,7 +698,7 @@ CAudioSourceDecoder::InitInternal(CParameter & ReceiverParam)
     iOutputBlockSize = 0;
 
     /* Set audiodecoder to empty string - means "unknown" and "can't decode" to GUI */
-    audiodecoder.clear();
+    audiodecoder = "";
 
     try
     {
