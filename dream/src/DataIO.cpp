@@ -191,7 +191,8 @@ void CWriteData::InitInternal(CParameter&)
     vecsTmpAudData.Init(iAudFrameSize * 2 /* stereo */);
 
     /* Inits for audio spectrum plot */
-    vecrHammingWindow = Hamming(NUM_SMPLS_4_AUDIO_SPECTRUM);
+//  vecrAudioWindowFunction = Hamming(NUM_SMPLS_4_AUDIO_SPECTRUM);
+    vecrAudioWindowFunction = Hann(NUM_SMPLS_4_AUDIO_SPECTRUM); /* higher dynamic range */
     vecsOutputData.Reset(0); /* Reset audio data storage vector */
 
     /* Define block-size for input (stereo input) */
@@ -208,7 +209,7 @@ CWriteData::CWriteData(CSoundOutInterface* pNS) : pSound(pNS), /* Sound interfac
         FftPlan(NUM_SMPLS_4_AUDIO_SPECTRUM),
         veccFFTInput(NUM_SMPLS_4_AUDIO_SPECTRUM),
         veccFFTOutput(NUM_SMPLS_4_AUDIO_SPECTRUM),
-        vecrHammingWindow(NUM_SMPLS_4_AUDIO_SPECTRUM)
+        vecrAudioWindowFunction(NUM_SMPLS_4_AUDIO_SPECTRUM)
 {
     /* Constructor */
 }
@@ -263,8 +264,8 @@ void CWriteData::GetAudioSpec(CVector<_REAL>& vecrData,
             veccFFTInput[j] = _REAL(vecsOutputData[jj] + vecsOutputData[jj + 1]) / 2;
         }
 
-        /* Apply hamming window */
-        veccFFTInput *= vecrHammingWindow;
+        /* Apply window function */
+        veccFFTInput *= vecrAudioWindowFunction;
 
         /* Calculate Fourier transformation to get the spectrum */
         veccFFTOutput = Fft(veccFFTInput, FftPlan);

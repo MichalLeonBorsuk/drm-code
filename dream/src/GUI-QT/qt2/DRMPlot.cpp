@@ -641,9 +641,9 @@ void CDRMPlot::SetupAudioSpec()
 	canvas()->setBackgroundMode(QWidget::PaletteBackground);
 
 	/* Fixed scale */
-	setAxisScale(QwtPlot::yLeft, (double) -90.0, (double) -20.0);
+	setAxisScale(QwtPlot::yLeft, (double) -100.0, (double) -20.0);
 	double dBandwidth = (double) SOUNDCRD_SAMPLE_RATE / 2400; /* 20.0 for 48 kHz */
-	if (dBandwidth < 20.0)
+	if (dBandwidth < (double) 20.0)
 		dBandwidth = (double) 20.0;
 
 	setAxisScale(QwtPlot::xBottom, (double) 0.0, dBandwidth);
