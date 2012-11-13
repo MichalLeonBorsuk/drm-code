@@ -513,7 +513,7 @@ QTreeWidgetItem* systemevalDlg::FindItemByECharType(CDRMPlot::ECharType eCharTyp
 {
     for (int i = 0;; i++)
     {
-		QTreeWidgetItem* item = chartSelector->topLevelItem(i);
+        QTreeWidgetItem* item = chartSelector->topLevelItem(i);
         if (item == NULL)
             return NULL;
         for (int j = 0; j < item->childCount(); j++)
@@ -526,23 +526,28 @@ QTreeWidgetItem* systemevalDlg::FindItemByECharType(CDRMPlot::ECharType eCharTyp
     }
 }
 
+CDRMPlot::ECharType systemevalDlg::PlotNameToECharType(const string& PlotName)
+{
+    for (int i = 0;; i++)
+    {
+        QTreeWidgetItem* item = chartSelector->topLevelItem(i);
+        if (item == NULL)
+            return CDRMPlot::AUDIO_SPECTRUM; /* safe value */
+        for (int j = 0; j < item->childCount(); j++)
+        {
+            QTreeWidgetItem* subitem = item->child(j);
+            if (QString(PlotName.c_str()) == subitem->text(0))
+                return CDRMPlot::ECharType(subitem->data(0, Qt::UserRole).toInt());
+        }
+    }
+}
+
 string systemevalDlg::ECharTypeToPlotName(CDRMPlot::ECharType eCharType)
 {
     QTreeWidgetItem* item = FindItemByECharType(eCharType);
     if (item != NULL)
         return string(item->text(0).toStdString());
     return string();
-}
-
-CDRMPlot::ECharType systemevalDlg::PlotNameToECharType(const string& PlotName)
-{
-    QList<QTreeWidgetItem*> pl = chartSelector->findItems(PlotName.c_str(), Qt::MatchRecursive);
-    if (pl.size() > 0)
-    {
-        QTreeWidgetItem* subitem = pl.first();
-        return CDRMPlot::ECharType(subitem->data(0, Qt::UserRole).toInt());
-    }
-    return CDRMPlot::AUDIO_SPECTRUM; /* safe value */
 }
 
 void systemevalDlg::SetStatus(CMultColorLED* LED, ETypeRxStatus state)
