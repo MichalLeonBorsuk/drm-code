@@ -844,8 +844,14 @@ void FDRMDialog::ClearDisplay()
 {
     /* No signal is currently received ---------------------------------- */
     /* Disable service buttons and associated labels */
+    pButtonGroup->setExclusive(FALSE);
     for(size_t i=0; i<serviceLabels.size(); i++)
+    {
+        pButtonGroup->button(i)->setEnabled(FALSE);
+        pButtonGroup->button(i)->setChecked(FALSE);
         serviceLabels[i]->setText("");
+    }
+    pButtonGroup->setExclusive(TRUE);
 
     /* Main text labels */
     LabelBitrate->setText("");
