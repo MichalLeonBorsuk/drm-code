@@ -13,10 +13,17 @@
   <property name="windowTitle">
    <string>Stations</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="res/icons.qrc">
+    <normaloff>:/icons/MainIcon.png</normaloff>:/icons/MainIcon.png</iconset>
+  </property>
   <property name="sizeGripEnabled">
    <bool>true</bool>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_3">
+   <property name="topMargin">
+    <number>0</number>
+   </property>
    <item>
     <widget class="QMenuBar" name="menubar">
      <widget class="QMenu" name="menuView">

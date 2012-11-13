@@ -22,6 +22,10 @@
   <property name="windowTitle">
    <string>Programme Guide</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="res/icons.qrc">
+    <normaloff>:/icons/MainIcon.png</normaloff>:/icons/MainIcon.png</iconset>
+  </property>
   <property name="sizeGripEnabled">
    <bool>true</bool>
   </property>
@@ -237,7 +241,9 @@
   <tabstop>pages</tabstop>
   <tabstop>close</tabstop>
  </tabstops>
- <resources/>
+ <resources>
+  <include location="res/icons.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>close</sender>
