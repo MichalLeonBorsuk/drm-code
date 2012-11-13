@@ -189,7 +189,7 @@ void CDRMPlot::OnTimerChart()
 	_REAL rDCFrequency = Parameters.GetDCFrequency();
 	ECodScheme eSDCCodingScheme = Parameters.eSDCCodingScheme;
 	ECodScheme eMSCCodingScheme = Parameters.eMSCCodingScheme;
-	_BOOLEAN bAudioDecoder = Parameters.audiodecoder != "";
+	_BOOLEAN bAudioDecoder = !Parameters.audiodecoder.empty();
 	Parameters.Unlock();
 
 	CPlotManager& PlotManager = *pDRMRec->GetPlotManager();
