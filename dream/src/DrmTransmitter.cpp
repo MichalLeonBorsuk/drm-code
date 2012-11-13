@@ -352,7 +352,7 @@ CDRMTransmitter::CDRMTransmitter() :
     TransmParam.eSDCCodingScheme = CS_2_SM;
 
     /* Set desired intermedia frequency (IF) in Hertz */
-    SetCarOffset(12000.0); /* Default: "VIRTUAL_INTERMED_FREQ" */
+    SetCarOffset(_REAL(VIRTUAL_INTERMED_FREQ)); /* Default: "VIRTUAL_INTERMED_FREQ" */
 
     if (bUseUEP == TRUE)
     {
