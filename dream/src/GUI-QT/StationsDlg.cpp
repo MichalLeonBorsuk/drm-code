@@ -520,32 +520,11 @@ Station::EState CDRMSchedule::GetState(const int iPos)
 {
     /* Get system time */
 #if QT_VERSION < 0x040000
-        char tz[70];
-        char *s = getenv("TZ");
-	if(s)
-            strcpy(tz, s);
-	else
-	    tz[0]=0;
-#ifdef _WIN32
-        _putenv("TZ=UTC");
-        _tzset();
-	QDateTime dt = QDateTime::currentDateTime();
-        if(tz[0])
-	{
-	stringstream ss;
-	ss << "TZ=" << tz;
-        _putenv(ss.str().c_str());
-        _tzset();
-	}
-#else
-        setenv("TZ", "UTC", 1);
-        tzset();
-	QDateTime dt = QDateTime::currentDateTime();
-        if(tz[0])
-            setenv("TZ", tz, 1);
-        else
-            unsetenv("TZ");
-#endif
+    time_t now = time(NULL);
+    struct tm tm = *gmtime(&now);
+    QDate d(1900+tm.tm_year, tm.tm_mon+1, tm.tm_mday);
+    QTime t(tm.tm_hour, tm.tm_min, tm.tm_sec);
+    QDateTime dt(d,t);
 #else
     QDateTime dt = QDateTime::currentDateTime().toUTC();
 #endif
