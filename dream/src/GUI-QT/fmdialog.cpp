@@ -131,7 +131,6 @@ FMDialog::FMDialog(CDRMReceiver& NDRMR, CSettings& NSettings, CRig& rig,
 	LabelLanguage->setText("");
 	LabelCountryCode->setText("");
 	LabelServiceID->setText("");
-	TextTextMessage->setText("");
 
 	/* Init progress bar for input signal level */
 	ProgrInputLevel->setRange(-50.0, 0.0);
