@@ -48,7 +48,8 @@
 
 /* Length of vector for audio spectrum. We use a power-of-two length to
    make the FFT work more efficient */
-#define NUM_SMPLS_4_AUDIO_SPECTRUM	256
+//#define NUM_SMPLS_4_AUDIO_SPECTRUM	256
+#define NUM_SMPLS_4_AUDIO_SPECTRUM	1024 /* higher frequency resolution */
 
 /* Time span used for averaging the audio spectrum. Shall be higher than the
    400 ms DRM audio block */
@@ -138,7 +139,7 @@ protected:
     CFftPlans				FftPlan;
     CComplexVector			veccFFTInput;
     CComplexVector			veccFFTOutput;
-    CRealVector				vecrHammingWindow;
+    CRealVector				vecrAudioWindowFunction;
 
     virtual void InitInternal(CParameter& ReceiverParam);
     virtual void ProcessDataInternal(CParameter& ReceiverParam);

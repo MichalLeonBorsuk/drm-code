@@ -751,7 +751,7 @@ void CDRMPlot::SetupAudioSpec(_BOOLEAN bAudioDecoder)
 	plot->setAxisTitle(QwtPlot::yLeft, "AS [dB]");
 
 	/* Fixed scale */
-	plot->setAxisScale(QwtPlot::yLeft, (double) -90.0, (double) -20.0);
+	plot->setAxisScale(QwtPlot::yLeft, (double) -100.0, (double) -20.0);
 	double dBandwidth = (double) SOUNDCRD_SAMPLE_RATE / 2400; /* 20.0 for 48 kHz */
 	if (dBandwidth < (double) 20.0)
 		dBandwidth = (double) 20.0;
