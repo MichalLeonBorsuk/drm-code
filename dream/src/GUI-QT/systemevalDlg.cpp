@@ -573,11 +573,10 @@ void systemevalDlg::hideEvent(QHideEvent*)
             /* Convert plot type into an integer type. TODO: better solution */
             Settings.Put(s.str(), "type", (int) vecpDRMPlots[i]->GetChartType());
 
-            /* Close window afterwards */
-            vecpDRMPlots[i]->close();
-
             iNumOpenCharts++;
         }
+        /* Close window afterwards */
+        vecpDRMPlots[i]->close();
     }
     Settings.Put("System Evaluation Dialog", "numchartwin", iNumOpenCharts);
 

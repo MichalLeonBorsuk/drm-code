@@ -56,14 +56,11 @@ systemevalDlg::systemevalDlg(CDRMReceiver& NDRMR, CSettings& NSettings,
     /* Set help text for the controls */
     AddWhatsThisHelp();
 
-    MainPlot = new CDRMPlot(plot);
-
     /* Init controls -------------------------------------------------------- */
+
     /* Init main plot */
-    int iPlotStyle = Settings.Get("System Evaluation Dialog", "plotstyle", 0);
-    Settings.Put("System Evaluation Dialog", "plotstyle", iPlotStyle);
+    MainPlot = new CDRMPlot(plot);
     MainPlot->SetRecObj(&DRMReceiver);
-    MainPlot->SetPlotStyle(iPlotStyle);
 
     /* Init slider control */
     SliderNoOfIterations->setRange(0, 4);
@@ -79,7 +76,6 @@ systemevalDlg::systemevalDlg(CDRMReceiver& NDRMR, CSettings& NSettings,
     LEDFrameSync->SetUpdateTime(600);
     LEDTimeSync->SetUpdateTime(600);
     LEDIOInterface->SetUpdateTime(2000); /* extra long -> red light stays long */
-
 
     /* Update controls */
     UpdateControls();
@@ -123,7 +119,9 @@ systemevalDlg::systemevalDlg(CDRMReceiver& NDRMR, CSettings& NSettings,
     /* Expand all items */
     chartSelector->expandAll();
 
-    string  plotType = Settings.Get("System Evaluation Dialog", "sysevplottype", string("Audio Spectrum"));
+    /* Load saved main plot style */
+    eCurCharType = PlotNameToECharType(Settings.Get("System Evaluation Dialog", "plotstyle", string()));
+
     /* If MDI in is enabled, disable some of the controls and use different
        initialization for the chart and chart selector */
     if (DRMReceiver.GetRSIIn()->GetInEnabled() == TRUE)
@@ -139,14 +137,7 @@ systemevalDlg::systemevalDlg(CDRMReceiver& NDRMR, CSettings& NSettings,
         GroupBoxInterfRej->setEnabled(FALSE);
 
         /* Only audio spectrum makes sence for MDI in */
-        plotType = "Audio Spectrum";
-    }
-    QList<QTreeWidgetItem*> pl = chartSelector->findItems(plotType.c_str(), Qt::MatchRecursive);
-    if(pl.size()>0)
-    {
-        QTreeWidgetItem* i = pl.first();
-        chartSelector->setCurrentItem(i, 0);
-        OnListSelChanged(i, NULL); // TODO why doesn't setCurrentItem send signal ?
+        eCurCharType = CDRMPlot::AUDIO_SPECTRUM;
     }
 
     /* Init context menu for tree widget */
@@ -212,6 +203,9 @@ systemevalDlg::systemevalDlg(CDRMReceiver& NDRMR, CSettings& NSettings,
 
     /* Start log file flag */
     CheckBoxWriteLog->setChecked(Settings.Get("Logfile", "enablelog", FALSE));
+
+    /* Select chart type */
+    chartSelector->setCurrentItem(FindItemByECharType(eCurCharType), 0);
 
     /* Force update */
     OnTimer();
@@ -339,7 +333,7 @@ void systemevalDlg::showEvent(QShowEvent* e)
         s << "Chart Window " << i;
 
         /* get the chart type */
-        const CDRMPlot::ECharType eNewType = (CDRMPlot::ECharType) Settings.Get(s.str(), "type", 0);
+        const CDRMPlot::ECharType eNewType = PlotNameToECharType(Settings.Get(s.str(), "plotstyle", string()));
 
         /* get window geometry data */
         CWinGeom c;
@@ -367,10 +361,6 @@ void systemevalDlg::showEvent(QShowEvent* e)
     /* Notify the MainPlot of showEvent */
     MainPlot->activate();
 #endif
-//#ifdef _WIN32
-//    /* Compatibility with DRMLogger */
-//    CheckBoxWriteLog->setFocus();
-//#endif
 }
 
 void systemevalDlg::hideEvent(QHideEvent* e)
@@ -404,8 +394,7 @@ void systemevalDlg::hideEvent(QHideEvent* e)
 
             s << "Chart Window " << iNumOpenCharts;
             Settings.Put(s.str(), c);
-            /* Convert plot type into an integer type. TODO: better solution */
-            Settings.Put(s.str(), "type", (int) vecpDRMPlots[i]->GetChartType());
+            Settings.Put(s.str(), "plotstyle", ECharTypeToPlotName(vecpDRMPlots[i]->GetChartType()));
 
             iNumOpenCharts++;
         }
@@ -426,9 +415,8 @@ void systemevalDlg::hideEvent(QHideEvent* e)
     s.iWSize = WinGeom.width();
     Settings.Put("System Evaluation Dialog", s);
 
-    /* Store current plot type. Convert plot type into an integer type.  */
-    QString ctext = chartSelector->currentItem()->text(0);
-    Settings.Put("System Evaluation Dialog", "sysevplottype", ctext.toStdString());
+    /* Store current plot type. */
+    Settings.Put("System Evaluation Dialog", "plotstyle", ECharTypeToPlotName(eCurCharType));
 }
 
 void systemevalDlg::OnTimerInterDigit()
@@ -445,10 +433,6 @@ void systemevalDlg::OnTimerInterDigit()
     EdtFrequency->setText(QString::number(freq));
     bEdtFrequencyMutex = FALSE;
     DRMReceiver.SetFrequency(freq);
-//#ifdef _WIN32
-//    /* Compatibility with DRMLogger */
-//    CheckBoxWriteLog->setFocus();
-//#endif
 }
 
 void systemevalDlg::OnFrequencyEdited(const QString&)
@@ -511,9 +495,6 @@ CDRMPlot* systemevalDlg::OpenChartWin(CDRMPlot::ECharType eNewType)
     CDRMPlot* pNewChartWin = new CDRMPlot(NULL);
     pNewChartWin->setCaption(tr("Chart Window"));
 
-    /* Set plot style*/
-    pNewChartWin->SetPlotStyle(Settings.Get("System Evaluation Dialog", "plotstyle", 0));
-
     /* Set correct icon (use the same as this dialog) */
     const QIcon& icon = windowIcon();
     pNewChartWin->setIcon(icon);
@@ -526,6 +507,42 @@ CDRMPlot* systemevalDlg::OpenChartWin(CDRMPlot::ECharType eNewType)
     pNewChartWin->show();
 
     return pNewChartWin;
+}
+
+QTreeWidgetItem* systemevalDlg::FindItemByECharType(CDRMPlot::ECharType eCharType)
+{
+    for (int i = 0;; i++)
+    {
+		QTreeWidgetItem* item = chartSelector->topLevelItem(i);
+        if (item == NULL)
+            return NULL;
+        for (int j = 0; j < item->childCount(); j++)
+        {
+            QTreeWidgetItem* subitem = item->child(j);
+            CDRMPlot::ECharType eCurCharType = CDRMPlot::ECharType(subitem->data(0, Qt::UserRole).toInt());
+            if (eCurCharType == eCharType)
+                return subitem;
+        }
+    }
+}
+
+string systemevalDlg::ECharTypeToPlotName(CDRMPlot::ECharType eCharType)
+{
+    QTreeWidgetItem* item = FindItemByECharType(eCharType);
+    if (item != NULL)
+        return string(item->text(0).toStdString());
+    return string();
+}
+
+CDRMPlot::ECharType systemevalDlg::PlotNameToECharType(const string& PlotName)
+{
+    QList<QTreeWidgetItem*> pl = chartSelector->findItems(PlotName.c_str(), Qt::MatchRecursive);
+    if (pl.size() > 0)
+    {
+        QTreeWidgetItem* subitem = pl.first();
+        return CDRMPlot::ECharType(subitem->data(0, Qt::UserRole).toInt());
+    }
+    return CDRMPlot::AUDIO_SPECTRUM; /* safe value */
 }
 
 void systemevalDlg::SetStatus(CMultColorLED* LED, ETypeRxStatus state)
@@ -945,8 +962,10 @@ void systemevalDlg::OnListSelChanged(QTreeWidgetItem *curr, QTreeWidgetItem *)
     /* Make sure we have a non root item */
     if (curr && curr->parent())
     {
-        /* Get char type from selected item and setup chart */
-        MainPlot->SetupChart(CDRMPlot::ECharType(curr->data(0, Qt::UserRole).toInt()));
+        /* Get chart type from selected item */
+        eCurCharType = CDRMPlot::ECharType(curr->data(0, Qt::UserRole).toInt());
+        /* Setup chart */
+        MainPlot->SetupChart(eCurCharType);
     }
 }
 

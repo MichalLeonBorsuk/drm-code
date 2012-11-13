@@ -87,12 +87,15 @@ protected:
 	void			UpdateControls();
 	void			AddWhatsThisHelp();
 	CDRMPlot*		OpenChartWin(CDRMPlot::ECharType eNewType);
+	QTreeWidgetItem* FindItemByECharType(CDRMPlot::ECharType eCharType);
+	string			ECharTypeToPlotName(CDRMPlot::ECharType eCharType);
+	CDRMPlot::ECharType PlotNameToECharType(const string& PlotName);
 
 	QString			GetRobModeStr();
 	QString			GetSpecOccStr();
 
 	QMenu*			pTreeWidgetContextMenu;
-	CDRMPlot::ECharType eNewCharType;
+	CDRMPlot::ECharType eCurCharType, eNewCharType;
 	vector<CDRMPlot*>	vecpDRMPlots;
 	CEventFilter	ef;
 
