@@ -929,7 +929,7 @@ CDRMReceiver::SetInStartMode()
     ReceiverParam.ReceiveStatus.MOT.SetStatus(NOT_PRESENT);
 
     /* Clear audio decoder string */
-    ReceiverParam.audiodecoder.clear();
+    ReceiverParam.audiodecoder = "";
 
     ReceiverParam.Unlock();
 
