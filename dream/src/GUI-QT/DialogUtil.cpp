@@ -30,7 +30,7 @@
 #include <qlabel.h>
 #include <qaction.h>
 #include <qmessagebox.h>
-#if QT_VERSION < 0x030000
+#if QT_VERSION < 0x040000
 # include <qregexp.h>
 #endif
 #ifdef _WIN32
