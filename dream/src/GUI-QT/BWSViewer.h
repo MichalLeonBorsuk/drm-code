@@ -55,7 +55,6 @@ protected:
     CDataDecoder*   decoder;
     bool            initialised;
     CEventFilter    ef;
-//    std::map<QString,QVariant> pages;
 
     bool Changed();
     void CreateDirectories(const QString& filename);
