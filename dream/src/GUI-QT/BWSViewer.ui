@@ -188,7 +188,7 @@
       </spacer>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButtonClearCache">
+      <widget class="QPushButton" name="ButtonClearCache">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Minimum" vsizetype="Maximum">
          <horstretch>0</horstretch>

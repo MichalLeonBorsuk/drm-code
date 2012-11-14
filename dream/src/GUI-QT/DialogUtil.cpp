@@ -651,17 +651,30 @@ void RemoteMenu::OnComPortMenu(QAction* action)
 #endif
 }
 
-/* Make sure that the given filename is secure */
+/* Ensure that the given filename is secure */
 QString VerifyFilename(QString filename)
 {
-#if QT_VERSION < 0x030000
-	filename.replace(QRegExp("/"), "_");  /* replace unix-like path separator */
-	filename.replace(QRegExp("\\"), "_"); /* replace windows path separator */
-#else
-	filename.replace("/", "_");  /* replace unix-like path separator */
-	filename.replace("\\", "_"); /* replace windows path separator */
+    filename.replace(QRegExp("/"), "_"); /* replace unix-like path separator with '_' */
+#ifdef _WIN32
+    filename.replace(QRegExp("\\\\"), "_"); /* replace windows path separator with '_' */
+    filename.replace(QRegExp(":"), "_"); /* replace ':' with '_' */
 #endif
-	return filename;
+    return filename;
+}
+
+/* Ensure that the given html path is secure */
+QString VerifyHtmlPath(QString path)
+{
+    if (path == "..")
+        return "_";
+#ifdef _WIN32
+    path.replace(QRegExp("\\\\"), "_"); /* replace windows path separator with '_' */
+    path.replace(QRegExp(":"), "_"); /* replace ':' with '_' */
+#endif
+    path.replace(QRegExp("^\\.\\./"), "_/"); /* replace '../' at the beginning with '_/' */
+    path.replace(QRegExp("/\\.\\.$"), "/_"); /* replace '/..' at the end with '/_' */
+    path.replace(QRegExp("/\\.\\./"), "/_/"); /* replace '/../' with '/_/' */
+    return path;
 }
 
 void InitSMeter(QWidget* parent, QwtThermo* sMeter)
