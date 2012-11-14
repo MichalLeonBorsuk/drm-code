@@ -318,8 +318,6 @@ bool BWSViewer::Changed()
     if (decoder->GetMOTObject(obj, CDataDecoder::AT_BROADCASTWEBSITE) == TRUE)
     {
         QString strObjName = VerifyHtmlPath(obj.strName.c_str());
-//printf("%s\n", obj.strMimeType.c_str());
-//printf("file: %s\n", obj.strName.c_str());
 		if (strObjName.endsWith(".stm")) // TODO hack
 			strObjName.append(".html");
 
@@ -329,25 +327,6 @@ bool BWSViewer::Changed()
         /* Store received MOT object on disk */
         const QString strFileName = strCurrentSavePath + "/" + strObjName;
         SaveMOTObject(obj, strFileName);
-#if 0
-	    /* Store it in the internal map */
-	    if (strObjName.endsWith(".html") /*|| strObjName.endsWith(".stm")*/)
-        {
-	        QString s;
-	        for(int i=0; i<obj.Body.vecData.Size(); i++)
-		        s += obj.Body.vecData[i];
-	        s = s.replace(QRegExp("color=([0-9a-fA-F])"), "color=#\\1"); 
-	
-	        pages[strObjName] = s;
-	    }
-	    else
-	    {
-	        QByteArray ba(obj.Body.vecData.Size());
-	        for(int i=0; i<obj.Body.vecData.Size(); i++)
-		        ba[i] = obj.Body.vecData[i];
-	        pages[strObjName] = ba;
-	    }
-#endif
         if (strObjName.contains('/') == 0) /* if has a path is not the main page */
         {
             /* Get the current directory */
@@ -365,7 +344,6 @@ bool BWSViewer::Changed()
                     else if(MOTDir.DirectoryIndex.find(BASIC_PROFILE) != MOTDir.DirectoryIndex.end())
                         sNewHomeUrl =
                             MOTDir.DirectoryIndex[BASIC_PROFILE].c_str();
-//printf("home: %s\n", sNewHomeUrl.toUtf8().data());
         		    if (sNewHomeUrl == "not_here.html") // this is a hack
             			sNewHomeUrl = "index.html";
         		    if (strHomeUrl.isEmpty() && !sNewHomeUrl.isEmpty())
