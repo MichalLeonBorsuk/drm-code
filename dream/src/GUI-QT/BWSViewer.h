@@ -47,29 +47,35 @@ public:
     virtual ~BWSViewer();
 
 protected:
-
-    QTimer Timer;
-    CDRMReceiver&	receiver;
-    CSettings&          settings;
-    bool                decoderSet;
-    bool                initialised;
-    QString		strCurrentSavePath;
-    bool changed();
-    void CreateDirectories(const QString& filename);
-    void SaveMOTObject(const CVector<_BYTE>& vecbRawData, const QString& strFileName);
+    QTimer          Timer;
+    CDRMReceiver&   receiver;
+    CSettings&      settings;
+    QString         strCurrentSavePath;
+    QString         strHomeUrl;
     CDataDecoder*   decoder;
-    std::map<QString,QVariant> pages;
-    QString         sHomeUrl;
+    bool            initialised;
     CEventFilter    ef;
+//    std::map<QString,QVariant> pages;
+
+    bool Changed();
+    void CreateDirectories(const QString& filename);
+    void SaveMOTObject(const CMOTObject& obj, const QString& strFileName);
+    bool RemoveDir(const QString &dirName, int level = 0);
+    void SetupCurrentSavePath();
+    void UpdateButtons();
 
 public slots:
     void OnTimer();
     void OnSave();
     void OnSaveAll();
     void OnClearAll();
+    void OnClearCache();
     void OnHome();
+    void OnBack();
+    void OnForward();
     void onSetProfile(bool);
-    void OnlinkClicked(const QUrl & url);
+    void OnLinkClicked(const QUrl & url);
+    void OnLoadFinished(bool ok);
     void showEvent(QShowEvent*);
     void hideEvent(QHideEvent*);
 };
