@@ -519,16 +519,11 @@ void CDRMSchedule::ReadCSVFile(FILE* pFile)
 Station::EState CDRMSchedule::GetState(const int iPos)
 {
     /* Get system time */
-#if QT_VERSION < 0x040000
     time_t now = time(NULL);
     struct tm tm = *gmtime(&now);
     QDate d(1900+tm.tm_year, tm.tm_mon+1, tm.tm_mday);
     QTime t(tm.tm_hour, tm.tm_min, tm.tm_sec);
     QDateTime dt(d,t);
-#else
-    QDateTime dt = QDateTime::currentDateTime().toUTC();
-#endif
-
     return StationsTable[iPos].stateAt(dt, GetSecondsPreview());
 }
 
