@@ -189,7 +189,7 @@ CAboutDlg::CAboutDlg(QWidget* parent, const char* name, bool modal, Qt::WFlags f
         "result of this development.<br>In 2005, <i>Andrew Murphy</i> of the <i>British "
         "Broadcasting Corporation</i> added code for an "
         "AMSS demodulator. <i>Oliver Haffenden</i> and <i>Julian Cable</i> (also <i>BBC</i>) rewrote "
-        "the MDI interface and added RSCI support.
+        "the MDI interface and added RSCI support."
         "Many other GUI improvements were implemented by <i>Andrea Russo and David Flamand</i>."
         "<br>Right now the code is mainly maintained by <i>David Flamand and Julian Cable</i>."
         " Quality Assurance and user testing is provided by <i>Simone St&ouml;ppler.</i>"
