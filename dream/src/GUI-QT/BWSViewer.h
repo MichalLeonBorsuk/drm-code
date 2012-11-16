@@ -89,7 +89,8 @@ class CNetworkReplyCache : public QNetworkReply
 
 public:
     CNetworkReplyCache(QObject* parent, QNetworkAccessManager::Operation op,
-        const QNetworkRequest& req, CWebsiteCache& cache, volatile int& waitobjs);
+        const QNetworkRequest& req, CWebsiteCache& cache, volatile int& waitobjs,
+        QObject* pBWSViewer);
     virtual ~CNetworkReplyCache();
     void abort() { id = 0; }
     qint64 bytesAvailable() const;
@@ -101,6 +102,7 @@ protected:
     QMutex              mutex;
     CWebsiteCache&      cache;
     volatile int&       waitobjs;
+    QObject*            pBWSViewer;
     QString             path;
     int                 readOffset;
     bool                emitted;
@@ -116,14 +118,15 @@ class CNetworkAccessManager : public QNetworkAccessManager
     Q_OBJECT
 
 public:
-    CNetworkAccessManager(QObject* parent, CWebsiteCache& objs,
+    CNetworkAccessManager(QObject* pBWSViewer, CWebsiteCache& objs,
         volatile int& waitobjs, const bool& bAllowExternalContent, const QString& strCacheHost)
-        : QNetworkAccessManager(parent), objs(objs), waitobjs(waitobjs),
+        : QNetworkAccessManager(pBWSViewer), pBWSViewer(pBWSViewer), objs(objs), waitobjs(waitobjs),
         bAllowExternalContent(bAllowExternalContent), strCacheHost(strCacheHost) {};
     virtual ~CNetworkAccessManager() {};
 
 protected:
     QNetworkReply *createRequest(Operation op, const QNetworkRequest & req, QIODevice *);
+    QObject*        pBWSViewer;
     CWebsiteCache&  objs;
     volatile int&   waitobjs;
     const bool&     bAllowExternalContent;
@@ -138,6 +141,7 @@ class BWSViewer : public QDialog, Ui_BWSViewer
 public:
     BWSViewer(CDRMReceiver&, CSettings&, QWidget* parent = 0, Qt::WFlags f = 0);
     virtual ~BWSViewer();
+    QString GetDirectoryIndex();
 
 protected:
     CNetworkAccessManager nam;
@@ -145,7 +149,7 @@ protected:
     CDRMReceiver&   receiver;
     CSettings&      settings;
     QString         strCurrentSavePath;
-    QString         strHomeUrl;
+    QString         strDirectoryIndex;
     CDataDecoder*   decoder;
     CWebsiteCache   wobjs;
     bool            bHomeSet;
@@ -153,9 +157,11 @@ protected:
     bool            bSaveFileToDisk;
     bool            bRestrictedProfile;
     bool            bAllowExternalContent;
+    bool            bDirectoryIndexChanged;
     volatile int    iAwaitingOjects;
     int             iLastAwaitingOjects;
     QString         strCacheHost;
+    QMutex          mutexDirectoryIndex;
     CEventFilter    ef;
 
     bool Changed();
@@ -166,6 +172,7 @@ protected:
     void UpdateButtons();
     void UpdateStatus();
     QString ObjectStr(unsigned int count);
+    void SetDirectoryIndex(const QString strNewDirectoryIndex);
 
 public slots:
     void OnTimer();

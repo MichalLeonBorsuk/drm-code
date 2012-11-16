@@ -252,7 +252,10 @@ QString VerifyFilename(QString filename);
 
 QString VerifyHtmlPath(QString path);
 
-QString UrlEncodePath(QString path);
+#if QT_VERSION >= 0x040000
+QString UrlEncodePath(QString url);
+bool IsUrlDirectory(QString url);
+#endif
 
 /* s-meter thermo parameters */
 #define S_METER_THERMO_MIN				((_REAL) -60.0) /* dB */
