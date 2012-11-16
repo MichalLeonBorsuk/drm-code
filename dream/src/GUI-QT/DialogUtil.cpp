@@ -677,20 +677,36 @@ QString VerifyHtmlPath(QString path)
     return path;
 }
 
-/* Encode URL path, invalid characters are percent-encoded */
-QString UrlEncodePath(QString path)
+#if QT_VERSION >= 0x040000
+/* Accept both absolute and relative url, but only return the path component.
+   Invalid characters in path are percent-encoded (e.g. space = %20) */
+QString UrlEncodePath(QString url)
 {
-    path.replace(QRegExp("/{1,}"), "/"); /* replace multiple '/' by single '/' */
-    if (path.size()>0 && path.at(0) != QChar('/'))
+    /* Get path component */
+    QString path(QUrl(url, QUrl::TolerantMode).path());
+    /* Prepend with '/' if none present */
+    if (path.size() == 0 || path.at(0) != QChar('/'))
         path.insert(0, QChar('/'));
-#if QT_VERSION < 0x040000
-    return QUrl("http://127.0.0.1" + path).path(TRUE);
-#elif QT_VERSION < 0x040400
-    return QString(QUrl("http://127.0.0.1" + path, QUrl::TolerantMode).toEncoded(QUrl::RemoveScheme | QUrl::RemoveAuthority));
-#else
-    return QString(QUrl("http://127.0.0.1" + path, QUrl::TolerantMode).encodedPath());
-#endif
+    /* Replace multiple '/' by single '/' */
+    path.replace(QRegExp("/{1,}"), "/");
+    /* Replace all occurrence of '/./' with '/' */
+    while (path.indexOf("/./") != -1)
+        path.replace(QRegExp("/\\./"), "/");
+    /* The Actual percent encoding */
+# if QT_VERSION < 0x040400
+    path = QString(QUrl(path, QUrl::TolerantMode).toEncoded(QUrl::RemoveScheme | QUrl::RemoveAuthority));
+# else
+    path = QString(QUrl(path, QUrl::TolerantMode).encodedPath());
+# endif
+    return path;
 }
+
+/* Determine if the given url is a directory */
+bool IsUrlDirectory(QString url)
+{
+    return url.endsWith(QChar('/'));
+}
+#endif
 
 void InitSMeter(QWidget* parent, QwtThermo* sMeter)
 {

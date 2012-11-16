@@ -35,7 +35,7 @@
 
 
 #define DEFAULT_DIRECTORY   "data/mot"
-#define CACHE_HOST          "127.0.0.1"
+#define CACHE_HOST          "127.0.0.1" /* not an actual web server */
 
 #define ICON_REFRESH        ":/icons/Refresh.png"
 #define ICON_STOP           ":/icons/Stop.png"
@@ -46,6 +46,7 @@ BWSViewer::BWSViewer(CDRMReceiver& rec, CSettings& s, QWidget* parent, Qt::WFlag
     nam(this, wobjs, iAwaitingOjects, bAllowExternalContent, strCacheHost),
     receiver(rec), settings(s), decoder(NULL), bHomeSet(false), bPageLoading(false),
     bSaveFileToDisk(false), bRestrictedProfile(false), bAllowExternalContent(true),
+    bDirectoryIndexChanged(false),
     iAwaitingOjects(0), iLastAwaitingOjects(0), strCacheHost(CACHE_HOST)
 {
     /* Enable minimize and maximize box for QDialog */
@@ -163,14 +164,18 @@ void BWSViewer::OnTimer()
 
     if (Changed())
     {
-        ButtonClearCache->setEnabled(true);
-        actionClear_Cache->setEnabled(true);
-        if (!bHomeSet && !strHomeUrl.isEmpty())
+        if (bDirectoryIndexChanged)
         {
-            bHomeSet = true;
-            OnHome();
+            bDirectoryIndexChanged = false;
+            if (!bHomeSet)
+            {
+                bHomeSet = true;
+                OnHome();
+            }
         }
         Update();
+        ButtonClearCache->setEnabled(true);
+        actionClear_Cache->setEnabled(true);
     }
     else
     {
@@ -181,8 +186,8 @@ void BWSViewer::OnTimer()
 
 void BWSViewer::OnHome()
 {
-    if (!strHomeUrl.isEmpty())
-         webView->load("http://" + strCacheHost + "/" + strHomeUrl);
+    if (!strDirectoryIndex.isNull())
+         webView->load("http://" + strCacheHost + "/");
 }
 
 void BWSViewer::OnStopRefresh()
@@ -192,7 +197,7 @@ void BWSViewer::OnStopRefresh()
     else
     {
         if (webView->url().isEmpty())
-             webView->load("http://" + strCacheHost + "/" + strHomeUrl);
+             webView->load("http://" + strCacheHost + "/");
         else
             webView->reload();
     }
@@ -213,9 +218,10 @@ void BWSViewer::OnClearCache()
     webView->setHtml("");
     webView->history()->clear();
     wobjs.ClearObjects();
-    strHomeUrl = "";
+    SetDirectoryIndex(QString());
     bHomeSet = false;
     bPageLoading = false;
+    bDirectoryIndexChanged = false;
     ButtonClearCache->setEnabled(false);
     actionClear_Cache->setEnabled(false);
     Update();
@@ -373,6 +379,36 @@ bool BWSViewer::Changed()
         /* Poll the data decoder module for new object */
         while (decoder->GetMOTObject(obj, CDataDecoder::AT_BROADCASTWEBSITE) == TRUE)
         {
+            /* Get the current directory */
+            CMOTDirectory MOTDir;
+            if (decoder->GetMOTDirectory(MOTDir, CDataDecoder::AT_BROADCASTWEBSITE) == TRUE)
+            {
+                /* ETSI TS 101 498-1 Section 5.5.1 */
+
+                /* Checks if the DirectoryIndex has values */
+                if (MOTDir.DirectoryIndex.size() > 0)
+                {
+                    QString strNewDirectoryIndex;
+                    /* TODO proper profile handling */
+                    if(MOTDir.DirectoryIndex.find(UNRESTRICTED_PC_PROFILE) != MOTDir.DirectoryIndex.end())
+                        strNewDirectoryIndex =
+                            MOTDir.DirectoryIndex[UNRESTRICTED_PC_PROFILE].c_str();
+                    else if(MOTDir.DirectoryIndex.find(BASIC_PROFILE) != MOTDir.DirectoryIndex.end())
+                        strNewDirectoryIndex =
+                            MOTDir.DirectoryIndex[BASIC_PROFILE].c_str();
+                    if (strNewDirectoryIndex == "not_here.html") // this is a hack
+	                    strNewDirectoryIndex = "index.html";
+                    if (!strNewDirectoryIndex.isNull())
+                    {
+                        if (strDirectoryIndex != strNewDirectoryIndex)
+                        {
+                            SetDirectoryIndex(strNewDirectoryIndex);
+                            bDirectoryIndexChanged = true;
+                        }
+                    }
+                }
+            }
+
             /* Get object name */
             QString strObjName(obj.strName.c_str());
 
@@ -381,34 +417,6 @@ bool BWSViewer::Changed()
 
             /* Add received MOT object to webView */
             wobjs.AddObject(strObjName, strContentType, obj.Body.vecData);
-
-            /* if has a path is not the main page */
-            if (!strObjName.contains('/'))
-            {
-                /* Get the current directory */
-                CMOTDirectory MOTDir;
-
-                if (decoder->GetMOTDirectory(MOTDir, CDataDecoder::AT_BROADCASTWEBSITE) == TRUE)
-                {
-                    /* Checks if the DirectoryIndex has values */
-                    if (MOTDir.DirectoryIndex.size() > 0)
-                    {
-		                QString sNewHomeUrl;
-                        if(MOTDir.DirectoryIndex.find(UNRESTRICTED_PC_PROFILE) != MOTDir.DirectoryIndex.end())
-                            sNewHomeUrl =
-                                MOTDir.DirectoryIndex[UNRESTRICTED_PC_PROFILE].c_str();
-                        else if(MOTDir.DirectoryIndex.find(BASIC_PROFILE) != MOTDir.DirectoryIndex.end())
-                            sNewHomeUrl =
-                                MOTDir.DirectoryIndex[BASIC_PROFILE].c_str();
-            		    if (sNewHomeUrl == "not_here.html") // this is a hack
-                			sNewHomeUrl = "index.html";
-            		    if (strHomeUrl.isEmpty() && !sNewHomeUrl.isEmpty())
-            		    {
-                            strHomeUrl = sNewHomeUrl;
-            		    }
-                    }
-                }
-            }
 
             /* Store received MOT object on disk */
             if (bSaveFileToDisk)
@@ -484,6 +492,20 @@ void BWSViewer::CreateDirectories(const QString& filename)
     }
 }
 
+void BWSViewer::SetDirectoryIndex(const QString strNewDirectoryIndex)
+{
+    mutexDirectoryIndex.lock();
+        strDirectoryIndex = strNewDirectoryIndex;
+    mutexDirectoryIndex.unlock();
+}
+
+QString BWSViewer::GetDirectoryIndex()
+{
+    mutexDirectoryIndex.lock();
+        QString str = strDirectoryIndex;
+    mutexDirectoryIndex.unlock();
+    return str;
+}
 
 //////////////////////////////////////////////////////////////////
 // CWebsiteCache implementation
@@ -597,11 +619,18 @@ CWebsiteObject* CWebsiteCache::FindObject(const QString& strObjName)
 // CNetworkReplyCache implementation
 
 CNetworkReplyCache::CNetworkReplyCache(QObject* parent, QNetworkAccessManager::Operation op,
-    const QNetworkRequest& req, CWebsiteCache& cache, volatile int& waitobjs)
-    : QNetworkReply(parent), cache(cache), waitobjs(waitobjs),
+    const QNetworkRequest& req, CWebsiteCache& cache, volatile int& waitobjs,
+    QObject* pBWSViewer)
+    : QNetworkReply(parent), cache(cache), waitobjs(waitobjs), pBWSViewer(pBWSViewer),
     readOffset(0), emitted(false), id(0)
 {
-    path = UrlEncodePath(req.url().path());
+    /* ETSI TS 101 498-1 Section 6.2.3 */
+    QString strUrl(req.url().toString());
+    QString strDirectoryIndex;
+    if (IsUrlDirectory(strUrl))
+        strDirectoryIndex = ((BWSViewer*)pBWSViewer)->GetDirectoryIndex();
+    path = UrlEncodePath(strUrl + strDirectoryIndex);
+
     connect(&cache, SIGNAL(ObjectAdded(QString)), this, SLOT(CheckObject(QString)));
     setOperation(op);
     setRequest(req);
@@ -662,7 +691,7 @@ void CNetworkReplyCache::CheckObject(QString strObjName)
 QNetworkReply* CNetworkAccessManager::createRequest(Operation op, const QNetworkRequest& req, QIODevice* outgoingData)
 {
     if (!bAllowExternalContent || req.url().host() == strCacheHost)
-        return new CNetworkReplyCache(this, op, req, objs, waitobjs);
+        return new CNetworkReplyCache(this, op, req, objs, waitobjs, pBWSViewer);
     else
         return QNetworkAccessManager::createRequest(op, req, outgoingData);
 }
