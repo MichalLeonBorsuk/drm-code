@@ -1,9 +1,9 @@
 /******************************************************************************\
  * British Broadcasting Corporation
- * Copyright (c) 2009
+ * Copyright (c) 2009, 2012
  *
  * Author(s):
- *	 Julian Cable
+ *	 Julian Cable, David Flamand (rewrite)
  *
  * Description: MOT Broadcast Website Viewer
  *
@@ -31,54 +31,59 @@
 #include "../datadecoding/DataDecoder.h"
 
 #include <QDir>
-#include <QFile>
-#include <QFileInfo>
-#include <QFileInfoList>
 #include <QWebHistory>
 
 
-//#define DEFAULT_DIRECTORY "MOT"
-#define DEFAULT_DIRECTORY "data/mot"
+#define DEFAULT_DIRECTORY   "data/mot"
+#define CACHE_HOST          "127.0.0.1"
+
+#define ICON_REFRESH        ":/icons/Refresh.png"
+#define ICON_STOP           ":/icons/Stop.png"
 
 
 BWSViewer::BWSViewer(CDRMReceiver& rec, CSettings& s, QWidget* parent, Qt::WFlags):
     QDialog(parent), Ui_BWSViewer(),
-    receiver(rec), settings(s), decoder(NULL), initialised(false)
+    nam(this, wobjs, iAwaitingOjects, bAllowExternalContent, strCacheHost),
+    receiver(rec), settings(s), decoder(NULL), bHomeSet(false), bPageLoading(false),
+    bSaveFileToDisk(false), bRestrictedProfile(false), bAllowExternalContent(true),
+    iAwaitingOjects(0), iLastAwaitingOjects(0), strCacheHost(CACHE_HOST)
 {
     /* Enable minimize and maximize box for QDialog */
 	setWindowFlags(Qt::Window);
 
     setupUi(this);
 
-    webView->page()->setLinkDelegationPolicy(QWebPage::DelegateAllLinks);
-
-    connect(buttonOk, SIGNAL(clicked()), this, SLOT(close()));
-
-    connect(actionClear_All, SIGNAL(triggered()), SLOT(OnClearAll()));
-    connect(actionSave, SIGNAL(triggered()), SLOT(OnSave()));
-    connect(actionSave_All, SIGNAL(triggered()), SLOT(OnSaveAll()));
-    connect(actionClose, SIGNAL(triggered()), SLOT(close()));
-    connect(actionRestricted_Profile_Only, SIGNAL(triggered(bool)), SLOT(onSetProfile(bool)));
-
+    /* Setup webView */
+    webView->page()->setNetworkAccessManager(&nam);
+    webView->pageAction(QWebPage::OpenLinkInNewWindow)->setVisible(false);
+    webView->pageAction(QWebPage::DownloadLinkToDisk)->setVisible(false);
+    webView->pageAction(QWebPage::OpenImageInNewWindow)->setVisible(false);
+    webView->pageAction(QWebPage::DownloadImageToDisk)->setVisible(false);
+ 
     /* Update time for color LED */
     LEDStatus->SetUpdateTime(1000);
 
+    /* Update various buttons and labels */
+    ButtonClearCache->setEnabled(false);
+    LabelTitle->setText("");
+    Update();
+
     /* Connect controls */
+    connect(buttonOk, SIGNAL(clicked()), this, SLOT(close()));
+    connect(actionClear_Cache, SIGNAL(triggered()), SLOT(OnClearCache()));
+    connect(actionClose, SIGNAL(triggered()), SLOT(close()));
+    connect(actionAllow_External_Content, SIGNAL(triggered(bool)), SLOT(OnAllowExternalContent(bool)));
+    connect(actionRestricted_Profile_Only, SIGNAL(triggered(bool)), SLOT(OnSetProfile(bool)));
+    connect(actionSave_File_to_Disk, SIGNAL(triggered(bool)), SLOT(OnSaveFileToDisk(bool)));
     connect(ButtonStepBack, SIGNAL(clicked()), this, SLOT(OnBack()));
     connect(ButtonStepForward, SIGNAL(clicked()), this, SLOT(OnForward()));
     connect(ButtonHome, SIGNAL(clicked()), this, SLOT(OnHome()));
+    connect(ButtonStopRefresh, SIGNAL(clicked()), this, SLOT(OnStopRefresh()));
     connect(ButtonClearCache, SIGNAL(clicked()), this, SLOT(OnClearCache()));
-    connect(webView, SIGNAL(linkClicked(const QUrl &)), this, SLOT(OnLinkClicked(const QUrl &)));
-    connect(webView, SIGNAL(loadFinished(bool)), this, SLOT(OnLoadFinished(bool)));
-
-    OnClearAll();
-
+    connect(webView, SIGNAL(loadStarted()), this, SLOT(OnWebViewLoadStarted()));
+    connect(webView, SIGNAL(loadFinished(bool)), this, SLOT(OnWebViewLoadFinished(bool)));
+    connect(webView, SIGNAL(titleChanged(const QString &)), this, SLOT(OnWebViewTitleChanged(const QString &)));
     connect(&Timer, SIGNAL(timeout()), this, SLOT(OnTimer()));
-
-    ButtonStepBack->setEnabled(false);
-    ButtonStepForward->setEnabled(false);
-    ButtonHome->setEnabled(false);
-    ButtonClearCache->setEnabled(false);
 }
 
 BWSViewer::~BWSViewer()
@@ -88,10 +93,41 @@ BWSViewer::~BWSViewer()
 void BWSViewer::UpdateButtons()
 {
     ButtonStepBack->setEnabled(webView->history()->canGoBack());
-    ButtonHome->setEnabled(initialised);
     ButtonStepForward->setEnabled(webView->history()->canGoForward());
+    ButtonHome->setEnabled(bHomeSet);
+    ButtonStopRefresh->setEnabled(bHomeSet);
+    ButtonStopRefresh->setIcon(QIcon(bPageLoading ? ICON_STOP : ICON_REFRESH));
 }
 
+QString BWSViewer::ObjectStr(unsigned int count)
+{
+    return QString(count > 1 ? tr("objects") : tr("object"));
+}
+
+void BWSViewer::UpdateStatus()
+{
+    unsigned int count, size;
+    wobjs.GetObjectCountAndSize(count, size);
+    if (count == 0)
+        LabelStatus->setText("");
+    else
+    {
+        iLastAwaitingOjects = iAwaitingOjects;
+        QString text(tr("%1 %2 cached, %3 kB"));
+        text = text.arg(count).arg(ObjectStr(count)).arg((size+999) / 1000);
+        if (iLastAwaitingOjects)
+            text += tr("  |  %1 %2 pending").arg(iLastAwaitingOjects).arg(ObjectStr(iLastAwaitingOjects));
+        if (bAllowExternalContent && webView->url().isValid() && webView->url().host() != strCacheHost)
+            text += "  |  " + webView->url().toString();
+        LabelStatus->setText(text);
+    }
+}
+
+void BWSViewer::Update()
+{
+    UpdateStatus();
+    UpdateButtons();
+}
 
 void BWSViewer::OnTimer()
 {
@@ -127,90 +163,96 @@ void BWSViewer::OnTimer()
 
     if (Changed())
     {
-        webView->reload();
-//        UpdateButtons();
+        ButtonClearCache->setEnabled(true);
+        actionClear_Cache->setEnabled(true);
+        if (!bHomeSet && !strHomeUrl.isEmpty())
+        {
+            bHomeSet = true;
+            OnHome();
+        }
+        Update();
     }
-}
-
-void BWSViewer::OnSave()
-{
-}
-
-void BWSViewer::OnSaveAll()
-{
-}
-
-void BWSViewer::OnClearAll()
-{
-    webView->history()->clear();
-    webView->setHtml("");
-    webView->setToolTip("");
-
-    actionClear_All->setEnabled(false);
-    actionSave->setEnabled(false);
-    actionSave_All->setEnabled(false);
-    ButtonStepBack->setEnabled(false);
-    ButtonStepForward->setEnabled(false);
-    ButtonHome->setEnabled(false);
+    else
+    {
+        if (iAwaitingOjects != iLastAwaitingOjects)
+            UpdateStatus();
+    }
 }
 
 void BWSViewer::OnHome()
 {
-    if (!strCurrentSavePath.isEmpty() && !strHomeUrl.isEmpty())
-    {
-        QUrl url(strCurrentSavePath + "/" + strHomeUrl);
-        webView->setUrl(url);
-    }
+    if (!strHomeUrl.isEmpty())
+         webView->load("http://" + strCacheHost + "/" + strHomeUrl);
+}
+
+void BWSViewer::OnStopRefresh()
+{
+    if (bPageLoading)
+        webView->stop();
     else
-        webView->setHtml("");
+    {
+        if (webView->url().isEmpty())
+             webView->load("http://" + strCacheHost + "/" + strHomeUrl);
+        else
+            webView->reload();
+    }
 }
 
 void BWSViewer::OnBack()
 {
     webView->history()->back();
-//    UpdateButtons();
 }
 
 void BWSViewer::OnForward()
 {
     webView->history()->forward();
-//    UpdateButtons();
 }
 
 void BWSViewer::OnClearCache()
 {
-    if (strCurrentSavePath.size() >= 6) /* at least 6 digit directory */
-        if (RemoveDir(strCurrentSavePath))
-        {
-            webView->history()->clear();
-            webView->setHtml("");
-            webView->setToolTip("");
-            strHomeUrl = "";
-            initialised = false;
-            ButtonClearCache->setEnabled(false);
-            UpdateButtons();
-        }
+    webView->setHtml("");
+    webView->history()->clear();
+    wobjs.ClearObjects();
+    strHomeUrl = "";
+    bHomeSet = false;
+    bPageLoading = false;
+    ButtonClearCache->setEnabled(false);
+    actionClear_Cache->setEnabled(false);
+    Update();
 }
 
-void BWSViewer::OnLinkClicked(const QUrl & url)
+void BWSViewer::OnWebViewLoadStarted()
 {
-    QString file(VerifyHtmlPath(url.toLocalFile()));
-    if (file.endsWith(".stm")) // TODO hack
-        file.append(".html");
-    if (QFile(file).exists())
-        webView->setUrl(QUrl(file));
+    bPageLoading = true;
+    QTimer::singleShot(20, this, SLOT(Update()));
 }
 
-void BWSViewer::OnLoadFinished(bool ok)
+void BWSViewer::OnWebViewLoadFinished(bool ok)
 {
-    UpdateButtons();
+    (void)ok;
+    bPageLoading = false;
+    QTimer::singleShot(20, this, SLOT(Update()));
 }
 
-void BWSViewer::onSetProfile(bool isChecked)
+void BWSViewer::OnWebViewTitleChanged(const QString& title)
 {
-	(void)isChecked;
+    LabelTitle->setText("<b>" + title + "</b>");
 }
 
+void BWSViewer::OnAllowExternalContent(bool isChecked)
+{
+    bAllowExternalContent = isChecked;
+}
+
+void BWSViewer::OnSetProfile(bool isChecked)
+{
+    bRestrictedProfile = isChecked;
+}
+
+void BWSViewer::OnSaveFileToDisk(bool isChecked)
+{
+    bSaveFileToDisk = isChecked;
+}
 
 void BWSViewer::showEvent(QShowEvent* e)
 {
@@ -222,6 +264,15 @@ void BWSViewer::showEvent(QShowEvent* e)
 
     if (WinGeom.isValid() && !WinGeom.isEmpty() && !WinGeom.isNull())
         setGeometry(WinGeom);
+
+    bAllowExternalContent = settings.Get("BWS", "allowexternalcontent", bAllowExternalContent);
+    actionAllow_External_Content->setChecked(bAllowExternalContent);
+
+    bSaveFileToDisk = settings.Get("BWS", "savefiletodisk", bSaveFileToDisk);
+    actionSave_File_to_Disk->setChecked(bSaveFileToDisk);
+
+    bRestrictedProfile = settings.Get("BWS", "restrictedprofile", bRestrictedProfile);
+    actionRestricted_Profile_Only->setChecked(bRestrictedProfile);
 
     CParameter& Parameters = *receiver.GetParameters();
     Parameters.Lock();
@@ -238,7 +289,6 @@ void BWSViewer::showEvent(QShowEvent* e)
     {
         /* Do UTF-8 to QString (UNICODE) conversion with the label strings */
         QString strLabel = QString().fromUtf8(service.strLabel.c_str()).trimmed();
-
 
         /* Service ID (plot number in hexadecimal format) */
         QString strServiceID = "";
@@ -281,6 +331,12 @@ void BWSViewer::hideEvent(QHideEvent* e)
     c.iHSize = WinGeom.height();
     c.iWSize = WinGeom.width();
     settings.Put("BWS", c);
+
+    settings.Put("BWS", "savefiletodisk", bSaveFileToDisk);
+
+    settings.Put("BWS", "restrictedprofile", bRestrictedProfile);
+
+    settings.Put("BWS", "allowexternalcontent", bAllowExternalContent);
 }
 
 void BWSViewer::SetupCurrentSavePath()
@@ -293,7 +349,7 @@ void BWSViewer::SetupCurrentSavePath()
 
     QString strServiceID;
     strServiceID.setNum(iServiceID, 16).toUpper();
-    strServiceID = strServiceID.rightJustified(6, '0');
+    strServiceID = strServiceID.rightJustified(8, '0');
 
     strCurrentSavePath = QString(settings.Get("BWS", "storagepath", string(DEFAULT_DIRECTORY)).c_str());
     settings.Put("BWS", "storagepath", string(strCurrentSavePath.latin1()));
@@ -309,65 +365,72 @@ void BWSViewer::SetupCurrentSavePath()
 
 bool BWSViewer::Changed()
 {
-    if (decoder == NULL)
-        return false;
-
-    CMOTObject obj;
-
-    /* Poll the data decoder module for new object */
-    if (decoder->GetMOTObject(obj, CDataDecoder::AT_BROADCASTWEBSITE) == TRUE)
+    bool bChanged = false;
+    if (decoder != NULL)
     {
-        QString strObjName = VerifyHtmlPath(obj.strName.c_str());
-		if (strObjName.endsWith(".stm")) // TODO hack
-			strObjName.append(".html");
+        CMOTObject obj;
 
-        /* Set strCurrentSavePath */
-        SetupCurrentSavePath();
-
-        /* Store received MOT object on disk */
-        const QString strFileName = strCurrentSavePath + "/" + strObjName;
-        SaveMOTObject(obj, strFileName);
-        if (strObjName.contains('/') == 0) /* if has a path is not the main page */
+        /* Poll the data decoder module for new object */
+        while (decoder->GetMOTObject(obj, CDataDecoder::AT_BROADCASTWEBSITE) == TRUE)
         {
-            /* Get the current directory */
-            CMOTDirectory MOTDir;
+            /* Get object name */
+            QString strObjName(obj.strName.c_str());
 
-            if (decoder->GetMOTDirectory(MOTDir, CDataDecoder::AT_BROADCASTWEBSITE) == TRUE)
+            /* Get ContentType */
+            QString strContentType(obj.strMimeType.c_str());
+
+            /* Add received MOT object to webView */
+            wobjs.AddObject(strObjName, strContentType, obj.Body.vecData);
+
+            /* if has a path is not the main page */
+            if (!strObjName.contains('/'))
             {
-                /* Checks if the DirectoryIndex has values */
-                if (MOTDir.DirectoryIndex.size() > 0)
+                /* Get the current directory */
+                CMOTDirectory MOTDir;
+
+                if (decoder->GetMOTDirectory(MOTDir, CDataDecoder::AT_BROADCASTWEBSITE) == TRUE)
                 {
-		            QString sNewHomeUrl;
-                    if(MOTDir.DirectoryIndex.find(UNRESTRICTED_PC_PROFILE) != MOTDir.DirectoryIndex.end())
-                        sNewHomeUrl =
-                            MOTDir.DirectoryIndex[UNRESTRICTED_PC_PROFILE].c_str();
-                    else if(MOTDir.DirectoryIndex.find(BASIC_PROFILE) != MOTDir.DirectoryIndex.end())
-                        sNewHomeUrl =
-                            MOTDir.DirectoryIndex[BASIC_PROFILE].c_str();
-        		    if (sNewHomeUrl == "not_here.html") // this is a hack
-            			sNewHomeUrl = "index.html";
-        		    if (strHomeUrl.isEmpty() && !sNewHomeUrl.isEmpty())
-        		    {
-                        strHomeUrl = sNewHomeUrl;
-        		    }
+                    /* Checks if the DirectoryIndex has values */
+                    if (MOTDir.DirectoryIndex.size() > 0)
+                    {
+		                QString sNewHomeUrl;
+                        if(MOTDir.DirectoryIndex.find(UNRESTRICTED_PC_PROFILE) != MOTDir.DirectoryIndex.end())
+                            sNewHomeUrl =
+                                MOTDir.DirectoryIndex[UNRESTRICTED_PC_PROFILE].c_str();
+                        else if(MOTDir.DirectoryIndex.find(BASIC_PROFILE) != MOTDir.DirectoryIndex.end())
+                            sNewHomeUrl =
+                                MOTDir.DirectoryIndex[BASIC_PROFILE].c_str();
+            		    if (sNewHomeUrl == "not_here.html") // this is a hack
+                			sNewHomeUrl = "index.html";
+            		    if (strHomeUrl.isEmpty() && !sNewHomeUrl.isEmpty())
+            		    {
+                            strHomeUrl = sNewHomeUrl;
+            		    }
+                    }
                 }
             }
+
+            /* Store received MOT object on disk */
+            if (bSaveFileToDisk)
+                SaveMOTObject(strObjName, obj);
+
+            /* Set changed flag */
+        	bChanged = true;
         }
-        if (!initialised && strHomeUrl == strObjName)
-        {
-            initialised = true;
-            OnHome();
-        }
-        ButtonClearCache->setEnabled(true);
-    	return true;
     }
-    return false;
+    return bChanged;
 }
 
-void BWSViewer::SaveMOTObject(const CMOTObject& obj,
-                                  const QString& strFileName)
+void BWSViewer::SaveMOTObject(const QString& strObjName,
+                              const CMOTObject& obj)
 {
     const CVector<_BYTE>& vecbRawData = obj.Body.vecData;
+
+    /* Set strCurrentSavePath */
+    SetupCurrentSavePath();
+
+    /* Generate safe filename */
+    const QString strFileName = strCurrentSavePath + "/" + VerifyHtmlPath(strObjName);
 
     /* First, create directory for storing the file (if not exists) */
     CreateDirectories(strFileName.latin1());
@@ -421,9 +484,186 @@ void BWSViewer::CreateDirectories(const QString& filename)
     }
 }
 
-bool BWSViewer::RemoveDir(const QString &dirName, int level)
+
+//////////////////////////////////////////////////////////////////
+// CWebsiteCache implementation
+
+void CWebsiteCache::GetObjectCountAndSize(unsigned int& count, unsigned int& size)
 {
-    bool result = true;
-    return result;
+    mutex.lock();
+        count = objects.size();
+        size = total_size;
+    mutex.unlock();
+}
+
+void CWebsiteCache::ClearObjects()
+{
+    mutex.lock();
+        objects.clear();
+        total_size = 0;
+    mutex.unlock();
+}
+
+void CWebsiteCache::AddObject(QString strObjName, QString strContentType, CVector<_BYTE>& vecbData)
+{
+    mutex.lock();
+        /* increment id counter, 0 is reserved for error */
+        id_counter++; if (!id_counter) id_counter++;
+
+        /* Get the object name */
+        strObjName = UrlEncodePath(strObjName);
+
+        /* Hack */
+        if (strObjName.endsWith(".stm", Qt::CaseInsensitive) && !strContentType.compare("application/octet-stream", Qt::CaseInsensitive))
+            strContentType = "text/html";
+    
+        /* Erase previous object if any */
+        map<QString,CWebsiteObject>::iterator it;
+        it = objects.find(strObjName);
+        if (it != objects.end())
+        {
+            total_size -= it->second.data.size();
+            objects.erase(it);
+        }
+
+        /* Insert the new object */
+        objects.insert(pair<QString,CWebsiteObject>(strObjName, CWebsiteObject(id_counter, strContentType, vecbData)));
+        total_size += vecbData.Size();
+    mutex.unlock();
+
+    /* Signal that a new object is added */
+    emit ObjectAdded(strObjName);
+}
+
+int CWebsiteCache::GetObjectContentType(const QString& strObjName, QString& strContentType)
+{
+    int id = 0;
+    mutex.lock();
+        CWebsiteObject* obj = FindObject(strObjName);
+        if (obj)
+        {
+            id = obj->id;
+            strContentType = obj->strContentType;
+        }
+    mutex.unlock();
+    return id;
+}
+
+int CWebsiteCache::GetObjectSize(const QString& strObjName, const unsigned int id)
+{
+    int size = 0;
+    mutex.lock();
+        CWebsiteObject* obj = FindObject(strObjName);
+        if (obj && obj->id == id)
+        {
+            size = obj->data.size();
+        }
+    mutex.unlock();
+    return size;
+}
+
+int CWebsiteCache::CopyObjectData(const QString& strObjName, const unsigned int id, char *buffer, int maxsize, int offset)
+{
+    int size = -1;
+    if (maxsize >= 0 && offset >= 0)
+    {
+        mutex.lock();
+            CWebsiteObject* obj = FindObject(strObjName);
+            if (obj && obj->id == id)
+            {
+                size = obj->data.size();
+                if (offset < size)
+                {
+                    size -= offset;
+                    if (size > maxsize)
+                        size = maxsize;
+                    memcpy(buffer, &obj->data.data()[offset], size);
+                }
+            }
+        mutex.unlock();
+    }
+    return size;
+}
+
+CWebsiteObject* CWebsiteCache::FindObject(const QString& strObjName)
+{
+    map<QString,CWebsiteObject>::iterator it;
+    it = objects.find(strObjName);
+    return it != objects.end() ? &it->second : NULL;
+}
+
+
+//////////////////////////////////////////////////////////////////
+// CNetworkReplyCache implementation
+
+CNetworkReplyCache::CNetworkReplyCache(QObject* parent, QNetworkAccessManager::Operation op,
+    const QNetworkRequest& req, CWebsiteCache& cache, volatile int& waitobjs)
+    : QNetworkReply(parent), cache(cache), waitobjs(waitobjs),
+    readOffset(0), emitted(false), id(0)
+{
+    path = UrlEncodePath(req.url().path());
+    connect(&cache, SIGNAL(ObjectAdded(QString)), this, SLOT(CheckObject(QString)));
+    setOperation(op);
+    setRequest(req);
+    setUrl(req.url());
+    open(QIODevice::ReadOnly);
+    QCoreApplication::postEvent(this, new QEvent(QEvent::User));
+    mutex.lock();
+        waitobjs++;
+    mutex.unlock();
+};
+
+CNetworkReplyCache::~CNetworkReplyCache()
+{
+    mutex.lock();
+        waitobjs--;
+    mutex.unlock();
+};
+
+void CNetworkReplyCache::customEvent(QEvent* event)
+{
+    if (event->type() == QEvent::User)
+        CheckObject(path);
+}
+
+qint64 CNetworkReplyCache::bytesAvailable() const
+{
+    return cache.GetObjectSize(path, id);
+}
+
+qint64 CNetworkReplyCache::readData(char * data, qint64 maxSize)
+{
+    int len = cache.CopyObjectData(path, id, data, maxSize, readOffset);
+    if (len > 0)
+        readOffset += len;
+    return len;
+}
+
+void CNetworkReplyCache::CheckObject(QString strObjName)
+{
+    if (!emitted && path == strObjName)
+    {
+        QString strContentType;
+        unsigned int new_id = cache.GetObjectContentType(path, strContentType);
+        if (new_id)
+        {
+            id = new_id;
+            setRawHeader(QByteArray("Content-Type"), QByteArray(strContentType.toUtf8().constData()));
+            emitted = true;
+            emit finished();
+        }
+    }
+}
+
+
+//////////////////////////////////////////////////////////////////
+// CNetworkAccessManager implementation
+
+QNetworkReply* CNetworkAccessManager::createRequest(Operation op, const QNetworkRequest& req, QIODevice* outgoingData)
+{
+    if (!bAllowExternalContent || req.url().host() == strCacheHost)
+        return new CNetworkReplyCache(this, op, req, objs, waitobjs);
+    else
+        return QNetworkAccessManager::createRequest(op, req, outgoingData);
 }
 

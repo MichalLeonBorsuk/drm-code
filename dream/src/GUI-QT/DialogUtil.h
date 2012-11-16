@@ -252,6 +252,8 @@ QString VerifyFilename(QString filename);
 
 QString VerifyHtmlPath(QString path);
 
+QString UrlEncodePath(QString path);
+
 /* s-meter thermo parameters */
 #define S_METER_THERMO_MIN				((_REAL) -60.0) /* dB */
 #define S_METER_THERMO_MAX				((_REAL) 60.0) /* dB */

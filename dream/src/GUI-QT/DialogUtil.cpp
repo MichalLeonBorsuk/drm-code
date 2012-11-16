@@ -677,6 +677,21 @@ QString VerifyHtmlPath(QString path)
     return path;
 }
 
+/* Encode URL path, invalid characters are percent-encoded */
+QString UrlEncodePath(QString path)
+{
+    path.replace(QRegExp("/{1,}"), "/"); /* replace multiple '/' by single '/' */
+    if (path.size()>0 && path.at(0) != QChar('/'))
+        path.insert(0, QChar('/'));
+#if QT_VERSION < 0x040000
+    return QUrl("http://127.0.0.1" + path).path(TRUE);
+#elif QT_VERSION < 0x040400
+    return QString(QUrl("http://127.0.0.1" + path, QUrl::TolerantMode).toEncoded(QUrl::RemoveScheme | QUrl::RemoveAuthority));
+#else
+    return QString(QUrl("http://127.0.0.1" + path, QUrl::TolerantMode).encodedPath());
+#endif
+}
+
 void InitSMeter(QWidget* parent, QwtThermo* sMeter)
 {
     sMeter->setRange(S_METER_THERMO_MIN, S_METER_THERMO_MAX);

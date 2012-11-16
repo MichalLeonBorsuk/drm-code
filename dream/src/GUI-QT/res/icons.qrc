@@ -30,7 +30,9 @@
     <file>LogoJournaline.png</file>
     <file>LogoSmall.png</file>
     <file>MainIcon.png</file>
+    <file>Refresh.png</file>
     <file>StepBack.png</file>
     <file>StepForw.png</file>
+    <file>Stop.png</file>
   </qresource>
 </RCC>
