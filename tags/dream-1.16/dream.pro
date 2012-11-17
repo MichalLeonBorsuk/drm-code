@@ -8,7 +8,6 @@ else {
     RESOURCES = src/GUI-QT/res/icons.qrc
 }
 TEMPLATE = app
-TARGET = dream
 CONFIG += qt warn_on debug thread
 INCLUDEPATH += src/GUI-QT
 INCLUDEPATH += libs
@@ -16,11 +15,21 @@ OBJECTS_DIR = obj
 DEFINES += EXECUTABLE_NAME=$$TARGET
 #LIBS += -L$$PWD/libs
 macx:QMAKE_LFLAGS += -F$$PWD/libs
+unix {
+	target.path = /usr/bin
+	documentation.path = /usr/share/man/man1
+	documentation.files = linux/dream.1
+	INSTALLS += documentation
+}
 contains(QT_VERSION, ^4\\..*) {
     message("Qt 4")
     QT += network xml qt3support webkit
     VPATH += src/GUI-QT
-    !console {
+    console {
+	TARGET = dream-cli
+    }
+    else {
+	TARGET = dream-qt4
         HEADERS += src/GUI-QT/DRMPlot.h src/GUI-QT/EvaluationDlg.h
         HEADERS += src/GUI-QT/SlideShowViewer.h src/GUI-QT/JLViewer.h src/GUI-QT/BWSViewer.h
         HEADERS += src/GUI-QT/bwsbrowser.h src/GUI-QT/jlbrowser.h
@@ -113,7 +122,11 @@ count(QT_VERSION, 0) {
     message("Qt 3")
     CONFIG += old
     VPATH += src/GUI-QT/qt2
-    !console {
+    console {
+        TARGET = dream-cli
+    }
+    else {
+        TARGET = dream-qt3
         HEADERS += src/GUI-QT/qt2/DRMPlot.h src/GUI-QT/systemevalDlg.h src/GUI-QT/MultimediaDlg.h
         SOURCES += src/GUI-QT/qt2/DRMPlot.cpp src/GUI-QT/systemevalDlg.cpp src/GUI-QT/MultimediaDlg.cpp
         FORMS += fdrmdialogbase.ui fmdialogbase.ui AnalogDemDlgbase.ui LiveScheduleDlgbase.ui
@@ -168,7 +181,6 @@ exists(libs/neaacdec.h) {
               message("with FAAD2")
           }
 unix {
-    target.path = /usr/bin
     INSTALLS += target
     CONFIG += link_pkgconfig
     exists(/usr/include/pulse/pulseaudio.h) {
