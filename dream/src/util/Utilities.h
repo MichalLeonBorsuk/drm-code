@@ -50,6 +50,24 @@
 #define	METER_FLY_BACK					15
 
 /* Classes ********************************************************************/
+/* Thread safe counter ------------------------------------------------------ */
+class CCounter
+{
+public:
+	CCounter() : count(0) {}
+	~CCounter() {}
+	unsigned int operator++();
+	unsigned int operator++(int);
+	unsigned int operator--();
+	unsigned int operator--(int);
+	operator unsigned int();
+	unsigned int operator=(unsigned int value);
+private:
+	CMutex mutex;
+	unsigned int count;
+};
+
+
 /* Signal level meter ------------------------------------------------------- */
 class CSignalLevelMeter
 {

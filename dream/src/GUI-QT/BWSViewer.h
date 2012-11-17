@@ -65,16 +65,19 @@ public:
     CWebsiteCache() : id_counter(0), total_size(0) {}
     virtual ~CWebsiteCache() {}
     void GetObjectCountAndSize(unsigned int& count, unsigned int& size);
-    void ClearObjects();
+    void ClearAll();
     void AddObject(QString strObjName, QString strContentType, CVector<_BYTE>& vecbData);
     int GetObjectContentType(const QString& strObjName, QString& strContentType);
     int GetObjectSize(const QString& strObjName, const unsigned int id);
     int CopyObjectData(const QString& strObjName, const unsigned int id, char *buffer, int maxsize, int offset);
+    bool SetDirectoryIndex(const QString strNewDirectoryIndex);
+    QString GetDirectoryIndex();
 
 protected:
     CWebsiteObject* FindObject(const QString& strObjName);
     std::map<QString,CWebsiteObject> objects;
     QMutex          mutex;
+    QString         strDirectoryIndex;
     unsigned int    id_counter;
     unsigned int    total_size;
 
@@ -88,9 +91,8 @@ class CNetworkReplyCache : public QNetworkReply
     Q_OBJECT
 
 public:
-    CNetworkReplyCache(QObject* parent, QNetworkAccessManager::Operation op,
-        const QNetworkRequest& req, CWebsiteCache& cache, volatile int& waitobjs,
-        QObject* pBWSViewer);
+    CNetworkReplyCache(QNetworkAccessManager::Operation op,
+        const QNetworkRequest& req, CWebsiteCache& cache, CCounter& waitobjs);
     virtual ~CNetworkReplyCache();
     void abort() { id = 0; }
     qint64 bytesAvailable() const;
@@ -99,10 +101,8 @@ public:
 protected:
     qint64 readData(char * data, qint64 maxSize);
     void customEvent(QEvent* event);
-    QMutex              mutex;
     CWebsiteCache&      cache;
-    volatile int&       waitobjs;
-    QObject*            pBWSViewer;
+    CCounter&           waitobjs;
     QString             path;
     int                 readOffset;
     bool                emitted;
@@ -118,17 +118,16 @@ class CNetworkAccessManager : public QNetworkAccessManager
     Q_OBJECT
 
 public:
-    CNetworkAccessManager(QObject* pBWSViewer, CWebsiteCache& objs,
-        volatile int& waitobjs, const bool& bAllowExternalContent, const QString& strCacheHost)
-        : QNetworkAccessManager(pBWSViewer), pBWSViewer(pBWSViewer), objs(objs), waitobjs(waitobjs),
+    CNetworkAccessManager(QObject* parent, CWebsiteCache& cache,
+        CCounter& waitobjs, const bool& bAllowExternalContent, const QString& strCacheHost)
+        : QNetworkAccessManager(parent), cache(cache), waitobjs(waitobjs),
         bAllowExternalContent(bAllowExternalContent), strCacheHost(strCacheHost) {};
     virtual ~CNetworkAccessManager() {};
 
 protected:
     QNetworkReply *createRequest(Operation op, const QNetworkRequest & req, QIODevice *);
-    QObject*        pBWSViewer;
-    CWebsiteCache&  objs;
-    volatile int&   waitobjs;
+    CWebsiteCache&  cache;
+    CCounter&       waitobjs;
     const bool&     bAllowExternalContent;
     const QString&  strCacheHost;
 };
@@ -141,7 +140,6 @@ class BWSViewer : public QDialog, Ui_BWSViewer
 public:
     BWSViewer(CDRMReceiver&, CSettings&, QWidget* parent = 0, Qt::WFlags f = 0);
     virtual ~BWSViewer();
-    QString GetDirectoryIndex();
 
 protected:
     CNetworkAccessManager nam;
@@ -149,19 +147,17 @@ protected:
     CDRMReceiver&   receiver;
     CSettings&      settings;
     QString         strCurrentSavePath;
-    QString         strDirectoryIndex;
     CDataDecoder*   decoder;
-    CWebsiteCache   wobjs;
+    CWebsiteCache   cache;
     bool            bHomeSet;
     bool            bPageLoading;
     bool            bSaveFileToDisk;
     bool            bRestrictedProfile;
     bool            bAllowExternalContent;
     bool            bDirectoryIndexChanged;
-    volatile int    iAwaitingOjects;
-    int             iLastAwaitingOjects;
-    QString         strCacheHost;
-    QMutex          mutexDirectoryIndex;
+    unsigned int    iLastAwaitingOjects;
+    CCounter        waitobjs;
+    const QString   strCacheHost;
     CEventFilter    ef;
 
     bool Changed();
@@ -172,7 +168,6 @@ protected:
     void UpdateButtons();
     void UpdateStatus();
     QString ObjectStr(unsigned int count);
-    void SetDirectoryIndex(const QString strNewDirectoryIndex);
 
 public slots:
     void OnTimer();
