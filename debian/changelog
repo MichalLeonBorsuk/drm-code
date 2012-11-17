@@ -1,0 +1,28 @@
+dream-qt3 (1.16) unstable; urgency=low
+
+  * Full support of Qt4 and Qwt 5/6
+  * Default use of fftw3 
+  * various other bugfix, cleanup, ui tweaks
+  * Transmitter Enhancements
+    - configuration stored in Dream.ini
+    - ability to transmit the current time
+    - fix for restart bug
+    - provide a clean spectrum when stopping
+    - fix for problems with MOT slide show
+    - stop MOT Slide Show encoding the full path of files
+  * Receiver Enhancements
+    - stations Dialog Filters get mixed up when swapping between modes
+    - frequency missing in live schedule
+    - remove support for process priority
+    - fix pcap reading
+  ` - prevent crash when EPG item has no duration
+    - prevent crash with HVXC encoded service
+    - fix delay for starting logfiles
+    - fix direct frequency input
+    - fix support for DRM Logger
+    - add missing SDC information to MOT service display
+    - remember sound card input in ini file
+    - additional receiver state stored in Dream.ini
+
+
+ -- Julian Cable <jcable@users.sourceforge.net>  Fri, 16 Nov 2012 17:51:13 +0000

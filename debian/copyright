@@ -1,0 +1,26 @@
+This work was packaged for Debian by:
+
+    julian <jcable@users.sourceforge.net> on Fri, 11 Mar 2011 07:51:13 +0000
+
+It was downloaded from:
+
+    http://sourceforge.net/projects/drm
+
+Upstream Author(s):
+
+    julian <jcable@users.sourceforge.net>
+
+Copyright:
+
+    Copyright (C) 2011 British Broadcasting Coporation
+
+License:
+
+    GPL
+
+The Debian packaging is:
+
+    Copyright (C) 2011 julian <jcable@users.sourceforge.net>
+
+and is licensed under the GPL version 3,
+see "/usr/share/common-licenses/GPL-3".
