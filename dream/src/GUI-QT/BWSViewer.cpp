@@ -31,6 +31,7 @@
 #include "../datadecoding/DataDecoder.h"
 
 #include <QDir>
+#include <QFile>
 #include <QWebHistory>
 
 
@@ -419,35 +420,23 @@ void BWSViewer::SaveMOTObject(const QString& strObjName,
 
     /* Generate safe filename */
     QString strFileName = strCurrentSavePath + "/" + VerifyHtmlPath(strObjName);
-#ifdef _WIN32
-    strFileName = strFileName.latin1(); /* force internal conversion */
-    const char* pcFileName = strFileName.latin1();
-#else
-    QByteArray baFilename = strFileName.toUtf8();
-    strFileName = baFilename; /* save back conversion */
-    const char* pcFileName = baFilename.data();
-#endif
 
     /* First, create directory for storing the file (if not exists) */
     CreateDirectories(strFileName);
 
-    /* Data size in bytes */
-    const int iSize = vecbRawData.Size();
-
     /* Open file */
-    FILE* pFiBody = fopen(pcFileName, "wb");
-
-    if (pFiBody != NULL)
+    QFile file(strFileName);
+    if (file.open(QIODevice::WriteOnly | QIODevice::Truncate))
     {
-        /* Write data byte-wise */
-        for (int i = 0; i < iSize; i++)
-        {
-            const _BYTE b = vecbRawData[i];
-            fwrite(&b, size_t(1), size_t(1), pFiBody);
-        }
+        int i, written, size;
+        size = vecbRawData.Size();
+
+        /* Write data */
+        for (i = 0, written = 0; size > 0 && written >= 0; i+=written, size-=written)
+            written = file.write((const char*)&vecbRawData.at(i), size);
 
         /* Close the file afterwards */
-        fclose(pFiBody);
+        file.close();
     }
 }
 
@@ -476,12 +465,8 @@ void BWSViewer::SetupSavePath(QString& strSavePath)
     strServiceID.setNum(iServiceID, 16).toUpper();
     strServiceID = strServiceID.rightJustified(8, '0');
 
-    strSavePath = QString(settings.Get("BWS", "storagepath", string(SAVE_DIRECTORY)).c_str());
-#ifdef _WIN32
-    string sSavePath(strSavePath.latin1());
-#else
-    string sSavePath(strSavePath.toUtf8());
-#endif
+    string sSavePath(settings.Get("BWS", "storagepath", string(SAVE_DIRECTORY)));
+    strSavePath = QString::fromUtf8(sSavePath.c_str());
     settings.Put("BWS", "storagepath", sSavePath);
 
     if (!strSavePath.isEmpty())
