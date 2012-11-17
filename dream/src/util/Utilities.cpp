@@ -48,6 +48,22 @@
 
 /* Implementation *************************************************************/
 /******************************************************************************\
+* Thread safe counter                                                          *
+\******************************************************************************/
+unsigned int CCounter::operator++()
+	{ unsigned int value; mutex.Lock(); value = ++count; mutex.Unlock(); return value; }
+unsigned int CCounter::operator++(int)
+	{ unsigned int value; mutex.Lock(); value = count++; mutex.Unlock(); return value; }
+unsigned int CCounter::operator--()
+	{ unsigned int value; mutex.Lock(); value = --count; mutex.Unlock(); return value; }
+unsigned int CCounter::operator--(int)
+	{ unsigned int value; mutex.Lock(); value = count--; mutex.Unlock(); return value; }
+CCounter::operator unsigned int()
+	{ unsigned int value; mutex.Lock(); value = count;   mutex.Unlock(); return value; }
+unsigned int CCounter::operator=(unsigned int value)
+	{ mutex.Lock(); count = value; mutex.Unlock(); return value; }
+
+/******************************************************************************\
 * Signal level meter                                                           *
 \******************************************************************************/
 void

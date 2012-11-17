@@ -43,11 +43,11 @@
 
 BWSViewer::BWSViewer(CDRMReceiver& rec, CSettings& s, QWidget* parent, Qt::WFlags):
     QDialog(parent), Ui_BWSViewer(),
-    nam(this, wobjs, iAwaitingOjects, bAllowExternalContent, strCacheHost),
+    nam(this, cache, waitobjs, bAllowExternalContent, strCacheHost),
     receiver(rec), settings(s), decoder(NULL), bHomeSet(false), bPageLoading(false),
     bSaveFileToDisk(false), bRestrictedProfile(false), bAllowExternalContent(true),
     bDirectoryIndexChanged(false),
-    iAwaitingOjects(0), iLastAwaitingOjects(0), strCacheHost(CACHE_HOST)
+    iLastAwaitingOjects(0), strCacheHost(CACHE_HOST)
 {
     /* Enable minimize and maximize box for QDialog */
 	setWindowFlags(Qt::Window);
@@ -108,14 +108,14 @@ QString BWSViewer::ObjectStr(unsigned int count)
 void BWSViewer::UpdateStatus()
 {
     unsigned int count, size;
-    wobjs.GetObjectCountAndSize(count, size);
+    cache.GetObjectCountAndSize(count, size);
     if (count == 0)
         LabelStatus->setText("");
     else
     {
-        iLastAwaitingOjects = iAwaitingOjects;
         QString text(tr("%1 %2 cached, %3 kB"));
         text = text.arg(count).arg(ObjectStr(count)).arg((size+999) / 1000);
+        iLastAwaitingOjects = waitobjs;
         if (iLastAwaitingOjects)
             text += tr("  |  %1 %2 pending").arg(iLastAwaitingOjects).arg(ObjectStr(iLastAwaitingOjects));
         if (bAllowExternalContent && webView->url().isValid() && webView->url().host() != strCacheHost)
@@ -179,15 +179,18 @@ void BWSViewer::OnTimer()
     }
     else
     {
-        if (iAwaitingOjects != iLastAwaitingOjects)
+        unsigned int iAwaitingOjects = waitobjs;
+        if (iLastAwaitingOjects != iAwaitingOjects)
+        {
+            iLastAwaitingOjects = iAwaitingOjects;
             UpdateStatus();
+        }
     }
 }
 
 void BWSViewer::OnHome()
 {
-    if (!strDirectoryIndex.isNull())
-         webView->load("http://" + strCacheHost + "/");
+    webView->load("http://" + strCacheHost + "/");
 }
 
 void BWSViewer::OnStopRefresh()
@@ -197,7 +200,7 @@ void BWSViewer::OnStopRefresh()
     else
     {
         if (webView->url().isEmpty())
-             webView->load("http://" + strCacheHost + "/");
+            OnHome();
         else
             webView->reload();
     }
@@ -217,8 +220,7 @@ void BWSViewer::OnClearCache()
 {
     webView->setHtml("");
     webView->history()->clear();
-    wobjs.ClearObjects();
-    SetDirectoryIndex(QString());
+    cache.ClearAll();
     bHomeSet = false;
     bPageLoading = false;
     bDirectoryIndexChanged = false;
@@ -399,13 +401,7 @@ bool BWSViewer::Changed()
                     if (strNewDirectoryIndex == "not_here.html") // this is a hack
 	                    strNewDirectoryIndex = "index.html";
                     if (!strNewDirectoryIndex.isNull())
-                    {
-                        if (strDirectoryIndex != strNewDirectoryIndex)
-                        {
-                            SetDirectoryIndex(strNewDirectoryIndex);
-                            bDirectoryIndexChanged = true;
-                        }
-                    }
+                        bDirectoryIndexChanged |= cache.SetDirectoryIndex(strNewDirectoryIndex);
                 }
             }
 
@@ -416,7 +412,7 @@ bool BWSViewer::Changed()
             QString strContentType(obj.strMimeType.c_str());
 
             /* Add received MOT object to webView */
-            wobjs.AddObject(strObjName, strContentType, obj.Body.vecData);
+            cache.AddObject(strObjName, strContentType, obj.Body.vecData);
 
             /* Store received MOT object on disk */
             if (bSaveFileToDisk)
@@ -492,21 +488,6 @@ void BWSViewer::CreateDirectories(const QString& filename)
     }
 }
 
-void BWSViewer::SetDirectoryIndex(const QString strNewDirectoryIndex)
-{
-    mutexDirectoryIndex.lock();
-        strDirectoryIndex = strNewDirectoryIndex;
-    mutexDirectoryIndex.unlock();
-}
-
-QString BWSViewer::GetDirectoryIndex()
-{
-    mutexDirectoryIndex.lock();
-        QString str = strDirectoryIndex;
-    mutexDirectoryIndex.unlock();
-    return str;
-}
-
 //////////////////////////////////////////////////////////////////
 // CWebsiteCache implementation
 
@@ -518,9 +499,10 @@ void CWebsiteCache::GetObjectCountAndSize(unsigned int& count, unsigned int& siz
     mutex.unlock();
 }
 
-void CWebsiteCache::ClearObjects()
+void CWebsiteCache::ClearAll()
 {
     mutex.lock();
+        strDirectoryIndex = QString(); /* NULL string, not empty string! */
         objects.clear();
         total_size = 0;
     mutex.unlock();
@@ -614,21 +596,39 @@ CWebsiteObject* CWebsiteCache::FindObject(const QString& strObjName)
     return it != objects.end() ? &it->second : NULL;
 }
 
+bool CWebsiteCache::SetDirectoryIndex(const QString strNewDirectoryIndex)
+{
+    bool bChanged;
+    mutex.lock();
+        bChanged = strDirectoryIndex != strNewDirectoryIndex;
+        if (bChanged)
+            strDirectoryIndex = strNewDirectoryIndex;
+    mutex.unlock();
+    return bChanged;
+}
+
+QString CWebsiteCache::GetDirectoryIndex()
+{
+    mutex.lock();
+        QString str = strDirectoryIndex;
+    mutex.unlock();
+    return str;
+}
+
 
 //////////////////////////////////////////////////////////////////
 // CNetworkReplyCache implementation
 
-CNetworkReplyCache::CNetworkReplyCache(QObject* parent, QNetworkAccessManager::Operation op,
-    const QNetworkRequest& req, CWebsiteCache& cache, volatile int& waitobjs,
-    QObject* pBWSViewer)
-    : QNetworkReply(parent), cache(cache), waitobjs(waitobjs), pBWSViewer(pBWSViewer),
+CNetworkReplyCache::CNetworkReplyCache(QNetworkAccessManager::Operation op,
+    const QNetworkRequest& req, CWebsiteCache& cache, CCounter& waitobjs)
+    : cache(cache), waitobjs(waitobjs),
     readOffset(0), emitted(false), id(0)
 {
     /* ETSI TS 101 498-1 Section 6.2.3 */
     QString strUrl(req.url().toString());
     QString strDirectoryIndex;
     if (IsUrlDirectory(strUrl))
-        strDirectoryIndex = ((BWSViewer*)pBWSViewer)->GetDirectoryIndex();
+        strDirectoryIndex = cache.GetDirectoryIndex();
     path = UrlEncodePath(strUrl + strDirectoryIndex);
 
     connect(&cache, SIGNAL(ObjectAdded(QString)), this, SLOT(CheckObject(QString)));
@@ -637,16 +637,12 @@ CNetworkReplyCache::CNetworkReplyCache(QObject* parent, QNetworkAccessManager::O
     setUrl(req.url());
     open(QIODevice::ReadOnly);
     QCoreApplication::postEvent(this, new QEvent(QEvent::User));
-    mutex.lock();
-        waitobjs++;
-    mutex.unlock();
+    waitobjs++;
 };
 
 CNetworkReplyCache::~CNetworkReplyCache()
 {
-    mutex.lock();
-        waitobjs--;
-    mutex.unlock();
+    waitobjs--;
 };
 
 void CNetworkReplyCache::customEvent(QEvent* event)
@@ -691,7 +687,7 @@ void CNetworkReplyCache::CheckObject(QString strObjName)
 QNetworkReply* CNetworkAccessManager::createRequest(Operation op, const QNetworkRequest& req, QIODevice* outgoingData)
 {
     if (!bAllowExternalContent || req.url().host() == strCacheHost)
-        return new CNetworkReplyCache(this, op, req, objs, waitobjs, pBWSViewer);
+        return new CNetworkReplyCache(op, req, cache, waitobjs);
     else
         return QNetworkAccessManager::createRequest(op, req, outgoingData);
 }
