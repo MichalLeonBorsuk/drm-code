@@ -420,11 +420,12 @@ void BWSViewer::SaveMOTObject(const QString& strObjName,
     /* Generate safe filename */
     QString strFileName = strCurrentSavePath + "/" + VerifyHtmlPath(strObjName);
 #ifdef _WIN32
-    const char* pcFileName(strFileName.latin1().data());
-    strFileName = strFileName.latin1();
+    strFileName = strFileName.latin1(); /* force internal conversion */
+    const char* pcFileName = strFileName.latin1();
 #else
-    const char* pcFileName(strFileName.toUtf8().data());
-    strFileName = strFileName.toUtf8();
+    QByteArray baFilename = strFileName.toUtf8();
+    strFileName = baFilename; /* save back conversion */
+    const char* pcFileName = baFilename.data();
 #endif
 
     /* First, create directory for storing the file (if not exists) */
