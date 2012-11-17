@@ -1,4 +1,4 @@
-dream-qt3 (1.16) unstable; urgency=low
+dream (1.16) unstable; urgency=low
 
   * Full support of Qt4 and Qwt 5/6
   * Default use of fftw3 
