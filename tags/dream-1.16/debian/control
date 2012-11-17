@@ -1,12 +1,13 @@
-Source: dream-qt3
+Standards-Version: 3.9.4
+Source: dream
 Section: hamradio
 Priority: optional
 Maintainer: Julian Cable <jcable@users.sourceforge.net>
 Build-Depends: debhelper (>= 7.0.50~),
-               libqt3-mt-dev,
-               qt3-dev-tools,
+               libqt4-dev,
+               qt4-dev-tools,
+               libqwt5-qt4-dev,
                fftw3-dev,
-               libqwt-dev,
                portaudio19-dev,
                libsndfile1-dev,
                libpcap0.8-dev,
@@ -14,9 +15,9 @@ Build-Depends: debhelper (>= 7.0.50~),
                libgps-dev
 
 Homepage: http://drm.sourceforge.net
-Package: dream-qt3
+Package: dream
 Architecture: any
-Depends:       libqt3-mt, libqwt4c2, libfftw3-3, libhamlib2, libgps19, libportaudio2, libpcap0.8, libsndfile1
+Depends:      ${shlibs:Depends}
 Description: a DRM (Digital Radio Mondiale) and AM Software Defined Radio
  Digital Radio Mondiale (DRM) is the digital radio standard for the
  long-, medium- and short-wave ranges. The standard was formed by a
