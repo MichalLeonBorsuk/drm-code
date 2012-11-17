@@ -420,8 +420,10 @@ void BWSViewer::SaveMOTObject(const QString& strObjName,
     /* Generate safe filename */
     QString strFileName = strCurrentSavePath + "/" + VerifyHtmlPath(strObjName);
 #ifdef _WIN32
+    const char* pcFileName(strFileName.latin1().data());
     strFileName = strFileName.latin1();
 #else
+    const char* pcFileName(strFileName.toUtf8().data());
     strFileName = strFileName.toUtf8();
 #endif
 
@@ -432,7 +434,7 @@ void BWSViewer::SaveMOTObject(const QString& strObjName,
     const int iSize = vecbRawData.Size();
 
     /* Open file */
-    FILE* pFiBody = fopen(strFileName, "wb");
+    FILE* pFiBody = fopen(pcFileName, "wb");
 
     if (pFiBody != NULL)
     {
