@@ -161,10 +161,10 @@ protected:
     CEventFilter    ef;
 
     bool Changed();
-    void CreateDirectories(const QString& filename);
+    void CreateDirectories(const QString& strFilename);
     void SaveMOTObject(const QString& strObjName, const CMOTObject& obj);
     bool RemoveDir(const QString &dirName, int level = 0);
-    void SetupCurrentSavePath();
+    void SetupSavePath(QString& strSavePath);
     void UpdateButtons();
     void UpdateStatus();
     QString ObjectStr(unsigned int count);

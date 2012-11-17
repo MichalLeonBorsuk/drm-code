@@ -34,11 +34,14 @@
 #include <QWebHistory>
 
 
-#define DEFAULT_DIRECTORY   "data/mot"
-#define CACHE_HOST          "127.0.0.1" /* not an actual web server */
+#define SAVE_DIRECTORY      "data/mot"
+#define CACHE_HOST          "127.0.0.1" /* Not an actual server, MUST be set to "127.0.0.1" */
 
 #define ICON_REFRESH        ":/icons/Refresh.png"
 #define ICON_STOP           ":/icons/Stop.png"
+
+#undef ENABLE_HACK
+#define ENABLE_HACK /* Do we really need these hack unless for vtc trial sample? */
 
 
 BWSViewer::BWSViewer(CDRMReceiver& rec, CSettings& s, QWidget* parent, Qt::WFlags):
@@ -46,8 +49,7 @@ BWSViewer::BWSViewer(CDRMReceiver& rec, CSettings& s, QWidget* parent, Qt::WFlag
     nam(this, cache, waitobjs, bAllowExternalContent, strCacheHost),
     receiver(rec), settings(s), decoder(NULL), bHomeSet(false), bPageLoading(false),
     bSaveFileToDisk(false), bRestrictedProfile(false), bAllowExternalContent(true),
-    bDirectoryIndexChanged(false),
-    iLastAwaitingOjects(0), strCacheHost(CACHE_HOST)
+    bDirectoryIndexChanged(false), iLastAwaitingOjects(0), strCacheHost(CACHE_HOST)
 {
     /* Enable minimize and maximize box for QDialog */
 	setWindowFlags(Qt::Window);
@@ -190,7 +192,7 @@ void BWSViewer::OnTimer()
 
 void BWSViewer::OnHome()
 {
-    webView->load("http://" + strCacheHost + "/");
+    webView->load("http://" + strCacheHost);
 }
 
 void BWSViewer::OnStopRefresh()
@@ -347,30 +349,6 @@ void BWSViewer::hideEvent(QHideEvent* e)
     settings.Put("BWS", "allowexternalcontent", bAllowExternalContent);
 }
 
-void BWSViewer::SetupCurrentSavePath()
-{
-    CParameter& Parameters = *receiver.GetParameters();
-    Parameters.Lock();
-    const int iCurSelDataServ = Parameters.GetCurSelDataService();
-    const int iServiceID = Parameters.Service[iCurSelDataServ].iServiceID;
-    Parameters.Unlock();
-
-    QString strServiceID;
-    strServiceID.setNum(iServiceID, 16).toUpper();
-    strServiceID = strServiceID.rightJustified(8, '0');
-
-    strCurrentSavePath = QString(settings.Get("BWS", "storagepath", string(DEFAULT_DIRECTORY)).c_str());
-    settings.Put("BWS", "storagepath", string(strCurrentSavePath.latin1()));
-
-    if (!strCurrentSavePath.isEmpty())
-        strCurrentSavePath += "/";
-    strCurrentSavePath += strServiceID;
-
-    /* Create the cache directory if not exist */
-    if (!QFileInfo(strCurrentSavePath).exists())
-        QDir().mkdir(strCurrentSavePath);
-}
-
 bool BWSViewer::Changed()
 {
     bool bChanged = false;
@@ -398,8 +376,10 @@ bool BWSViewer::Changed()
                     else if(MOTDir.DirectoryIndex.find(BASIC_PROFILE) != MOTDir.DirectoryIndex.end())
                         strNewDirectoryIndex =
                             MOTDir.DirectoryIndex[BASIC_PROFILE].c_str();
-                    if (strNewDirectoryIndex == "not_here.html") // this is a hack
+#ifdef ENABLE_HACK
+                    if (strNewDirectoryIndex == "not_here.html") /* Hack needed for vtc trial sample */
 	                    strNewDirectoryIndex = "index.html";
+#endif
                     if (!strNewDirectoryIndex.isNull())
                         bDirectoryIndexChanged |= cache.SetDirectoryIndex(strNewDirectoryIndex);
                 }
@@ -410,7 +390,11 @@ bool BWSViewer::Changed()
 
             /* Get ContentType */
             QString strContentType(obj.strMimeType.c_str());
-
+#ifdef ENABLE_HACK
+            /* Hack needed for vtc trial sample */
+            if (strObjName.endsWith(".stm", Qt::CaseInsensitive) && !strContentType.compare("application/octet-stream", Qt::CaseInsensitive))
+                strContentType = "text/html";
+#endif 
             /* Add received MOT object to webView */
             cache.AddObject(strObjName, strContentType, obj.Body.vecData);
 
@@ -430,20 +414,25 @@ void BWSViewer::SaveMOTObject(const QString& strObjName,
 {
     const CVector<_BYTE>& vecbRawData = obj.Body.vecData;
 
-    /* Set strCurrentSavePath */
-    SetupCurrentSavePath();
+    /* Set up save path */
+    SetupSavePath(strCurrentSavePath);
 
     /* Generate safe filename */
-    const QString strFileName = strCurrentSavePath + "/" + VerifyHtmlPath(strObjName);
+    QString strFileName = strCurrentSavePath + "/" + VerifyHtmlPath(strObjName);
+#ifdef _WIN32
+    strFileName = strFileName.latin1();
+#else
+    strFileName = strFileName.toUtf8();
+#endif
 
     /* First, create directory for storing the file (if not exists) */
-    CreateDirectories(strFileName.latin1());
+    CreateDirectories(strFileName);
 
     /* Data size in bytes */
     const int iSize = vecbRawData.Size();
 
     /* Open file */
-    FILE* pFiBody = fopen(strFileName.latin1(), "wb");
+    FILE* pFiBody = fopen(strFileName, "wb");
 
     if (pFiBody != NULL)
     {
@@ -459,33 +448,42 @@ void BWSViewer::SaveMOTObject(const QString& strObjName,
     }
 }
 
-void BWSViewer::CreateDirectories(const QString& filename)
+void BWSViewer::CreateDirectories(const QString& strFilename)
 {
-    int i = 0;
-
-    while (i < filename.length())
+    for (int i = 0;; i++)
     {
-        _BOOLEAN bFound = FALSE;
-
-        while ((i < filename.length()) && (bFound == FALSE))
-        {
-            if (filename[i] == '/')
-                bFound = TRUE;
-            else
-                i++;
-        }
-
-        if (bFound == TRUE)
-        {
-            /* create directory */
-            const QString sDirName = filename.left(i);
-
-            if (!QFileInfo(sDirName).exists())
-                QDir().mkdir(sDirName);
-        }
-
-        i++;
+        i = strFilename.indexOf(QChar('/'), i);
+        if (i < 0)
+            break;
+        const QString strDirName = strFilename.left(i);
+        if (!strDirName.isEmpty() && !QFileInfo(strDirName).exists())
+            QDir().mkdir(strDirName);
     }
+}
+
+void BWSViewer::SetupSavePath(QString& strSavePath)
+{
+    CParameter& Parameters = *receiver.GetParameters();
+    Parameters.Lock();
+    const int iCurSelDataServ = Parameters.GetCurSelDataService();
+    const int iServiceID = Parameters.Service[iCurSelDataServ].iServiceID;
+    Parameters.Unlock();
+
+    QString strServiceID;
+    strServiceID.setNum(iServiceID, 16).toUpper();
+    strServiceID = strServiceID.rightJustified(8, '0');
+
+    strSavePath = QString(settings.Get("BWS", "storagepath", string(SAVE_DIRECTORY)).c_str());
+#ifdef _WIN32
+    string sSavePath(strSavePath.latin1());
+#else
+    string sSavePath(strSavePath.toUtf8());
+#endif
+    settings.Put("BWS", "storagepath", sSavePath);
+
+    if (!strSavePath.isEmpty())
+        strSavePath += "/";
+    strSavePath += strServiceID;
 }
 
 //////////////////////////////////////////////////////////////////
@@ -517,10 +515,6 @@ void CWebsiteCache::AddObject(QString strObjName, QString strContentType, CVecto
         /* Get the object name */
         strObjName = UrlEncodePath(strObjName);
 
-        /* Hack */
-        if (strObjName.endsWith(".stm", Qt::CaseInsensitive) && !strContentType.compare("application/octet-stream", Qt::CaseInsensitive))
-            strContentType = "text/html";
-    
         /* Erase previous object if any */
         map<QString,CWebsiteObject>::iterator it;
         it = objects.find(strObjName);
