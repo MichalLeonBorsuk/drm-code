@@ -3,14 +3,15 @@
 %define name            dream
 %define version         1.16
 %define release         1
+%define revision        365
  
-Summary:	Digital Radio Mondiale (DRM) software receiver.
+Summary:	Digital Radio Mondiale (DRM) software receiver
 Name:		%{name}
 Version:	%{version}
 Release:	%{release}
-License:	GPL
-Group:		Applications/Communications
-Source0:	%{name}-%{version}.tar.gz
+License:	GPL-2.0
+Group:		Productivity/Hamradio/Other
+Source0:	%{name}-%{version}-%{revision}.tar.gz
 URL:		http://drm.sourceforge.net/
 BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-root
 BuildRequires:	qt-devel make gcc-c++ libQtWebKit-devel
@@ -20,7 +21,7 @@ BuildRequires:	gpsd-devel
 BuildRequires:	libsndfile-devel
 BuildRequires:	libpcap-devel
 #BuildRequires:	hamlib, hamlib-devel
-BuildRequires:  portaudio-devel 
+BuildRequires:  portaudio-devel alsa-devel
 
 %description
 Digital Radio Mondiale (DRM) is the digital radio standard for
@@ -29,10 +30,11 @@ the long, medium and short wave ranges.
 Dream is an open source software implementation of a DRM receiver.
 
 %prep
-%setup -q
+#zypper ar http://download.opensuse.org/repositories/hamradio/openSUSE_12.2/hamradio.repo
+%setup -n %{name}-%{version}-%{revision}
 
 %build
-qmake -spec linux-g++-32
+qmake
 make
 
 %install
@@ -49,9 +51,9 @@ rm -rf %{buildroot}
 %{_bindir}/dream
 
 %changelog
-* Sat Nov 17 2012 Julian Cable <jcable@sf.net>
+* Sat Nov 17 2012 Julian Cable <jcable@sf.net> 1.16
 - Fully implemented Qt4 and others
-* Tue Oct 23 2012 Julian Cable <jcable@sf.net>
+* Tue Oct 23 2012 Julian Cable <jcable@sf.net> 1.15
 - Qt4 and others
 * Wed Apr 24 2005 Alexander Kurpiers <kurpiers@sf.net>
 - add libjournaline and hamlib
