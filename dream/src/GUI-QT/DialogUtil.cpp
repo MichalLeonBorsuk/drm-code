@@ -54,6 +54,9 @@
 #ifdef USE_PORTAUDIO
 # include <portaudio.h>
 #endif
+#ifdef USE_PULSEAUDIO
+# include <pulse/version.h>
+#endif
 #ifdef HAVE_LIBSNDFILE
 # include <sndfile.h>
 #endif
@@ -98,12 +101,7 @@ CAboutDlg::CAboutDlg(QWidget* parent, const char* name, bool modal, Qt::WFlags f
     char  sfversion [128] ;
     sf_command (NULL, SFC_GET_LIB_VERSION, sfversion, sizeof (sfversion)) ;
 #endif
-    /* Set the text for the about dialog html text control */
-#if QT_VERSION < 0x040000
-    TextViewCredits->setText(
-#else
-	textBrowser->setText(
-#endif
+    QString strCredits = 
         "<p>" /* General description of Dream software */
         "<big><b>Dream</b> " + tr("is a software implementation of a Digital "
                                   "Radio Mondiale (DRM) receiver. With Dream, DRM broadcasts can be received "
@@ -145,7 +143,7 @@ CAboutDlg::CAboutDlg(QWidget* parent, const char* name, bool modal, Qt::WFlags f
         "<li><b>FAAC</b> <i>http://faac.sourceforge.net</i></li>"
 #endif
 #ifdef USE_QT_GUI /* QWT */
-        "<li><b>Qt</b> (" + QString(QT_VERSION_STR) + ") <i>http://www.trolltech.com</i></li>"
+        "<li><b>Qt</b> (" + QString(QT_VERSION_STR) + ") <i>http://qt.digia.com</i></li>"
         "<li><b>QWT</b> (" + QString(QWT_VERSION_STR) + ") <i>Dream is based in part on the work of the Qwt "
         "project (http://qwt.sf.net).</i></li>"
 #endif
@@ -175,7 +173,10 @@ CAboutDlg::CAboutDlg(QWidget* parent, const char* name, bool modal, Qt::WFlags f
         "<li><b>ALSA</b> (" + QString(SND_LIB_VERSION_STR) + ") <i>http://www.alsa-project.org</i></li>"
 #endif
 #ifdef USE_PORTAUDIO
-        "<li><b>portaudio</b> ("+QString(Pa_GetVersionText())+") <i>http://www.portaudio.com</i></li>"
+        "<li><b>portaudio</b> (" + QString(Pa_GetVersionText()) + ") <i>http://www.portaudio.com</i></li>"
+#endif
+#ifdef USE_PULSEAUDIO
+        "<li><b>PulseAudio</b> (" + QString(pa_get_headers_version()) + ") <i>http://www.pulseaudio.org</i></li>"
 #endif
 #ifdef USE_JACK
         "<li><b>libjack</b> (The Jack Audio Connection Kit) <i>http://www.jackaudio.org</i></li>"
@@ -189,10 +190,9 @@ CAboutDlg::CAboutDlg(QWidget* parent, const char* name, bool modal, Qt::WFlags f
         "result of this development.<br>In 2005, <i>Andrew Murphy</i> of the <i>British "
         "Broadcasting Corporation</i> added code for an "
         "AMSS demodulator. <i>Oliver Haffenden</i> and <i>Julian Cable</i> (also <i>BBC</i>) rewrote "
-        "the MDI interface and added RSCI support. The EPG was implemented by "
-        "<i>Julian Cable</i> and the Broadcast Website and AFS features as well as many "
-        "other GUI improvements were implemented by <i>Andrea Russo</i>."
-        "<br>Right now the code is mainly maintained by <i>Julian Cable</i>."
+        "the MDI interface and added RSCI support."
+        " Many other GUI improvements were implemented by <i>Andrea Russo and David Flamand</i>."
+        "<br>Right now the code is mainly maintained by <i>David Flamand and Julian Cable</i>."
         " Quality Assurance and user testing is provided by <i>Simone St&ouml;ppler.</i>"
         "<br><br><br>"
         "<center><b>CREDITS</b></center><br>"
@@ -207,6 +207,7 @@ CAboutDlg::CAboutDlg(QWidget* parent, const char* name, bool modal, Qt::WFlags f
         "<p>Fillod, Stephane</p>"
         "<p>Fischer, Volker</p>"
         "<p>Fine, Mark J.</p>"
+        "<p>Flamand, David</p>"
         "<p>Haffenden, Oliver</p>"
         "<p>Kurpiers, Alexander</p>"
         "<p>Manninen, Tomi</p>"
@@ -242,7 +243,13 @@ CAboutDlg::CAboutDlg(QWidget* parent, const char* name, bool modal, Qt::WFlags f
         "<p>St&ouml;ppler, Simone</p>"
         "<p>Varlamov, Oleg</p>"
         "<p>Wade, Graham</p>"
-        "</center><br>");
+        "</center><br>";
+
+    /* Add link to text */
+    Linkify(strCredits);
+
+    /* Set the text for the about dialog html text control */
+    TextViewCredits->setText(strCredits);
 
     /* Set version number in about dialog */
     QString strVersionText;
@@ -790,8 +797,15 @@ void Linkify(QString& text)
             newLink = newLink.arg(rawLink.toString());
             int newLinkSize = newLink.size();
             text.replace(posBegin, rawLinkSize, newLink);
-            i = posEnd + newLinkSize - rawLinkSize;
-            size += newLinkSize - rawLinkSize;
+            const int diff = newLinkSize - rawLinkSize;
+            i = posEnd + diff;
+            size += diff;
+            if (posWWW >= 0)
+                posWWW += diff;
+            if (posHTTP >= 0)
+                posHTTP += diff;
+            if (posMAIL >= 0)
+                posMAIL += diff;
         }
         else
             break;
