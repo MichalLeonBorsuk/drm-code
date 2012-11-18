@@ -3,23 +3,25 @@ It is a very complete receiver, featuring compliant decoding of HE AAC v2
 audio streams, journaline decoding, a feature rich statistics section
 providing invaluable information about the streams being received, and automatic
 update of available stations from the web, among several other features.
-
+ 
 It also features a limited transmission mode, that uses the FAAC AAC encoder.
-
+ 
 Dream is multi-platform and has been tested on OSX, Win32 and Linux.
-
+ 
 We would like to welcome David Flamand to the developement and administration
 team. David is the main driver behind this release which completes our migration
 to modern supported 3rd party libraries. David has many more ideas for new features,
 some of which we will see very soon.
-
+ 
 The source files are available here: http://drm.sourceforge.net
-
+ 
 Changes since version 1.15:
-
+ 
   - Full support of Qt4 and Qwt 5/6
-  - Default use of fftw3 
-  - various other bugfix, cleanup, ui tweaks
+  - Default use of fftw3
+  - Better looking logo and icons
+  - PulseAudio sound interface (linux)
+  - Various bug fixes, code cleanups and user interface changes
   - Transmitter Enhancements
     - configuration stored in Dream.ini
     - ability to transmit the current time
@@ -28,31 +30,30 @@ Changes since version 1.15:
     - fix for problems with MOT slide show
     - stop MOT Slide Show encoding the full path of files
   - Receiver Enhancements
-    - stations Dialog Filters get mixed up when swapping between modes
-    - frequency missing in live schedule
-    - remove support for process priority
     - fix pcap reading
   ` - prevent crash when EPG item has no duration
     - prevent crash with HVXC encoded service
-    - fix delay for starting logfiles
     - fix direct frequency input
     - fix support for DRM Logger
     - add missing SDC information to MOT service display
-    - remember sound card input in ini file
     - additional receiver state stored in Dream.ini
+    - better frequency resolution and dynamic range of audio spectrum plot
+    - support of links in text messages (qt4 only)
+    - added display of UTC offset on received time in system evaluation dialogue
 
-
+ 
 The binaries are compiled without support for AAC decoding or encoding.
-
+ 
 On windows, if you want to hear the audio of a DRM broadcast you will need to obtain a 
 copy of faad2_drm.dll and place it in the same directory as the dream.exe file. 
-
+ 
 Instructions for building faad2_drm.dll and faac_drm.dll are available at drm.sf.net. 
-
+ 
 If you want to control a SW Rig you will need additional hamlib dlls. 
-
+ 
 These are available at www.hamlib.org. 
-
+ 
 On linux the procedure is similar and libfaad2_drm.so and hamlib .so files will be needed.
-
+ 
 Have fun with dream
+
