@@ -3,15 +3,16 @@ Source: dream
 Section: hamradio
 Priority: optional
 Maintainer: Julian Cable <jcable@users.sourceforge.net>
-Build-Depends: debhelper (>= 7.0.50~),
+Build-Depends: debhelper,
                libqt4-dev,
                qt4-dev-tools,
                libqwt5-qt4-dev,
                fftw3-dev,
-               portaudio19-dev, libjack-jackd2-dev,
-               libsndfile1-dev, libpcap0.8-dev, zlib1g-dev,
+               portaudio19-dev,
+               libsndfile1-dev,
+               libpcap0.8-dev,
                libhamlib-dev,
-               libgps-dev
+               libgps-dev, zlib1g-dev
 
 Homepage: http://drm.sourceforge.net
 Package: dream
