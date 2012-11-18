@@ -657,6 +657,7 @@ void CNetworkReplyCache::CheckObject(QString strObjName)
             id = new_id;
             setRawHeader(QByteArray("Content-Type"), QByteArray(strContentType.toUtf8().constData()));
             emitted = true;
+            emit readyRead(); /* needed for Qt 4.6 */
             emit finished();
         }
     }
