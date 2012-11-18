@@ -52,50 +52,32 @@ TARGET = dream-cli
                 }
             }
             else {
-                exists($$(QWT)) {
-                    message("with qwt6")
-                    INCLUDEPATH += $$(QWT)/include
-                    LIBS += $$(QWT)/lib/libqwt.so
-                }
-                else {
-                    exists(/usr/lib/libqwt.so.6) {
+                    exists(/usr/include/qwt6) {
                         message("with qwt6")
-                        LIBS += /usr/lib/libqwt.so.6
-                        exists(/usr/include/qwt6) {
+                        LIBS += -lqwt
                             INCLUDEPATH += /usr/include/qwt6
-                        }
-                        else {
-                            exists(libs/qwt) {
-                                INCLUDEPATH += libs/qwt
-                            } else {
-                                INCLUDEPATH += /usr/include/qwt
-                            }
-                        }
                     }
                     else {
-                        exists(/usr/lib/libqwt-qt4.so.5) {
+                        exists(/usr/include/qwt-qt4) {
                             message("with qwt5")
-                            LIBS += /usr/lib/libqwt-qt4.so.5
-                            exists(/usr/include/qwt-qt4) {
-                                INCLUDEPATH += /usr/include/qwt-qt4
-                            } 
-                            } 
-                            else {
-                        exists(/usr/include/qwt5) {
+                            LIBS += -lqwt-qt4
+                            INCLUDEPATH += /usr/include/qwt-qt4
+                        } 
+                        else {
+                          exists(/usr/include/qwt5) {
                             message("with qwt5")
                             LIBS += -lqwt
-                                INCLUDEPATH += /usr/include/qwt5
-                            } 
-                            else {
-                                exists(libs/qwt) {
-                                    INCLUDEPATH += libs/qwt
-                                } else {
-                                    INCLUDEPATH += /usr/include/qwt
-                                }
+                            INCLUDEPATH += /usr/include/qwt5
+                          } 
+                          else {
+                            exists(/usr/include/qwt) {
+                              message("with qwt5")
+                              LIBS += -lqwt
+                              INCLUDEPATH += /usr/include/qwt
                             }
-                        }
-                        else {
-                            error("no usable qwt version found")
+                            else {
+                              error("no usable qwt version found")
+                            }
                         }
                     }
                 }
