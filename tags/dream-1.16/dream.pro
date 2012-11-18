@@ -79,6 +79,13 @@ TARGET = dream-cli
                             exists(/usr/include/qwt-qt4) {
                                 INCLUDEPATH += /usr/include/qwt-qt4
                             } 
+                            } 
+                            else {
+                        exists(/usr/lib/libqwt.so.5) {
+                            message("with qwt5")
+                            LIBS += -lqwt
+                                INCLUDEPATH += /usr/include/qwt5
+                            } 
                             else {
                                 exists(libs/qwt) {
                                     INCLUDEPATH += libs/qwt
