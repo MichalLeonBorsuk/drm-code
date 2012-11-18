@@ -8,9 +8,8 @@ Build-Depends: debhelper (>= 7.0.50~),
                qt4-dev-tools,
                libqwt5-qt4-dev,
                fftw3-dev,
-               portaudio19-dev,
-               libsndfile1-dev,
-               libpcap0.8-dev,
+               portaudio19-dev, libjack-jackd2-dev,
+               libsndfile1-dev, libpcap0.8-dev, zlib1g-dev,
                libhamlib-dev,
                libgps-dev
 
