@@ -176,20 +176,18 @@ class LiveScheduleDlg : public CLiveScheduleDlgBase
 	Q_OBJECT
 
 public:
-
-	LiveScheduleDlg(CDRMReceiver&,
+	LiveScheduleDlg(CDRMReceiver&, CSettings&,
 		QWidget* parent = 0,
 		const char* name = 0, bool modal = FALSE, Qt::WFlags f = 0);
 	virtual ~LiveScheduleDlg();
 
 	void LoadSchedule();
-	void LoadSettings(const CSettings&);
 	void SaveSettings(CSettings&);
 
-	int			iCurrentSortColumn;
-	_BOOLEAN		bCurrentSortAscending;
-
 protected:
+	int				iCurrentSortColumn;
+	_BOOLEAN		bCurrentSortAscending;
+	void			LoadSettings(const CSettings&);
 	void			SetStationsView();
 	void			AddWhatsThisHelp();
 	void			SetUTCTimeLabel();
@@ -198,9 +196,10 @@ protected:
 	QString			ExtractDaysFlagString(const int iDayCode);
 	QString			ExtractTime(const CAltFreqSched& schedule);
 	_BOOLEAN		showAll();
-	int			currentSortColumn();
+	int				currentSortColumn();
 
 	CDRMReceiver&		DRMReceiver;
+	CSettings&			Settings;
 	CDRMLiveSchedule	DRMSchedule;
 	QTimer			TimerList;
 	QTimer			TimerUTCLabel;

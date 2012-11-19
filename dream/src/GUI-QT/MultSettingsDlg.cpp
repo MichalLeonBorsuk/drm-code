@@ -46,6 +46,12 @@ MultSettingsDlg::MultSettingsDlg(CParameter& NP, CSettings& NSettings, QWidget* 
 	/* Set help text for the controls */
 	AddWhatsThisHelp();
 
+#if QT_VERSION >= 0x040000
+	// TODO
+	CheckBoxAddRefresh->hide();
+	EdtSecRefresh->hide();
+#endif
+
 	/* Connect buttons */
 
 	connect(PushButtonChooseDir, SIGNAL(clicked()),

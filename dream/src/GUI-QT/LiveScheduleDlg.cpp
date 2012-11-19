@@ -335,25 +335,28 @@ CDRMLiveSchedule::LoadAFSInformations(const CAltFreqSign& AltFreqSign)
     }
 }
 
-LiveScheduleDlg::LiveScheduleDlg(CDRMReceiver & NDRMR,
+LiveScheduleDlg::LiveScheduleDlg(CDRMReceiver& DRMReceiver, CSettings& Settings,
                                  QWidget * parent, const char *name,
                                  bool modal, Qt::WFlags f):
     CLiveScheduleDlgBase(parent, name, modal, f),
-    DRMReceiver(NDRMR),
+    DRMReceiver(DRMReceiver), Settings(Settings),
 #if QT_VERSION >= 0x040000
-smallGreenCube(":/icons/smallGreenCube.png"),greenCube(":/icons/greenCube.png"),
-redCube(":/icons/redCube.png"),orangeCube(":/icons/organgeCube.png"),pinkCube(":/icons/pinkCube.png"),
+    smallGreenCube(":/icons/smallGreenCube.png"),
+    greenCube(":/icons/greenCube.png"), redCube(":/icons/redCube.png"),
+    orangeCube(":/icons/organgeCube.png"), pinkCube(":/icons/pinkCube.png"),
 #endif
     vecpListItems(), iColStationID(1), iWidthColStationID(0)
 {
     setupUi(this);
+
+    /* Load settings */
+    LoadSettings(Settings);
+
     /* Set help text for the controls */
     AddWhatsThisHelp();
 
     /* Clear list box for file names and set up columns */
     ListViewStations->clear();
-
-
 
 #if QT_VERSION < 0x040000
     /* Define size of the bitmaps */

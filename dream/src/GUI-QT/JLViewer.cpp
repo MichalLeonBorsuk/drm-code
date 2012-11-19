@@ -33,11 +33,10 @@
 #include <QFontDialog>
 
 JLViewer::JLViewer(CDRMReceiver& rec, CSettings& s, QWidget* parent,
-                   const char* name, Qt::WFlags f):
-    QDialog(parent), Ui_JLViewer(), Timer(),
+                   const char*, Qt::WFlags):
+    QDialog(parent), Ui_JLViewer(),
     receiver(rec), settings(s), decoderSet(false)
 {
-    (void)name; (void)f;
     /* Enable minimize and maximize box for QDialog */
 	setWindowFlags(Qt::Window);
 
@@ -61,8 +60,6 @@ JLViewer::JLViewer(CDRMReceiver& rec, CSettings& s, QWidget* parent,
     connect(&Timer, SIGNAL(timeout()), this, SLOT(OnTimer()));
 
     OnClearAll();
-
-    Timer.stop();
 }
 
 JLViewer::~JLViewer()

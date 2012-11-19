@@ -118,16 +118,14 @@ class MultimediaDlg : public MultimediaDlgBase
 	Q_OBJECT
 
 public:
-	MultimediaDlg(CDRMReceiver&, QWidget* parent = 0,
+	MultimediaDlg(CDRMReceiver&, CSettings&, QWidget* parent = 0,
 		const char* name = 0, bool modal = FALSE, Qt::WFlags f = 0);
-
 	virtual ~MultimediaDlg();
 
-	void LoadSettings(const CSettings&);
 	void SaveSettings(CSettings&);
 
 protected:
-
+	CSettings&				Settings;
 	CParameter&				Parameters;
 	CDataDecoder&			DataDecoder;
 	CJournaline				JournalineDecoder;
@@ -156,6 +154,7 @@ protected:
 	int						iRefresh;
 	bool					bGetFromFile;
 
+	void LoadSettings(const CSettings&);
 	void SetSlideShowPicture();
 	void SetJournalineText();
 	void UpdateAccButtonsSlideShow();

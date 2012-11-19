@@ -650,22 +650,23 @@ void CStationsItem::SetDaysFlagString(const QString& strNewDaysFlags)
     }
 }
 
-StationsDlg::StationsDlg(CDRMReceiver& NDRMR, CRig& rig,
+StationsDlg::StationsDlg(CDRMReceiver& DRMReceiver, CSettings& Settings, CRig& Rig,
                          QWidget* parent, const char* name, bool modal, Qt::WFlags f) :
     CStationsDlgBase(parent, name, modal, f),
-    DRMReceiver(NDRMR),
+    DRMReceiver(DRMReceiver), Settings(Settings), Rig(Rig),
 #if QT_VERSION < 0x040000
     vecpListItems(0),
 #else
-    greenCube(":/icons/greenCube.png"),redCube(":/icons/redCube.png"),
-    orangeCube(":/icons/orangeCube.png"),pinkCube(":/icons/pinkCube.png"),
+    greenCube(":/icons/greenCube.png"), redCube(":/icons/redCube.png"),
+    orangeCube(":/icons/orangeCube.png"), pinkCube(":/icons/pinkCube.png"),
 #endif
     bReInitOnFrequencyChange(FALSE)
 {
-#if QT_VERSION < 0x040000
-    pRemoteMenu = new RemoteMenu(this, rig);
-#endif
     setupUi(this);
+
+    /* Load settings */
+    LoadSettings(Settings);
+
     /* Set help text for the controls */
     AddWhatsThisHelp();
 
@@ -725,7 +726,7 @@ StationsDlg::StationsDlg(CDRMReceiver& NDRMR, CRig& rig,
 
     //connect(actionGetUpdate, SIGNAL(triggered()), this, SLOT(OnGetUpdate()));
 # ifdef HAVE_LIBHAMLIB
-    RigDlg *pRigDlg = new RigDlg(rig, this);
+    RigDlg *pRigDlg = new RigDlg(Rig, this);
     connect(actionChooseRig, SIGNAL(triggered()), pRigDlg, SLOT(show()));
 # else
     actionChooseRig->setEnabled(false);
@@ -835,6 +836,7 @@ void StationsDlg::setupUi(QObject*)
 
     /* Remote menu  --------------------------------------------------------- */
     /* Separator */
+    pRemoteMenu = new RemoteMenu(this, Rig);
     pRemoteMenu->menu()->insertSeparator();
 
     /* Enable s-meter */
