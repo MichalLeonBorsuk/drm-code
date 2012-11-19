@@ -72,6 +72,7 @@ MultSettingsDlg::~MultSettingsDlg()
 
 void MultSettingsDlg::hideEvent(QHideEvent*)
 {
+#if QT_VERSION < 0x040000
 	/* save current settings */
 	Settings.Put("Multimedia Dialog", "addrefresh", CheckBoxAddRefresh->isChecked());
 
@@ -85,22 +86,23 @@ void MultSettingsDlg::hideEvent(QHideEvent*)
 		iMOTRefresh = MAX_MOT_BWS_REFRESH_TIME;
 
 	Settings.Put("Multimedia Dialog", "motbwsrefresh", iMOTRefresh);
+#else
+	// TODO
+#endif
 }
 
 void MultSettingsDlg::showEvent(QShowEvent*)
 {
+#if QT_VERSION < 0x040000
 	if (Settings.Get("Multimedia Dialog", "addrefresh", TRUE))
 		CheckBoxAddRefresh->setChecked(TRUE);
 
 	EdtSecRefresh->setText(QString().setNum(Settings.Get("Multimedia Dialog", "motbwsrefresh", 10)));
-
-	QString dir = QString::fromUtf8(Parameters.GetDataDirectory().c_str());
-	TextLabelDir->setText(dir);
-#if QT_VERSION < 0x040000
-    QToolTip::add(TextLabelDir, dir);
 #else
-    TextLabelDir->setToolTip(dir);
+	// TODO
 #endif
+
+    SetDataDirectoryControls();
 }
 
 void MultSettingsDlg::ClearCache(QString sPath, QString sFilter = "", _BOOLEAN bDeleteDirs)
@@ -161,22 +163,20 @@ void MultSettingsDlg::ClearCache(QString sPath, QString sFilter = "", _BOOLEAN b
 void MultSettingsDlg::OnbuttonChooseDir()
 {
 #if QT_VERSION < 0x040000
-    QString strFileName = QFileDialog::getExistingDirectory(TextLabelDir->text(), this);
+	QString strFilename = QFileDialog::getExistingDirectory(TextLabelDir->text(), this);
 #else
-    QString strFileName = QFileDialog::getExistingDirectory(this, TextLabelDir->text());
+	QString strFilename = QFileDialog::getExistingDirectory(this, TextLabelDir->text());
 #endif
-    /* Check if user not hit the cancel button */
-    if (!strFileName.isEmpty())
-    {
-        TextLabelDir->setText(strFileName);
+	/* Check if user not hit the cancel button */
+	if (!strFilename.isEmpty())
+	{
 #if QT_VERSION < 0x040000
-	    QToolTip::add(TextLabelDir, strFileName);
-        Parameters.SetDataDirectory(string(strFileName.utf8().data()));
+		Parameters.SetDataDirectory(string(strFilename.utf8().data()));
 #else
-		TextLabelDir->setToolTip(strFileName);
-        Parameters.SetDataDirectory(string(strFileName.toUtf8().data()));
+		Parameters.SetDataDirectory(string(strFilename.toUtf8().data()));
 #endif
-    }
+		SetDataDirectoryControls();
+	}
 }
 
 void MultSettingsDlg::OnbuttonClearCacheMOT()
@@ -189,6 +189,26 @@ void MultSettingsDlg::OnbuttonClearCacheEPG()
 {
 	/* Delete all EPG files */
 	ClearCache(QString::fromUtf8(Parameters.GetDataDirectory("EPG").c_str()), "*.EHA;*.EHB");
+}
+
+void MultSettingsDlg::SetDataDirectoryControls()
+{
+	QString strFilename(QString::fromUtf8(Parameters.GetDataDirectory().c_str()));
+#undef PATH_SEP
+#ifdef _WIN32
+	strFilename.replace(QRegExp("/"), "\\");
+# define PATH_SEP '\\'
+#else
+# define PATH_SEP '/'
+#endif
+	if (!strFilename.isEmpty() && strFilename.at(strFilename.size()-1) == QChar(PATH_SEP))
+		strFilename.remove(strFilename.size()-1, 1);
+#if QT_VERSION < 0x040000
+	QToolTip::add(TextLabelDir, strFilename);
+#else
+	TextLabelDir->setToolTip(strFilename);
+#endif
+	TextLabelDir->setText(strFilename);
 }
 
 void MultSettingsDlg::AddWhatsThisHelp()

@@ -73,6 +73,7 @@ protected:
 	virtual void	showEvent(QShowEvent* pEvent);
 	virtual void	hideEvent(QHideEvent* pEvent);
 
+	void			SetDataDirectoryControls();
 	void			AddWhatsThisHelp();
 
 	CParameter&		Parameters;
