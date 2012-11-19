@@ -170,6 +170,9 @@ void MultSettingsDlg::OnbuttonChooseDir()
 	/* Check if user not hit the cancel button */
 	if (!strFilename.isEmpty())
 	{
+#ifdef _WIN32
+		strFilename.replace(QRegExp("/"), "\\");
+#endif
 #if QT_VERSION < 0x040000
 		Parameters.SetDataDirectory(string(strFilename.utf8().data()));
 #else
