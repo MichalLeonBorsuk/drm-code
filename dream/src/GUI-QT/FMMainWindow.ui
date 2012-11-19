@@ -6325,7 +6325,7 @@
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
-     <string>Help</string>
+     <string>&amp;Help</string>
     </property>
     <addaction name="actionWhats_This"/>
     <addaction name="separator"/>
@@ -6368,7 +6368,7 @@
   </action>
   <action name="actionWhats_This">
    <property name="text">
-    <string>Whats This</string>
+    <string>&amp;Whats This</string>
    </property>
    <property name="shortcut">
     <string>Shift+F1</string>
@@ -6376,7 +6376,7 @@
   </action>
   <action name="actionAbout_Dream">
    <property name="text">
-    <string>About Dream...</string>
+    <string>&amp;About Dream...</string>
    </property>
   </action>
  </widget>

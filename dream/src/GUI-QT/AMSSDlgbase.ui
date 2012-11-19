@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>744</width>
-    <height>301</height>
+    <width>716</width>
+    <height>297</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -461,6 +461,9 @@
             </disabled>
            </palette>
           </property>
+          <property name="autoFillBackground">
+           <bool>true</bool>
+          </property>
           <property name="frameShape">
            <enum>QFrame::NoFrame</enum>
           </property>
@@ -485,16 +488,10 @@
              <item>
               <widget class="QLabel" name="TextAMSSAMCarrierMode">
                <property name="sizePolicy">
-                <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
+                <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
                  <horstretch>0</horstretch>
                  <verstretch>0</verstretch>
                 </sizepolicy>
-               </property>
-               <property name="minimumSize">
-                <size>
-                 <width>0</width>
-                 <height>0</height>
-                </size>
                </property>
                <property name="palette">
                 <palette>
@@ -909,16 +906,10 @@
              <item>
               <widget class="QLabel" name="TextAMSSInfo">
                <property name="sizePolicy">
-                <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
+                <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
                  <horstretch>0</horstretch>
                  <verstretch>0</verstretch>
                 </sizepolicy>
-               </property>
-               <property name="minimumSize">
-                <size>
-                 <width>0</width>
-                 <height>0</height>
-                </size>
                </property>
                <property name="palette">
                 <palette>
@@ -1333,16 +1324,10 @@
              <item>
               <widget class="QLabel" name="TextAMSSServiceID">
                <property name="sizePolicy">
-                <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
+                <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
                  <horstretch>0</horstretch>
                  <verstretch>0</verstretch>
                 </sizepolicy>
-               </property>
-               <property name="minimumSize">
-                <size>
-                 <width>0</width>
-                 <height>0</height>
-                </size>
                </property>
                <property name="palette">
                 <palette>
@@ -1767,16 +1752,10 @@
              <item>
               <widget class="QLabel" name="TextAMSSLanguage">
                <property name="sizePolicy">
-                <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
+                <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
                  <horstretch>0</horstretch>
                  <verstretch>0</verstretch>
                 </sizepolicy>
-               </property>
-               <property name="minimumSize">
-                <size>
-                 <width>0</width>
-                 <height>0</height>
-                </size>
                </property>
                <property name="palette">
                 <palette>
@@ -2191,16 +2170,10 @@
              <item>
               <widget class="QLabel" name="TextAMSSCountryCode">
                <property name="sizePolicy">
-                <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
+                <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
                  <horstretch>0</horstretch>
                  <verstretch>0</verstretch>
                 </sizepolicy>
-               </property>
-               <property name="minimumSize">
-                <size>
-                 <width>0</width>
-                 <height>0</height>
-                </size>
                </property>
                <property name="palette">
                 <palette>
@@ -2617,16 +2590,10 @@
            <item row="0" column="0">
             <widget class="QLabel" name="TextAMSSTimeDate">
              <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
+              <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
                <horstretch>0</horstretch>
                <verstretch>0</verstretch>
               </sizepolicy>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>0</width>
-               <height>0</height>
-              </size>
              </property>
              <property name="palette">
               <palette>
@@ -3040,7 +3007,7 @@
            <item row="1" column="0">
             <widget class="QLabel" name="TextAMSSServiceLabel">
              <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+              <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
                <horstretch>0</horstretch>
                <verstretch>0</verstretch>
               </sizepolicy>

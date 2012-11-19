@@ -705,6 +705,7 @@ StationsDlg::StationsDlg(CDRMReceiver& NDRMR, CRig& rig,
     showMapper->setMapping(actionShowOnlyActiveStations, 0);
     showGroup->addAction(actionShowAllStations);
     showMapper->setMapping(actionShowAllStations, 1);
+    connect(actionClose, SIGNAL(triggered()), SLOT(close()));
     connect(actionShowAllStations, SIGNAL(triggered()), showMapper, SLOT(map()));
     connect(actionShowOnlyActiveStations, SIGNAL(triggered()), showMapper, SLOT(map()));
     connect(showMapper, SIGNAL(mapped(int)), this, SLOT(OnShowStationsMenu(int)));
