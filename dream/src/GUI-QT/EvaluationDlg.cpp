@@ -35,6 +35,9 @@
 #include <qfiledialog.h>
 #include <QHideEvent>
 #include <QShowEvent>
+#ifdef _WIN32
+# include <windows.h>
+#endif
 
 /* Implementation *************************************************************/
 systemevalDlg::systemevalDlg(CDRMReceiver& NDRMR, CSettings& NSettings,
