@@ -49,7 +49,9 @@ BWSViewer::BWSViewer(CDRMReceiver& rec, CSettings& s, QWidget* parent, Qt::WFlag
     nam(this, cache, waitobjs, bAllowExternalContent, strCacheHost),
     receiver(rec), settings(s), decoder(NULL), bHomeSet(false), bPageLoading(false),
     bSaveFileToDisk(false), bRestrictedProfile(false), bAllowExternalContent(true),
-    bDirectoryIndexChanged(false), iLastAwaitingOjects(0), strCacheHost(CACHE_HOST)
+    bClearCacheOnNewService(true), bDirectoryIndexChanged(false),
+    iLastAwaitingOjects(0), strCacheHost(CACHE_HOST),
+    iLastServiceID(0), bLastServiceValid(false), iLastValidServiceID(0)
 {
     /* Enable minimize and maximize box for QDialog */
 	setWindowFlags(Qt::Window);
@@ -79,6 +81,7 @@ BWSViewer::BWSViewer(CDRMReceiver& rec, CSettings& s, QWidget* parent, Qt::WFlag
     connect(actionAllow_External_Content, SIGNAL(triggered(bool)), SLOT(OnAllowExternalContent(bool)));
     connect(actionRestricted_Profile_Only, SIGNAL(triggered(bool)), SLOT(OnSetProfile(bool)));
     connect(actionSave_File_to_Disk, SIGNAL(triggered(bool)), SLOT(OnSaveFileToDisk(bool)));
+    connect(actionClear_Cache_on_New_Service, SIGNAL(triggered(bool)), SLOT(OnClearCacheOnNewService(bool)));
     connect(ButtonStepBack, SIGNAL(clicked()), this, SLOT(OnBack()));
     connect(ButtonStepForward, SIGNAL(clicked()), this, SLOT(OnForward()));
     connect(ButtonHome, SIGNAL(clicked()), this, SLOT(OnHome()));
@@ -127,6 +130,28 @@ void BWSViewer::UpdateStatus()
     }
 }
 
+void BWSViewer::UpdateWindowTitle(const uint32_t iServiceID, const bool bServiceValid, QString strLabel)
+{
+    QString strTitle("MOT Broadcast Website");
+    iLastServiceID = iServiceID;
+    bLastServiceValid = bServiceValid;
+    strLastLabel = strLabel;
+    if (bServiceValid)
+    {
+        if (strLabel != "")
+            strLabel += " - ";
+
+        /* Service ID (plot number in hexadecimal format) */
+        QString strServiceID = "ID:" +
+                       QString().setNum(iServiceID, 16).toUpper();
+
+        /* Add the description on the title of the dialog */
+        if (strLabel != "" || strServiceID != "")
+            strTitle += " [" + strLabel + strServiceID + "]";
+    }
+    setWindowTitle(strTitle);
+}
+
 void BWSViewer::Update()
 {
     UpdateStatus();
@@ -135,13 +160,21 @@ void BWSViewer::Update()
 
 void BWSViewer::OnTimer()
 {
-    CParameter& Parameters = *receiver.GetParameters();
-    Parameters.Lock();
-    ETypeRxStatus status = Parameters.ReceiveStatus.MOT.GetStatus();
-    /* Get current data service */
-    const int iCurSelDataServ = Parameters.GetCurSelDataService();
-    CService service = Parameters.Service[iCurSelDataServ];
-    Parameters.Unlock();
+    /* Get current service parameters */
+    uint32_t iServiceID; bool bServiceValid; QString strLabel; ETypeRxStatus status;
+    GetServiceParams(&iServiceID, &bServiceValid, &strLabel, &status);
+
+    /* Check for new valid data service */
+    if (bServiceValid && iLastValidServiceID != iServiceID)
+    {
+        iLastValidServiceID = iServiceID;
+        if (bClearCacheOnNewService)
+            OnClearCache();
+    }
+
+    /* Update the window title if something have changed */
+    if (iLastServiceID != iServiceID || bLastServiceValid != bServiceValid || strLastLabel != strLabel)
+        UpdateWindowTitle(iServiceID, bServiceValid, strLabel);
 
     if (decoder == NULL)
         decoder = receiver.GetDataDecoder();
@@ -265,6 +298,11 @@ void BWSViewer::OnSaveFileToDisk(bool isChecked)
     bSaveFileToDisk = isChecked;
 }
 
+void BWSViewer::OnClearCacheOnNewService(bool isChecked)
+{
+    bClearCacheOnNewService = isChecked;
+}
+
 void BWSViewer::showEvent(QShowEvent* e)
 {
 	EVENT_FILTER(e);
@@ -285,42 +323,15 @@ void BWSViewer::showEvent(QShowEvent* e)
     bRestrictedProfile = settings.Get("BWS", "restrictedprofile", bRestrictedProfile);
     actionRestricted_Profile_Only->setChecked(bRestrictedProfile);
 
-    CParameter& Parameters = *receiver.GetParameters();
-    Parameters.Lock();
-    const int iCurSelAudioServ = Parameters.GetCurSelAudioService();
-    const uint32_t iAudioServiceID = Parameters.Service[iCurSelAudioServ].iServiceID;
-    /* Get current data service */
-    const int iCurSelDataServ = Parameters.GetCurSelDataService();
-    CService service = Parameters.Service[iCurSelDataServ];
-    Parameters.Unlock();
+    bClearCacheOnNewService = settings.Get("BWS", "clearcacheonnewservice", bClearCacheOnNewService);
+    actionClear_Cache_on_New_Service->setChecked(bClearCacheOnNewService);
 
-    QString strTitle("MOT Broadcast Website");
+    /* Update window title */
+    uint32_t iServiceID; bool bServiceValid; QString strLabel;
+    GetServiceParams(&iServiceID, &bServiceValid, &strLabel);
+    UpdateWindowTitle(iServiceID, bServiceValid, strLabel);
 
-    if (service.IsActive())
-    {
-        /* Do UTF-8 to QString (UNICODE) conversion with the label strings */
-        QString strLabel = QString().fromUtf8(service.strLabel.c_str()).trimmed();
-
-        /* Service ID (plot number in hexadecimal format) */
-        QString strServiceID = "";
-
-        /* show the ID only if differ from the audio service */
-        if ((service.iServiceID != 0) && (service.iServiceID != iAudioServiceID))
-        {
-            if (strLabel != "")
-                strLabel += " ";
-
-            strServiceID = "- ID:" +
-                           QString().setNum(long(service.iServiceID), 16).toUpper();
-        }
-
-        /* add the description on the title of the dialog */
-        if (strLabel != "" || strServiceID != "")
-            strTitle += " [" + strLabel + strServiceID + "]";
-    }
-    setWindowTitle(strTitle);
-
-    /* Update window */
+    /* Update window content */
     OnTimer();
 
     /* Activate real-time timer when window is shown */
@@ -348,6 +359,8 @@ void BWSViewer::hideEvent(QHideEvent* e)
     settings.Put("BWS", "restrictedprofile", bRestrictedProfile);
 
     settings.Put("BWS", "allowexternalcontent", bAllowExternalContent);
+
+    settings.Put("BWS", "clearcacheonnewservice", bClearCacheOnNewService);
 }
 
 bool BWSViewer::Changed()
@@ -415,6 +428,8 @@ void BWSViewer::SaveMOTObject(const QString& strObjName,
 {
     const CVector<_BYTE>& vecbRawData = obj.Body.vecData;
 
+    QString strCurrentSavePath;
+
     /* Set up save path */
     SetupSavePath(strCurrentSavePath);
 
@@ -442,19 +457,32 @@ void BWSViewer::SaveMOTObject(const QString& strObjName,
 
 void BWSViewer::SetupSavePath(QString& strSavePath)
 {
+    uint32_t iServiceID;
+    /* Get the selected data service ID */
+    GetServiceParams(&iServiceID);
+    /* Append service ID to MOT save path */
+    strSavePath = strSavePath.setNum(iServiceID, 16).toUpper().rightJustified(8, '0');
+    strSavePath = QString::fromUtf8((*receiver.GetParameters()).GetDataDirectory("MOT").c_str()) + strSavePath + "/";
+}
+
+void BWSViewer::GetServiceParams(uint32_t* iServiceID, bool* bServiceValid, QString* strLabel, ETypeRxStatus* eStatus)
+{
     CParameter& Parameters = *receiver.GetParameters();
     Parameters.Lock();
-    const int iCurSelDataServ = Parameters.GetCurSelDataService();
-    const int iServiceID = Parameters.Service[iCurSelDataServ].iServiceID;
-    strSavePath = QString::fromUtf8(Parameters.GetDataDirectory("MOT").c_str());
+        const int iCurSelDataServ = Parameters.GetCurSelDataService();
+        const CService service = Parameters.Service[iCurSelDataServ];
+        if (eStatus)
+            *eStatus = Parameters.ReceiveStatus.MOT.GetStatus();
     Parameters.Unlock();
-
-    QString strServiceID;
-    strServiceID.setNum(iServiceID, 16).toUpper();
-    strServiceID = strServiceID.rightJustified(8, '0');
-
-    strSavePath += strServiceID + "/";
+    if (iServiceID)
+        *iServiceID = service.iServiceID;
+    if (bServiceValid)
+        *bServiceValid = service.IsActive() && service.eAudDataFlag == CService::SF_DATA;
+    /* Do UTF-8 to QString (UNICODE) conversion with the label strings */
+    if (strLabel)
+        *strLabel = QString().fromUtf8(service.strLabel.c_str()).trimmed();
 }
+
 
 //////////////////////////////////////////////////////////////////
 // CWebsiteCache implementation

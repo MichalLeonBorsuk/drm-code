@@ -146,7 +146,6 @@ protected:
     QTimer          Timer;
     CDRMReceiver&   receiver;
     CSettings&      settings;
-    QString         strCurrentSavePath;
     CDataDecoder*   decoder;
     CWebsiteCache   cache;
     bool            bHomeSet;
@@ -154,10 +153,15 @@ protected:
     bool            bSaveFileToDisk;
     bool            bRestrictedProfile;
     bool            bAllowExternalContent;
+    bool            bClearCacheOnNewService;
     bool            bDirectoryIndexChanged;
     unsigned int    iLastAwaitingOjects;
     CCounter        waitobjs;
     const QString   strCacheHost;
+    uint32_t        iLastServiceID;
+    bool            bLastServiceValid;
+    uint32_t        iLastValidServiceID;
+    QString         strLastLabel;
     CEventFilter    ef;
 
     bool Changed();
@@ -166,7 +170,9 @@ protected:
     void SetupSavePath(QString& strSavePath);
     void UpdateButtons();
     void UpdateStatus();
+    void UpdateWindowTitle(const uint32_t iServiceID, const bool bServiceValid, QString strLabel);
     QString ObjectStr(unsigned int count);
+    void GetServiceParams(uint32_t* iServiceID=NULL, bool* bServiceValid=NULL, QString* strLabel=NULL, ETypeRxStatus* eStatus=NULL);
 
 public slots:
     void OnTimer();
@@ -178,6 +184,7 @@ public slots:
     void OnSetProfile(bool);
     void OnSaveFileToDisk(bool);
     void OnAllowExternalContent(bool);
+    void OnClearCacheOnNewService(bool);
     void OnWebViewLoadStarted();
     void OnWebViewLoadFinished(bool ok);
     void OnWebViewTitleChanged(const QString& title);
