@@ -68,6 +68,7 @@ BWSViewer::BWSViewer(CDRMReceiver& rec, CSettings& s, QWidget* parent, Qt::WFlag
 
     /* Update various buttons and labels */
     ButtonClearCache->setEnabled(false);
+    actionClear_Cache->setEnabled(false);
     LabelTitle->setText("");
     Update();
 
