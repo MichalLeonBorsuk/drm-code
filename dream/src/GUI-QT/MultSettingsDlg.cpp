@@ -201,8 +201,8 @@ void MultSettingsDlg::SetDataDirectoryControls()
 #else
 # define PATH_SEP '/'
 #endif
-	if (!strFilename.isEmpty() && strFilename.at(strFilename.size()-1) == QChar(PATH_SEP))
-		strFilename.remove(strFilename.size()-1, 1);
+	if (!strFilename.isEmpty() && strFilename.at(strFilename.length()-1) == QChar(PATH_SEP))
+		strFilename.remove(strFilename.length()-1, 1);
 #if QT_VERSION < 0x040000
 	QToolTip::add(TextLabelDir, strFilename);
 #else
