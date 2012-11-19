@@ -303,7 +303,8 @@ void CDRMPlot::OnTimerChart()
 			SetupAudioSpec(bAudioDecoder);
 		}
 		/* Set data */
-		SetData(vecrData, vecrScale);
+		if (bAudioDecoder)
+			SetData(vecrData, vecrScale);
 		break;
 
 	case FREQ_SAM_OFFS_HIST:
@@ -744,7 +745,10 @@ void CDRMPlot::SetupAudioSpec(_BOOLEAN bAudioDecoder)
 	if (bAudioDecoder)
 		plot->setTitle(tr("Audio Spectrum"));
 	else
+	{
 		plot->setTitle(tr("No audio decoding possible"));
+		main1curve.SETDATA(NULL, NULL, 0);
+	}
 	plot->enableAxis(QwtPlot::yRight, FALSE);
 	plot->setAxisTitle(QwtPlot::xBottom, tr("Frequency [kHz]"));
 	plot->enableAxis(QwtPlot::yLeft, TRUE);
