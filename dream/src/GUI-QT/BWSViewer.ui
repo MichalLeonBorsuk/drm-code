@@ -44,6 +44,7 @@
       <addaction name="actionAllow_External_Content"/>
       <addaction name="actionRestricted_Profile_Only"/>
       <addaction name="actionSave_File_to_Disk"/>
+      <addaction name="actionClear_Cache_on_New_Service"/>
      </widget>
      <addaction name="menuFile"/>
      <addaction name="menuSettings"/>
@@ -372,6 +373,14 @@
    </property>
    <property name="text">
     <string>&amp;Allow External Content</string>
+   </property>
+  </action>
+  <action name="actionClear_Cache_on_New_Service">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>&amp;Clear Cache on New Service</string>
    </property>
   </action>
  </widget>
