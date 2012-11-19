@@ -69,8 +69,10 @@ JLViewer::~JLViewer()
 {
 }
 
-void JLViewer::showEvent(QShowEvent*)
+void JLViewer::showEvent(QShowEvent* e)
 {
+	EVENT_FILTER(e);
+
     /* Get window geometry data and apply it */
     CWinGeom g;
     settings.Get("Journaline", g);
@@ -79,7 +81,7 @@ void JLViewer::showEvent(QShowEvent*)
     if (WinGeom.isValid() && !WinGeom.isEmpty() && !WinGeom.isNull())
         setGeometry(WinGeom);
 
-    strCurrentSavePath = settings.Get("Journaline", "storagepath", strCurrentSavePath);
+//    strCurrentSavePath = QString::fromUtf8(Parameters.GetDataDirectory("Journaline").c_str());
 
     /* Store the default font */
     QFont fontDefault = textBrowser->font();
@@ -148,8 +150,10 @@ void JLViewer::showEvent(QShowEvent*)
     Timer.start(GUI_CONTROL_UPDATE_TIME);
 }
 
-void JLViewer::hideEvent(QHideEvent*)
+void JLViewer::hideEvent(QHideEvent* e)
 {
+	EVENT_FILTER(e);
+
     /* Deactivate real-time timer so that it does not get new pictures */
     Timer.stop();
 
@@ -162,9 +166,6 @@ void JLViewer::hideEvent(QHideEvent*)
     c.iHSize = WinGeom.height();
     c.iWSize = WinGeom.width();
     settings.Put("Journaline", c);
-
-    /* Store save path */
-    settings.Put("Journaline","storagepath", strCurrentSavePath);
 
     QFont fontTextBrowser = textBrowser->currentFont();
     /* Store current textBrowser font */

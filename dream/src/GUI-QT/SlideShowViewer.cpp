@@ -27,14 +27,13 @@
 \******************************************************************************/
 
 #include "SlideShowViewer.h"
-#include "DialogUtil.h"
 #include "../util/Settings.h"
 #include "../datadecoding/DABMOT.h"
 #include "../datadecoding/DataDecoder.h"
 #include <QFileDialog>
 
 SlideShowViewer::SlideShowViewer(CDRMReceiver& rec, CSettings& s, QWidget* parent):
-    QDialog(parent), Timer(), strCurrentSavePath("."),
+    QDialog(parent), Timer(),
     receiver(rec), settings(s),vecImages(),vecImageNames(),iCurImagePos(-1)
 {
     /* Enable minimize and maximize box for QDialog */
@@ -162,22 +161,38 @@ void SlideShowViewer::OnButtonJumpEnd()
 
 void SlideShowViewer::OnSave()
 {
-    QString fileName = QString(strCurrentSavePath.c_str()) + "/" + VerifyFilename(vecImageNames[iCurImagePos]);
-    fileName = QFileDialog::getSaveFileName(this, tr("Save File"),
-                                            fileName,
-                                            tr("Images (*.png *.jpg)"));
-    vecImages[iCurImagePos].save(fileName);
-    strCurrentSavePath = QDir(fileName).path().toUtf8().data();
+    /* Create directory for storing the file (if not exists) */
+    CreateDirectories(strCurrentSavePath);
+
+    QString strFilename = strCurrentSavePath + VerifyFilename(vecImageNames[iCurImagePos]);
+    strFilename = QFileDialog::getSaveFileName(this,
+        tr("Save File"), strFilename, tr("Images (*.png *.jpg)"));
+
+    /* Check if user not hit the cancel button */
+    if (!strFilename.isEmpty())
+    {
+        vecImages[iCurImagePos].save(strFilename);
+
+        strCurrentSavePath = QFileInfo(strFilename).path() + "/";
+    }
 }
 
 void SlideShowViewer::OnSaveAll()
 {
-    QString dir = QFileDialog::getExistingDirectory(this, tr("Open Directory"), strCurrentSavePath.c_str());
-    for(size_t i=0; i<vecImages.size(); i++)
+    /* Create directory for storing the files (if not exists) */
+    CreateDirectories(strCurrentSavePath);
+
+    QString strDirectory = QFileDialog::getExistingDirectory(this,
+        tr("Open Directory"), strCurrentSavePath);
+
+    /* Check if user not hit the cancel button */
+    if (!strDirectory.isEmpty())
     {
-        vecImages[i].save(dir + "/" + VerifyFilename(vecImageNames[i]));
+        strCurrentSavePath = strDirectory + "/";
+
+        for(size_t i=0; i<vecImages.size(); i++)
+            vecImages[i].save(strCurrentSavePath + VerifyFilename(vecImageNames[i]));
     }
-    strCurrentSavePath = dir.toUtf8().data();
 }
 
 void SlideShowViewer::OnClearAll()
@@ -188,8 +203,10 @@ void SlideShowViewer::OnClearAll()
     UpdateButtons();
 }
 
-void SlideShowViewer::showEvent(QShowEvent*)
+void SlideShowViewer::showEvent(QShowEvent* e)
 {
+	EVENT_FILTER(e);
+
     /* Get window geometry data and apply it */
     CWinGeom g;
     settings.Get("SlideShow", g);
@@ -198,10 +215,9 @@ void SlideShowViewer::showEvent(QShowEvent*)
     if (WinGeom.isValid() && !WinGeom.isEmpty() && !WinGeom.isNull())
         setGeometry(WinGeom);
 
-    strCurrentSavePath = settings.Get("SlideShow", "storagepath", strCurrentSavePath);
-
     CParameter& Parameters = *receiver.GetParameters();
     Parameters.Lock();
+    strCurrentSavePath = QString::fromUtf8(Parameters.GetDataDirectory("MOT").c_str());
     const int iCurSelAudioServ = Parameters.GetCurSelAudioService();
     const uint32_t iAudioServiceID = Parameters.Service[iCurSelAudioServ].iServiceID;
 
@@ -244,8 +260,10 @@ void SlideShowViewer::showEvent(QShowEvent*)
     Timer.start(GUI_CONTROL_UPDATE_TIME);
 }
 
-void SlideShowViewer::hideEvent(QHideEvent*)
+void SlideShowViewer::hideEvent(QHideEvent* e)
 {
+	EVENT_FILTER(e);
+
     /* Deactivate real-time timer so that it does not get new pictures */
     Timer.stop();
 
@@ -258,9 +276,6 @@ void SlideShowViewer::hideEvent(QHideEvent*)
     c.iHSize = WinGeom.height();
     c.iWSize = WinGeom.width();
     settings.Put("SlideShow", c);
-
-    /* Store save path */
-    settings.Put("SlideShow ","storagepath", strCurrentSavePath);
 }
 
 void SlideShowViewer::SetImage(int pos)

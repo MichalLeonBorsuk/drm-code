@@ -88,7 +88,7 @@ void MultSettingsDlg::showEvent(QShowEvent*)
 
 	EdtSecRefresh->setText(QString().setNum(Settings.Get("Multimedia Dialog", "motbwsrefresh", 10)));
 
-	QString dir = Parameters.sDataFilesDirectory.c_str();
+	QString dir = QString::fromUtf8(Parameters.GetDataDirectory().c_str());
 	TextLabelDir->setText(dir);
 #if QT_VERSION < 0x040000
     QToolTip::add(TextLabelDir, dir);
@@ -165,24 +165,24 @@ void MultSettingsDlg::OnbuttonChooseDir()
         TextLabelDir->setText(strFileName);
 #if QT_VERSION < 0x040000
 	    QToolTip::add(TextLabelDir, strFileName);
-        Parameters.sDataFilesDirectory = (const char*)strFileName.utf8();
+        Parameters.SetDataDirectory(string(strFileName.utf8().data()));
 #else
 		TextLabelDir->setToolTip(strFileName);
-        Parameters.sDataFilesDirectory = (const char*)strFileName.toUtf8();
+        Parameters.SetDataDirectory(string(strFileName.toUtf8().data()));
 #endif
     }
 }
 
 void MultSettingsDlg::OnbuttonClearCacheMOT()
 {
-	/* delete all files and directories in the MOT directory */
-	ClearCache(TextLabelDir->text()+"/MOT", "", TRUE);
+	/* Delete all files and directories in the MOT directory */
+	ClearCache(QString::fromUtf8(Parameters.GetDataDirectory("MOT").c_str()), "", TRUE);
 }
 
 void MultSettingsDlg::OnbuttonClearCacheEPG()
 {
 	/* Delete all EPG files */
-	ClearCache((Parameters.sDataFilesDirectory+"/EPG").c_str(), "*.EHA;*.EHB");
+	ClearCache(QString::fromUtf8(Parameters.GetDataDirectory("EPG").c_str()), "*.EHA;*.EHB");
 }
 
 void MultSettingsDlg::AddWhatsThisHelp()
