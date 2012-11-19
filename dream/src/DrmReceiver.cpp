@@ -697,7 +697,7 @@ CDRMReceiver::InitReceiverMode()
                 pAMParam->use_gpsd = pDRMParam->use_gpsd;
                 pAMParam->sSerialNumber = pDRMParam->sSerialNumber;
                 pAMParam->sReceiverID  = pDRMParam->sReceiverID;
-                pAMParam->sDataFilesDirectory = pDRMParam->sDataFilesDirectory;
+                pAMParam->SetDataDirectory(pDRMParam->GetDataDirectory());
                 break;
             case RM_NONE:
                 /* Start from cold in AM mode - no special action */
@@ -757,7 +757,7 @@ CDRMReceiver::InitReceiverMode()
                 pDRMParam->use_gpsd = pAMParam->use_gpsd;
                 pDRMParam->sSerialNumber = pAMParam->sSerialNumber;
                 pDRMParam->sReceiverID  = pAMParam->sReceiverID;
-                pDRMParam->sDataFilesDirectory = pAMParam->sDataFilesDirectory;
+                pDRMParam->SetDataDirectory(pAMParam->GetDataDirectory());
                 break;
             case RM_DRM:
                 /* DRM to DRM switch - re-acquisition requested - no special action */
@@ -1346,14 +1346,9 @@ CDRMReceiver::LoadSettings(CSettings& s)
 
     /* Data files directory */
     string sDataFilesDirectory = s.Get(
-                                     "Receiver", "datafilesdirectory", pReceiverParam->sDataFilesDirectory);
-    // remove trailing slash if there
-    size_t p = sDataFilesDirectory.find_last_not_of("/\\");
-    if (p != string::npos)
-        sDataFilesDirectory.erase(p+1);
-
-    pReceiverParam->sDataFilesDirectory = sDataFilesDirectory;
-    s.Put("Receiver", "datafilesdirectory", pReceiverParam->sDataFilesDirectory);
+        "Receiver", "datafilesdirectory", pReceiverParam->GetDataDirectory());
+    pReceiverParam->SetDataDirectory(sDataFilesDirectory);
+    s.Put("Receiver", "datafilesdirectory", pReceiverParam->GetDataDirectory());
 
     /* Receiver ------------------------------------------------------------- */
 
@@ -1665,7 +1660,7 @@ CDRMReceiver::SaveSettings(CSettings& s)
     /* Serial Number */
     s.Put("Receiver", "serialnumber", pReceiverParam->sSerialNumber);
 
-    s.Put("Receiver", "datafilesdirectory", pReceiverParam->sDataFilesDirectory);
+    s.Put("Receiver", "datafilesdirectory", pReceiverParam->GetDataDirectory());
 
     /* GPS */
     if(pReceiverParam->gps_data.set & LATLON_SET) {

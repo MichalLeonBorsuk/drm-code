@@ -30,6 +30,8 @@
 #include <qlabel.h>
 #include <qaction.h>
 #include <qmessagebox.h>
+#include <qdir.h>
+#include <qfile.h>
 #if QT_VERSION < 0x040000
 # include <qregexp.h>
 #endif
@@ -785,7 +787,7 @@ void Linkify(QString& text)
                     break;
                 }
             }
-            int rawLinkSize = posEnd-posBegin;
+            const int rawLinkSize = posEnd-posBegin;
             QStringRef rawLink(&text, posBegin, rawLinkSize);
             QString newLink;
             if (posBegin == posMAIL)
@@ -795,7 +797,7 @@ void Linkify(QString& text)
             else /* posBegin == posHTTP */
                 newLink = "<a href=\"%1\">%1</a>";
             newLink = newLink.arg(rawLink.toString());
-            int newLinkSize = newLink.size();
+            const int newLinkSize = newLink.size();
             text.replace(posBegin, rawLinkSize, newLink);
             const int diff = newLinkSize - rawLinkSize;
             i = posEnd + diff;
@@ -812,3 +814,33 @@ void Linkify(QString& text)
     }
 #endif
 }
+
+void CreateDirectories(const QString& strFilename)
+{
+    /*
+    	This function is for creating a complete directory structure to a given
+    	file name. If there is a pathname like this:
+    	/html/files/images/myimage.gif
+    	this function create all the folders into MOTCache:
+    	/html
+    	/html/files
+    	/html/files/images
+    	QFileInfo only creates a file if the pathname is valid. If not all folders
+    	are created, QFileInfo will not save the file. There was no QT function
+    	or a hint the QT mailing list found in which does the job of this function.
+    */
+    for (int i = 0;; i++)
+    {
+#if QT_VERSION < 0x040000
+        i = strFilename.find(QChar('/'), i);
+#else
+        i = strFilename.indexOf(QChar('/'), i);
+#endif
+        if (i < 0)
+            break;
+        const QString strDirName = strFilename.left(i);
+        if (!strDirName.isEmpty() && !QFileInfo(strDirName).exists())
+            QDir().mkdir(strDirName);
+    }
+}
+

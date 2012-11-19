@@ -344,10 +344,7 @@ LiveScheduleDlg::LiveScheduleDlg(CDRMReceiver & NDRMR,
 smallGreenCube(":/icons/smallGreenCube.png"),greenCube(":/icons/greenCube.png"),
 redCube(":/icons/redCube.png"),orangeCube(":/icons/organgeCube.png"),pinkCube(":/icons/pinkCube.png"),
 #endif
-    vecpListItems(),
-    strCurrentSavePath("."),
-    iColStationID(1),
-    iWidthColStationID(0)
+    vecpListItems(), iColStationID(1), iWidthColStationID(0)
 {
     setupUi(this);
     /* Set help text for the controls */
@@ -509,10 +506,10 @@ LiveScheduleDlg::LoadSettings(const CSettings& Settings)
     ListViewStations->sortItems(iCurrentSortColumn, bCurrentSortAscending?Qt::AscendingOrder:Qt::DescendingOrder);
 #endif
     /* Retrieve the setting saved into the .ini file */
-    strCurrentSavePath = (DRMReceiver.GetParameters()->sDataFilesDirectory+"/AFS").c_str();
+    strCurrentSavePath = QString::fromUtf8(DRMReceiver.GetParameters()->GetDataDirectory("AFS").c_str());
+
     /* and make sure it exists */
-    if (!QFileInfo(strCurrentSavePath).exists())
-        QDir().mkdir(strCurrentSavePath);
+	CreateDirectories(strCurrentSavePath);
 
     /* Set stations in list view which are active right now */
     bool bShowAll = Settings.Get("Live Schedule Dialog", "showall", false);
@@ -831,8 +828,10 @@ LiveScheduleDlg::LoadSchedule()
 }
 
 void
-LiveScheduleDlg::showEvent(QShowEvent *)
+LiveScheduleDlg::showEvent(QShowEvent* e)
 {
+	EVENT_FILTER(e);
+
     /* Update window */
     OnTimerUTCLabel();
     TimerUTCLabel.start(GUI_TIMER_UTC_TIME_LABEL);
@@ -847,8 +846,10 @@ LiveScheduleDlg::showEvent(QShowEvent *)
 }
 
 void
-LiveScheduleDlg::hideEvent(QHideEvent *)
+LiveScheduleDlg::hideEvent(QHideEvent* e)
 {
+	EVENT_FILTER(e);
+
     /* Deactivate real-time timers */
     TimerList.stop();
     TimerUTCLabel.stop();
@@ -1033,7 +1034,7 @@ ColValue(const QString strValue)
 void
 LiveScheduleDlg::OnSave()
 {
-    QString strFileName;
+    QString strFilename;
     QString strSchedule = "";
     QString strValue = "";
 
@@ -1115,18 +1116,18 @@ LiveScheduleDlg::OnSave()
                           QDateTime().currentDateTime().toString() + "</i></font></p>"
                           "</body>\n</html>";
 
-        QString strPath = strCurrentSavePath + "/"
-                          + strStationName + "_" + "LiveSchedule.html";
+        QString strPath = strCurrentSavePath +
+                          strStationName + "_" + "LiveSchedule.html";
 #if QT_VERSION < 0x040000
+        strFilename = QFileDialog::getSaveFileName(strPath, "*.html", this);
 #else
-        strFileName = QFileDialog::getSaveFileName(this, "*.html", strPath);
+        strFilename = QFileDialog::getSaveFileName(this, "*.html", strPath);
 #endif
 
-        if (!strFileName.isEmpty())
+        if (!strFilename.isEmpty())
         {
-
             /* Save as a text stream */
-            QFile FileObj(strFileName);
+            QFile FileObj(strFilename);
 
 #if QT_VERSION < 0x040000
             if (FileObj.open(IO_WriteOnly))
@@ -1137,13 +1138,10 @@ LiveScheduleDlg::OnSave()
                 QTextStream TextStream(&FileObj);
                 TextStream << strText;	/* Actual writing */
                 FileObj.close();
-                /* TODO ini files are latin 1 but the storage path could contain non-latin characters,
-                 * either from the station name or the current filesystem via the file dialog
-                 */
 #if QT_VERSION < 0x040000
-                strCurrentSavePath = strFileName.latin1();
+                strCurrentSavePath = QFileInfo(strFilename).filePath() + "/";
 #else
-                strCurrentSavePath = strFileName.toLatin1();
+                strCurrentSavePath = QFileInfo(strFilename).path() + "/";
 #endif
             }
         }

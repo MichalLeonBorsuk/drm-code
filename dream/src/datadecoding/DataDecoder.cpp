@@ -319,7 +319,7 @@ CDataDecoder::DecodeEPG(const CParameter & ReceiverParam)
 			fileName = NewObj.strName;
 		}
 
-		string path = ReceiverParam.sDataFilesDirectory + "/EPG/" + fileName;
+		string path = ReceiverParam.GetDataDirectory("EPG") + fileName;
 		mkdirs(path);
 		//cerr << "writing EPG file " << path << endl;
 		FILE *f = fopen(path.c_str(), "wb");

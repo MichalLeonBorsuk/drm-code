@@ -1234,9 +1234,9 @@ EPG::EPG(CParameter& NParameters):Parameters(NParameters)
         genres[genre_list[i].genre] = genre_list[i].desc;
     }
 
-    dir = (Parameters.sDataFilesDirectory + "/EPG").c_str();
-	if (!QFileInfo(dir).exists())
-	QDir().mkdir(dir);
+    dir = Parameters.GetDataDirectory("EPG").c_str();
+    if (!QFileInfo(dir).exists())
+        QDir().mkdir(dir);
     servicesFilename = dir + "/services.xml";
     loadChannels (servicesFilename);
     saveChannels (servicesFilename);

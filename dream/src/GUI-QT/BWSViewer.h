@@ -161,7 +161,6 @@ protected:
     CEventFilter    ef;
 
     bool Changed();
-    void CreateDirectories(const QString& strFilename);
     void SaveMOTObject(const QString& strObjName, const CMOTObject& obj);
     bool RemoveDir(const QString &dirName, int level = 0);
     void SetupSavePath(QString& strSavePath);

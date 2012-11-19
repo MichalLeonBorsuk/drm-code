@@ -35,7 +35,6 @@
 #include <QWebHistory>
 
 
-#define SAVE_DIRECTORY      "data/mot"
 #define CACHE_HOST          "127.0.0.1" /* Not an actual server, MUST be set to "127.0.0.1" */
 
 #define ICON_REFRESH        ":/icons/Refresh.png"
@@ -419,7 +418,7 @@ void BWSViewer::SaveMOTObject(const QString& strObjName,
     SetupSavePath(strCurrentSavePath);
 
     /* Generate safe filename */
-    QString strFileName = strCurrentSavePath + "/" + VerifyHtmlPath(strObjName);
+    QString strFileName = strCurrentSavePath + VerifyHtmlPath(strObjName);
 
     /* First, create directory for storing the file (if not exists) */
     CreateDirectories(strFileName);
@@ -440,38 +439,20 @@ void BWSViewer::SaveMOTObject(const QString& strObjName,
     }
 }
 
-void BWSViewer::CreateDirectories(const QString& strFilename)
-{
-    for (int i = 0;; i++)
-    {
-        i = strFilename.indexOf(QChar('/'), i);
-        if (i < 0)
-            break;
-        const QString strDirName = strFilename.left(i);
-        if (!strDirName.isEmpty() && !QFileInfo(strDirName).exists())
-            QDir().mkdir(strDirName);
-    }
-}
-
 void BWSViewer::SetupSavePath(QString& strSavePath)
 {
     CParameter& Parameters = *receiver.GetParameters();
     Parameters.Lock();
     const int iCurSelDataServ = Parameters.GetCurSelDataService();
     const int iServiceID = Parameters.Service[iCurSelDataServ].iServiceID;
+    strSavePath = QString::fromUtf8(Parameters.GetDataDirectory("MOT").c_str());
     Parameters.Unlock();
 
     QString strServiceID;
     strServiceID.setNum(iServiceID, 16).toUpper();
     strServiceID = strServiceID.rightJustified(8, '0');
 
-    string sSavePath(settings.Get("BWS", "storagepath", string(SAVE_DIRECTORY)));
-    strSavePath = QString::fromUtf8(sSavePath.c_str());
-    settings.Put("BWS", "storagepath", sSavePath);
-
-    if (!strSavePath.isEmpty())
-        strSavePath += "/";
-    strSavePath += strServiceID;
+    strSavePath += strServiceID + "/";
 }
 
 //////////////////////////////////////////////////////////////////

@@ -266,4 +266,6 @@ void InitSMeter(QWidget* parent, QwtThermo* sMeter);
 
 void Linkify(QString& text);
 
+void CreateDirectories(const QString& strFilename);
+
 #endif // DIALOGUTIL_H__FD6B23452398345OIJ9453_804E1606C2AC__INCLUDED_

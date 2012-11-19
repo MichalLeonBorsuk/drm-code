@@ -463,7 +463,7 @@ string CDownstreamDI::GetRSIfilename(CParameter& Parameter, const char cProfile)
 	iFrequency = Parameter.GetFrequency(); // remember this for later
 
 	stringstream filename;
-	filename << Parameter.sDataFilesDirectory << '/';
+	filename << Parameter.GetDataDirectory();
 	filename << Parameter.sReceiverID << "_";
 	filename << setw(4) << setfill('0') << gmtCur->tm_year + 1900 << "-" << setw(2) << setfill('0')<< gmtCur->tm_mon + 1;
 	filename << "-" << setw(2) << setfill('0')<< gmtCur->tm_mday << "_";

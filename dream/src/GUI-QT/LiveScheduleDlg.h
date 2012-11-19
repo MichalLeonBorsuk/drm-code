@@ -214,26 +214,27 @@ protected:
 	QPopupMenu*		pViewMenu;
 	QPopupMenu*		pPreviewMenu;
 	QPopupMenu*		pFileMenu;
-	int			showActiveViewMenuItem;
-	int			showAllViewMenuItem;
+	int				showActiveViewMenuItem;
+	int				showAllViewMenuItem;
 	void setupUi(QWidget*);
 #else
-	QIcon	smallGreenCube;
-	QIcon	greenCube;
-	QIcon	redCube;
-	QIcon	orangeCube;
-	QIcon	pinkCube;
-	QSignalMapper* previewMapper;
-	QActionGroup* previewGroup;
-	QSignalMapper* showMapper;
-	QActionGroup* showGroup;
+	QIcon			smallGreenCube;
+	QIcon			greenCube;
+	QIcon			redCube;
+	QIcon			orangeCube;
+	QIcon			pinkCube;
+	QSignalMapper*	previewMapper;
+	QActionGroup*	previewGroup;
+	QSignalMapper*	showMapper;
+	QActionGroup*	showGroup;
 #endif
 
 	vector<MyListLiveViewItem*>	vecpListItems;
-	QMutex		ListItemsMutex;
-	QString		strCurrentSavePath;
-	int		iColStationID;
-	int		iWidthColStationID;
+	QMutex			ListItemsMutex;
+	QString			strCurrentSavePath;
+	int				iColStationID;
+	int				iWidthColStationID;
+	CEventFilter	ef;
 
 public slots:
 	void OnTimerList();

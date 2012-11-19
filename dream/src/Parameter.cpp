@@ -34,6 +34,15 @@
 #include <iomanip>
 //#include "util/LogPrint.h"
 
+#ifdef _WIN32
+# define PATH_SEPARATOR "\\"
+# define PATH_SEPARATORS "/\\"
+#else
+# define PATH_SEPARATOR "/"
+# define PATH_SEPARATORS "/"
+#endif
+#define DEFAULT_DATA_FILES_DIRECTORY "data" PATH_SEPARATOR
+
 /* Implementation *************************************************************/
 CParameter::CParameter(CDRMReceiver *pRx):
     pDRMRec(pRx),
@@ -45,7 +54,7 @@ CParameter::CParameter(CDRMReceiver *pRx):
     iAMSSCarrierMode(0),
     sReceiverID("                "),
     sSerialNumber(),
-    sDataFilesDirectory("."),
+    sDataFilesDirectory(DEFAULT_DATA_FILES_DIRECTORY),
     MSCPrLe(),
     Stream(MAX_NUM_STREAMS), Service(MAX_NUM_SERVICES),
     iNumBitsHierarchFrameTotal(0),
@@ -896,6 +905,40 @@ void CParameter::SetServiceID(const int iShortID, const uint32_t iNewServiceID)
             }
         }
     }
+}
+
+/* Append child directory to data files directory,
+   always terminated by '/' or '\' */
+string CParameter::GetDataDirectory(const char* pcChildDirectory) const
+{
+    string sDirectory(sDataFilesDirectory);
+    size_t p = sDirectory.find_last_of(PATH_SEPARATORS);
+    if (sDirectory != "" && (p == string::npos || p != (sDirectory.size()-1)))
+        sDirectory += PATH_SEPARATOR;
+    if (pcChildDirectory != NULL)
+    {
+        sDirectory += pcChildDirectory;
+        size_t p = sDirectory.find_last_of(PATH_SEPARATORS);
+        if (sDirectory != "" && (p == string::npos || p != (sDirectory.size()-1)))
+            sDirectory += PATH_SEPARATOR;
+    }
+    if (sDirectory == "")
+        sDirectory = DEFAULT_DATA_FILES_DIRECTORY;
+    return sDirectory;
+}
+
+/* Set new data files directory, terminated by '/' or '\' if not */
+void CParameter::SetDataDirectory(string sNewDataFilesDirectory)
+{
+    if (sNewDataFilesDirectory == "")
+        sNewDataFilesDirectory = DEFAULT_DATA_FILES_DIRECTORY;
+    else
+    {
+        size_t p = sNewDataFilesDirectory.find_last_of(PATH_SEPARATORS);
+        if (p == string::npos || p != (sNewDataFilesDirectory.size()-1))
+            sNewDataFilesDirectory += PATH_SEPARATOR;
+    }
+    sDataFilesDirectory = sNewDataFilesDirectory;
 }
 
 

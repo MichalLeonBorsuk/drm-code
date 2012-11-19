@@ -31,6 +31,7 @@
 
 #include "ui_SlideShowViewer.h"
 #include "../DrmReceiver.h"
+#include "DialogUtil.h"
 class CSettings;
 
 class SlideShowViewer : public QDialog
@@ -42,17 +43,17 @@ public:
     virtual ~SlideShowViewer();
 
 protected:
-
     void                    SetImage(int);
     void                    UpdateButtons();
-    QTimer Timer;
-    std::string             strCurrentSavePath;
-    CDRMReceiver&	    receiver;
+    QTimer                  Timer;
+    QString                 strCurrentSavePath;
+    CDRMReceiver&           receiver;
     CSettings&              settings;
     std::vector<QPixmap>    vecImages;
     std::vector<QString>    vecImageNames;
-    int			    iCurImagePos;
+    int                     iCurImagePos;
     Ui_SlideShowViewer*	    ui;
+    CEventFilter            ef;
 
 public slots:
     void OnTimer();

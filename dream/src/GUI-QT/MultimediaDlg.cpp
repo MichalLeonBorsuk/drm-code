@@ -48,7 +48,7 @@ MultimediaDlg::MultimediaDlg(CDRMReceiver& NDRMR,
                              QWidget* parent, const char* name, bool modal, Qt::WFlags f):
     MultimediaDlgBase(parent, name, modal, f),
     Parameters(*NDRMR.GetParameters()), DataDecoder(*NDRMR.GetDataDecoder()),
-    JournalineDecoder(),strCurrentSavePath("."),bGetFromFile(false)
+    JournalineDecoder(), bGetFromFile(false)
 {
     QString fhgLogo, jlLogo;
     /* Add body's stylesheet */
@@ -270,11 +270,11 @@ void MultimediaDlg::OnTimer()
         if (DataDecoder.GetMOTObject(NewObj, eAppType) == TRUE)
         {
             /* Store received MOT object on disk */
-            const QString strNewObjName = NewObj.strName.c_str();
+            const QString strNewObjName = VerifyFilename(NewObj.strName.c_str());
             const QString strFileName =
-                QString(strCurrentSavePath + "/" + strNewObjName);
+                QString(strCurrentSavePath + strNewObjName);
 
-            SaveMOTObject(NewObj.Body.vecData, strFileName);
+            SaveMOTObject(strFileName, NewObj);
 
             /* Check if DABMOT could not unzip */
             const _BOOLEAN bZipped =
@@ -339,7 +339,7 @@ void MultimediaDlg::OnTimer()
                                          + tr("Impossible to uncompress the home page.<br>"
                                               "For uncompress data compile Dream with zlib or Freeimage.<br>"
                                               "Compress files will be saved on disk here:<br>" +
-                                              strCurrentSavePath + "/") + "</center>");
+                                              strCurrentSavePath) + "</center>");
                 }
             }
         }
@@ -504,7 +504,7 @@ void MultimediaDlg::LoadSettings(const CSettings& Settings)
     fontDefault = TextBrowser->font();
 
     /* Retrieve the setting saved into the .ini file */
-    strCurrentSavePath = (Parameters.sDataFilesDirectory+"/MOT").c_str();
+    strCurrentSavePath = QString::fromUtf8(Parameters.GetDataDirectory("MOT").c_str());
 
     /* Retrieve the font setting saved into the .ini file */
     string strFontFamily = Settings.Get("Multimedia Dialog", "fontfamily");
@@ -601,12 +601,12 @@ void MultimediaDlg::OnButtonStepForw()
 
     case CDataDecoder::AT_BROADCASTWEBSITE:
         /* Try to open browser */
-        if (!openBrowser(this, strCurrentSavePath + "/" + strBWSHomePage))
+        if (!openBrowser(this, strCurrentSavePath + strBWSHomePage))
         {
             QMessageBox::information(this, "Dream",
                                      tr("Failed to start the default browser.\n"
                                         "Open the home page:\n" + strCurrentSavePath +
-                                        "/" + strBWSHomePage + "\nmanually."), QMessageBox::Ok);
+                                        strBWSHomePage + "\nmanually."), QMessageBox::Ok);
         }
         break;
 
@@ -793,14 +793,12 @@ void MultimediaDlg::OnSave()
             strDefFileName += "." + strExt;
 
         strFileName =
-            QFileDialog::getSaveFileName(strCurrentSavePath + "/" + strDefFileName,
+            QFileDialog::getSaveFileName(strCurrentSavePath + strDefFileName,
                                          strFilter, this);
 
         /* Check if user not hit the cancel button */
         if (!strFileName.isEmpty())
-        {
-            SaveMOTObject(vecRawImages[iCurImagePos].Body.vecData, strFileName);
-        }
+            SaveMOTObject(strFileName, vecRawImages[iCurImagePos]);
         break;
 
     case CDataDecoder::AT_JOURNALINE:
@@ -825,7 +823,7 @@ void MultimediaDlg::OnSave()
                                    QDateTime().currentDateTime().toString() + "</i></font></p>"
                                    "</body>\n</html>";
 
-        strFileName = QFileDialog::getSaveFileName(strCurrentSavePath + "/" +
+        strFileName = QFileDialog::getSaveFileName(strCurrentSavePath +
                       strTitle + ".html", "*.html", this);
 
         if (!strFileName.isEmpty())
@@ -863,9 +861,9 @@ void MultimediaDlg::OnSaveAll()
         /* Loop over all pictures received yet */
         for (int j = 0; j < GetIDLastPicture() + 1; j++)
         {
-            const CMOTObject& o = vecRawImages[j];
-            QString strFileName = VerifyFilename(o.strName.c_str());
-            QString strExt = QString(o.strFormat.c_str());
+            const CMOTObject& obj = vecRawImages[j];
+            QString strFileName = VerifyFilename(obj.strName.c_str());
+            QString strExt = QString(obj.strFormat.c_str());
 
             if (strFileName.length() == 0)
             {
@@ -880,7 +878,7 @@ void MultimediaDlg::OnSaveAll()
             if ((strFileName.contains(".") == 0) && (strExt.length() > 0))
                 strFileName += "." + strExt;
 
-            SaveMOTObject(o.Body.vecData, strFileName);
+            SaveMOTObject(strFileName, obj);
         }
     }
 }
@@ -954,8 +952,7 @@ void MultimediaDlg::InitBroadcastWebSite()
                              "</h2></center>");
 
         /* Create the cache directory if not exist */
-        if (!QFileInfo(strCurrentSavePath).exists())
-            QDir().mkdir(strCurrentSavePath);
+		CreateDirectories(strCurrentSavePath);
     }
 }
 
@@ -1016,47 +1013,6 @@ void MultimediaDlg::InitJournaline()
     NewIDHistory.Reset();
 }
 
-void MultimediaDlg::CreateDirectories(const QString& filename)
-{
-    /*
-    	This function is for creating a complete directory structure to a given
-    	file name. If there is a pathname like this:
-    	/html/files/images/myimage.gif
-    	this function create all the folders into MOTCache:
-    	/html
-    	/html/files
-    	/html/files/images
-    	QFileInfo only creates a file if the pathname is valid. If not all folders
-    	are created, QFileInfo will not save the file. There was no QT function
-    	or a hint the QT mailing list found in which does the job of this function.
-    */
-    int i = 0;
-
-    while (uint(i) < filename.length())
-    {
-        _BOOLEAN bFound = FALSE;
-
-        while ((uint(i) < filename.length()) && (bFound == FALSE))
-        {
-            if (filename[i] == '/')
-                bFound = TRUE;
-            else
-                i++;
-        }
-
-        if (bFound == TRUE)
-        {
-            /* create directory */
-            const QString sDirName = filename.left(i);
-
-            if (!QFileInfo(sDirName).exists())
-                QDir().mkdir(sDirName);
-        }
-
-        i++;
-    }
-}
-
 void MultimediaDlg::AddRefreshHeader(const QString& strFileName)
 {
     /*
@@ -1076,29 +1032,27 @@ void MultimediaDlg::AddRefreshHeader(const QString& strFileName)
     }
 }
 
-void MultimediaDlg::SaveMOTObject(const CVector<_BYTE>& vecbRawData,
-                                  const QString& strFileName)
+void MultimediaDlg::SaveMOTObject(const QString& strFileName,
+                                  const CMOTObject& obj)
 {
-    /* First, create directory for storing the file (if not exists) */
-    CreateDirectories(strFileName.latin1());
+    const CVector<_BYTE>& vecbRawData = obj.Body.vecData;
 
-    /* Data size in bytes */
-    const int iSize = vecbRawData.Size();
+    /* First, create directory for storing the file (if not exists) */
+    CreateDirectories(strFileName);
 
     /* Open file */
-    FILE* pFiBody = fopen(strFileName.latin1(), "wb");
-
-    if (pFiBody != NULL)
+    QFile file(strFileName);
+    if (file.open(IO_WriteOnly | IO_Truncate))
     {
-        /* Write data byte-wise */
-        for (int i = 0; i < iSize; i++)
-        {
-            const _BYTE b = vecbRawData[i];
-            fwrite(&b, size_t(1), size_t(1), pFiBody);
-        }
+        int i, written, size;
+        size = vecbRawData.Size();
+
+        /* Write data */
+        for (i = 0, written = 0; size > 0 && written >= 0; i+=written, size-=written)
+            written = file.writeBlock((const char*)&vecbRawData.at(i), size);
 
         /* Close the file afterwards */
-        fclose(pFiBody);
+        file.close();
     }
 }
 

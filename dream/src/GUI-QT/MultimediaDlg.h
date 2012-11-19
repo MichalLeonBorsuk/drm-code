@@ -160,8 +160,7 @@ protected:
 	void SetJournalineText();
 	void UpdateAccButtonsSlideShow();
 	int GetIDLastPicture() {return vecRawImages.Size() - 1;}
-	void SaveMOTObject(const CVector<_BYTE>& vecbRawData, const QString& strFileName);
-	void CreateDirectories(const QString& filename);
+	void SaveMOTObject(const QString& strFileName, const CMOTObject& obj);
 	void ClearAllSlideShow();
 
 	void InitApplication(CDataDecoder::EAppType eNewAppType);
