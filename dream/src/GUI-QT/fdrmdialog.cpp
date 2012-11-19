@@ -84,19 +84,24 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& NSettings, CRig& rig,
 	pLogging->LoadSettings(Settings);
 
 #if QT_VERSION < 0x040000
+    /* Analog demodulation window */
+    pAnalogDemDlg = new AnalogDemDlg(DRMReceiver, Settings, NULL, "", FALSE, Qt::WStyle_MinMax);
+    SetDialogCaption(pAnalogDemDlg, tr("Analog Demodulation"));
+
+    /* FM window */
+    pFMDlg = new FMDialog(DRMReceiver, Settings, rig, NULL, "", FALSE, Qt::WStyle_MinMax);
+    SetDialogCaption(pFMDlg, tr("FM Receiver"));
+
     /* Multimedia window */
-    pMultiMediaDlg = new MultimediaDlg(DRMReceiver, this, "", FALSE, Qt::WStyle_MinMax);
-    pMultiMediaDlg->LoadSettings(Settings);
+    pMultiMediaDlg = new MultimediaDlg(DRMReceiver, Settings, NULL, "", FALSE, Qt::WStyle_MinMax);
     SetDialogCaption(pMultiMediaDlg, tr("Multimedia"));
 
     /* Stations window */
-    pStationsDlg = new StationsDlg(DRMReceiver, /*Settings,*/ rig, this, "", FALSE, Qt::WStyle_MinMax);
-    pStationsDlg->LoadSettings(Settings);
+    pStationsDlg = new StationsDlg(DRMReceiver, Settings, rig, this, "", FALSE, Qt::WStyle_MinMax);
     SetDialogCaption(pStationsDlg, tr("Stations"));
 
     /* Live Schedule window */
-    pLiveScheduleDlg = new LiveScheduleDlg(DRMReceiver, NULL, "", FALSE, Qt::WType_TopLevel);
-    pLiveScheduleDlg->LoadSettings(Settings);
+    pLiveScheduleDlg = new LiveScheduleDlg(DRMReceiver, Settings, this, "", FALSE, Qt::WStyle_MinMax);
     SetDialogCaption(pLiveScheduleDlg, tr("Live Schedule"));
 
     /* Programme Guide Window */
@@ -107,15 +112,7 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& NSettings, CRig& rig,
     pSysEvalDlg = new systemevalDlg(DRMReceiver, Settings, this, "", FALSE, Qt::WStyle_MinMax);
     SetDialogCaption(pSysEvalDlg, tr("System Evaluation"));
 
-	/* Analog demodulation window */
-    pAnalogDemDlg = new AnalogDemDlg(DRMReceiver, Settings, NULL, "", FALSE, Qt::WStyle_MinMax);
-    SetDialogCaption(pAnalogDemDlg, tr("Analog Demodulation"));
-
-    /* FM window */
-    pFMDlg = new FMDialog(DRMReceiver, Settings, rig, NULL, "", FALSE, Qt::WStyle_MinMax);
-    SetDialogCaption(pFMDlg, tr("FM Receiver"));
-
-	/* general settings window */
+    /* General settings window */
     pGeneralSettingsDlg = new GeneralSettingsDlg(Parameters, Settings, this, "", TRUE, Qt::WStyle_Dialog);
     SetDialogCaption(pGeneralSettingsDlg, tr("General settings"));
 
@@ -202,29 +199,32 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& NSettings, CRig& rig,
     connect(pButtonGroup, SIGNAL(clicked(int)), this, SLOT(OnSelectAudioService(int)));
     connect(pButtonGroup, SIGNAL(clicked(int)), this, SLOT(OnSelectDataService(int)));
 #else
-    pBWSDlg = new BWSViewer(DRMReceiver, Settings);
-    pJLDlg = new JLViewer(DRMReceiver, Settings);
-    pSlideShowDlg = new SlideShowViewer(DRMReceiver, Settings);
+    /* Analog demodulation window */
+    pAnalogDemDlg = new AnalogDemDlg(DRMReceiver, Settings);
+
+    /* FM window */
+    pFMDlg = new FMDialog(DRMReceiver, Settings, rig);
+
+    /* MOT broadcast website viewer window */
+    pBWSDlg = new BWSViewer(DRMReceiver, Settings, NULL);
+
+    /* Journaline viewer window */
+    pJLDlg = new JLViewer(DRMReceiver, Settings, NULL);
+
+    /* MOT slide show window */
+    pSlideShowDlg = new SlideShowViewer(DRMReceiver, Settings, NULL);
 
     /* Stations window */
-    pStationsDlg = new StationsDlg(DRMReceiver, rig, this);
-    pStationsDlg->LoadSettings(Settings);
+    pStationsDlg = new StationsDlg(DRMReceiver, Settings, rig, this);
 
     /* Live Schedule window */
-    pLiveScheduleDlg = new LiveScheduleDlg(DRMReceiver, NULL);
-    pLiveScheduleDlg->LoadSettings(Settings);
+    pLiveScheduleDlg = new LiveScheduleDlg(DRMReceiver, Settings, this);
 
     /* Programme Guide Window */
     pEPGDlg = new EPGDlg(DRMReceiver, Settings, this);
 
     /* Evaluation window */
     pSysEvalDlg = new systemevalDlg(DRMReceiver, Settings, this);
-
-    /* Analog demodulation window */
-    pAnalogDemDlg = new AnalogDemDlg(DRMReceiver, Settings);
-
-    /* FM window */
-    pFMDlg = new FMDialog(DRMReceiver, Settings, rig);
 
     /* general settings window */
     pGeneralSettingsDlg = new GeneralSettingsDlg(Parameters, Settings, this);
@@ -1123,9 +1123,9 @@ void FDRMDialog::closeEvent(QCloseEvent* ce)
         /* Stop real-time timer */
         Timer.stop();
 
-	pStationsDlg->SaveSettings(Settings);
-	pLiveScheduleDlg->SaveSettings(Settings);
-	pLogging->SaveSettings(Settings);
+        pStationsDlg->SaveSettings(Settings);
+        pLiveScheduleDlg->SaveSettings(Settings);
+        pLogging->SaveSettings(Settings);
 
         /* Save the station dialog visibility state */
         switch (DRMReceiver.GetReceiverMode())

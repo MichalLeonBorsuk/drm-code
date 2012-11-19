@@ -255,15 +255,14 @@ class StationsDlg : public CStationsDlgBase
 	Q_OBJECT
 
 public:
-
-	StationsDlg(CDRMReceiver&, CRig&, QWidget* parent = 0,
+	StationsDlg(CDRMReceiver&, CSettings&, CRig&, QWidget* parent = 0,
 		const char* name = 0, bool modal = FALSE, Qt::WFlags f = 0);
 	virtual ~StationsDlg();
 
-	void LoadSettings(const CSettings&);
 	void SaveSettings(CSettings&);
 
 protected:
+	void			LoadSettings(const CSettings&);
 	void			CheckMode();
 	void			LoadSchedule();
 	void			LoadFilters();
@@ -286,6 +285,8 @@ protected:
 	int			iSortColumnanalog;
 
 	CDRMReceiver&		DRMReceiver;
+	CSettings&			Settings;
+	CRig&				Rig;
 	CDRMSchedule		DRMSchedule;
 #if QT_VERSION < 0x040000
 	void			setupUi(QObject*);

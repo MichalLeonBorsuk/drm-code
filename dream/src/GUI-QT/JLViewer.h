@@ -47,7 +47,6 @@ public:
     virtual ~JLViewer();
 
 protected:
-
     QTimer Timer;
     QTextDocument           document;
 //    QString                 strCurrentSavePath;

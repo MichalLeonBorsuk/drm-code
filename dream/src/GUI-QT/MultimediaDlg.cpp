@@ -44,12 +44,15 @@
 #include <qtextstream.h>
 
 /* Implementation *************************************************************/
-MultimediaDlg::MultimediaDlg(CDRMReceiver& NDRMR,
+MultimediaDlg::MultimediaDlg(CDRMReceiver& DRMReceiver, CSettings& Settings,
                              QWidget* parent, const char* name, bool modal, Qt::WFlags f):
-    MultimediaDlgBase(parent, name, modal, f),
-    Parameters(*NDRMR.GetParameters()), DataDecoder(*NDRMR.GetDataDecoder()),
+    MultimediaDlgBase(parent, name, modal, f), Settings(Settings),
+    Parameters(*DRMReceiver.GetParameters()), DataDecoder(*DRMReceiver.GetDataDecoder()),
     JournalineDecoder(), bGetFromFile(false)
 {
+    /* Load settings */
+    LoadSettings(Settings);
+
     QString fhgLogo, jlLogo;
     /* Add body's stylesheet */
 
@@ -147,8 +150,6 @@ MultimediaDlg::MultimediaDlg(CDRMReceiver& NDRMR,
 
     connect(&Timer, SIGNAL(timeout()),
             this, SLOT(OnTimer()));
-
-    Timer.stop();
 }
 
 MultimediaDlg::~MultimediaDlg()

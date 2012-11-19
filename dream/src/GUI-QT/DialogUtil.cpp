@@ -154,7 +154,7 @@ CAboutDlg::CAboutDlg(QWidget* parent, const char* name, bool modal, Qt::WFlags f
 #endif
         "<li><b>FhG IIS Journaline Decoder</b> <i>Features NewsService "
         "Journaline(R) decoder technology by Fraunhofer IIS, Erlangen, "
-        "Germany. For more information visit http://www.iis.fhg.de/dab</i></li>"
+        "Germany. For more information visit http://www.iis.fraunhofer.de/en/bf/db/pro.html</i></li>"
 #ifdef HAVE_LIBFREEIMAGE
         "<li><b>FreeImage</b> (" + QString(FreeImage_GetVersion()) + ") <i>This software uses the FreeImage open source "
         "image library. See http://freeimage.sourceforge.net for details. "
@@ -175,7 +175,7 @@ CAboutDlg::CAboutDlg(QWidget* parent, const char* name, bool modal, Qt::WFlags f
         "<li><b>ALSA</b> (" + QString(SND_LIB_VERSION_STR) + ") <i>http://www.alsa-project.org</i></li>"
 #endif
 #ifdef USE_PORTAUDIO
-        "<li><b>portaudio</b> (" + QString(Pa_GetVersionText()) + ") <i>http://www.portaudio.com</i></li>"
+        "<li><b>PortAudio</b> (" + QString(Pa_GetVersionText()) + ") <i>http://www.portaudio.com</i></li>"
 #endif
 #ifdef USE_PULSEAUDIO
         "<li><b>PulseAudio</b> (" + QString(pa_get_headers_version()) + ") <i>http://www.pulseaudio.org</i></li>"
