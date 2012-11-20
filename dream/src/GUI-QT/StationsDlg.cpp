@@ -687,6 +687,7 @@ StationsDlg::StationsDlg(CDRMReceiver& DRMReceiver, CSettings& Settings, CRig& R
     ListViewStations->setSortingEnabled ( true );
     QStringList headers;
     headers
+            << QString() /* icon, enable sorting by online/offline */
             << tr("Station Name")
             << tr("Time [UTC]")
             << tr("Frequency [kHz]")
@@ -697,9 +698,9 @@ StationsDlg::StationsDlg(CDRMReceiver& DRMReceiver, CSettings& Settings, CRig& R
             << tr("Language")
             << tr("Days");
     ListViewStations->setHeaderLabels(headers);
-    ListViewStations->headerItem()->setTextAlignment(1, Qt::AlignRight | Qt::AlignVCenter);
     ListViewStations->headerItem()->setTextAlignment(2, Qt::AlignRight | Qt::AlignVCenter);
     ListViewStations->headerItem()->setTextAlignment(3, Qt::AlignRight | Qt::AlignVCenter);
+    ListViewStations->headerItem()->setTextAlignment(4, Qt::AlignRight | Qt::AlignVCenter);
 
     previewMapper = new QSignalMapper(this);
     previewGroup = new QActionGroup(this);
@@ -1554,19 +1555,19 @@ void StationsDlg::LoadSchedule()
         vecpListItems[i] = item;
 #else
         QTreeWidgetItem* item = new CaseInsensitiveTreeWidgetItem(ListViewStations);
-        item->setText(0, station.strName);
-        item->setText(1, strTimes /* time */);
-        item->setText(2, QString().setNum(station.iFreq) /* freq. */);
-        item->setText(3, strPower            /* power */);
-        item->setText(4, station.strTarget   /* target */);
-        item->setText(5, station.strCountry  /* country */);
-        item->setText(6, station.strSite     /* site */);
-        item->setText(7, station.strLanguage /* language */);
-        item->setText(8, station.strDaysShow);
-        item->setData(0, Qt::UserRole, i);
-        item->setTextAlignment(1, Qt::AlignRight | Qt::AlignVCenter);
+        item->setText(1, station.strName);
+        item->setText(2, strTimes /* time */);
+        item->setText(3, QString().setNum(station.iFreq) /* freq. */);
+        item->setText(4, strPower            /* power */);
+        item->setText(5, station.strTarget   /* target */);
+        item->setText(6, station.strCountry  /* country */);
+        item->setText(7, station.strSite     /* site */);
+        item->setText(8, station.strLanguage /* language */);
+        item->setText(9, station.strDaysShow);
+        item->setData(1, Qt::UserRole, i);
         item->setTextAlignment(2, Qt::AlignRight | Qt::AlignVCenter);
         item->setTextAlignment(3, Qt::AlignRight | Qt::AlignVCenter);
+        item->setTextAlignment(4, Qt::AlignRight | Qt::AlignVCenter);
 #endif
     }
     int c;
@@ -1675,25 +1676,30 @@ void StationsDlg::SetStationsView()
     for (int i = 0; i < ListViewStations->topLevelItemCount(); i++)
     {
         QTreeWidgetItem* item = ListViewStations->topLevelItem(i);
-        int scheduleItem = item->data(0, Qt::UserRole).toInt();
+        int scheduleItem = item->data(1, Qt::UserRole).toInt();
 
         Station::EState iState = DRMSchedule.GetState(scheduleItem);
 
         switch (iState)
         {
         case Station::IS_ACTIVE:
+            item->setData(0, Qt::UserRole, 1);
             item->setIcon(0, greenCube);
             break;
         case Station::IS_PREVIEW:
+            item->setData(0, Qt::UserRole, 2);
             item->setIcon(0, orangeCube);
             break;
         case Station::IS_SOON_INACTIVE:
+            item->setData(0, Qt::UserRole, 0);
             item->setIcon(0, pinkCube);
             break;
         case Station::IS_INACTIVE:
+            item->setData(0, Qt::UserRole, 3);
             item->setIcon(0, redCube);
             break;
         default:
+            item->setData(0, Qt::UserRole, 4);
             item->setIcon(0, redCube);
             break;
         }
@@ -1788,13 +1794,14 @@ void StationsDlg::ColumnParamFromStr(const QString& strColumnParam)
             }
         }
     }
-#if QT_VERSION >= 0x040200
     else
     {
+#if QT_VERSION >= 0x040200
         ListViewStations->header()->resizeSections(QHeaderView::ResizeToContents);
         ListViewStations->header()->resizeSections(QHeaderView::Interactive);
-    }
 #endif
+        ListViewStations->header()->resizeSection(0, ListViewStations->header()->minimumSectionSize());
+    }
 }
 
 void StationsDlg::ColumnParamToStr(QString& strColumnParam)
