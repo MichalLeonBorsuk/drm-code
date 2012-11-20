@@ -90,9 +90,6 @@
 /* Maximum for preview */
 #define MAX_NUM_SEC_PREVIEW			3600
 
-/* Maximum for column number in stations preview */
-#define MAX_COLUMN_NUMBER			8
-
 /* Maximum value for rgb-colors encoded as integers */
 #define MAX_NUM_COL_MAIN_DISP		16777215
 

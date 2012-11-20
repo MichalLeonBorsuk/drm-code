@@ -1800,7 +1800,9 @@ void StationsDlg::ColumnParamFromStr(const QString& strColumnParam)
         ListViewStations->header()->resizeSections(QHeaderView::ResizeToContents);
         ListViewStations->header()->resizeSections(QHeaderView::Interactive);
 #endif
+#if QT_VERSION >= 0x040000
         ListViewStations->header()->resizeSection(0, ListViewStations->header()->minimumSectionSize());
+#endif
     }
 }
 
