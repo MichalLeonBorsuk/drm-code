@@ -1788,6 +1788,13 @@ void StationsDlg::ColumnParamFromStr(const QString& strColumnParam)
             }
         }
     }
+#if QT_VERSION >= 0x040200
+    else
+    {
+        ListViewStations->header()->resizeSections(QHeaderView::ResizeToContents);
+        ListViewStations->header()->resizeSections(QHeaderView::Interactive);
+    }
+#endif
 }
 
 void StationsDlg::ColumnParamToStr(QString& strColumnParam)
