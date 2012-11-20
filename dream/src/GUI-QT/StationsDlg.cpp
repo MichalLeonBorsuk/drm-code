@@ -1884,7 +1884,7 @@ void StationsDlg::on_ListViewStations_itemSelectionChanged()
     QList<QTreeWidgetItem *> items =  ListViewStations->selectedItems();
     if(items.size()==1)
     {
-        SetFrequencyFromGUI(QString(items.first()->text(2)).toInt());
+        SetFrequencyFromGUI(QString(items.first()->text(3)).toInt());
     }
 #endif
 }
