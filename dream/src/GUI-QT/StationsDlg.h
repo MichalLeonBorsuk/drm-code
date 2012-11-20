@@ -138,7 +138,7 @@ public:
 		int col = treeWidget()->sortColumn();
 		if (col == 2) // integer frequency
 			return text( col ).toInt() < rhs.text( col ).toInt();
-		else if (col == 4) // real power
+		else if (col == 3) // real power
 			return text( col ).toDouble() < rhs.text( col ).toDouble();
 		else
 			return text( col ).toLower() < rhs.text( col ).toLower();
@@ -198,7 +198,7 @@ public:
 	CDRMSchedule();
 	virtual ~CDRMSchedule() {}
 
-	enum ESchedMode {SM_DRM, SM_ANALOG};
+	enum ESchedMode {SM_NONE, SM_DRM, SM_ANALOG};
 
 	void ReadINIFile(FILE* pFile);
 	void ReadCSVFile(FILE* pFile);
@@ -215,14 +215,14 @@ public:
 	void UpdateStringListForFilter(const CStationsItem& StationsItem);
 	void LoadSchedule();
 
-	QStringList			ListTargets;
-	QStringList			ListCountries;
-	QStringList			ListLanguages;
+	QStringList		ListTargets;
+	QStringList		ListCountries;
+	QStringList		ListLanguages;
 
-	QString countryFilterdrm, targetFilterdrm, languageFilterdrm;
-	QString countryFilteranalog, targetFilteranalog, languageFilteranalog;
-	QString schedFileName;
-	QUrl *qurldrm, *qurlanalog;
+	QString			countryFilterdrm, targetFilterdrm, languageFilterdrm;
+	QString			countryFilteranalog, targetFilteranalog, languageFilteranalog;
+	QString			schedFileName;
+	QUrl			qurldrm, qurlanalog;
 
 protected:
 	void			SetAnalogUrl();
@@ -278,11 +278,15 @@ protected:
 	_BOOLEAN		showAll();
 	_BOOLEAN		GetSortAscending();
 	void			SetSortAscending(_BOOLEAN b);
+	void			ColumnParamFromStr(const QString& strColumnParam);
+	void			ColumnParamToStr(QString& strColumnParam);
 	int			currentSortColumn();
 	_BOOLEAN		bCurrentSortAscendingdrm;
 	_BOOLEAN		bCurrentSortAscendinganalog;
 	int			iSortColumndrm;
 	int			iSortColumnanalog;
+	QString			strColumnParamdrm;
+	QString			strColumnParamanalog;
 
 	CDRMReceiver&		DRMReceiver;
 	CSettings&			Settings;
@@ -321,7 +325,8 @@ protected:
 	QMutex			ListItemsMutex;
 
 	RemoteMenu*		pRemoteMenu;
-	QString		okMessage, badMessage;
+	QString			okMessage, badMessage;
+	CDRMSchedule::ESchedMode eLastScheduleMode;
 	CEventFilter	ef;
 
 signals:
