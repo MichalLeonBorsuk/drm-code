@@ -51,7 +51,7 @@ BWSViewer::BWSViewer(CDRMReceiver& rec, CSettings& s, QWidget* parent, Qt::WFlag
     bSaveFileToDisk(false), bRestrictedProfile(false), bAllowExternalContent(true),
     bClearCacheOnNewService(true), bDirectoryIndexChanged(false),
     iLastAwaitingOjects(0), strCacheHost(CACHE_HOST),
-    iLastServiceID(0), bLastServiceValid(false), iLastValidServiceID(0)
+    iLastServiceID(0), iCurrentDataServiceID(0), bLastServiceValid(false), iLastValidServiceID(0)
 {
     /* Enable minimize and maximize box for QDialog */
 	setWindowFlags(Qt::Window);
@@ -161,8 +161,11 @@ void BWSViewer::Update()
 void BWSViewer::OnTimer()
 {
     /* Get current service parameters */
-    uint32_t iServiceID; bool bServiceValid; QString strLabel; ETypeRxStatus status;
-    GetServiceParams(&iServiceID, &bServiceValid, &strLabel, &status);
+    uint32_t iServiceID; bool bServiceValid; QString strLabel; ETypeRxStatus eStatus;
+    GetServiceParams(&iServiceID, &bServiceValid, &strLabel, &eStatus);
+
+    /* Set current data service ID */
+    iCurrentDataServiceID = bServiceValid ? iServiceID : 0;
 
     /* Check for new valid data service */
     if (bServiceValid && iLastValidServiceID != iServiceID)
@@ -179,7 +182,7 @@ void BWSViewer::OnTimer()
     if (decoder == NULL)
         decoder = receiver.GetDataDecoder();
 
-    switch(status)
+    switch(eStatus)
     {
     case NOT_PRESENT:
         LEDStatus->Reset();
@@ -457,11 +460,8 @@ void BWSViewer::SaveMOTObject(const QString& strObjName,
 
 void BWSViewer::SetupSavePath(QString& strSavePath)
 {
-    uint32_t iServiceID;
-    /* Get the selected data service ID */
-    GetServiceParams(&iServiceID);
     /* Append service ID to MOT save path */
-    strSavePath = strSavePath.setNum(iServiceID, 16).toUpper().rightJustified(8, '0');
+    strSavePath = strSavePath.setNum(iCurrentDataServiceID, 16).toUpper().rightJustified(8, '0');
     strSavePath = QString::fromUtf8((*receiver.GetParameters()).GetDataDirectory("MOT").c_str()) + strSavePath + "/";
 }
 
