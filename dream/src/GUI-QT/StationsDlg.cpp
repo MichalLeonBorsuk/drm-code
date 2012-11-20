@@ -981,7 +981,7 @@ void StationsDlg::httpConnected()
 {
     const bool bDrmMode = DRMSchedule.GetSchedMode() == CDRMSchedule::SM_DRM;
     QUrl* pqurl = bDrmMode ? &DRMSchedule.qurldrm : &DRMSchedule.qurlanalog;
-    QUrl& qurl(*pqurl);
+    QUrl qurl = *pqurl;
     QCString s = QString("GET %1 HTTP/1.0\r\nHost: %2\r\n\r\n")
                  .arg(qurl.encodedPathAndQuery()).arg(qurl.host()).utf8();
     httpSocket->writeBlock(s.data(), s.length());
@@ -1048,8 +1048,12 @@ void StationsDlg::httpError(int n)
 void StationsDlg::on_actionGetUpdate_triggered()
 {
     const bool bDrmMode = DRMSchedule.GetSchedMode() == CDRMSchedule::SM_DRM;
+#if QT_VERSION < 0x040000
     QUrl* pqurl = bDrmMode ? &DRMSchedule.qurldrm : &DRMSchedule.qurlanalog;
-    QUrl& qurl(*pqurl);
+    QUrl qurl = *pqurl;
+#else
+    QUrl& qurl(bDrmMode ? DRMSchedule.qurldrm : DRMSchedule.qurlanalog);
+#endif
     if (QMessageBox::information(this, tr("Dream Schedule Update"),
                                  tr("Dream tries to download the newest schedule\n"
                                     "Your computer must be connected to the internet.\n\n"
