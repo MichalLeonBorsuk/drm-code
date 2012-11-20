@@ -33,6 +33,7 @@
 # include <qftp.h>
 # include <qsocket.h>
 # include <qwhatsthis.h>
+# include <qregexp.h>
 # ifdef HAVE_LIBHAMLIB
 #  include "Rig.h"
 # endif
@@ -108,36 +109,31 @@ void CDRMSchedule::SetSchedMode(const ESchedMode eNewSchM)
 
 void CDRMSchedule::UpdateStringListForFilter(const CStationsItem& StationsItem)
 {
-    QStringList result;
-
+#if QT_VERSION < 0x040000
     QString strTarget = StationsItem.strTarget;
     QString strCountry = StationsItem.strCountry;
     QString strLanguage = StationsItem.strLanguage;
-#if QT_VERSION < 0x040000
-    result = ListTargets.grep(strTarget);
+    QStringList result;
+    result = ListTargets.grep(QRegExp("^" + strTarget + "$"));
     if (result.isEmpty())
         ListTargets.append(strTarget);
 
-    result = ListCountries.grep(strCountry);
+    result = ListCountries.grep(QRegExp("^" + strCountry + "$"));
     if (result.isEmpty())
         ListCountries.append(strCountry);
 
-    result = ListLanguages.grep(strLanguage);
+    result = ListLanguages.grep(QRegExp("^" + strLanguage + "$"));
     if (result.isEmpty())
         ListLanguages.append(strLanguage);
 #else
-    result = ListTargets.filter(strTarget);
-    if (result.isEmpty())
-        ListTargets.append(strTarget);
+    if (!ListTargets.contains(StationsItem.strTarget))
+        ListTargets.append(StationsItem.strTarget);
 
-    result = ListCountries.filter(strCountry);
-    if (result.isEmpty())
-        ListCountries.append(strCountry);
+    if (!ListCountries.contains(StationsItem.strCountry))
+        ListCountries.append(StationsItem.strCountry);
 
-
-    result = ListLanguages.filter(strLanguage);
-    if (result.isEmpty())
-        ListLanguages.append(strLanguage);
+    if (!ListLanguages.contains(StationsItem.strLanguage))
+        ListLanguages.append(StationsItem.strLanguage);
 #endif
 }
 
