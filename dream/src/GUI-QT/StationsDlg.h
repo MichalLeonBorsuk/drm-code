@@ -136,9 +136,11 @@ public:
 	{
 		// bug 29 - sort frequency and power numerically
 		int col = treeWidget()->sortColumn();
-		if (col == 2) // integer frequency
+		if (col == 0) // online/offline
+			return data(0, Qt::UserRole).toInt() < rhs.data(0, Qt::UserRole).toInt();
+		else if (col == 3) // integer frequency
 			return text( col ).toInt() < rhs.text( col ).toInt();
-		else if (col == 3) // real power
+		else if (col == 4) // real power
 			return text( col ).toDouble() < rhs.text( col ).toDouble();
 		else
 			return text( col ).toLower() < rhs.text( col ).toLower();
