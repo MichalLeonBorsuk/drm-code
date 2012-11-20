@@ -678,6 +678,9 @@ StationsDlg::StationsDlg(CDRMReceiver& DRMReceiver, CSettings& Settings, CRig& R
 
 #if QT_VERSION >= 0x040000
 
+#if QT_VERSION >= 0x040200
+    ListViewStations->setAllColumnsShowFocus(true);
+#endif
     ListViewStations->setColumnCount(9);
     ListViewStations->setRootIsDecorated ( false );
     ListViewStations->setSortingEnabled ( true );
