@@ -159,6 +159,7 @@ protected:
     CCounter        waitobjs;
     const QString   strCacheHost;
     uint32_t        iLastServiceID;
+    uint32_t        iCurrentDataServiceID;
     bool            bLastServiceValid;
     uint32_t        iLastValidServiceID;
     QString         strLastLabel;
