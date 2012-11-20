@@ -113,8 +113,6 @@ namespace Station {
 class MyListViewItem : public QListViewItem
 {
 public:
-	/* If you want to add another columns, change also MAX_COLUMN_NUMBER in
-	   Settings.h! */
 	MyListViewItem(QListView* parent, QString s1, QString s2 = QString::null,
 		QString s3 = QString::null, QString s4 = QString::null,
 		QString s5 = QString::null, QString s6 = QString::null,
