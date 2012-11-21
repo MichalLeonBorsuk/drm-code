@@ -638,6 +638,10 @@ QString FDRMDialog::serviceSelector(CParameter& Parameters, int i)
         /* Audio service */
         if ((service.eAudDataFlag == CService::SF_AUDIO))
         {
+            /* Report missing codec */
+            if (!DRMReceiver.GetAudSorceDec()->CanDecode(service.AudioParam.eAudioCoding))
+                text += tr(" [NO CODEC AVAILABLE]");
+
             /* Show, if a multimedia stream is connected to this service */
             if (service.DataParam.iStreamID != STREAM_ID_NOT_USED)
             {
