@@ -83,8 +83,8 @@ protected:
     faacEncSetConfiguration_t*
 			    faacEncSetConfiguration;
     faacEncOpen_t*          faacEncOpen;
-    faacEncGetDecoderSpecificInfo_t*
-			    faacEncGetDecoderSpecificInfo;
+//    faacEncGetDecoderSpecificInfo_t*
+//			    faacEncGetDecoderSpecificInfo;
     faacEncEncode_t*        faacEncEncode;
     faacEncClose_t*         faacEncClose;
 #endif
@@ -99,6 +99,7 @@ protected:
 	int						iAudioPayloadLen;
 	int						iNumHigherProtectedBytes;
 
+	_BOOLEAN				bFaacCodecSupported;
 	CAudioResample			ResampleObj;
 	CVector<_REAL>			vecTempResBufIn;
 	CVector<_REAL>			vecTempResBufOut;
@@ -106,7 +107,7 @@ protected:
 public:
 		virtual void InitInternalTx(CParameter &TransmParam, int &iInputBlockSize, int &iOutputBlockSize);
 		virtual void InitInternalRx(CParameter& Param, int &iInputBlockSize, int &iOutputBlockSize);
-		virtual void ProcessDataInternal(CVectorEx<_SAMPLE>* pvecInputData,
+		virtual void ProcessDataInternal(CParameter& TransmParam, CVectorEx<_SAMPLE>* pvecInputData,
 						CVectorEx<_BINARY>* pvecOutputData, int &iInputBlockSize, int &iOutputBlockSize);
 };
 
@@ -124,9 +125,9 @@ protected:
 		AudioSourceEncoderImpl.InitInternalRx(Param, iInputBlockSize, iOutputBlockSize);
 	}
 
-	virtual void ProcessDataInternal(CParameter& )
+	virtual void ProcessDataInternal(CParameter& Param)
 	{
-		AudioSourceEncoderImpl.ProcessDataInternal(pvecInputData, pvecOutputData, iInputBlockSize, iOutputBlockSize);
+		AudioSourceEncoderImpl.ProcessDataInternal(Param, pvecInputData, pvecOutputData, iInputBlockSize, iOutputBlockSize);
 	}
 };
 
@@ -158,9 +159,9 @@ protected:
 		AudioSourceEncoderImpl.InitInternalTx(TransmParam, iInputBlockSize, iOutputBlockSize);
 	}
 
-	virtual void ProcessDataInternal(CParameter& )
+	virtual void ProcessDataInternal(CParameter& TransmParam)
 	{
-		AudioSourceEncoderImpl.ProcessDataInternal(pvecInputData, pvecOutputData, iInputBlockSize, iOutputBlockSize);
+		AudioSourceEncoderImpl.ProcessDataInternal(TransmParam, pvecInputData, pvecOutputData, iInputBlockSize, iOutputBlockSize);
 	}
 
 };
