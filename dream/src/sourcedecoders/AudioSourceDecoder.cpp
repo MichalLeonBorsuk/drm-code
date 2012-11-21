@@ -672,11 +672,6 @@ CAudioSourceDecoder::InitInternal(CParameter & ReceiverParam)
        constructor with arbitrary values to be sure that this is satisfied */
     NeAACDecInitDRM(&HandleAACDecoder, 24000, DRMCH_MONO);
 
-#ifdef USE_HVXC_DECODER
-    canDecodeHVXC = true;
-#endif
-
-
     /*
     	Since we use the exception mechanism in this init routine, the sequence of
     	the individual initializations is very important!
@@ -1146,9 +1141,11 @@ CAudioSourceDecoder::CAudioSourceDecoder()
 #ifndef USE_FAAD2_LIBRARY
     cerr << "looking for FAAD2" << endl;
 # ifdef _WIN32
-    hFaaDlib = LoadLibrary(TEXT("faad2_drmd"));
+    hFaaDlib = LoadLibrary(TEXT("faad2_drm.dll"));
     if (hFaaDlib == NULL)
-		hFaaDlib = LoadLibrary(TEXT("faad2_drm"));
+        hFaaDlib = LoadLibrary(TEXT("libfaad2_drm.dll"));
+    if (hFaaDlib == NULL)
+        hFaaDlib = LoadLibrary(TEXT("faad_drm.dll"));
 # else
 #  define GetProcAddress(a, b) dlsym(a, b)
 #  define FreeLibrary(a) dlclose(a)

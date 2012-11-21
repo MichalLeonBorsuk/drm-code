@@ -137,6 +137,15 @@ public:
 
     virtual ~CAudioSourceDecoder();
 
+    bool CanDecode(CAudioParam::EAudCod eAudCod) {
+        switch (eAudCod)
+        {
+        case CAudioParam::AC_AAC:  return canDecodeAAC;
+        case CAudioParam::AC_CELP: return canDecodeCELP;
+        case CAudioParam::AC_HVXC: return canDecodeHVXC;
+        }
+        return false;
+    }
     int GetNumCorDecAudio();
     void SetReverbEffect(const _BOOLEAN bNER) {
         bUseReverbEffect = bNER;
@@ -218,9 +227,9 @@ protected:
     CVector<_BYTE> celp_crc_bits;
     int iNumHigherProtectedBits;
     int iNumLowerProtectedBits;
-
     _BOOLEAN bCELPCRC;
     CCRC CELPCRCObject;
+
     string audiodecoder;
     bool canDecodeAAC;
     bool canDecodeCELP;
