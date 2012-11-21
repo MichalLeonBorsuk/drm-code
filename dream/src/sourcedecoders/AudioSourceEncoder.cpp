@@ -60,14 +60,16 @@ static int FAACAPI dummyfaacEncClose(faacEncHandle) {
 /* Implementation *************************************************************/
 
 CAudioSourceEncoderImplementation::CAudioSourceEncoderImplementation()
-    : bUsingTextMessage(FALSE), hEncoder(NULL)
+    : bUsingTextMessage(FALSE), hEncoder(NULL),
 #ifndef USE_FAAC_LIBRARY
-        ,faacEncGetVersion(NULL), faacEncGetCurrentConfiguration(NULL), faacEncSetConfiguration(NULL), faacEncOpen(NULL),
-        /*faacEncGetDecoderSpecificInfo(NULL), */faacEncEncode(NULL), faacEncClose(NULL)
+        faacEncGetVersion(NULL), faacEncGetCurrentConfiguration(NULL), faacEncSetConfiguration(NULL), faacEncOpen(NULL),
+        /*faacEncGetDecoderSpecificInfo(NULL), */faacEncEncode(NULL), faacEncClose(NULL),
+        bFaacCodecSupported(FALSE)
+#else
+        bFaacCodecSupported(TRUE)
 #endif
 {
 #ifndef USE_FAAC_LIBRARY
-    _BOOLEAN bFaacCodecSupported;
 # ifdef _WIN32
     hlib = LoadLibrary(TEXT("faac_drm.dll"));
 # else
@@ -120,7 +122,8 @@ CAudioSourceEncoderImplementation::CAudioSourceEncoderImplementation()
 }
 
 void
-CAudioSourceEncoderImplementation::ProcessDataInternal(CVectorEx < _SAMPLE >
+CAudioSourceEncoderImplementation::ProcessDataInternal(CParameter& TransmParam,
+        CVectorEx < _SAMPLE >
         *pvecInputData,
         CVectorEx < _BINARY >
         *pvecOutputData,
@@ -128,6 +131,7 @@ CAudioSourceEncoderImplementation::ProcessDataInternal(CVectorEx < _SAMPLE >
         int &iOutputBlockSize)
 {
     int i, j;
+    (void)TransmParam;
 
     /* Reset data to zero. This is important since usually not all data is used
        and this data has to be set to zero as defined in the DRM standard */
