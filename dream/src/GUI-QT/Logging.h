@@ -50,14 +50,14 @@ public:
 	void SaveSettings(CSettings&);
 
 protected:
-	QTimer			TimerLogFileLong;
-	QTimer			TimerLogFileShort;
+	QTimer			TimerLogFile;
 	QTimer			TimerLogFileStart;
 
 	CShortLog		shortLog;
 	CLongLog		longLog;
 	bool			enabled;
 	int			iLogDelay;
+	int			iLogCount;
 
 signals:
 	void subscribeRig();
@@ -66,8 +66,7 @@ public slots:
 	void start();
 	void stop();
 	void reStart();
-	void OnTimerLogFileShort();
-	void OnTimerLogFileLong();
+	void OnTimerLogFile();
 };
 
 #endif
