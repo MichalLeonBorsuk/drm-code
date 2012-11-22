@@ -352,6 +352,9 @@ void systemevalDlg::showEvent(QShowEvent* e)
 
         /* Add window pointer in vector (needed for closing the windows) */
         vecpDRMPlots.push_back(pNewChartWin);
+
+		/* Show new window */
+		pNewChartWin->show();
     }
 
     /* Update controls */
@@ -475,7 +478,12 @@ void systemevalDlg::OnTreeWidgetContMenu(bool)
     if (eNewCharType != CDRMPlot::NONE_OLD)
     {
         /* Open the new chart */
-        vecpDRMPlots.push_back(OpenChartWin(eNewCharType));
+		CDRMPlot* pNewChartWin = OpenChartWin(eNewCharType);
+        vecpDRMPlots.push_back(pNewChartWin);
+
+		/* Show new window */
+		pNewChartWin->show();
+
         eNewCharType = CDRMPlot::NONE_OLD;
     }
 }
@@ -505,9 +513,6 @@ CDRMPlot* systemevalDlg::OpenChartWin(CDRMPlot::ECharType eNewType)
     /* Set receiver object and correct chart type */
     pNewChartWin->SetRecObj(&DRMReceiver);
     pNewChartWin->SetupChart(eNewType);
-
-    /* Show new window */
-    pNewChartWin->show();
 
     return pNewChartWin;
 }

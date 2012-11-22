@@ -41,6 +41,7 @@
 #include <QTimer>
 #include <QDialog>
 #include <QResizeEvent>
+#include <QPaintEvent>
 #include <QPixmap>
 #include <QHideEvent>
 #include <QMouseEvent>
@@ -57,6 +58,7 @@
 #include <qwt_plot_canvas.h>
 #include <qwt_plot_curve.h>
 #include <qwt_plot_grid.h>
+#include <qwt_plot_layout.h>
 #include <qwt_plot_marker.h>
 #include <qwt_plot_picker.h>
 #include <qwt_scale_draw.h>
@@ -217,6 +219,30 @@ signals:
 };
 
 
+class CWidget : public QWidget
+{
+	Q_OBJECT
+public:
+	CWidget(QWidget* parent, const QPixmap& Pixmap)
+		: QWidget(parent), Pixmap(Pixmap)
+	{ setAttribute(Qt::WA_OpaquePaintEvent, true);
+	  setAttribute(Qt::WA_TransparentForMouseEvents, true);
+	  setCursor(Qt::CrossCursor); show(); }
+	virtual ~CWidget() {}
+protected:
+	QPainter Painter;
+	const QPixmap& Pixmap;
+	void paintEvent(QPaintEvent *)
+	{
+		if (Painter.begin(this))
+		{
+			Painter.drawPixmap(0, 0, Pixmap);
+			Painter.end();
+		}
+	}
+};
+
+
 class CDRMPlot : public QObject
 {
 	Q_OBJECT
@@ -292,7 +318,7 @@ protected:
 	void SetQAMGrid(const ECodScheme eCoSc);
 
 	void PlotDefaults();
-	bool PlotForceUpdate(QColor BackgroundColor);
+	void PlotForceUpdate();
 
 	void SetupAvIR();
 	void SetupTranFct();
@@ -334,8 +360,6 @@ protected:
 
 	QwtText			leftTitle, rightTitle, bottomTitle;
 
-	QPixmap			Canvas;
-
 	QwtPlotCurve	main1curve, main2curve;
 	QwtPlotCurve	curve1, curve2, curve3, curve4, curve5;
 	QwtPlotCurve	hcurvegrid, vcurvegrid;
@@ -348,10 +372,17 @@ protected:
 
 	_BOOLEAN		bOnTimerCharMutexFlag;
 	QTimer			TimerChart;
-
-	CSpectrumResample Resample;
-
 	CDRMReceiver	*pDRMRec;
+
+	/* Waterfall spectrum stuff */
+	QPixmap			Canvas;
+	QImage			Image;
+	QColor			BackgroundColor;
+	CSpectrumResample Resample;
+	CWidget*		WaterfallWidget;
+	QRect			LastPlotCanvRect;
+	int				scaleWidth;
+	QRgb*			imageData;
 
 public slots:
 #if QWT_VERSION < 0x060000

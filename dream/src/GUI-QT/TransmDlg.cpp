@@ -77,8 +77,8 @@
 # define ProgressBarSetValue(c, v) (c)->setValue(v)
 # define FromUtf8(s) QString::fromUtf8(s)
 # define TextEditClear(c) (c)->clear()
-# define TextEditClearModified(c) (c)->setModified(FALSE)
-# define TextEditIsModified(c) (c)->isModified()
+# define TextEditClearModified(c)
+# define TextEditIsModified(c) !(c)->toPlainText().isEmpty()
 # define ToUtf8(s) (s).toUtf8().constData()
 # define WhatsThis(c, s) (c)->setWhatsThis(s)
 #endif

@@ -18,7 +18,7 @@ DEFINES += EXECUTABLE_NAME=$$TARGET
 macx:QMAKE_LFLAGS += -F$$PWD/libs
 contains(QT_VERSION, ^4\\..*) {
     message("Qt 4")
-    QT += network xml qt3support webkit
+    QT += network xml webkit
     VPATH += src/GUI-QT
     !console {
         HEADERS += src/GUI-QT/DRMPlot.h src/GUI-QT/EvaluationDlg.h

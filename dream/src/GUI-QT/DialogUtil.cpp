@@ -656,7 +656,11 @@ void RemoteMenu::OnRemoteMenu(int iID)
 void RemoteMenu::OnComPortMenu(QAction* action)
 {
 #ifdef HAVE_LIBHAMLIB
+# if QT_VERSION < 0x040000
     rig.SetComPort(action->text().utf8().data());
+# else
+    rig.SetComPort(action->text().toUtf8().data());
+# endif
 #endif
 }
 

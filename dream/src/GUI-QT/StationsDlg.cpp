@@ -51,6 +51,12 @@
 #include <qapplication.h>
 #include <cmath>
 
+#if QT_VERSION < 0x040000
+# define TOUTF8() utf8().data()
+#else
+# define TOUTF8() toUtf8().data()
+#endif
+
 /* Implementation *************************************************************/
 #if QT_VERSION < 0x040000
 QString MyListViewItem::key(int column, bool ascending) const
@@ -139,7 +145,12 @@ void CDRMSchedule::UpdateStringListForFilter(const CStationsItem& StationsItem)
 
 void CDRMSchedule::LoadSchedule()
 {
+#if QT_VERSION < 0x040000
     const char *filename = schedFileName.latin1();
+#else
+    QByteArray fn(schedFileName.toUtf8());
+    const char *filename = fn.data();
+#endif
     if (filename != NULL) /* Needed for Qt3 windows */
     {
         QApplication::setOverrideCursor(
@@ -321,11 +332,7 @@ void CDRMSchedule::ReadCSVFile(FILE* pFile)
 
         if(fields[2].length()>0)
         {
-#if QT_VERSION < 0x040000
-            stringstream ss(fields[2].utf8().data());
-#else
-            stringstream ss(fields[2].toUtf8().data());
-#endif
+            stringstream ss(fields[2].TOUTF8());
             char c;
             enum Days { Sunday=0, Monday=1, Tuesday=2, Wednesday=3,
                         Thursday=4, Friday=5, Saturday=6
@@ -398,11 +405,7 @@ void CDRMSchedule::ReadCSVFile(FILE* pFile)
 #endif
         if(fieldcount>3)
         {
-#if QT_VERSION < 0x040000
-            homecountry = fields[3].utf8().data();
-#else
-            homecountry = fields[3].toUtf8().data();
-#endif
+            homecountry = fields[3].TOUTF8();
             string c = data.itu_r_country(homecountry);
             if(c == "")
                 c = homecountry;
@@ -414,21 +417,13 @@ void CDRMSchedule::ReadCSVFile(FILE* pFile)
 
         if(fieldcount>5)
         {
-#if QT_VERSION < 0x040000
-            string l = data.eibi_language(fields[5].utf8().data());
-#else
-            string l = data.eibi_language(fields[5].toUtf8().data());
-#endif
+            string l = data.eibi_language(fields[5].TOUTF8());
             StationsItem.strLanguage = QString::fromUtf8(l.c_str());
         }
 
         if(fieldcount>6)
         {
-#if QT_VERSION < 0x040000
-            string s = fields[6].utf8().data();
-#else
-            string s = fields[6].toUtf8().data();
-#endif
+            string s = fields[6].TOUTF8();
             string t = data.eibi_target(s);
             if(t == "")
             {
@@ -448,11 +443,7 @@ void CDRMSchedule::ReadCSVFile(FILE* pFile)
         if(fieldcount>7)
         {
             StationsItem.strSite = fields[7];
-#if QT_VERSION < 0x040000
-            string s  = fields[7].utf8().data();
-#else
-            string s  = fields[7].toUtf8().data();
-#endif
+            string s  = fields[7].TOUTF8();
             if(s=="") // unknown or main Tx site of the home country
             {
                 country = homecountry;
@@ -1391,14 +1382,13 @@ void StationsDlg::LoadSettings(const CSettings& Settings)
     bCurrentSortAscendinganalog = Settings.Get("Stations Dialog", "sortascendinganalog", TRUE);
     strColumnParamanalog = QString::fromUtf8(Settings.Get("Stations Dialog", "columnparamanalog", string("")).c_str());
 
-    string url = Settings.Get("Stations Dialog", "DRM URL", string(DRM_SCHEDULE_URL));
-    DRMSchedule.qurldrm = QUrl(QString(url.c_str()));
-    DRMSchedule.targetFilterdrm = Settings.Get("Stations Dialog", "targetfilterdrm", string("")).c_str();
-    DRMSchedule.countryFilterdrm = Settings.Get("Stations Dialog", "countryfilterdrm", string("")).c_str();
-    DRMSchedule.languageFilterdrm = Settings.Get("Stations Dialog", "languagefilterdrm", string("")).c_str();
-    DRMSchedule.targetFilteranalog = Settings.Get("Stations Dialog", "targetfilteranalog", string("")).c_str();
-    DRMSchedule.countryFilteranalog = Settings.Get("Stations Dialog", "countryfilteranalog", string("")).c_str();
-    DRMSchedule.languageFilteranalog = Settings.Get("Stations Dialog", "languagefilteranalog", string("")).c_str();
+    DRMSchedule.qurldrm = QUrl(QString::fromUtf8(Settings.Get("Stations Dialog", "DRM URL", string(DRM_SCHEDULE_URL)).c_str()));
+    DRMSchedule.targetFilterdrm = QString::fromUtf8(Settings.Get("Stations Dialog", "targetfilterdrm", string("")).c_str());
+    DRMSchedule.countryFilterdrm = QString::fromUtf8(Settings.Get("Stations Dialog", "countryfilterdrm", string("")).c_str());
+    DRMSchedule.languageFilterdrm = QString::fromUtf8(Settings.Get("Stations Dialog", "languagefilterdrm", string("")).c_str());
+    DRMSchedule.targetFilteranalog = QString::fromUtf8(Settings.Get("Stations Dialog", "targetfilteranalog", string("")).c_str());
+    DRMSchedule.countryFilteranalog = QString::fromUtf8(Settings.Get("Stations Dialog", "countryfilteranalog", string("")).c_str());
+    DRMSchedule.languageFilteranalog = QString::fromUtf8(Settings.Get("Stations Dialog", "languagefilteranalog", string("")).c_str());
 }
 
 void StationsDlg::SaveSettings(CSettings& Settings)
@@ -1416,20 +1406,20 @@ void StationsDlg::SaveSettings(CSettings& Settings)
     Settings.Put("Hamlib", "ensmeter", actionEnable_S_Meter->isChecked());
     Settings.Put("Stations Dialog", "showall", actionShowAllStations->isChecked());
 #endif
-    Settings.Put("Stations Dialog", "DRM URL", string(DRMSchedule.qurldrm.toString().latin1()));
-    Settings.Put("Stations Dialog", "ANALOG URL", string(DRMSchedule.qurlanalog.toString().latin1()));
+    Settings.Put("Stations Dialog", "DRM URL", string(DRMSchedule.qurldrm.toString().TOUTF8()));
+    Settings.Put("Stations Dialog", "ANALOG URL", string(DRMSchedule.qurlanalog.toString().TOUTF8()));
     Settings.Put("Stations Dialog", "sortcolumndrm", iSortColumndrm);
     Settings.Put("Stations Dialog", "sortascendingdrm", bCurrentSortAscendingdrm);
-    Settings.Put("Stations Dialog", "columnparamdrm", string(strColumnParamdrm.latin1()));
+    Settings.Put("Stations Dialog", "columnparamdrm", string(strColumnParamdrm.TOUTF8()));
     Settings.Put("Stations Dialog", "sortcolumnanalog", iSortColumnanalog);
     Settings.Put("Stations Dialog", "sortascendinganalog", bCurrentSortAscendinganalog);
-    Settings.Put("Stations Dialog", "columnparamanalog", string(strColumnParamanalog.latin1()));
-    Settings.Put("Stations Dialog", "targetfilterdrm", string(DRMSchedule.targetFilterdrm.latin1()));
-    Settings.Put("Stations Dialog", "countryfilterdrm", string(DRMSchedule.countryFilterdrm.latin1()));
-    Settings.Put("Stations Dialog", "languagefilterdrm", string(DRMSchedule.languageFilterdrm.latin1()));
-    Settings.Put("Stations Dialog", "targetfilteranalog", string(DRMSchedule.targetFilteranalog.latin1()));
-    Settings.Put("Stations Dialog", "countryfilteranalog", string(DRMSchedule.countryFilteranalog.latin1()));
-    Settings.Put("Stations Dialog", "languagefilteranalog", string(DRMSchedule.languageFilteranalog.latin1()));
+    Settings.Put("Stations Dialog", "columnparamanalog", string(strColumnParamanalog.TOUTF8()));
+    Settings.Put("Stations Dialog", "targetfilterdrm", string(DRMSchedule.targetFilterdrm.TOUTF8()));
+    Settings.Put("Stations Dialog", "countryfilterdrm", string(DRMSchedule.countryFilterdrm.TOUTF8()));
+    Settings.Put("Stations Dialog", "languagefilterdrm", string(DRMSchedule.languageFilterdrm.TOUTF8()));
+    Settings.Put("Stations Dialog", "targetfilteranalog", string(DRMSchedule.targetFilteranalog.TOUTF8()));
+    Settings.Put("Stations Dialog", "countryfilteranalog", string(DRMSchedule.countryFilteranalog.TOUTF8()));
+    Settings.Put("Stations Dialog", "languagefilteranalog", string(DRMSchedule.languageFilteranalog.TOUTF8()));
 
     /* Set window geometry data in DRMReceiver module */
     QRect WinGeom = geometry();
@@ -1768,7 +1758,11 @@ _BOOLEAN StationsDlg::GetSortAscending()
 
 void StationsDlg::ColumnParamFromStr(const QString& strColumnParam)
 {
+#if QT_VERSION < 0x040000
     QStringList list(QStringList::split(QChar('|'), strColumnParam));
+#else
+    QStringList list(strColumnParam.split(QChar('|')));
+#endif
     const int n = list.count(); /* width and position */
     if (n == 2)
     {

@@ -177,7 +177,7 @@ public:
 protected:
 	QEvent::Type eLastEventType; 
 };
-#define EVENT_FILTER(e) do { if (!ef.isValid(e)) return; } while(0)
+#define EVENT_FILTER(e) do { if (!ef.isValid((QEvent*)e)) return; } while(0)
 
 
 inline void SetDialogCaption(QDialog* pDlg, const QString sCap)
