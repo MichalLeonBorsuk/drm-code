@@ -632,7 +632,11 @@ void CDRMPlot::PlotForceUpdate()
 
 	/* Get/Set various size */
 	scaleWidth = plot->axisScaleDraw(QwtPlot::xBottom)->length();
+#if QWT_VERSION >= 0x060000
 	QRect rect(plot->plotLayout()->canvasRect().toRect());
+#else
+	QRect rect(plot->plotLayout()->canvasRect());
+#endif
 	QSize CanvSize(scaleWidth, rect.height());
 	LastPlotCanvRect = rect;
 
@@ -1171,7 +1175,11 @@ void CDRMPlot::SetInpSpecWaterf(CVector<_REAL>& vecrData, CVector<_REAL>&)
 	/* Check if the canvas size has changed */
 	_BOOLEAN bWidthChanged, bHeightChanged;
 	QSize CanvSize(Canvas.size());
+#if QWT_VERSION >= 0x060000
 	QRect PlotCanvRect(plot->plotLayout()->canvasRect().toRect());
+#else
+	QRect PlotCanvRect(plot->plotLayout()->canvasRect());
+#endif
 	bWidthChanged = LastPlotCanvRect.width() != PlotCanvRect.width();
 	bHeightChanged = LastPlotCanvRect.height() != PlotCanvRect.height();
 	if (Canvas.size().isEmpty() || bWidthChanged)
