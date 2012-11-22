@@ -652,6 +652,12 @@ void AnalogDemDlg::OnCheckSaveAudioWAV()
 
 void AnalogDemDlg::OnChartxAxisValSet(double dVal)
 {
+	/* Perform range check */
+	if (dVal < 0.0)
+		dVal = 0.0;
+	else if (dVal > 1.0)
+		dVal = 1.0;
+
 	/* Set new frequency in receiver module */
 	DRMReceiver.SetAMDemodAcq(dVal);
 
