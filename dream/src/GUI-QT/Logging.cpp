@@ -31,18 +31,15 @@
 
 /* Implementation *************************************************************/
 CLogging::CLogging(CParameter& Parameters) : QObject(),
-    TimerLogFileLong(), TimerLogFileShort(), TimerLogFileStart(),
+    TimerLogFile(), TimerLogFileStart(),
     shortLog(Parameters), longLog(Parameters),
-    enabled(false),iLogDelay(0)
+    enabled(false),iLogDelay(0),iLogCount(0)
 {
 #if QT_VERSION >= 0x040000
 	TimerLogFileStart.setSingleShot(true);
 #endif
-    connect(&TimerLogFileLong, SIGNAL(timeout()), this, SLOT(OnTimerLogFileLong()));
-    connect(&TimerLogFileShort, SIGNAL(timeout()), this, SLOT(OnTimerLogFileShort()));
+    connect(&TimerLogFile, SIGNAL(timeout()), this, SLOT(OnTimerLogFile()));
     connect(&TimerLogFileStart, SIGNAL(timeout()), this, SLOT(start()));
-    TimerLogFileLong.stop();
-    TimerLogFileShort.stop();
 }
 
 void CLogging::LoadSettings(CSettings& Settings)
@@ -84,16 +81,24 @@ void CLogging::SaveSettings(CSettings& Settings)
     Settings.Put("Logfile", "delay", iLogDelay);
 }
 
-void CLogging::OnTimerLogFileShort()
+void CLogging::OnTimerLogFile()
 {
-    /* Write new parameters in log file (short version) */
-    shortLog.Update();
-}
-
-void CLogging::OnTimerLogFileLong()
-{
-    /* Write new parameters in log file (long version) */
-    longLog.Update();
+    if(shortLog.restartNeeded())
+    {
+	stop();
+	enabled = true;
+	reStart();
+    }
+    else
+    {
+	iLogCount++;
+	if(iLogCount == 60)
+	{
+	    iLogCount = 0;
+	    shortLog.Update();
+	}
+	longLog.Update();
+    }
 }
 
 void CLogging::start()
@@ -102,9 +107,7 @@ void CLogging::start()
     /* Start logging (if not already done) */
     if(!longLog.GetLoggingActivated())
     {
-        /* Activate log file timer for long and short log file */
-        TimerLogFileShort.start(60000); /* Every minute (i.e. 60000 ms) */
-        TimerLogFileLong.start(1000); /* Every second */
+        TimerLogFile.start(1000); /* Every second */
 
         /* Open log file */
         shortLog.Start("DreamLog.txt");
@@ -120,8 +123,7 @@ void CLogging::stop()
 {
     enabled = false;
     TimerLogFileStart.stop();
-    TimerLogFileShort.stop();
-    TimerLogFileLong.stop();
+    TimerLogFile.stop();
     shortLog.Stop();
     longLog.Stop();
     if(longLog.GetRxlEnabled())

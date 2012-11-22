@@ -34,8 +34,8 @@
 /* implementation --------------------------------------------- */
 
 CReceptLog::CReceptLog(CParameter & p):Parameters(p), File(), bLogActivated(FALSE),
-            bRxlEnabled(FALSE), bPositionEnabled(FALSE),
-            iSecDelLogStart(0)
+    bRxlEnabled(FALSE), bPositionEnabled(FALSE),
+    iSecDelLogStart(0)
 {
     iFrequency = Parameters.GetFrequency();
     latitude = Parameters.gps_data.fix.latitude;
@@ -69,29 +69,25 @@ CReceptLog::Update()
 {
     if (!bLogActivated)
         return;
+    writeParameters();
+}
+
+bool CReceptLog::restartNeeded()
+{
     int iCurrentFrequency = Parameters.GetFrequency();
     double currentLatitude = Parameters.gps_data.fix.latitude;
     double currentLongitude = Parameters.gps_data.fix.longitude;
     if((iCurrentFrequency != iFrequency)
-    || (bPositionEnabled && int(currentLatitude) != int(latitude))
-    || (bPositionEnabled && int(currentLongitude) != int(longitude))
-    )
+            || (bPositionEnabled && int(currentLatitude) != int(latitude))
+            || (bPositionEnabled && int(currentLongitude) != int(longitude))
+      )
     {
-        // Frequency or position has changed
-        if (bLogActivated)
-        {
-            writeTrailer();
-            iFrequency = iCurrentFrequency;
-	    latitude = currentLatitude;
-	    longitude = currentLongitude;
-            writeHeader();
-        }
-        else
-        {
-            iFrequency = iCurrentFrequency;
-        }
+        iFrequency = iCurrentFrequency;
+        latitude = currentLatitude;
+        longitude = currentLongitude;
+        return true;
     }
-    writeParameters();
+    return false;
 }
 
 /* Get robustness mode string */

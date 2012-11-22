@@ -42,6 +42,7 @@ public:
     void Start(const string & filename);
     void Stop();
     void Update();
+    bool restartNeeded();
 
     void SetRxlEnabled(const _BOOLEAN b) {
         bRxlEnabled = b;
