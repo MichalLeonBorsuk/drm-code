@@ -33,17 +33,16 @@
 CLogging::CLogging(CParameter& Parameters) : QObject(),
     TimerLogFileLong(), TimerLogFileShort(), TimerLogFileStart(),
     shortLog(Parameters), longLog(Parameters),
-    enabled(false)
+    enabled(false),iLogDelay(0)
 {
 #if QT_VERSION >= 0x040000
 	TimerLogFileStart.setSingleShot(true);
 #endif
-    connect(&TimerLogFileLong, SIGNAL(timeout()),
-            this, SLOT(OnTimerLogFileLong()));
-    connect(&TimerLogFileShort, SIGNAL(timeout()),
-            this, SLOT(OnTimerLogFileShort()));
-    connect(&TimerLogFileStart, SIGNAL(timeout()),
-            this, SLOT(start()));
+    connect(&TimerLogFileLong, SIGNAL(timeout()), this, SLOT(OnTimerLogFileLong()));
+    connect(&TimerLogFileShort, SIGNAL(timeout()), this, SLOT(OnTimerLogFileShort()));
+    connect(&TimerLogFileStart, SIGNAL(timeout()), this, SLOT(start()));
+    TimerLogFileLong.stop();
+    TimerLogFileShort.stop();
 }
 
 void CLogging::LoadSettings(CSettings& Settings)
@@ -59,19 +58,21 @@ void CLogging::LoadSettings(CSettings& Settings)
     longLog.SetPositionEnabled(enablepositiondata);
 
     enabled = Settings.Get("Logfile", "enablelog", false);
+    iLogDelay = Settings.Get("Logfile", "delay", 0);
+    SaveSettings(Settings);
+}
 
+void CLogging::reStart()
+{
     /* Activate log file start if necessary. */
     if (enabled)
     {
         /* One shot timer */
-	int iLogDelay = Settings.Get("Logfile", "delay", 0);
 #if QT_VERSION < 0x040000
         TimerLogFileStart.start(iLogDelay * 1000 /* ms */, true);
 #else
         TimerLogFileStart.start(iLogDelay * 1000 /* ms */);
 #endif
-	// initialise ini file if never set
-        Settings.Put("Logfile", "delay", iLogDelay);
     }
 }
 
@@ -80,6 +81,7 @@ void CLogging::SaveSettings(CSettings& Settings)
     Settings.Put("Logfile", "enablerxl", shortLog.GetRxlEnabled());
     Settings.Put("Logfile", "enablepositiondata", shortLog.GetPositionEnabled());
     Settings.Put("Logfile", "enablelog", enabled);
+    Settings.Put("Logfile", "delay", iLogDelay);
 }
 
 void CLogging::OnTimerLogFileShort()

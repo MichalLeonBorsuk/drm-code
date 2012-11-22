@@ -57,6 +57,7 @@ protected:
 	CShortLog		shortLog;
 	CLongLog		longLog;
 	bool			enabled;
+	int			iLogDelay;
 
 signals:
 	void subscribeRig();
@@ -64,6 +65,7 @@ signals:
 public slots:
 	void start();
 	void stop();
+	void reStart();
 	void OnTimerLogFileShort();
 	void OnTimerLogFileLong();
 };
