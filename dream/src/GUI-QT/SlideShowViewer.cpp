@@ -3,7 +3,7 @@
  * Copyright (c) 2009
  *
  * Author(s):
- *	 Julian Cable
+ *	 Julian Cable, David Flamand
  *
  * Description: SlideShow Viewer
  *
@@ -33,36 +33,37 @@
 #include <QFileDialog>
 
 SlideShowViewer::SlideShowViewer(CDRMReceiver& rec, CSettings& s, QWidget* parent):
-    QDialog(parent), Timer(),
-    receiver(rec), settings(s),vecImages(),vecImageNames(),iCurImagePos(-1)
+    QDialog(parent), Ui_SlideShowViewer(),
+    receiver(rec), settings(s), vecImages(), vecImageNames(), iCurImagePos(-1),
+    bClearMOTCache(false), iLastServiceID(0), bLastServiceValid(false)
 {
     /* Enable minimize and maximize box for QDialog */
 	setWindowFlags(Qt::Window);
 
-    ui = new Ui_SlideShowViewer();
-    ui->setupUi(this);
+    setupUi(this);
 
-    connect(ui->buttonOk, SIGNAL(clicked()), this, SLOT(close()));
-
-    connect(ui->actionClear_All, SIGNAL(triggered()), SLOT(OnClearAll()));
-    connect(ui->actionSave, SIGNAL(triggered()), SLOT(OnSave()));
-    connect(ui->actionSave_All, SIGNAL(triggered()), SLOT(OnSaveAll()));
-    connect(ui->actionClose, SIGNAL(triggered()), SLOT(close()));
+    /* Get MOT save path */
+    CParameter& Parameters = *receiver.GetParameters();
+    Parameters.Lock();
+    strCurrentSavePath = QString::fromUtf8(Parameters.GetDataDirectory("MOT").c_str());
+    Parameters.Unlock();
 
     /* Update time for color LED */
-    ui->LEDStatus->SetUpdateTime(1000);
+    LEDStatus->SetUpdateTime(1000);
 
     /* Connect controls */
-    connect(ui->ButtonStepBack, SIGNAL(clicked()), this, SLOT(OnButtonStepBack()));
-    connect(ui->ButtonStepForward, SIGNAL(clicked()), this, SLOT(OnButtonStepForward()));
-    connect(ui->ButtonJumpBegin, SIGNAL(clicked()), this, SLOT(OnButtonJumpBegin()));
-    connect(ui->ButtonJumpEnd, SIGNAL(clicked()), this, SLOT(OnButtonJumpEnd()));
-
+    connect(ButtonStepBack, SIGNAL(clicked()), this, SLOT(OnButtonStepBack()));
+    connect(ButtonStepForward, SIGNAL(clicked()), this, SLOT(OnButtonStepForward()));
+    connect(ButtonJumpBegin, SIGNAL(clicked()), this, SLOT(OnButtonJumpBegin()));
+    connect(ButtonJumpEnd, SIGNAL(clicked()), this, SLOT(OnButtonJumpEnd()));
+    connect(buttonOk, SIGNAL(clicked()), this, SLOT(close()));
+    connect(actionClear_All, SIGNAL(triggered()), SLOT(OnClearAll()));
+    connect(actionSave, SIGNAL(triggered()), SLOT(OnSave()));
+    connect(actionSave_All, SIGNAL(triggered()), SLOT(OnSaveAll()));
+    connect(actionClose, SIGNAL(triggered()), SLOT(close()));
     connect(&Timer, SIGNAL(timeout()), this, SLOT(OnTimer()));
 
     OnClearAll();
-
-    Timer.stop();
 }
 
 SlideShowViewer::~SlideShowViewer()
@@ -71,29 +72,31 @@ SlideShowViewer::~SlideShowViewer()
 
 void SlideShowViewer::OnTimer()
 {
-    CParameter& Parameters = *receiver.GetParameters();
-    Parameters.Lock();
-    ETypeRxStatus status = Parameters.ReceiveStatus.MOT.GetStatus();
-    int shortID = Parameters.GetCurSelDataService();
-    CDataParam dp = Parameters.GetDataParam(shortID);
-    Parameters.Unlock();
+    /* Get current service parameters */
+    uint32_t iServiceID; bool bServiceValid; QString strLabel; ETypeRxStatus eStatus;
+    int shortID; int iPacketID;
+    GetServiceParams(&iServiceID, &bServiceValid, &strLabel, &eStatus, &shortID, &iPacketID);
 
-    switch(status)
+    /* Update the window title if something have changed */
+    if (iLastServiceID != iServiceID || bLastServiceValid != bServiceValid || strLastLabel != strLabel)
+        UpdateWindowTitle(iServiceID, bServiceValid, strLabel);
+
+    switch(eStatus)
     {
     case NOT_PRESENT:
-        ui->LEDStatus->Reset(); /* GREY */
+        LEDStatus->Reset(); /* GREY */
         break;
 
     case CRC_ERROR:
-        ui->LEDStatus->SetLight(CMultColorLED::RL_RED);
+        LEDStatus->SetLight(CMultColorLED::RL_RED);
         break;
 
     case DATA_ERROR:
-        ui->LEDStatus->SetLight(CMultColorLED::RL_YELLOW);
+        LEDStatus->SetLight(CMultColorLED::RL_YELLOW);
         break;
 
     case RX_OK:
-        ui->LEDStatus->SetLight(CMultColorLED::RL_GREEN);
+        LEDStatus->SetLight(CMultColorLED::RL_GREEN);
         break;
     }
 
@@ -103,12 +106,18 @@ void SlideShowViewer::OnTimer()
         qDebug("can't get data decoder from receiver");
         return;
     }
-    CMOTDABDec *motdec = DataDecoder->getApplication(dp.iPacketID);
+    CMOTDABDec *motdec = DataDecoder->getApplication(iPacketID);
 
     if(motdec==NULL)
     {
-        qDebug("can't get MOT decoder for short id %d, packetId %d", shortID, dp.iPacketID);
+        qDebug("can't get MOT decoder for short id %d, packetId %d", shortID, iPacketID);
         return;
+    }
+
+    if (bClearMOTCache)
+    {
+        bClearMOTCache = false;
+        ClearMOTCache(motdec);
     }
 
     /* Poll the data decoder module for new picture */
@@ -201,6 +210,8 @@ void SlideShowViewer::OnClearAll()
     vecImageNames.clear();
     iCurImagePos = -1;
     UpdateButtons();
+    LabelTitle->setText("");
+    bClearMOTCache = true;
 }
 
 void SlideShowViewer::showEvent(QShowEvent* e)
@@ -211,47 +222,13 @@ void SlideShowViewer::showEvent(QShowEvent* e)
     CWinGeom g;
     settings.Get("SlideShow", g);
     const QRect WinGeom(g.iXPos, g.iYPos, g.iWSize, g.iHSize);
-
     if (WinGeom.isValid() && !WinGeom.isEmpty() && !WinGeom.isNull())
         setGeometry(WinGeom);
 
-    CParameter& Parameters = *receiver.GetParameters();
-    Parameters.Lock();
-    strCurrentSavePath = QString::fromUtf8(Parameters.GetDataDirectory("MOT").c_str());
-    const int iCurSelAudioServ = Parameters.GetCurSelAudioService();
-    const uint32_t iAudioServiceID = Parameters.Service[iCurSelAudioServ].iServiceID;
-
-    /* Get current data service */
-    const int iCurSelDataServ = Parameters.GetCurSelDataService();
-    CService service = Parameters.Service[iCurSelDataServ];
-    Parameters.Unlock();
-
-    /* Add the service description into the dialog caption */
-    QString strTitle = tr("MOT Slide Show");
-
-    if (service.IsActive())
-    {
-        /* Do UTF-8 to QString (UNICODE) conversion with the label strings */
-        QString strLabel = QString().fromUtf8(service.strLabel.c_str()).trimmed();
-
-        /* Service ID (plot number in hexadecimal format) */
-        QString strServiceID = "";
-
-        /* show the ID only if differ from the audio service */
-        if ((service.iServiceID != 0) && (service.iServiceID != iAudioServiceID))
-        {
-            if (strLabel != "")
-                strLabel += " ";
-
-            strServiceID = "- ID:" +
-                           QString().setNum(long(service.iServiceID), 16).toUpper();
-        }
-
-        /* add the description on the title of the dialog */
-        if (strLabel != "" || strServiceID != "")
-            strTitle += " [" + strLabel + strServiceID + "]";
-    }
-    setWindowTitle(strTitle);
+    /* Update window title */
+    uint32_t iServiceID; bool bServiceValid; QString strLabel;
+    GetServiceParams(&iServiceID, &bServiceValid, &strLabel);
+    UpdateWindowTitle(iServiceID, bServiceValid, strLabel);
 
     /* Update window */
     OnTimer();
@@ -269,7 +246,6 @@ void SlideShowViewer::hideEvent(QHideEvent* e)
 
     /* Save window geometry data */
     QRect WinGeom = geometry();
-
     CWinGeom c;
     c.iXPos = WinGeom.x();
     c.iYPos = WinGeom.y();
@@ -287,10 +263,12 @@ void SlideShowViewer::SetImage(int pos)
     if(pos>int(vecImages.size()-1))
         pos = vecImages.size()-1;
     iCurImagePos = pos;
-    ui->image->setPixmap(vecImages[pos]);
-    const QString& imagename = vecImageNames[pos];
-    if (imagename.length() > 0)
-        ui->image->setToolTip(imagename);
+    Image->setPixmap(vecImages[pos]);
+    QString imagename = vecImageNames[pos];
+    Image->setToolTip(imagename);
+    imagename =  "<b>" + imagename + "</b>";
+    Linkify(imagename);
+    LabelTitle->setText(imagename);
     UpdateButtons();
 }
 
@@ -299,39 +277,39 @@ void SlideShowViewer::UpdateButtons()
     /* Set enable menu entry for saving a picture */
     if (iCurImagePos < 0)
     {
-        ui->actionClear_All->setEnabled(false);
-        ui->actionSave->setEnabled(false);
-        ui->actionSave_All->setEnabled(false);
+        actionClear_All->setEnabled(false);
+        actionSave->setEnabled(false);
+        actionSave_All->setEnabled(false);
     }
     else
     {
-        ui->actionClear_All->setEnabled(true);
-        ui->actionSave->setEnabled(true);
-        ui->actionSave_All->setEnabled(true);
+        actionClear_All->setEnabled(true);
+        actionSave->setEnabled(true);
+        actionSave_All->setEnabled(true);
     }
 
     if (iCurImagePos <= 0)
     {
         /* We are already at the beginning */
-        ui->ButtonStepBack->setEnabled(false);
-        ui->ButtonJumpBegin->setEnabled(false);
+        ButtonStepBack->setEnabled(false);
+        ButtonJumpBegin->setEnabled(false);
     }
     else
     {
-        ui->ButtonStepBack->setEnabled(true);
-        ui->ButtonJumpBegin->setEnabled(true);
+        ButtonStepBack->setEnabled(true);
+        ButtonJumpBegin->setEnabled(true);
     }
 
     if (iCurImagePos == int(vecImages.size()-1))
     {
         /* We are already at the end */
-        ui->ButtonStepForward->setEnabled(false);
-        ui->ButtonJumpEnd->setEnabled(false);
+        ButtonStepForward->setEnabled(false);
+        ButtonJumpEnd->setEnabled(false);
     }
     else
     {
-        ui->ButtonStepForward->setEnabled(true);
-        ui->ButtonJumpEnd->setEnabled(true);
+        ButtonStepForward->setEnabled(true);
+        ButtonJumpEnd->setEnabled(true);
     }
 
     QString strTotImages = QString().setNum(vecImages.size());
@@ -342,13 +320,79 @@ void SlideShowViewer::UpdateButtons()
     for (int i = 0; i < (strTotImages.length() - strNumImage.length()); i++)
         strSep += " ";
 
-    ui->LabelCurPicNum->setText(strSep + strNumImage + "/" + strTotImages);
+    LabelCurPicNum->setText(strSep + strNumImage + "/" + strTotImages);
 
     /* If no picture was received, show the following text */
     if (iCurImagePos < 0)
     {
         /* Init text browser window */
-        ui->image->setText("<center>" + tr("MOT Slideshow Viewer") + "</center>");
+        Image->setText("<center>" + tr("MOT Slideshow Viewer") + "</center>");
+        Image->setToolTip("");
     }
+}
+
+void SlideShowViewer::ClearMOTCache(CMOTDABDec *motdec)
+{
+    /* Remove all object from cache */
+    CMOTObject	NewObj;
+    while (motdec->NewObjectAvailable())
+        motdec->GetNextObject(NewObj);
+}
+
+void SlideShowViewer::GetServiceParams(uint32_t* iServiceID, bool* bServiceValid, QString* strLabel, ETypeRxStatus* eStatus, int* shortID, int* iPacketID)
+{
+    CParameter& Parameters = *receiver.GetParameters();
+    Parameters.Lock();
+
+        /* Get current audio service */
+        const int iCurSelAudioServ = Parameters.GetCurSelAudioService();
+        const uint32_t iAudioServiceID = Parameters.Service[iCurSelAudioServ].iServiceID;
+
+        /* Get current data service */
+        const int iCurSelDataServ = Parameters.GetCurSelDataService();
+        const CService service = Parameters.Service[iCurSelDataServ];
+
+        if (eStatus)
+            *eStatus = Parameters.ReceiveStatus.MOT.GetStatus();
+        if (iPacketID)
+            *iPacketID = Parameters.GetDataParam(iCurSelDataServ).iPacketID;
+    Parameters.Unlock();
+
+    if (iServiceID)
+        *iServiceID = service.iServiceID != iAudioServiceID ? service.iServiceID : 0;
+    if (bServiceValid)
+        *bServiceValid = service.IsActive() && service.eAudDataFlag == CService::SF_DATA;
+    /* Do UTF-8 to QString (UNICODE) conversion with the label strings */
+    if (strLabel)
+        *strLabel = QString().fromUtf8(service.strLabel.c_str()).trimmed();
+    if (shortID)
+        *shortID = iCurSelDataServ;
+}
+
+void SlideShowViewer::UpdateWindowTitle(const uint32_t iServiceID, const bool bServiceValid, QString strLabel)
+{
+    QString strTitle("MOT Slide Show");
+    iLastServiceID = iServiceID;
+    bLastServiceValid = bServiceValid;
+    strLastLabel = strLabel;
+    if (bServiceValid)
+    {
+        QString strServiceID;
+
+        if (iServiceID != 0)
+        {
+            if (strLabel != "")
+                strLabel += " - ";
+
+            /* Service ID (plot number in hexadecimal format) */
+            strServiceID = "ID:" +
+                           QString().setNum(iServiceID, 16).toUpper();
+        }
+
+        /* Add the description on the title of the dialog */
+        if (strLabel != "" || strServiceID != "")
+            strTitle += " [" + strLabel + strServiceID + "]";
+    }
+    setWindowTitle(strTitle);
 }
 
