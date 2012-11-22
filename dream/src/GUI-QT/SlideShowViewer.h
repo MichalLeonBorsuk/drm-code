@@ -3,7 +3,7 @@
  * Copyright (c) 2009
  *
  * Author(s):
- *	 Julian Cable
+ *	 Julian Cable, David Flamand
  *
  * Description: MOT Slide Show Viewer
  *
@@ -34,7 +34,7 @@
 #include "DialogUtil.h"
 class CSettings;
 
-class SlideShowViewer : public QDialog
+class SlideShowViewer : public QDialog, Ui_SlideShowViewer
 {
     Q_OBJECT
 
@@ -45,6 +45,9 @@ public:
 protected:
     void                    SetImage(int);
     void                    UpdateButtons();
+    void                    ClearMOTCache(CMOTDABDec *motdec);
+    void                    GetServiceParams(uint32_t* iServiceID, bool* bServiceValid, QString* strLabel, ETypeRxStatus* eStatus=NULL, int* shortID=NULL, int* iPacketID=NULL);
+    void                    UpdateWindowTitle(const uint32_t iServiceID, const bool bServiceValid, QString strLabel);
     QTimer                  Timer;
     QString                 strCurrentSavePath;
     CDRMReceiver&           receiver;
@@ -52,7 +55,11 @@ protected:
     std::vector<QPixmap>    vecImages;
     std::vector<QString>    vecImageNames;
     int                     iCurImagePos;
-    Ui_SlideShowViewer*	    ui;
+    bool                    bClearMOTCache;
+    uint32_t                iLastServiceID;
+    uint32_t                iCurrentDataServiceID;
+    bool                    bLastServiceValid;
+    QString                 strLastLabel;
     CEventFilter            ef;
 
 public slots:
