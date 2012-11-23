@@ -73,6 +73,7 @@ void CAMSSPhaseDemod::InitInternal(CParameter& Parameters)
     /* Get parameters from info class */
     Parameters.Lock();
     iSymbolBlockSize = Parameters.CellMappingTable.iSymbolBlockSize;
+    rBPNormBW = CReal(AMSS_IF_FILTER_BW) / Parameters.GetSampleRate();
     Parameters.Unlock();
 
     /* Define block-sizes for input and output */
