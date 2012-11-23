@@ -244,6 +244,12 @@
           <iconset resource="res/icons.qrc">
            <normaloff>:/icons/StepBack.png</normaloff>:/icons/StepBack.png</iconset>
          </property>
+         <property name="iconSize">
+          <size>
+           <width>16</width>
+           <height>16</height>
+          </size>
+         </property>
         </widget>
        </item>
        <item>
@@ -260,6 +266,12 @@
          <property name="icon">
           <iconset resource="res/icons.qrc">
            <normaloff>:/icons/StepForw.png</normaloff>:/icons/StepForw.png</iconset>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>16</width>
+           <height>16</height>
+          </size>
          </property>
         </widget>
        </item>
@@ -278,6 +290,12 @@
           <iconset resource="res/icons.qrc">
            <normaloff>:/icons/Home.png</normaloff>:/icons/Home.png</iconset>
          </property>
+         <property name="iconSize">
+          <size>
+           <width>16</width>
+           <height>16</height>
+          </size>
+         </property>
         </widget>
        </item>
        <item>
@@ -294,6 +312,12 @@
          <property name="icon">
           <iconset resource="res/icons.qrc">
            <normaloff>:/icons/Refresh.png</normaloff>:/icons/Refresh.png</iconset>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>16</width>
+           <height>16</height>
+          </size>
          </property>
         </widget>
        </item>
