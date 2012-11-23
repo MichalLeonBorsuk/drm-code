@@ -143,8 +143,10 @@ void CTransmitData::InitInternal(CParameter& Parameters)
     	int		iNumTapsTransmFilt;
     	CReal	rNormCurFreqOffset;
     */
-    int iSampleRate = Parameters.GetSampleRate();
-    int iSymbolBlockSize = Parameters.CellMappingTable.iSymbolBlockSize;
+    /* Get sample rate */
+    const int iSampleRate = Parameters.GetSampleRate();
+    /* Define symbol block-size */
+    const int iSymbolBlockSize = Parameters.CellMappingTable.iSymbolBlockSize;
 
     /* Init vector for storing a complete DRM frame number of OFDM symbols */
     iBlockCnt = 0;
@@ -164,7 +166,7 @@ void CTransmitData::InitInternal(CParameter& Parameters)
     if (bUseSoundcard == TRUE)
     {
         /* Init sound interface */
-        pSound->Init(iBigBlockSize, TRUE);
+        pSound->Init(iSampleRate, iBigBlockSize, TRUE);
     }
     else
     {
@@ -365,6 +367,7 @@ void CReceiveData::InitInternal(CParameter& Parameters)
     Parameters.Lock();
     /* Define output block-size */
     iOutputBlockSize = Parameters.CellMappingTable.iSymbolBlockSize;
+    /* Get sample rate */
     iSampleRate = Parameters.GetSampleRate();
     Parameters.Unlock();
 

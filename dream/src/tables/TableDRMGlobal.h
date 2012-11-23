@@ -40,7 +40,7 @@
    must fit into the range of the FFT-size. Therefore 6000 Hz was chosen */
 #define VIRTUAL_INTERMED_FREQ			6000	// Hz
 
-#define SOUNDCRD_SAMPLE_RATE			48000	// Hz, must be a multiple of 750
+#define SOUNDCRD_SAMPLE_RATE			48000	// Hz, this is the default sample rate, must be a multiple of 750
 
 /* DRM parameters */
 #define NUM_FRAMES_IN_SUPERFRAME		3

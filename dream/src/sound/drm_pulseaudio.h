@@ -71,7 +71,7 @@ public:
 	virtual void	SetDev(int iNewDevice);
 	virtual int		GetDev();
 
-	void			Init(int iSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking = TRUE);
+	void			Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking = TRUE);
 	_BOOLEAN		Read(CVector<_SAMPLE>& psData);
 	void			Close();
 #ifdef CLOCK_DRIFT_ADJ_ENABLED
@@ -80,12 +80,11 @@ public:
 
 protected:
 	void			Init_HW();
-	int			Read_HW(void *recbuf, int size);
+	int				Read_HW(void *recbuf, int size);
 	void			Close_HW();
 	void			SetBufferSize_HW();
 
 	int 			iSampleRate;
-	int			iMaxSampleRateOffset;
 	int 			iBufferSize;
 	_BOOLEAN		bBlockingRec;
 
@@ -117,7 +116,7 @@ public:
 	virtual void	SetDev(int iNewDevice);
 	virtual int		GetDev();
 
-	void			Init(int iSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking = FALSE);
+	void			Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking = FALSE);
 	_BOOLEAN		Write(CVector<_SAMPLE>& psData);
 	void			Close();
 #ifdef CLOCK_DRIFT_ADJ_ENABLED
@@ -134,9 +133,8 @@ protected:
 	int				Write_HW(void *playbuf, int size);
 	void			Close_HW();
 
-	int			iSampleRate;
-	int			iMaxSampleRateOffset;
-	int			iBufferSize;
+	int				iSampleRate;
+	int				iBufferSize;
 	_BOOLEAN		bBlockingPlay;
 
 	vector<string>	devices;
@@ -151,6 +149,7 @@ protected:
 	pa_stream_notify_cb_userdata_t pa_stream_notify_cb_userdata_overflow;
 
 #ifdef CLOCK_DRIFT_ADJ_ENABLED
+	int				iMaxSampleRateOffset;
 	CReal			playback_usec_smoothed;
 	int				playback_usec;
 	int				target_latency;
