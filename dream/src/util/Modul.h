@@ -1280,11 +1280,11 @@ template<class TInput>
 class CSplitModul: public CReceiverModul<TInput, TInput>
 {
 protected:
-	virtual void SetInputBlockSize(CParameter& ReceiverParam) = 0;
+	virtual void SetInputBlockSize(CParameter& Parameters) = 0;
 
-	virtual void InitInternal(CParameter& ReceiverParam)
+	virtual void InitInternal(CParameter& Parameters)
 	{
-		this->SetInputBlockSize(ReceiverParam);
+		this->SetInputBlockSize(Parameters);
 		this->iOutputBlockSize = this->iInputBlockSize;
 		this->iOutputBlockSize2 = this->iInputBlockSize;
 	}

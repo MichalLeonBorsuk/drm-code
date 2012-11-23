@@ -38,7 +38,7 @@ CAMDemodulation::CAMDemodulation() :
     cvecHilbert(),
     iHilFiltBlLen(0),
     FftPlansHilFilt(),
-    rBPNormBW((CReal) 10000.0 / SOUNDCRD_SAMPLE_RATE),
+    rBPNormBW(0.0),
     rNormCurMixFreqOffs((CReal) 0.0),
     rBPNormCentOffsTot(0.0),
     rvecZAM(), rvecADC(), rvecBDC(), rvecZFM(), rvecAFM(), rvecBFM(),
@@ -46,22 +46,22 @@ CAMDemodulation::CAMDemodulation() :
     bPLLIsEnabled(FALSE), bAutoFreqAcquIsEnabled(TRUE), eDemodType(DT_AM),
     cOldVal(),
     PLL(), Mixer(), FreqOffsAcq(), AGC(), NoiseReduction(), NoiRedType(NR_OFF),
-    iFreeSymbolCounter()
+    iFreeSymbolCounter(0),iSampleRate(48000)
 {
 }
 
-void CAMDemodulation::ProcessDataInternal(CParameter& ReceiverParam)
+void CAMDemodulation::ProcessDataInternal(CParameter& Parameters)
 {
     int i;
 
     /* OPH: update free-running symbol counter */
-    ReceiverParam.Lock();
+    Parameters.Lock();
     iFreeSymbolCounter++;
-    if (iFreeSymbolCounter >= ReceiverParam.CellMappingTable.iNumSymPerFrame)
+    if (iFreeSymbolCounter >= Parameters.CellMappingTable.iNumSymPerFrame)
     {
         iFreeSymbolCounter = 0;
     }
-    ReceiverParam.Unlock();
+    Parameters.Unlock();
 
 
     /* Frequency offset estimation if requested */
@@ -154,12 +154,16 @@ void CAMDemodulation::ProcessDataInternal(CParameter& ReceiverParam)
     }
 }
 
-void CAMDemodulation::InitInternal(CParameter& ReceiverParam)
+void CAMDemodulation::InitInternal(CParameter& Parameters)
 {
     /* Get parameters from info class */
-    ReceiverParam.Lock();
-    iSymbolBlockSize = ReceiverParam.CellMappingTable.iSymbolBlockSize;
-    ReceiverParam.Unlock();
+    Parameters.Lock();
+    iSymbolBlockSize = Parameters.CellMappingTable.iSymbolBlockSize;
+    iSampleRate = Parameters.GetSampleRate();
+    Parameters.Unlock();
+
+    // TODO - make sure this is the right place to set this.
+    rBPNormBW = 10000.0 / CReal(iSampleRate);
 
     /* Init temporary vector for filter input and output */
     rvecInpTmp.Init(iSymbolBlockSize);
@@ -169,14 +173,14 @@ void CAMDemodulation::InitInternal(CParameter& ReceiverParam)
     cOldVal = (CReal) 0.0;
 
     /* Init noise reduction object */
-    NoiseReduction.Init(iSymbolBlockSize);
+    NoiseReduction.Init(iSampleRate, iSymbolBlockSize);
 
     /* Init frequency offset acquisition (start new acquisition) */
     FreqOffsAcq.Init(iSymbolBlockSize);
     FreqOffsAcq.Start((CReal) 0.0); /* Search entire bandwidth */
 
     /* Init AGC */
-    AGC.Init(iSymbolBlockSize);
+    AGC.Init(iSampleRate, iSymbolBlockSize);
 
     /* Init mixer */
     Mixer.Init(iSymbolBlockSize);
@@ -237,7 +241,7 @@ void CAMDemodulation::InitInternal(CParameter& ReceiverParam)
     /* Define block-sizes for input and output */
     /* The output buffer is a cyclic buffer, we have to specify the total
        buffer size */
-    iMaxOutputBlockSize = (int) ((_REAL) SOUNDCRD_SAMPLE_RATE *
+    iMaxOutputBlockSize = (int) ((_REAL) iSampleRate *
                                  (_REAL) 0.4 /* 400ms */ * 2 /* for stereo */);
 
     iInputBlockSize = iSymbolBlockSize;
@@ -255,7 +259,7 @@ void CAMDemodulation::SetNormCurMixFreqOffs(const CReal rNewNormCurMixFreqOffs)
     if (eDemodType == DT_CW)
     {
         rNormCurMixFreqOffs =
-            rNewNormCurMixFreqOffs - FREQ_OFFS_CW_DEMOD / SOUNDCRD_SAMPLE_RATE;
+            rNewNormCurMixFreqOffs - FREQ_OFFS_CW_DEMOD / iSampleRate;
     }
     else
         rNormCurMixFreqOffs = rNewNormCurMixFreqOffs;
@@ -282,7 +286,7 @@ void CAMDemodulation::SetBPFilter(const CReal rNewBPNormBW,
 
     /* Adjust center of filter for respective demodulation types */
     CReal rBPNormFreqOffset = (CReal) 0.0;;
-    const CReal rSSBMargin = SSB_DC_MARGIN_HZ / SOUNDCRD_SAMPLE_RATE;
+    const CReal rSSBMargin = SSB_DC_MARGIN_HZ / iSampleRate;
     switch (eDemodType)
     {
     case DT_AM:
@@ -306,7 +310,7 @@ void CAMDemodulation::SetBPFilter(const CReal rNewBPNormBW,
     case DT_CW:
         /* Shift filter to the right side of the carrier according to the
            special CW demodulation shift */
-        rBPNormFreqOffset = FREQ_OFFS_CW_DEMOD / SOUNDCRD_SAMPLE_RATE;
+        rBPNormFreqOffset = FREQ_OFFS_CW_DEMOD / iSampleRate;
         break;
     }
 
@@ -378,7 +382,7 @@ void CAMDemodulation::SetFilterBW(const int iNewBW)
     /* Lock resources */
     Lock();
     {
-        SetBPFilter((CReal) iNewBW / SOUNDCRD_SAMPLE_RATE, rNormCurMixFreqOffs,
+        SetBPFilter((CReal) iNewBW / iSampleRate, rNormCurMixFreqOffs,
                     eDemodType);
     }
     Unlock();
@@ -580,9 +584,10 @@ void CAGC::Process(CRealVector& vecrIn)
     }
 }
 
-void CAGC::Init(const int iNewBlockSize)
+void CAGC::Init(int iNewSampleRate, int iNewBlockSize)
 {
     /* Set internal parameter */
+    iSampleRate = iNewSampleRate;
     iBlockSize = iNewBlockSize;
 
     /* Init filters */
@@ -603,18 +608,18 @@ void CAGC::SetType(const EType eNewType)
     switch (eType)
     {
     case AT_SLOW:
-        rAttack = IIR1Lam(0.025, SOUNDCRD_SAMPLE_RATE);
-        rDecay = IIR1Lam(4.000, SOUNDCRD_SAMPLE_RATE);
+        rAttack = IIR1Lam(0.025, iSampleRate);
+        rDecay = IIR1Lam(4.000, iSampleRate);
         break;
 
     case AT_MEDIUM:
-        rAttack = IIR1Lam(0.015, SOUNDCRD_SAMPLE_RATE);
-        rDecay = IIR1Lam(2.000, SOUNDCRD_SAMPLE_RATE);
+        rAttack = IIR1Lam(0.015, iSampleRate);
+        rDecay = IIR1Lam(2.000, iSampleRate);
         break;
 
     case AT_FAST:
-        rAttack = IIR1Lam(0.005, SOUNDCRD_SAMPLE_RATE);
-        rDecay = IIR1Lam(0.200, SOUNDCRD_SAMPLE_RATE);
+        rAttack = IIR1Lam(0.005, iSampleRate);
+        rDecay = IIR1Lam(0.200, iSampleRate);
         break;
 
     case AT_NO_AGC:
@@ -781,7 +786,7 @@ void CNoiseReduction::Process(CRealVector& vecrIn)
         int vectorSz = vecrIn.Size();
         if (preprocess_state == NULL)
         {
-            preprocess_state = speex_preprocess_state_init(vectorSz, SOUNDCRD_SAMPLE_RATE);
+            preprocess_state = speex_preprocess_state_init(vectorSz, iSampleRate);
             speexData = (spx_int16_t*)malloc(vectorSz*sizeof(spx_int16_t));
         }
         for (i=0; i<vectorSz; i++)
@@ -912,7 +917,7 @@ void CNoiseReduction::UpdateNoiseEst(CRealVector& vecrNoisePSD,
     }
 }
 
-void CNoiseReduction::Init(const int iNewBlockLen)
+void CNoiseReduction::Init(int iSampleRate, int iNewBlockLen)
 {
     iBlockLen = iNewBlockLen;
     iHalfBlockLen = iBlockLen / 2;
@@ -923,12 +928,11 @@ void CNoiseReduction::Init(const int iNewBlockLen)
     iFreqBlLen = iBlockLen + 1;
 
     /* Length of the minimum statistic history */
-    iMinStatHistLen = (int) (MIN_STAT_HIST_LENGTH_SEC *
-                             (CReal) SOUNDCRD_SAMPLE_RATE / iBlockLen);
+    iMinStatHistLen = (int) (MIN_STAT_HIST_LENGTH_SEC * (CReal) iSampleRate / iBlockLen);
 
     /* Lambda for IIR filter */
     rLamPSD = IIR1Lam(TICONST_PSD_EST_SIG_NOISE_RED,
-                      (CReal) SOUNDCRD_SAMPLE_RATE / iBlockLen);
+                      (CReal) iSampleRate / iBlockLen);
 
     /* Init vectors storing time series signals */
     vecrOldSignal.Init(iBlockLen, (CReal) 0.0);

@@ -139,8 +139,8 @@ protected:
     int					iInitNumIterations;
     int					iIndexLastBranch;
 
-    virtual void InitInternal(CParameter& ReceiverParam);
-    virtual void ProcessDataInternal(CParameter& ReceiverParam);
+    virtual void InitInternal(CParameter& Parameters);
+    virtual void ProcessDataInternal(CParameter& Parameters);
 };
 
 
@@ -189,39 +189,39 @@ protected:
 class CMSCMLCDecoder : public CMLCDecoder
 {
 protected:
-    virtual void InitInternal(CParameter& ReceiverParam)
+    virtual void InitInternal(CParameter& Parameters)
     {
         /* Set corresponding type */
         eChannelType = CT_MSC;
 
         /* Call init in encoder */
-        CMLCDecoder::InitInternal(ReceiverParam);
+        CMLCDecoder::InitInternal(Parameters);
     };
 };
 
 class CSDCMLCDecoder : public CMLCDecoder
 {
 protected:
-    virtual void InitInternal(CParameter& ReceiverParam)
+    virtual void InitInternal(CParameter& Parameters)
     {
         /* Set corresponding type */
         eChannelType = CT_SDC;
 
         /* Call init in encoder */
-        CMLCDecoder::InitInternal(ReceiverParam);
+        CMLCDecoder::InitInternal(Parameters);
     };
 };
 
 class CFACMLCDecoder : public CMLCDecoder
 {
 protected:
-    virtual void InitInternal(CParameter& ReceiverParam)
+    virtual void InitInternal(CParameter& Parameters)
     {
         /* Set corresponding type */
         eChannelType = CT_FAC;
 
         /* Call init in encoder */
-        CMLCDecoder::InitInternal(ReceiverParam);
+        CMLCDecoder::InitInternal(Parameters);
     };
 };
 

@@ -140,8 +140,8 @@ CDRMBandpassFilt::Process(CVector < _COMPLEX > &veccData)
 }
 
 void
-CDRMBandpassFilt::Init(const int iNewBlockSize, const _REAL rOffsetHz,
-					   const ESpecOcc eSpecOcc, const EFiltType eNFiTy)
+CDRMBandpassFilt::Init(int iSampleRate, int iNewBlockSize, _REAL rOffsetHz,
+					   ESpecOcc eSpecOcc, EFiltType eNFiTy)
 {
 	CReal rMargin = 0.0;
 
@@ -154,9 +154,9 @@ CDRMBandpassFilt::Init(const int iNewBlockSize, const _REAL rOffsetHz,
 	/* Choose correct filter for chosen DRM bandwidth. Also, adjust offset
 	   frequency for different modes. E.g., 5 kHz mode is on the right side
 	   of the DC frequency */
-	CReal rNormCurFreqOffset = rOffsetHz / SOUNDCRD_SAMPLE_RATE;
+	CReal rNormCurFreqOffset = rOffsetHz / iSampleRate;
 	/* Band-pass filter bandwidth */
-	CReal rBPFiltBW = ((CReal) 10000.0 + rMargin) / SOUNDCRD_SAMPLE_RATE;
+	CReal rBPFiltBW = ((CReal) 10000.0 + rMargin) / iSampleRate;
 
 	/* Negative margin for receiver filter for better interferer rejection */
 	if (eNFiTy == FT_TRANSMITTER)
@@ -167,49 +167,49 @@ CDRMBandpassFilt::Init(const int iNewBlockSize, const _REAL rOffsetHz,
 	switch (eSpecOcc)
 	{
 	case SO_0:
-		rBPFiltBW = ((CReal) 4500.0 + rMargin) / SOUNDCRD_SAMPLE_RATE;
+		rBPFiltBW = ((CReal) 4500.0 + rMargin) / iSampleRate;
 
 		/* Completely on the right side of DC */
 		rNormCurFreqOffset =
-			(rOffsetHz + (CReal) 2190.0) / SOUNDCRD_SAMPLE_RATE;
+			(rOffsetHz + (CReal) 2190.0) / iSampleRate;
 		break;
 
 	case SO_1:
-		rBPFiltBW = ((CReal) 5000.0 + rMargin) / SOUNDCRD_SAMPLE_RATE;
+		rBPFiltBW = ((CReal) 5000.0 + rMargin) / iSampleRate;
 
 		/* Completely on the right side of DC */
 		rNormCurFreqOffset =
-			(rOffsetHz + (CReal) 2440.0) / SOUNDCRD_SAMPLE_RATE;
+			(rOffsetHz + (CReal) 2440.0) / iSampleRate;
 		break;
 
 	case SO_2:
-		rBPFiltBW = ((CReal) 9000.0 + rMargin) / SOUNDCRD_SAMPLE_RATE;
+		rBPFiltBW = ((CReal) 9000.0 + rMargin) / iSampleRate;
 
 		/* Centered */
-		rNormCurFreqOffset = rOffsetHz / SOUNDCRD_SAMPLE_RATE;
+		rNormCurFreqOffset = rOffsetHz / iSampleRate;
 		break;
 
 	case SO_3:
-		rBPFiltBW = ((CReal) 10000.0 + rMargin) / SOUNDCRD_SAMPLE_RATE;
+		rBPFiltBW = ((CReal) 10000.0 + rMargin) / iSampleRate;
 
 		/* Centered */
-		rNormCurFreqOffset = rOffsetHz / SOUNDCRD_SAMPLE_RATE;
+		rNormCurFreqOffset = rOffsetHz / iSampleRate;
 		break;
 
 	case SO_4:
-		rBPFiltBW = ((CReal) 18000.0 + rMargin) / SOUNDCRD_SAMPLE_RATE;
+		rBPFiltBW = ((CReal) 18000.0 + rMargin) / iSampleRate;
 
 		/* Main part on the right side of DC */
 		rNormCurFreqOffset =
-			(rOffsetHz + (CReal) 4500.0) / SOUNDCRD_SAMPLE_RATE;
+			(rOffsetHz + (CReal) 4500.0) / iSampleRate;
 		break;
 
 	case SO_5:
-		rBPFiltBW = ((CReal) 20000.0 + rMargin) / SOUNDCRD_SAMPLE_RATE;
+		rBPFiltBW = ((CReal) 20000.0 + rMargin) / iSampleRate;
 
 		/* Main part on the right side of DC */
 		rNormCurFreqOffset =
-			(rOffsetHz + (CReal) 5000.0) / SOUNDCRD_SAMPLE_RATE;
+			(rOffsetHz + (CReal) 5000.0) / iSampleRate;
 		break;
 	}
 
@@ -322,11 +322,11 @@ CModJulDate::Set(const uint32_t iModJulDate)
 	three series allpass units, followed by four parallel comb filters, and two
 	decorrelation delay lines in parallel at the output.
 */
-CAudioReverb::CAudioReverb(const CReal rT60)
+void CAudioReverb::Init(CReal rT60, int iSampleRate)
 {
 	/* Delay lengths for 44100 Hz sample rate */
 	int lengths[9] = { 1777, 1847, 1993, 2137, 389, 127, 43, 211, 179 };
-	const CReal scaler = (CReal) SOUNDCRD_SAMPLE_RATE / 44100.0;
+	const CReal scaler = CReal(iSampleRate) / 44100.0;
 
 	int delay, i;
 	if (scaler != 1.0)
@@ -351,7 +351,7 @@ CAudioReverb::CAudioReverb(const CReal rT60)
 	for (i = 0; i < 4; i++)
 		combDelays_[i].Init(lengths[i]);
 
-	setT60(rT60);
+	setT60(rT60, iSampleRate);
 	allpassCoefficient_ = (CReal) 0.7;
 	Clear();
 }
@@ -393,15 +393,12 @@ CAudioReverb::Clear()
 }
 
 void
-CAudioReverb::setT60(const CReal rT60)
+CAudioReverb::setT60(const CReal rT60, int iSampleRate)
 {
 	/* Set the reverberation T60 decay time */
 	for (int i = 0; i < 4; i++)
 	{
-		combCoefficient_[i] = pow((CReal) 10.0, (CReal) (-3.0 *
-														 combDelays_[i].
-														 Size() / (rT60 *
-																   SOUNDCRD_SAMPLE_RATE)));
+		combCoefficient_[i] = pow((CReal) 10.0, (CReal) (-3.0 * combDelays_[i].  Size() / (rT60 * iSampleRate)));
 	}
 }
 

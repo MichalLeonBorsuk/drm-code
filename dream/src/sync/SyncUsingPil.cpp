@@ -30,11 +30,11 @@
 
 
 /* Implementation *************************************************************/
-void CSyncUsingPil::ProcessDataInternal(CParameter& ReceiverParam)
+void CSyncUsingPil::ProcessDataInternal(CParameter& Parameters)
 {
 	int i;
 
-	ReceiverParam.Lock(); 
+	Parameters.Lock(); 
 
 	/**************************************************************************\
 	* Frame synchronization detection										   *
@@ -101,7 +101,7 @@ void CSyncUsingPil::ProcessDataInternal(CParameter& ReceiverParam)
 						bFrameSyncWasOK = TRUE;
 
 						/* Post Message for GUI (Good frame sync) */
-						ReceiverParam.ReceiveStatus.FSync.SetStatus(RX_OK);
+						Parameters.ReceiveStatus.FSync.SetStatus(RX_OK);
 					}
 					else
 					{
@@ -118,7 +118,7 @@ void CSyncUsingPil::ProcessDataInternal(CParameter& ReceiverParam)
 							/* Reset flag */
 							bBadFrameSync = FALSE;
 
-							ReceiverParam.ReceiveStatus.FSync.SetStatus(CRC_ERROR);
+							Parameters.ReceiveStatus.FSync.SetStatus(CRC_ERROR);
 						}
 						else
 						{
@@ -134,10 +134,10 @@ void CSyncUsingPil::ProcessDataInternal(CParameter& ReceiverParam)
 							{
 								/* Post Message that frame sync was wrong but
 								   was not yet corrected (yellow light) */
-								ReceiverParam.ReceiveStatus.FSync.SetStatus(DATA_ERROR);
+								Parameters.ReceiveStatus.FSync.SetStatus(DATA_ERROR);
 							}
 							else
-								ReceiverParam.ReceiveStatus.FSync.SetStatus(CRC_ERROR);
+								Parameters.ReceiveStatus.FSync.SetStatus(CRC_ERROR);
 						}
 
 						/* Set flag for bad sync */
@@ -151,7 +151,7 @@ void CSyncUsingPil::ProcessDataInternal(CParameter& ReceiverParam)
 	{
 		/* Frame synchronization has successfully finished, show always green
 		   light */
-		ReceiverParam.ReceiveStatus.FSync.SetStatus(RX_OK);
+		Parameters.ReceiveStatus.FSync.SetStatus(RX_OK);
 	}
 
 	/* Set current symbol ID and flag in extended data of output vector */
@@ -190,7 +190,7 @@ void CSyncUsingPil::ProcessDataInternal(CParameter& ReceiverParam)
 // the first "old pilots" were stored. Also, an "initial frequecy offset
 // estimate" should be made and rFreqOffsetTrack should be set to this value!
 
-			if ((ReceiverParam.GetWaveMode() == RM_ROBUSTNESS_MODE_D) &&
+			if ((Parameters.GetWaveMode() == RM_ROBUSTNESS_MODE_D) &&
 				(i < 2))
 			{
 				cOldFreqPil[i] = -(*pvecInputData)[iPosFreqPil[i]];
@@ -217,19 +217,19 @@ void CSyncUsingPil::ProcessDataInternal(CParameter& ReceiverParam)
 
 		/* Get sample rate offset change */
 		const CReal rDiffSamOffset =
-			rPrevSamRateOffset - ReceiverParam.rResampleOffset;
+			rPrevSamRateOffset - Parameters.rResampleOffset;
 
 		/* Save current resample offset for next symbol */
-		rPrevSamRateOffset = ReceiverParam.rResampleOffset;
+		rPrevSamRateOffset = Parameters.rResampleOffset;
 
 		/* Correct sample-rate offset correction according to the proportional
 		   rule. Use relative DC frequency offset plus relative average offset
 		   of frequency pilots to the DC frequency. Normalize this offset so
 		   that it can be used as a phase correction for frequency offset
 		   estimation  */
-		CReal rPhaseCorr = (ReceiverParam.rFreqOffsetAcqui +
-			ReceiverParam.rFreqOffsetTrack + rAvFreqPilDistToDC) *
-			rDiffSamOffset / SOUNDCRD_SAMPLE_RATE / rNormConstFOE;
+		CReal rPhaseCorr = (Parameters.rFreqOffsetAcqui +
+			Parameters.rFreqOffsetTrack + rAvFreqPilDistToDC) *
+			rDiffSamOffset / Parameters.GetSampleRate() / rNormConstFOE;
 
 		/* Actual correction (rotate vector) */
 		cFreqOffVec *= CComplex(Cos(rPhaseCorr), Sin(rPhaseCorr));
@@ -248,7 +248,7 @@ void CSyncUsingPil::ProcessDataInternal(CParameter& ReceiverParam)
 #ifndef USE_FRQOFFS_TRACK_GUARDCORR
 		/* Integrate the result for controling the frequency offset, normalize
 		   estimate */
-		ReceiverParam.rFreqOffsetTrack += rFreqOffsetEst * rNormConstFOE;
+		Parameters.rFreqOffsetTrack += rFreqOffsetEst * rNormConstFOE;
 #endif
 
 
@@ -264,15 +264,15 @@ void CSyncUsingPil::ProcessDataInternal(CParameter& ReceiverParam)
 			(iPosFreqPil[2] - iPosFreqPil[0])) / (CReal) 2.0;
 
 		/* Integrate the result for controling the resampling */
-		ReceiverParam.rResampleOffset +=
+		Parameters.rResampleOffset +=
 			CONTR_SAMP_OFF_INTEGRATION * rSampFreqOffsetEst;
 #endif
 
 #ifdef _DEBUG_
 /* Save frequency and sample rate tracking */
 static FILE* pFile = fopen("test/freqtrack.dat", "w");
-fprintf(pFile, "%e %e\n", SOUNDCRD_SAMPLE_RATE * ReceiverParam.rFreqOffsetTrack,
-	ReceiverParam.rResampleOffset);
+fprintf(pFile, "%e %e\n", Parameters.GetSampleRate() * Parameters.rFreqOffsetTrack,
+	Parameters.rResampleOffset);
 fflush(pFile);
 #endif
 	}
@@ -281,7 +281,7 @@ fflush(pFile);
 	/* If synchronized DRM input stream is used, overwrite the detected
 	   frequency offest estimate by "0", because we know this value */
 	if (bSyncInput == TRUE)
-		ReceiverParam.rFreqOffsetTrack = (CReal) 0.0;
+		Parameters.rFreqOffsetTrack = (CReal) 0.0;
 
 	/* Do not ship data before first frame synchronization was done. The flag
 	   "bAquisition" must not be set to FALSE since in that case we would run
@@ -299,32 +299,32 @@ fflush(pFile);
 			(*pvecOutputData)[i] = (*pvecInputData)[i];
 	}
 
-	ReceiverParam.Unlock(); 
+	Parameters.Unlock(); 
 }
 
-void CSyncUsingPil::InitInternal(CParameter& ReceiverParam)
+void CSyncUsingPil::InitInternal(CParameter& Parameters)
 {
 	int			i;
 	_COMPLEX	cPhaseCorTermDivi;
 
-	ReceiverParam.Lock(); 
+	Parameters.Lock(); 
 
 	/* Init base class for modifying the pilots (rotation) */
-	CPilotModiClass::InitRot(ReceiverParam);
+	CPilotModiClass::InitRot(Parameters);
 
 	/* Init internal parameters from global struct */
-	iNumCarrier = ReceiverParam.CellMappingTable.iNumCarrier;
-	eCurRobMode = ReceiverParam.GetWaveMode();
+	iNumCarrier = Parameters.CellMappingTable.iNumCarrier;
+	eCurRobMode = Parameters.GetWaveMode();
 
 	/* Check if symbol number per frame has changed. If yes, reset the
 	   symbol counter */
-	if (iNumSymPerFrame != ReceiverParam.CellMappingTable.iNumSymPerFrame)
+	if (iNumSymPerFrame != Parameters.CellMappingTable.iNumSymPerFrame)
 	{
 		/* Init internal counter for symbol number */
 		iSymbCntFraSy = 0;
 
 		/* Refresh parameter */
-		iNumSymPerFrame = ReceiverParam.CellMappingTable.iNumSymPerFrame;
+		iNumSymPerFrame = Parameters.CellMappingTable.iNumSymPerFrame;
 	}
 
 	/* Allocate memory for histories. Init history with small values, because
@@ -349,14 +349,14 @@ void CSyncUsingPil::InitInternal(CParameter& ReceiverParam)
 	for (i = 0; i < iNumCarrier - 1; i++)
 	{
 		/* Only successive pilots (in frequency direction) are used */
-		if (_IsPilot(ReceiverParam.CellMappingTable.matiMapTab[0][i]) &&
-			_IsPilot(ReceiverParam.CellMappingTable.matiMapTab[0][i + 1]))
+		if (_IsPilot(Parameters.CellMappingTable.matiMapTab[0][i]) &&
+			_IsPilot(Parameters.CellMappingTable.matiMapTab[0][i + 1]))
 		{
 			/* Store indices and complex numbers */
 			vecPilCorr[iNumPilPairs].iIdx1 = i;
 			vecPilCorr[iNumPilPairs].iIdx2 = i + 1;
-			vecPilCorr[iNumPilPairs].cPil1 = ReceiverParam.CellMappingTable.matcPilotCells[0][i];
-			vecPilCorr[iNumPilPairs].cPil2 = ReceiverParam.CellMappingTable.matcPilotCells[0][i + 1];
+			vecPilCorr[iNumPilPairs].cPil1 = Parameters.CellMappingTable.matcPilotCells[0][i];
+			vecPilCorr[iNumPilPairs].cPil2 = Parameters.CellMappingTable.matcPilotCells[0][i + 1];
 
 			iNumPilPairs++;
 		}
@@ -365,7 +365,7 @@ void CSyncUsingPil::InitInternal(CParameter& ReceiverParam)
 	/* Calculate channel correlation in frequency direction. Use rectangular
 	   shaped PDS with the length of the guard-interval */
 	const CReal rArgSinc =
-		(CReal) ReceiverParam.CellMappingTable.iGuardSize / ReceiverParam.CellMappingTable.iFFTSizeN;
+		(CReal) Parameters.CellMappingTable.iGuardSize / Parameters.CellMappingTable.iFFTSizeN;
 	const CReal rArgExp = crPi * rArgSinc;
 
 	cR_HH = Sinc(rArgSinc) * CComplex(Cos(rArgExp), -Sin(rArgExp));
@@ -377,10 +377,10 @@ void CSyncUsingPil::InitInternal(CParameter& ReceiverParam)
 	int iAvPilPos = 0;
 	for (i = 0; i < iNumCarrier - 1; i++)
 	{
-		if (_IsFreqPil(ReceiverParam.CellMappingTable.matiMapTab[0][i]))
+		if (_IsFreqPil(Parameters.CellMappingTable.matiMapTab[0][i]))
 		{
 			/* For average frequency pilot position to DC carrier */
-			iAvPilPos += i + ReceiverParam.CellMappingTable.iCarrierKmin;
+			iAvPilPos += i + Parameters.CellMappingTable.iCarrierKmin;
 			
 			iPosFreqPil[iFreqPilCount] = i;
 			iFreqPilCount++;
@@ -390,7 +390,7 @@ void CSyncUsingPil::InitInternal(CParameter& ReceiverParam)
 	/* Average distance of the frequency pilots from the DC carrier. Needed for
 	   corrections for sample rate offset changes. Normalized to sample rate! */
 	rAvFreqPilDistToDC =
-		(CReal) iAvPilPos / NUM_FREQ_PILOTS / ReceiverParam.CellMappingTable.iFFTSizeN;
+		(CReal) iAvPilPos / NUM_FREQ_PILOTS / Parameters.CellMappingTable.iFFTSizeN;
 
 	/* Init memory for "old" frequency pilots */
 	for (i = 0; i < NUM_FREQ_PILOTS; i++)
@@ -398,11 +398,11 @@ void CSyncUsingPil::InitInternal(CParameter& ReceiverParam)
 	
 	/* Nomalization constant for frequency offset estimation */
 	rNormConstFOE =
-		(CReal) 1.0 / ((CReal) 2.0 * crPi * ReceiverParam.CellMappingTable.iSymbolBlockSize);
+		(CReal) 1.0 / ((CReal) 2.0 * crPi * Parameters.CellMappingTable.iSymbolBlockSize);
 
 	/* Init time constant for IIR filter for frequency offset estimation */
-	rLamFreqOff = IIR1Lam(TICONST_FREQ_OFF_EST, (CReal) SOUNDCRD_SAMPLE_RATE /
-		ReceiverParam.CellMappingTable.iSymbolBlockSize);
+	rLamFreqOff = IIR1Lam(TICONST_FREQ_OFF_EST, (CReal) Parameters.GetSampleRate() /
+		Parameters.CellMappingTable.iSymbolBlockSize);
 
 	/* Init vector for averaging the frequency offset estimation */
 	cFreqOffVec = CComplex((CReal) 0.0, (CReal) 0.0);
@@ -410,7 +410,7 @@ void CSyncUsingPil::InitInternal(CParameter& ReceiverParam)
 	/* Init value for previous estimated sample rate offset with the current
 	   setting. This can be non-zero if, e.g., an initial sample rate offset
 	   was set by command line arguments */
-	rPrevSamRateOffset = ReceiverParam.rResampleOffset;
+	rPrevSamRateOffset = Parameters.rResampleOffset;
 
 
 #ifdef USE_SAMOFFS_TRACK_FRE_PIL
@@ -421,7 +421,7 @@ void CSyncUsingPil::InitInternal(CParameter& ReceiverParam)
 
 	/* Init time constant for IIR filter for sample rate offset estimation */
 	rLamSamRaOff = IIR1Lam(TICONST_SAMRATE_OFF_EST,
-		(CReal) SOUNDCRD_SAMPLE_RATE / ReceiverParam.CellMappingTable.iSymbolBlockSize);
+		(CReal) Parameters.GetSampleRate() / Parameters.CellMappingTable.iSymbolBlockSize);
 #endif
 
 
@@ -429,7 +429,7 @@ void CSyncUsingPil::InitInternal(CParameter& ReceiverParam)
 	iInputBlockSize = iNumCarrier;
 	iMaxOutputBlockSize = iNumCarrier;
 
-	ReceiverParam.Unlock(); 
+	Parameters.Unlock(); 
 }
 
 void CSyncUsingPil::StartAcquisition()

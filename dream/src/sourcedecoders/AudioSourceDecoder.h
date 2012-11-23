@@ -240,8 +240,8 @@ protected:
 #ifdef USE_CELP_DECODER
     /* TODO put here decoder specific things */
 #endif
-    virtual void InitInternal(CParameter& ReceiverParam);
-    virtual void ProcessDataInternal(CParameter& ReceiverParam);
+    virtual void InitInternal(CParameter& Parameters);
+    virtual void ProcessDataInternal(CParameter& Parameters);
     string AACFileName(CParameter&);
     string CELPFileName(CParameter&);
     string HVXCFileName(CParameter&);

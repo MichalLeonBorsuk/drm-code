@@ -30,7 +30,7 @@
 
 
 /* Implementation *************************************************************/
-void CInputResample::ProcessDataInternal(CParameter& ReceiverParam)
+void CInputResample::ProcessDataInternal(CParameter& Parameters)
 {
     if (bSyncInput == TRUE)
     {
@@ -42,9 +42,9 @@ void CInputResample::ProcessDataInternal(CParameter& ReceiverParam)
     }
     else
     {
-        ReceiverParam.Lock();
-        _REAL rSamRateOffset = ReceiverParam.rResampleOffset;
-        ReceiverParam.Unlock();
+        Parameters.Lock();
+        _REAL rSamRateOffset = Parameters.rResampleOffset;
+        Parameters.Unlock();
 
         /* Constrain the sample rate offset estimation to prevent from an
            output buffer overrun */
@@ -55,19 +55,19 @@ void CInputResample::ProcessDataInternal(CParameter& ReceiverParam)
 
         /* Do actual resampling */
         iOutputBlockSize = ResampleObj.Resample(pvecInputData, pvecOutputData,
-                                                (_REAL) SOUNDCRD_SAMPLE_RATE /
-                                                (SOUNDCRD_SAMPLE_RATE - rSamRateOffset));
+                                                (_REAL) Parameters.GetSampleRate() /
+                                                (Parameters.GetSampleRate() - rSamRateOffset));
     }
 }
 
-void CInputResample::InitInternal(CParameter& ReceiverParam)
+void CInputResample::InitInternal(CParameter& Parameters)
 {
-    ReceiverParam.Lock();
+    Parameters.Lock();
     /* Init resample object */
-    ResampleObj.Init(ReceiverParam.CellMappingTable.iSymbolBlockSize);
+    ResampleObj.Init(Parameters.CellMappingTable.iSymbolBlockSize);
 
     /* Define block-sizes for input and output */
-    iInputBlockSize = ReceiverParam.CellMappingTable.iSymbolBlockSize;
+    iInputBlockSize = Parameters.CellMappingTable.iSymbolBlockSize;
 
     /* With this parameter we define the maximum lenght of the output buffer
        Due to the constrained sample rate offset estimation the output
@@ -78,6 +78,6 @@ void CInputResample::InitInternal(CParameter& ReceiverParam)
        smaller than one symbol -> no data is read by the next unit, but
        after that the output block size is bigger than one symbol, therefore
        we have to allocate three symbols for output buffer */
-    iMaxOutputBlockSize = 3 * ReceiverParam.CellMappingTable.iSymbolBlockSize;
-    ReceiverParam.Unlock();
+    iMaxOutputBlockSize = 3 * Parameters.CellMappingTable.iSymbolBlockSize;
+    Parameters.Unlock();
 }

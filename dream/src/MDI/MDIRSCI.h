@@ -72,8 +72,8 @@ public:
 	_BOOLEAN GetDestination(string& strArgument);
 
 	/* CReceiverModul */
-	void InitInternal(CParameter& ReceiverParam);
-	void ProcessDataInternal(CParameter& ReceiverParam);
+	void InitInternal(CParameter& Parameters);
+	void ProcessDataInternal(CParameter& Parameters);
 
 protected:
 

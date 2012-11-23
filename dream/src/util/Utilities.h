@@ -92,8 +92,8 @@ class CDRMBandpassFilt
 public:
 	enum EFiltType {FT_TRANSMITTER, FT_RECEIVER};
 
-	void Init(const int iNewBlockSize, const _REAL rOffsetHz,
-		const ESpecOcc eSpecOcc, const EFiltType eNFiTy);
+	void Init(int iSampleRate, int iNewBlockSize, _REAL rOffsetHz,
+		ESpecOcc eSpecOcc, EFiltType eNFiTy);
 	void Process(CVector<_COMPLEX>& veccData);
 
 protected:
@@ -132,13 +132,13 @@ protected:
 class CAudioReverb
 {
 public:
-	CAudioReverb(const CReal rT60 = (CReal) 1.0);
-
+	CAudioReverb() {}
+	void Init(CReal rT60, int iSampleRate);
 	void Clear();
 	CReal ProcessSample(const CReal rLInput, const CReal rRInput);
 
 protected:
-	void setT60(const CReal rT60);
+	void setT60(const CReal rT60, int iSampleRate);
 	_BOOLEAN isPrime(const int number);
 
 	CFIFO<int>	allpassDelays_[3];

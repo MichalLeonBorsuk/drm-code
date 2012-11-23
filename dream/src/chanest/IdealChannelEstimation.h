@@ -62,8 +62,8 @@ protected:
 	long int			lAvCnt;
 	int					iStartCnt;
 
-	virtual void InitInternal(CParameter& ReceiverParam);
-	virtual void ProcessDataInternal(CParameter& ReceiverParam);
+	virtual void InitInternal(CParameter& Parameters);
+	virtual void ProcessDataInternal(CParameter& Parameters);
 };
 
 

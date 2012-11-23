@@ -86,6 +86,7 @@ protected:
     CComplexVector			veccFFTOutput;
 
     CVector<_REAL>			vecrPowSpec;
+    int						iSampleRate;
     int						iLenPowSpec;
 
     int						iShiftedKmin;
@@ -97,8 +98,8 @@ protected:
     CReal					rLamPSD;
 
 
-    virtual void InitInternal(CParameter& ReceiverParam);
-    virtual void ProcessDataInternal(CParameter& ReceiverParam);
+    virtual void InitInternal(CParameter& Parameters);
+    virtual void ProcessDataInternal(CParameter& Parameters);
 };
 
 class COFDMDemodSimulation :
@@ -126,8 +127,8 @@ protected:
 
     int						iNumTapsChan;
 
-    virtual void InitInternal(CParameter& ReceiverParam);
-    virtual void ProcessDataInternal(CParameter& ReceiverParam);
+    virtual void InitInternal(CParameter& Parameters);
+    virtual void ProcessDataInternal(CParameter& Parameters);
 };
 
 

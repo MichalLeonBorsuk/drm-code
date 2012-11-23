@@ -71,7 +71,7 @@ public:
 	virtual void	SetDev(int iNewDevice);
 	virtual int		GetDev();
 
-	void			Init(int iNewBufferSize, _BOOLEAN bNewBlocking = TRUE);
+	void			Init(int iSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking = TRUE);
 	_BOOLEAN		Read(CVector<_SAMPLE>& psData);
 	void			Close();
 #ifdef CLOCK_DRIFT_ADJ_ENABLED
@@ -80,10 +80,12 @@ public:
 
 protected:
 	void			Init_HW();
-	int				Read_HW(void *recbuf, int size);
+	int			Read_HW(void *recbuf, int size);
 	void			Close_HW();
 	void			SetBufferSize_HW();
 
+	int 			iSampleRate;
+	int			iMaxSampleRateOffset;
 	int 			iBufferSize;
 	_BOOLEAN		bBlockingRec;
 
@@ -115,7 +117,7 @@ public:
 	virtual void	SetDev(int iNewDevice);
 	virtual int		GetDev();
 
-	void			Init(int iNewBufferSize, _BOOLEAN bNewBlocking = FALSE);
+	void			Init(int iSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking = FALSE);
 	_BOOLEAN		Write(CVector<_SAMPLE>& psData);
 	void			Close();
 #ifdef CLOCK_DRIFT_ADJ_ENABLED
@@ -132,7 +134,9 @@ protected:
 	int				Write_HW(void *playbuf, int size);
 	void			Close_HW();
 
-	int				iBufferSize;
+	int			iSampleRate;
+	int			iMaxSampleRateOffset;
+	int			iBufferSize;
 	_BOOLEAN		bBlockingPlay;
 
 	vector<string>	devices;

@@ -141,8 +141,8 @@ protected:
     CComplexVector			veccFFTOutput;
     CRealVector				vecrAudioWindowFunction;
 
-    virtual void InitInternal(CParameter& ReceiverParam);
-    virtual void ProcessDataInternal(CParameter& ReceiverParam);
+    virtual void InitInternal(CParameter& Parameters);
+    virtual void ProcessDataInternal(CParameter& Parameters);
 };
 
 class CGenSimData : public CTransmitterModul<_BINARY, _BINARY>
@@ -180,8 +180,8 @@ protected:
     int		iNumAccBitErrRate;
     _REAL	rAccBitErrRate;
 
-    virtual void InitInternal(CParameter& ReceiverParam);
-    virtual void ProcessDataInternal(CParameter& ReceiverParam);
+    virtual void InitInternal(CParameter& Parameters);
+    virtual void ProcessDataInternal(CParameter& Parameters);
 };
 
 
@@ -220,8 +220,8 @@ protected:
     _BOOLEAN	bSyncInput;
     _BOOLEAN	bCRCOk;
 
-    virtual void InitInternal(CParameter& ReceiverParam);
-    virtual void ProcessDataInternal(CParameter& ReceiverParam);
+    virtual void InitInternal(CParameter& Parameters);
+    virtual void ProcessDataInternal(CParameter& Parameters);
 };
 
 
@@ -253,8 +253,8 @@ protected:
     CSDCReceive SDCReceive;
     _BOOLEAN	bFirstBlock;
 
-    virtual void InitInternal(CParameter& ReceiverParam);
-    virtual void ProcessDataInternal(CParameter& ReceiverParam);
+    virtual void InitInternal(CParameter& Parameters);
+    virtual void ProcessDataInternal(CParameter& Parameters);
 };
 
 
@@ -265,10 +265,10 @@ protected:
 class CDataConvChanResam : public CReceiverModul<CChanSimDataMod, _REAL>
 {
 protected:
-    virtual void InitInternal(CParameter& ReceiverParam)
+    virtual void InitInternal(CParameter& Parameters)
     {
-        iInputBlockSize = ReceiverParam.CellMappingTable.iSymbolBlockSize;
-        iOutputBlockSize = ReceiverParam.CellMappingTable.iSymbolBlockSize;
+        iInputBlockSize = Parameters.CellMappingTable.iSymbolBlockSize;
+        iOutputBlockSize = Parameters.CellMappingTable.iSymbolBlockSize;
     }
     virtual void ProcessDataInternal(CParameter&)
     {
@@ -281,11 +281,11 @@ protected:
 class CSplit: public CReceiverModul<_REAL, _REAL>
 {
 protected:
-    virtual void InitInternal(CParameter& ReceiverParam)
+    virtual void InitInternal(CParameter& Parameters)
     {
-        iInputBlockSize = ReceiverParam.CellMappingTable.iSymbolBlockSize;
-        iOutputBlockSize = ReceiverParam.CellMappingTable.iSymbolBlockSize;
-        iOutputBlockSize2 = ReceiverParam.CellMappingTable.iSymbolBlockSize;
+        iInputBlockSize = Parameters.CellMappingTable.iSymbolBlockSize;
+        iOutputBlockSize = Parameters.CellMappingTable.iSymbolBlockSize;
+        iOutputBlockSize2 = Parameters.CellMappingTable.iSymbolBlockSize;
     }
     virtual void ProcessDataInternal(CParameter&)
     {
@@ -304,18 +304,18 @@ public:
     CWriteIQFile();
     virtual ~CWriteIQFile();
 
-    void StartRecording(CParameter& ReceiverParam);
+    void StartRecording(CParameter& Parameters);
     void StopRecording();
 
-    void NewFrequency(CParameter &ReceiverParam);
+    void NewFrequency(CParameter &Parameters);
 
 protected:
     FILE *					pFile;
     CVector<_SAMPLE>		vecsTmpAudData;
 
-    virtual void InitInternal(CParameter& ReceiverParam);
-    virtual void ProcessDataInternal(CParameter& ReceiverParam);
-    void		 OpenFile(CParameter& ReceiverParam);
+    virtual void InitInternal(CParameter& Parameters);
+    virtual void ProcessDataInternal(CParameter& Parameters);
+    void		 OpenFile(CParameter& Parameters);
 
     /* For doing the IF to IQ conversion (stolen from AM demod) */
     CRealVector					rvecInpTmp;

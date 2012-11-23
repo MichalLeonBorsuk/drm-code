@@ -351,15 +351,15 @@ void CMLCDecoder::ProcessDataInternal(CParameter&)
     EnergyDisp.ProcessData(pvecOutputData);
 }
 
-void CMLCDecoder::InitInternal(CParameter& ReceiverParam)
+void CMLCDecoder::InitInternal(CParameter& Parameters)
 {
     int i;
 
 
     /* First, calculate all necessary parameters for decoding process */
-    ReceiverParam.Lock();
-    CalculateParam(ReceiverParam, eChannelType);
-    ReceiverParam.Unlock();
+    Parameters.Lock();
+    CalculateParam(Parameters, eChannelType);
+    Parameters.Unlock();
 
     /* Reasonable number of iterations depends on coding scheme. With a
        4-QAM no iteration is possible */

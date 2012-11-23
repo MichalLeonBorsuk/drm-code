@@ -153,9 +153,9 @@ void COFDMCellMapping::InitInternal(CParameter& TransmParam)
 /******************************************************************************\
 * OFDM cells demapping														   *
 \******************************************************************************/
-void COFDMCellDemapping::ProcessDataInternal(CParameter& ReceiverParam)
+void COFDMCellDemapping::ProcessDataInternal(CParameter& Parameters)
 {
-	const CCellMappingTable& Param = ReceiverParam.CellMappingTable;
+	const CCellMappingTable& Param = Parameters.CellMappingTable;
 
 	/* Set absolute symbol position */
 	const int iSymbolCounterAbs =
@@ -249,7 +249,7 @@ void COFDMCellDemapping::ProcessDataInternal(CParameter& ReceiverParam)
 
 		/* Frame ID of this FAC block stands for the "current" block. We need
 		   the ID of the next block, therefore we have to add "1" */
-		int iNewFrameID = ReceiverParam.iFrameIDReceiv + 1;
+		int iNewFrameID = Parameters.iFrameIDReceiv + 1;
 		if (iNewFrameID == NUM_FRAMES_IN_SUPERFRAME)
 			iNewFrameID = 0;
 
@@ -290,9 +290,9 @@ void COFDMCellDemapping::ProcessDataInternal(CParameter& ReceiverParam)
 	}
 }
 
-void COFDMCellDemapping::InitInternal(CParameter& ReceiverParam)
+void COFDMCellDemapping::InitInternal(CParameter& Parameters)
 {
-	const CCellMappingTable& Param = ReceiverParam.CellMappingTable;
+	const CCellMappingTable& Param = Parameters.CellMappingTable;
 
 	iNumSymPerFrame = Param.iNumSymPerFrame;
 	iNumCarrier = Param.iNumCarrier;

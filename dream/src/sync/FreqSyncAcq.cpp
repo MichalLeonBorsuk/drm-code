@@ -32,7 +32,7 @@
 #include "FreqSyncAcq.h"
 
 /* Implementation *************************************************************/
-void CFreqSyncAcq::ProcessDataInternal(CParameter& ReceiverParam)
+void CFreqSyncAcq::ProcessDataInternal(CParameter& Parameters)
 {
 	int			i;
 	int			iMaxIndex=0;
@@ -43,11 +43,11 @@ void CFreqSyncAcq::ProcessDataInternal(CParameter& ReceiverParam)
 	_BOOLEAN	bNoPeaksLeft;
 	CRealVector	vecrPSDPilPoin(3);
 
-	ReceiverParam.Lock(); 
+	Parameters.Lock(); 
 
 	/* OPH: update free-running symbol counter */
 	iFreeSymbolCounter++;
-	if (iFreeSymbolCounter >= ReceiverParam.CellMappingTable.iNumSymPerFrame)
+	if (iFreeSymbolCounter >= Parameters.CellMappingTable.iNumSymPerFrame)
 	{
 		iFreeSymbolCounter = 0;
 	}
@@ -282,7 +282,7 @@ fclose(pFile1);
 						   found */
 						/* Calculate frequency offset and set global parameter
 						   for offset */
-						ReceiverParam.rFreqOffsetAcqui =
+						Parameters.rFreqOffsetAcqui =
 							(_REAL) iMaxIndex / iFrAcFFTSize;
 
 						/* Reset acquisition flag */
@@ -298,7 +298,7 @@ fclose(pFile1);
 
 							/* Frequency offset correction */
 							const _REAL rNormCurFreqOffsFst = (_REAL) 2.0 * crPi *
-								(ReceiverParam.rFreqOffsetAcqui - rInternIFNorm);
+								(Parameters.rFreqOffsetAcqui - rInternIFNorm);
 
 							for (i = 0; i < iHistBufSize; i++)
 							{
@@ -327,8 +327,8 @@ fclose(pFile1);
 		   this value */
 		if (bSyncInput == TRUE)
 		{
-			ReceiverParam.rFreqOffsetAcqui =
-				(_REAL) ReceiverParam.CellMappingTable.iIndexDCFreq / ReceiverParam.CellMappingTable.iFFTSizeN;
+			Parameters.rFreqOffsetAcqui =
+				(_REAL) Parameters.CellMappingTable.iIndexDCFreq / Parameters.CellMappingTable.iFFTSizeN;
 		}
 
 		/* Use the same block size as input block size */
@@ -339,8 +339,8 @@ fclose(pFile1);
 		/* Total frequency offset from acquisition and tracking (we calculate
 		   the normalized frequency offset) */
 		const _REAL rNormCurFreqOffset =
-			(_REAL) 2.0 * crPi * (ReceiverParam.rFreqOffsetAcqui +
-			ReceiverParam.rFreqOffsetTrack - rInternIFNorm);
+			(_REAL) 2.0 * crPi * (Parameters.rFreqOffsetAcqui +
+			Parameters.rFreqOffsetTrack - rInternIFNorm);
 
 		/* New rotation vector for exp() calculation */
 		const _COMPLEX cExpStep =
@@ -365,15 +365,15 @@ fclose(pFile1);
 			BPFilter.Process(*pvecOutputData);
 
 	}
-	ReceiverParam.Unlock(); 
+	Parameters.Unlock(); 
 }
 
-void CFreqSyncAcq::InitInternal(CParameter& ReceiverParam)
+void CFreqSyncAcq::InitInternal(CParameter& Parameters)
 {
-	ReceiverParam.Lock(); 
+	Parameters.Lock(); 
 	/* Needed for calculating offset in Hertz in case of synchronized input
 	   (for simulation) */
-	iFFTSize = ReceiverParam.CellMappingTable.iFFTSizeN;
+	iFFTSize = Parameters.CellMappingTable.iFFTSizeN;
 
 	/* We using parameters from robustness mode B as pattern for the desired
 	   frequency pilot positions */
@@ -392,8 +392,8 @@ void CFreqSyncAcq::InitInternal(CParameter& ReceiverParam)
 	   Set start- and endpoint of search window for DC carrier after the
 	   correlation with the known pilot structure */
 	/* Normalize the desired position and window size which are in Hertz */
-	const _REAL rNormDesPos = rCenterFreq / SOUNDCRD_SAMPLE_RATE * 2;
-	const _REAL rNormHalfWinSize = rWinSize / SOUNDCRD_SAMPLE_RATE;
+	const _REAL rNormDesPos = rCenterFreq / Parameters.GetSampleRate() * 2;
+	const _REAL rNormHalfWinSize = rWinSize / Parameters.GetSampleRate();
 
 	/* Length of the half of the spectrum of real input signal (the other half
 	   is the same because of the real input signal). We have to consider the
@@ -456,29 +456,29 @@ void CFreqSyncAcq::InitInternal(CParameter& ReceiverParam)
 	/* Frequency correction */
 	/* Start with phase null (arbitrary) */
 	cCurExp = (_REAL) 1.0;
-	rInternIFNorm = (_REAL) ReceiverParam.CellMappingTable.iIndexDCFreq / iFFTSize;
+	rInternIFNorm = (_REAL) Parameters.CellMappingTable.iIndexDCFreq / iFFTSize;
 
 
 	/* Init bandpass filter object */
-	BPFilter.Init(ReceiverParam.CellMappingTable.iSymbolBlockSize, VIRTUAL_INTERMED_FREQ,
-		ReceiverParam.GetSpectrumOccup(), CDRMBandpassFilt::FT_RECEIVER);
+	BPFilter.Init(Parameters.GetSampleRate(), Parameters.CellMappingTable.iSymbolBlockSize, VIRTUAL_INTERMED_FREQ,
+		Parameters.GetSpectrumOccup(), CDRMBandpassFilt::FT_RECEIVER);
 
 
 	/* Define block-sizes for input (The output block size is set inside
 	   the processing routine, therefore only a maximum block size is set
 	   here) */
-	iInputBlockSize = ReceiverParam.CellMappingTable.iSymbolBlockSize;
+	iInputBlockSize = Parameters.CellMappingTable.iSymbolBlockSize;
 
 	/* We have to consider that the next module can take up to two symbols per
 	   step. This can be satisfied be multiplying with "3". We also want to ship
 	   the whole FFT buffer after finishing the frequency acquisition so that
 	   these samples can be reused for synchronization and do not get lost */
-	iMaxOutputBlockSize = 3 * ReceiverParam.CellMappingTable.iSymbolBlockSize + iHistBufSize;
+	iMaxOutputBlockSize = 3 * Parameters.CellMappingTable.iSymbolBlockSize + iHistBufSize;
 
 	/* OPH: init free-running symbol counter */
 	iFreeSymbolCounter = 0;
 
-	ReceiverParam.Unlock(); 
+	Parameters.Unlock(); 
 }
 
 void CFreqSyncAcq::SetSearchWindow(_REAL rNewCenterFreq, _REAL rNewWinSize)

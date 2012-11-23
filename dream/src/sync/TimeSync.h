@@ -91,6 +91,7 @@ public:
 	void StopRMDetAcqu() {bRobModAcqu = FALSE;}
 
 protected:
+	int							iSampleRate;
 	int							iCorrCounter;
 	int							iAveCorr;
 	int							iStepSizeGuardCorr;
@@ -165,8 +166,8 @@ protected:
 	ERobMode	GetRModeFromInd(int iNewInd);
 	void		SetFilterTaps(const CReal rNewOffsetNorm);
 
-	virtual void InitInternal(CParameter& ReceiverParam);
-	virtual void ProcessDataInternal(CParameter& ReceiverParam);
+	virtual void InitInternal(CParameter& Parameters);
+	virtual void ProcessDataInternal(CParameter& Parameters);
 };
 
 

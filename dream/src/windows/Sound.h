@@ -58,7 +58,7 @@ class CSoundIn : public CSoundInInterface
     CSoundIn();
 virtual ~CSoundIn();
 
-virtual void		Init(int iNewBufferSize, _BOOLEAN bNewBlocking = TRUE);
+virtual void		Init(int iSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking = TRUE);
 virtual _BOOLEAN	Read(CVector<short>& psData);
 virtual void		Enumerate(vector<string>&);
 virtual int			GetDev();
@@ -75,8 +75,9 @@ int				iCurDev;
 WAVEFORMATEX	sWaveFormatEx;
 _BOOLEAN		bChangDev;
 HANDLE			m_WaveEvent;
-int				iBufferSize;
-int				iWhichBuffer;
+int			iSampleRate;
+int			iBufferSize;
+int			iWhichBuffer;
 _BOOLEAN		bBlocking;
 
 /* Wave in */
@@ -93,7 +94,7 @@ class CSoundOut : public CSoundOutInterface
     CSoundOut();
 virtual ~CSoundOut();
 
-virtual void		Init(int iNewBufferSize, _BOOLEAN bNewBlocking = FALSE);
+virtual void		Init(int iSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking = FALSE);
 virtual _BOOLEAN	Write(CVector<short>& psData);
 virtual void		Enumerate(vector<string>&);
 virtual int			GetDev();
@@ -107,12 +108,13 @@ void		AddBuffer(int iBufNum);
 void		GetDoneBuffer(int& iCntPrepBuf, int& iIndexDoneBuf);
 
 vector<string>	vecstrDevices;
-int				iCurDev;
+int			iCurDev;
 WAVEFORMATEX	sWaveFormatEx;
-_BOOLEAN			bChangDev;
+_BOOLEAN		bChangDev;
 HANDLE			m_WaveEvent;
-int				iBufferSize;
-int				iWhichBuffer;
+int			iSampleRate;
+int			iBufferSize;
+int			iWhichBuffer;
 _BOOLEAN		bBlocking;
 
 /* Wave out */

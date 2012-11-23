@@ -120,6 +120,7 @@ CParameter::CParameter(CDRMReceiver *pRx):
     audioencoder(""),audiodecoder(""),
     use_gpsd(0), restart_gpsd(false),
     gps_host("localhost"), gps_port("2497"),
+    iSampleRate(48000),
     rSysSimSNRdB(0.0),
     iFrequency(0),
     bValidSignalStrength(FALSE),
@@ -136,7 +137,7 @@ CParameter::CParameter(CDRMReceiver *pRx):
     GenerateRandomSerialNumber();
     if (pDRMRec)
         eReceiverMode = pDRMRec->GetReceiverMode();
-    CellMappingTable.MakeTable(eRobustnessMode, eSpectOccup);
+    CellMappingTable.MakeTable(eRobustnessMode, eSpectOccup, iSampleRate);
     gps_data.set=0;
     gps_data.status=0;
 #ifdef HAVE_LIBGPS
@@ -228,6 +229,7 @@ CParameter::CParameter(const CParameter& p):
     audioencoder(p.audioencoder),audiodecoder(p.audiodecoder),
     use_gpsd(p.use_gpsd),restart_gpsd(p.restart_gpsd),
     gps_host(p.gps_host),gps_port(p.gps_port),
+    iSampleRate(p.iSampleRate),
     rSysSimSNRdB(p.rSysSimSNRdB),
     iFrequency(p.iFrequency),
     bValidSignalStrength(p.bValidSignalStrength),
@@ -241,7 +243,7 @@ CParameter::CParameter(const CParameter& p):
     LastDataService(p.LastDataService)
 //, Mutex() // jfbc: I don't think this state should be copied
 {
-    CellMappingTable.MakeTable(eRobustnessMode, eSpectOccup);
+    CellMappingTable.MakeTable(eRobustnessMode, eSpectOccup, iSampleRate);
     matcReceivedPilotValues = p.matcReceivedPilotValues; // TODO
     gps_data = p.gps_data;
 }
@@ -322,13 +324,14 @@ CParameter& CParameter::operator=(const CParameter& p)
     rMaxPSDFreq = p.rMaxPSDFreq;
     rSigStrengthCorrection = p.rSigStrengthCorrection;
     eRunState = p.eRunState;
-    CellMappingTable.MakeTable(eRobustnessMode, eSpectOccup); // don't copy CMatrix
+    CellMappingTable.MakeTable(eRobustnessMode, eSpectOccup, iSampleRate); // don't copy CMatrix
     audiodecoder =  p.audiodecoder;
     audioencoder =  p.audioencoder;
     use_gpsd = p.use_gpsd;
     gps_host = p.gps_host;
     gps_port = p.gps_port;
     restart_gpsd = p.restart_gpsd;
+    iSampleRate = p.iSampleRate;
     rSysSimSNRdB = p.rSysSimSNRdB;
     iFrequency = p.iFrequency;
     bValidSignalStrength = p.bValidSignalStrength;
@@ -545,7 +548,7 @@ void CParameter::InitCellMapTable(const ERobMode eNewWaveMode,
     /* Set new values and make table */
     eRobustnessMode = eNewWaveMode;
     eSpectOccup = eNewSpecOcc;
-    CellMappingTable.MakeTable(eRobustnessMode, eSpectOccup);
+    CellMappingTable.MakeTable(eRobustnessMode, eSpectOccup, iSampleRate);
 }
 
 _BOOLEAN CParameter::SetWaveMode(const ERobMode eNewWaveMode)
@@ -570,7 +573,7 @@ _BOOLEAN CParameter::SetWaveMode(const ERobMode eNewWaveMode)
         eRobustnessMode = eNewWaveMode;
 
         /* This parameter change provokes update of table */
-        CellMappingTable.MakeTable(eRobustnessMode, eSpectOccup);
+        CellMappingTable.MakeTable(eRobustnessMode, eSpectOccup, iSampleRate);
 
         /* Set init flags */
         if (pDRMRec) pDRMRec->InitsForWaveMode();
@@ -604,7 +607,7 @@ void CParameter::SetSpectrumOccup(ESpecOcc eNewSpecOcc)
         eSpectOccup = eNewSpecOcc;
 
         /* This parameter change provokes update of table */
-        CellMappingTable.MakeTable(eRobustnessMode, eSpectOccup);
+        CellMappingTable.MakeTable(eRobustnessMode, eSpectOccup, iSampleRate);
 
         /* Set init flags */
         if (pDRMRec) pDRMRec->InitsForSpectrumOccup();
@@ -971,7 +974,9 @@ _REAL CParameter::GetSysSNRdBPilPos() const
     	positions compared to the total SNR of the DRM signal.
     */
     return (_REAL) 10.0 * log10(pow((_REAL) 10.0, rSysSimSNRdB / 10) /
-                                CellMappingTable.rAvPowPerSymbol * CellMappingTable.rAvScatPilPow * (_REAL) CellMappingTable.iNumCarrier);
+                                CellMappingTable.rAvPowPerSymbol *
+				CellMappingTable.rAvScatPilPow *
+				(_REAL) CellMappingTable.iNumCarrier);
 }
 
 void
@@ -1044,7 +1049,7 @@ _REAL CParameter::GetSysToNomBWCorrFact()
     _REAL rNomBW = GetNominalBandwidth();
 
     /* Calculate system bandwidth (N / T_u) */
-    const _REAL rSysBW = (_REAL) CellMappingTable.iNumCarrier / CellMappingTable.iFFTSizeN * SOUNDCRD_SAMPLE_RATE;
+    const _REAL rSysBW = (_REAL) CellMappingTable.iNumCarrier / CellMappingTable.iFFTSizeN * iSampleRate;
 
     return rSysBW / rNomBW;
 }

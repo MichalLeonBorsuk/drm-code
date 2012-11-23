@@ -38,7 +38,7 @@ public:
     CSoundInNull():iDev(-1) {}
     virtual ~CSoundInNull() {}
 
-    virtual void		Init(int, _BOOLEAN) {}
+    virtual void		Init(int, int, _BOOLEAN) {}
     virtual _BOOLEAN	Read(CVector<short>&) {
         return FALSE;
     }
@@ -62,7 +62,7 @@ public:
     CSoundOutNull():iDev(-1) {}
     virtual ~CSoundOutNull() {}
 
-    virtual void		Init(int, _BOOLEAN) {}
+    virtual void		Init(int, int, _BOOLEAN) {}
     virtual _BOOLEAN	Write(CVector<short>&) {
         return FALSE;
     }

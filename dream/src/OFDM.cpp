@@ -72,21 +72,21 @@ void COFDMModulation::ProcessDataInternal(CParameter&)
     }
 }
 
-void COFDMModulation::InitInternal(CParameter& TransmParam)
+void COFDMModulation::InitInternal(CParameter& Parameters)
 {
-    TransmParam.Lock();
+    Parameters.Lock();
     /* Get global parameters */
-    iDFTSize = TransmParam.CellMappingTable.iFFTSizeN;
-    iGuardSize = TransmParam.CellMappingTable.iGuardSize;
-    iShiftedKmin = TransmParam.CellMappingTable.iShiftedKmin;
+    iDFTSize = Parameters.CellMappingTable.iFFTSizeN;
+    iGuardSize = Parameters.CellMappingTable.iGuardSize;
+    iShiftedKmin = Parameters.CellMappingTable.iShiftedKmin;
 
     /* Last index */
-    iEndIndex = TransmParam.CellMappingTable.iShiftedKmax + 1;
+    iEndIndex = Parameters.CellMappingTable.iShiftedKmax + 1;
 
     /* Normalized offset correction factor for IF shift. Subtract the
        default IF frequency ("VIRTUAL_INTERMED_FREQ") */
     const _REAL rNormCurFreqOffset = (_REAL) -2.0 * crPi *
-                                     (rDefCarOffset - VIRTUAL_INTERMED_FREQ) / SOUNDCRD_SAMPLE_RATE;
+                                     (rDefCarOffset - VIRTUAL_INTERMED_FREQ) / Parameters.GetSampleRate();
 
     /* Rotation vector for exp() calculation */
     cExpStep = _COMPLEX(cos(rNormCurFreqOffset), sin(rNormCurFreqOffset));
@@ -103,9 +103,9 @@ void COFDMModulation::InitInternal(CParameter& TransmParam)
     veccFFTOutput.Init(iDFTSize);
 
     /* Define block-sizes for input and output */
-    iInputBlockSize = TransmParam.CellMappingTable.iNumCarrier;
-    iOutputBlockSize = TransmParam.CellMappingTable.iSymbolBlockSize;
-    TransmParam.Unlock();
+    iInputBlockSize = Parameters.CellMappingTable.iNumCarrier;
+    iOutputBlockSize = Parameters.CellMappingTable.iSymbolBlockSize;
+    Parameters.Unlock();
 }
 
 
@@ -159,13 +159,14 @@ void COFDMDemodulation::ProcessDataInternal(CParameter&)
         IIR1(vecrPowSpec[i], SqMag(veccFFTOutput[i]), rLamPSD);
 }
 
-void COFDMDemodulation::InitInternal(CParameter& ReceiverParam)
+void COFDMDemodulation::InitInternal(CParameter& Parameters)
 {
-    ReceiverParam.Lock();
-    iDFTSize = ReceiverParam.CellMappingTable.iFFTSizeN;
-    iGuardSize = ReceiverParam.CellMappingTable.iGuardSize;
-    iShiftedKmin = ReceiverParam.CellMappingTable.iShiftedKmin;
-    iShiftedKmax = ReceiverParam.CellMappingTable.iShiftedKmax;
+    Parameters.Lock();
+    iSampleRate = Parameters.GetSampleRate();
+    iDFTSize = Parameters.CellMappingTable.iFFTSizeN;
+    iGuardSize = Parameters.CellMappingTable.iGuardSize;
+    iShiftedKmin = Parameters.CellMappingTable.iShiftedKmin;
+    iShiftedKmax = Parameters.CellMappingTable.iShiftedKmax;
 
     /* Init plans for FFT (faster processing of Fft and Ifft commands) */
     FftPlan.Init(iDFTSize);
@@ -177,14 +178,14 @@ void COFDMDemodulation::InitInternal(CParameter& ReceiverParam)
     /* Vector for power density spectrum of input signal */
     iLenPowSpec = iDFTSize / 2;
     vecrPowSpec.Init(iLenPowSpec, (_REAL) 0.0);
-    rLamPSD = IIR1Lam(TICONST_PSD_EST_OFDM, (CReal) SOUNDCRD_SAMPLE_RATE /
-                      ReceiverParam.CellMappingTable.iSymbolBlockSize); /* Lambda for IIR filter */
+    rLamPSD = IIR1Lam(TICONST_PSD_EST_OFDM, (CReal) iSampleRate /
+                      Parameters.CellMappingTable.iSymbolBlockSize); /* Lambda for IIR filter */
 
 
     /* Define block-sizes for input and output */
     iInputBlockSize = iDFTSize;
-    iOutputBlockSize = ReceiverParam.CellMappingTable.iNumCarrier;
-    ReceiverParam.Unlock();
+    iOutputBlockSize = Parameters.CellMappingTable.iNumCarrier;
+    Parameters.Unlock();
 }
 
 void COFDMDemodulation::GetPowDenSpec(CVector<_REAL>& vecrData,
@@ -205,8 +206,7 @@ void COFDMDemodulation::GetPowDenSpec(CVector<_REAL>& vecrData,
         const _REAL rNormData =
             (_REAL) iDFTSize * iDFTSize * _MAXSHORT * _MAXSHORT;
 
-        const _REAL rFactorScale =
-            (_REAL) SOUNDCRD_SAMPLE_RATE / iLenPowSpec / 2000;
+        const _REAL rFactorScale = _REAL(iSampleRate / iLenPowSpec / 2000);
 
         /* Apply the normalization (due to the FFT) */
         for (int i = 0; i < iLenPowSpec; i++)
@@ -347,19 +347,19 @@ void COFDMDemodSimulation::ProcessDataInternal(CParameter&)
     (*pvecOutputData2).GetExData().bSymbolIDHasChanged = FALSE;
 }
 
-void COFDMDemodSimulation::InitInternal(CParameter& ReceiverParam)
+void COFDMDemodSimulation::InitInternal(CParameter& Parameters)
 {
-    ReceiverParam.Lock();
+    Parameters.Lock();
     /* Set internal parameters */
-    iDFTSize = ReceiverParam.CellMappingTable.iFFTSizeN;
-    iGuardSize = ReceiverParam.CellMappingTable.iGuardSize;
-    iNumCarrier = ReceiverParam.CellMappingTable.iNumCarrier;
-    iShiftedKmin = ReceiverParam.CellMappingTable.iShiftedKmin;
-    iShiftedKmax = ReceiverParam.CellMappingTable.iShiftedKmax;
-    iSymbolBlockSize = ReceiverParam.CellMappingTable.iSymbolBlockSize;
-    iNumSymPerFrame = ReceiverParam.CellMappingTable.iNumSymPerFrame;
+    iDFTSize = Parameters.CellMappingTable.iFFTSizeN;
+    iGuardSize = Parameters.CellMappingTable.iGuardSize;
+    iNumCarrier = Parameters.CellMappingTable.iNumCarrier;
+    iShiftedKmin = Parameters.CellMappingTable.iShiftedKmin;
+    iShiftedKmax = Parameters.CellMappingTable.iShiftedKmax;
+    iSymbolBlockSize = Parameters.CellMappingTable.iSymbolBlockSize;
+    iNumSymPerFrame = Parameters.CellMappingTable.iNumSymPerFrame;
 
-    iNumTapsChan = ReceiverParam.iNumTaps;
+    iNumTapsChan = Parameters.iNumTaps;
 
     /* Init plans for FFT (faster processing of Fft and Ifft commands) */
     FftPlan.Init(iDFTSize);
@@ -377,14 +377,14 @@ void COFDMDemodSimulation::InitInternal(CParameter& ReceiverParam)
        channel which was chosen. Place the delay spread centered in the
        middle of the guard-interval */
     iStartPointGuardRemov =
-        (iGuardSize + ReceiverParam.iPathDelay[iNumTapsChan - 1]) / 2;
+        (iGuardSize + Parameters.iPathDelay[iNumTapsChan - 1]) / 2;
 
     /* Check the case if impulse response is longer than guard-interval */
     if (iStartPointGuardRemov > iGuardSize)
         iStartPointGuardRemov = iGuardSize;
 
     /* Set start point of useful part extraction in global struct */
-    ReceiverParam.iOffUsfExtr = iGuardSize - iStartPointGuardRemov;
+    Parameters.iOffUsfExtr = iGuardSize - iStartPointGuardRemov;
 
     /* Define block-sizes for input and output */
     iInputBlockSize = iSymbolBlockSize;
@@ -393,6 +393,6 @@ void COFDMDemodSimulation::InitInternal(CParameter& ReceiverParam)
 
     /* We need to store as many symbols in output buffer as long the channel
        estimation delay is */
-    iMaxOutputBlockSize2 = iNumCarrier * ReceiverParam.iChanEstDelay;
-    ReceiverParam.Unlock();
+    iMaxOutputBlockSize2 = iNumCarrier * Parameters.iChanEstDelay;
+    Parameters.Unlock();
 }

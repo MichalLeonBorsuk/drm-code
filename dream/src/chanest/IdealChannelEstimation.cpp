@@ -30,7 +30,7 @@
 
 
 /* Implementation *************************************************************/
-void CIdealChanEst::ProcessDataInternal(CParameter& ReceiverParam)
+void CIdealChanEst::ProcessDataInternal(CParameter& Parameters)
 {
 	int i, j;
 
@@ -50,12 +50,12 @@ void CIdealChanEst::ProcessDataInternal(CParameter& ReceiverParam)
 		   (inter-carrier-interfearence). Consider offset from guard-interval
 		   removal (additional phase rotation) */
 		veccRefChan[i] = (_REAL) 0.0;
-		for (j = 0; j < ReceiverParam.iNumTaps; j++)
+		for (j = 0; j < Parameters.iNumTaps; j++)
 			veccRefChan[i] += Rotate((*pvecInputData2)[0].veccTap[j], i,
-				ReceiverParam.iPathDelay[j] + ReceiverParam.iOffUsfExtr);
+				Parameters.iPathDelay[j] + Parameters.iOffUsfExtr);
 
 		/* Normalize result */
-		veccRefChan[i] *= ReceiverParam.rGainCorr;
+		veccRefChan[i] *= Parameters.rGainCorr;
 	}
 
 	/* Debar DC carriers, set them to zero */
@@ -105,19 +105,19 @@ void CIdealChanEst::ProcessDataInternal(CParameter& ReceiverParam)
 		(*pvecInputData).GetExData().iSymbolID;
 }
 
-void CIdealChanEst::InitInternal(CParameter& ReceiverParam)
+void CIdealChanEst::InitInternal(CParameter& Parameters)
 {
 	/* Init base class for modifying the pilots (rotation) */
-	CPilotModiClass::InitRot(ReceiverParam);
+	CPilotModiClass::InitRot(Parameters);
 
 	/* Get local parameters */
-	iNumCarrier = ReceiverParam.CellMappingTable.iNumCarrier;
-	iNumSymPerFrame = ReceiverParam.CellMappingTable.iNumSymPerFrame;
-	iDFTSize = ReceiverParam.CellMappingTable.iFFTSizeN;
+	iNumCarrier = Parameters.CellMappingTable.iNumCarrier;
+	iNumSymPerFrame = Parameters.CellMappingTable.iNumSymPerFrame;
+	iDFTSize = Parameters.CellMappingTable.iFFTSizeN;
 
 	/* Parameters for debaring the DC carriers from evaluation. First check if
 	   we have only useful part on the right side of the DC carrier */
-	if (ReceiverParam.CellMappingTable.iCarrierKmin > 0)
+	if (Parameters.CellMappingTable.iCarrierKmin > 0)
 	{
 		/* In this case, no DC carriers are in the useful spectrum */
 		iNumDCCarriers = 0;
@@ -125,15 +125,15 @@ void CIdealChanEst::InitInternal(CParameter& ReceiverParam)
 	}
 	else
 	{
-		if (ReceiverParam.GetWaveMode() == RM_ROBUSTNESS_MODE_A)
+		if (Parameters.GetWaveMode() == RM_ROBUSTNESS_MODE_A)
 		{
 			iNumDCCarriers = 3;
-			iStartDCCar = abs(ReceiverParam.CellMappingTable.iCarrierKmin) - 1;
+			iStartDCCar = abs(Parameters.CellMappingTable.iCarrierKmin) - 1;
 		}
 		else
 		{
 			iNumDCCarriers = 1;
-			iStartDCCar = abs(ReceiverParam.CellMappingTable.iCarrierKmin);
+			iStartDCCar = abs(Parameters.CellMappingTable.iCarrierKmin);
 		}
 	}
 
@@ -144,8 +144,8 @@ void CIdealChanEst::InitInternal(CParameter& ReceiverParam)
 	iStartCnt = 20;
 
 	/* Additional delay from long interleaving has to be considered */
-	if (ReceiverParam.GetInterleaverDepth() == CParameter::SI_LONG)
-		iStartCnt += ReceiverParam.CellMappingTable.iNumSymPerFrame * D_LENGTH_LONG_INTERL;
+	if (Parameters.GetInterleaverDepth() == CParameter::SI_LONG)
+		iStartCnt += Parameters.CellMappingTable.iNumSymPerFrame * D_LENGTH_LONG_INTERL;
 
 
 	/* Allocate memory for intermedia results */

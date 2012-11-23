@@ -93,11 +93,11 @@ void CSoundOut::Init_HW()
 
 
     /* Sampling rate */
-    arg = SOUNDCRD_SAMPLE_RATE;
+    arg = Parameters.GetSampleRate();
     status = ioctl(dev.fildes(), SNDCTL_DSP_SPEED, &arg);
     if (status == -1)
         throw CGenErr("SNDCTL_DSP_SPEED ioctl failed");
-    if (arg != SOUNDCRD_SAMPLE_RATE)
+    if (arg != Parameters.GetSampleRate())
         throw CGenErr("unable to set sample rate");
 
 
@@ -238,10 +238,10 @@ void CSoundOut::Init_HW()
     }
     /* Set the stream rate */
     dir=0;
-    err = snd_pcm_hw_params_set_rate(handle, hwparams, SOUNDCRD_SAMPLE_RATE, dir);
+    err = snd_pcm_hw_params_set_rate(handle, hwparams, Parameters.GetSampleRate(), dir);
     if (err < 0) {
 #ifdef USE_QT_GUI
-        qDebug("Rate %iHz not available : %s", SOUNDCRD_SAMPLE_RATE, snd_strerror(err));
+        qDebug("Rate %iHz not available : %s", Parameters.GetSampleRate(), snd_strerror(err));
 #endif
         throw CGenErr("alsa CSoundOut::Init_HW ");
     }

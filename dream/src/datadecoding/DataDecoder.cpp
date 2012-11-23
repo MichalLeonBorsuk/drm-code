@@ -47,7 +47,7 @@ CDataDecoder::~CDataDecoder ()
 }
 
 void
-CDataDecoder::ProcessDataInternal(CParameter & ReceiverParam)
+CDataDecoder::ProcessDataInternal(CParameter & Parameters)
 {
 	int i, j;
 	int iPacketID;
@@ -85,12 +85,12 @@ CDataDecoder::ProcessDataInternal(CParameter & ReceiverParam)
 		if (CRCObject.CheckCRC(crc) == TRUE)
 		{
 			veciCRCOk[j] = 1;	/* CRC ok */
-			ReceiverParam.ReceiveStatus.MOT.SetStatus(RX_OK);
+			Parameters.ReceiveStatus.MOT.SetStatus(RX_OK);
 		}
 		else
 		{
 			veciCRCOk[j] = 0;	/* CRC wrong */
-			ReceiverParam.ReceiveStatus.MOT.SetStatus(CRC_ERROR);
+			Parameters.ReceiveStatus.MOT.SetStatus(CRC_ERROR);
 		}
 	}
 
@@ -217,13 +217,13 @@ CDataDecoder::ProcessDataInternal(CParameter & ReceiverParam)
 
 				if(eAppType[iPacketID] == AT_NOT_SUP)
 				{
-					int iCurSelDataServ = ReceiverParam.GetCurSelDataService();
-					// TODO int iCurDataStreamID = ReceiverParam.Service[iCurSelDataServ].DataParam.iStreamID;
+					int iCurSelDataServ = Parameters.GetCurSelDataService();
+					// TODO int iCurDataStreamID = Parameters.Service[iCurSelDataServ].DataParam.iStreamID;
 					for (int i = 0; i <=3; i++)
 					{
-						if(ReceiverParam.Service[iCurSelDataServ].DataParam.iPacketID == iPacketID)
+						if(Parameters.Service[iCurSelDataServ].DataParam.iPacketID == iPacketID)
 						{
-							eAppType[iPacketID] = GetAppType(ReceiverParam.Service[iCurSelDataServ].DataParam);
+							eAppType[iPacketID] = GetAppType(Parameters.Service[iCurSelDataServ].DataParam);
 						}
 					}
 				}
@@ -277,11 +277,11 @@ CDataDecoder::ProcessDataInternal(CParameter & ReceiverParam)
 		}
 	}
 	if(iEPGService >= 0)	/* if EPG decoding is active */
-		DecodeEPG(ReceiverParam);
+		DecodeEPG(Parameters);
 }
 
 void
-CDataDecoder::DecodeEPG(const CParameter & ReceiverParam)
+CDataDecoder::DecodeEPG(const CParameter & Parameters)
 {
 	/* Application Decoding - must run all the time and in background */
 	if ((DoNotProcessData == FALSE)
@@ -303,7 +303,7 @@ CDataDecoder::DecodeEPG(const CParameter & ReceiverParam)
 				}
 			int iScopeId = NewObj.iScopeId;
 			if (iScopeId == 0)
-				iScopeId = ReceiverParam.Service[iEPGService].iServiceID;
+				iScopeId = Parameters.Service[iEPGService].iServiceID;
 			fileName = epgFilename(NewObj.ScopeStart, iScopeId,
 								   NewObj.iContentSubType, advanced);
 
@@ -319,7 +319,7 @@ CDataDecoder::DecodeEPG(const CParameter & ReceiverParam)
 			fileName = NewObj.strName;
 		}
 
-		string path = ReceiverParam.GetDataDirectory("EPG") + fileName;
+		string path = Parameters.GetDataDirectory("EPG") + fileName;
 		mkdirs(path);
 		//cerr << "writing EPG file " << path << endl;
 		FILE *f = fopen(path.c_str(), "wb");
@@ -333,7 +333,7 @@ CDataDecoder::DecodeEPG(const CParameter & ReceiverParam)
 }
 
 void
-CDataDecoder::InitInternal(CParameter & ReceiverParam)
+CDataDecoder::InitInternal(CParameter & Parameters)
 {
 	int iTotalNumInputBits;
 	int iTotalNumInputBytes;
@@ -344,19 +344,19 @@ CDataDecoder::InitInternal(CParameter & ReceiverParam)
 	DoNotProcessData = FALSE;
 
 	/* Get current selected data service */
-	iCurSelDataServ = ReceiverParam.GetCurSelDataService();
+	iCurSelDataServ = Parameters.GetCurSelDataService();
 
 	/* Get current data stream ID */
 	iCurDataStreamID =
-		ReceiverParam.Service[iCurSelDataServ].DataParam.iStreamID;
+		Parameters.Service[iCurSelDataServ].DataParam.iStreamID;
 
 	/* Get number of total input bits (and bytes) for this module */
-	iTotalNumInputBits = ReceiverParam.iNumDataDecoderBits;
+	iTotalNumInputBits = Parameters.iNumDataDecoderBits;
 	iTotalNumInputBytes = iTotalNumInputBits / SIZEOF__BYTE;
 
 	/* Get the packet ID of the selected service */
 	iServPacketID =
-		ReceiverParam.Service[iCurSelDataServ].DataParam.iPacketID;
+		Parameters.Service[iCurSelDataServ].DataParam.iPacketID;
 
 	/* Init application type (will be overwritten by correct type later */
 	eAppType[iServPacketID] = AT_NOT_SUP;
@@ -364,7 +364,7 @@ CDataDecoder::InitInternal(CParameter & ReceiverParam)
 	/* Check, if service is activated. Also, only packet services can be
 	   decoded */
 	if ((iCurDataStreamID != STREAM_ID_NOT_USED) &&
-		(ReceiverParam.Service[iCurSelDataServ].DataParam.
+		(Parameters.Service[iCurSelDataServ].DataParam.
 		 ePacketModInd == CDataParam::PM_PACKET_MODE))
 	{
 		/* Calculate total packet size. DRM standard: packet length: this
@@ -373,7 +373,7 @@ CDataDecoder::InitInternal(CParameter & ReceiverParam)
 		   length is three bytes longer as it includes the header and CRC
 		   fields) */
 		iTotalPacketSize =
-			ReceiverParam.Service[iCurSelDataServ].DataParam.iPacketLen + 3;
+			Parameters.Service[iCurSelDataServ].DataParam.iPacketLen + 3;
 
 		/* Check total packet size, could be wrong due to wrong SDC */
 		if ((iTotalPacketSize <= 0) ||
@@ -391,7 +391,7 @@ CDataDecoder::InitInternal(CParameter & ReceiverParam)
 			/* Number of data packets in one data block */
 			iNumDataPackets = iTotalNumInputBytes / iTotalPacketSize;
 
-			eAppType[iServPacketID] = GetAppType(ReceiverParam.Service[iCurSelDataServ].DataParam);
+			eAppType[iServPacketID] = GetAppType(Parameters.Service[iCurSelDataServ].DataParam);
 
 			/* Check, if service ID of Journaline application has
 			   changed, that indicates that a new transmission is
@@ -399,7 +399,7 @@ CDataDecoder::InitInternal(CParameter & ReceiverParam)
 			   use old buffer. That ensures that the decoder keeps
 			   old data in buffer when synchronization was lost for
 			   a short time */
-			const uint32_t iNewServID = ReceiverParam.Service[iCurSelDataServ].iServiceID;
+			const uint32_t iNewServID = Parameters.Service[iCurSelDataServ].iServiceID;
 
 			if((eAppType[iServPacketID]==AT_JOURNALINE) && (iOldJournalineServiceID != iNewServID))
 			{
@@ -438,12 +438,12 @@ CDataDecoder::InitInternal(CParameter & ReceiverParam)
 	/* look for EPG */
 	for (int i = 0; i <= 3; i++)
 	{
-		if ((ReceiverParam.Service[i].DataParam.eAppDomain ==
+		if ((Parameters.Service[i].DataParam.eAppDomain ==
 			 CDataParam::AD_DAB_SPEC_APP)
-			&& (ReceiverParam.Service[i].DataParam.iUserAppIdent == 7))
+			&& (Parameters.Service[i].DataParam.iUserAppIdent == 7))
 		{
 			iEPGService = i;
-			iEPGPacketID = ReceiverParam.Service[i].DataParam.iPacketID;
+			iEPGPacketID = Parameters.Service[i].DataParam.iPacketID;
 			eAppType[iEPGPacketID] = AT_EPG;
 			//cerr << "EPG packet id " << iEPGPacketID << endl;
 		}

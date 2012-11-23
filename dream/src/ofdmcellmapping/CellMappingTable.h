@@ -77,7 +77,7 @@ public:
 	CCellMappingTable() : iNumSymbolsPerSuperframe(0) {}
 	virtual ~CCellMappingTable() {}
 
-	void MakeTable(ERobMode eNewRobustnessMode, ESpecOcc eNewSpectOccup);
+	void MakeTable(ERobMode eNewRobustnessMode, ESpecOcc eNewSpectOccup, int iSampleRate);
 
 	struct CRatio {int iEnum; int iDenom;};
 

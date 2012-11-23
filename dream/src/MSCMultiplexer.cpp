@@ -58,17 +58,17 @@ void CMSCDemultiplexer::ProcessDataInternal(CParameter&)
         ExtractData(*pvecInputData, *vecpvecOutputData[i], StreamPos[i]);
 }
 
-void CMSCDemultiplexer::InitInternal(CParameter& ReceiverParam)
+void CMSCDemultiplexer::InitInternal(CParameter& Parameters)
 {
-    ReceiverParam.Lock();
+    Parameters.Lock();
     for (size_t i=0; i<MAX_NUM_STREAMS; i++)
     {
-        StreamPos[i] = GetStreamPos(ReceiverParam, i);
+        StreamPos[i] = GetStreamPos(Parameters, i);
         veciOutputBlockSize[i] = StreamPos[i].iLenHigh + StreamPos[i].iLenLow;
     }
     /* Set input block size */
-    iInputBlockSize = ReceiverParam.iNumDecodedBitsMSC;
-    ReceiverParam.Unlock();
+    iInputBlockSize = Parameters.iNumDecodedBitsMSC;
+    Parameters.Unlock();
 }
 
 void CMSCDemultiplexer::ExtractData(CVectorEx<_BINARY>& vecIn,

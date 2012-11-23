@@ -74,16 +74,16 @@ CAudioFileIn::SetFileName(const string& strFileName)
         if (ext.length() == 4)
             iFileSampleRate = 1000*atoi(ext.substr(2).c_str());
         else
-            iFileSampleRate = 48000; /* not SOUNDCRD_SAMPLE_RATE */
+            iFileSampleRate = 48000; /* not iSampleRate TODO check! */
         break;
     default:
         iFileChannels = 1;
-        iFileSampleRate = 48000; /* not SOUNDCRD_SAMPLE_RATE */
+        iFileSampleRate = 48000; /* not iSampleRate TODO check! */
     }
 }
 
 void
-CAudioFileIn::Init(int iNewBufferSize, _BOOLEAN bNewBlocking)
+CAudioFileIn::Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking)
 {
     if (pFileReceiver != NULL)
         return;
@@ -97,6 +97,7 @@ CAudioFileIn::Init(int iNewBufferSize, _BOOLEAN bNewBlocking)
 		buffer=NULL;
 	}
 
+	iSampleRate = iNewSampleRate;
 	iBufferSize = iNewBufferSize;
 	buffer = new short[iBufferSize];
 
@@ -123,9 +124,9 @@ CAudioFileIn::Init(int iNewBufferSize, _BOOLEAN bNewBlocking)
         {
             iFileChannels = sfinfo.channels;
             iFileSampleRate = sfinfo.samplerate;
-            int oversample_factor = SOUNDCRD_SAMPLE_RATE / iFileSampleRate;
+            int oversample_factor = iSampleRate / iFileSampleRate;
             /* we can only cope with inter submultiples */
-            if (SOUNDCRD_SAMPLE_RATE != oversample_factor*iFileSampleRate)
+            if (iSampleRate != oversample_factor*iFileSampleRate)
                 throw CGenErr("unsupported sample rate in input file");
         }
         break;
@@ -144,7 +145,7 @@ CAudioFileIn::Init(int iNewBufferSize, _BOOLEAN bNewBlocking)
 
     if (bNewBlocking)
     {
-        double interval = double(iNewBufferSize/2) / double(SOUNDCRD_SAMPLE_RATE);
+        double interval = double(iNewBufferSize/2) / double(iSampleRate);
         pacer = new CPacer(uint64_t(1e9*interval));
     }
 }
@@ -191,7 +192,7 @@ CAudioFileIn::Read(CVector<short>& psData)
         fread(buffer, sizeof(short), size_t(iFileChannels*iFrames), pFileReceiver);
     }
 #endif
-    int oversample_factor = SOUNDCRD_SAMPLE_RATE / iFileSampleRate;
+    int oversample_factor = iSampleRate / iFileSampleRate;
     if (iFileChannels==2)
     {
         for (i = 0; i < iFrames/oversample_factor; i++)

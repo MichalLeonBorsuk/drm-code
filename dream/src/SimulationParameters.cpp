@@ -73,22 +73,22 @@ void CDRMSimulation::SimScript()
        By using the skript "plotsimres.m" in Matlab, a nice plot of the results
        is generated automatically (this script reads all available simulation
        results) */
-    Param.eSimType = CParameter::ST_BITERROR;
-    Param.eSimType = CParameter::ST_SYNC_PARAM; /* Check "SetSyncInput()"s! */
-    Param.eSimType = CParameter::ST_BER_IDEALCHAN;
-    Param.eSimType = CParameter::ST_MSECHANEST;
-    Param.eSimType = CParameter::ST_NONE; /* No simulation, regular GUI */
+    Parameters.eSimType = CParameter::ST_BITERROR;
+    Parameters.eSimType = CParameter::ST_SYNC_PARAM; /* Check "SetSyncInput()"s! */
+    Parameters.eSimType = CParameter::ST_BER_IDEALCHAN;
+    Parameters.eSimType = CParameter::ST_MSECHANEST;
+    Parameters.eSimType = CParameter::ST_NONE; /* No simulation, regular GUI */
 
 
-    if (Param.eSimType != CParameter::ST_NONE)
+    if (Parameters.eSimType != CParameter::ST_NONE)
     {
         /* Choose channel model. The channel numbers are according to the
            numbers in the DRM-standard (e.g., channel number 1 is AWGN) plus
            some additional channel profiles defined by the author */
-        Param.iDRMChannelNum = 1;
+        Parameters.iDRMChannelNum = 1;
 
         /* This parameter is only needed for the non-standard special channels 8, 10, 11, 12 */
-        Param.iSpecChDoppler = 2; /* Hz (integer value!) */
+        Parameters.iSpecChDoppler = 2; /* Hz (integer value!) */
 
         /* Defines the SNR range for the simulation. A start, stop and step
            value can be set here */
@@ -112,8 +112,8 @@ void CDRMSimulation::SimScript()
         iNumItMLC = 1;
 
         /* The associated code rate is R = 0,6 and the modulation is 64-QAM */
-        Param.MSCPrLe.iPartB = 1;
-        Param.eMSCCodingScheme = CS_3_SM;
+        Parameters.MSCPrLe.iPartB = 1;
+        Parameters.eMSCCodingScheme = CS_3_SM;
 
 
         /* Choose the type of channel estimation algorithms used for simlation */
@@ -130,21 +130,21 @@ void CDRMSimulation::SimScript()
         TimeSync.SetSyncInput(TRUE);
 
 
-        if (Param.iDRMChannelNum < 3)
+        if (Parameters.iDRMChannelNum < 3)
         {
-            Param.InitCellMapTable(RM_ROBUSTNESS_MODE_A, SO_2);
-            Param.eSymbolInterlMode = CParameter::SI_SHORT;
+            Parameters.InitCellMapTable(RM_ROBUSTNESS_MODE_A, SO_2);
+            Parameters.eSymbolInterlMode = CParameter::SI_SHORT;
         }
-        else if ((Param.iDRMChannelNum == 8) || (Param.iDRMChannelNum == 10))
+        else if ((Parameters.iDRMChannelNum == 8) || (Parameters.iDRMChannelNum == 10))
         {
             /* Special setting for channel 8 */
-            Param.InitCellMapTable(RM_ROBUSTNESS_MODE_B, SO_0);
-            Param.eSymbolInterlMode = CParameter::SI_LONG;
+            Parameters.InitCellMapTable(RM_ROBUSTNESS_MODE_B, SO_0);
+            Parameters.eSymbolInterlMode = CParameter::SI_LONG;
         }
         else
         {
-            Param.InitCellMapTable(RM_ROBUSTNESS_MODE_B, SO_3);
-            Param.eSymbolInterlMode = CParameter::SI_LONG;
+            Parameters.InitCellMapTable(RM_ROBUSTNESS_MODE_B, SO_3);
+            Parameters.eSymbolInterlMode = CParameter::SI_LONG;
         }
 
 
@@ -186,19 +186,19 @@ void CDRMSimulation::SimScript()
         if (iSimTime != 0)
         {
             GenSimData.SetSimTime(iSimTime,
-                                  SimFileName(Param, strSpecialRemark, TRUE));
+                                  SimFileName(Parameters, strSpecialRemark, TRUE));
         }
         else
         {
             GenSimData.SetNumErrors(iSimNumErrors,
-                                    SimFileName(Param, strSpecialRemark, TRUE));
+                                    SimFileName(Parameters, strSpecialRemark, TRUE));
         }
 
         /* Set file name for simulation results output (in case of MSE, plot
            SNR range, too) */
         strSimFile = string(SIM_OUT_FILES_PATH) +
-                     SimFileName(Param, strSpecialRemark,
-                                 Param.eSimType == CParameter::ST_MSECHANEST) + string(".dat");
+                     SimFileName(Parameters, strSpecialRemark,
+                                 Parameters.eSimType == CParameter::ST_MSECHANEST) + string(".dat");
 
         /* Open file for storing simulation results */
         pFileSimRes = fopen(strSimFile.c_str(), "w");
@@ -214,11 +214,11 @@ void CDRMSimulation::SimScript()
         for (rSNRCnt = rStartSNR; rSNRCnt <= rEndSNR; rSNRCnt += rStepSNR)
         {
             /* Set SNR in global struct and run simulation */
-            Param.SetNominalSNRdB(rSNRCnt);
+            Parameters.SetNominalSNRdB(rSNRCnt);
             Run();
 
             /* Store results in file */
-            switch (Param.eSimType)
+            switch (Parameters.eSimType)
             {
             case CParameter::ST_MSECHANEST:
                 /* After the simulation get results */
@@ -232,12 +232,12 @@ void CDRMSimulation::SimScript()
 
             case CParameter::ST_SYNC_PARAM:
                 /* Save results in the file */
-                fprintf(pFileSimRes, "%e %e\n", rSNRCnt, Param.rSyncTestParam);
+                fprintf(pFileSimRes, "%e %e\n", rSNRCnt, Parameters.rSyncTestParam);
                 break;
 
             default:
                 /* Save results in the file */
-                fprintf(pFileSimRes, "%e %e\n", rSNRCnt, Param.rBitErrRate);
+                fprintf(pFileSimRes, "%e %e\n", rSNRCnt, Parameters.rBitErrRate);
                 break;
             }
 
