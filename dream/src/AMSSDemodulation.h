@@ -119,12 +119,10 @@ protected:
 class CAMSSPhaseDemod : public CReceiverModul<_REAL, _REAL>
 {
 public:
-    CAMSSPhaseDemod() : rBPNormBW((CReal) AMSS_IF_FILTER_BW / SOUNDCRD_SAMPLE_RATE), rNormCurMixFreqOffs((CReal) 0.0)
-    {
-        rPreviousPhaseSample = 0.0;
-        rPhaseOffset = 0.0;
-    }
-    virtual ~CAMSSPhaseDemod() { }
+    CAMSSPhaseDemod() :
+        rBPNormBW((CReal) 0.0), rNormCurMixFreqOffs((CReal) 0.0),
+        rPreviousPhaseSample((CReal) 0.0), rPhaseOffset((CReal) 0.0) {}
+    virtual ~CAMSSPhaseDemod() {}
 
     void SetAcqFreq(const CReal rNewNormCenter);
     _BOOLEAN GetPLLPhase(CReal& rPhaseOut);
