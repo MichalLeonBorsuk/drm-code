@@ -50,13 +50,16 @@ void CReadData::ProcessDataInternal(CParameter&)
 
 void CReadData::InitInternal(CParameter& Parameters)
 {
+    /* Get sample rate */
+    const int iSampleRate = Parameters.GetSampleRate();
+
     /* Define block-size for output, an audio frame always corresponds
        to 400 ms. We use always stereo blocks */
-    iOutputBlockSize = (int) ((_REAL) Parameters.GetSampleRate() *
+    iOutputBlockSize = (int) ((_REAL) iSampleRate *
                               (_REAL) 0.4 /* 400 ms */ * 2 /* stereo */);
 
     /* Init sound interface and intermediate buffer */
-    pSound->Init(iOutputBlockSize, FALSE);
+    pSound->Init(iSampleRate, iOutputBlockSize, FALSE);
     vecsSoundBuffer.Init(iOutputBlockSize);
 
     /* Init level meter */
@@ -175,9 +178,12 @@ void CWriteData::ProcessDataInternal(CParameter& Parameters)
 
 void CWriteData::InitInternal(CParameter& Parameters)
 {
+    /* Get sample rate */
+    const int iSampleRate = Parameters.GetSampleRate();
+
     /* An audio frame always corresponds to 400 ms.
        We use always stereo blocks */
-    const int iAudFrameSize = (int) ((_REAL) Parameters.GetSampleRate() *
+    const int iAudFrameSize = (int) ((_REAL) iSampleRate *
                                      (_REAL) 0.4 /* 400 ms */);
 
     /* Check if blocking behaviour of sound interface shall be changed */
@@ -185,7 +191,7 @@ void CWriteData::InitInternal(CParameter& Parameters)
         bSoundBlocking = bNewSoundBlocking;
 
     /* Init sound interface with blocking or non-blocking behaviour */
-    pSound->Init(iAudFrameSize * 2 /* stereo */, bSoundBlocking);
+    pSound->Init(iSampleRate, iAudFrameSize * 2 /* stereo */, bSoundBlocking);
 
     /* Init intermediate buffer needed for different channel selections */
     vecsTmpAudData.Init(iAudFrameSize * 2 /* stereo */);

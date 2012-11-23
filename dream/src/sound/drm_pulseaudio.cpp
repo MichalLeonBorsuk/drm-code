@@ -698,14 +698,12 @@ CSoundInPulse::CSoundInPulse():
 	getdevices(names, devices, false);
 }
 
-void CSoundInPulse::Init(int iSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking)
+void CSoundInPulse::Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking)
 {
 	DEBUG_MSG("initrec iNewBufferSize=%i bNewBlocking=%i\n", iNewBufferSize, bNewBlocking);
 
-	this->iSampleRate = iSampleRate;
-	iMaxSampleRateOffset = iSampleRate * 2 / 100; // = 2%
-
-	/* Save blocking mode and buffer size */
+	/* Save samplerate and blocking mode */
+	iSampleRate = iNewSampleRate;
 	bBlockingRec = bNewBlocking;
 
 	/* Check if device must be opened or reinitialized */
@@ -797,14 +795,12 @@ CSoundOutPulse::CSoundOutPulse():
 	getdevices(names, devices, true);
 }
 
-void CSoundOutPulse::Init(int iSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking)
+void CSoundOutPulse::Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking)
 {
 	DEBUG_MSG("initplay iNewBufferSize=%i bNewBlocking=%i\n", iNewBufferSize, bNewBlocking);
 
-	this->iSampleRate = iSampleRate;
-	iMaxSampleRateOffset = iSampleRate * 2 / 100; // = 2%
-
-	/* Save blocking mode and buffer size */
+	/* Save samplerate, blocking mode and buffer size */
+	iSampleRate = iNewSampleRate;
 	bBlockingPlay = bNewBlocking;
 	iBufferSize = iNewBufferSize;
 

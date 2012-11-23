@@ -120,7 +120,7 @@ CParameter::CParameter(CDRMReceiver *pRx):
     audioencoder(""),audiodecoder(""),
     use_gpsd(0), restart_gpsd(false),
     gps_host("localhost"), gps_port("2497"),
-    iSampleRate(48000),
+    iSampleRate(SOUNDCRD_SAMPLE_RATE),
     rSysSimSNRdB(0.0),
     iFrequency(0),
     bValidSignalStrength(FALSE),
