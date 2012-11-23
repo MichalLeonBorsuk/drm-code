@@ -594,6 +594,8 @@ void RemoteMenu::OnModRigMenu(int iID)
         pRemoteMenu->setItemChecked(iID, TRUE);
         rig.SetEnableModRigSettings(TRUE);
     }
+# else
+    (void)iID;
 # endif
 #else
     // TODO QT4
@@ -604,7 +606,7 @@ void RemoteMenu::OnModRigMenu(int iID)
 void RemoteMenu::OnRemoteMenu(int iID)
 {
 #if QT_VERSION < 0x040000
-#ifdef HAVE_LIBHAMLIB
+# ifdef HAVE_LIBHAMLIB
     // if an "others" rig was selected add it to the specials list
     for (map<int,Rigmenu>::iterator i=rigmenus.begin(); i!=rigmenus.end(); i++)
     {
@@ -649,7 +651,9 @@ void RemoteMenu::OnRemoteMenu(int iID)
     {
         emit SMeterAvailable();
     }
-#endif
+# else
+	(void)iID;
+# endif
 #else
     // TODO QT4
     (void)iID;
