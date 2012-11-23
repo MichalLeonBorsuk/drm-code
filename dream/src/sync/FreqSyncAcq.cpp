@@ -371,6 +371,10 @@ fclose(pFile1);
 void CFreqSyncAcq::InitInternal(CParameter& Parameters)
 {
 	Parameters.Lock(); 
+
+	/* Get sample rate */
+	const int iSampleRate = Parameters.GetSampleRate();
+
 	/* Needed for calculating offset in Hertz in case of synchronized input
 	   (for simulation) */
 	iFFTSize = Parameters.CellMappingTable.iFFTSizeN;
@@ -385,15 +389,15 @@ void CFreqSyncAcq::InitInternal(CParameter& Parameters)
 		iTableFreqPilRobModB[2][0] * NUM_BLOCKS_4_FREQ_ACQU;
 
 	/* Size of FFT */
-	iFrAcFFTSize = RMB_FFT_SIZE_N * NUM_BLOCKS_4_FREQ_ACQU;
+	iFrAcFFTSize = ADJ_RM_FFT_SIZE_N(RMB_FFT_SIZE_N, iSampleRate) * NUM_BLOCKS_4_FREQ_ACQU;
 
 
 	/* -------------------------------------------------------------------------
 	   Set start- and endpoint of search window for DC carrier after the
 	   correlation with the known pilot structure */
 	/* Normalize the desired position and window size which are in Hertz */
-	const _REAL rNormDesPos = rCenterFreq / Parameters.GetSampleRate() * 2;
-	const _REAL rNormHalfWinSize = rWinSize / Parameters.GetSampleRate();
+	const _REAL rNormDesPos = rCenterFreq / iSampleRate * 2;
+	const _REAL rNormHalfWinSize = rWinSize / iSampleRate;
 
 	/* Length of the half of the spectrum of real input signal (the other half
 	   is the same because of the real input signal). We have to consider the
@@ -460,7 +464,7 @@ void CFreqSyncAcq::InitInternal(CParameter& Parameters)
 
 
 	/* Init bandpass filter object */
-	BPFilter.Init(Parameters.GetSampleRate(), Parameters.CellMappingTable.iSymbolBlockSize, VIRTUAL_INTERMED_FREQ,
+	BPFilter.Init(iSampleRate, Parameters.CellMappingTable.iSymbolBlockSize, VIRTUAL_INTERMED_FREQ,
 		Parameters.GetSpectrumOccup(), CDRMBandpassFilt::FT_RECEIVER);
 
 
