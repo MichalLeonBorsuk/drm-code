@@ -397,6 +397,9 @@ RemoteMenu::RemoteMenu(QWidget* parent, CRig& nrig)
     :rigmenus(),specials(),rig(nrig)
 #endif
 {
+#ifndef HAVE_LIBHAMLIB
+    (void)nrig;
+#endif
 #if QT_VERSION < 0x040000
     pRemoteMenu = new QPopupMenu(parent);
     pRemoteMenuOther = new QPopupMenu(parent);
@@ -661,6 +664,8 @@ void RemoteMenu::OnComPortMenu(QAction* action)
 # else
     rig.SetComPort(action->text().toUtf8().data());
 # endif
+#else
+    (void)action;
 #endif
 }
 
