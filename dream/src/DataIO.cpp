@@ -236,7 +236,7 @@ void CWriteData::StartWriteWaveFile(const string& strFileName)
     /* No Lock(), Unlock() needed here */
     if (bDoWriteWaveFile == FALSE)
     {
-        WaveFileAudio.Open(strFileName);
+        WaveFileAudio.Open(strFileName, iSampleRate);
         bDoWriteWaveFile = TRUE;
     }
 }

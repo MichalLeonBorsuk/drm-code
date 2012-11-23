@@ -162,9 +162,6 @@ void CAMDemodulation::InitInternal(CParameter& Parameters)
     iSampleRate = Parameters.GetSampleRate();
     Parameters.Unlock();
 
-    // TODO - make sure this is the right place to set this.
-    rBPNormBW = 10000.0 / CReal(iSampleRate);
-
     /* Init temporary vector for filter input and output */
     rvecInpTmp.Init(iSymbolBlockSize);
     cvecHilbert.Init(iSymbolBlockSize);

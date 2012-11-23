@@ -30,8 +30,6 @@
 #if !defined(AUDIOFILE_H__FD6B234594328533_80UWFB06C2AC__INCLUDED_)
 #define AUDIOFILE_H__FD6B234594328533_80UWFB06C2AC__INCLUDED_
 
-#include "../GlobalDefinitions.h"
-
 
 /* Classes ********************************************************************/
 class CWaveFile
@@ -40,7 +38,7 @@ public:
 	CWaveFile() : pFile(NULL), iBytesWritten(0) {}
 	virtual ~CWaveFile() {if (pFile != NULL) Close();}
 
-	void Open(const string strFileName)
+	void Open(const string strFileName, const int iSampleRate)
 	{
 		if (pFile != NULL)
 			Close();
@@ -49,8 +47,8 @@ public:
 		{
 			/* Use always stereo and PCM */
 			{'R', 'I', 'F', 'F'}, 0, {'W', 'A', 'V', 'E'},
-			{'f', 'm', 't', ' '}, 16, 1, 2, SOUNDCRD_SAMPLE_RATE,
-			SOUNDCRD_SAMPLE_RATE * 4 /* same as block align */,
+			{'f', 'm', 't', ' '}, 16, 1, 2, iSampleRate,
+			iSampleRate * 4 /* same as block align */,
 			4 /* block align */, 16,
 			{'d', 'a', 't', 'a'}, 0
 		};

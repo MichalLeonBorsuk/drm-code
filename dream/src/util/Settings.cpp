@@ -281,7 +281,7 @@ CSettings::ParseArguments(int argc, char **argv)
 
 		/* Frequency acquisition search window size ------------------------- */
 		if (GetNumericArgument(argc, argv, i, "-S", "--fracwinsize", 0,
-							   MAX_FREQ_AQC_SE_WIN_SI, rArgument) == TRUE)
+							   MAX_FREQ_AQC_SE_WIN_SZ, rArgument) == TRUE)
 		{
 			Put("command", "fracwinsize", rArgument);
 			continue;
@@ -289,7 +289,7 @@ CSettings::ParseArguments(int argc, char **argv)
 
 		/* Frequency acquisition search window center ----------------------- */
 		if (GetNumericArgument(argc, argv, i, "-E", "--fracwincent", 0,
-							   MAX_FREQ_AQC_SE_WIN_CEN, rArgument) == TRUE)
+							   MAX_FREQ_AQC_SE_WIN_CT, rArgument) == TRUE)
 		{
 			Put("command", "fracwincent", rArgument);
 			continue;

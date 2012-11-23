@@ -291,7 +291,7 @@ public:
 
     void SetFilterBW(const int iNewBW);
     int GetFilterBW() {
-        return (int) (rBPNormBW * SOUNDCRD_SAMPLE_RATE);
+        return (int) (rBPNormBW * iSampleRate);
     }
 
     void SetAGCType(const CAGC::EType eNewType);
@@ -321,7 +321,7 @@ public:
     _BOOLEAN GetPLLPhase(CReal& rPhaseOut);
     CReal GetCurMixFreqOffs() const
     {
-        return rNormCurMixFreqOffs * SOUNDCRD_SAMPLE_RATE;
+        return rNormCurMixFreqOffs * iSampleRate;
     }
 
     _BOOLEAN GetFrameBoundary() {
