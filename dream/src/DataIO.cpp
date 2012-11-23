@@ -226,7 +226,7 @@ CWriteData::CWriteData(CSoundOutInterface* pNS) : pSound(pNS), /* Sound interfac
         bSoundBlocking(FALSE), bNewSoundBlocking(FALSE),
         eOutChanSel(CS_BOTH_BOTH), rMixNormConst(MIX_OUT_CHAN_NORM_CONST),
         iSampleRate(0), iNumSmpls4AudioSprectrum(0), iNumBlocksAvAudioSpec(0),
-        iMaxAudioFrequency(20000)
+        iMaxAudioFrequency(MAX_SPEC_AUDIO_FREQUENCY)
 {
     /* Constructor */
 }

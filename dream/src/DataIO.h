@@ -43,6 +43,9 @@
 #include "AMDemodulation.h" // For CMixer
 
 /* Definitions ****************************************************************/
+/* Maximum frequency for audio spectrum */
+#define MAX_SPEC_AUDIO_FREQUENCY	20000 /* Hz */
+
 /* In case of random-noise, define number of blocks */
 #define DEFAULT_NUM_SIM_BLOCKS		50
 
