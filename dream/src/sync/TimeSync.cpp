@@ -593,6 +593,12 @@ void CTimeSync::InitInternal(CParameter& Parameters)
 	/* Get parameters from info class */
 	iSampleRate = Parameters.GetSampleRate();
 
+	/* Adjusting fft size to sample rate */
+	const int iRMAFFTSizeN = ADJ_RM_FFT_SIZE_N(RMA_FFT_SIZE_N, iSampleRate);
+	const int iRMBFFTSizeN = ADJ_RM_FFT_SIZE_N(RMB_FFT_SIZE_N, iSampleRate);
+	const int iRMCFFTSizeN = ADJ_RM_FFT_SIZE_N(RMC_FFT_SIZE_N, iSampleRate);
+	const int iRMDFFTSizeN = ADJ_RM_FFT_SIZE_N(RMD_FFT_SIZE_N, iSampleRate);
+
 	/* Init Hilbert filter. Since the frequency offset correction was
 	   done in the previous module, the offset for the filter is
 	   always "VIRTUAL_INTERMED_FREQ" */
@@ -607,8 +613,8 @@ void CTimeSync::InitInternal(CParameter& Parameters)
 	iDecSymBS = iSymbolBlockSize / GRDCRR_DEC_FACT;
 
 	/* Calculate maximum symbol block size (This is Rob. Mode A) */
-	iMaxSymbolBlockSize = RMA_FFT_SIZE_N + 
-		RMA_FFT_SIZE_N * RMA_ENUM_TG_TU / RMA_DENOM_TG_TU;
+	iMaxSymbolBlockSize = iRMAFFTSizeN + 
+		iRMAFFTSizeN * RMA_ENUM_TG_TU / RMA_DENOM_TG_TU;
 
 	/* We need at least two blocks of data for determining the timing */
 	iTotalBufferSize = 2 * iSymbolBlockSize + iMaxSymbolBlockSize;
@@ -692,26 +698,26 @@ void CTimeSync::InitInternal(CParameter& Parameters)
 		switch (i)
 		{
 		case 0:
-			iLenUsefPart[i] = RMA_FFT_SIZE_N / GRDCRR_DEC_FACT;
-			iLenGuardInt[i] = (int) ((CReal) RMA_FFT_SIZE_N * 
+			iLenUsefPart[i] = iRMAFFTSizeN / GRDCRR_DEC_FACT;
+			iLenGuardInt[i] = (int) ((CReal) iRMAFFTSizeN * 
 				RMA_ENUM_TG_TU / RMA_DENOM_TG_TU / GRDCRR_DEC_FACT);
 			break;
 
 		case 1:
-			iLenUsefPart[i] = RMB_FFT_SIZE_N / GRDCRR_DEC_FACT;
-			iLenGuardInt[i] = (int) ((CReal) RMB_FFT_SIZE_N * 
+			iLenUsefPart[i] = iRMBFFTSizeN / GRDCRR_DEC_FACT;
+			iLenGuardInt[i] = (int) ((CReal) iRMBFFTSizeN * 
 				RMB_ENUM_TG_TU / RMB_DENOM_TG_TU / GRDCRR_DEC_FACT);
 			break;
 
 		case 2:
-			iLenUsefPart[i] = RMC_FFT_SIZE_N / GRDCRR_DEC_FACT;
-			iLenGuardInt[i] = (int) ((CReal) RMC_FFT_SIZE_N * 
+			iLenUsefPart[i] = iRMCFFTSizeN / GRDCRR_DEC_FACT;
+			iLenGuardInt[i] = (int) ((CReal) iRMCFFTSizeN * 
 				RMC_ENUM_TG_TU / RMC_DENOM_TG_TU / GRDCRR_DEC_FACT);
 			break;
 
 		case 3:
-			iLenUsefPart[i] = RMD_FFT_SIZE_N / GRDCRR_DEC_FACT;
-			iLenGuardInt[i] = (int) ((CReal) RMD_FFT_SIZE_N * 
+			iLenUsefPart[i] = iRMDFFTSizeN / GRDCRR_DEC_FACT;
+			iLenGuardInt[i] = (int) ((CReal) iRMDFFTSizeN * 
 				RMD_ENUM_TG_TU / RMD_DENOM_TG_TU / GRDCRR_DEC_FACT);
 			break;
 		}
