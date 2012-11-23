@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>620</width>
-    <height>530</height>
+    <width>617</width>
+    <height>478</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -20,7 +20,7 @@
   <property name="sizeGripEnabled">
    <bool>true</bool>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_3">
+  <layout class="QVBoxLayout" name="verticalLayout_2">
    <property name="spacing">
     <number>0</number>
    </property>
@@ -93,6 +93,9 @@
        <property name="alignment">
         <set>Qt::AlignCenter</set>
        </property>
+       <property name="wordWrap">
+        <bool>true</bool>
+       </property>
        <property name="textInteractionFlags">
         <set>Qt::NoTextInteraction</set>
        </property>
@@ -110,9 +113,9 @@
         <enum>QFrame::StyledPanel</enum>
        </property>
        <property name="frameShadow">
-        <enum>QFrame::Sunken</enum>
+        <enum>QFrame::Raised</enum>
        </property>
-       <layout class="QVBoxLayout" name="verticalLayout_2">
+       <layout class="QVBoxLayout" name="verticalLayout_3">
         <property name="spacing">
          <number>0</number>
         </property>
@@ -122,7 +125,7 @@
         <item>
          <widget class="QWebView" name="webView">
           <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+           <sizepolicy hsizetype="Ignored" vsizetype="Ignored">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
@@ -229,7 +232,7 @@
        <item>
         <widget class="QToolButton" name="ButtonStepBack">
          <property name="sizePolicy">
-          <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+          <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
@@ -241,18 +244,12 @@
           <iconset resource="res/icons.qrc">
            <normaloff>:/icons/StepBack.png</normaloff>:/icons/StepBack.png</iconset>
          </property>
-         <property name="iconSize">
-          <size>
-           <width>16</width>
-           <height>16</height>
-          </size>
-         </property>
         </widget>
        </item>
        <item>
         <widget class="QToolButton" name="ButtonStepForward">
          <property name="sizePolicy">
-          <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+          <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
@@ -264,18 +261,12 @@
           <iconset resource="res/icons.qrc">
            <normaloff>:/icons/StepForw.png</normaloff>:/icons/StepForw.png</iconset>
          </property>
-         <property name="iconSize">
-          <size>
-           <width>16</width>
-           <height>16</height>
-          </size>
-         </property>
         </widget>
        </item>
        <item>
         <widget class="QToolButton" name="ButtonHome">
          <property name="sizePolicy">
-          <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+          <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
@@ -287,18 +278,12 @@
           <iconset resource="res/icons.qrc">
            <normaloff>:/icons/Home.png</normaloff>:/icons/Home.png</iconset>
          </property>
-         <property name="iconSize">
-          <size>
-           <width>16</width>
-           <height>16</height>
-          </size>
-         </property>
         </widget>
        </item>
        <item>
         <widget class="QToolButton" name="ButtonStopRefresh">
          <property name="sizePolicy">
-          <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+          <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
@@ -309,12 +294,6 @@
          <property name="icon">
           <iconset resource="res/icons.qrc">
            <normaloff>:/icons/Refresh.png</normaloff>:/icons/Refresh.png</iconset>
-         </property>
-         <property name="iconSize">
-          <size>
-           <width>16</width>
-           <height>16</height>
-          </size>
          </property>
         </widget>
        </item>
