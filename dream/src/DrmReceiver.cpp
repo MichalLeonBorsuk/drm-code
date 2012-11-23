@@ -1513,8 +1513,8 @@ CDRMReceiver::LoadSettings(CSettings& s)
     FreqSyncAcq.SetRecFilter(s.Get("Receiver", "filter", FALSE));
 
     /* Set parameters for frequency acquisition search window if needed */
-    _REAL rFreqAcSeWinSize = s.Get("command", "fracwinsize", (48000.0 / 2.0));
-    _REAL rFreqAcSeWinCenter = s.Get("command", "fracwincent",  (48000.0 / 4));
+    _REAL rFreqAcSeWinSize = s.Get("command", "fracwinsize", (_REAL(DEFAULT_SOUNDCRD_SAMPLE_RATE) / 2));
+    _REAL rFreqAcSeWinCenter = s.Get("command", "fracwincent",  (_REAL(DEFAULT_SOUNDCRD_SAMPLE_RATE) / 4));
     /* Set new parameters */
     FreqSyncAcq.SetSearchWindow(rFreqAcSeWinCenter, rFreqAcSeWinSize);
 
