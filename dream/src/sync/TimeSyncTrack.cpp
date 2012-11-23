@@ -33,9 +33,9 @@
 
 
 /* Implementation *************************************************************/
-void CTimeSyncTrack::Process(CParameter& Parameter,
-							 CComplexVector& veccChanEst, int iNewTiCorr,
-							 _REAL& rLenPDS, _REAL& rOffsPDS)
+void CTimeSyncTrack::Process(CParameter& Parameters,
+		 CComplexVector& veccChanEst, int iNewTiCorr,
+		 _REAL& rLenPDS, _REAL& rOffsPDS)
 {
 	int			i, j;
 	int			iIntShiftVal;
@@ -234,7 +234,7 @@ void CTimeSyncTrack::Process(CParameter& Parameter,
 			veciNewMeasHist[i] += iContrTiOffs;
 
 		/* Apply correction */
-		Parameter.iTimingOffsTrack = -iContrTiOffs;
+		Parameters.iTimingOffsTrack = -iContrTiOffs;
 	}
 
 
@@ -308,11 +308,11 @@ void CTimeSyncTrack::Process(CParameter& Parameter,
 			   initialization phase of channel estimation by "iSymDelay" */
 			CReal rInitSamOffset = GetSamOffHz(iCurRes - veciSRTiCorrHist[
 				iLenCorrectionHist - (iResOffAcqCntMax - iSymDelay)],
-				iResOffAcqCntMax - iSymDelay - 1, Parameter.GetSampleRate());
+				iResOffAcqCntMax - iSymDelay - 1, Parameters.GetSampleRate());
 
 #ifndef USE_SAMOFFS_TRACK_FRE_PIL
 			/* Apply initial sample rate offset estimation */
-			Parameter.rResampleOffset -= rInitSamOffset;
+			Parameters.rResampleOffset -= rInitSamOffset;
 #endif
 
 			/* Reset estimation history (init with zeros) since the sample
@@ -325,11 +325,11 @@ void CTimeSyncTrack::Process(CParameter& Parameter,
 			/* Tracking phase */
 			/* Get actual sample rate offset in Hertz */
 			const CReal rSamOffset = GetSamOffHz(iCurRes - veciSRTiCorrHist[0],
-				iLenCorrectionHist - 1, Parameter.GetSampleRate());
+				iLenCorrectionHist - 1, Parameters.GetSampleRate());
 
 #ifndef USE_SAMOFFS_TRACK_FRE_PIL
 			/* Apply result from sample rate offset estimation */
-			Parameter.rResampleOffset -= CONTR_SAMP_OFF_INT_FTI * rSamOffset;
+			Parameters.rResampleOffset -= CONTR_SAMP_OFF_INT_FTI * rSamOffset;
 #endif
 		}
 	}
@@ -417,11 +417,11 @@ void CTimeSyncTrack::Process(CParameter& Parameter,
 	CVector<_REAL> vecrScale;
 	_REAL rLowerBound=0, rHigherBound=0, rStartGuard=0, rEndGuard=0, rPDSBegin=0, rPDSEnd=0;
 
-	//Parameter.Lock();
-	GetAvPoDeSp(Parameter.vecrPIR, vecrScale, rLowerBound, rHigherBound, rStartGuard, rEndGuard, rPDSBegin, rPDSEnd, Parameter.GetSampleRate());
-	Parameter.rPIRStart = vecrScale[0];
-	Parameter.rPIREnd = vecrScale[vecrScale.Size()-1];
-	//Parameter.Unlock();
+	//Parameters.Lock();
+	GetAvPoDeSp(Parameters.vecrPIR, vecrScale, rLowerBound, rHigherBound, rStartGuard, rEndGuard, rPDSBegin, rPDSEnd, Parameters.GetSampleRate());
+	Parameters.rPIRStart = vecrScale[0];
+	Parameters.rPIREnd = vecrScale[vecrScale.Size()-1];
+	//Parameters.Unlock();
 
 
 	/* Set return parameters */
@@ -429,12 +429,12 @@ void CTimeSyncTrack::Process(CParameter& Parameter,
 	rOffsPDS = rEstPDSBegin;
 }
 
-void CTimeSyncTrack::Init(CParameter& Parameter, int iNewSymbDelay)
+void CTimeSyncTrack::Init(CParameter& Parameters, int iNewSymbDelay)
 {
-	iNumCarrier = Parameter.CellMappingTable.iNumCarrier;
-	iScatPilFreqInt = Parameter.CellMappingTable.iScatPilFreqInt;
-	iNumIntpFreqPil = Parameter.CellMappingTable.iNumIntpFreqPil;
-	iDFTSize = Parameter.CellMappingTable.iFFTSizeN;
+	iNumCarrier = Parameters.CellMappingTable.iNumCarrier;
+	iScatPilFreqInt = Parameters.CellMappingTable.iScatPilFreqInt;
+	iNumIntpFreqPil = Parameters.CellMappingTable.iNumIntpFreqPil;
+	iDFTSize = Parameters.CellMappingTable.iFFTSizeN;
 
 	/* Timing correction history */
 	iSymDelay = iNewSymbDelay;
@@ -450,15 +450,15 @@ void CTimeSyncTrack::Init(CParameter& Parameter, int iNewSymbDelay)
 	vecrAvPoDeSp.Init(iNumIntpFreqPil, (CReal) 0.0);
 
 	/* Lambda for IIR filter for averaging the PDS */
-	rLamAvPDS = IIR1Lam(TICONST_PDS_EST_TISYNC, (CReal) Parameter.GetSampleRate() /
-		Parameter.CellMappingTable.iSymbolBlockSize);
+	rLamAvPDS = IIR1Lam(TICONST_PDS_EST_TISYNC, (CReal) Parameters.GetSampleRate() /
+		Parameters.CellMappingTable.iSymbolBlockSize);
 
 	/* Vector for rotated result */
 	vecrAvPoDeSpRot.Init(iNumIntpFreqPil);
 
 	/* Length of guard-interval with respect to FFT-size! */
 	rGuardSizeFFT = (CReal) iNumCarrier *
-		Parameter.CellMappingTable.RatioTgTu.iEnum / Parameter.CellMappingTable.RatioTgTu.iDenom;
+		Parameters.CellMappingTable.RatioTgTu.iEnum / Parameters.CellMappingTable.RatioTgTu.iDenom;
 
 	/* Get the hamming window taps. The window is to reduce the leakage effect
 	   of a DFT transformation */
@@ -467,7 +467,7 @@ void CTimeSyncTrack::Init(CParameter& Parameter, int iNewSymbDelay)
 
 	/* Weights for peak bound calculation, in Eq. (19), special values for
 	   robustness mode D! */
-	if (Parameter.GetWaveMode() == RM_ROBUSTNESS_MODE_D)
+	if (Parameters.GetWaveMode() == RM_ROBUSTNESS_MODE_D)
 	{
 		rConst1 = pow((_REAL) 10.0, (_REAL) -TETA1_DIST_FROM_MAX_DB_RMD / 10);
 		rConst2 = pow((_REAL) 10.0, (_REAL) TETA2_DIST_FROM_MIN_DB_RMD / 10);
@@ -510,12 +510,12 @@ void CTimeSyncTrack::Init(CParameter& Parameter, int iNewSymbDelay)
 	/* Inits for sample rate offset estimation ------------------------------ */
 	/* Calculate number of symbols for a given time span as defined for the
 	   length of the sample rate offset estimation history size */
-	iLenCorrectionHist = (int) ((_REAL) Parameter.GetSampleRate() *
-		HIST_LEN_SAM_OFF_EST_TI_CORR / Parameter.CellMappingTable.iSymbolBlockSize);
+	iLenCorrectionHist = (int) ((_REAL) Parameters.GetSampleRate() *
+		HIST_LEN_SAM_OFF_EST_TI_CORR / Parameters.CellMappingTable.iSymbolBlockSize);
 
 	/* Init count for acquisition */
-	iResOffAcqCntMax = (int) ((_REAL) Parameter.GetSampleRate() *
-		SAM_OFF_EST_TI_CORR_ACQ_LEN / Parameter.CellMappingTable.iSymbolBlockSize);
+	iResOffAcqCntMax = (int) ((_REAL) Parameters.GetSampleRate() *
+		SAM_OFF_EST_TI_CORR_ACQ_LEN / Parameters.CellMappingTable.iSymbolBlockSize);
 
 	/* Init sample rate offset estimation acquisition count */
 	iResOffsetAcquCnt = iResOffAcqCntMax;
@@ -525,7 +525,7 @@ void CTimeSyncTrack::Init(CParameter& Parameter, int iNewSymbDelay)
 
 	/* Symbol block size converted in domain of estimated PDS */
 	rSymBloSiIRDomain =
-		(CReal) Parameter.CellMappingTable.iSymbolBlockSize * iNumCarrier / iDFTSize;
+		(CReal) Parameters.CellMappingTable.iSymbolBlockSize * iNumCarrier / iDFTSize;
 
 	/* Init variable for storing the old difference of maximum position */
 	iOldNonZeroDiff = 0;
@@ -674,7 +674,7 @@ void CTimeSyncTrack::GetAvPoDeSp(CVector<_REAL>& vecrData,
 }
 
 /* OPH: Calculate the delay according to the rdel tag of RSCI */
-void CTimeSyncTrack::CalculateRdel(CParameter& Parameter)
+void CTimeSyncTrack::CalculateRdel(CParameter& Parameters)
 {
 	/* Define the intervals in ascending order of threshold percentage */
 	CReal rTotEgy = Sum(vecrAvPoDeSpRot);
@@ -722,8 +722,8 @@ void CTimeSyncTrack::CalculateRdel(CParameter& Parameter)
 	{
 		CReal rInterval =
 			((_REAL) (vecrIntervalEnd[j] - vecrIntervalStart[j])) *
-			Parameter.CellMappingTable.iFFTSizeN / (Parameter.GetSampleRate() *
-			Parameter.CellMappingTable.iNumIntpFreqPil * Parameter.CellMappingTable.iScatPilFreqInt) * 1000;
+			Parameters.CellMappingTable.iFFTSizeN / (Parameters.GetSampleRate() *
+			Parameters.CellMappingTable.iNumIntpFreqPil * Parameters.CellMappingTable.iScatPilFreqInt) * 1000;
 
 		/* Clip the delay interval values for display purposes */
 		if (rInterval < (CReal) -9.9)
@@ -735,11 +735,11 @@ void CTimeSyncTrack::CalculateRdel(CParameter& Parameter)
 		vecrRdelIntervals[j] = rInterval;
 	}
 
-	Parameter.vecrRdelThresholds = vecrRdelThresholds;
-	Parameter.vecrRdelIntervals = vecrRdelIntervals;
+	Parameters.vecrRdelThresholds = vecrRdelThresholds;
+	Parameters.vecrRdelIntervals = vecrRdelIntervals;
 }
 
-void CTimeSyncTrack::CalculateRdop(CParameter& Parameter)
+void CTimeSyncTrack::CalculateRdop(CParameter& Parameters)
 {
 	/* Initialise accumulators for sum of squares and sum of squared
 	   differences */
@@ -753,7 +753,7 @@ void CTimeSyncTrack::CalculateRdop(CParameter& Parameter)
 		rSumSqChan += SqMag(veccPilots[i]);
 	}
 
-	CReal rTs = (_REAL) Parameter.CellMappingTable.iSymbolBlockSize / Parameter.GetSampleRate();
+	CReal rTs = (_REAL) Parameters.CellMappingTable.iSymbolBlockSize / Parameters.GetSampleRate();
 
-	Parameter.rRdop = Sqrt(rSumSqDiff / rSumSqChan) / (crPi * rTs);
+	Parameters.rRdop = Sqrt(rSumSqDiff / rSumSqChan) / (crPi * rTs);
 }
