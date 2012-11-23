@@ -183,7 +183,7 @@ CSettings::FileArg(const string& str)
 void
 CSettings::ParseArguments(int argc, char **argv)
 {
-	_BOOLEAN bIsReceiver = TRUE;
+//	_BOOLEAN bIsReceiver = TRUE;
 	_REAL rArgument;
 	string strArgument;
 	int rsioutnum = 0;
@@ -197,7 +197,7 @@ CSettings::ParseArguments(int argc, char **argv)
 		/* DRM transmitter mode flag ---------------------------------------- */
 		if (GetFlagArgument(argc, argv, i, "-t", "--transmitter") == TRUE)
 		{
-			bIsReceiver = FALSE;
+//			bIsReceiver = FALSE;
 			Put("command", "mode", string("transmit"));
 			continue;
 		}

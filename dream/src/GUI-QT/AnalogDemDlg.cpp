@@ -425,6 +425,15 @@ void AnalogDemDlg::UpdateControls()
 		if (!RadioButtonNoiRedHigh->isChecked())
 			RadioButtonNoiRedHigh->setChecked(TRUE);
 		break;
+
+	case CAMDemodulation::NR_SPEEX_LOW: // TODO
+		break;
+
+	case CAMDemodulation::NR_SPEEX_MEDIUM: // TODO
+		break;
+
+	case CAMDemodulation::NR_SPEEX_HIGH: // TODO
+		break;
 	}
 
 	/* Set filter bandwidth */

@@ -240,7 +240,7 @@ std::string NML::Dump(void) const
           GetObjectType(),
           isStatic(),
           GetRevisionIndex(),
-          _news.extended_header.size(),
+          (int)_news.extended_header.size(),
           nr_of_items);
   std::string s = buf;
   if (_news.extended_header.size())
@@ -536,7 +536,7 @@ NML* NMLFactory::CreateNML( const NML::RawNewsObject_t& rno, const NMLEscapeCode
 				n->SetErrorDump( n->_news.object_id, uncompressed, error );
 				return n;
 			}
-			bool newRow = (*p == 0x04);
+//			bool newRow = (*p == 0x04);
 			len--;
 			p++;
 

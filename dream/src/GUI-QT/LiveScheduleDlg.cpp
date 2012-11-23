@@ -656,6 +656,8 @@ LiveScheduleDlg::OnShowStationsMenu(int iID)
     /* Taking care of checks in the menu */
     pViewMenu->setItemChecked(showActiveViewMenuItem, showActiveViewMenuItem == iID);
     pViewMenu->setItemChecked(showAllViewMenuItem, showAllViewMenuItem == iID);
+#else
+	(void)iID;
 #endif
 }
 

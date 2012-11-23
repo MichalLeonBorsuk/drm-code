@@ -700,7 +700,7 @@ void CGenerateSDCData::InitInternal(CParameter& TransmParam)
 /* Receiver */
 void CUtilizeSDCData::ProcessDataInternal(CParameter& ReceiverParam)
 {
-    _BOOLEAN bSDCOK = FALSE;
+//    _BOOLEAN bSDCOK = FALSE;
 
     /* Decode SDC block and return CRC status */
     CSDCReceive::ERetStatus eStatus = SDCReceive.SDCParam(pvecInputData, ReceiverParam);
@@ -710,7 +710,7 @@ void CUtilizeSDCData::ProcessDataInternal(CParameter& ReceiverParam)
     {
     case CSDCReceive::SR_OK:
         ReceiverParam.ReceiveStatus.SDC.SetStatus(RX_OK);
-        bSDCOK = TRUE;
+//        bSDCOK = TRUE;
         break;
 
     case CSDCReceive::SR_BAD_CRC:

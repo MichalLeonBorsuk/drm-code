@@ -65,11 +65,11 @@ bool CPft::DecodePFTPacket(const vector < _BYTE > &vecIn,
 	iAddr = (n & 0x4000) ? 1 : 0;
 	iPlen = n & 0x3FFF;
 
-	int iRSk, iRSz;
+//	int iRSk, iRSz;
 	if (iFEC == 1)
 	{
-		iRSk = (int) vecIn[12];
-		iRSz = (int) vecIn[13];
+//		iRSk = (int) vecIn[12];
+//		iRSz = (int) vecIn[13];
 		iHeaderLen += 2;
 	}
 

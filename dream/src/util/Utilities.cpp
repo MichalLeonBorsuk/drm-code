@@ -251,7 +251,7 @@ void
 CModJulDate::Set(const uint32_t iModJulDate)
 {
 	uint32_t iZ, iA, iAlpha, iB, iC, iD, iE;
-	_REAL rJulDate, rF;
+	_REAL rJulDate/*, rF*/;
 
 	/* Definition of the Modified Julian Date */
 	rJulDate = (_REAL) iModJulDate + 2400000.5;
@@ -261,7 +261,7 @@ CModJulDate::Set(const uint32_t iModJulDate)
 	// 1. Add .5 to the JD and let Z = integer part of (JD+.5) and F the
 	// fractional part F = (JD+.5)-Z
 	iZ = (uint32_t) (rJulDate + (_REAL) 0.5);
-	rF = (rJulDate + (_REAL) 0.5) - iZ;
+//	rF = (rJulDate + (_REAL) 0.5) - iZ;
 
 	// 2. If Z < 2299161, take A = Z
 	// If Z >= 2299161, calculate alpha = INT((Z-1867216.25)/36524.25)
