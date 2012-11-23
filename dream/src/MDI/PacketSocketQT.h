@@ -113,4 +113,14 @@ private slots:
 #endif
 };
 
+// stop compiler warning
+class CDummy_ :
+	public QObject
+{
+	Q_OBJECT
+public:
+	CDummy_() {};
+	~CDummy_() {};
+};
+
 #endif

@@ -816,6 +816,8 @@ void Linkify(QString& text)
         else
             break;
     }
+#else
+	(void)text;
 #endif
 }
 

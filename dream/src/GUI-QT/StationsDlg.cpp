@@ -836,7 +836,7 @@ void StationsDlg::setupUi(QObject*)
     pRemoteMenu->menu()->insertSeparator();
 
     /* Enable s-meter */
-    const int iSMeterMenuID = pRemoteMenu->menu()->insertItem(tr("Enable S-Meter"),
+    /*const int iSMeterMenuID =*/ pRemoteMenu->menu()->insertItem(tr("Enable S-Meter"),
                               this, SLOT(OnSMeterMenu(int)), 0, SMETER_MENU_ID);
 
     /* Update menu ---------------------------------------------------------- */

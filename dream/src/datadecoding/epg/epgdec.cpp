@@ -137,10 +137,10 @@ static dectab attribute_tags4[] = {
     {"type", enums3, enum_attr},
     {"url", 0, string_attr},
 };
-static dectab attribute_tags5[] = {
-    {"id", 0, string_attr},
-    {"version", 0, u16_attr}
-};
+//static dectab attribute_tags5[] = {
+//    {"id", 0, string_attr},
+//    {"version", 0, u16_attr}
+//};
 static dectab attribute_tags6[] = {
     {"type", enums4, enum_attr},
     {"kHz", 0, u24_attr}
