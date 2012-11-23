@@ -381,9 +381,9 @@ protected:
 	CSpectrumResample	Resample;
 	CWidget*		WaterfallWidget;
 	QRect			LastPlotCanvRect;
-	int			scaleWidth;
+	int				scaleWidth;
 	QRgb*			imageData;
-	int			sampleRate;
+	int				iSampleRate;
 
 public slots:
 #if QWT_VERSION < 0x060000

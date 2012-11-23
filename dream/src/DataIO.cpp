@@ -179,7 +179,24 @@ void CWriteData::ProcessDataInternal(CParameter& Parameters)
 void CWriteData::InitInternal(CParameter& Parameters)
 {
     /* Get sample rate */
-    const int iSampleRate = Parameters.GetSampleRate();
+    iSampleRate = Parameters.GetSampleRate();
+
+    /* Length of vector for audio spectrum. We use a power-of-two length to
+       make the FFT work more efficient, need to be scaled from sample rate to
+       keep the same frequency resolution */
+    iNumSmpls4AudioSprectrum = 1024 * iSampleRate / 48000;
+
+    /* Number of blocks for averaging the audio spectrum */
+    iNumBlocksAvAudioSpec = Ceil(((_REAL) iSampleRate *
+        TIME_AV_AUDIO_SPECT_MS / 1000 / iNumSmpls4AudioSprectrum));
+
+    /* Inits for audio spectrum plotting */
+    vecsOutputData.Init((int) iNumBlocksAvAudioSpec * iNumSmpls4AudioSprectrum *
+                   2 /* stereo */, 0); /* Init with zeros */
+    FftPlan.Init(iNumSmpls4AudioSprectrum);
+    veccFFTInput.Init(iNumSmpls4AudioSprectrum);
+    veccFFTOutput.Init(iNumSmpls4AudioSprectrum);
+    vecrAudioWindowFunction.Init(iNumSmpls4AudioSprectrum);
 
     /* An audio frame always corresponds to 400 ms.
        We use always stereo blocks */
@@ -197,8 +214,7 @@ void CWriteData::InitInternal(CParameter& Parameters)
     vecsTmpAudData.Init(iAudFrameSize * 2 /* stereo */);
 
     /* Inits for audio spectrum plot */
-//  vecrAudioWindowFunction = Hamming(NUM_SMPLS_4_AUDIO_SPECTRUM);
-    vecrAudioWindowFunction = Hann(NUM_SMPLS_4_AUDIO_SPECTRUM); /* higher dynamic range */
+    vecrAudioWindowFunction = Hann(iNumSmpls4AudioSprectrum);
     vecsOutputData.Reset(0); /* Reset audio data storage vector */
 
     /* Define block-size for input (stereo input) */
@@ -209,13 +225,8 @@ CWriteData::CWriteData(CSoundOutInterface* pNS) : pSound(pNS), /* Sound interfac
         bMuteAudio(FALSE), bDoWriteWaveFile(FALSE),
         bSoundBlocking(FALSE), bNewSoundBlocking(FALSE),
         eOutChanSel(CS_BOTH_BOTH), rMixNormConst(MIX_OUT_CHAN_NORM_CONST),
-        /* Inits for audio spectrum plotting */
-        vecsOutputData((int) NUM_BLOCKS_AV_AUDIO_SPEC * NUM_SMPLS_4_AUDIO_SPECTRUM *
-                       2 /* stereo */, 0), /* Init with zeros */
-        FftPlan(NUM_SMPLS_4_AUDIO_SPECTRUM),
-        veccFFTInput(NUM_SMPLS_4_AUDIO_SPECTRUM),
-        veccFFTOutput(NUM_SMPLS_4_AUDIO_SPECTRUM),
-        vecrAudioWindowFunction(NUM_SMPLS_4_AUDIO_SPECTRUM)
+        iSampleRate(0), iNumSmpls4AudioSprectrum(0), iNumBlocksAvAudioSpec(0),
+        iMaxAudioFrequency(20000)
 {
     /* Constructor */
 }
@@ -243,8 +254,17 @@ void CWriteData::StopWriteWaveFile()
 void CWriteData::GetAudioSpec(CVector<_REAL>& vecrData,
                               CVector<_REAL>& vecrScale)
 {
+    if (iSampleRate == 0)
+    {
+        /* Init output vectors to zero data */
+        vecrData.Init(0, (_REAL) 0.0);
+        vecrScale.Init(0, (_REAL) 0.0);
+        return;
+    }
+
     /* Real input signal -> symmetrical spectrum -> use only half of spectrum */
-    const int iLenPowSpec = NUM_SMPLS_4_AUDIO_SPECTRUM / 2;
+    const _REAL rLenPowSpec = _REAL(iNumSmpls4AudioSprectrum) * iMaxAudioFrequency / iSampleRate;
+    const int iLenPowSpec = int(rLenPowSpec);
 
     /* Init output vectors */
     vecrData.Init(iLenPowSpec, (_REAL) 0.0);
@@ -259,12 +279,12 @@ void CWriteData::GetAudioSpec(CVector<_REAL>& vecrData,
     CVector<_REAL> veccAvSpectrum(iLenPowSpec, (_REAL) 0.0);
 
     int iCurPosInStream = 0;
-    for (i = 0; i < NUM_BLOCKS_AV_AUDIO_SPEC; i++)
+    for (i = 0; i < iNumBlocksAvAudioSpec; i++)
     {
         int j;
 
         /* Mix both channels */
-        for (j = 0; j < NUM_SMPLS_4_AUDIO_SPECTRUM; j++)
+        for (j = 0; j < iNumSmpls4AudioSprectrum; j++)
         {
             int jj =  2*(iCurPosInStream + j);
             veccFFTInput[j] = _REAL(vecsOutputData[jj] + vecsOutputData[jj + 1]) / 2;
@@ -280,16 +300,16 @@ void CWriteData::GetAudioSpec(CVector<_REAL>& vecrData,
         for (j = 0; j < iLenPowSpec; j++)
             veccAvSpectrum[j] += SqMag(veccFFTOutput[j]);
 
-        iCurPosInStream += NUM_SMPLS_4_AUDIO_SPECTRUM;
+        iCurPosInStream += iNumSmpls4AudioSprectrum;
     }
 
     /* Calculate norm constant and scale factor */
-    const _REAL rNormData = (_REAL) NUM_SMPLS_4_AUDIO_SPECTRUM *
-                            NUM_SMPLS_4_AUDIO_SPECTRUM * _MAXSHORT * _MAXSHORT *
-                            NUM_BLOCKS_AV_AUDIO_SPEC;
+    const _REAL rNormData = (_REAL) iNumSmpls4AudioSprectrum *
+                            iNumSmpls4AudioSprectrum * _MAXSHORT * _MAXSHORT *
+                            iNumBlocksAvAudioSpec;
 
-    // was SOUNDCRD_SAMPLE_RATE - TODO check this is right. TODO 0.4 is not true for Mode E
-    const _REAL rFactorScale = _REAL(iInputBlockSize/2)/0.4/_REAL(iLenPowSpec)/2000.0;
+    /* Define scale factor for audio data */
+    const _REAL rFactorScale = _REAL(iMaxAudioFrequency) / iLenPowSpec / 1000;
 
     /* Apply the normalization (due to the FFT) */
     for (i = 0; i < iLenPowSpec; i++)

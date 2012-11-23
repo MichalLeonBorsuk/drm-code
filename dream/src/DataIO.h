@@ -46,18 +46,9 @@
 /* In case of random-noise, define number of blocks */
 #define DEFAULT_NUM_SIM_BLOCKS		50
 
-/* Length of vector for audio spectrum. We use a power-of-two length to
-   make the FFT work more efficient */
-//#define NUM_SMPLS_4_AUDIO_SPECTRUM	256
-#define NUM_SMPLS_4_AUDIO_SPECTRUM	1024 /* higher frequency resolution */
-
 /* Time span used for averaging the audio spectrum. Shall be higher than the
    400 ms DRM audio block */
 #define TIME_AV_AUDIO_SPECT_MS		500 /* ms */
-
-/* Number of blocks for averaging the audio spectrum */
-#define NUM_BLOCKS_AV_AUDIO_SPEC	Ceil(((_REAL) SOUNDCRD_SAMPLE_RATE * \
-	TIME_AV_AUDIO_SPECT_MS / 1000 / NUM_SMPLS_4_AUDIO_SPECTRUM))
 
 /* Normalization constant for two mixed signals. If this constant is 2, no
    overrun of the "short" variable can happen but signal has quite much lower
@@ -115,6 +106,10 @@ public:
         SetInitFlag();
     }
 
+    int GetMaxAudioFrequency() {
+        return iMaxAudioFrequency;
+    }
+
     void GetAudioSpec(CVector<_REAL>& vecrData, CVector<_REAL>& vecrScale);
 
     void SetOutChanSel(const EOutChanSel eNS) {
@@ -140,6 +135,10 @@ protected:
     CComplexVector			veccFFTInput;
     CComplexVector			veccFFTOutput;
     CRealVector				vecrAudioWindowFunction;
+    int						iSampleRate;
+    int                     iNumSmpls4AudioSprectrum;
+    int                     iNumBlocksAvAudioSpec;
+    int                     iMaxAudioFrequency;
 
     virtual void InitInternal(CParameter& Parameters);
     virtual void ProcessDataInternal(CParameter& Parameters);

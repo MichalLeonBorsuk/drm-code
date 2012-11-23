@@ -32,7 +32,7 @@
 /* Implementation *************************************************************/
 CDRMPlot::CDRMPlot(QWidget *p, const char *name) :
 	QwtPlot (p, name), CurCharType(NONE_OLD), InitCharType(NONE_OLD),
-	bOnTimerCharMutexFlag(FALSE), pDRMRec(NULL)
+	bOnTimerCharMutexFlag(FALSE), pDRMRec(NULL), iSampleRate(0)
 {
 	/* Grid defaults */
 	enableGridX(TRUE);
@@ -101,6 +101,7 @@ void CDRMPlot::OnTimerChart()
 	ECodScheme eSDCCodingScheme = Parameters.eSDCCodingScheme;
 	ECodScheme eMSCCodingScheme = Parameters.eMSCCodingScheme;
 	string audiodecoder = Parameters.audiodecoder;
+	iSampleRate = Parameters.GetSampleRate();
 	Parameters.Unlock();
 
 	CPlotManager& PlotManager = *pDRMRec->GetPlotManager();
@@ -642,10 +643,7 @@ void CDRMPlot::SetupAudioSpec()
 
 	/* Fixed scale */
 	setAxisScale(QwtPlot::yLeft, (double) -100.0, (double) -20.0);
-	double dBandwidth = (double) Parameters.GetSampleRate() / 2400; /* 20.0 for 48 kHz */
-	if (dBandwidth < (double) 20.0)
-		dBandwidth = (double) 20.0;
-
+	const double dBandwidth = double(pDRMRec->GetWriteData()->GetMaxAudioFrequency()) / 1000;
 	setAxisScale(QwtPlot::xBottom, (double) 0.0, dBandwidth);
 
 	/* Add main curve */
@@ -897,7 +895,7 @@ void CDRMPlot::SetupPSD()
 
 	/* Fixed scale */
 	setAxisScale(QwtPlot::xBottom,
-		(double) 0.0, (double) Parameters.GetSampleRate() / 2000);
+		(double) 0.0, (double) iSampleRate / 2000);
 
 	setAxisScale(QwtPlot::yLeft, MIN_VAL_SHIF_PSD_Y_AXIS_DB,
 		MAX_VAL_SHIF_PSD_Y_AXIS_DB);
@@ -1014,7 +1012,7 @@ void CDRMPlot::SetupInpSpec()
 
 	/* Fixed scale */
 	setAxisScale(QwtPlot::xBottom,
-		(double) 0.0, (double) Parameters.GetSampleRate() / 2000);
+		(double) 0.0, (double) iSampleRate / 2000);
 
 	setAxisScale(QwtPlot::yLeft, MIN_VAL_INP_SPEC_Y_AXIS_DB,
 		MAX_VAL_INP_SPEC_Y_AXIS_DB);
@@ -1073,7 +1071,7 @@ void CDRMPlot::SetupInpPSD()
 	canvas()->setBackgroundMode(QWidget::PaletteBackground);
 
 	/* Fixed scale */
-	const double dXScaleMax = (double) Parameters.GetSampleRate() / 2000;
+	const double dXScaleMax = (double) iSampleRate / 2000;
 	setAxisScale(QwtPlot::xBottom, (double) 0.0, dXScaleMax);
 
 	setAxisScale(QwtPlot::yLeft, MIN_VAL_INP_SPEC_Y_AXIS_DB,
@@ -1166,8 +1164,8 @@ void CDRMPlot::SetInpPSD(CVector<_REAL>& vecrData, CVector<_REAL>& vecrScale,
 	/* Insert marker for filter bandwidth if required */
 	if (rBWWidth != (_REAL) 0.0)
 	{
-		dX[0] = (rBWCenter - rBWWidth / 2) * Parameters.GetSampleRate() / 1000;
-		dX[1] = (rBWCenter + rBWWidth / 2) * Parameters.GetSampleRate() / 1000;
+		dX[0] = (rBWCenter - rBWWidth / 2) * iSampleRate / 1000;
+		dX[1] = (rBWCenter + rBWWidth / 2) * iSampleRate / 1000;
 
 		/* Take the min-max values from scale to get vertical line */
 		dY[0] = MIN_VAL_INP_SPEC_Y_AXIS_DB;
@@ -1194,7 +1192,7 @@ void CDRMPlot::SetupInpSpecWaterf()
 
 	/* Fixed scale */
 	setAxisScale(QwtPlot::xBottom,
-		(double) 0.0, (double) Parameters.GetSampleRate() / 2000);
+		(double) 0.0, (double) iSampleRate / 2000);
 
 	/* Clear old plot data */
 	clear();
