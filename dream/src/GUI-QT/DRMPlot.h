@@ -302,7 +302,7 @@ protected:
 	void SetBWMarker(const _REAL rBWCenter, const _REAL rBWWidth);
 	void AutoScale(CVector<_REAL>& vecrData, CVector<_REAL>& vecrData2,
 		CVector<_REAL>& vecrScale);
-    void AutoScale2(CVector<_REAL>& vecrData,
+	void AutoScale2(CVector<_REAL>& vecrData,
 		CVector<_REAL>& vecrData2,
 		CVector<_REAL>& vecrScale);
 	void AutoScale3(CVector<_REAL>& vecrData, CVector<_REAL>& vecrScale);
@@ -378,11 +378,12 @@ protected:
 	QPixmap			Canvas;
 	QImage			Image;
 	QColor			BackgroundColor;
-	CSpectrumResample Resample;
+	CSpectrumResample	Resample;
 	CWidget*		WaterfallWidget;
 	QRect			LastPlotCanvRect;
-	int				scaleWidth;
+	int			scaleWidth;
 	QRgb*			imageData;
+	int			sampleRate;
 
 public slots:
 #if QWT_VERSION < 0x060000

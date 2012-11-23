@@ -1010,9 +1010,19 @@ public:
         iCurSelDataService = 0;
     }
 
+    int GetSampleRate() const
+    {
+	return iSampleRate;
+    }
+
+    void SetSampleRate(int sr)
+    {
+	iSampleRate = sr;
+    }
+
     _REAL GetDCFrequency() const
     {
-        return SOUNDCRD_SAMPLE_RATE * (rFreqOffsetAcqui + rFreqOffsetTrack);
+        return iSampleRate * (rFreqOffsetAcqui + rFreqOffsetTrack);
     }
 
     _REAL GetBitRateKbps(const int iShortID, const _BOOLEAN bAudData) const;
@@ -1228,6 +1238,8 @@ public:
     string gps_host; string gps_port;
 
 protected:
+
+    int iSampleRate;
 
     _REAL rSysSimSNRdB;
 

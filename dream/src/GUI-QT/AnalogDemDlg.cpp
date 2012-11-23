@@ -154,7 +154,7 @@ AnalogDemDlg::AnalogDemDlg(CDRMReceiver& NDRMR, CSettings& NSettings,
 #endif
 	}
 
-	SliderBandwidth->setRange(0, SOUNDCRD_SAMPLE_RATE / 2);
+	SliderBandwidth->setRange(0, DRMReceiver.GetParameters()->GetSampleRate() / 2);
 #if QT_VERSION < 0x040000
 	SliderBandwidth->setTickmarks(QSlider::Both);
 #else

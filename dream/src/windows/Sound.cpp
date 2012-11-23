@@ -55,7 +55,7 @@ CSoundIn::CSoundIn():CSoundInInterface(),m_WaveIn(NULL)
     sWaveFormatEx.wFormatTag = WAVE_FORMAT_PCM;
     sWaveFormatEx.nChannels = NUM_IN_OUT_CHANNELS;
     sWaveFormatEx.wBitsPerSample = BITS_PER_SAMPLE;
-    sWaveFormatEx.nSamplesPerSec = SOUNDCRD_SAMPLE_RATE;
+    sWaveFormatEx.nSamplesPerSec = iSampleRate;
     sWaveFormatEx.nBlockAlign = sWaveFormatEx.nChannels *
                                 sWaveFormatEx.wBitsPerSample / 8;
     sWaveFormatEx.nAvgBytesPerSec = sWaveFormatEx.nBlockAlign *
@@ -350,7 +350,7 @@ CSoundOut::CSoundOut():CSoundOutInterface(),m_WaveOut(NULL)
     sWaveFormatEx.wFormatTag = WAVE_FORMAT_PCM;
     sWaveFormatEx.nChannels = NUM_IN_OUT_CHANNELS;
     sWaveFormatEx.wBitsPerSample = BITS_PER_SAMPLE;
-    sWaveFormatEx.nSamplesPerSec = SOUNDCRD_SAMPLE_RATE;
+    sWaveFormatEx.nSamplesPerSec = iSampleRate;
     sWaveFormatEx.nBlockAlign = sWaveFormatEx.nChannels *
                                 sWaveFormatEx.wBitsPerSample / 8;
     sWaveFormatEx.nAvgBytesPerSec = sWaveFormatEx.nBlockAlign *

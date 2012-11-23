@@ -254,13 +254,13 @@ _REAL CTimeWiener::Estimate(CVectorEx<_COMPLEX>* pvecInputData,
 	return (_REAL) 1.0 / rMMSE;
 }
 
-int CTimeWiener::Init(CParameter& ReceiverParam)
+int CTimeWiener::Init(CParameter& Parameters)
 {
 	/* Init base class, must be at the beginning of this init! */
-	CPilotModiClass::InitRot(ReceiverParam);
+	CPilotModiClass::InitRot(Parameters);
 
 	/* Set local parameters */
-	const CCellMappingTable& Param = ReceiverParam.CellMappingTable;
+	const CCellMappingTable& Param = Parameters.CellMappingTable;
 	iNumCarrier = Param.iNumCarrier;
 	iScatPilTimeInt = Param.iScatPilTimeInt;
 	iScatPilFreqInt = Param.iScatPilFreqInt;
@@ -268,10 +268,10 @@ int CTimeWiener::Init(CParameter& ReceiverParam)
 	const int iNumIntpFreqPil = Param.iNumIntpFreqPil;
 
 	/* Generate filter phase table for Wiener filter */
-	GenFiltPhaseTable(ReceiverParam.CellMappingTable.matiMapTab, iNumCarrier, iNumSymPerFrame, iScatPilTimeInt);
+	GenFiltPhaseTable(Parameters.CellMappingTable.matiMapTab, iNumCarrier, iNumSymPerFrame, iScatPilTimeInt);
 
 	/* Init length of filter and maximum value of sigma (doppler) */
-	switch (ReceiverParam.GetWaveMode())
+	switch (Parameters.GetWaveMode())
 	{
 	case RM_ROBUSTNESS_MODE_A:
 		iLengthWiener = LEN_WIENER_FILT_TIME_RMA;
@@ -316,7 +316,7 @@ int CTimeWiener::Init(CParameter& ReceiverParam)
 	iLenHistBuff = iSymDelyChanEst + 1;
 
 	/* Duration of useful part plus guard interval */
-	rTs = (_REAL) ReceiverParam.CellMappingTable.iSymbolBlockSize / SOUNDCRD_SAMPLE_RATE;
+	rTs = (_REAL) Parameters.CellMappingTable.iSymbolBlockSize / Parameters.GetSampleRate();
 
 	/* Total number of interpolated pilots in frequency direction. We have to
 	   consider the last pilot at the end ("+ 1") */
@@ -340,7 +340,7 @@ int CTimeWiener::Init(CParameter& ReceiverParam)
 	   direction are "iScatPilTimeInt * iScatPilFreqInt" apart */
 	const int iNumPilOneOFDMSym = iNumIntpFreqPil / iScatPilTimeInt;
 	rLamTiCorrAv = IIR1Lam(TICONST_TI_CORREL_EST * iNumPilOneOFDMSym,
-		(CReal) SOUNDCRD_SAMPLE_RATE / ReceiverParam.CellMappingTable.iSymbolBlockSize);
+		(CReal) Parameters.GetSampleRate() / Parameters.CellMappingTable.iSymbolBlockSize);
 
 	/* Init update counter for Wiener filter update. We immediatly use the
 	   filtered result although right at the beginning there is no averaging.
@@ -372,12 +372,12 @@ int CTimeWiener::Init(CParameter& ReceiverParam)
 
 	/* Get modulation alphabet of MSC and SDC (MSC can only be 16- or 64-QAM,
 	   for SDC, only 4- or 16-QAM is possible) */
-	if (ReceiverParam.eMSCCodingScheme == CParameter::CS_2_SM)
+	if (Parameters.eMSCCodingScheme == CParameter::CS_2_SM)
 		eMSCQAMMode = CParameter::CS_2_SM;
 	else
 		eMSCQAMMode = CParameter::CS_3_SM;
 
-	if (ReceiverParam.eSDCCodingScheme == CParameter::CS_1_SM)
+	if (Parameters.eSDCCodingScheme == CParameter::CS_1_SM)
 		eSDCQAMMode = CParameter::CS_1_SM;
 	else
 		eSDCQAMMode = CParameter::CS_2_SM;
@@ -402,7 +402,7 @@ int CTimeWiener::Init(CParameter& ReceiverParam)
 
 	/* Distinguish between simulation and regular receiver. When we run a
 	   simulation, the parameters are taken from simulation init */
-	if (ReceiverParam.eSimType == CParameter::ST_NONE)
+	if (Parameters.eSimType == CParameter::ST_NONE)
 	{
 		/* Init SNR value */
 		rSNR = pow((CReal) 10.0, INIT_VALUE_SNR_WIEN_TIME_DB / 10);
@@ -416,10 +416,10 @@ int CTimeWiener::Init(CParameter& ReceiverParam)
 	else
 	{
 		/* Get SNR on the pilot positions */
-		rSNR = pow((CReal) 10.0, ReceiverParam.GetSysSNRdBPilPos() / 10);
+		rSNR = pow((CReal) 10.0, Parameters.GetSysSNRdBPilPos() / 10);
 	
 		/* Sigma from channel profiles */
-		switch (ReceiverParam.iDRMChannelNum)
+		switch (Parameters.iDRMChannelNum)
 		{
 		case 1:
 		case 2:
@@ -442,7 +442,7 @@ int CTimeWiener::Init(CParameter& ReceiverParam)
 		case 10:
 		case 11:
 		case 12:
-			rSigma = (_REAL) ReceiverParam.iSpecChDoppler / 2;
+			rSigma = (_REAL) Parameters.iSpecChDoppler / 2;
 			break;
 
 		default: /* Including channel number 6 */

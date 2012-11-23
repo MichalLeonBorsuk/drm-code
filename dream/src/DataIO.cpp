@@ -48,11 +48,11 @@ void CReadData::ProcessDataInternal(CParameter&)
     SignalLevelMeter.Update((*pvecOutputData));
 }
 
-void CReadData::InitInternal(CParameter&)
+void CReadData::InitInternal(CParameter& Parameters)
 {
     /* Define block-size for output, an audio frame always corresponds
        to 400 ms. We use always stereo blocks */
-    iOutputBlockSize = (int) ((_REAL) SOUNDCRD_SAMPLE_RATE *
+    iOutputBlockSize = (int) ((_REAL) Parameters.GetSampleRate() *
                               (_REAL) 0.4 /* 400 ms */ * 2 /* stereo */);
 
     /* Init sound interface and intermediate buffer */
@@ -64,7 +64,7 @@ void CReadData::InitInternal(CParameter&)
 }
 
 /* Receiver ----------------------------------------------------------------- */
-void CWriteData::ProcessDataInternal(CParameter& ReceiverParam)
+void CWriteData::ProcessDataInternal(CParameter& Parameters)
 {
     int i;
 
@@ -144,9 +144,9 @@ void CWriteData::ProcessDataInternal(CParameter& ReceiverParam)
 		soundCardStatus = DATA_ERROR;
     }
 
-    ReceiverParam.Lock();
-	ReceiverParam.ReceiveStatus.Interface.SetStatus(soundCardStatus);
-    ReceiverParam.Unlock();
+    Parameters.Lock();
+	Parameters.ReceiveStatus.Interface.SetStatus(soundCardStatus);
+    Parameters.Unlock();
 
     /* Write data as wave in file */
     if (bDoWriteWaveFile == TRUE)
@@ -173,11 +173,11 @@ void CWriteData::ProcessDataInternal(CParameter& ReceiverParam)
     vecsOutputData.AddEnd((*pvecInputData), iInputBlockSize);
 }
 
-void CWriteData::InitInternal(CParameter&)
+void CWriteData::InitInternal(CParameter& Parameters)
 {
     /* An audio frame always corresponds to 400 ms.
        We use always stereo blocks */
-    const int iAudFrameSize = (int) ((_REAL) SOUNDCRD_SAMPLE_RATE *
+    const int iAudFrameSize = (int) ((_REAL) Parameters.GetSampleRate() *
                                      (_REAL) 0.4 /* 400 ms */);
 
     /* Check if blocking behaviour of sound interface shall be changed */
@@ -281,7 +281,9 @@ void CWriteData::GetAudioSpec(CVector<_REAL>& vecrData,
     const _REAL rNormData = (_REAL) NUM_SMPLS_4_AUDIO_SPECTRUM *
                             NUM_SMPLS_4_AUDIO_SPECTRUM * _MAXSHORT * _MAXSHORT *
                             NUM_BLOCKS_AV_AUDIO_SPEC;
-    const _REAL rFactorScale = (_REAL)SOUNDCRD_SAMPLE_RATE/iLenPowSpec/2000;
+
+    // was SOUNDCRD_SAMPLE_RATE - TODO check this is right. TODO 0.4 is not true for Mode E
+    const _REAL rFactorScale = _REAL(iInputBlockSize/2)/0.4/_REAL(iLenPowSpec)/2000.0;
 
     /* Apply the normalization (due to the FFT) */
     for (i = 0; i < iLenPowSpec; i++)
@@ -555,7 +557,7 @@ void CGenSimData::SetNumErrors(int iNewNE, string strNewFileName)
                   strNewFileName + "__SIMTIME" + string(".dat");
 }
 
-void CEvaSimData::ProcessDataInternal(CParameter& ReceiverParam)
+void CEvaSimData::ProcessDataInternal(CParameter& Parameters)
 {
     uint32_t	iTempShiftRegister1;
     _BINARY		biPRBSbit;
@@ -568,7 +570,7 @@ void CEvaSimData::ProcessDataInternal(CParameter& ReceiverParam)
        received signal */
     /* Init shift register with an arbitrary number (Must be known at the
        receiver AND transmitter!) */
-    iShiftRegister = ReceiverParam.RawSimDa.Get();
+    iShiftRegister = Parameters.RawSimDa.Get();
 
     iNumBitErrors = 0;
 
@@ -599,12 +601,12 @@ void CEvaSimData::ProcessDataInternal(CParameter& ReceiverParam)
         rAccBitErrRate += (_REAL) iNumBitErrors / iInputBlockSize;
         iNumAccBitErrRate++;
 
-        ReceiverParam.rBitErrRate = rAccBitErrRate / iNumAccBitErrRate;
-        ReceiverParam.iNumBitErrors += iNumBitErrors;
+        Parameters.rBitErrRate = rAccBitErrRate / iNumAccBitErrRate;
+        Parameters.iNumBitErrors += iNumBitErrors;
     }
 }
 
-void CEvaSimData::InitInternal(CParameter& ReceiverParam)
+void CEvaSimData::InitInternal(CParameter& Parameters)
 {
     /* Reset bit error rate parameters */
     rAccBitErrRate = (_REAL) 0.0;
@@ -614,11 +616,11 @@ void CEvaSimData::InitInternal(CParameter& ReceiverParam)
     iIniCnt = 10;
 
     /* Init global parameters */
-    ReceiverParam.rBitErrRate = (_REAL) 0.0;
-    ReceiverParam.iNumBitErrors = 0;
+    Parameters.rBitErrRate = (_REAL) 0.0;
+    Parameters.iNumBitErrors = 0;
 
     /* Define block-size for input */
-    iInputBlockSize = ReceiverParam.iNumDecodedBitsMSC;
+    iInputBlockSize = Parameters.iNumDecodedBitsMSC;
 }
 
 
@@ -640,17 +642,17 @@ void CGenerateFACData::InitInternal(CParameter& TransmParam)
 }
 
 /* Receiver */
-void CUtilizeFACData::ProcessDataInternal(CParameter& ReceiverParam)
+void CUtilizeFACData::ProcessDataInternal(CParameter& Parameters)
 {
     /* Do not use received FAC data in case of simulation */
     if (bSyncInput == FALSE)
     {
-        bCRCOk = FACReceive.FACParam(pvecInputData, ReceiverParam);
+        bCRCOk = FACReceive.FACParam(pvecInputData, Parameters);
         /* Set FAC status for RSCI, log file & GUI */
         if (bCRCOk)
-            ReceiverParam.ReceiveStatus.FAC.SetStatus(RX_OK);
+            Parameters.ReceiveStatus.FAC.SetStatus(RX_OK);
         else
-            ReceiverParam.ReceiveStatus.FAC.SetStatus(CRC_ERROR);
+            Parameters.ReceiveStatus.FAC.SetStatus(CRC_ERROR);
     }
 
     if ((bSyncInput == TRUE) || (bCRCOk == FALSE))
@@ -659,20 +661,20 @@ void CUtilizeFACData::ProcessDataInternal(CParameter& ReceiverParam)
            manually. If only FAC data was corrupted, the others can still
            decode if they have the right frame number. In case of simulation
            no FAC data is used, we have to increase the counter here */
-        ReceiverParam.iFrameIDReceiv++;
+        Parameters.iFrameIDReceiv++;
 
-        if (ReceiverParam.iFrameIDReceiv == NUM_FRAMES_IN_SUPERFRAME)
-            ReceiverParam.iFrameIDReceiv = 0;
+        if (Parameters.iFrameIDReceiv == NUM_FRAMES_IN_SUPERFRAME)
+            Parameters.iFrameIDReceiv = 0;
     }
 }
 
-void CUtilizeFACData::InitInternal(CParameter& ReceiverParam)
+void CUtilizeFACData::InitInternal(CParameter& Parameters)
 {
 
 // This should be in FAC class in an Init() routine which has to be defined, this
 // would be cleaner code! TODO
     /* Init frame ID so that a "0" comes after increasing the init value once */
-    ReceiverParam.iFrameIDReceiv = NUM_FRAMES_IN_SUPERFRAME - 1;
+    Parameters.iFrameIDReceiv = NUM_FRAMES_IN_SUPERFRAME - 1;
 
     /* Reset flag */
     bCRCOk = FALSE;
@@ -698,18 +700,18 @@ void CGenerateSDCData::InitInternal(CParameter& TransmParam)
 }
 
 /* Receiver */
-void CUtilizeSDCData::ProcessDataInternal(CParameter& ReceiverParam)
+void CUtilizeSDCData::ProcessDataInternal(CParameter& Parameters)
 {
 //    _BOOLEAN bSDCOK = FALSE;
 
     /* Decode SDC block and return CRC status */
-    CSDCReceive::ERetStatus eStatus = SDCReceive.SDCParam(pvecInputData, ReceiverParam);
+    CSDCReceive::ERetStatus eStatus = SDCReceive.SDCParam(pvecInputData, Parameters);
 
-    ReceiverParam.Lock();
+    Parameters.Lock();
     switch (eStatus)
     {
     case CSDCReceive::SR_OK:
-        ReceiverParam.ReceiveStatus.SDC.SetStatus(RX_OK);
+        Parameters.ReceiveStatus.SDC.SetStatus(RX_OK);
 //        bSDCOK = TRUE;
         break;
 
@@ -723,27 +725,27 @@ void CUtilizeSDCData::ProcessDataInternal(CParameter& ReceiverParam)
            case that the parameters are not correct. In this case do not
            show a red light if SDC CRC was not ok */
         if (bFirstBlock == FALSE)
-            ReceiverParam.ReceiveStatus.SDC.SetStatus(CRC_ERROR);
+            Parameters.ReceiveStatus.SDC.SetStatus(CRC_ERROR);
         break;
 
     case CSDCReceive::SR_BAD_DATA:
         /* CRC was ok but data seems to be incorrect */
-        ReceiverParam.ReceiveStatus.SDC.SetStatus(DATA_ERROR);
+        Parameters.ReceiveStatus.SDC.SetStatus(DATA_ERROR);
         break;
     }
-    ReceiverParam.Unlock();
+    Parameters.Unlock();
 
     /* Reset "first block" flag */
     bFirstBlock = FALSE;
 }
 
-void CUtilizeSDCData::InitInternal(CParameter& ReceiverParam)
+void CUtilizeSDCData::InitInternal(CParameter& Parameters)
 {
     /* Init "first block" flag */
     bFirstBlock = TRUE;
 
     /* Define block-size for input */
-    iInputBlockSize = ReceiverParam.iNumSDCBitsPerSFrame;
+    iInputBlockSize = Parameters.iNumSDCBitsPerSFrame;
 }
 
 
@@ -765,9 +767,9 @@ void CWriteIQFile::StartRecording(CParameter&)
     bChangeReceived = TRUE;
 }
 
-void CWriteIQFile::OpenFile(CParameter& ReceiverParam)
+void CWriteIQFile::OpenFile(CParameter& Parameters)
 {
-    iFrequency = ReceiverParam.GetFrequency();
+    iFrequency = Parameters.GetFrequency();
 
     /* Get current UTC time */
     time_t ltime;
@@ -775,13 +777,13 @@ void CWriteIQFile::OpenFile(CParameter& ReceiverParam)
     struct tm* gmtCur = gmtime(&ltime);
 
     stringstream filename;
-    filename << ReceiverParam.GetDataDirectory();
-    filename << ReceiverParam.sReceiverID << "_";
+    filename << Parameters.GetDataDirectory();
+    filename << Parameters.sReceiverID << "_";
     filename << setw(4) << setfill('0') << gmtCur->tm_year + 1900 << "-" << setw(2) << setfill('0')<< gmtCur->tm_mon + 1;
     filename << "-" << setw(2) << setfill('0')<< gmtCur->tm_mday << "_";
     filename << setw(2) << setfill('0') << gmtCur->tm_hour << "-" << setw(2) << setfill('0')<< gmtCur->tm_min;
     filename << "-" << setw(2) << setfill('0')<< gmtCur->tm_sec << "_";
-    filename << setw(8) << setfill('0') << (iFrequency*1000) << ".iq" << (SOUNDCRD_SAMPLE_RATE/1000);
+    filename << setw(8) << setfill('0') << (iFrequency*1000) << ".iq" << (Parameters.GetSampleRate()/1000);
 
     pFile = fopen(filename.str().c_str(), "wb");
 
@@ -797,10 +799,10 @@ void CWriteIQFile::NewFrequency(CParameter &)
 {
 }
 
-void CWriteIQFile::InitInternal(CParameter& ReceiverParam)
+void CWriteIQFile::InitInternal(CParameter& Parameters)
 {
     /* Get parameters from info class */
-    const int iSymbolBlockSize = ReceiverParam.CellMappingTable.iSymbolBlockSize;
+    const int iSymbolBlockSize = Parameters.CellMappingTable.iSymbolBlockSize;
 
     iInputBlockSize = iSymbolBlockSize;
 
@@ -861,7 +863,7 @@ void CWriteIQFile::InitInternal(CParameter& ReceiverParam)
 
 }
 
-void CWriteIQFile::ProcessDataInternal(CParameter& ReceiverParam)
+void CWriteIQFile::ProcessDataInternal(CParameter& Parameters)
 {
     int i;
 
@@ -888,7 +890,7 @@ void CWriteIQFile::ProcessDataInternal(CParameter& ReceiverParam)
 
 
     // Has the frequency changed? If so, close any open file (a new one will be opened)
-    int iNewFrequency = ReceiverParam.GetFrequency();
+    int iNewFrequency = Parameters.GetFrequency();
 
     if (iNewFrequency != iFrequency)
     {
@@ -903,7 +905,7 @@ void CWriteIQFile::ProcessDataInternal(CParameter& ReceiverParam)
     // Now open the file with correct name if it isn't currently open
     if (!pFile)
     {
-        OpenFile(ReceiverParam);
+        OpenFile(Parameters);
     }
 
     /* Band-pass filter and mixer ------------------------------------------- */

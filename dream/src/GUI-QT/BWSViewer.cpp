@@ -27,6 +27,7 @@
 \******************************************************************************/
 
 #include "BWSViewer.h"
+#include "../DrmReceiver.h"
 #include "../util/Settings.h"
 #include "../datadecoding/DataDecoder.h"
 

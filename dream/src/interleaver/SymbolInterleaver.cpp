@@ -150,14 +150,14 @@ void CSymbDeinterleaver::ProcessDataInternal(CParameter&)
 		iOutputBlockSize = iN_MUX; 
 }
 
-void CSymbDeinterleaver::InitInternal(CParameter& ReceiverParam)
+void CSymbDeinterleaver::InitInternal(CParameter& Parameters)
 {
 	int i;
 
-	ReceiverParam.Lock(); 
+	Parameters.Lock(); 
 
 	/* Set internal parameters */
-	iN_MUX = ReceiverParam.CellMappingTable.iNumUsefMSCCellsPerFrame;
+	iN_MUX = Parameters.CellMappingTable.iNumUsefMSCCellsPerFrame;
 
 	/* Allocate memory for table */
 	veciIntTable.Init(iN_MUX);
@@ -166,7 +166,7 @@ void CSymbDeinterleaver::InitInternal(CParameter& ReceiverParam)
 	MakeTable(veciIntTable, iN_MUX, SYMB_INTERL_CONST_T_0);
 
 	/* Set interleaver depth */
-	switch (ReceiverParam.eSymbolInterlMode)
+	switch (Parameters.eSymbolInterlMode)
 	{
 	case CParameter::SI_LONG:
 		iD = D_LENGTH_LONG_INTERL;
@@ -190,7 +190,7 @@ void CSymbDeinterleaver::InitInternal(CParameter& ReceiverParam)
 		veciCurIndex[i] = i;
 
 #ifdef USE_ERASURE_FOR_FASTER_ACQ
-	if (ReceiverParam.eSimType == CParameter::ST_NONE)
+	if (Parameters.eSimType == CParameter::ST_NONE)
 	{
 		/* Output right after the first block */
 		iInitCnt = (int) Min(1, iD);
@@ -208,5 +208,5 @@ void CSymbDeinterleaver::InitInternal(CParameter& ReceiverParam)
 	iInputBlockSize = iN_MUX;
 	iMaxOutputBlockSize = iN_MUX;
 
-	ReceiverParam.Unlock(); 
+	Parameters.Unlock(); 
 }

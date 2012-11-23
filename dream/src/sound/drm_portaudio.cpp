@@ -149,12 +149,14 @@ CPaCommon::GetDev()
 
 /* buffer_size is in samples - frames would be better */
 void
-CPaCommon::Init(int iNewBufferSize, _BOOLEAN bNewBlocking)
+CPaCommon::Init(int iSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking)
 {
     if (device_changed == false)
         return;
 
     unsigned long channels=2;
+
+    samplerate = double(iSampleRate);
 
     if (is_capture)
         framesPerBuffer = iNewBufferSize / channels;
@@ -215,7 +217,6 @@ CPaCommon::ReInit()
     if (pParameters.device == paNoDevice)
         return;
 
-    double srate = (double)SOUNDCRD_SAMPLE_RATE;
     unsigned long minRingBufferSize;
     int err;
 
@@ -236,7 +237,7 @@ CPaCommon::ReInit()
     /* flags that can be used to define dither, clip settings and more */
     if (is_capture)
     {
-        err = Pa_OpenStream(&stream, &pParameters, NULL, srate,
+        err = Pa_OpenStream(&stream, &pParameters, NULL, samplerate,
                             framesPerBuffer, paNoFlag, captureCallback,
                             (void *) this);
 
@@ -250,7 +251,7 @@ CPaCommon::ReInit()
     }
     else
     {
-        err = Pa_OpenStream(&stream, NULL, &pParameters, srate,
+        err = Pa_OpenStream(&stream, NULL, &pParameters, samplerate,
                             framesPerBuffer, paNoFlag, playbackCallback,
                             (void *) this);
         if (err != paNoError) {
@@ -360,9 +361,9 @@ CPaIn::~CPaIn()
 }
 
 void
-CPaIn::Init(int iNewBufferSize, _BOOLEAN bNewBlocking)
+CPaIn::Init(int iSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking)
 {
-    hw.Init(iNewBufferSize, bNewBlocking);
+    hw.Init(iSampleRate, iNewBufferSize, bNewBlocking);
 }
 
 _BOOLEAN
@@ -388,9 +389,9 @@ CPaOut::~CPaOut()
 }
 
 void
-CPaOut::Init(int iNewBufferSize, _BOOLEAN bNewBlocking)
+CPaOut::Init(int iSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking)
 {
-    hw.Init(iNewBufferSize, bNewBlocking);
+    hw.Init(iSampleRate, iNewBufferSize, bNewBlocking);
 }
 
 _BOOLEAN

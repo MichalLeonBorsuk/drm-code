@@ -37,16 +37,16 @@ class CPaCommon: public CSelectionInterface
 {
 public:
     CPaCommon(bool);
-    virtual 			~CPaCommon();
+    virtual 		~CPaCommon();
 
-    virtual void		Enumerate(vector<string>& choices);
-    virtual void		SetDev(int iNewDevice);
-    virtual int			GetDev();
+    virtual void	Enumerate(vector<string>& choices);
+    virtual void	SetDev(int iNewDevice);
+    virtual int		GetDev();
 
-    void		Init(int iNewBufferSize, _BOOLEAN bNewBlocking = TRUE);
+    void		Init(int iSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking = TRUE);
     void		ReInit();
-    _BOOLEAN	Read(CVector<short>& psData);
-    _BOOLEAN	Write(CVector<short>& psData);
+    _BOOLEAN		Read(CVector<short>& psData);
+    _BOOLEAN		Write(CVector<short>& psData);
     void		Close();
 
     PaUtilRingBuffer ringBuffer;
@@ -62,6 +62,7 @@ protected:
     int framesPerBuffer;
     int iBufferSize;
     char *ringBufferData;
+    double samplerate;
 
     static int pa_count;
 };
@@ -81,7 +82,7 @@ public:
         return hw.GetDev();
     }
 
-    virtual void		Init(int iNewBufferSize, _BOOLEAN bNewBlocking = TRUE);
+    virtual void		Init(int iSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking = TRUE);
     virtual void		Close();
     virtual _BOOLEAN	Read(CVector<short>& psData);
 

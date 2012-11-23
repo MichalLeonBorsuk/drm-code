@@ -42,14 +42,13 @@
 #define APP_NAME_TRANSMITTER "Dream Transmitter" // PulseAudio stream name
 #define PLAYBACK_BUFFER  2000000 // us
 #define PLAYBACK_LATENCY 1000000 // us
-#define MAX_SAMPLE_RATE_OFFSET ((int)(SOUNDCRD_SAMPLE_RATE * 2 / 100)) // = 2%
 #define WAIT_PREBUFFER ((int)(PLAYBACK_LATENCY + 399999) / 400000) // 400000us = .4s (frame duration)
 #define NUM_CHANNELS 2 // Stereo
 #define BYTES_PER_SAMPLE ((int)sizeof(_SAMPLE))
-#define PA_RECORD_MAXLENGTH -1//((int)((double)(NUM_CHANNELS * BYTES_PER_SAMPLE * SOUNDCRD_SAMPLE_RATE) * ((double)RECORD_BUFFER)  / (double)1000000))
+#define PA_RECORD_MAXLENGTH -1//((int)((double)(NUM_CHANNELS * BYTES_PER_SAMPLE * iSampleRate) * ((double)RECORD_BUFFER)  / (double)1000000))
 #define PA_RECORD_FRAGSIZE (2560*BYTES_PER_SAMPLE/2)
-#define PA_PLAYBACK_TLENGTH ((int)((double)(NUM_CHANNELS * BYTES_PER_SAMPLE * SOUNDCRD_SAMPLE_RATE) * ((double)PLAYBACK_BUFFER)  / (double)1000000))
-#define PA_PLAYBACK_PREBUF  ((int)((double)(NUM_CHANNELS * BYTES_PER_SAMPLE * SOUNDCRD_SAMPLE_RATE) * ((double)PLAYBACK_LATENCY) / (double)1000000))
+#define PA_PLAYBACK_TLENGTH ((int)((double)(NUM_CHANNELS * BYTES_PER_SAMPLE * iSampleRate) * ((double)PLAYBACK_BUFFER)  / (double)1000000))
+#define PA_PLAYBACK_PREBUF  ((int)((double)(NUM_CHANNELS * BYTES_PER_SAMPLE * iSampleRate) * ((double)PLAYBACK_LATENCY) / (double)1000000))
 #define STREAM_FLAGS (PA_STREAM_ADJUST_LATENCY | PA_STREAM_DONT_MOVE)
 
 
@@ -222,7 +221,7 @@ void CSoundInPulse::Init_HW()
 
 	ss.format = PA_SAMPLE_S16NE;
 	ss.channels = NUM_CHANNELS;
-	ss.rate = SOUNDCRD_SAMPLE_RATE;
+	ss.rate = iSampleRate;
 
 	/* record device */
 	if(devices.size()==0)
@@ -284,9 +283,9 @@ int CSoundInPulse::Read_HW(void *recbuf, int size)
 			bClockDriftComp = cp->bClockDriftComp;
 			DEBUG_MSG("CSoundInPulse::Read_HW(): bClockDriftComp=%i\n", bClockDriftComp);
 			if (!bClockDriftComp)
-				pa_set_sample_rate(pa_m, pa_c, pa_s, SOUNDCRD_SAMPLE_RATE);
+				pa_set_sample_rate(pa_m, pa_c, pa_s, iSampleRate);
 		}
-		int sample_rate = SOUNDCRD_SAMPLE_RATE - cp->sample_rate_offset;
+		int sample_rate = iSampleRate - cp->sample_rate_offset;
 		if (record_sample_rate != sample_rate) {
 			record_sample_rate = sample_rate;
 			pa_set_sample_rate(pa_m, pa_c, pa_s, sample_rate);
@@ -384,7 +383,7 @@ void CSoundOutPulse::Init_HW()
 
 	ss.format = PA_SAMPLE_S16NE;
 	ss.channels = NUM_CHANNELS;
-	ss.rate = SOUNDCRD_SAMPLE_RATE;
+	ss.rate = iSampleRate;
 
 	/* playback device */
 	if(devices.size()==0)
@@ -439,9 +438,9 @@ void CSoundOutPulse::Init_HW()
 	pa_stream_notify_cb_userdata_overflow.bMute = FALSE;
 	pa_stream_set_overflow_callback(pa_s, &pa_stream_notify_cb, (void*)&pa_stream_notify_cb_userdata_overflow);
 
-//	pa_o_sync(pa_m, pa_c, pa_stream_update_sample_rate(pa_s, SOUNDCRD_SAMPLE_RATE+750, pa_stream_success_cb, NULL));
+//	pa_o_sync(pa_m, pa_c, pa_stream_update_sample_rate(pa_s, iSampleRate+750, pa_stream_success_cb, NULL));
 //	playback_latency_usec = PLAYBACK_LATENCY;
-//	playback_sample_rate = SOUNDCRD_SAMPLE_RATE;
+//	playback_sample_rate = iSampleRate;
 
 #ifdef CLOCK_DRIFT_ADJ_ENABLED
 	X.Init(1);
@@ -470,7 +469,7 @@ int CSoundOutPulse::Write_HW(void *playbuf, int size)
 			bInitClockDriftComp = TRUE;
 		else
 			if (!bBlockingPlay)
-				pa_set_sample_rate(pa_m, pa_c, pa_s, SOUNDCRD_SAMPLE_RATE);
+				pa_set_sample_rate(pa_m, pa_c, pa_s, iSampleRate);
 	}
 #endif
 
@@ -502,9 +501,9 @@ int CSoundOutPulse::Write_HW(void *playbuf, int size)
 		}
 
 		if (!bBlockingPlay)
-/*Receiver*/	DEBUG_MSG("playback latency: %07i us, smoothed %07i us, %i, %02i, %02i, %i\n", (int)playback_usec, (int)playback_usec_smoothed, SOUNDCRD_SAMPLE_RATE + cp.sample_rate_offset, wait_prebuffer, filter_stabilized, ++clock);
+/*Receiver*/	DEBUG_MSG("playback latency: %07i us, smoothed %07i us, %i, %02i, %02i, %i\n", (int)playback_usec, (int)playback_usec_smoothed, iSampleRate + cp.sample_rate_offset, wait_prebuffer, filter_stabilized, ++clock);
 		else
-/*Transmitter*/	DEBUG_MSG("playback latency: %07i us, smoothed %07i us, %i, %02i, %02i, %i\n", (int)playback_usec, (int)playback_usec_smoothed, SOUNDCRD_SAMPLE_RATE - cp.sample_rate_offset, wait_prebuffer, filter_stabilized, ++clock);
+/*Transmitter*/	DEBUG_MSG("playback latency: %07i us, smoothed %07i us, %i, %02i, %02i, %i\n", (int)playback_usec, (int)playback_usec_smoothed, iSampleRate - cp.sample_rate_offset, wait_prebuffer, filter_stabilized, ++clock);
 
 		if (wait_prebuffer > 0) {
 			wait_prebuffer--;
@@ -519,11 +518,11 @@ int CSoundOutPulse::Write_HW(void *playbuf, int size)
 				error = pow(fabs(error), ALGO_ERROR_EXPONENT) * (error >= 0.0 ? 1.0 : -1.0);
 				if (error >= 0.0) offset = (int)floor(error + 0.5);
 				else              offset = (int) ceil(error - 0.5);
-				if      (offset>MAX_SAMPLE_RATE_OFFSET) offset=MAX_SAMPLE_RATE_OFFSET;
-				else if (offset<-MAX_SAMPLE_RATE_OFFSET) offset=-MAX_SAMPLE_RATE_OFFSET;
+				if      (offset>iMaxSampleRateOffset) offset=iMaxSampleRateOffset;
+				else if (offset<-iMaxSampleRateOffset) offset=-iMaxSampleRateOffset;
 				/****************************************************************************************************************/
 				if (!bBlockingPlay && cp.sample_rate_offset != offset) {
-					pa_set_sample_rate(pa_m, pa_c, pa_s, SOUNDCRD_SAMPLE_RATE + offset);
+					pa_set_sample_rate(pa_m, pa_c, pa_s, iSampleRate + offset);
 				}
 				cp.sample_rate_offset = offset;
 			}
@@ -547,7 +546,7 @@ int CSoundOutPulse::Write_HW(void *playbuf, int size)
 				ti = pa_stream_get_timing_info(pa_s);
 				if (ti && !ti->write_index_corrupt && !ti->read_index_corrupt) {
 					uint64_t samples = abs(ti->write_index - ti->read_index) / (NUM_CHANNELS*BYTES_PER_SAMPLE);
-					uint64_t usec = samples * (uint32_t)1000000 / (uint32_t)SOUNDCRD_SAMPLE_RATE;
+					uint64_t usec = samples * (uint32_t)1000000 / (uint32_t)iSampleRate;
 					playback_usec = usec;
 					X[0] = CReal(usec);
 					playback_usec_smoothed = Filter(B, A, X, Z)[0];
@@ -699,9 +698,12 @@ CSoundInPulse::CSoundInPulse():
 	getdevices(names, devices, false);
 }
 
-void CSoundInPulse::Init(int iNewBufferSize, _BOOLEAN bNewBlocking)
+void CSoundInPulse::Init(int iSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking)
 {
 	DEBUG_MSG("initrec iNewBufferSize=%i bNewBlocking=%i\n", iNewBufferSize, bNewBlocking);
+
+	this->iSampleRate = iSampleRate;
+	iMaxSampleRateOffset = iSampleRate * 2 / 100; // = 2%
 
 	/* Save blocking mode and buffer size */
 	bBlockingRec = bNewBlocking;
@@ -795,9 +797,12 @@ CSoundOutPulse::CSoundOutPulse():
 	getdevices(names, devices, true);
 }
 
-void CSoundOutPulse::Init(int iNewBufferSize, _BOOLEAN bNewBlocking)
+void CSoundOutPulse::Init(int iSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking)
 {
 	DEBUG_MSG("initplay iNewBufferSize=%i bNewBlocking=%i\n", iNewBufferSize, bNewBlocking);
+
+	this->iSampleRate = iSampleRate;
+	iMaxSampleRateOffset = iSampleRate * 2 / 100; // = 2%
 
 	/* Save blocking mode and buffer size */
 	bBlockingPlay = bNewBlocking;

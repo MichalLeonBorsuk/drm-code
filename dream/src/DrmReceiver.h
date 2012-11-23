@@ -143,7 +143,7 @@ public:
         bRestartFlag = TRUE;
     }
     EAcqStat				GetAcquiState() {
-        return pReceiverParam->GetAcquiState();
+        return pParameters->GetAcquiState();
     }
     ERecMode				GetReceiverMode() {
         return eReceiverMode;
@@ -168,7 +168,7 @@ public:
 #endif
     void	 				SetFrequency(int);
     int		 				GetFrequency() {
-        return pReceiverParam->GetFrequency();
+        return pParameters->GetFrequency();
     }
     void					SetIQRecording(_BOOLEAN);
     void					SetRSIRecording(_BOOLEAN, const char);
@@ -290,7 +290,7 @@ public:
     }
 
     CParameter*				GetParameters() {
-        return pReceiverParam;
+        return pParameters;
     }
 
     CPlotManager*			GetPlotManager() {
@@ -369,7 +369,7 @@ protected:
     CDownstreamDI			downstreamRSCI;
 
     /* Parameters */
-    CParameter*				pReceiverParam;
+    CParameter*				pParameters;
     CParameter*				pDRMParam;
     CParameter*				pAMParam;
 

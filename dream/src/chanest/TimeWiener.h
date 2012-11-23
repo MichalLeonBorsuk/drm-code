@@ -87,7 +87,7 @@ public:
 	CTimeWiener() : bTracking(FALSE) {}
 	virtual ~CTimeWiener() {}
 
-	virtual int Init(CParameter& ReceiverParam);
+	virtual int Init(CParameter& Parameters);
 	virtual _REAL Estimate(CVectorEx<_COMPLEX>* pvecInputData,
 						   CComplexVector& veccOutputData,
 						   CVector<int>& veciMapTab,

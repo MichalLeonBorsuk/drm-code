@@ -170,14 +170,15 @@ protected:
 
     CShiftRegister<_REAL>	vecrInpData;
 
-    _BOOLEAN				bFippedSpectrum;
+    int				iSampleRate;
+    _BOOLEAN			bFippedSpectrum;
 
-    EInChanSel				eInChanSelection;
+    EInChanSel			eInChanSelection;
 
-    CVector<_REAL>			vecrReHist;
-    CVector<_REAL>			vecrImHist;
-    _COMPLEX				cCurExp;
-    _COMPLEX				cExpStep;
+    CVector<_REAL>		vecrReHist;
+    CVector<_REAL>		vecrImHist;
+    _COMPLEX			cCurExp;
+    _COMPLEX			cExpStep;
 
     _REAL HilbertFilt(const _REAL rRe, const _REAL rIm);
 
@@ -185,17 +186,17 @@ protected:
     /* RSCI output */
     int							iFreeSymbolCounter;
 
-    virtual void InitInternal(CParameter& ReceiverParam);
-    virtual void ProcessDataInternal(CParameter& ReceiverParam);
+    virtual void InitInternal(CParameter& Parameters);
+    virtual void ProcessDataInternal(CParameter& Parameters);
 
-    void PutPSD(CParameter& ReceiverParam);
+    void PutPSD(CParameter& Parameters);
     void CalculatePSD(CVector<_REAL>& vecrData, CVector<_REAL>& vecrScale,
                       const int iLenPSDAvEachBlock = LEN_PSD_AV_EACH_BLOCK,
                       const int iNumAvBlocksPSD = NUM_AV_BLOCKS_PSD,
                       const int iPSDOverlap = 0);
 
-    void CalculateSigStrengthCorrection(CParameter &ReceiverParam, CVector<_REAL> &vecrPSD);
-    void CalculatePSDInterferenceTag(CParameter &ReceiverParam, CVector<_REAL> &vecrPSD);
+    void CalculateSigStrengthCorrection(CParameter &Parameters, CVector<_REAL> &vecrPSD);
+    void CalculatePSDInterferenceTag(CParameter &Parameters, CVector<_REAL> &vecrPSD);
 
     int FreqToBin(_REAL rFreq);
     _REAL CalcTotalPower(CVector<_REAL> &vecrData, int iStartBin, int iEndBin);

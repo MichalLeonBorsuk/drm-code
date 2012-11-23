@@ -71,12 +71,12 @@ COSSDev::devdata::open(const string & name, int mode)
             CGenErr("unable to set number of channels");
 
         /* Sampling rate */
-        arg = SOUNDCRD_SAMPLE_RATE;
+        arg = Parameters.GetSampleRate();
         status = ioctl(fd, SNDCTL_DSP_SPEED, &arg);
         if (status == -1)
             throw
             CGenErr("SNDCTL_DSP_SPEED ioctl failed");
-        if (arg != SOUNDCRD_SAMPLE_RATE)
+        if (arg != Parameters.GetSampleRate())
             throw
             CGenErr("unable to set sample rate");
 

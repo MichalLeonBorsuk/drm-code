@@ -106,7 +106,7 @@ public:
 
     enum ENoiRedDegree {NR_LOW, NR_MEDIUM, NR_HIGH};
 
-    void Init(const int iNewBlockLen);
+    void Init(int iSampleRate, int iNewBlockLen);
     void Process(CRealVector& vecrIn /* in/out */);
 
     void SetNoiRedSpeex(bool);
@@ -191,7 +191,7 @@ public:
     enum EType {AT_NO_AGC, AT_SLOW, AT_MEDIUM, AT_FAST};
 
     CAGC() : eType(AT_MEDIUM) {}
-    void Init(const int iNewBlockSize);
+    void Init(int iSampleRate, int iNewBlockSize);
     void Process(CRealVector& vecrIn /* in/out */);
 
     void SetType(const EType eNewType);
@@ -200,6 +200,7 @@ public:
     }
 
 protected:
+    int		iSampleRate;
     int		iBlockSize;
     EType	eType;
     CReal	rAttack, rDecay;
@@ -377,10 +378,11 @@ protected:
     /* OPH: counter to count symbols within a frame in order to generate */
     /* RSCI output */
     int							iFreeSymbolCounter;
+    int							iSampleRate;
 
 
-    virtual void InitInternal(CParameter& ReceiverParam);
-    virtual void ProcessDataInternal(CParameter& ReceiverParam);
+    virtual void InitInternal(CParameter& Parameters);
+    virtual void ProcessDataInternal(CParameter& Parameters);
 };
 
 

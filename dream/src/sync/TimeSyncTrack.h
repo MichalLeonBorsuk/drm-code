@@ -92,7 +92,7 @@ public:
 	void GetAvPoDeSp(CVector<_REAL>& vecrData, CVector<_REAL>& vecrScale, 
 					 _REAL& rLowerBound, _REAL& rHigherBound,
 					 _REAL& rStartGuard, _REAL& rEndGuard, _REAL& rPDSBegin,
-					 _REAL& rPDSEnd);
+					 _REAL& rPDSEnd, int iSampleRate);
 
 	void StartTracking() {bTiSyncTracking = TRUE;}
 	void StopTracking() {bTiSyncTracking = FALSE;}
@@ -155,7 +155,7 @@ protected:
 	int						iResOffAcqCntMax;
 	int						iOldNonZeroDiff;
 
-	CReal GetSamOffHz(int iDiff, int iLen);
+	CReal GetSamOffHz(int iDiff, int iLen, int iSampleRate);
 
 	/* O. Haffenden variables for rdop and rdel calculation */
 	CComplexVector			veccOldImpulseResponse;

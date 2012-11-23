@@ -57,7 +57,7 @@ void CPlotManager::Init()
 void
 CPlotManager::UpdateParamHistories(ERecState eReceiverState)
 {
-    CParameter& ReceiverParam = *pReceiver->GetParameters();
+    CParameter& Parameters = *pReceiver->GetParameters();
 
     /* TODO: do not use the shift register class, build a new
        one which just increments a pointer in a buffer and put
@@ -68,21 +68,21 @@ CPlotManager::UpdateParamHistories(ERecState eReceiverState)
     /* Only update histories if the receiver is in tracking mode */
     if (eReceiverState == RS_TRACKING)
     {
-        ReceiverParam.Lock();
-        _REAL rFreqOffsetTrack = ReceiverParam.rFreqOffsetTrack;
-        _REAL rResampleOffset = ReceiverParam.rResampleOffset;
-        _REAL rSNR = ReceiverParam.GetSNR();
-        _REAL rSigmaEstimate = ReceiverParam.rSigmaEstimate;
-        _REAL iNumSymPerFrame = ReceiverParam.CellMappingTable.iNumSymPerFrame;
-        _REAL rMeanDelay = (ReceiverParam.rMinDelay +	ReceiverParam.rMaxDelay) / 2.0;
-        ReceiverParam.Unlock();
+        Parameters.Lock();
+        _REAL rFreqOffsetTrack = Parameters.rFreqOffsetTrack;
+        _REAL rResampleOffset = Parameters.rResampleOffset;
+        _REAL rSNR = Parameters.GetSNR();
+        _REAL rSigmaEstimate = Parameters.rSigmaEstimate;
+        _REAL iNumSymPerFrame = Parameters.CellMappingTable.iNumSymPerFrame;
+        _REAL rMeanDelay = (Parameters.rMinDelay +	Parameters.rMaxDelay) / 2.0;
+        Parameters.Unlock();
 
 #ifdef USE_QT_GUI
         MutexHist.lock();
 #endif
 
         /* Frequency offset tracking values */
-        vecrFreqSyncValHist.AddEnd(rFreqOffsetTrack * SOUNDCRD_SAMPLE_RATE);
+        vecrFreqSyncValHist.AddEnd(rFreqOffsetTrack * Parameters.GetSampleRate());
 
         /* Sample rate offset estimation */
         vecrSamOffsValHist.AddEnd(rResampleOffset);
@@ -127,15 +127,15 @@ CPlotManager::UpdateParamHistoriesRSIIn()
 {
     /* This function is only called once per RSI frame, so process every time */
 
-    CParameter& ReceiverParam = *pReceiver->GetParameters();
+    CParameter& Parameters = *pReceiver->GetParameters();
 
-    ReceiverParam.Lock();
+    Parameters.Lock();
     _REAL rDelay = _REAL(0.0);
-    if (ReceiverParam.vecrRdelIntervals.GetSize() > 0)
-        rDelay = ReceiverParam.vecrRdelIntervals[0];
-    _REAL rMER = ReceiverParam.rMER;
-    _REAL rRdop = ReceiverParam.rRdop;
-    ReceiverParam.Unlock();
+    if (Parameters.vecrRdelIntervals.GetSize() > 0)
+        rDelay = Parameters.vecrRdelIntervals[0];
+    _REAL rMER = Parameters.rMER;
+    _REAL rRdop = Parameters.rRdop;
+    Parameters.Unlock();
 
 #ifdef USE_QT_GUI
     MutexHist.lock();
@@ -167,14 +167,14 @@ CPlotManager::GetFreqSamOffsHist(CVector < _REAL > &vecrFreqOffs,
                                  CVector < _REAL > &vecrScale,
                                  _REAL & rFreqAquVal)
 {
-    CParameter& ReceiverParam = *pReceiver->GetParameters();
+    CParameter& Parameters = *pReceiver->GetParameters();
 
-    ReceiverParam.Lock();
+    Parameters.Lock();
     /* Duration of OFDM symbol */
-    const _REAL rTs = (CReal) (ReceiverParam.CellMappingTable.iFFTSizeN + ReceiverParam.CellMappingTable.iGuardSize) / SOUNDCRD_SAMPLE_RATE;
+    const _REAL rTs = (CReal) (Parameters.CellMappingTable.iFFTSizeN + Parameters.CellMappingTable.iGuardSize) / Parameters.GetSampleRate();
     /* Value from frequency acquisition */
-    rFreqAquVal = ReceiverParam.rFreqOffsetAcqui * SOUNDCRD_SAMPLE_RATE;
-    ReceiverParam.Unlock();
+    rFreqAquVal = Parameters.rFreqOffsetAcqui * Parameters.GetSampleRate();
+    Parameters.Unlock();
 
     /* Init output vectors */
     vecrFreqOffs.Init(LEN_HIST_PLOT_SYNC_PARMS, (_REAL) 0.0);
@@ -205,19 +205,19 @@ CPlotManager::GetDopplerDelHist(CVector < _REAL > &vecrLenIR,
                                 CVector < _REAL > &vecrDoppler,
                                 CVector < _REAL > &vecrScale)
 {
-    CParameter& ReceiverParam = *pReceiver->GetParameters();
+    CParameter& Parameters = *pReceiver->GetParameters();
 
     /* Init output vectors */
     vecrLenIR.Init(LEN_HIST_PLOT_SYNC_PARMS, (_REAL) 0.0);
     vecrDoppler.Init(LEN_HIST_PLOT_SYNC_PARMS, (_REAL) 0.0);
     vecrScale.Init(LEN_HIST_PLOT_SYNC_PARMS, (_REAL) 0.0);
 
-    ReceiverParam.Lock();
+    Parameters.Lock();
     /* Duration of DRM frame */
-    const _REAL rDRMFrameDur = (CReal) (ReceiverParam.CellMappingTable.iFFTSizeN
-                                        + ReceiverParam.CellMappingTable.iGuardSize) /
-                               SOUNDCRD_SAMPLE_RATE * ReceiverParam.CellMappingTable.iNumSymPerFrame;
-    ReceiverParam.Unlock();
+    const _REAL rDRMFrameDur = (CReal) (Parameters.CellMappingTable.iFFTSizeN
+                                        + Parameters.CellMappingTable.iGuardSize) /
+                               Parameters.GetSampleRate() * Parameters.CellMappingTable.iNumSymPerFrame;
+    Parameters.Unlock();
 
     /* Lock resources */
 #ifdef USE_QT_GUI
@@ -244,13 +244,13 @@ CPlotManager::GetSNRHist(CVector < _REAL > &vecrSNR,
                          CVector < _REAL > &vecrCDAud,
                          CVector < _REAL > &vecrScale)
 {
-    CParameter& ReceiverParam = *pReceiver->GetParameters();
+    CParameter& Parameters = *pReceiver->GetParameters();
     /* Duration of DRM frame */
-    ReceiverParam.Lock();
+    Parameters.Lock();
     /* Duration of DRM frame */
-    const _REAL rDRMFrameDur = (CReal) (ReceiverParam.CellMappingTable.iFFTSizeN + ReceiverParam.CellMappingTable.iGuardSize) /
-                               SOUNDCRD_SAMPLE_RATE * ReceiverParam.CellMappingTable.iNumSymPerFrame;
-    ReceiverParam.Unlock();
+    const _REAL rDRMFrameDur = (CReal) (Parameters.CellMappingTable.iFFTSizeN + Parameters.CellMappingTable.iGuardSize) /
+                               Parameters.GetSampleRate() * Parameters.CellMappingTable.iNumSymPerFrame;
+    Parameters.Unlock();
 
     /* Init output vectors */
     vecrSNR.Init(LEN_HIST_PLOT_SYNC_PARMS, (_REAL) 0.0);
@@ -285,14 +285,14 @@ CPlotManager::GetSNRHist(CVector < _REAL > &vecrSNR,
 void
 CPlotManager::GetInputPSD(CVector<_REAL>& vecrData, CVector<_REAL>& vecrScale)
 {
-    CParameter& ReceiverParam = *pReceiver->GetParameters();
+    CParameter& Parameters = *pReceiver->GetParameters();
 
     if (pReceiver->GetRSIIn()->GetInEnabled())
     {
         // read it from the parameter structure
-        ReceiverParam.Lock();
-        CVector<_REAL>& vecrPSD = ReceiverParam.vecrPSD;
-        ReceiverParam.Unlock();
+        Parameters.Lock();
+        CVector<_REAL>& vecrPSD = Parameters.vecrPSD;
+        Parameters.Unlock();
 
         int iVectorLen = vecrPSD.Size();
         vecrData.Init(iVectorLen);
@@ -329,16 +329,16 @@ void CPlotManager::GetAvPoDeSp(CVector<_REAL>& vecrData, CVector<_REAL>& vecrSca
                                _REAL& rStartGuard, _REAL& rEndGuard, _REAL& rPDSBegin,
                                _REAL& rPDSEnd)
 {
-    CParameter& ReceiverParam = *pReceiver->GetParameters();
+    CParameter& Parameters = *pReceiver->GetParameters();
 
     if (pReceiver->GetRSIIn()->GetInEnabled())
     {
         // read it from the parameter structure
-        ReceiverParam.Lock();
-        CVector<_REAL>& vecrPIR = ReceiverParam.vecrPIR;
-        _REAL rPIRStart = ReceiverParam.rPIRStart;
-        _REAL rPIREnd = ReceiverParam.rPIREnd;
-        ReceiverParam.Unlock();
+        Parameters.Lock();
+        CVector<_REAL>& vecrPIR = Parameters.vecrPIR;
+        _REAL rPIRStart = Parameters.rPIRStart;
+        _REAL rPIREnd = Parameters.rPIREnd;
+        Parameters.Unlock();
 
         int iVectorLen = vecrPIR.Size();
         vecrData.Init(iVectorLen);

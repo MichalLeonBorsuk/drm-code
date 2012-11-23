@@ -60,7 +60,7 @@ public:
     void SimScript();
 
     CParameter* GetParameters() {
-        return &Param;
+        return &Parameters;
     }
 
 protected:
@@ -73,7 +73,7 @@ protected:
     _REAL rStartSNR, rEndSNR, rStepSNR;
 
     /* Parameters */
-    CParameter				Param;
+    CParameter				Parameters;
 
 
     /* Buffers -------------------------------------------------------------- */

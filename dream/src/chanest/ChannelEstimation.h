@@ -152,7 +152,8 @@ protected:
     enum EDFTWinType {DFT_WIN_RECT, DFT_WIN_HAMM, DFT_WIN_HANN};
     EDFTWinType				eDFTWindowingMethod;
 
-    int						iNumSymPerFrame;
+    int					iSampleRate;
+    int					iNumSymPerFrame;
 
     CChanEstTime*			pTimeInt;
 
@@ -236,8 +237,8 @@ protected:
     _REAL CalAndBoundSNR(const _REAL rSignalEst, const _REAL rNoiseEst);
 
     /* OPH: RSCI interference tag calculation */
-    void CalculateRint(CParameter& ReceiverParam);
-    void UpdateRSIPilotStore(CParameter& ReceiverParam, CVectorEx<_COMPLEX>* pvecInputData,
+    void CalculateRint(CParameter& Parameters);
+    void UpdateRSIPilotStore(CParameter& Parameters, CVectorEx<_COMPLEX>* pvecInputData,
                              CVector<int>& veciMapTab, CVector<_COMPLEX>& veccPilotCells, const int iSymbolCounter);
 
     CMatrix<_COMPLEX>	matcRSIPilotStore;
@@ -263,8 +264,8 @@ protected:
     int						iCurrentFrameID;
 #endif
 
-    virtual void InitInternal(CParameter& ReceiverParam);
-    virtual void ProcessDataInternal(CParameter& ReceiverParam);
+    virtual void InitInternal(CParameter& Parameters);
+    virtual void ProcessDataInternal(CParameter& Parameters);
 };
 
 

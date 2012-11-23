@@ -32,7 +32,7 @@
 #include "ui_BWSViewer.h"
 #include <string>
 
-#include "../DrmReceiver.h"
+#include "../util/Utilities.h"
 #include "DialogUtil.h"
 #include <QMutex>
 #include <QNetworkAccessManager>
@@ -40,6 +40,8 @@
 #include <QNetworkRequest>
 
 
+class CMOTObject;
+class CDRMReceiver;
 class CSettings;
 class CDataDecoder;
 

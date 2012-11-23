@@ -46,7 +46,7 @@ public:
     }
     virtual void		SetFileName(const string& strFileName);
 
-    virtual void 		Init(int iNewBufferSize, _BOOLEAN bNewBlocking = TRUE);
+    virtual void 		Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking = TRUE);
     virtual _BOOLEAN 	Read(CVector<short>& psData);
     virtual void 		Close();
 
@@ -56,6 +56,7 @@ protected:
     enum {
         fmt_txt, fmt_raw_mono, fmt_raw_stereo, fmt_other
     }				eFmt;
+    int					iSampleRate;
     int					iFileSampleRate;
     int					iFileChannels;
     CPacer*				pacer;

@@ -677,18 +677,18 @@ void systemevalDlg::SetStatus(CMultColorLED* LED, ETypeRxStatus state)
 
 void systemevalDlg::OnTimer()
 {
-    CParameter& ReceiverParam = *(DRMReceiver.GetParameters());
+    CParameter& Parameters = *(DRMReceiver.GetParameters());
 
-    ReceiverParam.Lock();
+    Parameters.Lock();
 
     if (this->isVisible())
     {
-        SetStatus(LEDMSC, ReceiverParam.ReceiveStatus.Audio.GetStatus());
-        SetStatus(LEDSDC, ReceiverParam.ReceiveStatus.SDC.GetStatus());
-        SetStatus(LEDFAC, ReceiverParam.ReceiveStatus.FAC.GetStatus());
-        SetStatus(LEDFrameSync, ReceiverParam.ReceiveStatus.FSync.GetStatus());
-        SetStatus(LEDTimeSync, ReceiverParam.ReceiveStatus.TSync.GetStatus());
-        SetStatus(LEDIOInterface, ReceiverParam.ReceiveStatus.Interface.GetStatus());
+        SetStatus(LEDMSC, Parameters.ReceiveStatus.Audio.GetStatus());
+        SetStatus(LEDSDC, Parameters.ReceiveStatus.SDC.GetStatus());
+        SetStatus(LEDFAC, Parameters.ReceiveStatus.FAC.GetStatus());
+        SetStatus(LEDFrameSync, Parameters.ReceiveStatus.FSync.GetStatus());
+        SetStatus(LEDTimeSync, Parameters.ReceiveStatus.TSync.GetStatus());
+        SetStatus(LEDIOInterface, Parameters.ReceiveStatus.Interface.GetStatus());
 
         /* Show SNR if receiver is in tracking mode */
         if (DRMReceiver.GetAcquiState() == AS_WITH_SIGNAL)
@@ -696,7 +696,7 @@ void systemevalDlg::OnTimer()
             /* Get a consistant snapshot */
 
             /* We only get SNR from a local DREAM Front-End */
-            _REAL rSNR = ReceiverParam.GetSNR();
+            _REAL rSNR = Parameters.GetSNR();
             if (rSNR >= 0.0)
             {
                 /* SNR */
@@ -708,11 +708,11 @@ void systemevalDlg::OnTimer()
                 ValueSNR->setText("<b>---</b>");
             }
             /* We get MER from a local DREAM Front-End or an RSCI input but not an MDI input */
-            _REAL rMER = ReceiverParam.rMER;
+            _REAL rMER = Parameters.rMER;
             if (rMER >= 0.0 )
             {
                 ValueMERWMER->setText(QString().
-                                      setNum(ReceiverParam.rWMERMSC, 'f', 1) + " dB / "
+                                      setNum(Parameters.rWMERMSC, 'f', 1) + " dB / "
                                       + QString().setNum(rMER, 'f', 1) + " dB");
             }
             else
@@ -721,27 +721,27 @@ void systemevalDlg::OnTimer()
             }
 
             /* Doppler estimation (assuming Gaussian doppler spectrum) */
-            if (ReceiverParam.rSigmaEstimate >= 0.0)
+            if (Parameters.rSigmaEstimate >= 0.0)
             {
                 /* Plot delay and Doppler values */
                 ValueWiener->setText(
-                    QString().setNum(ReceiverParam.rSigmaEstimate, 'f', 2) + " Hz / "
-                    + QString().setNum(ReceiverParam.rMinDelay, 'f', 2) + " ms");
+                    QString().setNum(Parameters.rSigmaEstimate, 'f', 2) + " Hz / "
+                    + QString().setNum(Parameters.rMinDelay, 'f', 2) + " ms");
             }
             else
             {
                 /* Plot only delay, Doppler not available */
                 ValueWiener->setText("--- / "
-                                     + QString().setNum(ReceiverParam.rMinDelay, 'f', 2) + " ms");
+                                     + QString().setNum(Parameters.rMinDelay, 'f', 2) + " ms");
             }
 
             /* Sample frequency offset estimation */
-            const _REAL rCurSamROffs = ReceiverParam.rResampleOffset;
+            const _REAL rCurSamROffs = Parameters.rResampleOffset;
 
             /* Display value in [Hz] and [ppm] (parts per million) */
             ValueSampFreqOffset->setText(
                 QString().setNum(rCurSamROffs, 'f', 2) + " Hz (" +
-                QString().setNum((int) (rCurSamROffs / SOUNDCRD_SAMPLE_RATE * 1e6))
+                QString().setNum((int) (rCurSamROffs / Parameters.GetSampleRate() * 1e6))
                 + " ppm)");
 
         }
@@ -755,7 +755,7 @@ void systemevalDlg::OnTimer()
 
 #ifdef _DEBUG_
         TextFreqOffset->setText("DC: " +
-                                QString().setNum(ReceiverParam.
+                                QString().setNum(Parameters.
                                         GetDCFrequency(), 'f', 3) + " Hz ");
 
         /* Metric values */
@@ -769,7 +769,7 @@ void systemevalDlg::OnTimer()
 #else
         /* DC frequency */
         ValueFreqOffset->setText(QString().setNum(
-                                     ReceiverParam.GetDCFrequency(), 'f', 2) + " Hz");
+                                     Parameters.GetDCFrequency(), 'f', 2) + " Hz");
 #endif
 
         /* _WIN32 fix because in Visual c++ the GUI files are always compiled even
@@ -779,12 +779,12 @@ void systemevalDlg::OnTimer()
         if (DRMReceiver.GetRSIIn()->GetInEnabled() == TRUE)
         {
             ValueSNR->setText("<b>---</b>");
-            if (ReceiverParam.vecrRdelThresholds.GetSize() > 0)
-                ValueWiener->setText(QString().setNum(ReceiverParam.rRdop, 'f', 2) + " Hz / "
-                                     + QString().setNum(ReceiverParam.vecrRdelIntervals[0], 'f', 2) + " ms ("
-                                     + QString().setNum(ReceiverParam.vecrRdelThresholds[0]) + "%)");
+            if (Parameters.vecrRdelThresholds.GetSize() > 0)
+                ValueWiener->setText(QString().setNum(Parameters.rRdop, 'f', 2) + " Hz / "
+                                     + QString().setNum(Parameters.vecrRdelIntervals[0], 'f', 2) + " ms ("
+                                     + QString().setNum(Parameters.vecrRdelThresholds[0]) + "%)");
             else
-                ValueWiener->setText(QString().setNum(ReceiverParam.rRdop, 'f', 2) + " Hz / ---");
+                ValueWiener->setText(QString().setNum(Parameters.rRdop, 'f', 2) + " Hz / ---");
 
             ValueSampFreqOffset->setText("---");
             ValueFreqOffset->setText("---");
@@ -803,7 +803,7 @@ void systemevalDlg::OnTimer()
 
 
         /* Interleaver Depth #################### */
-        switch (ReceiverParam.eSymbolInterlMode)
+        switch (Parameters.eSymbolInterlMode)
         {
         case CParameter::SI_LONG:
             strFACInfo = tr("2 s (Long Interleaving)");
@@ -823,7 +823,7 @@ void systemevalDlg::OnTimer()
 
         /* SDC, MSC mode #################### */
         /* SDC */
-        switch (ReceiverParam.eSDCCodingScheme)
+        switch (Parameters.eSDCCodingScheme)
         {
         case CS_1_SM:
             strFACInfo = "4-QAM / ";
@@ -838,7 +838,7 @@ void systemevalDlg::OnTimer()
         }
 
         /* MSC */
-        switch (ReceiverParam.eMSCCodingScheme)
+        switch (Parameters.eMSCCodingScheme)
         {
         case CS_2_SM:
             strFACInfo += "SM 16-QAM";
@@ -865,9 +865,9 @@ void systemevalDlg::OnTimer()
 
 
         /* Code rates #################### */
-        strFACInfo = QString().setNum(ReceiverParam.MSCPrLe.iPartB);
+        strFACInfo = QString().setNum(Parameters.MSCPrLe.iPartB);
         strFACInfo += " / ";
-        strFACInfo += QString().setNum(ReceiverParam.MSCPrLe.iPartA);
+        strFACInfo += QString().setNum(Parameters.MSCPrLe.iPartA);
 
         FACCodeRateL->setText(tr("Prot. Level (B / A):")); /* Label */
         FACCodeRateV->setText(strFACInfo); /* Value */
@@ -875,20 +875,20 @@ void systemevalDlg::OnTimer()
 
         /* Number of services #################### */
         strFACInfo = tr("Audio: ");
-        strFACInfo += QString().setNum(ReceiverParam.iNumAudioService);
+        strFACInfo += QString().setNum(Parameters.iNumAudioService);
         strFACInfo += tr(" / Data: ");
-        strFACInfo += QString().setNum(ReceiverParam.iNumDataService);
+        strFACInfo += QString().setNum(Parameters.iNumDataService);
 
         FACNumServicesL->setText(tr("Number of Services:")); /* Label */
         FACNumServicesV->setText(strFACInfo); /* Value */
 
 
         /* Time, date #################### */
-        if ((ReceiverParam.iUTCHour == 0) &&
-                (ReceiverParam.iUTCMin == 0) &&
-                (ReceiverParam.iDay == 0) &&
-                (ReceiverParam.iMonth == 0) &&
-                (ReceiverParam.iYear == 0))
+        if ((Parameters.iUTCHour == 0) &&
+                (Parameters.iUTCMin == 0) &&
+                (Parameters.iDay == 0) &&
+                (Parameters.iMonth == 0) &&
+                (Parameters.iYear == 0))
         {
             /* No time service available */
             strFACInfo = tr("Service not available");
@@ -898,17 +898,17 @@ void systemevalDlg::OnTimer()
 #ifdef GUI_QT_DATE_TIME_TYPE
             /* QT type of displaying date and time */
             QDateTime DateTime;
-            DateTime.setDate(QDate(ReceiverParam.iYear,
-                                   ReceiverParam.iMonth,
-                                   ReceiverParam.iDay));
-            DateTime.setTime(QTime(ReceiverParam.iUTCHour,
-                                   ReceiverParam.iUTCMin));
+            DateTime.setDate(QDate(Parameters.iYear,
+                                   Parameters.iMonth,
+                                   Parameters.iDay));
+            DateTime.setTime(QTime(Parameters.iUTCHour,
+                                   Parameters.iUTCMin));
 
             strFACInfo = DateTime.toString();
 #else
             /* Set time and date */
             QString strMin;
-            const int iMin = ReceiverParam.iUTCMin;
+            const int iMin = Parameters.iUTCMin;
 
             /* Add leading zero to number smaller than 10 */
             if (iMin < 10)
@@ -920,35 +920,35 @@ void systemevalDlg::OnTimer()
 
             strFACInfo =
                 /* Time */
-                QString().setNum(ReceiverParam.iUTCHour) + ":" +
+                QString().setNum(Parameters.iUTCHour) + ":" +
                 strMin + "  -  " +
                 /* Date */
-                QString().setNum(ReceiverParam.iMonth) + "/" +
-                QString().setNum(ReceiverParam.iDay) + "/" +
-                QString().setNum(ReceiverParam.iYear);
+                QString().setNum(Parameters.iMonth) + "/" +
+                QString().setNum(Parameters.iDay) + "/" +
+                QString().setNum(Parameters.iYear);
 #endif
             /* Add UTC offset if available */
-            if (ReceiverParam.bValidUTCOffsetAndSense)
+            if (Parameters.bValidUTCOffsetAndSense)
                 strFACInfo += QString(" %1%2%3%4")
                     .arg(tr("UTC"))
-                    .arg(ReceiverParam.iUTCSense ? "-" : "+")
-                    .arg(ReceiverParam.iUTCOff / 2, 0, 10)
-                    .arg(ReceiverParam.iUTCOff & 1 ? ".5" : "");
+                    .arg(Parameters.iUTCSense ? "-" : "+")
+                    .arg(Parameters.iUTCOff / 2, 0, 10)
+                    .arg(Parameters.iUTCOff & 1 ? ".5" : "");
         }
 
         FACTimeDateL->setText(tr("Received time - date:")); /* Label */
         FACTimeDateV->setText(strFACInfo); /* Value */
 
-        UpdateGPS(ReceiverParam);
+        UpdateGPS(Parameters);
 
         UpdateControls();
     }
-    ReceiverParam.Unlock();
+    Parameters.Unlock();
 }
 
-void systemevalDlg::UpdateGPS(CParameter& ReceiverParam)
+void systemevalDlg::UpdateGPS(CParameter& Parameters)
 {
-    gps_data_t& gps = ReceiverParam.gps_data;
+    gps_data_t& gps = Parameters.gps_data;
 
     if((gps.set&STATUS_SET)==0) {
         LEDGPS->SetLight(CMultColorLED::RL_RED);

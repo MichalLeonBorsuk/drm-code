@@ -57,8 +57,8 @@ protected:
     void ExtractData(CVectorEx<_BINARY>& vecIn, CVectorEx<_BINARY>& vecOut,
                      SStreamPos& StrPos);
 
-    virtual void InitInternal(CParameter& ReceiverParam);
-    virtual void ProcessDataInternal(CParameter& ReceiverParam);
+    virtual void InitInternal(CParameter& Parameters);
+    virtual void ProcessDataInternal(CParameter& Parameters);
 };
 
 

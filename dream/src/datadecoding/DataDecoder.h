@@ -110,12 +110,12 @@ class CDataDecoder:public CReceiverModul < _BINARY, _BINARY >
 
     EAppType eAppType[MAX_NUM_PACK_PER_STREAM];
 
-    virtual void InitInternal (CParameter & ReceiverParam);
-    virtual void ProcessDataInternal (CParameter & ReceiverParam);
+    virtual void InitInternal (CParameter & Parameters);
+    virtual void ProcessDataInternal (CParameter & Parameters);
 
     int iEPGService;
     int iEPGPacketID;
-    void DecodeEPG(const CParameter& ReceiverParam);
+    void DecodeEPG(const CParameter& Parameters);
 	EAppType GetAppType(const CDataParam&);
 
 };

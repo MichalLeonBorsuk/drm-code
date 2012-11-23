@@ -50,7 +50,7 @@ public:
 class CTapgain : public CChannelSim
 {
 public:
-    void Init(_REAL rNewDelay, _REAL rNewGain, _REAL rNewFshift, _REAL rNewFd);
+    void Init(int iNewSampleRate, _REAL rNewDelay, _REAL rNewGain, _REAL rNewFshift, _REAL rNewFd);
     _COMPLEX Update();
     _REAL GetGain() const {
         return gain;
@@ -78,6 +78,7 @@ protected:
     _REAL fshift;				/* Doppler shift */
     _REAL gain;					/* Tap-gain */
     int delay;					/* Path delay */
+    int samplerate;				/* Sound Card Sample Rate */
 
     int		DelMs2Sam(const _REAL rDelay) const;
     _REAL	NormShift(const _REAL rShift) const;
@@ -98,6 +99,7 @@ protected:
     _COMPLEX			cCurExp[4];
     _COMPLEX			cExpStep[4];
 
+    int					iSampleRate;
     int					iNumTaps;
     CVector<_COMPLEX>	veccHistory;
     int					iMaxDelay;
@@ -108,8 +110,8 @@ protected:
 
     void InitTapgain(CTapgain& tapg);
 
-    virtual void InitInternal(CParameter& ReceiverParam);
-    virtual void ProcessDataInternal(CParameter& ReceiverParam);
+    virtual void InitInternal(CParameter& Parameters);
+    virtual void ProcessDataInternal(CParameter& Parameters);
 };
 
 

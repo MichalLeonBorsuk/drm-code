@@ -35,7 +35,7 @@
 
 
 /* Implementation *************************************************************/
-void CTimeSync::ProcessDataInternal(CParameter& ReceiverParam)
+void CTimeSync::ProcessDataInternal(CParameter& Parameters)
 {
 	int				i, j, k;
 	int				iMaxIndex;
@@ -142,9 +142,9 @@ void CTimeSync::ProcessDataInternal(CParameter& ReceiverParam)
 
 		/* Integrate the result for controling the frequency offset, normalize
 		   estimate */
-		ReceiverParam.Lock(); 
-		ReceiverParam.rFreqOffsetTrack -= rFreqOffsetEst * rNormConstFOE;
-		ReceiverParam.Unlock(); 
+		Parameters.Lock(); 
+		Parameters.rFreqOffsetTrack -= rFreqOffsetEst * rNormConstFOE;
+		Parameters.Unlock(); 
 #endif
 
 
@@ -375,8 +375,8 @@ void CTimeSync::ProcessDataInternal(CParameter& ReceiverParam)
 						bRobModAcqu = FALSE;
 
 						/* Set wave mode */
-						ReceiverParam.Lock(); 
-						if (ReceiverParam.
+						Parameters.Lock(); 
+						if (Parameters.
 							SetWaveMode(GetRModeFromInd(iDetectedRModeInd)) == TRUE)
 						{
 							/* Reset output cyclic-buffer because wave mode has
@@ -384,7 +384,7 @@ void CTimeSync::ProcessDataInternal(CParameter& ReceiverParam)
 							   valid anymore */
 							SetBufReset1();
 						}
-						ReceiverParam.Unlock(); 
+						Parameters.Unlock(); 
 					}
 				}
 			}
@@ -413,9 +413,9 @@ void CTimeSync::ProcessDataInternal(CParameter& ReceiverParam)
 				iAveCorr = 0;
 
 				/* GUI message that timing is ok */
-				ReceiverParam.Lock(); 
-				ReceiverParam.ReceiveStatus.TSync.SetStatus(RX_OK);
-				ReceiverParam.Unlock(); 
+				Parameters.Lock(); 
+				Parameters.ReceiveStatus.TSync.SetStatus(RX_OK);
+				Parameters.Unlock(); 
 
 				/* Acquisition was successful, reset init flag (just in case it
 				   was not reset by the non-linear correction unit */
@@ -453,9 +453,9 @@ void CTimeSync::ProcessDataInternal(CParameter& ReceiverParam)
 							(CReal) iAveCorr / (NUM_SYM_BEFORE_RESET + 1);
 
 						/* GUI message that timing was corrected (red light) */
-						ReceiverParam.Lock(); 
-						ReceiverParam.ReceiveStatus.TSync.SetStatus(CRC_ERROR);
-						ReceiverParam.Unlock(); 
+						Parameters.Lock(); 
+						Parameters.ReceiveStatus.TSync.SetStatus(CRC_ERROR);
+						Parameters.Unlock(); 
 					}
 
 					/* Reset counters */
@@ -468,9 +468,9 @@ void CTimeSync::ProcessDataInternal(CParameter& ReceiverParam)
 					   show any light if init was done right before this */
 					if (bInitTimingAcqu == FALSE)
 					{
-						ReceiverParam.Lock(); 
-						ReceiverParam.ReceiveStatus.TSync.SetStatus(DATA_ERROR);
-						ReceiverParam.Unlock(); 
+						Parameters.Lock(); 
+						Parameters.ReceiveStatus.TSync.SetStatus(DATA_ERROR);
+						Parameters.Unlock(); 
 					}
 				}
 			}
@@ -488,7 +488,7 @@ fflush(pFile);
 	}
 	else
 	{
-		ReceiverParam.Lock(); 
+		Parameters.Lock(); 
 		/* Detect situation when acquisition was deactivated right now */
 		if (bAcqWasActive == TRUE)
 		{
@@ -496,24 +496,24 @@ fflush(pFile);
 
 			/* Reset also the tracking value since the tracking could not get
 			   right parameters since the timing was not yet correct */
-			ReceiverParam.iTimingOffsTrack = 0;
+			Parameters.iTimingOffsTrack = 0;
 		}
 
 		/* In case of tracking only, use final acquisition result "rStartIndex"
 		   (which is not updated any more) and add tracking correction */
-		iStartIndex = (int) rStartIndex + ReceiverParam.iTimingOffsTrack;
+		iStartIndex = (int) rStartIndex + Parameters.iTimingOffsTrack;
 
 		/* Timing acquisition was successfully finished, show always green
 		   light */
-		ReceiverParam.ReceiveStatus.TSync.SetStatus(RX_OK);
+		Parameters.ReceiveStatus.TSync.SetStatus(RX_OK);
 
-		ReceiverParam.Unlock(); 
+		Parameters.Unlock(); 
 
 #ifdef _DEBUG_
 /* Save estimated positions of timing (tracking) */
 static FILE* pFile = fopen("test/testtimetrack.dat", "w");
 static int iTimeTrackAbs = 0;
-iTimeTrackAbs += ReceiverParam.iTimingOffsTrack; /* Integration */
+iTimeTrackAbs += Parameters.iTimingOffsTrack; /* Integration */
 fprintf(pFile, "%d\n", iTimeTrackAbs);
 fflush(pFile);
 #endif
@@ -580,20 +580,28 @@ fflush(pFile);
 	(*pvecOutputData).GetExData().iCurTimeCorr = iIntDiffToCenter;
 }
 
-void CTimeSync::InitInternal(CParameter& ReceiverParam)
+void CTimeSync::InitInternal(CParameter& Parameters)
 {
-	int		i, j;
-	int		iMaxSymbolBlockSize;
-	int		iObservedFreqBin;
+	int	i, j;
+	int	iMaxSymbolBlockSize;
+	int	iObservedFreqBin;
 	CReal	rArgTemp;
-	int		iCorrBuffSize;
+	int	iCorrBuffSize;
 
-	ReceiverParam.Lock(); 
+	Parameters.Lock(); 
 
 	/* Get parameters from info class */
-	iGuardSize = ReceiverParam.CellMappingTable.iGuardSize;
-	iDFTSize = ReceiverParam.CellMappingTable.iFFTSizeN;
-	iSymbolBlockSize = ReceiverParam.CellMappingTable.iSymbolBlockSize;
+	iSampleRate = Parameters.GetSampleRate();
+
+	/* Init Hilbert filter. Since the frequency offset correction was
+	   done in the previous module, the offset for the filter is
+	   always "VIRTUAL_INTERMED_FREQ" */
+	// moved from constructor to allow changes of sample rate TODO check this is the right place
+	SetFilterTaps((_REAL) VIRTUAL_INTERMED_FREQ / iSampleRate);
+
+	iGuardSize = Parameters.CellMappingTable.iGuardSize;
+	iDFTSize = Parameters.CellMappingTable.iFFTSizeN;
+	iSymbolBlockSize = Parameters.CellMappingTable.iSymbolBlockSize;
 
 	/* Decimated symbol block size */
 	iDecSymBS = iSymbolBlockSize / GRDCRR_DEC_FACT;
@@ -657,7 +665,7 @@ void CTimeSync::InitInternal(CParameter& ReceiverParam)
 
 
 	/* Set the selected robustness mode index */
-	iSelectedMode = GetIndFromRMode(ReceiverParam.GetWaveMode());
+	iSelectedMode = GetIndFromRMode(Parameters.GetWaveMode());
 
 	/* Init init count for timing sync (one symbol) */
 	iTiSyncInitCnt = iDecSymBS / iStepSizeGuardCorr;
@@ -756,18 +764,18 @@ void CTimeSync::InitInternal(CParameter& ReceiverParam)
 
 	/* Init time constant for IIR filter for frequency offset estimation */
 	rLamFreqOff = IIR1Lam(TICONST_FREQ_OFF_EST_GUCORR,
-		(CReal) SOUNDCRD_SAMPLE_RATE / ReceiverParam.iSymbolBlockSize);
+		(CReal) iSampleRate / Parameters.iSymbolBlockSize);
 
 	/* Nomalization constant for frequency offset estimation */
 	rNormConstFOE = (CReal) 1.0 /
-		((CReal) 2.0 * crPi * ReceiverParam.iFFTSizeN * GRDCRR_DEC_FACT);
+		((CReal) 2.0 * crPi * Parameters.iFFTSizeN * GRDCRR_DEC_FACT);
 #endif
 
 	/* Define block-sizes for input and output */
 	iInputBlockSize = iSymbolBlockSize; /* For the first loop */
 	iOutputBlockSize = iDFTSize;
 
-	ReceiverParam.Unlock(); 
+	Parameters.Unlock(); 
 }
 
 void CTimeSync::StartAcquisition()
@@ -808,7 +816,7 @@ void CTimeSync::SetFilterTaps(const CReal rNewOffsetNorm)
 	float * fHilLPProt = fHilLPProt5;
 
 	/* The filter should be on the right of the DC carrier in 5 kHz mode */
-	rNewOffsetNorm += (CReal) HILB_FILT_BNDWIDTH / 2 / SOUNDCRD_SAMPLE_RATE;
+	rNewOffsetNorm += (CReal) HILB_FILT_BNDWIDTH / 2 / iSampleRate;
 #endif
 
 	/* Calculate filter taps for complex Hilbert filter */
@@ -833,10 +841,6 @@ CTimeSync::CTimeSync() : iTimeSyncPos(0), bSyncInput(FALSE), bTimingAcqu(FALSE),
 	rGuardPowBlock(NUM_ROBUSTNESS_MODES)
 ,vecrRMCorrBuffer()
 {
-	/* Init Hilbert filter. Since the frequency offset correction was
-	   done in the previous module, the offset for the filter is
-	   always "VIRTUAL_INTERMED_FREQ" */
-	SetFilterTaps((_REAL) VIRTUAL_INTERMED_FREQ / SOUNDCRD_SAMPLE_RATE);
 }
 
 int CTimeSync::GetIndFromRMode(ERobMode eNewMode)
