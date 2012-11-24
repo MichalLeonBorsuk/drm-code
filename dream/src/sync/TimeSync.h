@@ -92,6 +92,7 @@ public:
 
 protected:
 	int							iSampleRate;
+	int							iGrdcrrDecFact;
 	int							iCorrCounter;
 	int							iAveCorr;
 	int							iStepSizeGuardCorr;

@@ -204,7 +204,7 @@ void CCellMappingTable::MakeTable(
 	}
 
 	/* Adjusting fft size to sample rate */
-	iFFTSizeN = ADJ_RM_FFT_SIZE_N(iFFTSizeN, iSampleRate);
+	iFFTSizeN = ADJ_FOR_SRATE(iFFTSizeN, iSampleRate);
 
 	/* Get number of carriers with DC */
 	iNumCarrier = iCarrierKmax - iCarrierKmin + 1;
