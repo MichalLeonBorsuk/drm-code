@@ -814,7 +814,7 @@ void CTimeSync::StartAcquisition()
 	iCorrAvInd = 0;
 }
 
-void CTimeSync::SetFilterTaps(const CReal rNewOffsetNorm)
+void CTimeSync::SetFilterTaps(CReal rNewOffsetNorm)
 {
 #ifdef USE_10_KHZ_HILBFILT
 	float * fHilLPProt = fHilLPProt10;
