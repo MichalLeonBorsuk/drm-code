@@ -41,5 +41,5 @@ char dream_implementation[] = "Q2";
 char dream_implementation[] = "CL";
 #endif
 int dream_version_major = 1;
-int dream_version_minor = 16;
+int dream_version_minor = 17;
 
