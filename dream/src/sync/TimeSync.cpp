@@ -86,7 +86,7 @@ void CTimeSync::ProcessDataInternal(CParameter& Parameters)
 		   We decimate the signal with this function, too, because we only
 		   analyze a spectrum bandwith of approx. 5 [10] kHz */
 		CComplexVector cvecOutTmp(
-			FirFiltDec(cvecB, cvecInpTmp, cvecZ, GRDCRR_DEC_FACT));
+			FirFiltDec(cvecB, cvecInpTmp, cvecZ, iGrdcrrDecFact));
 
 		/* Get size of new output vector */
 		iDecInpuSize = cvecOutTmp.GetSize();
@@ -115,7 +115,7 @@ void CTimeSync::ProcessDataInternal(CParameter& Parameters)
 		/* Guard-interval correlation at ML estimated timing position */
 		/* Calculate start points for correlation. Consider delay from
 		   Hilbert-filter */
-		const int iHalHilFilDelDec = NUM_TAPS_HILB_FILT / 2 / GRDCRR_DEC_FACT;
+		const int iHalHilFilDelDec = NUM_TAPS_HILB_FILT / 2 / iGrdcrrDecFact;
 		const int iCorrPosFirst = iDecSymBS + iHalHilFilDelDec;
 		const int iCorrPosSec =
 			iDecSymBS + iHalHilFilDelDec + iLenUsefPart[iSelectedMode];
@@ -304,13 +304,13 @@ void CTimeSync::ProcessDataInternal(CParameter& Parameters)
 								/* The optimal start position for the FFT-window
 								   is the middle of the "MaxDetBuffer" */
 								iNewStartIndexField[iNewStIndCount] = 
-									iTimeSyncPos * GRDCRR_DEC_FACT -
+									iTimeSyncPos * iGrdcrrDecFact -
 									iSymbolBlockSize / 2 -
 									/* Compensate for Hilbert-filter delay. The
 									   delay is introduced in the downsampled
 									   domain, therefore devide it by
 									   "GRDCRR_DEC_FACT" */
-									NUM_TAPS_HILB_FILT / 2 / GRDCRR_DEC_FACT;
+									NUM_TAPS_HILB_FILT / 2 / iGrdcrrDecFact;
 
 								iNewStIndCount++;
 							}
@@ -594,10 +594,13 @@ void CTimeSync::InitInternal(CParameter& Parameters)
 	iSampleRate = Parameters.GetSampleRate();
 
 	/* Adjusting fft size to sample rate */
-	const int iRMAFFTSizeN = ADJ_RM_FFT_SIZE_N(RMA_FFT_SIZE_N, iSampleRate);
-	const int iRMBFFTSizeN = ADJ_RM_FFT_SIZE_N(RMB_FFT_SIZE_N, iSampleRate);
-	const int iRMCFFTSizeN = ADJ_RM_FFT_SIZE_N(RMC_FFT_SIZE_N, iSampleRate);
-	const int iRMDFFTSizeN = ADJ_RM_FFT_SIZE_N(RMD_FFT_SIZE_N, iSampleRate);
+	const int iRMAFFTSizeN = ADJ_FOR_SRATE(RMA_FFT_SIZE_N, iSampleRate);
+	const int iRMBFFTSizeN = ADJ_FOR_SRATE(RMB_FFT_SIZE_N, iSampleRate);
+	const int iRMCFFTSizeN = ADJ_FOR_SRATE(RMC_FFT_SIZE_N, iSampleRate);
+	const int iRMDFFTSizeN = ADJ_FOR_SRATE(RMD_FFT_SIZE_N, iSampleRate);
+
+	/* Adjusting GRDCRR_DEC_FACT to sample rate */
+	iGrdcrrDecFact = ADJ_FOR_SRATE(GRDCRR_DEC_FACT, iSampleRate);
 
 	/* Init Hilbert filter. Since the frequency offset correction was
 	   done in the previous module, the offset for the filter is
@@ -609,7 +612,7 @@ void CTimeSync::InitInternal(CParameter& Parameters)
 	iSymbolBlockSize = Parameters.CellMappingTable.iSymbolBlockSize;
 
 	/* Decimated symbol block size */
-	iDecSymBS = iSymbolBlockSize / GRDCRR_DEC_FACT;
+	iDecSymBS = iSymbolBlockSize / iGrdcrrDecFact;
 
 	/* Calculate maximum symbol block size (This is Rob. Mode A) */
 	iMaxSymbolBlockSize = iRMAFFTSizeN + 
@@ -617,14 +620,14 @@ void CTimeSync::InitInternal(CParameter& Parameters)
 
 	/* We need at least two blocks of data for determining the timing */
 	iTotalBufferSize = 2 * iSymbolBlockSize + iMaxSymbolBlockSize;
-	iCorrBuffSize = iTotalBufferSize / GRDCRR_DEC_FACT;
+	iCorrBuffSize = iTotalBufferSize / iGrdcrrDecFact;
 
 	/* Set step size of the guard-interval correlation */
 	iStepSizeGuardCorr = STEP_SIZE_GUARD_CORR;
 
 	/* Size for moving average buffer for guard-interval correlation */
 	iMovAvBufSize = 
-		(int) ((CReal) iGuardSize / GRDCRR_DEC_FACT / iStepSizeGuardCorr);
+		(int) ((CReal) iGuardSize / iGrdcrrDecFact / iStepSizeGuardCorr);
 
 	/* Size of buffer, storing the moving-average results for 
 	   maximum detection */
@@ -697,27 +700,27 @@ void CTimeSync::InitInternal(CParameter& Parameters)
 		switch (i)
 		{
 		case 0:
-			iLenUsefPart[i] = iRMAFFTSizeN / GRDCRR_DEC_FACT;
+			iLenUsefPart[i] = iRMAFFTSizeN / iGrdcrrDecFact;
 			iLenGuardInt[i] = (int) ((CReal) iRMAFFTSizeN * 
-				RMA_ENUM_TG_TU / RMA_DENOM_TG_TU / GRDCRR_DEC_FACT);
+				RMA_ENUM_TG_TU / RMA_DENOM_TG_TU / iGrdcrrDecFact);
 			break;
 
 		case 1:
-			iLenUsefPart[i] = iRMBFFTSizeN / GRDCRR_DEC_FACT;
+			iLenUsefPart[i] = iRMBFFTSizeN / iGrdcrrDecFact;
 			iLenGuardInt[i] = (int) ((CReal) iRMBFFTSizeN * 
-				RMB_ENUM_TG_TU / RMB_DENOM_TG_TU / GRDCRR_DEC_FACT);
+				RMB_ENUM_TG_TU / RMB_DENOM_TG_TU / iGrdcrrDecFact);
 			break;
 
 		case 2:
-			iLenUsefPart[i] = iRMCFFTSizeN / GRDCRR_DEC_FACT;
+			iLenUsefPart[i] = iRMCFFTSizeN / iGrdcrrDecFact;
 			iLenGuardInt[i] = (int) ((CReal) iRMCFFTSizeN * 
-				RMC_ENUM_TG_TU / RMC_DENOM_TG_TU / GRDCRR_DEC_FACT);
+				RMC_ENUM_TG_TU / RMC_DENOM_TG_TU / iGrdcrrDecFact);
 			break;
 
 		case 3:
-			iLenUsefPart[i] = iRMDFFTSizeN / GRDCRR_DEC_FACT;
+			iLenUsefPart[i] = iRMDFFTSizeN / iGrdcrrDecFact;
 			iLenGuardInt[i] = (int) ((CReal) iRMDFFTSizeN * 
-				RMD_ENUM_TG_TU / RMD_DENOM_TG_TU / GRDCRR_DEC_FACT);
+				RMD_ENUM_TG_TU / RMD_DENOM_TG_TU / iGrdcrrDecFact);
 			break;
 		}
 
@@ -773,7 +776,7 @@ void CTimeSync::InitInternal(CParameter& Parameters)
 
 	/* Nomalization constant for frequency offset estimation */
 	rNormConstFOE = (CReal) 1.0 /
-		((CReal) 2.0 * crPi * Parameters.iFFTSizeN * GRDCRR_DEC_FACT);
+		((CReal) 2.0 * crPi * Parameters.iFFTSizeN * iGrdcrrDecFact);
 #endif
 
 	/* Define block-sizes for input and output */
@@ -836,7 +839,8 @@ void CTimeSync::SetFilterTaps(CReal rNewOffsetNorm)
 	cvecZ.Init(NUM_TAPS_HILB_FILT - 1, (CReal) 0.0);
 }
 
-CTimeSync::CTimeSync() : iTimeSyncPos(0), bSyncInput(FALSE), bTimingAcqu(FALSE),
+CTimeSync::CTimeSync() : iSampleRate(0), iGrdcrrDecFact(0),
+	iTimeSyncPos(0), bSyncInput(FALSE), bTimingAcqu(FALSE),
 	bRobModAcqu(FALSE), bAcqWasActive(FALSE), rLambdaCoAv((CReal) 1.0),
 	iLengthIntermCRes(NUM_ROBUSTNESS_MODES),
 	iPosInIntermCResBuf(NUM_ROBUSTNESS_MODES),

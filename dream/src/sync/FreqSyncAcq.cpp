@@ -389,7 +389,7 @@ void CFreqSyncAcq::InitInternal(CParameter& Parameters)
 		iTableFreqPilRobModB[2][0] * NUM_BLOCKS_4_FREQ_ACQU;
 
 	/* Size of FFT */
-	iFrAcFFTSize = ADJ_RM_FFT_SIZE_N(RMB_FFT_SIZE_N, iSampleRate) * NUM_BLOCKS_4_FREQ_ACQU;
+	iFrAcFFTSize = ADJ_FOR_SRATE(RMB_FFT_SIZE_N, iSampleRate) * NUM_BLOCKS_4_FREQ_ACQU;
 
 
 	/* -------------------------------------------------------------------------

@@ -72,7 +72,7 @@
 
 #define NUM_ROBUSTNESS_MODES			4
 
-#define ADJ_RM_FFT_SIZE_N(fftsz, srate)	((int)(fftsz * srate / 48000)) /* Reminder: 48000 is the right value, do not edit! (don't replace it by DEFAULT_SOUNDCRD_SAMPLE_RATE) */
+#define ADJ_FOR_SRATE(value, srate)		((int)(value * srate / 48000)) /* Reminder: 48000 is the right value, do not edit! (don't replace it by DEFAULT_SOUNDCRD_SAMPLE_RATE) */
 
 
 /* Service ID has 24 bits, define a number which cannot be an ID and fits into
