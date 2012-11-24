@@ -1422,41 +1422,17 @@ CDRMReceiver::LoadSettings(CSettings& s)
     /* auto frequency acquisition */
     AMDemodulation.EnableAutoFreqAcq(s.Get("AM Demodulation", "autofreqacq", 0));
 
-    /* demodulation */
-    CAMDemodulation::EDemodType DemodType
+    /* demodulation type and bandwidth */
+    CAMDemodulation::EDemodType eDemodType
     = (CAMDemodulation::EDemodType)s.Get("AM Demodulation", "demodulation", CAMDemodulation::DT_AM);
-
-    AMDemodulation.SetDemodType(DemodType);
-
     iBwAM = s.Get("AM Demodulation", "filterbwam", 10000);
     iBwUSB = s.Get("AM Demodulation", "filterbwusb", 5000);
     iBwLSB = s.Get("AM Demodulation", "filterbwlsb", 5000);
     iBwCW = s.Get("AM Demodulation", "filterbwcw", 150);
     iBwFM = s.Get("AM Demodulation", "filterbwfm", 6000);
 
-    /* Load user's saved filter bandwidth for the demodulation type. */
-    switch (DemodType)
-    {
-    case CAMDemodulation::DT_AM:
-        AMDemodulation.SetFilterBW(iBwAM);
-        break;
-
-    case CAMDemodulation::DT_LSB:
-        AMDemodulation.SetFilterBW(iBwLSB);
-        break;
-
-    case CAMDemodulation::DT_USB:
-        AMDemodulation.SetFilterBW(iBwUSB);
-        break;
-
-    case CAMDemodulation::DT_CW:
-        AMDemodulation.SetFilterBW(iBwCW);
-        break;
-
-    case CAMDemodulation::DT_FM:
-        AMDemodulation.SetFilterBW(iBwFM);
-        break;
-    }
+    /* Load user's saved filter bandwidth and demodulation type */
+    SetAMDemodType(eDemodType);
 
     /* Sound Out device */
     pSoundOutInterface->SetDev(s.Get("Receiver", "snddevout", int(0)));
@@ -1545,7 +1521,7 @@ CDRMReceiver::LoadSettings(CSettings& s)
 
     FrontEndParameters.rCalFactorAM = s.Get("FrontEnd", "calfactoram", 0.0);
 
-    FrontEndParameters.rIFCentreFreq = s.Get("FrontEnd", "ifcentrefrequency", 48000.0 / 4.0);
+    FrontEndParameters.rIFCentreFreq = s.Get("FrontEnd", "ifcentrefrequency", (_REAL(DEFAULT_SOUNDCRD_SAMPLE_RATE) / 4));
 
     /* Latitude string (used to be just for log file) */
     double latitude, longitude;
