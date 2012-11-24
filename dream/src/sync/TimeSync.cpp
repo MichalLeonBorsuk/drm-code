@@ -602,8 +602,7 @@ void CTimeSync::InitInternal(CParameter& Parameters)
 	/* Init Hilbert filter. Since the frequency offset correction was
 	   done in the previous module, the offset for the filter is
 	   always "VIRTUAL_INTERMED_FREQ" */
-	// moved from constructor to allow changes of sample rate TODO check this is the right place
-	SetFilterTaps((_REAL) VIRTUAL_INTERMED_FREQ / iSampleRate);
+	SetFilterTaps((CReal) VIRTUAL_INTERMED_FREQ / iSampleRate);
 
 	iGuardSize = Parameters.CellMappingTable.iGuardSize;
 	iDFTSize = Parameters.CellMappingTable.iFFTSizeN;
@@ -844,8 +843,7 @@ CTimeSync::CTimeSync() : iTimeSyncPos(0), bSyncInput(FALSE), bTimingAcqu(FALSE),
 	iLengthOverlap(NUM_ROBUSTNESS_MODES), iLenUsefPart(NUM_ROBUSTNESS_MODES),
 	iLenGuardInt(NUM_ROBUSTNESS_MODES), cGuardCorr(NUM_ROBUSTNESS_MODES),
 	cGuardCorrBlock(NUM_ROBUSTNESS_MODES), rGuardPow(NUM_ROBUSTNESS_MODES),
-	rGuardPowBlock(NUM_ROBUSTNESS_MODES)
-,vecrRMCorrBuffer()
+	rGuardPowBlock(NUM_ROBUSTNESS_MODES), vecrRMCorrBuffer()
 {
 }
 
