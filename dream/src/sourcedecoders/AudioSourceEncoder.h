@@ -105,9 +105,9 @@ protected:
 	CVector<_REAL>			vecTempResBufOut;
 
 public:
-		virtual void InitInternalTx(CParameter &TransmParam, int &iInputBlockSize, int &iOutputBlockSize);
-		virtual void InitInternalRx(CParameter& Param, int &iInputBlockSize, int &iOutputBlockSize);
-		virtual void ProcessDataInternal(CParameter& TransmParam, CVectorEx<_SAMPLE>* pvecInputData,
+		virtual void InitInternalTx(CParameter& Parameters, int &iInputBlockSize, int &iOutputBlockSize);
+		virtual void InitInternalRx(CParameter& Parameters, int &iInputBlockSize, int &iOutputBlockSize);
+		virtual void ProcessDataInternal(CParameter& Parameters, CVectorEx<_SAMPLE>* pvecInputData,
 						CVectorEx<_BINARY>* pvecOutputData, int &iInputBlockSize, int &iOutputBlockSize);
 };
 
@@ -120,14 +120,14 @@ public:
 protected:
 	CAudioSourceEncoderImplementation AudioSourceEncoderImpl;
 
-	virtual void InitInternal(CParameter& Param)
+	virtual void InitInternal(CParameter& Parameters)
 	{
-		AudioSourceEncoderImpl.InitInternalRx(Param, iInputBlockSize, iOutputBlockSize);
+		AudioSourceEncoderImpl.InitInternalRx(Parameters, iInputBlockSize, iOutputBlockSize);
 	}
 
-	virtual void ProcessDataInternal(CParameter& Param)
+	virtual void ProcessDataInternal(CParameter& Parameters)
 	{
-		AudioSourceEncoderImpl.ProcessDataInternal(Param, pvecInputData, pvecOutputData, iInputBlockSize, iOutputBlockSize);
+		AudioSourceEncoderImpl.ProcessDataInternal(Parameters, pvecInputData, pvecOutputData, iInputBlockSize, iOutputBlockSize);
 	}
 };
 
@@ -154,14 +154,14 @@ public:
 protected:
 	CAudioSourceEncoderImplementation AudioSourceEncoderImpl;
 
-	virtual void InitInternal(CParameter& TransmParam)
+	virtual void InitInternal(CParameter& Parameters)
 	{
-		AudioSourceEncoderImpl.InitInternalTx(TransmParam, iInputBlockSize, iOutputBlockSize);
+		AudioSourceEncoderImpl.InitInternalTx(Parameters, iInputBlockSize, iOutputBlockSize);
 	}
 
-	virtual void ProcessDataInternal(CParameter& TransmParam)
+	virtual void ProcessDataInternal(CParameter& Parameters)
 	{
-		AudioSourceEncoderImpl.ProcessDataInternal(TransmParam, pvecInputData, pvecOutputData, iInputBlockSize, iOutputBlockSize);
+		AudioSourceEncoderImpl.ProcessDataInternal(Parameters, pvecInputData, pvecOutputData, iInputBlockSize, iOutputBlockSize);
 	}
 
 };
