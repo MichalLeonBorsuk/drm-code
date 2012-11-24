@@ -616,8 +616,9 @@ void systemevalDlg::OnTimerInterDigit()
 #endif
 }
 
-void systemevalDlg::OnFrequencyEdited ( const QString& s)
+void systemevalDlg::OnFrequencyEdited(const QString& s)
 {
+    (void)s;
     TimerInterDigit.changeInterval(1000);
 }
 

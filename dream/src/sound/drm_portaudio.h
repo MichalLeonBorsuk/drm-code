@@ -106,7 +106,7 @@ public:
         return hw.GetDev();
     }
 
-    virtual void		Init(int iNewBufferSize, _BOOLEAN bNewBlocking = TRUE);
+    virtual void		Init(int iSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking = TRUE);
     virtual void		Close();
     virtual _BOOLEAN	Write(CVector<short>& psData);
 
