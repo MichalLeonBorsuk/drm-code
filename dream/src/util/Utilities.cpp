@@ -624,14 +624,14 @@ CHamlib::GetPortList(map < string, string > &ports)
 	while (!feof(p))
 	{
 		char buf[1024];
-		fgets(buf, sizeof(buf), p);
+		char* r = fgets(buf, sizeof(buf), p);
 		if (strlen(buf) > 0)
 		{
 			string s =
 				string("hal-get-property --key serial.device --udi ") +
 				buf;
 			FILE *p2 = popen(s.c_str(), "r");
-			fgets(buf, sizeof(buf), p2);
+			r = fgets(buf, sizeof(buf), p2);
 			size_t n = strlen(buf);
 			if (n > 0)
 			{
@@ -643,6 +643,7 @@ CHamlib::GetPortList(map < string, string > &ports)
 			}
 			pclose(p2);
 		}
+		(void)r;
 	}
 	pclose(p);
 	if (!bOK)

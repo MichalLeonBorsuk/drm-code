@@ -184,11 +184,11 @@ void CDRMSchedule::LoadSchedule()
 void CDRMSchedule::ReadINIFile(FILE* pFile)
 {
     const int	iMaxLenName = 256;
-    char	cName[iMaxLenName];
-    int		iFileStat;
+    char	cName[iMaxLenName], *r;
+    int		iFileStat, n;
     _BOOLEAN	bReadOK = TRUE;
 
-    fgets(cName, iMaxLenName, pFile); /* [DRMSchedule] */
+    r = fgets(cName, iMaxLenName, pFile); /* [DRMSchedule] */
     do
     {
         CStationsItem StationsItem;
@@ -213,7 +213,7 @@ void CDRMSchedule::ReadINIFile(FILE* pFile)
 
         iFileStat = fscanf(pFile, "Days[SMTWTFS]=%255[^\n|^\r]\n", cName);
         if (iFileStat != 1)
-            fscanf(pFile, "\n");
+            n = fscanf(pFile, "\n");
         else
         {
             /* Check for length of input string (must be 7) */
@@ -230,42 +230,42 @@ void CDRMSchedule::ReadINIFile(FILE* pFile)
         /* Target */
         iFileStat = fscanf(pFile, "Target=%255[^\n|^\r]\n", cName);
         if (iFileStat != 1)
-            fscanf(pFile, "\n");
+            n = fscanf(pFile, "\n");
         else
             StationsItem.strTarget = cName;
 
         /* Power */
         iFileStat = fscanf(pFile, "Power=%255[^\n|^\r]\n", cName);
         if (iFileStat != 1)
-            fscanf(pFile, "\n");
+            n = fscanf(pFile, "\n");
         else
             StationsItem.rPower = QString(cName).toFloat();
 
         /* Name of the station */
         iFileStat = fscanf(pFile, "Programme=%255[^\n|^\r]\n", cName);
         if (iFileStat != 1)
-            fscanf(pFile, "\n");
+            n = fscanf(pFile, "\n");
         else
             StationsItem.strName = cName;
 
         /* Language */
         iFileStat = fscanf(pFile, "Language=%255[^\n|^\r]\n", cName);
         if (iFileStat != 1)
-            fscanf(pFile, "\n");
+            n = fscanf(pFile, "\n");
         else
             StationsItem.strLanguage = cName;
 
         /* Site */
         iFileStat = fscanf(pFile, "Site=%255[^\n|^\r]\n", cName);
         if (iFileStat != 1)
-            fscanf(pFile, "\n");
+            n = fscanf(pFile, "\n");
         else
             StationsItem.strSite = cName;
 
         /* Country */
         iFileStat = fscanf(pFile, "Country=%255[^\n|^\r]\n", cName);
         if (iFileStat != 1)
-            fscanf(pFile, "\n");
+            n = fscanf(pFile, "\n");
         else
             StationsItem.strCountry = cName;
 
@@ -285,6 +285,7 @@ void CDRMSchedule::ReadINIFile(FILE* pFile)
         }
     } while (!((iFileStat == EOF) || (bReadOK == FALSE)));
 
+    (void)r; (void)n;
 }
 
 void CDRMSchedule::ReadCSVFile(FILE* pFile)
@@ -296,7 +297,7 @@ void CDRMSchedule::ReadCSVFile(FILE* pFile)
     do {
         CStationsItem StationsItem;
 
-        fgets(cRow, iMaxLenRow, pFile);
+        char* r = fgets(cRow, iMaxLenRow, pFile); (void)r;
         QStringList fields;
         stringstream ss(cRow);
         do {
@@ -1143,8 +1144,8 @@ void CDRMSchedule::SetAnalogUrl()
 {
     QDate d = QDate::currentDate();
     int month = d.month();
-    int year;
-    char season;
+    int year = 0;
+    char season = 0;
 
 // transitions last sunday in March and October
     switch(month) {
@@ -1194,7 +1195,8 @@ void CDRMSchedule::SetAnalogUrl()
         year = d.year();
         season = 'b';
     }
-    qurlanalog = QUrl(QString("http://eibispace.de/dx/sked-%1%2.csv").arg(season).arg(year-2000,2));
+    if (season)
+        qurlanalog = QUrl(QString("http://eibispace.de/dx/sked-%1%2.csv").arg(season).arg(year-2000,2));
 }
 
 void StationsDlg::hideEvent(QHideEvent* e)
