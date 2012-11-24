@@ -51,17 +51,6 @@ CSoundIn::CSoundIn():CSoundInInterface(),m_WaveIn(NULL)
         psSoundcardBuffer[i] = NULL;
     }
 
-    /* Init wave-format structure */
-    sWaveFormatEx.wFormatTag = WAVE_FORMAT_PCM;
-    sWaveFormatEx.nChannels = NUM_IN_OUT_CHANNELS;
-    sWaveFormatEx.wBitsPerSample = BITS_PER_SAMPLE;
-    sWaveFormatEx.nSamplesPerSec = iSampleRate;
-    sWaveFormatEx.nBlockAlign = sWaveFormatEx.nChannels *
-                                sWaveFormatEx.wBitsPerSample / 8;
-    sWaveFormatEx.nAvgBytesPerSec = sWaveFormatEx.nBlockAlign *
-                                    sWaveFormatEx.nSamplesPerSec;
-    sWaveFormatEx.cbSize = 0;
-
     /* Get info about the devices and store the names */
     for (i = 0; i < iNumDevs; i++)
         if (!waveInGetDevCaps(i, &m_WaveInDevCaps, sizeof(WAVEINCAPS)))
@@ -177,9 +166,14 @@ void CSoundIn::PrepareBuffer(int iBufNum)
     waveInPrepareHeader(m_WaveIn, &m_WaveInHeader[iBufNum], sizeof(WAVEHDR));
 }
 
-void CSoundIn::Init(int iSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking)
+void CSoundIn::Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking)
 {
-    /* Check if device must be opened or reinitialized */
+    /* Set internal parameter */
+    iSampleRate = iNewSampleRate;
+    iBufferSize = iNewBufferSize;
+    bBlocking = bNewBlocking;
+
+	/* Check if device must be opened or reinitialized */
     if (bChangDev == TRUE)
     {
         OpenDevice();
@@ -187,10 +181,6 @@ void CSoundIn::Init(int iSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking)
         /* Reset flag */
         bChangDev = FALSE;
     }
-
-    /* Set internal parameter */
-    iBufferSize = iNewBufferSize;
-    bBlocking = bNewBlocking;
 
     /* Reset interface so that all buffers are returned from the interface */
     waveInReset(m_WaveIn);
@@ -232,7 +222,18 @@ void CSoundIn::Init(int iSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking)
 
 void CSoundIn::OpenDevice()
 {
-    /* Open wave-input and set call-back mechanism to event handle */
+    /* Init wave-format structure */
+    sWaveFormatEx.wFormatTag = WAVE_FORMAT_PCM;
+    sWaveFormatEx.nChannels = NUM_IN_OUT_CHANNELS;
+    sWaveFormatEx.wBitsPerSample = BITS_PER_SAMPLE;
+    sWaveFormatEx.nSamplesPerSec = iSampleRate;
+    sWaveFormatEx.nBlockAlign = sWaveFormatEx.nChannels *
+                                sWaveFormatEx.wBitsPerSample / 8;
+    sWaveFormatEx.nAvgBytesPerSec = sWaveFormatEx.nBlockAlign *
+                                    sWaveFormatEx.nSamplesPerSec;
+    sWaveFormatEx.cbSize = 0;
+
+	/* Open wave-input and set call-back mechanism to event handle */
     if (m_WaveIn != NULL)
     {
         waveInReset(m_WaveIn);
@@ -345,17 +346,6 @@ CSoundOut::CSoundOut():CSoundOutInterface(),m_WaveOut(NULL)
         memset(&m_WaveOutHeader[i], 0, sizeof(WAVEHDR));
         psPlaybackBuffer[i] = NULL;
     }
-
-    /* Init wave-format structure */
-    sWaveFormatEx.wFormatTag = WAVE_FORMAT_PCM;
-    sWaveFormatEx.nChannels = NUM_IN_OUT_CHANNELS;
-    sWaveFormatEx.wBitsPerSample = BITS_PER_SAMPLE;
-    sWaveFormatEx.nSamplesPerSec = iSampleRate;
-    sWaveFormatEx.nBlockAlign = sWaveFormatEx.nChannels *
-                                sWaveFormatEx.wBitsPerSample / 8;
-    sWaveFormatEx.nAvgBytesPerSec = sWaveFormatEx.nBlockAlign *
-                                    sWaveFormatEx.nSamplesPerSec;
-    sWaveFormatEx.cbSize = 0;
 
     /* Get info about the devices and store the names */
     for (i = 0; i < iNumDevs; i++)
@@ -510,9 +500,12 @@ void CSoundOut::PrepareBuffer(int iBufNum)
     waveOutPrepareHeader(m_WaveOut, &m_WaveOutHeader[iBufNum], sizeof(WAVEHDR));
 }
 
-void CSoundOut::Init(int iSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking)
+void CSoundOut::Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking)
 {
-    int	i, j;
+    /* Set internal parameters */
+    iSampleRate = iNewSampleRate;
+    iBufferSize = iNewBufferSize;
+    bBlocking = bNewBlocking;
 
     /* Check if device must be opened or reinitialized */
     if (bChangDev == TRUE)
@@ -523,14 +516,10 @@ void CSoundOut::Init(int iSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking)
         bChangDev = FALSE;
     }
 
-    /* Set internal parameters */
-    iBufferSize = iNewBufferSize;
-    bBlocking = bNewBlocking;
-
     /* Reset interface */
     waveOutReset(m_WaveOut);
 
-    for (j = 0; j < NUM_SOUND_BUFFERS_OUT; j++)
+    for (int j = 0; j < NUM_SOUND_BUFFERS_OUT; j++)
     {
         /* Unprepare old wave-header (in case header was not prepared before,
            simply nothing happens with this function call */
@@ -543,7 +532,7 @@ void CSoundOut::Init(int iSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking)
         psPlaybackBuffer[j] = new short[iBufferSize];
 
         /* Clear new buffer */
-        for (i = 0; i < iBufferSize; i++)
+        for (int i = 0; i < iBufferSize; i++)
             psPlaybackBuffer[j][i] = 0;
 
         /* Prepare buffer for sending to the sound interface */
@@ -556,6 +545,16 @@ void CSoundOut::Init(int iSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking)
 
 void CSoundOut::OpenDevice()
 {
+    /* Init wave-format structure */
+    sWaveFormatEx.wFormatTag = WAVE_FORMAT_PCM;
+    sWaveFormatEx.nChannels = NUM_IN_OUT_CHANNELS;
+    sWaveFormatEx.wBitsPerSample = BITS_PER_SAMPLE;
+    sWaveFormatEx.nSamplesPerSec = iSampleRate;
+    sWaveFormatEx.nBlockAlign = sWaveFormatEx.nChannels *
+                                sWaveFormatEx.wBitsPerSample / 8;
+    sWaveFormatEx.nAvgBytesPerSec = sWaveFormatEx.nBlockAlign *
+                                    sWaveFormatEx.nSamplesPerSec;
+    sWaveFormatEx.cbSize = 0;
 
     if (m_WaveOut != NULL)
     {
