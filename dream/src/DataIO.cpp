@@ -184,7 +184,7 @@ void CWriteData::InitInternal(CParameter& Parameters)
     /* Length of vector for audio spectrum. We use a power-of-two length to
        make the FFT work more efficient, need to be scaled from sample rate to
        keep the same frequency resolution */
-    iNumSmpls4AudioSprectrum = 1024 * iSampleRate / 48000;
+    iNumSmpls4AudioSprectrum = 1024 * iSampleRate / 48000; // Reminder: 48000 is the right value, do not edit! (don't replace it by DEFAULT_SOUNDCRD_SAMPLE_RATE)
 
     /* Number of blocks for averaging the audio spectrum */
     iNumBlocksAvAudioSpec = Ceil(((_REAL) iSampleRate *
