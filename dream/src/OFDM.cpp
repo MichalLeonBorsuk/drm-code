@@ -206,7 +206,7 @@ void COFDMDemodulation::GetPowDenSpec(CVector<_REAL>& vecrData,
         const _REAL rNormData =
             (_REAL) iDFTSize * iDFTSize * _MAXSHORT * _MAXSHORT;
 
-        const _REAL rFactorScale = _REAL(iSampleRate / iLenPowSpec / 2000);
+        const _REAL rFactorScale = _REAL(iSampleRate) / iLenPowSpec / 2000;
 
         /* Apply the normalization (due to the FFT) */
         for (int i = 0; i < iLenPowSpec; i++)
