@@ -379,6 +379,7 @@ protected:
     /* RSCI output */
     int							iFreeSymbolCounter;
     int							iSampleRate;
+    int							iBandwidth;
 
 
     virtual void InitInternal(CParameter& Parameters);

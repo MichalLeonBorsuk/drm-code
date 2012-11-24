@@ -43,10 +43,10 @@ CAMDemodulation::CAMDemodulation() :
     rBPNormCentOffsTot(0.0),
     rvecZAM(), rvecADC(), rvecBDC(), rvecZFM(), rvecAFM(), rvecBFM(),
     iSymbolBlockSize(0),
-    bPLLIsEnabled(FALSE), bAutoFreqAcquIsEnabled(TRUE), eDemodType(DT_AM),
+    bPLLIsEnabled(FALSE), bAutoFreqAcquIsEnabled(FALSE), eDemodType(DT_AM),
     cOldVal(),
     PLL(), Mixer(), FreqOffsAcq(), AGC(), NoiseReduction(), NoiRedType(NR_OFF),
-    iFreeSymbolCounter(0),iSampleRate(48000)
+    iFreeSymbolCounter(0), iSampleRate(0), iBandwidth(0)
 {
 }
 
@@ -161,6 +161,10 @@ void CAMDemodulation::InitInternal(CParameter& Parameters)
     iSymbolBlockSize = Parameters.CellMappingTable.iSymbolBlockSize;
     iSampleRate = Parameters.GetSampleRate();
     Parameters.Unlock();
+
+    /* SetFilterBW() can be called before InitInternal() and iSampleRate is defined,
+       so we need to recalculate the bandwidth here */
+    rBPNormBW = (CReal) iBandwidth / iSampleRate;
 
     /* Init temporary vector for filter input and output */
     rvecInpTmp.Init(iSymbolBlockSize);
@@ -282,7 +286,7 @@ void CAMDemodulation::SetBPFilter(const CReal rNewBPNormBW,
     vecrFilter = FirLP(rBPNormBW, Nuttallwin(iHilFiltBlLen));
 
     /* Adjust center of filter for respective demodulation types */
-    CReal rBPNormFreqOffset = (CReal) 0.0;;
+    CReal rBPNormFreqOffset = (CReal) 0.0;
     const CReal rSSBMargin = SSB_DC_MARGIN_HZ / iSampleRate;
     switch (eDemodType)
     {
@@ -369,7 +373,8 @@ void CAMDemodulation::SetDemodType(const EDemodType eNewType)
         eDemodType = eNewType;
 
         /* Init band-pass filter according to new demodulation method */
-        SetBPFilter(rBPNormBW, rNormCurMixFreqOffs, eDemodType);
+        if (iSampleRate != 0)
+            SetBPFilter(rBPNormBW, rNormCurMixFreqOffs, eDemodType);
     }
     Unlock();
 }
@@ -379,8 +384,13 @@ void CAMDemodulation::SetFilterBW(const int iNewBW)
     /* Lock resources */
     Lock();
     {
-        SetBPFilter((CReal) iNewBW / iSampleRate, rNormCurMixFreqOffs,
-                    eDemodType);
+        /* Set internal bandwidth value */
+        iBandwidth = iNewBW;
+
+        /* Init band-pass filter according to new bandwidth value */
+        if (iSampleRate != 0)
+            SetBPFilter((CReal) iNewBW / iSampleRate, rNormCurMixFreqOffs,
+                        eDemodType);
     }
     Unlock();
 }

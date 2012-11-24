@@ -71,14 +71,18 @@ CAudioFileIn::SetFileName(const string& strFileName)
     {
     case fmt_raw_stereo:
         iFileChannels = 2;
-        if (ext.length() == 4)
-            iFileSampleRate = 1000*atoi(ext.substr(2).c_str());
+        if (ext.length() == 4 || ext.length() == 5) /* e.g.: iq48, IF192 */
+            iFileSampleRate = 1000 * atoi(ext.substr(2).c_str());
         else
-            iFileSampleRate = 48000; /* not iSampleRate TODO check! */
+            iFileSampleRate = DEFAULT_SOUNDCRD_SAMPLE_RATE;
         break;
     default:
         iFileChannels = 1;
-        iFileSampleRate = 48000; /* not iSampleRate TODO check! */
+        if (ext.length() == 5 || ext.length() == 6) /* e.g.: TXT48, pcm192 */
+            iFileSampleRate = 1000 * atoi(ext.substr(3).c_str());
+        else
+            iFileSampleRate = DEFAULT_SOUNDCRD_SAMPLE_RATE;
+        break;
     }
 }
 
