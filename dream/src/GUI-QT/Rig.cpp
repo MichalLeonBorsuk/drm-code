@@ -102,6 +102,8 @@ void CRig::LoadSettings(CSettings& s)
 {
 #ifdef HAVE_LIBHAMLIB
     Hamlib.LoadSettings(s);
+#else
+    (void)s;
 #endif
 }
 
@@ -109,6 +111,8 @@ void CRig::SaveSettings(CSettings& s)
 {
 #ifdef HAVE_LIBHAMLIB
     Hamlib.SaveSettings(s);
+#else
+    (void)s;
 #endif
 }
 
@@ -116,5 +120,7 @@ void CRig::SetFrequency(int f)
 {
 #ifdef HAVE_LIBHAMLIB
     Hamlib.SetFrequency(f);
+#else
+    (void)f;
 #endif
 }
