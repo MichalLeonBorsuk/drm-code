@@ -123,7 +123,8 @@ CPacketSourceFile::SetOrigin(const string& origin)
         if ( pF != NULL)
         {
             char c;
-            (void)fread(&c, sizeof(c), 1, (FILE *) pF);
+            size_t n = fread(&c, sizeof(c), 1, (FILE *) pF);
+            (void)n;
             fseek ( (FILE *) pF , 0 , SEEK_SET );
             if(c=='A') eFileType = af;
             if(c=='P') eFileType = pf;
@@ -164,18 +165,20 @@ void
 CPacketSourceFile::readTagPacketHeader(string& tag, uint32_t& len)
 {
     uint32_t bytes;
-//    size_t n;
+    size_t n;
 
     tag = "";
     for(int i=0; i<4; i++)
     {
         char c;
-        /*n =*/ (void)fread(&c, sizeof(char), 1, (FILE *) pF);
+        n = fread(&c, sizeof(char), 1, (FILE *) pF);
         tag += c;
     }
 
-    /*n =*/ (void)fread(&bytes, sizeof(bytes), 1, (FILE *) pF);
+    n = fread(&bytes, sizeof(bytes), 1, (FILE *) pF);
     len = ntohl(bytes)/8;
+
+    (void)n;
 }
 
 void
@@ -213,8 +216,9 @@ CPacketSourceFile::readFF(vector<_BYTE>& vecbydata, int& interval)
             }
             // read the time tag packet payload
             uint32_t s,ns;
-            /*size_t n =*/ (void)fread(&s, sizeof(s), 1, (FILE *) pF);
-            /*n =*/ (void)fread(&ns, sizeof(ns), 1, (FILE *) pF);
+            size_t n = fread(&s, sizeof(s), 1, (FILE *) pF);
+            n = fread(&ns, sizeof(ns), 1, (FILE *) pF);
+            (void)n;
             //TODO update last packet and interval times
         }
 
@@ -238,8 +242,8 @@ CPacketSourceFile::readRawAF(vector<_BYTE>& vecbydata, int& interval)
 
     interval = 400;
 
-    /*size_t n =*/ (void)fread(sync, 2, 1, (FILE *) pF);
-    /*n =*/ (void)fread(&bytes, 4, 1, (FILE *) pF);
+    size_t n = fread(sync, 2, 1, (FILE *) pF);
+    n = fread(&bytes, 4, 1, (FILE *) pF);
     fseek((FILE*)pF, -6, SEEK_CUR);
 
     if (sync[0] != 'A' || sync[1] != 'F')
@@ -263,9 +267,11 @@ CPacketSourceFile::readRawAF(vector<_BYTE>& vecbydata, int& interval)
     // initialise the output vector
     vecbydata.resize(iAFPacketLen);
 
-    /*n =*/ (void)fread(&vecbydata[0], 1, iAFPacketLen, (FILE *)pF);
+    n = fread(&vecbydata[0], 1, iAFPacketLen, (FILE *)pF);
 
     last_packet_time += interval;
+
+    (void)n;
 }
 
 // not robust against the sync characters appearing in the payload!!!!
@@ -276,7 +282,7 @@ CPacketSourceFile::readRawPFT(vector<_BYTE>& vecbydata, int& interval)
 
     interval = 400;
 
-    /*size_t n =*/ (void)fread(sync, 2, 1, (FILE *) pF);
+    size_t n = fread(sync, 2, 1, (FILE *) pF);
     if (sync[0] != 'P' || sync[1] != 'F')
     {
         // throw?
@@ -291,7 +297,7 @@ CPacketSourceFile::readRawPFT(vector<_BYTE>& vecbydata, int& interval)
     while(true)
     {
         char c;
-        /*n =*/ (void)fread(&c, 1, 1, (FILE *) pF);
+        n = fread(&c, 1, 1, (FILE *) pF);
         if(prev == 'P' && c == 'F')
         {
             fseek((FILE*)pF, -2, SEEK_CUR);
@@ -301,6 +307,8 @@ CPacketSourceFile::readRawPFT(vector<_BYTE>& vecbydata, int& interval)
         prev = c;
         vecbydata.push_back(c);
     }
+
+    (void)n;
 }
 
 void

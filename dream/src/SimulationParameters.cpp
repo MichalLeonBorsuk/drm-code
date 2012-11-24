@@ -168,7 +168,7 @@ void CDRMSimulation::SimScript()
 #else
 # ifdef HAVE_UNISTD_H
         /* re-nice the process to highest possible value -> 19 */
-        nice(19);
+        int n = nice(19); (void)n;
 
         /* Try to get hostname */
         char chHostName[255];
