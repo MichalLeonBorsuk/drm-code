@@ -164,7 +164,7 @@ protected:
 
 	int			GetIndFromRMode(ERobMode eNewMode);
 	ERobMode	GetRModeFromInd(int iNewInd);
-	void		SetFilterTaps(const CReal rNewOffsetNorm);
+	void		SetFilterTaps(CReal rNewOffsetNorm);
 
 	virtual void InitInternal(CParameter& Parameters);
 	virtual void ProcessDataInternal(CParameter& Parameters);
