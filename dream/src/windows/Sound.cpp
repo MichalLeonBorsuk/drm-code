@@ -177,7 +177,7 @@ void CSoundIn::PrepareBuffer(int iBufNum)
     waveInPrepareHeader(m_WaveIn, &m_WaveInHeader[iBufNum], sizeof(WAVEHDR));
 }
 
-void CSoundIn::Init(int iNewBufferSize, _BOOLEAN bNewBlocking)
+void CSoundIn::Init(int iSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking)
 {
     /* Check if device must be opened or reinitialized */
     if (bChangDev == TRUE)
@@ -510,9 +510,8 @@ void CSoundOut::PrepareBuffer(int iBufNum)
     waveOutPrepareHeader(m_WaveOut, &m_WaveOutHeader[iBufNum], sizeof(WAVEHDR));
 }
 
-void CSoundOut::Init(int iNewBufferSize, _BOOLEAN bNewBlocking)
+void CSoundOut::Init(int iSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking)
 {
-
     int	i, j;
 
     /* Check if device must be opened or reinitialized */
