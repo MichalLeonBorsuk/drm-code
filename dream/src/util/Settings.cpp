@@ -776,11 +776,14 @@ CIniFile::LoadIni(const char *filename)
 			string key,value;
 			getline(file, key, '=');
 			getline(file, value);
-			size_t n = value.length()-1;
-			if(value[n] == '\r') // remove CR if file has DOS line endings
-				PutIniSetting(section, key, value.substr(0,n));
-			else
-				PutIniSetting(section, key, value);
+			int n = int(value.length())-1;
+			if(n >= 0)
+			{
+				if(value[n] == '\r') // remove CR if file has DOS line endings
+					PutIniSetting(section, key, value.substr(0,n));
+				else
+					PutIniSetting(section, key, value);
+			}
 		}
 	}
 }
