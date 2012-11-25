@@ -101,7 +101,7 @@
 #      endif
 #   endif
 #elif defined(_MSC_VER)
-#  pragma comment(compiler, "hoping alignment renders barriers unnecessary")
+//#  pragma comment(compiler, "hoping alignment renders barriers unnecessary")
 #  define PaUtil_FullMemoryBarrier()
 #  define PaUtil_ReadMemoryBarrier()
 #  define PaUtil_WriteMemoryBarrier()
