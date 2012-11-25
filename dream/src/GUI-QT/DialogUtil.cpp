@@ -283,11 +283,10 @@ CAboutDlg::CAboutDlg(QWidget* parent, const char* name, bool modal, Qt::WFlags f
 CHelpUsage::CHelpUsage(const char* usage, QWidget* parent, const char* name, bool modal, Qt::WFlags f)
     : CAboutDlgBase(parent, name, modal, f)
 {
-	show();
 #if QT_VERSION < 0x040000
-    SetDialogCaption(this, tr("Dream help"));
+    SetDialogCaption(this, tr("Dream Command Line Help"));
 #else
-    setWindowTitle(tr("Dream help"));
+    setWindowTitle(tr("Dream Command Line Help"));
 #endif
     TextLabelVersion->setText(VersionString(this));
     TextLabelAuthorNames->setText("");
