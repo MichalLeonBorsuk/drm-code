@@ -224,19 +224,19 @@ void CSoundInPulse::Init_HW()
 	ss.rate = iSampleRate;
 
 	/* record device */
-	if(devices.size()==0)
+	if (devices.size() == 0)
 		throw CGenErr("pulseaudio CSoundInPulse::Init_HW no record devices available!");
 
-	if(iCurrentDevice < 0 || iCurrentDevice >= int(devices.size()))
+	if (iCurrentDevice < 0 || iCurrentDevice >= int(devices.size()))
 		iCurrentDevice = 0;
 
-	if (iCurrentDevice)
+	if (iCurrentDevice != 0)
 		recdevice = devices[iCurrentDevice].c_str();
 
 	if (pa_m != NULL)
 		throw CGenErr("pulseaudio CSoundInPulse::Init_HW already init");
 
-	if (pa_init(&pa_m, &pa_c, !bBlockingRec)!=PA_OK)
+	if (pa_init(&pa_m, &pa_c, !bBlockingRec) != PA_OK)
 		throw CGenErr("pulseaudio CSoundInPulse::Init_HW pa_init failed");
 
 	pa_s = pa_stream_new(pa_c,	// The context to create this stream in
@@ -363,12 +363,7 @@ void CSoundInPulse::SetBufferSize_HW()
 	pa_attr.minreq    = -1;								// Playback only: minimum request.
 	pa_attr.fragsize  = iBufferSize*BYTES_PER_SAMPLE;	// Recording only: fragment size.
 	if (pa_o_sync(pa_m, pa_c, pa_stream_set_buffer_attr(pa_s, &pa_attr, pa_stream_success_cb, NULL)) != PA_OK)
-	{
 		DEBUG_MSG("CSoundInPulse::SetBufferSize_HW() error\n");
-	}
-	else {
-		DEBUG_MSG("CSoundInPulse::SetBufferSize_HW() success\n");
-	}
 #endif
 }
 
@@ -386,19 +381,19 @@ void CSoundOutPulse::Init_HW()
 	ss.rate = iSampleRate;
 
 	/* playback device */
-	if(devices.size()==0)
+	if (devices.size() == 0)
 		throw CGenErr("CSoundOutPulse::Init_HW no playback devices available!");
 
-	if(iCurrentDevice < 0 || iCurrentDevice >= int(devices.size()))
+	if (iCurrentDevice < 0 || iCurrentDevice >= int(devices.size()))
 		iCurrentDevice = 0;
 
-	if (iCurrentDevice)
+	if (iCurrentDevice != 0)
 		playdevice = devices[iCurrentDevice].c_str();
 	
 	if (pa_m != NULL)
 		throw CGenErr("CSoundOutPulse::Init_HW already init");
 
-	if (pa_init(&pa_m, &pa_c, bBlockingPlay)!=PA_OK)
+	if (pa_init(&pa_m, &pa_c, bBlockingPlay) != PA_OK)
 		throw CGenErr("CSoundOutPulse::Init_HW pa_init failed");
 
 	pa_s = pa_stream_new(pa_c,	// The context to create this stream in
@@ -687,11 +682,12 @@ getdevices(vector < string > &names, vector < string > &devices,
 /* Wave in ********************************************************************/
 
 CSoundInPulse::CSoundInPulse():
-	iBufferSize(0),devices(),names(),bChangDev(TRUE),iCurrentDevice(-1),
-	pa_m(NULL),pa_c(NULL),pa_s(NULL),
-	remaining_nbytes(0),remaining_data(NULL)
+	iSampleRate(0), iBufferSize(0), bBlockingRec(FALSE),
+	bChangDev(TRUE), iCurrentDevice(-1),
+	pa_m(NULL), pa_c(NULL), pa_s(NULL),
+	remaining_nbytes(0), remaining_data(NULL)
 #ifdef CLOCK_DRIFT_ADJ_ENABLED
-	,record_sample_rate(0),bClockDriftComp(FALSE),cp(NULL)
+	,record_sample_rate(0), bClockDriftComp(FALSE), cp(NULL)
 #endif
 {
 	/* Get devices list */
@@ -700,7 +696,7 @@ CSoundInPulse::CSoundInPulse():
 
 void CSoundInPulse::Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking)
 {
-	DEBUG_MSG("initrec iNewBufferSize=%i bNewBlocking=%i\n", iNewBufferSize, bNewBlocking);
+	DEBUG_MSG("initrec iSampleRate=%i iBufferSize=%i bBlocking=%i\n", iNewSampleRate, iNewBufferSize, bNewBlocking);
 
 	/* Save samplerate and blocking mode */
 	iSampleRate = iNewSampleRate;
@@ -784,11 +780,12 @@ int CSoundInPulse::GetDev()
 /* Wave out *******************************************************************/
 
 CSoundOutPulse::CSoundOutPulse():
-	iBufferSize(0),devices(),names(),bChangDev(TRUE),iCurrentDevice(-1),
+	iSampleRate(0), iBufferSize(0), bBlockingPlay(FALSE),
+	bChangDev(TRUE), iCurrentDevice(-1),
 	pa_m(NULL),pa_c(NULL),pa_s(NULL)
 #ifdef CLOCK_DRIFT_ADJ_ENABLED
-//	,bNewClockDriftComp(TRUE),cp()
-	,bNewClockDriftComp(FALSE),cp()
+//	,bNewClockDriftComp(TRUE), cp()
+	,bNewClockDriftComp(FALSE), cp()
 #endif
 {
 	/* Get devices list */
@@ -797,7 +794,7 @@ CSoundOutPulse::CSoundOutPulse():
 
 void CSoundOutPulse::Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking)
 {
-	DEBUG_MSG("initplay iNewBufferSize=%i bNewBlocking=%i\n", iNewBufferSize, bNewBlocking);
+	DEBUG_MSG("initplay iSampleRate=%i iBufferSize=%i bBlocking=%i\n", iNewSampleRate, iNewBufferSize, bNewBlocking);
 
 	/* Save samplerate, blocking mode and buffer size */
 	iSampleRate = iNewSampleRate;
