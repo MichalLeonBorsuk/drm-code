@@ -43,12 +43,13 @@ public:
 		if (pFile != NULL)
 			Close();
 
+		uint32_t sr = uint32_t(iSampleRate);
 		const CWaveHdr WaveHeader =
 		{
 			/* Use always stereo and PCM */
 			{'R', 'I', 'F', 'F'}, 0, {'W', 'A', 'V', 'E'},
-			{'f', 'm', 't', ' '}, 16, 1, 2, iSampleRate,
-			iSampleRate * 4 /* same as block align */,
+			{'f', 'm', 't', ' '}, 16, 1, 2, sr,
+			sr * 4 /* same as block align */,
 			4 /* block align */, 16,
 			{'d', 'a', 't', 'a'}, 0
 		};
