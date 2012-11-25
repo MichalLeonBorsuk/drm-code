@@ -403,6 +403,13 @@ CSettings::ParseArguments(int argc, char **argv)
 			continue;
 		}
 
+		/* read DRMlog.ini style schedule file ------------------------------ */
+		if (GetStringArgument(argc, argv, i, "-L", "--schedule", strArgument) == TRUE)
+		{
+			Put("command", "schedule", strArgument);
+			continue;
+		}
+
 		/* Latitude string for log file ------------------------------------- */
 		if (GetStringArgument(argc, argv, i, "-a", "--latitude",
 							  strArgument) == TRUE)
@@ -603,6 +610,7 @@ CSettings::UsageArguments(char **argv)
 		"  -g <n>, --enablelog <n>     enable/disable logging (0: no logging; 1: logging\n"
 		"  -r <n>, --frequency <n>     set frequency [kHz] for log file\n"
 		"  -l <n>, --logdelay <n>      delay start of logging by <n> seconds, allowed range: 0...3600)\n"
+		"  -L <s>, --schedule <s>      read DRMlog.ini style schedule file and obey it\n"
 		"  -y <n>, --sysevplotstyle <n> set style for main plot\n"
 		"                              0: blue-white (default);   1: green-black;   2: black-grey\n"
 #endif
@@ -717,7 +725,7 @@ CSettings::GetNumericArgument(int argc, char **argv, int &i,
 
 string
 CIniFile::GetIniSetting(const string& section,
-						 const string& key, const string& defaultval) const
+	 const string& key, const string& defaultval) const
 {
 	string result(defaultval);
 	const_cast<CMutex*>(&Mutex)->Lock();
@@ -767,7 +775,11 @@ CIniFile::LoadIni(const char *filename)
 			string key,value;
 			getline(file, key, '=');
 			getline(file, value);
-			PutIniSetting(section, key, value);
+			size_t n = value.length()-1;
+			if(value[n] == '\r') // remove CR if file has DOS line endings
+				PutIniSetting(section, key, value.substr(0,n));
+			else
+				PutIniSetting(section, key, value);
 		}
 	}
 }
