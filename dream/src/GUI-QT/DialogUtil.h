@@ -83,6 +83,16 @@ public:
 		Qt::WFlags f = 0);
 };
 
+/* Help Usage --------------------------------------------------------------- */
+class CHelpUsage : public CAboutDlgBase
+{
+	Q_OBJECT
+
+public:
+	CHelpUsage(const char* usage, QWidget* parent = 0, const char* name = 0, bool modal = FALSE,
+		Qt::WFlags f = 0);
+};
+
 #if QT_VERSION < 0x040000
 /* Help menu ---------------------------------------------------------------- */
 class CDreamHelpMenu : public QPopupMenu
