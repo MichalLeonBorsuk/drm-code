@@ -90,27 +90,6 @@ CRx::run()
     qDebug("Working thread complete");
 }
 
-int isTransmitter(const char *argv0)
-{
-#ifdef EXECUTABLE_NAME
-	/* Give the possibility to launch directly dream transmitter
-	   with a symbolic link to the executable, a 't' need to be 
-	   appended to the symbolic link name */
-# define _xstr(s) _str(s)
-# define _str(s) #s
-# ifndef _WIN32
-	const int pathseparator = '/';
-# else
-	const int pathseparator = '\\';
-# endif
-	const char *str = strrchr(argv0, pathseparator);
-	return !strcmp(str ? str+1 : argv0, _xstr(EXECUTABLE_NAME) "t");
-#else
-	(void)argv0;
-	return 0;
-#endif
-}
-
 #ifdef USE_QT_GUI
 /******************************************************************************\
 * Using GUI with QT                                                            *
@@ -146,8 +125,6 @@ main(int argc, char **argv)
 	/* Parse arguments and load settings from init-file */
 	Settings.Load(argc, argv);
 
-	const int transmitter = isTransmitter(argv[0]);
-
 	try
 	{
 
@@ -168,8 +145,8 @@ main(int argc, char **argv)
 				Settings.Put("GUI", "processpriority", FALSE);
 #endif
 
-		string mode = Settings.Get("command", "mode", string("receive"));
-		if (!transmitter && mode == "receive")
+		string mode = Settings.Get("command", "mode", string());
+		if (mode == "receive")
 		{
 			CDRMReceiver DRMReceiver;
 
@@ -217,7 +194,7 @@ main(int argc, char **argv)
 #endif
 			DRMReceiver.SaveSettings(Settings);
 		}
-		else if(transmitter || mode == "transmit")
+		else if(mode == "transmit")
 		{
 			TransmDialog MainDlg(Settings
 #if QT_VERSION < 0x040000
@@ -297,12 +274,11 @@ main(int argc, char **argv)
 {
 	try
 	{
-		const int transmitter = isTransmitter(argv[0]);
-
 		CSettings Settings;
 		Settings.Load(argc, argv);
-		string mode = Settings.Get("command", "mode", string("receive"));
-		if (!transmitter && mode == "receive")
+
+		string mode = Settings.Get("command", "mode", string());
+		if (mode == "receive")
 		{
 			CDRMSimulation DRMSimulation;
 			CDRMReceiver DRMReceiver;
@@ -322,7 +298,7 @@ main(int argc, char **argv)
 #endif
 
 		}
-		else if(transmitter || mode == "transmit")
+		else if(mode == "transmit")
 		{
 			CDRMTransmitter DRMTransmitter;
 			DRMTransmitter.LoadSettings(Settings);

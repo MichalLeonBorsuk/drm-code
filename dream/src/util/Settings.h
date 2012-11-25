@@ -166,8 +166,7 @@ public:
 	string UsageArguments(char** argv);
 
 protected:
-
-
+	int IsReceiver(const char *argv0);
 	void ParseArguments(int argc, char** argv);
 	void FileArg(const string&);
 	_BOOLEAN GetFlagArgument(int argc, char** argv, int& i, string strShortOpt,
@@ -179,7 +178,6 @@ protected:
 	_BOOLEAN GetStringArgument(int argc, char** argv, int& i,
 							   string strShortOpt, string strLongOpt,
 							   string& strArg);
-
 };
 
 #endif // !defined(SETTINGS_H__3B0BA660_DGEG56GE64B2B_23DSG9876D31912__INCLUDED_)

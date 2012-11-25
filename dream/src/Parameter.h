@@ -1012,12 +1012,16 @@ public:
 
     int GetSampleRate() const
     {
-	return iSampleRate;
+        return iSampleRate;
     }
 
     void SetSampleRate(int sr)
     {
-	iSampleRate = sr;
+        /* Set to the nearest supported sample rate */
+        if      (sr < 72000)  sr = 48000;
+        else if (sr < 144000) sr = 96000;
+        else                  sr = 192000;
+        iSampleRate = sr;
     }
 
     _REAL GetDCFrequency() const
