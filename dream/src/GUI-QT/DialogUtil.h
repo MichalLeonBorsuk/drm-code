@@ -57,9 +57,11 @@ typedef int rig_model_t;
 
 /* Definition for Courier font */
 #ifdef _WIN32
-	#define FONT_COURIER    "Courier New"
+# define FONT_COURIER    "Courier New"
+#elif defined(__linux__)
+# define FONT_COURIER    "Monospace"
 #else
-	#define FONT_COURIER    "Courier"
+# define FONT_COURIER    "Courier"
 #endif
 /* Classes ********************************************************************/
 
