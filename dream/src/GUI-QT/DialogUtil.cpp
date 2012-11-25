@@ -94,6 +94,19 @@
 # endif
 #endif
 
+
+QString VersionString(QWidget* parent)
+{
+    QString strVersionText;
+    strVersionText = "<center><b>" + parent->tr("Dream, Version ");
+    strVersionText += QString("%1.%2").arg(dream_version_major).arg(dream_version_minor);
+    strVersionText += "</b><br> " + parent->tr("Open-Source Software Implementation of "
+                                       "a DRM-Receiver") + "<br>";
+    strVersionText += parent->tr("Under the GNU General Public License (GPL)") +
+                      "</center>";
+    return strVersionText;
+}
+
 /* Implementation *************************************************************/
 /* About dialog ------------------------------------------------------------- */
 CAboutDlg::CAboutDlg(QWidget* parent, const char* name, bool modal, Qt::WFlags f):
@@ -109,7 +122,7 @@ CAboutDlg::CAboutDlg(QWidget* parent, const char* name, bool modal, Qt::WFlags f
                                   "Radio Mondiale (DRM) receiver. With Dream, DRM broadcasts can be received "
                                   "with a modified analog receiver (SW, MW, LW) and a PC with a sound card.")
         + "</big></p><br>"
-        "<p><font face=\"" + FONT_COURIER + "\">" /* GPL header text */
+        "<p><font face=\"" FONT_COURIER "\">" /* GPL header text */
         "This program is free software; you can redistribute it and/or modify "
         "it under the terms of the GNU General Public License as published by "
         "the Free Software Foundation; either version 2 of the License, or "
@@ -122,7 +135,7 @@ CAboutDlg::CAboutDlg(QWidget* parent, const char* name, bool modal, Qt::WFlags f
         "Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 "
         "USA"
         "</font></p><br>" /* Our warning text */
-        "<p><font color=\"#ff0000\" face=\"" + FONT_COURIER + "\">" +
+        "<p><font color=\"#ff0000\" face=\"" FONT_COURIER "\">" +
         tr("Although this software is going to be "
            "distributed as free software under the terms of the GPL this does not "
            "mean that its use is free of rights of others. The use may infringe "
@@ -254,14 +267,7 @@ CAboutDlg::CAboutDlg(QWidget* parent, const char* name, bool modal, Qt::WFlags f
     TextViewCredits->setText(strCredits);
 
     /* Set version number in about dialog */
-    QString strVersionText;
-    strVersionText = "<center><b>" + tr("Dream, Version ");
-    strVersionText += QString("%1.%2").arg(dream_version_major).arg(dream_version_minor);
-    strVersionText += "</b><br> " + tr("Open-Source Software Implementation of "
-                                       "a DRM-Receiver") + "<br>";
-    strVersionText += tr("Under the GNU General Public License (GPL)") +
-                      "</center>";
-    TextLabelVersion->setText(strVersionText);
+    TextLabelVersion->setText(VersionString(this));
 
     /* Set author names in about dialog */
     TextLabelAuthorNames->setText("Volker Fischer, Alexander Kurpiers, Andrea Russo\nJulian Cable, Andrew Murphy, Oliver Haffenden");
@@ -270,6 +276,24 @@ CAboutDlg::CAboutDlg(QWidget* parent, const char* name, bool modal, Qt::WFlags f
     TextLabelCopyright->setText("Copyright (C) 2001 - 2012");
 }
 
+/* Help Usage --------------------------------------------------------------- */
+CHelpUsage::CHelpUsage(const char* usage, QWidget* parent, const char* name, bool modal, Qt::WFlags f)
+    : CAboutDlgBase(parent, name, modal, f)
+{
+	show();
+#if QT_VERSION < 0x040000
+    SetDialogCaption(this, tr("Dream help"));
+#else
+    setWindowTitle(tr("Dream help"));
+#endif
+    TextLabelVersion->setText(VersionString(this));
+    TextLabelAuthorNames->setText("");
+    TextLabelCopyright->setText(tr("Command line usage:"));
+    TextViewCredits->setFontFamily(FONT_COURIER);
+    TextViewCredits->setFontWeight(QFont::DemiBold);
+    TextViewCredits->setPlainText(tr(usage));
+    show();
+}
 
 /* Help menu ---------------------------------------------------------------- */
 #if QT_VERSION < 0x040000

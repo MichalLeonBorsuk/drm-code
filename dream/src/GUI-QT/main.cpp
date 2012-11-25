@@ -51,11 +51,13 @@
 # include <qmessagebox.h>
 # include "fdrmdialog.h"
 # include "TransmDlg.h"
+# include "DialogUtil.h"
 #endif
 #if QT_VERSION >= 0x040000
 # include <QCoreApplication>
 # include <QTranslator>
 #endif
+
 
 class CRx: public QThread
 {
@@ -202,8 +204,8 @@ main(int argc, char **argv)
 #endif
 				);
 
-			/* Set main window */
 #if QT_VERSION < 0x040000
+			/* Set main window */
 			app.setMainWidget(&MainDlg);
 #endif
 
@@ -213,7 +215,15 @@ main(int argc, char **argv)
 		}
 		else
 		{
-			QMessageBox::information(0, "Dream", Settings.UsageArguments(argv).c_str());
+			CHelpUsage HelpUsage(Settings.UsageArguments(argv[0]).c_str()
+#if QT_VERSION < 0x040000
+			, NULL, NULL, FALSE, Qt::WStyle_MinMax
+#endif
+			);
+#if QT_VERSION < 0x040000
+			app.setMainWidget(&HelpUsage);
+#endif
+			app.exec();
 			exit(0);
 		}
 	}

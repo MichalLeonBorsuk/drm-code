@@ -163,7 +163,7 @@ public:
 	void Get(const string& section, CWinGeom&) const;
 	void Put(const string& section, const CWinGeom&);
 
-	string UsageArguments(char** argv);
+	string UsageArguments(const char* argv0);
 
 protected:
 	int IsReceiver(const char *argv0);
