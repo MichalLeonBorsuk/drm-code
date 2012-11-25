@@ -735,7 +735,7 @@ _BOOLEAN CSoundInPulse::Read(CVector<_SAMPLE>& psData)
 	if (bChangDev == TRUE)
 	{
 		/* Reinit sound interface */
-		Init(iBufferSize, bBlockingRec);
+		Init(iSampleRate, iBufferSize, bBlockingRec);
 
 		/* Reset flag */
 		bChangDev = FALSE;
@@ -824,7 +824,7 @@ _BOOLEAN CSoundOutPulse::Write(CVector<_SAMPLE>& psData)
 	if (bChangDev == TRUE)
 	{
 		/* Reinit sound interface */
-		Init(iBufferSize, bBlockingPlay);
+		Init(iSampleRate, iBufferSize, bBlockingPlay);
 
 		/* Reset flag */
 		bChangDev = FALSE;

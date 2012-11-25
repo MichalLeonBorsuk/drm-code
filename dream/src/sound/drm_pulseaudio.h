@@ -71,7 +71,7 @@ public:
 	virtual void	SetDev(int iNewDevice);
 	virtual int		GetDev();
 
-	void			Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking = TRUE);
+	void			Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking);
 	_BOOLEAN		Read(CVector<_SAMPLE>& psData);
 	void			Close();
 #ifdef CLOCK_DRIFT_ADJ_ENABLED
@@ -116,7 +116,7 @@ public:
 	virtual void	SetDev(int iNewDevice);
 	virtual int		GetDev();
 
-	void			Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking = FALSE);
+	void			Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking);
 	_BOOLEAN		Write(CVector<_SAMPLE>& psData);
 	void			Close();
 #ifdef CLOCK_DRIFT_ADJ_ENABLED
