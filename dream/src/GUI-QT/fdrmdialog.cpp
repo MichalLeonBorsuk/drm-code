@@ -49,6 +49,7 @@
 # define toUpper(s) s.toUpper()
 #endif
 #include "Rig.h"
+#include "../Scheduler.h"
 
 inline QString str2qstr(const string& s) {
 #if QT_VERSION < 0x040000
@@ -66,7 +67,8 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& NSettings, CRig& rig,
     DRMReceiver(NDRMR),Settings(NSettings),
     Timer(),serviceLabels(4),pLogging(NULL),
     iMultimediaServiceBit(0),
-    iLastMultimediaServiceSelected(-1)
+    iLastMultimediaServiceSelected(-1),
+    pScheduler(NULL)
 {
     /* Recover window size and position */
     CWinGeom s;
@@ -363,76 +365,85 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& NSettings, CRig& rig,
 
     /* Activate real-time timers */
     Timer.start(GUI_CONTROL_UPDATE_TIME);
+    string schedfile = Settings.Get("command", "schedule", string());
+    if(schedfile != "")
+    {
+	pScheduler = new CScheduler;
+        pScheduler->LoadSchedule(schedfile);
+	pScheduleTimer = new QTimer(0);
+	connect(pScheduleTimer, SIGNAL(timeout()), this, SLOT(OnScheduleTimer()));
+	pScheduleTimer->start();
+    }
 }
 
 FDRMDialog::~FDRMDialog()
 {
-    delete pLogging;
+delete pLogging;
 }
 
 void FDRMDialog::on_actionWhats_This()
 {
-    QWhatsThis::enterWhatsThisMode();
+QWhatsThis::enterWhatsThisMode();
 }
 
 #if QT_VERSION < 0x040000
 void FDRMDialog::OnMenuPlotStyle(int value)
 {
-    /* Set new plot style in other dialogs */
-    emit plotStyleChanged(value);
-    /* Taking care of the checks */
-    for (int i = 0; i < NUM_AVL_COLOR_SCHEMES_PLOT; i++)
-        pPlotStyleMenu->setItemChecked(i, i == value);
+/* Set new plot style in other dialogs */
+emit plotStyleChanged(value);
+/* Taking care of the checks */
+for (int i = 0; i < NUM_AVL_COLOR_SCHEMES_PLOT; i++)
+pPlotStyleMenu->setItemChecked(i, i == value);
 }
 #endif
 
 void FDRMDialog::OnSwitchToFM()
 {
-    OnSwitchMode(RM_FM);
+OnSwitchMode(RM_FM);
 }
 
 void FDRMDialog::OnSwitchToAM()
 {
-    OnSwitchMode(RM_AM);
+OnSwitchMode(RM_AM);
 }
 
 void FDRMDialog::SetStatus(CMultColorLED* LED, ETypeRxStatus state)
 {
-    switch(state)
-    {
-    case NOT_PRESENT:
-        LED->Reset(); /* GREY */
-        break;
+switch(state)
+{
+case NOT_PRESENT:
+LED->Reset(); /* GREY */
+break;
 
-    case CRC_ERROR:
-        LED->SetLight(CMultColorLED::RL_RED);
-        break;
+case CRC_ERROR:
+LED->SetLight(CMultColorLED::RL_RED);
+break;
 
-    case DATA_ERROR:
-        LED->SetLight(CMultColorLED::RL_YELLOW);
-        break;
+case DATA_ERROR:
+LED->SetLight(CMultColorLED::RL_YELLOW);
+break;
 
-    case RX_OK:
-        LED->SetLight(CMultColorLED::RL_GREEN);
-        break;
-    }
+case RX_OK:
+LED->SetLight(CMultColorLED::RL_GREEN);
+break;
+}
 }
 
 void FDRMDialog::UpdateDRM_GUI()
 {
 #if QT_VERSION >= 0x040000
-    _BOOLEAN bMultimediaServiceAvailable;
+_BOOLEAN bMultimediaServiceAvailable;
 #endif
-    CParameter& Parameters = *DRMReceiver.GetParameters();
-    if(isVisible()==false)
-    {
-        ChangeGUIModeToDRM();
-    }
-    Parameters.Lock();
+CParameter& Parameters = *DRMReceiver.GetParameters();
+if(isVisible()==false)
+{
+ChangeGUIModeToDRM();
+}
+Parameters.Lock();
 
-    /* Input level meter */
-    ProgrInputLevel->setValue(Parameters.GetIFSignalLevel());
-    SetStatus(CLED_MSC, Parameters.ReceiveStatus.Audio.GetStatus());
+/* Input level meter */
+ProgrInputLevel->setValue(Parameters.GetIFSignalLevel());
+SetStatus(CLED_MSC, Parameters.ReceiveStatus.Audio.GetStatus());
     SetStatus(CLED_SDC, Parameters.ReceiveStatus.SDC.GetStatus());
     SetStatus(CLED_FAC, Parameters.ReceiveStatus.FAC.GetStatus());
 
@@ -458,6 +469,25 @@ void FDRMDialog::UpdateDRM_GUI()
     if (bMultimediaServiceAvailable != action_Multimedia_Dialog->isEnabled())
         action_Multimedia_Dialog->setEnabled(bMultimediaServiceAvailable);
 #endif
+}
+
+void FDRMDialog::OnScheduleTimer()
+{
+	time_t t = time(NULL);
+	int f = pScheduler->frequency(t);
+	time_t next = pScheduler->next(t);
+	char s[80], n[80];
+	strcpy(s, ctime(&t));
+	strcpy(n, ctime(&next));
+	pScheduleTimer->setInterval(1000*(next-t));
+	if(f != -1)
+	{
+		DRMReceiver.SetFrequency(f);
+	}
+	else
+	{
+		// TODO turn logging off but don't disable it
+	}
 }
 
 void FDRMDialog::OnTimer()
