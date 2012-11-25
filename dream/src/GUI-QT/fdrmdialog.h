@@ -76,6 +76,7 @@ class BWSViewer;
 class JLViewer;
 class SlideShowViewer;
 #endif
+class CScheduler;
 
 #if QT_VERSION >= 0x040000
 class FDRMDialogBase : public QMainWindow, public Ui_DRMMainWindow
@@ -137,6 +138,9 @@ protected:
     CAboutDlg		AboutDlg;
     int			iMultimediaServiceBit;
     int			iLastMultimediaServiceSelected;
+    CScheduler* 	pScheduler;
+    QTimer*		pScheduleTimer;
+    CEventFilter ef;
 
     void SetStatus(CMultColorLED* LED, ETypeRxStatus state);
     virtual void	closeEvent(QCloseEvent* ce);
@@ -158,10 +162,10 @@ protected:
     QString serviceSelector(CParameter&, int);
     void showTextMessage(const QString&);
     void showServiceInfo(const CService&);
-	CEventFilter ef;
 
 public slots:
     void OnTimer();
+    void OnScheduleTimer();
     void OnTimerClose();
     void OnSelectAudioService(int);
     void OnSelectDataService(int);

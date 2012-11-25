@@ -342,8 +342,7 @@ pcap {
     win32:LIBS += wpcap.lib packet.lib
 }
 hamlib {
-    DEFINES += HAVE_LIBHAMLIB \
-    HAVE_RIG_PARSE_MODE
+    DEFINES += HAVE_LIBHAMLIB
     macx:LIBS += -framework IOKit
     unix:LIBS += -lhamlib
     win32:LIBS += libhamlib-2.lib
@@ -460,6 +459,7 @@ HEADERS += src/AMDemodulation.h \
    src/selectioninterface.h \
    src/soundinterface.h \
    src/sound.h \
+   src/Scheduler.h \
    src/sound/soundnull.h \
    src/sourcedecoders/AudioSourceDecoder.h \
    src/sourcedecoders/AudioSourceEncoder.h \
@@ -524,6 +524,7 @@ SOURCES += src/AMDemodulation.cpp \
       src/DrmTransmitter.cpp \
       src/FAC/FAC.cpp \
       src/InputResample.cpp \
+      src/Scheduler.cpp \
       src/interleaver/BlockInterleaver.cpp \
       src/interleaver/SymbolInterleaver.cpp \
       src/IQInputFilter.cpp \
