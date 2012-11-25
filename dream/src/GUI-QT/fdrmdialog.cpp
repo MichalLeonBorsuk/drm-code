@@ -372,8 +372,12 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& NSettings, CRig& rig,
         pScheduler->LoadSchedule(schedfile);
 	pScheduleTimer = new QTimer(0);
 	connect(pScheduleTimer, SIGNAL(timeout()), this, SLOT(OnScheduleTimer()));
+#if QT_VERSION >= 0x040000
 	pScheduleTimer->start();
-    }
+#else
+	// TODO
+#endif
+	}
 }
 
 FDRMDialog::~FDRMDialog()
@@ -479,7 +483,11 @@ void FDRMDialog::OnScheduleTimer()
 	char s[80], n[80];
 	strcpy(s, ctime(&t));
 	strcpy(n, ctime(&next));
+#if QT_VERSION >= 0x040000
 	pScheduleTimer->setInterval(1000*(next-t));
+#else
+	// TODO
+#endif
 	if(f != -1)
 	{
 		DRMReceiver.SetFrequency(f);
