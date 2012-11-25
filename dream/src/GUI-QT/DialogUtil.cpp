@@ -295,9 +295,6 @@ CHelpUsage::CHelpUsage(const char* usage, QWidget* parent, const char* name, boo
     TextViewCredits->setText(tr(usage));
 #else
 	TextViewCredits->setFontFamily(FONT_COURIER);
-# ifndef _WIN32
-    TextViewCredits->setFontWeight(QFont::DemiBold);
-# endif
 	TextViewCredits->setPlainText(tr(usage));
 #endif
 	show();
