@@ -105,6 +105,9 @@ QString VersionString(QWidget* parent)
     strVersionText += parent->tr("Under the GNU General Public License (GPL)") +
                       "</center>";
     return strVersionText;
+#ifdef _MSC_VER
+	parent; // warning C4100: 'parent' : unreferenced formal parameter !!!
+#endif
 }
 
 /* Implementation *************************************************************/
@@ -289,10 +292,16 @@ CHelpUsage::CHelpUsage(const char* usage, QWidget* parent, const char* name, boo
     TextLabelVersion->setText(VersionString(this));
     TextLabelAuthorNames->setText("");
     TextLabelCopyright->setText(tr("Command line usage:"));
-    TextViewCredits->setFontFamily(FONT_COURIER);
+#if QT_VERSION < 0x040000
+    TextViewCredits->setText(tr(usage));
+#else
+	TextViewCredits->setFontFamily(FONT_COURIER);
+# ifndef _WIN32
     TextViewCredits->setFontWeight(QFont::DemiBold);
-    TextViewCredits->setPlainText(tr(usage));
-    show();
+# endif
+	TextViewCredits->setPlainText(tr(usage));
+#endif
+	show();
 }
 
 /* Help menu ---------------------------------------------------------------- */
