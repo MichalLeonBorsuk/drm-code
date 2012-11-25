@@ -331,48 +331,48 @@ CSoundCardSelMenu::CSoundCardSelMenu(
     CSelectionInterface* pNSIn, CSelectionInterface* pNSOut, QWidget* parent) :
     QPopupMenu(parent), pSoundInIF(pNSIn), pSoundOutIF(pNSOut)
 {
-        pSoundInMenu = new QPopupMenu(parent);
-        CHECK_PTR(pSoundInMenu);
-        pSoundOutMenu = new QPopupMenu(parent);
-        CHECK_PTR(pSoundOutMenu);
-        int i;
+    pSoundInMenu = new QPopupMenu(parent);
+    CHECK_PTR(pSoundInMenu);
+    pSoundOutMenu = new QPopupMenu(parent);
+    CHECK_PTR(pSoundOutMenu);
+    int i;
 
-        /* Get sound device names */
-        pSoundInIF->Enumerate(vecSoundInNames);
-        iNumSoundInDev = vecSoundInNames.size();
+    /* Get sound in device names */
+    pSoundInIF->Enumerate(vecSoundInNames);
+    iNumSoundInDev = vecSoundInNames.size();
 
-        for (i = 0; i < iNumSoundInDev; i++)
-        {
-                QString name(vecSoundInNames[i].c_str());
+    for (i = 0; i < iNumSoundInDev; i++)
+    {
+        QString name(QString::fromUtf8(vecSoundInNames[i].c_str()));
 #if defined(_MSC_VER) && (_MSC_VER < 1400)
-                if(name.find("blaster", 0, FALSE)>=0)
-                        name += " (has problems on some platforms)";
+        if (name.find("blaster", 0, FALSE) >= 0)
+            name += " (has problems on some platforms)";
 #endif
-                pSoundInMenu->insertItem(name, this, SLOT(OnSoundInDevice(int)), 0, i);
-        }
+        pSoundInMenu->insertItem(name, this, SLOT(OnSoundInDevice(int)), 0, i);
+    }
 
-        pSoundOutIF->Enumerate(vecSoundOutNames);
-        iNumSoundOutDev = vecSoundOutNames.size();
-        for (i = 0; i < iNumSoundOutDev; i++)
-        {
-                pSoundOutMenu->insertItem(QString(vecSoundOutNames[i].c_str()), this,
-                        SLOT(OnSoundOutDevice(int)), 0, i);
-        }
+    /* Get sound out device names */
+    pSoundOutIF->Enumerate(vecSoundOutNames);
+    iNumSoundOutDev = vecSoundOutNames.size();
+    for (i = 0; i < iNumSoundOutDev; i++)
+    {
+        pSoundOutMenu->insertItem(QString::fromUtf8(vecSoundOutNames[i].c_str()), this,
+            SLOT(OnSoundOutDevice(int)), 0, i);
+    }
 
-        /* Set default device. If no valid device was selected, select
- *            "Wave mapper" */
-        int iDefaultInDev = pSoundInIF->GetDev();
-        if ((iDefaultInDev > iNumSoundInDev) || (iDefaultInDev < 0))
-                iDefaultInDev = iNumSoundInDev;
-        int iDefaultOutDev = pSoundOutIF->GetDev();
+    /* Set default device. If no valid device was selected, select "Wave mapper" */
+    int iDefaultInDev = pSoundInIF->GetDev();
+    if ((iDefaultInDev > iNumSoundInDev) || (iDefaultInDev < 0))
+        iDefaultInDev = iNumSoundInDev;
+    int iDefaultOutDev = pSoundOutIF->GetDev();
         if ((iDefaultOutDev > iNumSoundOutDev) || (iDefaultOutDev < 0))
-                iDefaultOutDev = iNumSoundOutDev;
+    iDefaultOutDev = iNumSoundOutDev;
 
-        pSoundInMenu->setItemChecked(iDefaultInDev, TRUE);
-        pSoundOutMenu->setItemChecked(iDefaultOutDev, TRUE);
+    pSoundInMenu->setItemChecked(iDefaultInDev, TRUE);
+    pSoundOutMenu->setItemChecked(iDefaultOutDev, TRUE);
 
-        insertItem(tr("Sound &In"), pSoundInMenu);
-        insertItem(tr("Sound &Out"), pSoundOutMenu);
+    insertItem(tr("Sound &In"), pSoundInMenu);
+    insertItem(tr("Sound &Out"), pSoundOutMenu);
 }
 
 void CSoundCardSelMenu::OnSoundInDevice(int id)

@@ -59,7 +59,7 @@ QMenu* CSoundCardSelMenu::Init(const QString& text, CSelectionInterface* intf)
 
     for (int i = 0; i < iNumSoundDev; i++)
     {
-        QString name(names[i].c_str());
+        QString name(QString::fromUtf8(names[i].c_str()));
         QAction* m = menu->addAction(name);
         m->setCheckable(true);
         group->addAction(m);
