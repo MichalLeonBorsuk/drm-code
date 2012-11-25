@@ -372,7 +372,7 @@ void CReceiveData::InitInternal(CParameter& Parameters)
     Parameters.Unlock();
 
 	try {
-		pSound->Init(iSampleRate, iOutputBlockSize * 2);
+		pSound->Init(iSampleRate, iOutputBlockSize * 2, TRUE);
 
 		/* Init buffer size for taking stereo input */
 		vecsSoundBuffer.Init(iOutputBlockSize * 2);
