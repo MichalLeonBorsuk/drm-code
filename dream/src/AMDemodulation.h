@@ -291,7 +291,7 @@ public:
 
     void SetFilterBW(const int iNewBW);
     int GetFilterBW() {
-        return (int) (rBPNormBW * iSampleRate);
+        return (int) (rBPNormBW * iSigSampleRate);
     }
 
     void SetAGCType(const CAGC::EType eNewType);
@@ -321,7 +321,7 @@ public:
     _BOOLEAN GetPLLPhase(CReal& rPhaseOut);
     CReal GetCurMixFreqOffs() const
     {
-        return rNormCurMixFreqOffs * iSampleRate;
+        return rNormCurMixFreqOffs * iSigSampleRate;
     }
 
     _BOOLEAN GetFrameBoundary() {
@@ -366,6 +366,8 @@ protected:
 
     CComplex					cOldVal;
 
+    CVector<_REAL>				vecTempResBufIn;
+    CVector<_REAL>				vecTempResBufOut;
 
     /* Objects */
     CPLL						PLL;
@@ -374,12 +376,15 @@ protected:
     CAGC						AGC;
     CNoiseReduction				NoiseReduction;
     ENoiRedType					NoiRedType;
+    CAudioResample				ResampleObj;
 
     /* OPH: counter to count symbols within a frame in order to generate */
     /* RSCI output */
     int							iFreeSymbolCounter;
-    int							iSampleRate;
+    int							iAudSampleRate;
+    int							iSigSampleRate;
     int							iBandwidth;
+    int							iResOutBlockSize;
 
 
     virtual void InitInternal(CParameter& Parameters);
