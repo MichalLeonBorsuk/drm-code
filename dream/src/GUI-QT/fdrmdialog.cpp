@@ -477,25 +477,29 @@ SetStatus(CLED_MSC, Parameters.ReceiveStatus.Audio.GetStatus());
 
 void FDRMDialog::OnScheduleTimer()
 {
-	time_t t = time(NULL);
-	int f = pScheduler->frequency(t);
-	time_t next = pScheduler->next(t);
-	char s[80], n[80];
-	strcpy(s, ctime(&t));
-	strcpy(n, ctime(&next));
-#if QT_VERSION >= 0x040000
-	pScheduleTimer->setInterval(1000*(next-t));
-#else
-	// TODO
-#endif
-	if(f != -1)
+	CScheduler::SEvent e;
+	e = pScheduler->front();
+QDateTime dt;
+dt.setTime_t(e.time);
+qDebug() << dt.toString("yyyy-MM-ddThh:mm:ss") << " " <<  e.frequency;
+	pScheduler->pop();
+	if(e.frequency != -1)
 	{
-		DRMReceiver.SetFrequency(f);
+		pLogging->LoadSettings(Settings);
+		pLogging->reStart();
+		DRMReceiver.SetFrequency(e.frequency);
 	}
 	else
 	{
-		// TODO turn logging off but don't disable it
+		pLogging->stop();
 	}
+	e = pScheduler->front();
+	time_t now = time(NULL);
+#if QT_VERSION >= 0x040000
+	pScheduleTimer->setInterval(1000*(e.time-now));
+#else
+	pScheduleTimer->changeInterval(1000*(e.time-now));
+#endif
 }
 
 void FDRMDialog::OnTimer()

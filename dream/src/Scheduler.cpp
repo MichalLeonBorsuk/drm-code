@@ -32,6 +32,27 @@
 #include <cstdlib>
 #include <ctime>
 
+// get next event
+CScheduler::SEvent CScheduler::front()
+{
+	if(events.empty())
+	{
+		fill();
+	}
+	return events.front();
+}
+
+// remove first event from queue
+void CScheduler::pop()
+{
+	events.pop();
+}
+
+bool CScheduler::empty() const
+{
+	return events.empty();
+}
+
 void CScheduler::LoadSchedule(const string& filename)
 {
 	LoadIni(filename.c_str());
@@ -53,36 +74,20 @@ void CScheduler::LoadSchedule(const string& filename)
 		schedule[start] = int(atol(f.c_str()));
 		schedule[end] = -1;
 	}
+	fill();
 }
 
-// get next event time and frequency after input time
-time_t CScheduler::next(time_t dt)
+void CScheduler::fill()
 {
-	map<time_t,int> abs_sched = abs(dt);
-	// find last event before dt
-	for(map<time_t,int>::const_iterator i = abs_sched.begin(); i != abs_sched.end(); i++)
+	time_t dt;
+	if(events.empty())
 	{
-		if(i->first>dt)
-			return i->first;
+		dt = time(NULL);
 	}
-	return 0;
-}
-
-// get frequency we should be tuned to at input time
-int CScheduler::frequency(time_t dt)
-{
-	map<time_t,int> abs_sched = abs(dt);
-	// find last event before dt
-	for(map<time_t,int>::const_iterator i = abs_sched.begin(); i != abs_sched.end(); i++)
+	else
 	{
-		if(dt>=i->first)
-			return i->second;
+		dt = events.back().time;
 	}
-	return -1;
-}
-
-map<time_t,int> CScheduler::abs(time_t dt)
-{
 	struct tm dts;
 	dts = *gmtime(&dt);
 	dts.tm_hour = 0;
@@ -98,7 +103,12 @@ map<time_t,int> CScheduler::abs(time_t dt)
 			st += 86400; // want tomorrow's.
 		abs_sched[st] = i->second;
 	}
-	return abs_sched;
+	for(map<time_t,int>::const_iterator i = abs_sched.begin(); i != abs_sched.end(); i++)
+	{
+		SEvent e;
+		e.time = i->first; e.frequency = i->second;
+		events.push(e);
+	}
 }
 
 int CScheduler::parse(string s)
