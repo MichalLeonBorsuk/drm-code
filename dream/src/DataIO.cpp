@@ -50,8 +50,8 @@ void CReadData::ProcessDataInternal(CParameter&)
 
 void CReadData::InitInternal(CParameter& Parameters)
 {
-    /* Get sample rate */
-    const int iSampleRate = Parameters.GetSampleRate();
+    /* Get audio sample rate */
+    const int iSampleRate = Parameters.GetAudSampleRate();
 
     /* Define block-size for output, an audio frame always corresponds
        to 400 ms. We use always stereo blocks */
@@ -178,16 +178,21 @@ void CWriteData::ProcessDataInternal(CParameter& Parameters)
 
 void CWriteData::InitInternal(CParameter& Parameters)
 {
-    /* Get sample rate */
-    iSampleRate = Parameters.GetSampleRate();
+    /* Get audio sample rate */
+    iAudSampleRate = Parameters.GetAudSampleRate();
+
+    /* Set maximum audio frequency */
+	iMaxAudioFrequency = MAX_SPEC_AUDIO_FREQUENCY;
+	if (iMaxAudioFrequency > iAudSampleRate/2)
+		iMaxAudioFrequency = iAudSampleRate/2;
 
     /* Length of vector for audio spectrum. We use a power-of-two length to
        make the FFT work more efficient, need to be scaled from sample rate to
        keep the same frequency resolution */
-    iNumSmpls4AudioSprectrum = ADJ_FOR_SRATE(1024, iSampleRate);
+    iNumSmpls4AudioSprectrum = ADJ_FOR_SRATE(1024, iAudSampleRate);
 
     /* Number of blocks for averaging the audio spectrum */
-    iNumBlocksAvAudioSpec = Ceil(((_REAL) iSampleRate *
+    iNumBlocksAvAudioSpec = Ceil(((_REAL) iAudSampleRate *
         TIME_AV_AUDIO_SPECT_MS / 1000 / iNumSmpls4AudioSprectrum));
 
     /* Inits for audio spectrum plotting */
@@ -200,7 +205,7 @@ void CWriteData::InitInternal(CParameter& Parameters)
 
     /* An audio frame always corresponds to 400 ms.
        We use always stereo blocks */
-    const int iAudFrameSize = (int) ((_REAL) iSampleRate *
+    const int iAudFrameSize = (int) ((_REAL) iAudSampleRate *
                                      (_REAL) 0.4 /* 400 ms */);
 
     /* Check if blocking behaviour of sound interface shall be changed */
@@ -208,7 +213,7 @@ void CWriteData::InitInternal(CParameter& Parameters)
         bSoundBlocking = bNewSoundBlocking;
 
     /* Init sound interface with blocking or non-blocking behaviour */
-    pSound->Init(iSampleRate, iAudFrameSize * 2 /* stereo */, bSoundBlocking);
+    pSound->Init(iAudSampleRate, iAudFrameSize * 2 /* stereo */, bSoundBlocking);
 
     /* Init intermediate buffer needed for different channel selections */
     vecsTmpAudData.Init(iAudFrameSize * 2 /* stereo */);
@@ -225,7 +230,7 @@ CWriteData::CWriteData(CSoundOutInterface* pNS) : pSound(pNS), /* Sound interfac
         bMuteAudio(FALSE), bDoWriteWaveFile(FALSE),
         bSoundBlocking(FALSE), bNewSoundBlocking(FALSE),
         eOutChanSel(CS_BOTH_BOTH), rMixNormConst(MIX_OUT_CHAN_NORM_CONST),
-        iSampleRate(0), iNumSmpls4AudioSprectrum(0), iNumBlocksAvAudioSpec(0),
+        iAudSampleRate(0), iNumSmpls4AudioSprectrum(0), iNumBlocksAvAudioSpec(0),
         iMaxAudioFrequency(MAX_SPEC_AUDIO_FREQUENCY)
 {
     /* Constructor */
@@ -236,7 +241,7 @@ void CWriteData::StartWriteWaveFile(const string& strFileName)
     /* No Lock(), Unlock() needed here */
     if (bDoWriteWaveFile == FALSE)
     {
-        WaveFileAudio.Open(strFileName, iSampleRate);
+        WaveFileAudio.Open(strFileName, iAudSampleRate);
         bDoWriteWaveFile = TRUE;
     }
 }
@@ -254,7 +259,7 @@ void CWriteData::StopWriteWaveFile()
 void CWriteData::GetAudioSpec(CVector<_REAL>& vecrData,
                               CVector<_REAL>& vecrScale)
 {
-    if (iSampleRate == 0)
+    if (iAudSampleRate == 0)
     {
         /* Init output vectors to zero data */
         vecrData.Init(0, (_REAL) 0.0);
@@ -263,7 +268,7 @@ void CWriteData::GetAudioSpec(CVector<_REAL>& vecrData,
     }
 
     /* Real input signal -> symmetrical spectrum -> use only half of spectrum */
-    const _REAL rLenPowSpec = _REAL(iNumSmpls4AudioSprectrum) * iMaxAudioFrequency / iSampleRate;
+    const _REAL rLenPowSpec = _REAL(iNumSmpls4AudioSprectrum) * iMaxAudioFrequency / iAudSampleRate;
     const int iLenPowSpec = int(rLenPowSpec);
 
     /* Init output vectors */
@@ -809,7 +814,7 @@ void CWriteIQFile::OpenFile(CParameter& Parameters)
     filename << "-" << setw(2) << setfill('0')<< gmtCur->tm_mday << "_";
     filename << setw(2) << setfill('0') << gmtCur->tm_hour << "-" << setw(2) << setfill('0')<< gmtCur->tm_min;
     filename << "-" << setw(2) << setfill('0')<< gmtCur->tm_sec << "_";
-    filename << setw(8) << setfill('0') << (iFrequency*1000) << ".iq" << (Parameters.GetSampleRate()/1000);
+    filename << setw(8) << setfill('0') << (iFrequency*1000) << ".iq" << (Parameters.GetSigSampleRate()/1000);
 
     pFile = fopen(filename.str().c_str(), "wb");
 

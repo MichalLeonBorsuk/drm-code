@@ -79,7 +79,11 @@ void CTimeSync::ProcessDataInternal(CParameter& Parameters)
 
 		/* Copy CVector data in CMatlibVector */
 		for (i = 0; i < iInputBlockSize; i++)
+		{
 			cvecInpTmp[i] = (*pvecInputData)[i];
+//			float value[2] = {cvecInpTmp[i].real()/8192, cvecInpTmp[i].imag()/8192};
+//			write(1000, &value, sizeof(value));
+		}
 
 		/* Complex Hilbert filter. We use the copy constructor for storing
 		   the result since the sizes of the output vector varies with time.
@@ -97,7 +101,11 @@ void CTimeSync::ProcessDataInternal(CParameter& Parameters)
 		   everywhere) */
 		cvecOutTmpInterm.Init(iDecInpuSize);
 		for (i = 0; i < iDecInpuSize; i++)
+		{
 			cvecOutTmpInterm[i] = cvecOutTmp[i];
+//			float value[2] = {cvecOutTmp[i].real()/8192, cvecOutTmp[i].imag()/8192};
+//			write(1000, &value, sizeof(value));
+		}
 
 		/* Write new block of data at the end of shift register */
 		HistoryBufCorr.AddEnd(cvecOutTmpInterm, iDecInpuSize);
@@ -591,7 +599,7 @@ void CTimeSync::InitInternal(CParameter& Parameters)
 	Parameters.Lock(); 
 
 	/* Get parameters from info class */
-	iSampleRate = Parameters.GetSampleRate();
+	iSampleRate = Parameters.GetSigSampleRate();
 
 	/* Adjusting fft size to sample rate */
 	const int iRMAFFTSizeN = ADJ_FOR_SRATE(RMA_FFT_SIZE_N, iSampleRate);
@@ -820,6 +828,10 @@ void CTimeSync::SetFilterTaps(CReal rNewOffsetNorm)
 {
 #ifdef USE_10_KHZ_HILBFILT
 	float * fHilLPProt = fHilLPProt10;
+
+	/* TODO more testing */
+	if (iSampleRate == 24000)
+		rNewOffsetNorm += (CReal) HILB_FILT_BNDWIDTH / 4 / iSampleRate;
 #else
 	float * fHilLPProt = fHilLPProt5;
 

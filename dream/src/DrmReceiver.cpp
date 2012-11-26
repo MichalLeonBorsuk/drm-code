@@ -1352,8 +1352,11 @@ CDRMReceiver::LoadSettings(CSettings& s)
 
     /* Receiver ------------------------------------------------------------- */
 
-    /* Sound card sample rate, some settings below depends on this one */
-    pParameters->SetSampleRate(s.Get("Receiver", "samplerate", int(DEFAULT_SOUNDCRD_SAMPLE_RATE)));
+    /* Sound card audio sample rate, some settings below depends on this one */
+    pParameters->SetAudSampleRate(s.Get("Receiver", "samplerateaud", int(DEFAULT_SOUNDCRD_SAMPLE_RATE)));
+
+    /* Sound card signal sample rate, some settings below depends on this one */
+    pParameters->SetSigSampleRate(s.Get("Receiver", "sampleratesig", int(DEFAULT_SOUNDCRD_SAMPLE_RATE)));
 
     /* if 0 then only measure PSD when RSCI in use otherwise always measure it */
     pParameters->bMeasurePSDAlways = s.Get("Receiver", "measurepsdalways", 0);
@@ -1494,9 +1497,9 @@ CDRMReceiver::LoadSettings(CSettings& s)
     /* Set parameters for frequency acquisition search window if needed */
     _REAL rFreqAcSeWinCenter = s.Get("command", "fracwincent", -1);
     _REAL rFreqAcSeWinSize = s.Get("command", "fracwinsize", -1);
-    const int iSampleRate = pParameters->GetSampleRate();
-    if (rFreqAcSeWinCenter < 0) rFreqAcSeWinCenter = _REAL(iSampleRate / 4);
-    if (rFreqAcSeWinSize < 0) rFreqAcSeWinSize = _REAL(iSampleRate / 2);
+    const int iSigSampleRate = pParameters->GetSigSampleRate();
+    if (rFreqAcSeWinCenter < 0) rFreqAcSeWinCenter = _REAL(iSigSampleRate / 4);
+    if (rFreqAcSeWinSize < 0) rFreqAcSeWinSize = _REAL(iSigSampleRate / 2);
     /* Set new parameters */
     FreqSyncAcq.SetSearchWindow(rFreqAcSeWinCenter, rFreqAcSeWinSize);
 
@@ -1562,8 +1565,11 @@ CDRMReceiver::SaveSettings(CSettings& s)
 
     /* Receiver ------------------------------------------------------------- */
 
-    /* Sound card sample rate */
-    s.Put("Receiver", "samplerate", pParameters->GetSampleRate());
+    /* Sound card audio sample rate */
+    s.Put("Receiver", "samplerateaud", pParameters->GetAudSampleRate());
+
+    /* Sound card signal sample rate */
+    s.Put("Receiver", "sampleratesig", pParameters->GetSigSampleRate());
 
     /* if 0 then only measure PSD when RSCI in use otherwise always measure it */
     s.Put("Receiver", "measurepsdalways", pParameters->bMeasurePSDAlways);
@@ -1661,7 +1667,7 @@ void CConvertAudio::InitInternal(CParameter& Parameters)
 {
     iInputBlockSize = Parameters.CellMappingTable.iSymbolBlockSize;
     iOutputBlockSize = 2*iInputBlockSize;
-    iMaxOutputBlockSize = 2 * int((_REAL) Parameters.GetSampleRate() * (_REAL) 0.4 /* 400 ms */);
+    iMaxOutputBlockSize = 2 * int((_REAL) Parameters.GetAudSampleRate() * (_REAL) 0.4 /* 400 ms */);
 }
 
 void CConvertAudio::ProcessDataInternal(CParameter& Parameters)

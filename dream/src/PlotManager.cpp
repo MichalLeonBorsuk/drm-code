@@ -82,7 +82,7 @@ CPlotManager::UpdateParamHistories(ERecState eReceiverState)
 #endif
 
         /* Frequency offset tracking values */
-        vecrFreqSyncValHist.AddEnd(rFreqOffsetTrack * Parameters.GetSampleRate());
+        vecrFreqSyncValHist.AddEnd(rFreqOffsetTrack * Parameters.GetSigSampleRate());
 
         /* Sample rate offset estimation */
         vecrSamOffsValHist.AddEnd(rResampleOffset);
@@ -171,9 +171,9 @@ CPlotManager::GetFreqSamOffsHist(CVector < _REAL > &vecrFreqOffs,
 
     Parameters.Lock();
     /* Duration of OFDM symbol */
-    const _REAL rTs = (CReal) (Parameters.CellMappingTable.iFFTSizeN + Parameters.CellMappingTable.iGuardSize) / Parameters.GetSampleRate();
+    const _REAL rTs = (CReal) (Parameters.CellMappingTable.iFFTSizeN + Parameters.CellMappingTable.iGuardSize) / Parameters.GetSigSampleRate();
     /* Value from frequency acquisition */
-    rFreqAquVal = Parameters.rFreqOffsetAcqui * Parameters.GetSampleRate();
+    rFreqAquVal = Parameters.rFreqOffsetAcqui * Parameters.GetSigSampleRate();
     Parameters.Unlock();
 
     /* Init output vectors */
@@ -216,7 +216,7 @@ CPlotManager::GetDopplerDelHist(CVector < _REAL > &vecrLenIR,
     /* Duration of DRM frame */
     const _REAL rDRMFrameDur = (CReal) (Parameters.CellMappingTable.iFFTSizeN
                                         + Parameters.CellMappingTable.iGuardSize) /
-                               Parameters.GetSampleRate() * Parameters.CellMappingTable.iNumSymPerFrame;
+                               Parameters.GetSigSampleRate() * Parameters.CellMappingTable.iNumSymPerFrame;
     Parameters.Unlock();
 
     /* Lock resources */
@@ -249,7 +249,7 @@ CPlotManager::GetSNRHist(CVector < _REAL > &vecrSNR,
     Parameters.Lock();
     /* Duration of DRM frame */
     const _REAL rDRMFrameDur = (CReal) (Parameters.CellMappingTable.iFFTSizeN + Parameters.CellMappingTable.iGuardSize) /
-                               Parameters.GetSampleRate() * Parameters.CellMappingTable.iNumSymPerFrame;
+                               Parameters.GetSigSampleRate() * Parameters.CellMappingTable.iNumSymPerFrame;
     Parameters.Unlock();
 
     /* Init output vectors */

@@ -611,7 +611,7 @@ void CChannelEstimation::InitInternal(CParameter& Parameters)
     iNumCarrier = Parameters.CellMappingTable.iNumCarrier;
     iFFTSizeN = Parameters.CellMappingTable.iFFTSizeN;
     iNumSymPerFrame = Parameters.CellMappingTable.iNumSymPerFrame;
-    iSampleRate = Parameters.GetSampleRate();
+    iSampleRate = Parameters.GetSigSampleRate();
 
     /* Length of guard-interval with respect to FFT-size! */
     rGuardSizeFFT = (_REAL) iNumCarrier *

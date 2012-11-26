@@ -316,7 +316,7 @@ int CTimeWiener::Init(CParameter& Parameters)
 	iLenHistBuff = iSymDelyChanEst + 1;
 
 	/* Duration of useful part plus guard interval */
-	rTs = (_REAL) Parameters.CellMappingTable.iSymbolBlockSize / Parameters.GetSampleRate();
+	rTs = (_REAL) Parameters.CellMappingTable.iSymbolBlockSize / Parameters.GetSigSampleRate();
 
 	/* Total number of interpolated pilots in frequency direction. We have to
 	   consider the last pilot at the end ("+ 1") */
@@ -340,7 +340,7 @@ int CTimeWiener::Init(CParameter& Parameters)
 	   direction are "iScatPilTimeInt * iScatPilFreqInt" apart */
 	const int iNumPilOneOFDMSym = iNumIntpFreqPil / iScatPilTimeInt;
 	rLamTiCorrAv = IIR1Lam(TICONST_TI_CORREL_EST * iNumPilOneOFDMSym,
-		(CReal) Parameters.GetSampleRate() / Parameters.CellMappingTable.iSymbolBlockSize);
+		(CReal) Parameters.GetSigSampleRate() / Parameters.CellMappingTable.iSymbolBlockSize);
 
 	/* Init update counter for Wiener filter update. We immediatly use the
 	   filtered result although right at the beginning there is no averaging.

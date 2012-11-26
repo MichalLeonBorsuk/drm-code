@@ -383,7 +383,8 @@ protected:
 	QRect			LastPlotCanvRect;
 	int				scaleWidth;
 	QRgb*			imageData;
-	int				iSampleRate;
+	int				iAudSampleRate;
+	int				iSigSampleRate;
 
 public slots:
 #if QWT_VERSION < 0x060000

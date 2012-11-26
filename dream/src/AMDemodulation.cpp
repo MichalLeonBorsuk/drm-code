@@ -159,7 +159,7 @@ void CAMDemodulation::InitInternal(CParameter& Parameters)
     /* Get parameters from info class */
     Parameters.Lock();
     iSymbolBlockSize = Parameters.CellMappingTable.iSymbolBlockSize;
-    iSampleRate = Parameters.GetSampleRate();
+    iSampleRate = Parameters.GetSigSampleRate();
     Parameters.Unlock();
 
     /* SetFilterBW() can be called before InitInternal() and iSampleRate is defined,
