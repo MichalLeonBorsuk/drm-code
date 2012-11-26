@@ -46,7 +46,8 @@ CAMDemodulation::CAMDemodulation() :
     bPLLIsEnabled(FALSE), bAutoFreqAcquIsEnabled(FALSE), eDemodType(DT_AM),
     cOldVal(),
     PLL(), Mixer(), FreqOffsAcq(), AGC(), NoiseReduction(), NoiRedType(NR_OFF),
-    iFreeSymbolCounter(0), iSampleRate(0), iBandwidth(0)
+    iFreeSymbolCounter(0), iAudSampleRate(0), iSigSampleRate(0), iBandwidth(0),
+    iResOutBlockSize(0)
 {
 }
 
@@ -146,11 +147,19 @@ void CAMDemodulation::ProcessDataInternal(CParameter& Parameters)
     AGC.Process(rvecInpTmp);
 
 
-    /* Write mono signal in both channels (left and right) */
+    /* Resampling audio ------------------------------------------------- */
+    /* Change type of data (short -> real) */
     for (i = 0; i < iSymbolBlockSize; i++)
+        vecTempResBufIn[i] = rvecInpTmp[i];
+
+    /* Resample data */
+    ResampleObj.Resample(vecTempResBufIn, vecTempResBufOut);
+
+    /* Write mono signal in both channels (left and right) */
+    for (i = 0; i < iResOutBlockSize; i++)
     {
         (*pvecOutputData)[2 * i] = (*pvecOutputData)[2 * i + 1] =
-                                       Real2Sample(rvecInpTmp[i]);
+            Real2Sample(vecTempResBufOut[i]);
     }
 }
 
@@ -159,12 +168,13 @@ void CAMDemodulation::InitInternal(CParameter& Parameters)
     /* Get parameters from info class */
     Parameters.Lock();
     iSymbolBlockSize = Parameters.CellMappingTable.iSymbolBlockSize;
-    iSampleRate = Parameters.GetSigSampleRate();
+    iAudSampleRate = Parameters.GetAudSampleRate();
+    iSigSampleRate = Parameters.GetSigSampleRate();
     Parameters.Unlock();
 
-    /* SetFilterBW() can be called before InitInternal() and iSampleRate is defined,
+    /* SetFilterBW() can be called before InitInternal() and iSigSampleRate is defined,
        so we need to recalculate the bandwidth here */
-    rBPNormBW = (CReal) iBandwidth / iSampleRate;
+    rBPNormBW = (CReal) iBandwidth / iSigSampleRate;
 
     /* Init temporary vector for filter input and output */
     rvecInpTmp.Init(iSymbolBlockSize);
@@ -174,21 +184,20 @@ void CAMDemodulation::InitInternal(CParameter& Parameters)
     cOldVal = (CReal) 0.0;
 
     /* Init noise reduction object */
-    NoiseReduction.Init(iSampleRate, iSymbolBlockSize);
+    NoiseReduction.Init(iSigSampleRate, iSymbolBlockSize);
 
     /* Init frequency offset acquisition (start new acquisition) */
     FreqOffsAcq.Init(iSymbolBlockSize);
     FreqOffsAcq.Start((CReal) 0.0); /* Search entire bandwidth */
 
     /* Init AGC */
-    AGC.Init(iSampleRate, iSymbolBlockSize);
+    AGC.Init(iSigSampleRate, iSymbolBlockSize);
 
     /* Init mixer */
     Mixer.Init(iSymbolBlockSize);
 
     /* Init PLL */
     PLL.Init(iSymbolBlockSize);
-
 
     /* Inits for Hilbert and DC filter -------------------------------------- */
     /* Hilbert filter block length is the same as input block length */
@@ -242,11 +251,22 @@ void CAMDemodulation::InitInternal(CParameter& Parameters)
     /* Define block-sizes for input and output */
     /* The output buffer is a cyclic buffer, we have to specify the total
        buffer size */
-    iMaxOutputBlockSize = (int) ((_REAL) iSampleRate *
+    iMaxOutputBlockSize = (int) ((_REAL) iSigSampleRate *
                                  (_REAL) 0.4 /* 400ms */ * 2 /* for stereo */);
 
     iInputBlockSize = iSymbolBlockSize;
-    iOutputBlockSize = 2 * iSymbolBlockSize; /* Stereo */
+
+    /* Init audio resampler */
+    ResampleObj.Init(iSymbolBlockSize,
+        (_REAL) iAudSampleRate / iSigSampleRate);
+
+    iResOutBlockSize = (int) ((_REAL) iSymbolBlockSize *
+                              iAudSampleRate / iSigSampleRate);
+
+    vecTempResBufIn.Init(iSymbolBlockSize, (_REAL) 0.0);
+    vecTempResBufOut.Init(iResOutBlockSize, (_REAL) 0.0);
+
+    iOutputBlockSize = 2 * iResOutBlockSize; /* Stereo */
 
     /* OPH: init free-running symbol counter */
     iFreeSymbolCounter = 0;
@@ -260,7 +280,7 @@ void CAMDemodulation::SetNormCurMixFreqOffs(const CReal rNewNormCurMixFreqOffs)
     if (eDemodType == DT_CW)
     {
         rNormCurMixFreqOffs =
-            rNewNormCurMixFreqOffs - FREQ_OFFS_CW_DEMOD / iSampleRate;
+            rNewNormCurMixFreqOffs - FREQ_OFFS_CW_DEMOD / iSigSampleRate;
     }
     else
         rNormCurMixFreqOffs = rNewNormCurMixFreqOffs;
@@ -287,7 +307,7 @@ void CAMDemodulation::SetBPFilter(const CReal rNewBPNormBW,
 
     /* Adjust center of filter for respective demodulation types */
     CReal rBPNormFreqOffset = (CReal) 0.0;
-    const CReal rSSBMargin = SSB_DC_MARGIN_HZ / iSampleRate;
+    const CReal rSSBMargin = SSB_DC_MARGIN_HZ / iSigSampleRate;
     switch (eDemodType)
     {
     case DT_AM:
@@ -311,7 +331,7 @@ void CAMDemodulation::SetBPFilter(const CReal rNewBPNormBW,
     case DT_CW:
         /* Shift filter to the right side of the carrier according to the
            special CW demodulation shift */
-        rBPNormFreqOffset = FREQ_OFFS_CW_DEMOD / iSampleRate;
+        rBPNormFreqOffset = FREQ_OFFS_CW_DEMOD / iSigSampleRate;
         break;
     }
 
@@ -373,7 +393,7 @@ void CAMDemodulation::SetDemodType(const EDemodType eNewType)
         eDemodType = eNewType;
 
         /* Init band-pass filter according to new demodulation method */
-        if (iSampleRate != 0)
+        if (iSigSampleRate != 0)
             SetBPFilter(rBPNormBW, rNormCurMixFreqOffs, eDemodType);
     }
     Unlock();
@@ -388,8 +408,8 @@ void CAMDemodulation::SetFilterBW(const int iNewBW)
         iBandwidth = iNewBW;
 
         /* Init band-pass filter according to new bandwidth value */
-        if (iSampleRate != 0)
-            SetBPFilter((CReal) iNewBW / iSampleRate, rNormCurMixFreqOffs,
+        if (iSigSampleRate != 0)
+            SetBPFilter((CReal) iNewBW / iSigSampleRate, rNormCurMixFreqOffs,
                         eDemodType);
     }
     Unlock();
