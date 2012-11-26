@@ -3,7 +3,7 @@
 %* Copyright (c) 2003
 %*
 %* Author:
-%*	Alexander Kurpiers
+%*	Alexander Kurpiers, modified by David Flamand to support more sample rate
 %*
 %* Description:
 %* 	Hilbert Filter for timing acquisition
@@ -35,26 +35,34 @@ function [b] = DesignFilter(fstart, fstop, ftrans, nhil, fs)
 	m = [2 2 0 0];
 
 	b = remez(nhil - 1, f * 2 / fs, m, [1 10]);
-return;
-end
+endfunction
+
+
+% Hilbert filter characteristic frequencies
+% 5 kHz bandwidth
+global fstart5 = 800;
+global fstop5 = 5200;
+global ftrans5 = 800; % Size of transition region
+% 10 kHz bandwidth
+global fstart10 = 800;
+global fstop10 = 10200;
+global ftrans10 = 800; % Size of transition region
+
+
+function MakeFilter(fid_cpp, fid_h, multi)
+global fstart5 fstop5 ftrans5;
+global fstart10 fstop10 ftrans10;
+
+fs = 48000 * multi;
+ntaps = 80 * multi + 1;
 
 PLOT = 0;
 
-% Length of hilbert filter and characteristic frequencies
+% Length of hilbert filter
 % 5 kHz bandwidth
-nhil5 = 81;
-fstart5 = 800;
-fstop5 = 5200;
-ftrans5 = 800; % Size of transition region
-
+nhil5 = ntaps;
 % 10 kHz bandwidth
-nhil10 = 81;
-fstart10 = 800;
-fstop10 = 10200;
-ftrans10 = 800; % Size of transition region
-
-
-fs = 48000; % Constant for all cases
+nhil10 = ntaps;
 
 % Actual filter design
 b5 = DesignFilter(fstart5, fstop5, ftrans5, nhil5, fs);
@@ -104,57 +112,72 @@ end
 
 
 % Export coefficiants to file ****************************************
-fid = fopen('TimeSyncFilter.h', 'w');
 
-fprintf(fid, '/* Automatically generated file with GNU Octave */\n');
-fprintf(fid, '/* File name: "TimeSyncFilter.octave" */\n');
-fprintf(fid, '/* Filter taps in time-domain */\n\n');
-
-fprintf(fid, '#ifndef _TIMESYNCFILTER_H_\n');
-fprintf(fid, '#define _TIMESYNCFILTER_H_\n\n');
-
-
-fprintf(fid, '#define NUM_TAPS_HILB_FILT_5            ');
-fprintf(fid, int2str(nhil5));
-fprintf(fid, '\n');
-fprintf(fid, '#define HILB_FILT_BNDWIDTH_5            ');
-fprintf(fid, int2str(fstop5 - fstart5 + ftrans5));
-fprintf(fid, '\n');
-fprintf(fid, '#define NUM_TAPS_HILB_FILT_10           ');
-fprintf(fid, int2str(nhil10));
-fprintf(fid, '\n');
-fprintf(fid, '#define HILB_FILT_BNDWIDTH_10           ');
-fprintf(fid, int2str(fstop10 - fstart10 + ftrans10));
-fprintf(fid, '\n\n\n');
-fprintf(fid, '/* Low pass prototype for Hilbert-filter 5 kHz bandwidth */\n');
-fprintf(fid, 'extern float fHilLPProt5[NUM_TAPS_HILB_FILT_5];\n');
-fprintf(fid, 'extern float fHilLPProt10[NUM_TAPS_HILB_FILT_10];\n');
-
-fprintf(fid, '#endif	/* _TIMESYNCFILTER_H_ */\n');
-fclose(fid);
-
-fid = fopen('TimeSyncFilter.cpp', 'w');
-
-fprintf(fid, '/* Automatically generated file with GNU Octave */\n');
-fprintf(fid, '/* File name: "TimeSyncFilter.octave" */\n');
-fprintf(fid, '/* Filter taps in time-domain */\n\n');
-
-fprintf(fid, '#include "TimeSyncFilter.h"\n\n');
+fprintf(fid_h, '/* Filter parameters for %i Hz sample rate */\n', fs);
+fprintf(fid_h, '#define NUM_TAPS_HILB_FILT_5_%i            ', fs/1000);
+fprintf(fid_h, int2str(nhil5));
+fprintf(fid_h, '\n');
+fprintf(fid_h, '#define NUM_TAPS_HILB_FILT_10_%i           ', fs/1000);
+fprintf(fid_h, int2str(nhil10));
+fprintf(fid_h, '\n');
+fprintf(fid_h, '/* Low pass prototype for Hilbert-filter 5 kHz bandwidth */\n');
+fprintf(fid_h, 'extern float fHilLPProt5_%i[NUM_TAPS_HILB_FILT_5_%i];\n', fs/1000, fs/1000);
+fprintf(fid_h, '/* Low pass prototype for Hilbert-filter 10 kHz bandwidth */\n');
+fprintf(fid_h, 'extern float fHilLPProt10_%i[NUM_TAPS_HILB_FILT_10_%i];\n\n', fs/1000, fs/1000);
 
 % Write filter taps
-fprintf(fid, '/* Low pass prototype for Hilbert-filter 5 kHz bandwidth */\n');
-fprintf(fid, 'float fHilLPProt5[NUM_TAPS_HILB_FILT_5] =\n');
-fprintf(fid, '{\n');
-fprintf(fid, '	%.20ff,\n', b5(1:end - 1));
-fprintf(fid, '	%.20ff\n', b5(end));
-fprintf(fid, '};\n\n');
-fprintf(fid, '/* Low pass prototype for Hilbert-filter 10 kHz bandwidth */\n');
-fprintf(fid, 'float fHilLPProt10[NUM_TAPS_HILB_FILT_10] =\n');
-fprintf(fid, '{\n');
-fprintf(fid, '	%.20ff,\n', b10(1:end - 1));
-fprintf(fid, '	%.20ff\n', b10(end));
-fprintf(fid, '};\n\n\n');
+fprintf(fid_cpp, '/*********************************************************/\n');
+fprintf(fid_cpp, '/* Filter taps for %-6i Hz sample rate                 */\n', fs);
+fprintf(fid_cpp, '/* Low pass prototype for Hilbert-filter 5 kHz bandwidth */\n');
+fprintf(fid_cpp, 'float fHilLPProt5_%i[NUM_TAPS_HILB_FILT_5_%i] =\n', fs/1000, fs/1000);
+fprintf(fid_cpp, '{\n');
+fprintf(fid_cpp, '	%.20ff,\n', b5(1:end - 1));
+fprintf(fid_cpp, '	%.20ff\n', b5(end));
+fprintf(fid_cpp, '};\n');
+fprintf(fid_cpp, '/* Low pass prototype for Hilbert-filter 10 kHz bandwidth */\n');
+fprintf(fid_cpp, 'float fHilLPProt10_%i[NUM_TAPS_HILB_FILT_10_%i] =\n', fs/1000, fs/1000);
+fprintf(fid_cpp, '{\n');
+fprintf(fid_cpp, '	%.20ff,\n', b10(1:end - 1));
+fprintf(fid_cpp, '	%.20ff\n', b10(end));
+fprintf(fid_cpp, '};\n\n');
 
-fclose(fid);
+endfunction
 
 
+fid_cpp = fopen('TimeSyncFilter.cpp', 'w');
+
+fprintf(fid_cpp, '/* Automatically generated file with GNU Octave */\n');
+fprintf(fid_cpp, '/* File name: "TimeSyncFilter.octave" */\n');
+fprintf(fid_cpp, '/* Filter taps in time-domain */\n\n');
+
+fprintf(fid_cpp, '#include "TimeSyncFilter.h"\n\n');
+
+
+fid_h = fopen('TimeSyncFilter.h', 'w');
+
+fprintf(fid_h, '/* Automatically generated file with GNU Octave */\n');
+fprintf(fid_h, '/* File name: "TimeSyncFilter.octave" */\n');
+fprintf(fid_h, '/* Filter taps in time-domain */\n\n');
+
+fprintf(fid_h, '#ifndef _TIMESYNCFILTER_H_\n');
+fprintf(fid_h, '#define _TIMESYNCFILTER_H_\n\n');
+
+fprintf(fid_h, '/* Filter bandwidths */\n');
+fprintf(fid_h, '#define HILB_FILT_BNDWIDTH_5            ');
+fprintf(fid_h, int2str(fstop5 - fstart5 + ftrans5));
+fprintf(fid_h, '\n');
+fprintf(fid_h, '#define HILB_FILT_BNDWIDTH_10           ');
+fprintf(fid_h, int2str(fstop10 - fstart10 + ftrans10));
+fprintf(fid_h, '\n\n');
+
+
+MakeFilter(fid_cpp, fid_h, 0.5); % 24000 kHz
+MakeFilter(fid_cpp, fid_h, 1);   % 48000 kHz
+MakeFilter(fid_cpp, fid_h, 2);   % 96000 kHz
+MakeFilter(fid_cpp, fid_h, 4);   % 192000 kHz
+
+
+fprintf(fid_h, '#endif	/* _TIMESYNCFILTER_H_ */\n');
+
+fclose(fid_h);
+fclose(fid_cpp);

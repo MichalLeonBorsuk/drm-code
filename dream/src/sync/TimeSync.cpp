@@ -79,11 +79,7 @@ void CTimeSync::ProcessDataInternal(CParameter& Parameters)
 
 		/* Copy CVector data in CMatlibVector */
 		for (i = 0; i < iInputBlockSize; i++)
-		{
 			cvecInpTmp[i] = (*pvecInputData)[i];
-//			float value[2] = {cvecInpTmp[i].real()/8192, cvecInpTmp[i].imag()/8192};
-//			write(1000, &value, sizeof(value));
-		}
 
 		/* Complex Hilbert filter. We use the copy constructor for storing
 		   the result since the sizes of the output vector varies with time.
@@ -123,7 +119,7 @@ void CTimeSync::ProcessDataInternal(CParameter& Parameters)
 		/* Guard-interval correlation at ML estimated timing position */
 		/* Calculate start points for correlation. Consider delay from
 		   Hilbert-filter */
-		const int iHalHilFilDelDec = NUM_TAPS_HILB_FILT / 2 / iGrdcrrDecFact;
+		const int iHalHilFilDelDec = iNumTapsHilbFilt / 2 / iGrdcrrDecFact;
 		const int iCorrPosFirst = iDecSymBS + iHalHilFilDelDec;
 		const int iCorrPosSec =
 			iDecSymBS + iHalHilFilDelDec + iLenUsefPart[iSelectedMode];
@@ -318,7 +314,7 @@ void CTimeSync::ProcessDataInternal(CParameter& Parameters)
 									   delay is introduced in the downsampled
 									   domain, therefore devide it by
 									   "GRDCRR_DEC_FACT" */
-									NUM_TAPS_HILB_FILT / 2 / iGrdcrrDecFact;
+									iNumTapsHilbFilt / 2 / iGrdcrrDecFact;
 
 								iNewStIndCount++;
 							}
@@ -610,6 +606,51 @@ void CTimeSync::InitInternal(CParameter& Parameters)
 	/* Adjusting GRDCRR_DEC_FACT to sample rate */
 	iGrdcrrDecFact = ADJ_FOR_SRATE(GRDCRR_DEC_FACT, iSampleRate);
 
+	/* Set Hilbert-filter parameters according to sample rate */
+	switch (iSampleRate)
+	{
+#ifdef NUM_TAPS_HILB_FILT_24
+	case 24000:
+		iNumTapsHilbFilt = NUM_TAPS_HILB_FILT_24;
+# ifdef USE_10_KHZ_HILBFILT
+		fHilLPProt = fHilLPProt10_24;
+# else
+		fHilLPProt = fHilLPProt5_24;
+# endif
+		break;
+#endif
+#ifdef NUM_TAPS_HILB_FILT_48
+	case 48000:
+		iNumTapsHilbFilt = NUM_TAPS_HILB_FILT_48;
+# ifdef USE_10_KHZ_HILBFILT
+		fHilLPProt = fHilLPProt10_48;
+# else
+		fHilLPProt = fHilLPProt5_48
+# endif
+		break;
+#endif
+#ifdef NUM_TAPS_HILB_FILT_96
+	case 96000:
+		iNumTapsHilbFilt = NUM_TAPS_HILB_FILT_96;
+# ifdef USE_10_KHZ_HILBFILT
+		fHilLPProt = fHilLPProt10_96;
+# else
+		fHilLPProt = fHilLPProt5_96;
+# endif
+		break;
+#endif
+#ifdef NUM_TAPS_HILB_FILT_192
+	case 192000:
+		iNumTapsHilbFilt = NUM_TAPS_HILB_FILT_192;
+# ifdef USE_10_KHZ_HILBFILT
+		fHilLPProt = fHilLPProt10_192;
+# else
+		fHilLPProt = fHilLPProt5_192;
+# endif
+		break;
+#endif
+	}
+
 	/* Init Hilbert filter. Since the frequency offset correction was
 	   done in the previous module, the offset for the filter is
 	   always "VIRTUAL_INTERMED_FREQ" */
@@ -826,32 +867,25 @@ void CTimeSync::StartAcquisition()
 
 void CTimeSync::SetFilterTaps(CReal rNewOffsetNorm)
 {
-#ifdef USE_10_KHZ_HILBFILT
-	float * fHilLPProt = fHilLPProt10;
-
-	/* TODO more testing */
-	if (iSampleRate == 24000)
-		rNewOffsetNorm += (CReal) HILB_FILT_BNDWIDTH / 4 / iSampleRate;
-#else
-	float * fHilLPProt = fHilLPProt5;
-
+#ifndef USE_10_KHZ_HILBFILT
 	/* The filter should be on the right of the DC carrier in 5 kHz mode */
 	rNewOffsetNorm += (CReal) HILB_FILT_BNDWIDTH / 2 / iSampleRate;
 #endif
 
 	/* Calculate filter taps for complex Hilbert filter */
-	cvecB.Init(NUM_TAPS_HILB_FILT);
+	cvecB.Init(iNumTapsHilbFilt);
 
-	for (int i = 0; i < NUM_TAPS_HILB_FILT; i++)
+	for (int i = 0; i < iNumTapsHilbFilt; i++)
 		cvecB[i] = CComplex(
 			fHilLPProt[i] * Cos((CReal) 2.0 * crPi * rNewOffsetNorm * i),
 			fHilLPProt[i] * Sin((CReal) 2.0 * crPi * rNewOffsetNorm * i));
 
 	/* Init state vector for filtering with zeros */
-	cvecZ.Init(NUM_TAPS_HILB_FILT - 1, (CReal) 0.0);
+	cvecZ.Init(iNumTapsHilbFilt - 1, (CReal) 0.0);
 }
 
 CTimeSync::CTimeSync() : iSampleRate(0), iGrdcrrDecFact(0),
+	iNumTapsHilbFilt(0), fHilLPProt(NULL),
 	iTimeSyncPos(0), bSyncInput(FALSE), bTimingAcqu(FALSE),
 	bRobModAcqu(FALSE), bAcqWasActive(FALSE), rLambdaCoAv((CReal) 1.0),
 	iLengthIntermCRes(NUM_ROBUSTNESS_MODES),
