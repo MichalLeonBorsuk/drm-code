@@ -117,7 +117,7 @@ class CSplitAudio : public CSplitModul<_SAMPLE>
 protected:
     void SetInputBlockSize(CParameter& p)
     {
-        this->iInputBlockSize = (int) ((_REAL) p.GetSampleRate() * (_REAL) 0.4 /* 400 ms */) * 2 /* stereo */;
+        this->iInputBlockSize = (int) ((_REAL) p.GetAudSampleRate() * (_REAL) 0.4 /* 400 ms */) * 2 /* stereo */;
     }
 };
 

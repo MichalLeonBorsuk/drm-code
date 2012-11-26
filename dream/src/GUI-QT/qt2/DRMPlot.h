@@ -211,7 +211,8 @@ protected:
 	CSpectrumResample Resample;
 
 	CDRMReceiver*	pDRMRec;
-	int				iSampleRate;
+	int				iAudSampleRate;
+	int				iSigSampleRate;
 
 public slots:
 	void OnClicked(const QMouseEvent& e);

@@ -374,8 +374,11 @@ void CDRMTransmitter::LoadSettings(CSettings& s)
     std::ostringstream oss;
     string value, service;
 
-    /* Sound card sample rate */
-    TransmParam.SetSampleRate(s.Get(Transmitter, "samplerate", int(DEFAULT_SOUNDCRD_SAMPLE_RATE)));
+    /* Sound card audio sample rate */
+    TransmParam.SetAudSampleRate(s.Get(Transmitter, "samplerateaud", int(DEFAULT_SOUNDCRD_SAMPLE_RATE)));
+
+    /* Sound card signal sample rate */
+    TransmParam.SetSigSampleRate(s.Get(Transmitter, "sampleratesig", int(DEFAULT_SOUNDCRD_SAMPLE_RATE)));
 
     /* Sound card input device id */
     pSoundInInterface->SetDev(s.Get(Transmitter, "snddevin", int(0)));
@@ -506,8 +509,11 @@ void CDRMTransmitter::SaveSettings(CSettings& s)
     std::ostringstream oss;
     string value, service;
 
-    /* Sound card sample rate */
-    s.Put(Transmitter, "samplerate", TransmParam.GetSampleRate());
+    /* Sound card audio sample rate */
+    s.Put(Transmitter, "samplerateaud", TransmParam.GetAudSampleRate());
+
+    /* Sound card signal sample rate */
+    s.Put(Transmitter, "sampleratesig", TransmParam.GetSigSampleRate());
 
     /* Sound card input device id */
     s.Put(Transmitter, "snddevin", int(pSoundInInterface->GetDev()));

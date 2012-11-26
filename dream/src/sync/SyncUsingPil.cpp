@@ -229,7 +229,7 @@ void CSyncUsingPil::ProcessDataInternal(CParameter& Parameters)
 		   estimation  */
 		CReal rPhaseCorr = (Parameters.rFreqOffsetAcqui +
 			Parameters.rFreqOffsetTrack + rAvFreqPilDistToDC) *
-			rDiffSamOffset / Parameters.GetSampleRate() / rNormConstFOE;
+			rDiffSamOffset / Parameters.GetSigSampleRate() / rNormConstFOE;
 
 		/* Actual correction (rotate vector) */
 		cFreqOffVec *= CComplex(Cos(rPhaseCorr), Sin(rPhaseCorr));
@@ -271,7 +271,7 @@ void CSyncUsingPil::ProcessDataInternal(CParameter& Parameters)
 #ifdef _DEBUG_
 /* Save frequency and sample rate tracking */
 static FILE* pFile = fopen("test/freqtrack.dat", "w");
-fprintf(pFile, "%e %e\n", Parameters.GetSampleRate() * Parameters.rFreqOffsetTrack,
+fprintf(pFile, "%e %e\n", Parameters.GetSigSampleRate() * Parameters.rFreqOffsetTrack,
 	Parameters.rResampleOffset);
 fflush(pFile);
 #endif
@@ -401,7 +401,7 @@ void CSyncUsingPil::InitInternal(CParameter& Parameters)
 		(CReal) 1.0 / ((CReal) 2.0 * crPi * Parameters.CellMappingTable.iSymbolBlockSize);
 
 	/* Init time constant for IIR filter for frequency offset estimation */
-	rLamFreqOff = IIR1Lam(TICONST_FREQ_OFF_EST, (CReal) Parameters.GetSampleRate() /
+	rLamFreqOff = IIR1Lam(TICONST_FREQ_OFF_EST, (CReal) Parameters.GetSigSampleRate() /
 		Parameters.CellMappingTable.iSymbolBlockSize);
 
 	/* Init vector for averaging the frequency offset estimation */
@@ -421,7 +421,7 @@ void CSyncUsingPil::InitInternal(CParameter& Parameters)
 
 	/* Init time constant for IIR filter for sample rate offset estimation */
 	rLamSamRaOff = IIR1Lam(TICONST_SAMRATE_OFF_EST,
-		(CReal) Parameters.GetSampleRate() / Parameters.CellMappingTable.iSymbolBlockSize);
+		(CReal) Parameters.GetSigSampleRate() / Parameters.CellMappingTable.iSymbolBlockSize);
 #endif
 
 

@@ -103,7 +103,7 @@ void CDRMChannel::ProcessDataInternal(CParameter&)
 void CDRMChannel::InitInternal(CParameter& Parameters)
 {
     Parameters.Lock();
-    iSampleRate = Parameters.GetSampleRate();
+    iSampleRate = Parameters.GetSigSampleRate();
     /* Set channel parameter according to selected channel number (table B.1) */
     switch (Parameters.iDRMChannelNum)
     {

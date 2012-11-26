@@ -373,7 +373,7 @@ void CFreqSyncAcq::InitInternal(CParameter& Parameters)
 	Parameters.Lock(); 
 
 	/* Get sample rate */
-	const int iSampleRate = Parameters.GetSampleRate();
+	const int iSampleRate = Parameters.GetSigSampleRate();
 
 	/* Needed for calculating offset in Hertz in case of synchronized input
 	   (for simulation) */

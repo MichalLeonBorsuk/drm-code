@@ -1010,23 +1010,35 @@ public:
         iCurSelDataService = 0;
     }
 
-    int GetSampleRate() const
+    int GetAudSampleRate() const
     {
-        return iSampleRate;
+        return iAudSampleRate;
+    }
+    int GetSigSampleRate() const
+    {
+        return iSigSampleRate;
     }
 
-    void SetSampleRate(int sr)
+    void SetAudSampleRate(int sr)
+    {
+        /* Perform range check */
+        if      (sr < 8000)   sr = 8000;
+        else if (sr > 192000) sr = 192000;
+        iAudSampleRate = sr;
+    }
+    void SetSigSampleRate(int sr)
     {
         /* Set to the nearest supported sample rate */
-        if      (sr < 72000)  sr = 48000;
+        if      (sr < 36000)  sr = 24000;
+        else if (sr < 72000)  sr = 48000;
         else if (sr < 144000) sr = 96000;
         else                  sr = 192000;
-        iSampleRate = sr;
+        iSigSampleRate = sr;
     }
 
     _REAL GetDCFrequency() const
     {
-        return iSampleRate * (rFreqOffsetAcqui + rFreqOffsetTrack);
+        return iSigSampleRate * (rFreqOffsetAcqui + rFreqOffsetTrack);
     }
 
     _REAL GetBitRateKbps(const int iShortID, const _BOOLEAN bAudData) const;
@@ -1243,7 +1255,8 @@ public:
 
 protected:
 
-    int iSampleRate;
+    int iAudSampleRate;
+    int iSigSampleRate;
 
     _REAL rSysSimSNRdB;
 

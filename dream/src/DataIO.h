@@ -138,7 +138,7 @@ protected:
     CComplexVector			veccFFTInput;
     CComplexVector			veccFFTOutput;
     CRealVector				vecrAudioWindowFunction;
-    int						iSampleRate;
+    int						iAudSampleRate;
     int                     iNumSmpls4AudioSprectrum;
     int                     iNumBlocksAvAudioSpec;
     int                     iMaxAudioFrequency;

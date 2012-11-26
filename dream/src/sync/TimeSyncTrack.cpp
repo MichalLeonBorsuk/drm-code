@@ -308,7 +308,7 @@ void CTimeSyncTrack::Process(CParameter& Parameters,
 			   initialization phase of channel estimation by "iSymDelay" */
 			CReal rInitSamOffset = GetSamOffHz(iCurRes - veciSRTiCorrHist[
 				iLenCorrectionHist - (iResOffAcqCntMax - iSymDelay)],
-				iResOffAcqCntMax - iSymDelay - 1, Parameters.GetSampleRate());
+				iResOffAcqCntMax - iSymDelay - 1, Parameters.GetSigSampleRate());
 
 #ifndef USE_SAMOFFS_TRACK_FRE_PIL
 			/* Apply initial sample rate offset estimation */
@@ -325,7 +325,7 @@ void CTimeSyncTrack::Process(CParameter& Parameters,
 			/* Tracking phase */
 			/* Get actual sample rate offset in Hertz */
 			const CReal rSamOffset = GetSamOffHz(iCurRes - veciSRTiCorrHist[0],
-				iLenCorrectionHist - 1, Parameters.GetSampleRate());
+				iLenCorrectionHist - 1, Parameters.GetSigSampleRate());
 
 #ifndef USE_SAMOFFS_TRACK_FRE_PIL
 			/* Apply result from sample rate offset estimation */
@@ -418,7 +418,7 @@ void CTimeSyncTrack::Process(CParameter& Parameters,
 	_REAL rLowerBound=0, rHigherBound=0, rStartGuard=0, rEndGuard=0, rPDSBegin=0, rPDSEnd=0;
 
 	//Parameters.Lock();
-	GetAvPoDeSp(Parameters.vecrPIR, vecrScale, rLowerBound, rHigherBound, rStartGuard, rEndGuard, rPDSBegin, rPDSEnd, Parameters.GetSampleRate());
+	GetAvPoDeSp(Parameters.vecrPIR, vecrScale, rLowerBound, rHigherBound, rStartGuard, rEndGuard, rPDSBegin, rPDSEnd, Parameters.GetSigSampleRate());
 	Parameters.rPIRStart = vecrScale[0];
 	Parameters.rPIREnd = vecrScale[vecrScale.Size()-1];
 	//Parameters.Unlock();
@@ -450,7 +450,7 @@ void CTimeSyncTrack::Init(CParameter& Parameters, int iNewSymbDelay)
 	vecrAvPoDeSp.Init(iNumIntpFreqPil, (CReal) 0.0);
 
 	/* Lambda for IIR filter for averaging the PDS */
-	rLamAvPDS = IIR1Lam(TICONST_PDS_EST_TISYNC, (CReal) Parameters.GetSampleRate() /
+	rLamAvPDS = IIR1Lam(TICONST_PDS_EST_TISYNC, (CReal) Parameters.GetSigSampleRate() /
 		Parameters.CellMappingTable.iSymbolBlockSize);
 
 	/* Vector for rotated result */
@@ -510,11 +510,11 @@ void CTimeSyncTrack::Init(CParameter& Parameters, int iNewSymbDelay)
 	/* Inits for sample rate offset estimation ------------------------------ */
 	/* Calculate number of symbols for a given time span as defined for the
 	   length of the sample rate offset estimation history size */
-	iLenCorrectionHist = (int) ((_REAL) Parameters.GetSampleRate() *
+	iLenCorrectionHist = (int) ((_REAL) Parameters.GetSigSampleRate() *
 		HIST_LEN_SAM_OFF_EST_TI_CORR / Parameters.CellMappingTable.iSymbolBlockSize);
 
 	/* Init count for acquisition */
-	iResOffAcqCntMax = (int) ((_REAL) Parameters.GetSampleRate() *
+	iResOffAcqCntMax = (int) ((_REAL) Parameters.GetSigSampleRate() *
 		SAM_OFF_EST_TI_CORR_ACQ_LEN / Parameters.CellMappingTable.iSymbolBlockSize);
 
 	/* Init sample rate offset estimation acquisition count */
@@ -722,7 +722,7 @@ void CTimeSyncTrack::CalculateRdel(CParameter& Parameters)
 	{
 		CReal rInterval =
 			((_REAL) (vecrIntervalEnd[j] - vecrIntervalStart[j])) *
-			Parameters.CellMappingTable.iFFTSizeN / (Parameters.GetSampleRate() *
+			Parameters.CellMappingTable.iFFTSizeN / (Parameters.GetSigSampleRate() *
 			Parameters.CellMappingTable.iNumIntpFreqPil * Parameters.CellMappingTable.iScatPilFreqInt) * 1000;
 
 		/* Clip the delay interval values for display purposes */
@@ -753,7 +753,7 @@ void CTimeSyncTrack::CalculateRdop(CParameter& Parameters)
 		rSumSqChan += SqMag(veccPilots[i]);
 	}
 
-	CReal rTs = (_REAL) Parameters.CellMappingTable.iSymbolBlockSize / Parameters.GetSampleRate();
+	CReal rTs = (_REAL) Parameters.CellMappingTable.iSymbolBlockSize / Parameters.GetSigSampleRate();
 
 	Parameters.rRdop = Sqrt(rSumSqDiff / rSumSqChan) / (crPi * rTs);
 }

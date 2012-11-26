@@ -86,7 +86,7 @@ void COFDMModulation::InitInternal(CParameter& Parameters)
     /* Normalized offset correction factor for IF shift. Subtract the
        default IF frequency ("VIRTUAL_INTERMED_FREQ") */
     const _REAL rNormCurFreqOffset = (_REAL) -2.0 * crPi *
-                                     (rDefCarOffset - VIRTUAL_INTERMED_FREQ) / Parameters.GetSampleRate();
+                                     (rDefCarOffset - VIRTUAL_INTERMED_FREQ) / Parameters.GetSigSampleRate();
 
     /* Rotation vector for exp() calculation */
     cExpStep = _COMPLEX(cos(rNormCurFreqOffset), sin(rNormCurFreqOffset));
@@ -162,7 +162,7 @@ void COFDMDemodulation::ProcessDataInternal(CParameter&)
 void COFDMDemodulation::InitInternal(CParameter& Parameters)
 {
     Parameters.Lock();
-    iSampleRate = Parameters.GetSampleRate();
+    iSampleRate = Parameters.GetSigSampleRate();
     iDFTSize = Parameters.CellMappingTable.iFFTSizeN;
     iGuardSize = Parameters.CellMappingTable.iGuardSize;
     iShiftedKmin = Parameters.CellMappingTable.iShiftedKmin;

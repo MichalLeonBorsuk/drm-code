@@ -216,13 +216,16 @@ CSettings::ParseArguments(int argc, char **argv)
 	/* QT docu: argv()[0] is the program name, argv()[1] is the first
 	   argument and argv()[argc()-1] is the last argument.
 	   Start with first argument, therefore "i = 1" */
-	for (int i = 1; i < argc; i++)
+	if (bIsReceiver)
 	{
-		/* DRM transmitter mode flag ---------------------------------------- */
-		if (GetFlagArgument(argc, argv, i, "-t", "--transmitter") == TRUE)
+		for (int i = 1; i < argc; i++)
 		{
-			bIsReceiver = FALSE;
-			break;
+			/* DRM transmitter mode flag ---------------------------------------- */
+			if (GetFlagArgument(argc, argv, i, "-t", "--transmitter") == TRUE)
+			{
+				bIsReceiver = FALSE;
+				break;
+			}
 		}
 	}
 
@@ -239,7 +242,24 @@ CSettings::ParseArguments(int argc, char **argv)
 		if (GetNumericArgument(argc, argv, i, "-R", "--samplerate",
 							   -1e9, +1e9, rArgument) == TRUE)
 		{
-			Put(ReceiverTransmitter, "samplerate", int (rArgument));
+			Put(ReceiverTransmitter, "samplerateaud", int (rArgument));
+			Put(ReceiverTransmitter, "sampleratesig", int (rArgument));
+			continue;
+		}
+
+		/* Audio sample rate ------------------------------------------------ */
+		if (GetNumericArgument(argc, argv, i, "--audsrate", "--audsrate",
+							   -1e9, +1e9, rArgument) == TRUE)
+		{
+			Put(ReceiverTransmitter, "samplerateaud", int (rArgument));
+			continue;
+		}
+
+		/* Signal sample rate ------------------------------------------------ */
+		if (GetNumericArgument(argc, argv, i, "--sigsrate", "--sigsrate",
+							   -1e9, +1e9, rArgument) == TRUE)
+		{
+			Put(ReceiverTransmitter, "sampleratesig", int (rArgument));
 			continue;
 		}
 
@@ -626,7 +646,9 @@ CSettings::UsageArguments(const char *argv0)
 		"  --rsirecordprofile <s>       RSCI recording profile: A|B|C|D|Q|M\n"
 		"  --rsirecordtype <s>          RSCI recording file type: raw|ff|pcap\n"
 		"  --recordiq <n>               enable/disable recording an I/Q file\n"
-		"  -R <n>, --samplerate <n>     sound card sample rate [Hz] (allowed values: 48000, 96000, 192000)\n"
+		"  -R <n>, --samplerate <n>     set audio and signal sound card sample rate [Hz]\n"
+		"  --audsrate <n>               set audio sound card sample rate [Hz] (allowed range: 8000...192000)\n"
+		"  --sigsrate <n>               set signal sound card sample rate [Hz] (allowed values: 24000, 48000, 96000, 192000)\n"
 		"  -I <n>, --snddevin <n>       set sound in device\n"
 		"  -O <n>, --snddevout <n>      set sound out device\n"
 #ifdef HAVE_LIBHAMLIB

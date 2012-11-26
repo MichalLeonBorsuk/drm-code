@@ -645,7 +645,7 @@ void systemevalDlg::OnTimer()
             /* Display value in [Hz] and [ppm] (parts per million) */
             ValueSampFreqOffset->setText(
                 QString().setNum(rCurSamROffs, 'f', 2) + " Hz (" +
-                QString().setNum((int) (rCurSamROffs / Parameters.GetSampleRate() * 1e6))
+                QString().setNum((int) (rCurSamROffs / Parameters.GetSigSampleRate() * 1e6))
                 + " ppm)");
 
         }

@@ -143,8 +143,8 @@ void CTransmitData::InitInternal(CParameter& Parameters)
     	int		iNumTapsTransmFilt;
     	CReal	rNormCurFreqOffset;
     */
-    /* Get sample rate */
-    const int iSampleRate = Parameters.GetSampleRate();
+    /* Get signal sample rate */
+    const int iSampleRate = Parameters.GetSigSampleRate();
     /* Define symbol block-size */
     const int iSymbolBlockSize = Parameters.CellMappingTable.iSymbolBlockSize;
 
@@ -367,8 +367,8 @@ void CReceiveData::InitInternal(CParameter& Parameters)
     Parameters.Lock();
     /* Define output block-size */
     iOutputBlockSize = Parameters.CellMappingTable.iSymbolBlockSize;
-    /* Get sample rate */
-    iSampleRate = Parameters.GetSampleRate();
+    /* Get signal sample rate */
+    iSampleRate = Parameters.GetSigSampleRate();
     Parameters.Unlock();
 
 	try {

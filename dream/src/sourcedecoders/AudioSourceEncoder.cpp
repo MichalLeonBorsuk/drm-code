@@ -310,7 +310,7 @@ CAudioSourceEncoderImplementation::InitInternalTx(CParameter & Parameters,
 
     /* Calculate number of input samples in mono. Audio block are always
        400 ms long */
-    const int iNumInSamplesMono = (int) ((_REAL) Parameters.GetSampleRate() * (_REAL) 0.4 /* 400 ms */ );
+    const int iNumInSamplesMono = (int) ((_REAL) Parameters.GetAudSampleRate() * (_REAL) 0.4 /* 400 ms */ );
 
     /* Set the total available number of bits, byte aligned */
     iTotNumBitsForUsage =
@@ -429,13 +429,13 @@ CAudioSourceEncoderImplementation::InitInternalTx(CParameter & Parameters,
         if (lNumSampEncIn == 1024)
         {
             ResampleObj.Init(iNumInSamplesMono,
-                             (_REAL) lEncSamprate / Parameters.GetSampleRate() *
+                             (_REAL) lEncSamprate / Parameters.GetAudSampleRate() *
                              1024.0 / 960.0);
         }
         else
         {
             ResampleObj.Init(iNumInSamplesMono,
-                             (_REAL) lEncSamprate / Parameters.GetSampleRate());
+                             (_REAL) lEncSamprate / Parameters.GetAudSampleRate());
         }
 
         /* Calculate number of bytes for higher protected blocks */
@@ -479,7 +479,7 @@ CAudioSourceEncoderImplementation::InitInternalRx(CParameter& Parameters,
     Parameters.Lock();
 
     /* Calculate number of input samples in mono. Audio block are always 400 ms long */
-    const int iNumInSamplesMono = (int) ((_REAL) Parameters.GetSampleRate() *
+    const int iNumInSamplesMono = (int) ((_REAL) Parameters.GetAudSampleRate() *
                                          (_REAL) 0.4 /* 400 ms */ );
 
     /* Set the total available number of bits, byte aligned */
@@ -588,13 +588,13 @@ CAudioSourceEncoderImplementation::InitInternalRx(CParameter& Parameters,
     if (lNumSampEncIn == 1024)
     {
         ResampleObj.Init(iNumInSamplesMono,
-                         (_REAL) lEncSamprate / Parameters.GetSampleRate() *
+                         (_REAL) lEncSamprate / Parameters.GetAudSampleRate() *
                          1024.0 / 960.0);
     }
     else
     {
         ResampleObj.Init(iNumInSamplesMono,
-                         (_REAL) lEncSamprate / Parameters.GetSampleRate());
+                         (_REAL) lEncSamprate / Parameters.GetAudSampleRate());
     }
 
     /* Calculate number of bytes for higher protected blocks */

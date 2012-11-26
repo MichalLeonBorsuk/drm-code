@@ -1052,12 +1052,12 @@ CAudioSourceDecoder::InitInternal(CParameter & Parameters)
         /* Since we do not correct for sample rate offsets here (yet), we do not
            have to consider larger buffers. An audio frame always corresponds
            to 400 ms */
-        iMaxLenResamplerOutput = (int) ((_REAL) Parameters.GetSampleRate() *
+        iMaxLenResamplerOutput = (int) ((_REAL) Parameters.GetAudSampleRate() *
                                         (_REAL) 0.4 /* 400ms */  *
                                         2 /* for stereo */ );
 
         iResOutBlockSize = (int) ((_REAL) iLenDecOutPerChan *
-                                  Parameters.GetSampleRate() / iAudioSampleRate);
+                                  Parameters.GetAudSampleRate() / iAudioSampleRate);
 
         /* Additional buffers needed for resampling since we need conversation
            between _REAL and _SAMPLE. We have to init the buffers with
@@ -1072,12 +1072,12 @@ CAudioSourceDecoder::InitInternal(CParameter & Parameters)
 
         /* Init resample objects */
         ResampleObjL.Init(iLenDecOutPerChan,
-                          (_REAL) Parameters.GetSampleRate() / iAudioSampleRate);
+                          (_REAL) Parameters.GetAudSampleRate() / iAudioSampleRate);
         ResampleObjR.Init(iLenDecOutPerChan,
-                          (_REAL) Parameters.GetSampleRate() / iAudioSampleRate);
+                          (_REAL) Parameters.GetAudSampleRate() / iAudioSampleRate);
 
         /* Clear reverberation object */
-        AudioRev.Init(1.0 /* seconds delay */, Parameters.GetSampleRate());
+        AudioRev.Init(1.0 /* seconds delay */, Parameters.GetAudSampleRate());
         AudioRev.Clear();
 
         /* With this parameter we define the maximum lenght of the output

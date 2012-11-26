@@ -85,7 +85,7 @@ CDRMSimulation::CDRMSimulation() : iSimTime(0), iSimNumErrors(0),
 
     /* Initialize synchronization parameters */
     Parameters.rResampleOffset = (_REAL) 0.0;
-    Parameters.rFreqOffsetAcqui = (_REAL) VIRTUAL_INTERMED_FREQ / Parameters.GetSampleRate();
+    Parameters.rFreqOffsetAcqui = (_REAL) VIRTUAL_INTERMED_FREQ / Parameters.GetSigSampleRate();
     Parameters.rFreqOffsetTrack = (_REAL) 0.0;
     Parameters.iTimingOffsTrack = 0;
 
