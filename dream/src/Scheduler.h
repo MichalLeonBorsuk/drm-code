@@ -31,6 +31,7 @@
 
 #include <string>
 #include <map>
+#include <queue>
 #include "util/Settings.h"
 
 using namespace std;
@@ -38,13 +39,16 @@ using namespace std;
 class CScheduler: public CIniFile
 {
 public:
-	CScheduler():schedule(){}
+	struct SEvent { time_t time; int frequency; };
+	CScheduler():schedule(),events(){}
 	void LoadSchedule(const string& filename);
-	time_t next(time_t); // get next event time after input time
-	int frequency(time_t); // get frequency we should be tuned to at input time
+	bool empty() const;
+	SEvent front(); // get next event 
+	void pop(); // remove first event from queue
 private:
 	map<time_t,int> schedule; // map seconds from start of day to schedule event, frequency or -1 for off
-	map<time_t,int> abs(time_t dt);
+	queue<SEvent> events;
+	void fill();
 	int parse(string);
 };
 
