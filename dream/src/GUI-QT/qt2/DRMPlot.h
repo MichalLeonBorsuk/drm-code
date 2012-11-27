@@ -211,6 +211,8 @@ protected:
 	CSpectrumResample Resample;
 
 	CDRMReceiver*	pDRMRec;
+	_BOOLEAN		bAudioDecoder;
+	_BOOLEAN		bLastAudioDecoder;
 	int				iAudSampleRate;
 	int				iSigSampleRate;
 

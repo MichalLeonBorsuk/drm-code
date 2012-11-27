@@ -31,9 +31,9 @@
 
 /* Implementation *************************************************************/
 CDRMPlot::CDRMPlot(QWidget *p, const char *name) :
-	QwtPlot (p, name), CurCharType(NONE_OLD), InitCharType(NONE_OLD),
-	bOnTimerCharMutexFlag(FALSE), pDRMRec(NULL),
-	iAudSampleRate(0), iSigSampleRate(0)
+	QwtPlot(p, name), CurCharType(NONE_OLD), InitCharType(NONE_OLD),
+	bOnTimerCharMutexFlag(FALSE), pDRMRec(NULL), bAudioDecoder(FALSE),
+	bLastAudioDecoder(FALSE), iAudSampleRate(0), iSigSampleRate(0)
 {
 	/* Grid defaults */
 	enableGridX(TRUE);
@@ -70,8 +70,6 @@ CDRMPlot::CDRMPlot(QWidget *p, const char *name) :
 		this, SLOT(OnClicked(const QMouseEvent&)));
 	connect(&TimerChart, SIGNAL(timeout()),
 		this, SLOT(OnTimerChart()));
-
-	TimerChart.stop();
 }
 
 void CDRMPlot::OnTimerChart()
@@ -101,7 +99,7 @@ void CDRMPlot::OnTimerChart()
 	_REAL rDCFrequency = Parameters.GetDCFrequency();
 	ECodScheme eSDCCodingScheme = Parameters.eSDCCodingScheme;
 	ECodScheme eMSCCodingScheme = Parameters.eMSCCodingScheme;
-	string audiodecoder = Parameters.audiodecoder;
+	bAudioDecoder = Parameters.audiodecoder != "";
 	iAudSampleRate = Parameters.GetAudSampleRate();
 	iSigSampleRate = Parameters.GetSigSampleRate();
 	Parameters.Unlock();
@@ -182,14 +180,6 @@ void CDRMPlot::OnTimerChart()
 	case AUDIO_SPECTRUM:
 		/* Get data from module */
 		pDRMRec->GetWriteData()->GetAudioSpec(vecrData, vecrScale);
-		if(audiodecoder=="")
-		{
-			setTitle(tr("No audio decoding possible"));
-		}
-		else
-		{
-			setTitle(tr("Audio Spectrum"));
-		}
 		/* Prepare graph and set data */
 		SetAudioSpec(vecrData, vecrScale);
 		break;
@@ -635,6 +625,10 @@ void CDRMPlot::SetTranFct(CVector<_REAL>& vecrData, CVector<_REAL>& vecrData2,
 void CDRMPlot::SetupAudioSpec()
 {
 	/* Init chart for audio spectrum */
+	if (bAudioDecoder)
+		setTitle(tr("Audio Spectrum"));
+	else
+		setTitle(tr("No audio decoding possible"));
 	enableAxis(QwtPlot::yRight, FALSE);
 	enableGridX(TRUE);
 	enableGridY(TRUE);
@@ -660,13 +654,14 @@ void CDRMPlot::SetupAudioSpec()
 void CDRMPlot::SetAudioSpec(CVector<_REAL>& vecrData, CVector<_REAL>& vecrScale)
 {
 	/* First check if plot must be set up */
-	if (InitCharType != AUDIO_SPECTRUM)
+	if (InitCharType != AUDIO_SPECTRUM || bLastAudioDecoder != bAudioDecoder)
 	{
+		bLastAudioDecoder = bAudioDecoder;
 		InitCharType = AUDIO_SPECTRUM;
 		SetupAudioSpec();
 	}
-
-	SetData(vecrData, vecrScale);
+	if (bAudioDecoder)
+		SetData(vecrData, vecrScale);
 	replot();
 }
 
