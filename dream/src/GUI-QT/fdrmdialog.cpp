@@ -479,9 +479,11 @@ void FDRMDialog::OnScheduleTimer()
 {
 	CScheduler::SEvent e;
 	e = pScheduler->front();
+#if QT_VERSION >= 0x040000
 QDateTime dt;
 dt.setTime_t(e.time);
 qDebug() << dt.toString("yyyy-MM-ddThh:mm:ss") << " " << e.frequency;
+#endif
 	pScheduler->pop();
 	if(e.frequency != -1)
 	{
