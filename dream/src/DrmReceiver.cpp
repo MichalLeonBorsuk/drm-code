@@ -193,7 +193,6 @@ CDRMReceiver::Run()
     }
 
     /* Input - from upstream RSCI or input and demodulation from sound card / file */
-
     if (upstreamRSCI.GetInEnabled() == TRUE)
     {
         RSIPacketBuf.Clear();
@@ -224,7 +223,7 @@ CDRMReceiver::Run()
     {
         ReceiveData.ReadData(Parameters, RecDataBuf);
 
-        // Split samples, one output to the demodulation, another for IQ recording
+        /* Split samples, one output to the demodulation, another for IQ recording */
         if (SplitForIQRecord.ProcessData(Parameters, RecDataBuf, DemodDataBuf, IQRecordDataBuf))
         {
             bEnoughData = TRUE;
@@ -276,7 +275,7 @@ CDRMReceiver::Run()
         break;
     }
 
-    /* decoding */
+    /* Decoding */
     while (bEnoughData && (Parameters.eRunState==CParameter::RUNNING))
     {
         /* Init flag */
@@ -304,7 +303,7 @@ CDRMReceiver::Run()
         }
     }
 
-    /* output to downstream RSCI */
+    /* Output to downstream RSCI */
     if (downstreamRSCI.GetOutEnabled())
     {
         switch (eReceiverMode)
@@ -343,7 +342,7 @@ CDRMReceiver::Run()
             break;
         }
     }
-    // check for RSCI commands
+    /* Check for RSCI commands */
     if (downstreamRSCI.GetInEnabled())
     {
         downstreamRSCI.poll();
@@ -351,7 +350,6 @@ CDRMReceiver::Run()
 
     /* Play and/or save the audio */
     if (iAudioStreamID != STREAM_ID_NOT_USED || (eReceiverMode == RM_AM) || (eReceiverMode == RM_FM))
-
     {
         if (WriteData.WriteData(Parameters, AudSoDecBuf))
         {
