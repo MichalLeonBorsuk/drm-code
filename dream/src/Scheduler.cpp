@@ -100,7 +100,7 @@ void CScheduler::fill()
 	{
 		time_t st = sod+i->first;
 		if(st < dt)
-			st += 86400; // want tomorrow's.
+			st += 24 * 60 * 60; // want tomorrow's.
 		abs_sched[st] = i->second;
 	}
 	for(map<time_t,int>::const_iterator i = abs_sched.begin(); i != abs_sched.end(); i++)
@@ -117,5 +117,6 @@ int CScheduler::parse(string s)
 	char c;
 	istringstream iss(s);
 	iss >> hh >> c >> mm >> c >> ss;
+//printf("%02i:%02i:%02i\n", hh, mm, ss);
 	return 60*(mm + 60*hh)+ss;
 }

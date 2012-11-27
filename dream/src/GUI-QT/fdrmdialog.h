@@ -140,6 +140,8 @@ protected:
     int			iLastMultimediaServiceSelected;
     CScheduler* 	pScheduler;
     QTimer*		pScheduleTimer;
+	string		schedfile;
+	bool		bTimeoutStart;
     CEventFilter ef;
 
     void SetStatus(CMultColorLED* LED, ETypeRxStatus state);
