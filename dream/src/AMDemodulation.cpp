@@ -157,10 +157,8 @@ void CAMDemodulation::ProcessDataInternal(CParameter& Parameters)
 
     /* Write mono signal in both channels (left and right) */
     for (i = 0; i < iResOutBlockSize; i++)
-    {
         (*pvecOutputData)[2 * i] = (*pvecOutputData)[2 * i + 1] =
             Real2Sample(vecTempResBufOut[i]);
-    }
 }
 
 void CAMDemodulation::InitInternal(CParameter& Parameters)
@@ -251,22 +249,22 @@ void CAMDemodulation::InitInternal(CParameter& Parameters)
     /* Define block-sizes for input and output */
     /* The output buffer is a cyclic buffer, we have to specify the total
        buffer size */
-    iMaxOutputBlockSize = (int) ((_REAL) iSigSampleRate *
+    iMaxOutputBlockSize = (int) ((_REAL) iAudSampleRate *
                                  (_REAL) 0.4 /* 400ms */ * 2 /* for stereo */);
 
     iInputBlockSize = iSymbolBlockSize;
 
-    /* Init audio resampler */
-    ResampleObj.Init(iSymbolBlockSize,
-        (_REAL) iAudSampleRate / iSigSampleRate);
-
     iResOutBlockSize = (int) ((_REAL) iSymbolBlockSize *
                               iAudSampleRate / iSigSampleRate);
 
+    iOutputBlockSize = 2 * iResOutBlockSize; /* Stereo */
+
+
+    /* Init audio resampler */
+    ResampleObj.Init(iSymbolBlockSize,
+        (_REAL) iAudSampleRate / iSigSampleRate);
     vecTempResBufIn.Init(iSymbolBlockSize, (_REAL) 0.0);
     vecTempResBufOut.Init(iResOutBlockSize, (_REAL) 0.0);
-
-    iOutputBlockSize = 2 * iResOutBlockSize; /* Stereo */
 
     /* OPH: init free-running symbol counter */
     iFreeSymbolCounter = 0;
