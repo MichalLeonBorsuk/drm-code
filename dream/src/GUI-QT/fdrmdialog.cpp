@@ -368,86 +368,86 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& NSettings, CRig& rig,
     string schedfile = Settings.Get("command", "schedule", string());
     if(schedfile != "")
     {
-	pScheduler = new CScheduler;
+        pScheduler = new CScheduler;
         pScheduler->LoadSchedule(schedfile);
-	pScheduleTimer = new QTimer(0);
-	connect(pScheduleTimer, SIGNAL(timeout()), this, SLOT(OnScheduleTimer()));
+        pScheduleTimer = new QTimer(0);
+        connect(pScheduleTimer, SIGNAL(timeout()), this, SLOT(OnScheduleTimer()));
 #if QT_VERSION >= 0x040000
-	pScheduleTimer->start();
+        pScheduleTimer->start();
 #else
-	// TODO
+        // TODO
 #endif
 	}
 }
 
 FDRMDialog::~FDRMDialog()
 {
-delete pLogging;
+    delete pLogging;
 }
 
 void FDRMDialog::on_actionWhats_This()
 {
-QWhatsThis::enterWhatsThisMode();
+    QWhatsThis::enterWhatsThisMode();
 }
 
 #if QT_VERSION < 0x040000
 void FDRMDialog::OnMenuPlotStyle(int value)
 {
-/* Set new plot style in other dialogs */
-emit plotStyleChanged(value);
-/* Taking care of the checks */
-for (int i = 0; i < NUM_AVL_COLOR_SCHEMES_PLOT; i++)
-pPlotStyleMenu->setItemChecked(i, i == value);
+    /* Set new plot style in other dialogs */
+    emit plotStyleChanged(value);
+    /* Taking care of the checks */
+    for (int i = 0; i < NUM_AVL_COLOR_SCHEMES_PLOT; i++)
+    pPlotStyleMenu->setItemChecked(i, i == value);
 }
 #endif
 
 void FDRMDialog::OnSwitchToFM()
 {
-OnSwitchMode(RM_FM);
+    OnSwitchMode(RM_FM);
 }
 
 void FDRMDialog::OnSwitchToAM()
 {
-OnSwitchMode(RM_AM);
+    OnSwitchMode(RM_AM);
 }
 
 void FDRMDialog::SetStatus(CMultColorLED* LED, ETypeRxStatus state)
 {
-switch(state)
-{
-case NOT_PRESENT:
-LED->Reset(); /* GREY */
-break;
+    switch(state)
+    {
+    case NOT_PRESENT:
+        LED->Reset(); /* GREY */
+        break;
 
-case CRC_ERROR:
-LED->SetLight(CMultColorLED::RL_RED);
-break;
+    case CRC_ERROR:
+        LED->SetLight(CMultColorLED::RL_RED);
+        break;
 
-case DATA_ERROR:
-LED->SetLight(CMultColorLED::RL_YELLOW);
-break;
+    case DATA_ERROR:
+        LED->SetLight(CMultColorLED::RL_YELLOW);
+        break;
 
-case RX_OK:
-LED->SetLight(CMultColorLED::RL_GREEN);
-break;
-}
+    case RX_OK:
+        LED->SetLight(CMultColorLED::RL_GREEN);
+        break;
+    }
 }
 
 void FDRMDialog::UpdateDRM_GUI()
 {
 #if QT_VERSION >= 0x040000
-_BOOLEAN bMultimediaServiceAvailable;
+    _BOOLEAN bMultimediaServiceAvailable;
 #endif
-CParameter& Parameters = *DRMReceiver.GetParameters();
-if(isVisible()==false)
-{
-ChangeGUIModeToDRM();
-}
-Parameters.Lock();
+    CParameter& Parameters = *DRMReceiver.GetParameters();
 
-/* Input level meter */
-ProgrInputLevel->setValue(Parameters.GetIFSignalLevel());
-SetStatus(CLED_MSC, Parameters.ReceiveStatus.Audio.GetStatus());
+    if (isVisible() == false)
+        ChangeGUIModeToDRM();
+
+    Parameters.Lock();
+
+    /* Input level meter */
+    ProgrInputLevel->setValue(Parameters.GetIFSignalLevel());
+    SetStatus(CLED_MSC, Parameters.ReceiveStatus.Audio.GetStatus());
     SetStatus(CLED_SDC, Parameters.ReceiveStatus.SDC.GetStatus());
     SetStatus(CLED_FAC, Parameters.ReceiveStatus.FAC.GetStatus());
 
@@ -481,7 +481,7 @@ void FDRMDialog::OnScheduleTimer()
 	e = pScheduler->front();
 QDateTime dt;
 dt.setTime_t(e.time);
-qDebug() << dt.toString("yyyy-MM-ddThh:mm:ss") << " " <<  e.frequency;
+qDebug() << dt.toString("yyyy-MM-ddThh:mm:ss") << " " << e.frequency;
 	pScheduler->pop();
 	if(e.frequency != -1)
 	{
