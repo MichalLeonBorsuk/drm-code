@@ -91,8 +91,8 @@ class CHelpUsage : public CAboutDlgBase
 	Q_OBJECT
 
 public:
-	CHelpUsage(const char* usage, QWidget* parent = 0, const char* name = 0, bool modal = FALSE,
-		Qt::WFlags f = 0);
+	CHelpUsage(const char* usage, const char* argv0, QWidget* parent = 0,
+		const char* name = 0, bool modal = FALSE, Qt::WFlags f = 0);
 };
 
 #if QT_VERSION < 0x040000

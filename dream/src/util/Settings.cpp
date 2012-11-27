@@ -600,13 +600,12 @@ CSettings::ParseArguments(int argc, char **argv)
 	}
 }
 
-string
-CSettings::UsageArguments(const char *argv0)
+const char *
+CSettings::UsageArguments()
 {
-// TODO: Use macro definitions for help text, too (instead of hard-coded numbers)!
-
+	/* The text below must be translatable */
 	return
-		"Usage: " + string(argv0) + " [option] [argument]\n"
+		"Usage: $EXECNAME [option] [argument]\n\n"
 		"Recognized options:\n"
 		"  -t, --transmitter            DRM transmitter mode\n"
 		"  -p, --flipspectrum           flip input spectrum\n"
@@ -659,12 +658,12 @@ CSettings::UsageArguments(const char *argv0)
 #ifdef _WIN32
 		"  -P, --processpriority <n>    enable/disable high priority for working thread\n"
 #endif
-		"  -h, -?, --help               this help text\n"
-		"Example: " + string(argv0) + " -p --sampleoff -0.23 -i 2 "
+		"  -h, -?, --help               this help text\n\n"
+		"Example: $EXECNAME -p --sampleoff -0.23 -i 2"
 #ifdef USE_QT_GUI
-		"-r 6140 --rsiout 127.0.0.1:3002"
+		" -r 6140 --rsiout 127.0.0.1:3002"
 #endif
-		"\n";
+		"";
 }
 
 _BOOLEAN

@@ -215,7 +215,7 @@ main(int argc, char **argv)
 		}
 		else
 		{
-			CHelpUsage HelpUsage(Settings.UsageArguments(argv[0]).c_str()
+			CHelpUsage HelpUsage(Settings.UsageArguments(), argv[0]
 #if QT_VERSION < 0x040000
 			, NULL, NULL, FALSE, Qt::WStyle_MinMax
 #endif
@@ -316,7 +316,14 @@ main(int argc, char **argv)
 		}
 		else
 		{
-			cerr << Settings.UsageArguments(argv) << endl;
+			string usage(Settings.UsageArguments());
+			for (;;)
+			{
+				size_t pos = usage.find("$EXECNAME");
+				if (pos == string::npos) break;
+				usage.replace(pos, sizeof("$EXECNAME")-1, argv[0]);
+			}
+			cerr << usage << endl << endl;
 			exit(0);
 		}
 	}

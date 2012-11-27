@@ -31,7 +31,6 @@
 
 #include <qtimer.h>
 #include <qstring.h>
-#include <qlabel.h>
 
 #include "../GlobalDefinitions.h"
 #include "../ReceptLog.h"

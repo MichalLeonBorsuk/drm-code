@@ -30,10 +30,9 @@
 #include "../util/Settings.h"
 
 /* Implementation *************************************************************/
-CLogging::CLogging(CParameter& Parameters) : QObject(),
-    TimerLogFile(), TimerLogFileStart(),
+CLogging::CLogging(CParameter& Parameters) :
     shortLog(Parameters), longLog(Parameters),
-    enabled(false),iLogDelay(0),iLogCount(0)
+    enabled(false), iLogDelay(0), iLogCount(0)
 {
 #if QT_VERSION >= 0x040000
 	TimerLogFileStart.setSingleShot(true);
@@ -85,19 +84,19 @@ void CLogging::OnTimerLogFile()
 {
     if(shortLog.restartNeeded())
     {
-	stop();
-	enabled = true;
-	reStart();
+        stop();
+        enabled = true;
+        reStart();
     }
     else
     {
-	iLogCount++;
-	if(iLogCount == 60)
-	{
-	    iLogCount = 0;
-	    shortLog.Update();
-	}
-	longLog.Update();
+        iLogCount++;
+        if(iLogCount == 60)
+        {
+            iLogCount = 0;
+            shortLog.Update();
+        }
+        longLog.Update();
     }
 }
 

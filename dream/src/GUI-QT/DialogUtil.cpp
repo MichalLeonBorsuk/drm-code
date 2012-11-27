@@ -280,7 +280,8 @@ CAboutDlg::CAboutDlg(QWidget* parent, const char* name, bool modal, Qt::WFlags f
 }
 
 /* Help Usage --------------------------------------------------------------- */
-CHelpUsage::CHelpUsage(const char* usage, QWidget* parent, const char* name, bool modal, Qt::WFlags f)
+CHelpUsage::CHelpUsage(const char* usage, const char* argv0,
+    QWidget* parent, const char* name, bool modal, Qt::WFlags f)
     : CAboutDlgBase(parent, name, modal, f)
 {
 #if QT_VERSION < 0x040000
@@ -291,13 +292,15 @@ CHelpUsage::CHelpUsage(const char* usage, QWidget* parent, const char* name, boo
     TextLabelVersion->setText(VersionString(this));
     TextLabelAuthorNames->setText("");
     TextLabelCopyright->setText(tr("Command line usage:"));
+    QString text(tr(usage));
+    text.replace(QRegExp("\\$EXECNAME"), QString::fromUtf8(argv0));
 #if QT_VERSION < 0x040000
-    TextViewCredits->setText(tr(usage));
+    TextViewCredits->setText(text);
 #else
-	TextViewCredits->setFontFamily(FONT_COURIER);
-	TextViewCredits->setPlainText(tr(usage));
+    TextViewCredits->setFontFamily(FONT_COURIER);
+    TextViewCredits->setPlainText(text);
 #endif
-	show();
+    show();
 }
 
 /* Help menu ---------------------------------------------------------------- */
