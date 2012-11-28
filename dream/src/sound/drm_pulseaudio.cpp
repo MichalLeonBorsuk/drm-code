@@ -183,6 +183,7 @@ static void pa_stream_notify_cb(pa_stream *p, void *userdata)
 		if (!((CSoundOutPulse*)ud->SoundIO)->bPrebuffer) {
 			DEBUG_MSG("*** playback %s\n", type);
 		}
+		*ud->bBufferingError = TRUE;
 	}
 	if (ud->bOverflow)
 		((CSoundOutPulse*)ud->SoundIO)->bSeek = TRUE;
@@ -427,10 +428,12 @@ void CSoundOutPulse::Init_HW()
 	pa_stream_notify_cb_userdata_underflow.SoundIO = this;
 	pa_stream_notify_cb_userdata_underflow.bOverflow = FALSE;
 	pa_stream_notify_cb_userdata_underflow.bMute = FALSE;
+	pa_stream_notify_cb_userdata_underflow.bBufferingError = &bBufferingError;
 	pa_stream_set_underflow_callback(pa_s, &pa_stream_notify_cb, (void*)&pa_stream_notify_cb_userdata_underflow);
 	pa_stream_notify_cb_userdata_overflow.SoundIO = this;
 	pa_stream_notify_cb_userdata_overflow.bOverflow = TRUE;
 	pa_stream_notify_cb_userdata_overflow.bMute = FALSE;
+	pa_stream_notify_cb_userdata_overflow.bBufferingError = &bBufferingError;
 	pa_stream_set_overflow_callback(pa_s, &pa_stream_notify_cb, (void*)&pa_stream_notify_cb_userdata_overflow);
 
 //	pa_o_sync(pa_m, pa_c, pa_stream_update_sample_rate(pa_s, iSampleRate+750, pa_stream_success_cb, NULL));
@@ -742,12 +745,11 @@ _BOOLEAN CSoundInPulse::Read(CVector<_SAMPLE>& psData)
 	}
 
 	/* Read from 'hardware' */
-	if (Read_HW(&psData[0], iBufferSize) != iBufferSize)
-	{
+	_BOOLEAN bError = Read_HW(&psData[0], iBufferSize) != iBufferSize;
+	if (bError)
 	    DEBUG_MSG("CSoundInPulse::Read(): read_HW error\n");
-	}
 
-	return FALSE;
+	return bError;
 }
 
 void CSoundInPulse::Close()
@@ -781,6 +783,7 @@ int CSoundInPulse::GetDev()
 
 CSoundOutPulse::CSoundOutPulse():
 	iSampleRate(0), iBufferSize(0), bBlockingPlay(FALSE),
+	bBufferingError(FALSE),
 	bChangDev(TRUE), iCurrentDevice(-1),
 	pa_m(NULL),pa_c(NULL),pa_s(NULL)
 #ifdef CLOCK_DRIFT_ADJ_ENABLED
@@ -831,12 +834,14 @@ _BOOLEAN CSoundOutPulse::Write(CVector<_SAMPLE>& psData)
 	}
 
 	/* Write to 'hardware' */
-	if (Write_HW(&psData[0], iBufferSize) != iBufferSize)
-	{
+	_BOOLEAN bError = Write_HW(&psData[0], iBufferSize) != iBufferSize;
+	if (bError)
 		DEBUG_MSG("CSoundOutPulse::Write(): write_HW error\n");
-	}
 
-	return FALSE;
+	bError |= bBufferingError;
+	bBufferingError = FALSE;
+
+	return bError;
 }
 
 void CSoundOutPulse::Close()

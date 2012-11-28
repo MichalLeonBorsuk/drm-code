@@ -689,7 +689,9 @@ void systemevalDlg::OnTimer()
         SetStatus(LEDFAC, Parameters.ReceiveStatus.FAC.GetStatus());
         SetStatus(LEDFrameSync, Parameters.ReceiveStatus.FSync.GetStatus());
         SetStatus(LEDTimeSync, Parameters.ReceiveStatus.TSync.GetStatus());
-        SetStatus(LEDIOInterface, Parameters.ReceiveStatus.Interface.GetStatus());
+        ETypeRxStatus soundCardStatusI = Parameters.ReceiveStatus.InterfaceI.GetStatus(); /* Input */
+        ETypeRxStatus soundCardStatusO = Parameters.ReceiveStatus.InterfaceO.GetStatus(); /* Output */
+        SetStatus(LEDIOInterface, soundCardStatusO == NOT_PRESENT || (soundCardStatusI != NOT_PRESENT && soundCardStatusI != RX_OK) ? soundCardStatusI : soundCardStatusO);
 
         /* Show SNR if receiver is in tracking mode */
         if (DRMReceiver.GetAcquiState() == AS_WITH_SIGNAL)

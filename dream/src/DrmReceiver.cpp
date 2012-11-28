@@ -209,7 +209,8 @@ CDRMReceiver::Run()
             time_t now = time(NULL);
             if ((now - time_keeper) > 2)
             {
-                Parameters.ReceiveStatus.Interface.SetStatus(NOT_PRESENT);
+                Parameters.ReceiveStatus.InterfaceI.SetStatus(NOT_PRESENT);
+                Parameters.ReceiveStatus.InterfaceO.SetStatus(NOT_PRESENT);
                 Parameters.ReceiveStatus.TSync.SetStatus(NOT_PRESENT);
                 Parameters.ReceiveStatus.FSync.SetStatus(NOT_PRESENT);
                 Parameters.ReceiveStatus.FAC.SetStatus(NOT_PRESENT);
@@ -918,7 +919,8 @@ CDRMReceiver::SetInStartMode()
     iDelayedTrackModeCnt = NUM_FAC_DEL_TRACK_SWITCH;
 
     /* Reset GUI lights */
-    Parameters.ReceiveStatus.Interface.SetStatus(NOT_PRESENT);
+    Parameters.ReceiveStatus.InterfaceI.SetStatus(NOT_PRESENT);
+    Parameters.ReceiveStatus.InterfaceO.SetStatus(NOT_PRESENT);
     Parameters.ReceiveStatus.TSync.SetStatus(NOT_PRESENT);
     Parameters.ReceiveStatus.FSync.SetStatus(NOT_PRESENT);
     Parameters.ReceiveStatus.FAC.SetStatus(NOT_PRESENT);
