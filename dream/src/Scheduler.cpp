@@ -31,6 +31,27 @@
 #include <sstream>
 #include <cstdlib>
 #include <ctime>
+#ifdef _WIN32
+# include <windows.h>
+#endif
+
+#if 1
+# ifdef _WIN32
+# include <stdarg.h>
+int dprintf(const char *format, ...)
+{
+	char buffer[1024];
+	va_list vl;
+	va_start(vl, format);
+	int ret = vsprintf(buffer, format, vl);
+	va_end(vl);
+	OutputDebugString(buffer);
+	return ret;
+}
+# else
+#  define dprintf printf
+# endif
+#endif
 
 // get next event
 CScheduler::SEvent CScheduler::front()
@@ -98,9 +119,9 @@ void CScheduler::fill()
 //	time_t sod = mktime(&dts); // start of daytime // mktime is for localtime struct tm to time_t (UTC)
 #ifdef _WIN32
 	SYSTEMTIME st;
-	st.wYear = dt.tm_year;
-	st.wMonth = dt.tm_mon+1;
-	st.wDay = dt.tm_day;
+	st.wYear = dts.tm_year;
+	st.wMonth = dts.tm_mon+1;
+	st.wDay = dts.tm_mday;
 	st.wHour = 0;
 	st.wMinute = 0;
 	st.wSecond = 0;
@@ -110,11 +131,13 @@ void CScheduler::fill()
 	ULARGE_INTEGER uli;
 	uli.LowPart = ft.dwLowDateTime;
 	uli.HighPart = ft.dwHighDateTime;
-	uint64_t t = uli.QuadPart - 116444736000000000ULL;
+//	uint64_t t = uli.QuadPart - 116444736000000000ULL;
 	time_t sod = (uli.QuadPart - 116444736000000000ULL)/10000000ULL;
+//dprintf("");
 #else
 	time_t sod = timegm(&dts); // start of daytime
 #endif
+struct tm* gtm = gmtime(&sod); if (gtm) dprintf("%02i:%02i:%02i\n", (int)gtm->tm_mday, (int)gtm->tm_hour, (int)gtm->tm_min, (int)gtm->tm_sec); else dprintf("gtm == NULL\n");
 	// resolve schedule to absolute time
 	map<time_t,int> abs_sched;
 	for (map<time_t,int>::const_iterator i = schedule.begin(); i != schedule.end(); i++)
@@ -130,7 +153,7 @@ void CScheduler::fill()
 		e.time = i->first;
 		e.frequency = i->second;
 		events.push(e);
-//struct tm* dts = gmtime(&e.time); printf("%i %02i:%02i:%02i frequency=%i\n", (int)dts->tm_mday, (int)dts->tm_hour, (int)dts->tm_min, (int)dts->tm_sec, (int)e.frequency);
+//struct tm* dts = gmtime(&e.time); dprintf("%i %02i:%02i:%02i frequency=%i\n", (int)dts->tm_mday, (int)dts->tm_hour, (int)dts->tm_min, (int)dts->tm_sec, (int)e.frequency);
 	}
 }
 
@@ -140,6 +163,6 @@ int CScheduler::parse(string s)
 	char c;
 	istringstream iss(s);
 	iss >> hh >> c >> mm >> c >> ss;
-//printf("%02i:%02i:%02i\n", hh, mm, ss);
+//dprintf("%02i:%02i:%02i\n", hh, mm, ss);
 	return 60*(mm + 60*hh)+ss;
 }
