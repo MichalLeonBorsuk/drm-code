@@ -45,7 +45,7 @@ int dprintf(const char *format, ...)
 	va_start(vl, format);
 	int ret = vsprintf(buffer, format, vl);
 	va_end(vl);
-	OutputDebugString(buffer);
+	OutputDebugStringA(buffer);
 	return ret;
 }
 # else
@@ -132,12 +132,12 @@ void CScheduler::fill()
 	uli.LowPart = ft.dwLowDateTime;
 	uli.HighPart = ft.dwHighDateTime;
 //	uint64_t t = uli.QuadPart - 116444736000000000ULL;
-	time_t sod = (uli.QuadPart - 116444736000000000ULL)/10000000ULL;
-//dprintf("");
+	time_t sod = (uli.QuadPart - 116444736000000000ULL)/1000000000ULL;
+dprintf("sod = %lli\n", (long long)sod);
 #else
 	time_t sod = timegm(&dts); // start of daytime
 #endif
-struct tm* gtm = gmtime(&sod); if (gtm) dprintf("%02i:%02i:%02i\n", (int)gtm->tm_mday, (int)gtm->tm_hour, (int)gtm->tm_min, (int)gtm->tm_sec); else dprintf("gtm == NULL\n");
+struct tm* gtm = gmtime(&sod); if (gtm) dprintf("%i %i %02i:%02i:%02i\n", (int)gtm->tm_year, (int)gtm->tm_mday, (int)gtm->tm_hour, (int)gtm->tm_min, (int)gtm->tm_sec); else dprintf("gtm = NULL\n");
 	// resolve schedule to absolute time
 	map<time_t,int> abs_sched;
 	for (map<time_t,int>::const_iterator i = schedule.begin(); i != schedule.end(); i++)
