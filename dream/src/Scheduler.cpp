@@ -96,7 +96,25 @@ void CScheduler::fill()
 	dts.tm_min = 0;
 	dts.tm_sec = 0;
 //	time_t sod = mktime(&dts); // start of daytime // mktime is for localtime struct tm to time_t (UTC)
+#ifdef _WIN32
+	SYSTEMTIME st;
+	st.wYear = dt.tm_year;
+	st.wMonth = dt.tm_mon+1;
+	st.wDay = dt.tm_day;
+	st.wHour = 0;
+	st.wMinute = 0;
+	st.wSecond = 0;
+	st.wMilliseconds = 0;
+	FILETIME ft;
+	SystemTimeToFileTime(&st, &ft);
+	ULARGE_INTEGER uli;
+	uli.LowPart = ft.dwLowDateTime;
+	uli.HighPart = ft.dwHighDateTime;
+	uint64_t t = uli.QuadPart - 116444736000000000ULL;
+	time_t sod = (uli.QuadPart - 116444736000000000ULL)/10000000ULL;
+#else
 	time_t sod = timegm(&dts); // start of daytime
+#endif
 	// resolve schedule to absolute time
 	map<time_t,int> abs_sched;
 	for (map<time_t,int>::const_iterator i = schedule.begin(); i != schedule.end(); i++)
