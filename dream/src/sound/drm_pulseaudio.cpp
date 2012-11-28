@@ -782,6 +782,7 @@ int CSoundInPulse::GetDev()
 /* Wave out *******************************************************************/
 
 CSoundOutPulse::CSoundOutPulse():
+	bPrebuffer(FALSE), bSeek(FALSE),
 	iSampleRate(0), iBufferSize(0), bBlockingPlay(FALSE),
 	bBufferingError(FALSE),
 	bChangDev(TRUE), iCurrentDevice(-1),
@@ -819,6 +820,10 @@ void CSoundOutPulse::Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewB
 
 	/* Set prebuffer flag */
 	bPrebuffer = TRUE;
+	/* Clear seek flag */
+	bSeek = FALSE;
+	/* Clear buffering error flag */
+	bBufferingError = FALSE;
 }
 
 _BOOLEAN CSoundOutPulse::Write(CVector<_SAMPLE>& psData)
