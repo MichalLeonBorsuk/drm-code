@@ -93,6 +93,7 @@ protected:
 
 	QPopupMenu*		pListViewContextMenu;
 	vector<CDRMPlot*>	vecpDRMPlots;
+	int				iPlotStyle;
 
 public slots:
 	void UpdatePlotStyle(int);

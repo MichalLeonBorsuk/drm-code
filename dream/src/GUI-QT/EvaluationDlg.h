@@ -96,6 +96,7 @@ protected:
 
 	QMenu*			pTreeWidgetContextMenu;
 	CDRMPlot::ECharType eCurCharType, eNewCharType;
+	int				iPlotStyle;
 	vector<CDRMPlot*>	vecpDRMPlots;
 	CEventFilter	ef;
 
