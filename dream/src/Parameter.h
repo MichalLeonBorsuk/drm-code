@@ -822,12 +822,12 @@ private:
 class CReceiveStatus
 {
 public:
-    CReceiveStatus():FSync(),TSync(),Interface(),
+    CReceiveStatus():FSync(),TSync(),InterfaceI(),InterfaceO(),
             FAC(),SDC(),Audio(),LLAudio(),MOT()
     {
     }
     CReceiveStatus(const CReceiveStatus& s):FSync(s.FSync), TSync(s.TSync),
-            Interface(s.Interface), FAC(s.FAC), SDC(s.SDC),
+            InterfaceI(s.InterfaceI), InterfaceO(s.InterfaceO), FAC(s.FAC), SDC(s.SDC),
             Audio(s.Audio),LLAudio(s.LLAudio),MOT(s.MOT)
     {
     }
@@ -835,7 +835,8 @@ public:
     {
         FSync = s.FSync;
         TSync = s.TSync;
-        Interface = s.Interface;
+        InterfaceI = s.InterfaceI;
+        InterfaceO = s.InterfaceO;
         FAC = s.FAC;
         SDC = s.SDC;
         Audio = s.Audio;
@@ -846,7 +847,8 @@ public:
 
     CRxStatus FSync;
     CRxStatus TSync;
-    CRxStatus Interface;
+    CRxStatus InterfaceI;
+    CRxStatus InterfaceO;
     CRxStatus FAC;
     CRxStatus SDC;
     CRxStatus Audio;

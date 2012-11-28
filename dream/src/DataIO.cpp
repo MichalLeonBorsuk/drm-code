@@ -141,14 +141,9 @@ void CWriteData::ProcessDataInternal(CParameter& Parameters)
     }
 
     /* Put data to sound card interface. Show sound card state on GUI */
-    ETypeRxStatus soundCardStatus = RX_OK;
-    if (pSound->Write(vecsTmpAudData) == TRUE)
-    {
-		soundCardStatus = DATA_ERROR;
-    }
-
+    const _BOOLEAN bBad = pSound->Write(vecsTmpAudData);
     Parameters.Lock();
-	Parameters.ReceiveStatus.Interface.SetStatus(soundCardStatus);
+    Parameters.ReceiveStatus.InterfaceO.SetStatus(bBad ? DATA_ERROR : RX_OK); /* Yellow light */
     Parameters.Unlock();
 
     /* Write data as wave in file */

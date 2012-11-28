@@ -235,10 +235,9 @@ void CReceiveData::ProcessDataInternal(CParameter& Parameters)
 
     /* Get data from sound interface. The read function must be a
        blocking function! */
-    _BOOLEAN bBad = pSound->Read(vecsSoundBuffer);
-
+    const _BOOLEAN bBad = pSound->Read(vecsSoundBuffer);
     Parameters.Lock();
-	Parameters.ReceiveStatus.Interface.SetStatus(bBad?CRC_ERROR:RX_OK);
+    Parameters.ReceiveStatus.InterfaceI.SetStatus(bBad ? CRC_ERROR : RX_OK); /* Red light */
     Parameters.Unlock();
 
     /* Write data to output buffer. Do not set the switch command inside

@@ -48,8 +48,9 @@
 typedef struct _pa_stream_notify_cb_userdata_t
 {
 	void *SoundIO;
-	_BOOLEAN bOverflow;
-	_BOOLEAN bMute;
+	_BOOLEAN	bOverflow;
+	_BOOLEAN	bMute;
+	_BOOLEAN*	bBufferingError;
 } pa_stream_notify_cb_userdata_t;
 
 typedef struct _pa_common
@@ -136,6 +137,8 @@ protected:
 	int				iSampleRate;
 	int				iBufferSize;
 	_BOOLEAN		bBlockingPlay;
+
+	_BOOLEAN		bBufferingError;
 
 	vector<string>	devices;
 	vector<string>	names;

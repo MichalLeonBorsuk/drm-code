@@ -48,7 +48,7 @@ void CDecodeRSIMDI::ProcessDataInternal(CParameter& Parameters)
 	if(err != CTagPacketDecoder::E_OK)
 	{
 		Parameters.Lock();
-		Parameters.ReceiveStatus.Interface.SetStatus(CRC_ERROR);
+		Parameters.ReceiveStatus.InterfaceI.SetStatus(CRC_ERROR);
 		Parameters.Unlock();
 		return;
 	}
@@ -68,7 +68,7 @@ void CDecodeRSIMDI::ProcessDataInternal(CParameter& Parameters)
 
 	Parameters.Lock();
 
-	Parameters.ReceiveStatus.Interface.SetStatus(RX_OK);
+	Parameters.ReceiveStatus.InterfaceI.SetStatus(RX_OK);
 
 	if (TagPacketDecoderMDI.TagItemDecoderRobMod.IsReady())
 		Parameters.SetWaveMode(TagPacketDecoderMDI.TagItemDecoderRobMod.eRobMode);
