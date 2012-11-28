@@ -44,7 +44,7 @@ public:
 	void LoadSchedule(const string& filename);
 	bool empty() const;
 	SEvent front(); // get next event 
-	void pop(); // remove first event from queue
+	SEvent pop(); // remove first event from queue
 private:
 	map<time_t,int> schedule; // map seconds from start of day to schedule event, frequency or -1 for off
 	queue<SEvent> events;

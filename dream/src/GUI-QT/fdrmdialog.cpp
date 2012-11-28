@@ -41,6 +41,7 @@
 # include <QEvent>
 # include <QShowEvent>
 # include <QCloseEvent>
+//# include <QDebug>
 # include "SoundCardSelMenu.h"
 # include "BWSViewer.h"
 # include "SlideShowViewer.h"
@@ -372,11 +373,16 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& NSettings, CRig& rig,
         pScheduler->LoadSchedule(schedfile);
         pScheduleTimer = new QTimer(0);
         connect(pScheduleTimer, SIGNAL(timeout()), this, SLOT(OnScheduleTimer()));
-#if QT_VERSION >= 0x040000
-        pScheduleTimer->start();
-#else
-        // TODO
-#endif
+        /* Setup the first timeout */
+        CScheduler::SEvent e;
+        e = pScheduler->front();
+        time_t now = time(NULL);
+        pScheduleTimer->start(1000*(e.time-now));
+//#if QT_VERSION >= 0x040000
+//        pScheduleTimer->start();
+//#else
+//        // TODO
+//#endif
 	}
 }
 
@@ -479,29 +485,31 @@ void FDRMDialog::OnScheduleTimer()
 {
 	CScheduler::SEvent e;
 	e = pScheduler->front();
-#if QT_VERSION >= 0x040000
-QDateTime dt;
-dt.setTime_t(e.time);
-qDebug() << dt.toString("yyyy-MM-ddThh:mm:ss") << " " << e.frequency;
-#endif
-	pScheduler->pop();
-	if(e.frequency != -1)
+//#if QT_VERSION >= 0x040000
+//QDateTime dt;
+//dt.setTime_t(e.time);
+//qDebug() << dt.toString("yyyy-MM-dd hh:mm:ss") << " " << e.frequency;
+//#endif
+	if (e.frequency != -1)
 	{
 		pLogging->LoadSettings(Settings);
 		pLogging->reStart();
 		DRMReceiver.SetFrequency(e.frequency);
+//printf("start\n");
 	}
 	else
 	{
 		pLogging->stop();
+//printf("stop\n");
 	}
-	e = pScheduler->front();
+	e = pScheduler->pop();
 	time_t now = time(NULL);
-#if QT_VERSION >= 0x040000
-	pScheduleTimer->setInterval(1000*(e.time-now));
-#else
-	pScheduleTimer->changeInterval(1000*(e.time-now));
-#endif
+	pScheduleTimer->start(1000*(e.time-now));
+//#if QT_VERSION >= 0x040000
+//	pScheduleTimer->setInterval(1000*(e.time-now));
+//#else
+//	pScheduleTimer->changeInterval(1000*(e.time-now));
+//#endif
 }
 
 void FDRMDialog::OnTimer()
