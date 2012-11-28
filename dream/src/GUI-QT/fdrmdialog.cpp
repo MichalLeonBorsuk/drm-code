@@ -69,7 +69,7 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& NSettings, CRig& rig,
     Timer(),serviceLabels(4),pLogging(NULL),
     iMultimediaServiceBit(0),
     iLastMultimediaServiceSelected(-1),
-    pScheduler(NULL)
+    pScheduler(NULL), pScheduleTimer(NULL)
 {
     /* Recover window size and position */
     CWinGeom s;
@@ -371,7 +371,7 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& NSettings, CRig& rig,
     {
         pScheduler = new CScheduler;
         pScheduler->LoadSchedule(schedfile);
-        pScheduleTimer = new QTimer(0);
+        pScheduleTimer = new QTimer(this);
         connect(pScheduleTimer, SIGNAL(timeout()), this, SLOT(OnScheduleTimer()));
         /* Setup the first timeout */
         CScheduler::SEvent e;
