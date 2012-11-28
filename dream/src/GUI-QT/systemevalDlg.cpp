@@ -65,8 +65,7 @@ systemevalDlg::systemevalDlg(CDRMReceiver& NDRMR, CSettings& NSettings,
                              QWidget* parent, const char* name, bool modal, Qt::WFlags f) :
     systemevalDlgBase(parent, name, modal, f),
     DRMReceiver(NDRMR),
-    Settings(NSettings),
-    Timer(), TimerInterDigit()
+    Settings(NSettings)
 {
     /* Get window geometry data and apply it */
     CWinGeom s;
@@ -80,8 +79,9 @@ systemevalDlg::systemevalDlg(CDRMReceiver& NDRMR, CSettings& NSettings,
     AddWhatsThisHelp();
 
     /* Init controls -------------------------------------------------------- */
+
     /* Init main plot */
-    int iPlotStyle = Settings.Get("System Evaluation Dialog", "plotstyle", 0);
+    iPlotStyle = Settings.Get("System Evaluation Dialog", "plotstyle", 0);
     Settings.Put("System Evaluation Dialog", "plotstyle", iPlotStyle);
     MainPlot->SetRecObj(&DRMReceiver);
     MainPlot->SetPlotStyle(iPlotStyle);
@@ -514,7 +514,7 @@ void systemevalDlg::showEvent(QShowEvent*)
         s << "Chart Window " << i;
 
         /* get the chart type */
-        const CDRMPlot::ECharType eNewType = (CDRMPlot::ECharType) Settings.Get(s.str(), "type", 0);
+        const CDRMPlot::ECharType eNewType = (CDRMPlot::ECharType) Settings.Get(s.str(), "plottype", 0);
 
         /* get window geometry data */
         CWinGeom c;
@@ -571,7 +571,7 @@ void systemevalDlg::hideEvent(QHideEvent*)
             s << "Chart Window " << iNumOpenCharts;
             Settings.Put(s.str(), c);
             /* Convert plot type into an integer type. TODO: better solution */
-            Settings.Put(s.str(), "type", (int) vecpDRMPlots[i]->GetChartType());
+            Settings.Put(s.str(), "plottype", (int) vecpDRMPlots[i]->GetChartType());
 
             iNumOpenCharts++;
         }
@@ -624,7 +624,10 @@ void systemevalDlg::OnFrequencyEdited(const QString& s)
 
 void systemevalDlg::UpdatePlotStyle(int iPlotStyle)
 {
+    /* Save the new style */
     Settings.Put("System Evaluation Dialog", "plotstyle", iPlotStyle);
+    this->iPlotStyle = iPlotStyle;
+
     /* Update chart windows */
     for (size_t i = 0; i < vecpDRMPlots.size(); i++)
         vecpDRMPlots[i]->SetPlotStyle(iPlotStyle);
@@ -637,9 +640,6 @@ CDRMPlot* systemevalDlg::OpenChartWin(CDRMPlot::ECharType eNewType)
 {
     /* Create new chart window */
     CDRMPlot* pNewChartWin = new CDRMPlot(NULL);
-
-    /* Set plot style*/
-    pNewChartWin->SetPlotStyle(Settings.Get("System Evaluation Dialog", "plotstyle", 0));
     pNewChartWin->setCaption(tr("Chart Window"));
 
     /* Set correct icon (use the same as this dialog) */
@@ -648,6 +648,9 @@ CDRMPlot* systemevalDlg::OpenChartWin(CDRMPlot::ECharType eNewType)
     /* Set receiver object and correct chart type */
     pNewChartWin->SetRecObj(&DRMReceiver);
     pNewChartWin->SetupChart(eNewType);
+
+    /* Set plot style*/
+    pNewChartWin->SetPlotStyle(iPlotStyle);
 
     /* Show new window */
     pNewChartWin->show();

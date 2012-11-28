@@ -62,8 +62,11 @@ systemevalDlg::systemevalDlg(CDRMReceiver& NDRMR, CSettings& NSettings,
     /* Init controls -------------------------------------------------------- */
 
     /* Init main plot */
+    iPlotStyle = Settings.Get("System Evaluation Dialog", "plotstyle", 0);
+    Settings.Put("System Evaluation Dialog", "plotstyle", iPlotStyle);
     MainPlot = new CDRMPlot(NULL, plot);
     MainPlot->SetRecObj(&DRMReceiver);
+    MainPlot->SetPlotStyle(iPlotStyle);
 
     /* Init slider control */
     SliderNoOfIterations->setRange(0, 4);
@@ -122,8 +125,8 @@ systemevalDlg::systemevalDlg(CDRMReceiver& NDRMR, CSettings& NSettings,
     /* Expand all items */
     chartSelector->expandAll();
 
-    /* Load saved main plot style */
-    eCurCharType = PlotNameToECharType(Settings.Get("System Evaluation Dialog", "plotstyle", string()));
+    /* Load saved main plot type */
+    eCurCharType = PlotNameToECharType(Settings.Get("System Evaluation Dialog", "plottype", string()));
 
     /* If MDI in is enabled, disable some of the controls and use different
        initialization for the chart and chart selector */
@@ -336,7 +339,7 @@ void systemevalDlg::showEvent(QShowEvent* e)
         s << "Chart Window " << i;
 
         /* get the chart type */
-        const CDRMPlot::ECharType eNewType = PlotNameToECharType(Settings.Get(s.str(), "plotstyle", string()));
+        const CDRMPlot::ECharType eNewType = PlotNameToECharType(Settings.Get(s.str(), "plottype", string()));
 
         /* get window geometry data */
         CWinGeom c;
@@ -400,7 +403,7 @@ void systemevalDlg::hideEvent(QHideEvent* e)
 
             s << "Chart Window " << iNumOpenCharts;
             Settings.Put(s.str(), c);
-            Settings.Put(s.str(), "plotstyle", ECharTypeToPlotName(vecpDRMPlots[i]->GetChartType()));
+            Settings.Put(s.str(), "plottype", ECharTypeToPlotName(vecpDRMPlots[i]->GetChartType()));
 
             iNumOpenCharts++;
         }
@@ -421,8 +424,8 @@ void systemevalDlg::hideEvent(QHideEvent* e)
     s.iWSize = WinGeom.width();
     Settings.Put("System Evaluation Dialog", s);
 
-    /* Store current plot type. */
-    Settings.Put("System Evaluation Dialog", "plotstyle", ECharTypeToPlotName(eCurCharType));
+    /* Store current plot type */
+    Settings.Put("System Evaluation Dialog", "plottype", ECharTypeToPlotName(eCurCharType));
 }
 
 void systemevalDlg::OnTimerInterDigit()
@@ -465,6 +468,10 @@ void systemevalDlg::OnFrequencyEdited(const QString&)
 
 void systemevalDlg::UpdatePlotStyle(int iPlotStyle)
 {
+    /* Save the new style */
+    Settings.Put("System Evaluation Dialog", "plotstyle", iPlotStyle);
+    this->iPlotStyle = iPlotStyle;
+
     /* Update chart windows */
     for (size_t i = 0; i < vecpDRMPlots.size(); i++)
         vecpDRMPlots[i]->SetPlotStyle(iPlotStyle);
@@ -513,6 +520,9 @@ CDRMPlot* systemevalDlg::OpenChartWin(CDRMPlot::ECharType eNewType)
     /* Set receiver object and correct chart type */
     pNewChartWin->SetRecObj(&DRMReceiver);
     pNewChartWin->SetupChart(eNewType);
+
+    /* Set plot style*/
+    pNewChartWin->SetPlotStyle(iPlotStyle);
 
     return pNewChartWin;
 }
