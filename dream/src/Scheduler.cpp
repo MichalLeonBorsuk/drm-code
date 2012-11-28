@@ -39,13 +39,15 @@ CScheduler::SEvent CScheduler::front()
 	{
 		fill();
 	}
+//struct tm* dts = gmtime(&events.front().time); printf("%i %02i:%02i:%02i frequency=%i\n", (int)dts->tm_mday, (int)dts->tm_hour, (int)dts->tm_min, (int)dts->tm_sec, (int)events.front().frequency);
 	return events.front();
 }
 
-// remove first event from queue
-void CScheduler::pop()
+// remove first event from queue and return the front
+CScheduler::SEvent CScheduler::pop()
 {
 	events.pop();
+	return front();
 }
 
 bool CScheduler::empty() const
@@ -80,34 +82,37 @@ void CScheduler::LoadSchedule(const string& filename)
 void CScheduler::fill()
 {
 	time_t dt;
-	if(events.empty())
-	{
-		dt = time(NULL);
-	}
-	else
-	{
-		dt = events.back().time;
-	}
+//	if (events.empty())
+//	{
+		dt = time(NULL); // daytime
+//	}
+//	else
+//	{
+//		dt = events.back().time;
+//	}
 	struct tm dts;
 	dts = *gmtime(&dt);
 	dts.tm_hour = 0;
 	dts.tm_min = 0;
 	dts.tm_sec = 0;
-	time_t sod = mktime(&dts);
+//	time_t sod = mktime(&dts); // start of daytime // mktime is for localtime struct tm to time_t (UTC)
+	time_t sod = timegm(&dts); // start of daytime
 	// resolve schedule to absolute time
 	map<time_t,int> abs_sched;
-	for(map<time_t,int>::const_iterator i = schedule.begin(); i != schedule.end(); i++)
+	for (map<time_t,int>::const_iterator i = schedule.begin(); i != schedule.end(); i++)
 	{
-		time_t st = sod+i->first;
-		if(st < dt)
+		time_t st = sod + i->first;
+		if (st < dt)
 			st += 24 * 60 * 60; // want tomorrow's.
 		abs_sched[st] = i->second;
 	}
-	for(map<time_t,int>::const_iterator i = abs_sched.begin(); i != abs_sched.end(); i++)
+	for (map<time_t,int>::const_iterator i = abs_sched.begin(); i != abs_sched.end(); i++)
 	{
 		SEvent e;
-		e.time = i->first; e.frequency = i->second;
+		e.time = i->first;
+		e.frequency = i->second;
 		events.push(e);
+//struct tm* dts = gmtime(&e.time); printf("%i %02i:%02i:%02i frequency=%i\n", (int)dts->tm_mday, (int)dts->tm_hour, (int)dts->tm_min, (int)dts->tm_sec, (int)e.frequency);
 	}
 }
 
