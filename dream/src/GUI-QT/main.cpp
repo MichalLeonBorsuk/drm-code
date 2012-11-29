@@ -72,7 +72,7 @@ void
 CRx::run()
 {
 #ifdef _WIN32
-    if (Settings.Get("GUI", "processpriority", TRUE))
+    if (Settings.Get("GUI", "processpriority", bool(TRUE)))
     {
         /* It doesn't matter what the GUI does, we want to be above normal! */
         SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_ABOVE_NORMAL);
@@ -137,7 +137,7 @@ main(int argc, char **argv)
 		/* works for both transmit and receive. GUI is low, working is normal.
 		 * the working thread does not need to know what the setting is.
 		 */
-			bool bPrioEnabled = Settings.Get("GUI", "processpriority", TRUE);
+			bool bPrioEnabled = Settings.Get("GUI", "processpriority", bool(TRUE));
 			if (bPrioEnabled)
 			{
 				/* Set priority class for this application */
