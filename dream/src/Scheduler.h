@@ -52,4 +52,8 @@ private:
 	int parse(string);
 };
 
+#if 0
+int dprintf(const char *format, ...);
+#endif
+
 #endif

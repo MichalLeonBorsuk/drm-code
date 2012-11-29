@@ -35,7 +35,7 @@
 # include <windows.h>
 #endif
 
-#if 1
+#if 0
 # ifdef _WIN32
 # include <stdarg.h>
 int dprintf(const char *format, ...)
@@ -51,6 +51,26 @@ int dprintf(const char *format, ...)
 # else
 #  define dprintf printf
 # endif
+#endif
+
+#ifdef _WIN32
+time_t timegm(struct tm *tm)
+{
+	SYSTEMTIME st;
+	st.wYear = tm->tm_year+1900;
+	st.wMonth = tm->tm_mon+1;
+	st.wDay = tm->tm_mday;
+	st.wHour = 0;
+	st.wMinute = 0;
+	st.wSecond = 0;
+	st.wMilliseconds = 0;
+	FILETIME ft;
+	SystemTimeToFileTime(&st, &ft);
+	ULARGE_INTEGER uli;
+	uli.LowPart = ft.dwLowDateTime;
+	uli.HighPart = ft.dwHighDateTime;
+	return (time_t)((uli.QuadPart - 116444736000000000ULL)/10000000ULL);
+}
 #endif
 
 // get next event
@@ -116,28 +136,9 @@ void CScheduler::fill()
 	dts.tm_hour = 0;
 	dts.tm_min = 0;
 	dts.tm_sec = 0;
-//	time_t sod = mktime(&dts); // start of daytime // mktime is for localtime struct tm to time_t (UTC)
-#ifdef _WIN32
-	SYSTEMTIME st;
-	st.wYear = dts.tm_year;
-	st.wMonth = dts.tm_mon+1;
-	st.wDay = dts.tm_mday;
-	st.wHour = 0;
-	st.wMinute = 0;
-	st.wSecond = 0;
-	st.wMilliseconds = 0;
-	FILETIME ft;
-	SystemTimeToFileTime(&st, &ft);
-	ULARGE_INTEGER uli;
-	uli.LowPart = ft.dwLowDateTime;
-	uli.HighPart = ft.dwHighDateTime;
-//	uint64_t t = uli.QuadPart - 116444736000000000ULL;
-	time_t sod = (uli.QuadPart - 116444736000000000ULL)/1000000000ULL;
-dprintf("sod = %lli\n", (long long)sod);
-#else
 	time_t sod = timegm(&dts); // start of daytime
-#endif
-struct tm* gtm = gmtime(&sod); if (gtm) dprintf("%i %i %02i:%02i:%02i\n", (int)gtm->tm_year, (int)gtm->tm_mday, (int)gtm->tm_hour, (int)gtm->tm_min, (int)gtm->tm_sec); else dprintf("gtm = NULL\n");
+//dprintf("sod = %i\n", sod);
+//{struct tm* gtm = gmtime(&sod); if (gtm) dprintf("%i %i %02i:%02i:%02i\n", (int)gtm->tm_year+1900, (int)gtm->tm_mday, (int)gtm->tm_hour, (int)gtm->tm_min, (int)gtm->tm_sec); else dprintf("gtm = NULL\n");}
 	// resolve schedule to absolute time
 	map<time_t,int> abs_sched;
 	for (map<time_t,int>::const_iterator i = schedule.begin(); i != schedule.end(); i++)

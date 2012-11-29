@@ -495,12 +495,12 @@ void FDRMDialog::OnScheduleTimer()
 		pLogging->LoadSettings(Settings);
 		pLogging->reStart();
 		DRMReceiver.SetFrequency(e.frequency);
-//printf("start\n");
+//dprintf("start\n");
 	}
 	else
 	{
 		pLogging->stop();
-//printf("stop\n");
+//dprintf("stop\n");
 	}
 	e = pScheduler->pop();
 	time_t now = time(NULL);
