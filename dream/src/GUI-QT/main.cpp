@@ -72,8 +72,11 @@ void
 CRx::run()
 {
 #ifdef _WIN32
-    /* it doesn't matter what the GUI does, we want to be normal! */
-    SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_NORMAL);
+    if (Settings.Get("GUI", "processpriority", TRUE))
+    {
+        /* It doesn't matter what the GUI does, we want to be above normal! */
+        SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_ABOVE_NORMAL);
+    }
 #endif
     qDebug("Working thread started");
     try
@@ -134,17 +137,16 @@ main(int argc, char **argv)
 		/* works for both transmit and receive. GUI is low, working is normal.
 		 * the working thread does not need to know what the setting is.
 		 */
-			if (Settings.Get("GUI", "processpriority", TRUE))
+			bool bPrioEnabled = Settings.Get("GUI", "processpriority", TRUE);
+			if (bPrioEnabled)
 			{
 				/* Set priority class for this application */
-				SetPriorityClass(GetCurrentProcess(), HIGH_PRIORITY_CLASS);
+				SetPriorityClass(GetCurrentProcess(), ABOVE_NORMAL_PRIORITY_CLASS);
 
-				/* Low priority for GUI thread */
-				SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_LOWEST);
-				Settings.Put("GUI", "processpriority", TRUE);
+				/* Normal priority for GUI thread */
+				SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_NORMAL);
 			}
-			else
-				Settings.Put("GUI", "processpriority", FALSE);
+			Settings.Put("GUI", "processpriority", bPrioEnabled);
 #endif
 
 		string mode = Settings.Get("command", "mode", string());
