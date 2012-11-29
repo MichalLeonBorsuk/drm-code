@@ -326,20 +326,13 @@ void CReceiveData::ProcessDataInternal(CParameter& Parameters)
     /* Flip spectrum if necessary ------------------------------------------- */
     if (bFippedSpectrum == TRUE)
     {
-        static _BOOLEAN bFlagInv = FALSE;
-
-        for (i = 0; i < iOutputBlockSize; i++)
+        /* Since iOutputBlockSize is always even we can do some opt. here */
+        for (i = 0; i < iOutputBlockSize; i+=2)
         {
             /* We flip the spectrum by using the mirror spectrum at the negative
                frequencys. If we shift by half of the sample frequency, we can
                do the shift without the need of a Hilbert transformation */
-            if (bFlagInv == FALSE)
-            {
-                (*pvecOutputData)[i] = -(*pvecOutputData)[i];
-                bFlagInv = TRUE;
-            }
-            else
-                bFlagInv = FALSE;
+            (*pvecOutputData)[i] = -(*pvecOutputData)[i];
         }
     }
 
