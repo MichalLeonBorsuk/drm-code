@@ -59,17 +59,7 @@
 /* TODO more optimized algorithm and/or parameters */
 # define ALGO_ERROR_MULTIPLIER 256.0
 # define ALGO_ERROR_EXPONENT 2.0
-# define FIR_NTAPS 31
-static const double fir_taps[FIR_NTAPS] = {
-	3.101997697081398790e-04,	8.886432578895606680e-04,	2.034224618317520290e-03,	3.972795457854356310e-03,
-	6.946703306811025623e-03,	1.115796813527233054e-02,	1.672148617456211198e-02,	2.362113883029164432e-02,
-	3.167801425275264954e-02,	4.053912141968199490e-02,	4.969219159313521123e-02,	5.850780817682837975e-02,
-	6.630498434957272924e-02,	7.243147253964839216e-02,	7.634661516740624820e-02,	7.769326590053561576e-02,
-	7.634661516740624820e-02,	7.243147253964839216e-02,	6.630498434957272924e-02,	5.850780817682837975e-02,
-	4.969219159313521123e-02,	4.053912141968199490e-02,	3.167801425275264954e-02,	2.362113883029164432e-02,
-	1.672148617456211198e-02,	1.115796813527233054e-02,	6.946703306811025623e-03,	3.972795457854356310e-03,
-	2.034224618317520290e-03,	8.886432578895606680e-04,	3.101997697081398790e-04
-};
+# include "LatencyFilter.h"
 #endif
 
 
@@ -443,9 +433,9 @@ void CSoundOutPulse::Init_HW()
 #ifdef CLOCK_DRIFT_ADJ_ENABLED
 	X.Init(1);
 	A.Init(1, 1.0);
-	B.Init(FIR_NTAPS);
-	for (int i = 0; i < FIR_NTAPS; i++)
-		B[i] = fir_taps[i];
+	B.Init(NUM_TAPS_LATENCY_FILT);
+	for (int i = 0; i < NUM_TAPS_LATENCY_FILT; i++)
+		B[i] = dLatFilt[i];
 #endif
 
 	DEBUG_MSG("pulseaudio output device '%s', init done\n", devices[iCurrentDevice].c_str());
@@ -488,14 +478,15 @@ int CSoundOutPulse::Write_HW(void *playbuf, int size)
 #ifdef CLOCK_DRIFT_ADJ_ENABLED
 	if (cp.bClockDriftComp) {
 		if (bInitClockDriftComp) {
+			iMaxSampleRateOffset = iSampleRate * 2 / 100; /* = 2% */
 			playback_usec_smoothed = PLAYBACK_LATENCY;
 			target_latency = PLAYBACK_LATENCY;
 			wait_prebuffer = WAIT_PREBUFFER;
 			cp.sample_rate_offset = 0;
 			clock = 0;
 //			filter_stabilized = 16;
-			filter_stabilized = FIR_NTAPS;
-			Z.Init(FIR_NTAPS, CReal(PLAYBACK_LATENCY));
+			filter_stabilized = NUM_TAPS_LATENCY_FILT;
+			Z.Init(NUM_TAPS_LATENCY_FILT, CReal(PLAYBACK_LATENCY));
 		}
 
 		if (!bBlockingPlay)
@@ -509,14 +500,14 @@ int CSoundOutPulse::Write_HW(void *playbuf, int size)
 		else {
 			if (!filter_stabilized) {
 				/****************************************************************************************************************/
-				/* The Clock Drift Adjustment Algorithm                                                                        */
+				/* The Clock Drift Adjustment Algorithm                                                                         */
 				int offset;
 				double error = (playback_usec_smoothed - (double)target_latency) / (double)target_latency * ALGO_ERROR_MULTIPLIER;
 //				error = error * error * (error >= 0.0 ? 1.0 : -1.0);
 				error = pow(fabs(error), ALGO_ERROR_EXPONENT) * (error >= 0.0 ? 1.0 : -1.0);
 				if (error >= 0.0) offset = (int)floor(error + 0.5);
 				else              offset = (int) ceil(error - 0.5);
-				if      (offset>iMaxSampleRateOffset) offset=iMaxSampleRateOffset;
+				if      (offset>iMaxSampleRateOffset)  offset=iMaxSampleRateOffset;
 				else if (offset<-iMaxSampleRateOffset) offset=-iMaxSampleRateOffset;
 				/****************************************************************************************************************/
 				if (!bBlockingPlay && cp.sample_rate_offset != offset) {
@@ -690,7 +681,7 @@ CSoundInPulse::CSoundInPulse():
 	pa_m(NULL), pa_c(NULL), pa_s(NULL),
 	remaining_nbytes(0), remaining_data(NULL)
 #ifdef CLOCK_DRIFT_ADJ_ENABLED
-	,record_sample_rate(0), bClockDriftComp(FALSE), cp(NULL)
+	, record_sample_rate(0), bClockDriftComp(FALSE), cp(NULL)
 #endif
 {
 	/* Get devices list */
@@ -786,10 +777,11 @@ CSoundOutPulse::CSoundOutPulse():
 	iSampleRate(0), iBufferSize(0), bBlockingPlay(FALSE),
 	bBufferingError(FALSE),
 	bChangDev(TRUE), iCurrentDevice(-1),
-	pa_m(NULL),pa_c(NULL),pa_s(NULL)
+	pa_m(NULL), pa_c(NULL), pa_s(NULL)
 #ifdef CLOCK_DRIFT_ADJ_ENABLED
-//	,bNewClockDriftComp(TRUE), cp()
-	,bNewClockDriftComp(FALSE), cp()
+	, iMaxSampleRateOffset(0)
+//	, bNewClockDriftComp(TRUE), cp()
+	, bNewClockDriftComp(FALSE), cp()
 #endif
 {
 	/* Get devices list */
