@@ -60,8 +60,8 @@ CSoundCardSelMenu::CSoundCardSelMenu(
     {   /* Receiver */
         CParameter& Parameters = *DRMReceiver->GetParameters();
         Parameters.Lock();
-            QMenu* input_menu = addMenu(tr("Input"));
-            QMenu* output_menu = addMenu(tr("Output"));
+            QMenu* input_menu = addMenu(tr("Signal Input"));
+            QMenu* output_menu = addMenu(tr("Audio Output"));
             connect(InitChannel(input_menu, tr("Channel"), (int)DRMReceiver->GetReceiveData()->GetInChanSel(), InputChannelTable), SIGNAL(triggered(QAction*)), this, SLOT(OnSoundInChannel(QAction*)));
             connect(InitChannel(output_menu, tr("Channel"), (int)DRMReceiver->GetWriteData()->GetOutChanSel(), OutputChannelTable), SIGNAL(triggered(QAction*)), this, SLOT(OnSoundOutChannel(QAction*)));
             connect(InitDevice(input_menu, tr("Device"), pSoundInIF), SIGNAL(triggered(QAction*)), this, SLOT(OnSoundInDevice(QAction*)));
