@@ -30,13 +30,13 @@
 
 static CHANSEL InputChannelTable[] =
 {
-    { "Left channel",  CReceiveData::CS_LEFT_CHAN   },
-    { "Right channel", CReceiveData::CS_RIGHT_CHAN  },
-    { "Mix channels",  CReceiveData::CS_MIX_CHAN    },
-    { "I/Q pos",       CReceiveData::CS_IQ_POS      },
-    { "I/Q neg",       CReceiveData::CS_IQ_NEG      },
-    { "I/Q pos zero",  CReceiveData::CS_IQ_POS_ZERO },
-    { "I/Q neg zero",  CReceiveData::CS_IQ_NEG_ZERO },
+    { "Left Channel",  CReceiveData::CS_LEFT_CHAN   },
+    { "Right Channel", CReceiveData::CS_RIGHT_CHAN  },
+    { "Mix Channels",  CReceiveData::CS_MIX_CHAN    },
+    { "I/Q Pos",       CReceiveData::CS_IQ_POS      },
+    { "I/Q Neg",       CReceiveData::CS_IQ_NEG      },
+    { "I/Q Pos Zero",  CReceiveData::CS_IQ_POS_ZERO },
+    { "I/Q Neg Zero",  CReceiveData::CS_IQ_NEG_ZERO },
     { NULL, 0 } /* end of list */
 };
 
