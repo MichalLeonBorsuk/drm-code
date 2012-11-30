@@ -89,6 +89,8 @@ protected:
 	int 			iBufferSize;
 	_BOOLEAN		bBlockingRec;
 
+	_BOOLEAN		bBufferingError;
+
 	vector<string>	devices;
 	vector<string>	names;
 	_BOOLEAN		bChangDev;

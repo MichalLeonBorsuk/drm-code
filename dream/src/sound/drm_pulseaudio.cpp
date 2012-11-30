@@ -40,13 +40,14 @@
 
 #define APP_NAME_RECEIVER    "Dream Receiver" // PulseAudio stream name
 #define APP_NAME_TRANSMITTER "Dream Transmitter" // PulseAudio stream name
+#define RECORD_BUFFER    2000000 // us
 #define PLAYBACK_BUFFER  2000000 // us
 #define PLAYBACK_LATENCY 1000000 // us
 #define WAIT_PREBUFFER ((int)(PLAYBACK_LATENCY + 399999) / 400000) // 400000us = .4s (frame duration)
 #define NUM_CHANNELS 2 // Stereo
 #define BYTES_PER_SAMPLE ((int)sizeof(_SAMPLE))
-#define PA_RECORD_MAXLENGTH -1//((int)((double)(NUM_CHANNELS * BYTES_PER_SAMPLE * iSampleRate) * ((double)RECORD_BUFFER)  / (double)1000000))
-#define PA_RECORD_FRAGSIZE (2560*BYTES_PER_SAMPLE/2)
+#define PA_RECORD_MAXLENGTH ((int)((double)(NUM_CHANNELS * BYTES_PER_SAMPLE * iSampleRate) * ((double)RECORD_BUFFER)  / (double)1000000))
+//#define PA_RECORD_FRAGSIZE (2560*BYTES_PER_SAMPLE/2)
 #define PA_PLAYBACK_TLENGTH ((int)((double)(NUM_CHANNELS * BYTES_PER_SAMPLE * iSampleRate) * ((double)PLAYBACK_BUFFER)  / (double)1000000))
 #define PA_PLAYBACK_PREBUF  ((int)((double)(NUM_CHANNELS * BYTES_PER_SAMPLE * iSampleRate) * ((double)PLAYBACK_LATENCY) / (double)1000000))
 #define STREAM_FLAGS (PA_STREAM_ADJUST_LATENCY | PA_STREAM_DONT_MOVE)
@@ -268,6 +269,20 @@ int CSoundInPulse::Read_HW(void *recbuf, int size)
 	const char *data;
 	size_t nbytes;
 
+	_BOOLEAN bError = TRUE;
+	if (pa_o_sync(pa_m, pa_c, pa_stream_update_timing_info(pa_s, pa_stream_success_cb, NULL)) == PA_OK) {
+		const pa_timing_info *ti;
+		ti = pa_stream_get_timing_info(pa_s);
+		if (ti && !ti->write_index_corrupt && !ti->read_index_corrupt) {
+			uint64_t samples = abs(ti->write_index - ti->read_index) / (NUM_CHANNELS*BYTES_PER_SAMPLE);
+			uint64_t usec = samples * (uint32_t)1000000 / (uint32_t)iSampleRate;
+//			DEBUG_MSG("recording usec=%i\n", (int)usec);
+			/* buffering error when latency >= 75% of RECORD_BUFFER */
+			bError = usec >= (uint64_t)(PA_RECORD_MAXLENGTH * 75 / 100) ? TRUE : FALSE;
+		}
+	}
+	bBufferingError |= bError;
+
 #ifdef CLOCK_DRIFT_ADJ_ENABLED
 	if (!bBlockingRec && cp) {
 		if (bClockDriftComp != cp->bClockDriftComp) {
@@ -301,16 +316,7 @@ int CSoundInPulse::Read_HW(void *recbuf, int size)
 			data   = remaining_data;
 		}
 		if (data) {
-/*			int negative;
-			pa_usec_t pa_usec;
-			pa_usec = 0;
-			if (pa_o_sync(pa_m, pa_c, pa_stream_update_timing_info(pa_s, pa_stream_success_cb, NULL))>=0) {
-				ret = pa_stream_get_latency(pa_s, &pa_usec, &negative);
-				if (ret == PA_OK) {
-					DEBUG_MSG("record latency: %i us\n", (int)pa_usec);
-				}
-			}
-*/			if (nbytes > (size_t)size) {
+			if (nbytes > (size_t)size) {
 				chunk = size;
 				remaining_nbytes = nbytes - chunk;
 				remaining_data   = data   + chunk;
@@ -677,6 +683,7 @@ getdevices(vector < string > &names, vector < string > &devices,
 
 CSoundInPulse::CSoundInPulse():
 	iSampleRate(0), iBufferSize(0), bBlockingRec(FALSE),
+	bBufferingError(FALSE),
 	bChangDev(TRUE), iCurrentDevice(-1),
 	pa_m(NULL), pa_c(NULL), pa_s(NULL),
 	remaining_nbytes(0), remaining_data(NULL)
@@ -721,6 +728,9 @@ void CSoundInPulse::Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBl
 			SetBufferSize_HW();
 		}
 	}
+
+	/* Clear buffering error flag */
+	bBufferingError = FALSE;
 }
 
 _BOOLEAN CSoundInPulse::Read(CVector<_SAMPLE>& psData)
@@ -739,6 +749,9 @@ _BOOLEAN CSoundInPulse::Read(CVector<_SAMPLE>& psData)
 	_BOOLEAN bError = Read_HW(&psData[0], iBufferSize) != iBufferSize;
 	if (bError)
 	    DEBUG_MSG("CSoundInPulse::Read(): read_HW error\n");
+
+	bError |= bBufferingError;
+	bBufferingError = FALSE;
 
 	return bError;
 }
