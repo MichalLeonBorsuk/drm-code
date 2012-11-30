@@ -58,17 +58,22 @@
 # include <QTranslator>
 #endif
 
-#ifdef _WIN32
-static bool bPriorityEnabled;
-#endif
-
 class CRx: public QThread
 {
 public:
-	CRx(CDRMReceiver& nRx):rx(nRx){}
+	CRx(CDRMReceiver& nRx
+#ifdef _WIN32
+	, bool bPriorityEnabled
+#endif
+	):rx(nRx)
+#ifdef _WIN32
+	, bPriorityEnabled(bPriorityEnabled)
+#endif
+	{}
 	void run();
 private:
 	CDRMReceiver& rx;
+	bool bPriorityEnabled;
 };
 
 void
@@ -77,7 +82,6 @@ CRx::run()
 #ifdef _WIN32
     if (bPriorityEnabled)
     {
-        /* It doesn't matter what the GUI does, we want to be above normal! */
         SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_ABOVE_NORMAL);
     }
 #endif
@@ -140,16 +144,16 @@ main(int argc, char **argv)
 		/* works for both transmit and receive. GUI is low, working is normal.
 		 * the working thread does not need to know what the setting is.
 		 */
-			bPriorityEnabled = Settings.Get("GUI", "processpriority", bool(TRUE));
-			if (bPriorityEnabled)
-			{
-				/* Set priority class for this application */
-				SetPriorityClass(GetCurrentProcess(), ABOVE_NORMAL_PRIORITY_CLASS);
+		bool bPriorityEnabled = Settings.Get("GUI", "processpriority", bool(TRUE));
+		if (bPriorityEnabled)
+		{
+			/* Set priority class for this application */
+			SetPriorityClass(GetCurrentProcess(), ABOVE_NORMAL_PRIORITY_CLASS);
 
-				/* Normal priority for GUI thread */
-				SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_NORMAL);
-			}
-			Settings.Put("GUI", "processpriority", bPriorityEnabled);
+			/* Normal priority for GUI thread */
+			SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_NORMAL);
+		}
+		Settings.Put("GUI", "processpriority", bPriorityEnabled);
 #endif
 
 		string mode = Settings.Get("command", "mode", string());
@@ -182,7 +186,11 @@ main(int argc, char **argv)
 				);
 
 			/* Start working thread */
+#ifdef _WIN32
+			CRx rx(DRMReceiver, bPriorityEnabled);
+#else
 			CRx rx(DRMReceiver);
+#endif
 			rx.start();
 
 			/* Set main window */
