@@ -63,6 +63,7 @@ end
 % Write header file
 fid = fopen('IQInputFilter.h', 'w');
 fprintf(fid, '/* Automatically generated file with GNU Octave */\n');
+fprintf(fid, '\n');
 fprintf(fid, '/* File name: "IQInputFilter.octave" */\n');
 fprintf(fid, '/* Filter taps in time-domain */\n');
 fprintf(fid, '\n');
@@ -81,6 +82,7 @@ fclose(fid);
 % Write filter taps
 fid = fopen('IQInputFilter.cpp', 'w');
 fprintf(fid, '/* Automatically generated file with GNU Octave */\n');
+fprintf(fid, '\n');
 fprintf(fid, '/* File name: "IQInputFilter.octave" */\n');
 fprintf(fid, '/* Filter taps in time-domain */\n');
 fprintf(fid, '\n');
@@ -89,7 +91,7 @@ fprintf(fid, '\n');
 fprintf(fid, '/* Low pass prototype for Hilbert-filter */\n');
 fprintf(fid, 'const float fHilFiltIQ[NUM_TAPS_IQ_INPUT_FILT] =\n');
 fprintf(fid, '{\n');
-fprintf(fid, '	%.20ff,\n', b(1:end - 1));
-fprintf(fid, '	%.20ff\n', b(end));
+fprintf(fid, '	%.18ef,\n', b(1:end - 1));
+fprintf(fid, '	%.18ef\n', b(end));
 fprintf(fid, '};\n');
 fclose(fid);

@@ -41,6 +41,7 @@ end
 
 fid = fopen('LatencyFilter.h', 'w');
 fprintf(fid, '/* Automatically generated file with GNU Octave */\n');
+fprintf(fid, '\n');
 fprintf(fid, '/* File name: "LatencyFilter.octave" */\n');
 fprintf(fid, '/* Filter taps in time-domain */\n');
 fprintf(fid, '\n');
