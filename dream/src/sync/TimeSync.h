@@ -100,7 +100,7 @@ protected:
 	int							iSampleRate;
 	int							iGrdcrrDecFact;
 	int							iNumTapsHilbFilt;
-	float*						fHilLPProt;
+	const float*				fHilLPProt;
 	int							iCorrCounter;
 	int							iAveCorr;
 	int							iStepSizeGuardCorr;

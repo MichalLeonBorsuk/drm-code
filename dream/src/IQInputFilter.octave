@@ -3,7 +3,7 @@
 %* Copyright (c) 2004
 %*
 %* Author:
-%*	Volker Fischer
+%*	Volker Fischer, modified by David Flamand (bandwith increased)
 %*
 %* Description:
 %* 	Hilbert Filter for I / Q input

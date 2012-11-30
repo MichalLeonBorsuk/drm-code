@@ -1,4 +1,5 @@
 /* Automatically generated file with GNU Octave */
+
 /* File name: "TimeSyncFilter.octave" */
 /* Filter taps in time-domain */
 
@@ -7,7 +8,7 @@
 /*********************************************************/
 /* Filter taps for 24000  Hz sample rate                 */
 /* Low pass prototype for Hilbert-filter 5 kHz bandwidth */
-float fHilLPProt5_24[NUM_TAPS_HILB_FILT_5_24] =
+const float fHilLPProt5_24[NUM_TAPS_HILB_FILT_5_24] =
 {
 	-0.00569076550675578878f,
 	-0.02636034308612325572f,
@@ -52,7 +53,7 @@ float fHilLPProt5_24[NUM_TAPS_HILB_FILT_5_24] =
 	-0.00569076550675578878f
 };
 /* Low pass prototype for Hilbert-filter 10 kHz bandwidth */
-float fHilLPProt10_24[NUM_TAPS_HILB_FILT_10_24] =
+const float fHilLPProt10_24[NUM_TAPS_HILB_FILT_10_24] =
 {
 	-0.01126468176123466419f,
 	-0.04573315426073081696f,
@@ -100,7 +101,7 @@ float fHilLPProt10_24[NUM_TAPS_HILB_FILT_10_24] =
 /*********************************************************/
 /* Filter taps for 48000  Hz sample rate                 */
 /* Low pass prototype for Hilbert-filter 5 kHz bandwidth */
-float fHilLPProt5_48[NUM_TAPS_HILB_FILT_5_48] =
+const float fHilLPProt5_48[NUM_TAPS_HILB_FILT_5_48] =
 {
 	-0.00023478690135598997f,
 	-0.01413273123257565052f,
@@ -185,7 +186,7 @@ float fHilLPProt5_48[NUM_TAPS_HILB_FILT_5_48] =
 	-0.00023478690135598997f
 };
 /* Low pass prototype for Hilbert-filter 10 kHz bandwidth */
-float fHilLPProt10_48[NUM_TAPS_HILB_FILT_10_48] =
+const float fHilLPProt10_48[NUM_TAPS_HILB_FILT_10_48] =
 {
 	-0.00265802839641611326f,
 	-0.01970912920536988661f,
@@ -273,7 +274,7 @@ float fHilLPProt10_48[NUM_TAPS_HILB_FILT_10_48] =
 /*********************************************************/
 /* Filter taps for 96000  Hz sample rate                 */
 /* Low pass prototype for Hilbert-filter 5 kHz bandwidth */
-float fHilLPProt5_96[NUM_TAPS_HILB_FILT_5_96] =
+const float fHilLPProt5_96[NUM_TAPS_HILB_FILT_5_96] =
 {
 	0.00344351743508067992f,
 	-0.00925278666089145857f,
@@ -438,7 +439,7 @@ float fHilLPProt5_96[NUM_TAPS_HILB_FILT_5_96] =
 	0.00344351743508067992f
 };
 /* Low pass prototype for Hilbert-filter 10 kHz bandwidth */
-float fHilLPProt10_96[NUM_TAPS_HILB_FILT_10_96] =
+const float fHilLPProt10_96[NUM_TAPS_HILB_FILT_10_96] =
 {
 	0.00180344649481576583f,
 	-0.01124009964748978740f,
@@ -606,7 +607,7 @@ float fHilLPProt10_96[NUM_TAPS_HILB_FILT_10_96] =
 /*********************************************************/
 /* Filter taps for 192000 Hz sample rate                 */
 /* Low pass prototype for Hilbert-filter 5 kHz bandwidth */
-float fHilLPProt5_192[NUM_TAPS_HILB_FILT_5_192] =
+const float fHilLPProt5_192[NUM_TAPS_HILB_FILT_5_192] =
 {
 	0.00597665458855372710f,
 	-0.00599723610232585913f,
@@ -931,7 +932,7 @@ float fHilLPProt5_192[NUM_TAPS_HILB_FILT_5_192] =
 	0.00597665458855372710f
 };
 /* Low pass prototype for Hilbert-filter 10 kHz bandwidth */
-float fHilLPProt10_192[NUM_TAPS_HILB_FILT_10_192] =
+const float fHilLPProt10_192[NUM_TAPS_HILB_FILT_10_192] =
 {
 	0.00481248575344039864f,
 	-0.00716589506396039279f,
