@@ -487,7 +487,7 @@ TransmDialog::TransmDialog(CSettings& NSettings,
 
 #else
 
-	menu_Settings->addMenu( new CSoundCardSelMenu(
+	menu_Settings->addMenu( new CSoundCardSelMenu(NULL,
 		DRMTransmitter.GetSoundInInterface(),
 		DRMTransmitter.GetSoundOutInterface(),
 		this));

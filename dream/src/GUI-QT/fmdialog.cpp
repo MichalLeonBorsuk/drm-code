@@ -109,7 +109,7 @@ FMDialog::FMDialog(CDRMReceiver& NDRMR, CSettings& NSettings, CRig& rig,
 	connect(actionDisplayColor, SIGNAL(triggered()), this, SLOT(OnMenuSetDisplayColor()));
 
 	menu_Settings->addMenu(
-		new CSoundCardSelMenu(
+		new CSoundCardSelMenu(&DRMReceiver,
 			DRMReceiver.GetSoundInInterface(), DRMReceiver.GetSoundOutInterface(), this
 		)
 	);

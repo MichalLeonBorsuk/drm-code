@@ -245,7 +245,7 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& NSettings, CRig& rig,
 
     action_Multimedia_Dialog->setEnabled(false);
 
-    menu_Settings->addMenu( new CSoundCardSelMenu(
+    menu_Settings->addMenu( new CSoundCardSelMenu(&DRMReceiver,
                                 DRMReceiver.GetSoundInInterface(),
                                 DRMReceiver.GetSoundOutInterface(),
                                 this));
