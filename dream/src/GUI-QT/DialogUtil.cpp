@@ -330,35 +330,15 @@ CDreamHelpMenu::CDreamHelpMenu(QWidget* parent) : QPopupMenu(parent)
 #endif
 #endif
 
-#if 0 // QT_VERSION >= 0x040000
-QSignalMapper* CSoundCardSelMenu::Init(const QString& text, CSelectionInterface* intf)
-{
-    QMenu* menu = addMenu(text);
-    QSignalMapper* map = new QSignalMapper(this);
-    QActionGroup* group = new QActionGroup(this);
-    vector<string> names;
-
-    intf->Enumerate(names);
-    int iNumSoundDev = names.size();
-    int iDefaultDev = intf->GetDev();
-    if ((iDefaultDev > iNumSoundDev) || (iDefaultDev < 0))
-        iDefaultDev = iNumSoundDev;
-
-    for (int i = 0; i < iNumSoundDev; i++)
-    {
-        QString name(names[i].c_str());
-        QAction* m = menu->addAction(name, map, SLOT(map()));
-		group->addAction(m);
-		map->setMapping(m, i);
-        if(i==iDefaultDev)
-            menu->setActiveAction(m);
-    }
-    return map;
-}
-#endif
-
 /* Sound card selection menu ------------------------------------------------ */
 #if QT_VERSION < 0x040000
+#undef DEVICE_STRING
+#ifdef _WIN32
+# define DEVICE_STRING(s) s.c_str()
+#else
+# define DEVICE_STRING(s) QString::fromUtf8(s.c_str())
+#endif
+
 CSoundCardSelMenu::CSoundCardSelMenu(
     CSelectionInterface* pNSIn, CSelectionInterface* pNSOut, QWidget* parent) :
     QPopupMenu(parent), pSoundInIF(pNSIn), pSoundOutIF(pNSOut)
@@ -375,7 +355,7 @@ CSoundCardSelMenu::CSoundCardSelMenu(
 
     for (i = 0; i < iNumSoundInDev; i++)
     {
-        QString name(QString::fromUtf8(vecSoundInNames[i].c_str()));
+        QString name(DEVICE_STRING(vecSoundInNames[i]));
 #if defined(_MSC_VER) && (_MSC_VER < 1400)
         if (name.find("blaster", 0, FALSE) >= 0)
             name += " (has problems on some platforms)";
@@ -388,7 +368,7 @@ CSoundCardSelMenu::CSoundCardSelMenu(
     iNumSoundOutDev = vecSoundOutNames.size();
     for (i = 0; i < iNumSoundOutDev; i++)
     {
-        pSoundOutMenu->insertItem(QString::fromUtf8(vecSoundOutNames[i].c_str()), this,
+        pSoundOutMenu->insertItem(DEVICE_STRING(vecSoundOutNames[i]), this,
             SLOT(OnSoundOutDevice(int)), 0, i);
     }
 
@@ -422,6 +402,7 @@ void CSoundCardSelMenu::OnSoundOutDevice(int id)
     for (int i = 0; i < iNumSoundOutDev + 1; i++)
         pSoundOutMenu->setItemChecked(i, i == id);
 }
+#undef DEVICE_STRING
 #endif
 
 RemoteMenu::RemoteMenu(QWidget* parent, CRig& nrig)

@@ -27,6 +27,12 @@
 \******************************************************************************/
 #include "SoundCardSelMenu.h"
 
+#ifdef _WIN32
+# define DEVICE_STRING(s) s.c_str()
+#else
+# define DEVICE_STRING(s) QString::fromUtf8(s.c_str())
+#endif
+
 
 static CHANSEL InputChannelTable[] =
 {
@@ -124,7 +130,7 @@ QMenu* CSoundCardSelMenu::InitDevice(QMenu* parent, const QString& text, CSelect
 
     for (int i = 0; i < iNumSoundDev; i++)
     {
-        QString name(QString::fromUtf8(names[i].c_str()));
+        QString name(DEVICE_STRING(names[i]));
         QAction* m = menu->addAction(name);
         m->setData(i);
         m->setCheckable(true);
