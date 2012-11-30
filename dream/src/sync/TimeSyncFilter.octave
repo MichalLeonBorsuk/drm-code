@@ -129,14 +129,14 @@ function MakeFilter(fid_cpp, fid_h, multi)
     fprintf(fid_cpp, '/* Low pass prototype for Hilbert-filter 5 kHz bandwidth */\n');
     fprintf(fid_cpp, 'const float fHilLPProt5_%i[NUM_TAPS_HILB_FILT_5_%i] =\n', f, f);
     fprintf(fid_cpp, '{\n');
-    fprintf(fid_cpp, '	%.20ff,\n', b5(1:end - 1));
-    fprintf(fid_cpp, '	%.20ff\n', b5(end));
+    fprintf(fid_cpp, '	%.18ef,\n', b5(1:end - 1));
+    fprintf(fid_cpp, '	%.18ef\n', b5(end));
     fprintf(fid_cpp, '};\n');
     fprintf(fid_cpp, '/* Low pass prototype for Hilbert-filter 10 kHz bandwidth */\n');
     fprintf(fid_cpp, 'const float fHilLPProt10_%i[NUM_TAPS_HILB_FILT_10_%i] =\n', f, f);
     fprintf(fid_cpp, '{\n');
-    fprintf(fid_cpp, '	%.20ff,\n', b10(1:end - 1));
-    fprintf(fid_cpp, '	%.20ff\n', b10(end));
+    fprintf(fid_cpp, '	%.18ef,\n', b10(1:end - 1));
+    fprintf(fid_cpp, '	%.18ef\n', b10(end));
     fprintf(fid_cpp, '};\n');
     fprintf(fid_cpp, '\n');
 endfunction

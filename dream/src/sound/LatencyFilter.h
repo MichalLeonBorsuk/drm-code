@@ -1,4 +1,5 @@
 /* Automatically generated file with GNU Octave */
+
 /* File name: "LatencyFilter.octave" */
 /* Filter taps in time-domain */
 
