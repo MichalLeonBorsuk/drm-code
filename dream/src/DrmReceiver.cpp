@@ -1408,10 +1408,12 @@ CDRMReceiver::LoadSettings(CSettings& s)
     /* Flip spectrum flag */
     ReceiveData.SetFlippedSpectrum(s.Get("Receiver", "flipspectrum", FALSE));
 
-    CReceiveData::EInChanSel inChanSel = (CReceiveData::EInChanSel)s.Get("command", "inchansel", int(defaultInChanSel));
+    /* Input channel selection */
+    CReceiveData::EInChanSel inChanSel = (CReceiveData::EInChanSel)s.Get("Receiver", "inchansel", int(defaultInChanSel));
     ReceiveData.SetInChanSel(inChanSel);
 
-    CWriteData::EOutChanSel outChanSel = (CWriteData::EOutChanSel)s.Get("command", "outchansel", CWriteData::CS_BOTH_BOTH);
+    /* Output channel selection */
+    CWriteData::EOutChanSel outChanSel = (CWriteData::EOutChanSel)s.Get("Receiver", "outchansel", CWriteData::CS_BOTH_BOTH);
     WriteData.SetOutChanSel(outChanSel);
 
     /* AM Parameters */
@@ -1585,6 +1587,12 @@ CDRMReceiver::SaveSettings(CSettings& s)
 
     /* Flip spectrum flag */
     s.Put("Receiver", "flipspectrum", ReceiveData.GetFlippedSpectrum());
+
+    /* Input channel selection */
+    s.Put("Receiver", "inchansel", ReceiveData.GetInChanSel());
+
+    /* Output channel selection */
+    s.Put("Receiver", "outchansel",  WriteData.GetOutChanSel());
 
     /* Mute audio flag */
     s.Put("Receiver", "muteaudio", WriteData.GetMuteAudio());

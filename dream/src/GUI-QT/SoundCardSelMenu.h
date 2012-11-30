@@ -3,7 +3,7 @@
  * Copyright (c) 2012
  *
  * Author(s):
- *      Julian Cable
+ *      Julian Cable, David Flamand
  *
  * Description:
  *
@@ -30,24 +30,40 @@
 
 #include <QMenu>
 #include <QActionGroup>
+#include "../DrmReceiver.h"
+#include "../Parameter.h"
+#include "../DRMSignalIO.h"
+#include "../DataIO.h"
 #include "../selectioninterface.h"
 #include <vector>
 
+typedef struct _CHANSEL {
+    const char* Name;
+    int iChanSel;
+} CHANSEL;
+
 class CSoundCardSelMenu : public QMenu
 {
-        Q_OBJECT
+    Q_OBJECT
 
 public:
-        CSoundCardSelMenu(CSelectionInterface* pNSIn,
-                CSelectionInterface* pNSOut, QWidget* parent = 0);
+    CSoundCardSelMenu(CDRMReceiver* DRMReceiver,
+        CSelectionInterface* pNSIn,
+        CSelectionInterface* pNSOut,
+        QWidget* parent = 0);
 
 protected:
-        CSelectionInterface*    pSoundInIF;
-        CSelectionInterface*    pSoundOutIF;
-	QMenu* Init(const QString& text, CSelectionInterface* intf);
+    CDRMReceiver*           DRMReceiver;
+    CSelectionInterface*    pSoundInIF;
+    CSelectionInterface*    pSoundOutIF;
+    QMenu* InitDevice(QMenu* parent, const QString& text, CSelectionInterface* intf);
+    QMenu* InitChannel(QMenu* parent, const QString& text, int iChanSel, CHANSEL* ChanSel);
 
 public slots:
-        void OnSoundInDevice(QAction*);
-        void OnSoundOutDevice(QAction*);
+    void OnSoundInChannel(QAction*);
+    void OnSoundOutChannel(QAction*);
+    void OnSoundInDevice(QAction*);
+    void OnSoundOutDevice(QAction*);
 };
+
 #endif

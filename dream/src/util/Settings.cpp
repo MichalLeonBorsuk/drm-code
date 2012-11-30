@@ -360,7 +360,7 @@ CSettings::ParseArguments(int argc, char **argv)
 		if (GetNumericArgument(argc, argv, i, "-c", "--inchansel", 0,
 							   MAX_VAL_IN_CHAN_SEL, rArgument) == TRUE)
 		{
-			Put("command", "inchansel", (int) rArgument);
+			Put("Receiver", "inchansel", (int) rArgument);
 			continue;
 		}
 
@@ -368,7 +368,7 @@ CSettings::ParseArguments(int argc, char **argv)
 		if (GetNumericArgument(argc, argv, i, "-u", "--outchansel", 0,
 							   MAX_VAL_OUT_CHAN_SEL, rArgument) == TRUE)
 		{
-			Put("command", "outchansel", (int) rArgument);
+			Put("Receiver", "outchansel", (int) rArgument);
 			continue;
 		}
 

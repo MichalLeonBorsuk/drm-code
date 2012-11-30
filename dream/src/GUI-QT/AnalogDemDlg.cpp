@@ -118,7 +118,7 @@ AnalogDemDlg::AnalogDemDlg(CDRMReceiver& NDRMR, CSettings& NSettings,
     connect(actionAM, SIGNAL(triggered()), this, SIGNAL(NewAMAcquisition()));
     connect(actionFM, SIGNAL(triggered()), this, SLOT(OnSwitchToFM()));
     connect(actionDRM, SIGNAL(triggered()), this, SLOT(OnSwitchToDRM()));
-    menu_Settings->addMenu( new CSoundCardSelMenu(
+    menu_Settings->addMenu( new CSoundCardSelMenu(&DRMReceiver,
 		DRMReceiver.GetSoundInInterface(),
 		DRMReceiver.GetSoundOutInterface(),
 	this));
