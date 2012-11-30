@@ -372,9 +372,14 @@ void CReceiveData::InitInternal(CParameter& Parameters)
 		/* Init signal meter */
 		SignalLevelMeter.Init(0);
 
-		/* Inits for I / Q input */
-		vecrReHist.Init(NUM_TAPS_IQ_INPUT_FILT, (_REAL) 0.0);
-		vecrImHist.Init(NUM_TAPS_IQ_INPUT_FILT, (_REAL) 0.0);
+		/* Inits for I / Q input, only if it is not already
+		   to keep the history intact, TODO clear the history
+		   on sample rate change */
+		if (vecrReHist.Size() != NUM_TAPS_IQ_INPUT_FILT)
+		{
+			vecrReHist.Init(NUM_TAPS_IQ_INPUT_FILT, (_REAL) 0.0);
+			vecrImHist.Init(NUM_TAPS_IQ_INPUT_FILT, (_REAL) 0.0);
+		}
 
 		/* Start with phase null (can be arbitrarily chosen) */
 		cCurExp = (_REAL) 1.0;
