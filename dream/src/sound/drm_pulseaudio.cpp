@@ -271,9 +271,6 @@ void CSoundInPulse::Init_HW()
 	remaining_nbytes = 0;
 	remaining_data   = NULL;
 
-	/* Clear buffering error flag */
-	bBufferingError = FALSE;
-
 	DEBUG_MSG("pulseaudio input device '%s', init done\n", devices[iCurrentDevice].c_str());
 }
 
@@ -443,12 +440,6 @@ void CSoundOutPulse::Init_HW()
 		B[i] = dLatFilt[i];
 #endif
 
-	/* Set prebuffer flag */
-	bPrebuffer = TRUE;
-	/* Clear seek flag */
-	bSeek = FALSE;
-	/* Clear buffering error flag */
-	bBufferingError = FALSE;
 	/* Clear mute flag */
 	bMute = FALSE;
 
@@ -697,6 +688,9 @@ void CSoundInPulse::Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBl
 			SetBufferSize_HW();
 		}
 	}
+
+	/* Clear buffering error flag */
+	bBufferingError = FALSE;
 }
 
 _BOOLEAN CSoundInPulse::Read(CVector<_SAMPLE>& psData)
@@ -788,6 +782,13 @@ void CSoundOutPulse::Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewB
 		/* Reset flag */
 		bChangDev = FALSE;
 	}
+
+	/* Set prebuffer flag */
+	bPrebuffer = TRUE;
+	/* Clear seek flag */
+	bSeek = FALSE;
+	/* Clear buffering error flag */
+	bBufferingError = FALSE;
 }
 
 _BOOLEAN CSoundOutPulse::Write(CVector<_SAMPLE>& psData)
