@@ -31,15 +31,15 @@
 
 #include "GlobalDefinitions.h"
 #include <vector>
+#include <string>
 
 class CSelectionInterface
 {
 public:
     virtual 			~CSelectionInterface() {}
-    virtual void		Enumerate(vector<string>&)=0;
-    virtual int			GetDev()=0;
-    virtual void		SetDev(int iNewDev)=0;
-
+    virtual void		Enumerate(vector<string>& names, vector<string>& descriptions)=0;
+    virtual string		GetDev()=0;
+    virtual void		SetDev(string sNewDev)=0;
 };
 
 #endif

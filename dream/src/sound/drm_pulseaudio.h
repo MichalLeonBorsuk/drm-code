@@ -72,9 +72,10 @@ public:
 	CSoundInPulse();
 	virtual ~CSoundInPulse() {}
 
-	virtual void	Enumerate(vector<string>& choices) { choices = names; }
-	virtual void	SetDev(int iNewDevice);
-	virtual int		GetDev();
+	virtual void	Enumerate(vector<string>& names, vector<string>& descriptions)
+		{ names=this->names; descriptions=this->descriptions; }
+	virtual void	SetDev(string sNewDevice);
+	virtual string	GetDev();
 
 	void			Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking);
 	_BOOLEAN		Read(CVector<_SAMPLE>& psData);
@@ -95,10 +96,10 @@ protected:
 
 	_BOOLEAN		bBufferingError;
 
-	vector<string>	devices;
 	vector<string>	names;
+	vector<string>	descriptions;
 	_BOOLEAN		bChangDev;
-	int				iCurrentDevice;
+	string			sCurrentDevice;
 
 	pa_stream		*pa_s;
 	size_t			remaining_nbytes;
@@ -117,9 +118,10 @@ public:
 	CSoundOutPulse();
 	virtual ~CSoundOutPulse() {}
 
-	virtual void	Enumerate(vector<string>& choices) { choices = names; }
-	virtual void	SetDev(int iNewDevice);
-	virtual int		GetDev();
+	virtual void	Enumerate(vector<string>& names, vector<string>& descriptions)
+		{ names=this->names; descriptions=this->descriptions; }
+	virtual void	SetDev(string sNewDevice);
+	virtual string	GetDev();
 
 	void			Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking);
 	_BOOLEAN		Write(CVector<_SAMPLE>& psData);
@@ -144,10 +146,10 @@ protected:
 	int				iBufferSize;
 	_BOOLEAN		bBlockingPlay;
 
-	vector<string>	devices;
 	vector<string>	names;
+	vector<string>	descriptions;
 	_BOOLEAN		bChangDev;
-	int				iCurrentDevice;
+	string			sCurrentDevice;
 
 	pa_stream		*pa_s;
 	pa_stream_notify_cb_userdata_t pa_stream_notify_cb_userdata_underflow;

@@ -35,49 +35,49 @@
 class CSoundInNull : public CSoundInInterface
 {
 public:
-    CSoundInNull():iDev(-1) {}
+    CSoundInNull() {}
     virtual ~CSoundInNull() {}
 
     virtual void		Init(int, int, _BOOLEAN) {}
     virtual _BOOLEAN	Read(CVector<short>&) {
         return FALSE;
     }
-    virtual void		Enumerate(vector<string>&choices) {
+    virtual void		Enumerate(vector<string>&choices, vector<string>&) {
         choices.push_back("(File or Network)");
     }
-    virtual int			GetDev() {
-        return iDev;
+    virtual string		GetDev() {
+        return sDev;
     }
-    virtual void		SetDev(int iNewDev) {
-        iDev = iNewDev;
+    virtual void		SetDev(string sNewDev) {
+        sDev = sNewDev;
     }
     virtual void		Close() {}
 private:
-    int iDev;
+    string sDev;
 };
 
 class CSoundOutNull : public CSoundOutInterface
 {
 public:
-    CSoundOutNull():iDev(-1) {}
+    CSoundOutNull() {}
     virtual ~CSoundOutNull() {}
 
     virtual void		Init(int, int, _BOOLEAN) {}
     virtual _BOOLEAN	Write(CVector<short>&) {
         return FALSE;
     }
-    virtual void		Enumerate(vector<string>& choices) {
+    virtual void		Enumerate(vector<string>& choices, vector<string>&) {
         choices.push_back("(None)");
     }
-    virtual int			GetDev() {
-        return iDev;
+    virtual string		GetDev() {
+        return sDev;
     }
-    virtual void		SetDev(int iNewDev) {
-        iDev = iNewDev;
+    virtual void		SetDev(string sNewDev) {
+        sDev = sNewDev;
     }
     virtual void		Close() {}
 private:
-    int iDev;
+    string sDev;
 };
 
 #endif
