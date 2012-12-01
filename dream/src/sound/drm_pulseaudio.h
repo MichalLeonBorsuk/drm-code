@@ -44,13 +44,11 @@
 # include "../matlib/MatlibSigProToolbox.h"
 #endif
 
-
+class CSoundOutPulse;
 typedef struct _pa_stream_notify_cb_userdata_t
 {
-	void *SoundIO;
-	_BOOLEAN	bOverflow;
-	_BOOLEAN	bMute;
-	_BOOLEAN*	bBufferingError;
+	CSoundOutPulse*		SoundOutPulse;
+	_BOOLEAN			bOverflow;
 } pa_stream_notify_cb_userdata_t;
 
 typedef struct _pa_common
@@ -130,6 +128,8 @@ public:
 
 	_BOOLEAN		bPrebuffer;
 	_BOOLEAN		bSeek;
+	_BOOLEAN		bBufferingError;
+	_BOOLEAN		bMute;
 
 protected:
 	void			Init_HW();
@@ -139,8 +139,6 @@ protected:
 	int				iSampleRate;
 	int				iBufferSize;
 	_BOOLEAN		bBlockingPlay;
-
-	_BOOLEAN		bBufferingError;
 
 	vector<string>	devices;
 	vector<string>	names;
@@ -156,14 +154,14 @@ protected:
 #ifdef CLOCK_DRIFT_ADJ_ENABLED
 	int				iMaxSampleRateOffset;
 	CReal			playback_usec_smoothed;
-	int				playback_usec;
 	int				target_latency;
 	int				filter_stabilized;
 	int				wait_prebuffer;
-	int				clock;
 	CMatlibVector<CReal> B, A, X, Z;
 	_BOOLEAN		bNewClockDriftComp;
 	pa_common		cp;
+	int				playback_usec; // DEBUG
+	int				clock; // DEBUG
 #endif
 };
 
