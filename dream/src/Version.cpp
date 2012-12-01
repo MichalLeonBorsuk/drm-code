@@ -28,18 +28,19 @@
 #include "Version.h"
 #include "GlobalDefinitions.h"
 
-char dream_manufacturer[] = "drea";
+const char dream_manufacturer[] = "drea";
 #ifdef QT_VERSION
 # if QT_VERSION >= 0x040000
-char dream_implementation[] = "Q4";
+const char dream_implementation[] = "Q4";
 # elif QT_VERSION >= 0x030000
-char dream_implementation[] = "Q3";
+const char dream_implementation[] = "Q3";
 # else
-char dream_implementation[] = "Q2";
+const char dream_implementation[] = "Q2";
 # endif
 #else
-char dream_implementation[] = "CL";
+const char dream_implementation[] = "CL";
 #endif
-int dream_version_major = 1;
-int dream_version_minor = 17;
+const int dream_version_major = 1;
+const int dream_version_minor = 17;
+const char dream_version_build[] = "";
 

@@ -99,7 +99,10 @@ QString VersionString(QWidget* parent)
 {
     QString strVersionText;
     strVersionText = "<center><b>" + parent->tr("Dream, Version ");
-    strVersionText += QString("%1.%2").arg(dream_version_major).arg(dream_version_minor);
+    strVersionText += QString("%1.%2%3")
+        .arg(dream_version_major)
+        .arg(dream_version_minor)
+        .arg(dream_version_build);
     strVersionText += "</b><br> " + parent->tr("Open-Source Software Implementation of "
                                        "a DRM-Receiver") + "<br>";
     strVersionText += parent->tr("Under the GNU General Public License (GPL)") +
