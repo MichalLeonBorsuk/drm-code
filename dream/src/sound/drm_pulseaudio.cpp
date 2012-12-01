@@ -65,9 +65,9 @@
 
 static pa_object pa_obj =
 {
-	.pa_m = NULL,
-	.pa_c = NULL,
-	.ref_count = 1
+	/*.pa_m =*/			NULL,
+	/*.pa_c =*/			NULL,
+	/*.ref_count =*/	1
 };
 
 static int pa_c_sync(pa_object *pa_obj, int error)
@@ -138,7 +138,7 @@ static int pa_init(pa_object *pa_obj, const char *app_name)
 			pa_mainloop_free(pa_m_tmp);
 			return PA_ERR_MAX;
 		}
-		pa_object pa_obj_tmp = { .pa_m=pa_m_tmp, .pa_c=pa_c_tmp, .ref_count=1 };
+		pa_object pa_obj_tmp = { /*.pa_m=*/pa_m_tmp, /*.pa_c=*/pa_c_tmp, /*.ref_count=*/1 };
 		ret = pa_context_connect(pa_c_tmp, NULL, PA_CONTEXT_NOFLAGS, NULL);
 		if (pa_c_sync(&pa_obj_tmp, ret)!=PA_OK) {
 			DEBUG_MSG("pa_init pa_context_connect failed\n");
@@ -631,7 +631,7 @@ void
 getdevices(vector < string > &names, vector < string > &devices,
 		   bool playback)
 {
-	pa_object pa_obj = { .pa_m=NULL, .pa_c=NULL, .ref_count=0 };
+	pa_object pa_obj = { /*.pa_m=*/NULL, /*.pa_c=*/NULL, /*.ref_count=*/0 };
 	pa_operation *pa_o;
 	USERDATA userdata;
 
