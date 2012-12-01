@@ -377,10 +377,10 @@ void CDRMTransmitter::LoadSettings(CSettings& s)
     TransmParam.SetSigSampleRate(s.Get(Transmitter, "sampleratesig", int(DEFAULT_SOUNDCRD_SAMPLE_RATE)));
 
     /* Sound card input device id */
-    pSoundInInterface->SetDev(s.Get(Transmitter, "snddevin", int(0)));
+    pSoundInInterface->SetDev(s.Get(Transmitter, "snddevin", string()));
 
     /* Sound card output device id */
-    pSoundOutInterface->SetDev(s.Get(Transmitter, "snddevout", int(0)));
+    pSoundOutInterface->SetDev(s.Get(Transmitter, "snddevout", string()));
 #if 0 // TODO
     /* Sound clock drift adjustment */
     _BOOLEAN bEnabled = s.Get(Transmitter, "sndclkadj", int(0));
@@ -512,10 +512,10 @@ void CDRMTransmitter::SaveSettings(CSettings& s)
     s.Put(Transmitter, "sampleratesig", TransmParam.GetSigSampleRate());
 
     /* Sound card input device id */
-    s.Put(Transmitter, "snddevin", int(pSoundInInterface->GetDev()));
+    s.Put(Transmitter, "snddevin", pSoundInInterface->GetDev());
 
     /* Sound card output device id */
-    s.Put(Transmitter, "snddevout", int(pSoundOutInterface->GetDev()));
+    s.Put(Transmitter, "snddevout", pSoundOutInterface->GetDev());
 #if 0 // TODO
     /* Sound clock drift adjustment */
     s.Put(Transmitter, "sndclkadj", int(((CSoundOutPulse*)pSoundOutInterface)->IsClockDriftAdjEnabled()));

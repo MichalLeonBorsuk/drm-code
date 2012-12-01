@@ -350,14 +350,24 @@ CSoundCardSelMenu::CSoundCardSelMenu(
     CHECK_PTR(pSoundInMenu);
     pSoundOutMenu = new QPopupMenu(parent);
     CHECK_PTR(pSoundOutMenu);
+    vector<string> vecDescriptions;
     int i;
+    int iDefaultInDev = -1;
+    int iDefaultOutDev = -1;
+
+    /* Get default devices */
+    string sDefaultInDev = pSoundInIF->GetDev();
+    string sDefaultOutDev = pSoundOutIF->GetDev();
 
     /* Get sound in device names */
-    pSoundInIF->Enumerate(vecSoundInNames);
+    vecDescriptions.clear();
+    pSoundInIF->Enumerate(vecSoundInNames, vecDescriptions);
     iNumSoundInDev = vecSoundInNames.size();
 
     for (i = 0; i < iNumSoundInDev; i++)
     {
+        if (vecSoundInNames[i] == sDefaultInDev)
+            iDefaultInDev = i;
         QString name(DEVICE_STRING(vecSoundInNames[i]));
 #if defined(_MSC_VER) && (_MSC_VER < 1400)
         if (name.find("blaster", 0, FALSE) >= 0)
@@ -367,24 +377,21 @@ CSoundCardSelMenu::CSoundCardSelMenu(
     }
 
     /* Get sound out device names */
-    pSoundOutIF->Enumerate(vecSoundOutNames);
+    vecDescriptions.clear();
+    pSoundOutIF->Enumerate(vecSoundOutNames, vecDescriptions);
     iNumSoundOutDev = vecSoundOutNames.size();
     for (i = 0; i < iNumSoundOutDev; i++)
     {
+        if (vecSoundOutNames[i] == sDefaultOutDev)
+            iDefaultOutDev = i;
         pSoundOutMenu->insertItem(DEVICE_STRING(vecSoundOutNames[i]), this,
             SLOT(OnSoundOutDevice(int)), 0, i);
     }
 
-    /* Set default device. If no valid device was selected, select "Wave mapper" */
-    int iDefaultInDev = pSoundInIF->GetDev();
-    if ((iDefaultInDev > iNumSoundInDev) || (iDefaultInDev < 0))
-        iDefaultInDev = iNumSoundInDev;
-    int iDefaultOutDev = pSoundOutIF->GetDev();
-        if ((iDefaultOutDev > iNumSoundOutDev) || (iDefaultOutDev < 0))
-    iDefaultOutDev = iNumSoundOutDev;
-
-    pSoundInMenu->setItemChecked(iDefaultInDev, TRUE);
-    pSoundOutMenu->setItemChecked(iDefaultOutDev, TRUE);
+    if (iDefaultInDev >= 0)
+        pSoundInMenu->setItemChecked(iDefaultInDev, TRUE);
+    if (iDefaultOutDev >= 0)
+        pSoundOutMenu->setItemChecked(iDefaultOutDev, TRUE);
 
     insertItem(tr("Sound &In"), pSoundInMenu);
     insertItem(tr("Sound &Out"), pSoundOutMenu);
@@ -392,17 +399,17 @@ CSoundCardSelMenu::CSoundCardSelMenu(
 
 void CSoundCardSelMenu::OnSoundInDevice(int id)
 {
-    pSoundInIF->SetDev(id);
-    /* Take care of checks in the menu. "+ 1" because of wave mapper entry */
-    for (int i = 0; i < iNumSoundInDev + 1; i++)
+    if (id >= 0 && id < int(vecSoundInNames.size()))
+        pSoundInIF->SetDev(vecSoundInNames[id]);
+    for (int i = 0; i < iNumSoundInDev; i++)
         pSoundInMenu->setItemChecked(i, i == id);
 }
 
 void CSoundCardSelMenu::OnSoundOutDevice(int id)
 {
-    pSoundOutIF->SetDev(id);
-    /* Take care of checks in the menu. "+ 1" because of wave mapper entry */
-    for (int i = 0; i < iNumSoundOutDev + 1; i++)
+    if (id >= 0 && id < int(vecSoundOutNames.size()))
+        pSoundOutIF->SetDev(vecSoundOutNames[id]);
+    for (int i = 0; i < iNumSoundOutDev; i++)
         pSoundOutMenu->setItemChecked(i, i == id);
 }
 #undef DEVICE_STRING

@@ -39,11 +39,9 @@ public:
     CAudioFileIn();
     virtual ~CAudioFileIn();
 
-    virtual void		Enumerate(vector<string>&) { }
-    virtual void		SetDev(int) {}
-    virtual int			GetDev() {
-        return -1;
-    }
+    virtual void		Enumerate(vector<string>&, vector<string>&) {}
+    virtual void		SetDev(string) {}
+    virtual string		GetDev() {return string();}
     virtual void		SetFileName(const string& strFileName);
 
     virtual void 		Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking = TRUE);

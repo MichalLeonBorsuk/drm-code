@@ -109,12 +109,12 @@ void CSoundCardSelMenu::OnSoundOutChannel(QAction* action)
 
 void CSoundCardSelMenu::OnSoundInDevice(QAction* action)
 {
-    pSoundInIF->SetDev(action->data().toInt());
+    pSoundInIF->SetDev(action->data().toString().toUtf8().data());
 }
 
 void CSoundCardSelMenu::OnSoundOutDevice(QAction* action)
 {
-    pSoundOutIF->SetDev(action->data().toInt());
+    pSoundOutIF->SetDev(action->data().toString().toUtf8().data());
 }
 
 QMenu* CSoundCardSelMenu::InitDevice(QMenu* parent, const QString& text, CSelectionInterface* intf)
@@ -122,19 +122,19 @@ QMenu* CSoundCardSelMenu::InitDevice(QMenu* parent, const QString& text, CSelect
     QMenu* menu = parent->addMenu(text);
     QActionGroup* group = new QActionGroup(this);
     vector<string> names;
-    intf->Enumerate(names);
+    vector<string> descriptions;
+    intf->Enumerate(names, descriptions);
     int iNumSoundDev = names.size();
-    int iDefaultDev = intf->GetDev();
-    if ((iDefaultDev > iNumSoundDev) || (iDefaultDev < 0))
-        iDefaultDev = iNumSoundDev;
-
+    int iNumDescriptions = descriptions.size(); /* descriptions is optional */
+    string sDefaultDev = intf->GetDev();
     for (int i = 0; i < iNumSoundDev; i++)
     {
         QString name(DEVICE_STRING(names[i]));
-        QAction* m = menu->addAction(name);
-        m->setData(i);
+		QString desc(i < iNumDescriptions ? DEVICE_STRING(descriptions[i]) : QString());
+        QAction* m = menu->addAction(name + (desc.isEmpty() ? desc : (name.isEmpty() ? "[" : " [" ) + desc + "]"));
+        m->setData(QString::fromUtf8(names[i].c_str()));
         m->setCheckable(true);
-        if (i == iDefaultDev)
+        if (names[i] == sDefaultDev)
         {
 //            menu->setDefaultAction(m); // TODO
             m->setChecked(true);

@@ -1392,7 +1392,7 @@ CDRMReceiver::LoadSettings(CSettings& s)
             /* Sound In device */
             delete pSoundInInterface;
             pSoundInInterface = new CSoundIn;
-            pSoundInInterface->SetDev(s.Get("Receiver", "snddevin", int(0)));
+            pSoundInInterface->SetDev(s.Get("Receiver", "snddevin", string()));
         }
     }
 
@@ -1443,7 +1443,7 @@ CDRMReceiver::LoadSettings(CSettings& s)
     SetAMDemodType(eDemodType);
 
     /* Sound Out device */
-    pSoundOutInterface->SetDev(s.Get("Receiver", "snddevout", int(0)));
+    pSoundOutInterface->SetDev(s.Get("Receiver", "snddevout", string()));
 
     str = s.Get("command", "rciout");
     if (str != "")
