@@ -159,7 +159,8 @@ _BOOLEAN CSDCTransmit::CanTransmitCurrentTime(CParameter& Parameter)
             switch (Parameter.eTransmitCurrentTime)
             {
             case CParameter::CT_UTC_OFFSET:
-                /* Extract time zone info */
+#ifndef _WIN32
+				/* Extract time zone info */
                 if (ltm != NULL)
                 {
                     const int iTimeZone = ltm->tm_gmtoff; /* offset in seconds */
@@ -170,7 +171,10 @@ _BOOLEAN CSDCTransmit::CanTransmitCurrentTime(CParameter& Parameter)
                     /* Set UTC offset and sense valid flag */
                     Parameter.bValidUTCOffsetAndSense = Parameter.iUTCOff >= 0 && Parameter.iUTCOff <= 31;
                 }
-            case CParameter::CT_LOCAL:
+#else
+// TODO
+#endif
+			case CParameter::CT_LOCAL:
             case CParameter::CT_UTC:
                 /* Extract time components */
                 if (Parameter.eTransmitCurrentTime == CParameter::CT_LOCAL)
