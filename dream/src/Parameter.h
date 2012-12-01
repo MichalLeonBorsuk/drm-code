@@ -958,9 +958,11 @@ public:
     /* AS: AFS in SDC is valid or not */
     enum EAFSVali { AS_VALID, AS_NOT_VALID };
 
-
     /* SI: Symbol Interleaver */
     enum ESymIntMod { SI_LONG, SI_SHORT };
+
+    /* CT: Current Time */
+    enum ECurTime { CT_OFF, CT_LOCAL, CT_UTC, CT_UTC_OFFSET };
 
     /* ST: Simulation Type */
     enum ESimType
@@ -1110,6 +1112,7 @@ public:
     void SetStreamLen(const int iStreamID, const int iNewLenPartA, const int iNewLenPartB);
     void GetStreamLen(const int iStreamID, int& iLenPartA, int& iLenPartB) const;
     int GetStreamLen(const int iStreamID) const;
+    ECurTime eTransmitCurrentTime;
 
     /* Protection levels for MSC */
     CMSCProtLev MSCPrLe;

@@ -55,6 +55,7 @@ CParameter::CParameter(CDRMReceiver *pRx):
     sReceiverID("                "),
     sSerialNumber(),
     sDataFilesDirectory(DEFAULT_DATA_FILES_DIRECTORY),
+    eTransmitCurrentTime(CT_OFF),
     MSCPrLe(),
     Stream(MAX_NUM_STREAMS), Service(MAX_NUM_SERVICES),
     iNumBitsHierarchFrameTotal(0),
@@ -161,6 +162,7 @@ CParameter::CParameter(const CParameter& p):
     sReceiverID(p.sReceiverID),
     sSerialNumber(p.sSerialNumber),
     sDataFilesDirectory(p.sDataFilesDirectory),
+    eTransmitCurrentTime(p.eTransmitCurrentTime),
     MSCPrLe(p.MSCPrLe),
     Stream(p.Stream), Service(p.Service),
     iNumBitsHierarchFrameTotal(p.iNumBitsHierarchFrameTotal),
@@ -263,6 +265,7 @@ CParameter& CParameter::operator=(const CParameter& p)
     sReceiverID = p.sReceiverID;
     sSerialNumber = p.sSerialNumber;
     sDataFilesDirectory = p.sDataFilesDirectory;
+    eTransmitCurrentTime = p.eTransmitCurrentTime;
     MSCPrLe = p.MSCPrLe;
     Stream = p.Stream;
     Service = p.Service;
