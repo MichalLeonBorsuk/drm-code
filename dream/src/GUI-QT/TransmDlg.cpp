@@ -173,11 +173,8 @@ TransmDialog::TransmDialog(CSettings& NSettings,
 	}
 
 	/* Don't lock the Parameter object since the working thread is stopped */
-
 	CParameter& Parameters = *DRMTransmitter.GetParameters();
 
-
-#ifdef ENABLE_TRANSM_CURRENTTIME
 	/* Transmission of current time */
 	switch (Parameters.eTransmitCurrentTime)
 	{
@@ -196,14 +193,6 @@ TransmDialog::TransmDialog(CSettings& NSettings,
 	case CParameter::CT_UTC_OFFSET:
 		RadioButtonCurTimeUTCOffset->setChecked(TRUE);
 	}
-#else
-	/* Remove the tab */
-# if QT_VERSION < 0x040000
-	delete tabMiscellaneous;
-# else
-	TabWidgetParam->removeTab(2);
-# endif
-#endif
 
 	/* Robustness mode */
 	switch (Parameters.GetWaveMode())
@@ -549,10 +538,8 @@ TransmDialog::TransmDialog(CSettings& NSettings,
 	connect(ButtonGroupCodec, SIGNAL(clicked(int)),
 		this, SLOT(OnRadioCodec(int)));
 # endif
-# ifdef ENABLE_TRANSM_CURRENTTIME
 	connect(ButtonGroupCurrentTime, SIGNAL(clicked(int)),
 		this, SLOT(OnRadioCurrentTime(int)));
-# endif
 #else
 	connect(ButtonGroupRobustnessMode, SIGNAL(buttonClicked(int)),
 		this, SLOT(OnRadioRobustnessMode(int)));
@@ -564,10 +551,8 @@ TransmDialog::TransmDialog(CSettings& NSettings,
 	connect(ButtonGroupCodec, SIGNAL(buttonClicked(int)),
 		this, SLOT(OnRadioCodec(int)));
 # endif
-# ifdef ENABLE_TRANSM_CURRENTTIME
 	connect(ButtonGroupCurrentTime, SIGNAL(buttonClicked(int)),
 		this, SLOT(OnRadioCurrentTime(int)));
-# endif
 #endif
 
 	/* Line edits */
@@ -1451,7 +1436,6 @@ void TransmDialog::OnRadioOutput(int iID)
 	}
 }
 
-#ifdef ENABLE_TRANSM_CURRENTTIME
 void TransmDialog::OnRadioCurrentTime(int iID)
 {
 #if QT_VERSION >= 0x040000
@@ -1487,11 +1471,6 @@ void TransmDialog::OnRadioCurrentTime(int iID)
 
 	Parameters.Unlock();
 }
-#else
-# if QT_VERSION < 0x040000
-void TransmDialog::OnRadioCurrentTime(int iID) {(void)iID;}
-# endif
-#endif
 
 #ifdef ENABLE_TRANSM_CODECPARAMS
 void TransmDialog::OnRadioCodec(int iID)
@@ -1710,7 +1689,6 @@ void TransmDialog::AddWhatsThisHelp()
 	WhatsThis(RadioButtonOutIQNeg, strOutputFormat);
 	WhatsThis(RadioButtonOutEP, strOutputFormat);
 
-#ifdef ENABLE_TRANSM_CURRENTTIME
 	/* Current Time Transmission */
 	const QString strCurrentTime =
 		tr("<b>Current Time Transmission:</b> The current time is transmitted, "
@@ -1730,7 +1708,6 @@ void TransmDialog::AddWhatsThisHelp()
 	WhatsThis(RadioButtonCurTimeLocal, strCurrentTime);
 	WhatsThis(RadioButtonCurTimeUTC, strCurrentTime);
 	WhatsThis(RadioButtonCurTimeUTCOffset, strCurrentTime);
-#endif
 
 	/* TODO: Services... */
 

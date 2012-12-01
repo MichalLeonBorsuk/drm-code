@@ -114,17 +114,21 @@ protected:
 class CModJulDate
 {
 public:
-	CModJulDate() : iYear(0), iDay(0), iMonth(0) {}
+	CModJulDate() : iYear(0), iDay(0), iMonth(0), iModJulDate(0) {}
 	CModJulDate(const uint32_t iModJulDate) {Set(iModJulDate);}
+	CModJulDate(const uint32_t iYear, const uint32_t iMonth, const uint32_t iDay)
+		{Get(iYear, iMonth, iDay);}
 
 	void Set(const uint32_t iModJulDate);
+	void Get(const uint32_t iYear, const uint32_t iMonth, const uint32_t iDay);
 
 	int GetYear() {return iYear;}
 	int GetDay() {return iDay;}
 	int GetMonth() {return iMonth;}
+	int GetModJulDate() {return iModJulDate;}
 
 protected:
-	int iYear, iDay, iMonth;
+	int iYear, iDay, iMonth, iModJulDate;
 };
 
 

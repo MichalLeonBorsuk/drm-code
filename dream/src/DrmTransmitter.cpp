@@ -242,13 +242,9 @@ CDRMTransmitter::CDRMTransmitter() :
     /* Init frame ID counter (index) */
     TransmParam.iFrameIDTransm = 0;
 
-    /* Date, time. TODO: use computer system time... */
-    TransmParam.iDay = 0;
-    TransmParam.iMonth = 0;
-    TransmParam.iYear = 0;
-    TransmParam.iUTCHour = 0;
-    TransmParam.iUTCMin = 0;
-
+    /* Init transmission of current time */
+    TransmParam.eTransmitCurrentTime = CParameter::CT_OFF;
+	TransmParam.bValidUTCOffsetAndSense = FALSE;
 
     /**************************************************************************/
     /* Robustness mode and spectrum occupancy. Available transmission modes:
@@ -438,14 +434,14 @@ void CDRMTransmitter::LoadSettings(CSettings& s)
     else if (value == "OF_IQ_POS")   { GetTransData()->SetIQOutput(CTransmitData::OF_IQ_POS);   }
     else if (value == "OF_IQ_NEG")   { GetTransData()->SetIQOutput(CTransmitData::OF_IQ_NEG);   }
     else if (value == "OF_EP")       { GetTransData()->SetIQOutput(CTransmitData::OF_EP);       }
-#if 0 // TODO
+
     /* Transmission of current time */
     value = s.Get(Transmitter, "currenttime", string("CT_OFF"));
     if      (value == "CT_OFF")        { TransmParam.eTransmitCurrentTime = CParameter::CT_OFF;        }
     else if (value == "CT_LOCAL")      { TransmParam.eTransmitCurrentTime = CParameter::CT_LOCAL;      }
     if      (value == "CT_UTC")        { TransmParam.eTransmitCurrentTime = CParameter::CT_UTC;        }
     else if (value == "CT_UTC_OFFSET") { TransmParam.eTransmitCurrentTime = CParameter::CT_UTC_OFFSET; }
-#endif
+
     /**********************/
     /* Service parameters */
     for (int i=0; i<1/*MAX_NUM_SERVICES*/; i++) // TODO
@@ -581,7 +577,7 @@ void CDRMTransmitter::SaveSettings(CSettings& s)
     case CTransmitData::OF_EP:       value = "OF_EP";       break;
     default: value = ""; }
     s.Put(Transmitter, "ifformat", value);
-#if 0 // TODO
+
     /* Transmission of current time */
     switch (TransmParam.eTransmitCurrentTime) {
     case CParameter::CT_OFF:        value = "CT_OFF";        break;
@@ -590,7 +586,7 @@ void CDRMTransmitter::SaveSettings(CSettings& s)
     case CParameter::CT_UTC_OFFSET: value = "CT_UTC_OFFSET"; break;
     default: value = ""; }
     s.Put(Transmitter, "currenttime", value);
-#endif
+
     /**********************/
     /* Service parameters */
     for (int i=0; i<1/*MAX_NUM_SERVICES*/; i++) // TODO

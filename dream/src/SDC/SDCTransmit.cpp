@@ -32,96 +32,98 @@
 /* Implementation *************************************************************/
 void CSDCTransmit::SDCParam(CVector<_BINARY>* pbiData, CParameter& Parameter)
 {
-    /*
-    	Put SDC parameters on a stream
-    */
-    int					i;
-    int					iSize;
-    CVector<_BINARY>	vecbiData;
+    CommitEnter(pbiData, Parameter);
+
+        /* Type 0 */
+        DataEntityType0(vecbiData, Parameter);
+        CommitFlush();
+
+        // Only working for either one audio or data service!
+        if (Parameter.iNumAudioService == 1)
+        {
+            /* Type 9 */
+            DataEntityType9(vecbiData, 0, Parameter);
+            CommitFlush();
+        }
+        else
+        {
+            /* Type 5 */
+            DataEntityType5(vecbiData, 0, Parameter);
+            CommitFlush();
+        }
+
+        /* Type 1 */
+        DataEntityType1(vecbiData, 0, Parameter);
+        CommitFlush();
+
+        /* Check if the current time can be transmitted */
+        if (CanTransmitCurrentTime(Parameter))
+        {
+            /* Type 8 */
+            DataEntityType8(vecbiData, 0, Parameter);
+            CommitFlush();
+        }
+
+    CommitLeave();
+}
+
+
+void CSDCTransmit::CommitEnter(CVector<_BINARY>* pbiData, CParameter& Parameter)
+{
+    CSDCTransmit::pbiData = pbiData;
 
     /* Calculate length of data field in bytes
        (consistant to table 61 in (6.4.1)) */
-    const int iLengthDataFieldBytes =
+    iLengthDataFieldBytes =
         (int) ((_REAL) (Parameter.iNumSDCBitsPerSFrame - 20) / 8);
 
     /* 20 bits from AFS index and CRC */
-    const int iUsefulBitsSDC = 20 + iLengthDataFieldBytes * 8;
+    iUsefulBitsSDC = 20 + iLengthDataFieldBytes * 8;
 
     /* "- 20" for the AFS-index and CRC! */
-    const int iMaxNumBitsDataBlocks = iUsefulBitsSDC - 20;
+    iMaxNumBitsDataBlocks = iUsefulBitsSDC - 20;
 
     /* Reset enqueue function */
     (*pbiData).ResetBitAccess();
-
 
     /* SDC Header ----------------------------------------------------------- */
     /* AFS index (not used by this application, insert a "1" */
     (*pbiData).Enqueue((uint32_t) 1, 4);
 
+    /* Reset number of bits used */
+    iNumUsedBits = 0;
+}
 
-    /* Data Entities -------------------------------------------------------- */
-    /* Init bit-count */
-    int iNumUsedBits = 0;
-
-// Choose types, TEST. Send only important types for this test!
-// TODO: test, if SDC block is long enough for all types!
-    /* Type 0 */
-    DataEntityType0(vecbiData, Parameter);
-
+void CSDCTransmit::CommitFlush()
+{
     // TODO: nicer solution
-    iSize = vecbiData.Size();
+    /* Copy all bit of vecbiData to pbiData if enough room */
+    int iSize = vecbiData.Size();
     if (iNumUsedBits + iSize < iMaxNumBitsDataBlocks)
     {
         iNumUsedBits += iSize;
-
         vecbiData.ResetBitAccess();
-        for (i = 0; i < iSize; i++)
-            (*pbiData).Enqueue(vecbiData.Separate(1), 1);
+        /* Optimized bit transfer: by 32, 16, 8, 4, 2 or 1 */
+        int i, bits, size, numtrans;
+        for (bits = 5; iSize > 0; bits--)
+        {
+            numtrans = iSize >> bits;
+            if (!numtrans)
+                continue;
+            size = 1 << bits;
+            for (i = 0; i < numtrans; i++, iSize -= size)
+                (*pbiData).Enqueue(vecbiData.Separate(size), size);
+        }
     }
+}
 
-
-// Only working for either one audio or data service!
-    if (Parameter.iNumAudioService == 1)
-    {
-        /* Type 9 */
-        DataEntityType9(vecbiData, 0, Parameter);
-    }
-    else
-    {
-        /* Type 5 */
-        DataEntityType5(vecbiData, 0, Parameter);
-    }
-
-// TODO: nicer solution
-    iSize = vecbiData.Size();
-    if (iNumUsedBits + iSize < iMaxNumBitsDataBlocks)
-    {
-        iNumUsedBits += iSize;
-
-        vecbiData.ResetBitAccess();
-        for (i = 0; i < iSize; i++)
-            (*pbiData).Enqueue(vecbiData.Separate(1), 1);
-    }
-
-    /* Type 1 */
-    DataEntityType1(vecbiData, 0, Parameter);
-
-    // TODO: nicer solution
-    iSize = vecbiData.Size();
-    if (iNumUsedBits + iSize < iMaxNumBitsDataBlocks)
-    {
-        iNumUsedBits += iSize;
-
-        vecbiData.ResetBitAccess();
-        for (i = 0; i < iSize; i++)
-            (*pbiData).Enqueue(vecbiData.Separate(1), 1);
-    }
-
+void CSDCTransmit::CommitLeave()
+{
+    int i;
 
     /* Zero-pad the unused bits in this SDC-block */
     for (i = 0; i < iMaxNumBitsDataBlocks - iNumUsedBits; i++)
         (*pbiData).Enqueue((uint32_t) 0, 1);
-
 
     /* CRC ------------------------------------------------------------------ */
     /* Calculate the CRC and put it at the end of the stream */
@@ -142,6 +144,62 @@ void CSDCTransmit::SDCParam(CVector<_BINARY>* pbiData, CParameter& Parameter)
     /* Now, pointer in "enqueue"-function is back at the same place,
        add CRC */
     (*pbiData).Enqueue(CRCObject.GetCRC(), 16);
+}
+
+
+_BOOLEAN CSDCTransmit::CanTransmitCurrentTime(CParameter& Parameter)
+{
+    if (Parameter.eTransmitCurrentTime != CParameter::CT_OFF)
+    {
+        /* Get current UTC time */
+        time_t t = time(NULL);
+        if (t != ((time_t)-1))
+        {
+            struct tm *gtm, *ltm = localtime(&t);
+            switch (Parameter.eTransmitCurrentTime)
+            {
+            case CParameter::CT_UTC_OFFSET:
+                /* Extract time zone info */
+                if (ltm != NULL)
+                {
+                    const int iTimeZone = ltm->tm_gmtoff; /* offset in seconds */
+                    /* Set local time offset in half hour */
+                    Parameter.iUTCOff = (abs(iTimeZone) + 15 * 60) / (30 * 60);
+                    /* Set the sense of the offset: 0 = positive, 1 = negative */
+                    Parameter.iUTCSense = iTimeZone < 0;
+                    /* Set UTC offset and sense valid flag */
+                    Parameter.bValidUTCOffsetAndSense = Parameter.iUTCOff >= 0 && Parameter.iUTCOff <= 31;
+                }
+            case CParameter::CT_LOCAL:
+            case CParameter::CT_UTC:
+                /* Extract time components */
+                if (Parameter.eTransmitCurrentTime == CParameter::CT_LOCAL)
+                    gtm = ltm;
+                else
+                    gtm = gmtime(&t);
+                if (gtm != NULL)
+                {
+                    /* Time info is only transmitted at minute edge see 6.4.3.9 */
+                    if (iLastMinuteTransmitted != gtm->tm_min)
+                    {
+                        iLastMinuteTransmitted = gtm->tm_min;
+                        Parameter.Lock();
+                        Parameter.iDay = (int)gtm->tm_mday;
+                        Parameter.iMonth = (int)gtm->tm_mon + 1;
+                        Parameter.iYear = (int)gtm->tm_year + 1900;
+                        Parameter.iUTCHour = (int)gtm->tm_hour;
+                        Parameter.iUTCMin = (int)gtm->tm_min;
+                        Parameter.Unlock();
+                        return TRUE;
+                    }
+                }
+                break;
+            case CParameter::CT_OFF:
+                break;
+            }
+        }
+    }
+    return FALSE;
 }
 
 
@@ -365,6 +423,57 @@ void CSDCTransmit::DataEntityType5(CVector<_BINARY>& vecbiData, int ServiceID,
 
     /* User application identifier. SlideShow = 2 */
     vecbiData.Enqueue((uint32_t) 2, 11);
+}
+
+
+/******************************************************************************\
+* Data entity Type 8 (Time and date information data entity)				   *
+\******************************************************************************/
+void CSDCTransmit::DataEntityType8(CVector<_BINARY>& vecbiData, int ServiceID,
+                                      CParameter& Parameter)
+{
+    (void)ServiceID;
+    const _BOOLEAN bTransmitOffset =
+        Parameter.bValidUTCOffsetAndSense &&
+        Parameter.eTransmitCurrentTime == CParameter::CT_UTC_OFFSET;
+    const int iNumBitsTotal = 28 + (bTransmitOffset ? 8 : 0);
+
+    /* Init return vector (storing this data block) */
+    vecbiData.Init(iNumBitsTotal + NUM_BITS_HEADER_SDC);
+    vecbiData.ResetBitAccess();
+
+    /* Length of the body, excluding the initial 4 bits ("- 4"),
+       measured in bytes ("/ 8") */
+    vecbiData.Enqueue((uint32_t) (iNumBitsTotal - 4) / 8, 7);
+
+    /* Version flag (not used in this implementation) */
+    vecbiData.Enqueue((uint32_t) 0, 1);
+
+    /* Data entity type */
+    vecbiData.Enqueue((uint32_t) 8, 4); /* Type 08 */
+
+
+    /* Actual body ---------------------------------------------------------- */
+    /* Date */
+    CModJulDate ModJulDate(Parameter.iYear, Parameter.iMonth, Parameter.iDay);
+    vecbiData.Enqueue((uint32_t) ModJulDate.GetModJulDate(), 17);
+
+    /* UTC (hours and minutes) */
+    vecbiData.Enqueue((uint32_t) Parameter.iUTCHour, 5);
+    vecbiData.Enqueue((uint32_t) Parameter.iUTCMin, 6);
+
+    /* UTC offset */
+    if (bTransmitOffset)
+    {
+        /* rfu */
+        vecbiData.Enqueue((uint32_t) 0, 2);
+
+        /* UTC Sense */
+        vecbiData.Enqueue((uint32_t) Parameter.iUTCSense, 1);
+
+        /* UTC Offset */
+        vecbiData.Enqueue((uint32_t) Parameter.iUTCOff, 5);
+    }
 }
 
 

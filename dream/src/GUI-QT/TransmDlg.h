@@ -29,7 +29,6 @@
 #define __TransmDlg_H
 // (DF) TODO: to be enabled and removed in a future release
 //#define ENABLE_TRANSM_CODECPARAMS
-//#define ENABLE_TRANSM_CURRENTTIME
 
 #include <qpushbutton.h>
 #include <qstring.h>
@@ -187,9 +186,7 @@ public slots:
 #if defined(ENABLE_TRANSM_CODECPARAMS) || QT_VERSION < 0x040000
 	void OnRadioCodec(int iID);
 #endif
-#if defined(ENABLE_TRANSM_CURRENTTIME) || QT_VERSION < 0x040000
 	void OnRadioCurrentTime(int iID);
-#endif
 	void OnTextChangedServiceLabel(const QString& strLabel);
 	void OnTextChangedServiceID(const QString& strID);
 	void OnTextChangedSndCrdIF(const QString& strIF);
