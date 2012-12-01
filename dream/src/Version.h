@@ -29,9 +29,10 @@
 #ifndef _VERSION_H
 #define _VERSION_H
 
-extern char dream_manufacturer[];
-extern char dream_implementation[];
-extern int dream_version_major;
-extern int dream_version_minor;
+extern const char dream_manufacturer[];
+extern const char dream_implementation[];
+extern const int dream_version_major;
+extern const int dream_version_minor;
+extern const char dream_version_build[];
 
 #endif
