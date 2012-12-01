@@ -45,18 +45,24 @@
 #endif
 
 class CSoundOutPulse;
-typedef struct _pa_stream_notify_cb_userdata_t
+typedef struct pa_stream_notify_cb_userdata_t
 {
 	CSoundOutPulse*		SoundOutPulse;
 	_BOOLEAN			bOverflow;
 } pa_stream_notify_cb_userdata_t;
 
-typedef struct _pa_common
+typedef struct pa_common
 {
 	_BOOLEAN		bClockDriftComp;
 	int				sample_rate_offset;
 } pa_common;
 
+typedef struct pa_object
+{
+	pa_mainloop *pa_m;
+	pa_context *pa_c;
+	int ref_count;
+} pa_object;
 
 /* Classes ********************************************************************/
 
@@ -94,8 +100,6 @@ protected:
 	_BOOLEAN		bChangDev;
 	int				iCurrentDevice;
 
-	pa_mainloop		*pa_m;
-	pa_context		*pa_c;
 	pa_stream		*pa_s;
 	size_t			remaining_nbytes;
 	const char		*remaining_data;
@@ -145,8 +149,6 @@ protected:
 	_BOOLEAN		bChangDev;
 	int				iCurrentDevice;
 
-	pa_mainloop		*pa_m;
-	pa_context		*pa_c;
 	pa_stream		*pa_s;
 	pa_stream_notify_cb_userdata_t pa_stream_notify_cb_userdata_underflow;
 	pa_stream_notify_cb_userdata_t pa_stream_notify_cb_userdata_overflow;
