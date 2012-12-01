@@ -41,15 +41,15 @@
 
 #define APP_NAME_RECEIVER    "Dream Receiver"    // PulseAudio application name
 #define APP_NAME_TRANSMITTER "Dream Transmitter" // PulseAudio application name
-#define RECORD_BUFFER    2000000 // us
-#define PLAYBACK_BUFFER  2000000 // us
-#define PLAYBACK_LATENCY 1000000 // us
-#define WAIT_PREBUFFER ((int)(PLAYBACK_LATENCY + 399999) / 400000) // 400000us = .4s (frame duration)
+#define RECORD_BUFFER_US    2000000 // us
+#define PLAYBACK_BUFFER_US  2000000 // us
+#define PLAYBACK_LATENCY_US 1000000 // us (50% of PLAYBACK_BUFFER_US)
+#define WAIT_PREBUFFER ((int)(PLAYBACK_LATENCY_US + 399999) / 400000) // 400000us = .4s (frame duration)
 #define NUM_CHANNELS 2 // Stereo
 #define BYTES_PER_SAMPLE ((int)sizeof(_SAMPLE))
-#define PA_RECORD_MAXLENGTH ((int)((double)(NUM_CHANNELS * BYTES_PER_SAMPLE * iSampleRate) * ((double)RECORD_BUFFER)    / (double)1000000))
-#define PA_PLAYBACK_TLENGTH ((int)((double)(NUM_CHANNELS * BYTES_PER_SAMPLE * iSampleRate) * ((double)PLAYBACK_BUFFER)  / (double)1000000))
-#define PA_PLAYBACK_PREBUF  ((int)((double)(NUM_CHANNELS * BYTES_PER_SAMPLE * iSampleRate) * ((double)PLAYBACK_LATENCY) / (double)1000000))
+#define PA_RECORD_MAXLENGTH ((int)((double)(NUM_CHANNELS * BYTES_PER_SAMPLE * iSampleRate) * ((double)RECORD_BUFFER_US)    / (double)1000000))
+#define PA_PLAYBACK_TLENGTH ((int)((double)(NUM_CHANNELS * BYTES_PER_SAMPLE * iSampleRate) * ((double)PLAYBACK_BUFFER_US)  / (double)1000000))
+#define PA_PLAYBACK_PREBUF  ((int)((double)(NUM_CHANNELS * BYTES_PER_SAMPLE * iSampleRate) * ((double)PLAYBACK_LATENCY_US) / (double)1000000))
 #define STREAM_FLAGS (PA_STREAM_ADJUST_LATENCY | PA_STREAM_DONT_MOVE)
 
 
@@ -168,12 +168,13 @@ static void pa_stream_notify_cb(pa_stream *, void *userdata)
 {
 	pa_stream_notify_cb_userdata_t* ud = (pa_stream_notify_cb_userdata_t*)userdata;
 	CSoundOutPulse& SoundOutPulse = *ud->SoundOutPulse;
-	if (!SoundOutPulse.bMute)
+	if (!SoundOutPulse.bMuteError)
 	{
-		const char *type = ud->bOverflow ? "OVERFLOW" : "UNDERFLOW";
 		if (!SoundOutPulse.bPrebuffer)
-			DEBUG_MSG("*** playback %s\n", type);
-		SoundOutPulse.bBufferingError = TRUE;
+		{
+			DEBUG_MSG("*** playback %sFLOW\n", ud->bOverflow ? "OVER" : "UNDER");
+			SoundOutPulse.bBufferingError = TRUE;
+		}
 	}
 	if (ud->bOverflow)
 		SoundOutPulse.bSeek = TRUE;
@@ -280,11 +281,11 @@ int CSoundInPulse::Read_HW(void *recbuf, int size)
 	const char *data;
 	size_t nbytes;
 
-	/* Buffering error when latency >= 75% of RECORD_BUFFER */
+	/* Buffering error when latency >= 75% of RECORD_BUFFER_US */
 	_BOOLEAN bError = TRUE;
 	uint64_t recording_usec;
 	if (pa_stream_get_latency(pa_m, pa_c, pa_s, iSampleRate, &recording_usec))
-		bError = recording_usec >= (uint64_t)(PA_RECORD_MAXLENGTH * 75 / 100) ? TRUE : FALSE;
+		bError = recording_usec >= (uint64_t)(RECORD_BUFFER_US * 75 / 100) ? TRUE : FALSE;
 	bBufferingError |= bError;
 
 #ifdef CLOCK_DRIFT_ADJ_ENABLED
@@ -440,8 +441,8 @@ void CSoundOutPulse::Init_HW()
 		B[i] = dLatFilt[i];
 #endif
 
-	/* Clear mute flag */
-	bMute = FALSE;
+	/* Clear mute error flag */
+	bMuteError = FALSE;
 
 	DEBUG_MSG("pulseaudio output device '%s', init done\n", devices[iCurrentDevice].c_str());
 }
@@ -480,12 +481,12 @@ int CSoundOutPulse::Write_HW(void *playbuf, int size)
 	if (cp.bClockDriftComp) {
 		if (bInitClockDriftComp) {
 			iMaxSampleRateOffset = iSampleRate * 2 / 100; /* = 2% */
-			playback_usec_smoothed = PLAYBACK_LATENCY;
-			target_latency = PLAYBACK_LATENCY;
+			playback_usec_smoothed = PLAYBACK_LATENCY_US;
+			target_latency = PLAYBACK_LATENCY_US;
 			wait_prebuffer = WAIT_PREBUFFER;
 			cp.sample_rate_offset = 0;
 			filter_stabilized = NUM_TAPS_LATENCY_FILT;
-			Z.Init(NUM_TAPS_LATENCY_FILT, CReal(PLAYBACK_LATENCY));
+			Z.Init(NUM_TAPS_LATENCY_FILT, CReal(PLAYBACK_LATENCY_US));
 			clock = playback_usec = 0; // DEBUG
 		}
 
@@ -561,7 +562,7 @@ int CSoundOutPulse::Write_HW(void *playbuf, int size)
 void CSoundOutPulse::Close_HW()
 {
 	DEBUG_MSG("CSoundOutPulse::close_HW()\n");
-	bMute = TRUE;
+	bMuteError = TRUE;
 	if (bBlockingPlay && pa_m!=NULL && pa_c!=NULL && pa_s!=NULL)
 	{
 		if (pa_o_sync(pa_m, pa_c, pa_stream_drain(pa_s, pa_stream_success_cb, NULL)) != PA_OK)
@@ -747,7 +748,7 @@ int CSoundInPulse::GetDev()
 
 CSoundOutPulse::CSoundOutPulse():
 	bPrebuffer(FALSE), bSeek(FALSE),
-	bBufferingError(FALSE), bMute(FALSE),
+	bBufferingError(FALSE), bMuteError(FALSE),
 	iSampleRate(0), iBufferSize(0), bBlockingPlay(FALSE),
 	bChangDev(TRUE), iCurrentDevice(-1),
 	pa_m(NULL), pa_c(NULL), pa_s(NULL)

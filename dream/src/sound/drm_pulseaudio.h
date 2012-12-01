@@ -129,7 +129,7 @@ public:
 	_BOOLEAN		bPrebuffer;
 	_BOOLEAN		bSeek;
 	_BOOLEAN		bBufferingError;
-	_BOOLEAN		bMute;
+	_BOOLEAN		bMuteError;
 
 protected:
 	void			Init_HW();
