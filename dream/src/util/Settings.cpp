@@ -264,18 +264,18 @@ CSettings::ParseArguments(int argc, char **argv)
 		}
 
 		/* Sound In device -------------------------------------------------- */
-		if (GetNumericArgument(argc, argv, i, "-I", "--snddevin", -1,
-							   MAX_NUM_SND_DEV, rArgument) == TRUE)
+		if (GetStringArgument(argc, argv, i, "-I", "--snddevin",
+							  strArgument) == TRUE)
 		{
-			Put(ReceiverTransmitter, "snddevin", int (rArgument));
+			Put(ReceiverTransmitter, "snddevin", strArgument);
 			continue;
 		}
 
 		/* Sound Out device ------------------------------------------------- */
-		if (GetNumericArgument(argc, argv, i, "-O", "--snddevout", -1,
-							   MAX_NUM_SND_DEV, rArgument) == TRUE)
+		if (GetStringArgument(argc, argv, i, "-O", "--snddevout",
+							  strArgument) == TRUE)
 		{
-			Put(ReceiverTransmitter, "snddevout", int (rArgument));
+			Put(ReceiverTransmitter, "snddevout", strArgument);
 			continue;
 		}
 
@@ -648,8 +648,8 @@ CSettings::UsageArguments()
 		"  -R <n>, --samplerate <n>     set audio and signal sound card sample rate [Hz]\n"
 		"  --audsrate <n>               set audio sound card sample rate [Hz] (allowed range: 8000...192000)\n"
 		"  --sigsrate <n>               set signal sound card sample rate [Hz] (allowed values: 24000, 48000, 96000, 192000)\n"
-		"  -I <n>, --snddevin <n>       set sound in device\n"
-		"  -O <n>, --snddevout <n>      set sound out device\n"
+		"  -I <s>, --snddevin <s>       set sound in device\n"
+		"  -O <s>, --snddevout <s>      set sound out device\n"
 #ifdef HAVE_LIBHAMLIB
 		"  -M <n>, --hamlib-model <n>   set Hamlib radio model ID\n"
 		"  -C <s>, --hamlib-config <s>  set Hamlib config parameter\n"
