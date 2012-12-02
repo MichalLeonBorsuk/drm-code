@@ -44,6 +44,10 @@
 # include "../matlib/MatlibSigProToolbox.h"
 #endif
 
+#ifndef _WIN32
+# define ENABLE_STDIN_STDOUT
+#endif
+
 
 class CSoundOutPulse;
 typedef struct pa_stream_notify_cb_userdata_t
@@ -68,29 +72,33 @@ typedef struct pa_object
 
 /* Classes ********************************************************************/
 
-class CSoundCommonPulse
+class CSoundPulse
 {
 public:
-	CSoundCommonPulse(_BOOLEAN bPlayback);
-	virtual ~CSoundCommonPulse() {}
+	CSoundPulse(_BOOLEAN bPlayback);
+	virtual ~CSoundPulse() {}
 	void			Enumerate(vector<string>& names, vector<string>& descriptions);
 	void			SetDev(string sNewDevice);
 	string			GetDev();
 protected:
-	bool			IsDefaultDevice();
+	_BOOLEAN		IsDefaultDevice();
 	_BOOLEAN		bPlayback;
 	_BOOLEAN		bChangDev;
 	string			sCurrentDevice;
+#ifdef ENABLE_STDIN_STDOUT
+	_BOOLEAN		IsStdinStdout();
+	_BOOLEAN		bStdinStdout;
+#endif
 };
 
-class CSoundInPulse : public CSoundCommonPulse, public CSoundInInterface
+class CSoundInPulse : public CSoundPulse, public CSoundInInterface
 {
 public:
 	CSoundInPulse();
 	virtual ~CSoundInPulse() {}
-	void			Enumerate(vector<string>& names, vector<string>& descriptions) {CSoundCommonPulse::Enumerate(names, descriptions);};
-	string			GetDev() {return CSoundCommonPulse::GetDev();};
-	void			SetDev(string sNewDevice) {CSoundCommonPulse::SetDev(sNewDevice);};
+	void			Enumerate(vector<string>& names, vector<string>& descriptions) {CSoundPulse::Enumerate(names, descriptions);};
+	string			GetDev() {return CSoundPulse::GetDev();};
+	void			SetDev(string sNewDevice) {CSoundPulse::SetDev(sNewDevice);};
 
 	void			Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking);
 	_BOOLEAN		Read(CVector<_SAMPLE>& psData);
@@ -122,14 +130,14 @@ protected:
 #endif
 };
 
-class CSoundOutPulse : public CSoundCommonPulse, public CSoundOutInterface
+class CSoundOutPulse : public CSoundPulse, public CSoundOutInterface
 {
 public:
 	CSoundOutPulse();
 	virtual ~CSoundOutPulse() {}
-	void			Enumerate(vector<string>& names, vector<string>& descriptions) {CSoundCommonPulse::Enumerate(names, descriptions);};
-	string			GetDev() {return CSoundCommonPulse::GetDev();};
-	void			SetDev(string sNewDevice) {CSoundCommonPulse::SetDev(sNewDevice);};
+	void			Enumerate(vector<string>& names, vector<string>& descriptions) {CSoundPulse::Enumerate(names, descriptions);};
+	string			GetDev() {return CSoundPulse::GetDev();};
+	void			SetDev(string sNewDevice) {CSoundPulse::SetDev(sNewDevice);};
 
 	void			Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking);
 	_BOOLEAN		Write(CVector<_SAMPLE>& psData);
