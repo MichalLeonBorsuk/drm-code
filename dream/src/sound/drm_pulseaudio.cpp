@@ -51,8 +51,6 @@
 #define STREAM_FLAGS (PA_STREAM_ADJUST_LATENCY | PA_STREAM_DONT_MOVE)
 #define STREAM_NAME(io, blocking) (blocking ? "Signal " io : "Audio " io)
 #define APP_NAME(io, blocking) ((!io != !blocking) ? "Dream Transmitter" : "Dream Receiver")
-#define DEFAULT_DEVICE_NAME ""
-#define DEFAULT_DEVICE_DESC "default"
 
 #define DEBUG_MSG(...) fprintf(stderr, __VA_ARGS__)
 
@@ -252,7 +250,7 @@ void CSoundInPulse::Init_HW()
 	ss.rate = iSampleRate;
 
 	/* record device */
-	if (sCurrentDevice != DEFAULT_DEVICE_NAME)
+	if (!IsDefaultDevice())
 		recdevice = sCurrentDevice.c_str();
 
 	if (pa_init(&pa_obj, APP_NAME(1, bBlockingRec)) != PA_OK)
@@ -401,7 +399,7 @@ void CSoundOutPulse::Init_HW()
 	ss.rate = iSampleRate;
 
 	/* playback device */
-	if (sCurrentDevice != DEFAULT_DEVICE_NAME)
+	if (!IsDefaultDevice())
 		playdevice = sCurrentDevice.c_str();
 
 	if (pa_init(&pa_obj, APP_NAME(0, bBlockingPlay)) != PA_OK)
@@ -590,23 +588,21 @@ void CSoundOutPulse::Close_HW()
 /****************/
 /* devices list */
 
-typedef struct _USERDATA {
-	vector < string > *names;
-	vector < string > *descriptions;
+typedef struct USERDATA {
+	vector<string> *names;
+	vector<string> *descriptions;
 } USERDATA;
 
-void my_pa_source_info_cb_t(pa_context *c, const pa_source_info *i, int eol, void *userdata)
+static void my_pa_source_info_cb_t(pa_context *, const pa_source_info *i, int eol, void *userdata)
 {
-	(void)c;
 	if (!eol)
 	{
 		((USERDATA*)userdata)->names->push_back(string(i->name));
 		((USERDATA*)userdata)->descriptions->push_back(string(i->description));
 	}
 }
-void my_pa_sink_info_cb_t(pa_context *c, const pa_sink_info *i, int eol, void *userdata)
+static void my_pa_sink_info_cb_t(pa_context *, const pa_sink_info *i, int eol, void *userdata)
 {
-	(void)c;
 	if (!eol)
 	{
 		((USERDATA*)userdata)->names->push_back(string(i->name));
@@ -614,9 +610,18 @@ void my_pa_sink_info_cb_t(pa_context *c, const pa_sink_info *i, int eol, void *u
 	}
 }
 
-void
-getdevices(vector < string > &names, vector < string > &descriptions,
-		   bool playback)
+
+/*********************************************************************************************************************/
+
+
+/* Common ********************************************************************/
+
+CSoundCommonPulse::CSoundCommonPulse(_BOOLEAN bPlayback)
+	: bPlayback(bPlayback), bChangDev(TRUE)
+{
+}
+
+void CSoundCommonPulse::Enumerate(vector<string>& names, vector<string>& descriptions)
 {
 	pa_object pa_obj = { /*.pa_m=*/NULL, /*.pa_c=*/NULL, /*.ref_count=*/0 };
 	pa_operation *pa_o;
@@ -624,8 +629,8 @@ getdevices(vector < string > &names, vector < string > &descriptions,
 
 	names.clear();
 	descriptions.clear();
-	names.push_back(DEFAULT_DEVICE_NAME);
-	descriptions.push_back(DEFAULT_DEVICE_DESC);
+	names.push_back(""); /* default device */
+	descriptions.push_back("");
 
 	if (pa_init(&pa_obj, "") != PA_OK)
 	{
@@ -636,7 +641,7 @@ getdevices(vector < string > &names, vector < string > &descriptions,
 	userdata.names = &names;
 	userdata.descriptions = &descriptions;
 
-	if (playback)
+	if (bPlayback)
 		pa_o = pa_context_get_sink_info_list(pa_obj.pa_c, my_pa_sink_info_cb_t, &userdata);
 	else
 		pa_o = pa_context_get_source_info_list(pa_obj.pa_c, my_pa_source_info_cb_t, &userdata);
@@ -647,23 +652,38 @@ getdevices(vector < string > &names, vector < string > &descriptions,
 	pa_free(&pa_obj);
 }
 
+void CSoundCommonPulse::SetDev(string sNewDevice)
+{
+	if (sNewDevice != sCurrentDevice)
+	{
+		sCurrentDevice = sNewDevice;
+		bChangDev = TRUE;
+	}
+}
 
-/*********************************************************************************************************************/
+string CSoundCommonPulse::GetDev()
+{
+	return sCurrentDevice;
+}
+
+bool CSoundCommonPulse::IsDefaultDevice()
+{
+	const char *str = sCurrentDevice.c_str();
+	return str == NULL || *str == 0 || (str[1] == 0 && str[0] >= '0' && str[0] <= '9');
+}
 
 
 /* Wave in ********************************************************************/
 
-CSoundInPulse::CSoundInPulse():
+CSoundInPulse::CSoundInPulse(): CSoundCommonPulse(FALSE),
 	iSampleRate(0), iBufferSize(0), bBlockingRec(FALSE),
 	bBufferingError(FALSE),
-	bChangDev(TRUE), pa_s(NULL),
+	/*bChangDev(TRUE),*/ pa_s(NULL),
 	remaining_nbytes(0), remaining_data(NULL)
 #ifdef CLOCK_DRIFT_ADJ_ENABLED
 	, record_sample_rate(0), bClockDriftComp(FALSE), cp(NULL)
 #endif
 {
-	/* Get devices list */
-	getdevices(names, descriptions, false);
 }
 
 void CSoundInPulse::Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking)
@@ -738,37 +758,20 @@ void CSoundInPulse::Close()
 	bChangDev = TRUE;
 }
 
-void CSoundInPulse::SetDev(string sNewDevice)
-{
-	/* Change only in case new device id is not already active */
-	if (sNewDevice != sCurrentDevice)
-	{
-		sCurrentDevice = sNewDevice;
-		bChangDev = TRUE;
-	}
-}
-
-string CSoundInPulse::GetDev()
-{
-	return sCurrentDevice;
-}
-
 
 /* Wave out *******************************************************************/
 
-CSoundOutPulse::CSoundOutPulse():
+CSoundOutPulse::CSoundOutPulse(): CSoundCommonPulse(TRUE),
 	bPrebuffer(FALSE), bSeek(FALSE),
 	bBufferingError(FALSE), bMuteError(FALSE),
 	iSampleRate(0), iBufferSize(0), bBlockingPlay(FALSE),
-	bChangDev(TRUE), pa_s(NULL)
+	/*bChangDev(TRUE),*/ pa_s(NULL)
 #ifdef CLOCK_DRIFT_ADJ_ENABLED
 	, iMaxSampleRateOffset(0)
 //	, bNewClockDriftComp(TRUE), cp()
 	, bNewClockDriftComp(FALSE), cp()
 #endif
 {
-	/* Get devices list */
-	getdevices(names, descriptions, true);
 }
 
 void CSoundOutPulse::Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking)
@@ -835,17 +838,3 @@ void CSoundOutPulse::Close()
 	bChangDev = TRUE;
 }
 
-void CSoundOutPulse::SetDev(string sNewDevice)
-{
-	/* Change only in case new device id is not already active */
-	if (sNewDevice != sCurrentDevice)
-	{
-		sCurrentDevice = sNewDevice;
-		bChangDev = TRUE;
-	}
-}
-
-string CSoundOutPulse::GetDev()
-{
-	return sCurrentDevice;
-}

@@ -106,8 +106,12 @@ void
 CPaCommon::Enumerate(vector < string > &choices, vector < string > &descriptions)
 {
     vector < string > tmp;
+
     names.clear();
     descriptions.clear();
+	names.push_back(""); /* default device */
+	descriptions.push_back("");
+
     int numDevices = Pa_GetDeviceCount();
     if (numDevices < 0)
         throw string("PortAudio error: ") + Pa_GetErrorText(numDevices);

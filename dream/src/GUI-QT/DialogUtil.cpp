@@ -306,8 +306,8 @@ CHelpUsage::CHelpUsage(const char* usage, const char* argv0,
     show();
 }
 
-/* Help menu ---------------------------------------------------------------- */
 #if QT_VERSION < 0x040000
+/* Help menu ---------------------------------------------------------------- */
 CDreamHelpMenu::CDreamHelpMenu(QWidget* parent) : QPopupMenu(parent)
 {
     /* Standard help menu consists of about and what's this help */
@@ -320,27 +320,14 @@ void CDreamHelpMenu::OnHelpWhatsThis()
 {
     QWhatsThis::enterWhatsThisMode();
 }
-#else
-#if 0
-CDreamHelpMenu::CDreamHelpMenu(QWidget* parent) : QPopupMenu(parent)
-{
-    /* Standard help menu consists of about and what's this help */
-    setTitle("?");
-    addAction(tr("What's This"), this , SLOT(OnHelpWhatsThis()), Qt::SHIFT+Qt::Key_F1);
-    addSeparator();
-    addAction(tr("About..."), parent, SLOT(OnHelpAbout()));
-}
-#endif
-#endif
 
 /* Sound card selection menu ------------------------------------------------ */
-#if QT_VERSION < 0x040000
-#undef DEVICE_STRING
-#ifdef _WIN32
-# define DEVICE_STRING(s) s.c_str()
-#else
-# define DEVICE_STRING(s) QString::fromUtf8(s.c_str())
-#endif
+# undef DEVICE_STRING
+# ifdef _WIN32
+#  define DEVICE_STRING(s) s.c_str()
+# else
+#  define DEVICE_STRING(s) QString::fromUtf8(s.c_str())
+# endif
 
 CSoundCardSelMenu::CSoundCardSelMenu(
     CSelectionInterface* pNSIn, CSelectionInterface* pNSOut, QWidget* parent) :
@@ -351,41 +338,36 @@ CSoundCardSelMenu::CSoundCardSelMenu(
     pSoundOutMenu = new QPopupMenu(parent);
     CHECK_PTR(pSoundOutMenu);
     vector<string> vecDescriptions;
-    int i;
-    int iDefaultInDev = -1;
-    int iDefaultOutDev = -1;
-
-    /* Get default devices */
-    string sDefaultInDev = pSoundInIF->GetDev();
-    string sDefaultOutDev = pSoundOutIF->GetDev();
+    int i, iDefaultInDev = -1, iDefaultOutDev = -1;
 
     /* Get sound in device names */
-    vecDescriptions.clear();
+    string sDefaultInDev = pSoundInIF->GetDev();
     pSoundInIF->Enumerate(vecSoundInNames, vecDescriptions);
     iNumSoundInDev = vecSoundInNames.size();
-
     for (i = 0; i < iNumSoundInDev; i++)
     {
         if (vecSoundInNames[i] == sDefaultInDev)
             iDefaultInDev = i;
         QString name(DEVICE_STRING(vecSoundInNames[i]));
-#if defined(_MSC_VER) && (_MSC_VER < 1400)
+# if defined(_MSC_VER) && (_MSC_VER < 1400)
         if (name.find("blaster", 0, FALSE) >= 0)
             name += " (has problems on some platforms)";
-#endif
+# endif
+        if (name == "") name = tr("[default]");
         pSoundInMenu->insertItem(name, this, SLOT(OnSoundInDevice(int)), 0, i);
     }
 
     /* Get sound out device names */
-    vecDescriptions.clear();
+    string sDefaultOutDev = pSoundOutIF->GetDev();
     pSoundOutIF->Enumerate(vecSoundOutNames, vecDescriptions);
     iNumSoundOutDev = vecSoundOutNames.size();
     for (i = 0; i < iNumSoundOutDev; i++)
     {
         if (vecSoundOutNames[i] == sDefaultOutDev)
             iDefaultOutDev = i;
-        pSoundOutMenu->insertItem(DEVICE_STRING(vecSoundOutNames[i]), this,
-            SLOT(OnSoundOutDevice(int)), 0, i);
+        QString name(DEVICE_STRING(vecSoundOutNames[i]));
+        if (name == "") name = tr("[default]");
+        pSoundOutMenu->insertItem(name, this, SLOT(OnSoundOutDevice(int)), 0, i);
     }
 
     if (iDefaultInDev >= 0)
@@ -412,7 +394,7 @@ void CSoundCardSelMenu::OnSoundOutDevice(int id)
     for (int i = 0; i < iNumSoundOutDev; i++)
         pSoundOutMenu->setItemChecked(i, i == id);
 }
-#undef DEVICE_STRING
+# undef DEVICE_STRING
 #endif
 
 RemoteMenu::RemoteMenu(QWidget* parent, CRig& nrig)

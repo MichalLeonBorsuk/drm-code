@@ -26,8 +26,8 @@
  *
 \******************************************************************************/
 
-#ifndef PULSEAUDIO_H_INCLUDED
-#define PULSEAUDIO_H_INCLUDED
+#ifndef DRM_PULSEAUDIO_H_INCLUDED
+#define DRM_PULSEAUDIO_H_INCLUDED
 
 
 /* Master switch */
@@ -44,6 +44,7 @@
 # include "../matlib/MatlibSigProToolbox.h"
 #endif
 
+
 class CSoundOutPulse;
 typedef struct pa_stream_notify_cb_userdata_t
 {
@@ -59,23 +60,37 @@ typedef struct pa_common
 
 typedef struct pa_object
 {
-	pa_mainloop *pa_m;
-	pa_context *pa_c;
-	int ref_count;
+	pa_mainloop		*pa_m;
+	pa_context		*pa_c;
+	int				ref_count;
 } pa_object;
+
 
 /* Classes ********************************************************************/
 
-class CSoundInPulse : public CSoundInInterface
+class CSoundCommonPulse
+{
+public:
+	CSoundCommonPulse(_BOOLEAN bPlayback);
+	virtual ~CSoundCommonPulse() {}
+	void			Enumerate(vector<string>& names, vector<string>& descriptions);
+	void			SetDev(string sNewDevice);
+	string			GetDev();
+protected:
+	bool			IsDefaultDevice();
+	_BOOLEAN		bPlayback;
+	_BOOLEAN		bChangDev;
+	string			sCurrentDevice;
+};
+
+class CSoundInPulse : public CSoundCommonPulse, public CSoundInInterface
 {
 public:
 	CSoundInPulse();
 	virtual ~CSoundInPulse() {}
-
-	virtual void	Enumerate(vector<string>& names, vector<string>& descriptions)
-		{ names=this->names; descriptions=this->descriptions; }
-	virtual void	SetDev(string sNewDevice);
-	virtual string	GetDev();
+	void			Enumerate(vector<string>& names, vector<string>& descriptions) {CSoundCommonPulse::Enumerate(names, descriptions);};
+	string			GetDev() {return CSoundCommonPulse::GetDev();};
+	void			SetDev(string sNewDevice) {CSoundCommonPulse::SetDev(sNewDevice);};
 
 	void			Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking);
 	_BOOLEAN		Read(CVector<_SAMPLE>& psData);
@@ -96,11 +111,6 @@ protected:
 
 	_BOOLEAN		bBufferingError;
 
-	vector<string>	names;
-	vector<string>	descriptions;
-	_BOOLEAN		bChangDev;
-	string			sCurrentDevice;
-
 	pa_stream		*pa_s;
 	size_t			remaining_nbytes;
 	const char		*remaining_data;
@@ -112,16 +122,14 @@ protected:
 #endif
 };
 
-class CSoundOutPulse : public CSoundOutInterface
+class CSoundOutPulse : public CSoundCommonPulse, public CSoundOutInterface
 {
 public:
 	CSoundOutPulse();
 	virtual ~CSoundOutPulse() {}
-
-	virtual void	Enumerate(vector<string>& names, vector<string>& descriptions)
-		{ names=this->names; descriptions=this->descriptions; }
-	virtual void	SetDev(string sNewDevice);
-	virtual string	GetDev();
+	void			Enumerate(vector<string>& names, vector<string>& descriptions) {CSoundCommonPulse::Enumerate(names, descriptions);};
+	string			GetDev() {return CSoundCommonPulse::GetDev();};
+	void			SetDev(string sNewDevice) {CSoundCommonPulse::SetDev(sNewDevice);};
 
 	void			Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking);
 	_BOOLEAN		Write(CVector<_SAMPLE>& psData);
@@ -145,11 +153,6 @@ protected:
 	int				iSampleRate;
 	int				iBufferSize;
 	_BOOLEAN		bBlockingPlay;
-
-	vector<string>	names;
-	vector<string>	descriptions;
-	_BOOLEAN		bChangDev;
-	string			sCurrentDevice;
 
 	pa_stream		*pa_s;
 	pa_stream_notify_cb_userdata_t pa_stream_notify_cb_userdata_underflow;
