@@ -51,6 +51,7 @@
 #define STREAM_FLAGS (PA_STREAM_ADJUST_LATENCY | PA_STREAM_DONT_MOVE)
 #define STREAM_NAME(io, blocking) (blocking ? "Signal " io : "Audio " io)
 #define APP_NAME(io, blocking) ((!io != !blocking) ? "Dream Transmitter" : "Dream Receiver")
+#define STDIN_STDOUT_DEVICE_NAME "-"
 
 #define DEBUG_MSG(...) fprintf(stderr, __VA_ARGS__)
 
@@ -61,6 +62,46 @@
 # define ALGO_ERROR_EXPONENT 2.0
 # include "LatencyFilter.h"
 #endif
+
+
+/* stdin/stdout ***************************************************************/
+
+#ifdef ENABLE_STDIN_STDOUT
+
+#include <unistd.h>
+
+static int StdoutWrite(const char *buf, size_t count)
+{
+	size_t chunk, total = 0;
+	while (count) {
+		chunk = write(STDOUT_FILENO, buf, count);
+		if (chunk <= 0)
+			return 1;
+		total += chunk;
+		buf += chunk;
+		count -= chunk;
+	};
+	return 0;
+}
+
+static int StdinRead(char *buf, size_t count)
+{
+	size_t chunk, total = 0;
+	while (count) {
+		chunk = read(STDIN_FILENO, buf, count);
+		if (chunk <= 0)
+			return 1;
+		total += chunk;
+		buf += chunk;
+		count -= chunk;
+	};
+	return 0;
+}
+
+#endif
+
+
+/* PulseAudio low level functions *********************************************/
 
 
 static pa_object pa_obj =
@@ -232,6 +273,34 @@ static void pa_set_sample_rate(pa_object *pa_obj, pa_stream *pa_s, int sample_ra
 }
 #endif
 
+
+/****************/
+/* devices list */
+
+typedef struct USERDATA {
+	vector<string> *names;
+	vector<string> *descriptions;
+} USERDATA;
+
+static void pa_source_info_cb(pa_context *, const pa_source_info *i, int eol, void *userdata)
+{
+	if (!eol)
+	{
+		((USERDATA*)userdata)->names->push_back(string(i->name));
+		((USERDATA*)userdata)->descriptions->push_back(string(i->description));
+	}
+}
+static void pa_sink_info_cb(pa_context *, const pa_sink_info *i, int eol, void *userdata)
+{
+	if (!eol)
+	{
+		((USERDATA*)userdata)->names->push_back(string(i->name));
+		((USERDATA*)userdata)->descriptions->push_back(string(i->description));
+	}
+}
+
+
+/* Classes ********************************************************************/
 
 /* Implementation *************************************************************/
 
@@ -585,43 +654,20 @@ void CSoundOutPulse::Close_HW()
 }
 
 
-/****************/
-/* devices list */
-
-typedef struct USERDATA {
-	vector<string> *names;
-	vector<string> *descriptions;
-} USERDATA;
-
-static void my_pa_source_info_cb_t(pa_context *, const pa_source_info *i, int eol, void *userdata)
-{
-	if (!eol)
-	{
-		((USERDATA*)userdata)->names->push_back(string(i->name));
-		((USERDATA*)userdata)->descriptions->push_back(string(i->description));
-	}
-}
-static void my_pa_sink_info_cb_t(pa_context *, const pa_sink_info *i, int eol, void *userdata)
-{
-	if (!eol)
-	{
-		((USERDATA*)userdata)->names->push_back(string(i->name));
-		((USERDATA*)userdata)->descriptions->push_back(string(i->description));
-	}
-}
-
-
 /*********************************************************************************************************************/
 
 
 /* Common ********************************************************************/
 
-CSoundCommonPulse::CSoundCommonPulse(_BOOLEAN bPlayback)
+CSoundPulse::CSoundPulse(_BOOLEAN bPlayback)
 	: bPlayback(bPlayback), bChangDev(TRUE)
+#ifdef ENABLE_STDIN_STDOUT
+	, bStdinStdout(FALSE)
+#endif
 {
 }
 
-void CSoundCommonPulse::Enumerate(vector<string>& names, vector<string>& descriptions)
+void CSoundPulse::Enumerate(vector<string>& names, vector<string>& descriptions)
 {
 	pa_object pa_obj = { /*.pa_m=*/NULL, /*.pa_c=*/NULL, /*.ref_count=*/0 };
 	pa_operation *pa_o;
@@ -634,7 +680,7 @@ void CSoundCommonPulse::Enumerate(vector<string>& names, vector<string>& descrip
 
 	if (pa_init(&pa_obj, "") != PA_OK)
 	{
-		DEBUG_MSG("getdevices(): pa_init failed\n");
+		DEBUG_MSG("CSoundPulse::Enumerate(): pa_init failed\n");
 		return;
 	}
 
@@ -642,17 +688,17 @@ void CSoundCommonPulse::Enumerate(vector<string>& names, vector<string>& descrip
 	userdata.descriptions = &descriptions;
 
 	if (bPlayback)
-		pa_o = pa_context_get_sink_info_list(pa_obj.pa_c, my_pa_sink_info_cb_t, &userdata);
+		pa_o = pa_context_get_sink_info_list(pa_obj.pa_c, pa_sink_info_cb, &userdata);
 	else
-		pa_o = pa_context_get_source_info_list(pa_obj.pa_c, my_pa_source_info_cb_t, &userdata);
+		pa_o = pa_context_get_source_info_list(pa_obj.pa_c, pa_source_info_cb, &userdata);
 
 	if (pa_o_sync(&pa_obj, pa_o) != PA_OK)
-		DEBUG_MSG("getdevices(): pa_context_get_(sink/source)_info_list failed\n");
+		DEBUG_MSG("CSoundPulse::Enumerate(): pa_context_get_(sink/source)_info_list failed\n");
 
 	pa_free(&pa_obj);
 }
 
-void CSoundCommonPulse::SetDev(string sNewDevice)
+void CSoundPulse::SetDev(string sNewDevice)
 {
 	if (sNewDevice != sCurrentDevice)
 	{
@@ -661,24 +707,31 @@ void CSoundCommonPulse::SetDev(string sNewDevice)
 	}
 }
 
-string CSoundCommonPulse::GetDev()
+string CSoundPulse::GetDev()
 {
 	return sCurrentDevice;
 }
 
-bool CSoundCommonPulse::IsDefaultDevice()
+_BOOLEAN CSoundPulse::IsDefaultDevice()
 {
 	const char *str = sCurrentDevice.c_str();
-	return str == NULL || *str == 0 || (str[1] == 0 && str[0] >= '0' && str[0] <= '9');
+	return *str == 0;
 }
+
+#ifdef ENABLE_STDIN_STDOUT
+_BOOLEAN CSoundPulse::IsStdinStdout()
+{
+	bStdinStdout = sCurrentDevice == STDIN_STDOUT_DEVICE_NAME;
+	return bStdinStdout;
+}
+#endif
 
 
 /* Wave in ********************************************************************/
 
-CSoundInPulse::CSoundInPulse(): CSoundCommonPulse(FALSE),
+CSoundInPulse::CSoundInPulse(): CSoundPulse(FALSE),
 	iSampleRate(0), iBufferSize(0), bBlockingRec(FALSE),
-	bBufferingError(FALSE),
-	/*bChangDev(TRUE),*/ pa_s(NULL),
+	bBufferingError(FALSE), pa_s(NULL),
 	remaining_nbytes(0), remaining_data(NULL)
 #ifdef CLOCK_DRIFT_ADJ_ENABLED
 	, record_sample_rate(0), bClockDriftComp(FALSE), cp(NULL)
@@ -689,6 +742,15 @@ CSoundInPulse::CSoundInPulse(): CSoundCommonPulse(FALSE),
 void CSoundInPulse::Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking)
 {
 	DEBUG_MSG("initrec iSampleRate=%i iBufferSize=%i bBlocking=%i\n", iNewSampleRate, iNewBufferSize, bNewBlocking);
+
+#ifdef ENABLE_STDIN_STDOUT
+	/* Check if it's stdin */
+	if (IsStdinStdout())
+	{
+		iBufferSize = iNewBufferSize * BYTES_PER_SAMPLE;
+		return;
+	}
+#endif
 
 	/* Save samplerate and blocking mode */
 	iSampleRate = iNewSampleRate;
@@ -726,6 +788,12 @@ void CSoundInPulse::Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBl
 
 _BOOLEAN CSoundInPulse::Read(CVector<_SAMPLE>& psData)
 {
+#ifdef ENABLE_STDIN_STDOUT
+	/* Stdin support */
+	if (bStdinStdout)
+		return StdinRead((char*)&psData[0], iBufferSize);
+#endif
+
 	/* Check if device must be opened or reinitialized */
 	if (bChangDev == TRUE)
 	{
@@ -751,6 +819,12 @@ void CSoundInPulse::Close()
 {
 	DEBUG_MSG("stoprec\n");
 
+#ifdef ENABLE_STDIN_STDOUT
+	/* Stdout support */
+	if (bStdinStdout)
+		return;
+#endif
+
 	/* Close the input */
 	Close_HW();
 
@@ -761,11 +835,11 @@ void CSoundInPulse::Close()
 
 /* Wave out *******************************************************************/
 
-CSoundOutPulse::CSoundOutPulse(): CSoundCommonPulse(TRUE),
+CSoundOutPulse::CSoundOutPulse(): CSoundPulse(TRUE),
 	bPrebuffer(FALSE), bSeek(FALSE),
 	bBufferingError(FALSE), bMuteError(FALSE),
-	iSampleRate(0), iBufferSize(0), bBlockingPlay(FALSE),
-	/*bChangDev(TRUE),*/ pa_s(NULL)
+	iSampleRate(0), iBufferSize(0),
+	bBlockingPlay(FALSE), pa_s(NULL)
 #ifdef CLOCK_DRIFT_ADJ_ENABLED
 	, iMaxSampleRateOffset(0)
 //	, bNewClockDriftComp(TRUE), cp()
@@ -777,6 +851,15 @@ CSoundOutPulse::CSoundOutPulse(): CSoundCommonPulse(TRUE),
 void CSoundOutPulse::Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking)
 {
 	DEBUG_MSG("initplay iSampleRate=%i iBufferSize=%i bBlocking=%i\n", iNewSampleRate, iNewBufferSize, bNewBlocking);
+
+#ifdef ENABLE_STDIN_STDOUT
+	/* Check if it's stdin */
+	if (IsStdinStdout())
+	{
+		iBufferSize = iNewBufferSize * BYTES_PER_SAMPLE;
+		return;
+	}
+#endif
 
 	/* Save samplerate, blocking mode and buffer size */
 	iSampleRate = iNewSampleRate;
@@ -806,6 +889,12 @@ void CSoundOutPulse::Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewB
 
 _BOOLEAN CSoundOutPulse::Write(CVector<_SAMPLE>& psData)
 {
+#ifdef ENABLE_STDIN_STDOUT
+	/* Stdout support */
+	if (bStdinStdout)
+		return StdoutWrite((char*)&psData[0], iBufferSize);
+#endif
+
 	/* Check if device must be opened or reinitialized */
 	if (bChangDev == TRUE)
 	{
@@ -830,6 +919,12 @@ _BOOLEAN CSoundOutPulse::Write(CVector<_SAMPLE>& psData)
 void CSoundOutPulse::Close()
 {
 	DEBUG_MSG("stopplay\n");
+
+#ifdef ENABLE_STDIN_STDOUT
+	/* Stdout support */
+	if (bStdinStdout)
+		return;
+#endif
 
 	/* Close the output */
 	Close_HW();
