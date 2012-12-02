@@ -144,9 +144,6 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& NSettings, CRig& rig,
     /* Settings menu  ------------------------------------------------------- */
     pSettingsMenu = new QPopupMenu(this);
     CHECK_PTR(pSettingsMenu);
-    pSettingsMenu->insertItem(tr("&Sound Card Selection"),
-                              new CSoundCardSelMenu(DRMReceiver.GetSoundInInterface(),
-                                      DRMReceiver.GetSoundOutInterface(), this));
 
     pSettingsMenu->insertItem(tr("&AM (analog)"), this,
                               SLOT(OnSwitchToAM()), Qt::CTRL+Qt::Key_A);
@@ -157,6 +154,7 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& NSettings, CRig& rig,
     pSettingsMenu->insertSeparator();
     pSettingsMenu->insertItem(tr("Set D&isplay Color..."), this,
                               SLOT(OnMenuSetDisplayColor()));
+
     /* Plot style settings */
     pPlotStyleMenu = new QPopupMenu(this);
     pPlotStyleMenu->insertItem(tr("&Blue / White"), this, SLOT(OnMenuPlotStyle(int)), 0, 0);
@@ -174,6 +172,11 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& NSettings, CRig& rig,
 
     pSettingsMenu->insertItem(tr("&General settings..."), pGeneralSettingsDlg,
                               SLOT(show()));
+
+    /* Sound Card */
+    pSettingsMenu->insertItem(tr("&Sound Card Selection"),
+                              new CSoundCardSelMenu(DRMReceiver.GetSoundInInterface(),
+                                      DRMReceiver.GetSoundOutInterface(), this));
 
     /* Main menu bar -------------------------------------------------------- */
     pMenu = new QMenuBar(this);

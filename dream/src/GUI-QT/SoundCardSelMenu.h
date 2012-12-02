@@ -37,7 +37,7 @@
 #include "../selectioninterface.h"
 #include <vector>
 
-typedef struct _CHANSEL {
+typedef struct CHANSEL {
     const char* Name;
     int iChanSel;
 } CHANSEL;
@@ -53,9 +53,9 @@ public:
         QWidget* parent = 0);
 
 protected:
-    CDRMReceiver*           DRMReceiver;
-    CSelectionInterface*    pSoundInIF;
-    CSelectionInterface*    pSoundOutIF;
+    CDRMReceiver* DRMReceiver;
+    CSelectionInterface* pSoundInIF;
+    CSelectionInterface* pSoundOutIF;
     QMenu* InitDevice(QMenu* parent, const QString& text, CSelectionInterface* intf);
     QMenu* InitChannel(QMenu* parent, const QString& text, int iChanSel, CHANSEL* ChanSel);
 

@@ -125,13 +125,13 @@ QMenu* CSoundCardSelMenu::InitDevice(QMenu* parent, const QString& text, CSelect
     vector<string> descriptions;
     intf->Enumerate(names, descriptions);
     int iNumSoundDev = names.size();
-    int iNumDescriptions = descriptions.size(); /* descriptions is optional */
+    int iNumDescriptions = descriptions.size(); /* descriptions are optional */
     string sDefaultDev = intf->GetDev();
     for (int i = 0; i < iNumSoundDev; i++)
     {
         QString name(DEVICE_STRING(names[i]));
 		QString desc(i < iNumDescriptions ? DEVICE_STRING(descriptions[i]) : QString());
-        QAction* m = menu->addAction(name + (desc.isEmpty() ? desc : (name.isEmpty() ? "[" : " [" ) + desc + "]"));
+        QAction* m = menu->addAction(name.isEmpty() ? tr("[default]") : name + (desc.isEmpty() ? desc : " [" + desc + "]"));
         m->setData(QString::fromUtf8(names[i].c_str()));
         m->setCheckable(true);
         if (names[i] == sDefaultDev)

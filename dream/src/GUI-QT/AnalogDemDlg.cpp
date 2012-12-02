@@ -91,15 +91,15 @@ AnalogDemDlg::AnalogDemDlg(CDRMReceiver& NDRMR, CSettings& NSettings,
 	/* Settings menu  ------------------------------------------------------- */
 	QPopupMenu* pSettingsMenu = new QPopupMenu(this);
 	CHECK_PTR(pSettingsMenu);
-	pSettingsMenu->insertItem(tr("&Sound Card Selection"),
-		new CSoundCardSelMenu(DRMReceiver.GetSoundInInterface(), DRMReceiver.GetSoundOutInterface(), this));
 	pSettingsMenu->insertItem(tr("&DRM (digital)"), this,
 		SLOT(OnSwitchToDRM()), CTRL+Key_D);
 	pSettingsMenu->insertItem(tr("&FM (analog)"), this,
 		SLOT(OnSwitchToFM()), CTRL+Key_F);
 	pSettingsMenu->insertItem(tr("New &AM Acquisition"), this,
 		SIGNAL(NewAMAcquisition()), CTRL+Key_A);
-
+	pSettingsMenu->insertSeparator();
+	pSettingsMenu->insertItem(tr("&Sound Card Selection"),
+		new CSoundCardSelMenu(DRMReceiver.GetSoundInInterface(), DRMReceiver.GetSoundOutInterface(), this));
 
 	/* Main menu bar -------------------------------------------------------- */
 	QMenuBar* pMenu = new QMenuBar(this);
