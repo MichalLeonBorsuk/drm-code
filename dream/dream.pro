@@ -275,6 +275,11 @@ win32 {
         CONFIG += portaudio
         message("with portaudio")
     }
+    else {
+        HEADERS += src/windows/Sound.h src/windows/SoundWin.h
+        SOURCES += src/windows/Sound.cpp
+        message("with mmsystem")
+    }
     exists(libs/fftw3.h) {
         DEFINES += HAVE_FFTW3_H
         LIBS += -lfftw3-3
@@ -314,8 +319,7 @@ win32 {
     DEFINES += HAVE_SETUPAPI \
     HAVE_LIBZ
     DEFINES -= UNICODE
-#    HEADERS += src/windows/Sound.h src/windows/SoundWin.h
-#    SOURCES += src/windows/Pacer.cpp src/windows/Sound.cpp
+    SOURCES += src/windows/Pacer.cpp
 }
 faad {
     DEFINES += HAVE_LIBFAAD \
