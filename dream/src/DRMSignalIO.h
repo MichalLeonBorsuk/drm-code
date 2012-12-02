@@ -129,7 +129,7 @@ protected:
 class CReceiveData : public CReceiverModul<_REAL, _REAL>
 {
 public:
-    enum EInChanSel {CS_LEFT_CHAN, CS_RIGHT_CHAN, CS_MIX_CHAN, CS_IQ_POS,
+    enum EInChanSel {CS_LEFT_CHAN, CS_RIGHT_CHAN, CS_MIX_CHAN, CS_SUB_CHAN, CS_IQ_POS,
                      CS_IQ_NEG, CS_IQ_POS_ZERO, CS_IQ_NEG_ZERO
                     };
 

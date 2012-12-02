@@ -260,8 +260,17 @@ void CReceiveData::ProcessDataInternal(CParameter& Parameters)
             /* Mix left and right channel together */
             const _REAL rLeftChan = sample2real(vecsSoundBuffer[2 * i]);
             const _REAL rRightChan = sample2real(vecsSoundBuffer[2 * i + 1]);
-
             (*pvecOutputData)[i] = (rLeftChan + rRightChan) / 2;
+        }
+        break;
+
+    case CS_SUB_CHAN:
+        for (i = 0; i < iOutputBlockSize; i++)
+        {
+            /* Substract right channel from left */
+            const _REAL rLeftChan = sample2real(vecsSoundBuffer[2 * i]);
+            const _REAL rRightChan = sample2real(vecsSoundBuffer[2 * i + 1]);
+            (*pvecOutputData)[i] = (rLeftChan - rRightChan) / 2;
         }
         break;
 
