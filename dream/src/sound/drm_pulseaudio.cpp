@@ -51,7 +51,6 @@
 #define STREAM_FLAGS (PA_STREAM_ADJUST_LATENCY | PA_STREAM_DONT_MOVE)
 #define STREAM_NAME(io, blocking) (blocking ? "Signal " io : "Audio " io)
 #define APP_NAME(io, blocking) ((!io != !blocking) ? "Dream Transmitter" : "Dream Receiver")
-#define STDIN_STDOUT_DEVICE_NAME "-"
 
 #define DEBUG_MSG(...) fprintf(stderr, __VA_ARGS__)
 
@@ -67,37 +66,34 @@
 /* stdin/stdout ***************************************************************/
 
 #ifdef ENABLE_STDIN_STDOUT
-
-#include <unistd.h>
-
-static int StdoutWrite(const char *buf, size_t count)
+# define STDIN_STDOUT_DEVICE_NAME "-"
+# include <unistd.h>
+static int StdoutWrite(const char *buf, ssize_t count)
 {
-	size_t chunk, total = 0;
-	while (count) {
+	ssize_t chunk;
+	while (count > 0) {
 		chunk = write(STDOUT_FILENO, buf, count);
 		if (chunk <= 0)
 			return 1;
-		total += chunk;
 		buf += chunk;
 		count -= chunk;
 	};
 	return 0;
 }
-
-static int StdinRead(char *buf, size_t count)
+static int StdinRead(char *buf, ssize_t count)
 {
-	size_t chunk, total = 0;
-	while (count) {
+	ssize_t chunk;
+	while (count > 0) {
 		chunk = read(STDIN_FILENO, buf, count);
-		if (chunk <= 0)
+		if (chunk <= 0) {
+			memset(buf, 0, count);
 			return 1;
-		total += chunk;
+		}
 		buf += chunk;
 		count -= chunk;
 	};
 	return 0;
 }
-
 #endif
 
 
