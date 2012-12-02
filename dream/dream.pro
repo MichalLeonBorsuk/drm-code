@@ -314,8 +314,8 @@ win32 {
     DEFINES += HAVE_SETUPAPI \
     HAVE_LIBZ
     DEFINES -= UNICODE
-    HEADERS += src/windows/Sound.h src/windows/SoundWin.h
-    SOURCES += src/windows/Pacer.cpp src/windows/Sound.cpp
+#    HEADERS += src/windows/Sound.h src/windows/SoundWin.h
+#    SOURCES += src/windows/Pacer.cpp src/windows/Sound.cpp
 }
 faad {
     DEFINES += HAVE_LIBFAAD \
