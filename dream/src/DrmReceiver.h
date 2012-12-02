@@ -56,7 +56,7 @@
 #include "sync/SyncUsingPil.h"
 #include "AMDemodulation.h"
 #include "AMSSDemodulation.h"
-#include "soundinterface.h"
+#include "sound/soundinterface.h"
 #include "PlotManager.h"
 
 /* Definitions ****************************************************************/

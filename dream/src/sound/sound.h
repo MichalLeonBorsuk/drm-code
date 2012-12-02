@@ -6,7 +6,7 @@
  *	Julian Cable
  *
  * Decription:
- * Read a file at the correct rate
+ * sound interface selection
  *
  ******************************************************************************
  *
@@ -26,40 +26,45 @@
  *
 \******************************************************************************/
 
-#ifndef _AUDIOFILEIN
-#define _AUDIOFILEIN
+#ifndef _SOUND_H
+#define _SOUND_H
 
-#include "soundinterface.h"
-#include "util/Pacer.h"
+#if defined(_WIN32) && !defined(USE_PORTAUDIO) && !defined(USE_JACK)
+# include "../windows/Sound.h"
+#endif
 
-/* Classes ********************************************************************/
-class CAudioFileIn : public CSoundInInterface
-{
-public:
-    CAudioFileIn();
-    virtual ~CAudioFileIn();
+#ifdef USE_OSS
+# include "../linux/soundin.h"
+# include "../linux/soundout.h"
+#endif
 
-    virtual void		Enumerate(vector<string>&, vector<string>&) {}
-    virtual void		SetDev(string) {}
-    virtual string		GetDev() {return string();}
-    virtual void		SetFileName(const string& strFileName);
+#ifdef USE_ALSA
+# include "../linux/soundin.h"
+# include "../linux/soundout.h"
+#endif
 
-    virtual void 		Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking = TRUE);
-    virtual _BOOLEAN 	Read(CVector<short>& psData);
-    virtual void 		Close();
+#ifdef USE_JACK
+# include "../linux/jack.h"
+typedef CSoundInJack CSoundIn;
+typedef CSoundOutJack CSoundOut;
+#endif
 
-protected:
-    FILE*				pFileReceiver;
-    string				strInFileName;
-    enum {
-        fmt_txt, fmt_raw_mono, fmt_raw_stereo, fmt_other
-    }				eFmt;
-    int					iSampleRate;
-    int					iFileSampleRate;
-    int					iFileChannels;
-    CPacer*				pacer;
-    short *buffer;
-    int iBufferSize;
-};
+#ifdef USE_PULSEAUDIO
+# include "drm_pulseaudio.h"
+typedef CSoundInPulse CSoundIn;
+typedef CSoundOutPulse CSoundOut;
+#endif
+
+#ifdef USE_PORTAUDIO
+# include "drm_portaudio.h"
+typedef CPaIn CSoundIn;
+typedef CPaOut CSoundOut;
+#endif
+
+#if !defined(_WIN32) && !defined(USE_OSS) && !defined(USE_ALSA) && !defined(USE_JACK) && !defined(USE_PULSEAUDIO) && !defined(USE_PORTAUDIO)
+# include "soundnull.h"
+typedef CSoundInNull CSoundIn;
+typedef CSoundOutNull CSoundOut;
+#endif
 
 #endif

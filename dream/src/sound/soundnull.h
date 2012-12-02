@@ -29,7 +29,7 @@
 #ifndef _SOUNDNULL_H
 #define _SOUNDNULL_H
 
-#include "../soundinterface.h"
+#include "soundinterface.h"
 
 /* Classes ********************************************************************/
 class CSoundInNull : public CSoundInInterface
