@@ -34,7 +34,7 @@
 #include "../Parameter.h"
 #include "../DRMSignalIO.h"
 #include "../DataIO.h"
-#include "../selectioninterface.h"
+#include "../sound/selectioninterface.h"
 #include <vector>
 
 typedef struct CHANSEL {

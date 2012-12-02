@@ -30,7 +30,7 @@
 #define _SOUNDINTERFACE_H
 
 #include "selectioninterface.h"
-#include "util/Vector.h"
+#include "../util/Vector.h"
 
 class CSoundInInterface : public CSelectionInterface
 {

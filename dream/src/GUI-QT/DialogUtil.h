@@ -30,7 +30,7 @@
 #define DIALOGUTIL_H__FD6B23452398345OIJ9453_804E1606C2AC__INCLUDED_
 
 #include "../Parameter.h"
-#include "../selectioninterface.h"
+#include "../sound/selectioninterface.h"
 
 #include<map>
 

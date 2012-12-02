@@ -39,7 +39,7 @@
 #include "OFDM.h"
 #include "DRMSignalIO.h"
 #include "sourcedecoders/AudioSourceEncoder.h"
-#include "soundinterface.h"
+#include "sound/soundinterface.h"
 
 /* Classes ********************************************************************/
 class CDRMTransmitter

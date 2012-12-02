@@ -29,7 +29,7 @@
 #ifndef _SELECTIONINTERFACE_H
 #define _SELECTIONINTERFACE_H
 
-#include "GlobalDefinitions.h"
+#include "../GlobalDefinitions.h"
 #include <vector>
 #include <string>
 

@@ -36,9 +36,9 @@
 #include "util/Settings.h"
 #include "util/Utilities.h"
 
-#include "sound.h"
+#include "sound/sound.h"
 #include "sound/soundnull.h"
-#include "audiofilein.h"
+#include "sound/audiofilein.h"
 #include "GUI-QT/Rig.h"
 
 const int

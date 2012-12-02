@@ -27,7 +27,7 @@
 \******************************************************************************/
 
 #include "DrmTransmitter.h"
-#include "sound.h"
+#include "sound/sound.h"
 #include <sstream>
 
 /* Implementation *************************************************************/

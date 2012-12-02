@@ -35,7 +35,7 @@
 
 
 #include <pulse/pulseaudio.h>
-#include "../soundinterface.h"
+#include "../sound/soundinterface.h"
 #if defined(PA_STREAM_VARIABLE_RATE) && defined(ENABLE_CLOCK_DRIFT_ADJ)
 # define CLOCK_DRIFT_ADJ_ENABLED
 #endif
