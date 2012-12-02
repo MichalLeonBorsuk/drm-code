@@ -380,7 +380,6 @@ pulseaudio {
 }
 HEADERS += src/AMDemodulation.h \
    src/AMSSDemodulation.h \
-   src/audiofilein.h \
    src/chanest/ChanEstTime.h \
    src/chanest/ChannelEstimation.h \
    src/chanest/IdealChannelEstimation.h \
@@ -460,10 +459,11 @@ HEADERS += src/AMDemodulation.h \
    src/resample/Resample.h \
    src/resample/ResampleFilter.h \
    src/SDC/SDC.h \
-   src/selectioninterface.h \
-   src/soundinterface.h \
-   src/sound.h \
    src/Scheduler.h \
+   src/sound/audiofilein.h \
+   src/sound/selectioninterface.h \
+   src/sound/sound.h \
+   src/sound/soundinterface.h \
    src/sound/soundnull.h \
    src/sourcedecoders/AudioSourceDecoder.h \
    src/sourcedecoders/AudioSourceEncoder.h \
@@ -495,7 +495,6 @@ HEADERS += src/AMDemodulation.h \
    src/Version.h
 SOURCES += src/AMDemodulation.cpp \
       src/AMSSDemodulation.cpp \
-      src/audiofilein.cpp \
       src/chanest/ChanEstTime.cpp \
       src/chanest/ChannelEstimation.cpp \
       src/chanest/IdealChannelEstimation.cpp \
@@ -572,6 +571,7 @@ SOURCES += src/AMDemodulation.cpp \
       src/SDC/SDCReceive.cpp \
       src/SDC/SDCTransmit.cpp \
       src/SimulationParameters.cpp \
+      src/sound/audiofilein.cpp \
       src/sourcedecoders/AudioSourceDecoder.cpp \
       src/sourcedecoders/AudioSourceEncoder.cpp \
       src/sync/FreqSyncAcq.cpp \
