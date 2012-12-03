@@ -27,12 +27,6 @@
 \******************************************************************************/
 #include "SoundCardSelMenu.h"
 
-#ifdef _WIN32
-# define DEVICE_STRING(s) s.c_str()
-#else
-# define DEVICE_STRING(s) QString::fromUtf8(s.c_str())
-#endif
-
 
 static CHANSEL InputChannelTable[] =
 {
@@ -110,12 +104,12 @@ void CSoundCardSelMenu::OnSoundOutChannel(QAction* action)
 
 void CSoundCardSelMenu::OnSoundInDevice(QAction* action)
 {
-    pSoundInIF->SetDev(action->data().toString().toUtf8().data());
+    pSoundInIF->SetDev(action->data().toString().toLocal8Bit().data());
 }
 
 void CSoundCardSelMenu::OnSoundOutDevice(QAction* action)
 {
-    pSoundOutIF->SetDev(action->data().toString().toUtf8().data());
+    pSoundOutIF->SetDev(action->data().toString().toLocal8Bit().data());
 }
 
 QMenu* CSoundCardSelMenu::InitDevice(QMenu* parent, const QString& text, CSelectionInterface* intf)
@@ -130,10 +124,10 @@ QMenu* CSoundCardSelMenu::InitDevice(QMenu* parent, const QString& text, CSelect
     string sDefaultDev = intf->GetDev();
     for (int i = 0; i < iNumSoundDev; i++)
     {
-        QString name(DEVICE_STRING(names[i]));
-		QString desc(i < iNumDescriptions ? DEVICE_STRING(descriptions[i]) : QString());
+		QString name(QString::fromLocal8Bit(names[i].c_str()));
+		QString desc(i < iNumDescriptions ? QString::fromLocal8Bit(descriptions[i].c_str()) : QString());
         QAction* m = menu->addAction(name.isEmpty() ? tr("[default]") : name + (desc.isEmpty() ? desc : " [" + desc + "]"));
-        m->setData(QString::fromUtf8(names[i].c_str()));
+        m->setData(name);
         m->setCheckable(true);
         if (names[i] == sDefaultDev)
         {
