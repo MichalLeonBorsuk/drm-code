@@ -192,9 +192,9 @@ public:
 		Frame->setFrameStyle(QFrame::Panel|QFrame::Sunken);
 		Frame->setLineWidth(WINDOW_BORDER);
 		Plot = new QwtPlot(Frame);
-		/*printf("QwtPlotDialog()\n");*/
+		/*fprintf(stderr, "QwtPlotDialog()\n");*/
 	}
-	~QwtPlotDialog() { /*printf("~QwtPlotDialog()\n");*/ }
+	~QwtPlotDialog() { /*fprintf(stderr, "~QwtPlotDialog()\n");*/ }
 	QwtPlot *GetPlot() { return Plot; }
 	void show() { QDialog::show(); emit activate(); }
 	void hide() { emit deactivate(); QDialog::hide(); }

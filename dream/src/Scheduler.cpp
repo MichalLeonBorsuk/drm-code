@@ -49,7 +49,7 @@ int dprintf(const char *format, ...)
 	return ret;
 }
 # else
-#  define dprintf printf
+#  define dprintf(...) fprintf(stderr, __VA_ARGS__)
 # endif
 #endif
 
@@ -80,7 +80,7 @@ CScheduler::SEvent CScheduler::front()
 	{
 		fill();
 	}
-//struct tm* dts = gmtime(&events.front().time); printf("%i %02i:%02i:%02i frequency=%i\n", (int)dts->tm_mday, (int)dts->tm_hour, (int)dts->tm_min, (int)dts->tm_sec, (int)events.front().frequency);
+//struct tm* dts = gmtime(&events.front().time); dprintf("%i %02i:%02i:%02i frequency=%i\n", (int)dts->tm_mday, (int)dts->tm_hour, (int)dts->tm_min, (int)dts->tm_sec, (int)events.front().frequency);
 	return events.front();
 }
 

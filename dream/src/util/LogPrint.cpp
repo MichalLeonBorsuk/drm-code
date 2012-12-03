@@ -149,20 +149,20 @@ void CFileLogPrinter::Instantiate()
 
 void CPrintfLogPrinter::LogStatusSpecific(char *s)
 {
-	printf("STATUS: %s\n",s);
-	fflush(stdout);
+	fprintf(stderr, "STATUS: %s\n",s);
+	fflush(stderr);
 }
 
 void CPrintfLogPrinter::LogWarningSpecific(char *s)
 {
-	printf("WARNING: %s\n",s);
-	fflush(stdout);
+	fprintf(stderr, "WARNING: %s\n",s);
+	fflush(stderr);
 }
 
 void CPrintfLogPrinter::LogErrorSpecific(char *s)
 {
-	printf("ERROR: %s\n",s);
-	fflush(stdout);
+	fprintf(stderr, "ERROR: %s\n",s);
+	fflush(stderr);
 }
 
 void CNullLogPrinter::LogStatus(char *)
