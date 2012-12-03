@@ -253,7 +253,7 @@ void CAMSSExtractBits::ProcessDataInternal(CParameter& Parameters)
 
         if (iBitSyncSampleCount >= (AMSS_12kHz_SAMPLES_PER_BIT-1))
         {
-            //printf("pos: %d\n", m_bit_sync_slice_offset);
+            //fprintf(stderr, "pos: %d\n", m_bit_sync_slice_offset);
             iBitSyncSliceOffset = RecursiveFilter.GetPeakPos();
             iBitSyncSampleCount = 0;
         }

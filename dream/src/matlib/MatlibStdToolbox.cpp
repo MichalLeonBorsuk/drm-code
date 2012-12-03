@@ -248,7 +248,7 @@ CMatlibMatrix<CComplex> Inv(const CMatlibMatrix<CComplex>& matrI)
 // TEST
 if (row == iSize)
 {
-printf("couldn't invert matrix, possibly singular.\n");
+	fprintf(stderr, "couldn't invert matrix, possibly singular.\n");
 	matrRet = Eye(iSize);
 	return matrRet;
 }
@@ -372,7 +372,7 @@ CComplex _integral(MATLIB_CALLBACK_QAUD f, const CReal a, const CReal b,
 			/* Complete loss of significance? */
 			if (left >= right)
 			{
-				printf("integral: Error 1");
+				fprintf(stderr, "integral: Error 1\n");
 				return value;
 			}
 
@@ -398,7 +398,7 @@ CComplex _integral(MATLIB_CALLBACK_QAUD f, const CReal a, const CReal b,
 					/* Complete loss of significance? */
 					if (left >= right)
 					{
-						printf("integral: Error 2");
+						fprintf(stderr, "integral: Error 2\n");
 						return value;
 					}
 
@@ -760,7 +760,7 @@ void CFftPlans::Init(const int iFSi, EFFTPlan eFFTPlan)
 	/* The following fftw_ call might be cpu intensive, they must be called only when needed */
 	if (bSizeChanged || bNeedPlanInit)
 	{
-//		printf("CFftPlans::Init() bSizeChanged=%i bNeedPlanInit=%i iFSi=%i fftw_n=%i\n", bSizeChanged, bNeedPlanInit, iFSi, fftw_n);
+//		fprintf(stderr, "CFftPlans::Init() bSizeChanged=%i bNeedPlanInit=%i iFSi=%i fftw_n=%i\n", bSizeChanged, bNeedPlanInit, iFSi, fftw_n);
 		MUTEX_LOCK();
 		switch (eFFTPlan)
 		{

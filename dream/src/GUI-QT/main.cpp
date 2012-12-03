@@ -369,6 +369,6 @@ DebugError(const char *pchErDescr, const char *pchPar1Descr,
 	fprintf(pFile, ": ");
 	fprintf(pFile, "%e\n", dPar2);
 	fclose(pFile);
-	printf("\nDebug error! For more information see test/DebugError.dat\n");
+	fprintf(stderr, "\nDebug error! For more information see test/DebugError.dat\n");
 	exit(1);
 }

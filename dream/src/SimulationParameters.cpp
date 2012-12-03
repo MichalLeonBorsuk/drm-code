@@ -208,7 +208,7 @@ void CDRMSimulation::SimScript()
             exit(1);
 
         /* Show name as console output */
-        printf("%s\n", strSimFile.c_str());
+        fprintf(stderr, "%s\n", strSimFile.c_str());
 
         /* Main SNR loop */
         for (rSNRCnt = rStartSNR; rSNRCnt <= rEndSNR; rSNRCnt += rStepSNR)

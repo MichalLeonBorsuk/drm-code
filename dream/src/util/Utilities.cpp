@@ -672,7 +672,7 @@ CHamlib::GetPortList(map < string, string > &ports)
     classesToMatch = IOServiceMatching(kIOSerialBSDServiceValue);
     if (classesToMatch == NULL)
     {
-        printf("IOServiceMatching returned a NULL dictionary.\n");
+        fprintf(stderr, "IOServiceMatching returned a NULL dictionary.\n");
     }
     else
 	{
@@ -684,7 +684,7 @@ CHamlib::GetPortList(map < string, string > &ports)
     kernResult = IOServiceGetMatchingServices(kIOMasterPortDefault, classesToMatch, &serialPortIterator);
     if (KERN_SUCCESS != kernResult)
     {
-        printf("IOServiceGetMatchingServices returned %d\n", kernResult);
+        fprintf(stderr, "IOServiceGetMatchingServices returned %d\n", kernResult);
     }
 
     io_object_t		modemService;
