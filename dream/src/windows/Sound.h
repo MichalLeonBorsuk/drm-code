@@ -29,7 +29,7 @@
 #if !defined(AFX_SOUNDIN_H__9518A621_7F78_11D3_8C0D_EEBF182CF549__INCLUDED_)
 #define AFX_SOUNDIN_H__9518A621_7F78_11D3_8C0D_EEBF182CF549__INCLUDED_
 
-#include "../soundinterface.h"
+#include "../sound/soundinterface.h"
 #include <windows.h>
 #include <mmsystem.h>
 
@@ -58,11 +58,11 @@ class CSoundIn : public CSoundInInterface
     CSoundIn();
 virtual ~CSoundIn();
 
-virtual void		Init(int iSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking = TRUE);
+virtual void		Init(int iSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking);
 virtual _BOOLEAN	Read(CVector<short>& psData);
-virtual void		Enumerate(vector<string>&);
-virtual int			GetDev();
-virtual void		SetDev(int iNewDev);
+virtual void		Enumerate(vector<string>& names, vector<string>& descriptions);
+virtual string		GetDev();
+virtual void		SetDev(string sNewDev);
 virtual void		Close();
 
 protected:
@@ -71,7 +71,7 @@ void		PrepareBuffer(int iBufNum);
 void		AddBuffer();
 
 vector<string>	vecstrDevices;
-int				iCurDev;
+string			sCurDev;
 WAVEFORMATEX	sWaveFormatEx;
 _BOOLEAN		bChangDev;
 HANDLE			m_WaveEvent;
@@ -94,11 +94,11 @@ class CSoundOut : public CSoundOutInterface
     CSoundOut();
 virtual ~CSoundOut();
 
-virtual void		Init(int iSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking = FALSE);
+virtual void		Init(int iSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking);
 virtual _BOOLEAN	Write(CVector<short>& psData);
-virtual void		Enumerate(vector<string>&);
-virtual int			GetDev();
-virtual void		SetDev(int iNewDev);
+virtual void		Enumerate(vector<string>& names, vector<string>& descriptions);
+virtual string		GetDev();
+virtual void		SetDev(string sNewDev);
 virtual void		Close();
 
 protected:
@@ -108,7 +108,7 @@ void		AddBuffer(int iBufNum);
 void		GetDoneBuffer(int& iCntPrepBuf, int& iIndexDoneBuf);
 
 vector<string>	vecstrDevices;
-int			iCurDev;
+string			sCurDev;
 WAVEFORMATEX	sWaveFormatEx;
 _BOOLEAN		bChangDev;
 HANDLE			m_WaveEvent;

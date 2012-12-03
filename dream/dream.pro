@@ -276,7 +276,7 @@ win32 {
         message("with portaudio")
     }
     else {
-        HEADERS += src/windows/Sound.h src/windows/SoundWin.h
+        HEADERS += src/windows/Sound.h
         SOURCES += src/windows/Sound.cpp
         message("with mmsystem")
     }
