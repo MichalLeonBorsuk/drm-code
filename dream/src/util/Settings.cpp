@@ -605,7 +605,7 @@ CSettings::UsageArguments()
 {
 	/* The text below must be translatable */
 	return
-		"Usage: $EXECNAME [option] [argument]\n\n"
+		"Usage: $EXECNAME [option [argument]]\n\n"
 		"Recognized options:\n"
 		"  -t, --transmitter            DRM transmitter mode\n"
 		"  -p, --flipspectrum           flip input spectrum\n"
@@ -619,12 +619,13 @@ CSettings::UsageArguments()
 		"  -F, --filter                 apply bandpass filter\n"
 		"  -D, --modmetric              enable modified metrics\n"
 		"  -c <n>, --inchansel <n>      input channel selection\n"
-		"                               0: left channel;   1: right channel;   2: mix both channels (default)\n"
-		"                               3: I / Q input positive;   4: I / Q input negative\n"
-		"                               5: I / Q input positive (0 Hz IF);   6: I / Q input negative (0 Hz IF)\n"
+		"                               0: left channel;                     1: right channel;\n"
+		"                               2: mix both channels (default);      3: subtract right from left;\n"
+		"                               4: I / Q input positive;             5: I / Q input negative;\n"
+		"                               6: I / Q input positive (0 Hz IF);   7: I / Q input negative (0 Hz IF)\n"
 		"  -u <n>, --outchansel <n>     output channel selection\n"
 		"                               0: L -> L, R -> R (default);   1: L -> L, R muted;   2: L muted, R -> R\n"
-		"                               3: mix -> L, R muted;   4: L muted, mix -> R\n"
+		"                               3: mix -> L, R muted;          4: L muted, mix -> R\n"
 		"  -e <n>, --decodeepg <n>      enable/disable epg decoding (0: off; 1: on)\n"
 #ifdef USE_QT_GUI
 		"  -g <n>, --enablelog <n>      enable/disable logging (0: no logging; 1: logging\n"
