@@ -44,7 +44,7 @@ public:
     virtual string		GetDev() {return string();}
     virtual void		SetFileName(const string& strFileName);
 
-    virtual void 		Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking = TRUE);
+    virtual _BOOLEAN	Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking);
     virtual _BOOLEAN 	Read(CVector<short>& psData);
     virtual void 		Close();
 

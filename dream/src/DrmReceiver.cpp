@@ -805,13 +805,16 @@ CDRMReceiver::Start()
     if (iFreqkHz != -1)
         SetFrequency(iFreqkHz);
 
+    /* Set restart flag */
+    pParameters->eRunState = CParameter::RESTART;
     do
     {
         RequestNewAcquisition();
 
+        Run();
+
         /* Set run flag so that the thread can work */
         pParameters->eRunState = CParameter::RUNNING;
-
         do
         {
             Run();
@@ -820,8 +823,6 @@ CDRMReceiver::Start()
 
         pSoundInInterface->Close();
         pSoundOutInterface->Close();
-
-        GetReceiveData()->SetClearDataBufferFlag();
     }
     while (pParameters->eRunState == CParameter::RESTART);
 

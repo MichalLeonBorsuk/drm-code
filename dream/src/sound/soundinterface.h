@@ -38,7 +38,7 @@ public:
     virtual 		~CSoundInInterface() {}
 
     /* sound card interface - used by ReadData */
-    virtual void     Init(int iSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking)=0;
+    virtual _BOOLEAN Init(int iSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking)=0;
     virtual _BOOLEAN Read(CVector<short>& psData)=0;
     virtual void     Close()=0;
 
@@ -50,7 +50,7 @@ public:
     virtual 		~CSoundOutInterface() {}
 
     /* sound card interface - used by WriteData */
-    virtual void     Init(int iSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking)=0;
+    virtual _BOOLEAN Init(int iSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking)=0;
     virtual _BOOLEAN Write(CVector<short>& psData)=0;
     virtual void     Close()=0;
 };

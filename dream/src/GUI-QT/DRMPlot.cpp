@@ -160,6 +160,11 @@ CDRMPlot::~CDRMPlot()
 
 void CDRMPlot::OnTimerChart()
 {
+	CParameter& Parameters = *pDRMRec->GetParameters();
+	/* Update only performed when running */
+	if (Parameters.eRunState != CParameter::RUNNING)
+		return;
+
 	/* CHART ******************************************************************/
 	CVector<_REAL>	vecrData;
 	CVector<_REAL>	vecrData2;
@@ -172,9 +177,6 @@ void CDRMPlot::OnTimerChart()
 	_REAL		rCenterFreq, rBandwidth;
 	int			iXoredSampleRate;
 
-	CParameter& Parameters = *pDRMRec->GetParameters();
-	if (Parameters.eRunState != CParameter::RUNNING)
-		return;
 	Parameters.Lock();
 	_REAL rDCFrequency = Parameters.GetDCFrequency();
 	ECodScheme eSDCCodingScheme = Parameters.eSDCCodingScheme;

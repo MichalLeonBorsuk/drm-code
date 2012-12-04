@@ -86,11 +86,11 @@ CAudioFileIn::SetFileName(const string& strFileName)
     }
 }
 
-void
+_BOOLEAN
 CAudioFileIn::Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking)
 {
     if (pFileReceiver != NULL)
-        return;
+        return FALSE;
 
     /* Check previously a file was being used */
     Close();
@@ -152,6 +152,8 @@ CAudioFileIn::Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking
         double interval = double(iNewBufferSize/2) / double(iSampleRate);
         pacer = new CPacer(uint64_t(1e9*interval));
     }
+
+    return TRUE;
 }
 
 _BOOLEAN

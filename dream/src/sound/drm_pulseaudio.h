@@ -100,7 +100,7 @@ public:
 	string			GetDev() {return CSoundPulse::GetDev();};
 	void			SetDev(string sNewDevice) {CSoundPulse::SetDev(sNewDevice);};
 
-	void			Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking);
+	_BOOLEAN		Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking);
 	_BOOLEAN		Read(CVector<_SAMPLE>& psData);
 	void			Close();
 #ifdef CLOCK_DRIFT_ADJ_ENABLED
@@ -139,7 +139,7 @@ public:
 	string			GetDev() {return CSoundPulse::GetDev();};
 	void			SetDev(string sNewDevice) {CSoundPulse::SetDev(sNewDevice);};
 
-	void			Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking);
+	_BOOLEAN		Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking);
 	_BOOLEAN		Write(CVector<_SAMPLE>& psData);
 	void			Close();
 #ifdef CLOCK_DRIFT_ADJ_ENABLED
