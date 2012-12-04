@@ -39,7 +39,7 @@
 
 typedef struct CHANSEL {
     const char* Name;
-    int iChanSel;
+    const int iChanSel;
 } CHANSEL;
 
 class CSoundCardSelMenu : public QMenu
@@ -57,13 +57,16 @@ protected:
     CSelectionInterface* pSoundInIF;
     CSelectionInterface* pSoundOutIF;
     QMenu* InitDevice(QMenu* parent, const QString& text, CSelectionInterface* intf);
-    QMenu* InitChannel(QMenu* parent, const QString& text, int iChanSel, CHANSEL* ChanSel);
+    QMenu* InitChannel(QMenu* parent, const QString& text, const int iChanSel, const CHANSEL* ChanSel);
+    QMenu* InitSampleRate(QMenu* parent, const QString& text, const int iCurrentSampleRate, const int* SampleRate);
+    void RestartReceiver();
 
 public slots:
     void OnSoundInChannel(QAction*);
     void OnSoundOutChannel(QAction*);
     void OnSoundInDevice(QAction*);
     void OnSoundOutDevice(QAction*);
+    void OnSoundSampleRate(QAction*);
 };
 
 #endif

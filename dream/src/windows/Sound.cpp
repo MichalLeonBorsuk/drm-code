@@ -183,13 +183,14 @@ void CSoundIn::PrepareBuffer(int iBufNum)
 void CSoundIn::Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking)
 {
     /* Set internal parameter */
-    iSampleRate = iNewSampleRate;
     iBufferSize = iNewBufferSize;
     bBlocking = bNewBlocking;
 
 	/* Check if device must be opened or reinitialized */
-    if (bChangDev == TRUE)
+    if (bChangDev == TRUE || iSampleRate != iNewSampleRate)
     {
+        iSampleRate = iNewSampleRate;
+
         OpenDevice();
 
         /* Reset flag */
@@ -509,13 +510,14 @@ void CSoundOut::PrepareBuffer(int iBufNum)
 void CSoundOut::Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking)
 {
     /* Set internal parameters */
-    iSampleRate = iNewSampleRate;
     iBufferSize = iNewBufferSize;
     bBlocking = bNewBlocking;
 
     /* Check if device must be opened or reinitialized */
-    if (bChangDev == TRUE)
+    if (bChangDev == TRUE || iSampleRate != iNewSampleRate)
     {
+        iSampleRate = iNewSampleRate;
+
         OpenDevice();
 
         /* Reset flag */

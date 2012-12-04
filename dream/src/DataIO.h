@@ -109,10 +109,6 @@ public:
         SetInitFlag();
     }
 
-    int GetMaxAudioFrequency() {
-        return iMaxAudioFrequency;
-    }
-
     void GetAudioSpec(CVector<_REAL>& vecrData, CVector<_REAL>& vecrScale);
 
     void SetOutChanSel(const EOutChanSel eNS) {

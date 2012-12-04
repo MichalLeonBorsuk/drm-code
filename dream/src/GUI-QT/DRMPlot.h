@@ -370,7 +370,6 @@ protected:
 	QwtPlotPicker	*picker;
 	QwtLegend		*legend;
 
-	_BOOLEAN		bOnTimerCharMutexFlag;
 	QTimer			TimerChart;
 	CDRMReceiver	*pDRMRec;
 
@@ -385,6 +384,7 @@ protected:
 	QRgb*			imageData;
 	int				iAudSampleRate;
 	int				iSigSampleRate;
+	int				iLastXoredSampleRate;
 
 public slots:
 #if QWT_VERSION < 0x060000

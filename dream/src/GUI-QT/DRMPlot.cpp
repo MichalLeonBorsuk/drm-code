@@ -39,8 +39,8 @@ CDRMPlot::CDRMPlot(QWidget* parent, QwtPlot* SuppliedPlot) :
 	SuppliedPlot(SuppliedPlot), DialogPlot(NULL), bActive(FALSE),
 	CurCharType(NONE_OLD), InitCharType(NONE_OLD),
 	eLastSDCCodingScheme((ECodScheme)-1), eLastMSCCodingScheme((ECodScheme)-1),
-	bLastAudioDecoder(FALSE), bOnTimerCharMutexFlag(FALSE), pDRMRec(NULL),
-	WaterfallWidget(NULL), iAudSampleRate(0), iSigSampleRate(0)
+	bLastAudioDecoder(FALSE), pDRMRec(NULL),
+	WaterfallWidget(NULL), iAudSampleRate(0), iSigSampleRate(0), iLastXoredSampleRate(0)
 {
 	/* Create new plot if none is supplied */
 	if (SuppliedPlot == NULL)
@@ -160,20 +160,6 @@ CDRMPlot::~CDRMPlot()
 
 void CDRMPlot::OnTimerChart()
 {
-	/* In some cases, if the user moves the mouse very fast over the chart
-	   selection list view, this function is called by two different threads.
-	   Somehow, using QMutex does not help. Therefore we introduce a flag for
-	   doing this job. This solution is a work-around. TODO: better solution */
-	/* DF: Not sure if this bug exist in Qt4 or even in a recent Qt3 version.
-	   The mutex flag idea is good, but (optional) TODO: the flag check and set
-	   must be done inside a real mutex, a race condition can still happen. */
-//	mutex lock
-    if (bOnTimerCharMutexFlag == TRUE)
-//		mutex unlock
-		return;
-	bOnTimerCharMutexFlag = TRUE;
-//	mutex unlock
-
 	/* CHART ******************************************************************/
 	CVector<_REAL>	vecrData;
 	CVector<_REAL>	vecrData2;
@@ -184,8 +170,11 @@ void CDRMPlot::OnTimerChart()
 	_REAL		rPDSBegin, rPDSEnd;
 	_REAL		rFreqAcquVal;
 	_REAL		rCenterFreq, rBandwidth;
+	int			iXoredSampleRate;
 
 	CParameter& Parameters = *pDRMRec->GetParameters();
+	if (Parameters.eRunState != CParameter::RUNNING)
+		return;
 	Parameters.Lock();
 	_REAL rDCFrequency = Parameters.GetDCFrequency();
 	ECodScheme eSDCCodingScheme = Parameters.eSDCCodingScheme;
@@ -195,12 +184,16 @@ void CDRMPlot::OnTimerChart()
 	iSigSampleRate = Parameters.GetSigSampleRate();
 	Parameters.Unlock();
 
+	/* Needed to detect sample rate change */
+	iXoredSampleRate = iAudSampleRate ^ iSigSampleRate;
+
 	CPlotManager& PlotManager = *pDRMRec->GetPlotManager();
 
 	/* First check if plot must be set up */
 	bool change = false;
-	if (InitCharType != CurCharType)
+	if (InitCharType != CurCharType || iLastXoredSampleRate != iXoredSampleRate)
 	{
+		iLastXoredSampleRate = iXoredSampleRate;
 		InitCharType = CurCharType;
 		change = true;
 		PlotDefaults();
@@ -392,9 +385,6 @@ void CDRMPlot::OnTimerChart()
 	}
 
 	plot->replot();
-
-	/* "Unlock" mutex flag */
-	bOnTimerCharMutexFlag = FALSE;
 }
 
 void CDRMPlot::SetupChart(const ECharType eNewType)
@@ -778,7 +768,10 @@ void CDRMPlot::SetupAudioSpec(_BOOLEAN bAudioDecoder)
 
 	/* Fixed scale */
 	plot->setAxisScale(QwtPlot::yLeft, (double) -100.0, (double) -20.0);
-	const double dBandwidth = double(pDRMRec->GetWriteData()->GetMaxAudioFrequency()) / 1000;
+	int iMaxAudioFrequency = MAX_SPEC_AUDIO_FREQUENCY;
+	if (iMaxAudioFrequency > iAudSampleRate/2)
+		iMaxAudioFrequency = iAudSampleRate/2;
+	const double dBandwidth = double(iMaxAudioFrequency) / 1000;
 	plot->setAxisScale(QwtPlot::xBottom, (double) 0.0, dBandwidth);
 
 	/* Curve color */
