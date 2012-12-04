@@ -38,14 +38,14 @@
 #include <cstring>
 
 CAudioFileIn::CAudioFileIn(): CSoundInInterface(), pFileReceiver(NULL),
-        strInFileName(), eFmt(fmt_other),
-        iFileSampleRate(0), iFileChannels(1), pacer(NULL),buffer(NULL), iBufferSize(0)
+        strInFileName(), eFmt(fmt_other), iSampleRate(0), iBufferSize(0),
+        iFileSampleRate(0), iFileChannels(1), pacer(NULL), buffer(NULL)
 {
 }
 
 CAudioFileIn::~CAudioFileIn()
 {
-	if(buffer!=NULL)
+	if (buffer!=NULL)
 		delete[] buffer;
     Close();
 }
@@ -84,26 +84,6 @@ CAudioFileIn::SetFileName(const string& strFileName)
             iFileSampleRate = DEFAULT_SOUNDCRD_SAMPLE_RATE;
         break;
     }
-}
-
-_BOOLEAN
-CAudioFileIn::Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking)
-{
-    if (pFileReceiver != NULL)
-        return FALSE;
-
-    /* Check previously a file was being used */
-    Close();
-
-	if(buffer!=NULL)
-	{
-		delete[] buffer;
-		buffer=NULL;
-	}
-
-	iSampleRate = iNewSampleRate;
-	iBufferSize = iNewBufferSize;
-	buffer = new short[iBufferSize];
 
 #ifdef HAVE_LIBSNDFILE
     SF_INFO sfinfo;
@@ -128,10 +108,7 @@ CAudioFileIn::Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking
         {
             iFileChannels = sfinfo.channels;
             iFileSampleRate = sfinfo.samplerate;
-            int oversample_factor = iSampleRate / iFileSampleRate;
-            /* we can only cope with inter submultiples */
-            if (iSampleRate != oversample_factor*iFileSampleRate)
-                throw CGenErr("unsupported sample rate in input file");
+// TODO better handling of file sample rate: resample to the nearest supported sample rate
         }
         break;
     }
@@ -146,14 +123,42 @@ CAudioFileIn::Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking
     {
         throw CGenErr("The file " + strInFileName + " could not be openned");
     }
+}
 
+_BOOLEAN
+CAudioFileIn::Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking)
+{
+    if (pFileReceiver == NULL)
+        return TRUE;
+
+    _BOOLEAN bChanged = FALSE;
+
+	if (iSampleRate != iNewSampleRate)
+    {
+        iSampleRate = iNewSampleRate;
+        bChanged = TRUE;
+    }
+
+    if (iBufferSize != iNewBufferSize)
+    {
+    	iBufferSize = iNewBufferSize;
+        if (buffer)
+            delete[] buffer;
+        buffer = new short[iBufferSize];
+    }
+
+    if (pacer)
+    {
+        delete pacer;
+        pacer = NULL;
+    }
     if (bNewBlocking)
     {
-        double interval = double(iNewBufferSize/2) / double(iSampleRate);
+        double interval = double(iNewBufferSize/2) / double(iNewSampleRate);
         pacer = new CPacer(uint64_t(1e9*interval));
     }
 
-    return TRUE;
+    return bChanged;
 }
 
 _BOOLEAN

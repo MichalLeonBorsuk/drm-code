@@ -43,6 +43,7 @@ public:
     virtual void		SetDev(string) {}
     virtual string		GetDev() {return string();}
     virtual void		SetFileName(const string& strFileName);
+    virtual int			GetFileSampleRate() {return iFileSampleRate;};
 
     virtual _BOOLEAN	Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking);
     virtual _BOOLEAN 	Read(CVector<short>& psData);
@@ -55,11 +56,11 @@ protected:
         fmt_txt, fmt_raw_mono, fmt_raw_stereo, fmt_other
     }				eFmt;
     int					iSampleRate;
+    int					iBufferSize;
     int					iFileSampleRate;
     int					iFileChannels;
     CPacer*				pacer;
     short *buffer;
-    int iBufferSize;
 };
 
 #endif

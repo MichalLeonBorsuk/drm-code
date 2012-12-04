@@ -66,7 +66,7 @@ CDRMReceiver::CDRMReceiver():
 #ifdef HAVE_LIBHAMLIB
     pRig(NULL),
 #endif
-    PlotManager(),rsiOrigin("")
+    PlotManager(), rsiOrigin(""), iPrevSigSampleRate(0)
 {
     pParameters = new CParameter(this);
     downstreamRSCI.SetReceiver(this);
@@ -378,12 +378,26 @@ CDRMReceiver::ProcessSoundFile()
             if (pSoundInInterface != NULL)
                 pSoundInInterface->Close();
             if (sSoundFile != "")
-            {   /* Open sound file interface */
-                pSoundInInterface = new CAudioFileIn();
-                ((CAudioFileIn*)pSoundInInterface)->SetFileName(sSoundFile);
+            {   
+                /* Save sample rate */
+                if (iPrevSigSampleRate == 0)
+                    iPrevSigSampleRate = pParameters->GetSigSampleRate();
+                /* Open sound file interface */
+                CAudioFileIn* AudioFileIn = new CAudioFileIn();
+                AudioFileIn->SetFileName(sSoundFile);
+                const int iFileSampleRate = AudioFileIn->GetFileSampleRate();
+                pParameters->SetSigSampleRate(iFileSampleRate);
+                pSoundInInterface = AudioFileIn;
             }
             else
-            {   /* Open sound interface */
+            {
+                /* Restore previous sample rate */
+                if (iPrevSigSampleRate != 0)
+                {
+                    pParameters->SetSigSampleRate(iPrevSigSampleRate);
+                    iPrevSigSampleRate = 0;
+                }
+                /* Open sound interface */
                 pSoundInInterface = new CSoundIn();
             }
         pParameters->Unlock();
@@ -1574,13 +1588,9 @@ CDRMReceiver::LoadSettings(CSettings& s)
     /* Bandpass filter flag */
     FreqSyncAcq.SetRecFilter(s.Get("Receiver", "filter", FALSE));
 
-    /* Set parameters for frequency acquisition search window if needed */
-    _REAL rFreqAcSeWinCenter = s.Get("command", "fracwincent", -1);
-    _REAL rFreqAcSeWinSize = s.Get("command", "fracwinsize", -1);
-    const int iSigSampleRate = pParameters->GetSigSampleRate();
-    if (rFreqAcSeWinCenter < 0) rFreqAcSeWinCenter = _REAL(iSigSampleRate / 4);
-    if (rFreqAcSeWinSize < 0) rFreqAcSeWinSize = _REAL(iSigSampleRate / 2);
-    /* Set new parameters */
+    /* Set parameters for frequency acquisition search window */
+    const _REAL rFreqAcSeWinCenter = s.Get("command", "fracwincent", -1);
+    const _REAL rFreqAcSeWinSize = s.Get("command", "fracwinsize", -1);
     FreqSyncAcq.SetSearchWindow(rFreqAcSeWinCenter, rFreqAcSeWinSize);
 
     /* Modified metrics flag */

@@ -446,12 +446,13 @@ protected:
     int						iBwFM;
     time_t					time_keeper;
 #ifdef HAVE_LIBHAMLIB
-    CRig*				pRig;
+    CRig*					pRig;
 #endif
 
-    CPlotManager PlotManager;
-    string			rsiOrigin;
-    string			sSoundFile;
+    CPlotManager			PlotManager;
+    string					rsiOrigin;
+    string					sSoundFile;
+    int						iPrevSigSampleRate; /* sample rate before sound file */
 };
 
 
