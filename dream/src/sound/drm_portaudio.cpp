@@ -154,11 +154,11 @@ CPaCommon::GetDev()
 }
 
 /* buffer_size is in samples - frames would be better */
-void
+_BOOLEAN
 CPaCommon::Init(int iSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking)
 {
     if (device_changed == false && double(iSampleRate) == samplerate)
-        return;
+        return FALSE;
 
     unsigned long channels=2;
 
@@ -193,6 +193,8 @@ CPaCommon::Init(int iSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking)
         cerr << "portaudio can't open stream" << endl;
         //throw "portaudio open error";
     }
+
+	return TRUE;
 }
 
 void
@@ -376,10 +378,10 @@ CPaIn::~CPaIn()
     Close();
 }
 
-void
+_BOOLEAN
 CPaIn::Init(int iSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking)
 {
-    hw.Init(iSampleRate, iNewBufferSize, bNewBlocking);
+    return hw.Init(iSampleRate, iNewBufferSize, bNewBlocking);
 }
 
 _BOOLEAN
@@ -404,10 +406,10 @@ CPaOut::~CPaOut()
     Close();
 }
 
-void
+_BOOLEAN
 CPaOut::Init(int iSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking)
 {
-    hw.Init(iSampleRate, iNewBufferSize, bNewBlocking);
+    return hw.Init(iSampleRate, iNewBufferSize, bNewBlocking);
 }
 
 _BOOLEAN

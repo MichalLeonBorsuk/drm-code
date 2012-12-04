@@ -735,16 +735,17 @@ CSoundInPulse::CSoundInPulse(): CSoundPulse(FALSE),
 {
 }
 
-void CSoundInPulse::Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking)
+_BOOLEAN CSoundInPulse::Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking)
 {
 	DEBUG_MSG("initrec iSampleRate=%i iBufferSize=%i bBlocking=%i\n", iNewSampleRate, iNewBufferSize, bNewBlocking);
+	_BOOLEAN bChanged = FALSE;
 
 #ifdef ENABLE_STDIN_STDOUT
 	/* Check if it's stdin */
 	if (IsStdinStdout())
 	{
 		iBufferSize = iNewBufferSize * BYTES_PER_SAMPLE;
-		return;
+		return FALSE;
 	}
 #endif
 
@@ -766,6 +767,9 @@ void CSoundInPulse::Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBl
 
 		/* Reset flag */
 		bChangDev = FALSE;
+
+		/* Set changed flag */
+		bChanged = TRUE;
 	}
 	else {
 		if (iBufferSize != iNewBufferSize)
@@ -780,6 +784,8 @@ void CSoundInPulse::Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBl
 
 	/* Clear buffering error flag */
 	bBufferingError = FALSE;
+
+	return bChanged;
 }
 
 _BOOLEAN CSoundInPulse::Read(CVector<_SAMPLE>& psData)
@@ -844,16 +850,17 @@ CSoundOutPulse::CSoundOutPulse(): CSoundPulse(TRUE),
 {
 }
 
-void CSoundOutPulse::Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking)
+_BOOLEAN CSoundOutPulse::Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking)
 {
 	DEBUG_MSG("initplay iSampleRate=%i iBufferSize=%i bBlocking=%i\n", iNewSampleRate, iNewBufferSize, bNewBlocking);
+	_BOOLEAN bChanged = FALSE;
 
 #ifdef ENABLE_STDIN_STDOUT
 	/* Check if it's stdin */
 	if (IsStdinStdout())
 	{
 		iBufferSize = iNewBufferSize * BYTES_PER_SAMPLE;
-		return;
+		return FALSE;
 	}
 #endif
 
@@ -875,6 +882,9 @@ void CSoundOutPulse::Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewB
 
 		/* Reset flag */
 		bChangDev = FALSE;
+
+		/* Set changed flag */
+		bChanged = TRUE;
 	}
 
 	/* Set prebuffer flag */
@@ -883,6 +893,8 @@ void CSoundOutPulse::Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewB
 	bSeek = FALSE;
 	/* Clear buffering error flag */
 	bBufferingError = FALSE;
+
+	return bChanged;
 }
 
 _BOOLEAN CSoundOutPulse::Write(CVector<_SAMPLE>& psData)

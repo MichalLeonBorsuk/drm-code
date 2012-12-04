@@ -373,7 +373,11 @@ void CReceiveData::InitInternal(CParameter& Parameters)
     Parameters.Unlock();
 
 	try {
-		pSound->Init(iSampleRate, iOutputBlockSize * 2, TRUE);
+		const _BOOLEAN bChanged = pSound->Init(iSampleRate, iOutputBlockSize * 2, TRUE);
+
+		/* Clear data buffer on change */
+		if (bChanged)
+			vecrInpData.Init(INPUT_DATA_VECTOR_SIZE, (_REAL) 0.0);
 
 		/* Init buffer size for taking stereo input */
 		vecsSoundBuffer.Init(iOutputBlockSize * 2);
@@ -383,7 +387,7 @@ void CReceiveData::InitInternal(CParameter& Parameters)
 
 		/* Inits for I / Q input, only if it is not already
 		   to keep the history intact */
-		if (vecrReHist.Size() != NUM_TAPS_IQ_INPUT_FILT || bClearDataBuffer)
+		if (vecrReHist.Size() != NUM_TAPS_IQ_INPUT_FILT || bChanged)
 		{
 			vecrReHist.Init(NUM_TAPS_IQ_INPUT_FILT, (_REAL) 0.0);
 			vecrImHist.Init(NUM_TAPS_IQ_INPUT_FILT, (_REAL) 0.0);
@@ -402,6 +406,7 @@ void CReceiveData::InitInternal(CParameter& Parameters)
 
 		/* OPH: init free-running symbol counter */
 		iFreeSymbolCounter = 0;
+
 	}
     catch (CGenErr GenErr)
     {
@@ -411,13 +416,6 @@ void CReceiveData::InitInternal(CParameter& Parameters)
     {
 		pSound = NULL;
     }
-
-	/* Clear data buffer */
-	if (bClearDataBuffer)
-	{
-		bClearDataBuffer = FALSE;
-		vecrInpData.Init(INPUT_DATA_VECTOR_SIZE, (_REAL) 0.0);
-	}
 }
 
 _REAL CReceiveData::HilbertFilt(const _REAL rRe, const _REAL rIm)
