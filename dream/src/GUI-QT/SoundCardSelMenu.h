@@ -47,11 +47,14 @@ public:
         CSelectionInterface* pNSIn,
         CSelectionInterface* pNSOut,
         QWidget* parent = 0);
+    void EnableSigMenu(bool bEnable);
 
 protected:
     CDRMReceiver* DRMReceiver;
     CSelectionInterface* pSoundInIF;
     CSelectionInterface* pSoundOutIF;
+    QMenu* menuSigDevice;
+    QMenu* menuSigSampleRate;
     QMenu* InitDevice(QMenu* parent, const QString& text, CSelectionInterface* intf);
     QMenu* InitChannel(QMenu* parent, const QString& text, const int iChanSel, const CHANSEL* ChanSel);
     QMenu* InitSampleRate(QMenu* parent, const QString& text, const int iCurrentSampleRate, const int* SampleRate);

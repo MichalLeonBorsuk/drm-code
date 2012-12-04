@@ -70,21 +70,24 @@ static const int SignalSampleRateTable[] =
 
 CSoundCardSelMenu::CSoundCardSelMenu(
     CDRMReceiver* DRMReceiver, CSelectionInterface* pNSIn, CSelectionInterface* pNSOut, QWidget* parent) :
-    QMenu(parent), DRMReceiver(DRMReceiver), pSoundInIF(pNSIn), pSoundOutIF(pNSOut)
+    QMenu(parent), DRMReceiver(DRMReceiver), pSoundInIF(pNSIn), pSoundOutIF(pNSOut),
+    menuSigDevice(NULL), menuSigSampleRate(NULL)
 {
     setTitle(tr("Sound Card"));
     if (DRMReceiver != NULL)
     {   /* Receiver */
         CParameter& Parameters = *DRMReceiver->GetParameters();
         Parameters.Lock();
-            QMenu* input_menu = addMenu(tr("Signal Input"));
-            QMenu* output_menu = addMenu(tr("Audio Output"));
-            connect(InitChannel(input_menu, tr("Channel"), (int)DRMReceiver->GetReceiveData()->GetInChanSel(), InputChannelTable), SIGNAL(triggered(QAction*)), this, SLOT(OnSoundInChannel(QAction*)));
-            connect(InitChannel(output_menu, tr("Channel"), (int)DRMReceiver->GetWriteData()->GetOutChanSel(), OutputChannelTable), SIGNAL(triggered(QAction*)), this, SLOT(OnSoundOutChannel(QAction*)));
-            connect(InitDevice(input_menu, tr("Device"), pSoundInIF), SIGNAL(triggered(QAction*)), this, SLOT(OnSoundInDevice(QAction*)));
-            connect(InitDevice(output_menu, tr("Device"), pSoundOutIF), SIGNAL(triggered(QAction*)), this, SLOT(OnSoundOutDevice(QAction*)));
-            connect(InitSampleRate(input_menu, tr("Sample Rate"), Parameters.GetSigSampleRate(), SignalSampleRateTable), SIGNAL(triggered(QAction*)), this, SLOT(OnSoundSampleRate(QAction*)));
-            connect(InitSampleRate(output_menu, tr("Sample Rate"), Parameters.GetAudSampleRate(), AudioSampleRateTable), SIGNAL(triggered(QAction*)), this, SLOT(OnSoundSampleRate(QAction*)));
+            QMenu* menuSigInput = addMenu(tr("Signal Input"));
+            QMenu* menuAudOutput = addMenu(tr("Audio Output"));
+            connect(InitChannel(menuSigInput, tr("Channel"), (int)DRMReceiver->GetReceiveData()->GetInChanSel(), InputChannelTable), SIGNAL(triggered(QAction*)), this, SLOT(OnSoundInChannel(QAction*)));
+            connect(InitChannel(menuAudOutput, tr("Channel"), (int)DRMReceiver->GetWriteData()->GetOutChanSel(), OutputChannelTable), SIGNAL(triggered(QAction*)), this, SLOT(OnSoundOutChannel(QAction*)));
+            menuSigDevice = InitDevice(menuSigInput, tr("Device"), pSoundInIF);
+            connect(menuSigDevice, SIGNAL(triggered(QAction*)), this, SLOT(OnSoundInDevice(QAction*)));
+            connect(InitDevice(menuAudOutput, tr("Device"), pSoundOutIF), SIGNAL(triggered(QAction*)), this, SLOT(OnSoundOutDevice(QAction*)));
+            menuSigSampleRate = InitSampleRate(menuSigInput, tr("Sample Rate"), Parameters.GetSigSampleRate(), SignalSampleRateTable);
+            connect(menuSigSampleRate, SIGNAL(triggered(QAction*)), this, SLOT(OnSoundSampleRate(QAction*)));
+            connect(InitSampleRate(menuAudOutput, tr("Sample Rate"), Parameters.GetAudSampleRate(), AudioSampleRateTable), SIGNAL(triggered(QAction*)), this, SLOT(OnSoundSampleRate(QAction*)));
         Parameters.Unlock();
     }
     else
@@ -92,6 +95,14 @@ CSoundCardSelMenu::CSoundCardSelMenu(
         connect(InitDevice(this, tr("Input Device"), pSoundInIF), SIGNAL(triggered(QAction*)), this, SLOT(OnSoundInDevice(QAction*)));
         connect(InitDevice(this, tr("Output Device"), pSoundOutIF), SIGNAL(triggered(QAction*)), this, SLOT(OnSoundOutDevice(QAction*)));
     }
+}
+
+void CSoundCardSelMenu::EnableSigMenu(bool bEnable)
+{
+    if (menuSigDevice != NULL)
+        menuSigDevice->setEnabled(bEnable);
+    if (menuSigSampleRate != NULL)
+        menuSigSampleRate->setEnabled(bEnable);
 }
 
 void CSoundCardSelMenu::OnSoundInDevice(QAction* action)

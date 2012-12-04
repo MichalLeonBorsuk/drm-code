@@ -396,8 +396,8 @@ void CFreqSyncAcq::InitInternal(CParameter& Parameters)
 	   Set start- and endpoint of search window for DC carrier after the
 	   correlation with the known pilot structure */
 	/* Normalize the desired position and window size which are in Hertz */
-	const _REAL rNormDesPos = rCenterFreq / iSampleRate * 2;
-	const _REAL rNormHalfWinSize = rWinSize / iSampleRate;
+	const _REAL rNormDesPos   = rCenterFreq < 0.0 ? 0.5 : rCenterFreq / iSampleRate * 2;
+	const _REAL rNormHalfWinSize = rWinSize < 0.0 ? 0.5 : rWinSize    / iSampleRate;
 
 	/* Length of the half of the spectrum of real input signal (the other half
 	   is the same because of the real input signal). We have to consider the

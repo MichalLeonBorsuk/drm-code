@@ -52,6 +52,7 @@
 # include <QCloseEvent>
 # include "ui_DRMMainWindow.h"
 # include "EvaluationDlg.h"
+# include "SoundCardSelMenu.h"
 #endif
 
 #include "DialogUtil.h"
@@ -134,6 +135,7 @@ protected:
     QMenu*		pPlotStyleMenu;
     QSignalMapper*	plotStyleMapper;
     QActionGroup*	plotStyleGroup;
+    CSoundCardSelMenu* pSoundCardMenu;
 #endif
     CAboutDlg		AboutDlg;
     int			iMultimediaServiceBit;

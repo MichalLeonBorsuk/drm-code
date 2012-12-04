@@ -42,8 +42,6 @@
 # include <QEvent>
 # include <QShowEvent>
 # include <QCloseEvent>
-//# include <QDebug>
-# include "SoundCardSelMenu.h"
 # include "BWSViewer.h"
 # include "SlideShowViewer.h"
 # include "JLViewer.h"
@@ -252,10 +250,11 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& NSettings, CRig& rig,
 	action_Close_Sound_File->setEnabled(false);
     action_Multimedia_Dialog->setEnabled(false);
 
-    menu_Settings->addMenu( new CSoundCardSelMenu(&DRMReceiver,
-                                DRMReceiver.GetSoundInInterface(),
-                                DRMReceiver.GetSoundOutInterface(),
-                                this));
+	pSoundCardMenu = new CSoundCardSelMenu(&DRMReceiver,
+		DRMReceiver.GetSoundInInterface(),
+		DRMReceiver.GetSoundOutInterface(),
+		this);
+    menu_Settings->addMenu(pSoundCardMenu);
 
     connect(actionMultimediaSettings, SIGNAL(triggered()), pMultSettingsDlg, SLOT(show()));
     connect(actionGeneralSettings, SIGNAL(triggered()), pGeneralSettingsDlg, SLOT(show()));
@@ -472,7 +471,10 @@ void FDRMDialog::UpdateDRM_GUI()
 #if QT_VERSION >= 0x040000
 	/* Update "Sound File Close" menu */
 	if (bIsSoundFile != action_Close_Sound_File->isEnabled())
+	{
 		action_Close_Sound_File->setEnabled(bIsSoundFile);
+		pSoundCardMenu->EnableSigMenu(!bIsSoundFile);
+	}
 #endif
 
     /* Clear the multimedia service bit */
