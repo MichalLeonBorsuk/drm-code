@@ -369,6 +369,57 @@ CDRMReceiver::CloseSoundInterface()
 }
 
 void
+CDRMReceiver::ProcessSoundFile()
+{
+    if (pParameters != NULL)
+    {
+        pParameters->Lock();
+            /* Close previous sound interface */
+            if (pSoundInInterface != NULL)
+                pSoundInInterface->Close();
+            if (sSoundFile != "")
+            {   /* Open sound file interface */
+                pSoundInInterface = new CAudioFileIn();
+                ((CAudioFileIn*)pSoundInInterface)->SetFileName(sSoundFile);
+            }
+            else
+            {   /* Open sound interface */
+                pSoundInInterface = new CSoundIn();
+            }
+        pParameters->Unlock();
+    }
+}
+
+void
+CDRMReceiver::SetSoundFile(const string& soundFile)
+{
+    if (pParameters != NULL)
+    {
+        pParameters->Lock();
+            sSoundFile = soundFile;
+        pParameters->Unlock();
+    }
+}
+
+void
+CDRMReceiver::ClearSoundFile()
+{
+    if (pParameters != NULL)
+    {
+        pParameters->Lock();
+            sSoundFile = "";
+        pParameters->Unlock();
+    }
+}
+
+/* To be called within parameter lock */
+_BOOLEAN
+CDRMReceiver::IsSoundFile()
+{
+    return sSoundFile != "";
+}
+
+void
 CDRMReceiver::DemodulateDRM(_BOOLEAN& bEnoughData)
 {
     CParameter & Parameters = *pParameters;
@@ -816,8 +867,13 @@ CDRMReceiver::Start()
     pParameters->eRunState = CParameter::RESTART;
     do
     {
+        /* Process new sound file if any */
+        ProcessSoundFile();
+
+        /* Set new acquisition flag */
         RequestNewAcquisition();
 
+        /* Initilization pass */
         Run();
 
         /* Set run flag so that the thread can work */

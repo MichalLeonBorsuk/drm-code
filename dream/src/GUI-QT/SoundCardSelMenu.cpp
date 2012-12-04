@@ -25,8 +25,11 @@
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
 \******************************************************************************/
+#include "../Parameter.h"
+#include "../DRMSignalIO.h"
+#include "../DataIO.h"
 #include "SoundCardSelMenu.h"
-#include <QCoreApplication>
+#include "DialogUtil.h"
 
 
 static const CHANSEL InputChannelTable[] =
@@ -137,7 +140,7 @@ void CSoundCardSelMenu::OnSoundSampleRate(QAction* action)
             if (iSampleRate < 0) Parameters.SetSigSampleRate(-iSampleRate);
             else                 Parameters.SetAudSampleRate(iSampleRate);
         Parameters.Unlock();
-        RestartReceiver();
+        RestartReceiver(DRMReceiver);
     }
 }
 
@@ -201,16 +204,5 @@ QMenu* CSoundCardSelMenu::InitSampleRate(QMenu* parent, const QString& text, con
         group->addAction(m);
     }
     return menu;
-}
-
-void CSoundCardSelMenu::RestartReceiver()
-{
-    if (DRMReceiver != NULL)
-    {
-        CParameter Parameters = *DRMReceiver->GetParameters();
-        DRMReceiver->Restart();
-        while (Parameters.eRunState == CParameter::RESTART)
-            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents | QEventLoop::WaitForMoreEvents, 10);
-    }
 }
 

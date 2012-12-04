@@ -30,6 +30,7 @@
 #define DIALOGUTIL_H__FD6B23452398345OIJ9453_804E1606C2AC__INCLUDED_
 
 #include "../Parameter.h"
+#include "../DrmReceiver.h"
 #include "../sound/selectioninterface.h"
 
 #include<map>
@@ -279,5 +280,7 @@ void InitSMeter(QWidget* parent, QwtThermo* sMeter);
 void Linkify(QString& text);
 
 void CreateDirectories(const QString& strFilename);
+
+void RestartReceiver(CDRMReceiver *DRMReceiver);
 
 #endif // DIALOGUTIL_H__FD6B23452398345OIJ9453_804E1606C2AC__INCLUDED_
