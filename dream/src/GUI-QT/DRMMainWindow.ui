@@ -872,7 +872,7 @@
             <number>0</number>
            </property>
            <item>
-            <widget class="QwtThermo" name="ProgrInputLevel" native="true">
+            <widget class="QwtThermo" name="ProgrInputLevel">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
                <horstretch>0</horstretch>
@@ -7017,7 +7017,7 @@
      <x>0</x>
      <y>0</y>
      <width>484</width>
-     <height>17</height>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_View">
@@ -7029,8 +7029,6 @@
     <addaction name="action_Stations_Dialog"/>
     <addaction name="action_Live_Schedule_Dialog"/>
     <addaction name="action_Programme_Guide_Dialog"/>
-    <addaction name="separator"/>
-    <addaction name="actionExit"/>
    </widget>
    <widget class="QMenu" name="menu_Settings">
     <property name="title">
@@ -7062,6 +7060,16 @@
     <addaction name="separator"/>
     <addaction name="actionAbout_Dream"/>
    </widget>
+   <widget class="QMenu" name="menu_File">
+    <property name="title">
+     <string>&amp;File</string>
+    </property>
+    <addaction name="action_Open_Sound_File"/>
+    <addaction name="action_Close_Sound_File"/>
+    <addaction name="separator"/>
+    <addaction name="actionExit"/>
+   </widget>
+   <addaction name="menu_File"/>
    <addaction name="menu_View"/>
    <addaction name="menu_Settings"/>
    <addaction name="menuHelp"/>
@@ -7181,12 +7189,28 @@
     <string>&amp;About Dream...</string>
    </property>
   </action>
+  <action name="action_Open_Sound_File">
+   <property name="text">
+    <string>&amp;Open Sound File...</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+O</string>
+   </property>
+  </action>
+  <action name="action_Close_Sound_File">
+   <property name="text">
+    <string>&amp;Close Sound File</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+C</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
    <class>QwtThermo</class>
    <extends>QWidget</extends>
-   <header location="global">qwt_thermo.h</header>
+   <header>qwt_thermo.h</header>
   </customwidget>
   <customwidget>
    <class>CMultColorLED</class>

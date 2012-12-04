@@ -31,11 +31,7 @@
 #include <QMenu>
 #include <QActionGroup>
 #include "../DrmReceiver.h"
-#include "../Parameter.h"
-#include "../DRMSignalIO.h"
-#include "../DataIO.h"
 #include "../sound/selectioninterface.h"
-#include <vector>
 
 typedef struct CHANSEL {
     const char* Name;
@@ -59,7 +55,6 @@ protected:
     QMenu* InitDevice(QMenu* parent, const QString& text, CSelectionInterface* intf);
     QMenu* InitChannel(QMenu* parent, const QString& text, const int iChanSel, const CHANSEL* ChanSel);
     QMenu* InitSampleRate(QMenu* parent, const QString& text, const int iCurrentSampleRate, const int* SampleRate);
-    void RestartReceiver();
 
 public slots:
     void OnSoundInChannel(QAction*);

@@ -43,6 +43,7 @@
 # include <qwhatsthis.h>
 # include <qtextview.h>
 #else
+# include <QCoreApplication>
 # include <QWhatsThis>
 # define CHECK_PTR(x) Q_CHECK_PTR(x)
 #endif
@@ -862,5 +863,18 @@ void CreateDirectories(const QString& strFilename)
         if (!strDirName.isEmpty() && !QFileInfo(strDirName).exists())
             QDir().mkdir(strDirName);
     }
+}
+
+void RestartReceiver(CDRMReceiver *DRMReceiver)
+{
+#if QT_VERSION >= 0x040000
+    if (DRMReceiver != NULL)
+    {
+        CParameter Parameters = *DRMReceiver->GetParameters();
+        DRMReceiver->Restart();
+        while (Parameters.eRunState == CParameter::RESTART)
+            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents | QEventLoop::WaitForMoreEvents, 10);
+    }
+#endif
 }
 

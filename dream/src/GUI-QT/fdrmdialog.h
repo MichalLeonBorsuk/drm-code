@@ -176,6 +176,8 @@ public slots:
     void OnSwitchToFM();
     void OnSwitchToAM();
     void OnHelpAbout() {AboutDlg.show();}
+    void OnOpenSoundFile();
+    void OnCloseSoundFile();
     void on_actionWhats_This();
 #if QT_VERSION < 0x040000
     void OnMenuPlotStyle(int);
