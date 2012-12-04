@@ -639,7 +639,10 @@ void CDRMPlot::SetupAudioSpec()
 
 	/* Fixed scale */
 	setAxisScale(QwtPlot::yLeft, (double) -100.0, (double) -20.0);
-	const double dBandwidth = double(pDRMRec->GetWriteData()->GetMaxAudioFrequency()) / 1000;
+	int iMaxAudioFrequency = MAX_SPEC_AUDIO_FREQUENCY;
+	if (iMaxAudioFrequency > iAudSampleRate/2)
+		iMaxAudioFrequency = iAudSampleRate/2;
+	const double dBandwidth = double(iMaxAudioFrequency) / 1000;
 	setAxisScale(QwtPlot::xBottom, (double) 0.0, dBandwidth);
 
 	/* Add main curve */

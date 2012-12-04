@@ -135,7 +135,8 @@ public:
 
     CReceiveData() : pSound(NULL),
             vecrInpData(INPUT_DATA_VECTOR_SIZE, (_REAL) 0.0),
-            bFippedSpectrum(FALSE), eInChanSelection(CS_MIX_CHAN)
+            bFippedSpectrum(FALSE), bClearDataBuffer(FALSE),
+            eInChanSelection(CS_MIX_CHAN)
     {}
     virtual ~CReceiveData();
 
@@ -162,6 +163,10 @@ public:
         return eInChanSelection;
     }
 
+    void SetClearDataBufferFlag() {
+        bClearDataBuffer = TRUE;
+    }
+
 protected:
     CSignalLevelMeter		SignalLevelMeter;
 
@@ -172,6 +177,7 @@ protected:
 
     int				iSampleRate;
     _BOOLEAN			bFippedSpectrum;
+    _BOOLEAN			bClearDataBuffer;
 
     EInChanSel			eInChanSelection;
 

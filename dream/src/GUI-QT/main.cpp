@@ -169,8 +169,6 @@ main(int argc, char **argv)
 			rig.LoadSettings(Settings); // must be before DRMReceiver for G313
 			DRMReceiver.LoadSettings(Settings);
 
-			DRMReceiver.SetReceiverMode(ERecMode(Settings.Get("Receiver", "mode", int(0))));
-
 #ifdef HAVE_LIBHAMLIB
 			DRMReceiver.SetRig(&rig);
 
@@ -308,7 +306,6 @@ main(int argc, char **argv)
 
 			DRMSimulation.SimScript();
 			DRMReceiver.LoadSettings(Settings);
-			DRMReceiver.SetReceiverMode(ERecMode(Settings.Get("Receiver", "mode", int(0))));
 
 #if QT_VERSION >= 0x040000
 			QCoreApplication a(argc, argv);

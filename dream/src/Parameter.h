@@ -1251,7 +1251,7 @@ public:
     /* General -------------------------------------------------------------- */
     _REAL GetNominalBandwidth();
     _REAL GetSysToNomBWCorrFact();
-    enum { STOPPED, RUNNING, STOP_REQUESTED } eRunState;
+    enum { STOPPED, RUNNING, STOP_REQUESTED, RESTART } eRunState;
 
     CCellMappingTable CellMappingTable;
 

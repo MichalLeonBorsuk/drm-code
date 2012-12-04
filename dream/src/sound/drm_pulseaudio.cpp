@@ -748,14 +748,14 @@ void CSoundInPulse::Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBl
 	}
 #endif
 
-	/* Save samplerate and blocking mode */
-	iSampleRate = iNewSampleRate;
+	/* Save blocking mode */
 	bBlockingRec = bNewBlocking;
 
 	/* Check if device must be opened or reinitialized */
-	if (bChangDev == TRUE)
+	if (bChangDev == TRUE || iSampleRate != iNewSampleRate)
 	{
-		/* Save buffer size */
+		/* Save samplerate buffer size */
+		iSampleRate = iNewSampleRate;
 		iBufferSize = iNewBufferSize;
 
 		/* Close the previous input */
@@ -857,14 +857,16 @@ void CSoundOutPulse::Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewB
 	}
 #endif
 
-	/* Save samplerate, blocking mode and buffer size */
-	iSampleRate = iNewSampleRate;
+	/* Save blocking mode and buffer size */
 	bBlockingPlay = bNewBlocking;
 	iBufferSize = iNewBufferSize;
 
 	/* Check if device must be opened or reinitialized */
-	if (bChangDev == TRUE)
+	if (bChangDev == TRUE || iSampleRate != iNewSampleRate)
 	{
+		/* Save samplerate */
+		iSampleRate = iNewSampleRate;
+
 		/* Close the previous input */
 		Close_HW();
 

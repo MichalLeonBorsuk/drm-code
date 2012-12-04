@@ -277,7 +277,9 @@ CDRMReceiver::Run()
     }
 
     /* Decoding */
-    while (bEnoughData && (Parameters.eRunState==CParameter::RUNNING))
+    while (bEnoughData &&
+        (Parameters.eRunState==CParameter::RUNNING ||
+         Parameters.eRunState==CParameter::RESTART))
     {
         /* Init flag */
         bEnoughData = FALSE;
@@ -795,29 +797,42 @@ void
 CDRMReceiver::Start()
 {
     // set this here to make sure we are in a QThread
-    if(rsiOrigin != "")
+    if (rsiOrigin != "")
         upstreamRSCI.SetOrigin(rsiOrigin);
-
-    /* Set run flag so that the thread can work */
-    pParameters->eRunState = CParameter::RUNNING;
 
     // set the frequency from the command line or ini file
     int iFreqkHz = pParameters->GetFrequency();
-    if(iFreqkHz!=-1)
-    {
+    if (iFreqkHz != -1)
         SetFrequency(iFreqkHz);
-    }
 
     do
     {
-        Run();
-    }
-    while (pParameters->eRunState == CParameter::RUNNING);
+        RequestNewAcquisition();
 
-    pSoundInInterface->Close();
-    pSoundOutInterface->Close();
+        /* Set run flag so that the thread can work */
+        pParameters->eRunState = CParameter::RUNNING;
+
+        do
+        {
+            Run();
+        }
+        while (pParameters->eRunState == CParameter::RUNNING);
+
+        pSoundInInterface->Close();
+        pSoundOutInterface->Close();
+
+        GetReceiveData()->SetClearDataBufferFlag();
+    }
+    while (pParameters->eRunState == CParameter::RESTART);
 
     pParameters->eRunState = CParameter::STOPPED;
+}
+
+void
+CDRMReceiver::Restart()
+{
+    if (pParameters->eRunState == CParameter::RUNNING)
+        pParameters->eRunState = CParameter::RESTART;
 }
 
 void
@@ -1511,6 +1526,7 @@ CDRMReceiver::LoadSettings(CSettings& s)
     /* Number of iterations for MLC setting */
     MSCMLCDecoder.SetNumIterations(s.Get("Receiver", "mlciter", 0));
 
+    /* Receiver mode (DRM, AM, FM) */
     SetReceiverMode(ERecMode(s.Get("Receiver", "mode", int(0))));
 
     /* Tuned Frequency */

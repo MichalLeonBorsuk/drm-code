@@ -138,6 +138,7 @@ public:
     void					LoadSettings(CSettings&); // can write to settings to set defaults
     void					SaveSettings(CSettings&);
     void					Start();
+    void					Restart();
     void					Stop();
     void					RequestNewAcquisition() {
         bRestartFlag = TRUE;

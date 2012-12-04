@@ -157,7 +157,7 @@ CPaCommon::GetDev()
 void
 CPaCommon::Init(int iSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking)
 {
-    if (device_changed == false)
+    if (device_changed == false && double(iSampleRate) == samplerate)
         return;
 
     unsigned long channels=2;

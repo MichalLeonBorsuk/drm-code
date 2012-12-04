@@ -43,7 +43,7 @@ public:
     virtual void	SetDev(string sNewDevice);
     virtual string	GetDev();
 
-    void		Init(int iSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking = TRUE);
+    void		Init(int iSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking);
     void		ReInit();
     _BOOLEAN		Read(CVector<short>& psData);
     _BOOLEAN		Write(CVector<short>& psData);
@@ -82,7 +82,7 @@ public:
         return hw.GetDev();
     }
 
-    virtual void		Init(int iSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking = TRUE);
+    virtual void		Init(int iSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking);
     virtual void		Close();
     virtual _BOOLEAN	Read(CVector<short>& psData);
 
@@ -106,7 +106,7 @@ public:
         return hw.GetDev();
     }
 
-    virtual void		Init(int iSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking = TRUE);
+    virtual void		Init(int iSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking);
     virtual void		Close();
     virtual _BOOLEAN	Write(CVector<short>& psData);
 
