@@ -180,9 +180,11 @@ void CSoundIn::PrepareBuffer(int iBufNum)
     waveInPrepareHeader(m_WaveIn, &m_WaveInHeader[iBufNum], sizeof(WAVEHDR));
 }
 
-void CSoundIn::Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking)
+_BOOLEAN CSoundIn::Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking)
 {
-    /* Set internal parameter */
+    _BOOLEAN bChanged = FALSE;
+
+	/* Set internal parameter */
     iBufferSize = iNewBufferSize;
     bBlocking = bNewBlocking;
 
@@ -195,44 +197,48 @@ void CSoundIn::Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBlockin
 
         /* Reset flag */
         bChangDev = FALSE;
+
+        /* Reset interface so that all buffers are returned from the interface */
+        waveInReset(m_WaveIn);
+        waveInStop(m_WaveIn);
+
+        /* Reset current buffer ID (it is important to do this BEFORE calling
+           "AddInBuffer()" */
+        iWhichBuffer = 0;
+
+        /* Create memory for sound card buffer */
+        for (int i = 0; i < NUM_SOUND_BUFFERS_IN; i++)
+        {
+            /* Unprepare old wave-header in case that we "re-initialized" this
+               module. Calling "waveInUnprepareHeader()" with an unprepared
+               buffer (when the module is initialized for the first time) has
+               simply no effect */
+            waveInUnprepareHeader(m_WaveIn, &m_WaveInHeader[i], sizeof(WAVEHDR));
+
+            if (psSoundcardBuffer[i] != NULL)
+                delete[] psSoundcardBuffer[i];
+
+            psSoundcardBuffer[i] = new short[iBufferSize];
+
+
+            /* Send all buffers to driver for filling the queue ----------------- */
+            /* Prepare buffers before sending them to the sound interface */
+            PrepareBuffer(i);
+
+            AddBuffer();
+        }
+
+        /* This reset event is very important for initialization, otherwise we will
+           get errors! */
+        ResetEvent(m_WaveEvent);
+
+	    /* Notify that sound capturing can start now */
+        waveInStart(m_WaveIn);
+
+        bChanged = TRUE;
     }
 
-    /* Reset interface so that all buffers are returned from the interface */
-    waveInReset(m_WaveIn);
-    waveInStop(m_WaveIn);
-
-    /* Reset current buffer ID (it is important to do this BEFORE calling
-       "AddInBuffer()" */
-    iWhichBuffer = 0;
-
-    /* Create memory for sound card buffer */
-    for (int i = 0; i < NUM_SOUND_BUFFERS_IN; i++)
-    {
-        /* Unprepare old wave-header in case that we "re-initialized" this
-           module. Calling "waveInUnprepareHeader()" with an unprepared
-           buffer (when the module is initialized for the first time) has
-           simply no effect */
-        waveInUnprepareHeader(m_WaveIn, &m_WaveInHeader[i], sizeof(WAVEHDR));
-
-        if (psSoundcardBuffer[i] != NULL)
-            delete[] psSoundcardBuffer[i];
-
-        psSoundcardBuffer[i] = new short[iBufferSize];
-
-
-        /* Send all buffers to driver for filling the queue ----------------- */
-        /* Prepare buffers before sending them to the sound interface */
-        PrepareBuffer(i);
-
-        AddBuffer();
-    }
-
-    /* This reset event is very important for initialization, otherwise we will
-       get errors! */
-    ResetEvent(m_WaveEvent);
-
-	/* Notify that sound capturing can start now */
-    waveInStart(m_WaveIn);
+    return bChanged;
 }
 
 void CSoundIn::OpenDevice()
@@ -308,9 +314,6 @@ void CSoundIn::Close()
     if (m_WaveEvent != NULL)
         SetEvent(m_WaveEvent);
 
-    /* Wait for the thread to terminate */
-//    Sleep(500);
-
     /* Unprepare wave-headers */
     if (m_WaveIn != NULL)
     {
@@ -328,8 +331,9 @@ void CSoundIn::Close()
         result = waveInClose(m_WaveIn);
         if (result != MMSYSERR_NOERROR)
             throw CGenErr("Sound Interface, waveInClose() failed.");
-    }
 
+        m_WaveIn = NULL;
+	}
 
     /* Set flag to open devices the next time it is initialized */
     bChangDev = TRUE;
@@ -507,9 +511,11 @@ void CSoundOut::PrepareBuffer(int iBufNum)
     waveOutPrepareHeader(m_WaveOut, &m_WaveOutHeader[iBufNum], sizeof(WAVEHDR));
 }
 
-void CSoundOut::Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking)
+_BOOLEAN CSoundOut::Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking)
 {
-    /* Set internal parameters */
+    _BOOLEAN bChanged = FALSE;
+
+	/* Set internal parameters */
     iBufferSize = iNewBufferSize;
     bBlocking = bNewBlocking;
 
@@ -522,33 +528,37 @@ void CSoundOut::Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocki
 
         /* Reset flag */
         bChangDev = FALSE;
+
+        /* Reset interface */
+        waveOutReset(m_WaveOut);
+
+        for (int j = 0; j < NUM_SOUND_BUFFERS_OUT; j++)
+        {
+            /* Unprepare old wave-header (in case header was not prepared before,
+               simply nothing happens with this function call */
+            waveOutUnprepareHeader(m_WaveOut, &m_WaveOutHeader[j], sizeof(WAVEHDR));
+
+            /* Create memory for playback buffer */
+            if (psPlaybackBuffer[j] != NULL)
+                delete[] psPlaybackBuffer[j];
+
+            psPlaybackBuffer[j] = new short[iBufferSize];
+
+            /* Clear new buffer */
+            for (int i = 0; i < iBufferSize; i++)
+                psPlaybackBuffer[j][i] = 0;
+
+            /* Prepare buffer for sending to the sound interface */
+            PrepareBuffer(j);
+
+            /* Initially, send all buffers to the interface */
+            AddBuffer(j);
+        }
+
+        bChanged = TRUE;
     }
 
-    /* Reset interface */
-    waveOutReset(m_WaveOut);
-
-    for (int j = 0; j < NUM_SOUND_BUFFERS_OUT; j++)
-    {
-        /* Unprepare old wave-header (in case header was not prepared before,
-           simply nothing happens with this function call */
-        waveOutUnprepareHeader(m_WaveOut, &m_WaveOutHeader[j], sizeof(WAVEHDR));
-
-        /* Create memory for playback buffer */
-        if (psPlaybackBuffer[j] != NULL)
-            delete[] psPlaybackBuffer[j];
-
-        psPlaybackBuffer[j] = new short[iBufferSize];
-
-        /* Clear new buffer */
-        for (int i = 0; i < iBufferSize; i++)
-            psPlaybackBuffer[j][i] = 0;
-
-        /* Prepare buffer for sending to the sound interface */
-        PrepareBuffer(j);
-
-        /* Initially, send all buffers to the interface */
-        AddBuffer(j);
-    }
+    return bChanged;
 }
 
 void CSoundOut::OpenDevice()
@@ -623,9 +633,7 @@ void CSoundOut::Close()
     if (m_WaveEvent != NULL)
         SetEvent(m_WaveEvent);
 
-	/* Wait for the thread to terminate */
-//    Sleep(500);
-
+    /* Unprepare wave-headers */
     if (m_WaveOut != NULL)
     {
         for (i = 0; i < NUM_SOUND_BUFFERS_OUT; i++)
@@ -642,7 +650,9 @@ void CSoundOut::Close()
         result = waveOutClose(m_WaveOut);
         if (result != MMSYSERR_NOERROR)
             throw CGenErr("Sound Interface, waveOutClose() failed.");
-    }
+
+        m_WaveOut = NULL;
+	}
 
     /* Set flag to open devices the next time it is initialized */
     bChangDev = TRUE;
