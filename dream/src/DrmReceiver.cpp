@@ -362,6 +362,13 @@ CDRMReceiver::Run()
 }
 
 void
+CDRMReceiver::CloseSoundInterface()
+{
+    pSoundInInterface->Close();
+    pSoundOutInterface->Close();
+}
+
+void
 CDRMReceiver::DemodulateDRM(_BOOLEAN& bEnoughData)
 {
     CParameter & Parameters = *pParameters;
@@ -820,11 +827,10 @@ CDRMReceiver::Start()
             Run();
         }
         while (pParameters->eRunState == CParameter::RUNNING);
-
-        pSoundInInterface->Close();
-        pSoundOutInterface->Close();
     }
     while (pParameters->eRunState == CParameter::RESTART);
+
+    CloseSoundInterface();
 
     pParameters->eRunState = CParameter::STOPPED;
 }

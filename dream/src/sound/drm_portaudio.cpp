@@ -194,7 +194,7 @@ CPaCommon::Init(int iSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking)
         //throw "portaudio open error";
     }
 
-	return TRUE;
+    return TRUE;
 }
 
 void
