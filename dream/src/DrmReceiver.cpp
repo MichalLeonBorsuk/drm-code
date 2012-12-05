@@ -385,18 +385,12 @@ CDRMReceiver::ProcessSoundFile()
                 /* Open sound file interface */
                 CAudioFileIn* AudioFileIn = new CAudioFileIn();
                 AudioFileIn->SetFileName(sSoundFile);
-                const int iFileSampleRate = AudioFileIn->GetFileSampleRate();
+                const int iFileSampleRate = AudioFileIn->GetSampleRate();
                 pParameters->SetSigSampleRate(iFileSampleRate);
                 pSoundInInterface = AudioFileIn;
             }
             else
             {
-                /* Restore previous sample rate */
-                if (iPrevSigSampleRate != 0)
-                {
-                    pParameters->SetSigSampleRate(iPrevSigSampleRate);
-                    iPrevSigSampleRate = 0;
-                }
                 /* Open sound interface */
                 pSoundInInterface = new CSoundIn();
             }
@@ -423,6 +417,19 @@ CDRMReceiver::ClearSoundFile()
         pParameters->Lock();
             sSoundFile = "";
         pParameters->Unlock();
+    }
+}
+
+void
+CDRMReceiver::RestoreSampleRate()
+{
+    if (pParameters != NULL)
+    {
+        if (iPrevSigSampleRate != 0)
+        {
+            pParameters->SetSigSampleRate(iPrevSigSampleRate);
+            iPrevSigSampleRate = 0;
+        }
     }
 }
 
@@ -897,6 +904,9 @@ CDRMReceiver::Start()
             Run();
         }
         while (pParameters->eRunState == CParameter::RUNNING);
+
+        /* Restore previous sample rate */
+        RestoreSampleRate();
     }
     while (pParameters->eRunState == CParameter::RESTART);
 

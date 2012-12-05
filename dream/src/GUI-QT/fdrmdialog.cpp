@@ -1188,7 +1188,12 @@ void FDRMDialog::OnMenuSetDisplayColor()
 void FDRMDialog::OnOpenSoundFile()
 {
 #if QT_VERSION >= 0x040000
-	QString filename = QFileDialog::getOpenFileName(this, tr("Open Sound File"), NULL, tr("Sound Files (*)"));
+# ifdef HAVE_LIBSNDFILE
+#  define AUDIO_FILE_FILTER "Sound Files (*.aif* *.au *.flac *.ogg *.rf64 *.snd *.wav);;All files (*)"
+# else
+#  define AUDIO_FILE_FILTER "Sound Files (*.if* *.iq* *.pcm* *.txt);;All files (*)"
+# endif
+	QString filename = QFileDialog::getOpenFileName(this, tr("Open Sound File"), NULL, tr(AUDIO_FILE_FILTER));
 	/* Check if user not hit the cancel button */
 	if (!filename.isEmpty())
 	{

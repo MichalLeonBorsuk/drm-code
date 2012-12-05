@@ -875,6 +875,8 @@ void RestartReceiver(CDRMReceiver *DRMReceiver)
         while (Parameters.eRunState == CParameter::RESTART)
             QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents | QEventLoop::WaitForMoreEvents, 10);
     }
+#else
+	(void)DRMReceiver;
 #endif
 }
 

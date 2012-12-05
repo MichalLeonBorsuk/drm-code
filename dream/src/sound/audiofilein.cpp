@@ -1,9 +1,9 @@
 /******************************************************************************\
  * British Broadcasting Corporation
- * Copyright (c) 2007
+ * Copyright (c) 2007, 2012
  *
  * Author(s):
- *	Julian Cable
+ *	Julian Cable, David Flamand
  *
  * Decription:
  * Read a file at the correct rate
@@ -36,17 +36,18 @@
 #endif
 #include <cstdlib>
 #include <cstring>
+#include <string.h>
 
-CAudioFileIn::CAudioFileIn(): CSoundInInterface(), pFileReceiver(NULL),
-        strInFileName(), eFmt(fmt_other), iSampleRate(0), iBufferSize(0),
-        iFileSampleRate(0), iFileChannels(1), pacer(NULL), buffer(NULL)
+
+CAudioFileIn::CAudioFileIn(): CSoundInInterface(), eFmt(fmt_other),
+    pFileReceiver(NULL), iSampleRate(0), iRequestedSampleRate(0), iBufferSize(0),
+    iFileSampleRate(0), iFileChannels(0), pacer(NULL),
+    ResampleObjL(NULL), ResampleObjR(NULL), buffer(NULL)
 {
 }
 
 CAudioFileIn::~CAudioFileIn()
 {
-	if (buffer!=NULL)
-		delete[] buffer;
     Close();
 }
 
@@ -99,7 +100,7 @@ CAudioFileIn::SetFileName(const string& strFileName)
         sfinfo.channels = iFileChannels;
         sfinfo.format = SF_FORMAT_RAW|SF_FORMAT_PCM_16|SF_ENDIAN_LITTLE;
         pFileReceiver = (FILE*)sf_open(strInFileName.c_str(), SFM_READ, &sfinfo);
-        if (pFileReceiver==NULL)
+        if (pFileReceiver == NULL)
             throw CGenErr(sf_strerror(0));
         break;
     case fmt_other:
@@ -108,45 +109,65 @@ CAudioFileIn::SetFileName(const string& strFileName)
         {
             iFileChannels = sfinfo.channels;
             iFileSampleRate = sfinfo.samplerate;
-// TODO better handling of file sample rate: resample to the nearest supported sample rate
         }
+        break;
+    default:
+        pFileReceiver = NULL;
         break;
     }
 #else
-    if (eFmt==fmt_txt)
+    if (eFmt == fmt_txt)
         pFileReceiver = fopen(strInFileName.c_str(), "r");
     else
         pFileReceiver = fopen(strInFileName.c_str(), "rb");
 #endif
-    /* Check for error */
-    if (pFileReceiver == NULL)
+
+    /* Check for errors */
+#ifdef HAVE_LIBSNDFILE
+    if (pFileReceiver != NULL)
     {
-        throw CGenErr("The file " + strInFileName + " could not be openned");
+        sf_count_t count;
+        switch (eFmt)
+        {
+        case fmt_txt:
+            // TODO
+            break;
+        case fmt_raw_mono:
+        case fmt_raw_stereo:
+        case fmt_other:
+            count = sf_seek((SNDFILE*)pFileReceiver, 1, SEEK_SET);
+            /* Must contain at least one sample, mono or stereo */
+            if (sf_error((SNDFILE*)pFileReceiver) || count != 1 || iFileChannels < 1 || iFileChannels > 2)
+            {
+                sf_close((SNDFILE*)pFileReceiver);
+                pFileReceiver = NULL;
+            }
+            else
+            {
+                /* Reset position */
+                sf_seek((SNDFILE*)pFileReceiver, 0, SEEK_SET);
+            }
+            break;
+        }
     }
+#else
+    // TODO
+#endif
+
+// The error is reported when reading (red light in system eval on interface IO led)
+//    if (pFileReceiver == NULL)
+//        throw CGenErr("The file " + strInFileName + " could not be openned");
+
+    iRequestedSampleRate = iFileSampleRate;
+    if      (iRequestedSampleRate <= 24000) iRequestedSampleRate = 24000;
+    else if (iRequestedSampleRate <= 48000) iRequestedSampleRate = 48000;
+    else if (iRequestedSampleRate <= 96000) iRequestedSampleRate = 96000;
+    else                                    iRequestedSampleRate = 192000;
 }
 
 _BOOLEAN
 CAudioFileIn::Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking)
 {
-    if (pFileReceiver == NULL)
-        return TRUE;
-
-    _BOOLEAN bChanged = FALSE;
-
-	if (iSampleRate != iNewSampleRate)
-    {
-        iSampleRate = iNewSampleRate;
-        bChanged = TRUE;
-    }
-
-    if (iBufferSize != iNewBufferSize)
-    {
-    	iBufferSize = iNewBufferSize;
-        if (buffer)
-            delete[] buffer;
-        buffer = new short[iBufferSize];
-    }
-
     if (pacer)
     {
         delete pacer;
@@ -158,22 +179,58 @@ CAudioFileIn::Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking
         pacer = new CPacer(uint64_t(1e9*interval));
     }
 
+    if (pFileReceiver == NULL)
+        return TRUE;
+
+    _BOOLEAN bChanged = FALSE;
+
+	if (iSampleRate != iNewSampleRate)
+    {
+        iSampleRate = iNewSampleRate;
+        bChanged = TRUE;
+    }
+
+    if (iBufferSize != iNewBufferSize || bChanged)
+    {
+    	iBufferSize = iNewBufferSize;
+        if (buffer)
+            delete[] buffer;
+        /* Create a resampler object if the file's sample rate isn't supported */
+        if (iNewSampleRate != iFileSampleRate)
+        {
+            iOutBlockSize = iNewBufferSize / 2; /* Mono */
+            iInBlockSize = _REAL(iOutBlockSize) * iFileSampleRate / iNewSampleRate;
+            if (ResampleObjL == NULL)
+                ResampleObjL = new CAudioResample();
+            ResampleObjL->Init(iInBlockSize, _REAL(iNewSampleRate) / iFileSampleRate);
+            if (iFileChannels == 2)
+            {
+                if (ResampleObjR == NULL)
+                    ResampleObjR = new CAudioResample();
+                ResampleObjR->Init(iInBlockSize, _REAL(iNewSampleRate) / iFileSampleRate);
+            }
+            vecTempResBufIn.Init(iInBlockSize, (_REAL) 0.0);
+            vecTempResBufOut.Init(iOutBlockSize, (_REAL) 0.0);
+        }
+        buffer = new short[iNewBufferSize];
+    }
+
     return bChanged;
 }
 
 _BOOLEAN
 CAudioFileIn::Read(CVector<short>& psData)
 {
-    int iFrames = psData.Size()/2;
-    int i;
-    if (pacer) pacer->wait();
+    if (pacer)
+        pacer->wait();
 
-    if (pFileReceiver == NULL)
-    {
+    if (pFileReceiver == NULL || psData.Size() != iBufferSize)
         return TRUE;
-    }
 
-    if (eFmt==fmt_txt)
+    const int iFrames = ResampleObjL ? iInBlockSize : iBufferSize/2;
+    int i;
+
+    if (eFmt == fmt_txt)
     {
         for (i = 0; i < iFrames; i++)
         {
@@ -188,45 +245,90 @@ CAudioFileIn::Read(CVector<short>& psData)
         }
         return FALSE;
     }
+
+    _BOOLEAN bError = FALSE;
+    int iRemainingFrame = iFrames;
+    int iReadFrame = 0;
 #ifdef HAVE_LIBSNDFILE
-	sf_count_t c = sf_readf_short((SNDFILE*)pFileReceiver, buffer, iFrames);
-	if (c!=iFrames)
-	{
-		/* rewind */
-		sf_seek((SNDFILE*)pFileReceiver, 0, SEEK_SET);
-		c = sf_readf_short((SNDFILE*)pFileReceiver, buffer, iFrames);
-	}
-#else
-    if (fread(buffer, sizeof(short), size_t(iFileChannels*iFrames), pFileReceiver) == size_t(0))
+    while (iRemainingFrame > 0)
     {
-        rewind(pFileReceiver);
-        fread(buffer, sizeof(short), size_t(iFileChannels*iFrames), pFileReceiver);
+	    sf_count_t c = sf_readf_short((SNDFILE*)pFileReceiver, &buffer[iReadFrame * iFileChannels], iRemainingFrame);
+	    if (c != sf_count_t(iRemainingFrame))
+	    {
+            /* rewind */
+            if (sf_error((SNDFILE*)pFileReceiver) || sf_seek((SNDFILE*)pFileReceiver, 0, SEEK_SET) == -1)
+            {
+                memset(&buffer[iReadFrame * iFileChannels], 0, iRemainingFrame * iFileChannels);
+                bError = TRUE;
+                break;
+            }
+	    }
+        iRemainingFrame -= c;
+        iReadFrame += c;
+    }
+#else
+    while (iRemainingFrame > 0)
+    {
+        size_t c = fread(&buffer[iReadFrame * iFileChannels], sizeof(short), size_t(iRemainingFrame), pFileReceiver);
+        if (c != size_t(iRemainingFrame))
+        {
+            /* rewind */
+            if (ferror(pFileReceiver) || fseek(pFileReceiver, 0, SEEK_SET) == -1)
+            {
+                memset(&buffer[iReadFrame * iFileChannels], 0, iRemainingFrame * iFileChannels);
+                bError = TRUE;
+                break;
+            }
+        }
+        iRemainingFrame -= c;
+        iReadFrame += c;
     }
 #endif
-    int oversample_factor = iSampleRate / iFileSampleRate;
-    if (iFileChannels==2)
-    {
-        for (i = 0; i < iFrames/oversample_factor; i++)
-        {
-            for (int j = 0; j < oversample_factor; j++)
-            {
-                psData[2*i+j] = buffer[2*i];
-                psData[2*i+1+j] = buffer[2*i+1];
-            }
+
+    if (ResampleObjL)
+    {   /* Resampling is needed */
+        if (iFileChannels == 2)
+        {   /* Stereo */
+            /* Left channel*/
+            for (i = 0; i < iInBlockSize; i++)
+                vecTempResBufIn[i] = buffer[2*i];
+            ResampleObjL->Resample(vecTempResBufIn, vecTempResBufOut);
+            for (i = 0; i < iOutBlockSize; i++)
+                psData[i*2] = Real2Sample(vecTempResBufOut[i]);
+            /* Right channel*/
+            for (i = 0; i < iInBlockSize; i++)
+                vecTempResBufIn[i] = buffer[2*i+1];
+            ResampleObjR->Resample(vecTempResBufIn, vecTempResBufOut);
+            for (i = 0; i < iOutBlockSize; i++)
+                psData[i*2+1] = Real2Sample(vecTempResBufOut[i]);
+        }
+        else
+        {   /* Mono */
+            for (i = 0; i < iInBlockSize; i++)
+                vecTempResBufIn[i] = buffer[i];
+            ResampleObjL->Resample(vecTempResBufIn, vecTempResBufOut);
+            for (i = 0; i < iOutBlockSize; i++)
+                psData[i*2] = psData[i*2+1] = Real2Sample(vecTempResBufOut[i]);
         }
     }
     else
-    {
-        for (i = 0; i < iFrames/oversample_factor; i++)
-        {
-            for (int j = 0; j < oversample_factor; j++)
+    {   /* Resampling is not needed, only copy data */
+        if (iFileChannels == 2)
+        {   /* Stereo */
+            for (i = 0; i < iFrames; i++)
             {
-                psData[2*i+j] = buffer[i];
-                psData[2*i+1+j] = buffer[i];
+                psData[2*i] = buffer[2*i];
+                psData[2*i+1] = buffer[2*i+1];
             }
         }
+        else
+        {   /* Mono */
+            for (i = 0; i < iFrames; i++)
+                psData[2*i] = psData[2*i+1] = buffer[i];
+        }
     }
-    return FALSE;
+
+    return bError;
 }
 
 void
@@ -236,7 +338,7 @@ CAudioFileIn::Close()
     if (pFileReceiver != NULL)
     {
 #ifdef HAVE_LIBSNDFILE
-        if (eFmt==fmt_txt)
+        if (eFmt == fmt_txt)
             fclose(pFileReceiver);
         else
             sf_close((SNDFILE*)pFileReceiver);
@@ -245,7 +347,26 @@ CAudioFileIn::Close()
 #endif
         pFileReceiver = NULL;
     }
-    if (pacer)
+
+	if (buffer != NULL)
+		delete[] buffer;
+    buffer = NULL;
+
+    if (pacer != NULL)
         delete pacer;
     pacer = NULL;
+
+    if (ResampleObjL != NULL)
+        delete ResampleObjL;
+    ResampleObjL = NULL;
+
+    if (ResampleObjR != NULL)
+        delete ResampleObjR;
+    ResampleObjR = NULL;
+
+    vecTempResBufIn.Init(0, (_REAL) 0.0);
+    vecTempResBufOut.Init(0, (_REAL) 0.0);
+
+    iSampleRate = 0;
+    iBufferSize = 0;
 }
