@@ -141,7 +141,7 @@ public:
     void					Restart();
     void					Stop();
     void					SetSoundFile(const string& soundFile);
-    void					ClearSoundFile(void);
+    void					ClearSoundFile();
     _BOOLEAN				IsSoundFile();
     void					RequestNewAcquisition() {
         bRestartFlag = TRUE;
@@ -320,6 +320,7 @@ protected:
     void					InitsForAllModules();
     void					Run();
     void					CloseSoundInterface();
+    void					RestoreSampleRate();
     void					ProcessSoundFile();
     void					DemodulateDRM(_BOOLEAN&);
     void					DecodeDRM(_BOOLEAN&, _BOOLEAN&);
