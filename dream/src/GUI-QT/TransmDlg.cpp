@@ -479,7 +479,7 @@ TransmDialog::TransmDialog(CSettings& NSettings,
 	menu_Settings->addMenu( new CSoundCardSelMenu(NULL,
 		DRMTransmitter.GetSoundInInterface(),
 		DRMTransmitter.GetSoundOutInterface(),
-		this));
+		NULL, this));
 
 	connect(actionAbout_Dream, SIGNAL(triggered()), &AboutDlg, SLOT(show()));
 	connect(actionWhats_This, SIGNAL(triggered()), this, SLOT(on_actionWhats_This()));

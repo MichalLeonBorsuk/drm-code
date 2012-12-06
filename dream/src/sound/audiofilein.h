@@ -41,8 +41,8 @@ public:
     virtual ~CAudioFileIn();
 
     virtual void		Enumerate(vector<string>&, vector<string>&) {}
-    virtual void		SetDev(string) {}
-    virtual string		GetDev() {return string();}
+    virtual void		SetDev(string sNewDevice) {sCurrentDevice = sNewDevice;}
+    virtual string		GetDev() {return sCurrentDevice;}
     virtual void		SetFileName(const string& strFileName);
     virtual int			GetSampleRate() {return iRequestedSampleRate;};
 
@@ -66,7 +66,8 @@ protected:
     CAudioResample*		ResampleObjR;
     short*				buffer;
     int					iInBlockSize;
-    int                 iOutBlockSize;
+    int					iOutBlockSize;
+    string				sCurrentDevice;
 };
 
 #endif

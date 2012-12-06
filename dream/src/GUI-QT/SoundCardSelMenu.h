@@ -29,7 +29,9 @@
 #define __SOUNDCARDMENU_H
 
 #include <QMenu>
+#include <QMenuBar>
 #include <QActionGroup>
+#include <QMainWindow>
 #include "../DrmReceiver.h"
 #include "../sound/selectioninterface.h"
 
@@ -38,6 +40,7 @@ typedef struct CHANSEL {
     const int iChanSel;
 } CHANSEL;
 
+class CFileMenu;
 class CSoundCardSelMenu : public QMenu
 {
     Q_OBJECT
@@ -46,16 +49,15 @@ public:
     CSoundCardSelMenu(CDRMReceiver* DRMReceiver,
         CSelectionInterface* pNSIn,
         CSelectionInterface* pNSOut,
+        CFileMenu* pFileMenu,
         QWidget* parent = 0);
-    void EnableSigMenu(bool bEnable);
 
 protected:
     CDRMReceiver* DRMReceiver;
-    CSelectionInterface* pSoundInIF;
-    CSelectionInterface* pSoundOutIF;
+	QMenu* menuSigInput;
     QMenu* menuSigDevice;
     QMenu* menuSigSampleRate;
-    QMenu* InitDevice(QMenu* parent, const QString& text, CSelectionInterface* intf);
+    QMenu* InitDevice(QMenu* self, QMenu* parent, const QString& text, bool bInput);
     QMenu* InitChannel(QMenu* parent, const QString& text, const int iChanSel, const CHANSEL* ChanSel);
     QMenu* InitSampleRate(QMenu* parent, const QString& text, const int iCurrentSampleRate, const int* SampleRate);
 
@@ -65,6 +67,30 @@ public slots:
     void OnSoundInDevice(QAction*);
     void OnSoundOutDevice(QAction*);
     void OnSoundSampleRate(QAction*);
+    void OnSoundFileChanged(CDRMReceiver::ESFStatus);
+};
+
+class CFileMenu : public QMenu
+{
+    Q_OBJECT
+
+public:
+    CFileMenu(CDRMReceiver& DRMReceiver,
+        QMainWindow* parent, QMenu* menuInsertBefore,
+        bool bSignal = TRUE);
+    void UpdateMenu();
+
+protected:
+    CDRMReceiver& DRMReceiver;
+    QAction* actionOpenSignalFile;
+    QAction* actionCloseSignalFile;
+
+public slots:
+    void OnOpenSignalFile();
+    void OnCloseSignalFile();
+
+signals:
+    void soundFileChanged(CDRMReceiver::ESFStatus eStatus);
 };
 
 #endif

@@ -132,6 +132,8 @@ class CDRMReceiver
 {
 public:
 
+    enum ESFStatus { SF_SNDCARDIN, SF_SNDFILEIN, SF_RSIIN };
+
     CDRMReceiver();
     virtual ~CDRMReceiver();
 
@@ -142,7 +144,7 @@ public:
     void					Stop();
     void					SetSoundFile(const string& soundFile);
     void					ClearSoundFile();
-    _BOOLEAN				IsSoundFile();
+    ESFStatus				GetSoundFileStatus();
     void					RequestNewAcquisition() {
         bRestartFlag = TRUE;
     }
@@ -454,6 +456,7 @@ protected:
     string					rsiOrigin;
     string					sSoundFile;
     int						iPrevSigSampleRate; /* sample rate before sound file */
+    string					sSndDevIn;
 };
 
 

@@ -384,6 +384,7 @@ CDRMReceiver::ProcessSoundFile()
                     iPrevSigSampleRate = pParameters->GetSigSampleRate();
                 /* Open sound file interface */
                 CAudioFileIn* AudioFileIn = new CAudioFileIn();
+                AudioFileIn->SetDev(sSndDevIn);
                 AudioFileIn->SetFileName(sSoundFile);
                 const int iFileSampleRate = AudioFileIn->GetSampleRate();
                 pParameters->SetSigSampleRate(iFileSampleRate);
@@ -393,6 +394,7 @@ CDRMReceiver::ProcessSoundFile()
             {
                 /* Open sound interface */
                 pSoundInInterface = new CSoundIn();
+                pSoundInInterface->SetDev(sSndDevIn);
             }
         pParameters->Unlock();
     }
@@ -433,11 +435,20 @@ CDRMReceiver::RestoreSampleRate()
     }
 }
 
-/* To be called within parameter lock */
-_BOOLEAN
-CDRMReceiver::IsSoundFile()
+CDRMReceiver::ESFStatus
+CDRMReceiver::GetSoundFileStatus()
 {
-    return sSoundFile != "";
+    CDRMReceiver::ESFStatus eStatus = SF_SNDCARDIN;
+    if (pParameters != NULL)
+    {
+        pParameters->Lock();
+            if (rsiOrigin != "")
+                eStatus = SF_RSIIN;
+            else if (sSoundFile != "")
+                eStatus = SF_SNDFILEIN;
+        pParameters->Unlock();
+    }
+    return eStatus;
 }
 
 void
@@ -905,7 +916,7 @@ CDRMReceiver::Start()
         }
         while (pParameters->eRunState == CParameter::RUNNING);
 
-        /* Restore previous sample rate */
+        /* Restore sample rate and device name */
         RestoreSampleRate();
     }
     while (pParameters->eRunState == CParameter::RESTART);
@@ -1431,9 +1442,6 @@ CDRMReceiver::saveSDCtoFile()
 void
 CDRMReceiver::LoadSettings(CSettings& s)
 {
-    string str;
-    CReceiveData::EInChanSel defaultInChanSel = CReceiveData::CS_MIX_CHAN;
-
     /* Serial Number */
     string sValue = s.Get("Receiver", "serialnumber");
     if (sValue != "")
@@ -1463,38 +1471,19 @@ CDRMReceiver::LoadSettings(CSettings& s)
     /* if 0 then only measure PSD when RSCI in use otherwise always measure it */
     pParameters->bMeasurePSDAlways = s.Get("Receiver", "measurepsdalways", 0);
 
-    /* upstream RSCI or sound card, etc. */
-    str = s.Get("command", "rsiin");
+    /* Upstream RSCI or sound card, etc. */
+    string str = s.Get("command", "rsiin");
     if (str != "")
     {
         rsiOrigin = str;
     }
     else
     {
-        /* input from file or sound card */
+        /* Input from file or sound card */
         string strInFile = s.Get("command", string("fileio"));
         if (strInFile != "")
         {
-            // It's an I/Q or I/F file
-            delete pSoundInInterface;
-            CAudioFileIn *pf = new CAudioFileIn;
-            pf->SetFileName(strInFile);
-            string ext;
-            size_t p = str.rfind('.');
-            if (p != string::npos)
-                ext = str.substr(p + 1);
-            if (ext.substr(0, 2) == "iq")
-                defaultInChanSel = CReceiveData::CS_IQ_POS_ZERO;
-            if (ext.substr(0, 2) == "IQ")
-                defaultInChanSel = CReceiveData::CS_IQ_POS_ZERO;
-            pSoundInInterface = pf;
-        }
-        else /* sound card */
-        {
-            /* Sound In device */
-            delete pSoundInInterface;
-            pSoundInInterface = new CSoundIn;
-            pSoundInInterface->SetDev(s.Get("Receiver", "snddevin", string()));
+			SetSoundFile(strInFile);
         }
     }
 
@@ -1511,12 +1500,10 @@ CDRMReceiver::LoadSettings(CSettings& s)
     ReceiveData.SetFlippedSpectrum(s.Get("Receiver", "flipspectrum", FALSE));
 
     /* Input channel selection */
-    CReceiveData::EInChanSel inChanSel = (CReceiveData::EInChanSel)s.Get("Receiver", "inchansel", int(defaultInChanSel));
-    ReceiveData.SetInChanSel(inChanSel);
+    ReceiveData.SetInChanSel((CReceiveData::EInChanSel)s.Get("Receiver", "inchansel", int(CReceiveData::CS_MIX_CHAN)));
 
     /* Output channel selection */
-    CWriteData::EOutChanSel outChanSel = (CWriteData::EOutChanSel)s.Get("Receiver", "outchansel", CWriteData::CS_BOTH_BOTH);
-    WriteData.SetOutChanSel(outChanSel);
+    WriteData.SetOutChanSel((CWriteData::EOutChanSel)s.Get("Receiver", "outchansel", int(CWriteData::CS_BOTH_BOTH)));
 
     /* AM Parameters */
 
@@ -1543,6 +1530,9 @@ CDRMReceiver::LoadSettings(CSettings& s)
 
     /* Load user's saved filter bandwidth and demodulation type */
     SetAMDemodType(eDemodType);
+
+    /* Sound In device */
+    sSndDevIn = s.Get("Receiver", "snddevin", string());
 
     /* Sound Out device */
     pSoundOutInterface->SetDev(s.Get("Receiver", "snddevout", string()));

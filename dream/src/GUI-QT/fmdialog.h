@@ -44,6 +44,7 @@
 # include <QMenu>
 # include <QDialog>
 # include "ui_FMMainWindow.h"
+# include "SoundCardSelMenu.h"
 #endif
 #include "DialogUtil.h"
 #include "MultColorLED.h"
@@ -86,6 +87,8 @@ protected:
 	QMenu*				pReceiverModeMenu;
 	QMenu*				pSettingsMenu;
 	QMenu*				pPlotStyleMenu;
+	CFileMenu*			pFileMenu;
+	CSoundCardSelMenu*	pSoundCardMenu;
 #endif
 	QTimer				Timer;
 	QTimer				TimerClose;

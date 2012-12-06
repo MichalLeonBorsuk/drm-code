@@ -101,17 +101,17 @@ FMDialog::FMDialog(CDRMReceiver& NDRMR, CSettings& NSettings, CRig& rig,
     /* Now tell the layout about the menu */
     FMDialogBaseLayout->setMenuBar(pMenu);
 #else
+	pFileMenu = new CFileMenu(DRMReceiver, this, menu_View, FALSE);
 	connect(actionTune, SIGNAL(triggered()), this, SLOT(OnTune()));
 	connect(actionExit, SIGNAL(triggered()), this, SLOT(close()));
 	connect(actionAM, SIGNAL(triggered()), this, SLOT(OnSwitchToAM()));
 	connect(actionDRM, SIGNAL(triggered()), this, SLOT(OnSwitchToDRM()));
 	connect(actionDisplayColor, SIGNAL(triggered()), this, SLOT(OnMenuSetDisplayColor()));
 
-	menu_Settings->addMenu(
-		new CSoundCardSelMenu(&DRMReceiver,
-			DRMReceiver.GetSoundInInterface(), DRMReceiver.GetSoundOutInterface(), this
-		)
-	);
+	pSoundCardMenu = new CSoundCardSelMenu(&DRMReceiver,
+		DRMReceiver.GetSoundInInterface(), DRMReceiver.GetSoundOutInterface(), pFileMenu, this);
+	menu_Settings->addMenu(pSoundCardMenu);
+
 	//menu_Settings->addMenu(pRemoteMenu->menu());
 	connect(actionAbout_Dream, SIGNAL(triggered()), this, SLOT(OnHelpAbout()));
 	connect(actionWhats_This, SIGNAL(triggered()), this, SLOT(on_actionWhats_This()));
@@ -458,6 +458,9 @@ void FMDialog::ClearDisplay()
 void FMDialog::showEvent(QShowEvent* e)
 {
 	EVENT_FILTER(e);
+#if QT_VERSION >= 0x040000
+	pFileMenu->UpdateMenu();
+#endif
 	/* Set timer for real-time controls */
 	OnTimer();
  	Timer.start(GUI_CONTROL_UPDATE_TIME);
