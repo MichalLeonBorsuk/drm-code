@@ -115,19 +115,22 @@ class CSoundCardSelMenu : public QPopupMenu
 	Q_OBJECT
 
 public:
-	CSoundCardSelMenu(CSelectionInterface* pNSIn,
-		CSelectionInterface* pNSOut, QWidget* parent = 0);
+	CSoundCardSelMenu(
+        void* DRMReceiver,
+        void* DRMTransmitter,
+        QWidget* parent = 0);
 
 protected:
-	CSelectionInterface*	pSoundInIF;
-	CSelectionInterface*	pSoundOutIF;
-
+        void*                   DRMReceiver;
+        void*                   DRMTransmitter;
         vector<string>          vecSoundInNames;
         vector<string>          vecSoundOutNames;
         int                     iNumSoundInDev;
         int                     iNumSoundOutDev;
         QPopupMenu*             pSoundInMenu;
         QPopupMenu*             pSoundOutMenu;
+        CSelectionInterface*    GetSoundInInterface();
+        CSelectionInterface*    GetSoundOutInterface();
 
 public slots:
 	void OnSoundInDevice(int id);
