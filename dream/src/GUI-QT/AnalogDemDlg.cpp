@@ -98,7 +98,7 @@ AnalogDemDlg::AnalogDemDlg(CDRMReceiver& NDRMR, CSettings& NSettings,
 		SIGNAL(NewAMAcquisition()), CTRL+Key_A);
 	pSettingsMenu->insertSeparator();
 	pSettingsMenu->insertItem(tr("&Sound Card Selection"),
-		new CSoundCardSelMenu(DRMReceiver.GetSoundInInterface(), DRMReceiver.GetSoundOutInterface(), this));
+		new CSoundCardSelMenu(&DRMReceiver, NULL, this));
 
 	/* Main menu bar -------------------------------------------------------- */
 	QMenuBar* pMenu = new QMenuBar(this);

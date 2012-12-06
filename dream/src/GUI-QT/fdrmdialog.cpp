@@ -173,8 +173,7 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& NSettings, CRig& rig,
 
     /* Sound Card */
     pSettingsMenu->insertItem(tr("&Sound Card Selection"),
-                              new CSoundCardSelMenu(DRMReceiver.GetSoundInInterface(),
-                                      DRMReceiver.GetSoundOutInterface(), this));
+                              new CSoundCardSelMenu(&DRMReceiver, NULL, this));
 
     /* Main menu bar -------------------------------------------------------- */
     pMenu = new QMenuBar(this);

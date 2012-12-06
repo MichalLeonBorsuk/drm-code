@@ -459,10 +459,7 @@ TransmDialog::TransmDialog(CSettings& NSettings,
 	pSettingsMenu = new QPopupMenu(this);
 	CHECK_PTR(pSettingsMenu);
 	pSettingsMenu->insertItem(tr("&Sound Card Selection"),
-		new CSoundCardSelMenu(
-		DRMTransmitter.GetSoundInInterface(),
-		DRMTransmitter.GetSoundOutInterface(),
-		this));
+		new CSoundCardSelMenu(NULL, &DRMTransmitter, this));
 
 	/* Main menu bar -------------------------------------------------------- */
 	pMenu = new QMenuBar(this);

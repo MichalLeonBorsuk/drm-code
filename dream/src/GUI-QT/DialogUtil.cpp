@@ -32,14 +32,15 @@
 #include <qmessagebox.h>
 #include <qdir.h>
 #include <qfile.h>
-#if QT_VERSION < 0x040000
-# include <qregexp.h>
-#endif
 #ifdef _WIN32
 # include <winsock2.h>
 #endif
 #include "DialogUtil.h"
 #if QT_VERSION < 0x040000
+# include "../DRMReceiver.h"
+# include "../DRMTransmitter.h"
+# include "../sound/sound.h"
+# include <qregexp.h>
 # include <qwhatsthis.h>
 # include <qtextview.h>
 #else
@@ -331,9 +332,14 @@ void CDreamHelpMenu::OnHelpWhatsThis()
 # endif
 
 CSoundCardSelMenu::CSoundCardSelMenu(
-    CSelectionInterface* pNSIn, CSelectionInterface* pNSOut, QWidget* parent) :
-    QPopupMenu(parent), pSoundInIF(pNSIn), pSoundOutIF(pNSOut)
+    void* DRMReceiver, void* DRMTransmitter, QWidget* parent) :
+    QPopupMenu(parent), DRMReceiver(DRMReceiver), DRMTransmitter(DRMTransmitter)
 {
+    /* We need to get device list directly from sound card,
+       since DRMReceiver.GetSoundInInterface() can be an audio file interface */
+    CSelectionInterface* pSoundInIF = new CSoundIn();
+    CSelectionInterface* pSoundOutIF = GetSoundOutInterface();
+
     pSoundInMenu = new QPopupMenu(parent);
     CHECK_PTR(pSoundInMenu);
     pSoundOutMenu = new QPopupMenu(parent);
@@ -382,6 +388,7 @@ CSoundCardSelMenu::CSoundCardSelMenu(
 
 void CSoundCardSelMenu::OnSoundInDevice(int id)
 {
+    CSelectionInterface* pSoundInIF = GetSoundInInterface();
     if (id >= 0 && id < int(vecSoundInNames.size()))
         pSoundInIF->SetDev(vecSoundInNames[id]);
     for (int i = 0; i < iNumSoundInDev; i++)
@@ -390,11 +397,31 @@ void CSoundCardSelMenu::OnSoundInDevice(int id)
 
 void CSoundCardSelMenu::OnSoundOutDevice(int id)
 {
+    CSelectionInterface* pSoundOutIF = GetSoundOutInterface();
     if (id >= 0 && id < int(vecSoundOutNames.size()))
         pSoundOutIF->SetDev(vecSoundOutNames[id]);
     for (int i = 0; i < iNumSoundOutDev; i++)
         pSoundOutMenu->setItemChecked(i, i == id);
 }
+
+/* Ok, we now have to deal with dynamic sound interfaces... */
+CSelectionInterface* CSoundCardSelMenu::GetSoundInInterface()
+{
+    if (DRMReceiver != NULL)
+        return ((CDRMReceiver*)DRMReceiver)->GetSoundInInterface();
+    else if (DRMTransmitter != NULL)
+        return ((CDRMTransmitter*)DRMTransmitter)->GetSoundInInterface();
+    return NULL; /* Should not happen */
+}
+CSelectionInterface* CSoundCardSelMenu::GetSoundOutInterface()
+{
+    if (DRMReceiver != NULL)
+        return ((CDRMReceiver*)DRMReceiver)->GetSoundOutInterface();
+    else if (DRMTransmitter != NULL)
+        return ((CDRMTransmitter*)DRMTransmitter)->GetSoundOutInterface();
+    return NULL; /* Should not happen */
+}
+
 # undef DEVICE_STRING
 #endif
 

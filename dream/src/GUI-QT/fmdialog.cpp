@@ -87,8 +87,7 @@ FMDialog::FMDialog(CDRMReceiver& NDRMR, CSettings& NSettings, CRig& rig,
     pSettingsMenu->insertItem(tr("Set D&isplay Color..."), this,
             SLOT(OnMenuSetDisplayColor()));
     pSettingsMenu->insertItem(tr("&Sound Card Selection"),
-            new CSoundCardSelMenu(DRMReceiver.GetSoundInInterface(),
-            DRMReceiver.GetSoundOutInterface(), this));
+            new CSoundCardSelMenu(&DRMReceiver, NULL, this));
 
     /* Main menu bar -------------------------------------------------------- */
     pMenu = new QMenuBar(this);
