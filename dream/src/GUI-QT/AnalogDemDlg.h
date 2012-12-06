@@ -120,7 +120,7 @@ class AnalogDemDlg : public AnalogDemDlgBase
 public:
 	AnalogDemDlg(CDRMReceiver&, CSettings&, QWidget* parent = 0,
 		const char* name = 0, bool modal = FALSE, Qt::WFlags f = 0);
-
+	void switchEvent();
 
 protected:
 	CDRMReceiver&	DRMReceiver;

@@ -167,10 +167,6 @@ FMDialog::FMDialog(CDRMReceiver& NDRMR, CSettings& NSettings, CRig& rig,
  	Timer.start(GUI_CONTROL_UPDATE_TIME);
 }
 
-FMDialog::~FMDialog()
-{
-}
-
 void FMDialog::on_actionWhats_This()
 {
         QWhatsThis::enterWhatsThisMode();
@@ -455,12 +451,17 @@ void FMDialog::ClearDisplay()
 	//LabelServiceLabel->setText(tr("Scanning..."));
 }
 
-void FMDialog::showEvent(QShowEvent* e)
+void FMDialog::switchEvent()
 {
-	EVENT_FILTER(e);
+	/* Put initilization code on mode switch here */
 #if QT_VERSION >= 0x040000
 	pFileMenu->UpdateMenu();
 #endif
+}
+
+void FMDialog::showEvent(QShowEvent* e)
+{
+	EVENT_FILTER(e);
 	/* Set timer for real-time controls */
 	OnTimer();
  	Timer.start(GUI_CONTROL_UPDATE_TIME);

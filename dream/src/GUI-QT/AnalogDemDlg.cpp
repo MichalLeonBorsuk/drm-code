@@ -248,6 +248,14 @@ void AnalogDemDlg::OnSwitchToFM()
 	emit SwitchMode(RM_FM);
 }
 
+void AnalogDemDlg::switchEvent()
+{
+	/* Put initilization code on mode switch here */
+#if QT_VERSION >= 0x040000
+	pFileMenu->UpdateMenu();
+#endif
+}
+
 void AnalogDemDlg::showEvent(QShowEvent* e)
 {
 	EVENT_FILTER(e);
@@ -271,8 +279,6 @@ void AnalogDemDlg::showEvent(QShowEvent* e)
 		AMSSDlg.hide();
 
 #if QT_VERSION >= 0x040000
-	pFileMenu->UpdateMenu();
-
     /* Notify the MainPlot of showEvent */
     if(MainPlot) MainPlot->activate();
 #endif
