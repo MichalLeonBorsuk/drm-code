@@ -369,7 +369,7 @@ CDRMReceiver::CloseSoundInterface()
 }
 
 void
-CDRMReceiver::ProcessSoundFile()
+CDRMReceiver::SetInput()
 {
     if (pParameters != NULL)
     {
@@ -401,6 +401,20 @@ CDRMReceiver::ProcessSoundFile()
 }
 
 void
+CDRMReceiver::ResetInput()
+{
+    if (pParameters != NULL)
+    {
+        if (iPrevSigSampleRate != 0)
+        {
+            pParameters->SetSigSampleRate(iPrevSigSampleRate);
+            iPrevSigSampleRate = 0;
+        }
+        sSndDevIn = pSoundInInterface->GetDev();
+    }
+}
+
+void
 CDRMReceiver::SetSoundFile(const string& soundFile)
 {
     if (pParameters != NULL)
@@ -419,19 +433,6 @@ CDRMReceiver::ClearSoundFile()
         pParameters->Lock();
             sSoundFile = "";
         pParameters->Unlock();
-    }
-}
-
-void
-CDRMReceiver::RestoreSampleRate()
-{
-    if (pParameters != NULL)
-    {
-        if (iPrevSigSampleRate != 0)
-        {
-            pParameters->SetSigSampleRate(iPrevSigSampleRate);
-            iPrevSigSampleRate = 0;
-        }
     }
 }
 
@@ -900,7 +901,7 @@ CDRMReceiver::Start()
     do
     {
         /* Process new sound file if any */
-        ProcessSoundFile();
+        SetInput();
 
         /* Set new acquisition flag */
         RequestNewAcquisition();
@@ -917,7 +918,7 @@ CDRMReceiver::Start()
         while (pParameters->eRunState == CParameter::RUNNING);
 
         /* Restore sample rate and device name */
-        RestoreSampleRate();
+        ResetInput();
     }
     while (pParameters->eRunState == CParameter::RESTART);
 
@@ -1696,7 +1697,7 @@ CDRMReceiver::SaveSettings(CSettings& s)
     s.Put("Receiver", "modmetric", ChannelEstimation.GetIntCons());
 
     /* Sound In device */
-    s.Put("Receiver", "snddevin", pSoundInInterface->GetDev());
+    s.Put("Receiver", "snddevin", sSndDevIn);
 
     /* Sound Out device */
     s.Put("Receiver", "snddevout", pSoundOutInterface->GetDev());

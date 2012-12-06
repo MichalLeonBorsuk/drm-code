@@ -322,8 +322,8 @@ protected:
     void					InitsForAllModules();
     void					Run();
     void					CloseSoundInterface();
-    void					RestoreSampleRate();
-    void					ProcessSoundFile();
+    void					SetInput();
+    void					ResetInput();
     void					DemodulateDRM(_BOOLEAN&);
     void					DecodeDRM(_BOOLEAN&, _BOOLEAN&);
     void					UtilizeDRM(_BOOLEAN&);
