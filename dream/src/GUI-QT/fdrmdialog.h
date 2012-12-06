@@ -97,6 +97,7 @@ class FDRMDialog : public FDRMDialogBase
 public:
     FDRMDialog(CDRMReceiver&, CSettings&, CRig&, QWidget* parent = 0, const char* name = 0,
                bool modal = FALSE,	Qt::WFlags f = 0);
+    void switchEvent();
 
     virtual ~FDRMDialog();
 

@@ -144,7 +144,7 @@ public:
     void					Stop();
     void					SetSoundFile(const string& soundFile);
     void					ClearSoundFile();
-    ESFStatus				GetSoundFileStatus();
+    ESFStatus				GetInputStatus();
     void					RequestNewAcquisition() {
         bRestartFlag = TRUE;
     }
@@ -379,8 +379,8 @@ protected:
 
     /* Parameters */
     CParameter*				pParameters;
-    CParameter*				pDRMParam;
-    CParameter*				pAMParam;
+//    CParameter*				pDRMParam;
+//    CParameter*				pAMParam;
 
     /* Buffers */
     CSingleBuffer<_REAL>			AMDataBuf;

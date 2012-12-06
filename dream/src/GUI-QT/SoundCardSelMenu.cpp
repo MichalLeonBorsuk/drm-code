@@ -95,7 +95,7 @@ CSoundCardSelMenu::CSoundCardSelMenu(
         if (pFileMenu != NULL)
 		{
             connect(pFileMenu, SIGNAL(soundFileChanged(CDRMReceiver::ESFStatus)), this, SLOT(OnSoundFileChanged(CDRMReceiver::ESFStatus)));
-			pFileMenu->UpdateMenu();
+//			pFileMenu->UpdateMenu();
 		}
     }
     else
@@ -233,8 +233,8 @@ QMenu* CSoundCardSelMenu::InitSampleRate(QMenu* parent, const QString& text, con
 
 void CSoundCardSelMenu::OnSoundFileChanged(CDRMReceiver::ESFStatus eStatus)
 {
-	const bool bSoundFile = eStatus == CDRMReceiver::SF_SNDFILEIN;
-	const bool bRsiinFile = eStatus == CDRMReceiver::SF_RSIIN;
+    const bool bSoundFile = eStatus == CDRMReceiver::SF_SNDFILEIN;
+    const bool bRsiinFile = eStatus == CDRMReceiver::SF_RSIIN;
 
     if (menuSigInput != NULL && bRsiinFile == menuSigDevice->isEnabled())
         menuSigInput->setEnabled(!bRsiinFile);
@@ -245,8 +245,16 @@ void CSoundCardSelMenu::OnSoundFileChanged(CDRMReceiver::ESFStatus eStatus)
     if (menuSigSampleRate != NULL && bSoundFile == menuSigSampleRate->isEnabled())
         menuSigSampleRate->setEnabled(!bSoundFile);
 
-	if (eStatus == CDRMReceiver::SF_SNDCARDIN)
-		InitDevice(menuSigDevice, menuSigInput, tr("Device"), true);
+    if (eStatus == CDRMReceiver::SF_SNDCARDIN)
+    {
+        if (DRMReceiver != NULL)
+        {
+            CParameter& Parameters = *DRMReceiver->GetParameters();
+            Parameters.Lock();
+                InitDevice(menuSigDevice, menuSigInput, tr("Device"), true);
+            Parameters.Unlock();
+        }
+    }
 }
 
 /* CFileMenu ******************************************************************/
@@ -292,7 +300,7 @@ void CFileMenu::OnCloseSignalFile()
 
 void CFileMenu::UpdateMenu()
 {
-    CDRMReceiver::ESFStatus eStatus = DRMReceiver.GetSoundFileStatus();
+    CDRMReceiver::ESFStatus eStatus = DRMReceiver.GetInputStatus();
 	const bool bSoundFile = eStatus == CDRMReceiver::SF_SNDFILEIN;
 	const bool bRsiinFile = eStatus == CDRMReceiver::SF_RSIIN;
 

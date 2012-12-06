@@ -71,8 +71,7 @@ class FMDialog : public FMDialogBase
 public:
 	FMDialog(CDRMReceiver&, CSettings&, CRig&, QWidget* parent = 0, const char* name = 0,
 		bool modal = FALSE,	Qt::WFlags f = 0);
-
-	virtual ~FMDialog();
+	void switchEvent();
 
 protected:
 	CDRMReceiver&		DRMReceiver;

@@ -53,7 +53,7 @@ CDRMReceiver::CDRMReceiver():
     UtilizeFACData(), UtilizeSDCData(), MSCDemultiplexer(),
     AudioSourceDecoder(),
     upstreamRSCI(), DecodeRSIMDI(), downstreamRSCI(),
-    pParameters(NULL), pDRMParam(NULL), pAMParam(NULL),
+    pParameters(NULL), /*pDRMParam(NULL), pAMParam(NULL),*/
     RSIPacketBuf(),
     MSCDecBuf(MAX_NUM_STREAMS), MSCUseBuf(MAX_NUM_STREAMS),
     MSCSendBuf(MAX_NUM_STREAMS), iAcquRestartCnt(0),
@@ -371,84 +371,69 @@ CDRMReceiver::CloseSoundInterface()
 void
 CDRMReceiver::SetInput()
 {
-    if (pParameters != NULL)
-    {
-        pParameters->Lock();
-            /* Close previous sound interface */
-            if (pSoundInInterface != NULL)
-                pSoundInInterface->Close();
-            if (sSoundFile != "")
-            {   
-                /* Save sample rate */
-                if (iPrevSigSampleRate == 0)
-                    iPrevSigSampleRate = pParameters->GetSigSampleRate();
-                /* Open sound file interface */
-                CAudioFileIn* AudioFileIn = new CAudioFileIn();
-                AudioFileIn->SetDev(sSndDevIn);
-                AudioFileIn->SetFileName(sSoundFile);
-                const int iFileSampleRate = AudioFileIn->GetSampleRate();
-                pParameters->SetSigSampleRate(iFileSampleRate);
-                pSoundInInterface = AudioFileIn;
-            }
-            else
-            {
-                /* Open sound interface */
-                pSoundInInterface = new CSoundIn();
-                pSoundInInterface->SetDev(sSndDevIn);
-            }
-        pParameters->Unlock();
-    }
+    pParameters->Lock();
+        /* Close previous sound interface */
+        if (pSoundInInterface != NULL)
+            pSoundInInterface->Close();
+        if (sSoundFile != "")
+        {   
+            /* Save sample rate */
+            if (iPrevSigSampleRate == 0)
+                iPrevSigSampleRate = pParameters->GetSigSampleRate();
+            /* Open sound file interface */
+            CAudioFileIn* AudioFileIn = new CAudioFileIn();
+            AudioFileIn->SetDev(sSndDevIn);
+            AudioFileIn->SetFileName(sSoundFile);
+            const int iSampleRate = AudioFileIn->GetSampleRate();
+            pSoundInInterface = AudioFileIn;
+            pParameters->SetSigSampleRate(iSampleRate);
+        }
+        else
+        {
+            /* Open sound card interface */
+            pSoundInInterface = new CSoundIn();
+            pSoundInInterface->SetDev(sSndDevIn);
+        }
+    pParameters->Unlock();
 }
 
 void
 CDRMReceiver::ResetInput()
 {
-    if (pParameters != NULL)
+    if (iPrevSigSampleRate != 0)
     {
-        if (iPrevSigSampleRate != 0)
-        {
-            pParameters->SetSigSampleRate(iPrevSigSampleRate);
-            iPrevSigSampleRate = 0;
-        }
-        sSndDevIn = pSoundInInterface->GetDev();
+        pParameters->SetSigSampleRate(iPrevSigSampleRate);
+        iPrevSigSampleRate = 0;
     }
+    sSndDevIn = pSoundInInterface->GetDev();
 }
 
 void
 CDRMReceiver::SetSoundFile(const string& soundFile)
 {
-    if (pParameters != NULL)
-    {
-        pParameters->Lock();
-            sSoundFile = soundFile;
-        pParameters->Unlock();
-    }
+    pParameters->Lock();
+        sSoundFile = soundFile;
+    pParameters->Unlock();
 }
 
 void
 CDRMReceiver::ClearSoundFile()
 {
-    if (pParameters != NULL)
-    {
-        pParameters->Lock();
-            sSoundFile = "";
-        pParameters->Unlock();
-    }
+    pParameters->Lock();
+        sSoundFile = "";
+    pParameters->Unlock();
 }
 
 CDRMReceiver::ESFStatus
-CDRMReceiver::GetSoundFileStatus()
+CDRMReceiver::GetInputStatus()
 {
     CDRMReceiver::ESFStatus eStatus = SF_SNDCARDIN;
-    if (pParameters != NULL)
-    {
-        pParameters->Lock();
-            if (rsiOrigin != "")
-                eStatus = SF_RSIIN;
-            else if (sSoundFile != "")
-                eStatus = SF_SNDFILEIN;
-        pParameters->Unlock();
-    }
+    pParameters->Lock();
+        if (rsiOrigin != "")
+            eStatus = SF_RSIIN;
+        else if (sSoundFile != "")
+            eStatus = SF_SNDFILEIN;
+    pParameters->Unlock();
     return eStatus;
 }
 
@@ -749,6 +734,7 @@ CDRMReceiver::InitReceiverMode()
     {
     case RM_AM:
     case RM_FM:
+#if 0
         if (pAMParam == NULL)
         {
             /* its the first time we have been in AM mode */
@@ -801,19 +787,30 @@ CDRMReceiver::InitReceiverMode()
 
         if (pParameters == NULL)
             throw CGenErr("Something went terribly wrong in the Receiver");
+#endif
+        pParameters->eReceiverMode = eNewReceiverMode;
 
         /* Tell the SDC decoder that it's AMSS to decode (no AFS index) */
         UtilizeSDCData.GetSDCReceive()->SetSDCType(CSDCReceive::SDC_AMSS);
 
         /* Set the receive status - this affects the RSI output */
+/*
         pAMParam->ReceiveStatus.TSync.SetStatus(NOT_PRESENT);
         pAMParam->ReceiveStatus.FSync.SetStatus(NOT_PRESENT);
         pAMParam->ReceiveStatus.FAC.SetStatus(NOT_PRESENT);
         pAMParam->ReceiveStatus.SDC.SetStatus(NOT_PRESENT);
         pAMParam->ReceiveStatus.Audio.SetStatus(NOT_PRESENT);
         pAMParam->ReceiveStatus.MOT.SetStatus(NOT_PRESENT);
+*/
+        pParameters->ReceiveStatus.TSync.SetStatus(NOT_PRESENT);
+        pParameters->ReceiveStatus.FSync.SetStatus(NOT_PRESENT);
+        pParameters->ReceiveStatus.FAC.SetStatus(NOT_PRESENT);
+        pParameters->ReceiveStatus.SDC.SetStatus(NOT_PRESENT);
+        pParameters->ReceiveStatus.Audio.SetStatus(NOT_PRESENT);
+        pParameters->ReceiveStatus.MOT.SetStatus(NOT_PRESENT);
         break;
     case RM_DRM:
+#if 0
         if (pDRMParam == NULL)
         {
             /* its the first time we have been in DRM mode */
@@ -859,11 +856,13 @@ CDRMReceiver::InitReceiverMode()
                 break;
             }
         }
-        pDRMParam->eReceiverMode = RM_DRM;
-        pParameters = pDRMParam;
+#endif
+//        pDRMParam->eReceiverMode = RM_DRM;
+//        pParameters = pDRMParam;
 
-        if (pParameters == NULL)
-            throw CGenErr("Something went terribly wrong in the Receiver");
+//        if (pParameters == NULL)
+//            throw CGenErr("Something went terribly wrong in the Receiver");
+        pParameters->eReceiverMode = eNewReceiverMode;
 
         UtilizeSDCData.GetSDCReceive()->SetSDCType(CSDCReceive::SDC_DRM);
         break;

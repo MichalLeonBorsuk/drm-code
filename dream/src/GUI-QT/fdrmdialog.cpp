@@ -943,19 +943,32 @@ void FDRMDialog::ClearDisplay()
 
 void FDRMDialog::ChangeGUIModeToDRM()
 {
+    switchEvent();
     show();
 }
 
 void FDRMDialog::ChangeGUIModeToAM()
 {
     hide();
+    Timer.stop();
+    pAnalogDemDlg->switchEvent();
     pAnalogDemDlg->show();
 }
 
 void FDRMDialog::ChangeGUIModeToFM()
 {
     hide();
+    Timer.stop();
+    pFMDlg->switchEvent();
     pFMDlg->show();
+}
+
+void FDRMDialog::switchEvent()
+{
+    /* Put initilization code on mode switch here */
+#if QT_VERSION >= 0x040000
+    pFileMenu->UpdateMenu();
+#endif
 }
 
 void FDRMDialog::showEvent(QShowEvent* e)
@@ -991,10 +1004,6 @@ void FDRMDialog::showEvent(QShowEvent* e)
 
     if (Settings.Get("DRM Dialog", "EPG Dialog visible", false))
         pEPGDlg->show();
-
-#if QT_VERSION >= 0x040000
-    pFileMenu->UpdateMenu();
-#endif
 
     /* Set timer for real-time controls */
     OnTimer();
