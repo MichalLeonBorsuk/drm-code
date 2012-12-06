@@ -39,6 +39,7 @@
 # include "ui_AMSSDlgbase.h"
 # include <QDialog>
 # include <QButtonGroup>
+# include "SoundCardSelMenu.h"
 #endif
 
 #include "DialogUtil.h"
@@ -130,6 +131,10 @@ protected:
 	QTimer			TimerClose;
 	CAMSSDlg		AMSSDlg;
 	CEventFilter	ef;
+#if QT_VERSION >= 0x040000
+    CFileMenu*			pFileMenu;
+    CSoundCardSelMenu*	pSoundCardMenu;
+#endif
 
 	void UpdateControls();
 	void AddWhatsThisHelp();

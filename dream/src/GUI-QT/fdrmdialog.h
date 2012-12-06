@@ -126,16 +126,17 @@ protected:
     QMenuBar*			pMenu;
     QButtonGroup*		pButtonGroup;
 #if QT_VERSION < 0x040000
-    QPopupMenu*		pReceiverModeMenu;
-    QPopupMenu*		pSettingsMenu;
-    QPopupMenu*		pPlotStyleMenu;
+    QPopupMenu*			pReceiverModeMenu;
+    QPopupMenu*			pSettingsMenu;
+    QPopupMenu*			pPlotStyleMenu;
 #else
-    QMenu*		pReceiverModeMenu;
-    QMenu*		pSettingsMenu;
-    QMenu*		pPlotStyleMenu;
-    QSignalMapper*	plotStyleMapper;
-    QActionGroup*	plotStyleGroup;
-    CSoundCardSelMenu* pSoundCardMenu;
+    QMenu*				pReceiverModeMenu;
+    QMenu*				pSettingsMenu;
+    QMenu*				pPlotStyleMenu;
+    QSignalMapper*		plotStyleMapper;
+    QActionGroup*		plotStyleGroup;
+    CFileMenu*			pFileMenu;
+    CSoundCardSelMenu*	pSoundCardMenu;
 #endif
     CAboutDlg		AboutDlg;
     int			iMultimediaServiceBit;
@@ -178,8 +179,6 @@ public slots:
     void OnSwitchToFM();
     void OnSwitchToAM();
     void OnHelpAbout() {AboutDlg.show();}
-    void OnOpenSoundFile();
-    void OnCloseSoundFile();
     void on_actionWhats_This();
 #if QT_VERSION < 0x040000
     void OnMenuPlotStyle(int);

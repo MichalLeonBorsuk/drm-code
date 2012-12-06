@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>484</width>
-    <height>320</height>
+    <height>319</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -7060,16 +7060,6 @@
     <addaction name="separator"/>
     <addaction name="actionAbout_Dream"/>
    </widget>
-   <widget class="QMenu" name="menu_File">
-    <property name="title">
-     <string>&amp;File</string>
-    </property>
-    <addaction name="action_Open_Sound_File"/>
-    <addaction name="action_Close_Sound_File"/>
-    <addaction name="separator"/>
-    <addaction name="actionExit"/>
-   </widget>
-   <addaction name="menu_File"/>
    <addaction name="menu_View"/>
    <addaction name="menu_Settings"/>
    <addaction name="menuHelp"/>

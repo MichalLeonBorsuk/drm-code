@@ -543,8 +543,6 @@ Phase Offset</string>
     </property>
     <addaction name="action_Stations_Dialog"/>
     <addaction name="action_Live_Schedule_Dialog"/>
-    <addaction name="separator"/>
-    <addaction name="actionExit"/>
    </widget>
    <widget class="QMenu" name="menu_Settings">
     <property name="title">

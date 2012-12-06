@@ -36,7 +36,6 @@
 # include "MultimediaDlg.h"
 # define toUpper(s) s.upper()
 #else
-# include <QFileDialog>
 # include <QWhatsThis>
 # include <QHideEvent>
 # include <QEvent>
@@ -243,17 +242,16 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& NSettings, CRig& rig,
     connect(action_Stations_Dialog, SIGNAL(triggered()), pStationsDlg, SLOT(show()));
     connect(action_Live_Schedule_Dialog, SIGNAL(triggered()), pLiveScheduleDlg, SLOT(show()));
     connect(action_Programme_Guide_Dialog, SIGNAL(triggered()), pEPGDlg, SLOT(show()));
-    connect(action_Open_Sound_File, SIGNAL(triggered()), this, SLOT(OnOpenSoundFile()));
-    connect(action_Close_Sound_File, SIGNAL(triggered()), this, SLOT(OnCloseSoundFile()));
     connect(actionExit, SIGNAL(triggered()), this, SLOT(close()));
 
-	action_Close_Sound_File->setEnabled(false);
     action_Multimedia_Dialog->setEnabled(false);
+
+	pFileMenu = new CFileMenu(DRMReceiver, this, menu_View);
 
 	pSoundCardMenu = new CSoundCardSelMenu(&DRMReceiver,
 		DRMReceiver.GetSoundInInterface(),
 		DRMReceiver.GetSoundOutInterface(),
-		this);
+		pFileMenu, this);
     menu_Settings->addMenu(pSoundCardMenu);
 
     connect(actionMultimediaSettings, SIGNAL(triggered()), pMultSettingsDlg, SLOT(show()));
@@ -462,20 +460,8 @@ void FDRMDialog::UpdateDRM_GUI()
     SetStatus(CLED_MSC, Parameters.ReceiveStatus.Audio.GetStatus());
     SetStatus(CLED_SDC, Parameters.ReceiveStatus.SDC.GetStatus());
     SetStatus(CLED_FAC, Parameters.ReceiveStatus.FAC.GetStatus());
-#if QT_VERSION >= 0x040000
-	_BOOLEAN bIsSoundFile = DRMReceiver.IsSoundFile();
-#endif
 
     Parameters.Unlock();
-
-#if QT_VERSION >= 0x040000
-	/* Update "Sound File Close" menu */
-	if (bIsSoundFile != action_Close_Sound_File->isEnabled())
-	{
-		action_Close_Sound_File->setEnabled(bIsSoundFile);
-		pSoundCardMenu->EnableSigMenu(!bIsSoundFile);
-	}
-#endif
 
     /* Clear the multimedia service bit */
     iMultimediaServiceBit = 0;
@@ -1006,6 +992,10 @@ void FDRMDialog::showEvent(QShowEvent* e)
     if (Settings.Get("DRM Dialog", "EPG Dialog visible", false))
         pEPGDlg->show();
 
+#if QT_VERSION >= 0x040000
+    pFileMenu->UpdateMenu();
+#endif
+
     /* Set timer for real-time controls */
     OnTimer();
     Timer.start(GUI_CONTROL_UPDATE_TIME);
@@ -1183,33 +1173,6 @@ void FDRMDialog::OnMenuSetDisplayColor()
         SetDisplayColor(newColor);
         Settings.Put("DRM Dialog", "colorscheme", CRGBConversion::RGB2int(newColor));
     }
-}
-
-void FDRMDialog::OnOpenSoundFile()
-{
-#if QT_VERSION >= 0x040000
-# ifdef HAVE_LIBSNDFILE
-#  define AUDIO_FILE_FILTER "Sound Files (*.aif* *.au *.flac *.ogg *.rf64 *.snd *.wav);;All files (*)"
-# else
-#  define AUDIO_FILE_FILTER "Sound Files (*.if* *.iq* *.pcm* *.txt);;All files (*)"
-# endif
-	QString filename = QFileDialog::getOpenFileName(this, tr("Open Sound File"), NULL, tr(AUDIO_FILE_FILTER));
-	/* Check if user not hit the cancel button */
-	if (!filename.isEmpty())
-	{
-		// TODO implement a queue for more that one file!
-		DRMReceiver.SetSoundFile(string(filename.toLocal8Bit().data()));
-		RestartReceiver(&DRMReceiver);
-	}
-#endif
-}
-
-void FDRMDialog::OnCloseSoundFile()
-{
-#if QT_VERSION >= 0x040000
-	DRMReceiver.ClearSoundFile();
-	RestartReceiver(&DRMReceiver);
-#endif
 }
 
 void FDRMDialog::closeEvent(QCloseEvent* ce)

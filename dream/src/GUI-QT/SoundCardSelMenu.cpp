@@ -30,6 +30,7 @@
 #include "../DataIO.h"
 #include "SoundCardSelMenu.h"
 #include "DialogUtil.h"
+#include <QFileDialog>
 
 
 static const CHANSEL InputChannelTable[] =
@@ -57,7 +58,7 @@ static const CHANSEL OutputChannelTable[] =
 
 static const int AudioSampleRateTable[] =
 {
-    8000, 11025, 22050, 24000, 44100, 48000, 96000, 192000, 0
+    8000, 11025, 16000, 22050, 24000, 32000, 44100, 48000, 96000, 192000, 0
 };
 
 static const int SignalSampleRateTable[] =
@@ -68,9 +69,11 @@ static const int SignalSampleRateTable[] =
 
 /* Implementation *************************************************************/
 
+/* CSoundCardSelMenu **********************************************************/
+
 CSoundCardSelMenu::CSoundCardSelMenu(
-    CDRMReceiver* DRMReceiver, CSelectionInterface* pNSIn, CSelectionInterface* pNSOut, QWidget* parent) :
-    QMenu(parent), DRMReceiver(DRMReceiver), pSoundInIF(pNSIn), pSoundOutIF(pNSOut),
+    CDRMReceiver* DRMReceiver, CSelectionInterface* pNSIn, CSelectionInterface* pNSOut, CFileMenu* pFileMenu, QWidget* parent) :
+    QMenu(parent), DRMReceiver(DRMReceiver),
     menuSigDevice(NULL), menuSigSampleRate(NULL)
 {
     setTitle(tr("Sound Card"));
@@ -78,41 +81,46 @@ CSoundCardSelMenu::CSoundCardSelMenu(
     {   /* Receiver */
         CParameter& Parameters = *DRMReceiver->GetParameters();
         Parameters.Lock();
-            QMenu* menuSigInput = addMenu(tr("Signal Input"));
+            menuSigInput = addMenu(tr("Signal Input"));
             QMenu* menuAudOutput = addMenu(tr("Audio Output"));
             connect(InitChannel(menuSigInput, tr("Channel"), (int)DRMReceiver->GetReceiveData()->GetInChanSel(), InputChannelTable), SIGNAL(triggered(QAction*)), this, SLOT(OnSoundInChannel(QAction*)));
             connect(InitChannel(menuAudOutput, tr("Channel"), (int)DRMReceiver->GetWriteData()->GetOutChanSel(), OutputChannelTable), SIGNAL(triggered(QAction*)), this, SLOT(OnSoundOutChannel(QAction*)));
-            menuSigDevice = InitDevice(menuSigInput, tr("Device"), pSoundInIF);
+            menuSigDevice = InitDevice(NULL, menuSigInput, tr("Device"), true);
             connect(menuSigDevice, SIGNAL(triggered(QAction*)), this, SLOT(OnSoundInDevice(QAction*)));
-            connect(InitDevice(menuAudOutput, tr("Device"), pSoundOutIF), SIGNAL(triggered(QAction*)), this, SLOT(OnSoundOutDevice(QAction*)));
+            connect(InitDevice(NULL, menuAudOutput, tr("Device"), false), SIGNAL(triggered(QAction*)), this, SLOT(OnSoundOutDevice(QAction*)));
             menuSigSampleRate = InitSampleRate(menuSigInput, tr("Sample Rate"), Parameters.GetSigSampleRate(), SignalSampleRateTable);
             connect(menuSigSampleRate, SIGNAL(triggered(QAction*)), this, SLOT(OnSoundSampleRate(QAction*)));
             connect(InitSampleRate(menuAudOutput, tr("Sample Rate"), Parameters.GetAudSampleRate(), AudioSampleRateTable), SIGNAL(triggered(QAction*)), this, SLOT(OnSoundSampleRate(QAction*)));
         Parameters.Unlock();
+        if (pFileMenu != NULL)
+		{
+            connect(pFileMenu, SIGNAL(soundFileChanged(CDRMReceiver::ESFStatus)), this, SLOT(OnSoundFileChanged(CDRMReceiver::ESFStatus)));
+			pFileMenu->UpdateMenu();
+		}
     }
     else
     {   /* Transmitter */
-        connect(InitDevice(this, tr("Input Device"), pSoundInIF), SIGNAL(triggered(QAction*)), this, SLOT(OnSoundInDevice(QAction*)));
-        connect(InitDevice(this, tr("Output Device"), pSoundOutIF), SIGNAL(triggered(QAction*)), this, SLOT(OnSoundOutDevice(QAction*)));
+        connect(InitDevice(NULL, this, tr("Input Device"), pNSIn), SIGNAL(triggered(QAction*)), this, SLOT(OnSoundInDevice(QAction*)));
+        connect(InitDevice(NULL, this, tr("Output Device"), pNSOut), SIGNAL(triggered(QAction*)), this, SLOT(OnSoundOutDevice(QAction*)));
     }
-}
-
-void CSoundCardSelMenu::EnableSigMenu(bool bEnable)
-{
-    if (menuSigDevice != NULL)
-        menuSigDevice->setEnabled(bEnable);
-    if (menuSigSampleRate != NULL)
-        menuSigSampleRate->setEnabled(bEnable);
 }
 
 void CSoundCardSelMenu::OnSoundInDevice(QAction* action)
 {
-    pSoundInIF->SetDev(action->data().toString().toLocal8Bit().data());
+    if (DRMReceiver != NULL)
+    {
+		CSelectionInterface* pSoundInIF = DRMReceiver->GetSoundInInterface();
+		pSoundInIF->SetDev(action->data().toString().toLocal8Bit().data());
+	}
 }
 
 void CSoundCardSelMenu::OnSoundOutDevice(QAction* action)
 {
-    pSoundOutIF->SetDev(action->data().toString().toLocal8Bit().data());
+    if (DRMReceiver != NULL)
+    {
+		CSelectionInterface* pSoundOutIF = DRMReceiver->GetSoundOutInterface();
+		pSoundOutIF->SetDev(action->data().toString().toLocal8Bit().data());
+	}
 }
 
 void CSoundCardSelMenu::OnSoundInChannel(QAction* action)
@@ -155,10 +163,13 @@ void CSoundCardSelMenu::OnSoundSampleRate(QAction* action)
     }
 }
 
-QMenu* CSoundCardSelMenu::InitDevice(QMenu* parent, const QString& text, CSelectionInterface* intf)
+QMenu* CSoundCardSelMenu::InitDevice(QMenu* self, QMenu* parent, const QString& text, bool bInput)
 {
-    QMenu* menu = parent->addMenu(text);
-    QActionGroup* group = new QActionGroup(this);
+//printf("CSoundCardSelMenu::InitDevice(%i)\n", bInput);
+    CSelectionInterface* intf = bInput ? DRMReceiver->GetSoundInInterface() : DRMReceiver->GetSoundOutInterface();
+    QMenu* menu = self != NULL ? self : parent->addMenu(text);
+    menu->clear();
+    QActionGroup* group = NULL;
     vector<string> names;
     vector<string> descriptions;
     intf->Enumerate(names, descriptions);
@@ -167,8 +178,8 @@ QMenu* CSoundCardSelMenu::InitDevice(QMenu* parent, const QString& text, CSelect
     string sDefaultDev = intf->GetDev();
     for (int i = 0; i < iNumSoundDev; i++)
     {
-		QString name(QString::fromLocal8Bit(names[i].c_str()));
-		QString desc(i < iNumDescriptions ? QString::fromLocal8Bit(descriptions[i].c_str()) : QString());
+        QString name(QString::fromLocal8Bit(names[i].c_str()));
+        QString desc(i < iNumDescriptions ? QString::fromLocal8Bit(descriptions[i].c_str()) : QString());
         QAction* m = menu->addAction(name.isEmpty() ? tr("[default]") : name + (desc.isEmpty() ? desc : " [" + desc + "]"));
         m->setData(name);
         m->setCheckable(true);
@@ -176,8 +187,11 @@ QMenu* CSoundCardSelMenu::InitDevice(QMenu* parent, const QString& text, CSelect
         {
 //            menu->setDefaultAction(m); // TODO
             m->setChecked(true);
-    	}
+            }
+        if (group == NULL)
+            group = new QActionGroup(m);
         group->addAction(m);
+//printf("CSoundCardSelMenu::InitDevice() %s\n", name.toUtf8().data());
     }
     return menu;
 }
@@ -215,5 +229,79 @@ QMenu* CSoundCardSelMenu::InitSampleRate(QMenu* parent, const QString& text, con
         group->addAction(m);
     }
     return menu;
+}
+
+void CSoundCardSelMenu::OnSoundFileChanged(CDRMReceiver::ESFStatus eStatus)
+{
+	const bool bSoundFile = eStatus == CDRMReceiver::SF_SNDFILEIN;
+	const bool bRsiinFile = eStatus == CDRMReceiver::SF_RSIIN;
+
+    if (menuSigInput != NULL && bRsiinFile == menuSigDevice->isEnabled())
+        menuSigInput->setEnabled(!bRsiinFile);
+	
+    if (menuSigDevice != NULL && bSoundFile == menuSigDevice->isEnabled())
+        menuSigDevice->setEnabled(!bSoundFile);
+
+    if (menuSigSampleRate != NULL && bSoundFile == menuSigSampleRate->isEnabled())
+        menuSigSampleRate->setEnabled(!bSoundFile);
+
+	if (eStatus == CDRMReceiver::SF_SNDCARDIN)
+		InitDevice(menuSigDevice, menuSigInput, tr("Device"), true);
+}
+
+/* CFileMenu ******************************************************************/
+
+CFileMenu::CFileMenu(CDRMReceiver& DRMReceiver, QMainWindow* parent,
+    QMenu* menuInsertBefore, bool bSignal)
+    : QMenu(parent), DRMReceiver(DRMReceiver)
+{
+    setTitle(tr("&File"));
+    QString openFile(tr(bSignal ? "&Open Signal File..." : "&Open Audio File..."));
+    QString closeFile(tr(bSignal ? "&Close Signal File" : "&Close Audio File"));
+    actionOpenSignalFile = addAction(openFile, this, SLOT(OnOpenSignalFile()), QKeySequence(tr("Alt+O")));
+    actionCloseSignalFile = addAction(closeFile, this, SLOT(OnCloseSignalFile()), QKeySequence(tr("Alt+C")));
+    addSeparator();
+    addAction(tr("&Exit"), parent, SLOT(close()), QKeySequence(tr("Alt+X")));
+    parent->menuBar()->insertMenu(menuInsertBefore->menuAction(), this);
+}
+
+void CFileMenu::OnOpenSignalFile()
+{
+#ifdef HAVE_LIBSNDFILE
+# define AUDIO_FILE_FILTER "Sound Files (*.aif* *.au *.flac *.ogg *.rf64 *.snd *.wav);;All files (*)"
+#else
+# define AUDIO_FILE_FILTER "Sound Files (*.if* *.iq* *.pcm* *.txt);;All files (*)"
+#endif
+	QString filename = QFileDialog::getOpenFileName(this, tr("Open Sound File"), NULL, tr(AUDIO_FILE_FILTER));
+	/* Check if user not hit the cancel button */
+	if (!filename.isEmpty())
+	{
+		// TODO implement a queue for more that one file!
+		DRMReceiver.SetSoundFile(string(filename.toLocal8Bit().data()));
+		RestartReceiver(&DRMReceiver);
+        UpdateMenu();
+	}
+}
+
+void CFileMenu::OnCloseSignalFile()
+{
+	DRMReceiver.ClearSoundFile();
+	RestartReceiver(&DRMReceiver);
+    UpdateMenu();
+}
+
+void CFileMenu::UpdateMenu()
+{
+    CDRMReceiver::ESFStatus eStatus = DRMReceiver.GetSoundFileStatus();
+	const bool bSoundFile = eStatus == CDRMReceiver::SF_SNDFILEIN;
+	const bool bRsiinFile = eStatus == CDRMReceiver::SF_RSIIN;
+
+	if (bRsiinFile == actionOpenSignalFile->isEnabled())
+		actionOpenSignalFile->setEnabled(!bRsiinFile);
+
+	if (bSoundFile != actionCloseSignalFile->isEnabled())
+		actionCloseSignalFile->setEnabled(bSoundFile);
+
+	emit soundFileChanged(eStatus);
 }
 

@@ -870,7 +870,7 @@ void RestartReceiver(CDRMReceiver *DRMReceiver)
 #if QT_VERSION >= 0x040000
     if (DRMReceiver != NULL)
     {
-        CParameter Parameters = *DRMReceiver->GetParameters();
+        CParameter& Parameters = *DRMReceiver->GetParameters();
         DRMReceiver->Restart();
         while (Parameters.eRunState == CParameter::RESTART)
             QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents | QEventLoop::WaitForMoreEvents, 10);

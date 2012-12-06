@@ -54,7 +54,6 @@
 # include <qmotifstyle.h>
 #else
 # include "DRMPlot.h"
-# include "SoundCardSelMenu.h"
 # include <QWhatsThis>
 # include <QDateTime>
 # include <QCloseEvent>
@@ -112,16 +111,16 @@ AnalogDemDlg::AnalogDemDlg(CDRMReceiver& NDRMR, CSettings& NSettings,
 	/* Now tell the layout about the menu */
 	AnalogDemDlgBaseLayout->setMenuBar(pMenu);
 #else
+	pFileMenu = new CFileMenu(DRMReceiver, this, menu_View);
     connect(action_Stations_Dialog, SIGNAL(triggered()), this, SIGNAL(ViewStationsDlg()));
     connect(action_Live_Schedule_Dialog, SIGNAL(triggered()), this, SIGNAL(ViewLiveScheduleDlg()));
     connect(actionExit, SIGNAL(triggered()), this, SLOT(close()));
     connect(actionAM, SIGNAL(triggered()), this, SIGNAL(NewAMAcquisition()));
     connect(actionFM, SIGNAL(triggered()), this, SLOT(OnSwitchToFM()));
     connect(actionDRM, SIGNAL(triggered()), this, SLOT(OnSwitchToDRM()));
-    menu_Settings->addMenu( new CSoundCardSelMenu(&DRMReceiver,
-		DRMReceiver.GetSoundInInterface(),
-		DRMReceiver.GetSoundOutInterface(),
-	this));
+	pSoundCardMenu = new CSoundCardSelMenu(&DRMReceiver,
+		DRMReceiver.GetSoundInInterface(), DRMReceiver.GetSoundOutInterface(), pFileMenu, this);
+	menu_Settings->addMenu(pSoundCardMenu);
     connect(actionAbout_Dream, SIGNAL(triggered()), this, SLOT(OnHelpAbout()));
     connect(actionWhats_This, SIGNAL(triggered()), this, SLOT(on_actionWhats_This()));
     SliderBandwidth->setTickPosition(QSlider::TicksBothSides);
@@ -271,7 +270,9 @@ void AnalogDemDlg::showEvent(QShowEvent* e)
 	else
 		AMSSDlg.hide();
 
-#if QT_VERSION >= 0x040000  
+#if QT_VERSION >= 0x040000
+	pFileMenu->UpdateMenu();
+
     /* Notify the MainPlot of showEvent */
     if(MainPlot) MainPlot->activate();
 #endif
