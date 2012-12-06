@@ -870,10 +870,16 @@ void RestartReceiver(CDRMReceiver *DRMReceiver)
 #if QT_VERSION >= 0x040000
     if (DRMReceiver != NULL)
     {
+        QMutex sleep;
         CParameter& Parameters = *DRMReceiver->GetParameters();
         DRMReceiver->Restart();
         while (Parameters.eRunState == CParameter::RESTART)
-            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents | QEventLoop::WaitForMoreEvents, 10);
+        {
+            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+            sleep.lock(); /* TODO find a better way to sleep on Qt */
+            sleep.tryLock(10);
+            sleep.unlock();
+        }
     }
 #else
 	(void)DRMReceiver;
