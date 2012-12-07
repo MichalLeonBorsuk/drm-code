@@ -37,8 +37,6 @@
 #endif
 #include "DialogUtil.h"
 #if QT_VERSION < 0x040000
-//# include "../DRMReceiver.h"
-//# include "../DRMTransmitter.h"
 # include "../sound/sound.h"
 # include <qregexp.h>
 # include <qwhatsthis.h>
