@@ -84,12 +84,13 @@
 #endif
 
 
-TransmDialog::TransmDialog(CSettings& NSettings,
+TransmDialog::TransmDialog(CSettings& Settings,
 	QWidget* parent, const char* name, bool modal, Qt::WFlags f)
 	:
 	TransmDlgBase(parent, name, modal, f),
-	Settings(NSettings),
+	TransThread(Settings),
 	DRMTransmitter(TransThread.DRMTransmitter),
+	Settings(*DRMTransmitter.GetSettings()),
 #ifdef ENABLE_TRANSM_CODECPARAMS
 	CodecDlg(NULL),
 #endif
@@ -101,7 +102,7 @@ TransmDialog::TransmDialog(CSettings& NSettings,
 #endif
 {
 	/* Load transmitter settings */
-	DRMTransmitter.LoadSettings(Settings);
+	DRMTransmitter.LoadSettings();
 
 	/* Recover window size and position */
 	CWinGeom s;
@@ -459,7 +460,7 @@ TransmDialog::TransmDialog(CSettings& NSettings,
 	pSettingsMenu = new QPopupMenu(this);
 	CHECK_PTR(pSettingsMenu);
 	pSettingsMenu->insertItem(tr("&Sound Card Selection"),
-		new CSoundCardSelMenu(NULL, &DRMTransmitter, this));
+		new CSoundCardSelMenu(DRMTransmitter, this));
 
 	/* Main menu bar -------------------------------------------------------- */
 	pMenu = new QMenuBar(this);
@@ -472,7 +473,9 @@ TransmDialog::TransmDialog(CSettings& NSettings,
 	TransmDlgBaseLayout->setMenuBar(pMenu);
 
 #else
-	menu_Settings->addMenu(new CSoundCardSelMenu(DRMTransmitter, NULL, this));
+	CFileMenu* pFileMenu = new CFileMenu(DRMTransmitter, this, menu_Settings);
+
+	menu_Settings->addMenu(new CSoundCardSelMenu(DRMTransmitter, pFileMenu, this));
 
 	connect(actionAbout_Dream, SIGNAL(triggered()), &AboutDlg, SLOT(show()));
 	connect(actionWhats_This, SIGNAL(triggered()), this, SLOT(on_actionWhats_This()));
@@ -595,7 +598,7 @@ TransmDialog::~TransmDialog()
 	Service.iServiceDescr = iServiceDescr;
 
 	/* Save transmitter settings */
-	DRMTransmitter.SaveSettings(Settings);
+	DRMTransmitter.SaveSettings();
 
 	Parameters.Unlock();
 }

@@ -45,7 +45,7 @@ const int
 CDRMReceiver::MAX_UNLOCKED_COUNT = 2;
 
 /* Implementation *************************************************************/
-CDRMReceiver::CDRMReceiver() : CDRMTransceiver(new CSoundInNull, new CSoundOut),
+CDRMReceiver::CDRMReceiver(CSettings* pSettings) : CDRMTransceiver(pSettings, new CSoundInNull, new CSoundOut),
     ReceiveData(), WriteData(pSoundOutInterface),
     FreqSyncAcq(),
     ChannelEstimation(),
@@ -367,11 +367,16 @@ void
 CDRMReceiver::SetInput()
 {
     Parameters.Lock();
+        string sSndDevIn;
         /* Close previous sound interface */
         if (pSoundInInterface != NULL)
+        {
+            sSndDevIn = pSoundInInterface->GetDev();
             pSoundInInterface->Close();
+            delete pSoundInInterface;
+        }
         if (sSoundFile != "")
-        {   
+        {
             /* Save sample rate */
             if (iPrevSigSampleRate == 0)
                 iPrevSigSampleRate = Parameters.GetSigSampleRate();
@@ -400,7 +405,6 @@ CDRMReceiver::ResetInput()
         Parameters.SetSigSampleRate(iPrevSigSampleRate);
         iPrevSigSampleRate = 0;
     }
-    sSndDevIn = pSoundInInterface->GetDev();
 }
 
 void
@@ -1420,8 +1424,11 @@ CDRMReceiver::saveSDCtoFile()
 }
 
 void
-CDRMReceiver::LoadSettings(CSettings& s)
+CDRMReceiver::LoadSettings()
 {
+    if (pSettings == NULL) return;
+    CSettings& s = *pSettings;
+
     /* Serial Number */
     string sValue = s.Get("Receiver", "serialnumber");
     if (sValue != "")
@@ -1512,7 +1519,7 @@ CDRMReceiver::LoadSettings(CSettings& s)
     SetAMDemodType(eDemodType);
 
     /* Sound In device */
-    sSndDevIn = s.Get("Receiver", "snddevin", string());
+    pSoundInInterface->SetDev(s.Get("Receiver", "snddevin", string()));
 
     /* Sound Out device */
     pSoundOutInterface->SetDev(s.Get("Receiver", "snddevout", string()));
@@ -1629,8 +1636,10 @@ CDRMReceiver::LoadSettings(CSettings& s)
 }
 
 void
-CDRMReceiver::SaveSettings(CSettings& s)
+CDRMReceiver::SaveSettings()
 {
+    if (pSettings == NULL) return;
+    CSettings& s = *pSettings;
 
     s.Put("Receiver", "mode", int(eReceiverMode));
 
@@ -1676,7 +1685,7 @@ CDRMReceiver::SaveSettings(CSettings& s)
     s.Put("Receiver", "modmetric", ChannelEstimation.GetIntCons());
 
     /* Sound In device */
-    s.Put("Receiver", "snddevin", sSndDevIn);
+    s.Put("Receiver", "snddevin", pSoundInInterface->GetDev());
 
     /* Sound Out device */
     s.Put("Receiver", "snddevout", pSoundOutInterface->GetDev());

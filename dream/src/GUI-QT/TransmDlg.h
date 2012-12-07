@@ -73,6 +73,8 @@
 class CTransmitterThread : public QThread 
 {
 public:
+	CTransmitterThread(CSettings& Settings) : DRMTransmitter(&Settings) {}
+
 	void Stop()
 	{
 		/* Stop working thread */
@@ -127,8 +129,9 @@ protected:
 	void EnableAllControlsForSet();
 	void TabWidgetEnableTabs(QTabWidget* tabWidget, bool enable);
 
-	CSettings&			Settings;
+	CTransmitterThread	TransThread; /* Working thread object */
 	CDRMTransmitter&	DRMTransmitter;
+	CSettings&			Settings;
 #if QT_VERSION < 0x040000
 	QMenuBar*			pMenu;
 	QPopupMenu*			pSettingsMenu;
@@ -142,7 +145,6 @@ protected:
 	CodecParams*		CodecDlg;
 #endif
 
-	CTransmitterThread	TransThread; /* Working thread object */
 	_BOOLEAN			bIsStarted;
 	CVector<string>		vecstrTextMessage;
 	int					iIDCurrentText;

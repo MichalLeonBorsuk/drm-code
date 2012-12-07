@@ -136,11 +136,11 @@ public:
 
     enum ESFStatus { SF_SNDCARDIN, SF_SNDFILEIN, SF_RSIIN };
 
-    CDRMReceiver();
+    CDRMReceiver(CSettings* pSettings=NULL);
     virtual ~CDRMReceiver();
 
-    void					LoadSettings(CSettings&); // can write to settings to set defaults
-    void					SaveSettings(CSettings&);
+    void					LoadSettings(); // can write to settings to set defaults
+    void					SaveSettings();
     void					Start();
     void					Restart();
     void					Stop();
@@ -441,7 +441,6 @@ protected:
     string					rsiOrigin;
     string					sSoundFile;
     int						iPrevSigSampleRate; /* sample rate before sound file */
-    string					sSndDevIn;
 };
 
 

@@ -36,14 +36,22 @@
 class CDRMTransceiver
 {
 public:
-	CDRMTransceiver(CSoundInInterface* pSoundIn = NULL, CSoundOutInterface* pSoundOut = NULL, bool bTransmitter = false)
-	: pSoundInInterface(pSoundIn), pSoundOutInterface(pSoundOut), bTransmitter(bTransmitter)
-	{};
+	CDRMTransceiver(CSettings* pSettings, CSoundInInterface* pSoundIn, CSoundOutInterface* pSoundOut, _BOOLEAN bTransmitter = FALSE)
+	: pSettings(pSettings), pSoundInInterface(pSoundIn), pSoundOutInterface(pSoundOut), bTransmitter(bTransmitter) {};
 	virtual ~CDRMTransceiver() {};
 
-    virtual void LoadSettings(CSettings&) = 0;
-    virtual void SaveSettings(CSettings&) = 0;
+    virtual void LoadSettings() = 0;
+    virtual void SaveSettings() = 0;
+    virtual void Start() = 0;
+    virtual void Restart() = 0;
+    virtual void Stop() = 0;
 
+    virtual CSettings*				GetSettings() {
+        return pSettings;
+    }
+    virtual void					SetSettings(CSettings* pNewSettings) {
+        pSettings = pNewSettings;
+    }
     virtual CParameter*				GetParameters() {
         return &Parameters;
     }
@@ -53,20 +61,21 @@ public:
     virtual CSoundOutInterface*		GetSoundOutInterface() {
         return pSoundOutInterface;
     }
-	virtual bool					IsReceiver() {
+	virtual _BOOLEAN				IsReceiver() const {
 		return !bTransmitter;
 	}
-	virtual bool					IsTransmitter() {
+	virtual _BOOLEAN				IsTransmitter() const {
 		return bTransmitter;
 	}
 
 protected:
+	CSettings*				pSettings;
     CParameter				Parameters;
     CSoundInInterface*		pSoundInInterface;
     CSoundOutInterface*		pSoundOutInterface;
 
 private:
-	const bool bTransmitter;
+	const _BOOLEAN bTransmitter;
 };
 
 #endif
