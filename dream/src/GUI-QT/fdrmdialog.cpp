@@ -173,7 +173,7 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& NSettings, CRig& rig,
 
     /* Sound Card */
     pSettingsMenu->insertItem(tr("&Sound Card Selection"),
-                              new CSoundCardSelMenu(&DRMReceiver, NULL, this));
+                              new CSoundCardSelMenu(DRMReceiver, this));
 
     /* Main menu bar -------------------------------------------------------- */
     pMenu = new QMenuBar(this);
@@ -960,7 +960,7 @@ void FDRMDialog::ChangeGUIModeToFM()
 
 void FDRMDialog::switchEvent()
 {
-    /* Put initilization code on mode switch here */
+    /* Put initialization code on mode switch here */
 #if QT_VERSION >= 0x040000
     pFileMenu->UpdateMenu();
 #endif

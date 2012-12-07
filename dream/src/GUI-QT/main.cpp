@@ -159,7 +159,7 @@ main(int argc, char **argv)
 		string mode = Settings.Get("command", "mode", string());
 		if (mode == "receive")
 		{
-			CDRMReceiver DRMReceiver;
+			CDRMReceiver DRMReceiver(&Settings);
 
 			/* First, initialize the working thread. This should be done in an extra
 			   routine since we cannot 100% assume that the working thread is
@@ -167,7 +167,7 @@ main(int argc, char **argv)
 
 			CRig rig(DRMReceiver.GetParameters());
 			rig.LoadSettings(Settings); // must be before DRMReceiver for G313
-			DRMReceiver.LoadSettings(Settings);
+			DRMReceiver.LoadSettings();
 
 #ifdef HAVE_LIBHAMLIB
 			DRMReceiver.SetRig(&rig);
@@ -205,7 +205,7 @@ main(int argc, char **argv)
 			}
 			rig.SaveSettings(Settings);
 #endif
-			DRMReceiver.SaveSettings(Settings);
+			DRMReceiver.SaveSettings();
 		}
 		else if(mode == "transmit")
 		{
@@ -302,10 +302,10 @@ main(int argc, char **argv)
 		if (mode == "receive")
 		{
 			CDRMSimulation DRMSimulation;
-			CDRMReceiver DRMReceiver;
+			CDRMReceiver DRMReceiver(&Settings);
 
 			DRMSimulation.SimScript();
-			DRMReceiver.LoadSettings(Settings);
+			DRMReceiver.LoadSettings();
 
 #if QT_VERSION >= 0x040000
 			QCoreApplication a(argc, argv);
@@ -320,8 +320,8 @@ main(int argc, char **argv)
 		}
 		else if(mode == "transmit")
 		{
-			CDRMTransmitter DRMTransmitter;
-			DRMTransmitter.LoadSettings(Settings);
+			CDRMTransmitter DRMTransmitter(&Settings);
+			DRMTransmitter.LoadSettings();
 			DRMTransmitter.Start();
 		}
 		else

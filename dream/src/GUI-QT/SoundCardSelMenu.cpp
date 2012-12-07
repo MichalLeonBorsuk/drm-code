@@ -153,7 +153,7 @@ void CSoundCardSelMenu::OnSoundSampleRate(QAction* action)
             if (iSampleRate < 0) Parameters.SetSigSampleRate(-iSampleRate);
             else                 Parameters.SetAudSampleRate(iSampleRate);
         Parameters.Unlock();
-        RestartReceiver(((CDRMReceiver*)&DRMTransceiver));
+        RestartTransceiver(&DRMTransceiver);
     }
 }
 
@@ -253,16 +253,19 @@ void CSoundCardSelMenu::OnSoundFileChanged(CDRMReceiver::ESFStatus eStatus)
 /* CFileMenu ******************************************************************/
 // TODO DRMTransmitter
 
-CFileMenu::CFileMenu(CDRMReceiver& DRMReceiver, QMainWindow* parent,
+CFileMenu::CFileMenu(CDRMTransceiver& DRMTransceiver, QMainWindow* parent,
     QMenu* menuInsertBefore, bool bSignal)
-    : QMenu(parent), DRMReceiver(DRMReceiver)
+    : QMenu(parent), DRMTransceiver(DRMTransceiver), bReceiver(DRMTransceiver.IsReceiver())
 {
     setTitle(tr("&File"));
-    QString openFile(tr(bSignal ? "&Open Signal File..." : "&Open Audio File..."));
-    QString closeFile(tr(bSignal ? "&Close Signal File" : "&Close Audio File"));
-    actionOpenSignalFile = addAction(openFile, this, SLOT(OnOpenSignalFile()), QKeySequence(tr("Alt+O")));
-    actionCloseSignalFile = addAction(closeFile, this, SLOT(OnCloseSignalFile()), QKeySequence(tr("Alt+C")));
-    addSeparator();
+    if (bReceiver)
+    {
+        QString openFile(tr(bSignal ? "&Open Signal File..." : "&Open Audio File..."));
+        QString closeFile(tr(bSignal ? "&Close Signal File" : "&Close Audio File"));
+        actionOpenSignalFile = addAction(openFile, this, SLOT(OnOpenSignalFile()), QKeySequence(tr("Alt+O")));
+        actionCloseSignalFile = addAction(closeFile, this, SLOT(OnCloseSignalFile()), QKeySequence(tr("Alt+C")));
+        addSeparator();
+    }
     addAction(tr("&Exit"), parent, SLOT(close()), QKeySequence(tr("Alt+X")));
     parent->menuBar()->insertMenu(menuInsertBefore->menuAction(), this);
 }
@@ -274,36 +277,45 @@ void CFileMenu::OnOpenSignalFile()
 #else
 # define AUDIO_FILE_FILTER "Sound Files (*.if* *.iq* *.pcm* *.txt);;All files (*)"
 #endif
-	QString filename = QFileDialog::getOpenFileName(this, tr("Open Sound File"), NULL, tr(AUDIO_FILE_FILTER));
-	/* Check if user not hit the cancel button */
-	if (!filename.isEmpty())
-	{
-		// TODO implement a queue for more that one file!
-		DRMReceiver.SetSoundFile(string(filename.toLocal8Bit().data()));
-		RestartReceiver(&DRMReceiver);
-        UpdateMenu();
-	}
+    if (bReceiver)
+    {
+	    QString filename = QFileDialog::getOpenFileName(this, tr("Open Sound File"), NULL, tr(AUDIO_FILE_FILTER));
+	    /* Check if user not hit the cancel button */
+	    if (!filename.isEmpty())
+	    {
+		    // TODO implement a queue for more that one file!
+		    ((CDRMReceiver&)DRMTransceiver).SetSoundFile(string(filename.toLocal8Bit().data()));
+		    RestartTransceiver(&DRMTransceiver);
+            UpdateMenu();
+	    }
+    }
 }
 
 void CFileMenu::OnCloseSignalFile()
 {
-	DRMReceiver.ClearSoundFile();
-	RestartReceiver(&DRMReceiver);
-    UpdateMenu();
+    if (bReceiver)
+    {
+	    ((CDRMReceiver&)DRMTransceiver).ClearSoundFile();
+	    RestartTransceiver(&DRMTransceiver);
+        UpdateMenu();
+    }
 }
 
 void CFileMenu::UpdateMenu()
 {
-    CDRMReceiver::ESFStatus eStatus = DRMReceiver.GetInputStatus();
-	const bool bSoundFile = eStatus == CDRMReceiver::SF_SNDFILEIN;
-	const bool bRsiinFile = eStatus == CDRMReceiver::SF_RSIIN;
+    if (bReceiver)
+    {
+        CDRMReceiver::ESFStatus eStatus = ((CDRMReceiver&)DRMTransceiver).GetInputStatus();
+	    const bool bSoundFile = eStatus == CDRMReceiver::SF_SNDFILEIN;
+	    const bool bRsiinFile = eStatus == CDRMReceiver::SF_RSIIN;
 
-	if (bRsiinFile == actionOpenSignalFile->isEnabled())
-		actionOpenSignalFile->setEnabled(!bRsiinFile);
+	    if (bRsiinFile == actionOpenSignalFile->isEnabled())
+		    actionOpenSignalFile->setEnabled(!bRsiinFile);
 
-	if (bSoundFile != actionCloseSignalFile->isEnabled())
-		actionCloseSignalFile->setEnabled(bSoundFile);
+	    if (bSoundFile != actionCloseSignalFile->isEnabled())
+		    actionCloseSignalFile->setEnabled(bSoundFile);
 
-	emit soundFileChanged(eStatus);
+	    emit soundFileChanged(eStatus);
+    }
 }
 

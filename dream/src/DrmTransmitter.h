@@ -46,13 +46,14 @@
 class CDRMTransmitter : public CDRMTransceiver
 {
 public:
-    CDRMTransmitter();
+    CDRMTransmitter(CSettings* pSettings=NULL);
     virtual ~CDRMTransmitter() {}
 
-    void LoadSettings(CSettings&);
-    void SaveSettings(CSettings&);
+    void LoadSettings();
+    void SaveSettings();
     void Init();
     void Start();
+    void Restart() {}
     void Stop();
 
     CAudioSourceEncoder*	GetAudSrcEnc() {

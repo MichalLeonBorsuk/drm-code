@@ -228,7 +228,7 @@ void CDRMTransmitter::Init()
     InitSoftStop();
 }
 
-CDRMTransmitter::CDRMTransmitter() : CDRMTransceiver(new CSoundIn, new CSoundOut, true),
+CDRMTransmitter::CDRMTransmitter(CSettings* pSettings) : CDRMTransceiver(pSettings, new CSoundIn, new CSoundOut, TRUE),
         ReadData(pSoundInInterface), TransmitData(pSoundOutInterface),
         rDefCarOffset((_REAL) VIRTUAL_INTERMED_FREQ),
         // UEP only works with Dream receiver, FIXME! -> disabled for now
@@ -362,8 +362,11 @@ CDRMTransmitter::CDRMTransmitter() : CDRMTransceiver(new CSoundIn, new CSoundOut
     }
 }
 
-void CDRMTransmitter::LoadSettings(CSettings& s)
+void CDRMTransmitter::LoadSettings()
 {
+    if (pSettings == NULL) return;
+    CSettings& s = *pSettings;
+
     const char *Transmitter = "Transmitter";
     std::ostringstream oss;
     string value, service;
@@ -497,8 +500,11 @@ void CDRMTransmitter::LoadSettings(CSettings& s)
     }
 }
 
-void CDRMTransmitter::SaveSettings(CSettings& s)
+void CDRMTransmitter::SaveSettings()
 {
+    if (pSettings == NULL) return;
+    CSettings& s = *pSettings;
+
     const char *Transmitter = "Transmitter";
     std::ostringstream oss;
     string value, service;

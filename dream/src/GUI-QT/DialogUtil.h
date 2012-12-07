@@ -30,7 +30,7 @@
 #define DIALOGUTIL_H__FD6B23452398345OIJ9453_804E1606C2AC__INCLUDED_
 
 #include "../Parameter.h"
-#include "../DrmReceiver.h"
+#include "../DrmTransceiver.h"
 #include "../sound/selectioninterface.h"
 
 #include<map>
@@ -116,21 +116,15 @@ class CSoundCardSelMenu : public QPopupMenu
 
 public:
 	CSoundCardSelMenu(
-        void* DRMReceiver,
-        void* DRMTransmitter,
+        CDRMTransceiver& DRMTransceiver,
         QWidget* parent = 0);
 
 protected:
-        void*                   DRMReceiver;
-        void*                   DRMTransmitter;
+        CDRMTransceiver&        DRMTransceiver;
         vector<string>          vecSoundInNames;
         vector<string>          vecSoundOutNames;
-        int                     iNumSoundInDev;
-        int                     iNumSoundOutDev;
         QPopupMenu*             pSoundInMenu;
         QPopupMenu*             pSoundOutMenu;
-        CSelectionInterface*    GetSoundInInterface();
-        CSelectionInterface*    GetSoundOutInterface();
 
 public slots:
 	void OnSoundInDevice(int id);
@@ -284,6 +278,6 @@ void Linkify(QString& text);
 
 void CreateDirectories(const QString& strFilename);
 
-void RestartReceiver(CDRMReceiver *DRMReceiver);
+void RestartTransceiver(CDRMTransceiver *DRMTransceiver);
 
 #endif // DIALOGUTIL_H__FD6B23452398345OIJ9453_804E1606C2AC__INCLUDED_

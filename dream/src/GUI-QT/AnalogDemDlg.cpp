@@ -98,7 +98,7 @@ AnalogDemDlg::AnalogDemDlg(CDRMReceiver& NDRMR, CSettings& NSettings,
 		SIGNAL(NewAMAcquisition()), CTRL+Key_A);
 	pSettingsMenu->insertSeparator();
 	pSettingsMenu->insertItem(tr("&Sound Card Selection"),
-		new CSoundCardSelMenu(&DRMReceiver, NULL, this));
+		new CSoundCardSelMenu(DRMReceiver, this));
 
 	/* Main menu bar -------------------------------------------------------- */
 	QMenuBar* pMenu = new QMenuBar(this);
@@ -249,7 +249,7 @@ void AnalogDemDlg::OnSwitchToFM()
 
 void AnalogDemDlg::switchEvent()
 {
-	/* Put initilization code on mode switch here */
+	/* Put initialization code on mode switch here */
 #if QT_VERSION >= 0x040000
 	pFileMenu->UpdateMenu();
 #endif

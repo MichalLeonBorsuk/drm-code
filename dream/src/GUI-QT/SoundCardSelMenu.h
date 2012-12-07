@@ -78,16 +78,16 @@ class CFileMenu : public QMenu
     Q_OBJECT
 
 public:
-    CFileMenu(CDRMReceiver& DRMReceiver,
+    CFileMenu(CDRMTransceiver& DRMTransceiver,
         QMainWindow* parent, QMenu* menuInsertBefore,
         bool bSignal = TRUE);
     void UpdateMenu();
 
 protected:
-    CDRMReceiver&		DRMReceiver;
-
-    QAction* actionOpenSignalFile;
-    QAction* actionCloseSignalFile;
+    CDRMTransceiver&	DRMTransceiver;
+    QAction*			actionOpenSignalFile;
+    QAction*			actionCloseSignalFile;
+    const bool			bReceiver;
 
 public slots:
     void OnOpenSignalFile();

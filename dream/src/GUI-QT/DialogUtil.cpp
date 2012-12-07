@@ -37,8 +37,8 @@
 #endif
 #include "DialogUtil.h"
 #if QT_VERSION < 0x040000
-# include "../DRMReceiver.h"
-# include "../DRMTransmitter.h"
+//# include "../DRMReceiver.h"
+//# include "../DRMTransmitter.h"
 # include "../sound/sound.h"
 # include <qregexp.h>
 # include <qwhatsthis.h>
@@ -331,14 +331,13 @@ void CDreamHelpMenu::OnHelpWhatsThis()
 #  define DEVICE_STRING(s) QString::fromUtf8(s.c_str())
 # endif
 
-CSoundCardSelMenu::CSoundCardSelMenu(
-    void* DRMReceiver, void* DRMTransmitter, QWidget* parent) :
-    QPopupMenu(parent), DRMReceiver(DRMReceiver), DRMTransmitter(DRMTransmitter)
+CSoundCardSelMenu::CSoundCardSelMenu(CDRMTransceiver& DRMTransceiver, QWidget* parent) :
+    QPopupMenu(parent), DRMTransceiver(DRMTransceiver)
 {
     /* We need to get device list directly from sound card,
-       since DRMReceiver.GetSoundInInterface() can be an audio file interface */
+       since DRMTransceiver.GetSoundInInterface() can be an audio file interface */
     CSelectionInterface* pSoundInIF = new CSoundIn();
-    CSelectionInterface* pSoundOutIF = GetSoundOutInterface();
+    CSelectionInterface* pSoundOutIF = DRMTransceiver.GetSoundOutInterface();
 
     pSoundInMenu = new QPopupMenu(parent);
     CHECK_PTR(pSoundInMenu);
@@ -348,9 +347,9 @@ CSoundCardSelMenu::CSoundCardSelMenu(
     int i, iDefaultInDev = -1, iDefaultOutDev = -1;
 
     /* Get sound in device names */
-    string sDefaultInDev = pSoundInIF->GetDev();
+    string sDefaultInDev = DRMTransceiver.GetSoundInInterface()->GetDev();
     pSoundInIF->Enumerate(vecSoundInNames, vecDescriptions);
-    iNumSoundInDev = vecSoundInNames.size();
+    const int iNumSoundInDev = vecSoundInNames.size();
     for (i = 0; i < iNumSoundInDev; i++)
     {
         if (vecSoundInNames[i] == sDefaultInDev)
@@ -367,7 +366,7 @@ CSoundCardSelMenu::CSoundCardSelMenu(
     /* Get sound out device names */
     string sDefaultOutDev = pSoundOutIF->GetDev();
     pSoundOutIF->Enumerate(vecSoundOutNames, vecDescriptions);
-    iNumSoundOutDev = vecSoundOutNames.size();
+    const int iNumSoundOutDev = vecSoundOutNames.size();
     for (i = 0; i < iNumSoundOutDev; i++)
     {
         if (vecSoundOutNames[i] == sDefaultOutDev)
@@ -388,8 +387,9 @@ CSoundCardSelMenu::CSoundCardSelMenu(
 
 void CSoundCardSelMenu::OnSoundInDevice(int id)
 {
-    CSelectionInterface* pSoundInIF = GetSoundInInterface();
-    if (id >= 0 && id < int(vecSoundInNames.size()))
+    CSelectionInterface* pSoundInIF = DRMTransceiver.GetSoundInInterface();
+	const int iNumSoundInDev = vecSoundInNames.size();
+    if (id >= 0 && id < iNumSoundInDev)
         pSoundInIF->SetDev(vecSoundInNames[id]);
     for (int i = 0; i < iNumSoundInDev; i++)
         pSoundInMenu->setItemChecked(i, i == id);
@@ -397,29 +397,12 @@ void CSoundCardSelMenu::OnSoundInDevice(int id)
 
 void CSoundCardSelMenu::OnSoundOutDevice(int id)
 {
-    CSelectionInterface* pSoundOutIF = GetSoundOutInterface();
-    if (id >= 0 && id < int(vecSoundOutNames.size()))
+    CSelectionInterface* pSoundOutIF = DRMTransceiver.GetSoundOutInterface();
+	const int iNumSoundOutDev = vecSoundOutNames.size();
+    if (id >= 0 && id < iNumSoundOutDev)
         pSoundOutIF->SetDev(vecSoundOutNames[id]);
     for (int i = 0; i < iNumSoundOutDev; i++)
         pSoundOutMenu->setItemChecked(i, i == id);
-}
-
-/* Ok, we now have to deal with dynamic sound interfaces... */
-CSelectionInterface* CSoundCardSelMenu::GetSoundInInterface()
-{
-    if (DRMReceiver != NULL)
-        return ((CDRMReceiver*)DRMReceiver)->GetSoundInInterface();
-    else if (DRMTransmitter != NULL)
-        return ((CDRMTransmitter*)DRMTransmitter)->GetSoundInInterface();
-    return NULL; /* Should not happen */
-}
-CSelectionInterface* CSoundCardSelMenu::GetSoundOutInterface()
-{
-    if (DRMReceiver != NULL)
-        return ((CDRMReceiver*)DRMReceiver)->GetSoundOutInterface();
-    else if (DRMTransmitter != NULL)
-        return ((CDRMTransmitter*)DRMTransmitter)->GetSoundOutInterface();
-    return NULL; /* Should not happen */
 }
 
 # undef DEVICE_STRING
@@ -892,14 +875,14 @@ void CreateDirectories(const QString& strFilename)
     }
 }
 
-void RestartReceiver(CDRMReceiver *DRMReceiver)
+void RestartTransceiver(CDRMTransceiver *DRMTransceiver)
 {
 #if QT_VERSION >= 0x040000
-    if (DRMReceiver != NULL)
+    if (DRMTransceiver != NULL)
     {
         QMutex sleep;
-        CParameter& Parameters = *DRMReceiver->GetParameters();
-        DRMReceiver->Restart();
+        CParameter& Parameters = *DRMTransceiver->GetParameters();
+        DRMTransceiver->Restart();
         while (Parameters.eRunState == CParameter::RESTART)
         {
             QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
@@ -909,7 +892,7 @@ void RestartReceiver(CDRMReceiver *DRMReceiver)
         }
     }
 #else
-	(void)DRMReceiver;
+	(void)DRMTransceiver;
 #endif
 }
 

@@ -87,7 +87,7 @@ FMDialog::FMDialog(CDRMReceiver& NDRMR, CSettings& NSettings, CRig& rig,
     pSettingsMenu->insertItem(tr("Set D&isplay Color..."), this,
             SLOT(OnMenuSetDisplayColor()));
     pSettingsMenu->insertItem(tr("&Sound Card Selection"),
-            new CSoundCardSelMenu(&DRMReceiver, NULL, this));
+            new CSoundCardSelMenu(DRMReceiver, this));
 
     /* Main menu bar -------------------------------------------------------- */
     pMenu = new QMenuBar(this);
@@ -451,7 +451,7 @@ void FMDialog::ClearDisplay()
 
 void FMDialog::switchEvent()
 {
-	/* Put initilization code on mode switch here */
+	/* Put initialization code on mode switch here */
 #if QT_VERSION >= 0x040000
 	pFileMenu->UpdateMenu();
 #endif
