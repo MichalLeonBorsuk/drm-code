@@ -44,8 +44,8 @@
 #define DEFAULT_DATA_FILES_DIRECTORY "data" PATH_SEPARATOR
 
 /* Implementation *************************************************************/
-CParameter::CParameter(CDRMReceiver *pRx):
-    pDRMRec(pRx),
+CParameter::CParameter():
+    pDRMRec(NULL),
     eSymbolInterlMode(),
     eMSCCodingScheme(),
     eSDCCodingScheme(),
@@ -137,8 +137,6 @@ CParameter::CParameter(CDRMReceiver *pRx):
     Mutex()
 {
     GenerateRandomSerialNumber();
-    if (pDRMRec)
-        eReceiverMode = pDRMRec->GetReceiverMode();
     CellMappingTable.MakeTable(eRobustnessMode, eSpectOccup, iSigSampleRate);
     gps_data.set=0;
     gps_data.status=0;
@@ -350,6 +348,13 @@ CParameter& CParameter::operator=(const CParameter& p)
     LastAudioService = p.LastAudioService;
     LastDataService = p.LastDataService;
     return *this;
+}
+
+void CParameter::SetReceiver(CDRMReceiver* pDRMReceiver)
+{
+	pDRMRec = pDRMReceiver;
+    if (pDRMRec)
+        eReceiverMode = pDRMRec->GetReceiverMode();
 }
 
 void CParameter::ResetServicesStreams()

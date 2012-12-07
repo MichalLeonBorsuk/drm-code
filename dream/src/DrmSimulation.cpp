@@ -33,7 +33,7 @@
 
 CDRMSimulation::CDRMSimulation() : iSimTime(0), iSimNumErrors(0),
         rStartSNR(0.0), rEndSNR(0.0), rStepSNR(0.0),
-        Parameters(NULL),
+        Parameters(),
         DataBuf(), MLCEncBuf(), IntlBuf(), GenFACDataBuf(), FACMapBuf(), GenSDCDataBuf(),
         SDCMapBuf(), CarMapBuf(), OFDMModBuf(), OFDMDemodBufChan2(), ChanEstInBufSim(),
         ChanEstOutBufChan(),

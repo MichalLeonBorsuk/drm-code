@@ -246,11 +246,7 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& NSettings, CRig& rig,
     action_Multimedia_Dialog->setEnabled(false);
 
 	pFileMenu = new CFileMenu(DRMReceiver, this, menu_View);
-
-	pSoundCardMenu = new CSoundCardSelMenu(&DRMReceiver,
-		DRMReceiver.GetSoundInInterface(),
-		DRMReceiver.GetSoundOutInterface(),
-		pFileMenu, this);
+	pSoundCardMenu = new CSoundCardSelMenu(DRMReceiver, pFileMenu, this);
     menu_Settings->addMenu(pSoundCardMenu);
 
     connect(actionMultimediaSettings, SIGNAL(triggered()), pMultSettingsDlg, SLOT(show()));

@@ -118,8 +118,7 @@ AnalogDemDlg::AnalogDemDlg(CDRMReceiver& NDRMR, CSettings& NSettings,
     connect(actionAM, SIGNAL(triggered()), this, SIGNAL(NewAMAcquisition()));
     connect(actionFM, SIGNAL(triggered()), this, SLOT(OnSwitchToFM()));
     connect(actionDRM, SIGNAL(triggered()), this, SLOT(OnSwitchToDRM()));
-	pSoundCardMenu = new CSoundCardSelMenu(&DRMReceiver,
-		DRMReceiver.GetSoundInInterface(), DRMReceiver.GetSoundOutInterface(), pFileMenu, this);
+	pSoundCardMenu = new CSoundCardSelMenu(DRMReceiver, pFileMenu, this);
 	menu_Settings->addMenu(pSoundCardMenu);
     connect(actionAbout_Dream, SIGNAL(triggered()), this, SLOT(OnHelpAbout()));
     connect(actionWhats_This, SIGNAL(triggered()), this, SLOT(on_actionWhats_This()));

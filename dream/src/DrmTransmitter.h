@@ -40,9 +40,10 @@
 #include "DRMSignalIO.h"
 #include "sourcedecoders/AudioSourceEncoder.h"
 #include "sound/soundinterface.h"
+#include "DrmTransceiver.h"
 
 /* Classes ********************************************************************/
-class CDRMTransmitter
+class CDRMTransmitter : public CDRMTransceiver
 {
 public:
     CDRMTransmitter();
@@ -54,13 +55,6 @@ public:
     void Start();
     void Stop();
 
-    /* Get pointer to internal modules */
-    CSoundInInterface*		GetSoundInInterface() {
-        return pSoundInInterface;
-    }
-    CSoundOutInterface*		GetSoundOutInterface() {
-        return pSoundOutInterface;
-    }
     CAudioSourceEncoder*	GetAudSrcEnc() {
         return &AudioSourceEncoder;
     }
@@ -69,10 +63,6 @@ public:
     }
     CReadData*				GetReadData() {
         return &ReadData;
-    }
-
-    CParameter*				GetParameters() {
-        return &TransmParam;
     }
 
     void SetCarOffset(const _REAL rNewCarOffset)
@@ -91,9 +81,6 @@ protected:
     void InitSoftStop() { iSoftStopSymbolCount=0; };
     _BOOLEAN CanSoftStopExit();
 
-    /* Parameters */
-    CParameter				TransmParam;
-
     /* Buffers */
     CSingleBuffer<_SAMPLE>	DataBuf;
     CSingleBuffer<_BINARY>	AudSrcBuf;
@@ -109,9 +96,6 @@ protected:
 
     CSingleBuffer<_COMPLEX>	CarMapBuf;
     CSingleBuffer<_COMPLEX>	OFDMModBuf;
-
-    CSoundInInterface*		pSoundInInterface;
-    CSoundOutInterface*		pSoundOutInterface;
 
     /* Modules */
     CReadData				ReadData;

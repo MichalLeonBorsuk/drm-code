@@ -107,8 +107,7 @@ FMDialog::FMDialog(CDRMReceiver& NDRMR, CSettings& NSettings, CRig& rig,
 	connect(actionDRM, SIGNAL(triggered()), this, SLOT(OnSwitchToDRM()));
 	connect(actionDisplayColor, SIGNAL(triggered()), this, SLOT(OnMenuSetDisplayColor()));
 
-	pSoundCardMenu = new CSoundCardSelMenu(&DRMReceiver,
-		DRMReceiver.GetSoundInInterface(), DRMReceiver.GetSoundOutInterface(), pFileMenu, this);
+	pSoundCardMenu = new CSoundCardSelMenu(DRMReceiver, pFileMenu, this);
 	menu_Settings->addMenu(pSoundCardMenu);
 
 	//menu_Settings->addMenu(pRemoteMenu->menu());
