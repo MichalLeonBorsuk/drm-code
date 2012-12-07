@@ -375,9 +375,9 @@ void CReceiveData::InitInternal(CParameter& Parameters)
 	try {
 		const _BOOLEAN bChanged = pSound->Init(iSampleRate, iOutputBlockSize * 2, TRUE);
 
-		/* Clear data buffer on change */
+		/* Clear input data buffer on change */
 		if (bChanged)
-			vecrInpData.Init(INPUT_DATA_VECTOR_SIZE, (_REAL) 0.0);
+			ClearInputData();
 
 		/* Init buffer size for taking stereo input */
 		vecsSoundBuffer.Init(iOutputBlockSize * 2);
