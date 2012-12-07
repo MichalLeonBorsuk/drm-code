@@ -377,6 +377,7 @@ CDRMReceiver::SetInput()
         }
         if (rsiOrigin != "")
         {
+            ReceiveData.ClearInputData();
             pSoundInInterface = new CSoundInNull();
             upstreamRSCI.SetOrigin(rsiOrigin);
         }
@@ -424,7 +425,6 @@ CDRMReceiver::ClearRsiInput()
 {
     Parameters.Lock();
         rsiOrigin = "";
-        upstreamRSCI.SetOrigin(rsiOrigin);
     Parameters.Unlock();
 }
 
