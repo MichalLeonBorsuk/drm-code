@@ -148,8 +148,9 @@ main(int argc, char **argv)
 		if (bPriorityEnabled)
 		{
 			/* Set priority class for this application */
+# ifdef ABOVE_NORMAL_PRIORITY_CLASS
 			SetPriorityClass(GetCurrentProcess(), ABOVE_NORMAL_PRIORITY_CLASS);
-
+# endif
 			/* Normal priority for GUI thread */
 			SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_NORMAL);
 		}
