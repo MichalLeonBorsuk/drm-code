@@ -152,6 +152,10 @@ public:
         return bFippedSpectrum;
     }
 
+    void ClearInputData() {
+        vecrInpData.Init(INPUT_DATA_VECTOR_SIZE, (_REAL) 0.0);
+    }
+
     void SetSoundInterface(CSoundInInterface* pS) {
         pSound = pS;
     }
