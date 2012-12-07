@@ -948,9 +948,8 @@ protected:
 class CParameter
 {
 public:
-    CParameter(CDRMReceiver*);
+    CParameter();
     CParameter(const CParameter&);
-    //CParameter(CDRMReceiver *pRx, CParameter *pParameter); // OPH - just copy some of the members
     virtual ~CParameter();
     CParameter& operator=(const CParameter&);
 
@@ -971,6 +970,7 @@ public:
     };
 
     /* Misc. Functions ------------------------------------------------------ */
+    void SetReceiver(CDRMReceiver *pDRMReceiver);
     void GenerateRandomSerialNumber();
     void GenerateReceiverID();
     void ResetServicesStreams();

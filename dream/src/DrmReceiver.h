@@ -58,6 +58,8 @@
 #include "AMSSDemodulation.h"
 #include "sound/soundinterface.h"
 #include "PlotManager.h"
+#include "DrmTransceiver.h"
+
 
 /* Definitions ****************************************************************/
 /* Number of FAC frames until the acquisition is activated in case a signal
@@ -128,7 +130,7 @@ protected:
     virtual void ProcessDataInternal(CParameter&);
 };
 
-class CDRMReceiver
+class CDRMReceiver : public CDRMTransceiver
 {
 public:
 
@@ -149,7 +151,7 @@ public:
         bRestartFlag = TRUE;
     }
     EAcqStat				GetAcquiState() {
-        return pParameters->GetAcquiState();
+        return Parameters.GetAcquiState();
     }
     ERecMode				GetReceiverMode() {
         return eReceiverMode;
@@ -174,7 +176,7 @@ public:
 #endif
     void	 				SetFrequency(int);
     int		 				GetFrequency() {
-        return pParameters->GetFrequency();
+        return Parameters.GetFrequency();
     }
     void					SetIQRecording(_BOOLEAN);
     void					SetRSIRecording(_BOOLEAN, const char);
@@ -231,12 +233,6 @@ public:
     }
 
     /* Get pointer to internal modules */
-    CSelectionInterface*	GetSoundInInterface() {
-        return pSoundInInterface;
-    }
-    CSelectionInterface*	GetSoundOutInterface() {
-        return pSoundOutInterface;
-    }
     CUtilizeFACData*		GetFAC() {
         return &UtilizeFACData;
     }
@@ -295,10 +291,6 @@ public:
         return &ChannelEstimation;
     }
 
-    CParameter*				GetParameters() {
-        return pParameters;
-    }
-
     CPlotManager*			GetPlotManager() {
         return &PlotManager;
     }
@@ -339,8 +331,6 @@ protected:
     void					saveSDCtoFile();
 
     /* Modules */
-    CSoundInInterface*		pSoundInInterface;
-    CSoundOutInterface*		pSoundOutInterface;
     CReceiveData			ReceiveData;
     CWriteData				WriteData;
     CInputResample			InputResample;
@@ -376,11 +366,6 @@ protected:
     CUpstreamDI				upstreamRSCI;
     CDecodeRSIMDI			DecodeRSIMDI;
     CDownstreamDI			downstreamRSCI;
-
-    /* Parameters */
-    CParameter*				pParameters;
-//    CParameter*				pDRMParam;
-//    CParameter*				pAMParam;
 
     /* Buffers */
     CSingleBuffer<_REAL>			AMDataBuf;

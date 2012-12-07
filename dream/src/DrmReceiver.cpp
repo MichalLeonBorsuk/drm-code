@@ -45,15 +45,13 @@ const int
 CDRMReceiver::MAX_UNLOCKED_COUNT = 2;
 
 /* Implementation *************************************************************/
-CDRMReceiver::CDRMReceiver():
-    pSoundInInterface(new CSoundInNull), pSoundOutInterface(new CSoundOut),
+CDRMReceiver::CDRMReceiver() : CDRMTransceiver(new CSoundInNull, new CSoundOut),
     ReceiveData(), WriteData(pSoundOutInterface),
     FreqSyncAcq(),
     ChannelEstimation(),
     UtilizeFACData(), UtilizeSDCData(), MSCDemultiplexer(),
     AudioSourceDecoder(),
     upstreamRSCI(), DecodeRSIMDI(), downstreamRSCI(),
-    pParameters(NULL), /*pDRMParam(NULL), pAMParam(NULL),*/
     RSIPacketBuf(),
     MSCDecBuf(MAX_NUM_STREAMS), MSCUseBuf(MAX_NUM_STREAMS),
     MSCSendBuf(MAX_NUM_STREAMS), iAcquRestartCnt(0),
@@ -68,7 +66,7 @@ CDRMReceiver::CDRMReceiver():
 #endif
     PlotManager(), rsiOrigin(""), iPrevSigSampleRate(0)
 {
-    pParameters = new CParameter(this);
+	Parameters.SetReceiver(this);
     downstreamRSCI.SetReceiver(this);
     PlotManager.SetReceiver(this);
 }
@@ -77,7 +75,6 @@ CDRMReceiver::~CDRMReceiver()
 {
     delete pSoundInInterface;
     delete pSoundOutInterface;
-    delete pParameters;
 }
 
 void
@@ -155,8 +152,6 @@ CDRMReceiver::Run()
      * is done in this (the working) thread to avoid problems with shared data */
     if (eNewReceiverMode != RM_NONE)
         InitReceiverMode();
-
-    CParameter & Parameters = *pParameters;
 
 #ifdef HAVE_LIBGPS
 //TODO locking
@@ -371,7 +366,7 @@ CDRMReceiver::CloseSoundInterface()
 void
 CDRMReceiver::SetInput()
 {
-    pParameters->Lock();
+    Parameters.Lock();
         /* Close previous sound interface */
         if (pSoundInInterface != NULL)
             pSoundInInterface->Close();
@@ -379,14 +374,14 @@ CDRMReceiver::SetInput()
         {   
             /* Save sample rate */
             if (iPrevSigSampleRate == 0)
-                iPrevSigSampleRate = pParameters->GetSigSampleRate();
+                iPrevSigSampleRate = Parameters.GetSigSampleRate();
             /* Open sound file interface */
             CAudioFileIn* AudioFileIn = new CAudioFileIn();
             AudioFileIn->SetDev(sSndDevIn);
             AudioFileIn->SetFileName(sSoundFile);
             const int iSampleRate = AudioFileIn->GetSampleRate();
             pSoundInInterface = AudioFileIn;
-            pParameters->SetSigSampleRate(iSampleRate);
+            Parameters.SetSigSampleRate(iSampleRate);
         }
         else
         {
@@ -394,7 +389,7 @@ CDRMReceiver::SetInput()
             pSoundInInterface = new CSoundIn();
             pSoundInInterface->SetDev(sSndDevIn);
         }
-    pParameters->Unlock();
+    Parameters.Unlock();
 }
 
 void
@@ -402,7 +397,7 @@ CDRMReceiver::ResetInput()
 {
     if (iPrevSigSampleRate != 0)
     {
-        pParameters->SetSigSampleRate(iPrevSigSampleRate);
+        Parameters.SetSigSampleRate(iPrevSigSampleRate);
         iPrevSigSampleRate = 0;
     }
     sSndDevIn = pSoundInInterface->GetDev();
@@ -411,37 +406,35 @@ CDRMReceiver::ResetInput()
 void
 CDRMReceiver::SetSoundFile(const string& soundFile)
 {
-    pParameters->Lock();
+    Parameters.Lock();
         sSoundFile = soundFile;
-    pParameters->Unlock();
+    Parameters.Unlock();
 }
 
 void
 CDRMReceiver::ClearSoundFile()
 {
-    pParameters->Lock();
+    Parameters.Lock();
         sSoundFile = "";
-    pParameters->Unlock();
+    Parameters.Unlock();
 }
 
 CDRMReceiver::ESFStatus
 CDRMReceiver::GetInputStatus()
 {
     CDRMReceiver::ESFStatus eStatus = SF_SNDCARDIN;
-    pParameters->Lock();
+    Parameters.Lock();
         if (rsiOrigin != "")
             eStatus = SF_RSIIN;
         else if (sSoundFile != "")
             eStatus = SF_SNDFILEIN;
-    pParameters->Unlock();
+    Parameters.Unlock();
     return eStatus;
 }
 
 void
 CDRMReceiver::DemodulateDRM(_BOOLEAN& bEnoughData)
 {
-    CParameter & Parameters = *pParameters;
-
     /* Resample input DRM-stream -------------------------------- */
     if (InputResample.ProcessData(Parameters, DemodDataBuf, InpResBuf))
     {
@@ -510,8 +503,6 @@ CDRMReceiver::DemodulateDRM(_BOOLEAN& bEnoughData)
 void
 CDRMReceiver::DecodeDRM(_BOOLEAN& bEnoughData, _BOOLEAN& bFrameToSend)
 {
-    CParameter & Parameters = *pParameters;
-
     /* FAC ------------------------------------------------------ */
     if (FACMLCDecoder.ProcessData(Parameters, FACCarDemapBuf, FACDecBuf))
     {
@@ -549,8 +540,6 @@ CDRMReceiver::DecodeDRM(_BOOLEAN& bEnoughData, _BOOLEAN& bFrameToSend)
 void
 CDRMReceiver::UtilizeDRM(_BOOLEAN& bEnoughData)
 {
-    CParameter & Parameters = *pParameters;
-
     if (UtilizeFACData.WriteData(Parameters, FACUseBuf))
     {
         bEnoughData = TRUE;
@@ -593,8 +582,6 @@ CDRMReceiver::UtilizeDRM(_BOOLEAN& bEnoughData)
 void
 CDRMReceiver::DemodulateAM(_BOOLEAN& bEnoughData)
 {
-    CParameter & Parameters = *pParameters;
-
     /* The incoming samples are split 2 ways.
        One set is passed to the existing AM demodulator.
        The other set is passed to the new AMSS demodulator.
@@ -621,8 +608,6 @@ CDRMReceiver::DemodulateAM(_BOOLEAN& bEnoughData)
 void
 CDRMReceiver::DecodeAM(_BOOLEAN& bEnoughData)
 {
-    CParameter & Parameters = *pParameters;
-
     /* AMSS resampling */
     if (InputResample.ProcessData(Parameters, AMSSPhaseBuf, AMSSResPhaseBuf))
     {
@@ -646,8 +631,6 @@ CDRMReceiver::DecodeAM(_BOOLEAN& bEnoughData)
 void
 CDRMReceiver::UtilizeAM(_BOOLEAN& bEnoughData)
 {
-    CParameter & Parameters = *pParameters;
-
     if (UtilizeSDCData.WriteData(Parameters, SDCDecBuf))
     {
         bEnoughData = TRUE;
@@ -656,7 +639,7 @@ CDRMReceiver::UtilizeAM(_BOOLEAN& bEnoughData)
 
 void CDRMReceiver::DemodulateFM(_BOOLEAN& bEnoughData)
 {
-    if (ConvertAudio.ProcessData(*pParameters, DemodDataBuf, AMAudioBuf))
+    if (ConvertAudio.ProcessData(Parameters, DemodDataBuf, AMAudioBuf))
     {
         bEnoughData = TRUE;
         iAudioStreamID = 0; // TODO
@@ -690,7 +673,7 @@ CDRMReceiver::DetectAcquiFAC()
         iAcquRestartCnt++;
 
         /* Check situation when receiver must be set back in start mode */
-        if ((pParameters->eAcquiState == AS_WITH_SIGNAL)
+        if ((Parameters.eAcquiState == AS_WITH_SIGNAL)
                 && (iAcquRestartCnt > NUM_FAC_FRA_U_ACQ_WITH))
         {
             SetInStartMode();
@@ -704,7 +687,7 @@ CDRMReceiver::DetectAcquiFAC()
            successive FAC blocks "ok" if no good signal is received */
         if (iGoodSignCnt > 0)
         {
-            pParameters->eAcquiState = AS_WITH_SIGNAL;
+            Parameters.eAcquiState = AS_WITH_SIGNAL;
 
             /* Take care of delayed tracking mode switch */
             if (iDelayedTrackModeCnt > 0)
@@ -788,7 +771,7 @@ CDRMReceiver::InitReceiverMode()
         if (pParameters == NULL)
             throw CGenErr("Something went terribly wrong in the Receiver");
 #endif
-        pParameters->eReceiverMode = eNewReceiverMode;
+        Parameters.eReceiverMode = eNewReceiverMode;
 
         /* Tell the SDC decoder that it's AMSS to decode (no AFS index) */
         UtilizeSDCData.GetSDCReceive()->SetSDCType(CSDCReceive::SDC_AMSS);
@@ -802,12 +785,12 @@ CDRMReceiver::InitReceiverMode()
         pAMParam->ReceiveStatus.Audio.SetStatus(NOT_PRESENT);
         pAMParam->ReceiveStatus.MOT.SetStatus(NOT_PRESENT);
 */
-        pParameters->ReceiveStatus.TSync.SetStatus(NOT_PRESENT);
-        pParameters->ReceiveStatus.FSync.SetStatus(NOT_PRESENT);
-        pParameters->ReceiveStatus.FAC.SetStatus(NOT_PRESENT);
-        pParameters->ReceiveStatus.SDC.SetStatus(NOT_PRESENT);
-        pParameters->ReceiveStatus.Audio.SetStatus(NOT_PRESENT);
-        pParameters->ReceiveStatus.MOT.SetStatus(NOT_PRESENT);
+        Parameters.ReceiveStatus.TSync.SetStatus(NOT_PRESENT);
+        Parameters.ReceiveStatus.FSync.SetStatus(NOT_PRESENT);
+        Parameters.ReceiveStatus.FAC.SetStatus(NOT_PRESENT);
+        Parameters.ReceiveStatus.SDC.SetStatus(NOT_PRESENT);
+        Parameters.ReceiveStatus.Audio.SetStatus(NOT_PRESENT);
+        Parameters.ReceiveStatus.MOT.SetStatus(NOT_PRESENT);
         break;
     case RM_DRM:
 #if 0
@@ -862,7 +845,7 @@ CDRMReceiver::InitReceiverMode()
 
 //        if (pParameters == NULL)
 //            throw CGenErr("Something went terribly wrong in the Receiver");
-        pParameters->eReceiverMode = eNewReceiverMode;
+        Parameters.eReceiverMode = eNewReceiverMode;
 
         UtilizeSDCData.GetSDCReceive()->SetSDCType(CSDCReceive::SDC_DRM);
         break;
@@ -891,12 +874,12 @@ CDRMReceiver::Start()
         upstreamRSCI.SetOrigin(rsiOrigin);
 
     // set the frequency from the command line or ini file
-    int iFreqkHz = pParameters->GetFrequency();
+    int iFreqkHz = Parameters.GetFrequency();
     if (iFreqkHz != -1)
         SetFrequency(iFreqkHz);
 
     /* Set restart flag */
-    pParameters->eRunState = CParameter::RESTART;
+    Parameters.eRunState = CParameter::RESTART;
     do
     {
         /* Process new sound file if any */
@@ -909,34 +892,34 @@ CDRMReceiver::Start()
         Run();
 
         /* Set run flag so that the thread can work */
-        pParameters->eRunState = CParameter::RUNNING;
+        Parameters.eRunState = CParameter::RUNNING;
         do
         {
             Run();
         }
-        while (pParameters->eRunState == CParameter::RUNNING);
+        while (Parameters.eRunState == CParameter::RUNNING);
 
         /* Restore sample rate and device name */
         ResetInput();
     }
-    while (pParameters->eRunState == CParameter::RESTART);
+    while (Parameters.eRunState == CParameter::RESTART);
 
     CloseSoundInterface();
 
-    pParameters->eRunState = CParameter::STOPPED;
+    Parameters.eRunState = CParameter::STOPPED;
 }
 
 void
 CDRMReceiver::Restart()
 {
-    if (pParameters->eRunState == CParameter::RUNNING)
-        pParameters->eRunState = CParameter::RESTART;
+    if (Parameters.eRunState == CParameter::RUNNING)
+        Parameters.eRunState = CParameter::RESTART;
 }
 
 void
 CDRMReceiver::Stop()
 {
-    pParameters->eRunState = CParameter::STOP_REQUESTED;
+    Parameters.eRunState = CParameter::STOP_REQUESTED;
 }
 
 void
@@ -954,8 +937,6 @@ CDRMReceiver::SetAMDemodAcq(_REAL rNewNorCen)
 void
 CDRMReceiver::SetInStartMode()
 {
-    CParameter & Parameters = *pParameters;
-
     iUnlockedCount = MAX_UNLOCKED_COUNT;
 
     Parameters.Lock();
@@ -1109,20 +1090,20 @@ CDRMReceiver::InitsForAllModules()
 {
     if (downstreamRSCI.GetOutEnabled())
     {
-        pParameters->bMeasureDelay = TRUE;
-        pParameters->bMeasureDoppler = TRUE;
-        pParameters->bMeasureInterference = TRUE;
-        pParameters->bMeasurePSD = TRUE;
+        Parameters.bMeasureDelay = TRUE;
+        Parameters.bMeasureDoppler = TRUE;
+        Parameters.bMeasureInterference = TRUE;
+        Parameters.bMeasurePSD = TRUE;
     }
     else
     {
-        pParameters->bMeasureDelay = FALSE;
-        pParameters->bMeasureDoppler = FALSE;
-        pParameters->bMeasureInterference = FALSE;
-        if(pParameters->bMeasurePSDAlways)
-            pParameters->bMeasurePSD = TRUE;
+        Parameters.bMeasureDelay = FALSE;
+        Parameters.bMeasureDoppler = FALSE;
+        Parameters.bMeasureInterference = FALSE;
+        if(Parameters.bMeasurePSDAlways)
+            Parameters.bMeasurePSD = TRUE;
         else
-            pParameters->bMeasurePSD = FALSE;
+            Parameters.bMeasurePSD = FALSE;
     }
 
     /* Set init flags */
@@ -1344,9 +1325,9 @@ CDRMReceiver::InitsForAudParam()
     /* Set init flags */
     DecodeRSIMDI.SetInitFlag();
     MSCDemultiplexer.SetInitFlag();
-    int a = pParameters->GetCurSelAudioService();
-    iAudioStreamID = pParameters->GetAudioParam(a).iStreamID;
-    pParameters->SetNumAudioDecoderBits(pParameters->
+    int a = Parameters.GetCurSelAudioService();
+    iAudioStreamID = Parameters.GetAudioParam(a).iStreamID;
+    Parameters.SetNumAudioDecoderBits(Parameters.
                                            GetStreamLen(iAudioStreamID) *
                                            SIZEOF__BYTE);
     AudioSourceDecoder.SetInitFlag();
@@ -1358,9 +1339,9 @@ CDRMReceiver::InitsForDataParam()
     /* Set init flags */
     DecodeRSIMDI.SetInitFlag();
     MSCDemultiplexer.SetInitFlag();
-    int d = pParameters->GetCurSelDataService();
-    iDataStreamID = pParameters->GetDataParam(d).iStreamID;
-    pParameters->SetNumDataDecoderBits(pParameters->
+    int d = Parameters.GetCurSelDataService();
+    iDataStreamID = Parameters.GetDataParam(d).iStreamID;
+    Parameters.SetNumDataDecoderBits(Parameters.
                                           GetStreamLen(iDataStreamID) *
                                           SIZEOF__BYTE);
     DataDecoder.SetInitFlag();
@@ -1368,12 +1349,12 @@ CDRMReceiver::InitsForDataParam()
 
 void CDRMReceiver::SetFrequency(int iNewFreqkHz)
 {
-    pParameters->Lock();
-    pParameters->SetFrequency(iNewFreqkHz);
+    Parameters.Lock();
+    Parameters.SetFrequency(iNewFreqkHz);
     /* clear out AMSS data and re-initialise AMSS acquisition */
-    if (pParameters->eReceiverMode == RM_AM)
-        pParameters->ResetServicesStreams();
-    pParameters->Unlock();
+    if (Parameters.eReceiverMode == RM_AM)
+        Parameters.ResetServicesStreams();
+    Parameters.Unlock();
 
     if (upstreamRSCI.GetOutEnabled() == TRUE)
     {
@@ -1386,17 +1367,17 @@ void CDRMReceiver::SetFrequency(int iNewFreqkHz)
 #endif
 
     if (downstreamRSCI.GetOutEnabled() == TRUE)
-        downstreamRSCI.NewFrequency(*pParameters);
+        downstreamRSCI.NewFrequency(Parameters);
 
     /* tell the IQ file writer that freq has changed in case it needs to start a new file */
-    WriteIQFile.NewFrequency(*pParameters);
+    WriteIQFile.NewFrequency(Parameters);
 }
 
 void
 CDRMReceiver::SetIQRecording(_BOOLEAN bON)
 {
     if (bON)
-        WriteIQFile.StartRecording(*pParameters);
+        WriteIQFile.StartRecording(Parameters);
     else
         WriteIQFile.StopRecording();
 }
@@ -1404,14 +1385,13 @@ CDRMReceiver::SetIQRecording(_BOOLEAN bON)
 void
 CDRMReceiver::SetRSIRecording(_BOOLEAN bOn, const char cProfile)
 {
-    downstreamRSCI.SetRSIRecording(*pParameters, bOn, cProfile);
+    downstreamRSCI.SetRSIRecording(Parameters, bOn, cProfile);
 }
 
 /* TEST store information about alternative frequency transmitted in SDC */
 void
 CDRMReceiver::saveSDCtoFile()
 {
-    CParameter & Parameters = *pParameters;
     static FILE *pFile = NULL;
 
     if (pFile == NULL)
@@ -1449,27 +1429,27 @@ CDRMReceiver::LoadSettings(CSettings& s)
         // Pad to a minimum of 6 characters
         while (sValue.length() < 6)
             sValue += "_";
-        pParameters->sSerialNumber = sValue;
+        Parameters.sSerialNumber = sValue;
     }
 
-    pParameters->GenerateReceiverID();
+    Parameters.GenerateReceiverID();
 
     /* Data files directory */
     string sDataFilesDirectory = s.Get(
-        "Receiver", "datafilesdirectory", pParameters->GetDataDirectory());
-    pParameters->SetDataDirectory(sDataFilesDirectory);
-    s.Put("Receiver", "datafilesdirectory", pParameters->GetDataDirectory());
+        "Receiver", "datafilesdirectory", Parameters.GetDataDirectory());
+    Parameters.SetDataDirectory(sDataFilesDirectory);
+    s.Put("Receiver", "datafilesdirectory", Parameters.GetDataDirectory());
 
     /* Receiver ------------------------------------------------------------- */
 
     /* Sound card audio sample rate, some settings below depends on this one */
-    pParameters->SetAudSampleRate(s.Get("Receiver", "samplerateaud", int(DEFAULT_SOUNDCRD_SAMPLE_RATE)));
+    Parameters.SetAudSampleRate(s.Get("Receiver", "samplerateaud", int(DEFAULT_SOUNDCRD_SAMPLE_RATE)));
 
     /* Sound card signal sample rate, some settings below depends on this one */
-    pParameters->SetSigSampleRate(s.Get("Receiver", "sampleratesig", int(DEFAULT_SOUNDCRD_SAMPLE_RATE)));
+    Parameters.SetSigSampleRate(s.Get("Receiver", "sampleratesig", int(DEFAULT_SOUNDCRD_SAMPLE_RATE)));
 
     /* if 0 then only measure PSD when RSCI in use otherwise always measure it */
-    pParameters->bMeasurePSDAlways = s.Get("Receiver", "measurepsdalways", 0);
+    Parameters.bMeasurePSDAlways = s.Get("Receiver", "measurepsdalways", 0);
 
     /* Upstream RSCI or sound card, etc. */
     string str = s.Get("command", "rsiin");
@@ -1568,11 +1548,11 @@ CDRMReceiver::LoadSettings(CSettings& s)
     str = s.Get("command", "rsirecordprofile");
     string s2 = s.Get("command", "rsirecordtype");
     if (str != "" || s2 != "")
-        downstreamRSCI.SetRSIRecording(*pParameters, TRUE, str[0], s2);
+        downstreamRSCI.SetRSIRecording(Parameters, TRUE, str[0], s2);
 
     /* IQ File Recording */
     if (s.Get("command", "recordiq", false))
-        WriteIQFile.StartRecording(*pParameters);
+        WriteIQFile.StartRecording(Parameters);
 
     /* Mute audio flag */
     WriteData.MuteAudio(s.Get("Receiver", "muteaudio", FALSE));
@@ -1603,10 +1583,10 @@ CDRMReceiver::LoadSettings(CSettings& s)
     SetReceiverMode(ERecMode(s.Get("Receiver", "mode", int(0))));
 
     /* Tuned Frequency */
-    pParameters->SetFrequency(s.Get("Receiver", "frequency", 0));
+    Parameters.SetFrequency(s.Get("Receiver", "frequency", 0));
 
     /* Front-end - combine into Hamlib? */
-    CFrontEndParameters& FrontEndParameters = pParameters->FrontEndParameters;
+    CFrontEndParameters& FrontEndParameters = Parameters.FrontEndParameters;
 
     FrontEndParameters.eSMeterCorrectionType =
         CFrontEndParameters::ESMeterCorrectionType(s.Get("FrontEnd", "smetercorrectiontype", 0));
@@ -1628,24 +1608,24 @@ CDRMReceiver::LoadSettings(CSettings& s)
     latitude = s.Get("GPS", "latitude", s.Get("Logfile", "latitude", 1000.0));
     /* Longitude string */
     longitude = s.Get("GPS", "longitude", s.Get("Logfile", "longitude", 1000.0));
-    pParameters->Lock();
+    Parameters.Lock();
     if(-90.0 <= latitude && latitude <= 90.0 && -180.0 <= longitude  && longitude <= 180.0)
     {
-        pParameters->gps_data.set = LATLON_SET;
-        pParameters->gps_data.fix.latitude = latitude;
-        pParameters->gps_data.fix.longitude = longitude;
+        Parameters.gps_data.set = LATLON_SET;
+        Parameters.gps_data.fix.latitude = latitude;
+        Parameters.gps_data.fix.longitude = longitude;
     }
     else {
-        pParameters->gps_data.set = 0;
+        Parameters.gps_data.set = 0;
     }
     bool use_gpsd = s.Get("GPS", "usegpsd", false);
-    pParameters->use_gpsd=use_gpsd;
+    Parameters.use_gpsd=use_gpsd;
     string host = s.Get("GPS", "host", string("localhost"));
-    pParameters->gps_host = host;
-    pParameters->gps_port = s.Get("GPS", "port", string("2947"));
+    Parameters.gps_host = host;
+    Parameters.gps_port = s.Get("GPS", "port", string("2947"));
     if(use_gpsd)
-        pParameters->restart_gpsd=true;
-    pParameters->Unlock();
+        Parameters.restart_gpsd=true;
+    Parameters.Unlock();
 }
 
 void
@@ -1657,13 +1637,13 @@ CDRMReceiver::SaveSettings(CSettings& s)
     /* Receiver ------------------------------------------------------------- */
 
     /* Sound card audio sample rate */
-    s.Put("Receiver", "samplerateaud", pParameters->GetAudSampleRate());
+    s.Put("Receiver", "samplerateaud", Parameters.GetAudSampleRate());
 
     /* Sound card signal sample rate */
-    s.Put("Receiver", "sampleratesig", pParameters->GetSigSampleRate());
+    s.Put("Receiver", "sampleratesig", Parameters.GetSigSampleRate());
 
     /* if 0 then only measure PSD when RSCI in use otherwise always measure it */
-    s.Put("Receiver", "measurepsdalways", pParameters->bMeasurePSDAlways);
+    s.Put("Receiver", "measurepsdalways", Parameters.bMeasurePSDAlways);
 
     /* Channel Estimation: Frequency Interpolation */
     s.Put("Receiver", "freqint", GetFreqInt());
@@ -1705,7 +1685,7 @@ CDRMReceiver::SaveSettings(CSettings& s)
     s.Put("Receiver", "mlciter", MSCMLCDecoder.GetInitNumIterations());
 
     /* Tuned Frequency */
-    s.Put("Receiver", "frequency", pParameters->GetFrequency());
+    s.Put("Receiver", "frequency", Parameters.GetFrequency());
 
     /* AM Parameters */
 
@@ -1731,33 +1711,33 @@ CDRMReceiver::SaveSettings(CSettings& s)
     s.Put("AM Demodulation", "filterbwfm", iBwFM);
 
     /* Front-end - combine into Hamlib? */
-    s.Put("FrontEnd", "smetercorrectiontype", int(pParameters->FrontEndParameters.eSMeterCorrectionType));
+    s.Put("FrontEnd", "smetercorrectiontype", int(Parameters.FrontEndParameters.eSMeterCorrectionType));
 
-    s.Put("FrontEnd", "smeterbandwidth", int(pParameters->FrontEndParameters.rSMeterBandwidth));
+    s.Put("FrontEnd", "smeterbandwidth", int(Parameters.FrontEndParameters.rSMeterBandwidth));
 
-    s.Put("FrontEnd", "defaultmeasurementbandwidth", int(pParameters->FrontEndParameters.rDefaultMeasurementBandwidth));
+    s.Put("FrontEnd", "defaultmeasurementbandwidth", int(Parameters.FrontEndParameters.rDefaultMeasurementBandwidth));
 
-    s.Put("FrontEnd", "automeasurementbandwidth", pParameters->FrontEndParameters.bAutoMeasurementBandwidth);
+    s.Put("FrontEnd", "automeasurementbandwidth", Parameters.FrontEndParameters.bAutoMeasurementBandwidth);
 
-    s.Put("FrontEnd", "calfactordrm", int(pParameters->FrontEndParameters.rCalFactorDRM));
+    s.Put("FrontEnd", "calfactordrm", int(Parameters.FrontEndParameters.rCalFactorDRM));
 
-    s.Put("FrontEnd", "calfactoram", int(pParameters->FrontEndParameters.rCalFactorAM));
+    s.Put("FrontEnd", "calfactoram", int(Parameters.FrontEndParameters.rCalFactorAM));
 
-    s.Put("FrontEnd", "ifcentrefrequency", int(pParameters->FrontEndParameters.rIFCentreFreq));
+    s.Put("FrontEnd", "ifcentrefrequency", int(Parameters.FrontEndParameters.rIFCentreFreq));
 
     /* Serial Number */
-    s.Put("Receiver", "serialnumber", pParameters->sSerialNumber);
+    s.Put("Receiver", "serialnumber", Parameters.sSerialNumber);
 
-    s.Put("Receiver", "datafilesdirectory", pParameters->GetDataDirectory());
+    s.Put("Receiver", "datafilesdirectory", Parameters.GetDataDirectory());
 
     /* GPS */
-    if(pParameters->gps_data.set & LATLON_SET) {
-	s.Put("GPS", "latitude", pParameters->gps_data.fix.latitude);
-	s.Put("GPS", "longitude", pParameters->gps_data.fix.longitude);
+    if(Parameters.gps_data.set & LATLON_SET) {
+	s.Put("GPS", "latitude", Parameters.gps_data.fix.latitude);
+	s.Put("GPS", "longitude", Parameters.gps_data.fix.longitude);
     }
-    s.Put("GPS", "usegpsd", pParameters->use_gpsd);
-    s.Put("GPS", "host", pParameters->gps_host);
-    s.Put("GPS", "port", pParameters->gps_port);
+    s.Put("GPS", "usegpsd", Parameters.use_gpsd);
+    s.Put("GPS", "host", Parameters.gps_host);
+    s.Put("GPS", "port", Parameters.gps_port);
 }
 
 void CConvertAudio::InitInternal(CParameter& Parameters)

@@ -33,6 +33,7 @@
 #include <QActionGroup>
 #include <QMainWindow>
 #include "../DrmReceiver.h"
+#include "../DrmTransceiver.h"
 #include "../sound/selectioninterface.h"
 
 typedef struct CHANSEL {
@@ -46,17 +47,19 @@ class CSoundCardSelMenu : public QMenu
     Q_OBJECT
 
 public:
-    CSoundCardSelMenu(CDRMReceiver* DRMReceiver,
-        CSelectionInterface* pNSIn,
-        CSelectionInterface* pNSOut,
+    CSoundCardSelMenu(
+        CDRMTransceiver& DRMTransceiver,
         CFileMenu* pFileMenu,
         QWidget* parent = 0);
 
 protected:
-    CDRMReceiver* DRMReceiver;
-	QMenu* menuSigInput;
-    QMenu* menuSigDevice;
-    QMenu* menuSigSampleRate;
+    CDRMTransceiver&	DRMTransceiver;
+    CParameter&			Parameters;
+    QMenu*				menuSigInput;
+    QMenu*				menuSigDevice;
+    QMenu*				menuSigSampleRate;
+    const bool			bReceiver;
+
     QMenu* InitDevice(QMenu* self, QMenu* parent, const QString& text, bool bInput);
     QMenu* InitChannel(QMenu* parent, const QString& text, const int iChanSel, const CHANSEL* ChanSel);
     QMenu* InitSampleRate(QMenu* parent, const QString& text, const int iCurrentSampleRate, const int* SampleRate);
@@ -81,7 +84,8 @@ public:
     void UpdateMenu();
 
 protected:
-    CDRMReceiver& DRMReceiver;
+    CDRMReceiver&		DRMReceiver;
+
     QAction* actionOpenSignalFile;
     QAction* actionCloseSignalFile;
 
