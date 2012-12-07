@@ -284,7 +284,7 @@ public:
         return &AudioSourceDecoder;
     }
     CUpstreamDI*			GetRSIIn() {
-        return &upstreamRSCI;
+        return pUpstreamRSCI;
     }
     CDownstreamDI*			GetRSIOut() {
         return &downstreamRSCI;
@@ -365,7 +365,7 @@ protected:
     CAMSSExtractBits		AMSSExtractBits;
     CAMSSDecode				AMSSDecode;
 
-    CUpstreamDI				upstreamRSCI;
+    CUpstreamDI*			pUpstreamRSCI;
     CDecodeRSIMDI			DecodeRSIMDI;
     CDownstreamDI			downstreamRSCI;
 

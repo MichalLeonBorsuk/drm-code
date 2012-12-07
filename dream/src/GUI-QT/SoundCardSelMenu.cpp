@@ -266,8 +266,7 @@ CFileMenu::CFileMenu(CDRMTransceiver& DRMTransceiver, QMainWindow* parent,
         actionCloseSignalFile = addAction(closeFile, this, SLOT(OnCloseSignalFile()), QKeySequence(tr("Alt+C")));
         addSeparator();
         actionOpenRsiFile = addAction(tr("Open RSI File..."), this, SLOT(OnOpenRsiFile())/*, QKeySequence(tr("Alt+O"))*/);
-        //TODO
-        //actionCloseRsiFile = addAction(tr("Close RSI File"), this, SLOT(OnCloseRsiFile())/*, QKeySequence(tr("Alt+C"))*/);
+        actionCloseRsiFile = addAction(tr("Close RSI File"), this, SLOT(OnCloseRsiFile())/*, QKeySequence(tr("Alt+C"))*/);
         addSeparator();
     }
     addAction(tr("&Exit"), parent, SLOT(close()), QKeySequence(tr("Alt+X")));
@@ -277,9 +276,9 @@ CFileMenu::CFileMenu(CDRMTransceiver& DRMTransceiver, QMainWindow* parent,
 void CFileMenu::OnOpenSignalFile()
 {
 #ifdef HAVE_LIBSNDFILE
-# define AUDIO_FILE_FILTER "Sound Files (*.aif* *.au *.flac *.ogg *.rf64 *.snd *.wav);;All files (*)"
+# define AUDIO_FILE_FILTER "Sound Files (*.aif* *.au *.flac *.ogg *.rf64 *.snd *.wav);;All Files (*)"
 #else
-# define AUDIO_FILE_FILTER "Sound Files (*.if* *.iq* *.pcm* *.txt);;All files (*)"
+# define AUDIO_FILE_FILTER "Sound Files (*.if* *.iq* *.pcm* *.txt);;All Files (*)"
 #endif
     if (bReceiver)
     {
@@ -309,7 +308,7 @@ void CFileMenu::OnOpenRsiFile()
 {
     if (bReceiver)
     {
-        QString filename = QFileDialog::getOpenFileName(this, tr("Open RSI File"), NULL, tr("RSI Files (*.rs*);;All files (*)"));
+        QString filename = QFileDialog::getOpenFileName(this, tr("Open RSI File"), NULL, tr("RSI Files (*.rs*);;All Files (*)"));
         /* Check if user not hit the cancel button */
         if (!filename.isEmpty())
         {
@@ -348,7 +347,10 @@ void CFileMenu::UpdateMenu()
         if (bRsiinFile == actionOpenRsiFile->isEnabled())
 		    actionOpenRsiFile->setEnabled(!bRsiinFile);
 
-	    emit soundFileChanged(eStatus);
+        if (bRsiinFile != actionCloseRsiFile->isEnabled())
+		    actionCloseRsiFile->setEnabled(bRsiinFile);
+
+        emit soundFileChanged(eStatus);
     }
 }
 

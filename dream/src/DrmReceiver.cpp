@@ -51,7 +51,7 @@ CDRMReceiver::CDRMReceiver(CSettings* pSettings) : CDRMTransceiver(pSettings, ne
     ChannelEstimation(),
     UtilizeFACData(), UtilizeSDCData(), MSCDemultiplexer(),
     AudioSourceDecoder(),
-    upstreamRSCI(), DecodeRSIMDI(), downstreamRSCI(),
+    pUpstreamRSCI(new CUpstreamDI()), DecodeRSIMDI(), downstreamRSCI(),
     RSIPacketBuf(),
     MSCDecBuf(MAX_NUM_STREAMS), MSCUseBuf(MAX_NUM_STREAMS),
     MSCSendBuf(MAX_NUM_STREAMS), iAcquRestartCnt(0),
@@ -75,6 +75,7 @@ CDRMReceiver::~CDRMReceiver()
 {
     delete pSoundInInterface;
     delete pSoundOutInterface;
+    delete pUpstreamRSCI;
 }
 
 void
@@ -188,10 +189,10 @@ CDRMReceiver::Run()
     }
 
     /* Input - from upstream RSCI or input and demodulation from sound card / file */
-    if (upstreamRSCI.GetInEnabled() == TRUE)
+    if (pUpstreamRSCI->GetInEnabled() == TRUE)
     {
         RSIPacketBuf.Clear();
-        upstreamRSCI.ReadData(Parameters, RSIPacketBuf);
+        pUpstreamRSCI->ReadData(Parameters, RSIPacketBuf);
         if (RSIPacketBuf.GetFillLevel() > 0)
         {
             time_keeper = time(NULL);
@@ -375,11 +376,16 @@ CDRMReceiver::SetInput()
             pSoundInInterface->Close();
             delete pSoundInInterface;
         }
+        if (pUpstreamRSCI->GetInEnabled())
+        {
+            delete pUpstreamRSCI;
+            pUpstreamRSCI = new CUpstreamDI();
+        }
         if (rsiOrigin != "")
         {
             ReceiveData.ClearInputData();
             pSoundInInterface = new CSoundInNull();
-            upstreamRSCI.SetOrigin(rsiOrigin);
+            pUpstreamRSCI->SetOrigin(rsiOrigin);
         }
         else if (sSoundFile != "")
         {
@@ -686,7 +692,7 @@ CDRMReceiver::DetectAcquiFAC()
 {
     /* If upstreamRSCI in is enabled, do not check for acquisition state because we want
        to stay in tracking mode all the time */
-    if (upstreamRSCI.GetInEnabled() == TRUE)
+    if (pUpstreamRSCI->GetInEnabled() == TRUE)
         return;
 
     /* Acquisition switch */
@@ -885,9 +891,9 @@ CDRMReceiver::InitReceiverMode()
     /* Init all modules */
     SetInStartMode();
 
-    if (upstreamRSCI.GetOutEnabled() == TRUE)
+    if (pUpstreamRSCI->GetOutEnabled() == TRUE)
     {
-        upstreamRSCI.SetReceiverMode(eReceiverMode);
+        pUpstreamRSCI->SetReceiverMode(eReceiverMode);
     }
 }
 
@@ -1050,7 +1056,7 @@ CDRMReceiver::SetInStartMode()
 
     /* In case upstreamRSCI is enabled, go directly to tracking mode, do not activate the
        synchronization units */
-    if (upstreamRSCI.GetInEnabled() == TRUE)
+    if (pUpstreamRSCI->GetInEnabled() == TRUE)
     {
         /* We want to have as low CPU usage as possible, therefore set the
            synchronization units in a state where they do only a minimum
@@ -1173,7 +1179,7 @@ CDRMReceiver::InitsForAllModules()
     AMSSExtractBits.SetInitFlag();
     AMSSDecode.SetInitFlag();
 
-    upstreamRSCI.SetInitFlag();
+    pUpstreamRSCI->SetInitFlag();
     //downstreamRSCI.SetInitFlag();
 
     /* Clear all buffers (this is especially important for the "AudSoDecBuf"
@@ -1377,9 +1383,9 @@ void CDRMReceiver::SetFrequency(int iNewFreqkHz)
         Parameters.ResetServicesStreams();
     Parameters.Unlock();
 
-    if (upstreamRSCI.GetOutEnabled() == TRUE)
+    if (pUpstreamRSCI->GetOutEnabled() == TRUE)
     {
-        upstreamRSCI.SetFrequency(iNewFreqkHz);
+        pUpstreamRSCI->SetFrequency(iNewFreqkHz);
     }
 
 #ifdef HAVE_LIBHAMLIB
@@ -1543,7 +1549,7 @@ CDRMReceiver::LoadSettings()
 
     str = s.Get("command", "rciout");
     if (str != "")
-        upstreamRSCI.SetDestination(str);
+        pUpstreamRSCI->SetDestination(str);
 
     /* downstream RSCI */
     for (int i = 0; i<MAX_NUM_RSI_SUBSCRIBERS; i++)
