@@ -375,25 +375,29 @@ CDRMReceiver::SetInput()
             pSoundInInterface->Close();
             delete pSoundInInterface;
         }
-        if (sSoundFile != "")
+        if (rsiOrigin != "")
+        {
+            pSoundInInterface = new CSoundInNull();
+            upstreamRSCI.SetOrigin(rsiOrigin);
+        }
+        else if (sSoundFile != "")
         {
             /* Save sample rate */
             if (iPrevSigSampleRate == 0)
                 iPrevSigSampleRate = Parameters.GetSigSampleRate();
             /* Open sound file interface */
             CAudioFileIn* AudioFileIn = new CAudioFileIn();
-            AudioFileIn->SetDev(sSndDevIn);
             AudioFileIn->SetFileName(sSoundFile);
             const int iSampleRate = AudioFileIn->GetSampleRate();
-            pSoundInInterface = AudioFileIn;
             Parameters.SetSigSampleRate(iSampleRate);
+            pSoundInInterface = AudioFileIn;
         }
         else
         {
             /* Open sound card interface */
             pSoundInInterface = new CSoundIn();
-            pSoundInInterface->SetDev(sSndDevIn);
         }
+        pSoundInInterface->SetDev(sSndDevIn);
     Parameters.Unlock();
 }
 
@@ -405,6 +409,23 @@ CDRMReceiver::ResetInput()
         Parameters.SetSigSampleRate(iPrevSigSampleRate);
         iPrevSigSampleRate = 0;
     }
+}
+
+void
+CDRMReceiver::SetRsiInput(const string& rsiInput)
+{
+    Parameters.Lock();
+        rsiOrigin = rsiInput;
+    Parameters.Unlock();
+}
+
+void
+CDRMReceiver::ClearRsiInput()
+{
+    Parameters.Lock();
+        rsiOrigin = "";
+        upstreamRSCI.SetOrigin(rsiOrigin);
+    Parameters.Unlock();
 }
 
 void
@@ -873,10 +894,6 @@ CDRMReceiver::InitReceiverMode()
 void
 CDRMReceiver::Start()
 {
-    // set this here to make sure we are in a QThread
-    if (rsiOrigin != "")
-        upstreamRSCI.SetOrigin(rsiOrigin);
-
     // set the frequency from the command line or ini file
     int iFreqkHz = Parameters.GetFrequency();
     if (iFreqkHz != -1)
@@ -886,7 +903,7 @@ CDRMReceiver::Start()
     Parameters.eRunState = CParameter::RESTART;
     do
     {
-        /* Process new sound file if any */
+        /* Process new sound file or RSI input if any */
         SetInput();
 
         /* Set new acquisition flag */
@@ -903,7 +920,7 @@ CDRMReceiver::Start()
         }
         while (Parameters.eRunState == CParameter::RUNNING);
 
-        /* Restore sample rate and device name */
+        /* Restore sample rate */
         ResetInput();
     }
     while (Parameters.eRunState == CParameter::RESTART);

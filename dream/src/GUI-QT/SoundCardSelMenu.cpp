@@ -265,6 +265,10 @@ CFileMenu::CFileMenu(CDRMTransceiver& DRMTransceiver, QMainWindow* parent,
         actionOpenSignalFile = addAction(openFile, this, SLOT(OnOpenSignalFile()), QKeySequence(tr("Alt+O")));
         actionCloseSignalFile = addAction(closeFile, this, SLOT(OnCloseSignalFile()), QKeySequence(tr("Alt+C")));
         addSeparator();
+        actionOpenRsiFile = addAction(tr("Open RSI File..."), this, SLOT(OnOpenRsiFile())/*, QKeySequence(tr("Alt+O"))*/);
+        //TODO
+        //actionCloseRsiFile = addAction(tr("Close RSI File"), this, SLOT(OnCloseRsiFile())/*, QKeySequence(tr("Alt+C"))*/);
+        addSeparator();
     }
     addAction(tr("&Exit"), parent, SLOT(close()), QKeySequence(tr("Alt+X")));
     parent->menuBar()->insertMenu(menuInsertBefore->menuAction(), this);
@@ -301,6 +305,32 @@ void CFileMenu::OnCloseSignalFile()
     }
 }
 
+void CFileMenu::OnOpenRsiFile()
+{
+    if (bReceiver)
+    {
+        QString filename = QFileDialog::getOpenFileName(this, tr("Open RSI File"), NULL, tr("RSI Files (*.rs*);;All files (*)"));
+        /* Check if user not hit the cancel button */
+        if (!filename.isEmpty())
+        {
+            // TODO implement a queue for more that one file!
+            ((CDRMReceiver&)DRMTransceiver).SetRsiInput(string(filename.toLocal8Bit().data()));
+            RestartTransceiver(&DRMTransceiver);
+            UpdateMenu();
+        }
+    }
+}
+
+void CFileMenu::OnCloseRsiFile()
+{
+    if (bReceiver)
+    {
+        ((CDRMReceiver&)DRMTransceiver).ClearRsiInput();
+        RestartTransceiver(&DRMTransceiver);
+        UpdateMenu();
+    }
+}
+
 void CFileMenu::UpdateMenu()
 {
     if (bReceiver)
@@ -314,6 +344,9 @@ void CFileMenu::UpdateMenu()
 
 	    if (bSoundFile != actionCloseSignalFile->isEnabled())
 		    actionCloseSignalFile->setEnabled(bSoundFile);
+
+        if (bRsiinFile == actionOpenRsiFile->isEnabled())
+		    actionOpenRsiFile->setEnabled(!bRsiinFile);
 
 	    emit soundFileChanged(eStatus);
     }

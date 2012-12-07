@@ -37,8 +37,9 @@ class CSoundInNull : public CSoundInInterface
 public:
     CSoundInNull() {}
     virtual ~CSoundInNull() {}
-
-    virtual _BOOLEAN	Init(int, int, _BOOLEAN) { return FALSE; }
+    virtual _BOOLEAN	Init(int, int, _BOOLEAN) {
+        return TRUE;
+    }
     virtual _BOOLEAN	Read(CVector<short>&) {
         return FALSE;
     }
@@ -61,8 +62,9 @@ class CSoundOutNull : public CSoundOutInterface
 public:
     CSoundOutNull() {}
     virtual ~CSoundOutNull() {}
-
-    virtual _BOOLEAN	Init(int, int, _BOOLEAN) { return FALSE; }
+    virtual _BOOLEAN	Init(int, int, _BOOLEAN) {
+        return TRUE;
+    }
     virtual _BOOLEAN	Write(CVector<short>&) {
         return FALSE;
     }
