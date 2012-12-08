@@ -56,6 +56,9 @@ int dprintf(const char *format, ...)
 #ifdef _WIN32
 time_t timegm(struct tm *tm)
 {
+#if defined(_MSC_VER) && (_MSC_VER <= 1200) // MSVC++ 6.0
+	// TODO
+#else
 	SYSTEMTIME st;
 	st.wYear = tm->tm_year+1900;
 	st.wMonth = tm->tm_mon+1;
@@ -70,6 +73,7 @@ time_t timegm(struct tm *tm)
 	uli.LowPart = ft.dwLowDateTime;
 	uli.HighPart = ft.dwHighDateTime;
 	return (time_t)((uli.QuadPart - 116444736000000000ULL)/10000000ULL);
+#endif
 }
 #endif
 
@@ -122,6 +126,9 @@ void CScheduler::LoadSchedule(const string& filename)
 
 void CScheduler::fill()
 {
+#if defined(_MSC_VER) && (_MSC_VER <= 1200) // MSVC++ 6.0
+	// TODO
+#else
 	time_t dt;
 //	if (events.empty())
 //	{
@@ -156,6 +163,7 @@ void CScheduler::fill()
 		events.push(e);
 //struct tm* dts = gmtime(&e.time); dprintf("%i %02i:%02i:%02i frequency=%i\n", (int)dts->tm_mday, (int)dts->tm_hour, (int)dts->tm_min, (int)dts->tm_sec, (int)e.frequency);
 	}
+#endif
 }
 
 int CScheduler::parse(string s)
