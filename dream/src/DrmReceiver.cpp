@@ -419,15 +419,15 @@ CDRMReceiver::ResetInput()
 }
 
 void
-CDRMReceiver::SetRsiInput(const string& rsiInput)
+CDRMReceiver::SetRsciInput(const string& rsciInput)
 {
     Parameters.Lock();
-        rsiOrigin = rsiInput;
+        rsiOrigin = rsciInput;
     Parameters.Unlock();
 }
 
 void
-CDRMReceiver::ClearRsiInput()
+CDRMReceiver::ClearRsciInput()
 {
     Parameters.Lock();
         rsiOrigin = "";

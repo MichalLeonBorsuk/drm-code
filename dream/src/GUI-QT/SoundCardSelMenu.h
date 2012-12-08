@@ -87,15 +87,15 @@ protected:
     CDRMTransceiver&	DRMTransceiver;
     QAction*			actionOpenSignalFile;
     QAction*			actionCloseSignalFile;
-    QAction*			actionOpenRsiFile;
-    QAction*			actionCloseRsiFile;
+    QAction*			actionOpenRsciFile;
+    QAction*			actionCloseRsciFile;
     const bool			bReceiver;
 
 public slots:
     void OnOpenSignalFile();
     void OnCloseSignalFile();
-    void OnOpenRsiFile();
-    void OnCloseRsiFile();
+    void OnOpenRsciFile();
+    void OnCloseRsciFile();
 
 signals:
     void soundFileChanged(CDRMReceiver::ESFStatus eStatus);

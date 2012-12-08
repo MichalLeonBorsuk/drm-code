@@ -144,8 +144,8 @@ public:
     void					Start();
     void					Restart();
     void					Stop();
-    void					SetRsiInput(const string& rsiInput);
-    void					ClearRsiInput();
+    void					SetRsciInput(const string& rsciInput);
+    void					ClearRsciInput();
     void					SetSoundFile(const string& soundFile);
     void					ClearSoundFile();
     ESFStatus				GetInputStatus();

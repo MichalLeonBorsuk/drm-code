@@ -265,8 +265,8 @@ CFileMenu::CFileMenu(CDRMTransceiver& DRMTransceiver, QMainWindow* parent,
         actionOpenSignalFile = addAction(openFile, this, SLOT(OnOpenSignalFile()), QKeySequence(tr("Alt+O")));
         actionCloseSignalFile = addAction(closeFile, this, SLOT(OnCloseSignalFile()), QKeySequence(tr("Alt+C")));
         addSeparator();
-        actionOpenRsiFile = addAction(tr("Open RSI File..."), this, SLOT(OnOpenRsiFile())/*, QKeySequence(tr("Alt+O"))*/);
-        actionCloseRsiFile = addAction(tr("Close RSI File"), this, SLOT(OnCloseRsiFile())/*, QKeySequence(tr("Alt+C"))*/);
+        actionOpenRsciFile = addAction(tr("Open RSCI/MDI File..."), this, SLOT(OnOpenRsciFile())/*, QKeySequence(tr("Alt+O"))*/);
+        actionCloseRsciFile = addAction(tr("Close RSCI/MDI File"), this, SLOT(OnCloseRsciFile())/*, QKeySequence(tr("Alt+C"))*/);
         addSeparator();
     }
     addAction(tr("&Exit"), parent, SLOT(close()), QKeySequence(tr("Alt+X")));
@@ -304,27 +304,27 @@ void CFileMenu::OnCloseSignalFile()
     }
 }
 
-void CFileMenu::OnOpenRsiFile()
+void CFileMenu::OnOpenRsciFile()
 {
     if (bReceiver)
     {
-        QString filename = QFileDialog::getOpenFileName(this, tr("Open RSI File"), NULL, tr("RSI Files (*.rs*);;All Files (*)"));
+        QString filename = QFileDialog::getOpenFileName(this, tr("Open RSCI/MDI File"), NULL, tr("RSCI/MDI Files (*.rs*);;All Files (*)"));
         /* Check if user not hit the cancel button */
         if (!filename.isEmpty())
         {
             // TODO implement a queue for more that one file!
-            ((CDRMReceiver&)DRMTransceiver).SetRsiInput(string(filename.toLocal8Bit().data()));
+            ((CDRMReceiver&)DRMTransceiver).SetRsciInput(string(filename.toLocal8Bit().data()));
             RestartTransceiver(&DRMTransceiver);
             UpdateMenu();
         }
     }
 }
 
-void CFileMenu::OnCloseRsiFile()
+void CFileMenu::OnCloseRsciFile()
 {
     if (bReceiver)
     {
-        ((CDRMReceiver&)DRMTransceiver).ClearRsiInput();
+        ((CDRMReceiver&)DRMTransceiver).ClearRsciInput();
         RestartTransceiver(&DRMTransceiver);
         UpdateMenu();
     }
@@ -344,11 +344,11 @@ void CFileMenu::UpdateMenu()
 	    if (bSoundFile != actionCloseSignalFile->isEnabled())
 		    actionCloseSignalFile->setEnabled(bSoundFile);
 
-        if (bRsiinFile == actionOpenRsiFile->isEnabled())
-		    actionOpenRsiFile->setEnabled(!bRsiinFile);
+        if (bRsiinFile == actionOpenRsciFile->isEnabled())
+		    actionOpenRsciFile->setEnabled(!bRsiinFile);
 
-        if (bRsiinFile != actionCloseRsiFile->isEnabled())
-		    actionCloseRsiFile->setEnabled(bRsiinFile);
+        if (bRsiinFile != actionCloseRsciFile->isEnabled())
+		    actionCloseRsciFile->setEnabled(bRsiinFile);
 
         emit soundFileChanged(eStatus);
     }
