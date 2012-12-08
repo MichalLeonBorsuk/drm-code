@@ -58,6 +58,7 @@ time_t timegm(struct tm *tm)
 {
 #if defined(_MSC_VER) && (_MSC_VER <= 1200) // MSVC++ 6.0
 	// TODO
+	return (time_t)0;
 #else
 	SYSTEMTIME st;
 	st.wYear = tm->tm_year+1900;
