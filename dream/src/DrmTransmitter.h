@@ -47,7 +47,7 @@ class CDRMTransmitter : public CDRMTransceiver
 {
 public:
     CDRMTransmitter(CSettings* pSettings=NULL);
-    virtual ~CDRMTransmitter() {}
+    virtual ~CDRMTransmitter();
 
     void LoadSettings();
     void SaveSettings();

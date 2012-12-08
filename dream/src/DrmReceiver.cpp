@@ -376,33 +376,43 @@ CDRMReceiver::SetInput()
             pSoundInInterface->Close();
             delete pSoundInInterface;
         }
+        /* Get a fresh CUpstreamDI interface */
         if (pUpstreamRSCI->GetInEnabled())
         {
             delete pUpstreamRSCI;
             pUpstreamRSCI = new CUpstreamDI();
         }
+        /* Check for RSCI file */
         if (rsiOrigin != "")
         {
             ReceiveData.ClearInputData();
             pSoundInInterface = new CSoundInNull();
             pUpstreamRSCI->SetOrigin(rsiOrigin);
         }
-        else if (sSoundFile != "")
-        {
-            /* Save sample rate */
-            if (iPrevSigSampleRate == 0)
-                iPrevSigSampleRate = Parameters.GetSigSampleRate();
-            /* Open sound file interface */
-            CAudioFileIn* AudioFileIn = new CAudioFileIn();
-            AudioFileIn->SetFileName(sSoundFile);
-            const int iSampleRate = AudioFileIn->GetSampleRate();
-            Parameters.SetSigSampleRate(iSampleRate);
-            pSoundInInterface = AudioFileIn;
-        }
         else
         {
-            /* Open sound card interface */
-            pSoundInInterface = new CSoundIn();
+            /* SetSyncInput to FALSE, can be modified by pUpstreamRSCI */
+            InputResample.SetSyncInput(FALSE);
+            SyncUsingPil.SetSyncInput(FALSE);
+            TimeSync.SetSyncInput(FALSE);
+            /* Check for Sound file */
+            if (sSoundFile != "")
+            {
+                /* Save sample rate */
+                if (iPrevSigSampleRate == 0)
+                    iPrevSigSampleRate = Parameters.GetSigSampleRate();
+                /* Open sound file interface */
+                CAudioFileIn* AudioFileIn = new CAudioFileIn();
+                AudioFileIn->SetFileName(sSoundFile);
+                const int iSampleRate = AudioFileIn->GetSampleRate();
+                Parameters.SetSigSampleRate(iSampleRate);
+                pSoundInInterface = AudioFileIn;
+            }
+            else
+            {
+                /* Open sound card interface */
+                pSoundInInterface = new CSoundIn();
+            }
         }
         pSoundInInterface->SetDev(sSndDevIn);
     Parameters.Unlock();
@@ -909,7 +919,7 @@ CDRMReceiver::Start()
     Parameters.eRunState = CParameter::RESTART;
     do
     {
-        /* Process new sound file or RSI input if any */
+        /* Setup new sound file or RSCI input if any */
         SetInput();
 
         /* Set new acquisition flag */
@@ -926,7 +936,7 @@ CDRMReceiver::Start()
         }
         while (Parameters.eRunState == CParameter::RUNNING);
 
-        /* Restore sample rate */
+        /* Restore some parameter previously set by SetInput() */
         ResetInput();
     }
     while (Parameters.eRunState == CParameter::RESTART);

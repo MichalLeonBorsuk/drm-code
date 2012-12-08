@@ -228,6 +228,12 @@ void CDRMTransmitter::Init()
     InitSoftStop();
 }
 
+CDRMTransmitter::~CDRMTransmitter()
+{
+    delete pSoundInInterface;
+    delete pSoundOutInterface;
+}
+
 CDRMTransmitter::CDRMTransmitter(CSettings* pSettings) : CDRMTransceiver(pSettings, new CSoundIn, new CSoundOut, TRUE),
         ReadData(pSoundInInterface), TransmitData(pSoundOutInterface),
         rDefCarOffset((_REAL) VIRTUAL_INTERMED_FREQ),
