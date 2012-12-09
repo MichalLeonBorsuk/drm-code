@@ -245,9 +245,10 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& NSettings, CRig& rig,
 
     action_Multimedia_Dialog->setEnabled(false);
 
-	pFileMenu = new CFileMenu(DRMReceiver, this, menu_View);
-	pSoundCardMenu = new CSoundCardSelMenu(DRMReceiver, pFileMenu, this);
+    pFileMenu = new CFileMenu(DRMReceiver, this, menu_View);
+    pSoundCardMenu = new CSoundCardSelMenu(DRMReceiver, pFileMenu, this);
     menu_Settings->addMenu(pSoundCardMenu);
+    connect(pFileMenu, SIGNAL(soundFileChanged(CDRMReceiver::ESFStatus)), this, SLOT(OnSoundFileChanged(CDRMReceiver::ESFStatus)));
 
     connect(actionMultimediaSettings, SIGNAL(triggered()), pMultSettingsDlg, SLOT(show()));
     connect(actionGeneralSettings, SIGNAL(triggered()), pGeneralSettingsDlg, SLOT(show()));

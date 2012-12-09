@@ -335,20 +335,17 @@ void CFileMenu::UpdateMenu()
     if (bReceiver)
     {
         CDRMReceiver::ESFStatus eStatus = ((CDRMReceiver&)DRMTransceiver).GetInputStatus();
-	    const bool bSoundFile = eStatus == CDRMReceiver::SF_SNDFILEIN;
-	    const bool bRsciMdiIn = eStatus == CDRMReceiver::SF_RSCIMDIIN;
+        const bool bSoundFile = eStatus == CDRMReceiver::SF_SNDFILEIN;
+        const bool bRsciMdiIn = eStatus == CDRMReceiver::SF_RSCIMDIIN;
 
-	    if (bRsciMdiIn == actionOpenSignalFile->isEnabled())
-		    actionOpenSignalFile->setEnabled(!bRsciMdiIn);
+        if (bRsciMdiIn == actionOpenSignalFile->isEnabled())
+            actionOpenSignalFile->setEnabled(!bRsciMdiIn);
 
-	    if (bSoundFile != actionCloseSignalFile->isEnabled())
-		    actionCloseSignalFile->setEnabled(bSoundFile);
-
-        if (bRsciMdiIn == actionOpenRsciFile->isEnabled())
-		    actionOpenRsciFile->setEnabled(!bRsciMdiIn);
+        if (bSoundFile != actionCloseSignalFile->isEnabled())
+            actionCloseSignalFile->setEnabled(bSoundFile);
 
         if (bRsciMdiIn != actionCloseRsciFile->isEnabled())
-		    actionCloseRsciFile->setEnabled(bRsciMdiIn);
+            actionCloseRsciFile->setEnabled(bRsciMdiIn);
 
         emit soundFileChanged(eStatus);
     }
