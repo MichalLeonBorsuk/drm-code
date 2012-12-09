@@ -1491,21 +1491,15 @@ CDRMReceiver::LoadSettings()
     /* if 0 then only measure PSD when RSCI in use otherwise always measure it */
     Parameters.bMeasurePSDAlways = s.Get("Receiver", "measurepsdalways", 0);
 
-    /* Upstream RSCI or sound card, etc. */
+    /* Upstream RSCI if any */
     string str = s.Get("command", "rsiin");
     if (str != "")
-    {
         rsiOrigin = str;
-    }
-    else
-    {
-        /* Input from file or sound card */
-        string strInFile = s.Get("command", string("fileio"));
-        if (strInFile != "")
-        {
-			SetSoundFile(strInFile);
-        }
-    }
+
+    /* Input from file if any */
+    str = s.Get("command", string("fileio"));
+    if (str != "")
+        SetSoundFile(str);
 
     /* Channel Estimation: Frequency Interpolation */
     SetFreqInt((CChannelEstimation::ETypeIntFreq)s.Get("Receiver", "freqint", int(CChannelEstimation::FWIENER)));
