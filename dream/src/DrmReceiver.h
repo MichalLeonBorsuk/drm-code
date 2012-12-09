@@ -134,7 +134,7 @@ class CDRMReceiver : public CDRMTransceiver
 {
 public:
 
-    enum ESFStatus { SF_SNDCARDIN, SF_SNDFILEIN, SF_RSIIN };
+    enum ESFStatus { SF_SNDCARDIN, SF_SNDFILEIN, SF_RSCIMDIIN };
 
     CDRMReceiver(CSettings* pSettings=NULL);
     virtual ~CDRMReceiver();

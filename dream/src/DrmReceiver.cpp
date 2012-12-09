@@ -466,7 +466,7 @@ CDRMReceiver::GetInputStatus()
     CDRMReceiver::ESFStatus eStatus = SF_SNDCARDIN;
     Parameters.Lock();
         if (rsiOrigin != "")
-            eStatus = SF_RSIIN;
+            eStatus = SF_RSCIMDIIN;
         else if (sSoundFile != "")
             eStatus = SF_SNDFILEIN;
     Parameters.Unlock();
