@@ -228,10 +228,10 @@ QMenu* CSoundCardSelMenu::InitSampleRate(QMenu* parent, const QString& text, con
 void CSoundCardSelMenu::OnSoundFileChanged(CDRMReceiver::ESFStatus eStatus)
 {
     const bool bSoundFile = eStatus == CDRMReceiver::SF_SNDFILEIN;
-    const bool bRsiinFile = eStatus == CDRMReceiver::SF_RSIIN;
+    const bool bRsciMdiIn = eStatus == CDRMReceiver::SF_RSCIMDIIN;
 
-    if (menuSigInput != NULL && bRsiinFile == menuSigDevice->isEnabled())
-        menuSigInput->setEnabled(!bRsiinFile);
+    if (menuSigInput != NULL && bRsciMdiIn == menuSigInput->isEnabled())
+        menuSigInput->setEnabled(!bRsciMdiIn);
 	
     if (menuSigDevice != NULL && bSoundFile == menuSigDevice->isEnabled())
         menuSigDevice->setEnabled(!bSoundFile);
@@ -336,19 +336,19 @@ void CFileMenu::UpdateMenu()
     {
         CDRMReceiver::ESFStatus eStatus = ((CDRMReceiver&)DRMTransceiver).GetInputStatus();
 	    const bool bSoundFile = eStatus == CDRMReceiver::SF_SNDFILEIN;
-	    const bool bRsiinFile = eStatus == CDRMReceiver::SF_RSIIN;
+	    const bool bRsciMdiIn = eStatus == CDRMReceiver::SF_RSCIMDIIN;
 
-	    if (bRsiinFile == actionOpenSignalFile->isEnabled())
-		    actionOpenSignalFile->setEnabled(!bRsiinFile);
+	    if (bRsciMdiIn == actionOpenSignalFile->isEnabled())
+		    actionOpenSignalFile->setEnabled(!bRsciMdiIn);
 
 	    if (bSoundFile != actionCloseSignalFile->isEnabled())
 		    actionCloseSignalFile->setEnabled(bSoundFile);
 
-        if (bRsiinFile == actionOpenRsciFile->isEnabled())
-		    actionOpenRsciFile->setEnabled(!bRsiinFile);
+        if (bRsciMdiIn == actionOpenRsciFile->isEnabled())
+		    actionOpenRsciFile->setEnabled(!bRsciMdiIn);
 
-        if (bRsiinFile != actionCloseRsciFile->isEnabled())
-		    actionCloseRsciFile->setEnabled(bRsiinFile);
+        if (bRsciMdiIn != actionCloseRsciFile->isEnabled())
+		    actionCloseRsciFile->setEnabled(bRsciMdiIn);
 
         emit soundFileChanged(eStatus);
     }
