@@ -47,6 +47,10 @@ void CPacketSocketNull::SendPacket(const vector<_BYTE>&, uint32_t, uint16_t)
 {
 }
 
+void CPacketSocketNull::poll()
+{
+}
+
 _BOOLEAN CPacketSocketNull::SetOrigin(const string&)
 {
 	return TRUE;

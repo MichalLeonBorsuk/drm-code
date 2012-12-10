@@ -39,7 +39,9 @@
 #include "sound/sound.h"
 #include "sound/soundnull.h"
 #include "sound/audiofilein.h"
-#include "GUI-QT/Rig.h"
+#ifdef USE_QT
+# include "GUI-QT/Rig.h"
+#endif
 
 const int
 CDRMReceiver::MAX_UNLOCKED_COUNT = 2;
@@ -1399,8 +1401,10 @@ void CDRMReceiver::SetFrequency(int iNewFreqkHz)
     }
 
 #ifdef HAVE_LIBHAMLIB
+# ifdef USE_QT // TODO
     if(pRig)
         pRig->SetFrequency(iNewFreqkHz);
+# endif
 #endif
 
     if (downstreamRSCI.GetOutEnabled() == TRUE)

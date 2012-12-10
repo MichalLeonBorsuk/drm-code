@@ -41,34 +41,38 @@
 #include "../DrmTransmitter.h"
 #include "../DrmSimulation.h"
 #include "../util/Settings.h"
-#include "Rig.h"
-
 #include <iostream>
 
-#include <qthread.h>
 #ifdef USE_QT_GUI
-# include <qapplication.h>
-# include <qmessagebox.h>
 # include "fdrmdialog.h"
 # include "TransmDlg.h"
 # include "DialogUtil.h"
+# include "Rig.h"
+# include <qapplication.h>
+# include <qmessagebox.h>
+# if QT_VERSION >= 0x040000
+#  include <QCoreApplication>
+#  include <QTranslator>
+# endif
 #endif
-#if QT_VERSION >= 0x040000
-# include <QCoreApplication>
-# include <QTranslator>
-#endif
+
+#if QT_VERSION >= 0x040000 || defined(USE_QT_GUI)
+# if QT_VERSION >= 0x040000
+#  include <QCoreApplication>
+# endif
+# include <qthread.h>
 
 class CRx: public QThread
 {
 public:
 	CRx(CDRMReceiver& nRx
-#ifdef _WIN32
+# ifdef _WIN32
 	, bool bPriorityEnabled
-#endif
+# endif
 	):rx(nRx)
-#ifdef _WIN32
+# ifdef _WIN32
 	, bPriorityEnabled(bPriorityEnabled)
-#endif
+# endif
 	{}
 	void run();
 private:
@@ -79,12 +83,12 @@ private:
 void
 CRx::run()
 {
-#ifdef _WIN32
+# ifdef _WIN32
     if (bPriorityEnabled)
     {
         SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_ABOVE_NORMAL);
     }
-#endif
+# endif
     qDebug("Working thread started");
     try
     {
@@ -101,6 +105,7 @@ CRx::run()
     }
     qDebug("Working thread complete");
 }
+#endif
 
 #ifdef USE_QT_GUI
 /******************************************************************************\
