@@ -90,6 +90,8 @@ protected:
     QAction*			actionOpenRsciFile;
     QAction*			actionCloseRsciFile;
     const bool			bReceiver;
+	QString				strLastSoundPath;
+	QString				strLastRsciPath;
 
 public slots:
     void OnOpenSignalFile();

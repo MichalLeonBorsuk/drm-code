@@ -282,11 +282,11 @@ void CFileMenu::OnOpenSignalFile()
 #endif
     if (bReceiver)
     {
-	    QString filename = QFileDialog::getOpenFileName(this, tr("Open Sound File"), NULL, tr(AUDIO_FILE_FILTER));
+	    QString filename = QFileDialog::getOpenFileName(this, tr("Open Sound File"), strLastSoundPath, tr(AUDIO_FILE_FILTER));
 	    /* Check if user not hit the cancel button */
 	    if (!filename.isEmpty())
 	    {
-		    // TODO implement a queue for more that one file!
+			strLastSoundPath = filename;
 		    ((CDRMReceiver&)DRMTransceiver).SetSoundFile(string(filename.toLocal8Bit().data()));
 		    RestartTransceiver(&DRMTransceiver);
             UpdateMenu();
@@ -308,11 +308,11 @@ void CFileMenu::OnOpenRsciFile()
 {
     if (bReceiver)
     {
-        QString filename = QFileDialog::getOpenFileName(this, tr("Open RSCI/MDI File"), NULL, tr("RSCI/MDI Files (*.rs*);;All Files (*)"));
+        QString filename = QFileDialog::getOpenFileName(this, tr("Open RSCI/MDI File"), strLastRsciPath, tr("RSCI/MDI Files (*.rs*);;All Files (*)"));
         /* Check if user not hit the cancel button */
         if (!filename.isEmpty())
         {
-            // TODO implement a queue for more that one file!
+			strLastRsciPath = filename;
             ((CDRMReceiver&)DRMTransceiver).SetRsciInput(string(filename.toLocal8Bit().data()));
             RestartTransceiver(&DRMTransceiver);
             UpdateMenu();
