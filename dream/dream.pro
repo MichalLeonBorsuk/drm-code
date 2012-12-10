@@ -1,11 +1,21 @@
-console {
-    message("console mode")
+qtconsole {
+    message("qt console mode")
     QT -= gui
     DEFINES -= USE_QT_GUI
 }
 else {
     DEFINES += USE_QT_GUI
     RESOURCES = src/GUI-QT/res/icons.qrc
+}
+console {
+    message("console mode")
+    QT -= gui
+    DEFINES -= USE_QT_GUI
+    DEFINES -= USE_QT
+    RESOURCES -= src/GUI-QT/res/icons.qrc
+}
+else {
+    DEFINES += USE_QT
 }
 TEMPLATE = app
 TARGET = dream
@@ -17,10 +27,15 @@ DEFINES += EXECUTABLE_NAME=$$TARGET
 #LIBS += -L$$PWD/libs
 macx:QMAKE_LFLAGS += -F$$PWD/libs
 contains(QT_VERSION, ^4\\..*) {
-    message("Qt 4")
-    QT += network xml webkit
+    console {
+        CONFIG -= qt
+	}
+    else {
+        message("Qt 4")
+        QT += network xml webkit
+    }
     VPATH += src/GUI-QT
-    !console {
+    !console:!qtconsole {
         HEADERS += src/GUI-QT/DRMPlot.h src/GUI-QT/EvaluationDlg.h
         HEADERS += src/GUI-QT/SlideShowViewer.h src/GUI-QT/JLViewer.h
         HEADERS += src/GUI-QT/BWSViewer.h src/GUI-QT/jlbrowser.h
@@ -110,10 +125,15 @@ contains(QT_VERSION, ^4\\..*) {
     }
 }
 count(QT_VERSION, 0) {
-    message("Qt 3")
+    console {
+        CONFIG -= qt
+	}
+    else {
+        message("Qt 3")
+        VPATH += src/GUI-QT/qt2
+    }
     CONFIG += old
-    VPATH += src/GUI-QT/qt2
-    !console {
+    !console:!qtconsole {
         HEADERS += src/GUI-QT/qt2/DRMPlot.h src/GUI-QT/systemevalDlg.h src/GUI-QT/MultimediaDlg.h
         SOURCES += src/GUI-QT/qt2/DRMPlot.cpp src/GUI-QT/systemevalDlg.cpp src/GUI-QT/MultimediaDlg.cpp
         FORMS += fdrmdialogbase.ui fmdialogbase.ui AnalogDemDlgbase.ui LiveScheduleDlgbase.ui
@@ -140,7 +160,7 @@ count(QT_VERSION, 0) {
         }
     }
 }
-!console {
+!console:!qtconsole {
     FORMS += TransmDlgbase.ui
     FORMS += AMSSDlgbase.ui \
     systemevalDlgbase.ui \
@@ -350,7 +370,7 @@ hamlib {
     macx:LIBS += -framework IOKit
     unix:LIBS += -lhamlib
     win32:LIBS += libhamlib-2.lib
-    !console:!old {
+    !console:!qtconsole:!old {
         HEADERS += src/GUI-QT/RigDlg.h
         SOURCES += src/GUI-QT/RigDlg.cpp
         FORMS += RigDlg.ui
@@ -378,7 +398,8 @@ pulseaudio {
     SOURCES += src/sound/drm_pulseaudio.cpp
     LIBS += -lpulse
 }
-HEADERS += src/AMDemodulation.h \
+HEADERS += \
+   src/AMDemodulation.h \
    src/AMSSDemodulation.h \
    src/chanest/ChanEstTime.h \
    src/chanest/ChannelEstimation.h \
@@ -388,8 +409,6 @@ HEADERS += src/AMDemodulation.h \
    src/datadecoding/DABMOT.h \
    src/datadecoding/DataDecoder.h \
    src/datadecoding/DataEncoder.h \
-   src/datadecoding/epg/EPG.h \
-   src/datadecoding/epg/epgdec.h \
    src/datadecoding/epg/epgutil.h \
    src/datadecoding/journaline/NML.h \
    src/datadecoding/journaline/Splitter.h \
@@ -433,8 +452,6 @@ HEADERS += src/AMDemodulation.h \
    src/MDI/PacketInOut.h \
    src/MDI/PacketSinkFile.h \
    src/MDI/PacketSourceFile.h \
-   src/MDI/PacketSocketNull.h \
-   src/MDI/PacketSocketQT.h \
    src/MDI/Pft.h \
    src/MDI/RCITagItems.h \
    src/MDI/RSCITagItemDecoders.h \
@@ -491,10 +508,9 @@ HEADERS += src/AMDemodulation.h \
    src/util/Settings.h \
    src/util/Utilities.h \
    src/util/Vector.h \
-   src/GUI-QT/Rig.h \
-   src/GUI-QT/Logging.h \
    src/Version.h
-SOURCES += src/AMDemodulation.cpp \
+SOURCES += \
+      src/AMDemodulation.cpp \
       src/AMSSDemodulation.cpp \
       src/chanest/ChanEstTime.cpp \
       src/chanest/ChannelEstimation.cpp \
@@ -504,8 +520,6 @@ SOURCES += src/AMDemodulation.cpp \
       src/datadecoding/DABMOT.cpp \
       src/datadecoding/DataDecoder.cpp \
       src/datadecoding/DataEncoder.cpp \
-      src/datadecoding/epg/EPG.cpp \
-      src/datadecoding/epg/epgdec.cpp \
       src/datadecoding/epg/epgutil.cpp \
       src/datadecoding/journaline/NML.cpp \
       src/datadecoding/journaline/dabdgdec_impl.c \
@@ -542,8 +556,6 @@ SOURCES += src/AMDemodulation.cpp \
       src/MDI/MDITagItems.cpp \
       src/MDI/PacketSinkFile.cpp \
       src/MDI/PacketSourceFile.cpp \
-      src/MDI/PacketSocketNull.cpp \
-      src/MDI/PacketSocketQT.cpp \
       src/MDI/Pft.cpp \
       src/MDI/RCITagItems.cpp \
       src/MDI/RSCITagItemDecoders.cpp \
@@ -590,11 +602,30 @@ SOURCES += src/AMDemodulation.cpp \
       src/util/Settings.cpp \
       src/util/Utilities.cpp \
       src/Version.cpp \
-      src/GUI-QT/Rig.cpp \
-      src/GUI-QT/Logging.cpp \
       src/GUI-QT/main.cpp
 !console {
-    HEADERS += src/GUI-QT/AnalogDemDlg.h \
+HEADERS += \
+    src/datadecoding/epg/EPG.h \
+    src/datadecoding/epg/epgdec.h \
+    src/GUI-QT/Logging.h \
+    src/GUI-QT/Rig.h \
+    src/MDI/PacketSocketQT.h
+SOURCES += \
+    src/datadecoding/epg/EPG.cpp \
+    src/datadecoding/epg/epgdec.cpp \
+    src/GUI-QT/Logging.cpp \
+    src/GUI-QT/Rig.cpp \
+    src/MDI/PacketSocketQT.cpp
+}
+else {
+HEADERS += \
+    src/MDI/PacketSocketNull.h
+SOURCES += \
+    src/MDI/PacketSocketNull.cpp
+}
+!console:!qtconsole {
+HEADERS += \
+    src/GUI-QT/AnalogDemDlg.h \
     src/GUI-QT/DialogUtil.h \
     src/GUI-QT/EPGDlg.h \
     src/GUI-QT/fdrmdialog.h \
@@ -605,7 +636,8 @@ SOURCES += src/AMDemodulation.cpp \
     src/GUI-QT/MultSettingsDlg.h \
     src/GUI-QT/StationsDlg.h \
     src/GUI-QT/TransmDlg.h
-    SOURCES += src/GUI-QT/AnalogDemDlg.cpp \
+SOURCES += \
+    src/GUI-QT/AnalogDemDlg.cpp \
     src/GUI-QT/DialogUtil.cpp \
     src/GUI-QT/EPGDlg.cpp \
     src/GUI-QT/fmdialog.cpp \

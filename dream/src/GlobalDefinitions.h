@@ -59,7 +59,9 @@ using namespace std; /* Because of the library: "complex" */
 #endif /* _WIN32 */
 
 /* set sensible defaults for QT */
-#include <qglobal.h>
+#ifdef USE_QT
+# include <qglobal.h>
+#endif
 
 /* Standard definitions */
 #ifndef TRUE
@@ -236,16 +238,22 @@ public:
     _REAL		rChan; /* Channel power at this cell */
 };
 
+
 /* Mutex object to access data safely from different threads */
 /* QT mutex */
-
 #ifdef USE_QT_GUI
 
+#if QT_VERSION < 0x040000
 # if QT_VERSION < 0x030000
 #  include <qthread.h>
 # else
+#  include <qwaitcondition.h>
 #  include <qmutex.h>
 # endif
+#else
+# include <QWaitCondition>
+# include <QMutex>
+#endif
 
 class CMutex
 {
@@ -256,9 +264,19 @@ public:
     void Unlock() {
         Mutex.unlock();
     }
-
-protected:
     QMutex Mutex;
+};
+
+class CWaitCondition
+{
+public:
+    void wakeOne() {
+        waitcond.wakeOne();
+    }
+    bool wait(CMutex* mutex, unsigned long time) {
+        return waitcond.wait(&mutex->Mutex, time);
+    }
+    QWaitCondition waitcond;
 };
 #else
 /* No GUI and no threads, we do not need mutex in this case */
@@ -268,6 +286,13 @@ public:
     void Lock() {}
     void Unlock() {}
 };
+
+class CWaitCondition
+{
+public:
+    void wakeOne() {}
+    bool wait(CMutex* mutex, unsigned long time) { (void)mutex; (void)time; return true;}
+};
 #endif
 
 class CGenErr
@@ -276,6 +301,7 @@ public:
     CGenErr(string strNE) : strError(strNE) {}
     string strError;
 };
+
 
 // FIXME something nicer than using "MAX_NUM_TAPS_DRM_CHAN"
 /* For simulation, data from channel simulation */

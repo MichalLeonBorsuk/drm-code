@@ -30,16 +30,6 @@
 #define MDI_IN_BUFFER_H_INCLUDED
 
 #include "../GlobalDefinitions.h"
-#if QT_VERSION < 0x040000
-# if QT_VERSION < 0x030000
-#  include <qthread.h>
-# else
-# include <qwaitcondition.h>
-# endif
-#else
-# include <QWaitCondition>
-# include <QMutex>
-#endif
 #include <vector>
 #include <queue>
 
@@ -54,8 +44,8 @@ public:
 
 protected:
 	queue< vector<_BYTE> > buffer;
-	QMutex guard;
-	QWaitCondition blocker;
+	CMutex guard;
+	CWaitCondition blocker;
 };
 
 #endif
