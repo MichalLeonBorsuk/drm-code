@@ -2,25 +2,30 @@
 # Microsoft Developer Studio Generated Build File, Format Version 6.00
 # ** DO NOT EDIT **
 
+
 # TARGTYPE "Win32 (x86) Application" 0x0101
 
 CFG=FDRM - Win32 Debug
 !MESSAGE This is not a valid makefile. To build this project using NMAKE,
 !MESSAGE use the Export Makefile command and run
+
+
 !MESSAGE 
 !MESSAGE NMAKE /f "FDRM.mak".
 !MESSAGE 
 !MESSAGE You can specify a configuration when running NMAKE
 !MESSAGE by defining the macro CFG on the command line. For example:
+
+
 !MESSAGE 
 !MESSAGE NMAKE /f "FDRM.mak" CFG="FDRM - Win32 Debug"
 !MESSAGE 
 !MESSAGE Possible choices for configuration are:
+
 !MESSAGE 
 !MESSAGE "FDRM - Win32 Release" (based on "Win32 (x86) Application")
 !MESSAGE "FDRM - Win32 Debug" (based on "Win32 (x86) Application")
 !MESSAGE 
-
 # Begin Project
 # PROP AllowPerConfigDependencies 0
 # PROP Scc_ProjName ""
@@ -710,7 +715,7 @@ SOURCE=..\src\AMSSDemodulation.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\src\audiofilein.cpp
+SOURCE=..\src\sound\audiofilein.cpp
 # End Source File
 # Begin Source File
 
@@ -783,6 +788,10 @@ SOURCE=..\src\resample\Resample.cpp
 # Begin Source File
 
 SOURCE=..\src\resample\ResampleFilter.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\Scheduler.cpp
 # End Source File
 # Begin Source File
 
@@ -1109,6 +1118,10 @@ SOURCE=..\src\datadecoding\journaline\Splitter.h
 # End Group
 # Begin Source File
 
+SOURCE=..\src\sound\audiofilein.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\src\datadecoding\DABMOT.h
 # End Source File
 # Begin Source File
@@ -1130,6 +1143,10 @@ SOURCE=..\src\datadecoding\Journaline.h
 # Begin Source File
 
 SOURCE=..\src\datadecoding\MOTSlideShow.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\Scheduler.h
 # End Source File
 # End Group
 # Begin Group "Header Utilities"
@@ -1271,10 +1288,6 @@ SOURCE=..\src\AMDemodulation.h
 # Begin Source File
 
 SOURCE=..\src\AMSSDemodulation.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\src\audiofilein.h
 # End Source File
 # Begin Source File
 
