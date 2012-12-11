@@ -67,7 +67,7 @@ class CRx: public QThread
 public:
 	CRx(CDRMReceiver& nRx
 # ifdef _WIN32
-	, bool bPriorityEnabled
+	, bool bPriorityEnabled=false
 # endif
 	):rx(nRx)
 # ifdef _WIN32
@@ -314,17 +314,16 @@ main(int argc, char **argv)
 			DRMReceiver.LoadSettings();
 
 #if QT_VERSION >= 0x040000
-			QCoreApplication a(argc, argv);
+			QCoreApplication app(argc, argv);
 			/* Start working thread */
 			CRx rx(DRMReceiver);
 			rx.start();
-			return a.exec();
+			return app.exec();
 #else
 			DRMReceiver.Start();
 #endif
-
 		}
-		else if(mode == "transmit")
+		else if (mode == "transmit")
 		{
 			CDRMTransmitter DRMTransmitter(&Settings);
 			DRMTransmitter.LoadSettings();

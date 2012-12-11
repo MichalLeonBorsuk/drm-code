@@ -39,7 +39,7 @@
 #include "sound/sound.h"
 #include "sound/soundnull.h"
 #include "sound/audiofilein.h"
-#ifdef USE_QT
+#ifdef USE_QT // TODO should not have dependency to qt here
 # include "GUI-QT/Rig.h"
 #endif
 
@@ -66,9 +66,9 @@ CDRMReceiver::CDRMReceiver(CSettings* pSettings) : CDRMTransceiver(pSettings, ne
 #ifdef HAVE_LIBHAMLIB
     pRig(NULL),
 #endif
-    PlotManager(), rsiOrigin(""), iPrevSigSampleRate(0)
+    PlotManager(), iPrevSigSampleRate(0)
 {
-	Parameters.SetReceiver(this);
+    Parameters.SetReceiver(this);
     downstreamRSCI.SetReceiver(this);
     PlotManager.SetReceiver(this);
 }
@@ -1401,7 +1401,7 @@ void CDRMReceiver::SetFrequency(int iNewFreqkHz)
     }
 
 #ifdef HAVE_LIBHAMLIB
-# ifdef USE_QT // TODO
+# ifdef USE_QT // TODO should not have dependency to qt here
     if(pRig)
         pRig->SetFrequency(iNewFreqkHz);
 # endif
@@ -1498,7 +1498,7 @@ CDRMReceiver::LoadSettings()
     /* Upstream RSCI if any */
     string str = s.Get("command", "rsiin");
     if (str != "")
-        rsiOrigin = str;
+        SetRsciInput(str);
 
     /* Input from file if any */
     str = s.Get("command", string("fileio"));

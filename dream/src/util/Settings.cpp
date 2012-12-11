@@ -280,30 +280,34 @@ CSettings::ParseArguments(int argc, char **argv)
 		}
 
 		/* Flip spectrum flag ----------------------------------------------- */
-		if (GetFlagArgument(argc, argv, i, "-p", "--flipspectrum") == TRUE)
+		if (GetNumericArgument(argc, argv, i, "-p", "--flipspectrum",
+							   0, 1, rArgument) == TRUE)
 		{
-			Put("Receiver", "flipspectrum", 1);
+			Put("Receiver", "flipspectrum", int (rArgument));
 			continue;
 		}
 
 		/* Mute audio flag -------------------------------------------------- */
-		if (GetFlagArgument(argc, argv, i, "-m", "--muteaudio") == TRUE)
+		if (GetNumericArgument(argc, argv, i, "-m", "--muteaudio",
+							   0, 1, rArgument) == TRUE)
 		{
-			Put("Receiver", "muteaudio", 1);
+			Put("Receiver", "muteaudio", int (rArgument));
 			continue;
 		}
 
 		/* Bandpass filter flag --------------------------------------------- */
-		if (GetFlagArgument(argc, argv, i, "-F", "--filter") == TRUE)
+		if (GetNumericArgument(argc, argv, i, "-F", "--filter",
+							   0, 1, rArgument) == TRUE)
 		{
-			Put("Receiver", "filter", 1);
+			Put("Receiver", "filter", int (rArgument));
 			continue;
 		}
 
 		/* Modified metrics flag -------------------------------------------- */
-		if (GetFlagArgument(argc, argv, i, "-D", "--modmetric") == TRUE)
+		if (GetNumericArgument(argc, argv, i, "-D", "--modmetric",
+							   0, 1, rArgument) == TRUE)
 		{
-			Put("Receiver", "modmetric", 1);
+			Put("Receiver", "modmetric", int (rArgument));
 			continue;
 		}
 
@@ -406,7 +410,7 @@ CSettings::ParseArguments(int argc, char **argv)
 			continue;
 		}
 
-#ifdef USE_QT_GUI				/* QThread needed for log file timing */
+#ifdef USE_QT_GUI /* QThread needed for log file timing */
 
 		/* log enable flag  ------------------------------------------------- */
 		if (GetNumericArgument(argc, argv, i, "-g", "--enablelog", 0, 1,
@@ -564,14 +568,15 @@ CSettings::ParseArguments(int argc, char **argv)
 		if (GetNumericArgument(argc, argv, i, "-M", "--hamlib-model", 0,
 							   MAX_ID_HAMLIB, rArgument) == TRUE)
 		{
-			Put("Hamlib", "hamlib-model", (int)rArgument);
+			Put("Hamlib", "hamlib-model", int (rArgument));
 			continue;
 		}
 
 		/* Enable s-meter flag ---------------------------------------------- */
-		if (GetFlagArgument(argc, argv, i, "-T", "--ensmeter") == TRUE)
+		if (GetNumericArgument(argc, argv, i, "-T", "--ensmeter",
+							   0, 1, rArgument) == TRUE)
 		{
-			Put("Hamlib", "ensmeter", (int)rArgument);
+			Put("Hamlib", "ensmeter", int (rArgument));
 			continue;
 		}
 #endif
@@ -605,19 +610,20 @@ CSettings::UsageArguments()
 {
 	/* The text below must be translatable */
 	return
-		"Usage: $EXECNAME [option [argument]]\n\n"
+		"Usage: $EXECNAME [option [argument]]\n"
+		"\n"
 		"Recognized options:\n"
 		"  -t, --transmitter            DRM transmitter mode\n"
-		"  -p, --flipspectrum           flip input spectrum\n"
+		"  -p <b>, --flipspectrum <b>   flip input spectrum (0: off; 1: on)\n"
 		"  -i <n>, --mlciter <n>        number of MLC iterations (allowed range: 0...4 default: 1)\n"
 		"  -s <r>, --sampleoff <r>      sample rate offset initial value [Hz] (allowed range: -200.0...200.0)\n"
-		"  -m, --muteaudio              mute audio output\n"
+		"  -m <b>, --muteaudio <b>      mute audio output (0: off; 1: on)\n"
 		"  -f <s>, --fileio <s>         disable sound card, use file <s> instead\n"
 		"  -w <s>, --writewav <s>       write output to wave file\n"
-		"  -S <r>, --fracwinsize <r>    freq. acqu. search window size [Hz]\n"
-		"  -E <r>, --fracwincent <r>    freq. acqu. search window center [Hz]\n"
-		"  -F, --filter                 apply bandpass filter\n"
-		"  -D, --modmetric              enable modified metrics\n"
+		"  -S <r>, --fracwinsize <r>    freq. acqu. search window size [Hz] (-1.0: sample rate / 2 (default))\n"
+		"  -E <r>, --fracwincent <r>    freq. acqu. search window center [Hz] (-1.0: sample rate / 4 (default))\n"
+		"  -F <b>, --filter <b>         apply bandpass filter (0: off; 1: on)\n"
+		"  -D <b>, --modmetric <b>      enable modified metrics (0: off; 1: on)\n"
 		"  -c <n>, --inchansel <n>      input channel selection\n"
 		"                               0: left channel;                     1: right channel;\n"
 		"                               2: mix both channels (default);      3: subtract right from left;\n"
@@ -626,26 +632,26 @@ CSettings::UsageArguments()
 		"  -u <n>, --outchansel <n>     output channel selection\n"
 		"                               0: L -> L, R -> R (default);   1: L -> L, R muted;   2: L muted, R -> R\n"
 		"                               3: mix -> L, R muted;          4: L muted, mix -> R\n"
-		"  -e <n>, --decodeepg <n>      enable/disable epg decoding (0: off; 1: on)\n"
+		"  -e <n>, --decodeepg <b>      enable/disable epg decoding (0: off; 1: on)\n"
 #ifdef USE_QT_GUI
-		"  -g <n>, --enablelog <n>      enable/disable logging (0: no logging; 1: logging\n"
+		"  -g <n>, --enablelog <b>      enable/disable logging (0: no logging; 1: logging\n"
 		"  -r <n>, --frequency <n>      set frequency [kHz] for log file\n"
 		"  -l <n>, --logdelay <n>       delay start of logging by <n> seconds, allowed range: 0...3600)\n"
 		"  -L <s>, --schedule <s>       read DRMlog.ini style schedule file and obey it\n"
 		"  -y <n>, --sysevplotstyle <n> set style for main plot\n"
 		"                               0: blue-white (default);   1: green-black;   2: black-grey\n"
 #endif
-		"  --enablepsd <n>              if 0 then only measure PSD when RSCI in use otherwise always measure it\n"
+		"  --enablepsd <b>              if 0 then only measure PSD when RSCI in use otherwise always measure it\n"
 		"  --mdiout <s>                 MDI out address format [IP#:]IP#:port (for Content Server)\n"
 		"  --mdiin  <s>                 MDI in address (for modulator) [[IP#:]IP:]port\n"
 		"  --rsioutprofile <s>          MDI/RSCI output profile: A|B|C|D|Q|M\n"
 		"  --rsiout <s>                 MDI/RSCI output address format [IP#:]IP#:port (prefix address with 'p' to enable the simple PFT)\n"
-		"  --rsiin <s>                  RSCI/MDI status input address format [[IP#:]IP#:]port\n"
+		"  --rsiin <s>                  MDI/RSCI input address format [[IP#:]IP#:]port\n"
 		"  --rciout <s>                 RSCI Control output format IP#:port\n"
 		"  --rciin <s>                  RSCI Control input address number format [IP#:]port\n"
 		"  --rsirecordprofile <s>       RSCI recording profile: A|B|C|D|Q|M\n"
 		"  --rsirecordtype <s>          RSCI recording file type: raw|ff|pcap\n"
-		"  --recordiq <n>               enable/disable recording an I/Q file\n"
+		"  --recordiq <b>               enable/disable recording an I/Q file\n"
 		"  -R <n>, --samplerate <n>     set audio and signal sound card sample rate [Hz]\n"
 		"  --audsrate <n>               set audio sound card sample rate [Hz] (allowed range: 8000...192000)\n"
 		"  --sigsrate <n>               set signal sound card sample rate [Hz] (allowed values: 24000, 48000, 96000, 192000)\n"
@@ -654,12 +660,13 @@ CSettings::UsageArguments()
 #ifdef HAVE_LIBHAMLIB
 		"  -M <n>, --hamlib-model <n>   set Hamlib radio model ID\n"
 		"  -C <s>, --hamlib-config <s>  set Hamlib config parameter\n"
+		"  -T <b>, --ensmeter <b>       enable S-Meter (0: off; 1: on)\n"
 #endif
-		"  -T, --ensmeter               enable S-Meter\n"
 #ifdef _WIN32
-		"  -P, --processpriority <n>    enable/disable high priority for working thread\n"
+		"  -P, --processpriority <b>    enable/disable high priority for working thread\n"
 #endif
-		"  -h, -?, --help               this help text\n\n"
+		"  -h, -?, --help               this help text\n"
+		"\n"
 		"Example: $EXECNAME -p --sampleoff -0.23 -i 2"
 #ifdef USE_QT_GUI
 		" -r 6140 --rsiout 127.0.0.1:3002"

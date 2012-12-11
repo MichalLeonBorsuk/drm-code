@@ -1,21 +1,21 @@
-qtconsole {
-    message("qt console mode")
-    QT -= gui
-    DEFINES -= USE_QT_GUI
-}
-else {
-    DEFINES += USE_QT_GUI
-    RESOURCES = src/GUI-QT/res/icons.qrc
-}
 console {
     message("console mode")
     QT -= gui
-    DEFINES -= USE_QT_GUI
     DEFINES -= USE_QT
-    RESOURCES -= src/GUI-QT/res/icons.qrc
+    DEFINES -= USE_QT_GUI
 }
 else {
-    DEFINES += USE_QT
+    qtconsole {
+        message("qt console mode")
+        QT -= gui
+        DEFINES += USE_QT
+        DEFINES -= USE_QT_GUI
+    }
+    else {
+        DEFINES += USE_QT
+        DEFINES += USE_QT_GUI
+        RESOURCES = src/GUI-QT/res/icons.qrc
+    }
 }
 TEMPLATE = app
 TARGET = dream
@@ -29,12 +29,12 @@ macx:QMAKE_LFLAGS += -F$$PWD/libs
 contains(QT_VERSION, ^4\\..*) {
     console {
         CONFIG -= qt
-	}
+    }
     else {
         message("Qt 4")
         QT += network xml webkit
+        VPATH += src/GUI-QT
     }
-    VPATH += src/GUI-QT
     !console:!qtconsole {
         HEADERS += src/GUI-QT/DRMPlot.h src/GUI-QT/EvaluationDlg.h
         HEADERS += src/GUI-QT/SlideShowViewer.h src/GUI-QT/JLViewer.h

@@ -114,10 +114,10 @@ CAudioSourceEncoderImplementation::CAudioSourceEncoderImplementation()
             FreeLibrary(hlib);
             hlib = NULL;
         }
-        cerr << "no FAAC library - using dummy" << endl;
+        cerr << "No usable FAAC aac encoder library found" << endl;
     }
     else
-        cerr << "got FAAC library" << endl;
+        cerr << "Got FAAC library" << endl;
 #endif
 }
 
