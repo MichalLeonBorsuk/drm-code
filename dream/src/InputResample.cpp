@@ -47,12 +47,15 @@ void CInputResample::ProcessDataInternal(CParameter& Parameters)
         _REAL rSigSampleRate = _REAL(Parameters.GetSigSampleRate());
         Parameters.Unlock();
 
+        /* Adjust maximum resample offset to sample rate */
+        const _REAL rMaxResampleOffset = ADJ_FOR_SRATE(_REAL(MAX_RESAMPLE_OFFSET), rSigSampleRate);
+
         /* Constrain the sample rate offset estimation to prevent from an
            output buffer overrun */
-        if (rSamRateOffset > MAX_RESAMPLE_OFFSET)
-            rSamRateOffset = MAX_RESAMPLE_OFFSET;
-        if (rSamRateOffset < -MAX_RESAMPLE_OFFSET)
-            rSamRateOffset = -MAX_RESAMPLE_OFFSET;
+        if (rSamRateOffset > rMaxResampleOffset)
+            rSamRateOffset = rMaxResampleOffset;
+        if (rSamRateOffset < -rMaxResampleOffset)
+            rSamRateOffset = -rMaxResampleOffset;
 
         /* Do actual resampling */
         iOutputBlockSize = ResampleObj.Resample(pvecInputData, pvecOutputData,
