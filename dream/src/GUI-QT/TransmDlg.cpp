@@ -173,6 +173,14 @@ TransmDialog::TransmDialog(CSettings& Settings,
 		break;
 	}
 
+	/* Output High Quality I/Q */
+	CheckBoxHighQualityIQ->setEnabled(TransThread.DRMTransmitter.GetTransData()->GetIQOutput() != CTransmitData::OF_REAL_VAL);
+	CheckBoxHighQualityIQ->setChecked(TransThread.DRMTransmitter.GetTransData()->GetHighQualityIQ());
+
+	/* Output Amplified */
+	CheckBoxHighQualityIQ->setEnabled(TransThread.DRMTransmitter.GetTransData()->GetIQOutput() != CTransmitData::OF_EP);
+	CheckBoxAmplifiedOutput->setChecked(TransThread.DRMTransmitter.GetTransData()->GetAmplifiedOutput());
+
 	/* Don't lock the Parameter object since the working thread is stopped */
 	CParameter& Parameters = *DRMTransmitter.GetParameters();
 
@@ -483,6 +491,7 @@ TransmDialog::TransmDialog(CSettings& Settings,
 
 
 	/* Connections ---------------------------------------------------------- */
+	/* Push buttons */
 	connect(ButtonStartStop, SIGNAL(clicked()),
 		this, SLOT(OnButtonStartStop()));
 #ifdef ENABLE_TRANSM_CODECPARAMS
@@ -497,6 +506,12 @@ TransmDialog::TransmDialog(CSettings& Settings,
 		this, SLOT(OnPushButtonAddFileName()));
 	connect(PushButtonClearAllFileNames, SIGNAL(clicked()),
 		this, SLOT(OnButtonClearAllFileNames()));
+
+	/* Check boxes */
+	connect(CheckBoxHighQualityIQ, SIGNAL(toggled(bool)),
+		this, SLOT(OnToggleCheckBoxHighQualityIQ(bool)));
+	connect(CheckBoxAmplifiedOutput, SIGNAL(toggled(bool)),
+		this, SLOT(OnToggleCheckBoxAmplifiedOutput(bool)));
 	connect(CheckBoxEnableTextMessage, SIGNAL(toggled(bool)),
 		this, SLOT(OnToggleCheckBoxEnableTextMessage(bool)));
 	connect(CheckBoxEnableAudio, SIGNAL(toggled(bool)),
@@ -559,6 +574,7 @@ TransmDialog::TransmDialog(CSettings& Settings,
 	connect(LineEditSndCrdIF, SIGNAL(textChanged(const QString&)),
 		this, SLOT(OnTextChangedSndCrdIF(const QString&)));
 
+	/* Timers */
 	connect(&Timer, SIGNAL(timeout()),
 		this, SLOT(OnTimer()));
 	connect(&TimerStop, SIGNAL(timeout()),
@@ -761,6 +777,16 @@ void TransmDialog::OnButtonStartStop()
 			bIsStarted = TRUE;
 		}
 	}
+}
+
+void TransmDialog::OnToggleCheckBoxHighQualityIQ(bool bState)
+{
+	TransThread.DRMTransmitter.GetTransData()->SetHighQualityIQ(bState);
+}
+
+void TransmDialog::OnToggleCheckBoxAmplifiedOutput(bool bState)
+{
+	TransThread.DRMTransmitter.GetTransData()->SetAmplifiedOutput(bState);
 }
 
 void TransmDialog::OnToggleCheckBoxEnableTextMessage(bool bState)
@@ -1410,24 +1436,32 @@ void TransmDialog::OnRadioOutput(int iID)
 		/* Button "Real Valued" */
 		TransThread.DRMTransmitter.GetTransData()->
 			SetIQOutput(CTransmitData::OF_REAL_VAL);
+		CheckBoxAmplifiedOutput->setEnabled(true);
+		CheckBoxHighQualityIQ->setEnabled(false);
 		break;
 
 	case 1:
 		/* Button "I / Q (pos)" */
 		TransThread.DRMTransmitter.GetTransData()->
 			SetIQOutput(CTransmitData::OF_IQ_POS);
+		CheckBoxAmplifiedOutput->setEnabled(true);
+		CheckBoxHighQualityIQ->setEnabled(true);
 		break;
 
 	case 2:
 		/* Button "I / Q (neg)" */
 		TransThread.DRMTransmitter.GetTransData()->
 			SetIQOutput(CTransmitData::OF_IQ_NEG);
+		CheckBoxAmplifiedOutput->setEnabled(true);
+		CheckBoxHighQualityIQ->setEnabled(true);
 		break;
 
 	case 3:
 		/* Button "E / P" */
 		TransThread.DRMTransmitter.GetTransData()->
 			SetIQOutput(CTransmitData::OF_EP);
+		CheckBoxAmplifiedOutput->setEnabled(false);
+		CheckBoxHighQualityIQ->setEnabled(true);
 		break;
 	}
 }

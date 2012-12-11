@@ -12,4 +12,10 @@
 /* Low pass prototype for Hilbert-filter */
 extern const float fHilFiltIQ[NUM_TAPS_IQ_INPUT_FILT];
 
+#define NUM_TAPS_IQ_INPUT_FILT_HQ        169
+#define IQ_INP_HIL_FILT_DELAY_HQ         84
+
+/* Low pass prototype for Hilbert-filter */
+extern const float fHilFiltIQ_HQ[NUM_TAPS_IQ_INPUT_FILT_HQ];
+
 #endif /* _IQINPUTFILTER_H_ */

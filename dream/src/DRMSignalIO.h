@@ -81,7 +81,8 @@ public:
 
     CTransmitData(CSoundOutInterface* pNS) : pFileTransmitter(NULL), pSound(pNS),
             eOutputFormat(OF_REAL_VAL), rDefCarOffset((_REAL) VIRTUAL_INTERMED_FREQ),
-            strOutFileName("test/TransmittedData.txt"), bUseSoundcard(TRUE) {}
+            strOutFileName("test/TransmittedData.txt"), bUseSoundcard(TRUE),
+            bAmplified(FALSE), bHighQualityIQ(FALSE) {}
     virtual ~CTransmitData();
 
     void SetIQOutput(const EOutFormat eFormat) {
@@ -89,6 +90,20 @@ public:
     }
     EOutFormat GetIQOutput() {
         return eOutputFormat;
+    }
+
+    void SetAmplifiedOutput(_BOOLEAN bEnable) {
+        bAmplified = bEnable;
+    }
+    _BOOLEAN GetAmplifiedOutput() {
+        return bAmplified;
+    }
+
+    void SetHighQualityIQ(_BOOLEAN bEnable) {
+        bHighQualityIQ = bEnable;
+    }
+    _BOOLEAN GetHighQualityIQ() {
+        return bHighQualityIQ;
     }
 
     void SetCarOffset(const CReal rNewCarOffset)
@@ -121,6 +136,12 @@ protected:
 
     string				strOutFileName;
     _BOOLEAN			bUseSoundcard;
+
+    _BOOLEAN			bAmplified;
+    _BOOLEAN			bHighQualityIQ;
+    CVector<_REAL>		vecrReHist;
+
+    void HilbertFilt(_COMPLEX& vecData);
 
     virtual void InitInternal(CParameter& TransmParam);
     virtual void ProcessDataInternal(CParameter& Parameter);

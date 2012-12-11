@@ -12,7 +12,7 @@
             <x>0</x>
             <y>0</y>
             <width>913</width>
-            <height>677</height>
+            <height>684</height>
         </rect>
     </property>
     <property stdset="1">
@@ -47,7 +47,7 @@
             <class>QLayoutWidget</class>
             <property stdset="1">
                 <name>name</name>
-                <cstring>Layout23</cstring>
+                <cstring>Layout25</cstring>
             </property>
             <hbox>
                 <property stdset="1">
@@ -965,6 +965,49 @@ Institute for Communication Technology</string>
                                         <property stdset="1">
                                             <name>buttonGroupId</name>
                                             <number>3</number>
+                                        </property>
+                                    </widget>
+                                </hbox>
+                            </widget>
+                            <widget>
+                                <class>QGroupBox</class>
+                                <property stdset="1">
+                                    <name>name</name>
+                                    <cstring>GroupBoxOptions</cstring>
+                                </property>
+                                <property stdset="1">
+                                    <name>title</name>
+                                    <string>Options</string>
+                                </property>
+                                <hbox>
+                                    <property stdset="1">
+                                        <name>margin</name>
+                                        <number>11</number>
+                                    </property>
+                                    <property stdset="1">
+                                        <name>spacing</name>
+                                        <number>6</number>
+                                    </property>
+                                    <widget>
+                                        <class>QCheckBox</class>
+                                        <property stdset="1">
+                                            <name>name</name>
+                                            <cstring>CheckBoxAmplifiedOutput</cstring>
+                                        </property>
+                                        <property stdset="1">
+                                            <name>text</name>
+                                            <string>+14 dB</string>
+                                        </property>
+                                    </widget>
+                                    <widget>
+                                        <class>QCheckBox</class>
+                                        <property stdset="1">
+                                            <name>name</name>
+                                            <cstring>CheckBoxHighQualityIQ</cstring>
+                                        </property>
+                                        <property stdset="1">
+                                            <name>text</name>
+                                            <string>High Quality I / Q</string>
                                         </property>
                                     </widget>
                                 </hbox>

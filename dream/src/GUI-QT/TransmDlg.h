@@ -171,6 +171,8 @@ public slots:
 #if defined(ENABLE_TRANSM_CODECPARAMS) || QT_VERSION < 0x040000
 	void OnButtonCodec();
 #endif
+	void OnToggleCheckBoxHighQualityIQ(bool bState);
+	void OnToggleCheckBoxAmplifiedOutput(bool bState);
 	void OnToggleCheckBoxEnableData(bool bState);
 	void OnToggleCheckBoxEnableAudio(bool bState);
 	void OnToggleCheckBoxEnableTextMessage(bool bState);

@@ -585,9 +585,92 @@ Institute for Communication Technology</string>
             <property name="radioButtonExclusive" stdset="0">
              <bool>true</bool>
             </property>
-            <layout class="QHBoxLayout" name="horizontalLayout_3">
+            <layout class="QVBoxLayout" name="verticalLayout_7">
              <item>
-              <widget class="QRadioButton" name="RadioButtonOutReal">
+              <layout class="QHBoxLayout" name="horizontalLayout_3">
+               <item>
+                <widget class="QRadioButton" name="RadioButtonOutReal">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="text">
+                  <string>Real val.</string>
+                 </property>
+                 <attribute name="buttonGroup">
+                  <string notr="true">ButtonGroupOutput</string>
+                 </attribute>
+                </widget>
+               </item>
+               <item>
+                <widget class="QRadioButton" name="RadioButtonOutIQPos">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="text">
+                  <string>I / Q (pos)</string>
+                 </property>
+                 <attribute name="buttonGroup">
+                  <string notr="true">ButtonGroupOutput</string>
+                 </attribute>
+                </widget>
+               </item>
+               <item>
+                <widget class="QRadioButton" name="RadioButtonOutIQNeg">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="text">
+                  <string>I / Q (neg)</string>
+                 </property>
+                 <attribute name="buttonGroup">
+                  <string notr="true">ButtonGroupOutput</string>
+                 </attribute>
+                </widget>
+               </item>
+               <item>
+                <widget class="QRadioButton" name="RadioButtonOutEP">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="text">
+                  <string>E / P</string>
+                 </property>
+                 <attribute name="buttonGroup">
+                  <string notr="true">ButtonGroupOutput</string>
+                 </attribute>
+                </widget>
+               </item>
+              </layout>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item>
+           <widget class="QGroupBox" name="GroupBoxOutputOption">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="title">
+             <string>Options</string>
+            </property>
+            <layout class="QHBoxLayout" name="horizontalLayout_7">
+             <item>
+              <widget class="QCheckBox" name="CheckBoxAmplifiedOutput">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
                  <horstretch>0</horstretch>
@@ -595,15 +678,12 @@ Institute for Communication Technology</string>
                 </sizepolicy>
                </property>
                <property name="text">
-                <string>Real val.</string>
+                <string>+14 dB</string>
                </property>
-               <attribute name="buttonGroup">
-                <string notr="true">ButtonGroupOutput</string>
-               </attribute>
               </widget>
              </item>
              <item>
-              <widget class="QRadioButton" name="RadioButtonOutIQPos">
+              <widget class="QCheckBox" name="CheckBoxHighQualityIQ">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
                  <horstretch>0</horstretch>
@@ -611,43 +691,8 @@ Institute for Communication Technology</string>
                 </sizepolicy>
                </property>
                <property name="text">
-                <string>I / Q (pos)</string>
+                <string>High quality I / Q</string>
                </property>
-               <attribute name="buttonGroup">
-                <string notr="true">ButtonGroupOutput</string>
-               </attribute>
-              </widget>
-             </item>
-             <item>
-              <widget class="QRadioButton" name="RadioButtonOutIQNeg">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="text">
-                <string>I / Q (neg)</string>
-               </property>
-               <attribute name="buttonGroup">
-                <string notr="true">ButtonGroupOutput</string>
-               </attribute>
-              </widget>
-             </item>
-             <item>
-              <widget class="QRadioButton" name="RadioButtonOutEP">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="text">
-                <string>E / P</string>
-               </property>
-               <attribute name="buttonGroup">
-                <string notr="true">ButtonGroupOutput</string>
-               </attribute>
               </widget>
              </item>
             </layout>
