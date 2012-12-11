@@ -737,7 +737,7 @@ CSoundInPulse::CSoundInPulse(): CSoundPulse(FALSE),
 
 _BOOLEAN CSoundInPulse::Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking)
 {
-	DEBUG_MSG("initrec iSampleRate=%i iBufferSize=%i bBlocking=%i\n", iNewSampleRate, iNewBufferSize, bNewBlocking);
+	DEBUG_MSG("initrec %i %i %i\n", iNewSampleRate, iNewBufferSize, bNewBlocking);
 	_BOOLEAN bChanged = FALSE;
 
 #ifdef ENABLE_STDIN_STDOUT
@@ -852,7 +852,7 @@ CSoundOutPulse::CSoundOutPulse(): CSoundPulse(TRUE),
 
 _BOOLEAN CSoundOutPulse::Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking)
 {
-	DEBUG_MSG("initplay iSampleRate=%i iBufferSize=%i bBlocking=%i\n", iNewSampleRate, iNewBufferSize, bNewBlocking);
+	DEBUG_MSG("initplay %i %i %i\n", iNewSampleRate, iNewBufferSize, bNewBlocking);
 	_BOOLEAN bChanged = FALSE;
 
 #ifdef ENABLE_STDIN_STDOUT

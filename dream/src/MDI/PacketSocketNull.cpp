@@ -53,15 +53,15 @@ void CPacketSocketNull::poll()
 
 _BOOLEAN CPacketSocketNull::SetOrigin(const string&)
 {
-	return TRUE;
+	return FALSE;
 }
 
 _BOOLEAN CPacketSocketNull::SetDestination(const string&)
 {
-	return TRUE;
+	return FALSE;
 }
 
 _BOOLEAN CPacketSocketNull::GetDestination(string&)
 {
-	return TRUE;
+	return FALSE;
 }

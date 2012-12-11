@@ -265,8 +265,8 @@ CFileMenu::CFileMenu(CDRMTransceiver& DRMTransceiver, QMainWindow* parent,
         actionOpenSignalFile = addAction(openFile, this, SLOT(OnOpenSignalFile()), QKeySequence(tr("Alt+O")));
         actionCloseSignalFile = addAction(closeFile, this, SLOT(OnCloseSignalFile()), QKeySequence(tr("Alt+C")));
         addSeparator();
-        actionOpenRsciFile = addAction(tr("Open RSCI/MDI File..."), this, SLOT(OnOpenRsciFile())/*, QKeySequence(tr("Alt+O"))*/);
-        actionCloseRsciFile = addAction(tr("Close RSCI/MDI File"), this, SLOT(OnCloseRsciFile())/*, QKeySequence(tr("Alt+C"))*/);
+        actionOpenRsciFile = addAction(tr("Open MDI/RSCI File..."), this, SLOT(OnOpenRsciFile())/*, QKeySequence(tr("Alt+O"))*/);
+        actionCloseRsciFile = addAction(tr("Close MDI/RSCI File"), this, SLOT(OnCloseRsciFile())/*, QKeySequence(tr("Alt+C"))*/);
         addSeparator();
     }
     addAction(tr("&Exit"), parent, SLOT(close()), QKeySequence(tr("Alt+X")));
@@ -308,7 +308,14 @@ void CFileMenu::OnOpenRsciFile()
 {
     if (bReceiver)
     {
-        QString filename = QFileDialog::getOpenFileName(this, tr("Open RSCI/MDI File"), strLastRsciPath, tr("RSCI/MDI Files (*.rs*);;All Files (*)"));
+        QString filename = QFileDialog::getOpenFileName(this, tr("Open MDI/RSCI File"), strLastRsciPath,
+			tr(
+				"MDI/RSCI Files (*.rsA* *.rsB* *.rsC* *.rsD* *.rsQ* *.rsM*);;"
+#ifdef HAVE_LIBPCAP
+				"PCAP Files (*.pcap);;"
+#endif
+				"All Files (*)"
+			));
         /* Check if user not hit the cancel button */
         if (!filename.isEmpty())
         {

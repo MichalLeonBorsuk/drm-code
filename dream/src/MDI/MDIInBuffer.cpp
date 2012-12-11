@@ -38,7 +38,7 @@ CMDIInBuffer::Put(const vector<_BYTE>& data)
 {
 	guard.Lock();
 	buffer.push(data);
-	blocker.wakeOne();
+	blocker.WakeOne();
 	guard.Unlock();
 }
 
@@ -52,7 +52,7 @@ CMDIInBuffer::Get(vector<_BYTE>& data)
 	guard.Lock();
 	if(buffer.empty())
 	{
-		if(blocker.wait(&guard, 1000))
+		if(blocker.Wait(&guard, 1000))
 		{
 			if(buffer.empty())
 				data.clear();

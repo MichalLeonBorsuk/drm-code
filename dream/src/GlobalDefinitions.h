@@ -65,7 +65,7 @@ using namespace std; /* Because of the library: "complex" */
 
 /* Standard definitions */
 #ifndef TRUE
-# define	TRUE							1
+# define TRUE							1
 #endif
 #ifndef FALSE
 # define FALSE							0
@@ -239,21 +239,19 @@ public:
 };
 
 
-/* Mutex object to access data safely from different threads */
-/* QT mutex */
-#ifdef USE_QT_GUI
-
+#if QT_VERSION >= 0x040000 || defined(USE_QT_GUI)
 #if QT_VERSION < 0x040000
 # if QT_VERSION < 0x030000
 #  include <qthread.h>
 # else
-#  include <qwaitcondition.h>
 #  include <qmutex.h>
+#  include <qwaitcondition.h>
 # endif
 #else
-# include <QWaitCondition>
 # include <QMutex>
+# include <QWaitCondition>
 #endif
+/* Mutex object to access data safely from different threads */
 
 class CMutex
 {
@@ -264,22 +262,27 @@ public:
     void Unlock() {
         Mutex.unlock();
     }
+protected:
     QMutex Mutex;
+friend class CWaitCondition;
 };
 
 class CWaitCondition
 {
 public:
-    void wakeOne() {
-        waitcond.wakeOne();
+    void WakeOne() {
+        WaitCond.wakeOne();
     }
-    bool wait(CMutex* mutex, unsigned long time) {
-        return waitcond.wait(&mutex->Mutex, time);
+    _BOOLEAN Wait(CMutex* mutex, unsigned long time) {
+        return WaitCond.wait(&mutex->Mutex, time);
     }
-    QWaitCondition waitcond;
+protected:
+    QWaitCondition WaitCond;
 };
+
 #else
 /* No GUI and no threads, we do not need mutex in this case */
+
 class CMutex
 {
 public:
@@ -290,9 +293,10 @@ public:
 class CWaitCondition
 {
 public:
-    void wakeOne() {}
-    bool wait(CMutex* mutex, unsigned long time) { (void)mutex; (void)time; return true;}
+    void WakeOne() {}
+    _BOOLEAN Wait(CMutex*, unsigned long) {return TRUE;}
 };
+
 #endif
 
 class CGenErr

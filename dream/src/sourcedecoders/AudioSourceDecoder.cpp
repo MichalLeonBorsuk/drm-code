@@ -1140,7 +1140,6 @@ CAudioSourceDecoder::CAudioSourceDecoder()
         pFile(NULL)
 {
 #ifndef USE_FAAD2_LIBRARY
-    cerr << "looking for FAAD2" << endl;
 # ifdef _WIN32
     hFaaDlib = LoadLibrary(TEXT("faad2_drm.dll"));
     if (hFaaDlib == NULL)
@@ -1177,10 +1176,10 @@ CAudioSourceDecoder::CAudioSourceDecoder()
             FreeLibrary(hFaaDlib);
             hFaaDlib = NULL;
         }
-        cerr << "no usable AAC lib found" << endl;
+        cerr << "No usable FAAD2 aac decoder library found" << endl;
     }
     else
-        cerr << "AAC decoder lib found" << endl;
+        cerr << "Got FAAD2 library" << endl;
 #endif
 }
 
