@@ -223,7 +223,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\src\audiofilein.cpp"
+				RelativePath="..\src\sound\audiofilein.cpp"
 				>
 			</File>
 			<File
@@ -543,6 +543,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\src\Scheduler.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\src\SDC\SDCReceive.cpp"
 				>
 			</File>
@@ -710,7 +714,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\src\audiofilein.h"
+				RelativePath="..\src\sound\audiofilein.h"
 				>
 			</File>
 			<File
@@ -1344,6 +1348,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\src\Scheduler.h"
+				>
+			</File>
+			<File
 				RelativePath="..\src\SDC\SDC.h"
 				>
 			</File>
@@ -1360,11 +1368,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\src\windows\Sound.h"
+				RelativePath="..\src\sound.h"
 				>
 			</File>
 			<File
-				RelativePath="..\src\sound.h"
+				RelativePath="..\src\windows\Sound.h"
 				>
 			</File>
 			<File
