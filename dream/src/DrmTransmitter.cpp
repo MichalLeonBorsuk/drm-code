@@ -442,6 +442,12 @@ void CDRMTransmitter::LoadSettings()
     else if (value == "OF_IQ_NEG")   { GetTransData()->SetIQOutput(CTransmitData::OF_IQ_NEG);   }
     else if (value == "OF_EP")       { GetTransData()->SetIQOutput(CTransmitData::OF_EP);       }
 
+    /* IF high quality I/Q */
+    GetTransData()->SetHighQualityIQ(s.Get(Transmitter, "hqiq", int(1)));
+
+    /* IF amplified output */
+    GetTransData()->SetAmplifiedOutput(s.Get(Transmitter, "ifamp", int(1)));
+
     /* Transmission of current time */
     value = s.Get(Transmitter, "currenttime", string("CT_OFF"));
     if      (value == "CT_OFF")        { Parameters.eTransmitCurrentTime = CParameter::CT_OFF;        }
@@ -587,6 +593,12 @@ void CDRMTransmitter::SaveSettings()
     case CTransmitData::OF_EP:       value = "OF_EP";       break;
     default: value = ""; }
     s.Put(Transmitter, "ifformat", value);
+
+    /* IF high quality I/Q */
+    s.Put(Transmitter, "hqiq", int(GetTransData()->GetHighQualityIQ()));
+
+    /* IF amplified output */
+    s.Put(Transmitter, "ifamp", int(GetTransData()->GetAmplifiedOutput()));
 
     /* Transmission of current time */
     switch (Parameters.eTransmitCurrentTime) {
