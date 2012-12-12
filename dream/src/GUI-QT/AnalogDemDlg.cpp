@@ -112,18 +112,19 @@ AnalogDemDlg::AnalogDemDlg(CDRMReceiver& NDRMR, CSettings& NSettings,
 	AnalogDemDlgBaseLayout->setMenuBar(pMenu);
 #else
 	pFileMenu = new CFileMenu(DRMReceiver, this, menu_View);
-    connect(action_Stations_Dialog, SIGNAL(triggered()), this, SIGNAL(ViewStationsDlg()));
-    connect(action_Live_Schedule_Dialog, SIGNAL(triggered()), this, SIGNAL(ViewLiveScheduleDlg()));
-    connect(actionExit, SIGNAL(triggered()), this, SLOT(close()));
-    connect(actionAM, SIGNAL(triggered()), this, SIGNAL(NewAMAcquisition()));
-    connect(actionFM, SIGNAL(triggered()), this, SLOT(OnSwitchToFM()));
-    connect(actionDRM, SIGNAL(triggered()), this, SLOT(OnSwitchToDRM()));
+	connect(action_Stations_Dialog, SIGNAL(triggered()), this, SIGNAL(ViewStationsDlg()));
+	connect(action_Live_Schedule_Dialog, SIGNAL(triggered()), this, SIGNAL(ViewLiveScheduleDlg()));
+	connect(actionExit, SIGNAL(triggered()), this, SLOT(close()));
+	connect(actionAM, SIGNAL(triggered()), this, SIGNAL(NewAMAcquisition()));
+	connect(actionFM, SIGNAL(triggered()), this, SLOT(OnSwitchToFM()));
+	connect(actionDRM, SIGNAL(triggered()), this, SLOT(OnSwitchToDRM()));
 	pSoundCardMenu = new CSoundCardSelMenu(DRMReceiver, pFileMenu, this);
 	menu_Settings->addMenu(pSoundCardMenu);
-    connect(actionAbout_Dream, SIGNAL(triggered()), this, SLOT(OnHelpAbout()));
-    connect(actionWhats_This, SIGNAL(triggered()), this, SLOT(on_actionWhats_This()));
-    SliderBandwidth->setTickPosition(QSlider::TicksBothSides);
-    MainPlot = new CDRMPlot(NULL, plot);
+	connect(pSoundCardMenu, SIGNAL(sampleRateChanged()), this, SLOT(switchEvent()));
+	connect(actionAbout_Dream, SIGNAL(triggered()), this, SLOT(OnHelpAbout()));
+	connect(actionWhats_This, SIGNAL(triggered()), this, SLOT(on_actionWhats_This()));
+	SliderBandwidth->setTickPosition(QSlider::TicksBothSides);
+	MainPlot = new CDRMPlot(NULL, plot);
 #endif
 
 	/* Init main plot */
@@ -141,7 +142,7 @@ AnalogDemDlg::AnalogDemDlg(CDRMReceiver& NDRMR, CSettings& NSettings,
 	}
 
 	/* Add tool tip to show the user the possibility of choosing the AM IF */
-        QString ptt = tr("Click on the plot to set the demodulation frequency");
+	QString ptt = tr("Click on the plot to set the demodulation frequency");
 	if(MainPlot)
 	{
 #if QT_VERSION < 0x040000
@@ -250,6 +251,7 @@ void AnalogDemDlg::OnSwitchToFM()
 void AnalogDemDlg::switchEvent()
 {
 	/* Put initialization code on mode switch here */
+	SliderBandwidth->setRange(0, DRMReceiver.GetParameters()->GetSigSampleRate() / 2);
 #if QT_VERSION >= 0x040000
 	pFileMenu->UpdateMenu();
 #endif

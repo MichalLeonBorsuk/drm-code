@@ -120,7 +120,6 @@ class AnalogDemDlg : public AnalogDemDlgBase
 public:
 	AnalogDemDlg(CDRMReceiver&, CSettings&, QWidget* parent = 0,
 		const char* name = 0, bool modal = FALSE, Qt::WFlags f = 0);
-	void switchEvent();
 
 protected:
 	CDRMReceiver&	DRMReceiver;
@@ -142,6 +141,7 @@ protected:
 	void hideEvent(QHideEvent* pEvent);
 
 public slots:
+	void switchEvent();
 	void closeEvent(QCloseEvent* pEvent);
 	void UpdatePlotStyle(int);
 	void OnTimer();
