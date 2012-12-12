@@ -678,7 +678,7 @@ Institute for Communication Technology</string>
                 </sizepolicy>
                </property>
                <property name="text">
-                <string>+14 dB</string>
+                <string>+12 dB</string>
                </property>
               </widget>
              </item>
