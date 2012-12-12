@@ -1318,7 +1318,7 @@ CMOTDirectory::Reset ()
 void
 CMOTDirectory::AddHeader(CVector < _BINARY > &vecbiHeader)
 {
-//	int iDirectorySize;
+	int iDirectorySize;
 
 	/* compression flag - must be zero */
 	bCompressionFlag = vecbiHeader.Separate(1) ? TRUE : FALSE;
@@ -1327,7 +1327,7 @@ CMOTDirectory::AddHeader(CVector < _BINARY > &vecbiHeader)
 	vecbiHeader.Separate(1);
 
 	/* Directory size: not used */
-//	iDirectorySize = (int) vecbiHeader.Separate(30);
+	iDirectorySize = (int) vecbiHeader.Separate(30); (void)iDirectorySize;
 
 	/* Number of objects */
 	iNumberOfObjects = (int) vecbiHeader.Separate(16);
