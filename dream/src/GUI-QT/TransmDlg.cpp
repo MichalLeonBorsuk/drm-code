@@ -1373,9 +1373,9 @@ void TransmDialog::OnRadioRobustnessMode(int iID)
 		break;
 	}
 
-	/* Set new robustness mode. Spectrum occupancy is the same as before */
+	/* Set new robustness mode */
 	Parameters.Lock();
-	Parameters.InitCellMapTable(eNewRobMode, Parameters.GetSpectrumOccup());
+	Parameters.SetWaveMode(eNewRobMode);
 	Parameters.Unlock();
 }
 
@@ -1417,11 +1417,9 @@ void TransmDialog::OnRadioBandwidth(int iID)
 
 	CParameter& Parameters = *TransThread.DRMTransmitter.GetParameters();
 
+	/* Set new spectrum occupancy */
 	Parameters.Lock();
-
-	/* Set new spectrum occupancy. Robustness mode is the same as before */
-	Parameters.InitCellMapTable(Parameters.GetWaveMode(), eNewSpecOcc);
-
+	Parameters.SetSpectrumOccup(eNewSpecOcc);
 	Parameters.Unlock();
 }
 

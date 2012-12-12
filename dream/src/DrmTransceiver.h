@@ -43,9 +43,16 @@ public:
     virtual void LoadSettings() = 0;
     virtual void SaveSettings() = 0;
     virtual void Start() = 0;
-    virtual void Restart() = 0;
-    virtual void Stop() = 0;
 
+    virtual void Restart()
+    {
+        if (Parameters.eRunState == CParameter::RUNNING)
+            Parameters.eRunState = CParameter::RESTART;
+    }
+    virtual void Stop()
+    {
+        Parameters.eRunState = CParameter::STOP_REQUESTED;
+    }
     virtual CSettings*				GetSettings() {
         return pSettings;
     }
@@ -69,6 +76,11 @@ public:
 	}
 
 protected:
+    virtual void CloseSoundInterfaces()
+    {
+        pSoundInInterface->Close();
+        pSoundOutInterface->Close();
+    }
 	CSettings*				pSettings;
     CParameter				Parameters;
     CSoundInInterface*		pSoundInInterface;

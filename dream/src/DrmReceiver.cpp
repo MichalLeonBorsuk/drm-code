@@ -360,17 +360,12 @@ CDRMReceiver::Run()
 }
 
 void
-CDRMReceiver::CloseSoundInterface()
-{
-    pSoundInInterface->Close();
-    pSoundOutInterface->Close();
-}
-
-void
 CDRMReceiver::SetInput()
 {
+    string sSndDevIn;
     Parameters.Lock();
-        string sSndDevIn;
+        /* Fetch new sample rate if any */
+        Parameters.FetchNewSampleRate();
         /* Close previous sound interface */
         if (pSoundInInterface != NULL)
         {
@@ -943,22 +938,9 @@ CDRMReceiver::Start()
     }
     while (Parameters.eRunState == CParameter::RESTART);
 
-    CloseSoundInterface();
+    CloseSoundInterfaces();
 
     Parameters.eRunState = CParameter::STOPPED;
-}
-
-void
-CDRMReceiver::Restart()
-{
-    if (Parameters.eRunState == CParameter::RUNNING)
-        Parameters.eRunState = CParameter::RESTART;
-}
-
-void
-CDRMReceiver::Stop()
-{
-    Parameters.eRunState = CParameter::STOP_REQUESTED;
 }
 
 void
@@ -1487,10 +1469,13 @@ CDRMReceiver::LoadSettings()
     /* Receiver ------------------------------------------------------------- */
 
     /* Sound card audio sample rate, some settings below depends on this one */
-    Parameters.SetAudSampleRate(s.Get("Receiver", "samplerateaud", int(DEFAULT_SOUNDCRD_SAMPLE_RATE)));
+    Parameters.SetNewAudSampleRate(s.Get("Receiver", "samplerateaud", int(DEFAULT_SOUNDCRD_SAMPLE_RATE)));
 
     /* Sound card signal sample rate, some settings below depends on this one */
-    Parameters.SetSigSampleRate(s.Get("Receiver", "sampleratesig", int(DEFAULT_SOUNDCRD_SAMPLE_RATE)));
+    Parameters.SetNewSigSampleRate(s.Get("Receiver", "sampleratesig", int(DEFAULT_SOUNDCRD_SAMPLE_RATE)));
+
+    /* Fetch new sample rate if any */
+    Parameters.FetchNewSampleRate();
 
     /* if 0 then only measure PSD when RSCI in use otherwise always measure it */
     Parameters.bMeasurePSDAlways = s.Get("Receiver", "measurepsdalways", 0);
@@ -1675,6 +1660,9 @@ CDRMReceiver::SaveSettings()
     s.Put("Receiver", "mode", int(eReceiverMode));
 
     /* Receiver ------------------------------------------------------------- */
+
+    /* Fetch new sample rate if any */
+    Parameters.FetchNewSampleRate();
 
     /* Sound card audio sample rate */
     s.Put("Receiver", "samplerateaud", Parameters.GetAudSampleRate());
