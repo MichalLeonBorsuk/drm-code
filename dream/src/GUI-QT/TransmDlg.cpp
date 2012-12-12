@@ -178,7 +178,7 @@ TransmDialog::TransmDialog(CSettings& Settings,
 	CheckBoxHighQualityIQ->setChecked(TransThread.DRMTransmitter.GetTransData()->GetHighQualityIQ());
 
 	/* Output Amplified */
-	CheckBoxHighQualityIQ->setEnabled(TransThread.DRMTransmitter.GetTransData()->GetIQOutput() != CTransmitData::OF_EP);
+	CheckBoxAmplifiedOutput->setEnabled(TransThread.DRMTransmitter.GetTransData()->GetIQOutput() != CTransmitData::OF_EP);
 	CheckBoxAmplifiedOutput->setChecked(TransThread.DRMTransmitter.GetTransData()->GetAmplifiedOutput());
 
 	/* Don't lock the Parameter object since the working thread is stopped */
