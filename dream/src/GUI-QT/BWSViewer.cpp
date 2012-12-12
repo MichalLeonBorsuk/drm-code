@@ -381,7 +381,6 @@ bool BWSViewer::Changed()
         /* Poll the data decoder module for new object */
         while (decoder->GetMOTObject(obj, CDataDecoder::AT_BROADCASTWEBSITE) == TRUE)
         {
-printf("obj strName=%s\n", obj.strName.c_str());
             /* Get the current directory */
             CMOTDirectory MOTDir;
             if (decoder->GetMOTDirectory(MOTDir, CDataDecoder::AT_BROADCASTWEBSITE) == TRUE)
