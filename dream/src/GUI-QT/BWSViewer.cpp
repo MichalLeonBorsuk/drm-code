@@ -180,9 +180,6 @@ void BWSViewer::OnTimer()
     if (iLastServiceID != iServiceID || bLastServiceValid != bServiceValid || strLastLabel != strLabel)
         UpdateWindowTitle(iServiceID, bServiceValid, strLabel);
 
-    if (decoder == NULL)
-        decoder = receiver.GetDataDecoder();
-
     switch(eStatus)
     {
     case NOT_PRESENT:
@@ -200,6 +197,13 @@ void BWSViewer::OnTimer()
     case RX_OK:
         LEDStatus->SetLight(CMultColorLED::RL_GREEN);
         break;
+    }
+
+    if (decoder == NULL)
+    {
+        decoder = receiver.GetDataDecoder();
+        if (decoder == NULL)
+            qDebug("can't get data decoder from receiver");
     }
 
     if (Changed())
@@ -377,6 +381,7 @@ bool BWSViewer::Changed()
         /* Poll the data decoder module for new object */
         while (decoder->GetMOTObject(obj, CDataDecoder::AT_BROADCASTWEBSITE) == TRUE)
         {
+printf("obj strName=%s\n", obj.strName.c_str());
             /* Get the current directory */
             CMOTDirectory MOTDir;
             if (decoder->GetMOTDirectory(MOTDir, CDataDecoder::AT_BROADCASTWEBSITE) == TRUE)

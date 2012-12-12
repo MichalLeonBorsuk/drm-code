@@ -91,9 +91,6 @@ CPacketSocketQT::ResetPacketSink(void)
 void
 CPacketSocketQT::SendPacket(const vector < _BYTE > &vecbydata, uint32_t addr, uint16_t port)
 {
-//    int bytes_written;
-    /* Send packet to network */
-
 #if QT_VERSION < 0x040000
     int bytes_written;
     if(pSocketDevice->type() == QSocketDevice::Datagram)
@@ -117,6 +114,7 @@ CPacketSocketQT::SendPacket(const vector < _BYTE > &vecbydata, uint32_t addr, ui
         // TODO
     }
 #else
+    /*int bytes_written;*/
     (void)addr; (void)port;
     if(udpSocket != NULL)
         /*bytes_written =*/ udpSocket->writeDatagram((char*)&vecbydata[0], vecbydata.size(), HostAddrOut, iHostPortOut);
