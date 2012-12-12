@@ -53,8 +53,6 @@ public:
     void SaveSettings();
     void Init();
     void Start();
-    void Restart() {}
-    void Stop();
 
     CAudioSourceEncoder*	GetAudSrcEnc() {
         return &AudioSourceEncoder;

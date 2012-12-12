@@ -123,6 +123,8 @@ CParameter::CParameter():
     gps_host("localhost"), gps_port("2497"),
     iAudSampleRate(DEFAULT_SOUNDCRD_SAMPLE_RATE),
     iSigSampleRate(DEFAULT_SOUNDCRD_SAMPLE_RATE),
+    iNewAudSampleRate(0),
+    iNewSigSampleRate(0),
     rSysSimSNRdB(0.0),
     iFrequency(0),
     bValidSignalStrength(FALSE),
@@ -232,6 +234,8 @@ CParameter::CParameter(const CParameter& p):
     gps_host(p.gps_host),gps_port(p.gps_port),
     iAudSampleRate(p.iAudSampleRate),
     iSigSampleRate(p.iSigSampleRate),
+    iNewAudSampleRate(p.iNewAudSampleRate),
+    iNewSigSampleRate(p.iNewSigSampleRate),
     rSysSimSNRdB(p.rSysSimSNRdB),
     iFrequency(p.iFrequency),
     bValidSignalStrength(p.bValidSignalStrength),
@@ -336,6 +340,8 @@ CParameter& CParameter::operator=(const CParameter& p)
     restart_gpsd = p.restart_gpsd;
     iAudSampleRate = p.iAudSampleRate;
     iSigSampleRate = p.iSigSampleRate;
+    iNewAudSampleRate = p.iNewAudSampleRate;
+    iNewSigSampleRate = p.iNewSigSampleRate;
     rSysSimSNRdB = p.rSysSimSNRdB;
     iFrequency = p.iFrequency;
     bValidSignalStrength = p.bValidSignalStrength;

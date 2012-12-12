@@ -142,8 +142,6 @@ public:
     void					LoadSettings(); // can write to settings to set defaults
     void					SaveSettings();
     void					Start();
-    void					Restart();
-    void					Stop();
     void					SetRsciInput(const string& rsciInput);
     void					ClearRsciInput();
     void					SetSoundFile(const string& soundFile);
@@ -315,7 +313,6 @@ protected:
     void					SetInTrackingModeDelayed();
     void					InitsForAllModules();
     void					Run();
-    void					CloseSoundInterface();
     void					SetInput();
     void					ResetInput();
     void					DemodulateDRM(_BOOLEAN&);

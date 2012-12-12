@@ -33,20 +33,26 @@
 /* Implementation *************************************************************/
 void CDRMTransmitter::Start()
 {
-    /* Set run flag */
-    Parameters.eRunState = CParameter::RUNNING;
+    /* Set restart flag */
+    Parameters.eRunState = CParameter::RESTART;
+    do
+    {
+        /* Initialization of the modules */
+        Init();
 
-    /* Initialization of the modules */
-    Init();
+        /* Set run flag */
+        Parameters.eRunState = CParameter::RUNNING;
 
-    /* Start the transmitter run routine */
-    Run();
-}
+        /* Start the transmitter run routine */
+        Run();
+    }
+    while (Parameters.eRunState == CParameter::RESTART);
 
-void CDRMTransmitter::Stop()
-{
-    /* Set flag to request stop */
-    Parameters.eRunState = CParameter::STOP_REQUESTED;
+    /* Closing the sound interfaces */
+    CloseSoundInterfaces();
+
+    /* Set flag to stopped */
+    Parameters.eRunState = CParameter::STOPPED;
 }
 
 void CDRMTransmitter::Run()
@@ -98,13 +104,6 @@ void CDRMTransmitter::Run()
         /* Transmit the signal ************************************************/
         TransmitData.WriteData(Parameters, OFDMModBuf);
     }
-
-    /* Closing the sound interfaces */
-    if (pSoundInInterface) pSoundInInterface->Close();
-    if (pSoundOutInterface) pSoundOutInterface->Close();
-
-    /* Set flag to stopped */
-    Parameters.eRunState = CParameter::STOPPED;
 }
 
 #if 1
@@ -196,17 +195,11 @@ _BOOLEAN CDRMTransmitter::CanSoftStopExit()
 
 void CDRMTransmitter::Init()
 {
-    /* (Re)Initialization of the buffers */
-    CarMapBuf.Clear();
-    SDCMapBuf.Clear();
-    MLCEncBuf.Clear();
-    IntlBuf.Clear();
-    GenFACDataBuf.Clear();
-    FACMapBuf.Clear();
-    GenSDCDataBuf.Clear();
-    OFDMModBuf.Clear();
-    AudSrcBuf.Clear();
-    DataBuf.Clear();
+    /* Fetch new sample rate if any */
+    Parameters.FetchNewSampleRate();
+
+    /* Init cell mapping table */
+    Parameters.InitCellMapTable(Parameters.GetWaveMode(), Parameters.GetSpectrumOccup());
 
     /* Defines number of cells, important! */
     OFDMCellMapping.Init(Parameters, CarMapBuf);
@@ -223,6 +216,18 @@ void CDRMTransmitter::Init()
     AudioSourceEncoder.Init(Parameters, AudSrcBuf);
     ReadData.Init(Parameters, DataBuf);
     TransmitData.Init(Parameters);
+
+    /* (Re)Initialization of the buffers */
+    CarMapBuf.Clear();
+    SDCMapBuf.Clear();
+    MLCEncBuf.Clear();
+    IntlBuf.Clear();
+    GenFACDataBuf.Clear();
+    FACMapBuf.Clear();
+    GenSDCDataBuf.Clear();
+    OFDMModBuf.Clear();
+    AudSrcBuf.Clear();
+    DataBuf.Clear();
 
     /* Initialize the soft stop */
     InitSoftStop();
@@ -378,10 +383,13 @@ void CDRMTransmitter::LoadSettings()
     string value, service;
 
     /* Sound card audio sample rate */
-    Parameters.SetAudSampleRate(s.Get(Transmitter, "samplerateaud", int(DEFAULT_SOUNDCRD_SAMPLE_RATE)));
+    Parameters.SetNewAudSampleRate(s.Get(Transmitter, "samplerateaud", int(DEFAULT_SOUNDCRD_SAMPLE_RATE)));
 
     /* Sound card signal sample rate */
-    Parameters.SetSigSampleRate(s.Get(Transmitter, "sampleratesig", int(DEFAULT_SOUNDCRD_SAMPLE_RATE)));
+    Parameters.SetNewSigSampleRate(s.Get(Transmitter, "sampleratesig", int(DEFAULT_SOUNDCRD_SAMPLE_RATE)));
+
+    /* Fetch new sample rate if any */
+    Parameters.FetchNewSampleRate();
 
     /* Sound card input device id */
     pSoundInInterface->SetDev(s.Get(Transmitter, "snddevin", string()));
@@ -520,6 +528,9 @@ void CDRMTransmitter::SaveSettings()
     const char *Transmitter = "Transmitter";
     std::ostringstream oss;
     string value, service;
+
+    /* Fetch new sample rate if any */
+    Parameters.FetchNewSampleRate();
 
     /* Sound card audio sample rate */
     s.Put(Transmitter, "samplerateaud", Parameters.GetAudSampleRate());
