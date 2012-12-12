@@ -151,12 +151,12 @@ class CReceiveData : public CReceiverModul<_REAL, _REAL>
 {
 public:
     enum EInChanSel {CS_LEFT_CHAN, CS_RIGHT_CHAN, CS_MIX_CHAN, CS_SUB_CHAN, CS_IQ_POS,
-                     CS_IQ_NEG, CS_IQ_POS_ZERO, CS_IQ_NEG_ZERO
+                     CS_IQ_NEG, CS_IQ_POS_ZERO, CS_IQ_NEG_ZERO, CS_IQ_POS_SPLIT, CS_IQ_NEG_SPLIT
                     };
 
     CReceiveData() : pSound(NULL),
             vecrInpData(INPUT_DATA_VECTOR_SIZE, (_REAL) 0.0),
-            bFippedSpectrum(FALSE), eInChanSelection(CS_MIX_CHAN)
+            bFippedSpectrum(FALSE), eInChanSelection(CS_MIX_CHAN), iPhase(0)
     {}
     virtual ~CReceiveData();
 
@@ -204,6 +204,7 @@ protected:
     CVector<_REAL>		vecrImHist;
     _COMPLEX			cCurExp;
     _COMPLEX			cExpStep;
+    int					iPhase;
 
     _REAL HilbertFilt(const _REAL rRe, const _REAL rIm);
 

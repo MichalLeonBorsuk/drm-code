@@ -37,14 +37,16 @@
 
 static const CHANSEL InputChannelTable[] =
 {
-    { "Left Channel",  CReceiveData::CS_LEFT_CHAN   },
-    { "Right Channel", CReceiveData::CS_RIGHT_CHAN  },
-    { "L + R",         CReceiveData::CS_MIX_CHAN    },
-    { "L - R",         CReceiveData::CS_SUB_CHAN    },
-    { "I/Q Pos",       CReceiveData::CS_IQ_POS      },
-    { "I/Q Neg",       CReceiveData::CS_IQ_NEG      },
-    { "I/Q Pos Zero",  CReceiveData::CS_IQ_POS_ZERO },
-    { "I/Q Neg Zero",  CReceiveData::CS_IQ_NEG_ZERO },
+    { "Left Channel",  CReceiveData::CS_LEFT_CHAN    },
+    { "Right Channel", CReceiveData::CS_RIGHT_CHAN   },
+    { "L + R",         CReceiveData::CS_MIX_CHAN     },
+    { "L - R",         CReceiveData::CS_SUB_CHAN     },
+    { "I/Q Pos",       CReceiveData::CS_IQ_POS       },
+    { "I/Q Neg",       CReceiveData::CS_IQ_NEG       },
+    { "I/Q Pos Zero",  CReceiveData::CS_IQ_POS_ZERO  },
+    { "I/Q Neg Zero",  CReceiveData::CS_IQ_NEG_ZERO  },
+    { "I/Q Pos Split", CReceiveData::CS_IQ_POS_SPLIT },
+    { "I/Q Neg Split", CReceiveData::CS_IQ_NEG_SPLIT },
     { NULL, 0 } /* end of list */
 };
 
@@ -156,6 +158,7 @@ void CSoundCardSelMenu::OnSoundSampleRate(QAction* action)
         else                 Parameters.SetNewAudSampleRate(iSampleRate);
     Parameters.Unlock();
     RestartTransceiver(&DRMTransceiver);
+    emit sampleRateChanged();
 }
 
 QMenu* CSoundCardSelMenu::InitDevice(QMenu* self, QMenu* parent, const QString& text, bool bInput)

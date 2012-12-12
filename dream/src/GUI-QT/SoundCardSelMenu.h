@@ -71,6 +71,9 @@ public slots:
     void OnSoundOutDevice(QAction*);
     void OnSoundSampleRate(QAction*);
     void OnSoundFileChanged(CDRMReceiver::ESFStatus);
+
+signals:
+    void sampleRateChanged();
 };
 
 class CFileMenu : public QMenu

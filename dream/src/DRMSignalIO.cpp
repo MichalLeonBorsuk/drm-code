@@ -267,18 +267,14 @@ void CReceiveData::ProcessDataInternal(CParameter& Parameters)
     const _BOOLEAN bBad = pSound->Read(vecsSoundBuffer);
     Parameters.Lock();
     Parameters.ReceiveStatus.InterfaceI.SetStatus(bBad ? CRC_ERROR : RX_OK); /* Red light */
+    const int iSigSampleRate = Parameters.GetSigSampleRate();
     Parameters.Unlock();
 
-//static double phase;
-//double inc = 2.0 * M_PI * 12000.0 / double(Parameters.GetSigSampleRate());
     /* Write data to output buffer. Do not set the switch command inside
        the for-loop for efficiency reasons */
     switch (eInChanSelection)
     {
     case CS_LEFT_CHAN:
-//        for (i = 0; i < iOutputBlockSize; i++) {
-//            vecsSoundBuffer[2 * i] = vecsSoundBuffer[2 * i] * cos(phase) - vecsSoundBuffer[2 * i + 1] * sin(phase); phase += inc;
-//            (*pvecOutputData)[i] = sample2real(vecsSoundBuffer[2 * i]); }
         for (i = 0; i < iOutputBlockSize; i++)
             (*pvecOutputData)[i] = sample2real(vecsSoundBuffer[2 * i]);
         break;
@@ -362,6 +358,26 @@ void CReceiveData::ProcessDataInternal(CParameter& Parameters)
 
             (*pvecOutputData)[i] =
                 HilbertFilt(cCurSig.real(), cCurSig.imag());
+        }
+        break;
+
+    case CS_IQ_POS_SPLIT: /* Require twice the bandwidth */
+        iPhase %= iSigSampleRate;
+        for (i = 0; i < iOutputBlockSize; i++, iPhase++)
+        {
+            _REAL rPhase = crPi * 0.5 * iPhase;
+            _REAL rValue = Cos(rPhase) * vecsSoundBuffer[2 * i] - Sin(rPhase) * vecsSoundBuffer[2 * i + 1];
+            (*pvecOutputData)[i] = sample2real(rValue);
+        }
+        break;
+
+    case CS_IQ_NEG_SPLIT: /* Require twice the bandwidth */
+        iPhase %= iSigSampleRate;
+        for (i = 0; i < iOutputBlockSize; i++, iPhase++)
+        {
+            _REAL rPhase = crPi * 0.5 * iPhase;
+            _REAL rValue = Cos(rPhase) * vecsSoundBuffer[2 * i + 1] - Sin(rPhase) * vecsSoundBuffer[2 * i];
+            (*pvecOutputData)[i] = sample2real(rValue);
         }
         break;
     }
