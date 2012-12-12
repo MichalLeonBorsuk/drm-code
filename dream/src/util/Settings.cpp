@@ -403,12 +403,12 @@ CSettings::ParseArguments(int argc, char **argv)
 #endif
 
 		/* Enable/Disable epg decoding -------------------------------------- */
-		if (GetNumericArgument(argc, argv, i, "-e", "--decodeepg", 0,
-							   1, rArgument) == TRUE)
-		{
-			Put("EPG", "decodeepg", (int) rArgument);
-			continue;
-		}
+//		if (GetNumericArgument(argc, argv, i, "-e", "--decodeepg", 0,
+//							   1, rArgument) == TRUE)
+//		{
+//			Put("EPG", "decodeepg", (int) rArgument);
+//			continue;
+//		}
 
 #ifdef USE_QT_GUI /* QThread needed for log file timing */
 
@@ -632,9 +632,9 @@ CSettings::UsageArguments()
 		"  -u <n>, --outchansel <n>     output channel selection\n"
 		"                               0: L -> L, R -> R (default);   1: L -> L, R muted;   2: L muted, R -> R\n"
 		"                               3: mix -> L, R muted;          4: L muted, mix -> R\n"
-		"  -e <n>, --decodeepg <b>      enable/disable epg decoding (0: off; 1: on)\n"
+//		"  -e <b>, --decodeepg <b>      enable/disable epg decoding (0: off; 1: on)\n"
 #ifdef USE_QT_GUI
-		"  -g <n>, --enablelog <b>      enable/disable logging (0: no logging; 1: logging\n"
+		"  -g <b>, --enablelog <b>      enable/disable logging (0: no logging; 1: logging\n"
 		"  -r <n>, --frequency <n>      set frequency [kHz] for log file\n"
 		"  -l <n>, --logdelay <n>       delay start of logging by <n> seconds, allowed range: 0...3600)\n"
 		"  -L <s>, --schedule <s>       read DRMlog.ini style schedule file and obey it\n"
