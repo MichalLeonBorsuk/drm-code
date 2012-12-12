@@ -199,9 +199,9 @@ void CTransmitData::InitInternal(CParameter& Parameters)
        symbol (the number 3000 was obtained through output tests) */
     rNormFactor = (CReal) 3000.0 / Sqrt(Parameters.CellMappingTable.rAvPowPerSymbol);
 
-    /* Apply amplification factor, 5.0 = +14dB
+    /* Apply amplification factor, 4.0 = +12dB
        (the maximum without clipping, obtained through output tests) */
-    rNormFactor *= bAmplified ? 5.0 : 1.0;
+    rNormFactor *= bAmplified ? 4.0 : 1.0;
 
     /* Define block-size for input */
     iInputBlockSize = iSymbolBlockSize;
