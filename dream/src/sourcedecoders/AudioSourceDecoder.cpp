@@ -1151,11 +1151,12 @@ CAudioSourceDecoder::CAudioSourceDecoder()
 #  define FreeLibrary(a) dlclose(a)
 #  define TEXT(a) (a)
 #  if defined(__APPLE__)
-#   define SO_NAME "libfaad2_drm.dylib"
+    hFaaDlib = dlopen("libfaad2_drm.dylib", RTLD_LOCAL | RTLD_NOW);
 #  else
-#   define SO_NAME "libfaad2_drm.so"
+    hFaaDlib = dlopen("libfaad2_drm.so", RTLD_LOCAL | RTLD_NOW);
+    if (hFaaDlib == NULL)
+        hFaaDlib = dlopen("libfaad.so.2", RTLD_LOCAL | RTLD_NOW);
 #  endif
-    hFaaDlib = dlopen(SO_NAME, RTLD_LOCAL | RTLD_NOW);
 # endif
     if (hFaaDlib)
     {

@@ -80,6 +80,8 @@ CAudioSourceEncoderImplementation::CAudioSourceEncoderImplementation()
     hlib = dlopen("libfaac_drm.dylib", RTLD_LOCAL | RTLD_NOW);
 #  else
     hlib = dlopen("libfaac_drm.so", RTLD_LOCAL | RTLD_NOW);
+    if (hlib == NULL)
+        hlib = dlopen("libfaac.so.0", RTLD_LOCAL | RTLD_NOW);
 #  endif
 # endif
     if (hlib)
