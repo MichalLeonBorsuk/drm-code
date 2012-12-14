@@ -75,7 +75,7 @@ static const LIBFUNC LibFuncs[] = {
 	{ NULL, NULL, NULL }
 };
 # if defined(_WIN32)
-static const char* LibNames[] = { "faac_drm.dll", NULL };
+static const char* LibNames[] = { "faac_drm.dll", "libfaac_drm.dll", "libfaac.dll", NULL };
 # elif defined(__APPLE__)
 static const char* LibNames[] = { "libfaac_drm.dylib", NULL };
 # else
