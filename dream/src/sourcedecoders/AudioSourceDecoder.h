@@ -207,17 +207,7 @@ protected:
 
     int iBadBlockCount;
     int iAudioPayloadLen;
-#ifndef USE_FAAD2_LIBRARY
-# ifdef _WIN32
-    HINSTANCE hFaaDlib;
-# else
-    void* hFaaDlib;
-# endif
-    NeAACDecOpen_t *NeAACDecOpen;
-    NeAACDecInitDRM_t *NeAACDecInitDRM;
-    NeAACDecClose_t *NeAACDecClose;
-    NeAACDecDecode_t *NeAACDecDecode;
-#endif
+
     /* HVXC decoding */
     CMatrix<_BINARY> hvxc_frame;
     int iNumHvxcBits;

@@ -27,10 +27,12 @@
 \******************************************************************************/
 
 #include "AudioSourceEncoder.h"
+#include "../util/LibraryLoader.h"
 #include <iostream>
 
-// dummy AAC Encoder implementation if dll not found
+
 #ifndef USE_FAAC_LIBRARY
+// dummy AAC Encoder implementation if dll not found
 static int FAACAPI dummyfaacEncGetVersion(char **, char **) {
     return 0;
 }
@@ -54,6 +56,31 @@ static int FAACAPI dummyfaacEncEncode(faacEncHandle, int32_t *, unsigned int, un
 static int FAACAPI dummyfaacEncClose(faacEncHandle) {
     return 0;
 }
+static void* hFaacLib;
+static faacEncGetVersion_t* faacEncGetVersion;
+static faacEncGetCurrentConfiguration_t* faacEncGetCurrentConfiguration;
+static faacEncSetConfiguration_t* faacEncSetConfiguration;
+static faacEncOpen_t* faacEncOpen;
+//static faacEncGetDecoderSpecificInfo_t* faacEncGetDecoderSpecificInfo;
+static faacEncEncode_t* faacEncEncode;
+static faacEncClose_t* faacEncClose;
+static LIBFUNC LibFuncs[] = {
+	{ "faacEncGetVersion",              (void**)&faacEncGetVersion,              (void*)dummyfaacEncGetVersion              },
+	{ "faacEncGetCurrentConfiguration", (void**)&faacEncGetCurrentConfiguration, (void*)dummyfaacEncGetCurrentConfiguration },
+	{ "faacEncSetConfiguration",        (void**)&faacEncSetConfiguration,        (void*)dummyfaacEncSetConfiguration        },
+	{ "faacEncOpen",                    (void**)&faacEncOpen,                    (void*)dummyfaacEncOpen                    },
+//	{ "faacEncGetDecoderSpecificInfo",  (void**)&faacEncGetDecoderSpecificInfo,  (void*)dummyfaacEncGetDecoderSpecificInfo  },
+	{ "faacEncEncode",                  (void**)&faacEncEncode,                  (void*)dummyfaacEncEncode                  },
+	{ "faacEncClose",                   (void**)&faacEncClose,                   (void*)dummyfaacEncClose                   },
+	{ NULL, NULL, NULL }
+};
+# if defined(_WIN32)
+static const char* LibNames[] = { "faac_drm.dll", NULL };
+# elif defined(__APPLE__)
+static const char* LibNames[] = { "libfaac_drm.dylib", NULL };
+# else
+static const char* LibNames[] = { "libfaac_drm.so", "libfaac.so.0", NULL };
+# endif
 #endif
 
 
@@ -62,64 +89,21 @@ static int FAACAPI dummyfaacEncClose(faacEncHandle) {
 CAudioSourceEncoderImplementation::CAudioSourceEncoderImplementation()
     : bUsingTextMessage(FALSE), hEncoder(NULL),
 #ifndef USE_FAAC_LIBRARY
-        faacEncGetVersion(NULL), faacEncGetCurrentConfiguration(NULL), faacEncSetConfiguration(NULL), faacEncOpen(NULL),
-        /*faacEncGetDecoderSpecificInfo(NULL), */faacEncEncode(NULL), faacEncClose(NULL),
         bFaacCodecSupported(FALSE)
 #else
         bFaacCodecSupported(TRUE)
 #endif
 {
 #ifndef USE_FAAC_LIBRARY
-# ifdef _WIN32
-    hlib = LoadLibrary(TEXT("faac_drm.dll"));
-# else
-#  define GetProcAddress(a, b) dlsym(a, b)
-#  define FreeLibrary(a) dlclose(a)
-#  define TEXT(a) (a)
-#  if defined(__APPLE__)
-    hlib = dlopen("libfaac_drm.dylib", RTLD_LOCAL | RTLD_NOW);
-#  else
-    hlib = dlopen("libfaac_drm.so", RTLD_LOCAL | RTLD_NOW);
-    if (hlib == NULL)
-        hlib = dlopen("libfaac.so.0", RTLD_LOCAL | RTLD_NOW);
-#  endif
-# endif
-    if (hlib)
-    {
-        faacEncGetVersion = (faacEncGetVersion_t*)GetProcAddress(hlib, TEXT("faacEncGetVersion"));
-        faacEncGetCurrentConfiguration = (faacEncGetCurrentConfiguration_t*)GetProcAddress(hlib, TEXT("faacEncGetCurrentConfiguration"));
-        faacEncSetConfiguration = (faacEncSetConfiguration_t*)GetProcAddress(hlib, TEXT("faacEncSetConfiguration"));
-        faacEncOpen = (faacEncOpen_t*)GetProcAddress(hlib, TEXT("faacEncOpen"));
-//        faacEncGetDecoderSpecificInfo = (faacEncGetDecoderSpecificInfo_t*)GetProcAddress(hlib, TEXT("faacEncGetDecoderSpecificInfo"));
-        faacEncEncode = (faacEncEncode_t*)GetProcAddress(hlib, TEXT("faacEncEncode"));
-        faacEncClose = (faacEncClose_t*)GetProcAddress(hlib, TEXT("faacEncClose"));
-    }
-    bFaacCodecSupported =
-        faacEncGetVersion &&
-        faacEncGetCurrentConfiguration &&
-        faacEncSetConfiguration &&
-        faacEncOpen &&
-//        faacEncGetDecoderSpecificInfo &&
-        faacEncEncode &&
-        faacEncClose;
-    if (!bFaacCodecSupported)
-    {
-        faacEncGetVersion = dummyfaacEncGetVersion;
-        faacEncGetCurrentConfiguration = dummyfaacEncGetCurrentConfiguration;
-        faacEncSetConfiguration = dummyfaacEncSetConfiguration;
-        faacEncOpen = dummyfaacEncOpen;
-//        faacEncGetDecoderSpecificInfo = dummyfaacEncGetDecoderSpecificInfo;
-        faacEncEncode = dummyfaacEncEncode;
-        faacEncClose = dummyfaacEncClose;
-        if (hlib)
-        {
-            FreeLibrary(hlib);
-            hlib = NULL;
-        }
-        cerr << "No usable FAAC aac encoder library found" << endl;
-    }
-    else
-        cerr << "Got FAAC library" << endl;
+	if (hFaacLib == NULL)
+	{
+		hFaacLib = CLibraryLoader::Load(LibNames, LibFuncs);
+		bFaacCodecSupported = !!hFaacLib;
+		if (!bFaacCodecSupported)
+		    cerr << "No usable FAAC aac decoder library found" << endl;
+		else
+		    cerr << "Got FAAC library" << endl;
+	}
 #endif
 }
 
