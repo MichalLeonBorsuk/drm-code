@@ -57,7 +57,7 @@ static NeAACDecOpen_t *NeAACDecOpen;
 static NeAACDecInitDRM_t *NeAACDecInitDRM;
 static NeAACDecClose_t *NeAACDecClose;
 static NeAACDecDecode_t *NeAACDecDecode;
-static LIBFUNC LibFuncs[] = {
+static const LIBFUNC LibFuncs[] = {
 	{ "NeAACDecOpen",    (void**)&NeAACDecOpen,    (void*)NeAACDecOpenDummy    },
 	{ "NeAACDecInitDRM", (void**)&NeAACDecInitDRM, (void*)NeAACDecInitDRMDummy },
 	{ "NeAACDecClose",   (void**)&NeAACDecClose,   (void*)NeAACDecCloseDummy   },

@@ -27,11 +27,12 @@
 \******************************************************************************/
 
 #ifdef _WIN32
-# include "windows.h"
+# include <windows.h>
 # define LOADLIB(a) (void*)LoadLibraryA(a)
 # define GETPROC(a, b) (void*)GetProcAddress((HMODULE)a, b)
 # define FREELIB(a) FreeLibrary((HMODULE)a)
 #else
+# include <dlfcn.h>
 # define LOADLIB(a) dlopen(a, RTLD_LOCAL | RTLD_NOW)
 # define GETPROC(a, b) dlsym(a, b)
 # define FREELIB(a) dlclose(a)
@@ -47,7 +48,7 @@ typedef struct LIBFUNC
 class CLibraryLoader
 {
 public:
-	static void* Load(const char** LibraryNames, LIBFUNC* LibFunc)
+	static void* Load(const char** LibraryNames, const LIBFUNC* LibFuncs, bool (*LibCheckCallback)()=NULL)
 	{
 		void* hLib = NULL;
 		for (int l = 0; LibraryNames[l]; l++)
@@ -56,29 +57,37 @@ public:
 			if (hLib != NULL)
 			{
 				int f;
-				for (f = 0; LibFunc[f].pcFunctionName; f++)
+				for (f = 0; LibFuncs[f].pcFunctionName; f++)
 				{
-					void *pvFunc = GETPROC(hLib, LibFunc[f].pcFunctionName);
+					void *pvFunc = GETPROC(hLib, LibFuncs[f].pcFunctionName);
 					if (!pvFunc)
 						break;
-					*LibFunc[f].ppvFunctionAddress = pvFunc;
+					*LibFuncs[f].ppvFunctionAddress = pvFunc;
 				}
-				if (!LibFunc[f].pcFunctionName)
-					break;
+				if (!LibFuncs[f].pcFunctionName)
+				{
+					if (LibCheckCallback==NULL || LibCheckCallback())
+						break;
+				}
 				FREELIB(hLib);
 				hLib = NULL;
 			}
 		}
 		if (hLib == NULL)
 		{
-			for (int f = 0; LibFunc[f].pcFunctionName; f++)
-				*LibFunc[f].ppvFunctionAddress = LibFunc[f].pvDummyFunctionAddress;
+			for (int f = 0; LibFuncs[f].pcFunctionName; f++)
+				*LibFuncs[f].ppvFunctionAddress = LibFuncs[f].pvDummyFunctionAddress;
 		}
 		return hLib;
 	}
-	static void Free(void* hLib)
+	static void Free(void** hLib, const LIBFUNC* LibFuncs)
 	{
-		if (hLib != NULL)
-			FREELIB(hLib);
+		for (int f = 0; LibFuncs[f].pcFunctionName; f++)
+			*LibFuncs[f].ppvFunctionAddress = LibFuncs[f].pvDummyFunctionAddress;
+		if (*hLib != NULL)
+		{
+			FREELIB(*hLib);
+			*hLib = NULL;
+		}
 	}
 };

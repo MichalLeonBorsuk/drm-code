@@ -64,7 +64,7 @@ static faacEncOpen_t* faacEncOpen;
 //static faacEncGetDecoderSpecificInfo_t* faacEncGetDecoderSpecificInfo;
 static faacEncEncode_t* faacEncEncode;
 static faacEncClose_t* faacEncClose;
-static LIBFUNC LibFuncs[] = {
+static const LIBFUNC LibFuncs[] = {
 	{ "faacEncGetVersion",              (void**)&faacEncGetVersion,              (void*)dummyfaacEncGetVersion              },
 	{ "faacEncGetCurrentConfiguration", (void**)&faacEncGetCurrentConfiguration, (void*)dummyfaacEncGetCurrentConfiguration },
 	{ "faacEncSetConfiguration",        (void**)&faacEncSetConfiguration,        (void*)dummyfaacEncSetConfiguration        },
@@ -81,6 +81,20 @@ static const char* LibNames[] = { "libfaac_drm.dylib", NULL };
 # else
 static const char* LibNames[] = { "libfaac_drm.so", "libfaac.so.0", NULL };
 # endif
+static bool FaacCheckCallback()
+{
+    bool bLibOk = false;
+    unsigned long lNumSampEncIn = 0;
+    unsigned long lMaxBytesEncOut = 0;
+    faacEncHandle hEncoder = faacEncOpen(24000, 1, &lNumSampEncIn, &lMaxBytesEncOut);
+    if (hEncoder != NULL)
+    {
+        /* lMaxBytesEncOut is odd when DRM is supported */
+        bLibOk = (lMaxBytesEncOut > 0) && (lMaxBytesEncOut & 1);
+        faacEncClose(hEncoder);
+    }
+    return bLibOk;
+}
 #endif
 
 
@@ -95,15 +109,15 @@ CAudioSourceEncoderImplementation::CAudioSourceEncoderImplementation()
 #endif
 {
 #ifndef USE_FAAC_LIBRARY
-	if (hFaacLib == NULL)
-	{
-		hFaacLib = CLibraryLoader::Load(LibNames, LibFuncs);
-		bFaacCodecSupported = !!hFaacLib;
-		if (!bFaacCodecSupported)
-		    cerr << "No usable FAAC aac decoder library found" << endl;
-		else
-		    cerr << "Got FAAC library" << endl;
-	}
+    if (hFaacLib == NULL)
+    {
+        hFaacLib = CLibraryLoader::Load(LibNames, LibFuncs, FaacCheckCallback);
+        bFaacCodecSupported = !!hFaacLib;
+        if (!bFaacCodecSupported)
+            cerr << "No usable FAAC aac encoder library found" << endl;
+        else
+            cerr << "Got FAAC library" << endl;
+    }
 #endif
 }
 
