@@ -90,7 +90,7 @@ static bool FaacCheckCallback()
     if (hEncoder != NULL)
     {
         /* lMaxBytesEncOut is odd when DRM is supported */
-        bLibOk = (lMaxBytesEncOut > 0) && (lMaxBytesEncOut & 1);
+        bLibOk = lMaxBytesEncOut & 1;
         faacEncClose(hEncoder);
     }
     return bLibOk;
