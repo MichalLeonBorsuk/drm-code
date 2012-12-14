@@ -30,7 +30,7 @@
 # include "windows.h"
 # define LOADLIB(a) (void*)LoadLibraryA(a)
 # define GETPROC(a, b) (void*)GetProcAddress((HMODULE)a, b)
-# define FREELIB(a, b) FreeLibrary((HMODULE)a)
+# define FREELIB(a) FreeLibrary((HMODULE)a)
 #else
 # define LOADLIB(a) dlopen(a, RTLD_LOCAL | RTLD_NOW)
 # define GETPROC(a, b) dlsym(a, b)
