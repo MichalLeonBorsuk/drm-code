@@ -71,23 +71,6 @@ protected:
 	faacEncHandle			hEncoder;
 	faacEncConfigurationPtr CurEncFormat;
 
-#ifndef USE_FAAC_LIBRARY
-# ifdef _WIN32
-    HINSTANCE hlib;
-# else
-    void* hlib;
-# endif
-    faacEncGetVersion_t*  faacEncGetVersion;
-    faacEncGetCurrentConfiguration_t*
-			    faacEncGetCurrentConfiguration;
-    faacEncSetConfiguration_t*
-			    faacEncSetConfiguration;
-    faacEncOpen_t*          faacEncOpen;
-//    faacEncGetDecoderSpecificInfo_t*
-//			    faacEncGetDecoderSpecificInfo;
-    faacEncEncode_t*        faacEncEncode;
-    faacEncClose_t*         faacEncClose;
-#endif
 	unsigned long			lNumSampEncIn;
 	unsigned long			lMaxBytesEncOut;
 	unsigned long			lEncSamprate;

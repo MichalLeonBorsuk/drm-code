@@ -501,6 +501,7 @@ HEADERS += \
    src/util/AudioFile.h \
    src/util/Buffer.h \
    src/util/CRC.h \
+   src/util/LibraryLoader.h \
    src/util/LogPrint.h \
    src/util/Modul.h \
    src/util/Pacer.h \
