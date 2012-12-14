@@ -26,6 +26,9 @@
  *
 \******************************************************************************/
 
+#ifndef _LIBRARYLOADER_H_
+#define _LIBRARYLOADER_H_
+
 #ifdef _WIN32
 # include <windows.h>
 # define LOADLIB(a) (void*)LoadLibraryA(a)
@@ -91,3 +94,5 @@ public:
 		}
 	}
 };
+
+#endif
