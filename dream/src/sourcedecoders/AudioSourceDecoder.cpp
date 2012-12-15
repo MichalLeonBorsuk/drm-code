@@ -17,7 +17,7 @@
  *
  * This program is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more 1111
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
  *
  * You should have received a copy of the GNU General Public License along with
@@ -27,7 +27,9 @@
 \******************************************************************************/
 
 #include "AudioSourceDecoder.h"
-#include "../util/LibraryLoader.h"
+#if !defined(USE_FAAD2_LIBRARY)
+# include "../util/LibraryLoader.h"
+#endif
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -122,7 +124,7 @@ CAudioSourceDecoder::AACFileName(CParameter & Parameters)
             AudioParam.eAudioMode)
     {
     case CAudioParam::AM_MONO:
-	ss << "mono";
+        ss << "mono";
         break;
 
     case CAudioParam::AM_P_STEREO:
@@ -155,7 +157,7 @@ CAudioSourceDecoder::CELPFileName(CParameter & Parameters)
     if (Parameters.Service[Parameters.GetCurSelAudioService()].
             AudioParam.eAudioSamplRate == CAudioParam::AS_8_KHZ)
     {
-	ss << "8kHz_" << 
+        ss << "8kHz_" << 
             iTableCELP8kHzUEPParams
                  [Parameters.
                   Service[Parameters.GetCurSelAudioService()].
