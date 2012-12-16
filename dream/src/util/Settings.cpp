@@ -392,16 +392,6 @@ CSettings::ParseArguments(int argc, char **argv)
 			continue;
 		}
 
-#ifdef _WIN32
-		/* Enable/Disable process priority flag ----------------------------- */
-		if (GetNumericArgument(argc, argv, i, "-P", "--processpriority", 0, 1,
-							   rArgument) == TRUE)
-		{
-			Put("command", "processpriority", (int) rArgument);
-			continue;
-		}
-#endif
-
 		/* Enable/Disable epg decoding -------------------------------------- */
 //		if (GetNumericArgument(argc, argv, i, "-e", "--decodeepg", 0,
 //							   1, rArgument) == TRUE)
@@ -661,9 +651,6 @@ CSettings::UsageArguments()
 		"  -M <n>, --hamlib-model <n>   set Hamlib radio model ID\n"
 		"  -C <s>, --hamlib-config <s>  set Hamlib config parameter\n"
 		"  -T <b>, --ensmeter <b>       enable S-Meter (0: off; 1: on)\n"
-#endif
-#ifdef _WIN32
-		"  -P, --processpriority <b>    enable/disable high priority for working thread\n"
 #endif
 		"  -h, -?, --help               this help text\n"
 		"\n"

@@ -29,10 +29,6 @@
 \******************************************************************************/
 
 #ifdef _WIN32
-# ifdef _WIN32_WINNT
-#  undef _WIN32_WINNT
-# endif
-# define _WIN32_WINNT 0x0400
 # include <windows.h>
 #endif
 
@@ -65,30 +61,16 @@
 class CRx: public QThread
 {
 public:
-	CRx(CDRMReceiver& nRx
-# ifdef _WIN32
-	, bool bPriorityEnabled=false
-# endif
-	):rx(nRx)
-# ifdef _WIN32
-	, bPriorityEnabled(bPriorityEnabled)
-# endif
+	CRx(CDRMReceiver& nRx):rx(nRx)
 	{}
 	void run();
 private:
 	CDRMReceiver& rx;
-	bool bPriorityEnabled;
 };
 
 void
 CRx::run()
 {
-# ifdef _WIN32
-    if (bPriorityEnabled)
-    {
-        SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_ABOVE_NORMAL);
-    }
-# endif
     qDebug("Working thread started");
     try
     {
@@ -144,24 +126,6 @@ main(int argc, char **argv)
 
 	try
 	{
-
-#ifdef _WIN32
-		/* works for both transmit and receive. GUI is low, working is normal.
-		 * the working thread does not need to know what the setting is.
-		 */
-		bool bPriorityEnabled = Settings.Get("GUI", "processpriority", bool(TRUE));
-		if (bPriorityEnabled)
-		{
-			/* Set priority class for this application */
-# ifdef ABOVE_NORMAL_PRIORITY_CLASS
-			SetPriorityClass(GetCurrentProcess(), ABOVE_NORMAL_PRIORITY_CLASS);
-# endif
-			/* Normal priority for GUI thread */
-			SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_NORMAL);
-		}
-		Settings.Put("GUI", "processpriority", bPriorityEnabled);
-#endif
-
 		string mode = Settings.Get("command", "mode", string());
 		if (mode == "receive")
 		{
@@ -190,11 +154,7 @@ main(int argc, char **argv)
 				);
 
 			/* Start working thread */
-#ifdef _WIN32
-			CRx rx(DRMReceiver, bPriorityEnabled);
-#else
 			CRx rx(DRMReceiver);
-#endif
 			rx.start();
 
 			/* Set main window */
