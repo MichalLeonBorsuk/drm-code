@@ -35,6 +35,23 @@
 #include <QFileDialog>
 
 
+#ifdef HAVE_LIBPCAP
+# define PCAP_FILES " *.pcap"
+#else
+# define PCAP_FILES ""
+#endif
+#ifdef HAVE_LIBSNDFILE
+# define SND_FILES "*.aif* *.au *.flac *.ogg *.rf64 *.snd *.wav"
+#else
+# define SND_FILES "*.if* *.iq* *.pcm* *.txt"
+#endif
+#define SND_FILE1 SND_FILES " "
+#define SND_FILE2 "Sound Files (" SND_FILES ");;"
+#define RSCI_FILES "*.rsA *.rsB *.rsC *.rsD *.rsQ *.rsM" PCAP_FILES
+#define RSCI_FILE1 RSCI_FILES " "
+#define RSCI_FILE2 "MDI/RSCI Files (" RSCI_FILES ");;"
+
+
 static const CHANSEL InputChannelTable[] =
 {
     { "Left Channel",  CReceiveData::CS_LEFT_CHAN    },
@@ -265,6 +282,13 @@ CFileMenu::CFileMenu(CDRMTransceiver& DRMTransceiver, QMainWindow* parent,
     setTitle(tr("&File"));
     if (bReceiver)
     {
+#ifdef FILE_MENU_UNIFIED_OPEN_FILE
+        (void)bSignal;
+        QString openFile(tr("&Open File..."));
+        QString closeFile(tr("&Close File"));
+        actionOpenFile = addAction(openFile, this, SLOT(OnOpenFile()), QKeySequence(tr("Alt+O")));
+        actionCloseFile = addAction(closeFile, this, SLOT(OnCloseFile()), QKeySequence(tr("Alt+C")));
+#else
         QString openFile(tr(bSignal ? "&Open Signal File..." : "&Open Audio File..."));
         QString closeFile(tr(bSignal ? "&Close Signal File" : "&Close Audio File"));
         actionOpenSignalFile = addAction(openFile, this, SLOT(OnOpenSignalFile()), QKeySequence(tr("Alt+O")));
@@ -272,30 +296,67 @@ CFileMenu::CFileMenu(CDRMTransceiver& DRMTransceiver, QMainWindow* parent,
         addSeparator();
         actionOpenRsciFile = addAction(tr("Open MDI/RSCI File..."), this, SLOT(OnOpenRsciFile())/*, QKeySequence(tr("Alt+O"))*/);
         actionCloseRsciFile = addAction(tr("Close MDI/RSCI File"), this, SLOT(OnCloseRsciFile())/*, QKeySequence(tr("Alt+C"))*/);
+#endif
         addSeparator();
     }
     addAction(tr("&Exit"), parent, SLOT(close()), QKeySequence(tr("Alt+X")));
     parent->menuBar()->insertMenu(menuInsertBefore->menuAction(), this);
 }
 
-void CFileMenu::OnOpenSignalFile()
+
+#ifdef FILE_MENU_UNIFIED_OPEN_FILE
+
+void CFileMenu::OnOpenFile()
 {
-#ifdef HAVE_LIBSNDFILE
-# define AUDIO_FILE_FILTER "Sound Files (*.aif* *.au *.flac *.ogg *.rf64 *.snd *.wav);;All Files (*)"
-#else
-# define AUDIO_FILE_FILTER "Sound Files (*.if* *.iq* *.pcm* *.txt);;All Files (*)"
-#endif
+#define FILE_FILTER \
+	"Supported Files (" \
+	SND_FILE1 \
+	RSCI_FILE1 \
+	");;" \
+	SND_FILE2 \
+	RSCI_FILE2 \
+	"All Files (*)"
     if (bReceiver)
     {
-	    QString filename = QFileDialog::getOpenFileName(this, tr("Open Sound File"), strLastSoundPath, tr(AUDIO_FILE_FILTER));
+	    QString filename = QFileDialog::getOpenFileName(this, tr("Open File"), strLastSoundPath, tr(FILE_FILTER));
 	    /* Check if user not hit the cancel button */
 	    if (!filename.isEmpty())
 	    {
 			strLastSoundPath = filename;
-		    ((CDRMReceiver&)DRMTransceiver).SetSoundFile(string(filename.toLocal8Bit().data()));
+		    ((CDRMReceiver&)DRMTransceiver).SetInputFile(string(filename.toLocal8Bit().data()));
 		    RestartTransceiver(&DRMTransceiver);
             UpdateMenu();
 	    }
+    }
+}
+
+void CFileMenu::OnCloseFile()
+{
+    if (bReceiver)
+    {
+	    ((CDRMReceiver&)DRMTransceiver).ClearInputFile();
+	    RestartTransceiver(&DRMTransceiver);
+        UpdateMenu();
+    }
+}
+
+#else
+
+void CFileMenu::OnOpenSignalFile()
+{
+#define AUDIO_FILE_FILTER "Sound Files (" SND_FILES ");;All Files (*)"
+    if (bReceiver)
+    {
+        QString filename = QFileDialog::getOpenFileName(this, tr("Open Sound File"),
+            strLastSoundPath, tr(AUDIO_FILE_FILTER));
+        /* Check if user not hit the cancel button */
+        if (!filename.isEmpty())
+        {
+            strLastSoundPath = filename;
+            ((CDRMReceiver&)DRMTransceiver).SetSoundFile(string(filename.toLocal8Bit().data()));
+            RestartTransceiver(&DRMTransceiver);
+            UpdateMenu();
+        }
     }
 }
 
@@ -311,16 +372,11 @@ void CFileMenu::OnCloseSignalFile()
 
 void CFileMenu::OnOpenRsciFile()
 {
+#define RSCI_FILE_FILTER "MDI/RSCI Files (" RSCI_FILES ");;All Files (*)"
     if (bReceiver)
     {
-        QString filename = QFileDialog::getOpenFileName(this, tr("Open MDI/RSCI File"), strLastRsciPath,
-			tr(
-				"MDI/RSCI Files (*.rsA* *.rsB* *.rsC* *.rsD* *.rsQ* *.rsM*);;"
-#ifdef HAVE_LIBPCAP
-				"PCAP Files (*.pcap);;"
-#endif
-				"All Files (*)"
-			));
+        QString filename = QFileDialog::getOpenFileName(this, tr("Open MDI/RSCI File"),
+            strLastRsciPath, tr(RSCI_FILE_FILTER));
         /* Check if user not hit the cancel button */
         if (!filename.isEmpty())
         {
@@ -342,6 +398,9 @@ void CFileMenu::OnCloseRsciFile()
     }
 }
 
+#endif
+
+
 void CFileMenu::UpdateMenu()
 {
     if (bReceiver)
@@ -350,6 +409,11 @@ void CFileMenu::UpdateMenu()
         const bool bSoundFile = eStatus == CDRMReceiver::SF_SNDFILEIN;
         const bool bRsciMdiIn = eStatus == CDRMReceiver::SF_RSCIMDIIN;
 
+#ifdef FILE_MENU_UNIFIED_OPEN_FILE
+        const bool bInputFile = bSoundFile | bRsciMdiIn;
+        if (bInputFile != actionCloseFile->isEnabled())
+            actionCloseFile->setEnabled(bInputFile);
+#else
         if (bRsciMdiIn == actionOpenSignalFile->isEnabled())
             actionOpenSignalFile->setEnabled(!bRsciMdiIn);
 
@@ -358,6 +422,7 @@ void CFileMenu::UpdateMenu()
 
         if (bRsciMdiIn != actionCloseRsciFile->isEnabled())
             actionCloseRsciFile->setEnabled(bRsciMdiIn);
+#endif
 
         emit soundFileChanged(eStatus);
     }

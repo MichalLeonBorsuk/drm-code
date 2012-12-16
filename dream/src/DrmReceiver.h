@@ -146,6 +146,8 @@ public:
     void					ClearRsciInput();
     void					SetSoundFile(const string& soundFile);
     void					ClearSoundFile();
+    void					SetInputFile(const string& inputFile);
+    void					ClearInputFile();
     ESFStatus				GetInputStatus();
     void					RequestNewAcquisition() {
         bRestartFlag = TRUE;
