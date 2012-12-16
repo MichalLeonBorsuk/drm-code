@@ -1514,7 +1514,7 @@ CDRMReceiver::LoadSettings()
     /* Input from file if any */
     str = s.Get("command", string("fileio"));
     if (str != "")
-        SetSoundFile(str);
+        SetInputFile(str);
 
     /* Channel Estimation: Frequency Interpolation */
     SetFreqInt((CChannelEstimation::ETypeIntFreq)s.Get("Receiver", "freqint", int(CChannelEstimation::FWIENER)));
