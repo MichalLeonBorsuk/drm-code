@@ -457,6 +457,32 @@ CDRMReceiver::ClearSoundFile()
     Parameters.Unlock();
 }
 
+void
+CDRMReceiver::SetInputFile(const string& inputFile)
+{
+    string ext;
+    size_t p = inputFile.rfind('.');
+    if (p != string::npos)
+    ext = inputFile.substr(p + 1);
+    if (ext.substr(0,2) == "RS" || ext.substr(0,2) == "rs" || ext.substr(0,4) == "pcap")
+    {
+        SetRsciInput(inputFile);
+        ClearSoundFile();
+    }
+    else
+    {
+        SetSoundFile(inputFile);
+        ClearRsciInput();
+    }
+}
+
+void
+CDRMReceiver::ClearInputFile()
+{
+    ClearSoundFile();
+    ClearRsciInput();
+}
+
 CDRMReceiver::ESFStatus
 CDRMReceiver::GetInputStatus()
 {

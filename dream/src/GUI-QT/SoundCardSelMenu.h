@@ -36,6 +36,12 @@
 #include "../DrmTransceiver.h"
 #include "../sound/selectioninterface.h"
 
+
+/* undefine this if you want a separate
+   "Open Signal file..." "Open MDI/RSCI File..." */
+#define FILE_MENU_UNIFIED_OPEN_FILE
+
+
 typedef struct CHANSEL {
     const char* Name;
     const int iChanSel;
@@ -88,19 +94,29 @@ public:
 
 protected:
     CDRMTransceiver&	DRMTransceiver;
+#ifdef FILE_MENU_UNIFIED_OPEN_FILE
+    QAction*			actionOpenFile;
+    QAction*			actionCloseFile;
+#else
     QAction*			actionOpenSignalFile;
     QAction*			actionCloseSignalFile;
     QAction*			actionOpenRsciFile;
     QAction*			actionCloseRsciFile;
+#endif
     const bool			bReceiver;
 	QString				strLastSoundPath;
 	QString				strLastRsciPath;
 
 public slots:
+#ifdef FILE_MENU_UNIFIED_OPEN_FILE
+    void OnOpenFile();
+    void OnCloseFile();
+#else
     void OnOpenSignalFile();
     void OnCloseSignalFile();
     void OnOpenRsciFile();
     void OnCloseRsciFile();
+#endif
 
 signals:
     void soundFileChanged(CDRMReceiver::ESFStatus eStatus);
