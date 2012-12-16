@@ -610,7 +610,7 @@ CSettings::UsageArguments()
 {
 	/* The text below must be translatable */
 	return
-		"Usage: $EXECNAME [option [argument]]\n"
+		"Usage: $EXECNAME [option [argument]] | [input file]\n"
 		"\n"
 		"Recognized options:\n"
 		"  -t, --transmitter            DRM transmitter mode\n"
