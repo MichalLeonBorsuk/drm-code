@@ -375,10 +375,10 @@ protected:
     CCyclicBuffer<_REAL>			AMSSResPhaseBuf;
     CCyclicBuffer<_BINARY>			AMSSBitsBuf;
 
-    CSingleBuffer<_REAL>			DemodDataBuf;
+    CCyclicBuffer<_REAL>			DemodDataBuf;
     CSingleBuffer<_REAL>			IQRecordDataBuf;
 
-    CSingleBuffer<_REAL>			RecDataBuf;
+    CCyclicBuffer<_REAL>			RecDataBuf;
     CCyclicBuffer<_REAL>			InpResBuf;
     CCyclicBuffer<_COMPLEX>			FreqSyncAcqBuf;
     CSingleBuffer<_COMPLEX>			TimeSyncBuf;

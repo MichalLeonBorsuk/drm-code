@@ -307,6 +307,8 @@ public:
 
     void NewFrequency(CParameter &Parameters);
 
+	_BOOLEAN IsRecording() {return bIsRecording;}
+
 protected:
     FILE *					pFile;
     CVector<_SAMPLE>		vecsTmpAudData;
