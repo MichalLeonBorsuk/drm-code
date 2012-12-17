@@ -220,12 +220,22 @@ CDRMReceiver::Run()
     }
     else
     {
-        ReceiveData.ReadData(Parameters, RecDataBuf);
 
-        /* Split samples, one output to the demodulation, another for IQ recording */
-        if (SplitForIQRecord.ProcessData(Parameters, RecDataBuf, DemodDataBuf, IQRecordDataBuf))
+        if (WriteIQFile.IsRecording())
         {
-            bEnoughData = TRUE;
+            /* Receive data in RecDataBuf */
+            ReceiveData.ReadData(Parameters, RecDataBuf);
+
+            /* Split samples, one output to the demodulation, another for IQ recording */
+            if (SplitForIQRecord.ProcessData(Parameters, RecDataBuf, DemodDataBuf, IQRecordDataBuf))
+            {
+                bEnoughData = TRUE;
+            }
+        }
+        else
+        {
+            /* No I/Q recording then receive data directly in DemodDataBuf */
+            ReceiveData.ReadData(Parameters, DemodDataBuf);
         }
 
         switch (eReceiverMode)
@@ -283,9 +293,12 @@ CDRMReceiver::Run()
         bEnoughData = FALSE;
 
         // Write output I/Q file
-        if (WriteIQFile.WriteData(Parameters, IQRecordDataBuf))
+        if (WriteIQFile.IsRecording())
         {
-            bEnoughData = TRUE;
+            if (WriteIQFile.WriteData(Parameters, IQRecordDataBuf))
+            {
+                bEnoughData = TRUE;
+            }
         }
 
         switch (eReceiverMode)

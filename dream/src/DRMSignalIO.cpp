@@ -248,7 +248,7 @@ void CReceiveData::ProcessDataInternal(CParameter& Parameters)
     Parameters.Lock();
 
     iFreeSymbolCounter++;
-    if (iFreeSymbolCounter >= Parameters.CellMappingTable.iNumSymPerFrame)
+    if (iFreeSymbolCounter >= Parameters.CellMappingTable.iNumSymPerFrame * 2) /* x2 because iOutputBlockSize=iSymbolBlockSize/2 */
     {
         iFreeSymbolCounter = 0;
         /* calculate the PSD once per frame for the RSI output */
@@ -416,8 +416,13 @@ void CReceiveData::InitInternal(CParameter& Parameters)
         return;
 
     Parameters.Lock();
+    /* We define iOutputBlockSize as half the iSymbolBlockSize because
+       if a positive frequency offset is present in drm signal,
+       after some time a buffer overflow occur in the output buffer of
+       InputResample.ProcessData() */
     /* Define output block-size */
-    iOutputBlockSize = Parameters.CellMappingTable.iSymbolBlockSize;
+    iOutputBlockSize = Parameters.CellMappingTable.iSymbolBlockSize / 2;
+    iMaxOutputBlockSize = iOutputBlockSize * 2;
     /* Get signal sample rate */
     iSampleRate = Parameters.GetSigSampleRate();
     Parameters.Unlock();
