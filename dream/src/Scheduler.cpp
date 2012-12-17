@@ -56,10 +56,6 @@ int dprintf(const char *format, ...)
 #ifdef _WIN32
 time_t timegm(struct tm *tm)
 {
-#if defined(_MSC_VER) && (_MSC_VER <= 1200) // MSVC++ 6.0
-	// TODO
-	return (time_t)0;
-#else
 	SYSTEMTIME st;
 	st.wYear = tm->tm_year+1900;
 	st.wMonth = tm->tm_mon+1;
@@ -73,8 +69,7 @@ time_t timegm(struct tm *tm)
 	ULARGE_INTEGER uli;
 	uli.LowPart = ft.dwLowDateTime;
 	uli.HighPart = ft.dwHighDateTime;
-	return (time_t)((uli.QuadPart - 116444736000000000ULL)/10000000ULL);
-#endif
+	return (time_t)(uli.QuadPart/10000000 - 11644473600);
 }
 #endif
 
@@ -127,18 +122,7 @@ void CScheduler::LoadSchedule(const string& filename)
 
 void CScheduler::fill()
 {
-#if defined(_MSC_VER) && (_MSC_VER <= 1200) // MSVC++ 6.0
-	// TODO
-#else
-	time_t dt;
-//	if (events.empty())
-//	{
-		dt = time(NULL); // daytime
-//	}
-//	else
-//	{
-//		dt = events.back().time;
-//	}
+	time_t dt = time(NULL); // daytime
 	struct tm dts;
 	dts = *gmtime(&dt);
 	dts.tm_hour = 0;
@@ -149,14 +133,15 @@ void CScheduler::fill()
 //{struct tm* gtm = gmtime(&sod); if (gtm) dprintf("%i %i %02i:%02i:%02i\n", (int)gtm->tm_year+1900, (int)gtm->tm_mday, (int)gtm->tm_hour, (int)gtm->tm_min, (int)gtm->tm_sec); else dprintf("gtm = NULL\n");}
 	// resolve schedule to absolute time
 	map<time_t,int> abs_sched;
-	for (map<time_t,int>::const_iterator i = schedule.begin(); i != schedule.end(); i++)
+	map<time_t,int>::const_iterator i;
+	for(i = schedule.begin(); i != schedule.end(); i++)
 	{
 		time_t st = sod + i->first;
 		if (st < dt)
 			st += 24 * 60 * 60; // want tomorrow's.
 		abs_sched[st] = i->second;
 	}
-	for (map<time_t,int>::const_iterator i = abs_sched.begin(); i != abs_sched.end(); i++)
+	for (i = abs_sched.begin(); i != abs_sched.end(); i++)
 	{
 		SEvent e;
 		e.time = i->first;
@@ -164,7 +149,6 @@ void CScheduler::fill()
 		events.push(e);
 //struct tm* dts = gmtime(&e.time); dprintf("%i %02i:%02i:%02i frequency=%i\n", (int)dts->tm_mday, (int)dts->tm_hour, (int)dts->tm_min, (int)dts->tm_sec, (int)e.frequency);
 	}
-#endif
 }
 
 int CScheduler::parse(string s)
