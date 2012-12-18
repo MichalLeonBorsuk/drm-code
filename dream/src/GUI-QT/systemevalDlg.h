@@ -73,6 +73,8 @@ public:
 
 	void SetStatus(CMultColorLED* LED, ETypeRxStatus state);
 	void StopLogTimers();
+	void StartLogging(bool bStart);
+	void SetFrequency(int iFrequency);
 
 protected:
 	CDRMReceiver&		DRMReceiver;

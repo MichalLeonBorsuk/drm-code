@@ -430,6 +430,16 @@ systemevalDlg::~systemevalDlg()
         DRMReceiver.GetWriteData()->StopWriteWaveFile();
 }
 
+void systemevalDlg::StartLogging(bool bStart)
+{
+    CheckBoxWriteLog->setChecked(bStart);
+    OnCheckWriteLog();
+}
+void systemevalDlg::SetFrequency(int iFrequency)
+{
+    EdtFrequency->setText(QString().setNum(iFrequency));
+}
+
 void systemevalDlg::UpdateControls()
 {
     /* Slider for MLC number of iterations */
