@@ -29,16 +29,20 @@
 #include "Logging.h"
 #include "../util/Settings.h"
 
+#define SHORT_LOG_FILENAME "DreamLog.txt"
+#define LONG_LOG_FILENAME "DreamLogLong.csv"
+
+
 /* Implementation *************************************************************/
 CLogging::CLogging(CParameter& Parameters) :
     shortLog(Parameters), longLog(Parameters),
     enabled(false), iLogDelay(0), iLogCount(0)
 {
-#if QT_VERSION >= 0x040000
-	TimerLogFileStart.setSingleShot(true);
-#endif
+//#if QT_VERSION >= 0x040000
+//	TimerLogFileStart.setSingleShot(true);
+//#endif
     connect(&TimerLogFile, SIGNAL(timeout()), this, SLOT(OnTimerLogFile()));
-    connect(&TimerLogFileStart, SIGNAL(timeout()), this, SLOT(start()));
+//    connect(&TimerLogFileStart, SIGNAL(timeout()), this, SLOT(start()));
 }
 
 void CLogging::LoadSettings(CSettings& Settings)
@@ -57,10 +61,9 @@ void CLogging::LoadSettings(CSettings& Settings)
     iLogDelay = Settings.Get("Logfile", "delay", 0);
     SaveSettings(Settings);
 }
-
+#if 0
 void CLogging::reStart()
 {
-//printf("CLogging::reStart()\n");
     /* Activate log file start if necessary. */
     if (enabled)
     {
@@ -72,7 +75,7 @@ void CLogging::reStart()
 #endif
     }
 }
-
+#endif
 void CLogging::SaveSettings(CSettings& Settings)
 {
     Settings.Put("Logfile", "enablerxl", shortLog.GetRxlEnabled());
@@ -85,24 +88,28 @@ void CLogging::OnTimerLogFile()
 {
     if (shortLog.restartNeeded())
     {
+printf("shortLog.restartNeeded()\n");
         shortLog.Stop();
-        shortLog.Start("DreamLog.txt");
+        shortLog.Start(SHORT_LOG_FILENAME);
 //        stop();
 //        enabled = true;
 //        reStart();
     }
 //    else
 //    {
-		if (!iLogCount)
+        iLogCount++;
+        if(iLogCount == 60)
+        {
+            iLogCount = 0;
             shortLog.Update();
-        iLogCount = (iLogCount + 1) % 60;
+        }
         longLog.Update();
 //    }
 }
 
 void CLogging::start()
 {
-//printf("CLogging::start()\n");
+printf("CLogging::start()\n");
 	iLogCount = 0;
     enabled = true;
     /* Start logging (if not already done) */
@@ -110,9 +117,11 @@ void CLogging::start()
     {
         TimerLogFile.start(1000); /* Every second */
 
+		/* Latch new param */
+		shortLog.restartNeeded();
         /* Open log file */
-        shortLog.Start("DreamLog.txt");
-        longLog.Start("DreamLogLong.csv");
+        shortLog.Start(SHORT_LOG_FILENAME);
+        longLog.Start(LONG_LOG_FILENAME);
     }
     if(longLog.GetRxlEnabled())
     {
@@ -122,9 +131,9 @@ void CLogging::start()
 
 void CLogging::stop()
 {
-//printf("CLogging::stop()\n");
+printf("CLogging::stop()\n");
     enabled = false;
-    TimerLogFileStart.stop();
+//    TimerLogFileStart.stop();
     TimerLogFile.stop();
     shortLog.Stop();
     longLog.Stop();

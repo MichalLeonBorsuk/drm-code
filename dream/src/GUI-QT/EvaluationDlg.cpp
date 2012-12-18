@@ -231,7 +231,10 @@ void systemevalDlg::StartLogging(bool bStart)
 }
 void systemevalDlg::SetFrequency(int iFrequency)
 {
-    EdtFrequency->setText(QString().setNum(iFrequency));
+    bEdtFrequencyMutex = TRUE;
+    EdtFrequency->setText(QString::number(iFrequency));
+    bEdtFrequencyMutex = FALSE;
+    DRMReceiver.SetFrequency(iFrequency);
 }
 
 void systemevalDlg::UpdateControls()
@@ -448,10 +451,7 @@ void systemevalDlg::OnTimerInterDigit()
         if (!(strFreq[i]>=QChar('0') && strFreq[i]<=QChar('9')))
             { strFreq.remove(i, 1); len--; i--; }
     int freq = strFreq.toInt();
-    bEdtFrequencyMutex = TRUE;
-    EdtFrequency->setText(QString::number(freq));
-    bEdtFrequencyMutex = FALSE;
-    DRMReceiver.SetFrequency(freq);
+    SetFrequency(freq);
 }
 
 void systemevalDlg::OnFrequencyEdited(const QString&)

@@ -50,7 +50,7 @@ public:
 
 protected:
 	QTimer			TimerLogFile;
-	QTimer			TimerLogFileStart;
+//	QTimer			TimerLogFileStart;
 
 	CShortLog		shortLog;
 	CLongLog		longLog;
@@ -64,7 +64,7 @@ signals:
 public slots:
 	void start();
 	void stop();
-	void reStart();
+//	void reStart();
 	void OnTimerLogFile();
 };
 

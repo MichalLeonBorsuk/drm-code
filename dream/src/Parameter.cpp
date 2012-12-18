@@ -1124,7 +1124,11 @@ void CParameter::GenerateRandomSerialNumber()
     char serialNumTemp[7];
 
     for (size_t i=0; i < 6; i++)
-        serialNumTemp[i] = randomChars[(int) 35.0*rand()/RAND_MAX];
+#ifdef _WIN32
+        serialNumTemp[i] = randomChars[(int) 35.0*rand()/RAND_MAX]; /* integer overflow on linux, RAND_MAX=0x7FFFFFFF */
+#else
+        serialNumTemp[i] = randomChars[35ll * (long long)rand() / RAND_MAX];
+#endif
 
     serialNumTemp[6] = '\0';
 
