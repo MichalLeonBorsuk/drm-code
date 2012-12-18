@@ -348,6 +348,7 @@ CLongLog::writeParameters()
 {
 
     Parameters.Lock();
+    iFrequency = Parameters.GetFrequency();
 
     /* Get parameters for delay and Doppler. In case the receiver is
        not synchronized, set parameters to zero */
