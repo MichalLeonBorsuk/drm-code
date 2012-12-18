@@ -88,7 +88,7 @@ void CLogging::OnTimerLogFile()
 {
     if (shortLog.restartNeeded())
     {
-printf("shortLog.restartNeeded()\n");
+//printf("shortLog.restartNeeded()\n");
         shortLog.Stop();
         shortLog.Start(SHORT_LOG_FILENAME);
 //        stop();
@@ -109,7 +109,7 @@ printf("shortLog.restartNeeded()\n");
 
 void CLogging::start()
 {
-printf("CLogging::start()\n");
+//printf("CLogging::start()\n");
 	iLogCount = 0;
     enabled = true;
     /* Start logging (if not already done) */
@@ -131,7 +131,7 @@ printf("CLogging::start()\n");
 
 void CLogging::stop()
 {
-printf("CLogging::stop()\n");
+//printf("CLogging::stop()\n");
     enabled = false;
 //    TimerLogFileStart.stop();
     TimerLogFile.stop();
