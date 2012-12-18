@@ -492,14 +492,17 @@ void FDRMDialog::OnScheduleTimer()
 //#endif
 	if (e.frequency != -1)
 	{
-		DRMReceiver.SetFrequency(e.frequency);
-		pLogging->LoadSettings(Settings);
-		pLogging->start();
+		pSysEvalDlg->SetFrequency(e.frequency);
+		pSysEvalDlg->StartLogging(true);
+//		DRMReceiver.SetFrequency(e.frequency);
+//		pLogging->LoadSettings(Settings);
+//		pLogging->start();
 //dprintf("start\n");
 	}
 	else
 	{
-		pLogging->stop();
+		pSysEvalDlg->StartLogging(false);
+//		pLogging->stop();
 //dprintf("stop\n");
 	}
 	e = pScheduler->pop();

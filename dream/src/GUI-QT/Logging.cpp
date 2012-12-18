@@ -60,6 +60,7 @@ void CLogging::LoadSettings(CSettings& Settings)
 
 void CLogging::reStart()
 {
+//printf("CLogging::reStart()\n");
     /* Activate log file start if necessary. */
     if (enabled)
     {
@@ -82,26 +83,27 @@ void CLogging::SaveSettings(CSettings& Settings)
 
 void CLogging::OnTimerLogFile()
 {
-    if(shortLog.restartNeeded())
+    if (shortLog.restartNeeded())
     {
-        stop();
-        enabled = true;
-        reStart();
+        shortLog.Stop();
+        shortLog.Start("DreamLog.txt");
+//        stop();
+//        enabled = true;
+//        reStart();
     }
-    else
-    {
-        iLogCount++;
-        if(iLogCount == 60)
-        {
-            iLogCount = 0;
+//    else
+//    {
+		if (!iLogCount)
             shortLog.Update();
-        }
+        iLogCount = (iLogCount + 1) % 60;
         longLog.Update();
-    }
+//    }
 }
 
 void CLogging::start()
 {
+//printf("CLogging::start()\n");
+	iLogCount = 0;
     enabled = true;
     /* Start logging (if not already done) */
     if(!longLog.GetLoggingActivated())
@@ -120,6 +122,7 @@ void CLogging::start()
 
 void CLogging::stop()
 {
+//printf("CLogging::stop()\n");
     enabled = false;
     TimerLogFileStart.stop();
     TimerLogFile.stop();
