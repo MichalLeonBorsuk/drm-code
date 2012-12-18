@@ -83,7 +83,7 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& NSettings, CRig& rig,
 
     pLogging = new CLogging(Parameters);
     pLogging->LoadSettings(Settings);
-    pLogging->reStart();
+//    pLogging->reStart();
 
 #if QT_VERSION < 0x040000
     /* Analog demodulation window */
