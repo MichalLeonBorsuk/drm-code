@@ -151,7 +151,14 @@ count(QT_VERSION, 0) {
                     LIBS += /usr/lib/libqwt.so.4
                 }
                 else {
-                    error("no usable qwt version found")
+					exits(/usr/lib/libqwt-qt3.so.5) {
+            	        message("with qwt5")
+                        INCLUDEPATH += /usr/include/qwt-qt3
+                        LIBS += /usr/lib/libqwt-qt3.so.5
+                    }
+                    else {
+                        error("no usable qwt version found")
+                    }
                 }
             }
         }
