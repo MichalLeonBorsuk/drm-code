@@ -97,6 +97,8 @@ protected:
 	vector<CDRMPlot*>	vecpDRMPlots;
 	int				iPlotStyle;
 
+	_BOOLEAN		bEdtFrequencyMutex;
+
 public slots:
 	void UpdatePlotStyle(int);
 	void OnTimer();

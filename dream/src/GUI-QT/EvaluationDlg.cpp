@@ -312,13 +312,11 @@ void systemevalDlg::UpdateControls()
     {
         int iFrequency = DRMReceiver.GetFrequency();
         int iCurFrequency = EdtFrequency->text().toInt();
-
         if (iFrequency != iCurFrequency)
         {
             bEdtFrequencyMutex = TRUE;
-            EdtFrequency->setText(QString().setNum(iFrequency));
+            EdtFrequency->setText(QString::number(iFrequency));
             bEdtFrequencyMutex = FALSE;
-            iCurFrequency = iFrequency;
         }
     }
 }

@@ -64,8 +64,8 @@ protected:
 systemevalDlg::systemevalDlg(CDRMReceiver& NDRMR, CSettings& NSettings,
                              QWidget* parent, const char* name, bool modal, Qt::WFlags f) :
     systemevalDlgBase(parent, name, modal, f),
-    DRMReceiver(NDRMR),
-    Settings(NSettings)
+    DRMReceiver(NDRMR), Settings(NSettings),
+    bEdtFrequencyMutex(FALSE)
 {
     /* Get window geometry data and apply it */
     CWinGeom s;
@@ -437,7 +437,10 @@ void systemevalDlg::StartLogging(bool bStart)
 }
 void systemevalDlg::SetFrequency(int iFrequency)
 {
+    bEdtFrequencyMutex = TRUE;
     EdtFrequency->setText(QString().setNum(iFrequency));
+    bEdtFrequencyMutex = FALSE;
+    DRMReceiver.SetFrequency(iFrequency);
 }
 
 void systemevalDlg::UpdateControls()
@@ -497,8 +500,19 @@ void systemevalDlg::UpdateControls()
         break;
     }
 
-    if(!TimerInterDigit.isActive())
-	EdtFrequency->setText(QString().setNum(DRMReceiver.GetFrequency()));
+    /* Update frequency edit control (frequency could be changed by
+       schedule dialog */
+    if (!TimerInterDigit.isActive())
+    {
+        int iFrequency = DRMReceiver.GetFrequency();
+        int iCurFrequency = EdtFrequency->text().toInt();
+        if (iFrequency != iCurFrequency)
+        {
+            bEdtFrequencyMutex = TRUE;
+            EdtFrequency->setText(QString().setNum(iFrequency));
+            bEdtFrequencyMutex = FALSE;
+        }
+    }
 
     /* Update settings checkbuttons */
     CheckBoxReverb->setChecked(DRMReceiver.GetAudSorceDec()->GetReverbEffect());
@@ -618,18 +632,19 @@ void systemevalDlg::OnTimerInterDigit()
         if (!(strFreq[i]>=QChar('0') && strFreq[i]<=QChar('9')))
             { strFreq.remove(i, 1); len--; i--; }
     int freq = strFreq.toInt();
-    EdtFrequency->setText(QString::number(freq));
-    DRMReceiver.SetFrequency(freq);
+    SetFrequency(freq);
 #ifdef _WIN32
     /* Compatibility with DRMLogger */
     CheckBoxWriteLog->setFocus();
 #endif
 }
 
-void systemevalDlg::OnFrequencyEdited(const QString& s)
+void systemevalDlg::OnFrequencyEdited(const QString&)
 {
-    (void)s;
-    TimerInterDigit.changeInterval(1000);
+    if (!bEdtFrequencyMutex)
+    {
+        TimerInterDigit.changeInterval(1000);
+    }
 }
 
 void systemevalDlg::UpdatePlotStyle(int iPlotStyle)
