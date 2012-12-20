@@ -59,7 +59,7 @@ using namespace std; /* Because of the library: "complex" */
 #endif /* _WIN32 */
 
 /* set sensible defaults for QT */
-#ifdef USE_QT
+#ifndef USE_NO_QT
 # include <qglobal.h>
 #endif
 

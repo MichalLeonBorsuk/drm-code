@@ -1,18 +1,16 @@
 console {
     message("console mode")
     QT -= gui
-    DEFINES -= USE_QT
+    DEFINES += USE_NO_QT
     DEFINES -= USE_QT_GUI
 }
 else {
     qtconsole {
         message("qt console mode")
         QT -= gui
-        DEFINES += USE_QT
         DEFINES -= USE_QT_GUI
     }
     else {
-        DEFINES += USE_QT
         DEFINES += USE_QT_GUI
         RESOURCES = src/GUI-QT/res/icons.qrc
     }
