@@ -1,12 +1,22 @@
+!release:!debug:CONFIG += release
+release {
+    CONFIG_MESSAGE += "release"
+    CONFIG -= debug
+}
+debug {
+    CONFIG_MESSAGE += "debug"
+    CONFIG -= release
+}
+
 console {
-    message("console mode")
+    message("console mode" $$CONFIG_MESSAGE)
     QT -= gui
     DEFINES += USE_NO_QT
     DEFINES -= USE_QT_GUI
 }
 else {
     qtconsole {
-        message("qt console mode")
+        CONFIG_MESSAGE = "console mode" $$CONFIG_MESSAGE
         QT -= gui
         DEFINES -= USE_QT_GUI
     }
@@ -15,9 +25,10 @@ else {
         RESOURCES = src/GUI-QT/res/icons.qrc
     }
 }
+
 TEMPLATE = app
 TARGET = dream
-CONFIG += qt warn_on debug thread
+CONFIG += qt warn_on thread
 INCLUDEPATH += src/GUI-QT
 INCLUDEPATH += libs
 OBJECTS_DIR = obj
@@ -29,7 +40,7 @@ contains(QT_VERSION, ^4\\..*) {
         CONFIG -= qt
     }
     else {
-        message("Qt 4")
+        message("Qt 4" $$CONFIG_MESSAGE)
         QT += network xml webkit
         VPATH += src/GUI-QT
     }
@@ -127,7 +138,7 @@ count(QT_VERSION, 0) {
         CONFIG -= qt
 	}
     else {
-        message("Qt 3")
+        message("Qt 3" $$CONFIG_MESSAGE)
         VPATH += src/GUI-QT/qt2
     }
     CONFIG += old
