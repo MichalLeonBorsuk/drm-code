@@ -1225,6 +1225,11 @@ EPG::genre_list[] = {
     {0, 0},
 };
 
+#ifdef USE_QT_GUI
+/* DialogUtil.cpp compat for Qt2 */
+extern void CreateDirectories(const QString& strFilename);
+#endif
+
 EPG::EPG(CParameter& NParameters):Parameters(NParameters)
 {
     for (int i = 0; true; i++)
@@ -1233,10 +1238,13 @@ EPG::EPG(CParameter& NParameters):Parameters(NParameters)
             break;
         genres[genre_list[i].genre] = genre_list[i].desc;
     }
-
     dir = Parameters.GetDataDirectory("EPG").c_str();
+#ifdef USE_QT_GUI
+    CreateDirectories(dir);
+#else
     if (!QFileInfo(dir).exists())
         QDir().mkdir(dir);
+#endif
     servicesFilename = dir + "/services.xml";
     loadChannels (servicesFilename);
     saveChannels (servicesFilename);
