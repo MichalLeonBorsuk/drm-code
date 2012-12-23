@@ -861,9 +861,21 @@ void CreateDirectories(const QString& strFilename)
     for (int i = 0;; i++)
     {
 #if QT_VERSION < 0x040000
+# ifdef _WIN32
+        int i1 = strFilename.find(QChar('/'), i);
+        int i2 = strFilename.find(QChar('\\'), i);
+        i = i1 >= 0 && i1 < i2 ? i1 : i2;
+# else
         i = strFilename.find(QChar('/'), i);
+# endif
 #else
+# ifdef _WIN32
+        int i1 = strFilename.indexOf(QChar('/'), i);
+        int i2 = strFilename.indexOf(QChar('\\'), i);
+        i = i1 >= 0 && i1 < i2 ? i1 : i2;
+# else
         i = strFilename.indexOf(QChar('/'), i);
+# endif
 #endif
         if (i < 0)
             break;
