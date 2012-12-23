@@ -1226,7 +1226,7 @@ EPG::genre_list[] = {
 };
 
 #ifdef USE_QT_GUI
-/* DialogUtil.cpp compat for Qt2 */
+/* DialogUtil.cpp TODO: CreateDirectories should be accessible from qtconsole mode */
 extern void CreateDirectories(const QString& strFilename);
 #endif
 
