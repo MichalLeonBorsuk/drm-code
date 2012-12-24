@@ -36,17 +36,18 @@
 /* Implementation *************************************************************/
 CLogging::CLogging(CParameter& Parameters) :
     shortLog(Parameters), longLog(Parameters),
-    enabled(false), iLogDelay(0), iLogCount(0)
+    iLogDelay(0), iLogCount(0), state(off)
 {
-//#if QT_VERSION >= 0x040000
-//	TimerLogFileStart.setSingleShot(true);
-//#endif
+#if QT_VERSION >= 0x040000
+    TimerLogFileStart.setSingleShot(true);
+#endif
     connect(&TimerLogFile, SIGNAL(timeout()), this, SLOT(OnTimerLogFile()));
-//    connect(&TimerLogFileStart, SIGNAL(timeout()), this, SLOT(start()));
+    connect(&TimerLogFileStart, SIGNAL(timeout()), this, SLOT(OnTimerLogFileStart()));
 }
 
 void CLogging::LoadSettings(CSettings& Settings)
 {
+qDebug("CLogging::LoadSettings");
     /* log file flag for storing signal strength in long log */
     _BOOLEAN logrxl = Settings.Get("Logfile", "enablerxl", FALSE);
     shortLog.SetRxlEnabled(logrxl);
@@ -57,46 +58,47 @@ void CLogging::LoadSettings(CSettings& Settings)
     shortLog.SetPositionEnabled(enablepositiondata);
     longLog.SetPositionEnabled(enablepositiondata);
 
-    enabled = Settings.Get("Logfile", "enablelog", false);
+    bool enabled = Settings.Get("Logfile", "enablelog", false);
+    if(enabled)
+	state = starting;
     iLogDelay = Settings.Get("Logfile", "delay", 0);
     SaveSettings(Settings);
 }
-#if 0
-void CLogging::reStart()
+
+void CLogging::start()
 {
-    /* Activate log file start if necessary. */
-    if (enabled)
-    {
-        /* One shot timer */
+qDebug("CLogging::start");
+    /* One shot timer */
+    TimerLogFileStart.start(iLogDelay * 1000 /* ms */
 #if QT_VERSION < 0x040000
-        TimerLogFileStart.start(iLogDelay * 1000 /* ms */, true);
-#else
-        TimerLogFileStart.start(iLogDelay * 1000 /* ms */);
+	, true
 #endif
-    }
+    );
 }
-#endif
+
 void CLogging::SaveSettings(CSettings& Settings)
 {
+qDebug("CLogging::SaveSettings");
     Settings.Put("Logfile", "enablerxl", shortLog.GetRxlEnabled());
     Settings.Put("Logfile", "enablepositiondata", shortLog.GetPositionEnabled());
-    Settings.Put("Logfile", "enablelog", enabled);
+    Settings.Put("Logfile", "enablelog", state!=off);
     Settings.Put("Logfile", "delay", iLogDelay);
 }
 
 void CLogging::OnTimerLogFile()
 {
+qDebug("CLogging::OnTimerLogFile");
     if (shortLog.restartNeeded())
     {
-//printf("shortLog.restartNeeded()\n");
+qDebug("shortLog.restartNeeded()");
         shortLog.Stop();
         shortLog.Start(SHORT_LOG_FILENAME);
-//        stop();
-//        enabled = true;
-//        reStart();
+        stop();
+        state = starting;
+        start();
     }
-//    else
-//    {
+    else
+    {
         iLogCount++;
         if(iLogCount == 60)
         {
@@ -104,21 +106,20 @@ void CLogging::OnTimerLogFile()
             shortLog.Update();
         }
         longLog.Update();
-//    }
+    }
 }
 
-void CLogging::start()
+void CLogging::OnTimerLogFileStart()
 {
-//printf("CLogging::start()\n");
-	iLogCount = 0;
-    enabled = true;
+qDebug("CLogging::TimerLogFileStart()");
+    iLogCount = 0;
+    state = on;
     /* Start logging (if not already done) */
     if(!longLog.GetLoggingActivated())
     {
         TimerLogFile.start(1000); /* Every second */
-
-		/* Latch new param */
-		shortLog.restartNeeded();
+	/* Latch new param */
+	shortLog.restartNeeded();
         /* Open log file */
         shortLog.Start(SHORT_LOG_FILENAME);
         longLog.Start(LONG_LOG_FILENAME);
@@ -131,9 +132,9 @@ void CLogging::start()
 
 void CLogging::stop()
 {
-//printf("CLogging::stop()\n");
-    enabled = false;
-//    TimerLogFileStart.stop();
+qDebug("CLogging::stop()");
+    state = off;
+    TimerLogFileStart.stop();
     TimerLogFile.stop();
     shortLog.Stop();
     longLog.Stop();

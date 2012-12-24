@@ -35,9 +35,6 @@
 #include <qfiledialog.h>
 #include <QHideEvent>
 #include <QShowEvent>
-#ifdef _WIN32
-# include <windows.h>
-#endif
 
 /* Implementation *************************************************************/
 systemevalDlg::systemevalDlg(CDRMReceiver& NDRMR, CSettings& NSettings,
@@ -45,8 +42,7 @@ systemevalDlg::systemevalDlg(CDRMReceiver& NDRMR, CSettings& NSettings,
     systemevalDlgBase(parent, name, modal, f),
     DRMReceiver(NDRMR),
     Settings(NSettings),
-    eNewCharType(CDRMPlot::NONE_OLD),
-    bEdtFrequencyMutex(FALSE)
+    eNewCharType(CDRMPlot::NONE_OLD)
 {
     /* Get window geometry data and apply it */
     CWinGeom s;
@@ -138,8 +134,6 @@ systemevalDlg::systemevalDlg(CDRMReceiver& NDRMR, CSettings& NSettings,
         ButtonGroupChanEstTimeInt->setEnabled(FALSE);
         ButtonGroupTimeSyncTrack->setEnabled(FALSE);
         CheckBoxFlipSpec->setEnabled(FALSE);
-        EdtFrequency->setText("0");
-        EdtFrequency->setEnabled(FALSE);
         GroupBoxInterfRej->setEnabled(FALSE);
 
         /* Only audio spectrum makes sence for MDI in */
@@ -186,8 +180,8 @@ systemevalDlg::systemevalDlg(CDRMReceiver& NDRMR, CSettings& NSettings,
             this, SLOT(OnCheckFlipSpectrum()));
     connect(CheckBoxMuteAudio, SIGNAL(clicked()),
             this, SLOT(OnCheckBoxMuteAudio()));
-    connect(CheckBoxWriteLog, SIGNAL(clicked()),
-            this, SLOT(OnCheckWriteLog()));
+    connect(CheckBoxWriteLog, SIGNAL(stateChanged(int)),
+            this, SLOT(OnCheckWriteLog(int)));
     connect(CheckBoxSaveAudioWave, SIGNAL(clicked()),
             this, SLOT(OnCheckSaveAudioWAV()));
     connect(CheckBoxRecFilter, SIGNAL(clicked()),
@@ -197,18 +191,9 @@ systemevalDlg::systemevalDlg(CDRMReceiver& NDRMR, CSettings& NSettings,
     connect(CheckBoxReverb, SIGNAL(clicked()),
             this, SLOT(OnCheckBoxReverb()));
 
-    /* Timers */
+    /* Timer */
     connect(&Timer, SIGNAL(timeout()),
             this, SLOT(OnTimer()));
-
-    connect(&TimerInterDigit, SIGNAL(timeout()),
-            this, SLOT(OnTimerInterDigit()));
-
-    connect(EdtFrequency, SIGNAL(textChanged ( const QString&)),
-            this, SLOT(OnFrequencyEdited ( const QString &)));
-
-    /* Start log file flag */
-    CheckBoxWriteLog->setChecked(Settings.Get("Logfile", "enablelog", FALSE));
 
     /* Select chart type */
     chartSelector->setCurrentItem(FindItemByECharType(eCurCharType), 0);
@@ -222,19 +207,6 @@ systemevalDlg::~systemevalDlg()
     if(DRMReceiver.GetWriteData()->GetIsWriteWaveFile())
         DRMReceiver.GetWriteData()->StopWriteWaveFile();
     delete MainPlot;
-}
-
-void systemevalDlg::StartLogging(bool bStart)
-{
-    CheckBoxWriteLog->setChecked(bStart);
-    OnCheckWriteLog();
-}
-void systemevalDlg::SetFrequency(int iFrequency)
-{
-    bEdtFrequencyMutex = TRUE;
-    EdtFrequency->setText(QString::number(iFrequency));
-    bEdtFrequencyMutex = FALSE;
-    DRMReceiver.SetFrequency(iFrequency);
 }
 
 void systemevalDlg::UpdateControls()
@@ -304,38 +276,7 @@ void systemevalDlg::UpdateControls()
 
     CheckBoxSaveAudioWave->
     setChecked(DRMReceiver.GetWriteData()->GetIsWriteWaveFile());
-
-
-    /* Update frequency edit control (frequency could be changed by
-       schedule dialog */
-    if (!TimerInterDigit.isActive())
-    {
-        int iFrequency = DRMReceiver.GetFrequency();
-        int iCurFrequency = EdtFrequency->text().toInt();
-        if (iFrequency != iCurFrequency)
-        {
-            bEdtFrequencyMutex = TRUE;
-            EdtFrequency->setText(QString::number(iFrequency));
-            bEdtFrequencyMutex = FALSE;
-        }
-    }
 }
-
-#ifdef _WIN32
-/* Compatibility with DRMLogger */
-bool systemevalDlg::winEvent(MSG *msg, long *result)
-{
-	(void)result;
-	if (msg->message == WM_ACTIVATE && msg->wParam == WA_ACTIVE)
-	{
-		if (CheckBoxWriteLog->isChecked())
-			EdtFrequency->setFocus();
-		else
-			CheckBoxWriteLog->setFocus();
-	}
-	return false;
-}
-#endif
 
 void systemevalDlg::showEvent(QShowEvent* e)
 {
@@ -437,41 +378,6 @@ void systemevalDlg::hideEvent(QHideEvent* e)
 
     /* Store current plot type */
     Settings.Put("System Evaluation Dialog", "plottype", ECharTypeToPlotName(eCurCharType));
-}
-
-void systemevalDlg::OnTimerInterDigit()
-{
-    TimerInterDigit.stop();
-    QString strFreq = EdtFrequency->text();
-    int len = strFreq.size();
-    /* Keep only characters 0 to 9 */
-    for (int i = 0; i < len; i++)
-        if (!(strFreq[i]>=QChar('0') && strFreq[i]<=QChar('9')))
-            { strFreq.remove(i, 1); len--; i--; }
-    int freq = strFreq.toInt();
-    SetFrequency(freq);
-}
-
-void systemevalDlg::OnFrequencyEdited(const QString&)
-{
-    if (!bEdtFrequencyMutex)
-    {
-#ifdef _WIN32
-		/* Compatibility with DRMLogger */
-		QString strFreq = EdtFrequency->text();
-		int pos = strFreq.lastIndexOf(QChar('L'), -1, Qt::CaseInsensitive);
-		if (pos >= 0 && (pos+1) == strFreq.length())
-		{
-			strFreq.remove(pos, 1);
-			bEdtFrequencyMutex = TRUE;
-			EdtFrequency->setText(strFreq);
-			bEdtFrequencyMutex = FALSE;
-			CheckBoxWriteLog->toggle();
-		}
-#endif
-		TimerInterDigit.stop();
-        TimerInterDigit.start(1000);
-    }
 }
 
 void systemevalDlg::UpdatePlotStyle(int iPlotStyle)
@@ -1067,9 +973,10 @@ void systemevalDlg::OnCheckSaveAudioWAV()
 }
 
 
-void systemevalDlg::OnCheckWriteLog()
+void systemevalDlg::OnCheckWriteLog(int state)
 {
-    if (CheckBoxWriteLog->isChecked())
+qDebug("systemevalDlg::OnCheckWriteLog");
+    if (state == Qt::Checked)
     {
 		emit startLogging();
     }
@@ -1320,12 +1227,6 @@ void systemevalDlg::AddWhatsThisHelp()
                         "<br>The log file will be "
                         "written in the directory were the Dream application was started and "
                         "the name of this file is always DreamLog.txt"));
-
-    /* Freq */
-    EdtFrequency->setWhatsThis(
-                     tr("<b>Freq:</b> In this edit control, the current "
-                        "selected frequency on the front-end can be specified. This frequency "
-                        "will be written into the log file."));
 
     /* Wiener */
     const QString strWienerChanEst =
