@@ -38,7 +38,7 @@
 #if 0
 # ifdef _WIN32
 # include <stdarg.h>
-int dprintf(const char *format, ...)
+int qDebug(const char *format, ...)
 {
 	char buffer[1024];
 	va_list vl;
@@ -49,7 +49,7 @@ int dprintf(const char *format, ...)
 	return ret;
 }
 # else
-#  define dprintf(...) fprintf(stderr, __VA_ARGS__)
+#  define qDebug(...) fprintf(stderr, __VA_ARGS__)
 # endif
 #endif
 
@@ -80,7 +80,6 @@ CScheduler::SEvent CScheduler::front()
 	{
 		fill();
 	}
-//struct tm* dts = gmtime(&events.front().time); dprintf("%i %02i:%02i:%02i frequency=%i\n", (int)dts->tm_mday, (int)dts->tm_hour, (int)dts->tm_min, (int)dts->tm_sec, (int)events.front().frequency);
 	return events.front();
 }
 
@@ -99,11 +98,13 @@ bool CScheduler::empty() const
 void CScheduler::LoadSchedule(const string& filename)
 {
 	LoadIni(filename.c_str());
+SaveIni(cerr);
 	for(int i=1; i<999; i++)
 	{
 		ostringstream ss;
 		ss << "Freq" << i;
 		string f = GetIniSetting("Settings", ss.str());
+qDebug("freq %s", f.c_str());
 		ss.str("");
 		ss << "StartTime" << i;
 		string starttime = GetIniSetting("Settings", ss.str());
@@ -129,8 +130,6 @@ void CScheduler::fill()
 	dts.tm_min = 0;
 	dts.tm_sec = 0;
 	time_t sod = timegm(&dts); // start of daytime
-//dprintf("sod = %i\n", sod);
-//{struct tm* gtm = gmtime(&sod); if (gtm) dprintf("%i %i %02i:%02i:%02i\n", (int)gtm->tm_year+1900, (int)gtm->tm_mday, (int)gtm->tm_hour, (int)gtm->tm_min, (int)gtm->tm_sec); else dprintf("gtm = NULL\n");}
 	// resolve schedule to absolute time
 	map<time_t,int> abs_sched;
 	map<time_t,int>::const_iterator i;
@@ -147,7 +146,6 @@ void CScheduler::fill()
 		e.time = i->first;
 		e.frequency = i->second;
 		events.push(e);
-//struct tm* dts = gmtime(&e.time); dprintf("%i %02i:%02i:%02i frequency=%i\n", (int)dts->tm_mday, (int)dts->tm_hour, (int)dts->tm_min, (int)dts->tm_sec, (int)e.frequency);
 	}
 }
 
@@ -157,6 +155,6 @@ int CScheduler::parse(string s)
 	char c;
 	istringstream iss(s);
 	iss >> hh >> c >> mm >> c >> ss;
-//dprintf("%02i:%02i:%02i\n", hh, mm, ss);
+qDebug("%s %02i:%02i:%02i\n", s.c_str(), hh, mm, ss);
 	return 60*(mm + 60*hh)+ss;
 }

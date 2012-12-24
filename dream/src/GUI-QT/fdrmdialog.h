@@ -166,6 +166,8 @@ protected:
     QString serviceSelector(CParameter&, int);
     void showTextMessage(const QString&);
     void showServiceInfo(const CService&);
+    void startLogging();
+    void stopLogging();
 
 public slots:
     void OnTimer();
