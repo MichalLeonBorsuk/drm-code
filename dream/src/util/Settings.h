@@ -134,8 +134,9 @@ public:
 	CIniFile() {}
 	virtual ~CIniFile() {}
 protected:
-	void SaveIni(const char* pszFilename);
-	void LoadIni(const char* pszFilename);
+	void SaveIni(ostream&);
+	void SaveIni(const char*);
+	void LoadIni(const char*);
 
 	string GetIniSetting(const string& strSection, const string& strKey,
 				const string& strDefaultVal = "") const;
