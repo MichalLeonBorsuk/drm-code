@@ -807,9 +807,15 @@ CIniFile::LoadIni(const char *filename)
 void
 CIniFile::SaveIni(const char *filename)
 {
-	_BOOLEAN bFirstSection = TRUE;	/* Init flag */
+	fstream file(filename, std::ios::out);
+	SaveIni(file);
+	file.close();
+}
 
-	std::fstream file(filename, std::ios::out);
+void
+CIniFile::SaveIni(ostream& file)
+{
+	_BOOLEAN bFirstSection = TRUE;	/* Init flag */
 	if (!file.good())
 		return;
 
@@ -844,7 +850,6 @@ CIniFile::SaveIni(const char *filename)
 			}
 		}
 	}
-	file.close();
 }
 
 /* Return true or false depending on whether the first string is less than the
