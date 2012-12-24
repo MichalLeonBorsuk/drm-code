@@ -368,22 +368,35 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& NSettings, CRig& rig,
     string schedfile = Settings.Get("command", "schedule", string());
     if(schedfile != "")
     {
+qDebug("using scheduler");
         pScheduler = new CScheduler;
         pScheduler->LoadSchedule(schedfile);
         pScheduleTimer = new QTimer(this);
         connect(pScheduleTimer, SIGNAL(timeout()), this, SLOT(OnScheduleTimer()));
         /* Setup the first timeout */
         CScheduler::SEvent e;
-        e = pScheduler->front();
-        time_t now = time(NULL);
-        pScheduleTimer->start(1000*(e.time-now));
-//#if QT_VERSION >= 0x040000
-//        pScheduleTimer->start();
-//#else
-//        // TODO
-//#endif
+	if(!pScheduler->empty()) {
+qDebug("schedule not empty");
+            e = pScheduler->front();
+            time_t now = time(NULL);
+            time_t next = e.time - now;
+qDebug("next %ld togo %ld", e.time, next);
+	    if(next > 0)
+	    {
+qDebug("starting schedule timer");
+                pScheduleTimer->start(1000*(next));
+	    }
+	    else // WE ARE LATE STARTING
+	    {
+                startLogging();
+	    }
 	}
-    pSysEvalDlg->CheckBoxWriteLog->setChecked(pLogging->enabled());
+    }
+    else 
+    {
+        if(pLogging->enabled())
+            startLogging();
+    }
 }
 
 FDRMDialog::~FDRMDialog()
@@ -481,6 +494,16 @@ void FDRMDialog::UpdateDRM_GUI()
 #endif
 }
 
+void FDRMDialog::startLogging()
+{
+    pSysEvalDlg->CheckBoxWriteLog->setChecked(true);
+}
+
+void FDRMDialog::stopLogging()
+{
+    pSysEvalDlg->CheckBoxWriteLog->setChecked(false);
+}
+
 void FDRMDialog::OnScheduleTimer()
 {
 	CScheduler::SEvent e;
@@ -488,15 +511,23 @@ void FDRMDialog::OnScheduleTimer()
 	if (e.frequency != -1)
 	{
 		DRMReceiver.SetFrequency(e.frequency);
-		pSysEvalDlg->CheckBoxWriteLog->setChecked(true);
+		if(!pLogging->enabled())
+		    startLogging();
 	}
 	else
 	{
-		pSysEvalDlg->CheckBoxWriteLog->setChecked(false);
+		stopLogging();
 	}
-	e = pScheduler->pop();
-	time_t now = time(NULL);
-	pScheduleTimer->start(1000*(e.time-now));
+	if(pScheduler->empty())
+        {
+		stopLogging();
+        }
+        else
+        {
+	    e = pScheduler->pop();
+	    time_t now = time(NULL);
+	    pScheduleTimer->start(1000*(e.time-now));
+	}
 }
 
 void FDRMDialog::OnTimer()

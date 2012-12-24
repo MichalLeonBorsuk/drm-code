@@ -91,11 +91,7 @@ qDebug("CLogging::OnTimerLogFile");
     if (shortLog.restartNeeded())
     {
 qDebug("shortLog.restartNeeded()");
-        shortLog.Stop();
-        shortLog.Start(SHORT_LOG_FILENAME);
-        stop();
-        state = starting;
-        start();
+        stop(); start();
     }
     else
     {
@@ -115,15 +111,10 @@ qDebug("CLogging::TimerLogFileStart()");
     iLogCount = 0;
     state = on;
     /* Start logging (if not already done) */
-    if(!longLog.GetLoggingActivated())
-    {
-        TimerLogFile.start(1000); /* Every second */
-	/* Latch new param */
-	shortLog.restartNeeded();
-        /* Open log file */
-        shortLog.Start(SHORT_LOG_FILENAME);
-        longLog.Start(LONG_LOG_FILENAME);
-    }
+    TimerLogFile.start(1000); /* Every second */
+    /* Open log files */
+    shortLog.Start(SHORT_LOG_FILENAME);
+    longLog.Start(LONG_LOG_FILENAME);
     if(longLog.GetRxlEnabled())
     {
         emit subscribeRig();
