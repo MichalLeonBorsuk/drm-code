@@ -1428,7 +1428,7 @@
                </sizepolicy>
               </property>
               <property name="text">
-               <string>&amp;Log File, Freq:</string>
+               <string>&amp;Log to file:</string>
               </property>
              </widget>
             </item>
@@ -1448,19 +1448,6 @@
                </widget>
               </item>
               <item>
-               <widget class="QLineEdit" name="EdtFrequency">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="maxLength">
-                 <number>32767</number>
-                </property>
-               </widget>
-              </item>
-              <item>
                <widget class="QWidget" name="widget_2" native="true">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
@@ -1471,25 +1458,6 @@
                </widget>
               </item>
              </layout>
-            </item>
-            <item>
-             <widget class="QLabel" name="TextLabel1_3">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="text">
-               <string>kHz</string>
-              </property>
-              <property name="wordWrap">
-               <bool>false</bool>
-              </property>
-              <property name="indent">
-               <number>1</number>
-              </property>
-             </widget>
             </item>
             <item>
              <spacer name="horizontalSpacer">

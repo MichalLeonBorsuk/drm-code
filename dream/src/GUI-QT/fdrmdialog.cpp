@@ -83,7 +83,6 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& NSettings, CRig& rig,
 
     pLogging = new CLogging(Parameters);
     pLogging->LoadSettings(Settings);
-//    pLogging->reStart();
 
 #if QT_VERSION < 0x040000
     /* Analog demodulation window */
@@ -384,6 +383,7 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& NSettings, CRig& rig,
 //        // TODO
 //#endif
 	}
+    pSysEvalDlg->CheckBoxWriteLog->setChecked(pLogging->enabled());
 }
 
 FDRMDialog::~FDRMDialog()
@@ -485,34 +485,18 @@ void FDRMDialog::OnScheduleTimer()
 {
 	CScheduler::SEvent e;
 	e = pScheduler->front();
-//#if QT_VERSION >= 0x040000
-//QDateTime dt;
-//dt.setTime_t(e.time);
-//qDebug() << dt.toString("yyyy-MM-dd hh:mm:ss") << " " << e.frequency;
-//#endif
 	if (e.frequency != -1)
 	{
-		pSysEvalDlg->SetFrequency(e.frequency);
-		pSysEvalDlg->StartLogging(true);
-//		DRMReceiver.SetFrequency(e.frequency);
-//		pLogging->LoadSettings(Settings);
-//		pLogging->start();
-//dprintf("start\n");
+		DRMReceiver.SetFrequency(e.frequency);
+		pSysEvalDlg->CheckBoxWriteLog->setChecked(true);
 	}
 	else
 	{
-		pSysEvalDlg->StartLogging(false);
-//		pLogging->stop();
-//dprintf("stop\n");
+		pSysEvalDlg->CheckBoxWriteLog->setChecked(false);
 	}
 	e = pScheduler->pop();
 	time_t now = time(NULL);
 	pScheduleTimer->start(1000*(e.time-now));
-//#if QT_VERSION >= 0x040000
-//	pScheduleTimer->setInterval(1000*(e.time-now));
-//#else
-//	pScheduleTimer->changeInterval(1000*(e.time-now));
-//#endif
 }
 
 void FDRMDialog::OnTimer()

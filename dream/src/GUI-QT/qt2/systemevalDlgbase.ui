@@ -11,7 +11,7 @@
         <rect>
             <x>0</x>
             <y>0</y>
-            <width>866</width>
+            <width>872</width>
             <height>534</height>
         </rect>
     </property>
@@ -1812,29 +1812,7 @@
                                             </property>
                                             <property stdset="1">
                                                 <name>text</name>
-                                                <string>&amp;Log File, Freq:</string>
-                                            </property>
-                                        </widget>
-                                        <widget>
-                                            <class>QLineEdit</class>
-                                            <property stdset="1">
-                                                <name>name</name>
-                                                <cstring>EdtFrequency</cstring>
-                                            </property>
-                                        </widget>
-                                        <widget>
-                                            <class>QLabel</class>
-                                            <property stdset="1">
-                                                <name>name</name>
-                                                <cstring>TextLabel1_3</cstring>
-                                            </property>
-                                            <property stdset="1">
-                                                <name>text</name>
-                                                <string>kHz</string>
-                                            </property>
-                                            <property stdset="1">
-                                                <name>indent</name>
-                                                <number>1</number>
+                                                <string>&amp;Log to file</string>
                                             </property>
                                         </widget>
                                     </hbox>
@@ -2355,7 +2333,6 @@
     <tabstop>CheckBoxMuteAudio</tabstop>
     <tabstop>SliderNoOfIterations</tabstop>
     <tabstop>CheckBoxWriteLog</tabstop>
-    <tabstop>EdtFrequency</tabstop>
     <tabstop>CheckBoxSaveAudioWave</tabstop>
     <tabstop>CheckBoxReverb</tabstop>
     <tabstop>CheckBoxRecFilter</tabstop>

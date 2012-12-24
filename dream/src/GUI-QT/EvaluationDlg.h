@@ -65,26 +65,17 @@ public:
 		const char* name = 0, bool modal = FALSE, Qt::WFlags f = 0);
 
 	virtual ~systemevalDlg();
-
 	void SetStatus(CMultColorLED*, ETypeRxStatus);
-	void StopLogTimers();
-	void StartLogging(bool bStart);
-	void SetFrequency(int iFrequency);
 
 protected:
 	CDRMReceiver&	DRMReceiver;
 	CSettings&		Settings;
 
 	QTimer			Timer;
-	QTimer			TimerInterDigit;
-
 	CDRMPlot*		MainPlot;
 
 	virtual void	showEvent(QShowEvent* pEvent);
 	virtual void	hideEvent(QHideEvent* pEvent);
-#ifdef _WIN32
-	virtual bool	winEvent(MSG *message, long *result);
-#endif
 	void			UpdateGPS(CParameter&);
 	void			UpdateControls();
 	void			AddWhatsThisHelp();
@@ -102,11 +93,8 @@ protected:
 	vector<CDRMPlot*>	vecpDRMPlots;
 	CEventFilter	ef;
 
-	_BOOLEAN		bEdtFrequencyMutex;
-
 public slots:
 	void OnTimer();
-	void OnTimerInterDigit();
 	void OnRadioTimeLinear();
 	void OnRadioTimeWiener();
 	void OnRadioFrequencyLinear();
@@ -118,11 +106,10 @@ public slots:
 	void OnCheckFlipSpectrum();
 	void OnCheckBoxMuteAudio();
 	void OnCheckBoxReverb();
-	void OnCheckWriteLog();
+	void OnCheckWriteLog(int);
 	void OnCheckSaveAudioWAV();
 	void OnCheckRecFilter();
 	void OnCheckModiMetric();
-	void OnFrequencyEdited (const QString&);
 	void OnListSelChanged(QTreeWidgetItem*, QTreeWidgetItem*);
 	void OnTreeWidgetContMenu(bool);
 	void OnCustomContextMenuRequested(const QPoint&);
