@@ -40,7 +40,7 @@ class CScheduler
 {
 public:
 	struct SEvent { time_t time; int frequency; };
-	CScheduler():schedule(),events(){}
+	CScheduler(bool test=false):schedule(),events(),iniFile(),testMode(test){}
 	void LoadSchedule(const string& filename);
 	bool empty() const;
 	SEvent front(); // get next event 
@@ -48,12 +48,13 @@ public:
 private:
 	map<time_t,int> schedule; // map seconds from start of day to schedule event, frequency or -1 for off
 	queue<SEvent> events;
+	CIniFile iniFile;
+	bool testMode;
 	void fill();
 	void before();
 	int parse(string);
 	string format(time_t);
 	string format(const struct tm&);
-	CIniFile iniFile;
 };
 
 #if 0

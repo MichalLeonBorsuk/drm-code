@@ -570,6 +570,13 @@ CSettings::ParseArguments(int argc, char **argv)
 			continue;
 		}
 #endif
+		/* invoke test functionality ---------------------------------------- */
+		if (GetStringArgument(argc, argv, i, "--test", "--test", strArgument) == TRUE)
+		{
+			Put("command", "test", strArgument);
+			continue;
+		}
+
 
 		/* Help (usage) flag ------------------------------------------------ */
 		if ((!strcmp(argv[i], "--help")) ||
@@ -652,6 +659,7 @@ CSettings::UsageArguments()
 		"  -C <s>, --hamlib-config <s>  set Hamlib config parameter\n"
 		"  -T <b>, --ensmeter <b>       enable S-Meter (0: off; 1: on)\n"
 #endif
+		"  --test <n>                   if 1 then some test setup will be done"
 		"  -h, -?, --help               this help text\n"
 		"\n"
 		"Example: $EXECNAME -p --sampleoff -0.23 -i 2"
