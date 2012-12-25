@@ -36,7 +36,7 @@
 
 using namespace std;
 
-class CScheduler: public CIniFile
+class CScheduler
 {
 public:
 	struct SEvent { time_t time; int frequency; };
@@ -49,7 +49,11 @@ private:
 	map<time_t,int> schedule; // map seconds from start of day to schedule event, frequency or -1 for off
 	queue<SEvent> events;
 	void fill();
+	void before();
 	int parse(string);
+	string format(time_t);
+	string format(const struct tm&);
+	CIniFile iniFile;
 };
 
 #if 0

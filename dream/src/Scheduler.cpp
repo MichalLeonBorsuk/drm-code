@@ -35,24 +35,6 @@
 # include <windows.h>
 #endif
 
-#if 0
-# ifdef _WIN32
-# include <stdarg.h>
-int qDebug(const char *format, ...)
-{
-	char buffer[1024];
-	va_list vl;
-	va_start(vl, format);
-	int ret = vsprintf(buffer, format, vl);
-	va_end(vl);
-	OutputDebugStringA(buffer);
-	return ret;
-}
-# else
-#  define qDebug(...) fprintf(stderr, __VA_ARGS__)
-# endif
-#endif
-
 #ifdef _WIN32
 time_t timegm(struct tm *tm)
 {
@@ -97,20 +79,19 @@ bool CScheduler::empty() const
 
 void CScheduler::LoadSchedule(const string& filename)
 {
-	LoadIni(filename.c_str());
-SaveIni(cerr);
-	for(int i=1; i<999; i++)
+	iniFile.LoadIni(filename.c_str());
+	//before();
+	for(int i=1; i<99; i++)
 	{
 		ostringstream ss;
 		ss << "Freq" << i;
-		string f = GetIniSetting("Settings", ss.str());
-qDebug("freq %s", f.c_str());
+		string f = iniFile.GetIniSetting("Settings", ss.str());
 		ss.str("");
 		ss << "StartTime" << i;
-		string starttime = GetIniSetting("Settings", ss.str());
+		string starttime = iniFile.GetIniSetting("Settings", ss.str());
 		ss.str("");
 		ss << "EndTime" << i;
-		string endtime = GetIniSetting("Settings", ss.str());
+		string endtime = iniFile.GetIniSetting("Settings", ss.str());
 		if(starttime == endtime)
 			break;
 		time_t start = parse(starttime);
@@ -155,6 +136,38 @@ int CScheduler::parse(string s)
 	char c;
 	istringstream iss(s);
 	iss >> hh >> c >> mm >> c >> ss;
-qDebug("%s %02i:%02i:%02i\n", s.c_str(), hh, mm, ss);
 	return 60*(mm + 60*hh)+ss;
+}
+
+string CScheduler::format(time_t t)
+{
+	struct tm g = *gmtime(&t);
+	return format(g);
+}
+
+string CScheduler::format(const struct tm& g)
+{
+	ostringstream ss;
+	if(g.tm_hour < 10)
+		ss << '0';
+	ss << g.tm_hour << ":";
+	if(g.tm_min < 10)
+		ss << '0';
+	ss << g.tm_min << ":" ;
+	if(g.tm_sec < 10)
+		ss << '0';
+	ss << g.tm_sec;
+	return ss.str();
+}
+
+void CScheduler::before()
+{
+	time_t t = time(NULL);
+	t += 10;
+	iniFile.PutIniSetting("Settings", "StartTime1", format(t));
+	t += 30;
+	iniFile.PutIniSetting("Settings", "EndTime1", format(t));
+	iniFile.PutIniSetting("Settings", "StartTime2", format(t));
+	t += 30;
+	iniFile.PutIniSetting("Settings", "EndTime2", format(t));
 }

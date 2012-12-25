@@ -368,7 +368,6 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& NSettings, CRig& rig,
     string schedfile = Settings.Get("command", "schedule", string());
     if(schedfile != "")
     {
-qDebug("using scheduler");
         pScheduler = new CScheduler;
         pScheduler->LoadSchedule(schedfile);
         pScheduleTimer = new QTimer(this);
@@ -376,15 +375,12 @@ qDebug("using scheduler");
         /* Setup the first timeout */
         CScheduler::SEvent e;
 	if(!pScheduler->empty()) {
-qDebug("schedule not empty");
             e = pScheduler->front();
             time_t now = time(NULL);
             time_t next = e.time - now;
-qDebug("next %ld togo %ld", e.time, next);
 	    if(next > 0)
 	    {
-qDebug("starting schedule timer");
-                pScheduleTimer->start(1000*(next));
+                pScheduleTimer->start(1000*next);
 	    }
 	    else // WE ARE LATE STARTING
 	    {
@@ -512,7 +508,9 @@ void FDRMDialog::OnScheduleTimer()
 	{
 		DRMReceiver.SetFrequency(e.frequency);
 		if(!pLogging->enabled())
+		{
 		    startLogging();
+		}
 	}
 	else
 	{
