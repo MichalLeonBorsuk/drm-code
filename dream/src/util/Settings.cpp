@@ -295,6 +295,14 @@ CSettings::ParseArguments(int argc, char **argv)
 			continue;
 		}
 
+		/* Reverb audio flag ------------------------------------------------ */
+		if (GetNumericArgument(argc, argv, i, "-b", "--reverb",
+							   0, 1, rArgument) == TRUE)
+		{
+			Put("Receiver", "reverb", int (rArgument));
+			continue;
+		}
+
 		/* Bandpass filter flag --------------------------------------------- */
 		if (GetNumericArgument(argc, argv, i, "-F", "--filter",
 							   0, 1, rArgument) == TRUE)
@@ -615,6 +623,7 @@ CSettings::UsageArguments()
 		"  -i <n>, --mlciter <n>        number of MLC iterations (allowed range: 0...4 default: 1)\n"
 		"  -s <r>, --sampleoff <r>      sample rate offset initial value [Hz] (allowed range: -200.0...200.0)\n"
 		"  -m <b>, --muteaudio <b>      mute audio output (0: off; 1: on)\n"
+		"  -b <b>, --reverb <b>         audio reverberation on drop-out (0: off; 1: on)\n"
 		"  -f <s>, --fileio <s>         disable sound card, use file <s> instead\n"
 		"  -w <s>, --writewav <s>       write output to wave file\n"
 		"  -S <r>, --fracwinsize <r>    freq. acqu. search window size [Hz] (-1.0: sample rate / 2 (default))\n"
@@ -631,7 +640,7 @@ CSettings::UsageArguments()
 		"                               3: mix -> L, R muted;          4: L muted, mix -> R\n"
 //		"  -e <b>, --decodeepg <b>      enable/disable epg decoding (0: off; 1: on)\n"
 #ifdef USE_QT_GUI
-		"  -g <b>, --enablelog <b>      enable/disable logging (0: no logging; 1: logging\n"
+		"  -g <b>, --enablelog <b>      enable/disable logging (0: no logging; 1: logging)\n"
 		"  -r <n>, --frequency <n>      set frequency [kHz] for log file\n"
 		"  -l <n>, --logdelay <n>       delay start of logging by <n> seconds, allowed range: 0...3600)\n"
 		"  -L <s>, --schedule <s>       read DRMlog.ini style schedule file and obey it\n"
@@ -659,7 +668,7 @@ CSettings::UsageArguments()
 		"  -C <s>, --hamlib-config <s>  set Hamlib config parameter\n"
 		"  -T <b>, --ensmeter <b>       enable S-Meter (0: off; 1: on)\n"
 #endif
-		"  --test <n>                   if 1 then some test setup will be done"
+		"  --test <n>                   if 1 then some test setup will be done\n"
 		"  -h, -?, --help               this help text\n"
 		"\n"
 		"Example: $EXECNAME -p --sampleoff -0.23 -i 2"
