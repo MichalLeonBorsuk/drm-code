@@ -47,7 +47,6 @@ CLogging::CLogging(CParameter& Parameters) :
 
 void CLogging::LoadSettings(CSettings& Settings)
 {
-qDebug("CLogging::LoadSettings");
     /* log file flag for storing signal strength in long log */
     _BOOLEAN logrxl = Settings.Get("Logfile", "enablerxl", FALSE);
     shortLog.SetRxlEnabled(logrxl);
@@ -67,7 +66,6 @@ qDebug("CLogging::LoadSettings");
 
 void CLogging::start()
 {
-qDebug("CLogging::start");
     /* One shot timer */
     TimerLogFileStart.start(iLogDelay * 1000 /* ms */
 #if QT_VERSION < 0x040000
@@ -78,7 +76,6 @@ qDebug("CLogging::start");
 
 void CLogging::SaveSettings(CSettings& Settings)
 {
-qDebug("CLogging::SaveSettings");
     Settings.Put("Logfile", "enablerxl", shortLog.GetRxlEnabled());
     Settings.Put("Logfile", "enablepositiondata", shortLog.GetPositionEnabled());
     Settings.Put("Logfile", "enablelog", state!=off);
@@ -87,10 +84,8 @@ qDebug("CLogging::SaveSettings");
 
 void CLogging::OnTimerLogFile()
 {
-qDebug("CLogging::OnTimerLogFile");
     if (shortLog.restartNeeded())
     {
-qDebug("shortLog.restartNeeded()");
         stop(); start();
     }
     else
@@ -107,7 +102,6 @@ qDebug("shortLog.restartNeeded()");
 
 void CLogging::OnTimerLogFileStart()
 {
-qDebug("CLogging::TimerLogFileStart()");
     iLogCount = 0;
     state = on;
     /* Start logging (if not already done) */
@@ -123,7 +117,6 @@ qDebug("CLogging::TimerLogFileStart()");
 
 void CLogging::stop()
 {
-qDebug("CLogging::stop()");
     state = off;
     TimerLogFileStart.stop();
     TimerLogFile.stop();
