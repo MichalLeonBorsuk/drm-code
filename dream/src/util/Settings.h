@@ -133,15 +133,15 @@ class CIniFile
 public:
 	CIniFile() {}
 	virtual ~CIniFile() {}
-protected:
-	void SaveIni(ostream&);
-	void SaveIni(const char*);
+	void SaveIni(ostream&) const;
+	void SaveIni(const char*) const;
 	void LoadIni(const char*);
 
 	string GetIniSetting(const string& strSection, const string& strKey,
 				const string& strDefaultVal = "") const;
 	void PutIniSetting(const string& strSection, const string& strKey="",
 				const string& strVal = "");
+protected:
 	INIFile ini;
 	CMutex Mutex;
 };
