@@ -110,7 +110,7 @@ public slots:
 	void OnCheckFlipSpectrum();
 	void OnCheckBoxMuteAudio();
 	void OnCheckBoxReverb();
-	void OnCheckWriteLog();
+	void OnCheckWriteLog(int);
 	void OnCheckSaveAudioWAV();
 	void OnCheckRecFilter();
 	void OnCheckModiMetric();

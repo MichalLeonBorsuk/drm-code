@@ -975,7 +975,6 @@ void systemevalDlg::OnCheckSaveAudioWAV()
 
 void systemevalDlg::OnCheckWriteLog(int state)
 {
-qDebug("systemevalDlg::OnCheckWriteLog");
     if (state == Qt::Checked)
     {
 		emit startLogging();

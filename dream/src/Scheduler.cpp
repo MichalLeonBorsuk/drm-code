@@ -62,6 +62,8 @@ CScheduler::SEvent CScheduler::front()
 	{
 		fill();
 	}
+	if(testMode)
+		cerr << format(events.front().time) << " " << events.front().frequency << endl;
 	return events.front();
 }
 
@@ -80,7 +82,8 @@ bool CScheduler::empty() const
 void CScheduler::LoadSchedule(const string& filename)
 {
 	iniFile.LoadIni(filename.c_str());
-	//before();
+	if(testMode)
+		before();
 	for(int i=1; i<99; i++)
 	{
 		ostringstream ss;
@@ -170,4 +173,5 @@ void CScheduler::before()
 	iniFile.PutIniSetting("Settings", "StartTime2", format(t));
 	t += 30;
 	iniFile.PutIniSetting("Settings", "EndTime2", format(t));
+	cerr << "CScheduler::before()" << endl;
 }

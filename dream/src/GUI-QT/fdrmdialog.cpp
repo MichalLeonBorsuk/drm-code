@@ -366,9 +366,10 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& NSettings, CRig& rig,
     /* Activate real-time timers */
     Timer.start(GUI_CONTROL_UPDATE_TIME);
     string schedfile = Settings.Get("command", "schedule", string());
+    bool testMode = Settings.Get("command", "test", false);
     if(schedfile != "")
     {
-        pScheduler = new CScheduler;
+        pScheduler = new CScheduler(testMode);
         pScheduler->LoadSchedule(schedfile);
         pScheduleTimer = new QTimer(this);
         connect(pScheduleTimer, SIGNAL(timeout()), this, SLOT(OnScheduleTimer()));

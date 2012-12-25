@@ -393,8 +393,8 @@ systemevalDlg::systemevalDlg(CDRMReceiver& NDRMR, CSettings& NSettings,
             this, SLOT(OnCheckFlipSpectrum()));
     connect(CheckBoxMuteAudio, SIGNAL(clicked()),
             this, SLOT(OnCheckBoxMuteAudio()));
-    connect(CheckBoxWriteLog, SIGNAL(clicked()),
-            this, SLOT(OnCheckWriteLog()));
+    connect(CheckBoxWriteLog, SIGNAL(stateChanged(int)),
+            this, SLOT(OnCheckWriteLog(int)));
     connect(CheckBoxSaveAudioWave, SIGNAL(clicked()),
             this, SLOT(OnCheckSaveAudioWAV()));
     connect(CheckBoxRecFilter, SIGNAL(clicked()),
@@ -1118,9 +1118,9 @@ void systemevalDlg::OnCheckSaveAudioWAV()
         DRMReceiver.GetWriteData()->StopWriteWaveFile();
 }
 
-void systemevalDlg::OnCheckWriteLog()
+void systemevalDlg::OnCheckWriteLog(int state)
 {
-    if (CheckBoxWriteLog->isChecked())
+    if (state == 2)
     {
         emit startLogging();
     }
