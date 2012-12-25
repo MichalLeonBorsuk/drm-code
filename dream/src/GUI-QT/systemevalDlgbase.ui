@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>968</width>
-    <height>544</height>
+    <height>539</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -1328,15 +1328,27 @@
             </property>
             <item>
              <widget class="QCheckBox" name="CheckBoxFlipSpec">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
               <property name="text">
                <string>&amp;Flip Input Spectrum</string>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QCheckBox" name="CheckBoxMuteAudio">
+             <widget class="QCheckBox" name="CheckBoxWriteLog">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
               <property name="text">
-               <string>Mute &amp;Audio</string>
+               <string>&amp;Log to file</string>
               </property>
              </widget>
             </item>
@@ -1411,16 +1423,16 @@
           </sizepolicy>
          </property>
          <property name="title">
-          <string>Log File, Audio</string>
+          <string>Audio</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
          </property>
-         <layout class="QVBoxLayout" name="verticalLayout_5">
+         <layout class="QVBoxLayout" name="verticalLayout_4">
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_3">
             <item>
-             <widget class="QCheckBox" name="CheckBoxWriteLog">
+             <widget class="QCheckBox" name="CheckBoxMuteAudio">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
                 <horstretch>0</horstretch>
@@ -1428,49 +1440,22 @@
                </sizepolicy>
               </property>
               <property name="text">
-               <string>&amp;Log to file:</string>
+               <string>Mute &amp;Audio</string>
               </property>
              </widget>
             </item>
             <item>
-             <layout class="QVBoxLayout" name="verticalLayout_4">
-              <property name="spacing">
-               <number>0</number>
+             <widget class="QCheckBox" name="CheckBoxReverb">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
               </property>
-              <item>
-               <widget class="QWidget" name="widget" native="true">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QWidget" name="widget_2" native="true">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </item>
-            <item>
-             <spacer name="horizontalSpacer">
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
+              <property name="text">
+               <string>&amp;Reverberation</string>
               </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>0</width>
-                <height>10</height>
-               </size>
-              </property>
-             </spacer>
+             </widget>
             </item>
            </layout>
           </item>
@@ -1484,17 +1469,29 @@
             </property>
             <item>
              <widget class="QCheckBox" name="CheckBoxSaveAudioWave">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
               <property name="text">
                <string>&amp;Save Audio as WAV</string>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QCheckBox" name="CheckBoxReverb">
-              <property name="text">
-               <string>&amp;Reverberation</string>
+             <spacer name="horizontalSpacer">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
               </property>
-             </widget>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>13</width>
+                <height>13</height>
+               </size>
+              </property>
+             </spacer>
             </item>
            </layout>
           </item>
