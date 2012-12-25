@@ -751,7 +751,9 @@ CIniFile::GetIniSetting(const string& section,
 	{
 		INISection::const_iterator apair = iSection->second.find(key);
 		if (apair != iSection->second.end())
+		{
 			result = apair->second;
+		}
 	}
 	const_cast<CMutex*>(&Mutex)->Unlock();
 	return result;
@@ -783,6 +785,10 @@ CIniFile::LoadIni(const char *filename)
 			getline(file, section, ']');
 			file.ignore(80, '\n'); // read eol
 		}
+		else if(file.peek() == '\r')
+		{
+			file.ignore(); // read '\r'
+		}
 		else if(file.peek() == '\n')
 		{
 			file.ignore(10, '\n'); // read eol
@@ -805,7 +811,7 @@ CIniFile::LoadIni(const char *filename)
 }
 
 void
-CIniFile::SaveIni(const char *filename)
+CIniFile::SaveIni(const char *filename) const
 {
 	fstream file(filename, std::ios::out);
 	SaveIni(file);
@@ -813,14 +819,14 @@ CIniFile::SaveIni(const char *filename)
 }
 
 void
-CIniFile::SaveIni(ostream& file)
+CIniFile::SaveIni(ostream& file) const
 {
 	_BOOLEAN bFirstSection = TRUE;	/* Init flag */
 	if (!file.good())
 		return;
 
-	/* Just iterate the hashes and values and dump them to a file */
-	for(INIFile::iterator section = ini.begin(); section != ini.end(); section++)
+	/* Just iterate the hashes and values and dump them to the stream */
+	for(INIFile::const_iterator section = ini.begin(); section != ini.end(); section++)
 	{
 		if (section->first != "command")
 		{
@@ -838,7 +844,7 @@ CIniFile::SaveIni(ostream& file)
 					file << std::endl << "[" << section-> first << "]" << std::endl;
 			}
 
-			INISection::iterator pair = section->second.begin();
+			INISection::const_iterator pair = section->second.begin();
 
 			while (pair != section->second.end())
 			{
@@ -861,35 +867,8 @@ StlIniCompareStringNoCase::operator() (const string & x, const string & y)
 #ifdef _WIN32
 		 return (_stricmp(x.c_str(), y.c_str()) < 0) ? true : false;
 #else
-#ifdef strcasecmp
 		 return (strcasecmp(x.c_str(), y.c_str()) < 0) ? true : false;
-#else
-		 unsigned nCount = 0;
-		 int nResult = 0;
-		 const char *p1 = x.c_str();
-		 const char *p2 = y.c_str();
-
-		 while (*p1 && *p2)
-		 {
-			 nResult = toupper(*p1) - toupper(*p2);
-			 if (nResult != 0)
-				 break;
-			 p1++;
-			 p2++;
-			 nCount++;
-		 }
-		 if (nResult == 0)
-		 {
-			 if (*p1 && !*p2)
-				 nResult = -1;
-			 if (!*p1 && *p2)
-				 nResult = 1;
-		 }
-		 if (nResult < 0)
-			 return true;
-		 return false;
 #endif /* strcasecmp */
-#endif
 	 }
 
 #ifdef _MSC_VER
