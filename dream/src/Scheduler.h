@@ -41,7 +41,7 @@ class CScheduler
 public:
 	struct SEvent { time_t time; int frequency; };
 	CScheduler(bool test=false):schedule(),events(),iniFile(),testMode(test){}
-	void LoadSchedule(const string& filename);
+	bool LoadSchedule(const string& filename);
 	bool empty() const;
 	SEvent front(); // get next event 
 	SEvent pop(); // remove first event from queue

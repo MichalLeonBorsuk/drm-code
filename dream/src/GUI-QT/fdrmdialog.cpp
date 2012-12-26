@@ -365,35 +365,6 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& NSettings, CRig& rig,
 
     /* Activate real-time timers */
     Timer.start(GUI_CONTROL_UPDATE_TIME);
-    string schedfile = Settings.Get("command", "schedule", string());
-    bool testMode = Settings.Get("command", "test", false);
-    if(schedfile != "")
-    {
-        pScheduler = new CScheduler(testMode);
-        pScheduler->LoadSchedule(schedfile);
-        pScheduleTimer = new QTimer(this);
-        connect(pScheduleTimer, SIGNAL(timeout()), this, SLOT(OnScheduleTimer()));
-        /* Setup the first timeout */
-        CScheduler::SEvent e;
-	if(!pScheduler->empty()) {
-            e = pScheduler->front();
-            time_t now = time(NULL);
-            time_t next = e.time - now;
-	    if(next > 0)
-	    {
-                pScheduleTimer->start(1000*next);
-	    }
-	    else // WE ARE LATE STARTING
-	    {
-                startLogging();
-	    }
-	}
-    }
-    else 
-    {
-        if(pLogging->enabled())
-            startLogging();
-    }
 }
 
 FDRMDialog::~FDRMDialog()
@@ -413,7 +384,7 @@ void FDRMDialog::OnMenuPlotStyle(int value)
     emit plotStyleChanged(value);
     /* Taking care of the checks */
     for (int i = 0; i < NUM_AVL_COLOR_SCHEMES_PLOT; i++)
-    pPlotStyleMenu->setItemChecked(i, i == value);
+        pPlotStyleMenu->setItemChecked(i, i == value);
 }
 #endif
 
@@ -503,30 +474,30 @@ void FDRMDialog::stopLogging()
 
 void FDRMDialog::OnScheduleTimer()
 {
-	CScheduler::SEvent e;
-	e = pScheduler->front();
-	if (e.frequency != -1)
-	{
-		DRMReceiver.SetFrequency(e.frequency);
-		if(!pLogging->enabled())
-		{
-		    startLogging();
-		}
-	}
-	else
-	{
-		stopLogging();
-	}
-	if(pScheduler->empty())
+    CScheduler::SEvent e;
+    e = pScheduler->front();
+    if (e.frequency != -1)
+    {
+        DRMReceiver.SetFrequency(e.frequency);
+        if(!pLogging->enabled())
         {
-		stopLogging();
+            startLogging();
         }
-        else
-        {
-	    e = pScheduler->pop();
-	    time_t now = time(NULL);
-	    pScheduleTimer->start(1000*(e.time-now));
-	}
+    }
+    else
+    {
+        stopLogging();
+    }
+    if(pScheduler->empty())
+    {
+        stopLogging();
+    }
+    else
+    {
+        e = pScheduler->pop();
+        time_t now = time(NULL);
+        pScheduleTimer->start(1000*(e.time-now));
+    }
 }
 
 void FDRMDialog::OnTimer()
@@ -547,6 +518,44 @@ void FDRMDialog::OnTimer()
         break;
     case RM_NONE: // wait until working thread starts operating
         break;
+    }
+
+    // do this here so GUI has initialised before we might pop up a message box
+    if(pScheduler!=NULL)
+	return;
+
+    string schedfile = Settings.Get("command", "schedule", string());
+    if(schedfile != "")
+    {
+	bool testMode = Settings.Get("command", "test", false);
+        pScheduler = new CScheduler(testMode);
+        if(pScheduler->LoadSchedule(schedfile)) {
+            pScheduleTimer = new QTimer(this);
+            connect(pScheduleTimer, SIGNAL(timeout()), this, SLOT(OnScheduleTimer()));
+            /* Setup the first timeout */
+            CScheduler::SEvent e;
+            if(!pScheduler->empty()) {
+                e = pScheduler->front();
+                time_t now = time(NULL);
+                time_t next = e.time - now;
+                if(next > 0)
+                {
+                    pScheduleTimer->start(1000*next);
+                }
+                else // We are late starting
+                {
+                    startLogging();
+                }
+            }
+        }
+        else {
+            QMessageBox::information(this, "Dream", tr("Schedule file requested but not found"));
+        }
+    }
+    else
+    {
+        if(pLogging->enabled())
+            startLogging();
     }
 }
 

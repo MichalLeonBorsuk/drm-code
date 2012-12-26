@@ -79,9 +79,12 @@ bool CScheduler::empty() const
 	return events.empty();
 }
 
-void CScheduler::LoadSchedule(const string& filename)
+bool CScheduler::LoadSchedule(const string& filename)
 {
-	iniFile.LoadIni(filename.c_str());
+	bool ok = iniFile.LoadIni(filename.c_str());
+	if(!ok)
+		return false;
+
 	if(testMode)
 		before();
 	for(int i=1; i<99; i++)
@@ -103,6 +106,7 @@ void CScheduler::LoadSchedule(const string& filename)
 		schedule[end] = -1;
 	}
 	fill();
+	return true;
 }
 
 void CScheduler::fill()
