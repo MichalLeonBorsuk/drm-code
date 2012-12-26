@@ -26,18 +26,14 @@
  *
 \******************************************************************************/
 
-#if !defined(DEF_H__3B0BA660_CA63_4344_BB2B_23E7A0D31912__INCLUDED_)
-#define DEF_H__3B0BA660_CA63_4344_BB2B_23E7A0D31912__INCLUDED_
+#ifndef _GLOBALDEFINITIONS_H
+#define _GLOBALDEFINITIONS_H
 
 #include <complex>
 using namespace std; /* Because of the library: "complex" */
 #include <string>
 #include <stdio.h>
 #include <math.h>
-#ifdef HAVE_CONFIG_H
-# include "config.h"
-#endif
-
 #include "tables/TableDRMGlobal.h"
 
 
@@ -59,18 +55,11 @@ using namespace std; /* Because of the library: "complex" */
 #endif /* _WIN32 */
 
 /* set sensible defaults for QT */
-#ifndef USE_NO_QT
+#ifdef QT_CORE_LIB
 # include <qglobal.h>
+#else
+# define qDebug(ARGS…) do {} while (0)
 #endif
-
-/* Standard definitions */
-#ifndef TRUE
-# define TRUE							1
-#endif
-#ifndef FALSE
-# define FALSE							0
-#endif
-
 
 /* Choose algorithms -------------------------------------------------------- */
 /* There are two algorithms available for frequency offset estimation for
@@ -239,18 +228,10 @@ public:
 };
 
 
-#if QT_VERSION >= 0x040000 || defined(USE_QT_GUI)
-#if QT_VERSION < 0x040000
-# if QT_VERSION < 0x030000
-#  include <qthread.h>
-# else
-#  include <qmutex.h>
-#  include <qwaitcondition.h>
-# endif
-#else
+#ifdef QT_CORE_LIB 
 # include <QMutex>
 # include <QWaitCondition>
-#endif
+
 /* Mutex object to access data safely from different threads */
 
 class CMutex

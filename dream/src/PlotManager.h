@@ -35,11 +35,9 @@
 #include "GlobalDefinitions.h"
 #include "Parameter.h"
 
-#ifdef USE_QT_GUI
+#ifdef QT_CORE_LIB
 # include <qthread.h>
-# if QT_VERSION >= 0x030000
-#  include <qmutex.h>
-# endif
+# include <qmutex.h>
 #endif
 
 /* Definitions ****************************************************************/
@@ -108,7 +106,7 @@ private:
     _REAL					rSumDopplerHist;
     _REAL					rSumSNRHist;
     int						iCurrentCDAud;
-#ifdef USE_QT_GUI
+#ifdef QT_CORE_LIB
     QMutex					MutexHist;
 #endif
 

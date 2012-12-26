@@ -41,14 +41,9 @@
 #include <qtimer.h>
 #include <qpixmap.h>
 #include <map>
-#if QT_VERSION < 0x040000
-# include <qlistview.h>
-# include "EPGDlgbase.h"
-#else
-# include <QTreeWidget>
-# include <QDialog>
-# include "ui_EPGDlgbase.h"
-#endif
+#include <QTreeWidget>
+#include <QDialog>
+#include "ui_EPGDlgbase.h"
 
 #include "../DrmReceiver.h"
 #include "../datadecoding/epg/EPG.h"
@@ -68,20 +63,7 @@
 #define COL_DURATION	4
 
 /* Classes ********************************************************************/
-#if QT_VERSION < 0x040000
-class EPGListViewItem : public QListViewItem
-{
-    public:
-        EPGListViewItem(QListView * parent, QString a, QString b, QString c, QString d, QString e, time_t s, int dr):
-            QListViewItem(parent,a,b,c,d,e),start(s),duration(dr) {}
-        _BOOLEAN IsActive();
 
-        time_t start;
-        int duration;
-};
-#endif
-
-#if QT_VERSION >= 0x040000
 class CEPGDlgbase : public QDialog, public Ui_CEPGDlgbase
 {
 public:
@@ -89,7 +71,7 @@ public:
         QDialog(parent,f) {setWindowFlags(Qt::Window); setupUi(this);}
     virtual ~CEPGDlgbase() {}
 };
-#endif
+
 class EPGDlg : public CEPGDlgbase
 {
     Q_OBJECT
@@ -112,12 +94,8 @@ protected:
 
     virtual void showEvent(QShowEvent *e);
     virtual void hideEvent(QHideEvent* pEvent);
-#if QT_VERSION < 0x040000
-    void setActive(QListViewItem*);
-#else
     void setActive(QTreeWidgetItem*);
     bool isActive(QTreeWidgetItem*);
-#endif
 
     virtual QString getFileName(const QDate& date, uint32_t sid, bool bAdvanced);
     virtual QString getFileName_etsi(const QDate& date, uint32_t sid, bool bAdvanced);
@@ -130,15 +108,8 @@ protected:
     CSettings&		Settings;
     QTimer		Timer;
     map<QString,uint32_t> sids;
-#if QT_VERSION < 0x040000
-    void setDate();
-    QDate date;
-    QPixmap		BitmCubeGreen;
-    QListViewItem*	next;
-#else
     QIcon		greenCube;
     QTreeWidgetItem*	next;
-#endif
 
 signals:
     void NowNext(QString);
@@ -147,13 +118,6 @@ public slots:
     void on_channel_activated(const QString&);
     void on_dateEdit_dateChanged(const QDate&);
     void OnTimer();
-#if QT_VERSION < 0x040000
-    void nextDay();
-    void previousDay();
-    void setDay(int);
-    void setMonth(int);
-    void setYear(int);
-#endif
 };
 
 #endif

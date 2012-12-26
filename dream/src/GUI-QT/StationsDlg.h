@@ -44,20 +44,12 @@
 #include <qdatetime.h>
 #include <qwt_thermo.h>
 #include <qwt_counter.h>
-#if QT_VERSION < 0x040000
-# include <qpopupmenu.h>
-# include <qurloperator.h>
-# include <qlistview.h>
-# include "StationsDlgbase.h"
-typedef QNetworkOperation QNetworkReply; // needed to keep moc happy
-#else
-# include <QActionGroup>
-# include <QSignalMapper>
-# include <QNetworkAccessManager>
-# include <QButtonGroup>
-# include <QDialog>
-# include "ui_StationsDlgbase.h"
-#endif
+#include <QActionGroup>
+#include <QSignalMapper>
+#include <QNetworkAccessManager>
+#include <QButtonGroup>
+#include <QDialog>
+#include "ui_StationsDlgbase.h"
 
 #include "DialogUtil.h"
 #include "../DrmReceiver.h"
@@ -109,20 +101,6 @@ namespace Station {
 };
 
 /* Classes ********************************************************************/
-#if QT_VERSION < 0x040000
-class MyListViewItem : public QListViewItem
-{
-public:
-	MyListViewItem(QListView* parent, QString s1, QString s2 = QString::null,
-		QString s3 = QString::null, QString s4 = QString::null,
-		QString s5 = QString::null, QString s6 = QString::null,
-		QString s7 = QString::null, QString s8 = QString::null) :
-		QListViewItem(parent, s1, s2, s3, s4, s5, s6, s7, s8) {}
-
-	/* Custom "key()" function for correct sorting behaviour */
-	virtual QString key(int column, bool ascending) const;
-};
-#else
 class CaseInsensitiveTreeWidgetItem : public QTreeWidgetItem
 {
 public:
@@ -144,7 +122,7 @@ public:
 			return text( col ).toLower() < rhs.text( col ).toLower();
 	}
 };
-#endif
+
 class CStationsItem
 {
 public:
@@ -186,9 +164,6 @@ public:
 	QString	strDaysFlags;
 	QString	strDaysShow;
 	_REAL	rPower;
-#if QT_VERSION < 0x040000
-	QListViewItem* item;
-#endif
 };
 
 
@@ -240,7 +215,6 @@ protected:
 class RemoteMenu;
 class QSocket;
 
-#if QT_VERSION >= 0x040000
 class CStationsDlgBase : public QDialog, public Ui_StationsDlgbase
 {
 public:
@@ -249,7 +223,7 @@ public:
 		QDialog(parent) {(void)name;(void)modal;(void)f; setWindowFlags(Qt::Window);}
 	virtual ~CStationsDlgBase() {}
 };
-#endif
+
 class StationsDlg : public CStationsDlgBase
 {
 	Q_OBJECT
@@ -292,22 +266,6 @@ protected:
 	CSettings&			Settings;
 	CRig&				Rig;
 	CDRMSchedule		DRMSchedule;
-#if QT_VERSION < 0x040000
-	void			setupUi(QObject*);
-	QPixmap			BitmCubeGreen;
-	QPixmap			BitmCubeYellow;
-	QPixmap			BitmCubeRed;
-	QPixmap			BitmCubeOrange;
-	QPixmap			BitmCubePink;
-	QPopupMenu*		pViewMenu;
-	QPopupMenu*		pPreviewMenu;
-	QPopupMenu*		pUpdateMenu;
-	vector<MyListViewItem*>	vecpListItems;
-	QUrlOperator	UrlUpdateSchedule;
-	QFile *schedFile;
-	QSocket *httpSocket;
-	bool httpHeader;
-#else
 	QIcon			greenCube;
 	QIcon			redCube;
 	QIcon			orangeCube;
@@ -317,7 +275,6 @@ protected:
 	QSignalMapper* showMapper;
 	QActionGroup* showGroup;
 	QNetworkAccessManager *manager;
-#endif
 	QTimer			TimerList;
 	QTimer			TimerUTCLabel;
 	_BOOLEAN		bReInitOnFrequencyChange;
@@ -338,16 +295,7 @@ public slots:
 	void OnTimerUTCLabel();
 	void OnSMeterMenu(int iID);
 	void OnSMeterMenu();
-#if QT_VERSION < 0x040000
-	void httpConnected();
-	void httpDisconnected();
-	void httpRead();
-	void httpError(int);
-	void OnListItemClicked(QListViewItem* item);
-	void OnUrlFinished(QNetworkOperation* pNetwOp);
-#else
 	void OnUrlFinished(QNetworkReply*);
-#endif
 	void OnShowStationsMenu(int iID);
 	void OnShowPreviewMenu(int iID);
 	void OnFreqCntNewValue(double dVal);

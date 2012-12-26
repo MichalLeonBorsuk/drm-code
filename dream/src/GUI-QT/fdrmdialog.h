@@ -38,22 +38,16 @@
 #include <qpalette.h>
 #include <qcolordialog.h>
 #include <qwt_thermo.h>
-#if QT_VERSION < 0x040000
-# include <qpopupmenu.h>
-# include "fdrmdialogbase.h"
-# include "systemevalDlg.h"
-#else
-# include <QActionGroup>
-# include <QSignalMapper>
-# include <QDialog>
-# include <QMenu>
-# include <QShowEvent>
-# include <QHideEvent>
-# include <QCloseEvent>
-# include "ui_DRMMainWindow.h"
-# include "EvaluationDlg.h"
-# include "SoundCardSelMenu.h"
-#endif
+#include <QActionGroup>
+#include <QSignalMapper>
+#include <QDialog>
+#include <QMenu>
+#include <QShowEvent>
+#include <QHideEvent>
+#include <QCloseEvent>
+#include "ui_DRMMainWindow.h"
+#include "EvaluationDlg.h"
+#include "SoundCardSelMenu.h"
 
 #include "DialogUtil.h"
 #include "StationsDlg.h"
@@ -70,16 +64,11 @@
 #include "../datadecoding/DataDecoder.h"
 
 /* Classes ********************************************************************/
-#if QT_VERSION < 0x040000
-class MultimediaDlg;
-#else
 class BWSViewer;
 class JLViewer;
 class SlideShowViewer;
-#endif
 class CScheduler;
 
-#if QT_VERSION >= 0x040000
 class FDRMDialogBase : public QMainWindow, public Ui_DRMMainWindow
 {
 public:
@@ -89,7 +78,7 @@ public:
     }
     virtual ~FDRMDialogBase() {}
 };
-#endif
+
 class FDRMDialog : public FDRMDialogBase
 {
     Q_OBJECT
@@ -110,13 +99,9 @@ protected:
 
     CLogging*			pLogging;
     systemevalDlg*		pSysEvalDlg;
-#if QT_VERSION < 0x040000
-    MultimediaDlg*		pMultiMediaDlg;
-#else
     BWSViewer*			pBWSDlg;
     JLViewer*			pJLDlg;
     SlideShowViewer*	pSlideShowDlg;
-#endif
     MultSettingsDlg*	pMultSettingsDlg;
     StationsDlg*		pStationsDlg;
     LiveScheduleDlg*	pLiveScheduleDlg;
@@ -126,11 +111,6 @@ protected:
     GeneralSettingsDlg* pGeneralSettingsDlg;
     QMenuBar*			pMenu;
     QButtonGroup*		pButtonGroup;
-#if QT_VERSION < 0x040000
-    QPopupMenu*			pReceiverModeMenu;
-    QPopupMenu*			pSettingsMenu;
-    QPopupMenu*			pPlotStyleMenu;
-#else
     QMenu*				pReceiverModeMenu;
     QMenu*				pSettingsMenu;
     QMenu*				pPlotStyleMenu;
@@ -138,7 +118,6 @@ protected:
     QActionGroup*		plotStyleGroup;
     CFileMenu*			pFileMenu;
     CSoundCardSelMenu*	pSoundCardMenu;
-#endif
     CAboutDlg		AboutDlg;
     int			iMultimediaServiceBit;
     int			iLastMultimediaServiceSelected;
@@ -184,9 +163,6 @@ public slots:
     void OnHelpAbout() {AboutDlg.show();}
     void OnSoundFileChanged(CDRMReceiver::ESFStatus) {ClearDisplay();};
     void on_actionWhats_This();
-#if QT_VERSION < 0x040000
-    void OnMenuPlotStyle(int);
-#endif
 signals:
     void plotStyleChanged(int);
 };

@@ -37,12 +37,8 @@
    In case of robustness mode D we have 24 symbols */
 #define NUM_SOUND_BUFFERS_IN	24		/* Number of sound card buffers */
 
-#ifdef USE_QT_GUI
-# if QT_VERSION >= 0x030000
-#  define NUM_SOUND_BUFFERS_OUT	6		/* Number of sound card buffers */
-# else
-#  define NUM_SOUND_BUFFERS_OUT	12		/* Number of sound card buffers */
-# endif
+#ifdef QT_GUI_LIB
+# define NUM_SOUND_BUFFERS_OUT	6		/* Number of sound card buffers */
 #else
 # define NUM_SOUND_BUFFERS_OUT	3		/* Number of sound card buffers */
 #endif

@@ -33,21 +33,11 @@
 #include "../util/Vector.h"
 #include "../util/Buffer.h"
 
-#if QT_VERSION < 0x040000
-# include <qsocketdevice.h>
-# include <qsocketnotifier.h> 
-# include <qstringlist.h>
-#else
-# include <QUdpSocket>
-# include <QTcpSocket>
-# include <QHostAddress>
-# if QT_VERSION >= 0x040200
-#   include <QNetworkInterface>
-# endif
-# if QT_VERSION >= 0x040800
-#  include <QNetworkAddressEntry>
-# endif
-#endif
+#include <QUdpSocket>
+#include <QTcpSocket>
+#include <QHostAddress>
+#include <QNetworkInterface>
+#include <QNetworkAddressEntry>
 #include <qdatetime.h>
 
 /* Maximum number of bytes received from the network interface. Maximum data
@@ -59,14 +49,8 @@
 #include "PacketInOut.h"
 
 class CPacketSocketQT :
-#if QT_VERSION < 0x040000
-	public QObject,
-#endif
 	public CPacketSocket
 {
-#if QT_VERSION < 0x040000
-	Q_OBJECT
-#endif
 public:
 	CPacketSocketQT();
 	virtual ~CPacketSocketQT();
@@ -91,9 +75,7 @@ private:
 
 	QStringList parseDest(const string & strNewAddr);
 	_BOOLEAN doSetSource(QHostAddress, QHostAddress, int, QHostAddress);
-#if QT_VERSION >= 0x040200
 	QNetworkInterface GetInterface(QHostAddress AddrInterface);
-#endif
 	CPacketSink *pPacketSink;
 
 	uint32_t	sourceAddr;
@@ -102,25 +84,7 @@ private:
 	vector<_BYTE>	writeBuf;
 	bool udp;
 
-#if QT_VERSION < 0x040000
-	QSocketDevice* pSocketDevice;
-	QSocketNotifier* pSn;
-private slots:
-	void OnActivated();
-#else
 	QUdpSocket* udpSocket;
 	QTcpSocket* tcpSocket;
-#endif
 };
-
-// stop compiler warning
-class CDummy_ :
-	public QObject
-{
-	Q_OBJECT
-public:
-	CDummy_() {};
-	~CDummy_() {};
-};
-
 #endif

@@ -32,17 +32,10 @@
 #include "../util/Settings.h"
 #include "DialogUtil.h"
 #include <vector>
-#if QT_VERSION < 0x040000
-# include "LiveScheduleDlgbase.h"
-# include <qpopupmenu.h>
-# include <qurloperator.h>
-# include <qlistview.h>
-#else
-# include <QSignalMapper>
-# include <QDialog>
-# include <QTreeWidget>
-# include "ui_LiveScheduleWindow.h"
-#endif
+#include <QSignalMapper>
+#include <QDialog>
+#include <QTreeWidget>
+#include "ui_LiveScheduleWindow.h"
 #include <qpixmap.h>
 #include <qradiobutton.h>
 #include <qtimer.h>
@@ -131,21 +124,6 @@ protected:
 	double		dReceiverLongitude;
 };
 
-#if QT_VERSION < 0x040000
-class MyListLiveViewItem : public QListViewItem
-{
-public:
-	MyListLiveViewItem(QListView* parent, QString s1, QString s2 = QString::null,
-		QString s3 = QString::null, QString s4 = QString::null,
-		QString s5 = QString::null, QString s6 = QString::null,
-		QString s7 = QString::null, QString s8 = QString::null) :
-	QListViewItem(parent, s1, s2, s3, s4, s5, s6, s7, s8)
-	{}
-
-	/* Custom "key()" function for correct sorting behaviour */
-	virtual QString key(int column, bool ascending) const;
-};
-#else
 class MyListLiveViewItem : public QTreeWidgetItem
 {
 public:
@@ -160,9 +138,7 @@ public:
 	virtual QString key(int column, bool ascending) const;
 	void setPixmap(int col, QPixmap p) { setIcon(col, p); }
 };
-#endif
 
-#if QT_VERSION >= 0x040000
 class CLiveScheduleDlgBase : public QDialog, public Ui_LiveScheduleWindow
 {
 public:
@@ -170,7 +146,7 @@ public:
 		QDialog(parent) {setWindowFlags(Qt::Window);}
 	virtual ~CLiveScheduleDlgBase() {}
 };
-#endif
+
 class LiveScheduleDlg : public CLiveScheduleDlgBase
 {
 	Q_OBJECT
@@ -203,20 +179,6 @@ protected:
 	CDRMLiveSchedule	DRMSchedule;
 	QTimer			TimerList;
 	QTimer			TimerUTCLabel;
-#if QT_VERSION < 0x040000
-	QPixmap			BitmCubeGreen;
-	QPixmap			BitmCubeGreenLittle;
-	QPixmap			BitmCubeYellow;
-	QPixmap			BitmCubeRed;
-	QPixmap			BitmCubeOrange;
-	QPixmap			BitmCubePink;
-	QPopupMenu*		pViewMenu;
-	QPopupMenu*		pPreviewMenu;
-	QPopupMenu*		pFileMenu;
-	int				showActiveViewMenuItem;
-	int				showAllViewMenuItem;
-	void setupUi(QWidget*);
-#else
 	QIcon			smallGreenCube;
 	QIcon			greenCube;
 	QIcon			redCube;
@@ -226,7 +188,6 @@ protected:
 	QActionGroup*	previewGroup;
 	QSignalMapper*	showMapper;
 	QActionGroup*	showGroup;
-#endif
 
 	vector<MyListLiveViewItem*>	vecpListItems;
 	QMutex			ListItemsMutex;

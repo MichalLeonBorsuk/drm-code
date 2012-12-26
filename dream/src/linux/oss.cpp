@@ -242,11 +242,7 @@ int CSoundIn::read_HW( void * recbuf, int size) {
             return 0;
             break;
         default:
-#ifdef USE_QT_GUI
             qDebug("read error: %s", strerror(errno));
-#else
-            cout <<"read error " << strerror(errno) <<endl;
-#endif
             throw CGenErr("CSound:Read");
         }
     } else

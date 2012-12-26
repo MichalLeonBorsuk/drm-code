@@ -32,18 +32,14 @@
 #include <qmessagebox.h>
 #include <qinputdialog.h>
 #include <qwt_thermo.h>
-#if QT_VERSION < 0x040000
-# include <qwhatsthis.h>
-#else
-# include <QWhatsThis>
-# include <QShowEvent>
-# include <QHideEvent>
-# include <QCustomEvent>
-# include <QCloseEvent>
-# include <QEvent>
-# include "SoundCardSelMenu.h"
-# define CHECK_PTR(x) Q_CHECK_PTR(x)
-#endif
+#include <QWhatsThis>
+#include <QShowEvent>
+#include <QHideEvent>
+#include <QCustomEvent>
+#include <QCloseEvent>
+#include <QEvent>
+#include "SoundCardSelMenu.h"
+#define CHECK_PTR(x) Q_CHECK_PTR(x)
 
 /* Implementation *************************************************************/
 FMDialog::FMDialog(CDRMReceiver& NDRMR, CSettings& NSettings, CRig& rig,
@@ -63,43 +59,6 @@ FMDialog::FMDialog(CDRMReceiver& NDRMR, CSettings& NSettings, CRig& rig,
 	/* Set help text for the controls */
 	AddWhatsThisHelp();
 
-#if QT_VERSION < 0x040000
-    /* Set Menu ***************************************************************/
-    /* View menu ------------------------------------------------------------ */
-    QPopupMenu* ViewMenu = new QPopupMenu(this);
-    CHECK_PTR(ViewMenu);
-    ViewMenu->insertItem(tr("&Tune"), this, SLOT(OnTune()), Qt::CTRL+Qt::Key_T);
-    ViewMenu->insertSeparator();
-    ViewMenu->insertItem(tr("E&xit"), this, SLOT(close()), Qt::CTRL+Qt::Key_Q, 5);
-
-    /* Remote menu  --------------------------------------------------------- */
-    RemoteMenu* pRemoteMenu = new RemoteMenu(this, rig);
-
-    /* Settings menu  ------------------------------------------------------- */
-    pSettingsMenu = new QPopupMenu(this);
-    CHECK_PTR(pSettingsMenu);
-    pSettingsMenu->insertItem(tr("&DRM (digital)"), this,
-            SLOT(OnSwitchToDRM()), Qt::CTRL+Qt::Key_D);
-    pSettingsMenu->insertItem(tr("&AM (analog)"), this,
-            SLOT(OnSwitchToAM()), Qt::CTRL+Qt::Key_A);
-    pSettingsMenu->insertSeparator();
-    pSettingsMenu->insertItem(tr("Set &Rig..."), pRemoteMenu->menu(), Qt::CTRL+Qt::Key_R);
-    pSettingsMenu->insertItem(tr("Set D&isplay Color..."), this,
-            SLOT(OnMenuSetDisplayColor()));
-    pSettingsMenu->insertItem(tr("&Sound Card Selection"),
-            new CSoundCardSelMenu(DRMReceiver, this));
-
-    /* Main menu bar -------------------------------------------------------- */
-    pMenu = new QMenuBar(this);
-    CHECK_PTR(pMenu);
-    pMenu->insertItem(tr("&View"), ViewMenu);
-    pMenu->insertItem(tr("&Settings"), pSettingsMenu);
-    pMenu->insertItem(tr("&?"), new CDreamHelpMenu(this));
-    pMenu->setSeparator(QMenuBar::InWindowsStyle);
-
-    /* Now tell the layout about the menu */
-    FMDialogBaseLayout->setMenuBar(pMenu);
-#else
 	pFileMenu = new CFileMenu(DRMReceiver, this, menu_View, FALSE);
 	connect(actionTune, SIGNAL(triggered()), this, SLOT(OnTune()));
 	connect(actionExit, SIGNAL(triggered()), this, SLOT(close()));
@@ -113,7 +72,6 @@ FMDialog::FMDialog(CDRMReceiver& NDRMR, CSettings& NSettings, CRig& rig,
 	//menu_Settings->addMenu(pRemoteMenu->menu());
 	connect(actionAbout_Dream, SIGNAL(triggered()), this, SLOT(OnHelpAbout()));
 	connect(actionWhats_This, SIGNAL(triggered()), this, SLOT(on_actionWhats_This()));
-#endif
 
 	/* Digi controls */
 	/* Set display color */
@@ -184,11 +142,7 @@ void FMDialog::OnTune()
 {
 	bool ok;
 	double freq = double(DRMReceiver.GetFrequency())/1000.0;
-#if QT_VERSION < 0x040000
-	double f = QInputDialog::getDouble(tr("Dream FM"), tr("Frequency (MHz):"), freq, 86.0, 110.0, 2, &ok, this);
-#else
 	double f = QInputDialog::getDouble(this, tr("Dream FM"), tr("Frequency (MHz):"), freq, 86.0, 110.0, 2, &ok);
-#endif
 	if (ok)
 	{
 		DRMReceiver.SetFrequency(int(1000.0*f));
@@ -261,10 +215,8 @@ void FMDialog::OnTimer()
 
 void FMDialog::OnTimerClose()
 {
-#if QT_VERSION >= 0x040000
 	if(DRMReceiver.GetParameters()->eRunState == CParameter::STOPPED)
 		close();
-#endif
 }
 
 void FMDialog::UpdateDisplay()
@@ -452,9 +404,7 @@ void FMDialog::ClearDisplay()
 void FMDialog::switchEvent()
 {
 	/* Put initialization code on mode switch here */
-#if QT_VERSION >= 0x040000
 	pFileMenu->UpdateMenu();
-#endif
 }
 
 void FMDialog::showEvent(QShowEvent* e)
@@ -636,19 +586,6 @@ void FMDialog::SetDisplayColor(const QColor newColor)
 		QPalette CurPal(vecpWidgets[i]->palette());
 
 		/* Change colors */
-#if QT_VERSION < 0x040000
-		CurPal.setColor(QPalette::Active, QColorGroup::Foreground, newColor);
-		CurPal.setColor(QPalette::Active, QColorGroup::Button, newColor);
-		CurPal.setColor(QPalette::Active, QColorGroup::Text, newColor);
-		CurPal.setColor(QPalette::Active, QColorGroup::Light, newColor);
-		CurPal.setColor(QPalette::Active, QColorGroup::Dark, newColor);
-
-		CurPal.setColor(QPalette::Inactive, QColorGroup::Foreground, newColor);
-		CurPal.setColor(QPalette::Inactive, QColorGroup::Button, newColor);
-		CurPal.setColor(QPalette::Inactive, QColorGroup::Text, newColor);
-		CurPal.setColor(QPalette::Inactive, QColorGroup::Light, newColor);
-		CurPal.setColor(QPalette::Inactive, QColorGroup::Dark, newColor);
-#else
 		CurPal.setColor(QPalette::Active, QPalette::Foreground, newColor);
 		CurPal.setColor(QPalette::Active, QPalette::Button, newColor);
 		CurPal.setColor(QPalette::Active, QPalette::Text, newColor);
@@ -660,7 +597,6 @@ void FMDialog::SetDisplayColor(const QColor newColor)
 		CurPal.setColor(QPalette::Inactive, QPalette::Text, newColor);
 		CurPal.setColor(QPalette::Inactive, QPalette::Light, newColor);
 		CurPal.setColor(QPalette::Inactive, QPalette::Dark, newColor);
-#endif
 		/* Set new palette */
 		vecpWidgets[i]->setPalette(CurPal);
 	}
@@ -710,22 +646,6 @@ void FMDialog::AddWhatsThisHelp()
 		"transmitted in a different logical channel of a DRM stream. On the "
 		"right, the ID number connected with this service is shown.");
 
-#if QT_VERSION < 0x040000
-	QWhatsThis::add(TextLabelInputLevel, strInputLevel);
-	QWhatsThis::add(ProgrInputLevel, strInputLevel);
-	QWhatsThis::add(CLED_MSC, strStatusLEDS);
-	QWhatsThis::add(CLED_SDC, strStatusLEDS);
-	QWhatsThis::add(CLED_FAC, strStatusLEDS);
-	QWhatsThis::add(LabelBitrate, strStationLabelOther);
-	QWhatsThis::add(LabelCodec, strStationLabelOther);
-	QWhatsThis::add(LabelStereoMono, strStationLabelOther);
-	QWhatsThis::add(LabelServiceLabel, strStationLabelOther);
-	QWhatsThis::add(LabelProgrType, strStationLabelOther);
-	QWhatsThis::add(LabelServiceID, strStationLabelOther);
-	QWhatsThis::add(LabelLanguage, strStationLabelOther);
-	QWhatsThis::add(LabelCountryCode, strStationLabelOther);
-	QWhatsThis::add(FrameAudioDataParams, strStationLabelOther);
-#else
 	TextLabelInputLevel->setWhatsThis(strInputLevel);
 	ProgrInputLevel->setWhatsThis(strInputLevel);
 	CLED_MSC->setWhatsThis(strStatusLEDS);
@@ -740,5 +660,4 @@ void FMDialog::AddWhatsThisHelp()
 	LabelLanguage->setWhatsThis(strStationLabelOther);
 	LabelCountryCode->setWhatsThis(strStationLabelOther);
 	FrameAudioDataParams->setWhatsThis(strStationLabelOther);
-#endif
 }

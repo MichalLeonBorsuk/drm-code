@@ -62,11 +62,7 @@ CPacketSourceFile::CPacketSourceFile():pPacketSink(NULL),
     last_packet_time(0),pacer(NULL),
     pF(NULL), wanted_dest_port(-1), eFileType(pcap)
 {
-#if defined(_MSC_VER) && (_MSC_VER < 1400)
-    pacer = new CPacer(400000000);
-#else
     pacer = new CPacer(400000000ULL);
-#endif
 }
 
 void CPacketSourceFile::poll()

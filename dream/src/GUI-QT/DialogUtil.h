@@ -36,18 +36,11 @@
 #include<map>
 
 #include <qthread.h>
-#if QT_VERSION < 0x040000
-# include <qaction.h>
-# include <qpopupmenu.h>
-# include <qevent.h>
-# include "AboutDlgbase.h"
-#else
-# include "ui_AboutDlgbase.h"
-# include <QMenu>
-# include <QDialog>
-# include <QAction>
-# include <QEvent>
-#endif
+#include "ui_AboutDlgbase.h"
+#include <QMenu>
+#include <QDialog>
+#include <QAction>
+#include <QEvent>
 
 #include <qwt_thermo.h> /* S-Meter */
 
@@ -67,7 +60,6 @@ typedef int rig_model_t;
 /* Classes ********************************************************************/
 
 /* About dialog ------------------------------------------------------------- */
-#if QT_VERSION >= 0x040000
 class CAboutDlgBase : public QDialog, public Ui_CAboutDlgBase
 {
 public:
@@ -75,7 +67,6 @@ public:
 		QDialog(parent,f){setupUi(this);}
 	virtual ~CAboutDlgBase() {}
 };
-#endif
 
 class CAboutDlg : public CAboutDlgBase
 {
@@ -95,42 +86,6 @@ public:
 	CHelpUsage(const char* usage, const char* argv0, QWidget* parent = 0,
 		const char* name = 0, bool modal = FALSE, Qt::WFlags f = 0);
 };
-
-#if QT_VERSION < 0x040000
-/* Help menu ---------------------------------------------------------------- */
-class CDreamHelpMenu : public QPopupMenu
-{
-	Q_OBJECT
-
-public:
-	CDreamHelpMenu(QWidget* parent);
-
-public slots:
-	void OnHelpWhatsThis();
-};
-
-/* Sound card selection menu ------------------------------------------------ */
-class CSoundCardSelMenu : public QPopupMenu
-{
-	Q_OBJECT
-
-public:
-	CSoundCardSelMenu(
-        CDRMTransceiver& DRMTransceiver,
-        QWidget* parent = 0);
-
-protected:
-        CDRMTransceiver&        DRMTransceiver;
-        vector<string>          vecSoundInNames;
-        vector<string>          vecSoundOutNames;
-        QPopupMenu*             pSoundInMenu;
-        QPopupMenu*             pSoundOutMenu;
-
-public slots:
-	void OnSoundInDevice(int id);
-	void OnSoundOutDevice(int id);
-};
-#endif
 
 /* GUI help functions ------------------------------------------------------- */
 /* Converts from RGB to integer and back */
@@ -192,23 +147,7 @@ protected:
 
 inline void SetDialogCaption(QDialog* pDlg, const QString sCap)
 {
-#if QT_VERSION < 0x030000
-	/* Under Windows QT only sets the caption if a "Qt" is
-	   present in the name. Make a little "trick" to display our desired
-	   name without seeing the "Qt" (by Andrea Russo) */
-	QString sTitle = "";
-#ifdef _MSC_VER
-	sTitle.fill(' ', 10000);
-	sTitle += "Qt";
-#endif
-	pDlg->setCaption(sCap + sTitle);
-#else
-# if QT_VERSION < 0x040000
-	pDlg->setCaption(sCap);
-# else
 	pDlg->setWindowTitle(sCap);
-# endif
-#endif
 }
 
 class RemoteMenu : public QObject
@@ -217,11 +156,7 @@ class RemoteMenu : public QObject
 
 public:
 	RemoteMenu(QWidget*, CRig&);
-# if QT_VERSION < 0x040000
-	QPopupMenu
-#else
 	QMenu
-#endif
 	* menu(){ return pRemoteMenu; }
 
 public slots:
@@ -236,23 +171,13 @@ protected:
 #ifdef HAVE_LIBHAMLIB
 	struct Rigmenu {
 		std::string mfr;
-# if QT_VERSION < 0x040000
-	QPopupMenu
-#else
-	QMenu
-#endif
-		* pMenu;
+		QMenu * pMenu;
 	};
 	std::map<int,Rigmenu> rigmenus;
 	std::vector<rig_model_t> specials;
 	CRig&	rig;
 #endif
-# if QT_VERSION < 0x040000
-	QPopupMenu
-#else
-	QMenu
-#endif
-	* pRemoteMenu, *pRemoteMenuOther;
+	QMenu* pRemoteMenu, *pRemoteMenuOther;
 };
 
 #define OTHER_MENU_ID (666)
@@ -262,10 +187,8 @@ QString VerifyFilename(QString filename);
 
 QString VerifyHtmlPath(QString path);
 
-#if QT_VERSION >= 0x040000
 QString UrlEncodePath(QString url);
 bool IsUrlDirectory(QString url);
-#endif
 
 /* s-meter thermo parameters */
 #define S_METER_THERMO_MIN				((_REAL) -60.0) /* dB */

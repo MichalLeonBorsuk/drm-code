@@ -61,11 +61,7 @@ void CGPSReceiver::open()
     Parameters.Unlock();
     if (m_pSocket == NULL)
     {
-#if QT_VERSION < 0x040000
-        m_pSocket = new QSocket();
-#else
         m_pSocket = new QTcpSocket();
-#endif
         if (m_pSocket == NULL)
             return;
 
@@ -272,11 +268,7 @@ qDebug("slotConnected");
     while (m_pSocket->canReadLine())
         m_pSocket->readLine();
 
-#if QT_VERSION < 0x040000
-    m_pSocket->writeBlock("W1\n",2);	// try to force gpsd into watcher mode
-#else
-	m_pSocket->write("W1\n");
-#endif
+    m_pSocket->write("W1\n");
     disconnect(m_pTimerDataTimeout, 0, 0, 0);	// disconnect everything connected from the timer
     connect( m_pTimerDataTimeout, SIGNAL(timeout()), SLOT(slotTimeout()) );
     m_pTimerDataTimeout->start(c_usReconnectIntervalSeconds*1000);
@@ -323,9 +315,5 @@ qDebug("slotSocketError");
 //	close()
     disconnect(m_pTimer, 0, 0, 0);	// disconnect everything connected to the timer
     connect( m_pTimer, SIGNAL(timeout()), SLOT(slotInit()) );
-#if QT_VERSION < 0x040000
-    m_pTimer->start(c_usReconnectIntervalSeconds*1000, TRUE);
-#else
     m_pTimer->start(c_usReconnectIntervalSeconds*1000);
-#endif
 }

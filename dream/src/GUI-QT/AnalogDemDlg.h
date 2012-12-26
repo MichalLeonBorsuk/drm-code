@@ -31,16 +31,11 @@
 
 
 #include <qtimer.h>
-#if QT_VERSION < 0x040000
-# include "AnalogDemDlgbase.h"
-# include "AMSSDlgbase.h"
-#else
-# include "ui_AMMainWindow.h"
-# include "ui_AMSSDlgbase.h"
-# include <QDialog>
-# include <QButtonGroup>
-# include "SoundCardSelMenu.h"
-#endif
+#include "ui_AMMainWindow.h"
+#include "ui_AMSSDlgbase.h"
+#include <QDialog>
+#include <QButtonGroup>
+#include "SoundCardSelMenu.h"
 
 #include "DialogUtil.h"
 #include "../GlobalDefinitions.h"
@@ -57,7 +52,6 @@
 /* Classes ********************************************************************/
 class CDRMPlot;
 
-#if QT_VERSION >= 0x040000
 class CAMSSDlgBase : public QDialog, public Ui_CAMSSDlgBase
 {
 public:
@@ -83,8 +77,6 @@ public:
 protected:
     CDRMPlot*           MainPlot;
 };
-#endif
-
 
 /* AMSS dialog -------------------------------------------------------------- */
 class CAMSSDlg : public CAMSSDlgBase
@@ -129,11 +121,9 @@ protected:
 	QTimer			TimerPLLPhaseDial;
 	QTimer			TimerClose;
 	CAMSSDlg		AMSSDlg;
-	CEventFilter	ef;
-#if QT_VERSION >= 0x040000
-    CFileMenu*			pFileMenu;
-    CSoundCardSelMenu*	pSoundCardMenu;
-#endif
+	CEventFilter		ef;
+	CFileMenu*		pFileMenu;
+	CSoundCardSelMenu*	pSoundCardMenu;
 
 	void UpdateControls();
 	void AddWhatsThisHelp();

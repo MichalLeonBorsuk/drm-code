@@ -36,16 +36,9 @@
 # include <winsock2.h>
 #endif
 #include "DialogUtil.h"
-#if QT_VERSION < 0x040000
-# include "../sound/sound.h"
-# include <qregexp.h>
-# include <qwhatsthis.h>
-# include <qtextview.h>
-#else
-# include <QCoreApplication>
-# include <QWhatsThis>
-# define CHECK_PTR(x) Q_CHECK_PTR(x)
-#endif
+#include <QCoreApplication>
+#include <QWhatsThis>
+#define CHECK_PTR(x) Q_CHECK_PTR(x)
 #include "../Version.h"
 #ifdef USE_ALSA
 # include <alsa/version.h>
@@ -108,9 +101,6 @@ QString VersionString(QWidget* parent)
     strVersionText += parent->tr("Under the GNU General Public License (GPL)") +
                       "</center>";
     return strVersionText;
-#ifdef _MSC_VER
-	parent; // warning C4100: 'parent' : unreferenced formal parameter !!!
-#endif
 }
 
 /* Implementation *************************************************************/
@@ -287,124 +277,16 @@ CHelpUsage::CHelpUsage(const char* usage, const char* argv0,
     QWidget* parent, const char* name, bool modal, Qt::WFlags f)
     : CAboutDlgBase(parent, name, modal, f)
 {
-#if QT_VERSION < 0x040000
-    SetDialogCaption(this, tr("Dream Command Line Help"));
-#else
     setWindowTitle(tr("Dream Command Line Help"));
-#endif
     TextLabelVersion->setText(VersionString(this));
     TextLabelAuthorNames->setText("");
     TextLabelCopyright->setText(tr("Command line usage:"));
     QString text(tr(usage));
     text.replace(QRegExp("\\$EXECNAME"), QString::fromUtf8(argv0));
-#if QT_VERSION < 0x040000
-    TextViewCredits->setText(text);
-#else
     TextViewCredits->setFontFamily(FONT_COURIER);
     TextViewCredits->setPlainText(text);
-#endif
     show();
 }
-
-#if QT_VERSION < 0x040000
-/* Help menu ---------------------------------------------------------------- */
-CDreamHelpMenu::CDreamHelpMenu(QWidget* parent) : QPopupMenu(parent)
-{
-    /* Standard help menu consists of about and what's this help */
-        insertItem(tr("What's &This"), this, SLOT(OnHelpWhatsThis()), Qt::SHIFT+Qt::Key_F1);
-        insertSeparator();
-        insertItem(tr("&About..."), parent, SLOT(OnHelpAbout()));
-}
-
-void CDreamHelpMenu::OnHelpWhatsThis()
-{
-    QWhatsThis::enterWhatsThisMode();
-}
-
-/* Sound card selection menu ------------------------------------------------ */
-# undef DEVICE_STRING
-# ifdef _WIN32
-#  define DEVICE_STRING(s) s.c_str()
-# else
-#  define DEVICE_STRING(s) QString::fromUtf8(s.c_str())
-# endif
-
-CSoundCardSelMenu::CSoundCardSelMenu(CDRMTransceiver& DRMTransceiver, QWidget* parent) :
-    QPopupMenu(parent), DRMTransceiver(DRMTransceiver)
-{
-    /* We need to get device list directly from sound card,
-       since DRMTransceiver.GetSoundInInterface() can be an audio file interface */
-    CSelectionInterface* pSoundInIF = new CSoundIn();
-    CSelectionInterface* pSoundOutIF = DRMTransceiver.GetSoundOutInterface();
-
-    pSoundInMenu = new QPopupMenu(parent);
-    CHECK_PTR(pSoundInMenu);
-    pSoundOutMenu = new QPopupMenu(parent);
-    CHECK_PTR(pSoundOutMenu);
-    vector<string> vecDescriptions;
-    int i, iDefaultInDev = -1, iDefaultOutDev = -1;
-
-    /* Get sound in device names */
-    string sDefaultInDev = DRMTransceiver.GetSoundInInterface()->GetDev();
-    pSoundInIF->Enumerate(vecSoundInNames, vecDescriptions);
-    const int iNumSoundInDev = vecSoundInNames.size();
-    for (i = 0; i < iNumSoundInDev; i++)
-    {
-        if (vecSoundInNames[i] == sDefaultInDev)
-            iDefaultInDev = i;
-        QString name(DEVICE_STRING(vecSoundInNames[i]));
-# if defined(_MSC_VER) && (_MSC_VER < 1400)
-        if (name.find("blaster", 0, FALSE) >= 0)
-            name += " (has problems on some platforms)";
-# endif
-        if (name == "") name = tr("[default]");
-        pSoundInMenu->insertItem(name, this, SLOT(OnSoundInDevice(int)), 0, i);
-    }
-
-    /* Get sound out device names */
-    string sDefaultOutDev = pSoundOutIF->GetDev();
-    pSoundOutIF->Enumerate(vecSoundOutNames, vecDescriptions);
-    const int iNumSoundOutDev = vecSoundOutNames.size();
-    for (i = 0; i < iNumSoundOutDev; i++)
-    {
-        if (vecSoundOutNames[i] == sDefaultOutDev)
-            iDefaultOutDev = i;
-        QString name(DEVICE_STRING(vecSoundOutNames[i]));
-        if (name == "") name = tr("[default]");
-        pSoundOutMenu->insertItem(name, this, SLOT(OnSoundOutDevice(int)), 0, i);
-    }
-
-    if (iDefaultInDev >= 0)
-        pSoundInMenu->setItemChecked(iDefaultInDev, TRUE);
-    if (iDefaultOutDev >= 0)
-        pSoundOutMenu->setItemChecked(iDefaultOutDev, TRUE);
-
-    insertItem(tr("Sound &In"), pSoundInMenu);
-    insertItem(tr("Sound &Out"), pSoundOutMenu);
-}
-
-void CSoundCardSelMenu::OnSoundInDevice(int id)
-{
-    CSelectionInterface* pSoundInIF = DRMTransceiver.GetSoundInInterface();
-	const int iNumSoundInDev = vecSoundInNames.size();
-    if (id >= 0 && id < iNumSoundInDev)
-        pSoundInIF->SetDev(vecSoundInNames[id]);
-    for (int i = 0; i < iNumSoundInDev; i++)
-        pSoundInMenu->setItemChecked(i, i == id);
-}
-
-void CSoundCardSelMenu::OnSoundOutDevice(int id)
-{
-    CSelectionInterface* pSoundOutIF = DRMTransceiver.GetSoundOutInterface();
-	const int iNumSoundOutDev = vecSoundOutNames.size();
-    if (id >= 0 && id < iNumSoundOutDev)
-        pSoundOutIF->SetDev(vecSoundOutNames[id]);
-    for (int i = 0; i < iNumSoundOutDev; i++)
-        pSoundOutMenu->setItemChecked(i, i == id);
-}
-
-# undef DEVICE_STRING
-#endif
 
 RemoteMenu::RemoteMenu(QWidget* parent, CRig& nrig)
 #ifdef HAVE_LIBHAMLIB
@@ -414,13 +296,8 @@ RemoteMenu::RemoteMenu(QWidget* parent, CRig& nrig)
 #ifndef HAVE_LIBHAMLIB
     (void)nrig;
 #endif
-#if QT_VERSION < 0x040000
-    pRemoteMenu = new QPopupMenu(parent);
-    pRemoteMenuOther = new QPopupMenu(parent);
-#else
     pRemoteMenu = new QMenu(parent);
     pRemoteMenuOther = new QMenu(parent);
-#endif
     CHECK_PTR(pRemoteMenu);
 
     CHECK_PTR(pRemoteMenuOther);
@@ -434,14 +311,9 @@ RemoteMenu::RemoteMenu(QWidget* parent, CRig& nrig)
     rigmenus.clear();
     specials.clear();
     /* Add menu entry "none" */
-#if QT_VERSION < 0x040000
-    pRemoteMenu->insertItem(tr("None"), this, SLOT(OnRemoteMenu(int)), 0, RIG_MODEL_NONE);
-    pRemoteMenu->setItemChecked(RIG_MODEL_NONE, TRUE);
-#else
     QAction* actionNoRig = pRemoteMenu->addAction(tr("None"), this, SLOT(OnRemoteMenu(int)));
     actionNoRig->setData(RIG_MODEL_NONE);
     actionNoRig->setChecked(true);
-#endif
     specials.push_back(RIG_MODEL_NONE);
 
     rig_model_t currentRig = rig.GetHamlibModelID();
@@ -458,11 +330,7 @@ RemoteMenu::RemoteMenu(QWidget* parent, CRig& nrig)
         if(k == rigmenus.end())
         {
             m.mfr = rig.strManufacturer;
-#if QT_VERSION < 0x040000
-            m.pMenu = new QPopupMenu(pRemoteMenuOther);
-#else
             m.pMenu = new QMenu(pRemoteMenuOther);
-#endif
             CHECK_PTR(m.pMenu);
         }
         else
@@ -475,12 +343,8 @@ RemoteMenu::RemoteMenu(QWidget* parent, CRig& nrig)
         QString strMenuText =
             "[" + QString().setNum(iModelID) + "] " + rig.strModelName.c_str()
             + " (" + rig_strstatus(rig.eRigStatus) + ")";
-#if QT_VERSION < 0x040000
-        m.pMenu->insertItem(strMenuText, this, SLOT(OnRemoteMenu(int)), 0, iModelID);
-#else
 	QAction* actionRig = m.pMenu->addAction(strMenuText, this, SLOT(OnRemoteMenu(int)));
 	actionNoRig->setData(iModelID);
-#endif
         rigmenus[backend] = m;
 
         if (rig.bIsSpecRig || (currentRig == iModelID))
@@ -492,23 +356,14 @@ RemoteMenu::RemoteMenu(QWidget* parent, CRig& nrig)
                 rig.strManufacturer.c_str() + " " +
                 rig.strModelName.c_str();
 
-#if QT_VERSION < 0x040000
-            pRemoteMenu->insertItem(strMenuText, this, SLOT(OnRemoteMenu(int)), 0, iModelID);
-#else
 	    actionRig = m.pMenu->addAction(strMenuText, this, SLOT(OnRemoteMenu(int)));
 	    actionRig->setData(iModelID);
-#endif
 
             /* Check for checking */
             if (currentRig == iModelID)
             {
-#if QT_VERSION < 0x040000
-                pRemoteMenu->setItemChecked(RIG_MODEL_NONE, FALSE);
-                pRemoteMenu->setItemChecked(iModelID, TRUE);
-#else
 		actionNoRig->setChecked(false);
 		actionRig->setChecked(true);
-#endif
             }
 
             specials.push_back(iModelID);
@@ -517,26 +372,14 @@ RemoteMenu::RemoteMenu(QWidget* parent, CRig& nrig)
 
     for (map<int,Rigmenu>::iterator j=rigmenus.begin(); j!=rigmenus.end(); j++)
     {
-#if QT_VERSION < 0x040000
-        pRemoteMenuOther->insertItem(j->second.mfr.c_str(), j->second.pMenu);
-#else
 	//pRemoteMenuOther->addAction(j->second.mfr.c_str(), j->second.pMenu);
-#endif
     }
 
     /* Add "other" menu */
-#if QT_VERSION < 0x040000
-    pRemoteMenu->insertItem(tr("Other"), pRemoteMenuOther, OTHER_MENU_ID);
-#else
     //pRemoteMenu->addAction(tr("Other"), pRemoteMenuOther);
-#endif
 
     /* Separator */
-#if QT_VERSION < 0x040000
-    pRemoteMenu->insertSeparator();
-#else
     pRemoteMenu->addSeparator();
-#endif
 
     /* COM port selection --------------------------------------------------- */
     /* Toggle action for com port selection menu entries */
@@ -550,138 +393,43 @@ RemoteMenu::RemoteMenu(QWidget* parent, CRig& nrig)
         QString text = p->second.c_str();
         QString menuText = p->first.c_str();
         QAction* pacMenu = new QAction(agCOMPortSel);
-#if QT_VERSION < 0x040000
-        pacMenu->setText(text);
-        pacMenu->setMenuText(menuText);
-        pacMenu->setToggleAction(true);
-        if(strPort == p->second)
-            pacMenu->setOn(TRUE);
-#else
         pacMenu->setData(text);
         pacMenu->setText(menuText);
         pacMenu->setCheckable(true);
         if(strPort == p->second)
             pacMenu->setChecked(true);
-#endif
     }
 
     /* Action group */
     connect(agCOMPortSel, SIGNAL(selected(QAction*)), this, SLOT(OnComPortMenu(QAction*)));
-#if QT_VERSION < 0x040000
-    agCOMPortSel->addTo(pRemoteMenu);
-#else
     pRemoteMenu->addActions(agCOMPortSel->actions());
-#endif
     /* Separator */
-#if QT_VERSION < 0x040000
-    pRemoteMenu->insertSeparator();
-#else
     pRemoteMenu->addSeparator();
-#endif
 
     /* Enable special settings for rigs */
-#if QT_VERSION < 0x040000
-    const int iModRigMenuID = pRemoteMenu->insertItem(
-	tr("With DRM Modification"), this, SLOT(OnModRigMenu(int)), 0);
-    /* Set check */
-    pRemoteMenu->setItemChecked(iModRigMenuID, rig.GetEnableModRigSettings());
-#else
     QAction* modRigAction = pRemoteMenu->addAction(
 	tr("With DRM Modification"), this, SLOT(OnModRigMenu(int)));
     modRigAction->setChecked(rig.GetEnableModRigSettings());
-#endif
 
 #endif
 }
 
 void RemoteMenu::OnModRigMenu(int iID)
 {
-#if QT_VERSION < 0x040000
-# ifdef HAVE_LIBHAMLIB
-    if (pRemoteMenu->isItemChecked(iID))
-    {
-        pRemoteMenu->setItemChecked(iID, FALSE);
-        rig.SetEnableModRigSettings(FALSE);
-    }
-    else
-    {
-        pRemoteMenu->setItemChecked(iID, TRUE);
-        rig.SetEnableModRigSettings(TRUE);
-    }
-# else
-    (void)iID;
-# endif
-#else
     // TODO QT4
     (void)iID;
-#endif
 }
 
 void RemoteMenu::OnRemoteMenu(int iID)
 {
-#if QT_VERSION < 0x040000
-# ifdef HAVE_LIBHAMLIB
-    // if an "others" rig was selected add it to the specials list
-    for (map<int,Rigmenu>::iterator i=rigmenus.begin(); i!=rigmenus.end(); i++)
-    {
-        QPopupMenu* pMenu = i->second.pMenu;
-        for(size_t j=0; j<pMenu->count(); j++)
-        {
-            int mID = pMenu->idAt(j);
-            if(mID==iID)
-            {
-                // if necessary add it to the specials menus
-                if(pRemoteMenu->indexOf(mID)==-1)
-                {
-                    map<rig_model_t,CHamlib::SDrRigCaps> rigs;
-                    rig.GetRigList(rigs);
-                    QString strMenuText =
-                        "[" + QString().setNum(mID) + "] " +
-                        i->second.mfr.c_str() + " " +
-                        rigs[mID].strModelName.c_str();
-                    int pos = pRemoteMenu->indexOf(OTHER_MENU_ID);
-                    pRemoteMenu->insertItem(strMenuText, this, SLOT(OnRemoteMenu(int)), 0, mID, pos);
-                    specials.push_back(mID);
-                }
-            }
-        }
-    }
-
-
-    /* Take care of check */
-    // do this after others menu in case we added something
-    for(size_t j=0; j<specials.size(); j++)
-    {
-        pRemoteMenu->setItemChecked(specials[j], specials[j]==iID);
-    }
-    // disable com port - if rig has changed
-    //if(iID != Hamlib.GetHamlibModelID())
-    //	agComPortSel->setChecked(false);
-
-    /* Set ID */
-    rig.SetHamlibModelID(iID);
-    double r;
-    if(rig.GetSMeter(r) == CHamlib::SS_VALID)
-    {
-        emit SMeterAvailable();
-    }
-# else
-	(void)iID;
-# endif
-#else
     // TODO QT4
     (void)iID;
-#endif
 }
 
 void RemoteMenu::OnComPortMenu(QAction* action)
 {
 #ifdef HAVE_LIBHAMLIB
-# if QT_VERSION < 0x040000
-    rig.SetComPort(action->text().utf8().data());
-# else
     rig.SetComPort(action->text().toUtf8().data());
-# endif
 #else
     (void)action;
 #endif
@@ -713,7 +461,6 @@ QString VerifyHtmlPath(QString path)
     return path;
 }
 
-#if QT_VERSION >= 0x040000
 /* Accept both absolute and relative url, but only return the path component.
    Invalid characters in path are percent-encoded (e.g. space = %20) */
 QString UrlEncodePath(QString url)
@@ -729,11 +476,7 @@ QString UrlEncodePath(QString url)
     while (path.indexOf("/./") != -1)
         path.replace(QRegExp("/\\./"), "/");
     /* The Actual percent encoding */
-# if QT_VERSION < 0x040400
-    path = QString(QUrl(path, QUrl::TolerantMode).toEncoded(QUrl::RemoveScheme | QUrl::RemoveAuthority));
-# else
     path = QString(QUrl(path, QUrl::TolerantMode).encodedPath());
-# endif
     return path;
 }
 
@@ -742,16 +485,11 @@ bool IsUrlDirectory(QString url)
 {
     return url.endsWith(QChar('/'));
 }
-#endif
 
 void InitSMeter(QWidget* parent, QwtThermo* sMeter)
 {
     sMeter->setRange(S_METER_THERMO_MIN, S_METER_THERMO_MAX);
-#if QT_VERSION < 0x040000
-    sMeter->setOrientation(QwtThermo::Horizontal, QwtThermo::Top);
-//#else
 //    sMeter->setOrientation(Qt::Horizontal, QwtThermo::TopScale); // Set via ui file
-#endif
     sMeter->setAlarmLevel(S_METER_THERMO_ALARM);
     sMeter->setAlarmLevel(-12.5);
     sMeter->setScale(S_METER_THERMO_MIN, S_METER_THERMO_MAX, 10.0);
@@ -775,7 +513,6 @@ void InitSMeter(QWidget* parent, QwtThermo* sMeter)
    Code by David Flamand */
 void Linkify(QString& text)
 {
-#if QT_VERSION >= 0x040000
     int i, j, posWWW=-2, posHTTP=-2, posMAIL=-2, posBegin, posEnd, size;
     size = text.size();
     for (i = 0; i < size;)
@@ -784,12 +521,8 @@ void Linkify(QString& text)
             posWWW  = text.indexOf("www.", i, Qt::CaseInsensitive);
         if (posHTTP != -1 && posHTTP < i)
             posHTTP = text.indexOf("http://", i, Qt::CaseInsensitive);
-#if QT_VERSION >= 0x040500
         if (posMAIL != -1 && posMAIL < i)
             posMAIL = text.indexOf(QRegExp("\\b[0-9a-z._-]+@[0-9a-z.-]+\\.[a-z]{2,4}\\b", Qt::CaseInsensitive), i);
-#else
-        posMAIL = -1;
-#endif
         if (posMAIL>=0 && (posMAIL<=posWWW || posWWW<0) && (posMAIL<posHTTP || posHTTP<0))
             posBegin = posMAIL;
         else if (posWWW>=0 && (posWWW<posHTTP || posHTTP<0))
@@ -839,9 +572,6 @@ void Linkify(QString& text)
         else
             break;
     }
-#else
-	(void)text;
-#endif
 }
 
 void CreateDirectories(const QString& strFilename)
@@ -860,22 +590,12 @@ void CreateDirectories(const QString& strFilename)
     */
     for (int i = 0;; i++)
     {
-#if QT_VERSION < 0x040000
-# ifdef _WIN32
-        int i1 = strFilename.find(QChar('/'), i);
-        int i2 = strFilename.find(QChar('\\'), i);
-        i = i1 >= 0 && i1 < i2 ? i1 : i2;
-# else
-        i = strFilename.find(QChar('/'), i);
-# endif
-#else
-# ifdef _WIN32
+#ifdef _WIN32
         int i1 = strFilename.indexOf(QChar('/'), i);
         int i2 = strFilename.indexOf(QChar('\\'), i);
         i = i1 >= 0 && i1 < i2 ? i1 : i2;
-# else
+#else
         i = strFilename.indexOf(QChar('/'), i);
-# endif
 #endif
         if (i < 0)
             break;
@@ -887,7 +607,6 @@ void CreateDirectories(const QString& strFilename)
 
 void RestartTransceiver(CDRMTransceiver *DRMTransceiver)
 {
-#if QT_VERSION >= 0x040000
     if (DRMTransceiver != NULL)
     {
         QMutex sleep;
@@ -901,8 +620,4 @@ void RestartTransceiver(CDRMTransceiver *DRMTransceiver)
             sleep.unlock();
         }
     }
-#else
-	(void)DRMTransceiver;
-#endif
 }
-

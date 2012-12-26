@@ -86,9 +86,7 @@ CSoundIn::CRecThread::run()
             msleep( 1 );
         }
     }
-#ifdef USE_QT_GUI
     qDebug("Rec Thread stopped");
-#endif
 }
 
 
@@ -96,9 +94,7 @@ CSoundIn::CRecThread::run()
 
 void CSoundIn::Init(int iNewBufferSize, _BOOLEAN bNewBlocking)
 {
-#ifdef USE_QT_GUI
     qDebug("initrec %d", iNewBufferSize);
-#endif
 
     /* Save < */
     RecThread.SoundBuf.lock();
@@ -167,9 +163,7 @@ _BOOLEAN CSoundIn::Read(CVector< _SAMPLE >& psData)
 
 void CSoundIn::Close()
 {
-#ifdef USE_QT_GUI
     qDebug("stoprec");
-#endif
 
     // stop the recording threads
 
@@ -251,16 +245,12 @@ void CSoundOut::CPlayThread::run()
             } while ((SoundBuf.keep_running) && ( fill < SOUNDBUFLEN/2 ));	// wait until buffer is at least half full
         }
     }
-#ifdef USE_QT_GUI
     qDebug("Play Thread stopped");
-#endif
 }
 
 void CSoundOut::Init(int iNewBufferSize, _BOOLEAN bNewBlocking)
 {
-#ifdef USE_QT_GUI
     qDebug("initplay %d", iNewBufferSize);
-#endif
 
     /* Save buffer size */
     PlayThread.SoundBuf.lock();
@@ -331,9 +321,7 @@ _BOOLEAN CSoundOut::Write(CVector< _SAMPLE >& psData)
 
 void CSoundOut::Close()
 {
-#ifdef USE_QT_GUI
     qDebug("stopplay");
-#endif
 
     // stop the playback thread
     if (PlayThread.running() ) {
