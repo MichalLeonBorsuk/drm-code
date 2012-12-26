@@ -1,50 +1,65 @@
-!release:!debug:CONFIG += release
-release {
-    CONFIG_MESSAGE += "release"
-    CONFIG -= debug
+contains(QT_VERSION, ^4\\..*) {
+	CONFIG += qt4
+	VERSION_MESSAGE = Qt 4
+	CONFIG(debug, debug|release) {
+		DEBUG_MESSAGE = debug
+	}
+	else {
+		DEBUG_MESSAGE = release 
+	}
 }
-debug {
-    CONFIG_MESSAGE += "debug"
-    CONFIG -= release
+count(QT_VERSION, 0) {
+	CONFIG += qt3 thread
+	VERSION_MESSAGE = Qt 3
+	debug {
+		DEBUG_MESSAGE = debug
+	}
+	else {
+		DEBUG_MESSAGE = release 
+	}
 }
-
 console {
-    message("console mode" $$CONFIG_MESSAGE)
     QT -= gui
+    CONFIG -= qt
+    qt3:CONFIG -= qt3
+    qt4:CONFIG -= qt4
     DEFINES += USE_NO_QT
     DEFINES -= USE_QT_GUI
+    UI_MESSAGE = console mode
+    VERSION_MESSAGE=No Qt
 }
 else {
     qtconsole {
-        CONFIG_MESSAGE = "console mode" $$CONFIG_MESSAGE
         QT -= gui
         DEFINES -= USE_QT_GUI
+        UI_MESSAGE = console mode
     }
     else {
         DEFINES += USE_QT_GUI
         RESOURCES = src/GUI-QT/res/icons.qrc
+        UI_MESSAGE = GUI mode
+	FORMS += TransmDlgbase.ui
+	FORMS += AMSSDlgbase.ui \
+	systemevalDlgbase.ui \
+	StationsDlgbase.ui \
+	EPGDlgbase.ui
+	FORMS += GeneralSettingsDlgbase.ui \
+	MultSettingsDlgbase.ui \
+	AboutDlgbase.ui
     }
 }
-
+message($$VERSION_MESSAGE $$DEBUG_MESSAGE $$UI_MESSAGE)
 TEMPLATE = app
 TARGET = dream
-CONFIG += qt warn_on thread
 INCLUDEPATH += src/GUI-QT
 INCLUDEPATH += libs
+LIBS += -Llibs
 OBJECTS_DIR = obj
 DEFINES += EXECUTABLE_NAME=$$TARGET
-#LIBS += -L$$PWD/libs
 macx:QMAKE_LFLAGS += -F$$PWD/libs
-contains(QT_VERSION, ^4\\..*) {
-    console {
-        CONFIG -= qt
-    }
-    else {
-        message("Qt 4" $$CONFIG_MESSAGE)
+qt4 {
+	VPATH += src/GUI-QT
         QT += network xml webkit
-        VPATH += src/GUI-QT
-    }
-    !console:!qtconsole {
         HEADERS += src/GUI-QT/DRMPlot.h src/GUI-QT/EvaluationDlg.h
         HEADERS += src/GUI-QT/SlideShowViewer.h src/GUI-QT/JLViewer.h
         HEADERS += src/GUI-QT/BWSViewer.h src/GUI-QT/jlbrowser.h
@@ -67,117 +82,57 @@ contains(QT_VERSION, ^4\\..*) {
                 }
             }
             else {
-                exists($$(QWT)) {
-                    message("with qwt6")
-                    INCLUDEPATH += $$(QWT)/include
-                    LIBS += $$(QWT)/lib/libqwt.so
+                exists(/usr/include/qwt/qwt.h) {
+                    message("with qwt")
+                    INCLUDEPATH += /usr/include/qwt
+                    LIBS += -lqwt
                 }
-                else {
-                    exists(/usr/lib/libqwt.so.6) {
-                        message("with qwt6")
-                        LIBS += /usr/lib/libqwt.so.6
-                        exists(/usr/include/qwt6) {
-                            INCLUDEPATH += /usr/include/qwt6
-                        }
-                        else {
-                            exists(libs/qwt) {
-                                INCLUDEPATH += libs/qwt
-                            } else {
-                                INCLUDEPATH += /usr/include/qwt
-                            }
-                        }
-                    }
-                    else {
-                        exists(/usr/lib/libqwt-qt4.so.5) {
-                            message("with qwt5")
-                            LIBS += /usr/lib/libqwt-qt4.so.5
-                            exists(/usr/include/qwt-qt4) {
-                                INCLUDEPATH += /usr/include/qwt-qt4
-                            } 
-                            else {
-                                exists(libs/qwt) {
-                                    INCLUDEPATH += libs/qwt
-                                } else {
-                                    INCLUDEPATH += /usr/include/qwt
-                                }
-                            }
-                        }
-                        else {
-                            error("no usable qwt version found")
-                        }
-                    }
+                exists(/usr/include/qwt5/qwt.h) {
+                    message("with qwt")
+                    INCLUDEPATH += /usr/include/qwt5
+                    LIBS += -lqwt
                 }
+                exists(/usr/include/qwt-qt4/qwt.h) {
+                    message("with qwt")
+                    INCLUDEPATH += /usr/include/qwt-qt4
+                    LIBS += -lqwt-qt4
+                }
+		target.path = /usr/bin
+		documentation.path = /usr/share/man/man1
+		documentation.files = linux/dream.1
+		INSTALLS += documentation
             }
         }
         win32 {
-            exists($$(QWT)) {
-                message("with qwt6")
-                INCLUDEPATH += $$(QWT)/include
-                LIBS += $$(QWT)/lib/libqwt.so
-            }
-            else {
-                exists(libs/qwt) {
-                    INCLUDEPATH += libs/qwt
-                    CONFIG( debug, debug|release ) {
-                        # debug
-                        LIBS += -lqwtd
-                    } else {
-                        # release
-                        LIBS += -lqwt
-                    }
-                }
-                else {
-                    error("no usable qwt version found")
-                }
-            }
+             INCLUDEPATH += libs/qwt
+             CONFIG( debug, debug|release ) {
+                 # debug
+                 LIBS += -lqwtd
+             } else {
+                 # release
+                 LIBS += -lqwt
+             }
         }
-    }
 }
-count(QT_VERSION, 0) {
-    console {
-        CONFIG -= qt
-	}
-    else {
-        message("Qt 3" $$CONFIG_MESSAGE)
-        VPATH += src/GUI-QT/qt2
-    }
-    CONFIG += old
-    !console:!qtconsole {
+qt3 {
+	VPATH += src/GUI-QT/qt2
         HEADERS += src/GUI-QT/qt2/DRMPlot.h src/GUI-QT/systemevalDlg.h src/GUI-QT/MultimediaDlg.h
         SOURCES += src/GUI-QT/qt2/DRMPlot.cpp src/GUI-QT/systemevalDlg.cpp src/GUI-QT/MultimediaDlg.cpp
         FORMS += fdrmdialogbase.ui fmdialogbase.ui AnalogDemDlgbase.ui LiveScheduleDlgbase.ui
         FORMS += MultimediaDlgbase.ui
+        LIBS += -lqwt
         unix {
-            exists(/usr/local/lib/libqwt.so.4) {
-    	        message("with qwt4")
+            exists(/usr/local/include/qwt) {
                 INCLUDEPATH += /usr/local/include/qwt
-                LIBS += /usr/local/lib/libqwt.so.4
+                LIBS += -L/usr/local/lib
             }
-            else {
-                exists(/usr/lib/libqwt.so.4) {
-        	        message("with qwt4")
-                    INCLUDEPATH += /usr/include/qwt
-                    LIBS += /usr/lib/libqwt.so.4
-                }
-                else {
-                    error("no usable qwt version found")
-                }
+            exists(/usr/include/qwt) {
+                INCLUDEPATH += /usr/include/qwt
             }
         }
         win32 {
             INCLUDEPATH += libs/qwt
         }
-    }
-}
-!console:!qtconsole {
-    FORMS += TransmDlgbase.ui
-    FORMS += AMSSDlgbase.ui \
-    systemevalDlgbase.ui \
-    StationsDlgbase.ui \
-    EPGDlgbase.ui
-    FORMS += GeneralSettingsDlgbase.ui \
-    MultSettingsDlgbase.ui \
-    AboutDlgbase.ui
 }
 macx {
     INCLUDEPATH += /Developer/dream/include /opt/local/include
@@ -190,12 +145,12 @@ macx {
 }
 exists(libs/faac.h) {
     CONFIG += faac
-              message("with FAAC")
-          }
+    message("with FAAC")
+}
 exists(libs/neaacdec.h) {
     CONFIG += faad
-              message("with FAAD2")
-          }
+    message("with FAAD2")
+}
 unix {
     target.path = /usr/bin
     INSTALLS += target
@@ -258,22 +213,21 @@ unix {
         error("no usable fftw library found - install fftw dev package")
       }
     }
-    LIBS += -lz \
-            -ldl
+    LIBS += -lz -ldl
     SOURCES += src/linux/Pacer.cpp
     DEFINES += HAVE_DLFCN_H \
               HAVE_MEMORY_H \
               HAVE_STDINT_H \
               HAVE_STDLIB_H
-      DEFINES += HAVE_STRINGS_H \
+    DEFINES += HAVE_STRINGS_H \
               HAVE_STRING_H \
               STDC_HEADERS
-      DEFINES += HAVE_INTTYPES_H \
+    DEFINES += HAVE_INTTYPES_H \
               HAVE_STDINT_H \
               HAVE_SYS_STAT_H \
               HAVE_SYS_TYPES_H \
               HAVE_UNISTD_H
-      DEFINES += HAVE_LIBZ
+    DEFINES += HAVE_LIBZ
     !macx {
         MAKEFILE = Makefile
         LIBS += -lrt
@@ -379,7 +333,7 @@ hamlib {
     macx:LIBS += -framework IOKit
     unix:LIBS += -lhamlib
     win32:LIBS += libhamlib-2.lib
-    !console:!qtconsole:!old {
+    qt4 {
         HEADERS += src/GUI-QT/RigDlg.h
         SOURCES += src/GUI-QT/RigDlg.cpp
         FORMS += RigDlg.ui
