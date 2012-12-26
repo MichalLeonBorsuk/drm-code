@@ -89,6 +89,7 @@ qt4 {
             }
         }
         win32 {
+	     RC_FILE = windows/dream.rc
              INCLUDEPATH += libs/qwt
              CONFIG( debug, debug|release ) {
                  # debug
