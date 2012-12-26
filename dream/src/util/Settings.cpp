@@ -50,7 +50,7 @@ CSettings::Load(int argc, char **argv)
 {
 	/* First load settings from init-file and then parse command line arguments.
 	   The command line arguments overwrite settings in init-file! */
-	LoadIni(DREAM_INIT_FILE_NAME);
+	(void)LoadIni(DREAM_INIT_FILE_NAME);
 	ParseArguments(argc, argv);
 }
 
@@ -788,14 +788,18 @@ CIniFile::PutIniSetting(const string& section, const string& key, const string& 
 	Mutex.Unlock();
 }
 
-void
+bool
 CIniFile::LoadIni(const char *filename)
 {
 	string section;
-	fstream file(filename, ios::in);
+	ifstream file(filename);
+
+	bool ok = false;
 
 	while (file.good())
 	{
+		ok = true;
+
 		if(file.peek() == '[')
 		{
 			file.ignore(); // read '['
@@ -825,6 +829,7 @@ CIniFile::LoadIni(const char *filename)
 			}
 		}
 	}
+	return ok;
 }
 
 void
