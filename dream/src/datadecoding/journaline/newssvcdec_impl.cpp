@@ -70,22 +70,10 @@
 
 #endif
 
-
-#if defined(_MSC_VER) && (_MSC_VER==1200)
-// for Visual Studio 6.0, define min (algorithm) as _MIN
-#define min _MIN
-
-#pragma warning(disable:4512)
-#endif
-
 #include <algorithm>
 #include <time.h>
 #ifdef _WIN32
 # include <windows.h> // for GetTickCount
-#endif
-
-#if defined(_MSC_VER) && (_MSC_VER==1200)
-#pragma warning(default:4512)
 #endif
 
 #include "dabdatagroupdecoder.h"
@@ -229,13 +217,8 @@ unsigned long NEWS_SVC_DEC_putData(
 		<< reception_time.tv_usec << endmsg;
 #endif
 
-#if defined(LINUX) || (_MSC_VER>1200)
 	// do not throw an exception when out of memory
 	NewsObject *obj=new(std::nothrow)NewsObject(len, buf, &reception_time);
-#else
-	// Microsoft Visual Studio up to version 6.0 does not throw anyway
-	NewsObject *obj=new NewsObject(len, buf, &reception_time);
-#endif
 	if(obj==0)
 	{
 		if(showDdNewsSvcDecErr)

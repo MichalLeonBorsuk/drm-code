@@ -28,9 +28,7 @@
 \******************************************************************************/
 
 #include "MultColorLED.h"
-#if QT_VERSION >= 0x040000
-# include <QLabel>
-#endif
+#include <QLabel>
 
 
 /* Implementation *************************************************************/
@@ -153,31 +151,19 @@ void CMultColorLED::SetLight(ELightColor color)
 	case RL_GREEN:
 		/* Green light */
 		bFlagGreenLi = true;
-#if QT_VERSION < 0x040000
-		TimerGreenLight.changeInterval(iUpdateTime);
-#else
 		TimerGreenLight.start(iUpdateTime);
-#endif
 		break;
 
 	case RL_YELLOW:
 		/* Yellow light */
 		bFlagYellowLi = true;
-#if QT_VERSION < 0x040000
-		TimerYellowLight.changeInterval(iUpdateTime);
-#else
 		TimerYellowLight.start(iUpdateTime);
-#endif
 		break;
 
 	case RL_RED:
 		/* Red light */
 		bFlagRedLi = true;
-#if QT_VERSION < 0x040000
-		TimerRedLight.changeInterval(iUpdateTime);
-#else
 		TimerRedLight.start(iUpdateTime);
-#endif
 		break;
 	case RL_GREY:
 		// TODO

@@ -46,15 +46,9 @@
 #include <qthread.h>
 #include <qtimer.h>
 #include <qwt_thermo.h>
-#if QT_VERSION < 0x040000
-# include <qdialog.h>
-# include <qpopupmenu.h>
-# include "TransmDlgbase.h"
-#else
-# include <QMainWindow>
-# include <QMenu>
-# include "ui_TransmDlgbase.h"
-#endif
+#include <QMainWindow>
+#include <QMenu>
+#include "ui_TransmDlgbase.h"
 
 #ifdef _WIN32
 # include "windows.h"
@@ -104,7 +98,6 @@ public:
 	CDRMTransmitter	DRMTransmitter;
 };
 
-#if QT_VERSION >= 0x040000
 class TransmDlgBase : public QMainWindow, public Ui_TransmDlgBase
 {
 public:
@@ -113,7 +106,7 @@ public:
 		QMainWindow(parent){(void)name;(void)modal;(void)f;setupUi(this);}
 	virtual ~TransmDlgBase() {}
 };
-#endif
+
 class TransmDialog : public TransmDlgBase
 {
 	Q_OBJECT
@@ -132,12 +125,7 @@ protected:
 	CTransmitterThread	TransThread; /* Working thread object */
 	CDRMTransmitter&	DRMTransmitter;
 	CSettings&			Settings;
-#if QT_VERSION < 0x040000
-	QMenuBar*			pMenu;
-	QPopupMenu*			pSettingsMenu;
-#else
 	QMenu*				pSettingsMenu;
-#endif
 	CAboutDlg			AboutDlg;
 	QTimer				Timer;
 	QTimer				TimerStop;
@@ -168,7 +156,7 @@ public slots:
 	void OnButtonClearAllText();
 	void OnPushButtonAddFileName();
 	void OnButtonClearAllFileNames();
-#if defined(ENABLE_TRANSM_CODECPARAMS) || QT_VERSION < 0x040000
+#if defined(ENABLE_TRANSM_CODECPARAMS)
 	void OnButtonCodec();
 #endif
 	void OnToggleCheckBoxHighQualityIQ(bool bState);
@@ -187,7 +175,7 @@ public slots:
 	void OnRadioRobustnessMode(int iID);
 	void OnRadioBandwidth(int iID);
 	void OnRadioOutput(int iID);
-#if defined(ENABLE_TRANSM_CODECPARAMS) || QT_VERSION < 0x040000
+#if defined(ENABLE_TRANSM_CODECPARAMS)
 	void OnRadioCodec(int iID);
 #endif
 	void OnRadioCurrentTime(int iID);
@@ -197,8 +185,5 @@ public slots:
 	void OnTimer();
 	void OnTimerStop();
 	void on_actionWhats_This();
-#if QT_VERSION < 0x040000
-	void OnHelpAbout() {AboutDlg.show();}
-#endif
 };
 #endif

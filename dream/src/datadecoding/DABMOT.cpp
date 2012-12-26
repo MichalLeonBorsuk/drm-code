@@ -99,13 +99,9 @@ CMOTDABEnc::SetMOTObject(CMOTObject & NewMOTObject)
 	/* Get ending string which declares the type of the file. Make lowercase */
 
 	string strFormat;
-#if defined(_MSC_VER) && (_MSC_VER < 1400)
-	strFormat = _strlwr(_strdup(NewMOTObject.strFormat.c_str()));
-#else
 	strFormat.resize(NewMOTObject.strFormat.size());
 	transform(NewMOTObject.strFormat.begin(), NewMOTObject.strFormat.end(),
 			  strFormat.begin(), (int (*)(int)) tolower);
-#endif
 
 	/* gif: 0, image: 2 */
 	if (strFormat.compare("gif") == 0)

@@ -39,24 +39,18 @@
 #include "../util/Settings.h"
 #include <iostream>
 
-#ifdef USE_QT_GUI
-# include "fdrmdialog.h"
-# include "TransmDlg.h"
-# include "DialogUtil.h"
-# include "Rig.h"
-# include <qapplication.h>
-# include <qmessagebox.h>
-# if QT_VERSION >= 0x040000
-#  include <QCoreApplication>
-#  include <QTranslator>
+#ifdef QT_CORE_LIB 
+# ifdef QT_GUI_LIB 
+#  include "fdrmdialog.h"
+#  include "TransmDlg.h"
+#  include "DialogUtil.h"
+#  include "Rig.h"
+#  include <QApplication>
+#  include <QMessageBox>
 # endif
-#endif
-
-#if QT_VERSION >= 0x040000 || defined(USE_QT_GUI)
-# if QT_VERSION >= 0x040000
-#  include <QCoreApplication>
-# endif
-# include <qthread.h>
+# include <QCoreApplication>
+# include <QTranslator>
+# include <QThread>
 
 class CRx: public QThread
 {
@@ -89,7 +83,7 @@ CRx::run()
 }
 #endif
 
-#ifdef USE_QT_GUI
+#ifdef QT_GUI_LIB 
 /******************************************************************************\
 * Using GUI with QT                                                            *
 \******************************************************************************/
@@ -101,11 +95,7 @@ main(int argc, char **argv)
 
 #if defined(__APPLE__)
 	/* find plugins on MacOs when deployed in a bundle */
-# if QT_VERSION>0x040000
 	app.addLibraryPath(app.applicationDirPath()+"../PlugIns");
-# else
-	app.setLibraryPaths(app.applicationDirPath()+"../PlugIns");
-# endif
 #endif
 
 	/* Load and install multi-language support (if available) */
@@ -147,21 +137,13 @@ main(int argc, char **argv)
 				rig.subscribe();
 			}
 #endif
-			FDRMDialog MainDlg(DRMReceiver, Settings, rig
-#if QT_VERSION < 0x040000
-				, NULL, NULL, FALSE, Qt::WStyle_MinMax
-#endif
-				);
+			FDRMDialog MainDlg(DRMReceiver, Settings, rig);
 
 			/* Start working thread */
 			CRx rx(DRMReceiver);
 			rx.start();
 
 			/* Set main window */
-#if QT_VERSION < 0x040000
-			app.setMainWidget(&MainDlg);
-#endif
-
 			app.exec();
 
 #ifdef HAVE_LIBHAMLIB
@@ -175,16 +157,7 @@ main(int argc, char **argv)
 		}
 		else if(mode == "transmit")
 		{
-			TransmDialog MainDlg(Settings
-#if QT_VERSION < 0x040000
-				, NULL, NULL, FALSE, Qt::WStyle_MinMax
-#endif
-				);
-
-#if QT_VERSION < 0x040000
-			/* Set main window */
-			app.setMainWidget(&MainDlg);
-#endif
+			TransmDialog MainDlg(Settings);
 
 			/* Show dialog */
 			MainDlg.show();
@@ -192,14 +165,7 @@ main(int argc, char **argv)
 		}
 		else
 		{
-			CHelpUsage HelpUsage(Settings.UsageArguments(), argv[0]
-#if QT_VERSION < 0x040000
-			, NULL, NULL, FALSE, Qt::WStyle_MinMax
-#endif
-			);
-#if QT_VERSION < 0x040000
-			app.setMainWidget(&HelpUsage);
-#endif
+			CHelpUsage HelpUsage(Settings.UsageArguments(), argv[0]);
 			app.exec();
 			exit(0);
 		}
@@ -273,15 +239,11 @@ main(int argc, char **argv)
 			DRMSimulation.SimScript();
 			DRMReceiver.LoadSettings();
 
-#if QT_VERSION >= 0x040000
 			QCoreApplication app(argc, argv);
 			/* Start working thread */
 			CRx rx(DRMReceiver);
 			rx.start();
 			return app.exec();
-#else
-			DRMReceiver.Start();
-#endif
 		}
 		else if (mode == "transmit")
 		{

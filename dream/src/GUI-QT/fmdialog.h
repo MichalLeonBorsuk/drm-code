@@ -37,15 +37,10 @@
 #include <qevent.h>
 #include <qlayout.h>
 #include <qpalette.h>
-#if QT_VERSION < 0x040000
-# include "fmdialogbase.h"
-# include <qpopupmenu.h>
-#else
-# include <QMenu>
-# include <QDialog>
-# include "ui_FMMainWindow.h"
-# include "SoundCardSelMenu.h"
-#endif
+#include <QMenu>
+#include <QDialog>
+#include "ui_FMMainWindow.h"
+#include "SoundCardSelMenu.h"
 #include "DialogUtil.h"
 #include "MultColorLED.h"
 #include "../DrmReceiver.h"
@@ -54,7 +49,6 @@
 #include <qcolordialog.h>
 
 /* Classes ********************************************************************/
-#if QT_VERSION >= 0x040000
 class FMDialogBase : public QMainWindow, public Ui_FMMainWindow
 {
 public:
@@ -63,7 +57,7 @@ public:
 		QMainWindow(parent,f){(void)name;(void)modal;setupUi(this);}
 	virtual ~FMDialogBase() {}
 };
-#endif
+
 class FMDialog : public FMDialogBase
 {
 	Q_OBJECT
@@ -78,17 +72,11 @@ protected:
 	CSettings&			Settings;
 
 	QMenuBar*			pMenu;
-#if QT_VERSION < 0x040000
-	QPopupMenu*			pReceiverModeMenu;
-	QPopupMenu*			pSettingsMenu;
-	QPopupMenu*			pPlotStyleMenu;
-#else
 	QMenu*				pReceiverModeMenu;
 	QMenu*				pSettingsMenu;
 	QMenu*				pPlotStyleMenu;
 	CFileMenu*			pFileMenu;
 	CSoundCardSelMenu*	pSoundCardMenu;
-#endif
 	QTimer				Timer;
 	QTimer				TimerClose;
 

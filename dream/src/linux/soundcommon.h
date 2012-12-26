@@ -28,11 +28,8 @@
 #ifndef _SOUND_COMMON_H
 #define _SOUND_COMMON_H
 
-#ifdef USE_QT_GUI
-# if QT_VERSION >= 0x030000
-#  include <qmutex.h>
-# else
-# endif
+#ifdef QT_CORE_LIB
+# include <qmutex.h>
 # include <qthread.h>
 #endif
 #include "../util/Buffer.h"
@@ -80,12 +77,12 @@ class CSoundBuf : public CCyclicBuffer<_SAMPLE> {
 
     public:
     CSoundBuf() : keep_running(TRUE)
-#ifdef USE_QT_GUI
+#ifdef QT_CORE_LIB
             , data_accessed()
 #endif
 {}
 bool keep_running;
-#ifdef USE_QT_GUI
+#ifdef QT_CORE_LIB
 void lock () {
     data_accessed.lock();
 }
@@ -101,7 +98,7 @@ void unlock () { }
 #endif
 };
 
-#ifdef USE_QT_GUI
+#ifdef QT_CORE_LIB
 typedef QThread CThread;
 #else
 class CThread {

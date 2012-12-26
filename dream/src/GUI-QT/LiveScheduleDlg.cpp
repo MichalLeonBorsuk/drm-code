@@ -26,22 +26,14 @@
 \******************************************************************************/
 
 #include "LiveScheduleDlg.h"
-# include <qfile.h>
-# include <qdir.h>
-#if QT_VERSION < 0x040000
-# include <qpushbutton.h>
-# include <qfiledialog.h>
-# include <qtextstream.h>
-# include <qheader.h>
-# include <qwhatsthis.h>
-#else
-# include <QFileDialog>
-# include <QTextStream>
-# include <QDateTime>
-# include <QHideEvent>
-# include <QShowEvent>
-# define CHECK_PTR(x) Q_CHECK_PTR(x)
-#endif
+#include <qfile.h>
+#include <qdir.h>
+#include <QFileDialog>
+#include <QTextStream>
+#include <QDateTime>
+#include <QHideEvent>
+#include <QShowEvent>
+#define CHECK_PTR(x) Q_CHECK_PTR(x)
 
 /* Implementation *************************************************************/
 
@@ -340,11 +332,9 @@ LiveScheduleDlg::LiveScheduleDlg(CDRMReceiver& DRMReceiver, CSettings& Settings,
                                  bool modal, Qt::WFlags f):
     CLiveScheduleDlgBase(parent, name, modal, f),
     DRMReceiver(DRMReceiver), Settings(Settings),
-#if QT_VERSION >= 0x040000
     smallGreenCube(":/icons/smallGreenCube.png"),
     greenCube(":/icons/greenCube.png"), redCube(":/icons/redCube.png"),
     orangeCube(":/icons/organgeCube.png"), pinkCube(":/icons/pinkCube.png"),
-#endif
     vecpListItems(), iColStationID(1), iWidthColStationID(0)
 {
     setupUi(this);
@@ -358,42 +348,6 @@ LiveScheduleDlg::LiveScheduleDlg(CDRMReceiver& DRMReceiver, CSettings& Settings,
     /* Clear list box for file names and set up columns */
     ListViewStations->clear();
 
-#if QT_VERSION < 0x040000
-    /* Define size of the bitmaps */
-    const int iXSize = 13;
-    const int iYSize = 13;
-    BitmCubeGreen.resize(iXSize, iYSize);
-    BitmCubeGreenLittle.resize(5, 5);
-    BitmCubeYellow.resize(iXSize, iYSize);
-    BitmCubeRed.resize(iXSize, iYSize);
-    BitmCubeOrange.resize(iXSize, iYSize);
-    BitmCubePink.resize(iXSize, iYSize);
-	/* Create bitmaps */
-    BitmCubeGreen.fill(QColor(0, 255, 0));
-    BitmCubeGreenLittle.fill(QColor(0, 255, 0));
-    BitmCubeYellow.fill(QColor(255, 255, 0));
-    BitmCubeRed.fill(QColor(255, 0, 0));
-    BitmCubeOrange.fill(QColor(255, 128, 0));
-    BitmCubePink.fill(QColor(255, 128, 128));
-
-	/* We assume that one column is already there */
-    ListViewStations->setColumnText(COL_FREQ, tr("Frequency [kHz/MHz]"));
-    iColStationID = ListViewStations->addColumn(tr(""));
-    iWidthColStationID = this->fontMetrics().width(tr("Station Name/Id"));
-    ListViewStations->addColumn(tr("System"));
-    ListViewStations->addColumn(tr("Time [UTC]"));
-    ListViewStations->addColumn(tr("Target"));
-    ListViewStations->addColumn(tr("Start day"));
-    /* Set right alignment for numeric columns */
-    ListViewStations->setColumnAlignment(COL_FREQ, Qt::AlignRight);
-
-    /* this for add spaces into the column and show all the header caption */
-    vecpListItems.resize(1);
-    vecpListItems[0] =
-        new MyListLiveViewItem(ListViewStations, "00000000000000000");
-
-    connect(ListViewStations->header(), SIGNAL(clicked(int)), this, SLOT(OnHeaderClicked(int)));
-#else
     connect(actionSave,  SIGNAL(triggered()), this, SLOT(OnSave()));
 
     previewMapper = new QSignalMapper(this);
@@ -421,7 +375,6 @@ LiveScheduleDlg::LiveScheduleDlg(CDRMReceiver& DRMReceiver, CSettings& Settings,
     connect(action15minutes, SIGNAL(triggered()), previewMapper, SLOT(map()));
     connect(action30minutes, SIGNAL(triggered()), previewMapper, SLOT(map()));
     connect(previewMapper, SIGNAL(mapped(int)), this, SLOT(OnShowPreviewMenu(int)));
-#endif
 
     connect(buttonOk,  SIGNAL(clicked()), this, SLOT(close()));
     //connect(actionGetUpdate, SIGNAL(triggered()), this, SLOT(OnGetUpdate()));
@@ -441,56 +394,6 @@ LiveScheduleDlg::~LiveScheduleDlg()
 {
 }
 
-#if QT_VERSION < 0x040000
-void
-LiveScheduleDlg::setupUi(QWidget*)
-{
-    /* Set Menu ************************************************************** */
-    /* View menu ------------------------------------------------------------ */
-    pViewMenu = new QPopupMenu(this);
-    CHECK_PTR(pViewMenu);
-    showActiveViewMenuItem = pViewMenu->insertItem(tr("Show &only active stations"), this,
-                          SLOT(OnShowStationsMenu(int)), 0, 0);
-    showAllViewMenuItem = pViewMenu->insertItem(tr("Show &all stations"), this,
-                          SLOT(OnShowStationsMenu(int)), 0, 1);
-
-    /* Stations Preview menu ------------------------------------------------ */
-    pPreviewMenu = new QPopupMenu(this);
-    CHECK_PTR(pPreviewMenu);
-    pPreviewMenu->insertItem(tr("&Disabled"), this,
-                             SLOT(OnShowPreviewMenu(int)), 0, 0);
-    pPreviewMenu->insertItem(tr("&5 minutes"), this,
-                             SLOT(OnShowPreviewMenu(int)), 0, 1);
-    pPreviewMenu->insertItem(tr("&15 minutes"), this,
-                             SLOT(OnShowPreviewMenu(int)), 0, 2);
-    pPreviewMenu->insertItem(tr("&30 minutes"), this,
-                             SLOT(OnShowPreviewMenu(int)), 0, 3);
-    pViewMenu->insertSeparator();
-    pViewMenu->insertItem(tr("Stations &preview"), pPreviewMenu);
-
-    SetStationsView();
-
-    /* File menu ------------------------------------------------------------ */
-    pFileMenu = new QPopupMenu(this);
-    CHECK_PTR(pFileMenu);
-    pFileMenu->insertItem(tr("&Save..."), this, SLOT(OnSave()), Qt::CTRL+Qt::Key_S,0);
-
-    /* Main menu bar -------------------------------------------------------- */
-    QMenuBar *pMenu = new QMenuBar(this);
-    CHECK_PTR(pMenu);
-    pMenu->insertItem(tr("&File"), pFileMenu);
-    pMenu->insertItem(tr("&View"), pViewMenu);
-
-    pMenu->setSeparator(QMenuBar::InWindowsStyle);
-
-    /* disable save menu */
-    pFileMenu->setItemEnabled(0, FALSE);
-
-    /* Now tell the layout about the menu */
-    CLiveScheduleDlgBaseLayout->setMenuBar(pMenu);
-}
-#endif
-
 void
 LiveScheduleDlg::LoadSettings(const CSettings& Settings)
 {
@@ -504,11 +407,7 @@ LiveScheduleDlg::LoadSettings(const CSettings& Settings)
     /* Set sorting behaviour of the list */
     iCurrentSortColumn = Settings.Get("Live Schedule Dialog", "sortcolumn", 0);
     bCurrentSortAscending = Settings.Get("Live Schedule Dialog", "sortascending", TRUE);
-#if QT_VERSION < 0x040000
-    ListViewStations->setSorting(iCurrentSortColumn, bCurrentSortAscending);
-#else
     ListViewStations->sortItems(iCurrentSortColumn, bCurrentSortAscending?Qt::AscendingOrder:Qt::DescendingOrder);
-#endif
     /* Retrieve the setting saved into the .ini file */
     strCurrentSavePath = QString::fromUtf8(DRMReceiver.GetParameters()->GetDataDirectory("AFS").c_str());
 
@@ -519,36 +418,6 @@ LiveScheduleDlg::LoadSettings(const CSettings& Settings)
     bool bShowAll = Settings.Get("Live Schedule Dialog", "showall", false);
     int iPrevSecs = Settings.Get("Live Schedule Dialog", "preview", 0);
 
-#if QT_VERSION < 0x040000
-    if (bShowAll)
-        pViewMenu->setItemChecked(showAllViewMenuItem, TRUE);
-    else
-        pViewMenu->setItemChecked(showActiveViewMenuItem, TRUE);
-
-    /* Set stations preview */
-    switch (iPrevSecs)
-    {
-    case NUM_SECONDS_PREV_5MIN:
-        pPreviewMenu->setItemChecked(1, TRUE);
-        DRMSchedule.SetSecondsPreview(NUM_SECONDS_PREV_5MIN);
-        break;
-
-    case NUM_SECONDS_PREV_15MIN:
-        pPreviewMenu->setItemChecked(2, TRUE);
-        DRMSchedule.SetSecondsPreview(NUM_SECONDS_PREV_15MIN);
-        break;
-
-    case NUM_SECONDS_PREV_30MIN:
-        pPreviewMenu->setItemChecked(3, TRUE);
-        DRMSchedule.SetSecondsPreview(NUM_SECONDS_PREV_30MIN);
-        break;
-
-    default:/* case 0, also takes care of out of value parameters */
-        pPreviewMenu->setItemChecked(0, TRUE);
-        DRMSchedule.SetSecondsPreview(0);
-        break;
-    }
-#else
     if(bShowAll)
         actionShowAllStations->setChecked(true);
     else
@@ -572,8 +441,6 @@ LiveScheduleDlg::LoadSettings(const CSettings& Settings)
         actionDisabled->setChecked(true);
         break;
     }
-#endif
-
 }
 
 void
@@ -614,20 +481,12 @@ LiveScheduleDlg::OnCheckFreeze()
 
 int LiveScheduleDlg::currentSortColumn()
 {
-#if QT_VERSION < 0x030000
-	return iCurrentSortColumn;
-#else
 	return ListViewStations->sortColumn();
-#endif
 }
 
 _BOOLEAN LiveScheduleDlg::showAll()
 {
-#if QT_VERSION < 0x040000
-	return pViewMenu->isItemChecked(showAllViewMenuItem);
-#else
 	return actionShowAllStations->isChecked();
-#endif
 }
 
 void
@@ -652,49 +511,13 @@ LiveScheduleDlg::OnShowStationsMenu(int iID)
 {
     /* Update list view */
     SetStationsView();
-#if QT_VERSION < 0x040000
-    /* Taking care of checks in the menu */
-    pViewMenu->setItemChecked(showActiveViewMenuItem, showActiveViewMenuItem == iID);
-    pViewMenu->setItemChecked(showAllViewMenuItem, showAllViewMenuItem == iID);
-#else
-	(void)iID;
-#endif
+    (void)iID;
 }
 
 void
 LiveScheduleDlg::OnShowPreviewMenu(int iID)
 {
-#if QT_VERSION < 0x040000
-    switch (iID)
-    {
-    case 1:
-        DRMSchedule.SetSecondsPreview(NUM_SECONDS_PREV_5MIN);
-        break;
-
-    case 2:
-        DRMSchedule.SetSecondsPreview(NUM_SECONDS_PREV_15MIN);
-        break;
-
-    case 3:
-        DRMSchedule.SetSecondsPreview(NUM_SECONDS_PREV_30MIN);
-        break;
-
-    default:					/* case 0: */
-        DRMSchedule.SetSecondsPreview(0);
-        break;
-    }
-
-    /* Update list view */
-    SetStationsView();
-
-    /* Taking care of checks in the menu */
-    pPreviewMenu->setItemChecked(0, 0 == iID);
-    pPreviewMenu->setItemChecked(1, 1 == iID);
-    pPreviewMenu->setItemChecked(2, 2 == iID);
-    pPreviewMenu->setItemChecked(3, 3 == iID);
-#else
     DRMSchedule.SetSecondsPreview(iID);
-#endif
 }
 
 void
@@ -728,11 +551,7 @@ MyListLiveViewItem::key(int column, bool ascending) const
            after the decimal, therefore multiply with 10000 (which moves the
            numbers in front of the comma). Afterwards append zeros at the
            beginning so that positive integer numbers are sorted correctly */
-#if QT_VERSION < 0x040000
-        return QString().setNum(long(fFreq * 10000.0)).rightJustify(20, '0');
-#else
         return QString().setNum(long(fFreq * 10000.0)).rightJustified(20, '0');
-#endif
     }
     else
     {
@@ -743,13 +562,8 @@ MyListLiveViewItem::key(int column, bool ascending) const
         if (!ascending)
             d = 100000.0;
 
-#if QT_VERSION < 0x040000
-        const QString sFreq = QString().setNum(long((fFreq - d) * 10000.0)).rightJustify(20, '0');
-        return text(column).lower() + "|" + sFreq;
-#else
-		const QString sFreq = QString().setNum(long((fFreq - d) * 10000.0)).rightJustified(20, '0');
+	const QString sFreq = QString().setNum(long((fFreq - d) * 10000.0)).rightJustified(20, '0');
         return text(column).toLower() + "|" + sFreq;
-#endif
     }
 }
 
@@ -782,12 +596,7 @@ LiveScheduleDlg::LoadSchedule()
 
     vecpListItems.resize(iNumStations, NULL);
 
-#if QT_VERSION < 0x040000
-    /* Enable disable save menu item */
-    pFileMenu->setItemEnabled(0, (iNumStations > 0));
-#else
     actionSave->setEnabled(iNumStations > 0);
-#endif
     /* Unlock BEFORE calling the stations view update because in this function
        the mutex is locked, too! */
     ListItemsMutex.unlock();
@@ -808,29 +617,17 @@ LiveScheduleDlg::LoadSchedule()
         {
             /* Do UTF-8 to string conversion with the label strings */
             QString strStationName = QString().fromUtf8(
-#if QT_VERSION < 0x040000
-				QCString(Parameters.Service[iCurSelAudioServ].strLabel.c_str())
-#else
 				Parameters.Service[iCurSelAudioServ].strLabel.c_str()
-#endif
 				);
 
             /* add station name on the title of the dialog */
             if (strStationName != "")
-#if QT_VERSION < 0x040000
-                strTitle += " [" + strStationName.stripWhiteSpace() + "]";
-#else
                 strTitle += " [" + strStationName.trimmed() + "]";
-#endif
         }
         Parameters.Unlock();
     }
 
-#if QT_VERSION < 0x040000
-	SetDialogCaption(this, strTitle);
-#else
 	setWindowTitle(strTitle);
-#endif
 }
 
 void
@@ -924,32 +721,6 @@ LiveScheduleDlg::SetStationsView()
                 bListHastChanged = TRUE;
             }
 
-#if QT_VERSION < 0x040000
-            /* If receiver coordinates are within the target area add a little green cube */
-            if (DRMSchedule.GetItem(i).bInsideTargetArea == TRUE)
-                vecpListItems[i]->setPixmap(COL_TARGET, BitmCubeGreenLittle);
-
-            /* Check, if station is currently transmitting. If yes, set
-               special pixmap */
-            switch (DRMSchedule.CheckState(i))
-            {
-            case CDRMLiveSchedule::IS_ACTIVE:
-                vecpListItems[i]->setPixmap(COL_FREQ, BitmCubeGreen);
-                break;
-            case CDRMLiveSchedule::IS_PREVIEW:
-                vecpListItems[i]->setPixmap(COL_FREQ, BitmCubeOrange);
-                break;
-            case CDRMLiveSchedule::IS_SOON_INACTIVE:
-                vecpListItems[i]->setPixmap(COL_FREQ, BitmCubePink);
-                break;
-            case CDRMLiveSchedule::IS_INACTIVE:
-                vecpListItems[i]->setPixmap(COL_FREQ, BitmCubeRed);
-                break;
-            default:
-                vecpListItems[i]->setPixmap(COL_FREQ, BitmCubeRed);
-                break;
-            }
-#else
             /* If receiver coordinates are within the target area add a little green cube */
             if (DRMSchedule.GetItem(i).bInsideTargetArea == TRUE)
                 vecpListItems[i]->setIcon(COL_TARGET, smallGreenCube);
@@ -974,7 +745,6 @@ LiveScheduleDlg::SetStationsView()
                 vecpListItems[i]->setIcon(COL_FREQ, redCube);
                 break;
             }
-#endif
         }
         else
         {
@@ -1006,13 +776,8 @@ LiveScheduleDlg::SetStationsView()
     }
 
     /* Sort the list if items have changed */
-#if QT_VERSION < 0x040000
-    if(bListHastChanged)
-        ListViewStations->sort();
-#else
     if(bListHastChanged)
         ListViewStations->sortItems(iCurrentSortColumn, bCurrentSortAscending?Qt::AscendingOrder:Qt::DescendingOrder);
-#endif
     ListItemsMutex.unlock();
 }
 
@@ -1059,24 +824,6 @@ LiveScheduleDlg::OnSave()
     /* Lock mutex for use the vecpListItems */
     ListItemsMutex.lock();
 
-#if QT_VERSION < 0x040000
-    /* Force the sort for all items */
-	ListViewStations->sort();
-
-    /* Extract values from the list */
-
-    QListViewItem *myItem = ListViewStations->firstChild();
-    while (myItem)
-    {
-        strSchedule += "<tr>" "<td align=\"right\">" + myItem->text(COL_FREQ) + "</td>"	/* freq */
-                       "<td>" + ColValue(myItem->text(1)) + "</td>"	/* system */
-                       "<td>" + ColValue(myItem->text(2)) + "</td>"	/* time */
-                       "<td>" + ColValue(myItem->text(3)) + "</td>"	/* target */
-                       "<td>" + ColValue(myItem->text(4)) + "</td>"	/* days */
-                       "</tr>\n";
-        myItem = myItem->nextSibling();
-    }
-#else
     /* Force the sort for all items */
 	ListViewStations->sortItems(iCurrentSortColumn, bCurrentSortAscending?Qt::AscendingOrder:Qt::DescendingOrder);
 
@@ -1092,7 +839,6 @@ LiveScheduleDlg::OnSave()
                        "<td>" + ColValue(myItem->text(4)) + "</td>"	/* days */
                        "</tr>\n";
 	}
-#endif
 
     ListItemsMutex.unlock();
 
@@ -1124,31 +870,19 @@ LiveScheduleDlg::OnSave()
 
         QString strPath = strCurrentSavePath +
                           strStationName + "_" + "LiveSchedule.html";
-#if QT_VERSION < 0x040000
-        strFilename = QFileDialog::getSaveFileName(strPath, "*.html", this);
-#else
         strFilename = QFileDialog::getSaveFileName(this, "*.html", strPath);
-#endif
 
         if (!strFilename.isEmpty())
         {
             /* Save as a text stream */
             QFile FileObj(strFilename);
 
-#if QT_VERSION < 0x040000
-            if (FileObj.open(IO_WriteOnly))
-#else
             if (FileObj.open(QIODevice::WriteOnly))
-#endif
             {
                 QTextStream TextStream(&FileObj);
                 TextStream << strText;	/* Actual writing */
                 FileObj.close();
-#if QT_VERSION < 0x040000
-                strCurrentSavePath = QFileInfo(strFilename).filePath() + "/";
-#else
                 strCurrentSavePath = QFileInfo(strFilename).path() + "/";
-#endif
             }
         }
     }
@@ -1184,15 +918,9 @@ LiveScheduleDlg::AddWhatsThisHelp()
 
     /* Check box freeze */
 	QString strFreeze = tr("<b>Freeze:</b> If this check box is selected the live schedule is frozen.");
-#if QT_VERSION < 0x040000
-    QWhatsThis::add(ListViewStations, strView);
-    QWhatsThis::add(TextLabelUTCTime, strTime);
-    QWhatsThis::add(CheckBoxFreeze, strFreeze);
-#else
 	ListViewStations->setWhatsThis(strView);
     TextLabelUTCTime->setWhatsThis(strTime);
     CheckBoxFreeze->setWhatsThis(strFreeze);
-#endif
 }
 
 CDRMLiveSchedule::StationState CDRMLiveSchedule::CheckState(const int iPos)

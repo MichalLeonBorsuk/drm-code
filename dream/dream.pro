@@ -8,34 +8,19 @@ contains(QT_VERSION, ^4\\..*) {
 		DEBUG_MESSAGE = release 
 	}
 }
-count(QT_VERSION, 0) {
-	CONFIG += qt3 thread
-	VERSION_MESSAGE = Qt 3
-	debug {
-		DEBUG_MESSAGE = debug
-	}
-	else {
-		DEBUG_MESSAGE = release 
-	}
-}
 console {
     QT -= gui
     CONFIG -= qt
-    qt3:CONFIG -= qt3
     qt4:CONFIG -= qt4
-    DEFINES += USE_NO_QT
-    DEFINES -= USE_QT_GUI
     UI_MESSAGE = console mode
     VERSION_MESSAGE=No Qt
 }
 else {
     qtconsole {
         QT -= gui
-        DEFINES -= USE_QT_GUI
         UI_MESSAGE = console mode
     }
     else {
-        DEFINES += USE_QT_GUI
         RESOURCES = src/GUI-QT/res/icons.qrc
         UI_MESSAGE = GUI mode
 	FORMS += TransmDlgbase.ui
@@ -112,26 +97,6 @@ qt4 {
                  # release
                  LIBS += -lqwt
              }
-        }
-}
-qt3 {
-	VPATH += src/GUI-QT/qt2
-        HEADERS += src/GUI-QT/qt2/DRMPlot.h src/GUI-QT/systemevalDlg.h src/GUI-QT/MultimediaDlg.h
-        SOURCES += src/GUI-QT/qt2/DRMPlot.cpp src/GUI-QT/systemevalDlg.cpp src/GUI-QT/MultimediaDlg.cpp
-        FORMS += fdrmdialogbase.ui fmdialogbase.ui AnalogDemDlgbase.ui LiveScheduleDlgbase.ui
-        FORMS += MultimediaDlgbase.ui
-        LIBS += -lqwt
-        unix {
-            exists(/usr/local/include/qwt) {
-                INCLUDEPATH += /usr/local/include/qwt
-                LIBS += -L/usr/local/lib
-            }
-            exists(/usr/include/qwt) {
-                INCLUDEPATH += /usr/include/qwt
-            }
-        }
-        win32 {
-            INCLUDEPATH += libs/qwt
         }
 }
 macx {

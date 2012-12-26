@@ -74,15 +74,10 @@
 #include "Splitter.h"
 #include "cpplog.h"
 
-#ifdef _MSC_VER
-# pragma warning (disable: 4786)
-#endif
-
 static int Inflate(unsigned char *dest,
                    unsigned long *destLen,
                    const unsigned char *source,
                    unsigned long sourceLen);
-
 
 /// maximum length of a raw NML object
 const unsigned int NML::NML_MAX_LEN = 4092;

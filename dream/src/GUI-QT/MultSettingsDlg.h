@@ -37,17 +37,12 @@
 #include "../DrmReceiver.h"
 #include "../datadecoding/epg/epgutil.h"
 #include "../util/Settings.h"
-#if QT_VERSION < 0x040000
-# include "MultSettingsDlgbase.h"
-#else
-# include <QDialog>
-# include "ui_MultSettingsDlgbase.h"
-#endif
+#include <QDialog>
+#include "ui_MultSettingsDlgbase.h"
 
 /* Definitions ****************************************************************/
 
 /* Classes ********************************************************************/
-#if QT_VERSION >= 0x040000
 class CMultSettingsDlgBase : public QDialog, public Ui_CMultSettingsDlgBase
 {
 public:
@@ -56,7 +51,7 @@ public:
 		QDialog(parent,f){(void)name;(void)modal;setupUi(this);}
 	virtual ~CMultSettingsDlgBase() {}
 };
-#endif
+
 class MultSettingsDlg : public CMultSettingsDlgBase
 {
 	Q_OBJECT

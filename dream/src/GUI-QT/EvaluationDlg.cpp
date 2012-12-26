@@ -318,19 +318,15 @@ void systemevalDlg::showEvent(QShowEvent* e)
     /* Activate real-time timer */
     Timer.start(GUI_CONTROL_UPDATE_TIME);
 
-#if QT_VERSION >= 0x040000  
     /* Notify the MainPlot of showEvent */
     MainPlot->activate();
-#endif
 }
 
 void systemevalDlg::hideEvent(QHideEvent* e)
 {
 	EVENT_FILTER(e);
-#if QT_VERSION >= 0x040000  
     /* Notify the MainPlot of hideEvent */
     MainPlot->deactivate();
-#endif
 
     /* Stop the real-time timer */
     Timer.stop();

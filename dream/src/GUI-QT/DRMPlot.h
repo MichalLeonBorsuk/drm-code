@@ -33,12 +33,9 @@
 #define __DRMPLOT_QWT5_H
 
 /* Qt includes */
-#include <qobject.h>
-#if QT_VERSION < 0x040000
-# error QT_VERSION < 0x040000
-#endif
-#include <QPainter>
 #include <QTimer>
+#include <QObject>
+#include <QPainter>
 #include <QDialog>
 #include <QResizeEvent>
 #include <QPaintEvent>

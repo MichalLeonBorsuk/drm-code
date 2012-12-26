@@ -27,55 +27,19 @@
 #include "StationsDlg.h"
 #include "../tables/TableStations.h"
 #include "DialogUtil.h"
-#if QT_VERSION < 0x040000
-# include <qheader.h>
-# include <qdir.h>
-# include <qftp.h>
-# include <qsocket.h>
-# include <qwhatsthis.h>
-# include <qregexp.h>
-# ifdef HAVE_LIBHAMLIB
-#  include "Rig.h"
-# endif
-#else
-# ifdef HAVE_LIBHAMLIB
-#  include "Rig.h"
-#  include "RigDlg.h"
-# endif
-# include <QHideEvent>
-# include <QShowEvent>
-# include <QNetworkRequest>
-# include <QNetworkReply>
-# define CHECK_PTR(x) Q_CHECK_PTR(x)
+#ifdef HAVE_LIBHAMLIB
+# include "Rig.h"
+# include "RigDlg.h"
 #endif
+#include <QHideEvent>
+#include <QShowEvent>
+#include <QNetworkRequest>
+#include <QNetworkReply>
+#define CHECK_PTR(x) Q_CHECK_PTR(x)
 #include <qapplication.h>
 #include <cmath>
 
-#if QT_VERSION < 0x040000
-# define TOUTF8() utf8().data()
-#else
-# define TOUTF8() toUtf8().data()
-#endif
-
 /* Implementation *************************************************************/
-#if QT_VERSION < 0x040000
-QString MyListViewItem::key(int column, bool ascending) const
-{
-    /* Reimplement "key()" function to get correct sorting behaviour */
-    if ((column == 2) || (column == 3))
-    {
-        /* These columns are filled with numbers. Some items may have numbers
-           after the comma, therefore multiply with 10000 (which moves the
-           numbers in front of the comma). Afterwards append zeros at the
-           beginning so that positive integer numbers are sorted correctly */
-        return QString(QString().setNum((long int)
-                                        (text(column).toFloat() * 10000.0))).rightJustify(20, '0');
-    }
-    else
-        return QListViewItem::key(column, ascending);
-}
-#endif
-
 CDRMSchedule::CDRMSchedule():
     ListTargets(), ListCountries(), ListLanguages(),
     StationsTable(),eSchedMode(SM_DRM),iSecondsPreviewdrm(0),iSecondsPreviewanalog(0)
@@ -115,23 +79,6 @@ void CDRMSchedule::SetSchedMode(const ESchedMode eNewSchM)
 
 void CDRMSchedule::UpdateStringListForFilter(const CStationsItem& StationsItem)
 {
-#if QT_VERSION < 0x040000
-    QString strTarget = StationsItem.strTarget;
-    QString strCountry = StationsItem.strCountry;
-    QString strLanguage = StationsItem.strLanguage;
-    QStringList result;
-    result = ListTargets.grep(QRegExp("^" + strTarget + "$"));
-    if (result.isEmpty())
-        ListTargets.append(strTarget);
-
-    result = ListCountries.grep(QRegExp("^" + strCountry + "$"));
-    if (result.isEmpty())
-        ListCountries.append(strCountry);
-
-    result = ListLanguages.grep(QRegExp("^" + strLanguage + "$"));
-    if (result.isEmpty())
-        ListLanguages.append(strLanguage);
-#else
     if (!ListTargets.contains(StationsItem.strTarget))
         ListTargets.append(StationsItem.strTarget);
 
@@ -140,25 +87,16 @@ void CDRMSchedule::UpdateStringListForFilter(const CStationsItem& StationsItem)
 
     if (!ListLanguages.contains(StationsItem.strLanguage))
         ListLanguages.append(StationsItem.strLanguage);
-#endif
 }
 
 void CDRMSchedule::LoadSchedule()
 {
-#if QT_VERSION < 0x040000
-    const char *filename = schedFileName.latin1();
-#else
     QByteArray fn(schedFileName.toUtf8());
     const char *filename = fn.data();
-#endif
     if (filename != NULL) /* Needed for Qt3 windows */
     {
         QApplication::setOverrideCursor(
-#if QT_VERSION < 0x040000
-            Qt::waitCursor
-#else
             Qt::BusyCursor
-#endif
         );
 
         ListTargets = QStringList("");
@@ -303,11 +241,7 @@ void CDRMSchedule::ReadCSVFile(FILE* pFile)
         do {
             string s;
             getline(ss, s, ';');
-#if QT_VERSION < 0x030000
-            fields.append(s.c_str());
-#else
             fields.push_back(s.c_str());
-#endif
         } while(!ss.eof());
 
         StationsItem.iFreq = floor(fields[0].toFloat());
@@ -319,11 +253,7 @@ void CDRMSchedule::ReadCSVFile(FILE* pFile)
         }
         else
         {
-#if QT_VERSION < 0x040000
-            QStringList times = QStringList::split("-", fields[1]);
-#else
             QStringList times = fields[1].split("-");
-#endif
 	    if(times.count()==2)
 	    {
 		StationsItem.SetStartTime(times[0].toInt());
@@ -333,7 +263,7 @@ void CDRMSchedule::ReadCSVFile(FILE* pFile)
 
         if(fields[2].length()>0)
         {
-            stringstream ss(fields[2].TOUTF8());
+            stringstream ss(fields[2].toUtf8().data());
             char c;
             enum Days { Sunday=0, Monday=1, Tuesday=2, Wednesday=3,
                         Thursday=4, Friday=5, Saturday=6
@@ -399,14 +329,10 @@ void CDRMSchedule::ReadCSVFile(FILE* pFile)
 //0   ;1        ;2    ;3  ;4               ;5;6;7;8;9;10
 //1170;1600-1700;Mo-Fr;USA;Voice of America;E; ; ;0; ;
         string homecountry;
-#if QT_VERSION < 0x030000
-        int fieldcount = fields.count();
-#else
         int fieldcount = fields.size();
-#endif
         if(fieldcount>3)
         {
-            homecountry = fields[3].TOUTF8();
+            homecountry = fields[3].toUtf8().data();
             string c = data.itu_r_country(homecountry);
             if(c == "")
                 c = homecountry;
@@ -418,13 +344,13 @@ void CDRMSchedule::ReadCSVFile(FILE* pFile)
 
         if(fieldcount>5)
         {
-            string l = data.eibi_language(fields[5].TOUTF8());
+            string l = data.eibi_language(fields[5].toUtf8().data());
             StationsItem.strLanguage = QString::fromUtf8(l.c_str());
         }
 
         if(fieldcount>6)
         {
-            string s = fields[6].TOUTF8();
+            string s = fields[6].toUtf8().data();
             string t = data.eibi_target(s);
             if(t == "")
             {
@@ -444,7 +370,7 @@ void CDRMSchedule::ReadCSVFile(FILE* pFile)
         if(fieldcount>7)
         {
             StationsItem.strSite = fields[7];
-            string s  = fields[7].TOUTF8();
+            string s  = fields[7].toUtf8().data();
             if(s=="") // unknown or main Tx site of the home country
             {
                 country = homecountry;
@@ -642,12 +568,8 @@ StationsDlg::StationsDlg(CDRMReceiver& DRMReceiver, CSettings& Settings, CRig& R
                          QWidget* parent, const char* name, bool modal, Qt::WFlags f) :
     CStationsDlgBase(parent, name, modal, f),
     DRMReceiver(DRMReceiver), Settings(Settings), Rig(Rig),
-#if QT_VERSION < 0x040000
-    vecpListItems(0),
-#else
     greenCube(":/icons/greenCube.png"), redCube(":/icons/redCube.png"),
     orangeCube(":/icons/orangeCube.png"), pinkCube(":/icons/pinkCube.png"),
-#endif
     bReInitOnFrequencyChange(FALSE), eLastScheduleMode(CDRMSchedule::SM_NONE)
 {
     setupUi(this);
@@ -668,11 +590,7 @@ StationsDlg::StationsDlg(CDRMReceiver& DRMReceiver, CSettings& Settings, CRig& R
     QwtCounterFrequency->setIncSteps(QwtCounter::Button2, 10);
     QwtCounterFrequency->setIncSteps(QwtCounter::Button3, 100);
 
-#if QT_VERSION >= 0x040000
-
-#if QT_VERSION >= 0x040200
     ListViewStations->setAllColumnsShowFocus(true);
-#endif
     ListViewStations->setColumnCount(9);
     ListViewStations->setRootIsDecorated ( false );
     ListViewStations->setSortingEnabled ( true );
@@ -729,35 +647,17 @@ StationsDlg::StationsDlg(CDRMReceiver& DRMReceiver, CSettings& Settings, CRig& R
 # endif
     connect(buttonOk, SIGNAL(clicked()), this, SLOT(close()));
     connect(actionEnable_S_Meter, SIGNAL(triggered()), this, SLOT(OnSMeterMenu()));
-#endif
 
     /* Init progress bar for input s-meter */
     InitSMeter(this, ProgrSigStrength);
 
-#if QT_VERSION < 0x040000
-    /* Register the network protocol (ftp). This is needed for the DRMSchedule download */
-    QNetworkProtocol::registerNetworkProtocol("ftp", new QNetworkProtocolFactory<QFtp>);
-#else
     manager = new QNetworkAccessManager(this);
     connect(manager, SIGNAL(finished(QNetworkReply*)), this, SLOT(OnUrlFinished(QNetworkReply*)));
-#endif
+
     /* Connections ---------------------------------------------------------- */
 
     connect(&TimerList, SIGNAL(timeout()), this, SLOT(OnTimerList()));
     connect(&TimerUTCLabel, SIGNAL(timeout()), this, SLOT(OnTimerUTCLabel()));
-
-#if QT_VERSION < 0x040000
-    connect(ListViewStations, SIGNAL(selectionChanged(QListViewItem*)),
-            this, SLOT(OnListItemClicked(QListViewItem*)));
-    connect(&UrlUpdateSchedule, SIGNAL(finished(QNetworkOperation*)),
-            this, SLOT(OnUrlFinished(QNetworkOperation*)));
-    connect(ListViewStations->header(), SIGNAL(clicked(int)),
-            this, SLOT(OnHeaderClicked(int)));
-    connect(ComboBoxFilterTarget, SIGNAL(activated(const QString&)), this, SLOT(on_ComboBoxFilterTarget_activated(const QString&)));
-    connect(ComboBoxFilterCountry, SIGNAL(activated(const QString&)), this, SLOT(on_ComboBoxFilterCountry_activated(const QString&)));
-    connect(ComboBoxFilterLanguage, SIGNAL(activated(const QString&)), this, SLOT(on_ComboBoxFilterLanguage_activated(const QString&)));
-#endif
-
     connect(QwtCounterFrequency, SIGNAL(valueChanged(double)),
             this, SLOT(OnFreqCntNewValue(double)));
 
@@ -773,145 +673,20 @@ StationsDlg::StationsDlg(CDRMReceiver& DRMReceiver, CSettings& Settings, CRig& R
     OnTimerUTCLabel();
 }
 
-#if QT_VERSION < 0x040000
-void StationsDlg::setupUi(QObject*)
-{
-    /* Define size of the bitmaps */
-    const int iXSize = 13;
-    const int iYSize = 13;
-
-    /* Create bitmaps */
-    BitmCubeGreen.resize(iXSize, iYSize);
-    BitmCubeGreen.fill(QColor(0, 255, 0));
-    BitmCubeYellow.resize(iXSize, iYSize);
-    BitmCubeYellow.fill(QColor(255, 255, 0));
-    BitmCubeRed.resize(iXSize, iYSize);
-    BitmCubeRed.fill(QColor(255, 0, 0));
-    BitmCubeOrange.resize(iXSize, iYSize);
-    BitmCubeOrange.fill(QColor(255, 128, 0));
-    BitmCubePink.resize(iXSize, iYSize);
-    BitmCubePink.fill(QColor(255, 128, 128));
-    /* We assume that one column is already there */
-    ListViewStations->setColumnText(0, tr("Station Name"));
-    ListViewStations->addColumn(tr("Time [UTC]"));
-    ListViewStations->addColumn(tr("Frequency [kHz]"));
-    ListViewStations->addColumn(tr("Power [kW]"));
-    ListViewStations->addColumn(tr("Target"));
-    ListViewStations->addColumn(tr("Country"));
-    ListViewStations->addColumn(tr("Site"));
-    ListViewStations->addColumn(tr("Language"));
-    ListViewStations->addColumn(tr("Days"));
-    /* Set right alignment for numeric columns */
-    ListViewStations->setColumnAlignment(1, Qt::AlignRight);
-    ListViewStations->setColumnAlignment(2, Qt::AlignRight);
-    ListViewStations->setColumnAlignment(3, Qt::AlignRight);
-
-    /* Set Menu ***************************************************************/
-    /* View menu ------------------------------------------------------------ */
-    pViewMenu = new QPopupMenu(this);
-    CHECK_PTR(pViewMenu);
-    pViewMenu->insertItem(tr("Show &only active stations"), this,
-                          SLOT(OnShowStationsMenu(int)), 0, 0);
-    pViewMenu->insertItem(tr("Show &all stations"), this,
-                          SLOT(OnShowStationsMenu(int)), 0, 1);
-
-    /* Stations Preview menu ------------------------------------------------ */
-    pPreviewMenu = new QPopupMenu(this);
-    CHECK_PTR(pPreviewMenu);
-    pPreviewMenu->insertItem(tr("&Disabled"), this,
-                             SLOT(OnShowPreviewMenu(int)), 0, 0);
-    pPreviewMenu->insertItem(tr("&5 minutes"), this,
-                             SLOT(OnShowPreviewMenu(int)), 0, 1);
-    pPreviewMenu->insertItem(tr("&15 minutes"), this,
-                             SLOT(OnShowPreviewMenu(int)), 0, 2);
-    pPreviewMenu->insertItem(tr("&30 minutes"), this,
-                             SLOT(OnShowPreviewMenu(int)), 0, 3);
-
-    pViewMenu->insertSeparator();
-    pViewMenu->insertItem(tr("Stations &preview"),pPreviewMenu);
-
-
-    /* Remote menu  --------------------------------------------------------- */
-    /* Separator */
-    pRemoteMenu = new RemoteMenu(this, Rig);
-    pRemoteMenu->menu()->insertSeparator();
-
-    /* Enable s-meter */
-    /*const int iSMeterMenuID =*/ pRemoteMenu->menu()->insertItem(tr("Enable S-Meter"),
-                              this, SLOT(OnSMeterMenu(int)), 0, SMETER_MENU_ID);
-
-    /* Update menu ---------------------------------------------------------- */
-    pUpdateMenu = new QPopupMenu(this);
-    CHECK_PTR(pUpdateMenu);
-    pUpdateMenu->insertItem(tr("&Get Update..."), this, SLOT(on_actionGetUpdate_triggered()), 0, 0);
-
-    /* Main menu bar -------------------------------------------------------- */
-    QMenuBar* pMenu = new QMenuBar(this);
-    CHECK_PTR(pMenu);
-    pMenu->insertItem(tr("&View"), pViewMenu);
-    pMenu->insertItem(tr("&Remote"), pRemoteMenu->menu());
-    pMenu->insertItem(tr("&Update"), pUpdateMenu); /* String "Update" used below */
-    pMenu->setSeparator(QMenuBar::InWindowsStyle);
-
-    /* Now tell the layout about the menu */
-    CStationsDlgBaseLayout->setMenuBar(pMenu);
-
-}
-#endif
-
 StationsDlg::~StationsDlg()
 {
 }
 
 void StationsDlg::OnShowStationsMenu(int iID)
 {
-#if QT_VERSION < 0x040000
-    /* Show only active stations if ID is 0, else show all */
-    if (iID == 0)
-    {
-        /* clear all and reload. If the list is too big this increase the performance */
-        ClearStationsView();
-    }
-
-    /* Taking care of checks in the menu */
-    pViewMenu->setItemChecked(0, 0 == iID);
-    pViewMenu->setItemChecked(1, 1 == iID);
-#else
     (void)iID;
-#endif
     /* Update list view */
     SetStationsView();
 }
 
 void StationsDlg::OnShowPreviewMenu(int iID)
 {
-#if QT_VERSION < 0x040000
-    switch (iID)
-    {
-    case 1:
-        DRMSchedule.SetSecondsPreview(NUM_SECONDS_PREV_5MIN);
-        break;
-
-    case 2:
-        DRMSchedule.SetSecondsPreview(NUM_SECONDS_PREV_15MIN);
-        break;
-
-    case 3:
-        DRMSchedule.SetSecondsPreview(NUM_SECONDS_PREV_30MIN);
-        break;
-
-    default: /* case 0: */
-        DRMSchedule.SetSecondsPreview(0);
-        break;
-    }
-    /* Taking care of checks in the menu */
-    pPreviewMenu->setItemChecked(0, 0 == iID);
-    pPreviewMenu->setItemChecked(1, 1 == iID);
-    pPreviewMenu->setItemChecked(2, 2 == iID);
-    pPreviewMenu->setItemChecked(3, 3 == iID);
-#else
     DRMSchedule.SetSecondsPreview(iID);
-#endif
 
     /* Update list view */
     SetStationsView();
@@ -937,11 +712,7 @@ void StationsDlg::AddUpdateDateTime()
             + f.lastModified().date().toString() + ")";
     }
 
-#if QT_VERSION < 0x040000
-    pUpdateMenu->changeItem(tr("&Get Update") + s + "...", 0);
-#else
     actionGetUpdate->setText(tr("&Get Update") + s + "...");
-#endif
 }
 
 void StationsDlg::on_ComboBoxFilterTarget_activated(const QString& s)
@@ -971,84 +742,10 @@ void StationsDlg::on_ComboBoxFilterLanguage_activated(const QString& s)
     SetStationsView();
 }
 
-#if QT_VERSION < 0x040000
-void StationsDlg::httpConnected()
-{
-    const bool bDrmMode = DRMSchedule.GetSchedMode() == CDRMSchedule::SM_DRM;
-    QUrl* pqurl = bDrmMode ? &DRMSchedule.qurldrm : &DRMSchedule.qurlanalog;
-    QUrl qurl = *pqurl;
-    QCString s = QString("GET %1 HTTP/1.0\r\nHost: %2\r\n\r\n")
-                 .arg(qurl.encodedPathAndQuery()).arg(qurl.host()).utf8();
-    httpSocket->writeBlock(s.data(), s.length());
-    httpHeader=true;
-}
-#endif
-
-#if QT_VERSION < 0x040000
-void StationsDlg::httpDisconnected()
-{
-    disconnect(httpSocket, SIGNAL(connected()), this, SLOT(httpConnected()));
-    disconnect(httpSocket, SIGNAL(connectionClosed()), this, SLOT(httpDisconnected()));
-    disconnect(httpSocket, SIGNAL(error(int)), this, SLOT(httpError(int)));
-    disconnect(httpSocket, SIGNAL(readyRead()), this, SLOT(httpRead()));
-    httpSocket->close();
-    schedFile->close();
-    QApplication::restoreOverrideCursor();
-    /* Notify the user that update was successful */
-    QMessageBox::information(this, "Dream", okMessage, QMessageBox::Ok);
-    /* Read updated ini-file */
-    LoadSchedule();
-}
-#endif
-
-#if QT_VERSION < 0x040000
-void StationsDlg::httpRead()
-{
-    char buf[4000];
-    if(httpHeader) {
-        httpSocket->readLine(buf, sizeof(buf));
-        if(strstr(buf,"200")==NULL) {
-            QMessageBox::information(this, "Dream", buf, QMessageBox::Ok);
-            httpSocket->close();
-            return;
-        }
-        do {
-            httpSocket->readLine(buf, sizeof(buf));
-            //qDebug("header %s", buf);
-        } while(strcmp(buf, "\r\n")!=0);
-        httpHeader=false;
-        schedFile = new QFile(DRMSchedule.schedFileName);
-        if(!schedFile->open(IO_WriteOnly)) {
-            QMessageBox::information(this, "Dream", "can't open schedule file for writing", QMessageBox::Ok);
-            httpSocket->close();
-            return;
-        }
-    }
-    while(httpSocket->bytesAvailable()>0) {
-        int n = httpSocket->readBlock(buf, sizeof(buf));
-        schedFile->writeBlock(buf, n);
-    }
-}
-#endif
-
-#if QT_VERSION < 0x040000
-void StationsDlg::httpError(int n)
-{
-    qDebug("http error %d", n);
-    QMessageBox::information(this, "Dream", "http error", QMessageBox::Ok);
-    QApplication::restoreOverrideCursor();
-}
-#endif
-
 void StationsDlg::on_actionGetUpdate_triggered()
 {
     const bool bDrmMode = DRMSchedule.GetSchedMode() == CDRMSchedule::SM_DRM;
-#if QT_VERSION < 0x040000
-    QUrl* pqurl = bDrmMode ? &DRMSchedule.qurldrm : &DRMSchedule.qurlanalog;
-    QUrl qurl = *pqurl;
-#else
     QUrl& qurl(bDrmMode ? DRMSchedule.qurldrm : DRMSchedule.qurlanalog);
-#endif
     if (QMessageBox::information(this, tr("Dream Schedule Update"),
                                  tr("Dream tries to download the newest schedule\n"
                                     "Your computer must be connected to the internet.\n\n"
@@ -1058,63 +755,10 @@ void StationsDlg::on_actionGetUpdate_triggered()
     {
         /* Try to download the current schedule. Copy the file to the
            current working directory (which is "QDir().absFilePath(NULL)") */
-#if QT_VERSION < 0x040000
-        if(qurl.protocol() == QString("ftp")) {
-            UrlUpdateSchedule.copy(qurl.toString(), QDir().absFilePath(NULL));
-        }
-        else
-        {
-            QApplication::setOverrideCursor( Qt::waitCursor );
-            httpSocket = new QSocket(this);
-            connect(httpSocket, SIGNAL(connected()), this, SLOT(httpConnected()));
-            connect(httpSocket, SIGNAL(connectionClosed()), this, SLOT(httpDisconnected()));
-            connect(httpSocket, SIGNAL(error(int)), this, SLOT(httpError(int)));
-            connect(httpSocket, SIGNAL(readyRead()), this, SLOT(httpRead()));
-            int port = qurl.port();
-            if(port == -1)
-                port = 80;
-            httpSocket->connectToHost(qurl.host().utf8().data(), port);
-        }
-#else
         manager->get(QNetworkRequest(qurl));
-#endif
     }
 }
 
-#if QT_VERSION < 0x040000
-void StationsDlg::OnUrlFinished(QNetworkOperation* pNetwOp)
-{
-    /* Check that pointer points to valid object */
-    if (pNetwOp)
-    {
-        if (pNetwOp->state() == QNetworkProtocol::StFailed)
-        {
-            /* Something went wrong -> stop all network operations */
-            UrlUpdateSchedule.stop();
-
-            /* Notify the user of the failure */
-            QMessageBox::information(this, "Dream", badMessage, QMessageBox::Ok);
-        }
-
-        /* We are interested in the state of the final put function */
-        if (pNetwOp->operation() == QNetworkProtocol::OpPut)
-        {
-            if (pNetwOp->state() == QNetworkProtocol::StDone)
-            {
-                QDir d;
-                d.remove(DRMSchedule.schedFileName);
-                d.rename("TODO", DRMSchedule.schedFileName);
-                /* Notify the user that update was successful */
-                QMessageBox::information(this, "Dream", okMessage, QMessageBox::Ok);
-                /* Read updated ini-file */
-                LoadSchedule();
-                /* add last update information on menu item */
-                AddUpdateDateTime();
-            }
-        }
-    }
-}
-#else
 void StationsDlg::OnUrlFinished(QNetworkReply* reply)
 {
     if(reply->error()==QNetworkReply::NoError)
@@ -1138,7 +782,6 @@ void StationsDlg::OnUrlFinished(QNetworkReply* reply)
         QMessageBox::information(this, "Dream", badMessage, QMessageBox::Ok);
     }
 }
-#endif
 
 void CDRMSchedule::SetAnalogUrl()
 {
@@ -1218,12 +861,7 @@ void StationsDlg::showEvent(QShowEvent* e)
     QwtCounterFrequency->setValue(DRMReceiver.GetFrequency());
 
     bool ensmeter = false;
-#if QT_VERSION < 0x040000
-    if(pRemoteMenu && pRemoteMenu->menu()->isItemChecked(SMETER_MENU_ID))
-        ensmeter = true;
-#else
     ensmeter = actionEnable_S_Meter->isChecked();
-#endif
     if(ensmeter)
         EnableSMeter();
     else
@@ -1305,40 +943,12 @@ void StationsDlg::LoadSettings(const CSettings& Settings)
     /* S-meter settings */
     bool ensmeter = Settings.Get("Hamlib", "ensmeter", false);
 
-#if QT_VERSION < 0x040000
-    if(pRemoteMenu) pRemoteMenu->menu()->setItemChecked(SMETER_MENU_ID, ensmeter);
-#else
     actionEnable_S_Meter->setChecked(ensmeter);
-#endif
 
     bool showAll = Settings.Get("Stations Dialog", "showall", false);
     int iPrevSecs = Settings.Get("Stations Dialog", "preview", NUM_SECONDS_PREV_5MIN);
     DRMSchedule.SetSecondsPreview(iPrevSecs);
 
-#if QT_VERSION < 0x040000
-    /* Set stations in list view which are active right now */
-    pViewMenu->setItemChecked(1, showAll);
-
-    /* Set stations preview */
-    switch (iPrevSecs)
-    {
-    case NUM_SECONDS_PREV_5MIN:
-        pPreviewMenu->setItemChecked(1, TRUE);
-        break;
-
-    case NUM_SECONDS_PREV_15MIN:
-        pPreviewMenu->setItemChecked(2, TRUE);
-        break;
-
-    case NUM_SECONDS_PREV_30MIN:
-        pPreviewMenu->setItemChecked(3, TRUE);
-        break;
-
-    default: /* case 0, also takes care of out of value parameters */
-        pPreviewMenu->setItemChecked(0, TRUE);
-        break;
-    }
-#else
     if(showAll)
         actionShowAllStations->setChecked(true);
     else
@@ -1362,7 +972,7 @@ void StationsDlg::LoadSettings(const CSettings& Settings)
         actionDisabled->setChecked(true);
         break;
     }
-#endif
+
     /* get sorting and filtering behaviour */
     ERecMode eRecSM = DRMReceiver.GetReceiverMode();
     switch (eRecSM)
@@ -1401,27 +1011,22 @@ void StationsDlg::SaveSettings(CSettings& Settings)
         ColumnParamToStr(bDrmMode ? strColumnParamdrm : strColumnParamanalog);
     }
 
-#if QT_VERSION < 0x040000
-    Settings.Put("Hamlib", "ensmeter", (pRemoteMenu==NULL)?false:pRemoteMenu->menu()->isItemChecked(SMETER_MENU_ID));
-    Settings.Put("Stations Dialog", "showall", pViewMenu->isItemChecked(1));
-#else
     Settings.Put("Hamlib", "ensmeter", actionEnable_S_Meter->isChecked());
     Settings.Put("Stations Dialog", "showall", actionShowAllStations->isChecked());
-#endif
-    Settings.Put("Stations Dialog", "DRM URL", string(DRMSchedule.qurldrm.toString().TOUTF8()));
-    Settings.Put("Stations Dialog", "ANALOG URL", string(DRMSchedule.qurlanalog.toString().TOUTF8()));
+    Settings.Put("Stations Dialog", "DRM URL", string(DRMSchedule.qurldrm.toString().toUtf8().data()));
+    Settings.Put("Stations Dialog", "ANALOG URL", string(DRMSchedule.qurlanalog.toString().toUtf8().data()));
     Settings.Put("Stations Dialog", "sortcolumndrm", iSortColumndrm);
     Settings.Put("Stations Dialog", "sortascendingdrm", bCurrentSortAscendingdrm);
-    Settings.Put("Stations Dialog", "columnparamdrm", string(strColumnParamdrm.TOUTF8()));
+    Settings.Put("Stations Dialog", "columnparamdrm", string(strColumnParamdrm.toUtf8().data()));
     Settings.Put("Stations Dialog", "sortcolumnanalog", iSortColumnanalog);
     Settings.Put("Stations Dialog", "sortascendinganalog", bCurrentSortAscendinganalog);
-    Settings.Put("Stations Dialog", "columnparamanalog", string(strColumnParamanalog.TOUTF8()));
-    Settings.Put("Stations Dialog", "targetfilterdrm", string(DRMSchedule.targetFilterdrm.TOUTF8()));
-    Settings.Put("Stations Dialog", "countryfilterdrm", string(DRMSchedule.countryFilterdrm.TOUTF8()));
-    Settings.Put("Stations Dialog", "languagefilterdrm", string(DRMSchedule.languageFilterdrm.TOUTF8()));
-    Settings.Put("Stations Dialog", "targetfilteranalog", string(DRMSchedule.targetFilteranalog.TOUTF8()));
-    Settings.Put("Stations Dialog", "countryfilteranalog", string(DRMSchedule.countryFilteranalog.TOUTF8()));
-    Settings.Put("Stations Dialog", "languagefilteranalog", string(DRMSchedule.languageFilteranalog.TOUTF8()));
+    Settings.Put("Stations Dialog", "columnparamanalog", string(strColumnParamanalog.toUtf8().data()));
+    Settings.Put("Stations Dialog", "targetfilterdrm", string(DRMSchedule.targetFilterdrm.toUtf8().data()));
+    Settings.Put("Stations Dialog", "countryfilterdrm", string(DRMSchedule.countryFilterdrm.toUtf8().data()));
+    Settings.Put("Stations Dialog", "languagefilterdrm", string(DRMSchedule.languageFilterdrm.toUtf8().data()));
+    Settings.Put("Stations Dialog", "targetfilteranalog", string(DRMSchedule.targetFilteranalog.toUtf8().data()));
+    Settings.Put("Stations Dialog", "countryfilteranalog", string(DRMSchedule.countryFilteranalog.toUtf8().data()));
+    Settings.Put("Stations Dialog", "languagefilteranalog", string(DRMSchedule.languageFilteranalog.toUtf8().data()));
 
     /* Set window geometry data in DRMReceiver module */
     QRect WinGeom = geometry();
@@ -1442,15 +1047,9 @@ void StationsDlg::LoadFilters()
     ComboBoxFilterTarget->clear();
     ComboBoxFilterCountry->clear();
     ComboBoxFilterLanguage->clear();
-#if QT_VERSION < 0x040000
-    ComboBoxFilterTarget->insertStringList(DRMSchedule.ListTargets);
-    ComboBoxFilterCountry->insertStringList(DRMSchedule.ListCountries);
-    ComboBoxFilterLanguage->insertStringList(DRMSchedule.ListLanguages);
-#else
     ComboBoxFilterTarget->addItems(DRMSchedule.ListTargets);
     ComboBoxFilterCountry->addItems(DRMSchedule.ListCountries);
     ComboBoxFilterLanguage->addItems(DRMSchedule.ListLanguages);
-#endif
 
     QString targetFilter,countryFilter,languageFilter;
     if(DRMSchedule.GetSchedMode()==CDRMSchedule::SM_DRM)
@@ -1465,30 +1064,9 @@ void StationsDlg::LoadFilters()
         countryFilter=DRMSchedule.countryFilteranalog;
         languageFilter=DRMSchedule.languageFilteranalog;
     }
-#if QT_VERSION < 0x040000
-    if(targetFilter!="") {
-        for(int i=0; i<ComboBoxFilterTarget->count(); i++) {
-            if(ComboBoxFilterTarget->text(i) == targetFilter)
-                ComboBoxFilterTarget->setCurrentItem(i);
-        }
-    }
-    if(countryFilter!="") {
-        for(int i=0; i<ComboBoxFilterCountry->count(); i++) {
-            if(ComboBoxFilterCountry->text(i) == countryFilter)
-                ComboBoxFilterCountry->setCurrentItem(i);
-        }
-    }
-    if(languageFilter!="") {
-        for(int i=0; i<ComboBoxFilterLanguage->count(); i++) {
-            if(ComboBoxFilterLanguage->text(i) == languageFilter)
-                ComboBoxFilterLanguage->setCurrentItem(i);
-        }
-    }
-#else
     ComboBoxFilterTarget->setCurrentIndex(ComboBoxFilterTarget->findText(targetFilter));
     ComboBoxFilterCountry->setCurrentIndex(ComboBoxFilterCountry->findText(countryFilter));
     ComboBoxFilterLanguage->setCurrentIndex(ComboBoxFilterLanguage->findText(languageFilter));
-#endif
 }
 
 void StationsDlg::LoadSchedule()
@@ -1505,16 +1083,6 @@ void StationsDlg::LoadSchedule()
     DRMSchedule.LoadSchedule();
 
     int i;
-#if QT_VERSION < 0x040000
-    // delete all previous list items
-    for (i = 0; i < int(vecpListItems.size()); i++)
-    {
-        if (vecpListItems[i] != NULL)
-            delete vecpListItems[i];
-    }
-    // fill the vector just once, then add and remove items from the View
-    vecpListItems.resize( DRMSchedule.GetStationNumber());
-#endif
 
     for (i = 0; i < DRMSchedule.GetStationNumber(); i++)
     {
@@ -1534,21 +1102,6 @@ void StationsDlg::LoadSchedule()
         QString strTimes = QString().sprintf("%04d-%04d", station.StartTime(), station.StopTime());
 
         /* Generate new list station with all necessary column entries */
-#if QT_VERSION < 0x040000
-        MyListViewItem* item = new MyListViewItem(ListViewStations,
-                station.strName     /* name */,
-                strTimes            /* time */,
-                QString().setNum(station.iFreq) /* freq. */,
-                strPower            /* power */,
-                station.strTarget   /* target */,
-                station.strCountry  /* country */,
-                station.strSite     /* site */,
-                station.strLanguage /* language */);
-        /* Show list of days */
-        item->setText(8, station.strDaysShow);
-
-        vecpListItems[i] = item;
-#else
         QTreeWidgetItem* item = new CaseInsensitiveTreeWidgetItem(ListViewStations);
         item->setText(1, station.strName);
         item->setText(2, strTimes /* time */);
@@ -1563,7 +1116,6 @@ void StationsDlg::LoadSchedule()
         item->setTextAlignment(2, Qt::AlignRight | Qt::AlignVCenter);
         item->setTextAlignment(3, Qt::AlignRight | Qt::AlignVCenter);
         item->setTextAlignment(4, Qt::AlignRight | Qt::AlignVCenter);
-#endif
     }
     int c;
     bool b;
@@ -1577,11 +1129,7 @@ void StationsDlg::LoadSchedule()
         b = bCurrentSortAscendinganalog;
         c = iSortColumnanalog;
     }
-#if QT_VERSION < 0x040000
-    ListViewStations->setSorting(c, b);
-#else
     ListViewStations->sortByColumn(c, b ? Qt::AscendingOrder : Qt::DescendingOrder);
-#endif
     LoadFilters();
 
     /* Restore columns settings */
@@ -1595,12 +1143,7 @@ void StationsDlg::LoadSchedule()
 
 void StationsDlg::ClearStationsView()
 {
-#if QT_VERSION < 0x040000
-    while(ListViewStations->childCount()>0)
-        ListViewStations->takeItem(ListViewStations->firstChild());
-#else
     ListViewStations->clear();
-#endif
 }
 
 void StationsDlg::SetStationsView()
@@ -1609,64 +1152,6 @@ void StationsDlg::SetStationsView()
     ListItemsMutex.lock();
 
     bool bShowAll = showAll();
-#if QT_VERSION < 0x040000
-    /* Stop the timer and disable the list */
-
-    const _BOOLEAN bListFocus = ListViewStations->hasFocus();
-
-    ListViewStations->setUpdatesEnabled(FALSE);
-    ListViewStations->setEnabled(FALSE);
-    bool bListHastChanged = true; // TODO optimise if not changed
-
-    ClearStationsView();
-
-    /* Add new item for each visible station in list view */
-    for (size_t i = 0; i < vecpListItems.size(); i++)
-    {
-
-        MyListViewItem* item = vecpListItems[i];
-        /* Check, if station is currently transmitting. If yes, set special pixmap */
-        Station::EState iState = DRMSchedule.GetState(i);
-        if(DRMSchedule.CheckFilter(i) && (bShowAll || (iState != Station::IS_INACTIVE)))
-        {
-            ListViewStations->insertItem(item);
-            switch (iState)
-            {
-            case Station::IS_ACTIVE:
-                item->setPixmap(0, BitmCubeGreen);
-                break;
-            case Station::IS_PREVIEW:
-                item->setPixmap(0, BitmCubeOrange);
-                break;
-            case Station::IS_SOON_INACTIVE:
-                item->setPixmap(0, BitmCubePink);
-                break;
-            case Station::IS_INACTIVE:
-                item->setPixmap(0, BitmCubeRed);
-                break;
-            default:
-                item->setPixmap(0, BitmCubeRed);
-                break;
-            }
-        }
-    }
-
-    /* Sort the list if items have changed */
-    if (bListHastChanged == TRUE)
-        ListViewStations->sort();
-
-
-    /* Start the timer and enable the list */
-    ListViewStations->setUpdatesEnabled(TRUE);
-    ListViewStations->setEnabled(TRUE);
-
-    /* to update the scrollbars */
-    ListViewStations->triggerUpdate();
-
-    if (bListFocus == TRUE)
-        ListViewStations->setFocus();
-
-#else
     ListViewStations->setSortingEnabled(false);
     for (int i = 0; i < ListViewStations->topLevelItemCount(); i++)
     {
@@ -1710,7 +1195,6 @@ void StationsDlg::SetStationsView()
     ListViewStations->setSortingEnabled(true);
     ListViewStations->sortItems(ListViewStations->sortColumn(), GetSortAscending()?Qt::AscendingOrder:Qt::DescendingOrder);
     ListViewStations->setFocus();
-#endif
     ListItemsMutex.unlock();
     TimerList.start(GUI_TIMER_LIST_VIEW_STAT);
 }
@@ -1760,22 +1244,14 @@ _BOOLEAN StationsDlg::GetSortAscending()
 
 void StationsDlg::ColumnParamFromStr(const QString& strColumnParam)
 {
-#if QT_VERSION < 0x040000
-    QStringList list(QStringList::split(QChar('|'), strColumnParam));
-#else
     QStringList list(strColumnParam.split(QChar('|')));
-#endif
     const int n = list.count(); /* width and position */
     if (n == 2)
     {
         for (int j = 0; j < n; j++)
         {
             int c = ListViewStations->header()->count();
-#if QT_VERSION < 0x040000
-            QStringList values(QStringList::split(QChar(','), list[j]));
-#else
             QStringList values(list[j].split(QChar(',')));
-#endif
             const int lc = (int)values.count();
             if (lc < c)
                 c = lc;
@@ -1785,23 +1261,15 @@ void StationsDlg::ColumnParamFromStr(const QString& strColumnParam)
                 if (!j) /* width*/
                     ListViewStations->header()->resizeSection(i, v);
                 else /* position */
-#if QT_VERSION < 0x040000
-                    ListViewStations->header()->moveSection(i, v);
-#else
                     ListViewStations->header()->moveSection(ListViewStations->header()->visualIndex(i), v);
-#endif
             }
         }
     }
     else
     {
-#if QT_VERSION >= 0x040200
         ListViewStations->header()->resizeSections(QHeaderView::ResizeToContents);
         ListViewStations->header()->resizeSections(QHeaderView::Interactive);
-#endif
-#if QT_VERSION >= 0x040000
         ListViewStations->header()->resizeSection(0, ListViewStations->header()->minimumSectionSize());
-#endif
     }
 }
 
@@ -1818,11 +1286,7 @@ void StationsDlg::ColumnParamToStr(QString& strColumnParam)
             if (!j) /* width*/
                 v = ListViewStations->header()->sectionSize(i);
             else /* position */
-#if QT_VERSION < 0x040000
-                v = ListViewStations->header()->mapToIndex(i);
-#else
                 v = ListViewStations->header()->visualIndex(i);
-#endif
             QString strValue;
             strValue.setNum(v);
             strColumnParam += strValue;
@@ -1864,58 +1328,26 @@ void StationsDlg::SetFrequencyFromGUI(int iFreq)
     }
 }
 
-#if QT_VERSION < 0x040000
-void StationsDlg::OnListItemClicked(QListViewItem* item)
-{
-    /* Check that it is a valid item (!= 0) */
-    if (item)
-    {
-        /* Third text of list view item is frequency -> text(2)
-           Set value in frequency counter control QWT. Setting this parameter
-           will emit a "value changed" signal which sets the new frequency.
-           Therefore, here is no call to "SetFrequency()" needed.*/
-        SetFrequencyFromGUI(QString(item->text(2)).toInt());
-    }
-}
-#endif
-
 void StationsDlg::on_ListViewStations_itemSelectionChanged()
 {
-#if QT_VERSION >= 0x040000
     QList<QTreeWidgetItem *> items =  ListViewStations->selectedItems();
     if(items.size()==1)
     {
         SetFrequencyFromGUI(QString(items.first()->text(3)).toInt());
     }
-#endif
 }
 
 void StationsDlg::OnSMeterMenu(int iID)
 {
-#if QT_VERSION < 0x040000
-    if (pRemoteMenu->menu()->isItemChecked(iID))
-    {
-        pRemoteMenu->menu()->setItemChecked(iID, FALSE);
-        DisableSMeter();
-    }
-    else
-    {
-        pRemoteMenu->menu()->setItemChecked(iID, TRUE);
-        EnableSMeter();
-    }
-#else
     (void)iID;
-#endif
 }
 
 void StationsDlg::OnSMeterMenu()
 {
-#if QT_VERSION >= 0x040000
     if(actionEnable_S_Meter->isChecked())
         EnableSMeter();
     else
         DisableSMeter();
-#endif
 }
 
 void StationsDlg::EnableSMeter()
@@ -1983,26 +1415,14 @@ void StationsDlg::AddWhatsThisHelp()
            "front-ends controlled by hamlib support this feature. If the s-meter "
            "is not available, the controls are disabled.");
 
-#if QT_VERSION < 0x040000
-    QWhatsThis::add(ListViewStations, strList);
-    QWhatsThis::add(QwtCounterFrequency, strCounter);
-    QWhatsThis::add(TextLabelUTCTime, strTime);
-    QWhatsThis::add(TextLabelSMeter, strSMeter);
-    QWhatsThis::add(ProgrSigStrength, strSMeter);
-#else
     ListViewStations->setWhatsThis(strList);
     QwtCounterFrequency->setWhatsThis(strCounter);
     TextLabelUTCTime->setWhatsThis(strTime);
     TextLabelSMeter->setWhatsThis(strSMeter);
     ProgrSigStrength->setWhatsThis(strSMeter);
-#endif
 }
 
 _BOOLEAN StationsDlg::showAll()
 {
-#if QT_VERSION < 0x040000
-    return pViewMenu->isItemChecked(1);
-#else
     return actionShowAllStations->isChecked();
-#endif
 }

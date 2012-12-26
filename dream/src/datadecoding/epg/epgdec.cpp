@@ -606,15 +606,9 @@ static void attribute(map<string,string>& out, _BYTE element_tag, tag_length_val
     string name = decode_attribute_name(tab);
     string value;
     if(tab.decode == enum_attr) {
-		// TODO if MSVC6 has ptrdiff_t then remove the int version.
-#if defined(_MSC_VER) && (_MSC_VER < 1400)
-		int index = tlv.value[0];
-		int num_vals = reinterpret_cast<int>(tab.vals[0]);
-#else
 		/* needed for 64 bit compatibility */
 		ptrdiff_t index = tlv.value[0];
 		ptrdiff_t num_vals = (tab.vals[0] - (const char*)0);
-#endif
 		if(index<=num_vals && index>0)
 			value = tab.vals[index];
 		else

@@ -77,7 +77,7 @@ CPlotManager::UpdateParamHistories(ERecState eReceiverState)
         _REAL rMeanDelay = (Parameters.rMinDelay +	Parameters.rMaxDelay) / 2.0;
         Parameters.Unlock();
 
-#ifdef USE_QT_GUI
+#ifdef QT_CORE_LIB
         MutexHist.lock();
 #endif
 
@@ -116,7 +116,7 @@ CPlotManager::UpdateParamHistories(ERecState eReceiverState)
             rSumSNRHist = (_REAL) 0.0;
         }
 
-#ifdef USE_QT_GUI
+#ifdef QT_CORE_LIB
         MutexHist.unlock();
 #endif
     }
@@ -137,7 +137,7 @@ CPlotManager::UpdateParamHistoriesRSIIn()
     _REAL rRdop = Parameters.rRdop;
     Parameters.Unlock();
 
-#ifdef USE_QT_GUI
+#ifdef QT_CORE_LIB
     MutexHist.lock();
 #endif
 
@@ -156,7 +156,7 @@ CPlotManager::UpdateParamHistoriesRSIIn()
     rSumDopplerHist = (_REAL) 0.0;
     rSumSNRHist = (_REAL) 0.0;
 
-#ifdef USE_QT_GUI
+#ifdef QT_CORE_LIB
     MutexHist.unlock();
 #endif
 }
@@ -182,7 +182,7 @@ CPlotManager::GetFreqSamOffsHist(CVector < _REAL > &vecrFreqOffs,
     vecrScale.Init(LEN_HIST_PLOT_SYNC_PARMS, (_REAL) 0.0);
 
     /* Lock resources */
-#ifdef USE_QT_GUI
+#ifdef QT_CORE_LIB
     MutexHist.lock();
 #endif
 
@@ -195,7 +195,7 @@ CPlotManager::GetFreqSamOffsHist(CVector < _REAL > &vecrFreqOffs,
         vecrScale[i] = (i - LEN_HIST_PLOT_SYNC_PARMS + 1) * rTs;
 
     /* Release resources */
-#ifdef USE_QT_GUI
+#ifdef QT_CORE_LIB
     MutexHist.unlock();
 #endif
 }
@@ -220,7 +220,7 @@ CPlotManager::GetDopplerDelHist(CVector < _REAL > &vecrLenIR,
     Parameters.Unlock();
 
     /* Lock resources */
-#ifdef USE_QT_GUI
+#ifdef QT_CORE_LIB
     MutexHist.lock();
 #endif
 
@@ -234,7 +234,7 @@ CPlotManager::GetDopplerDelHist(CVector < _REAL > &vecrLenIR,
         vecrScale[i] = (i - LEN_HIST_PLOT_SYNC_PARMS + 1) * rDRMFrameDur / 60;
 
     /* Release resources */
-#ifdef USE_QT_GUI
+#ifdef QT_CORE_LIB
     MutexHist.unlock();
 #endif
 }
@@ -258,7 +258,7 @@ CPlotManager::GetSNRHist(CVector < _REAL > &vecrSNR,
     vecrScale.Init(LEN_HIST_PLOT_SYNC_PARMS, (_REAL) 0.0);
 
     /* Lock resources */
-#ifdef USE_QT_GUI
+#ifdef QT_CORE_LIB
     MutexHist.lock();
 #endif
 
@@ -277,7 +277,7 @@ CPlotManager::GetSNRHist(CVector < _REAL > &vecrSNR,
     }
 
     /* Release resources */
-#ifdef USE_QT_GUI
+#ifdef QT_CORE_LIB
     MutexHist.unlock();
 #endif
 }

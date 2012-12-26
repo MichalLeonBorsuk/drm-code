@@ -46,19 +46,11 @@
 #include <qlayout.h>
 #include <qprogressbar.h>
 #include <qcombobox.h>
-
-#if QT_VERSION < 0x040000
-# include "qt2/DRMPlot.h"
-# include <qlistbox.h>
-  /* This include is for setting the progress bar style */
-# include <qmotifstyle.h>
-#else
-# include "DRMPlot.h"
-# include <QWhatsThis>
-# include <QDateTime>
-# include <QCloseEvent>
-# include <qwt_plot_layout.h>
-#endif
+#include "DRMPlot.h"
+#include <QWhatsThis>
+#include <QDateTime>
+#include <QCloseEvent>
+#include <qwt_plot_layout.h>
 
 /* Implementation *************************************************************/
 AnalogDemDlg::AnalogDemDlg(CDRMReceiver& NDRMR, CSettings& NSettings,
@@ -75,42 +67,6 @@ AnalogDemDlg::AnalogDemDlg(CDRMReceiver& NDRMR, CSettings& NSettings,
 	/* Set help text for the controls */
 	AddWhatsThisHelp();
 
-#if QT_VERSION < 0x040000
-	/* Set Menu ***************************************************************/
-	/* View menu ------------------------------------------------------------ */
-	QPopupMenu* EvalWinMenu = new QPopupMenu(this);
-	CHECK_PTR(EvalWinMenu);
-	EvalWinMenu->insertItem(tr("S&tations Dialog..."), this,
-		SIGNAL(ViewStationsDlg()), CTRL+Key_T);
-	EvalWinMenu->insertItem(tr("&Live Schedule Dialog..."), this,
-		SIGNAL(ViewLiveScheduleDlg()), CTRL+Key_L);
-	EvalWinMenu->insertSeparator();
-	EvalWinMenu->insertItem(tr("E&xit"), this, SLOT(close()), CTRL+Key_Q);
-
-	/* Settings menu  ------------------------------------------------------- */
-	QPopupMenu* pSettingsMenu = new QPopupMenu(this);
-	CHECK_PTR(pSettingsMenu);
-	pSettingsMenu->insertItem(tr("&DRM (digital)"), this,
-		SLOT(OnSwitchToDRM()), CTRL+Key_D);
-	pSettingsMenu->insertItem(tr("&FM (analog)"), this,
-		SLOT(OnSwitchToFM()), CTRL+Key_F);
-	pSettingsMenu->insertItem(tr("New &AM Acquisition"), this,
-		SIGNAL(NewAMAcquisition()), CTRL+Key_A);
-	pSettingsMenu->insertSeparator();
-	pSettingsMenu->insertItem(tr("&Sound Card Selection"),
-		new CSoundCardSelMenu(DRMReceiver, this));
-
-	/* Main menu bar -------------------------------------------------------- */
-	QMenuBar* pMenu = new QMenuBar(this);
-	CHECK_PTR(pMenu);
-	pMenu->insertItem(tr("&View"), EvalWinMenu);
-	pMenu->insertItem(tr("&Settings"), pSettingsMenu);
-	pMenu->insertItem(tr("&?"), new CDreamHelpMenu(this));
-	pMenu->setSeparator(QMenuBar::InWindowsStyle);
-
-	/* Now tell the layout about the menu */
-	AnalogDemDlgBaseLayout->setMenuBar(pMenu);
-#else
 	pFileMenu = new CFileMenu(DRMReceiver, this, menu_View);
 	connect(action_Stations_Dialog, SIGNAL(triggered()), this, SIGNAL(ViewStationsDlg()));
 	connect(action_Live_Schedule_Dialog, SIGNAL(triggered()), this, SIGNAL(ViewLiveScheduleDlg()));
@@ -125,15 +81,10 @@ AnalogDemDlg::AnalogDemDlg(CDRMReceiver& NDRMR, CSettings& NSettings,
 	connect(actionWhats_This, SIGNAL(triggered()), this, SLOT(on_actionWhats_This()));
 	SliderBandwidth->setTickPosition(QSlider::TicksBothSides);
 	MainPlot = new CDRMPlot(NULL, plot);
-#endif
 
 	/* Init main plot */
 	bool waterfall = Settings.Get("AM Dialog", "waterfall", false);
-#if QT_VERSION < 0x040000
-	ButtonWaterfall->setOn(waterfall);
-#else
 	ButtonWaterfall->setChecked(waterfall);
-#endif
 	if(MainPlot)
 	{
 		MainPlot->SetRecObj(&DRMReceiver);
@@ -145,20 +96,11 @@ AnalogDemDlg::AnalogDemDlg(CDRMReceiver& NDRMR, CSettings& NSettings,
 	QString ptt = tr("Click on the plot to set the demodulation frequency");
 	if(MainPlot)
 	{
-#if QT_VERSION < 0x040000
-		MainPlot->setMargin(1);
-        QToolTip::add(MainPlot, ptt);
-#else
-        MainPlot->plot->setToolTip(ptt);
-#endif
+		MainPlot->plot->setToolTip(ptt);
 	}
 
 	SliderBandwidth->setRange(0, DRMReceiver.GetParameters()->GetSigSampleRate() / 2);
-#if QT_VERSION < 0x040000
-	SliderBandwidth->setTickmarks(QSlider::Both);
-#else
 	SliderBandwidth->setTickPosition(QSlider::TicksBothSides);
-#endif
 	SliderBandwidth->setTickInterval(1000); /* Each kHz a tick */
 	SliderBandwidth->setPageStep(1000); /* Hz */
 
@@ -192,21 +134,12 @@ AnalogDemDlg::AnalogDemDlg(CDRMReceiver& NDRMR, CSettings& NSettings,
 		this, SLOT(OnChartxAxisValSet(double)));
 
 	/* Button groups */
-#if QT_VERSION < 0x040000
-	connect(ButtonGroupDemodulation, SIGNAL(clicked(int)),
-		this, SLOT(OnRadioDemodulation(int)));
-	connect(ButtonGroupAGC, SIGNAL(clicked(int)),
-		this, SLOT(OnRadioAGC(int)));
-	connect(ButtonGroupNoiseReduction, SIGNAL(clicked(int)),
-		this, SLOT(OnRadioNoiRed(int)));
-#else
 	connect(ButtonGroupDemodulation, SIGNAL(buttonClicked(int)),
 		this, SLOT(OnRadioDemodulation(int)));
 	connect(ButtonGroupAGC, SIGNAL(buttonClicked(int)),
 		this, SLOT(OnRadioAGC(int)));
 	connect(ButtonGroupNoiseReduction, SIGNAL(buttonClicked(int)),
 		this, SLOT(OnRadioNoiRed(int)));
-#endif
 
 	/* Slider */
 	connect(SliderBandwidth, SIGNAL(valueChanged(int)),
@@ -252,9 +185,7 @@ void AnalogDemDlg::switchEvent()
 {
 	/* Put initialization code on mode switch here */
 	SliderBandwidth->setRange(0, DRMReceiver.GetParameters()->GetSigSampleRate() / 2);
-#if QT_VERSION >= 0x040000
 	pFileMenu->UpdateMenu();
-#endif
 }
 
 void AnalogDemDlg::showEvent(QShowEvent* e)
@@ -279,19 +210,15 @@ void AnalogDemDlg::showEvent(QShowEvent* e)
 	else
 		AMSSDlg.hide();
 
-#if QT_VERSION >= 0x040000
     /* Notify the MainPlot of showEvent */
     if(MainPlot) MainPlot->activate();
-#endif
 }
 
 void AnalogDemDlg::hideEvent(QHideEvent* e)
 {
 	EVENT_FILTER(e);
-#if QT_VERSION >= 0x040000  
     /* Notify the MainPlot of hideEvent */
     if(MainPlot) MainPlot->deactivate();
-#endif
 
 	/* stop real-time timers */
 	Timer.stop();
@@ -310,11 +237,7 @@ void AnalogDemDlg::hideEvent(QHideEvent* e)
 	s.iWSize = WinGeom.width();
 	Settings.Put("AM Dialog", s);
 	bool waterfall;
-#if QT_VERSION < 0x040000
-	waterfall = ButtonWaterfall->state() == QButton::On;
-#else
 	waterfall = ButtonWaterfall->isChecked();
-#endif
 	Settings.Put("AM Dialog", "waterfall", waterfall);
 }
 
@@ -514,17 +437,13 @@ void AnalogDemDlg::OnTimerPLLPhaseDial()
 
 void AnalogDemDlg::OnTimerClose()
 {
-#if QT_VERSION >= 0x040000
 	if(DRMReceiver.GetParameters()->eRunState == CParameter::STOPPED)
 		close();
-#endif
 }
 
 void AnalogDemDlg::OnRadioDemodulation(int iID)
 {
-#if QT_VERSION >= 0x040000
 	iID = -iID - 2; // TODO understand why
-#endif
 	/* DRMReceiver takes care of setting appropriate filter BW */
 	switch (iID)
 	{
@@ -555,9 +474,7 @@ void AnalogDemDlg::OnRadioDemodulation(int iID)
 
 void AnalogDemDlg::OnRadioAGC(int iID)
 {
-#if QT_VERSION >= 0x040000
 	iID = -iID - 2; // TODO understand why
-#endif
 	switch (iID)
 	{
 	case 0:
@@ -580,9 +497,7 @@ void AnalogDemDlg::OnRadioAGC(int iID)
 
 void AnalogDemDlg::OnRadioNoiRed(int iID)
 {
-#if QT_VERSION >= 0x040000
 	iID = -iID - 2; // TODO understand why
-#endif
 	switch (iID)
 	{
 	case 0:
@@ -641,21 +556,12 @@ void AnalogDemDlg::OnCheckSaveAudioWAV()
 	{
 		/* Show "save file" dialog */
 		QString strFileName =
-#if QT_VERSION < 0x040000
-			QFileDialog::getSaveFileName("DreamOut.wav", "*.wav", this);
-#else
 			QFileDialog::getSaveFileName(this, tr("Save Audio"), "DreamOut.wav", tr("Wav (*.wav)"));
-#endif
 		/* Check if user not hit the cancel button */
 		if (!strFileName.isEmpty())
 		{
-#if QT_VERSION < 0x040000
-			DRMReceiver.GetWriteData()->
-				StartWriteWaveFile(strFileName.latin1());
-#else
 			DRMReceiver.GetWriteData()->
 				StartWriteWaveFile(strFileName.toLatin1().data());
-#endif
 		}
 		else
 		{
@@ -685,11 +591,7 @@ void AnalogDemDlg::OnChartxAxisValSet(double dVal)
 void AnalogDemDlg::OnButtonWaterfall()
 {
 	/* Toggle between normal spectrum plot and waterfall spectrum plot */
-#if QT_VERSION < 0x040000
-	if (MainPlot && ButtonWaterfall->state() == QButton::On)
-#else
 	if (MainPlot && ButtonWaterfall->isChecked())
-#endif
 		MainPlot->SetupChart(CDRMPlot::INP_SPEC_WATERF);
 	else
 		MainPlot->SetupChart(CDRMPlot::INPUT_SIG_PSD_ANALOG);
@@ -793,44 +695,6 @@ void AnalogDemDlg::AddWhatsThisHelp()
 		"If the Auto Frequency Acquisition is enabled, the largest peak "
 		"near the curser is selected.");
 
-#if QT_VERSION < 0x040000
-	QWhatsThis::add(ButtonGroupNoiseReduction, strNoiseReduction);
-	QWhatsThis::add(RadioButtonNoiRedOff, strNoiseReduction);
-	QWhatsThis::add(RadioButtonNoiRedLow, strNoiseReduction);
-	QWhatsThis::add(RadioButtonNoiRedMed, strNoiseReduction);
-	QWhatsThis::add(RadioButtonNoiRedHigh, strNoiseReduction);
-
-	QWhatsThis::add(ButtonGroupAGC, strAGC);
-	QWhatsThis::add(RadioButtonAGCOff, strAGC);
-	QWhatsThis::add(RadioButtonAGCSlow, strAGC);
-	QWhatsThis::add(RadioButtonAGCMed, strAGC);
-	QWhatsThis::add(RadioButtonAGCFast, strAGC);
-
-	QWhatsThis::add(ButtonGroupBW, strFilterBW);
-	QWhatsThis::add(TextLabelBandWidth, strFilterBW);
-	QWhatsThis::add(SliderBandwidth, strFilterBW);
-
-	QWhatsThis::add(ButtonGroupDemodulation, strDemodType);
-	QWhatsThis::add(RadioButtonDemAM, strDemodType);
-	QWhatsThis::add(RadioButtonDemLSB, strDemodType);
-	QWhatsThis::add(RadioButtonDemUSB, strDemodType);
-	QWhatsThis::add(RadioButtonDemCW, strDemodType);
-	QWhatsThis::add(RadioButtonDemFM, strDemodType);
-
-	QWhatsThis::add(CheckBoxMuteAudio, strCheckBoxMuteAudio);
-
-	QWhatsThis::add(CheckBoxSaveAudioWave, strCheckBoxSaveAudioWave);
-
-	QWhatsThis::add(TextFreqOffset, strTextFreqOffset);
-
-	QWhatsThis::add(GroupBoxPLL, strPLL);
-	QWhatsThis::add(CheckBoxPLL, strPLL);
-	QWhatsThis::add(PhaseDial, strPLL);
-	QWhatsThis::add(TextLabelPhaseOffset, strPLL);
-
-	QWhatsThis::add(GroupBoxAutoFreqAcq, strAutoFreqAcqu);
-	QWhatsThis::add(CheckBoxAutoFreqAcq, strAutoFreqAcqu);
-#else
     RadioButtonNoiRedOff->setWhatsThis(strNoiseReduction);
     RadioButtonNoiRedLow->setWhatsThis(strNoiseReduction);
     RadioButtonNoiRedMed->setWhatsThis(strNoiseReduction);
@@ -859,7 +723,6 @@ void AnalogDemDlg::AddWhatsThisHelp()
     groupBoxAGC->setWhatsThis(strAGC);
     groupBoxDemodulation->setWhatsThis(strDemodType);
     groupBoxBW->setWhatsThis(strFilterBW);
-#endif
 }
 
 
@@ -931,9 +794,6 @@ CAMSSDlg::CAMSSDlg(CDRMReceiver& NDRMR, CSettings& NSettings,
 		this, SLOT(OnTimerPLLPhaseDial()));
 
 	/* set the progress bar style */
-#if QT_VERSION < 0x040000
-	ProgressBarAMSS->setStyle( new QMotifStyle() );
-#endif
 
 }
 
@@ -977,11 +837,7 @@ void CAMSSDlg::OnTimer()
 	{
 		/* Service label (UTF-8 encoded string -> convert) */
 		TextAMSSServiceLabel->setText(QString().fromUtf8(
-#if QT_VERSION < 0x040000
-			QCString(Parameters.Service[0].strLabel.c_str())
-#else
 			Parameters.Service[0].strLabel.c_str()
-#endif
 		));
 	}
 	else
@@ -1038,11 +894,7 @@ void CAMSSDlg::OnTimer()
 	if (iNumAltServices != 0)
 	{
 		QString val = QString().setNum((long) iNumAltServices);
-#if QT_VERSION < 0x040000
-		ListBoxAMSSAFSList->insertItem(val, 10);
-#else
 		ListBoxAMSSAFSList->insertItem(10, val);
-#endif
 
 		ListBoxAMSSAFSList->clear();
 		ListBoxAMSSAFSList->setEnabled(TRUE);
@@ -1103,15 +955,9 @@ void CAMSSDlg::OnTimer()
 				{
 					freqEntry += " ID:";
 					freqEntry +=
-#if QT_VERSION < 0x040000
-						QString().setNum((long) Parameters.
-						AltFreqSign.vecOtherServices[i].
-						iServiceID, 16).upper();
-#else
 						QString().setNum((long) Parameters.
 						AltFreqSign.vecOtherServices[i].
 						iServiceID, 16).toUpper();
-#endif
 				}
 				break;
 
@@ -1135,30 +981,18 @@ void CAMSSDlg::OnTimer()
 				{
 					freqEntry += " ECC+PI:";
 					freqEntry +=
-#if QT_VERSION < 0x040000
-						QString().setNum((long) Parameters.
-						AltFreqSign.vecOtherServices[i].
-						iServiceID, 16).upper();
-#else
 						QString().setNum((long) Parameters.
 						AltFreqSign.vecOtherServices[i].
 						iServiceID, 16).toUpper();
-#endif
 				}
 
 				if (iSystemID == 4)
 				{
 					freqEntry += " PI:";
 					freqEntry +=
-#if QT_VERSION < 0x040000
-						QString().setNum((long) Parameters.
-						AltFreqSign.vecOtherServices[i].
-						iServiceID, 16).upper();
-#else
 						QString().setNum((long) Parameters.
 						AltFreqSign.vecOtherServices[i].
 						iServiceID, 16).toUpper();
-#endif
 				}
 				break;
 
@@ -1182,30 +1016,18 @@ void CAMSSDlg::OnTimer()
 				{
 					freqEntry += " ECC+PI:";
 					freqEntry +=
-#if QT_VERSION < 0x040000
-						QString().setNum((long) Parameters.
-						AltFreqSign.vecOtherServices[i].
-						iServiceID, 16).upper();
-#else
 						QString().setNum((long) Parameters.
 						AltFreqSign.vecOtherServices[i].
 						iServiceID, 16).toUpper();
-#endif
 				}
 
 				if (iSystemID == 7)
 				{
 					freqEntry += " PI:";
 					freqEntry +=
-#if QT_VERSION < 0x040000
-						QString().setNum((long) Parameters.
-						AltFreqSign.vecOtherServices[i].
-						iServiceID, 16).upper();
-#else
 						QString().setNum((long) Parameters.
 						AltFreqSign.vecOtherServices[i].
 						iServiceID, 16).toUpper();
-#endif
 				}
 				break;
 
@@ -1223,12 +1045,7 @@ void CAMSSDlg::OnTimer()
 			{
 				freqEntry += " (alt service)";
 			}
-
-#if QT_VERSION < 0x040000
-			ListBoxAMSSAFSList->insertItem(freqEntry, 0);
-#else
 			ListBoxAMSSAFSList->insertItem(0, freqEntry);
-#endif
 		}
 	}
 	else
@@ -1258,13 +1075,8 @@ void CAMSSDlg::OnTimer()
 			TextAMSSLanguage->setText(QString(strTableLanguageCode[DRMReceiver.
 				GetParameters()->Service[0].iLanguage].c_str()));
 
-#if QT_VERSION < 0x040000
-			TextAMSSServiceID->setText("ID:" + QString().setNum(
-				(long) Parameters.Service[0].iServiceID, 16).upper());
-#else
 			TextAMSSServiceID->setText("ID:" + QString().setNum(
 				(long) Parameters.Service[0].iServiceID, 16).toUpper());
-#endif
 
 			TextAMSSAMCarrierMode->setText(QString(strTableAMSSCarrierMode[DRMReceiver.
 				GetParameters()->iAMSSCarrierMode].c_str()));
@@ -1281,11 +1093,7 @@ void CAMSSDlg::OnTimer()
 
 	int val = DRMReceiver.GetAMSSDecode()->GetPercentageDataEntityGroupComplete();
 	Parameters.Unlock();
-#if QT_VERSION < 0x040000
-	ProgressBarAMSS->setProgress(val);
-#else
 	ProgressBarAMSS->setValue(val);
-#endif
 }
 
 void CAMSSDlg::OnTimerPLLPhaseDial()

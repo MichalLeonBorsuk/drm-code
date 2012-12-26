@@ -45,22 +45,13 @@
 #include <qmessagebox.h>
 #include <qfontdialog.h>
 #include <qfont.h>
-#if QT_VERSION < 0x040000
-# include <qpopupmenu.h>
-# include "MultimediaDlgbase.h"
-#else
-# include <QMenu>
-# include <QDialog>
-# include "ui_MultimediaDlgbase.h"
-#endif
+#include <QMenu>
+#include <QDialog>
+#include "ui_MultimediaDlgbase.h"
 
 #include "MultColorLED.h"
 #include "DialogUtil.h"
 #include "../GlobalDefinitions.h"
-
-#ifdef HAVE_LIBFREEIMAGE
-# include <FreeImage.h>
-#endif
 
 #include "../DrmReceiver.h"
 #include "../datadecoding/DABMOT.h"
@@ -103,7 +94,6 @@ protected:
 	int				iNumHist;
 };
 
-#if QT_VERSION >= 0x040000
 class MultimediaDlgBase : public QMainWindow, public Ui_MultimediaDlgBase
 {
 public:
@@ -112,7 +102,7 @@ public:
 		QMainWindow(parent,name,f){(void)name;(void)modal;setupUi(this);}
 	virtual ~MultimediaDlgBase() {}
 };
-#endif
+
 class MultimediaDlg : public MultimediaDlgBase
 {
 	Q_OBJECT
@@ -132,11 +122,7 @@ protected:
 
 	QTimer					Timer;
 	QMenuBar*				pMenu;
-#if QT_VERSION < 0x040000
-	QPopupMenu*				pFileMenu;
-#else
 	QMenu*					pFileMenu;
-#endif
 	virtual void			showEvent(QShowEvent* pEvent);
 	virtual void			hideEvent(QHideEvent* pEvent);
 	CVector<CMOTObject>		vecRawImages;

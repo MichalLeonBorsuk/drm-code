@@ -1252,19 +1252,12 @@ void CDRMPlot::SetInpSpecWaterf(CVector<_REAL>& vecrData, CVector<_REAL>&)
 		imageData[i] = color.rgb();
 	}
 
-#if QT_VERSION >= 0x040600
 	/* Scroll Canvas */
 	Canvas.scroll(0, 1, 0, 0, CanvSize.width(), CanvSize.height(), 0);
-#endif
 
 	/* Paint new line (top line) */
 	QPainter Painter;
 	if (Painter.begin(&Canvas)) {
-#if QT_VERSION < 0x040600
-		/* Scroll Canvas */
-		QPixmap tmpCanvas = Canvas;
-		Painter.drawPixmap(0, 1, tmpCanvas, 0, 0, CanvSize.width(), CanvSize.height()-1);
-#endif
 		/* Draw pixel line to canvas */
 		Painter.drawImage(0, 0, Image);
 
@@ -1656,9 +1649,5 @@ void CDRMPlot::AddWhatsThisHelpChar(const ECharType NCharType)
 	}
 
 	/* Main plot */
-#if QT_VERSION < 0x040000
-	QWhatsThis::add(plot, strCurPlotHelp);
-#else
 	plot->setWhatsThis(strCurPlotHelp);
-#endif
 }

@@ -408,7 +408,7 @@ CSettings::ParseArguments(int argc, char **argv)
 //			continue;
 //		}
 
-#ifdef USE_QT_GUI /* QThread needed for log file timing */
+#ifdef QT_CORE_LIB /* QThread needed for log file timing */
 
 		/* log enable flag  ------------------------------------------------- */
 		if (GetNumericArgument(argc, argv, i, "-g", "--enablelog", 0, 1,
@@ -638,8 +638,7 @@ CSettings::UsageArguments()
 		"  -u <n>, --outchansel <n>     output channel selection\n"
 		"                               0: L -> L, R -> R (default);   1: L -> L, R muted;   2: L muted, R -> R\n"
 		"                               3: mix -> L, R muted;          4: L muted, mix -> R\n"
-//		"  -e <b>, --decodeepg <b>      enable/disable epg decoding (0: off; 1: on)\n"
-#ifdef USE_QT_GUI
+#ifdef QT_CORE_LIB
 		"  -g <b>, --enablelog <b>      enable/disable logging (0: no logging; 1: logging)\n"
 		"  -r <n>, --frequency <n>      set frequency [kHz] for log file\n"
 		"  -l <n>, --logdelay <n>       delay start of logging by <n> seconds, allowed range: 0...3600)\n"
@@ -648,6 +647,7 @@ CSettings::UsageArguments()
 		"                               0: blue-white (default);   1: green-black;   2: black-grey\n"
 #endif
 		"  --enablepsd <b>              if 0 then only measure PSD when RSCI in use otherwise always measure it\n"
+#ifdef QT_NETWORK_LIB
 		"  --mdiout <s>                 MDI out address format [IP#:]IP#:port (for Content Server)\n"
 		"  --mdiin  <s>                 MDI in address (for modulator) [[IP#:]IP:]port\n"
 		"  --rsioutprofile <s>          MDI/RSCI output profile: A|B|C|D|Q|M\n"
@@ -655,6 +655,7 @@ CSettings::UsageArguments()
 		"  --rsiin <s>                  MDI/RSCI input address format [[IP#:]IP#:]port\n"
 		"  --rciout <s>                 RSCI Control output format IP#:port\n"
 		"  --rciin <s>                  RSCI Control input address number format [IP#:]port\n"
+#endif
 		"  --rsirecordprofile <s>       RSCI recording profile: A|B|C|D|Q|M\n"
 		"  --rsirecordtype <s>          RSCI recording file type: raw|ff|pcap\n"
 		"  --recordiq <b>               enable/disable recording an I/Q file\n"
@@ -672,7 +673,7 @@ CSettings::UsageArguments()
 		"  -h, -?, --help               this help text\n"
 		"\n"
 		"Example: $EXECNAME -p --sampleoff -0.23 -i 2"
-#ifdef USE_QT_GUI
+#ifdef QT_NETWORK_LIB
 		" -r 6140 --rsiout 127.0.0.1:3002"
 #endif
 		"";
@@ -748,14 +749,6 @@ CSettings::GetNumericArgument(int argc, char **argv, int &i,
    The homepage is http://robertk.com/source
 
    Copyright August 18, 1999 by Robert Kesterson */
-
-#ifdef _MSC_VER
-/* These pragmas are to quiet VC++ about the expanded template identifiers
-   exceeding 255 chars. You won't be able to see those variables in a debug
-   session, but the code will run normally */
-#pragma warning (push)
-#pragma warning (disable : 4786 4503)
-#endif
 
 string
 CIniFile::GetIniSetting(const string& section,
@@ -883,16 +876,11 @@ CIniFile::SaveIni(ostream& file) const
 /* Return true or false depending on whether the first string is less than the
    second */
 bool
-StlIniCompareStringNoCase::operator() (const string & x, const string & y)
-	 const
-	 {
+StlIniCompareStringNoCase::operator() (const string & x, const string & y) const
+{
 #ifdef _WIN32
-		 return (_stricmp(x.c_str(), y.c_str()) < 0) ? true : false;
+	return (_stricmp(x.c_str(), y.c_str()) < 0) ? true : false;
 #else
-		 return (strcasecmp(x.c_str(), y.c_str()) < 0) ? true : false;
+	return (strcasecmp(x.c_str(), y.c_str()) < 0) ? true : false;
 #endif /* strcasecmp */
-	 }
-
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
+}

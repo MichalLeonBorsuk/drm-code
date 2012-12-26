@@ -27,61 +27,30 @@
 \******************************************************************************/
 
 #include "TransmDlg.h"
-#if QT_VERSION < 0x040000
-# include <qevent.h>
-# include <qpopupmenu.h>
-# include <qbuttongroup.h>
-# include <qmultilineedit.h>
-# include <qlistview.h>
-# include <qfiledialog.h>
-# include <qpopupmenu.h>
-# include <qprogressbar.h>
-# include <qwhatsthis.h>
-#else
-# include <QCloseEvent>
-# include <QTreeWidget>
-# include <QFileDialog>
-# include <QTextEdit>
-# include <QProgressBar>
-# include <QHeaderView>
-# include <QWhatsThis>
-# define CHECK_PTR(x) Q_CHECK_PTR(x)
-# include "SoundCardSelMenu.h"
-#endif
+#include <QCloseEvent>
+#include <QTreeWidget>
+#include <QFileDialog>
+#include <QTextEdit>
+#include <QProgressBar>
+#include <QHeaderView>
+#include <QWhatsThis>
+#define CHECK_PTR(x) Q_CHECK_PTR(x)
+#include "SoundCardSelMenu.h"
 
 
 /* TODO to be moved in DialogUtil.h */
-#if QT_VERSION < 0x040000
-# if QT_VERSION < 0x030000
-#  define ButtonGroupGetCurrentId(c) (c->selected()?c->id(c->selected()):int(-1))
-# else
-#  define ButtonGroupGetCurrentId(c) (c)->selectedId()
-# endif
-# define ComboBoxClear(c) (c)->clear()
-# define ComboBoxInsertItem(c, t, i) (c)->insertItem(t, i)
-# define ComboBoxSetCurrentItem(c, i) (c)->setCurrentItem(i)
-# define ProgressBarSetRange(c, r) (c)->setTotalSteps(r)
-# define ProgressBarSetValue(c, v) (c)->setProgress(v)
-# define FromUtf8(s) QString::fromUtf8(s)
-# define TextEditClear(c) (c)->clear()
-# define TextEditClearModified(c) (c)->setEdited(FALSE)
-# define TextEditIsModified(c) (c)->edited()
-# define ToUtf8(s) (s).latin1()
-# define WhatsThis(c, s) QWhatsThis::add(c ,s)
-#else
-# define ButtonGroupGetCurrentId(c) (c)->checkedId()
-# define ComboBoxClear(c) (c)->clear()
-# define ComboBoxInsertItem(c, t, i) (c)->insertItem(i, t)
-# define ComboBoxSetCurrentItem(c, i) (c)->setCurrentIndex(i)
-# define ProgressBarSetRange(c, r) (c)->setRange(0, r)
-# define ProgressBarSetValue(c, v) (c)->setValue(v)
-# define FromUtf8(s) QString::fromUtf8(s)
-# define TextEditClear(c) (c)->clear()
-# define TextEditClearModified(c)
-# define TextEditIsModified(c) !(c)->toPlainText().isEmpty()
-# define ToUtf8(s) (s).toUtf8().constData()
-# define WhatsThis(c, s) (c)->setWhatsThis(s)
-#endif
+#define ButtonGroupGetCurrentId(c) (c)->checkedId()
+#define ComboBoxClear(c) (c)->clear()
+#define ComboBoxInsertItem(c, t, i) (c)->insertItem(i, t)
+#define ComboBoxSetCurrentItem(c, i) (c)->setCurrentIndex(i)
+#define ProgressBarSetRange(c, r) (c)->setRange(0, r)
+#define ProgressBarSetValue(c, v) (c)->setValue(v)
+#define FromUtf8(s) QString::fromUtf8(s)
+#define TextEditClear(c) (c)->clear()
+#define TextEditClearModified(c)
+#define TextEditIsModified(c) !(c)->toPlainText().isEmpty()
+#define ToUtf8(s) (s).toUtf8().constData()
+#define WhatsThis(c, s) (c)->setWhatsThis(s)
 
 
 TransmDialog::TransmDialog(CSettings& Settings,
@@ -111,18 +80,8 @@ TransmDialog::TransmDialog(CSettings& Settings,
 	if (WinGeom.isValid() && !WinGeom.isEmpty() && !WinGeom.isNull())
 			setGeometry(WinGeom);
 
-#if QT_VERSION < 0x040000
-	/* Set the window title */
-	SetDialogCaption(this, tr("Dream DRM Transmitter"));
-#endif
-
 	/* Set help text for the controls */
 	AddWhatsThisHelp();
-
-	/* Set controls to custom behavior */
-#if QT_VERSION < 0x040000
-	MultiLineEditTextMessage->setWordWrap(QMultiLineEdit::WidgetWidth);
-#endif
 
 	/* Init controls with default settings */
 	ButtonStartStop->setText(tr("&Start"));
@@ -131,11 +90,7 @@ TransmDialog::TransmDialog(CSettings& Settings,
 
 	/* Init progress bar for input signal level */
 	ProgrInputLevel->setRange(-50.0, 0.0);
-#if QT_VERSION < 0x040000
-	ProgrInputLevel->setOrientation(QwtThermo::Horizontal, QwtThermo::Bottom);
-#else
 	ProgrInputLevel->setOrientation(Qt::Horizontal, QwtThermo::BottomScale);
-#endif
 	ProgrInputLevel->setAlarmLevel(-5.0);
 #if QWT_VERSION < 0x060000
 	ProgrInputLevel->setAlarmColor(QColor(255, 0, 0));
@@ -262,16 +217,6 @@ TransmDialog::TransmDialog(CSettings& Settings,
 		break;
 	}
 
-
-#if QT_VERSION < 0x040000
-	/* Set button group IDs */
-	ButtonGroupBandwidth->insert(RadioButtonBandwidth45, 0);
-	ButtonGroupBandwidth->insert(RadioButtonBandwidth5, 1);
-	ButtonGroupBandwidth->insert(RadioButtonBandwidth9, 2);
-	ButtonGroupBandwidth->insert(RadioButtonBandwidth10, 3);
-	ButtonGroupBandwidth->insert(RadioButtonBandwidth18, 4);
-	ButtonGroupBandwidth->insert(RadioButtonBandwidth20, 5);
-#endif
 	/* MSC interleaver mode */
 	ComboBoxInsertItem(ComboBoxMSCInterleaver, tr("2 s (Long Interleaving)"), 0);
 	ComboBoxInsertItem(ComboBoxMSCInterleaver, tr("400 ms (Short Interleaving)"), 1);
@@ -371,24 +316,10 @@ TransmDialog::TransmDialog(CSettings& Settings,
 	/* Clear list box for file names */
 	OnButtonClearAllFileNames();
 
-	/* Set up file list box columns */
-#if QT_VERSION < 0x040000
-	/* We assume that one column is already there */
-	ListViewFileNames->setColumnText(0, "File Name");
-	ListViewFileNames->addColumn("Size [KB]");
-	ListViewFileNames->addColumn("Full Path");
-#endif
-
 	/* Disable other three services */
-#if QT_VERSION < 0x040000
-	TabWidgetServices->setTabEnabled(tabService2, FALSE);
-	TabWidgetServices->setTabEnabled(tabService3, FALSE);
-	TabWidgetServices->setTabEnabled(tabService4, FALSE);
-#else
 	TabWidgetServices->setTabEnabled(1, FALSE);
 	TabWidgetServices->setTabEnabled(2, FALSE);
 	TabWidgetServices->setTabEnabled(3, FALSE);
-#endif
 	CheckBoxEnableService->setChecked(TRUE);
 	CheckBoxEnableService->setEnabled(FALSE);
 
@@ -424,13 +355,8 @@ TransmDialog::TransmDialog(CSettings& Settings,
 //TODO	if (!AudioSourceEncoder.OpusCodecSupported())
 //TODO		RadioButtonOPUS->hide();
 #else
-# if QT_VERSION < 0x040000
-	ButtonGroupCodec->hide();
-	ButtonCodec->hide();
-# else
 	GroupBoxCodec->setVisible(FALSE);
 	ButtonCodec->setVisible(FALSE);
-# endif
 #endif
 
 	/* Add example text message at startup ---------------------------------- */
@@ -463,32 +389,12 @@ TransmDialog::TransmDialog(CSettings& Settings,
 
 
 	/* Set Menu ***************************************************************/
-#if QT_VERSION < 0x040000
-	/* Settings menu  ------------------------------------------------------- */
-	pSettingsMenu = new QPopupMenu(this);
-	CHECK_PTR(pSettingsMenu);
-	pSettingsMenu->insertItem(tr("&Sound Card Selection"),
-		new CSoundCardSelMenu(DRMTransmitter, this));
-
-	/* Main menu bar -------------------------------------------------------- */
-	pMenu = new QMenuBar(this);
-	CHECK_PTR(pMenu);
-	pMenu->insertItem(tr("&Settings"), pSettingsMenu);
-	pMenu->insertItem(tr("&?"), new CDreamHelpMenu(this));
-	pMenu->setSeparator(QMenuBar::InWindowsStyle);
-
-	/* Now tell the layout about the menu */
-	TransmDlgBaseLayout->setMenuBar(pMenu);
-
-#else
 	CFileMenu* pFileMenu = new CFileMenu(DRMTransmitter, this, menu_Settings);
 
 	menu_Settings->addMenu(new CSoundCardSelMenu(DRMTransmitter, pFileMenu, this));
 
 	connect(actionAbout_Dream, SIGNAL(triggered()), &AboutDlg, SLOT(show()));
 	connect(actionWhats_This, SIGNAL(triggered()), this, SLOT(on_actionWhats_This()));
-#endif
-
 
 	/* Connections ---------------------------------------------------------- */
 	/* Push buttons */
@@ -538,20 +444,6 @@ TransmDialog::TransmDialog(CSettings& Settings,
 		this, SLOT(OnComboBoxMSCProtLevActivated(int)));
 
 	/* Button groups */
-#if QT_VERSION < 0x040000
-	connect(ButtonGroupRobustnessMode, SIGNAL(clicked(int)),
-		this, SLOT(OnRadioRobustnessMode(int)));
-	connect(ButtonGroupBandwidth, SIGNAL(clicked(int)),
-		this, SLOT(OnRadioBandwidth(int)));
-	connect(ButtonGroupOutput, SIGNAL(clicked(int)),
-		this, SLOT(OnRadioOutput(int)));
-# ifdef ENABLE_TRANSM_CODECPARAMS
-	connect(ButtonGroupCodec, SIGNAL(clicked(int)),
-		this, SLOT(OnRadioCodec(int)));
-# endif
-	connect(ButtonGroupCurrentTime, SIGNAL(clicked(int)),
-		this, SLOT(OnRadioCurrentTime(int)));
-#else
 	connect(ButtonGroupRobustnessMode, SIGNAL(buttonClicked(int)),
 		this, SLOT(OnRadioRobustnessMode(int)));
 	connect(ButtonGroupBandwidth, SIGNAL(buttonClicked(int)),
@@ -564,7 +456,6 @@ TransmDialog::TransmDialog(CSettings& Settings,
 # endif
 	connect(ButtonGroupCurrentTime, SIGNAL(buttonClicked(int)),
 		this, SLOT(OnRadioCurrentTime(int)));
-#endif
 
 	/* Line edits */
 	connect(LineEditServiceLabel, SIGNAL(textChanged(const QString&)),
@@ -676,11 +567,7 @@ void TransmDialog::OnTimer()
 
 void TransmDialog::OnTimerStop()
 {
-#if QT_VERSION < 0x040000
-	if (!TransThread.running())
-#else
 	if (!TransThread.isRunning())
-#endif
 	{
 		TimerStop.stop();
 
@@ -728,24 +615,6 @@ void TransmDialog::OnButtonStartStop()
 			/* Set file names for data application */
 			TransThread.DRMTransmitter.GetAudSrcEnc()->ClearPicFileNames();
 
-#if QT_VERSION < 0x040000
-			/* Iteration through list view items. Code based on QT sample code for
-			   list view items */
-			QListViewItemIterator it(ListViewFileNames);
-
-			for (; it.current(); it++)
-			{
-				/* Complete file path is in third column */
-				const QString strFileName = it.current()->text(2);
-
-				/* Extract format string */
-				QFileInfo FileInfo(strFileName);
-				const QString strFormat = FileInfo.extension(FALSE);
-
-				TransThread.DRMTransmitter.GetAudSrcEnc()->
-					SetPicFileName(ToUtf8(strFileName), ToUtf8(strFormat));
-			}
-#else
 			/* Iteration through table widget items */
 			int count = TreeWidgetFileNames->topLevelItemCount();
 
@@ -766,7 +635,6 @@ void TransmDialog::OnButtonStartStop()
 						SetPicFileName(ToUtf8(strFileName), ToUtf8(strFormat));
 				}
 			}
-#endif
 
 			TransThread.start();
 
@@ -855,11 +723,7 @@ void TransmDialog::EnableAudio(const _BOOLEAN bFlag)
 	if (bFlag == TRUE)
 	{
 		/* Enable audio controls */
-#if QT_VERSION < 0x040000
-		ButtonGroupCodec->setEnabled(TRUE);
-#else
 		GroupBoxCodec->setEnabled(TRUE);
-#endif
 		GroupBoxTextMessage->setEnabled(TRUE);
 		ComboBoxProgramType->setEnabled(TRUE);
 
@@ -885,11 +749,7 @@ void TransmDialog::EnableAudio(const _BOOLEAN bFlag)
 	else
 	{
 		/* Disable audio controls */
-#if QT_VERSION < 0x040000
-		ButtonGroupCodec->setEnabled(FALSE);
-#else
 		GroupBoxCodec->setEnabled(FALSE);
-#endif
 		GroupBoxTextMessage->setEnabled(FALSE);
 		ComboBoxProgramType->setEnabled(FALSE);
 	}
@@ -917,11 +777,7 @@ void TransmDialog::EnableData(const _BOOLEAN bFlag)
 {
 	/* Enable/Disable data controls */
 	CheckBoxRemovePath->setEnabled(bFlag);
-#if QT_VERSION < 0x040000
-	ListViewFileNames->setEnabled(bFlag);
-#else
 	TreeWidgetFileNames->setEnabled(bFlag);
-#endif
 	PushButtonClearAllFileNames->setEnabled(bFlag);
 	PushButtonAddFile->setEnabled(bFlag);
 
@@ -967,22 +823,6 @@ _BOOLEAN TransmDialog::GetMessageText(const int iID)
 
 		/* DF: I did some test on both Qt3 and Qt4, and
 		   UTF8 char are well preserved */
-#if QT_VERSION < 0x040000
-		/* First line */
-		vecstrTextMessage[iID] = MultiLineEditTextMessage->textLine(0).utf8().data();
-		/* Other lines */
-		const int iNumLines = MultiLineEditTextMessage->numLines();
-
-		for (int i = 1; i < iNumLines; i++)
-		{
-			/* Insert line break */
-			vecstrTextMessage[iID].append("\x0A");
-
-			/* Insert text of next line */
-			vecstrTextMessage[iID].
-				append(MultiLineEditTextMessage->textLine(i).utf8());
-		}
-#else
 		/* Get the text from MultiLineEditTextMessage */
 		QString text = MultiLineEditTextMessage->toPlainText();
 
@@ -991,7 +831,6 @@ _BOOLEAN TransmDialog::GetMessageText(const int iID)
 
 		/* Save the text */
 		vecstrTextMessage[iID] = ToUtf8(text);
-#endif
 
 	}
 	else
@@ -1043,11 +882,7 @@ void TransmDialog::OnToggleCheckBoxRemovePath(bool bState)
 void TransmDialog::OnPushButtonAddFileName()
 {
 	/* Show "open file" dialog. Let the user select more than one file */
-#if QT_VERSION < 0x040000
-	QStringList list = QFileDialog::getOpenFileNames(tr("Image Files (*.png *.jpg *.jpeg *.jfif)"), NULL, this);
-#else
 	QStringList list = QFileDialog::getOpenFileNames(this, tr("Add Files"), NULL, tr("Image Files (*.png *.jpg *.jpeg *.jfif)"));
-#endif
 
 	/* Check if user not hit the cancel button */
 	if (!list.isEmpty())
@@ -1057,15 +892,6 @@ void TransmDialog::OnPushButtonAddFileName()
 		{
 			QFileInfo FileInfo((*it));
 
-#if QT_VERSION < 0x040000
-			/* Insert list view item. The object which is created
-			   here will be automatically destroyed by QT when
-			   the parent ("ListViewFileNames") is destroyed */
-			ListViewFileNames->insertItem(
-				new QListViewItem(ListViewFileNames, FileInfo.fileName(),
-				QString().setNum((float) FileInfo.size() / 1000.0, 'f', 2),
-				FileInfo.filePath()));
-#else
 			/* Insert tree widget item. The objects which is created
 			   here will be automatically destroyed by QT when
 			   the parent ("TreeWidgetFileNames") is destroyed */
@@ -1077,28 +903,20 @@ void TransmDialog::OnPushButtonAddFileName()
 				item->setText(2, FileInfo.filePath());
 				TreeWidgetFileNames->addTopLevelItem(item);
 			}
-#endif
 		}
-#if QT_VERSION >= 0x040000
 		/* Resize columns to content */
 		for (int i = 0; i < 3; i++)
 			TreeWidgetFileNames->resizeColumnToContents(i);
-#endif
 	}
 }
 
 void TransmDialog::OnButtonClearAllFileNames()
 {
-#if QT_VERSION < 0x040000
-	/* Clear list box for file names */
-	ListViewFileNames->clear();
-#else
 	/* Remove all items */
 	TreeWidgetFileNames->clear();
 	/* Resize columns */
 	for (int i = 0; i < 3; i++)
 		TreeWidgetFileNames->resizeColumnToContents(i);
-#endif
 }
 
 #ifdef ENABLE_TRANSM_CODECPARAMS
@@ -1108,20 +926,12 @@ void TransmDialog::OnButtonCodec()
 	if (!CodecDlg)
 	{
 		CParameter& Parameters = *TransThread.DRMTransmitter.GetParameters();
-# if QT_VERSION < 0x040000
-		CodecDlg = new CodecParams(Settings, Parameters, this, NULL, FALSE, Qt::WStyle_MinMax);
-# else
 		CodecDlg = new CodecParams(Settings, Parameters, this, NULL, FALSE, Qt::Dialog);
-# endif
 	}
 	/* Toggle the visibility */
 	if (CodecDlg)
 		CodecDlg->Toggle();
 }
-#else
-# if QT_VERSION < 0x040000
-void TransmDialog::OnButtonCodec() {}
-# endif
 #endif
 
 void TransmDialog::OnComboBoxTextMessageActivated(int iID)
@@ -1296,9 +1106,7 @@ void TransmDialog::OnComboBoxProgramTypeActivated(int iID)
 
 void TransmDialog::OnRadioRobustnessMode(int iID)
 {
-#if QT_VERSION >= 0x040000
 	iID = -iID - 2; // TODO understand why
-#endif
 	CParameter& Parameters = *TransThread.DRMTransmitter.GetParameters();
 
 	/* Set current bandwidth */
@@ -1381,11 +1189,9 @@ void TransmDialog::OnRadioRobustnessMode(int iID)
 
 void TransmDialog::OnRadioBandwidth(int iID)
 {
-#if QT_VERSION >= 0x040000
 	iID = -iID - 2; // TODO understand why
 	static const int table[6] = {0, 2, 4, 1, 3, 5};
 	iID = table[(unsigned int)iID % (unsigned int)6];
-#endif
 	ESpecOcc eNewSpecOcc = SO_0;
 
 	switch (iID)
@@ -1425,9 +1231,7 @@ void TransmDialog::OnRadioBandwidth(int iID)
 
 void TransmDialog::OnRadioOutput(int iID)
 {
-#if QT_VERSION >= 0x040000
 	iID = -iID - 2; // TODO understand why
-#endif
 	switch (iID)
 	{
 	case 0:
@@ -1466,9 +1270,7 @@ void TransmDialog::OnRadioOutput(int iID)
 
 void TransmDialog::OnRadioCurrentTime(int iID)
 {
-#if QT_VERSION >= 0x040000
 	iID = -iID - 2; // TODO understand why
-#endif
 	CParameter::ECurTime eCurTime = CParameter::CT_OFF;
 
 	switch (iID)
@@ -1503,9 +1305,7 @@ void TransmDialog::OnRadioCurrentTime(int iID)
 #ifdef ENABLE_TRANSM_CODECPARAMS
 void TransmDialog::OnRadioCodec(int iID)
 {
-#if QT_VERSION >= 0x040000
 	iID = -iID - 2; // TODO understand why
-#endif
 	CAudioParam::EAudCod eNewAudioCoding = CAudioParam::AC_AAC;
 
 	switch (iID)
@@ -1530,10 +1330,6 @@ void TransmDialog::OnRadioCodec(int iID)
 
 	Parameters.Unlock();
 }
-#else
-# if QT_VERSION < 0x040000
-void TransmDialog::OnRadioCodec(int iID) {(void)iID;}
-# endif
 #endif
 
 void TransmDialog::DisableAllControlsForSet()
@@ -1559,16 +1355,8 @@ void TransmDialog::EnableAllControlsForSet()
 
 void TransmDialog::TabWidgetEnableTabs(QTabWidget *tabWidget, bool enable)
 {
-#if QT_VERSION < 0x030000
-	tabWidget->setEnabled(enable);
-#else
 	for (int i = 0; i < tabWidget->count(); i++)
-# if QT_VERSION < 0x040000
-		tabWidget->page(i)->setEnabled(enable);
-# else
 		tabWidget->widget(i)->setEnabled(enable);
-# endif
-#endif
 }
 
 #ifdef ENABLE_TRANSM_CODECPARAMS
@@ -1632,11 +1420,7 @@ void TransmDialog::AddWhatsThisHelp()
 		"</i> As robustness mode B, but with severe delay and "
 		"Doppler spread</li></ul>");
 
-#if QT_VERSION < 0x040000
-	WhatsThis(ButtonGroupRobustnessMode, strRobustnessMode);
-#else
 	WhatsThis(GroupBoxRobustnessMode, strRobustnessMode);
-#endif
 	WhatsThis(RadioButtonRMA, strRobustnessMode);
 	WhatsThis(RadioButtonRMB, strRobustnessMode);
 	WhatsThis(RadioButtonRMC, strRobustnessMode);
@@ -1649,11 +1433,7 @@ void TransmDialog::AddWhatsThisHelp()
 		"bandwidth constellations are possible, e.g., DRM robustness mode D "
 		"and C are only defined for the bandwidths 10 kHz and 20 kHz.");
 
-#if QT_VERSION < 0x040000
-	WhatsThis(ButtonGroupBandwidth, strBandwidth);
-#else
 	WhatsThis(GroupBoxBandwidth, strBandwidth);
-#endif
 	WhatsThis(RadioButtonBandwidth45, strBandwidth);
 	WhatsThis(RadioButtonBandwidth5, strBandwidth);
 	WhatsThis(RadioButtonBandwidth9, strBandwidth);
@@ -1707,11 +1487,7 @@ void TransmDialog::AddWhatsThisHelp()
 		"is output on the left channel and the phase is output on the right "
 		"channel.</li></ul>");
 
-#if QT_VERSION < 0x040000
-	WhatsThis(ButtonGroupOutput, strOutputFormat);
-#else
 	WhatsThis(GroupBoxOutput, strOutputFormat);
-#endif
 	WhatsThis(RadioButtonOutReal, strOutputFormat);
 	WhatsThis(RadioButtonOutIQPos, strOutputFormat);
 	WhatsThis(RadioButtonOutIQNeg, strOutputFormat);
@@ -1727,11 +1503,7 @@ void TransmDialog::AddWhatsThisHelp()
 		"<li><i>UTC+Offset:</i> Same as UTC but with the addition of an offset "
 		"in hours from local time</li></ul>");
 
-# if QT_VERSION < 0x040000
-	WhatsThis(ButtonGroupCurrentTime, strCurrentTime);
-# else
 	WhatsThis(GroupBoxCurrentTime, strCurrentTime);
-# endif
 	WhatsThis(RadioButtonCurTimeOff, strCurrentTime);
 	WhatsThis(RadioButtonCurTimeLocal, strCurrentTime);
 	WhatsThis(RadioButtonCurTimeUTC, strCurrentTime);
