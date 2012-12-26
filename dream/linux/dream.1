@@ -69,6 +69,8 @@ enable/disable logging (0: no logging; 1: logging
 set frequency [kHz] for log file
 .IP "-l <n>, --logdelay <n>"
 delay start of logging by <n> seconds, allowed range: 0...3600)
+.IP "-L <s>, --schedule <s>"
+read DRMLogger style ini file and obey it
 .IP "-y <n>, --sysevplotstyle <n>"
 set style for main plot
 .br
@@ -95,9 +97,15 @@ RSCI recording profile: A|B|C|D|Q|M
 RSCI recording file type: raw|ff|pcap
 .IP "--recordiq <n>"
 enable/disable recording an I/Q file
-.IP "-I <n>, --snddevin <n>"
+.IP "-R <n>, --samplerate <n>"
+set audio and signal sound card sample rate [Hz]
+.IP "--audsrate <n>"
+set audio sample rate for playback [Hz], allowed range 8000 - 192000)
+.IP "--sigsrate <n>"
+set sample rate for I/F and IQ signal processing [Hz], allowed values 24000, 48000, 96000, 192000)
+.IP "-I <s>, --snddevin <s>"
 set sound in device
-.IP "-O <n>, --snddevout <n>"
+.IP "-O <s>, --snddevout <s>"
 set sound out device
 .IP "-M <n>, --hamlib-model <n>"
 set Hamlib radio model ID
@@ -105,6 +113,8 @@ set Hamlib radio model ID
 set Hamlib config parameter
 .IP "-T, --ensmeter"
 enable S-Meter
+.IP "--test <n>"
+if 1 then some test setup will be done
 .IP "-h, -?, --help"
 this help text
 
@@ -138,3 +148,4 @@ Dream creates an ini file in the directory it is run from. Sub folders for AFS, 
 .SH BUGS 
 
 Probably
+
