@@ -787,13 +787,13 @@ void CNoiseReduction::SetNoiRedDegree(const ENoiRedDegree eNND)
         spx_int32_t supressionLevel;
         switch(eNoiRedDegree) {
         case NR_LOW:
-            supressionLevel = -10;
+            supressionLevel = -9;
             break;
         case NR_MEDIUM:
             supressionLevel = -15;
             break;
         case NR_HIGH:
-            supressionLevel = -20;
+            supressionLevel = -21;
             break;
         }
         speex_preprocess_ctl(preprocess_state, SPEEX_PREPROCESS_SET_NOISE_SUPPRESS, &supressionLevel);
@@ -808,10 +808,10 @@ void CNoiseReduction::Process(CRealVector& vecrIn)
         static spx_int16_t* speexData = {NULL};
         int i;
         double* vectorData = &( vecrIn[0] );
-        int vectorSz = vecrIn.Size();
+        int vectorSz = vecrIn.GetSize();
         if (preprocess_state == NULL)
         {
-            preprocess_state = speex_preprocess_state_init(vectorSz, iSampleRate);
+            preprocess_state = speex_preprocess_state_init(vectorSz, DEFAULT_SOUNDCRD_SAMPLE_RATE);
             speexData = (spx_int16_t*)malloc(vectorSz*sizeof(spx_int16_t));
         }
         for (i=0; i<vectorSz; i++)
