@@ -155,6 +155,12 @@ unix {
         CONFIG += sndfile
                   message("with libsndfile")
               }
+    exists(/usr/include/speex/speex_preprocess.h) {
+        DEFINES += HAVE_SPEEX
+        LIBS += -lspeexdsp
+        CONFIG += speexdsp
+                  message("with libspeexdsp")
+              }
     exists(/usr/include/fftw3.h) {
         DEFINES += HAVE_FFTW3_H
                    LIBS += -lfftw3
