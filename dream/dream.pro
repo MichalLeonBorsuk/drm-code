@@ -115,16 +115,19 @@ exists(libs/neaacdec.h) {
     message("with FAAD2")
 }
 unix {
+# packagesExist() not available on Debian Squeeze
     target.path = /usr/bin
     INSTALLS += target
     CONFIG += link_pkgconfig
-    packagesExist(libpulse) {
+    exists(/usr/include/pulse/pulseaudio.h) {
+    #packagesExist(libpulse) {
         CONFIG += pulseaudio
      PKGCONFIG += libpulse
                   message("with pulseaudio")
     }
     else {
-        packagesExist(portaudio-2.0) {
+        exists(/usr/include/portaudio.h) {
+        #packagesExist(portaudio-2.0) {
             CONFIG += portaudio
          PKGCONFIG += portaudio-2.0
                       message("with portaudio")
