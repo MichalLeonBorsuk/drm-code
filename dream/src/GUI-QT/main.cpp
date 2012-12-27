@@ -239,11 +239,15 @@ main(int argc, char **argv)
 			DRMSimulation.SimScript();
 			DRMReceiver.LoadSettings();
 
+#ifdef QT_CORE_LIB
 			QCoreApplication app(argc, argv);
 			/* Start working thread */
 			CRx rx(DRMReceiver);
 			rx.start();
 			return app.exec();
+#else
+			DRMReceiver.Start();
+#endif
 		}
 		else if (mode == "transmit")
 		{

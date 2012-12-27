@@ -58,7 +58,13 @@ using namespace std; /* Because of the library: "complex" */
 #ifdef QT_CORE_LIB
 # include <qglobal.h>
 #else
-# define qDebug(ARGS…) do {} while (0)
+# define qDebug(...) do {} while (0)
+# ifndef TRUE
+#  define TRUE 1
+# endif
+# ifndef FALSE
+#  define FALSE 0
+# endif
 #endif
 
 /* Choose algorithms -------------------------------------------------------- */

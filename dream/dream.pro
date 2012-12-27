@@ -1,5 +1,5 @@
 contains(QT_VERSION, ^4\\..*) {
-	CONFIG += qt4
+	CONFIG += qt qt4
 	VERSION_MESSAGE = Qt 4
 	CONFIG(debug, debug|release) {
 		DEBUG_MESSAGE = debug
@@ -10,8 +10,7 @@ contains(QT_VERSION, ^4\\..*) {
 }
 console {
     QT -= gui
-    CONFIG -= qt
-    qt4:CONFIG -= qt4
+    CONFIG -= qt qt4
     UI_MESSAGE = console mode
     VERSION_MESSAGE=No Qt
 }
@@ -23,82 +22,80 @@ else {
     else {
         RESOURCES = src/GUI-QT/res/icons.qrc
         UI_MESSAGE = GUI mode
-	FORMS += TransmDlgbase.ui
-	FORMS += AMSSDlgbase.ui \
-	systemevalDlgbase.ui \
-	StationsDlgbase.ui \
-	EPGDlgbase.ui
-	FORMS += GeneralSettingsDlgbase.ui \
-	MultSettingsDlgbase.ui \
-	AboutDlgbase.ui
+        FORMS += \
+            TransmDlgbase.ui AMSSDlgbase.ui DRMMainWindow.ui \
+            FMMainWindow.ui AMMainWindow.ui LiveScheduleWindow.ui \
+            JLViewer.ui BWSViewer.ui SlideShowViewer.ui \
+            systemevalDlgbase.ui StationsDlgbase.ui EPGDlgbase.ui \
+            GeneralSettingsDlgbase.ui MultSettingsDlgbase.ui AboutDlgbase.ui
+        HEADERS += \
+            src/GUI-QT/DRMPlot.h src/GUI-QT/EvaluationDlg.h \
+            src/GUI-QT/SlideShowViewer.h src/GUI-QT/JLViewer.h \
+            src/GUI-QT/BWSViewer.h src/GUI-QT/jlbrowser.h \
+            src/GUI-QT/SoundCardSelMenu.h
+        SOURCES += \
+            src/GUI-QT/DRMPlot.cpp src/GUI-QT/EvaluationDlg.cpp \
+            src/GUI-QT/SlideShowViewer.cpp src/GUI-QT/JLViewer.cpp \
+            src/GUI-QT/BWSViewer.cpp src/GUI-QT/jlbrowser.cpp \
+            src/GUI-QT/SoundCardSelMenu.cpp
     }
 }
 message($$VERSION_MESSAGE $$DEBUG_MESSAGE $$UI_MESSAGE)
 TEMPLATE = app
+CONFIG += warn_on
 TARGET = dream
-INCLUDEPATH += src/GUI-QT
-INCLUDEPATH += libs
+INCLUDEPATH += libs src/GUI-QT
 LIBS += -Llibs
 OBJECTS_DIR = obj
 DEFINES += EXECUTABLE_NAME=$$TARGET
 macx:QMAKE_LFLAGS += -F$$PWD/libs
 qt4 {
+    QT += network xml webkit
 	VPATH += src/GUI-QT
-        QT += network xml webkit
-        HEADERS += src/GUI-QT/DRMPlot.h src/GUI-QT/EvaluationDlg.h
-        HEADERS += src/GUI-QT/SlideShowViewer.h src/GUI-QT/JLViewer.h
-        HEADERS += src/GUI-QT/BWSViewer.h src/GUI-QT/jlbrowser.h
-        HEADERS += src/GUI-QT/SoundCardSelMenu.h
-        SOURCES += src/GUI-QT/DRMPlot.cpp src/GUI-QT/EvaluationDlg.cpp
-        SOURCES += src/GUI-QT/SlideShowViewer.cpp src/GUI-QT/JLViewer.cpp
-        SOURCES += src/GUI-QT/BWSViewer.cpp src/GUI-QT/jlbrowser.cpp
-        SOURCES += src/GUI-QT/SoundCardSelMenu.cpp
-        FORMS += DRMMainWindow.ui FMMainWindow.ui AMMainWindow.ui LiveScheduleWindow.ui
-        FORMS += JLViewer.ui BWSViewer.ui SlideShowViewer.ui
-        unix {
-            macx {
-                exists(libs/qwt.framework) {
-                    message("with qwt6")
-                    INCLUDEPATH += libs/qwt
-                    LIBS += -framework qwt
-                }
-                else {
-                    error("no usable qwt version 6 found")
-                }
+    unix {
+        macx {
+            exists(libs/qwt.framework) {
+                message("with qwt6")
+                INCLUDEPATH += libs/qwt
+                LIBS += -framework qwt
             }
             else {
-                exists(/usr/include/qwt/qwt.h) {
-                    message("with qwt")
-                    INCLUDEPATH += /usr/include/qwt
-                    LIBS += -lqwt
-                }
-                exists(/usr/include/qwt5/qwt.h) {
-                    message("with qwt")
-                    INCLUDEPATH += /usr/include/qwt5
-                    LIBS += -lqwt
-                }
-                exists(/usr/include/qwt-qt4/qwt.h) {
-                    message("with qwt")
-                    INCLUDEPATH += /usr/include/qwt-qt4
-                    LIBS += -lqwt-qt4
-                }
-		target.path = /usr/bin
-		documentation.path = /usr/share/man/man1
-		documentation.files = linux/dream.1
-		INSTALLS += documentation
+                error("no usable qwt version 6 found")
             }
         }
-        win32 {
-	     RC_FILE = windows/dream.rc
-             INCLUDEPATH += libs/qwt
-             CONFIG( debug, debug|release ) {
-                 # debug
-                 LIBS += -lqwtd
-             } else {
-                 # release
-                 LIBS += -lqwt
-             }
+        else {
+            exists(/usr/include/qwt/qwt.h) {
+                message("with qwt")
+                INCLUDEPATH += /usr/include/qwt
+                LIBS += -lqwt
+            }
+            exists(/usr/include/qwt5/qwt.h) {
+                message("with qwt")
+                INCLUDEPATH += /usr/include/qwt5
+                LIBS += -lqwt
+            }
+            exists(/usr/include/qwt-qt4/qwt.h) {
+                message("with qwt")
+                INCLUDEPATH += /usr/include/qwt-qt4
+                LIBS += -lqwt-qt4
+            }
+            target.path = /usr/bin
+            documentation.path = /usr/share/man/man1
+            documentation.files = linux/dream.1
+            INSTALLS += documentation
         }
+    }
+    win32 {
+        RC_FILE = windows/dream.rc
+        INCLUDEPATH += libs/qwt
+        CONFIG( debug, debug|release ) {
+            # debug
+            LIBS += -lqwtd
+        } else {
+            # release
+            LIBS += -lqwt
+        }
+    }
 }
 macx {
     INCLUDEPATH += /Developer/dream/include /opt/local/include
@@ -121,24 +118,31 @@ unix {
     target.path = /usr/bin
     INSTALLS += target
     CONFIG += link_pkgconfig
-    exists(/usr/include/pulse/pulseaudio.h) {
+    packagesExist(libpulse) {
         CONFIG += pulseaudio
+     PKGCONFIG += libpulse
                   message("with pulseaudio")
-              }
+    }
     else {
-    #packagesExist(portaudio-2.0) {
-        CONFIG += portaudio
-     PKGCONFIG += portaudio-2.0
-                  message("with portaudio")
-              }
-    exists(/usr/include/hamlib/rig.h) {
-        CONFIG += hamlib
-                  message("with hamlib")
-              }
-    exists(/usr/local/include/hamlib/rig.h) {
-        CONFIG += hamlib
-                  message("with hamlib")
-              }
+        packagesExist(portaudio-2.0) {
+            CONFIG += portaudio
+         PKGCONFIG += portaudio-2.0
+                      message("with portaudio")
+        }
+        else {
+            error("no usable audio interface found - install pulseaudio or portaudio dev package")
+        }
+    }
+    !qtconsole:!console {
+        exists(/usr/include/hamlib/rig.h) {
+            CONFIG += hamlib
+            message("with hamlib")
+        }
+        exists(/usr/local/include/hamlib/rig.h) {
+            CONFIG += hamlib
+            message("with hamlib")
+        }
+    }
     exists(/usr/include/gps.h) {
         CONFIG += gps
                   message("with gps")
@@ -167,23 +171,23 @@ unix {
                            message("with fftw3")
                        }
     else {
-      exists(/usr/include/fftw.h) {
-	message("with fftw2")
-        LIBS += -lfftw
-        exists(/usr/include/rfftw.h):LIBS += -lrfftw
-        exists(/opt/local/include/dfftw.h) {
-            DEFINES += HAVE_DFFTW_H
-            LIBS += -ldfftw
+        exists(/usr/include/fftw.h) {
+            message("with fftw2")
+            LIBS += -lfftw
+            exists(/usr/include/rfftw.h):LIBS += -lrfftw
+            exists(/opt/local/include/dfftw.h) {
+                DEFINES += HAVE_DFFTW_H
+                LIBS += -ldfftw
+            }
+            exists(/opt/local/include/drfftw.h) {
+               DEFINES += HAVE_DRFFTW_H
+               LIBS += -ldrfftw
+            }
+            DEFINES += HAVE_FFTW_H HAVE_RFFTW_H
         }
-        exists(/opt/local/include/drfftw.h) {
-           DEFINES += HAVE_DRFFTW_H
-           LIBS += -ldrfftw
+        else {
+            error("no usable fftw library found - install fftw dev package")
         }
-        DEFINES += HAVE_FFTW_H HAVE_RFFTW_H
-      }
-      else {
-        error("no usable fftw library found - install fftw dev package")
-      }
     }
     LIBS += -lz -ldl
     SOURCES += src/linux/Pacer.cpp

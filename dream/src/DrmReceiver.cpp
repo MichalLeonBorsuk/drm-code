@@ -39,7 +39,7 @@
 #include "sound/sound.h"
 #include "sound/soundnull.h"
 #include "sound/audiofilein.h"
-#ifndef USE_NO_QT // TODO should not have dependency to qt here
+#ifdef QT_CORE_LIB // TODO should not have dependency to qt here
 # include "GUI-QT/Rig.h"
 #endif
 
@@ -1423,7 +1423,7 @@ void CDRMReceiver::SetFrequency(int iNewFreqkHz)
     }
 
 #ifdef HAVE_LIBHAMLIB
-# ifndef USE_NO_QT // TODO should not have dependency to qt here
+# ifdef QT_CORE_LIB // TODO should not have dependency to qt here
     if(pRig)
         pRig->SetFrequency(iNewFreqkHz);
 # endif
