@@ -57,6 +57,9 @@ using namespace std; /* Because of the library: "complex" */
 /* set sensible defaults for QT */
 #ifdef QT_CORE_LIB
 # include <qglobal.h>
+# if QT_VERSION < 0x040600
+#  error Qt version too old, need at least Qt 4.6
+# endif
 #else
 # define qDebug(...) do {} while (0)
 # ifndef TRUE
