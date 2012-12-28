@@ -142,10 +142,22 @@ CPacketSocketQT::SetDestination(const string & strNewAddr)
     {
         if(udpSocket == NULL)
             udpSocket = new QUdpSocket();
-
-    udpSocket->setSocketOption(QAbstractSocket::MulticastTtlOption, ttl);
-    if(AddrInterface != QHostAddress(QHostAddress::Any))
-        udpSocket->setMulticastInterface(GetInterface(AddrInterface));
+# if QT_VERSION < 0x040800
+        const SOCKET s = udpSocket->socketDescriptor();
+        if(setsockopt(s, IPPROTO_IP, IP_TTL, (char*)&ttl, sizeof(ttl))==SOCKET_ERROR)
+            bAddressOK = FALSE;
+        uint32_t mc_if = htonl(AddrInterface.toIPv4Address());
+        if(mc_if != 0)
+        {
+            if(setsockopt(s, IPPROTO_IP, IP_MULTICAST_IF,
+                          (char *) &mc_if, sizeof(mc_if)) == SOCKET_ERROR)
+                bAddressOK = FALSE;
+        }
+# else
+        udpSocket->setSocketOption(QAbstractSocket::MulticastTtlOption, ttl);
+        if(AddrInterface != QHostAddress(QHostAddress::Any))
+             udpSocket->setMulticastInterface(GetInterface(AddrInterface));
+# endif
     }
     else
     {
@@ -251,10 +263,19 @@ _BOOLEAN CPacketSocketQT::doSetSource(QHostAddress AddrGroup, QHostAddress AddrI
             {
                 throw CGenErr("Can't bind to port to receive packets");
             }
-if(AddrInterface == QHostAddress(QHostAddress::Any))
-    ok = udpSocket->joinMulticastGroup(AddrGroup);
-else
-    ok = udpSocket->joinMulticastGroup(AddrGroup, GetInterface(AddrInterface));
+#if QT_VERSION < 0x040800
+            struct ip_mreq mreq;
+            mreq.imr_multiaddr.s_addr = htonl(AddrGroup.toIPv4Address());
+            mreq.imr_interface.s_addr = htonl(AddrInterface.toIPv4Address());
+            int n = setsockopt(udpSocket->socketDescriptor(), IPPROTO_IP, IP_ADD_MEMBERSHIP,(char *) &mreq,	sizeof(mreq));
+            if(n == SOCKET_ERROR)
+                ok = false;
+#else
+            if(AddrInterface == QHostAddress(QHostAddress::Any))
+                ok = udpSocket->joinMulticastGroup(AddrGroup);
+            else
+                ok = udpSocket->joinMulticastGroup(AddrGroup, GetInterface(AddrInterface));
+#endif
             if(!ok)
             {
                 qDebug("Can't join multicast group");
