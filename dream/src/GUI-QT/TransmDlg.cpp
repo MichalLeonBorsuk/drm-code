@@ -26,7 +26,6 @@
  *
 \******************************************************************************/
 
-#include "TransmDlg.h"
 #include <QCloseEvent>
 #include <QTreeWidget>
 #include <QFileDialog>
@@ -34,22 +33,8 @@
 #include <QProgressBar>
 #include <QHeaderView>
 #include <QWhatsThis>
+#include "TransmDlg.h"
 #include "SoundCardSelMenu.h"
-
-
-/* TODO to be moved in DialogUtil.h */
-#define ButtonGroupGetCurrentId(c) (c)->checkedId()
-#define ComboBoxClear(c) (c)->clear()
-#define ComboBoxInsertItem(c, t, i) (c)->insertItem(i, t)
-#define ComboBoxSetCurrentItem(c, i) (c)->setCurrentIndex(i)
-#define ProgressBarSetRange(c, r) (c)->setRange(0, r)
-#define ProgressBarSetValue(c, v) (c)->setValue(v)
-#define FromUtf8(s) QString::fromUtf8(s)
-#define TextEditClear(c) (c)->clear()
-#define TextEditClearModified(c)
-#define TextEditIsModified(c) !(c)->toPlainText().isEmpty()
-#define ToUtf8(s) (s).toUtf8().constData()
-#define WhatsThis(c, s) (c)->setWhatsThis(s)
 
 
 TransmDialog::TransmDialog(CSettings& Settings,
@@ -103,8 +88,8 @@ TransmDialog::TransmDialog(CSettings& Settings,
 #endif
 
 	/* Init progress bar for current transmitted picture */
-	ProgressBarSetRange(ProgressBarCurPict, 100);
-	ProgressBarSetValue(ProgressBarCurPict, 0);
+	ProgressBarCurPict->setRange(0, 100);
+	ProgressBarCurPict->setValue(0);
 	TextLabelCurPict->setText("");
 
 	/* Output mode (real valued, I / Q or E / P) */
@@ -217,28 +202,28 @@ TransmDialog::TransmDialog(CSettings& Settings,
 	}
 
 	/* MSC interleaver mode */
-	ComboBoxInsertItem(ComboBoxMSCInterleaver, tr("2 s (Long Interleaving)"), 0);
-	ComboBoxInsertItem(ComboBoxMSCInterleaver, tr("400 ms (Short Interleaving)"), 1);
+	ComboBoxMSCInterleaver->insertItem(0, tr("2 s (Long Interleaving)"));
+	ComboBoxMSCInterleaver->insertItem(1, tr("400 ms (Short Interleaving)"));
 
 	switch (Parameters.eSymbolInterlMode)
 	{
 	case CParameter::SI_LONG:
-		ComboBoxSetCurrentItem(ComboBoxMSCInterleaver, 0);
+		ComboBoxMSCInterleaver->setCurrentIndex(0);
 		break;
 
 	case CParameter::SI_SHORT:
-		ComboBoxSetCurrentItem(ComboBoxMSCInterleaver, 1);
+		ComboBoxMSCInterleaver->setCurrentIndex(1);
 		break;
 	}
 
 	/* MSC Constellation Scheme */
-	ComboBoxInsertItem(ComboBoxMSCConstellation, tr("SM 16-QAM"), 0);
-	ComboBoxInsertItem(ComboBoxMSCConstellation, tr("SM 64-QAM"), 1);
+	ComboBoxMSCConstellation->insertItem(0, tr("SM 16-QAM"));
+	ComboBoxMSCConstellation->insertItem(1, tr("SM 64-QAM"));
 
 // These modes should not be used right now, TODO
 // DF: I reenabled those, because it seems to work, at least with dream
-	ComboBoxInsertItem(ComboBoxMSCConstellation, tr("HMsym 64-QAM"), 2);
-	ComboBoxInsertItem(ComboBoxMSCConstellation, tr("HMmix 64-QAM"), 3);
+	ComboBoxMSCConstellation->insertItem(2, tr("HMsym 64-QAM"));
+	ComboBoxMSCConstellation->insertItem(3, tr("HMmix 64-QAM"));
 
 	switch (Parameters.eMSCCodingScheme)
 	{
@@ -246,34 +231,34 @@ TransmDialog::TransmDialog(CSettings& Settings,
 		break;
 
 	case CS_2_SM:
-		ComboBoxSetCurrentItem(ComboBoxMSCConstellation, 0);
+		ComboBoxMSCConstellation->setCurrentIndex(0);
 		break;
 
 	case CS_3_SM:
-		ComboBoxSetCurrentItem(ComboBoxMSCConstellation, 1);
+		ComboBoxMSCConstellation->setCurrentIndex(1);
 		break;
 
 	case CS_3_HMSYM:
-		ComboBoxSetCurrentItem(ComboBoxMSCConstellation, 2);
+		ComboBoxMSCConstellation->setCurrentIndex(2);
 		break;
 
 	case CS_3_HMMIX:
-		ComboBoxSetCurrentItem(ComboBoxMSCConstellation, 3);
+		ComboBoxMSCConstellation->setCurrentIndex(3);
 		break;
 	}
 
 	/* SDC Constellation Scheme */
-	ComboBoxInsertItem(ComboBoxSDCConstellation, tr("4-QAM"), 0);
-	ComboBoxInsertItem(ComboBoxSDCConstellation, tr("16-QAM"), 1);
+	ComboBoxSDCConstellation->insertItem(0, tr("4-QAM"));
+	ComboBoxSDCConstellation->insertItem(1, tr("16-QAM"));
 
 	switch (Parameters.eSDCCodingScheme)
 	{
 	case CS_1_SM:
-		ComboBoxSetCurrentItem(ComboBoxSDCConstellation, 0);
+		ComboBoxSDCConstellation->setCurrentIndex(0);
 		break;
 
 	case CS_2_SM:
-		ComboBoxSetCurrentItem(ComboBoxSDCConstellation, 1);
+		ComboBoxSDCConstellation->setCurrentIndex(1);
 		break;
 
 	case CS_3_SM:
@@ -286,7 +271,7 @@ TransmDialog::TransmDialog(CSettings& Settings,
 	/* Service parameters --------------------------------------------------- */
 	/* Service label */
 	CService& Service = Parameters.Service[0]; // TODO
-	QString label = FromUtf8(Service.strLabel.c_str());
+	QString label = QString::fromUtf8(Service.strLabel.c_str());
 	LineEditServiceLabel->setText(label);
 
 	/* Service ID */
@@ -296,17 +281,17 @@ TransmDialog::TransmDialog(CSettings& Settings,
 	int i;
 	/* Language */
 	for (i = 0; i < LEN_TABLE_LANGUAGE_CODE; i++)
-		ComboBoxInsertItem(ComboBoxLanguage, strTableLanguageCode[i].c_str(), i);
+		ComboBoxLanguage->insertItem(i, strTableLanguageCode[i].c_str());
 
-	ComboBoxSetCurrentItem(ComboBoxLanguage, Service.iLanguage);
+	ComboBoxLanguage->setCurrentIndex(Service.iLanguage);
 
 	/* Program type */
 	for (i = 0; i < LEN_TABLE_PROG_TYPE_CODE; i++)
-		ComboBoxInsertItem(ComboBoxProgramType, strTableProgTypCod[i].c_str(), i);
+		ComboBoxProgramType->insertItem(i, strTableProgTypCod[i].c_str());
 
 	/* Service description */
 	iServiceDescr = Service.iServiceDescr;
-	ComboBoxSetCurrentItem(ComboBoxProgramType, iServiceDescr);
+	ComboBoxProgramType->setCurrentIndex(iServiceDescr);
 
 	/* Sound card IF */
 	LineEditSndCrdIF->setText(QString().number(
@@ -365,11 +350,11 @@ TransmDialog::TransmDialog(CSettings& Settings,
 
 	/* Add example text in internal container */
 	vecstrTextMessage.Add(
-		ToUtf8(tr("Dream DRM Transmitter\x0B\x0AThis is a test transmission")));
+		tr("Dream DRM Transmitter\x0B\x0AThis is a test transmission").toUtf8().data());
 
 	/* Insert item in combo box, display text and set item to our text */
-	ComboBoxInsertItem(ComboBoxTextMessage, QString().setNum(1), 1);
-	ComboBoxSetCurrentItem(ComboBoxTextMessage, 1);
+	ComboBoxTextMessage->insertItem(1, QString().setNum(1));
+	ComboBoxTextMessage->setCurrentIndex(1);
 
 	/* Update the TextEdit with the default text */
 	OnComboBoxTextMessageActivated(1);
@@ -553,7 +538,7 @@ void TransmDialog::OnTimer()
 
 			/* Show current file name and percentage */
 			TextLabelCurPict->setText(FileInfo.fileName());
-			ProgressBarSetValue(ProgressBarCurPict, (int) (rCPercent * 100)); /* % */
+			ProgressBarCurPict->setValue((int) (rCPercent * 100)); /* % */
 		}
 		else
 		{
@@ -631,7 +616,7 @@ void TransmDialog::OnButtonStartStop()
 					const QString strFormat = FileInfo.suffix();
 
 					TransThread.DRMTransmitter.GetAudSrcEnc()->
-						SetPicFileName(ToUtf8(strFileName), ToUtf8(strFormat));
+						SetPicFileName(strFileName.toUtf8().data(), strFormat.toUtf8().data());
 				}
 			}
 
@@ -814,7 +799,7 @@ _BOOLEAN TransmDialog::GetMessageText(const int iID)
 	_BOOLEAN bTextIsNotEmpty = TRUE;
 
 	/* Check if text control is not empty */
-	if (TextEditIsModified(MultiLineEditTextMessage))
+	if (!MultiLineEditTextMessage->toPlainText().isEmpty())
 	{
 		/* Check size of container. If not enough space, enlarge */
 		if (iID == vecstrTextMessage.Size())
@@ -829,7 +814,7 @@ _BOOLEAN TransmDialog::GetMessageText(const int iID)
 		   so no special processing is further required */
 
 		/* Save the text */
-		vecstrTextMessage[iID] = ToUtf8(text);
+		vecstrTextMessage[iID] = text.toUtf8().data();
 
 	}
 	else
@@ -846,10 +831,9 @@ void TransmDialog::OnPushButtonAddText()
 		{
 			/* If text was not empty, add new text in combo box */
 			const int iNewID = vecstrTextMessage.Size() - 1;
-			ComboBoxInsertItem(ComboBoxTextMessage, QString().setNum(iNewID), iNewID);
+			ComboBoxTextMessage->insertItem(iNewID, QString().setNum(iNewID));
 			/* Clear added text */
-			TextEditClear(MultiLineEditTextMessage);
-			TextEditClearModified(MultiLineEditTextMessage);
+			MultiLineEditTextMessage->clear();
 		}
 	}
 	else
@@ -866,11 +850,10 @@ void TransmDialog::OnButtonClearAllText()
 	iIDCurrentText = 0;
 
 	/* Clear combo box */
-	ComboBoxClear(ComboBoxTextMessage);
-	ComboBoxInsertItem(ComboBoxTextMessage, "new", 0);
+	ComboBoxTextMessage->clear();
+	ComboBoxTextMessage->insertItem(0, "new");
 	/* Clear multi line edit */
-	TextEditClear(MultiLineEditTextMessage);
-	TextEditClearModified(MultiLineEditTextMessage);
+	MultiLineEditTextMessage->clear();
 }
 
 void TransmDialog::OnToggleCheckBoxRemovePath(bool bState)
@@ -938,12 +921,11 @@ void TransmDialog::OnComboBoxTextMessageActivated(int iID)
 	iIDCurrentText = iID;
 
 	/* Set text control with selected message */
-	TextEditClear(MultiLineEditTextMessage);
-	TextEditClearModified(MultiLineEditTextMessage);
+	MultiLineEditTextMessage->clear();
 	if (iID != 0)
 	{
 		/* Get the text */
-		QString text = FromUtf8(vecstrTextMessage[iID].c_str());
+		QString text = QString::fromUtf8(vecstrTextMessage[iID].c_str());
 
 		/* Write stored text in multi line edit control */
 		MultiLineEditTextMessage->setText(text);
@@ -982,7 +964,7 @@ void TransmDialog::OnTextChangedServiceLabel(const QString& strLabel)
 
 	Parameters.Lock();
 	/* Set additional text for log file. */
-	Parameters.Service[0].strLabel = ToUtf8(strLabel);
+	Parameters.Service[0].strLabel = strLabel.toUtf8().data();
 	Parameters.Unlock();
 }
 
@@ -1049,9 +1031,9 @@ void TransmDialog::UpdateMSCProtLevCombo()
 	if (Parameters.eMSCCodingScheme == CS_2_SM)
 	{
 		/* Only two protection levels possible in 16 QAM mode */
-		ComboBoxClear(ComboBoxMSCProtLev);
-		ComboBoxInsertItem(ComboBoxMSCProtLev, "0", 0);
-		ComboBoxInsertItem(ComboBoxMSCProtLev, "1", 1);
+		ComboBoxMSCProtLev->clear();
+		ComboBoxMSCProtLev->insertItem(0, "0");
+		ComboBoxMSCProtLev->insertItem(1, "1");
 		/* Set protection level to 1 if greater than 1 */
 		if (Parameters.MSCPrLe.iPartB > 1)
 			Parameters.MSCPrLe.iPartB = 1;
@@ -1059,14 +1041,14 @@ void TransmDialog::UpdateMSCProtLevCombo()
 	else
 	{
 		/* Four protection levels defined */
-		ComboBoxClear(ComboBoxMSCProtLev);
-		ComboBoxInsertItem(ComboBoxMSCProtLev, "0", 0);
-		ComboBoxInsertItem(ComboBoxMSCProtLev, "1", 1);
-		ComboBoxInsertItem(ComboBoxMSCProtLev, "2", 2);
-		ComboBoxInsertItem(ComboBoxMSCProtLev, "3", 3);
+		ComboBoxMSCProtLev->clear();
+		ComboBoxMSCProtLev->insertItem(0, "0");
+		ComboBoxMSCProtLev->insertItem(1, "1");
+		ComboBoxMSCProtLev->insertItem(2, "2");
+		ComboBoxMSCProtLev->insertItem(3, "3");
 	}
 	Parameters.Unlock();
-	ComboBoxSetCurrentItem(ComboBoxMSCProtLev, Parameters.MSCPrLe.iPartB);
+	ComboBoxMSCProtLev->setCurrentIndex(Parameters.MSCPrLe.iPartB);
 }
 
 void TransmDialog::OnComboBoxSDCConstellationActivated(int iID)
@@ -1153,7 +1135,7 @@ void TransmDialog::OnRadioRobustnessMode(int iID)
 				RadioButtonBandwidth20->setChecked(TRUE);
 			else
 				RadioButtonBandwidth10->setChecked(TRUE);
-			OnRadioBandwidth(ButtonGroupGetCurrentId(ButtonGroupBandwidth));
+			OnRadioBandwidth(ButtonGroupBandwidth->checkedId());
 		}
 		/* Set new robustness mode */
 		eNewRobMode = RM_ROBUSTNESS_MODE_C;
@@ -1173,7 +1155,7 @@ void TransmDialog::OnRadioRobustnessMode(int iID)
 				RadioButtonBandwidth20->setChecked(TRUE);
 			else
 				RadioButtonBandwidth10->setChecked(TRUE);
-			OnRadioBandwidth(ButtonGroupGetCurrentId(ButtonGroupBandwidth));
+			OnRadioBandwidth(ButtonGroupBandwidth->checkedId());
 		}
 		/* Set new robustness mode */
 		eNewRobMode = RM_ROBUSTNESS_MODE_D;
@@ -1348,7 +1330,7 @@ void TransmDialog::EnableAllControlsForSet()
 
 	/* Reset status bars */
 	ProgrInputLevel->setValue(RET_VAL_LOG_0);
-	ProgressBarSetValue(ProgressBarCurPict, 0);
+	ProgressBarCurPict->setValue(0);
 	TextLabelCurPict->setText("");
 }
 
@@ -1386,7 +1368,7 @@ void TransmDialog::AddWhatsThisHelp()
 		tr("<b>Dream Logo:</b> This is the official logo of "
 		"the Dream software.");
 
-	WhatsThis(PixmapLabelDreamLogo, strPixmapLabelDreamLogo);
+	PixmapLabelDreamLogo->setWhatsThis(strPixmapLabelDreamLogo);
 
 	/* Input Level */
 	const QString strInputLevel =
@@ -1394,8 +1376,8 @@ void TransmDialog::AddWhatsThisHelp()
 		"the relative input signal peak level in dB. If the level is too high, "
 		"the meter turns from green to red.");
 
-	WhatsThis(TextLabelAudioLevel, strInputLevel);
-	WhatsThis(ProgrInputLevel, strInputLevel);
+	TextLabelAudioLevel->setWhatsThis(strInputLevel);
+	ProgrInputLevel->setWhatsThis(strInputLevel);
 
 	/* Progress Bar */
 	const QString strProgressBar =
@@ -1404,7 +1386,7 @@ void TransmDialog::AddWhatsThisHelp()
 		"Only meaningful when 'Data (SlideShow Application)' "
 		"mode is enabled.");
 
-	WhatsThis(ProgressBarCurPict, strProgressBar);
+	ProgressBarCurPict->setWhatsThis(strProgressBar);
 
 	/* DRM Robustness Mode */
 	const QString strRobustnessMode =
@@ -1419,11 +1401,11 @@ void TransmDialog::AddWhatsThisHelp()
 		"</i> As robustness mode B, but with severe delay and "
 		"Doppler spread</li></ul>");
 
-	WhatsThis(GroupBoxRobustnessMode, strRobustnessMode);
-	WhatsThis(RadioButtonRMA, strRobustnessMode);
-	WhatsThis(RadioButtonRMB, strRobustnessMode);
-	WhatsThis(RadioButtonRMC, strRobustnessMode);
-	WhatsThis(RadioButtonRMD, strRobustnessMode);
+	GroupBoxRobustnessMode->setWhatsThis(strRobustnessMode);
+	RadioButtonRMA->setWhatsThis(strRobustnessMode);
+	RadioButtonRMB->setWhatsThis(strRobustnessMode);
+	RadioButtonRMC->setWhatsThis(strRobustnessMode);
+	RadioButtonRMD->setWhatsThis(strRobustnessMode);
 
 	/* Bandwidth */
 	const QString strBandwidth =
@@ -1432,13 +1414,13 @@ void TransmDialog::AddWhatsThisHelp()
 		"bandwidth constellations are possible, e.g., DRM robustness mode D "
 		"and C are only defined for the bandwidths 10 kHz and 20 kHz.");
 
-	WhatsThis(GroupBoxBandwidth, strBandwidth);
-	WhatsThis(RadioButtonBandwidth45, strBandwidth);
-	WhatsThis(RadioButtonBandwidth5, strBandwidth);
-	WhatsThis(RadioButtonBandwidth9, strBandwidth);
-	WhatsThis(RadioButtonBandwidth10, strBandwidth);
-	WhatsThis(RadioButtonBandwidth18, strBandwidth);
-	WhatsThis(RadioButtonBandwidth20, strBandwidth);
+	GroupBoxBandwidth->setWhatsThis(strBandwidth);
+	RadioButtonBandwidth45->setWhatsThis(strBandwidth);
+	RadioButtonBandwidth5->setWhatsThis(strBandwidth);
+	RadioButtonBandwidth9->setWhatsThis(strBandwidth);
+	RadioButtonBandwidth10->setWhatsThis(strBandwidth);
+	RadioButtonBandwidth18->setWhatsThis(strBandwidth);
+	RadioButtonBandwidth20->setWhatsThis(strBandwidth);
 
 	/* TODO: ComboBoxMSCConstellation, ComboBoxMSCProtLev,
 	         ComboBoxSDCConstellation */
@@ -1452,8 +1434,8 @@ void TransmDialog::AddWhatsThisHelp()
 		"the interleaver length the longer the delay until (after a "
 		"re-synchronization) audio can be heard.");
 
-	WhatsThis(TextLabelInterleaver, strInterleaver);
-	WhatsThis(ComboBoxMSCInterleaver, strInterleaver);
+	TextLabelInterleaver->setWhatsThis(strInterleaver);
+	ComboBoxMSCInterleaver->setWhatsThis(strInterleaver);
 
 	/* Output intermediate frequency of DRM signal */
 	const QString strOutputIF =
@@ -1464,9 +1446,9 @@ void TransmDialog::AddWhatsThisHelp()
 		"should be chosen that the DRM signal lies entirely inside the "
 		"sound-card bandwidth.");
 
-	WhatsThis(ButtonGroupIF, strOutputIF);
-	WhatsThis(LineEditSndCrdIF, strOutputIF);
-	WhatsThis(TextLabelIFUnit, strOutputIF);
+	ButtonGroupIF->setWhatsThis(strOutputIF);
+	LineEditSndCrdIF->setWhatsThis(strOutputIF);
+	TextLabelIFUnit->setWhatsThis(strOutputIF);
 
 	/* Output format */
 	const QString strOutputFormat =
@@ -1486,11 +1468,11 @@ void TransmDialog::AddWhatsThisHelp()
 		"is output on the left channel and the phase is output on the right "
 		"channel.</li></ul>");
 
-	WhatsThis(GroupBoxOutput, strOutputFormat);
-	WhatsThis(RadioButtonOutReal, strOutputFormat);
-	WhatsThis(RadioButtonOutIQPos, strOutputFormat);
-	WhatsThis(RadioButtonOutIQNeg, strOutputFormat);
-	WhatsThis(RadioButtonOutEP, strOutputFormat);
+	GroupBoxOutput->setWhatsThis(strOutputFormat);
+	RadioButtonOutReal->setWhatsThis(strOutputFormat);
+	RadioButtonOutIQPos->setWhatsThis(strOutputFormat);
+	RadioButtonOutIQNeg->setWhatsThis(strOutputFormat);
+	RadioButtonOutEP->setWhatsThis(strOutputFormat);
 
 	/* Current Time Transmission */
 	const QString strCurrentTime =
@@ -1502,11 +1484,11 @@ void TransmDialog::AddWhatsThisHelp()
 		"<li><i>UTC+Offset:</i> Same as UTC but with the addition of an offset "
 		"in hours from local time</li></ul>");
 
-	WhatsThis(GroupBoxCurrentTime, strCurrentTime);
-	WhatsThis(RadioButtonCurTimeOff, strCurrentTime);
-	WhatsThis(RadioButtonCurTimeLocal, strCurrentTime);
-	WhatsThis(RadioButtonCurTimeUTC, strCurrentTime);
-	WhatsThis(RadioButtonCurTimeUTCOffset, strCurrentTime);
+	GroupBoxCurrentTime->setWhatsThis(strCurrentTime);
+	RadioButtonCurTimeOff->setWhatsThis(strCurrentTime);
+	RadioButtonCurTimeLocal->setWhatsThis(strCurrentTime);
+	RadioButtonCurTimeUTC->setWhatsThis(strCurrentTime);
+	RadioButtonCurTimeUTCOffset->setWhatsThis(strCurrentTime);
 
 	/* TODO: Services... */
 
@@ -1518,5 +1500,5 @@ void TransmDialog::AddWhatsThisHelp()
 		"transmit the full path of the image location on your computer. "
 		"This might not be what you want.");
 
-	WhatsThis(CheckBoxRemovePath, strRemovePath);
+	CheckBoxRemovePath->setWhatsThis(strRemovePath);
 }
