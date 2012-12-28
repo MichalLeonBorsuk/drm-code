@@ -98,7 +98,7 @@ MultimediaDlg::MultimediaDlg(CDRMReceiver& DRMReceiver, CSettings& Settings,
     /* Set Menu ***************************************************************/
     /* File menu ------------------------------------------------------------ */
     pFileMenu = new QPopupMenu(this);
-    CHECK_PTR(pFileMenu);
+    Q_CHECK_PTR(pFileMenu);
     pFileMenu->insertItem(tr("C&lear all"), this, SLOT(OnClearAll()),
                           Qt::CTRL+Qt::Key_X, 0);
     pFileMenu->insertSeparator();
@@ -111,13 +111,13 @@ MultimediaDlg::MultimediaDlg(CDRMReceiver& DRMReceiver, CSettings& Settings,
 
     /* Settings menu  ------------------------------------------------------- */
     QPopupMenu* pSettingsMenu = new QPopupMenu(this);
-    CHECK_PTR(pSettingsMenu);
+    Q_CHECK_PTR(pSettingsMenu);
     pSettingsMenu->insertItem(tr("Set &Font..."), this, SLOT(OnSetFont()));
 
 
     /* Main menu bar -------------------------------------------------------- */
     pMenu = new QMenuBar(this);
-    CHECK_PTR(pMenu);
+    Q_CHECK_PTR(pMenu);
     pMenu->insertItem(tr("&File"), pFileMenu);
     pMenu->insertItem(tr("&Settings"), pSettingsMenu);
 

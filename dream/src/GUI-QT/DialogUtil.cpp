@@ -38,7 +38,6 @@
 #include "DialogUtil.h"
 #include <QCoreApplication>
 #include <QWhatsThis>
-#define CHECK_PTR(x) Q_CHECK_PTR(x)
 #include "../Version.h"
 #ifdef USE_ALSA
 # include <alsa/version.h>
@@ -298,9 +297,9 @@ RemoteMenu::RemoteMenu(QWidget* parent, CRig& nrig)
 #endif
     pRemoteMenu = new QMenu(parent);
     pRemoteMenuOther = new QMenu(parent);
-    CHECK_PTR(pRemoteMenu);
+    Q_CHECK_PTR(pRemoteMenu);
 
-    CHECK_PTR(pRemoteMenuOther);
+    Q_CHECK_PTR(pRemoteMenuOther);
 
 #ifdef HAVE_LIBHAMLIB
 
@@ -331,7 +330,7 @@ RemoteMenu::RemoteMenu(QWidget* parent, CRig& nrig)
         {
             m.mfr = rig.strManufacturer;
             m.pMenu = new QMenu(pRemoteMenuOther);
-            CHECK_PTR(m.pMenu);
+            Q_CHECK_PTR(m.pMenu);
         }
         else
         {

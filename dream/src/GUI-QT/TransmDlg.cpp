@@ -34,7 +34,6 @@
 #include <QProgressBar>
 #include <QHeaderView>
 #include <QWhatsThis>
-#define CHECK_PTR(x) Q_CHECK_PTR(x)
 #include "SoundCardSelMenu.h"
 
 

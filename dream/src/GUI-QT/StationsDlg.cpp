@@ -35,7 +35,6 @@
 #include <QShowEvent>
 #include <QNetworkRequest>
 #include <QNetworkReply>
-#define CHECK_PTR(x) Q_CHECK_PTR(x)
 #include <qapplication.h>
 #include <cmath>
 

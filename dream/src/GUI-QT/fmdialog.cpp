@@ -39,7 +39,6 @@
 #include <QCloseEvent>
 #include <QEvent>
 #include "SoundCardSelMenu.h"
-#define CHECK_PTR(x) Q_CHECK_PTR(x)
 
 /* Implementation *************************************************************/
 FMDialog::FMDialog(CDRMReceiver& NDRMR, CSettings& NSettings, CRig& rig,
