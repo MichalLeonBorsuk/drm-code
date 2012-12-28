@@ -27,11 +27,11 @@
 
 #include "DialogUtil.h"
 #include "GeneralSettingsDlg.h"
-#include <qlineedit.h>
-#include <qpushbutton.h>
-#include <qvalidator.h>
-#include <qmessagebox.h>
-#include <qcheckbox.h>
+#include <QLineEdit>
+#include <QPushButton>
+#include <QValidator>
+#include <QMessageBox>
+#include <QCheckBox>
 #include <QShowEvent>
 #include <QHideEvent>
 

@@ -29,8 +29,10 @@
 \******************************************************************************/
 
 #include "PacketSocketQT.h"
-#include <qstringlist.h>
-#include <qtimer.h>
+#include <QStringList>
+#include <QTimer>
+#include <QUdpSocket>
+#include <QTcpSocket>
 #include <iostream>
 #include <sstream>
 
@@ -46,8 +48,6 @@
 # include <ws2tcpip.h>
 # include <windows.h>
 #endif
-#include <QUdpSocket>
-#include <QTcpSocket>
 
 /* Some defines needed for compatibility when using Linux */
 #ifndef _WIN32

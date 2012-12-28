@@ -26,19 +26,22 @@
  *
 \******************************************************************************/
 
-#include <qmenubar.h>
-#include <qlabel.h>
-#include <qaction.h>
-#include <qmessagebox.h>
-#include <qdir.h>
-#include <qfile.h>
+#include <QMenuBar>
+#include <QLabel>
+#include <QAction>
+#include <QMessageBox>
+#include <QDir>
+#include <QFile>
+#include <QCoreApplication>
+#include <QWhatsThis>
 #ifdef _WIN32
 # include <winsock2.h>
 #endif
-#include "DialogUtil.h"
-#include <QCoreApplication>
-#include <QWhatsThis>
 #include "../Version.h"
+#include "DialogUtil.h"
+#include "Rig.h"
+
+/* to extract the library version */
 #ifdef USE_ALSA
 # include <alsa/version.h>
 #endif
@@ -57,32 +60,26 @@
 #ifdef HAVE_LIBPCAP
 # include <pcap.h>
 #endif
-#ifdef HAVE_LIBWIRETAP
-# include <wtap.h>
-#endif
-#include "Rig.h"
-
 #ifdef HAVE_LIBFREEIMAGE
-# include <FreeImage.h> /* to extract the library version */
+# include <FreeImage.h>
 #endif
-
-#include <qwt_global.h> /* to extract the library version */
-
+#ifdef QT_GUI_LIB
+# include <qwt_global.h>
+#endif
 #ifdef USE_FAAD2_LIBRARY
 # include <neaacdec.h>
 #else
 # include "../sourcedecoders/neaacdec_dll.h"
 #endif
-
 /* fftw 3.3.2 doesn't export the symbol fftw_version
  * for windows in libfftw3-3.def
  * You can add it regenerate the lib file and it's supposed to work,
  * but for now the version string is disabled for windows. */
 #ifndef _WIN32
 # ifdef HAVE_FFTW3_H
-#  include <fftw3.h> /* to extract the library version */
+#  include <fftw3.h> 
 # else
-#  include <fftw.h> /* to extract the library version */
+#  include <fftw.h>
 # endif
 #endif
 
@@ -90,15 +87,18 @@
 QString VersionString(QWidget* parent)
 {
     QString strVersionText;
-    strVersionText = "<center><b>" + parent->tr("Dream, Version ");
+    strVersionText =
+        "<center><b>" + parent->tr("Dream, Version ");
     strVersionText += QString("%1.%2%3")
         .arg(dream_version_major)
         .arg(dream_version_minor)
         .arg(dream_version_build);
-    strVersionText += "</b><br> " + parent->tr("Open-Source Software Implementation of "
-                                       "a DRM-Receiver") + "<br>";
+    strVersionText +=
+        "</b><br> " + parent->tr("Open-Source Software Implementation of "
+                                 "a DRM-Receiver") +
+        "<br>";
     strVersionText += parent->tr("Under the GNU General Public License (GPL)") +
-                      "</center>";
+        "</center>";
     return strVersionText;
 #ifdef _MSC_VER /* MSVC 2008 */
     parent; // warning C4100: 'parent' : unreferenced formal parameter
@@ -210,10 +210,10 @@ CAboutDlg::CAboutDlg(QWidget* parent, const char* name, bool modal, Qt::WFlags f
         "<br>Right now the code is mainly maintained by <i>David Flamand and Julian Cable</i>."
         " Quality Assurance and user testing is provided by <i>Simone St&ouml;ppler.</i>"
         "<br><br><br>"
-        "<center><b>CREDITS</b></center><br>"
+        "<center><b>"+tr("CREDITS")+"</b></center><br>"
         +tr("We want to thank all the contributors to the Dream software (in "
             "alphabetical order):")+"<br><br>"
-        "<b>Developers</b>"
+        "<b>"+tr("Developers")+"</b>"
         "<center>"
         "<p>Bakker, Menno</p>"
         "<p>Cable, Julian</p>"
@@ -234,8 +234,8 @@ CAboutDlg::CAboutDlg(QWidget* parent, const char* name, bool modal, Qt::WFlags f
         "<p>Russo, Andrea</p>"
         "<p>Turnbull, Robert</p>"
         "</center>"
-        "<p>If your name should be in the above list and its missing, please let us know.</p>"
-        "<br><b>Parts of Dream are based on code by</b>"
+        "<p>"+tr("If your name should be in the above list and its missing, please let us know.")+"</p>"
+        "<br><b>"+tr("Parts of Dream are based on code by")+"</b>"
         "<center>"
         "<p>Karn, Phil (www.ka9q.net)</p>"
         "<p>Ptolemy Project (http://ptolemy.eecs.berkeley.edu)</p>"
@@ -244,7 +244,7 @@ CAboutDlg::CAboutDlg(QWidget* parent, const char* name, bool modal, Qt::WFlags f
         "<p>The Synthesis ToolKit in C++ (STK) "
         "(http://ccrma.stanford.edu/software/stk)</p>"
         "</center>"
-        "<br><b>Supporters</b>"
+        "<br><b>"+tr("Supporters")+"</b>"
         "<center>"
         "<p>Amorim, Roberto Jos&eacute; de</p>"
         "<p>Kainka, Burkhard</p>"
@@ -493,7 +493,6 @@ bool IsUrlDirectory(QString url)
 void InitSMeter(QWidget* parent, QwtThermo* sMeter)
 {
     sMeter->setRange(S_METER_THERMO_MIN, S_METER_THERMO_MAX);
-//    sMeter->setOrientation(Qt::Horizontal, QwtThermo::TopScale); // Set via ui file
     sMeter->setAlarmLevel(S_METER_THERMO_ALARM);
     sMeter->setAlarmLevel(-12.5);
     sMeter->setScale(S_METER_THERMO_MIN, S_METER_THERMO_MAX, 10.0);
@@ -620,7 +619,7 @@ void RestartTransceiver(CDRMTransceiver *DRMTransceiver)
         {
             QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
             sleep.lock(); /* TODO find a better way to sleep on Qt */
-            sleep.tryLock(10);
+            sleep.tryLock(10); /* 10 ms */
             sleep.unlock();
         }
     }

@@ -35,7 +35,7 @@
 #include <QShowEvent>
 #include <QNetworkRequest>
 #include <QNetworkReply>
-#include <qapplication.h>
+#include <QApplication>
 #include <cmath>
 
 /* Implementation *************************************************************/

@@ -27,7 +27,7 @@
 \******************************************************************************/
 
 #include "Rig.h"
-#include <qtimer.h>
+#include <QTimer>
 
 CRig::CRig(CParameter* np):
 #ifdef HAVE_LIBHAMLIB
