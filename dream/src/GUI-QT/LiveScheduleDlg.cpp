@@ -33,7 +33,6 @@
 #include <QDateTime>
 #include <QHideEvent>
 #include <QShowEvent>
-#define CHECK_PTR(x) Q_CHECK_PTR(x)
 
 /* Implementation *************************************************************/
 

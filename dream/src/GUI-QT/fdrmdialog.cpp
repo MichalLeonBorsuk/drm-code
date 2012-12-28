@@ -36,7 +36,6 @@
 #include "BWSViewer.h"
 #include "SlideShowViewer.h"
 #include "JLViewer.h"
-#define CHECK_PTR(x) Q_CHECK_PTR(x)
 #include "Rig.h"
 #include "../Scheduler.h"
 
