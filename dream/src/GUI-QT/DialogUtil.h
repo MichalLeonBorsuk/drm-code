@@ -145,11 +145,6 @@ protected:
 #define EVENT_FILTER(e) do { if (!ef.isValid((QEvent*)e)) return; } while(0)
 
 
-inline void SetDialogCaption(QDialog* pDlg, const QString sCap)
-{
-	pDlg->setWindowTitle(sCap);
-}
-
 class RemoteMenu : public QObject
 {
 	Q_OBJECT
