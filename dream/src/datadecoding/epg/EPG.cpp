@@ -1328,11 +1328,7 @@ EPG::parseDoc (const QDomDocument & doc)
                     if (e.tagName () == "genre")
                     {
                         QString genre = e.attribute ("href", "");
-#if QT_VERSION < 0x040000
-                        int i = genre.findRev (':');
-#else
                         int i = genre.lastIndexOf(':');
-#endif
                         if (i != -1)
                             genre = genre.mid (i + 1);
                         QString type = e.attribute ("type", "main");
@@ -1354,11 +1350,7 @@ EPG::parseDoc (const QDomDocument & doc)
             QMap<time_t,CProg>::ConstIterator existing = progs.find(start);
             if (existing != progs.end())
             {
-#if QT_VERSION < 0x040000
-                p.augment(existing.data());
-#else
                 p.augment(existing.value());
-#endif
             }
             progs[start] = p;
         }
@@ -1406,11 +1398,7 @@ void
 EPG::saveChannels (const QString & fileName)
 {
     QFile f (fileName);
-# if QT_VERSION < 0x040000
-    if (!f.open (IO_WriteOnly))
-#else
     if (!f.open (QIODevice::WriteOnly))
-#endif
     {
         return;
     }
@@ -1447,11 +1435,7 @@ EPG::loadChannels (const QString & fileName)
 {
     QDomDocument domTree;
     QFile f (fileName);
-# if QT_VERSION < 0x040000
-    if (!f.open (IO_ReadOnly))
-#else
     if (!f.open (QIODevice::ReadOnly))
-#endif
     {
         addChannel ("BBC & DW", 0xE1C248);
         return;
@@ -1477,11 +1461,7 @@ EPG::loadChannels (const QString & fileName)
                 {
                     QDomElement s = e.toElement ();
                     if (s.tagName () == "shortName")
-#if QT_VERSION >= 0x040000
-                        name = s.text().toUtf8().constData();
-#else
-                        name = s.text().utf8().data();
-#endif
+                        name = s.text().toUtf8().data(); // XXX
                     if (s.tagName () == "serviceID")
                         sid = s.attribute ("id", "0");
                 }
@@ -1501,11 +1481,7 @@ time_t EPG::parseTime(const QString & time)
     if (time=="")
         return 0; // invalid
     QRegExp q("[-T:+Z]");
-#if QT_VERSION >= 0x040000
     QStringList sl = time.split(q);
-#else
-    QStringList sl = QStringList::split(q, time);
-#endif
 #ifdef _WIN32
     SYSTEMTIME st;
     st.wYear = 1970;
