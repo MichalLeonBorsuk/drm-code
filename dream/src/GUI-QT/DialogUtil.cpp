@@ -100,6 +100,9 @@ QString VersionString(QWidget* parent)
     strVersionText += parent->tr("Under the GNU General Public License (GPL)") +
                       "</center>";
     return strVersionText;
+#ifdef _MSC_VER /* MSVC 2008 */
+    parent; // warning C4100: 'parent' : unreferenced formal parameter
+#endif
 }
 
 /* Implementation *************************************************************/
