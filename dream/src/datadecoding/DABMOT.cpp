@@ -606,7 +606,7 @@ void
 CMOTDABDec::GetNextObject(CMOTObject & NewMOTObject)
 {
 	TTransportID firstNew;
-#ifdef USE_QT_GUI
+#ifdef QT_CORE_LIB
 	guard.lock();
 	if(qiNewObjects.empty())
 	{
@@ -647,7 +647,7 @@ CMOTDABDec::DeliverIfReady(TTransportID TransportID)
 		}
 		//cerr << o << endl;;
 		ostringstream ss; ss << o << endl;
-#ifdef USE_QT_GUI
+#ifdef QT_CORE_LIB
 		guard.lock();
 		qiNewObjects.push(TransportID);
 		blocker.wakeOne();

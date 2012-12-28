@@ -39,8 +39,8 @@
 #include "../util/Settings.h"
 #include <iostream>
 
-#ifdef QT_CORE_LIB 
-# ifdef QT_GUI_LIB 
+#ifdef QT_CORE_LIB
+# ifdef QT_GUI_LIB
 #  include "fdrmdialog.h"
 #  include "TransmDlg.h"
 #  include "DialogUtil.h"
@@ -83,7 +83,7 @@ CRx::run()
 }
 #endif
 
-#ifdef QT_GUI_LIB 
+#ifdef QT_GUI_LIB
 /******************************************************************************\
 * Using GUI with QT                                                            *
 \******************************************************************************/
@@ -217,7 +217,7 @@ ErrorMessage(string strErrorString)
 */
 	exit(1);
 }
-#else /* USE_QT_GUI */
+#else /* QT_GUI_LIB */
 /******************************************************************************\
 * No GUI                                                                       *
 \******************************************************************************/
@@ -281,7 +281,7 @@ ErrorMessage(string strErrorString)
 {
 	perror(strErrorString.c_str());
 }
-#endif /* USE_QT_GUI */
+#endif /* QT_GUI_LIB */
 
 void
 DebugError(const char *pchErDescr, const char *pchPar1Descr,

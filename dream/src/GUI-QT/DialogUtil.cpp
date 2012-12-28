@@ -152,8 +152,10 @@ CAboutDlg::CAboutDlg(QWidget* parent, const char* name, bool modal, Qt::WFlags f
 #ifdef USE_FAAC_LIBRARY
         "<li><b>FAAC</b> <i>http://faac.sourceforge.net</i></li>"
 #endif
-#ifdef USE_QT_GUI /* QWT */
+#ifdef QT_CORE_LIB
         "<li><b>Qt</b> (" + QString(QT_VERSION_STR) + ") <i>http://qt-project.org</i></li>"
+#endif
+#ifdef QT_GUI_LIB
         "<li><b>QWT</b> (" + QString(QWT_VERSION_STR) + ") <i>Dream is based in part on the work of the Qwt "
         "project (http://qwt.sf.net).</i></li>"
 #endif

@@ -599,8 +599,8 @@ void systemevalDlg::OnTimer()
 #endif
 
         /* _WIN32 fix because in Visual c++ the GUI files are always compiled even
-           if USE_QT_GUI is set or not (problem with MDI in DRMReceiver) */
-#ifdef USE_QT_GUI
+           if QT_GUI_LIB is set or not (problem with MDI in DRMReceiver) */
+#ifdef QT_GUI_LIB
         /* If MDI in is enabled, do not show any synchronization parameter */
         if (DRMReceiver.GetRSIIn()->GetInEnabled() == TRUE)
         {
