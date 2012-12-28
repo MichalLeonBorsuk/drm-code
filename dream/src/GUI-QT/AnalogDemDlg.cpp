@@ -29,27 +29,27 @@
 \******************************************************************************/
 
 #include "AnalogDemDlg.h"
-#include <qmessagebox.h>
-#include <qmenubar.h>
-#include <qwt_dial.h>
-#include <qwt_dial_needle.h>
-#include <qstring.h>
-#include <qlabel.h>
-#include <qradiobutton.h>
-#include <qcheckbox.h>
-#include <qtooltip.h>
-#include <qbuttongroup.h>
-#include <qpushbutton.h>
-#include <qcheckbox.h>
-#include <qfiledialog.h>
-#include <qslider.h>
-#include <qlayout.h>
-#include <qprogressbar.h>
-#include <qcombobox.h>
 #include "DRMPlot.h"
+#include <QMessageBox>
+#include <QMenuBar>
+#include <QString>
+#include <QLabel>
+#include <QRadioButton>
+#include <QCheckBox>
+#include <QToolTip>
+#include <QButtonGroup>
+#include <QPushButton>
+#include <QCheckBox>
+#include <QFileDialog>
+#include <QSlider>
+#include <QLayout>
+#include <QProgressBar>
+#include <QComboBox>
 #include <QWhatsThis>
 #include <QDateTime>
 #include <QCloseEvent>
+#include <qwt_dial.h>
+#include <qwt_dial_needle.h>
 #include <qwt_plot_layout.h>
 
 /* Implementation *************************************************************/

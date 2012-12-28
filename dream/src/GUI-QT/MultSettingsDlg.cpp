@@ -29,8 +29,8 @@
 #include <QFileDialog>
 #include <QShowEvent>
 #include <QHideEvent>
-#include <qlabel.h>
-#include <qtooltip.h>
+#include <QLabel>
+#include <QToolTip>
 
 /* Implementation *************************************************************/
 

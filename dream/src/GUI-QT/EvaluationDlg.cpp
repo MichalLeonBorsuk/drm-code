@@ -29,10 +29,10 @@
 #include "EvaluationDlg.h"
 #include "DialogUtil.h"
 #include "Rig.h"
-#include <qmessagebox.h>
-#include <qlayout.h>
-#include <qdatetime.h>
-#include <qfiledialog.h>
+#include <QMessageBox>
+#include <QLayout>
+#include <QDateTime>
+#include <QFileDialog>
 #include <QHideEvent>
 #include <QShowEvent>
 

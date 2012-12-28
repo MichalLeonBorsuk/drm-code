@@ -30,8 +30,8 @@
 #include "EPGDlg.h"
 #include "../datadecoding/epg/epgutil.h"
 #include <set>
-#include <qregexp.h>
-#include <qfile.h>
+#include <QRegExp>
+#include <QFile>
 #include <QShowEvent>
 #include <QHideEvent>
 #include <QPixmap>

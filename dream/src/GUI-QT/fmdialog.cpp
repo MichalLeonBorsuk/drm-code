@@ -29,15 +29,15 @@
 #include "fmdialog.h"
 #include "DialogUtil.h"
 #include "Rig.h"
-#include <qmessagebox.h>
-#include <qinputdialog.h>
-#include <qwt_thermo.h>
+#include <QMessageBox>
+#include <QInputDialog>
 #include <QWhatsThis>
 #include <QShowEvent>
 #include <QHideEvent>
 #include <QCustomEvent>
 #include <QCloseEvent>
 #include <QEvent>
+#include <qwt_thermo.h>
 #include "SoundCardSelMenu.h"
 
 /* Implementation *************************************************************/

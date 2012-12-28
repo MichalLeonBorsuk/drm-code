@@ -46,7 +46,7 @@
 #include "../DrmReceiver.h"
 #ifdef QT_CORE_LIB
 # include "PacketSocketQT.h"
-# include <qhostaddress.h>
+# include <QHostAddress>
 #else
 # include "PacketSocketNull.h"
 #endif

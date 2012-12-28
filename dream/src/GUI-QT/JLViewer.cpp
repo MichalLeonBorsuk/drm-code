@@ -29,7 +29,7 @@
 #include "JLViewer.h"
 #include "jlbrowser.h"
 #include "../util/Settings.h"
-#include <../datadecoding/DataDecoder.h>
+#include "../datadecoding/DataDecoder.h"
 #include <QFontDialog>
 
 JLViewer::JLViewer(CDRMReceiver& rec, CSettings& s, QWidget* parent,

@@ -30,7 +30,6 @@
 #include "../DrmReceiver.h"
 #include "../util/Settings.h"
 #include "../datadecoding/DataDecoder.h"
-
 #include <QDir>
 #include <QFile>
 #include <QWebHistory>

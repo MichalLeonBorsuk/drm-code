@@ -28,11 +28,11 @@
 \******************************************************************************/
 
 #include "EPG.h"
-#include <qfileinfo.h>
-#include <qfile.h>
-#include <qdir.h>
-#include <qtextstream.h>
-#include <qregexp.h>
+#include <QFileInfo>
+#include <QFile>
+#include <QDir>
+#include <QTextStream>
+#include <QRegExp>
 #include <iostream>
 #include <cstdlib>
 #include <sys/stat.h>
