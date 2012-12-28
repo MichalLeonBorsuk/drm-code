@@ -484,7 +484,7 @@ void CTextMessageDecoder::SetText()
                         /* Append new character */
                         (*pstrText).append(&cNewChar, 1);
 #else
-                        /* NOT USE_QT_GUI */
+                        /* NOT QT_GUI_LIB */
                         switch (cNewChar)
                         {
                         case 0x0A:

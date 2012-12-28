@@ -35,17 +35,9 @@
 #include <time.h>
 #include <map>
 #include <queue>
-#ifdef USE_QT_GUI
-# if QT_VERSION < 0x040000
-#  if QT_VERSION < 0x030000
-#   include <qthread.h>
-#  else
-#   include <qwaitcondition.h>
-#  endif
-# else
-#  include <QWaitCondition>
-#  include <QMutex>
-# endif
+#ifdef QT_CORE_LIB
+# include <QWaitCondition>
+# include <QMutex>
 #endif
 
 
@@ -604,7 +596,7 @@ class CMOTDABDec
     CMOTDirectory MOTDirectory;
     map < TTransportID, CMOTObject > MOTCarousel;
     queue < TTransportID > qiNewObjects;
-#ifdef USE_QT_GUI
+#ifdef QT_CORE_LIB
     QMutex guard;
     QWaitCondition blocker;
 #endif

@@ -234,7 +234,7 @@ public:
 };
 
 
-#ifdef QT_CORE_LIB 
+#ifdef QT_CORE_LIB
 # include <QMutex>
 # include <QWaitCondition>
 

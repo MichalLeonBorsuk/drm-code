@@ -1225,7 +1225,7 @@ EPG::genre_list[] = {
     {0, 0},
 };
 
-#ifdef USE_QT_GUI
+#ifdef QT_GUI_LIB
 /* DialogUtil.cpp TODO: CreateDirectories should be accessible from qtconsole mode */
 extern void CreateDirectories(const QString& strFilename);
 #endif
@@ -1239,7 +1239,7 @@ EPG::EPG(CParameter& NParameters):Parameters(NParameters)
         genres[genre_list[i].genre] = genre_list[i].desc;
     }
     dir = Parameters.GetDataDirectory("EPG").c_str();
-#ifdef USE_QT_GUI
+#ifdef QT_GUI_LIB
     CreateDirectories(dir);
 #else
     if (!QFileInfo(dir).exists())
