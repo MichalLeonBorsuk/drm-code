@@ -10,6 +10,7 @@ contains(QT_VERSION, ^4\\..*) {
 }
 console {
     QT -= gui
+    QT += network xml
     CONFIG -= qt qt4
     UI_MESSAGE = console mode
     VERSION_MESSAGE=No Qt
