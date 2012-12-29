@@ -33,7 +33,7 @@
 #include "RSISubscriber.h"
 #include "../DrmReceiver.h"
 #include "TagPacketGenerator.h"
-#ifdef QT_CORE_LIB
+#ifdef QT_NETWORK_LIB
 # include "PacketSocketQT.h"
 #else
 # include "PacketSocketNull.h"

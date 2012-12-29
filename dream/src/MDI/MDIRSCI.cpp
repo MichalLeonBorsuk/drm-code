@@ -44,7 +44,7 @@
 
 #include "MDIRSCI.h"
 #include "../DrmReceiver.h"
-#ifdef QT_CORE_LIB
+#ifdef QT_NETWORK_LIB
 # include "PacketSocketQT.h"
 # include <QHostAddress>
 #else
@@ -561,7 +561,7 @@ _BOOLEAN CUpstreamDI::SetOrigin(const string& str)
 	strOrigin = str;
 
 	// try a socket
-#ifdef QT_CORE_LIB
+#ifdef QT_NETWORK_LIB
 	source = new CPacketSocketQT;
 #else
 	source = new CPacketSocketNull;
