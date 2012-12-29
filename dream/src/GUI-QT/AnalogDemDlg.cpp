@@ -561,7 +561,7 @@ void AnalogDemDlg::OnCheckSaveAudioWAV()
 		if (!strFileName.isEmpty())
 		{
 			DRMReceiver.GetWriteData()->
-				StartWriteWaveFile(strFileName.toLatin1().data());
+				StartWriteWaveFile(strFileName.toLocal8Bit().constData());
 		}
 		else
 		{

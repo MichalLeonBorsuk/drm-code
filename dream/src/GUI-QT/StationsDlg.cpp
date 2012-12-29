@@ -90,32 +90,25 @@ void CDRMSchedule::UpdateStringListForFilter(const CStationsItem& StationsItem)
 
 void CDRMSchedule::LoadSchedule()
 {
-    QByteArray fn(schedFileName.toUtf8());
-    const char *filename = fn.data();
-    if (filename != NULL) /* Needed for Qt3 windows */
+    string filename(schedFileName.toUtf8().constData());
+    QApplication::setOverrideCursor(Qt::BusyCursor);
+    ListTargets = QStringList("");
+    ListCountries = QStringList("");
+    ListLanguages = QStringList("");
+    StationsTable.clear();
+    FILE* pFile = fopen(filename.c_str(), "r");
+    if(pFile)
     {
-        QApplication::setOverrideCursor(
-            Qt::BusyCursor
-        );
-
-        ListTargets = QStringList("");
-        ListCountries = QStringList("");
-        ListLanguages = QStringList("");
-        StationsTable.clear();
-        FILE* pFile = fopen(filename, "r");
-        if(pFile)
-        {
-            if(schedFileName.contains("ini"))
-                ReadINIFile(pFile);
-            else
-                ReadCSVFile(pFile);
-            fclose(pFile);
-        }
-        ListTargets.sort();
-        ListCountries.sort();
-        ListLanguages.sort();
-        QApplication::restoreOverrideCursor();
+        if(schedFileName.contains("ini"))
+            ReadINIFile(pFile);
+        else
+            ReadCSVFile(pFile);
+        fclose(pFile);
     }
+    ListTargets.sort();
+    ListCountries.sort();
+    ListLanguages.sort();
+    QApplication::restoreOverrideCursor();
 }
 
 void CDRMSchedule::ReadINIFile(FILE* pFile)
@@ -262,7 +255,7 @@ void CDRMSchedule::ReadCSVFile(FILE* pFile)
 
         if(fields[2].length()>0)
         {
-            stringstream ss(fields[2].toUtf8().data());
+            stringstream ss(fields[2].toUtf8().constData());
             char c;
             enum Days { Sunday=0, Monday=1, Tuesday=2, Wednesday=3,
                         Thursday=4, Friday=5, Saturday=6
@@ -331,7 +324,7 @@ void CDRMSchedule::ReadCSVFile(FILE* pFile)
         int fieldcount = fields.size();
         if(fieldcount>3)
         {
-            homecountry = fields[3].toUtf8().data();
+            homecountry = fields[3].toUtf8().constData();
             string c = data.itu_r_country(homecountry);
             if(c == "")
                 c = homecountry;
@@ -343,13 +336,13 @@ void CDRMSchedule::ReadCSVFile(FILE* pFile)
 
         if(fieldcount>5)
         {
-            string l = data.eibi_language(fields[5].toUtf8().data());
+            string l = data.eibi_language(fields[5].toUtf8().constData());
             StationsItem.strLanguage = QString::fromUtf8(l.c_str());
         }
 
         if(fieldcount>6)
         {
-            string s = fields[6].toUtf8().data();
+            string s = fields[6].toUtf8().constData();
             string t = data.eibi_target(s);
             if(t == "")
             {
@@ -369,7 +362,7 @@ void CDRMSchedule::ReadCSVFile(FILE* pFile)
         if(fieldcount>7)
         {
             StationsItem.strSite = fields[7];
-            string s  = fields[7].toUtf8().data();
+            string s  = fields[7].toUtf8().constData();
             if(s=="") // unknown or main Tx site of the home country
             {
                 country = homecountry;
@@ -1012,20 +1005,20 @@ void StationsDlg::SaveSettings(CSettings& Settings)
 
     Settings.Put("Hamlib", "ensmeter", actionEnable_S_Meter->isChecked());
     Settings.Put("Stations Dialog", "showall", actionShowAllStations->isChecked());
-    Settings.Put("Stations Dialog", "DRM URL", string(DRMSchedule.qurldrm.toString().toUtf8().data()));
-    Settings.Put("Stations Dialog", "ANALOG URL", string(DRMSchedule.qurlanalog.toString().toUtf8().data()));
+    Settings.Put("Stations Dialog", "DRM URL", string(DRMSchedule.qurldrm.toString().toUtf8().constData()));
+    Settings.Put("Stations Dialog", "ANALOG URL", string(DRMSchedule.qurlanalog.toString().toUtf8().constData()));
     Settings.Put("Stations Dialog", "sortcolumndrm", iSortColumndrm);
     Settings.Put("Stations Dialog", "sortascendingdrm", bCurrentSortAscendingdrm);
-    Settings.Put("Stations Dialog", "columnparamdrm", string(strColumnParamdrm.toUtf8().data()));
+    Settings.Put("Stations Dialog", "columnparamdrm", string(strColumnParamdrm.toUtf8().constData()));
     Settings.Put("Stations Dialog", "sortcolumnanalog", iSortColumnanalog);
     Settings.Put("Stations Dialog", "sortascendinganalog", bCurrentSortAscendinganalog);
-    Settings.Put("Stations Dialog", "columnparamanalog", string(strColumnParamanalog.toUtf8().data()));
-    Settings.Put("Stations Dialog", "targetfilterdrm", string(DRMSchedule.targetFilterdrm.toUtf8().data()));
-    Settings.Put("Stations Dialog", "countryfilterdrm", string(DRMSchedule.countryFilterdrm.toUtf8().data()));
-    Settings.Put("Stations Dialog", "languagefilterdrm", string(DRMSchedule.languageFilterdrm.toUtf8().data()));
-    Settings.Put("Stations Dialog", "targetfilteranalog", string(DRMSchedule.targetFilteranalog.toUtf8().data()));
-    Settings.Put("Stations Dialog", "countryfilteranalog", string(DRMSchedule.countryFilteranalog.toUtf8().data()));
-    Settings.Put("Stations Dialog", "languagefilteranalog", string(DRMSchedule.languageFilteranalog.toUtf8().data()));
+    Settings.Put("Stations Dialog", "columnparamanalog", string(strColumnParamanalog.toUtf8().constData()));
+    Settings.Put("Stations Dialog", "targetfilterdrm", string(DRMSchedule.targetFilterdrm.toUtf8().constData()));
+    Settings.Put("Stations Dialog", "countryfilterdrm", string(DRMSchedule.countryFilterdrm.toUtf8().constData()));
+    Settings.Put("Stations Dialog", "languagefilterdrm", string(DRMSchedule.languageFilterdrm.toUtf8().constData()));
+    Settings.Put("Stations Dialog", "targetfilteranalog", string(DRMSchedule.targetFilteranalog.toUtf8().constData()));
+    Settings.Put("Stations Dialog", "countryfilteranalog", string(DRMSchedule.countryFilteranalog.toUtf8().constData()));
+    Settings.Put("Stations Dialog", "languagefilteranalog", string(DRMSchedule.languageFilteranalog.toUtf8().constData()));
 
     /* Set window geometry data in DRMReceiver module */
     QRect WinGeom = geometry();

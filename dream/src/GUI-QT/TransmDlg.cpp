@@ -350,7 +350,7 @@ TransmDialog::TransmDialog(CSettings& Settings,
 
 	/* Add example text in internal container */
 	vecstrTextMessage.Add(
-		tr("Dream DRM Transmitter\x0B\x0AThis is a test transmission").toUtf8().data());
+		tr("Dream DRM Transmitter\x0B\x0AThis is a test transmission").toUtf8().constData());
 
 	/* Insert item in combo box, display text and set item to our text */
 	ComboBoxTextMessage->insertItem(1, QString().setNum(1));
@@ -616,7 +616,7 @@ void TransmDialog::OnButtonStartStop()
 					const QString strFormat = FileInfo.suffix();
 
 					TransThread.DRMTransmitter.GetAudSrcEnc()->
-						SetPicFileName(strFileName.toUtf8().data(), strFormat.toUtf8().data());
+						SetPicFileName(strFileName.toUtf8().constData(), strFormat.toUtf8().constData());
 				}
 			}
 
@@ -814,7 +814,7 @@ _BOOLEAN TransmDialog::GetMessageText(const int iID)
 		   so no special processing is further required */
 
 		/* Save the text */
-		vecstrTextMessage[iID] = text.toUtf8().data();
+		vecstrTextMessage[iID] = text.toUtf8().constData();
 
 	}
 	else
@@ -964,7 +964,7 @@ void TransmDialog::OnTextChangedServiceLabel(const QString& strLabel)
 
 	Parameters.Lock();
 	/* Set additional text for log file. */
-	Parameters.Service[0].strLabel = strLabel.toUtf8().data();
+	Parameters.Service[0].strLabel = strLabel.toUtf8().constData();
 	Parameters.Unlock();
 }
 
