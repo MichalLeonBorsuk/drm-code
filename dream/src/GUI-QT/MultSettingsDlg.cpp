@@ -124,7 +124,7 @@ void MultSettingsDlg::OnbuttonChooseDir()
 #ifdef _WIN32
 		strFilename.replace(QRegExp("/"), "\\");
 #endif
-		Parameters.SetDataDirectory(string(strFilename.toUtf8().data()));
+		Parameters.SetDataDirectory(string(strFilename.toUtf8().constData()));
 		SetDataDirectoryControls();
 	}
 }

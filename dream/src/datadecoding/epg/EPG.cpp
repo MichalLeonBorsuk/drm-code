@@ -1461,7 +1461,7 @@ EPG::loadChannels (const QString & fileName)
                 {
                     QDomElement s = e.toElement ();
                     if (s.tagName () == "shortName")
-                        name = s.text().toUtf8().data(); // XXX
+                        name = s.text().toUtf8().constData();
                     if (s.tagName () == "serviceID")
                         sid = s.attribute ("id", "0");
                 }

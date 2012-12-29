@@ -131,7 +131,7 @@ void CSoundCardSelMenu::OnSoundInDevice(QAction* action)
 {
     Parameters.Lock();
         CSelectionInterface* pSoundInIF = DRMTransceiver.GetSoundInInterface();
-        pSoundInIF->SetDev(action->data().toString().toLocal8Bit().data());
+        pSoundInIF->SetDev(action->data().toString().toLocal8Bit().constData());
     Parameters.Unlock();
 }
 
@@ -139,7 +139,7 @@ void CSoundCardSelMenu::OnSoundOutDevice(QAction* action)
 {
     Parameters.Lock();
         CSelectionInterface* pSoundOutIF = DRMTransceiver.GetSoundOutInterface();
-        pSoundOutIF->SetDev(action->data().toString().toLocal8Bit().data());
+        pSoundOutIF->SetDev(action->data().toString().toLocal8Bit().constData());
     Parameters.Unlock();
 }
 
@@ -205,7 +205,7 @@ QMenu* CSoundCardSelMenu::InitDevice(QMenu* self, QMenu* parent, const QString& 
         if (group == NULL)
             group = new QActionGroup(m);
         group->addAction(m);
-//printf("CSoundCardSelMenu::InitDevice() %s\n", name.toUtf8().data());
+//printf("CSoundCardSelMenu::InitDevice() %s\n", name.toUtf8().constData());
     }
     return menu;
 }
@@ -323,7 +323,7 @@ void CFileMenu::OnOpenFile()
 	    if (!filename.isEmpty())
 	    {
 			strLastSoundPath = filename;
-		    ((CDRMReceiver&)DRMTransceiver).SetInputFile(string(filename.toLocal8Bit().data()));
+		    ((CDRMReceiver&)DRMTransceiver).SetInputFile(string(filename.toLocal8Bit().constData()));
 		    RestartTransceiver(&DRMTransceiver);
             UpdateMenu();
 	    }
@@ -353,7 +353,7 @@ void CFileMenu::OnOpenSignalFile()
         if (!filename.isEmpty())
         {
             strLastSoundPath = filename;
-            ((CDRMReceiver&)DRMTransceiver).SetSoundFile(string(filename.toLocal8Bit().data()));
+            ((CDRMReceiver&)DRMTransceiver).SetSoundFile(string(filename.toLocal8Bit().constData()));
             RestartTransceiver(&DRMTransceiver);
             UpdateMenu();
         }
@@ -381,7 +381,7 @@ void CFileMenu::OnOpenRsciFile()
         if (!filename.isEmpty())
         {
 			strLastRsciPath = filename;
-            ((CDRMReceiver&)DRMTransceiver).SetRsciInput(string(filename.toLocal8Bit().data()));
+            ((CDRMReceiver&)DRMTransceiver).SetRsciInput(string(filename.toLocal8Bit().constData()));
             RestartTransceiver(&DRMTransceiver);
             UpdateMenu();
         }
