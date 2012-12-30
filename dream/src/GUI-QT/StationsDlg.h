@@ -28,27 +28,10 @@
 #ifndef __StationsDlg_H
 #define __StationsDlg_H
 
-#include <qdatetime.h>
-#include <qpixmap.h>
-#include <qradiobutton.h>
-#include <qtimer.h>
-#include <qmessagebox.h>
-#include <qcombobox.h>
-#include <qdir.h>
-#include <qmenubar.h>
-#include <qlayout.h>
-#include <qthread.h>
-#include <qaction.h>
-#include <qlabel.h>
-#include <qfileinfo.h>
-#include <qdatetime.h>
-#include <qwt_thermo.h>
-#include <qwt_counter.h>
-#include <QActionGroup>
+#include <QDialog>
 #include <QSignalMapper>
 #include <QNetworkAccessManager>
-#include <QButtonGroup>
-#include <QDialog>
+#include <QTimer>
 #include "ui_StationsDlgbase.h"
 
 #include "DialogUtil.h"
@@ -210,27 +193,12 @@ protected:
 	int iSecondsPreviewanalog;
 };
 
-
-
-class RemoteMenu;
-class QSocket;
-
-class CStationsDlgBase : public QDialog, public Ui_StationsDlgbase
-{
-public:
-	CStationsDlgBase(QWidget* parent = 0, const char* name = 0,
-		bool modal = FALSE, Qt::WFlags f = 0):
-		QDialog(parent) {(void)name;(void)modal;(void)f; setWindowFlags(Qt::Window);}
-	virtual ~CStationsDlgBase() {}
-};
-
-class StationsDlg : public CStationsDlgBase
+class StationsDlg : public QDialog, public Ui_StationsDlgbase
 {
 	Q_OBJECT
 
 public:
-	StationsDlg(CDRMReceiver&, CSettings&, CRig&, QWidget* parent = 0,
-		const char* name = 0, bool modal = FALSE, Qt::WFlags f = 0);
+	StationsDlg(CDRMReceiver&, CSettings&, CRig&);
 	virtual ~StationsDlg();
 
 	void SaveSettings(CSettings&);
@@ -254,26 +222,26 @@ protected:
 	void			SetSortAscending(_BOOLEAN b);
 	void			ColumnParamFromStr(const QString& strColumnParam);
 	void			ColumnParamToStr(QString& strColumnParam);
-	int			currentSortColumn();
+	int				currentSortColumn();
 	_BOOLEAN		bCurrentSortAscendingdrm;
 	_BOOLEAN		bCurrentSortAscendinganalog;
-	int			iSortColumndrm;
-	int			iSortColumnanalog;
+	int				iSortColumndrm;
+	int				iSortColumnanalog;
 	QString			strColumnParamdrm;
 	QString			strColumnParamanalog;
 
-	CDRMReceiver&		DRMReceiver;
-	CSettings&			Settings;
-	CRig&				Rig;
-	CDRMSchedule		DRMSchedule;
+	CDRMReceiver&	DRMReceiver;
+	CSettings&		Settings;
+	CRig&			Rig;
+	CDRMSchedule	DRMSchedule;
 	QIcon			greenCube;
 	QIcon			redCube;
 	QIcon			orangeCube;
 	QIcon			pinkCube;
-	QSignalMapper* previewMapper;
-	QActionGroup* previewGroup;
-	QSignalMapper* showMapper;
-	QActionGroup* showGroup;
+	QSignalMapper*	previewMapper;
+	QActionGroup*	previewGroup;
+	QSignalMapper*	showMapper;
+	QActionGroup*	showGroup;
 	QNetworkAccessManager *manager;
 	QTimer			TimerList;
 	QTimer			TimerUTCLabel;

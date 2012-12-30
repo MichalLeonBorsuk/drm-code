@@ -36,6 +36,9 @@
 #include <QNetworkRequest>
 #include <QNetworkReply>
 #include <QApplication>
+#include <QDateTime>
+#include <QMessageBox>
+#include <QFileInfo>
 #include <cmath>
 
 /* Implementation *************************************************************/
@@ -246,11 +249,11 @@ void CDRMSchedule::ReadCSVFile(FILE* pFile)
         else
         {
             QStringList times = fields[1].split("-");
-	    if(times.count()==2)
-	    {
-		StationsItem.SetStartTime(times[0].toInt());
-		StationsItem.SetStopTime(times[1].toInt());
-	    }
+			if(times.count()==2)
+			{
+				StationsItem.SetStartTime(times[0].toInt());
+				StationsItem.SetStopTime(times[1].toInt());
+			}
         }
 
         if(fields[2].length()>0)
@@ -455,7 +458,7 @@ Station::EState CStationsItem::stateAt(const QDateTime& ltime, int previewSecond
 {
     if (activeAt(ltime) == TRUE)
     {
-	QDateTime dt = ltime.addSecs(NUM_SECONDS_SOON_INACTIVE);
+		QDateTime dt = ltime.addSecs(NUM_SECONDS_SOON_INACTIVE);
 	
         /* Check if the station soon will be inactive */
         if (activeAt(dt) == TRUE)
@@ -465,12 +468,12 @@ Station::EState CStationsItem::stateAt(const QDateTime& ltime, int previewSecond
     }
     else
     {
-	QDateTime dt = ltime.addSecs(previewSeconds);
-	if (activeAt(dt) == TRUE)
-	{
-            return Station::IS_PREVIEW;
-	}
-	return Station::IS_INACTIVE;
+		QDateTime dt = ltime.addSecs(previewSeconds);
+		if (activeAt(dt) == TRUE)
+		{
+				return Station::IS_PREVIEW;
+		}
+		return Station::IS_INACTIVE;
     }
 }
 
@@ -556,15 +559,13 @@ void CStationsItem::SetDaysFlagString(const QString& strNewDaysFlags)
     }
 }
 
-StationsDlg::StationsDlg(CDRMReceiver& DRMReceiver, CSettings& Settings, CRig& Rig,
-                         QWidget* parent, const char* name, bool modal, Qt::WFlags f) :
-    CStationsDlgBase(parent, name, modal, f),
-    DRMReceiver(DRMReceiver), Settings(Settings), Rig(Rig),
+StationsDlg::StationsDlg(CDRMReceiver& DRMReceiver, CSettings& Settings, CRig& Rig):
+	QDialog(NULL), DRMReceiver(DRMReceiver), Settings(Settings), Rig(Rig),
     greenCube(":/icons/greenCube.png"), redCube(":/icons/redCube.png"),
     orangeCube(":/icons/orangeCube.png"), pinkCube(":/icons/pinkCube.png"),
     bReInitOnFrequencyChange(FALSE), eLastScheduleMode(CDRMSchedule::SM_NONE)
 {
-    setupUi(this);
+	setupUi(this);
 
     /* Load settings */
     LoadSettings(Settings);
