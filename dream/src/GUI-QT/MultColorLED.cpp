@@ -36,26 +36,23 @@ CMultColorLED::CMultColorLED(QWidget * parent, const char * name, Qt::WFlags f) 
 	QLabel(parent), eColorFlag(RL_GREY),
 	TimerRedLight(), TimerGreenLight(), TimerYellowLight(),
 	bFlagRedLi(false), bFlagGreenLi(false), bFlagYellowLi(false),
-	iUpdateTime(DEFAULT_UPDATE_TIME),
-	green(13,13),yellow(13,13),red(13,13)//,grey(13,13)
+	iUpdateTime(DEFAULT_UPDATE_TIME)
 {
 	(void)name;
 	(void)f;
-	green.fill(QColor(0, 255, 0));
-	red.fill(QColor(255, 0, 0));
-//	grey.fill(QColor(192, 192, 192));
-	yellow.fill(QColor(255, 255, 0));
+
+	green = QColor(0, 255, 0);
+	red = QColor(255, 0, 0);
+	yellow = QColor(255, 255, 0);
+	grey = palette().color(QPalette::Window);
 
 	/* Set modified style */
+	setAutoFillBackground(true);
 	setFrameShape(QFrame::Panel);
 	setFrameShadow(QFrame::Sunken);
 	setIndent(0);
 
 	Reset();
-
-	/* Set init-bitmap */
-//	setPixmap(grey);
-
 
 	/* Connect timer events to the desired slots */
 	connect(&TimerRedLight, SIGNAL(timeout()), 
@@ -110,7 +107,7 @@ void CMultColorLED::UpdateColor()
 	{
 		if (eColorFlag != RL_RED)
 		{
-			setPixmap(red);
+			SetColor(red);
 			eColorFlag = RL_RED;
 		}
 		return;
@@ -120,7 +117,7 @@ void CMultColorLED::UpdateColor()
 	{
 		if (eColorFlag != RL_YELLOW)
 		{
-			setPixmap(yellow);
+			SetColor(yellow);
 			eColorFlag = RL_YELLOW;
 		}
 		return;
@@ -130,7 +127,7 @@ void CMultColorLED::UpdateColor()
 	{
 		if (eColorFlag != RL_GREEN)
 		{
-			setPixmap(green);
+			SetColor(green);
 			eColorFlag = RL_GREEN;
 		}
 		return;
@@ -139,7 +136,7 @@ void CMultColorLED::UpdateColor()
 	/* If no color is active, set control to grey light */
 	if (eColorFlag != RL_GREY)
 	{
-		setPixmap(NULL/*grey*/);
+		SetColor(grey);
 		eColorFlag = RL_GREY;
 	}
 }
@@ -180,4 +177,11 @@ void CMultColorLED::SetUpdateTime(int iNUTi)
 		iUpdateTime = MIN_TIME_FOR_RED_LIGHT;
 	else
 		iUpdateTime = iNUTi;
+}
+
+void CMultColorLED::SetColor(const QColor& color)
+{
+	QPalette newPalette(palette());
+	newPalette.setColor(QPalette::Window, color);
+	setPalette(newPalette);
 }
