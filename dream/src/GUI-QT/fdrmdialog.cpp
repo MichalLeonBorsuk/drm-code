@@ -81,7 +81,7 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& NSettings, CRig& rig,
     pSlideShowDlg = new SlideShowViewer(DRMReceiver, Settings, NULL);
 
     /* Stations window */
-    pStationsDlg = new StationsDlg(DRMReceiver, Settings, rig, this);
+    pStationsDlg = new StationsDlg(DRMReceiver, Settings, rig);
 
     /* Live Schedule window */
     pLiveScheduleDlg = new LiveScheduleDlg(DRMReceiver, Settings, this);
@@ -174,11 +174,7 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& NSettings, CRig& rig,
     ProgrInputLevel->setAlarmLevel(-12.5);
     QColor alarmColor(QColor(255, 0, 0));
     QColor fillColor(QColor(0, 190, 0));
-#if QWT_VERSION < 0x050000
-    ProgrInputLevel->setOrientation(QwtThermo::Vertical, QwtThermo::Left);
-#else
     ProgrInputLevel->setOrientation(Qt::Vertical, QwtThermo::LeftScale);
-#endif
 #if QWT_VERSION < 0x060000
     ProgrInputLevel->setAlarmColor(alarmColor);
     ProgrInputLevel->setFillColor(fillColor);
