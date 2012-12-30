@@ -73,14 +73,15 @@ protected:
 	bool			bFlagGreenLi;
 	bool			bFlagYellowLi;
 
-	int			iUpdateTime;
+	int				iUpdateTime;
 
-	QPixmap			green;
-	QPixmap			yellow;
-	QPixmap			red;
-//	QPixmap			grey;
+	QColor			green;
+	QColor			yellow;
+	QColor			red;
+	QColor			grey;
 
 	void			UpdateColor();
+	void			SetColor(const QColor& color);
 
 protected slots:
 	void OnTimerRedLight();
