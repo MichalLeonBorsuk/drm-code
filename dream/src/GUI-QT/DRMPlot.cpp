@@ -55,8 +55,15 @@ CDRMPlot::CDRMPlot(QWidget* parent, QwtPlot* SuppliedPlot) :
 	plot->setAutoDelete(false);
 	plot->setAutoReplot(false);
 
+	/* Base font */
+	QFont basefont;
+	basefont.setPointSize(PLOT_FONT_SIZE);
+	basefont.setStyleHint(QFont::SansSerif, QFont::PreferOutline);
+
 	/* Legend creation */
-	QwtLegend* legend = new QwtLegend();
+	legend = new QwtLegend();
+	QFont legendfont(basefont);
+	legend->setFont(legendfont);
 	plot->insertLegend(legend, QwtPlot::RightLegend);
 
 	/* Curve defaults (other curves are set by PlotDefaults) */
@@ -86,13 +93,10 @@ CDRMPlot::CDRMPlot(QWidget* parent, QwtPlot* SuppliedPlot) :
 	grid.enableYMin(FALSE);
 	grid.attach(plot);
 
-	/* Fonts */
-	QFont axisfont;
-	axisfont.setPointSize(8);
-	axisfont.setStyleHint(QFont::SansSerif, QFont::PreferOutline);
-	QFont titlefont(axisfont);
+	/* Axis and title fonts */
+	QFont axisfont(basefont);
+	QFont titlefont(basefont);
 	titlefont.setWeight(QFont::Bold);
-
 	plot->setAxisFont(QwtPlot::xBottom, axisfont);
 	plot->setAxisFont(QwtPlot::yLeft, axisfont);
 	plot->setAxisFont(QwtPlot::yRight, axisfont);
@@ -103,10 +107,8 @@ CDRMPlot::CDRMPlot(QWidget* parent, QwtPlot* SuppliedPlot) :
 	/* Axis titles */
 	bottomTitle.setFont(axisfont);
 	plot->setAxisTitle(QwtPlot::xBottom, bottomTitle);
-
 	leftTitle.setFont(axisfont);
 	plot->setAxisTitle(QwtPlot::yLeft, leftTitle);
-
 	rightTitle.setFont(axisfont);
 	plot->setAxisTitle(QwtPlot::yRight, rightTitle);
 
@@ -610,6 +612,12 @@ void CDRMPlot::PlotDefaults()
 	}
 }
 
+void CDRMPlot::PlotSetLegendFont()
+{
+	foreach(QWidget* item, legend->legendItems())
+		item->setFont(legend->font());
+}
+
 void CDRMPlot::PlotForceUpdate()
 {
 	/* Force the plot to update */
@@ -751,6 +759,7 @@ void CDRMPlot::SetupTranFct()
 	main2curve.setTitle(tr("Group Del."));
 	main2curve.setYAxis(QwtPlot::yRight);
 	main2curve.attach(plot);
+	PlotSetLegendFont();
 }
 
 void CDRMPlot::SetupAudioSpec(_BOOLEAN bAudioDecoder)
@@ -809,6 +818,7 @@ void CDRMPlot::SetupFreqSamOffsHist()
 	main2curve.setTitle(tr("Samp."));
 	main2curve.setYAxis(QwtPlot::yRight);
 	main2curve.attach(plot);
+	PlotSetLegendFont();
 }
 
 void CDRMPlot::AutoScale(CVector<_REAL>& vecrData,
@@ -879,6 +889,7 @@ void CDRMPlot::SetupDopplerDelayHist()
 	main2curve.setTitle(tr("Doppler"));
 	main2curve.setYAxis(QwtPlot::yRight);
 	main2curve.attach(plot);
+	PlotSetLegendFont();
 }
 
 void CDRMPlot::SetupSNRAudHist()
@@ -907,6 +918,7 @@ void CDRMPlot::SetupSNRAudHist()
 	main2curve.setTitle(tr("Audio"));
 	main2curve.setYAxis(QwtPlot::yRight);
 	main2curve.attach(plot);
+	PlotSetLegendFont();
 }
 
 void CDRMPlot::AutoScale2(CVector<_REAL>& vecrData,
@@ -1422,6 +1434,7 @@ void CDRMPlot::SetupAllConst()
 	curve1.attach(plot);
 	curve2.attach(plot);
 	curve3.attach(plot);
+	PlotSetLegendFont();
 }
 
 void CDRMPlot::SetGrid(double div, int step, int substep)
