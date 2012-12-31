@@ -139,6 +139,10 @@
 #define MARKER_STYLE Qt::DashLine
 
 
+/* Define the plot font size */
+#define PLOT_FONT_SIZE 8
+
+
 /* Sometime between Qwt version some name may change, we fix this */
 #if QWT_VERSION < 0x050200
 # define LOWERBOUND lBound
@@ -316,6 +320,7 @@ protected:
 
 	void PlotDefaults();
 	void PlotForceUpdate();
+	void PlotSetLegendFont();
 
 	void SetupAvIR();
 	void SetupTranFct();
