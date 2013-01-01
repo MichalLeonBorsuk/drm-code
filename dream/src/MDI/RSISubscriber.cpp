@@ -30,10 +30,10 @@
  *
 \******************************************************************************/
 
+#include "PacketSocket.h"
 #include "RSISubscriber.h"
 #include "../DrmReceiver.h"
 #include "TagPacketGenerator.h"
-#include "PacketSocket.h"
 
 
 CRSISubscriber::CRSISubscriber(CPacketSink *pSink) : pPacketSink(pSink),
