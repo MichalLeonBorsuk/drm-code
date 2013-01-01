@@ -42,12 +42,12 @@
  *
 \******************************************************************************/
 
-#include "MDIRSCI.h"
-#include "../DrmReceiver.h"
 #include "PacketSocket.h"
+#include "../DrmReceiver.h"
 #include "PacketSourceFile.h"
 #include <sstream>
 #include <iomanip>
+#include "MDIRSCI.h"
 
 /* Implementation *************************************************************/
 CDownstreamDI::CDownstreamDI() : iLogFraCnt(0), pDrmReceiver(NULL),

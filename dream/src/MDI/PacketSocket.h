@@ -29,7 +29,9 @@
 #ifndef PACKET_SOCKET_H_INCLUDED
 #define PACKET_SOCKET_H_INCLUDED
 
-#ifndef _WIN32
+#ifdef _WIN32
+# include <winsock2.h>
+#else
   typedef int SOCKET;
 # include <netinet/in.h>
 #endif

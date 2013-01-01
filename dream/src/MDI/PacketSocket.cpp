@@ -37,8 +37,7 @@
 
 #ifdef _WIN32
 /* Always include winsock2.h before windows.h */
-# include <winsock2.h>
-# include <ws2tcpip.h>
+# include <Ws2tcpip.h>
 # include <windows.h>
 #else
 # include <arpa/inet.h>
@@ -256,8 +255,8 @@ CPacketSocketNative::SetOrigin(const string & strNewAddr)
         if((gp.s_addr & mc) == mc)	/* multicast! */
         {
             int optval = 1;
-            setsockopt(s, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof optval);
-            sockaddr_in sa;
+            setsockopt(s, SOL_SOCKET, SO_REUSEADDR, (char*)&optval, sizeof optval);
+			sockaddr_in sa;
             sa.sin_family = AF_INET;
             sa.sin_addr.s_addr = gp.s_addr;
             sa.sin_port = htons(port);
@@ -304,7 +303,12 @@ CPacketSocketNative::SetOrigin(const string & strNewAddr)
 
 
     }
+#ifdef _WIN32
+	u_long mode = 1;
+	(void)ioctlsocket(s, FIONBIO, &mode);
+#else
     fcntl(s, F_SETFL, O_NONBLOCK);  // set to non-blocking
+#endif
     return TRUE;
 }
 

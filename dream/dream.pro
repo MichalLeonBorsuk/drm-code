@@ -277,9 +277,7 @@ win32 {
      }
      UI_DIR = moc
      MOC_DIR = moc
-     LIBS += -lsetupapi \
-     -lwinmm \
-     -lwsock32
+     LIBS += -lsetupapi -lwinmm -lwsock32 -lws2_32 -lzdll
      DEFINES += HAVE_SETUPAPI \
      HAVE_LIBZ
      DEFINES -= UNICODE
