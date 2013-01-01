@@ -33,11 +33,7 @@
 #include "RSISubscriber.h"
 #include "../DrmReceiver.h"
 #include "TagPacketGenerator.h"
-#ifdef QT_NETWORK_LIB
-# include "PacketSocketQT.h"
-#else
-# include "PacketSocketNull.h"
-#endif
+#include "PacketSocket.h"
 
 
 CRSISubscriber::CRSISubscriber(CPacketSink *pSink) : pPacketSink(pSink),
@@ -107,11 +103,7 @@ void CRSISubscriber::SendPacket(const vector<_BYTE>& vecbydata, uint32_t, uint16
 CRSISubscriberSocket::CRSISubscriberSocket(CPacketSink *pSink):CRSISubscriber(pSink),pSocket(NULL)
 ,uIf(0),uAddr(0),uPort(0)
 {
-#ifdef QT_CORE_LIB
-	pSocket = new CPacketSocketQT;
-#else
-	pSocket = new CPacketSocketNull;
-#endif
+	pSocket = new CPacketSocketNative;
 	pPacketSink = pSocket;
 }
 
