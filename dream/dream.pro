@@ -106,6 +106,14 @@ macx {
      UI_DIR = moc
      MOC_DIR = moc
      RC_FILE = src/GUI-QT/res/macicons.icns
+     exists(/opt/local/include/portaudio.h) {
+          CONFIG += portaudio sound
+          message("with portaudio")
+     }
+     exists(/opt/local/include/sndfile.h) {
+      CONFIG += sndfile
+          message("with libsndfile")
+     }
 }
 exists(libs/faac.h) {
      CONFIG += faac
@@ -116,27 +124,22 @@ exists(libs/neaacdec.h) {
      message("with FAAD2")
 }
 unix {
-     QMAKE_CXXFLAGS += -std=c++11
+     !macx:QMAKE_CXXFLAGS += -std=c++11
 # packagesExist() not available on Debian Squeeze
      target.path = /usr/bin
      INSTALLS += target
      CONFIG += link_pkgconfig
      exists(/usr/include/pulse/pulseaudio.h) {
-     #packagesExist(libpulse) {
-      CONFIG += pulseaudio
+     #packagesExist(libpulse) 
+      CONFIG += pulseaudio sound
       PKGCONFIG += libpulse
                 message("with pulseaudio")
      }
-     else {
-      exists(/usr/include/portaudio.h) {
-      #packagesExist(portaudio-2.0) {
-          CONFIG += portaudio
-       PKGCONFIG += portaudio-2.0
-                    message("with portaudio")
-      }
-      else {
-          error("no usable audio interface found - install pulseaudio or portaudio dev package")
-      }
+     exists(/usr/include/portaudio.h) {
+      #packagesExist(portaudio-2.0) 
+          CONFIG += portaudio sound
+          PKGCONFIG += portaudio-2.0
+          message("with portaudio")
      }
      !qtconsole:!console {
       exists(/usr/include/hamlib/rig.h) {
@@ -157,10 +160,6 @@ unix {
                 message("with pcap")
             }
      exists(/usr/include/sndfile.h) {
-      CONFIG += sndfile
-                message("with libsndfile")
-            }
-     exists(/opt/local/include/sndfile.h) {
       CONFIG += sndfile
                 message("with libsndfile")
             }
@@ -585,4 +584,7 @@ SOURCES += \
     src/GUI-QT/MultSettingsDlg.cpp \
     src/GUI-QT/StationsDlg.cpp \
     src/GUI-QT/TransmDlg.cpp
+}
+!sound {
+  error("no usable audio interface found - install pulseaudio or portaudio dev package")
 }
