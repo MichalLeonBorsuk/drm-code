@@ -107,12 +107,10 @@ macx {
      MOC_DIR = moc
      RC_FILE = src/GUI-QT/res/macicons.icns
      exists(/opt/local/include/portaudio.h) {
-          CONFIG += portaudio sound
-          message("with portaudio")
+          CONFIG += portaudio
      }
      exists(/opt/local/include/sndfile.h) {
       CONFIG += sndfile
-          message("with libsndfile")
      }
 }
 exists(libs/faac.h) {
@@ -131,15 +129,13 @@ unix {
      CONFIG += link_pkgconfig
      exists(/usr/include/pulse/pulseaudio.h) {
      #packagesExist(libpulse) 
-      CONFIG += pulseaudio sound
+      CONFIG += pulseaudio
       PKGCONFIG += libpulse
-                message("with pulseaudio")
      }
      exists(/usr/include/portaudio.h) {
       #packagesExist(portaudio-2.0) 
-          CONFIG += portaudio sound
+          CONFIG += portaudio
           PKGCONFIG += portaudio-2.0
-          message("with portaudio")
      }
      !qtconsole:!console {
       exists(/usr/include/hamlib/rig.h) {
@@ -148,50 +144,43 @@ unix {
       }
       exists(/usr/local/include/hamlib/rig.h) {
           CONFIG += hamlib
-          message("with hamlib")
       }
      }
      exists(/usr/include/gps.h) {
       CONFIG += gps
-                message("with gps")
             }
      exists(/usr/include/pcap.h) {
       CONFIG += pcap
-                message("with pcap")
             }
      exists(/usr/include/sndfile.h) {
       CONFIG += sndfile
-                message("with libsndfile")
             }
      exists(/usr/include/speex/speex_preprocess.h) {
       DEFINES += HAVE_SPEEX
       LIBS += -lspeexdsp
       CONFIG += speexdsp
-                message("with libspeexdsp")
-            }
+      message("with libspeexdsp")
+     }
      exists(/usr/include/fftw3.h) {
       DEFINES += HAVE_FFTW3_H
-                 LIBS += -lfftw3
-                         message("with fftw3")
-                     }
-     else {
-      exists(/usr/include/fftw.h) {
-          message("with fftw2")
-          LIBS += -lfftw
-          exists(/usr/include/rfftw.h):LIBS += -lrfftw
-          exists(/opt/local/include/dfftw.h) {
+      LIBS += -lfftw3
+      message("with fftw3")
+      CONFIG += fftw
+     }
+     exists(/usr/include/fftw.h) {
+       CONFIG += fftw
+       message("with fftw2")
+       LIBS += -lfftw
+       exists(/usr/include/rfftw.h):LIBS += -lrfftw
+       exists(/opt/local/include/dfftw.h) {
               DEFINES += HAVE_DFFTW_H
               LIBS += -ldfftw
-          }
-          exists(/opt/local/include/drfftw.h) {
+       }
+       exists(/opt/local/include/drfftw.h) {
              DEFINES += HAVE_DRFFTW_H
              LIBS += -ldrfftw
-          }
-          DEFINES += HAVE_FFTW_H HAVE_RFFTW_H
-      }
-      else {
-          error("no usable fftw library found - install fftw dev package")
-      }
+        }
+        DEFINES += HAVE_FFTW_H HAVE_RFFTW_H
      }
      LIBS += -lz -ldl
      SOURCES += src/linux/Pacer.cpp
@@ -236,47 +225,38 @@ win32-g++ {
 win32 {
      exists(libs/portaudio.h) {
       CONFIG += portaudio
-      message("with portaudio")
      }
      else {
-      HEADERS += src/windows/Sound.h
-      SOURCES += src/windows/Sound.cpp
-      message("with mmsystem")
+      CONFIG += mmsystem
      }
      exists(libs/fftw3.h) {
       DEFINES += HAVE_FFTW3_H
       LIBS += -lfftw3-3
       message("with fftw3")
+      CONFIG += fftw
      }
-     else {
-      exists(libs/fftw.h) {
-          DEFINES += HAVE_FFTW_H
-          LIBS += -lfftw
-			exists(libs/rfftw.lib) {
-				DEFINES += HAVE_RFFTW_H
-				LIBS += -lrfftw
-			}
+     exists(libs/fftw.h) {
+        DEFINES += HAVE_FFTW_H
+        LIBS += -lfftw
+	  exists(libs/rfftw.lib) {
+		DEFINES += HAVE_RFFTW_H
+		LIBS += -lrfftw
+	}
       message("with fftw2")
-      }
-      else {
-          error("no usable fftw version 2 or 3 found")
-      }
+      CONFIG += fftw
      }
      exists(libs/hamlib/rig.h) {
       CONFIG += hamlib
-      message("with hamlib")
      }
      exists(libs/pcap.h) {
       CONFIG += pcap
-      message("with pcap")
      }
      exists(libs/sndfile.h) {
       CONFIG += sndfile
-      message("with libsndfile")
      }
      UI_DIR = moc
      MOC_DIR = moc
-     LIBS += -lsetupapi -lwinmm -lwsock32 -lws2_32 -lzdll
+     LIBS += -lsetupapi -lwsock32 -lws2_32 -lzdll
      DEFINES += HAVE_SETUPAPI \
      HAVE_LIBZ
      DEFINES -= UNICODE
@@ -296,21 +276,25 @@ sndfile {
      DEFINES += HAVE_LIBSNDFILE
      unix:LIBS += -lsndfile
      win32:LIBS += libsndfile-1.lib
+     message("with libsndfile")
 }
 gps {
      DEFINES += HAVE_LIBGPS
      unix:LIBS += -lgps
+     message("with gps")
 }
 pcap {
      DEFINES += HAVE_LIBPCAP
      unix:LIBS += -lpcap
      win32:LIBS += wpcap.lib packet.lib
+     message("with pcap")
 }
 hamlib {
      DEFINES += HAVE_LIBHAMLIB
      macx:LIBS += -framework IOKit
      unix:LIBS += -lhamlib
      win32:LIBS += libhamlib-2.lib
+     message("with hamlib")
      qt4 {
       HEADERS += src/GUI-QT/RigDlg.h
       SOURCES += src/GUI-QT/RigDlg.cpp
@@ -318,26 +302,39 @@ hamlib {
      }
 }
 alsa {
-     DEFINES += USE_ALSA
-     HEADERS += src/linux/soundsrc.h \
-     src/linux/soundin.h \
-     src/linux/soundout.h
-     SOURCES += src/linux/alsa.cpp \
-     src/linux/soundsrc.cpp
+    DEFINES += USE_ALSA
+    HEADERS += src/linux/soundsrc.h \
+    src/linux/soundin.h \
+    src/linux/soundout.h
+    SOURCES += src/linux/alsa.cpp \
+    src/linux/soundsrc.cpp
+    message("with alsa")
+    CONFIG += sound
+}
+mmsystem {
+    HEADERS += src/windows/Sound.h
+    SOURCES += src/windows/Sound.cpp
+    LIBS += -lwinmm
+    message("with mmsystem")
+    CONFIG += sound
 }
 portaudio {
-     DEFINES += USE_PORTAUDIO
-     HEADERS += src/sound/pa_ringbuffer.h \
-     src/sound/drm_portaudio.h
-     SOURCES += src/sound/drm_portaudio.cpp \
-     src/sound/pa_ringbuffer.c
-     LIBS += -lportaudio
+    DEFINES += USE_PORTAUDIO
+    HEADERS += src/sound/pa_ringbuffer.h \
+    src/sound/drm_portaudio.h
+    SOURCES += src/sound/drm_portaudio.cpp \
+    src/sound/pa_ringbuffer.c
+    LIBS += -lportaudio
+    message("with portaudio")
+    CONFIG += sound
 }
 pulseaudio {
-     DEFINES += USE_PULSEAUDIO
-     HEADERS += src/sound/drm_pulseaudio.h
-     SOURCES += src/sound/drm_pulseaudio.cpp
-     LIBS += -lpulse
+    DEFINES += USE_PULSEAUDIO
+    HEADERS += src/sound/drm_pulseaudio.h
+    SOURCES += src/sound/drm_pulseaudio.cpp
+    LIBS += -lpulse
+    message("with pulseaudio")
+    CONFIG += sound
 }
 HEADERS += \
     src/MDI/PacketSocket.h \
@@ -587,4 +584,7 @@ SOURCES += \
 }
 !sound {
   error("no usable audio interface found - install pulseaudio or portaudio dev package")
+}
+!fftw {
+          error("no usable fftw library found - install fftw dev package")
 }
