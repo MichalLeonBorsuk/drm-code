@@ -27,7 +27,6 @@
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
 \******************************************************************************/
-
 #include "PacketSocket.h"
 #include <iostream>
 #include <sstream>
@@ -39,6 +38,9 @@
 /* Always include winsock2.h before windows.h */
 # include <Ws2tcpip.h>
 # include <windows.h>
+inline int inet_aton(const char*s, void * a) { ((in_addr*)a)->s_addr = inet_addr(s); return 1; }
+# define inet_pton(a, b, c) inet_aton(b, c)
+# define inet_ntop(a, b, c, d) inet_ntoa(*(in_addr*)b)
 #else
 # include <arpa/inet.h>
 # include <sys/unistd.h>
