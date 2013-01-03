@@ -279,8 +279,6 @@ CDRMTransmitter::CDRMTransmitter(CSettings* pSettings) : CDRMTransceiver(pSettin
     /* Either one audio or one data service can be chosen */
     _BOOLEAN bIsAudio = TRUE;
 
-    CService Service;
-
     /* In the current version only one service and one stream is supported. The
        stream IDs must be 0 in both cases */
     if (bIsAudio == TRUE)
@@ -301,7 +299,7 @@ CDRMTransmitter::CDRMTransmitter(CSettings* pSettings) : CDRMTransceiver(pSettin
         Parameters.SetAudDataFlag(0,  CService::SF_AUDIO);
 
         /* Programme Type code (see TableFAC.h, "strTableProgTypCod[]") */
-        Service.iServiceDescr = 15; /* 15 -> other music */
+        Parameters.Service[0].iServiceDescr = 15; /* 15 -> other music */
 
         Parameters.SetCurSelAudioService(0);
     }
@@ -325,20 +323,18 @@ CDRMTransmitter::CDRMTransmitter(CSettings* pSettings) : CDRMTransceiver(pSettin
 
         /* The value 0 indicates that the application details are provided
            solely by SDC data entity type 5 */
-        Service.iServiceDescr = 0;
+        Parameters.Service[0].iServiceDescr = 0;
     }
 
     /* Init service parameters, 24 bit unsigned integer number */
-    Service.iServiceID = 0;
+    Parameters.Service[0].iServiceID = 0;
 
     /* Service label data. Up to 16 bytes defining the label using UTF-8
        coding */
-    Service.strLabel = "Dream Test";
+    Parameters.Service[0].strLabel = "Dream Test";
 
     /* Language (see TableFAC.h, "strTableLanguageCode[]") */
-    Service.iLanguage = 5; /* 5 -> english */
-
-    Parameters.SetServiceParameters(0, Service);
+    Parameters.Service[0].iLanguage = 5; /* 5 -> english */
 
     /* Interleaver mode of MSC service. Long interleaving (2 s): SI_LONG,
        short interleaving (400 ms): SI_SHORT */
