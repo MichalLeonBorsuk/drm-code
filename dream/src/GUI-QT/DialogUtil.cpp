@@ -40,7 +40,9 @@
 #include "../Version.h"
 #include "../util-QT/Util.h"
 #include "DialogUtil.h"
-#include "../util-QT/Rig.h"
+#ifdef HAVE_LIBHAMLIB
+# include "../util-QT/Rig.h"
+#endif
 
 /* to extract the library version */
 #ifdef USE_ALSA

@@ -198,7 +198,11 @@ class StationsDlg : public QDialog, public Ui_StationsDlgbase
 	Q_OBJECT
 
 public:
+#ifdef HAVE_LIBHAMLIB
 	StationsDlg(CDRMReceiver&, CSettings&, CRig&);
+#else
+	StationsDlg(CDRMReceiver&, CSettings&);
+#endif
 	virtual ~StationsDlg();
 
 	void SaveSettings(CSettings&);
@@ -232,7 +236,9 @@ protected:
 
 	CDRMReceiver&	DRMReceiver;
 	CSettings&		Settings;
+#ifdef HAVE_LIBHAMLIB
 	CRig&			Rig;
+#endif
 	CDRMSchedule	DRMSchedule;
 	QIcon			greenCube;
 	QIcon			redCube;

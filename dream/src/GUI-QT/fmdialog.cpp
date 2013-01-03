@@ -28,7 +28,9 @@
 
 #include "fmdialog.h"
 #include "DialogUtil.h"
-#include "../util-QT/Rig.h"
+#ifdef HAVE_LIBHAMLIB
+# include "../util-QT/Rig.h"
+#endif
 #include <QMessageBox>
 #include <QInputDialog>
 #include <QWhatsThis>
@@ -41,13 +43,12 @@
 #include "SoundCardSelMenu.h"
 
 /* Implementation *************************************************************/
-FMDialog::FMDialog(CDRMReceiver& NDRMR, CSettings& NSettings, CRig& rig,
+FMDialog::FMDialog(CDRMReceiver& NDRMR, CSettings& NSettings,
 	QWidget* parent, const char* name, bool modal, Qt::WFlags f):
 	FMDialogBase(parent, name, modal, f),
 	DRMReceiver(NDRMR), Settings(NSettings),
 	eReceiverMode(RM_NONE)
 {
-	(void)rig; // TODO
 	/* recover window size and position */
 	CWinGeom s;
 	Settings.Get("FM Dialog", s);
