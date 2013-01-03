@@ -28,7 +28,9 @@
 
 #include "EvaluationDlg.h"
 #include "DialogUtil.h"
-#include "../util-QT/Rig.h"
+#ifdef HAVE_LIBHAMLIB
+# include "../util-QT/Rig.h"
+#endif
 #include <QMessageBox>
 #include <QLayout>
 #include <QDateTime>

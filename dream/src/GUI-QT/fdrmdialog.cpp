@@ -36,13 +36,20 @@
 #include "BWSViewer.h"
 #include "SlideShowViewer.h"
 #include "JLViewer.h"
-#include "../util-QT/Rig.h"
+#ifdef HAVE_LIBHAMLIB
+# include "../util-QT/Rig.h"
+#endif
 #include "../Scheduler.h"
 #include "../util-QT/Util.h"
 
 /* Implementation *************************************************************/
+#ifdef HAVE_LIBHAMLIB
 FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& NSettings, CRig& rig,
                        QWidget* parent, const char* name, bool modal, Qt::WFlags f)
+#else
+FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& NSettings, 
+                       QWidget* parent, const char* name, bool modal, Qt::WFlags f)
+#endif
     :
     FDRMDialogBase(parent, name, modal, f),
     DRMReceiver(NDRMR),Settings(NSettings),
@@ -70,7 +77,15 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& NSettings, CRig& rig,
     pAnalogDemDlg = new AnalogDemDlg(DRMReceiver, Settings);
 
     /* FM window */
-    pFMDlg = new FMDialog(DRMReceiver, Settings, rig);
+    pFMDlg = new FMDialog(DRMReceiver, Settings);
+
+#ifdef HAVE_HAMLIB
+    /* Stations window */
+    pStationsDlg = new StationsDlg(DRMReceiver, Settings, rig);
+#else
+    /* Stations window */
+    pStationsDlg = new StationsDlg(DRMReceiver, Settings);
+#endif
 
     /* MOT broadcast website viewer window */
     pBWSDlg = new BWSViewer(DRMReceiver, Settings, NULL);
@@ -80,9 +95,6 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& NSettings, CRig& rig,
 
     /* MOT slide show window */
     pSlideShowDlg = new SlideShowViewer(DRMReceiver, Settings, NULL);
-
-    /* Stations window */
-    pStationsDlg = new StationsDlg(DRMReceiver, Settings, rig);
 
     /* Live Schedule window */
     pLiveScheduleDlg = new LiveScheduleDlg(DRMReceiver, Settings, this);
@@ -187,11 +199,13 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& NSettings, CRig& rig,
     ProgrInputLevel->setPalette(newPalette);
 #endif
 
+#ifdef HAVE_LIBHAMLIB
     connect(pStationsDlg, SIGNAL(subscribeRig()), &rig, SLOT(subscribe()));
     connect(pStationsDlg, SIGNAL(unsubscribeRig()), &rig, SLOT(unsubscribe()));
     connect(&rig, SIGNAL(sigstr(double)), pStationsDlg, SLOT(OnSigStr(double)));
     connect(pLogging, SIGNAL(subscribeRig()), &rig, SLOT(subscribe()));
     connect(pLogging, SIGNAL(unsubscribeRig()), &rig, SLOT(unsubscribe()));
+#endif
     connect(pSysEvalDlg, SIGNAL(startLogging()), pLogging, SLOT(start()));
     connect(pSysEvalDlg, SIGNAL(stopLogging()), pLogging, SLOT(stop()));
 

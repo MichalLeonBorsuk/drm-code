@@ -44,7 +44,9 @@
 #  include "fdrmdialog.h"
 #  include "TransmDlg.h"
 #  include "DialogUtil.h"
-#  include "../util-QT/Rig.h"
+#  ifdef HAVE_LIBHAMLIB
+#   include "../util-QT/Rig.h"
+#  endif
 #  include <QApplication>
 #  include <QMessageBox>
 # endif
@@ -125,8 +127,10 @@ main(int argc, char **argv)
 			   routine since we cannot 100% assume that the working thread is
 			   ready before the GUI thread */
 
+#ifdef HAVE_LIBHAMLIB
 			CRig rig(DRMReceiver.GetParameters());
 			rig.LoadSettings(Settings); // must be before DRMReceiver for G313
+#endif
 			DRMReceiver.LoadSettings();
 
 #ifdef HAVE_LIBHAMLIB
@@ -136,8 +140,10 @@ main(int argc, char **argv)
 			{
 				rig.subscribe();
 			}
-#endif
 			FDRMDialog MainDlg(DRMReceiver, Settings, rig);
+#else
+			FDRMDialog MainDlg(DRMReceiver, Settings);
+#endif
 
 			/* Start working thread */
 			CRx rx(DRMReceiver);

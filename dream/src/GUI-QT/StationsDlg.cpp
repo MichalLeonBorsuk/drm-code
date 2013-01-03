@@ -559,8 +559,13 @@ void CStationsItem::SetDaysFlagString(const QString& strNewDaysFlags)
     }
 }
 
+#ifdef HAVE_LIBHAMLIB
 StationsDlg::StationsDlg(CDRMReceiver& DRMReceiver, CSettings& Settings, CRig& Rig):
 	QDialog(NULL), DRMReceiver(DRMReceiver), Settings(Settings), Rig(Rig),
+#else
+StationsDlg::StationsDlg(CDRMReceiver& DRMReceiver, CSettings& Settings):
+	QDialog(NULL), DRMReceiver(DRMReceiver), Settings(Settings),
+#endif
     greenCube(":/icons/greenCube.png"), redCube(":/icons/redCube.png"),
     orangeCube(":/icons/orangeCube.png"), pinkCube(":/icons/pinkCube.png"),
     bReInitOnFrequencyChange(FALSE), eLastScheduleMode(CDRMSchedule::SM_NONE)

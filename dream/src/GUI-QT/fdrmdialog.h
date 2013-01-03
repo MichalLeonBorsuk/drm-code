@@ -84,8 +84,13 @@ class FDRMDialog : public FDRMDialogBase
     Q_OBJECT
 
 public:
+#ifdef HAVE_LIBHAMLIB
     FDRMDialog(CDRMReceiver&, CSettings&, CRig&, QWidget* parent = 0, const char* name = 0,
                bool modal = FALSE,	Qt::WFlags f = 0);
+#else
+    FDRMDialog(CDRMReceiver&, CSettings&, QWidget* parent = 0, const char* name = 0,
+               bool modal = FALSE,	Qt::WFlags f = 0);
+#endif
     void switchEvent();
 
     virtual ~FDRMDialog();

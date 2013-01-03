@@ -39,8 +39,10 @@
 #include "sound/sound.h"
 #include "sound/soundnull.h"
 #include "sound/audiofilein.h"
-#ifdef QT_CORE_LIB // TODO should not have dependency to qt here
+#ifdef HAVE_LIBHAMLIB
+# ifdef QT_CORE_LIB // TODO should not have dependency to qt here
 # include "util-QT/Rig.h"
+# endif
 #endif
 
 const int
