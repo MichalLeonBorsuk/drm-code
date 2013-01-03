@@ -29,6 +29,7 @@
 #include "BWSViewer.h"
 #include "../DrmReceiver.h"
 #include "../util/Settings.h"
+#include "../util-QT/Util.h"
 #include "../datadecoding/DataDecoder.h"
 #include <QDir>
 #include <QFile>

@@ -6,7 +6,7 @@
  *	Julian Cable
  *
  * Description:
- *	ETSI DAB/DRM Electronic Programme Guide utilities
+ *	ETSI DAB/DRM Electronic Programme Guide XML Decompressor
  *
  *
  ******************************************************************************
@@ -27,21 +27,41 @@
  *
 \******************************************************************************/
 
-#ifndef _EPGUTIL_H
-#define _EPGUTIL_H
+#ifndef _EPGDEC_H
+#define _EPGDEC_H
+#include "../GlobalDefinitions.h"
+#include <QDomDocument>
+#include <vector>
+using namespace std;
 
-#include "../DABMOT.h"
+class tag_length_value
+{
+public:
 
-void mkdirs (const string & path);
+      tag_length_value(const _BYTE* p);
 
-string epgFilename (const CDateAndTime & date,
-		    uint32_t sid, int type, bool advanced);
-string epgFilename_etsi (const CDateAndTime & date,
-		    uint32_t sid, int type, bool advanced);
-string epgFilename_dab (const CDateAndTime & date,
-		    uint32_t sid, int type, bool advanced);
+      bool is_cdata() const { return tag == 1; }
+      bool is_epg() const { return tag == 2; }
+      bool is_service_information() const { return tag == 3; }
+      bool is_string_token_table() const { return tag == 4; }
+      bool is_default_id() const { return tag == 5; }
+      bool is_child_element() const { return (5<tag) && (tag<0x80); }
+      bool is_attribute() const { return tag>=0x80; }
 
-string epgFilename2 (const CDateAndTime & date,
-		    uint32_t sid, int type, bool advanced);
+      uint8_t tag;
+      size_t length;
+      _BYTE* value;
+};
 
+class CEPGDecoder
+{
+  public:
+    CEPGDecoder ():doc()
+    {
+    }
+    void decode (const vector<_BYTE>&);
+
+    QDomDocument doc;
+
+};
 #endif

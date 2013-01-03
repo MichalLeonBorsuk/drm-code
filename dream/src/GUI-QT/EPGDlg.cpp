@@ -28,7 +28,7 @@
 \******************************************************************************/
 
 #include "EPGDlg.h"
-#include "../datadecoding/epg/epgutil.h"
+#include "../datadecoding/epgutil.h"
 #include <set>
 #include <QRegExp>
 #include <QFile>

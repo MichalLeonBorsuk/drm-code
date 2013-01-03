@@ -122,20 +122,22 @@ exists(libs/neaacdec.h) {
      message("with FAAD2")
 }
 unix {
-     !macx:QMAKE_CXXFLAGS += -std=c++11
-# packagesExist() not available on Debian Squeeze
+# packagesExist() not available on Qt 4.6 (e.g. Debian Squeeze)
      target.path = /usr/bin
      INSTALLS += target
      CONFIG += link_pkgconfig
+     # check for pulseaudio before portaudio
      exists(/usr/include/pulse/pulseaudio.h) {
      #packagesExist(libpulse) 
       CONFIG += pulseaudio
       PKGCONFIG += libpulse
      }
-     exists(/usr/include/portaudio.h) {
+     else {
+       exists(/usr/include/portaudio.h) {
       #packagesExist(portaudio-2.0) 
           CONFIG += portaudio
           PKGCONFIG += portaudio-2.0
+       }
      }
      !qtconsole:!console {
       exists(/usr/include/hamlib/rig.h) {
@@ -294,12 +296,18 @@ hamlib {
      macx:LIBS += -framework IOKit
      unix:LIBS += -lhamlib
      win32:LIBS += libhamlib-2.lib
-     message("with hamlib")
-     qt4 {
-      HEADERS += src/GUI-QT/RigDlg.h
-      SOURCES += src/GUI-QT/RigDlg.cpp
-      FORMS += RigDlg.ui
+     HEADERS += src/util/Hamlib.h
+     SOURCES += src/util/Hamlib.cpp
+     !console {
+       HEADERS += src/util-QT/Rig.h
+       SOURCES += src/util-QT/Rig.cpp
+       !qtconsole {
+         HEADERS += src/GUI-QT/RigDlg.h
+         SOURCES += src/GUI-QT/RigDlg.cpp
+         FORMS += RigDlg.ui
+       }
      }
+     message("with hamlib")
 }
 alsa {
     DEFINES += USE_ALSA
@@ -348,7 +356,7 @@ HEADERS += \
     src/datadecoding/DABMOT.h \
     src/datadecoding/DataDecoder.h \
     src/datadecoding/DataEncoder.h \
-    src/datadecoding/epg/epgutil.h \
+    src/datadecoding/epgutil.h \
     src/datadecoding/journaline/NML.h \
     src/datadecoding/journaline/Splitter.h \
     src/datadecoding/journaline/cpplog.h \
@@ -461,7 +469,7 @@ SOURCES += \
     src/datadecoding/DABMOT.cpp \
     src/datadecoding/DataDecoder.cpp \
     src/datadecoding/DataEncoder.cpp \
-    src/datadecoding/epg/epgutil.cpp \
+    src/datadecoding/epgutil.cpp \
     src/datadecoding/journaline/NML.cpp \
     src/datadecoding/journaline/dabdgdec_impl.c \
     src/datadecoding/journaline/Splitter.cpp \
@@ -546,15 +554,15 @@ SOURCES += \
     src/GUI-QT/main.cpp
 !console {
 HEADERS += \
-    src/datadecoding/epg/EPG.h \
-    src/datadecoding/epg/epgdec.h \
-    src/GUI-QT/Logging.h \
-    src/GUI-QT/Rig.h
+    src/util-QT/Util.h \
+    src/util-QT/EPG.h \
+    src/util-QT/epgdec.h \
+    src/GUI-QT/Logging.h
 SOURCES += \
-    src/datadecoding/epg/EPG.cpp \
-    src/datadecoding/epg/epgdec.cpp \
-    src/GUI-QT/Logging.cpp \
-    src/GUI-QT/Rig.cpp
+    src/util-QT/Util.cpp \
+    src/util-QT/EPG.cpp \
+    src/util-QT/epgdec.cpp \
+    src/GUI-QT/Logging.cpp
 }
 !console:!qtconsole {
 HEADERS += \

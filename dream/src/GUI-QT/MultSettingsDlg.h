@@ -35,7 +35,7 @@
 #include <qvalidator.h>
 
 #include "../DrmReceiver.h"
-#include "../datadecoding/epg/epgutil.h"
+#include "../datadecoding/epgutil.h"
 #include "../util/Settings.h"
 #include <QDialog>
 #include "ui_MultSettingsDlgbase.h"

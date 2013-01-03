@@ -46,7 +46,7 @@
 #include "ui_EPGDlgbase.h"
 
 #include "../DrmReceiver.h"
-#include "../datadecoding/epg/EPG.h"
+#include "../util-QT/EPG.h"
 #include "../util/Settings.h"
 
 /* Definitions ****************************************************************/

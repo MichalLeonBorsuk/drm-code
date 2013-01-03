@@ -30,9 +30,9 @@
 #define __RIG_H
 
 #include "../Parameter.h"
-#include "../util/Utilities.h"
-#include <qobject.h>
-class QTimer;
+#include "../util/Hamlib.h"
+#include <QObject>
+#include <QTimer>
 
 class CRig :
 	public QObject

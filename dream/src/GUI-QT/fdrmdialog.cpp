@@ -36,8 +36,9 @@
 #include "BWSViewer.h"
 #include "SlideShowViewer.h"
 #include "JLViewer.h"
-#include "Rig.h"
+#include "../util-QT/Rig.h"
 #include "../Scheduler.h"
+#include "../util-QT/Util.h"
 
 /* Implementation *************************************************************/
 FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& NSettings, CRig& rig,

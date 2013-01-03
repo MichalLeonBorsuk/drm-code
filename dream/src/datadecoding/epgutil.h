@@ -1,12 +1,13 @@
 /******************************************************************************\
  * British Broadcasting Corporation
- * Copyright (c) 2007
+ * Copyright (c) 2006
  *
  * Author(s):
- *	Andrew Murphy
+ *	Julian Cable
  *
  * Description:
- *	See GPSReceiver.cpp
+ *	ETSI DAB/DRM Electronic Programme Guide utilities
+ *
  *
  ******************************************************************************
  *
@@ -26,52 +27,21 @@
  *
 \******************************************************************************/
 
-#if !defined(_GPSRECEIVER_H_)
-#define _GPSRECEIVER_H_
+#ifndef _EPGUTIL_H
+#define _EPGUTIL_H
 
-#include "Parameter.h"
-#include "util/Settings.h"
-#include <QTcpSocket>
-#include <qthread.h>
-#include <qmutex.h>
-#include <qtimer.h>
+#include "DABMOT.h"
 
-class CGPSReceiver : public QObject
-{
-    Q_OBJECT
-public:
-    CGPSReceiver(CParameter&, CSettings&);
-    virtual ~CGPSReceiver();
+void mkdirs (const string & path);
 
-protected:
+string epgFilename (const CDateAndTime & date,
+		    uint32_t sid, int type, bool advanced);
+string epgFilename_etsi (const CDateAndTime & date,
+		    uint32_t sid, int type, bool advanced);
+string epgFilename_dab (const CDateAndTime & date,
+		    uint32_t sid, int type, bool advanced);
 
-    void open();
-    void close();
+string epgFilename2 (const CDateAndTime & date,
+		    uint32_t sid, int type, bool advanced);
 
-    void DecodeGPSDReply(string Reply);
-    void DecodeString(char Command, string Value);
-    void DecodeO(string Value);
-    void DecodeY(string Value);
-
-    static const unsigned short c_usReconnectIntervalSeconds;
-
-    CParameter&	Parameters;
-    CSettings&	m_Settings;
-    QTcpSocket*	m_pSocket;
-    QTimer*		m_pTimer;
-    QTimer*		m_pTimerDataTimeout;
-    int			m_iCounter;
-    string		m_sHost;
-    int			m_iPort;
-
-public slots:
-
-    void slotInit();
-    void slotConnected();
-    void slotTimeout();
-    void slotReadyRead();
-    void slotSocketError(int);
-
-};
-
-#endif // !defined(_GPSRECEIVER_H_)
+#endif

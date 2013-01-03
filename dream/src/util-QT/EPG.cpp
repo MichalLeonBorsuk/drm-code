@@ -28,6 +28,7 @@
 \******************************************************************************/
 
 #include "EPG.h"
+#include "../util-QT/Util.h"
 #include <QFileInfo>
 #include <QFile>
 #include <QDir>
@@ -1225,11 +1226,6 @@ EPG::genre_list[] = {
     {0, 0},
 };
 
-#ifdef QT_GUI_LIB
-/* DialogUtil.cpp TODO: CreateDirectories should be accessible from qtconsole mode */
-extern void CreateDirectories(const QString& strFilename);
-#endif
-
 EPG::EPG(CParameter& NParameters):Parameters(NParameters)
 {
     for (int i = 0; true; i++)
@@ -1239,12 +1235,9 @@ EPG::EPG(CParameter& NParameters):Parameters(NParameters)
         genres[genre_list[i].genre] = genre_list[i].desc;
     }
     dir = Parameters.GetDataDirectory("EPG").c_str();
-#ifdef QT_GUI_LIB
     CreateDirectories(dir);
-#else
     if (!QFileInfo(dir).exists())
         QDir().mkdir(dir);
-#endif
     servicesFilename = dir + "/services.xml";
     loadChannels (servicesFilename);
     saveChannels (servicesFilename);

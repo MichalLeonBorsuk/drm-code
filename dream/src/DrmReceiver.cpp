@@ -40,7 +40,7 @@
 #include "sound/soundnull.h"
 #include "sound/audiofilein.h"
 #ifdef QT_CORE_LIB // TODO should not have dependency to qt here
-# include "GUI-QT/Rig.h"
+# include "util-QT/Rig.h"
 #endif
 
 const int

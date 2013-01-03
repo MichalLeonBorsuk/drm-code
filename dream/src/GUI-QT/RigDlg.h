@@ -29,7 +29,7 @@
 #define __RIGDLG_H
 
 #include "../util/Utilities.h"
-#include "Rig.h"
+#include "../util-QT/Rig.h"
 #include "ui_RigDlg.h"
 #include <QDialog>
 #include <QTimer>
