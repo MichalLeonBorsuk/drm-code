@@ -79,7 +79,7 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& NSettings,
     /* FM window */
     pFMDlg = new FMDialog(DRMReceiver, Settings);
 
-#ifdef HAVE_HAMLIB
+#ifdef HAVE_LIBHAMLIB
     /* Stations window */
     pStationsDlg = new StationsDlg(DRMReceiver, Settings, rig);
 #else
