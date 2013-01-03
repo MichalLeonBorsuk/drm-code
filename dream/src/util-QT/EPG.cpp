@@ -1236,9 +1236,7 @@ EPG::EPG(CParameter& NParameters):Parameters(NParameters)
     }
     dir = Parameters.GetDataDirectory("EPG").c_str();
     CreateDirectories(dir);
-    if (!QFileInfo(dir).exists())
-        QDir().mkdir(dir);
-    servicesFilename = dir + "/services.xml";
+    servicesFilename = dir + "services.xml";
     loadChannels (servicesFilename);
     saveChannels (servicesFilename);
 }
