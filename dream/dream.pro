@@ -184,6 +184,9 @@ unix {
         }
         DEFINES += HAVE_FFTW_H HAVE_RFFTW_H
      }
+     tui:console {
+      CONFIG += consoleio
+     }
      LIBS += -lz -ldl
      SOURCES += src/linux/Pacer.cpp
      DEFINES += HAVE_DLFCN_H \
@@ -343,6 +346,12 @@ pulseaudio {
     LIBS += -lpulse
     message("with pulseaudio")
     CONFIG += sound
+}
+consoleio {
+    DEFINES += USE_CONSOLEIO
+    HEADERS += src/linux/ConsoleIO.h
+    SOURCES += src/linux/ConsoleIO.cpp
+    message("with terminal user interface")
 }
 HEADERS += \
     src/MDI/PacketSocket.h \
@@ -591,8 +600,8 @@ SOURCES += \
     src/GUI-QT/TransmDlg.cpp
 }
 !sound {
-  error("no usable audio interface found - install pulseaudio or portaudio dev package")
+    error("no usable audio interface found - install pulseaudio or portaudio dev package")
 }
 !fftw {
-          error("no usable fftw library found - install fftw dev package")
+    error("no usable fftw library found - install fftw dev package")
 }

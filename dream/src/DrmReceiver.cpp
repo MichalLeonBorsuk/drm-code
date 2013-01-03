@@ -41,8 +41,11 @@
 #include "sound/audiofilein.h"
 #ifdef HAVE_LIBHAMLIB
 # ifdef QT_CORE_LIB // TODO should not have dependency to qt here
-# include "util-QT/Rig.h"
+#  include "util-QT/Rig.h"
 # endif
+#endif
+#ifdef USE_CONSOLEIO
+# include "linux/ConsoleIO.h"
 #endif
 
 const int
@@ -954,6 +957,10 @@ CDRMReceiver::Start()
     if (iFreqkHz != -1)
         SetFrequency(iFreqkHz);
 
+#ifdef USE_CONSOLEIO
+    CConsoleIO::Enter(this);
+#endif
+
     /* Set restart flag */
     Parameters.eRunState = CParameter::RESTART;
     do
@@ -972,6 +979,9 @@ CDRMReceiver::Start()
         do
         {
             Run();
+#ifdef USE_CONSOLEIO
+            CConsoleIO::Update();
+#endif
         }
         while (Parameters.eRunState == CParameter::RUNNING);
 
@@ -981,6 +991,10 @@ CDRMReceiver::Start()
     while (Parameters.eRunState == CParameter::RESTART);
 
     CloseSoundInterfaces();
+
+#ifdef USE_CONSOLEIO
+    CConsoleIO::Leave();
+#endif
 
     Parameters.eRunState = CParameter::STOPPED;
 }
