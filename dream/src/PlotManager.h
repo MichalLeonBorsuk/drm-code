@@ -35,11 +35,6 @@
 #include "GlobalDefinitions.h"
 #include "Parameter.h"
 
-#ifdef QT_CORE_LIB
-# include <qthread.h>
-# include <qmutex.h>
-#endif
-
 /* Definitions ****************************************************************/
 
 /* Length of the history for synchronization parameters (used for the plot) */
@@ -107,7 +102,7 @@ private:
     _REAL					rSumSNRHist;
     int						iCurrentCDAud;
 #ifdef QT_CORE_LIB
-    QMutex					MutexHist;
+    CMutex					MutexHist;
 #endif
 
 };

@@ -33,6 +33,7 @@
 #include <QDateTime>
 #include <QHideEvent>
 #include <QShowEvent>
+#include "../util-QT/Util.h"
 
 /* Implementation *************************************************************/
 

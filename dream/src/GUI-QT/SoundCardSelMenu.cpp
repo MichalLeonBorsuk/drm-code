@@ -33,6 +33,7 @@
 #include "SoundCardSelMenu.h"
 #include "DialogUtil.h"
 #include <QFileDialog>
+#include "../util-QT/Util.h"
 
 
 #ifdef HAVE_LIBPCAP

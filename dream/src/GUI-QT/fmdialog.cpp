@@ -28,7 +28,7 @@
 
 #include "fmdialog.h"
 #include "DialogUtil.h"
-#include "Rig.h"
+#include "../util-QT/Rig.h"
 #include <QMessageBox>
 #include <QInputDialog>
 #include <QWhatsThis>

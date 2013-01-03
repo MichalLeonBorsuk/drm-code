@@ -27,7 +27,7 @@
 \******************************************************************************/
 
 #include "DataDecoder.h"
-#include "./epg/epgutil.h"
+#include "epgutil.h"
 #include "Journaline.h"
 #include "Experiment.h"
 #include <iostream>

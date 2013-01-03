@@ -27,13 +27,13 @@
  *
 \******************************************************************************/
 
-#include <qdom.h>
-#include <qmap.h>
-#include <qstring.h>
-#include <qdatetime.h>
-#include "../../GlobalDefinitions.h"
-#include "../../Parameter.h"
-#include "../DABMOT.h"
+#include <QDomDocument>
+#include <QMap>
+#include <QString>
+#include <QDateTime>
+#include "../GlobalDefinitions.h"
+#include "../Parameter.h"
+#include "../datadecoding/DABMOT.h"
 #include "epgdec.h"
 
 class EPG

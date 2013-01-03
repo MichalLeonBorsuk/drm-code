@@ -28,7 +28,7 @@
 #include "../tables/TableStations.h"
 #include "DialogUtil.h"
 #ifdef HAVE_LIBHAMLIB
-# include "Rig.h"
+# include "../util-QT/Rig.h"
 # include "RigDlg.h"
 #endif
 #include <QHideEvent>

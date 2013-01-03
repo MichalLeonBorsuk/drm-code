@@ -44,7 +44,7 @@
 #  include "fdrmdialog.h"
 #  include "TransmDlg.h"
 #  include "DialogUtil.h"
-#  include "Rig.h"
+#  include "../util-QT/Rig.h"
 #  include <QApplication>
 #  include <QMessageBox>
 # endif

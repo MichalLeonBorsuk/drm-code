@@ -27,6 +27,7 @@
 \******************************************************************************/
 
 #include "SlideShowViewer.h"
+#include "../util-QT/Util.h"
 #include "../util/Settings.h"
 #include "../datadecoding/DABMOT.h"
 #include "../datadecoding/DataDecoder.h"

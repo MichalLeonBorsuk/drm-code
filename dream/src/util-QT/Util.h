@@ -1,12 +1,11 @@
 /******************************************************************************\
- * British Broadcasting Corporation
- * Copyright (c) 2006
+ * Technische Universitaet Darmstadt, Institut fuer Nachrichtentechnik
+ * Copyright (c) 2001-2006
  *
  * Author(s):
- *	Julian Cable
+ *	Volker Fischer, Andrea Russo, David Flamand
  *
  * Description:
- *	ETSI DAB/DRM Electronic Programme Guide XML Decompressor
  *
  *
  ******************************************************************************
@@ -27,41 +26,25 @@
  *
 \******************************************************************************/
 
-#ifndef _EPGDEC_H
-#define _EPGDEC_H
-#include "../../GlobalDefinitions.h"
-#include <qdom.h>
-#include <vector>
-using namespace std;
+#ifndef __UTIL_QT_UTIL_H
+#define __UTIL_QT_UTIL_H
 
-class tag_length_value
-{
-public:
+#include <QString>
 
-      tag_length_value(const _BYTE* p);
+class CDRMTransceiver;
 
-      bool is_cdata() const { return tag == 1; }
-      bool is_epg() const { return tag == 2; }
-      bool is_service_information() const { return tag == 3; }
-      bool is_string_token_table() const { return tag == 4; }
-      bool is_default_id() const { return tag == 5; }
-      bool is_child_element() const { return (5<tag) && (tag<0x80); }
-      bool is_attribute() const { return tag>=0x80; }
+QString VerifyFilename(QString filename);
 
-      uint8_t tag;
-      size_t length;
-      _BYTE* value;
-};
+QString VerifyHtmlPath(QString path);
 
-class CEPGDecoder
-{
-  public:
-    CEPGDecoder ():doc()
-    {
-    }
-    void decode (const vector<_BYTE>&);
+QString UrlEncodePath(QString url);
 
-    QDomDocument doc;
+bool IsUrlDirectory(QString url);
 
-};
-#endif
+void Linkify(QString& text);
+
+void CreateDirectories(const QString& strFilename);
+
+void RestartTransceiver(CDRMTransceiver *DRMTransceiver);
+
+#endif // DIALOGUTIL_H__FD6B23452398345OIJ9453_804E1606C2AC__INCLUDED_

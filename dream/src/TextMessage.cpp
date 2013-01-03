@@ -480,38 +480,40 @@ void CTextMessageDecoder::SetText()
                         /* Get character */
                         char cNewChar = Segment[i].byData[j];
 
-#ifdef QT_GUI_LIB
-                        /* Append new character */
-                        (*pstrText).append(&cNewChar, 1);
-#else
-                        /* NOT QT_GUI_LIB */
-                        switch (cNewChar)
+                        if(decodeSpecial)
                         {
-                        case 0x0A:
-                            /* Code 0x0A may be inserted to indicate a preferred
-                               line break */
-                        case 0x1F:
-                            /* Code 0x1F (hex) may be inserted to indicate a
-                               preferred word break. This code may be used to
-                               display long words comprehensibly */
+                            switch (cNewChar)
+                            {
+                            case 0x0A:
+                                /* Code 0x0A may be inserted to indicate a preferred
+                                   line break */
+                            case 0x1F:
+                                /* Code 0x1F (hex) may be inserted to indicate a
+                                   preferred word break. This code may be used to
+                                   display long words comprehensibly */
 
-                            (*pstrText).append("\r\n", 2);
-                            break;
+                                (*pstrText).append("\r\n", 2);
+                                break;
 
-                        case 0x0B:
-                            /* End of a headline */
+                            case 0x0B:
+                                /* End of a headline */
 
-                            /* Two line-breaks */
-                            (*pstrText).append("\r\n\r\n", 4);
-                            cNewChar = 0x0A;
-                            break;
+                                /* Two line-breaks */
+                                (*pstrText).append("\r\n\r\n", 4);
+                                cNewChar = 0x0A;
+                                break;
 
-                        default:
+                            default:
+                                /* Append new character */
+                                (*pstrText).append(&cNewChar, 1);
+                                break;
+                            }
+                        }
+                        else
+                        {
                             /* Append new character */
                             (*pstrText).append(&cNewChar, 1);
-                            break;
                         }
-#endif
                     }
                 }
             }
