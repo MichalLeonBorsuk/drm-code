@@ -80,7 +80,7 @@ static const char* LibNames[] = { "libfaad2_drm.so", "libfaad.so.2", NULL };
 
 // TODO chose GUI or non-GUI TextMessage initialisation
 CAudioSourceDecoder::CAudioSourceDecoder()
-    :	TextMessage(false),bWriteToFile(FALSE), bUseReverbEffect(TRUE), AudioRev(),
+    :	bWriteToFile(FALSE), TextMessage(FALSE), bUseReverbEffect(TRUE), AudioRev(),
         HandleAACDecoder(NULL),
 #ifndef USE_FAAD2_LIBRARY
 		canDecodeAAC(FALSE),

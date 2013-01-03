@@ -101,9 +101,7 @@ private:
     _REAL					rSumDopplerHist;
     _REAL					rSumSNRHist;
     int						iCurrentCDAud;
-#ifdef QT_CORE_LIB
     CMutex					MutexHist;
-#endif
 
 };
 
