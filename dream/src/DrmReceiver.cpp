@@ -1656,7 +1656,7 @@ CDRMReceiver::LoadSettings()
     ChannelEstimation.SetIntCons(s.Get("Receiver", "modmetric", FALSE));
 
     /* Number of iterations for MLC setting */
-    MSCMLCDecoder.SetNumIterations(s.Get("Receiver", "mlciter", 0));
+    MSCMLCDecoder.SetNumIterations(s.Get("Receiver", "mlciter", 1));
 
     /* Receiver mode (DRM, AM, FM) */
     SetReceiverMode(ERecMode(s.Get("Receiver", "mode", int(0))));
