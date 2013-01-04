@@ -44,8 +44,10 @@ inline int inet_aton(const char*s, void * a) { ((in_addr*)a)->s_addr = inet_addr
 # define inet_ntop(a, b, c, d) inet_ntoa(*(in_addr*)b)
 #else
 # include <arpa/inet.h>
-# include <sys/unistd.h>
-# include <sys/fcntl.h>
+# include <sys/types.h>
+# include <sys/socket.h>
+# include <unistd.h>
+# include <fcntl.h>
 # define SOCKET_ERROR				(-1)
 # define INVALID_SOCKET				(-1)
 #endif
