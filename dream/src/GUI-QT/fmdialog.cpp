@@ -69,7 +69,6 @@ FMDialog::FMDialog(CDRMReceiver& NDRMR, CSettings& NSettings,
 	pSoundCardMenu = new CSoundCardSelMenu(DRMReceiver, pFileMenu, this);
 	menu_Settings->addMenu(pSoundCardMenu);
 
-	//menu_Settings->addMenu(pRemoteMenu->menu());
 	connect(actionAbout_Dream, SIGNAL(triggered()), this, SLOT(OnHelpAbout()));
 	connect(actionWhats_This, SIGNAL(triggered()), this, SLOT(on_actionWhats_This()));
 
