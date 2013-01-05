@@ -255,7 +255,6 @@ protected:
 
 	QMutex			ListItemsMutex;
 
-	RemoteMenu*		pRemoteMenu;
 	QString			okMessage, badMessage;
 	CDRMSchedule::ESchedMode eLastScheduleMode;
 	CEventFilter	ef;

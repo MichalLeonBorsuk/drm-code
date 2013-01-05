@@ -33,7 +33,7 @@
 #include "../DrmTransceiver.h"
 #include "../sound/selectioninterface.h"
 
-#include<map>
+#include <map>
 
 #include <qthread.h>
 #include "ui_AboutDlgbase.h"
@@ -144,39 +144,6 @@ protected:
 };
 #define EVENT_FILTER(e) do { if (!ef.isValid((QEvent*)e)) return; } while(0)
 
-
-class RemoteMenu : public QObject
-{
-	Q_OBJECT
-
-public:
-	RemoteMenu(QWidget*, CRig&);
-	QMenu
-	* menu(){ return pRemoteMenu; }
-
-public slots:
-	void OnModRigMenu(int iID);
-	void OnRemoteMenu(int iID);
-	void OnComPortMenu(QAction* action);
-
-signals:
-	void SMeterAvailable();
-
-protected:
-#ifdef HAVE_LIBHAMLIB
-	struct Rigmenu {
-		std::string mfr;
-		QMenu * pMenu;
-	};
-	std::map<int,Rigmenu> rigmenus;
-	std::vector<rig_model_t> specials;
-	CRig&	rig;
-#endif
-	QMenu* pRemoteMenu, *pRemoteMenuOther;
-};
-
-#define OTHER_MENU_ID (666)
-#define SMETER_MENU_ID (667)
 
 /* s-meter thermo parameters */
 #define S_METER_THERMO_MIN				((_REAL) -60.0) /* dB */
