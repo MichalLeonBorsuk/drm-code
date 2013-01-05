@@ -261,9 +261,9 @@ win32 {
      }
      UI_DIR = moc
      MOC_DIR = moc
-     LIBS += -lsetupapi -lwsock32 -lws2_32 -lzdll
+     LIBS += -lsetupapi -lwsock32 -lws2_32 -lzlib
      DEFINES += HAVE_SETUPAPI \
-     HAVE_LIBZ
+     HAVE_LIBZ _CRT_SECURE_NO_WARNINGS
      DEFINES -= UNICODE
      SOURCES += src/windows/Pacer.cpp
 }
