@@ -334,7 +334,7 @@ LiveScheduleDlg::LiveScheduleDlg(CDRMReceiver& DRMReceiver, CSettings& Settings,
     DRMReceiver(DRMReceiver), Settings(Settings),
     smallGreenCube(":/icons/smallGreenCube.png"),
     greenCube(":/icons/greenCube.png"), redCube(":/icons/redCube.png"),
-    orangeCube(":/icons/organgeCube.png"), pinkCube(":/icons/pinkCube.png"),
+    orangeCube(":/icons/orangeCube.png"), pinkCube(":/icons/pinkCube.png"),
     vecpListItems(), iColStationID(1), iWidthColStationID(0)
 {
     setupUi(this);
