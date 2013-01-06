@@ -344,16 +344,7 @@ void opusEncSetParam(opus_encoder *enc,
 		EPRINTF("opusEncSetParam: OPUS_SET_MAX_BANDWIDTH returned: %s\n", opus_strerror(ret));
 
 	/* FEC */
-	switch (AudioParam.bOPUSForwardErrorCorrection)
-	{
-	case TRUE:
-		value = 1;
-		break;
-	default:
-	case FALSE:
-		value = 0;
-		break;
-	}
+    value = AudioParam.bOPUSForwardErrorCorrection;
 	ret = opus_encoder_ctl(enc->oe, OPUS_SET_INBAND_FEC(value));
 	if (ret != OPUS_OK)
 		EPRINTF("opusEncSetParam: OPUS_SET_INBAND_FEC returned: %s\n", opus_strerror(ret));
