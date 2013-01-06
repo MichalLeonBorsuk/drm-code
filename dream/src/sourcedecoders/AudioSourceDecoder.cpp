@@ -27,7 +27,7 @@
 \******************************************************************************/
 
 #include "AudioSourceDecoder.h"
-#if !defined(USE_FAAD2_LIBRARY)
+#if !defined(USE_FAAD2_LIBRARY) || !defined(USE_OPUS_LIBRARY)
 # include "../util/LibraryLoader.h"
 #endif
 #include <iostream>
@@ -78,16 +78,20 @@ static const char* LibNames[] = { "libfaad2_drm.so", "libfaad.so.2", NULL };
 
 /* Implementation *************************************************************/
 
-// TODO chose GUI or non-GUI TextMessage initialisation
 CAudioSourceDecoder::CAudioSourceDecoder()
     :	bWriteToFile(FALSE), TextMessage(FALSE), bUseReverbEffect(TRUE), AudioRev(),
-        HandleAACDecoder(NULL),
+        HandleAACDecoder(NULL), HandleOPUSDecoder(NULL),
 #ifndef USE_FAAD2_LIBRARY
 		canDecodeAAC(FALSE),
 #else
 		canDecodeAAC(TRUE),
 #endif
         canDecodeCELP(FALSE), canDecodeHVXC(FALSE),
+#ifndef USE_OPUS_LIBRARY
+        canDecodeOPUS(FALSE),
+#else
+        canDecodeOPUS(TRUE),
+#endif
         pFile(NULL)
 {
 #ifndef USE_FAAD2_LIBRARY
@@ -100,6 +104,13 @@ CAudioSourceDecoder::CAudioSourceDecoder()
 		else
 		    cerr << "Got FAAD2 library" << endl;
 	}
+#endif
+#ifndef USE_OPUS_LIBRARY
+    canDecodeOPUS = opus_init();
+    if (!canDecodeOPUS)
+        cerr << "No usable Opus library found" << endl;
+    else
+        cerr << "Got Opus library" << endl;
 #endif
 }
 
@@ -238,6 +249,7 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
 {
     int i, j;
     _BOOLEAN bCurBlockOK;
+    _BOOLEAN bCurBlockFaulty;
     _BOOLEAN bGoodValues;
 
     NeAACDecFrameInfo DecFrameInfo;
@@ -281,7 +293,7 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
     vector<uint8_t> aac_crc_bits(iNumAudioFrames);
 
     /* Check which audio coding type is used */
-    if (eAudioCoding == CAudioParam::AC_AAC)
+    if (eAudioCoding == CAudioParam::AC_AAC || eAudioCoding == CAudioParam::AC_OPUS)
     {
         /* AAC super-frame-header ------------------------------------------- */
         bGoodValues = TRUE;
@@ -305,10 +317,13 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
             (*pvecInputData).Separate(4);
 
         /* Frame length of last frame */
-        if(iAudioPayloadLen>=int(iPrevBorder))
-            audio_frame[iNumBorders].resize(iAudioPayloadLen - iPrevBorder);
-        else
-            bGoodValues = FALSE;
+        if (iNumBorders != iNumAudioFrames)
+        {
+            if(iAudioPayloadLen>=int(iPrevBorder))
+                audio_frame[iNumBorders].resize(iAudioPayloadLen - iPrevBorder);
+            else
+                bGoodValues = FALSE;
+        }
 
         /* Check if frame length entries represent possible values */
         for (i = 0; i < iNumAudioFrames; i++)
@@ -389,10 +404,12 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
     /* Init output block size to zero, this variable is also used for
        determining the position for writing the output vector */
     iOutputBlockSize = 0;
+    _BOOLEAN bOpusCodecInfoSet = FALSE;
 
     for (j = 0; j < iNumAudioFrames; j++)
     {
-        if (eAudioCoding == CAudioParam::AC_AAC)
+        bCurBlockFaulty = FALSE;
+        if (eAudioCoding == CAudioParam::AC_AAC || eAudioCoding == CAudioParam::AC_OPUS)
         {
             if (bGoodValues == TRUE)
             {
@@ -412,17 +429,35 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
                     fflush(pFile);
                 }
 
-                /* Call decoder routine */
-                psDecOutSampleBuf = (short *) NeAACDecDecode(HandleAACDecoder,
-                                    &DecFrameInfo,
-                                    &vecbyPrepAudioFrame[0],
-                                    vecbyPrepAudioFrame.size());
+                /* Call appropriate decoder routine */
+                if (eAudioCoding == CAudioParam::AC_AAC)
+                    psDecOutSampleBuf = (short *) NeAACDecDecode(HandleAACDecoder,
+                                        &DecFrameInfo,
+                                        &vecbyPrepAudioFrame[0],
+                                        vecbyPrepAudioFrame.size());
+                else
+                {
+                    psDecOutSampleBuf = (short *) opusDecDecode(HandleOPUSDecoder,
+                                        &DecFrameInfo.error,
+                                        &DecFrameInfo.channels,
+                                        &vecbyPrepAudioFrame[0],
+                                        vecbyPrepAudioFrame.size());
+                    /* set Opus codec information for displaying later */
+                    if (!bOpusCodecInfoSet && !DecFrameInfo.error)
+                    {
+                        bOpusCodecInfoSet = TRUE;
+                        Parameters.Lock();
+                        int iCurSelAudioServ = Parameters.GetCurSelAudioService();
+                        opusSetupParam(Parameters.Service[iCurSelAudioServ].AudioParam, &vecbyPrepAudioFrame[0]);
+                        Parameters.Unlock();
+                    }
+                }
 
                 /* OPH: add frame status to vector for RSCI */
                 Parameters.Lock();
                 Parameters.vecbiAudioFrameStatus.Add(DecFrameInfo.error == 0 ? 0 : 1);
                 Parameters.Unlock();
-                if (DecFrameInfo.error != 0)
+                if (!(eAudioCoding == CAudioParam::AC_OPUS && DecFrameInfo.error == OPUS_DECODER_ERROR_CRC && bUseReverbEffect == FALSE) && DecFrameInfo.error != 0)
                 {
                     //cerr << "AAC decode error" << endl;
                     bCurBlockOK = FALSE;	/* Set error flag */
@@ -430,6 +465,9 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
                 else
                 {
                     bCurBlockOK = TRUE;
+                    /* Opus can have FEC embeded, thus the audio frame is always OK */
+                    if (eAudioCoding == CAudioParam::AC_OPUS && DecFrameInfo.error != OPUS_DECODER_ERROR_OK)
+                        bCurBlockFaulty = TRUE;
 
                     if(psDecOutSampleBuf) // might be dummy decoder
                     {
@@ -643,11 +681,12 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
         else
         {
             /* Increment correctly decoded audio blocks counter */
-            iNumCorDecAudio++;
+            if (!bCurBlockFaulty)
+                iNumCorDecAudio++;
 
             Parameters.Lock();
-            Parameters.ReceiveStatus.Audio.SetStatus(RX_OK);
-            Parameters.ReceiveStatus.LLAudio.SetStatus(RX_OK);
+            Parameters.ReceiveStatus.Audio.SetStatus(bCurBlockFaulty ? DATA_ERROR : RX_OK);
+            Parameters.ReceiveStatus.LLAudio.SetStatus(bCurBlockFaulty ? DATA_ERROR : RX_OK);
             Parameters.Unlock();
 
             if (bAudioWasOK == FALSE)
@@ -714,12 +753,14 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
 void
 CAudioSourceDecoder::InitInternal(CParameter & Parameters)
 {
-    /* Open AACEncoder instance */
-    HandleAACDecoder = NeAACDecOpen();
+    /* Open decoders instance */
+    HandleAACDecoder  = NeAACDecOpen();
+    HandleOPUSDecoder = opusDecOpen();
 
-    /* Decoder MUST be initialized at least once, therefore do it here in the
-       constructor with arbitrary values to be sure that this is satisfied */
-    NeAACDecInitDRM(&HandleAACDecoder, 24000, DRMCH_MONO);
+//    /* Decoder MUST be initialized at least once, therefore do it here in the
+//       constructor with arbitrary values to be sure that this is satisfied */
+//    NeAACDecInitDRM(&HandleAACDecoder, 24000, DRMCH_MONO);
+// DF: NeAACDecInitDRM is initialized below, commented out the previous lines
 
     /*
     	Since we use the exception mechanism in this init routine, the sequence of
@@ -1086,6 +1127,57 @@ CAudioSourceDecoder::InitInternal(CParameter & Parameters)
             throw CInitErr(ET_AUDDECODER);
 #endif
         }
+        else if (eAudioCoding == CAudioParam::AC_OPUS)
+        {
+            /* Init for OPUS decoding ---------------------------------------- */
+            if (canDecodeOPUS)
+                audiodecoder = string("Opus Version ")+opusGetVersion();
+
+            /* Length of higher protected part of audio stream */
+            const int iLenAudHigh =
+                Parameters.Stream[iCurAudioStreamID].iLenPartA;
+
+            /* Number of audio frame and samplerate */
+            iNumAudioFrames = 20;
+            iAudioSampleRate = 48000;
+
+            /* Number of borders */
+            iNumBorders = iNumAudioFrames;
+
+            /* Number of channels: Stereo */
+            int iNumChannels = 2;
+
+            iLenDecOutPerChan = AUD_DEC_TRANSFROM_LENGTH;
+
+            /* The audio_payload_length is derived from the length of the audio
+               super frame (data_length_of_part_A + data_length_of_part_B)
+               subtracting the audio super frame overhead (bytes used for the
+               audio super frame header() and for the aac_crc_bits)
+               (5.3.1.1, Table 5) */
+            iAudioPayloadLen = iTotalFrameSize / SIZEOF__BYTE - iNumAudioFrames;
+
+            /* Check iAudioPayloadLen value, only positive values make sense */
+            if (iAudioPayloadLen < 0)
+                throw CInitErr(ET_AUDDECODER);
+
+            /* Calculate number of bytes for higher protected blocks */
+            iNumHigherProtectedBytes = (iLenAudHigh -
+                                        iNumAudioFrames /* CRC bytes */ ) /
+                                       iNumAudioFrames;
+
+            if (iNumHigherProtectedBytes < 0)
+                iNumHigherProtectedBytes = 0;
+
+            /* The maximum length for one audio frame is "iAudioPayloadLen". The
+               regular size will be much shorter since all audio frames share
+               the total size, but we do not know at this time how the data is
+               split in the transmitter source coder */
+            iMaxLenOneAudFrame = iAudioPayloadLen;
+
+            /* Init OPUS-decoder */
+            opusDecInit(HandleOPUSDecoder, iAudioSampleRate,
+                        (unsigned char) iNumChannels);
+        }
         else
         {
             /* Audio codec not supported */
@@ -1179,6 +1271,8 @@ CAudioSourceDecoder::GetNumCorDecAudio()
 CAudioSourceDecoder::~CAudioSourceDecoder()
 {
     /* Close decoders instance */
+    if (HandleOPUSDecoder != NULL)
+        opusDecClose(HandleOPUSDecoder);
     if (HandleAACDecoder != NULL)
         NeAACDecClose(HandleAACDecoder);
 }

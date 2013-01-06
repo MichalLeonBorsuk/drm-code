@@ -915,6 +915,9 @@ _BOOLEAN CSDCReceive::DataEntityType9(CVector<_BINARY>* pbiData,
     /* Init error flag with "no error" */
     _BOOLEAN bError = FALSE;
 
+    /* Init AC_OTHER flag to FALSE */
+    _BOOLEAN AC_OTHER = FALSE;
+
     /* Short ID (the short ID is the index of the service-array) */
     const int iTempShortID = (*pbiData).Separate(2);
 
@@ -942,113 +945,141 @@ _BOOLEAN CSDCReceive::DataEntityType9(CVector<_BINARY>* pbiData,
         break;
 
     default: /* reserved */
-        bError = TRUE;
+        AC_OTHER = TRUE;
         break;
     }
 
-    /* SBR flag */
-    switch ((*pbiData).Separate(1))
+    if (AC_OTHER)
     {
-    case 0: /* 0 */
-        AudParam.eSBRFlag = CAudioParam::SB_NOT_USED;
-        break;
-
-    case 1: /* 1 */
-        AudParam.eSBRFlag = CAudioParam::SB_USED;
-        break;
-    }
-
-    /* Audio mode */
-    switch (AudParam.eAudioCoding)
-    {
-    case CAudioParam::AC_AAC:
-        /* Channel type */
+        /* XXX EXPERIMENTAL NOT PART OF DRM STANDARD XXX */
         switch ((*pbiData).Separate(2))
         {
         case 0: /* 00 */
-            AudParam.eAudioMode = CAudioParam::AM_MONO;
-            break;
-
-        case 1: /* 01 */
-            AudParam.eAudioMode = CAudioParam::AM_P_STEREO;
-            break;
-
-        case 2: /* 10 */
+            AudParam.eAudioCoding = CAudioParam::AC_OPUS;
             AudParam.eAudioMode = CAudioParam::AM_STEREO;
+            AudParam.eAudioSamplRate = CAudioParam::AS_48KHZ;
+            AudParam.eSBRFlag = CAudioParam::SB_NOT_USED;
+            /* rfa */
+            (*pbiData).Separate(4);
+            break;
+
+        default: /* rooms for three other codec */
+            /* rfa */
+            (*pbiData).Separate(4);
+            bError = TRUE;
+            break;
+        }
+    }
+    else
+    {
+        /* SBR flag */
+        switch ((*pbiData).Separate(1))
+        {
+        case 0: /* 0 */
+            AudParam.eSBRFlag = CAudioParam::SB_NOT_USED;
+            break;
+
+        case 1: /* 1 */
+            AudParam.eSBRFlag = CAudioParam::SB_USED;
+            break;
+        }
+
+        /* Audio mode */
+        switch (AudParam.eAudioCoding)
+        {
+        case CAudioParam::AC_AAC:
+            /* Channel type */
+            switch ((*pbiData).Separate(2))
+            {
+            case 0: /* 00 */
+                AudParam.eAudioMode = CAudioParam::AM_MONO;
+                break;
+
+            case 1: /* 01 */
+                AudParam.eAudioMode = CAudioParam::AM_P_STEREO;
+                break;
+
+            case 2: /* 10 */
+                AudParam.eAudioMode = CAudioParam::AM_STEREO;
+                break;
+
+            default: /* reserved */
+                bError = TRUE;
+                break;
+            }
+            break;
+
+        case CAudioParam::AC_CELP:
+            /* rfa */
+            (*pbiData).Separate(1);
+
+            /* CELP_CRC */
+            switch ((*pbiData).Separate(1))
+            {
+            case 0: /* 0 */
+                AudParam.bCELPCRC = FALSE;
+                break;
+
+            case 1: /* 1 */
+                AudParam.bCELPCRC = TRUE;
+                break;
+            }
+            break;
+
+        case CAudioParam::AC_HVXC:
+            /* HVXC_rate */
+            switch ((*pbiData).Separate(1))
+            {
+            case 0: /* 0 */
+                AudParam.eHVXCRate = CAudioParam::HR_2_KBIT;
+                break;
+
+            case 1: /* 1 */
+                AudParam.eHVXCRate = CAudioParam::HR_4_KBIT;
+                break;
+            }
+
+            /* HVXC CRC */
+            switch ((*pbiData).Separate(1))
+            {
+            case 0: /* 0 */
+                AudParam.bHVXCCRC = FALSE;
+                break;
+
+            case 1: /* 1 */
+                AudParam.bHVXCCRC = TRUE;
+                break;
+            }
+            break;
+
+        default:
+            bError = TRUE;
+            break;
+        }
+
+        /* Audio sampling rate */
+        switch ((*pbiData).Separate(3))
+        {
+        case 0: /* 000 */
+            AudParam.eAudioSamplRate = CAudioParam::AS_8_KHZ;
+            break;
+
+        case 1: /* 001 */
+            AudParam.eAudioSamplRate = CAudioParam::AS_12KHZ;
+            break;
+
+        case 2: /* 010 */
+            AudParam.eAudioSamplRate = CAudioParam::AS_16KHZ;
+            break;
+
+        case 3: /* 011 */
+            AudParam.eAudioSamplRate = CAudioParam::AS_24KHZ;
             break;
 
         default: /* reserved */
             bError = TRUE;
             break;
         }
-        break;
-
-    case CAudioParam::AC_CELP:
-        /* rfa */
-        (*pbiData).Separate(1);
-
-        /* CELP_CRC */
-        switch ((*pbiData).Separate(1))
-        {
-        case 0: /* 0 */
-            AudParam.bCELPCRC = FALSE;
-            break;
-
-        case 1: /* 1 */
-            AudParam.bCELPCRC = TRUE;
-            break;
-        }
-        break;
-
-    case CAudioParam::AC_HVXC:
-        /* HVXC_rate */
-        switch ((*pbiData).Separate(1))
-        {
-        case 0: /* 0 */
-            AudParam.eHVXCRate = CAudioParam::HR_2_KBIT;
-            break;
-
-        case 1: /* 1 */
-            AudParam.eHVXCRate = CAudioParam::HR_4_KBIT;
-            break;
-        }
-
-        /* HVXC CRC */
-        switch ((*pbiData).Separate(1))
-        {
-        case 0: /* 0 */
-            AudParam.bHVXCCRC = FALSE;
-            break;
-
-        case 1: /* 1 */
-            AudParam.bHVXCCRC = TRUE;
-            break;
-        }
-        break;
-    }
-
-    /* Audio sampling rate */
-    switch ((*pbiData).Separate(3))
-    {
-    case 0: /* 000 */
-        AudParam.eAudioSamplRate = CAudioParam::AS_8_KHZ;
-        break;
-
-    case 1: /* 001 */
-        AudParam.eAudioSamplRate = CAudioParam::AS_12KHZ;
-        break;
-
-    case 2: /* 010 */
-        AudParam.eAudioSamplRate = CAudioParam::AS_16KHZ;
-        break;
-
-    case 3: /* 011 */
-        AudParam.eAudioSamplRate = CAudioParam::AS_24KHZ;
-        break;
-
-    default: /* reserved */
-        bError = TRUE;
-        break;
     }
 
     /* Text flag */

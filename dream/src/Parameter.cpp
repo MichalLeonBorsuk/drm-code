@@ -383,7 +383,7 @@ void CParameter::ResetServicesStreams()
         {
             Service[i].AudioParam.strTextMessage = "";
             Service[i].AudioParam.iStreamID = STREAM_ID_NOT_USED;
-            Service[i].AudioParam.eAudioCoding = CAudioParam::AC_AAC;
+            Service[i].AudioParam.eAudioCoding = CAudioParam::AC_NONE;
             Service[i].AudioParam.eSBRFlag = CAudioParam::SB_NOT_USED;
             Service[i].AudioParam.eAudioSamplRate = CAudioParam::AS_24KHZ;
             Service[i].AudioParam.bTextflag = FALSE;

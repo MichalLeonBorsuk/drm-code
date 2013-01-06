@@ -69,6 +69,9 @@
 #ifdef QT_GUI_LIB
 # include <qwt_global.h>
 #endif
+#ifdef USE_OPUS_LIBRARY
+# include "../sourcedecoders/opus_codec.h"
+#endif
 #ifdef USE_FAAD2_LIBRARY
 # include <neaacdec.h>
 #else
@@ -198,6 +201,9 @@ CAboutDlg::CAboutDlg(QWidget* parent, const char* name, bool modal, Qt::WFlags f
 #endif
 #ifdef USE_JACK
         "<li><b>libjack</b> (The Jack Audio Connection Kit) <i>http://www.jackaudio.org</i></li>"
+#endif
+#ifdef USE_OPUS_LIBRARY
+		"<li><b>" + QString(OPUS_DESCRIPTION) + "</b> (" + QString(opusGetVersion()) + ") <i>" + QString(OPUS_WEBSITE_LINK) + "</i></li>"
 #endif
         "</ul><br><br><hr/><br><br>"
         "<center><b>HISTORY</b></center><br>"

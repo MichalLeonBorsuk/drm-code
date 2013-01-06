@@ -41,6 +41,12 @@
 # include "faac_dll.h"
 #endif
 
+#include "opus_codec.h"
+
+/* Definition */
+#define MAX_ENCODED_CHANNELS 2
+
+
 /* Classes ********************************************************************/
 class CAudioSourceEncoderImplementation
 {
@@ -60,7 +66,12 @@ public:
 	_BOOLEAN GetTransStat(string& strCPi, _REAL& rCPe)
 		{return DataEncoder.GetSliShowEnc()->GetTransStat(strCPi, rCPe);}
 
+	_BOOLEAN FaacCodecSupported() {return bFaacCodecSupported;}
+	_BOOLEAN OpusCodecSupported() {return bOpusCodecSupported;}
+
 protected:
+	void CloseEncoder();
+
 	CTextMessageEncoder		TextMessage;
 	_BOOLEAN				bUsingTextMessage;
 	CDataEncoder			DataEncoder;
@@ -68,7 +79,9 @@ protected:
 	_BOOLEAN				bIsDataService;
 	int						iTotNumBitsForUsage;
 
-	faacEncHandle			hEncoder;
+	opus_encoder			*hOpusEncoder;
+
+	faacEncHandle			hFaacEncoder;
 	faacEncConfigurationPtr CurEncFormat;
 
 	unsigned long			lNumSampEncIn;
@@ -78,14 +91,18 @@ protected:
 	CVector<_SAMPLE>		vecsEncInData;
 	CMatrix<_BYTE>			audio_frame;
 	CVector<int>			veciFrameLength;
-	int						iNumAACFrames;
+	int						iNumChannels;
+	int						iNumAudioFrames;
+	int						iNumBorders;
 	int						iAudioPayloadLen;
 	int						iNumHigherProtectedBytes;
 
+	CAudioResample			ResampleObj[MAX_ENCODED_CHANNELS];
+	CVector<_REAL>			vecTempResBufIn[MAX_ENCODED_CHANNELS];
+	CVector<_REAL>			vecTempResBufOut[MAX_ENCODED_CHANNELS];
+
 	_BOOLEAN				bFaacCodecSupported;
-	CAudioResample			ResampleObj;
-	CVector<_REAL>			vecTempResBufIn;
-	CVector<_REAL>			vecTempResBufOut;
+	_BOOLEAN				bOpusCodecSupported;
 
 public:
 		virtual void InitInternalTx(CParameter& Parameters, int &iInputBlockSize, int &iOutputBlockSize);
@@ -133,6 +150,9 @@ public:
 
 	_BOOLEAN GetTransStat(string& strCPi, _REAL& rCPe)
 			{return AudioSourceEncoderImpl.GetTransStat(strCPi, rCPe);}
+
+	_BOOLEAN FaacCodecSupported() {return AudioSourceEncoderImpl.FaacCodecSupported();}
+	_BOOLEAN OpusCodecSupported() {return AudioSourceEncoderImpl.OpusCodecSupported();}
 
 protected:
 	CAudioSourceEncoderImplementation AudioSourceEncoderImpl;

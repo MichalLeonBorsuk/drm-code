@@ -28,17 +28,18 @@ else {
           FMMainWindow.ui AMMainWindow.ui LiveScheduleWindow.ui \
           JLViewer.ui BWSViewer.ui SlideShowViewer.ui \
           systemevalDlgbase.ui StationsDlgbase.ui EPGDlgbase.ui \
-          GeneralSettingsDlgbase.ui MultSettingsDlgbase.ui AboutDlgbase.ui
+          GeneralSettingsDlgbase.ui MultSettingsDlgbase.ui AboutDlgbase.ui \
+          CodecParams.ui
       HEADERS += \
           src/GUI-QT/DRMPlot.h src/GUI-QT/EvaluationDlg.h \
           src/GUI-QT/SlideShowViewer.h src/GUI-QT/JLViewer.h \
           src/GUI-QT/BWSViewer.h src/GUI-QT/jlbrowser.h \
-          src/GUI-QT/SoundCardSelMenu.h
+          src/GUI-QT/SoundCardSelMenu.h CodecParams.h
       SOURCES += \
           src/GUI-QT/DRMPlot.cpp src/GUI-QT/EvaluationDlg.cpp \
           src/GUI-QT/SlideShowViewer.cpp src/GUI-QT/JLViewer.cpp \
           src/GUI-QT/BWSViewer.cpp src/GUI-QT/jlbrowser.cpp \
-          src/GUI-QT/SoundCardSelMenu.cpp
+          src/GUI-QT/SoundCardSelMenu.cpp CodecParams.cpp
      }
 }
 message($$VERSION_MESSAGE $$DEBUG_MESSAGE $$UI_MESSAGE)
@@ -156,6 +157,9 @@ unix {
             }
      exists(/usr/include/sndfile.h) {
       CONFIG += sndfile
+            }
+     exists(/usr/include/opus/opus.h) {
+      CONFIG += opus
             }
      exists(/usr/include/speex/speex_preprocess.h) {
       DEFINES += HAVE_SPEEX
@@ -276,6 +280,12 @@ faac {
      DEFINES += HAVE_LIBFAAC \
      USE_FAAC_LIBRARY
      LIBS += -lfaac_drm
+}
+opus {
+     DEFINES += HAVE_LIBOPUS \
+     USE_OPUS_LIBRARY
+     unix:LIBS += -lopus
+     message("with opus")
 }
 sndfile {
      DEFINES += HAVE_LIBSNDFILE
@@ -441,6 +451,7 @@ HEADERS += \
     src/sound/soundnull.h \
     src/sourcedecoders/AudioSourceDecoder.h \
     src/sourcedecoders/AudioSourceEncoder.h \
+    src/sourcedecoders/opus_codec.h \
     src/sync/FreqSyncAcq.h \
     src/sync/SyncUsingPil.h \
     src/sync/TimeSync.h \
@@ -545,6 +556,7 @@ SOURCES += \
     src/sound/audiofilein.cpp \
     src/sourcedecoders/AudioSourceDecoder.cpp \
     src/sourcedecoders/AudioSourceEncoder.cpp \
+    src/sourcedecoders/opus_codec.cpp \
     src/sync/FreqSyncAcq.cpp \
     src/sync/SyncUsingPil.cpp \
     src/sync/TimeSync.cpp \

@@ -88,7 +88,7 @@ bool IsUrlDirectory(QString url)
 /* Convert all www. or http:// or email to real
    clickable link, for use with QLabel and such.
    Code by David Flamand */
-void Linkify(QString& text)
+QString& Linkify(QString& text)
 {
     int i, j, posWWW=-2, posHTTP=-2, posMAIL=-2, posBegin, posEnd, size;
     size = text.size();
@@ -149,6 +149,7 @@ void Linkify(QString& text)
         else
             break;
     }
+    return text;
 }
 
 void CreateDirectories(const QString& strFilename)

@@ -1,5 +1,5 @@
 <RCC>
-  <qresource prefix="/icons" >
+  <qresource prefix="/icons">
     <file>greenCube.png</file>
     <file>smallGreenCube.png</file>
     <file>redCube.png</file>
@@ -28,6 +28,7 @@
     <file>JumpEnd.png</file>
     <file>LogoFhGIIS.png</file>
     <file>LogoJournaline.png</file>
+    <file>LogoOpus.png</file>
     <file>LogoSmall.png</file>
     <file>MainIcon.png</file>
     <file>Refresh.png</file>

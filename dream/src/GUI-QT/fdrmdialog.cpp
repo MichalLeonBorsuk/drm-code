@@ -565,7 +565,11 @@ QString FDRMDialog::serviceSelector(CParameter& Parameters, int i)
 
         /* Label for service selection button (service label, codec
            and Mono / Stereo information) */
-        text = strLabel + "  |   " + GetCodecString(service) + " " + GetTypeString(service);
+		QString strCodec = GetCodecString(service);
+		QString strType = GetTypeString(service);
+		text = strLabel;
+		if (!strCodec.isEmpty() || !strType.isEmpty())
+			text += "  |   " + strCodec + " " + strType;
 
         /* Bit-rate (only show if greater than 0) */
         if (rAudioBitRate > (_REAL) 0.0)
@@ -1083,6 +1087,9 @@ QString FDRMDialog::GetCodecString(const CService& service)
         /* Audio coding */
         switch (service.AudioParam.eAudioCoding)
         {
+        case CAudioParam::AC_NONE:
+            break;
+
         case CAudioParam::AC_AAC:
             /* Only 12 and 24 kHz sample rates are supported for AAC encoding */
             if (eSamRate == CAudioParam::AS_12KHZ)
@@ -1102,6 +1109,41 @@ QString FDRMDialog::GetCodecString(const CService& service)
         case CAudioParam::AC_HVXC:
             strReturn = "HVXC";
             break;
+
+		case CAudioParam::AC_OPUS:
+			strReturn = "OPUS ";
+			/* Opus Audio sub codec */
+			switch (service.AudioParam.eOPUSSubCod)
+			{
+				case CAudioParam::OS_SILK:
+					strReturn += "SILK ";
+					break;
+				case CAudioParam::OS_HYBRID:
+					strReturn += "HYBRID ";
+					break;
+				case CAudioParam::OS_CELT:
+					strReturn += "CELT ";
+					break;
+			}
+			/* Opus Audio bandwidth */
+			switch (service.AudioParam.eOPUSBandwidth)
+			{
+				case CAudioParam::OB_NB:
+					strReturn += "NB";
+					break;
+				case CAudioParam::OB_MB:
+					strReturn += "MB";
+					break;
+				case CAudioParam::OB_WB:
+					strReturn += "WB";
+					break;
+				case CAudioParam::OB_SWB:
+					strReturn += "SWB";
+					break;
+				case CAudioParam::OB_FB:
+					strReturn += "FB";
+					break;
+			}
         }
 
         /* SBR */
@@ -1127,20 +1169,41 @@ QString FDRMDialog::GetTypeString(const CService& service)
     if (service.eAudDataFlag == CService::SF_AUDIO)
     {
         /* Audio service */
-        /* Mono-Stereo */
-        switch (service.AudioParam.eAudioMode)
+        switch (service.AudioParam.eAudioCoding)
         {
-        case CAudioParam::AM_MONO:
-            strReturn = "Mono";
+        case CAudioParam::AC_NONE:
             break;
 
-        case CAudioParam::AM_P_STEREO:
-            strReturn = "P-Stereo";
+        case CAudioParam::AC_OPUS:
+            /* Opus channels configuration */
+            switch (service.AudioParam.eOPUSChan)
+            {
+            case CAudioParam::OC_MONO:
+            strReturn = "MONO";
             break;
 
-        case CAudioParam::AM_STEREO:
-            strReturn = "Stereo";
+            case CAudioParam::OC_STEREO:
+            strReturn = "STEREO";
             break;
+            }
+            break;
+
+        default:
+            /* Mono-Stereo */
+            switch (service.AudioParam.eAudioMode)
+            {
+            case CAudioParam::AM_MONO:
+                strReturn = "Mono";
+                break;
+
+            case CAudioParam::AM_P_STEREO:
+                strReturn = "P-Stereo";
+                break;
+
+            case CAudioParam::AM_STEREO:
+                strReturn = "Stereo";
+                break;
+            }
         }
     }
     else

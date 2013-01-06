@@ -479,10 +479,10 @@ void CDRMTransmitter::LoadSettings()
 
         /* Language */
         Service.iLanguage = s.Get(service, "language", int(Service.iLanguage));
-#if 0 // TODO
+
         /* Audio codec */
-        value = s.Get(service, "codec", string("faac"));
-        if      (value == "faac") { Service.AudioParam.eAudioCoding = CAudioParam::AC_AAC;  }
+        value = s.Get(service, "codec", string("AAC"));
+        if      (value == "AAC") { Service.AudioParam.eAudioCoding = CAudioParam::AC_AAC;   }
         else if (value == "Opus") { Service.AudioParam.eAudioCoding = CAudioParam::AC_OPUS; }
 
         /* Opus Codec Channels */
@@ -512,7 +512,6 @@ void CDRMTransmitter::LoadSettings()
         value = s.Get(service, "Opus_Application", string("OA_AUDIO"));
         if      (value == "OA_VOIP")  { Service.AudioParam.eOPUSApplication = CAudioParam::OA_VOIP;  }
         else if (value == "OA_AUDIO") { Service.AudioParam.eOPUSApplication = CAudioParam::OA_AUDIO; }
-#endif
     }
 }
 
@@ -636,10 +635,10 @@ void CDRMTransmitter::SaveSettings()
 
         /* Language */
         s.Put(service, "language", int(Service.iLanguage));
-#if 0 // TODO
+
         /* Audio codec */
         switch (Service.AudioParam.eAudioCoding) {
-        case CAudioParam::AC_AAC:  value = "faac"; break;
+        case CAudioParam::AC_AAC:  value = "AAC";  break;
         case CAudioParam::AC_OPUS: value = "Opus"; break;
         default: value = ""; }
         s.Put(service, "codec", value);
@@ -681,6 +680,5 @@ void CDRMTransmitter::SaveSettings()
         case CAudioParam::OA_AUDIO: value = "OA_AUDIO"; break;
         default: value = ""; }
         s.Put(service, "Opus_Application", value);
-#endif
     }
 }

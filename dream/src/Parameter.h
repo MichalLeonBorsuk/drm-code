@@ -106,7 +106,7 @@ class CAudioParam
 public:
 
     /* AC: Audio Coding */
-    enum EAudCod { AC_AAC, AC_CELP, AC_HVXC };
+    enum EAudCod { AC_NONE, AC_AAC, AC_CELP, AC_HVXC, AC_OPUS };
 
     /* SB: SBR */
     enum ESBRFlag { SB_NOT_USED, SB_USED };
@@ -118,12 +118,31 @@ public:
     enum EHVXCRate { HR_2_KBIT, HR_4_KBIT };
 
     /* AS: Audio Sampling rate */
-    enum EAudSamRat { AS_8_KHZ, AS_12KHZ, AS_16KHZ, AS_24KHZ };
+    enum EAudSamRat { AS_8_KHZ, AS_12KHZ, AS_16KHZ, AS_24KHZ, AS_48KHZ };
+
+    /* OB: Opus Audio Bandwidth, coded in audio data stream */
+    enum EOPUSBandwidth { OB_NB, OB_MB, OB_WB, OB_SWB, OB_FB };
+
+    /* OS: Opus Audio Sub Codec, coded in audio data stream */
+    enum EOPUSSubCod { OS_SILK, OS_HYBRID, OS_CELT };
+
+    /* OC: Opus Audio Channels, coded in audio data stream */
+    enum EOPUSChan { OC_MONO, OC_STEREO };
+
+    /* OG: Opus encoder signal type, for encoder only */
+    enum EOPUSSignal { OG_VOICE, OG_MUSIC };
+
+    /* OA: Opus encoder intended application, for encoder only */
+    enum EOPUSApplication { OA_VOIP, OA_AUDIO };
 
     CAudioParam(): strTextMessage(), iStreamID(STREAM_ID_NOT_USED),
-            eAudioCoding(AC_AAC), eSBRFlag(SB_NOT_USED), eAudioSamplRate(AS_24KHZ),
+            eAudioCoding(AC_NONE), eSBRFlag(SB_NOT_USED), eAudioSamplRate(AS_24KHZ),
             bTextflag(FALSE), bEnhanceFlag(FALSE), eAudioMode(AM_MONO),
-            iCELPIndex(0), bCELPCRC(FALSE), eHVXCRate(HR_2_KBIT), bHVXCCRC(FALSE)
+            iCELPIndex(0), bCELPCRC(FALSE), eHVXCRate(HR_2_KBIT), bHVXCCRC(FALSE),
+            eOPUSBandwidth(OB_FB), eOPUSSubCod(OS_SILK), eOPUSChan(OC_STEREO),
+            eOPUSSignal(OG_MUSIC), eOPUSApplication(OA_AUDIO),
+            bOPUSForwardErrorCorrection(FALSE), bOPUSTransmitterParamChanged(FALSE),
+            bOPUSRequestReset(FALSE)
     {
     }
     CAudioParam(const CAudioParam& ap):
@@ -138,7 +157,15 @@ public:
             iCELPIndex(ap.iCELPIndex),
             bCELPCRC(ap.bCELPCRC),
             eHVXCRate(ap.eHVXCRate),
-            bHVXCCRC(ap.bHVXCCRC)
+            bHVXCCRC(ap.bHVXCCRC),
+            eOPUSBandwidth(ap.eOPUSBandwidth),
+            eOPUSSubCod(ap.eOPUSSubCod),
+            eOPUSChan(ap.eOPUSChan),
+            eOPUSSignal(ap.eOPUSSignal),
+            eOPUSApplication(ap.eOPUSApplication),
+            bOPUSForwardErrorCorrection(ap.bOPUSForwardErrorCorrection),
+            bOPUSTransmitterParamChanged(ap.bOPUSTransmitterParamChanged),
+            bOPUSRequestReset(ap.bOPUSRequestReset)
     {
     }
     CAudioParam& operator=(const CAudioParam& ap)
@@ -155,6 +182,14 @@ public:
         bCELPCRC = ap.bCELPCRC;
         eHVXCRate = ap.eHVXCRate;
         bHVXCCRC = ap.bHVXCCRC;
+        eOPUSBandwidth = ap.eOPUSBandwidth;
+        eOPUSSubCod = ap.eOPUSSubCod;
+        eOPUSChan = ap.eOPUSChan;
+        eOPUSSignal = ap.eOPUSSignal;
+        eOPUSApplication = ap.eOPUSApplication;
+        bOPUSForwardErrorCorrection = ap.bOPUSForwardErrorCorrection;
+        bOPUSTransmitterParamChanged = ap.bOPUSTransmitterParamChanged;
+        bOPUSRequestReset = ap.bOPUSRequestReset;
         return *this;
     }
 
@@ -179,6 +214,16 @@ public:
     /* For HVXC --------------------------------------------------------- */
     EHVXCRate eHVXCRate;	/* This field indicates the rate of the HVXC */
     _BOOLEAN bHVXCCRC;		/* This field indicates whether the CRC is used or not */
+
+    /* For OPUS --------------------------------------------------------- */
+    EOPUSBandwidth eOPUSBandwidth; /* Audio bandwidth */
+    EOPUSSubCod eOPUSSubCod; /* Audio sub codec */
+    EOPUSChan eOPUSChan;	/* Audio channels */
+    EOPUSSignal eOPUSSignal; /* Encoder signal type */
+    EOPUSApplication eOPUSApplication; /* Encoder intended application */
+    _BOOLEAN bOPUSForwardErrorCorrection; /* Encoder Forward Error Correction enabled */
+    _BOOLEAN bOPUSTransmitterParamChanged; /* Encoder parameters have changed */
+    _BOOLEAN bOPUSRequestReset; /* Request encoder reset */
 
 
     /* This function is needed for detection changes in the class */
@@ -216,6 +261,10 @@ public:
                 return TRUE;
             if (bHVXCCRC != AudioParam.bHVXCCRC)
                 return TRUE;
+            break;
+
+        case AC_NONE:
+        case AC_OPUS:
             break;
         }
         return FALSE;

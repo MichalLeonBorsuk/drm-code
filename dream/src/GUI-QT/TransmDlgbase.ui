@@ -1028,9 +1028,9 @@ Institute for Communication Technology</string>
              </property>
              <layout class="QHBoxLayout">
               <item>
-               <widget class="QRadioButton" name="RadioButtonFAAC">
+               <widget class="QRadioButton" name="RadioButtonAAC">
                 <property name="text">
-                 <string>faac</string>
+                 <string>AAC</string>
                 </property>
                 <attribute name="buttonGroup">
                  <string notr="true">ButtonGroupCodec</string>
@@ -1444,7 +1444,7 @@ Institute for Communication Technology</string>
   <tabstop>ComboBoxLanguage</tabstop>
   <tabstop>CheckBoxEnableAudio</tabstop>
   <tabstop>ComboBoxProgramType</tabstop>
-  <tabstop>RadioButtonFAAC</tabstop>
+  <tabstop>RadioButtonAAC</tabstop>
   <tabstop>RadioButtonOPUS</tabstop>
   <tabstop>CheckBoxEnableTextMessage</tabstop>
   <tabstop>ComboBoxTextMessage</tabstop>
