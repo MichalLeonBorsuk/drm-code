@@ -41,10 +41,10 @@ QString UrlEncodePath(QString url);
 
 bool IsUrlDirectory(QString url);
 
-void Linkify(QString& text);
+QString& Linkify(QString& text);
 
 void CreateDirectories(const QString& strFilename);
 
 void RestartTransceiver(CDRMTransceiver *DRMTransceiver);
 
-#endif // DIALOGUTIL_H__FD6B23452398345OIJ9453_804E1606C2AC__INCLUDED_
+#endif // __UTIL_QT_UTIL_H

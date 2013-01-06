@@ -487,6 +487,9 @@ QString FMDialog::GetCodecString(const int iServiceID)
 		switch (Parameters.Service[iServiceID].
 			AudioParam.eAudioCoding)
 		{
+		case CAudioParam::AC_NONE:
+			break;
+
 		case CAudioParam::AC_AAC:
 			/* Only 12 and 24 kHz sample rates are supported for AAC encoding */
 			if (eSamRate == CAudioParam::AS_12KHZ)
@@ -506,6 +509,47 @@ QString FMDialog::GetCodecString(const int iServiceID)
 		case CAudioParam::AC_HVXC:
 			strReturn = "HVXC";
 			break;
+
+		case CAudioParam::AC_OPUS:
+			strReturn = "OPUS ";
+			/* Opus audio sub codec */
+			switch (Parameters.Service[iServiceID].AudioParam.eOPUSSubCod)
+			{
+			case CAudioParam::OS_SILK:
+				strReturn += "SILK ";
+				break;
+
+			case CAudioParam::OS_HYBRID:
+				strReturn += "HYBRID ";
+				break;
+
+			case CAudioParam::OS_CELT:
+				strReturn += "CELT ";
+				break;
+			}
+			/* Opus audio bandwidth */
+			switch (Parameters.Service[iServiceID].AudioParam.eOPUSBandwidth)
+			{
+			case CAudioParam::OB_NB:
+				strReturn += "NB";
+				break;
+
+			case CAudioParam::OB_MB:
+				strReturn += "MB";
+				break;
+
+			case CAudioParam::OB_WB:
+				strReturn += "WB";
+				break;
+
+			case CAudioParam::OB_SWB:
+				strReturn += "SWB";
+				break;
+
+			case CAudioParam::OB_FB:
+				strReturn += "FB";
+				break;
+			}
 		}
 
 		/* SBR */
@@ -534,23 +578,43 @@ QString FMDialog::GetTypeString(const int iServiceID)
 	if (Parameters.Service[iServiceID].
 		eAudDataFlag == CService::SF_AUDIO)
 	{
-		/* Audio service */
-		/* Mono-Stereo */
-		switch (Parameters.
-			Service[iServiceID].AudioParam.eAudioMode)
-		{
-			case CAudioParam::AM_MONO:
-				strReturn = "Mono";
-				break;
+        /* Audio service */
+        switch (Parameters.Service[iServiceID].AudioParam.eAudioCoding)
+        {
+        case CAudioParam::AC_NONE:
+            break;
 
-			case CAudioParam::AM_P_STEREO:
-				strReturn = "P-Stereo";
-				break;
+        case CAudioParam::AC_OPUS:
+            /* Opus channels configuration */
+            switch (Parameters.Service[iServiceID].AudioParam.eOPUSChan)
+            {
+            case CAudioParam::OC_MONO:
+            strReturn = "MONO";
+            break;
 
-			case CAudioParam::AM_STEREO:
-				strReturn = "Stereo";
-				break;
-		}
+            case CAudioParam::OC_STEREO:
+            strReturn = "STEREO";
+            break;
+            }
+            break;
+
+        default:
+            /* Mono-Stereo */
+            switch (Parameters.Service[iServiceID].AudioParam.eAudioMode)
+            {
+            case CAudioParam::AM_MONO:
+                strReturn = "Mono";
+                break;
+
+            case CAudioParam::AM_P_STEREO:
+                strReturn = "P-Stereo";
+                break;
+
+            case CAudioParam::AM_STEREO:
+                strReturn = "Stereo";
+                break;
+            }
+        }
 	}
 
 	return strReturn;

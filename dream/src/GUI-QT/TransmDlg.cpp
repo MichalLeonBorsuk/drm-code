@@ -44,15 +44,11 @@ TransmDialog::TransmDialog(CSettings& Settings,
 	TransThread(Settings),
 	DRMTransmitter(TransThread.DRMTransmitter),
 	Settings(*DRMTransmitter.GetSettings()),
-#ifdef ENABLE_TRANSM_CODECPARAMS
 	CodecDlg(NULL),
-#endif
 	bIsStarted(FALSE),
 	vecstrTextMessage(1) /* 1 for new text */,
-	iIDCurrentText(0), iServiceDescr(0), bCloseRequested(FALSE)
-#ifdef ENABLE_TRANSM_CODECPARAMS
-	, iButtonCodecState(0)
-#endif
+	iIDCurrentText(0), iServiceDescr(0),
+	bCloseRequested(FALSE), iButtonCodecState(0)
 {
 	/* Load transmitter settings */
 	DRMTransmitter.LoadSettings();
@@ -315,12 +311,11 @@ TransmDialog::TransmDialog(CSettings& Settings,
 	CheckBoxEnableData->setChecked(FALSE);
 	EnableData(FALSE);
 
-#ifdef ENABLE_TRANSM_CODECPARAMS
 	/* Setup audio codec check boxes */
 	switch (Service.AudioParam.eAudioCoding)
 	{
 	case CAudioParam::AC_AAC:
-		RadioButtonFAAC->setChecked(TRUE);
+		RadioButtonAAC->setChecked(TRUE);
 		ShowButtonCodec(FALSE, 1);
 		break;
 
@@ -333,15 +328,11 @@ TransmDialog::TransmDialog(CSettings& Settings,
 		ShowButtonCodec(FALSE, 1);
 		break;
 	}
-//TODO	CAudioSourceEncoder& AudioSourceEncoder = *DRMTransmitter.GetAudSrcEnc();
-//TODO	if (!AudioSourceEncoder.FaacCodecSupported())
-//TODO		RadioButtonFAAC->hide();
-//TODO	if (!AudioSourceEncoder.OpusCodecSupported())
-//TODO		RadioButtonOPUS->hide();
-#else
-	GroupBoxCodec->setVisible(FALSE);
-	ButtonCodec->setVisible(FALSE);
-#endif
+	CAudioSourceEncoder& AudioSourceEncoder = *DRMTransmitter.GetAudSrcEnc();
+	if (!AudioSourceEncoder.FaacCodecSupported())
+		RadioButtonAAC->hide();
+	if (!AudioSourceEncoder.OpusCodecSupported())
+		RadioButtonOPUS->hide();
 
 	/* Add example text message at startup ---------------------------------- */
 	/* Activate text message */
@@ -384,10 +375,8 @@ TransmDialog::TransmDialog(CSettings& Settings,
 	/* Push buttons */
 	connect(ButtonStartStop, SIGNAL(clicked()),
 		this, SLOT(OnButtonStartStop()));
-#ifdef ENABLE_TRANSM_CODECPARAMS
 	connect(ButtonCodec, SIGNAL(clicked()),
 		this, SLOT(OnButtonCodec()));
-#endif
 	connect(PushButtonAddText, SIGNAL(clicked()),
 		this, SLOT(OnPushButtonAddText()));
 	connect(PushButtonClearAllText, SIGNAL(clicked()),
@@ -434,10 +423,8 @@ TransmDialog::TransmDialog(CSettings& Settings,
 		this, SLOT(OnRadioBandwidth(int)));
 	connect(ButtonGroupOutput, SIGNAL(buttonClicked(int)),
 		this, SLOT(OnRadioOutput(int)));
-# ifdef ENABLE_TRANSM_CODECPARAMS
 	connect(ButtonGroupCodec, SIGNAL(buttonClicked(int)),
 		this, SLOT(OnRadioCodec(int)));
-# endif
 	connect(ButtonGroupCurrentTime, SIGNAL(buttonClicked(int)),
 		this, SLOT(OnRadioCurrentTime(int)));
 
@@ -462,11 +449,9 @@ TransmDialog::TransmDialog(CSettings& Settings,
 
 TransmDialog::~TransmDialog()
 {
-#ifdef ENABLE_TRANSM_CODECPARAMS
 	/* Destroy codec dialog if exist */
 	if (CodecDlg)
 		delete CodecDlg;
-#endif
 
 	/* Save window position and size */
 	CWinGeom s;
@@ -687,18 +672,14 @@ void TransmDialog::OnToggleCheckBoxEnableAudio(bool bState)
 		/* Set audio enable check box */
 		CheckBoxEnableData->setChecked(FALSE);
 		EnableData(FALSE);
-#ifdef ENABLE_TRANSM_CODECPARAMS
 		ShowButtonCodec(TRUE, 2);
-#endif
 	}
 	else
 	{
 		/* Set audio enable check box */
 		CheckBoxEnableData->setChecked(TRUE);
 		EnableData(TRUE);
-#ifdef ENABLE_TRANSM_CODECPARAMS
 		ShowButtonCodec(FALSE, 2);
-#endif
 	}
 }
 
@@ -901,20 +882,19 @@ void TransmDialog::OnButtonClearAllFileNames()
 		TreeWidgetFileNames->resizeColumnToContents(i);
 }
 
-#ifdef ENABLE_TRANSM_CODECPARAMS
 void TransmDialog::OnButtonCodec()
 {
 	/* Create Codec Dialog if NULL */
 	if (!CodecDlg)
 	{
+		const int iShortID = 0; // TODO
 		CParameter& Parameters = *TransThread.DRMTransmitter.GetParameters();
-		CodecDlg = new CodecParams(Settings, Parameters, this, NULL, FALSE, Qt::Dialog);
+		CodecDlg = new CodecParams(Settings, Parameters, iShortID, this, NULL, FALSE, Qt::Dialog);
 	}
 	/* Toggle the visibility */
 	if (CodecDlg)
 		CodecDlg->Toggle();
 }
-#endif
 
 void TransmDialog::OnComboBoxTextMessageActivated(int iID)
 {
@@ -1283,7 +1263,6 @@ void TransmDialog::OnRadioCurrentTime(int iID)
 	Parameters.Unlock();
 }
 
-#ifdef ENABLE_TRANSM_CODECPARAMS
 void TransmDialog::OnRadioCodec(int iID)
 {
 	iID = -iID - 2; // TODO understand why
@@ -1311,7 +1290,6 @@ void TransmDialog::OnRadioCodec(int iID)
 
 	Parameters.Unlock();
 }
-#endif
 
 void TransmDialog::DisableAllControlsForSet()
 {
@@ -1340,7 +1318,6 @@ void TransmDialog::TabWidgetEnableTabs(QTabWidget *tabWidget, bool enable)
 		tabWidget->widget(i)->setEnabled(enable);
 }
 
-#ifdef ENABLE_TRANSM_CODECPARAMS
 void TransmDialog::ShowButtonCodec(_BOOLEAN bShow, int iKey)
 {
 	_BOOLEAN bLastShow = iButtonCodecState == 0;
@@ -1359,7 +1336,6 @@ void TransmDialog::ShowButtonCodec(_BOOLEAN bShow, int iKey)
 			CodecDlg->Show(bShow);
 	}
 }
-#endif
 
 void TransmDialog::AddWhatsThisHelp()
 {

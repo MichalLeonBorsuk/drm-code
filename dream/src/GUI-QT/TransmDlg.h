@@ -27,8 +27,6 @@
 \******************************************************************************/
 #ifndef __TransmDlg_H
 #define __TransmDlg_H
-// (DF) TODO: to be enabled and removed in a future release
-//#define ENABLE_TRANSM_CODECPARAMS
 
 #include <qpushbutton.h>
 #include <qstring.h>
@@ -57,9 +55,7 @@
 #include "../DrmTransmitter.h"
 #include "../Parameter.h"
 #include "../util/Settings.h"
-#ifdef ENABLE_TRANSM_CODECPARAMS
-# include "CodecParams.h"
-#endif
+#include "CodecParams.h"
 
 
 /* Classes ********************************************************************/
@@ -129,19 +125,15 @@ protected:
 	CAboutDlg			AboutDlg;
 	QTimer				Timer;
 	QTimer				TimerStop;
-#ifdef ENABLE_TRANSM_CODECPARAMS
 	CodecParams*		CodecDlg;
-#endif
 
 	_BOOLEAN			bIsStarted;
 	CVector<string>		vecstrTextMessage;
 	int					iIDCurrentText;
 	int					iServiceDescr;
 	_BOOLEAN			bCloseRequested;
-#ifdef ENABLE_TRANSM_CODECPARAMS
 	int					iButtonCodecState;
 	void				ShowButtonCodec(_BOOLEAN bShow, int iKey);
-#endif
 	_BOOLEAN			GetMessageText(const int iID);
 	void				UpdateMSCProtLevCombo();
 	void				EnableTextMessage(const _BOOLEAN bFlag);
@@ -156,9 +148,7 @@ public slots:
 	void OnButtonClearAllText();
 	void OnPushButtonAddFileName();
 	void OnButtonClearAllFileNames();
-#if defined(ENABLE_TRANSM_CODECPARAMS)
 	void OnButtonCodec();
-#endif
 	void OnToggleCheckBoxHighQualityIQ(bool bState);
 	void OnToggleCheckBoxAmplifiedOutput(bool bState);
 	void OnToggleCheckBoxEnableData(bool bState);
@@ -175,9 +165,7 @@ public slots:
 	void OnRadioRobustnessMode(int iID);
 	void OnRadioBandwidth(int iID);
 	void OnRadioOutput(int iID);
-#if defined(ENABLE_TRANSM_CODECPARAMS)
 	void OnRadioCodec(int iID);
-#endif
 	void OnRadioCurrentTime(int iID);
 	void OnTextChangedServiceLabel(const QString& strLabel);
 	void OnTextChangedServiceID(const QString& strID);
