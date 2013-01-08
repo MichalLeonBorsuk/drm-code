@@ -282,7 +282,7 @@ CAboutDlg::CAboutDlg(QWidget* parent, const char* name, bool modal, Qt::WFlags f
     TextLabelAuthorNames->setText("Volker Fischer, Alexander Kurpiers, Andrea Russo\nJulian Cable, Andrew Murphy, Oliver Haffenden");
 
     /* Set copyright year in about dialog */
-    TextLabelCopyright->setText("Copyright (C) 2001 - 2012");
+    TextLabelCopyright->setText("Copyright (C) 2001 - 2013");
 }
 
 /* Help Usage --------------------------------------------------------------- */

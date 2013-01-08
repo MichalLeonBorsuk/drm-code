@@ -158,7 +158,7 @@ unix {
      exists(/usr/include/sndfile.h) {
       CONFIG += sndfile
             }
-     exists(/usr/include/opus/opus.h2) {
+     exists(/usr/include/opus/opus.h) {
       CONFIG += opus
             }
      exists(/usr/include/speex/speex_preprocess.h) {
