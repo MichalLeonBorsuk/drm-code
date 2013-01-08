@@ -329,9 +329,9 @@ TransmDialog::TransmDialog(CSettings& Settings,
 		break;
 	}
 	CAudioSourceEncoder& AudioSourceEncoder = *DRMTransmitter.GetAudSrcEnc();
-	if (!AudioSourceEncoder.FaacCodecSupported())
+	if (!AudioSourceEncoder.CanEncode(CAudioParam::AC_AAC))
 		RadioButtonAAC->hide();
-	if (!AudioSourceEncoder.OpusCodecSupported())
+	if (!AudioSourceEncoder.CanEncode(CAudioParam::AC_OPUS))
 		RadioButtonOPUS->hide();
 
 	/* Add example text message at startup ---------------------------------- */

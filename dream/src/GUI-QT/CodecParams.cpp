@@ -36,6 +36,7 @@
 #include "DialogUtil.h"
 #include "../util-QT/Util.h"
 #include "../DrmTransmitter.h"
+#include "../sourcedecoders/opus_codec.h"
 
 
 CodecParams::CodecParams(CSettings& Settings, CParameter& Parameters,
@@ -162,7 +163,7 @@ void CodecParams::OnButtonGroupChannels(int iID)
 	}
 	Parameters.Lock();
 	Parameters.Service[iShortID].AudioParam.eOPUSChan = eOPUSChan;
-	Parameters.Service[iShortID].AudioParam.bOPUSTransmitterParamChanged = TRUE;
+	Parameters.Service[iShortID].AudioParam.bParamChanged = TRUE;
 	Parameters.Unlock();
 }
 
@@ -191,7 +192,7 @@ void CodecParams::OnButtonGroupBandwidth(int iID)
 	}
 	Parameters.Lock();
 	Parameters.Service[iShortID].AudioParam.eOPUSBandwidth = eOPUSBandwidth;
-	Parameters.Service[iShortID].AudioParam.bOPUSTransmitterParamChanged = TRUE;
+	Parameters.Service[iShortID].AudioParam.bParamChanged = TRUE;
 	Parameters.Unlock();
 }
 
@@ -211,7 +212,7 @@ void CodecParams::OnButtonGroupFEC(int iID)
 	}
 	Parameters.Lock();
 	Parameters.Service[iShortID].AudioParam.bOPUSForwardErrorCorrection = bOPUSForwardErrorCorrection;
-	Parameters.Service[iShortID].AudioParam.bOPUSTransmitterParamChanged = TRUE;
+	Parameters.Service[iShortID].AudioParam.bParamChanged = TRUE;
 	Parameters.Unlock();
 }
 
@@ -232,7 +233,7 @@ void CodecParams::OnButtonGroupSignal(int iID)
 	Parameters.Lock();
 	Parameters.Service[iShortID].AudioParam.eOPUSSignal = eOPUSSignal;
 	Parameters.Service[iShortID].AudioParam.bOPUSRequestReset = TRUE;
-	Parameters.Service[iShortID].AudioParam.bOPUSTransmitterParamChanged = TRUE;
+	Parameters.Service[iShortID].AudioParam.bParamChanged = TRUE;
 	Parameters.Unlock();
 }
 
@@ -253,7 +254,7 @@ void CodecParams::OnButtonGroupApplication(int iID)
 	Parameters.Lock();
 	Parameters.Service[iShortID].AudioParam.eOPUSApplication = eOPUSApplication;
 	Parameters.Service[iShortID].AudioParam.bOPUSRequestReset = TRUE;
-	Parameters.Service[iShortID].AudioParam.bOPUSTransmitterParamChanged = TRUE;
+	Parameters.Service[iShortID].AudioParam.bParamChanged = TRUE;
 	Parameters.Unlock();
 }
 

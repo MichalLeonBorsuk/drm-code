@@ -3,10 +3,10 @@
  * Copyright (c) 2012-2013
  *
  * Author(s):
- *	David Flamand
+ *  David Flamand
  *
  * Description:
- *  Opus codec wrapper based on faac and faad api
+ *  Opus codec class
  *
  ******************************************************************************
  *
@@ -30,7 +30,9 @@
 #include <stdio.h>
 #include <string.h>
 #include "opus_codec.h"
-#include "../util/LibraryLoader.h"
+#ifndef USE_OPUS_LIBRARY
+# include "../util/LibraryLoader.h"
+#endif
 
 #undef EPRINTF
 #define EPRINTF(...) do {fprintf(stderr, __VA_ARGS__); fflush(stderr);} while(0)
@@ -40,16 +42,6 @@
 
 
 #ifndef USE_OPUS_LIBRARY
-static OPUS_EXPORT const char *dummy_opus_get_version_string(void) { return ""; }
-static OPUS_EXPORT const char *dummy_opus_strerror(int) { return ""; }
-static OPUS_EXPORT OpusEncoder *dummy_opus_encoder_create(opus_int32, int, int, int *) { return (OpusEncoder *)""; }
-static OPUS_EXPORT int dummy_opus_encoder_ctl(OpusEncoder *, int, ...) { return OPUS_OK; }
-static OPUS_EXPORT opus_int32 dummy_opus_encode(OpusEncoder *, const opus_int16 *, int, unsigned char *, opus_int32) { return 0; }
-static OPUS_EXPORT void dummy_opus_encoder_destroy(OpusEncoder *) { return; };
-static OPUS_EXPORT OpusDecoder *dummy_opus_decoder_create(opus_int32, int, int *) { return (OpusDecoder *)""; }
-static OPUS_EXPORT int dummy_opus_decoder_ctl(OpusDecoder *, int, ...) { return OPUS_OK; }
-static OPUS_EXPORT int dummy_opus_decode(OpusDecoder *, const unsigned char *, opus_int32, opus_int16 *, int, int) { return OPUS_INVALID_PACKET; }
-static OPUS_EXPORT void dummy_opus_decoder_destroy(OpusDecoder *) { return; }
 static void* hOpusLib;
 static opus_encode_t *opus_encode;
 static opus_encoder_create_t *opus_encoder_create;
@@ -62,16 +54,16 @@ static opus_decoder_destroy_t *opus_decoder_destroy;
 static opus_get_version_string_t *opus_get_version_string;
 static opus_strerror_t *opus_strerror;
 static const LIBFUNC LibFuncs[] = {
-	{ "opus_decode",             (void**)&opus_decode,             (void*)dummy_opus_decode             },
-	{ "opus_decoder_create",     (void**)&opus_decoder_create,     (void*)dummy_opus_decoder_create     },
-	{ "opus_decoder_ctl",        (void**)&opus_decoder_ctl,        (void*)dummy_opus_decoder_ctl        },
-	{ "opus_decoder_destroy",    (void**)&opus_decoder_destroy,    (void*)dummy_opus_decoder_destroy    },
-	{ "opus_encode",             (void**)&opus_encode,             (void*)dummy_opus_encode             },
-	{ "opus_encoder_create",     (void**)&opus_encoder_create,     (void*)dummy_opus_encoder_create     },
-	{ "opus_encoder_ctl",        (void**)&opus_encoder_ctl,        (void*)dummy_opus_encoder_ctl        },
-	{ "opus_encoder_destroy",    (void**)&opus_encoder_destroy,    (void*)dummy_opus_encoder_destroy    },
-	{ "opus_get_version_string", (void**)&opus_get_version_string, (void*)dummy_opus_get_version_string },
-	{ "opus_strerror",           (void**)&opus_strerror,           (void*)dummy_opus_strerror           },
+	{ "opus_decode",             (void**)&opus_decode,             (void*)NULL },
+	{ "opus_decoder_create",     (void**)&opus_decoder_create,     (void*)NULL },
+	{ "opus_decoder_ctl",        (void**)&opus_decoder_ctl,        (void*)NULL },
+	{ "opus_decoder_destroy",    (void**)&opus_decoder_destroy,    (void*)NULL },
+	{ "opus_encode",             (void**)&opus_encode,             (void*)NULL },
+	{ "opus_encoder_create",     (void**)&opus_encoder_create,     (void*)NULL },
+	{ "opus_encoder_ctl",        (void**)&opus_encoder_ctl,        (void*)NULL },
+	{ "opus_encoder_destroy",    (void**)&opus_encoder_destroy,    (void*)NULL },
+	{ "opus_get_version_string", (void**)&opus_get_version_string, (void*)NULL },
+	{ "opus_strerror",           (void**)&opus_strerror,           (void*)NULL },
 	{ NULL, NULL, NULL }
 };
 # if defined(_WIN32)
@@ -81,13 +73,6 @@ static const char* LibNames[] = { "libopus.dylib", NULL };
 # else
 static const char* LibNames[] = { "libopus.so.0", "libopus.so", NULL };
 # endif
-/* Dynamic initialization */
-bool opus_init(void)
-{
-	if (hOpusLib == NULL)
-		hOpusLib = CLibraryLoader::Load(LibNames, LibFuncs);
-	return hOpusLib != NULL;
-}
 #endif
 
 
@@ -104,15 +89,14 @@ const char *opusGetVersion(
 
 void opusSetupParam(
 	CAudioParam &AudioParam,
-	unsigned char *encoded_data
+	int toc
 	)
 {
 	static const CAudioParam::EOPUSBandwidth bandwidth_silk[] =
 		{ CAudioParam::OB_NB, CAudioParam::OB_MB, CAudioParam::OB_WB };
 	static const CAudioParam::EOPUSBandwidth bandwidth_celt[] =
 		{ CAudioParam::OB_NB, CAudioParam::OB_WB, CAudioParam::OB_SWB, CAudioParam::OB_FB };
-	int toc, stereo, config, mode;
-	toc = encoded_data[CRC_BYTES];
+	int stereo, config, mode;
 	stereo = (toc >> 2) & 0x01;
 	config = (toc >> 3) & 0x1F;
 	mode = (config >> 2) & 0x07;
@@ -226,7 +210,7 @@ opus_encoder *opusEncOpen(
 
 
 int opusEncEncode(opus_encoder *enc,
-	int32_t *inputBuffer,
+	opus_int16 *inputBuffer,
 	unsigned int samplesInput,
 	unsigned char *outputBuffer,
 	unsigned int bufferSize
@@ -463,8 +447,8 @@ int opusDecInit(
 
 void *opusDecDecode(
 	opus_decoder *dec,
-	unsigned char *error,
-	unsigned char *channels,
+	CAudioCodec::EDecError *eDecError,
+	int *iChannels,
 	unsigned char *buffer,
 	unsigned long buffer_size
 	)
@@ -509,21 +493,179 @@ void *opusDecDecode(
 	if (corrupted)
 	{
 		memset(dec->out_pcm, 0, OPUS_PCM_FRAME_SIZE * sizeof(opus_int16) * dec->channels);
-		EPRINTF("opusDecDecode: OPUS_DECODER_ERROR_CORRUPTED\n");
-		*error =  OPUS_DECODER_ERROR_CORRUPTED;
+		EPRINTF("opusDecDecode: DECODER_ERROR_CORRUPTED\n");
+		*eDecError =  CAudioCodec::DECODER_ERROR_CORRUPTED;
 	}
 	else if (!crc_ok)
 	{
-		EPRINTF("opusDecDecode: OPUS_DECODER_ERROR_CRC\n");
-		*error =  OPUS_DECODER_ERROR_CRC;
+		EPRINTF("opusDecDecode: DECODER_ERROR_CRC\n");
+		*eDecError =  CAudioCodec::DECODER_ERROR_CRC;
 	}
 	else
 	{
-		*error = OPUS_DECODER_ERROR_OK;
+		*eDecError = CAudioCodec::DECODER_ERROR_OK;
+		if (frame_bytes >= 1)
+			dec->last_good_toc = buffer[frame_extra_bytes];
 	}
 
-	*channels = dec->channels;
+	*iChannels = dec->channels;
 	dec->changed = 1;
 	return dec->out_pcm;
+}
+
+
+/******************************************************************************/
+/* Implementation *************************************************************/
+
+OpusCodec::OpusCodec() :
+	hOpusDecoder(NULL), hOpusEncoder(NULL)
+{
+#ifndef USE_OPUS_LIBRARY
+	if (hOpusLib == NULL)
+	{
+		hOpusLib = CLibraryLoader::Load(LibNames, LibFuncs);
+		if (!hOpusLib)
+			cerr << "No usable Opus library found" << endl;
+		else
+			cerr << "Got Opus library" << endl;
+	}
+#endif
+}
+OpusCodec::~OpusCodec()
+{
+	DecClose();
+	EncClose();
+}
+
+/******************************************************************************/
+/* Decoder Implementation *****************************************************/
+
+string
+OpusCodec::DecGetVersion()
+{
+	return string("Opus version: ") + opusGetVersion();
+}
+
+bool
+OpusCodec::CanDecode(CAudioParam::EAudCod eAudioCoding)
+{
+#ifndef USE_OPUS_LIBRARY
+	return hOpusLib && eAudioCoding == CAudioParam::AC_OPUS;
+#else
+	return eAudioCoding == CAudioParam::AC_OPUS;
+#endif
+}
+
+bool
+OpusCodec::DecOpen(CAudioParam& AudioParam, int *iAudioSampleRate, int *iLenDecOutPerChan)
+{
+	(void)AudioParam;
+	const int iSampleRate = 48000;
+	if (hOpusDecoder == NULL)
+		hOpusDecoder = opusDecOpen();
+	if (hOpusDecoder != NULL)
+		opusDecInit(hOpusDecoder, iSampleRate, 2);
+	*iAudioSampleRate = iSampleRate;
+	*iLenDecOutPerChan = AUD_DEC_TRANSFROM_LENGTH;
+	return hOpusDecoder != NULL;
+}
+
+_SAMPLE*
+OpusCodec::Decode(CVector<uint8_t>& vecbyPrepAudioFrame, int *iChannels, CAudioCodec::EDecError *eDecError)
+{
+	_SAMPLE *sample = NULL;
+	if (hOpusDecoder != NULL)
+	{
+		sample = (_SAMPLE *)opusDecDecode(hOpusDecoder,
+			eDecError,
+			iChannels,
+			&vecbyPrepAudioFrame[0],
+			vecbyPrepAudioFrame.size());
+	}
+	return sample;
+}
+
+void
+OpusCodec::DecClose()
+{
+	if (hOpusDecoder != NULL)
+	{
+		opusDecClose(hOpusDecoder);
+		hOpusDecoder = NULL;
+	}
+}
+
+void
+OpusCodec::DecUpdate(CAudioParam& AudioParam)
+{
+	if (hOpusDecoder != NULL)
+	{
+        opusSetupParam(AudioParam, hOpusDecoder->last_good_toc);
+	}
+}
+
+/******************************************************************************/
+/* Encoder Implementation *****************************************************/
+
+string
+OpusCodec::EncGetVersion()
+{
+	return DecGetVersion();
+}
+
+bool
+OpusCodec::CanEncode(CAudioParam::EAudCod eAudioCoding)
+{
+	return CanDecode(eAudioCoding);
+}
+
+bool
+OpusCodec::EncOpen(int iSampleRate, int iChannels, unsigned long *lNumSampEncIn, unsigned long *lMaxBytesEncOut)
+{
+	hOpusEncoder = opusEncOpen(iSampleRate, iChannels,
+		0, lNumSampEncIn, lMaxBytesEncOut);
+	return hOpusEncoder != NULL;
+}
+
+int
+OpusCodec::Encode(CVector<_SAMPLE>& vecsEncInData, unsigned long lNumSampEncIn, CVector<uint8_t>& vecsEncOutData, unsigned long lMaxBytesEncOut)
+{
+	int bytesEncoded = 0;
+	if (hOpusEncoder != NULL)
+	{
+		bytesEncoded = opusEncEncode(hOpusEncoder,
+			(opus_int16 *) &vecsEncInData[0],
+			lNumSampEncIn, &vecsEncOutData[0],
+			lMaxBytesEncOut);
+	}
+	return bytesEncoded;
+}
+
+void
+OpusCodec::EncClose()
+{
+	if (hOpusEncoder != NULL)
+	{
+		opusEncClose(hOpusEncoder);
+		hOpusEncoder = NULL;
+	}
+}
+
+void
+OpusCodec::EncSetBitrate(int iBitRate)
+{
+	if (hOpusEncoder != NULL)
+	{
+		hOpusEncoder->bytes_per_frame = iBitRate / SIZEOF__BYTE;
+	}
+}
+
+void
+OpusCodec::EncUpdate(CAudioParam& AudioParam)
+{
+	if (hOpusEncoder != NULL)
+	{
+		opusEncSetParam(hOpusEncoder, AudioParam);
+	}
 }
 

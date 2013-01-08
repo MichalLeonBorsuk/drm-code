@@ -27,91 +27,32 @@
 \******************************************************************************/
 
 #include "AudioSourceDecoder.h"
-#if !defined(USE_FAAD2_LIBRARY) || !defined(USE_OPUS_LIBRARY)
-# include "../util/LibraryLoader.h"
-#endif
 #include <iostream>
 #include <sstream>
 #include <string>
 #include <algorithm>
 
 
-#ifndef USE_FAAD2_LIBRARY
-// dummy AAC Decoder implementation if dll not found
-static NeAACDecHandle NEAACDECAPI NeAACDecOpenDummy(void)
-{
-    return NULL;
-}
-static void NEAACDECAPI NeAACDecCloseDummy(NeAACDecHandle)
-{
-}
-static char NEAACDECAPI NeAACDecInitDRMDummy(NeAACDecHandle*, unsigned long, unsigned char)
-{
-    return 1; /* error */
-}
-static void* NEAACDECAPI NeAACDecDecodeDummy(NeAACDecHandle,NeAACDecFrameInfo* hInfo, unsigned char*, unsigned long)
-{
-    hInfo->error = 1;
-    return NULL;
-}
-static void* hFaadLib;
-static NeAACDecOpen_t *NeAACDecOpen;
-static NeAACDecInitDRM_t *NeAACDecInitDRM;
-static NeAACDecClose_t *NeAACDecClose;
-static NeAACDecDecode_t *NeAACDecDecode;
-static const LIBFUNC LibFuncs[] = {
-	{ "NeAACDecOpen",    (void**)&NeAACDecOpen,    (void*)NeAACDecOpenDummy    },
-	{ "NeAACDecInitDRM", (void**)&NeAACDecInitDRM, (void*)NeAACDecInitDRMDummy },
-	{ "NeAACDecClose",   (void**)&NeAACDecClose,   (void*)NeAACDecCloseDummy   },
-	{ "NeAACDecDecode",  (void**)&NeAACDecDecode,  (void*)NeAACDecDecodeDummy  },
-	{ NULL, NULL, NULL }
-};
-# if defined(_WIN32)
-static const char* LibNames[] = { "faad2_drm.dll", "libfaad2_drm.dll", "faad_drm.dll", "libfaad2.dll", NULL };
-# elif defined(__APPLE__)
-static const char* LibNames[] = { "libfaad2_drm.dylib", NULL };
-# else
-static const char* LibNames[] = { "libfaad2_drm.so", "libfaad.so.2", NULL };
-# endif
-#endif
-
-
 /* Implementation *************************************************************/
 
 CAudioSourceDecoder::CAudioSourceDecoder()
-    :	bWriteToFile(FALSE), TextMessage(FALSE), bUseReverbEffect(TRUE), AudioRev(),
-        HandleAACDecoder(NULL), HandleOPUSDecoder(NULL),
-#ifndef USE_FAAD2_LIBRARY
-		canDecodeAAC(FALSE),
-#else
-		canDecodeAAC(TRUE),
-#endif
-        canDecodeCELP(FALSE), canDecodeHVXC(FALSE),
-#ifndef USE_OPUS_LIBRARY
-        canDecodeOPUS(FALSE),
-#else
-        canDecodeOPUS(TRUE),
-#endif
-        pFile(NULL)
+    :	bWriteToFile(FALSE), TextMessage(FALSE),
+        bUseReverbEffect(TRUE), codec(NULL), pFile(NULL)
 {
-#ifndef USE_FAAD2_LIBRARY
-	if (hFaadLib == NULL)
-	{
-		hFaadLib = CLibraryLoader::Load(LibNames, LibFuncs);
-		canDecodeAAC = !!hFaadLib;
-		if (!canDecodeAAC)
-		    cerr << "No usable FAAD2 aac decoder library found" << endl;
-		else
-		    cerr << "Got FAAD2 library" << endl;
-	}
-#endif
-#ifndef USE_OPUS_LIBRARY
-    canDecodeOPUS = opus_init();
-    if (!canDecodeOPUS)
-        cerr << "No usable Opus library found" << endl;
-    else
-        cerr << "Got Opus library" << endl;
-#endif
+    /* Initialize Audio Codec List */
+    CAudioCodec::InitCodecList();
+
+    /* Needed by fdrmdialog.cpp to report missing codec */
+    bCanDecodeAAC  = CAudioCodec::GetDecoder(CAudioParam::AC_AAC,  true) != NULL;
+    bCanDecodeCELP = CAudioCodec::GetDecoder(CAudioParam::AC_CELP, true) != NULL;
+    bCanDecodeHVXC = CAudioCodec::GetDecoder(CAudioParam::AC_HVXC, true) != NULL;
+    bCanDecodeOPUS = CAudioCodec::GetDecoder(CAudioParam::AC_OPUS, true) != NULL;
+}
+
+CAudioSourceDecoder::~CAudioSourceDecoder()
+{
+    /* Unreference Audio Codec List */
+    CAudioCodec::UnrefCodecList();
 }
 
 string
@@ -252,7 +193,8 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
     _BOOLEAN bCurBlockFaulty;
     _BOOLEAN bGoodValues;
 
-    NeAACDecFrameInfo DecFrameInfo;
+    int iDecChannels;
+    CAudioCodec::EDecError eDecError;
     short *psDecOutSampleBuf;
 
     bGoodValues = FALSE;
@@ -312,8 +254,8 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
             iPrevBorder = iFrameBorder;
         }
 
-        /* Byte-alignment (4 bits) in case of 10 audio frames */
-        if (iNumBorders == 9)
+        /* Byte-alignment (4 bits) in case of odd number of borders */
+        if (iNumBorders & 1)
             (*pvecInputData).Separate(4);
 
         /* Frame length of last frame */
@@ -404,7 +346,7 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
     /* Init output block size to zero, this variable is also used for
        determining the position for writing the output vector */
     iOutputBlockSize = 0;
-    _BOOLEAN bOpusCodecInfoSet = FALSE;
+    _BOOLEAN bCodecUpdated = FALSE;
 
     for (j = 0; j < iNumAudioFrames; j++)
     {
@@ -415,7 +357,7 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
             {
                 /* Prepare data vector with CRC at the beginning (the definition
                    with faad2 DRM interface) */
-                vector<uint8_t> vecbyPrepAudioFrame(audio_frame[j].size()+1);
+                CVector<uint8_t> vecbyPrepAudioFrame(audio_frame[j].size()+1);
                 vecbyPrepAudioFrame[0] = aac_crc_bits[j];
 
                 for (i = 0; i < int(audio_frame[j].size()); i++)
@@ -429,35 +371,24 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
                     fflush(pFile);
                 }
 
-                /* Call appropriate decoder routine */
-                if (eAudioCoding == CAudioParam::AC_AAC)
-                    psDecOutSampleBuf = (short *) NeAACDecDecode(HandleAACDecoder,
-                                        &DecFrameInfo,
-                                        &vecbyPrepAudioFrame[0],
-                                        vecbyPrepAudioFrame.size());
-                else
+                /* The actual decoding */
+                psDecOutSampleBuf = codec->Decode(vecbyPrepAudioFrame, &iDecChannels, &eDecError);
+
+                /* Call decoder update */
+                if (!bCodecUpdated)
                 {
-                    psDecOutSampleBuf = (short *) opusDecDecode(HandleOPUSDecoder,
-                                        &DecFrameInfo.error,
-                                        &DecFrameInfo.channels,
-                                        &vecbyPrepAudioFrame[0],
-                                        vecbyPrepAudioFrame.size());
-                    /* set Opus codec information for displaying later */
-                    if (!bOpusCodecInfoSet && !DecFrameInfo.error)
-                    {
-                        bOpusCodecInfoSet = TRUE;
-                        Parameters.Lock();
-                        int iCurSelAudioServ = Parameters.GetCurSelAudioService();
-                        opusSetupParam(Parameters.Service[iCurSelAudioServ].AudioParam, &vecbyPrepAudioFrame[0]);
-                        Parameters.Unlock();
-                    }
+                    bCodecUpdated = TRUE;
+                    Parameters.Lock();
+                    int iCurSelAudioServ = Parameters.GetCurSelAudioService();
+                    codec->DecUpdate(Parameters.Service[iCurSelAudioServ].AudioParam);
+                    Parameters.Unlock();
                 }
 
                 /* OPH: add frame status to vector for RSCI */
                 Parameters.Lock();
-                Parameters.vecbiAudioFrameStatus.Add(DecFrameInfo.error == 0 ? 0 : 1);
+                Parameters.vecbiAudioFrameStatus.Add(eDecError == CAudioCodec::DECODER_ERROR_OK ? 0 : 1);
                 Parameters.Unlock();
-                if (!(eAudioCoding == CAudioParam::AC_OPUS && DecFrameInfo.error == OPUS_DECODER_ERROR_CRC && bUseReverbEffect == FALSE) && DecFrameInfo.error != 0)
+                if (!(eAudioCoding == CAudioParam::AC_OPUS && eDecError == CAudioCodec::DECODER_ERROR_CRC && bUseReverbEffect == FALSE) && eDecError != CAudioCodec::DECODER_ERROR_OK)
                 {
                     //cerr << "AAC decode error" << endl;
                     bCurBlockOK = FALSE;	/* Set error flag */
@@ -466,15 +397,15 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
                 {
                     bCurBlockOK = TRUE;
                     /* Opus can have FEC embeded, thus the audio frame is always OK */
-                    if (eAudioCoding == CAudioParam::AC_OPUS && DecFrameInfo.error != OPUS_DECODER_ERROR_OK)
+                    if (eAudioCoding == CAudioParam::AC_OPUS && eDecError != CAudioCodec::DECODER_ERROR_OK)
                         bCurBlockFaulty = TRUE;
 
                     if(psDecOutSampleBuf) // might be dummy decoder
                     {
                         /* Conversion from _SAMPLE vector to _REAL vector for
                            resampling. ATTENTION: We use a vector which was
-                           allocated inside the AAC decoder! */
-                        if (DecFrameInfo.channels == 1)
+                           allocated inside the decoder! */
+                        if (iDecChannels == 1)
                         {
                             /* Change type of data (short -> real) */
                             for (i = 0; i < iLenDecOutPerChan; i++)
@@ -753,14 +684,8 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
 void
 CAudioSourceDecoder::InitInternal(CParameter & Parameters)
 {
-    /* Open decoders instance */
-    HandleAACDecoder  = NeAACDecOpen();
-    HandleOPUSDecoder = opusDecOpen();
-
-//    /* Decoder MUST be initialized at least once, therefore do it here in the
-//       constructor with arbitrary values to be sure that this is satisfied */
-//    NeAACDecInitDRM(&HandleAACDecoder, 24000, DRMCH_MONO);
-// DF: NeAACDecInitDRM is initialized below, commented out the previous lines
+    /* Close previous decoder instance if any */
+    CloseDecoder();
 
     /*
     	Since we use the exception mechanism in this init routine, the sequence of
@@ -787,7 +712,6 @@ CAudioSourceDecoder::InitInternal(CParameter & Parameters)
 
     try
     {
-
         Parameters.Lock();
 
         /* Init counter for correctly decoded audio blocks */
@@ -802,27 +726,31 @@ CAudioSourceDecoder::InitInternal(CParameter & Parameters)
         /* Get current selected audio service */
         iCurSelServ = Parameters.GetCurSelAudioService();
 
+        /* Get current selected audio param */
+        CAudioParam& AudioParam(Parameters.Service[iCurSelServ].AudioParam);
+
+        /* Get current audio coding */
+        eAudioCoding = AudioParam.eAudioCoding;
+
         /* Current audio stream ID */
-        iCurAudioStreamID =
-            Parameters.Service[iCurSelServ].AudioParam.iStreamID;
+        iCurAudioStreamID = AudioParam.iStreamID;
 
         /* The requirement for this module is that the stream is used and the
            service is an audio service. Check it here */
-        if ((Parameters.Service[iCurSelServ].  eAudDataFlag != CService::SF_AUDIO) ||
+        if ((Parameters.Service[iCurSelServ].eAudDataFlag != CService::SF_AUDIO) ||
                 (iCurAudioStreamID == STREAM_ID_NOT_USED))
         {
             throw CInitErr(ET_ALL);
         }
 
         /* Init text message application ------------------------------------ */
-        switch (Parameters.Service[iCurSelServ].AudioParam.bTextflag)
+        switch (AudioParam.bTextflag)
         {
         case TRUE:
             bTextMessageUsed = TRUE;
 
             /* Get a pointer to the string */
-            TextMessage.Init(&Parameters.Service[iCurSelServ].AudioParam.
-                             strTextMessage);
+            TextMessage.Init(&AudioParam.strTextMessage);
 
             /* Total frame size is input block size minus the bytes for the text
                message */
@@ -842,35 +770,32 @@ CAudioSourceDecoder::InitInternal(CParameter & Parameters)
             break;
         }
 
-        /* Get audio coding type */
-        eAudioCoding =
-            Parameters.Service[iCurSelServ].AudioParam.eAudioCoding;
+        /* Get decoder instance */
+        codec = CAudioCodec::GetDecoder(eAudioCoding);
+
+        if (codec->CanDecode(eAudioCoding))
+            audiodecoder = codec->DecGetVersion();
 
         if (eAudioCoding == CAudioParam::AC_AAC)
         {
             /* Init for AAC decoding ---------------------------------------- */
-            int iAACSampleRate, iNumHeaderBytes, iDRMchanMode = DRMCH_MONO;
-
-            if(canDecodeAAC)
-                audiodecoder = string("Nero AAC Version ")+FAAD2_VERSION;
+            int iNumHeaderBytes;
 
             /* Length of higher protected part of audio stream */
             const int iLenAudHigh =
                 Parameters.Stream[iCurAudioStreamID].iLenPartA;
 
             /* Set number of AAC frames in a AAC super-frame */
-            switch (Parameters.Service[iCurSelServ].AudioParam.eAudioSamplRate)	/* Only 12 kHz and 24 kHz is allowed */
+            switch (AudioParam.eAudioSamplRate)	/* Only 12 kHz and 24 kHz is allowed */
             {
             case CAudioParam::AS_12KHZ:
                 iNumAudioFrames = 5;
                 iNumHeaderBytes = 6;
-                iAACSampleRate = 12000;
                 break;
 
             case CAudioParam::AS_24KHZ:
                 iNumAudioFrames = 10;
                 iNumHeaderBytes = 14;
-                iAACSampleRate = 24000;
                 break;
 
             default:
@@ -881,51 +806,6 @@ CAudioSourceDecoder::InitInternal(CParameter & Parameters)
 
             /* Number of borders */
             iNumBorders = iNumAudioFrames - 1;
-
-            /* Number of channels for AAC: Mono, PStereo, Stereo */
-            switch (Parameters.Service[iCurSelServ].AudioParam.eAudioMode)
-            {
-            case CAudioParam::AM_MONO:
-                if (Parameters.Service[iCurSelServ].AudioParam.
-                        eSBRFlag == CAudioParam::SB_USED)
-                {
-                    iDRMchanMode = DRMCH_SBR_MONO;
-                }
-                else
-                    iDRMchanMode = DRMCH_MONO;
-                break;
-
-            case CAudioParam::AM_P_STEREO:
-                /* Low-complexity only defined in SBR mode */
-                iDRMchanMode = DRMCH_SBR_PS_STEREO;
-                break;
-
-            case CAudioParam::AM_STEREO:
-                if (Parameters.Service[iCurSelServ].AudioParam.
-                        eSBRFlag == CAudioParam::SB_USED)
-                {
-                    iDRMchanMode = DRMCH_SBR_STEREO;
-                }
-                else
-                {
-                    iDRMchanMode = DRMCH_STEREO;
-                }
-                break;
-            }
-
-            /* In case of SBR, AAC sample rate is half the total sample rate.
-               Length of output is doubled if SBR is used */
-            if (Parameters.Service[iCurSelServ].AudioParam.
-                    eSBRFlag == CAudioParam::SB_USED)
-            {
-                iAudioSampleRate = iAACSampleRate * 2;
-                iLenDecOutPerChan = AUD_DEC_TRANSFROM_LENGTH * 2;
-            }
-            else
-            {
-                iAudioSampleRate = iAACSampleRate;
-                iLenDecOutPerChan = AUD_DEC_TRANSFROM_LENGTH;
-            }
 
             /* The audio_payload_length is derived from the length of the audio
                super frame (data_length_of_part_A + data_length_of_part_B)
@@ -942,7 +822,7 @@ CAudioSourceDecoder::InitInternal(CParameter & Parameters)
             /* Calculate number of bytes for higher protected blocks */
             iNumHigherProtectedBytes = (iLenAudHigh - iNumHeaderBytes -
                                         iNumAudioFrames /* CRC bytes */ ) /
-                                       iNumAudioFrames;
+                                        iNumAudioFrames;
 
             if (iNumHigherProtectedBytes < 0)
                 iNumHigherProtectedBytes = 0;
@@ -953,9 +833,8 @@ CAudioSourceDecoder::InitInternal(CParameter & Parameters)
                split in the transmitter source coder */
             iMaxLenOneAudFrame = iAudioPayloadLen;
 
-            /* Init AAC-decoder */
-            NeAACDecInitDRM(&HandleAACDecoder, iAACSampleRate,
-                            (unsigned char) iDRMchanMode);
+            /* Init AAC decoder */
+			codec->DecOpen(AudioParam, &iAudioSampleRate, &iLenDecOutPerChan);
 
             if(bWriteToFile)
             {
@@ -968,18 +847,14 @@ CAudioSourceDecoder::InitInternal(CParameter & Parameters)
         else if (eAudioCoding == CAudioParam::AC_CELP)
         {
             /* Init for CELP decoding --------------------------------------- */
-            if(canDecodeCELP)
-                audiodecoder = string("CELP Codec");
-
             int iCurCelpIdx, iCelpFrameLength;
 
             /* Set number of frames in a super-frame */
-            switch (Parameters.Service[iCurSelServ].AudioParam.eAudioSamplRate)	/* Only 8000 and 16000 is allowed */
+            switch (AudioParam.eAudioSamplRate)	/* Only 8000 and 16000 is allowed */
             {
             case CAudioParam::AS_8_KHZ:
                 /* Check range */
-                iCurCelpIdx =
-                    Parameters.Service[iCurSelServ].AudioParam.iCELPIndex;
+                iCurCelpIdx = AudioParam.iCELPIndex;
 
                 if ((iCurCelpIdx > 0) &&
                         (iCurCelpIdx < LEN_CELP_8KHZ_UEP_PARAMS_TAB))
@@ -1003,8 +878,7 @@ CAudioSourceDecoder::InitInternal(CParameter & Parameters)
 
             case CAudioParam::AS_16KHZ:
                 /* Check range */
-                iCurCelpIdx =
-                    Parameters.Service[iCurSelServ].AudioParam.iCELPIndex;
+                iCurCelpIdx = AudioParam.iCELPIndex;
 
                 if ((iCurCelpIdx > 0) &&
                         (iCurCelpIdx < LEN_CELP_16KHZ_UEP_PARAMS_TAB))
@@ -1045,7 +919,7 @@ CAudioSourceDecoder::InitInternal(CParameter & Parameters)
             iNumAudioFrames = 400 /* ms */  / iCelpFrameLength /* ms */ ;
 
             /* Set CELP CRC flag */
-            bCELPCRC = Parameters.Service[iCurSelServ].AudioParam.bCELPCRC;
+            bCELPCRC = AudioParam.bCELPCRC;
 
             /* Init vectors storing the CELP raw data and CRCs */
             celp_frame.Init(iNumAudioFrames, iTotalNumCELPBits);
@@ -1074,8 +948,7 @@ CAudioSourceDecoder::InitInternal(CParameter & Parameters)
         }
         else if (eAudioCoding == CAudioParam::AC_HVXC)
         {
-            if(canDecodeHVXC)
-                audiodecoder = string("HVXC Codec");
+            /* Init for HVXC decoding --------------------------------------- */
 
 			iAudioSampleRate = 8000;
             iNumAudioFrames = 400 / 20;
@@ -1083,22 +956,18 @@ CAudioSourceDecoder::InitInternal(CParameter & Parameters)
             iLenDecOutPerChan = 0;
 
             iNumHvxcBits = 0;
-            if (Parameters.Service[iCurSelServ].AudioParam.
-                    eHVXCRate == CAudioParam::HR_2_KBIT)
+            if (AudioParam.eHVXCRate == CAudioParam::HR_2_KBIT)
             {
                 iNumHvxcBits = 40;
-                if (Parameters.Service[iCurSelServ].AudioParam.
-                        bHVXCCRC)
+                if (AudioParam.bHVXCCRC)
                 {
                     iNumHvxcBits += 8;
                 }
             }
-            else if (Parameters.Service[iCurSelServ].AudioParam.
-                     eHVXCRate == CAudioParam::HR_4_KBIT)
+            else if (AudioParam.eHVXCRate == CAudioParam::HR_4_KBIT)
             {
                 iNumHvxcBits = 80;
-                if (Parameters.Service[iCurSelServ].AudioParam.
-                        bHVXCCRC)
+                if (AudioParam.bHVXCCRC)
                 {
                     iNumHvxcBits += 13;
                 }
@@ -1130,24 +999,16 @@ CAudioSourceDecoder::InitInternal(CParameter & Parameters)
         else if (eAudioCoding == CAudioParam::AC_OPUS)
         {
             /* Init for OPUS decoding ---------------------------------------- */
-            if (canDecodeOPUS)
-                audiodecoder = string("Opus Version ")+opusGetVersion();
 
             /* Length of higher protected part of audio stream */
             const int iLenAudHigh =
                 Parameters.Stream[iCurAudioStreamID].iLenPartA;
 
-            /* Number of audio frame and samplerate */
+            /* Number of audio frame */
             iNumAudioFrames = 20;
-            iAudioSampleRate = 48000;
 
             /* Number of borders */
             iNumBorders = iNumAudioFrames;
-
-            /* Number of channels: Stereo */
-            int iNumChannels = 2;
-
-            iLenDecOutPerChan = AUD_DEC_TRANSFROM_LENGTH;
 
             /* The audio_payload_length is derived from the length of the audio
                super frame (data_length_of_part_A + data_length_of_part_B)
@@ -1163,7 +1024,7 @@ CAudioSourceDecoder::InitInternal(CParameter & Parameters)
             /* Calculate number of bytes for higher protected blocks */
             iNumHigherProtectedBytes = (iLenAudHigh -
                                         iNumAudioFrames /* CRC bytes */ ) /
-                                       iNumAudioFrames;
+                                        iNumAudioFrames;
 
             if (iNumHigherProtectedBytes < 0)
                 iNumHigherProtectedBytes = 0;
@@ -1174,9 +1035,8 @@ CAudioSourceDecoder::InitInternal(CParameter & Parameters)
                split in the transmitter source coder */
             iMaxLenOneAudFrame = iAudioPayloadLen;
 
-            /* Init OPUS-decoder */
-            opusDecInit(HandleOPUSDecoder, iAudioSampleRate,
-                        (unsigned char) iNumChannels);
+            /* Init Opus decoder */
+			codec->DecOpen(AudioParam, &iAudioSampleRate, &iLenDecOutPerChan);
         }
         else
         {
@@ -1268,11 +1128,10 @@ CAudioSourceDecoder::GetNumCorDecAudio()
     return iRet;
 }
 
-CAudioSourceDecoder::~CAudioSourceDecoder()
+void
+CAudioSourceDecoder::CloseDecoder()
 {
-    /* Close decoders instance */
-    if (HandleOPUSDecoder != NULL)
-        opusDecClose(HandleOPUSDecoder);
-    if (HandleAACDecoder != NULL)
-        NeAACDecClose(HandleAACDecoder);
+    if (codec != NULL)
+        codec->DecClose();
 }
+

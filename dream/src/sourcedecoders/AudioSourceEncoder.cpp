@@ -27,112 +27,26 @@
 \******************************************************************************/
 
 #include "AudioSourceEncoder.h"
-#if !defined(USE_FAAC_LIBRARY) || !defined(USE_OPUS_LIBRARY)
-# include "../util/LibraryLoader.h"
-#endif
 #include <iostream>
-
-
-#ifndef USE_FAAC_LIBRARY
-// dummy AAC Encoder implementation if dll not found
-static int FAACAPI dummyfaacEncGetVersion(char **, char **) {
-    return 0;
-}
-static faacEncConfigurationPtr FAACAPI dummyfaacEncGetCurrentConfiguration(faacEncHandle) {
-    return NULL;
-}
-static int FAACAPI dummyfaacEncSetConfiguration(faacEncHandle, faacEncConfigurationPtr) {
-    return 0;
-}
-static faacEncHandle FAACAPI dummyfaacEncOpen(unsigned long, unsigned int, unsigned long *lNumSampEncIn, unsigned long *lMaxBytesEncOut) {
-    *lNumSampEncIn = AUD_DEC_TRANSFROM_LENGTH;
-    *lMaxBytesEncOut = 1;
-    return NULL;
-}
-//static int FAACAPI dummyfaacEncGetDecoderSpecificInfo(faacEncHandle, unsigned char **, unsigned long *) {
-//    return 0;
-//}
-static int FAACAPI dummyfaacEncEncode(faacEncHandle, int32_t *, unsigned int, unsigned char *, unsigned int) {
-    return 0;
-}
-static int FAACAPI dummyfaacEncClose(faacEncHandle) {
-    return 0;
-}
-static void* hFaacLib;
-static faacEncGetVersion_t* faacEncGetVersion;
-static faacEncGetCurrentConfiguration_t* faacEncGetCurrentConfiguration;
-static faacEncSetConfiguration_t* faacEncSetConfiguration;
-static faacEncOpen_t* faacEncOpen;
-//static faacEncGetDecoderSpecificInfo_t* faacEncGetDecoderSpecificInfo;
-static faacEncEncode_t* faacEncEncode;
-static faacEncClose_t* faacEncClose;
-static const LIBFUNC LibFuncs[] = {
-	{ "faacEncGetVersion",              (void**)&faacEncGetVersion,              (void*)dummyfaacEncGetVersion              },
-	{ "faacEncGetCurrentConfiguration", (void**)&faacEncGetCurrentConfiguration, (void*)dummyfaacEncGetCurrentConfiguration },
-	{ "faacEncSetConfiguration",        (void**)&faacEncSetConfiguration,        (void*)dummyfaacEncSetConfiguration        },
-	{ "faacEncOpen",                    (void**)&faacEncOpen,                    (void*)dummyfaacEncOpen                    },
-//	{ "faacEncGetDecoderSpecificInfo",  (void**)&faacEncGetDecoderSpecificInfo,  (void*)dummyfaacEncGetDecoderSpecificInfo  },
-	{ "faacEncEncode",                  (void**)&faacEncEncode,                  (void*)dummyfaacEncEncode                  },
-	{ "faacEncClose",                   (void**)&faacEncClose,                   (void*)dummyfaacEncClose                   },
-	{ NULL, NULL, NULL }
-};
-# if defined(_WIN32)
-static const char* LibNames[] = { "faac_drm.dll", "libfaac_drm.dll", "libfaac.dll", NULL };
-# elif defined(__APPLE__)
-static const char* LibNames[] = { "libfaac_drm.dylib", NULL };
-# else
-static const char* LibNames[] = { "libfaac_drm.so", "libfaac.so.0", NULL };
-# endif
-static bool FaacCheckCallback()
-{
-    bool bLibOk = false;
-    unsigned long lNumSampEncIn = 0;
-    unsigned long lMaxBytesEncOut = 0;
-    faacEncHandle hEncoder = faacEncOpen(24000, 1, &lNumSampEncIn, &lMaxBytesEncOut);
-    if (hEncoder != NULL)
-    {
-        /* lMaxBytesEncOut is odd when DRM is supported */
-        bLibOk = lMaxBytesEncOut & 1;
-        faacEncClose(hEncoder);
-    }
-    return bLibOk;
-}
-#endif
 
 
 /* Implementation *************************************************************/
 
 CAudioSourceEncoderImplementation::CAudioSourceEncoderImplementation()
-    : bUsingTextMessage(FALSE), hOpusEncoder(NULL), hFaacEncoder(NULL),
-#ifndef USE_FAAC_LIBRARY
-        bFaacCodecSupported(FALSE),
-#else
-        bFaacCodecSupported(TRUE),
-#endif
-#ifndef USE_OPUS_LIBRARY
-        bOpusCodecSupported(FALSE)
-#else
-        bOpusCodecSupported(TRUE)
-#endif
+    : bUsingTextMessage(FALSE), codec(NULL)
 {
-#ifndef USE_FAAC_LIBRARY
-    if (hFaacLib == NULL)
-    {
-        hFaacLib = CLibraryLoader::Load(LibNames, LibFuncs, FaacCheckCallback);
-        bFaacCodecSupported = !!hFaacLib;
-        if (!bFaacCodecSupported)
-            cerr << "No usable FAAC aac encoder library found" << endl;
-        else
-            cerr << "Got FAAC library" << endl;
-    }
-#endif
-#ifndef USE_OPUS_LIBRARY
-    bOpusCodecSupported = opus_init();
-    if (!bOpusCodecSupported)
-        cerr << "No usable Opus library found" << endl;
-    else
-        cerr << "Got Opus library" << endl;
-#endif
+    /* Initialize Audio Codec List */
+    CAudioCodec::InitCodecList();
+
+    /* Needed by TransmDlg.cpp to report available codec */
+    bCanEncodeAAC  = CAudioCodec::GetEncoder(CAudioParam::AC_AAC,  true) != NULL;
+    bCanEncodeOPUS = CAudioCodec::GetEncoder(CAudioParam::AC_OPUS, true) != NULL;
+}
+
+CAudioSourceEncoderImplementation::~CAudioSourceEncoderImplementation()
+{
+    /* Unreference Audio Codec List */
+    CAudioCodec::UnrefCodecList();
 }
 
 void
@@ -147,8 +61,8 @@ CAudioSourceEncoderImplementation::ProcessDataInternal(CParameter& Parameters,
     int i, j;
     int iCurSelServ = 0;
 
-    /* Get codec type for audio service */
-    CAudioParam::EAudCod eAudioCoding = Parameters.Service[iCurSelServ].AudioParam.eAudioCoding;
+    /* Get audio param for audio service */
+    CAudioParam& AudioParam(Parameters.Service[iCurSelServ].AudioParam);
 
     /* Reset data to zero. This is important since usually not all data is used
        and this data has to be set to zero as defined in the DRM standard */
@@ -157,18 +71,14 @@ CAudioSourceEncoderImplementation::ProcessDataInternal(CParameter& Parameters,
 
     if (bIsDataService == FALSE)
     {
-        /* Check if Opus codec parameters have changed */
-        if (eAudioCoding == CAudioParam::AC_OPUS)
+        /* Check if audio param have changed */
+        Parameters.Lock();
+        if (AudioParam.bParamChanged)
         {
-            Parameters.Lock();
-            CAudioParam& AudioParam = Parameters.Service[iCurSelServ].AudioParam;
-            if (AudioParam.bOPUSTransmitterParamChanged)
-            {
-                AudioParam.bOPUSTransmitterParamChanged = FALSE;
-                opusEncSetParam(hOpusEncoder, AudioParam);
-            }
-            Parameters.Unlock();
+            AudioParam.bParamChanged = FALSE;
+            codec->EncUpdate(AudioParam);
         }
+        Parameters.Unlock();
 
         /* Resample data to encoder bit-rate */
         /* Change type of data (short -> real) */
@@ -198,26 +108,8 @@ CAudioSourceEncoderImplementation::ProcessDataInternal(CParameter& Parameters,
                         Real2Sample(vecTempResBufOut[i][j * lNumSampEncIn + k]);
             }
 
-            switch (eAudioCoding) {
-            case CAudioParam::AC_AAC:
-                /* Actual AAC encoding */
-                bytesEncoded = faacEncEncode(hFaacEncoder,
-                                             (int32_t *) &vecsEncInData[0],
-                                             lNumSampEncIn * iNumChannels, &vecsTmpData[0],
-                                             lMaxBytesEncOut);
-                break;
-            case CAudioParam::AC_OPUS:
-                /* Actual Opus encoding */
-                bytesEncoded = opusEncEncode(hOpusEncoder,
-                                             (int32_t *) &vecsEncInData[0],
-                                             lNumSampEncIn * iNumChannels, &vecsTmpData[0],
-                                             lMaxBytesEncOut);
-                break;
-            default:
-                /* Unsupported codec */
-                bytesEncoded = 0;
-            }
-
+            /* Actual encoding */
+            bytesEncoded = codec->Encode(vecsEncInData, lNumSampEncIn * iNumChannels, vecsTmpData, lMaxBytesEncOut);
             if (bytesEncoded > 0)
             {
                 /* Extract CRC */
@@ -394,6 +286,9 @@ CAudioSourceEncoderImplementation::InitInternalTx(CParameter & Parameters,
         iCurStreamID = Parameters.Service[iCurSelServ].AudioParam.iStreamID;
         CAudioParam::EAudCod eAudioCoding = Parameters.Service[iCurSelServ].AudioParam.eAudioCoding;
 
+        /* Get encoder instance */
+        codec = CAudioCodec::GetEncoder(eAudioCoding);
+
         /* Total frame size is input block size minus the bytes for the text
            message (if text message is used) */
         int iTotAudFraSizeBits = iTotNumBitsForUsage;
@@ -450,25 +345,12 @@ CAudioSourceEncoderImplementation::InitInternalTx(CParameter & Parameters,
             const int iActEncOutBytes = (int) (iAudioPayloadLen / iNumAudioFrames);
 
             /* Open encoder instance */
-            hFaacEncoder = faacEncOpen(lEncSamprate, iNumChannels,
-                                       &lNumSampEncIn, &lMaxBytesEncOut);
+            codec->EncOpen(lEncSamprate, iNumChannels, &lNumSampEncIn, &lMaxBytesEncOut);
             lNumSampEncIn /= iNumChannels;
 
-            if (hFaacEncoder != NULL)
-            {
-                /* Calculate bitrate */
-                int iBitRate = iActEncOutBytes * SIZEOF__BYTE * AUD_DEC_TRANSFROM_LENGTH / lNumSampEncIn / iTimeEachAudBloMS * 1000;
-                /* Set encoder configuration */
-                CurEncFormat = faacEncGetCurrentConfiguration(hFaacEncoder);
-                CurEncFormat->inputFormat = FAAC_INPUT_16BIT;
-                CurEncFormat->useTns = 1;
-                CurEncFormat->aacObjectType = LOW;
-                CurEncFormat->mpegVersion = MPEG4;
-                CurEncFormat->outputFormat = 0;	/* (0 = Raw; 1 = ADTS -> Raw) */
-                CurEncFormat->bitRate = iBitRate;
-                CurEncFormat->bandWidth = 0;	/* Let the encoder choose the bandwidth */
-                faacEncSetConfiguration(hFaacEncoder, CurEncFormat);
-            }
+            /* Calculate bitrate, bit per second */
+            const int iBitRate = iActEncOutBytes * SIZEOF__BYTE * AUD_DEC_TRANSFROM_LENGTH / lNumSampEncIn / iTimeEachAudBloMS * 1000;
+            codec->EncSetBitrate(iBitRate);
         }
         break;
 
@@ -496,13 +378,16 @@ CAudioSourceEncoderImplementation::InitInternalTx(CParameter & Parameters,
             const int iActEncOutBytes = (int) (iAudioPayloadLen / iNumAudioFrames);
 
             /* Open encoder instance */
-            hOpusEncoder = opusEncOpen(lEncSamprate, iNumChannels,
-                                       iActEncOutBytes, &lNumSampEncIn, &lMaxBytesEncOut);
+            codec->EncOpen(lEncSamprate, iNumChannels, &lNumSampEncIn, &lMaxBytesEncOut);
             lNumSampEncIn /= iNumChannels;
+
+            /* Calculate bitrate, bit per frame */
+            const int iBitRate = iActEncOutBytes * SIZEOF__BYTE;
+            codec->EncSetBitrate(iBitRate);
 
             /* Set flags to reset and init codec params on first ProcessDataInternal call */
             Parameters.Service[iCurSelServ].AudioParam.bOPUSRequestReset = TRUE;
-            Parameters.Service[iCurSelServ].AudioParam.bOPUSTransmitterParamChanged = TRUE;
+            Parameters.Service[iCurSelServ].AudioParam.bParamChanged = TRUE;
         }
         break;
 
@@ -601,6 +486,9 @@ CAudioSourceEncoderImplementation::InitInternalRx(CParameter& Parameters,
     if (bUsingTextMessage == TRUE)
         iTotAudFraSizeBits -= SIZEOF__BYTE * NUM_BYTES_TEXT_MESS_IN_AUD_STR;
 
+    /* Get encoder instance */
+    codec = CAudioCodec::GetEncoder(Parameters.Service[0].AudioParam.eAudioCoding);
+
     switch (Parameters.Service[0].AudioParam.eAudioCoding) {
 
     case CAudioParam::AC_AAC:
@@ -648,25 +536,12 @@ CAudioSourceEncoderImplementation::InitInternalRx(CParameter& Parameters,
         const int iActEncOutBytes = (int) (iAudioPayloadLen / iNumAudioFrames);
 
         /* Open encoder instance */
-        hFaacEncoder = faacEncOpen(lEncSamprate, iNumChannels,
-                                   &lNumSampEncIn, &lMaxBytesEncOut);
+        codec->EncOpen(lEncSamprate, iNumChannels, &lNumSampEncIn, &lMaxBytesEncOut);
         lNumSampEncIn /= iNumChannels;
 
-        if (hFaacEncoder != NULL)
-        {
-            /* Calculate bitrate */
-            int iBitRate = iActEncOutBytes * SIZEOF__BYTE * AUD_DEC_TRANSFROM_LENGTH / lNumSampEncIn / iTimeEachAudBloMS * 1000;
-            /* Set encoder configuration */
-            CurEncFormat = faacEncGetCurrentConfiguration(hFaacEncoder);
-            CurEncFormat->inputFormat = FAAC_INPUT_16BIT;
-            CurEncFormat->useTns = 1;
-            CurEncFormat->aacObjectType = LOW;
-            CurEncFormat->mpegVersion = MPEG4;
-            CurEncFormat->outputFormat = 0;	/* (0 = Raw; 1 = ADTS -> Raw) */
-            CurEncFormat->bitRate = iBitRate;
-            CurEncFormat->bandWidth = 0;	/* Let the encoder choose the bandwidth */
-            faacEncSetConfiguration(hFaacEncoder, CurEncFormat);
-        }
+        /* Calculate bitrate, bit per second */
+        const int iBitRate = iActEncOutBytes * SIZEOF__BYTE * AUD_DEC_TRANSFROM_LENGTH / lNumSampEncIn / iTimeEachAudBloMS * 1000;
+        codec->EncSetBitrate(iBitRate);
     }
     break;
 
@@ -694,13 +569,16 @@ CAudioSourceEncoderImplementation::InitInternalRx(CParameter& Parameters,
         const int iActEncOutBytes = (int) (iAudioPayloadLen / iNumAudioFrames);
 
         /* Open encoder instance */
-        hOpusEncoder = opusEncOpen(lEncSamprate, iNumChannels,
-                                   iActEncOutBytes, &lNumSampEncIn, &lMaxBytesEncOut);
+        codec->EncOpen(lEncSamprate, iNumChannels, &lNumSampEncIn, &lMaxBytesEncOut);
         lNumSampEncIn /= iNumChannels;
+
+        /* Calculate bitrate, bit per frame */
+        const int iBitRate = iActEncOutBytes * SIZEOF__BYTE;
+        codec->EncSetBitrate(iBitRate);
 
         /* Set flags to reset and init codec params on first ProcessDataInternal call */
         Parameters.Service[0].AudioParam.bOPUSRequestReset = TRUE;
-        Parameters.Service[0].AudioParam.bOPUSTransmitterParamChanged = TRUE;
+        Parameters.Service[0].AudioParam.bParamChanged = TRUE;
     }
     break;
 
@@ -748,14 +626,8 @@ CAudioSourceEncoderImplementation::InitInternalRx(CParameter& Parameters,
 void
 CAudioSourceEncoderImplementation::CloseEncoder()
 {
-    if (hFaacEncoder != NULL) {
-        faacEncClose(hFaacEncoder);
-        hFaacEncoder = NULL;
-    }
-    if (hOpusEncoder != NULL) {
-        opusEncClose(hOpusEncoder);
-        hOpusEncoder = NULL;
-    }
+    if (codec != NULL)
+        codec->EncClose();
 }
 
 void
@@ -778,8 +650,3 @@ CAudioSourceEncoderImplementation::ClearTextMessage()
     bUsingTextMessage = FALSE;
 }
 
-CAudioSourceEncoderImplementation::~CAudioSourceEncoderImplementation()
-{
-    /* Close encoder instance afterwards */
-    CloseEncoder();
-}
