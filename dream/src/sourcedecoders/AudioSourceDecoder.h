@@ -23,8 +23,8 @@
  *
 \******************************************************************************/
 
-#if !defined(AUIDOSOURCEDECODER_H__3B0BA660_CABB2B_23E7A0D31912__INCLUDED_)
-#define AUIDOSOURCEDECODER_H__3B0BA660_CABB2B_23E7A0D31912__INCLUDED_
+#ifndef _AUIDOSOURCEDECODER_H_INCLUDED_
+#define _AUIDOSOURCEDECODER_H_INCLUDED_
 
 #include "../GlobalDefinitions.h"
 #include "../Parameter.h"
@@ -34,14 +34,7 @@
 #include "../resample/Resample.h"
 #include "../datadecoding/DataDecoder.h"
 #include "../util/Utilities.h"
-
-#ifdef USE_FAAD2_LIBRARY
-# include <neaacdec.h>
-#else
-# include "neaacdec_dll.h"
-#endif
-
-#include "opus_codec.h"
+#include "AudioCodec.h"
 
 /* Definitions ****************************************************************/
 
@@ -143,10 +136,10 @@ public:
         switch (eAudCod)
         {
         case CAudioParam::AC_NONE: return true;
-        case CAudioParam::AC_AAC:  return canDecodeAAC;
-        case CAudioParam::AC_CELP: return canDecodeCELP;
-        case CAudioParam::AC_HVXC: return canDecodeHVXC;
-        case CAudioParam::AC_OPUS: return canDecodeOPUS;
+        case CAudioParam::AC_AAC:  return bCanDecodeAAC;
+        case CAudioParam::AC_CELP: return bCanDecodeCELP;
+        case CAudioParam::AC_HVXC: return bCanDecodeHVXC;
+        case CAudioParam::AC_OPUS: return bCanDecodeOPUS;
         }
         return false;
     }
@@ -202,9 +195,7 @@ protected:
     int iNumAudioFrames;
 
     CAudioParam::EAudCod eAudioCoding;
-
-    NeAACDecHandle HandleAACDecoder;
-    opus_decoder *HandleOPUSDecoder;
+	CAudioCodec* codec;
 
     int iNumBorders;
     int iNumHigherProtectedBytes;
@@ -226,10 +217,10 @@ protected:
     CCRC CELPCRCObject;
 
     string audiodecoder;
-    bool canDecodeAAC;
-    bool canDecodeCELP;
-    bool canDecodeHVXC;
-    bool canDecodeOPUS;
+    bool bCanDecodeAAC;
+    bool bCanDecodeCELP;
+    bool bCanDecodeHVXC;
+    bool bCanDecodeOPUS;
 
     FILE *pFile;
 
@@ -241,6 +232,7 @@ protected:
     string AACFileName(CParameter&);
     string CELPFileName(CParameter&);
     string HVXCFileName(CParameter&);
+	void CloseDecoder();
 };
 
-#endif // !defined(AUIDOSOURCEDECODER_H__3B0BA660_CABB2B_23E7A0D31912__INCLUDED_)
+#endif // _AUIDOSOURCEDECODER_H_INCLUDED_

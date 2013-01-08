@@ -141,8 +141,8 @@ public:
             iCELPIndex(0), bCELPCRC(FALSE), eHVXCRate(HR_2_KBIT), bHVXCCRC(FALSE),
             eOPUSBandwidth(OB_FB), eOPUSSubCod(OS_SILK), eOPUSChan(OC_STEREO),
             eOPUSSignal(OG_MUSIC), eOPUSApplication(OA_AUDIO),
-            bOPUSForwardErrorCorrection(FALSE), bOPUSTransmitterParamChanged(FALSE),
-            bOPUSRequestReset(FALSE)
+            bOPUSForwardErrorCorrection(FALSE), bOPUSRequestReset(FALSE),
+            bParamChanged(FALSE)
     {
     }
     CAudioParam(const CAudioParam& ap):
@@ -164,8 +164,8 @@ public:
             eOPUSSignal(ap.eOPUSSignal),
             eOPUSApplication(ap.eOPUSApplication),
             bOPUSForwardErrorCorrection(ap.bOPUSForwardErrorCorrection),
-            bOPUSTransmitterParamChanged(ap.bOPUSTransmitterParamChanged),
-            bOPUSRequestReset(ap.bOPUSRequestReset)
+            bOPUSRequestReset(ap.bOPUSRequestReset),
+            bParamChanged(ap.bParamChanged)
     {
     }
     CAudioParam& operator=(const CAudioParam& ap)
@@ -188,8 +188,8 @@ public:
         eOPUSSignal = ap.eOPUSSignal;
         eOPUSApplication = ap.eOPUSApplication;
         bOPUSForwardErrorCorrection = ap.bOPUSForwardErrorCorrection;
-        bOPUSTransmitterParamChanged = ap.bOPUSTransmitterParamChanged;
         bOPUSRequestReset = ap.bOPUSRequestReset;
+        bParamChanged = ap.bParamChanged;
         return *this;
     }
 
@@ -222,9 +222,10 @@ public:
     EOPUSSignal eOPUSSignal; /* Encoder signal type */
     EOPUSApplication eOPUSApplication; /* Encoder intended application */
     _BOOLEAN bOPUSForwardErrorCorrection; /* Encoder Forward Error Correction enabled */
-    _BOOLEAN bOPUSTransmitterParamChanged; /* Encoder parameters have changed */
     _BOOLEAN bOPUSRequestReset; /* Request encoder reset */
 
+    /* CAudioParam has changed */
+    _BOOLEAN bParamChanged;
 
     /* This function is needed for detection changes in the class */
     _BOOLEAN operator!=(const CAudioParam AudioParam)

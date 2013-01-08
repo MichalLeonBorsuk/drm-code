@@ -158,7 +158,7 @@ unix {
      exists(/usr/include/sndfile.h) {
       CONFIG += sndfile
             }
-     exists(/usr/include/opus/opus.h) {
+     exists(/usr/include/opus/opus.h2) {
       CONFIG += opus
             }
      exists(/usr/include/speex/speex_preprocess.h) {
@@ -449,8 +449,11 @@ HEADERS += \
     src/sound/sound.h \
     src/sound/soundinterface.h \
     src/sound/soundnull.h \
+    src/sourcedecoders/AudioCodec.h \
     src/sourcedecoders/AudioSourceDecoder.h \
     src/sourcedecoders/AudioSourceEncoder.h \
+    src/sourcedecoders/aac_codec.h \
+    src/sourcedecoders/null_codec.h \
     src/sourcedecoders/opus_codec.h \
     src/sync/FreqSyncAcq.h \
     src/sync/SyncUsingPil.h \
@@ -554,8 +557,11 @@ SOURCES += \
     src/SDC/SDCTransmit.cpp \
     src/SimulationParameters.cpp \
     src/sound/audiofilein.cpp \
+    src/sourcedecoders/AudioCodec.cpp \
     src/sourcedecoders/AudioSourceDecoder.cpp \
     src/sourcedecoders/AudioSourceEncoder.cpp \
+    src/sourcedecoders/aac_codec.cpp \
+    src/sourcedecoders/null_codec.cpp \
     src/sourcedecoders/opus_codec.cpp \
     src/sync/FreqSyncAcq.cpp \
     src/sync/SyncUsingPil.cpp \

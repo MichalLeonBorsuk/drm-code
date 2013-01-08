@@ -3,7 +3,7 @@
  * Copyright (c) 2012-2013
  *
  * Author(s):
- *	David Flamand
+ *  David Flamand
  *
  * Description:
  *  See opus_codec.cpp
@@ -26,9 +26,10 @@
  *
 \******************************************************************************/
 
-#ifndef OPUS_CODEC_H_INCLUDED
-#define OPUS_CODEC_H_INCLUDED
+#ifndef _OPUS_CODEC_H_
+#define _OPUS_CODEC_H_
 
+#include "AudioCodec.h"
 #include "../GlobalDefinitions.h"
 #include "../Parameter.h"
 #include "../util/CRC.h"
@@ -43,9 +44,6 @@
 #define OPUS_PCM_FRAME_SIZE 960  // (in samples) = 48000Hz * 0.020ms
 #define OPUS_MAX_PCM_FRAME 3840  // (in samples) = 48000Hz * 0.060ms
 #define OPUS_MAX_DATA_FRAME 1276 // (in bytes)   = CELT CBR BITRATE 510400
-#define OPUS_DECODER_ERROR_OK 			0
-#define OPUS_DECODER_ERROR_CRC			1
-#define OPUS_DECODER_ERROR_CORRUPTED	2
 
 /*************
  *  generic
@@ -61,7 +59,7 @@ const char *opusGetVersion(
 
 void opusSetupParam(
 	CAudioParam &AudioParam,
-	unsigned char *encoded_data
+	int toc
 	);
 
 /*************
@@ -111,6 +109,7 @@ typedef struct _opus_decoder {
 	int samplerate;
 	int channels;
 	int changed;
+	int last_good_toc;
 	CCRC *CRCObject;
 	opus_int16 out_pcm[OPUS_MAX_PCM_FRAME * 2]; // 2 = stereo
 } opus_decoder;
@@ -137,4 +136,33 @@ void *opusDecDecode(
 	unsigned long buffer_size
 	);
 
-#endif
+/*************
+ *  class
+ */
+
+class OpusCodec : public CAudioCodec
+{
+public:
+	OpusCodec();
+	virtual ~OpusCodec();
+	/* Decoder */
+	virtual string DecGetVersion();
+	virtual bool CanDecode(CAudioParam::EAudCod eAudioCoding);
+	virtual bool DecOpen(CAudioParam& AudioParam, int *iAudioSampleRate, int *iLenDecOutPerChan);
+	virtual _SAMPLE* Decode(CVector<uint8_t>& vecbyPrepAudioFrame, int *iChannels, CAudioCodec::EDecError *eDecError);
+	virtual void DecClose();
+	virtual void DecUpdate(CAudioParam& AudioParam);
+	/* Encoder */
+	virtual string EncGetVersion();
+	virtual bool CanEncode(CAudioParam::EAudCod eAudioCoding);
+	virtual bool EncOpen(int iSampleRate, int iChannels, unsigned long *lNumSampEncIn, unsigned long *lMaxBytesEncOut);
+	virtual int Encode(CVector<_SAMPLE>& vecsEncInData, unsigned long lNumSampEncIn, CVector<uint8_t>& vecsEncOutData, unsigned long lMaxBytesEncOut);
+	virtual void EncClose();
+	virtual void EncSetBitrate(int iBitRate);
+	virtual void EncUpdate(CAudioParam& AudioParam);
+protected:
+	opus_decoder *hOpusDecoder;
+	opus_encoder *hOpusEncoder;
+};
+
+#endif // _OPUS_CODEC_H_
