@@ -6,7 +6,8 @@
  *  David Flamand
  *
  * Description:
- *  Null codec class
+ *  Null codec class, this codec is used when the requested codec is not
+ *  available.
  *
  ******************************************************************************
  *
@@ -69,8 +70,6 @@ bool NullCodec::DecOpen(CAudioParam& AudioParam, int *iAudioSampleRate, int *iLe
 		break;
 	case CAudioParam::AS_48KHZ:
 		iSampleRate = 48000;
-		break;
-	default:
 		break;
 	}
 	*iAudioSampleRate = iSampleRate;
