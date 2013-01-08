@@ -46,7 +46,7 @@
    double of this size should be ok for all possible cases */
 #define MAX_SIZE_BYTES_NETW_BUF		10000
 
-#include "PacketInOut.h"
+#include "../MDI/PacketInOut.h"
 
 class CPacketSocketQT :
 	public CPacketSocket
