@@ -35,12 +35,15 @@
 
 #include <map>
 
-#include <qthread.h>
 #include "ui_AboutDlgbase.h"
+#include <QThread>
 #include <QMenu>
 #include <QDialog>
 #include <QAction>
 #include <QEvent>
+#include <QSystemTrayIcon>
+#include <QTimer>
+#include <QAction>
 
 #include <qwt_thermo.h> /* S-Meter */
 
@@ -85,6 +88,29 @@ class CHelpUsage : public CAboutDlgBase
 public:
 	CHelpUsage(const char* usage, const char* argv0, QWidget* parent = 0,
 		const char* name = 0, bool modal = FALSE, Qt::WFlags f = 0);
+};
+
+/* System Tray -------------------------------------------------------------- */
+class CSysTray
+{
+public:
+    static CSysTray* Create(QWidget* parent, const char* callbackIcon, const char* callbackTimer, const char* icon);
+    static void Destroy(CSysTray* pSysTray);
+    static void SetToolTip(CSysTray* pSysTray, const QString& Title, const QString& Message);
+    static void Start(CSysTray* pSysTray);
+    static void Stop(CSysTray* pSysTray, const QString& Message);
+    static QAction* AddAction(CSysTray* pSysTray, const QString& text, const QObject* receiver, const char* member);
+    static QAction* AddSeparator(CSysTray* pSysTray);
+
+protected:
+    CSysTray::~CSysTray();
+    CSysTray::CSysTray(QWidget* parent, const char* callbackIcon, const char* callbackTimer, const char* icon);
+    void CreateContextMenu();
+    QSystemTrayIcon* pSystemTrayIcon;
+    QString Title;
+    QString Message;
+    QTimer Timer;
+    QMenu* pContextMenu;
 };
 
 /* GUI help functions ------------------------------------------------------- */

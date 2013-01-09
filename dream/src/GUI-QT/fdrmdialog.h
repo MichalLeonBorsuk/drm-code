@@ -45,7 +45,6 @@
 #include <QShowEvent>
 #include <QHideEvent>
 #include <QCloseEvent>
-#include <QSystemTrayIcon>
 #include "ui_DRMMainWindow.h"
 #include "EvaluationDlg.h"
 #include "SoundCardSelMenu.h"
@@ -110,7 +109,7 @@ protected:
     QMenu*				pPlotStyleMenu;
     QSignalMapper*		plotStyleMapper;
     QActionGroup*		plotStyleGroup;
-    QSystemTrayIcon*    pSysTray;
+    CSysTray*           pSysTray;
     QWidget*            pCurrentWindow;
     CFileMenu*			pFileMenu;
     CSoundCardSelMenu*	pSoundCardMenu;

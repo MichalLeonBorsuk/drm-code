@@ -234,7 +234,14 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& NSettings,
 
     ClearDisplay();
 
-    SysTrayCreate();
+    pSysTray = CSysTray::Create(
+        this,
+        SLOT(OnSysTrayActivated(QSystemTrayIcon::ActivationReason)),
+        SLOT(OnSysTrayTimer()),
+        ":/icons/MainIcon.svg");
+    CSysTray::AddAction(pSysTray, tr("&New Acquisition"), this, SLOT(OnNewAcquisition()));
+    CSysTray::AddSeparator(pSysTray);
+    CSysTray::AddAction(pSysTray, tr("&Exit"), this, SLOT(close()));
 
     /* Activate real-time timers */
     Timer.start(GUI_CONTROL_UPDATE_TIME);
@@ -243,6 +250,7 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& NSettings,
 FDRMDialog::~FDRMDialog()
 {
     delete pLogging;
+    CSysTray::Destroy(pSysTray);
 }
 
 void FDRMDialog::OnSysTrayActivated(QSystemTrayIcon::ActivationReason reason)
@@ -272,72 +280,8 @@ void FDRMDialog::OnSysTrayActivated(QSystemTrayIcon::ActivationReason reason)
     }
 }
 
-void FDRMDialog::SysTrayCreate()
-{
-    if (pSysTray == NULL && QSystemTrayIcon::isSystemTrayAvailable())
-    {
-        pSysTray = new QSystemTrayIcon(QIcon(":/icons/MainIcon.svg"), this);
-        pSysTray->show();
-        connect(pSysTray, SIGNAL(activated(QSystemTrayIcon::ActivationReason)), this, SLOT(OnSysTrayActivated(QSystemTrayIcon::ActivationReason)));
-        QMenu* pContextMenu = new QMenu(this);
-        pContextMenu->addAction(tr("&New Acquisition"), this, SLOT(OnNewAcquisition()));
-        pContextMenu->addSeparator();
-        pContextMenu->addAction(tr("&Exit"), this, SLOT(close()));
-        pSysTray->setContextMenu(pContextMenu);
-        connect(&TimerSysTray, SIGNAL(timeout()), this, SLOT(OnSysTrayTimer()));
-        SysTrayStart();
-    }
-}
-
-void FDRMDialog::SysTrayStart()
-{
-    if (pSysTray == NULL) return;
-    TimerSysTray.start(GUI_CONTROL_UPDATE_TIME);
-    OnSysTrayTimer();
-}
-
-void FDRMDialog::SysTrayStop(const QString& Message)
-{
-    if (pSysTray == NULL) return;
-    TimerSysTray.stop();
-    SysTrayToolTip(QString(), Message);
-}
-
-void FDRMDialog::SysTrayToolTip(const QString& Title, const QString& Message)
-{
-    if (pSysTray != NULL &&
-        (SysTrayTitle != Title || SysTrayMessage != Message))
-    {
-        SysTrayTitle = Title;
-        SysTrayMessage = Message;
-        QString ToolTip;
-        if (!Title.isEmpty())
-        {
-            QString NewTitle(Title);
-            NewTitle.replace('&', "&amp;");
-            NewTitle.replace(' ', "&nbsp;");
-            NewTitle.replace('<', "&lt;");
-            NewTitle.replace('>', "&gt;");
-            ToolTip = "<b>" + NewTitle + "</b>";
-        }
-        if (!Message.isEmpty())
-        {
-            if (!Title.isEmpty())
-                ToolTip += "<br>";
-            QString NewMessage(Message);
-            NewMessage.replace('&', "&amp;");
-            NewMessage.replace('<', "&lt;");
-            NewMessage.replace('>', "&gt;");
-            ToolTip += NewMessage;
-        }
-        ToolTip.replace(QRegExp("(\r|\n|\v)"), "<br>");
-        pSysTray->setToolTip(ToolTip);
-    }
-}
-
 void FDRMDialog::OnSysTrayTimer()
 {
-    if (pSysTray == NULL) return;
     QString Title, Message;
     if (DRMReceiver.GetAcquiState() == AS_WITH_SIGNAL)
     {
@@ -359,7 +303,7 @@ void FDRMDialog::OnSysTrayTimer()
     }
     else
         Message = tr("Scanning...");
-    SysTrayToolTip(Title, Message);
+    CSysTray::SetToolTip(pSysTray, Title, Message);
 }
 
 void FDRMDialog::SetWindowGeometry()
@@ -941,7 +885,7 @@ void FDRMDialog::ClearDisplay()
 
 void FDRMDialog::ChangeGUIModeToDRM()
 {
-    SysTrayStart();
+    CSysTray::Start(pSysTray);
     pCurrentWindow = this;
     switchEvent();
     show();
@@ -951,7 +895,7 @@ void FDRMDialog::ChangeGUIModeToAM()
 {
     hide();
     Timer.stop();
-    SysTrayStop(tr("Dream AM"));
+    CSysTray::Stop(pSysTray, tr("Dream AM"));
     pCurrentWindow = pAnalogDemDlg;
     pAnalogDemDlg->switchEvent();
     pAnalogDemDlg->show();
@@ -961,7 +905,7 @@ void FDRMDialog::ChangeGUIModeToFM()
 {
     hide();
     Timer.stop();
-    SysTrayStop(tr("Dream FM"));
+    CSysTray::Stop(pSysTray, tr("Dream FM"));
     pCurrentWindow = pFMDlg;
     pFMDlg->switchEvent();
     pFMDlg->show();
