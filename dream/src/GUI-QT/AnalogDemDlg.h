@@ -30,14 +30,14 @@
 \******************************************************************************/
 
 
-#include <qtimer.h>
-#include "ui_AMMainWindow.h"
-#include "ui_AMSSDlgbase.h"
+#include <QTimer>
 #include <QDialog>
 #include <QButtonGroup>
+#include "ui_AMMainWindow.h"
+#include "ui_AMSSDlgbase.h"
 #include "SoundCardSelMenu.h"
-
 #include "DialogUtil.h"
+#include "DRMPlot.h"
 #include "../GlobalDefinitions.h"
 #include "../DrmReceiver.h"
 #include "../util/Settings.h"
@@ -50,53 +50,26 @@
 
 
 /* Classes ********************************************************************/
-class CDRMPlot;
 
-class CAMSSDlgBase : public QDialog, public Ui_CAMSSDlgBase
-{
-public:
-    CAMSSDlgBase(QWidget* parent, const char*, bool, Qt::WFlags f = 0):
-        QDialog(parent,f) {
-        setupUi(this);
-    }
-    virtual ~CAMSSDlgBase() {}
-};
-
-class AnalogDemDlgBase : public QMainWindow, public Ui_AMMainWindow
-{
-public:
-    AnalogDemDlgBase(QWidget* parent = 0,
-                     const char* name = 0, bool modal=false, Qt::WFlags f = 0):
-        QMainWindow(parent,f), MainPlot(NULL)
-    {
-        (void)name;
-        (void)modal;
-        setupUi(this);
-    }
-    virtual ~AnalogDemDlgBase() {}
-protected:
-    CDRMPlot*           MainPlot;
-};
 
 /* AMSS dialog -------------------------------------------------------------- */
-class CAMSSDlg : public CAMSSDlgBase
+class CAMSSDlg : public QDialog, public Ui_CAMSSDlgBase
 {
 	Q_OBJECT
 
 public:
-	CAMSSDlg(CDRMReceiver&, CSettings&, QWidget* parent = 0, const char* name = 0,
-		bool modal = FALSE, Qt::WFlags f = 0);
+	CAMSSDlg(CDRMReceiver&, CSettings&, QWidget* parent = 0);
 
 protected:
 	CDRMReceiver&	DRMReceiver;
-	CSettings&	Settings;
+	CSettings&		Settings;
 	CEventFilter	ef;
 
-	QTimer	Timer;
-	QTimer	TimerPLLPhaseDial;
-	void	AddWhatsThisHelp();
-	void	showEvent(QShowEvent*);
-	void	hideEvent(QHideEvent*);
+	QTimer			Timer;
+	QTimer			TimerPLLPhaseDial;
+	void			AddWhatsThisHelp();
+	void			showEvent(QShowEvent*);
+	void			hideEvent(QHideEvent*);
 
 public slots:
 	void OnTimer();
@@ -105,25 +78,27 @@ public slots:
 
 
 /* Analog demodulation dialog ----------------------------------------------- */
-class AnalogDemDlg : public AnalogDemDlgBase
+class AnalogDemDlg : public QMainWindow, public Ui_AMMainWindow
 {
 	Q_OBJECT
 
 public:
-	AnalogDemDlg(CDRMReceiver&, CSettings&, QWidget* parent = 0,
-		const char* name = 0, bool modal = FALSE, Qt::WFlags f = 0);
+	AnalogDemDlg(CDRMReceiver&, CSettings&, QWidget* parent = 0);
+
+	void SetWindowGeometry();
 
 protected:
-	CDRMReceiver&	DRMReceiver;
-	CSettings&		Settings;
+	CDRMReceiver&		DRMReceiver;
+	CSettings&			Settings;
 
-	QTimer			Timer;
-	QTimer			TimerPLLPhaseDial;
-	QTimer			TimerClose;
-	CAMSSDlg		AMSSDlg;
-	CEventFilter		ef;
-	CFileMenu*		pFileMenu;
+	QTimer				Timer;
+	QTimer				TimerPLLPhaseDial;
+	QTimer				TimerClose;
+	CAMSSDlg			AMSSDlg;
+    CDRMPlot*			MainPlot;
+	CFileMenu*			pFileMenu;
 	CSoundCardSelMenu*	pSoundCardMenu;
+	CEventFilter		ef;
 
 	void UpdateControls();
 	void AddWhatsThisHelp();
@@ -151,7 +126,7 @@ public slots:
 	void OnSwitchToDRM();
 	void OnSwitchToFM();
 	void OnHelpAbout() {emit About();}
-	void on_actionWhats_This();
+	void OnWhatsThis();
 
 signals:
 	void SwitchMode(int);

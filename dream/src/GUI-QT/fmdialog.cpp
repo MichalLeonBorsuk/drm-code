@@ -44,17 +44,15 @@
 
 /* Implementation *************************************************************/
 FMDialog::FMDialog(CDRMReceiver& NDRMR, CSettings& NSettings,
-	QWidget* parent, const char* name, bool modal, Qt::WFlags f):
-	FMDialogBase(parent, name, modal, f),
+	QWidget* parent) :
+	QMainWindow(parent),
 	DRMReceiver(NDRMR), Settings(NSettings),
 	eReceiverMode(RM_NONE)
 {
-	/* recover window size and position */
-	CWinGeom s;
-	Settings.Get("FM Dialog", s);
-	const QRect WinGeom(s.iXPos, s.iYPos, s.iWSize, s.iHSize);
-	if (WinGeom.isValid() && !WinGeom.isEmpty() && !WinGeom.isNull())
-			setGeometry(WinGeom);
+	setupUi(this);
+
+	/* Recover window size and position */
+	SetWindowGeometry();
 
 	/* Set help text for the controls */
 	AddWhatsThisHelp();
@@ -70,7 +68,7 @@ FMDialog::FMDialog(CDRMReceiver& NDRMR, CSettings& NSettings,
 	menu_Settings->addMenu(pSoundCardMenu);
 
 	connect(actionAbout_Dream, SIGNAL(triggered()), this, SLOT(OnHelpAbout()));
-	connect(actionWhats_This, SIGNAL(triggered()), this, SLOT(on_actionWhats_This()));
+	connect(actionWhats_This, SIGNAL(triggered()), this, SLOT(OnWhatsThis()));
 
 	/* Digi controls */
 	/* Set display color */
@@ -118,9 +116,18 @@ FMDialog::FMDialog(CDRMReceiver& NDRMR, CSettings& NSettings,
  	Timer.start(GUI_CONTROL_UPDATE_TIME);
 }
 
-void FMDialog::on_actionWhats_This()
+void FMDialog::SetWindowGeometry()
 {
-        QWhatsThis::enterWhatsThisMode();
+	CWinGeom s;
+	Settings.Get("FM Dialog", s);
+	const QRect WinGeom(s.iXPos, s.iYPos, s.iWSize, s.iHSize);
+	if (WinGeom.isValid() && !WinGeom.isEmpty() && !WinGeom.isNull())
+		setGeometry(WinGeom);
+}
+
+void FMDialog::OnWhatsThis()
+{
+	QWhatsThis::enterWhatsThisMode();
 }
 
 void FMDialog::OnSwitchToDRM()
@@ -399,6 +406,7 @@ void FMDialog::ClearDisplay()
 void FMDialog::switchEvent()
 {
 	/* Put initialization code on mode switch here */
+    SetWindowGeometry();
 	pFileMenu->UpdateMenu();
 }
 

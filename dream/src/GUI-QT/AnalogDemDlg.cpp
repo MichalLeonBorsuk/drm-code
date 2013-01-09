@@ -54,15 +54,16 @@
 
 /* Implementation *************************************************************/
 AnalogDemDlg::AnalogDemDlg(CDRMReceiver& NDRMR, CSettings& NSettings,
-	QWidget* parent, const char* name, bool modal, Qt::WFlags f):
-	AnalogDemDlgBase(parent, name, modal, f),
-	DRMReceiver(NDRMR), Settings(NSettings), AMSSDlg(NDRMR, Settings, parent, name, modal, f)
+	QWidget* parent):
+	QMainWindow(parent),
+	DRMReceiver(NDRMR), Settings(NSettings),
+	AMSSDlg(NDRMR, Settings, parent),
+	MainPlot(NULL)
 {
-	CWinGeom s;
-	Settings.Get("AM Dialog", s);
-	const QRect WinGeom(s.iXPos, s.iYPos, s.iWSize, s.iHSize);
-	if (WinGeom.isValid() && !WinGeom.isEmpty() && !WinGeom.isNull())
-			setGeometry(WinGeom);
+	setupUi(this);
+
+    /* Recover window size and position */
+	SetWindowGeometry();
 
 	/* Set help text for the controls */
 	AddWhatsThisHelp();
@@ -78,7 +79,7 @@ AnalogDemDlg::AnalogDemDlg(CDRMReceiver& NDRMR, CSettings& NSettings,
 	menu_Settings->addMenu(pSoundCardMenu);
 	connect(pSoundCardMenu, SIGNAL(sampleRateChanged()), this, SLOT(switchEvent()));
 	connect(actionAbout_Dream, SIGNAL(triggered()), this, SLOT(OnHelpAbout()));
-	connect(actionWhats_This, SIGNAL(triggered()), this, SLOT(on_actionWhats_This()));
+	connect(actionWhats_This, SIGNAL(triggered()), this, SLOT(OnWhatsThis()));
 	SliderBandwidth->setTickPosition(QSlider::TicksBothSides);
 	MainPlot = new CDRMPlot(NULL, plot);
 
@@ -166,9 +167,18 @@ AnalogDemDlg::AnalogDemDlg(CDRMReceiver& NDRMR, CSettings& NSettings,
 	/* Don't activate real-time timers, wait for show event */
 }
 
-void AnalogDemDlg::on_actionWhats_This()
+void AnalogDemDlg::SetWindowGeometry()
 {
-        QWhatsThis::enterWhatsThisMode();
+	CWinGeom s;
+	Settings.Get("AM Dialog", s);
+	const QRect WinGeom(s.iXPos, s.iYPos, s.iWSize, s.iHSize);
+	if (WinGeom.isValid() && !WinGeom.isEmpty() && !WinGeom.isNull())
+			setGeometry(WinGeom);
+}
+
+void AnalogDemDlg::OnWhatsThis()
+{
+	QWhatsThis::enterWhatsThisMode();
 }
 
 void AnalogDemDlg::OnSwitchToDRM()
@@ -184,6 +194,7 @@ void AnalogDemDlg::OnSwitchToFM()
 void AnalogDemDlg::switchEvent()
 {
 	/* Put initialization code on mode switch here */
+    SetWindowGeometry();
 	SliderBandwidth->setRange(0, DRMReceiver.GetParameters()->GetSigSampleRate() / 2);
 	pFileMenu->UpdateMenu();
 }
@@ -747,11 +758,14 @@ void AnalogDemDlg::AddWhatsThisHelp()
 	Added phase offset display for AMSS demodulation loop.
 */
 CAMSSDlg::CAMSSDlg(CDRMReceiver& NDRMR, CSettings& NSettings,
-	QWidget* parent, const char* name, bool modal, Qt::WFlags f) :
-	CAMSSDlgBase(parent, name, modal, f),
+	QWidget* parent) :
+	QDialog(parent),
 	DRMReceiver(NDRMR),
 	Settings(NSettings)
 {
+	setupUi(this);
+
+	/* Recover window size and position */
 	CWinGeom s;
 	Settings.Get("AMSS Dialog", s);
 	const QRect WinGeom(s.iXPos, s.iYPos, s.iWSize, s.iHSize);
