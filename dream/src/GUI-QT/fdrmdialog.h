@@ -26,18 +26,17 @@
  *
 \******************************************************************************/
 
-#ifndef __FDRMDIALOG_H
-#define __FDRMDIALOG_H
+#ifndef _FDRMDIALOG_H_
+#define _FDRMDIALOG_H_
 
-#include <qlabel.h>
-#include <qpushbutton.h>
-#include <qtimer.h>
-#include <qstring.h>
-#include <qmenubar.h>
-#include <qlayout.h>
-#include <qpalette.h>
-#include <qcolordialog.h>
-#include <qwt_thermo.h>
+#include <QLabel>
+#include <QPushButton>
+#include <QTimer>
+#include <QString>
+#include <QMenuBar>
+#include <QLayout>
+#include <QPalette>
+#include <QColorDialog>
 #include <QActionGroup>
 #include <QSignalMapper>
 #include <QDialog>
@@ -45,10 +44,11 @@
 #include <QShowEvent>
 #include <QHideEvent>
 #include <QCloseEvent>
+#include <qwt_thermo.h>
 #include "ui_DRMMainWindow.h"
+
 #include "EvaluationDlg.h"
 #include "SoundCardSelMenu.h"
-
 #include "DialogUtil.h"
 #include "StationsDlg.h"
 #include "LiveScheduleDlg.h"
@@ -172,4 +172,4 @@ signals:
     void plotStyleChanged(int);
 };
 
-#endif
+#endif // _FDRMDIALOG_H_

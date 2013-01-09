@@ -302,21 +302,25 @@ CHelpUsage::CHelpUsage(const char* usage, const char* argv0,
 }
 
 /* System Tray -------------------------------------------------------------- */
-//CSysTray::CSysTray()
 
 CSysTray::CSysTray(QWidget* parent, const char* callbackIcon, const char* callbackTimer, const char* icon)
-    : pContextMenu(NULL)
+    : pTimer(NULL), pContextMenu(NULL)
 {
     pSystemTrayIcon = new QSystemTrayIcon(QIcon(icon), parent);
     if (callbackIcon != NULL)
         parent->connect(pSystemTrayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)), parent, callbackIcon);
     if (callbackTimer != NULL)
-        parent->connect(&Timer, SIGNAL(timeout()), parent, callbackTimer);
+	{
+		pTimer = new QTimer();
+        parent->connect(pTimer, SIGNAL(timeout()), parent, callbackTimer);
+	}
     pSystemTrayIcon->show();
 }
 
 CSysTray::~CSysTray()
 {
+	if (pTimer != NULL)
+		delete pTimer;
     if (pSystemTrayIcon != NULL)
         delete pSystemTrayIcon;
     if (pContextMenu != NULL)
@@ -349,13 +353,15 @@ void CSysTray::Destroy(CSysTray* pSysTray)
 void CSysTray::Start(CSysTray* pSysTray)
 {
     if (pSysTray == NULL) return;
-    pSysTray->Timer.start(GUI_CONTROL_UPDATE_TIME);
+    if (pSysTray->pTimer != NULL)
+        pSysTray->pTimer->start(GUI_CONTROL_UPDATE_TIME);
 }
 
 void CSysTray::Stop(CSysTray* pSysTray, const QString& Message)
 {
     if (pSysTray == NULL) return;
-    pSysTray->Timer.stop();
+	if (pSysTray->pTimer != NULL)
+        pSysTray->pTimer->stop();
     SetToolTip(pSysTray, QString(), Message);
 }
 
@@ -415,6 +421,8 @@ void CSysTray::SetToolTip(CSysTray* pSysTray, const QString& Title, const QStrin
         pSysTray->pSystemTrayIcon->setToolTip(ToolTip);
     }
 }
+
+/* -------------------------------------------------------------------------- */
 
 void InitSMeter(QWidget* parent, QwtThermo* sMeter)
 {

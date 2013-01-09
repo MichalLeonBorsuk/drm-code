@@ -106,10 +106,10 @@ protected:
     ~CSysTray();
     CSysTray(QWidget* parent, const char* callbackIcon, const char* callbackTimer, const char* icon);
     void CreateContextMenu();
-    QSystemTrayIcon* pSystemTrayIcon;
     QString Title;
     QString Message;
-    QTimer Timer;
+    QSystemTrayIcon* pSystemTrayIcon;
+    QTimer* pTimer;
     QMenu* pContextMenu;
 };
 

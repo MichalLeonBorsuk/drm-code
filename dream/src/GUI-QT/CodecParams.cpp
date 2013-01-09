@@ -40,9 +40,9 @@
 
 
 CodecParams::CodecParams(CSettings& Settings, CParameter& Parameters,
-	int iShortID, QWidget* parent, const char*, bool, Qt::WindowFlags f)
+	int iShortID, QWidget* parent)
 	:
-	QDialog(parent, f), Settings(Settings), Parameters(Parameters),
+	QDialog(parent), Settings(Settings), Parameters(Parameters),
 	iShortID(iShortID), bWasVisible(FALSE), bLastPositionValid(FALSE)
 {
 	setupUi(this);
@@ -145,6 +145,14 @@ CodecParams::~CodecParams()
 		}
 	}
 	Settings.Put("Codec Dialog", s);
+}
+
+void CodecParams::reject()
+{ 
+	GetDialogPosition();
+	QWidget* parent = parentWidget();
+	if (parent && parent->isVisible())
+		hide();
 }
 
 void CodecParams::OnButtonGroupChannels(int iID)
