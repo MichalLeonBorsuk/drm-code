@@ -29,16 +29,17 @@
 #ifndef __FMDIALOG_H
 #define __FMDIALOG_H
 
-#include <qlabel.h>
-#include <qpushbutton.h>
-#include <qtimer.h>
-#include <qstring.h>
-#include <qmenubar.h>
-#include <qevent.h>
-#include <qlayout.h>
-#include <qpalette.h>
+#include <QLabel>
+#include <QPushButton>
+#include <QTimer>
+#include <QString>
+#include <QMenuBar>
+#include <QEvent>
+#include <QLayout>
+#include <QPalette>
 #include <QMenu>
 #include <QDialog>
+#include <QColorDialog>
 #include "ui_FMMainWindow.h"
 #include "SoundCardSelMenu.h"
 #include "DialogUtil.h"
@@ -46,26 +47,16 @@
 #include "../DrmReceiver.h"
 #include "../util/Vector.h"
 
-#include <qcolordialog.h>
-
 /* Classes ********************************************************************/
-class FMDialogBase : public QMainWindow, public Ui_FMMainWindow
-{
-public:
-	FMDialogBase(QWidget* parent = 0, const char* name = 0,
-		bool modal = FALSE, Qt::WFlags f = 0):
-		QMainWindow(parent,f){(void)name;(void)modal;setupUi(this);}
-	virtual ~FMDialogBase() {}
-};
 
-class FMDialog : public FMDialogBase
+class FMDialog : public QMainWindow, public Ui_FMMainWindow
 {
 	Q_OBJECT
 
 public:
-	FMDialog(CDRMReceiver&, CSettings&, QWidget* parent = 0, const char* name = 0,
-		bool modal = FALSE,	Qt::WFlags f = 0);
-	void switchEvent();
+	FMDialog(CDRMReceiver&, CSettings&, QWidget* parent = 0);
+
+	void SetWindowGeometry();
 
 protected:
 	CDRMReceiver&		DRMReceiver;
@@ -103,6 +94,7 @@ protected:
 	void			SetDisplayColor(const QColor newColor);
 
 public slots:
+	void switchEvent();
 	void OnTune();
 	void OnTimer();
 	void OnTimerClose();
@@ -110,7 +102,7 @@ public slots:
 	void OnSwitchToDRM();
 	void OnSwitchToAM();
 	void OnHelpAbout() {emit About();}
-	void on_actionWhats_This();
+	void OnWhatsThis();
 
 signals:
 	void SwitchMode(int);

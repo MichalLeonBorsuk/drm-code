@@ -45,25 +45,24 @@
 /* Implementation *************************************************************/
 #ifdef HAVE_LIBHAMLIB
 FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& NSettings, CRig& rig,
-                       QWidget* parent, const char* name, bool modal, Qt::WFlags f)
+                       QWidget* parent)
 #else
 FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& NSettings, 
-                       QWidget* parent, const char* name, bool modal, Qt::WFlags f)
+                       QWidget* parent)
 #endif
     :
-    FDRMDialogBase(parent, name, modal, f),
+    QMainWindow(parent),
     DRMReceiver(NDRMR),Settings(NSettings),
     Timer(),serviceLabels(4),pLogging(NULL),
+    pSysTray(NULL), pCurrentWindow(this),
     iMultimediaServiceBit(0),
     iLastMultimediaServiceSelected(-1),
     pScheduler(NULL), pScheduleTimer(NULL)
 {
+    setupUi(this);
+
     /* Recover window size and position */
-    CWinGeom s;
-    Settings.Get("DRM Dialog", s);
-    const QRect WinGeom(s.iXPos, s.iYPos, s.iWSize, s.iHSize);
-    if (WinGeom.isValid() && !WinGeom.isEmpty() && !WinGeom.isNull())
-        setGeometry(WinGeom);
+    SetWindowGeometry();
 
     /* Set help text for the controls */
     AddWhatsThisHelp();
@@ -161,7 +160,7 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& NSettings,
     }
 
     connect(actionAbout_Dream, SIGNAL(triggered()), this, SLOT(OnHelpAbout()));
-    connect(actionWhats_This, SIGNAL(triggered()), this, SLOT(on_actionWhats_This()));
+    connect(actionWhats_This, SIGNAL(triggered()), this, SLOT(OnWhatsThis()));
 
     connect(this, SIGNAL(plotStyleChanged(int)), pSysEvalDlg, SLOT(UpdatePlotStyle(int)));
     connect(this, SIGNAL(plotStyleChanged(int)), pAnalogDemDlg, SLOT(UpdatePlotStyle(int)));
@@ -235,6 +234,8 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& NSettings,
 
     ClearDisplay();
 
+    SysTrayCreate();
+
     /* Activate real-time timers */
     Timer.start(GUI_CONTROL_UPDATE_TIME);
 }
@@ -244,7 +245,133 @@ FDRMDialog::~FDRMDialog()
     delete pLogging;
 }
 
-void FDRMDialog::on_actionWhats_This()
+void FDRMDialog::OnSysTrayActivated(QSystemTrayIcon::ActivationReason reason)
+{
+    if (reason == QSystemTrayIcon::Trigger ||
+        reason == QSystemTrayIcon::DoubleClick)
+    {
+        if (pCurrentWindow->isMinimized())
+        {
+            pCurrentWindow->showNormal();
+            pCurrentWindow->activateWindow();
+        }
+        else
+            if (!pCurrentWindow->isVisible())
+            {
+                if (pCurrentWindow == this)
+                    this->SetWindowGeometry();
+                else if (pCurrentWindow == pAnalogDemDlg)
+                    pAnalogDemDlg->SetWindowGeometry();
+                else if (pCurrentWindow == pFMDlg)
+                    pFMDlg->SetWindowGeometry();
+                pCurrentWindow->show();
+                pCurrentWindow->activateWindow();
+            }
+            else
+                pCurrentWindow->hide();
+    }
+}
+
+void FDRMDialog::SysTrayCreate()
+{
+    if (pSysTray == NULL && QSystemTrayIcon::isSystemTrayAvailable())
+    {
+        pSysTray = new QSystemTrayIcon(QIcon(":/icons/MainIcon.svg"), this);
+        pSysTray->show();
+        connect(pSysTray, SIGNAL(activated(QSystemTrayIcon::ActivationReason)), this, SLOT(OnSysTrayActivated(QSystemTrayIcon::ActivationReason)));
+        QMenu* pContextMenu = new QMenu(this);
+        pContextMenu->addAction(tr("&New Acquisition"), this, SLOT(OnNewAcquisition()));
+        pContextMenu->addSeparator();
+        pContextMenu->addAction(tr("&Exit"), this, SLOT(close()));
+        pSysTray->setContextMenu(pContextMenu);
+        connect(&TimerSysTray, SIGNAL(timeout()), this, SLOT(OnSysTrayTimer()));
+        SysTrayStart();
+    }
+}
+
+void FDRMDialog::SysTrayStart()
+{
+    if (pSysTray == NULL) return;
+    TimerSysTray.start(GUI_CONTROL_UPDATE_TIME);
+    OnSysTrayTimer();
+}
+
+void FDRMDialog::SysTrayStop(const QString& Message)
+{
+    if (pSysTray == NULL) return;
+    TimerSysTray.stop();
+    SysTrayToolTip(QString(), Message);
+}
+
+void FDRMDialog::SysTrayToolTip(const QString& Title, const QString& Message)
+{
+    if (pSysTray != NULL &&
+        (SysTrayTitle != Title || SysTrayMessage != Message))
+    {
+        SysTrayTitle = Title;
+        SysTrayMessage = Message;
+        QString ToolTip;
+        if (!Title.isEmpty())
+        {
+            QString NewTitle(Title);
+            NewTitle.replace('&', "&amp;");
+            NewTitle.replace(' ', "&nbsp;");
+            NewTitle.replace('<', "&lt;");
+            NewTitle.replace('>', "&gt;");
+            ToolTip = "<b>" + NewTitle + "</b>";
+        }
+        if (!Message.isEmpty())
+        {
+            if (!Title.isEmpty())
+                ToolTip += "<br>";
+            QString NewMessage(Message);
+            NewMessage.replace('&', "&amp;");
+            NewMessage.replace('<', "&lt;");
+            NewMessage.replace('>', "&gt;");
+            ToolTip += NewMessage;
+        }
+        ToolTip.replace(QRegExp("(\r|\n|\v)"), "<br>");
+        pSysTray->setToolTip(ToolTip);
+    }
+}
+
+void FDRMDialog::OnSysTrayTimer()
+{
+    if (pSysTray == NULL) return;
+    QString Title, Message;
+    if (DRMReceiver.GetAcquiState() == AS_WITH_SIGNAL)
+    {
+        CParameter& Parameters = *(DRMReceiver.GetParameters());
+        Parameters.Lock();
+            const int iCurSelAudioServ = Parameters.GetCurSelAudioService();
+            CService audioService = Parameters.Service[iCurSelAudioServ];
+            const bool bServiceIsValid = audioService.IsActive()
+                                   && (audioService.AudioParam.iStreamID != STREAM_ID_NOT_USED)
+                                   && (audioService.eAudDataFlag == CService::SF_AUDIO);
+            if (bServiceIsValid)
+            {
+                /* Service label (UTF-8 encoded string -> convert) */
+                Title = QString::fromUtf8(audioService.strLabel.c_str());
+                // Text message of current selected audio service (UTF-8 decoding)
+                Message = QString::fromUtf8(audioService.AudioParam.strTextMessage.c_str());
+            }
+        Parameters.Unlock();
+    }
+    else
+        Message = tr("Scanning...");
+    SysTrayToolTip(Title, Message);
+}
+
+void FDRMDialog::SetWindowGeometry()
+{
+    CWinGeom s;
+    Settings.Get("DRM Dialog", s);
+    const QRect WinGeom(s.iXPos, s.iYPos, s.iWSize, s.iHSize);
+    if (WinGeom.isValid() && !WinGeom.isEmpty() && !WinGeom.isNull())
+        setGeometry(WinGeom);
+}
+
+void FDRMDialog::OnWhatsThis()
 {
     QWhatsThis::enterWhatsThisMode();
 }
@@ -470,7 +597,8 @@ void FDRMDialog::showTextMessage(const QString& textMessage)
 void FDRMDialog::showServiceInfo(const CService& service)
 {
     /* Service label (UTF-8 encoded string -> convert) */
-    LabelServiceLabel->setText(QString().fromUtf8(service.strLabel.c_str()));
+    QString ServiceLabel(QString::fromUtf8(service.strLabel.c_str()));
+    LabelServiceLabel->setText(ServiceLabel);
 
     /* Service ID (plot number in hexadecimal format) */
     const long iServiceID = (long) service.iServiceID;
@@ -723,7 +851,8 @@ void FDRMDialog::UpdateDisplay()
         if (audioService.AudioParam.bTextflag == TRUE)
         {
             // Text message of current selected audio service (UTF-8 decoding)
-            showTextMessage(QString().fromUtf8(audioService.AudioParam.strTextMessage.c_str()));
+            QString TextMessage(QString::fromUtf8(audioService.AudioParam.strTextMessage.c_str()));
+            showTextMessage(TextMessage);
         }
         else
         {
@@ -812,6 +941,8 @@ void FDRMDialog::ClearDisplay()
 
 void FDRMDialog::ChangeGUIModeToDRM()
 {
+    SysTrayStart();
+    pCurrentWindow = this;
     switchEvent();
     show();
 }
@@ -820,6 +951,8 @@ void FDRMDialog::ChangeGUIModeToAM()
 {
     hide();
     Timer.stop();
+    SysTrayStop(tr("Dream AM"));
+    pCurrentWindow = pAnalogDemDlg;
     pAnalogDemDlg->switchEvent();
     pAnalogDemDlg->show();
 }
@@ -828,6 +961,8 @@ void FDRMDialog::ChangeGUIModeToFM()
 {
     hide();
     Timer.stop();
+    SysTrayStop(tr("Dream FM"));
+    pCurrentWindow = pFMDlg;
     pFMDlg->switchEvent();
     pFMDlg->show();
 }
@@ -835,6 +970,7 @@ void FDRMDialog::ChangeGUIModeToFM()
 void FDRMDialog::switchEvent()
 {
     /* Put initialization code on mode switch here */
+    SetWindowGeometry();
     pFileMenu->UpdateMenu();
 }
 

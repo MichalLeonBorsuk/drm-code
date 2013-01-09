@@ -45,6 +45,7 @@
 #include <QShowEvent>
 #include <QHideEvent>
 #include <QCloseEvent>
+#include <QSystemTrayIcon>
 #include "ui_DRMMainWindow.h"
 #include "EvaluationDlg.h"
 #include "SoundCardSelMenu.h"
@@ -69,27 +70,15 @@ class JLViewer;
 class SlideShowViewer;
 class CScheduler;
 
-class FDRMDialogBase : public QMainWindow, public Ui_DRMMainWindow
-{
-public:
-    FDRMDialogBase(QWidget* parent, const char*, bool, Qt::WFlags f):
-        QMainWindow(parent,f) {
-        setupUi(this);
-    }
-    virtual ~FDRMDialogBase() {}
-};
-
-class FDRMDialog : public FDRMDialogBase
+class FDRMDialog : public QMainWindow, public Ui_DRMMainWindow
 {
     Q_OBJECT
 
 public:
 #ifdef HAVE_LIBHAMLIB
-    FDRMDialog(CDRMReceiver&, CSettings&, CRig&, QWidget* parent = 0, const char* name = 0,
-               bool modal = FALSE,	Qt::WFlags f = 0);
+    FDRMDialog(CDRMReceiver&, CSettings&, CRig&, QWidget* parent = 0);
 #else
-    FDRMDialog(CDRMReceiver&, CSettings&, QWidget* parent = 0, const char* name = 0,
-               bool modal = FALSE,	Qt::WFlags f = 0);
+    FDRMDialog(CDRMReceiver&, CSettings&, QWidget* parent = 0);
 #endif
     void switchEvent();
 
@@ -121,19 +110,24 @@ protected:
     QMenu*				pPlotStyleMenu;
     QSignalMapper*		plotStyleMapper;
     QActionGroup*		plotStyleGroup;
+    QSystemTrayIcon*    pSysTray;
+    QWidget*            pCurrentWindow;
     CFileMenu*			pFileMenu;
     CSoundCardSelMenu*	pSoundCardMenu;
-    CAboutDlg		AboutDlg;
-    int			iMultimediaServiceBit;
-    int			iLastMultimediaServiceSelected;
-    CScheduler* 	pScheduler;
-    QTimer*		pScheduleTimer;
-    CEventFilter ef;
+    CAboutDlg		    AboutDlg;
+    int			        iMultimediaServiceBit;
+    int			        iLastMultimediaServiceSelected;
+    QString             SysTrayTitle;
+    QString             SysTrayMessage;
+    QTimer				TimerSysTray;
+    CScheduler* 	    pScheduler;
+    QTimer*		        pScheduleTimer;
+    CEventFilter        ef;
 
     void SetStatus(CMultColorLED* LED, ETypeRxStatus state);
     virtual void	closeEvent(QCloseEvent* ce);
     virtual void	showEvent(QShowEvent* pEvent);
-    void		hideEvent(QHideEvent* pEvent);
+    virtual void	hideEvent(QHideEvent* pEvent);
     void		AddWhatsThisHelp();
     void		UpdateDRM_GUI();
     void		UpdateDisplay();
@@ -152,10 +146,16 @@ protected:
     void showServiceInfo(const CService&);
     void startLogging();
     void stopLogging();
+    void SysTrayCreate();
+    void SysTrayStart();
+    void SysTrayStop(const QString&);
+    void SysTrayToolTip(const QString&, const QString&);
+    void SetWindowGeometry();
 
 public slots:
     void OnTimer();
     void OnScheduleTimer();
+    void OnSysTrayTimer();
     void OnTimerClose();
     void OnSelectAudioService(int);
     void OnSelectDataService(int);
@@ -167,7 +167,8 @@ public slots:
     void OnSwitchToAM();
     void OnHelpAbout() {AboutDlg.show();}
     void OnSoundFileChanged(CDRMReceiver::ESFStatus) {ClearDisplay();};
-    void on_actionWhats_This();
+    void OnWhatsThis();
+    void OnSysTrayActivated(QSystemTrayIcon::ActivationReason);
 signals:
     void plotStyleChanged(int);
 };
