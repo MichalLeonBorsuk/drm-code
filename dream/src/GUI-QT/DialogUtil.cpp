@@ -301,6 +301,120 @@ CHelpUsage::CHelpUsage(const char* usage, const char* argv0,
     show();
 }
 
+/* System Tray -------------------------------------------------------------- */
+//CSysTray::CSysTray()
+
+CSysTray::CSysTray(QWidget* parent, const char* callbackIcon, const char* callbackTimer, const char* icon)
+    : pContextMenu(NULL)
+{
+    pSystemTrayIcon = new QSystemTrayIcon(QIcon(icon), parent);
+    if (callbackIcon != NULL)
+        parent->connect(pSystemTrayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)), parent, callbackIcon);
+    if (callbackTimer != NULL)
+        parent->connect(&Timer, SIGNAL(timeout()), parent, callbackTimer);
+    pSystemTrayIcon->show();
+}
+
+CSysTray::~CSysTray()
+{
+    if (pSystemTrayIcon != NULL)
+        delete pSystemTrayIcon;
+    if (pContextMenu != NULL)
+        delete pContextMenu;
+}
+
+void CSysTray::CreateContextMenu()
+{
+    if (pContextMenu == NULL)
+    {
+        pContextMenu = new QMenu();
+        pSystemTrayIcon->setContextMenu(pContextMenu);
+    }
+}
+
+CSysTray* CSysTray::Create(QWidget* parent, const char* callbackIcon, const char* callbackTimer, const char* icon)
+{
+    CSysTray* pSysTray = NULL;
+    if (QSystemTrayIcon::isSystemTrayAvailable())
+        pSysTray = new CSysTray(parent, callbackIcon, callbackTimer, icon);
+    return pSysTray;
+}
+
+void CSysTray::Destroy(CSysTray* pSysTray)
+{
+    if (pSysTray == NULL) return;
+    delete pSysTray;
+}
+
+void CSysTray::Start(CSysTray* pSysTray)
+{
+    if (pSysTray == NULL) return;
+    pSysTray->Timer.start(GUI_CONTROL_UPDATE_TIME);
+}
+
+void CSysTray::Stop(CSysTray* pSysTray, const QString& Message)
+{
+    if (pSysTray == NULL) return;
+    pSysTray->Timer.stop();
+    SetToolTip(pSysTray, QString(), Message);
+}
+
+QAction* CSysTray::AddAction(CSysTray* pSysTray, const QString& text, const QObject* receiver, const char* member)
+{
+    if (pSysTray == NULL) return NULL;
+    pSysTray->CreateContextMenu();
+    return pSysTray->pContextMenu->addAction(text, receiver, member);
+}
+
+QAction* CSysTray::AddSeparator(CSysTray* pSysTray)
+{
+    if (pSysTray == NULL) return NULL;
+    pSysTray->CreateContextMenu();
+    return pSysTray->pContextMenu->addSeparator();
+}
+
+void CSysTray::SetToolTip(CSysTray* pSysTray, const QString& Title, const QString& Message)
+{
+    if (pSysTray != NULL &&
+        (pSysTray->Title != Title || pSysTray->Message != Message))
+    {
+        pSysTray->Title = Title;
+        pSysTray->Message = Message;
+        QString ToolTip;
+#ifdef _WIN32
+        ToolTip = Title;
+        if (!Message.isEmpty())
+        {
+            if (!Title.isEmpty())
+                ToolTip += " |  ";
+            ToolTip += Message;
+        }
+        ToolTip.replace(QRegExp("(\r|\n|\v|\t|\b)"), " ");
+#else
+        if (!Title.isEmpty())
+        {
+            QString NewTitle(Title);
+            NewTitle.replace('&', "&amp;");
+            NewTitle.replace(' ', "&nbsp;");
+            NewTitle.replace('<', "&lt;");
+            NewTitle.replace('>', "&gt;");
+            ToolTip = "<b>" + NewTitle + "</b>";
+        }
+        if (!Message.isEmpty())
+        {
+            QString NewMessage(Message);
+            if (!Title.isEmpty())
+                ToolTip += "<br>";
+            NewMessage.replace('&', "&amp;");
+            NewMessage.replace('<', "&lt;");
+            NewMessage.replace('>', "&gt;");
+            ToolTip += NewMessage;
+        }
+        ToolTip.replace(QRegExp("(\r|\n|\v)"), "<br>");
+#endif
+        pSysTray->pSystemTrayIcon->setToolTip(ToolTip);
+    }
+}
 
 void InitSMeter(QWidget* parent, QwtThermo* sMeter)
 {
