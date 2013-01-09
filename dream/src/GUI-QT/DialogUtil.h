@@ -103,8 +103,8 @@ public:
     static QAction* AddSeparator(CSysTray* pSysTray);
 
 protected:
-    CSysTray::~CSysTray();
-    CSysTray::CSysTray(QWidget* parent, const char* callbackIcon, const char* callbackTimer, const char* icon);
+    ~CSysTray();
+    CSysTray(QWidget* parent, const char* callbackIcon, const char* callbackTimer, const char* icon);
     void CreateContextMenu();
     QSystemTrayIcon* pSystemTrayIcon;
     QString Title;
