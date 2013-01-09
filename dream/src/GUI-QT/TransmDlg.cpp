@@ -38,27 +38,25 @@
 
 
 TransmDialog::TransmDialog(CSettings& Settings,
-	QWidget* parent, const char* name, bool modal, Qt::WFlags f)
+	QWidget* parent)
 	:
-	TransmDlgBase(parent, name, modal, f),
+	QMainWindow(parent),
 	TransThread(Settings),
 	DRMTransmitter(TransThread.DRMTransmitter),
 	Settings(*DRMTransmitter.GetSettings()),
-	CodecDlg(NULL),
-	bIsStarted(FALSE),
 	vecstrTextMessage(1) /* 1 for new text */,
+	pCodecDlg(NULL), pSysTray(NULL),
+	pActionStartStop(NULL), bIsStarted(FALSE),
 	iIDCurrentText(0), iServiceDescr(0),
 	bCloseRequested(FALSE), iButtonCodecState(0)
 {
+	setupUi(this);
+
 	/* Load transmitter settings */
 	DRMTransmitter.LoadSettings();
 
 	/* Recover window size and position */
-	CWinGeom s;
-	Settings.Get("Transmit Dialog", s);
-	const QRect WinGeom(s.iXPos, s.iYPos, s.iWSize, s.iHSize);
-	if (WinGeom.isValid() && !WinGeom.isEmpty() && !WinGeom.isNull())
-			setGeometry(WinGeom);
+	SetWindowGeometry();
 
 	/* Set help text for the controls */
 	AddWhatsThisHelp();
@@ -369,7 +367,7 @@ TransmDialog::TransmDialog(CSettings& Settings,
 	menu_Settings->addMenu(new CSoundCardSelMenu(DRMTransmitter, pFileMenu, this));
 
 	connect(actionAbout_Dream, SIGNAL(triggered()), &AboutDlg, SLOT(show()));
-	connect(actionWhats_This, SIGNAL(triggered()), this, SLOT(on_actionWhats_This()));
+	connect(actionWhats_This, SIGNAL(triggered()), this, SLOT(OnWhatsThis()));
 
 	/* Connections ---------------------------------------------------------- */
 	/* Push buttons */
@@ -442,6 +440,15 @@ TransmDialog::TransmDialog(CSettings& Settings,
 	connect(&TimerStop, SIGNAL(timeout()),
 		this, SLOT(OnTimerStop()));
 
+	/* System tray */
+    pSysTray = CSysTray::Create(this,
+        SLOT(OnSysTrayActivated(QSystemTrayIcon::ActivationReason)),
+        NULL, ":/icons/MainIconTx.svg");
+	pActionStartStop = CSysTray::AddAction(pSysTray,
+		ButtonStartStop->text(), this, SLOT(OnButtonStartStop()));
+	CSysTray::AddSeparator(pSysTray);
+	CSysTray::AddAction(pSysTray, tr("&Exit"), this, SLOT(close()));
+	CSysTray::SetToolTip(pSysTray, QString(), tr("Stopped"));
 
 	/* Set timer for real-time controls */
 	Timer.start(GUI_CONTROL_UPDATE_TIME);
@@ -449,18 +456,12 @@ TransmDialog::TransmDialog(CSettings& Settings,
 
 TransmDialog::~TransmDialog()
 {
-	/* Destroy codec dialog if exist */
-	if (CodecDlg)
-		delete CodecDlg;
+	/* Destroy system tray */
+    CSysTray::Destroy(pSysTray);
 
-	/* Save window position and size */
-	CWinGeom s;
-	QRect WinGeom = geometry();
-	s.iXPos = WinGeom.x();
-	s.iYPos = WinGeom.y();
-	s.iHSize = WinGeom.height();
-	s.iWSize = WinGeom.width();
-	Settings.Put("Transmit Dialog", s);
+	/* Destroy codec dialog if exist */
+	if (pCodecDlg)
+		delete pCodecDlg;
 
 	/* Stop transmitter */
 	if (bIsStarted == TRUE)
@@ -479,6 +480,33 @@ TransmDialog::~TransmDialog()
 	Parameters.Unlock();
 }
 
+void TransmDialog::SetWindowGeometry()
+{
+	CWinGeom s;
+	Settings.Get("Transmit Dialog", s);
+	const QRect WinGeom(s.iXPos, s.iYPos, s.iWSize, s.iHSize);
+	if (WinGeom.isValid() && !WinGeom.isEmpty() && !WinGeom.isNull())
+		setGeometry(WinGeom);
+}
+
+void TransmDialog::showEvent(QShowEvent* e)
+{
+	EVENT_FILTER(e);
+}
+
+void TransmDialog::hideEvent(QHideEvent* e)
+{
+	EVENT_FILTER(e);
+	/* Save window position and size */
+	CWinGeom s;
+	QRect WinGeom = geometry();
+	s.iXPos = WinGeom.x();
+	s.iYPos = WinGeom.y();
+	s.iHSize = WinGeom.height();
+	s.iWSize = WinGeom.width();
+	Settings.Put("Transmit Dialog", s);
+}
+
 void TransmDialog::closeEvent(QCloseEvent* ce)
 {
 	bCloseRequested = TRUE;
@@ -491,9 +519,31 @@ void TransmDialog::closeEvent(QCloseEvent* ce)
 		ce->accept();
 }
 
-void TransmDialog::on_actionWhats_This()
+void TransmDialog::OnWhatsThis()
 {
 	QWhatsThis::enterWhatsThisMode();
+}
+
+void TransmDialog::OnSysTrayActivated(QSystemTrayIcon::ActivationReason reason)
+{
+	if (reason == QSystemTrayIcon::Trigger ||
+		reason == QSystemTrayIcon::DoubleClick)
+	{
+		if (isMinimized())
+		{
+			showNormal();
+			activateWindow();
+		}
+		else
+			if (!isVisible())
+			{
+				SetWindowGeometry();
+				show();
+				activateWindow();
+			}
+			else
+				hide();
+	}
 }
 
 void TransmDialog::OnTimer()
@@ -549,6 +599,9 @@ void TransmDialog::OnTimerStop()
 		else
 		{
 			ButtonStartStop->setText(tr("&Start"));
+			if (pActionStartStop)
+				pActionStartStop->setText(ButtonStartStop->text());
+			CSysTray::SetToolTip(pSysTray, QString(), tr("Stopped"));
 
 			EnableAllControlsForSet();
 		}
@@ -562,6 +615,9 @@ void TransmDialog::OnButtonStartStop()
 		if (bIsStarted == TRUE)
 		{
 			ButtonStartStop->setText(tr("Stopping..."));
+			if (pActionStartStop)
+				pActionStartStop->setText(ButtonStartStop->text());
+			CSysTray::SetToolTip(pSysTray, QString(), ButtonStartStop->text());
 
 			/* Request a transmitter stop */
 			TransThread.Stop();
@@ -608,6 +664,9 @@ void TransmDialog::OnButtonStartStop()
 			TransThread.start();
 
 			ButtonStartStop->setText(tr("&Stop"));
+			if (pActionStartStop)
+				pActionStartStop->setText(ButtonStartStop->text());
+			CSysTray::SetToolTip(pSysTray, QString(), tr("Transmitting"));
 
 			DisableAllControlsForSet();
 
@@ -885,15 +944,15 @@ void TransmDialog::OnButtonClearAllFileNames()
 void TransmDialog::OnButtonCodec()
 {
 	/* Create Codec Dialog if NULL */
-	if (!CodecDlg)
+	if (!pCodecDlg)
 	{
 		const int iShortID = 0; // TODO
 		CParameter& Parameters = *TransThread.DRMTransmitter.GetParameters();
-		CodecDlg = new CodecParams(Settings, Parameters, iShortID, this, NULL, FALSE, Qt::Dialog);
+		pCodecDlg = new CodecParams(Settings, Parameters, iShortID, this);
 	}
 	/* Toggle the visibility */
-	if (CodecDlg)
-		CodecDlg->Toggle();
+	if (pCodecDlg)
+		pCodecDlg->Toggle();
 }
 
 void TransmDialog::OnComboBoxTextMessageActivated(int iID)
@@ -1332,8 +1391,8 @@ void TransmDialog::ShowButtonCodec(_BOOLEAN bShow, int iKey)
 			ButtonCodec->show();
 		else
 			ButtonCodec->hide();
-		if (CodecDlg)
-			CodecDlg->Show(bShow);
+		if (pCodecDlg)
+			pCodecDlg->Show(bShow);
 	}
 }
 

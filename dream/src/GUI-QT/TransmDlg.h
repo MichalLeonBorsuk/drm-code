@@ -25,38 +25,34 @@
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
 \******************************************************************************/
-#ifndef __TransmDlg_H
-#define __TransmDlg_H
 
-#include <qpushbutton.h>
-#include <qstring.h>
-#include <qlabel.h>
-#include <qradiobutton.h>
-#include <qcheckbox.h>
-#include <qlineedit.h>
-#include <qtabwidget.h>
-#include <qcombobox.h>
-#include <qstring.h>
-#include <qfileinfo.h>
-#include <qstringlist.h>
-#include <qmenubar.h>
-#include <qlayout.h>
-#include <qthread.h>
-#include <qtimer.h>
-#include <qwt_thermo.h>
+#ifndef _TRANSMDLG_H_
+#define _TRANSMDLG_H_
+
+#include <QPushButton>
+#include <QString>
+#include <QLabel>
+#include <QRadioButton>
+#include <QCheckBox>
+#include <QLineEdit>
+#include <QTabWidget>
+#include <QComboBox>
+#include <QFileInfo>
+#include <QStringList>
+#include <QMenuBar>
+#include <QLayout>
+#include <QThread>
+#include <QTimer>
 #include <QMainWindow>
 #include <QMenu>
+#include <qwt_thermo.h>
 #include "ui_TransmDlgbase.h"
 
-#ifdef _WIN32
-# include "windows.h"
-#endif
+#include "CodecParams.h"
 #include "DialogUtil.h"
 #include "../DrmTransmitter.h"
 #include "../Parameter.h"
 #include "../util/Settings.h"
-#include "CodecParams.h"
-
 
 /* Classes ********************************************************************/
 /* Thread class for the transmitter */
@@ -73,12 +69,6 @@ public:
 
 	virtual void run()
 	{
-		/* Set thread priority (The working thread should have a higher priority
-		   than the GUI) */
-#ifdef _WIN32
-		SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_NORMAL);
-#endif
-
 		try
 		{
 			/* Call receiver main routine */
@@ -94,45 +84,42 @@ public:
 	CDRMTransmitter	DRMTransmitter;
 };
 
-class TransmDlgBase : public QMainWindow, public Ui_TransmDlgBase
-{
-public:
-	TransmDlgBase(QWidget* parent = 0, const char* name = 0,
-		bool modal = FALSE, Qt::WFlags f = 0):
-		QMainWindow(parent){(void)name;(void)modal;(void)f;setupUi(this);}
-	virtual ~TransmDlgBase() {}
-};
 
-class TransmDialog : public TransmDlgBase
+class TransmDialog : public QMainWindow, public Ui_TransmDlgBase
 {
 	Q_OBJECT
 
 public:
-	TransmDialog(CSettings&,
-		QWidget* parent=0, const char* name=0, bool modal=FALSE, Qt::WFlags f=0);
+	TransmDialog(CSettings&, QWidget* parent=0);
 	virtual ~TransmDialog();
 
 protected:
-	void closeEvent(QCloseEvent*);
 	void DisableAllControlsForSet();
 	void EnableAllControlsForSet();
 	void TabWidgetEnableTabs(QTabWidget* tabWidget, bool enable);
+    virtual void showEvent(QShowEvent*);
+    virtual void hideEvent(QHideEvent*);
+	virtual void closeEvent(QCloseEvent*);
 
 	CTransmitterThread	TransThread; /* Working thread object */
 	CDRMTransmitter&	DRMTransmitter;
 	CSettings&			Settings;
-	QMenu*				pSettingsMenu;
 	CAboutDlg			AboutDlg;
 	QTimer				Timer;
 	QTimer				TimerStop;
-	CodecParams*		CodecDlg;
+	CVector<string>		vecstrTextMessage;
+	QMenu*				pSettingsMenu;
+	CodecParams*		pCodecDlg;
+    CSysTray*           pSysTray;
+	QAction*			pActionStartStop;
+    CEventFilter        ef;
 
 	_BOOLEAN			bIsStarted;
-	CVector<string>		vecstrTextMessage;
 	int					iIDCurrentText;
 	int					iServiceDescr;
 	_BOOLEAN			bCloseRequested;
 	int					iButtonCodecState;
+
 	void				ShowButtonCodec(_BOOLEAN bShow, int iKey);
 	_BOOLEAN			GetMessageText(const int iID);
 	void				UpdateMSCProtLevCombo();
@@ -140,7 +127,7 @@ protected:
 	void				EnableAudio(const _BOOLEAN bFlag);
 	void				EnableData(const _BOOLEAN bFlag);
 	void				AddWhatsThisHelp();
-
+	void				SetWindowGeometry();
 
 public slots:
 	void OnButtonStartStop();
@@ -172,6 +159,8 @@ public slots:
 	void OnTextChangedSndCrdIF(const QString& strIF);
 	void OnTimer();
 	void OnTimerStop();
-	void on_actionWhats_This();
+	void OnSysTrayActivated(QSystemTrayIcon::ActivationReason);
+	void OnWhatsThis();
 };
-#endif
+
+#endif // _TRANSMDLG_H_

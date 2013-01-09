@@ -37,22 +37,21 @@ class CodecParams : public QDialog, public Ui_CodecParams
 
 public:
 	CodecParams(CSettings&, CParameter&, int iShortID,
-		QWidget* parent = 0, const char* name = 0, 
-		bool modal = FALSE, Qt::WFlags f = 0);
+		QWidget* parent = 0);
 	virtual ~CodecParams();
 	void Toggle(void);
 	void Show(bool bShow);
 
 protected:
-	CSettings&	Settings;
-	CParameter&	Parameters;
-	const int	iShortID;
-	bool		bWasVisible;
-	int			iLastXPosition;
-	int			iLastYPosition;
-	bool		bLastPositionValid;
-	void		GetDialogPosition(void);
-	void reject() { GetDialogPosition(); QDialog::reject(); }
+	CSettings&		Settings;
+	CParameter&		Parameters;
+	const int		iShortID;
+	bool			bWasVisible;
+	int				iLastXPosition;
+	int				iLastYPosition;
+	bool			bLastPositionValid;
+	void			GetDialogPosition(void);
+	virtual void	reject();
 
 public slots:
 	void OnButtonGroupChannels(int iID);
