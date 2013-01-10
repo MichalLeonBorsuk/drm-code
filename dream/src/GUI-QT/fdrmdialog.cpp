@@ -182,7 +182,11 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& NSettings,
     connect(pAnalogDemDlg, SIGNAL(About()), this, SLOT(OnHelpAbout()));
 
     /* Init progress bar for input signal level */
+#if QWT_VERSION < 0x060100
     ProgrInputLevel->setRange(-50.0, 0.0);
+#else
+    //TODO
+#endif
     ProgrInputLevel->setAlarmLevel(-12.5);
     QColor alarmColor(QColor(255, 0, 0));
     QColor fillColor(QColor(0, 190, 0));

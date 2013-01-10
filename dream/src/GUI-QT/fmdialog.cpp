@@ -36,7 +36,6 @@
 #include <QWhatsThis>
 #include <QShowEvent>
 #include <QHideEvent>
-#include <QCustomEvent>
 #include <QCloseEvent>
 #include <QEvent>
 #include <qwt_thermo.h>
@@ -85,7 +84,11 @@ FMDialog::FMDialog(CDRMReceiver& NDRMR, CSettings& NSettings,
 	LabelServiceID->setText("");
 
 	/* Init progress bar for input signal level */
+#if QWT_VERSION < 0x060100
 	ProgrInputLevel->setRange(-50.0, 0.0);
+#else
+	//TODO
+#endif
 	ProgrInputLevel->setAlarmLevel(-12.5);
 	QColor alarmColor(QColor(255, 0, 0));
 	QColor fillColor(QColor(0, 190, 0));
@@ -466,12 +469,12 @@ void FMDialog::closeEvent(QCloseEvent* ce)
 
 		/* Set the timer for polling the working thread state */
 		TimerClose.start(50);
-	}
+    }
 
 	/* Stay open until working thread is done */
 	if (DRMReceiver.GetParameters()->eRunState == CParameter::STOPPED)
 	{
-        TimerClose.stop();
+		TimerClose.stop();
 		ce->accept();
 	}
 	else

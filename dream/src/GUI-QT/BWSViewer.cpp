@@ -45,8 +45,8 @@
 #define ENABLE_HACK /* Do we really need these hack unless for vtc trial sample? */
 
 
-BWSViewer::BWSViewer(CDRMReceiver& rec, CSettings& s, QWidget* parent, Qt::WFlags):
-    QDialog(parent), Ui_BWSViewer(),
+BWSViewer::BWSViewer(CDRMReceiver& rec, CSettings& s, QWidget* parent):
+    QDialog(parent),
     nam(this, cache, waitobjs, bAllowExternalContent, strCacheHost),
     receiver(rec), settings(s), decoder(NULL), bHomeSet(false), bPageLoading(false),
     bSaveFileToDisk(false), bRestrictedProfile(false), bAllowExternalContent(true),

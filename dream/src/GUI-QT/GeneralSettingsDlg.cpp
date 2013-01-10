@@ -38,10 +38,11 @@
 /* Implementation *************************************************************/
 
 GeneralSettingsDlg::GeneralSettingsDlg(CParameter& NParam, CSettings& NSettings,
-                                       QWidget* parent, const char* name, bool modal, Qt::WFlags f) :
-    CGeneralSettingsDlgBase(parent, name, modal, f),
-    Parameters(NParam),Settings(NSettings)
+    QWidget* parent) :
+    QDialog(parent), Parameters(NParam), Settings(NSettings)
 {
+    setupUi(this);
+
     /* Set the validators fro the receiver coordinate */
     EdtLatitudeDegrees->setValidator(new QIntValidator(0, 90, EdtLatitudeDegrees));
     EdtLongitudeDegrees->setValidator(new QIntValidator(0, 180, EdtLongitudeDegrees));

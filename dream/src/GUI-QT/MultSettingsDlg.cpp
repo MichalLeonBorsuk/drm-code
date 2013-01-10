@@ -34,11 +34,12 @@
 
 /* Implementation *************************************************************/
 
-MultSettingsDlg::MultSettingsDlg(CParameter& NP, CSettings& NSettings, QWidget* parent,
-	const char* name, bool modal, Qt::WFlags f) :
-	CMultSettingsDlgBase(parent, name, modal, f),
-	Parameters(NP), Settings(NSettings)
+MultSettingsDlg::MultSettingsDlg(CParameter& NP, CSettings& NSettings,
+	QWidget* parent) :
+	QDialog(parent), Parameters(NP), Settings(NSettings)
 {
+	setupUi(this);
+
 	/* Set help text for the controls */
 	AddWhatsThisHelp();
 

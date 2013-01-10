@@ -328,15 +328,15 @@ CDRMLiveSchedule::LoadAFSInformations(const CAltFreqSign& AltFreqSign)
 }
 
 LiveScheduleDlg::LiveScheduleDlg(CDRMReceiver& DRMReceiver, CSettings& Settings,
-                                 QWidget * parent, const char *name,
-                                 bool modal, Qt::WFlags f):
-    CLiveScheduleDlgBase(parent, name, modal, f),
+                                 QWidget * parent):
+    QDialog(parent),
     DRMReceiver(DRMReceiver), Settings(Settings),
     smallGreenCube(":/icons/smallGreenCube.png"),
     greenCube(":/icons/greenCube.png"), redCube(":/icons/redCube.png"),
     orangeCube(":/icons/orangeCube.png"), pinkCube(":/icons/pinkCube.png"),
     vecpListItems(), iColStationID(1), iWidthColStationID(0)
 {
+    setWindowFlags(Qt::Window);
     setupUi(this);
 
     /* Load settings */

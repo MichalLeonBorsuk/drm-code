@@ -62,12 +62,13 @@ using namespace std; /* Because of the library: "complex" */
 # endif
 #else
 # define qDebug(...) do {} while (0)
-# ifndef TRUE
-#  define TRUE 1
-# endif
-# ifndef FALSE
-#  define FALSE 0
-# endif
+#endif
+
+#ifndef TRUE
+# define TRUE 1
+#endif
+#ifndef FALSE
+# define FALSE 0
 #endif
 
 /* Choose algorithms -------------------------------------------------------- */

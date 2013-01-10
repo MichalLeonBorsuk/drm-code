@@ -120,7 +120,11 @@ CDRMPlot::CDRMPlot(QWidget* parent, QwtPlot* SuppliedPlot) :
 		WINDOW_MARGIN, WINDOW_MARGIN);
 
 	/* Canvas */
+#if QWT_VERSION < 0x060100
 	plot->setCanvasLineWidth(0);
+#else
+	//TODO
+#endif
 	plot->canvas()->setBackgroundRole(QPalette::Window);
 
 	/* Picker */
@@ -504,8 +508,12 @@ void CDRMPlot::SetPlotStyle(const int iNewStyleID)
 	}
 
 	/* Apply colors */
+#if QWT_VERSION < 0x060100
 	grid.setMajPen(QPen(MainGridColorPlot, 0, Qt::DotLine));
 	grid.setMinPen(QPen(MainGridColorPlot, 0, Qt::DotLine));
+#else
+	//TODO
+#endif
 	vcurvegrid.setPen(QPen(MainGridColorPlot, 1, Qt::DotLine));
 	hcurvegrid.setPen(QPen(MainGridColorPlot, 1, Qt::DotLine));
 	plot->setCanvasBackground(QColor(BckgrdColorPlot));
@@ -585,7 +593,7 @@ void CDRMPlot::PlotDefaults()
 	main2curve.SETDATA(NULL, NULL, 0);
 #if QWT_VERSION < 0x060000
 	curve1.setSymbol(QwtSymbol());
-	curve2.setSymbol(QwtSymbol());
+    curve2.setSymbol(QwtSymbol());
 	curve3.setSymbol(QwtSymbol());
 #else
 	curve1.setSymbol(NULL);
@@ -597,8 +605,12 @@ void CDRMPlot::PlotDefaults()
 #endif
 	grid.enableX(TRUE);
 	grid.enableY(TRUE);
+#if QWT_VERSION < 0x060100
 	grid.setMajPen(QPen(MainGridColorPlot, 0, Qt::DotLine));
 	grid.setMinPen(QPen(MainGridColorPlot, 0, Qt::DotLine));
+#else
+	//TODO
+#endif
 	curve1.setItemAttribute(QwtPlotItem::Legend, false);
 	curve2.setItemAttribute(QwtPlotItem::Legend, false);
 	curve3.setItemAttribute(QwtPlotItem::Legend, false);
@@ -614,8 +626,12 @@ void CDRMPlot::PlotDefaults()
 
 void CDRMPlot::PlotSetLegendFont()
 {
+#if QWT_VERSION < 0x060100
 	foreach(QWidget* item, legend->legendItems())
 		item->setFont(legend->font());
+#else
+	//TODO
+#endif
 }
 
 void CDRMPlot::PlotForceUpdate()
@@ -1498,7 +1514,12 @@ void CDRMPlot::OnSelected(const QPointF &pos)
 #endif
 {
 	/* Send normalized frequency to receiver */
+#if QWT_VERSION < 0x060100
 	const double dMaxxBottom = plot->axisScaleDiv(QwtPlot::xBottom)->UPPERBOUND();
+#else
+	//TODO
+	const double dMaxxBottom = 0.0;
+#endif
 
 	/* Check if dMaxxBottom is valid */
 	if (dMaxxBottom > 0.0)

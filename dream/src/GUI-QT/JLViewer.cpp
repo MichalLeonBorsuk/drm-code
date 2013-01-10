@@ -32,8 +32,7 @@
 #include "../datadecoding/DataDecoder.h"
 #include <QFontDialog>
 
-JLViewer::JLViewer(CDRMReceiver& rec, CSettings& s, QWidget* parent,
-                   const char*, Qt::WFlags):
+JLViewer::JLViewer(CDRMReceiver& rec, CSettings& s, QWidget* parent):
     QDialog(parent), Ui_JLViewer(),
     receiver(rec), settings(s), decoderSet(false)
 {

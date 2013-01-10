@@ -38,23 +38,13 @@
 /* Definitions ****************************************************************/
 
 /* Classes ********************************************************************/
-class CGeneralSettingsDlgBase : public QDialog, public Ui_CGeneralSettingsDlgBase
-{
-public:
-	CGeneralSettingsDlgBase(QWidget* parent = 0, const char* name = 0,
-		bool modal = FALSE, Qt::WFlags f = 0):
-		QDialog(parent,f){(void)name;(void)modal;setupUi(this);}
-	virtual ~CGeneralSettingsDlgBase() {}
-};
-
-class GeneralSettingsDlg : public CGeneralSettingsDlgBase
+class GeneralSettingsDlg : public QDialog, public Ui_CGeneralSettingsDlgBase
 {
 	Q_OBJECT
 
 public:
-
-	GeneralSettingsDlg(CParameter& NParam, CSettings& NSettings, QWidget* parent = 0,
-		const char* name = 0, bool modal = FALSE, Qt::WFlags f = 0);
+	GeneralSettingsDlg(CParameter& NParam, CSettings& NSettings, 
+		QWidget* parent = 0);
 	virtual ~GeneralSettingsDlg();
 
 protected:

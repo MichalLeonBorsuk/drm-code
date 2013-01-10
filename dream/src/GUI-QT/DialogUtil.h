@@ -63,54 +63,46 @@ typedef int rig_model_t;
 /* Classes ********************************************************************/
 
 /* About dialog ------------------------------------------------------------- */
-class CAboutDlgBase : public QDialog, public Ui_CAboutDlgBase
-{
-public:
-	CAboutDlgBase(QWidget* parent, const char*, bool, Qt::WFlags f):
-		QDialog(parent,f){setupUi(this);}
-	virtual ~CAboutDlgBase() {}
-};
-
-class CAboutDlg : public CAboutDlgBase
+class CAboutDlg : public QDialog, public Ui_CAboutDlgBase
 {
 	Q_OBJECT
 
 public:
-	CAboutDlg(QWidget* parent = 0, const char* name = 0, bool modal = FALSE,
-		Qt::WFlags f = 0);
+	CAboutDlg(QWidget* parent = 0);
+	virtual ~CAboutDlg() {}
 };
 
 /* Help Usage --------------------------------------------------------------- */
-class CHelpUsage : public CAboutDlgBase
+class CHelpUsage : public CAboutDlg
 {
 	Q_OBJECT
 
 public:
-	CHelpUsage(const char* usage, const char* argv0, QWidget* parent = 0,
-		const char* name = 0, bool modal = FALSE, Qt::WFlags f = 0);
+	CHelpUsage(const char* usage, const char* argv0, QWidget* parent = 0);
+	virtual ~CHelpUsage() {}
 };
 
 /* System Tray -------------------------------------------------------------- */
 class CSysTray
 {
 public:
-    static CSysTray* Create(QWidget* parent, const char* callbackIcon, const char* callbackTimer, const char* icon);
-    static void Destroy(CSysTray* pSysTray);
-    static void SetToolTip(CSysTray* pSysTray, const QString& Title, const QString& Message);
-    static void Start(CSysTray* pSysTray);
-    static void Stop(CSysTray* pSysTray, const QString& Message);
-    static QAction* AddAction(CSysTray* pSysTray, const QString& text, const QObject* receiver, const char* member);
-    static QAction* AddSeparator(CSysTray* pSysTray);
+	static CSysTray* Create(QWidget* parent, const char* callbackIcon, const char* callbackTimer, const char* icon);
+	static void Destroy(CSysTray* pSysTray);
+	static void SetToolTip(CSysTray* pSysTray, const QString& Title, const QString& Message);
+	static void Start(CSysTray* pSysTray);
+	static void Stop(CSysTray* pSysTray, const QString& Message);
+	static QAction* AddAction(CSysTray* pSysTray, const QString& text, const QObject* receiver, const char* member);
+	static QAction* AddSeparator(CSysTray* pSysTray);
 
 protected:
-    ~CSysTray();
-    CSysTray(QWidget* parent, const char* callbackIcon, const char* callbackTimer, const char* icon);
-    void CreateContextMenu();
-    QString Title;
-    QString Message;
-    QSystemTrayIcon* pSystemTrayIcon;
-    QTimer* pTimer;
-    QMenu* pContextMenu;
+	~CSysTray();
+	CSysTray(QWidget* parent, const char* callbackIcon, const char* callbackTimer, const char* icon);
+	void CreateContextMenu();
+	QString Title;
+	QString Message;
+	QSystemTrayIcon* pSystemTrayIcon;
+	QTimer* pTimer;
+	QMenu* pContextMenu;
 };
 
 /* GUI help functions ------------------------------------------------------- */

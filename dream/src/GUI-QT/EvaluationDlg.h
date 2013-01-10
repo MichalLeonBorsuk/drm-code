@@ -47,24 +47,14 @@
 
 /* Classes ********************************************************************/
 
-class systemevalDlgBase : public QDialog, public Ui::SystemEvaluationWindow
-{
-public:
-	systemevalDlgBase(QWidget* parent = 0, const char* name = 0,
-		bool modal = FALSE, Qt::WFlags f = 0):
-		QDialog(parent) {(void)name;(void)modal;(void)f; setWindowFlags(Qt::Window); setupUi(this);}
-	virtual ~systemevalDlgBase() {}
-};
-
-class systemevalDlg : public systemevalDlgBase
+class systemevalDlg : public QDialog, public Ui_SystemEvaluationWindow
 {
 	Q_OBJECT
 
 public:
-	systemevalDlg(CDRMReceiver&, CSettings&, QWidget* parent = 0,
-		const char* name = 0, bool modal = FALSE, Qt::WFlags f = 0);
-
+	systemevalDlg(CDRMReceiver&, CSettings&, QWidget* parent = 0);
 	virtual ~systemevalDlg();
+
 	void SetStatus(CMultColorLED*, ETypeRxStatus);
 
 protected:

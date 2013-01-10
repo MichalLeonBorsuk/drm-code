@@ -40,12 +40,15 @@
 
 /* Implementation *************************************************************/
 systemevalDlg::systemevalDlg(CDRMReceiver& NDRMR, CSettings& NSettings,
-                             QWidget* parent, const char* name, bool modal, Qt::WFlags f) :
-    systemevalDlgBase(parent, name, modal, f),
+                             QWidget* parent) :
+    QDialog(parent),
     DRMReceiver(NDRMR),
     Settings(NSettings),
     eNewCharType(CDRMPlot::NONE_OLD)
 {
+    setWindowFlags(Qt::Window);
+    setupUi(this);
+
     /* Get window geometry data and apply it */
     CWinGeom s;
     Settings.Get("System Evaluation Dialog", s);

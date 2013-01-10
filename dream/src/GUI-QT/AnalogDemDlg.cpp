@@ -54,15 +54,13 @@
 
 /* Implementation *************************************************************/
 AnalogDemDlg::AnalogDemDlg(CDRMReceiver& NDRMR, CSettings& NSettings,
-	QWidget* parent):
-	QMainWindow(parent),
-	DRMReceiver(NDRMR), Settings(NSettings),
-	AMSSDlg(NDRMR, Settings, parent),
-	MainPlot(NULL)
+	QWidget* parent) :
+	QMainWindow(parent), DRMReceiver(NDRMR), Settings(NSettings),
+	AMSSDlg(NDRMR, Settings, parent), MainPlot(NULL)
 {
 	setupUi(this);
 
-    /* Recover window size and position */
+	/* Recover window size and position */
 	SetWindowGeometry();
 
 	/* Set help text for the controls */
@@ -109,14 +107,22 @@ AnalogDemDlg::AnalogDemDlg(CDRMReceiver& NDRMR, CSettings& NSettings,
 	PhaseDial->setMode(QwtDial::RotateNeedle);
 	PhaseDial->setWrapping(true);
 	PhaseDial->setReadOnly(true);
+#if QWT_VERSION < 0x060100
 	PhaseDial->setScale(0, 360, 45); /* Degrees */
+#else
+	//TODO
+#endif
 	PhaseDial->setOrigin(270);
 	PhaseDial->setNeedle(new QwtDialSimpleNeedle(QwtDialSimpleNeedle::Arrow));
 	PhaseDial->setFrameShadow(QwtDial::Plain);
 #if QWT_VERSION < 0x060000
 	PhaseDial->setScaleOptions(QwtDial::ScaleTicks);
 #else
+# if QWT_VERSION < 0x060100
 	PhaseDial->setScaleComponents(QwtAbstractScaleDraw::Ticks);
+# else
+	//TODO
+# endif
 #endif
 
 
@@ -779,14 +785,22 @@ CAMSSDlg::CAMSSDlg(CDRMReceiver& NDRMR, CSettings& NSettings,
 	PhaseDialAMSS->setMode(QwtDial::RotateNeedle);
 	PhaseDialAMSS->setWrapping(true);
 	PhaseDialAMSS->setReadOnly(true);
+#if QWT_VERSION < 0x060100
 	PhaseDialAMSS->setScale(0, 360, 45); /* Degrees */
+#else
+	//TODO
+#endif
 	PhaseDialAMSS->setOrigin(270);
 	PhaseDialAMSS->setNeedle(new QwtDialSimpleNeedle(QwtDialSimpleNeedle::Arrow));
 	PhaseDialAMSS->setFrameShadow(QwtDial::Plain);
 #if QWT_VERSION < 0x060000
 	PhaseDialAMSS->setScaleOptions(QwtDial::ScaleTicks);
 #else
+# if QWT_VERSION < 0x060100
 	PhaseDialAMSS->setScaleComponents(QwtAbstractScaleDraw::Ticks);
+# else
+	//TODO
+# endif
 #endif
 
 	TextAMSSServiceLabel->setText("");
