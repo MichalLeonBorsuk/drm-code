@@ -582,7 +582,11 @@ StationsDlg::StationsDlg(CDRMReceiver& DRMReceiver, CSettings& Settings):
     TextLabelSMeter->hide();
 
     /* Set up frequency selector control (QWTCounter control) */
+#if QWT_VERSION < 0x060100
     QwtCounterFrequency->setRange(0.0, MAX_RF_FREQ, 1.0);
+#else
+    //TODO
+#endif
     QwtCounterFrequency->setNumButtons(3); /* Three buttons on each side */
     QwtCounterFrequency->setIncSteps(QwtCounter::Button1, 1); /* Increment */
     QwtCounterFrequency->setIncSteps(QwtCounter::Button2, 10);
@@ -797,7 +801,7 @@ void CDRMSchedule::SetAnalogUrl()
         break;
     case 3: {
         QDate s = d;
-        s.setYMD(d.year(), month+1, 1);
+        s.setDate(d.year(), month+1, 1);
         s = s.addDays(0-s.dayOfWeek());
         if(d<s) {
             year = d.year()-1;
@@ -819,7 +823,7 @@ void CDRMSchedule::SetAnalogUrl()
         break;
     case 10: {
         QDate s = d;
-        s.setYMD(d.year(), month+1, 1);
+        s.setDate(d.year(), month+1, 1);
         int n = s.dayOfWeek();
         s = s.addDays(0-n);
         if(d<s) {

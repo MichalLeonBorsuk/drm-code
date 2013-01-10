@@ -43,23 +43,13 @@
 /* Definitions ****************************************************************/
 
 /* Classes ********************************************************************/
-class CMultSettingsDlgBase : public QDialog, public Ui_CMultSettingsDlgBase
-{
-public:
-	CMultSettingsDlgBase(QWidget* parent = 0, const char* name = 0,
-		bool modal = FALSE, Qt::WFlags f = 0):
-		QDialog(parent,f){(void)name;(void)modal;setupUi(this);}
-	virtual ~CMultSettingsDlgBase() {}
-};
 
-class MultSettingsDlg : public CMultSettingsDlgBase
+class MultSettingsDlg : public QDialog, public Ui_CMultSettingsDlgBase
 {
 	Q_OBJECT
 
 public:
-
-	MultSettingsDlg(CParameter&, CSettings&, QWidget* parent = 0,
-		const char* name = 0, bool modal = FALSE, Qt::WFlags f = 0);
+	MultSettingsDlg(CParameter&, CSettings&, QWidget* parent = 0);
 	virtual ~MultSettingsDlg();
 
 protected:

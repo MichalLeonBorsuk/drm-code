@@ -32,15 +32,12 @@
 
 
 /* Implementation *************************************************************/
-CMultColorLED::CMultColorLED(QWidget * parent, const char * name, Qt::WFlags f) : 
-	QLabel(parent), eColorFlag(RL_GREY),
+CMultColorLED::CMultColorLED(QWidget * parent) :
+	QFrame(parent), eColorFlag(RL_GREY),
 	TimerRedLight(), TimerGreenLight(), TimerYellowLight(),
 	bFlagRedLi(false), bFlagGreenLi(false), bFlagYellowLi(false),
 	iUpdateTime(DEFAULT_UPDATE_TIME)
 {
-	(void)name;
-	(void)f;
-
 	green = QColor(0, 255, 0);
 	red = QColor(255, 0, 0);
 	yellow = QColor(255, 255, 0);
@@ -50,7 +47,6 @@ CMultColorLED::CMultColorLED(QWidget * parent, const char * name, Qt::WFlags f) 
 	setAutoFillBackground(true);
 	setFrameShape(QFrame::Panel);
 	setFrameShadow(QFrame::Sunken);
-	setIndent(0);
 
 	Reset();
 

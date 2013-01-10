@@ -1,18 +1,24 @@
 contains(QT_VERSION, ^4\\..*) {
-	CONFIG += qt qt4
-	VERSION_MESSAGE = Qt 4
-	CONFIG(debug, debug|release) {
-		DEBUG_MESSAGE = debug
-	}
-	else {
-		DEBUG_MESSAGE = release 
-	}
+    CONFIG += qt qt4
+    VERSION_MESSAGE = Qt 4
+}
+contains(QT_VERSION, ^5\\..*) {
+    CONFIG += qt qt5
+    VERSION_MESSAGE = Qt 5
+}
+qt4|qt5 {
+    CONFIG(debug, debug|release) {
+        DEBUG_MESSAGE = debug
+    }
+    else {
+        DEBUG_MESSAGE = release
+    }
 }
 console {
-     QT -= gui
-     CONFIG -= qt qt4
-     UI_MESSAGE = console mode
-     VERSION_MESSAGE=No Qt
+    QT -= core gui
+    CONFIG -= qt qt4 qt5
+    UI_MESSAGE = console mode
+    VERSION_MESSAGE=No Qt
 }
 else {
      qtconsole {
@@ -34,12 +40,12 @@ else {
           src/GUI-QT/DRMPlot.h src/GUI-QT/EvaluationDlg.h \
           src/GUI-QT/SlideShowViewer.h src/GUI-QT/JLViewer.h \
           src/GUI-QT/BWSViewer.h src/GUI-QT/jlbrowser.h \
-          src/GUI-QT/SoundCardSelMenu.h CodecParams.h
+          src/GUI-QT/SoundCardSelMenu.h src/GUI-QT/CodecParams.h
       SOURCES += \
           src/GUI-QT/DRMPlot.cpp src/GUI-QT/EvaluationDlg.cpp \
           src/GUI-QT/SlideShowViewer.cpp src/GUI-QT/JLViewer.cpp \
           src/GUI-QT/BWSViewer.cpp src/GUI-QT/jlbrowser.cpp \
-          src/GUI-QT/SoundCardSelMenu.cpp CodecParams.cpp
+          src/GUI-QT/SoundCardSelMenu.cpp src/GUI-QT/CodecParams.cpp
      }
 }
 message($$VERSION_MESSAGE $$DEBUG_MESSAGE $$UI_MESSAGE)
@@ -53,7 +59,7 @@ DEFINES += EXECUTABLE_NAME=$$TARGET
 macx:QMAKE_LFLAGS += -F$$PWD/libs
 qt4 {
      QT += network xml webkit
-	VPATH += src/GUI-QT
+     VPATH += src/GUI-QT
      unix {
       macx {
           exists(libs/qwt.framework) {
@@ -97,6 +103,15 @@ qt4 {
           # release
           LIBS += -lqwt
       }
+     }
+}
+qt5 {
+     QT += network xml widgets webkitwidgets
+     VPATH += src/GUI-QT
+     exists($$PWD/../qwt-6.1.0-rc2/src/qwt.h) {
+      message("with qwt")
+      INCLUDEPATH += $$PWD/../qwt-6.1.0-rc2/src
+      LIBS += -lqwt -L$$PWD/../qwt-6.1.0-rc2/lib
      }
 }
 macx {

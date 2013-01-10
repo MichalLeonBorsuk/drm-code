@@ -37,9 +37,8 @@
 #include <QPixmap>
 #include <QMetaObject>
 
-EPGDlg::EPGDlg(CDRMReceiver& NDRMR, CSettings& NSettings, QWidget* parent,
-               const char* name, bool modal, Qt::WFlags f):
-    CEPGDlgbase(parent, name, modal, f),
+EPGDlg::EPGDlg(CDRMReceiver& NDRMR, CSettings& NSettings, QWidget* parent):
+    QDialog(parent),
     do_updates(false),
     epg(*NDRMR.GetParameters()),
     DRMReceiver(NDRMR),
@@ -47,6 +46,9 @@ EPGDlg::EPGDlg(CDRMReceiver& NDRMR, CSettings& NSettings, QWidget* parent,
     greenCube(":/icons/greenCube.png"),
     next(NULL)
 {
+    setWindowFlags(Qt::Window);
+    setupUi(this);
+
     /* recover window size and position */
     CWinGeom s;
     Settings.Get("EPG Dialog", s);

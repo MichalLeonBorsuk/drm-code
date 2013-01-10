@@ -64,23 +64,14 @@
 
 /* Classes ********************************************************************/
 
-class CEPGDlgbase : public QDialog, public Ui_CEPGDlgbase
-{
-public:
-    CEPGDlgbase(QWidget* parent, const char*, bool, Qt::WFlags f = 0):
-        QDialog(parent,f) {setWindowFlags(Qt::Window); setupUi(this);}
-    virtual ~CEPGDlgbase() {}
-};
-
-class EPGDlg : public CEPGDlgbase
+class EPGDlg : public QDialog, public Ui_CEPGDlgbase
 {
     Q_OBJECT
 
 public:
-
-    EPGDlg(CDRMReceiver&, CSettings&, QWidget* parent = 0, const char* name = 0,
-           bool modal = FALSE, Qt::WFlags f = 0);
+    EPGDlg(CDRMReceiver&, CSettings&, QWidget* parent = 0);
     virtual ~EPGDlg();
+
     /* dummy assignment operator to help MSVC8 */
     EPGDlg& operator=(const EPGDlg&)
     {

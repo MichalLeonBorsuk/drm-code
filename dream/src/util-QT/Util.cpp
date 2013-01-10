@@ -75,7 +75,9 @@ QString UrlEncodePath(QString url)
     while (path.indexOf("/./") != -1)
         path.replace(QRegExp("/\\./"), "/");
     /* The Actual percent encoding */
-    path = QString(QUrl(path, QUrl::TolerantMode).encodedPath());
+    path = QString(QUrl(path, QUrl::TolerantMode).toEncoded(
+        QUrl::RemoveScheme | QUrl::RemoveAuthority |
+        QUrl::RemoveQuery | QUrl::RemoveFragment));
     return path;
 }
 

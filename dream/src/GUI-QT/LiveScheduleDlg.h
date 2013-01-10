@@ -139,22 +139,12 @@ public:
 	void setPixmap(int col, QPixmap p) { setIcon(col, p); }
 };
 
-class CLiveScheduleDlgBase : public QDialog, public Ui_LiveScheduleWindow
-{
-public:
-	CLiveScheduleDlgBase(QWidget* parent, const char*, bool, Qt::WFlags):
-		QDialog(parent) {setWindowFlags(Qt::Window);}
-	virtual ~CLiveScheduleDlgBase() {}
-};
-
-class LiveScheduleDlg : public CLiveScheduleDlgBase
+class LiveScheduleDlg : public QDialog, public Ui_LiveScheduleWindow
 {
 	Q_OBJECT
 
 public:
-	LiveScheduleDlg(CDRMReceiver&, CSettings&,
-		QWidget* parent = 0,
-		const char* name = 0, bool modal = FALSE, Qt::WFlags f = 0);
+	LiveScheduleDlg(CDRMReceiver&, CSettings&, QWidget* parent = 0);
 	virtual ~LiveScheduleDlg();
 
 	void LoadSchedule();

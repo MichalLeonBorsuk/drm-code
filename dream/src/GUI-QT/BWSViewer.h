@@ -140,7 +140,7 @@ class BWSViewer : public QDialog, Ui_BWSViewer
     Q_OBJECT
 
 public:
-    BWSViewer(CDRMReceiver&, CSettings&, QWidget* parent = 0, Qt::WFlags f = 0);
+    BWSViewer(CDRMReceiver&, CSettings&, QWidget* parent = 0);
     virtual ~BWSViewer();
 
 protected:

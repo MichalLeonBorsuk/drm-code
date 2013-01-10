@@ -35,16 +35,14 @@
 
 /* Implementation *************************************************************/
 
-RigDlg::RigDlg(
-    CRig& nrig,
-    QWidget* parent, Qt::WFlags f) :
-    QDialog(parent, f), Ui_RigDlg(),
+RigDlg::RigDlg(CRig& nrig, QWidget* parent) :
+    QDialog(parent),
     rig(nrig),rigmap()
 {
+    setupUi(this);
 
     map<rig_model_t,CHamlib::SDrRigCaps> r;
 
-    setupUi(this);
     rig.GetRigList(r);
     modified->setEnabled(false);
     //rigTypes->setColumnCount(2);

@@ -113,9 +113,10 @@ QString VersionString(QWidget* parent)
 
 /* Implementation *************************************************************/
 /* About dialog ------------------------------------------------------------- */
-CAboutDlg::CAboutDlg(QWidget* parent, const char* name, bool modal, Qt::WFlags f):
-    CAboutDlgBase(parent, name, modal, f)
+CAboutDlg::CAboutDlg(QWidget* parent):
+    QDialog(parent)
 {
+    setupUi(this);
 #ifdef HAVE_LIBSNDFILE
     char  sfversion [128] ;
     sf_command (NULL, SFC_GET_LIB_VERSION, sfversion, sizeof (sfversion)) ;
@@ -286,9 +287,8 @@ CAboutDlg::CAboutDlg(QWidget* parent, const char* name, bool modal, Qt::WFlags f
 }
 
 /* Help Usage --------------------------------------------------------------- */
-CHelpUsage::CHelpUsage(const char* usage, const char* argv0,
-    QWidget* parent, const char* name, bool modal, Qt::WFlags f)
-    : CAboutDlgBase(parent, name, modal, f)
+CHelpUsage::CHelpUsage(const char* usage, const char* argv0, QWidget* parent)
+    : CAboutDlg(parent)
 {
     setWindowTitle(tr("Dream Command Line Help"));
     TextLabelVersion->setText(VersionString(this));
@@ -426,10 +426,18 @@ void CSysTray::SetToolTip(CSysTray* pSysTray, const QString& Title, const QStrin
 
 void InitSMeter(QWidget* parent, QwtThermo* sMeter)
 {
+#if QWT_VERSION < 0x060100
     sMeter->setRange(S_METER_THERMO_MIN, S_METER_THERMO_MAX);
+#else
+    //TODO
+#endif
     sMeter->setAlarmLevel(S_METER_THERMO_ALARM);
     sMeter->setAlarmLevel(-12.5);
+#if QWT_VERSION < 0x060100
     sMeter->setScale(S_METER_THERMO_MIN, S_METER_THERMO_MAX, 10.0);
+#else
+    //TODO
+#endif
     sMeter->setAlarmEnabled(TRUE);
     sMeter->setValue(S_METER_THERMO_MIN);
 #if QWT_VERSION < 0x060000

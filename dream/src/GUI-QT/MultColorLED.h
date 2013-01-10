@@ -47,14 +47,14 @@
 
 
 /* Classes ********************************************************************/
-class CMultColorLED : public QLabel
+class CMultColorLED : public QFrame
 {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
 	enum ELightColor {RL_GREY, RL_RED, RL_GREEN, RL_YELLOW};
 
-	CMultColorLED(QWidget* parent, const char * name = 0, Qt::WFlags f = 0);
+	CMultColorLED(QWidget* parent);
 	virtual ~CMultColorLED() {}
 
 	void SetUpdateTime(int);

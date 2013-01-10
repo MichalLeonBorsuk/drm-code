@@ -45,8 +45,7 @@ class RigDlg : public QDialog, public Ui_RigDlg
 	Q_OBJECT
 
 public:
-
-    RigDlg(CRig&, QWidget* parent = 0, Qt::WFlags f = 0);
+    RigDlg(CRig&, QWidget* parent = 0);
     virtual ~RigDlg();
 
 protected:

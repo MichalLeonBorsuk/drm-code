@@ -67,7 +67,11 @@ TransmDialog::TransmDialog(CSettings& Settings,
 	UpdateMSCProtLevCombo();
 
 	/* Init progress bar for input signal level */
+#if QWT_VERSION < 0x060100
 	ProgrInputLevel->setRange(-50.0, 0.0);
+#else
+	//TODO
+#endif
 	ProgrInputLevel->setOrientation(Qt::Horizontal, QwtThermo::BottomScale);
 	ProgrInputLevel->setAlarmLevel(-5.0);
 #if QWT_VERSION < 0x060000
