@@ -1372,31 +1372,29 @@ void FDRMDialog::SetDisplayColor(const QColor newColor)
         QPalette CurPal(vecpWidgets[i]->palette());
 
         /* Change colors */
-        CurPal.setColor(QPalette::Active, QPalette::Foreground, newColor);
+        if (vecpWidgets[i] != TextTextMessage)
+        {
+            CurPal.setColor(QPalette::Active, QPalette::Text, newColor);
+            CurPal.setColor(QPalette::Active, QPalette::Foreground, newColor);
+            CurPal.setColor(QPalette::Inactive, QPalette::Text, newColor);
+            CurPal.setColor(QPalette::Inactive, QPalette::Foreground, newColor);
+        }
         CurPal.setColor(QPalette::Active, QPalette::Button, newColor);
-        CurPal.setColor(QPalette::Active, QPalette::Text, newColor);
         CurPal.setColor(QPalette::Active, QPalette::Light, newColor);
         CurPal.setColor(QPalette::Active, QPalette::Dark, newColor);
 
-        CurPal.setColor(QPalette::Inactive, QPalette::Foreground, newColor);
         CurPal.setColor(QPalette::Inactive, QPalette::Button, newColor);
-        CurPal.setColor(QPalette::Inactive, QPalette::Text, newColor);
         CurPal.setColor(QPalette::Inactive, QPalette::Light, newColor);
         CurPal.setColor(QPalette::Inactive, QPalette::Dark, newColor);
 
-        /* Special treatment for text message window. This should always be
-           black color of the text */
+        /* Special treatment for text message window */
         if (vecpWidgets[i] == TextTextMessage)
         {
-            CurPal.setColor(QPalette::Active, QPalette::Text, Qt::black);
-            CurPal.setColor(QPalette::Active, QPalette::Foreground, Qt::black);
-            CurPal.setColor(QPalette::Inactive, QPalette::Text, Qt::black);
-            CurPal.setColor(QPalette::Inactive, QPalette::Foreground, Qt::black);
-
             /* We need to specify special color for disabled */
             CurPal.setColor(QPalette::Disabled, QPalette::Light, Qt::black);
             CurPal.setColor(QPalette::Disabled, QPalette::Dark, Qt::black);
         }
+
         /* Set new palette */
         vecpWidgets[i]->setPalette(CurPal);
     }
