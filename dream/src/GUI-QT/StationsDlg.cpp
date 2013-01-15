@@ -585,7 +585,8 @@ StationsDlg::StationsDlg(CDRMReceiver& DRMReceiver, CSettings& Settings):
 #if QWT_VERSION < 0x060100
     QwtCounterFrequency->setRange(0.0, MAX_RF_FREQ, 1.0);
 #else
-    //TODO
+    QwtCounterFrequency->setRange(0.0, MAX_RF_FREQ);
+    QwtCounterFrequency->setSingleStep(1.0);
 #endif
     QwtCounterFrequency->setNumButtons(3); /* Three buttons on each side */
     QwtCounterFrequency->setIncSteps(QwtCounter::Button1, 1); /* Increment */

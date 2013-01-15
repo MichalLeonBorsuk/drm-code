@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>716</width>
-    <height>297</height>
+    <width>724</width>
+    <height>305</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -3674,6 +3674,12 @@
             <width>0</width>
             <height>70</height>
            </size>
+          </property>
+          <property name="focusPolicy">
+           <enum>Qt::NoFocus</enum>
+          </property>
+          <property name="lineWidth">
+           <number>4</number>
           </property>
          </widget>
         </item>

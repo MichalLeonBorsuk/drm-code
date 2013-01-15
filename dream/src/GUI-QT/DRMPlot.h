@@ -9,7 +9,7 @@
  *  David Flamand
  *
  * Description:
- *	Custom settings of the qwt-plot, Support Qwt version 5.0.0 to 6.0.1(+)
+ *	Custom settings of the qwt-plot, Support Qwt version 5.0.0 to 6.1.0(+)
  *
  ******************************************************************************
  *
@@ -156,7 +156,13 @@
 #else
 # define SETDATA setSamples
 #endif
-
+#if QWT_VERSION < 0x060100
+# define SETMAJORPEN setMajPen
+# define SETMINORPEN setMinPen
+#else
+# define SETMAJORPEN setMajorPen
+# define SETMINORPEN setMinorPen
+#endif
 
 /* Set workaround flag for Qwt version 5.0.0 and 5.0.1 */
 /* QwtPlotCurve::Xfy seems broken on these versions */

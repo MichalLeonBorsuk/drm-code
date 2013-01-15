@@ -51,6 +51,9 @@
 #include <qwt_dial.h>
 #include <qwt_dial_needle.h>
 #include <qwt_plot_layout.h>
+#if QWT_VERSION >= 0x060100
+# include <qwt_round_scale_draw.h>
+#endif
 
 /* Implementation *************************************************************/
 AnalogDemDlg::AnalogDemDlg(CDRMReceiver& NDRMR, CSettings& NSettings,
@@ -110,19 +113,20 @@ AnalogDemDlg::AnalogDemDlg(CDRMReceiver& NDRMR, CSettings& NSettings,
 #if QWT_VERSION < 0x060100
 	PhaseDial->setScale(0, 360, 45); /* Degrees */
 #else
-	//TODO
+	PhaseDial->setScale(0, 360); /* Degrees */
+	PhaseDial->setScaleStepSize(45);
 #endif
 	PhaseDial->setOrigin(270);
 	PhaseDial->setNeedle(new QwtDialSimpleNeedle(QwtDialSimpleNeedle::Arrow));
 	PhaseDial->setFrameShadow(QwtDial::Plain);
 #if QWT_VERSION < 0x060000
 	PhaseDial->setScaleOptions(QwtDial::ScaleTicks);
-#else
-# if QWT_VERSION < 0x060100
+#elif QWT_VERSION < 0x060100
 	PhaseDial->setScaleComponents(QwtAbstractScaleDraw::Ticks);
-# else
-	//TODO
-# endif
+#else
+	PhaseDial->setFrameShadow(QwtDial::Sunken);
+	PhaseDial->setScaleMaxMinor(0);
+	PhaseDial->scaleDraw()->enableComponent(QwtAbstractScaleDraw::Labels, false);
 #endif
 
 
@@ -770,6 +774,13 @@ CAMSSDlg::CAMSSDlg(CDRMReceiver& NDRMR, CSettings& NSettings,
 	Settings(NSettings)
 {
 	setupUi(this);
+#if QWT_VERSION >= 0x060100
+	/* Workaround for PhaseDialAMSS receiving focus 
+	even if its FocusPolicy is set to Qt::NoFocus,
+	might not be needed in final release of Qwt 6.1.0 */
+	setFocusPolicy(Qt::StrongFocus);
+	setFocus();
+#endif
 
 	/* Recover window size and position */
 	CWinGeom s;
@@ -788,19 +799,20 @@ CAMSSDlg::CAMSSDlg(CDRMReceiver& NDRMR, CSettings& NSettings,
 #if QWT_VERSION < 0x060100
 	PhaseDialAMSS->setScale(0, 360, 45); /* Degrees */
 #else
-	//TODO
+	PhaseDialAMSS->setScale(0, 360); /* Degrees */
+	PhaseDialAMSS->setScaleStepSize(45);
 #endif
 	PhaseDialAMSS->setOrigin(270);
 	PhaseDialAMSS->setNeedle(new QwtDialSimpleNeedle(QwtDialSimpleNeedle::Arrow));
 	PhaseDialAMSS->setFrameShadow(QwtDial::Plain);
 #if QWT_VERSION < 0x060000
 	PhaseDialAMSS->setScaleOptions(QwtDial::ScaleTicks);
-#else
-# if QWT_VERSION < 0x060100
+#elif QWT_VERSION < 0x060100
 	PhaseDialAMSS->setScaleComponents(QwtAbstractScaleDraw::Ticks);
-# else
-	//TODO
-# endif
+#else
+	PhaseDialAMSS->setFrameShadow(QwtDial::Sunken);
+	PhaseDialAMSS->setScaleMaxMinor(0);
+	PhaseDialAMSS->scaleDraw()->enableComponent(QwtAbstractScaleDraw::Labels, false);
 #endif
 
 	TextAMSSServiceLabel->setText("");

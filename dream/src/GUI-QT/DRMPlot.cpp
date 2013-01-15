@@ -9,7 +9,7 @@
  *  David Flamand
  *
  * Description:
- *	Custom settings of the qwt-plot, Support Qwt version 5.0.0 to 6.0.1(+)
+ *	Custom settings of the qwt-plot, Support Qwt version 5.0.0 to 6.1.0(+)
  *
  ******************************************************************************
  *
@@ -123,7 +123,7 @@ CDRMPlot::CDRMPlot(QWidget* parent, QwtPlot* SuppliedPlot) :
 #if QWT_VERSION < 0x060100
 	plot->setCanvasLineWidth(0);
 #else
-	//TODO
+	((QFrame*)plot->canvas())->setLineWidth(0);
 #endif
 	plot->canvas()->setBackgroundRole(QPalette::Window);
 
@@ -508,12 +508,8 @@ void CDRMPlot::SetPlotStyle(const int iNewStyleID)
 	}
 
 	/* Apply colors */
-#if QWT_VERSION < 0x060100
-	grid.setMajPen(QPen(MainGridColorPlot, 0, Qt::DotLine));
-	grid.setMinPen(QPen(MainGridColorPlot, 0, Qt::DotLine));
-#else
-	//TODO
-#endif
+	grid.SETMAJORPEN(QPen(MainGridColorPlot, 0, Qt::DotLine));
+	grid.SETMINORPEN(QPen(MainGridColorPlot, 0, Qt::DotLine));
 	vcurvegrid.setPen(QPen(MainGridColorPlot, 1, Qt::DotLine));
 	hcurvegrid.setPen(QPen(MainGridColorPlot, 1, Qt::DotLine));
 	plot->setCanvasBackground(QColor(BckgrdColorPlot));
@@ -605,12 +601,8 @@ void CDRMPlot::PlotDefaults()
 #endif
 	grid.enableX(TRUE);
 	grid.enableY(TRUE);
-#if QWT_VERSION < 0x060100
-	grid.setMajPen(QPen(MainGridColorPlot, 0, Qt::DotLine));
-	grid.setMinPen(QPen(MainGridColorPlot, 0, Qt::DotLine));
-#else
-	//TODO
-#endif
+	grid.SETMAJORPEN(QPen(MainGridColorPlot, 0, Qt::DotLine));
+	grid.SETMINORPEN(QPen(MainGridColorPlot, 0, Qt::DotLine));
 	curve1.setItemAttribute(QwtPlotItem::Legend, false);
 	curve2.setItemAttribute(QwtPlotItem::Legend, false);
 	curve3.setItemAttribute(QwtPlotItem::Legend, false);
@@ -629,8 +621,6 @@ void CDRMPlot::PlotSetLegendFont()
 #if QWT_VERSION < 0x060100
 	foreach(QWidget* item, legend->legendItems())
 		item->setFont(legend->font());
-#else
-	//TODO
 #endif
 }
 
@@ -1517,8 +1507,7 @@ void CDRMPlot::OnSelected(const QPointF &pos)
 #if QWT_VERSION < 0x060100
 	const double dMaxxBottom = plot->axisScaleDiv(QwtPlot::xBottom)->UPPERBOUND();
 #else
-	//TODO
-	const double dMaxxBottom = 0.0;
+	const double dMaxxBottom = plot->axisScaleDiv(QwtPlot::xBottom).UPPERBOUND();
 #endif
 
 	/* Check if dMaxxBottom is valid */
