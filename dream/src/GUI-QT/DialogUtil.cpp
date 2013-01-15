@@ -428,16 +428,13 @@ void InitSMeter(QWidget* parent, QwtThermo* sMeter)
 {
 #if QWT_VERSION < 0x060100
     sMeter->setRange(S_METER_THERMO_MIN, S_METER_THERMO_MAX);
+    sMeter->setScale(S_METER_THERMO_MIN, S_METER_THERMO_MAX, 10.0);
 #else
-    //TODO
+    sMeter->setScale(S_METER_THERMO_MIN, S_METER_THERMO_MAX);
+    sMeter->setScaleStepSize(10.0);
 #endif
     sMeter->setAlarmLevel(S_METER_THERMO_ALARM);
     sMeter->setAlarmLevel(-12.5);
-#if QWT_VERSION < 0x060100
-    sMeter->setScale(S_METER_THERMO_MIN, S_METER_THERMO_MAX, 10.0);
-#else
-    //TODO
-#endif
     sMeter->setAlarmEnabled(TRUE);
     sMeter->setValue(S_METER_THERMO_MIN);
 #if QWT_VERSION < 0x060000

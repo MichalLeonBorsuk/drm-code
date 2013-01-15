@@ -185,7 +185,7 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& NSettings,
 #if QWT_VERSION < 0x060100
     ProgrInputLevel->setRange(-50.0, 0.0);
 #else
-    //TODO
+    ProgrInputLevel->setScale(-50.0, 0.0);
 #endif
     ProgrInputLevel->setAlarmLevel(-12.5);
     QColor alarmColor(QColor(255, 0, 0));
