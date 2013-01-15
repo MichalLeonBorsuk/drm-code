@@ -46,6 +46,7 @@ CodecParams::CodecParams(CSettings& Settings, CParameter& Parameters,
 	iShortID(iShortID), bWasVisible(FALSE), bLastPositionValid(FALSE)
 {
 	setupUi(this);
+	setAttribute(Qt::WA_QuitOnClose, false);
 
 	/* Recover window size and position */
 	CWinGeom s;
@@ -150,9 +151,7 @@ CodecParams::~CodecParams()
 void CodecParams::reject()
 { 
 	GetDialogPosition();
-	QWidget* parent = parentWidget();
-	if (parent && parent->isVisible())
-		hide();
+	QDialog::reject();
 }
 
 void CodecParams::OnButtonGroupChannels(int iID)
