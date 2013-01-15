@@ -444,7 +444,7 @@ TransmDialog::TransmDialog(CSettings& Settings,
 	connect(&TimerStop, SIGNAL(timeout()),
 		this, SLOT(OnTimerStop()));
 
-	/* System tray */
+    /* System tray setup */
     pSysTray = CSysTray::Create(this,
         SLOT(OnSysTrayActivated(QSystemTrayIcon::ActivationReason)),
         NULL, ":/icons/MainIconTx.svg");
@@ -461,7 +461,7 @@ TransmDialog::TransmDialog(CSettings& Settings,
 TransmDialog::~TransmDialog()
 {
 	/* Destroy system tray */
-    CSysTray::Destroy(pSysTray);
+    CSysTray::Destroy(&pSysTray);
 
 	/* Destroy codec dialog if exist */
 	if (pCodecDlg)
@@ -519,8 +519,12 @@ void TransmDialog::closeEvent(QCloseEvent* ce)
 		OnButtonStartStop();
 		ce->ignore();
 	}
-	else
+	else {
+#if QT_VERSION >= 0x050000
+		CSysTray::Destroy(&pSysTray); /* Needed for Qt 5.0.0 - possible framework bug */
+#endif
 		ce->accept();
+	}
 }
 
 void TransmDialog::OnWhatsThis()

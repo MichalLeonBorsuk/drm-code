@@ -238,6 +238,7 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& NSettings,
 
     ClearDisplay();
 
+    /* System tray setup */
     pSysTray = CSysTray::Create(
         this,
         SLOT(OnSysTrayActivated(QSystemTrayIcon::ActivationReason)),
@@ -254,7 +255,7 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& NSettings,
 FDRMDialog::~FDRMDialog()
 {
     delete pLogging;
-    CSysTray::Destroy(pSysTray);
+    CSysTray::Destroy(&pSysTray);
 }
 
 void FDRMDialog::OnSysTrayActivated(QSystemTrayIcon::ActivationReason reason)
@@ -1152,6 +1153,9 @@ void FDRMDialog::closeEvent(QCloseEvent* ce)
     {
         TimerClose.stop();
         AboutDlg.reject();
+#if QT_VERSION >= 0x050000
+        CSysTray::Destroy(&pSysTray); /* Needed for Qt 5.0.0 - possible framework bug */
+#endif
         ce->accept();
     }
     else

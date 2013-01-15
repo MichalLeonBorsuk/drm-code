@@ -344,10 +344,13 @@ CSysTray* CSysTray::Create(QWidget* parent, const char* callbackIcon, const char
     return pSysTray;
 }
 
-void CSysTray::Destroy(CSysTray* pSysTray)
+void CSysTray::Destroy(CSysTray** pSysTray)
 {
-    if (pSysTray == NULL) return;
-    delete pSysTray;
+    if (*pSysTray != NULL)
+    {
+        delete *pSysTray;
+        *pSysTray = NULL;
+    }
 }
 
 void CSysTray::Start(CSysTray* pSysTray)
