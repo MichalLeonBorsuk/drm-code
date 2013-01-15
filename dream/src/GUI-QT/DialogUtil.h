@@ -87,7 +87,7 @@ class CSysTray
 {
 public:
 	static CSysTray* Create(QWidget* parent, const char* callbackIcon, const char* callbackTimer, const char* icon);
-	static void Destroy(CSysTray* pSysTray);
+	static void Destroy(CSysTray** pSysTray);
 	static void SetToolTip(CSysTray* pSysTray, const QString& Title, const QString& Message);
 	static void Start(CSysTray* pSysTray);
 	static void Stop(CSysTray* pSysTray, const QString& Message);
