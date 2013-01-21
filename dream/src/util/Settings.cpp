@@ -635,6 +635,7 @@ CSettings::UsageArguments()
 		"                               2: mix both channels (default);      3: subtract right from left;\n"
 		"                               4: I / Q input positive;             5: I / Q input negative;\n"
 		"                               6: I / Q input positive (0 Hz IF);   7: I / Q input negative (0 Hz IF)\n"
+		"                               8: I / Q input positive split;       9: I / Q input negative split\n"
 		"  -u <n>, --outchansel <n>     output channel selection\n"
 		"                               0: L -> L, R -> R (default);   1: L -> L, R muted;   2: L muted, R -> R\n"
 		"                               3: mix -> L, R muted;          4: L muted, mix -> R\n"
