@@ -44,7 +44,7 @@
 #define MAX_NUM_MLC_IT				4
 
 /* Maximum value of input/output channel selection */
-#define MAX_VAL_IN_CHAN_SEL			6
+#define MAX_VAL_IN_CHAN_SEL			9
 #define MAX_VAL_OUT_CHAN_SEL		4
 
 /* Minimum and maximum of initial sample rate offset parameter */
