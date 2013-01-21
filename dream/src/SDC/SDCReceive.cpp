@@ -960,7 +960,7 @@ _BOOLEAN CSDCReceive::DataEntityType9(CVector<_BINARY>* pbiData,
             AudParam.eAudioSamplRate = CAudioParam::AS_48KHZ;
             AudParam.eSBRFlag = CAudioParam::SB_NOT_USED;
             /* rfa */
-            (*pbiData).Separate(4);
+            bError = (*pbiData).Separate(4) != 0;
             break;
 
         default: /* rooms for three other codec */
