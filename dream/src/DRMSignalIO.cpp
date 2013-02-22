@@ -30,6 +30,9 @@
 #include <iostream>
 
 
+static int SineTable[5] = { 0, 1, 0, -1, 0 };
+
+
 /* Implementation *************************************************************/
 /******************************************************************************\
 * Transmitter                                                                  *
@@ -267,7 +270,6 @@ void CReceiveData::ProcessDataInternal(CParameter& Parameters)
     const _BOOLEAN bBad = pSound->Read(vecsSoundBuffer);
     Parameters.Lock();
     Parameters.ReceiveStatus.InterfaceI.SetStatus(bBad ? CRC_ERROR : RX_OK); /* Red light */
-    const int iSigSampleRate = Parameters.GetSigSampleRate();
     Parameters.Unlock();
 
     /* Write data to output buffer. Do not set the switch command inside
@@ -362,21 +364,21 @@ void CReceiveData::ProcessDataInternal(CParameter& Parameters)
         break;
 
     case CS_IQ_POS_SPLIT: /* Require twice the bandwidth */
-        iPhase %= iSigSampleRate;
-        for (i = 0; i < iOutputBlockSize; i++, iPhase++)
+        for (i = 0; i < iOutputBlockSize; i++)
         {
-            _REAL rPhase = crPi * 0.5 * iPhase;
-            _REAL rValue = Cos(rPhase) * vecsSoundBuffer[2 * i] - Sin(rPhase) * vecsSoundBuffer[2 * i + 1];
+            iPhase = (iPhase + 1) & 3;
+            _REAL rValue = vecsSoundBuffer[2 * i]     * /*COS*/SineTable[iPhase + 1] -
+                           vecsSoundBuffer[2 * i + 1] * /*SIN*/SineTable[iPhase];
             (*pvecOutputData)[i] = sample2real(rValue);
         }
         break;
 
     case CS_IQ_NEG_SPLIT: /* Require twice the bandwidth */
-        iPhase %= iSigSampleRate;
-        for (i = 0; i < iOutputBlockSize; i++, iPhase++)
+        for (i = 0; i < iOutputBlockSize; i++)
         {
-            _REAL rPhase = crPi * 0.5 * iPhase;
-            _REAL rValue = Cos(rPhase) * vecsSoundBuffer[2 * i + 1] - Sin(rPhase) * vecsSoundBuffer[2 * i];
+            iPhase = (iPhase + 1) & 3;
+            _REAL rValue = vecsSoundBuffer[2 * i + 1] * /*COS*/SineTable[iPhase + 1] -
+                           vecsSoundBuffer[2 * i]     * /*SIN*/SineTable[iPhase];
             (*pvecOutputData)[i] = sample2real(rValue);
         }
         break;
