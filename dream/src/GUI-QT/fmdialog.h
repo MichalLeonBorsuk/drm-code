@@ -54,7 +54,8 @@ class FMDialog : public QMainWindow, public Ui_FMMainWindow
 	Q_OBJECT
 
 public:
-	FMDialog(CDRMReceiver&, CSettings&, QWidget* parent = 0);
+	FMDialog(CDRMReceiver&, CSettings&, CFileMenu*, CSoundCardSelMenu*,
+	QWidget* parent = 0);
 
 	void SetWindowGeometry();
 

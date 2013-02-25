@@ -43,10 +43,9 @@
 
 /* Implementation *************************************************************/
 FMDialog::FMDialog(CDRMReceiver& NDRMR, CSettings& NSettings,
-	QWidget* parent) :
-	QMainWindow(parent),
-	DRMReceiver(NDRMR), Settings(NSettings),
-	eReceiverMode(RM_NONE)
+	CFileMenu* pFileMenu, CSoundCardSelMenu* pSoundCardMenu, QWidget* parent) :
+	QMainWindow(parent), DRMReceiver(NDRMR), Settings(NSettings),
+	pFileMenu(pFileMenu), pSoundCardMenu(pSoundCardMenu), eReceiverMode(RM_NONE)
 {
 	setupUi(this);
 
@@ -56,16 +55,15 @@ FMDialog::FMDialog(CDRMReceiver& NDRMR, CSettings& NSettings,
 	/* Set help text for the controls */
 	AddWhatsThisHelp();
 
-	pFileMenu = new CFileMenu(DRMReceiver, this, menu_View, FALSE);
+	/* Add file and sound card menu */
+	menuBar()->insertMenu(menu_View->menuAction(), pFileMenu);
+	menu_Settings->addMenu(pSoundCardMenu);
+
 	connect(actionTune, SIGNAL(triggered()), this, SLOT(OnTune()));
 	connect(actionExit, SIGNAL(triggered()), this, SLOT(close()));
 	connect(actionAM, SIGNAL(triggered()), this, SLOT(OnSwitchToAM()));
 	connect(actionDRM, SIGNAL(triggered()), this, SLOT(OnSwitchToDRM()));
 	connect(actionDisplayColor, SIGNAL(triggered()), this, SLOT(OnMenuSetDisplayColor()));
-
-	pSoundCardMenu = new CSoundCardSelMenu(DRMReceiver, pFileMenu, this);
-	menu_Settings->addMenu(pSoundCardMenu);
-
 	connect(actionAbout_Dream, SIGNAL(triggered()), this, SLOT(OnHelpAbout()));
 	connect(actionWhats_This, SIGNAL(triggered()), this, SLOT(OnWhatsThis()));
 
@@ -409,8 +407,7 @@ void FMDialog::ClearDisplay()
 void FMDialog::switchEvent()
 {
 	/* Put initialization code on mode switch here */
-    SetWindowGeometry();
-	pFileMenu->UpdateMenu();
+	SetWindowGeometry();
 }
 
 void FMDialog::showEvent(QShowEvent* e)

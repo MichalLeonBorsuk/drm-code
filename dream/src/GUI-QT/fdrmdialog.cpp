@@ -72,11 +72,17 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& NSettings,
     pLogging = new CLogging(Parameters);
     pLogging->LoadSettings(Settings);
 
+    /* Creation of file and sound card menu */
+    pFileMenu = new CFileMenu(DRMReceiver, this, menu_View);
+    pSoundCardMenu = new CSoundCardSelMenu(DRMReceiver, pFileMenu, this);
+    menu_Settings->addMenu(pSoundCardMenu);
+    connect(pFileMenu, SIGNAL(soundFileChanged(CDRMReceiver::ESFStatus)), this, SLOT(OnSoundFileChanged(CDRMReceiver::ESFStatus)));
+
     /* Analog demodulation window */
-    pAnalogDemDlg = new AnalogDemDlg(DRMReceiver, Settings);
+    pAnalogDemDlg = new AnalogDemDlg(DRMReceiver, Settings, pFileMenu, pSoundCardMenu);
 
     /* FM window */
-    pFMDlg = new FMDialog(DRMReceiver, Settings);
+    pFMDlg = new FMDialog(DRMReceiver, Settings, pFileMenu, pSoundCardMenu);
 
 #ifdef HAVE_LIBHAMLIB
     /* Stations window */
@@ -118,11 +124,6 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& NSettings,
     connect(actionExit, SIGNAL(triggered()), this, SLOT(close()));
 
     action_Multimedia_Dialog->setEnabled(false);
-
-    pFileMenu = new CFileMenu(DRMReceiver, this, menu_View);
-    pSoundCardMenu = new CSoundCardSelMenu(DRMReceiver, pFileMenu, this);
-    menu_Settings->addMenu(pSoundCardMenu);
-    connect(pFileMenu, SIGNAL(soundFileChanged(CDRMReceiver::ESFStatus)), this, SLOT(OnSoundFileChanged(CDRMReceiver::ESFStatus)));
 
     connect(actionMultimediaSettings, SIGNAL(triggered()), pMultSettingsDlg, SLOT(show()));
     connect(actionGeneralSettings, SIGNAL(triggered()), pGeneralSettingsDlg, SLOT(show()));
