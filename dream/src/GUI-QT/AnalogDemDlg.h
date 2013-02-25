@@ -83,7 +83,8 @@ class AnalogDemDlg : public QMainWindow, public Ui_AMMainWindow
 	Q_OBJECT
 
 public:
-	AnalogDemDlg(CDRMReceiver&, CSettings&, QWidget* parent = 0);
+	AnalogDemDlg(CDRMReceiver&, CSettings&, CFileMenu*, CSoundCardSelMenu*,
+	QWidget* parent = 0);
 
 	void SetWindowGeometry();
 

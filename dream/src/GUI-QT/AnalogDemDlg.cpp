@@ -57,9 +57,10 @@
 
 /* Implementation *************************************************************/
 AnalogDemDlg::AnalogDemDlg(CDRMReceiver& NDRMR, CSettings& NSettings,
-	QWidget* parent) :
+	CFileMenu* pFileMenu, CSoundCardSelMenu* pSoundCardMenu, QWidget* parent) :
 	QMainWindow(parent), DRMReceiver(NDRMR), Settings(NSettings),
-	AMSSDlg(NDRMR, Settings, parent), MainPlot(NULL)
+	AMSSDlg(NDRMR, Settings, parent), MainPlot(NULL),
+	pFileMenu(pFileMenu), pSoundCardMenu(pSoundCardMenu)
 {
 	setupUi(this);
 
@@ -69,15 +70,16 @@ AnalogDemDlg::AnalogDemDlg(CDRMReceiver& NDRMR, CSettings& NSettings,
 	/* Set help text for the controls */
 	AddWhatsThisHelp();
 
-	pFileMenu = new CFileMenu(DRMReceiver, this, menu_View);
+	/* Add file and sound card menu */
+	menuBar()->insertMenu(menu_View->menuAction(), pFileMenu);
+	menu_Settings->addMenu(pSoundCardMenu);
+
 	connect(action_Stations_Dialog, SIGNAL(triggered()), this, SIGNAL(ViewStationsDlg()));
 	connect(action_Live_Schedule_Dialog, SIGNAL(triggered()), this, SIGNAL(ViewLiveScheduleDlg()));
 	connect(actionExit, SIGNAL(triggered()), this, SLOT(close()));
 	connect(actionAM, SIGNAL(triggered()), this, SIGNAL(NewAMAcquisition()));
 	connect(actionFM, SIGNAL(triggered()), this, SLOT(OnSwitchToFM()));
 	connect(actionDRM, SIGNAL(triggered()), this, SLOT(OnSwitchToDRM()));
-	pSoundCardMenu = new CSoundCardSelMenu(DRMReceiver, pFileMenu, this);
-	menu_Settings->addMenu(pSoundCardMenu);
 	connect(pSoundCardMenu, SIGNAL(sampleRateChanged()), this, SLOT(switchEvent()));
 	connect(actionAbout_Dream, SIGNAL(triggered()), this, SLOT(OnHelpAbout()));
 	connect(actionWhats_This, SIGNAL(triggered()), this, SLOT(OnWhatsThis()));
@@ -204,9 +206,8 @@ void AnalogDemDlg::OnSwitchToFM()
 void AnalogDemDlg::switchEvent()
 {
 	/* Put initialization code on mode switch here */
-    SetWindowGeometry();
+	SetWindowGeometry();
 	SliderBandwidth->setRange(0, DRMReceiver.GetParameters()->GetSigSampleRate() / 2);
-	pFileMenu->UpdateMenu();
 }
 
 void AnalogDemDlg::showEvent(QShowEvent* e)

@@ -277,35 +277,22 @@ void CSoundCardSelMenu::OnSoundFileChanged(CDRMReceiver::ESFStatus eStatus)
 // TODO DRMTransmitter
 
 CFileMenu::CFileMenu(CDRMTransceiver& DRMTransceiver, QMainWindow* parent,
-    QMenu* menuInsertBefore, bool bSignal)
+    QMenu* menuInsertBefore)
     : QMenu(parent), DRMTransceiver(DRMTransceiver), bReceiver(DRMTransceiver.IsReceiver())
 {
     setTitle(tr("&File"));
     if (bReceiver)
     {
-#ifdef FILE_MENU_UNIFIED_OPEN_FILE
-        (void)bSignal;
         QString openFile(tr("&Open File..."));
         QString closeFile(tr("&Close File"));
         actionOpenFile = addAction(openFile, this, SLOT(OnOpenFile()), QKeySequence(tr("Alt+O")));
         actionCloseFile = addAction(closeFile, this, SLOT(OnCloseFile()), QKeySequence(tr("Alt+C")));
-#else
-        QString openFile(tr(bSignal ? "&Open Signal File..." : "&Open Audio File..."));
-        QString closeFile(tr(bSignal ? "&Close Signal File" : "&Close Audio File"));
-        actionOpenSignalFile = addAction(openFile, this, SLOT(OnOpenSignalFile()), QKeySequence(tr("Alt+O")));
-        actionCloseSignalFile = addAction(closeFile, this, SLOT(OnCloseSignalFile()), QKeySequence(tr("Alt+C")));
-        addSeparator();
-        actionOpenRsciFile = addAction(tr("Open MDI/RSCI File..."), this, SLOT(OnOpenRsciFile())/*, QKeySequence(tr("Alt+O"))*/);
-        actionCloseRsciFile = addAction(tr("Close MDI/RSCI File"), this, SLOT(OnCloseRsciFile())/*, QKeySequence(tr("Alt+C"))*/);
-#endif
         addSeparator();
     }
     addAction(tr("&Exit"), parent, SLOT(close()), QKeySequence(tr("Alt+X")));
     parent->menuBar()->insertMenu(menuInsertBefore->menuAction(), this);
 }
 
-
-#ifdef FILE_MENU_UNIFIED_OPEN_FILE
 
 void CFileMenu::OnOpenFile()
 {
@@ -341,67 +328,6 @@ void CFileMenu::OnCloseFile()
     }
 }
 
-#else
-
-void CFileMenu::OnOpenSignalFile()
-{
-#define AUDIO_FILE_FILTER "Sound Files (" SND_FILES ");;All Files (*)"
-    if (bReceiver)
-    {
-        QString filename = QFileDialog::getOpenFileName(this, tr("Open Sound File"),
-            strLastSoundPath, tr(AUDIO_FILE_FILTER));
-        /* Check if user not hit the cancel button */
-        if (!filename.isEmpty())
-        {
-            strLastSoundPath = filename;
-            ((CDRMReceiver&)DRMTransceiver).SetSoundFile(string(filename.toLocal8Bit().constData()));
-            RestartTransceiver(&DRMTransceiver);
-            UpdateMenu();
-        }
-    }
-}
-
-void CFileMenu::OnCloseSignalFile()
-{
-    if (bReceiver)
-    {
-	    ((CDRMReceiver&)DRMTransceiver).ClearSoundFile();
-	    RestartTransceiver(&DRMTransceiver);
-        UpdateMenu();
-    }
-}
-
-void CFileMenu::OnOpenRsciFile()
-{
-#define RSCI_FILE_FILTER "MDI/RSCI Files (" RSCI_FILES ");;All Files (*)"
-    if (bReceiver)
-    {
-        QString filename = QFileDialog::getOpenFileName(this, tr("Open MDI/RSCI File"),
-            strLastRsciPath, tr(RSCI_FILE_FILTER));
-        /* Check if user not hit the cancel button */
-        if (!filename.isEmpty())
-        {
-			strLastRsciPath = filename;
-            ((CDRMReceiver&)DRMTransceiver).SetRsciInput(string(filename.toLocal8Bit().constData()));
-            RestartTransceiver(&DRMTransceiver);
-            UpdateMenu();
-        }
-    }
-}
-
-void CFileMenu::OnCloseRsciFile()
-{
-    if (bReceiver)
-    {
-        ((CDRMReceiver&)DRMTransceiver).ClearRsciInput();
-        RestartTransceiver(&DRMTransceiver);
-        UpdateMenu();
-    }
-}
-
-#endif
-
-
 void CFileMenu::UpdateMenu()
 {
     if (bReceiver)
@@ -410,20 +336,9 @@ void CFileMenu::UpdateMenu()
         const bool bSoundFile = eStatus == CDRMReceiver::SF_SNDFILEIN;
         const bool bRsciMdiIn = eStatus == CDRMReceiver::SF_RSCIMDIIN;
 
-#ifdef FILE_MENU_UNIFIED_OPEN_FILE
         const bool bInputFile = bSoundFile | bRsciMdiIn;
         if (bInputFile != actionCloseFile->isEnabled())
             actionCloseFile->setEnabled(bInputFile);
-#else
-        if (bRsciMdiIn == actionOpenSignalFile->isEnabled())
-            actionOpenSignalFile->setEnabled(!bRsciMdiIn);
-
-        if (bSoundFile != actionCloseSignalFile->isEnabled())
-            actionCloseSignalFile->setEnabled(bSoundFile);
-
-        if (bRsciMdiIn != actionCloseRsciFile->isEnabled())
-            actionCloseRsciFile->setEnabled(bRsciMdiIn);
-#endif
 
         emit soundFileChanged(eStatus);
     }
