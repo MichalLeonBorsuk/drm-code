@@ -408,6 +408,7 @@ void FMDialog::switchEvent()
 {
 	/* Put initialization code on mode switch here */
 	SetWindowGeometry();
+	pFileMenu->UpdateMenu();
 }
 
 void FMDialog::showEvent(QShowEvent* e)

@@ -207,6 +207,7 @@ void AnalogDemDlg::switchEvent()
 {
 	/* Put initialization code on mode switch here */
 	SetWindowGeometry();
+	pFileMenu->UpdateMenu();
 	SliderBandwidth->setRange(0, DRMReceiver.GetParameters()->GetSigSampleRate() / 2);
 }
 
