@@ -1,6 +1,6 @@
 /******************************************************************************\
  *
- * Copyright (c) 2012
+ * Copyright (c) 2012-2013
  *
  * Author(s):
  *	David Flamand
@@ -113,8 +113,9 @@ protected:
 	void			Close_HW();
 	void			SetBufferSize_HW();
 
-	int 			iSampleRate;
-	int 			iBufferSize;
+	int				iSampleRate;
+	int				iBufferSize;
+	long			lTimeToWait;
 	_BOOLEAN		bBlockingRec;
 
 	_BOOLEAN		bBufferingError;
@@ -160,6 +161,7 @@ protected:
 
 	int				iSampleRate;
 	int				iBufferSize;
+	long			lTimeToWait;
 	_BOOLEAN		bBlockingPlay;
 
 	pa_stream		*pa_s;
