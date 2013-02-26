@@ -1,6 +1,6 @@
 /******************************************************************************\
  *
- * Copyright (c) 2012
+ * Copyright (c) 2012-2013
  *
  * Author(s):
  *	David Flamand
@@ -26,6 +26,7 @@
  *
 \******************************************************************************/
 
+#include <unistd.h>
 #include <time.h>
 #include <string.h>
 #include <stdlib.h>
@@ -67,7 +68,6 @@
 
 #ifdef ENABLE_STDIN_STDOUT
 # define STDIN_STDOUT_DEVICE_NAME "-"
-# include <unistd.h>
 static int StdoutWrite(const char *buf, ssize_t count)
 {
 	ssize_t chunk;
@@ -387,6 +387,7 @@ int CSoundInPulse::Read_HW(void *recbuf, int size)
 
 	while (size) {
 		if (!remaining_nbytes) {
+			if (pa_stream_get_state(pa_s) != PA_STREAM_READY) break;
 			ret = pa_mainloop_iterate(pa_obj.pa_m, 1, &retval);
 			if (ret < 0) break;
 			nbytes = 0;
@@ -419,6 +420,9 @@ int CSoundInPulse::Read_HW(void *recbuf, int size)
 			recbuf = ((char*)recbuf)+chunk;
 		}
 	};
+
+	if (filled == 0 && bBlockingRec)
+		usleep(lTimeToWait);
 
 //	DEBUG_MSG("CSoundInPulse::read_HW filled %6i\n", filled);
 	return filled / BYTES_PER_SAMPLE;
@@ -628,6 +632,9 @@ int CSoundOutPulse::Write_HW(void *playbuf, int size)
 		return size;
 	}
 
+	if (bBlockingPlay)
+		usleep(lTimeToWait);
+
 	return -1;
 }
 
@@ -726,8 +733,8 @@ _BOOLEAN CSoundPulse::IsStdinStdout()
 /* Wave in ********************************************************************/
 
 CSoundInPulse::CSoundInPulse(): CSoundPulse(FALSE),
-	iSampleRate(0), iBufferSize(0), bBlockingRec(FALSE),
-	bBufferingError(FALSE), pa_s(NULL),
+	iSampleRate(0), iBufferSize(0), lTimeToWait(0),
+	bBlockingRec(FALSE), bBufferingError(FALSE), pa_s(NULL),
 	remaining_nbytes(0), remaining_data(NULL)
 #ifdef CLOCK_DRIFT_ADJ_ENABLED
 	, record_sample_rate(0), bClockDriftComp(FALSE), cp(NULL)
@@ -758,6 +765,9 @@ _BOOLEAN CSoundInPulse::Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bN
 		/* Save samplerate buffer size */
 		iSampleRate = iNewSampleRate;
 		iBufferSize = iNewBufferSize;
+
+		/* Time to wait in case of read error (ns) */
+		lTimeToWait = (iNewBufferSize / NUM_CHANNELS) * 1000l / (iNewSampleRate / 1000l) + 1000;
 
 		/* Close the previous input */
 		Close_HW();
@@ -840,7 +850,7 @@ void CSoundInPulse::Close()
 CSoundOutPulse::CSoundOutPulse(): CSoundPulse(TRUE),
 	bPrebuffer(FALSE), bSeek(FALSE),
 	bBufferingError(FALSE), bMuteError(FALSE),
-	iSampleRate(0), iBufferSize(0),
+	iSampleRate(0), iBufferSize(0), lTimeToWait(0),
 	bBlockingPlay(FALSE), pa_s(NULL)
 #ifdef CLOCK_DRIFT_ADJ_ENABLED
 	, iMaxSampleRateOffset(0)
@@ -873,6 +883,9 @@ _BOOLEAN CSoundOutPulse::Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN b
 	{
 		/* Save samplerate */
 		iSampleRate = iNewSampleRate;
+
+		/* Time to wait in case of write error (ns) */
+		lTimeToWait = (iNewBufferSize / NUM_CHANNELS) * 1000l / (iNewSampleRate / 1000l) + 1000;
 
 		/* Close the previous input */
 		Close_HW();
