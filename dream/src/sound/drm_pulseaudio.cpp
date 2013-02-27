@@ -387,13 +387,14 @@ int CSoundInPulse::Read_HW(void *recbuf, int size)
 
 	while (size) {
 		if (!remaining_nbytes) {
-			if (pa_stream_get_state(pa_s) != PA_STREAM_READY) break;
-			ret = pa_mainloop_iterate(pa_obj.pa_m, 1, &retval);
-			if (ret < 0) break;
 			nbytes = 0;
 			data   = NULL;
 			ret = pa_stream_peek(pa_s, (const void **)&data, &nbytes);
 			if (ret != PA_OK) break;
+			if (!data) {
+				ret = pa_mainloop_iterate(pa_obj.pa_m, 1, &retval);
+				if (ret < 0) break;
+			}
 		}
 		else {
 			nbytes = remaining_nbytes;
@@ -421,8 +422,12 @@ int CSoundInPulse::Read_HW(void *recbuf, int size)
 		}
 	};
 
-	if (filled == 0 && bBlockingRec)
-		usleep(lTimeToWait);
+	if (size != 0)
+	{
+		memset(recbuf, 0, size);
+		if (bBlockingRec)
+			usleep(lTimeToWait);
+	}
 
 //	DEBUG_MSG("CSoundInPulse::read_HW filled %6i\n", filled);
 	return filled / BYTES_PER_SAMPLE;

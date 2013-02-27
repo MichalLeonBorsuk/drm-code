@@ -1153,7 +1153,9 @@ void FDRMDialog::closeEvent(QCloseEvent* ce)
     if (DRMReceiver.GetParameters()->eRunState == CParameter::STOPPED)
     {
         TimerClose.stop();
-        AboutDlg.reject();
+        AboutDlg.close();
+        pAnalogDemDlg->close();
+        pFMDlg->close();
 #if QT_VERSION >= 0x050000
         CSysTray::Destroy(&pSysTray); /* Needed for Qt 5.0.0 - possible framework bug */
 #endif
