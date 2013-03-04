@@ -1,12 +1,12 @@
 /******************************************************************************\
  * British Broadcasting Corporation
- * Copyright (c) 2007, 2012
+ * Copyright (c) 2007, 2012, 2013
  *
  * Author(s):
  *	Julian Cable, David Flamand
  *
  * Decription:
- * Read a file at the correct rate
+ *  Read a file at the correct rate
  *
  ******************************************************************************
  *
@@ -168,6 +168,8 @@ CAudioFileIn::SetFileName(const string& strFileName)
 _BOOLEAN
 CAudioFileIn::Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking)
 {
+//    qDebug("CAudioFileIn::Init() iNewSampleRate=%i iNewBufferSize=%i bNewBlocking=%i", iNewSampleRate, iNewBufferSize, bNewBlocking);
+
     if (pacer)
     {
         delete pacer;
@@ -192,27 +194,38 @@ CAudioFileIn::Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking
 
     if (iBufferSize != iNewBufferSize || bChanged)
     {
-    	iBufferSize = iNewBufferSize;
+        iBufferSize = iNewBufferSize;
         if (buffer)
             delete[] buffer;
         /* Create a resampler object if the file's sample rate isn't supported */
         if (iNewSampleRate != iFileSampleRate)
         {
             iOutBlockSize = iNewBufferSize / 2; /* Mono */
-            iInBlockSize = _REAL(iOutBlockSize) * iFileSampleRate / iNewSampleRate;
             if (ResampleObjL == NULL)
                 ResampleObjL = new CAudioResample();
-            ResampleObjL->Init(iInBlockSize, _REAL(iNewSampleRate) / iFileSampleRate);
+            ResampleObjL->Init(iOutBlockSize, iFileSampleRate, iNewSampleRate);
             if (iFileChannels == 2)
             {
                 if (ResampleObjR == NULL)
                     ResampleObjR = new CAudioResample();
-                ResampleObjR->Init(iInBlockSize, _REAL(iNewSampleRate) / iFileSampleRate);
+                ResampleObjR->Init(iOutBlockSize, iFileSampleRate, iNewSampleRate);
             }
-            vecTempResBufIn.Init(iInBlockSize, (_REAL) 0.0);
+            const int iMaxInputSize = ResampleObjL->GetMaxInputSize();
+            vecTempResBufIn.Init(iMaxInputSize, (_REAL) 0.0);
             vecTempResBufOut.Init(iOutBlockSize, (_REAL) 0.0);
+            buffer = new short[iMaxInputSize * 2];
+            if (bChanged)
+            {
+                if (ResampleObjL != NULL)
+                    ResampleObjL->Reset();
+                if (ResampleObjR != NULL)
+                    ResampleObjR->Reset();
+            }
         }
-        buffer = new short[iNewBufferSize];
+        else
+        {
+            buffer = new short[iNewBufferSize * 2];
+        }
     }
 
     return bChanged;
@@ -224,10 +237,10 @@ CAudioFileIn::Read(CVector<short>& psData)
     if (pacer)
         pacer->wait();
 
-    if (pFileReceiver == NULL || psData.Size() != iBufferSize)
+    if (pFileReceiver == NULL || psData.Size() < iBufferSize)
         return TRUE;
 
-    const int iFrames = ResampleObjL ? iInBlockSize : iBufferSize/2;
+    const int iFrames = ResampleObjL ? ResampleObjL->GetFreeInputSize() : iBufferSize/2;
     int i;
 
     if (eFmt == fmt_txt)
@@ -290,13 +303,13 @@ CAudioFileIn::Read(CVector<short>& psData)
         if (iFileChannels == 2)
         {   /* Stereo */
             /* Left channel*/
-            for (i = 0; i < iInBlockSize; i++)
+            for (i = 0; i < iFrames; i++)
                 vecTempResBufIn[i] = buffer[2*i];
             ResampleObjL->Resample(vecTempResBufIn, vecTempResBufOut);
             for (i = 0; i < iOutBlockSize; i++)
                 psData[i*2] = Real2Sample(vecTempResBufOut[i]);
             /* Right channel*/
-            for (i = 0; i < iInBlockSize; i++)
+            for (i = 0; i < iFrames; i++)
                 vecTempResBufIn[i] = buffer[2*i+1];
             ResampleObjR->Resample(vecTempResBufIn, vecTempResBufOut);
             for (i = 0; i < iOutBlockSize; i++)
@@ -304,7 +317,7 @@ CAudioFileIn::Read(CVector<short>& psData)
         }
         else
         {   /* Mono */
-            for (i = 0; i < iInBlockSize; i++)
+            for (i = 0; i < iFrames; i++)
                 vecTempResBufIn[i] = buffer[i];
             ResampleObjL->Resample(vecTempResBufIn, vecTempResBufOut);
             for (i = 0; i < iOutBlockSize; i++)

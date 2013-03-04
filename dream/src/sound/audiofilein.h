@@ -1,12 +1,12 @@
 /******************************************************************************\
  * British Broadcasting Corporation
- * Copyright (c) 2007
+ * Copyright (c) 2007, 2012, 2013
  *
  * Author(s):
- *	Julian Cable
+ *	Julian Cable, David Flamand
  *
  * Decription:
- * Read a file at the correct rate
+ *  Read a file at the correct rate
  *
  ******************************************************************************
  *
@@ -65,7 +65,6 @@ protected:
     CAudioResample*		ResampleObjL;
     CAudioResample*		ResampleObjR;
     short*				buffer;
-    int					iInBlockSize;
     int					iOutBlockSize;
     string				sCurrentDevice;
 };
