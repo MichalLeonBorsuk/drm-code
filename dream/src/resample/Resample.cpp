@@ -1,9 +1,9 @@
 /******************************************************************************\
  * Technische Universitaet Darmstadt, Institut fuer Nachrichtentechnik
- * Copyright (c) 2002
+ * Copyright (c) 2002, 2012, 2013
  *
  * Author(s):
- *	Volker Fischer
+ *	Volker Fischer, David Flamand (added CSpectrumResample, speex resampler)
  *
  * Description:
  * Resample routine for arbitrary sample-rate conversions in a low range (for
@@ -34,6 +34,11 @@
 \******************************************************************************/
 
 #include "Resample.h"
+#include "ResampleFilter.h"
+#ifdef HAVE_SPEEX
+# include <string.h>
+# define RESAMPLING_QUALITY 6 /* 0-10 : 0=fast/bad 10=slow/good */
+#endif
 
 
 /* Implementation *************************************************************/
@@ -116,6 +121,150 @@ void CResample::Init(const int iNewInputBlockSize)
 	rtOut = (_REAL) RES_FILT_NUM_TAPS_PER_PHASE * INTERP_DECIM_I_D;
 }
 
+#ifdef HAVE_SPEEX
+CAudioResample::CAudioResample() :
+	rRation(1.0), iInputBlockSize(0), iOutputBlockSize(0),
+	resampler(NULL), iInputBuffered(0), iMaxInputSize(0)
+{
+}
+CAudioResample::~CAudioResample()
+{
+	Free();
+}
+void CAudioResample::Free()
+{
+	if (resampler != NULL)
+	{
+		speex_resampler_destroy(resampler);
+		resampler = NULL;
+	}
+	vecfInput.Init(0);
+	vecfOutput.Init(0);
+	rRation = 1.0;
+}
+void CAudioResample::Resample(CVector<_REAL>& rInput, CVector<_REAL>& rOutput)
+{
+	if (rRation == 1.0)
+	{
+		memcpy(&rOutput[0], &rInput[0], sizeof(_REAL) * iOutputBlockSize);
+	}
+	else
+	{
+		int i;
+		if (rOutput.Size() != iOutputBlockSize)
+			qDebug("CAudioResample::Resample(): rOutput.Size(%i) != iOutputBlockSize(%i)", (int)rOutput.Size(), iOutputBlockSize);
+
+		int iInputSize = GetFreeInputSize();
+		for (i = 0; i < iInputSize; i++)
+			vecfInput[i+iInputBuffered] = rInput[i];
+
+		int input_frames_used = 0;
+		int output_frames_gen = 0;
+		int input_frames = iInputBuffered + iInputSize;
+
+		if (resampler != NULL)
+		{
+			spx_uint32_t in_len = input_frames;
+			spx_uint32_t out_len = iOutputBlockSize;
+			int err = speex_resampler_process_float(
+				resampler,
+				0,
+				&vecfInput[0],
+				&in_len,
+				&vecfOutput[0],
+				&out_len);
+			if (err != RESAMPLER_ERR_SUCCESS)
+				qDebug("CAudioResample::Init(): libspeexdsp error: %s", speex_resampler_strerror(err));
+			input_frames_used = err != RESAMPLER_ERR_SUCCESS ? 0 : in_len;
+			output_frames_gen = err != RESAMPLER_ERR_SUCCESS ? 0 : out_len;
+		}
+
+		if (output_frames_gen != iOutputBlockSize)
+			qDebug("CAudioResample::Resample(): output_frames_gen(%i) != iOutputBlockSize(%i)", output_frames_gen, iOutputBlockSize);
+
+		for (i = 0; i < iOutputBlockSize; i++)
+			rOutput[i] = vecfOutput[i];
+		
+		iInputBuffered = input_frames - input_frames_used;
+		for (i = 0; i < iInputBuffered; i++)
+			vecfInput[i] = vecfInput[i+input_frames_used];
+	}
+}
+int CAudioResample::GetMaxInputSize() const
+{
+	return iMaxInputSize != 0 ? iMaxInputSize : iInputBlockSize;
+}
+int CAudioResample::GetFreeInputSize() const
+{
+	return GetMaxInputSize() - iInputBuffered;
+}
+void CAudioResample::Reset()
+{
+	iInputBuffered = 0;
+	if (resampler != NULL)
+	{
+		int err = speex_resampler_reset_mem(resampler);
+		if (err != RESAMPLER_ERR_SUCCESS)
+			qDebug("CAudioResample::Init(): libspeexdsp error: %s", speex_resampler_strerror(err));
+	}
+}
+void CAudioResample::Init(const int iNewInputBlockSize, const _REAL rNewRation)
+{
+	rRation = rNewRation;
+	iInputBlockSize = iNewInputBlockSize;
+	iOutputBlockSize = int(iNewInputBlockSize * rNewRation);
+	iInputBuffered = 0;
+	iMaxInputSize = 0;
+	if (rRation != 1.0)
+	{
+		if (resampler == NULL)
+		{
+			int err;
+			resampler = speex_resampler_init(1, spx_uint32_t(192000 / rNewRation), spx_uint32_t(192000), RESAMPLING_QUALITY, &err);
+			if (!resampler)
+				qDebug("CAudioResample::Init(): libspeexdsp error: %s", speex_resampler_strerror(err));
+		}
+		vecfInput.Init(iInputBlockSize);
+		vecfOutput.Init(iOutputBlockSize);
+	}
+	else
+	{
+		Free();
+	}
+}
+void CAudioResample::Init(const int iNewOutputBlockSize, const int iInputSamplerate, const int iOutputSamplerate)
+{
+	rRation = _REAL(iOutputSamplerate) / iInputSamplerate;
+	iInputBlockSize = int(iNewOutputBlockSize / rRation);
+	iOutputBlockSize = iNewOutputBlockSize;
+	if (rRation != 1.0)
+	{
+		const int iNewMaxInputSize = iInputBlockSize * 2;
+		const int iInputSize = vecfInput.Size();
+		if (iInputSize < iNewMaxInputSize)
+		{
+			vecfInput.Enlarge(iNewMaxInputSize - iInputSize);
+			iMaxInputSize = iNewMaxInputSize;
+		}
+		vecfOutput.Init(iOutputBlockSize);
+		if (resampler == NULL)
+		{
+			int err;
+			resampler = speex_resampler_init(1, spx_uint32_t(iInputSamplerate), spx_uint32_t(iOutputSamplerate), RESAMPLING_QUALITY, &err);
+			if (resampler == NULL)
+				qDebug("CAudioResample::Init(): libspeexdsp error: %s", speex_resampler_strerror(err));
+			iInputBuffered = 0;
+		}
+	}
+	else
+	{
+		Free();
+	}
+}
+
+#else // HAVE_SPEEX
+CAudioResample::CAudioResample() {}
+CAudioResample::~CAudioResample() {}
 void CAudioResample::Resample(CVector<_REAL>& rInput, CVector<_REAL>& rOutput)
 {
 	int j;
@@ -151,17 +300,35 @@ void CAudioResample::Resample(CVector<_REAL>& rInput, CVector<_REAL>& rOutput)
 		}
 	}
 }
-
 void CAudioResample::Init(int iNewInputBlockSize, _REAL rNewRation)
 {
 	rRation = rNewRation;
 	iInputBlockSize = iNewInputBlockSize;
-	iOutputBlockSize = (int) (iInputBlockSize * rNewRation);
-
+	iOutputBlockSize = (int) (iInputBlockSize * rRation);
+	Reset();
+}
+void CAudioResample::Init(const int iNewOutputBlockSize, const int iInputSamplerate, const int iOutputSamplerate)
+{
+	rRation = _REAL(iOutputSamplerate) / iInputSamplerate;
+	iInputBlockSize = (int) (iNewOutputBlockSize / rRation);
+	iOutputBlockSize = iNewOutputBlockSize;
+	Reset();
+}
+int CAudioResample::GetMaxInputSize() const
+{
+	return iInputBlockSize;
+}
+int CAudioResample::GetFreeInputSize() const
+{
+	return iInputBlockSize;
+}
+void CAudioResample::Reset()
+{
 	/* Allocate memory for internal buffer, clear sample history */
 	vecrIntBuff.Init(iInputBlockSize + RES_FILT_NUM_TAPS_PER_PHASE,
 		(_REAL) 0.0);
 }
+#endif // HAVE_SPEEX
 
 void CSpectrumResample::Resample(CVector<_REAL>* prInput, CVector<_REAL>** pprOutput,
 	int iNewOutputBlockSize, _BOOLEAN bResample)
@@ -214,3 +381,4 @@ void CSpectrumResample::Resample(CVector<_REAL>* prInput, CVector<_REAL>** pprOu
 		*pprOutput = prOutput;
 	}
 }
+

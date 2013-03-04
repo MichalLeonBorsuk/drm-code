@@ -1,9 +1,9 @@
 /******************************************************************************\
  * Technische Universitaet Darmstadt, Institut fuer Nachrichtentechnik
- * Copyright (c) 2002
+ * Copyright (c) 2002, 2012, 2013
  *
  * Author(s):
- *	Volker Fischer
+ *	Volker Fischer, David Flamand (added CSpectrumResample, speex resampler)
  *
  * Description:
  *	See Resampling.cpp
@@ -29,9 +29,11 @@
 #if !defined(RESAMPLE_H__3B0FEUFE7876F_FE8FE_CA63_4344_1912__INCLUDED_)
 #define RESAMPLE_H__3B0FEUFE7876F_FE8FE_CA63_4344_1912__INCLUDED_
 
-#include "ResampleFilter.h"
 #include "../GlobalDefinitions.h"
 #include "../util/Vector.h"
+#ifdef HAVE_SPEEX
+# include <speex/speex_resampler.h>
+#endif
 
 
 /* Classes ********************************************************************/
@@ -59,20 +61,31 @@ protected:
 class CAudioResample
 {
 public:
-	CAudioResample() {}
-	virtual ~CAudioResample() {}
+	CAudioResample();
+	virtual ~CAudioResample();
 
 	void Init(int iNewInputBlockSize, _REAL rNewRation);
+	void Init(int iNewOutputBlockSize, int iInputSamplerate, int iOutputSamplerate);
 	void Resample(CVector<_REAL>& rInput, CVector<_REAL>& rOutput);
+	int GetFreeInputSize() const;
+	int GetMaxInputSize() const;
+	void Reset();
 
 protected:
 	_REAL					rRation;
-
-	CShiftRegister<_REAL>	vecrIntBuff;
-	int						iHistorySize;
-
 	int						iInputBlockSize;
 	int						iOutputBlockSize;
+#ifdef HAVE_SPEEX
+	SpeexResamplerState*	resampler; 
+	CVector<float>			vecfInput;
+	CVector<float>			vecfOutput;
+	int						iInputBuffered;
+	int						iMaxInputSize;
+	void Free();
+#else
+	CShiftRegister<_REAL>	vecrIntBuff;
+	int						iHistorySize;
+#endif
 };
 
 class CSpectrumResample
