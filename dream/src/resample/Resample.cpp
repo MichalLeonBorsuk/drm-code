@@ -210,6 +210,7 @@ void CAudioResample::Reset()
 }
 void CAudioResample::Init(const int iNewInputBlockSize, const _REAL rNewRation)
 {
+	Free();
 	rRation = rNewRation;
 	iInputBlockSize = iNewInputBlockSize;
 	iOutputBlockSize = int(iNewInputBlockSize * rNewRation);
@@ -227,10 +228,6 @@ void CAudioResample::Init(const int iNewInputBlockSize, const _REAL rNewRation)
 		vecfInput.Init(iInputBlockSize);
 		vecfOutput.Init(iOutputBlockSize);
 	}
-	else
-	{
-		Free();
-	}
 }
 void CAudioResample::Init(const int iNewOutputBlockSize, const int iInputSamplerate, const int iOutputSamplerate)
 {
@@ -247,14 +244,18 @@ void CAudioResample::Init(const int iNewOutputBlockSize, const int iInputSampler
 			iMaxInputSize = iNewMaxInputSize;
 		}
 		vecfOutput.Init(iOutputBlockSize);
+		int err = RESAMPLER_ERR_SUCCESS;
 		if (resampler == NULL)
 		{
-			int err;
 			resampler = speex_resampler_init(1, spx_uint32_t(iInputSamplerate), spx_uint32_t(iOutputSamplerate), RESAMPLING_QUALITY, &err);
-			if (resampler == NULL)
-				qDebug("CAudioResample::Init(): libspeexdsp error: %s", speex_resampler_strerror(err));
 			iInputBuffered = 0;
 		}
+		else
+		{
+			err = speex_resampler_set_rate(resampler, spx_uint32_t(iInputSamplerate), spx_uint32_t(iOutputSamplerate));
+		}
+		if (err != RESAMPLER_ERR_SUCCESS)
+			qDebug("CAudioResample::Init(): libspeexdsp error: %s", speex_resampler_strerror(err));
 	}
 	else
 	{
