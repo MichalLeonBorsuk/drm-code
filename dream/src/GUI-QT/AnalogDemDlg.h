@@ -102,6 +102,7 @@ protected:
 	CEventFilter		ef;
 
 	void UpdateControls();
+	void UpdateSliderBandwidth();
 	void AddWhatsThisHelp();
 	void showEvent(QShowEvent* pEvent);
 	void hideEvent(QHideEvent* pEvent);
@@ -110,6 +111,7 @@ public slots:
 	void switchEvent();
 	void closeEvent(QCloseEvent* pEvent);
 	void UpdatePlotStyle(int);
+	void OnSoundFileChanged(CDRMReceiver::ESFStatus);
 	void OnTimer();
 	void OnTimerPLLPhaseDial();
 	void OnTimerClose();

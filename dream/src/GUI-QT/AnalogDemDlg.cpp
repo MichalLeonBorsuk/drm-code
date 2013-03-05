@@ -80,6 +80,7 @@ AnalogDemDlg::AnalogDemDlg(CDRMReceiver& NDRMR, CSettings& NSettings,
 	connect(actionAM, SIGNAL(triggered()), this, SIGNAL(NewAMAcquisition()));
 	connect(actionFM, SIGNAL(triggered()), this, SLOT(OnSwitchToFM()));
 	connect(actionDRM, SIGNAL(triggered()), this, SLOT(OnSwitchToDRM()));
+	connect(pFileMenu, SIGNAL(soundFileChanged(CDRMReceiver::ESFStatus)), this, SLOT(OnSoundFileChanged(CDRMReceiver::ESFStatus)));
 	connect(pSoundCardMenu, SIGNAL(sampleRateChanged()), this, SLOT(switchEvent()));
 	connect(actionAbout_Dream, SIGNAL(triggered()), this, SLOT(OnHelpAbout()));
 	connect(actionWhats_This, SIGNAL(triggered()), this, SLOT(OnWhatsThis()));
@@ -208,7 +209,7 @@ void AnalogDemDlg::switchEvent()
 	/* Put initialization code on mode switch here */
 	SetWindowGeometry();
 	pFileMenu->UpdateMenu();
-	SliderBandwidth->setRange(0, DRMReceiver.GetParameters()->GetSigSampleRate() / 2);
+	UpdateSliderBandwidth();
 }
 
 void AnalogDemDlg::showEvent(QShowEvent* e)
@@ -406,11 +407,21 @@ void AnalogDemDlg::UpdateControls()
 	CheckBoxPLL->setChecked(DRMReceiver.GetAMDemod()->PLLEnabled());
 }
 
+void AnalogDemDlg::UpdateSliderBandwidth()
+{
+	SliderBandwidth->setRange(0, DRMReceiver.GetParameters()->GetSigSampleRate() / 2);
+}
+
 void AnalogDemDlg::UpdatePlotStyle(int iPlotstyle)
 {
-    /* Update main plot window */
-    if(MainPlot)
-        MainPlot->SetPlotStyle(iPlotstyle);
+	/* Update main plot window */
+	if(MainPlot)
+		MainPlot->SetPlotStyle(iPlotstyle);
+}
+
+void AnalogDemDlg::OnSoundFileChanged(CDRMReceiver::ESFStatus)
+{
+	UpdateSliderBandwidth();
 }
 
 void AnalogDemDlg::OnTimer()
