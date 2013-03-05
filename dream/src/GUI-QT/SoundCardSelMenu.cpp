@@ -80,7 +80,7 @@ static const CHANSEL OutputChannelTable[] =
 
 static const int AudioSampleRateTable[] =
 {
-    8000, 11025, 16000, 22050, 24000, 32000, 44100, 48000, 96000, 192000, 0
+    11025, 22050, 24000, 44100, 48000, 96000, 192000, 0
 };
 
 static const int SignalSampleRateTable[] =
