@@ -111,6 +111,7 @@ public slots:
 	void switchEvent();
 	void closeEvent(QCloseEvent* pEvent);
 	void UpdatePlotStyle(int);
+	void OnSampleRateChanged();
 	void OnSoundFileChanged(CDRMReceiver::ESFStatus);
 	void OnTimer();
 	void OnTimerPLLPhaseDial();
