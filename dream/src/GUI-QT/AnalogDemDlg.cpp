@@ -81,7 +81,7 @@ AnalogDemDlg::AnalogDemDlg(CDRMReceiver& NDRMR, CSettings& NSettings,
 	connect(actionFM, SIGNAL(triggered()), this, SLOT(OnSwitchToFM()));
 	connect(actionDRM, SIGNAL(triggered()), this, SLOT(OnSwitchToDRM()));
 	connect(pFileMenu, SIGNAL(soundFileChanged(CDRMReceiver::ESFStatus)), this, SLOT(OnSoundFileChanged(CDRMReceiver::ESFStatus)));
-	connect(pSoundCardMenu, SIGNAL(sampleRateChanged()), this, SLOT(switchEvent()));
+	connect(pSoundCardMenu, SIGNAL(sampleRateChanged()), this, SLOT(OnSampleRateChanged()));
 	connect(actionAbout_Dream, SIGNAL(triggered()), this, SLOT(OnHelpAbout()));
 	connect(actionWhats_This, SIGNAL(triggered()), this, SLOT(OnWhatsThis()));
 	SliderBandwidth->setTickPosition(QSlider::TicksBothSides);
@@ -104,7 +104,8 @@ AnalogDemDlg::AnalogDemDlg(CDRMReceiver& NDRMR, CSettings& NSettings,
 		MainPlot->plot->setToolTip(ptt);
 	}
 
-	SliderBandwidth->setRange(0, DRMReceiver.GetParameters()->GetSigSampleRate() / 2);
+	/* Init bandwidth slider */
+	UpdateSliderBandwidth();
 	SliderBandwidth->setTickPosition(QSlider::TicksBothSides);
 	SliderBandwidth->setTickInterval(1000); /* Each kHz a tick */
 	SliderBandwidth->setPageStep(1000); /* Hz */
@@ -417,6 +418,11 @@ void AnalogDemDlg::UpdatePlotStyle(int iPlotstyle)
 	/* Update main plot window */
 	if(MainPlot)
 		MainPlot->SetPlotStyle(iPlotstyle);
+}
+
+void AnalogDemDlg::OnSampleRateChanged()
+{
+	UpdateSliderBandwidth();
 }
 
 void AnalogDemDlg::OnSoundFileChanged(CDRMReceiver::ESFStatus)
