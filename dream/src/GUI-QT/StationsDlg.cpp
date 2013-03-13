@@ -570,7 +570,10 @@ StationsDlg::StationsDlg(CDRMReceiver& DRMReceiver, CSettings& Settings):
     orangeCube(":/icons/orangeCube.png"), pinkCube(":/icons/pinkCube.png"),
     bReInitOnFrequencyChange(FALSE), eLastScheduleMode(CDRMSchedule::SM_NONE)
 {
-	setupUi(this);
+    /* Enable minimize and maximize box for QDialog */
+    setWindowFlags(Qt::Window);
+
+    setupUi(this);
 
     /* Load settings */
     LoadSettings(Settings);
