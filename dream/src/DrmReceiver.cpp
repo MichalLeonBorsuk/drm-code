@@ -1639,7 +1639,10 @@ CDRMReceiver::LoadSettings()
     /* Output to File */
     str = s.Get("command", "writewav");
     if (str != "")
+    {
+        WriteData.Init(Parameters); /* Needed for iAudSampleRate initialization */
         WriteData.StartWriteWaveFile(str);
+    }
 
     /* Reverberation flag */
     AudioSourceDecoder.SetReverbEffect(s.Get("Receiver", "reverb", TRUE));
