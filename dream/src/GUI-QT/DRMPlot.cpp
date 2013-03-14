@@ -185,7 +185,7 @@ void CDRMPlot::OnTimerChart()
 	_REAL		rCenterFreq, rBandwidth;
 
 	Parameters.Lock();
-	_REAL rDCFrequency = pDRMRec->GetReceiveData()->GetDCFrequency(Parameters);
+	_REAL rDCFrequency = Parameters.GetDCFrequency();
 	ECodScheme eSDCCodingScheme = Parameters.eSDCCodingScheme;
 	ECodScheme eMSCCodingScheme = Parameters.eMSCCodingScheme;
 	_BOOLEAN bAudioDecoder = !Parameters.audiodecoder.empty();
@@ -1095,7 +1095,8 @@ void CDRMPlot::SetDCCarrier(const _REAL rDCFreq)
 {
 	/* Insert line for DC carrier */
 	double dX[2], dY[2];
-	dX[0] = dX[1] = rDCFreq / 1000;
+	dX[0] = dX[1] =
+		pDRMRec->GetReceiveData()->ConvertFrequency(rDCFreq) / 1000;
 
 	/* Take the min-max values from scale to get vertical line */
 	dY[0] = MIN_VAL_INP_SPEC_Y_AXIS_DB;
@@ -1154,8 +1155,10 @@ void CDRMPlot::SetBWMarker(const _REAL rBWCenter, const _REAL rBWWidth)
 	/* Insert marker for filter bandwidth if required */
 	if (rBWWidth != (_REAL) 0.0)
 	{
-		dX[0] = (rBWCenter - rBWWidth / 2) * (double)iSigSampleRate / 1000.0;
-		dX[1] = (rBWCenter + rBWWidth / 2) * (double)iSigSampleRate / 1000.0;
+		dX[0] = pDRMRec->GetReceiveData()->ConvertFrequency(
+			(rBWCenter - rBWWidth / 2) * (double)iSigSampleRate) / 1000.0;
+		dX[1] = pDRMRec->GetReceiveData()->ConvertFrequency(
+			(rBWCenter + rBWWidth / 2) * (double)iSigSampleRate) / 1000.0;
 
 		/* Take the min-max values from scale to get vertical line */
 		dY[0] = MAX_VAL_INP_SPEC_Y_AXIS_DB;//MIN_VAL_INP_SPEC_Y_AXIS_DB;
@@ -1531,7 +1534,9 @@ void CDRMPlot::OnSelected(const QPointF &pos)
 		double dFreq = pos.x();
 
 		/* Emit signal containing normalized selected frequency */
-		emit xAxisValSet(dFreq / dMaxxBottom);
+		emit xAxisValSet(
+			pDRMRec->GetReceiveData()->ConvertFrequency(dFreq * 1000, TRUE) /
+			pDRMRec->GetReceiveData()->ConvertFrequency(dMaxxBottom * 1000, TRUE));
 	}
 }
 

@@ -443,7 +443,10 @@ void AnalogDemDlg::OnTimer()
 	case RM_AM:
 		/* Carrier frequency of AM signal */
 		TextFreqOffset->setText(tr("Carrier<br>Frequency:<br><b>")
-		+ QString().setNum(DRMReceiver.GetAMDemod()->GetCurMixFreqOffs(), 'f', 2)
+		+ QString().setNum(
+			DRMReceiver.GetReceiveData()->ConvertFrequency(
+				DRMReceiver.GetAMDemod()->GetCurMixFreqOffs())
+		, 'f', 2)
 		+ " Hz</b>");
 		break;
 	case RM_NONE:
