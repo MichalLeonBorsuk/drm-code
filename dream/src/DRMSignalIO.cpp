@@ -550,7 +550,8 @@ void CReceiveData::GetInputSpec(CVector<_REAL>& vecrData,
 
     const int iOffsetScale =
         bNegativeFreq ? iLenSpecWithNyFreq / 2 :
-        (bOffsetFreq ? iLenSpecWithNyFreq * 6000 / (iSampleRate / 2) : 0);
+        (bOffsetFreq ? iLenSpecWithNyFreq * VIRTUAL_INTERMED_FREQ
+            / (iSampleRate / 2) : 0);
 
     const _REAL rFactorScale =
         (_REAL) iSampleRate / iLenSpecWithNyFreq / 2000;
@@ -626,7 +627,8 @@ void CReceiveData::CalculatePSD(CVector<_REAL>& vecrData,
 
     const int iOffsetScale =
         bNegativeFreq ? iLenSpecWithNyFreq / 2 :
-        (bOffsetFreq ? iLenSpecWithNyFreq * 6000 / (iSampleRate / 2) : 0);
+        (bOffsetFreq ? iLenSpecWithNyFreq * VIRTUAL_INTERMED_FREQ
+            / (iSampleRate / 2) : 0);
 
     const _REAL rFactorScale =
         (_REAL) iSampleRate / iLenSpecWithNyFreq / 2000;
