@@ -188,6 +188,9 @@ CAboutDlg::CAboutDlg(QWidget* parent):
 #ifdef HAVE_LIBSNDFILE
         "<li><b>LIBSNDFILE</b> (" + QString(sfversion) + ") <i>http://www.mega-nerd.com/libsndfile</i></li>"
 #endif
+#ifdef HAVE_SPEEX
+        "<li><b>LIBSPEEX</b> <i>http://www.speex.org</i></li>"
+#endif
 #ifdef USE_OSS
         "<li><b>OSS</b> (" + QString("Open Sound System version %1").arg(SOUND_VERSION, 0, 16) + ")</li>"
 #endif
