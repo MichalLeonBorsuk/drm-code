@@ -322,7 +322,10 @@ void CDRMPlot::OnTimerChart()
 
 		if (change) SetupFreqSamOffsHist();
 		/* Prepare graph and set data */
-		plot->setAxisTitle(QwtPlot::yLeft, tr("Freq. Offset [Hz] rel. to ") + QString().setNum(rFreqAcquVal) + " Hz");
+		plot->setAxisTitle(QwtPlot::yLeft, tr("Freq. Offset [Hz] rel. to ")
+			+ QString().setNum(pDRMRec->GetReceiveData()->
+				ConvertFrequency(rFreqAcquVal))
+			+ " Hz");
 		AutoScale(vecrData, vecrData2, vecrScale);
 		SetData(vecrData, vecrData2, vecrScale);
 		break;
