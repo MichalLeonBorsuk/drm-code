@@ -30,6 +30,7 @@
 \******************************************************************************/
 
 #include "DRMPlot.h"
+#include "../DRMSignalIO.h"
 #include <cmath>
 #include <algorithm>
 
@@ -40,7 +41,8 @@ CDRMPlot::CDRMPlot(QWidget* parent, QwtPlot* SuppliedPlot) :
 	CurCharType(NONE_OLD), InitCharType(NONE_OLD),
 	eLastSDCCodingScheme((ECodScheme)-1), eLastMSCCodingScheme((ECodScheme)-1),
 	bLastAudioDecoder(FALSE), pDRMRec(NULL),
-	WaterfallWidget(NULL), iAudSampleRate(0), iSigSampleRate(0), iLastXoredSampleRate(0)
+	WaterfallWidget(NULL), iAudSampleRate(0), iSigSampleRate(0),
+	iLastXoredSampleRate(0), iLastChanMode(-1)
 {
 	/* Create new plot if none is supplied */
 	if (SuppliedPlot == NULL)
@@ -181,28 +183,31 @@ void CDRMPlot::OnTimerChart()
 	_REAL		rPDSBegin, rPDSEnd;
 	_REAL		rFreqAcquVal;
 	_REAL		rCenterFreq, rBandwidth;
-	int			iXoredSampleRate;
 
 	Parameters.Lock();
-	_REAL rDCFrequency = Parameters.GetDCFrequency();
+	_REAL rDCFrequency = pDRMRec->GetReceiveData()->GetDCFrequency(Parameters);
 	ECodScheme eSDCCodingScheme = Parameters.eSDCCodingScheme;
 	ECodScheme eMSCCodingScheme = Parameters.eMSCCodingScheme;
 	_BOOLEAN bAudioDecoder = !Parameters.audiodecoder.empty();
 	iAudSampleRate = Parameters.GetAudSampleRate();
 	iSigSampleRate = Parameters.GetSigSampleRate();
+	int iChanMode = (int)pDRMRec->GetReceiveData()->GetInChanSel();
 	Parameters.Unlock();
 
 	/* Needed to detect sample rate change */
-	iXoredSampleRate = iAudSampleRate ^ iSigSampleRate;
+	const int iXoredSampleRate = iAudSampleRate ^ iSigSampleRate;
 
 	CPlotManager& PlotManager = *pDRMRec->GetPlotManager();
 
 	/* First check if plot must be set up */
 	bool change = false;
-	if (InitCharType != CurCharType || iLastXoredSampleRate != iXoredSampleRate)
+	if (InitCharType != CurCharType ||
+		iLastXoredSampleRate != iXoredSampleRate ||
+		iLastChanMode != iChanMode)
 	{
-		iLastXoredSampleRate = iXoredSampleRate;
 		InitCharType = CurCharType;
+		iLastXoredSampleRate = iXoredSampleRate;
+		iLastChanMode = iChanMode;
 		change = true;
 		PlotDefaults();
 	}
@@ -1064,8 +1069,11 @@ void CDRMPlot::SetupInpSpec()
 	plot->setAxisTitle(QwtPlot::yLeft, tr("Input Spectrum [dB]"));
 
 	/* Fixed scale */
-	plot->setAxisScale(QwtPlot::xBottom,
-	(double) 0.0, (double) iSigSampleRate / 2000);
+	const double dXScaleMin = pDRMRec->GetReceiveData()->
+		ConvertFrequency((_REAL) 0.0) / 1000;
+	const double dXScaleMax = pDRMRec->GetReceiveData()->
+		ConvertFrequency((_REAL) iSigSampleRate / 2) / 1000;
+	plot->setAxisScale(QwtPlot::xBottom, dXScaleMin, dXScaleMax);
 
 	plot->setAxisScale(QwtPlot::yLeft, MIN_VAL_INP_SPEC_Y_AXIS_DB,
 		MAX_VAL_INP_SPEC_Y_AXIS_DB);
@@ -1106,8 +1114,11 @@ void CDRMPlot::SetupInpPSD(_BOOLEAN bAnalog)
 	plot->setAxisTitle(QwtPlot::yLeft, tr("Input PSD [dB]"));
 
 	/* Fixed scale */
-	const double dXScaleMax = (double) iSigSampleRate / 2000;
-	plot->setAxisScale(QwtPlot::xBottom, (double) 0.0, dXScaleMax);
+	const double dXScaleMin = pDRMRec->GetReceiveData()->
+		ConvertFrequency((_REAL) 0.0) / 1000;
+	const double dXScaleMax = pDRMRec->GetReceiveData()->
+		ConvertFrequency((_REAL) iSigSampleRate / 2) / 1000;
+	plot->setAxisScale(QwtPlot::xBottom, dXScaleMin, dXScaleMax);
 
 	plot->setAxisScale(QwtPlot::yLeft, MIN_VAL_INP_SPEC_Y_AXIS_DB,
 		MAX_VAL_INP_SPEC_Y_AXIS_DB);
@@ -1175,8 +1186,11 @@ void CDRMPlot::SetupInpSpecWaterf()
 	plot->setCanvasBackground(palette.color(QPalette::Window));
 
 	/* Fixed scale */
-	plot->setAxisScale(QwtPlot::xBottom,
-		(double) 0.0, (double) iSigSampleRate / 2000);
+	const double dXScaleMin = pDRMRec->GetReceiveData()->
+		ConvertFrequency((_REAL) 0.0) / 1000;
+	const double dXScaleMax = pDRMRec->GetReceiveData()->
+		ConvertFrequency((_REAL) iSigSampleRate / 2) / 1000;
+	plot->setAxisScale(QwtPlot::xBottom, dXScaleMin, dXScaleMax);
 }
 
 void CDRMPlot::SetInpSpecWaterf(CVector<_REAL>& vecrData, CVector<_REAL>&)
