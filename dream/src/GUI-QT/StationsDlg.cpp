@@ -674,9 +674,6 @@ StationsDlg::StationsDlg(CDRMReceiver& DRMReceiver, CSettings& Settings):
            "\t- the internet connection was not set up properly\n"
            "\t- the server is currently not available\n"
            "\t- the file 'DRMSchedule.ini' could not be written");
-
-    /* Init UTC time shown with a label control */
-    OnTimerUTCLabel();
 }
 
 StationsDlg::~StationsDlg()
@@ -879,6 +876,10 @@ void StationsDlg::showEvent(QShowEvent* e)
                                  "No stations can be displayed.\n"
                                  "Try to download this file by using the 'Update' menu."),
                                  QMessageBox::Ok);
+
+    /* Force list and UTC label update */
+    OnTimerUTCLabel();
+    OnTimerList();
 }
 
 void StationsDlg::CheckMode()
