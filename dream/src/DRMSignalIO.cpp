@@ -505,22 +505,23 @@ CReceiveData::~CReceiveData()
 {
 }
 
-_REAL CReceiveData::ConvertFrequency(_REAL rFrequency) const
+/*
+    Convert Real to I/Q frequency when bInvert is FALSE
+    Convert I/Q to Real frequency when bInvert is TRUE
+*/
+_REAL CReceiveData::ConvertFrequency(_REAL rFrequency, _BOOLEAN bInvert) const
 {
+    const int iInvert = bInvert ? -1 : 1;
+
     if (eInChanSelection == CReceiveData::CS_IQ_POS_SPLIT ||
         eInChanSelection == CReceiveData::CS_IQ_NEG_SPLIT)
-        rFrequency -= iSampleRate / 4;
+        rFrequency -= iSampleRate / 4 * iInvert;
     else
         if (eInChanSelection == CReceiveData::CS_IQ_POS_ZERO ||
             eInChanSelection == CReceiveData::CS_IQ_NEG_ZERO)
-            rFrequency -= VIRTUAL_INTERMED_FREQ;
+            rFrequency -= VIRTUAL_INTERMED_FREQ * iInvert;
 
     return rFrequency;
-}
-
-_REAL CReceiveData::GetDCFrequency(const CParameter& Parameter) const
-{
-    return ConvertFrequency(Parameter.GetDCFrequency());
 }
 
 void CReceiveData::GetInputSpec(CVector<_REAL>& vecrData,

@@ -160,8 +160,7 @@ public:
     {}
     virtual ~CReceiveData();
 
-    _REAL ConvertFrequency(_REAL rFrequency) const;
-    _REAL GetDCFrequency(const CParameter& Parameter) const;
+    _REAL ConvertFrequency(_REAL rFrequency, _BOOLEAN bInvert=FALSE) const;
 
     void GetInputSpec(CVector<_REAL>& vecrData, CVector<_REAL>& vecrScale);
     void GetInputPSD(CVector<_REAL>& vecrData, CVector<_REAL>& vecrScale,

@@ -587,7 +587,7 @@ void systemevalDlg::OnTimer()
 #ifdef _DEBUG_
         TextFreqOffset->setText("DC: " +
                                 QString().setNum(DRMReceiver.GetReceiveData()->
-                                        GetDCFrequency(Parameters), 'f', 3) + " Hz ");
+                                        ConvertFrequency(Parameters.GetDCFrequency()), 'f', 3) + " Hz ");
 
         /* Metric values */
         ValueFreqOffset->setText(tr("Metrics [dB]: MSC: ") +
@@ -600,7 +600,7 @@ void systemevalDlg::OnTimer()
 #else
         /* DC frequency */
         ValueFreqOffset->setText(QString().setNum(DRMReceiver.GetReceiveData()->
-                                     GetDCFrequency(Parameters), 'f', 2) + " Hz");
+                                     ConvertFrequency(Parameters.GetDCFrequency()), 'f', 2) + " Hz");
 #endif
 
         /* _WIN32 fix because in Visual c++ the GUI files are always compiled even
