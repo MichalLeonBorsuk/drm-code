@@ -505,6 +505,24 @@ CReceiveData::~CReceiveData()
 {
 }
 
+_REAL CReceiveData::ConvertFrequency(_REAL rFrequency) const
+{
+    if (eInChanSelection == CReceiveData::CS_IQ_POS_SPLIT ||
+        eInChanSelection == CReceiveData::CS_IQ_NEG_SPLIT)
+        rFrequency -= iSampleRate / 4;
+    else
+        if (eInChanSelection == CReceiveData::CS_IQ_POS_ZERO ||
+            eInChanSelection == CReceiveData::CS_IQ_NEG_ZERO)
+            rFrequency -= VIRTUAL_INTERMED_FREQ;
+
+    return rFrequency;
+}
+
+_REAL CReceiveData::GetDCFrequency(const CParameter& Parameter) const
+{
+    return ConvertFrequency(Parameter.GetDCFrequency());
+}
+
 void CReceiveData::GetInputSpec(CVector<_REAL>& vecrData,
                                 CVector<_REAL>& vecrScale)
 {
@@ -521,11 +539,25 @@ void CReceiveData::GetInputSpec(CVector<_REAL>& vecrData,
     Lock();
 
     /* Init the constants for scale and normalization */
+    const _BOOLEAN bNegativeFreq = 
+        eInChanSelection == CReceiveData::CS_IQ_POS_SPLIT ||
+		eInChanSelection == CReceiveData::CS_IQ_NEG_SPLIT;
+
+    const _BOOLEAN bOffsetFreq = 
+        eInChanSelection == CReceiveData::CS_IQ_POS_ZERO ||
+		eInChanSelection == CReceiveData::CS_IQ_NEG_ZERO;
+
+    const int iOffsetScale =
+        bNegativeFreq ? iLenSpecWithNyFreq / 2 :
+        (bOffsetFreq ? iLenSpecWithNyFreq * 6000 / (iSampleRate / 2) : 0);
+
     const _REAL rFactorScale =
-        (_REAL) iSampleRate / iLenSpecWithNyFreq / 2000;
+        (_REAL) iSampleRate / iLenSpecWithNyFreq / 2000 *
+        (bNegativeFreq ? 2 : 1);
 
     const _REAL rNormData = (_REAL) _MAXSHORT * _MAXSHORT *
-                            NUM_SMPLS_4_INPUT_SPECTRUM * NUM_SMPLS_4_INPUT_SPECTRUM;
+                            NUM_SMPLS_4_INPUT_SPECTRUM *
+                            NUM_SMPLS_4_INPUT_SPECTRUM;
 
     /* Copy data from shift register in Matlib vector */
     CRealVector vecrFFTInput(NUM_SMPLS_4_INPUT_SPECTRUM);
@@ -551,7 +583,7 @@ void CReceiveData::GetInputSpec(CVector<_REAL>& vecrData,
         else
             vecrData[i] = RET_VAL_LOG_0;
 
-        vecrScale[i] = (_REAL) i * rFactorScale;
+        vecrScale[i] = (_REAL) (i - iOffsetScale) * rFactorScale;
     }
 
 }
@@ -584,8 +616,21 @@ void CReceiveData::CalculatePSD(CVector<_REAL>& vecrData,
     vecrScale.Init(iLenSpecWithNyFreq, (_REAL) 0.0);
 
     /* Init the constants for scale and normalization */
+    const _BOOLEAN bNegativeFreq = 
+        eInChanSelection == CReceiveData::CS_IQ_POS_SPLIT ||
+		eInChanSelection == CReceiveData::CS_IQ_NEG_SPLIT;
+
+    const _BOOLEAN bOffsetFreq = 
+        eInChanSelection == CReceiveData::CS_IQ_POS_ZERO ||
+		eInChanSelection == CReceiveData::CS_IQ_NEG_ZERO;
+
+    const int iOffsetScale =
+        bNegativeFreq ? iLenSpecWithNyFreq / 2 :
+        (bOffsetFreq ? iLenSpecWithNyFreq * 6000 / (iSampleRate / 2) : 0);
+
     const _REAL rFactorScale =
-        (_REAL) iSampleRate / iLenSpecWithNyFreq / 2000;
+        (_REAL) iSampleRate / iLenSpecWithNyFreq / 2000 *
+        (bNegativeFreq ? 2 : 1);
 
     const _REAL rNormData = (_REAL) _MAXSHORT * _MAXSHORT *
                             iLenPSDAvEachBlock * iLenPSDAvEachBlock *
@@ -626,7 +671,7 @@ void CReceiveData::CalculatePSD(CVector<_REAL>& vecrData,
         else
             vecrData[i] = RET_VAL_LOG_0;
 
-        vecrScale[i] = (_REAL) i * rFactorScale;
+        vecrScale[i] = (_REAL) (i - iOffsetScale) * rFactorScale;
     }
 }
 

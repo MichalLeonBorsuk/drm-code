@@ -393,6 +393,7 @@ protected:
 	int				iAudSampleRate;
 	int				iSigSampleRate;
 	int				iLastXoredSampleRate;
+	int				iLastChanMode;
 
 public slots:
 #if QWT_VERSION < 0x060000

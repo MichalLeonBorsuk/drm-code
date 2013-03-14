@@ -160,6 +160,9 @@ public:
     {}
     virtual ~CReceiveData();
 
+    _REAL ConvertFrequency(_REAL rFrequency) const;
+    _REAL GetDCFrequency(const CParameter& Parameter) const;
+
     void GetInputSpec(CVector<_REAL>& vecrData, CVector<_REAL>& vecrScale);
     void GetInputPSD(CVector<_REAL>& vecrData, CVector<_REAL>& vecrScale,
                      const int iLenPSDAvEachBlock = LEN_PSD_AV_EACH_BLOCK,
