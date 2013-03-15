@@ -52,8 +52,8 @@
 #define MAX_SAM_OFFS_INI			200
 
 /* Maximum for frequency acqisition search window size and center frequency */
-#define MAX_FREQ_AQC_SE_WIN_SZ		(_REAL(DEFAULT_SOUNDCRD_SAMPLE_RATE) / 2)
-#define MAX_FREQ_AQC_SE_WIN_CT		(_REAL(DEFAULT_SOUNDCRD_SAMPLE_RATE) / 4)
+#define MAX_FREQ_AQC_SE_WIN_SZ		(+1e6)
+#define MAX_FREQ_AQC_SE_WIN_CT		(+1e6)
 
 /* Maximum carrier frequency  */
 # define MAX_RF_FREQ				30000 /* kHz */
