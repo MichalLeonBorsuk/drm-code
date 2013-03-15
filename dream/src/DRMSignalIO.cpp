@@ -556,9 +556,14 @@ void CReceiveData::GetInputSpec(CVector<_REAL>& vecrData,
     const _REAL rFactorScale =
         (_REAL) iSampleRate / iLenSpecWithNyFreq / 2000;
 
-    const _REAL rNormData = (_REAL) _MAXSHORT * _MAXSHORT *
+    /* The calibration factor was determined experimentaly,
+       give 0 dB for a full scale sine wave input (0 dBFS) */
+    const _REAL rDataCalibrationFactor = 18.49;
+
+    const _REAL rNormData = rDataCalibrationFactor /
+                            ((_REAL) _MAXSHORT * _MAXSHORT *
                             NUM_SMPLS_4_INPUT_SPECTRUM *
-                            NUM_SMPLS_4_INPUT_SPECTRUM;
+                            NUM_SMPLS_4_INPUT_SPECTRUM);
 
     /* Copy data from shift register in Matlib vector */
     CRealVector vecrFFTInput(NUM_SMPLS_4_INPUT_SPECTRUM);
@@ -577,7 +582,7 @@ void CReceiveData::GetInputSpec(CVector<_REAL>& vecrData,
     /* Log power spectrum data */
     for (i = 0; i < iLenSpecWithNyFreq; i++)
     {
-        const _REAL rNormSqMag = vecrSqMagSpect[i] / rNormData;
+        const _REAL rNormSqMag = vecrSqMagSpect[i] * rNormData;
 
         if (rNormSqMag > 0)
             vecrData[i] = (_REAL) 10.0 * log10(rNormSqMag);
