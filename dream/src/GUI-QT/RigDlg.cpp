@@ -37,7 +37,7 @@
 
 RigDlg::RigDlg(CRig& nrig, QWidget* parent) :
     QDialog(parent),
-    rig(nrig),rigmap()
+    rig(nrig), rigmap(), bComboBoxPortMutex(FALSE)
 {
     setupUi(this);
 
@@ -87,19 +87,31 @@ RigDlg::~RigDlg()
 
 void RigDlg::showEvent(QShowEvent*)
 {
-    map<string,string> ports;
-    rig.GetPortList(ports);
-    comboBoxPort->clear();
-	string port = rig.GetComPort();
-	int index=0;
-    for(map<string,string>::const_iterator i=ports.begin(); i!=ports.end(); i++)
-    {
+	/* Port selection */
+	bComboBoxPortMutex = TRUE;
+	map<string,string> ports;
+	rig.GetPortList(ports);
+	comboBoxPort->clear();
+	prev_port = rig.GetComPort();
+	int index = -1;
+	for (map<string,string>::const_iterator i=ports.begin(); i!=ports.end(); i++)
+	{
 		comboBoxPort->addItem(i->first.c_str(), i->second.c_str());
-		if(i->second.compare(port)==0)
-			index = comboBoxPort->count();
-    }
-	comboBoxPort->setCurrentIndex(index);
+		if (i->second.compare(prev_port) == 0)
+			index = comboBoxPort->count() - 1; /* index is zero based */
+	}
+	if (index != -1)
+	{
+		comboBoxPort->setCurrentIndex(index);
+	}
+	else
+	{	/* Add the port to the list if not found */
+		comboBoxPort->addItem(prev_port.c_str(), prev_port.c_str());
+		comboBoxPort->setCurrentIndex(comboBoxPort->findText(prev_port.c_str()));
+	}
+	bComboBoxPortMutex = FALSE;
 
+	/* Rig model selection */
     prev_rig_model = rig.GetHamlibModelID();
     if (prev_rig_model == RIG_MODEL_NONE)
     {
@@ -118,9 +130,6 @@ void RigDlg::showEvent(QShowEvent*)
             }
         }
     }
-
-    prev_port = rig.GetComPort();
-    comboBoxPort->setCurrentIndex(comboBoxPort->findText(prev_port.c_str()));
 
 	connect(&rig, SIGNAL(sigstr(double)), this, SLOT(onSigstr(double)));
 }
@@ -176,7 +185,8 @@ RigDlg::on_buttonBox_rejected()
 void
 RigDlg::on_comboBoxPort_currentIndexChanged(int index)
 {
-	rig.SetComPort(comboBoxPort->itemData(index).toString().toStdString());
+	if (index != -1 && bComboBoxPortMutex == FALSE)
+		rig.SetComPort(comboBoxPort->itemData(index).toString().toStdString());
 }
 
 void

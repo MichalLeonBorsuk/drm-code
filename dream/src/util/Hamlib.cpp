@@ -205,34 +205,40 @@ CHamlib::GetPortList(map < string, string > &ports)
 		ports["COM5"] = "COM5 ";
 	}
 #elif defined(__linux)
-	FILE *p =
-		popen("hal-find-by-capability --capability serial", "r");
 	_BOOLEAN bOK = FALSE;
-	while (!feof(p))
+	FILE *p = popen("hal-find-by-capability --capability serial", "r");
+	if (p != NULL)
 	{
-		char buf[1024];
-		char* r = fgets(buf, sizeof(buf), p);
-		if (strlen(buf) > 0)
+		while (!feof(p))
 		{
-			string s =
-				string("hal-get-property --key serial.device --udi ") +
-				buf;
-			FILE *p2 = popen(s.c_str(), "r");
-			r = fgets(buf, sizeof(buf), p2);
-			size_t n = strlen(buf);
-			if (n > 0)
+			char buf[1024];
+			buf[0] = 0;
+			char* r = fgets(buf, sizeof(buf), p);
+			if (strlen(buf) > 0)
 			{
-				if (buf[n - 1] == '\n')
-					buf[n - 1] = 0;
-				ports[buf] = buf;
-				bOK = TRUE;
-				buf[0] = 0;
+				string s =
+					string("hal-get-property --key serial.device --udi ") +
+					buf;
+				FILE *p2 = popen(s.c_str(), "r");
+				if (p2 != NULL)
+				{
+					buf[0] = 0;
+					r = fgets(buf, sizeof(buf), p2);
+					size_t n = strlen(buf);
+					if (n > 0)
+					{
+						if (buf[n - 1] == '\n')
+							buf[n - 1] = 0;
+						ports[buf] = buf;
+						bOK = TRUE;
+					}
+					pclose(p2);
+				}
 			}
-			pclose(p2);
+			(void)r;
 		}
-		(void)r;
+		pclose(p);
 	}
-	pclose(p);
 	if (!bOK)
 	{
 		ports["ttyS0"] = "/dev/ttyS0";

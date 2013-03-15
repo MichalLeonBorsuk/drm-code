@@ -56,6 +56,7 @@ protected:
     rig_model_t		prev_rig_model;
     string		prev_port;
     map<rig_model_t,string> rigmap;
+    _BOOLEAN	bComboBoxPortMutex;
 
 public slots:
     void		on_rigTypes_itemSelectionChanged(); 
