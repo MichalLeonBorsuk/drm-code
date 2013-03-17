@@ -31,6 +31,9 @@
 #ifdef _WIN32
 # include <windows.h>
 #endif
+#ifdef __linux
+# include <signal.h>
+#endif
 
 #include "../GlobalDefinitions.h"
 #include "../DrmReceiver.h"
@@ -92,6 +95,15 @@ CRx::run()
 int
 main(int argc, char **argv)
 {
+#if defined(__linux)
+	/* Prevent signal interaction with popen */
+	sigset_t sigset;
+	sigemptyset(&sigset);
+	sigaddset(&sigset, SIGPIPE);
+	sigaddset(&sigset, SIGCHLD);
+	pthread_sigmask(SIG_BLOCK, &sigset, NULL);
+#endif
+
 	/* create app before running Settings.Load to consume platform/QT parameters */
 	QApplication app(argc, argv);
 
