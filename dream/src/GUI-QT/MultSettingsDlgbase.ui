@@ -2,6 +2,9 @@
 <ui version="4.0">
  <class>CMultSettingsDlgBase</class>
  <widget class="QDialog" name="CMultSettingsDlgBase">
+  <property name="windowModality">
+   <enum>Qt::ApplicationModal</enum>
+  </property>
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -304,7 +307,7 @@
      <item>
       <widget class="QPushButton" name="buttonOk">
        <property name="text">
-        <string>&amp;Close</string>
+        <string>&amp;OK</string>
        </property>
        <property name="autoDefault">
         <bool>true</bool>
