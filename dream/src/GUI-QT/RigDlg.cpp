@@ -167,7 +167,7 @@ RigDlg::on_testRig_clicked()
 void
 RigDlg::on_buttonBox_accepted()
 {
-	rig.SetComPort(comboBoxPort->itemData(comboBoxPort->currentIndex()).toString().toStdString());
+	rig.SetComPort(getComboBoxComPort().toStdString());
 	rig.SetHamlibModelID(rigTypes->currentItem()->data(0, Qt::UserRole).toInt());
 	rig.unsubscribe();
 	close();
@@ -183,10 +183,22 @@ RigDlg::on_buttonBox_rejected()
 }
 
 void
-RigDlg::on_comboBoxPort_currentIndexChanged(int index)
+RigDlg::on_comboBoxPort_editTextChanged(const QString&)
 {
-	if (index != -1 && bComboBoxPortMutex == FALSE)
-		rig.SetComPort(comboBoxPort->itemData(index).toString().toStdString());
+	if (bComboBoxPortMutex == FALSE)
+		rig.SetComPort(getComboBoxComPort().toStdString());
+}
+
+QString
+RigDlg::getComboBoxComPort()
+{
+	QString strPort;
+	const int index = comboBoxPort->currentIndex();
+	if (comboBoxPort->currentText().compare(comboBoxPort->itemText(index)))
+		strPort = comboBoxPort->currentText();
+	else
+		strPort = comboBoxPort->itemData(index).toString();
+	return strPort;
 }
 
 void

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>425</width>
-    <height>472</height>
+    <width>404</width>
+    <height>465</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -21,7 +21,7 @@
    <bool>true</bool>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="0" column="0" colspan="2">
+   <item row="0" column="0" colspan="3">
     <widget class="QTreeWidget" name="rigTypes">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Expanding" vsizetype="MinimumExpanding">
@@ -37,34 +37,41 @@
     </widget>
    </item>
    <item row="1" column="0">
-    <layout class="QHBoxLayout" name="horizontalLayout_2">
-     <item>
-      <widget class="QLabel" name="label_2">
-       <property name="text">
-        <string>Connected Rig</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLineEdit" name="selectedRigType"/>
-     </item>
-    </layout>
+    <widget class="QLabel" name="label_2">
+     <property name="text">
+      <string>Connected Rig</string>
+     </property>
+    </widget>
    </item>
-   <item row="3" column="0">
-    <layout class="QHBoxLayout" name="horizontalLayout">
-     <item>
-      <widget class="QLabel" name="labelPort">
-       <property name="text">
-        <string>Com Port</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QComboBox" name="comboBoxPort"/>
-     </item>
-    </layout>
+   <item row="1" column="1">
+    <widget class="QLineEdit" name="selectedRigType">
+     <property name="readOnly">
+      <bool>true</bool>
+     </property>
+    </widget>
    </item>
-   <item row="4" column="0">
+   <item row="1" column="2">
+    <widget class="QCheckBox" name="modified">
+     <property name="text">
+      <string>Modified for DRM</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="0">
+    <widget class="QLabel" name="labelPort">
+     <property name="text">
+      <string>Com Port</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="1">
+    <widget class="QComboBox" name="comboBoxPort">
+     <property name="editable">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="0" colspan="2">
     <widget class="QGroupBox" name="groupBox_8">
      <property name="title">
       <string>S-Meter</string>
@@ -80,14 +87,14 @@
      </layout>
     </widget>
    </item>
-   <item row="4" column="1">
+   <item row="3" column="2">
     <widget class="QPushButton" name="testRig">
      <property name="text">
       <string>Test</string>
      </property>
     </widget>
    </item>
-   <item row="5" column="1">
+   <item row="4" column="2">
     <widget class="QDialogButtonBox" name="buttonBox">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
@@ -95,12 +102,8 @@
      <property name="standardButtons">
       <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
      </property>
-    </widget>
-   </item>
-   <item row="1" column="1">
-    <widget class="QCheckBox" name="modified">
-     <property name="text">
-      <string>Modified for DRM</string>
+     <property name="centerButtons">
+      <bool>false</bool>
      </property>
     </widget>
    </item>

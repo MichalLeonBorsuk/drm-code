@@ -151,6 +151,8 @@ void
 CHamlib::GetPortList(map < string, string > &ports)
 {
 	ports.clear();
+/* Port for use with 'NET rigctl' */
+	ports["localhost:4532"] = "localhost:4532";
 /* Config string for com-port selection is different in Windows and Linux */
 #ifdef _WIN32
 # ifdef HAVE_SETUPAPI
