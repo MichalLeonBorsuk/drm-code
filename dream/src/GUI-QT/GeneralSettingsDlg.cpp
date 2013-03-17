@@ -41,6 +41,7 @@ GeneralSettingsDlg::GeneralSettingsDlg(CParameter& NParam, CSettings& NSettings,
     QWidget* parent) :
     QDialog(parent), Parameters(NParam), Settings(NSettings)
 {
+    setAttribute(Qt::WA_QuitOnClose, false);
     setupUi(this);
 
     /* Set the validators fro the receiver coordinate */

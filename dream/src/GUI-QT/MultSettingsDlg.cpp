@@ -38,6 +38,7 @@ MultSettingsDlg::MultSettingsDlg(CParameter& NP, CSettings& NSettings,
 	QWidget* parent) :
 	QDialog(parent), Parameters(NP), Settings(NSettings)
 {
+	setAttribute(Qt::WA_QuitOnClose, false);
 	setupUi(this);
 
 	/* Set help text for the controls */

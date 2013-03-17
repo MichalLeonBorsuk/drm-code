@@ -39,6 +39,7 @@ RigDlg::RigDlg(CRig& nrig, QWidget* parent) :
     QDialog(parent),
     rig(nrig), rigmap(), bComboBoxPortMutex(FALSE)
 {
+    setAttribute(Qt::WA_QuitOnClose, false);
     setupUi(this);
 
     map<rig_model_t,CHamlib::SDrRigCaps> r;
