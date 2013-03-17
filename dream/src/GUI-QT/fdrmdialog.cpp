@@ -1156,6 +1156,7 @@ void FDRMDialog::closeEvent(QCloseEvent* ce)
         AboutDlg.close();
         pAnalogDemDlg->close();
         pFMDlg->close();
+        pStationsDlg->close();
 #if QT_VERSION >= 0x050000
         CSysTray::Destroy(&pSysTray); /* Needed for Qt 5.0.0 - possible framework bug */
 #endif
