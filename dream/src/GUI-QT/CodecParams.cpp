@@ -45,8 +45,8 @@ CodecParams::CodecParams(CSettings& Settings, CParameter& Parameters,
 	QDialog(parent), Settings(Settings), Parameters(Parameters),
 	iShortID(iShortID), bWasVisible(FALSE), bLastPositionValid(FALSE)
 {
-	setupUi(this);
 	setAttribute(Qt::WA_QuitOnClose, false);
+	setupUi(this);
 
 	/* Recover window size and position */
 	CWinGeom s;

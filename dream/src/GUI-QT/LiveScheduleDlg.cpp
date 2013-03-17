@@ -336,7 +336,10 @@ LiveScheduleDlg::LiveScheduleDlg(CDRMReceiver& DRMReceiver, CSettings& Settings,
     orangeCube(":/icons/orangeCube.png"), pinkCube(":/icons/pinkCube.png"),
     vecpListItems(), iColStationID(1), iWidthColStationID(0)
 {
+    /* Enable minimize and maximize box */
     setWindowFlags(Qt::Window);
+
+    setAttribute(Qt::WA_QuitOnClose, false);
     setupUi(this);
 
     /* Load settings */
