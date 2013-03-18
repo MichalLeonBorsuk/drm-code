@@ -233,14 +233,14 @@ msvc2008 {
      QMAKE_CXXFLAGS += /wd"4996" /wd"4521"
      QMAKE_LFLAGS_RELEASE += /NODEFAULTLIB:libcmt.lib
      QMAKE_LFLAGS_DEBUG += /NODEFAULTLIB:libcmtd.lib
-     LIB += zlib.lib
+     LIB += zdll.lib
 }
 msvc2010 {
      TEMPLATE = vc
      QMAKE_CXXFLAGS += /wd"4996" /wd"4521"
      QMAKE_LFLAGS_RELEASE += /NODEFAULTLIB:libcmt.lib
      QMAKE_LFLAGS_DEBUG += /NODEFAULTLIB:libcmtd.lib
-     LIB += zlib.lib
+     LIB += zdll.lib
 }
 win32-g++ {
      DEFINES += HAVE_STDINT_H
@@ -280,7 +280,7 @@ win32 {
      }
      UI_DIR = moc
      MOC_DIR = moc
-     LIBS += -lsetupapi -lwsock32 -lws2_32 -lzlib
+     LIBS += -lsetupapi -lwsock32 -lws2_32 -lzdll
      DEFINES += HAVE_SETUPAPI \
      HAVE_LIBZ _CRT_SECURE_NO_WARNINGS
      DEFINES -= UNICODE
