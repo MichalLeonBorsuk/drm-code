@@ -110,9 +110,13 @@ CSoundCardSelMenu::CSoundCardSelMenu(CDRMTransceiver& DRMTransceiver,
             connect(InitDevice(NULL, menuAudOutput, tr("Device"), false), SIGNAL(triggered(QAction*)), this, SLOT(OnSoundOutDevice(QAction*)));
             connect(InitChannel(menuSigInput, tr("Channel"), (int)((CDRMReceiver&)DRMTransceiver).GetReceiveData()->GetInChanSel(), InputChannelTable), SIGNAL(triggered(QAction*)), this, SLOT(OnSoundInChannel(QAction*)));
             connect(InitChannel(menuAudOutput, tr("Channel"), (int)((CDRMReceiver&)DRMTransceiver).GetWriteData()->GetOutChanSel(), OutputChannelTable), SIGNAL(triggered(QAction*)), this, SLOT(OnSoundOutChannel(QAction*)));
-            menuSigSampleRate = InitSampleRate(menuSigInput, tr("Sample Rate"), Parameters.GetSigSampleRate(), SignalSampleRateTable);
+            menuSigSampleRate = InitSampleRate(menuSigInput, tr("Sample Rate"), Parameters.GetSoundCardSigSampleRate(), SignalSampleRateTable);
             connect(menuSigSampleRate, SIGNAL(triggered(QAction*)), this, SLOT(OnSoundSampleRate(QAction*)));
             connect(InitSampleRate(menuAudOutput, tr("Sample Rate"), Parameters.GetAudSampleRate(), AudioSampleRateTable), SIGNAL(triggered(QAction*)), this, SLOT(OnSoundSampleRate(QAction*)));
+            QAction *actionUpscale = menuSigInput->addAction(tr("2:1 upscale"));
+            actionUpscale->setCheckable(true);
+            actionUpscale->setChecked(Parameters.GetSigUpscaleRatio() == 2);
+            connect(actionUpscale, SIGNAL(toggled(bool)), this, SLOT(OnSoundSignalUpscale(bool)));
         Parameters.Unlock();
         if (pFileMenu != NULL)
             connect(pFileMenu, SIGNAL(soundFileChanged(CDRMReceiver::ESFStatus)), this, SLOT(OnSoundFileChanged(CDRMReceiver::ESFStatus)));
@@ -174,6 +178,16 @@ void CSoundCardSelMenu::OnSoundSampleRate(QAction* action)
     Parameters.Lock();
         if (iSampleRate < 0) Parameters.SetNewSigSampleRate(-iSampleRate);
         else                 Parameters.SetNewAudSampleRate(iSampleRate);
+    Parameters.Unlock();
+    RestartTransceiver(&DRMTransceiver);
+    emit sampleRateChanged();
+}
+
+void CSoundCardSelMenu::OnSoundSignalUpscale(bool bChecked)
+{
+    Parameters.Lock();  
+        Parameters.SetNewSigSampleRate(Parameters.GetSoundCardSigSampleRate());
+        Parameters.SetNewSigUpscaleRatio(bChecked ? 2 : 1);
     Parameters.Unlock();
     RestartTransceiver(&DRMTransceiver);
     emit sampleRateChanged();

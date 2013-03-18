@@ -279,6 +279,14 @@ CSettings::ParseArguments(int argc, char **argv)
 			continue;
 		}
 
+		/* Signal upscale ratio --------------------------------------------- */
+		if (GetNumericArgument(argc, argv, i, "-U", "--sigupratio",
+							  1, 2, rArgument) == TRUE)
+		{
+			Put("Receiver", "sigupratio", rArgument);
+			continue;
+		}
+
 		/* Flip spectrum flag ----------------------------------------------- */
 		if (GetNumericArgument(argc, argv, i, "-p", "--flipspectrum",
 							   0, 1, rArgument) == TRUE)
@@ -665,6 +673,7 @@ CSettings::UsageArguments()
 		"  --sigsrate <n>               set signal sound card sample rate [Hz] (allowed values: 24000, 48000, 96000, 192000)\n"
 		"  -I <s>, --snddevin <s>       set sound in device\n"
 		"  -O <s>, --snddevout <s>      set sound out device\n"
+		"  -U <n>, --sigupratio <n>     set signal upscale ratio (allowed values: 1, 2)\n"
 #ifdef HAVE_LIBHAMLIB
 		"  -M <n>, --hamlib-model <n>   set Hamlib radio model ID\n"
 		"  -C <s>, --hamlib-config <s>  set Hamlib config parameter\n"

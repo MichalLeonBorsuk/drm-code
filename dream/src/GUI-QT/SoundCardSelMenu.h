@@ -71,6 +71,7 @@ public slots:
     void OnSoundInDevice(QAction*);
     void OnSoundOutDevice(QAction*);
     void OnSoundSampleRate(QAction*);
+    void OnSoundSignalUpscale(bool);
     void OnSoundFileChanged(CDRMReceiver::ESFStatus);
 
 signals:
