@@ -18,7 +18,7 @@ console {
     QT -= core gui
     CONFIG -= qt qt4 qt5
     UI_MESSAGE = console mode
-    VERSION_MESSAGE=No Qt
+    VERSION_MESSAGE = No Qt
 }
 else {
      qtconsole {
@@ -58,84 +58,101 @@ OBJECTS_DIR = obj
 DEFINES += EXECUTABLE_NAME=$$TARGET
 macx:QMAKE_LFLAGS += -F$$PWD/libs
 qt4 {
-     QT += network xml webkit
-     VPATH += src/GUI-QT
-     unix {
-      macx {
-          exists(libs/qwt.framework) {
-              message("with qwt6")
-              INCLUDEPATH += libs/qwt
-              LIBS += -framework qwt
-          }
-          else {
-              error("no usable qwt version 6 found")
-          }
-      }
-      else {
-          exists(/usr/include/qwt/qwt.h) {
-              message("with qwt")
-              INCLUDEPATH += /usr/include/qwt
-              LIBS += -lqwt
-          }
-          exists(/usr/include/qwt5/qwt.h) {
-              message("with qwt")
-              INCLUDEPATH += /usr/include/qwt5
-              LIBS += -lqwt
-          }
-          exists(/usr/include/qwt-qt4/qwt.h) {
-              message("with qwt")
-              INCLUDEPATH += /usr/include/qwt-qt4
-              LIBS += -lqwt-qt4
-          }
-          target.path = /usr/bin
-          documentation.path = /usr/share/man/man1
-          documentation.files = linux/dream.1
-          INSTALLS += documentation
-      }
-     }
-     win32 {
-      RC_FILE = windows/dream.rc
-      INCLUDEPATH += libs/qwt
-      CONFIG( debug, debug|release ) {
-          # debug
-          LIBS += -lqwtd
-      } else {
-          # release
-          LIBS += -lqwt
-      }
-     }
+    QT += network xml webkit
+    VPATH += src/GUI-QT
+    unix {
+        macx {
+            exists(libs/qwt.framework) {
+                message("with qwt")
+                INCLUDEPATH += libs/qwt
+                LIBS += -framework qwt
+                CONFIG += qwt
+            }
+        }
+        else {
+            exists(/usr/include/qwt/qwt.h) {
+                message("with qwt")
+                INCLUDEPATH += /usr/include/qwt
+                LIBS += -lqwt
+                CONFIG += qwt
+            }
+            exists(/usr/include/qwt5/qwt.h) {
+                message("with qwt")
+                INCLUDEPATH += /usr/include/qwt5
+                LIBS += -lqwt
+                CONFIG += qwt
+            }
+            exists(/usr/include/qwt-qt4/qwt.h) {
+                message("with qwt")
+                INCLUDEPATH += /usr/include/qwt-qt4
+                LIBS += -lqwt-qt4
+                CONFIG += qwt
+            }
+            target.path = /usr/bin
+            documentation.path = /usr/share/man/man1
+            documentation.files = linux/dream.1
+            INSTALLS += documentation
+        }
+    }
+    win32 {
+        RC_FILE = windows/dream.rc
+        INCLUDEPATH += libs/qwt
+        CONFIG( debug, debug|release ) {
+            # debug
+            LIBS += -lqwtd
+        } else {
+            # release
+            LIBS += -lqwt
+        }
+        CONFIG += qwt
+    }
 }
 qt5 {
-     QT += network xml widgets webkitwidgets
-     VPATH += src/GUI-QT
-     exists($$PWD/../qwt-6.1.0-rc2/src/qwt.h) {
-      message("with qwt")
-      INCLUDEPATH += $$PWD/../qwt-6.1.0-rc2/src
-      LIBS += -lqwt -L$$PWD/../qwt-6.1.0-rc2/lib
-     }
+    QT += network xml widgets webkitwidgets
+    VPATH += src/GUI-QT
+    exists(libs/qwt/qwt.h) {
+        message("with qwt")
+        INCLUDEPATH += libs/qwt
+        unix {
+            LIBS += -lqwt -L$$PWD/libs/qwt
+        }
+        win32 {
+            CONFIG( debug, debug|release ) {
+                # debug
+                LIBS += -lqwtd
+            } else {
+                # release
+                LIBS += -lqwt
+            }
+        }
+        CONFIG += qwt
+    }
+    win32 {
+        RC_FILE = windows/dream.rc
+    }
 }
 macx {
-     INCLUDEPATH += /Developer/dream/include /opt/local/include
-     LIBS += -L/Developer/dream/lib -L/opt/local/lib
-     LIBS += -framework CoreFoundation -framework CoreServices
-     LIBS += -framework CoreAudio -framework AudioToolbox -framework AudioUnit
-     UI_DIR = moc
-     MOC_DIR = moc
-     RC_FILE = src/GUI-QT/res/macicons.icns
-     exists(/opt/local/include/portaudio.h) {
-          CONFIG += portaudio
-     }
-     exists(/opt/local/include/sndfile.h) {
-      CONFIG += sndfile
-     }
+    INCLUDEPATH += /Developer/dream/include /opt/local/include
+    LIBS += -L/Developer/dream/lib -L/opt/local/lib
+    LIBS += -framework CoreFoundation -framework CoreServices
+    LIBS += -framework CoreAudio -framework AudioToolbox -framework AudioUnit
+    UI_DIR = moc
+    MOC_DIR = moc
+    RC_FILE = src/GUI-QT/res/macicons.icns
+    exists(/opt/local/include/portaudio.h) {
+        CONFIG += portaudio
+    }
+    exists(/opt/local/include/sndfile.h) {
+        CONFIG += sndfile
+    }
 }
 exists(libs/faac.h) {
-     CONFIG += faac
-     message("with FAAC")
+    CONFIG += faac
+    message("with FAAC")
 }
 exists(libs/neaacdec.h) {
-     CONFIG += faad
-     message("with FAAD2")
+    CONFIG += faad
+    message("with FAAD2")
 }
 unix {
 # packagesExist() not available on Qt 4.6 (e.g. Debian Squeeze)
@@ -638,4 +655,7 @@ SOURCES += \
 }
 !fftw {
     error("no usable fftw library found - install fftw dev package")
+}
+!qwt {
+    error("no usable qwt library found - install qwt dev package")
 }
