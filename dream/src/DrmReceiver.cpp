@@ -416,12 +416,12 @@ CDRMReceiver::SetInput()
             {
                 /* Save sample rate */
                 if (iPrevSigSampleRate == 0)
-                    iPrevSigSampleRate = Parameters.GetSigSampleRate();
+                    iPrevSigSampleRate = Parameters.GetSoundCardSigSampleRate();
                 /* Open sound file interface */
                 CAudioFileIn* AudioFileIn = new CAudioFileIn();
                 AudioFileIn->SetFileName(sSoundFile);
                 const int iSampleRate = AudioFileIn->GetSampleRate();
-                Parameters.SetSigSampleRate(iSampleRate);
+                Parameters.SetSoundCardSigSampleRate(iSampleRate);
                 pSoundInInterface = AudioFileIn;
             }
             else
@@ -439,7 +439,7 @@ CDRMReceiver::ResetInput()
 {
     if (iPrevSigSampleRate != 0)
     {
-        Parameters.SetSigSampleRate(iPrevSigSampleRate);
+        Parameters.SetSoundCardSigSampleRate(iPrevSigSampleRate);
         iPrevSigSampleRate = 0;
     }
 }
@@ -1530,6 +1530,9 @@ CDRMReceiver::LoadSettings()
     /* Sound card signal sample rate, some settings below depends on this one */
     Parameters.SetNewSigSampleRate(s.Get("Receiver", "sampleratesig", int(DEFAULT_SOUNDCRD_SAMPLE_RATE)));
 
+    /* Signal upscale ratio */
+    Parameters.SetNewSigUpscaleRatio(s.Get("Receiver", "sigupratio", int(1)));
+
     /* Fetch new sample rate if any */
     Parameters.FetchNewSampleRate();
 
@@ -1727,7 +1730,10 @@ CDRMReceiver::SaveSettings()
     s.Put("Receiver", "samplerateaud", Parameters.GetAudSampleRate());
 
     /* Sound card signal sample rate */
-    s.Put("Receiver", "sampleratesig", Parameters.GetSigSampleRate());
+    s.Put("Receiver", "sampleratesig", Parameters.GetSoundCardSigSampleRate());
+
+    /* Signal upscale ratio */
+    s.Put("Receiver", "sigupratio", Parameters.GetSigUpscaleRatio());
 
     /* if 0 then only measure PSD when RSCI in use otherwise always measure it */
     s.Put("Receiver", "measurepsdalways", Parameters.bMeasurePSDAlways);

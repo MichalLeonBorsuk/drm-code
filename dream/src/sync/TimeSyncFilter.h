@@ -41,4 +41,12 @@ extern const float fHilLPProt5_192[NUM_TAPS_HILB_FILT_5_192];
 /* Low pass prototype for Hilbert-filter 10 kHz bandwidth */
 extern const float fHilLPProt10_192[NUM_TAPS_HILB_FILT_10_192];
 
+/* Filter parameters for 384000 Hz sample rate */
+#define NUM_TAPS_HILB_FILT_5_384            641
+#define NUM_TAPS_HILB_FILT_10_384           641
+/* Low pass prototype for Hilbert-filter 5 kHz bandwidth */
+extern const float fHilLPProt5_384[NUM_TAPS_HILB_FILT_5_384];
+/* Low pass prototype for Hilbert-filter 10 kHz bandwidth */
+extern const float fHilLPProt10_384[NUM_TAPS_HILB_FILT_10_384];
+
 #endif	/* _TIMESYNCFILTER_H_ */

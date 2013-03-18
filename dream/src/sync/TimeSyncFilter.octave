@@ -168,6 +168,7 @@ MakeFilter(fid_cpp, fid_h, 0.5); % 24000 kHz
 MakeFilter(fid_cpp, fid_h, 1);   % 48000 kHz
 MakeFilter(fid_cpp, fid_h, 2);   % 96000 kHz
 MakeFilter(fid_cpp, fid_h, 4);   % 192000 kHz
+MakeFilter(fid_cpp, fid_h, 8);   % 384000 kHz
 
 fprintf(fid_h, '#endif	/* _TIMESYNCFILTER_H_ */\n');
 

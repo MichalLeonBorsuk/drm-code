@@ -31,11 +31,12 @@
 
 #include "sound/soundinterface.h"
 #include "Parameter.h"
-#include <math.h>
 #include "matlib/Matlib.h"
 #include "IQInputFilter.h"
 #include "util/Modul.h"
 #include "util/Utilities.h"
+#include <math.h>
+#include <vector>
 
 /* Definitions ****************************************************************/
 /* Number of FFT blocks used for averaging. See next definition
@@ -197,8 +198,11 @@ protected:
 
     CShiftRegister<_REAL>	vecrInpData;
 
-    int				iSampleRate;
+    int					iSampleRate;
     _BOOLEAN			bFippedSpectrum;
+
+    int					iUpscaleRatio;
+    vector<float>		vecf_B, vecf_YL, vecf_YR, vecf_ZL, vecf_ZR;
 
     EInChanSel			eInChanSelection;
 
@@ -229,6 +233,7 @@ protected:
     int FreqToBin(_REAL rFreq);
     _REAL CalcTotalPower(CVector<_REAL> &vecrData, int iStartBin, int iEndBin);
 
+    void InterpFIR_2X(const int channels, _SAMPLE* X, vector<float>& Z, vector<float>& Y, vector<float>& B);
 };
 
 

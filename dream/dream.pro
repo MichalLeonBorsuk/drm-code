@@ -483,6 +483,7 @@ HEADERS += \
     src/tables/TableQAMMapping.h \
     src/tables/TableStations.h \
     src/TextMessage.h \
+    src/UpsampleFilter.h \
     src/util/AudioFile.h \
     src/util/Buffer.h \
     src/util/CRC.h \

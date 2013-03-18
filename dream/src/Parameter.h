@@ -1064,6 +1064,9 @@ public:
         iCurSelDataService = 0;
     }
 
+    /*
+       Sample rate related getters/setters
+    */
     int GetAudSampleRate() const
     {
         return iAudSampleRate;
@@ -1072,10 +1075,17 @@ public:
     {
         return iSigSampleRate;
     }
-    /* Used internaly by DrmReceiver.cpp TODO */
-    void SetSigSampleRate(int sr)
+    int GetSigUpscaleRatio() const
     {
-        iSigSampleRate = sr;
+        return iSigUpscaleRatio;
+    }
+    int GetSoundCardSigSampleRate() const
+    {
+        return iSigSampleRate / iSigUpscaleRatio;
+    }
+    void SetSoundCardSigSampleRate(int sr)
+    {
+        iSigSampleRate = sr * iSigUpscaleRatio;
     }
     void SetNewAudSampleRate(int sr)
     {
@@ -1098,9 +1108,18 @@ public:
         else                  sr = 192000;
         iNewSigSampleRate = sr;
     }
-    /* New sample rate are fetched at init (restart) */
+    void SetNewSigUpscaleRatio(int ratio)
+    {
+        iNewSigUpscaleRatio = ratio < 2 ? 1 : 2;
+    }
+    /* New sample rate are fetched at init and restart */
     void FetchNewSampleRate()
     {
+        if (iNewSigUpscaleRatio != 0)
+        {
+            iSigUpscaleRatio = iNewSigUpscaleRatio;
+            iNewSigUpscaleRatio = 0;
+        }
         if (iNewAudSampleRate != 0)
         {
             iAudSampleRate = iNewAudSampleRate;
@@ -1108,7 +1127,7 @@ public:
         }
         if (iNewSigSampleRate != 0)
         {
-            iSigSampleRate = iNewSigSampleRate;
+            iSigSampleRate = iNewSigSampleRate * iSigUpscaleRatio;
             iNewSigSampleRate = 0;
         }
     }
@@ -1335,8 +1354,10 @@ protected:
 
     int iAudSampleRate;
     int iSigSampleRate;
+    int iSigUpscaleRatio;
     int iNewAudSampleRate;
     int iNewSigSampleRate;
+    int iNewSigUpscaleRatio;
 
     _REAL rSysSimSNRdB;
 
