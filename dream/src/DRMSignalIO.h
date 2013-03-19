@@ -177,7 +177,9 @@ public:
     }
 
     void ClearInputData() {
+        mutexInpData.Lock();
         vecrInpData.Init(INPUT_DATA_VECTOR_SIZE, (_REAL) 0.0);
+        mutexInpData.Unlock();
     }
 
     void SetSoundInterface(CSoundInInterface* pS) {
@@ -196,7 +198,10 @@ protected:
     CSoundInInterface*		pSound;
     CVector<_SAMPLE>		vecsSoundBuffer;
 
+    /* Access to vecrInpData buffer must be done 
+       inside mutexInpData mutex */
     CShiftRegister<_REAL>	vecrInpData;
+    CMutex                  mutexInpData;
 
     int					iSampleRate;
     _BOOLEAN			bFippedSpectrum;

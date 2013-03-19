@@ -514,7 +514,9 @@ void CReceiveData::ProcessDataInternal(CParameter& Parameters)
     }
 
     /* Copy data in buffer for spectrum calculation */
+    mutexInpData.Lock();
     vecrInpData.AddEnd((*pvecOutputData), iOutputBlockSize);
+    mutexInpData.Unlock();
 
     /* Update level meter */
     SignalLevelMeter.Update((*pvecOutputData));
@@ -733,9 +735,6 @@ void CReceiveData::GetInputSpec(CVector<_REAL>& vecrData,
     vecrData.Init(iLenSpecWithNyFreq, (_REAL) 0.0);
     vecrScale.Init(iLenSpecWithNyFreq, (_REAL) 0.0);
 
-    /* Lock resources */
-    Lock();
-
     /* Init the constants for scale and normalization */
     const _BOOLEAN bNegativeFreq = 
         eInChanSelection == CReceiveData::CS_IQ_POS_SPLIT ||
@@ -764,15 +763,14 @@ void CReceiveData::GetInputSpec(CVector<_REAL>& vecrData,
 
     /* Copy data from shift register in Matlib vector */
     CRealVector vecrFFTInput(NUM_SMPLS_4_INPUT_SPECTRUM);
+    mutexInpData.Lock();
     for (i = 0; i < NUM_SMPLS_4_INPUT_SPECTRUM; i++)
         vecrFFTInput[i] = vecrInpData[i];
-
-    /* Release resources */
-    Unlock();
+    mutexInpData.Unlock();
 
     /* Get squared magnitude of spectrum */
     CRealVector vecrSqMagSpect(iLenSpecWithNyFreq);
-    CFftPlans FftPlans; // TODO remove from stack
+    CFftPlans FftPlans;
     vecrSqMagSpect =
         SqMag(rfft(vecrFFTInput * Hann(NUM_SMPLS_4_INPUT_SPECTRUM), FftPlans));
 
@@ -797,12 +795,7 @@ void CReceiveData::GetInputPSD(CVector<_REAL>& vecrData,
                                const int iNumAvBlocksPSD,
                                const int iPSDOverlap)
 {
-
-    /* Lock resources */
-    Lock();
     CalculatePSD(vecrData, vecrScale, iLenPSDAvEachBlock,iNumAvBlocksPSD,iPSDOverlap);
-    /* Release resources */
-    Unlock();
 }
 
 void CReceiveData::CalculatePSD(CVector<_REAL>& vecrData,
@@ -848,9 +841,8 @@ void CReceiveData::CalculatePSD(CVector<_REAL>& vecrData,
 
     /* Calculate FFT of each small block and average results (estimation
        of PSD of input signal) */
-
-    CFftPlans FftPlans; // TODO remove from stack
-    int i;
+    CFftPlans FftPlans; int i;
+    mutexInpData.Lock();
     for (i = 0; i < iNumAvBlocksPSD; i++)
     {
         /* Copy data from shift register in Matlib vector */
@@ -863,6 +855,7 @@ void CReceiveData::CalculatePSD(CVector<_REAL>& vecrData,
         /* Calculate squared magnitude of spectrum and average results */
         vecrAvSqMagSpect += SqMag(rfft(vecrFFTInput, FftPlans));
     }
+    mutexInpData.Unlock();
 
     /* Log power spectrum data */
     for (i = 0; i <iLenSpecWithNyFreq; i++)
