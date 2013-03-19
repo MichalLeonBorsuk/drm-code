@@ -166,6 +166,20 @@ CDRMPlot::~CDRMPlot()
 		delete DialogPlot;
 }
 
+void CDRMPlot::UpdateAnalogBWMarker()
+{
+	if (CurCharType == INPUT_SIG_PSD_ANALOG)
+	{
+		_REAL rCenterFreq, rBandwidth;
+		/* Get data and parameters from modules */
+		pDRMRec->GetAMDemod()->GetBWParameters(rCenterFreq, rBandwidth);
+		/* Prepare graph and set data */
+		SetDCCarrier(pDRMRec->GetAMDemod()->GetCurMixFreqOffs());
+		SetBWMarker(rCenterFreq, rBandwidth);
+		plot->replot();
+	}
+}
+
 void CDRMPlot::OnTimerChart()
 {
 	CParameter& Parameters = *pDRMRec->GetParameters();

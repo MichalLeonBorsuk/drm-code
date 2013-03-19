@@ -48,6 +48,7 @@
 #include <QWhatsThis>
 #include <QDateTime>
 #include <QCloseEvent>
+#include <QInputDialog>
 #include <qwt_dial.h>
 #include <qwt_dial_needle.h>
 #include <qwt_plot_layout.h>
@@ -442,12 +443,10 @@ void AnalogDemDlg::OnTimer()
 		break;
 	case RM_AM:
 		/* Carrier frequency of AM signal */
-		TextFreqOffset->setText(tr("Carrier<br>Frequency:<br><b>")
-		+ QString().setNum(
+		TextFreqOffset->setText(QString().setNum(
 			DRMReceiver.GetReceiveData()->ConvertFrequency(
 				DRMReceiver.GetAMDemod()->GetCurMixFreqOffs())
-		, 'f', 2)
-		+ " Hz</b>");
+			, 'f', 2) + " Hz");
 		break;
 	case RM_NONE:
 		break;
@@ -568,7 +567,7 @@ void AnalogDemDlg::OnSliderBWChange(int value)
 	TextLabelBandWidth->setText(QString().setNum(value) + tr(" Hz"));
 
 	/* Update chart */
-	if(MainPlot) MainPlot->Update();
+	if(MainPlot) MainPlot->UpdateAnalogBWMarker();
 }
 
 void AnalogDemDlg::OnCheckAutoFreqAcq()
@@ -628,7 +627,7 @@ void AnalogDemDlg::OnChartxAxisValSet(double dVal)
 	DRMReceiver.SetAMDemodAcq(dVal);
 
 	/* Update chart */
-	if(MainPlot) MainPlot->Update();
+	if(MainPlot) MainPlot->UpdateAnalogBWMarker();
 }
 
 void AnalogDemDlg::OnButtonWaterfall()
@@ -638,6 +637,25 @@ void AnalogDemDlg::OnButtonWaterfall()
 		MainPlot->SetupChart(CDRMPlot::INP_SPEC_WATERF);
 	else
 		MainPlot->SetupChart(CDRMPlot::INPUT_SIG_PSD_ANALOG);
+}
+
+/* Manual carrier frequency input box */
+void AnalogDemDlg::on_TextFreqOffset_clicked(bool)
+{
+	bool ok = false;
+	const double prev_freq =
+		DRMReceiver.GetReceiveData()->ConvertFrequency(
+			DRMReceiver.GetAMDemod()->GetCurMixFreqOffs());
+	const double new_freq = QInputDialog::getDouble(this, this->windowTitle(),
+		LabelCarrierFrequency->text(), prev_freq, -1e6, 1e6, 2, &ok);
+	if (ok)
+	{
+		const _REAL conv_freq =
+			DRMReceiver.GetReceiveData()->ConvertFrequency(new_freq, TRUE);
+		const double dVal = conv_freq /
+			(DRMReceiver.GetParameters()->GetSigSampleRate() / 2);
+		OnChartxAxisValSet(dVal);
+	}
 }
 
 void AnalogDemDlg::OnButtonAMSS()

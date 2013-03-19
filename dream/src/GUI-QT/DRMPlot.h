@@ -286,7 +286,7 @@ public:
 
 	void SetupChart(const ECharType eNewType);
 	ECharType GetChartType() const { return CurCharType; }
-	void Update() { OnTimerChart(); }
+	void UpdateAnalogBWMarker();
 	void SetPlotStyle(const int iNewStyleID);
 
 	void setCaption(const QString& s) { if (DialogPlot) DialogPlot->setWindowTitle(s); }
