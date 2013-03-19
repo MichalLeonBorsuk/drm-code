@@ -443,7 +443,7 @@ void AnalogDemDlg::OnTimer()
 		break;
 	case RM_AM:
 		/* Carrier frequency of AM signal */
-		TextFreqOffset->setText(QString().setNum(
+		ButtonFreqOffset->setText(QString().setNum(
 			DRMReceiver.GetReceiveData()->ConvertFrequency(
 				DRMReceiver.GetAMDemod()->GetCurMixFreqOffs())
 			, 'f', 2) + " Hz");
@@ -640,14 +640,14 @@ void AnalogDemDlg::OnButtonWaterfall()
 }
 
 /* Manual carrier frequency input box */
-void AnalogDemDlg::on_TextFreqOffset_clicked(bool)
+void AnalogDemDlg::on_ButtonFreqOffset_clicked(bool)
 {
 	bool ok = false;
 	const double prev_freq =
 		DRMReceiver.GetReceiveData()->ConvertFrequency(
 			DRMReceiver.GetAMDemod()->GetCurMixFreqOffs());
 	const double new_freq = QInputDialog::getDouble(this, this->windowTitle(),
-		LabelCarrierFrequency->text(), prev_freq, -1e6, 1e6, 2, &ok);
+		LabelFreqOffset->text(), prev_freq, -1e6, 1e6, 2, &ok);
 	if (ok)
 	{
 		const _REAL conv_freq =
@@ -778,7 +778,8 @@ void AnalogDemDlg::AddWhatsThisHelp()
     CheckBoxPLL->setWhatsThis(strPLL);
     PhaseDial->setWhatsThis(strPLL);
     TextLabelPhaseOffset->setWhatsThis(strPLL);
-    TextFreqOffset->setWhatsThis(strTextFreqOffset);
+    LabelFreqOffset->setWhatsThis(strTextFreqOffset);
+    ButtonFreqOffset->setWhatsThis(strTextFreqOffset);
     CheckBoxSaveAudioWave->setWhatsThis(strCheckBoxSaveAudioWave);
     groupBoxNoiseReduction->setWhatsThis(strNoiseReduction);
     groupBoxAGC->setWhatsThis(strAGC);

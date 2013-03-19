@@ -84,7 +84,7 @@
              <number>0</number>
             </property>
             <item>
-             <widget class="QLabel" name="LabelCarrierFrequency">
+             <widget class="QLabel" name="LabelFreqOffset">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
                 <horstretch>0</horstretch>
@@ -106,7 +106,7 @@
              </widget>
             </item>
             <item>
-             <widget class="QPushButton" name="TextFreqOffset">
+             <widget class="QPushButton" name="ButtonFreqOffset">
               <property name="font">
                <font>
                 <weight>75</weight>

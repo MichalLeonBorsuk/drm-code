@@ -126,7 +126,7 @@ public slots:
 	void OnSliderBWChange(int value);
 	void OnRadioNoiRed(int iID);
 	void OnButtonWaterfall();
-	void on_TextFreqOffset_clicked(bool);
+	void on_ButtonFreqOffset_clicked(bool);
 	void OnButtonAMSS();
 	void OnSwitchToDRM();
 	void OnSwitchToFM();
