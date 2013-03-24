@@ -661,7 +661,7 @@ void CDRMTransmitter::SaveSettings()
         s.Put(service, "Opus_Bandwith", value);
 
         /* Opus Forward Error Correction */
-        value = Service.AudioParam.bOPUSForwardErrorCorrection;
+        value = Service.AudioParam.bOPUSForwardErrorCorrection ? "1" : "0";
         s.Put(service, "Opus_FEC", value);
 
         /* Opus encoder signal type */
