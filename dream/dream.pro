@@ -656,6 +656,6 @@ SOURCES += \
 !fftw {
     error("no usable fftw library found - install fftw dev package")
 }
-!qwt {
+!qwt:!console:!qtconsole {
     error("no usable qwt library found - install qwt dev package")
 }
