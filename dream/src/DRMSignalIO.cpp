@@ -27,11 +27,11 @@
 \******************************************************************************/
 
 #include "DRMSignalIO.h"
+#include "UpsampleFilter.h"
 #include <iostream>
-#include "../UpsampleFilter.h"
 
 
-const static int SineTable[] = { 0, 1, 0, -1, 0, 1, 0, -1, 0, 1, 0, -1 };
+const static int SineTable[] = { 0, 1, 0, -1, 0 };
 
 
 /* Implementation *************************************************************/

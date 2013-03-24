@@ -116,7 +116,6 @@ QString VersionString(QWidget* parent)
 CAboutDlg::CAboutDlg(QWidget* parent):
     QDialog(parent)
 {
-    setAttribute(Qt::WA_QuitOnClose, false);
     setupUi(this);
 #ifdef HAVE_LIBSNDFILE
     char  sfversion [128] ;
