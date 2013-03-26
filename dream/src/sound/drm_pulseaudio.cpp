@@ -319,7 +319,10 @@ void CSoundInPulse::Init_HW()
 		recdevice = sCurrentDevice.c_str();
 
 	if (pa_init(&pa_obj, APP_NAME(1, bBlockingRec)) != PA_OK)
-		throw CGenErr("pulseaudio CSoundInPulse::Init_HW pa_init failed");
+	{
+		DEBUG_MSG("CSoundInPulse::Init_HW pa_init failed\n");
+		return;
+	}
 
 	pa_s = pa_stream_new(pa_obj.pa_c,		// The context to create this stream in
 		STREAM_NAME("input", bBlockingRec),	// A name for this stream
@@ -327,7 +330,10 @@ void CSoundInPulse::Init_HW()
 		NULL								// Use default channel map
 		);
 	if (!pa_s)
-		throw CGenErr("pulseaudio CSoundInPulse::Init_HW pa_stream_new failed");
+	{
+		DEBUG_MSG("CSoundInPulse::Init_HW pa_stream_new failed\n");
+		return;
+	}
 
 	pa_attr.maxlength = PA_RECORD_MAXLENGTH;			// Maximum length of the buffer.
 	pa_attr.tlength   = -1;								// Playback only: target length of the buffer.
@@ -345,7 +351,7 @@ void CSoundInPulse::Init_HW()
 #endif
 		);
 	if (pa_s_sync(&pa_obj, pa_s, ret) != PA_OK)
-		throw CGenErr("pulseaudio CSoundInPulse::Init_HW pa_stream_connect_record failed");
+		DEBUG_MSG("CSoundInPulse::Init_HW pa_stream_connect_record failed\n");
 
 	remaining_nbytes = 0;
 	remaining_data   = NULL;
@@ -359,71 +365,73 @@ int CSoundInPulse::Read_HW(void *recbuf, int size)
 	const char *data;
 	size_t nbytes;
 
-	/* Buffering error when latency >= 75% of RECORD_BUFFER_US */
-	_BOOLEAN bError = TRUE;
-	uint64_t recording_usec;
-	if (pa_stream_get_latency(&pa_obj, pa_s, iSampleRate, &recording_usec))
-		bError = recording_usec >= (uint64_t)(RECORD_BUFFER_US * 75 / 100) ? TRUE : FALSE;
-	bBufferingError |= bError;
-
-#ifdef CLOCK_DRIFT_ADJ_ENABLED
-	if (!bBlockingRec && cp) {
-		if (bClockDriftComp != cp->bClockDriftComp) {
-			bClockDriftComp = cp->bClockDriftComp;
-			DEBUG_MSG("CSoundInPulse::Read_HW(): bClockDriftComp=%i\n", bClockDriftComp);
-			if (!bClockDriftComp)
-				pa_set_sample_rate(&pa_obj, pa_s, iSampleRate);
-		}
-		int sample_rate = iSampleRate - cp->sample_rate_offset;
-		if (record_sample_rate != sample_rate) {
-			record_sample_rate = sample_rate;
-			pa_set_sample_rate(&pa_obj, pa_s, sample_rate);
-		}
-	}
-#endif
-
 	filled = 0;
 	size *= BYTES_PER_SAMPLE;
 
-	while (size) {
-		if (!remaining_nbytes) {
-			nbytes = 0;
-			data   = NULL;
-			ret = pa_stream_peek(pa_s, (const void **)&data, &nbytes);
-			if (ret != PA_OK) break;
-			if (!data) {
-				ret = pa_mainloop_iterate(pa_obj.pa_m, 1, &retval);
-				if (ret < 0) break;
+	if (pa_s)
+	{
+		/* Buffering error when latency >= 75% of RECORD_BUFFER_US */
+		_BOOLEAN bError = TRUE;
+		uint64_t recording_usec;
+		if (pa_stream_get_latency(&pa_obj, pa_s, iSampleRate, &recording_usec))
+			bError = recording_usec >= (uint64_t)(RECORD_BUFFER_US * 75 / 100) ? TRUE : FALSE;
+		bBufferingError |= bError;
+
+#ifdef CLOCK_DRIFT_ADJ_ENABLED
+		if (!bBlockingRec && cp) {
+			if (bClockDriftComp != cp->bClockDriftComp) {
+				bClockDriftComp = cp->bClockDriftComp;
+				DEBUG_MSG("CSoundInPulse::Read_HW(): bClockDriftComp=%i\n", bClockDriftComp);
+				if (!bClockDriftComp)
+					pa_set_sample_rate(&pa_obj, pa_s, iSampleRate);
+			}
+			int sample_rate = iSampleRate - cp->sample_rate_offset;
+			if (record_sample_rate != sample_rate) {
+				record_sample_rate = sample_rate;
+				pa_set_sample_rate(&pa_obj, pa_s, sample_rate);
 			}
 		}
-		else {
-			nbytes = remaining_nbytes;
-			data   = remaining_data;
-		}
-		if (data) {
-			if (nbytes > (size_t)size) {
-				chunk = size;
-				remaining_nbytes = nbytes - chunk;
-				remaining_data   = data   + chunk;
-//				DEBUG_MSG("pa_stream_peek frag %6i %6i\n", (int)nbytes, chunk);
-				memcpy(recbuf, data, chunk);
+#endif
+
+		while (size) {
+			if (!remaining_nbytes) {
+				nbytes = 0;
+				data   = NULL;
+				ret = pa_stream_peek(pa_s, (const void **)&data, &nbytes);
+				if (ret != PA_OK) break;
+				if (!data) {
+					ret = pa_mainloop_iterate(pa_obj.pa_m, 1, &retval);
+					if (ret < 0) break;
+				}
 			}
 			else {
-				chunk = (int)nbytes;
-				remaining_nbytes = 0;
-				remaining_data   = NULL;
-//				DEBUG_MSG("pa_stream_peek full %6i %6i\n", (int)nbytes, chunk);
-				memcpy(recbuf, data, chunk);
-				pa_stream_drop(pa_s); // <- after memcpy
+				nbytes = remaining_nbytes;
+				data   = remaining_data;
 			}
-			filled += chunk;
-			size -= chunk;
-			recbuf = ((char*)recbuf)+chunk;
+			if (data) {
+				if (nbytes > (size_t)size) {
+					chunk = size;
+					remaining_nbytes = nbytes - chunk;
+					remaining_data   = data   + chunk;
+//					DEBUG_MSG("pa_stream_peek frag %6i %6i\n", (int)nbytes, chunk);
+					memcpy(recbuf, data, chunk);
+				}
+				else {
+					chunk = (int)nbytes;
+					remaining_nbytes = 0;
+					remaining_data   = NULL;
+//					DEBUG_MSG("pa_stream_peek full %6i %6i\n", (int)nbytes, chunk);
+					memcpy(recbuf, data, chunk);
+					pa_stream_drop(pa_s); // <- after memcpy
+				}
+				filled += chunk;
+				size -= chunk;
+				recbuf = ((char*)recbuf)+chunk;
+			}
 		}
-	};
+	}
 
-	if (size != 0)
-	{
+	if (size > 0) {
 		memset(recbuf, 0, size);
 		if (bBlockingRec)
 			usleep(lTimeToWait);
@@ -477,7 +485,10 @@ void CSoundOutPulse::Init_HW()
 		playdevice = sCurrentDevice.c_str();
 
 	if (pa_init(&pa_obj, APP_NAME(0, bBlockingPlay)) != PA_OK)
-		throw CGenErr("CSoundOutPulse::Init_HW pa_init failed");
+	{
+		DEBUG_MSG("CSoundOutPulse::Init_HW pa_init failed\n");
+		return;
+	}
 
 	pa_s = pa_stream_new(pa_obj.pa_c,			// The context to create this stream in
 		STREAM_NAME("output", bBlockingPlay),	// A name for this stream
@@ -485,7 +496,10 @@ void CSoundOutPulse::Init_HW()
 		NULL									// Use default channel map
 		);
 	if (!pa_s)
-		throw CGenErr("CSoundOutPulse::Init_HW pa_stream_new failed");
+	{
+		DEBUG_MSG("CSoundOutPulse::Init_HW pa_stream_new failed\n");
+		return;
+	}
 
 	pa_attr.maxlength = PA_PLAYBACK_TLENGTH;	// Maximum length of the buffer.
 	pa_attr.tlength   = PA_PLAYBACK_TLENGTH;	// Playback only: target length of the buffer.
@@ -505,7 +519,7 @@ void CSoundOutPulse::Init_HW()
 		NULL								// Synchronize this stream with the specified one, or NULL for a standalone stream
 		);
 	if (pa_s_sync(&pa_obj, pa_s, ret) != PA_OK)
-		throw CGenErr("CSoundOutPulse::Init_HW pa_stream_connect_playback failed");
+		DEBUG_MSG("CSoundOutPulse::Init_HW pa_stream_connect_playback failed\n");
 
 	pa_stream_notify_cb_userdata_underflow.SoundOutPulse = this;
 	pa_stream_notify_cb_userdata_underflow.bOverflow = FALSE;
@@ -533,112 +547,117 @@ int CSoundOutPulse::Write_HW(void *playbuf, int size)
 	int ret;
 	int retval;
 
+	if (pa_s)
+	{
 #ifdef CLOCK_DRIFT_ADJ_ENABLED
-	_BOOLEAN bInitClockDriftComp = FALSE;
-	if (cp.bClockDriftComp != bNewClockDriftComp) {
-		cp.bClockDriftComp = bNewClockDriftComp;
-		DEBUG_MSG("CSoundOutPulse::write_HW(): bClockDriftComp=%i\n", cp.bClockDriftComp);
-		if (cp.bClockDriftComp)
+		_BOOLEAN bInitClockDriftComp = FALSE;
+		if (cp.bClockDriftComp != bNewClockDriftComp) {
+			cp.bClockDriftComp = bNewClockDriftComp;
+			DEBUG_MSG("CSoundOutPulse::write_HW(): bClockDriftComp=%i\n", cp.bClockDriftComp);
+			if (cp.bClockDriftComp)
+				bInitClockDriftComp = TRUE;
+			else
+				if (!bBlockingPlay)
+					pa_set_sample_rate(&pa_obj, pa_s, iSampleRate);
+		}
+#endif
+
+		if (bPrebuffer) {
+	//		pa_o_sync(&pa_obj, pa_stream_prebuf(pa_s, pa_stream_success_cb, NULL);
+	//		DEBUG_MSG("CSoundOutPulse::write_HW(): prebuffering ...\n");
+			if (pa_o_sync(&pa_obj, pa_stream_prebuf(pa_s, pa_stream_success_cb, NULL)) != PA_OK)
+				DEBUG_MSG("CSoundOutPulse::write_HW(): prebuffering failed\n");
+			bPrebuffer = FALSE;
+			bSeek = FALSE;
+#ifdef CLOCK_DRIFT_ADJ_ENABLED
 			bInitClockDriftComp = TRUE;
-		else
+#endif
+		}
+
+#ifdef CLOCK_DRIFT_ADJ_ENABLED
+		if (cp.bClockDriftComp) {
+			if (bInitClockDriftComp) {
+				iMaxSampleRateOffset = iSampleRate * 2 / 100; /* = 2% */
+				playback_usec_smoothed = PLAYBACK_LATENCY_US;
+				target_latency = PLAYBACK_LATENCY_US;
+				wait_prebuffer = WAIT_PREBUFFER;
+				cp.sample_rate_offset = 0;
+				filter_stabilized = NUM_TAPS_LATENCY_FILT;
+				Z.Init(NUM_TAPS_LATENCY_FILT, CReal(PLAYBACK_LATENCY_US));
+				clock = playback_usec = 0; // DEBUG
+			}
+
 			if (!bBlockingPlay)
-				pa_set_sample_rate(&pa_obj, pa_s, iSampleRate);
-	}
-#endif
+	/*Receiver*/	DEBUG_MSG("playback latency: %07i us, smoothed %07i us, %i, %02i, %02i, %i\n", playback_usec, (int)playback_usec_smoothed, iSampleRate + cp.sample_rate_offset, wait_prebuffer, filter_stabilized, ++clock);
+			else
+	/*Transmitter*/	DEBUG_MSG("playback latency: %07i us, smoothed %07i us, %i, %02i, %02i, %i\n", playback_usec, (int)playback_usec_smoothed, iSampleRate - cp.sample_rate_offset, wait_prebuffer, filter_stabilized, ++clock);
 
-	if (bPrebuffer) {
-//		pa_o_sync(&pa_obj, pa_stream_prebuf(pa_s, pa_stream_success_cb, NULL);
-//		DEBUG_MSG("CSoundOutPulse::write_HW(): prebuffering ...\n");
-		if (pa_o_sync(&pa_obj, pa_stream_prebuf(pa_s, pa_stream_success_cb, NULL)) != PA_OK)
-			DEBUG_MSG("CSoundOutPulse::write_HW(): prebuffering failed\n");
-		bPrebuffer = FALSE;
-		bSeek = FALSE;
-#ifdef CLOCK_DRIFT_ADJ_ENABLED
-		bInitClockDriftComp = TRUE;
-#endif
-	}
-
-#ifdef CLOCK_DRIFT_ADJ_ENABLED
-	if (cp.bClockDriftComp) {
-		if (bInitClockDriftComp) {
-			iMaxSampleRateOffset = iSampleRate * 2 / 100; /* = 2% */
-			playback_usec_smoothed = PLAYBACK_LATENCY_US;
-			target_latency = PLAYBACK_LATENCY_US;
-			wait_prebuffer = WAIT_PREBUFFER;
-			cp.sample_rate_offset = 0;
-			filter_stabilized = NUM_TAPS_LATENCY_FILT;
-			Z.Init(NUM_TAPS_LATENCY_FILT, CReal(PLAYBACK_LATENCY_US));
-			clock = playback_usec = 0; // DEBUG
-		}
-
-		if (!bBlockingPlay)
-/*Receiver*/	DEBUG_MSG("playback latency: %07i us, smoothed %07i us, %i, %02i, %02i, %i\n", playback_usec, (int)playback_usec_smoothed, iSampleRate + cp.sample_rate_offset, wait_prebuffer, filter_stabilized, ++clock);
-		else
-/*Transmitter*/	DEBUG_MSG("playback latency: %07i us, smoothed %07i us, %i, %02i, %02i, %i\n", playback_usec, (int)playback_usec_smoothed, iSampleRate - cp.sample_rate_offset, wait_prebuffer, filter_stabilized, ++clock);
-
-		if (wait_prebuffer > 0) {
-			wait_prebuffer--;
-		}
-		else {
-			if (!filter_stabilized) {
-				/****************************************************************************************************************/
-				/* The Clock Drift Adjustment Algorithm                                                                         */
-				int offset;
-				double error = (playback_usec_smoothed - (double)target_latency) / (double)target_latency * ALGO_ERROR_MULTIPLIER;
-//				error = error * error * (error >= 0.0 ? 1.0 : -1.0);
-				error = pow(fabs(error), ALGO_ERROR_EXPONENT) * (error >= 0.0 ? 1.0 : -1.0);
-				if (error >= 0.0) offset = (int)floor(error + 0.5);
-				else              offset = (int) ceil(error - 0.5);
-				if      (offset>iMaxSampleRateOffset)  offset=iMaxSampleRateOffset;
-				else if (offset<-iMaxSampleRateOffset) offset=-iMaxSampleRateOffset;
-				/****************************************************************************************************************/
-				if (!bBlockingPlay && cp.sample_rate_offset != offset) {
-					pa_set_sample_rate(&pa_obj, pa_s, iSampleRate + offset);
+			if (wait_prebuffer > 0) {
+				wait_prebuffer--;
+			}
+			else {
+				if (!filter_stabilized) {
+					/****************************************************************************************************************/
+					/* The Clock Drift Adjustment Algorithm                                                                         */
+					int offset;
+					double error = (playback_usec_smoothed - (double)target_latency) / (double)target_latency * ALGO_ERROR_MULTIPLIER;
+	//				error = error * error * (error >= 0.0 ? 1.0 : -1.0);
+					error = pow(fabs(error), ALGO_ERROR_EXPONENT) * (error >= 0.0 ? 1.0 : -1.0);
+					if (error >= 0.0) offset = (int)floor(error + 0.5);
+					else              offset = (int) ceil(error - 0.5);
+					if      (offset>iMaxSampleRateOffset)  offset=iMaxSampleRateOffset;
+					else if (offset<-iMaxSampleRateOffset) offset=-iMaxSampleRateOffset;
+					/****************************************************************************************************************/
+					if (!bBlockingPlay && cp.sample_rate_offset != offset) {
+						pa_set_sample_rate(&pa_obj, pa_s, iSampleRate + offset);
+					}
+					cp.sample_rate_offset = offset;
 				}
-				cp.sample_rate_offset = offset;
 			}
 		}
-	}
 #endif
 
-	ret = pa_stream_write(pa_s,		// The stream to use
-		playbuf,					// The data to write
-		size * BYTES_PER_SAMPLE,	// The length of the data to write in bytes
-		NULL,						// A cleanup routine for the data or NULL to request an internal copy
-		bSeek ? -(PA_PLAYBACK_PREBUF/2) : 0,	// Offset for seeking, must be 0 for upload streams
-		PA_SEEK_RELATIVE			// Seek mode, must be PA_SEEK_RELATIVE for upload streams
-		);
+		ret = pa_stream_write(pa_s,		// The stream to use
+			playbuf,					// The data to write
+			size * BYTES_PER_SAMPLE,	// The length of the data to write in bytes
+			NULL,						// A cleanup routine for the data or NULL to request an internal copy
+			bSeek ? -(PA_PLAYBACK_PREBUF/2) : 0,	// Offset for seeking, must be 0 for upload streams
+			PA_SEEK_RELATIVE			// Seek mode, must be PA_SEEK_RELATIVE for upload streams
+			);
 
 #ifdef CLOCK_DRIFT_ADJ_ENABLED
-	if (cp.bClockDriftComp) {
-		if (!wait_prebuffer) {
-			uint64_t playback_usec;
-			if (pa_stream_get_latency(&pa_obj, pa_s, iSampleRate, &playback_usec)) {
-				this->playback_usec = (int)playback_usec; // DEBUG
-				X[0] = CReal(playback_usec);
-				playback_usec_smoothed = Filter(B, A, X, Z)[0];
-				if (filter_stabilized > 0) {
-					filter_stabilized--;
-					if(!filter_stabilized) {
-						target_latency = playback_usec_smoothed;
+		if (cp.bClockDriftComp) {
+			if (!wait_prebuffer) {
+				uint64_t playback_usec;
+				if (pa_stream_get_latency(&pa_obj, pa_s, iSampleRate, &playback_usec)) {
+					this->playback_usec = (int)playback_usec; // DEBUG
+					X[0] = CReal(playback_usec);
+					playback_usec_smoothed = Filter(B, A, X, Z)[0];
+					if (filter_stabilized > 0) {
+						filter_stabilized--;
+						if(!filter_stabilized) {
+							target_latency = playback_usec_smoothed;
+						}
 					}
 				}
 			}
 		}
-	}
 #endif
 
-	bSeek = FALSE;
+		bSeek = FALSE;
 
-	if (ret == PA_OK) {
-		do {
-			ret = pa_mainloop_iterate(pa_obj.pa_m, 0, &retval);
-		} while (ret>0);
-		return size;
+		if (ret == PA_OK) {
+			do {
+				ret = pa_mainloop_iterate(pa_obj.pa_m, 0, &retval);
+			} while (ret>0);
+			return size;
+		}
 	}
 
-	if (bBlockingPlay)
-		usleep(lTimeToWait);
+	if (size > 0) {
+		if (bBlockingPlay)
+			usleep(lTimeToWait);
+	}
 
 	return -1;
 }
