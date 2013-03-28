@@ -127,41 +127,6 @@ public:
 	}
 };
 
-/* The purpose of this class is to prevent showEvent and
-   hideEvent from spurious event like unmatched show/hide,
-   which cause some problem for window save and restore.
-   The class may be adapted for other type of filtering
-   as well. The member isValid() return FALSE when the
-   event must be ignored. */
-class CEventFilter
-{
-public:
-	CEventFilter() : eLastEventType(QEvent::Hide) {}
-	~CEventFilter() {}
-	bool isValid(const QEvent* event)
-	{
-		bool bValid = FALSE;
-		QEvent::Type eEventType = event->type();
-		switch (eEventType)
-		{
-		case QEvent::Hide:
-			bValid = eLastEventType == QEvent::Show;
-			eLastEventType = eEventType;
-			break;
-		case QEvent::Show:
-			bValid = eLastEventType == QEvent::Hide;
-			eLastEventType = eEventType;
-			break;
-		default:
-			break;
-		}
-		return bValid;
-	}
-protected:
-	QEvent::Type eLastEventType; 
-};
-#define EVENT_FILTER(e) do { if (!ef.isValid((QEvent*)e)) return; } while(0)
-
 
 /* s-meter thermo parameters */
 #define S_METER_THERMO_MIN				((_REAL) -60.0) /* dB */

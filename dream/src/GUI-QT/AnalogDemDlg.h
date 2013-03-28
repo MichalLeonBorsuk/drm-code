@@ -30,18 +30,17 @@
 \******************************************************************************/
 
 
-#include <QTimer>
-#include <QDialog>
-#include <QButtonGroup>
 #include "ui_AMMainWindow.h"
 #include "ui_AMSSDlgbase.h"
+#include "CWindow.h"
 #include "SoundCardSelMenu.h"
-#include "DialogUtil.h"
 #include "DRMPlot.h"
 #include "../GlobalDefinitions.h"
 #include "../DrmReceiver.h"
-#include "../util/Settings.h"
 #include "../tables/TableAMSS.h"
+#include <QTimer>
+#include <QDialog>
+#include <QButtonGroup>
 
 
 /* Definitions ****************************************************************/
@@ -53,7 +52,7 @@
 
 
 /* AMSS dialog -------------------------------------------------------------- */
-class CAMSSDlg : public QDialog, public Ui_CAMSSDlgBase
+class CAMSSDlg : public CWindow, public Ui_CAMSSDlgBase
 {
 	Q_OBJECT
 
@@ -62,14 +61,12 @@ public:
 
 protected:
 	CDRMReceiver&	DRMReceiver;
-	CSettings&		Settings;
-	CEventFilter	ef;
 
 	QTimer			Timer;
 	QTimer			TimerPLLPhaseDial;
 	void			AddWhatsThisHelp();
-	void			showEvent(QShowEvent*);
-	void			hideEvent(QHideEvent*);
+	virtual void	eventShow(QShowEvent*);
+	virtual void	eventHide(QHideEvent*);
 
 public slots:
 	void OnTimer();
@@ -78,7 +75,7 @@ public slots:
 
 
 /* Analog demodulation dialog ----------------------------------------------- */
-class AnalogDemDlg : public QMainWindow, public Ui_AMMainWindow
+class AnalogDemDlg : public CWindow, public Ui_AMMainWindow
 {
 	Q_OBJECT
 
@@ -86,11 +83,8 @@ public:
 	AnalogDemDlg(CDRMReceiver&, CSettings&, CFileMenu*, CSoundCardSelMenu*,
 	QWidget* parent = 0);
 
-	void SetWindowGeometry();
-
 protected:
 	CDRMReceiver&		DRMReceiver;
-	CSettings&			Settings;
 
 	QTimer				Timer;
 	QTimer				TimerPLLPhaseDial;
@@ -99,17 +93,16 @@ protected:
     CDRMPlot*			MainPlot;
 	CFileMenu*			pFileMenu;
 	CSoundCardSelMenu*	pSoundCardMenu;
-	CEventFilter		ef;
 
 	void UpdateControls();
 	void UpdateSliderBandwidth();
 	void AddWhatsThisHelp();
-	void showEvent(QShowEvent* pEvent);
-	void hideEvent(QHideEvent* pEvent);
+	virtual void eventClose(QCloseEvent* pEvent);
+	virtual void eventShow(QShowEvent* pEvent);
+	virtual void eventHide(QHideEvent* pEvent);
+	virtual void eventUpdate();
 
 public slots:
-	void switchEvent();
-	void closeEvent(QCloseEvent* pEvent);
 	void UpdatePlotStyle(int);
 	void OnSampleRateChanged();
 	void OnSoundFileChanged(CDRMReceiver::ESFStatus);
@@ -127,7 +120,6 @@ public slots:
 	void OnRadioNoiRed(int iID);
 	void OnButtonWaterfall();
 	void on_ButtonFreqOffset_clicked(bool);
-	void OnButtonAMSS();
 	void OnSwitchToDRM();
 	void OnSwitchToFM();
 	void OnHelpAbout() {emit About();}

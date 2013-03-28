@@ -28,7 +28,6 @@
 
 #include "BWSViewer.h"
 #include "../DrmReceiver.h"
-#include "../util/Settings.h"
 #include "../util-QT/Util.h"
 #include "../datadecoding/DataDecoder.h"
 #include <QDir>
@@ -45,18 +44,15 @@
 #define ENABLE_HACK /* Do we really need these hack unless for vtc trial sample? */
 
 
-BWSViewer::BWSViewer(CDRMReceiver& rec, CSettings& s, QWidget* parent):
-    QDialog(parent),
+BWSViewer::BWSViewer(CDRMReceiver& rec, CSettings& Settings, QWidget* parent):
+    CWindow(parent, Settings, "BWS"),
     nam(this, cache, waitobjs, bAllowExternalContent, strCacheHost),
-    receiver(rec), settings(s), decoder(NULL), bHomeSet(false), bPageLoading(false),
+    receiver(rec), decoder(NULL), bHomeSet(false), bPageLoading(false),
     bSaveFileToDisk(false), bRestrictedProfile(false), bAllowExternalContent(true),
     bClearCacheOnNewService(true), bDirectoryIndexChanged(false),
     iLastAwaitingOjects(0), strCacheHost(CACHE_HOST),
     iLastServiceID(0), iCurrentDataServiceID(0), bLastServiceValid(false), iLastValidServiceID(0)
 {
-    /* Enable minimize and maximize box for QDialog */
-	setWindowFlags(Qt::Window);
-
     setupUi(this);
 
     /* Setup webView */
@@ -311,27 +307,18 @@ void BWSViewer::OnClearCacheOnNewService(bool isChecked)
     bClearCacheOnNewService = isChecked;
 }
 
-void BWSViewer::showEvent(QShowEvent* e)
+void BWSViewer::eventShow(QShowEvent*)
 {
-	EVENT_FILTER(e);
-    /* Get window geometry data and apply it */
-    CWinGeom g;
-    settings.Get("BWS", g);
-    const QRect WinGeom(g.iXPos, g.iYPos, g.iWSize, g.iHSize);
-
-    if (WinGeom.isValid() && !WinGeom.isEmpty() && !WinGeom.isNull())
-        setGeometry(WinGeom);
-
-    bAllowExternalContent = settings.Get("BWS", "allowexternalcontent", bAllowExternalContent);
+    bAllowExternalContent = getSetting("allowexternalcontent", bAllowExternalContent);
     actionAllow_External_Content->setChecked(bAllowExternalContent);
 
-    bSaveFileToDisk = settings.Get("BWS", "savefiletodisk", bSaveFileToDisk);
+    bSaveFileToDisk = getSetting("savefiletodisk", bSaveFileToDisk);
     actionSave_File_to_Disk->setChecked(bSaveFileToDisk);
 
-    bRestrictedProfile = settings.Get("BWS", "restrictedprofile", bRestrictedProfile);
+    bRestrictedProfile = getSetting("restrictedprofile", bRestrictedProfile);
     actionRestricted_Profile_Only->setChecked(bRestrictedProfile);
 
-    bClearCacheOnNewService = settings.Get("BWS", "clearcacheonnewservice", bClearCacheOnNewService);
+    bClearCacheOnNewService = getSetting("clearcacheonnewservice", bClearCacheOnNewService);
     actionClear_Cache_on_New_Service->setChecked(bClearCacheOnNewService);
 
     /* Update window title */
@@ -346,29 +333,18 @@ void BWSViewer::showEvent(QShowEvent* e)
     Timer.start(GUI_CONTROL_UPDATE_TIME);
 }
 
-void BWSViewer::hideEvent(QHideEvent* e)
+void BWSViewer::eventHide(QHideEvent*)
 {
-	EVENT_FILTER(e);
     /* Deactivate real-time timer so that it does not get new pictures */
     Timer.stop();
 
-    /* Save window geometry data */
-    QRect WinGeom = geometry();
+    putSetting("savefiletodisk", bSaveFileToDisk);
 
-    CWinGeom c;
-    c.iXPos = WinGeom.x();
-    c.iYPos = WinGeom.y();
-    c.iHSize = WinGeom.height();
-    c.iWSize = WinGeom.width();
-    settings.Put("BWS", c);
+    putSetting("restrictedprofile", bRestrictedProfile);
 
-    settings.Put("BWS", "savefiletodisk", bSaveFileToDisk);
+    putSetting("allowexternalcontent", bAllowExternalContent);
 
-    settings.Put("BWS", "restrictedprofile", bRestrictedProfile);
-
-    settings.Put("BWS", "allowexternalcontent", bAllowExternalContent);
-
-    settings.Put("BWS", "clearcacheonnewservice", bClearCacheOnNewService);
+    putSetting("clearcacheonnewservice", bClearCacheOnNewService);
 }
 
 bool BWSViewer::Changed()

@@ -28,16 +28,15 @@
 #ifndef __StationsDlg_H
 #define __StationsDlg_H
 
-#include <QDialog>
 #include <QSignalMapper>
 #include <QNetworkAccessManager>
 #include <QTimer>
 #include "ui_StationsDlgbase.h"
 
 #include "DialogUtil.h"
+#include "CWindow.h"
 #include "../DrmReceiver.h"
 #include "../util/Vector.h"
-#include "../util/Settings.h"
 
 
 /* Definitions ****************************************************************/
@@ -193,30 +192,30 @@ protected:
 	int iSecondsPreviewanalog;
 };
 
-class StationsDlg : public QDialog, public Ui_StationsDlgbase
+class StationsDlg : public CWindow, public Ui_StationsDlgbase
 {
 	Q_OBJECT
 
 public:
 #ifdef HAVE_LIBHAMLIB
-	StationsDlg(CDRMReceiver&, CSettings&, CRig&);
+	StationsDlg(CDRMReceiver&, CSettings&, CRig&, QMap<QWidget*,QString>&);
 #else
-	StationsDlg(CDRMReceiver&, CSettings&);
+	StationsDlg(CDRMReceiver&, CSettings&, QMap<QWidget*,QString>&);
 #endif
 	virtual ~StationsDlg();
 
-	void SaveSettings(CSettings&);
-
 protected:
-	void			LoadSettings(const CSettings&);
+	virtual void	eventClose(QCloseEvent* pEvent);
+	virtual void	eventHide(QHideEvent* pEvent);
+	virtual void	eventShow(QShowEvent* pEvent);
+	void			LoadSettings();
+	void			SaveSettings();
 	void			CheckMode();
 	void			LoadSchedule();
 	void			LoadFilters();
 	void			SetFrequencyFromGUI(int);
 	void			SetStationsView();
 	void			ClearStationsView();
-	void			showEvent(QShowEvent* pEvent);
-	void			hideEvent(QHideEvent* pEvent);
 	void			AddWhatsThisHelp();
 	void			EnableSMeter();
 	void			DisableSMeter();
@@ -235,7 +234,6 @@ protected:
 	QString			strColumnParamanalog;
 
 	CDRMReceiver&	DRMReceiver;
-	CSettings&		Settings;
 #ifdef HAVE_LIBHAMLIB
 	CRig&			Rig;
 #endif
@@ -257,7 +255,6 @@ protected:
 
 	QString			okMessage, badMessage;
 	CDRMSchedule::ESchedMode eLastScheduleMode;
-	CEventFilter	ef;
 
 signals:
 	void subscribeRig();

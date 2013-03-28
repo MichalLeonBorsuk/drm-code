@@ -29,16 +29,14 @@
 #ifndef __EVALUATIONDLG_H
 #define __EVALUATIONDLG_H
 
-#include <QMainWindow>
 #include "ui_systemevalDlgbase.h"
+#include "CWindow.h"
 #include "DRMPlot.h"
-
 #include "DialogUtil.h"
 #include "MultColorLED.h"
 #include "../GlobalDefinitions.h"
 #include "../util/Vector.h"
 #include "../DrmReceiver.h"
-#include "../util/Settings.h"
 
 /* Definitions ****************************************************************/
 /* Define this macro if you prefer the QT-type of displaying date and time */
@@ -47,7 +45,7 @@
 
 /* Classes ********************************************************************/
 
-class systemevalDlg : public QDialog, public Ui_SystemEvaluationWindow
+class systemevalDlg : public CWindow, public Ui_SystemEvaluationWindow
 {
 	Q_OBJECT
 
@@ -59,13 +57,12 @@ public:
 
 protected:
 	CDRMReceiver&	DRMReceiver;
-	CSettings&		Settings;
 
 	QTimer			Timer;
 	CDRMPlot*		MainPlot;
 
-	virtual void	showEvent(QShowEvent* pEvent);
-	virtual void	hideEvent(QHideEvent* pEvent);
+	virtual void	eventShow(QShowEvent* pEvent);
+	virtual void	eventHide(QHideEvent* pEvent);
 	void			UpdateGPS(CParameter&);
 	void			UpdateControls();
 	void			AddWhatsThisHelp();
@@ -81,7 +78,6 @@ protected:
 	CDRMPlot::ECharType eCurCharType, eNewCharType;
 	int				iPlotStyle;
 	vector<CDRMPlot*>	vecpDRMPlots;
-	CEventFilter	ef;
 
 public slots:
 	void OnTimer();

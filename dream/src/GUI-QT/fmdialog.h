@@ -43,13 +43,14 @@
 #include "ui_FMMainWindow.h"
 #include "SoundCardSelMenu.h"
 #include "DialogUtil.h"
+#include "CWindow.h"
 #include "MultColorLED.h"
 #include "../DrmReceiver.h"
 #include "../util/Vector.h"
 
 /* Classes ********************************************************************/
 
-class FMDialog : public QMainWindow, public Ui_FMMainWindow
+class FMDialog : public CWindow, public Ui_FMMainWindow
 {
 	Q_OBJECT
 
@@ -57,11 +58,8 @@ public:
 	FMDialog(CDRMReceiver&, CSettings&, CFileMenu*, CSoundCardSelMenu*,
 	QWidget* parent = 0);
 
-	void SetWindowGeometry();
-
 protected:
 	CDRMReceiver&		DRMReceiver;
-	CSettings&			Settings;
 
 	QMenuBar*			pMenu;
 	QMenu*				pReceiverModeMenu;
@@ -78,12 +76,12 @@ protected:
 	_BOOLEAN		bStationsDlgWasVis;
 	_BOOLEAN		bEPGDlgWasVis;
 	ERecMode		eReceiverMode;
-    CEventFilter	ef;
 
 	void SetStatus(CMultColorLED* LED, ETypeRxStatus state);
-	virtual void	closeEvent(QCloseEvent* ce);
-	virtual void	showEvent(QShowEvent* pEvent);
-	void			hideEvent(QHideEvent* pEvent);
+	virtual void	eventClose(QCloseEvent* ce);
+	virtual void	eventShow(QShowEvent* pEvent);
+	virtual void	eventHide(QHideEvent* pEvent);
+	virtual void	eventUpdate();
 	void			SetService(int iNewServiceID);
 	void			AddWhatsThisHelp();
 	void			UpdateDisplay();
@@ -95,7 +93,6 @@ protected:
 	void			SetDisplayColor(const QColor newColor);
 
 public slots:
-	void switchEvent();
 	void OnTune();
 	void OnTimer();
 	void OnTimerClose();

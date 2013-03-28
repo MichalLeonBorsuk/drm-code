@@ -26,6 +26,8 @@
  *
 \******************************************************************************/
 
+#include "TransmDlg.h"
+#include "SoundCardSelMenu.h"
 #include <QCloseEvent>
 #include <QTreeWidget>
 #include <QFileDialog>
@@ -33,17 +35,13 @@
 #include <QProgressBar>
 #include <QHeaderView>
 #include <QWhatsThis>
-#include "TransmDlg.h"
-#include "SoundCardSelMenu.h"
 
 
-TransmDialog::TransmDialog(CSettings& Settings,
-	QWidget* parent)
+TransmDialog::TransmDialog(CSettings& Settings,	QWidget* parent)
 	:
-	QMainWindow(parent),
+    CWindow(parent, Settings, "Transmit"),
 	TransThread(Settings),
 	DRMTransmitter(TransThread.DRMTransmitter),
-	Settings(*DRMTransmitter.GetSettings()),
 	vecstrTextMessage(1) /* 1 for new text */,
 	pCodecDlg(NULL), pSysTray(NULL),
 	pActionStartStop(NULL), bIsStarted(FALSE),
@@ -54,9 +52,6 @@ TransmDialog::TransmDialog(CSettings& Settings,
 
 	/* Load transmitter settings */
 	DRMTransmitter.LoadSettings();
-
-	/* Recover window size and position */
-	SetWindowGeometry();
 
 	/* Set help text for the controls */
 	AddWhatsThisHelp();
@@ -484,34 +479,7 @@ TransmDialog::~TransmDialog()
 	Parameters.Unlock();
 }
 
-void TransmDialog::SetWindowGeometry()
-{
-	CWinGeom s;
-	Settings.Get("Transmit Dialog", s);
-	const QRect WinGeom(s.iXPos, s.iYPos, s.iWSize, s.iHSize);
-	if (WinGeom.isValid() && !WinGeom.isEmpty() && !WinGeom.isNull())
-		setGeometry(WinGeom);
-}
-
-void TransmDialog::showEvent(QShowEvent* e)
-{
-	EVENT_FILTER(e);
-}
-
-void TransmDialog::hideEvent(QHideEvent* e)
-{
-	EVENT_FILTER(e);
-	/* Save window position and size */
-	CWinGeom s;
-	QRect WinGeom = geometry();
-	s.iXPos = WinGeom.x();
-	s.iYPos = WinGeom.y();
-	s.iHSize = WinGeom.height();
-	s.iWSize = WinGeom.width();
-	Settings.Put("Transmit Dialog", s);
-}
-
-void TransmDialog::closeEvent(QCloseEvent* ce)
+void TransmDialog::eventClose(QCloseEvent* ce)
 {
 	bCloseRequested = TRUE;
 	if (bIsStarted == TRUE)
@@ -534,23 +502,17 @@ void TransmDialog::OnWhatsThis()
 
 void TransmDialog::OnSysTrayActivated(QSystemTrayIcon::ActivationReason reason)
 {
-	if (reason == QSystemTrayIcon::Trigger ||
-		reason == QSystemTrayIcon::DoubleClick)
+	if (reason == QSystemTrayIcon::Trigger
+#if QT_VERSION < 0x050000
+		|| reason == QSystemTrayIcon::DoubleClick
+#endif
+	)
 	{
-		if (isMinimized())
-		{
-			showNormal();
-			activateWindow();
-		}
+		const Qt::WindowStates ws = windowState();
+		if (ws & Qt::WindowMinimized)
+			setWindowState((ws & ~Qt::WindowMinimized) | Qt::WindowActive);
 		else
-			if (!isVisible())
-			{
-				SetWindowGeometry();
-				show();
-				activateWindow();
-			}
-			else
-				hide();
+			toggleVisibility();
 	}
 }
 

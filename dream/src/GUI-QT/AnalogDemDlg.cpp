@@ -57,16 +57,14 @@
 #endif
 
 /* Implementation *************************************************************/
-AnalogDemDlg::AnalogDemDlg(CDRMReceiver& NDRMR, CSettings& NSettings,
+AnalogDemDlg::AnalogDemDlg(CDRMReceiver& NDRMR, CSettings& Settings,
 	CFileMenu* pFileMenu, CSoundCardSelMenu* pSoundCardMenu, QWidget* parent) :
-	QMainWindow(parent), DRMReceiver(NDRMR), Settings(NSettings),
-	AMSSDlg(NDRMR, Settings, parent), MainPlot(NULL),
+	CWindow(parent, Settings, "AM"),
+	DRMReceiver(NDRMR),
+	AMSSDlg(NDRMR, Settings, this), MainPlot(NULL),
 	pFileMenu(pFileMenu), pSoundCardMenu(pSoundCardMenu)
 {
 	setupUi(this);
-
-	/* Recover window size and position */
-	SetWindowGeometry();
 
 	/* Set help text for the controls */
 	AddWhatsThisHelp();
@@ -89,12 +87,12 @@ AnalogDemDlg::AnalogDemDlg(CDRMReceiver& NDRMR, CSettings& NSettings,
 	MainPlot = new CDRMPlot(NULL, plot);
 
 	/* Init main plot */
-	bool waterfall = Settings.Get("AM Dialog", "waterfall", false);
+	bool waterfall = getSetting("waterfall", false);
 	ButtonWaterfall->setChecked(waterfall);
 	if(MainPlot)
 	{
 		MainPlot->SetRecObj(&DRMReceiver);
-		MainPlot->SetPlotStyle(Settings.Get("System Evaluation Dialog", "plotstyle", 0));
+		MainPlot->SetPlotStyle(getSetting("plotstyle", 0, true));
 		MainPlot->SetupChart(waterfall?CDRMPlot::INP_SPEC_WATERF:CDRMPlot::INPUT_SIG_PSD_ANALOG);
 	}
 
@@ -143,7 +141,7 @@ AnalogDemDlg::AnalogDemDlg(CDRMReceiver& NDRMR, CSettings& NSettings,
 	connect(ButtonDRM, SIGNAL(clicked()),
 		this, SLOT(OnSwitchToDRM()));
 	connect(ButtonAMSS, SIGNAL(clicked()),
-		this, SLOT(OnButtonAMSS()));
+		&AMSSDlg, SLOT(show()));
 	connect(ButtonWaterfall, SIGNAL(clicked()),
 		this, SLOT(OnButtonWaterfall()));
 	connect(MainPlot, SIGNAL(xAxisValSet(double)),
@@ -182,15 +180,6 @@ AnalogDemDlg::AnalogDemDlg(CDRMReceiver& NDRMR, CSettings& NSettings,
 	/* Don't activate real-time timers, wait for show event */
 }
 
-void AnalogDemDlg::SetWindowGeometry()
-{
-	CWinGeom s;
-	Settings.Get("AM Dialog", s);
-	const QRect WinGeom(s.iXPos, s.iYPos, s.iWSize, s.iHSize);
-	if (WinGeom.isValid() && !WinGeom.isEmpty() && !WinGeom.isNull())
-			setGeometry(WinGeom);
-}
-
 void AnalogDemDlg::OnWhatsThis()
 {
 	QWhatsThis::enterWhatsThisMode();
@@ -206,17 +195,16 @@ void AnalogDemDlg::OnSwitchToFM()
 	emit SwitchMode(RM_FM);
 }
 
-void AnalogDemDlg::switchEvent()
+void AnalogDemDlg::eventUpdate()
 {
-	/* Put initialization code on mode switch here */
-	SetWindowGeometry();
+	/* Put (re)initialization code here for the settings that might have
+	   be changed by another top level window. Called on mode switch */
 	pFileMenu->UpdateMenu();
 	UpdateSliderBandwidth();
 }
 
-void AnalogDemDlg::showEvent(QShowEvent* e)
+void AnalogDemDlg::eventShow(QShowEvent*)
 {
-	EVENT_FILTER(e);
 	OnTimer();
 	OnTimerPLLPhaseDial();
 	/* Set correct schedule */
@@ -225,24 +213,14 @@ void AnalogDemDlg::showEvent(QShowEvent* e)
 	Timer.start(GUI_CONTROL_UPDATE_TIME);
 	TimerPLLPhaseDial.start(PLL_PHASE_DIAL_UPDATE_TIME);
 
-	if(Settings.Get("AM Dialog", "Stations Dialog visible", FALSE))
-		emit ViewStationsDlg();
-
 	UpdateControls();
-
-	/* Open AMSS window */
-	if (Settings.Get("AMSS Dialog", "visible", FALSE) == TRUE)
-		AMSSDlg.show();
-	else
-		AMSSDlg.hide();
 
     /* Notify the MainPlot of showEvent */
     if(MainPlot) MainPlot->activate();
 }
 
-void AnalogDemDlg::hideEvent(QHideEvent* e)
+void AnalogDemDlg::eventHide(QHideEvent*)
 {
-	EVENT_FILTER(e);
     /* Notify the MainPlot of hideEvent */
     if(MainPlot) MainPlot->deactivate();
 
@@ -250,43 +228,17 @@ void AnalogDemDlg::hideEvent(QHideEvent* e)
 	Timer.stop();
 	TimerPLLPhaseDial.stop();
 
-	/* Close AMSS window */
-	Settings.Put("AMSS Dialog", "visible", AMSSDlg.isVisible());
-	AMSSDlg.hide();
-
-	/* Save window geometry data */
-	CWinGeom s;
-	QRect WinGeom = geometry();
-	s.iXPos = WinGeom.x();
-	s.iYPos = WinGeom.y();
-	s.iHSize = WinGeom.height();
-	s.iWSize = WinGeom.width();
-	Settings.Put("AM Dialog", s);
-	bool waterfall;
-	waterfall = ButtonWaterfall->isChecked();
-	Settings.Put("AM Dialog", "waterfall", waterfall);
+	bool waterfall = ButtonWaterfall->isChecked();
+	putSetting("waterfall", waterfall);
 }
 
-void AnalogDemDlg::closeEvent(QCloseEvent* ce)
+void AnalogDemDlg::eventClose(QCloseEvent* ce)
 {
 	if (!TimerClose.isActive())
 	{
 		/* Stop real-time timers */
 		Timer.stop();
 		TimerPLLPhaseDial.stop();
-
-		/* Close AMSS window */
-		Settings.Put("AMSS Dialog", "visible", AMSSDlg.isVisible());
-		AMSSDlg.hide();
-
-		/* Save window geometry data */
-		CWinGeom s;
-		QRect WinGeom = geometry();
-		s.iXPos = WinGeom.x();
-		s.iYPos = WinGeom.y();
-		s.iHSize = WinGeom.height();
-		s.iWSize = WinGeom.width();
-		Settings.Put("AM Dialog", s);
 
 		/* Tell every other window to close too */
 		emit Closed();
@@ -658,13 +610,6 @@ void AnalogDemDlg::on_ButtonFreqOffset_clicked(bool)
 	}
 }
 
-void AnalogDemDlg::OnButtonAMSS()
-{
-	/* Open AMSS window and set in foreground */
-	AMSSDlg.show();
-	AMSSDlg.raise();
-}
-
 void AnalogDemDlg::AddWhatsThisHelp()
 {
 	/* Noise Reduction */
@@ -808,13 +753,12 @@ void AnalogDemDlg::AddWhatsThisHelp()
 
 	Added phase offset display for AMSS demodulation loop.
 */
-CAMSSDlg::CAMSSDlg(CDRMReceiver& NDRMR, CSettings& NSettings,
-	QWidget* parent) :
-	QDialog(parent),
-	DRMReceiver(NDRMR),
-	Settings(NSettings)
+CAMSSDlg::CAMSSDlg(CDRMReceiver& NDRMR, CSettings& Settings, QWidget* parent) :
+	CWindow(parent, Settings, "AMSS"),
+	DRMReceiver(NDRMR)
 {
 	setupUi(this);
+
 #if QWT_VERSION >= 0x060100
 	/* Workaround for PhaseDialAMSS receiving focus 
 	even if its FocusPolicy is set to Qt::NoFocus,
@@ -822,13 +766,6 @@ CAMSSDlg::CAMSSDlg(CDRMReceiver& NDRMR, CSettings& NSettings,
 	setFocusPolicy(Qt::StrongFocus);
 	setFocus();
 #endif
-
-	/* Recover window size and position */
-	CWinGeom s;
-	Settings.Get("AMSS Dialog", s);
-	const QRect WinGeom(s.iXPos, s.iYPos, s.iWSize, s.iHSize);
-	if (WinGeom.isValid() && !WinGeom.isEmpty() && !WinGeom.isNull())
-			setGeometry(WinGeom);
 
 	/* Set help text for the controls */
 	AddWhatsThisHelp();
@@ -873,31 +810,17 @@ CAMSSDlg::CAMSSDlg(CDRMReceiver& NDRMR, CSettings& NSettings,
 		this, SLOT(OnTimer()));
 	connect(&TimerPLLPhaseDial, SIGNAL(timeout()),
 		this, SLOT(OnTimerPLLPhaseDial()));
-
-	/* set the progress bar style */
-
 }
 
-void CAMSSDlg::hideEvent(QHideEvent* e)
+void CAMSSDlg::eventHide(QHideEvent*)
 {
-	EVENT_FILTER(e);
 	/* stop real-time timers */
 	Timer.stop();
 	TimerPLLPhaseDial.stop();
-
-	/* Save window geometry data */
-	CWinGeom s;
-	QRect WinGeom = geometry();
-	s.iXPos = WinGeom.x();
-	s.iYPos = WinGeom.y();
-	s.iHSize = WinGeom.height();
-	s.iWSize = WinGeom.width();
-	Settings.Put("AMSS Dialog", s);
 }
 
-void CAMSSDlg::showEvent(QShowEvent* e)
+void CAMSSDlg::eventShow(QShowEvent*)
 {
-	EVENT_FILTER(e);
 	OnTimer();
 	OnTimerPLLPhaseDial();
 

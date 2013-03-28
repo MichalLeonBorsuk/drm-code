@@ -47,6 +47,7 @@
 #include <qwt_thermo.h>
 #include "ui_DRMMainWindow.h"
 
+#include "CWindow.h"
 #include "EvaluationDlg.h"
 #include "SoundCardSelMenu.h"
 #include "DialogUtil.h"
@@ -69,7 +70,7 @@ class JLViewer;
 class SlideShowViewer;
 class CScheduler;
 
-class FDRMDialog : public QMainWindow, public Ui_DRMMainWindow
+class FDRMDialog : public CWindow, public Ui_DRMMainWindow
 {
     Q_OBJECT
 
@@ -79,13 +80,10 @@ public:
 #else
     FDRMDialog(CDRMReceiver&, CSettings&, QWidget* parent = 0);
 #endif
-    void switchEvent();
-
     virtual ~FDRMDialog();
 
 protected:
     CDRMReceiver&		DRMReceiver;
-    CSettings&			Settings;
     QTimer				Timer;
     QTimer				TimerClose;
     vector<QLabel*>		serviceLabels;
@@ -107,10 +105,8 @@ protected:
     QMenu*				pReceiverModeMenu;
     QMenu*				pSettingsMenu;
     QMenu*				pPlotStyleMenu;
-    QSignalMapper*		plotStyleMapper;
-    QActionGroup*		plotStyleGroup;
     CSysTray*           pSysTray;
-    QWidget*            pCurrentWindow;
+    CWindow*            pCurrentWindow;
     CFileMenu*			pFileMenu;
     CSoundCardSelMenu*	pSoundCardMenu;
     CAboutDlg		    AboutDlg;
@@ -121,12 +117,12 @@ protected:
     QTimer				TimerSysTray;
     CScheduler* 	    pScheduler;
     QTimer*		        pScheduleTimer;
-    CEventFilter        ef;
 
     void SetStatus(CMultColorLED* LED, ETypeRxStatus state);
-    virtual void	closeEvent(QCloseEvent* ce);
-    virtual void	showEvent(QShowEvent* pEvent);
-    virtual void	hideEvent(QHideEvent* pEvent);
+    virtual void        eventClose(QCloseEvent* ce);
+    virtual void        eventHide(QHideEvent* pEvent);
+    virtual void        eventShow(QShowEvent* pEvent);
+    virtual void        eventUpdate();
     void		AddWhatsThisHelp();
     void		UpdateDRM_GUI();
     void		UpdateDisplay();
@@ -149,7 +145,6 @@ protected:
     void SysTrayStart();
     void SysTrayStop(const QString&);
     void SysTrayToolTip(const QString&, const QString&);
-    void SetWindowGeometry();
 
 public slots:
     void OnTimer();

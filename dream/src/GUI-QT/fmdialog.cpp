@@ -42,15 +42,13 @@
 #include "SoundCardSelMenu.h"
 
 /* Implementation *************************************************************/
-FMDialog::FMDialog(CDRMReceiver& NDRMR, CSettings& NSettings,
+FMDialog::FMDialog(CDRMReceiver& NDRMR, CSettings& Settings,
 	CFileMenu* pFileMenu, CSoundCardSelMenu* pSoundCardMenu, QWidget* parent) :
-	QMainWindow(parent), DRMReceiver(NDRMR), Settings(NSettings),
+	CWindow(parent, Settings, "FM"),
+	DRMReceiver(NDRMR),
 	pFileMenu(pFileMenu), pSoundCardMenu(pSoundCardMenu), eReceiverMode(RM_NONE)
 {
 	setupUi(this);
-
-	/* Recover window size and position */
-	SetWindowGeometry();
 
 	/* Set help text for the controls */
 	AddWhatsThisHelp();
@@ -66,10 +64,6 @@ FMDialog::FMDialog(CDRMReceiver& NDRMR, CSettings& NSettings,
 	connect(actionDisplayColor, SIGNAL(triggered()), this, SLOT(OnMenuSetDisplayColor()));
 	connect(actionAbout_Dream, SIGNAL(triggered()), this, SLOT(OnHelpAbout()));
 	connect(actionWhats_This, SIGNAL(triggered()), this, SLOT(OnWhatsThis()));
-
-	/* Digi controls */
-	/* Set display color */
-	SetDisplayColor(CRGBConversion::int2RGB(Settings.Get("DRM Dialog", "colorscheme", 0xff0000)));
 
 	/* Reset text */
 	LabelBitrate->setText("");
@@ -115,15 +109,6 @@ FMDialog::FMDialog(CDRMReceiver& NDRMR, CSettings& NSettings,
 
 	/* Activate real-time timers */
  	Timer.start(GUI_CONTROL_UPDATE_TIME);
-}
-
-void FMDialog::SetWindowGeometry()
-{
-	CWinGeom s;
-	Settings.Get("FM Dialog", s);
-	const QRect WinGeom(s.iXPos, s.iYPos, s.iWSize, s.iHSize);
-	if (WinGeom.isValid() && !WinGeom.isEmpty() && !WinGeom.isNull())
-		setGeometry(WinGeom);
 }
 
 void FMDialog::OnWhatsThis()
@@ -404,24 +389,23 @@ void FMDialog::ClearDisplay()
 	//LabelServiceLabel->setText(tr("Scanning..."));
 }
 
-void FMDialog::switchEvent()
+void FMDialog::eventUpdate()
 {
-	/* Put initialization code on mode switch here */
-	SetWindowGeometry();
+	/* Put (re)initialization code here for the settings that might have
+	   be changed by another top level window. Called on mode switch */
 	pFileMenu->UpdateMenu();
+	SetDisplayColor(CRGBConversion::int2RGB(getSetting("colorscheme", 0xff0000, true)));
 }
 
-void FMDialog::showEvent(QShowEvent* e)
+void FMDialog::eventShow(QShowEvent*)
 {
-	EVENT_FILTER(e);
 	/* Set timer for real-time controls */
 	OnTimer();
  	Timer.start(GUI_CONTROL_UPDATE_TIME);
 }
 
-void FMDialog::hideEvent(QHideEvent* e)
+void FMDialog::eventHide(QHideEvent*)
 {
-	EVENT_FILTER(e);
 	/* Deactivate real-time timer */
 	Timer.stop();
 }
@@ -436,31 +420,22 @@ void FMDialog::SetService(int iNewServiceID)
 
 void FMDialog::OnMenuSetDisplayColor()
 {
-    const QColor color = CRGBConversion::int2RGB(Settings.Get("DRM Dialog", "colorscheme", 0xff0000));
-    const QColor newColor = QColorDialog::getColor( color, this);
+    const QColor color = CRGBConversion::int2RGB(getSetting("colorscheme", 0xff0000, true));
+    const QColor newColor = QColorDialog::getColor(color, this);
     if (newColor.isValid())
 	{
 		/* Store new color and update display */
 		SetDisplayColor(newColor);
-    	Settings.Put("DRM Dialog", "colorscheme", CRGBConversion::RGB2int(newColor));
+    	putSetting("colorscheme", CRGBConversion::RGB2int(newColor), true);
 	}
 }
 
-void FMDialog::closeEvent(QCloseEvent* ce)
+void FMDialog::eventClose(QCloseEvent* ce)
 {
 	if (!TimerClose.isActive())
 	{
 		/* Stop real-time timer */
 		Timer.stop();
-
-		/* Save window geometry data */
-		CWinGeom s;
-		QRect WinGeom = geometry();
-		s.iXPos = WinGeom.x();
-		s.iYPos = WinGeom.y();
-		s.iHSize = WinGeom.height();
-		s.iWSize = WinGeom.width();
-		Settings.Put("FM Dialog", s);
 
 		/* Tell every other window to close too */
 		emit Closed();

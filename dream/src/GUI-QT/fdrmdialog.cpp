@@ -44,25 +44,22 @@
 
 /* Implementation *************************************************************/
 #ifdef HAVE_LIBHAMLIB
-FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& NSettings, CRig& rig,
+FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& Settings, CRig& rig,
                        QWidget* parent)
 #else
-FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& NSettings, 
+FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& Settings, 
                        QWidget* parent)
 #endif
     :
-    QMainWindow(parent),
-    DRMReceiver(NDRMR),Settings(NSettings),
-    Timer(),serviceLabels(4),pLogging(NULL),
+    CWindow(parent, Settings, "DRM"),
+    DRMReceiver(NDRMR),
+    serviceLabels(4), pLogging(NULL),
     pSysTray(NULL), pCurrentWindow(this),
     iMultimediaServiceBit(0),
     iLastMultimediaServiceSelected(-1),
     pScheduler(NULL), pScheduleTimer(NULL)
 {
     setupUi(this);
-
-    /* Recover window size and position */
-    SetWindowGeometry();
 
     /* Set help text for the controls */
     AddWhatsThisHelp();
@@ -84,25 +81,29 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& NSettings,
     /* FM window */
     pFMDlg = new FMDialog(DRMReceiver, Settings, pFileMenu, pSoundCardMenu);
 
+    /* Parent list for Stations and Live Schedule window */
+	QMap <QWidget*,QString> parents;
+	parents[this] = "drm";
+	parents[pAnalogDemDlg] = "analog";
+
+    /* Stations window */
 #ifdef HAVE_LIBHAMLIB
-    /* Stations window */
-    pStationsDlg = new StationsDlg(DRMReceiver, Settings, rig);
+    pStationsDlg = new StationsDlg(DRMReceiver, Settings, rig, parents);
 #else
-    /* Stations window */
-    pStationsDlg = new StationsDlg(DRMReceiver, Settings);
+    pStationsDlg = new StationsDlg(DRMReceiver, Settings, parents);
 #endif
 
+    /* Live Schedule window */
+    pLiveScheduleDlg = new LiveScheduleDlg(DRMReceiver, Settings, parents);
+
     /* MOT broadcast website viewer window */
-    pBWSDlg = new BWSViewer(DRMReceiver, Settings, NULL);
+    pBWSDlg = new BWSViewer(DRMReceiver, Settings, this);
 
     /* Journaline viewer window */
-    pJLDlg = new JLViewer(DRMReceiver, Settings, NULL);
+    pJLDlg = new JLViewer(DRMReceiver, Settings, this);
 
     /* MOT slide show window */
-    pSlideShowDlg = new SlideShowViewer(DRMReceiver, Settings, NULL);
-
-    /* Live Schedule window */
-    pLiveScheduleDlg = new LiveScheduleDlg(DRMReceiver, Settings, this);
+    pSlideShowDlg = new SlideShowViewer(DRMReceiver, Settings, this);
 
     /* Programme Guide Window */
     pEPGDlg = new EPGDlg(DRMReceiver, Settings, this);
@@ -135,8 +136,8 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& NSettings,
     connect(actionDisplayColor, SIGNAL(triggered()), this, SLOT(OnMenuSetDisplayColor()));
 
     /* Plot style settings */
-    plotStyleMapper = new QSignalMapper(this);
-    plotStyleGroup = new QActionGroup(this);
+    QSignalMapper* plotStyleMapper = new QSignalMapper(this);
+    QActionGroup* plotStyleGroup = new QActionGroup(this);
     plotStyleGroup->addAction(actionBlueWhite);
     plotStyleGroup->addAction(actionGreenBlack);
     plotStyleGroup->addAction(actionBlackGrey);
@@ -147,7 +148,7 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& NSettings,
     connect(actionGreenBlack, SIGNAL(triggered()), plotStyleMapper, SLOT(map()));
     connect(actionBlackGrey, SIGNAL(triggered()), plotStyleMapper, SLOT(map()));
     connect(plotStyleMapper, SIGNAL(mapped(int)), this, SIGNAL(plotStyleChanged(int)));
-    switch(Settings.Get("System Evaluation Dialog", "plotstyle", int(0)))
+    switch(getSetting("plotstyle", int(0), true))
     {
     case 0:
         actionBlueWhite->setChecked(true);
@@ -165,10 +166,6 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& NSettings,
 
     connect(this, SIGNAL(plotStyleChanged(int)), pSysEvalDlg, SLOT(UpdatePlotStyle(int)));
     connect(this, SIGNAL(plotStyleChanged(int)), pAnalogDemDlg, SLOT(UpdatePlotStyle(int)));
-
-    /* Digi controls */
-    /* Set display color */
-    SetDisplayColor(CRGBConversion::int2RGB(Settings.Get("DRM Dialog", "colorscheme", 0xff0000)));
 
     pButtonGroup = new QButtonGroup(this);
     pButtonGroup->setExclusive(true);
@@ -255,34 +252,28 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& NSettings,
 
 FDRMDialog::~FDRMDialog()
 {
+    /* Destroying logger */
     delete pLogging;
+    /* Destroying top level windows, children are automaticaly destroyed */
+    delete pAnalogDemDlg;
+    delete pFMDlg;
+    /* Destroying system tray icon */
     CSysTray::Destroy(&pSysTray);
 }
 
 void FDRMDialog::OnSysTrayActivated(QSystemTrayIcon::ActivationReason reason)
 {
-    if (reason == QSystemTrayIcon::Trigger ||
-        reason == QSystemTrayIcon::DoubleClick)
+    if (reason == QSystemTrayIcon::Trigger
+#if QT_VERSION < 0x050000
+        || reason == QSystemTrayIcon::DoubleClick
+#endif
+    )
     {
-        if (pCurrentWindow->isMinimized())
-        {
-            pCurrentWindow->showNormal();
-            pCurrentWindow->activateWindow();
-        }
+        const Qt::WindowStates ws = pCurrentWindow->windowState();
+        if (ws & Qt::WindowMinimized)
+            pCurrentWindow->setWindowState((ws & ~Qt::WindowMinimized) | Qt::WindowActive);
         else
-            if (!pCurrentWindow->isVisible())
-            {
-                if (pCurrentWindow == this)
-                    this->SetWindowGeometry();
-                else if (pCurrentWindow == pAnalogDemDlg)
-                    pAnalogDemDlg->SetWindowGeometry();
-                else if (pCurrentWindow == pFMDlg)
-                    pFMDlg->SetWindowGeometry();
-                pCurrentWindow->show();
-                pCurrentWindow->activateWindow();
-            }
-            else
-                pCurrentWindow->hide();
+            pCurrentWindow->toggleVisibility();
     }
 }
 
@@ -310,15 +301,6 @@ void FDRMDialog::OnSysTrayTimer()
     else
         Message = tr("Scanning...");
     CSysTray::SetToolTip(pSysTray, Title, Message);
-}
-
-void FDRMDialog::SetWindowGeometry()
-{
-    CWinGeom s;
-    Settings.Get("DRM Dialog", s);
-    const QRect WinGeom(s.iXPos, s.iYPos, s.iWSize, s.iHSize);
-    if (WinGeom.isValid() && !WinGeom.isEmpty() && !WinGeom.isNull())
-        setGeometry(WinGeom);
 }
 
 void FDRMDialog::OnWhatsThis()
@@ -446,8 +428,6 @@ void FDRMDialog::OnTimer()
         ChangeGUIModeToAM();
         break;
     case RM_FM:
-        pStationsDlg->hide(); // in case open in AM mode - AM dialog can't hide this
-        pLiveScheduleDlg->hide(); // in case open in AM mode - AM dialog can't hide this
         ChangeGUIModeToFM();
         break;
     case RM_NONE: // wait until working thread starts operating
@@ -456,12 +436,12 @@ void FDRMDialog::OnTimer()
 
     // do this here so GUI has initialised before we might pop up a message box
     if(pScheduler!=NULL)
-	return;
+        return;
 
     string schedfile = Settings.Get("command", "schedule", string());
     if(schedfile != "")
     {
-	bool testMode = Settings.Get("command", "test", false);
+        bool testMode = Settings.Get("command", "test", false);
         pScheduler = new CScheduler(testMode);
         if(pScheduler->LoadSchedule(schedfile)) {
             pScheduleTimer = new QTimer(this);
@@ -893,8 +873,8 @@ void FDRMDialog::ChangeGUIModeToDRM()
 {
     CSysTray::Start(pSysTray);
     pCurrentWindow = this;
-    switchEvent();
-    show();
+    pCurrentWindow->eventUpdate();
+    pCurrentWindow->show();
 }
 
 void FDRMDialog::ChangeGUIModeToAM()
@@ -903,8 +883,8 @@ void FDRMDialog::ChangeGUIModeToAM()
     Timer.stop();
     CSysTray::Stop(pSysTray, tr("Dream AM"));
     pCurrentWindow = pAnalogDemDlg;
-    pAnalogDemDlg->switchEvent();
-    pAnalogDemDlg->show();
+    pCurrentWindow->eventUpdate();
+    pCurrentWindow->show();
 }
 
 void FDRMDialog::ChangeGUIModeToFM()
@@ -913,82 +893,29 @@ void FDRMDialog::ChangeGUIModeToFM()
     Timer.stop();
     CSysTray::Stop(pSysTray, tr("Dream FM"));
     pCurrentWindow = pFMDlg;
-    pFMDlg->switchEvent();
-    pFMDlg->show();
+    pCurrentWindow->eventUpdate();
+    pCurrentWindow->show();
 }
 
-void FDRMDialog::switchEvent()
+void FDRMDialog::eventUpdate()
 {
-    /* Put initialization code on mode switch here */
-    SetWindowGeometry();
+    /* Put (re)initialization code here for the settings that might have
+       be changed by another top level window. Called on mode switch */
     pFileMenu->UpdateMenu();
+    SetDisplayColor(CRGBConversion::int2RGB(getSetting("colorscheme", 0xff0000, true)));
 }
 
-void FDRMDialog::showEvent(QShowEvent* e)
+void FDRMDialog::eventShow(QShowEvent*)
 {
-    EVENT_FILTER(e);
-    if (Settings.Get("DRM Dialog", "Stations Dialog visible", false))
-        pStationsDlg->show();
-    else
-        pStationsDlg->hide(); // in case AM had it open
-
-    if (Settings.Get("DRM Dialog", "Live Schedule Dialog visible", false))
-        pLiveScheduleDlg->show();
-
-    if (Settings.Get("DRM Dialog", "EPG Dialog visible", false))
-        pEPGDlg->show();
-
-    if (Settings.Get("DRM Dialog", "System Evaluation Dialog visible", false))
-        pSysEvalDlg->show();
-
-    if (Settings.Get("DRM Dialog", "BWS Dialog visible", false))
-        pBWSDlg->show();
-
-    if (Settings.Get("DRM Dialog", "SS Dialog visible", false))
-        pSlideShowDlg->show();
-
-    if (Settings.Get("DRM Dialog", "JL Dialog visible", false))
-        pJLDlg->show();
-
-    if (Settings.Get("DRM Dialog", "EPG Dialog visible", false))
-        pEPGDlg->show();
-
     /* Set timer for real-time controls */
     OnTimer();
     Timer.start(GUI_CONTROL_UPDATE_TIME);
 }
 
-void FDRMDialog::hideEvent(QHideEvent* e)
+void FDRMDialog::eventHide(QHideEvent*)
 {
-    EVENT_FILTER(e);
     /* Deactivate real-time timers */
     Timer.stop();
-
-    /* remember the state of the windows */
-    Settings.Put("DRM Dialog", "Live Schedule Dialog visible", pLiveScheduleDlg->isVisible());
-    Settings.Put("DRM Dialog", "System Evaluation Dialog visible", pSysEvalDlg->isVisible());
-    Settings.Put("DRM Dialog", "BWS Dialog visible", pBWSDlg->isVisible());
-    Settings.Put("DRM Dialog", "JL Dialog visible", pJLDlg->isVisible());
-    Settings.Put("DRM Dialog", "SS Dialog visible", pSlideShowDlg->isVisible());
-    pSlideShowDlg->hide();
-    pBWSDlg->hide();
-    pJLDlg->hide();
-    Settings.Put("DRM Dialog", "EPG Dialog visible", pEPGDlg->isVisible());
-
-    /* now close all the other windows */
-    pSysEvalDlg->hide();
-    pLiveScheduleDlg->hide();
-    pEPGDlg->hide();
-    pStationsDlg->hide();
-
-    CWinGeom s;
-    QRect WinGeom = geometry();
-    s.iXPos = WinGeom.x();
-    s.iYPos = WinGeom.y();
-    s.iHSize = WinGeom.height();
-    s.iWSize = WinGeom.width();
-    Settings.Put("DRM Dialog", s);
-
 }
 
 void FDRMDialog::OnNewAcquisition()
@@ -1100,17 +1027,17 @@ void FDRMDialog::OnViewMultimediaDlg()
 
 void FDRMDialog::OnMenuSetDisplayColor()
 {
-    const QColor color = CRGBConversion::int2RGB(Settings.Get("DRM Dialog", "colorscheme", 0xff0000));
-    const QColor newColor = QColorDialog::getColor( color, this);
+    const QColor color = CRGBConversion::int2RGB(getSetting("colorscheme", 0xff0000, true));
+    const QColor newColor = QColorDialog::getColor(color, this);
     if (newColor.isValid())
     {
         /* Store new color and update display */
         SetDisplayColor(newColor);
-        Settings.Put("DRM Dialog", "colorscheme", CRGBConversion::RGB2int(newColor));
+        putSetting("colorscheme", CRGBConversion::RGB2int(newColor), true);
     }
 }
 
-void FDRMDialog::closeEvent(QCloseEvent* ce)
+void FDRMDialog::eventClose(QCloseEvent* ce)
 {
     /* The close event has been actioned and we want to shut
      * down, but the main window should be the last thing to
@@ -1125,22 +1052,7 @@ void FDRMDialog::closeEvent(QCloseEvent* ce)
         /* Stop real-time timer */
         Timer.stop();
 
-        pStationsDlg->SaveSettings(Settings);
-        pLiveScheduleDlg->SaveSettings(Settings);
         pLogging->SaveSettings(Settings);
-
-        /* Save the station dialog visibility state */
-        switch (DRMReceiver.GetReceiverMode())
-        {
-        case RM_DRM:
-            Settings.Put("DRM Dialog", "Stations Dialog visible", pStationsDlg->isVisible());
-            break;
-        case RM_AM:
-            Settings.Put("AM Dialog", "Stations Dialog visible", pStationsDlg->isVisible());
-            break;
-        default:
-            break;
-        }
 
         /* Set the timer for polling the working thread state */
         TimerClose.start(50);
@@ -1156,7 +1068,6 @@ void FDRMDialog::closeEvent(QCloseEvent* ce)
         AboutDlg.close();
         pAnalogDemDlg->close();
         pFMDlg->close();
-        pStationsDlg->close();
 #if QT_VERSION >= 0x050000
         CSysTray::Destroy(&pSysTray); /* Needed for Qt 5.0.0 - possible framework bug */
 #endif

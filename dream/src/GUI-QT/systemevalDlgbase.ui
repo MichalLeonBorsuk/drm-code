@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>SystemEvaluationWindow</class>
- <widget class="QDialog" name="SystemEvaluationWindow">
+ <widget class="QMainWindow" name="SystemEvaluationWindow">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -17,9 +17,7 @@
    <iconset resource="res/icons.qrc">
     <normaloff>:/icons/MainIcon.svg</normaloff>:/icons/MainIcon.svg</iconset>
   </property>
-  <property name="sizeGripEnabled">
-   <bool>true</bool>
-  </property>
+  <widget class="QWidget" name="centralwidget">
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <layout class="QHBoxLayout">
@@ -1728,6 +1726,7 @@
     </layout>
    </item>
   </layout>
+  </widget>
  </widget>
  <customwidgets>
   <customwidget>

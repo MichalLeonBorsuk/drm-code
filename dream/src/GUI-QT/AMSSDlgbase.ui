@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>CAMSSDlgBase</class>
- <widget class="QDialog" name="CAMSSDlgBase">
+ <widget class="QMainWindow" name="CAMSSDlgBase">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -23,10 +23,8 @@
    <iconset resource="res/icons.qrc">
     <normaloff>:/icons/MainIcon.svg</normaloff>:/icons/MainIcon.svg</iconset>
   </property>
-  <property name="sizeGripEnabled">
-   <bool>true</bool>
-  </property>
-  <layout class="QVBoxLayout">
+  <widget class="QWidget" name="centralwidget">
+  <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <widget class="QGroupBox" name="GroupBoxAMSS">
      <property name="sizePolicy">
@@ -3689,6 +3687,7 @@
     </widget>
    </item>
   </layout>
+  </widget>
  </widget>
  <customwidgets>
   <customwidget>
