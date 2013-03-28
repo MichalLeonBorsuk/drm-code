@@ -560,24 +560,22 @@ void CStationsItem::SetDaysFlagString(const QString& strNewDaysFlags)
 }
 
 #ifdef HAVE_LIBHAMLIB
-StationsDlg::StationsDlg(CDRMReceiver& DRMReceiver, CSettings& Settings, CRig& Rig):
-	QDialog(NULL), DRMReceiver(DRMReceiver), Settings(Settings), Rig(Rig),
+StationsDlg::StationsDlg(CDRMReceiver& DRMReceiver, CSettings& Settings, CRig& Rig, QMap<QWidget*,QString>& parents):
+    CWindow(parents, Settings, "Stations"),
+    DRMReceiver(DRMReceiver), Rig(Rig),
 #else
-StationsDlg::StationsDlg(CDRMReceiver& DRMReceiver, CSettings& Settings):
-	QDialog(NULL), DRMReceiver(DRMReceiver), Settings(Settings),
+StationsDlg::StationsDlg(CDRMReceiver& DRMReceiver, CSettings& Settings, QMap<QWidget*,QString>& parents):
+    CWindow(parents, Settings, "Stations"),
+    DRMReceiver(DRMReceiver),
 #endif
     greenCube(":/icons/greenCube.png"), redCube(":/icons/redCube.png"),
     orangeCube(":/icons/orangeCube.png"), pinkCube(":/icons/pinkCube.png"),
     bReInitOnFrequencyChange(FALSE), eLastScheduleMode(CDRMSchedule::SM_NONE)
 {
-    /* Enable minimize and maximize box */
-    setWindowFlags(Qt::Window);
-
-    setAttribute(Qt::WA_QuitOnClose, false);
     setupUi(this);
 
     /* Load settings */
-    LoadSettings(Settings);
+    LoadSettings();
 
     /* Set help text for the controls */
     AddWhatsThisHelp();
@@ -846,18 +844,22 @@ void CDRMSchedule::SetAnalogUrl()
         qurlanalog = QUrl(QString("http://eibispace.de/dx/sked-%1%2.csv").arg(season).arg(year-2000,2));
 }
 
-void StationsDlg::hideEvent(QHideEvent* e)
+void StationsDlg::eventClose(QCloseEvent*)
 {
-    EVENT_FILTER(e);
+    /* Save settings */
+    SaveSettings();
+}
+
+void StationsDlg::eventHide(QHideEvent*)
+{
     /* Deactivate real-time timers */
     TimerList.stop();
     TimerUTCLabel.stop();
     DisableSMeter();
 }
 
-void StationsDlg::showEvent(QShowEvent* e)
+void StationsDlg::eventShow(QShowEvent*)
 {
-    EVENT_FILTER(e);
     /* Activate real-time timer when window is shown */
     TimerList.start(GUI_TIMER_LIST_VIEW_STAT); /* Stations list */
     TimerUTCLabel.start(GUI_TIMER_UTC_TIME_LABEL);
@@ -878,9 +880,10 @@ void StationsDlg::showEvent(QShowEvent* e)
                                  "Try to download this file by using the 'Update' menu."),
                                  QMessageBox::Ok);
 
-    /* Force list and UTC label update */
+    /* Force UTC label update */
     OnTimerUTCLabel();
-    OnTimerList();
+
+    QTimer::singleShot(1000, this, SLOT(OnTimerList()));
 }
 
 void StationsDlg::CheckMode()
@@ -890,12 +893,12 @@ void StationsDlg::CheckMode()
     if (eSchedM == CDRMSchedule::SM_DRM &&  eRecM != RM_DRM)
     {
         DRMSchedule.SetSchedMode(CDRMSchedule::SM_ANALOG);
-	AddUpdateDateTime();
+        AddUpdateDateTime();
     }
     if (eSchedM == CDRMSchedule::SM_ANALOG &&  eRecM == RM_DRM)
     {
         DRMSchedule.SetSchedMode(CDRMSchedule::SM_DRM);
-	AddUpdateDateTime();
+        AddUpdateDateTime();
     }
 }
 
@@ -913,48 +916,40 @@ void StationsDlg::OnTimerUTCLabel()
     /* Only apply if time label does not show the correct time */
     if (TextLabelUTCTime->text().compare(strUTCTime))
         TextLabelUTCTime->setText(strUTCTime);
-
-    /* Load the schedule if necessary
-     * do this here because the timer interval is short enough
-    */
-    CheckMode();
-    if (DRMSchedule.GetStationNumber() == 0)
-    {
-        LoadSchedule();
-    }
 }
 
 void StationsDlg::OnTimerList()
 {
-    /* frequency could be changed by evaluation dialog or RSCI */
-    int iFrequency = DRMReceiver.GetFrequency();
-    int iCurFrequency = QwtCounterFrequency->value();
-
-    if (iFrequency != iCurFrequency)
+    if (isVisible())
     {
-        QwtCounterFrequency->setValue(iFrequency);
-    }
+        if (DRMSchedule.GetStationNumber() == 0)
+        {
+            LoadSchedule();
+        }
 
-    /* Update list view */
-    SetStationsView();
+        /* frequency could be changed by evaluation dialog or RSCI */
+        int iFrequency = DRMReceiver.GetFrequency();
+        int iCurFrequency = QwtCounterFrequency->value();
+
+        if (iFrequency != iCurFrequency)
+        {
+            QwtCounterFrequency->setValue(iFrequency);
+        }
+
+        /* Update list view */
+        SetStationsView();
+    }
 }
 
-void StationsDlg::LoadSettings(const CSettings& Settings)
+void StationsDlg::LoadSettings()
 {
-    /* recover window size and position */
-    CWinGeom s;
-    Settings.Get("Stations Dialog", s);
-    const QRect WinGeom(s.iXPos, s.iYPos, s.iWSize, s.iHSize);
-    if (WinGeom.isValid() && !WinGeom.isEmpty() && !WinGeom.isNull())
-        setGeometry(WinGeom);
-
     /* S-meter settings */
     bool ensmeter = Settings.Get("Hamlib", "ensmeter", false);
 
     actionEnable_S_Meter->setChecked(ensmeter);
 
-    bool showAll = Settings.Get("Stations Dialog", "showall", false);
-    int iPrevSecs = Settings.Get("Stations Dialog", "preview", NUM_SECONDS_PREV_5MIN);
+    bool showAll = getSetting("showall", false);
+    int iPrevSecs = getSetting("preview", NUM_SECONDS_PREV_5MIN);
     DRMSchedule.SetSecondsPreview(iPrevSecs);
 
     if(showAll)
@@ -995,23 +990,23 @@ void StationsDlg::LoadSettings(const CSettings& Settings)
     default: // can't happen!
         ;
     }
-    iSortColumndrm = Settings.Get("Stations Dialog", "sortcolumndrm", 0);
-    bCurrentSortAscendingdrm = Settings.Get("Stations Dialog", "sortascendingdrm", TRUE);
-    strColumnParamdrm = QString::fromUtf8(Settings.Get("Stations Dialog", "columnparamdrm", string("")).c_str());
-    iSortColumnanalog = Settings.Get("Stations Dialog", "sortcolumnanalog", 0);
-    bCurrentSortAscendinganalog = Settings.Get("Stations Dialog", "sortascendinganalog", TRUE);
-    strColumnParamanalog = QString::fromUtf8(Settings.Get("Stations Dialog", "columnparamanalog", string("")).c_str());
+    iSortColumndrm = getSetting("sortcolumndrm", 0);
+    bCurrentSortAscendingdrm = getSetting("sortascendingdrm", true);
+    strColumnParamdrm = getSetting("columnparamdrm", QString());
+    iSortColumnanalog = getSetting("sortcolumnanalog", 0);
+    bCurrentSortAscendinganalog = getSetting("sortascendinganalog", true);
+    strColumnParamanalog = getSetting("columnparamanalog", QString());
 
-    DRMSchedule.qurldrm = QUrl(QString::fromUtf8(Settings.Get("Stations Dialog", "DRM URL", string(DRM_SCHEDULE_URL)).c_str()));
-    DRMSchedule.targetFilterdrm = QString::fromUtf8(Settings.Get("Stations Dialog", "targetfilterdrm", string("")).c_str());
-    DRMSchedule.countryFilterdrm = QString::fromUtf8(Settings.Get("Stations Dialog", "countryfilterdrm", string("")).c_str());
-    DRMSchedule.languageFilterdrm = QString::fromUtf8(Settings.Get("Stations Dialog", "languagefilterdrm", string("")).c_str());
-    DRMSchedule.targetFilteranalog = QString::fromUtf8(Settings.Get("Stations Dialog", "targetfilteranalog", string("")).c_str());
-    DRMSchedule.countryFilteranalog = QString::fromUtf8(Settings.Get("Stations Dialog", "countryfilteranalog", string("")).c_str());
-    DRMSchedule.languageFilteranalog = QString::fromUtf8(Settings.Get("Stations Dialog", "languagefilteranalog", string("")).c_str());
+    DRMSchedule.qurldrm = QUrl(getSetting("DRM URL", QString(DRM_SCHEDULE_URL)));
+    DRMSchedule.targetFilterdrm = getSetting("targetfilterdrm", QString());
+    DRMSchedule.countryFilterdrm = getSetting("countryfilterdrm", QString());
+    DRMSchedule.languageFilterdrm = getSetting("languagefilterdrm", QString());
+    DRMSchedule.targetFilteranalog = getSetting("targetfilteranalog", QString());
+    DRMSchedule.countryFilteranalog = getSetting("countryfilteranalog", QString());
+    DRMSchedule.languageFilteranalog = getSetting("languagefilteranalog", QString());
 }
 
-void StationsDlg::SaveSettings(CSettings& Settings)
+void StationsDlg::SaveSettings()
 {
     if (eLastScheduleMode != CDRMSchedule::SM_NONE)
     {
@@ -1020,34 +1015,24 @@ void StationsDlg::SaveSettings(CSettings& Settings)
     }
 
     Settings.Put("Hamlib", "ensmeter", actionEnable_S_Meter->isChecked());
-    Settings.Put("Stations Dialog", "showall", actionShowAllStations->isChecked());
-    Settings.Put("Stations Dialog", "DRM URL", string(DRMSchedule.qurldrm.toString().toUtf8().constData()));
-    Settings.Put("Stations Dialog", "ANALOG URL", string(DRMSchedule.qurlanalog.toString().toUtf8().constData()));
-    Settings.Put("Stations Dialog", "sortcolumndrm", iSortColumndrm);
-    Settings.Put("Stations Dialog", "sortascendingdrm", bCurrentSortAscendingdrm);
-    Settings.Put("Stations Dialog", "columnparamdrm", string(strColumnParamdrm.toUtf8().constData()));
-    Settings.Put("Stations Dialog", "sortcolumnanalog", iSortColumnanalog);
-    Settings.Put("Stations Dialog", "sortascendinganalog", bCurrentSortAscendinganalog);
-    Settings.Put("Stations Dialog", "columnparamanalog", string(strColumnParamanalog.toUtf8().constData()));
-    Settings.Put("Stations Dialog", "targetfilterdrm", string(DRMSchedule.targetFilterdrm.toUtf8().constData()));
-    Settings.Put("Stations Dialog", "countryfilterdrm", string(DRMSchedule.countryFilterdrm.toUtf8().constData()));
-    Settings.Put("Stations Dialog", "languagefilterdrm", string(DRMSchedule.languageFilterdrm.toUtf8().constData()));
-    Settings.Put("Stations Dialog", "targetfilteranalog", string(DRMSchedule.targetFilteranalog.toUtf8().constData()));
-    Settings.Put("Stations Dialog", "countryfilteranalog", string(DRMSchedule.countryFilteranalog.toUtf8().constData()));
-    Settings.Put("Stations Dialog", "languagefilteranalog", string(DRMSchedule.languageFilteranalog.toUtf8().constData()));
-
-    /* Set window geometry data in DRMReceiver module */
-    QRect WinGeom = geometry();
-
-    CWinGeom c;
-    c.iXPos = WinGeom.x();
-    c.iYPos = WinGeom.y();
-    c.iHSize = WinGeom.height();
-    c.iWSize = WinGeom.width();
-    Settings.Put("Stations Dialog", c);
+    putSetting("showall", actionShowAllStations->isChecked());
+    putSetting("DRM URL", DRMSchedule.qurldrm.toString());
+    putSetting("ANALOG URL", DRMSchedule.qurlanalog.toString());
+    putSetting("sortcolumndrm", iSortColumndrm);
+    putSetting("sortascendingdrm", bCurrentSortAscendingdrm);
+    putSetting("columnparamdrm", strColumnParamdrm);
+    putSetting("sortcolumnanalog", iSortColumnanalog);
+    putSetting("sortascendinganalog", bCurrentSortAscendinganalog);
+    putSetting("columnparamanalog", strColumnParamanalog);
+    putSetting("targetfilterdrm", DRMSchedule.targetFilterdrm);
+    putSetting("countryfilterdrm", DRMSchedule.countryFilterdrm);
+    putSetting("languagefilterdrm", DRMSchedule.languageFilterdrm);
+    putSetting("targetfilteranalog", DRMSchedule.targetFilteranalog);
+    putSetting("countryfilteranalog", DRMSchedule.countryFilteranalog);
+    putSetting("languagefilteranalog", DRMSchedule.languageFilteranalog);
 
     /* Store preview settings */
-    Settings.Put("Stations Dialog", "preview", DRMSchedule.GetSecondsPreview());
+    putSetting("preview", DRMSchedule.GetSecondsPreview());
 }
 
 void StationsDlg::LoadFilters()

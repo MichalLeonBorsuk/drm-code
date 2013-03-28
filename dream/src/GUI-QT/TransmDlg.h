@@ -29,6 +29,12 @@
 #ifndef _TRANSMDLG_H_
 #define _TRANSMDLG_H_
 
+#include "ui_TransmDlgbase.h"
+#include "CodecParams.h"
+#include "DialogUtil.h"
+#include "CWindow.h"
+#include "../DrmTransmitter.h"
+#include "../Parameter.h"
 #include <QPushButton>
 #include <QString>
 #include <QLabel>
@@ -46,13 +52,7 @@
 #include <QMainWindow>
 #include <QMenu>
 #include <qwt_thermo.h>
-#include "ui_TransmDlgbase.h"
 
-#include "CodecParams.h"
-#include "DialogUtil.h"
-#include "../DrmTransmitter.h"
-#include "../Parameter.h"
-#include "../util/Settings.h"
 
 /* Classes ********************************************************************/
 /* Thread class for the transmitter */
@@ -85,7 +85,7 @@ public:
 };
 
 
-class TransmDialog : public QMainWindow, public Ui_TransmDlgBase
+class TransmDialog : public CWindow, public Ui_TransmDlgBase
 {
 	Q_OBJECT
 
@@ -94,16 +94,13 @@ public:
 	virtual ~TransmDialog();
 
 protected:
+	virtual void eventClose(QCloseEvent*);
 	void DisableAllControlsForSet();
 	void EnableAllControlsForSet();
 	void TabWidgetEnableTabs(QTabWidget* tabWidget, bool enable);
-    virtual void showEvent(QShowEvent*);
-    virtual void hideEvent(QHideEvent*);
-	virtual void closeEvent(QCloseEvent*);
 
 	CTransmitterThread	TransThread; /* Working thread object */
 	CDRMTransmitter&	DRMTransmitter;
-	CSettings&			Settings;
 	CAboutDlg			AboutDlg;
 	QTimer				Timer;
 	QTimer				TimerStop;
@@ -112,7 +109,6 @@ protected:
 	CodecParams*		pCodecDlg;
     CSysTray*           pSysTray;
 	QAction*			pActionStartStop;
-    CEventFilter        ef;
 
 	_BOOLEAN			bIsStarted;
 	int					iIDCurrentText;
@@ -127,7 +123,6 @@ protected:
 	void				EnableAudio(const _BOOLEAN bFlag);
 	void				EnableData(const _BOOLEAN bFlag);
 	void				AddWhatsThisHelp();
-	void				SetWindowGeometry();
 
 public slots:
 	void OnButtonStartStop();

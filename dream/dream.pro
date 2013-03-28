@@ -21,32 +21,15 @@ console {
     VERSION_MESSAGE = No Qt
 }
 else {
-     qtconsole {
-      QT += xml
-      QT -= gui
-      UI_MESSAGE = console mode
-     }
-     else {
-      RESOURCES = src/GUI-QT/res/icons.qrc
-      UI_MESSAGE = GUI mode
-      FORMS += \
-          TransmDlgbase.ui AMSSDlgbase.ui DRMMainWindow.ui \
-          FMMainWindow.ui AMMainWindow.ui LiveScheduleWindow.ui \
-          JLViewer.ui BWSViewer.ui SlideShowViewer.ui \
-          systemevalDlgbase.ui StationsDlgbase.ui EPGDlgbase.ui \
-          GeneralSettingsDlgbase.ui MultSettingsDlgbase.ui AboutDlgbase.ui \
-          CodecParams.ui
-      HEADERS += \
-          src/GUI-QT/DRMPlot.h src/GUI-QT/EvaluationDlg.h \
-          src/GUI-QT/SlideShowViewer.h src/GUI-QT/JLViewer.h \
-          src/GUI-QT/BWSViewer.h src/GUI-QT/jlbrowser.h \
-          src/GUI-QT/SoundCardSelMenu.h src/GUI-QT/CodecParams.h
-      SOURCES += \
-          src/GUI-QT/DRMPlot.cpp src/GUI-QT/EvaluationDlg.cpp \
-          src/GUI-QT/SlideShowViewer.cpp src/GUI-QT/JLViewer.cpp \
-          src/GUI-QT/BWSViewer.cpp src/GUI-QT/jlbrowser.cpp \
-          src/GUI-QT/SoundCardSelMenu.cpp src/GUI-QT/CodecParams.cpp
-     }
+    qtconsole {
+        QT += xml
+        QT -= gui
+        UI_MESSAGE = console mode
+    }
+    else {
+        RESOURCES = src/GUI-QT/res/icons.qrc
+        UI_MESSAGE = GUI mode
+    }
 }
 message($$VERSION_MESSAGE $$DEBUG_MESSAGE $$UI_MESSAGE)
 TEMPLATE = app
@@ -396,7 +379,6 @@ consoleio {
     message("with terminal user interface")
 }
 HEADERS += \
-    src/MDI/PacketSocket.h \
     src/AMDemodulation.h \
     src/AMSSDemodulation.h \
     src/chanest/ChanEstTime.h \
@@ -408,24 +390,21 @@ HEADERS += \
     src/datadecoding/DataDecoder.h \
     src/datadecoding/DataEncoder.h \
     src/datadecoding/epgutil.h \
-    src/datadecoding/journaline/NML.h \
-    src/datadecoding/journaline/Splitter.h \
+    src/datadecoding/Experiment.h \
     src/datadecoding/journaline/cpplog.h \
     src/datadecoding/journaline/crc_8_16.h \
     src/datadecoding/journaline/dabdatagroupdecoder.h \
     src/datadecoding/journaline/dabdgdec_impl.h \
+    src/datadecoding/Journaline.h \
     src/datadecoding/journaline/log.h \
     src/datadecoding/journaline/newsobject.h \
     src/datadecoding/journaline/newssvcdec.h \
     src/datadecoding/journaline/newssvcdec_impl.h \
-    src/datadecoding/Experiment.h \
-    src/datadecoding/Journaline.h \
+    src/datadecoding/journaline/NML.h \
+    src/datadecoding/journaline/Splitter.h \
     src/datadecoding/MOTSlideShow.h \
     src/DataIO.h \
     src/drmchannel/ChannelSimulation.h \
-    src/ReceptLog.h \
-    src/PlotManager.h \
-    src/ServiceInformation.h \
     src/DrmReceiver.h \
     src/DRMSignalIO.h \
     src/DrmSimulation.h \
@@ -449,6 +428,7 @@ HEADERS += \
     src/MDI/MDITagItems.h \
     src/MDI/PacketInOut.h \
     src/MDI/PacketSinkFile.h \
+    src/MDI/PacketSocket.h \
     src/MDI/PacketSourceFile.h \
     src/MDI/Pft.h \
     src/MDI/RCITagItems.h \
@@ -468,29 +448,32 @@ HEADERS += \
     src/mlc/QAMMapping.h \
     src/mlc/ViterbiDecoder.h \
     src/MSCMultiplexer.h \
-    src/OFDM.h \
     src/ofdmcellmapping/CellMappingTable.h \
     src/ofdmcellmapping/OFDMCellMapping.h \
+    src/OFDM.h \
     src/Parameter.h \
-    src/resample/Resample.h \
+    src/PlotManager.h \
+    src/ReceptLog.h \
     src/resample/ResampleFilter.h \
-    src/SDC/SDC.h \
+    src/resample/Resample.h \
     src/Scheduler.h \
+    src/SDC/SDC.h \
+    src/ServiceInformation.h \
     src/sound/audiofilein.h \
     src/sound/selectioninterface.h \
     src/sound/sound.h \
     src/sound/soundinterface.h \
     src/sound/soundnull.h \
+    src/sourcedecoders/aac_codec.h \
     src/sourcedecoders/AudioCodec.h \
     src/sourcedecoders/AudioSourceDecoder.h \
     src/sourcedecoders/AudioSourceEncoder.h \
-    src/sourcedecoders/aac_codec.h \
     src/sourcedecoders/null_codec.h \
     src/sourcedecoders/opus_codec.h \
     src/sync/FreqSyncAcq.h \
     src/sync/SyncUsingPil.h \
-    src/sync/TimeSync.h \
     src/sync/TimeSyncFilter.h \
+    src/sync/TimeSync.h \
     src/sync/TimeSyncTrack.h \
     src/tables/TableAMSS.h \
     src/tables/TableCarMap.h \
@@ -514,7 +497,6 @@ HEADERS += \
     src/util/Vector.h \
     src/Version.h
 SOURCES += \
-    src/MDI/PacketSocket.cpp \
     src/AMDemodulation.cpp \
     src/AMSSDemodulation.cpp \
     src/chanest/ChanEstTime.cpp \
@@ -526,28 +508,25 @@ SOURCES += \
     src/datadecoding/DataDecoder.cpp \
     src/datadecoding/DataEncoder.cpp \
     src/datadecoding/epgutil.cpp \
-    src/datadecoding/journaline/NML.cpp \
-    src/datadecoding/journaline/dabdgdec_impl.c \
-    src/datadecoding/journaline/Splitter.cpp \
-    src/datadecoding/journaline/newsobject.cpp \
-    src/datadecoding/journaline/newssvcdec_impl.cpp \
-    src/datadecoding/journaline/crc_8_16.c \
-    src/datadecoding/journaline/log.c \
     src/datadecoding/Experiment.cpp \
     src/datadecoding/Journaline.cpp \
+    src/datadecoding/journaline/crc_8_16.c \
+    src/datadecoding/journaline/dabdgdec_impl.c \
+    src/datadecoding/journaline/log.c \
+    src/datadecoding/journaline/newsobject.cpp \
+    src/datadecoding/journaline/newssvcdec_impl.cpp \
+    src/datadecoding/journaline/NML.cpp \
+    src/datadecoding/journaline/Splitter.cpp \
     src/datadecoding/MOTSlideShow.cpp \
     src/DataIO.cpp \
     src/drmchannel/ChannelSimulation.cpp \
-    src/ReceptLog.cpp \
-    src/PlotManager.cpp \
-    src/ServiceInformation.cpp \
     src/DrmReceiver.cpp \
     src/DRMSignalIO.cpp \
     src/DrmSimulation.cpp \
     src/DrmTransmitter.cpp \
     src/FAC/FAC.cpp \
+    src/GUI-QT/main.cpp \
     src/InputResample.cpp \
-    src/Scheduler.cpp \
     src/interleaver/BlockInterleaver.cpp \
     src/interleaver/SymbolInterleaver.cpp \
     src/IQInputFilter.cpp \
@@ -560,6 +539,7 @@ SOURCES += \
     src/MDI/MDITagItemDecoders.cpp \
     src/MDI/MDITagItems.cpp \
     src/MDI/PacketSinkFile.cpp \
+    src/MDI/PacketSocket.cpp \
     src/MDI/PacketSourceFile.cpp \
     src/MDI/Pft.cpp \
     src/MDI/RCITagItems.cpp \
@@ -580,20 +560,24 @@ SOURCES += \
     src/mlc/TrellisUpdateSSE2.cpp \
     src/mlc/ViterbiDecoder.cpp \
     src/MSCMultiplexer.cpp \
-    src/OFDM.cpp \
     src/ofdmcellmapping/CellMappingTable.cpp \
     src/ofdmcellmapping/OFDMCellMapping.cpp \
+    src/OFDM.cpp \
     src/Parameter.cpp \
+    src/PlotManager.cpp \
+    src/ReceptLog.cpp \
     src/resample/Resample.cpp \
     src/resample/ResampleFilter.cpp \
+    src/Scheduler.cpp \
     src/SDC/SDCReceive.cpp \
     src/SDC/SDCTransmit.cpp \
+    src/ServiceInformation.cpp \
     src/SimulationParameters.cpp \
     src/sound/audiofilein.cpp \
+    src/sourcedecoders/aac_codec.cpp \
     src/sourcedecoders/AudioCodec.cpp \
     src/sourcedecoders/AudioSourceDecoder.cpp \
     src/sourcedecoders/AudioSourceEncoder.cpp \
-    src/sourcedecoders/aac_codec.cpp \
     src/sourcedecoders/null_codec.cpp \
     src/sourcedecoders/opus_codec.cpp \
     src/sync/FreqSyncAcq.cpp \
@@ -610,43 +594,76 @@ SOURCES += \
     src/util/Reassemble.cpp \
     src/util/Settings.cpp \
     src/util/Utilities.cpp \
-    src/Version.cpp \
-    src/GUI-QT/main.cpp
+    src/Version.cpp
 !console {
 HEADERS += \
-    src/util-QT/Util.h \
-    src/util-QT/EPG.h \
+    src/GUI-QT/Logging.h \
     src/util-QT/epgdec.h \
-    src/GUI-QT/Logging.h
+    src/util-QT/EPG.h \
+    src/util-QT/Util.h
 SOURCES += \
-    src/util-QT/Util.cpp \
+    src/GUI-QT/Logging.cpp \
     src/util-QT/EPG.cpp \
     src/util-QT/epgdec.cpp \
-    src/GUI-QT/Logging.cpp
+    src/util-QT/Util.cpp
 }
 !console:!qtconsole {
+FORMS += \
+    AboutDlgbase.ui \
+    AMMainWindow.ui \
+    AMSSDlgbase.ui \
+    CodecParams.ui \
+    DRMMainWindow.ui \
+    EPGDlgbase.ui \
+    FMMainWindow.ui \
+    GeneralSettingsDlgbase.ui \
+    JLViewer.ui BWSViewer.ui \
+    LiveScheduleWindow.ui \
+    MultSettingsDlgbase.ui \
+    SlideShowViewer.ui \
+    StationsDlgbase.ui \
+    systemevalDlgbase.ui \
+    TransmDlgbase.ui
 HEADERS += \
     src/GUI-QT/AnalogDemDlg.h \
+    src/GUI-QT/BWSViewer.h \
+    src/GUI-QT/CodecParams.h \
+    src/GUI-QT/CWindow.h \
     src/GUI-QT/DialogUtil.h \
+    src/GUI-QT/DRMPlot.h \
     src/GUI-QT/EPGDlg.h \
+    src/GUI-QT/EvaluationDlg.h \
     src/GUI-QT/fdrmdialog.h \
     src/GUI-QT/fmdialog.h \
     src/GUI-QT/GeneralSettingsDlg.h \
+    src/GUI-QT/jlbrowser.h \
+    src/GUI-QT/JLViewer.h \
     src/GUI-QT/LiveScheduleDlg.h \
     src/GUI-QT/MultColorLED.h \
     src/GUI-QT/MultSettingsDlg.h \
+    src/GUI-QT/SlideShowViewer.h \
+    src/GUI-QT/SoundCardSelMenu.h \
     src/GUI-QT/StationsDlg.h \
     src/GUI-QT/TransmDlg.h
 SOURCES += \
     src/GUI-QT/AnalogDemDlg.cpp \
+    src/GUI-QT/BWSViewer.cpp \
+    src/GUI-QT/CodecParams.cpp \
+    src/GUI-QT/CWindow.cpp \
     src/GUI-QT/DialogUtil.cpp \
+    src/GUI-QT/DRMPlot.cpp \
     src/GUI-QT/EPGDlg.cpp \
-    src/GUI-QT/fmdialog.cpp \
+    src/GUI-QT/EvaluationDlg.cpp \
     src/GUI-QT/fdrmdialog.cpp \
+    src/GUI-QT/fmdialog.cpp \
     src/GUI-QT/GeneralSettingsDlg.cpp \
+    src/GUI-QT/jlbrowser.cpp \
+    src/GUI-QT/JLViewer.cpp \
     src/GUI-QT/LiveScheduleDlg.cpp \
     src/GUI-QT/MultColorLED.cpp \
     src/GUI-QT/MultSettingsDlg.cpp \
+    src/GUI-QT/SlideShowViewer.cpp \
+    src/GUI-QT/SoundCardSelMenu.cpp \
     src/GUI-QT/StationsDlg.cpp \
     src/GUI-QT/TransmDlg.cpp
 }

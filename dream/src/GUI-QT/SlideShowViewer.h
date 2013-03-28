@@ -30,11 +30,10 @@
 #define _SLIDESHOWVIEWER_H
 
 #include "ui_SlideShowViewer.h"
+#include "CWindow.h"
 #include "../DrmReceiver.h"
-#include "DialogUtil.h"
-class CSettings;
 
-class SlideShowViewer : public QDialog, Ui_SlideShowViewer
+class SlideShowViewer : public CWindow, public Ui_SlideShowViewer
 {
     Q_OBJECT
 
@@ -43,6 +42,8 @@ public:
     virtual ~SlideShowViewer();
 
 protected:
+    virtual void            eventShow(QShowEvent*);
+    virtual void            eventHide(QHideEvent*);
     void                    SetImage(int);
     void                    UpdateButtons();
     void                    ClearMOTCache(CMOTDABDec *motdec);
@@ -51,7 +52,6 @@ protected:
     QTimer                  Timer;
     QString                 strCurrentSavePath;
     CDRMReceiver&           receiver;
-    CSettings&              settings;
     std::vector<QPixmap>    vecImages;
     std::vector<QString>    vecImageNames;
     int                     iCurImagePos;
@@ -60,7 +60,6 @@ protected:
     uint32_t                iCurrentDataServiceID;
     bool                    bLastServiceValid;
     QString                 strLastLabel;
-    CEventFilter            ef;
 
 public slots:
     void OnTimer();
@@ -71,8 +70,6 @@ public slots:
     void OnSave();
     void OnSaveAll();
     void OnClearAll();
-    void showEvent(QShowEvent*);
-    void hideEvent(QHideEvent*);
 };
 
 #endif

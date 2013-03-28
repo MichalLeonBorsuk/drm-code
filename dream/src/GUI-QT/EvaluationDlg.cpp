@@ -39,23 +39,13 @@
 #include <QShowEvent>
 
 /* Implementation *************************************************************/
-systemevalDlg::systemevalDlg(CDRMReceiver& NDRMR, CSettings& NSettings,
+systemevalDlg::systemevalDlg(CDRMReceiver& NDRMR, CSettings& Settings,
                              QWidget* parent) :
-    QDialog(parent),
+    CWindow(parent, Settings, "System Evaluation"),
     DRMReceiver(NDRMR),
-    Settings(NSettings),
     eNewCharType(CDRMPlot::NONE_OLD)
 {
-    setWindowFlags(Qt::Window);
     setupUi(this);
-
-    /* Get window geometry data and apply it */
-    CWinGeom s;
-    Settings.Get("System Evaluation Dialog", s);
-    const QRect WinGeom(s.iXPos, s.iYPos, s.iWSize, s.iHSize);
-
-    if (WinGeom.isValid() && !WinGeom.isEmpty() && !WinGeom.isNull())
-        setGeometry(WinGeom);
 
     /* Set help text for the controls */
     AddWhatsThisHelp();
@@ -63,8 +53,8 @@ systemevalDlg::systemevalDlg(CDRMReceiver& NDRMR, CSettings& NSettings,
     /* Init controls -------------------------------------------------------- */
 
     /* Init main plot */
-    iPlotStyle = Settings.Get("System Evaluation Dialog", "plotstyle", 0);
-    Settings.Put("System Evaluation Dialog", "plotstyle", iPlotStyle);
+    iPlotStyle = getSetting("plotstyle", 0, true);
+    putSetting("plotstyle", iPlotStyle, true);
     MainPlot = new CDRMPlot(NULL, plot);
     MainPlot->SetRecObj(&DRMReceiver);
     MainPlot->SetPlotStyle(iPlotStyle);
@@ -127,7 +117,7 @@ systemevalDlg::systemevalDlg(CDRMReceiver& NDRMR, CSettings& NSettings,
     chartSelector->expandAll();
 
     /* Load saved main plot type */
-    eCurCharType = PlotNameToECharType(Settings.Get("System Evaluation Dialog", "plottype", string()));
+    eCurCharType = PlotNameToECharType(string(getSetting("plottype", QString()).toLocal8Bit()));
 
     /* If MDI in is enabled, disable some of the controls and use different
        initialization for the chart and chart selector */
@@ -283,12 +273,11 @@ void systemevalDlg::UpdateControls()
     setChecked(DRMReceiver.GetWriteData()->GetIsWriteWaveFile());
 }
 
-void systemevalDlg::showEvent(QShowEvent* e)
+void systemevalDlg::eventShow(QShowEvent*)
 {
-	EVENT_FILTER(e);
     /* Restore chart windows */
-    const size_t iNumChartWin = Settings.Get("System Evaluation Dialog", "numchartwin", 0);
-    for (size_t i = 0; i < iNumChartWin; i++)
+    const int iNumChartWin = getSetting("numchartwin", 0);
+    for (int i = 0; i < iNumChartWin; i++)
     {
         stringstream s;
 
@@ -327,9 +316,8 @@ void systemevalDlg::showEvent(QShowEvent* e)
     MainPlot->activate();
 }
 
-void systemevalDlg::hideEvent(QHideEvent* e)
+void systemevalDlg::eventHide(QHideEvent*)
 {
-	EVENT_FILTER(e);
     /* Notify the MainPlot of hideEvent */
     MainPlot->deactivate();
 
@@ -363,28 +351,19 @@ void systemevalDlg::hideEvent(QHideEvent* e)
         /* Close window afterwards */
         vecpDRMPlots[i]->close();
     }
-    Settings.Put("System Evaluation Dialog", "numchartwin", iNumOpenCharts);
+    putSetting("numchartwin", iNumOpenCharts);
 
     /* We do not need the pointers anymore, reset vector */
     vecpDRMPlots.clear();
 
-    /* Set window geometry data in DRMReceiver module */
-    CWinGeom s;
-    QRect WinGeom = geometry();
-    s.iXPos = WinGeom.x();
-    s.iYPos = WinGeom.y();
-    s.iHSize = WinGeom.height();
-    s.iWSize = WinGeom.width();
-    Settings.Put("System Evaluation Dialog", s);
-
     /* Store current plot type */
-    Settings.Put("System Evaluation Dialog", "plottype", ECharTypeToPlotName(eCurCharType));
+    putSetting("plottype", QString::fromLocal8Bit(ECharTypeToPlotName(eCurCharType).c_str()));
 }
 
 void systemevalDlg::UpdatePlotStyle(int iPlotStyle)
 {
     /* Save the new style */
-    Settings.Put("System Evaluation Dialog", "plotstyle", iPlotStyle);
+    putSetting("plotstyle", iPlotStyle, true);
     this->iPlotStyle = iPlotStyle;
 
     /* Update chart windows */

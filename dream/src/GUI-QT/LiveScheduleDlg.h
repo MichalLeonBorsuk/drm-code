@@ -28,23 +28,22 @@
 #ifndef __LiveScheduleDlg_H
 #define LiveScheduleDlg_H
 
+#include "ui_LiveScheduleWindow.h"
+#include "CWindow.h"
 #include "../DrmReceiver.h"
-#include "../util/Settings.h"
-#include "DialogUtil.h"
-#include <vector>
 #include <QSignalMapper>
 #include <QDialog>
 #include <QTreeWidget>
-#include "ui_LiveScheduleWindow.h"
-#include <qpixmap.h>
-#include <qradiobutton.h>
-#include <qtimer.h>
-#include <qmessagebox.h>
-#include <qmenubar.h>
-#include <qlayout.h>
-#include <qlabel.h>
-#include <qcheckbox.h>
-#include <qthread.h>
+#include <QPixmap>
+#include <QRadioButton>
+#include <QTimer>
+#include <QMessageBox>
+#include <QMenuBar>
+#include <QLayout>
+#include <QLabel>
+#include <QCheckBox>
+#include <QThread>
+#include <vector>
 
 
 /* Definitions ****************************************************************/
@@ -139,33 +138,32 @@ public:
 	void setPixmap(int col, QPixmap p) { setIcon(col, p); }
 };
 
-class LiveScheduleDlg : public QDialog, public Ui_LiveScheduleWindow
+class LiveScheduleDlg : public CWindow, public Ui_LiveScheduleWindow
 {
 	Q_OBJECT
 
 public:
-	LiveScheduleDlg(CDRMReceiver&, CSettings&, QWidget* parent = 0);
+	LiveScheduleDlg(CDRMReceiver&, CSettings&, QMap<QWidget*,QString>&);
 	virtual ~LiveScheduleDlg();
 
-	void LoadSchedule();
-	void SaveSettings(CSettings&);
-
 protected:
+	virtual void	eventClose(QCloseEvent* pEvent);
+	virtual void	eventHide(QHideEvent* pEvent);
+	virtual void	eventShow(QShowEvent* pEvent);
+	void			LoadSettings();
+	void			SaveSettings();
+	void			LoadSchedule();
 	int				iCurrentSortColumn;
 	_BOOLEAN		bCurrentSortAscending;
-	void			LoadSettings(const CSettings&);
 	void			SetStationsView();
 	void			AddWhatsThisHelp();
 	void			SetUTCTimeLabel();
-	void			showEvent(QShowEvent* pEvent);
-	void			hideEvent(QHideEvent* pEvent);
 	QString			ExtractDaysFlagString(const int iDayCode);
 	QString			ExtractTime(const CAltFreqSched& schedule);
-	_BOOLEAN		showAll();
+	bool			showAll();
 	int				currentSortColumn();
 
 	CDRMReceiver&		DRMReceiver;
-	CSettings&			Settings;
 	CDRMLiveSchedule	DRMSchedule;
 	QTimer			TimerList;
 	QTimer			TimerUTCLabel;
@@ -184,7 +182,6 @@ protected:
 	QString			strCurrentSavePath;
 	int				iColStationID;
 	int				iWidthColStationID;
-	CEventFilter	ef;
 
 public slots:
 	void OnTimerList();

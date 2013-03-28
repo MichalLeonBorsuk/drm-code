@@ -37,33 +37,22 @@
 #include <QPixmap>
 #include <QMetaObject>
 
-EPGDlg::EPGDlg(CDRMReceiver& NDRMR, CSettings& NSettings, QWidget* parent):
-    QDialog(parent),
+EPGDlg::EPGDlg(CDRMReceiver& NDRMR, CSettings& Settings, QWidget* parent):
+    CWindow(parent, Settings, "EPG"),
     do_updates(false),
     epg(*NDRMR.GetParameters()),
     DRMReceiver(NDRMR),
-    Settings(NSettings),Timer(),sids(),
+    sids(),
     greenCube(":/icons/greenCube.png"),
     next(NULL)
 {
-    setWindowFlags(Qt::Window);
     setupUi(this);
-
-    /* recover window size and position */
-    CWinGeom s;
-    Settings.Get("EPG Dialog", s);
-    const QRect WinGeom(s.iXPos, s.iYPos, s.iWSize, s.iHSize);
-    if (WinGeom.isValid() && !WinGeom.isEmpty() && !WinGeom.isNull())
-        setGeometry(WinGeom);
 
     /* auto resize of the programme name column */
     dateEdit->setDate(QDate::currentDate());
     connect(channel, SIGNAL(activated(const QString&)), this , SLOT(on_channel_activated(const QString&)));
     connect(dateEdit, SIGNAL(dateChanged(const QDate&)), this , SLOT(on_dateEdit_dateChanged(const QDate&)));
     connect(&Timer, SIGNAL(timeout()), this, SLOT(OnTimer()));
-
-    /* Deactivate real-time timer */
-    Timer.stop();
 
     TextEPGDisabled->hide();
 }
@@ -113,7 +102,7 @@ void EPGDlg::OnTimer()
     }
 }
 
-void EPGDlg::showEvent(QShowEvent *)
+void EPGDlg::eventShow(QShowEvent *)
 {
     CParameter& Parameters = *DRMReceiver.GetParameters();
     Parameters.Lock();
@@ -149,18 +138,10 @@ void EPGDlg::showEvent(QShowEvent *)
     Timer.start(GUI_TIMER_EPG_UPDATE);
 }
 
-void EPGDlg::hideEvent(QHideEvent*)
+void EPGDlg::eventHide(QHideEvent*)
 {
     /* Deactivate real-time timer */
     Timer.stop();
-
-    CWinGeom s;
-    QRect WinGeom = geometry();
-    s.iXPos = WinGeom.x();
-    s.iYPos = WinGeom.y();
-    s.iHSize = WinGeom.height();
-    s.iWSize = WinGeom.width();
-    Settings.Put("EPG Dialog", s);
 }
 
 void EPGDlg::on_dateEdit_dateChanged(const QDate&)

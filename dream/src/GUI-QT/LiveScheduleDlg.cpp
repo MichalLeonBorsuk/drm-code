@@ -328,22 +328,18 @@ CDRMLiveSchedule::LoadAFSInformations(const CAltFreqSign& AltFreqSign)
 }
 
 LiveScheduleDlg::LiveScheduleDlg(CDRMReceiver& DRMReceiver, CSettings& Settings,
-                                 QWidget * parent):
-    QDialog(parent),
-    DRMReceiver(DRMReceiver), Settings(Settings),
+                                 QMap<QWidget*,QString>& parents):
+    CWindow(parents, Settings, "Live Schedule"),
+    DRMReceiver(DRMReceiver),
     smallGreenCube(":/icons/smallGreenCube.png"),
     greenCube(":/icons/greenCube.png"), redCube(":/icons/redCube.png"),
     orangeCube(":/icons/orangeCube.png"), pinkCube(":/icons/pinkCube.png"),
     vecpListItems(), iColStationID(1), iWidthColStationID(0)
 {
-    /* Enable minimize and maximize box */
-    setWindowFlags(Qt::Window);
-
-    setAttribute(Qt::WA_QuitOnClose, false);
     setupUi(this);
 
     /* Load settings */
-    LoadSettings(Settings);
+    LoadSettings();
 
     /* Set help text for the controls */
     AddWhatsThisHelp();
@@ -398,19 +394,13 @@ LiveScheduleDlg::~LiveScheduleDlg()
 }
 
 void
-LiveScheduleDlg::LoadSettings(const CSettings& Settings)
+LiveScheduleDlg::LoadSettings()
 {
-    /* recover window size and position */
-    CWinGeom s;
-    Settings.Get("Live Schedule Dialog", s);
-    const QRect WinGeom(s.iXPos, s.iYPos, s.iWSize, s.iHSize);
-    if (WinGeom.isValid() && !WinGeom.isEmpty() && !WinGeom.isNull())
-        setGeometry(WinGeom);
-
     /* Set sorting behaviour of the list */
-    iCurrentSortColumn = Settings.Get("Live Schedule Dialog", "sortcolumn", 0);
-    bCurrentSortAscending = Settings.Get("Live Schedule Dialog", "sortascending", TRUE);
+    iCurrentSortColumn = getSetting("sortcolumn", 0);
+    bCurrentSortAscending = getSetting("sortascending", true);
     ListViewStations->sortItems(iCurrentSortColumn, bCurrentSortAscending?Qt::AscendingOrder:Qt::DescendingOrder);
+
     /* Retrieve the setting saved into the .ini file */
     strCurrentSavePath = QString::fromUtf8(DRMReceiver.GetParameters()->GetDataDirectory("AFS").c_str());
 
@@ -418,8 +408,8 @@ LiveScheduleDlg::LoadSettings(const CSettings& Settings)
 	CreateDirectories(strCurrentSavePath);
 
     /* Set stations in list view which are active right now */
-    bool bShowAll = Settings.Get("Live Schedule Dialog", "showall", false);
-    int iPrevSecs = Settings.Get("Live Schedule Dialog", "preview", 0);
+    bool bShowAll = getSetting("showall", false);
+    int iPrevSecs = getSetting("preview", 0);
 
     if(bShowAll)
         actionShowAllStations->setChecked(true);
@@ -447,26 +437,17 @@ LiveScheduleDlg::LoadSettings(const CSettings& Settings)
 }
 
 void
-LiveScheduleDlg::SaveSettings(CSettings& Settings)
+LiveScheduleDlg::SaveSettings()
 {
-    /* save window geometry data */
-    QRect WinGeom = geometry();
-    CWinGeom c;
-    c.iXPos = WinGeom.x();
-    c.iYPos = WinGeom.y();
-    c.iHSize = WinGeom.height();
-    c.iWSize = WinGeom.width();
-    Settings.Put("Live Schedule Dialog", c);
-
     /* Store preview settings */
-    Settings.Put("Live Schedule Dialog", "preview", DRMSchedule.GetSecondsPreview());
+    putSetting("preview", DRMSchedule.GetSecondsPreview());
 
     /* Store sort settings */
-    Settings.Put("Live Schedule Dialog", "sortcolumn", iCurrentSortColumn);
-    Settings.Put("Live Schedule Dialog", "sortascending", bCurrentSortAscending);
+    putSetting("sortcolumn", iCurrentSortColumn);
+    putSetting("sortascending", bCurrentSortAscending);
 
     /* Store preview settings */
-    Settings.Put("Live Schedule Dialog", "showall", showAll());
+    putSetting("showall", showAll());
 }
 
 void
@@ -487,7 +468,7 @@ int LiveScheduleDlg::currentSortColumn()
 	return ListViewStations->sortColumn();
 }
 
-_BOOLEAN LiveScheduleDlg::showAll()
+bool LiveScheduleDlg::showAll()
 {
 	return actionShowAllStations->isChecked();
 }
@@ -634,10 +615,23 @@ LiveScheduleDlg::LoadSchedule()
 }
 
 void
-LiveScheduleDlg::showEvent(QShowEvent* e)
+LiveScheduleDlg::eventClose(QCloseEvent*)
 {
-	EVENT_FILTER(e);
+    /* Save settings */
+    SaveSettings();
+}
 
+void
+LiveScheduleDlg::eventHide(QHideEvent*)
+{
+    /* Deactivate real-time timers */
+    TimerList.stop();
+    TimerUTCLabel.stop();
+}
+
+void
+LiveScheduleDlg::eventShow(QShowEvent*)
+{
     /* Update window */
     OnTimerUTCLabel();
     TimerUTCLabel.start(GUI_TIMER_UTC_TIME_LABEL);
@@ -649,17 +643,6 @@ LiveScheduleDlg::showEvent(QShowEvent* e)
         /* Activate real-time timer when window is shown */
         TimerList.start(GUI_TIMER_LIST_VIEW_UPDATE);	/* Stations list */
     }
-}
-
-void
-LiveScheduleDlg::hideEvent(QHideEvent* e)
-{
-	EVENT_FILTER(e);
-
-    /* Deactivate real-time timers */
-    TimerList.stop();
-    TimerUTCLabel.stop();
-
 }
 
 void
@@ -684,7 +667,7 @@ LiveScheduleDlg::SetStationsView()
     /* Add new item for each station in list view */
     for (int i = 0; i < iNumStations; i++)
     {
-        if (!((showAll() == FALSE) &&
+        if (!((showAll() == false) &&
                 (DRMSchedule.CheckState(i) == CDRMLiveSchedule::IS_INACTIVE)))
         {
             /* Only insert item if it is not already in the list */

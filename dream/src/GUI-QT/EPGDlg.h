@@ -30,24 +30,23 @@
 #ifndef _EPGDLG_H
 #define _EPGDLG_H
 
-#include <qwidget.h>
-#include <qdatetime.h>
-#include <qpushbutton.h>
-#include <qspinbox.h>
-#include <qcombobox.h>
-#include <qstringlist.h>
-#include <qmessagebox.h>
-#include <qlabel.h>
-#include <qtimer.h>
-#include <qpixmap.h>
-#include <map>
-#include <QTreeWidget>
-#include <QDialog>
 #include "ui_EPGDlgbase.h"
-
+#include "CWindow.h"
 #include "../DrmReceiver.h"
 #include "../util-QT/EPG.h"
-#include "../util/Settings.h"
+#include <QWidget>
+#include <QDateTime>
+#include <QPushButton>
+#include <QSpinBox>
+#include <QComboBox>
+#include <QStringList>
+#include <QMessageBox>
+#include <QLabel>
+#include <QTimer>
+#include <QPixmap>
+#include <QTreeWidget>
+#include <map>
+
 
 /* Definitions ****************************************************************/
 #define COL_NAME	1
@@ -62,9 +61,10 @@
 #define	COL_DESCRIPTION	3
 #define COL_DURATION	4
 
+
 /* Classes ********************************************************************/
 
-class EPGDlg : public QDialog, public Ui_CEPGDlgbase
+class EPGDlg : public CWindow, public Ui_CEPGDlgbase
 {
     Q_OBJECT
 
@@ -72,19 +72,11 @@ public:
     EPGDlg(CDRMReceiver&, CSettings&, QWidget* parent = 0);
     virtual ~EPGDlg();
 
-    /* dummy assignment operator to help MSVC8 */
-    EPGDlg& operator=(const EPGDlg&)
-    {
-        throw "should not happen";
-        return *this;
-    }
-
     void select();
 
 protected:
-
-    virtual void showEvent(QShowEvent *e);
-    virtual void hideEvent(QHideEvent* pEvent);
+    virtual void eventShow(QShowEvent*);
+    virtual void eventHide(QHideEvent*);
     void setActive(QTreeWidgetItem*);
     bool isActive(QTreeWidgetItem*);
 
@@ -96,7 +88,6 @@ protected:
     bool do_updates;
     EPG epg;
     CDRMReceiver&	DRMReceiver;
-    CSettings&		Settings;
     QTimer		Timer;
     map<QString,uint32_t> sids;
     QIcon		greenCube;
