@@ -557,7 +557,8 @@ CDataDecoder::EAppType CDataDecoder::GetAppType(const CDataParam& DataParam)
 			eAppType  = AT_JOURNALINE;
 			break;
 
-		case DAB_AT_EXPERIMENTAL:	/* Journaline */
+		case AT_DMB: case AT_VOICE: case AT_MIDDLEWARE: case AT_IPDC:
+		case DAB_AT_DREAM_EXPERIMENTAL:	/* Just save the objects as files */
 			eAppType  = AT_EXPERIMENTAL;
 			break;
 		}
