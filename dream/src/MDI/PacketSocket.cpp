@@ -259,7 +259,7 @@ CPacketSocketNative::SetOrigin(const string & strNewAddr)
         inet_pton(AF_INET, parts[g].c_str(), &gp.s_addr);
 
         /* Multicast ? */
-	uint32_t mc = htonl(0xe0000000);
+        uint32_t mc = htonl(0xe0000000);
         if((gp.s_addr & mc) == mc)	/* multicast! */
         {
             int optval = 1;
@@ -307,9 +307,6 @@ CPacketSocketNative::SetOrigin(const string & strNewAddr)
         {
             perror("bind() failed");
         }
-
-
-
     }
 #ifdef _WIN32
 	u_long mode = 1;
