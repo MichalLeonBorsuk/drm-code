@@ -656,7 +656,6 @@ CSettings::UsageArguments()
 		"                               0: blue-white (default);   1: green-black;   2: black-grey\n"
 #endif
 		"  --enablepsd <b>              if 0 then only measure PSD when RSCI in use otherwise always measure it\n"
-#ifdef QT_NETWORK_LIB
 		"  --mdiout <s>                 MDI out address format [IP#:]IP#:port (for Content Server)\n"
 		"  --mdiin  <s>                 MDI in address (for modulator) [[IP#:]IP:]port\n"
 		"  --rsioutprofile <s>          MDI/RSCI output profile: A|B|C|D|Q|M\n"
@@ -664,7 +663,6 @@ CSettings::UsageArguments()
 		"  --rsiin <s>                  MDI/RSCI input address format [[IP#:]IP#:]port\n"
 		"  --rciout <s>                 RSCI Control output format IP#:port\n"
 		"  --rciin <s>                  RSCI Control input address number format [IP#:]port\n"
-#endif
 		"  --rsirecordprofile <s>       RSCI recording profile: A|B|C|D|Q|M\n"
 		"  --rsirecordtype <s>          RSCI recording file type: raw|ff|pcap\n"
 		"  --recordiq <b>               enable/disable recording an I/Q file\n"
