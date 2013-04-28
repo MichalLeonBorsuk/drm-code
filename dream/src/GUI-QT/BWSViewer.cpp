@@ -32,6 +32,7 @@
 #include "../datadecoding/DataDecoder.h"
 #include <QDir>
 #include <QFile>
+#include <QMessageBox>
 #include <QWebHistory>
 
 
@@ -425,7 +426,7 @@ void BWSViewer::SaveMOTObject(const QString& strObjName,
 
     /* Open file */
     QFile file(strFileName);
-    if (file.open(QIODevice::WriteOnly | QIODevice::Truncate))
+    if (file.open(QIODevice::WriteOnly))// | QIODevice::Truncate))
     {
         int i, written, size;
         size = vecbRawData.Size();
@@ -437,6 +438,10 @@ void BWSViewer::SaveMOTObject(const QString& strObjName,
         /* Close the file afterwards */
         file.close();
     }
+	else
+	{
+		QMessageBox::information(this, file.errorString(), strFileName);
+	}
 }
 
 void BWSViewer::SetupSavePath(QString& strSavePath)

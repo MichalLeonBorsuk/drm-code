@@ -173,7 +173,7 @@ void CreateDirectories(const QString& strFilename)
 #ifdef _WIN32
         int i1 = strFilename.indexOf(QChar('/'), i);
         int i2 = strFilename.indexOf(QChar('\\'), i);
-        i = i1 >= 0 && i1 < i2 ? i1 : i2;
+        i = (i1 >= 0 && ((i1 < i2) || (i2<0))) ? i1 : i2;
 #else
         i = strFilename.indexOf(QChar('/'), i);
 #endif
