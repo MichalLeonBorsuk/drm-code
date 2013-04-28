@@ -111,6 +111,10 @@ main(int argc, char **argv)
 	/* find plugins on MacOs when deployed in a bundle */
 	app.addLibraryPath(app.applicationDirPath()+"../PlugIns");
 #endif
+#ifdef _WIN32
+	WSADATA wsaData;
+	(void)WSAStartup(MAKEWORD(2,2), &wsaData);
+#endif
 
 	/* Load and install multi-language support (if available) */
 	QTranslator translator(0);
@@ -257,6 +261,10 @@ main(int argc, char **argv)
 			DRMSimulation.SimScript();
 			DRMReceiver.LoadSettings();
 
+#ifdef _WIN32
+	WSADATA wsaData;
+	(void)WSAStartup(MAKEWORD(2,2), &wsaData);
+#endif
 #ifdef QT_CORE_LIB
 			QCoreApplication app(argc, argv);
 			/* Start working thread */
