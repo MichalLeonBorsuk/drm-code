@@ -39,7 +39,10 @@
 /* Always include winsock2.h before windows.h */
 # include <Ws2tcpip.h>
 # include <windows.h>
-inline int inet_aton(const char*s, void * a) { ((in_addr*)a)->s_addr = inet_addr(s); return 1; }
+inline int inet_aton(const char*s, void * a) {
+    ((in_addr*)a)->s_addr = inet_addr(s);
+    return 1;
+}
 # define inet_pton(a, b, c) inet_aton(b, c)
 # define inet_ntop(a, b, c, d) inet_ntoa(*(in_addr*)b)
 #else
@@ -53,9 +56,9 @@ inline int inet_aton(const char*s, void * a) { ((in_addr*)a)->s_addr = inet_addr
 #endif
 
 CPacketSocketNative::CPacketSocketNative():
-    pPacketSink(NULL), HostAddrOut(),
-    writeBuf(),udp(true),
-    s(INVALID_SOCKET)
+        pPacketSink(NULL), HostAddrOut(),
+        writeBuf(),udp(true),
+        s(INVALID_SOCKET)
 {
 }
 
@@ -81,15 +84,15 @@ CPacketSocketNative::ResetPacketSink()
 void
 CPacketSocketNative::SendPacket(const vector < _BYTE > &vecbydata, uint32_t, uint16_t)
 {
-    if(s == INVALID_SOCKET)
+    if (s == INVALID_SOCKET)
         return;
-    if(udp)
-{
-string ss;
-GetDestination(ss);
-cerr << "send packet " << ss << endl;
+    if (udp)
+    {
+        string ss;
+        GetDestination(ss);
+        cerr << "send packet " << ss << endl;
         (void)sendto(s, (char*)&vecbydata[0], vecbydata.size(), 0, (sockaddr*)&HostAddrOut, sizeof(HostAddrOut));
-}
+    }
     else
         (void)send(s, (char*)&vecbydata[0], vecbydata.size(), 0);
 }
@@ -121,12 +124,12 @@ CPacketSocketNative::SetDestination(const string & strNewAddr)
     in_addr AddrInterface;
     AddrInterface.s_addr = htonl(INADDR_ANY);
     vector<string> parts = parseDest(strNewAddr);
-    if(tolower(parts[0][0])=='t')
+    if (tolower(parts[0][0])=='t')
     {
         udp = false;
         parts[0] = parts[0].substr(1);
     }
-    switch(parts.size())
+    switch (parts.size())
     {
     case 1: // Just a port - send to ourselves
         bAddressOK = inet_pton(AF_INET, "127.0.0.1", &HostAddrOut.sin_addr.s_addr);
@@ -135,11 +138,11 @@ CPacketSocketNative::SetDestination(const string & strNewAddr)
     case 2: // host and port, unicast
         bAddressOK = inet_pton(AF_INET, parts[0].c_str(), &HostAddrOut.sin_addr.s_addr);
         HostAddrOut.sin_port = ntohs(atol(parts[1].c_str()));
-{
-string s;
-GetDestination(s);
-cerr << "host and port, unicast " << s << endl;
-}
+        {
+            string s;
+            GetDestination(s);
+            cerr << "host and port, unicast " << s << endl;
+        }
         break;
     case 3: // interface, host and port, usually multicast udp
         inet_pton(AF_INET, parts[0].c_str(), &AddrInterface.s_addr);
@@ -149,25 +152,25 @@ cerr << "host and port, unicast " << s << endl;
     default:
         bAddressOK = FALSE;
     }
-    if(udp)
+    if (udp)
     {
-        if(s == INVALID_SOCKET)
+        if (s == INVALID_SOCKET)
             s = socket(AF_INET, SOCK_DGRAM, 0);
 
-        if(setsockopt(s, IPPROTO_IP, IP_TTL, (char*)&ttl, sizeof(ttl))==SOCKET_ERROR)
+        if (setsockopt(s, IPPROTO_IP, IP_TTL, (char*)&ttl, sizeof(ttl))==SOCKET_ERROR)
             bAddressOK = FALSE;
-        if(AddrInterface.s_addr != htonl(INADDR_ANY))
+        if (AddrInterface.s_addr != htonl(INADDR_ANY))
         {
-            if(setsockopt(s, IPPROTO_IP, IP_MULTICAST_IF,
-                          (char *) &AddrInterface, sizeof(AddrInterface)) == SOCKET_ERROR)
-	    {
+            if (setsockopt(s, IPPROTO_IP, IP_MULTICAST_IF,
+                           (char *) &AddrInterface, sizeof(AddrInterface)) == SOCKET_ERROR)
+            {
                 bAddressOK = FALSE;
-	    }
+            }
         }
     }
     else
     {
-        if(s == INVALID_SOCKET)
+        if (s == INVALID_SOCKET)
             s = socket(AF_INET, SOCK_STREAM, 0);
         int n = connect(s, (sockaddr*)&HostAddrOut, sizeof(HostAddrOut));
         bAddressOK = n==0;
@@ -199,15 +202,15 @@ CPacketSocketNative::SetOrigin(const string & strNewAddr)
        4:  <source ip>:<interface ip>:<group ip>:<port>
        5: - for TCP - no need to separately set origin
      */
-    if(strNewAddr == "-")
+    if (strNewAddr == "-")
     {
         udp = false;
-        if(s == INVALID_SOCKET)
+        if (s == INVALID_SOCKET)
             s = socket(AF_INET, SOCK_STREAM, 0);
         return TRUE;
     }
 
-    if(s == INVALID_SOCKET)
+    if (s == INVALID_SOCKET)
     {
         s = socket(AF_INET, SOCK_DGRAM, 0);
     }
@@ -217,7 +220,7 @@ CPacketSocketNative::SetOrigin(const string & strNewAddr)
     vector<string> parts = parseDest(strNewAddr);
     bool ok=true;
     int p=-1,o=-1,g=-1,i=-1;
-    switch(parts.size())
+    switch (parts.size())
     {
     case 1:
         p=0;
@@ -241,35 +244,39 @@ CPacketSocketNative::SetOrigin(const string & strNewAddr)
         ok = false;
     }
 
-    if(p>=0 && parts[p].length() > 0)
+    if (p>=0 && parts[p].length() > 0)
         port = atol(parts[p].c_str());
 
-    if(o>=0 && parts[o].length() > 0)
-        inet_pton(AF_INET, parts[o].c_str(), &sourceAddr);
+    if (o>=0 && parts[o].length() > 0)
+    {
+        inet_pton(AF_INET, parts[o].c_str(), &sourceAddr.sin_addr);
+    }
     else
+    {
         sourceAddr.sin_addr.s_addr=INADDR_ANY;
+    }
 
-    if(i>=0 && parts[i].length() > 0)
+    if (i>=0 && parts[i].length() > 0)
         inet_pton(AF_INET, parts[i].c_str(), &ifc.s_addr);
     else
         ifc.s_addr=INADDR_ANY;
 
-    if(g>=0 && parts[g].length() > 0)
+    if (g>=0 && parts[g].length() > 0)
     {
         inet_pton(AF_INET, parts[g].c_str(), &gp.s_addr);
 
         /* Multicast ? */
         uint32_t mc = htonl(0xe0000000);
-        if((gp.s_addr & mc) == mc)	/* multicast! */
+        if ((gp.s_addr & mc) == mc)	/* multicast! */
         {
             int optval = 1;
             setsockopt(s, SOL_SOCKET, SO_REUSEADDR, (char*)&optval, sizeof optval);
-			sockaddr_in sa;
+            sockaddr_in sa;
             sa.sin_family = AF_INET;
             sa.sin_addr.s_addr = gp.s_addr;
             sa.sin_port = htons(port);
             bind(s, (sockaddr*)&sa, sizeof(sa));
-            if(ok == false)
+            if (ok == false)
             {
                 throw CGenErr("Can't bind to port to receive packets");
             }
@@ -277,9 +284,9 @@ CPacketSocketNative::SetOrigin(const string & strNewAddr)
             mreq.imr_multiaddr.s_addr = gp.s_addr;
             mreq.imr_interface.s_addr = ifc.s_addr;
             int n = setsockopt(s, IPPROTO_IP, IP_ADD_MEMBERSHIP,(char *) &mreq, sizeof(mreq));
-            if(n == SOCKET_ERROR)
+            if (n == SOCKET_ERROR)
                 ok = false;
-            if(!ok)
+            if (!ok)
             {
                 cerr << "Can't join multicast group" << endl;
             }
@@ -309,8 +316,8 @@ CPacketSocketNative::SetOrigin(const string & strNewAddr)
         }
     }
 #ifdef _WIN32
-	u_long mode = 1;
-	(void)ioctlsocket(s, FIONBIO, &mode);
+    u_long mode = 1;
+    (void)ioctlsocket(s, FIONBIO, &mode);
 #else
     fcntl(s, F_SETFL, O_NONBLOCK);  // set to non-blocking
 #endif
@@ -320,7 +327,7 @@ CPacketSocketNative::SetOrigin(const string & strNewAddr)
 void
 CPacketSocketNative::poll()
 {
-    if(udp)
+    if (udp)
         pollDatagram();
     else
         pollStream();
@@ -332,10 +339,10 @@ CPacketSocketNative::pollStream()
     vector < _BYTE > vecbydata(MAX_SIZE_BYTES_NETW_BUF);
     /* Read block from network interface */
     int iNumBytesRead = ::recv(s, (char *) &vecbydata[0], MAX_SIZE_BYTES_NETW_BUF, 0);
-    if(iNumBytesRead > 0)
+    if (iNumBytesRead > 0)
     {
         /* Decode the incoming packet */
-        if(pPacketSink != NULL)
+        if (pPacketSink != NULL)
         {
             vecbydata.resize(iNumBytesRead);
             // TODO - is there any reason or possibility to optionally filter on source address?
@@ -353,12 +360,19 @@ CPacketSocketNative::pollDatagram()
         sockaddr_in sender;
         socklen_t l = sizeof(sender);
         readBytes = ::recvfrom(s, (char*)&vecbydata[0], vecbydata.size(), 0, (sockaddr*)&sender, &l);
-        if(readBytes>0) {
+        if (readBytes>0) {
             vecbydata.resize(readBytes);
-            if(sourceAddr.sin_addr.s_addr == htonl(INADDR_ANY))
+            if (sourceAddr.sin_addr.s_addr == htonl(INADDR_ANY))
+            {
                 pPacketSink->SendPacket(vecbydata, sender.sin_addr.s_addr, sender.sin_port);
-            else if(sourceAddr.sin_addr.s_addr == sender.sin_addr.s_addr) // optionally filter on source address
-                pPacketSink->SendPacket(vecbydata, sender.sin_addr.s_addr, sender.sin_port);
+            }
+            else
+            {
+                if (sourceAddr.sin_addr.s_addr == sender.sin_addr.s_addr) // optionally filter on source address
+                {
+                    pPacketSink->SendPacket(vecbydata, sender.sin_addr.s_addr, sender.sin_port);
+                }
+            }
         }
-    } while(readBytes>0);
+    } while (readBytes>0);
 }
