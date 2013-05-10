@@ -120,6 +120,7 @@ public slots:
 	void OnRadioNoiRed(int iID);
 	void OnButtonWaterfall();
 	void on_ButtonFreqOffset_clicked(bool);
+	void on_SpinBoxNoiRedLevel_valueChanged(int value);
 	void OnSwitchToDRM();
 	void OnSwitchToFM();
 	void OnHelpAbout() {emit About();}

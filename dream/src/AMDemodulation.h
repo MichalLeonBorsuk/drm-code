@@ -35,7 +35,7 @@
 #include "matlib/Matlib.h"
 #include "resample/Resample.h"
 #ifdef HAVE_SPEEX
- #include <speex/speex_preprocess.h>
+# include <speex/speex_preprocess.h>
 #endif
 
 
@@ -98,24 +98,17 @@ class CNoiseReduction
 public:
     CNoiseReduction() : eNoiRedDegree(NR_MEDIUM)
 #ifdef HAVE_SPEEX
-	 ,preprocess_state(NULL),use_speex_denoise(false)
+    , preprocess_state(NULL), speex_data(NULL)
+    , supression_level(0), sample_rate(0)
 #endif
-	{
-	}
-    virtual ~CNoiseReduction() {}
+    {}
+    virtual ~CNoiseReduction();
 
-    enum ENoiRedDegree {NR_LOW, NR_MEDIUM, NR_HIGH};
+    enum ENoiRedDegree {NR_LOW=1, NR_MEDIUM=2, NR_HIGH=3};
 
     void Init(int iSampleRate, int iNewBlockLen);
     void Process(CRealVector& vecrIn /* in/out */);
-
-    void SetNoiRedSpeex(bool);
-
     void SetNoiRedDegree(const ENoiRedDegree eNND);
-
-    ENoiRedDegree GetNoiRedDegree() {
-        return eNoiRedDegree;
-    }
 
 protected:
     void UpdateNoiseEst(CRealVector& vecrNoisePSD,
@@ -148,7 +141,9 @@ protected:
     ENoiRedDegree	eNoiRedDegree;
 #ifdef HAVE_SPEEX
     SpeexPreprocessState *preprocess_state;
-    bool		use_speex_denoise;
+    spx_int16_t*	speex_data;
+    spx_int32_t		supression_level;
+    int				sample_rate;
 #endif
 };
 
@@ -265,7 +260,7 @@ public:
     virtual ~CAMDemodulation() {}
 
     enum EDemodType {DT_AM, DT_LSB, DT_USB, DT_CW, DT_FM};
-    enum ENoiRedType {NR_OFF, NR_LOW, NR_MEDIUM, NR_HIGH, NR_SPEEX_LOW, NR_SPEEX_MEDIUM, NR_SPEEX_HIGH};
+    enum ENoiRedType {NR_OFF, NR_LOW, NR_MEDIUM, NR_HIGH, NR_SPEEX};
 
     void SetAcqFreq(const CReal rNewNormCenter);
 
@@ -301,7 +296,12 @@ public:
 
     void SetNoiRedType(const ENoiRedType eNewType);
     ENoiRedType GetNoiRedType() {
-        return NoiRedType;
+        return eNoiRedType;
+    }
+
+    void SetNoiRedLevel(const int iNewLevel);
+    int GetNoiRedLevel() {
+        return iNoiRedLevel;
     }
 
     _BOOLEAN haveSpeex() {
@@ -369,13 +369,15 @@ protected:
     CVector<_REAL>				vecTempResBufIn;
     CVector<_REAL>				vecTempResBufOut;
 
+    ENoiRedType					eNoiRedType;
+    int							iNoiRedLevel;
+
     /* Objects */
     CPLL						PLL;
     CMixer						Mixer;
     CFreqOffsAcq				FreqOffsAcq;
     CAGC						AGC;
     CNoiseReduction				NoiseReduction;
-    ENoiRedType					NoiRedType;
     CAudioResample				ResampleObj;
 
     /* OPH: counter to count symbols within a frame in order to generate */

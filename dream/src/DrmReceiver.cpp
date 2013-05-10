@@ -1575,6 +1575,11 @@ CDRMReceiver::LoadSettings()
     /* noise reduction */
     AMDemodulation.SetNoiRedType((CAMDemodulation::ENoiRedType)s.Get("AM Demodulation", "noisered", 0));
 
+#ifdef HAVE_SPEEX
+    /* noise reduction level */
+    AMDemodulation.SetNoiRedLevel(s.Get("AM Demodulation", "noiseredlvl", -12));
+#endif
+
     /* pll enabled/disabled */
     AMDemodulation.EnablePLL(s.Get("AM Demodulation", "enablepll", 0));
 
@@ -1787,6 +1792,11 @@ CDRMReceiver::SaveSettings()
 
     /* noise reduction */
     s.Put("AM Demodulation", "noisered", AMDemodulation.GetNoiRedType());
+
+#ifdef HAVE_SPEEX
+    /* noise reduction level */
+    s.Put("AM Demodulation", "noiseredlvl", AMDemodulation.GetNoiRedLevel());
+#endif
 
     /* pll enabled/disabled */
     s.Put("AM Demodulation", "enablepll", AMDemodulation.PLLEnabled());
