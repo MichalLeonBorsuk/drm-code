@@ -91,7 +91,13 @@ CPacketSocketNative::SendPacket(const vector < _BYTE > &vecbydata, uint32_t, uin
         string ss;
         GetDestination(ss);
         cerr << "send packet " << ss << endl;
-        (void)sendto(s, (char*)&vecbydata[0], vecbydata.size(), 0, (sockaddr*)&HostAddrOut, sizeof(HostAddrOut));
+        int n = sendto(s, (char*)&vecbydata[0], vecbydata.size(), 0, (sockaddr*)&HostAddrOut, sizeof(HostAddrOut));
+		if(n==SOCKET_ERROR) {
+#ifdef _WIN32
+			int err = GetLastError();
+			cerr << "socket send failed " << err << endl;
+#endif
+		}
     }
     else
         (void)send(s, (char*)&vecbydata[0], vecbydata.size(), 0);
@@ -124,6 +130,7 @@ CPacketSocketNative::SetDestination(const string & strNewAddr)
     in_addr AddrInterface;
     AddrInterface.s_addr = htonl(INADDR_ANY);
     vector<string> parts = parseDest(strNewAddr);
+	HostAddrOut.sin_family = AF_INET; 
     if (tolower(parts[0][0])=='t')
     {
         udp = false;
@@ -218,7 +225,8 @@ CPacketSocketNative::SetOrigin(const string & strNewAddr)
     int port=-1;
     in_addr gp, ifc;
     vector<string> parts = parseDest(strNewAddr);
-    bool ok=true;
+	sourceAddr.sin_family = AF_INET;
+	bool ok=true;
     int p=-1,o=-1,g=-1,i=-1;
     switch (parts.size())
     {
