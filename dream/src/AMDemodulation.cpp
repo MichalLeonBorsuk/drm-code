@@ -44,8 +44,8 @@ CAMDemodulation::CAMDemodulation() :
     rvecZAM(), rvecADC(), rvecBDC(), rvecZFM(), rvecAFM(), rvecBFM(),
     iSymbolBlockSize(0),
     bPLLIsEnabled(FALSE), bAutoFreqAcquIsEnabled(FALSE), eDemodType(DT_AM),
-    cOldVal(),
-    PLL(), Mixer(), FreqOffsAcq(), AGC(), NoiseReduction(), NoiRedType(NR_OFF),
+    cOldVal(), eNoiRedType(NR_OFF), iNoiRedLevel(-12),
+    PLL(), Mixer(), FreqOffsAcq(), AGC(), NoiseReduction(),
     iFreeSymbolCounter(0), iAudSampleRate(0), iSigSampleRate(0), iBandwidth(0),
     iResOutBlockSize(0)
 {
@@ -139,7 +139,7 @@ void CAMDemodulation::ProcessDataInternal(CParameter& Parameters)
 
 
     /* Noise reduction -------------------------------------------------- */
-    if (NoiRedType != NR_OFF)
+    if (eNoiRedType != NR_OFF)
         NoiseReduction.Process(rvecInpTmp);
 
 
@@ -428,43 +428,40 @@ void CAMDemodulation::SetNoiRedType(const ENoiRedType eNewType)
     /* Lock resources */
     Lock();
     {
-        NoiRedType = eNewType;
+        eNoiRedType = eNewType;
 
-        switch (NoiRedType)
+        switch (eNoiRedType)
         {
+        case NR_OFF:
+            break;
+
         case NR_LOW:
-            NoiseReduction.SetNoiRedSpeex(false);
             NoiseReduction.SetNoiRedDegree(CNoiseReduction::NR_LOW);
             break;
 
         case NR_MEDIUM:
-            NoiseReduction.SetNoiRedSpeex(false);
             NoiseReduction.SetNoiRedDegree(CNoiseReduction::NR_MEDIUM);
             break;
 
         case NR_HIGH:
-            NoiseReduction.SetNoiRedSpeex(false);
             NoiseReduction.SetNoiRedDegree(CNoiseReduction::NR_HIGH);
             break;
 
-        case NR_SPEEX_LOW:
-            NoiseReduction.SetNoiRedSpeex(true);
-            NoiseReduction.SetNoiRedDegree(CNoiseReduction::NR_MEDIUM);
-            break;
-
-        case NR_SPEEX_MEDIUM:
-            NoiseReduction.SetNoiRedSpeex(true);
-            NoiseReduction.SetNoiRedDegree(CNoiseReduction::NR_MEDIUM);
-            break;
-
-        case NR_SPEEX_HIGH:
-            NoiseReduction.SetNoiRedSpeex(true);
-            NoiseReduction.SetNoiRedDegree(CNoiseReduction::NR_HIGH);
-            break;
-
-        case NR_OFF:
+        case NR_SPEEX:
+            NoiseReduction.SetNoiRedDegree((CNoiseReduction::ENoiRedDegree)iNoiRedLevel);
             break;
         }
+    }
+    Unlock();
+}
+
+void CAMDemodulation::SetNoiRedLevel(const int iNewLevel)
+{
+    /* Lock resources */
+    Lock();
+    {
+        iNoiRedLevel = iNewLevel;
+        NoiseReduction.SetNoiRedDegree((CNoiseReduction::ENoiRedDegree)iNoiRedLevel);
     }
     Unlock();
 }
@@ -770,58 +767,55 @@ void CFreqOffsAcq::Start(const CReal rNewNormCenter)
 	Robert Turnbull added the capability to use the one from the SPEEX codec
 */
 
-void CNoiseReduction::SetNoiRedSpeex(bool b)
+CNoiseReduction::~CNoiseReduction()
 {
-#if HAVE_SPEEX
-    use_speex_denoise = b;
-#else
-    (void)b;
+#ifdef HAVE_SPEEX
+    if (preprocess_state)
+        speex_preprocess_state_destroy(preprocess_state);
+    if (speex_data)
+        free(speex_data);
 #endif
 }
 
 void CNoiseReduction::SetNoiRedDegree(const ENoiRedDegree eNND)
 {
     eNoiRedDegree = eNND;
-#if HAVE_SPEEX
-    if(use_speex_denoise) {
-        spx_int32_t supressionLevel;
-        switch(eNoiRedDegree) {
-        case NR_LOW:
-            supressionLevel = -9;
-            break;
-        case NR_MEDIUM:
-            supressionLevel = -15;
-            break;
-        case NR_HIGH:
-            supressionLevel = -21;
-            break;
-        }
-        speex_preprocess_ctl(preprocess_state, SPEEX_PREPROCESS_SET_NOISE_SUPPRESS, &supressionLevel);
-    }
+#ifdef HAVE_SPEEX
+    supression_level = (spx_int32_t)eNND;
 #endif
 }
 
 void CNoiseReduction::Process(CRealVector& vecrIn)
 {
-#if HAVE_SPEEX
-    if(use_speex_denoise) {
-        static spx_int16_t* speexData = {NULL};
+#ifdef HAVE_SPEEX
+    if ((int)eNoiRedDegree <= 0) {
         int i;
-        double* vectorData = &( vecrIn[0] );
+        CReal* vectorData = &vecrIn[0];
         int vectorSz = vecrIn.GetSize();
-        if (preprocess_state == NULL)
+        if (sample_rate)
         {
-            preprocess_state = speex_preprocess_state_init(vectorSz, DEFAULT_SOUNDCRD_SAMPLE_RATE);
-            speexData = (spx_int16_t*)malloc(vectorSz*sizeof(spx_int16_t));
+            if (preprocess_state)
+                speex_preprocess_state_destroy(preprocess_state);
+            if (speex_data)
+                free(speex_data);
+            preprocess_state = speex_preprocess_state_init(vectorSz, sample_rate);
+            speex_data = (spx_int16_t*)malloc(vectorSz*sizeof(spx_int16_t));
+            supression_level = (spx_int32_t)eNoiRedDegree;
+            sample_rate = 0;
+        }
+        if (supression_level)
+        {
+            speex_preprocess_ctl(preprocess_state, SPEEX_PREPROCESS_SET_NOISE_SUPPRESS, &supression_level);
+            supression_level = 0;
         }
         for (i=0; i<vectorSz; i++)
         {
-            speexData[i] = (spx_int16_t)vectorData[i];
+            speex_data[i] = (spx_int16_t)vectorData[i];
         }
-        speex_preprocess(preprocess_state, speexData, NULL);
+        speex_preprocess(preprocess_state, speex_data, NULL);
         for (i=0; i<vectorSz; i++)
         {
-            vectorData[i] = (double)speexData[i];
+            vectorData[i] = (CReal)speex_data[i];
         }
     } else {
 #endif
@@ -874,7 +868,7 @@ void CNoiseReduction::Process(CRealVector& vecrIn)
 
         /* Overlap and add operation */
         vecrIn = vecrFiltResult + vecrOutSig1;
-#if HAVE_SPEEX
+#ifdef HAVE_SPEEX
     }
 #endif
 }
@@ -986,4 +980,8 @@ void CNoiseReduction::Init(int iSampleRate, int iNewBlockLen)
     /* Init window for overlap and add */
     vecrTriangWin.Init(iBlockLen);
     vecrTriangWin = Triang(iBlockLen);
+
+#ifdef HAVE_SPEEX
+    sample_rate = iSampleRate;
+#endif
 }

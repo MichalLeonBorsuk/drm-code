@@ -132,6 +132,12 @@ AnalogDemDlg::AnalogDemDlg(CDRMReceiver& NDRMR, CSettings& Settings,
 	PhaseDial->scaleDraw()->enableComponent(QwtAbstractScaleDraw::Labels, false);
 #endif
 
+#ifdef HAVE_SPEEX
+	SpinBoxNoiRedLevel->setValue(DRMReceiver.GetAMDemod()->GetNoiRedLevel());
+#else
+	RadioButtonNoiRedSpeex->hide();
+	SpinBoxNoiRedLevel->hide();
+#endif
 
 	/* Update controls */
 	UpdateControls();
@@ -335,15 +341,16 @@ void AnalogDemDlg::UpdateControls()
 			RadioButtonNoiRedHigh->setChecked(TRUE);
 		break;
 
-	case CAMDemodulation::NR_SPEEX_LOW: // TODO
-		break;
-
-	case CAMDemodulation::NR_SPEEX_MEDIUM: // TODO
-		break;
-
-	case CAMDemodulation::NR_SPEEX_HIGH: // TODO
+	case CAMDemodulation::NR_SPEEX:
+		if (!RadioButtonNoiRedSpeex->isChecked())
+			RadioButtonNoiRedSpeex->setChecked(TRUE);
 		break;
 	}
+
+#ifdef HAVE_SPEEX
+	/* Set speex spinbox enable state */
+	SpinBoxNoiRedLevel->setEnabled(RadioButtonNoiRedSpeex->isChecked());
+#endif
 
 	/* Set filter bandwidth */
 	SliderBandwidth->setValue(DRMReceiver.GetAMDemod()->GetFilterBW());
@@ -509,7 +516,18 @@ void AnalogDemDlg::OnRadioNoiRed(int iID)
 	case 3:
 		DRMReceiver.GetAMDemod()->SetNoiRedType(CAMDemodulation::NR_HIGH);
 		break;
+
+#ifdef HAVE_SPEEX
+	case 4:
+		DRMReceiver.GetAMDemod()->SetNoiRedType(CAMDemodulation::NR_SPEEX);
+		break;
+#endif
 	}
+
+#ifdef HAVE_SPEEX
+	/* Set speex spinbox enable state */
+	SpinBoxNoiRedLevel->setEnabled(RadioButtonNoiRedSpeex->isChecked());
+#endif
 }
 
 void AnalogDemDlg::OnSliderBWChange(int value)
@@ -608,6 +626,11 @@ void AnalogDemDlg::on_ButtonFreqOffset_clicked(bool)
 			(DRMReceiver.GetParameters()->GetSigSampleRate() / 2);
 		OnChartxAxisValSet(dVal);
 	}
+}
+
+void AnalogDemDlg::on_SpinBoxNoiRedLevel_valueChanged(int value)
+{
+	DRMReceiver.GetAMDemod()->SetNoiRedLevel(value);
 }
 
 void AnalogDemDlg::AddWhatsThisHelp()
