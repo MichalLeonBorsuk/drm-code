@@ -555,18 +555,15 @@ _BOOLEAN CUpstreamDI::SetOrigin(const string& str)
 
 	strOrigin = str;
 
-	// try a socket
-	source = new CPacketSocketNative;
-
-	// Delegate to socket
+	// try a file
+	source = new CPacketSourceFile;
 	_BOOLEAN bOK = source->SetOrigin(str);
 
 	if(!bOK)
 	{
-		// try a file
+		// try a socket
 		delete source;
-		source = NULL;
-		source = new CPacketSourceFile;
+		source = new CPacketSocketNative;
 		bOK = source->SetOrigin(str);
 	}
 	if (bOK)
