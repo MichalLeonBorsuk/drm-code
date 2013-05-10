@@ -461,7 +461,8 @@ void CAMDemodulation::SetNoiRedLevel(const int iNewLevel)
     Lock();
     {
         iNoiRedLevel = iNewLevel;
-        NoiseReduction.SetNoiRedDegree((CNoiseReduction::ENoiRedDegree)iNoiRedLevel);
+        if (eNoiRedType == NR_SPEEX)
+            NoiseReduction.SetNoiRedDegree((CNoiseReduction::ENoiRedDegree)iNoiRedLevel);
     }
     Unlock();
 }
