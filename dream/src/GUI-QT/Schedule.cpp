@@ -459,10 +459,12 @@ Station::EState CStationsItem::stateAt(time_t ltime, int previewSeconds) const
 	}
 	else
 	{
-		time_t dt = ltime + previewSeconds;
-		if (activeAt(dt) == TRUE)
+		for(time_t dt = ltime; dt < ltime + previewSeconds; dt += 60)
 		{
-			return Station::IS_PREVIEW;
+			if (activeAt(dt) == TRUE)
+			{
+				return Station::IS_PREVIEW;
+			}
 		}
 		return Station::IS_INACTIVE;
 	}
