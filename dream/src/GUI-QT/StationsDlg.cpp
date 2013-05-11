@@ -916,6 +916,15 @@ void StationsDlg::OnTimerUTCLabel()
     /* Only apply if time label does not show the correct time */
     if (TextLabelUTCTime->text().compare(strUTCTime))
         TextLabelUTCTime->setText(strUTCTime);
+
+    /* frequency could be changed by evaluation dialog or RSCI */
+    int iFrequency = DRMReceiver.GetFrequency();
+    int iCurFrequency = QwtCounterFrequency->value();
+
+    if (iFrequency != iCurFrequency)
+    {
+        QwtCounterFrequency->setValue(iFrequency);
+    }
 }
 
 void StationsDlg::OnTimerList()
@@ -926,19 +935,7 @@ void StationsDlg::OnTimerList()
         {
             LoadSchedule();
         }
-
-        /* frequency could be changed by evaluation dialog or RSCI */
-        int iFrequency = DRMReceiver.GetFrequency();
-        int iCurFrequency = QwtCounterFrequency->value();
-
-        if (iFrequency != iCurFrequency)
-        {
-            QwtCounterFrequency->setValue(iFrequency);
-        }
-
-        /* Update list view */
-        SetStationsView();
-    }
+	}
 }
 
 void StationsDlg::LoadSettings()
@@ -1194,7 +1191,11 @@ void StationsDlg::SetStationsView()
 
 void StationsDlg::OnFreqCntNewValue(double dVal)
 {
-    DRMReceiver.SetFrequency(int(dVal));
+	int iFrequency = DRMReceiver.GetFrequency();
+	int newFreq = int(dVal);
+
+	if(newFreq != iFrequency) // avoid double tuning via RSCI
+	    DRMReceiver.SetFrequency(int(dVal));
 }
 
 void StationsDlg::OnHeaderClicked(int c)
