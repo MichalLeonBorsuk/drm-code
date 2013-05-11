@@ -40,15 +40,6 @@
 
 
 /* Definitions ****************************************************************/
-/* Define the timer interval of updating the list view */
-#define GUI_TIMER_LIST_VIEW_STAT		30000 /* ms (30 seconds) */
-
-/* Define the timer interval of updating the UTC label */
-#define GUI_TIMER_UTC_TIME_LABEL		1000 /* ms (1 second) */
-
-/* Define the timer interval of updating s-meter */
-#define GUI_TIMER_S_METER				300 /* ms (0.3 seconds) */
-
 
 #define DRM_SCHEDULE_URL	"http://www.baseportal.com/cgi-bin/baseportal.pl?htx=/drmdx/scheduleini2"
 
@@ -114,8 +105,8 @@ public:
 		strCountry(""), strDaysFlags(""), strDaysShow(""),
 		rPower((_REAL) 0.0) { }
 
-	Station::EState stateAt(const QDateTime&, int) const;
-	_BOOLEAN activeAt(const QDateTime&) const;
+	Station::EState stateAt(time_t, int) const;
+	_BOOLEAN activeAt(time_t) const;
 	int StartTime() const {return iStartHour * 100 + iStartMinute;}
 	int StopTime() const{return iStopHour * 100 + iStopMinute;}
 	void SetStartTime(const int iStartTime)
@@ -162,7 +153,7 @@ public:
 	ESchedMode GetSchedMode() {return eSchedMode;}
 	void SetSchedMode(const ESchedMode);
 
-	int GetStationNumber() {return StationsTable.size();}
+	int GetNumberOfStations() {return StationsTable.size();}
 	CStationsItem& GetItem(const int iPos) {return StationsTable[iPos];}
 	Station::EState GetState(const int iPos);
 	bool CheckFilter(const int iPos);
@@ -247,8 +238,7 @@ protected:
 	QSignalMapper*	showMapper;
 	QActionGroup*	showGroup;
 	QNetworkAccessManager *manager;
-	QTimer			TimerList;
-	QTimer			TimerUTCLabel;
+	QTimer			Timer;
 	_BOOLEAN		bReInitOnFrequencyChange;
 
 	QMutex			ListItemsMutex;
@@ -261,8 +251,7 @@ signals:
 	void unsubscribeRig();
 public slots:
 	void OnSigStr(double);
-	void OnTimerList();
-	void OnTimerUTCLabel();
+	void OnTimer();
 	void OnSMeterMenu(int iID);
 	void OnSMeterMenu();
 	void OnUrlFinished(QNetworkReply*);
