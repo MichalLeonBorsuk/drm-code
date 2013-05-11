@@ -97,6 +97,8 @@ void CLogging::OnTimerLogFileStart()
 {
     iLogCount = 0;
     state = on;
+	/* stop this timer! */
+	TimerLogFileStart.stop();
     /* Start logging (if not already done) */
     TimerLogFile.start(1000); /* Every second */
     /* Open log files */
