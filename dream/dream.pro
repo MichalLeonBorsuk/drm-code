@@ -641,6 +641,7 @@ HEADERS += \
     src/GUI-QT/LiveScheduleDlg.h \
     src/GUI-QT/MultColorLED.h \
     src/GUI-QT/MultSettingsDlg.h \
+    src/GUI-QT/Schedule.h \
     src/GUI-QT/SlideShowViewer.h \
     src/GUI-QT/SoundCardSelMenu.h \
     src/GUI-QT/StationsDlg.h \
@@ -662,6 +663,7 @@ SOURCES += \
     src/GUI-QT/LiveScheduleDlg.cpp \
     src/GUI-QT/MultColorLED.cpp \
     src/GUI-QT/MultSettingsDlg.cpp \
+    src/GUI-QT/Schedule.cpp \
     src/GUI-QT/SlideShowViewer.cpp \
     src/GUI-QT/SoundCardSelMenu.cpp \
     src/GUI-QT/StationsDlg.cpp \
