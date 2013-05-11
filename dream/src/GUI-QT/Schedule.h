@@ -30,7 +30,7 @@
 #define __SCHEDULE_H
 
 #include <QNetworkAccessManager>
-#include <QURl>
+#include <QUrl>
 #include <QTreeWidgetItem>
 #include "../util/Vector.h"
 
