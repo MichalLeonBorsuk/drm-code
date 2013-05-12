@@ -248,7 +248,14 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
 
             /* The length is difference between borders */
             if(iFrameBorder>=iPrevBorder)
-                audio_frame[i].resize(iFrameBorder - iPrevBorder);
+            {
+                int size = iFrameBorder - iPrevBorder;
+                if (size < iNumHigherProtectedBytes)
+                    size = iNumHigherProtectedBytes;
+                else if (size > iMaxLenOneAudFrame)
+                    size = iMaxLenOneAudFrame;
+                audio_frame[i].resize(size);
+            }
             else
                 bGoodValues = FALSE;
             iPrevBorder = iFrameBorder;
@@ -262,12 +269,20 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
         if (iNumBorders != iNumAudioFrames)
         {
             if(iAudioPayloadLen>=int(iPrevBorder))
-                audio_frame[iNumBorders].resize(iAudioPayloadLen - iPrevBorder);
+            {
+                int size = iAudioPayloadLen - iPrevBorder;
+                if (size < iNumHigherProtectedBytes)
+                    size = iNumHigherProtectedBytes;
+                else if (size > iMaxLenOneAudFrame)
+                    size = iMaxLenOneAudFrame;
+                audio_frame[iNumBorders].resize(size);
+            }
             else
                 bGoodValues = FALSE;
         }
 
         /* Check if frame length entries represent possible values */
+/*      // check not needed anymore, the size is checked above     //
         for (i = 0; i < iNumAudioFrames; i++)
         {
             if(int(audio_frame[i].size()) > iMaxLenOneAudFrame)
@@ -275,7 +290,7 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
                 bGoodValues = FALSE;
             }
         }
-
+*/
         if (bGoodValues == TRUE)
         {
             /* Higher-protected part */
