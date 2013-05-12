@@ -613,6 +613,8 @@ void CUpstreamDI::SetReceiverMode(ERecMode eNewMode)
 /* we only support one upstream RSCI source, so ignore the source address */
 void CUpstreamDI::SendPacket(const vector<_BYTE>& vecbydata, uint32_t, uint16_t)
 {
+	if(!vecbydata.size())
+		return;
 	if(vecbydata[0]=='P')
 	{
 		vector<_BYTE> vecOut;
