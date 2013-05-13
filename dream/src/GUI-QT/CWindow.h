@@ -38,6 +38,7 @@
 #include <QHideEvent>
 #include <QShowEvent>
 #include <QCloseEvent>
+#include <QContextMenuEvent>
 #include <QMap>
 #include <QString>
 
@@ -96,6 +97,7 @@ private:
 	virtual void closeEvent(QCloseEvent*);
 	virtual void showEvent(QShowEvent*);
 	virtual void hideEvent(QHideEvent*);
+	virtual void contextMenuEvent(QContextMenuEvent*);
 #if QT_VERSION >= 0x050000
 	virtual bool event(QEvent*);
 #endif
