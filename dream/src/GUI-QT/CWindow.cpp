@@ -35,6 +35,7 @@
 #if QT_VERSION >= 0x050000
 # include <QTimer>
 #endif
+#include <QWhatsThis>
 
 /* Implementation *************************************************************/
 
@@ -126,6 +127,20 @@ void CWindow::hideEvent(QHideEvent* pEvent)
 	saveWindowGeometry();
 	eventHide(pEvent);
 	emit showWindow(this, false);
+}
+void CWindow::contextMenuEvent(QContextMenuEvent *event)
+{
+	/* TODO popup a "What's This?" context menu */
+	QWidget *child = childAt(event->pos());
+	while (child)
+	{
+		if (!child->whatsThis().isEmpty())
+		{
+			QWhatsThis::enterWhatsThisMode();
+			break;
+		}
+		child = child->parentWidget();
+	}
 }
 #if QT_VERSION >= 0x050000
 	/* On Qt 5 hideEvent is not generated on window minimize,
