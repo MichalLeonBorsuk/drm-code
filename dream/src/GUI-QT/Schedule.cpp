@@ -470,13 +470,17 @@ Station::EState CStationsItem::stateAt(time_t ltime, int previewSeconds) const
 	}
 }
 
+#ifdef _WIN32
+extern time_t timegm(struct tm *tm); // defined in Scheduler.cpp
+#endif
+
 _BOOLEAN CStationsItem::activeAt(time_t wantedTime) const
 {
 	struct tm ptm = *gmtime (&wantedTime);
 	ptm.tm_hour = 0;
 	ptm.tm_min = 0;
 	ptm.tm_sec = 0;
-	time_t wantedDay = mktime(&ptm);
+	time_t wantedDay = timegm(&ptm); // start of daytime
 
 	/* Get start time */
 	time_t broadcastStart = wantedDay + 60*(60*iStartHour+iStartMinute);
