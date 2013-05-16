@@ -333,17 +333,21 @@ CPacketSourceFile::readPcap(vector<_BYTE>& vecbydata, int& interval)
         {
             link_len=14;
         }
+#ifdef DLT_LINUX_SLL
         /* linux cooked */
         if(lt==DLT_LINUX_SLL)
         {
             link_len=16;
         }
+#endif
         /* raw IP header ? */
         if(lt==DLT_RAW)
         {
             link_len=0;
         }
-        packet_time = header->ts;
+        //packet_time = header->ts; try this for BSD
+		packet_time.tv_sec = header->ts.tv_sec;
+		packet_time.tv_usec = header->ts.tv_usec;
 #endif
         if(pkt_data == NULL)
             return;
