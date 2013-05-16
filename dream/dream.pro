@@ -188,6 +188,14 @@ unix {
       message("with fftw3")
       CONFIG += fftw
      }
+     exists(/usr/local/include/fftw3.h) {
+      DEFINES += HAVE_FFTW3_H
+      LIBS += -lfftw3
+	  LIBS += -L/usr/local/lib
+      message("with fftw3")
+      CONFIG += fftw
+	  INCLUDEPATH += /usr/local/include
+     }
      exists(/usr/include/fftw.h) {
        CONFIG += fftw
        message("with fftw2")
