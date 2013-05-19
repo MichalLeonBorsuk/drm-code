@@ -1,4 +1,3 @@
-
 package provide rsci 1.0
 
 if ![info exists SE127_PROTOCOL] {
@@ -27,9 +26,7 @@ proc ProcessTagItem {tagName byteLength data} {
 	if {[string range $tagName 0 0] == "x"} {
 		# Process statistics tag - output is list of alternating statistic and value (e.g. 0 19.8 50 20.3 100 21.9)
 		set baseTagName "r[string range $tagName 1 3]"
-puts "basename $baseTagName"
 		binary scan $data "Sc" nFrames nStats
-puts "length of data [string length $data] nFrames $nFrames nStats $nStats"
 		set decodedTag [list $nFrames]
 		set byteLenPerStat [expr ($byteLength - 3) / $nStats]
 		set tag [list]
@@ -37,10 +34,8 @@ puts "length of data [string length $data] nFrames $nFrames nStats $nStats"
 			binary scan [string range $data $i $i] "c" statistic
 			lappend decodedTag $statistic
 			set subTag [ProcessTagItem $baseTagName [expr $byteLenPerStat - 1] [string range $data [expr $i + 1] [expr $i + $byteLenPerStat - 1]]]
-puts "subtag $subTag length [llength $subTag] stringlen [string length $subTag]"
 			lappend decodedTag $subTag
 		}
-puts "final list length [llength $decodedTag] first ele [lindex $decodedTag 0] second ele [lindex $decodedTag 1] then [lindex $decodedTag 2]"
 		return $decodedTag 
 	}
 	if {$tagName == "rast"} {
@@ -153,8 +148,6 @@ puts "final list length [llength $decodedTag] first ele [lindex $decodedTag 0] s
 	    }
 	    return $decodedTag
 	}	
-
-
 
 	if {$tagName == "rser"} {
 	    binary scan $data "c" decodedTag 
@@ -515,8 +508,6 @@ proc CmdStartRecording {tty profile source destination} {
 
 	set tagLayer [BuildTagLayer "crec" [ format "%s%d" $profiletag 1 ]]
 
-
-
 	# Build IPIO/DCP
 	set protLayer [BuildLayer $tagLayer]
 
@@ -635,11 +626,7 @@ proc CmdSetProfile {tty profile} {
     flush $tty
 }
 
-
-
-
 proc FACDecoder {facString} {
-
 
     # Decodes FAC nd returns list with content
 
@@ -982,5 +969,3 @@ proc BuildTagItemAudioStats {audioStats} {
       set tagBody [binary format "SS" [lindex $audioStats 0] [lindex $audioStats 1]]
       return [BuildTagLayer "rast" $tagBody]
 }
-
-
