@@ -317,6 +317,8 @@ CPacketSocketNative::SetOrigin(const string & strNewAddr)
         sa.sin_family = AF_INET;
         sa.sin_addr.s_addr = htonl(INADDR_ANY);
         sa.sin_port = htons(port);
+        int optval = 1;
+        setsockopt(s, SOL_SOCKET, SO_REUSEADDR, (char*)&optval, sizeof optval);
         int r = bind(s, (sockaddr*)&sa, sizeof(sa));
         if (r < 0)
         {
