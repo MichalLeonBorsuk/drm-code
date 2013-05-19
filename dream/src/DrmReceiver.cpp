@@ -1622,14 +1622,14 @@ CDRMReceiver::LoadSettings()
         string origin = s.Get("command", ss.str());
         if (str == "")
         {
-	    // allow control without status
-	    if(origin != "")
-		    downstreamRSCI.AddSubscriber("", origin, ' ');
-        }
-        else
-        {
-            downstreamRSCI.AddSubscriber(str, origin, profile[0]);
-        }
+			// allow control without status
+			if(origin != "")
+				downstreamRSCI.AddSubscriber("", origin, ' ');
+		}
+		else
+		{
+			downstreamRSCI.AddSubscriber(str, origin, profile[0]);
+		}
     }
     /* RSCI File Recording */
     str = s.Get("command", "rsirecordprofile");
