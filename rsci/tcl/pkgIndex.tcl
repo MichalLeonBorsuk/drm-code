@@ -14,3 +14,6 @@ package ifneeded rsciUtil 1.0 [list source [file join $dir rsciUtil.tcl]]
 package ifneeded rsci_crc 1.0 [list source [file join $dir rsci_crc.tcl]]
 package ifneeded rsci 1.0 [list source [file join $dir rsci.tcl]]
 package ifneeded sudp 1.0 [list source [file join $dir sudp.tcl]]
+if { [string first "win32" [string tolower [platform::generic]]] != -1 } {
+  package ifneeded syslog 1.0 [list source [file join $dir syslog.tcl]]
+}
