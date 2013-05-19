@@ -1,8 +1,12 @@
 set config_dir [file dirname $argv0]
+
+set config_dir "."
+
 source [file join $config_dir "settings.tcl"]
 
 # Include support for UDP
 package require udp
+package require syslog
 
 
 
@@ -48,13 +52,12 @@ proc ConnectToServer {} {
 
     set result 1
     while {$result != 0} {
-	if {[info exists PROXY_ADDRESS]} {
-		set result [catch {set tty [socks4connect $PROXY_ADDRESS $PROXY_PORT $SERVER_ADDRESS $SERVER_PORT]}]
-	} else {
-		set result [catch {set tty [socket $SERVER_ADDRESS $SERVER_PORT]}]
-	}
-	syslog "info" "socket returned $result"
- 
+		if {[info exists PROXY_ADDRESS]} {
+			set result [catch {set tty [socks4connect $PROXY_ADDRESS $PROXY_PORT $SERVER_ADDRESS $SERVER_PORT]}]
+		} else {
+			set result [catch {set tty [socket $SERVER_ADDRESS $SERVER_PORT]}]
+		}
+		syslog "info" "socket returned $result" 
     }
 	
     fconfigure $tty -translation binary 

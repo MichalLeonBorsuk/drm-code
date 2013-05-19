@@ -5,6 +5,7 @@
 package require platform
 
 set config_dir [file dirname $argv0]
+set config_dir "."
 
 proc source_if_exists { dir var } {
 	upvar 1 $var name
@@ -84,7 +85,7 @@ set FORWARD_STATUS_PORT [expr $PORT_BASE + 101]
 set FORWARD_CONTROL_PORT [expr $PORT_BASE + 102]
 
 # Setting for communication with Theseus server
-set SERVER_ADDRESS theseus.dyndns.ws
+set SERVER_ADDRESS 127.0.0.1
 set SERVER_PORT 12001
 set serverUser drm
 #set PROXY_ADDRESS somehost
@@ -117,10 +118,14 @@ set INTERNET_CONNECTION_END "23:59:00";# default is "23:59:00"
 # OS-specific functions
 #***************************************************************************************
 
-if { [string first "windows" [string tolower platform::generic]] != -1 } {
+if { [string first "windows" [string tolower [platform::generic]]] != -1 } {
 	set OS_CODE windows.tcl
 } else {
-	set OS_CODE unix.tcl
+	if { [string first "win32" [string tolower [platform::generic]]] != -1 } {
+		set OS_CODE windows.tcl
+	} else {
+    	set OS_CODE unix.tcl
+	}
 }
 
 
@@ -173,10 +178,6 @@ set USE_EXTERNAL_SIGNAL_STRENGTH 0
 
 # Send email with datafile once that it is fully created (1). Don't send: 0
 set ENABLE_EMAIL 0
-
-# Name of the email program to be used
-#set EMAIL_CLIENT "postie";# For Windows
-set EMAIL_CLIENT "mpack";# For Unix
 
 #** SMTP-server IP-address
 set MAIL_SMTP pop3.rd.bbc.co.uk

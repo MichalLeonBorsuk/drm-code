@@ -1,6 +1,6 @@
 #** Path to where you copied the TCL-files, remember to user "/" instead of "\" !
-set DATA_DIR "F:/datafiles"
-set LOG_DIR "F:/logging"
+set DATA_DIR "D:/datafiles"
+set LOG_DIR "D:/logging"
 set PUTTY_DIR "C:/Program Files/putty/"
 set EXE_SUFFIX ".exe"
 
@@ -15,6 +15,7 @@ set CLICKS_PER_MS 1;
 set TCLSH_CMD "tclsh"
 
 # Sending Emails
+
 proc EmailDataFile {fileName} {
 
     global MAIL_SMTP MAIL_FROM MAIL_TO RX_NAME ROOT_DIR
@@ -72,9 +73,3 @@ proc PutFile {gzFileName remoteFileName} {
     catch {file delete $gzFileName}
   }
 }
-
-proc syslog {priority message} {
-	puts $message
-}
-
-package provide syslog
