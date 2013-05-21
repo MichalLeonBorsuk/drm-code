@@ -1609,27 +1609,34 @@ CDRMReceiver::LoadSettings()
         pUpstreamRSCI->SetDestination(str);
 
     /* downstream RSCI */
-    for (int i = 0; i<MAX_NUM_RSI_SUBSCRIBERS; i++)
-    {
-        stringstream ss;
-        ss << "rsiout" << i;
-        str = s.Get("command", ss.str());
-        ss.str("");
-        ss << "rsioutprofile" << i;
-        string profile = s.Get("command", ss.str(), string("A"));
-        ss.str("");
-        ss << "rciin" << i;
-        string origin = s.Get("command", ss.str());
-        if (str == "")
-        {
-			// allow control without status
-			if(origin != "")
-				downstreamRSCI.AddSubscriber("", origin, ' ');
-		}
-		else
+	string rsiout = s.Get("command", "rsiout", string(""));
+	string rciin = s.Get("command", "rciin", string(""));
+	if(rsiout != "" || rciin != "")
+	{
+		istringstream cc(rciin);
+		vector<string> rci;
+		while(cc >> str)
 		{
-			downstreamRSCI.AddSubscriber(str, origin, profile[0]);
+			rci.push_back(str);
 		}
+		istringstream ss(rsiout);
+		size_t n=0;
+		while(ss >> str)
+		{
+			char profile = str[0];
+			string dest = str.substr(2);
+			if(rci.size()>n)
+			{
+				downstreamRSCI.AddSubscriber(dest, profile, rci[n]);
+				n++;
+			}
+			else
+			{
+				downstreamRSCI.AddSubscriber(dest, profile);
+			}
+		}
+		for(;n<rci.size(); n++)
+			downstreamRSCI.AddSubscriber("", ' ', rci[n]);
     }
     /* RSCI File Recording */
     str = s.Get("command", "rsirecordprofile");

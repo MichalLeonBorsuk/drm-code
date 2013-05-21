@@ -208,8 +208,7 @@ CSettings::ParseArguments(int argc, char **argv)
 	_BOOLEAN bIsReceiver;
 	_REAL rArgument;
 	string strArgument;
-	int rsioutnum = 0;
-	int rciinnum = 0;
+	string rsiOutProfile="A";
 
 	bIsReceiver = IsReceiver(argv[0]);
 
@@ -492,13 +491,7 @@ CSettings::ParseArguments(int argc, char **argv)
 		if (GetStringArgument(argc, argv, i, "--rsioutprofile", "--rsioutprofile",
 							  strArgument) == TRUE)
 		{
-			for (int i = 0; i < rsioutnum; i++)
-			{
-				stringstream s;
-				s << "rsioutprofile" << i;
-				if(ini["command"].count(s.str()) == 0)
-					Put("command", s.str(), strArgument);
-			}
+			rsiOutProfile = strArgument;
 			continue;
 		}
 
@@ -506,10 +499,11 @@ CSettings::ParseArguments(int argc, char **argv)
 		if (GetStringArgument(argc, argv, i, "--rsiout", "--rsiout",
 							  strArgument) == TRUE)
 		{
-			stringstream s;
-			s << "rsiout" << rsioutnum;
-			Put("command", s.str(), strArgument);
-			rsioutnum++;
+			string s = Get("command", "rsiout", string(""));
+			if(s == "")
+				Put("command", "rsiout", rsiOutProfile+":"+strArgument);
+			else
+				Put("command", "rsiout", s+" "+rsiOutProfile+":"+strArgument);
 			continue;
 		}
 
@@ -533,10 +527,11 @@ CSettings::ParseArguments(int argc, char **argv)
 		if (GetStringArgument(argc, argv, i, "--rciin", "--rciin",
 							  strArgument) == TRUE)
 		{
-			stringstream s;
-			s << "rciin" << rciinnum;
-			Put("command", s.str(), strArgument);
-			rciinnum++;
+			string s = Get("command", "rciin", string(""));
+			if(s == "")
+				Put("command", "rciin", strArgument);
+			else
+				Put("command", "rciin", s+" "+strArgument);
 			continue;
 		}
 
