@@ -376,7 +376,7 @@ void CDownstreamDI::GetNextPacket(CSingleBuffer<_BINARY>&)
 }
 
 _BOOLEAN
-CDownstreamDI::AddSubscriber(const string& dest, const string& origin, const char profile)
+CDownstreamDI::AddSubscriber(const string& dest, const char profile, const string& origin)
 {
 	CRSISubscriber* subs = NULL;
 	/* heuristic to test for file or socket - TODO - better syntax */
