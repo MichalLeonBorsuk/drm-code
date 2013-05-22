@@ -63,6 +63,7 @@ public:
 	virtual bool SetOrigin(const string& str);
 
 	virtual bool GetDestination(string& str);
+	virtual bool GetOrigin(string& str);
 
 	void poll();
 
@@ -78,5 +79,6 @@ private:
 	vector<_BYTE>	writeBuf;
 	bool udp;
 	SOCKET s;
+	string origin, dest;
 };
 #endif
