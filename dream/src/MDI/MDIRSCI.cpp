@@ -522,8 +522,13 @@ void CDownstreamDI::SendPacket(const vector<_BYTE>&, uint32_t, uint16_t)
 void CDownstreamDI::poll()
 {
 	for(vector<CRSISubscriber*>::iterator i = RSISubscribers.begin();
-			i!=RSISubscribers.end(); i++)
-		(*i)->poll();
+		i!=RSISubscribers.end(); i++) {
+		CRSISubscriber *s = *i;
+		string origin; 
+		bool hasOrigin = s->GetOrigin(origin);
+		if(hasOrigin)
+			s->poll();
+	}
 }
 
 /* allow multiple destinations, allow destinations to send cpro instructions back */

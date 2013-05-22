@@ -155,6 +155,16 @@ _BOOLEAN CRSISubscriberSocket::SetOrigin(const string& str)
 	return FALSE;
 }
 
+bool CRSISubscriberSocket::GetOrigin(string& str)
+{
+	if(pSocket==NULL)
+	{
+		return FALSE;
+	}
+	// Delegate to socket
+	return pSocket->GetOrigin(str);
+}
+
 /* poll for incoming packets */
 void CRSISubscriberSocket::poll()
 {
