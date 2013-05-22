@@ -58,8 +58,11 @@ inline int inet_aton(const char*s, void * a) {
 CPacketSocketNative::CPacketSocketNative():
         pPacketSink(NULL), HostAddrOut(),
         writeBuf(),udp(true),
-        s(INVALID_SOCKET)
+        s(INVALID_SOCKET), origin(""), dest("")
 {
+	memset(&sourceAddr, 0, sizeof(sourceAddr));
+	memset(&destAddr, 0, sizeof(destAddr));
+	memset(&HostAddrOut, 0, sizeof(HostAddrOut));
 }
 
 CPacketSocketNative::~CPacketSocketNative()
@@ -119,6 +122,7 @@ CPacketSocketNative::parseDest(const string& input)
 bool
 CPacketSocketNative::SetDestination(const string & strNewAddr)
 {
+	dest = strNewAddr;
     /* syntax
        1:  <port>                send to port on localhost
        2:  <ip>:<port>           send to port on host or port on m/c group
@@ -198,10 +202,23 @@ CPacketSocketNative::GetDestination(string & str)
 #endif
 }
 
+bool
+CPacketSocketNative::GetOrigin(string& str)
+{
+	if(sourceAddr.sin_family == 0)
+		return false;
+    stringstream s;
+    char buf[32];
+	(void)buf;
+    s << inet_ntop(AF_INET, &sourceAddr.sin_addr.s_addr, buf, sizeof(buf)) << ":" << ntohs(sourceAddr.sin_port);
+    str = s.str();
+    return TRUE;
+}
 
 bool
 CPacketSocketNative::SetOrigin(const string & strNewAddr)
 {
+	origin = strNewAddr;
     /* syntax (unwanted fields can be empty, e.g. <source ip>::<group ip>:<port>
        1:  <port>
        2:  <group ip>:<port>
@@ -312,12 +329,10 @@ CPacketSocketNative::SetOrigin(const string & strNewAddr)
     else
     {
         /* bind to a port on any interface. */
-        sockaddr_in sa;
-        memset(&sa, 0, sizeof(sa));
-        sa.sin_family = AF_INET;
-        sa.sin_addr.s_addr = htonl(INADDR_ANY);
-        sa.sin_port = htons(port);
-        int r = bind(s, (sockaddr*)&sa, sizeof(sa));
+        sourceAddr.sin_family = AF_INET;
+        sourceAddr.sin_addr.s_addr = htonl(INADDR_ANY);
+        sourceAddr.sin_port = htons(port);
+        int r = bind(s, (sockaddr*)&sourceAddr, sizeof(sourceAddr));
         if (r < 0)
         {
             perror("bind() failed");
@@ -364,11 +379,30 @@ CPacketSocketNative::pollDatagram()
 {
     vector < _BYTE > vecbydata(MAX_SIZE_BYTES_NETW_BUF);
     int readBytes = 0;
+	{
+		stringstream s;
+		char buf[32];
+		(void)buf;
+		s << "poll src: " << inet_ntop(AF_INET, &sourceAddr.sin_addr.s_addr, buf, sizeof(buf))
+		  << ":" << ntohs(sourceAddr.sin_port)
+		  << " dst: " << inet_ntop(AF_INET, &HostAddrOut.sin_addr.s_addr, buf, sizeof(buf)) 
+		  << ":" << ntohs(HostAddrOut.sin_port);
+		//qDebug(s.str().c_str());
+	}
+
     do {
         sockaddr_in sender;
         socklen_t l = sizeof(sender);
         readBytes = ::recvfrom(s, (char*)&vecbydata[0], vecbydata.size(), 0, (sockaddr*)&sender, &l);
         if (readBytes>0) {
+			{
+				stringstream s;
+				char buf[32];
+				(void)buf;
+				s << "got from: " << inet_ntop(AF_INET, &sender.sin_addr.s_addr, buf, sizeof(buf))
+				  << ":" << ntohs(sender.sin_port);
+				//qDebug(s.str().c_str());
+			}
             vecbydata.resize(readBytes);
             if (sourceAddr.sin_addr.s_addr == htonl(INADDR_ANY))
             {
