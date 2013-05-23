@@ -141,11 +141,9 @@ macx {
 }
 exists(libs/faac.h) {
     CONFIG += faac
-    message("with FAAC")
 }
 exists(libs/neaacdec.h) {
     CONFIG += faad
-    message("with FAAD2")
 }
 unix {
 # packagesExist() not available on Qt 4.6 (e.g. Debian Squeeze)
@@ -158,20 +156,16 @@ unix {
      {
      #packagesExist(libpulse) 
       CONFIG += pulseaudio
-      PKGCONFIG += libpulse
      }
      else {
-       exists(/usr/include/portaudio.h) {
+       exists(/usr/include/portaudio.h) |
+       exists(/usr/local/include/portaudio.h) {
       #packagesExist(portaudio-2.0) 
           CONFIG += portaudio
-          PKGCONFIG += portaudio-2.0
        }
      }
      !qtconsole:!console {
-      exists(/usr/include/hamlib/rig.h) {
-          CONFIG += hamlib
-          message("with hamlib")
-      }
+      exists(/usr/include/hamlib/rig.h) |
       exists(/usr/local/include/hamlib/rig.h) {
           CONFIG += hamlib
       }
@@ -182,31 +176,31 @@ unix {
      exists(/usr/include/pcap.h) {
       CONFIG += pcap
             }
-     exists(/usr/include/sndfile.h) {
+     exists(/usr/include/sndfile.h) |
+     exists(/usr/local/include/sndfile.h) {
       CONFIG += sndfile
             }
-     exists(/usr/include/opus/opus.h) {
+     exists(/usr/include/opus/opus.h) |
+     exists(/usr/local/include/opus/opus.h) {
       CONFIG += opus
             }
-     exists(/usr/include/speex/speex_preprocess.h) {
-      DEFINES += HAVE_SPEEX
-      LIBS += -lspeexdsp
+     exists(/usr/include/speex/speex_preprocess.h) |
+     exists(/usr/local/include/speex/speex_preprocess.h) {
       CONFIG += speexdsp
-      message("with libspeexdsp")
      }
      exists(/usr/include/fftw3.h) {
       DEFINES += HAVE_FFTW3_H
       LIBS += -lfftw3
-      message("with fftw3")
       CONFIG += fftw
+      message("with fftw3")
      }
      exists(/usr/local/include/fftw3.h) {
       DEFINES += HAVE_FFTW3_H
       LIBS += -lfftw3
-	  LIBS += -L/usr/local/lib
-      message("with fftw3")
+      LIBS += -L/usr/local/lib
       CONFIG += fftw
-	  INCLUDEPATH += /usr/local/include
+      INCLUDEPATH += /usr/local/include
+      message("with fftw3")
      }
      exists(/usr/include/fftw.h) {
        CONFIG += fftw
@@ -311,11 +305,13 @@ faad {
      DEFINES += HAVE_LIBFAAD \
      USE_FAAD2_LIBRARY
      LIBS += -lfaad_drm
+     message("with FAAD2")
 }
 faac {
      DEFINES += HAVE_LIBFAAC \
      USE_FAAC_LIBRARY
      LIBS += -lfaac_drm
+     message("with FAAC")
 }
 opus {
      DEFINES += HAVE_LIBOPUS \
@@ -328,6 +324,11 @@ sndfile {
      unix:LIBS += -lsndfile
      win32:LIBS += libsndfile-1.lib
      message("with libsndfile")
+}
+speexdsp {
+     DEFINES += HAVE_SPEEX
+     LIBS += -lspeexdsp
+     message("with libspeexdsp")
 }
 gps {
      DEFINES += HAVE_LIBGPS
@@ -365,15 +366,15 @@ alsa {
     src/linux/soundout.h
     SOURCES += src/linux/alsa.cpp \
     src/linux/soundsrc.cpp
-    message("with alsa")
     CONFIG += sound
+    message("with alsa")
 }
 mmsystem {
     HEADERS += src/windows/Sound.h
     SOURCES += src/windows/Sound.cpp
     LIBS += -lwinmm
-    message("with mmsystem")
     CONFIG += sound
+    message("with mmsystem")
 }
 portaudio {
     DEFINES += USE_PORTAUDIO
@@ -382,16 +383,18 @@ portaudio {
     SOURCES += src/sound/drm_portaudio.cpp \
     src/sound/pa_ringbuffer.c
     LIBS += -lportaudio
-    message("with portaudio")
     CONFIG += sound
+    unix:PKGCONFIG += portaudio-2.0
+    message("with portaudio")
 }
 pulseaudio {
     DEFINES += USE_PULSEAUDIO
     HEADERS += src/sound/drm_pulseaudio.h
     SOURCES += src/sound/drm_pulseaudio.cpp
     LIBS += -lpulse
-    message("with pulseaudio")
     CONFIG += sound
+    unix:PKGCONFIG += libpulse
+    message("with pulseaudio")
 }
 consoleio {
     DEFINES += USE_CONSOLEIO
