@@ -151,40 +151,42 @@ unix {
      INSTALLS += target
      CONFIG += link_pkgconfig
      # check for pulseaudio before portaudio
-     exists(/usr/include/pulse/pulseaudio.h) |
+     exists(/usr/include/pulse/pulseaudio.h) | \
      exists(/usr/local/include/pulse/pulseaudio.h)
      {
      #packagesExist(libpulse) 
       CONFIG += pulseaudio
      }
      else {
-       exists(/usr/include/portaudio.h) |
+       exists(/usr/include/portaudio.h) | \
        exists(/usr/local/include/portaudio.h) {
       #packagesExist(portaudio-2.0) 
           CONFIG += portaudio
        }
      }
      !qtconsole:!console {
-      exists(/usr/include/hamlib/rig.h) |
+      exists(/usr/include/hamlib/rig.h) | \
       exists(/usr/local/include/hamlib/rig.h) {
           CONFIG += hamlib
       }
      }
-     exists(/usr/include/gps.h) {
+     exists(/usr/include/gps.h) | \
+     exists(/usr/local/include/gps.h) {
       CONFIG += gps
             }
-     exists(/usr/include/pcap.h) {
+     exists(/usr/include/pcap.h) | \
+     exists(/usr/local/include/pcap.h) {
       CONFIG += pcap
             }
-     exists(/usr/include/sndfile.h) |
+     exists(/usr/include/sndfile.h) | \
      exists(/usr/local/include/sndfile.h) {
       CONFIG += sndfile
             }
-     exists(/usr/include/opus/opus.h) |
+     exists(/usr/include/opus/opus.h) | \
      exists(/usr/local/include/opus/opus.h) {
       CONFIG += opus
             }
-     exists(/usr/include/speex/speex_preprocess.h) |
+     exists(/usr/include/speex/speex_preprocess.h) | \
      exists(/usr/local/include/speex/speex_preprocess.h) {
       CONFIG += speexdsp
      }
