@@ -32,6 +32,10 @@ else {
     }
 }
 message($$VERSION_MESSAGE $$DEBUG_MESSAGE $$UI_MESSAGE)
+unix {
+    UNAME = $$system(uname -s)
+    message(on $$UNAME)
+}
 TEMPLATE = app
 CONFIG += warn_on
 TARGET = dream
@@ -53,6 +57,12 @@ qt4 {
             }
         }
         else {
+            exists(/usr/local/include/qwt/qwt.h) {
+                message("with qwt")
+                INCLUDEPATH += /usr/local/include/qwt
+                LIBS += -lqwt
+                CONFIG += qwt
+            }
             exists(/usr/include/qwt/qwt.h) {
                 message("with qwt")
                 INCLUDEPATH += /usr/include/qwt
@@ -143,7 +153,9 @@ unix {
      INSTALLS += target
      CONFIG += link_pkgconfig
      # check for pulseaudio before portaudio
-     exists(/usr/include/pulse/pulseaudio.h) {
+     exists(/usr/include/pulse/pulseaudio.h) |
+     exists(/usr/local/include/pulse/pulseaudio.h)
+     {
      #packagesExist(libpulse) 
       CONFIG += pulseaudio
       PKGCONFIG += libpulse
@@ -214,7 +226,8 @@ unix {
      tui:console {
       CONFIG += consoleio
      }
-     LIBS += -lz -ldl
+     !contains(UNAME, .*BSD) : LIBS += -ldl
+     LIBS += -lz
      SOURCES += src/linux/Pacer.cpp
      DEFINES += HAVE_DLFCN_H \
             HAVE_MEMORY_H \
@@ -620,12 +633,13 @@ FORMS += \
     AboutDlgbase.ui \
     AMMainWindow.ui \
     AMSSDlgbase.ui \
+    BWSViewer.ui \
     CodecParams.ui \
     DRMMainWindow.ui \
     EPGDlgbase.ui \
     FMMainWindow.ui \
     GeneralSettingsDlgbase.ui \
-    JLViewer.ui BWSViewer.ui \
+    JLViewer.ui \
     LiveScheduleWindow.ui \
     MultSettingsDlgbase.ui \
     SlideShowViewer.ui \

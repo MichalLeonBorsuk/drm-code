@@ -362,7 +362,7 @@ void CSoundInPulse::Init_HW()
 int CSoundInPulse::Read_HW(void *recbuf, int size)
 {
 	int ret, retval, filled, chunk;
-	const char *data;
+	const void *data;
 	size_t nbytes;
 
 	filled = 0;
@@ -397,7 +397,7 @@ int CSoundInPulse::Read_HW(void *recbuf, int size)
 			if (!remaining_nbytes) {
 				nbytes = 0;
 				data   = NULL;
-				ret = pa_stream_peek(pa_s, (const void **)&data, &nbytes);
+				ret = pa_stream_peek(pa_s, &data, &nbytes);
 				if (ret != PA_OK) break;
 				if (!data) {
 					ret = pa_mainloop_iterate(pa_obj.pa_m, 1, &retval);
@@ -412,7 +412,7 @@ int CSoundInPulse::Read_HW(void *recbuf, int size)
 				if (nbytes > (size_t)size) {
 					chunk = size;
 					remaining_nbytes = nbytes - chunk;
-					remaining_data   = data   + chunk;
+					remaining_data   = (char*)data   + chunk;
 //					DEBUG_MSG("pa_stream_peek frag %6i %6i\n", (int)nbytes, chunk);
 					memcpy(recbuf, data, chunk);
 				}
