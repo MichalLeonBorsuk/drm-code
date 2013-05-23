@@ -206,49 +206,8 @@ CHamlib::GetPortList(map < string, string > &ports)
 		ports["COM4"] = "COM4 ";
 		ports["COM5"] = "COM5 ";
 	}
-#elif defined(__linux)
-	_BOOLEAN bOK = FALSE;
-	FILE *p = popen("hal-find-by-capability --capability serial", "r");
-	if (p != NULL)
-	{
-		while (!feof(p))
-		{
-			char buf[1024];
-			buf[0] = 0;
-			char* r = fgets(buf, sizeof(buf), p);
-			if (strlen(buf) > 0)
-			{
-				string s =
-					string("hal-get-property --key serial.device --udi ") +
-					buf;
-				FILE *p2 = popen(s.c_str(), "r");
-				if (p2 != NULL)
-				{
-					buf[0] = 0;
-					r = fgets(buf, sizeof(buf), p2);
-					size_t n = strlen(buf);
-					if (n > 0)
-					{
-						if (buf[n - 1] == '\n')
-							buf[n - 1] = 0;
-						ports[buf] = buf;
-						bOK = TRUE;
-					}
-					pclose(p2);
-				}
-			}
-			(void)r;
-		}
-		pclose(p);
-	}
-	if (!bOK)
-	{
-		ports["ttyS0"] = "/dev/ttyS0";
-		ports["ttyS1"] = "/dev/ttyS1";
-		ports["ttyUSB0"] = "/dev/ttyUSB0";
-	}
 #elif defined(__APPLE__)
-	io_iterator_t serialPortIterator;
+    io_iterator_t serialPortIterator;
     kern_return_t			kernResult;
     CFMutableDictionaryRef	classesToMatch;
 
@@ -318,6 +277,49 @@ CHamlib::GetPortList(map < string, string > &ports)
 
 		(void) IOObjectRelease(modemService);
     }
+#elif defined(__unix__)
+	_BOOLEAN bOK = FALSE;
+	FILE *p = popen("hal-find-by-capability --capability serial", "r");
+	if (p != NULL)
+	{
+		while (!feof(p))
+		{
+			char buf[1024];
+			buf[0] = 0;
+			char* r = fgets(buf, sizeof(buf), p);
+			if (strlen(buf) > 0)
+			{
+				string s =
+					string("hal-get-property --key serial.device --udi ") +
+					buf;
+				FILE *p2 = popen(s.c_str(), "r");
+				if (p2 != NULL)
+				{
+					buf[0] = 0;
+					r = fgets(buf, sizeof(buf), p2);
+					size_t n = strlen(buf);
+					if (n > 0)
+					{
+						if (buf[n - 1] == '\n')
+							buf[n - 1] = 0;
+						ports[buf] = buf;
+						bOK = TRUE;
+					}
+					pclose(p2);
+				}
+			}
+			(void)r;
+		}
+		pclose(p);
+	}
+	if (!bOK)
+	{
+# ifdef __linux__
+		ports["ttyS0"] = "/dev/ttyS0";
+		ports["ttyS1"] = "/dev/ttyS1";
+		ports["ttyUSB0"] = "/dev/ttyUSB0";
+# endif
+	}
 #endif
 }
 

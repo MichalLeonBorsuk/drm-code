@@ -31,7 +31,7 @@
 #ifdef _WIN32
 # include <windows.h>
 #endif
-#ifdef __linux
+#if defined(__unix__) && !defined(__APPLE__)
 # include <signal.h>
 #endif
 
@@ -95,7 +95,7 @@ CRx::run()
 int
 main(int argc, char **argv)
 {
-#if defined(__linux)
+#if defined(__unix__) && !defined(__APPLE__)
 	/* Prevent signal interaction with popen */
 	sigset_t sigset;
 	sigemptyset(&sigset);
