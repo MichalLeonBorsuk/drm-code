@@ -173,40 +173,29 @@ unix {
      exists(/usr/include/gps.h) | \
      exists(/usr/local/include/gps.h) {
       CONFIG += gps
-            }
+     }
      exists(/usr/include/pcap.h) | \
      exists(/usr/local/include/pcap.h) {
       CONFIG += pcap
-            }
+     }
      exists(/usr/include/sndfile.h) | \
      exists(/usr/local/include/sndfile.h) {
       CONFIG += sndfile
-            }
+     }
      exists(/usr/include/opus/opus.h) | \
      exists(/usr/local/include/opus/opus.h) {
       CONFIG += opus
-            }
+     }
      exists(/usr/include/speex/speex_preprocess.h) | \
      exists(/usr/local/include/speex/speex_preprocess.h) {
       CONFIG += speexdsp
      }
-     exists(/usr/include/fftw3.h) {
-      DEFINES += HAVE_FFTW3_H
-      LIBS += -lfftw3
-      CONFIG += fftw
-      message("with fftw3")
-     }
+     exists(/usr/include/fftw3.h) | \
      exists(/usr/local/include/fftw3.h) {
-      DEFINES += HAVE_FFTW3_H
-      LIBS += -lfftw3
-      LIBS += -L/usr/local/lib
-      CONFIG += fftw
-      INCLUDEPATH += /usr/local/include
-      message("with fftw3")
+      CONFIG += fftw3
      }
      exists(/usr/include/fftw.h) {
        CONFIG += fftw
-       message("with fftw2")
        LIBS += -lfftw
        exists(/usr/include/rfftw.h):LIBS += -lrfftw
        exists(/opt/local/include/dfftw.h) {
@@ -216,8 +205,9 @@ unix {
        exists(/opt/local/include/drfftw.h) {
              DEFINES += HAVE_DRFFTW_H
              LIBS += -ldrfftw
-        }
-        DEFINES += HAVE_FFTW_H HAVE_RFFTW_H
+       }
+       DEFINES += HAVE_FFTW_H HAVE_RFFTW_H
+       message("with fftw2")
      }
      tui:console {
       CONFIG += consoleio
@@ -271,18 +261,15 @@ win32 {
       CONFIG += mmsystem
      }
      exists(libs/fftw3.h) {
-      DEFINES += HAVE_FFTW3_H
-      LIBS += -lfftw3-3
-      message("with fftw3")
-      CONFIG += fftw
+      CONFIG += fftw3
      }
      exists(libs/fftw.h) {
-        DEFINES += HAVE_FFTW_H
-        LIBS += -lfftw
+      DEFINES += HAVE_FFTW_H
+      LIBS += -lfftw
 	  exists(libs/rfftw.lib) {
 		DEFINES += HAVE_RFFTW_H
 		LIBS += -lrfftw
-	}
+      }
       message("with fftw2")
       CONFIG += fftw
      }
@@ -314,6 +301,13 @@ faac {
      USE_FAAC_LIBRARY
      LIBS += -lfaac_drm
      message("with FAAC")
+}
+fftw3 {
+      DEFINES += HAVE_FFTW3_H
+      unix:LIBS += -lfftw3
+      win32:LIBS += -lfftw3-3
+      CONFIG += fftw
+      message("with fftw3")
 }
 opus {
      DEFINES += HAVE_LIBOPUS \
