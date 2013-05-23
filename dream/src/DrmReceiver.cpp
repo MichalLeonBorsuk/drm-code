@@ -76,6 +76,9 @@ CDRMReceiver::CDRMReceiver(CSettings* pSettings) : CDRMTransceiver(pSettings, ne
     Parameters.SetReceiver(this);
     downstreamRSCI.SetReceiver(this);
     PlotManager.SetReceiver(this);
+#ifdef HAVE_LIBGPS
+    Parameters.gps_data.gps_fd = -1;
+#endif
 }
 
 CDRMReceiver::~CDRMReceiver()
@@ -172,21 +175,28 @@ CDRMReceiver::Run()
         if(gps_data->gps_fd != -1) (void)gps_close(gps_data);
 # if GPSD_API_MAJOR_VERSION < 5
         result = gps_open_r(Parameters.gps_host.c_str(), s.str().c_str(), gps_data);
-        result = gps_stream(gps_data, WATCH_ENABLE|POLL_NONBLOCK, NULL);
+        if(!result) (void)gps_stream(gps_data, WATCH_ENABLE|POLL_NONBLOCK, NULL);
 # else
         result = gps_open(Parameters.gps_host.c_str(), s.str().c_str(), gps_data);
-        result = gps_stream(gps_data, WATCH_ENABLE, NULL);
+        if(!result) (void)gps_stream(gps_data, WATCH_ENABLE, NULL);
 # endif
+        if(result) gps_data->gps_fd = -1;
         Parameters.restart_gpsd = false;
     }
-    if(Parameters.use_gpsd)
+    if(gps_data->gps_fd != -1)
+    {
+        if(Parameters.use_gpsd)
 # if GPSD_API_MAJOR_VERSION < 5
-        result = gps_poll(gps_data);
+            result = gps_poll(gps_data);
 # else
-        result = gps_read(gps_data);
+            result = gps_read(gps_data);
 # endif
-    else
-        if(gps_data->gps_fd != -1) (void)gps_close(gps_data);
+        else
+        {
+            (void)gps_close(gps_data);
+            gps_data->gps_fd = -1;
+        }
+    }
 	(void)result;
 #endif
 
