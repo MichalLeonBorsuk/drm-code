@@ -57,6 +57,11 @@ qt4 {
             }
         }
         else {
+            exists(/usr/local/include/qwt.h) {
+                message("with qwt")
+                LIBS += -lqwt
+                CONFIG += qwt
+	    }
             exists(/usr/local/include/qwt/qwt.h) {
                 message("with qwt")
                 INCLUDEPATH += /usr/local/include/qwt
@@ -230,7 +235,7 @@ unix {
      DEFINES += HAVE_LIBZ
      !macx {
       MAKEFILE = Makefile
-      LIBS += -lrt
+      !contains(UNAME, OpenBSD) : LIBS += -lrt
       UI_DIR = moc
       MOC_DIR = moc
      }
