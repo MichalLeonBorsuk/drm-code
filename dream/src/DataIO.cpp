@@ -362,7 +362,7 @@ void CGenSimData::ProcessDataInternal(CParameter& TransmParam)
                 fprintf(pFileCurPos,
                         "%d / %d (%ld min elapsed, estimated time remaining: %ld min)",
                         iCounter, iNumSimBlocks,
-                        tiElTi / 60, lReTi / 60);
+                        (long int)tiElTi / 60, lReTi / 60);
 
                 /* Write current paramter value */
                 _REAL rCurParamVal;
@@ -418,7 +418,7 @@ void CGenSimData::ProcessDataInternal(CParameter& TransmParam)
                 {
                     fprintf(pFileCurPos,
                             "%d / %d (%ld min elapsed, estimated time remaining: %ld min [%.1f days])",
-                            TransmParam.iNumBitErrors, iNumErrors, tiElTi / 60,
+                            TransmParam.iNumBitErrors, iNumErrors, (long int)tiElTi / 60,
                             lReTi / 60, rReDays);
 
                     /* Add current value of BER */
@@ -440,14 +440,14 @@ void CGenSimData::ProcessDataInternal(CParameter& TransmParam)
                     fprintf(pFileCurPos,
                             "%d / %d (%ld min elapsed, estimated minimum"
                             " time remaining: %ld min)\n",
-                            iCounter, iMinNumBlocks, tiElTi / 60, lReTi / 60);
+                            iCounter, iMinNumBlocks, (long int)tiElTi / 60, lReTi / 60);
 
                     lReTi = (long int)
                             (((_REAL) iNumErrors - TransmParam.iNumBitErrors) /
                              TransmParam.iNumBitErrors * tiElTi);
                     fprintf(pFileCurPos,
                             "%d / %d (%ld min elapsed, estimated time remaining: %ld min)",
-                            TransmParam.iNumBitErrors, iNumErrors, tiElTi / 60,
+                            TransmParam.iNumBitErrors, iNumErrors, (long int)tiElTi / 60,
                             lReTi / 60);
 
                     /* Add current value of BER */
