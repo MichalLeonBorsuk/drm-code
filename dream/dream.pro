@@ -61,7 +61,7 @@ qt4 {
                 message("with qwt")
                 LIBS += -lqwt
                 CONFIG += qwt
-	    }
+            }
             exists(/usr/local/include/qwt/qwt.h) {
                 message("with qwt")
                 INCLUDEPATH += /usr/local/include/qwt
@@ -268,6 +268,9 @@ win32 {
      exists(libs/fftw3.h) {
       CONFIG += fftw3
      }
+     exists(libs/speex/speex_preprocess.h) {
+      CONFIG += speexdsp
+     }
      exists(libs/fftw.h) {
       DEFINES += HAVE_FFTW_H
       LIBS += -lfftw
@@ -328,7 +331,8 @@ sndfile {
 }
 speexdsp {
      DEFINES += HAVE_SPEEX
-     LIBS += -lspeexdsp
+     unix:LIBS += -lspeexdsp
+     win32:LIBS += libspeexdsp.lib
      message("with libspeexdsp")
 }
 gps {
