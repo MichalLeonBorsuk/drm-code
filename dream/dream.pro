@@ -157,15 +157,14 @@ unix {
      CONFIG += link_pkgconfig
      # check for pulseaudio before portaudio
      exists(/usr/include/pulse/pulseaudio.h) | \
-     exists(/usr/local/include/pulse/pulseaudio.h)
-     {
+     exists(/usr/local/include/pulse/pulseaudio.h) {
      #packagesExist(libpulse) 
       CONFIG += pulseaudio
      }
      else {
        exists(/usr/include/portaudio.h) | \
        exists(/usr/local/include/portaudio.h) {
-      #packagesExist(portaudio-2.0) 
+       #packagesExist(portaudio-2.0) 
           CONFIG += portaudio
        }
      }
