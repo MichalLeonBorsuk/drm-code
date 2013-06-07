@@ -27,6 +27,14 @@
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
 \******************************************************************************/
+
+/*
+--rsiout 127.0.0.1:60023 --rciin 60021 --rsioutprofile D
+
+if I run it with the command:
+--rsiout 127.0.0.1:60023 --rciin 60021 --rsiout 127.0.0.1:60022 --rciin 60021 --rsioutprofile D
+*/
+
 #include "PacketSocket.h"
 #include <iostream>
 #include <sstream>
@@ -393,13 +401,14 @@ CPacketSocketNative::pollDatagram()
     do {
         sockaddr_in sender;
         socklen_t l = sizeof(sender);
-        readBytes = ::recvfrom(s, (char*)&vecbydata[0], vecbydata.size(), 0, (sockaddr*)&sender, &l);
+        readBytes = ::recvfrom(s, (char*)&vecbydata[0], MAX_SIZE_BYTES_NETW_BUF, 0, (sockaddr*)&sender, &l);
         if (readBytes>0) {
 			{
+				static int n=0;
 				stringstream s;
 				char buf[32];
 				(void)buf;
-				s << "got from: " << inet_ntop(AF_INET, &sender.sin_addr.s_addr, buf, sizeof(buf))
+				s << (n++) << " got from: " << inet_ntop(AF_INET, &sender.sin_addr.s_addr, buf, sizeof(buf))
 				  << ":" << ntohs(sender.sin_port);
 				//qDebug(s.str().c_str());
 			}

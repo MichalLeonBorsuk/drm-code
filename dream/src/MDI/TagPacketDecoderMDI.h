@@ -43,7 +43,7 @@ public:
 	void SetParameterPtr(CParameter *pP);
 
 	// Overridden tag packet decoder function - clear the str tags before decoding
-	virtual void DecodeTagPacket(CVectorEx<_BINARY>& vecbiPkt, int iPayloadLen);
+	virtual void DecodeTagPackets(CVectorEx<_BINARY>& vecbiPkt, int iPayloadLen);
 
 	// Decoders for each of the tag items in the vocabulary
 

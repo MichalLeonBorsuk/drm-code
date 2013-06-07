@@ -104,7 +104,7 @@ void CTagPacketDecoderMDI::SetParameterPtr(CParameter *pP)
 	TagItemDecoderRgps.SetParameterPtr(pP);
 }
 
-void CTagPacketDecoderMDI::DecodeTagPacket(CVectorEx<_BINARY>& vecbiPkt, int iPayloadLen)
+void CTagPacketDecoderMDI::DecodeTagPackets(CVectorEx<_BINARY>& vecbiPkt, int iPayloadLen)
 {
 	// Initialise all the decoders: this will set them to "not ready"
 	InitTagItemDecoders();
@@ -119,5 +119,5 @@ void CTagPacketDecoderMDI::DecodeTagPacket(CVectorEx<_BINARY>& vecbiPkt, int iPa
 
 	TagItemDecoderRobMod.Init();
 	// Call base class function to do the actual decoding
-	CTagPacketDecoder::DecodeTagPacket(vecbiPkt, iPayloadLen);
+	CTagPacketDecoder::DecodeTagPackets(vecbiPkt, iPayloadLen);
 }
