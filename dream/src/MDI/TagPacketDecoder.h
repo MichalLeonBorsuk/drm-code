@@ -46,7 +46,7 @@ public:
 
 	// Decode all the tags in the tag packet. To do things before or after the decoding,
 	// override this and call the base class function to do the decoding
-	virtual void DecodeTagPacket(CVectorEx<_BINARY>& vecbiPkt, int iPayloadLen);
+	virtual void DecodeTagPackets(CVectorEx<_BINARY>& vecbiPkt, int iPayloadLen);
 	virtual ~CTagPacketDecoder() {}
 
 protected:
