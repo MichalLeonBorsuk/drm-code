@@ -1,0 +1,16 @@
+Source: common
+Priority: extra
+Maintainer: unknown <julian.cable@bbc.co.uk>
+Build-Depends: debhelper (>= 7)
+Standards-Version: 3.7.3
+Section: libs
+Homepage: <insert the upstream URL, if relevant>
+
+Package: common-dev
+Section: libdevel
+Architecture: any
+Depends: libxml2-dev
+Description: common files for DRM & AMSS
+  provides classes:
+    bytev bitvector bytevector crcbytevector
+    Persist Cfg CCrc16 DrmTime

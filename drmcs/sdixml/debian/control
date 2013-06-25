@@ -1,0 +1,13 @@
+Source: libsdixml
+Priority: extra
+Maintainer: root <julian.cable@bbc.co.uk>
+Build-Depends: debhelper (>= 7)
+Standards-Version: 3.7.3
+Section: libs
+Homepage: 
+
+Package: libsdixml-dev
+Section: libdevel
+Architecture: any
+Depends: libstdc++-dev, libxml2-dev
+Description: classes to parse the ETSI SDI XML format for Digital Radio Mondiale

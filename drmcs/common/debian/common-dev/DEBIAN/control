@@ -1,0 +1,14 @@
+Package: common-dev
+Source: common
+Version: 1.0-1
+Architecture: i386
+Maintainer: unknown <julian.cable@bbc.co.uk>
+Installed-Size: 40
+Depends: libxml2-dev
+Section: libdevel
+Priority: extra
+Homepage: <insert the upstream URL, if relevant>
+Description: common files for DRM & AMSS
+  provides classes:
+    bytev bitvector bytevector crcbytevector
+    Persist Cfg CCrc16 DrmTime

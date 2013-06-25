@@ -1,0 +1,14 @@
+Source: mdigen
+Section: embedded
+Priority: extra
+Maintainer: Julian Cable <julian.cable@bbc.co.uk>
+Build-Depends: debhelper (>= 7), libsdixml-dev, librs-dev, libdrmenc-dev, libsndfile-dev
+ libstdc++-dev, libxml2-dev, libpcap-dev, libfam-dev | libgamin-dev, libasound2-dev, libjack-dev
+Standards-Version: 3.7.3
+Homepage: 
+
+Package: mdigen
+Architecture: any
+Depends: libstdc++6, libxml2, libpcap0.8, libfam0 | libgamin0, libasound2, libjack0, libsndfile1
+Description: Content Server for Digital Radio Mondiale
+ Provides ES 201 980 compliant MDI Streams
