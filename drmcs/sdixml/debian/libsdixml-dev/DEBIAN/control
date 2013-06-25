@@ -1,0 +1,10 @@
+Package: libsdixml-dev
+Source: libsdixml
+Version: 1.0.0-1
+Architecture: i386
+Maintainer: root <julian.cable@bbc.co.uk>
+Installed-Size: 1296
+Depends: libstdc++-dev, libxml2-dev
+Section: libdevel
+Priority: extra
+Description: classes to parse the ETSI SDI XML format for Digital Radio Mondiale

@@ -1,0 +1,6 @@
+#!/bin/sh
+strip mdigen
+/etc/init.d/mdigen stop
+sleep 1
+cp mdigen /usr/bin/mdigen
+/etc/init.d/mdigen start

@@ -1,0 +1,11 @@
+Package: librs-dev
+Source: librs
+Version: 1.0.0-1
+Architecture: i386
+Maintainer: Julian Cable <julian.cable@bbc.co.uk>
+Installed-Size: 196
+Section: libdevel
+Priority: extra
+Description: forward error correction for ETSI DCP
+ DCP is a framing protocol for broadcasters. It is defined in ETSI TS 102 821.
+ It is used in Digital Radio Mondiale and some flavours of the DMB family.
