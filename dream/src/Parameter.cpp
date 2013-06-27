@@ -58,6 +58,7 @@ CParameter::CParameter():
     eTransmitCurrentTime(CT_OFF),
     MSCPrLe(),
     Stream(MAX_NUM_STREAMS), Service(MAX_NUM_SERVICES),
+	AudioComponentStatus(MAX_NUM_SERVICES),DataComponentStatus(MAX_NUM_SERVICES),
     iNumBitsHierarchFrameTotal(0),
     iNumDecodedBitsMSC(0),
     iNumSDCBitsPerSFrame(0),
@@ -167,7 +168,8 @@ CParameter::CParameter(const CParameter& p):
     eTransmitCurrentTime(p.eTransmitCurrentTime),
     MSCPrLe(p.MSCPrLe),
     Stream(p.Stream), Service(p.Service),
-    iNumBitsHierarchFrameTotal(p.iNumBitsHierarchFrameTotal),
+	AudioComponentStatus(p.AudioComponentStatus),DataComponentStatus(p.DataComponentStatus),
+	iNumBitsHierarchFrameTotal(p.iNumBitsHierarchFrameTotal),
     iNumDecodedBitsMSC(p.iNumDecodedBitsMSC),
     iNumSDCBitsPerSFrame(p.iNumSDCBitsPerSFrame),
     iNumAudioDecoderBits(p.iNumAudioDecoderBits),
@@ -275,6 +277,8 @@ CParameter& CParameter::operator=(const CParameter& p)
     MSCPrLe = p.MSCPrLe;
     Stream = p.Stream;
     Service = p.Service;
+	AudioComponentStatus = p.AudioComponentStatus;
+	DataComponentStatus = p.DataComponentStatus;
     iNumBitsHierarchFrameTotal = p.iNumBitsHierarchFrameTotal;
     iNumDecodedBitsMSC = p.iNumDecodedBitsMSC;
     iNumSDCBitsPerSFrame = p.iNumSDCBitsPerSFrame;
@@ -416,6 +420,8 @@ void CParameter::ResetServicesStreams()
             Service[i].eAudDataFlag = CService::SF_AUDIO;
             Service[i].iServiceDescr = 0;
             Service[i].strLabel = "";
+			AudioComponentStatus[i].SetStatus(NOT_PRESENT);
+			DataComponentStatus[i].SetStatus(NOT_PRESENT);
         }
 
         for (i = 0; i < MAX_NUM_STREAMS; i++)

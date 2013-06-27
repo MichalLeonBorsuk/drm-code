@@ -458,7 +458,7 @@ void BWSViewer::GetServiceParams(uint32_t* iServiceID, bool* bServiceValid, QStr
         const int iCurSelDataServ = Parameters.GetCurSelDataService();
         const CService service = Parameters.Service[iCurSelDataServ];
         if (eStatus)
-            *eStatus = Parameters.ReceiveStatus.MOT.GetStatus();
+            *eStatus = Parameters.DataComponentStatus[iCurSelDataServ].GetStatus();
     Parameters.Unlock();
     if (iServiceID)
         *iServiceID = service.iServiceID;

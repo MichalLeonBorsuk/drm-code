@@ -80,10 +80,12 @@ void CTagItemDecoderRsta::DecodeTag(CVector<_BINARY>& vecbiTag, const int iLen)
         pParameter->ReceiveStatus.SDC.SetStatus(RX_OK);
     else
         pParameter->ReceiveStatus.SDC.SetStatus(CRC_ERROR);
+
+	int iShortID = pParameter->GetCurSelAudioService();
     if(audio==0)
-        pParameter->ReceiveStatus.Audio.SetStatus(RX_OK);
+        pParameter->AudioComponentStatus[iShortID].SetStatus(RX_OK);
     else
-        pParameter->ReceiveStatus.Audio.SetStatus(CRC_ERROR);
+        pParameter->AudioComponentStatus[iShortID].SetStatus(CRC_ERROR);
 }
 
 void CTagItemDecoderRwmf::DecodeTag(CVector<_BINARY>& vecbiTag, const int iLen)

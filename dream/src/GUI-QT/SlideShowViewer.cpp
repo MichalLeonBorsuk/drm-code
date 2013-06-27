@@ -330,7 +330,7 @@ void SlideShowViewer::GetServiceParams(uint32_t* iServiceID, bool* bServiceValid
         const CService service = Parameters.Service[iCurSelDataServ];
 
         if (eStatus)
-            *eStatus = Parameters.ReceiveStatus.MOT.GetStatus();
+            *eStatus = Parameters.DataComponentStatus[iCurSelDataServ].GetStatus();
         if (iPacketID)
             *iPacketID = Parameters.GetDataParam(iCurSelDataServ).iPacketID;
     Parameters.Unlock();

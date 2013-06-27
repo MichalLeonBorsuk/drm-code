@@ -125,7 +125,7 @@ CShortLog::init()
 {
     Parameters.Lock();
     Parameters.ReceiveStatus.FAC.ResetCounts();
-    Parameters.ReceiveStatus.Audio.ResetCounts();
+    Parameters.ReceiveStatus.SLAudio.ResetCounts();
     Parameters.Unlock();
     /* initialise the minute count */
     iCount = 0;
@@ -241,10 +241,10 @@ CShortLog::writeParameters()
 
     int iAverageSNR = (int) Round(Parameters.SNRstat.getMean());
     int iNumCRCOkFAC = Parameters.ReceiveStatus.FAC.GetOKCount();
-    int iNumCRCOkMSC = Parameters.ReceiveStatus.Audio.GetOKCount();
+    int iNumCRCOkMSC = Parameters.ReceiveStatus.SLAudio.GetOKCount();
 
     Parameters.ReceiveStatus.FAC.ResetCounts();
-    Parameters.ReceiveStatus.Audio.ResetCounts();
+    Parameters.ReceiveStatus.SLAudio.ResetCounts();
 
     int iTmpNumAAC=0, iRXL=0;
 

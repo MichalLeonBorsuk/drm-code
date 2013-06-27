@@ -554,15 +554,13 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
 // fine with CELP and HVXC
 
         /* Postprocessing of audio blocks, status informations -------------- */
+		ETypeRxStatus status = DATA_ERROR;
         if (bCurBlockOK == FALSE)
         {
             if (bAudioWasOK == TRUE)
             {
                 /* Post message to show that CRC was wrong (yellow light) */
-                Parameters.Lock();
-                Parameters.ReceiveStatus.Audio.SetStatus(DATA_ERROR);
-                Parameters.ReceiveStatus.LLAudio.SetStatus(DATA_ERROR);
-                Parameters.Unlock();
+				status = DATA_ERROR;
 
                 /* Fade-out old block to avoid "clicks" in audio. We use linear
                    fading which gives a log-fading impression */
@@ -599,10 +597,7 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
             }
             else
             {
-                Parameters.Lock();
-                Parameters.ReceiveStatus.Audio.SetStatus(CRC_ERROR);
-                Parameters.ReceiveStatus.LLAudio.SetStatus(CRC_ERROR);
-                Parameters.Unlock();
+				status = CRC_ERROR;
 
                 if (bUseReverbEffect == TRUE)
                 {
@@ -627,13 +622,14 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
         else
         {
             /* Increment correctly decoded audio blocks counter */
-            if (!bCurBlockFaulty)
+			if (bCurBlockFaulty) {
+				status = DATA_ERROR;
+			}
+			else {
                 iNumCorDecAudio++;
+				status = RX_OK;
+			}
 
-            Parameters.Lock();
-            Parameters.ReceiveStatus.Audio.SetStatus(bCurBlockFaulty ? DATA_ERROR : RX_OK);
-            Parameters.ReceiveStatus.LLAudio.SetStatus(bCurBlockFaulty ? DATA_ERROR : RX_OK);
-            Parameters.Unlock();
 
             if (bAudioWasOK == FALSE)
             {
@@ -676,6 +672,11 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
                 bAudioWasOK = TRUE;
             }
         }
+        Parameters.Lock();
+        Parameters.ReceiveStatus.SLAudio.SetStatus(status);
+        Parameters.ReceiveStatus.LLAudio.SetStatus(status);
+		Parameters.AudioComponentStatus[Parameters.GetCurSelAudioService()].SetStatus(status);
+        Parameters.Unlock();
 
         /* Conversion from _REAL to _SAMPLE with special function */
         for (i = 0; i < iResOutBlockSize; i++)

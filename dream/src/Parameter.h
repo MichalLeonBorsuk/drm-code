@@ -873,12 +873,12 @@ class CReceiveStatus
 {
 public:
     CReceiveStatus():FSync(),TSync(),InterfaceI(),InterfaceO(),
-            FAC(),SDC(),Audio(),LLAudio(),MOT()
+            FAC(),SDC(),SLAudio(),LLAudio()
     {
     }
     CReceiveStatus(const CReceiveStatus& s):FSync(s.FSync), TSync(s.TSync),
             InterfaceI(s.InterfaceI), InterfaceO(s.InterfaceO), FAC(s.FAC), SDC(s.SDC),
-            Audio(s.Audio),LLAudio(s.LLAudio),MOT(s.MOT)
+            SLAudio(s.SLAudio),LLAudio(s.LLAudio)
     {
     }
     CReceiveStatus& operator=(const CReceiveStatus& s)
@@ -889,9 +889,8 @@ public:
         InterfaceO = s.InterfaceO;
         FAC = s.FAC;
         SDC = s.SDC;
-        Audio = s.Audio;
+        SLAudio = s.SLAudio;
         LLAudio = s.LLAudio;
-        MOT = s.MOT;
         return *this;
     }
 
@@ -901,9 +900,8 @@ public:
     CRxStatus InterfaceO;
     CRxStatus FAC;
     CRxStatus SDC;
-    CRxStatus Audio;
+    CRxStatus SLAudio;
     CRxStatus LLAudio;
-    CRxStatus MOT;
 };
 
 
@@ -1206,6 +1204,8 @@ public:
 
     vector<CStream> Stream;
     vector<CService> Service;
+    vector<CRxStatus> AudioComponentStatus;
+    vector<CRxStatus> DataComponentStatus;
 
     /* information about services gathered from SDC, EPG and web schedules */
     map<uint32_t,CServiceInformation> ServiceInformation;
