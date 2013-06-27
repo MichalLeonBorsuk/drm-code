@@ -82,15 +82,16 @@ CDataDecoder::ProcessDataInternal(CParameter & Parameters)
 
 		/* Store result in vector and show CRC in multimedia window */
 		uint16_t crc = pvecInputData->Separate(16);
+		int iShortID = Parameters.GetCurSelDataService();
 		if (CRCObject.CheckCRC(crc) == TRUE)
 		{
 			veciCRCOk[j] = 1;	/* CRC ok */
-			Parameters.ReceiveStatus.MOT.SetStatus(RX_OK);
+			Parameters.DataComponentStatus[iShortID].SetStatus(RX_OK);
 		}
 		else
 		{
 			veciCRCOk[j] = 0;	/* CRC wrong */
-			Parameters.ReceiveStatus.MOT.SetStatus(CRC_ERROR);
+			Parameters.DataComponentStatus[iShortID].SetStatus(CRC_ERROR);
 		}
 	}
 

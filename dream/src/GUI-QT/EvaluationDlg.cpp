@@ -491,9 +491,11 @@ void systemevalDlg::OnTimer()
 
     Parameters.Lock();
 
-        SetStatus(LEDMSC, Parameters.ReceiveStatus.Audio.GetStatus());
-        SetStatus(LEDSDC, Parameters.ReceiveStatus.SDC.GetStatus());
         SetStatus(LEDFAC, Parameters.ReceiveStatus.FAC.GetStatus());
+        SetStatus(LEDSDC, Parameters.ReceiveStatus.SDC.GetStatus());
+		// TODO Data Broadcasts
+		int iShortID = Parameters.GetCurSelAudioService();
+        SetStatus(LEDMSC, Parameters.AudioComponentStatus[iShortID].GetStatus());
         SetStatus(LEDFrameSync, Parameters.ReceiveStatus.FSync.GetStatus());
         SetStatus(LEDTimeSync, Parameters.ReceiveStatus.TSync.GetStatus());
         ETypeRxStatus soundCardStatusI = Parameters.ReceiveStatus.InterfaceI.GetStatus(); /* Input */

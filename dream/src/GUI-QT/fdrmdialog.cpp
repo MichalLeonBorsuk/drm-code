@@ -246,8 +246,20 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& Settings,
     CSysTray::AddSeparator(pSysTray);
     CSysTray::AddAction(pSysTray, tr("&Exit"), this, SLOT(close()));
 
-    /* Activate real-time timers */
+	/* clear signal strenght */
+	setBars(0);
+
+	/* Activate real-time timers */
     Timer.start(GUI_CONTROL_UPDATE_TIME);
+}
+
+void FDRMDialog::setBars(int bars)
+{
+	onebar->setAutoFillBackground(bars>0);
+	twobars->setAutoFillBackground(bars>1);
+	threebars->setAutoFillBackground(bars>2);
+	fourbars->setAutoFillBackground(bars>3);
+	fivebars->setAutoFillBackground(bars>4);
 }
 
 FDRMDialog::~FDRMDialog()
@@ -296,10 +308,24 @@ void FDRMDialog::OnSysTrayTimer()
                 // Text message of current selected audio service (UTF-8 decoding)
                 Message = QString::fromUtf8(audioService.AudioParam.strTextMessage.c_str());
             }
+		if(Parameters.rWMERMSC>24.0)
+			setBars(5);
+		else if(Parameters.rWMERMSC>20.0)
+			setBars(4);
+		else if(Parameters.rWMERMSC>16.0)
+			setBars(3);
+		else if(Parameters.rWMERMSC>12.0)
+			setBars(2);
+		else if(Parameters.rWMERMSC>8.0)
+			setBars(1);
+		else
+			setBars(0);
         Parameters.Unlock();
     }
-    else
+	else {
         Message = tr("Scanning...");
+		setBars(0);
+	}
     CSysTray::SetToolTip(pSysTray, Title, Message);
 }
 
@@ -352,9 +378,13 @@ void FDRMDialog::UpdateDRM_GUI()
 
     /* Input level meter */
     ProgrInputLevel->setValue(Parameters.GetIFSignalLevel());
-    SetStatus(CLED_MSC, Parameters.ReceiveStatus.Audio.GetStatus());
-    SetStatus(CLED_SDC, Parameters.ReceiveStatus.SDC.GetStatus());
     SetStatus(CLED_FAC, Parameters.ReceiveStatus.FAC.GetStatus());
+    SetStatus(CLED_SDC, Parameters.ReceiveStatus.SDC.GetStatus());
+	int iShortID = Parameters.GetCurSelAudioService();
+	if(Parameters.Service[iShortID].eAudDataFlag == CService::SF_AUDIO)
+	    SetStatus(CLED_MSC, Parameters.AudioComponentStatus[iShortID].GetStatus());
+	else
+	    SetStatus(CLED_MSC, Parameters.DataComponentStatus[iShortID].GetStatus());
 
     Parameters.Unlock();
 
@@ -1413,4 +1443,11 @@ void FDRMDialog::AddWhatsThisHelp()
     TextMiniService2->setWhatsThis(strServiceSel);
     TextMiniService3->setWhatsThis(strServiceSel);
     TextMiniService4->setWhatsThis(strServiceSel);
+
+    const QString strBars = tr("from 1 to 5 bars indicates WMER in the range 8 to 24 dB");
+	onebar->setWhatsThis(strBars);
+	twobars->setWhatsThis(strBars);
+	threebars->setWhatsThis(strBars);
+	fourbars->setWhatsThis(strBars);
+	fivebars->setWhatsThis(strBars);
 }

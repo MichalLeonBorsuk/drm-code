@@ -145,6 +145,7 @@ protected:
     void SysTrayStart();
     void SysTrayStop(const QString&);
     void SysTrayToolTip(const QString&, const QString&);
+	void setBars(int);
 
 public slots:
     void OnTimer();

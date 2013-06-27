@@ -178,9 +178,11 @@ void FMDialog::OnTimer()
 			/* Input level meter */
 			ProgrInputLevel->setValue(Parameters.GetIFSignalLevel());
 
-			SetStatus(CLED_MSC, Parameters.ReceiveStatus.Audio.GetStatus());
 			SetStatus(CLED_SDC, Parameters.ReceiveStatus.SDC.GetStatus());
 			SetStatus(CLED_FAC, Parameters.ReceiveStatus.FAC.GetStatus());
+			// TODO Data broadcasts
+			int iShortID = Parameters.GetCurSelAudioService();
+			SetStatus(CLED_MSC, Parameters.AudioComponentStatus[iShortID].GetStatus());
 
 			int freq = DRMReceiver.GetFrequency();
 			QString fs = QString("%1 MHz").arg(double(freq)/1000.0, 5, 'f', 2);

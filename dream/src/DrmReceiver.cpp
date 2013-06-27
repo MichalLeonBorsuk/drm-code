@@ -229,8 +229,7 @@ CDRMReceiver::Run()
                 Parameters.ReceiveStatus.FSync.SetStatus(NOT_PRESENT);
                 Parameters.ReceiveStatus.FAC.SetStatus(NOT_PRESENT);
                 Parameters.ReceiveStatus.SDC.SetStatus(NOT_PRESENT);
-                Parameters.ReceiveStatus.Audio.SetStatus(NOT_PRESENT);
-                Parameters.ReceiveStatus.MOT.SetStatus(NOT_PRESENT);
+                Parameters.ReceiveStatus.SLAudio.SetStatus(NOT_PRESENT);
             }
         }
     }
@@ -870,20 +869,12 @@ CDRMReceiver::InitReceiverMode()
         UtilizeSDCData.GetSDCReceive()->SetSDCType(CSDCReceive::SDC_AMSS);
 
         /* Set the receive status - this affects the RSI output */
-/*
-        pAMParam->ReceiveStatus.TSync.SetStatus(NOT_PRESENT);
-        pAMParam->ReceiveStatus.FSync.SetStatus(NOT_PRESENT);
-        pAMParam->ReceiveStatus.FAC.SetStatus(NOT_PRESENT);
-        pAMParam->ReceiveStatus.SDC.SetStatus(NOT_PRESENT);
-        pAMParam->ReceiveStatus.Audio.SetStatus(NOT_PRESENT);
-        pAMParam->ReceiveStatus.MOT.SetStatus(NOT_PRESENT);
-*/
         Parameters.ReceiveStatus.TSync.SetStatus(NOT_PRESENT);
         Parameters.ReceiveStatus.FSync.SetStatus(NOT_PRESENT);
         Parameters.ReceiveStatus.FAC.SetStatus(NOT_PRESENT);
         Parameters.ReceiveStatus.SDC.SetStatus(NOT_PRESENT);
-        Parameters.ReceiveStatus.Audio.SetStatus(NOT_PRESENT);
-        Parameters.ReceiveStatus.MOT.SetStatus(NOT_PRESENT);
+        Parameters.ReceiveStatus.SLAudio.SetStatus(NOT_PRESENT);
+        Parameters.ReceiveStatus.LLAudio.SetStatus(NOT_PRESENT);
         break;
     case RM_DRM:
 #if 0
@@ -1106,8 +1097,8 @@ CDRMReceiver::SetInStartMode()
     Parameters.ReceiveStatus.FSync.SetStatus(NOT_PRESENT);
     Parameters.ReceiveStatus.FAC.SetStatus(NOT_PRESENT);
     Parameters.ReceiveStatus.SDC.SetStatus(NOT_PRESENT);
-    Parameters.ReceiveStatus.Audio.SetStatus(NOT_PRESENT);
-    Parameters.ReceiveStatus.MOT.SetStatus(NOT_PRESENT);
+    Parameters.ReceiveStatus.SLAudio.SetStatus(NOT_PRESENT);
+    Parameters.ReceiveStatus.LLAudio.SetStatus(NOT_PRESENT);
 
     /* Clear audio decoder string */
     Parameters.audiodecoder = "";

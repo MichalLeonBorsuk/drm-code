@@ -149,11 +149,11 @@ void JLViewer::OnTimer()
 {
     CParameter& Parameters = *receiver.GetParameters();
     Parameters.Lock();
-    ETypeRxStatus status = Parameters.ReceiveStatus.MOT.GetStatus();
 
     /* Get current data service */
     int shortID = Parameters.GetCurSelDataService();
     CService service = Parameters.Service[shortID];
+    ETypeRxStatus status = Parameters.DataComponentStatus[shortID].GetStatus();
     Parameters.Unlock();
 
     if(!decoderSet)
