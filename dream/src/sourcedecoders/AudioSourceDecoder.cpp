@@ -31,6 +31,7 @@
 #include <sstream>
 #include <string>
 #include <algorithm>
+#include <direct.h>
 
 
 /* Implementation *************************************************************/
@@ -1004,6 +1005,7 @@ CAudioSourceDecoder::InitInternal(CParameter & Parameters)
                 string fn = HVXCFileName(Parameters);
                 if(pFile)
                     fclose(pFile);
+				_mkdir("test");
                 pFile = fopen(fn.c_str(), "wb");
             }
 
