@@ -109,7 +109,10 @@ CAudioFileIn::SetFileName(const string& strFileName)
         {
             iFileChannels = sfinfo.channels;
             iFileSampleRate = sfinfo.samplerate;
-        }
+		} else {
+            const char *errs = sf_strerror(0);
+            throw CGenErr(errs);
+		}
         break;
     default:
         pFileReceiver = NULL;
