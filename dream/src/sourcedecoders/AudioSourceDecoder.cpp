@@ -31,7 +31,12 @@
 #include <sstream>
 #include <string>
 #include <algorithm>
-#include <direct.h>
+#ifdef _WIN32
+# include <direct.h>
+#else
+# include <sys/stat.h>
+# include <sys/types.h>
+#endif
 
 
 /* Implementation *************************************************************/
@@ -1005,7 +1010,11 @@ CAudioSourceDecoder::InitInternal(CParameter & Parameters)
                 string fn = HVXCFileName(Parameters);
                 if(pFile)
                     fclose(pFile);
-				_mkdir("test");
+#ifdef _WIN32
+                _mkdir("test");
+#else
+                mkdir("test", 0777);
+#endif
                 pFile = fopen(fn.c_str(), "wb");
             }
 
