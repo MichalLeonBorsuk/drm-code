@@ -106,7 +106,8 @@ qt4 {
     }
 }
 qt5 {
-    QT += network xml widgets webkitwidgets
+    QT += network xml widgets
+    !android:QT += webkitwidgets
     VPATH += src/GUI-QT
     exists(libs/qwt/qwt.h) {
         message("with qwt")
@@ -297,6 +298,9 @@ win32 {
      DEFINES -= UNICODE
      SOURCES += src/windows/Pacer.cpp
 }
+android {
+    CONFIG += openSL fftw3
+}
 faad {
      DEFINES += HAVE_LIBFAAD \
      USE_FAAD2_LIBRARY
@@ -313,6 +317,7 @@ fftw3 {
       DEFINES += HAVE_FFTW3_H
       unix:LIBS += -lfftw3
       win32:LIBS += -lfftw3-3
+      android:LIBS += -lfftw3
       CONFIG += fftw
       message("with fftw3")
 }
@@ -399,6 +404,10 @@ pulseaudio {
     CONFIG += sound
     unix:PKGCONFIG += libpulse
     message("with pulseaudio")
+}
+openSL {
+    CONFIG += sound
+    message("with openSL")
 }
 consoleio {
     DEFINES += USE_CONSOLEIO
@@ -636,11 +645,15 @@ SOURCES += \
     src/util-QT/Util.cpp
 }
 !console:!qtconsole {
+    webkitwidgets|webkit {
+        FORMS += BWSViewer.ui
+        HEADERS += src/GUI-QT/BWSViewer.h
+        SOURCES += src/GUI-QT/BWSViewer.cpp
+    }
 FORMS += \
     AboutDlgbase.ui \
     AMMainWindow.ui \
     AMSSDlgbase.ui \
-    BWSViewer.ui \
     CodecParams.ui \
     DRMMainWindow.ui \
     EPGDlgbase.ui \
@@ -655,7 +668,6 @@ FORMS += \
     TransmDlgbase.ui
 HEADERS += \
     src/GUI-QT/AnalogDemDlg.h \
-    src/GUI-QT/BWSViewer.h \
     src/GUI-QT/CodecParams.h \
     src/GUI-QT/CWindow.h \
     src/GUI-QT/DialogUtil.h \
@@ -677,7 +689,6 @@ HEADERS += \
     src/GUI-QT/TransmDlg.h
 SOURCES += \
     src/GUI-QT/AnalogDemDlg.cpp \
-    src/GUI-QT/BWSViewer.cpp \
     src/GUI-QT/CodecParams.cpp \
     src/GUI-QT/CWindow.cpp \
     src/GUI-QT/DialogUtil.cpp \
@@ -707,3 +718,33 @@ SOURCES += \
 !qwt:!console:!qtconsole {
     error("no usable qwt library found - install qwt dev package")
 }
+
+OTHER_FILES += \
+    android/AndroidManifest.xml \
+    android/res/layout/splash.xml \
+    android/res/values/libs.xml \
+    android/res/values/strings.xml \
+    android/res/values-de/strings.xml \
+    android/res/values-el/strings.xml \
+    android/res/values-es/strings.xml \
+    android/res/values-et/strings.xml \
+    android/res/values-fa/strings.xml \
+    android/res/values-fr/strings.xml \
+    android/res/values-id/strings.xml \
+    android/res/values-it/strings.xml \
+    android/res/values-ja/strings.xml \
+    android/res/values-ms/strings.xml \
+    android/res/values-nb/strings.xml \
+    android/res/values-nl/strings.xml \
+    android/res/values-pl/strings.xml \
+    android/res/values-pt-rBR/strings.xml \
+    android/res/values-ro/strings.xml \
+    android/res/values-rs/strings.xml \
+    android/res/values-ru/strings.xml \
+    android/res/values-zh-rCN/strings.xml \
+    android/res/values-zh-rTW/strings.xml \
+    android/src/org/kde/necessitas/ministro/IMinistro.aidl \
+    android/src/org/kde/necessitas/ministro/IMinistroCallback.aidl \
+    android/src/org/qtproject/qt5/android/bindings/QtActivity.java \
+    android/src/org/qtproject/qt5/android/bindings/QtApplication.java \
+    android/version.xml
