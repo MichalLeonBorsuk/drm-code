@@ -41,6 +41,11 @@ RigDlg::RigDlg(CRig& nrig, QWidget* parent) :
 {
     setAttribute(Qt::WA_QuitOnClose, false);
     setupUi(this);
+#if QWT_VERSION < 0x060100
+    sMeter->setScalePosition(QwtThermo::TopScale);
+#else
+    sMeter->setScalePosition(QwtThermo::TrailingScale);
+#endif
 
     map<rig_model_t,CHamlib::SDrRigCaps> r;
 

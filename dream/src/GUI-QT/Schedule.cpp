@@ -36,6 +36,12 @@
 #include <QMessageBox>
 #include <QFileInfo>
 #include <ctime>
+#ifdef _WIN32
+#include "../windows/platform_util.h"
+#endif
+#ifdef __ANDROID__
+#include "../android/platform_util.h"
+#endif
 
 /* Implementation *************************************************************/
 

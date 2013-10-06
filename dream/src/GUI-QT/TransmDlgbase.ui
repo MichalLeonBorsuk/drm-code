@@ -158,9 +158,6 @@ Institute for Communication Technology</string>
              </item>
              <item>
               <widget class="QwtThermo" name="ProgrInputLevel">
-               <property name="scalePosition">
-                <enum>QwtThermo::BottomScale</enum>
-               </property>
               </widget>
              </item>
             </layout>

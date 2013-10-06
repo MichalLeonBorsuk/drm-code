@@ -78,13 +78,15 @@ FMDialog::FMDialog(CDRMReceiver& NDRMR, CSettings& Settings,
 	/* Init progress bar for input signal level */
 #if QWT_VERSION < 0x060100
 	ProgrInputLevel->setRange(-50.0, 0.0);
+    ProgrInputLevel->setOrientation(Qt::Vertical, QwtThermo::LeftScale);
 #else
 	ProgrInputLevel->setScale(-50.0, 0.0);
+    ProgrInputLevel->setOrientation(Qt::Vertical);
+    ProgrInputLevel->setScalePosition(QwtThermo::TrailingScale);
 #endif
 	ProgrInputLevel->setAlarmLevel(-12.5);
 	QColor alarmColor(QColor(255, 0, 0));
 	QColor fillColor(QColor(0, 190, 0));
-	ProgrInputLevel->setOrientation(Qt::Vertical, QwtThermo::LeftScale);
 #if QWT_VERSION < 0x060000
 	ProgrInputLevel->setAlarmColor(alarmColor);
 	ProgrInputLevel->setFillColor(fillColor);
