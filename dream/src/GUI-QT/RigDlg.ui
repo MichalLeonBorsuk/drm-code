@@ -82,9 +82,6 @@
      <layout class="QHBoxLayout" name="horizontalLayout_3">
       <item>
        <widget class="QwtThermo" name="sMeter">
-        <property name="scalePosition">
-         <enum>QwtThermo::TopScale</enum>
-        </property>
        </widget>
       </item>
      </layout>

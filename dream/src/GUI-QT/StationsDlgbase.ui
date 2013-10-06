@@ -236,9 +236,6 @@
            <height>0</height>
           </size>
          </property>
-         <property name="scalePosition">
-          <enum>QwtThermo::TopScale</enum>
-         </property>
         </widget>
        </item>
        <item>

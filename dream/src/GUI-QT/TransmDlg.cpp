@@ -49,6 +49,11 @@ TransmDialog::TransmDialog(CSettings& Settings,	QWidget* parent)
 	bCloseRequested(FALSE), iButtonCodecState(0)
 {
 	setupUi(this);
+#if QWT_VERSION < 0x060100
+    ProgrInputLevel->setScalePosition(QwtThermo::BottomScale);
+#else
+    ProgrInputLevel->setScalePosition(QwtThermo::LeadingScale);
+#endif
 
 	/* Load transmitter settings */
 	DRMTransmitter.LoadSettings();
@@ -64,10 +69,12 @@ TransmDialog::TransmDialog(CSettings& Settings,	QWidget* parent)
 	/* Init progress bar for input signal level */
 #if QWT_VERSION < 0x060100
 	ProgrInputLevel->setRange(-50.0, 0.0);
+    ProgrInputLevel->setOrientation(Qt::Horizontal, QwtThermo::BottomScale);
 #else
 	ProgrInputLevel->setScale(-50.0, 0.0);
+    ProgrInputLevel->setOrientation(Qt::Horizontal);
+    ProgrInputLevel->setScalePosition(QwtThermo::LeadingScale);
 #endif
-	ProgrInputLevel->setOrientation(Qt::Horizontal, QwtThermo::BottomScale);
 	ProgrInputLevel->setAlarmLevel(-5.0);
 #if QWT_VERSION < 0x060000
 	ProgrInputLevel->setAlarmColor(QColor(255, 0, 0));

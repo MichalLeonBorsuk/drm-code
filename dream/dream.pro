@@ -106,8 +106,7 @@ qt4 {
     }
 }
 qt5 {
-    QT += network xml widgets
-    !android:QT += webkitwidgets
+    QT += network xml widgets webkitwidgets
     VPATH += src/GUI-QT
     exists(libs/qwt/qwt.h) {
         message("with qwt")
@@ -292,14 +291,19 @@ win32 {
      }
      UI_DIR = moc
      MOC_DIR = moc
-     LIBS += -lsetupapi -lwsock32 -lws2_32 -lzdll
+     LIBS += -lsetupapi -lwsock32 -lws2_32 -lzdll -ladvapi32 -luser32
      DEFINES += HAVE_SETUPAPI \
      HAVE_LIBZ _CRT_SECURE_NO_WARNINGS
      DEFINES -= UNICODE
-     SOURCES += src/windows/Pacer.cpp
+     SOURCES += src/windows/Pacer.cpp src/windows/platform_util.cpp
+     HEADERS += src/windows/platform_util.h
 }
 android {
     CONFIG += openSL fftw3
+    SOURCES += src/android/platform_util.cpp
+    HEADERS += src/android/platform_util.h
+    LIBS -= -lrt
+    QT -= webkitwidgets
 }
 faad {
      DEFINES += HAVE_LIBFAAD \

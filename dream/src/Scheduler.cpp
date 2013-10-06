@@ -36,35 +36,10 @@
 #endif
 
 #ifdef _WIN32
-time_t timegm(struct tm *tm)
-{
-	SYSTEMTIME st;
-	st.wYear = tm->tm_year+1900;
-	st.wMonth = tm->tm_mon+1;
-	st.wDay = tm->tm_mday;
-	st.wHour = 0;
-	st.wMinute = 0;
-	st.wSecond = 0;
-	st.wMilliseconds = 0;
-	FILETIME ft;
-	SystemTimeToFileTime(&st, &ft);
-	ULARGE_INTEGER uli;
-	uli.LowPart = ft.dwLowDateTime;
-	uli.HighPart = ft.dwHighDateTime;
-	return (time_t)(uli.QuadPart/10000000 - 11644473600);
-}
+# include "windows/platform_util.h"
 #endif
 #ifdef __ANDROID__
-#include <time64.h>
-time_t timegm(struct tm* const t) {
-  // time_t is signed on Android.
-  static const time_t kTimeMax = ~(1 << (sizeof(time_t) * CHAR_BIT - 1));
-  static const time_t kTimeMin = (1 << (sizeof(time_t) * CHAR_BIT - 1));
-  time64_t result = timegm64(t);
-  if (result < kTimeMin || result > kTimeMax)
-    return -1;
-  return result;
-}
+# include "android/platform_util.h"
 #endif
 
 // get next event

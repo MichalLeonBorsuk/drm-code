@@ -56,6 +56,11 @@ orangeCube(":/icons/orangeCube.png"), pinkCube(":/icons/pinkCube.png"),
 bReInitOnFrequencyChange(FALSE), eLastScheduleMode(CSchedule::SM_NONE)
 {
 	setupUi(this);
+#if QWT_VERSION < 0x060100
+    ProgrSigStrength->setScalePosition(QwtThermo::TopScale);
+#else
+    ProgrSigStrength->setScalePosition(QwtThermo::TrailingScale);
+#endif
 
 	/* Load settings */
 	LoadSettings();
