@@ -35,7 +35,7 @@
 #include <QCloseEvent>
 #include "SlideShowViewer.h"
 #include "JLViewer.h"
-#ifdef QT_QTWEBKIT_MODULE_H
+#ifdef QT_WEBKIT_LIB
 # include "BWSViewer.h"
 #endif
 #ifdef HAVE_LIBHAMLIB
@@ -43,6 +43,11 @@
 #endif
 #include "../Scheduler.h"
 #include "../util-QT/Util.h"
+
+// Simone's values
+// static _REAL WMERSteps[] = {8.0, 12.0, 16.0, 20.0, 24.0};
+// David's values
+static _REAL WMERSteps[] = {6.0, 12.0, 18.0, 24.0, 30.0};
 
 /* Implementation *************************************************************/
 #ifdef HAVE_LIBHAMLIB
@@ -99,7 +104,7 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& Settings,
     pLiveScheduleDlg = new LiveScheduleDlg(DRMReceiver, Settings, parents);
 
     /* MOT broadcast website viewer window */
-#ifdef QT_QTWEBKIT_MODULE_H
+#ifdef QT_WEBKIT_LIB
     pBWSDlg = new BWSViewer(DRMReceiver, Settings, this);
 #endif
 
@@ -314,15 +319,15 @@ void FDRMDialog::OnSysTrayTimer()
                 // Text message of current selected audio service (UTF-8 decoding)
                 Message = QString::fromUtf8(audioService.AudioParam.strTextMessage.c_str());
             }
-		if(Parameters.rWMERMSC>24.0)
+		if(Parameters.rWMERMSC>WMERSteps[4])
 			setBars(5);
-		else if(Parameters.rWMERMSC>20.0)
+		else if(Parameters.rWMERMSC>WMERSteps[3])
 			setBars(4);
-		else if(Parameters.rWMERMSC>16.0)
+		else if(Parameters.rWMERMSC>WMERSteps[2])
 			setBars(3);
-		else if(Parameters.rWMERMSC>12.0)
+		else if(Parameters.rWMERMSC>WMERSteps[1])
 			setBars(2);
-		else if(Parameters.rWMERMSC>8.0)
+		else if(Parameters.rWMERMSC>WMERSteps[0])
 			setBars(1);
 		else
 			setBars(0);
@@ -991,7 +996,7 @@ void FDRMDialog::OnSelectDataService(int shortId)
         pDlg = pEPGDlg;
         break;
     case DAB_AT_BROADCASTWEBSITE:
-#ifdef QT_QTWEBKIT_MODULE_H
+#ifdef QT_WEBKIT_LIB
         pDlg = pBWSDlg;
 #endif
         break;
