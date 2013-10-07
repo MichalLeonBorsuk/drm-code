@@ -49,12 +49,10 @@ qt4 {
     VPATH += src/GUI-QT
     unix {
         macx {
-            exists(libs/qwt.framework) {
-                message("with qwt")
-                INCLUDEPATH += libs/qwt
-                LIBS += -framework qwt
-                CONFIG += qwt
-            }
+            message("with qwt")
+            INCLUDEPATH += /opt/local/Library/Frameworks/qwt.framework/Versions/6/Headers
+            LIBS += -framework qwt
+            CONFIG += qwt
         }
         else {
             exists(/usr/local/include/qwt.h) {
@@ -649,7 +647,7 @@ SOURCES += \
     src/util-QT/Util.cpp
 }
 !console:!qtconsole {
-    webkitwidgets|webkit {
+    contains(QT, webkitwidgets)|contains(QT,webkit) {
         FORMS += BWSViewer.ui
         HEADERS += src/GUI-QT/BWSViewer.h
         SOURCES += src/GUI-QT/BWSViewer.cpp
