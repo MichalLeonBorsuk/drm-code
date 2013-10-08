@@ -87,7 +87,7 @@ CWindow::CWindow(QMap<QWidget*,QString>& parents, CSettings& Settings, const QSt
 }
 void CWindow::init()
 {
-//	printf("################################ CWindow::Init(%s) parents %i\n", section.c_str(), parents.count());
+//	printf("################################ CWindow::Init(%s) parents %i\n", getSection().c_str(), parents.count());
 	setAttribute(Qt::WA_QuitOnClose, parents.count() == 0);
 	setAttribute(Qt::WA_DeleteOnClose, false);
 	loadWindowGeometry();
@@ -101,13 +101,13 @@ void CWindow::init()
 
 CWindow::~CWindow()
 {
-//	printf("################################ CWindow::~CWindow(%s)\n", section.c_str());
+//	printf("################################ CWindow::~CWindow(%s)\n", getSection().c_str());
 	emit deleteWindow(this);
 }
 
 void CWindow::closeEvent(QCloseEvent* pEvent)
 {
-//	printf("################################ CWindow::closeEvent(%s)\n", section.c_str());
+//	printf("################################ CWindow::closeEvent(%s)\n", getSection().c_str());
 	eventClose(pEvent);
 	if (pEvent->isAccepted())
 		emit closeWindow(this);
@@ -115,7 +115,7 @@ void CWindow::closeEvent(QCloseEvent* pEvent)
 void CWindow::showEvent(QShowEvent* pEvent)
 {
 	EVENT_FILTER(pEvent);
-//	printf("################################ CWindow::showEvent(%s)\n", section.c_str());
+//	printf("################################ CWindow::showEvent(%s)\n", getSection().c_str());
 	loadWindowGeometry();
 	eventShow(pEvent);
 	emit showWindow(this, true);
@@ -123,7 +123,7 @@ void CWindow::showEvent(QShowEvent* pEvent)
 void CWindow::hideEvent(QHideEvent* pEvent)
 {
 	EVENT_FILTER(pEvent);
-//	printf("################################ CWindow::hideEvent(%s)\n", section.c_str());
+//	printf("################################ CWindow::hideEvent(%s)\n", getSection().c_str());
 	saveWindowGeometry();
 	eventHide(pEvent);
 	emit showWindow(this, false);
@@ -158,24 +158,24 @@ bool CWindow::event(QEvent* pEvent)
 
 void CWindow::eventClose(QCloseEvent*)
 {
-//	printf("################################ CWindow::eventClose(%s)\n", section.c_str());
+//	printf("################################ CWindow::eventClose(%s)\n", getSection().c_str());
 }
 void CWindow::eventHide(QHideEvent*)
 {
-//	printf("################################ CWindow::eventHide(%s)\n", section.c_str());
+//	printf("################################ CWindow::eventHide(%s)\n", getSection().c_str());
 }
 void CWindow::eventShow(QShowEvent*)
 {
-//	printf("################################ CWindow::eventShow(%s)\n", section.c_str());
+//	printf("################################ CWindow::eventShow(%s)\n", getSection().c_str());
 }
 void CWindow::eventUpdate()
 {
-//	printf("################################ CWindow::eventUpdate(%s)\n", section.c_str());
+//	printf("################################ CWindow::eventUpdate(%s)\n", getSection().c_str());
 }
 
 void CWindow::toggleVisibility()
 {
-//	printf("################################ CWindow::toggleVisibility(%s)\n", section.c_str());
+//	printf("################################ CWindow::toggleVisibility(%s)\n", getSection().c_str());
 	setVisible(!isVisible());
 }
 
@@ -200,7 +200,7 @@ void CWindow::saveWindowGeometry()
 
 void CWindow::OnShowWindow(QWidget* window, bool bVisible)
 {
-//	printf("################################ CWindow::OnShowWindow(%s) bVisible=%i\n", section.c_str(), bVisible);
+//	printf("################################ CWindow::OnShowWindow(%s) bVisible=%i\n", getSection().c_str(), bVisible);
 	if (parents.contains(window))
 	{
 		const QString key = QString("visible") + parents[window];
@@ -217,7 +217,7 @@ void CWindow::OnShowWindow(QWidget* window, bool bVisible)
 
 void CWindow::OnCloseWindow(QWidget* window)
 {
-//	printf("################################ CWindow::OnCloseWindow(%s) %p\n", section.c_str(), window);
+//	printf("################################ CWindow::OnCloseWindow(%s) %p\n", getSection().c_str(), window);
 	if (parents.contains(window))
 	{
 		QCloseEvent event;
@@ -227,12 +227,13 @@ void CWindow::OnCloseWindow(QWidget* window)
 
 void CWindow::OnDeleteWindow(QWidget* window)
 {
-//	printf("################################ CWindow::OnDeleteWindow(%s) %p\n", section.c_str(), window);
-	if (parents.remove(window) >= 1)
-	{
-		if (parents.count() == 0)
-			delete this;
-	}
+//	printf("################################ CWindow::OnDeleteWindow(%s) %p\n", getSection().c_str(), window);
+	parents.remove(window);
+//	if (parents.remove(window) >= 1)
+//	{
+//		if (parents.count() == 0)
+//			delete this;
+//	}
 }
 
 void CWindow::setVisible(bool visible)
