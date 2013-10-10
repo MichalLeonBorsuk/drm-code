@@ -101,7 +101,7 @@ CAudioFileIn::SetFileName(const string& strFileName)
         sfinfo.format = SF_FORMAT_RAW|SF_FORMAT_PCM_16|SF_ENDIAN_LITTLE;
         pFileReceiver = (FILE*)sf_open(strInFileName.c_str(), SFM_READ, &sfinfo);
         if (pFileReceiver == NULL)
-            throw CGenErr(sf_strerror(0));
+            throw CGenErr(string("")+sf_strerror(0)+" raised on "+strInFileName);
         break;
     case fmt_other:
         pFileReceiver = (FILE*)sf_open(strInFileName.c_str(), SFM_READ, &sfinfo);
@@ -110,7 +110,7 @@ CAudioFileIn::SetFileName(const string& strFileName)
             iFileChannels = sfinfo.channels;
             iFileSampleRate = sfinfo.samplerate;
 		} else {
-            const char *errs = sf_strerror(0);
+            string errs = string("")+sf_strerror(0)+" for "+strInFileName;
             throw CGenErr(errs);
 		}
         break;
