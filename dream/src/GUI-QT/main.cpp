@@ -160,6 +160,7 @@ main(int argc, char **argv)
 #else
 			FDRMDialog *pMainDlg = new FDRMDialog(DRMReceiver, Settings);
 #endif
+			(void)pMainDlg;
 
 			/* Start working thread */
 			CRx rx(DRMReceiver);
