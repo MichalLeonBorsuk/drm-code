@@ -1,9 +1,10 @@
 /******************************************************************************\
  * Technische Universitaet Darmstadt, Institut fuer Nachrichtentechnik
- * Copyright (c) 2001-2005
+ * British Broadcasting Corporation
+ * Copyright (c) 2001-2013
  *
  * Author(s):
- *	Volker Fischer
+ *	Volker Fischer, Julian Cable
  *
  * Description:
  *
@@ -283,7 +284,7 @@ CAboutDlg::CAboutDlg(QWidget* parent):
     TextLabelVersion->setText(VersionString(this));
 
     /* Set author names in about dialog */
-    TextLabelAuthorNames->setText("Volker Fischer, Alexander Kurpiers, Andrea Russo\nJulian Cable, Andrew Murphy, Oliver Haffenden");
+    TextLabelAuthorNames->setText("Volker Fischer, Alexander Kurpiers, Andrea Russo\nJulian Cable, Andrew Murphy, Oliver Haffenden, David Flamand");
 
     /* Set copyright year in about dialog */
     TextLabelCopyright->setText("Copyright (C) 2001 - 2013");
