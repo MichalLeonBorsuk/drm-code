@@ -29,6 +29,7 @@
 #include <iostream>
 #include <sstream>
 #include <cstring>
+#include <cstdlib>
 #if defined(_WIN32)
 # ifdef HAVE_SETUPAPI
 #  ifndef INITGUID
