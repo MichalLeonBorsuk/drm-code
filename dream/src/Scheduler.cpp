@@ -31,6 +31,10 @@
 #include <sstream>
 #include <cstdlib>
 #include <ctime>
+#ifdef __ANDROID_API__
+# include <time64.h>
+# define timegm timegm64
+#endif
 #ifdef _WIN32
 # include <windows.h>
 #endif

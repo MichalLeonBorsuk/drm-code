@@ -148,6 +148,15 @@ exists(libs/faac.h) {
 exists(libs/neaacdec.h) {
     CONFIG += faad
 }
+linux-* {
+    LIBS -= -ldl -lrt
+}
+android {
+    CONFIG += openSL fftw3
+    SOURCES += src/android/platform_util.cpp
+    HEADERS += src/android/platform_util.h
+    QT -= webkitwidgets
+}
 unix {
 # packagesExist() not available on Qt 4.6 (e.g. Debian Squeeze)
      target.path = /usr/bin
@@ -214,7 +223,6 @@ unix {
      tui:console {
       CONFIG += consoleio
      }
-     !contains(UNAME, .*BSD) : LIBS += -ldl
      LIBS += -lz
      SOURCES += src/linux/Pacer.cpp
      DEFINES += HAVE_DLFCN_H \
@@ -232,7 +240,6 @@ unix {
      DEFINES += HAVE_LIBZ
      !macx {
       MAKEFILE = Makefile
-      !contains(UNAME, OpenBSD) : LIBS += -lrt
       UI_DIR = moc
       MOC_DIR = moc
      }
@@ -295,13 +302,6 @@ win32 {
      DEFINES -= UNICODE
      SOURCES += src/windows/Pacer.cpp src/windows/platform_util.cpp
      HEADERS += src/windows/platform_util.h
-}
-android {
-    CONFIG += openSL fftw3
-    SOURCES += src/android/platform_util.cpp
-    HEADERS += src/android/platform_util.h
-    LIBS -= -lrt
-    QT -= webkitwidgets
 }
 faad {
      DEFINES += HAVE_LIBFAAD \
