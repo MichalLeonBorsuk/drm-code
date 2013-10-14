@@ -88,6 +88,11 @@ CRx::run()
 }
 #endif
 
+#ifdef USE_OPENSL
+# include <SLES/OpenSLES.h>
+SLObjectItf engineObject = NULL;
+#endif
+
 #ifdef QT_GUI_LIB
 /******************************************************************************\
 * Using GUI with QT                                                            *
@@ -95,6 +100,10 @@ CRx::run()
 int
 main(int argc, char **argv)
 {
+#ifdef USE_OPENSL
+    (void)slCreateEngine(&engineObject, 0, NULL, 0, NULL, NULL);
+    (void)(*engineObject)->Realize(engineObject, SL_BOOLEAN_FALSE);
+#endif
 #if defined(__unix__) && !defined(__APPLE__)
 	/* Prevent signal interaction with popen */
 	sigset_t sigset;
@@ -180,10 +189,10 @@ main(int argc, char **argv)
 		}
 		else if(mode == "transmit")
 		{
-			TransmDialog MainDlg(Settings);
+			TransmDialog* pMainDlg = new TransmDialog(Settings);
 
 			/* Show dialog */
-			MainDlg.show();
+			pMainDlg->show();
 			app.exec();
 		}
 		else
@@ -248,7 +257,11 @@ ErrorMessage(string strErrorString)
 int
 main(int argc, char **argv)
 {
-	try
+#ifdef USE_OPENSL
+    (void)slCreateEngine(&engineObject, 0, NULL, 0, NULL, NULL);
+    (void)(*engineObject)->Realize(engineObject, SL_BOOLEAN_FALSE);
+#endif
+    try
 	{
 		CSettings Settings;
 		Settings.Load(argc, argv);
