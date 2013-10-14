@@ -61,7 +61,14 @@ typedef CPaIn CSoundIn;
 typedef CPaOut CSoundOut;
 #endif
 
-#if !defined(_WIN32) && !defined(USE_OSS) && !defined(USE_ALSA) && !defined(USE_JACK) && !defined(USE_PULSEAUDIO) && !defined(USE_PORTAUDIO)
+#ifdef USE_OPENSL
+# include "../android/soundin.h"
+# include "../android/soundout.h"
+typedef COpenSLESIn CSoundIn;
+typedef COpenSLESOut CSoundOut;
+#endif
+
+#if !defined(_WIN32) && !defined(USE_OSS) && !defined(USE_ALSA) && !defined(USE_JACK) && !defined(USE_PULSEAUDIO) && !defined(USE_PORTAUDIO) && !defined(USE_OPENSL)
 # include "soundnull.h"
 typedef CSoundInNull CSoundIn;
 typedef CSoundOutNull CSoundOut;

@@ -307,14 +307,6 @@ TransmDialog::TransmDialog(CSettings& Settings,	QWidget* parent)
 	CheckBoxEnableService->setChecked(TRUE);
 	CheckBoxEnableService->setEnabled(FALSE);
 
-
-	/* Let this service be an audio service for initialization */
-	/* Set audio enable check box */
-	CheckBoxEnableAudio->setChecked(TRUE);
-	EnableAudio(TRUE);
-	CheckBoxEnableData->setChecked(FALSE);
-	EnableData(FALSE);
-
 	/* Setup audio codec check boxes */
 	switch (Service.AudioParam.eAudioCoding)
 	{
@@ -333,10 +325,35 @@ TransmDialog::TransmDialog(CSettings& Settings,	QWidget* parent)
 		break;
 	}
 	CAudioSourceEncoder& AudioSourceEncoder = *DRMTransmitter.GetAudSrcEnc();
-	if (!AudioSourceEncoder.CanEncode(CAudioParam::AC_AAC))
-		RadioButtonAAC->hide();
-	if (!AudioSourceEncoder.CanEncode(CAudioParam::AC_OPUS))
-		RadioButtonOPUS->hide();
+	if (!AudioSourceEncoder.CanEncode(CAudioParam::AC_AAC)) {
+		RadioButtonAAC->setText(tr("No DRM capable AAC Codec"));
+		RadioButtonAAC->setToolTip(tr("see http://drm.sourceforge.net"));
+		RadioButtonAAC->setEnabled(false);
+		//RadioButtonAAC->hide();
+	}
+	if (!AudioSourceEncoder.CanEncode(CAudioParam::AC_OPUS)) {
+		RadioButtonOPUS->setText(tr("No Opus Codec"));
+		RadioButtonOPUS->setToolTip(tr("see http://drm.sourceforge.net"));
+		RadioButtonOPUS->setEnabled(false);
+		//RadioButtonOPUS->hide();
+	}
+	if (!AudioSourceEncoder.CanEncode(CAudioParam::AC_AAC)
+	    && !AudioSourceEncoder.CanEncode(CAudioParam::AC_OPUS)) {
+		/* Let this service be an data service */
+		CheckBoxEnableAudio->setChecked(false);
+		CheckBoxEnableAudio->setEnabled(false);
+		EnableAudio(false);
+		CheckBoxEnableData->setChecked(true);
+		EnableData(true);
+	}
+	else {
+		/* Let this service be an audio service for initialization */
+		/* Set audio enable check box */
+		CheckBoxEnableAudio->setChecked(true);
+		EnableAudio(true);
+		CheckBoxEnableData->setChecked(false);
+		EnableData(false);
+	}
 
 	/* Add example text message at startup ---------------------------------- */
 	/* Activate text message */
