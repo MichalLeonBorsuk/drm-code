@@ -149,7 +149,7 @@ exists(libs/neaacdec.h) {
     CONFIG += faad
 }
 linux-* {
-    LIBS -= -ldl -lrt
+    LIBS += -ldl -lrt
 }
 android {
     CONFIG += openSL fftw3
