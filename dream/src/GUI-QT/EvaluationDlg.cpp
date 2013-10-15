@@ -459,7 +459,7 @@ string systemevalDlg::ECharTypeToPlotName(CDRMPlot::ECharType eCharType)
 {
     QTreeWidgetItem* item = FindItemByECharType(eCharType);
     if (item != NULL)
-        return string(item->text(0).toStdString());
+        return item->text(0).toStdString();
     return string();
 }
 
