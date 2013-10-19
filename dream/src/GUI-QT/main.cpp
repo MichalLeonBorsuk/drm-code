@@ -32,7 +32,7 @@
 # include <windows.h>
 #endif
 #if defined(__unix__) && !defined(__APPLE__)
-# include <signal.h>
+# include <csignal>
 #endif
 
 #include "../GlobalDefinitions.h"

@@ -29,9 +29,9 @@
 
 #include "LogPrint.h"
 
-#include <stdarg.h>
-#include <stdio.h>
-#include <string.h>
+#include <cstdarg>
+#include <cstdio>
+#include <cstring>
 
 void logStatus(char *format, ...) {
 	char s[256];
