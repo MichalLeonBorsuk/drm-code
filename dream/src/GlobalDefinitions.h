@@ -32,8 +32,8 @@
 #include <complex>
 using namespace std; /* Because of the library: "complex" */
 #include <string>
-#include <stdio.h>
-#include <math.h>
+#include <cstdio>
+#include <cmath>
 #include "tables/TableDRMGlobal.h"
 
 

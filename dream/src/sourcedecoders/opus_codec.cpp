@@ -26,9 +26,9 @@
  *
 \******************************************************************************/
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
+#include <cstdlib>
+#include <cstdio>
+#include <cstring>
 #include "opus_codec.h"
 #ifndef USE_OPUS_LIBRARY
 # include "../util/LibraryLoader.h"
