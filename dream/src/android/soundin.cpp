@@ -96,11 +96,15 @@ int COpenSLESIn::GetSampleRate()
 
 _BOOLEAN COpenSLESIn::Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking)
 {
+    (void)iNewSampleRate;
+    (void)iNewBufferSize;
+    (void)bNewBlocking;
     return FALSE;
 }
 
 _BOOLEAN COpenSLESIn::Read(CVector<short>& psData)
 {
+    (void)psData;
     return FALSE;
 }
 

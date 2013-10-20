@@ -1,3 +1,8 @@
+TEMPLATE = app
+CONFIG += warn_on
+TARGET = dream
+OBJECTS_DIR = obj
+DEFINES += EXECUTABLE_NAME=$$TARGET
 contains(QT_VERSION, ^4\\..*) {
     CONFIG += qt qt4
     VERSION_MESSAGE = Qt 4
@@ -6,13 +11,11 @@ contains(QT_VERSION, ^5\\..*) {
     CONFIG += qt qt5
     VERSION_MESSAGE = Qt 5
 }
-qt4|qt5 {
-    CONFIG(debug, debug|release) {
-        DEBUG_MESSAGE = debug
-    }
-    else {
-        DEBUG_MESSAGE = release
-    }
+CONFIG(debug, debug|release) {
+    DEBUG_MESSAGE = debug
+}
+else {
+    DEBUG_MESSAGE = release
 }
 console {
     QT -= core gui
@@ -20,167 +23,57 @@ console {
     UI_MESSAGE = console mode
     VERSION_MESSAGE = No Qt
 }
-else {
-    qtconsole {
-        QT += xml
-        QT -= gui
-        UI_MESSAGE = console mode
-    }
-    else {
-        RESOURCES = src/GUI-QT/res/icons.qrc
-        UI_MESSAGE = GUI mode
-    }
+qtconsole {
+    QT -= gui
+    QT += xml
+    UI_MESSAGE = console mode
+}
+!console:!qtconsole {
+    CONFIG += gui
+    UI_MESSAGE = GUI mode
+}
+gui {
+    RESOURCES = src/GUI-QT/res/icons.qrc
+    QT += network xml
+    qt4:QT += webkit
+    qt5:QT += widgets webkitwidgets
+    INCLUDEPATH += src/GUI-QT
+    VPATH += src/GUI-QT
+    win:RC_FILE = windows/dream.rc
+    macx:RC_FILE = src/GUI-QT/res/macicons.icns
+    CONFIG += qwt
+    UI_DIR = ui
+    MOC_DIR = moc
 }
 message($$VERSION_MESSAGE $$DEBUG_MESSAGE $$UI_MESSAGE)
-unix {
+unix:!cross_compile {
     UNAME = $$system(uname -s)
-    message(on $$UNAME)
-}
-TEMPLATE = app
-CONFIG += warn_on
-TARGET = dream
-INCLUDEPATH += libs src/GUI-QT
-LIBS += -Llibs
-OBJECTS_DIR = obj
-DEFINES += EXECUTABLE_NAME=$$TARGET
-macx:QMAKE_LFLAGS += -F$$PWD/libs
-qt4 {
-    QT += network xml webkit
-    VPATH += src/GUI-QT
-    unix {
-        macx {
-            message("with qwt")
-            INCLUDEPATH += /opt/local/Library/Frameworks/qwt.framework/Versions/6/Headers
-            LIBS += -framework qwt
-            CONFIG += qwt
-        }
-        else {
-            exists(/usr/local/include/qwt.h) {
-                message("with qwt")
-                LIBS += -lqwt
-                CONFIG += qwt
-            }
-            exists(/usr/local/include/qwt/qwt.h) {
-                message("with qwt")
-                INCLUDEPATH += /usr/local/include/qwt
-                LIBS += -lqwt
-                CONFIG += qwt
-            }
-            exists(/usr/include/qwt/qwt.h) {
-                message("with qwt")
-                INCLUDEPATH += /usr/include/qwt
-                LIBS += -lqwt
-                CONFIG += qwt
-            }
-            exists(/usr/include/qwt5/qwt.h) {
-                message("with qwt")
-                INCLUDEPATH += /usr/include/qwt5
-                LIBS += -lqwt
-                CONFIG += qwt
-            }
-            exists(/usr/include/qwt-qt4/qwt.h) {
-                message("with qwt")
-                INCLUDEPATH += /usr/include/qwt-qt4
-                LIBS += -lqwt-qt4
-                CONFIG += qwt
-            }
-            target.path = /usr/bin
-            documentation.path = /usr/share/man/man1
-            documentation.files = linux/dream.1
-            INSTALLS += documentation
-        }
-    }
-    win32 {
-        RC_FILE = windows/dream.rc
-        INCLUDEPATH += libs/qwt
-        CONFIG( debug, debug|release ) {
-            # debug
-            LIBS += -lqwtd
-        } else {
-            # release
-            LIBS += -lqwt
-        }
-        CONFIG += qwt
-    }
-}
-qt5 {
-    QT += network xml widgets webkitwidgets
-    VPATH += src/GUI-QT
-    exists(libs/qwt/qwt.h) {
-        message("with qwt")
-        INCLUDEPATH += libs/qwt
-        unix {
-            LIBS += -lqwt -L$$PWD/libs/qwt
-        }
-        win32 {
-            CONFIG( debug, debug|release ) {
-                # debug
-                LIBS += -lqwtd
-            } else {
-                # release
-                LIBS += -lqwt
-            }
-        }
-        CONFIG += qwt
-    }
-    win32 {
-        RC_FILE = windows/dream.rc
-    }
-}
-macx {
-    INCLUDEPATH += /Developer/dream/include /opt/local/include
-    LIBS += -L/Developer/dream/lib -L/opt/local/lib
-    LIBS += -framework CoreFoundation -framework CoreServices
-    LIBS += -framework CoreAudio -framework AudioToolbox -framework AudioUnit
-    UI_DIR = moc
-    MOC_DIR = moc
-    RC_FILE = src/GUI-QT/res/macicons.icns
-    exists(/opt/local/include/portaudio.h) {
-        CONFIG += portaudio
-    }
-    exists(/opt/local/include/sndfile.h) {
-        CONFIG += sndfile
-    }
-}
-exists(libs/faac.h) {
-    CONFIG += faac
-}
-exists(libs/neaacdec.h) {
-    CONFIG += faad
-}
-linux-* {
-    LIBS += -ldl -lrt
-}
-android {
-    CONFIG += openSL fftw3
-    SOURCES += src/android/platform_util.cpp src/android/soundin.cpp src/android/soundout.cpp
-    HEADERS += src/android/platform_util.h src/android/soundin.h src/android/soundout.h
-    QT -= webkitwidgets
-    LIBS += -lOpenSLES
+    message(building on $$UNAME)
 }
 unix {
 # packagesExist() not available on Qt 4.6 (e.g. Debian Squeeze)
-     target.path = /usr/bin
-     INSTALLS += target
-     CONFIG += link_pkgconfig
+    target.path = /usr/bin
+    documentation.path = /usr/share/man/man1
+    documentation.files = linux/dream.1
+    INSTALLS += documentation
+    INSTALLS += target
+    CONFIG += link_pkgconfig
      # check for pulseaudio before portaudio
      exists(/usr/include/pulse/pulseaudio.h) | \
      exists(/usr/local/include/pulse/pulseaudio.h) {
-     #packagesExist(libpulse) 
+     #packagesExist(libpulse)
       CONFIG += pulseaudio
      }
      else {
        exists(/usr/include/portaudio.h) | \
        exists(/usr/local/include/portaudio.h) {
-       #packagesExist(portaudio-2.0) 
+       #packagesExist(portaudio-2.0)
           CONFIG += portaudio
        }
      }
-     !qtconsole:!console {
       exists(/usr/include/hamlib/rig.h) | \
       exists(/usr/local/include/hamlib/rig.h) {
           CONFIG += hamlib
-      }
      }
      exists(/usr/include/gps.h) | \
      exists(/usr/local/include/gps.h) {
@@ -202,28 +95,10 @@ unix {
      exists(/usr/local/include/speex/speex_preprocess.h) {
       CONFIG += speexdsp
      }
-     exists(/usr/include/fftw3.h) | \
-     exists(/usr/local/include/fftw3.h) {
-      CONFIG += fftw3
-     }
-     exists(/usr/include/fftw.h) {
-       CONFIG += fftw
-       LIBS += -lfftw
-       exists(/usr/include/rfftw.h):LIBS += -lrfftw
-       exists(/opt/local/include/dfftw.h) {
-              DEFINES += HAVE_DFFTW_H
-              LIBS += -ldfftw
-       }
-       exists(/opt/local/include/drfftw.h) {
-             DEFINES += HAVE_DRFFTW_H
-             LIBS += -ldrfftw
-       }
-       DEFINES += HAVE_FFTW_H HAVE_RFFTW_H
-       message("with fftw2")
-     }
      tui:console {
       CONFIG += consoleio
      }
+     LIBS += -lfftw3
      LIBS += -lz
      SOURCES += src/linux/Pacer.cpp
      DEFINES += HAVE_DLFCN_H \
@@ -239,90 +114,88 @@ unix {
             HAVE_SYS_TYPES_H \
             HAVE_UNISTD_H
      DEFINES += HAVE_LIBZ
-     !macx {
-      MAKEFILE = Makefile
-      UI_DIR = moc
-      MOC_DIR = moc
-     }
 }
-msvc2008 {
-     TEMPLATE = vcapp
-     QMAKE_CXXFLAGS += /wd"4996" /wd"4521"
-     QMAKE_LFLAGS_RELEASE += /NODEFAULTLIB:libcmt.lib
-     QMAKE_LFLAGS_DEBUG += /NODEFAULTLIB:libcmtd.lib
-     LIB += zdll.lib
+macx {
+    INCLUDEPATH += /opt/local/include
+    LIBS += -L/opt/local/lib
+    LIBS += -framework CoreFoundation -framework CoreServices
+    LIBS += -framework CoreAudio -framework AudioToolbox -framework AudioUnit
+    CONFIG += portaudio
+    exists(/opt/local/include/sndfile.h) {
+        CONFIG += sndfile
+    }
 }
-msvc2010 {
-     TEMPLATE = vc
-     QMAKE_CXXFLAGS += /wd"4996" /wd"4521"
-     QMAKE_LFLAGS_RELEASE += /NODEFAULTLIB:libcmt.lib
-     QMAKE_LFLAGS_DEBUG += /NODEFAULTLIB:libcmtd.lib
-     LIB += zdll.lib
+linux-* {
+    LIBS += -ldl -lrt
 }
-win32-g++ {
-     DEFINES += HAVE_STDINT_H
-     LIBS += -lz
+android {
+    CONFIG += openSL
+    SOURCES += src/android/platform_util.cpp src/android/soundin.cpp src/android/soundout.cpp
+    HEADERS += src/android/platform_util.h src/android/soundin.h src/android/soundout.h
+    QT -= webkitwidgets
+    QT += svg
+    INCLUDEPATH += $$OUT_PWD/include
+    LIBS += -L$$OUT_PWD/lib
+    LIBS += -lOpenSLES
 }
 win32 {
-     exists(libs/portaudio.h) {
+    INCLUDEPATH += libs
+    LIBS += -Llibs
+    LIBS += -lfftw3-3
+    exists(libs/portaudio.h) {
       CONFIG += portaudio
-     }
-     else {
+    }
+    else {
       CONFIG += mmsystem
-     }
-     exists(libs/fftw3.h) {
-      CONFIG += fftw3
-     }
-     exists(libs/speex/speex_preprocess.h) {
+    }
+    exists(libs/speex/speex_preprocess.h) {
       CONFIG += speexdsp
-     }
-     exists(libs/fftw.h) {
-      DEFINES += HAVE_FFTW_H
-      LIBS += -lfftw
-	  exists(libs/rfftw.lib) {
-		DEFINES += HAVE_RFFTW_H
-		LIBS += -lrfftw
-      }
-      message("with fftw2")
-      CONFIG += fftw
-     }
-     exists(libs/hamlib/rig.h) {
+    }
+    exists(libs/hamlib/rig.h) {
       CONFIG += hamlib
-     }
-     exists(libs/pcap.h) {
+    }
+    exists(libs/pcap.h) {
       CONFIG += pcap
-     }
-     exists(libs/sndfile.h) {
-      CONFIG += sndfile
-     }
-     UI_DIR = moc
-     MOC_DIR = moc
-     LIBS += -lsetupapi -lwsock32 -lws2_32 -lzdll -ladvapi32 -luser32
-     DEFINES += HAVE_SETUPAPI \
-     HAVE_LIBZ _CRT_SECURE_NO_WARNINGS
-     DEFINES -= UNICODE
-     SOURCES += src/windows/Pacer.cpp src/windows/platform_util.cpp
-     HEADERS += src/windows/platform_util.h
+    }
+    exists(libs/sndfile.h) {
+        CONFIG += sndfile
+    }
+    LIBS += -lsetupapi -lwsock32 -lws2_32 -lzdll -ladvapi32 -luser32
+    DEFINES += HAVE_SETUPAPI \
+    HAVE_LIBZ _CRT_SECURE_NO_WARNINGS
+    DEFINES -= UNICODE
+    SOURCES += src/windows/Pacer.cpp src/windows/platform_util.cpp
+    HEADERS += src/windows/platform_util.h
+    msvc2008 {
+        TEMPLATE = vcapp
+        QMAKE_CXXFLAGS += /wd"4996" /wd"4521"
+        QMAKE_LFLAGS_RELEASE += /NODEFAULTLIB:libcmt.lib
+        QMAKE_LFLAGS_DEBUG += /NODEFAULTLIB:libcmtd.lib
+        LIB += zdll.lib
+    }
+    msvc2010 {
+        TEMPLATE = vc
+        QMAKE_CXXFLAGS += /wd"4996" /wd"4521"
+        QMAKE_LFLAGS_RELEASE += /NODEFAULTLIB:libcmt.lib
+        QMAKE_LFLAGS_DEBUG += /NODEFAULTLIB:libcmtd.lib
+        LIB += zdll.lib
+    }
+    g++ {
+         DEFINES += HAVE_STDINT_H
+         LIBS += -lz
+    }
 }
-faad {
+exists(libs/neaacdec.h) {
      DEFINES += HAVE_LIBFAAD \
      USE_FAAD2_LIBRARY
      LIBS += -lfaad_drm
      message("with FAAD2")
 }
-faac {
+exists(libs/faac.h) {
      DEFINES += HAVE_LIBFAAC \
      USE_FAAC_LIBRARY
      LIBS += -lfaac_drm
      message("with FAAC")
-}
-fftw3 {
-      DEFINES += HAVE_FFTW3_H
-      unix:LIBS += -lfftw3
-      win32:LIBS += -lfftw3-3
-      android:LIBS += -lfftw3
-      CONFIG += fftw
-      message("with fftw3")
 }
 opus {
      DEFINES += HAVE_LIBOPUS \
@@ -370,6 +243,41 @@ hamlib {
        }
      }
      message("with hamlib")
+}
+qwt {
+    macx {
+        INCLUDEPATH += /opt/local/Library/Frameworks/qwt.framework/Versions/6/Headers
+        LIBS += -framework qwt
+    }
+    unix {
+        LIBS += -lqwt
+        exists(/usr/include/qwt/qwt.h) {
+            INCLUDEPATH += /usr/include/qwt
+        }
+        exists(/usr/local/include/qwt/qwt.h) {
+            INCLUDEPATH += /usr/local/include/qwt
+        }
+        exists(/usr/include/qwt5/qwt.h) {
+            INCLUDEPATH += /usr/include/qwt5
+        }
+        qt4:exists(/usr/include/qwt-qt4/qwt.h) {
+            INCLUDEPATH += /usr/include/qwt-qt4
+            LIBS -= -lqwt
+            LIBS += -lqwt-qt4
+        }
+    }
+    win32 {
+        CONFIG( debug, debug|release ) {
+            # debug
+            LIBS += -lqwtd
+        } else {
+            # release
+            LIBS += -lqwt
+        }
+    }
+    exists(libs/qwt/qwt.h) {
+        INCLUDEPATH += libs/qwt
+    }
 }
 alsa {
     DEFINES += USE_ALSA
@@ -648,7 +556,7 @@ SOURCES += \
     src/util-QT/epgdec.cpp \
     src/util-QT/Util.cpp
 }
-!console:!qtconsole {
+gui {
     contains(QT, webkitwidgets)|contains(QT,webkit) {
         FORMS += BWSViewer.ui
         HEADERS += src/GUI-QT/BWSViewer.h
@@ -715,12 +623,6 @@ SOURCES += \
 }
 !sound {
     error("no usable audio interface found - install pulseaudio or portaudio dev package")
-}
-!fftw {
-    error("no usable fftw library found - install fftw dev package")
-}
-!qwt:!console:!qtconsole {
-    error("no usable qwt library found - install qwt dev package")
 }
 
 OTHER_FILES += \
