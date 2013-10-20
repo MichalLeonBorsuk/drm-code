@@ -50,77 +50,12 @@ unix:!cross_compile {
     UNAME = $$system(uname -s)
     message(building on $$UNAME)
 }
-unix {
-# packagesExist() not available on Qt 4.6 (e.g. Debian Squeeze)
-    target.path = /usr/bin
-    documentation.path = /usr/share/man/man1
-    documentation.files = linux/dream.1
-    INSTALLS += documentation
-    INSTALLS += target
-    CONFIG += link_pkgconfig
-     # check for pulseaudio before portaudio
-     exists(/usr/include/pulse/pulseaudio.h) | \
-     exists(/usr/local/include/pulse/pulseaudio.h) {
-     #packagesExist(libpulse)
-      CONFIG += pulseaudio
-     }
-     else {
-       exists(/usr/include/portaudio.h) | \
-       exists(/usr/local/include/portaudio.h) {
-       #packagesExist(portaudio-2.0)
-          CONFIG += portaudio
-       }
-     }
-      exists(/usr/include/hamlib/rig.h) | \
-      exists(/usr/local/include/hamlib/rig.h) {
-          CONFIG += hamlib
-     }
-     exists(/usr/include/gps.h) | \
-     exists(/usr/local/include/gps.h) {
-      CONFIG += gps
-     }
-     exists(/usr/include/pcap.h) | \
-     exists(/usr/local/include/pcap.h) {
-      CONFIG += pcap
-     }
-     exists(/usr/include/sndfile.h) | \
-     exists(/usr/local/include/sndfile.h) {
-      CONFIG += sndfile
-     }
-     exists(/usr/include/opus/opus.h) | \
-     exists(/usr/local/include/opus/opus.h) {
-      CONFIG += opus
-     }
-     exists(/usr/include/speex/speex_preprocess.h) | \
-     exists(/usr/local/include/speex/speex_preprocess.h) {
-      CONFIG += speexdsp
-     }
-     tui:console {
-      CONFIG += consoleio
-     }
-     LIBS += -lfftw3
-     LIBS += -lz
-     SOURCES += src/linux/Pacer.cpp
-     DEFINES += HAVE_DLFCN_H \
-            HAVE_MEMORY_H \
-            HAVE_STDINT_H \
-            HAVE_STDLIB_H
-     DEFINES += HAVE_STRINGS_H \
-            HAVE_STRING_H \
-            STDC_HEADERS
-     DEFINES += HAVE_INTTYPES_H \
-            HAVE_STDINT_H \
-            HAVE_SYS_STAT_H \
-            HAVE_SYS_TYPES_H \
-            HAVE_UNISTD_H
-     DEFINES += HAVE_LIBZ
-}
 macx {
     INCLUDEPATH += /opt/local/include
     LIBS += -L/opt/local/lib
     LIBS += -framework CoreFoundation -framework CoreServices
     LIBS += -framework CoreAudio -framework AudioToolbox -framework AudioUnit
-    CONFIG += portaudio
+    CONFIG += portaudio sound
     exists(/opt/local/include/sndfile.h) {
         CONFIG += sndfile
     }
@@ -129,7 +64,7 @@ linux-* {
     LIBS += -ldl -lrt
 }
 android {
-    CONFIG += openSL
+    CONFIG += openSL sound
     SOURCES += src/android/platform_util.cpp src/android/soundin.cpp src/android/soundout.cpp
     HEADERS += src/android/platform_util.h src/android/soundin.h src/android/soundout.h
     QT -= webkitwidgets
@@ -138,15 +73,84 @@ android {
     LIBS += -L$$OUT_PWD/lib
     LIBS += -lOpenSLES
 }
+unix {
+# packagesExist() not available on Qt 4.6 (e.g. Debian Squeeze)
+    target.path = /usr/bin
+    documentation.path = /usr/share/man/man1
+    documentation.files = linux/dream.1
+    INSTALLS += documentation
+    INSTALLS += target
+    CONFIG += link_pkgconfig
+    tui:console {
+      CONFIG += consoleio
+    }
+    LIBS += -lfftw3
+    LIBS += -lz
+    SOURCES += src/linux/Pacer.cpp
+    DEFINES += HAVE_DLFCN_H \
+           HAVE_MEMORY_H \
+           HAVE_STDINT_H \
+           HAVE_STDLIB_H
+    DEFINES += HAVE_STRINGS_H \
+           HAVE_STRING_H \
+           STDC_HEADERS
+    DEFINES += HAVE_INTTYPES_H \
+           HAVE_STDINT_H \
+           HAVE_SYS_STAT_H \
+           HAVE_SYS_TYPES_H \
+           HAVE_UNISTD_H
+    DEFINES += HAVE_LIBZ
+}
+unix:!cross_compile {
+    !sound {
+         # check for pulseaudio before portaudio
+         exists(/usr/include/pulse/pulseaudio.h) | \
+         exists(/usr/local/include/pulse/pulseaudio.h) {
+         #packagesExist(libpulse)
+          CONFIG += pulseaudio sound
+         }
+         else {
+           exists(/usr/include/portaudio.h) | \
+           exists(/usr/local/include/portaudio.h) {
+           #packagesExist(portaudio-2.0)
+              CONFIG += portaudio sound
+           }
+        }
+    }
+    exists(/usr/include/hamlib/rig.h) | \
+      exists(/usr/local/include/hamlib/rig.h) {
+          CONFIG += hamlib
+    }
+    exists(/usr/include/gps.h) | \
+    exists(/usr/local/include/gps.h) {
+        CONFIG += gps
+    }
+    exists(/usr/include/pcap.h) | \
+     exists(/usr/local/include/pcap.h) {
+      CONFIG += pcap
+    }
+    exists(/usr/include/sndfile.h) | \
+     exists(/usr/local/include/sndfile.h) {
+      CONFIG += sndfile
+    }
+    exists(/usr/include/opus/opus.h) | \
+     exists(/usr/local/include/opus/opus.h) {
+      CONFIG += opus
+    }
+    exists(/usr/include/speex/speex_preprocess.h) | \
+     exists(/usr/local/include/speex/speex_preprocess.h) {
+      CONFIG += speexdsp
+    }
+}
 win32 {
     INCLUDEPATH += libs
     LIBS += -Llibs
     LIBS += -lfftw3-3
     exists(libs/portaudio.h) {
-      CONFIG += portaudio
+      CONFIG += portaudio sound
     }
     else {
-      CONFIG += mmsystem
+      CONFIG += mmsystem sound
     }
     exists(libs/speex/speex_preprocess.h) {
       CONFIG += speexdsp
@@ -233,14 +237,14 @@ hamlib {
      win32:LIBS += libhamlib-2.lib
      HEADERS += src/util/Hamlib.h
      SOURCES += src/util/Hamlib.cpp
-     !console {
+     qt {
        HEADERS += src/util-QT/Rig.h
        SOURCES += src/util-QT/Rig.cpp
-       !qtconsole {
+     }
+     gui {
          HEADERS += src/GUI-QT/RigDlg.h
          SOURCES += src/GUI-QT/RigDlg.cpp
          FORMS += RigDlg.ui
-       }
      }
      message("with hamlib")
 }
@@ -257,13 +261,15 @@ qwt {
         exists(/usr/local/include/qwt/qwt.h) {
             INCLUDEPATH += /usr/local/include/qwt
         }
-        exists(/usr/include/qwt5/qwt.h) {
-            INCLUDEPATH += /usr/include/qwt5
-        }
-        qt4:exists(/usr/include/qwt-qt4/qwt.h) {
-            INCLUDEPATH += /usr/include/qwt-qt4
-            LIBS -= -lqwt
-            LIBS += -lqwt-qt4
+	qt4 {
+            exists(/usr/include/qwt5/qwt.h) {
+                INCLUDEPATH += /usr/include/qwt5
+            }
+            exists(/usr/include/qwt-qt4/qwt.h) {
+                INCLUDEPATH += /usr/include/qwt-qt4
+                LIBS -= -lqwt
+                LIBS += -lqwt-qt4
+            }
         }
     }
     win32 {
@@ -277,6 +283,7 @@ qwt {
     }
     exists(libs/qwt/qwt.h) {
         INCLUDEPATH += libs/qwt
+        !contains(LIBS, libs):LIBS += -Llibs
     }
 }
 alsa {
@@ -286,14 +293,12 @@ alsa {
     src/linux/soundout.h
     SOURCES += src/linux/alsa.cpp \
     src/linux/soundsrc.cpp
-    CONFIG += sound
     message("with alsa")
 }
 mmsystem {
     HEADERS += src/windows/Sound.h
     SOURCES += src/windows/Sound.cpp
     LIBS += -lwinmm
-    CONFIG += sound
     message("with mmsystem")
 }
 portaudio {
@@ -303,7 +308,6 @@ portaudio {
     SOURCES += src/sound/drm_portaudio.cpp \
     src/sound/pa_ringbuffer.c
     LIBS += -lportaudio
-    CONFIG += sound
     unix:PKGCONFIG += portaudio-2.0
     message("with portaudio")
 }
@@ -312,12 +316,10 @@ pulseaudio {
     HEADERS += src/sound/drm_pulseaudio.h
     SOURCES += src/sound/drm_pulseaudio.cpp
     LIBS += -lpulse
-    CONFIG += sound
     unix:PKGCONFIG += libpulse
     message("with pulseaudio")
 }
 openSL {
-    CONFIG += sound
     DEFINES += USE_OPENSL
     message("with openSL")
 }
