@@ -308,7 +308,7 @@ CPacketSocketNative::SetOrigin(const string & strNewAddr)
             sa.sin_family = AF_INET;
             sa.sin_addr.s_addr = gp.s_addr;
             sa.sin_port = htons(port);
-            bind(s, (sockaddr*)&sa, sizeof(sa));
+            ::bind(s, (sockaddr*)&sa, sizeof(sa));
             if (ok == false)
             {
                 throw CGenErr("Can't bind to port to receive packets");
@@ -331,7 +331,7 @@ CPacketSocketNative::SetOrigin(const string & strNewAddr)
             sa.sin_family = AF_INET;
             sa.sin_addr.s_addr = gp.s_addr;
             sa.sin_port = htons(port);
-            bind(s, (sockaddr*)&sa, sizeof(sa));
+            ::bind(s, (sockaddr*)&sa, sizeof(sa));
         }
     }
     else
@@ -340,7 +340,7 @@ CPacketSocketNative::SetOrigin(const string & strNewAddr)
         sourceAddr.sin_family = AF_INET;
         sourceAddr.sin_addr.s_addr = htonl(INADDR_ANY);
         sourceAddr.sin_port = htons(port);
-        int r = bind(s, (sockaddr*)&sourceAddr, sizeof(sourceAddr));
+        int r = ::bind(s, (sockaddr*)&sourceAddr, sizeof(sourceAddr));
         if (r < 0)
         {
             perror("bind() failed");
