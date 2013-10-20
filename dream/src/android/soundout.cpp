@@ -23,7 +23,12 @@ void COpenSLESOut::Enumerate(vector<string>& names, vector<string>& descriptions
     /* Get the Audio IO DEVICE CAPABILITIES interface */
     SLAudioIODeviceCapabilitiesItf AudioIODeviceCapabilitiesItf;
     SLresult res = (*engineObject)->GetInterface(engineObject, SL_IID_AUDIOIODEVICECAPABILITIES, (void*)&AudioIODeviceCapabilitiesItf);
-    //CheckErr(res);
+    if(res!=SL_RESULT_SUCCESS) {
+        string em = "Can't get audio output device capabilities";
+        //em += SLESErrorToString(res);
+        qDebug(em.c_str());
+        return;
+    }
     numOutputs = MAX_NUMBER_OUTPUT_DEVICES;
     res = (*AudioIODeviceCapabilitiesItf)->GetAvailableAudioOutputs( AudioIODeviceCapabilitiesItf, &numOutputs, OutputDeviceIDs);
     /* Search for phone earpiece output and phone speaker device */

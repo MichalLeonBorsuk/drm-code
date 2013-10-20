@@ -5,6 +5,35 @@ extern SLObjectItf engineObject;
 
 const int MAX_NUMBER_INPUT_DEVICES = 10;
 
+static const char* SLESErrorToString(SLresult result)
+{
+    switch (result)
+    {
+    case SL_RESULT_SUCCESS: return "SUCCESS";
+    case SL_RESULT_PRECONDITIONS_VIOLATED: return
+    "SL_RESULT_PRECONDITIONS_VIOLATED";
+    case SL_RESULT_PARAMETER_INVALID: return "SL_RESULT_PARAMETER_INVALID";
+    case SL_RESULT_MEMORY_FAILURE: return "SL_RESULT_MEMORY_FAILURE";
+    case SL_RESULT_RESOURCE_ERROR: return "SL_RESULT_RESOURCE_ERROR";
+    case SL_RESULT_RESOURCE_LOST: return "SL_RESULT_RESOURCE_LOST";
+    case SL_RESULT_IO_ERROR: return "SL_RESULT_IO_ERROR";
+    case SL_RESULT_BUFFER_INSUFFICIENT: return "SL_RESULT_BUFFER_INSUFFICIENT";
+    case SL_RESULT_CONTENT_CORRUPTED: return "SL_RESULT_CONTENT_CORRUPTED";
+    case SL_RESULT_CONTENT_UNSUPPORTED: return "SL_RESULT_CONTENT_UNSUPPORTED";
+    case SL_RESULT_CONTENT_NOT_FOUND: return "SL_RESULT_CONTENT_NOT_FOUND";
+    case SL_RESULT_PERMISSION_DENIED: return "SL_RESULT_PERMISSION_DENIED";
+    case SL_RESULT_FEATURE_UNSUPPORTED: return
+    "SL_RESULT_FEATURE_UNSUPPORTED";
+    case SL_RESULT_INTERNAL_ERROR: return "SL_RESULT_INTERNAL_ERROR";
+    case SL_RESULT_UNKNOWN_ERROR: return "SL_RESULT_UNKNOWN_ERROR";
+    case SL_RESULT_OPERATION_ABORTED: return "SL_RESULT_OPERATION_ABORTED";
+    case SL_RESULT_CONTROL_LOST: return "SL_RESULT_CONTROL_LOST";
+    default: return "Unknown";
+    }
+}
+
+
+
 COpenSLESIn::COpenSLESIn():currentDevice("")
 {
 }
@@ -22,9 +51,20 @@ void COpenSLESIn::Enumerate(vector<string>& names, vector<string>& descriptions)
     /* Get the Audio IO DEVICE CAPABILITIES interface */
     SLAudioIODeviceCapabilitiesItf AudioIODeviceCapabilitiesItf;
     SLresult res = (*engineObject)->GetInterface(engineObject, SL_IID_AUDIOIODEVICECAPABILITIES, (void*)&AudioIODeviceCapabilitiesItf);
-    //CheckErr(res);
+    if(res!=SL_RESULT_SUCCESS) {
+        string em = "Can't get audio input device capabilities ";
+        em += SLESErrorToString(res);
+        qDebug(em.c_str());
+        return;
+    }
     numInputs = MAX_NUMBER_INPUT_DEVICES;
     res = (*AudioIODeviceCapabilitiesItf)->GetAvailableAudioInputs( AudioIODeviceCapabilitiesItf, &numInputs, InputDeviceIDs);
+    if(res!=SL_RESULT_SUCCESS) {
+        string em = "Can't enumerate audio input devices ";
+        em += SLESErrorToString(res);
+        qDebug(em.c_str());
+        return;
+    }
     for (SLint32 i=0;i<numInputs; i++)
     {
         SLAudioInputDescriptor AudioInputDescriptor;
@@ -644,33 +684,6 @@ next_record_buffer_index << std::endl;
 }
 }
 
-static const char* SLESErrorToString(SLresult result)
-{
-switch (result)
-{
-case SL_RESULT_SUCCESS: return "SUCCESS";
-case SL_RESULT_PRECONDITIONS_VIOLATED: return
-"SL_RESULT_PRECONDITIONS_VIOLATED";
-case SL_RESULT_PARAMETER_INVALID: return "SL_RESULT_PARAMETER_INVALID";
-case SL_RESULT_MEMORY_FAILURE: return "SL_RESULT_MEMORY_FAILURE";
-case SL_RESULT_RESOURCE_ERROR: return "SL_RESULT_RESOURCE_ERROR";
-case SL_RESULT_RESOURCE_LOST: return "SL_RESULT_RESOURCE_LOST";
-case SL_RESULT_IO_ERROR: return "SL_RESULT_IO_ERROR";
-case SL_RESULT_BUFFER_INSUFFICIENT: return "SL_RESULT_BUFFER_INSUFFICIENT";
-case SL_RESULT_CONTENT_CORRUPTED: return "SL_RESULT_CONTENT_CORRUPTED";
-case SL_RESULT_CONTENT_UNSUPPORTED: return "SL_RESULT_CONTENT_UNSUPPORTED";
-case SL_RESULT_CONTENT_NOT_FOUND: return "SL_RESULT_CONTENT_NOT_FOUND";
-case SL_RESULT_PERMISSION_DENIED: return "SL_RESULT_PERMISSION_DENIED";
-case SL_RESULT_FEATURE_UNSUPPORTED: return
-"SL_RESULT_FEATURE_UNSUPPORTED";
-case SL_RESULT_INTERNAL_ERROR: return "SL_RESULT_INTERNAL_ERROR";
-case SL_RESULT_UNKNOWN_ERROR: return "SL_RESULT_UNKNOWN_ERROR";
-case SL_RESULT_OPERATION_ABORTED: return "SL_RESULT_OPERATION_ABORTED";
-case SL_RESULT_CONTROL_LOST: return "SL_RESULT_CONTROL_LOST";
-default: return "Unknown";
-}
-}
-
 int main()
 {
 record_buffers.resize(TOTAL_BUFFERS);
@@ -887,7 +900,6 @@ realizing the recorder object):
 Running: ./clienttest
 result: 9 : SL_RESULT_CONTENT_UNSUPPORTED
 assertion "SL_RESULT_SUCCESS == result" failed: file
-"jni/../../../../AxonCore/**make/android/jni/../../../../**AxonCore/src/clienttest.cpp",
 line 122, function "int main()"
 [1] Segmentation fault ./clienttest
 
