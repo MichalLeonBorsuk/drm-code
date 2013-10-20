@@ -39,7 +39,7 @@
 #ifdef _WIN32
 #include "../windows/platform_util.h"
 #endif
-#ifdef __ANDROID__
+#ifdef __ANDROID_API__
 #include "../android/platform_util.h"
 #endif
 

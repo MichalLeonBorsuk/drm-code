@@ -47,7 +47,9 @@
 #ifdef USE_CONSOLEIO
 # include "linux/ConsoleIO.h"
 #endif
-
+#if 0
+#include <fcd.h>
+#endif
 const int
 CDRMReceiver::MAX_UNLOCKED_COUNT = 2;
 
@@ -1445,7 +1447,26 @@ void CDRMReceiver::SetFrequency(int iNewFreqkHz)
         pRig->SetFrequency(iNewFreqkHz);
 # endif
 #endif
+#if 0
+	{
+		FCD_MODE_ENUM fme;
+		unsigned int uFreq, rFreq;
+		int lnbOffset = 6;
+		double d = (double) (iNewFreqkHz-lnbOffset);
 
+		//d *= 1.0 + n/1000000.0;
+		uFreq = (unsigned int) d;
+
+		fme = fcdAppSetFreq(uFreq, &rFreq);
+
+		if ((fme != FCD_MODE_APP) || (uFreq != rFreq))
+		{
+			stringstream ss;
+			ss << "Error in" << __FUNCTION__ << "set:" << uFreq << "read:" << rFreq;
+			qDebug(ss.str().c_str()); 
+		}
+	}
+#endif
     if (downstreamRSCI.GetOutEnabled() == TRUE)
         downstreamRSCI.NewFrequency(Parameters);
 
