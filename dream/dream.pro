@@ -55,9 +55,12 @@ macx {
     LIBS += -L/opt/local/lib
     LIBS += -framework CoreFoundation -framework CoreServices
     LIBS += -framework CoreAudio -framework AudioToolbox -framework AudioUnit
-    CONFIG += portaudio sound
-    exists(/opt/local/include/sndfile.h) {
+    CONFIG += portaudio sound pcap
+    packagesExist(sndfile) {
         CONFIG += sndfile
+    }
+    packagesExist(speexdsp) {
+      CONFIG += speexdsp
     }
 }
 linux-* {
@@ -250,11 +253,19 @@ hamlib {
 }
 qwt {
     macx {
-        INCLUDEPATH += /opt/local/Library/Frameworks/qwt.framework/Versions/6/Headers
         LIBS += -framework qwt
-    }
-    unix {
-        LIBS += -lqwt
+   }
+   else {
+        win32:CONFIG( debug, debug|release ) {
+            # win debug
+            LIBS += -lqwtd
+        } else {
+            # unix | win release
+            LIBS += -lqwt
+        }
+   }
+   !crosscompile {
+        macx:INCLUDEPATH += /opt/local/Library/Frameworks/qwt.framework/Versions/6/Headers
         exists(/usr/include/qwt/qwt.h) {
             INCLUDEPATH += /usr/include/qwt
         }
@@ -270,15 +281,6 @@ qwt {
                 LIBS -= -lqwt
                 LIBS += -lqwt-qt4
             }
-        }
-    }
-    win32 {
-        CONFIG( debug, debug|release ) {
-            # debug
-            LIBS += -lqwtd
-        } else {
-            # release
-            LIBS += -lqwt
         }
     }
     exists(libs/qwt/qwt.h) {
