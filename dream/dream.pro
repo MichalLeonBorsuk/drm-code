@@ -39,7 +39,7 @@ gui {
     qt5:QT += widgets webkitwidgets
     INCLUDEPATH += src/GUI-QT
     VPATH += src/GUI-QT
-    win:RC_FILE = windows/dream.rc
+    win32:RC_FILE = windows/dream.rc
     macx:RC_FILE = src/GUI-QT/res/macicons.icns
     CONFIG += qwt
     UI_DIR = ui
