@@ -194,11 +194,11 @@ CPacketSourceFile::readFF(vector<_BYTE>& vecbydata, int& interval)
         return;
     }
 
-    long remaining = fflen; // use a signed muber here to help loop exit
+    long remaining = fflen; // use a signed number here to help loop exit
     while(remaining>0)
     {
         readTagPacketHeader(tag, len);
-        remaining -= 64; // 4*8 nits tag, 4*8 bytes length;
+        remaining -= 8; // 4 bytes tag, 4 bytes length;
         remaining -= len;
 
         if(tag=="time")
@@ -218,9 +218,15 @@ CPacketSourceFile::readFF(vector<_BYTE>& vecbydata, int& interval)
             //TODO update last packet and interval times
         }
 
+        readTagPacketHeader(tag, len);
+        remaining -= 8; // 4 bytes tag, 4 bytes length;
+        remaining -= len;
         if(tag=="afpf")
         {
-            readRawAF(vecbydata, interval);
+            int l = readRawAF(vecbydata, interval);
+            if(l!=len) {
+                qDebug("why not");
+            }
         }
         else
         {
@@ -230,7 +236,7 @@ CPacketSourceFile::readFF(vector<_BYTE>& vecbydata, int& interval)
     }
 }
 
-void
+int
 CPacketSourceFile::readRawAF(vector<_BYTE>& vecbydata, int& interval)
 {
     char sync[2];
@@ -247,7 +253,7 @@ CPacketSourceFile::readRawAF(vector<_BYTE>& vecbydata, int& interval)
         // throw?
         fclose((FILE *) pF);
         pF = 0;
-        return;
+        return 0;
     }
     // get the length
     size_t iAFPacketLen = iAFHeaderLen + ntohl(bytes) + iAFCRCLen;
@@ -257,7 +263,7 @@ CPacketSourceFile::readRawAF(vector<_BYTE>& vecbydata, int& interval)
         // throw?
         fclose((FILE *) pF);
         pF = 0;
-        return;
+        return 0;
     }
 
     // initialise the output vector
@@ -267,7 +273,7 @@ CPacketSourceFile::readRawAF(vector<_BYTE>& vecbydata, int& interval)
 
     last_packet_time += interval;
 
-    (void)n;
+    return n;
 }
 
 // not robust against the sync characters appearing in the payload!!!!
