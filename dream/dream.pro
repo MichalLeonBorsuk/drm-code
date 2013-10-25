@@ -167,6 +167,9 @@ win32 {
     exists(libs/sndfile.h) {
         CONFIG += sndfile
     }
+    exists(libs/opus/opus.h) {
+        CONFIG += opus
+    }
     LIBS += -lsetupapi -lwsock32 -lws2_32 -lzdll -ladvapi32 -luser32
     DEFINES += HAVE_SETUPAPI \
     HAVE_LIBZ _CRT_SECURE_NO_WARNINGS
@@ -208,6 +211,7 @@ opus {
      DEFINES += HAVE_LIBOPUS \
      USE_OPUS_LIBRARY
      unix:LIBS += -lopus
+     win32:LIBS += libopus.lib
      message("with opus")
 }
 sndfile {
