@@ -51,7 +51,7 @@ public:
 
 private:
 
-    void readRawAF(vector<_BYTE>& vecbydata, int& interval);
+    int readRawAF(vector<_BYTE>& vecbydata, int& interval);
     void readRawPFT(vector<_BYTE>& vecbydata, int& interval);
     void readFF(vector<_BYTE>& vecbydata, int& interval);
 
