@@ -223,7 +223,7 @@ CPacketSourceFile::readFF(vector<_BYTE>& vecbydata, int& interval)
         remaining -= len;
         if(tag=="afpf")
         {
-            int l = readRawAF(vecbydata, interval);
+            uint32_t l = readRawAF(vecbydata, interval);
             if(l!=len) {
                 qDebug("why not");
             }
