@@ -35,6 +35,9 @@
 #include <QFileDialog>
 #include "../util-QT/Util.h"
 
+#ifdef QT_MULTIMEDIA_LIB
+# include <QAudioDeviceInfo>
+#endif
 
 #ifdef HAVE_LIBPCAP
 # define PCAP_FILES " *.pcap"
@@ -135,16 +138,36 @@ CSoundCardSelMenu::CSoundCardSelMenu(CDRMTransceiver& DRMTransceiver,
 void CSoundCardSelMenu::OnSoundInDevice(QAction* action)
 {
     Parameters.Lock();
+#ifdef QT_MULTIMEDIA_LIB
+    QString device = action->data().toString();
+    foreach(const QAudioDeviceInfo& di, QAudioDeviceInfo::availableDevices(QAudio::AudioInput))
+    {
+        QString name = di.deviceName();
+        if(name==device)
+            DRMTransceiver.SetInputDevice(di);
+    }
+#else
         CSelectionInterface* pSoundInIF = DRMTransceiver.GetSoundInInterface();
         pSoundInIF->SetDev(action->data().toString().toLocal8Bit().constData());
+#endif
     Parameters.Unlock();
 }
 
 void CSoundCardSelMenu::OnSoundOutDevice(QAction* action)
 {
     Parameters.Lock();
+#ifdef QT_MULTIMEDIA_LIB
+    QString device = action->data().toString();
+    foreach(const QAudioDeviceInfo& di, QAudioDeviceInfo::availableDevices(QAudio::AudioOutput))
+    {
+        QString name = di.deviceName();
+        if(name==device)
+            DRMTransceiver.SetInputDevice(di);
+    }
+#else
         CSelectionInterface* pSoundOutIF = DRMTransceiver.GetSoundOutInterface();
         pSoundOutIF->SetDev(action->data().toString().toLocal8Bit().constData());
+#endif
     Parameters.Unlock();
 }
 
@@ -195,11 +218,34 @@ void CSoundCardSelMenu::OnSoundSignalUpscale(bool bChecked)
 
 QMenu* CSoundCardSelMenu::InitDevice(QMenu* self, QMenu* parent, const QString& text, bool bInput)
 {
-//printf("CSoundCardSelMenu::InitDevice(%i)\n", bInput);
-    CSelectionInterface* intf = bInput ? (CSelectionInterface*)DRMTransceiver.GetSoundInInterface() : (CSelectionInterface*)DRMTransceiver.GetSoundOutInterface();
     QMenu* menu = self != NULL ? self : parent->addMenu(text);
     menu->clear();
     QActionGroup* group = NULL;
+#ifdef QT_MULTIMEDIA_LIB
+    QAudio::Mode m;
+    QAudioDeviceInfo def;
+    if(bInput) {
+        m = QAudio::AudioInput;
+        def = QAudioDeviceInfo::defaultInputDevice();
+
+    } else {
+        m = QAudio::AudioOutput;
+        def = QAudioDeviceInfo::defaultOutputDevice();
+    }
+    foreach(const QAudioDeviceInfo& di, QAudioDeviceInfo::availableDevices(m))
+    {
+        QString name = di.deviceName();
+        QAction* m = menu->addAction(name);
+        m->setData(name);
+        m->setCheckable(true);
+        if (name == def.deviceName())
+            m->setChecked(true);
+        if (group == NULL)
+            group = new QActionGroup(m);
+        group->addAction(m);
+    }
+#else
+    CSelectionInterface* intf = bInput ? (CSelectionInterface*)DRMTransceiver.GetSoundInInterface() : (CSelectionInterface*)DRMTransceiver.GetSoundOutInterface();
     vector<string> names;
     vector<string> descriptions;
     intf->Enumerate(names, descriptions);
@@ -222,6 +268,7 @@ QMenu* CSoundCardSelMenu::InitDevice(QMenu* self, QMenu* parent, const QString& 
         group->addAction(m);
 //printf("CSoundCardSelMenu::InitDevice() %s\n", name.toUtf8().constData());
     }
+#endif
     return menu;
 }
 
