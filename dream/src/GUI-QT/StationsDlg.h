@@ -58,16 +58,14 @@ protected:
 	virtual void	eventShow(QShowEvent* pEvent);
 	void			LoadSettings();
 	void			SaveSettings();
-	void			CheckMode();
-	void			LoadSchedule();
-	void			LoadFilters();
+    void			LoadSchedule();
+    void			LoadScheduleView();
+    void			UpdateTransmissionStatus();
+    void			LoadFilters();
 	void			SetFrequencyFromGUI(int);
-	void			SetStationsView();
-	void			ClearStationsView();
 	void			AddWhatsThisHelp();
 	void			EnableSMeter();
 	void			DisableSMeter();
-	void			AddUpdateDateTime();
 	_BOOLEAN		showAll();
 	_BOOLEAN		GetSortAscending();
 	void			SetSortAscending(_BOOLEAN b);
@@ -101,7 +99,6 @@ protected:
 	QMutex			ListItemsMutex;
 
 	QString			okMessage, badMessage;
-	CSchedule::ESchedMode eLastScheduleMode;
 
 signals:
 	void subscribeRig();
