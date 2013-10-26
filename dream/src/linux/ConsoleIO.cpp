@@ -38,6 +38,7 @@
 
 #include <unistd.h>
 #include <fcntl.h>
+#include <signal.h>
 #include <cstdio>
 #include "ConsoleIO.h"
 
@@ -79,6 +80,10 @@
 		str.replace(pos, sizeof(from "")-1, to ""); \
 		pos += sizeof(to "")-1; \
 	}
+
+#define MINIMUM_IF_LEVEL -200.0
+
+#define NA "---"
 
 
 /* Implementation *************************************************************/
@@ -221,7 +226,7 @@ CConsoleIO::Update()
 		return;
 	time = curtime;
 
-    char msc = ETypeRxStatus2char(Parameters.ReceiveStatus.Audio.GetStatus());
+    char msc = ETypeRxStatus2char(Parameters.ReceiveStatus.SLAudio.GetStatus());
     char sdc = ETypeRxStatus2char(Parameters.ReceiveStatus.SDC.GetStatus());
     char fac = ETypeRxStatus2char(Parameters.ReceiveStatus.FAC.GetStatus());
     char time = ETypeRxStatus2char(Parameters.ReceiveStatus.TSync.GetStatus());
@@ -233,7 +238,10 @@ CConsoleIO::Update()
 	cprintf(HOME "        IO:%c  Time:%c  Frame:%c  FAC:%c  SDC:%c  MSC:%c" NL, inter, time, frame, fac, sdc, msc);
 
 	_REAL rIFLevel = Parameters.GetIFSignalLevel();
-	cprintf("                   IF Level: %.1f dB" NL, rIFLevel);
+	if (rIFLevel > MINIMUM_IF_LEVEL)
+		cprintf("                   IF Level: %.1f dB" NL, rIFLevel);
+	else
+		cprintf("                   IF Level: " NA NL);
 
 	if (!(mode & MODE_SCREEN) || mode & MODE_BOTH)
 	{
@@ -259,7 +267,7 @@ CConsoleIO::Update()
 			if (rSigma >= 0.0)
 			cprintf("            Doppler / Delay: %.2f Hz / %.2f ms" NL, rSigma, rMinDelay);
 			else
-			cprintf("            Doppler / Delay: ---" NL);
+			cprintf("            Doppler / Delay: " NA NL);
 
 			const char *strRob;
 			switch (Parameters.GetWaveMode()) {
@@ -320,17 +328,17 @@ CConsoleIO::Update()
 
 		}
 		else {
-			cprintf("                        SNR: ---" NL
-					"         MSC WMER / MSC MER: ---" NL
-					" DC Frequency of DRM Signal: ---" NL
-					"    Sample Frequency Offset: ---" NL
-					"            Doppler / Delay: ---" NL
-					"       DRM Mode / Bandwidth: ---" NL
-					"          Interleaver Depth: ---" NL
-					"             SDC / MSC Mode: ---" NL
-					"        Prot. Level (B / A): ---" NL
-					"         Number of Services: ---" NL
-					"       Received time - date: ---" CL);
+			cprintf("                        SNR: " NA NL
+					"         MSC WMER / MSC MER: " NA NL
+					" DC Frequency of DRM Signal: " NA NL
+					"    Sample Frequency Offset: " NA NL
+					"            Doppler / Delay: " NA NL
+					"       DRM Mode / Bandwidth: " NA NL
+					"          Interleaver Depth: " NA NL
+					"             SDC / MSC Mode: " NA NL
+					"        Prot. Level (B / A): " NA NL
+					"         Number of Services: " NA NL
+					"       Received time - date: " NA CL);
 		}
 	}
 	if (mode & MODE_SCREEN || mode & MODE_BOTH)
