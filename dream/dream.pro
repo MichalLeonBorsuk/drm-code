@@ -3,6 +3,8 @@ CONFIG += warn_on
 TARGET = dream
 OBJECTS_DIR = obj
 DEFINES += EXECUTABLE_NAME=$$TARGET
+LIBS += -L$$OUT_PWD/lib
+INCLUDEPATH += $$OUT_PWD/include
 contains(QT_VERSION, ^4\\..*) {
     CONFIG += qt qt4
     VERSION_MESSAGE = Qt 4
@@ -10,12 +12,6 @@ contains(QT_VERSION, ^4\\..*) {
 contains(QT_VERSION, ^5\\..*) {
     CONFIG += qt qt5
     VERSION_MESSAGE = Qt 5
-}
-CONFIG(debug, debug|release) {
-    DEBUG_MESSAGE = debug
-}
-else {
-    DEBUG_MESSAGE = release
 }
 console {
     QT -= core gui
@@ -45,7 +41,7 @@ gui {
     UI_DIR = ui
     MOC_DIR = moc
 }
-message($$VERSION_MESSAGE $$DEBUG_MESSAGE $$UI_MESSAGE)
+message($$VERSION_MESSAGE $$UI_MESSAGE)
 unix:!cross_compile {
     UNAME = $$system(uname -s)
     message(building on $$UNAME)
@@ -65,7 +61,6 @@ macx {
 }
 linux-* {
     LIBS += -ldl -lrt
-    tui:LIBS += -lpthread
 }
 android {
     CONFIG += openSL sound
@@ -73,8 +68,6 @@ android {
     HEADERS += src/android/platform_util.h src/android/soundin.h src/android/soundout.h
     QT -= webkitwidgets
     QT += svg
-    INCLUDEPATH += $$OUT_PWD/include
-    LIBS += -L$$OUT_PWD/lib
     LIBS += -lOpenSLES
 }
 unix {
@@ -147,28 +140,26 @@ unix:!cross_compile {
     }
 }
 win32 {
-    INCLUDEPATH += libs
-    LIBS += -Llibs
     LIBS += -lfftw3-3
-    exists(libs/portaudio.h) {
+    exists($$OUT_PWD/include/portaudio.h) {
       CONFIG += portaudio sound
     }
     else {
       CONFIG += mmsystem sound
     }
-    exists(libs/speex/speex_preprocess.h) {
+    exists($$OUT_PWD/include/speex/speex_preprocess.h) {
       CONFIG += speexdsp
     }
-    exists(libs/hamlib/rig.h) {
+    exists($$OUT_PWD/include/hamlib/rig.h) {
       CONFIG += hamlib
     }
-    exists(libs/pcap.h) {
+    exists($$OUT_PWD/include/pcap.h) {
       CONFIG += pcap
     }
-    exists(libs/sndfile.h) {
+    exists($$OUT_PWD/include/sndfile.h) {
         CONFIG += sndfile
     }
-    exists(libs/opus/opus.h) {
+    exists($$OUT_PWD/include/opus/opus.h) {
         CONFIG += opus
     }
     LIBS += -lsetupapi -lwsock32 -lws2_32 -lzdll -ladvapi32 -luser32
@@ -177,15 +168,8 @@ win32 {
     DEFINES -= UNICODE
     SOURCES += src/windows/Pacer.cpp src/windows/platform_util.cpp
     HEADERS += src/windows/platform_util.h
-    msvc2008 {
+    msvc* {
         TEMPLATE = vcapp
-        QMAKE_CXXFLAGS += /wd"4996" /wd"4521"
-        QMAKE_LFLAGS_RELEASE += /NODEFAULTLIB:libcmt.lib
-        QMAKE_LFLAGS_DEBUG += /NODEFAULTLIB:libcmtd.lib
-        LIB += zdll.lib
-    }
-    msvc2010 {
-        TEMPLATE = vc
         QMAKE_CXXFLAGS += /wd"4996" /wd"4521"
         QMAKE_LFLAGS_RELEASE += /NODEFAULTLIB:libcmt.lib
         QMAKE_LFLAGS_DEBUG += /NODEFAULTLIB:libcmtd.lib
@@ -196,13 +180,13 @@ win32 {
          LIBS += -lz
     }
 }
-exists(libs/neaacdec.h) {
+exists($$OUT_PWD/include/neaacdec.h) {
      DEFINES += HAVE_LIBFAAD \
      USE_FAAD2_LIBRARY
      LIBS += -lfaad_drm
      message("with FAAD2")
 }
-exists(libs/faac.h) {
+exists($$OUT_PWD/include/faac.h) {
      DEFINES += HAVE_LIBFAAC \
      USE_FAAC_LIBRARY
      LIBS += -lfaac_drm
@@ -235,7 +219,8 @@ gps {
 pcap {
      DEFINES += HAVE_LIBPCAP
      unix:LIBS += -lpcap
-     win32:LIBS += wpcap.lib packet.lib
+     win32-msvc*:LIBS += wpcap.lib packet.lib
+     win32-g++:LIBS += -lwpcap -lpacket
      message("with pcap")
 }
 hamlib {
@@ -261,7 +246,7 @@ qwt {
         LIBS += -framework qwt
    }
    else {
-        win32:CONFIG( debug, debug|release ) {
+        win32:CONFIG(debug, debug|release) {
             # win debug
             LIBS += -lqwtd
         } else {
@@ -288,9 +273,8 @@ qwt {
             }
         }
     }
-    exists(libs/qwt/qwt.h) {
-        INCLUDEPATH += libs/qwt
-        !contains(LIBS, libs):LIBS += -Llibs
+    exists($$OUT_PWD/include/qwt/qwt.h) {
+        INCLUDEPATH += $$OUT_PWD/include/qwt
     }
 }
 alsa {
