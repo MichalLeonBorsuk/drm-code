@@ -149,6 +149,10 @@ public:
     void					SetInputFile(const string& inputFile);
     void					ClearInputFile();
     ESFStatus				GetInputStatus();
+#ifdef QT_MULTIMEDIA_LIB
+    void SetInputDevice(const QAudioDeviceInfo&);
+    void SetOutputDevice(const QAudioDeviceInfo&);
+#endif
     void					RequestNewAcquisition() {
         bRestartFlag = TRUE;
     }

@@ -244,6 +244,14 @@ void CTransmitData::HilbertFilt(_COMPLEX& vecData)
 //inline _REAL sample2real(_SAMPLE s) { return _REAL(s)/32768.0; }
 inline _REAL sample2real(_SAMPLE s) { return _REAL(s); }
 
+#ifdef QT_MULTIMEDIA_LIB
+void
+CReceiveData::SetSoundInterface(QIODevice*)
+{
+
+}
+#endif
+
 void CReceiveData::ProcessDataInternal(CParameter& Parameters)
 {
     int i;

@@ -55,7 +55,8 @@ macx {
     LIBS += -L/opt/local/lib
     LIBS += -framework CoreFoundation -framework CoreServices
     LIBS += -framework CoreAudio -framework AudioToolbox -framework AudioUnit
-    CONFIG += portaudio sound pcap
+    CONFIG += pcap
+    !multimedia:CONFIG += portaudio sound
     packagesExist(sndfile) {
         CONFIG += sndfile
     }
@@ -145,11 +146,13 @@ unix:!cross_compile {
 }
 win32 {
     LIBS += -lfftw3-3
-    exists($$OUT_PWD/include/portaudio.h) {
-      CONFIG += portaudio sound
-    }
-    else {
-      CONFIG += mmsystem sound
+    !multimedia {
+        exists($$OUT_PWD/include/portaudio.h) {
+          CONFIG += portaudio sound
+        }
+        else {
+          CONFIG += mmsystem sound
+        }
     }
     exists($$OUT_PWD/include/speex/speex_preprocess.h) {
       CONFIG += speexdsp

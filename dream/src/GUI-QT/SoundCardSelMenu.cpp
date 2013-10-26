@@ -138,6 +138,7 @@ CSoundCardSelMenu::CSoundCardSelMenu(CDRMTransceiver& DRMTransceiver,
 void CSoundCardSelMenu::OnSoundInDevice(QAction* action)
 {
     Parameters.Lock();
+    QString inputName;
 #ifdef QT_MULTIMEDIA_LIB
     QString device = action->data().toString();
     foreach(const QAudioDeviceInfo& di, QAudioDeviceInfo::availableDevices(QAudio::AudioInput))
@@ -162,7 +163,7 @@ void CSoundCardSelMenu::OnSoundOutDevice(QAction* action)
     {
         QString name = di.deviceName();
         if(name==device)
-            DRMTransceiver.SetInputDevice(di);
+            DRMTransceiver.SetOutputDevice(di);
     }
 #else
         CSelectionInterface* pSoundOutIF = DRMTransceiver.GetSoundOutInterface();

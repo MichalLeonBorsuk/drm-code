@@ -40,6 +40,12 @@
 #include "sound/sound.h"
 #include "sound/soundnull.h"
 #include "sound/audiofilein.h"
+#ifdef QT_MULTIMEDIA_LIB
+#include <QAudioInput>
+#include <QAudioOutput>
+#include <QAudioFormat>
+#include <QIODevice>
+#endif
 #ifdef HAVE_LIBHAMLIB
 # ifdef QT_CORE_LIB // TODO should not have dependency to qt here
 #  include "util-QT/Rig.h"
@@ -389,6 +395,52 @@ CDRMReceiver::Run()
         }
     }
 }
+
+#ifdef QT_MULTIMEDIA_LIB
+void
+CDRMReceiver::SetInputDevice(const QAudioDeviceInfo& di)
+{
+    QAudioFormat format;
+    format.setSampleRate(Parameters.GetSoundCardSigSampleRate());
+    format.setSampleSize(16);
+    format.setSampleType(QAudioFormat::SignedInt);
+    format.setChannelCount(2); // TODO
+    format.setByteOrder(QAudioFormat::LittleEndian);
+    format.setCodec("audio/pcm");
+    QAudioInput *pAudioInput = new QAudioInput(di, di.nearestFormat(format));
+    QIODevice* pIODevice = pAudioInput->start();
+    if(pAudioInput->error()==QAudio::NoError)
+    {
+        ReceiveData.SetSoundInterface(pIODevice);
+    }
+    else
+    {
+        qDebug("Can't open audio input");
+    }
+}
+
+void
+CDRMReceiver::SetOutputDevice(const QAudioDeviceInfo& di)
+{
+    QAudioFormat format;
+    format.setSampleRate(Parameters.GetAudSampleRate());
+    format.setSampleSize(16);
+    format.setSampleType(QAudioFormat::SignedInt);
+    format.setChannelCount(2); // TODO
+    format.setByteOrder(QAudioFormat::LittleEndian);
+    format.setCodec("audio/pcm");
+    QAudioOutput *pAudioOutput = new QAudioOutput(di, di.nearestFormat(format));
+    QIODevice* pIODevice = pAudioOutput->start();
+    if(pAudioOutput->error()==QAudio::NoError)
+    {
+        WriteData.SetSoundInterface(pIODevice);
+    }
+    else
+    {
+        qDebug("Can't open audio output");
+    }
+}
+#endif
 
 void
 CDRMReceiver::SetInput()
