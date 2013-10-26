@@ -53,7 +53,7 @@ DRMReceiver(DRMReceiver),
 #endif
 greenCube(":/icons/greenCube.png"), redCube(":/icons/redCube.png"),
 orangeCube(":/icons/orangeCube.png"), pinkCube(":/icons/pinkCube.png"),
-bReInitOnFrequencyChange(FALSE), eLastScheduleMode(CSchedule::SM_NONE)
+bReInitOnFrequencyChange(FALSE)
 {
 	setupUi(this);
 #if QWT_VERSION < 0x060100
@@ -169,39 +169,13 @@ StationsDlg::~StationsDlg()
 void StationsDlg::OnShowStationsMenu(int iID)
 {
 	(void)iID;
-	/* Update list view */
-	SetStationsView();
+    UpdateTransmissionStatus();
 }
 
 void StationsDlg::OnShowPreviewMenu(int iID)
 {
 	schedule.SetSecondsPreview(iID);
-
-	/* Update list view */
-	SetStationsView();
-}
-
-void StationsDlg::AddUpdateDateTime()
-{
-	/*
-	Set time and date of current schedule in the menu text for
-	querying a new schedule (online schedule update).
-	If no schedule file exists, do not show any time and date.
-	*/
-
-	/* init with empty string in case there is no schedule file */
-	QString s = "";
-
-	/* get time and date information */
-	QFileInfo f = QFileInfo(schedule.schedFileName);
-	if (f.exists()) /* make sure the DRM schedule file exists */
-	{
-		/* use QT-type of data string for displaying */
-		s = tr(" (last update: ")
-			+ f.lastModified().date().toString() + ")";
-	}
-
-	actionGetUpdate->setText(tr("&Get Update") + s + "...");
+    UpdateTransmissionStatus();
 }
 
 void StationsDlg::on_ComboBoxFilterTarget_activated(const QString& s)
@@ -210,7 +184,7 @@ void StationsDlg::on_ComboBoxFilterTarget_activated(const QString& s)
 		schedule.targetFilterdrm = s;
 	else
 		schedule.targetFilteranalog = s;
-	SetStationsView();
+    UpdateTransmissionStatus();
 }
 
 void StationsDlg::on_ComboBoxFilterCountry_activated(const QString& s)
@@ -219,7 +193,7 @@ void StationsDlg::on_ComboBoxFilterCountry_activated(const QString& s)
 		schedule.countryFilterdrm = s;
 	else
 		schedule.countryFilteranalog = s;
-	SetStationsView();
+    UpdateTransmissionStatus();
 }
 
 void StationsDlg::on_ComboBoxFilterLanguage_activated(const QString& s)
@@ -228,7 +202,7 @@ void StationsDlg::on_ComboBoxFilterLanguage_activated(const QString& s)
 		schedule.languageFilterdrm = s;
 	else
 		schedule.languageFilteranalog = s;
-	SetStationsView();
+    UpdateTransmissionStatus();
 }
 
 void StationsDlg::on_actionGetUpdate_triggered()
@@ -258,11 +232,11 @@ void StationsDlg::OnUrlFinished(QNetworkReply* reply)
 			f.close();
 			/* Notify the user that update was successful */
 			QMessageBox::information(this, "Dream", okMessage, QMessageBox::Ok);
-			/* Read updated ini-file */
-			LoadSchedule();
-			/* add last update information on menu item */
-			AddUpdateDateTime();
-		} else {
+            /* Read file */
+            LoadSchedule();
+            LoadScheduleView();
+            UpdateTransmissionStatus();
+        } else {
 			QMessageBox::information(this, "Dream", tr("Can't save new schedule"), QMessageBox::Ok);
 		}
 	}
@@ -270,6 +244,16 @@ void StationsDlg::OnUrlFinished(QNetworkReply* reply)
 	{
 		QMessageBox::information(this, "Dream", badMessage, QMessageBox::Ok);
 	}
+}
+
+void StationsDlg::LoadSchedule()
+{
+    schedule.LoadSchedule();
+    /* add last update information on menu item */
+    QFileInfo f = QFileInfo(schedule.schedFileName);
+    actionGetUpdate->setText(
+       tr("&Get Update (last update: %1)...").arg(f.lastModified().date().toString())
+    );
 }
 
 void StationsDlg::eventClose(QCloseEvent*)
@@ -287,51 +271,54 @@ void StationsDlg::eventHide(QHideEvent*)
 
 void StationsDlg::eventShow(QShowEvent*)
 {
-	/* Activate real-time timer when window is shown */
-	Timer.start(500 /* twice a second - nyquist for catching minute boundaries */);
-
 	QwtCounterFrequency->setValue(DRMReceiver.GetFrequency());
-
 	bool ensmeter = false;
 	ensmeter = actionEnable_S_Meter->isChecked();
 	if(ensmeter)
 		EnableSMeter();
 	else
 		DisableSMeter();
-	CheckMode();
-	if(QFile::exists(schedule.schedFileName))
+    CSchedule::ESchedMode eSchedM = schedule.GetSchedMode();
+    ERecMode eRecM = DRMReceiver.GetReceiverMode();
+    bool bIsDRM = eRecM == RM_DRM;
+    if (
+        (eSchedM == CSchedule::SM_DRM && !bIsDRM)
+    ||
+        (eSchedM == CSchedule::SM_ANALOG && bIsDRM)
+    )
+    {
+        /* Store previous columns settings */
+        if (eSchedM != CSchedule::SM_NONE)
+        {
+            ColumnParamToStr(bIsDRM?strColumnParamdrm:strColumnParamanalog);
+        }
+        // change mode
+        schedule.SetSchedMode(bIsDRM?CSchedule::SM_DRM:CSchedule::SM_ANALOG);
+        /* Restore columns settings */
+        ColumnParamFromStr(bIsDRM?strColumnParamdrm:strColumnParamanalog);
+    }
+    if(schedule.GetNumberOfStations()==0)
 	{
-		if(schedule.GetNumberOfStations()==0)
+        QString s = "";
+        if(QFile::exists(schedule.schedFileName))
 		{
-			LoadSchedule();
-		}
-	}
-	else
-	{
-		QMessageBox::information(this, "Dream", tr("The schedule file "
-		" could not be found or contains no data.\n"
-		"No stations can be displayed.\n"
-		"Try to download this file by using the 'Update' menu."),
-		QMessageBox::Ok);
-	}
-
-	QTimer::singleShot(1000, this, SLOT(OnTimer()));
-}
-
-void StationsDlg::CheckMode()
-{
-	CSchedule::ESchedMode eSchedM = schedule.GetSchedMode();
-	ERecMode eRecM = DRMReceiver.GetReceiverMode();
-	if (eSchedM == CSchedule::SM_DRM &&  eRecM != RM_DRM)
-	{
-		schedule.SetSchedMode(CSchedule::SM_ANALOG);
-		AddUpdateDateTime();
-	}
-	if (eSchedM == CSchedule::SM_ANALOG &&  eRecM == RM_DRM)
-	{
-		schedule.SetSchedMode(CSchedule::SM_DRM);
-		AddUpdateDateTime();
-	}
+            LoadSchedule();
+        }
+        else
+        {
+            QMessageBox::information(this, "Dream", tr("The schedule file "
+            " could not be found or contains no data.\n"
+            "No stations can be displayed.\n"
+            "Try to download this file by using the 'Update' menu."),
+            QMessageBox::Ok);
+            actionGetUpdate->setText(tr("&Get Update ..."));
+        }
+    }
+    LoadScheduleView();
+    UpdateTransmissionStatus();
+    /* Activate real-time timer when window is shown */
+    Timer.start(500 /* twice a second - nyquist for catching minute boundaries */);
+    QTimer::singleShot(1000, this, SLOT(OnTimer()));
 }
 
 void StationsDlg::OnTimer()
@@ -361,7 +348,7 @@ void StationsDlg::OnTimer()
 	/* reload schedule on minute boundaries */
 	if (ltime % 60 == 0)
 	{
-		SetStationsView();
+        UpdateTransmissionStatus();
 	}
 }
 
@@ -432,12 +419,6 @@ void StationsDlg::LoadSettings()
 
 void StationsDlg::SaveSettings()
 {
-	if (eLastScheduleMode != CSchedule::SM_NONE)
-	{
-		const bool bDrmMode = eLastScheduleMode == CSchedule::SM_DRM;
-		ColumnParamToStr(bDrmMode ? strColumnParamdrm : strColumnParamanalog);
-	}
-
 	Settings.Put("Hamlib", "ensmeter", actionEnable_S_Meter->isChecked());
 	putSetting("showall", actionShowAllStations->isChecked());
 	putSetting("DRM URL", schedule.qurldrm.toString());
@@ -486,22 +467,10 @@ void StationsDlg::LoadFilters()
 	ComboBoxFilterLanguage->setCurrentIndex(ComboBoxFilterLanguage->findText(languageFilter));
 }
 
-void StationsDlg::LoadSchedule()
+void StationsDlg::LoadScheduleView()
 {
-	/* Store previous columns settings */
-	if (eLastScheduleMode != CSchedule::SM_NONE)
-	{
-		const bool bDrmMode = eLastScheduleMode == CSchedule::SM_DRM;
-		ColumnParamToStr(bDrmMode ? strColumnParamdrm : strColumnParamanalog);
-	}
-
-	ClearStationsView();
-
-	schedule.LoadSchedule();
-
-	int i;
-
-	for (i = 0; i < schedule.GetNumberOfStations(); i++)
+    ListViewStations->clear();
+    for (int i = 0; i < schedule.GetNumberOfStations(); i++)
 	{
 		const CStationsItem& station = schedule.GetItem(i);
 
@@ -548,29 +517,16 @@ void StationsDlg::LoadSchedule()
 	}
 	ListViewStations->sortByColumn(c, b ? Qt::AscendingOrder : Qt::DescendingOrder);
 	LoadFilters();
-
-	/* Restore columns settings */
-	eLastScheduleMode = schedule.GetSchedMode();
-	const bool bDrmMode = eLastScheduleMode == CSchedule::SM_DRM;
-	ColumnParamFromStr(bDrmMode ? strColumnParamdrm : strColumnParamanalog);
-
-	/* Update list view */
-	SetStationsView();
 }
 
-void StationsDlg::ClearStationsView()
-{
-	ListViewStations->clear();
-}
-
-void StationsDlg::SetStationsView()
+void StationsDlg::UpdateTransmissionStatus()
 {
 	Timer.stop();
 	ListItemsMutex.lock();
 
 	bool bShowAll = showAll();
 	ListViewStations->setSortingEnabled(false);
-	for (int i = 0; i < ListViewStations->topLevelItemCount(); i++)
+    for (int i = 0; i < ListViewStations->topLevelItemCount(); i++)
 	{
 		QTreeWidgetItem* item = ListViewStations->topLevelItem(i);
 		int scheduleItem = item->data(1, Qt::UserRole).toInt();

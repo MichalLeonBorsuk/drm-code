@@ -47,14 +47,16 @@
 
 CSchedule::CSchedule():
 ListTargets(), ListCountries(), ListLanguages(),
-StationsTable(),eSchedMode(SM_DRM),iSecondsPreviewdrm(0),iSecondsPreviewanalog(0)
+StationsTable(),eSchedMode(SM_NONE),iSecondsPreviewdrm(0),iSecondsPreviewanalog(0)
 {
 	SetAnalogUrl();
 }
 
 void CSchedule::SetSecondsPreview(int iSec)
 {
-	if(eSchedMode==SM_DRM)
+    if(eSchedMode==SM_NONE)
+        return;
+    if(eSchedMode==SM_DRM)
 		iSecondsPreviewdrm = iSec;
 	else
 		iSecondsPreviewanalog = iSec;
@@ -62,7 +64,9 @@ void CSchedule::SetSecondsPreview(int iSec)
 
 int CSchedule::GetSecondsPreview()
 {
-	if(eSchedMode==SM_DRM)
+    if(eSchedMode==SM_NONE)
+        return 0;
+    if(eSchedMode==SM_DRM)
 		return iSecondsPreviewdrm;
 	else
 		return iSecondsPreviewanalog;
@@ -76,10 +80,14 @@ void CSchedule::SetSchedMode(const ESchedMode eNewSchM)
 	{
 		schedFileName = DRMSCHEDULE_INI_FILE_NAME;
 	}
-	else
+    else if(eSchedMode==SM_ANALOG)
 	{
 		schedFileName = AMSCHEDULE_CSV_FILE_NAME;
 	}
+    else
+    {
+        schedFileName = "";
+    }
 }
 
 void CSchedule::UpdateStringListForFilter(const CStationsItem& StationsItem)
