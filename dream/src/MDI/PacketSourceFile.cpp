@@ -216,11 +216,11 @@ CPacketSourceFile::readFF(vector<_BYTE>& vecbydata, int& interval)
             n = fread(&ns, sizeof(ns), 1, (FILE *) pF);
             (void)n;
             //TODO update last packet and interval times
+            readTagPacketHeader(tag, len);
+            remaining -= 8; // 4 bytes tag, 4 bytes length;
+            remaining -= len;
         }
 
-        readTagPacketHeader(tag, len);
-        remaining -= 8; // 4 bytes tag, 4 bytes length;
-        remaining -= len;
         if(tag=="afpf")
         {
             uint32_t l = readRawAF(vecbydata, interval);
