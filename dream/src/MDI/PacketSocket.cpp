@@ -204,10 +204,8 @@ CPacketSocketNative::GetDestination(string & str)
     char buf[32];
     s << inet_ntop(AF_INET, &HostAddrOut.sin_addr.s_addr, buf, sizeof(buf)) << ":" << ntohs(HostAddrOut.sin_port);
     str = s.str();
-    return TRUE;
-#ifdef _MSC_VER
     (void)buf; // MSVC2008 warning C4101: 'buf' : unreferenced local variable
-#endif
+    return TRUE;
 }
 
 bool
