@@ -42,6 +42,10 @@ gui {
     MOC_DIR = moc
 }
 message($$VERSION_MESSAGE $$UI_MESSAGE)
+qt:multimedia {
+    QT += multimedia
+    CONFIG += sound
+}
 unix:!cross_compile {
     UNAME = $$system(uname -s)
     message(building on $$UNAME)
@@ -242,6 +246,7 @@ hamlib {
      message("with hamlib")
 }
 qwt {
+    DEFINES += QWT_NO_SVG
     macx {
         LIBS += -framework qwt
    }
