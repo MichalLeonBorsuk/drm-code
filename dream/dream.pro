@@ -437,7 +437,8 @@ HEADERS += \
     src/util/Settings.h \
     src/util/Utilities.h \
     src/util/Vector.h \
-    src/Version.h
+    src/Version.h \
+    src/util/filetyper.h
 SOURCES += \
     src/AMDemodulation.cpp \
     src/AMSSDemodulation.cpp \
@@ -536,7 +537,8 @@ SOURCES += \
     src/util/Reassemble.cpp \
     src/util/Settings.cpp \
     src/util/Utilities.cpp \
-    src/Version.cpp
+    src/Version.cpp \
+    src/util/filetyper.cpp
 !console {
 HEADERS += \
     src/GUI-QT/Logging.h \
