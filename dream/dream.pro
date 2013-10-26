@@ -65,6 +65,7 @@ macx {
 }
 linux-* {
     LIBS += -ldl -lrt
+    tui:LIBS += -lpthread
 }
 android {
     CONFIG += openSL sound
