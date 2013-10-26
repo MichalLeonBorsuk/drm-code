@@ -43,6 +43,7 @@
 #include <cstring>
 #include <cstdlib>
 using namespace std;
+#include "filetyper.h"
 
 /* Implementation *************************************************************/
 void
@@ -185,13 +186,10 @@ CSettings::IsReceiver(const char *argv0)
 void
 CSettings::FileArg(const string& str)
 {
-	// Identify the type of file
-	string ext;
-	size_t p = str.rfind('.');
-	if (p != string::npos)
-		ext = str.substr(p + 1);
-	if (ext.substr(0,2) == "RS" || ext.substr(0,2) == "rs" || ext.substr(0,4) == "pcap")
-	{
+    // Identify the type of file
+    FileTyper::type t = FileTyper::resolve(str);
+    if(FileTyper::is_rxstat(t))
+    {
 		// it's an RSI or MDI input file
 		Put("command", "rsiin", str);
 	}

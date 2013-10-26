@@ -35,6 +35,7 @@
 #include "DrmReceiver.h"
 #include "util/Settings.h"
 #include "util/Utilities.h"
+#include "util/filetyper.h"
 
 #include "sound/sound.h"
 #include "sound/soundnull.h"
@@ -490,11 +491,8 @@ CDRMReceiver::ClearSoundFile()
 void
 CDRMReceiver::SetInputFile(const string& inputFile)
 {
-    string ext;
-    size_t p = inputFile.rfind('.');
-    if (p != string::npos)
-    ext = inputFile.substr(p + 1);
-    if (ext.substr(0,2) == "RS" || ext.substr(0,2) == "rs" || ext.substr(0,4) == "pcap")
+    FileTyper::type t = FileTyper::resolve(inputFile);
+    if(FileTyper::is_rxstat(t))
     {
         SetRsciInput(inputFile);
         ClearSoundFile();
