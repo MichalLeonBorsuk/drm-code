@@ -30,6 +30,9 @@
 #define DRMSIGNALIO_H__3B0BA660_CA63_4344_B_23E7A0D31912__INCLUDED_
 
 #include "sound/soundinterface.h"
+#ifdef QT_MULTIMEDIA_LIB
+#include <QIODevice>
+#endif
 #include "Parameter.h"
 #include "matlib/Matlib.h"
 #include "IQInputFilter.h"
@@ -185,6 +188,9 @@ public:
     void SetSoundInterface(CSoundInInterface* pS) {
         pSound = pS;
     }
+#ifdef QT_MULTIMEDIA_LIB
+    void SetSoundInterface(QIODevice*);
+#endif
     void SetInChanSel(const EInChanSel eNS) {
         eInChanSelection = eNS;
     }

@@ -33,6 +33,9 @@
 #define DATA_H__3B0BA660_CA63_4344_BB2B_23E7A0D31912__INCLUDED_
 
 #include "sound/soundinterface.h"
+#ifdef QT_MULTIMEDIA_LIB
+#include <QIODevice>
+#endif
 #include "Parameter.h"
 #include "util/Modul.h"
 #include "FAC/FAC.h"
@@ -117,6 +120,9 @@ public:
     EOutChanSel GetOutChanSel() {
         return eOutChanSel;
     }
+#ifdef QT_MULTIMEDIA_LIB
+    void SetSoundInterface(QIODevice*);
+#endif
 
 protected:
     CSoundOutInterface*		pSound;

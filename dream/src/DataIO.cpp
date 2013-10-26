@@ -67,6 +67,15 @@ void CReadData::InitInternal(CParameter& Parameters)
 }
 
 /* Receiver ----------------------------------------------------------------- */
+#ifdef QT_MULTIMEDIA_LIB
+void
+CWriteData::SetSoundInterface(QIODevice*)
+{
+
+}
+#endif
+
+
 void CWriteData::ProcessDataInternal(CParameter& Parameters)
 {
     int i;
