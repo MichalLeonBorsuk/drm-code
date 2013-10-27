@@ -1,12 +1,10 @@
 /******************************************************************************\
- * Technische Universitaet Darmstadt, Institut fuer Nachrichtentechnik
- * Copyright (c) 2001-2006
+ * Copyright (c) 2013
  *
  * Author(s):
- *	Andrea Russo, Julian Cable
+ *	Julian Cable
  *
  * Description:
- *	Dream program version number
  *
  ******************************************************************************
  *
@@ -25,22 +23,19 @@
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
 \******************************************************************************/
-#include "Version.h"
-#include "GlobalDefinitions.h"
 
-const char dream_manufacturer[] = "drea";
-#ifdef QT_CORE_LIB
-# if QT_VERSION >= 0x050000
-const char dream_implementation[] = "Q5";
-# elif QT_VERSION >= 0x040000
-const char dream_implementation[] = "Q4";
-# else
-const char dream_implementation[] = "QT";
-# endif
-#else
-const char dream_implementation[] = "CL";
-#endif
-const int dream_version_major = 2;
-const int dream_version_minor = 1;
-const char dream_version_build[] = "-svn768";
+#ifndef FILETYPER_H
+#define FILETYPER_H
 
+#include <string>
+
+class FileTyper
+{
+public:
+    enum type { pcap, file_framing, raw_af, raw_pft, pcm };
+    FileTyper();
+    static type resolve(const std::string& s);
+    static bool is_rxstat(type t) { return t != pcm; }
+};
+
+#endif // FILETYPER_H

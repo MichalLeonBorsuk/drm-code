@@ -35,7 +35,7 @@
 #include "DrmReceiver.h"
 #include "util/Settings.h"
 #include "util/Utilities.h"
-#include "util/filetyper.h"
+#include "util/FileTyper.h"
 
 #include "sound/sound.h"
 #include "sound/soundnull.h"

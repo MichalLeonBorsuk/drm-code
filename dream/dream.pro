@@ -444,6 +444,7 @@ HEADERS += \
     src/util/AudioFile.h \
     src/util/Buffer.h \
     src/util/CRC.h \
+    src/util/FileTyper.h \
     src/util/LibraryLoader.h \
     src/util/LogPrint.h \
     src/util/Modul.h \
@@ -452,8 +453,7 @@ HEADERS += \
     src/util/Settings.h \
     src/util/Utilities.h \
     src/util/Vector.h \
-    src/Version.h \
-    src/util/filetyper.h
+    src/Version.h
 SOURCES += \
     src/AMDemodulation.cpp \
     src/AMSSDemodulation.cpp \
@@ -548,12 +548,12 @@ SOURCES += \
     src/tables/TableStations.cpp \
     src/TextMessage.cpp \
     src/util/CRC.cpp \
+    src/util/FileTyper.cpp \
     src/util/LogPrint.cpp \
     src/util/Reassemble.cpp \
     src/util/Settings.cpp \
     src/util/Utilities.cpp \
-    src/Version.cpp \
-    src/util/filetyper.cpp
+    src/Version.cpp
 !console {
 HEADERS += \
     src/GUI-QT/Logging.h \
