@@ -43,7 +43,7 @@
 #include <cstring>
 #include <cstdlib>
 using namespace std;
-#include "filetyper.h"
+#include "FileTyper.h"
 
 /* Implementation *************************************************************/
 void
@@ -618,6 +618,14 @@ CSettings::ParseArguments(int argc, char **argv)
 	}
 }
 
+/*
+ Option argument:
+  <b> boolean (0=off, 1=on)
+  <n> integer number
+  <r> real number
+  <s> string
+*/
+
 const char *
 CSettings::UsageArguments()
 {
@@ -666,6 +674,7 @@ CSettings::UsageArguments()
 		"  --rsirecordprofile <s>       RSCI recording profile: A|B|C|D|Q|M\n"
 		"  --rsirecordtype <s>          RSCI recording file type: raw|ff|pcap\n"
 		"  --recordiq <b>               enable/disable recording an I/Q file\n"
+        "  --permissive <b>             enable decoding of bad RSCI frames (0: off; 1: on)\n"
 		"  -R <n>, --samplerate <n>     set audio and signal sound card sample rate [Hz]\n"
 		"  --audsrate <n>               set audio sound card sample rate [Hz] (allowed range: 8000...192000)\n"
 		"  --sigsrate <n>               set signal sound card sample rate [Hz] (allowed values: 24000, 48000, 96000, 192000)\n"
@@ -684,7 +693,6 @@ CSettings::UsageArguments()
 #ifdef QT_NETWORK_LIB
 		" -r 6140 --rsiout 127.0.0.1:3002"
 #endif
-        "  --permissive <n>             enable decoding of bad RSCI frames (0: off; 1: on)\n"
 		"";
 }
 
