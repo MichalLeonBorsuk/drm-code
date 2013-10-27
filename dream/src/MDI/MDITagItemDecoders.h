@@ -96,10 +96,10 @@ public:
 	int iStreamNumber;
 };
 
-class CTagItemDecoderSDCChanInf : public CTagItemDecoder
+class CTagItemDecoderSDCChanInf : public CTagItemDecoderRSI
 {
 public:
-	CTagItemDecoderSDCChanInf(){}
+    CTagItemDecoderSDCChanInf(CParameter* pP) : CTagItemDecoderRSI(pP, "sdci") {}
 	virtual string GetTagName(void);
 	virtual void DecodeTag(CVector<_BINARY>& vecbiTag, const int iLenDataBits);
 	CVector<_BINARY> vecbidata;

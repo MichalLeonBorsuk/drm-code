@@ -125,6 +125,9 @@ public:
 #endif
 
 protected:
+#ifdef QT_MULTIMEDIA_LIB
+    QIODevice*              pIODevice;
+#endif
     CSoundOutInterface*		pSound;
     _BOOLEAN				bMuteAudio;
     CWaveFile				WaveFileAudio;

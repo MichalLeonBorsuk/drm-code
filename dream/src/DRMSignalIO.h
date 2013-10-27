@@ -158,8 +158,12 @@ public:
                      CS_IQ_NEG, CS_IQ_POS_ZERO, CS_IQ_NEG_ZERO, CS_IQ_POS_SPLIT, CS_IQ_NEG_SPLIT
                     };
 
-    CReceiveData() : pSound(NULL),
-            vecrInpData(INPUT_DATA_VECTOR_SIZE, (_REAL) 0.0),
+    CReceiveData() :
+#ifdef QT_MULTIMEDIA_LIB
+        pIODevice(NULL),
+#endif
+        pSound(NULL),
+        vecrInpData(INPUT_DATA_VECTOR_SIZE, (_REAL) 0.0),
             bFippedSpectrum(FALSE), eInChanSelection(CS_MIX_CHAN), iPhase(0)
     {}
     virtual ~CReceiveData();
@@ -201,6 +205,9 @@ public:
 protected:
     CSignalLevelMeter		SignalLevelMeter;
 
+#ifdef QT_MULTIMEDIA_LIB
+    QIODevice*              pIODevice;
+#endif
     CSoundInInterface*		pSound;
     CVector<_SAMPLE>		vecsSoundBuffer;
 

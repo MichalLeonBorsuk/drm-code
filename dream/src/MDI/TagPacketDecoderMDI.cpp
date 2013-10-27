@@ -42,7 +42,7 @@ CTagPacketDecoderMDI::CTagPacketDecoderMDI()
 ,	TagItemDecoderSDC()
 ,	TagItemDecoderRobMod()
 ,	TagItemDecoderStr()
-,	TagItemDecoderSDCChanInf()
+,	TagItemDecoderSDCChanInf(0)
 ,	TagItemDecoderInfo()
 ,	TagItemDecoderRxDemodMode()
 ,	TagItemDecoderAMAudio()
@@ -93,7 +93,8 @@ CTagPacketDecoderMDI::CTagPacketDecoderMDI()
 void CTagPacketDecoderMDI::SetParameterPtr(CParameter *pP)
 {
 	// Pass this pointer to all of the tag item decoders that need it, i.e. the RSCI-specific ones
-	TagItemDecoderRmer.SetParameterPtr(pP);
+    TagItemDecoderSDCChanInf.SetParameterPtr(pP);
+    TagItemDecoderRmer.SetParameterPtr(pP);
 	TagItemDecoderRwmf.SetParameterPtr(pP);
 	TagItemDecoderRwmm.SetParameterPtr(pP);
 	TagItemDecoderRdbv.SetParameterPtr(pP);

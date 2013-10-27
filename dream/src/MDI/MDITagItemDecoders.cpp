@@ -216,16 +216,20 @@ void CTagItemDecoderSDCChanInf::DecodeTag(CVector<_BINARY>& vecbiTag, const int 
 	vecbiTag.Separate(4);
 
 	/* Protection level for part A */ // TODO
-	vecbiTag.Separate(2);
+    CMSCProtLev MSCProtLev;
+    MSCProtLev.iPartA = vecbiTag.Separate(2);
 
 	/* Protection level for part B */ // TODO
-	vecbiTag.Separate(2);
+    MSCProtLev.iPartB = vecbiTag.Separate(2);
 
 	/* Get stream parameters */
 
 	/* Determine if hierarchical modulation is used */ // TODO
 	_BOOLEAN bHierarchical = FALSE;
 
+    // don't store these if sdci tag packet signals zero length - dr111 bug
+    // rely on the sdc_ tag packet to do something sensible.
+    pParameter->Lock();
 	for (int i = 0; i < iNumStreams; i++)
 	{
 		/* In case of hirachical modulation stream 0 describes the protection
@@ -238,18 +242,27 @@ void CTagItemDecoderSDCChanInf::DecodeTag(CVector<_BINARY>& vecbiTag, const int 
 			/* rfu */
 			vecbiTag.Separate(10);
 
-			/* Data length for hierarchical */ // TODO
-			vecbiTag.Separate(12);
-		}
+            /* Data length for hierarchical */
+            int iLenPartB = vecbiTag.Separate(12);
+
+            /* Set new parameters in global struct. Length of part A is zero
+               with hierarchical modulation */
+            if(iLenPartB>0)
+                pParameter->SetStreamLen(i, 0, iLenPartB);
+        }
 		else
 		{
-			/* Data length for part A */ // TODO
-			vecbiTag.Separate(12);
+            /* Data length for part A */
+            int iLenPartA = vecbiTag.Separate(12);
 
-			/* Data length for part B */ // TODO
-			vecbiTag.Separate(12);
-		}
+            /* Data length for part B */
+            int iLenPartB = vecbiTag.Separate(12);
+
+            if(iLenPartA>0 || iLenPartB>0)
+                pParameter->SetStreamLen(i, iLenPartA, iLenPartB);
+        }
 	}
+    pParameter->Unlock();
 	SetReady(TRUE);
 }
 
