@@ -41,8 +41,6 @@
 #include "sound/soundnull.h"
 #include "sound/audiofilein.h"
 #ifdef QT_MULTIMEDIA_LIB
-#include <QAudioInput>
-#include <QAudioOutput>
 #include <QAudioFormat>
 #include <QIODevice>
 #endif
@@ -81,6 +79,10 @@ CDRMReceiver::CDRMReceiver(CSettings* pSettings) : CDRMTransceiver(pSettings, ne
     pRig(NULL),
 #endif
     PlotManager(), iPrevSigSampleRate(0)
+#ifdef QT_MULTIMEDIA_LIB
+  ,pAudioInput(NULL),pAudioOutput(NULL)
+#endif
+
 {
     Parameters.SetReceiver(this);
     downstreamRSCI.SetReceiver(this);
@@ -407,16 +409,9 @@ CDRMReceiver::SetInputDevice(const QAudioDeviceInfo& di)
     format.setChannelCount(2); // TODO
     format.setByteOrder(QAudioFormat::LittleEndian);
     format.setCodec("audio/pcm");
-    QAudioInput *pAudioInput = new QAudioInput(di, di.nearestFormat(format));
-    QIODevice* pIODevice = pAudioInput->start();
-    if(pAudioInput->error()==QAudio::NoError)
-    {
-        ReceiveData.SetSoundInterface(pIODevice);
-    }
-    else
-    {
-        qDebug("Can't open audio input");
-    }
+    QAudioFormat nearestFormat = di.nearestFormat(format);
+    pAudioInput = new QAudioInput(di, nearestFormat);
+    ReceiveData.SetSoundInterface(pAudioInput);
 }
 
 void
@@ -429,8 +424,11 @@ CDRMReceiver::SetOutputDevice(const QAudioDeviceInfo& di)
     format.setChannelCount(2); // TODO
     format.setByteOrder(QAudioFormat::LittleEndian);
     format.setCodec("audio/pcm");
-    QAudioOutput *pAudioOutput = new QAudioOutput(di, di.nearestFormat(format));
+    QAudioFormat nearestFormat = di.nearestFormat(format);
+    pAudioOutput = new QAudioOutput(di, nearestFormat);
+    pAudioOutput->setBufferSize(1000000);
     QIODevice* pIODevice = pAudioOutput->start();
+    int n = pAudioOutput->bufferSize();
     if(pAudioOutput->error()==QAudio::NoError)
     {
         WriteData.SetSoundInterface(pIODevice);
@@ -1040,7 +1038,7 @@ CDRMReceiver::Start()
         /* Set new acquisition flag */
         RequestNewAcquisition();
 
-        /* Initilization pass */
+        /* Initialisation pass */
         Run();
 
         /* Set run flag so that the thread can work */
@@ -1066,6 +1064,17 @@ CDRMReceiver::Start()
 #endif
 
     Parameters.eRunState = CParameter::STOPPED;
+}
+
+void
+CDRMReceiver::CloseSoundInterfaces()
+{
+    pSoundInInterface->Close();
+    pSoundOutInterface->Close();
+#ifdef QT_MULTIMEDIA_LIB
+    if(pAudioInput) pAudioInput->stop();
+    if(pAudioOutput) pAudioOutput->stop();
+#endif
 }
 
 void

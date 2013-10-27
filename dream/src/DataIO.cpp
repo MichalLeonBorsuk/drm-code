@@ -155,8 +155,8 @@ void CWriteData::ProcessDataInternal(CParameter& Parameters)
     bool bBad = true;
     if(pIODevice)
     {
-        int n = vecsTmpAudData.Size();
-        int m = pIODevice->write((char*)&vecsTmpAudData[0], 2*n);
+        qint64 n = 2*vecsTmpAudData.Size();
+        int m = pIODevice->write((char*)&vecsTmpAudData[0], n);
         if(m==n)
             bBad = false;
     }

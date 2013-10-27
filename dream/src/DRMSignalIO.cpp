@@ -29,6 +29,9 @@
 #include "DRMSignalIO.h"
 #include "UpsampleFilter.h"
 #include <iostream>
+#ifdef QT_MULTIMEDIA_LIB
+#include <QBuffer>
+#endif
 
 
 const static int SineTable[] = { 0, 1, 0, -1, 0 };
@@ -246,9 +249,19 @@ inline _REAL sample2real(_SAMPLE s) { return _REAL(s); }
 
 #ifdef QT_MULTIMEDIA_LIB
 void
-CReceiveData::SetSoundInterface(QIODevice* p)
+CReceiveData::SetSoundInterface(QAudioInput *p)
 {
-    pIODevice = p;
+    pAudioInput = p;
+    pIODevice = pAudioInput->start();
+    if(pAudioInput->error()==QAudio::NoError)
+    {
+        pIODevice->open(QIODevice::ReadOnly);
+        qDebug("audio input open");
+    }
+    else
+    {
+        qDebug("Can't open audio input");
+    }
 }
 #endif
 
@@ -271,27 +284,30 @@ void CReceiveData::ProcessDataInternal(CParameter& Parameters)
     }
     Parameters.Unlock();
 
-    if (pSound == NULL)
-        return;
 
     /* Get data from sound interface. The read function must be a
        blocking function! */
-#ifdef QT_MULTIMEDIA_LIB
     bool bBad = true;
-    if(pIODevice)
+    if (pSound == NULL)
     {
-        int n = 2*vecsSoundBuffer.Size();
-        while(pIODevice->bytesAvailable()<n)
+#ifdef QT_MULTIMEDIA_LIB
+        if(pIODevice)
         {
-            (void)pIODevice->waitForReadyRead(400);
+            qint64 n = 2*vecsSoundBuffer.Size();
+            int m = pIODevice->read((char*)&vecsSoundBuffer[0], n);
+            if(m==n)
+                bBad = false;
         }
-        int m = pIODevice->read((char*)&vecsSoundBuffer[0], n);
-        if(m==n)
-            bBad = false;
-    }
+        else
+            return;
 #else
-    const _BOOLEAN bBad = pSound->Read(vecsSoundBuffer);
+        return;
 #endif
+    }
+    else
+    {
+        bBad = pSound->Read(vecsSoundBuffer);
+    }
     Parameters.Lock();
     Parameters.ReceiveStatus.InterfaceI.SetStatus(bBad ? CRC_ERROR : RX_OK); /* Red light */
     Parameters.Unlock();
