@@ -1810,6 +1810,10 @@ CDRMReceiver::LoadSettings()
     Parameters.gps_port = s.Get("GPS", "port", string("2947"));
     if(use_gpsd)
         Parameters.restart_gpsd=true;
+
+    bool permissive = s.Get("command", "permissive", false);
+    Parameters.lenient_RSCI = permissive;
+
     Parameters.Unlock();
 }
 

@@ -70,9 +70,8 @@ void CDecodeRSIMDI::ProcessDataInternal(CParameter& Parameters)
         }
         else
         {
-#if 1 // set this to zero if you want to ignore dlfc errors (e.g. Newstar dr111 sets dlfc to zero in every frame
-            return;
-#endif
+            if(dlfc!=0) // allow Newstar dr111
+                return;
         }
 	}
 

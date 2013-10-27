@@ -97,7 +97,9 @@ CSDCReceive::ERetStatus CSDCReceive::SDCParam(CVector<_BINARY>* pbiData,
     for (int i = 0; i < iNumBytesForCRCCheck; i++)
         CRCObject.AddByte((_BYTE) (*pbiData).Separate(SIZEOF__BYTE));
 
-    if (CRCObject.CheckCRC((*pbiData).Separate(16)) == TRUE)
+    bool permissive = Parameter.lenient_RSCI;
+
+    if (permissive || CRCObject.CheckCRC((*pbiData).Separate(16)) == TRUE)
     {
         /* CRC-check successful, extract data from SDC-stream --------------- */
         int			iLengthOfBody;

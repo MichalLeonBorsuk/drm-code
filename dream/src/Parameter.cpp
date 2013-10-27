@@ -139,7 +139,7 @@ CParameter::CParameter():
     eSpectOccup(SO_3),
     LastAudioService(),
     LastDataService(),
-    Mutex()
+    Mutex(), lenient_RSCI(false)
 {
     GenerateRandomSerialNumber();
     CellMappingTable.MakeTable(eRobustnessMode, eSpectOccup, iSigSampleRate);
@@ -254,6 +254,7 @@ CParameter::CParameter(const CParameter& p):
     LastAudioService(p.LastAudioService),
     LastDataService(p.LastDataService)
 //, Mutex() // jfbc: I don't think this state should be copied
+  ,lenient_RSCI(p.lenient_RSCI)
 {
     CellMappingTable.MakeTable(eRobustnessMode, eSpectOccup, iSigSampleRate);
     matcReceivedPilotValues = p.matcReceivedPilotValues; // TODO
@@ -363,6 +364,7 @@ CParameter& CParameter::operator=(const CParameter& p)
     eSpectOccup = p.eSpectOccup;
     LastAudioService = p.LastAudioService;
     LastDataService = p.LastDataService;
+    lenient_RSCI = p.lenient_RSCI;
     return *this;
 }
 
