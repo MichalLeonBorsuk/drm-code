@@ -30,24 +30,9 @@
 #define RSCI_TAG_ITEM_DECODERS_H_INCLUDED
 
 #include "TagItemDecoder.h"
-#include "../Parameter.h"
 
 class CDRMReceiver;
 class CRSISubscriber;
-
-// RSCI Status
-class CTagItemDecoderRSI : public CTagItemDecoder
-{
-public:
-	CTagItemDecoderRSI(CParameter* pP, const string& s) : pParameter(pP), tag(s) {}
-	void SetParameterPtr(CParameter *pP) {pParameter = pP;}
-	virtual string GetTagName() { return tag; }
-protected:
-
-    _REAL decodeDb(CVector<_BINARY>& vecbiTag);
-	CParameter *pParameter;
-	string tag;
-};
 
 class CTagItemDecoderRdbv : public CTagItemDecoderRSI
 {

@@ -35,6 +35,7 @@
 #define TAG_ITEM_DECODER_H_INCLUDED
 
 #include "../GlobalDefinitions.h"
+#include "../Parameter.h"
 #include "MDIDefinitions.h"
 #include "../util/Vector.h"
 
@@ -64,5 +65,18 @@ private:
 
 };
 
+// RSCI Status
+class CTagItemDecoderRSI : public CTagItemDecoder
+{
+public:
+    CTagItemDecoderRSI(CParameter* pP, const string& s) : pParameter(pP), tag(s) {}
+    void SetParameterPtr(CParameter *pP) {pParameter = pP;}
+    virtual string GetTagName() { return tag; }
+protected:
+
+    _REAL decodeDb(CVector<_BINARY>& vecbiTag);
+    CParameter *pParameter;
+    string tag;
+};
 
 #endif

@@ -691,10 +691,10 @@ CDRMReceiver::UtilizeDRM(_BOOLEAN& bEnoughData)
         /* Use information of FAC CRC for detecting the acquisition
            requirement */
         DetectAcquiFAC();
+    }
 #if 0
         saveSDCtoFile();
 #endif
-    }
 
     if (UtilizeSDCData.WriteData(Parameters, SDCUseBuf))
     {
@@ -712,6 +712,22 @@ CDRMReceiver::UtilizeDRM(_BOOLEAN& bEnoughData)
     {
         if (AudioSourceDecoder.ProcessData(Parameters,
                                            MSCUseBuf[iAudioStreamID],
+                                           AudSoDecBuf))
+        {
+            bEnoughData = TRUE;
+
+            /* Store the number of correctly decoded audio blocks for
+             *                            the history */
+            PlotManager.SetCurrentCDAud(AudioSourceDecoder.GetNumCorDecAudio());
+        }
+    }
+    if( (iDataStreamID = STREAM_ID_NOT_USED)
+       &&
+         (iAudioStreamID == STREAM_ID_NOT_USED)
+    ) // try and decode stream 0 as audio anyway
+    {
+        if (AudioSourceDecoder.ProcessData(Parameters,
+                                           MSCUseBuf[0],
                                            AudSoDecBuf))
         {
             bEnoughData = TRUE;

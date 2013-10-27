@@ -246,9 +246,9 @@ inline _REAL sample2real(_SAMPLE s) { return _REAL(s); }
 
 #ifdef QT_MULTIMEDIA_LIB
 void
-CReceiveData::SetSoundInterface(QIODevice*)
+CReceiveData::SetSoundInterface(QIODevice* p)
 {
-
+    pIODevice = p;
 }
 #endif
 
@@ -276,7 +276,22 @@ void CReceiveData::ProcessDataInternal(CParameter& Parameters)
 
     /* Get data from sound interface. The read function must be a
        blocking function! */
+#ifdef QT_MULTIMEDIA_LIB
+    bool bBad = true;
+    if(pIODevice)
+    {
+        int n = 2*vecsSoundBuffer.Size();
+        while(pIODevice->bytesAvailable()<n)
+        {
+            (void)pIODevice->waitForReadyRead(400);
+        }
+        int m = pIODevice->read((char*)&vecsSoundBuffer[0], n);
+        if(m==n)
+            bBad = false;
+    }
+#else
     const _BOOLEAN bBad = pSound->Read(vecsSoundBuffer);
+#endif
     Parameters.Lock();
     Parameters.ReceiveStatus.InterfaceI.SetStatus(bBad ? CRC_ERROR : RX_OK); /* Red light */
     Parameters.Unlock();
