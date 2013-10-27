@@ -280,8 +280,6 @@ FDRMDialog::~FDRMDialog()
     /* Destroying top level windows, children are automaticaly destroyed */
     delete pAnalogDemDlg;
     delete pFMDlg;
-    /* Destroying system tray icon */
-    CSysTray::Destroy(&pSysTray);
 }
 
 void FDRMDialog::OnSysTrayActivated(QSystemTrayIcon::ActivationReason reason)
@@ -1111,9 +1109,7 @@ void FDRMDialog::eventClose(QCloseEvent* ce)
         AboutDlg.close();
         pAnalogDemDlg->close();
         pFMDlg->close();
-#if QT_VERSION >= 0x050000
-        CSysTray::Destroy(&pSysTray); /* Needed for Qt 5.0.0 - possible framework bug */
-#endif
+        CSysTray::Destroy(&pSysTray);
         ce->accept();
     }
     else
