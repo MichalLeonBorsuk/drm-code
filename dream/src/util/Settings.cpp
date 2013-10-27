@@ -533,6 +533,13 @@ CSettings::ParseArguments(int argc, char **argv)
 			continue;
 		}
 
+        if (GetNumericArgument(argc, argv, i, "-permissive",
+                "--permissive", 0, 1, rArgument) == TRUE)
+        {
+            Put("command", "permissive", (int) rArgument);
+            continue;
+        }
+
 		if (GetStringArgument (argc, argv, i,
 				"--rsirecordprofile", "--rsirecordprofile", strArgument) == TRUE)
 		{
@@ -677,6 +684,7 @@ CSettings::UsageArguments()
 #ifdef QT_NETWORK_LIB
 		" -r 6140 --rsiout 127.0.0.1:3002"
 #endif
+        "  --permissive <n>             enable decoding of bad RSCI frames (0: off; 1: on)\n"
 		"";
 }
 
