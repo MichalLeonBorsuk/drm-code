@@ -13,6 +13,12 @@ contains(QT_VERSION, ^5\\..*) {
     CONFIG += qt qt5
     VERSION_MESSAGE = Qt 5
 }
+CONFIG(debug, debug|release) {
+    DEBUG_MESSAGE = debug
+}
+else {
+    DEBUG_MESSAGE = release
+}
 console {
     QT -= core gui
     CONFIG -= qt qt4 qt5
@@ -41,7 +47,7 @@ gui {
     UI_DIR = ui
     MOC_DIR = moc
 }
-message($$VERSION_MESSAGE $$UI_MESSAGE)
+message($$VERSION_MESSAGE $$DEBUG_MESSAGE $$UI_MESSAGE)
 qt:multimedia {
     QT += multimedia
     CONFIG += sound
@@ -326,6 +332,7 @@ consoleio {
     DEFINES += USE_CONSOLEIO
     HEADERS += src/linux/ConsoleIO.h
     SOURCES += src/linux/ConsoleIO.cpp
+    LIBS += -lpthread
     message("with terminal user interface")
 }
 HEADERS += \
