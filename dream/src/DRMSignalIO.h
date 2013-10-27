@@ -31,6 +31,7 @@
 
 #include "sound/soundinterface.h"
 #ifdef QT_MULTIMEDIA_LIB
+#include <QAudioInput>
 #include <QIODevice>
 #endif
 #include "Parameter.h"
@@ -193,7 +194,7 @@ public:
         pSound = pS;
     }
 #ifdef QT_MULTIMEDIA_LIB
-    void SetSoundInterface(QIODevice*);
+    void SetSoundInterface(QAudioInput *);
 #endif
     void SetInChanSel(const EInChanSel eNS) {
         eInChanSelection = eNS;
@@ -206,6 +207,7 @@ protected:
     CSignalLevelMeter		SignalLevelMeter;
 
 #ifdef QT_MULTIMEDIA_LIB
+    QAudioInput*            pAudioInput;
     QIODevice*              pIODevice;
 #endif
     CSoundInInterface*		pSound;

@@ -215,7 +215,8 @@ opus {
 sndfile {
      DEFINES += HAVE_LIBSNDFILE
      unix:LIBS += -lsndfile
-     win32:LIBS += libsndfile-1.lib
+     win32-msvc*:LIBS += libsndfile-1.lib
+     win32-g++:LIBS += -lsndfile-1
      message("with libsndfile")
 }
 speexdsp {

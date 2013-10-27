@@ -59,7 +59,10 @@
 #include "sound/soundinterface.h"
 #include "PlotManager.h"
 #include "DrmTransceiver.h"
-
+#ifdef QT_MULTIMEDIA_LIB
+#include <QAudioInput>
+#include <QAudioOutput>
+#endif
 
 /* Definitions ****************************************************************/
 /* Number of FAC frames until the acquisition is activated in case a signal
@@ -334,6 +337,7 @@ protected:
     void					DetectAcquiSymbol();
     void					InitReceiverMode();
     void					saveSDCtoFile();
+    void                    CloseSoundInterfaces();
 
     /* Modules */
     CReceiveData			ReceiveData;
@@ -446,6 +450,10 @@ protected:
     string					rsiOrigin;
     string					sSoundFile;
     int						iPrevSigSampleRate; /* sample rate before sound file */
+#ifdef QT_MULTIMEDIA_LIB
+    QAudioInput *pAudioInput;
+    QAudioOutput *pAudioOutput;
+#endif
 };
 
 
