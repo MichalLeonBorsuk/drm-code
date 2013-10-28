@@ -577,7 +577,11 @@ CDRMReceiver::GetInputStatus()
 string
 CDRMReceiver::GetInputFileName()
 {
-    return rsiOrigin != "" ? rsiOrigin : sSoundFile;
+    string fileName;
+    Parameters.Lock();
+        fileName = rsiOrigin != "" ? rsiOrigin : sSoundFile;
+    Parameters.Unlock();
+    return fileName;
 }
 
 void
