@@ -28,6 +28,7 @@
 
 #include "fdrmdialog.h"
 #include <iostream>
+#include <QDir>
 #include <QWhatsThis>
 #include <QHideEvent>
 #include <QEvent>
@@ -902,6 +903,22 @@ void FDRMDialog::ClearDisplay()
     TextTextMessage->setText("");
 
     LabelServiceLabel->setText(tr("Scanning..."));
+}
+
+void FDRMDialog::UpdateWindowTitle()
+{
+    QString windowName, fileName(QString::fromLocal8Bit(DRMReceiver.GetInputFileName().c_str()));
+    const bool bInputFile = fileName != "";
+    fileName = bInputFile ? QDir(fileName).dirName() : "";
+    windowName = "Dream";
+    windowName = bInputFile ? fileName + " - " + windowName : windowName;
+    setWindowTitle(windowName);
+    windowName = tr("Analog Demodulation");
+    windowName = bInputFile ? fileName + " - " + windowName : windowName;
+    pAnalogDemDlg->setWindowTitle(windowName);
+    windowName = tr("FM Receiver");
+    windowName = bInputFile ? fileName + " - " + windowName : windowName;
+    pFMDlg->setWindowTitle(windowName);
 }
 
 /* change mode is only called when the mode REALLY has changed
