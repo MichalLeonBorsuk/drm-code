@@ -574,6 +574,12 @@ CDRMReceiver::GetInputStatus()
     return eStatus;
 }
 
+string
+CDRMReceiver::GetInputFileName()
+{
+    return rsiOrigin != "" ? rsiOrigin : sSoundFile;
+}
+
 void
 CDRMReceiver::DemodulateDRM(_BOOLEAN& bEnoughData)
 {

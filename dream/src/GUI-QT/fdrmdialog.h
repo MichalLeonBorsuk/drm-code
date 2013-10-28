@@ -127,6 +127,7 @@ protected:
     void		UpdateDRM_GUI();
     void		UpdateDisplay();
     void		ClearDisplay();
+    void		UpdateWindowTitle();
 
     void		SetDisplayColor(const QColor newColor);
 
@@ -161,7 +162,7 @@ public slots:
     void OnSwitchToFM();
     void OnSwitchToAM();
     void OnHelpAbout() {AboutDlg.show();}
-    void OnSoundFileChanged(CDRMReceiver::ESFStatus) {ClearDisplay();};
+    void OnSoundFileChanged(CDRMReceiver::ESFStatus) {UpdateWindowTitle(); ClearDisplay();};
     void OnWhatsThis();
     void OnSysTrayActivated(QSystemTrayIcon::ActivationReason);
 signals:
