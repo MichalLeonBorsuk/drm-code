@@ -45,7 +45,7 @@
 
 /* Classes ********************************************************************/
 
-class systemevalDlg : public CWindow, public Ui_SystemEvaluationWindow
+class systemevalDlg : public CWindow
 {
 	Q_OBJECT
 
@@ -56,7 +56,8 @@ public:
 	void SetStatus(CMultColorLED*, ETypeRxStatus);
 
 protected:
-	CDRMReceiver&	DRMReceiver;
+    Ui::SystemEvaluationWindow *ui;
+    CDRMReceiver&	DRMReceiver;
 
 	QTimer			Timer;
 	CDRMPlot*		MainPlot;
@@ -64,15 +65,11 @@ protected:
 	virtual void	eventShow(QShowEvent* pEvent);
 	virtual void	eventHide(QHideEvent* pEvent);
 	void			UpdateGPS(CParameter&);
-	void			UpdateControls();
 	void			AddWhatsThisHelp();
 	CDRMPlot*		OpenChartWin(CDRMPlot::ECharType eNewType);
 	QTreeWidgetItem* FindItemByECharType(CDRMPlot::ECharType eCharType);
 	string			ECharTypeToPlotName(CDRMPlot::ECharType eCharType);
 	CDRMPlot::ECharType PlotNameToECharType(const string& PlotName);
-
-	QString			GetRobModeStr();
-	QString			GetSpecOccStr();
 
 	QMenu*			pTreeWidgetContextMenu;
 	CDRMPlot::ECharType eCurCharType, eNewCharType;
@@ -81,25 +78,27 @@ protected:
 
 public slots:
 	void OnTimer();
-	void OnRadioTimeLinear();
-	void OnRadioTimeWiener();
-	void OnRadioFrequencyLinear();
-	void OnRadioFrequencyDft();
-	void OnRadioFrequencyWiener();
-	void OnRadioTiSyncFirstPeak();
-	void OnRadioTiSyncEnergy();
-	void OnSliderIterChange(int value);
-	void OnCheckFlipSpectrum();
-	void OnCheckBoxMuteAudio();
-	void OnCheckBoxReverb();
-	void OnCheckWriteLog(int);
-	void OnCheckSaveAudioWAV();
-	void OnCheckRecFilter();
-	void OnCheckModiMetric();
+    void OnTimeLinear();
+    void OnTimeWiener();
+    void OnFrequencyLinear();
+    void OnFrequencyDft();
+    void OnFrequencyWiener();
+    void OnTiSyncFirstPeak();
+    void OnTiSyncEnergy();
+    void OnIterChange(int);
+    void on_stateChanged_ModiMetric(int);
+    void on_stateChanged_FlipSpectrum(int);
+    void on_stateChanged_MuteAudio(int);
+    void on_stateChanged_Reverb(int);
+    void on_stateChanged_SaveAudioWAV(int);
+    void on_stateChanged_WriteLog(int);
+    void on_stateChanged_RecFilter(int);
 	void OnListSelChanged(QTreeWidgetItem*, QTreeWidgetItem*);
 	void OnTreeWidgetContMenu(bool);
 	void OnCustomContextMenuRequested(const QPoint&);
 	void UpdatePlotStyle(int);
+    void setLogging(bool);
+
 signals:
 	void startLogging();
 	void stopLogging();

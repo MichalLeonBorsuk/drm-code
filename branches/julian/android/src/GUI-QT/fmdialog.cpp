@@ -43,10 +43,10 @@
 
 /* Implementation *************************************************************/
 FMDialog::FMDialog(CDRMReceiver& NDRMR, CSettings& Settings,
-	CFileMenu* pFileMenu, CSoundCardSelMenu* pSoundCardMenu, QWidget* parent) :
+    CSoundCardSelMenu* pSoundCardMenu, QWidget* parent) :
 	CWindow(parent, Settings, "FM"),
 	DRMReceiver(NDRMR),
-	pFileMenu(pFileMenu), pSoundCardMenu(pSoundCardMenu), eReceiverMode(RM_NONE)
+    pFileMenu(NULL), pSoundCardMenu(pSoundCardMenu), eReceiverMode(RM_NONE)
 {
 	setupUi(this);
 
@@ -54,7 +54,7 @@ FMDialog::FMDialog(CDRMReceiver& NDRMR, CSettings& Settings,
 	AddWhatsThisHelp();
 
 	/* Add file and sound card menu */
-	menuBar()->insertMenu(menu_View->menuAction(), pFileMenu);
+    pFileMenu = new CFileMenu(DRMReceiver, this);
 	menu_Settings->addMenu(pSoundCardMenu);
 
 	connect(actionTune, SIGNAL(triggered()), this, SLOT(OnTune()));

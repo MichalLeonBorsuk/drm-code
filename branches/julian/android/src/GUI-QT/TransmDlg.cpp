@@ -385,7 +385,7 @@ TransmDialog::TransmDialog(CSettings& Settings,	QWidget* parent)
 
 
 	/* Set Menu ***************************************************************/
-	CFileMenu* pFileMenu = new CFileMenu(DRMTransmitter, this, menu_Settings);
+    CFileMenu* pFileMenu = new CFileMenu(DRMTransmitter, this);
 
 	menu_Settings->addMenu(new CSoundCardSelMenu(DRMTransmitter, pFileMenu, this));
 

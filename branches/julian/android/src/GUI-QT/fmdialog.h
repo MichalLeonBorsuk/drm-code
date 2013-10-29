@@ -55,7 +55,7 @@ class FMDialog : public CWindow, public Ui_FMMainWindow
 	Q_OBJECT
 
 public:
-	FMDialog(CDRMReceiver&, CSettings&, CFileMenu*, CSoundCardSelMenu*,
+    FMDialog(CDRMReceiver&, CSettings&, CSoundCardSelMenu*,
 	QWidget* parent = 0);
 
 protected:
@@ -101,6 +101,7 @@ public slots:
 	void OnSwitchToAM();
 	void OnHelpAbout() {emit About();}
 	void OnWhatsThis();
+    void OnSoundFileChanged(CDRMReceiver::ESFStatus) {ClearDisplay();};
 
 signals:
 	void SwitchMode(int);

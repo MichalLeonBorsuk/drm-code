@@ -80,7 +80,7 @@ class AnalogDemDlg : public CWindow, public Ui_AMMainWindow
 	Q_OBJECT
 
 public:
-	AnalogDemDlg(CDRMReceiver&, CSettings&, CFileMenu*, CSoundCardSelMenu*,
+    AnalogDemDlg(CDRMReceiver&, CSettings&, CSoundCardSelMenu*,
 	QWidget* parent = 0);
 
 protected:
