@@ -20,7 +20,6 @@ public:
 
 private:
     Ui::DRMDetail *ui;
-    void SetStatus(CMultColorLED* LED, ETypeRxStatus state);
     QString	GetRobModeStr(ERobMode e);
     QString	GetSpecOccStr(ESpecOcc e);
     void AddWhatsThisHelp();

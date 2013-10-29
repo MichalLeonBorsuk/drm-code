@@ -2,7 +2,8 @@
 #define DRMOPTIONS_H
 
 #include <QWidget>
-#include <../DrmReceiver.h>
+#include <../chanest/ChannelEstimation.h>
+#include <../sync/TimeSyncTrack.h>
 
 namespace Ui {
 class DRMOptions;
@@ -17,14 +18,20 @@ public:
     ~DRMOptions();
     void setRSCIModeEnabled(bool enabled);
     void setNumIterations(int iNumIt);
-    void UpdateControls(CDRMReceiver& DRMReceiver);
+    void setTimeInt(CChannelEstimation::ETypeIntTime);
+    void setFreqInt(CChannelEstimation::ETypeIntFreq);
+    void setTiSyncTrac(CTimeSyncTrack::ETypeTiSyncTrac);
+    void setRecFilterEnabled(bool);
+    void setIntConsEnabled(bool);
+    void setFlipSpectrumEnabled(bool);
 
 private:
     Ui::DRMOptions *ui;
+    bool rsci_mode;
     void AddWhatsThisHelp();
 
 private slots:
-    void on_change_SliderNoOfIterations(int);
+    void on_SliderNoOfIterations_valueChanged(int);
 
 signals:
     void noOfIterationsChanged(int);

@@ -27,6 +27,7 @@
 \******************************************************************************/
 
 #include "Util.h"
+#include <../datadecoding/DataDecoder.h>
 #include "../DrmTransceiver.h"
 #include <QRegExp>
 #include <QUrl>
@@ -199,5 +200,217 @@ void RestartTransceiver(CDRMTransceiver *DRMTransceiver)
             sleep.tryLock(10); /* 10 ms */
             sleep.unlock();
         }
+    }
+}
+
+
+QString GetCodecString(const CService& service)
+{
+    QString strReturn;
+
+    /* First check if it is audio or data service */
+    if (service.eAudDataFlag == CService::SF_AUDIO)
+    {
+        /* Audio service */
+        const CAudioParam::EAudSamRat eSamRate = service.AudioParam.eAudioSamplRate;
+
+        /* Audio coding */
+        switch (service.AudioParam.eAudioCoding)
+        {
+        case CAudioParam::AC_NONE:
+            break;
+
+        case CAudioParam::AC_AAC:
+            /* Only 12 and 24 kHz sample rates are supported for AAC encoding */
+            if (eSamRate == CAudioParam::AS_12KHZ)
+                strReturn = "aac";
+            else
+                strReturn = "AAC";
+            break;
+
+        case CAudioParam::AC_CELP:
+            /* Only 8 and 16 kHz sample rates are supported for CELP encoding */
+            if (eSamRate == CAudioParam::AS_8_KHZ)
+                strReturn = "celp";
+            else
+                strReturn = "CELP";
+            break;
+
+        case CAudioParam::AC_HVXC:
+            strReturn = "HVXC";
+            break;
+
+        case CAudioParam::AC_OPUS:
+            strReturn = "OPUS ";
+            /* Opus Audio sub codec */
+            switch (service.AudioParam.eOPUSSubCod)
+            {
+                case CAudioParam::OS_SILK:
+                    strReturn += "SILK ";
+                    break;
+                case CAudioParam::OS_HYBRID:
+                    strReturn += "HYBRID ";
+                    break;
+                case CAudioParam::OS_CELT:
+                    strReturn += "CELT ";
+                    break;
+            }
+            /* Opus Audio bandwidth */
+            switch (service.AudioParam.eOPUSBandwidth)
+            {
+                case CAudioParam::OB_NB:
+                    strReturn += "NB";
+                    break;
+                case CAudioParam::OB_MB:
+                    strReturn += "MB";
+                    break;
+                case CAudioParam::OB_WB:
+                    strReturn += "WB";
+                    break;
+                case CAudioParam::OB_SWB:
+                    strReturn += "SWB";
+                    break;
+                case CAudioParam::OB_FB:
+                    strReturn += "FB";
+                    break;
+            }
+        }
+
+        /* SBR */
+        if (service.AudioParam.eSBRFlag == CAudioParam::SB_USED)
+        {
+            strReturn += "+";
+        }
+    }
+    else
+    {
+        /* Data service */
+        strReturn = "Data:";
+    }
+
+    return strReturn;
+}
+
+QString GetTypeString(const CService& service)
+{
+    QString strReturn;
+
+    /* First check if it is audio or data service */
+    if (service.eAudDataFlag == CService::SF_AUDIO)
+    {
+        /* Audio service */
+        switch (service.AudioParam.eAudioCoding)
+        {
+        case CAudioParam::AC_NONE:
+            break;
+
+        case CAudioParam::AC_OPUS:
+            /* Opus channels configuration */
+            switch (service.AudioParam.eOPUSChan)
+            {
+            case CAudioParam::OC_MONO:
+            strReturn = "MONO";
+            break;
+
+            case CAudioParam::OC_STEREO:
+            strReturn = "STEREO";
+            break;
+            }
+            break;
+
+        default:
+            /* Mono-Stereo */
+            switch (service.AudioParam.eAudioMode)
+            {
+            case CAudioParam::AM_MONO:
+                strReturn = "Mono";
+                break;
+
+            case CAudioParam::AM_P_STEREO:
+                strReturn = "P-Stereo";
+                break;
+
+            case CAudioParam::AM_STEREO:
+                strReturn = "Stereo";
+                break;
+            }
+        }
+    }
+    else
+    {
+        /* Data service */
+        if (service.DataParam.ePacketModInd == CDataParam::PM_PACKET_MODE)
+        {
+            if (service.DataParam.eAppDomain == CDataParam::AD_DAB_SPEC_APP)
+            {
+                switch (service.DataParam.iUserAppIdent)
+                {
+                case 1:
+                    strReturn = QObject::tr("Dynamic labels");
+                    break;
+
+                case DAB_AT_MOTSLIDESHOW:
+                    strReturn = QObject::tr("MOT Slideshow");
+                    break;
+
+                case DAB_AT_BROADCASTWEBSITE:
+                    strReturn = QObject::tr("MOT WebSite");
+                    break;
+
+                case DAB_AT_TPEG:
+                    strReturn = QObject::tr("TPEG");
+                    break;
+
+                case DAB_AT_DGPS:
+                    strReturn = QObject::tr("DGPS");
+                    break;
+
+                case DAB_AT_TMC:
+                    strReturn = QObject::tr("TMC");
+                    break;
+
+                case DAB_AT_EPG:
+                    strReturn = QObject::tr("EPG - Electronic Programme Guide");
+                    break;
+
+                case DAB_AT_JAVA:
+                    strReturn = QObject::tr("Java");
+                    break;
+
+                case DAB_AT_JOURNALINE: /* Journaline */
+                    strReturn = QObject::tr("Journaline");
+                    break;
+                }
+            }
+            else
+                strReturn = QObject::tr("Unknown Service");
+        }
+        else
+            strReturn = QObject::tr("Unknown Service");
+    }
+
+    return strReturn;
+}
+
+
+void SetStatus(CMultColorLED* LED, ETypeRxStatus state)
+{
+    switch(state)
+    {
+    case NOT_PRESENT:
+        LED->Reset(); /* GREY */
+        break;
+
+    case CRC_ERROR:
+        LED->SetLight(CMultColorLED::RL_RED);
+        break;
+
+    case DATA_ERROR:
+        LED->SetLight(CMultColorLED::RL_YELLOW);
+        break;
+
+    case RX_OK:
+        LED->SetLight(CMultColorLED::RL_GREEN);
+        break;
     }
 }

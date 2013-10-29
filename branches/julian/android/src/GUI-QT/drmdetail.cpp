@@ -1,5 +1,6 @@
 #include "drmdetail.h"
 #include "ui_drmdetail.h"
+#include <../util-QT/Util.h>
 
 DRMDetail::DRMDetail(QWidget *parent) :
     QWidget(parent),
@@ -18,28 +19,6 @@ DRMDetail::DRMDetail(QWidget *parent) :
 DRMDetail::~DRMDetail()
 {
     delete ui;
-}
-
-void DRMDetail::SetStatus(CMultColorLED* LED, ETypeRxStatus state)
-{
-    switch(state)
-    {
-    case NOT_PRESENT:
-        LED->Reset(); /* GREY */
-        break;
-
-    case CRC_ERROR:
-        LED->SetLight(CMultColorLED::RL_RED);
-        break;
-
-    case DATA_ERROR:
-        LED->SetLight(CMultColorLED::RL_YELLOW);
-        break;
-
-    case RX_OK:
-        LED->SetLight(CMultColorLED::RL_GREEN);
-        break;
-    }
 }
 
 void DRMDetail::updateDisplay(CParameter& Parameters, _REAL freqOffset, EAcqStat acqState, bool rsciMode)

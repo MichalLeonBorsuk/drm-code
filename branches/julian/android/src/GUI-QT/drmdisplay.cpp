@@ -1,7 +1,6 @@
 #include "drmdisplay.h"
 #include "ui_drmdisplay.h"
 #include <../util-QT/Util.h>
-#include <../datadecoding/DataDecoder.h>
 
 DRMDisplay::DRMDisplay(QWidget *parent) :
     QWidget(parent),
@@ -24,7 +23,7 @@ DRMDisplay::DRMDisplay(QWidget *parent) :
     ui->ProgrInputLevel->setAlarmColor(alarmColor);
     ui->ProgrInputLevel->setFillColor(fillColor);
 #else
-    QPalette newPalette = ui->FrameMainDisplay->palette();
+    QPalette newPalette = ui->ProgrInputLevel->palette();
     newPalette.setColor(QPalette::Base, newPalette.color(QPalette::Window));
     newPalette.setColor(QPalette::ButtonText, fillColor);
     newPalette.setColor(QPalette::Highlight, alarmColor);
@@ -62,28 +61,6 @@ void DRMDisplay::showReceptionStatus(ETypeRxStatus fac, ETypeRxStatus sdc, EType
     SetStatus(ui->CLED_FAC, fac);
     SetStatus(ui->CLED_SDC, sdc);
     SetStatus(ui->CLED_MSC, msc);
-}
-
-void DRMDisplay::SetStatus(CMultColorLED* LED, ETypeRxStatus state)
-{
-    switch(state)
-    {
-    case NOT_PRESENT:
-        LED->Reset(); /* GREY */
-        break;
-
-    case CRC_ERROR:
-        LED->SetLight(CMultColorLED::RL_RED);
-        break;
-
-    case DATA_ERROR:
-        LED->SetLight(CMultColorLED::RL_YELLOW);
-        break;
-
-    case RX_OK:
-        LED->SetLight(CMultColorLED::RL_GREEN);
-        break;
-    }
 }
 
 void DRMDisplay::showTextMessage(const QString& textMessage)
@@ -204,194 +181,6 @@ void DRMDisplay::showServiceInfo(const CService& service)
         ui->LabelCountryCode->setText("");
 }
 
-QString DRMDisplay::GetCodecString(const CService& service)
-{
-    QString strReturn;
-
-    /* First check if it is audio or data service */
-    if (service.eAudDataFlag == CService::SF_AUDIO)
-    {
-        /* Audio service */
-        const CAudioParam::EAudSamRat eSamRate = service.AudioParam.eAudioSamplRate;
-
-        /* Audio coding */
-        switch (service.AudioParam.eAudioCoding)
-        {
-        case CAudioParam::AC_NONE:
-            break;
-
-        case CAudioParam::AC_AAC:
-            /* Only 12 and 24 kHz sample rates are supported for AAC encoding */
-            if (eSamRate == CAudioParam::AS_12KHZ)
-                strReturn = "aac";
-            else
-                strReturn = "AAC";
-            break;
-
-        case CAudioParam::AC_CELP:
-            /* Only 8 and 16 kHz sample rates are supported for CELP encoding */
-            if (eSamRate == CAudioParam::AS_8_KHZ)
-                strReturn = "celp";
-            else
-                strReturn = "CELP";
-            break;
-
-        case CAudioParam::AC_HVXC:
-            strReturn = "HVXC";
-            break;
-
-        case CAudioParam::AC_OPUS:
-            strReturn = "OPUS ";
-            /* Opus Audio sub codec */
-            switch (service.AudioParam.eOPUSSubCod)
-            {
-                case CAudioParam::OS_SILK:
-                    strReturn += "SILK ";
-                    break;
-                case CAudioParam::OS_HYBRID:
-                    strReturn += "HYBRID ";
-                    break;
-                case CAudioParam::OS_CELT:
-                    strReturn += "CELT ";
-                    break;
-            }
-            /* Opus Audio bandwidth */
-            switch (service.AudioParam.eOPUSBandwidth)
-            {
-                case CAudioParam::OB_NB:
-                    strReturn += "NB";
-                    break;
-                case CAudioParam::OB_MB:
-                    strReturn += "MB";
-                    break;
-                case CAudioParam::OB_WB:
-                    strReturn += "WB";
-                    break;
-                case CAudioParam::OB_SWB:
-                    strReturn += "SWB";
-                    break;
-                case CAudioParam::OB_FB:
-                    strReturn += "FB";
-                    break;
-            }
-        }
-
-        /* SBR */
-        if (service.AudioParam.eSBRFlag == CAudioParam::SB_USED)
-        {
-            strReturn += "+";
-        }
-    }
-    else
-    {
-        /* Data service */
-        strReturn = "Data:";
-    }
-
-    return strReturn;
-}
-
-QString DRMDisplay::GetTypeString(const CService& service)
-{
-    QString strReturn;
-
-    /* First check if it is audio or data service */
-    if (service.eAudDataFlag == CService::SF_AUDIO)
-    {
-        /* Audio service */
-        switch (service.AudioParam.eAudioCoding)
-        {
-        case CAudioParam::AC_NONE:
-            break;
-
-        case CAudioParam::AC_OPUS:
-            /* Opus channels configuration */
-            switch (service.AudioParam.eOPUSChan)
-            {
-            case CAudioParam::OC_MONO:
-            strReturn = "MONO";
-            break;
-
-            case CAudioParam::OC_STEREO:
-            strReturn = "STEREO";
-            break;
-            }
-            break;
-
-        default:
-            /* Mono-Stereo */
-            switch (service.AudioParam.eAudioMode)
-            {
-            case CAudioParam::AM_MONO:
-                strReturn = "Mono";
-                break;
-
-            case CAudioParam::AM_P_STEREO:
-                strReturn = "P-Stereo";
-                break;
-
-            case CAudioParam::AM_STEREO:
-                strReturn = "Stereo";
-                break;
-            }
-        }
-    }
-    else
-    {
-        /* Data service */
-        if (service.DataParam.ePacketModInd == CDataParam::PM_PACKET_MODE)
-        {
-            if (service.DataParam.eAppDomain == CDataParam::AD_DAB_SPEC_APP)
-            {
-                switch (service.DataParam.iUserAppIdent)
-                {
-                case 1:
-                    strReturn = tr("Dynamic labels");
-                    break;
-
-                case DAB_AT_MOTSLIDESHOW:
-                    strReturn = tr("MOT Slideshow");
-                    break;
-
-                case DAB_AT_BROADCASTWEBSITE:
-                    strReturn = tr("MOT WebSite");
-                    break;
-
-                case DAB_AT_TPEG:
-                    strReturn = tr("TPEG");
-                    break;
-
-                case DAB_AT_DGPS:
-                    strReturn = tr("DGPS");
-                    break;
-
-                case DAB_AT_TMC:
-                    strReturn = tr("TMC");
-                    break;
-
-                case DAB_AT_EPG:
-                    strReturn = tr("EPG - Electronic Programme Guide");
-                    break;
-
-                case DAB_AT_JAVA:
-                    strReturn = tr("Java");
-                    break;
-
-                case DAB_AT_JOURNALINE: /* Journaline */
-                    strReturn = tr("Journaline");
-                    break;
-                }
-            }
-            else
-                strReturn = tr("Unknown Service");
-        }
-        else
-            strReturn = tr("Unknown Service");
-    }
-
-    return strReturn;
-}
-
 /* Bit-rate */
 void
 DRMDisplay::setBitRate(_REAL rBitRate, _REAL rPartABLenRat)
@@ -416,7 +205,7 @@ DRMDisplay::setBitRate(_REAL rBitRate, _REAL rPartABLenRat)
 
 
 void
-DRMDisplay::clear(const QString& serviceLabel)
+DRMDisplay::clearDisplay(const QString& serviceLabel)
 {
     ui->LabelServiceLabel->setText(serviceLabel);
     ui->LabelBitrate->setText("");
@@ -446,7 +235,7 @@ void DRMDisplay::SetDisplayColor(const QColor& newColor)
     vecpWidgets.push_back(ui->CLED_FAC);
     vecpWidgets.push_back(ui->CLED_SDC);
     vecpWidgets.push_back(ui->CLED_MSC);
-    vecpWidgets.push_back(ui->FrameMainDisplay);
+    //vecpWidgets.push_back(ui->FrameMainDisplay);
 
     for (size_t i = 0; i < vecpWidgets.size(); i++)
     {

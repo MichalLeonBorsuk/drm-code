@@ -68,7 +68,7 @@ systemevalDlg::systemevalDlg(CDRMReceiver& NDRMR, CSettings& Settings,
 
 
     /* Update controls */
-    ui->drmOptions->UpdateControls(DRMReceiver);
+    UpdateControls();
 
     /* Set the Char Type of each selectable item */
     QTreeWidgetItemIterator it(ui->chartSelector, QTreeWidgetItemIterator::NoChildren);
@@ -127,55 +127,11 @@ systemevalDlg::systemevalDlg(CDRMReceiver& NDRMR, CSettings& Settings,
     pTreeWidgetContextMenu->addAction(tr("&Open in separate window"),
             this, SLOT(OnTreeWidgetContMenu(bool)));
 
-    /* Connect controls ----------------------------------------------------- */
-    connect(ui->drmOptions, SIGNAL(noOfIterationsChanged(int)),
-            this, SLOT(OnIterChange(int)));
-
-    /* Radio buttons */
-    connect(ui->drmOptions, SIGNAL(TiLinear()),
-            this, SLOT(OnTimeLinear()));
-    connect(ui->drmOptions, SIGNAL(TiWiener()),
-            this, SLOT(OnTimeWiener()));
-    connect(ui->drmOptions, SIGNAL(FreqLinear()),
-            this, SLOT(OnFrequencyLinear()));
-    connect(ui->drmOptions, SIGNAL(FreqDFT()),
-            this, SLOT(OnFrequencyDft()));
-    connect(ui->drmOptions, SIGNAL(FreqWiener()),
-            this, SLOT(OnFrequencyWiener()));
-    connect(ui->drmOptions, SIGNAL(TiSyncEnergy()),
-            this, SLOT(OnTiSyncEnergy()));
-    connect(ui->drmOptions, SIGNAL(TiSyncFirstPeak()),
-            this, SLOT(OnTiSyncFirstPeak()));
-    /* Check boxes */
-    connect(ui->drmOptions, SIGNAL(FlipSpec(int)),
-            this, SLOT(on_stateChanged_FlipSpectrum(int)));
-    connect(ui->drmOptions, SIGNAL(RecFilter(int)),
-            this, SLOT(on_stateChanged_RecFilter(int)));
-    connect(ui->drmOptions, SIGNAL(ModiMetric(int)),
-            this, SLOT(OnCheckModiMetric()));
-
     /* Char selector list view */
-    connect(ui->chartSelector, SIGNAL(currentItemChanged(QTreeWidgetItem *, QTreeWidgetItem *)),
-            this, SLOT(OnListSelChanged( QTreeWidgetItem *, QTreeWidgetItem *)));
     ui->chartSelector->setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(ui->chartSelector, SIGNAL(customContextMenuRequested ( const QPoint&  )),
-		this, SLOT(OnCustomContextMenuRequested(const QPoint&)));
-
-    connect(ui->CheckBoxMuteAudio, SIGNAL(clicked()),
-            this, SLOT(OnCheckBoxMuteAudio()));
-    connect(ui->CheckBoxWriteLog, SIGNAL(stateChanged(int)),
-            this, SLOT(OnCheckWriteLog(int)));
-    connect(ui->CheckBoxSaveAudioWave, SIGNAL(clicked()),
-            this, SLOT(OnCheckSaveAudioWAV()));
-    connect(ui->CheckBoxReverb, SIGNAL(clicked()),
-            this, SLOT(OnCheckBoxReverb()));
-
-    /* Buttons */
-    connect(ui->buttonOk, SIGNAL(clicked()), this, SLOT(close()));
 
     /* Timer */
-    connect(&Timer, SIGNAL(timeout()),
-            this, SLOT(OnTimer()));
+    connect(&Timer, SIGNAL(timeout()), this, SLOT(OnTimer()));
 
     /* Select chart type */
     ui->chartSelector->setCurrentItem(FindItemByECharType(eCurCharType), 0);
@@ -225,7 +181,7 @@ void systemevalDlg::eventShow(QShowEvent*)
     }
 
     /* Update controls */
-    ui->drmOptions->UpdateControls(DRMReceiver);
+    UpdateControls();
 
     /* Activate real-time timer */
     Timer.start(GUI_CONTROL_UPDATE_TIME);
@@ -292,6 +248,18 @@ void systemevalDlg::UpdatePlotStyle(int iPlotStyle)
     MainPlot->SetPlotStyle(iPlotStyle);
 }
 
+void systemevalDlg::on_chartSelector_currentItemChanged(QTreeWidgetItem *curr)
+{
+    /* Make sure we have a non root item */
+    if (curr && curr->parent())
+    {
+        /* Get chart type from selected item */
+        eCurCharType = CDRMPlot::ECharType(curr->data(0, Qt::UserRole).toInt());
+        /* Setup chart */
+        MainPlot->SetupChart(eCurCharType);
+    }
+}
+
 void systemevalDlg::OnTreeWidgetContMenu(bool)
 {
     if (eNewCharType != CDRMPlot::NONE_OLD)
@@ -307,7 +275,7 @@ void systemevalDlg::OnTreeWidgetContMenu(bool)
     }
 }
 
-void systemevalDlg::OnCustomContextMenuRequested(const QPoint& p)
+void systemevalDlg::on_chartSelector_customContextMenuRequested(const QPoint& p)
 {
     QModelIndex index = ui->chartSelector->indexAt(p);
     /* Make sure we have a non root item */
@@ -395,13 +363,24 @@ void systemevalDlg::OnTimer()
     );
     UpdateGPS(Parameters);
 
-    ui->drmOptions->UpdateControls(DRMReceiver);
+    UpdateControls();
 
     ui->CheckBoxReverb->setChecked(DRMReceiver.GetAudSorceDec()->GetReverbEffect());
     ui->CheckBoxMuteAudio->setChecked(DRMReceiver.GetWriteData()->GetMuteAudio());
     ui->CheckBoxSaveAudioWave->setChecked(DRMReceiver.GetWriteData()->GetIsWriteWaveFile());
 
     Parameters.Unlock();
+}
+
+void systemevalDlg::UpdateControls()
+{
+    ui->drmOptions->setNumIterations(DRMReceiver.GetMSCMLC()->GetInitNumIterations());
+    ui->drmOptions->setTimeInt(DRMReceiver.GetTimeInt());
+    ui->drmOptions->setFreqInt(DRMReceiver.GetFreqInt());
+    ui->drmOptions->setTiSyncTrac(DRMReceiver.GetTiSyncTracType());
+    ui->drmOptions->setRecFilterEnabled(DRMReceiver.GetFreqSyncAcq()->GetRecFilter());
+    ui->drmOptions->setIntConsEnabled(DRMReceiver.GetIntCons());
+    ui->drmOptions->setFlipSpectrumEnabled(DRMReceiver.GetReceiveData()->GetFlippedSpectrum());
 }
 
 void systemevalDlg::UpdateGPS(CParameter& Parameters)
@@ -469,37 +448,37 @@ void systemevalDlg::UpdateGPS(CParameter& Parameters)
     ui->TextLabelGPSTime->setText(qStrTime+qStrSat);
 }
 
-void systemevalDlg::OnTimeLinear()
+void systemevalDlg::on_drmOptions_TimeLinear()
 {
     if (DRMReceiver.GetTimeInt() != CChannelEstimation::TLINEAR)
         DRMReceiver.SetTimeInt(CChannelEstimation::TLINEAR);
 }
 
-void systemevalDlg::OnTimeWiener()
+void systemevalDlg::on_drmOptions_TimeWiener()
 {
     if (DRMReceiver.GetTimeInt() != CChannelEstimation::TWIENER)
         DRMReceiver.SetTimeInt(CChannelEstimation::TWIENER);
 }
 
-void systemevalDlg::OnFrequencyLinear()
+void systemevalDlg::on_drmOptions_FrequencyLinear()
 {
     if (DRMReceiver.GetFreqInt() != CChannelEstimation::FLINEAR)
         DRMReceiver.SetFreqInt(CChannelEstimation::FLINEAR);
 }
 
-void systemevalDlg::OnFrequencyDft()
+void systemevalDlg::on_drmOptions_FrequencyDft()
 {
     if (DRMReceiver.GetFreqInt() != CChannelEstimation::FDFTFILTER)
         DRMReceiver.SetFreqInt(CChannelEstimation::FDFTFILTER);
 }
 
-void systemevalDlg::OnFrequencyWiener()
+void systemevalDlg::on_drmOptions_FrequencyWiener()
 {
     if (DRMReceiver.GetFreqInt() != CChannelEstimation::FWIENER)
         DRMReceiver.SetFreqInt(CChannelEstimation::FWIENER);
 }
 
-void systemevalDlg::OnTiSyncFirstPeak()
+void systemevalDlg::on_drmOptions_TiSyncFirstPeak()
 {
     if (DRMReceiver.GetTiSyncTracType() !=
             CTimeSyncTrack::TSFIRSTPEAK)
@@ -508,7 +487,7 @@ void systemevalDlg::OnTiSyncFirstPeak()
     }
 }
 
-void systemevalDlg::OnTiSyncEnergy()
+void systemevalDlg::on_drmOptions_TiSyncEnergy()
 {
     if (DRMReceiver.GetTiSyncTracType() !=
             CTimeSyncTrack::TSENERGY)
@@ -517,31 +496,19 @@ void systemevalDlg::OnTiSyncEnergy()
     }
 }
 
-void systemevalDlg::OnIterChange(int value)
+void systemevalDlg::on_drmOptions_noOfIterationsChanged(int value)
 {
     /* Set new value in working thread module */
     DRMReceiver.GetMSCMLC()->SetNumIterations(value);
 }
 
-void systemevalDlg::OnListSelChanged(QTreeWidgetItem *curr, QTreeWidgetItem *)
-{
-    /* Make sure we have a non root item */
-    if (curr && curr->parent())
-    {
-        /* Get chart type from selected item */
-        eCurCharType = CDRMPlot::ECharType(curr->data(0, Qt::UserRole).toInt());
-        /* Setup chart */
-        MainPlot->SetupChart(eCurCharType);
-    }
-}
-
-void systemevalDlg::on_stateChanged_FlipSpectrum(int state)
+void systemevalDlg::on_drmOptions_FlipSpectrum(int state)
 {
     /* Set parameter in working thread module */
     DRMReceiver.GetReceiveData()->SetFlippedSpectrum(state == Qt::Checked);
 }
 
-void systemevalDlg::on_stateChanged_RecFilter(int state)
+void systemevalDlg::on_drmOptions_RecFilter(int state)
 {
     /* Set parameter in working thread module */
     DRMReceiver.GetFreqSyncAcq()->SetRecFilter(state == Qt::Checked);
@@ -550,25 +517,25 @@ void systemevalDlg::on_stateChanged_RecFilter(int state)
     DRMReceiver.RequestNewAcquisition();
 }
 
-void systemevalDlg::on_stateChanged_ModiMetric(int state)
+void systemevalDlg::on_drmOptions_ModiMetric(int state)
 {
     /* Set parameter in working thread module */
     DRMReceiver.SetIntCons(state == Qt::Checked);
 }
 
-void systemevalDlg::on_stateChanged_MuteAudio(int state)
+void systemevalDlg::on_CheckBoxMuteAudio_stateChanged(int state)
 {
     /* Set parameter in working thread module */
     DRMReceiver.GetWriteData()->MuteAudio(state == Qt::Checked);
 }
 
-void systemevalDlg::on_stateChanged_Reverb(int state)
+void systemevalDlg::on_CheckBoxReverb_stateChanged(int state)
 {
     /* Set parameter in working thread module */
     DRMReceiver.GetAudSorceDec()->SetReverbEffect(state == Qt::Checked);
 }
 
-void systemevalDlg::on_stateChanged_SaveAudioWAV(int state)
+void systemevalDlg::on_CheckBoxSaveAudioWave_stateChanged(int state)
 {
     /*
     	This code is copied in AnalogDemDlg.cpp. If you do changes here, you should
@@ -597,7 +564,7 @@ void systemevalDlg::on_stateChanged_SaveAudioWAV(int state)
 }
 
 
-void systemevalDlg::on_stateChanged_WriteLog(int state)
+void systemevalDlg::on_CheckBoxWriteLog_stateChanged(int state)
 {
     if (state == Qt::Checked)
     {
