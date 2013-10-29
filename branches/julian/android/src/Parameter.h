@@ -851,13 +851,13 @@ public:
         return *this;
     }
     void SetStatus(const ETypeRxStatus);
-    ETypeRxStatus GetStatus() {
+    ETypeRxStatus GetStatus() const {
         return status;
     }
-    int GetCount() {
+    int GetCount() const {
         return iNum;
     }
-    int GetOKCount() {
+    int GetOKCount() const {
         return iNumOK;
     }
     void ResetCounts() {
@@ -1332,7 +1332,7 @@ public:
 
     /* the signal level as measured at IF by dream */
     void SetIFSignalLevel(_REAL);
-    _REAL GetIFSignalLevel();
+    _REAL GetIFSignalLevel() const;
     _REAL rSigStrengthCorrection;
 
     /* General -------------------------------------------------------------- */

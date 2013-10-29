@@ -46,6 +46,7 @@
 #include <QCloseEvent>
 #include <qwt_thermo.h>
 #include "ui_DRMMainWindow.h"
+#include "ui_MainWindow.h"
 
 #include "CWindow.h"
 #include "EvaluationDlg.h"
@@ -70,7 +71,7 @@ class JLViewer;
 class SlideShowViewer;
 class CScheduler;
 
-class FDRMDialog : public CWindow, public Ui_DRMMainWindow
+class FDRMDialog : public CWindow
 {
     Q_OBJECT
 
@@ -83,6 +84,7 @@ public:
     virtual ~FDRMDialog();
 
 protected:
+    Ui_MainWindow*      ui;
     CDRMReceiver&		DRMReceiver;
     QTimer				Timer;
     QTimer				TimerClose;
@@ -118,7 +120,6 @@ protected:
     CScheduler* 	    pScheduler;
     QTimer*		        pScheduleTimer;
 
-    void SetStatus(CMultColorLED* LED, ETypeRxStatus state);
     virtual void        eventClose(QCloseEvent* ce);
     virtual void        eventHide(QHideEvent* pEvent);
     virtual void        eventShow(QShowEvent* pEvent);
@@ -127,26 +128,18 @@ protected:
     void		UpdateDRM_GUI();
     void		UpdateDisplay();
     void		ClearDisplay();
-    void		UpdateWindowTitle();
-
-    void		SetDisplayColor(const QColor newColor);
 
     void		ChangeGUIModeToDRM();
     void		ChangeGUIModeToAM();
     void		ChangeGUIModeToFM();
 
-    QString	GetCodecString(const CService&);
-    QString	GetTypeString(const CService&);
     QString serviceSelector(CParameter&, int);
-    void showTextMessage(const QString&);
-    void showServiceInfo(const CService&);
     void startLogging();
     void stopLogging();
     void SysTrayCreate();
     void SysTrayStart();
     void SysTrayStop(const QString&);
     void SysTrayToolTip(const QString&, const QString&);
-	void setBars(int);
 
 public slots:
     void OnTimer();
@@ -162,7 +155,7 @@ public slots:
     void OnSwitchToFM();
     void OnSwitchToAM();
     void OnHelpAbout() {AboutDlg.show();}
-    void OnSoundFileChanged(CDRMReceiver::ESFStatus) {UpdateWindowTitle(); ClearDisplay();};
+    void OnSoundFileChanged(CDRMReceiver::ESFStatus) {ClearDisplay();};
     void OnWhatsThis();
     void OnSysTrayActivated(QSystemTrayIcon::ActivationReason);
 signals:

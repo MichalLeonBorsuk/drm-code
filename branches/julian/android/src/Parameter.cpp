@@ -1091,7 +1091,7 @@ void CParameter::SetIFSignalLevel(_REAL rNewSigStr)
     rIFSigStr = rNewSigStr;
 }
 
-_REAL CParameter::GetIFSignalLevel()
+_REAL CParameter::GetIFSignalLevel() const
 {
     return rIFSigStr;
 }

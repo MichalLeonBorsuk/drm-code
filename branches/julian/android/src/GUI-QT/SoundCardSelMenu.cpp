@@ -338,21 +338,20 @@ void CSoundCardSelMenu::OnSoundFileChanged(CDRMReceiver::ESFStatus eStatus)
 /* CFileMenu ******************************************************************/
 // TODO DRMTransmitter
 
-CFileMenu::CFileMenu(CDRMTransceiver& DRMTransceiver, QMainWindow* parent,
-    QMenu* menuInsertBefore)
+CFileMenu::CFileMenu(CDRMTransceiver& DRMTransceiver, QMainWindow* parent)
     : QMenu(parent), DRMTransceiver(DRMTransceiver), bReceiver(DRMTransceiver.IsReceiver())
 {
-    setTitle(tr("&File"));
-    if (bReceiver)
+    QMenu* pFileMenu = parent->findChild<QMenu*>("menu_File");
+    if (pFileMenu && bReceiver)
     {
         QString openFile(tr("&Open File..."));
         QString closeFile(tr("&Close File"));
-        actionOpenFile = addAction(openFile, this, SLOT(OnOpenFile()), QKeySequence(tr("Alt+O")));
-        actionCloseFile = addAction(closeFile, this, SLOT(OnCloseFile()), QKeySequence(tr("Alt+C")));
-        addSeparator();
+        actionOpenFile = pFileMenu->addAction(openFile, this, SLOT(OnOpenFile()), QKeySequence(tr("Alt+O")));
+        actionCloseFile = pFileMenu->addAction(closeFile, this, SLOT(OnCloseFile()), QKeySequence(tr("Alt+C")));
+        pFileMenu->addSeparator();
+        connect(this, SIGNAL(soundFileChanged(CDRMReceiver::ESFStatus)), parent, SLOT(OnSoundFileChanged(CDRMReceiver::ESFStatus)));
     }
-    addAction(tr("&Exit"), parent, SLOT(close()), QKeySequence(tr("Alt+X")));
-    parent->menuBar()->insertMenu(menuInsertBefore->menuAction(), this);
+    pFileMenu->addAction(tr("&Exit"), parent, SLOT(close()), QKeySequence(tr("Alt+X")));
 }
 
 

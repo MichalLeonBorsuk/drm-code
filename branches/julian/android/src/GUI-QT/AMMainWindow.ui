@@ -598,6 +598,11 @@ Phase Offset</string>
      <height>21</height>
     </rect>
    </property>
+   <widget class="QMenu" name="menu_File">
+    <property name="title">
+     <string>&amp;File</string>
+    </property>
+   </widget>
    <widget class="QMenu" name="menu_View">
     <property name="title">
      <string>View</string>
@@ -621,6 +626,7 @@ Phase Offset</string>
     <addaction name="separator"/>
     <addaction name="actionAbout_Dream"/>
    </widget>
+   <addaction name="menu_File"/>
    <addaction name="menu_View"/>
    <addaction name="menu_Settings"/>
    <addaction name="menuHelp"/>
@@ -706,7 +712,7 @@ Phase Offset</string>
  <connections/>
  <buttongroups>
   <buttongroup name="ButtonGroupNoiseReduction"/>
-  <buttongroup name="ButtonGroupAGC"/>
   <buttongroup name="ButtonGroupDemodulation"/>
+  <buttongroup name="ButtonGroupAGC"/>
  </buttongroups>
 </ui>

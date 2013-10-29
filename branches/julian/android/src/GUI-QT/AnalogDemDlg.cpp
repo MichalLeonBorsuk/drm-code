@@ -58,11 +58,11 @@
 
 /* Implementation *************************************************************/
 AnalogDemDlg::AnalogDemDlg(CDRMReceiver& NDRMR, CSettings& Settings,
-	CFileMenu* pFileMenu, CSoundCardSelMenu* pSoundCardMenu, QWidget* parent) :
+    CSoundCardSelMenu* pSoundCardMenu, QWidget* parent) :
 	CWindow(parent, Settings, "AM"),
 	DRMReceiver(NDRMR),
 	AMSSDlg(NDRMR, Settings, this), MainPlot(NULL),
-	pFileMenu(pFileMenu), pSoundCardMenu(pSoundCardMenu)
+    pSoundCardMenu(pSoundCardMenu)
 {
 	setupUi(this);
 
@@ -70,7 +70,7 @@ AnalogDemDlg::AnalogDemDlg(CDRMReceiver& NDRMR, CSettings& Settings,
 	AddWhatsThisHelp();
 
 	/* Add file and sound card menu */
-	menuBar()->insertMenu(menu_View->menuAction(), pFileMenu);
+    pFileMenu = new CFileMenu(DRMReceiver, this);
 	menu_Settings->addMenu(pSoundCardMenu);
 
 	connect(action_Stations_Dialog, SIGNAL(triggered()), this, SIGNAL(ViewStationsDlg()));
@@ -205,7 +205,7 @@ void AnalogDemDlg::eventUpdate()
 {
 	/* Put (re)initialization code here for the settings that might have
 	   be changed by another top level window. Called on mode switch */
-	pFileMenu->UpdateMenu();
+    //pFileMenu->UpdateMenu();
 	UpdateSliderBandwidth();
 }
 

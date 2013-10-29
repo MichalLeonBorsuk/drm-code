@@ -454,7 +454,11 @@ HEADERS += \
     src/util/Settings.h \
     src/util/Utilities.h \
     src/util/Vector.h \
-    src/Version.h
+    src/Version.h \
+    src/GUI-QT/drmdisplay.h \
+    src/GUI-QT/mainwindow.h \
+    src/GUI-QT/drmdetail.h \
+    src/GUI-QT/drmoptions.h
 SOURCES += \
     src/AMDemodulation.cpp \
     src/AMSSDemodulation.cpp \
@@ -554,7 +558,11 @@ SOURCES += \
     src/util/Reassemble.cpp \
     src/util/Settings.cpp \
     src/util/Utilities.cpp \
-    src/Version.cpp
+    src/Version.cpp \
+    src/GUI-QT/drmdisplay.cpp \
+    src/GUI-QT/mainwindow.cpp \
+    src/GUI-QT/drmdetail.cpp \
+    src/GUI-QT/drmoptions.cpp
 !console {
 HEADERS += \
     src/GUI-QT/Logging.h \
@@ -721,3 +729,9 @@ OTHER_FILES += \
     android/res/values/strings.xml \
     android/res/values-pl/strings.xml \
     android/AndroidManifest.xml
+
+FORMS += \
+    src/GUI-QT/mainwindow.ui \
+    src/GUI-QT/drmdisplay.ui \
+    src/GUI-QT/drmdetail.ui \
+    src/GUI-QT/drmoptions.ui

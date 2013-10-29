@@ -428,7 +428,7 @@ CDRMReceiver::SetOutputDevice(const QAudioDeviceInfo& di)
     pAudioOutput = new QAudioOutput(di, nearestFormat);
     pAudioOutput->setBufferSize(1000000);
     QIODevice* pIODevice = pAudioOutput->start();
-    int n = pAudioOutput->bufferSize();
+    int n = pAudioOutput->bufferSize(); (void)n;
     if(pAudioOutput->error()==QAudio::NoError)
     {
         WriteData.SetSoundInterface(pIODevice);
@@ -572,16 +572,6 @@ CDRMReceiver::GetInputStatus()
             eStatus = SF_SNDFILEIN;
     Parameters.Unlock();
     return eStatus;
-}
-
-string
-CDRMReceiver::GetInputFileName()
-{
-    string fileName;
-    Parameters.Lock();
-        fileName = rsiOrigin != "" ? rsiOrigin : sSoundFile;
-    Parameters.Unlock();
-    return fileName;
 }
 
 void

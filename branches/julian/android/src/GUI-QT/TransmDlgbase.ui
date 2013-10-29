@@ -22,7 +22,16 @@
     <property name="spacing">
      <number>6</number>
     </property>
-    <property name="margin">
+    <property name="leftMargin">
+     <number>11</number>
+    </property>
+    <property name="topMargin">
+     <number>11</number>
+    </property>
+    <property name="rightMargin">
+     <number>11</number>
+    </property>
+    <property name="bottomMargin">
      <number>11</number>
     </property>
     <item>
@@ -32,7 +41,16 @@
         <property name="spacing">
          <number>6</number>
         </property>
-        <property name="margin">
+        <property name="leftMargin">
+         <number>11</number>
+        </property>
+        <property name="topMargin">
+         <number>11</number>
+        </property>
+        <property name="rightMargin">
+         <number>11</number>
+        </property>
+        <property name="bottomMargin">
          <number>11</number>
         </property>
         <item>
@@ -40,7 +58,16 @@
           <property name="spacing">
            <number>6</number>
           </property>
-          <property name="margin">
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
            <number>0</number>
           </property>
           <item>
@@ -70,7 +97,16 @@
             <property name="spacing">
              <number>6</number>
             </property>
-            <property name="margin">
+            <property name="leftMargin">
+             <number>11</number>
+            </property>
+            <property name="topMargin">
+             <number>11</number>
+            </property>
+            <property name="rightMargin">
+             <number>11</number>
+            </property>
+            <property name="bottomMargin">
              <number>11</number>
             </property>
             <item>
@@ -135,7 +171,16 @@ Institute for Communication Technology</string>
            <property name="spacing">
             <number>6</number>
            </property>
-           <property name="margin">
+           <property name="leftMargin">
+            <number>11</number>
+           </property>
+           <property name="topMargin">
+            <number>11</number>
+           </property>
+           <property name="rightMargin">
+            <number>11</number>
+           </property>
+           <property name="bottomMargin">
             <number>11</number>
            </property>
            <item>
@@ -143,7 +188,16 @@ Institute for Communication Technology</string>
              <property name="spacing">
               <number>6</number>
              </property>
-             <property name="margin">
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
               <number>0</number>
              </property>
              <item>
@@ -157,8 +211,7 @@ Institute for Communication Technology</string>
               </widget>
              </item>
              <item>
-              <widget class="QwtThermo" name="ProgrInputLevel">
-              </widget>
+              <widget class="QwtThermo" name="ProgrInputLevel" native="true"/>
              </item>
             </layout>
            </item>
@@ -231,7 +284,16 @@ Institute for Communication Technology</string>
           <property name="spacing">
            <number>6</number>
           </property>
-          <property name="margin">
+          <property name="leftMargin">
+           <number>11</number>
+          </property>
+          <property name="topMargin">
+           <number>11</number>
+          </property>
+          <property name="rightMargin">
+           <number>11</number>
+          </property>
+          <property name="bottomMargin">
            <number>11</number>
           </property>
           <item>
@@ -246,7 +308,16 @@ Institute for Communication Technology</string>
              <property name="spacing">
               <number>6</number>
              </property>
-             <property name="margin">
+             <property name="leftMargin">
+              <number>11</number>
+             </property>
+             <property name="topMargin">
+              <number>11</number>
+             </property>
+             <property name="rightMargin">
+              <number>11</number>
+             </property>
+             <property name="bottomMargin">
               <number>11</number>
              </property>
              <item>
@@ -304,7 +375,16 @@ Institute for Communication Technology</string>
              <property name="spacing">
               <number>6</number>
              </property>
-             <property name="margin">
+             <property name="leftMargin">
+              <number>11</number>
+             </property>
+             <property name="topMargin">
+              <number>11</number>
+             </property>
+             <property name="rightMargin">
+              <number>11</number>
+             </property>
+             <property name="bottomMargin">
               <number>11</number>
              </property>
              <item>
@@ -312,7 +392,16 @@ Institute for Communication Technology</string>
                <property name="spacing">
                 <number>6</number>
                </property>
-               <property name="margin">
+               <property name="leftMargin">
+                <number>0</number>
+               </property>
+               <property name="topMargin">
+                <number>0</number>
+               </property>
+               <property name="rightMargin">
+                <number>0</number>
+               </property>
+               <property name="bottomMargin">
                 <number>0</number>
                </property>
                <item>
@@ -352,7 +441,16 @@ Institute for Communication Technology</string>
                <property name="spacing">
                 <number>6</number>
                </property>
-               <property name="margin">
+               <property name="leftMargin">
+                <number>0</number>
+               </property>
+               <property name="topMargin">
+                <number>0</number>
+               </property>
+               <property name="rightMargin">
+                <number>0</number>
+               </property>
+               <property name="bottomMargin">
                 <number>0</number>
                </property>
                <item>
@@ -395,7 +493,16 @@ Institute for Communication Technology</string>
             <property name="spacing">
              <number>6</number>
             </property>
-            <property name="margin">
+            <property name="leftMargin">
+             <number>0</number>
+            </property>
+            <property name="topMargin">
+             <number>0</number>
+            </property>
+            <property name="rightMargin">
+             <number>0</number>
+            </property>
+            <property name="bottomMargin">
              <number>0</number>
             </property>
             <item>
@@ -403,7 +510,16 @@ Institute for Communication Technology</string>
               <property name="spacing">
                <number>6</number>
               </property>
-              <property name="margin">
+              <property name="leftMargin">
+               <number>0</number>
+              </property>
+              <property name="topMargin">
+               <number>0</number>
+              </property>
+              <property name="rightMargin">
+               <number>0</number>
+              </property>
+              <property name="bottomMargin">
                <number>0</number>
               </property>
               <item>
@@ -426,7 +542,16 @@ Institute for Communication Technology</string>
               <property name="spacing">
                <number>6</number>
               </property>
-              <property name="margin">
+              <property name="leftMargin">
+               <number>0</number>
+              </property>
+              <property name="topMargin">
+               <number>0</number>
+              </property>
+              <property name="rightMargin">
+               <number>0</number>
+              </property>
+              <property name="bottomMargin">
                <number>0</number>
               </property>
               <item>
@@ -451,7 +576,16 @@ Institute for Communication Technology</string>
             <property name="spacing">
              <number>6</number>
             </property>
-            <property name="margin">
+            <property name="leftMargin">
+             <number>0</number>
+            </property>
+            <property name="topMargin">
+             <number>0</number>
+            </property>
+            <property name="rightMargin">
+             <number>0</number>
+            </property>
+            <property name="bottomMargin">
              <number>0</number>
             </property>
             <item>
@@ -459,7 +593,16 @@ Institute for Communication Technology</string>
               <property name="spacing">
                <number>6</number>
               </property>
-              <property name="margin">
+              <property name="leftMargin">
+               <number>0</number>
+              </property>
+              <property name="topMargin">
+               <number>0</number>
+              </property>
+              <property name="rightMargin">
+               <number>0</number>
+              </property>
+              <property name="bottomMargin">
                <number>0</number>
               </property>
               <item>
@@ -482,7 +625,16 @@ Institute for Communication Technology</string>
               <property name="spacing">
                <number>6</number>
               </property>
-              <property name="margin">
+              <property name="leftMargin">
+               <number>0</number>
+              </property>
+              <property name="topMargin">
+               <number>0</number>
+              </property>
+              <property name="rightMargin">
+               <number>0</number>
+              </property>
+              <property name="bottomMargin">
                <number>0</number>
               </property>
               <item>
@@ -512,7 +664,16 @@ Institute for Communication Technology</string>
           <property name="spacing">
            <number>6</number>
           </property>
-          <property name="margin">
+          <property name="leftMargin">
+           <number>11</number>
+          </property>
+          <property name="topMargin">
+           <number>11</number>
+          </property>
+          <property name="rightMargin">
+           <number>11</number>
+          </property>
+          <property name="bottomMargin">
            <number>11</number>
           </property>
           <item>
@@ -718,7 +879,16 @@ Institute for Communication Technology</string>
           <property name="spacing">
            <number>6</number>
           </property>
-          <property name="margin">
+          <property name="leftMargin">
+           <number>11</number>
+          </property>
+          <property name="topMargin">
+           <number>11</number>
+          </property>
+          <property name="rightMargin">
+           <number>11</number>
+          </property>
+          <property name="bottomMargin">
            <number>11</number>
           </property>
           <item>
@@ -864,7 +1034,16 @@ Institute for Communication Technology</string>
             <property name="spacing">
              <number>6</number>
             </property>
-            <property name="margin">
+            <property name="leftMargin">
+             <number>11</number>
+            </property>
+            <property name="topMargin">
+             <number>11</number>
+            </property>
+            <property name="rightMargin">
+             <number>11</number>
+            </property>
+            <property name="bottomMargin">
              <number>11</number>
             </property>
             <item>
@@ -872,7 +1051,16 @@ Institute for Communication Technology</string>
               <property name="spacing">
                <number>6</number>
               </property>
-              <property name="margin">
+              <property name="leftMargin">
+               <number>0</number>
+              </property>
+              <property name="topMargin">
+               <number>0</number>
+              </property>
+              <property name="rightMargin">
+               <number>0</number>
+              </property>
+              <property name="bottomMargin">
                <number>0</number>
               </property>
               <item>
@@ -902,7 +1090,16 @@ Institute for Communication Technology</string>
               <property name="spacing">
                <number>6</number>
               </property>
-              <property name="margin">
+              <property name="leftMargin">
+               <number>0</number>
+              </property>
+              <property name="topMargin">
+               <number>0</number>
+              </property>
+              <property name="rightMargin">
+               <number>0</number>
+              </property>
+              <property name="bottomMargin">
                <number>0</number>
               </property>
               <item>
@@ -932,7 +1129,16 @@ Institute for Communication Technology</string>
               <property name="spacing">
                <number>6</number>
               </property>
-              <property name="margin">
+              <property name="leftMargin">
+               <number>0</number>
+              </property>
+              <property name="topMargin">
+               <number>0</number>
+              </property>
+              <property name="rightMargin">
+               <number>0</number>
+              </property>
+              <property name="bottomMargin">
                <number>0</number>
               </property>
               <item>
@@ -979,7 +1185,16 @@ Institute for Communication Technology</string>
            <property name="spacing">
             <number>6</number>
            </property>
-           <property name="margin">
+           <property name="leftMargin">
+            <number>11</number>
+           </property>
+           <property name="topMargin">
+            <number>11</number>
+           </property>
+           <property name="rightMargin">
+            <number>11</number>
+           </property>
+           <property name="bottomMargin">
             <number>11</number>
            </property>
            <item>
@@ -1000,7 +1215,16 @@ Institute for Communication Technology</string>
              <property name="spacing">
               <number>6</number>
              </property>
-             <property name="margin">
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
               <number>0</number>
              </property>
              <item>
@@ -1072,7 +1296,16 @@ Institute for Communication Technology</string>
               <property name="spacing">
                <number>6</number>
               </property>
-              <property name="margin">
+              <property name="leftMargin">
+               <number>11</number>
+              </property>
+              <property name="topMargin">
+               <number>11</number>
+              </property>
+              <property name="rightMargin">
+               <number>11</number>
+              </property>
+              <property name="bottomMargin">
                <number>11</number>
               </property>
               <item>
@@ -1106,7 +1339,16 @@ Institute for Communication Technology</string>
                 <property name="spacing">
                  <number>6</number>
                 </property>
-                <property name="margin">
+                <property name="leftMargin">
+                 <number>0</number>
+                </property>
+                <property name="topMargin">
+                 <number>0</number>
+                </property>
+                <property name="rightMargin">
+                 <number>0</number>
+                </property>
+                <property name="bottomMargin">
                  <number>0</number>
                 </property>
                 <item>
@@ -1156,7 +1398,16 @@ Institute for Communication Technology</string>
            <property name="spacing">
             <number>6</number>
            </property>
-           <property name="margin">
+           <property name="leftMargin">
+            <number>11</number>
+           </property>
+           <property name="topMargin">
+            <number>11</number>
+           </property>
+           <property name="rightMargin">
+            <number>11</number>
+           </property>
+           <property name="bottomMargin">
             <number>11</number>
            </property>
            <item>
@@ -1239,7 +1490,16 @@ Institute for Communication Technology</string>
              <property name="spacing">
               <number>6</number>
              </property>
-             <property name="margin">
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
               <number>0</number>
              </property>
              <item>
@@ -1370,9 +1630,14 @@ Institute for Communication Technology</string>
      <x>0</x>
      <y>0</y>
      <width>967</width>
-     <height>25</height>
+     <height>21</height>
     </rect>
    </property>
+   <widget class="QMenu" name="menu_File">
+    <property name="title">
+     <string>&amp;File</string>
+    </property>
+   </widget>
    <widget class="QMenu" name="menu_Settings">
     <property name="title">
      <string>&amp;Settings</string>
@@ -1386,6 +1651,7 @@ Institute for Communication Technology</string>
     <addaction name="separator"/>
     <addaction name="actionAbout_Dream"/>
    </widget>
+   <addaction name="menu_File"/>
    <addaction name="menu_Settings"/>
    <addaction name="menuHelp"/>
   </widget>
@@ -1480,9 +1746,9 @@ Institute for Communication Technology</string>
  </connections>
  <buttongroups>
   <buttongroup name="ButtonGroupCurrentTime"/>
-  <buttongroup name="ButtonGroupOutput"/>
   <buttongroup name="ButtonGroupRobustnessMode"/>
   <buttongroup name="ButtonGroupCodec"/>
   <buttongroup name="ButtonGroupBandwidth"/>
+  <buttongroup name="ButtonGroupOutput"/>
  </buttongroups>
 </ui>

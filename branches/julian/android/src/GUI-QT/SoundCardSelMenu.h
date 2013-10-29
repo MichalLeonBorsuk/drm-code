@@ -83,8 +83,7 @@ class CFileMenu : public QMenu
     Q_OBJECT
 
 public:
-    CFileMenu(CDRMTransceiver& DRMTransceiver,
-        QMainWindow* parent, QMenu* menuInsertBefore);
+    CFileMenu(CDRMTransceiver&, QMainWindow*);
     void UpdateMenu();
 
 protected:
