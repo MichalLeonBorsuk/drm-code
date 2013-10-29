@@ -65,6 +65,7 @@ protected:
 	virtual void	eventShow(QShowEvent* pEvent);
 	virtual void	eventHide(QHideEvent* pEvent);
 	void			UpdateGPS(CParameter&);
+    void            UpdateControls();
 	void			AddWhatsThisHelp();
 	CDRMPlot*		OpenChartWin(CDRMPlot::ECharType eNewType);
 	QTreeWidgetItem* FindItemByECharType(CDRMPlot::ECharType eCharType);
@@ -78,24 +79,24 @@ protected:
 
 public slots:
 	void OnTimer();
-    void OnTimeLinear();
-    void OnTimeWiener();
-    void OnFrequencyLinear();
-    void OnFrequencyDft();
-    void OnFrequencyWiener();
-    void OnTiSyncFirstPeak();
-    void OnTiSyncEnergy();
-    void OnIterChange(int);
-    void on_stateChanged_ModiMetric(int);
-    void on_stateChanged_FlipSpectrum(int);
-    void on_stateChanged_MuteAudio(int);
-    void on_stateChanged_Reverb(int);
-    void on_stateChanged_SaveAudioWAV(int);
-    void on_stateChanged_WriteLog(int);
-    void on_stateChanged_RecFilter(int);
-	void OnListSelChanged(QTreeWidgetItem*, QTreeWidgetItem*);
-	void OnTreeWidgetContMenu(bool);
-	void OnCustomContextMenuRequested(const QPoint&);
+    void on_drmOptions_TimeLinear();
+    void on_drmOptions_TimeWiener();
+    void on_drmOptions_FrequencyLinear();
+    void on_drmOptions_FrequencyDft();
+    void on_drmOptions_FrequencyWiener();
+    void on_drmOptions_TiSyncFirstPeak();
+    void on_drmOptions_TiSyncEnergy();
+    void on_drmOptions_noOfIterationsChanged(int);
+    void on_drmOptions_ModiMetric(int);
+    void on_drmOptions_FlipSpectrum(int);
+    void on_drmOptions_RecFilter(int);
+    void on_CheckBoxMuteAudio_stateChanged(int);
+    void on_CheckBoxReverb_stateChanged(int);
+    void on_CheckBoxSaveAudioWave_stateChanged(int);
+    void on_CheckBoxWriteLog_stateChanged(int);
+    void on_chartSelector_currentItemChanged(QTreeWidgetItem*);
+    void on_chartSelector_customContextMenuRequested(const QPoint&);
+    void OnTreeWidgetContMenu(bool);
 	void UpdatePlotStyle(int);
     void setLogging(bool);
 

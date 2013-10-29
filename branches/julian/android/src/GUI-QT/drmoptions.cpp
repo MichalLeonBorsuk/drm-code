@@ -3,14 +3,13 @@
 
 DRMOptions::DRMOptions(QWidget *parent) :
     QWidget(parent),
-    ui(new Ui::DRMOptions)
+    ui(new Ui::DRMOptions),rsci_mode(false)
 {
     ui->setupUi(this);
     /* Init slider control */
     ui->SliderNoOfIterations->setRange(0, 4);
     ui->SliderNoOfIterations->setValue(0);
     ui->TextNumOfIterations->setText(tr("MLC: Number of Iterations: ") + QString().setNum(0));
-    connect(ui->SliderNoOfIterations, SIGNAL(valueChanged(int)), this, SIGNAL(noOfIterationsChanged(int)));
 
     connect(ui->RadioButtonTiLinear, SIGNAL(clicked()), this, SIGNAL(TimeLinear()));
     connect(ui->RadioButtonTiWiener, SIGNAL(clicked()),
@@ -44,6 +43,7 @@ DRMOptions::~DRMOptions()
 void
 DRMOptions::setRSCIModeEnabled(bool enabled)
 {
+    rsci_mode = enabled;
     ui->SliderNoOfIterations->setEnabled(!enabled);
 
     ui->ButtonGroupChanEstFreqInt->setEnabled(!enabled);
@@ -66,19 +66,16 @@ DRMOptions::setNumIterations(int iNumIt)
     }
 }
 
-void DRMOptions::on_change_SliderNoOfIterations(int value)
+void DRMOptions::on_SliderNoOfIterations_valueChanged(int value)
 {
     /* Show the new value in the label control */
     ui->TextNumOfIterations->setText(tr("MLC: Number of Iterations: ") +
                                  QString().setNum(value));
 }
 
-void DRMOptions::UpdateControls(CDRMReceiver& DRMReceiver)
+void DRMOptions::setTimeInt(CChannelEstimation::ETypeIntTime state)
 {
-    setNumIterations(DRMReceiver.GetMSCMLC()->GetInitNumIterations());
-
-    /* Update for channel estimation and time sync switches */
-    switch (DRMReceiver.GetTimeInt())
+    switch (state)
     {
     case CChannelEstimation::TLINEAR:
         if (!ui->RadioButtonTiLinear->isChecked())
@@ -90,8 +87,11 @@ void DRMOptions::UpdateControls(CDRMReceiver& DRMReceiver)
             ui->RadioButtonTiWiener->setChecked(TRUE);
         break;
     }
+}
 
-    switch (DRMReceiver.GetFreqInt())
+void DRMOptions::setFreqInt(CChannelEstimation::ETypeIntFreq state)
+{
+    switch (state)
     {
     case CChannelEstimation::FLINEAR:
         if (!ui->RadioButtonFreqLinear->isChecked())
@@ -109,7 +109,11 @@ void DRMOptions::UpdateControls(CDRMReceiver& DRMReceiver)
         break;
     }
 
-    switch (DRMReceiver.GetTiSyncTracType())
+}
+
+void DRMOptions::setTiSyncTrac(CTimeSyncTrack::ETypeTiSyncTrac state)
+{
+    switch (state)
     {
     case CTimeSyncTrack::TSFIRSTPEAK:
         if (!ui->RadioButtonTiSyncFirstPeak->isChecked())
@@ -122,10 +126,21 @@ void DRMOptions::UpdateControls(CDRMReceiver& DRMReceiver)
         break;
     }
 
-    /* Update settings checkbuttons */
-    ui->CheckBoxRecFilter->setChecked(DRMReceiver.GetFreqSyncAcq()->GetRecFilter());
-    ui->CheckBoxModiMetric->setChecked(DRMReceiver.GetIntCons());
-    ui->CheckBoxFlipSpec->setChecked(DRMReceiver.GetReceiveData()->GetFlippedSpectrum());
+}
+
+void DRMOptions::setRecFilterEnabled(bool b)
+{
+    ui->CheckBoxRecFilter->setChecked(b);
+}
+
+void DRMOptions::setIntConsEnabled(bool b)
+{
+    ui->CheckBoxModiMetric->setChecked(b);
+}
+
+void DRMOptions::setFlipSpectrumEnabled(bool b)
+{
+    ui->CheckBoxFlipSpec->setChecked(b);
 }
 
 void DRMOptions::AddWhatsThisHelp()

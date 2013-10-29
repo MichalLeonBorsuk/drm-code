@@ -33,6 +33,7 @@
 #include <QEvent>
 #include <QShowEvent>
 #include <QCloseEvent>
+#include <QTableWidget>
 #include "SlideShowViewer.h"
 #include "JLViewer.h"
 #ifdef QT_WEBKIT_LIB
@@ -43,6 +44,7 @@
 #endif
 #include "../Scheduler.h"
 #include "../util-QT/Util.h"
+#include "audiodetailwidget.h"
 
 // Simone's values
 // static _REAL WMERSteps[] = {8.0, 12.0, 16.0, 20.0, 24.0};
@@ -61,7 +63,7 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& Settings,
     CWindow(parent, Settings, "DRM"),
     ui(new Ui_MainWindow()),
     DRMReceiver(NDRMR),
-    serviceLabels(4), pLogging(NULL),
+    pLogging(NULL),
     pSysTray(NULL), pCurrentWindow(this),
     iMultimediaServiceBit(0),
     iLastMultimediaServiceSelected(-1),
@@ -176,15 +178,6 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& Settings,
     connect(this, SIGNAL(plotStyleChanged(int)), pSysEvalDlg, SLOT(UpdatePlotStyle(int)));
     connect(this, SIGNAL(plotStyleChanged(int)), pAnalogDemDlg, SLOT(UpdatePlotStyle(int)));
 
-    pButtonGroup = new QButtonGroup(this);
-    pButtonGroup->setExclusive(true);
-    pButtonGroup->addButton(ui->PushButtonService1, 0);
-    pButtonGroup->addButton(ui->PushButtonService2, 1);
-    pButtonGroup->addButton(ui->PushButtonService3, 2);
-    pButtonGroup->addButton(ui->PushButtonService4, 3);
-    connect(pButtonGroup, SIGNAL(buttonClicked(int)), this, SLOT(OnSelectAudioService(int)));
-    connect(pButtonGroup, SIGNAL(buttonClicked(int)), this, SLOT(OnSelectDataService(int)));
-
     connect(pFMDlg, SIGNAL(About()), this, SLOT(OnHelpAbout()));
     connect(pAnalogDemDlg, SIGNAL(About()), this, SLOT(OnHelpAbout()));
 
@@ -211,11 +204,6 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& Settings,
 
     connect(&Timer, SIGNAL(timeout()), this, SLOT(OnTimer()));
     connect(&TimerClose, SIGNAL(timeout()), this, SLOT(OnTimerClose()));
-
-    serviceLabels[0] = ui->TextMiniService1;
-    serviceLabels[1] = ui->TextMiniService2;
-    serviceLabels[2] = ui->TextMiniService3;
-    serviceLabels[3] = ui->TextMiniService4;
 
     ClearDisplay();
 
@@ -463,6 +451,67 @@ void FDRMDialog::OnTimerClose()
         close();
 }
 
+QString
+FDRMDialog::audioServiceDescription(const CService &service, _REAL rAudioBitRate)
+{
+    /* Do UTF-8 to string conversion with the label strings */
+    QString strLabel = QString().fromUtf8(service.strLabel.c_str());
+
+    /* Label for service selection button (service label, codec
+       and Mono / Stereo information) */
+    QString strCodec = GetCodecString(service);
+    QString strType = GetTypeString(service);
+    QString text = strLabel;
+    if (!strCodec.isEmpty() || !strType.isEmpty())
+        text += "  |   " + strCodec + " " + strType;
+
+    /* Bit-rate (only show if greater than 0) */
+    if (rAudioBitRate > (_REAL) 0.0)
+    {
+        text += " (" + QString().setNum(rAudioBitRate, 'f', 2) + " kbps)";
+    }
+
+    /* Report missing codec */
+    if (!DRMReceiver.GetAudSorceDec()->CanDecode(service.AudioParam.eAudioCoding))
+        text += tr(" [no codec available]");
+
+    return text;
+}
+
+QString
+FDRMDialog::dataServiceDescription(const CService &service)
+{
+    QString text;
+    if (service.DataParam.ePacketModInd == CDataParam::PM_PACKET_MODE)
+    {
+        if (service.DataParam.eAppDomain == CDataParam::AD_DAB_SPEC_APP)
+        {
+            switch (service.DataParam.iUserAppIdent)
+            {
+            case DAB_AT_EPG:
+                text = tr("Programme Guide");
+                break;
+            case DAB_AT_BROADCASTWEBSITE:
+                text = tr("Web Site");
+                break;
+            case DAB_AT_JOURNALINE:
+                text = tr("News");
+                break;
+            case DAB_AT_MOTSLIDESHOW:
+                text = tr("Slides");
+                break;
+             default:
+                text = tr("Packet Data");
+            }
+        }
+        else
+            text = tr("Packet Data");
+    }
+    else
+        text = tr("Stream Data");
+    return text;
+}
+
 QString FDRMDialog::serviceSelector(CParameter& Parameters, int i)
 {
     Parameters.Lock();
@@ -484,29 +533,10 @@ QString FDRMDialog::serviceSelector(CParameter& Parameters, int i)
     /* Check, if service is used */
     if (service.IsActive())
     {
-        /* Do UTF-8 to string conversion with the label strings */
-        QString strLabel = QString().fromUtf8(service.strLabel.c_str());
-
-        /* Label for service selection button (service label, codec
-           and Mono / Stereo information) */
-        QString strCodec = ui->MainDisplay->GetCodecString(service);
-        QString strType = ui->MainDisplay->GetTypeString(service);
-		text = strLabel;
-		if (!strCodec.isEmpty() || !strType.isEmpty())
-			text += "  |   " + strCodec + " " + strType;
-
-        /* Bit-rate (only show if greater than 0) */
-        if (rAudioBitRate > (_REAL) 0.0)
-        {
-            text += " (" + QString().setNum(rAudioBitRate, 'f', 2) + " kbps)";
-        }
-
+        text = audioServiceDescription(service, rAudioBitRate);
         /* Audio service */
         if ((service.eAudDataFlag == CService::SF_AUDIO))
         {
-            /* Report missing codec */
-            if (!DRMReceiver.GetAudSorceDec()->CanDecode(service.AudioParam.eAudioCoding))
-                text += tr(" [no codec available]");
 
             /* Show, if a multimedia stream is connected to this service */
             if (service.DataParam.iStreamID != STREAM_ID_NOT_USED)
@@ -548,25 +578,6 @@ QString FDRMDialog::serviceSelector(CParameter& Parameters, int i)
         {
             text += tr(" + AFS");
         }
-
-        switch (i)
-        {
-        case 0:
-            ui->PushButtonService1->setEnabled(TRUE);
-            break;
-
-        case 1:
-            ui->PushButtonService2->setEnabled(TRUE);
-            break;
-
-        case 2:
-            ui->PushButtonService3->setEnabled(TRUE);
-            break;
-
-        case 3:
-            ui->PushButtonService4->setEnabled(TRUE);
-            break;
-        }
     }
     return text;
 }
@@ -574,11 +585,74 @@ QString FDRMDialog::serviceSelector(CParameter& Parameters, int i)
 void FDRMDialog::UpdateDisplay()
 {
     CParameter& Parameters = *(DRMReceiver.GetParameters());
+    Parameters.Lock();
+    int n=0;
+    for(int i=0; i<MAX_NUM_SERVICES; i++) {
+
+        CService service = Parameters.Service[i];
+        const _REAL rAudioBitRate = Parameters.GetBitRateKbps(i, FALSE);
+
+        bool isValidAudioService = service.IsActive()
+                && (service.eAudDataFlag == CService::SF_AUDIO)
+                && (service.AudioParam.iStreamID != STREAM_ID_NOT_USED);
+
+        if (isValidAudioService)
+        {
+            QString label = QString::fromUtf8(service.strLabel.c_str());
+            if(label == "")
+                label = QString("%1A").arg(i+1);
+            AudioDetailWidget* adw=NULL;
+            if(ui->serviceTabs->count()>n) {
+                adw = dynamic_cast<AudioDetailWidget*>(ui->serviceTabs->widget(n));
+            }
+            if(adw) {
+                ui->serviceTabs->setTabText(n, label);
+            }
+            else {
+                if(ui->serviceTabs->widget(n))
+                    ui->serviceTabs->removeTab(n);
+                adw = new AudioDetailWidget();
+                ui->serviceTabs->addTab(adw, label);
+                connect(adw, SIGNAL(listen(int)), this, SLOT(OnSelectAudioService(int)));
+            }
+            adw->updateDisplay(i, service);
+             n++;
+        }
+    }
+    for(int i=0; i<MAX_NUM_SERVICES; i++) {
+        const _REAL rDataBitRate = Parameters.GetBitRateKbps(i, TRUE);
+
+        const CService& service = Parameters.Service[i];
+
+        bool isValidDataService = service.IsActive()
+                && (service.DataParam.iStreamID != STREAM_ID_NOT_USED);
+
+        if (isValidDataService)
+        {
+            QString label = QString::fromUtf8(service.strLabel.c_str());
+            if(label == "")
+                label = QString("%1D").arg(i+1);
+            QString s = dataServiceDescription(service);
+            QLabel* w=NULL;
+            if(ui->serviceTabs->count()>n) {
+                w = dynamic_cast<QLabel*>(ui->serviceTabs->widget(n));
+            }
+            if(w) {
+                ui->serviceTabs->setTabText(n, label+" "+s);
+                w->setText(s+" "+QString("%1 %2 kbit/s").arg(service.iServiceID, 6, 16).arg(rDataBitRate));
+            }
+            else {
+                if(ui->serviceTabs->widget(n))
+                    ui->serviceTabs->removeTab(n);
+                ui->serviceTabs->addTab(new QLabel(s), QString("%1D").arg(i+1));
+            }
+             n++;
+        }
+    }
+    Parameters.Unlock();
 
     Parameters.Lock();
-
-    /* Receiver does receive a DRM signal ------------------------------- */
-    /* First get current selected services */
+    /*  get current selected services */
     int iCurSelAudioServ = Parameters.GetCurSelAudioService();
 
     CService audioService = Parameters.Service[iCurSelAudioServ];
@@ -592,8 +666,6 @@ void FDRMDialog::UpdateDisplay()
     for(i=0; i < MAX_NUM_SERVICES; i++)
     {
         QString label = serviceSelector(Parameters, i);
-        serviceLabels[i]->setText(label);
-        pButtonGroup->button(i)->setEnabled(label != "");
         if (!bServiceIsValid && (iFirstAudioService == -1 || iFirstDataService == -1))
         {
             Parameters.Lock();
@@ -641,8 +713,6 @@ void FDRMDialog::UpdateDisplay()
         audioService = Parameters.Service[iCurSelAudioServ];
         Parameters.Unlock();
 
-        pButtonGroup->button(iCurSelAudioServ)->setChecked(true);
-
         /* If we have text messages */
         if (audioService.AudioParam.bTextflag == TRUE)
         {
@@ -670,7 +740,7 @@ void FDRMDialog::UpdateDisplay()
         }
         else
         {
-            ui->MainDisplay->clear(tr("No Service"));
+            ui->MainDisplay->clearDisplay(tr("No Service"));
         }
     }
 }
@@ -678,19 +748,9 @@ void FDRMDialog::UpdateDisplay()
 void FDRMDialog::ClearDisplay()
 {
     /* No signal is currently received ---------------------------------- */
-    /* Disable service buttons and associated labels */
-    pButtonGroup->setExclusive(FALSE);
-    for(size_t i=0; i<serviceLabels.size(); i++)
-    {
-        QPushButton* button = (QPushButton*)pButtonGroup->button(i);
-        if (button && button->isEnabled()) button->setEnabled(FALSE);
-        if (button && button->isChecked()) button->setChecked(FALSE);
-        serviceLabels[i]->setText("");
-    }
-    pButtonGroup->setExclusive(TRUE);
-
+    ui->serviceTabs->clear();
     /* Main text labels */
-    ui->MainDisplay->clear(tr("Scanning..."));
+    ui->MainDisplay->clearDisplay(tr("Scanning..."));
     ui->MainDisplay->showTextMessage("");
 }
 
@@ -926,12 +986,5 @@ void FDRMDialog::AddWhatsThisHelp()
            "In this case the alternative frequencies can be viewed by opening the Live Schedule Dialog."
           );
 
-    ui->PushButtonService1->setWhatsThis(strServiceSel);
-    ui->PushButtonService2->setWhatsThis(strServiceSel);
-    ui->PushButtonService3->setWhatsThis(strServiceSel);
-    ui->PushButtonService4->setWhatsThis(strServiceSel);
-    ui->TextMiniService1->setWhatsThis(strServiceSel);
-    ui->TextMiniService2->setWhatsThis(strServiceSel);
-    ui->TextMiniService3->setWhatsThis(strServiceSel);
-    ui->TextMiniService4->setWhatsThis(strServiceSel);
+    ui->serviceTabs->setWhatsThis(strServiceSel);
 }

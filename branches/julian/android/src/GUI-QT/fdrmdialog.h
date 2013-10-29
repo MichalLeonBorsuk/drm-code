@@ -88,7 +88,6 @@ protected:
     CDRMReceiver&		DRMReceiver;
     QTimer				Timer;
     QTimer				TimerClose;
-    vector<QLabel*>		serviceLabels;
 
     CLogging*			pLogging;
     systemevalDlg*		pSysEvalDlg;
@@ -103,7 +102,6 @@ protected:
     FMDialog*			pFMDlg;
     GeneralSettingsDlg* pGeneralSettingsDlg;
     QMenuBar*			pMenu;
-    QButtonGroup*		pButtonGroup;
     QMenu*				pReceiverModeMenu;
     QMenu*				pSettingsMenu;
     QMenu*				pPlotStyleMenu;
@@ -134,6 +132,8 @@ protected:
     void		ChangeGUIModeToFM();
 
     QString serviceSelector(CParameter&, int);
+    QString audioServiceDescription(const CService&, _REAL=0.0);
+    QString dataServiceDescription(const CService&);
     void startLogging();
     void stopLogging();
     void SysTrayCreate();

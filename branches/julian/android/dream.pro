@@ -458,7 +458,8 @@ HEADERS += \
     src/GUI-QT/drmdisplay.h \
     src/GUI-QT/mainwindow.h \
     src/GUI-QT/drmdetail.h \
-    src/GUI-QT/drmoptions.h
+    src/GUI-QT/drmoptions.h \
+    src/GUI-QT/audiodetailwidget.h
 SOURCES += \
     src/AMDemodulation.cpp \
     src/AMSSDemodulation.cpp \
@@ -562,7 +563,8 @@ SOURCES += \
     src/GUI-QT/drmdisplay.cpp \
     src/GUI-QT/mainwindow.cpp \
     src/GUI-QT/drmdetail.cpp \
-    src/GUI-QT/drmoptions.cpp
+    src/GUI-QT/drmoptions.cpp \
+    src/GUI-QT/audiodetailwidget.cpp
 !console {
 HEADERS += \
     src/GUI-QT/Logging.h \
@@ -734,4 +736,5 @@ FORMS += \
     src/GUI-QT/mainwindow.ui \
     src/GUI-QT/drmdisplay.ui \
     src/GUI-QT/drmdetail.ui \
-    src/GUI-QT/drmoptions.ui
+    src/GUI-QT/drmoptions.ui \
+    src/GUI-QT/audiodetailwidget.ui
