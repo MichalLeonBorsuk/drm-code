@@ -44,7 +44,6 @@
 #endif
 #include "../Scheduler.h"
 #include "../util-QT/Util.h"
-#include "audiodetailwidget.h"
 
 // Simone's values
 // static _REAL WMERSteps[] = {8.0, 12.0, 16.0, 20.0, 24.0};
@@ -67,7 +66,8 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& Settings,
     pSysTray(NULL), pCurrentWindow(this),
     iMultimediaServiceBit(0),
     iLastMultimediaServiceSelected(-1),
-    pScheduler(NULL), pScheduleTimer(NULL)
+    pScheduler(NULL), pScheduleTimer(NULL),
+    serviceWidgets()
 {
     ui->setupUi(this);
 
@@ -586,11 +586,12 @@ void FDRMDialog::UpdateDisplay()
 {
     CParameter& Parameters = *(DRMReceiver.GetParameters());
     Parameters.Lock();
-    int n=0;
-    for(int i=0; i<MAX_NUM_SERVICES; i++) {
+    for(int shortId=0; shortId<MAX_NUM_SERVICES; shortId++) {
 
-        CService service = Parameters.Service[i];
-        const _REAL rAudioBitRate = Parameters.GetBitRateKbps(i, FALSE);
+        CService service = Parameters.Service[shortId];
+        const _REAL rAudioBitRate = Parameters.GetBitRateKbps(shortId, FALSE);
+        const _REAL rDataBitRate = Parameters.GetBitRateKbps(shortId, TRUE);
+        QString label = QString::fromUtf8(service.strLabel.c_str());
 
         bool isValidAudioService = service.IsActive()
                 && (service.eAudDataFlag == CService::SF_AUDIO)
@@ -598,55 +599,63 @@ void FDRMDialog::UpdateDisplay()
 
         if (isValidAudioService)
         {
-            QString label = QString::fromUtf8(service.strLabel.c_str());
+            int index;
             if(label == "")
-                label = QString("%1A").arg(i+1);
-            AudioDetailWidget* adw=NULL;
-            if(ui->serviceTabs->count()>n) {
-                adw = dynamic_cast<AudioDetailWidget*>(ui->serviceTabs->widget(n));
-            }
-            if(adw) {
-                ui->serviceTabs->setTabText(n, label);
-            }
-            else {
-                if(ui->serviceTabs->widget(n))
-                    ui->serviceTabs->removeTab(n);
-                adw = new AudioDetailWidget();
-                ui->serviceTabs->addTab(adw, label);
+                label = QString("%1A").arg(shortId+1);
+
+            if(serviceWidgets[shortId].audio==NULL)
+            {
+                AudioDetailWidget* adw = new AudioDetailWidget();
+                serviceWidgets[shortId].audio = adw;
+                index = ui->serviceTabs->addTab(adw, label);
                 connect(adw, SIGNAL(listen(int)), this, SLOT(OnSelectAudioService(int)));
             }
-            adw->updateDisplay(i, service);
-             n++;
+            else
+            {
+                index = ui->serviceTabs->indexOf(serviceWidgets[shortId].audio);
+                ui->serviceTabs->setTabText(index, label);
+            }
+            serviceWidgets[shortId].audio->updateDisplay(shortId, service);
+            // try and order the tabs by shortId
+            ui->serviceTabs->tabBar()->moveTab(index, shortId);
         }
-    }
-    for(int i=0; i<MAX_NUM_SERVICES; i++) {
-        const _REAL rDataBitRate = Parameters.GetBitRateKbps(i, TRUE);
-
-        const CService& service = Parameters.Service[i];
 
         bool isValidDataService = service.IsActive()
                 && (service.DataParam.iStreamID != STREAM_ID_NOT_USED);
 
         if (isValidDataService)
         {
-            QString label = QString::fromUtf8(service.strLabel.c_str());
+            int index;
+            QString desc = dataServiceDescription(service);
+            QString detail =  QString("%1 %2 %3 kbit/s")
+                    .arg(desc)
+                    .arg(service.iServiceID, 6, 16)
+                    .arg(rDataBitRate);
+
             if(label == "")
-                label = QString("%1D").arg(i+1);
-            QString s = dataServiceDescription(service);
-            QLabel* w=NULL;
-            if(ui->serviceTabs->count()>n) {
-                w = dynamic_cast<QLabel*>(ui->serviceTabs->widget(n));
+                label = QString("%1 (%2)").arg(shortId+1).arg(desc);
+            else
+            {
+                if(service.eAudDataFlag == CService::SF_AUDIO)
+                {
+                    label = QString("%1 (%2)").arg(label).arg(desc);
+                }
             }
-            if(w) {
-                ui->serviceTabs->setTabText(n, label+" "+s);
-                w->setText(s+" "+QString("%1 %2 kbit/s").arg(service.iServiceID, 6, 16).arg(rDataBitRate));
+
+            if(serviceWidgets[shortId].data==NULL)
+            {
+                QLabel* l = new QLabel(detail);
+                serviceWidgets[shortId].data = l;
+                index = ui->serviceTabs->addTab(l, label);
             }
-            else {
-                if(ui->serviceTabs->widget(n))
-                    ui->serviceTabs->removeTab(n);
-                ui->serviceTabs->addTab(new QLabel(s), QString("%1D").arg(i+1));
+            else
+            {
+                index = ui->serviceTabs->indexOf(serviceWidgets[shortId].data);
+                ui->serviceTabs->setTabText(index, label);
+                QLabel* l = dynamic_cast<QLabel*>(serviceWidgets[shortId].data);
+                if(l)
+                    l->setText(detail);
             }
-             n++;
         }
     }
     Parameters.Unlock();

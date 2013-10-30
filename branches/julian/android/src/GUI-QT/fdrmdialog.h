@@ -64,6 +64,7 @@
 #include "../DrmReceiver.h"
 #include "../util/Vector.h"
 #include "../datadecoding/DataDecoder.h"
+#include "audiodetailwidget.h"
 
 /* Classes ********************************************************************/
 class BWSViewer;
@@ -84,6 +85,14 @@ public:
     virtual ~FDRMDialog();
 
 protected:
+
+    struct ServiceWidget {
+        ServiceWidget():service(),audio(NULL),data(NULL){}
+        CService service;
+        AudioDetailWidget* audio;
+        QWidget* data;
+    };
+
     Ui_MainWindow*      ui;
     CDRMReceiver&		DRMReceiver;
     QTimer				Timer;
@@ -117,6 +126,7 @@ protected:
     QTimer				TimerSysTray;
     CScheduler* 	    pScheduler;
     QTimer*		        pScheduleTimer;
+    ServiceWidget       serviceWidgets[MAX_NUM_SERVICES];
 
     virtual void        eventClose(QCloseEvent* ce);
     virtual void        eventHide(QHideEvent* pEvent);
