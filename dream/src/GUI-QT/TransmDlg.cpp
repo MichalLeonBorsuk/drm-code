@@ -479,28 +479,9 @@ TransmDialog::TransmDialog(CSettings& Settings,	QWidget* parent)
 
 TransmDialog::~TransmDialog()
 {
-	/* Destroy system tray */
-    CSysTray::Destroy(&pSysTray);
-
 	/* Destroy codec dialog if exist */
 	if (pCodecDlg)
 		delete pCodecDlg;
-
-	/* Stop transmitter */
-	if (bIsStarted == TRUE)
-		TransThread.Stop();
-
-	/* Restore the service description, may
-	   have been reset by data service */
-	CParameter& Parameters = *DRMTransmitter.GetParameters();
-	Parameters.Lock();
-	CService& Service = Parameters.Service[0]; // TODO
-	Service.iServiceDescr = iServiceDescr;
-
-	/* Save transmitter settings */
-	DRMTransmitter.SaveSettings();
-
-	Parameters.Unlock();
 }
 
 void TransmDialog::eventClose(QCloseEvent* ce)
@@ -512,9 +493,23 @@ void TransmDialog::eventClose(QCloseEvent* ce)
 		ce->ignore();
 	}
 	else {
-#if QT_VERSION >= 0x050000
-		CSysTray::Destroy(&pSysTray); /* Needed for Qt 5.0.0 - possible framework bug */
-#endif
+		CSysTray::Destroy(&pSysTray);
+
+		/* Stop transmitter */
+		if (bIsStarted == TRUE)
+			TransThread.Stop();
+
+		/* Restore the service description, may
+		   have been reset by data service */
+		CParameter& Parameters = *DRMTransmitter.GetParameters();
+		Parameters.Lock();
+		CService& Service = Parameters.Service[0]; // TODO
+		Service.iServiceDescr = iServiceDescr;
+
+		/* Save transmitter settings */
+		DRMTransmitter.SaveSettings();
+		Parameters.Unlock();
+
 		ce->accept();
 	}
 }
