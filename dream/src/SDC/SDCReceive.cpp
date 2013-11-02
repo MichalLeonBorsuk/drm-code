@@ -917,8 +917,8 @@ _BOOLEAN CSDCReceive::DataEntityType9(CVector<_BINARY>* pbiData,
     /* Init error flag with "no error" */
     _BOOLEAN bError = FALSE;
 
-    /* Init AC_OTHER flag to FALSE */
-    _BOOLEAN AC_OTHER = FALSE;
+    /* Init bAudioSamplingRateValue7 flag to FALSE */
+    _BOOLEAN bAudioSamplingRateValue7 = FALSE;
 
     /* Short ID (the short ID is the index of the service-array) */
     const int iTempShortID = (*pbiData).Separate(2);
@@ -946,142 +946,133 @@ _BOOLEAN CSDCReceive::DataEntityType9(CVector<_BINARY>* pbiData,
         AudParam.eAudioCoding = CAudioParam::AC_HVXC;
         break;
 
-    default: /* reserved */
-        AC_OTHER = TRUE;
+    default: /* 11 */
+        bError = TRUE;
         break;
     }
 
-    if (AC_OTHER)
+    /* SBR flag */
+    switch ((*pbiData).Separate(1))
     {
-        /* XXX EXPERIMENTAL NOT PART OF DRM STANDARD XXX */
+    case 0: /* 0 */
+        AudParam.eSBRFlag = CAudioParam::SB_NOT_USED;
+        break;
+
+    case 1: /* 1 */
+        AudParam.eSBRFlag = CAudioParam::SB_USED;
+        break;
+    }
+
+    /* Audio mode */
+    switch (AudParam.eAudioCoding)
+    {
+    case CAudioParam::AC_AAC:
+        /* Channel type */
         switch ((*pbiData).Separate(2))
         {
         case 0: /* 00 */
-            AudParam.eAudioCoding = CAudioParam::AC_OPUS;
+            AudParam.eAudioMode = CAudioParam::AM_MONO;
+            break;
+
+        case 1: /* 01 */
+            AudParam.eAudioMode = CAudioParam::AM_P_STEREO;
+            break;
+
+        case 2: /* 10 */
             AudParam.eAudioMode = CAudioParam::AM_STEREO;
-            AudParam.eAudioSamplRate = CAudioParam::AS_48KHZ;
-            AudParam.eSBRFlag = CAudioParam::SB_NOT_USED;
-            /* rfa */
-            bError = (*pbiData).Separate(4) != 0;
-            break;
-
-        default: /* rooms for three other codec */
-            /* rfa */
-            (*pbiData).Separate(4);
-            bError = TRUE;
-            break;
-        }
-    }
-    else
-    {
-        /* SBR flag */
-        switch ((*pbiData).Separate(1))
-        {
-        case 0: /* 0 */
-            AudParam.eSBRFlag = CAudioParam::SB_NOT_USED;
-            break;
-
-        case 1: /* 1 */
-            AudParam.eSBRFlag = CAudioParam::SB_USED;
-            break;
-        }
-
-        /* Audio mode */
-        switch (AudParam.eAudioCoding)
-        {
-        case CAudioParam::AC_AAC:
-            /* Channel type */
-            switch ((*pbiData).Separate(2))
-            {
-            case 0: /* 00 */
-                AudParam.eAudioMode = CAudioParam::AM_MONO;
-                break;
-
-            case 1: /* 01 */
-                AudParam.eAudioMode = CAudioParam::AM_P_STEREO;
-                break;
-
-            case 2: /* 10 */
-                AudParam.eAudioMode = CAudioParam::AM_STEREO;
-                break;
-
-            default: /* reserved */
-                bError = TRUE;
-                break;
-            }
-            break;
-
-        case CAudioParam::AC_CELP:
-            /* rfa */
-            (*pbiData).Separate(1);
-
-            /* CELP_CRC */
-            switch ((*pbiData).Separate(1))
-            {
-            case 0: /* 0 */
-                AudParam.bCELPCRC = FALSE;
-                break;
-
-            case 1: /* 1 */
-                AudParam.bCELPCRC = TRUE;
-                break;
-            }
-            break;
-
-        case CAudioParam::AC_HVXC:
-            /* HVXC_rate */
-            switch ((*pbiData).Separate(1))
-            {
-            case 0: /* 0 */
-                AudParam.eHVXCRate = CAudioParam::HR_2_KBIT;
-                break;
-
-            case 1: /* 1 */
-                AudParam.eHVXCRate = CAudioParam::HR_4_KBIT;
-                break;
-            }
-
-            /* HVXC CRC */
-            switch ((*pbiData).Separate(1))
-            {
-            case 0: /* 0 */
-                AudParam.bHVXCCRC = FALSE;
-                break;
-
-            case 1: /* 1 */
-                AudParam.bHVXCCRC = TRUE;
-                break;
-            }
-            break;
-
-        default:
-            bError = TRUE;
-            break;
-        }
-
-        /* Audio sampling rate */
-        switch ((*pbiData).Separate(3))
-        {
-        case 0: /* 000 */
-            AudParam.eAudioSamplRate = CAudioParam::AS_8_KHZ;
-            break;
-
-        case 1: /* 001 */
-            AudParam.eAudioSamplRate = CAudioParam::AS_12KHZ;
-            break;
-
-        case 2: /* 010 */
-            AudParam.eAudioSamplRate = CAudioParam::AS_16KHZ;
-            break;
-
-        case 3: /* 011 */
-            AudParam.eAudioSamplRate = CAudioParam::AS_24KHZ;
             break;
 
         default: /* reserved */
             bError = TRUE;
             break;
         }
+        break;
+
+    case CAudioParam::AC_CELP:
+        /* rfa */
+        (*pbiData).Separate(1);
+
+        /* CELP_CRC */
+        switch ((*pbiData).Separate(1))
+        {
+        case 0: /* 0 */
+            AudParam.bCELPCRC = FALSE;
+            break;
+
+        case 1: /* 1 */
+            AudParam.bCELPCRC = TRUE;
+            break;
+        }
+        break;
+
+    case CAudioParam::AC_HVXC:
+        /* HVXC_rate */
+        switch ((*pbiData).Separate(1))
+        {
+        case 0: /* 0 */
+            AudParam.eHVXCRate = CAudioParam::HR_2_KBIT;
+            break;
+
+        case 1: /* 1 */
+            AudParam.eHVXCRate = CAudioParam::HR_4_KBIT;
+            break;
+        }
+
+        /* HVXC CRC */
+        switch ((*pbiData).Separate(1))
+        {
+        case 0: /* 0 */
+            AudParam.bHVXCCRC = FALSE;
+            break;
+
+        case 1: /* 1 */
+            AudParam.bHVXCCRC = TRUE;
+            break;
+        }
+        break;
+
+    default:
+        bError = TRUE;
+        break;
+    }
+
+    /* Audio sampling rate */
+    switch ((*pbiData).Separate(3))
+    {
+    case 0: /* 000 */
+        AudParam.eAudioSamplRate = CAudioParam::AS_8_KHZ;
+        break;
+
+    case 1: /* 001 */
+        AudParam.eAudioSamplRate = CAudioParam::AS_12KHZ;
+        break;
+
+    case 2: /* 010 */
+        AudParam.eAudioSamplRate = CAudioParam::AS_16KHZ;
+        break;
+
+    case 3: /* 011 */
+        AudParam.eAudioSamplRate = CAudioParam::AS_24KHZ;
+        break;
+
+    case 5: /* 101 */
+        AudParam.eAudioSamplRate = CAudioParam::AS_48KHZ;
+        break;
+
+    case 7: /* 111 */
+        bAudioSamplingRateValue7 = TRUE;
+    default: /* reserved */
+        bError = TRUE;
+        break;
+    }
+
+    /* XXX EXPERIMENTAL THIS IS NOT PART OF DRM STANDARD XXX */
+    if (bAudioSamplingRateValue7 && AudParam.eAudioCoding == CAudioParam::AC_AAC) {
+        bError = AudParam.eSBRFlag != CAudioParam::SB_NOT_USED || AudParam.eAudioMode != CAudioParam::AM_MONO;
+        AudParam.eAudioCoding = CAudioParam::AC_OPUS;
+        AudParam.eAudioMode = CAudioParam::AM_STEREO;
+        AudParam.eAudioSamplRate = CAudioParam::AS_48KHZ;
+        AudParam.eSBRFlag = CAudioParam::SB_NOT_USED;
     }
 
     /* Text flag */
