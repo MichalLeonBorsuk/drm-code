@@ -504,9 +504,6 @@ void CSDCTransmit::DataEntityType9(CVector<_BINARY>& vecbiData, int ServiceID,
     /* Data entity type */
     vecbiData.Enqueue((uint32_t) 9, 4); /* Type 09 */
 
-    /* Init AC_OTHER flag to FALSE */
-    _BOOLEAN AC_OTHER = FALSE;
-
     /* Actual body ---------------------------------------------------------- */
     /* Short Id */
     vecbiData.Enqueue((uint32_t) ServiceID, 2);
@@ -519,6 +516,7 @@ void CSDCTransmit::DataEntityType9(CVector<_BINARY>& vecbiData, int ServiceID,
     switch (Parameter.Service[ServiceID].AudioParam.eAudioCoding)
     {
     case CAudioParam::AC_AAC:
+    case CAudioParam::AC_OPUS:
         vecbiData.Enqueue(0 /* 00 */, 2);
         break;
 
@@ -531,27 +529,17 @@ void CSDCTransmit::DataEntityType9(CVector<_BINARY>& vecbiData, int ServiceID,
         break;
 
     default:
-        AC_OTHER = TRUE;
+        vecbiData.Enqueue(2 /* 11 */, 2);
         break;
     }
 
-    if (AC_OTHER)
+    if (Parameter.Service[ServiceID].AudioParam.eAudioCoding == CAudioParam::AC_OPUS)
     {
-        /* XXX EXPERIMENTAL NOT PART OF DRM STANDARD XXX */
-        vecbiData.Enqueue(3 /* 11 */, 2);
-        switch (Parameter.Service[ServiceID].AudioParam.eAudioCoding)
-        {
-        case CAudioParam::AC_OPUS:
-            /* AC_OPUS */
-            vecbiData.Enqueue(0 /* 00 */, 2);
-            /* rfa */
-            vecbiData.Enqueue(0, 4);
-            break;
-
-        default: /* shouldn't happen and make compiler happy */
-            vecbiData.Enqueue(-1, 6);
-            break;
-        }
+        /* XXX EXPERIMENTAL THIS IS NOT PART OF DRM STANDARD XXX */
+        /* SBR flag, Audio mode */
+        vecbiData.Enqueue(0 /* 000 */, 3); /* set to zero, rfa for OPUS */
+        /* Audio sampling rate */
+        vecbiData.Enqueue(7 /* 111 */, 3); /* set to seven, reserved value for AAC */
     }
     else
     {
@@ -631,9 +619,9 @@ void CSDCTransmit::DataEntityType9(CVector<_BINARY>& vecbiData, int ServiceID,
             }
             break;
 
-        case CAudioParam::AC_NONE:
-        case CAudioParam::AC_OPUS:
-            break; /* make compiler happy */
+        default:
+            vecbiData.Enqueue(0 /* 00 */, 2);
+            break;
         }
 
         /* Audio sampling rate */
