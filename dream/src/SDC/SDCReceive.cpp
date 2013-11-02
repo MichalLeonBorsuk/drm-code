@@ -983,6 +983,7 @@ _BOOLEAN CSDCReceive::DataEntityType9(CVector<_BINARY>* pbiData,
             break;
 
         default: /* reserved */
+            AudParam.eAudioMode = CAudioParam::AM_STEREO;
             bError = TRUE;
             break;
         }
