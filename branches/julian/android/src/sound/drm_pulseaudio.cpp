@@ -27,9 +27,9 @@
 \******************************************************************************/
 
 #include <unistd.h>
-#include <time.h>
-#include <string.h>
-#include <stdlib.h>
+#include <ctime>
+#include <cstring>
+#include <cstdlib>
 #include <vector>
 #include "drm_pulseaudio.h"
 

@@ -38,6 +38,7 @@ public slots:
     void setCodeRate(int,int);
 private slots:
     void on_chartSelector_currentItemChanged(QTreeWidgetItem *);
+    void on_showOptions_toggled(bool);
 
 signals:
     void noOfIterationsChanged(int);

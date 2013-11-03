@@ -41,7 +41,7 @@ if I run it with the command:
 #include <cerrno>
 #include <cctype>
 #include <cstring>
-#include <stdlib.h> /* for atol() */
+#include <cstdlib> /* for atol() */
 
 #ifdef _WIN32
 /* Always include winsock2.h before windows.h */

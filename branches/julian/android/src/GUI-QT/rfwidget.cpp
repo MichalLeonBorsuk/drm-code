@@ -3,15 +3,15 @@
 #include <QTabBar>
 #include "DRMPlot.h"
 
-RFWidget::RFWidget(CDRMReceiver* pDRMReceiver, QWidget *parent) :
+RFWidget::RFWidget(CDRMReceiver* prx, QWidget *parent) :
     QWidget(parent),
-    ui(new Ui::RFWidget)
+    ui(new Ui::RFWidget),pMainPlot(NULL),pDRMReceiver(prx)
 {
     ui->setupUi(this);
     pMainPlot = new CDRMPlot(NULL, ui->plot);
     pMainPlot->SetRecObj(pDRMReceiver);
     pMainPlot->setupTreeWidget(ui->chartSelector);
-    pMainPlot->SetupChart(CDRMPlot::INP_SPEC_WATERF);
+    pMainPlot->SetupChart(CDRMPlot::INPUT_SIG_PSD);
 }
 
 RFWidget::~RFWidget()
@@ -22,10 +22,22 @@ RFWidget::~RFWidget()
 void RFWidget::setActive(bool active)
 {
     if(active)
+    {
+        on_chartSelector_currentItemChanged(ui->chartSelector->currentItem());
         pMainPlot->activate();
+    }
     else
         pMainPlot->deactivate();
 }
+
+void RFWidget::on_showOptions_toggled(bool enabled)
+{
+    if(enabled)
+        ui->drmOptions->show();
+    else
+        ui->drmOptions->hide();
+}
+
 
 void RFWidget::on_chartSelector_currentItemChanged(QTreeWidgetItem *curr)
 {

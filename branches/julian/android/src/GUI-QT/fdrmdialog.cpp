@@ -34,6 +34,7 @@
 #include <QShowEvent>
 #include <QCloseEvent>
 #include <QTableWidget>
+#include "../stationselector.h"
 #include "SlideShowViewer.h"
 #include "journalineviewer.h"
 #include "rfwidget.h"
@@ -69,9 +70,11 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& Settings,
     iMultimediaServiceBit(0),
     iLastMultimediaServiceSelected(-1),
     pScheduler(NULL), pScheduleTimer(NULL),
-    serviceWidgets(),pRFWidget(NULL)
+    serviceWidgets(),engineeringWidgets()
 {
     ui->setupUi(this);
+    for(int i=0; i<4; i++)
+        engineeringWidgets[i]=NULL;
 
     /* Set help text for the controls */
     AddWhatsThisHelp();
@@ -121,15 +124,16 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& Settings,
 
     /* Multimedia settings window */
     pMultSettingsDlg = new MultSettingsDlg(Parameters, Settings, this);
-
+#if 0
     connect(ui->action_Evaluation_Dialog, SIGNAL(triggered()), pSysEvalDlg, SLOT(show()));
     connect(ui->action_Multimedia_Dialog, SIGNAL(triggered()), this, SLOT(OnViewMultimediaDlg()));
     connect(ui->action_Stations_Dialog, SIGNAL(triggered()), pStationsDlg, SLOT(show()));
     connect(ui->action_Live_Schedule_Dialog, SIGNAL(triggered()), pLiveScheduleDlg, SLOT(show()));
     connect(ui->action_Programme_Guide_Dialog, SIGNAL(triggered()), pEPGDlg, SLOT(show()));
     connect(ui->actionExit, SIGNAL(triggered()), this, SLOT(close()));
-
     ui->action_Multimedia_Dialog->setEnabled(false);
+#endif
+
 
     connect(ui->actionMultimediaSettings, SIGNAL(triggered()), pMultSettingsDlg, SLOT(show()));
     connect(ui->actionGeneralSettings, SIGNAL(triggered()), pGeneralSettingsDlg, SLOT(show()));
@@ -227,58 +231,103 @@ FDRMDialog::~FDRMDialog()
     delete pFMDlg;
 }
 
-void FDRMDialog::on_actionEngineering_toggled(bool checked)
+void FDRMDialog::on_action_Programme_Guide_toggled(bool checked)
 {
-        bEngineering = checked;
-        if(bEngineering)
-        {
-            if(pRFWidget==NULL)
-                pRFWidget = new RFWidget(&DRMReceiver);
-
-            ui->serviceTabs->addTab(pRFWidget, "Channel");
-            ui->serviceTabs->addTab(new QLabel(""), "Streams");
-            ui->serviceTabs->addTab(new QLabel(""), "AFS");
-            ui->serviceTabs->addTab(new QLabel(""), "GPS");
-        }
-        else
-        {
-            ui->serviceTabs->clear();
-            if(pRFWidget)
-            {
-                delete pRFWidget;
-                pRFWidget = NULL;
-            }
-            UpdateDisplay();
-        }
-}
-
-void FDRMDialog::on_serviceTabs_currentChanged(int index)
-{
-    if(index==-1)
+    if(checked)
     {
-        for(int i=0; i<ui->serviceTabs->count(); i++)
-        {
-            QString s = ui->serviceTabs->tabText(i);
-            if(s=="Channel")
-            {
-                on_actionEngineering_toggled(false);
-            }
-        }
+        pEpg = new QLabel("EPG");
+        int n = ui->serviceTabs->count();
+        ui->serviceTabs->insertTab(n++, pEpg, "EPG");
     }
     else
     {
-        QString s = ui->serviceTabs->tabText(index);
-        if(s=="Channel")
+        delete pEpg; pEpg=0;
+    }
+}
+
+void FDRMDialog::on_actionAlt_Frequencies_toggled(bool checked)
+{
+    if(checked)
+    {
+        pAltFreq = new QLabel("EPG");
+        int n = ui->serviceTabs->count();
+        ui->serviceTabs->insertTab(n++, pAltFreq, "Alt Freq");
+    }
+    else
+    {
+        delete pAltFreq; pAltFreq=0;
+    }
+}
+
+void FDRMDialog::on_action_Transmissions_toggled(bool checked)
+{
+    if(checked)
+    {
+        pTx = new StationSelector();
+        int n = ui->serviceTabs->count();
+        ui->serviceTabs->insertTab(n++, pTx, "Transmissions");
+        connect(this, SIGNAL(Frequency(int)), pTx, SLOT(on_newFrequency(int)));
+        connect(pTx, SIGNAL(tuningRequest(int)), this, SLOT(OnTuningRequest(int)));
+    }
+    else
+    {
+        disconnect(this, SIGNAL(Frequency(int)), pTx, SLOT(on_newFrequency(int)));
+        disconnect(pTx, SIGNAL(tuningRequest(int)), this, SLOT(OnTuningRequest(int)));
+        delete pTx; pTx=0;
+    }
+}
+
+
+void FDRMDialog::on_actionEngineering_toggled(bool checked)
+{
+        bEngineering = checked;
+        for(int i=0; i<MAX_NUM_SERVICES; i++)
         {
-            if(pRFWidget)
+            if(serviceWidgets[i].audio)
+                serviceWidgets[i].audio->setEngineering(bEngineering);
+            // TODO serviceWidgets[i].data->setEngineering(bEngineering);
+        }
+
+        if(bEngineering)
+        {
+            if(engineeringWidgets[0]==NULL)
             {
-                pRFWidget->setActive(true);
+                engineeringWidgets[0] = new RFWidget(&DRMReceiver);
+                engineeringWidgets[1] = new QLabel("");
+                engineeringWidgets[2] = new QLabel("");
+                engineeringWidgets[3] = new QLabel("");
             }
-            else
+
+            int n = ui->serviceTabs->count();
+            ui->serviceTabs->insertTab(n++, engineeringWidgets[0], "Channel");
+            ui->serviceTabs->insertTab(n++, engineeringWidgets[1], "Streams");
+            ui->serviceTabs->insertTab(n++, engineeringWidgets[2], "AFS");
+            ui->serviceTabs->insertTab(n++, engineeringWidgets[3], "GPS");
+        }
+        else
+        {
+            if(engineeringWidgets[0]!=NULL)
             {
-                pRFWidget->setActive(false);
+                for(int i=0; i<4; i++)
+                {
+                    //ui->serviceTabs->removeTab();
+                    delete engineeringWidgets[i];
+                    engineeringWidgets[i] = NULL;
+                }
             }
         }
+        UpdateDisplay();
+}
+
+void FDRMDialog::on_serviceTabs_currentChanged(int)
+{
+    RFWidget* pRFWidget = (RFWidget*)engineeringWidgets[0];
+    if(pRFWidget)
+    {
+        if(ui->serviceTabs->currentWidget()==pRFWidget)
+            pRFWidget->setActive(true);
+        else
+            pRFWidget->setActive(false);
     }
 }
 
@@ -392,11 +441,13 @@ void FDRMDialog::UpdateDRM_GUI()
            multimedia service selected to none */
         iLastMultimediaServiceSelected = -1;
     }
+#if 0
     /* If multimedia service availability has changed
        then update the menu */
     bMultimediaServiceAvailable = iMultimediaServiceBit != 0;
     if (bMultimediaServiceAvailable != ui->action_Multimedia_Dialog->isEnabled())
         ui->action_Multimedia_Dialog->setEnabled(bMultimediaServiceAvailable);
+#endif
 }
 
 void FDRMDialog::startLogging()
@@ -439,6 +490,10 @@ void FDRMDialog::OnScheduleTimer()
 
 void FDRMDialog::UpdateChannel()
 {
+    RFWidget* pRFWidget = (RFWidget*)engineeringWidgets[0];
+    if(pRFWidget==NULL)
+        return;
+
     CParameter& Parameters = *(DRMReceiver.GetParameters());
 
     Parameters.Lock();
@@ -568,7 +623,8 @@ void FDRMDialog::UpdateChannel()
 
 void FDRMDialog::OnTimer()
 {
-    if(pRFWidget)
+    RFWidget* pRFWidget = (RFWidget*)engineeringWidgets[0];
+    if(pRFWidget && pRFWidget == ui->serviceTabs->currentWidget())
         UpdateChannel();
     ERecMode eNewReceiverMode = DRMReceiver.GetReceiverMode();
     switch(eNewReceiverMode)
@@ -585,6 +641,12 @@ void FDRMDialog::OnTimer()
     case RM_NONE: // wait until working thread starts operating
         break;
     }
+
+    int f = DRMReceiver.GetFrequency();
+    if(f != iFrequency)
+        emit Frequency(f);
+    iFrequency = f;
+
 
     // do this here so GUI has initialised before we might pop up a message box
     if(pScheduler!=NULL)
@@ -632,7 +694,7 @@ void FDRMDialog::OnTimerClose()
 }
 
 QString
-FDRMDialog::audioServiceDescription(const CService &service, _REAL rAudioBitRate)
+FDRMDialog::audioServiceDescription(const CService &service)
 {
     /* Do UTF-8 to string conversion with the label strings */
     QString strLabel = QString().fromUtf8(service.strLabel.c_str());
@@ -646,9 +708,9 @@ FDRMDialog::audioServiceDescription(const CService &service, _REAL rAudioBitRate
         text += "  |   " + strCodec + " " + strType;
 
     /* Bit-rate (only show if greater than 0) */
-    if (rAudioBitRate > (_REAL) 0.0)
+    if (service.AudioParam.rBitrate > (_REAL) 0.0)
     {
-        text += " (" + QString().setNum(rAudioBitRate, 'f', 2) + " kbps)";
+        text += " (" + QString().setNum(service.AudioParam.rBitrate, 'f', 2) + " kbps)";
     }
 
     /* Report missing codec */
@@ -713,7 +775,7 @@ QString FDRMDialog::serviceSelector(CParameter& Parameters, int i)
     /* Check, if service is used */
     if (service.IsActive())
     {
-        text = audioServiceDescription(service, rAudioBitRate);
+        text = audioServiceDescription(service);
         /* Audio service */
         if ((service.eAudDataFlag == CService::SF_AUDIO))
         {
@@ -784,7 +846,9 @@ void FDRMDialog::UpdateDisplay()
 
             if(serviceWidgets[shortId].audio==NULL)
             {
-                AudioDetailWidget* adw = new AudioDetailWidget();
+                AudioDetailWidget* adw = new AudioDetailWidget(
+                            audioServiceDescription(service),
+                            &DRMReceiver);
                 serviceWidgets[shortId].audio = adw;
                 index = ui->serviceTabs->addTab(adw, label);
                 connect(adw, SIGNAL(listen(int)), this, SLOT(OnSelectAudioService(int)));
@@ -991,6 +1055,7 @@ void FDRMDialog::ChangeGUIModeToAM()
     pCurrentWindow = pAnalogDemDlg;
     pCurrentWindow->eventUpdate();
     pCurrentWindow->show();
+    emit Mode(RM_AM);
 }
 
 void FDRMDialog::ChangeGUIModeToFM()
@@ -1001,6 +1066,7 @@ void FDRMDialog::ChangeGUIModeToFM()
     pCurrentWindow = pFMDlg;
     pCurrentWindow->eventUpdate();
     pCurrentWindow->show();
+    emit Mode(RM_FM);
 }
 
 void FDRMDialog::eventUpdate()
@@ -1027,6 +1093,11 @@ void FDRMDialog::eventHide(QHideEvent*)
 void FDRMDialog::OnNewAcquisition()
 {
     DRMReceiver.RequestNewAcquisition();
+}
+
+void FDRMDialog::OnTuningRequest(int val)
+{
+    DRMReceiver.SetFrequency(val);
 }
 
 void FDRMDialog::OnSwitchMode(int newMode)

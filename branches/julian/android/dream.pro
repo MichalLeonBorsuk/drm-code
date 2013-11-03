@@ -595,7 +595,9 @@ FORMS += \
     drmdetail.ui \
     drmoptions.ui \
     audiodetailwidget.ui \
-    journalineviewer.ui
+    journalineviewer.ui \
+    rfwidget.ui \
+    stationselector.ui
 
 HEADERS += \
     src/GUI-QT/AnalogDemDlg.h \
@@ -624,7 +626,9 @@ HEADERS += \
     src/GUI-QT/audiodetailwidget.h \
     src/GUI-QT/journalineviewer.h \
     src/GUI-QT/rfwidget.h \
-    src/GUI-QT/waterfallwidget.h
+    src/GUI-QT/waterfallwidget.h \
+    src/GUI-QT/stationselector.h
+
 
 SOURCES += \
     src/GUI-QT/AnalogDemDlg.cpp \
@@ -653,7 +657,9 @@ SOURCES += \
     src/GUI-QT/audiodetailwidget.cpp \
     src/GUI-QT/journalineviewer.cpp \
     src/GUI-QT/rfwidget.cpp \
-    src/GUI-QT/waterfallwidget.cpp
+    src/GUI-QT/waterfallwidget.cpp \
+    src/GUI-QT/stationselector.cpp
+
 }
 !sound {
     error("no usable audio interface found - install pulseaudio or portaudio dev package")
@@ -744,6 +750,3 @@ OTHER_FILES += \
     android/res/values/strings.xml \
     android/res/values-pl/strings.xml \
     android/AndroidManifest.xml
-
-FORMS += \
-    src/GUI-QT/rfwidget.ui
