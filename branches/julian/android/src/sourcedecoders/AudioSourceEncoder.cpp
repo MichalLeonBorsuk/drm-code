@@ -37,10 +37,6 @@ CAudioSourceEncoderImplementation::CAudioSourceEncoderImplementation()
 {
     /* Initialize Audio Codec List */
     CAudioCodec::InitCodecList();
-
-    /* Needed by TransmDlg.cpp to report available codec */
-    bCanEncodeAAC  = CAudioCodec::GetEncoder(CAudioParam::AC_AAC,  true) != NULL;
-    bCanEncodeOPUS = CAudioCodec::GetEncoder(CAudioParam::AC_OPUS, true) != NULL;
 }
 
 CAudioSourceEncoderImplementation::~CAudioSourceEncoderImplementation()
@@ -453,6 +449,12 @@ CAudioSourceEncoderImplementation::InitInternalTx(CParameter & Parameters,
     iOutputBlockSize = Parameters.iNumDecodedBitsMSC;
     iInputBlockSize = iNumInSamplesMono * 2 /* stereo */ ;
 
+    // put this here, but should be global and only once per run
+    Parameters.bCanEncodeAAC  = CAudioCodec::GetEncoder(CAudioParam::AC_AAC,  true) != NULL;
+    Parameters.bCanEncodeCELP = CAudioCodec::GetEncoder(CAudioParam::AC_CELP, true) != NULL;
+    Parameters.bCanEncodeHVXC = CAudioCodec::GetEncoder(CAudioParam::AC_HVXC, true) != NULL;
+    Parameters.bCanEncodeOPUS = CAudioCodec::GetEncoder(CAudioParam::AC_OPUS, true) != NULL;
+    Parameters.bCanEncodexHEAAC = CAudioCodec::GetEncoder(CAudioParam::AC_xHEAAC, true) != NULL;
     Parameters.Unlock();
 }
 
@@ -620,6 +622,12 @@ CAudioSourceEncoderImplementation::InitInternalRx(CParameter& Parameters,
     iOutputBlockSize = iTotNumBitsForUsage;
     iInputBlockSize = iNumInSamplesMono * 2 /* stereo */ ;
 
+    // put this here, but should be global and only once per run
+    Parameters.bCanEncodeAAC  = CAudioCodec::GetEncoder(CAudioParam::AC_AAC,  true) != NULL;
+    Parameters.bCanEncodeCELP = CAudioCodec::GetEncoder(CAudioParam::AC_CELP, true) != NULL;
+    Parameters.bCanEncodeHVXC = CAudioCodec::GetEncoder(CAudioParam::AC_HVXC, true) != NULL;
+    Parameters.bCanEncodeOPUS = CAudioCodec::GetEncoder(CAudioParam::AC_OPUS, true) != NULL;
+    Parameters.bCanEncodexHEAAC = CAudioCodec::GetEncoder(CAudioParam::AC_xHEAAC, true) != NULL;
     Parameters.Unlock();
 }
 

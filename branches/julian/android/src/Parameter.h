@@ -74,6 +74,9 @@
 
 class CDRMReceiver;
 
+/* SI: Symbol Interleaver */
+enum ESymIntMod { SI_LONG, SI_SHORT, SI_MODE_E };
+
 /* CS: Coding Scheme */
 enum ECodScheme { CS_1_SM, CS_2_SM, CS_3_SM, CS_3_HMSYM, CS_3_HMMIX };
 
@@ -106,7 +109,7 @@ class CAudioParam
 public:
 
     /* AC: Audio Coding */
-    enum EAudCod { AC_NONE, AC_AAC, AC_CELP, AC_HVXC, AC_OPUS };
+    enum EAudCod { AC_NONE, AC_AAC, AC_CELP, AC_HVXC, AC_OPUS, AC_xHEAAC };
 
     /* SB: SBR */
     enum ESBRFlag { SB_NOT_USED, SB_USED };
@@ -142,7 +145,8 @@ public:
             eOPUSBandwidth(OB_FB), eOPUSSubCod(OS_SILK), eOPUSChan(OC_STEREO),
             eOPUSSignal(OG_MUSIC), eOPUSApplication(OA_AUDIO),
             bOPUSForwardErrorCorrection(FALSE), bOPUSRequestReset(FALSE),
-            bParamChanged(FALSE)
+            bParamChanged(FALSE),
+            bCanDecode(false),bCanEncode(false),rBitrate(0.0)
     {
     }
     CAudioParam(const CAudioParam& ap):
@@ -165,7 +169,8 @@ public:
             eOPUSApplication(ap.eOPUSApplication),
             bOPUSForwardErrorCorrection(ap.bOPUSForwardErrorCorrection),
             bOPUSRequestReset(ap.bOPUSRequestReset),
-            bParamChanged(ap.bParamChanged)
+            bParamChanged(ap.bParamChanged),
+            bCanDecode(ap.bCanDecode),bCanEncode(ap.bCanEncode),rBitrate(ap.rBitrate)
     {
     }
     CAudioParam& operator=(const CAudioParam& ap)
@@ -190,6 +195,9 @@ public:
         bOPUSForwardErrorCorrection = ap.bOPUSForwardErrorCorrection;
         bOPUSRequestReset = ap.bOPUSRequestReset;
         bParamChanged = ap.bParamChanged;
+        bCanDecode = ap.bCanDecode;
+        bCanEncode = ap.bCanEncode;
+        rBitrate = ap.rBitrate;
         return *this;
     }
 
@@ -226,6 +234,10 @@ public:
 
     /* CAudioParam has changed */
     _BOOLEAN bParamChanged;
+
+    bool bCanDecode;
+    bool bCanEncode;
+    _REAL rBitrate;
 
     /* This function is needed for detection changes in the class */
     _BOOLEAN operator!=(const CAudioParam AudioParam)
@@ -266,6 +278,7 @@ public:
 
         case AC_NONE:
         case AC_OPUS:
+        case AC_xHEAAC:
             break;
         }
         return FALSE;
@@ -1005,9 +1018,6 @@ public:
     /* AS: AFS in SDC is valid or not */
     enum EAFSVali { AS_VALID, AS_NOT_VALID };
 
-    /* SI: Symbol Interleaver */
-    enum ESymIntMod { SI_LONG, SI_SHORT };
-
     /* CT: Current Time */
     enum ECurTime { CT_OFF, CT_LOCAL, CT_UTC, CT_UTC_OFFSET };
 
@@ -1344,7 +1354,6 @@ public:
 
     CMinMaxMean SNRstat, SigStrstat;
 
-    string audioencoder, audiodecoder;
     gps_data_t gps_data;
     bool use_gpsd;
     bool restart_gpsd;
@@ -1380,6 +1389,42 @@ protected:
     CMutex Mutex;
 public:
     bool lenient_RSCI;
+    bool bCanDecodeAAC;
+    bool bCanDecodeCELP;
+    bool bCanDecodeHVXC;
+    bool bCanDecodeOPUS;
+    bool bCanDecodexHEAAC;
+    bool bCanEncodeAAC;
+    bool bCanEncodeCELP;
+    bool bCanEncodeHVXC;
+    bool bCanEncodeOPUS;
+    bool bCanEncodexHEAAC;
+
+    bool CanDecode(CAudioParam::EAudCod eAudCod) {
+        switch (eAudCod)
+        {
+        case CAudioParam::AC_NONE: return true;
+        case CAudioParam::AC_AAC:  return bCanDecodeAAC;
+        case CAudioParam::AC_CELP: return bCanDecodeCELP;
+        case CAudioParam::AC_HVXC: return bCanDecodeHVXC;
+        case CAudioParam::AC_OPUS: return bCanDecodeOPUS;
+        case CAudioParam::AC_xHEAAC: return bCanDecodexHEAAC;
+        }
+        return false;
+    }
+    bool CanEncode(CAudioParam::EAudCod eAudCod) {
+        switch (eAudCod)
+        {
+        case CAudioParam::AC_NONE: return true;
+        case CAudioParam::AC_AAC:  return bCanEncodeAAC;
+        case CAudioParam::AC_CELP: return bCanEncodeCELP;
+        case CAudioParam::AC_HVXC: return bCanEncodeHVXC;
+        case CAudioParam::AC_OPUS: return bCanEncodeOPUS;
+        case CAudioParam::AC_xHEAAC: return bCanEncodexHEAAC;
+        }
+        return false;
+    }
+
 };
 
 #endif // !defined(PARAMETER_H__3B0BA660_CA63_4344_BB2B_23E7A0D31912__INCLUDED_)

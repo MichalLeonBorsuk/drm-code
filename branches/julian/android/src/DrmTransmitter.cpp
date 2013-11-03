@@ -338,7 +338,7 @@ CDRMTransmitter::CDRMTransmitter(CSettings* pSettings) : CDRMTransceiver(pSettin
 
     /* Interleaver mode of MSC service. Long interleaving (2 s): SI_LONG,
        short interleaving (400 ms): SI_SHORT */
-    Parameters.eSymbolInterlMode = CParameter::SI_LONG;
+    Parameters.eSymbolInterlMode = SI_LONG;
 
     /* MSC modulation scheme. Available modes:
        16-QAM standard mapping (SM): CS_2_SM,
@@ -421,8 +421,8 @@ void CDRMTransmitter::LoadSettings()
 
     /* Interleaver mode of MSC service */
     value = s.Get(Transmitter, "interleaver", string("SI_LONG"));
-    if      (value == "SI_SHORT") { Parameters.eSymbolInterlMode = CParameter::SI_SHORT; }
-    else if (value == "SI_LONG")  { Parameters.eSymbolInterlMode = CParameter::SI_LONG;  }
+    if      (value == "SI_SHORT") { Parameters.eSymbolInterlMode = SI_SHORT; }
+    else if (value == "SI_LONG")  { Parameters.eSymbolInterlMode = SI_LONG;  }
 
     /* MSC modulation scheme */
     value = s.Get(Transmitter, "msc", string("CS_3_SM"));
@@ -567,8 +567,8 @@ void CDRMTransmitter::SaveSettings()
 
     /* Interleaver mode of MSC service */
     switch (Parameters.eSymbolInterlMode) {
-    case CParameter::SI_SHORT: value = "SI_SHORT"; break;
-    case CParameter::SI_LONG:  value = "SI_LONG";  break;
+    case SI_SHORT: value = "SI_SHORT"; break;
+    case SI_LONG:  value = "SI_LONG";  break;
     default: value = ""; }
     s.Put(Transmitter, "interleaver", value);
 

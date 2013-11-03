@@ -133,18 +133,18 @@ void CDRMSimulation::SimScript()
         if (Parameters.iDRMChannelNum < 3)
         {
             Parameters.InitCellMapTable(RM_ROBUSTNESS_MODE_A, SO_2);
-            Parameters.eSymbolInterlMode = CParameter::SI_SHORT;
+            Parameters.eSymbolInterlMode = SI_SHORT;
         }
         else if ((Parameters.iDRMChannelNum == 8) || (Parameters.iDRMChannelNum == 10))
         {
             /* Special setting for channel 8 */
             Parameters.InitCellMapTable(RM_ROBUSTNESS_MODE_B, SO_0);
-            Parameters.eSymbolInterlMode = CParameter::SI_LONG;
+            Parameters.eSymbolInterlMode = SI_LONG;
         }
         else
         {
             Parameters.InitCellMapTable(RM_ROBUSTNESS_MODE_B, SO_3);
-            Parameters.eSymbolInterlMode = CParameter::SI_LONG;
+            Parameters.eSymbolInterlMode = SI_LONG;
         }
 
 

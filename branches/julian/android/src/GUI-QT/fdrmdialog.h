@@ -65,10 +65,9 @@
 #include "../util/Vector.h"
 #include "../datadecoding/DataDecoder.h"
 #include "audiodetailwidget.h"
+#include "rfwidget.h"
 
 /* Classes ********************************************************************/
-class BWSViewer;
-class JLViewer;
 class SlideShowViewer;
 class CScheduler;
 
@@ -95,13 +94,12 @@ protected:
 
     Ui_MainWindow*      ui;
     CDRMReceiver&		DRMReceiver;
+    bool                bEngineering;
     QTimer				Timer;
     QTimer				TimerClose;
 
     CLogging*			pLogging;
     systemevalDlg*		pSysEvalDlg;
-    BWSViewer*			pBWSDlg;
-    JLViewer*			pJLDlg;
     SlideShowViewer*	pSlideShowDlg;
     MultSettingsDlg*	pMultSettingsDlg;
     StationsDlg*		pStationsDlg;
@@ -127,6 +125,7 @@ protected:
     CScheduler* 	    pScheduler;
     QTimer*		        pScheduleTimer;
     ServiceWidget       serviceWidgets[MAX_NUM_SERVICES];
+    RFWidget*           pRFWidget;
 
     virtual void        eventClose(QCloseEvent* ce);
     virtual void        eventHide(QHideEvent* pEvent);
@@ -150,6 +149,7 @@ protected:
     void SysTrayStart();
     void SysTrayStop(const QString&);
     void SysTrayToolTip(const QString&, const QString&);
+    void UpdateChannel();
 
 public slots:
     void OnTimer();
@@ -168,8 +168,23 @@ public slots:
     void OnSoundFileChanged(CDRMReceiver::ESFStatus) {ClearDisplay();};
     void OnWhatsThis();
     void OnSysTrayActivated(QSystemTrayIcon::ActivationReason);
+    void on_actionEngineering_toggled(bool);
+    void on_serviceTabs_currentChanged(int);
+
 signals:
     void plotStyleChanged(int);
+    void LEDFAC(ETypeRxStatus);
+    void LEDSDC(ETypeRxStatus status);
+    void LEDMSC(ETypeRxStatus status);
+    void LEDFrameSync(ETypeRxStatus status);
+    void LEDTimeSync(ETypeRxStatus status);
+    void LEDIOInterface(ETypeRxStatus status);
+    void SNR(double rSNR);
+    void MER(double rMER, double rWMERMSC);
+    void Delay_Doppler(double rSigmaEstimate, double rMinDelay);
+    void SampleFrequencyOffset(double rCurSamROffs, double rSampleRate);
+    void FrequencyOffset(double);
+    void Channel(ERobMode, ESpecOcc, ESymIntMod, ECodScheme, ECodScheme);
 };
 
 #endif // _FDRMDIALOG_H_

@@ -26,6 +26,7 @@ void AudioDetailWidget::updateDisplay(int id, const CService& s)
     ui->treeWidget->clear();
     addItem( tr("Codec"),  GetCodecString(s));
     addItem( tr("Mode"),  GetTypeString(s));
+    addItem( tr("Decodable"),  s.AudioParam.bCanDecode?tr("Yes"):tr("No"));
     addItem( tr("Text Messages"),  s.AudioParam.bTextflag?tr("Yes"):tr("No"));
     addItem( tr("Language Code"),  s.strLanguageCode.c_str());
     addItem( tr("Language"),  GetISOLanguageName(s.strLanguageCode).c_str());
@@ -34,6 +35,8 @@ void AudioDetailWidget::updateDisplay(int id, const CService& s)
     addItem( tr("Conditional Access"),  s.CA_USED?tr("Yes"):tr("No"));
     addItem( tr("Stream ID"),  QString("%1").arg(s.AudioParam.iStreamID));
     addItem( tr("Short ID"),  QString("%1").arg(id));
+
+    ui->buttonListen->setEnabled(s.AudioParam.bCanDecode);
 }
 
 void AudioDetailWidget::on_buttonListen_clicked()
