@@ -19,6 +19,23 @@ void WaterfallWidget::paintEvent(QPaintEvent *)
     painter.drawPixmap(0, 0, Canvas);
 }
 
+void WaterfallWidget::resizeEvent(QResizeEvent *e)
+{
+    if(e->size().height() != e->oldSize().height())
+    {
+        // increase/decrease the vertical history
+        QPixmap tmp = Canvas;
+
+        Canvas = QPixmap(Canvas.width(), e->size().height());
+        Canvas.fill(QColor::fromRgb(0, 0, 0));
+
+        QRect r(QPoint(0,0), tmp.size());
+
+        QPainter p(&Canvas);
+        p.drawPixmap(r, tmp, r);
+    }
+}
+
 void WaterfallWidget::updatePlot(CVector<_REAL>& vecrData, _REAL min, _REAL max)
 {
     /* Init some constants */
@@ -43,22 +60,19 @@ void WaterfallWidget::updatePlot(CVector<_REAL>& vecrData, _REAL min, _REAL max)
     /* Actual waterfall data */
     for (int i = 0; i <  vecrData.Size(); i++)
     {
-        /* Translate dB-values in colors */
+        /* Translate dB-values to colors */
         _REAL norm = (vecrData[i] - min) / (max - min);
-        int hue = int(Round(norm * iMaxHue));
+        int hue = iMaxHue - 60 - int(Round(norm * iMaxHue));
 
-        /* Reverse colors and add some offset (to make it look a bit nicer) */
-        hue = iMaxHue - 60 - hue;
         /* Prevent out-of-range */
-        if(hue>iMaxHue)
-            hue = iMaxHue;
-        if (hue < 0)
-            hue = 0;
+        if(hue>iMaxHue) hue = iMaxHue;
+        if (hue < 0) hue = 0;
 
         /* Also change saturation to get dark colors when low level */
         int sat = int((1 - double(hue) / iMaxHue) * iMaxSat);
-        if (sat < 0) /* Prevent out-of-range */
-            sat = 0;
+        /* Prevent out-of-range */
+        if (sat > iMaxSat) sat = iMaxSat;
+        if (sat < 0) sat = 0;
 
         /* Generate pixel */
         painter.setPen(QColor::fromHsv(hue, sat, sat));
@@ -66,5 +80,5 @@ void WaterfallWidget::updatePlot(CVector<_REAL>& vecrData, _REAL min, _REAL max)
     }
 
     painter.end();
-    repaint();
+    update();
 }

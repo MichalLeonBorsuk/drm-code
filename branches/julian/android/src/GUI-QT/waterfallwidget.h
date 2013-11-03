@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include <QPaintEvent>
+#include <QResizeEvent>
 #include <QPixmap>
 #include <QRect>
 #include <../util/Vector.h>
@@ -21,6 +22,7 @@ public slots:
 protected:
     QPixmap	 Canvas;
     void     paintEvent(QPaintEvent *);
+    void     resizeEvent(QResizeEvent *);
 };
 
 #endif // WATERFALLWIDGET_H
