@@ -183,6 +183,7 @@ win32 {
     HEADERS += src/windows/platform_util.h
     msvc* {
         TEMPLATE = vcapp
+        DEFINES += NOMINMAX
         QMAKE_CXXFLAGS += /wd"4996" /wd"4521"
         QMAKE_LFLAGS_RELEASE += /NODEFAULTLIB:libcmt.lib
         QMAKE_LFLAGS_DEBUG += /NODEFAULTLIB:libcmtd.lib
@@ -454,12 +455,8 @@ HEADERS += \
     src/util/Settings.h \
     src/util/Utilities.h \
     src/util/Vector.h \
-    src/Version.h \
-    src/GUI-QT/drmdisplay.h \
-    src/GUI-QT/mainwindow.h \
-    src/GUI-QT/drmdetail.h \
-    src/GUI-QT/drmoptions.h \
-    src/GUI-QT/audiodetailwidget.h
+    src/Version.h
+
 SOURCES += \
     src/AMDemodulation.cpp \
     src/AMSSDemodulation.cpp \
@@ -559,12 +556,8 @@ SOURCES += \
     src/util/Reassemble.cpp \
     src/util/Settings.cpp \
     src/util/Utilities.cpp \
-    src/Version.cpp \
-    src/GUI-QT/drmdisplay.cpp \
-    src/GUI-QT/mainwindow.cpp \
-    src/GUI-QT/drmdetail.cpp \
-    src/GUI-QT/drmoptions.cpp \
-    src/GUI-QT/audiodetailwidget.cpp
+    src/Version.cpp
+
 !console {
 HEADERS += \
     src/GUI-QT/Logging.h \
@@ -579,9 +572,9 @@ SOURCES += \
 }
 gui {
     contains(QT, webkitwidgets)|contains(QT,webkit) {
-        FORMS += BWSViewer.ui
-        HEADERS += src/GUI-QT/BWSViewer.h
-        SOURCES += src/GUI-QT/BWSViewer.cpp
+        FORMS += bwsviewer.ui
+        HEADERS += src/GUI-QT/bwsviewer.h
+        SOURCES += src/GUI-QT/bwsviewer.cpp
     }
 FORMS += \
     AboutDlgbase.ui \
@@ -590,15 +583,20 @@ FORMS += \
     CodecParams.ui \
     DRMMainWindow.ui \
     EPGDlgbase.ui \
-    FMMainWindow.ui \
     GeneralSettingsDlgbase.ui \
-    JLViewer.ui \
     LiveScheduleWindow.ui \
     MultSettingsDlgbase.ui \
     SlideShowViewer.ui \
     StationsDlgbase.ui \
     systemevalDlgbase.ui \
-    TransmDlgbase.ui
+    TransmDlgbase.ui \
+    mainwindow.ui \
+    drmdisplay.ui \
+    drmdetail.ui \
+    drmoptions.ui \
+    audiodetailwidget.ui \
+    journalineviewer.ui
+
 HEADERS += \
     src/GUI-QT/AnalogDemDlg.h \
     src/GUI-QT/CodecParams.h \
@@ -611,7 +609,6 @@ HEADERS += \
     src/GUI-QT/fmdialog.h \
     src/GUI-QT/GeneralSettingsDlg.h \
     src/GUI-QT/jlbrowser.h \
-    src/GUI-QT/JLViewer.h \
     src/GUI-QT/LiveScheduleDlg.h \
     src/GUI-QT/MultColorLED.h \
     src/GUI-QT/MultSettingsDlg.h \
@@ -619,7 +616,16 @@ HEADERS += \
     src/GUI-QT/SlideShowViewer.h \
     src/GUI-QT/SoundCardSelMenu.h \
     src/GUI-QT/StationsDlg.h \
-    src/GUI-QT/TransmDlg.h
+    src/GUI-QT/TransmDlg.h \
+    src/GUI-QT/mainwindow.h \
+    src/GUI-QT/drmdisplay.h \
+    src/GUI-QT/drmdetail.h \
+    src/GUI-QT/drmoptions.h \
+    src/GUI-QT/audiodetailwidget.h \
+    src/GUI-QT/journalineviewer.h \
+    src/GUI-QT/rfwidget.h \
+    src/GUI-QT/waterfallwidget.h
+
 SOURCES += \
     src/GUI-QT/AnalogDemDlg.cpp \
     src/GUI-QT/CodecParams.cpp \
@@ -632,7 +638,6 @@ SOURCES += \
     src/GUI-QT/fmdialog.cpp \
     src/GUI-QT/GeneralSettingsDlg.cpp \
     src/GUI-QT/jlbrowser.cpp \
-    src/GUI-QT/JLViewer.cpp \
     src/GUI-QT/LiveScheduleDlg.cpp \
     src/GUI-QT/MultColorLED.cpp \
     src/GUI-QT/MultSettingsDlg.cpp \
@@ -640,7 +645,15 @@ SOURCES += \
     src/GUI-QT/SlideShowViewer.cpp \
     src/GUI-QT/SoundCardSelMenu.cpp \
     src/GUI-QT/StationsDlg.cpp \
-    src/GUI-QT/TransmDlg.cpp
+    src/GUI-QT/TransmDlg.cpp \
+    src/GUI-QT/drmdisplay.cpp \
+    src/GUI-QT/mainwindow.cpp \
+    src/GUI-QT/drmdetail.cpp \
+    src/GUI-QT/drmoptions.cpp \
+    src/GUI-QT/audiodetailwidget.cpp \
+    src/GUI-QT/journalineviewer.cpp \
+    src/GUI-QT/rfwidget.cpp \
+    src/GUI-QT/waterfallwidget.cpp
 }
 !sound {
     error("no usable audio interface found - install pulseaudio or portaudio dev package")
@@ -733,8 +746,4 @@ OTHER_FILES += \
     android/AndroidManifest.xml
 
 FORMS += \
-    src/GUI-QT/mainwindow.ui \
-    src/GUI-QT/drmdisplay.ui \
-    src/GUI-QT/drmdetail.ui \
-    src/GUI-QT/drmoptions.ui \
-    src/GUI-QT/audiodetailwidget.ui
+    src/GUI-QT/rfwidget.ui

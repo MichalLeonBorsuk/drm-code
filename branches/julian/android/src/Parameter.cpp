@@ -119,7 +119,6 @@ CParameter::CParameter():
     rSigStrengthCorrection(0.0),
     eRunState(STOPPED),
     CellMappingTable(),
-    audioencoder(""),audiodecoder(""),
     use_gpsd(0), restart_gpsd(false),
     gps_host("localhost"), gps_port("2497"),
     iAudSampleRate(DEFAULT_SOUNDCRD_SAMPLE_RATE),
@@ -233,7 +232,6 @@ CParameter::CParameter(const CParameter& p):
     rSigStrengthCorrection(p.rSigStrengthCorrection),
     eRunState(p.eRunState),
     CellMappingTable(), // jfbc CCellMappingTable uses a CMatrix :(
-    audioencoder(p.audioencoder),audiodecoder(p.audiodecoder),
     use_gpsd(p.use_gpsd),restart_gpsd(p.restart_gpsd),
     gps_host(p.gps_host),gps_port(p.gps_port),
     iAudSampleRate(p.iAudSampleRate),
@@ -341,8 +339,6 @@ CParameter& CParameter::operator=(const CParameter& p)
     rSigStrengthCorrection = p.rSigStrengthCorrection;
     eRunState = p.eRunState;
     CellMappingTable.MakeTable(eRobustnessMode, eSpectOccup, iSigSampleRate); // don't copy CMatrix
-    audiodecoder =  p.audiodecoder;
-    audioencoder =  p.audioencoder;
     use_gpsd = p.use_gpsd;
     gps_host = p.gps_host;
     gps_port = p.gps_port;

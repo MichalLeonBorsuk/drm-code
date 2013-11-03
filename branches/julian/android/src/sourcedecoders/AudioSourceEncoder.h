@@ -59,18 +59,6 @@ public:
 	_BOOLEAN GetTransStat(string& strCPi, _REAL& rCPe)
 		{return DataEncoder.GetSliShowEnc()->GetTransStat(strCPi, rCPe);}
 
-    bool CanEncode(CAudioParam::EAudCod eAudCod) {
-        switch (eAudCod)
-        {
-        case CAudioParam::AC_NONE: return true;
-        case CAudioParam::AC_AAC:  return bCanEncodeAAC;
-        case CAudioParam::AC_CELP: return false;
-        case CAudioParam::AC_HVXC: return false;
-        case CAudioParam::AC_OPUS: return bCanEncodeOPUS;
-        }
-        return false;
-    }
-
 protected:
 	void CloseEncoder();
 
@@ -99,9 +87,6 @@ protected:
 	CAudioResample			ResampleObj[MAX_ENCODED_CHANNELS];
 	CVector<_REAL>			vecTempResBufIn[MAX_ENCODED_CHANNELS];
 	CVector<_REAL>			vecTempResBufOut[MAX_ENCODED_CHANNELS];
-
-	_BOOLEAN				bCanEncodeAAC;
-	_BOOLEAN				bCanEncodeOPUS;
 
 public:
 	virtual void InitInternalTx(CParameter& Parameters, int &iInputBlockSize, int &iOutputBlockSize);
@@ -149,9 +134,6 @@ public:
 
 	_BOOLEAN GetTransStat(string& strCPi, _REAL& rCPe)
 			{return AudioSourceEncoderImpl.GetTransStat(strCPi, rCPe);}
-
-	bool CanEncode(CAudioParam::EAudCod eAudCod)
-			{return AudioSourceEncoderImpl.CanEncode(eAudCod);}
 
 protected:
 	CAudioSourceEncoderImplementation AudioSourceEncoderImpl;

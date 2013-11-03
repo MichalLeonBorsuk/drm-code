@@ -207,11 +207,11 @@ TransmDialog::TransmDialog(CSettings& Settings,	QWidget* parent)
 
 	switch (Parameters.eSymbolInterlMode)
 	{
-	case CParameter::SI_LONG:
+    case SI_LONG:
 		ComboBoxMSCInterleaver->setCurrentIndex(0);
 		break;
 
-	case CParameter::SI_SHORT:
+    case SI_SHORT:
 		ComboBoxMSCInterleaver->setCurrentIndex(1);
 		break;
 	}
@@ -324,21 +324,21 @@ TransmDialog::TransmDialog(CSettings& Settings,	QWidget* parent)
 		ShowButtonCodec(FALSE, 1);
 		break;
 	}
-	CAudioSourceEncoder& AudioSourceEncoder = *DRMTransmitter.GetAudSrcEnc();
-	if (!AudioSourceEncoder.CanEncode(CAudioParam::AC_AAC)) {
+
+    if(!Parameters.bCanEncodeAAC) {
 		RadioButtonAAC->setText(tr("No DRM capable AAC Codec"));
 		RadioButtonAAC->setToolTip(tr("see http://drm.sourceforge.net"));
 		RadioButtonAAC->setEnabled(false);
 		//RadioButtonAAC->hide();
 	}
-	if (!AudioSourceEncoder.CanEncode(CAudioParam::AC_OPUS)) {
+    if(!Parameters.bCanEncodeOPUS) {
 		RadioButtonOPUS->setText(tr("No Opus Codec"));
 		RadioButtonOPUS->setToolTip(tr("see http://drm.sourceforge.net"));
 		RadioButtonOPUS->setEnabled(false);
 		//RadioButtonOPUS->hide();
 	}
-	if (!AudioSourceEncoder.CanEncode(CAudioParam::AC_AAC)
-	    && !AudioSourceEncoder.CanEncode(CAudioParam::AC_OPUS)) {
+    if(!Parameters.bCanEncodeAAC
+        && !Parameters.bCanEncodeOPUS) {
 		/* Let this service be an data service */
 		CheckBoxEnableAudio->setChecked(false);
 		CheckBoxEnableAudio->setEnabled(false);
@@ -1009,11 +1009,11 @@ void TransmDialog::OnComboBoxMSCInterleaverActivated(int iID)
 	switch (iID)
 	{
 	case 0:
-		Parameters.eSymbolInterlMode = CParameter::SI_LONG;
+        Parameters.eSymbolInterlMode = SI_LONG;
 		break;
 
 	case 1:
-		Parameters.eSymbolInterlMode = CParameter::SI_SHORT;
+        Parameters.eSymbolInterlMode = SI_SHORT;
 		break;
 	}
 	Parameters.Unlock();

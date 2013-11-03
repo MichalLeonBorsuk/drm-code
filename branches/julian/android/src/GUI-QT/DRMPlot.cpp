@@ -41,7 +41,7 @@ CDRMPlot::CDRMPlot(QWidget* parent, QwtPlot* SuppliedPlot) :
 	CurCharType(NONE_OLD), InitCharType(NONE_OLD),
 	eLastSDCCodingScheme((ECodScheme)-1), eLastMSCCodingScheme((ECodScheme)-1),
 	bLastAudioDecoder(FALSE), pDRMRec(NULL),
-	WaterfallWidget(NULL), iAudSampleRate(0), iSigSampleRate(0),
+    waterfallWidget(NULL), iAudSampleRate(0), iSigSampleRate(0),
 	iLastXoredSampleRate(0), iLastChanMode(-1)
 {
 	/* Create new plot if none is supplied */
@@ -202,8 +202,12 @@ void CDRMPlot::OnTimerChart()
 	_REAL rDCFrequency = Parameters.GetDCFrequency();
 	ECodScheme eSDCCodingScheme = Parameters.eSDCCodingScheme;
 	ECodScheme eMSCCodingScheme = Parameters.eMSCCodingScheme;
-	_BOOLEAN bAudioDecoder = !Parameters.audiodecoder.empty();
-	iAudSampleRate = Parameters.GetAudSampleRate();
+
+    const int iCurSelAudioServ = Parameters.GetCurSelAudioService();
+    CService audioService = Parameters.Service[iCurSelAudioServ];
+    _BOOLEAN bAudioDecoder = audioService.AudioParam.bCanDecode;
+
+    iAudSampleRate = Parameters.GetAudSampleRate();
 	iSigSampleRate = Parameters.GetSigSampleRate();
 	int iChanMode = (int)pDRMRec->GetReceiveData()->GetInChanSel();
 	Parameters.Unlock();
@@ -414,7 +418,7 @@ void CDRMPlot::OnTimerChart()
 		break;
 	}
 
-	plot->replot();
+    plot->replot();
 }
 
 void CDRMPlot::SetupChart(const ECharType eNewType)
@@ -474,8 +478,8 @@ void CDRMPlot::activate()
 	bActive = TRUE;
 
 	/* Force re-initialization */
-	InitCharType = NONE_OLD;
-	SetupChart(CurCharType);
+    //InitCharType = NONE_OLD;
+    //SetupChart(CurCharType);
 
 	/* Activate real-time timers when window is shown */
 	TimerChart.start();
@@ -589,8 +593,6 @@ void CDRMPlot::SetData(CVector<_COMPLEX>& veccMSCConst,
 void CDRMPlot::PlotDefaults()
 {
 	/* Set default value of plot items */
-	Canvas = QPixmap();
-	Image = QImage();
 	curve1.detach();
 	curve2.detach();
 	curve3.detach();
@@ -631,10 +633,10 @@ void CDRMPlot::PlotDefaults()
 	main1curve.setItemAttribute(QwtPlotItem::Legend, false);
 	main2curve.setItemAttribute(QwtPlotItem::Legend, false);
 	plot->setCanvasBackground(QColor(BckgrdColorPlot));
-	if (WaterfallWidget != NULL)
+    if (waterfallWidget != NULL)
 	{
-		delete WaterfallWidget;
-		WaterfallWidget = NULL;
+        delete waterfallWidget;
+        waterfallWidget = NULL;
 	}
 }
 
@@ -644,40 +646,6 @@ void CDRMPlot::PlotSetLegendFont()
 	foreach(QWidget* item, legend->legendItems())
 		item->setFont(legend->font());
 #endif
-}
-
-void CDRMPlot::PlotForceUpdate()
-{
-	/* Force the plot to update */
-#if QWT_VERSION >= 0x050200
-	plot->updateAxes();
-	plot->updateLayout();
-#else
-	plot->replot();
-#endif
-
-	/* Get window background color */
-	const QPalette& palette(plot->palette());
-	BackgroundColor = palette.color(QPalette::Window);
-
-	/* Get/Set various size */
-	scaleWidth = plot->axisScaleDraw(QwtPlot::xBottom)->length();
-#if QWT_VERSION >= 0x060000
-	QRect rect(plot->plotLayout()->canvasRect().toRect());
-#else
-	QRect rect(plot->plotLayout()->canvasRect());
-#endif
-	QSize CanvSize(scaleWidth, rect.height());
-	LastPlotCanvRect = rect;
-
-	/* Update waterfall widget geometry */
-	WaterfallWidget->setGeometry(rect.x() + (rect.width()-scaleWidth)/2, rect.y(), CanvSize.width(), CanvSize.height());
-
-	/* Allocate the new canvas */
-	Canvas = QPixmap(CanvSize);
-	Canvas.fill(BackgroundColor);
-	Image = QImage(scaleWidth, 1, QImage::Format_RGB32);
-	imageData = (QRgb*)Image.bits();
 }
 
 void CDRMPlot::SetupAvIR()
@@ -1198,8 +1166,8 @@ void CDRMPlot::SetupInpSpecWaterf()
 	grid.enableY(FALSE);
 
 	/* Create a new waterfall widget if not exists */
-	if (WaterfallWidget == NULL)
-		WaterfallWidget = new CWidget(plot, Canvas);
+    if (waterfallWidget == NULL)
+        waterfallWidget = new WaterfallWidget(plot->canvas());
 
 	/* Set plot background color */
 	const QPalette& palette(plot->palette());
@@ -1215,108 +1183,18 @@ void CDRMPlot::SetupInpSpecWaterf()
 
 void CDRMPlot::SetInpSpecWaterf(CVector<_REAL>& vecrData, CVector<_REAL>&)
 {
-	/* No WaterfallWidget so return */
-	if (WaterfallWidget == NULL)
-		return;
-
-	/* Check if the canvas size has changed */
-	_BOOLEAN bWidthChanged, bHeightChanged;
-	QSize CanvSize(Canvas.size());
-#if QWT_VERSION >= 0x060000
-	QRect PlotCanvRect(plot->plotLayout()->canvasRect().toRect());
+    /* No waterfallWidget so return */
+    if (waterfallWidget == NULL)
+        return;
+    /* plot should get a resize event and do this naturally
+#if QWT_VERSION >= 0x050200
+    plot->updateAxes();
+    plot->updateLayout();
 #else
-	QRect PlotCanvRect(plot->plotLayout()->canvasRect());
+    plot->replot();
 #endif
-	bWidthChanged = LastPlotCanvRect.width() != PlotCanvRect.width();
-	bHeightChanged = LastPlotCanvRect.height() != PlotCanvRect.height();
-	if (Canvas.size().isEmpty() || bWidthChanged)
-	{
-		/* Force plot update */
-		PlotForceUpdate();
-
-		/* Update current canvas size */
-		CanvSize = Canvas.size();
-	}
-
-	/* If only the height has changed, then copy the content
-	   to the newly allocated Canvas */
-	if (!bWidthChanged && bHeightChanged)
-	{
-		QPixmap tmpPixmap = QPixmap(Canvas);
-		Canvas = QPixmap(CanvSize);
-
-		/* Force plot update */
-		PlotForceUpdate();
-
-		/* Update current canvas size */
-		CanvSize = Canvas.size();
-		if (CanvSize.isEmpty())
-			return;
-
-		QPainter p(&Canvas);
-		int width = CanvSize.width();
-		int height = CanvSize.height();
-		p.drawPixmap(0, 0, width, height, tmpPixmap, 0, 0, width, height);
-	}
-
-	/* Check if the canvas is valid */
-	if (CanvSize.isEmpty())
-		return;
-
-	/* Resample input data */
-	CVector<_REAL> *pvecrResampledData;
-	Resample.Resample(&vecrData, &pvecrResampledData, scaleWidth, TRUE);
-
-	/* The scaling factor */
-	const _REAL rScale = _REAL(pvecrResampledData->Size()) / scaleWidth;
-
-	/* Actual waterfall data */
-	QColor color;
-	for (int i = 0; i < scaleWidth; i++)
-	{
-		/* Init some constants */
-		const int iMaxHue = 359; /* Range of "Hue" is 0-359 */
-		const int iMaxSat = 255; /* Range of saturation is 0-255 */
-
-		/* Stretch width to entire canvas width */
-		const int iCurIdx =
-			(int) Round(_REAL(i) * rScale);
-
-		/* Translate dB-values in colors */
-		const int iCurCol =
-			(int) Round(((*pvecrResampledData)[iCurIdx] - MIN_VAL_INP_SPEC_Y_AXIS_DB) /
-			(MAX_VAL_INP_SPEC_Y_AXIS_DB - MIN_VAL_INP_SPEC_Y_AXIS_DB) *
-			iMaxHue);
-
-		/* Reverse colors and add some offset (to make it look a bit nicer) */
-		const int iColOffset = 60;
-		int iFinalCol = iMaxHue - iColOffset - iCurCol;
-		if (iFinalCol < 0) /* Prevent from out-of-range */
-			iFinalCol = 0;
-
-		/* Also change saturation to get dark colors when low level */
-		int iCurSat = (int) ((1 - (_REAL) iFinalCol / iMaxHue) * iMaxSat);
-		if (iCurSat < 0) /* Prevent from out-of-range */
-			iCurSat = 0;
-
-		/* Generate pixel */
-		color.setHsv(iFinalCol, iCurSat, iCurSat);
-		imageData[i] = color.rgb();
-	}
-
-	/* Scroll Canvas */
-	Canvas.scroll(0, 1, 0, 0, CanvSize.width(), CanvSize.height(), 0);
-
-	/* Paint new line (top line) */
-	QPainter Painter;
-	if (Painter.begin(&Canvas)) {
-		/* Draw pixel line to canvas */
-		Painter.drawImage(0, 0, Image);
-
-		Painter.end();
-
-		WaterfallWidget->repaint();
-	}
+*/
+    waterfallWidget->updatePlot(vecrData);
 }
 
 void CDRMPlot::SetupFACConst()
@@ -1555,6 +1433,48 @@ void CDRMPlot::OnSelected(const QPointF &pos)
 			pDRMRec->GetReceiveData()->ConvertFrequency(dFreq * 1000, TRUE) /
 			pDRMRec->GetReceiveData()->ConvertFrequency(dMaxxBottom * 1000, TRUE));
 	}
+}
+
+void CDRMPlot::setupTreeWidget(QTreeWidget* tw)
+{
+    /* Set the Char Type of each selectable item */
+    QTreeWidgetItemIterator it(tw, QTreeWidgetItemIterator::NoChildren);
+    for (; *it; it++)
+    {
+        if ((*it)->text(0) == tr("SNR Spectrum"))
+            (*it)->setData(0,  Qt::UserRole, CDRMPlot::SNR_SPECTRUM);
+        if ((*it)->text(0) == tr("Audio Spectrum"))
+            (*it)->setData(0,  Qt::UserRole, CDRMPlot::AUDIO_SPECTRUM);
+        if ((*it)->text(0) == tr("Shifted PSD"))
+            (*it)->setData(0,  Qt::UserRole, CDRMPlot::POWER_SPEC_DENSITY);
+        if ((*it)->text(0) == tr("Waterfall Input Spectrum"))
+            (*it)->setData(0,  Qt::UserRole, CDRMPlot::INP_SPEC_WATERF);
+        if ((*it)->text(0) == tr("Input Spectrum"))
+            (*it)->setData(0,  Qt::UserRole, CDRMPlot::INPUTSPECTRUM_NO_AV);
+        if ((*it)->text(0) == tr("Input PSD"))
+            (*it)->setData(0,  Qt::UserRole, CDRMPlot::INPUT_SIG_PSD);
+        if ((*it)->text(0) == tr("MSC"))
+            (*it)->setData(0,  Qt::UserRole, CDRMPlot::MSC_CONSTELLATION);
+        if ((*it)->text(0) == tr("SDC"))
+            (*it)->setData(0,  Qt::UserRole, CDRMPlot::SDC_CONSTELLATION);
+        if ((*it)->text(0) == tr("FAC"))
+            (*it)->setData(0,  Qt::UserRole, CDRMPlot::FAC_CONSTELLATION);
+        if ((*it)->text(0) == tr("FAC / SDC / MSC"))
+            (*it)->setData(0,  Qt::UserRole, CDRMPlot::ALL_CONSTELLATION);
+        if ((*it)->text(0) == tr("Frequency / Sample Rate"))
+            (*it)->setData(0,  Qt::UserRole, CDRMPlot::FREQ_SAM_OFFS_HIST);
+        if ((*it)->text(0) == tr("Delay / Doppler"))
+            (*it)->setData(0,  Qt::UserRole, CDRMPlot::DOPPLER_DELAY_HIST);
+        if ((*it)->text(0) == tr("SNR / Audio"))
+            (*it)->setData(0,  Qt::UserRole, CDRMPlot::SNR_AUDIO_HIST);
+        if ((*it)->text(0) == tr("Transfer Function"))
+            (*it)->setData(0,  Qt::UserRole, CDRMPlot::TRANSFERFUNCTION);
+        if ((*it)->text(0) == tr("Impulse Response"))
+            (*it)->setData(0,  Qt::UserRole, CDRMPlot::AVERAGED_IR);
+    }
+
+    /* Expand all items */
+    tw->expandAll();
 }
 
 void CDRMPlot::AddWhatsThisHelpChar(const ECharType NCharType)

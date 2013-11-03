@@ -35,9 +35,10 @@
 #include <QCloseEvent>
 #include <QTableWidget>
 #include "SlideShowViewer.h"
-#include "JLViewer.h"
+#include "journalineviewer.h"
+#include "rfwidget.h"
 #ifdef QT_WEBKIT_LIB
-# include "BWSViewer.h"
+# include "bwsviewer.h"
 #endif
 #ifdef HAVE_LIBHAMLIB
 # include "../util-QT/Rig.h"
@@ -62,12 +63,13 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& Settings,
     CWindow(parent, Settings, "DRM"),
     ui(new Ui_MainWindow()),
     DRMReceiver(NDRMR),
+    bEngineering(false),
     pLogging(NULL),
     pSysTray(NULL), pCurrentWindow(this),
     iMultimediaServiceBit(0),
     iLastMultimediaServiceSelected(-1),
     pScheduler(NULL), pScheduleTimer(NULL),
-    serviceWidgets()
+    serviceWidgets(),pRFWidget(NULL)
 {
     ui->setupUi(this);
 
@@ -104,14 +106,6 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& Settings,
 
     /* Live Schedule window */
     pLiveScheduleDlg = new LiveScheduleDlg(DRMReceiver, Settings, parents);
-
-    /* MOT broadcast website viewer window */
-#ifdef QT_WEBKIT_LIB
-    pBWSDlg = new BWSViewer(DRMReceiver, Settings, this);
-#endif
-
-    /* Journaline viewer window */
-    pJLDlg = new JLViewer(DRMReceiver, Settings, this);
 
     /* MOT slide show window */
     pSlideShowDlg = new SlideShowViewer(DRMReceiver, Settings, this);
@@ -231,6 +225,61 @@ FDRMDialog::~FDRMDialog()
     /* Destroying top level windows, children are automaticaly destroyed */
     delete pAnalogDemDlg;
     delete pFMDlg;
+}
+
+void FDRMDialog::on_actionEngineering_toggled(bool checked)
+{
+        bEngineering = checked;
+        if(bEngineering)
+        {
+            if(pRFWidget==NULL)
+                pRFWidget = new RFWidget(&DRMReceiver);
+
+            ui->serviceTabs->addTab(pRFWidget, "Channel");
+            ui->serviceTabs->addTab(new QLabel(""), "Streams");
+            ui->serviceTabs->addTab(new QLabel(""), "AFS");
+            ui->serviceTabs->addTab(new QLabel(""), "GPS");
+        }
+        else
+        {
+            ui->serviceTabs->clear();
+            if(pRFWidget)
+            {
+                delete pRFWidget;
+                pRFWidget = NULL;
+            }
+            UpdateDisplay();
+        }
+}
+
+void FDRMDialog::on_serviceTabs_currentChanged(int index)
+{
+    if(index==-1)
+    {
+        for(int i=0; i<ui->serviceTabs->count(); i++)
+        {
+            QString s = ui->serviceTabs->tabText(i);
+            if(s=="Channel")
+            {
+                on_actionEngineering_toggled(false);
+            }
+        }
+    }
+    else
+    {
+        QString s = ui->serviceTabs->tabText(index);
+        if(s=="Channel")
+        {
+            if(pRFWidget)
+            {
+                pRFWidget->setActive(true);
+            }
+            else
+            {
+                pRFWidget->setActive(false);
+            }
+        }
+    }
 }
 
 void FDRMDialog::OnSysTrayActivated(QSystemTrayIcon::ActivationReason reason)
@@ -388,8 +437,139 @@ void FDRMDialog::OnScheduleTimer()
     }
 }
 
+void FDRMDialog::UpdateChannel()
+{
+    CParameter& Parameters = *(DRMReceiver.GetParameters());
+
+    Parameters.Lock();
+
+    pRFWidget->setLEDFAC(Parameters.ReceiveStatus.FAC.GetStatus());
+    pRFWidget->setLEDSDC(Parameters.ReceiveStatus.SDC.GetStatus());
+    // TODO Data Broadcasts
+    int iShortID = Parameters.GetCurSelAudioService();
+    //pRFWidget->setLEDMSC(Parameters.AudioComponentStatus[iShortID].GetStatus());
+    pRFWidget->setLEDFrameSync(Parameters.ReceiveStatus.FSync.GetStatus());
+    pRFWidget->setLEDTimeSync(Parameters.ReceiveStatus.TSync.GetStatus());
+    ETypeRxStatus soundCardStatusI = Parameters.ReceiveStatus.InterfaceI.GetStatus(); /* Input */
+    ETypeRxStatus soundCardStatusO = Parameters.ReceiveStatus.InterfaceO.GetStatus(); /* Output */
+    pRFWidget->setLEDIOInterface(soundCardStatusO == NOT_PRESENT || (soundCardStatusI != NOT_PRESENT && soundCardStatusI != RX_OK) ? soundCardStatusI : soundCardStatusO);
+
+    /* Show SNR if receiver is in tracking mode */
+    if (DRMReceiver.GetAcquiState() == AS_WITH_SIGNAL)
+    {
+        /* Get a consistant snapshot */
+
+        /* We only get SNR from a local DREAM Front-End */
+        pRFWidget->setSNR(Parameters.GetSNR());
+        pRFWidget->setMER(Parameters.rMER, Parameters.rWMERMSC);
+
+        pRFWidget->setDelay_Doppler(Parameters.rSigmaEstimate,  Parameters.rMinDelay);
+
+        /* Sample frequency offset estimation */
+        pRFWidget->setSampleFrequencyOffset(Parameters.rResampleOffset, Parameters.GetSigSampleRate());
+
+    }
+    else
+    {
+        pRFWidget->setSNR(-1.0);
+        pRFWidget->setMER(-1.0, 0);
+        pRFWidget->setDelay_Doppler(-1.0, 0);
+        pRFWidget->setSampleFrequencyOffset(-1.0, 0);
+    }
+
+    /* DC frequency */
+    pRFWidget->setFrequencyOffset(DRMReceiver.GetReceiveData()->
+                    ConvertFrequency(Parameters.GetDCFrequency()));
+
+
+    pRFWidget->setChannel(Parameters.GetWaveMode(), Parameters.GetSpectrumOccup(),
+            Parameters.eSymbolInterlMode,
+            Parameters.eSDCCodingScheme, Parameters.eMSCCodingScheme);
+
+    pRFWidget->setCodeRate(Parameters.MSCPrLe.iPartB, Parameters.MSCPrLe.iPartA);
+
+#if 0
+
+
+
+        /* Number of services #################### */
+        strFACInfo = tr("Audio: ");
+        strFACInfo += QString().setNum(Parameters.iNumAudioService);
+        strFACInfo += tr(" / Data: ");
+        strFACInfo += QString().setNum(Parameters.iNumDataService);
+
+        //FACNumServicesL->setText(tr("Number of Services:")); /* Label */
+        FACNumServicesV->setText(strFACInfo); /* Value */
+
+
+        /* Time, date #################### */
+        if ((Parameters.iUTCHour == 0) &&
+                (Parameters.iUTCMin == 0) &&
+                (Parameters.iDay == 0) &&
+                (Parameters.iMonth == 0) &&
+                (Parameters.iYear == 0))
+        {
+            /* No time service available */
+            strFACInfo = tr("Service not available");
+        }
+        else
+        {
+#ifdef GUI_QT_DATE_TIME_TYPE
+            /* QT type of displaying date and time */
+            QDateTime DateTime;
+            DateTime.setDate(QDate(Parameters.iYear,
+                                   Parameters.iMonth,
+                                   Parameters.iDay));
+            DateTime.setTime(QTime(Parameters.iUTCHour,
+                                   Parameters.iUTCMin));
+
+            strFACInfo = DateTime.toString();
+#else
+            /* Set time and date */
+            QString strMin;
+            const int iMin = Parameters.iUTCMin;
+
+            /* Add leading zero to number smaller than 10 */
+            if (iMin < 10)
+                strMin = "0";
+            else
+                strMin = "";
+
+            strMin += QString().setNum(iMin);
+
+            strFACInfo =
+                /* Time */
+                QString().setNum(Parameters.iUTCHour) + ":" +
+                strMin + "  -  " +
+                /* Date */
+                QString().setNum(Parameters.iMonth) + "/" +
+                QString().setNum(Parameters.iDay) + "/" +
+                QString().setNum(Parameters.iYear);
+#endif
+            /* Add UTC offset if available */
+            if (Parameters.bValidUTCOffsetAndSense)
+                strFACInfo += QString(" %1%2%3%4")
+                    .arg(tr("UTC"))
+                    .arg(Parameters.iUTCSense ? "-" : "+")
+                    .arg(Parameters.iUTCOff / 2, 0, 10)
+                    .arg(Parameters.iUTCOff & 1 ? ".5" : "");
+        }
+
+        //FACTimeDateL->setText(tr("Received time - date:")); /* Label */
+        FACTimeDateV->setText(strFACInfo); /* Value */
+
+        UpdateGPS(Parameters);
+
+        UpdateControls();
+#endif
+    Parameters.Unlock();
+}
+
+
 void FDRMDialog::OnTimer()
 {
+    if(pRFWidget)
+        UpdateChannel();
     ERecMode eNewReceiverMode = DRMReceiver.GetReceiverMode();
     switch(eNewReceiverMode)
     {
@@ -472,7 +652,7 @@ FDRMDialog::audioServiceDescription(const CService &service, _REAL rAudioBitRate
     }
 
     /* Report missing codec */
-    if (!DRMReceiver.GetAudSorceDec()->CanDecode(service.AudioParam.eAudioCoding))
+    if (!service.AudioParam.bCanDecode)
         text += tr(" [no codec available]");
 
     return text;
@@ -589,7 +769,6 @@ void FDRMDialog::UpdateDisplay()
     for(int shortId=0; shortId<MAX_NUM_SERVICES; shortId++) {
 
         CService service = Parameters.Service[shortId];
-        const _REAL rAudioBitRate = Parameters.GetBitRateKbps(shortId, FALSE);
         const _REAL rDataBitRate = Parameters.GetBitRateKbps(shortId, TRUE);
         QString label = QString::fromUtf8(service.strLabel.c_str());
 
@@ -644,9 +823,38 @@ void FDRMDialog::UpdateDisplay()
 
             if(serviceWidgets[shortId].data==NULL)
             {
-                QLabel* l = new QLabel(detail);
-                serviceWidgets[shortId].data = l;
-                index = ui->serviceTabs->addTab(l, label);
+                QWidget* w;
+                if (service.DataParam.ePacketModInd == CDataParam::PM_PACKET_MODE)
+                {
+                    if (service.DataParam.eAppDomain == CDataParam::AD_DAB_SPEC_APP)
+                    {
+                        switch (service.DataParam.iUserAppIdent)
+                        {
+                        case DAB_AT_EPG:
+                            w = new QLabel(detail);
+                            break;
+                        case DAB_AT_BROADCASTWEBSITE:
+                            w = new BWSViewer(DRMReceiver, Settings, shortId);
+                            connect(w, SIGNAL(activated(int)), this, SLOT(OnSelectDataService(int)));
+                            break;
+                        case DAB_AT_JOURNALINE:
+                            w = new JournalineViewer(DRMReceiver, Settings, shortId);
+                            connect(w, SIGNAL(activated(int)), this, SLOT(OnSelectDataService(int)));
+                            break;
+                        case DAB_AT_MOTSLIDESHOW:
+                            w = new QLabel(detail);
+                            break;
+                         default:
+                            w = new QLabel(detail);
+                        }
+                    }
+                    else
+                        w = new QLabel(detail);
+                }
+                else
+                    w = new QLabel(detail);
+                serviceWidgets[shortId].data = w;
+                index = ui->serviceTabs->addTab(w, label);
             }
             else
             {
@@ -841,50 +1049,12 @@ void FDRMDialog::OnSelectAudioService(int shortId)
 void FDRMDialog::OnSelectDataService(int shortId)
 {
     CParameter& Parameters = *DRMReceiver.GetParameters();
-    QWidget* pDlg = NULL;
 
     Parameters.Lock();
 
-    int iAppIdent = Parameters.Service[shortId].DataParam.iUserAppIdent;
-
-    switch(iAppIdent)
-    {
-    case DAB_AT_EPG:
-        pDlg = pEPGDlg;
-        break;
-    case DAB_AT_BROADCASTWEBSITE:
-#ifdef QT_WEBKIT_LIB
-        pDlg = pBWSDlg;
-#endif
-        break;
-    case DAB_AT_JOURNALINE:
-        pDlg = pJLDlg;
-        break;
-    case DAB_AT_MOTSLIDESHOW:
-        pDlg = pSlideShowDlg;
-        break;
-    }
-
-    if(pDlg != NULL)
-        Parameters.SetCurSelDataService(shortId);
-
-    CService::ETyOServ eAudDataFlag = Parameters.Service[shortId].eAudDataFlag;
+    Parameters.SetCurSelDataService(shortId);
 
     Parameters.Unlock();
-
-    if(pDlg != NULL)
-    {
-        if (pDlg != pEPGDlg)
-            iLastMultimediaServiceSelected = shortId;
-        pDlg->show();
-    }
-    else
-    {
-        if (eAudDataFlag == CService::SF_DATA)
-        {
-            QMessageBox::information(this, "Dream", tr("unsupported data application"));
-        }
-    }
 }
 
 void FDRMDialog::OnViewMultimediaDlg()

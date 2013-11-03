@@ -355,12 +355,7 @@ void systemevalDlg::OnTimer()
 
     Parameters.Lock();
 
-    ui->drmDetail->updateDisplay(
-                Parameters,
-                DRMReceiver.GetReceiveData()->ConvertFrequency(Parameters.GetDCFrequency()),
-                DRMReceiver.GetAcquiState(),
-                DRMReceiver.GetRSIIn()->GetInEnabled()
-    );
+    // TODO ui->drmDetail->updateDisplay();
     UpdateGPS(Parameters);
 
     UpdateControls();

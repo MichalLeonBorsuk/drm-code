@@ -538,6 +538,9 @@ QString FMDialog::GetCodecString(const int iServiceID)
 				strReturn += "FB";
 				break;
 			}
+            break;
+        case CAudioParam::AC_xHEAAC:
+            strReturn = "xHE-AAC";
 		}
 
 		/* SBR */

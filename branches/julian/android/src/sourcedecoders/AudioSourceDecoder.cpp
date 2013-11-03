@@ -47,12 +47,6 @@ CAudioSourceDecoder::CAudioSourceDecoder()
 {
     /* Initialize Audio Codec List */
     CAudioCodec::InitCodecList();
-
-    /* Needed by fdrmdialog.cpp to report missing codec */
-    bCanDecodeAAC  = CAudioCodec::GetDecoder(CAudioParam::AC_AAC,  true) != NULL;
-    bCanDecodeCELP = CAudioCodec::GetDecoder(CAudioParam::AC_CELP, true) != NULL;
-    bCanDecodeHVXC = CAudioCodec::GetDecoder(CAudioParam::AC_HVXC, true) != NULL;
-    bCanDecodeOPUS = CAudioCodec::GetDecoder(CAudioParam::AC_OPUS, true) != NULL;
 }
 
 CAudioSourceDecoder::~CAudioSourceDecoder()
@@ -729,9 +723,6 @@ CAudioSourceDecoder::InitInternal(CParameter & Parameters)
     DoNotProcessData = FALSE;
     iOutputBlockSize = 0;
 
-    /* Set audiodecoder to empty string - means "unknown" and "can't decode" to GUI */
-    audiodecoder = "";
-
     try
     {
         Parameters.Lock();
@@ -794,9 +785,6 @@ CAudioSourceDecoder::InitInternal(CParameter & Parameters)
 
         /* Get decoder instance */
         codec = CAudioCodec::GetDecoder(eAudioCoding);
-
-        if (codec->CanDecode(eAudioCoding))
-            audiodecoder = codec->DecGetVersion();
 
         if (eAudioCoding == CAudioParam::AC_AAC)
         {
@@ -1071,9 +1059,6 @@ CAudioSourceDecoder::InitInternal(CParameter & Parameters)
             throw CInitErr(ET_AUDDECODER);
         }
 
-        /* set string for GUI */
-        Parameters.audiodecoder = audiodecoder;
-
         /* Set number of Audio frames for log file */
         Parameters.iNumAudioFrames = iNumAudioFrames;
 
@@ -1141,6 +1126,15 @@ CAudioSourceDecoder::InitInternal(CParameter & Parameters)
         /* In all cases set output size to zero */
         iOutputBlockSize = 0;
     }
+
+    // put this here, but should be global and only once per run
+    Parameters.Lock();
+    Parameters.bCanDecodeAAC  = CAudioCodec::GetDecoder(CAudioParam::AC_AAC,  true) != NULL;
+    Parameters.bCanDecodeCELP = CAudioCodec::GetDecoder(CAudioParam::AC_CELP, true) != NULL;
+    Parameters.bCanDecodeHVXC = CAudioCodec::GetDecoder(CAudioParam::AC_HVXC, true) != NULL;
+    Parameters.bCanDecodeOPUS = CAudioCodec::GetDecoder(CAudioParam::AC_OPUS, true) != NULL;
+    Parameters.bCanDecodexHEAAC = CAudioCodec::GetDecoder(CAudioParam::AC_xHEAAC, true) != NULL;
+    Parameters.Unlock();
 }
 
 int

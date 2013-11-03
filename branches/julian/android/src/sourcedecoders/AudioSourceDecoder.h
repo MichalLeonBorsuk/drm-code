@@ -132,17 +132,6 @@ public:
 
     virtual ~CAudioSourceDecoder();
 
-    bool CanDecode(CAudioParam::EAudCod eAudCod) {
-        switch (eAudCod)
-        {
-        case CAudioParam::AC_NONE: return true;
-        case CAudioParam::AC_AAC:  return bCanDecodeAAC;
-        case CAudioParam::AC_CELP: return bCanDecodeCELP;
-        case CAudioParam::AC_HVXC: return bCanDecodeHVXC;
-        case CAudioParam::AC_OPUS: return bCanDecodeOPUS;
-        }
-        return false;
-    }
     int GetNumCorDecAudio();
     void SetReverbEffect(const _BOOLEAN bNER) {
         bUseReverbEffect = bNER;
@@ -215,12 +204,6 @@ protected:
     int iNumLowerProtectedBits;
     _BOOLEAN bCELPCRC;
     CCRC CELPCRCObject;
-
-    string audiodecoder;
-    bool bCanDecodeAAC;
-    bool bCanDecodeCELP;
-    bool bCanDecodeHVXC;
-    bool bCanDecodeOPUS;
 
     FILE *pFile;
 

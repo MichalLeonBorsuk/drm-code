@@ -926,6 +926,9 @@ _BOOLEAN CSDCReceive::DataEntityType9(CVector<_BINARY>* pbiData,
     /* Load audio parameters class with current parameters */
     Parameter.Lock();
     CAudioParam AudParam = Parameter.GetAudioParam(iTempShortID);
+
+    AudParam.rBitrate = Parameter.GetBitRateKbps(iTempShortID, false);
+
     Parameter.Unlock();
 
     /* Stream Id */
@@ -936,14 +939,17 @@ _BOOLEAN CSDCReceive::DataEntityType9(CVector<_BINARY>* pbiData,
     {
     case 0: /* 00 */
         AudParam.eAudioCoding = CAudioParam::AC_AAC;
+        AudParam.bCanDecode = Parameter.bCanDecodeAAC;
         break;
 
     case 1: /* 01 */
         AudParam.eAudioCoding = CAudioParam::AC_CELP;
+        AudParam.bCanDecode = Parameter.bCanDecodeCELP;
         break;
 
     case 2: /* 10 */
         AudParam.eAudioCoding = CAudioParam::AC_HVXC;
+        AudParam.bCanDecode = Parameter.bCanDecodeHVXC;
         break;
 
     default: /* reserved */
@@ -963,9 +969,10 @@ _BOOLEAN CSDCReceive::DataEntityType9(CVector<_BINARY>* pbiData,
             AudParam.eSBRFlag = CAudioParam::SB_NOT_USED;
             /* rfa */
             bError = (*pbiData).Separate(4) != 0;
+            AudParam.bCanDecode = Parameter.bCanDecodeOPUS;
             break;
 
-        default: /* rooms for three other codec */
+        default: /* room for three other codecs */
             /* rfa */
             (*pbiData).Separate(4);
             bError = TRUE;

@@ -10,7 +10,6 @@ DRMDetail::DRMDetail(QWidget *parent) :
     /* Update times for colour LEDs */
     ui->LEDFAC->SetUpdateTime(1500);
     ui->LEDSDC->SetUpdateTime(1500);
-    ui->LEDMSC->SetUpdateTime(600);
     ui->LEDFrameSync->SetUpdateTime(600);
     ui->LEDTimeSync->SetUpdateTime(600);
     ui->LEDIOInterface->SetUpdateTime(2000); /* extra long -> red light stays long */
@@ -21,152 +20,128 @@ DRMDetail::~DRMDetail()
     delete ui;
 }
 
-void DRMDetail::updateDisplay(CParameter& Parameters, _REAL freqOffset, EAcqStat acqState, bool rsciMode)
+void DRMDetail::setLEDFAC(ETypeRxStatus status)
 {
-    SetStatus(ui->LEDFAC, Parameters.ReceiveStatus.FAC.GetStatus());
-    SetStatus(ui->LEDSDC, Parameters.ReceiveStatus.SDC.GetStatus());
-    // TODO Data Broadcasts
-    int iShortID = Parameters.GetCurSelAudioService();
-    SetStatus(ui->LEDMSC, Parameters.AudioComponentStatus[iShortID].GetStatus());
-    SetStatus(ui->LEDFrameSync, Parameters.ReceiveStatus.FSync.GetStatus());
-    SetStatus(ui->LEDTimeSync, Parameters.ReceiveStatus.TSync.GetStatus());
-    ETypeRxStatus soundCardStatusI = Parameters.ReceiveStatus.InterfaceI.GetStatus(); /* Input */
-    ETypeRxStatus soundCardStatusO = Parameters.ReceiveStatus.InterfaceO.GetStatus(); /* Output */
-    SetStatus(ui->LEDIOInterface, soundCardStatusO == NOT_PRESENT || (soundCardStatusI != NOT_PRESENT && soundCardStatusI != RX_OK) ? soundCardStatusI : soundCardStatusO);
+    SetStatus(ui->LEDFAC, status);
+}
 
-    /* Show SNR if receiver is in tracking mode */
-    if (acqState == AS_WITH_SIGNAL)
+void DRMDetail::setLEDSDC(ETypeRxStatus status)
+{
+    SetStatus(ui->LEDSDC, status);
+}
+
+void DRMDetail::setLEDFrameSync(ETypeRxStatus status)
+{
+    SetStatus(ui->LEDFrameSync, status);
+}
+
+void DRMDetail::setLEDTimeSync(ETypeRxStatus status)
+{
+    SetStatus(ui->LEDTimeSync, status);
+}
+
+void DRMDetail::setLEDIOInterface(ETypeRxStatus status)
+{
+    SetStatus(ui->LEDIOInterface, status);
+}
+
+void DRMDetail::setSNR(double rSNR)
+{
+    if (rSNR >= 0.0)
     {
-        /* Get a consistant snapshot */
-
-        /* We only get SNR from a local DREAM Front-End */
-        _REAL rSNR = Parameters.GetSNR();
-        if (rSNR >= 0.0)
-        {
-            /* SNR */
-            ui->ValueSNR->setText("<b>" +
-                              QString().setNum(rSNR, 'f', 1) + " dB</b>");
-        }
-        else
-        {
-            ui->ValueSNR->setText("<b>---</b>");
-        }
-        /* We get MER from a local DREAM Front-End or an RSCI input but not an MDI input */
-        _REAL rMER = Parameters.rMER;
-        if (rMER >= 0.0 )
-        {
-            ui->ValueMERWMER->setText(QString().
-                                  setNum(Parameters.rWMERMSC, 'f', 1) + " dB / "
-                                  + QString().setNum(rMER, 'f', 1) + " dB");
-        }
-        else
-        {
-            ui->ValueMERWMER->setText("---");
-        }
-
-        /* Doppler estimation (assuming Gaussian doppler spectrum) */
-        if (Parameters.rSigmaEstimate >= 0.0)
-        {
-            /* Plot delay and Doppler values */
-            ui->ValueWiener->setText(
-                QString().setNum(Parameters.rSigmaEstimate, 'f', 2) + " Hz / "
-                + QString().setNum(Parameters.rMinDelay, 'f', 2) + " ms");
-        }
-        else
-        {
-            /* Plot only delay, Doppler not available */
-            ui->ValueWiener->setText("--- / "
-                                 + QString().setNum(Parameters.rMinDelay, 'f', 2) + " ms");
-        }
-
-        /* Sample frequency offset estimation */
-        const _REAL rCurSamROffs = Parameters.rResampleOffset;
-
-        /* Display value in [Hz] and [ppm] (parts per million) */
-        ui->ValueSampFreqOffset->setText(
-            QString().setNum(rCurSamROffs, 'f', 2) + " Hz (" +
-            QString().setNum((int) (rCurSamROffs / Parameters.GetSigSampleRate() * 1e6))
-            + " ppm)");
-
+        /* SNR */
+        ui->ValueSNR->setText("<b>" +
+                          QString().setNum(rSNR, 'f', 1) + " dB</b>");
     }
     else
     {
         ui->ValueSNR->setText("<b>---</b>");
-        ui->ValueMERWMER->setText("---");
-        ui->ValueWiener->setText("--- / ---");
-        ui->ValueSampFreqOffset->setText("---");
     }
+}
 
-#ifdef _DEBUG_
-    ui->TextFreqOffset->setText("DC: " +
-                            QString().setNum(DRMReceiver.GetReceiveData()->
-                                    ConvertFrequency(Parameters.GetDCFrequency()), 'f', 3) + " Hz ");
-
-    /* Metric values */
-    ui->ValueFreqOffset->setText(tr("Metrics [dB]: MSC: ") +
-                             QString().setNum(
-                                 DRMReceiver.GetMSCMLC()->GetAccMetric(), 'f', 2) +	"\nSDC: " +
-                             QString().setNum(
-                                 DRMReceiver.GetSDCMLC()->GetAccMetric(), 'f', 2) +	" / FAC: " +
-                             QString().setNum(
-                                 DRMReceiver.GetFACMLC()->GetAccMetric(), 'f', 2));
-#else
-    /* DC frequency */
-    ui->ValueFreqOffset->setText(QString().setNum(freqOffset, 'f', 2) + " Hz");
-#endif
-
-    /* _WIN32 fix because in Visual c++ the GUI files are always compiled even
-       if QT_GUI_LIB is set or not (problem with MDI in DRMReceiver) */
-#ifdef QT_GUI_LIB
-    /* If MDI in is enabled, do not show any synchronization parameter */
-    if (rsciMode == TRUE)
+void DRMDetail::setMER(double rMER, double rWMERMSC)
+{
+    if (rMER >= 0.0 )
     {
-        ui->ValueSNR->setText("<b>---</b>");
-        if (Parameters.vecrRdelThresholds.GetSize() > 0)
-            ui->ValueWiener->setText(QString().setNum(Parameters.rRdop, 'f', 2) + " Hz / "
-                                 + QString().setNum(Parameters.vecrRdelIntervals[0], 'f', 2) + " ms ("
-                                 + QString().setNum(Parameters.vecrRdelThresholds[0]) + "%)");
-        else
-            ui->ValueWiener->setText(QString().setNum(Parameters.rRdop, 'f', 2) + " Hz / ---");
-
-        ui->ValueSampFreqOffset->setText("---");
-        ui->ValueFreqOffset->setText("---");
+        ui->ValueMERWMER->setText(QString().
+                              setNum(rWMERMSC, 'f', 1) + " dB / "
+                              + QString().setNum(rMER, 'f', 1) + " dB");
     }
-#endif
+    else
+    {
+        ui->ValueMERWMER->setText("---");
+    }
+}
 
+void DRMDetail::setDelay_Doppler(double rSigmaEstimate, double rMinDelay)
+{
+    /* Doppler estimation (assuming Gaussian doppler spectrum) */
+    if (rSigmaEstimate >= 0.0)
+    {
+        /* Plot delay and Doppler values */
+        ui->ValueWiener->setText(
+                    QString("%1 Hz / %2 ms")
+                    .arg(rSigmaEstimate, 0, 'f', 2)
+                    .arg(rMinDelay, 0, 'f', 2)
+        );
+    }
+    else
+    {
+        /* Plot only delay, Doppler not available */
+        ui->ValueWiener->setText("--- / "
+                             + QString().setNum(rMinDelay, 'f', 2) + " ms");
+    }
+}
 
-    /* FAC info static ------------------------------------------------------ */
+void DRMDetail::setSampleFrequencyOffset(double rCurSamROffs, double rSampleRate)
+{
+    /* Display value in [Hz] and [ppm] (parts per million) */
+    ui->ValueSampFreqOffset->setText(
+                QString("%1 Hz (%2 ppm)")
+                    .arg(rCurSamROffs, 0, 'f', 2)
+                    .arg((int) (rCurSamROffs / rSampleRate * 1e6))
+                );
+}
+
+void DRMDetail::setFrequencyOffset(double rOffset)
+{
+    if(rOffset<0.0)
+        ui->ValueFreqOffset->setText("---");
+    else
+        ui->ValueFreqOffset->setText(QString().setNum(rOffset, 'f', 2) + " Hz");
+}
+
+void DRMDetail::setChannel(ERobMode robm, ESpecOcc specocc, ESymIntMod eSymbolInterlMode, ECodScheme eSDCCodingScheme, ECodScheme eMSCCodingScheme)
+{
     QString strFACInfo;
 
-    /* Robustness mode #################### */
-    strFACInfo = GetRobModeStr(Parameters.GetWaveMode()) + " / " + GetSpecOccStr(Parameters.GetSpectrumOccup());
-
-    //FACDRMModeBWL->setText(tr("DRM Mode / Bandwidth:")); /* Label */
-    ui->FACDRMModeBWV->setText(strFACInfo); /* Value */
-
+    ui->FACDRMModeBWV->setText(GetRobModeStr(robm) + " / " + GetSpecOccStr(specocc));
 
     /* Interleaver Depth #################### */
-    switch (Parameters.eSymbolInterlMode)
+    switch (eSymbolInterlMode)
     {
-    case CParameter::SI_LONG:
+    case SI_LONG:
         strFACInfo = tr("2 s (Long Interleaving)");
         break;
 
-    case CParameter::SI_SHORT:
+    case SI_SHORT:
         strFACInfo = tr("400 ms (Short Interleaving)");
+        break;
+
+    case SI_MODE_E:
+        strFACInfo = tr("600 ms");
         break;
 
     default:
         strFACInfo = "?";
     }
 
-    //FACInterleaverDepthL->setText(tr("Interleaver Depth:")); /* Label */
-    ui->FACInterleaverDepthV->setText(strFACInfo); /* Value */
+    ui->FACInterleaverDepthV->setText(strFACInfo);
 
 
     /* SDC, MSC mode #################### */
     /* SDC */
-    switch (Parameters.eSDCCodingScheme)
+    switch (eSDCCodingScheme)
     {
     case CS_1_SM:
         strFACInfo = "4-QAM / ";
@@ -181,7 +156,7 @@ void DRMDetail::updateDisplay(CParameter& Parameters, _REAL freqOffset, EAcqStat
     }
 
     /* MSC */
-    switch (Parameters.eMSCCodingScheme)
+    switch (eMSCCodingScheme)
     {
     case CS_2_SM:
         strFACInfo += "SM 16-QAM";
@@ -203,84 +178,15 @@ void DRMDetail::updateDisplay(CParameter& Parameters, _REAL freqOffset, EAcqStat
         strFACInfo += "?";
     }
 
-    //FACSDCMSCModeL->setText(tr("SDC / MSC Mode:")); /* Label */
     ui->FACSDCMSCModeV->setText(strFACInfo); /* Value */
+}
 
-
-    /* Code rates #################### */
-    strFACInfo = QString().setNum(Parameters.MSCPrLe.iPartB);
-    strFACInfo += " / ";
-    strFACInfo += QString().setNum(Parameters.MSCPrLe.iPartA);
-
-    //FACCodeRateL->setText(tr("Prot. Level (B / A):")); /* Label */
-    ui->FACCodeRateV->setText(strFACInfo); /* Value */
-
-
-    /* Number of services #################### */
-    strFACInfo = tr("Audio: ");
-    strFACInfo += QString().setNum(Parameters.iNumAudioService);
-    strFACInfo += tr(" / Data: ");
-    strFACInfo += QString().setNum(Parameters.iNumDataService);
-
-    //FACNumServicesL->setText(tr("Number of Services:")); /* Label */
-    ui->FACNumServicesV->setText(strFACInfo); /* Value */
-
-
-    /* Time, date #################### */
-    if ((Parameters.iUTCHour == 0) &&
-            (Parameters.iUTCMin == 0) &&
-            (Parameters.iDay == 0) &&
-            (Parameters.iMonth == 0) &&
-            (Parameters.iYear == 0))
-    {
-        /* No time service available */
-        strFACInfo = tr("Service not available");
-    }
+void DRMDetail::setCodeRate(int iPartB, int iPartA)
+{
+    if(iPartB<0)
+        ui->FACCodeRateV->setText("-----");
     else
-    {
-#ifdef GUI_QT_DATE_TIME_TYPE
-        /* QT type of displaying date and time */
-        QDateTime DateTime;
-        DateTime.setDate(QDate(Parameters.iYear,
-                               Parameters.iMonth,
-                               Parameters.iDay));
-        DateTime.setTime(QTime(Parameters.iUTCHour,
-                               Parameters.iUTCMin));
-
-        strFACInfo = DateTime.toString();
-#else
-        /* Set time and date */
-        QString strMin;
-        const int iMin = Parameters.iUTCMin;
-
-        /* Add leading zero to number smaller than 10 */
-        if (iMin < 10)
-            strMin = "0";
-        else
-            strMin = "";
-
-        strMin += QString().setNum(iMin);
-
-        strFACInfo =
-            /* Time */
-            QString().setNum(Parameters.iUTCHour) + ":" +
-            strMin + "  -  " +
-            /* Date */
-            QString().setNum(Parameters.iMonth) + "/" +
-            QString().setNum(Parameters.iDay) + "/" +
-            QString().setNum(Parameters.iYear);
-#endif
-        /* Add UTC offset if available */
-        if (Parameters.bValidUTCOffsetAndSense)
-            strFACInfo += QString(" %1%2%3%4")
-                .arg(tr("UTC"))
-                .arg(Parameters.iUTCSense ? "-" : "+")
-                .arg(Parameters.iUTCOff / 2, 0, 10)
-                .arg(Parameters.iUTCOff & 1 ? ".5" : "");
-    }
-
-    //FACTimeDateL->setText(tr("Received time - date:")); /* Label */
-    ui->FACTimeDateV->setText(strFACInfo); /* Value */
+        ui->FACCodeRateV->setText(QString("%1 / %2").arg(iPartB).arg(iPartA));
 }
 
 QString	DRMDetail::GetRobModeStr(ERobMode e)
@@ -456,21 +362,6 @@ void DRMDetail::AddWhatsThisHelp()
     ui->TextLabelLEDSDCCRC->setWhatsThis(strLEDSDCCRC);
     ui->LEDSDC->setWhatsThis(strLEDSDCCRC);
 
-    /* MSC CRC LED */
-    const QString strLEDMSCCRC =
-        tr("<b>MSC CRC LED:</b> This LED shows the status "
-           "of the Main Service Channel (MSC). This channel contains the actual "
-           "audio and data bits. The LED shows the CRC check of the AAC core "
-           "decoder. The SBR has a separate CRC, but this status is not shown "
-           "with this LED. If SBR CRC is wrong but the AAC CRC is ok one can "
-           "still hear something (of course, the high frequencies are not there "
-           "in this case). If this LED turns red, interruptions of the audio are "
-           "heard. The yellow light shows that only one 40 ms audio frame CRC "
-           "was wrong. This causes usually no hearable artifacts.");
-
-    ui->TextLabelLEDMSCCRC->setWhatsThis(strLEDMSCCRC);
-    ui->LEDMSC->setWhatsThis(strLEDMSCCRC);
-
     /* SNR */
     const QString strSNREst =
         tr("<b>SNR:</b> Signal to Noise Ratio (SNR) "
@@ -559,23 +450,5 @@ void DRMDetail::AddWhatsThisHelp()
 
     ui->FACCodeRateL->setWhatsThis(strProtLevel);
     ui->FACCodeRateV->setWhatsThis(strProtLevel);
-
-    /* Number of Services */
-    const QString strNumServices =
-        tr("<b>Number of Services:</b> This shows the "
-           "number of audio and data services transmitted in the DRM stream. "
-           "The maximum number of streams is four.");
-
-    ui->FACNumServicesL->setWhatsThis(strNumServices);
-    ui->FACNumServicesV->setWhatsThis(strNumServices);
-
-    /* Received time - date */
-    const QString strTimeDate =
-        tr("<b>Received time - date:</b> This label shows "
-           "the received time and date in UTC. This information is carried in "
-           "the SDC channel.");
-
-    ui->FACTimeDateL->setWhatsThis(strTimeDate);
-    ui->FACTimeDateV->setWhatsThis(strTimeDate);
 
 }
