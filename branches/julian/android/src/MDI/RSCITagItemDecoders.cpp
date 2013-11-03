@@ -37,8 +37,8 @@
 
 #include "RSCITagItemDecoders.h"
 #include "../DrmReceiver.h"
-#include <time.h>
-#include <stdlib.h>
+#include <ctime>
+#include <cstdlib>
 
 /* RX_STAT Items */
 

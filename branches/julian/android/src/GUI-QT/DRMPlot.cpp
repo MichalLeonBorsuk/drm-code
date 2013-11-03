@@ -56,6 +56,7 @@ CDRMPlot::CDRMPlot(QWidget* parent, QwtPlot* SuppliedPlot) :
 	/* Setup plot */
 	plot->setAutoDelete(false);
 	plot->setAutoReplot(false);
+    plot->setMinimumHeight(120); // very important for getting sizeHint rational
 
 	/* Base font */
 	QFont basefont;

@@ -119,13 +119,17 @@ protected:
     CAboutDlg		    AboutDlg;
     int			        iMultimediaServiceBit;
     int			        iLastMultimediaServiceSelected;
+    int                 iFrequency;
     QString             SysTrayTitle;
     QString             SysTrayMessage;
     QTimer				TimerSysTray;
     CScheduler* 	    pScheduler;
     QTimer*		        pScheduleTimer;
     ServiceWidget       serviceWidgets[MAX_NUM_SERVICES];
-    RFWidget*           pRFWidget;
+    QWidget*            engineeringWidgets[4];
+    QWidget*            pEpg;
+    QWidget*            pTx;
+    QWidget*            pAltFreq; // different from the engineering AFS
 
     virtual void        eventClose(QCloseEvent* ce);
     virtual void        eventHide(QHideEvent* pEvent);
@@ -141,7 +145,7 @@ protected:
     void		ChangeGUIModeToFM();
 
     QString serviceSelector(CParameter&, int);
-    QString audioServiceDescription(const CService&, _REAL=0.0);
+    QString audioServiceDescription(const CService&);
     QString dataServiceDescription(const CService&);
     void startLogging();
     void stopLogging();
@@ -169,7 +173,11 @@ public slots:
     void OnWhatsThis();
     void OnSysTrayActivated(QSystemTrayIcon::ActivationReason);
     void on_actionEngineering_toggled(bool);
+    void on_action_Programme_Guide_toggled(bool);
+    void on_actionAlt_Frequencies_toggled(bool);
+    void on_action_Transmissions_toggled(bool);
     void on_serviceTabs_currentChanged(int);
+    void OnTuningRequest(int);
 
 signals:
     void plotStyleChanged(int);
@@ -185,6 +193,8 @@ signals:
     void SampleFrequencyOffset(double rCurSamROffs, double rSampleRate);
     void FrequencyOffset(double);
     void Channel(ERobMode, ESpecOcc, ESymIntMod, ECodScheme, ECodScheme);
+    void Frequency(int);
+    void Mode(int);
 };
 
 #endif // _FDRMDIALOG_H_

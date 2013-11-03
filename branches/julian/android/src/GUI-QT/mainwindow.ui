@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>655</width>
-    <height>407</height>
+    <width>287</width>
+    <height>173</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -18,19 +18,18 @@
     <normaloff>:/icons/MainIcon.svg</normaloff>:/icons/MainIcon.svg</iconset>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QGridLayout" name="gridLayout">
-    <item row="0" column="0">
-     <widget class="DRMDisplay" name="MainDisplay" native="true">
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <item>
+     <widget class="DRMDisplay" name="MainDisplay" native="true"/>
+    </item>
+    <item>
+     <widget class="QTabWidget" name="serviceTabs">
       <property name="sizePolicy">
-       <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
         <horstretch>0</horstretch>
         <verstretch>0</verstretch>
        </sizepolicy>
       </property>
-     </widget>
-    </item>
-    <item row="1" column="0">
-     <widget class="QTabWidget" name="serviceTabs">
       <property name="currentIndex">
        <number>1</number>
       </property>
@@ -54,7 +53,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>655</width>
+     <width>287</width>
      <height>21</height>
     </rect>
    </property>
@@ -62,10 +61,9 @@
     <property name="title">
      <string>&amp;View</string>
     </property>
-    <addaction name="action_Evaluation_Dialog"/>
-    <addaction name="action_Stations_Dialog"/>
-    <addaction name="action_Live_Schedule_Dialog"/>
-    <addaction name="action_Programme_Guide_Dialog"/>
+    <addaction name="action_Transmissions"/>
+    <addaction name="actionAlt_Frequencies"/>
+    <addaction name="action_Programme_Guide"/>
     <addaction name="actionEngineering"/>
    </widget>
    <widget class="QMenu" name="menu_Settings">
@@ -108,39 +106,10 @@
    <addaction name="menu_Settings"/>
    <addaction name="menuHelp"/>
   </widget>
-  <action name="action_Evaluation_Dialog">
-   <property name="text">
-    <string>&amp;Evaluation Dialog...</string>
+  <action name="action_Programme_Guide">
+   <property name="checkable">
+    <bool>true</bool>
    </property>
-   <property name="shortcut">
-    <string>Alt+E</string>
-   </property>
-  </action>
-  <action name="action_Multimedia_Dialog">
-   <property name="text">
-    <string>M&amp;ultimedia Dialog...</string>
-   </property>
-   <property name="shortcut">
-    <string>Alt+U</string>
-   </property>
-  </action>
-  <action name="action_Stations_Dialog">
-   <property name="text">
-    <string>S&amp;tations Dialog...</string>
-   </property>
-   <property name="shortcut">
-    <string>Alt+T</string>
-   </property>
-  </action>
-  <action name="action_Live_Schedule_Dialog">
-   <property name="text">
-    <string>&amp;Live Schedule Dialog...</string>
-   </property>
-   <property name="shortcut">
-    <string>Alt+L</string>
-   </property>
-  </action>
-  <action name="action_Programme_Guide_Dialog">
    <property name="text">
     <string>&amp;Programme Guide ...</string>
    </property>
@@ -248,6 +217,22 @@
    </property>
    <property name="text">
     <string>Engineering</string>
+   </property>
+  </action>
+  <action name="action_Transmissions">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>&amp;Transmissions</string>
+   </property>
+  </action>
+  <action name="actionAlt_Frequencies">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Alt &amp;Frequencies</string>
    </property>
   </action>
  </widget>
