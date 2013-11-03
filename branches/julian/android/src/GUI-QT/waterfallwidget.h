@@ -3,11 +3,9 @@
 
 #include <QWidget>
 #include <QPaintEvent>
-#include <QResizeEvent>
 #include <QPixmap>
 #include <QRect>
 #include <../util/Vector.h>
-#include "../resample/Resample.h"
 
 class WaterfallWidget : public QWidget
 {
@@ -18,15 +16,11 @@ public:
 signals:
 
 public slots:
-    void     updatePlot(CVector<_REAL>& vecrData);
+    void     updatePlot(CVector<_REAL>& vecrData, _REAL min, _REAL max);
 
 protected:
-    CSpectrumResample	Resample;
-    QImage   Image;
     QPixmap	 Canvas;
     void     paintEvent(QPaintEvent *);
-    void     resizeEvent(QResizeEvent  *);
-
 };
 
 #endif // WATERFALLWIDGET_H

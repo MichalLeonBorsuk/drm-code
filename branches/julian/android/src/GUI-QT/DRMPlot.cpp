@@ -33,7 +33,7 @@
 #include "../DRMSignalIO.h"
 #include <cmath>
 #include <algorithm>
-
+#include <QHBoxLayout>
 
 /* Implementation *************************************************************/
 CDRMPlot::CDRMPlot(QWidget* parent, QwtPlot* SuppliedPlot) :
@@ -1166,18 +1166,25 @@ void CDRMPlot::SetupInpSpecWaterf()
 	grid.enableY(FALSE);
 
 	/* Create a new waterfall widget if not exists */
-    if (waterfallWidget == NULL)
+    if (waterfallWidget == NULL) {
         waterfallWidget = new WaterfallWidget(plot->canvas());
+        waterfallWidget->show();
+    }
+    QLayout *layout = plot->canvas()->layout();
+    if(layout != NULL)
+    {
+        delete layout;
+    }
+    layout = new QHBoxLayout;
+    layout->addWidget(waterfallWidget);
+    // remove top and bottom margins, set left/right to axis
+    layout->setContentsMargins(4, 0, 5, 0); // assume axis size is fixed
+    plot->canvas()->setLayout(layout);
 
-	/* Set plot background color */
-	const QPalette& palette(plot->palette());
-	plot->setCanvasBackground(palette.color(QPalette::Window));
-
-	/* Fixed scale */
-	const double dXScaleMin = pDRMRec->GetReceiveData()->
-		ConvertFrequency((_REAL) 0.0) / 1000;
-	const double dXScaleMax = pDRMRec->GetReceiveData()->
-		ConvertFrequency((_REAL) iSigSampleRate / 2) / 1000;
+    /* Fixed scale DC to 50% sample rate in kHz */
+    const CReceiveData* rd = pDRMRec->GetReceiveData();
+    const double dXScaleMin = rd->ConvertFrequency(0.0) / 1000;
+    const double dXScaleMax = rd->ConvertFrequency(_REAL(iSigSampleRate) / 2.0) / 1000;
 	plot->setAxisScale(QwtPlot::xBottom, dXScaleMin, dXScaleMax);
 }
 
@@ -1186,15 +1193,7 @@ void CDRMPlot::SetInpSpecWaterf(CVector<_REAL>& vecrData, CVector<_REAL>&)
     /* No waterfallWidget so return */
     if (waterfallWidget == NULL)
         return;
-    /* plot should get a resize event and do this naturally
-#if QWT_VERSION >= 0x050200
-    plot->updateAxes();
-    plot->updateLayout();
-#else
-    plot->replot();
-#endif
-*/
-    waterfallWidget->updatePlot(vecrData);
+    waterfallWidget->updatePlot(vecrData, MIN_VAL_INP_SPEC_Y_AXIS_DB, MAX_VAL_INP_SPEC_Y_AXIS_DB);
 }
 
 void CDRMPlot::SetupFACConst()
