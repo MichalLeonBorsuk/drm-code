@@ -46,7 +46,6 @@
 #include <QCloseEvent>
 #include <qwt_thermo.h>
 #include "ui_DRMMainWindow.h"
-#include "ui_MainWindow.h"
 
 #include "CWindow.h"
 #include "EvaluationDlg.h"
@@ -64,14 +63,14 @@
 #include "../DrmReceiver.h"
 #include "../util/Vector.h"
 #include "../datadecoding/DataDecoder.h"
-#include "audiodetailwidget.h"
-#include "rfwidget.h"
 
 /* Classes ********************************************************************/
+class BWSViewer;
+class JLViewer;
 class SlideShowViewer;
 class CScheduler;
 
-class FDRMDialog : public CWindow
+class FDRMDialog : public CWindow, public Ui_DRMMainWindow
 {
     Q_OBJECT
 
@@ -84,22 +83,15 @@ public:
     virtual ~FDRMDialog();
 
 protected:
-
-    struct ServiceWidget {
-        ServiceWidget():service(),audio(NULL),data(NULL){}
-        CService service;
-        AudioDetailWidget* audio;
-        QWidget* data;
-    };
-
-    Ui_MainWindow*      ui;
     CDRMReceiver&		DRMReceiver;
-    bool                bEngineering;
     QTimer				Timer;
     QTimer				TimerClose;
+    vector<QLabel*>		serviceLabels;
 
     CLogging*			pLogging;
     systemevalDlg*		pSysEvalDlg;
+    BWSViewer*			pBWSDlg;
+    JLViewer*			pJLDlg;
     SlideShowViewer*	pSlideShowDlg;
     MultSettingsDlg*	pMultSettingsDlg;
     StationsDlg*		pStationsDlg;
@@ -109,6 +101,7 @@ protected:
     FMDialog*			pFMDlg;
     GeneralSettingsDlg* pGeneralSettingsDlg;
     QMenuBar*			pMenu;
+    QButtonGroup*		pButtonGroup;
     QMenu*				pReceiverModeMenu;
     QMenu*				pSettingsMenu;
     QMenu*				pPlotStyleMenu;
@@ -119,18 +112,13 @@ protected:
     CAboutDlg		    AboutDlg;
     int			        iMultimediaServiceBit;
     int			        iLastMultimediaServiceSelected;
-    int                 iFrequency;
     QString             SysTrayTitle;
     QString             SysTrayMessage;
     QTimer				TimerSysTray;
     CScheduler* 	    pScheduler;
     QTimer*		        pScheduleTimer;
-    ServiceWidget       serviceWidgets[MAX_NUM_SERVICES];
-    QWidget*            engineeringWidgets[4];
-    QWidget*            pEpg;
-    QWidget*            pTx;
-    QWidget*            pAltFreq; // different from the engineering AFS
 
+    void SetStatus(CMultColorLED* LED, ETypeRxStatus state);
     virtual void        eventClose(QCloseEvent* ce);
     virtual void        eventHide(QHideEvent* pEvent);
     virtual void        eventShow(QShowEvent* pEvent);
@@ -139,21 +127,26 @@ protected:
     void		UpdateDRM_GUI();
     void		UpdateDisplay();
     void		ClearDisplay();
+    void		UpdateWindowTitle();
+
+    void		SetDisplayColor(const QColor newColor);
 
     void		ChangeGUIModeToDRM();
     void		ChangeGUIModeToAM();
     void		ChangeGUIModeToFM();
 
+    QString	GetCodecString(const CService&);
+    QString	GetTypeString(const CService&);
     QString serviceSelector(CParameter&, int);
-    QString audioServiceDescription(const CService&);
-    QString dataServiceDescription(const CService&);
+    void showTextMessage(const QString&);
+    void showServiceInfo(const CService&);
     void startLogging();
     void stopLogging();
     void SysTrayCreate();
     void SysTrayStart();
     void SysTrayStop(const QString&);
     void SysTrayToolTip(const QString&, const QString&);
-    void UpdateChannel();
+	void setBars(int);
 
 public slots:
     void OnTimer();
@@ -169,32 +162,11 @@ public slots:
     void OnSwitchToFM();
     void OnSwitchToAM();
     void OnHelpAbout() {AboutDlg.show();}
-    void OnSoundFileChanged(CDRMReceiver::ESFStatus) {ClearDisplay();};
+    void OnSoundFileChanged(CDRMReceiver::ESFStatus) {UpdateWindowTitle(); ClearDisplay();};
     void OnWhatsThis();
     void OnSysTrayActivated(QSystemTrayIcon::ActivationReason);
-    void on_actionEngineering_toggled(bool);
-    void on_action_Programme_Guide_toggled(bool);
-    void on_actionAlt_Frequencies_toggled(bool);
-    void on_action_Transmissions_toggled(bool);
-    void on_serviceTabs_currentChanged(int);
-    void OnTuningRequest(int);
-
 signals:
     void plotStyleChanged(int);
-    void LEDFAC(ETypeRxStatus);
-    void LEDSDC(ETypeRxStatus status);
-    void LEDMSC(ETypeRxStatus status);
-    void LEDFrameSync(ETypeRxStatus status);
-    void LEDTimeSync(ETypeRxStatus status);
-    void LEDIOInterface(ETypeRxStatus status);
-    void SNR(double rSNR);
-    void MER(double rMER, double rWMERMSC);
-    void Delay_Doppler(double rSigmaEstimate, double rMinDelay);
-    void SampleFrequencyOffset(double rCurSamROffs, double rSampleRate);
-    void FrequencyOffset(double);
-    void Channel(ERobMode, ESpecOcc, ESymIntMod, ECodScheme, ECodScheme);
-    void Frequency(int);
-    void Mode(int);
 };
 
 #endif // _FDRMDIALOG_H_

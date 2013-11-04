@@ -574,6 +574,16 @@ CDRMReceiver::GetInputStatus()
     return eStatus;
 }
 
+string
+CDRMReceiver::GetInputFileName()
+{
+    string fileName;
+    Parameters.Lock();
+        fileName = rsiOrigin != "" ? rsiOrigin : sSoundFile;
+    Parameters.Unlock();
+    return fileName;
+}
+
 void
 CDRMReceiver::DemodulateDRM(_BOOLEAN& bEnoughData)
 {

@@ -455,7 +455,7 @@ HEADERS += \
     src/util/Settings.h \
     src/util/Utilities.h \
     src/util/Vector.h \
-    src/Version.h
+    src/Version.h \
 
 SOURCES += \
     src/AMDemodulation.cpp \
@@ -572,9 +572,9 @@ SOURCES += \
 }
 gui {
     contains(QT, webkitwidgets)|contains(QT,webkit) {
-        FORMS += bwsviewer.ui
-        HEADERS += src/GUI-QT/bwsviewer.h
-        SOURCES += src/GUI-QT/bwsviewer.cpp
+        FORMS += BWSViewer.ui bwsviewerwidget.ui
+        HEADERS +=  src/GUI-QT/BWSViewer.h src/GUI-QT/bwsviewerwidget.h
+        SOURCES +=  src/GUI-QT/BWSViewer.cpp src/GUI-QT/bwsviewerwidget.cpp
     }
 FORMS += \
     AboutDlgbase.ui \
@@ -595,6 +595,7 @@ FORMS += \
     drmdetail.ui \
     drmoptions.ui \
     audiodetailwidget.ui \
+    JLViewer.ui \
     journalineviewer.ui \
     rfwidget.ui \
     stationselector.ui
@@ -624,6 +625,7 @@ HEADERS += \
     src/GUI-QT/drmdetail.h \
     src/GUI-QT/drmoptions.h \
     src/GUI-QT/audiodetailwidget.h \
+    src/GUI-QT/JLViewer.h \
     src/GUI-QT/journalineviewer.h \
     src/GUI-QT/rfwidget.h \
     src/GUI-QT/waterfallwidget.h \
@@ -656,6 +658,7 @@ SOURCES += \
     src/GUI-QT/drmoptions.cpp \
     src/GUI-QT/audiodetailwidget.cpp \
     src/GUI-QT/journalineviewer.cpp \
+    src/GUI-QT/JLViewer.cpp \
     src/GUI-QT/rfwidget.cpp \
     src/GUI-QT/waterfallwidget.cpp \
     src/GUI-QT/stationselector.cpp

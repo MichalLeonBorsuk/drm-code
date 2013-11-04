@@ -45,6 +45,7 @@
 #ifdef QT_CORE_LIB
 # ifdef QT_GUI_LIB
 #  include "fdrmdialog.h"
+#  include "mainwindow.h"
 #  include "TransmDlg.h"
 #  include "DialogUtil.h"
 #  ifdef HAVE_LIBHAMLIB
@@ -143,7 +144,8 @@ main(int argc, char **argv)
 
 	try
 	{
-		string mode = Settings.Get("command", "mode", string());
+        bool new_gui = Settings.Get("command", "new_gui", true);
+        string mode = Settings.Get("command", "mode", string());
 		if (mode == "receive")
 		{
 			CDRMReceiver DRMReceiver(&Settings);
@@ -158,6 +160,7 @@ main(int argc, char **argv)
 #endif
 			DRMReceiver.LoadSettings();
 
+            QMainWindow *pMainDlg;
 #ifdef HAVE_LIBHAMLIB
 			DRMReceiver.SetRig(&rig);
 
@@ -165,9 +168,15 @@ main(int argc, char **argv)
 			{
 				rig.subscribe();
 			}
-			FDRMDialog *pMainDlg = new FDRMDialog(DRMReceiver, Settings, rig);
+            if(new_gui)
+                pMainDlg = new MainWindow(DRMReceiver, Settings, rig);
+            else
+                pMainDlg = new FDRMDialog(DRMReceiver, Settings, rig);
 #else
-			FDRMDialog *pMainDlg = new FDRMDialog(DRMReceiver, Settings);
+            if(new_gui)
+                pMainDlg = new MainWindow(DRMReceiver, Settings);
+            else
+                pMainDlg = new FDRMDialog(DRMReceiver, Settings);
 #endif
 			(void)pMainDlg;
 
