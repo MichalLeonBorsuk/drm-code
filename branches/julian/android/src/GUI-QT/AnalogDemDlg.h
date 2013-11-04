@@ -29,6 +29,8 @@
  *
 \******************************************************************************/
 
+#ifndef __ANALOGDEMDLG_H
+#define __ANALOGDEMDLG_H
 
 #include "ui_AMMainWindow.h"
 #include "ui_AMSSDlgbase.h"
@@ -134,3 +136,5 @@ signals:
 	void Closed();
 	void About();
 };
+
+#endif

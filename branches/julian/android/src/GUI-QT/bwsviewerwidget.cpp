@@ -44,12 +44,12 @@
 #undef ENABLE_HACK
 #define ENABLE_HACK /* Do we really need these hack unless for vtc trial sample? */
 
-#include "bwsviewer.h"
-#include "ui_bwsviewer.h"
+#include "bwsviewerwidget.h"
+#include "ui_bwsviewerwidget.h"
 
-BWSViewer::BWSViewer(CDRMReceiver& rec, CSettings& Settings, int sid, QWidget* parent):
+BWSViewerWidget::BWSViewerWidget(CDRMReceiver& rec, CSettings& Settings, int sid, QWidget* parent):
     QWidget(parent),
-    ui(new Ui::BWSViewer),
+    ui(new Ui::BWSViewerWidget),
     short_id(sid),
     settings(Settings),
     nam(this, cache, waitobjs, bAllowExternalContent, strCacheHost),
@@ -96,12 +96,12 @@ BWSViewer::BWSViewer(CDRMReceiver& rec, CSettings& Settings, int sid, QWidget* p
     connect(&Timer, SIGNAL(timeout()), this, SLOT(OnTimer()));
 }
 
-BWSViewer::~BWSViewer()
+BWSViewerWidget::~BWSViewerWidget()
 {
     delete ui;
 }
 
-void BWSViewer::UpdateButtons()
+void BWSViewerWidget::UpdateButtons()
 {
     ui->buttonStepBack->setEnabled(ui->webView->history()->canGoBack());
     ui->buttonStepForward->setEnabled(ui->webView->history()->canGoForward());
@@ -110,12 +110,12 @@ void BWSViewer::UpdateButtons()
     ui->buttonStopRefresh->setIcon(QIcon(bPageLoading ? ICON_STOP : ICON_REFRESH));
 }
 
-QString BWSViewer::ObjectStr(unsigned int count)
+QString BWSViewerWidget::ObjectStr(unsigned int count)
 {
     return QString(count > 1 ? tr("objects") : tr("object"));
 }
 
-void BWSViewer::UpdateStatus()
+void BWSViewerWidget::UpdateStatus()
 {
     unsigned int count, size;
     cache.GetObjectCountAndSize(count, size);
@@ -134,7 +134,7 @@ void BWSViewer::UpdateStatus()
     }
 }
 
-void BWSViewer::UpdateWindowTitle(const uint32_t iServiceID, const bool bServiceValid, QString strLabel)
+void BWSViewerWidget::UpdateWindowTitle(const uint32_t iServiceID, const bool bServiceValid, QString strLabel)
 {
     QString strTitle("MOT Broadcast Website");
     iLastServiceID = iServiceID;
@@ -156,13 +156,13 @@ void BWSViewer::UpdateWindowTitle(const uint32_t iServiceID, const bool bService
     setWindowTitle(strTitle);
 }
 
-void BWSViewer::Update()
+void BWSViewerWidget::Update()
 {
     UpdateStatus();
     UpdateButtons();
 }
 
-void BWSViewer::OnTimer()
+void BWSViewerWidget::OnTimer()
 {
     /* Get current service parameters */
     uint32_t iServiceID; bool bServiceValid; QString strLabel; ETypeRxStatus eStatus;
@@ -235,12 +235,12 @@ void BWSViewer::OnTimer()
     }
 }
 
-void BWSViewer::OnHome()
+void BWSViewerWidget::OnHome()
 {
     ui->webView->load("http://" + strCacheHost);
 }
 
-void BWSViewer::OnStopRefresh()
+void BWSViewerWidget::OnStopRefresh()
 {
     if (bPageLoading)
         ui->webView->stop();
@@ -253,17 +253,17 @@ void BWSViewer::OnStopRefresh()
     }
 }
 
-void BWSViewer::OnBack()
+void BWSViewerWidget::OnBack()
 {
     ui->webView->history()->back();
 }
 
-void BWSViewer::OnForward()
+void BWSViewerWidget::OnForward()
 {
     ui->webView->history()->forward();
 }
 
-void BWSViewer::OnClearCache()
+void BWSViewerWidget::OnClearCache()
 {
     ui->webView->setHtml("");
     ui->webView->history()->clear();
@@ -276,45 +276,45 @@ void BWSViewer::OnClearCache()
     Update();
 }
 
-void BWSViewer::OnWebViewLoadStarted()
+void BWSViewerWidget::OnWebViewLoadStarted()
 {
     bPageLoading = true;
     QTimer::singleShot(20, this, SLOT(Update()));
 }
 
-void BWSViewer::OnWebViewLoadFinished(bool ok)
+void BWSViewerWidget::OnWebViewLoadFinished(bool ok)
 {
     (void)ok;
     bPageLoading = false;
     QTimer::singleShot(20, this, SLOT(Update()));
 }
 
-void BWSViewer::OnWebViewTitleChanged(const QString& title)
+void BWSViewerWidget::OnWebViewTitleChanged(const QString& title)
 {
     ui->labelTitle->setText("<b>" + title + "</b>");
 }
 
-void BWSViewer::OnAllowExternalContent(bool isChecked)
+void BWSViewerWidget::OnAllowExternalContent(bool isChecked)
 {
     bAllowExternalContent = isChecked;
 }
 
-void BWSViewer::OnSetProfile(bool isChecked)
+void BWSViewerWidget::OnSetProfile(bool isChecked)
 {
     bRestrictedProfile = isChecked;
 }
 
-void BWSViewer::OnSaveFileToDisk(bool isChecked)
+void BWSViewerWidget::OnSaveFileToDisk(bool isChecked)
 {
     bSaveFileToDisk = isChecked;
 }
 
-void BWSViewer::OnClearCacheOnNewService(bool isChecked)
+void BWSViewerWidget::OnClearCacheOnNewService(bool isChecked)
 {
     bClearCacheOnNewService = isChecked;
 }
 
-void BWSViewer::eventShow(QShowEvent*)
+void BWSViewerWidget::eventShow(QShowEvent*)
 {
     bAllowExternalContent = settings.Get("BWS", "allowexternalcontent", bAllowExternalContent);
     //actionAllow_External_Content->setChecked(bAllowExternalContent);
@@ -340,7 +340,7 @@ void BWSViewer::eventShow(QShowEvent*)
     Timer.start(GUI_CONTROL_UPDATE_TIME);
 }
 
-void BWSViewer::eventHide(QHideEvent*)
+void BWSViewerWidget::eventHide(QHideEvent*)
 {
     /* Deactivate real-time timer so that it does not get new pictures */
     Timer.stop();
@@ -354,7 +354,7 @@ void BWSViewer::eventHide(QHideEvent*)
     settings.Put("BWS", "clearcacheonnewservice", bClearCacheOnNewService);
 }
 
-bool BWSViewer::Changed()
+bool BWSViewerWidget::Changed()
 {
     bool bChanged = false;
     if (decoder != NULL)
@@ -414,7 +414,7 @@ bool BWSViewer::Changed()
     return bChanged;
 }
 
-void BWSViewer::SaveMOTObject(const QString& strObjName,
+void BWSViewerWidget::SaveMOTObject(const QString& strObjName,
                               const CMOTObject& obj)
 {
     const CVector<_BYTE>& vecbRawData = obj.Body.vecData;
@@ -450,14 +450,14 @@ void BWSViewer::SaveMOTObject(const QString& strObjName,
     }
 }
 
-void BWSViewer::SetupSavePath(QString& strSavePath)
+void BWSViewerWidget::SetupSavePath(QString& strSavePath)
 {
     /* Append service ID to MOT save path */
     strSavePath = strSavePath.setNum(iCurrentDataServiceID, 16).toUpper().rightJustified(8, '0');
     strSavePath = QString::fromUtf8((*receiver.GetParameters()).GetDataDirectory("MOT").c_str()) + strSavePath + "/";
 }
 
-void BWSViewer::GetServiceParams(uint32_t* iServiceID, bool* bServiceValid, QString* strLabel, ETypeRxStatus* eStatus)
+void BWSViewerWidget::GetServiceParams(uint32_t* iServiceID, bool* bServiceValid, QString* strLabel, ETypeRxStatus* eStatus)
 {
     CParameter& Parameters = *receiver.GetParameters();
     Parameters.Lock();
@@ -473,206 +473,4 @@ void BWSViewer::GetServiceParams(uint32_t* iServiceID, bool* bServiceValid, QStr
     /* Do UTF-8 to QString (UNICODE) conversion with the ui->Label strings */
     if (strLabel)
         *strLabel = QString().fromUtf8(service.strLabel.c_str()).trimmed();
-}
-
-
-//////////////////////////////////////////////////////////////////
-// CWebsiteCache implementation
-
-void CWebsiteCache::GetObjectCountAndSize(unsigned int& count, unsigned int& size)
-{
-    mutex.lock();
-        count = objects.size();
-        size = total_size;
-    mutex.unlock();
-}
-
-void CWebsiteCache::ClearAll()
-{
-    mutex.lock();
-        strDirectoryIndex = QString(); /* NULL string, not empty string! */
-        objects.clear();
-        total_size = 0;
-    mutex.unlock();
-}
-
-void CWebsiteCache::AddObject(QString strObjName, QString strContentType, CVector<_BYTE>& vecbData)
-{
-    mutex.lock();
-        /* increment id counter, 0 is reserved for error */
-        id_counter++; if (!id_counter) id_counter++;
-
-        /* Get the object name */
-        strObjName = UrlEncodePath(strObjName);
-
-        /* Erase previous object if any */
-        map<QString,CWebsiteObject>::iterator it;
-        it = objects.find(strObjName);
-        if (it != objects.end())
-        {
-            total_size -= it->second.data.size();
-            objects.erase(it);
-        }
-
-        /* Insert the new object */
-        objects.insert(pair<QString,CWebsiteObject>(strObjName, CWebsiteObject(id_counter, strContentType, vecbData)));
-        total_size += vecbData.Size();
-    mutex.unlock();
-
-    /* Signal that a new object is added */
-    emit ObjectAdded(strObjName);
-}
-
-int CWebsiteCache::GetObjectContentType(const QString& strObjName, QString& strContentType)
-{
-    int id = 0;
-    mutex.lock();
-        CWebsiteObject* obj = FindObject(strObjName);
-        if (obj)
-        {
-            id = obj->id;
-            strContentType = obj->strContentType;
-        }
-    mutex.unlock();
-    return id;
-}
-
-int CWebsiteCache::GetObjectSize(const QString& strObjName, const unsigned int id)
-{
-    int size = 0;
-    mutex.lock();
-        CWebsiteObject* obj = FindObject(strObjName);
-        if (obj && obj->id == id)
-        {
-            size = obj->data.size();
-        }
-    mutex.unlock();
-    return size;
-}
-
-int CWebsiteCache::CopyObjectData(const QString& strObjName, const unsigned int id, char *buffer, int maxsize, int offset)
-{
-    int size = -1;
-    if (maxsize >= 0 && offset >= 0)
-    {
-        mutex.lock();
-            CWebsiteObject* obj = FindObject(strObjName);
-            if (obj && obj->id == id)
-            {
-                size = obj->data.size();
-                if (offset < size)
-                {
-                    size -= offset;
-                    if (size > maxsize)
-                        size = maxsize;
-                    memcpy(buffer, &obj->data.data()[offset], size);
-                }
-            }
-        mutex.unlock();
-    }
-    return size;
-}
-
-CWebsiteObject* CWebsiteCache::FindObject(const QString& strObjName)
-{
-    map<QString,CWebsiteObject>::iterator it;
-    it = objects.find(strObjName);
-    return it != objects.end() ? &it->second : NULL;
-}
-
-bool CWebsiteCache::SetDirectoryIndex(const QString strNewDirectoryIndex)
-{
-    bool bChanged;
-    mutex.lock();
-        bChanged = strDirectoryIndex != strNewDirectoryIndex;
-        if (bChanged)
-            strDirectoryIndex = strNewDirectoryIndex;
-    mutex.unlock();
-    return bChanged;
-}
-
-QString CWebsiteCache::GetDirectoryIndex()
-{
-    mutex.lock();
-        QString str = strDirectoryIndex;
-    mutex.unlock();
-    return str;
-}
-
-
-//////////////////////////////////////////////////////////////////
-// CNetworkReplyCache implementation
-
-CNetworkReplyCache::CNetworkReplyCache(QNetworkAccessManager::Operation op,
-    const QNetworkRequest& req, CWebsiteCache& cache, CCounter& waitobjs)
-    : cache(cache), waitobjs(waitobjs),
-    readOffset(0), emitted(false), id(0)
-{
-    /* ETSI TS 101 498-1 Section 6.2.3 */
-    QString strUrl(req.url().toString());
-    QString strDirectoryIndex;
-    if (IsUrlDirectory(strUrl))
-        strDirectoryIndex = cache.GetDirectoryIndex();
-    path = UrlEncodePath(strUrl + strDirectoryIndex);
-
-    connect(&cache, SIGNAL(ObjectAdded(QString)), this, SLOT(CheckObject(QString)));
-    setOperation(op);
-    setRequest(req);
-    setUrl(req.url());
-    open(QIODevice::ReadOnly);
-    QCoreApplication::postEvent(this, new QEvent(QEvent::User));
-    waitobjs++;
-};
-
-CNetworkReplyCache::~CNetworkReplyCache()
-{
-    waitobjs--;
-};
-
-void CNetworkReplyCache::customEvent(QEvent* event)
-{
-    if (event->type() == QEvent::User)
-        CheckObject(path);
-}
-
-qint64 CNetworkReplyCache::bytesAvailable() const
-{
-    return cache.GetObjectSize(path, id);
-}
-
-qint64 CNetworkReplyCache::readData(char * data, qint64 maxSize)
-{
-    int len = cache.CopyObjectData(path, id, data, maxSize, readOffset);
-    if (len > 0)
-        readOffset += len;
-    return len;
-}
-
-void CNetworkReplyCache::CheckObject(QString strObjName)
-{
-    if (!emitted && path == strObjName)
-    {
-        QString strContentType;
-        unsigned int new_id = cache.GetObjectContentType(path, strContentType);
-        if (new_id)
-        {
-            id = new_id;
-            setRawHeader(QByteArray("Content-Type"), strContentType.toUtf8());
-            emitted = true;
-            emit readyRead(); /* needed for Qt 4.6 */
-            emit finished();
-        }
-    }
-}
-
-
-//////////////////////////////////////////////////////////////////
-// CNetworkAccessManager implementation
-
-QNetworkReply* CNetworkAccessManager::createRequest(Operation op, const QNetworkRequest& req, QIODevice* outgoingData)
-{
-    if (!bAllowExternalContent || req.url().host() == strCacheHost)
-        return new CNetworkReplyCache(op, req, cache, waitobjs);
-    else
-        return QNetworkAccessManager::createRequest(op, req, outgoingData);
 }
