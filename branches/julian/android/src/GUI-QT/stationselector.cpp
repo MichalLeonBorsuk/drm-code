@@ -53,11 +53,11 @@ StationSelector::StationSelector(QWidget *parent) :
 #else
     ui->ProgrSigStrength->setScalePosition(QwtThermo::TrailingScale);
 #endif
-    ui->comboBoxFilterTime->setItemData(0,  -1, Qt::UserRole);
-    ui->comboBoxFilterTime->setItemData(1,  0, Qt::UserRole);
-    ui->comboBoxFilterTime->setItemData(2,  5, Qt::UserRole);
-    ui->comboBoxFilterTime->setItemData(3,  15, Qt::UserRole);
-    ui->comboBoxFilterTime->setItemData(4,  30, Qt::UserRole);
+    ui->comboBoxFilterTime->setItemData(0,  NUM_SECONDS_SHOW_ALL, Qt::UserRole);
+    ui->comboBoxFilterTime->setItemData(1,  NUM_SECONDS_SHOW_ACTIVE, Qt::UserRole);
+    ui->comboBoxFilterTime->setItemData(2,  NUM_SECONDS_PREV_5MIN, Qt::UserRole);
+    ui->comboBoxFilterTime->setItemData(3,  NUM_SECONDS_PREV_15MIN, Qt::UserRole);
+    ui->comboBoxFilterTime->setItemData(4,  NUM_SECONDS_PREV_30MIN, Qt::UserRole);
 
 
     /* Load settings */
@@ -120,7 +120,7 @@ StationSelector::~StationSelector()
 void StationSelector::on_comboBoxFilterTime_activated(int index)
 {
     int seconds = ui->comboBoxFilterTime->itemData(index, Qt::UserRole).toInt();
-    if(seconds>=0)
+    if(seconds!=NUM_SECONDS_SHOW_ALL)
         schedule.SetSecondsPreview(seconds);
     UpdateTransmissionStatus();
 }
@@ -128,7 +128,7 @@ void StationSelector::on_comboBoxFilterTime_activated(int index)
 bool StationSelector::showAll()
 {
     int seconds = ui->comboBoxFilterTime->itemData(ui->comboBoxFilterTime->currentIndex(), Qt::UserRole).toInt();
-    return seconds<0;
+    return seconds==NUM_SECONDS_SHOW_ALL;
 }
 
 void StationSelector::on_comboBoxFilterTarget_activated(const QString& s)
