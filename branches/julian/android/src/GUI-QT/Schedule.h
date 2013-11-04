@@ -52,6 +52,8 @@
 #define AMSCHEDULE_CSV_FILE_NAME		"AMSchedule.csv"
 
 /* Time definitions for preview */
+#define NUM_SECONDS_SHOW_ALL			(-1)
+#define NUM_SECONDS_SHOW_ACTIVE			0
 #define NUM_SECONDS_PREV_5MIN			300
 #define NUM_SECONDS_PREV_15MIN			900
 #define NUM_SECONDS_PREV_30MIN			1800
