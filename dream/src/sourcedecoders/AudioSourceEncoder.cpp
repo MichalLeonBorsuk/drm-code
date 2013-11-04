@@ -76,7 +76,8 @@ CAudioSourceEncoderImplementation::ProcessDataInternal(CParameter& Parameters,
         if (AudioParam.bParamChanged)
         {
             AudioParam.bParamChanged = FALSE;
-            codec->EncUpdate(AudioParam);
+            if(codec->CanEncode(AudioParam.eAudioCoding))
+                codec->EncUpdate(AudioParam);
         }
         Parameters.Unlock();
 
@@ -109,7 +110,14 @@ CAudioSourceEncoderImplementation::ProcessDataInternal(CParameter& Parameters,
             }
 
             /* Actual encoding */
-            bytesEncoded = codec->Encode(vecsEncInData, lNumSampEncIn * iNumChannels, vecsTmpData, lMaxBytesEncOut);
+            if(codec->CanEncode(AudioParam.eAudioCoding))
+            {
+                bytesEncoded = codec->Encode(vecsEncInData, lNumSampEncIn * iNumChannels, vecsTmpData, lMaxBytesEncOut);
+            }
+            else
+            {
+                bytesEncoded = 0;
+            }
             if (bytesEncoded > 0)
             {
                 /* Extract CRC */
@@ -253,6 +261,8 @@ CAudioSourceEncoderImplementation::InitInternalTx(CParameter & Parameters,
 
     Parameters.Lock();
 
+    CService& service = Parameters.Service[iCurSelServ];
+
     /* Close previous encoder instance if any */
     CloseEncoder();
 
@@ -275,7 +285,7 @@ CAudioSourceEncoderImplementation::InitInternalTx(CParameter & Parameters,
         iTotPacketSize = DataEncoder.Init(Parameters);
 
         /* Get stream ID for data service */
-        iCurStreamID = Parameters.Service[iCurSelServ].DataParam.iStreamID;
+        iCurStreamID = service.DataParam.iStreamID;
     }
     else
     {
@@ -283,8 +293,8 @@ CAudioSourceEncoderImplementation::InitInternalTx(CParameter & Parameters,
         bIsDataService = FALSE;
 
         /* Get stream ID and codec type for audio service */
-        iCurStreamID = Parameters.Service[iCurSelServ].AudioParam.iStreamID;
-        CAudioParam::EAudCod eAudioCoding = Parameters.Service[iCurSelServ].AudioParam.eAudioCoding;
+        iCurStreamID = service.AudioParam.iStreamID;
+        CAudioParam::EAudCod eAudioCoding = service.AudioParam.eAudioCoding;
 
         /* Get encoder instance */
         codec = CAudioCodec::GetEncoder(eAudioCoding);
@@ -304,7 +314,7 @@ CAudioSourceEncoderImplementation::InitInternalTx(CParameter & Parameters,
         {
             int iTimeEachAudBloMS = 40;
 
-            /* Set encoder number of channels, faac support only mono */
+            /* Set encoder number of channels, faac only supports mono */
             iNumChannels = 1;
 
             /* Set encoder sample rate. This parameter decides other parameters */
@@ -319,13 +329,13 @@ CAudioSourceEncoderImplementation::InitInternalTx(CParameter & Parameters,
             case 12000:
                 iTimeEachAudBloMS = 80;	/* ms */
                 iNumAudioFrames = 5;
-                Parameters.Service[iCurSelServ].AudioParam.eAudioSamplRate = CAudioParam::AS_12KHZ;	/* Set parameter in global struct */
+                service.AudioParam.eAudioSamplRate = CAudioParam::AS_12KHZ;	/* Set parameter in global struct */
                 break;
 
             case 24000:
                 iTimeEachAudBloMS = 40;	/* ms */
                 iNumAudioFrames = 10;
-                Parameters.Service[iCurSelServ].AudioParam.eAudioSamplRate = CAudioParam::AS_24KHZ;	/* Set parameter in global struct */
+                service.AudioParam.eAudioSamplRate = CAudioParam::AS_24KHZ;	/* Set parameter in global struct */
                 break;
             }
 
@@ -344,13 +354,16 @@ CAudioSourceEncoderImplementation::InitInternalTx(CParameter & Parameters,
 
             const int iActEncOutBytes = (int) (iAudioPayloadLen / iNumAudioFrames);
 
-            /* Open encoder instance */
-            codec->EncOpen(lEncSamprate, iNumChannels, &lNumSampEncIn, &lMaxBytesEncOut);
-            lNumSampEncIn /= iNumChannels;
+            if(codec->CanEncode(CAudioParam::AC_AAC))
+            {
+                /* Open encoder instance */
+                codec->EncOpen(lEncSamprate, iNumChannels, &lNumSampEncIn, &lMaxBytesEncOut);
+                lNumSampEncIn /= iNumChannels;
 
-            /* Calculate bitrate, bit per second */
-            const int iBitRate = iActEncOutBytes * SIZEOF__BYTE * AUD_DEC_TRANSFROM_LENGTH / lNumSampEncIn / iTimeEachAudBloMS * 1000;
-            codec->EncSetBitrate(iBitRate);
+                /* Calculate bitrate, bit per second */
+                const int iBitRate = iActEncOutBytes * SIZEOF__BYTE * AUD_DEC_TRANSFROM_LENGTH / lNumSampEncIn / iTimeEachAudBloMS * 1000;
+                codec->EncSetBitrate(iBitRate);
+            }
         }
         break;
 
@@ -360,7 +373,7 @@ CAudioSourceEncoderImplementation::InitInternalTx(CParameter & Parameters,
             lEncSamprate = 48000;
             iNumChannels = 2;
             iNumAudioFrames = 20;
-            Parameters.Service[iCurSelServ].AudioParam.eAudioSamplRate = CAudioParam::AS_48KHZ;	/* Set parameter in global struct */
+            service.AudioParam.eAudioSamplRate = CAudioParam::AS_48KHZ;	/* Set parameter in global struct */
 
             /* Number of borders, opus decoder need to know the exact frame size,
                thus the number of borders equal the number of audio frames */
@@ -377,17 +390,20 @@ CAudioSourceEncoderImplementation::InitInternalTx(CParameter & Parameters,
 
             const int iActEncOutBytes = (int) (iAudioPayloadLen / iNumAudioFrames);
 
-            /* Open encoder instance */
-            codec->EncOpen(lEncSamprate, iNumChannels, &lNumSampEncIn, &lMaxBytesEncOut);
-            lNumSampEncIn /= iNumChannels;
+            if(codec->CanEncode(CAudioParam::AC_OPUS))
+            {
+                /* Open encoder instance */
+                codec->EncOpen(lEncSamprate, iNumChannels, &lNumSampEncIn, &lMaxBytesEncOut);
+                lNumSampEncIn /= iNumChannels;
 
-            /* Calculate bitrate, bit per frame */
-            const int iBitRate = iActEncOutBytes * SIZEOF__BYTE;
-            codec->EncSetBitrate(iBitRate);
+                /* Calculate bitrate, bit per frame */
+                const int iBitRate = iActEncOutBytes * SIZEOF__BYTE;
+                codec->EncSetBitrate(iBitRate);
+            }
 
             /* Set flags to reset and init codec params on first ProcessDataInternal call */
-            Parameters.Service[iCurSelServ].AudioParam.bOPUSRequestReset = TRUE;
-            Parameters.Service[iCurSelServ].AudioParam.bParamChanged = TRUE;
+            service.AudioParam.bOPUSRequestReset = TRUE;
+            service.AudioParam.bParamChanged = TRUE;
         }
         break;
 
@@ -401,7 +417,7 @@ CAudioSourceEncoderImplementation::InitInternalTx(CParameter & Parameters,
         }
 
         /* Set parameter in global struct */
-        Parameters.Service[iCurSelServ].AudioParam.eAudioMode =
+        service.AudioParam.eAudioMode =
             iNumChannels >= 2 ? CAudioParam::AM_STEREO : CAudioParam::AM_MONO;
 
         /* Init storage for actual data, CRCs and frame lengths */
@@ -466,6 +482,8 @@ CAudioSourceEncoderImplementation::InitInternalRx(CParameter& Parameters,
     /* Close previous encoder instance if any */
     CloseEncoder();
 
+    int short_id = 0; // TODO support another service
+
     /* Calculate number of input samples in mono. Audio block are always 400 ms long */
     const int iNumInSamplesMono = (int) ((_REAL) Parameters.GetAudSampleRate() *
                                          (_REAL) 0.4 /* 400 ms */ );
@@ -486,16 +504,18 @@ CAudioSourceEncoderImplementation::InitInternalRx(CParameter& Parameters,
     if (bUsingTextMessage == TRUE)
         iTotAudFraSizeBits -= SIZEOF__BYTE * NUM_BYTES_TEXT_MESS_IN_AUD_STR;
 
-    /* Get encoder instance */
-    codec = CAudioCodec::GetEncoder(Parameters.Service[0].AudioParam.eAudioCoding);
+    CService& service = Parameters.Service[short_id];
 
-    switch (Parameters.Service[0].AudioParam.eAudioCoding) {
+    /* Get encoder instance */
+    codec = CAudioCodec::GetEncoder(service.AudioParam.eAudioCoding);
+
+    switch (service.AudioParam.eAudioCoding) {
 
     case CAudioParam::AC_AAC:
     {
         int iTimeEachAudBloMS = 40;
 
-        /* Set encoder number of channels, faac support only mono */
+        /* Set encoder number of channels, faac only supports mono */
         iNumChannels = 1;
 
         /* Set encoder sample rate. This parameter decides other parameters */
@@ -510,13 +530,13 @@ CAudioSourceEncoderImplementation::InitInternalRx(CParameter& Parameters,
         case 12000:
             iTimeEachAudBloMS = 80;	/* ms */
             iNumAudioFrames = 5;
-            Parameters.Service[0].AudioParam.eAudioSamplRate = CAudioParam::AS_12KHZ;	/* Set parameter in global struct */
+            service.AudioParam.eAudioSamplRate = CAudioParam::AS_12KHZ;	/* Set parameter in global struct */
             break;
 
         case 24000:
             iTimeEachAudBloMS = 40;	/* ms */
             iNumAudioFrames = 10;
-            Parameters.Service[0].AudioParam.eAudioSamplRate = CAudioParam::AS_24KHZ;	/* Set parameter in global struct */
+            service.AudioParam.eAudioSamplRate = CAudioParam::AS_24KHZ;	/* Set parameter in global struct */
             break;
         }
 
@@ -533,15 +553,18 @@ CAudioSourceEncoderImplementation::InitInternalRx(CParameter& Parameters,
            super frame header() and for the aac_crc_bits) (5.3.1.1, Table 5) */
         iAudioPayloadLen = iTotAudFraSizeBits / SIZEOF__BYTE - iNumHeaderBytes - iNumAudioFrames /* for CRCs */ ;
 
-        const int iActEncOutBytes = (int) (iAudioPayloadLen / iNumAudioFrames);
+        const int iActEncOutBytes = int(iAudioPayloadLen / iNumAudioFrames);
 
-        /* Open encoder instance */
-        codec->EncOpen(lEncSamprate, iNumChannels, &lNumSampEncIn, &lMaxBytesEncOut);
-        lNumSampEncIn /= iNumChannels;
+        if(codec->CanEncode(CAudioParam::AC_AAC))
+        {
+            /* Open encoder instance */
+            codec->EncOpen(lEncSamprate, iNumChannels, &lNumSampEncIn, &lMaxBytesEncOut);
+            lNumSampEncIn /= iNumChannels;
 
-        /* Calculate bitrate, bit per second */
-        const int iBitRate = iActEncOutBytes * SIZEOF__BYTE * AUD_DEC_TRANSFROM_LENGTH / lNumSampEncIn / iTimeEachAudBloMS * 1000;
-        codec->EncSetBitrate(iBitRate);
+            /* Calculate bitrate, bit per second */
+            const int iBitRate = iActEncOutBytes * SIZEOF__BYTE * AUD_DEC_TRANSFROM_LENGTH / lNumSampEncIn / iTimeEachAudBloMS * 1000;
+            codec->EncSetBitrate(iBitRate);
+        }
     }
     break;
 
@@ -551,7 +574,7 @@ CAudioSourceEncoderImplementation::InitInternalRx(CParameter& Parameters,
         lEncSamprate = 48000;
         iNumChannels = 2;
         iNumAudioFrames = 20;
-        Parameters.Service[0].AudioParam.eAudioSamplRate = CAudioParam::AS_48KHZ;	/* Set parameter in global struct */
+        service.AudioParam.eAudioSamplRate = CAudioParam::AS_48KHZ;	/* Set parameter in global struct */
 
         /* Number of borders, opus decoder need to know the exact frame size,
            thus the number of borders equal the number of audio frames */
@@ -568,17 +591,20 @@ CAudioSourceEncoderImplementation::InitInternalRx(CParameter& Parameters,
 
         const int iActEncOutBytes = (int) (iAudioPayloadLen / iNumAudioFrames);
 
-        /* Open encoder instance */
-        codec->EncOpen(lEncSamprate, iNumChannels, &lNumSampEncIn, &lMaxBytesEncOut);
-        lNumSampEncIn /= iNumChannels;
+        if(codec->CanEncode(CAudioParam::AC_OPUS))
+        {
+            /* Open encoder instance */
+            codec->EncOpen(lEncSamprate, iNumChannels, &lNumSampEncIn, &lMaxBytesEncOut);
+            lNumSampEncIn /= iNumChannels;
 
-        /* Calculate bitrate, bit per frame */
-        const int iBitRate = iActEncOutBytes * SIZEOF__BYTE;
-        codec->EncSetBitrate(iBitRate);
+            /* Calculate bitrate, bit per frame */
+            const int iBitRate = iActEncOutBytes * SIZEOF__BYTE;
+            codec->EncSetBitrate(iBitRate);
+        }
 
         /* Set flags to reset and init codec params on first ProcessDataInternal call */
-        Parameters.Service[0].AudioParam.bOPUSRequestReset = TRUE;
-        Parameters.Service[0].AudioParam.bParamChanged = TRUE;
+        service.AudioParam.bOPUSRequestReset = TRUE;
+        service.AudioParam.bParamChanged = TRUE;
     }
     break;
 
@@ -591,7 +617,7 @@ CAudioSourceEncoderImplementation::InitInternalRx(CParameter& Parameters,
     }
 
     /* Set parameter in global struct */
-    Parameters.Service[0].AudioParam.eAudioMode =
+    service.AudioParam.eAudioMode =
         iNumChannels == 2 ? CAudioParam::AM_STEREO : CAudioParam::AM_MONO;
 
     /* Init storage for actual data, CRCs and frame lengths */

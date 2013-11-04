@@ -76,7 +76,7 @@ CAudioCodec::GetDecoder(CAudioParam::EAudCod eAudioCoding, bool bCanReturnNullPt
 		if (CodecList[i]->CanDecode(eAudioCoding))
 			return CodecList[i];
 	/* Fallback to null codec */
-	return bCanReturnNullPtr ? NULL : CodecList[0];
+    return bCanReturnNullPtr ? NULL : new NullCodec();
 }
 
 CAudioCodec*
@@ -87,6 +87,6 @@ CAudioCodec::GetEncoder(CAudioParam::EAudCod eAudioCoding, bool bCanReturnNullPt
 		if (CodecList[i]->CanEncode(eAudioCoding))
 			return CodecList[i];
 	/* Fallback to null codec */
-	return bCanReturnNullPtr ? NULL : CodecList[0];
+    return bCanReturnNullPtr ? NULL : new NullCodec();
 }
 
