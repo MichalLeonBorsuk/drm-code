@@ -6,8 +6,8 @@
 #include <QResizeEvent>
 #include <QPixmap>
 #include <QRect>
-#include <../util/Vector.h>
-#include <../resample/Resample.h>
+#include <vector>
+#include <../GlobalDefinitions.h>
 
 class SimpleWaterfallWidget : public QWidget
 {
@@ -18,7 +18,7 @@ public:
 signals:
 
 public slots:
-    void     updatePlot(vector<_REAL>& vecrData, _REAL min, _REAL max);
+    void     updatePlot(const std::vector<_REAL>& vec, _REAL min, _REAL max);
 
 protected:
     QPixmap	 Canvas;
@@ -26,41 +26,22 @@ protected:
     void     resizeEvent(QResizeEvent *);
 };
 
-class FasterWaterfallWidget : public QWidget
+class WaterfallWidget : public QWidget
 {
     Q_OBJECT
 public:
-    explicit FasterWaterfallWidget(QWidget *parent = 0);
+    explicit WaterfallWidget(QWidget *parent = 0);
 
 signals:
 
 public slots:
-    void     updatePlot(vector<_REAL>& vecrData, _REAL min, _REAL max);
+    void     updatePlot(const std::vector<_REAL>& vec, _REAL min, _REAL max);
 
 protected:
     QPixmap	 Canvas;
+    QImage image;
     void     paintEvent(QPaintEvent *);
     void     resizeEvent(QResizeEvent *);
 };
-
-class FastestWaterfallWidget : public QWidget
-{
-    Q_OBJECT
-public:
-    explicit FastestWaterfallWidget(QWidget *parent = 0);
-
-signals:
-
-public slots:
-    void     updatePlot(CVector<_REAL>& vecrData, _REAL min, _REAL max);
-
-protected:
-    QPixmap	 Canvas;
-    CSpectrumResample resample;
-    void     paintEvent(QPaintEvent *);
-    void     resizeEvent(QResizeEvent *);
-};
-
-typedef FastestWaterfallWidget WaterfallWidget;
 
 #endif // WATERFALLWIDGET_H
