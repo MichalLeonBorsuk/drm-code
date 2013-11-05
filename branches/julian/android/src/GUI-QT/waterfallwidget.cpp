@@ -146,8 +146,9 @@ void WaterfallWidget::updatePlot(const vector<_REAL>& vec, _REAL min, _REAL max)
     {
         vector<_REAL>::const_iterator last = first+interval;
         vector<_REAL>::const_iterator biggest = max_element(first, last);
+        // reduce dB value by 6 dB to avoid FSD and normalise
         _REAL norm = ((*biggest) - 6.0 - min) / (max - min);
-        // Translate dB-values to colors and enerate pixel
+        // Translate normalised value to a color and generate pixel
         ((QRgb*)image.scanLine(0))[i] = fromReal(norm).rgb();
         first=last;
     }
