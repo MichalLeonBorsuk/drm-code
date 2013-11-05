@@ -1,6 +1,7 @@
 #include "waterfallwidget.h"
 #include <QPainter>
 #include <../matlib/MatlibStdToolbox.h>
+#include <algorithm>
 
 /* Init some constants */
 static const int maxHue = 359; /* Range of "Hue" is 0-359 */
@@ -57,7 +58,7 @@ void SimpleWaterfallWidget::resizeEvent(QResizeEvent *e)
     }
 }
 
-void SimpleWaterfallWidget::updatePlot(vector<_REAL>& vec, _REAL min, _REAL max)
+void SimpleWaterfallWidget::updatePlot(const vector<_REAL>& vec, _REAL min, _REAL max)
 {
     if(int(vec.size()) != Canvas.width())
     {
@@ -89,8 +90,8 @@ void SimpleWaterfallWidget::updatePlot(vector<_REAL>& vec, _REAL min, _REAL max)
     update();
 }
 
-FasterWaterfallWidget::FasterWaterfallWidget(QWidget *parent) :
-    QWidget(parent),Canvas(0,0)
+WaterfallWidget::WaterfallWidget(QWidget *parent) :
+    QWidget(parent),Canvas(),image()
 {
     setAttribute(Qt::WA_OpaquePaintEvent, true);
     setAttribute(Qt::WA_TransparentForMouseEvents, true);
@@ -98,16 +99,17 @@ FasterWaterfallWidget::FasterWaterfallWidget(QWidget *parent) :
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 }
 
-void FasterWaterfallWidget::paintEvent(QPaintEvent *)
+void WaterfallWidget::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
     painter.drawPixmap(0, 0, Canvas);
 }
 
-void FasterWaterfallWidget::resizeEvent(QResizeEvent *e)
+void WaterfallWidget::resizeEvent(QResizeEvent *e)
 {
     QPixmap tmp = Canvas;
     Canvas = QPixmap(e->size());
+    image = QImage( e->size().width(), 1, QImage::Format_RGB32);
 
     // first time ever - initialise to black
     if(tmp.size().width()==0)
@@ -121,91 +123,33 @@ void FasterWaterfallWidget::resizeEvent(QResizeEvent *e)
         Canvas.fill(QColor::fromRgb(0, 0, 0));
 
     // copy old data, scaling to fit horizontally but making space below
+    // TODO - the width scaling is slightly off.
     QPainter p(&Canvas);
     QPoint origin(0,0);
     QSize top(Canvas.width(), tmp.height());
         p.drawPixmap(QRect(origin, top), tmp, QRect(origin, tmp.size()));
 }
 
-void FasterWaterfallWidget::updatePlot(vector<_REAL>& vec, _REAL min, _REAL max)
+void WaterfallWidget::updatePlot(const vector<_REAL>& vec, _REAL min, _REAL max)
 {
-    // move plot down canvas one row
-    Canvas.scroll(0, 1, Canvas.rect());
-
-    QPainter painter;
-    painter.setWindow(0, 0, vec.size(), 1);
-    painter.begin(&Canvas);
-
-    /* Actual waterfall data */
-    for (size_t i = 0; i<vec.size(); i++)
-    {
-        /* Translate dB-values to colors */
-        _REAL norm = (vec[i] - min) / (max - min);
-
-        /* Generate pixel */
-        painter.setPen(fromReal(norm));
-        painter.drawPoint(i, 0);// TODO why does this not work?
-    }
-
-    painter.end();
-    update();
-}
-
-FastestWaterfallWidget::FastestWaterfallWidget(QWidget *parent) :
-    QWidget(parent),Canvas()
-{
-    setAttribute(Qt::WA_OpaquePaintEvent, true);
-    setAttribute(Qt::WA_TransparentForMouseEvents, true);
-    setCursor(Qt::CrossCursor);
-    setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-}
-
-void FastestWaterfallWidget::paintEvent(QPaintEvent *)
-{
-    QPainter painter(this);
-    painter.drawPixmap(0, 0, Canvas);
-}
-
-void FastestWaterfallWidget::resizeEvent(QResizeEvent *e)
-{
-    QPixmap tmp = Canvas;
-    Canvas = QPixmap(e->size());
-
-    // first time ever - initialise to black
-    if(tmp.size().width()==0)
-    {
-        tmp = QPixmap(e->size());
-        // always use a black background
-        tmp.fill(QColor::fromRgb(0, 0, 0));
-    }
-    // vertical stretch - fill below old with black
-    if(Canvas.height()>tmp.height())
-        Canvas.fill(QColor::fromRgb(0, 0, 0));
-
-    // copy old data, scaling to fit horizontally but making space below
-    QPainter p(&Canvas);
-    QPoint origin(0,0);
-    QSize top(Canvas.width(), tmp.height());
-        p.drawPixmap(QRect(origin, top), tmp, QRect(origin, tmp.size()));
-}
-
-void FastestWaterfallWidget::updatePlot(CVector<_REAL>& input, _REAL min, _REAL max)
-{
-    int w = Canvas.width();
-    CVector<_REAL> *pResampled;
-    resample.Resample(&input, &pResampled, w, TRUE);
-    QImage image( w, 1, QImage::Format_RGB32);
-
+    int w = image.width();
     /* Scroll Canvas */
     Canvas.scroll(0, 1, Canvas.rect());
 
-    /* Actual waterfall data */
-    for (int i = 0; i <  w; i++)
+    size_t interval = int(floor(_REAL(vec.size())/_REAL(w)));
+    if(interval==0)
     {
-        /* Translate dB-values to colors */
-        _REAL norm = ((*pResampled)[i] - min) / (max - min);
-        /* Generate pixel */
+        interval = 1; // TODO handle stretching
+    }
+    vector<_REAL>::const_iterator first = vec.begin();
+    for(int i=0; i<w; i++)
+    {
+        vector<_REAL>::const_iterator last = first+interval;
+        vector<_REAL>::const_iterator biggest = max_element(first, last);
+        _REAL norm = ((*biggest) - 6.0 - min) / (max - min);
+        // Translate dB-values to colors and enerate pixel
         ((QRgb*)image.scanLine(0))[i] = fromReal(norm).rgb();
+        first=last;
     }
     QPainter painter(&Canvas);
     painter.drawImage(0, 0, image);
