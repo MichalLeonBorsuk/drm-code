@@ -582,6 +582,7 @@ FORMS += \
     AMSSDlgbase.ui \
     CodecParams.ui \
     DRMMainWindow.ui \
+    FMMainWindow.ui \
     EPGDlgbase.ui \
     GeneralSettingsDlgbase.ui \
     LiveScheduleWindow.ui \
