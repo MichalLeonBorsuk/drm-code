@@ -721,4 +721,5 @@ OTHER_FILES += \
     android/res/values/libs.xml \
     android/res/values/strings.xml \
     android/res/values-pl/strings.xml \
-    android/AndroidManifest.xml
+    android/AndroidManifest.xml \
+    windows/dream.iss
