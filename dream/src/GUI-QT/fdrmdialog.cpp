@@ -1114,6 +1114,8 @@ void FDRMDialog::eventClose(QCloseEvent* ce)
 
         /* Set the timer for polling the working thread state */
         TimerClose.start(50);
+
+        CSysTray::Destroy(&pSysTray);
     }
 
     /* Wait indefinitely until the working thread is stopped,
@@ -1126,7 +1128,6 @@ void FDRMDialog::eventClose(QCloseEvent* ce)
         AboutDlg.close();
         pAnalogDemDlg->close();
         pFMDlg->close();
-        CSysTray::Destroy(&pSysTray);
         ce->accept();
     }
     else
