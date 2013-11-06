@@ -132,27 +132,37 @@ void WaterfallWidget::resizeEvent(QResizeEvent *e)
 
 void WaterfallWidget::updatePlot(const vector<_REAL>& vec, _REAL min, _REAL max)
 {
+    QPainter painter;
+    if(!painter.begin(&Canvas)) // David had problems on Linux without this
+        return;
+
     int w = image.width();
     /* Scroll Canvas */
     Canvas.scroll(0, 1, Canvas.rect());
 
-    size_t interval = int(floor(_REAL(vec.size())/_REAL(w)));
-    if(interval==0)
+    // cast from u_char (8bits wide) to QRgb (probably 24bits wide)
+    QRgb* scanLine = ((QRgb*)image.scanLine(0));
+
+    // scaling factor between data and image
+    _REAL ratio = _REAL(vec.size())/_REAL(w);
+    if(ratio<1.0)
     {
-        interval = 1; // TODO handle stretching
+        ratio = 1.0; // TODO handle stretching
     }
-    vector<_REAL>::const_iterator first = vec.begin();
+    vector<_REAL>::const_iterator vi = vec.begin();
+    size_t l=0; // index of left edge of bin
     for(int i=0; i<w; i++)
     {
-        vector<_REAL>::const_iterator last = first+interval;
-        vector<_REAL>::const_iterator biggest = max_element(first, last);
+        // calculate right edge of current bin - not all bins are same width for all possible ratios
+        size_t r = size_t((i+1)*ratio); // index of right edge (ie left edge of following bin
+        vector<_REAL>::const_iterator biggest = max_element(vi+l, vi+r);
         // reduce dB value by 6 dB to avoid FSD and normalise
         _REAL norm = ((*biggest) - 6.0 - min) / (max - min);
         // Translate normalised value to a color and generate pixel
-        ((QRgb*)image.scanLine(0))[i] = fromReal(norm).rgb();
-        first=last;
+        scanLine[i] = fromReal(norm).rgb();
+        l = r;
     }
-    QPainter painter(&Canvas);
     painter.drawImage(0, 0, image);
+    painter.end();
     update();
 }

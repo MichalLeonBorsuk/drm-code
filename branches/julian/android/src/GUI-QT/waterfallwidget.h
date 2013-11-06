@@ -15,8 +15,6 @@ class SimpleWaterfallWidget : public QWidget
 public:
     explicit SimpleWaterfallWidget(QWidget *parent = 0);
 
-signals:
-
 public slots:
     void     updatePlot(const std::vector<_REAL>& vec, _REAL min, _REAL max);
 
@@ -32,13 +30,11 @@ class WaterfallWidget : public QWidget
 public:
     explicit WaterfallWidget(QWidget *parent = 0);
 
-signals:
-
 public slots:
     void     updatePlot(const std::vector<_REAL>& vec, _REAL min, _REAL max);
 
 protected:
-    QPixmap	 Canvas;
+    QPixmap Canvas;
     QImage image;
     void     paintEvent(QPaintEvent *);
     void     resizeEvent(QResizeEvent *);
