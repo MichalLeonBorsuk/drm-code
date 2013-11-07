@@ -26,6 +26,7 @@
 \******************************************************************************/
 
 #include "LiveScheduleDlg.h"
+#include "ui_LiveScheduleWidget.h"
 #include <QFile>
 #include <QDir>
 #include <QFileDialog>
@@ -35,6 +36,8 @@
 #include <QShowEvent>
 #include "../util-QT/Util.h"
 
+#define NUM_SECONDS_SHOW_ALL (-1)
+#define NUM_SECONDS_SHOW_ACTIVE 0
 /* Implementation *************************************************************/
 
 QString
@@ -327,63 +330,38 @@ CDRMLiveSchedule::LoadAFSInformations(const CAltFreqSign& AltFreqSign)
     }
 }
 
-LiveScheduleDlg::LiveScheduleDlg(CDRMReceiver& DRMReceiver, CSettings& Settings,
-                                 QMap<QWidget*,QString>& parents):
-    CWindow(parents, Settings, "Live Schedule"),
+LiveScheduleDlg::LiveScheduleDlg(CDRMReceiver& DRMReceiver, QWidget* parent):
+    QDialog(parent),
     DRMReceiver(DRMReceiver),
     smallGreenCube(":/icons/smallGreenCube.png"),
     greenCube(":/icons/greenCube.png"), redCube(":/icons/redCube.png"),
     orangeCube(":/icons/orangeCube.png"), pinkCube(":/icons/pinkCube.png"),
     vecpListItems(), iColStationID(1), iWidthColStationID(0)
 {
-    setupUi(this);
-
-    /* Load settings */
-    LoadSettings();
+    ui->setupUi(this);
 
     /* Set help text for the controls */
     AddWhatsThisHelp();
 
     /* Clear list box for file names and set up columns */
-    ListViewStations->clear();
+    ui->ListViewStations->clear();
 
-    connect(actionSave,  SIGNAL(triggered()), this, SLOT(OnSave()));
-
-    previewMapper = new QSignalMapper(this);
-    previewGroup = new QActionGroup(this);
-    showMapper = new QSignalMapper(this);
-    showGroup = new QActionGroup(this);
-    showGroup->addAction(actionShowOnlyActiveStations);
-    showMapper->setMapping(actionShowOnlyActiveStations, 0);
-    showGroup->addAction(actionShowAllStations);
-    showMapper->setMapping(actionShowAllStations, 1);
-    connect(actionClose, SIGNAL(triggered()), SLOT(close()));
-    connect(actionShowAllStations, SIGNAL(triggered()), showMapper, SLOT(map()));
-    connect(actionShowOnlyActiveStations, SIGNAL(triggered()), showMapper, SLOT(map()));
-    connect(showMapper, SIGNAL(mapped(int)), this, SLOT(OnShowStationsMenu(int)));
-    previewGroup->addAction(actionDisabled);
-    previewMapper->setMapping(actionDisabled, 0);
-    previewGroup->addAction(action5minutes);
-    previewMapper->setMapping(action5minutes, NUM_SECONDS_PREV_5MIN);
-    previewGroup->addAction(action15minutes);
-    previewMapper->setMapping(action15minutes, NUM_SECONDS_PREV_15MIN);
-    previewGroup->addAction(action30minutes);
-    previewMapper->setMapping(action30minutes, NUM_SECONDS_PREV_30MIN);
-    connect(actionDisabled, SIGNAL(triggered()), previewMapper, SLOT(map()));
-    connect(action5minutes, SIGNAL(triggered()), previewMapper, SLOT(map()));
-    connect(action15minutes, SIGNAL(triggered()), previewMapper, SLOT(map()));
-    connect(action30minutes, SIGNAL(triggered()), previewMapper, SLOT(map()));
-    connect(previewMapper, SIGNAL(mapped(int)), this, SLOT(OnShowPreviewMenu(int)));
-
-    connect(buttonOk,  SIGNAL(clicked()), this, SLOT(close()));
+    //connect(actionSave,  SIGNAL(triggered()), this, SLOT(OnSave()));
+    //connect(buttonOk,  SIGNAL(clicked()), this, SLOT(close()));
     //connect(actionGetUpdate, SIGNAL(triggered()), this, SLOT(OnGetUpdate()));
 
     /* Connections ---------------------------------------------------------- */
     connect(&TimerList, SIGNAL(timeout()), this, SLOT(OnTimerList()));
     connect(&TimerUTCLabel, SIGNAL(timeout()), this, SLOT(OnTimerUTCLabel()));
 
+    ui->comboBoxFilterTime->setItemData(0,  NUM_SECONDS_SHOW_ALL, Qt::UserRole);
+    ui->comboBoxFilterTime->setItemData(1,  NUM_SECONDS_SHOW_ACTIVE, Qt::UserRole);
+    ui->comboBoxFilterTime->setItemData(2,  NUM_SECONDS_PREV_5MIN, Qt::UserRole);
+    ui->comboBoxFilterTime->setItemData(3,  NUM_SECONDS_PREV_15MIN, Qt::UserRole);
+    ui->comboBoxFilterTime->setItemData(4,  NUM_SECONDS_PREV_30MIN, Qt::UserRole);
+
     /* Check boxes */
-    connect(CheckBoxFreeze, SIGNAL(clicked()), this, SLOT(OnCheckFreeze()));
+    connect(ui->CheckBoxFreeze, SIGNAL(clicked()), this, SLOT(OnCheckFreeze()));
 
     /* Init UTC time shown with a label control */
     OnTimerUTCLabel();
@@ -391,15 +369,16 @@ LiveScheduleDlg::LiveScheduleDlg(CDRMReceiver& DRMReceiver, CSettings& Settings,
 
 LiveScheduleDlg::~LiveScheduleDlg()
 {
+    delete ui;
 }
 
 void
-LiveScheduleDlg::LoadSettings()
+LiveScheduleDlg::LoadSettings(CSettings& settings)
 {
     /* Set sorting behaviour of the list */
-    iCurrentSortColumn = getSetting("sortcolumn", 0);
-    bCurrentSortAscending = getSetting("sortascending", true);
-    ListViewStations->sortItems(iCurrentSortColumn, bCurrentSortAscending?Qt::AscendingOrder:Qt::DescendingOrder);
+    iCurrentSortColumn = settings.Get("Live", "sortcolumn", 0);
+    bCurrentSortAscending = settings.Get("Live", "sortascending", true);
+    ui->ListViewStations->sortItems(iCurrentSortColumn, bCurrentSortAscending?Qt::AscendingOrder:Qt::DescendingOrder);
 
     /* Retrieve the setting saved into the .ini file */
     strCurrentSavePath = QString::fromUtf8(DRMReceiver.GetParameters()->GetDataDirectory("AFS").c_str());
@@ -408,53 +387,51 @@ LiveScheduleDlg::LoadSettings()
 	CreateDirectories(strCurrentSavePath);
 
     /* Set stations in list view which are active right now */
-    bool bShowAll = getSetting("showall", false);
-    int iPrevSecs = getSetting("preview", 0);
+    bool bShowAll = settings.Get("Live", "showall", false);
+    int iPrevSecs = settings.Get("Live", "preview", 0);
 
     if(bShowAll)
-        actionShowAllStations->setChecked(true);
+        ui->comboBoxFilterTime->setCurrentIndex(0);
     else
-        actionShowOnlyActiveStations->setChecked(true);
+        for(int i=0; i<ui->comboBoxFilterTime->count(); i++)
+            if(ui->comboBoxFilterTime->itemData(i, Qt::UserRole)==iPrevSecs)
+                ui->comboBoxFilterTime->setCurrentIndex(i);
     DRMSchedule.SetSecondsPreview(iPrevSecs);
-    switch (iPrevSecs)
-    {
-    case NUM_SECONDS_PREV_5MIN:
-        action5minutes->setChecked(true);
-        break;
-
-    case NUM_SECONDS_PREV_15MIN:
-        action5minutes->setChecked(true);
-        break;
-
-    case NUM_SECONDS_PREV_30MIN:
-        action30minutes->setChecked(true);
-        break;
-
-    default: /* case 0, also takes care of out of value parameters */
-        actionDisabled->setChecked(true);
-        break;
-    }
 }
 
 void
-LiveScheduleDlg::SaveSettings()
+LiveScheduleDlg::SaveSettings(CSettings& settings)
 {
     /* Store preview settings */
-    putSetting("preview", DRMSchedule.GetSecondsPreview());
+    settings.Put("Live", "preview", DRMSchedule.GetSecondsPreview());
 
     /* Store sort settings */
-    putSetting("sortcolumn", iCurrentSortColumn);
-    putSetting("sortascending", bCurrentSortAscending);
+    settings.Put("Live", "sortcolumn", iCurrentSortColumn);
+    settings.Put("Live", "sortascending", bCurrentSortAscending);
 
     /* Store preview settings */
-    putSetting("showall", showAll());
+    settings.Put("Live", "showall", showAll());
+}
+
+void LiveScheduleDlg::on_comboBoxFilterTime_activated(int index)
+{
+    int seconds = ui->comboBoxFilterTime->itemData(index, Qt::UserRole).toInt();
+    if(seconds!=NUM_SECONDS_SHOW_ALL)
+        DRMSchedule.SetSecondsPreview(seconds);
+    SetStationsView();
+}
+
+bool LiveScheduleDlg::showAll()
+{
+    int seconds = ui->comboBoxFilterTime->itemData(ui->comboBoxFilterTime->currentIndex(), Qt::UserRole).toInt();
+    return seconds==NUM_SECONDS_SHOW_ALL;
 }
 
 void
 LiveScheduleDlg::OnCheckFreeze()
 {
     /* if CheckBoxFreeze is checked the schedule is frozen */
-    if (CheckBoxFreeze->isChecked())
+    if (ui->CheckBoxFreeze->isChecked())
         TimerList.stop();
     else
     {
@@ -465,12 +442,7 @@ LiveScheduleDlg::OnCheckFreeze()
 
 int LiveScheduleDlg::currentSortColumn()
 {
-	return ListViewStations->sortColumn();
-}
-
-bool LiveScheduleDlg::showAll()
-{
-	return actionShowAllStations->isChecked();
+    return ui->ListViewStations->sortColumn();
 }
 
 void
@@ -486,22 +458,8 @@ LiveScheduleDlg::OnTimerUTCLabel()
                                            gmtCur->tm_hour, gmtCur->tm_min);
 
     /* Only apply if time label does not show the correct time */
-    if (TextLabelUTCTime->text().compare(strUTCTime))
-        TextLabelUTCTime->setText(strUTCTime);
-}
-
-void
-LiveScheduleDlg::OnShowStationsMenu(int iID)
-{
-    /* Update list view */
-    SetStationsView();
-    (void)iID;
-}
-
-void
-LiveScheduleDlg::OnShowPreviewMenu(int iID)
-{
-    DRMSchedule.SetSecondsPreview(iID);
+    if (ui->TextLabelUTCTime->text().compare(strUTCTime))
+        ui->TextLabelUTCTime->setText(strUTCTime);
 }
 
 void
@@ -558,7 +516,7 @@ LiveScheduleDlg::LoadSchedule()
     ListItemsMutex.lock();
 
     /* save the state of the station id column in case we want it later */
-    iWidthColStationID = ListViewStations->columnWidth(iColStationID);
+    iWidthColStationID = ui->ListViewStations->columnWidth(iColStationID);
 
     /* Delete all old list view items (it is important that the vector
        "vecpListItems" was initialized to 0 at creation of the global object
@@ -580,7 +538,7 @@ LiveScheduleDlg::LoadSchedule()
 
     vecpListItems.resize(iNumStations, NULL);
 
-    actionSave->setEnabled(iNumStations > 0);
+    //TODO actionSave->setEnabled(iNumStations > 0);
     /* Unlock BEFORE calling the stations view update because in this function
        the mutex is locked, too! */
     ListItemsMutex.unlock();
@@ -615,14 +573,7 @@ LiveScheduleDlg::LoadSchedule()
 }
 
 void
-LiveScheduleDlg::eventClose(QCloseEvent*)
-{
-    /* Save settings */
-    SaveSettings();
-}
-
-void
-LiveScheduleDlg::eventHide(QHideEvent*)
+LiveScheduleDlg::hideEvent(QHideEvent*)
 {
     /* Deactivate real-time timers */
     TimerList.stop();
@@ -630,13 +581,13 @@ LiveScheduleDlg::eventHide(QHideEvent*)
 }
 
 void
-LiveScheduleDlg::eventShow(QShowEvent*)
+LiveScheduleDlg::showEvent(QShowEvent*)
 {
     /* Update window */
     OnTimerUTCLabel();
     TimerUTCLabel.start(GUI_TIMER_UTC_TIME_LABEL);
 
-    if (!CheckBoxFreeze->isChecked())
+    if (!ui->CheckBoxFreeze->isChecked())
     {
         OnTimerList();
 
@@ -694,7 +645,7 @@ LiveScheduleDlg::SetStationsView()
                     Parameters.Unlock();
                 }
 
-                vecpListItems[i] = new MyListLiveViewItem(ListViewStations,
+                vecpListItems[i] = new MyListLiveViewItem(ui->ListViewStations,
                         QString(item.strFreq.c_str()) /* freq. */ ,
                         name /* station name or id or blank */ ,
                         QString(item.strSystem.c_str()) /* system */ ,
@@ -754,16 +705,16 @@ LiveScheduleDlg::SetStationsView()
 
     if(bHaveOtherServiceIDs)
     {
-        ListViewStations->setColumnWidth(iColStationID, iWidthColStationID);
+        ui->ListViewStations->setColumnWidth(iColStationID, iWidthColStationID);
     }
     else
     {
-        ListViewStations->setColumnWidth(iColStationID, 0);
+        ui->ListViewStations->setColumnWidth(iColStationID, 0);
     }
 
     /* Sort the list if items have changed */
     if(bListHastChanged)
-        ListViewStations->sortItems(iCurrentSortColumn, bCurrentSortAscending?Qt::AscendingOrder:Qt::DescendingOrder);
+        ui->ListViewStations->sortItems(iCurrentSortColumn, bCurrentSortAscending?Qt::AscendingOrder:Qt::DescendingOrder);
     ListItemsMutex.unlock();
 }
 
@@ -811,13 +762,13 @@ LiveScheduleDlg::OnSave()
     ListItemsMutex.lock();
 
     /* Force the sort for all items */
-	ListViewStations->sortItems(iCurrentSortColumn, bCurrentSortAscending?Qt::AscendingOrder:Qt::DescendingOrder);
+    ui->ListViewStations->sortItems(iCurrentSortColumn, bCurrentSortAscending?Qt::AscendingOrder:Qt::DescendingOrder);
 
     /* Extract values from the list */
 
-	for(int i=0; i<ListViewStations->topLevelItemCount(); i++)
+    for(int i=0; i<ui->ListViewStations->topLevelItemCount(); i++)
 	{
-		QTreeWidgetItem* myItem = ListViewStations->topLevelItem(i);
+        QTreeWidgetItem* myItem = ui->ListViewStations->topLevelItem(i);
         strSchedule += "<tr>" "<td align=\"right\">" + myItem->text(COL_FREQ) + "</td>"	/* freq */
                        "<td>" + ColValue(myItem->text(1)) + "</td>"	/* system */
                        "<td>" + ColValue(myItem->text(2)) + "</td>"	/* time */
@@ -904,9 +855,9 @@ LiveScheduleDlg::AddWhatsThisHelp()
 
     /* Check box freeze */
 	QString strFreeze = tr("<b>Freeze:</b> If this check box is selected the live schedule is frozen.");
-	ListViewStations->setWhatsThis(strView);
-    TextLabelUTCTime->setWhatsThis(strTime);
-    CheckBoxFreeze->setWhatsThis(strFreeze);
+    ui->ListViewStations->setWhatsThis(strView);
+    ui->TextLabelUTCTime->setWhatsThis(strTime);
+    ui->CheckBoxFreeze->setWhatsThis(strFreeze);
 }
 
 CDRMLiveSchedule::StationState CDRMLiveSchedule::CheckState(const int iPos)

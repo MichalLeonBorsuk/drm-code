@@ -22,6 +22,8 @@ public:
 
 signals:
     void listen(int);
+public slots:
+    void setPlotStyle(int);
 private:
     Ui::AudioDetailWidget *ui;
     int short_id;
@@ -29,6 +31,7 @@ private:
     bool engineeringMode;
     CDRMPlot *pMainPlot;
     CDRMReceiver* pDRMReceiver;
+    int iPlotStyle;
     void updateEngineeringModeDisplay(int, const CService&);
     void updateUserModeDisplay(int, const CService&);
     void addItem(const QString&, const QString&);

@@ -5,7 +5,7 @@
 
 RFWidget::RFWidget(CDRMReceiver* prx, QWidget *parent) :
     QWidget(parent),
-    ui(new Ui::RFWidget),pMainPlot(NULL),pDRMReceiver(prx)
+    ui(new Ui::RFWidget),pMainPlot(NULL),pDRMReceiver(prx),iPlotStyle(0)
 {
     ui->setupUi(this);
     pMainPlot = new CDRMPlot(NULL, ui->plot);
@@ -109,4 +109,13 @@ void RFWidget::setChannel(ERobMode robm, ESpecOcc specocc, ESymIntMod eSymbolInt
 void RFWidget::setCodeRate(int b, int a)
 {
     ui->drmDetail->setCodeRate(b, a);
+}
+
+void RFWidget::setPlotStyle(int n)
+{
+    /* Save the new style */
+    iPlotStyle = n;
+    /* Update main plot window */
+    if(pMainPlot)
+        pMainPlot->SetPlotStyle(iPlotStyle);
 }

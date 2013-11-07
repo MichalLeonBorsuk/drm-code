@@ -25,10 +25,9 @@
  *
 \******************************************************************************/
 
-#ifndef __LiveScheduleDlg_H
-#define __LiveScheduleDlg_H
+#ifndef _LIVESCHEDULEDLG_H
+#define _LIVESCHEDULEDLG_H
 
-#include "ui_LiveScheduleWindow.h"
 #include "CWindow.h"
 #include "../DrmReceiver.h"
 #include <QSignalMapper>
@@ -44,6 +43,10 @@
 #include <QCheckBox>
 #include <QThread>
 #include <vector>
+
+namespace Ui {
+    class LiveScheduleWidget;
+}
 
 
 /* Definitions ****************************************************************/
@@ -138,22 +141,22 @@ public:
 	void setPixmap(int col, QPixmap p) { setIcon(col, p); }
 };
 
-class LiveScheduleDlg : public CWindow, public Ui_LiveScheduleWindow
+class LiveScheduleDlg : public QDialog
 {
 	Q_OBJECT
 
 public:
-	LiveScheduleDlg(CDRMReceiver&, CSettings&, QMap<QWidget*,QString>&);
+    explicit LiveScheduleDlg(CDRMReceiver&, QWidget*);
 	virtual ~LiveScheduleDlg();
+    void			LoadSettings(CSettings&);
+    void			SaveSettings(CSettings&);
 
 protected:
-	virtual void	eventClose(QCloseEvent* pEvent);
-	virtual void	eventHide(QHideEvent* pEvent);
-	virtual void	eventShow(QShowEvent* pEvent);
-	void			LoadSettings();
-	void			SaveSettings();
-	void			LoadSchedule();
-	int				iCurrentSortColumn;
+    void            hideEvent(QHideEvent* pEvent);
+    void            showEvent(QShowEvent* pEvent);
+    void			LoadSchedule();
+    Ui::LiveScheduleWidget* ui;
+    int				iCurrentSortColumn;
 	_BOOLEAN		bCurrentSortAscending;
 	void			SetStationsView();
 	void			AddWhatsThisHelp();
@@ -172,10 +175,6 @@ protected:
 	QIcon			redCube;
 	QIcon			orangeCube;
 	QIcon			pinkCube;
-	QSignalMapper*	previewMapper;
-	QActionGroup*	previewGroup;
-	QSignalMapper*	showMapper;
-	QActionGroup*	showGroup;
 
 	vector<MyListLiveViewItem*>	vecpListItems;
 	QMutex			ListItemsMutex;
@@ -186,11 +185,10 @@ protected:
 public slots:
 	void OnTimerList();
 	void OnTimerUTCLabel();
-	void OnShowStationsMenu(int iID);
-	void OnShowPreviewMenu(int iID);
 	void OnHeaderClicked(int c);
 	void OnSave();
 	void OnCheckFreeze();
+    void on_comboBoxFilterTime_activated(int index);
 };
 
 #endif

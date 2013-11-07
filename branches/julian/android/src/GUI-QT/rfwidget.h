@@ -22,6 +22,7 @@ private:
     Ui::RFWidget *ui;
     CDRMPlot *pMainPlot;
     CDRMReceiver* pDRMReceiver;
+    int iPlotStyle;
 public slots:
     void setActive(bool);
     void setLEDFAC(ETypeRxStatus);
@@ -36,6 +37,7 @@ public slots:
     void setFrequencyOffset(double);
     void setChannel(ERobMode, ESpecOcc, ESymIntMod, ECodScheme, ECodScheme);
     void setCodeRate(int,int);
+    void setPlotStyle(int);
 private slots:
     void on_chartSelector_currentItemChanged(QTreeWidgetItem *);
     void on_showOptions_toggled(bool);

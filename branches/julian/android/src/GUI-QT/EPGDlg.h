@@ -30,68 +30,26 @@
 #ifndef _EPGDLG_H
 #define _EPGDLG_H
 
-#include "ui_EPGDlgbase.h"
-#include "CWindow.h"
-#include "../DrmReceiver.h"
 #include "../util-QT/EPG.h"
-#include <QWidget>
-#include <QDateTime>
-#include <QPushButton>
-#include <QSpinBox>
-#include <QComboBox>
-#include <QStringList>
-#include <QMessageBox>
-#include <QLabel>
-#include <QTimer>
-#include <QPixmap>
-#include <QTreeWidget>
 #include <map>
+#include <QDialog>
+#include <QIcon>
+#include <QTimer>
 
-
-/* Definitions ****************************************************************/
-#define COL_NAME	1
-
-/* Define the timer interval of updating */
-#define GUI_TIMER_EPG_UPDATE		1000 /* ms (1 second) */
-
-/* list view columns */
-#define COL_START		0
-#define COL_NAME		1
-#define	COL_GENRE		2
-#define	COL_DESCRIPTION	3
-#define COL_DURATION	4
-
+namespace Ui {
+    class EPGDialog;
+}
+class QTreeWidgetItem;
 
 /* Classes ********************************************************************/
 
-class EPGDlg : public CWindow, public Ui_CEPGDlgbase
+class EPGDlg : public QDialog
 {
     Q_OBJECT
 
 public:
-    EPGDlg(CDRMReceiver&, CSettings&, QWidget* parent = 0);
-    virtual ~EPGDlg();
-
-    void select();
-
-protected:
-    virtual void eventShow(QShowEvent*);
-    virtual void eventHide(QHideEvent*);
-    void setActive(QTreeWidgetItem*);
-    bool isActive(QTreeWidgetItem*);
-
-    virtual QString getFileName(const QDate& date, uint32_t sid, bool bAdvanced);
-    virtual QString getFileName_etsi(const QDate& date, uint32_t sid, bool bAdvanced);
-    virtual QDomDocument* getFile (const QString&);
-    virtual QDomDocument* getFile (const QDate& date, uint32_t sid, bool bAdvanced);
-
-    bool do_updates;
-    EPG epg;
-    CDRMReceiver&	DRMReceiver;
-    QTimer		Timer;
-    map<QString,uint32_t> sids;
-    QIcon		greenCube;
-    QTreeWidgetItem*	next;
+    explicit EPGDlg(string d, map<uint32_t,CServiceInformation>& si, QWidget* parent = 0);
+    ~EPGDlg();
 
 signals:
     void NowNext(QString);
@@ -100,6 +58,23 @@ public slots:
     void on_channel_activated(const QString&);
     void on_dateEdit_dateChanged(const QDate&);
     void OnTimer();
+
+private:
+    Ui::EPGDialog *ui;
+    EPG epg;
+    map<QString,uint32_t> sids;
+    QIcon		greenCube;
+    QTreeWidgetItem*	next;
+    QTimer timer;
+    void showEvent(QShowEvent*);
+    void hideEvent(QHideEvent*);
+    void setActive(QTreeWidgetItem*);
+    bool isActive(QTreeWidgetItem*);
+    void select();
+    QString getFileName(const QDate& date, uint32_t sid, bool bAdvanced);
+    QString getFileName_etsi(const QDate& date, uint32_t sid, bool bAdvanced);
+    QDomDocument* getFile (const QString&);
+    QDomDocument* getFile (const QDate& date, uint32_t sid, bool bAdvanced);
 };
 
 #endif

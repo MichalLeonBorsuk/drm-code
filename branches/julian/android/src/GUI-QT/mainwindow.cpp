@@ -89,52 +89,22 @@ MainWindow::MainWindow(CDRMReceiver& NDRMR, CSettings& Settings,
     pSoundCardMenu = new CSoundCardSelMenu(DRMReceiver, pFileMenu, this);
     ui->menu_Settings->addMenu(pSoundCardMenu);
 
+    /* TODO add logging menu item and connect to pLogging
+    connect(pRF, SIGNAL(startLogging()), pLogging, SLOT(start()));
+    connect(pRF, SIGNAL(stopLogging()), pLogging, SLOT(stop()));
+    */
+
     /* Analog demodulation window */
     pAnalogDemDlg = new AnalogDemDlg(DRMReceiver, Settings, pSoundCardMenu);
 
     /* FM window */
     pFMDlg = new FMDialog(DRMReceiver, Settings, pSoundCardMenu);
 
-    /* Parent list for Stations and Live Schedule window */
-    QMap <QWidget*,QString> parents;
-    parents[this] = "drm";
-    parents[pAnalogDemDlg] = "analog";
-
-    /* Stations window */
-#ifdef HAVE_LIBHAMLIB
-    pStationsDlg = new StationsDlg(DRMReceiver, Settings, rig, parents);
-#else
-    pStationsDlg = new StationsDlg(DRMReceiver, Settings, parents);
-#endif
-
-    /* Live Schedule window */
-    pLiveScheduleDlg = new LiveScheduleDlg(DRMReceiver, Settings, parents);
-
-    /* MOT slide show window */
-    pSlideShowDlg = new SlideShowViewer(DRMReceiver, Settings, this);
-
-    /* Programme Guide Window */
-    pEPGDlg = new EPGDlg(DRMReceiver, Settings, this);
-
-    /* Evaluation window */
-    pSysEvalDlg = new systemevalDlg(DRMReceiver, Settings, this);
-
     /* general settings window */
     pGeneralSettingsDlg = new GeneralSettingsDlg(Parameters, Settings, this);
 
     /* Multimedia settings window */
     pMultSettingsDlg = new MultSettingsDlg(Parameters, Settings, this);
-#if 0
-    connect(ui->action_Evaluation_Dialog, SIGNAL(triggered()), pSysEvalDlg, SLOT(show()));
-    connect(ui->action_Multimedia_Dialog, SIGNAL(triggered()), this, SLOT(OnViewMultimediaDlg()));
-    connect(ui->action_Stations_Dialog, SIGNAL(triggered()), pStationsDlg, SLOT(show()));
-    connect(ui->action_Live_Schedule_Dialog, SIGNAL(triggered()), pLiveScheduleDlg, SLOT(show()));
-    connect(ui->action_Programme_Guide_Dialog, SIGNAL(triggered()), pEPGDlg, SLOT(show()));
-    connect(ui->actionExit, SIGNAL(triggered()), this, SLOT(close()));
-    ui->action_Multimedia_Dialog->setEnabled(false);
-#endif
-
-
     connect(ui->actionMultimediaSettings, SIGNAL(triggered()), pMultSettingsDlg, SLOT(show()));
     connect(ui->actionGeneralSettings, SIGNAL(triggered()), pGeneralSettingsDlg, SLOT(show()));
 
@@ -173,7 +143,6 @@ MainWindow::MainWindow(CDRMReceiver& NDRMR, CSettings& Settings,
     connect(ui->actionAbout_Dream, SIGNAL(triggered()), this, SLOT(OnHelpAbout()));
     connect(ui->actionWhats_This, SIGNAL(triggered()), this, SLOT(OnWhatsThis()));
 
-    connect(this, SIGNAL(plotStyleChanged(int)), pSysEvalDlg, SLOT(UpdatePlotStyle(int)));
     connect(this, SIGNAL(plotStyleChanged(int)), pAnalogDemDlg, SLOT(UpdatePlotStyle(int)));
 
     connect(pFMDlg, SIGNAL(About()), this, SLOT(OnHelpAbout()));
@@ -187,18 +156,16 @@ MainWindow::MainWindow(CDRMReceiver& NDRMR, CSettings& Settings,
     connect(pLogging, SIGNAL(subscribeRig()), &rig, SLOT(subscribe()));
     connect(pLogging, SIGNAL(unsubscribeRig()), &rig, SLOT(unsubscribe()));
 #endif
-    connect(pSysEvalDlg, SIGNAL(startLogging()), pLogging, SLOT(start()));
-    connect(pSysEvalDlg, SIGNAL(stopLogging()), pLogging, SLOT(stop()));
     connect(pAnalogDemDlg, SIGNAL(SwitchMode(int)), this, SLOT(OnSwitchMode(int)));
     connect(pAnalogDemDlg, SIGNAL(NewAMAcquisition()), this, SLOT(OnNewAcquisition()));
     connect(pAnalogDemDlg, SIGNAL(ViewStationsDlg()), pStationsDlg, SLOT(show()));
-    connect(pAnalogDemDlg, SIGNAL(ViewLiveScheduleDlg()), pLiveScheduleDlg, SLOT(show()));
+    //connect(pAnalogDemDlg, SIGNAL(ViewLiveScheduleDlg()), pLiveScheduleDlg, SLOT(show()));
     connect(pAnalogDemDlg, SIGNAL(Closed()), this, SLOT(close()));
 
     connect(pFMDlg, SIGNAL(SwitchMode(int)), this, SLOT(OnSwitchMode(int)));
     connect(pFMDlg, SIGNAL(Closed()), this, SLOT(close()));
     connect(pFMDlg, SIGNAL(ViewStationsDlg()), pStationsDlg, SLOT(show()));
-    connect(pFMDlg, SIGNAL(ViewLiveScheduleDlg()), pLiveScheduleDlg, SLOT(show()));
+    //connect(pFMDlg, SIGNAL(ViewLiveScheduleDlg()), pLiveScheduleDlg, SLOT(show()));
 
     connect(&Timer, SIGNAL(timeout()), this, SLOT(OnTimer()));
     connect(&TimerClose, SIGNAL(timeout()), this, SLOT(OnTimerClose()));
@@ -231,18 +198,22 @@ MainWindow::~MainWindow()
     delete pAnalogDemDlg;
     delete pFMDlg;
 }
+//    TODO putSetting("plotstyle", iPlotStyle, true);
 
 void MainWindow::on_action_Programme_Guide_toggled(bool checked)
 {
     if(checked)
     {
-        pEpg = new QLabel("EPG");
+        CParameter& Parameters = *DRMReceiver.GetParameters();
+        Parameters.Lock();
+        pEpg = new EPGDlg(Parameters.GetDataDirectory(), Parameters.ServiceInformation);
+        Parameters.Unlock();
         int n = ui->serviceTabs->count();
         ui->serviceTabs->insertTab(n++, pEpg, "EPG");
     }
     else
     {
-        delete pEpg; pEpg=0;
+        delete pEpg; pEpg=NULL;
     }
 }
 
@@ -250,7 +221,7 @@ void MainWindow::on_actionAlt_Frequencies_toggled(bool checked)
 {
     if(checked)
     {
-        pAltFreq = new QLabel("EPG");
+        pAltFreq = new LiveScheduleDlg(DRMReceiver, this);
         int n = ui->serviceTabs->count();
         ui->serviceTabs->insertTab(n++, pAltFreq, "Alt Freq");
     }
@@ -278,7 +249,6 @@ void MainWindow::on_action_Transmissions_toggled(bool checked)
     }
 }
 
-
 void MainWindow::on_actionEngineering_toggled(bool checked)
 {
         bEngineering = checked;
@@ -293,7 +263,11 @@ void MainWindow::on_actionEngineering_toggled(bool checked)
         {
             if(engineeringWidgets[0]==NULL)
             {
-                engineeringWidgets[0] = new RFWidget(&DRMReceiver);
+                int iPlotStyle = 0;// TODO set from menu
+                RFWidget* pRf = new RFWidget(&DRMReceiver);
+                pRf->setPlotStyle(iPlotStyle);
+                connect(this, SIGNAL(plotStyleChanged(int)), pRf, SLOT(setPlotStyle(int)));
+                engineeringWidgets[0] = pRf;
                 engineeringWidgets[1] = new QLabel("");
                 engineeringWidgets[2] = new QLabel("");
                 engineeringWidgets[3] = new QLabel("");
@@ -853,6 +827,7 @@ void MainWindow::UpdateDisplay()
                 serviceWidgets[shortId].audio = adw;
                 index = ui->serviceTabs->addTab(adw, label);
                 connect(adw, SIGNAL(listen(int)), this, SLOT(OnSelectAudioService(int)));
+                connect(this, SIGNAL(plotStyleChanged(int)), adw, SLOT(setPlotStyle(int)));
             }
             else
             {

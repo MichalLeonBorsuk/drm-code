@@ -455,7 +455,7 @@ HEADERS += \
     src/util/Settings.h \
     src/util/Utilities.h \
     src/util/Vector.h \
-    src/Version.h \
+    src/Version.h
 
 SOURCES += \
     src/AMDemodulation.cpp \
@@ -754,3 +754,7 @@ OTHER_FILES += \
     android/res/values/strings.xml \
     android/res/values-pl/strings.xml \
     android/AndroidManifest.xml
+
+FORMS += \
+    src/GUI-QT/epgdialog.ui \
+    src/GUI-QT/LiveScheduleWidget.ui

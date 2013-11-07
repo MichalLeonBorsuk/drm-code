@@ -32,33 +32,42 @@
 #include <set>
 #include <QRegExp>
 #include <QFile>
-#include <QShowEvent>
-#include <QHideEvent>
-#include <QPixmap>
-#include <QMetaObject>
 
-EPGDlg::EPGDlg(CDRMReceiver& NDRMR, CSettings& Settings, QWidget* parent):
-    CWindow(parent, Settings, "EPG"),
-    do_updates(false),
-    epg(*NDRMR.GetParameters()),
-    DRMReceiver(NDRMR),
+/* Definitions ****************************************************************/
+#define COL_NAME	1
+
+/* Define the timer interval of updating */
+#define GUI_TIMER_EPG_UPDATE		1000 /* ms (1 second) */
+
+/* list view columns */
+#define COL_START		0
+#define COL_NAME		1
+#define	COL_GENRE		2
+#define	COL_DESCRIPTION	3
+#define COL_DURATION	4
+
+
+#include "ui_epgdialog.h"
+
+EPGDlg::EPGDlg(string d, map<uint32_t,CServiceInformation>& si, QWidget* parent):
+    QDialog(parent),
+    ui(new Ui::EPGDialog),
+    epg(d, si),
     sids(),
     greenCube(":/icons/greenCube.png"),
-    next(NULL)
+    next(NULL),
+    timer()
 {
-    setupUi(this);
-
+    ui->setupUi(this);
     /* auto resize of the programme name column */
-    dateEdit->setDate(QDate::currentDate());
-    connect(channel, SIGNAL(activated(const QString&)), this , SLOT(on_channel_activated(const QString&)));
-    connect(dateEdit, SIGNAL(dateChanged(const QDate&)), this , SLOT(on_dateEdit_dateChanged(const QDate&)));
-    connect(&Timer, SIGNAL(timeout()), this, SLOT(OnTimer()));
-
-    TextEPGDisabled->hide();
+    ui->dateEdit->setDate(QDate::currentDate());
+    connect(&timer, SIGNAL(timeout()), this, SLOT(OnTimer()));
+    ui->TextEPGDisabled->hide();
 }
 
 EPGDlg::~EPGDlg()
 {
+    delete ui;
 }
 
 void EPGDlg::setActive(QTreeWidgetItem* item)
@@ -66,9 +75,9 @@ void EPGDlg::setActive(QTreeWidgetItem* item)
     if(isActive(item))
     {
         item->setIcon(COL_START, greenCube);
-        Data->scrollToItem(item);
+        ui->Data->scrollToItem(item);
         emit NowNext(item->text(COL_NAME));
-        next = Data->itemBelow(item);
+        next = ui->Data->itemBelow(item);
     }
     else
     {
@@ -87,61 +96,44 @@ void EPGDlg::OnTimer()
         /* today in UTC */
         QDate todayUTC = QDate(gmtCur.tm_year + 1900, gmtCur.tm_mon + 1, gmtCur.tm_mday);
 
-        if ((basic->toPlainText() == tr("no basic profile data"))
-                || (advanced->toPlainText() == tr("no advanced profile data")))
+        if ((ui->basic->toPlainText() == tr("no basic profile data"))
+                || (ui->advanced->toPlainText() == tr("no advanced profile data")))
         {
             /* not all information is loaded */
             select();
         }
         /* Check the items now on line. */
-        if (dateEdit->date() == todayUTC) /* if today */
+        if (ui->dateEdit->date() == todayUTC) /* if today */
         {
-            for(int i=0; i<Data->topLevelItemCount(); i++)
-                setActive(Data->topLevelItem(i));
+            for(int i=0; i<ui->Data->topLevelItemCount(); i++)
+                setActive(ui->Data->topLevelItem(i));
         }
     }
 }
 
-void EPGDlg::eventShow(QShowEvent *)
+void EPGDlg::showEvent(QShowEvent *)
 {
-    CParameter& Parameters = *DRMReceiver.GetParameters();
-    Parameters.Lock();
-    int sNo = Parameters.GetCurSelAudioService();
-    uint32_t sid = Parameters.Service[sNo].iServiceID;
-
     // use the current date
-    dateEdit->setDate(QDate::currentDate());
-    // update the channels combobox from the epg
-    channel->clear();
+    ui->dateEdit->setDate(QDate::currentDate());
+    // update the ui->channels combobox from the epg
+    ui->channel->clear();
     int n = -1;
     sids.clear();
-    for (map < uint32_t, CServiceInformation >::const_iterator i = Parameters.ServiceInformation.begin();
-            i != Parameters.ServiceInformation.end(); i++) {
-        QString channel_label = QString().fromUtf8(i->second.label.begin()->c_str());
-        uint32_t channel_id = i->second.id;
-        sids[channel_label] = channel_id;
-        channel->addItem(channel_label);
-        if (channel_id == sid) {
-            n = channel->currentIndex();
-        }
-    }
-    Parameters.Unlock();
     // update the current selection
     if (n >= 0) {
-        channel->setCurrentIndex(n);
+        ui->channel->setCurrentIndex(n);
     }
-    do_updates = true;
     epg.progs.clear ();
     select();
 
     /* Activate real-time timer when window is shown */
-    Timer.start(GUI_TIMER_EPG_UPDATE);
+    timer.start(GUI_TIMER_EPG_UPDATE);
 }
 
-void EPGDlg::eventHide(QHideEvent*)
+void EPGDlg::hideEvent(QHideEvent*)
 {
     /* Deactivate real-time timer */
-    Timer.stop();
+    timer.stop();
 }
 
 void EPGDlg::on_dateEdit_dateChanged(const QDate&)
@@ -158,14 +150,12 @@ void EPGDlg::on_channel_activated(const QString&)
 void EPGDlg::select()
 {
     QTreeWidgetItem* CurrActiveItem = NULL;
-    QDate date = dateEdit->date();
+    QDate date = ui->dateEdit->date();
 
-    if (!do_updates)
-        return;
-    Data->clear();
-    basic->setText(tr("no basic profile data"));
-    advanced->setText(tr("no advanced profile data"));
-    QString chan = channel->currentText();
+    ui->Data->clear();
+    ui->basic->setText(tr("no basic profile data"));
+    ui->advanced->setText(tr("no advanced profile data"));
+    QString chan = ui->channel->currentText();
     // get schedule for date +/- 1 - will allow user timezones sometime
     QDomDocument *doc;
     QDate o = date.addDays(-1);
@@ -190,7 +180,7 @@ void EPGDlg::select()
         epg.parseDoc(*doc);
         xml = doc->toString();
         if (xml.length() > 0)
-            basic->setText(xml);
+            ui->basic->setText(xml);
     }
 
     doc = getFile (date, sids[chan], true);
@@ -199,14 +189,14 @@ void EPGDlg::select()
         epg.parseDoc(*doc);
         xml = doc->toString();
         if (xml.length() > 0)
-            advanced->setText(xml);
+            ui->advanced->setText(xml);
     }
 
     if (epg.progs.count()==0) {
-        (void) new QTreeWidgetItem(Data, QStringList() << tr("no data"));
+        (void) new QTreeWidgetItem(ui->Data, QStringList() << tr("no data"));
         return;
     }
-    Data->sortItems(COL_START, Qt::AscendingOrder);
+    ui->Data->sortItems(COL_START, Qt::AscendingOrder);
 
     for (QMap < time_t, EPG::CProg >::Iterator i = epg.progs.begin();
             i != epg.progs.end(); i++)
@@ -276,7 +266,7 @@ void EPGDlg::select()
         }
         QStringList l;
         l << s_start << name << genre << description << s_duration;
-        QTreeWidgetItem* CurrItem = new QTreeWidgetItem(Data, l);
+        QTreeWidgetItem* CurrItem = new QTreeWidgetItem(ui->Data, l);
         QDateTime dt;
         dt.setTime_t(start);
         CurrItem->setData(COL_START, Qt::UserRole, dt);
