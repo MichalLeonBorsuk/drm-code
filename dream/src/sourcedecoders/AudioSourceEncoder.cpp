@@ -38,6 +38,10 @@ CAudioSourceEncoderImplementation::CAudioSourceEncoderImplementation()
     /* Initialize Audio Codec List */
     CAudioCodec::InitCodecList();
 
+    // in case codec might be dereferenced before initialised
+    // this will get us a null codec at least.
+    codec = CAudioCodec::GetEncoder(CAudioParam::AC_AAC);
+
     /* Needed by TransmDlg.cpp to report available codec */
     bCanEncodeAAC  = CAudioCodec::GetEncoder(CAudioParam::AC_AAC,  true) != NULL;
     bCanEncodeOPUS = CAudioCodec::GetEncoder(CAudioParam::AC_OPUS, true) != NULL;
@@ -58,21 +62,21 @@ CAudioSourceEncoderImplementation::ProcessDataInternal(CParameter& Parameters,
         int &iInputBlockSize,
         int &iOutputBlockSize)
 {
-    int i, j;
     int iCurSelServ = 0;
-
-    /* Get audio param for audio service */
-    CAudioParam& AudioParam(Parameters.Service[iCurSelServ].AudioParam);
 
     /* Reset data to zero. This is important since usually not all data is used
        and this data has to be set to zero as defined in the DRM standard */
-    for (i = 0; i < iOutputBlockSize; i++)
+    for (int i = 0; i < iOutputBlockSize; i++)
         (*pvecOutputData)[i] = 0;
 
     if (bIsDataService == FALSE)
     {
         /* Check if audio param have changed */
         Parameters.Lock();
+
+        /* Get audio param for audio service */
+        CAudioParam& AudioParam(Parameters.Service[iCurSelServ].AudioParam);
+
         if (AudioParam.bParamChanged)
         {
             AudioParam.bParamChanged = FALSE;
@@ -84,18 +88,18 @@ CAudioSourceEncoderImplementation::ProcessDataInternal(CParameter& Parameters,
         /* Change type of data (short -> real) */
         /* The input data is always stereo, if the encoder
            if set to mono we take the left channel only */
-        for (j = 0; j < iInputBlockSize / 2; j++)
+        for (int j = 0; j < iInputBlockSize / 2; j++)
         {
-            for (i = 0; i < iNumChannels; i++)
+            for (int i = 0; i < iNumChannels; i++)
                 vecTempResBufIn[i][j] = (*pvecInputData)[j * 2 + i];
         }
 
         /* Resample data */
-        for (i = 0; i < iNumChannels; i++)
+        for (int i = 0; i < iNumChannels; i++)
             ResampleObj[i].Resample(vecTempResBufIn[i], vecTempResBufOut[i]);
 
         /* Split data in individual audio blocks */
-        for (j = 0; j < iNumAudioFrames; j++)
+        for (int j = 0; j < iNumAudioFrames; j++)
         {
             int bytesEncoded;
             CVector < unsigned char >vecsTmpData(lMaxBytesEncOut);
@@ -103,7 +107,7 @@ CAudioSourceEncoderImplementation::ProcessDataInternal(CParameter& Parameters,
             /* Convert _REAL type to _SAMPLE type, copy in smaller buffer */
             for (unsigned long k = 0; k < lNumSampEncIn; k++)
             {
-                for (i = 0; i < iNumChannels; i++)
+                for (int i = 0; i < iNumChannels; i++)
                     vecsEncInData[k * iNumChannels + i] =
                         Real2Sample(vecTempResBufOut[i][j * lNumSampEncIn + k]);
             }
@@ -116,7 +120,7 @@ CAudioSourceEncoderImplementation::ProcessDataInternal(CParameter& Parameters,
                 aac_crc_bits[j] = vecsTmpData[0];
 
                 /* Extract actual data */
-                for (i = 0; i < bytesEncoded - 1 /* "-1" for CRC */ ; i++)
+                for (int i = 0; i < bytesEncoded - 1 /* "-1" for CRC */ ; i++)
                     audio_frame[j][i] = vecsTmpData[i + 1];
 
                 /* Store block lengths for boarders in AAC super-frame-header */
@@ -132,7 +136,7 @@ CAudioSourceEncoderImplementation::ProcessDataInternal(CParameter& Parameters,
 
         /* Write data to output vector */
         /* First init buffer with zeros */
-        for (i = 0; i < iOutputBlockSize; i++)
+        for (int i = 0; i < iOutputBlockSize; i++)
             (*pvecOutputData)[i] = 0;
 
         /* Reset bit extraction access */
@@ -140,7 +144,7 @@ CAudioSourceEncoderImplementation::ProcessDataInternal(CParameter& Parameters,
 
         /* Audio super-frame-header */
         int iAudioFrameLength = 0;
-        for (j = 0; j < iNumBorders; j++)
+        for (int j = 0; j < iNumBorders; j++)
         {
             /* Accumulate audio frame length */
             iAudioFrameLength += veciFrameLength[j];
@@ -155,10 +159,10 @@ CAudioSourceEncoderImplementation::ProcessDataInternal(CParameter& Parameters,
 
         /* Higher protected part */
         int iCurNumBytes = 0;
-        for (j = 0; j < iNumAudioFrames; j++)
+        for (int j = 0; j < iNumAudioFrames; j++)
         {
             /* Data */
-            for (i = 0; i < iNumHigherProtectedBytes; i++)
+            for (int i = 0; i < iNumHigherProtectedBytes; i++)
             {
                 /* Check if enough data is available, set data to 0 if not */
                 if (i < veciFrameLength[j])
@@ -174,9 +178,9 @@ CAudioSourceEncoderImplementation::ProcessDataInternal(CParameter& Parameters,
         }
 
         /* Lower protected part */
-        for (j = 0; j < iNumAudioFrames; j++)
+        for (int j = 0; j < iNumAudioFrames; j++)
         {
-            for (i = iNumHigherProtectedBytes; i < veciFrameLength[j]; i++)
+            for (int i = iNumHigherProtectedBytes; i < veciFrameLength[j]; i++)
             {
                 /* If encoder produced too many bits, we have to drop them */
                 if (iCurNumBytes < iAudioPayloadLen)
@@ -209,7 +213,7 @@ CAudioSourceEncoderImplementation::ProcessDataInternal(CParameter& Parameters,
             DataEncoder.GeneratePacket(vecbiData);
 
             /* Put it on stream */
-            for (i = 0; i < iTotPacketSize; i++)
+            for (int i = 0; i < iTotPacketSize; i++)
             {
                 (*pvecOutputData)[iPos] = vecbiData[i];
                 iPos++;
@@ -235,7 +239,7 @@ CAudioSourceEncoderImplementation::ProcessDataInternal(CParameter& Parameters,
                 SIZEOF__BYTE * NUM_BYTES_TEXT_MESS_IN_AUD_STR;
 
             /* Add text message bytes to output stream */
-            for (i = iByteStartTextMess; i < iTotNumBitsForUsage; i++)
+            for (int i = iByteStartTextMess; i < iTotNumBitsForUsage; i++)
                 (*pvecOutputData)[i] =
                     vecbiTextMessBuf[i - iByteStartTextMess];
         }
