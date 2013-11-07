@@ -52,7 +52,6 @@ bool NullCodec::CanDecode(CAudioParam::EAudCod eAudioCoding)
 
 bool NullCodec::DecOpen(CAudioParam& AudioParam, int *iAudioSampleRate, int *iLenDecOutPerChan)
 {
-	(void)AudioParam;
 	int iSampleRate = 24000;
 	switch (AudioParam.eAudioSamplRate)
 	{
