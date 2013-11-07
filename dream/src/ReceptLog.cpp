@@ -163,8 +163,11 @@ CShortLog::writeHeader()
         return; /* allow updates when file closed */
 
     /* Beginning of new table (similar to DW DRM log file) */
-    File << endl << ">>>>" << endl << "Dream" << endl
-         << "Software Version " << dream_version_major << "." << dream_version_minor << dream_version_build << endl;
+    File << endl << ">>>>" << endl << "Dream" << endl << "Software Version ";
+    if (dream_version_patch == 0)
+        File << dream_version_major << "." << dream_version_minor << dream_version_build << endl;
+    else
+        File << dream_version_major << "." << dream_version_minor << "." << dream_version_patch << dream_version_build << endl;
 
     time_t now;
     (void) time(&now);
