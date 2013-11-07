@@ -1226,7 +1226,7 @@ EPG::genre_list[] = {
     {0, 0},
 };
 
-EPG::EPG(CParameter& NParameters):Parameters(NParameters)
+EPG::EPG(string d, map<uint32_t,CServiceInformation>& si):serviceInformation(si)
 {
     for (int i = 0; true; i++)
     {
@@ -1234,7 +1234,7 @@ EPG::EPG(CParameter& NParameters):Parameters(NParameters)
             break;
         genres[genre_list[i].genre] = genre_list[i].desc;
     }
-    dir = Parameters.GetDataDirectory("EPG").c_str();
+    dir = d.c_str();
     CreateDirectories(dir);
     servicesFilename = dir + "services.xml";
     loadChannels (servicesFilename);
@@ -1245,16 +1245,17 @@ EPG& EPG::operator=(const EPG& e)
 {
     progs = e.progs;
     genres = e.genres;
+    dir = e.dir;
     servicesFilename = e.servicesFilename;
-    Parameters = e.Parameters;
+    serviceInformation = e.serviceInformation;
     return *this;
 }
 
 void
 EPG::addChannel (const string& label, uint32_t sid)
 {
-    Parameters.ServiceInformation[sid].label.insert(label);
-    Parameters.ServiceInformation[sid].id = sid;
+    serviceInformation[sid].label.insert(label);
+    serviceInformation[sid].id = sid;
 }
 
 void
@@ -1398,8 +1399,8 @@ EPG::saveChannels (const QString & fileName)
     doc.appendChild (root);
     QDomElement ensemble = doc.createElement ("ensemble");
     root.appendChild (ensemble);
-    for (map < uint32_t, CServiceInformation >::const_iterator i = Parameters.ServiceInformation.begin();
-            i != Parameters.ServiceInformation.end(); i++)
+    for (map < uint32_t, CServiceInformation >::const_iterator i = serviceInformation.begin();
+            i != serviceInformation.end(); i++)
     {
         const CServiceInformation& si = i->second;
         QDomElement service = doc.createElement ("service");

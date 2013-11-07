@@ -39,10 +39,10 @@
 class EPG
 {
   public:
-    EPG (CParameter&);
+    EPG (string d, map<uint32_t,CServiceInformation>& si);
     virtual ~ EPG ()
     {
-	saveChannels (servicesFilename);
+    saveChannels (servicesFilename);
     }
 	/* assignment operator to help MSVC8 */
 	EPG& operator=(const EPG&);
@@ -73,7 +73,7 @@ class EPG
     QMap < time_t, CProg > progs;
     QMap < QString, QString > genres;
     QString dir, servicesFilename;
-    CParameter& Parameters;
+    map<uint32_t,CServiceInformation> serviceInformation;
     QMap < QString, time_t > filesLoaded;
 private:
     static const struct gl { const char *genre; const char* desc; } genre_list[];

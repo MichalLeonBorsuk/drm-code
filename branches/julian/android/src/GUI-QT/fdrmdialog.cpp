@@ -102,7 +102,8 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& Settings,
 #endif
 
     /* Live Schedule window */
-    pLiveScheduleDlg = new LiveScheduleDlg(DRMReceiver, Settings, parents);
+    pLiveScheduleDlg = new LiveScheduleDlg(DRMReceiver, this);
+    pLiveScheduleDlg->LoadSettings(Settings);
 
     /* MOT broadcast website viewer window */
 #ifdef QT_WEBKIT_LIB
@@ -116,7 +117,7 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& Settings,
     pSlideShowDlg = new SlideShowViewer(DRMReceiver, Settings, this);
 
     /* Programme Guide Window */
-    pEPGDlg = new EPGDlg(DRMReceiver, Settings, this);
+    pEPGDlg = new EPGDlg(Parameters.GetDataDirectory(), Parameters.ServiceInformation, this);
 
     /* Evaluation window */
     pSysEvalDlg = new systemevalDlg(DRMReceiver, Settings, this);

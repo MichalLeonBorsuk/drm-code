@@ -8,7 +8,7 @@
 AudioDetailWidget::AudioDetailWidget(QString d, CDRMReceiver* prx, QWidget *parent) :
     QWidget(parent),
     ui(new Ui::AudioDetailWidget),short_id(-1),description(d),
-    engineeringMode(false),pMainPlot(NULL),pDRMReceiver(prx)
+    engineeringMode(false),pMainPlot(NULL),pDRMReceiver(prx),iPlotStyle(0)
 {
     ui->setupUi(this);
 }
@@ -32,6 +32,7 @@ void AudioDetailWidget::setEngineering(bool eng)
         {
             pMainPlot = new CDRMPlot(NULL, ui->plot);
             pMainPlot->SetRecObj(pDRMReceiver);
+            pMainPlot->SetPlotStyle(iPlotStyle);
             pMainPlot->SetupChart(CDRMPlot::AUDIO_SPECTRUM);
         }
         pMainPlot->activate();
@@ -121,4 +122,13 @@ void AudioDetailWidget::on_save_stateChanged(int state)
     }
     else
         pDRMReceiver->GetWriteData()->StopWriteWaveFile();
+}
+
+void AudioDetailWidget::setPlotStyle(int n)
+{
+    /* Save the new style */
+    iPlotStyle = n;
+    /* Update main plot window */
+    if(pMainPlot)
+        pMainPlot->SetPlotStyle(iPlotStyle);
 }
