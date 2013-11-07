@@ -38,9 +38,9 @@ CAudioSourceEncoderImplementation::CAudioSourceEncoderImplementation()
     /* Initialize Audio Codec List */
     CAudioCodec::InitCodecList();
 
-    // in case codec might be dereferenced before initialised
-    // this will get us a null codec at least.
-    codec = CAudioCodec::GetEncoder(CAudioParam::AC_AAC);
+    /* In case codec might be dereferenced before initialised this will
+       get us a null codec at least, it is safer than other codec */
+    codec = CAudioCodec::GetEncoder(AC_NULL);
 
     /* Needed by TransmDlg.cpp to report available codec */
     bCanEncodeAAC  = CAudioCodec::GetEncoder(CAudioParam::AC_AAC,  true) != NULL;

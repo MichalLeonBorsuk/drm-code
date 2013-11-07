@@ -34,6 +34,8 @@
 #include <string>
 #include <vector>
 
+#define AC_NULL ((CAudioParam::EAudCod)-1)
+
 class CAudioCodec
 {
 public:
