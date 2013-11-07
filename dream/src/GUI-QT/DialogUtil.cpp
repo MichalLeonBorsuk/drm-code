@@ -91,10 +91,17 @@ QString VersionString(QWidget* parent)
     QString strVersionText;
     strVersionText =
         "<center><b>" + parent->tr("Dream, Version ");
-    strVersionText += QString("%1.%2%3")
-        .arg(dream_version_major)
-        .arg(dream_version_minor)
-        .arg(dream_version_build);
+    if (dream_version_patch == 0)
+        strVersionText += QString("%1.%2%3")
+            .arg(dream_version_major)
+            .arg(dream_version_minor)
+            .arg(dream_version_build);
+    else
+        strVersionText += QString("%1.%2.%3%4")
+            .arg(dream_version_major)
+            .arg(dream_version_minor)
+            .arg(dream_version_patch)
+            .arg(dream_version_build);
     strVersionText +=
         "</b><br> " + parent->tr("Open-Source Software Implementation of "
                                  "a DRM-Receiver") +
