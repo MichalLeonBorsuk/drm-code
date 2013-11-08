@@ -63,11 +63,21 @@ macx {
     LIBS += -framework CoreAudio -framework AudioToolbox -framework AudioUnit
     CONFIG += pcap
     !multimedia:CONFIG += portaudio sound
-    packagesExist(sndfile) {
+    !qt5:!contains(QT_VERSION, ^4\\.8.*) {
+      exists(/opt/local/include/sndfile.h) {
         CONFIG += sndfile
-    }
-    packagesExist(speexdsp) {
-      CONFIG += speexdsp
+      }
+      exists(/opt/local/include/speex/speex_preprocess.h) {
+        CONFIG += speexdsp
+      }
+      exists(/opt/local/include/hamlib/rig.h) {
+        CONFIG += hamlib
+      }
+      contains(QT_VERSION, ^4\\.7.*) {
+	QT += phonon opengl svg
+        DEFINES -= QWT_NO_SVG
+        QMAKE_LFLAGS += -bind_at_load
+      }
     }
 }
 linux-* {
@@ -82,7 +92,6 @@ android {
     LIBS += -lOpenSLES
 }
 unix {
-# packagesExist() not available on Qt 4.6 (e.g. Debian Squeeze)
     target.path = /usr/bin
     documentation.path = /usr/share/man/man1
     documentation.files = linux/dream.1
@@ -125,29 +134,51 @@ unix:!cross_compile {
            }
         }
     }
-    exists(/usr/include/hamlib/rig.h) | \
+    qt5|contains(QT_VERSION, ^4\\.8.*) {
+      packagesExist(sndfile) {
+        CONFIG += sndfile
+      }
+      packagesExist(hamlib) {
+        CONFIG += hamlib
+      }
+      packagesExist(gpsd) {
+        CONFIG += gps
+      }
+      packagesExist(pcap) {
+        CONFIG += pcap
+      }
+      packagesExist(opus) {
+        CONFIG += opus
+      }
+      packagesExist(speexdsp) {
+        CONFIG += speexdsp
+      }
+    }
+    else {
+      exists(/usr/include/sndfile.h) | \
+      exists(/usr/local/include/sndfile.h) {
+        CONFIG += sndfile
+      }
+      exists(/usr/include/hamlib/rig.h) | \
       exists(/usr/local/include/hamlib/rig.h) {
           CONFIG += hamlib
-    }
-    exists(/usr/include/gps.h) | \
-    exists(/usr/local/include/gps.h) {
+      }
+      exists(/usr/include/gps.h) | \
+      exists(/usr/local/include/gps.h) {
         CONFIG += gps
-    }
-    exists(/usr/include/pcap.h) | \
-     exists(/usr/local/include/pcap.h) {
-      CONFIG += pcap
-    }
-    exists(/usr/include/sndfile.h) | \
-     exists(/usr/local/include/sndfile.h) {
-      CONFIG += sndfile
-    }
-    exists(/usr/include/opus/opus.h) | \
-     exists(/usr/local/include/opus/opus.h) {
-      CONFIG += opus
-    }
-    exists(/usr/include/speex/speex_preprocess.h) | \
-     exists(/usr/local/include/speex/speex_preprocess.h) {
-      CONFIG += speexdsp
+      }
+      exists(/usr/include/pcap.h) | \
+      exists(/usr/local/include/pcap.h) {
+        CONFIG += pcap
+      }
+      exists(/usr/include/opus/opus.h) | \
+      exists(/usr/local/include/opus/opus.h) {
+       CONFIG += opus
+      }
+      exists(/usr/include/speex/speex_preprocess.h) | \
+      exists(/usr/local/include/speex/speex_preprocess.h) {
+       CONFIG += speexdsp
+      }
     }
 }
 win32 {
@@ -271,7 +302,14 @@ qwt {
         }
    }
    !crosscompile {
-        macx:INCLUDEPATH += /opt/local/Library/Frameworks/qwt.framework/Versions/6/Headers
+        macx {
+          exists(/opt/local/Library/Frameworks/qwt.framework) {
+            INCLUDEPATH += /opt/local/Library/Frameworks/qwt.framework/Versions/6/Headers
+          }
+          exists(/Library/Frameworks/qwt.framework) {
+            INCLUDEPATH += /Library/Frameworks/qwt.framework/Versions/6/Headers
+          }
+	}
         exists(/usr/include/qwt/qwt.h) {
             INCLUDEPATH += /usr/include/qwt
         }
