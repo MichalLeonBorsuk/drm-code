@@ -23,7 +23,7 @@ install_name_tool -change /opt/local/lib/libvorbis.0.dylib @executable_path/../F
 install_name_tool -change /opt/local/lib/libvorbisenc.2.dylib @executable_path/../Frameworks/libvorbisenc.2.dylib dream.app/Contents/Frameworks/libsndfile.1.dylib 
 install_name_tool -change /opt/local/lib/libFLAC.8.dylib @executable_path/../Frameworks/libFLAC.8.dylib dream.app/Contents/Frameworks/libsndfile.1.dylib 
 install_name_tool -change /opt/local/lib/libogg.0.dylib @executable_path/../Frameworks/libogg.0.dylib dream.app/Contents/Frameworks/libvorbisenc.2.dylib 
-install_name_tool -change /opt/local/lib/libvorbis.0.dylibb @executable_path/../Frameworks/libvorbis.0.dylib dream.app/Contents/Frameworks/libvorbisenc.2.dylib 
+install_name_tool -change /opt/local/lib/libvorbis.0.dylib @executable_path/../Frameworks/libvorbis.0.dylib dream.app/Contents/Frameworks/libvorbisenc.2.dylib 
 
 cd ..
 hdiutil create dream.dmg -srcfolder dream/ -ov
