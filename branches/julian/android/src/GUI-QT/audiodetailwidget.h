@@ -9,8 +9,10 @@ class AudioDetailWidget;
 }
 
 class CDRMPlot;
+#if QT_VERSION>=0x050100
 class QQuickView;
 class QQuickItem;
+#endif
 
 class AudioDetailWidget : public QWidget
 {
@@ -34,8 +36,10 @@ private:
     CDRMPlot *pMainPlot;
     CDRMReceiver* pDRMReceiver;
     int iPlotStyle;
+#if QT_VERSION>=0x050100
     QQuickView *view;
     QQuickItem* userModeDisplay;
+#endif
     void updateEngineeringModeDisplay(int, const CService&);
     void updateUserModeDisplay(int, const CService&);
     void addItem(const QString&, const QString&);

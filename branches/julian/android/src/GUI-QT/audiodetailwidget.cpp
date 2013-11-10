@@ -4,8 +4,10 @@
 #include <../tables/TableFAC.h>
 #include "DRMPlot.h"
 #include <QFileDialog>
-#include <QQuickView>
-#include <QQuickItem>
+#if QT_VERSION>=0x050100
+# include <QQuickView>
+# include <QQuickItem>
+#endif
 
 AudioDetailWidget::AudioDetailWidget(CDRMReceiver* prx, QWidget *parent) :
     QWidget(parent),
@@ -13,6 +15,7 @@ AudioDetailWidget::AudioDetailWidget(CDRMReceiver* prx, QWidget *parent) :
     engineeringMode(false),pMainPlot(NULL),pDRMReceiver(prx),iPlotStyle(0)
 {
     ui->setupUi(this);
+#if QT_VERSION>=0x050100
     view = new QQuickView();
     delete ui->widget;
     QWidget* widget = QWidget::createWindowContainer(view, ui->userMode);
@@ -21,6 +24,7 @@ AudioDetailWidget::AudioDetailWidget(CDRMReceiver* prx, QWidget *parent) :
         qDebug("can't initialise view");
     widget->setMinimumSize(500,100);
     userModeDisplay = view->rootObject();
+#endif
 }
 
 AudioDetailWidget::~AudioDetailWidget()
@@ -57,7 +61,9 @@ void AudioDetailWidget::setEngineering(bool eng)
 
 void AudioDetailWidget::setDescription(const QString& desc)
 {
+#if QT_VERSION>=0x050100
     userModeDisplay->setProperty("text", desc);
+#endif
 }
 
 void AudioDetailWidget::updateDisplay(int id, const CService& s)
