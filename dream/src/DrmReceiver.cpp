@@ -729,7 +729,7 @@ CDRMReceiver::UtilizeDRM(_BOOLEAN& bEnoughData)
             PlotManager.SetCurrentCDAud(AudioSourceDecoder.GetNumCorDecAudio());
         }
     }
-    if( (iDataStreamID = STREAM_ID_NOT_USED)
+    if( (iDataStreamID == STREAM_ID_NOT_USED)
        &&
          (iAudioStreamID == STREAM_ID_NOT_USED)
     ) // try and decode stream 0 as audio anyway
