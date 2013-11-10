@@ -512,6 +512,68 @@ void FDRMDialog::OnTimer()
         if(pLogging->enabled())
             startLogging();
     }
+
+    if(pSysEvalDlg->isVisible())
+    {
+        CParameter& Parameters = *DRMReceiver.GetParameters();
+
+        Parameters.Lock();
+
+        pSysEvalDlg->setLEDFAC(Parameters.ReceiveStatus.FAC.GetStatus());
+        pSysEvalDlg->setLEDSDC(Parameters.ReceiveStatus.SDC.GetStatus());
+        pSysEvalDlg->setLEDFrameSync(Parameters.ReceiveStatus.FSync.GetStatus());
+        pSysEvalDlg->setLEDTimeSync(Parameters.ReceiveStatus.TSync.GetStatus());
+        ETypeRxStatus soundCardStatusI = Parameters.ReceiveStatus.InterfaceI.GetStatus(); /* Input */
+        ETypeRxStatus soundCardStatusO = Parameters.ReceiveStatus.InterfaceO.GetStatus(); /* Output */
+        pSysEvalDlg->setLEDIOInterface(soundCardStatusO == NOT_PRESENT || (soundCardStatusI != NOT_PRESENT && soundCardStatusI != RX_OK) ? soundCardStatusI : soundCardStatusO);
+
+        /* Show SNR if receiver is in tracking mode */
+        if (DRMReceiver.GetAcquiState() == AS_WITH_SIGNAL)
+        {
+            /* Get a consistant snapshot */
+
+            /* We only get SNR from a local DREAM Front-End */
+            pSysEvalDlg->setSNR(Parameters.GetSNR());
+            pSysEvalDlg->setMER(Parameters.rMER, Parameters.rWMERMSC);
+
+            pSysEvalDlg->setDelay_Doppler(Parameters.rSigmaEstimate,  Parameters.rMinDelay);
+
+            /* Sample frequency offset estimation */
+            pSysEvalDlg->setSampleFrequencyOffset(Parameters.rResampleOffset, Parameters.GetSigSampleRate());
+
+        }
+        else
+        {
+            pSysEvalDlg->setSNR(-1.0);
+            pSysEvalDlg->setMER(-1.0, 0);
+            pSysEvalDlg->setDelay_Doppler(-1.0, 0);
+            pSysEvalDlg->setSampleFrequencyOffset(-1.0, 0);
+        }
+
+        /* DC frequency */
+        pSysEvalDlg->setFrequencyOffset(DRMReceiver.GetReceiveData()->
+                        ConvertFrequency(Parameters.GetDCFrequency()));
+
+
+        pSysEvalDlg->setChannel(Parameters.GetWaveMode(), Parameters.GetSpectrumOccup(),
+                Parameters.eSymbolInterlMode,
+                Parameters.eSDCCodingScheme, Parameters.eMSCCodingScheme);
+
+        pSysEvalDlg->setCodeRate(Parameters.MSCPrLe.iPartB, Parameters.MSCPrLe.iPartA);
+        pSysEvalDlg->setGPS(Parameters);
+        pSysEvalDlg->setSDCdateTime(Parameters);
+
+        pSysEvalDlg->setNumIterations(DRMReceiver.GetMSCMLC()->GetInitNumIterations());
+        pSysEvalDlg->setTimeInt(DRMReceiver.GetTimeInt());
+        pSysEvalDlg->setFreqInt(DRMReceiver.GetFreqInt());
+        pSysEvalDlg->setTiSyncTrac(DRMReceiver.GetTiSyncTracType());
+        pSysEvalDlg->setRecFilterEnabled(DRMReceiver.GetFreqSyncAcq()->GetRecFilter());
+        pSysEvalDlg->setIntConsEnabled(DRMReceiver.GetIntCons());
+        pSysEvalDlg->setFlipSpectrumEnabled(DRMReceiver.GetReceiveData()->GetFlippedSpectrum());
+
+        Parameters.Unlock();
+    }
+
 }
 
 void FDRMDialog::OnTimerClose()

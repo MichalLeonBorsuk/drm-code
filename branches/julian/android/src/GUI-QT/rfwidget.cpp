@@ -38,7 +38,6 @@ void RFWidget::on_showOptions_toggled(bool enabled)
         ui->drmOptions->hide();
 }
 
-
 void RFWidget::on_chartSelector_currentItemChanged(QTreeWidgetItem *curr)
 {
     /* Make sure we have a non root item */
@@ -109,6 +108,41 @@ void RFWidget::setChannel(ERobMode robm, ESpecOcc specocc, ESymIntMod eSymbolInt
 void RFWidget::setCodeRate(int b, int a)
 {
     ui->drmDetail->setCodeRate(b, a);
+}
+
+void RFWidget::setNumIterations(int n)
+{
+    ui->drmOptions->noOfIterationsChanged(n);
+}
+
+void RFWidget::setTimeInt(CChannelEstimation::ETypeIntTime e)
+{
+    ui->drmOptions->setTimeInt(e);
+}
+
+void RFWidget::setFreqInt(CChannelEstimation::ETypeIntFreq e)
+{
+    ui->drmOptions->setFreqInt(e);
+}
+
+void RFWidget::setTiSyncTrac(CTimeSyncTrack::ETypeTiSyncTrac e)
+{
+    ui->drmOptions->setTiSyncTrac(e);
+}
+
+void RFWidget::setRecFilterEnabled(bool b)
+{
+    ui->drmOptions->setRecFilterEnabled(b);
+}
+
+void RFWidget::setIntConsEnabled(bool b)
+{
+    ui->drmOptions->setIntConsEnabled(b);
+}
+
+void RFWidget::setFlipSpectrumEnabled(bool b)
+{
+    ui->drmOptions->setFlipSpectrumEnabled(b);
 }
 
 void RFWidget::setPlotStyle(int n)

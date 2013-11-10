@@ -48,8 +48,7 @@ gui {
     MOC_DIR = moc
 }
 message($$VERSION_MESSAGE $$DEBUG_MESSAGE $$UI_MESSAGE)
-qt:multimedia {
-    QT += multimedia
+contains(QT, multimedia) {
     CONFIG += sound
 }
 unix:!cross_compile {
@@ -62,27 +61,41 @@ macx {
     LIBS += -framework CoreFoundation -framework CoreServices
     LIBS += -framework CoreAudio -framework AudioToolbox -framework AudioUnit
     CONFIG += pcap
-    !multimedia:CONFIG += portaudio sound
-    packagesExist(sndfile) {
+    !sound:CONFIG += portaudio sound
+    !qt5:!contains(QT_VERSION, ^4\\.8.*) {
+      exists(/opt/local/include/sndfile.h) {
         CONFIG += sndfile
-    }
-    packagesExist(speexdsp) {
-      CONFIG += speexdsp
+      }
+      exists(/opt/local/include/speex/speex_preprocess.h) {
+        CONFIG += speexdsp
+      }
+      exists(/opt/local/include/hamlib/rig.h) {
+        CONFIG += hamlib
+      }
+      contains(QT_VERSION, ^4\\.7.*) {
+        QT += phonon opengl svg
+        DEFINES -= QWT_NO_SVG
+        QMAKE_LFLAGS += -bind_at_load
+      }
     }
 }
 linux-* {
     LIBS += -ldl -lrt
 }
 android {
-    CONFIG += openSL sound
-    SOURCES += src/android/platform_util.cpp src/android/soundin.cpp src/android/soundout.cpp
-    HEADERS += src/android/platform_util.h src/android/soundin.h src/android/soundout.h
+    openSL {
+        CONFIG += sound
+        SOURCES += src/android/platform_util.cpp src/android/soundin.cpp src/android/soundout.cpp
+        HEADERS += src/android/platform_util.h src/android/soundin.h src/android/soundout.h
+        LIBS += -lOpenSLES
+    }
+    else {
+        QT += multimedia
+    }
     QT -= webkitwidgets
     QT += svg
-    LIBS += -lOpenSLES
 }
 unix {
-# packagesExist() not available on Qt 4.6 (e.g. Debian Squeeze)
     target.path = /usr/bin
     documentation.path = /usr/share/man/man1
     documentation.files = linux/dream.1
@@ -125,34 +138,56 @@ unix:!cross_compile {
            }
         }
     }
-    exists(/usr/include/hamlib/rig.h) | \
+    qt5|contains(QT_VERSION, ^4\\.8.*) {
+      packagesExist(sndfile) {
+        CONFIG += sndfile
+      }
+      packagesExist(hamlib) {
+        CONFIG += hamlib
+      }
+      packagesExist(gpsd) {
+        CONFIG += gps
+      }
+      packagesExist(pcap) {
+        CONFIG += pcap
+      }
+      packagesExist(opus) {
+        CONFIG += opus
+      }
+      packagesExist(speexdsp) {
+        CONFIG += speexdsp
+      }
+    }
+    else {
+      exists(/usr/include/sndfile.h) | \
+      exists(/usr/local/include/sndfile.h) {
+        CONFIG += sndfile
+      }
+      exists(/usr/include/hamlib/rig.h) | \
       exists(/usr/local/include/hamlib/rig.h) {
           CONFIG += hamlib
-    }
-    exists(/usr/include/gps.h) | \
-    exists(/usr/local/include/gps.h) {
+      }
+      exists(/usr/include/gps.h) | \
+      exists(/usr/local/include/gps.h) {
         CONFIG += gps
-    }
-    exists(/usr/include/pcap.h) | \
-     exists(/usr/local/include/pcap.h) {
-      CONFIG += pcap
-    }
-    exists(/usr/include/sndfile.h) | \
-     exists(/usr/local/include/sndfile.h) {
-      CONFIG += sndfile
-    }
-    exists(/usr/include/opus/opus.h) | \
-     exists(/usr/local/include/opus/opus.h) {
-      CONFIG += opus
-    }
-    exists(/usr/include/speex/speex_preprocess.h) | \
-     exists(/usr/local/include/speex/speex_preprocess.h) {
-      CONFIG += speexdsp
+      }
+      exists(/usr/include/pcap.h) | \
+      exists(/usr/local/include/pcap.h) {
+        CONFIG += pcap
+      }
+      exists(/usr/include/opus/opus.h) | \
+      exists(/usr/local/include/opus/opus.h) {
+       CONFIG += opus
+      }
+      exists(/usr/include/speex/speex_preprocess.h) | \
+      exists(/usr/local/include/speex/speex_preprocess.h) {
+       CONFIG += speexdsp
+      }
     }
 }
 win32 {
     LIBS += -lfftw3-3
-    !multimedia {
+    !contains(QT, multimedia) {
         exists($$OUT_PWD/include/portaudio.h) {
           CONFIG += portaudio sound
         }
@@ -271,14 +306,21 @@ qwt {
         }
    }
    !crosscompile {
-        macx:INCLUDEPATH += /opt/local/Library/Frameworks/qwt.framework/Versions/6/Headers
+        macx {
+          exists(/opt/local/Library/Frameworks/qwt.framework) {
+            INCLUDEPATH += /opt/local/Library/Frameworks/qwt.framework/Versions/6/Headers
+          }
+          exists(/Library/Frameworks/qwt.framework) {
+            INCLUDEPATH += /Library/Frameworks/qwt.framework/Versions/6/Headers
+          }
+        }
         exists(/usr/include/qwt/qwt.h) {
             INCLUDEPATH += /usr/include/qwt
         }
         exists(/usr/local/include/qwt/qwt.h) {
             INCLUDEPATH += /usr/local/include/qwt
         }
-	qt4 {
+        qt4 {
             exists(/usr/include/qwt5/qwt.h) {
                 INCLUDEPATH += /usr/include/qwt5
             }
@@ -456,7 +498,6 @@ HEADERS += \
     src/util/Utilities.h \
     src/util/Vector.h \
     src/Version.h
-
 SOURCES += \
     src/AMDemodulation.cpp \
     src/AMSSDemodulation.cpp \
@@ -557,7 +598,6 @@ SOURCES += \
     src/util/Settings.cpp \
     src/util/Utilities.cpp \
     src/Version.cpp
-
 !console {
 HEADERS += \
     src/GUI-QT/Logging.h \
@@ -599,7 +639,9 @@ FORMS += \
     JLViewer.ui \
     journalineviewer.ui \
     rfwidget.ui \
-    stationselector.ui
+    stationselector.ui \
+    epgdialog.ui \
+    LiveScheduleWidget.ui
 
 HEADERS += \
     src/GUI-QT/AnalogDemDlg.h \
@@ -666,95 +708,6 @@ SOURCES += \
 
 }
 !sound {
-    error("no usable audio interface found - install pulseaudio or portaudio dev package")
+    error("no usable audio interface found - use Qt Multimedia or install pulseaudio or portaudio dev package")
 }
-
-OTHER_FILES += \
-    android/AndroidManifest.xml \
-    android/res/layout/splash.xml \
-    android/res/values/libs.xml \
-    android/res/values/strings.xml \
-    android/res/values-de/strings.xml \
-    android/res/values-el/strings.xml \
-    android/res/values-es/strings.xml \
-    android/res/values-et/strings.xml \
-    android/res/values-fa/strings.xml \
-    android/res/values-fr/strings.xml \
-    android/res/values-id/strings.xml \
-    android/res/values-it/strings.xml \
-    android/res/values-ja/strings.xml \
-    android/res/values-ms/strings.xml \
-    android/res/values-nb/strings.xml \
-    android/res/values-nl/strings.xml \
-    android/res/values-pl/strings.xml \
-    android/res/values-pt-rBR/strings.xml \
-    android/res/values-ro/strings.xml \
-    android/res/values-rs/strings.xml \
-    android/res/values-ru/strings.xml \
-    android/res/values-zh-rCN/strings.xml \
-    android/res/values-zh-rTW/strings.xml \
-    android/src/org/kde/necessitas/ministro/IMinistro.aidl \
-    android/src/org/kde/necessitas/ministro/IMinistroCallback.aidl \
-    android/src/org/qtproject/qt5/android/bindings/QtActivity.java \
-    android/src/org/qtproject/qt5/android/bindings/QtApplication.java \
-    android/version.xml \
-    android/AndroidManifest.xml \
-    android/res/layout/splash.xml \
-    android/res/values/libs.xml \
-    android/res/values/strings.xml \
-    android/res/values-de/strings.xml \
-    android/res/values-el/strings.xml \
-    android/res/values-es/strings.xml \
-    android/res/values-et/strings.xml \
-    android/res/values-fa/strings.xml \
-    android/res/values-fr/strings.xml \
-    android/res/values-id/strings.xml \
-    android/res/values-it/strings.xml \
-    android/res/values-ja/strings.xml \
-    android/res/values-ms/strings.xml \
-    android/res/values-nb/strings.xml \
-    android/res/values-nl/strings.xml \
-    android/res/values-pl/strings.xml \
-    android/res/values-pt-rBR/strings.xml \
-    android/res/values-ro/strings.xml \
-    android/res/values-rs/strings.xml \
-    android/res/values-ru/strings.xml \
-    android/res/values-zh-rCN/strings.xml \
-    android/res/values-zh-rTW/strings.xml \
-    android/src/org/kde/necessitas/ministro/IMinistro.aidl \
-    android/src/org/kde/necessitas/ministro/IMinistroCallback.aidl \
-    android/src/org/qtproject/qt5/android/bindings/QtActivity.java \
-    android/src/org/qtproject/qt5/android/bindings/QtApplication.java \
-    android/version.xml \
-    android/src/org/kde/necessitas/ministro/IMinistro.aidl \
-    android/src/org/kde/necessitas/ministro/IMinistroCallback.aidl \
-    android/src/org/qtproject/qt5/android/bindings/QtActivity.java \
-    android/src/org/qtproject/qt5/android/bindings/QtApplication.java \
-    android/version.xml \
-    android/res/values-es/strings.xml \
-    android/res/values-id/strings.xml \
-    android/res/values-ja/strings.xml \
-    android/res/values-nl/strings.xml \
-    android/res/values-rs/strings.xml \
-    android/res/values-de/strings.xml \
-    android/res/values-pt-rBR/strings.xml \
-    android/res/values-et/strings.xml \
-    android/res/layout/splash.xml \
-    android/res/values-it/strings.xml \
-    android/res/values-nb/strings.xml \
-    android/res/values-ro/strings.xml \
-    android/res/values-zh-rCN/strings.xml \
-    android/res/values-zh-rTW/strings.xml \
-    android/res/values-ru/strings.xml \
-    android/res/values-fa/strings.xml \
-    android/res/values-fr/strings.xml \
-    android/res/values-ms/strings.xml \
-    android/res/values-el/strings.xml \
-    android/res/values/libs.xml \
-    android/res/values/strings.xml \
-    android/res/values-pl/strings.xml \
-    android/AndroidManifest.xml
-
-FORMS += \
-    src/GUI-QT/epgdialog.ui \
-    src/GUI-QT/LiveScheduleWidget.ui
+message(using $$QT)

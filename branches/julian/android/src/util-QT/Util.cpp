@@ -34,6 +34,7 @@
 #include <QDir>
 #include <QFileInfo>
 #include <QCoreApplication>
+#include <QHeaderView>
 
 /* Ensure that the given filename is secure */
 QString VerifyFilename(QString filename)
@@ -416,4 +417,44 @@ void SetStatus(CMultColorLED* LED, ETypeRxStatus state)
         LED->SetLight(CMultColorLED::RL_GREEN);
         break;
     }
+}
+
+void setColumnParam(QHeaderView *h, const QString& strColumnParam)
+{
+    QStringList list(strColumnParam.split(QChar('|')));
+    const int n = list.count(); /* width and position */
+    if (n == 2)
+    {
+        QStringList widths(list[0].split(QChar(',')));
+        QStringList positions(list[1].split(QChar(',')));
+        int c = h->count();
+        if((c != widths.count()) || (c != positions.count()))
+        {
+            qDebug("bad settings parse of stations columns");
+            return;
+        }
+        for (int i = 0; i < c; i++)
+        {
+            h->resizeSection(i, widths[i].toInt());
+            h->moveSection(h->visualIndex(i), positions[i].toInt());
+        }
+    }
+    else
+    {
+        h->resizeSections(QHeaderView::ResizeToContents);
+        h->resizeSections(QHeaderView::Interactive);
+        h->resizeSection(0, h->minimumSectionSize());
+    }
+}
+
+QString columnParam(QHeaderView *h)
+{
+    const int c = h->count();
+    QStringList w,p;
+    for (int i = 0; i < c; i++)
+    {
+        w.append(QString().setNum(h->sectionSize(i)));
+        p.append(QString().setNum(h->visualIndex(i)));
+    }
+    return w.join(',')+"|"+p.join(',');
 }

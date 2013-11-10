@@ -51,6 +51,7 @@ protected:
 //    QString                 strCurrentSavePath;
     CDRMReceiver&           receiver;
     bool                    decoderSet;
+    int short_id;
 
 public slots:
     void OnTimer();

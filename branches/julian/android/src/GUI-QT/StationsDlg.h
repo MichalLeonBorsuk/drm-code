@@ -69,8 +69,6 @@ protected:
 	_BOOLEAN		showAll();
 	_BOOLEAN		GetSortAscending();
 	void			SetSortAscending(_BOOLEAN b);
-	void			ColumnParamFromStr(const QString& strColumnParam);
-	void			ColumnParamToStr(QString& strColumnParam);
 	int				currentSortColumn();
 	_BOOLEAN		bCurrentSortAscendingdrm;
 	_BOOLEAN		bCurrentSortAscendinganalog;

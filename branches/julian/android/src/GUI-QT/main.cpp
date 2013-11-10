@@ -144,7 +144,7 @@ main(int argc, char **argv)
 
 	try
 	{
-        bool new_gui = Settings.Get("command", "new_gui", true);
+        bool new_gui = Settings.Get("command", "new_gui", false);
         string mode = Settings.Get("command", "mode", string());
 		if (mode == "receive")
 		{

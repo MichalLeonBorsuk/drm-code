@@ -540,6 +540,13 @@ CSettings::ParseArguments(int argc, char **argv)
             continue;
         }
 
+        if (GetNumericArgument(argc, argv, i, "-new_gui",
+                "--new_gui", 0, 1, rArgument) == TRUE)
+        {
+            Put("command", "new_gui", (int) rArgument);
+            continue;
+        }
+
 		if (GetStringArgument (argc, argv, i,
 				"--rsirecordprofile", "--rsirecordprofile", strArgument) == TRUE)
 		{
@@ -675,7 +682,8 @@ CSettings::UsageArguments()
 		"  --rsirecordtype <s>          RSCI recording file type: raw|ff|pcap\n"
 		"  --recordiq <b>               enable/disable recording an I/Q file\n"
 		"  --permissive <b>             enable decoding of bad RSCI frames (0: off; 1: on)\n"
-		"  -R <n>, --samplerate <n>     set audio and signal sound card sample rate [Hz]\n"
+        "  --new_gui <b>                enable single window mode (0: off; 1: on)\n"
+        "  -R <n>, --samplerate <n>     set audio and signal sound card sample rate [Hz]\n"
 		"  --audsrate <n>               set audio sound card sample rate [Hz] (allowed range: 8000...192000)\n"
 		"  --sigsrate <n>               set signal sound card sample rate [Hz] (allowed values: 24000, 48000, 96000, 192000)\n"
 		"  -I <s>, --snddevin <s>       set sound in device\n"

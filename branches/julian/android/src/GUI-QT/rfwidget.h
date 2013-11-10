@@ -4,6 +4,9 @@
 #include <QWidget>
 #include <QTreeWidgetItem>
 #include <../Parameter.h>
+#include <../chanest/ChannelEstimation.h>
+#include <../chanest/ChanEstTime.h>
+
 class CDRMPlot;
 
 namespace Ui {
@@ -38,6 +41,14 @@ public slots:
     void setChannel(ERobMode, ESpecOcc, ESymIntMod, ECodScheme, ECodScheme);
     void setCodeRate(int,int);
     void setPlotStyle(int);
+    void setNumIterations(int);
+    void setTimeInt(CChannelEstimation::ETypeIntTime);
+    void setFreqInt(CChannelEstimation::ETypeIntFreq);
+    void setTiSyncTrac(CTimeSyncTrack::ETypeTiSyncTrac);
+    void setRecFilterEnabled(bool);
+    void setIntConsEnabled(bool);
+    void setFlipSpectrumEnabled(bool);
+
 private slots:
     void on_chartSelector_currentItemChanged(QTreeWidgetItem *);
     void on_showOptions_toggled(bool);

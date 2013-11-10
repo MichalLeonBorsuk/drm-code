@@ -4,13 +4,23 @@
 #include <../tables/TableFAC.h>
 #include "DRMPlot.h"
 #include <QFileDialog>
+#include <QQuickView>
+#include <QQuickItem>
 
-AudioDetailWidget::AudioDetailWidget(QString d, CDRMReceiver* prx, QWidget *parent) :
+AudioDetailWidget::AudioDetailWidget(CDRMReceiver* prx, QWidget *parent) :
     QWidget(parent),
-    ui(new Ui::AudioDetailWidget),short_id(-1),description(d),
+    ui(new Ui::AudioDetailWidget),short_id(-1),
     engineeringMode(false),pMainPlot(NULL),pDRMReceiver(prx),iPlotStyle(0)
 {
     ui->setupUi(this);
+    view = new QQuickView();
+    delete ui->widget;
+    QWidget* widget = QWidget::createWindowContainer(view, ui->userMode);
+    view->setSource(QUrl("qrc:/qml/usermodeaudiodetail.qml"));
+    if(view->status()!=QQuickView::Ready)
+        qDebug("can't initialise view");
+    widget->setMinimumSize(500,100);
+    userModeDisplay = view->rootObject();
 }
 
 AudioDetailWidget::~AudioDetailWidget()
@@ -45,6 +55,11 @@ void AudioDetailWidget::setEngineering(bool eng)
     update();
 }
 
+void AudioDetailWidget::setDescription(const QString& desc)
+{
+    userModeDisplay->setProperty("text", desc);
+}
+
 void AudioDetailWidget::updateDisplay(int id, const CService& s)
 {
     short_id = id;
@@ -56,7 +71,7 @@ void AudioDetailWidget::updateDisplay(int id, const CService& s)
 
 void AudioDetailWidget::updateUserModeDisplay(int, const CService&)
 {
-    ui->label->setText(description);
+    //ui->label->setText(description);
     ui->stackedWidget->setCurrentIndex(0);
 }
 

@@ -37,6 +37,8 @@
 #include "../GlobalDefinitions.h"
 #include "../util/Vector.h"
 #include "../DrmReceiver.h"
+#include <../chanest/ChannelEstimation.h>
+#include <../chanest/ChanEstTime.h>
 
 /* Definitions ****************************************************************/
 /* Define this macro if you prefer the QT-type of displaying date and time */
@@ -53,19 +55,14 @@ public:
 	systemevalDlg(CDRMReceiver&, CSettings&, QWidget* parent = 0);
 	virtual ~systemevalDlg();
 
-	void SetStatus(CMultColorLED*, ETypeRxStatus);
-
 protected:
     Ui::SystemEvaluationWindow *ui;
     CDRMReceiver&	DRMReceiver;
 
-	QTimer			Timer;
 	CDRMPlot*		MainPlot;
 
 	virtual void	eventShow(QShowEvent* pEvent);
 	virtual void	eventHide(QHideEvent* pEvent);
-	void			UpdateGPS(CParameter&);
-    void            UpdateControls();
 	void			AddWhatsThisHelp();
 	CDRMPlot*		OpenChartWin(CDRMPlot::ECharType eNewType);
 	QTreeWidgetItem* FindItemByECharType(CDRMPlot::ECharType eCharType);
@@ -78,7 +75,33 @@ protected:
 	vector<CDRMPlot*>	vecpDRMPlots;
 
 public slots:
-	void OnTimer();
+    void setReverb(bool);
+    void setMute(bool);
+    void setWriteAudio(bool);
+    void setLogging(bool);
+    void setGPS(const CParameter&);
+    void setSDCdateTime(const CParameter&);
+    void setLEDFAC(ETypeRxStatus);
+    void setLEDSDC(ETypeRxStatus status);
+    void setLEDFrameSync(ETypeRxStatus status);
+    void setLEDTimeSync(ETypeRxStatus status);
+    void setLEDIOInterface(ETypeRxStatus status);
+    void setSNR(double rSNR);
+    void setMER(double rMER, double rWMERMSC);
+    void setDelay_Doppler(double rSigmaEstimate, double rMinDelay);
+    void setSampleFrequencyOffset(double rCurSamROffs, double rSampleRate);
+    void setFrequencyOffset(double);
+    void setChannel(ERobMode, ESpecOcc, ESymIntMod, ECodScheme, ECodScheme);
+    void setCodeRate(int,int);
+    void setNumIterations(int);
+    void setTimeInt(CChannelEstimation::ETypeIntTime);
+    void setFreqInt(CChannelEstimation::ETypeIntFreq);
+    void setTiSyncTrac(CTimeSyncTrack::ETypeTiSyncTrac);
+    void setRecFilterEnabled(bool);
+    void setIntConsEnabled(bool);
+    void setFlipSpectrumEnabled(bool);
+
+private slots:
     void on_drmOptions_TimeLinear();
     void on_drmOptions_TimeWiener();
     void on_drmOptions_FrequencyLinear();
@@ -98,7 +121,6 @@ public slots:
     void on_chartSelector_customContextMenuRequested(const QPoint&);
     void OnTreeWidgetContMenu(bool);
 	void UpdatePlotStyle(int);
-    void setLogging(bool);
 
 signals:
 	void startLogging();
