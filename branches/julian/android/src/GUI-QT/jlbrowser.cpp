@@ -27,7 +27,6 @@
 \******************************************************************************/
 
 #include "jlbrowser.h"
-#include "../datadecoding/DataDecoder.h"
 #include "../datadecoding/Journaline.h"
 #include <iostream>
 
@@ -146,9 +145,4 @@ QVariant JLBrowser::loadResource( int, const QUrl & name )
         "<tr><td width=\"100%\"><hr></td></tr>" /* horizontial line */
         "</table>"
         + strFhGIISText;
-}
-
-void JLBrowser::setDecoder(CDataDecoder* d)
-{
-    decoder = d;
 }

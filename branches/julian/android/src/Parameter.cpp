@@ -58,7 +58,7 @@ CParameter::CParameter():
     eTransmitCurrentTime(CT_OFF),
     MSCPrLe(),
     Stream(MAX_NUM_STREAMS), Service(MAX_NUM_SERVICES),
-	AudioComponentStatus(MAX_NUM_SERVICES),DataComponentStatus(MAX_NUM_SERVICES),
+    AudioComponentStatus(MAX_NUM_SERVICES),DataComponentStatus(),
     iNumBitsHierarchFrameTotal(0),
     iNumDecodedBitsMSC(0),
     iNumSDCBitsPerSFrame(0),
@@ -277,7 +277,8 @@ CParameter& CParameter::operator=(const CParameter& p)
     Stream = p.Stream;
     Service = p.Service;
 	AudioComponentStatus = p.AudioComponentStatus;
-	DataComponentStatus = p.DataComponentStatus;
+    for(size_t i=0; i<4; i++) for(size_t j=0; j<4; j++)
+        DataComponentStatus[j][i] = p.DataComponentStatus[j][i];
     iNumBitsHierarchFrameTotal = p.iNumBitsHierarchFrameTotal;
     iNumDecodedBitsMSC = p.iNumDecodedBitsMSC;
     iNumSDCBitsPerSFrame = p.iNumSDCBitsPerSFrame;
@@ -389,6 +390,7 @@ void CParameter::ResetServicesStreams()
         /* Reset everything to possible start values */
         for (i = 0; i < MAX_NUM_SERVICES; i++)
         {
+            Service[i].AudioParam.bCA = false;
             Service[i].AudioParam.strTextMessage = "";
             Service[i].AudioParam.iStreamID = STREAM_ID_NOT_USED;
             Service[i].AudioParam.eAudioCoding = CAudioParam::AC_NONE;
@@ -402,6 +404,7 @@ void CParameter::ResetServicesStreams()
             Service[i].AudioParam.eHVXCRate = CAudioParam::HR_2_KBIT;
             Service[i].AudioParam.bHVXCCRC = FALSE;
 
+            Service[i].DataParam.bCA = false;
             Service[i].DataParam.iStreamID = STREAM_ID_NOT_USED;
             Service[i].DataParam.ePacketModInd = CDataParam::PM_PACKET_MODE;
             Service[i].DataParam.eDataUnitInd = CDataParam::DU_SINGLE_PACKETS;
@@ -411,7 +414,6 @@ void CParameter::ResetServicesStreams()
             Service[i].DataParam.iUserAppIdent = 0;
 
             Service[i].iServiceID = SERV_ID_NOT_USED;
-            Service[i].eCAIndication = CService::CA_NOT_USED;
             Service[i].iLanguage = 0;
             Service[i].strCountryCode = "";
             Service[i].strLanguageCode = "";
@@ -419,7 +421,10 @@ void CParameter::ResetServicesStreams()
             Service[i].iServiceDescr = 0;
             Service[i].strLabel = "";
 			AudioComponentStatus[i].SetStatus(NOT_PRESENT);
-			DataComponentStatus[i].SetStatus(NOT_PRESENT);
+            DataComponentStatus[i][0].SetStatus(NOT_PRESENT);
+            DataComponentStatus[i][1].SetStatus(NOT_PRESENT);
+            DataComponentStatus[i][2].SetStatus(NOT_PRESENT);
+            DataComponentStatus[i][3].SetStatus(NOT_PRESENT);
         }
 
         for (i = 0; i < MAX_NUM_STREAMS; i++)
@@ -432,6 +437,7 @@ void CParameter::ResetServicesStreams()
     {
 
         // Set up encoded AM audio parameters
+        Service[0].AudioParam.bCA = false;
         Service[0].AudioParam.strTextMessage = "";
         Service[0].AudioParam.iStreamID = 0;
         Service[0].AudioParam.eAudioCoding = CAudioParam::AC_AAC;
@@ -446,7 +452,6 @@ void CParameter::ResetServicesStreams()
         Service[0].AudioParam.bHVXCCRC = FALSE;
 
         Service[0].iServiceID = SERV_ID_NOT_USED;
-        Service[0].eCAIndication = CService::CA_NOT_USED;
         Service[0].iLanguage = 0;
         Service[0].strCountryCode = "";
         Service[0].strLanguageCode = "";

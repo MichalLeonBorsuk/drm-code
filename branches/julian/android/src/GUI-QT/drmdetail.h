@@ -17,14 +17,16 @@ public:
     explicit DRMDetail(QWidget *parent = 0);
     ~DRMDetail();
     void updateDisplay(CParameter& Parameters, _REAL freqOffset, EAcqStat acqState, bool rsciMode);
-    void hideLEDs();
-    void hideFACParams();
+    void hideMSCParams(bool);
+
 public slots:
     void setLEDFAC(ETypeRxStatus);
     void setLEDSDC(ETypeRxStatus status);
+    void setLEDMSC(ETypeRxStatus status);
     void setLEDFrameSync(ETypeRxStatus status);
     void setLEDTimeSync(ETypeRxStatus status);
     void setLEDIOInterface(ETypeRxStatus status);
+    void setNumServices(int, int);
     void setSNR(double rSNR);
     void setMER(double rMER, double rWMERMSC);
     void setDelay_Doppler(double rSigmaEstimate, double rMinDelay);

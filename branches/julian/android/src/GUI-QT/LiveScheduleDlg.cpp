@@ -161,11 +161,7 @@ CDRMLiveSchedule::DecodeTargets(const vector < CAltFreqRegion >
 
     for(size_t i = 0; i < vecRegions.size(); i++)
     {
-        const int iLatitude = vecRegions[i].iLatitude;
-        const int iLongitude = vecRegions[i].iLongitude;
-
-        const int iLatitudeEx = vecRegions[i].iLatitudeEx;
-        const int iLongitudeEx = vecRegions[i].iLongitudeEx;
+        CAltFreqSquare s = vecRegions[i].square;
 
         size_t iCIRAFSize = vecRegions[i].veciCIRAFZones.size();
 
@@ -190,7 +186,7 @@ CDRMLiveSchedule::DecodeTargets(const vector < CAltFreqRegion >
             if (ssRegions.str() != "")
                 ssRegions << ", ";
 
-            int iLatitudeMed = (iLatitude + (iLatitudeEx / 2));
+            int iLatitudeMed = (s.iLatitude + (s.iLatitudeEx / 2));
 
             ssRegions << "latitude " << abs(iLatitudeMed) << "\xb0 ";
 
@@ -199,7 +195,7 @@ CDRMLiveSchedule::DecodeTargets(const vector < CAltFreqRegion >
             else
                 ssRegions << 'N';
 
-            int iLongitudeMed = (iLongitude + (iLongitudeEx / 2));
+            int iLongitudeMed = (s.iLongitude + (s.iLongitudeEx / 2));
 
             if (iLongitudeMed >= 180)
                 iLongitudeMed = iLongitudeMed - 360;
@@ -214,16 +210,16 @@ CDRMLiveSchedule::DecodeTargets(const vector < CAltFreqRegion >
         }
         /* check if receiver coordinates are inside target area
          * TODO check if inside CIRAF zones */
-        _BOOLEAN bLongitudeOK = ((iReceiverLongitude >= iLongitude)
+        _BOOLEAN bLongitudeOK = ((iReceiverLongitude >= s.iLongitude)
                                  && (iReceiverLongitude <=
-                                     (iLongitude + iLongitudeEx)))
-                                || (((iLongitude + iLongitudeEx) >= 180)
+                                     (s.iLongitude + s.iLongitudeEx)))
+                                || (((s.iLongitude + s.iLongitudeEx) >= 180)
                                     && (iReceiverLongitude <=
-                                        (iLongitude + iLongitudeEx - 360)));
+                                        (s.iLongitude + s.iLongitudeEx - 360)));
 
-        _BOOLEAN bLatitudeOK = ((iReceiverLatitude >= iLatitude)
+        _BOOLEAN bLatitudeOK = ((iReceiverLatitude >= s.iLatitude)
                                 && (iReceiverLatitude <=
-                                    (iLatitude + iLatitudeEx)));
+                                    (s.iLatitude + s.iLatitudeEx)));
 
         bIntoTargetArea = bIntoTargetArea || (bLongitudeOK && bLatitudeOK);
     }

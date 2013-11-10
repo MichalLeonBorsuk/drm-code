@@ -101,24 +101,33 @@ protected:
                              CParameter& Parameter, const _BOOLEAN bVersion);
     _BOOLEAN DataEntityType1(CVector<_BINARY>* pbiData, const int iLengthOfBody,
                              CParameter& Parameter);
-// ...
+    _BOOLEAN DataEntityType2(CVector<_BINARY>* pbiData, const int iLengthOfBody,
+                             CParameter& Parameter);
     _BOOLEAN DataEntityType3(CVector<_BINARY>* pbiData, const int iLengthOfBody,
                              CParameter& Parameter, const _BOOLEAN bVersion);
     _BOOLEAN DataEntityType4(CVector<_BINARY>* pbiData, const int iLengthOfBody,
                              CParameter& Parameter, const _BOOLEAN bVersion);
     _BOOLEAN DataEntityType5(CVector<_BINARY>* pbiData, const int iLengthOfBody,
                              CParameter& Parameter, const _BOOLEAN bVersion);
-// ...
+    _BOOLEAN DataEntityType6(CVector<_BINARY>* pbiData, const int iLengthOfBody,
+                             CParameter& Parameter, const _BOOLEAN bVersion);
     _BOOLEAN DataEntityType7(CVector<_BINARY>* pbiData, const int iLengthOfBody,
                              CParameter& Parameter, const _BOOLEAN bVersion);
     _BOOLEAN DataEntityType8(CVector<_BINARY>* pbiData, const int iLengthOfBody,
                              CParameter& Parameter);
     _BOOLEAN DataEntityType9(CVector<_BINARY>* pbiData, const int iLengthOfBody,
                              CParameter& Parameter, const _BOOLEAN bVersion);
-// ...
+    _BOOLEAN DataEntityType10(CVector<_BINARY>* pbiData, const int iLengthOfBody,
+                              CParameter& Parameter, const _BOOLEAN bVersion);
     _BOOLEAN DataEntityType11(CVector<_BINARY>* pbiData, const int iLengthOfBody,
                               CParameter& Parameter, const _BOOLEAN bVersion);
     _BOOLEAN DataEntityType12(CVector<_BINARY>* pbiData, const int iLengthOfBody,
+                              CParameter& Parameter);
+    _BOOLEAN DataEntityType13(CVector<_BINARY>* pbiData, const int iLengthOfBody,
+                              CParameter& Parameter, const _BOOLEAN bVersion);
+    _BOOLEAN DataEntityType14(CVector<_BINARY>* pbiData, const int iLengthOfBody,
+                              CParameter& Parameter);
+    _BOOLEAN DataEntityType15(CVector<_BINARY>* pbiData, const int iLengthOfBody,
                               CParameter& Parameter);
 
     CCRC		CRCObject;

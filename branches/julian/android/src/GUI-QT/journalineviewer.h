@@ -27,8 +27,8 @@ private:
     bool                    decoderSet;
     int                     short_id;
 
-    void show();
-    void hide();
+    void showEvent(QShowEvent*);
+    void hideEvent(QHideEvent*);
 
 private slots:
     void OnTimer();

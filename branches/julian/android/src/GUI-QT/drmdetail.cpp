@@ -10,6 +10,7 @@ DRMDetail::DRMDetail(QWidget *parent) :
     /* Update times for colour LEDs */
     ui->LEDFAC->SetUpdateTime(1500);
     ui->LEDSDC->SetUpdateTime(1500);
+    ui->LEDMSC->SetUpdateTime(1500);
     ui->LEDFrameSync->SetUpdateTime(600);
     ui->LEDTimeSync->SetUpdateTime(600);
     ui->LEDIOInterface->SetUpdateTime(2000); /* extra long -> red light stays long */
@@ -30,6 +31,11 @@ void DRMDetail::setLEDSDC(ETypeRxStatus status)
     SetStatus(ui->LEDSDC, status);
 }
 
+void DRMDetail::setLEDMSC(ETypeRxStatus status)
+{
+    SetStatus(ui->LEDMSC, status);
+}
+
 void DRMDetail::setLEDFrameSync(ETypeRxStatus status)
 {
     SetStatus(ui->LEDFrameSync, status);
@@ -43,6 +49,22 @@ void DRMDetail::setLEDTimeSync(ETypeRxStatus status)
 void DRMDetail::setLEDIOInterface(ETypeRxStatus status)
 {
     SetStatus(ui->LEDIOInterface, status);
+}
+
+void DRMDetail::setNumServices(int aud, int data)
+{
+    QString strFACInfo;
+    strFACInfo = tr("Audio: ");
+    if(aud>=0)
+        strFACInfo += QString().setNum(aud);
+    else
+        strFACInfo += "-";
+    strFACInfo += tr(" / Data: ");
+    if(data>=0)
+        strFACInfo += QString().setNum(data);
+    else
+        strFACInfo += "-";
+    ui->FACNumServicesV->setText(strFACInfo);
 }
 
 void DRMDetail::setSNR(double rSNR)
@@ -244,6 +266,24 @@ QString	DRMDetail::GetSpecOccStr(ESpecOcc e)
 
     default:
         return "?";
+    }
+}
+
+void DRMDetail::hideMSCParams(bool h)
+{
+    if(h)
+    {
+        ui->LEDMSC->hide();
+        ui->TextLabelLEDMSCCRC->hide();
+        ui->FACNumServicesL->hide();
+        ui->FACNumServicesV->hide();
+    }
+    else
+    {
+        ui->LEDMSC->show();
+        ui->TextLabelLEDMSCCRC->show();
+        ui->FACNumServicesL->show();
+        ui->FACNumServicesV->show();
     }
 }
 

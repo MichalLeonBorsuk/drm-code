@@ -415,9 +415,7 @@ void MainWindow::UpdateChannel(CParameter& Parameters)
 
     pRFWidget->setLEDFAC(Parameters.ReceiveStatus.FAC.GetStatus());
     pRFWidget->setLEDSDC(Parameters.ReceiveStatus.SDC.GetStatus());
-    // TODO Data Broadcasts
-    int iShortID = Parameters.GetCurSelAudioService();
-    //pRFWidget->setLEDMSC(Parameters.AudioComponentStatus[iShortID].GetStatus());
+    //pRFWidget->setLEDMSC(Parameters.ReceiveStatus.MSC.GetStatus());
     pRFWidget->setLEDFrameSync(Parameters.ReceiveStatus.FSync.GetStatus());
     pRFWidget->setLEDTimeSync(Parameters.ReceiveStatus.TSync.GetStatus());
     ETypeRxStatus soundCardStatusI = Parameters.ReceiveStatus.InterfaceI.GetStatus(); /* Input */
@@ -610,16 +608,10 @@ void MainWindow::UpdateDisplay()
     CParameter& Parameters = *(DRMReceiver.GetParameters());
     Parameters.Lock();
     ui->MainDisplay->setLevel(Parameters.GetIFSignalLevel());
-    int iShortID = Parameters.GetCurSelAudioService();
-    ETypeRxStatus msc_status;
-    if(Parameters.Service[iShortID].eAudDataFlag == CService::SF_AUDIO)
-        msc_status = Parameters.AudioComponentStatus[iShortID].GetStatus();
-    else
-        msc_status = Parameters.DataComponentStatus[iShortID].GetStatus();
     ui->MainDisplay->showReceptionStatus(
                 Parameters.ReceiveStatus.FAC.GetStatus(),
                 Parameters.ReceiveStatus.SDC.GetStatus(),
-                msc_status
+                Parameters.ReceiveStatus.MSC.GetStatus()
     );
 
     Parameters.Unlock();
@@ -830,16 +822,10 @@ void MainWindow::UpdateDisplay()
         Parameters.Lock();
 
         ui->MainDisplay->setLevel(Parameters.GetIFSignalLevel());
-        int iShortID = Parameters.GetCurSelAudioService();
-        ETypeRxStatus msc_status;
-        if(Parameters.Service[iShortID].eAudDataFlag == CService::SF_AUDIO)
-            msc_status = Parameters.AudioComponentStatus[iShortID].GetStatus();
-        else
-            msc_status = Parameters.DataComponentStatus[iShortID].GetStatus();
         ui->MainDisplay->showReceptionStatus(
                     Parameters.ReceiveStatus.FAC.GetStatus(),
                     Parameters.ReceiveStatus.SDC.GetStatus(),
-                    msc_status
+                    Parameters.ReceiveStatus.MSC.GetStatus()
         );
 
         Parameters.Unlock();

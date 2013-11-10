@@ -44,7 +44,8 @@
 #include "DRMSignalIO.h"
 #include "MSCMultiplexer.h"
 #include "InputResample.h"
-#include "datadecoding/DataDecoder.h"
+#include "datadecoding/packetdatadecoder.h"
+//#include "datadecoding/DataDecoder.h"
 #include "sourcedecoders/AudioSourceEncoder.h"
 #include "sourcedecoders/AudioSourceDecoder.h"
 #include "mlc/MLC.h"
@@ -273,7 +274,8 @@ public:
     CWriteData*				GetWriteData() {
         return &WriteData;
     }
-    CDataDecoder*			GetDataDecoder() {
+    //CDataDecoder*			GetDataDecoder() {
+    PacketDataDecoder*		GetDataDecoder() {
         return &DataDecoder;
     }
     CAMDemodulation*		GetAMDemod() {
@@ -358,7 +360,8 @@ protected:
     CMSCMLCDecoder			MSCMLCDecoder;
     CMSCDemultiplexer		MSCDemultiplexer;
     CAudioSourceDecoder		AudioSourceDecoder;
-    CDataDecoder			DataDecoder;
+    //CDataDecoder			DataDecoder;
+    PacketDataDecoder		DataDecoder;
     CSplit					Split;
     CSplit					SplitForIQRecord;
     CWriteIQFile			WriteIQFile;

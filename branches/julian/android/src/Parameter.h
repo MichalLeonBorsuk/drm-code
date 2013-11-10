@@ -104,7 +104,21 @@ enum ERecState {RS_TRACKING, RS_ACQUISITION};
 
 /* Classes ********************************************************************/
 
-class CAudioParam
+struct CServiceParam
+{
+    CServiceParam():
+        iStreamID(STREAM_ID_NOT_USED),bEnhanceFlag(false),bCA(false),CAdata(),rBitrate(0.0)
+    {
+    }
+
+    int iStreamID;		    // Stream Id of the stream which carries the audio service
+    bool bEnhanceFlag;	    // Enhancement flag
+    bool bCA;               // Conditional Access flag;
+    vector<uint8_t> CAdata; // Conditional Access Data;
+    _REAL rBitrate;
+};
+
+class CAudioParam: public CServiceParam
 {
 public:
 
@@ -138,79 +152,26 @@ public:
     /* OA: Opus encoder intended application, for encoder only */
     enum EOPUSApplication { OA_VOIP, OA_AUDIO };
 
-    CAudioParam(): strTextMessage(), iStreamID(STREAM_ID_NOT_USED),
+    CAudioParam(): CServiceParam(), strTextMessage(),
             eAudioCoding(AC_NONE), eSBRFlag(SB_NOT_USED), eAudioSamplRate(AS_24KHZ),
-            bTextflag(FALSE), bEnhanceFlag(FALSE), eAudioMode(AM_MONO),
+            bTextflag(FALSE), eAudioMode(AM_MONO),
             iCELPIndex(0), bCELPCRC(FALSE), eHVXCRate(HR_2_KBIT), bHVXCCRC(FALSE),
             eOPUSBandwidth(OB_FB), eOPUSSubCod(OS_SILK), eOPUSChan(OC_STEREO),
             eOPUSSignal(OG_MUSIC), eOPUSApplication(OA_AUDIO),
             bOPUSForwardErrorCorrection(FALSE), bOPUSRequestReset(FALSE),
             bParamChanged(FALSE),
-            bCanDecode(false),bCanEncode(false),rBitrate(0.0)
+            bCanDecode(false),bCanEncode(false)
     {
-    }
-    CAudioParam(const CAudioParam& ap):
-            strTextMessage(ap.strTextMessage),
-            iStreamID(ap.iStreamID),
-            eAudioCoding(ap.eAudioCoding),
-            eSBRFlag(ap.eSBRFlag),
-            eAudioSamplRate(ap.eAudioSamplRate),
-            bTextflag(ap.bTextflag),
-            bEnhanceFlag(ap.bEnhanceFlag),
-            eAudioMode(ap.eAudioMode),
-            iCELPIndex(ap.iCELPIndex),
-            bCELPCRC(ap.bCELPCRC),
-            eHVXCRate(ap.eHVXCRate),
-            bHVXCCRC(ap.bHVXCCRC),
-            eOPUSBandwidth(ap.eOPUSBandwidth),
-            eOPUSSubCod(ap.eOPUSSubCod),
-            eOPUSChan(ap.eOPUSChan),
-            eOPUSSignal(ap.eOPUSSignal),
-            eOPUSApplication(ap.eOPUSApplication),
-            bOPUSForwardErrorCorrection(ap.bOPUSForwardErrorCorrection),
-            bOPUSRequestReset(ap.bOPUSRequestReset),
-            bParamChanged(ap.bParamChanged),
-            bCanDecode(ap.bCanDecode),bCanEncode(ap.bCanEncode),rBitrate(ap.rBitrate)
-    {
-    }
-    CAudioParam& operator=(const CAudioParam& ap)
-    {
-        strTextMessage = ap.strTextMessage;
-        iStreamID = ap.iStreamID;
-        eAudioCoding = ap.eAudioCoding;
-        eSBRFlag = ap.eSBRFlag;
-        eAudioSamplRate = ap.eAudioSamplRate;
-        bTextflag =	ap.bTextflag;
-        bEnhanceFlag = ap.bEnhanceFlag;
-        eAudioMode = ap.eAudioMode;
-        iCELPIndex = ap.iCELPIndex;
-        bCELPCRC = ap.bCELPCRC;
-        eHVXCRate = ap.eHVXCRate;
-        bHVXCCRC = ap.bHVXCCRC;
-        eOPUSBandwidth = ap.eOPUSBandwidth;
-        eOPUSSubCod = ap.eOPUSSubCod;
-        eOPUSChan = ap.eOPUSChan;
-        eOPUSSignal = ap.eOPUSSignal;
-        eOPUSApplication = ap.eOPUSApplication;
-        bOPUSForwardErrorCorrection = ap.bOPUSForwardErrorCorrection;
-        bOPUSRequestReset = ap.bOPUSRequestReset;
-        bParamChanged = ap.bParamChanged;
-        bCanDecode = ap.bCanDecode;
-        bCanEncode = ap.bCanEncode;
-        rBitrate = ap.rBitrate;
-        return *this;
     }
 
     /* Text-message */
     string strTextMessage;	/* Max length is (8 * 16 Bytes) */
 
-    int iStreamID;			/* Stream Id of the stream which carries the audio service */
 
     EAudCod eAudioCoding;	/* This field indicated the source coding system */
     ESBRFlag eSBRFlag;		/* SBR flag */
     EAudSamRat eAudioSamplRate;	/* Audio sampling rate */
     _BOOLEAN bTextflag;		/* Indicates whether a text message is present or not */
-    _BOOLEAN bEnhanceFlag;	/* Enhancement flag */
 
     /* For AAC: Mono, LC Stereo, Stereo --------------------------------- */
     EAudMode eAudioMode;	/* Audio mode */
@@ -237,7 +198,6 @@ public:
 
     bool bCanDecode;
     bool bCanEncode;
-    _REAL rBitrate;
 
     /* This function is needed for detection changes in the class */
     _BOOLEAN operator!=(const CAudioParam AudioParam)
@@ -285,7 +245,7 @@ public:
     }
 };
 
-class CDataParam
+class CDataParam: public CServiceParam
 {
 public:
 
@@ -298,8 +258,6 @@ public:
     /* AD: Application Domain */
     enum EApplDomain { AD_DRM_SPEC_APP, AD_DAB_SPEC_APP, AD_OTHER_SPEC_APP };
 
-    int iStreamID;			/* Stream Id of the stream which carries the data service */
-
     EPackMod ePacketModInd;	/* Packet mode indicator */
 
     /* In case of packet mode ------------------------------------------- */
@@ -311,8 +269,7 @@ public:
     EApplDomain eAppDomain;	/* Application domain */
     int iUserAppIdent;		/* User application identifier, only DAB */
 
-    CDataParam():
-            iStreamID(STREAM_ID_NOT_USED),
+    CDataParam():CServiceParam(),
             ePacketModInd(PM_PACKET_MODE),
             eDataUnitInd(DU_DATA_UNITS),
             iPacketID(0),
@@ -321,32 +278,13 @@ public:
             iUserAppIdent(0)
     {
     }
-    CDataParam(const CDataParam& DataParam):
-            iStreamID(DataParam.iStreamID),
-            ePacketModInd(DataParam.ePacketModInd),
-            eDataUnitInd(DataParam.eDataUnitInd),
-            iPacketID(DataParam.iPacketID),
-            iPacketLen(DataParam.iPacketLen),
-            eAppDomain(DataParam.eAppDomain),
-            iUserAppIdent(DataParam.iUserAppIdent)
-    {
-    }
-    CDataParam& operator=(const CDataParam& DataParam)
-    {
-        iStreamID = DataParam.iStreamID;
-        ePacketModInd = DataParam.ePacketModInd;
-        eDataUnitInd = DataParam.eDataUnitInd;
-        iPacketID = DataParam.iPacketID;
-        iPacketLen = DataParam.iPacketLen;
-        eAppDomain = DataParam.eAppDomain;
-        iUserAppIdent = DataParam.iUserAppIdent;
-        return *this;
-    }
 
     /* This function is needed to detect changes in the data service */
     _BOOLEAN operator!=(const CDataParam DataParam)
     {
         if (iStreamID != DataParam.iStreamID)
+            return TRUE;
+        if (bCA != DataParam.bCA)
             return TRUE;
         if (ePacketModInd != DataParam.ePacketModInd)
             return TRUE;
@@ -372,21 +310,18 @@ class CService
 {
 public:
 
-    /* CA: CA system */
-    enum ECACond { CA_USED, CA_NOT_USED };
-
     /* SF: Service Flag */
     enum ETyOServ { SF_AUDIO, SF_DATA };
 
     CService():
-            iServiceID(SERV_ID_NOT_USED), eCAIndication(CA_NOT_USED),
+            iServiceID(SERV_ID_NOT_USED),
             iLanguage(0), eAudDataFlag(SF_AUDIO), iServiceDescr(0),
             strCountryCode(), strLanguageCode(), strLabel(),
             AudioParam(), DataParam()
     {
     }
     CService(const CService& s):
-            iServiceID(s.iServiceID), eCAIndication(s.eCAIndication),
+            iServiceID(s.iServiceID),
             iLanguage(s.iLanguage), eAudDataFlag(s.eAudDataFlag),
             iServiceDescr(s.iServiceDescr), strCountryCode(s.strCountryCode),
             strLanguageCode(s.strLanguageCode), strLabel(s.strLabel),
@@ -396,7 +331,6 @@ public:
     CService& operator=(const CService& s)
     {
         iServiceID = s.iServiceID;
-        eCAIndication = s.eCAIndication;
         iLanguage = s.iLanguage;
         eAudDataFlag = s.eAudDataFlag;
         iServiceDescr = s.iServiceDescr;
@@ -414,7 +348,6 @@ public:
     }
 
     uint32_t iServiceID;
-    ECACond eCAIndication;
     int iLanguage;
     ETyOServ eAudDataFlag;
     int iServiceDescr;
@@ -435,12 +368,16 @@ class CStream
 {
 public:
 
-    CStream():iLenPartA(0), iLenPartB(0)
+    enum EStreamType { ST_UNKNOWN, ST_AUDIO, ST_DATA_STREAM, ST_DATA_PACKET };
+
+    CStream():iLenPartA(0), iLenPartB(0), eType(ST_UNKNOWN),
+        bFEC(false), packet_length(0), R(0), C(0)
     {
     }
     CStream(const CStream& s):iLenPartA(s.iLenPartA), iLenPartB(s.iLenPartB)
     {
     }
+#if 0
     CStream& operator=(const CStream& Stream)
     {
         iLenPartA=Stream.iLenPartA;
@@ -456,9 +393,14 @@ public:
             return false;
         return true;
     }
-
+#endif
     int iLenPartA;			/* Data length for part A */
     int iLenPartB;			/* Data length for part B */
+    EStreamType eType;
+    bool bFEC;
+    uint8_t packet_length;
+    uint8_t R;
+    uint8_t C;
 };
 
 class CMSCProtLev
@@ -523,62 +465,51 @@ public:
 };
 
 /* Alternative frequency signalling Regions informations class */
-class CAltFreqRegion
+struct CAltFreqSquare
 {
-public:
-    CAltFreqRegion():veciCIRAFZones(),
-            iLatitude(0), iLongitude(0),
-            iLatitudeEx(0), iLongitudeEx(0)
-    {
-    }
-    CAltFreqRegion(const CAltFreqRegion& nAFR):
-            veciCIRAFZones(nAFR.veciCIRAFZones),
-            iLatitude(nAFR.iLatitude),
-            iLongitude(nAFR.iLongitude),
-            iLatitudeEx(nAFR.iLatitudeEx), iLongitudeEx(nAFR.iLongitudeEx)
+    CAltFreqSquare():iLatitude(0), iLongitude(0),iLatitudeEx(0), iLongitudeEx(0)
     {
     }
 
-    CAltFreqRegion& operator=(const CAltFreqRegion& nAFR)
+    bool operator==(const CAltFreqSquare& s) const
     {
-        iLatitude = nAFR.iLatitude;
-        iLongitude = nAFR.iLongitude;
-        iLatitudeEx = nAFR.iLatitudeEx;
-        iLongitudeEx = nAFR.iLongitudeEx;
-
-        veciCIRAFZones = nAFR.veciCIRAFZones;
-
-        return *this;
+        return (iLatitude == s.iLatitude) && (iLongitude == s.iLongitude)
+                && (iLatitudeEx == s.iLatitudeEx) && (iLongitudeEx == s.iLongitudeEx);
     }
 
-    _BOOLEAN operator==(const CAltFreqRegion& nAFR)
-    {
-        if (iLatitude != nAFR.iLatitude)
-            return FALSE;
-        if (iLongitude != nAFR.iLongitude)
-            return FALSE;
-        if (iLatitudeEx != nAFR.iLatitudeEx)
-            return FALSE;
-        if (iLongitudeEx != nAFR.iLongitudeEx)
-            return FALSE;
-
-        /* Vector sizes */
-        if (veciCIRAFZones.size() != nAFR.veciCIRAFZones.size())
-            return FALSE;
-
-        /* Vector contents */
-        for (size_t i = 0; i < veciCIRAFZones.size(); i++)
-            if (veciCIRAFZones[i] != nAFR.veciCIRAFZones[i])
-                return FALSE;
-
-        return TRUE;
-    }
-
-    vector<int> veciCIRAFZones;
     int iLatitude;
     int iLongitude;
     int iLatitudeEx;
     int iLongitudeEx;
+};
+
+struct CAltFreqRegion
+{
+    CAltFreqRegion():veciCIRAFZones(),square()
+    {
+    }
+
+    bool operator==(const CAltFreqRegion& r) const
+    {
+        return (veciCIRAFZones == r.veciCIRAFZones) && (square == r.square);
+    }
+
+    vector<int> veciCIRAFZones;
+    CAltFreqSquare square;
+};
+
+struct CAltFreqDetailedRegion
+{
+    CAltFreqDetailedRegion():squares()
+    {
+    }
+
+    bool operator==(const CAltFreqDetailedRegion& r) const
+    {
+        return squares == r.squares;
+    }
+
+    vector<CAltFreqSquare> squares;
 };
 
 class CServiceDefinition
@@ -741,31 +672,11 @@ class CAltFreqSign
 {
 public:
 
-    CAltFreqSign():vecRegions(16),vecSchedules(16),vecMultiplexes(),vecOtherServices(),
-            bRegionVersionFlag(FALSE),bScheduleVersionFlag(FALSE),
+    CAltFreqSign():vecRegions(16),vecDetailedRegions(16),
+            vecSchedules(16),vecMultiplexes(),vecOtherServices(),
+            bRegionVersionFlag(FALSE),bDetailedRegionVersionFlag(FALSE),bScheduleVersionFlag(FALSE),
             bMultiplexVersionFlag(FALSE),bOtherServicesVersionFlag(FALSE)
     {
-    }
-
-    CAltFreqSign(const CAltFreqSign& a):vecRegions(a.vecRegions),
-            vecSchedules(a.vecSchedules), vecMultiplexes(a.vecMultiplexes),
-            bRegionVersionFlag(a.bRegionVersionFlag),
-            bScheduleVersionFlag(a.bScheduleVersionFlag),
-            bMultiplexVersionFlag(a.bMultiplexVersionFlag),
-            bOtherServicesVersionFlag(a.bOtherServicesVersionFlag)
-    {
-    }
-
-    CAltFreqSign& operator=(const CAltFreqSign& a)
-    {
-        vecRegions = a.vecRegions;
-        vecSchedules = a.vecSchedules;
-        vecMultiplexes = a.vecMultiplexes;
-        bRegionVersionFlag = a.bRegionVersionFlag;
-        bScheduleVersionFlag = a.bScheduleVersionFlag;
-        bMultiplexVersionFlag = a.bMultiplexVersionFlag;
-        bOtherServicesVersionFlag = a.bOtherServicesVersionFlag;
-        return *this;
     }
 
     void ResetRegions(_BOOLEAN b)
@@ -773,6 +684,13 @@ public:
         vecRegions.clear();
         vecRegions.resize(16);
         bRegionVersionFlag=b;
+    }
+
+    void ResetDetailedRegions(_BOOLEAN b)
+    {
+        vecDetailedRegions.clear();
+        vecDetailedRegions.resize(16);
+        bDetailedRegionVersionFlag=b;
     }
 
     void ResetSchedules(_BOOLEAN b)
@@ -797,16 +715,18 @@ public:
     void Reset()
     {
         ResetRegions(FALSE);
+        ResetDetailedRegions(FALSE);
         ResetSchedules(FALSE);
         ResetMultiplexes(FALSE);
         ResetOtherServices(FALSE);
     }
 
     vector < vector<CAltFreqRegion> > vecRegions; // outer vector indexed by regionID
+    vector < vector<CAltFreqDetailedRegion> > vecDetailedRegions; // outer vector indexed by regionID
     vector < vector<CAltFreqSched> > vecSchedules; // outer vector indexed by scheduleID
     vector < CMultiplexDefinition > vecMultiplexes;
     vector < COtherService > vecOtherServices;
-    _BOOLEAN bRegionVersionFlag;
+    _BOOLEAN bRegionVersionFlag, bDetailedRegionVersionFlag;
     _BOOLEAN bScheduleVersionFlag;
     _BOOLEAN bMultiplexVersionFlag;
     _BOOLEAN bOtherServicesVersionFlag;
@@ -886,11 +806,12 @@ class CReceiveStatus
 {
 public:
     CReceiveStatus():FSync(),TSync(),InterfaceI(),InterfaceO(),
-            FAC(),SDC(),SLAudio(),LLAudio()
+            FAC(),SDC(),MSC(),SLAudio(),LLAudio()
     {
     }
     CReceiveStatus(const CReceiveStatus& s):FSync(s.FSync), TSync(s.TSync),
-            InterfaceI(s.InterfaceI), InterfaceO(s.InterfaceO), FAC(s.FAC), SDC(s.SDC),
+            InterfaceI(s.InterfaceI), InterfaceO(s.InterfaceO),
+            FAC(s.FAC), SDC(s.SDC), MSC(s.MSC),
             SLAudio(s.SLAudio),LLAudio(s.LLAudio)
     {
     }
@@ -902,6 +823,7 @@ public:
         InterfaceO = s.InterfaceO;
         FAC = s.FAC;
         SDC = s.SDC;
+        SDC = s.MSC;
         SLAudio = s.SLAudio;
         LLAudio = s.LLAudio;
         return *this;
@@ -913,6 +835,7 @@ public:
     CRxStatus InterfaceO;
     CRxStatus FAC;
     CRxStatus SDC;
+    CRxStatus MSC;
     CRxStatus SLAudio;
     CRxStatus LLAudio;
 };
@@ -1214,8 +1137,8 @@ public:
 
     vector<CStream> Stream;
     vector<CService> Service;
-    vector<CRxStatus> AudioComponentStatus;
-    vector<CRxStatus> DataComponentStatus;
+    vector<CRxStatus> AudioComponentStatus; // currently indexed by short id
+    CRxStatus DataComponentStatus[4][4]; // index by streamid then packetid
 
     /* information about services gathered from SDC, EPG and web schedules */
     map<uint32_t,CServiceInformation> ServiceInformation;

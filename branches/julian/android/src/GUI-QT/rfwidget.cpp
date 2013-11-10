@@ -12,6 +12,7 @@ RFWidget::RFWidget(CDRMReceiver* prx, QWidget *parent) :
     pMainPlot->SetRecObj(pDRMReceiver);
     pMainPlot->setupTreeWidget(ui->chartSelector);
     pMainPlot->SetupChart(CDRMPlot::INPUT_SIG_PSD);
+    ui->drmDetail->hideMSCParams(true);
 }
 
 RFWidget::~RFWidget()

@@ -29,7 +29,7 @@
 #define JOURNALINE_H__3B0UBVE987346456363LIHGEW982__INCLUDED_
 
 #include "../GlobalDefinitions.h"
-#include "../util/Vector.h"
+#include "packetapplication.h"
 # include "journaline/NML.h"
 # include "journaline/newssvcdec.h"
 # include "journaline/dabdatagroupdecoder.h"
@@ -58,7 +58,7 @@ public:
 };
 
 
-class CJournaline
+class CJournaline : public PacketApplication
 {
 public:
 	CJournaline();

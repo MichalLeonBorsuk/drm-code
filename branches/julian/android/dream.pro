@@ -497,7 +497,11 @@ HEADERS += \
     src/util/Settings.h \
     src/util/Utilities.h \
     src/util/Vector.h \
-    src/Version.h
+    src/Version.h \
+    src/datadecoding/datastreamdecoder.h \
+    src/datadecoding/packetdatadecoder.h \
+    src/datadecoding/fecpacketdatadecoder.h \
+    src/datadecoding/packetapplication.h
 SOURCES += \
     src/AMDemodulation.cpp \
     src/AMSSDemodulation.cpp \
@@ -597,7 +601,11 @@ SOURCES += \
     src/util/Reassemble.cpp \
     src/util/Settings.cpp \
     src/util/Utilities.cpp \
-    src/Version.cpp
+    src/Version.cpp \
+    src/datadecoding/datastreamdecoder.cpp \
+    src/datadecoding/packetdatadecoder.cpp \
+    src/datadecoding/fecpacketdatadecoder.cpp \
+    src/datadecoding/packetapplication.cpp
 !console {
 HEADERS += \
     src/GUI-QT/Logging.h \

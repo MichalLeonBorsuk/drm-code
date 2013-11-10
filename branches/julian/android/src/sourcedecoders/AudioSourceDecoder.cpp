@@ -676,6 +676,7 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
         Parameters.ReceiveStatus.SLAudio.SetStatus(status);
         Parameters.ReceiveStatus.LLAudio.SetStatus(status);
 		Parameters.AudioComponentStatus[Parameters.GetCurSelAudioService()].SetStatus(status);
+        Parameters.ReceiveStatus.MSC.SetStatus(status);
         Parameters.Unlock();
 
         /* Conversion from _REAL to _SAMPLE with special function */

@@ -83,6 +83,7 @@ public slots:
     void setSDCdateTime(const CParameter&);
     void setLEDFAC(ETypeRxStatus);
     void setLEDSDC(ETypeRxStatus status);
+    void setLEDMSC(ETypeRxStatus status);
     void setLEDFrameSync(ETypeRxStatus status);
     void setLEDTimeSync(ETypeRxStatus status);
     void setLEDIOInterface(ETypeRxStatus status);
@@ -93,6 +94,7 @@ public slots:
     void setFrequencyOffset(double);
     void setChannel(ERobMode, ESpecOcc, ESymIntMod, ECodScheme, ECodScheme);
     void setCodeRate(int,int);
+    void setNumServices(int,int);
     void setNumIterations(int);
     void setTimeInt(CChannelEstimation::ETypeIntTime);
     void setFreqInt(CChannelEstimation::ETypeIntFreq);

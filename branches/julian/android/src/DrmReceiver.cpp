@@ -708,13 +708,27 @@ CDRMReceiver::UtilizeDRM(_BOOLEAN& bEnoughData)
     {
         bEnoughData = TRUE;
     }
-
     /* Data decoding */
+#if 0
+    bool ed = false;
+    for (size_t i = 0; i < MSCDecBuf.size(); i++)
+    {
+        CStream s = Parameters.Stream[i];
+        switch(s.eType) {
+        case CStream::ST_DATA_PACKET:
+            ed |= DataPacketDecoder.WriteData(Parameters, MSCUseBuf[i]), ;
+            break;
+         default: // do nothing
+        }
+    }
+    bEnoughData = ed; // at least one
+#else
     if (iDataStreamID != STREAM_ID_NOT_USED)
     {
         if (DataDecoder.WriteData(Parameters, MSCUseBuf[iDataStreamID]))
             bEnoughData = TRUE;
     }
+#endif
     /* Source decoding (audio) */
     if (iAudioStreamID != STREAM_ID_NOT_USED)
     {
@@ -729,7 +743,7 @@ CDRMReceiver::UtilizeDRM(_BOOLEAN& bEnoughData)
             PlotManager.SetCurrentCDAud(AudioSourceDecoder.GetNumCorDecAudio());
         }
     }
-    if( (iDataStreamID = STREAM_ID_NOT_USED)
+    if( (iDataStreamID == STREAM_ID_NOT_USED)
        &&
          (iAudioStreamID == STREAM_ID_NOT_USED)
     ) // try and decode stream 0 as audio anyway
@@ -1506,6 +1520,7 @@ CDRMReceiver::InitsForDataParam()
     Parameters.SetNumDataDecoderBits(Parameters.
                                           GetStreamLen(iDataStreamID) *
                                           SIZEOF__BYTE);
+    DataDecoder.setStreamID(iDataStreamID);
     DataDecoder.SetInitFlag();
 }
 

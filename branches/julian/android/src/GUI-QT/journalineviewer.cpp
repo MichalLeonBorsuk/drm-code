@@ -1,6 +1,7 @@
 #include "journalineviewer.h"
 #include "ui_journalineviewer.h"
 #include <../util-QT/Util.h>
+#include <../datadecoding/Journaline.h>
 #include <QFontDialog>
 
 JournalineViewer::JournalineViewer(CDRMReceiver& rx, CSettings& st, int s, QWidget *parent) :
@@ -27,7 +28,7 @@ JournalineViewer::~JournalineViewer()
     delete ui;
 }
 
-void JournalineViewer::show()
+void JournalineViewer::showEvent(QShowEvent*)
 {
     /* Retrieve the font setting saved into the .ini file */
     const QString strFontFamily = settings.Get("fontfamily", string()).c_str();
@@ -46,15 +47,18 @@ void JournalineViewer::show()
     const uint32_t iAudioServiceID = Parameters.Service[iCurSelAudioServ].iServiceID;
 
     /* Get current data service */
-    int shortID = Parameters.GetCurSelDataService();
-    CService service = Parameters.Service[shortID];
+    CService service = Parameters.Service[short_id];
     Parameters.Unlock();
-
-    CDataDecoder* dec = receiver.GetDataDecoder();
-    if(dec)
+    if(!decoderSet)
     {
-        ui->textBrowser->setDecoder(dec);
-        decoderSet = true;
+        PacketDataDecoder* dec = receiver.GetDataDecoder();
+        if(dec)
+        {
+            CJournaline* jldec = new CJournaline();
+            dec->setApplication(service.DataParam.iPacketID, jldec);
+            ui->textBrowser->setDecoder(jldec);
+            decoderSet = true;
+        }
     }
     ui->textBrowser->setSource(QUrl("0"));
 
@@ -93,7 +97,7 @@ void JournalineViewer::show()
     Timer.start(GUI_CONTROL_UPDATE_TIME);
 }
 
-void JournalineViewer::hide()
+void JournalineViewer::hideEvent(QHideEvent*)
 {
     /* Deactivate real-time timer so that it does not get new pictures */
     Timer.stop();
@@ -110,22 +114,9 @@ void JournalineViewer::OnTimer()
 {
     CParameter& Parameters = *receiver.GetParameters();
     Parameters.Lock();
-
-    /* Get current data service */
-    int shortID = Parameters.GetCurSelDataService();
-    CService service = Parameters.Service[shortID];
-    ETypeRxStatus status = Parameters.DataComponentStatus[shortID].GetStatus();
+    const CDataParam& dp = Parameters.Service[short_id].DataParam;
+    ETypeRxStatus status = Parameters.DataComponentStatus[dp.iStreamID][dp.iPacketID].GetStatus();
     Parameters.Unlock();
-
-    if(!decoderSet)
-    {
-        CDataDecoder* dec = receiver.GetDataDecoder();
-        if(dec)
-        {
-            ui->textBrowser->setDecoder(dec);
-            decoderSet = true;
-        }
-    }
 
     SetStatus(ui->LEDStatus, status);
 
