@@ -97,7 +97,7 @@ void SlideShowViewer::OnTimer()
         break;
     }
 
-    CDataDecoder* DataDecoder = receiver.GetDataDecoder();
+    CDataDecoder* DataDecoder = (CDataDecoder*)receiver.GetDataDecoder(); // TODO
     if (DataDecoder == NULL)
     {
         qDebug("can't get data decoder from receiver");
@@ -328,9 +328,10 @@ void SlideShowViewer::GetServiceParams(uint32_t* iServiceID, bool* bServiceValid
         /* Get current data service */
         const int iCurSelDataServ = Parameters.GetCurSelDataService();
         const CService service = Parameters.Service[iCurSelDataServ];
-
+        const CDataParam& dp = service.DataParam;
+        ETypeRxStatus status = Parameters.DataComponentStatus[dp.iStreamID][dp.iPacketID].GetStatus();
         if (eStatus)
-            *eStatus = Parameters.DataComponentStatus[iCurSelDataServ].GetStatus();
+            *eStatus = status;
         if (iPacketID)
             *iPacketID = Parameters.GetDataParam(iCurSelDataServ).iPacketID;
     Parameters.Unlock();

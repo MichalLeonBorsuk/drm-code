@@ -204,7 +204,7 @@ void BWSViewerWidget::OnTimer()
 
     if (decoder == NULL)
     {
-        decoder = receiver.GetDataDecoder();
+        decoder = (CDataDecoder*)receiver.GetDataDecoder(); // TODO
         if (decoder == NULL)
             qDebug("can't get data decoder from receiver");
     }
@@ -463,8 +463,10 @@ void BWSViewerWidget::GetServiceParams(uint32_t* iServiceID, bool* bServiceValid
     Parameters.Lock();
         const int iCurSelDataServ = Parameters.GetCurSelDataService();
         const CService service = Parameters.Service[iCurSelDataServ];
+        const CDataParam& dp = service.DataParam;
+        ETypeRxStatus status = Parameters.DataComponentStatus[dp.iStreamID][dp.iPacketID].GetStatus();
         if (eStatus)
-            *eStatus = Parameters.DataComponentStatus[iCurSelDataServ].GetStatus();
+            *eStatus = status;
     Parameters.Unlock();
     if (iServiceID)
         *iServiceID = service.iServiceID;

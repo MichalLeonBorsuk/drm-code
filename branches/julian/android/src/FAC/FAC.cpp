@@ -168,17 +168,8 @@ void CFACTransmit::FACParam(CVector<_BINARY>* pbiFACData, CParameter& Parameter)
     /* Short ID */
     (*pbiFACData).Enqueue((uint32_t) iCurShortID, 2);
 
-    /* CA indication */
-    switch (Parameter.Service[iCurShortID].eCAIndication)
-    {
-    case CService::CA_NOT_USED:
-        (*pbiFACData).Enqueue(0 /* 0 */, 1);
-        break;
-
-    case CService::CA_USED:
-        (*pbiFACData).Enqueue(1 /* 1 */, 1);
-        break;
-    }
+    /* Audio CA indication */
+    (*pbiFACData).Enqueue(Parameter.Service[iCurShortID].AudioParam.bCA?1:0, 1);
 
     /* Language */
     (*pbiFACData).Enqueue(
@@ -199,8 +190,11 @@ void CFACTransmit::FACParam(CVector<_BINARY>* pbiFACData, CParameter& Parameter)
     (*pbiFACData).Enqueue(
         (uint32_t) Parameter.Service[iCurShortID].iServiceDescr, 5);
 
+    /* Data CA indication */
+    (*pbiFACData).Enqueue(Parameter.Service[iCurShortID].DataParam.bCA?1:0, 1);
+
     /* Rfa */
-    (*pbiFACData).Enqueue(uint32_t(0), 7);
+    (*pbiFACData).Enqueue(uint32_t(0), 6);
 
     /* CRC ------------------------------------------------------------------ */
     /* Calculate the CRC and put at the end of the stream */
@@ -525,19 +519,8 @@ _BOOLEAN CFACReceive::FACParam(CVector<_BINARY>* pbiFACData,
         /* Set service identifier */
         Parameter.SetServiceID(iTempShortID, iTempServiceID);
 
-        /* CA indication */
-        switch ((*pbiFACData).Separate(1))
-        {
-        case 0: /* 0 */
-            Parameter.Service[iTempShortID].eCAIndication =
-                CService::CA_NOT_USED;
-            break;
-
-        case 1: /* 1 */
-            Parameter.Service[iTempShortID].eCAIndication =
-                CService::CA_USED;
-            break;
-        }
+        /* Audio CA indication */
+        Parameter.Service[iTempShortID].AudioParam.bCA = ((*pbiFACData).Separate(1)==1);
 
         /* Language */
         Parameter.Service[iTempShortID].iLanguage = (*pbiFACData).Separate(4);
@@ -558,11 +541,14 @@ _BOOLEAN CFACReceive::FACParam(CVector<_BINARY>* pbiFACData,
         Parameter.Service[iTempShortID].iServiceDescr =
             (*pbiFACData).Separate(5);
 
+        /* Audio CA indication */
+        Parameter.Service[iTempShortID].DataParam.bCA = ((*pbiFACData).Separate(1)==1);
+
         Parameter.Unlock();
 
         /* Rfa */
         /* Do not use Rfa */
-        (*pbiFACData).Separate(7);
+        (*pbiFACData).Separate(6);
 
         /* CRC is ok, return TRUE */
         return TRUE;

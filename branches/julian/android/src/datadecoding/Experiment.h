@@ -30,7 +30,7 @@
 #define __EXPERIMENT_H
 
 #include "../GlobalDefinitions.h"
-#include "../util/Vector.h"
+#include "packetapplication.h"
 # include "journaline/dabdatagroupdecoder.h"
 
 /* Definitions ****************************************************************/
@@ -38,7 +38,7 @@
 
 /* Classes ********************************************************************/
 
-class CExperiment
+class CExperiment : public PacketApplication
 {
 public:
 	CExperiment();

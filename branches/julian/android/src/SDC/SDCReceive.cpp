@@ -154,6 +154,10 @@ CSDCReceive::ERetStatus CSDCReceive::SDCParam(CVector<_BINARY>* pbiData,
                 bError = DataEntityType1(pbiData, iLengthOfBody, Parameter);
                 break;
 
+            case 2: /* Type 2 */
+                bError = DataEntityType2(pbiData, iLengthOfBody, Parameter);
+                break;
+
             case 3: /* Type 3 */
                 bError = DataEntityType3(pbiData, iLengthOfBody, Parameter, bVersionFlag);
                 break;
@@ -164,6 +168,10 @@ CSDCReceive::ERetStatus CSDCReceive::SDCParam(CVector<_BINARY>* pbiData,
 
             case 5: /* Type 5 */
                 bError = DataEntityType5(pbiData, iLengthOfBody, Parameter, bVersionFlag);
+                break;
+
+            case 6: /* Type 6 */
+                bError = DataEntityType6(pbiData, iLengthOfBody, Parameter, bVersionFlag);
                 break;
 
             case 7: /* Type 7 */
@@ -178,12 +186,28 @@ CSDCReceive::ERetStatus CSDCReceive::SDCParam(CVector<_BINARY>* pbiData,
                 bError = DataEntityType9(pbiData, iLengthOfBody, Parameter, bVersionFlag);
                 break;
 
+            case 10: /* Type 10 */
+                bError = DataEntityType10(pbiData, iLengthOfBody, Parameter, bVersionFlag);
+                break;
+
             case 11: /* Type 11 */
                 bError = DataEntityType11(pbiData, iLengthOfBody, Parameter, bVersionFlag);
                 break;
 
             case 12: /* Type 12 */
                 bError = DataEntityType12(pbiData, iLengthOfBody, Parameter);
+                break;
+
+            case 13: /* Type 13 */
+                bError = DataEntityType13(pbiData, iLengthOfBody, Parameter, bVersionFlag);
+                break;
+
+            case 14: /* Type 14 */
+                bError = DataEntityType14(pbiData, iLengthOfBody, Parameter);
+                break;
+
+            case 15: /* Type 15 */
+                bError = DataEntityType15(pbiData, iLengthOfBody, Parameter);
                 break;
 
             default:
@@ -339,6 +363,28 @@ _BOOLEAN CSDCReceive::DataEntityType1(CVector<_BINARY>* pbiData,
         return TRUE; /* error */
 }
 
+/******************************************************************************\
+* Data entity Type 2 (Conditional Access)                        *
+\******************************************************************************/
+_BOOLEAN CSDCReceive::DataEntityType2(CVector<_BINARY>* pbiData,
+                                      const int iLengthOfBody,
+                                      CParameter& Parameter)
+{
+    int iShortID = (*pbiData).Separate(2);
+    int Audio_CA = (*pbiData).Separate(1);
+    int Data_CA = (*pbiData).Separate(1);
+    vector<uint8_t> ssi((iLengthOfBody-4)/8);
+    for(size_t i=0; i<ssi.size(); i++)
+        ssi[i] = (*pbiData).Separate(8);
+    // TODO store in parameters and display in GUI
+    Parameter.Lock();
+    if(Audio_CA)
+        Parameter.Service[iShortID].AudioParam.CAdata = ssi;
+    if(Data_CA)
+        Parameter.Service[iShortID].DataParam.CAdata = ssi;
+    Parameter.Unlock();
+    return FALSE;
+}
 
 /******************************************************************************\
 * Data entity Type 3 (Alternative frequency signalling)                        *
@@ -717,8 +763,28 @@ _BOOLEAN CSDCReceive::DataEntityType5(CVector<_BINARY>* pbiData,
     /* Set new parameters in global struct */
     Parameter.Lock();
     Parameter.SetDataParam(iTempShortID, DataParam);
+    Parameter.Stream[DataParam.iStreamID].eType=(DataParam.ePacketModInd==CDataParam::PM_PACKET_MODE)?CStream::ST_DATA_PACKET:CStream::ST_DATA_STREAM;
+    Parameter.Stream[DataParam.iStreamID].packet_length = DataParam.iPacketLen;
     Parameter.Unlock();
 
+    return FALSE;
+}
+
+/******************************************************************************\
+* Data entity Type 6 (Announcement support and switching)                     *
+\******************************************************************************/
+_BOOLEAN CSDCReceive::DataEntityType6(CVector<_BINARY>* pbiData,
+                                      const int iLengthOfBody,
+                                      CParameter& Parameter,
+                                      const _BOOLEAN)
+{
+    int short_id_flags = (*pbiData).Separate(4);
+    int sm_os = (*pbiData).Separate(1);
+    int short_id = (*pbiData).Separate(2);
+    (void)(*pbiData).Separate(1); // rfa
+    uint16_t ann_sup_flags = (*pbiData).Separate(10);
+    uint16_t ann_ssw_flags = (*pbiData).Separate(10);
+    // TODO store in Parameters
     return FALSE;
 }
 
@@ -745,24 +811,24 @@ _BOOLEAN CSDCReceive::DataEntityType7(CVector<_BINARY>* pbiData,
        +90 (north pole) */
 
 
-    Region.iLatitude = Complement2toInt(8, pbiData);
+    Region.square.iLatitude = Complement2toInt(8, pbiData);
 
     /* Longitude: this field specifies the westerly point of the area in
        degrees, as a 2's complement number between -180 (west) and
        +179 (east) */
 
-    Region.iLongitude = Complement2toInt(9, pbiData);
+    Region.square.iLongitude = Complement2toInt(9, pbiData);
 
     /* Latitude Extent: this field specifies the size of the area to the north,
        in 1 degree steps; the value of Latitude plus the value of Latitude
        Extent shall be equal or less than 90 */
-    Region.iLatitudeEx = (*pbiData).Separate(7);
+    Region.square.iLatitudeEx = (*pbiData).Separate(7);
 
     /* Longitude Extent: this field specifies the size of the area to the east,
        in 1 degree steps; the value of Longitude plus the value of Longitude
        Extent may exceed the value +179 (i.e. wrap into the region of negative
        longitude values) */
-    Region.iLongitudeEx = (*pbiData).Separate(8);
+    Region.square.iLongitudeEx = (*pbiData).Separate(8);
 
     /* n CIRAF Zones: this field carries n CIRAF zones (n in the range 0 to 16).
        The number of CIRAF zones, n, is determined from the length field of the
@@ -791,9 +857,9 @@ _BOOLEAN CSDCReceive::DataEntityType7(CVector<_BINARY>* pbiData,
 
     /* Error checking */
     if ((iRegionID == 0)
-            || (Region.iLatitude + Region.iLatitudeEx > 90)
-            || (Region.iLongitude < -180) || (Region.iLongitude > 179)
-            || (Region.iLatitude < -90) || (Region.iLatitude > 90))
+            || (Region.square.iLatitude + Region.square.iLatitudeEx > 90)
+            || (Region.square.iLongitude < -180) || (Region.square.iLongitude > 179)
+            || (Region.square.iLatitude < -90) || (Region.square.iLatitude > 90))
     {
         return TRUE; /* Error */
     }
@@ -901,7 +967,6 @@ _BOOLEAN CSDCReceive::DataEntityType8(CVector<_BINARY>* pbiData,
     return FALSE;
 }
 
-
 /******************************************************************************\
 * Data entity Type 9 (Audio information data entity)						   *
 \******************************************************************************/
@@ -917,8 +982,8 @@ _BOOLEAN CSDCReceive::DataEntityType9(CVector<_BINARY>* pbiData,
     /* Init error flag with "no error" */
     _BOOLEAN bError = FALSE;
 
-    /* Init AC_OTHER flag to FALSE */
-    _BOOLEAN AC_OTHER = FALSE;
+    /* Init bAudioSamplingRateValue7 flag to FALSE */
+    _BOOLEAN bAudioSamplingRateValue7 = FALSE;
 
     /* Short ID (the short ID is the index of the service-array) */
     const int iTempShortID = (*pbiData).Separate(2);
@@ -926,9 +991,6 @@ _BOOLEAN CSDCReceive::DataEntityType9(CVector<_BINARY>* pbiData,
     /* Load audio parameters class with current parameters */
     Parameter.Lock();
     CAudioParam AudParam = Parameter.GetAudioParam(iTempShortID);
-
-    AudParam.rBitrate = Parameter.GetBitRateKbps(iTempShortID, false);
-
     Parameter.Unlock();
 
     /* Stream Id */
@@ -939,156 +1001,144 @@ _BOOLEAN CSDCReceive::DataEntityType9(CVector<_BINARY>* pbiData,
     {
     case 0: /* 00 */
         AudParam.eAudioCoding = CAudioParam::AC_AAC;
-        AudParam.bCanDecode = Parameter.bCanDecodeAAC;
         break;
 
     case 1: /* 01 */
         AudParam.eAudioCoding = CAudioParam::AC_CELP;
-        AudParam.bCanDecode = Parameter.bCanDecodeCELP;
         break;
 
     case 2: /* 10 */
         AudParam.eAudioCoding = CAudioParam::AC_HVXC;
-        AudParam.bCanDecode = Parameter.bCanDecodeHVXC;
         break;
 
-    default: /* reserved */
-        AC_OTHER = TRUE;
+    default: /* 11 */
+        bError = TRUE;
         break;
     }
 
-    if (AC_OTHER)
+    /* SBR flag */
+    switch ((*pbiData).Separate(1))
     {
-        /* XXX EXPERIMENTAL NOT PART OF DRM STANDARD XXX */
+    case 0: /* 0 */
+        AudParam.eSBRFlag = CAudioParam::SB_NOT_USED;
+        break;
+
+    case 1: /* 1 */
+        AudParam.eSBRFlag = CAudioParam::SB_USED;
+        break;
+    }
+
+    /* Audio mode */
+    switch (AudParam.eAudioCoding)
+    {
+    case CAudioParam::AC_AAC:
+        /* Channel type */
         switch ((*pbiData).Separate(2))
         {
         case 0: /* 00 */
-            AudParam.eAudioCoding = CAudioParam::AC_OPUS;
+            AudParam.eAudioMode = CAudioParam::AM_MONO;
+            break;
+
+        case 1: /* 01 */
+            AudParam.eAudioMode = CAudioParam::AM_P_STEREO;
+            break;
+
+        case 2: /* 10 */
             AudParam.eAudioMode = CAudioParam::AM_STEREO;
-            AudParam.eAudioSamplRate = CAudioParam::AS_48KHZ;
-            AudParam.eSBRFlag = CAudioParam::SB_NOT_USED;
-            /* rfa */
-            bError = (*pbiData).Separate(4) != 0;
-            AudParam.bCanDecode = Parameter.bCanDecodeOPUS;
-            break;
-
-        default: /* room for three other codecs */
-            /* rfa */
-            (*pbiData).Separate(4);
-            bError = TRUE;
-            break;
-        }
-    }
-    else
-    {
-        /* SBR flag */
-        switch ((*pbiData).Separate(1))
-        {
-        case 0: /* 0 */
-            AudParam.eSBRFlag = CAudioParam::SB_NOT_USED;
-            break;
-
-        case 1: /* 1 */
-            AudParam.eSBRFlag = CAudioParam::SB_USED;
-            break;
-        }
-
-        /* Audio mode */
-        switch (AudParam.eAudioCoding)
-        {
-        case CAudioParam::AC_AAC:
-            /* Channel type */
-            switch ((*pbiData).Separate(2))
-            {
-            case 0: /* 00 */
-                AudParam.eAudioMode = CAudioParam::AM_MONO;
-                break;
-
-            case 1: /* 01 */
-                AudParam.eAudioMode = CAudioParam::AM_P_STEREO;
-                break;
-
-            case 2: /* 10 */
-                AudParam.eAudioMode = CAudioParam::AM_STEREO;
-                break;
-
-            default: /* reserved */
-                bError = TRUE;
-                break;
-            }
-            break;
-
-        case CAudioParam::AC_CELP:
-            /* rfa */
-            (*pbiData).Separate(1);
-
-            /* CELP_CRC */
-            switch ((*pbiData).Separate(1))
-            {
-            case 0: /* 0 */
-                AudParam.bCELPCRC = FALSE;
-                break;
-
-            case 1: /* 1 */
-                AudParam.bCELPCRC = TRUE;
-                break;
-            }
-            break;
-
-        case CAudioParam::AC_HVXC:
-            /* HVXC_rate */
-            switch ((*pbiData).Separate(1))
-            {
-            case 0: /* 0 */
-                AudParam.eHVXCRate = CAudioParam::HR_2_KBIT;
-                break;
-
-            case 1: /* 1 */
-                AudParam.eHVXCRate = CAudioParam::HR_4_KBIT;
-                break;
-            }
-
-            /* HVXC CRC */
-            switch ((*pbiData).Separate(1))
-            {
-            case 0: /* 0 */
-                AudParam.bHVXCCRC = FALSE;
-                break;
-
-            case 1: /* 1 */
-                AudParam.bHVXCCRC = TRUE;
-                break;
-            }
-            break;
-
-        default:
-            bError = TRUE;
-            break;
-        }
-
-        /* Audio sampling rate */
-        switch ((*pbiData).Separate(3))
-        {
-        case 0: /* 000 */
-            AudParam.eAudioSamplRate = CAudioParam::AS_8_KHZ;
-            break;
-
-        case 1: /* 001 */
-            AudParam.eAudioSamplRate = CAudioParam::AS_12KHZ;
-            break;
-
-        case 2: /* 010 */
-            AudParam.eAudioSamplRate = CAudioParam::AS_16KHZ;
-            break;
-
-        case 3: /* 011 */
-            AudParam.eAudioSamplRate = CAudioParam::AS_24KHZ;
             break;
 
         default: /* reserved */
+            AudParam.eAudioMode = CAudioParam::AM_STEREO;
             bError = TRUE;
             break;
         }
+        break;
+
+    case CAudioParam::AC_CELP:
+        /* rfa */
+        (*pbiData).Separate(1);
+
+        /* CELP_CRC */
+        switch ((*pbiData).Separate(1))
+        {
+        case 0: /* 0 */
+            AudParam.bCELPCRC = FALSE;
+            break;
+
+        case 1: /* 1 */
+            AudParam.bCELPCRC = TRUE;
+            break;
+        }
+        break;
+
+    case CAudioParam::AC_HVXC:
+        /* HVXC_rate */
+        switch ((*pbiData).Separate(1))
+        {
+        case 0: /* 0 */
+            AudParam.eHVXCRate = CAudioParam::HR_2_KBIT;
+            break;
+
+        case 1: /* 1 */
+            AudParam.eHVXCRate = CAudioParam::HR_4_KBIT;
+            break;
+        }
+
+        /* HVXC CRC */
+        switch ((*pbiData).Separate(1))
+        {
+        case 0: /* 0 */
+            AudParam.bHVXCCRC = FALSE;
+            break;
+
+        case 1: /* 1 */
+            AudParam.bHVXCCRC = TRUE;
+            break;
+        }
+        break;
+
+    default:
+        bError = TRUE;
+        break;
+    }
+
+    /* Audio sampling rate */
+    switch ((*pbiData).Separate(3))
+    {
+    case 0: /* 000 */
+        AudParam.eAudioSamplRate = CAudioParam::AS_8_KHZ;
+        break;
+
+    case 1: /* 001 */
+        AudParam.eAudioSamplRate = CAudioParam::AS_12KHZ;
+        break;
+
+    case 2: /* 010 */
+        AudParam.eAudioSamplRate = CAudioParam::AS_16KHZ;
+        break;
+
+    case 3: /* 011 */
+        AudParam.eAudioSamplRate = CAudioParam::AS_24KHZ;
+        break;
+
+    case 5: /* 101 */
+        AudParam.eAudioSamplRate = CAudioParam::AS_48KHZ;
+        break;
+
+    case 7: /* 111 */
+        bAudioSamplingRateValue7 = TRUE;
+    default: /* reserved */
+        bError = TRUE;
+        break;
+    }
+
+    /* XXX EXPERIMENTAL THIS IS NOT PART OF DRM STANDARD XXX */
+    if (bAudioSamplingRateValue7 && AudParam.eAudioCoding == CAudioParam::AC_AAC) {
+        bError = AudParam.eSBRFlag != CAudioParam::SB_NOT_USED || AudParam.eAudioMode != CAudioParam::AM_MONO;
+        AudParam.eAudioCoding = CAudioParam::AC_OPUS;
+        AudParam.eAudioMode = CAudioParam::AM_STEREO;
+        AudParam.eAudioSamplRate = CAudioParam::AS_48KHZ;
+        AudParam.eSBRFlag = CAudioParam::SB_NOT_USED;
     }
 
     /* Text flag */
@@ -1135,11 +1185,33 @@ _BOOLEAN CSDCReceive::DataEntityType9(CVector<_BINARY>* pbiData,
     {
         Parameter.Lock();
         Parameter.SetAudioParam(iTempShortID, AudParam);
+        Parameter.Stream[AudParam.iStreamID].eType = CStream::ST_AUDIO;
         Parameter.Unlock();
         return FALSE;
     }
     else
         return TRUE;
+}
+
+/******************************************************************************\
+* Data entity Type 10 (Next FAC configuration)                                *
+\******************************************************************************/
+_BOOLEAN CSDCReceive::DataEntityType10(CVector<_BINARY>* pbiData,
+                                       const int iLengthOfBody,
+                                       CParameter& Parameter,
+                                       const _BOOLEAN bVersion)
+{
+    const int base_flag = pbiData->Separate(1);
+    const int robm = pbiData->Separate(2);
+    const int rm = pbiData->Separate(1);
+    const int so = pbiData->Separate(3);
+    const int id = pbiData->Separate(1);
+    const int msc_mode = pbiData->Separate(2);
+    const int sdc_mode = pbiData->Separate(1);
+    const int num_services = pbiData->Separate(4);
+    (void)pbiData->Separate(4); // rfa
+    (void)pbiData->Separate(1); // rfu
+    return FALSE;
 }
 
 /******************************************************************************\
@@ -1375,5 +1447,106 @@ _BOOLEAN CSDCReceive::DataEntityType12(CVector<_BINARY>* pbiData,
     }
     Parameter.Unlock();
 
+    return FALSE;
+}
+
+/******************************************************************************\
+* Data entity Type 13                  *
+\******************************************************************************/
+_BOOLEAN CSDCReceive::DataEntityType13(CVector<_BINARY>* pbiData,
+                                       const int iLengthOfBody,
+                                       CParameter& Parameter, const _BOOLEAN bVersion)
+{
+    const int iRegionID = (*pbiData).Separate(4);
+    int nSquares = (iLengthOfBody-4)/48;
+    CAltFreqDetailedRegion r;
+    for(int i=0; i<nSquares; i++)
+    {
+        CAltFreqSquare s;
+        (void)(*pbiData).Separate(1); // rfu
+        // Square Latitude: this field specifies the southerly point of the area in 1/16th degrees, as a 2's complement number
+        // between -90 (south pole) and +90 (north pole).
+        s.iLatitude = Complement2toInt(12, pbiData);
+        // Square Longitude: this field specifies the westerly point of the area in 1/16th degrees, as a 2's complement number
+        // between -180 (west) and +179 15/16th (east).
+        s.iLongitude = Complement2toInt(13, pbiData);
+        // Square Latitude Extent: this field specifies the size of the area to the north, in 1/16th degree steps; the value of
+        // Latitude plus the value of Latitude Extent shall be equal or less than 90.
+        s.iLatitudeEx = (*pbiData).Separate(11);
+        // Square Longitude Extent: this field specifies the size of the area to the east, in 1/16th degree steps; the value of
+        // Longitude plus the value of Longitude Extent may be equal to or exceed the value +180 (i.e. wrap into the region of
+        // negative longitude values).
+        s.iLongitudeEx = (*pbiData).Separate(11);
+        r.squares.push_back(s);
+    }
+    Parameter.Lock();
+    /* Check the version flag */
+    if (bVersion != Parameter.AltFreqSign.bDetailedRegionVersionFlag)
+    {
+        /* If version flag has changed, delete all data for this entity type and save flag */
+        Parameter.AltFreqSign.ResetDetailedRegions(bVersion);
+    }
+
+    vector<CAltFreqDetailedRegion>& vec = Parameter.AltFreqSign.vecDetailedRegions[iRegionID];
+
+    /*(first check if new object is not already there) */
+
+    _BOOLEAN bAlreadyThere = FALSE;
+    for (int i = 0; i < vec.size(); i++)
+    {
+        if (vec[i] == r)
+            bAlreadyThere = TRUE;
+    }
+
+    if (bAlreadyThere == FALSE)
+        vec.push_back(r);
+
+    Parameter.Unlock();
+    return FALSE;
+}
+
+/******************************************************************************\
+* Data entity Type 14                  *
+\******************************************************************************/
+_BOOLEAN CSDCReceive::DataEntityType14(CVector<_BINARY>* pbiData,
+                                       const int iLengthOfBody,
+                                       CParameter& Parameter)
+{
+    const int iStreamID = (*pbiData).Separate(2);
+    (void)(*pbiData).Separate(2); // rfu
+    const int R = (*pbiData).Separate(8);
+    const int C = (*pbiData).Separate(8);
+    const int packet_length = (*pbiData).Separate(8);
+    Parameter.Lock();
+    Parameter.Stream[iStreamID].eType = CStream::ST_DATA_PACKET;
+    Parameter.Stream[iStreamID].bFEC = true;
+    Parameter.Stream[iStreamID].R = R;
+    Parameter.Stream[iStreamID].C = C;
+    Parameter.Stream[iStreamID].packet_length = packet_length;
+    Parameter.Unlock();
+    return FALSE;
+}
+
+/******************************************************************************\
+* Data entity Type 15 (Service linking information)                           *
+\******************************************************************************/
+_BOOLEAN CSDCReceive::DataEntityType15(CVector<_BINARY>* pbiData,
+                                       const int iLengthOfBody,
+                                       CParameter& Parameter)
+{
+    /*
+    • Extension type == 0000 4 bits.
+    • Id (Identifier) list flag 1 bit.
+    • LA (Linkage Actuator) 1 bit.
+    • S/H (Soft/Hard) 1 bit.
+    • ILS indicator 1 bit.
+    • LSN (Linkage Set Number) 12 bits.
+      Rfu 1 bit.
+      • IdLQ (Identifier List Qualifier) 2 bits.
+      • Data flag 1 bit.
+      • Number of Ids: 4 bits.
+      • n Ids n × (16 or 24 or 32) bits.
+      */
+    (void)(*pbiData).Separate(iLengthOfBody); // TODO
     return FALSE;
 }

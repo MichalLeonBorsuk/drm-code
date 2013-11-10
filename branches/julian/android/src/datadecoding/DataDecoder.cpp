@@ -83,17 +83,22 @@ CDataDecoder::ProcessDataInternal(CParameter & Parameters)
 		/* Store result in vector and show CRC in multimedia window */
 		uint16_t crc = pvecInputData->Separate(16);
 		int iShortID = Parameters.GetCurSelDataService();
+        ETypeRxStatus status = DATA_ERROR;
 		if (CRCObject.CheckCRC(crc) == TRUE)
 		{
 			veciCRCOk[j] = 1;	/* CRC ok */
-			Parameters.DataComponentStatus[iShortID].SetStatus(RX_OK);
+            status = RX_OK;
 		}
 		else
 		{
 			veciCRCOk[j] = 0;	/* CRC wrong */
-			Parameters.DataComponentStatus[iShortID].SetStatus(CRC_ERROR);
+            status = CRC_ERROR;
 		}
-	}
+        const CService service = Parameters.Service[iShortID];
+        const CDataParam& dp = service.DataParam;
+        Parameters.DataComponentStatus[dp.iStreamID][dp.iPacketID].SetStatus(status);
+        Parameters.ReceiveStatus.MSC.SetStatus(status);
+    }
 
 	/* Extract packet data -------------------------------------------------- */
 	/* Reset bit extraction access */
@@ -214,7 +219,7 @@ CDataDecoder::ProcessDataInternal(CParameter & Parameters)
 				/* Decode all IDs regardless whether activated or not
 				   (iPacketID == or != iServPacketID) */
 				/* Only DAB multimedia is supported */
-				//cout << "new data unit for packet id " << iPacketID << " apptype " << eAppType[iPacketID] << endl;
+                cout << "new data unit for packet id " << iPacketID << " apptype " << eAppType[iPacketID] << endl;
 
 				if(eAppType[iPacketID] == AT_NOT_SUP)
 				{

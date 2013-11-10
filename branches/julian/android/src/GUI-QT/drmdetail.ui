@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>650</width>
-    <height>123</height>
+    <width>656</width>
+    <height>158</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -307,22 +307,37 @@
      <property name="frameShadow">
       <enum>QFrame::Sunken</enum>
      </property>
-     <layout class="QVBoxLayout" name="verticalLayout_3">
-      <property name="spacing">
-       <number>4</number>
-      </property>
-      <property name="leftMargin">
-       <number>6</number>
-      </property>
-      <property name="topMargin">
-       <number>6</number>
-      </property>
-      <property name="rightMargin">
-       <number>6</number>
-      </property>
-      <property name="bottomMargin">
-       <number>6</number>
-      </property>
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout">
+        <item>
+         <widget class="QLabel" name="TextLabelLEDMSCCRC">
+          <property name="text">
+           <string>MSC CRC:</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="CMultColorLED" name="LEDMSC" native="true">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>13</width>
+            <height>13</height>
+           </size>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
       <item>
        <layout class="QHBoxLayout" name="_8">
         <property name="spacing">
@@ -624,6 +639,9 @@
        </layout>
       </item>
      </layout>
+     <zorder>layoutWidget</zorder>
+     <zorder>TextLabelLEDMSCCRC</zorder>
+     <zorder>LEDMSC</zorder>
     </widget>
    </item>
    <item row="0" column="2">
@@ -731,6 +749,13 @@
           </property>
          </widget>
         </item>
+        <item>
+         <widget class="QLabel" name="FACNumServicesL">
+          <property name="text">
+           <string>Number of Services:</string>
+          </property>
+         </widget>
+        </item>
        </layout>
       </item>
       <item>
@@ -803,6 +828,13 @@
         </item>
         <item>
          <widget class="QLabel" name="FACCodeRateV">
+          <property name="text">
+           <string>TextLabel</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="FACNumServicesV">
           <property name="text">
            <string>TextLabel</string>
           </property>

@@ -110,11 +110,10 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& Settings,
     pBWSDlg = new BWSViewer(DRMReceiver, Settings, this);
 #endif
 
-    /* Journaline viewer window */
-    pJLDlg = new JLViewer(DRMReceiver, Settings, this);
-
     /* MOT slide show window */
     pSlideShowDlg = new SlideShowViewer(DRMReceiver, Settings, this);
+
+    pJLDlg = NULL;
 
     /* Programme Guide Window */
     pEPGDlg = new EPGDlg(Parameters.GetDataDirectory(), Parameters.ServiceInformation, this);
@@ -391,11 +390,7 @@ void FDRMDialog::UpdateDRM_GUI()
     ProgrInputLevel->setValue(Parameters.GetIFSignalLevel());
     SetStatus(CLED_FAC, Parameters.ReceiveStatus.FAC.GetStatus());
     SetStatus(CLED_SDC, Parameters.ReceiveStatus.SDC.GetStatus());
-	int iShortID = Parameters.GetCurSelAudioService();
-	if(Parameters.Service[iShortID].eAudDataFlag == CService::SF_AUDIO)
-	    SetStatus(CLED_MSC, Parameters.AudioComponentStatus[iShortID].GetStatus());
-	else
-	    SetStatus(CLED_MSC, Parameters.DataComponentStatus[iShortID].GetStatus());
+    SetStatus(CLED_MSC, Parameters.ReceiveStatus.MSC.GetStatus());
 
     Parameters.Unlock();
 
@@ -422,11 +417,13 @@ void FDRMDialog::UpdateDRM_GUI()
 void FDRMDialog::startLogging()
 {
     pSysEvalDlg->setLogging(true);
+    pLogging->start();
 }
 
 void FDRMDialog::stopLogging()
 {
     pSysEvalDlg->setLogging(false);
+    pLogging->stop();
 }
 
 void FDRMDialog::OnScheduleTimer()
@@ -521,6 +518,7 @@ void FDRMDialog::OnTimer()
 
         pSysEvalDlg->setLEDFAC(Parameters.ReceiveStatus.FAC.GetStatus());
         pSysEvalDlg->setLEDSDC(Parameters.ReceiveStatus.SDC.GetStatus());
+        pSysEvalDlg->setLEDMSC(Parameters.ReceiveStatus.MSC.GetStatus());
         pSysEvalDlg->setLEDFrameSync(Parameters.ReceiveStatus.FSync.GetStatus());
         pSysEvalDlg->setLEDTimeSync(Parameters.ReceiveStatus.TSync.GetStatus());
         ETypeRxStatus soundCardStatusI = Parameters.ReceiveStatus.InterfaceI.GetStatus(); /* Input */
@@ -541,6 +539,8 @@ void FDRMDialog::OnTimer()
             /* Sample frequency offset estimation */
             pSysEvalDlg->setSampleFrequencyOffset(Parameters.rResampleOffset, Parameters.GetSigSampleRate());
 
+            pSysEvalDlg->setNumServices(Parameters.iNumAudioService,Parameters.iNumDataService);
+
         }
         else
         {
@@ -548,12 +548,17 @@ void FDRMDialog::OnTimer()
             pSysEvalDlg->setMER(-1.0, 0);
             pSysEvalDlg->setDelay_Doppler(-1.0, 0);
             pSysEvalDlg->setSampleFrequencyOffset(-1.0, 0);
+
+            pSysEvalDlg->setNumServices(-1,-1);
         }
 
         /* DC frequency */
         pSysEvalDlg->setFrequencyOffset(DRMReceiver.GetReceiveData()->
                         ConvertFrequency(Parameters.GetDCFrequency()));
 
+        //pSysEvalDlg->setReverb(bool);
+        //pSysEvalDlg-> setMute(bool);
+        //pSysEvalDlg-> setWriteAudio(bool);
 
         pSysEvalDlg->setChannel(Parameters.GetWaveMode(), Parameters.GetSpectrumOccup(),
                 Parameters.eSymbolInterlMode,
@@ -1079,6 +1084,10 @@ void FDRMDialog::OnSelectDataService(int shortId)
 #endif
         break;
     case DAB_AT_JOURNALINE:
+        /* Journaline viewer window */
+        if(pJLDlg)
+            delete pJLDlg;
+        pJLDlg = new JLViewer(DRMReceiver, Settings, shortId, this);
         pDlg = pJLDlg;
         break;
     case DAB_AT_MOTSLIDESHOW:

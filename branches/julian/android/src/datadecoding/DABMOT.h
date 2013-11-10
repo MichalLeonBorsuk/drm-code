@@ -30,7 +30,7 @@
 #define DABMOT_H__3B0UBVE98732KJVEW363E7A0D31912__INCLUDED_
 
 #include "../GlobalDefinitions.h"
-#include "../util/Vector.h"
+#include "packetapplication.h"
 #include "../util/CRC.h"
 #include <time.h>
 #include <map>
@@ -550,7 +550,7 @@ class CMOTDABEnc
 
 /* Decoder ------------------------------------------------------------------ */
 
-class CMOTDABDec
+class CMOTDABDec : public PacketApplication
 {
   public:
 

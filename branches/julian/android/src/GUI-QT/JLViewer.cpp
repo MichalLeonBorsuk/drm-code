@@ -28,12 +28,14 @@
 
 #include "JLViewer.h"
 #include "jlbrowser.h"
-#include "../datadecoding/DataDecoder.h"
+//#include "../datadecoding/DataDecoder.h"
+#include "../datadecoding/packetdatadecoder.h"
+#include "../datadecoding/Journaline.h"
 #include <QFontDialog>
 
-JLViewer::JLViewer(CDRMReceiver& rec, CSettings& Settings, QWidget* parent):
+JLViewer::JLViewer(CDRMReceiver& rec, CSettings& Settings, int sid, QWidget* parent):
     CWindow(parent, Settings, "Journaline"),
-    receiver(rec), decoderSet(false)
+    receiver(rec), decoderSet(false),short_id(sid)
 {
     setupUi(this);
 
@@ -84,17 +86,21 @@ void JLViewer::eventShow(QShowEvent*)
     const int iCurSelAudioServ = Parameters.GetCurSelAudioService();
     const uint32_t iAudioServiceID = Parameters.Service[iCurSelAudioServ].iServiceID;
 
-    /* Get current data service */
-    short_id = Parameters.GetCurSelDataService();
     CService service = Parameters.Service[short_id];
     Parameters.Unlock();
 
-    CDataDecoder* dec = receiver.GetDataDecoder();
-    if(dec)
+    if(!decoderSet)
     {
-        textBrowser->setDecoder(dec);
-        decoderSet = true;
+        PacketDataDecoder* dec = receiver.GetDataDecoder();
+        if(dec)
+        {
+            CJournaline* jldec = new CJournaline();
+            dec->setApplication(service.DataParam.iPacketID, jldec);
+            textBrowser->setDecoder(jldec);
+            decoderSet = true;
+        }
     }
+
     textBrowser->setSource(QUrl("0"));
 
     /* Add the service description into the dialog caption */
@@ -149,20 +155,9 @@ void JLViewer::OnTimer()
 {
     CParameter& Parameters = *receiver.GetParameters();
     Parameters.Lock();
-
-    /* Get current data service */
-    ETypeRxStatus status = Parameters.DataComponentStatus[short_id].GetStatus();
+    const CDataParam& dp = Parameters.Service[short_id].DataParam;
+    ETypeRxStatus status = Parameters.DataComponentStatus[dp.iStreamID][dp.iPacketID].GetStatus();
     Parameters.Unlock();
-
-    if(!decoderSet)
-    {
-        CDataDecoder* dec = receiver.GetDataDecoder();
-        if(dec)
-        {
-            textBrowser->setDecoder(dec);
-            decoderSet = true;
-        }
-    }
 
     switch(status)
     {

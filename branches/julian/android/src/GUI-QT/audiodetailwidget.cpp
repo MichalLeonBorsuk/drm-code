@@ -93,7 +93,7 @@ void AudioDetailWidget::updateEngineeringModeDisplay(int id, const CService& s)
     addItem( tr("Language"),  GetISOLanguageName(s.strLanguageCode).c_str());
     addItem( tr("Country"),  GetISOCountryName(s.strCountryCode).c_str());
     addItem( tr("Service ID"), QString("%1").arg(s.iServiceID, 6, 16));
-    addItem( tr("Conditional Access"),  s.CA_USED?tr("Yes"):tr("No"));
+    addItem( tr("Conditional Access"),  s.AudioParam.bCA?tr("Yes"):tr("No"));
     addItem( tr("Stream ID"),  QString("%1").arg(s.AudioParam.iStreamID));
     addItem( tr("Short ID"),  QString("%1").arg(id));
 

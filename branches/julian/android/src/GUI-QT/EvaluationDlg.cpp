@@ -448,6 +448,11 @@ void systemevalDlg::setLEDSDC(ETypeRxStatus status)
     ui->drmDetail->setLEDSDC(status);
 }
 
+void systemevalDlg::setLEDMSC(ETypeRxStatus status)
+{
+    ui->drmDetail->setLEDMSC(status);
+}
+
 void systemevalDlg::setLEDFrameSync(ETypeRxStatus status)
 {
     ui->drmDetail->setLEDFrameSync(status);
@@ -496,6 +501,11 @@ void systemevalDlg::setChannel(ERobMode robm, ESpecOcc specocc, ESymIntMod eSymb
 void systemevalDlg::setCodeRate(int b, int a)
 {
     ui->drmDetail->setCodeRate(b, a);
+}
+
+void systemevalDlg::setNumServices(int aud, int data)
+{
+    ui->drmDetail->setNumServices(aud, data);
 }
 
 void systemevalDlg::setNumIterations(int n)
