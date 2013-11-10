@@ -186,8 +186,8 @@ public slots:
 	void OnTimerList();
 	void OnTimerUTCLabel();
 	void OnHeaderClicked(int c);
-	void OnSave();
-	void OnCheckFreeze();
+    void on_buttonSave_clicked();
+    void on_freeze_toggled(bool);
     void on_comboBoxFilterTime_activated(int index);
 };
 

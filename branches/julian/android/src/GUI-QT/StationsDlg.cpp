@@ -31,6 +31,7 @@
 # include "../util-QT/Rig.h"
 # include "RigDlg.h"
 #endif
+#include "../util-QT/Util.h"
 #include <QHideEvent>
 #include <QShowEvent>
 #include <QNetworkRequest>
@@ -276,7 +277,7 @@ void StationsDlg::eventShow(QShowEvent*)
 	ensmeter = actionEnable_S_Meter->isChecked();
 	if(ensmeter)
 		EnableSMeter();
-	else
+    else
 		DisableSMeter();
     CSchedule::ESchedMode eSchedM = schedule.GetSchedMode();
     ERecMode eRecM = DRMReceiver.GetReceiverMode();
@@ -290,13 +291,17 @@ void StationsDlg::eventShow(QShowEvent*)
         /* Store previous columns settings */
         if (eSchedM != CSchedule::SM_NONE)
         {
-            ColumnParamToStr(bIsDRM?strColumnParamdrm:strColumnParamanalog);
+            if(bIsDRM)
+                strColumnParamdrm = columnParam(ListViewStations->header());
+            else
+                strColumnParamanalog = columnParam(ListViewStations->header());
         }
         // change mode
         schedule.SetSchedMode(bIsDRM?CSchedule::SM_DRM:CSchedule::SM_ANALOG);
-        /* Restore columns settings */
-        ColumnParamFromStr(bIsDRM?strColumnParamdrm:strColumnParamanalog);
     }
+    /* Restore columns settings */
+    setColumnParam(ListViewStations->header(), bIsDRM?strColumnParamdrm:strColumnParamanalog);
+
     if(schedule.GetNumberOfStations()==0)
 	{
         QString s = "";
@@ -387,26 +392,29 @@ void StationsDlg::LoadSettings()
 		break;
 	}
 
+    iSortColumndrm = getSetting("sortcolumndrm", 0);
+    bCurrentSortAscendingdrm = getSetting("sortascendingdrm", true);
+    strColumnParamdrm = getSetting("columnparamdrm", QString("10|"));
+    iSortColumnanalog = getSetting("sortcolumnanalog", 0);
+    bCurrentSortAscendinganalog = getSetting("sortascendinganalog", true);
+    strColumnParamanalog = getSetting("columnparamanalog", QString("10|"));
+
 	/* get sorting and filtering behaviour */
 	ERecMode eRecSM = DRMReceiver.GetReceiverMode();
 	switch (eRecSM)
 	{
 	case RM_DRM:
 		schedule.SetSchedMode(CSchedule::SM_DRM);
-		break;
+        setColumnParam(ListViewStations->header(), strColumnParamdrm);
+        break;
 
 	case RM_AM:
 		schedule.SetSchedMode(CSchedule::SM_ANALOG);
-		break;
+        setColumnParam(ListViewStations->header(), strColumnParamanalog);
+        break;
 	default: // can't happen!
 		;
 	}
-	iSortColumndrm = getSetting("sortcolumndrm", 0);
-	bCurrentSortAscendingdrm = getSetting("sortascendingdrm", true);
-	strColumnParamdrm = getSetting("columnparamdrm", QString());
-	iSortColumnanalog = getSetting("sortcolumnanalog", 0);
-	bCurrentSortAscendinganalog = getSetting("sortascendinganalog", true);
-	strColumnParamanalog = getSetting("columnparamanalog", QString());
 
 	schedule.qurldrm = QUrl(getSetting("DRM URL", QString(DRM_SCHEDULE_URL)));
 	schedule.targetFilterdrm = getSetting("targetfilterdrm", QString());
@@ -419,7 +427,11 @@ void StationsDlg::LoadSettings()
 
 void StationsDlg::SaveSettings()
 {
-	Settings.Put("Hamlib", "ensmeter", actionEnable_S_Meter->isChecked());
+    if(schedule.GetSchedMode()== CSchedule::SM_DRM)
+        strColumnParamdrm = columnParam(ListViewStations->header());
+    else
+        strColumnParamanalog = columnParam(ListViewStations->header());
+    Settings.Put("Hamlib", "ensmeter", actionEnable_S_Meter->isChecked());
 	putSetting("showall", actionShowAllStations->isChecked());
 	putSetting("DRM URL", schedule.qurldrm.toString());
 	putSetting("ANALOG URL", schedule.qurlanalog.toString());
@@ -617,62 +629,6 @@ _BOOLEAN StationsDlg::GetSortAscending()
 		return bCurrentSortAscendingdrm;
 	else
 		return bCurrentSortAscendinganalog;
-}
-
-void StationsDlg::ColumnParamFromStr(const QString& strColumnParam)
-{
-	QStringList list(strColumnParam.split(QChar('|')));
-	const int n = list.count(); /* width and position */
-	if (n == 2)
-	{
-		for (int j = 0; j < n; j++)
-		{
-			int c = ListViewStations->header()->count();
-			QStringList values(list[j].split(QChar(',')));
-			const int lc = (int)values.count();
-			if (lc < c)
-				c = lc;
-			for (int i = 0; i < c; i++)
-			{
-				int v = values[i].toInt();
-				if (!j) /* width*/
-					ListViewStations->header()->resizeSection(i, v);
-				else /* position */
-					ListViewStations->header()->moveSection(ListViewStations->header()->visualIndex(i), v);
-			}
-		}
-	}
-	else
-	{
-		ListViewStations->header()->resizeSections(QHeaderView::ResizeToContents);
-		ListViewStations->header()->resizeSections(QHeaderView::Interactive);
-		ListViewStations->header()->resizeSection(0, ListViewStations->header()->minimumSectionSize());
-	}
-}
-
-void StationsDlg::ColumnParamToStr(QString& strColumnParam)
-{
-	strColumnParam = "";
-	const int n = 2; /* width and position */
-	for (int j = 0; j < n; j++)
-	{
-		const int c = ListViewStations->header()->count();
-		for (int i = 0; i < c; i++)
-		{
-			int v;
-			if (!j) /* width*/
-				v = ListViewStations->header()->sectionSize(i);
-			else /* position */
-				v = ListViewStations->header()->visualIndex(i);
-			QString strValue;
-			strValue.setNum(v);
-			strColumnParam += strValue;
-			if (i < (c-1))
-				strColumnParam += ",";
-		}
-		if (j < (n-1))
-			strColumnParam += "|";
-	}
 }
 
 void StationsDlg::SetFrequencyFromGUI(int iFreq)

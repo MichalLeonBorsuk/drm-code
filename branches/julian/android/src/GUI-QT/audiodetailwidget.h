@@ -9,13 +9,15 @@ class AudioDetailWidget;
 }
 
 class CDRMPlot;
+class QQuickView;
+class QQuickItem;
 
 class AudioDetailWidget : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit AudioDetailWidget(QString, CDRMReceiver*, QWidget * = 0);
+    explicit AudioDetailWidget(CDRMReceiver*, QWidget * = 0);
     ~AudioDetailWidget();
     void updateDisplay(int, const CService&);
     void setEngineering(bool);
@@ -24,14 +26,16 @@ signals:
     void listen(int);
 public slots:
     void setPlotStyle(int);
+    void setDescription(const QString&);
 private:
     Ui::AudioDetailWidget *ui;
     int short_id;
-    QString description;
     bool engineeringMode;
     CDRMPlot *pMainPlot;
     CDRMReceiver* pDRMReceiver;
     int iPlotStyle;
+    QQuickView *view;
+    QQuickItem* userModeDisplay;
     void updateEngineeringModeDisplay(int, const CService&);
     void updateUserModeDisplay(int, const CService&);
     void addItem(const QString&, const QString&);

@@ -141,6 +141,19 @@ void EPGDlg::on_dateEdit_dateChanged(const QDate&)
     select();
 }
 
+void EPGDlg::showButtons(bool s)
+{
+    if(s)
+        ui->buttons->show();
+    else
+        ui->buttons->hide();
+}
+
+void EPGDlg::on_close_clicked()
+{
+    close();
+}
+
 void EPGDlg::on_channel_activated(const QString&)
 {
     epg.progs.clear ();

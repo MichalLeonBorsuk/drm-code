@@ -57,7 +57,9 @@ signals:
 public slots:
     void on_channel_activated(const QString&);
     void on_dateEdit_dateChanged(const QDate&);
+    void on_close_clicked();
     void OnTimer();
+    void showButtons(bool);
 
 private:
     Ui::EPGDialog *ui;

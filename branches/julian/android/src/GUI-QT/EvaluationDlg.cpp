@@ -60,16 +60,6 @@ systemevalDlg::systemevalDlg(CDRMReceiver& NDRMR, CSettings& Settings,
     MainPlot->SetRecObj(&DRMReceiver);
     MainPlot->SetPlotStyle(iPlotStyle);
 
-    //ui->SliderNoOfIterations->
-    //    setValue(DRMReceiver.GetMSCMLC()->GetInitNumIterations());
-    //ui->TextNumOfIterations->setText(tr("MLC: Number of Iterations: ") +
-    //                             QString().setNum(DRMReceiver.GetMSCMLC()->GetInitNumIterations()));
-
-
-
-    /* Update controls */
-    UpdateControls();
-
     /* Set the Char Type of each selectable item */
     QTreeWidgetItemIterator it(ui->chartSelector, QTreeWidgetItemIterator::NoChildren);
     for (; *it; it++)
@@ -130,14 +120,8 @@ systemevalDlg::systemevalDlg(CDRMReceiver& NDRMR, CSettings& Settings,
     /* Char selector list view */
     ui->chartSelector->setContextMenuPolicy(Qt::CustomContextMenu);
 
-    /* Timer */
-    connect(&Timer, SIGNAL(timeout()), this, SLOT(OnTimer()));
-
     /* Select chart type */
     ui->chartSelector->setCurrentItem(FindItemByECharType(eCurCharType), 0);
-
-    /* Force update */
-    OnTimer();
 }
 
 systemevalDlg::~systemevalDlg()
@@ -180,12 +164,6 @@ void systemevalDlg::eventShow(QShowEvent*)
 		pNewChartWin->show();
     }
 
-    /* Update controls */
-    UpdateControls();
-
-    /* Activate real-time timer */
-    Timer.start(GUI_CONTROL_UPDATE_TIME);
-
     /* Notify the MainPlot of showEvent */
     MainPlot->activate();
 }
@@ -194,9 +172,6 @@ void systemevalDlg::eventHide(QHideEvent*)
 {
     /* Notify the MainPlot of hideEvent */
     MainPlot->deactivate();
-
-    /* Stop the real-time timer */
-    Timer.stop();
 
     /* Store size and position of all additional chart windows */
     int iNumOpenCharts = 0;
@@ -349,38 +324,24 @@ string systemevalDlg::ECharTypeToPlotName(CDRMPlot::ECharType eCharType)
     return string();
 }
 
-void systemevalDlg::OnTimer()
+void systemevalDlg::setReverb(bool b)
 {
-    CParameter& Parameters = *(DRMReceiver.GetParameters());
-
-    Parameters.Lock();
-
-    // TODO ui->drmDetail->updateDisplay();
-    UpdateGPS(Parameters);
-
-    UpdateControls();
-
-    ui->CheckBoxReverb->setChecked(DRMReceiver.GetAudSorceDec()->GetReverbEffect());
-    ui->CheckBoxMuteAudio->setChecked(DRMReceiver.GetWriteData()->GetMuteAudio());
-    ui->CheckBoxSaveAudioWave->setChecked(DRMReceiver.GetWriteData()->GetIsWriteWaveFile());
-
-    Parameters.Unlock();
+    ui->CheckBoxReverb->setChecked(b);
 }
 
-void systemevalDlg::UpdateControls()
+void systemevalDlg::setMute(bool b)
 {
-    ui->drmOptions->setNumIterations(DRMReceiver.GetMSCMLC()->GetInitNumIterations());
-    ui->drmOptions->setTimeInt(DRMReceiver.GetTimeInt());
-    ui->drmOptions->setFreqInt(DRMReceiver.GetFreqInt());
-    ui->drmOptions->setTiSyncTrac(DRMReceiver.GetTiSyncTracType());
-    ui->drmOptions->setRecFilterEnabled(DRMReceiver.GetFreqSyncAcq()->GetRecFilter());
-    ui->drmOptions->setIntConsEnabled(DRMReceiver.GetIntCons());
-    ui->drmOptions->setFlipSpectrumEnabled(DRMReceiver.GetReceiveData()->GetFlippedSpectrum());
+    ui->CheckBoxMuteAudio->setChecked(b);
 }
 
-void systemevalDlg::UpdateGPS(CParameter& Parameters)
+void systemevalDlg::setWriteAudio(bool b)
 {
-    gps_data_t& gps = Parameters.gps_data;
+    ui->CheckBoxSaveAudioWave->setChecked(b);
+}
+
+void systemevalDlg::setGPS(const CParameter& Parameters)
+{
+    const gps_data_t& gps = Parameters.gps_data;
 
     if((gps.set&STATUS_SET)==0) {
         ui->LEDGPS->SetLight(CMultColorLED::RL_RED);
@@ -431,7 +392,7 @@ void systemevalDlg::UpdateGPS(CParameter& Parameters)
                 .arg(p_ts->tm_sec,2, 10, fill);
     }
     else
-	qStrTime = "UTC: ?";
+    qStrTime = "UTC: ?";
     QString qStrSat;
     if (gps.set&SATELLITE_SET)
         qStrSat = tr("  Satellites: ") + QString().setNum(gps.satellites_used);
@@ -441,6 +402,135 @@ void systemevalDlg::UpdateGPS(CParameter& Parameters)
     ui->TextLabelGPSPosition->setText(qStrPosition+qStrAltitude);
     ui->TextLabelGPSSpeedHeading->setText(qStrSpeed+qStrTrack);
     ui->TextLabelGPSTime->setText(qStrTime+qStrSat);
+}
+
+void systemevalDlg::setSDCdateTime(const CParameter& Parameters)
+{
+    QString s;
+    if ((Parameters.iUTCHour == 0) &&
+            (Parameters.iUTCMin == 0) &&
+            (Parameters.iDay == 0) &&
+            (Parameters.iMonth == 0) &&
+            (Parameters.iYear == 0))
+    {
+        /* No time service available */
+        s = tr("Service not available");
+    }
+    else
+    {
+        /* QT type of displaying date and time */
+        QDateTime DateTime;
+        DateTime.setDate(QDate(Parameters.iYear,
+                               Parameters.iMonth,
+                               Parameters.iDay));
+        DateTime.setTime(QTime(Parameters.iUTCHour,
+                               Parameters.iUTCMin));
+
+        s = DateTime.toString();
+        /* Add UTC offset if available */
+        if (Parameters.bValidUTCOffsetAndSense)
+            s += QString(" %1%2%3%4")
+                .arg(tr("UTC"))
+                .arg(Parameters.iUTCSense ? "-" : "+")
+                .arg(Parameters.iUTCOff / 2, 0, 10)
+                .arg(Parameters.iUTCOff & 1 ? ".5" : "");
+    }
+    ui->SDCdateTime->setText(s);
+}
+
+void systemevalDlg::setLEDFAC(ETypeRxStatus status)
+{
+    ui->drmDetail->setLEDFAC(status);
+}
+
+void systemevalDlg::setLEDSDC(ETypeRxStatus status)
+{
+    ui->drmDetail->setLEDSDC(status);
+}
+
+void systemevalDlg::setLEDFrameSync(ETypeRxStatus status)
+{
+    ui->drmDetail->setLEDFrameSync(status);
+}
+
+void systemevalDlg::setLEDTimeSync(ETypeRxStatus status)
+{
+    ui->drmDetail->setLEDTimeSync(status);
+}
+
+void systemevalDlg::setLEDIOInterface(ETypeRxStatus status)
+{
+    ui->drmDetail->setLEDIOInterface(status);
+}
+
+void systemevalDlg::setSNR(double rSNR)
+{
+    ui->drmDetail->setSNR(rSNR);
+}
+
+void systemevalDlg::setMER(double rMER, double rWMERMSC)
+{
+    ui->drmDetail->setMER(rMER, rWMERMSC);
+}
+
+void systemevalDlg::setDelay_Doppler(double rSigmaEstimate, double rMinDelay)
+{
+    ui->drmDetail->setDelay_Doppler(rSigmaEstimate, rMinDelay);
+}
+
+void systemevalDlg::setSampleFrequencyOffset(double rCurSamROffs, double rSampleRate)
+{
+    ui->drmDetail->setSampleFrequencyOffset(rCurSamROffs, rSampleRate);
+}
+
+void systemevalDlg::setFrequencyOffset(double rOffset)
+{
+    ui->drmDetail->setFrequencyOffset(rOffset);
+}
+
+void systemevalDlg::setChannel(ERobMode robm, ESpecOcc specocc, ESymIntMod eSymbolInterlMode, ECodScheme eSDCCodingScheme, ECodScheme eMSCCodingScheme)
+{
+    ui->drmDetail->setChannel(robm, specocc, eSymbolInterlMode, eSDCCodingScheme, eMSCCodingScheme);
+}
+
+void systemevalDlg::setCodeRate(int b, int a)
+{
+    ui->drmDetail->setCodeRate(b, a);
+}
+
+void systemevalDlg::setNumIterations(int n)
+{
+    ui->drmOptions->noOfIterationsChanged(n);
+}
+
+void systemevalDlg::setTimeInt(CChannelEstimation::ETypeIntTime e)
+{
+    ui->drmOptions->setTimeInt(e);
+}
+
+void systemevalDlg::setFreqInt(CChannelEstimation::ETypeIntFreq e)
+{
+    ui->drmOptions->setFreqInt(e);
+}
+
+void systemevalDlg::setTiSyncTrac(CTimeSyncTrack::ETypeTiSyncTrac e)
+{
+    ui->drmOptions->setTiSyncTrac(e);
+}
+
+void systemevalDlg::setRecFilterEnabled(bool b)
+{
+    ui->drmOptions->setRecFilterEnabled(b);
+}
+
+void systemevalDlg::setIntConsEnabled(bool b)
+{
+    ui->drmOptions->setIntConsEnabled(b);
+}
+
+void systemevalDlg::setFlipSpectrumEnabled(bool b)
+{
+    ui->drmOptions->setFlipSpectrumEnabled(b);
 }
 
 void systemevalDlg::on_drmOptions_TimeLinear()

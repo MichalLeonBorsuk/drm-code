@@ -34,6 +34,7 @@
 #include <../GUI-QT/MultColorLED.h>
 
 class CDRMTransceiver;
+class QHeaderView;
 
 QString VerifyFilename(QString filename);
 
@@ -54,5 +55,8 @@ QString GetCodecString(const CService&);
 QString GetTypeString(const CService&);
 
 void SetStatus(CMultColorLED* LED, ETypeRxStatus state);
+
+void setColumnParam(QHeaderView*, const QString&);
+QString columnParam(QHeaderView*);
 
 #endif // __UTIL_QT_UTIL_H

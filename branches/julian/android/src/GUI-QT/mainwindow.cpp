@@ -67,8 +67,6 @@ MainWindow::MainWindow(CDRMReceiver& NDRMR, CSettings& Settings,
     bEngineering(false),
     pLogging(NULL),
     pSysTray(NULL), pCurrentWindow(this),
-    iMultimediaServiceBit(0),
-    iLastMultimediaServiceSelected(-1),
     pScheduler(NULL), pScheduleTimer(NULL),
     serviceWidgets(),engineeringWidgets()
 {
@@ -158,19 +156,17 @@ MainWindow::MainWindow(CDRMReceiver& NDRMR, CSettings& Settings,
 #endif
     connect(pAnalogDemDlg, SIGNAL(SwitchMode(int)), this, SLOT(OnSwitchMode(int)));
     connect(pAnalogDemDlg, SIGNAL(NewAMAcquisition()), this, SLOT(OnNewAcquisition()));
-    connect(pAnalogDemDlg, SIGNAL(ViewStationsDlg()), pStationsDlg, SLOT(show()));
+    //connect(pAnalogDemDlg, SIGNAL(ViewStationsDlg()), pStationsDlg, SLOT(show()));
     //connect(pAnalogDemDlg, SIGNAL(ViewLiveScheduleDlg()), pLiveScheduleDlg, SLOT(show()));
     connect(pAnalogDemDlg, SIGNAL(Closed()), this, SLOT(close()));
 
     connect(pFMDlg, SIGNAL(SwitchMode(int)), this, SLOT(OnSwitchMode(int)));
     connect(pFMDlg, SIGNAL(Closed()), this, SLOT(close()));
-    connect(pFMDlg, SIGNAL(ViewStationsDlg()), pStationsDlg, SLOT(show()));
+    //connect(pFMDlg, SIGNAL(ViewStationsDlg()), pStationsDlg, SLOT(show()));
     //connect(pFMDlg, SIGNAL(ViewLiveScheduleDlg()), pLiveScheduleDlg, SLOT(show()));
 
     connect(&Timer, SIGNAL(timeout()), this, SLOT(OnTimer()));
     connect(&TimerClose, SIGNAL(timeout()), this, SLOT(OnTimerClose()));
-
-    ClearDisplay();
 
     /* System tray setup */
     pSysTray = CSysTray::Create(
@@ -185,8 +181,9 @@ MainWindow::MainWindow(CDRMReceiver& NDRMR, CSettings& Settings,
     /* clear signal strenght */
     ui->MainDisplay->setBars(0);
 
-    /* Activate real-time timers */
-    Timer.start(GUI_CONTROL_UPDATE_TIME);
+    ui->serviceTabs->clear();
+
+    show();
 }
 
 MainWindow::~MainWindow()
@@ -208,6 +205,7 @@ void MainWindow::on_action_Programme_Guide_toggled(bool checked)
         Parameters.Lock();
         pEpg = new EPGDlg(Parameters.GetDataDirectory(), Parameters.ServiceInformation);
         Parameters.Unlock();
+        pEpg->showButtons(false);
         int n = ui->serviceTabs->count();
         ui->serviceTabs->insertTab(n++, pEpg, "EPG");
     }
@@ -291,7 +289,6 @@ void MainWindow::on_actionEngineering_toggled(bool checked)
                 }
             }
         }
-        UpdateDisplay();
 }
 
 void MainWindow::on_serviceTabs_currentChanged(int)
@@ -377,64 +374,6 @@ void MainWindow::OnSwitchToAM()
     OnSwitchMode(RM_AM);
 }
 
-
-void MainWindow::UpdateDRM_GUI()
-{
-    _BOOLEAN bMultimediaServiceAvailable;
-    CParameter& Parameters = *DRMReceiver.GetParameters();
-
-    if (isVisible() == false)
-        ChangeGUIModeToDRM();
-
-    Parameters.Lock();
-
-    ui->MainDisplay->setLevel(Parameters.GetIFSignalLevel());
-    int iShortID = Parameters.GetCurSelAudioService();
-    ETypeRxStatus msc_status;
-    if(Parameters.Service[iShortID].eAudDataFlag == CService::SF_AUDIO)
-        msc_status = Parameters.AudioComponentStatus[iShortID].GetStatus();
-    else
-        msc_status = Parameters.DataComponentStatus[iShortID].GetStatus();
-    ui->MainDisplay->showReceptionStatus(
-                Parameters.ReceiveStatus.FAC.GetStatus(),
-                Parameters.ReceiveStatus.SDC.GetStatus(),
-                msc_status
-    );
-
-    Parameters.Unlock();
-
-    /* Clear the multimedia service bit */
-    iMultimediaServiceBit = 0;
-
-    /* Check if receiver does receive a signal */
-    if(DRMReceiver.GetAcquiState() == AS_WITH_SIGNAL)
-        UpdateDisplay();
-    else
-    {
-        ClearDisplay();
-        /* No signal then set the last
-           multimedia service selected to none */
-        iLastMultimediaServiceSelected = -1;
-    }
-#if 0
-    /* If multimedia service availability has changed
-       then update the menu */
-    bMultimediaServiceAvailable = iMultimediaServiceBit != 0;
-    if (bMultimediaServiceAvailable != ui->action_Multimedia_Dialog->isEnabled())
-        ui->action_Multimedia_Dialog->setEnabled(bMultimediaServiceAvailable);
-#endif
-}
-
-void MainWindow::startLogging()
-{
-    pSysEvalDlg->setLogging(true);
-}
-
-void MainWindow::stopLogging()
-{
-    pSysEvalDlg->setLogging(false);
-}
-
 void MainWindow::OnScheduleTimer()
 {
     CScheduler::SEvent e;
@@ -444,16 +383,16 @@ void MainWindow::OnScheduleTimer()
         DRMReceiver.SetFrequency(e.frequency);
         if(!pLogging->enabled())
         {
-            startLogging();
+            pLogging->start();
         }
     }
     else
     {
-        stopLogging();
+        pLogging->stop();
     }
     if(pScheduler->empty())
     {
-        stopLogging();
+        pLogging->stop();
     }
     else
     {
@@ -463,13 +402,14 @@ void MainWindow::OnScheduleTimer()
     }
 }
 
-void MainWindow::UpdateChannel()
+void MainWindow::UpdateChannel(CParameter& Parameters)
 {
     RFWidget* pRFWidget = (RFWidget*)engineeringWidgets[0];
     if(pRFWidget==NULL)
         return;
 
-    CParameter& Parameters = *(DRMReceiver.GetParameters());
+    if(pRFWidget != ui->serviceTabs->currentWidget())
+        return;
 
     Parameters.Lock();
 
@@ -518,94 +458,30 @@ void MainWindow::UpdateChannel()
 
     pRFWidget->setCodeRate(Parameters.MSCPrLe.iPartB, Parameters.MSCPrLe.iPartA);
 
-#if 0
+    pRFWidget->setNumIterations(DRMReceiver.GetMSCMLC()->GetInitNumIterations());
+    pRFWidget->setTimeInt(DRMReceiver.GetTimeInt());
+    pRFWidget->setFreqInt(DRMReceiver.GetFreqInt());
+    pRFWidget->setTiSyncTrac(DRMReceiver.GetTiSyncTracType());
+    pRFWidget->setRecFilterEnabled(DRMReceiver.GetFreqSyncAcq()->GetRecFilter());
+    pRFWidget->setIntConsEnabled(DRMReceiver.GetIntCons());
+    pRFWidget->setFlipSpectrumEnabled(DRMReceiver.GetReceiveData()->GetFlippedSpectrum());
 
 
-
-        /* Number of services #################### */
-        strFACInfo = tr("Audio: ");
-        strFACInfo += QString().setNum(Parameters.iNumAudioService);
-        strFACInfo += tr(" / Data: ");
-        strFACInfo += QString().setNum(Parameters.iNumDataService);
-
-        //FACNumServicesL->setText(tr("Number of Services:")); /* Label */
-        FACNumServicesV->setText(strFACInfo); /* Value */
-
-
-        /* Time, date #################### */
-        if ((Parameters.iUTCHour == 0) &&
-                (Parameters.iUTCMin == 0) &&
-                (Parameters.iDay == 0) &&
-                (Parameters.iMonth == 0) &&
-                (Parameters.iYear == 0))
-        {
-            /* No time service available */
-            strFACInfo = tr("Service not available");
-        }
-        else
-        {
-#ifdef GUI_QT_DATE_TIME_TYPE
-            /* QT type of displaying date and time */
-            QDateTime DateTime;
-            DateTime.setDate(QDate(Parameters.iYear,
-                                   Parameters.iMonth,
-                                   Parameters.iDay));
-            DateTime.setTime(QTime(Parameters.iUTCHour,
-                                   Parameters.iUTCMin));
-
-            strFACInfo = DateTime.toString();
-#else
-            /* Set time and date */
-            QString strMin;
-            const int iMin = Parameters.iUTCMin;
-
-            /* Add leading zero to number smaller than 10 */
-            if (iMin < 10)
-                strMin = "0";
-            else
-                strMin = "";
-
-            strMin += QString().setNum(iMin);
-
-            strFACInfo =
-                /* Time */
-                QString().setNum(Parameters.iUTCHour) + ":" +
-                strMin + "  -  " +
-                /* Date */
-                QString().setNum(Parameters.iMonth) + "/" +
-                QString().setNum(Parameters.iDay) + "/" +
-                QString().setNum(Parameters.iYear);
-#endif
-            /* Add UTC offset if available */
-            if (Parameters.bValidUTCOffsetAndSense)
-                strFACInfo += QString(" %1%2%3%4")
-                    .arg(tr("UTC"))
-                    .arg(Parameters.iUTCSense ? "-" : "+")
-                    .arg(Parameters.iUTCOff / 2, 0, 10)
-                    .arg(Parameters.iUTCOff & 1 ? ".5" : "");
-        }
-
-        //FACTimeDateL->setText(tr("Received time - date:")); /* Label */
-        FACTimeDateV->setText(strFACInfo); /* Value */
-
-        UpdateGPS(Parameters);
-
-        UpdateControls();
-#endif
     Parameters.Unlock();
 }
 
+void MainWindow::OnSoundFileChanged(CDRMReceiver::ESFStatus)
+{
+    UpdateDisplay();
+}
 
 void MainWindow::OnTimer()
 {
-    RFWidget* pRFWidget = (RFWidget*)engineeringWidgets[0];
-    if(pRFWidget && pRFWidget == ui->serviceTabs->currentWidget())
-        UpdateChannel();
     ERecMode eNewReceiverMode = DRMReceiver.GetReceiverMode();
     switch(eNewReceiverMode)
     {
     case RM_DRM:
-        UpdateDRM_GUI();
+        UpdateDisplay();
         break;
     case RM_AM:
         ChangeGUIModeToAM();
@@ -647,7 +523,7 @@ void MainWindow::OnTimer()
                 }
                 else // We are late starting
                 {
-                    startLogging();
+                    pLogging->start();
                 }
             }
         }
@@ -658,7 +534,7 @@ void MainWindow::OnTimer()
     else
     {
         if(pLogging->enabled())
-            startLogging();
+            pLogging->start();  // because its normal, non-scheduled logging ? TODO - check!
     }
 }
 
@@ -729,321 +605,271 @@ MainWindow::dataServiceDescription(const CService &service)
     return text;
 }
 
-QString MainWindow::serviceSelector(CParameter& Parameters, int i)
-{
-    Parameters.Lock();
-
-    CService service = Parameters.Service[i];
-    const _REAL rAudioBitRate = Parameters.GetBitRateKbps(i, FALSE);
-    const _REAL rDataBitRate = Parameters.GetBitRateKbps(i, TRUE);
-
-    /* detect if AFS mux information is available TODO - align to service */
-    bool bAFS = ((i==0) && (
-                     (Parameters.AltFreqSign.vecMultiplexes.size() > 0)
-                     || (Parameters.AltFreqSign.vecOtherServices.size() > 0)
-                 ));
-
-    Parameters.Unlock();
-
-    QString text;
-
-    /* Check, if service is used */
-    if (service.IsActive())
-    {
-        text = audioServiceDescription(service);
-        /* Audio service */
-        if ((service.eAudDataFlag == CService::SF_AUDIO))
-        {
-
-            /* Show, if a multimedia stream is connected to this service */
-            if (service.DataParam.iStreamID != STREAM_ID_NOT_USED)
-            {
-                if (service.DataParam.iUserAppIdent == DAB_AT_EPG)
-                    text += tr(" + EPG"); /* EPG service */
-                else
-                {
-                    text += tr(" + MM"); /* other multimedia service */
-                    /* Set multimedia service bit */
-                    iMultimediaServiceBit |= 1 << i;
-                }
-
-                /* Bit-rate of connected data stream */
-                text += " (" + QString().setNum(rDataBitRate, 'f', 2) + " kbps)";
-            }
-        }
-        /* Data service */
-        else
-        {
-            if (service.DataParam.ePacketModInd == CDataParam::PM_PACKET_MODE)
-            {
-                if (service.DataParam.eAppDomain == CDataParam::AD_DAB_SPEC_APP)
-                {
-                    switch (service.DataParam.iUserAppIdent)
-                    {
-                    case DAB_AT_BROADCASTWEBSITE:
-                    case DAB_AT_JOURNALINE:
-                    case DAB_AT_MOTSLIDESHOW:
-                        /* Set multimedia service bit */
-                        iMultimediaServiceBit |= 1 << i;
-                        break;
-                    }
-                }
-            }
-        }
-
-        if(bAFS)
-        {
-            text += tr(" + AFS");
-        }
-    }
-    return text;
-}
-
 void MainWindow::UpdateDisplay()
 {
     CParameter& Parameters = *(DRMReceiver.GetParameters());
     Parameters.Lock();
-    for(int shortId=0; shortId<MAX_NUM_SERVICES; shortId++) {
+    ui->MainDisplay->setLevel(Parameters.GetIFSignalLevel());
+    int iShortID = Parameters.GetCurSelAudioService();
+    ETypeRxStatus msc_status;
+    if(Parameters.Service[iShortID].eAudDataFlag == CService::SF_AUDIO)
+        msc_status = Parameters.AudioComponentStatus[iShortID].GetStatus();
+    else
+        msc_status = Parameters.DataComponentStatus[iShortID].GetStatus();
+    ui->MainDisplay->showReceptionStatus(
+                Parameters.ReceiveStatus.FAC.GetStatus(),
+                Parameters.ReceiveStatus.SDC.GetStatus(),
+                msc_status
+    );
 
-        CService service = Parameters.Service[shortId];
-        const _REAL rDataBitRate = Parameters.GetBitRateKbps(shortId, TRUE);
-        QString label = QString::fromUtf8(service.strLabel.c_str());
+    Parameters.Unlock();
 
-        bool isValidAudioService = service.IsActive()
-                && (service.eAudDataFlag == CService::SF_AUDIO)
-                && (service.AudioParam.iStreamID != STREAM_ID_NOT_USED);
+    UpdateChannel(Parameters);
 
-        if (isValidAudioService)
-        {
-            int index;
-            if(label == "")
-                label = QString("%1A").arg(shortId+1);
+    /* Check if receiver does receive a signal */
+    if(DRMReceiver.GetAcquiState() == AS_WITH_SIGNAL) {
 
-            if(serviceWidgets[shortId].audio==NULL)
+        Parameters.Lock();
+        for(int shortId=0; shortId<MAX_NUM_SERVICES; shortId++) {
+
+            CService service = Parameters.Service[shortId];
+            const _REAL rDataBitRate = Parameters.GetBitRateKbps(shortId, TRUE);
+            QString label = QString::fromUtf8(service.strLabel.c_str());
+
+            bool isValidAudioService = service.IsActive()
+                    && (service.eAudDataFlag == CService::SF_AUDIO)
+                    && (service.AudioParam.iStreamID != STREAM_ID_NOT_USED);
+
+            if (isValidAudioService)
             {
-                AudioDetailWidget* adw = new AudioDetailWidget(
-                            audioServiceDescription(service),
-                            &DRMReceiver);
-                serviceWidgets[shortId].audio = adw;
-                index = ui->serviceTabs->addTab(adw, label);
-                connect(adw, SIGNAL(listen(int)), this, SLOT(OnSelectAudioService(int)));
-                connect(this, SIGNAL(plotStyleChanged(int)), adw, SLOT(setPlotStyle(int)));
-            }
-            else
-            {
-                index = ui->serviceTabs->indexOf(serviceWidgets[shortId].audio);
-                ui->serviceTabs->setTabText(index, label);
-            }
-            serviceWidgets[shortId].audio->updateDisplay(shortId, service);
-            // try and order the tabs by shortId
-            ui->serviceTabs->tabBar()->moveTab(index, shortId);
-        }
+                int index;
+                if(label == "")
+                    label = QString("%1A").arg(shortId+1);
 
-        bool isValidDataService = service.IsActive()
-                && (service.DataParam.iStreamID != STREAM_ID_NOT_USED);
-
-        if (isValidDataService)
-        {
-            int index;
-            QString desc = dataServiceDescription(service);
-            QString detail =  QString("%1 %2 %3 kbit/s")
-                    .arg(desc)
-                    .arg(service.iServiceID, 6, 16)
-                    .arg(rDataBitRate);
-
-            if(label == "")
-                label = QString("%1 (%2)").arg(shortId+1).arg(desc);
-            else
-            {
-                if(service.eAudDataFlag == CService::SF_AUDIO)
+                if(serviceWidgets[shortId].audio==NULL)
                 {
-                    label = QString("%1 (%2)").arg(label).arg(desc);
+                    AudioDetailWidget* adw = new AudioDetailWidget(&DRMReceiver);
+                    serviceWidgets[shortId].audio = adw;
+                    index = ui->serviceTabs->addTab(adw, label);
+                    connect(adw, SIGNAL(listen(int)), this, SLOT(OnSelectAudioService(int)));
+                    connect(this, SIGNAL(plotStyleChanged(int)), adw, SLOT(setPlotStyle(int)));
                 }
+                else
+                {
+                    index = ui->serviceTabs->indexOf(serviceWidgets[shortId].audio);
+                    ui->serviceTabs->setTabText(index, label);
+                }
+                serviceWidgets[shortId].audio->updateDisplay(shortId, service);
+                serviceWidgets[shortId].audio->setDescription(audioServiceDescription(service));
+                // try and order the tabs by shortId
+                ui->serviceTabs->tabBar()->moveTab(index, shortId);
             }
 
-            if(serviceWidgets[shortId].data==NULL)
+            bool isValidDataService = service.IsActive()
+                    && (service.DataParam.iStreamID != STREAM_ID_NOT_USED);
+
+            if (isValidDataService)
             {
-                QWidget* w;
-                if (service.DataParam.ePacketModInd == CDataParam::PM_PACKET_MODE)
+                int index;
+                QString desc = dataServiceDescription(service);
+                QString detail =  QString("%1 %2 %3 kbit/s")
+                        .arg(desc)
+                        .arg(service.iServiceID, 6, 16)
+                        .arg(rDataBitRate);
+
+                if(label == "")
+                    label = QString("%1 (%2)").arg(shortId+1).arg(desc);
+                else
                 {
-                    if (service.DataParam.eAppDomain == CDataParam::AD_DAB_SPEC_APP)
+                    if(service.eAudDataFlag == CService::SF_AUDIO)
                     {
-                        switch (service.DataParam.iUserAppIdent)
+                        label = QString("%1 (%2)").arg(label).arg(desc);
+                    }
+                }
+
+                if(serviceWidgets[shortId].data==NULL)
+                {
+                    QWidget* w;
+                    if (service.DataParam.ePacketModInd == CDataParam::PM_PACKET_MODE)
+                    {
+                        if (service.DataParam.eAppDomain == CDataParam::AD_DAB_SPEC_APP)
                         {
-                        case DAB_AT_EPG:
-                            w = new QLabel(detail);
-                            break;
-                        case DAB_AT_BROADCASTWEBSITE:
-#ifdef QT_WEBKIT_LIB
-                            w = new BWSViewerWidget(DRMReceiver, Settings, shortId);
-                            connect(w, SIGNAL(activated(int)), this, SLOT(OnSelectDataService(int)));
-#endif
-                            break;
-                        case DAB_AT_JOURNALINE:
-                            w = new JournalineViewer(DRMReceiver, Settings, shortId);
-                            connect(w, SIGNAL(activated(int)), this, SLOT(OnSelectDataService(int)));
-                            break;
-                        case DAB_AT_MOTSLIDESHOW:
-                            w = new QLabel(detail);
-                            break;
-                         default:
-                            w = new QLabel(detail);
+                            switch (service.DataParam.iUserAppIdent)
+                            {
+                            case DAB_AT_EPG:
+                                w = new QLabel(detail);
+                                break;
+                            case DAB_AT_BROADCASTWEBSITE:
+    #ifdef QT_WEBKIT_LIB
+                                w = new BWSViewerWidget(DRMReceiver, Settings, shortId);
+                                connect(w, SIGNAL(activated(int)), this, SLOT(OnSelectDataService(int)));
+    #endif
+                                break;
+                            case DAB_AT_JOURNALINE:
+                                w = new JournalineViewer(DRMReceiver, Settings, shortId);
+                                connect(w, SIGNAL(activated(int)), this, SLOT(OnSelectDataService(int)));
+                                break;
+                            case DAB_AT_MOTSLIDESHOW:
+                                w = new QLabel(detail);
+                                break;
+                             default:
+                                w = new QLabel(detail);
+                            }
                         }
+                        else
+                            w = new QLabel(detail);
                     }
                     else
                         w = new QLabel(detail);
+                    serviceWidgets[shortId].data = w;
+                    index = ui->serviceTabs->addTab(w, label);
                 }
                 else
-                    w = new QLabel(detail);
-                serviceWidgets[shortId].data = w;
-                index = ui->serviceTabs->addTab(w, label);
+                {
+                    index = ui->serviceTabs->indexOf(serviceWidgets[shortId].data);
+                    ui->serviceTabs->setTabText(index, label);
+                    QLabel* l = dynamic_cast<QLabel*>(serviceWidgets[shortId].data);
+                    if(l)
+                        l->setText(detail);
+                }
+            }
+        }
+
+        /*  get current selected services */
+        int iCurSelAudioServ = Parameters.GetCurSelAudioService();
+
+        CService audioService = Parameters.Service[iCurSelAudioServ];
+        Parameters.Unlock();
+
+        bool bServiceIsValid = audioService.IsActive()
+                               && (audioService.AudioParam.iStreamID != STREAM_ID_NOT_USED)
+                               && (audioService.eAudDataFlag == CService::SF_AUDIO);
+
+        int i, iFirstAudioService=-1, iFirstDataService=-1;
+        for(i=0; i < MAX_NUM_SERVICES; i++)
+        {
+            if (!bServiceIsValid && (iFirstAudioService == -1 || iFirstDataService == -1))
+            {
+                Parameters.Lock();
+                audioService = Parameters.Service[i];
+                Parameters.Unlock();
+
+                /* If the current audio service is not valid
+                    find the first audio service available */
+                if (iFirstAudioService == -1
+                        && audioService.IsActive()
+                        && (audioService.AudioParam.iStreamID != STREAM_ID_NOT_USED)
+                        && (audioService.eAudDataFlag == CService::SF_AUDIO))
+                {
+                    iFirstAudioService = i;
+                }
+                /* If the current audio service is not valid
+                    find the first data service available */
+                if (iFirstDataService == -1
+                        && audioService.IsActive()
+                        && (audioService.eAudDataFlag == CService::SF_DATA))
+                {
+                    iFirstDataService = i;
+                }
+            }
+        }
+
+        /* Select a valid service, priority to audio service */
+        if (iFirstAudioService != -1)
+        {
+            iCurSelAudioServ = iFirstAudioService;
+            bServiceIsValid = true;
+        }
+        else
+        {
+            if (iFirstDataService != -1)
+            {
+                iCurSelAudioServ = iFirstDataService;
+                bServiceIsValid = true;
+            }
+        }
+
+        if(bServiceIsValid)
+        {
+            /* Get selected service */
+            Parameters.Lock();
+            audioService = Parameters.Service[iCurSelAudioServ];
+            Parameters.Unlock();
+
+            /* If we have text messages */
+            if (audioService.AudioParam.bTextflag == TRUE)
+            {
+                // Text message of current selected audio service (UTF-8 decoding)
+                QString TextMessage(QString::fromUtf8(audioService.AudioParam.strTextMessage.c_str()));
+                ui->MainDisplay->showTextMessage(TextMessage);
             }
             else
             {
-                index = ui->serviceTabs->indexOf(serviceWidgets[shortId].data);
-                ui->serviceTabs->setTabText(index, label);
-                QLabel* l = dynamic_cast<QLabel*>(serviceWidgets[shortId].data);
-                if(l)
-                    l->setText(detail);
+                ui->MainDisplay->showTextMessage("");
             }
-        }
-    }
-    Parameters.Unlock();
 
-    Parameters.Lock();
-    /*  get current selected services */
-    int iCurSelAudioServ = Parameters.GetCurSelAudioService();
-
-    CService audioService = Parameters.Service[iCurSelAudioServ];
-    Parameters.Unlock();
-
-    bool bServiceIsValid = audioService.IsActive()
-                           && (audioService.AudioParam.iStreamID != STREAM_ID_NOT_USED)
-                           && (audioService.eAudDataFlag == CService::SF_AUDIO);
-
-    int i, iFirstAudioService=-1, iFirstDataService=-1;
-    for(i=0; i < MAX_NUM_SERVICES; i++)
-    {
-        QString label = serviceSelector(Parameters, i);
-        if (!bServiceIsValid && (iFirstAudioService == -1 || iFirstDataService == -1))
-        {
-            Parameters.Lock();
-            audioService = Parameters.Service[i];
-            Parameters.Unlock();
-            /* If the current audio service is not valid
-                find the first audio service available */
-            if (iFirstAudioService == -1
-                    && audioService.IsActive()
-                    && (audioService.AudioParam.iStreamID != STREAM_ID_NOT_USED)
-                    && (audioService.eAudDataFlag == CService::SF_AUDIO))
+            /* Check whether service parameters were not transmitted yet */
+            if (audioService.IsActive())
             {
-                iFirstAudioService = i;
+                ui->MainDisplay->showServiceInfo(audioService);
+
+                Parameters.Lock();
+                _REAL rPartABLenRat = Parameters.PartABLenRatio(iCurSelAudioServ);
+                _REAL rBitRate = Parameters.GetBitRateKbps(iCurSelAudioServ, FALSE);
+                Parameters.Unlock();
+
+                ui->MainDisplay->setBitRate(rBitRate, rPartABLenRat);
+
             }
-            /* If the current audio service is not valid
-                find the first data service available */
-            if (iFirstDataService == -1
-                    && audioService.IsActive()
-                    && (audioService.eAudDataFlag == CService::SF_DATA))
+            else
             {
-                iFirstDataService = i;
+                ui->MainDisplay->clearDisplay(tr("No Service"));
             }
         }
-    }
 
-    /* Select a valid service, priority to audio service */
-    if (iFirstAudioService != -1)
-    {
-        iCurSelAudioServ = iFirstAudioService;
-        bServiceIsValid = true;
-    }
-    else
-    {
-        if (iFirstDataService != -1)
-        {
-            iCurSelAudioServ = iFirstDataService;
-            bServiceIsValid = true;
-        }
-    }
-
-    if(bServiceIsValid)
-    {
-        /* Get selected service */
         Parameters.Lock();
-        audioService = Parameters.Service[iCurSelAudioServ];
+
+        ui->MainDisplay->setLevel(Parameters.GetIFSignalLevel());
+        int iShortID = Parameters.GetCurSelAudioService();
+        ETypeRxStatus msc_status;
+        if(Parameters.Service[iShortID].eAudDataFlag == CService::SF_AUDIO)
+            msc_status = Parameters.AudioComponentStatus[iShortID].GetStatus();
+        else
+            msc_status = Parameters.DataComponentStatus[iShortID].GetStatus();
+        ui->MainDisplay->showReceptionStatus(
+                    Parameters.ReceiveStatus.FAC.GetStatus(),
+                    Parameters.ReceiveStatus.SDC.GetStatus(),
+                    msc_status
+        );
+
         Parameters.Unlock();
-
-        /* If we have text messages */
-        if (audioService.AudioParam.bTextflag == TRUE)
+    }
+    else {
+        /* Main text labels */
+        ui->MainDisplay->clearDisplay(tr("Scanning..."));
+        ui->MainDisplay->showTextMessage("");
+        for(int i=0; i<MAX_NUM_SERVICES; i++)
         {
-            // Text message of current selected audio service (UTF-8 decoding)
-            QString TextMessage(QString::fromUtf8(audioService.AudioParam.strTextMessage.c_str()));
-            ui->MainDisplay->showTextMessage(TextMessage);
-        }
-        else
-        {
-            ui->MainDisplay->showTextMessage("");
-        }
-
-        /* Check whether service parameters were not transmitted yet */
-        if (audioService.IsActive())
-        {
-            ui->MainDisplay->showServiceInfo(audioService);
-
-            Parameters.Lock();
-            _REAL rPartABLenRat = Parameters.PartABLenRatio(iCurSelAudioServ);
-            _REAL rBitRate = Parameters.GetBitRateKbps(iCurSelAudioServ, FALSE);
-            Parameters.Unlock();
-
-            ui->MainDisplay->setBitRate(rBitRate, rPartABLenRat);
-
-        }
-        else
-        {
-            ui->MainDisplay->clearDisplay(tr("No Service"));
+            if(serviceWidgets[i].audio)
+                delete serviceWidgets[i].audio;
+            if(serviceWidgets[i].data)
+                delete serviceWidgets[i].data;
         }
     }
 }
-
-void MainWindow::ClearDisplay()
-{
-    /* No signal is currently received ---------------------------------- */
-    ui->serviceTabs->clear();
-    /* Main text labels */
-    ui->MainDisplay->clearDisplay(tr("Scanning..."));
-    ui->MainDisplay->showTextMessage("");
-}
-
-/* change mode is only called when the mode REALLY has changed
- * so no conditionals are needed in this routine
- */
 
 void MainWindow::ChangeGUIModeToDRM()
 {
     CSysTray::Start(pSysTray);
-    pCurrentWindow = this;
-    pCurrentWindow->eventUpdate();
-    pCurrentWindow->show();
 }
 
 void MainWindow::ChangeGUIModeToAM()
 {
-    hide();
-    Timer.stop();
-    CSysTray::Stop(pSysTray, tr("Dream AM"));
-    pCurrentWindow = pAnalogDemDlg;
-    pCurrentWindow->eventUpdate();
-    pCurrentWindow->show();
     emit Mode(RM_AM);
 }
 
 void MainWindow::ChangeGUIModeToFM()
 {
-    hide();
-    Timer.stop();
-    CSysTray::Stop(pSysTray, tr("Dream FM"));
-    pCurrentWindow = pFMDlg;
-    pCurrentWindow->eventUpdate();
-    pCurrentWindow->show();
     emit Mode(RM_FM);
 }
 
@@ -1104,44 +930,6 @@ void MainWindow::OnSelectDataService(int shortId)
     Parameters.SetCurSelDataService(shortId);
 
     Parameters.Unlock();
-}
-
-void MainWindow::OnViewMultimediaDlg()
-{
-    /* Check if multimedia service is available */
-    if (iMultimediaServiceBit != 0)
-    {
-        /* Initialize the multimedia service to show, -1 mean none */
-        int iMultimediaServiceToShow = -1;
-
-        /* Check the validity of iLastMultimediaServiceSelected,
-           if invalid set it to none */
-        if (((1<<iLastMultimediaServiceSelected) & iMultimediaServiceBit) == 0)
-            iLastMultimediaServiceSelected = -1;
-
-        /* Simply set to the last selected multimedia if any */
-        if (iLastMultimediaServiceSelected != -1)
-            iMultimediaServiceToShow = iLastMultimediaServiceSelected;
-
-        else
-        {
-            /* Select the first multimedia found */
-            for (int i = 0; i < MAX_NUM_SERVICES; i++)
-            {
-                /* A bit is set when a service is available,
-                   the position of the bit is the service number */
-                if ((1<<i) & iMultimediaServiceBit)
-                {
-                    /* Service found! */
-                    iMultimediaServiceToShow = i;
-                    break;
-                }
-            }
-        }
-        /* If we have a service then show it */
-        if (iMultimediaServiceToShow != -1)
-            OnSelectDataService(iMultimediaServiceToShow);
-    }
 }
 
 void MainWindow::OnMenuSetDisplayColor()

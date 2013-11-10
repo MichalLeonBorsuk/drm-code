@@ -332,6 +332,7 @@ CDRMLiveSchedule::LoadAFSInformations(const CAltFreqSign& AltFreqSign)
 
 LiveScheduleDlg::LiveScheduleDlg(CDRMReceiver& DRMReceiver, QWidget* parent):
     QDialog(parent),
+    ui(new Ui::LiveScheduleWidget),
     DRMReceiver(DRMReceiver),
     smallGreenCube(":/icons/smallGreenCube.png"),
     greenCube(":/icons/greenCube.png"), redCube(":/icons/redCube.png"),
@@ -346,10 +347,6 @@ LiveScheduleDlg::LiveScheduleDlg(CDRMReceiver& DRMReceiver, QWidget* parent):
     /* Clear list box for file names and set up columns */
     ui->ListViewStations->clear();
 
-    //connect(actionSave,  SIGNAL(triggered()), this, SLOT(OnSave()));
-    //connect(buttonOk,  SIGNAL(clicked()), this, SLOT(close()));
-    //connect(actionGetUpdate, SIGNAL(triggered()), this, SLOT(OnGetUpdate()));
-
     /* Connections ---------------------------------------------------------- */
     connect(&TimerList, SIGNAL(timeout()), this, SLOT(OnTimerList()));
     connect(&TimerUTCLabel, SIGNAL(timeout()), this, SLOT(OnTimerUTCLabel()));
@@ -359,9 +356,6 @@ LiveScheduleDlg::LiveScheduleDlg(CDRMReceiver& DRMReceiver, QWidget* parent):
     ui->comboBoxFilterTime->setItemData(2,  NUM_SECONDS_PREV_5MIN, Qt::UserRole);
     ui->comboBoxFilterTime->setItemData(3,  NUM_SECONDS_PREV_15MIN, Qt::UserRole);
     ui->comboBoxFilterTime->setItemData(4,  NUM_SECONDS_PREV_30MIN, Qt::UserRole);
-
-    /* Check boxes */
-    connect(ui->CheckBoxFreeze, SIGNAL(clicked()), this, SLOT(OnCheckFreeze()));
 
     /* Init UTC time shown with a label control */
     OnTimerUTCLabel();
@@ -428,10 +422,10 @@ bool LiveScheduleDlg::showAll()
 }
 
 void
-LiveScheduleDlg::OnCheckFreeze()
+LiveScheduleDlg::on_freeze_toggled(bool checked)
 {
     /* if CheckBoxFreeze is checked the schedule is frozen */
-    if (ui->CheckBoxFreeze->isChecked())
+    if (checked)
         TimerList.stop();
     else
     {
@@ -538,7 +532,8 @@ LiveScheduleDlg::LoadSchedule()
 
     vecpListItems.resize(iNumStations, NULL);
 
-    //TODO actionSave->setEnabled(iNumStations > 0);
+    ui->buttonSave->setEnabled(iNumStations > 0);
+
     /* Unlock BEFORE calling the stations view update because in this function
        the mutex is locked, too! */
     ListItemsMutex.unlock();
@@ -587,7 +582,7 @@ LiveScheduleDlg::showEvent(QShowEvent*)
     OnTimerUTCLabel();
     TimerUTCLabel.start(GUI_TIMER_UTC_TIME_LABEL);
 
-    if (!ui->CheckBoxFreeze->isChecked())
+    if (!ui->freeze->isChecked())
     {
         OnTimerList();
 
@@ -740,7 +735,7 @@ ColValue(const QString strValue)
 }
 
 void
-LiveScheduleDlg::OnSave()
+LiveScheduleDlg::on_buttonSave_clicked()
 {
     QString strFilename;
     QString strSchedule = "";
@@ -857,7 +852,7 @@ LiveScheduleDlg::AddWhatsThisHelp()
 	QString strFreeze = tr("<b>Freeze:</b> If this check box is selected the live schedule is frozen.");
     ui->ListViewStations->setWhatsThis(strView);
     ui->TextLabelUTCTime->setWhatsThis(strTime);
-    ui->CheckBoxFreeze->setWhatsThis(strFreeze);
+    ui->freeze->setWhatsThis(strFreeze);
 }
 
 CDRMLiveSchedule::StationState CDRMLiveSchedule::CheckState(const int iPos)

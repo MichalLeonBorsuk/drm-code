@@ -122,8 +122,6 @@ private:
     CFileMenu*			pFileMenu;
     CSoundCardSelMenu*	pSoundCardMenu;
     CAboutDlg		    AboutDlg;
-    int			        iMultimediaServiceBit;
-    int			        iLastMultimediaServiceSelected;
     int                 iFrequency;
     QString             SysTrayTitle;
     QString             SysTrayMessage;
@@ -132,7 +130,7 @@ private:
     QTimer*		        pScheduleTimer;
     ServiceWidget       serviceWidgets[MAX_NUM_SERVICES];
     QWidget*            engineeringWidgets[4];
-    QWidget*            pEpg;
+    EPGDlg*             pEpg;
     QWidget*            pTx;
     QWidget*            pAltFreq; // different from the engineering AFS
 
@@ -141,24 +139,19 @@ private:
     virtual void        eventShow(QShowEvent* pEvent);
     virtual void        eventUpdate();
     void		AddWhatsThisHelp();
-    void		UpdateDRM_GUI();
     void		UpdateDisplay();
-    void		ClearDisplay();
 
     void		ChangeGUIModeToDRM();
     void		ChangeGUIModeToAM();
     void		ChangeGUIModeToFM();
 
-    QString serviceSelector(CParameter&, int);
     QString audioServiceDescription(const CService&);
     QString dataServiceDescription(const CService&);
-    void startLogging();
-    void stopLogging();
     void SysTrayCreate();
     void SysTrayStart();
     void SysTrayStop(const QString&);
     void SysTrayToolTip(const QString&, const QString&);
-    void UpdateChannel();
+    void UpdateChannel(CParameter&);
 
 public slots:
     void OnTimer();
@@ -167,14 +160,13 @@ public slots:
     void OnTimerClose();
     void OnSelectAudioService(int);
     void OnSelectDataService(int);
-    void OnViewMultimediaDlg();
     void OnMenuSetDisplayColor();
     void OnNewAcquisition();
     void OnSwitchMode(int);
     void OnSwitchToFM();
     void OnSwitchToAM();
     void OnHelpAbout() {AboutDlg.show();}
-    void OnSoundFileChanged(CDRMReceiver::ESFStatus) {ClearDisplay();};
+    void OnSoundFileChanged(CDRMReceiver::ESFStatus);
     void OnWhatsThis();
     void OnSysTrayActivated(QSystemTrayIcon::ActivationReason);
     void on_actionEngineering_toggled(bool);
