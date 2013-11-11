@@ -28,16 +28,15 @@
 
 #include "JLViewer.h"
 #include "jlbrowser.h"
-//#include "../datadecoding/DataDecoder.h"
-#include "../datadecoding/packetdatadecoder.h"
-#include "../datadecoding/Journaline.h"
 #include <QFontDialog>
 
-JLViewer::JLViewer(CDRMReceiver& rec, CSettings& Settings, int sid, QWidget* parent):
+JLViewer::JLViewer(CDRMReceiver& rec, CJournaline* jldec, CSettings& Settings, int sid, QWidget* parent):
     CWindow(parent, Settings, "Journaline"),
     receiver(rec), decoderSet(false),short_id(sid)
 {
     setupUi(this);
+
+    textBrowser->setDecoder(jldec);
 
     connect(buttonOk, SIGNAL(clicked()), this, SLOT(close()));
     textBrowser->setDocument(&document);
@@ -88,18 +87,6 @@ void JLViewer::eventShow(QShowEvent*)
 
     CService service = Parameters.Service[short_id];
     Parameters.Unlock();
-
-    if(!decoderSet)
-    {
-        PacketDataDecoder* dec = receiver.GetDataDecoder();
-        if(dec)
-        {
-            CJournaline* jldec = new CJournaline();
-            dec->setApplication(service.DataParam.iPacketID, jldec);
-            textBrowser->setDecoder(jldec);
-            decoderSet = true;
-        }
-    }
 
     textBrowser->setSource(QUrl("0"));
 

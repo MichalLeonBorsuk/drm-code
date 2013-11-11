@@ -4,7 +4,9 @@
 #include <QWidget>
 #include <QTimer>
 #include <QTextDocument>
-#include <../DrmReceiver.h>
+#include <../Parameter.h>
+#include <../util/Settings.h>
+#include <../datadecoding/Journaline.h>
 
 namespace Ui {
 class JournalineViewer;
@@ -15,17 +17,17 @@ class JournalineViewer : public QWidget
     Q_OBJECT
 
 public:
-    explicit JournalineViewer(CDRMReceiver&, CSettings&, int, QWidget *parent = 0);
+    explicit JournalineViewer(CParameter&, CJournaline*, CSettings&, int, QWidget *parent = 0);
     ~JournalineViewer();
 
 private:
     Ui::JournalineViewer *ui;
     QTimer Timer;
-    QTextDocument           document;
-    CDRMReceiver&           receiver;
-    CSettings&              settings;
-    bool                    decoderSet;
-    int                     short_id;
+    QTextDocument   document;
+    CParameter&     Parameters;
+    CSettings&      settings;
+    bool            decoderSet;
+    int             short_id;
 
     void showEvent(QShowEvent*);
     void hideEvent(QHideEvent*);

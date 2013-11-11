@@ -32,6 +32,7 @@
 #include "ui_JLViewer.h"
 #include "CWindow.h"
 #include "../DrmReceiver.h"
+#include "../datadecoding/Journaline.h"
 #include <QTextDocument>
 #include <string>
 
@@ -40,7 +41,7 @@ class JLViewer : public CWindow, public Ui_JLViewer
     Q_OBJECT
 
 public:
-    JLViewer(CDRMReceiver&, CSettings&, int, QWidget* parent = 0);
+    JLViewer(CDRMReceiver&,  CJournaline*, CSettings&, int, QWidget* parent = 0);
     virtual ~JLViewer();
 
 protected:

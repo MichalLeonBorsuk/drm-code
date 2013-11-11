@@ -36,6 +36,7 @@
 #include "../util/Vector.h"
 #include "DABMOT.h"
 #include "MOTSlideShow.h"
+#include "dabapplications.h"
 
 class CExperiment;
 class CJournaline;
@@ -44,21 +45,6 @@ class CNews;
 /* Definitions ****************************************************************/
 /* Maximum number of packets per stream */
 #define MAX_NUM_PACK_PER_STREAM					4
-
-/* Define for application types */
-#define DAB_AT_DREAM_EXPERIMENTAL 1
-#define DAB_AT_MOTSLIDESHOW 2
-#define DAB_AT_BROADCASTWEBSITE 3
-#define DAB_AT_TPEG 4
-#define DAB_AT_DGPS 5
-#define DAB_AT_TMC 	6
-#define DAB_AT_EPG 	7
-#define DAB_AT_JAVA 	8
-#define DAB_AT_DMB 	9
-#define DAB_AT_IPDC 	0xa
-#define DAB_AT_VOICE 	0xb
-#define DAB_AT_MIDDLEWARE 	0xc
-#define DAB_AT_JOURNALINE 0x44A
 
 class CDataDecoder:public CReceiverModul < _BINARY, _BINARY >
 {

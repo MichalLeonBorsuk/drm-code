@@ -353,35 +353,35 @@ QString GetTypeString(const CService& service)
                     strReturn = QObject::tr("Dynamic labels");
                     break;
 
-                case DAB_AT_MOTSLIDESHOW:
+                case AT_MOTSLIDESHOW:
                     strReturn = QObject::tr("MOT Slideshow");
                     break;
 
-                case DAB_AT_BROADCASTWEBSITE:
+                case AT_BROADCASTWEBSITE:
                     strReturn = QObject::tr("MOT WebSite");
                     break;
 
-                case DAB_AT_TPEG:
+                case AT_TPEG:
                     strReturn = QObject::tr("TPEG");
                     break;
 
-                case DAB_AT_DGPS:
+                case AT_DGPS:
                     strReturn = QObject::tr("DGPS");
                     break;
 
-                case DAB_AT_TMC:
+                case AT_TMC:
                     strReturn = QObject::tr("TMC");
                     break;
 
-                case DAB_AT_EPG:
+                case AT_EPG:
                     strReturn = QObject::tr("EPG - Electronic Programme Guide");
                     break;
 
-                case DAB_AT_JAVA:
+                case AT_JAVA:
                     strReturn = QObject::tr("Java");
                     break;
 
-                case DAB_AT_JOURNALINE: /* Journaline */
+                case AT_JOURNALINE: /* Journaline */
                     strReturn = QObject::tr("Journaline");
                     break;
                 }

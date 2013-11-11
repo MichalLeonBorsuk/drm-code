@@ -107,7 +107,7 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& Settings,
 
     /* MOT broadcast website viewer window */
 #ifdef QT_WEBKIT_LIB
-    pBWSDlg = new BWSViewer(DRMReceiver, Settings, this);
+    pBWSDlg = NULL;
 #endif
 
     /* MOT slide show window */
@@ -753,7 +753,7 @@ QString FDRMDialog::serviceSelector(CParameter& Parameters, int i)
             /* Show, if a multimedia stream is connected to this service */
             if (service.DataParam.iStreamID != STREAM_ID_NOT_USED)
             {
-                if (service.DataParam.iUserAppIdent == DAB_AT_EPG)
+                if (service.DataParam.iUserAppIdent == AT_EPG)
                     text += tr(" + EPG"); /* EPG service */
                 else
                 {
@@ -775,9 +775,9 @@ QString FDRMDialog::serviceSelector(CParameter& Parameters, int i)
                 {
                     switch (service.DataParam.iUserAppIdent)
                     {
-                    case DAB_AT_BROADCASTWEBSITE:
-                    case DAB_AT_JOURNALINE:
-                    case DAB_AT_MOTSLIDESHOW:
+                    case AT_BROADCASTWEBSITE:
+                    case AT_JOURNALINE:
+                    case AT_MOTSLIDESHOW:
                         /* Set multimedia service bit */
                         iMultimediaServiceBit |= 1 << i;
                         break;
@@ -1067,38 +1067,54 @@ void FDRMDialog::OnSelectAudioService(int shortId)
 void FDRMDialog::OnSelectDataService(int shortId)
 {
     CParameter& Parameters = *DRMReceiver.GetParameters();
+    CService& service = Parameters.Service[shortId];
     QWidget* pDlg = NULL;
+    PacketApplication* pApp = NULL;
 
     Parameters.Lock();
 
-    int iAppIdent = Parameters.Service[shortId].DataParam.iUserAppIdent;
+    int iAppIdent = service.DataParam.iUserAppIdent;
 
     switch(iAppIdent)
     {
-    case DAB_AT_EPG:
+    case AT_EPG:
         pDlg = pEPGDlg;
         break;
-    case DAB_AT_BROADCASTWEBSITE:
+    case AT_BROADCASTWEBSITE:
+    {
 #ifdef QT_WEBKIT_LIB
+        if(pBWSDlg)
+            delete pBWSDlg;
+        CMOTDABDec* dec = new CMOTDABDec();
+        pApp = dec;
+        pBWSDlg = new BWSViewer(DRMReceiver, dec, Settings, this);
         pDlg = pBWSDlg;
 #endif
+    }
         break;
-    case DAB_AT_JOURNALINE:
+    case AT_JOURNALINE:
         /* Journaline viewer window */
+    {
         if(pJLDlg)
             delete pJLDlg;
-        pJLDlg = new JLViewer(DRMReceiver, Settings, shortId, this);
+        CJournaline* jldec = new CJournaline();
+        pApp = jldec;
+        pJLDlg = new JLViewer(DRMReceiver, jldec, Settings, shortId, this);
         pDlg = pJLDlg;
+    }
         break;
-    case DAB_AT_MOTSLIDESHOW:
+    case AT_MOTSLIDESHOW:
         pDlg = pSlideShowDlg;
         break;
     }
 
+    PacketDataDecoder* packetDataDecoder = DRMReceiver.GetDataDecoder();
+    packetDataDecoder->setApplication(service.DataParam.iPacketID, pApp);
+
     if(pDlg != NULL)
         Parameters.SetCurSelDataService(shortId);
 
-    CService::ETyOServ eAudDataFlag = Parameters.Service[shortId].eAudDataFlag;
+    CService::ETyOServ eAudDataFlag = service.eAudDataFlag;
 
     Parameters.Unlock();
 
@@ -1350,35 +1366,35 @@ QString FDRMDialog::GetTypeString(const CService& service)
                     strReturn = tr("Dynamic labels");
                     break;
 
-                case DAB_AT_MOTSLIDESHOW:
+                case AT_MOTSLIDESHOW:
                     strReturn = tr("MOT Slideshow");
                     break;
 
-                case DAB_AT_BROADCASTWEBSITE:
+                case AT_BROADCASTWEBSITE:
                     strReturn = tr("MOT WebSite");
                     break;
 
-                case DAB_AT_TPEG:
+                case AT_TPEG:
                     strReturn = tr("TPEG");
                     break;
 
-                case DAB_AT_DGPS:
+                case AT_DGPS:
                     strReturn = tr("DGPS");
                     break;
 
-                case DAB_AT_TMC:
+                case AT_TMC:
                     strReturn = tr("TMC");
                     break;
 
-                case DAB_AT_EPG:
+                case AT_EPG:
                     strReturn = tr("EPG - Electronic Programme Guide");
                     break;
 
-                case DAB_AT_JAVA:
+                case AT_JAVA:
                     strReturn = tr("Java");
                     break;
 
-                case DAB_AT_JOURNALINE: /* Journaline */
+                case AT_JOURNALINE: /* Journaline */
                     strReturn = tr("Journaline");
                     break;
                 }

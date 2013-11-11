@@ -28,6 +28,7 @@ AudioDetailWidget::AudioDetailWidget(CDRMReceiver* prx, QWidget *parent) :
 
 AudioDetailWidget::~AudioDetailWidget()
 {
+    delete view;
     delete ui;
 }
 
