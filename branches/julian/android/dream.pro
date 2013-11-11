@@ -501,7 +501,8 @@ HEADERS += \
     src/datadecoding/datastreamdecoder.h \
     src/datadecoding/packetdatadecoder.h \
     src/datadecoding/fecpacketdatadecoder.h \
-    src/datadecoding/packetapplication.h
+    src/datadecoding/packetapplication.h \
+    src/datadecoding/dabapplications.h
 SOURCES += \
     src/AMDemodulation.cpp \
     src/AMSSDemodulation.cpp \
@@ -605,7 +606,8 @@ SOURCES += \
     src/datadecoding/datastreamdecoder.cpp \
     src/datadecoding/packetdatadecoder.cpp \
     src/datadecoding/fecpacketdatadecoder.cpp \
-    src/datadecoding/packetapplication.cpp
+    src/datadecoding/packetapplication.cpp \
+    src/datadecoding/dabapplications.cpp
 !console {
 HEADERS += \
     src/GUI-QT/Logging.h \

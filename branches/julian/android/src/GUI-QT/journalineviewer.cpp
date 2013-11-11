@@ -1,15 +1,15 @@
 #include "journalineviewer.h"
 #include "ui_journalineviewer.h"
 #include <../util-QT/Util.h>
-#include <../datadecoding/Journaline.h>
 #include <QFontDialog>
 
-JournalineViewer::JournalineViewer(CDRMReceiver& rx, CSettings& st, int s, QWidget *parent) :
+JournalineViewer::JournalineViewer(CParameter& p, CJournaline* jldec, CSettings& st, int s, QWidget *parent) :
     QWidget(parent),
-    ui(new Ui::JournalineViewer),receiver(rx),settings(st),short_id(s)
+    ui(new Ui::JournalineViewer),Parameters(p),settings(st),short_id(s)
 {
     ui->setupUi(this);
     ui->textBrowser->setDocument(&document);
+    ui->textBrowser->setDecoder(jldec);
 
     //connect(actionSet_Font, SIGNAL(triggered()), SLOT(OnSetFont()));
 
@@ -41,7 +41,6 @@ void JournalineViewer::showEvent(QShowEvent*)
         ui->textBrowser->setFont(fontTextBrowser);
     }
 
-    CParameter& Parameters = *receiver.GetParameters();
     Parameters.Lock();
     const int iCurSelAudioServ = Parameters.GetCurSelAudioService();
     const uint32_t iAudioServiceID = Parameters.Service[iCurSelAudioServ].iServiceID;
@@ -49,17 +48,6 @@ void JournalineViewer::showEvent(QShowEvent*)
     /* Get current data service */
     CService service = Parameters.Service[short_id];
     Parameters.Unlock();
-    if(!decoderSet)
-    {
-        PacketDataDecoder* dec = receiver.GetDataDecoder();
-        if(dec)
-        {
-            CJournaline* jldec = new CJournaline();
-            dec->setApplication(service.DataParam.iPacketID, jldec);
-            ui->textBrowser->setDecoder(jldec);
-            decoderSet = true;
-        }
-    }
     ui->textBrowser->setSource(QUrl("0"));
 
     /* Add the service description into the dialog caption */
@@ -112,7 +100,6 @@ void JournalineViewer::hideEvent(QHideEvent*)
 
 void JournalineViewer::OnTimer()
 {
-    CParameter& Parameters = *receiver.GetParameters();
     Parameters.Lock();
     const CDataParam& dp = Parameters.Service[short_id].DataParam;
     ETypeRxStatus status = Parameters.DataComponentStatus[dp.iStreamID][dp.iPacketID].GetStatus();

@@ -72,7 +72,14 @@ MainWindow::MainWindow(CDRMReceiver& NDRMR, CSettings& Settings,
 {
     ui->setupUi(this);
     for(int i=0; i<4; i++)
-        engineeringWidgets[i]=NULL;
+    {
+        engineeringWidgets[i] = NULL;
+    }
+    for(int i=0; i<MAX_NUM_SERVICES; i++)
+    {
+        serviceWidgets[i].audio = NULL;
+        serviceWidgets[i].data = NULL;
+    }
 
     /* Set help text for the controls */
     AddWhatsThisHelp();
@@ -579,16 +586,16 @@ MainWindow::dataServiceDescription(const CService &service)
         {
             switch (service.DataParam.iUserAppIdent)
             {
-            case DAB_AT_EPG:
+            case AT_EPG:
                 text = tr("Programme Guide");
                 break;
-            case DAB_AT_BROADCASTWEBSITE:
+            case AT_BROADCASTWEBSITE:
                 text = tr("Web Site");
                 break;
-            case DAB_AT_JOURNALINE:
+            case AT_JOURNALINE:
                 text = tr("News");
                 break;
-            case DAB_AT_MOTSLIDESHOW:
+            case AT_MOTSLIDESHOW:
                 text = tr("Slides");
                 break;
              default:
@@ -686,22 +693,24 @@ void MainWindow::UpdateDisplay()
                     {
                         if (service.DataParam.eAppDomain == CDataParam::AD_DAB_SPEC_APP)
                         {
+                            PacketApplication* pApp = DABApplications::createDecoder(EDABAppType(service.DataParam.iUserAppIdent));
+                            DRMReceiver.GetDataDecoder()->setApplication(service.DataParam.iPacketID, pApp);
                             switch (service.DataParam.iUserAppIdent)
                             {
-                            case DAB_AT_EPG:
+                            case AT_EPG:
                                 w = new QLabel(detail);
                                 break;
-                            case DAB_AT_BROADCASTWEBSITE:
+                            case AT_BROADCASTWEBSITE:
     #ifdef QT_WEBKIT_LIB
-                                w = new BWSViewerWidget(DRMReceiver, Settings, shortId);
+                                w = new BWSViewerWidget(DRMReceiver, (CMOTDABDec*)pApp, Settings, shortId);
                                 connect(w, SIGNAL(activated(int)), this, SLOT(OnSelectDataService(int)));
     #endif
                                 break;
-                            case DAB_AT_JOURNALINE:
-                                w = new JournalineViewer(DRMReceiver, Settings, shortId);
+                            case AT_JOURNALINE:
+                                w = new JournalineViewer(Parameters, (CJournaline*)pApp, Settings, shortId);
                                 connect(w, SIGNAL(activated(int)), this, SLOT(OnSelectDataService(int)));
                                 break;
-                            case DAB_AT_MOTSLIDESHOW:
+                            case AT_MOTSLIDESHOW:
                                 w = new QLabel(detail);
                                 break;
                              default:
@@ -837,7 +846,9 @@ void MainWindow::UpdateDisplay()
         for(int i=0; i<MAX_NUM_SERVICES; i++)
         {
             if(serviceWidgets[i].audio)
+            {
                 delete serviceWidgets[i].audio;
+            }
             if(serviceWidgets[i].data)
                 delete serviceWidgets[i].data;
         }

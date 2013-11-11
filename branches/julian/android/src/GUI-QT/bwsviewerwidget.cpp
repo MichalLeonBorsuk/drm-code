@@ -28,8 +28,8 @@
 
 #include "BWSViewer.h"
 #include "../DrmReceiver.h"
+#include "../datadecoding/DABMOT.h"
 #include "../util-QT/Util.h"
-#include "../datadecoding/DataDecoder.h"
 #include <QDir>
 #include <QFile>
 #include <QMessageBox>
@@ -47,13 +47,13 @@
 #include "bwsviewerwidget.h"
 #include "ui_bwsviewerwidget.h"
 
-BWSViewerWidget::BWSViewerWidget(CDRMReceiver& rec, CSettings& Settings, int sid, QWidget* parent):
+BWSViewerWidget::BWSViewerWidget(CDRMReceiver& rec, CMOTDABDec* dec, CSettings& Settings, int sid, QWidget* parent):
     QWidget(parent),
     ui(new Ui::BWSViewerWidget),
     short_id(sid),
     settings(Settings),
     nam(this, cache, waitobjs, bAllowExternalContent, strCacheHost),
-    receiver(rec), decoder(NULL), bHomeSet(false), bPageLoading(false),
+    receiver(rec), decoder(dec), bHomeSet(false), bPageLoading(false),
     bSaveFileToDisk(false), bRestrictedProfile(false), bAllowExternalContent(true),
     bClearCacheOnNewService(true), bDirectoryIndexChanged(false),
     iLastAwaitingOjects(0), strCacheHost(CACHE_HOST),
@@ -200,13 +200,6 @@ void BWSViewerWidget::OnTimer()
     case RX_OK:
         ui->LEDStatus->SetLight(CMultColorLED::RL_GREEN);
         break;
-    }
-
-    if (decoder == NULL)
-    {
-        decoder = (CDataDecoder*)receiver.GetDataDecoder(); // TODO
-        if (decoder == NULL)
-            qDebug("can't get data decoder from receiver");
     }
 
     if (Changed())
@@ -362,32 +355,31 @@ bool BWSViewerWidget::Changed()
         CMOTObject obj;
 
         /* Poll the data decoder module for new object */
-        while (decoder->GetMOTObject(obj, CDataDecoder::AT_BROADCASTWEBSITE) == TRUE)
+        while (decoder->NewObjectAvailable() == TRUE)
         {
+            decoder->GetNextObject(obj);
             /* Get the current directory */
             CMOTDirectory MOTDir;
-            if (decoder->GetMOTDirectory(MOTDir, CDataDecoder::AT_BROADCASTWEBSITE) == TRUE)
-            {
-                /* ETSI TS 101 498-1 Section 5.5.1 */
+            decoder->GetDirectory(MOTDir);
+            /* ETSI TS 101 498-1 Section 5.5.1 */
 
-                /* Checks if the DirectoryIndex has values */
-                if (MOTDir.DirectoryIndex.size() > 0)
-                {
-                    QString strNewDirectoryIndex;
-                    /* TODO proper profile handling */
-                    if(MOTDir.DirectoryIndex.find(UNRESTRICTED_PC_PROFILE) != MOTDir.DirectoryIndex.end())
-                        strNewDirectoryIndex =
-                            MOTDir.DirectoryIndex[UNRESTRICTED_PC_PROFILE].c_str();
-                    else if(MOTDir.DirectoryIndex.find(BASIC_PROFILE) != MOTDir.DirectoryIndex.end())
-                        strNewDirectoryIndex =
-                            MOTDir.DirectoryIndex[BASIC_PROFILE].c_str();
+            /* Checks if the DirectoryIndex has values */
+            if (MOTDir.DirectoryIndex.size() > 0)
+            {
+                QString strNewDirectoryIndex;
+                /* TODO proper profile handling */
+                if(MOTDir.DirectoryIndex.find(UNRESTRICTED_PC_PROFILE) != MOTDir.DirectoryIndex.end())
+                    strNewDirectoryIndex =
+                        MOTDir.DirectoryIndex[UNRESTRICTED_PC_PROFILE].c_str();
+                else if(MOTDir.DirectoryIndex.find(BASIC_PROFILE) != MOTDir.DirectoryIndex.end())
+                    strNewDirectoryIndex =
+                        MOTDir.DirectoryIndex[BASIC_PROFILE].c_str();
 #ifdef ENABLE_HACK
-                    if (strNewDirectoryIndex == "not_here.html") /* Hack needed for vtc trial sample */
-                        strNewDirectoryIndex = "index.html";
+                if (strNewDirectoryIndex == "not_here.html") /* Hack needed for vtc trial sample */
+                    strNewDirectoryIndex = "index.html";
 #endif
-                    if (!strNewDirectoryIndex.isNull())
-                        bDirectoryIndexChanged |= cache.SetDirectoryIndex(strNewDirectoryIndex);
-                }
+                if (!strNewDirectoryIndex.isNull())
+                    bDirectoryIndexChanged |= cache.SetDirectoryIndex(strNewDirectoryIndex);
             }
 
             /* Get object name */

@@ -45,10 +45,10 @@
 #define ENABLE_HACK /* Do we really need these hack unless for vtc trial sample? */
 
 
-BWSViewer::BWSViewer(CDRMReceiver& rec, CSettings& Settings, QWidget* parent):
+BWSViewer::BWSViewer(CDRMReceiver& rec, CMOTDABDec*(dec), CSettings& Settings, QWidget* parent):
     CWindow(parent, Settings, "BWS"),
     nam(this, cache, waitobjs, bAllowExternalContent, strCacheHost),
-    receiver(rec), decoder(NULL), bHomeSet(false), bPageLoading(false),
+    receiver(rec), decoder(dec), bHomeSet(false), bPageLoading(false),
     bSaveFileToDisk(false), bRestrictedProfile(false), bAllowExternalContent(true),
     bClearCacheOnNewService(true), bDirectoryIndexChanged(false),
     iLastAwaitingOjects(0), strCacheHost(CACHE_HOST),
@@ -194,13 +194,6 @@ void BWSViewer::OnTimer()
     case RX_OK:
         LEDStatus->SetLight(CMultColorLED::RL_GREEN);
         break;
-    }
-
-    if (decoder == NULL)
-    {
-        decoder = (CDataDecoder*)receiver.GetDataDecoder(); // TODO
-        if (decoder == NULL)
-            qDebug("can't get data decoder from receiver");
     }
 
     if (Changed())
@@ -356,32 +349,31 @@ bool BWSViewer::Changed()
         CMOTObject obj;
 
         /* Poll the data decoder module for new object */
-        while (decoder->GetMOTObject(obj, CDataDecoder::AT_BROADCASTWEBSITE) == TRUE)
+        while (decoder->NewObjectAvailable() == TRUE)
         {
+            decoder->GetNextObject(obj);
             /* Get the current directory */
             CMOTDirectory MOTDir;
-            if (decoder->GetMOTDirectory(MOTDir, CDataDecoder::AT_BROADCASTWEBSITE) == TRUE)
-            {
-                /* ETSI TS 101 498-1 Section 5.5.1 */
+            decoder->GetDirectory(MOTDir);
+            /* ETSI TS 101 498-1 Section 5.5.1 */
 
-                /* Checks if the DirectoryIndex has values */
-                if (MOTDir.DirectoryIndex.size() > 0)
-                {
-                    QString strNewDirectoryIndex;
-                    /* TODO proper profile handling */
-                    if(MOTDir.DirectoryIndex.find(UNRESTRICTED_PC_PROFILE) != MOTDir.DirectoryIndex.end())
-                        strNewDirectoryIndex =
-                            MOTDir.DirectoryIndex[UNRESTRICTED_PC_PROFILE].c_str();
-                    else if(MOTDir.DirectoryIndex.find(BASIC_PROFILE) != MOTDir.DirectoryIndex.end())
-                        strNewDirectoryIndex =
-                            MOTDir.DirectoryIndex[BASIC_PROFILE].c_str();
+            /* Checks if the DirectoryIndex has values */
+            if (MOTDir.DirectoryIndex.size() > 0)
+            {
+                QString strNewDirectoryIndex;
+                /* TODO proper profile handling */
+                if(MOTDir.DirectoryIndex.find(UNRESTRICTED_PC_PROFILE) != MOTDir.DirectoryIndex.end())
+                    strNewDirectoryIndex =
+                        MOTDir.DirectoryIndex[UNRESTRICTED_PC_PROFILE].c_str();
+                else if(MOTDir.DirectoryIndex.find(BASIC_PROFILE) != MOTDir.DirectoryIndex.end())
+                    strNewDirectoryIndex =
+                        MOTDir.DirectoryIndex[BASIC_PROFILE].c_str();
 #ifdef ENABLE_HACK
-                    if (strNewDirectoryIndex == "not_here.html") /* Hack needed for vtc trial sample */
-	                    strNewDirectoryIndex = "index.html";
+                if (strNewDirectoryIndex == "not_here.html") /* Hack needed for vtc trial sample */
+                    strNewDirectoryIndex = "index.html";
 #endif
-                    if (!strNewDirectoryIndex.isNull())
-                        bDirectoryIndexChanged |= cache.SetDirectoryIndex(strNewDirectoryIndex);
-                }
+                if (!strNewDirectoryIndex.isNull())
+                    bDirectoryIndexChanged |= cache.SetDirectoryIndex(strNewDirectoryIndex);
             }
 
             /* Get object name */

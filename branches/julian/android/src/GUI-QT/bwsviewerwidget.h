@@ -22,13 +22,14 @@ class CWebsiteObject;
 class CWebsiteCache;
 class CNetworkReplyCache;
 class CNetworkAccessManager;
+class CMOTDABDec;
 
 class BWSViewerWidget : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit BWSViewerWidget(CDRMReceiver&, CSettings&, int, QWidget* parent = 0);
+    explicit BWSViewerWidget(CDRMReceiver&, CMOTDABDec*, CSettings&, int, QWidget* parent = 0);
     ~BWSViewerWidget();
 
 private:
@@ -38,7 +39,7 @@ private:
     CNetworkAccessManager nam;
     QTimer          Timer;
     CDRMReceiver&   receiver;
-    CDataDecoder*   decoder;
+    CMOTDABDec*     decoder;
     CWebsiteCache   cache;
     bool            bHomeSet;
     bool            bPageLoading;
