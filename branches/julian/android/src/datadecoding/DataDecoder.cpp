@@ -97,7 +97,6 @@ CDataDecoder::ProcessDataInternal(CParameter & Parameters)
         const CService service = Parameters.Service[iShortID];
         const CDataParam& dp = service.DataParam;
         Parameters.DataComponentStatus[dp.iStreamID][dp.iPacketID].SetStatus(status);
-        Parameters.ReceiveStatus.MSC.SetStatus(status);
     }
 
 	/* Extract packet data -------------------------------------------------- */
