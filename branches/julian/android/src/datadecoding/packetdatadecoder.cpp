@@ -69,6 +69,7 @@ void PacketDataDecoder::InitInternal (CParameter & Parameters)
     for (int i = 0; i < MAX_NUM_PACK_PER_STREAM; i++)
     {
         iNumPackets[i] = 0;
+        iNumGoodPackets[i] = 0;
     }
 }
 
@@ -111,12 +112,11 @@ void PacketDataDecoder::ProcessDataInternal (CParameter & Parameters)
         if (CRCObject.CheckCRC(crc) == TRUE)
         {
             veciCRCOk[j] = true;	/* CRC ok */
-            Parameters.ReceiveStatus.MSC.SetStatus(RX_OK);
+            iNumGoodPackets[j]++;
         }
         else
         {
             veciCRCOk[j] = false;	/* CRC wrong */
-            Parameters.ReceiveStatus.MSC.SetStatus(CRC_ERROR);
         }
     }
 
@@ -238,7 +238,7 @@ void PacketDataDecoder::ProcessDataInternal (CParameter & Parameters)
             /* Use data unit ------------------------------------------------ */
             if (DataUnit[iPacketID].bReady == TRUE)
             {
-                cout << "new data unit for stream " << iStreamID << " packet id " << iPacketID  << endl;
+                //cout << "new data unit for stream " << iStreamID << " packet id " << iPacketID  << endl;
 
                 if(app[iPacketID])
                     app[iPacketID]->AddDataUnit(DataUnit[iPacketID].vecbiData);
@@ -256,6 +256,18 @@ void PacketDataDecoder::ProcessDataInternal (CParameter & Parameters)
                 (*pvecInputData).Separate(SIZEOF__BYTE);
         }
     }
+}
+
+double PacketDataDecoder::proportionCorrect()
+{
+    int good=0;
+    int total=0;
+    for(int i=0; i<4; i++)
+    {
+        good += iNumGoodPackets[i];
+        total += iNumPackets[i];
+    }
+    return double(good)/double(total);
 }
 
 double PacketDataDecoder::bitRate(int pid)

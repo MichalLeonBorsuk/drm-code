@@ -17,7 +17,6 @@ AudioDetailWidget::AudioDetailWidget(CDRMReceiver* prx, QWidget *parent) :
     ui->setupUi(this);
 #if QT_VERSION>=0x050100
     view = new QQuickView();
-    delete ui->widget;
     QWidget* widget = QWidget::createWindowContainer(view, ui->userMode);
     view->setSource(QUrl("qrc:/qml/usermodeaudiodetail.qml"));
     if(view->status()!=QQuickView::Ready)

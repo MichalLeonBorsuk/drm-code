@@ -240,6 +240,7 @@ CDRMReceiver::Run()
                 Parameters.ReceiveStatus.FSync.SetStatus(NOT_PRESENT);
                 Parameters.ReceiveStatus.FAC.SetStatus(NOT_PRESENT);
                 Parameters.ReceiveStatus.SDC.SetStatus(NOT_PRESENT);
+                Parameters.ReceiveStatus.MSC.SetStatus(NOT_PRESENT);
                 Parameters.ReceiveStatus.SLAudio.SetStatus(NOT_PRESENT);
             }
         }
@@ -708,27 +709,18 @@ CDRMReceiver::UtilizeDRM(_BOOLEAN& bEnoughData)
     {
         bEnoughData = TRUE;
     }
+
+    /* MSC */
+    ETypeRxStatus msc_status = RX_OK;
     /* Data decoding */
-#if 0
-    bool ed = false;
-    for (size_t i = 0; i < MSCDecBuf.size(); i++)
-    {
-        CStream s = Parameters.Stream[i];
-        switch(s.eType) {
-        case CStream::ST_DATA_PACKET:
-            ed |= DataPacketDecoder.WriteData(Parameters, MSCUseBuf[i]), ;
-            break;
-         default: // do nothing
-        }
-    }
-    bEnoughData = ed; // at least one
-#else
     if (iDataStreamID != STREAM_ID_NOT_USED)
     {
         if (DataDecoder.WriteData(Parameters, MSCUseBuf[iDataStreamID]))
             bEnoughData = TRUE;
     }
-#endif
+    if(DataDecoder.proportionCorrect()<0.9)
+        msc_status = CRC_ERROR;
+
     /* Source decoding (audio) */
     if (iAudioStreamID != STREAM_ID_NOT_USED)
     {
@@ -740,7 +732,10 @@ CDRMReceiver::UtilizeDRM(_BOOLEAN& bEnoughData)
 
             /* Store the number of correctly decoded audio blocks for
              *                            the history */
-            PlotManager.SetCurrentCDAud(AudioSourceDecoder.GetNumCorDecAudio());
+            int n = AudioSourceDecoder.GetNumCorDecAudio();
+            if(n==0)
+                msc_status = CRC_ERROR;
+            PlotManager.SetCurrentCDAud(n);
         }
     }
     if( (iDataStreamID == STREAM_ID_NOT_USED)
@@ -756,9 +751,13 @@ CDRMReceiver::UtilizeDRM(_BOOLEAN& bEnoughData)
 
             /* Store the number of correctly decoded audio blocks for
              *                            the history */
-            PlotManager.SetCurrentCDAud(AudioSourceDecoder.GetNumCorDecAudio());
+            int n = AudioSourceDecoder.GetNumCorDecAudio();
+            if(n==0)
+                msc_status = CRC_ERROR;
+            PlotManager.SetCurrentCDAud(n);
         }
     }
+    Parameters.ReceiveStatus.MSC.SetStatus(msc_status);
 }
 
 void

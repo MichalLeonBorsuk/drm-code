@@ -29,6 +29,7 @@ public:
     void setApplication(int, PacketApplication*);
     void setStreamID(int n) { iStreamID = n; }
     double bitRate(int);
+    double proportionCorrect();
 
 protected:
     void InitInternal (CParameter & Parameters);
@@ -45,5 +46,6 @@ protected:
     // to calculate bit rate;
     int iNumFrames;
     int iNumPackets[MAX_NUM_PACK_PER_STREAM];
+    int iNumGoodPackets[MAX_NUM_PACK_PER_STREAM];
 };
 #endif // PACKETDATADECODER_H
