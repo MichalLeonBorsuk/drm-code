@@ -4,7 +4,7 @@
 #include "CWindow.h"
 #include "BWSViewer.h"
 
-class CDRMReceiver;
+class CService;
 class CMOTDABDec;
 class QWidget;
 
@@ -13,7 +13,7 @@ class BWSViewerWindow : public CWindow
     Q_OBJECT
 
 public:
-    explicit BWSViewerWindow(CDRMReceiver&, CMOTDABDec*, CSettings&, int, QWidget* parent = 0);
+    explicit BWSViewerWindow(CService&, CMOTDABDec*, CSettings&, QWidget* parent = 0);
     virtual ~BWSViewerWindow();
 private:
     BWSViewer viewer;

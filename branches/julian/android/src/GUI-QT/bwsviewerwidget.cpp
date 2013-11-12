@@ -28,9 +28,9 @@
 
 #include "bwsviewerwidget.h"
 
-BWSViewerWidget::BWSViewerWidget(CDRMReceiver& rx, CMOTDABDec* dec, CSettings& s, int sid, QWidget* parent):
+BWSViewerWidget::BWSViewerWidget(CMOTDABDec* dec, CSettings& s, QWidget* parent):
     QWidget(parent),
-    viewer(rx, dec, s, sid, this)
+    viewer(dec, s, this)
 {
 }
 
@@ -46,4 +46,9 @@ void BWSViewerWidget::showEvent(QShowEvent*)
 void BWSViewerWidget::hideEvent(QShowEvent*)
 {
     viewer.eventHide();
+}
+
+void BWSViewerWidget::setRxStatus(int streamID, int packedID, ETypeRxStatus s)
+{
+    viewer.setRxStatus(streamID, packedID, s);
 }

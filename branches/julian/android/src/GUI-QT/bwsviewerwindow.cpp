@@ -1,9 +1,11 @@
 #include "bwsviewerwindow.h"
 
-BWSViewerWindow::BWSViewerWindow(CDRMReceiver& rx, CMOTDABDec* dec, CSettings& s, int sid, QWidget* parent):
+BWSViewerWindow::BWSViewerWindow(CService& service, CMOTDABDec* dec, CSettings& s, QWidget* parent):
     CWindow(parent, Settings, "BWS"),
-    viewer(rx, dec, s, sid, this)
+    viewer(dec, s, this)
 {
+    viewer.setServiceInfo(service);
+    //container->connect(ui->buttonDecode, SIGNAL(clicked()), this, SLOT(close()));
     //container->connect(actionClear_Cache, SIGNAL(triggered()), SLOT(OnClearCache()));
     //container->connect(actionClose, SIGNAL(triggered()), SLOT(close()));
     //container->connect(actionAllow_External_Content, SIGNAL(triggered(bool)), SLOT(OnAllowExternalContent(bool)));

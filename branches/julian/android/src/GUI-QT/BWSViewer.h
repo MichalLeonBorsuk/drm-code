@@ -141,19 +141,23 @@ class BWSViewer: public QObject
     Q_OBJECT
 
 public:
-    explicit BWSViewer(CDRMReceiver&, CMOTDABDec*, CSettings&, int, QWidget*);
+    explicit BWSViewer(CMOTDABDec*, CSettings&, QWidget*);
     ~BWSViewer();
     void eventShow();
     void eventHide();
+public slots:
+    void setServiceInfo(CService);
+    void setRxStatus(int, int, ETypeRxStatus);
 
 private:
     QWidget*        container;
     Ui::BWSViewerWidget *ui;
-    int short_id;
+    int short_id, stream_id, packet_id;
+    uint32_t        serviceID;
+    QString         strServiceLabel;
     CSettings&      settings;
     CNetworkAccessManager nam;
     QTimer          Timer;
-    CDRMReceiver&   receiver;
     CMOTDABDec*     decoder;
     CWebsiteCache   cache;
     bool            bHomeSet;
@@ -166,23 +170,15 @@ private:
     unsigned int    iLastAwaitingOjects;
     CCounter        waitobjs;
     const QString   strCacheHost;
-    uint32_t        iLastServiceID;
-    uint32_t        iCurrentDataServiceID;
-    bool            bLastServiceValid;
-    uint32_t        iLastValidServiceID;
-    QString         strLastLabel;
+    QString         strCurrentSavePath;
 
     bool Changed();
     void SaveMOTObject(const QString& strObjName, const CMOTObject& obj);
     bool RemoveDir(const QString &dirName, int level = 0);
-    void SetupSavePath(QString& strSavePath);
-    void UpdateButtons();
-    void UpdateStatus();
-    void UpdateWindowTitle(const uint32_t iServiceID, const bool bServiceValid, QString strLabel);
     QString ObjectStr(unsigned int count);
-    void GetServiceParams(uint32_t* iServiceID=NULL, bool* bServiceValid=NULL, QString* strLabel=NULL, ETypeRxStatus* eStatus=NULL);
 
 public slots:
+    void setSavePath(const QString& strSavePath);
     void OnTimer();
     void OnClearCache();
     void OnHome();
@@ -197,9 +193,6 @@ public slots:
     void OnWebViewLoadFinished(bool ok);
     void OnWebViewTitleChanged(const QString& title);
     void Update();
-signals:
-    void activated(int);
 };
 
 #endif
-
