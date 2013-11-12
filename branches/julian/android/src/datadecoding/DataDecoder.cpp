@@ -228,7 +228,7 @@ CDataDecoder::ProcessDataInternal(CParameter & Parameters)
 					{
 						if(Parameters.Service[iCurSelDataServ].DataParam.iPacketID == iPacketID)
 						{
-							eAppType[iPacketID] = GetAppType(Parameters.Service[iCurSelDataServ].DataParam);
+                            eAppType[iPacketID] = Parameters.Service[iCurSelDataServ].DataParam.iUserAppIdent;
 						}
 					}
 				}
@@ -396,7 +396,7 @@ CDataDecoder::InitInternal(CParameter & Parameters)
 			/* Number of data packets in one data block */
 			iNumDataPackets = iTotalNumInputBytes / iTotalPacketSize;
 
-			eAppType[iServPacketID] = GetAppType(Parameters.Service[iCurSelDataServ].DataParam);
+            eAppType[iServPacketID] = Parameters.Service[iCurSelDataServ].DataParam.iUserAppIdent;
 
 			/* Check, if service ID of Journaline application has
 			   changed, that indicates that a new transmission is
@@ -515,58 +515,4 @@ CDataDecoder::GetNews(const int iObjID, CNews & News)
 
 	/* Release resources */
 	Unlock();
-}
-
-CDataDecoder::EAppType CDataDecoder::GetAppType(const CDataParam& DataParam)
-{
-	EAppType eAppType = AT_NOT_SUP;
-
-		/* Only DAB application supported */
-	if (DataParam.eAppDomain == CDataParam::AD_DAB_SPEC_APP)
-	{
-		/* Get application identifier of current selected service, only
-		   used with DAB */
-		const int iDABUserAppIdent = DataParam.iUserAppIdent;
-
-		switch (iDABUserAppIdent)
-		{
-		case DAB_AT_MOTSLIDESHOW:		/* MOTSlideshow */
-			eAppType = AT_MOTSLIDESHOW;
-			break;
-
-		case DAB_AT_BROADCASTWEBSITE:		/* MOT Broadcast Web Site */
-			eAppType = AT_BROADCASTWEBSITE;
-			break;
-
-		case DAB_AT_TPEG:
-			eAppType = AT_TPEG;
-			break;
-
-		case DAB_AT_DGPS:
-			eAppType = AT_DGPS;
-			break;
-
-		case DAB_AT_TMC:
-			eAppType = AT_TMC;
-			break;
-
-		case DAB_AT_EPG:
-			eAppType  = AT_EPG;
-			break;
-
-		case DAB_AT_JAVA:
-			eAppType = AT_JAVA;
-			break;
-
-		case DAB_AT_JOURNALINE:	/* Journaline */
-			eAppType  = AT_JOURNALINE;
-			break;
-
-		case AT_DMB: case AT_VOICE: case AT_MIDDLEWARE: case AT_IPDC:
-		case DAB_AT_DREAM_EXPERIMENTAL:	/* Just save the objects as files */
-			eAppType  = AT_EXPERIMENTAL;
-			break;
-		}
-	}
-	return eAppType;
 }

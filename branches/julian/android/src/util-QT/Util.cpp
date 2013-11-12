@@ -377,6 +377,26 @@ QString GetTypeString(const CService& service)
                     strReturn = QObject::tr("EPG - Electronic Programme Guide");
                     break;
 
+                case AT_FILECASTING: /*  */
+                    strReturn = QObject::tr("Filecasting");
+                    break;
+
+                case AT_DMB: /*  */
+                    strReturn = QObject::tr("DMB");
+                    break;
+
+                case AT_IPDC: /*  */
+                    strReturn = QObject::tr("IP Datacast");
+                    break;
+
+                case AT_MIDDLEWARE: /*  */
+                    strReturn = QObject::tr("Middleware");
+                    break;
+
+                case AT_VOICE: /*  */
+                    strReturn = QObject::tr("Voice Services");
+                    break;
+
                 case AT_JAVA:
                     strReturn = QObject::tr("Java");
                     break;
@@ -384,10 +404,12 @@ QString GetTypeString(const CService& service)
                 case AT_JOURNALINE: /* Journaline */
                     strReturn = QObject::tr("Journaline");
                     break;
+                default:
+                    strReturn = QObject::tr("Journaline");
                 }
             }
             else
-                strReturn = QObject::tr("Unknown Service");
+                strReturn = QObject::tr("Unknown DAB Application");
         }
         else
             strReturn = QObject::tr("Unknown Service");

@@ -6,7 +6,7 @@ DABApplications::DABApplications()
 {
 }
 
-PacketApplication* DABApplications::createDecoder(EDABAppType eAppType)
+PacketApplication* DABApplications::createDecoder(EAppType eAppType)
 {
     switch (eAppType)
     {
