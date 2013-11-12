@@ -41,6 +41,7 @@
 
 #include "GlobalDefinitions.h"
 #include "ofdmcellmapping/CellMappingTable.h"
+#include "datadecoding/dabapplications.h"
 #include "matlib/Matlib.h"
 #include <time.h>
 #include "ServiceInformation.h"
@@ -267,7 +268,7 @@ public:
 
     // "DAB specified application" not yet implemented!!!
     EApplDomain eAppDomain;	/* Application domain */
-    int iUserAppIdent;		/* User application identifier, only DAB */
+    EAppType iUserAppIdent; /* User application identifier, only DAB */
 
     CDataParam():CServiceParam(),
             ePacketModInd(PM_PACKET_MODE),
@@ -275,7 +276,7 @@ public:
             iPacketID(0),
             iPacketLen(0),
             eAppDomain(AD_DAB_SPEC_APP),
-            iUserAppIdent(0)
+            iUserAppIdent(AT_NOT_SUP)
     {
     }
 

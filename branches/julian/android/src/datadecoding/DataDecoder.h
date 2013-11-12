@@ -52,12 +52,6 @@ class CDataDecoder:public CReceiverModul < _BINARY, _BINARY >
     CDataDecoder ();
     virtual ~CDataDecoder ();
 
-    enum EAppType
-    { AT_NOT_SUP, AT_MOTSLIDESHOW, AT_JOURNALINE,
-	AT_BROADCASTWEBSITE, AT_TPEG, AT_DGPS, AT_TMC, AT_EPG,
-	    AT_JAVA, AT_EXPERIMENTAL, AT_DMB, AT_VOICE, AT_MIDDLEWARE, AT_IPDC
-    };
-
     _BOOLEAN GetMOTObject (CMOTObject & NewPic, const EAppType eAppTypeReq);
     _BOOLEAN GetMOTDirectory (CMOTDirectory & MOTDirectoryOut, const EAppType eAppTypeReq);
 	CMOTDABDec *getApplication(int iPacketID) { return (iPacketID>=0 && iPacketID<3)?&MOTObject[iPacketID]:NULL; }
@@ -106,8 +100,6 @@ class CDataDecoder:public CReceiverModul < _BINARY, _BINARY >
     int iEPGService;
     int iEPGPacketID;
     void DecodeEPG(const CParameter& Parameters);
-	EAppType GetAppType(const CDataParam&);
-
 };
 
 

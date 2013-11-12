@@ -38,7 +38,9 @@ gui {
     RESOURCES = src/GUI-QT/res/icons.qrc
     QT += network xml
     qt4:QT += webkit
-    qt5:QT += widgets webkitwidgets
+    qt5 {
+        QT += widgets webkitwidgets
+    }
     INCLUDEPATH += src/GUI-QT
     VPATH += src/GUI-QT
     win32:RC_FILE = windows/dream.rc
@@ -502,7 +504,8 @@ HEADERS += \
     src/datadecoding/packetdatadecoder.h \
     src/datadecoding/fecpacketdatadecoder.h \
     src/datadecoding/packetapplication.h \
-    src/datadecoding/dabapplications.h
+    src/datadecoding/dabapplications.h \
+    src/GUI-QT/bwsviewerwindow.h
 SOURCES += \
     src/AMDemodulation.cpp \
     src/AMSSDemodulation.cpp \
@@ -607,7 +610,8 @@ SOURCES += \
     src/datadecoding/packetdatadecoder.cpp \
     src/datadecoding/fecpacketdatadecoder.cpp \
     src/datadecoding/packetapplication.cpp \
-    src/datadecoding/dabapplications.cpp
+    src/datadecoding/dabapplications.cpp \
+    src/GUI-QT/bwsviewerwindow.cpp
 !console {
 HEADERS += \
     src/GUI-QT/Logging.h \

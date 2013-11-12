@@ -693,7 +693,7 @@ void MainWindow::UpdateDisplay()
                     {
                         if (service.DataParam.eAppDomain == CDataParam::AD_DAB_SPEC_APP)
                         {
-                            PacketApplication* pApp = DABApplications::createDecoder(EDABAppType(service.DataParam.iUserAppIdent));
+                            PacketApplication* pApp = DABApplications::createDecoder(service.DataParam.iUserAppIdent);
                             DRMReceiver.GetDataDecoder()->setApplication(service.DataParam.iPacketID, pApp);
                             switch (service.DataParam.iUserAppIdent)
                             {
@@ -848,9 +848,12 @@ void MainWindow::UpdateDisplay()
             if(serviceWidgets[i].audio)
             {
                 delete serviceWidgets[i].audio;
+                serviceWidgets[i].audio = NULL; // in case called twice
+
             }
             if(serviceWidgets[i].data)
                 delete serviceWidgets[i].data;
+                serviceWidgets[i].data = NULL; // in case called twice
         }
     }
 }

@@ -411,7 +411,7 @@ void CParameter::ResetServicesStreams()
             Service[i].DataParam.iPacketID = 0;
             Service[i].DataParam.iPacketLen = 0;
             Service[i].DataParam.eAppDomain = CDataParam::AD_DRM_SPEC_APP;
-            Service[i].DataParam.iUserAppIdent = 0;
+            Service[i].DataParam.iUserAppIdent = AT_NOT_SUP;
 
             Service[i].iServiceID = SERV_ID_NOT_USED;
             Service[i].iLanguage = 0;

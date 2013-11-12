@@ -749,7 +749,7 @@ _BOOLEAN CSDCReceive::DataEntityType5(CVector<_BINARY>* pbiData,
         (*pbiData).Separate(5);
 
         /* User application identifier */
-        DataParam.iUserAppIdent = (*pbiData).Separate(11);
+        DataParam.iUserAppIdent = EAppType((*pbiData).Separate(11));
 
         /* Data fields as required by DAB application specification, not used */
         (*pbiData).Separate(iLengthOfBody * 8 - 32);
@@ -757,7 +757,7 @@ _BOOLEAN CSDCReceive::DataEntityType5(CVector<_BINARY>* pbiData,
     else
     {
         /* AppIdent */
-        DataParam.iUserAppIdent = (*pbiData).Separate(iLengthOfBody * 8 - 16);
+        DataParam.iUserAppIdent = EAppType((*pbiData).Separate(iLengthOfBody * 8 - 16));
     }
 
     /* Set new parameters in global struct */

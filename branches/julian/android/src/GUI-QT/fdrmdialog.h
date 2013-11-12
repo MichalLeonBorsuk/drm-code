@@ -65,7 +65,7 @@
 #include "../datadecoding/DataDecoder.h"
 
 /* Classes ********************************************************************/
-class BWSViewer;
+class BWSViewerWindow;
 class JLViewer;
 class SlideShowViewer;
 class CScheduler;
@@ -90,7 +90,7 @@ protected:
 
     CLogging*			pLogging;
     systemevalDlg*		pSysEvalDlg;
-    BWSViewer*			pBWSDlg;
+    BWSViewerWindow*	pBWSDlg;
     JLViewer*			pJLDlg;
     SlideShowViewer*	pSlideShowDlg;
     MultSettingsDlg*	pMultSettingsDlg;
@@ -135,8 +135,6 @@ protected:
     void		ChangeGUIModeToAM();
     void		ChangeGUIModeToFM();
 
-    QString	GetCodecString(const CService&);
-    QString	GetTypeString(const CService&);
     QString serviceSelector(CParameter&, int);
     void showTextMessage(const QString&);
     void showServiceInfo(const CService&);
