@@ -541,6 +541,22 @@ void MainWindow::OnTimer()
         if(pLogging->enabled())
             pLogging->start();  // because its normal, non-scheduled logging ? TODO - check!
     }
+    // service LEDs
+    CParameter& Parameters = *DRMReceiver.GetParameters();
+    Parameters.Lock();
+    for(int i=0; i<MAX_NUM_SERVICES; i++)
+    {
+        if(Parameters.Service[i].AudioParam.iStreamID != STREAM_ID_NOT_USED)
+            emit LEDAudio(i, Parameters.AudioComponentStatus[i].GetStatus());
+        CDataParam& dp = Parameters.Service[i].DataParam;
+        int sid = dp.iStreamID;
+        int pid = dp.iPacketID;
+        if(sid != STREAM_ID_NOT_USED)
+        {
+            emit LEDData(sid, pid, Parameters.DataComponentStatus[sid][pid].GetStatus());
+        }
+    }
+    Parameters.Unlock();
 }
 
 void MainWindow::OnTimerClose()
@@ -652,6 +668,7 @@ void MainWindow::UpdateDisplay()
                     index = ui->serviceTabs->addTab(adw, label);
                     connect(adw, SIGNAL(listen(int)), this, SLOT(OnSelectAudioService(int)));
                     connect(this, SIGNAL(plotStyleChanged(int)), adw, SLOT(setPlotStyle(int)));
+                    connect(this, SIGNAL(LEDAudio(int, ETypeRxStatus)), adw, SLOT(setRxStatus(int, ETypeRxStatus)));
                 }
                 else
                 {
@@ -702,8 +719,12 @@ void MainWindow::UpdateDisplay()
                                 break;
                             case AT_BROADCASTWEBSITE:
     #ifdef QT_WEBKIT_LIB
-                                w = new BWSViewerWidget(DRMReceiver, (CMOTDABDec*)pApp, Settings, shortId);
-                                connect(w, SIGNAL(activated(int)), this, SLOT(OnSelectDataService(int)));
+                            {
+                                BWSViewerWidget* bw = new BWSViewerWidget((CMOTDABDec*)pApp, Settings);
+                                bw->setServiceInfo(service);
+                                connect(this, SIGNAL(LEDData(int, int, ETypeRxStatus)), bw, SLOT(setRxStatus(int, int, ETypeRxStatus)));
+                                w = bw;
+                            }
     #endif
                                 break;
                             case AT_JOURNALINE:

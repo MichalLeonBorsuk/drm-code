@@ -1090,7 +1090,7 @@ void FDRMDialog::OnSelectDataService(int shortId)
             delete pBWSDlg;
         CMOTDABDec* dec = new CMOTDABDec();
         pApp = dec;
-        pBWSDlg = new BWSViewerWindow(DRMReceiver, dec, Settings, shortId, this);
+        pBWSDlg = new BWSViewerWindow(service, dec, Settings, this);
         pDlg = pBWSDlg;
 #endif
     }

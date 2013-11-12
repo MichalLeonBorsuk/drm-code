@@ -78,6 +78,14 @@ void AudioDetailWidget::setDescription(const QString& desc)
 #endif
 }
 
+void AudioDetailWidget::setRxStatus(int sid, ETypeRxStatus s)
+{
+    if(sid == short_id)
+    {
+
+    }
+}
+
 void AudioDetailWidget::updateDisplay(int id, const CService& s)
 {
     short_id = id;

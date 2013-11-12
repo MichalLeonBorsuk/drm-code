@@ -46,17 +46,16 @@
 
 #include "ui_bwsviewerwidget.h"
 
-BWSViewer::BWSViewer(CDRMReceiver& rec, CMOTDABDec* dec, CSettings& Settings, int sid, QWidget* cont):
+BWSViewer::BWSViewer(CMOTDABDec* dec, CSettings& Settings, QWidget* cont):
     container(cont),
     ui(new Ui::BWSViewerWidget),
-    short_id(sid),
+    short_id(),stream_id(0),packet_id(0),serviceID(0),strServiceLabel(),
     settings(Settings),
     nam(container, cache, waitobjs, bAllowExternalContent, strCacheHost),
-    receiver(rec), decoder(dec), bHomeSet(false), bPageLoading(false),
+    decoder(dec), bHomeSet(false), bPageLoading(false),
     bSaveFileToDisk(false), bRestrictedProfile(false), bAllowExternalContent(true),
     bClearCacheOnNewService(true), bDirectoryIndexChanged(false),
-    iLastAwaitingOjects(0), strCacheHost(CACHE_HOST),
-    iLastServiceID(0), iCurrentDataServiceID(0), bLastServiceValid(false), iLastValidServiceID(0)
+    iLastAwaitingOjects(0), strCacheHost(CACHE_HOST)
 {
     ui->setupUi(container);
 
@@ -77,15 +76,14 @@ BWSViewer::BWSViewer(CDRMReceiver& rec, CMOTDABDec* dec, CSettings& Settings, in
     Update();
 
     /* container->connect controls */
-    container->connect(ui->buttonDecode, SIGNAL(clicked()), this, SLOT(close()));
     container->connect(ui->buttonStepBack, SIGNAL(clicked()), this, SLOT(OnBack()));
     container->connect(ui->buttonStepForward, SIGNAL(clicked()), this, SLOT(OnForward()));
     container->connect(ui->buttonHome, SIGNAL(clicked()), this, SLOT(OnHome()));
     container->connect(ui->buttonStopRefresh, SIGNAL(clicked()), this, SLOT(OnStopRefresh()));
     container->connect(ui->buttonClearCache, SIGNAL(clicked()), this, SLOT(OnClearCache()));
-    container->connect(ui->webView, SIGNAL(loadStarted()), this, SLOT(OnwebViewLoadStarted()));
-    container->connect(ui->webView, SIGNAL(loadFinished(bool)), this, SLOT(OnwebViewLoadFinished(bool)));
-    container->connect(ui->webView, SIGNAL(titleChanged(const QString &)), this, SLOT(OnwebViewTitleChanged(const QString &)));
+    container->connect(ui->webView, SIGNAL(loadStarted()), this, SLOT(OnWebViewLoadStarted()));
+    container->connect(ui->webView, SIGNAL(loadFinished(bool)), this, SLOT(OnWebViewLoadFinished(bool)));
+    container->connect(ui->webView, SIGNAL(titleChanged(const QString &)), this, SLOT(OnWebViewTitleChanged(const QString &)));
     container->connect(&Timer, SIGNAL(timeout()), this, SLOT(OnTimer()));
 }
 
@@ -94,21 +92,12 @@ BWSViewer::~BWSViewer()
     delete ui;
 }
 
-void BWSViewer::UpdateButtons()
-{
-    ui->buttonStepBack->setEnabled(ui->webView->history()->canGoBack());
-    ui->buttonStepForward->setEnabled(ui->webView->history()->canGoForward());
-    ui->buttonHome->setEnabled(bHomeSet);
-    ui->buttonStopRefresh->setEnabled(bHomeSet);
-    ui->buttonStopRefresh->setIcon(QIcon(bPageLoading ? ICON_STOP : ICON_REFRESH));
-}
-
 QString BWSViewer::ObjectStr(unsigned int count)
 {
-    return QString(count > 1 ? QObject::tr("objects") : QObject::tr("object"));
+    return QString(count > 1 ? tr("objects") : tr("object"));
 }
 
-void BWSViewer::UpdateStatus()
+void BWSViewer::Update()
 {
     unsigned int count, size;
     cache.GetObjectCountAndSize(count, size);
@@ -116,7 +105,7 @@ void BWSViewer::UpdateStatus()
         ui->labelStatus->setText("");
     else
     {
-        QString text(QObject::tr("%1 %2 cached, %3 kB"));
+        QString text(tr("%1 %2 cached, %3 kB"));
         text = text.arg(count).arg(ObjectStr(count)).arg((size+999) / 1000);
         iLastAwaitingOjects = waitobjs;
         if (iLastAwaitingOjects)
@@ -125,100 +114,11 @@ void BWSViewer::UpdateStatus()
             text += "  |  " + ui->webView->url().toString();
         ui->labelStatus->setText(text);
     }
-}
-
-void BWSViewer::UpdateWindowTitle(const uint32_t iServiceID, const bool bServiceValid, QString strLabel)
-{
-    QString strTitle("MOT Broadcast Website");
-    iLastServiceID = iServiceID;
-    bLastServiceValid = bServiceValid;
-    strLastLabel = strLabel;
-    if (bServiceValid)
-    {
-        if (strLabel != "")
-            strLabel += " - ";
-
-        /* Service ID (plot number in hexadecimal format) */
-        QString strServiceID = "ID:" +
-                       QString().setNum(iServiceID, 16).toUpper();
-
-        /* Add the description on the title of the dialog */
-        if (strLabel != "" || strServiceID != "")
-            strTitle += " [" + strLabel + strServiceID + "]";
-    }
-    container->setWindowTitle(strTitle);
-}
-
-void BWSViewer::Update()
-{
-    UpdateStatus();
-    UpdateButtons();
-}
-
-void BWSViewer::OnTimer()
-{
-    /* Get current service parameters */
-    uint32_t iServiceID; bool bServiceValid; QString strLabel; ETypeRxStatus eStatus;
-    GetServiceParams(&iServiceID, &bServiceValid, &strLabel, &eStatus);
-
-    /* Set current data service ID */
-    iCurrentDataServiceID = bServiceValid ? iServiceID : 0;
-
-    /* Check for new valid data service */
-    if (bServiceValid && iLastValidServiceID != iServiceID)
-    {
-        iLastValidServiceID = iServiceID;
-        if (bClearCacheOnNewService)
-            OnClearCache();
-    }
-
-    /* Update the window title if something have changed */
-    if (iLastServiceID != iServiceID || bLastServiceValid != bServiceValid || strLastLabel != strLabel)
-        UpdateWindowTitle(iServiceID, bServiceValid, strLabel);
-
-    switch(eStatus)
-    {
-    case NOT_PRESENT:
-        ui->LEDStatus->Reset();
-        break;
-
-    case CRC_ERROR:
-        ui->LEDStatus->SetLight(CMultColorLED::RL_RED);
-        break;
-
-    case DATA_ERROR:
-        ui->LEDStatus->SetLight(CMultColorLED::RL_YELLOW);
-        break;
-
-    case RX_OK:
-        ui->LEDStatus->SetLight(CMultColorLED::RL_GREEN);
-        break;
-    }
-
-    if (Changed())
-    {
-        if (bDirectoryIndexChanged)
-        {
-            bDirectoryIndexChanged = false;
-            if (!bHomeSet)
-            {
-                bHomeSet = true;
-                OnHome();
-            }
-        }
-        Update();
-        ui->buttonClearCache->setEnabled(true);
-        //actionClear_Cache->setEnabled(true);
-    }
-    else
-    {
-        unsigned int iAwaitingOjects = waitobjs;
-        if (iLastAwaitingOjects != iAwaitingOjects)
-        {
-            iLastAwaitingOjects = iAwaitingOjects;
-            UpdateStatus();
-        }
-    }
+    ui->buttonStepBack->setEnabled(ui->webView->history()->canGoBack());
+    ui->buttonStepForward->setEnabled(ui->webView->history()->canGoForward());
+    ui->buttonHome->setEnabled(bHomeSet);
+    ui->buttonStopRefresh->setEnabled(bHomeSet);
+    ui->buttonStopRefresh->setIcon(QIcon(bPageLoading ? ICON_STOP : ICON_REFRESH));
 }
 
 void BWSViewer::OnHome()
@@ -314,10 +214,20 @@ void BWSViewer::eventShow()
     bClearCacheOnNewService = settings.Get("BWS", "clearcacheonnewservice", bClearCacheOnNewService);
     //actionClear_Cache_on_New_Service->setChecked(bClearCacheOnNewService);
 
+    QString strLabel = strServiceLabel;
+
+    if (strLabel != "")
+        strLabel += " - ";
+
+    /* Service ID (plot number in hexadecimal format) */
+    QString strServiceID = QString("ID: %1").arg(serviceID, 0, 16).toUpper();
+
     /* Update window title */
-    uint32_t iServiceID; bool bServiceValid; QString strLabel;
-    GetServiceParams(&iServiceID, &bServiceValid, &strLabel);
-    UpdateWindowTitle(iServiceID, bServiceValid, strLabel);
+    QString strTitle(tr("MOT Broadcast Website"));
+    /* Add the description on the title of the dialog */
+    if (strLabel != "" || strServiceID != "")
+        strTitle += " [" + strLabel + strServiceID + "]";
+    container->setWindowTitle(strTitle);
 
     /* Update window content */
     OnTimer();
@@ -404,11 +314,6 @@ void BWSViewer::SaveMOTObject(const QString& strObjName,
 {
     const CVector<_BYTE>& vecbRawData = obj.Body.vecData;
 
-    QString strCurrentSavePath;
-
-    /* Set up save path */
-    SetupSavePath(strCurrentSavePath);
-
     /* Generate safe filename */
     QString strFileName = strCurrentSavePath + VerifyHtmlPath(strObjName);
 
@@ -435,31 +340,31 @@ void BWSViewer::SaveMOTObject(const QString& strObjName,
     }
 }
 
-void BWSViewer::SetupSavePath(QString& strSavePath)
+void BWSViewer::setSavePath(const QString& s)
 {
     /* Append service ID to MOT save path */
-    strSavePath = strSavePath.setNum(iCurrentDataServiceID, 16).toUpper().rightJustified(8, '0');
-    strSavePath = QString::fromUtf8((*receiver.GetParameters()).GetDataDirectory("MOT").c_str()) + strSavePath + "/";
+    QString strSavePath;
+    strSavePath.setNum(serviceID, 16).toUpper().rightJustified(8, '0');
+    strCurrentSavePath = s + "/" + strSavePath + "/";
 }
 
-void BWSViewer::GetServiceParams(uint32_t* iServiceID, bool* bServiceValid, QString* strLabel, ETypeRxStatus* eStatus)
+void BWSViewer::setServiceInfo(CService s)
 {
-    CParameter& Parameters = *receiver.GetParameters();
-    Parameters.Lock();
-        const int iCurSelDataServ = Parameters.GetCurSelDataService();
-        const CService service = Parameters.Service[iCurSelDataServ];
-        const CDataParam& dp = service.DataParam;
-        ETypeRxStatus status = Parameters.DataComponentStatus[dp.iStreamID][dp.iPacketID].GetStatus();
-        if (eStatus)
-            *eStatus = status;
-    Parameters.Unlock();
-    if (iServiceID)
-        *iServiceID = service.iServiceID;
-    if (bServiceValid)
-        *bServiceValid = service.IsActive() && service.eAudDataFlag == CService::SF_DATA;
-    /* Do UTF-8 to QString (UNICODE) conversion with the ui->Label strings */
-    if (strLabel)
-        *strLabel = QString().fromUtf8(service.strLabel.c_str()).trimmed();
+    strServiceLabel = QString::fromUtf8(s.strLabel.c_str());
+    serviceID = s.iServiceID;
+    stream_id = s.DataParam.iStreamID;
+    packet_id = s.DataParam.iPacketID;
+}
+
+void BWSViewer::setRxStatus(int streamID, int packetID, ETypeRxStatus s)
+{
+    if((streamID == stream_id) && (packetID == packet_id))
+        SetStatus(ui->LEDStatus, s);
+}
+
+void BWSViewer::OnTimer()
+{
+
 }
 
 //////////////////////////////////////////////////////////////////
@@ -662,4 +567,3 @@ QNetworkReply* CNetworkAccessManager::createRequest(Operation op, const QNetwork
     else
         return QNetworkAccessManager::createRequest(op, req, outgoingData);
 }
-

@@ -31,6 +31,7 @@ signals:
 public slots:
     void setPlotStyle(int);
     void setDescription(const QString&);
+    void setRxStatus(int, ETypeRxStatus);
 private:
     Ui::AudioDetailWidget *ui;
     int short_id;

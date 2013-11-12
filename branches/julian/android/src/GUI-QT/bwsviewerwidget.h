@@ -14,9 +14,11 @@ class BWSViewerWidget : public QWidget
     Q_OBJECT
 
 public:
-    explicit BWSViewerWidget(CDRMReceiver&, CMOTDABDec*, CSettings&, int, QWidget* parent = 0);
+    explicit BWSViewerWidget(CMOTDABDec*, CSettings&, QWidget* parent = 0);
     ~BWSViewerWidget();
-
+public slots:
+    void setServiceInfo(CService s) { viewer.setServiceInfo(s); }
+    void setRxStatus(int, int, ETypeRxStatus);
 private:
     BWSViewer viewer;
     void showEvent(QShowEvent*);

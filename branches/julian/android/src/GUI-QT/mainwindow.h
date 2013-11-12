@@ -184,6 +184,8 @@ signals:
     void LEDFrameSync(ETypeRxStatus status);
     void LEDTimeSync(ETypeRxStatus status);
     void LEDIOInterface(ETypeRxStatus status);
+    void LEDData(int, int, ETypeRxStatus);
+    void LEDAudio(int, ETypeRxStatus);
     void SNR(double rSNR);
     void MER(double rMER, double rWMERMSC);
     void Delay_Doppler(double rSigmaEstimate, double rMinDelay);
@@ -192,6 +194,7 @@ signals:
     void Channel(ERobMode, ESpecOcc, ESymIntMod, ECodScheme, ECodScheme);
     void Frequency(int);
     void Mode(int);
+    void dataStatus(int, int, ETypeRxStatus);
 };
 
 #endif // MAINWINDOW_H
