@@ -69,7 +69,7 @@ static const LIBFUNC LibFuncs[] = {
 # if defined(_WIN32)
 static const char* LibNames[] = { "libopus-0.dll", "libopus.dll", "opus.dll", NULL };
 # elif defined(__APPLE__)
-static const char* LibNames[] = { "libopus.dylib", NULL };
+static const char* LibNames[] = { "@executable_path/../Frameworks/libopus.dylib", NULL };
 # else
 static const char* LibNames[] = { "libopus.so.0", "libopus.so", NULL };
 # endif
