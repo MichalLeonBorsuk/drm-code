@@ -124,8 +124,12 @@ void PacketDataDecoder::ProcessDataInternal (CParameter & Parameters)
     /* Reset bit extraction access */
     (*pvecInputData).ResetBitAccess();
 
+    CRxStatus* compStatus = Parameters.DataComponentStatus[iStreamID];
+    for(int i=0; i<4; i++)
+        compStatus[i].SetStatus(NOT_PRESENT);
+
     for (int j = 0; j < iNumDataPackets; j++)
-    {
+    {        
         /* Check if CRC was ok */
         if (veciCRCOk[j])
         {
@@ -139,7 +143,6 @@ void PacketDataDecoder::ProcessDataInternal (CParameter & Parameters)
             /* Packet ID */
             iPacketID = (int) (*pvecInputData).Separate(2);
             //cout << "new packet for stream " << iStreamID << " packet id " << iPacketID  << endl;
-            Parameters.DataComponentStatus[iStreamID][iPacketID].SetStatus(veciCRCOk[j]?RX_OK:CRC_ERROR);
 
             /* Padded packet indicator (PPI) */
             biPadPackInd = (_BINARY) (*pvecInputData).Separate(1);
@@ -248,6 +251,7 @@ void PacketDataDecoder::ProcessDataInternal (CParameter & Parameters)
                    "DataUnit[iPacketID].bReady") */
                 DataUnit[iPacketID].Reset();
             }
+            compStatus[iPacketID].SetStatus(RX_OK);
         }
         else
         {
