@@ -162,10 +162,11 @@ public slots:
     void OnSwitchToFM();
     void OnSwitchToAM();
     void OnHelpAbout() {AboutDlg.show();}
-    void OnSoundFileChanged(CDRMReceiver::ESFStatus) {UpdateWindowTitle(); ClearDisplay();};
+    void OnSoundFileChanged(CDRMReceiver::ESFStatus) {UpdateWindowTitle(); ClearDisplay();}
     void OnWhatsThis();
     void OnSysTrayActivated(QSystemTrayIcon::ActivationReason);
 signals:
+    void dataStatusChanged(ETypeRxStatus);
     void plotStyleChanged(int);
 };
 

@@ -27,14 +27,12 @@
 \******************************************************************************/
 
 #include "BWSViewer.h"
-#include "../DrmReceiver.h"
 #include "../util-QT/Util.h"
 #include "../datadecoding/DataDecoder.h"
 #include <QDir>
 #include <QFile>
 #include <QMessageBox>
 #include <QWebHistory>
-
 
 #define CACHE_HOST          "127.0.0.1" /* Not an actual server, MUST be set to "127.0.0.1" */
 
@@ -45,14 +43,15 @@
 #define ENABLE_HACK /* Do we really need these hack unless for vtc trial sample? */
 
 
-BWSViewer::BWSViewer(CDRMReceiver& rec, CSettings& Settings, QWidget* parent):
+BWSViewer::BWSViewer(CSettings& Settings, QWidget* parent):
     CWindow(parent, Settings, "BWS"),
     nam(this, cache, waitobjs, bAllowExternalContent, strCacheHost),
-    receiver(rec), decoder(NULL), bHomeSet(false), bPageLoading(false),
+    decoder(NULL), bHomeSet(false), bPageLoading(false),
     bSaveFileToDisk(false), bRestrictedProfile(false), bAllowExternalContent(true),
     bClearCacheOnNewService(true), bDirectoryIndexChanged(false),
     iLastAwaitingOjects(0), strCacheHost(CACHE_HOST),
-    iLastServiceID(0), iCurrentDataServiceID(0), bLastServiceValid(false), iLastValidServiceID(0)
+    iLastServiceID(0), iCurrentDataServiceID(0), bLastServiceValid(false), iLastValidServiceID(0),
+    strLastLabel(),strCurrentSavePath()
 {
     setupUi(this);
 
@@ -88,11 +87,78 @@ BWSViewer::BWSViewer(CDRMReceiver& rec, CSettings& Settings, QWidget* parent):
     connect(webView, SIGNAL(loadStarted()), this, SLOT(OnWebViewLoadStarted()));
     connect(webView, SIGNAL(loadFinished(bool)), this, SLOT(OnWebViewLoadFinished(bool)));
     connect(webView, SIGNAL(titleChanged(const QString &)), this, SLOT(OnWebViewTitleChanged(const QString &)));
-    connect(&Timer, SIGNAL(timeout()), this, SLOT(OnTimer()));
 }
 
 BWSViewer::~BWSViewer()
 {
+}
+
+void BWSViewer::setSavePath(const QString& s)
+{
+    /* Append service ID to MOT save path */
+    strCurrentSavePath = s + QString().setNum(iCurrentDataServiceID, 16).toUpper().rightJustified(8, '0') + "/";
+}
+
+void BWSViewer::setDecoder(CDataDecoder* dec)
+{
+    decoder = dec;
+}
+
+void BWSViewer::setServiceInformation(const CService& service)
+{
+    QString strLabel = QString().fromUtf8(service.strLabel.c_str()).trimmed();
+
+    UpdateWindowTitle(service.iServiceID, true, strLabel);
+
+    // assume it is a new service
+    OnClearCache();
+}
+
+void BWSViewer::setStatus(ETypeRxStatus eStatus)
+{
+    switch(eStatus)
+    {
+    case NOT_PRESENT:
+        LEDStatus->Reset();
+        break;
+
+    case CRC_ERROR:
+        LEDStatus->SetLight(CMultColorLED::RL_RED);
+        break;
+
+    case DATA_ERROR:
+        LEDStatus->SetLight(CMultColorLED::RL_YELLOW);
+        break;
+
+    case RX_OK:
+        LEDStatus->SetLight(CMultColorLED::RL_GREEN);
+        break;
+    }
+
+    if (Changed())
+    {
+        if (bDirectoryIndexChanged)
+        {
+            bDirectoryIndexChanged = false;
+            if (!bHomeSet)
+            {
+                bHomeSet = true;
+                OnHome();
+            }
+        }
+        Update();
+        ButtonClearCache->setEnabled(true);
+        actionClear_Cache->setEnabled(true);
+    }
+    else
+    {
+        unsigned int iAwaitingOjects = waitobjs;
+        if (iLastAwaitingOjects != iAwaitingOjects)
+        {
+            iLastAwaitingOjects = iAwaitingOjects;
+            UpdateStatus();
+        }
+    }
 }
 
 void BWSViewer::UpdateButtons()
@@ -154,79 +220,6 @@ void BWSViewer::Update()
 {
     UpdateStatus();
     UpdateButtons();
-}
-
-void BWSViewer::OnTimer()
-{
-    /* Get current service parameters */
-    uint32_t iServiceID; bool bServiceValid; QString strLabel; ETypeRxStatus eStatus;
-    GetServiceParams(&iServiceID, &bServiceValid, &strLabel, &eStatus);
-
-    /* Set current data service ID */
-    iCurrentDataServiceID = bServiceValid ? iServiceID : 0;
-
-    /* Check for new valid data service */
-    if (bServiceValid && iLastValidServiceID != iServiceID)
-    {
-        iLastValidServiceID = iServiceID;
-        if (bClearCacheOnNewService)
-            OnClearCache();
-    }
-
-    /* Update the window title if something have changed */
-    if (iLastServiceID != iServiceID || bLastServiceValid != bServiceValid || strLastLabel != strLabel)
-        UpdateWindowTitle(iServiceID, bServiceValid, strLabel);
-
-    switch(eStatus)
-    {
-    case NOT_PRESENT:
-        LEDStatus->Reset();
-        break;
-
-    case CRC_ERROR:
-        LEDStatus->SetLight(CMultColorLED::RL_RED);
-        break;
-
-    case DATA_ERROR:
-        LEDStatus->SetLight(CMultColorLED::RL_YELLOW);
-        break;
-
-    case RX_OK:
-        LEDStatus->SetLight(CMultColorLED::RL_GREEN);
-        break;
-    }
-
-    if (decoder == NULL)
-    {
-        decoder = receiver.GetDataDecoder();
-        if (decoder == NULL)
-            qDebug("can't get data decoder from receiver");
-    }
-
-    if (Changed())
-    {
-        if (bDirectoryIndexChanged)
-        {
-            bDirectoryIndexChanged = false;
-            if (!bHomeSet)
-            {
-                bHomeSet = true;
-                OnHome();
-            }
-        }
-        Update();
-        ButtonClearCache->setEnabled(true);
-        actionClear_Cache->setEnabled(true);
-    }
-    else
-    {
-        unsigned int iAwaitingOjects = waitobjs;
-        if (iLastAwaitingOjects != iAwaitingOjects)
-        {
-            iLastAwaitingOjects = iAwaitingOjects;
-            UpdateStatus();
-        }
-    }
 }
 
 void BWSViewer::OnHome()
@@ -321,24 +314,10 @@ void BWSViewer::eventShow(QShowEvent*)
 
     bClearCacheOnNewService = getSetting("clearcacheonnewservice", bClearCacheOnNewService);
     actionClear_Cache_on_New_Service->setChecked(bClearCacheOnNewService);
-
-    /* Update window title */
-    uint32_t iServiceID; bool bServiceValid; QString strLabel;
-    GetServiceParams(&iServiceID, &bServiceValid, &strLabel);
-    UpdateWindowTitle(iServiceID, bServiceValid, strLabel);
-
-    /* Update window content */
-    OnTimer();
-
-    /* Activate real-time timer when window is shown */
-    Timer.start(GUI_CONTROL_UPDATE_TIME);
 }
 
 void BWSViewer::eventHide(QHideEvent*)
 {
-    /* Deactivate real-time timer so that it does not get new pictures */
-    Timer.stop();
-
     putSetting("savefiletodisk", bSaveFileToDisk);
 
     putSetting("restrictedprofile", bRestrictedProfile);
@@ -413,11 +392,6 @@ void BWSViewer::SaveMOTObject(const QString& strObjName,
 {
     const CVector<_BYTE>& vecbRawData = obj.Body.vecData;
 
-    QString strCurrentSavePath;
-
-    /* Set up save path */
-    SetupSavePath(strCurrentSavePath);
-
     /* Generate safe filename */
     QString strFileName = strCurrentSavePath + VerifyHtmlPath(strObjName);
 
@@ -443,32 +417,6 @@ void BWSViewer::SaveMOTObject(const QString& strObjName,
 		QMessageBox::information(this, file.errorString(), strFileName);
 	}
 }
-
-void BWSViewer::SetupSavePath(QString& strSavePath)
-{
-    /* Append service ID to MOT save path */
-    strSavePath = strSavePath.setNum(iCurrentDataServiceID, 16).toUpper().rightJustified(8, '0');
-    strSavePath = QString::fromUtf8((*receiver.GetParameters()).GetDataDirectory("MOT").c_str()) + strSavePath + "/";
-}
-
-void BWSViewer::GetServiceParams(uint32_t* iServiceID, bool* bServiceValid, QString* strLabel, ETypeRxStatus* eStatus)
-{
-    CParameter& Parameters = *receiver.GetParameters();
-    Parameters.Lock();
-        const int iCurSelDataServ = Parameters.GetCurSelDataService();
-        const CService service = Parameters.Service[iCurSelDataServ];
-        if (eStatus)
-            *eStatus = Parameters.DataComponentStatus[iCurSelDataServ].GetStatus();
-    Parameters.Unlock();
-    if (iServiceID)
-        *iServiceID = service.iServiceID;
-    if (bServiceValid)
-        *bServiceValid = service.IsActive() && service.eAudDataFlag == CService::SF_DATA;
-    /* Do UTF-8 to QString (UNICODE) conversion with the label strings */
-    if (strLabel)
-        *strLabel = QString().fromUtf8(service.strLabel.c_str()).trimmed();
-}
-
 
 //////////////////////////////////////////////////////////////////
 // CWebsiteCache implementation

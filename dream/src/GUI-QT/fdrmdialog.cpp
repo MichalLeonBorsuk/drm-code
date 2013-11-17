@@ -44,6 +44,7 @@
 #endif
 #include "../Scheduler.h"
 #include "../util-QT/Util.h"
+#include "../util-QT/EPG.h"
 
 // Simone's values
 // static _REAL WMERSteps[] = {8.0, 12.0, 16.0, 20.0, 24.0};
@@ -106,17 +107,18 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& Settings,
 
     /* MOT broadcast website viewer window */
 #ifdef QT_WEBKIT_LIB
-    pBWSDlg = new BWSViewer(DRMReceiver, Settings, this);
+    pBWSDlg = new BWSViewer(Settings, this);
 #endif
 
     /* Journaline viewer window */
-    pJLDlg = new JLViewer(DRMReceiver, Settings, this);
+    pJLDlg = new JLViewer(Settings, this);
 
     /* MOT slide show window */
-    pSlideShowDlg = new SlideShowViewer(DRMReceiver, Settings, this);
+    pSlideShowDlg = new SlideShowViewer(Settings, this);
 
     /* Programme Guide Window */
-    pEPGDlg = new EPGDlg(DRMReceiver, Settings, this);
+    pEPGDlg = new EPGDlg(Settings, this);
+    pEPGDlg->setDecoder(new EPG(Parameters));
 
     /* Evaluation window */
     pSysEvalDlg = new systemevalDlg(DRMReceiver, Settings, this);
@@ -833,7 +835,7 @@ void FDRMDialog::UpdateDisplay()
             TextTextMessage->setText("");
         }
 
-        /* Check whether service parameters were not transmitted yet */
+        /* Check whether service parameters were received yet */
         if (audioService.IsActive())
         {
             showServiceInfo(audioService);
@@ -873,6 +875,12 @@ void FDRMDialog::UpdateDisplay()
             LabelServiceID->setText("");
         }
     }
+
+    Parameters.Lock();
+    int iCurSelDataServ = Parameters.GetCurSelDataService();
+    ETypeRxStatus status = Parameters.DataComponentStatus[iCurSelDataServ].GetStatus();
+    Parameters.Unlock();
+    emit dataStatusChanged(status);
 }
 
 void FDRMDialog::ClearDisplay()
@@ -1001,30 +1009,58 @@ void FDRMDialog::OnSelectDataService(int shortId)
     CParameter& Parameters = *DRMReceiver.GetParameters();
     QWidget* pDlg = NULL;
 
+    CDataDecoder* DataDecoder = DRMReceiver.GetDataDecoder();
+
     Parameters.Lock();
 
+    const int iCurSelAudioServ = Parameters.GetCurSelAudioService();
+    const uint32_t iAudioServiceID = Parameters.Service[iCurSelAudioServ].iServiceID;
+
+    /* Get current data service */
+    int shortID = Parameters.GetCurSelDataService();
+    CService service = Parameters.Service[shortID];
+
+    CMOTDABDec* motdec = DataDecoder->getApplication(service.DataParam.iPacketID);
     int iAppIdent = Parameters.Service[shortId].DataParam.iUserAppIdent;
+
+    if(pDlg)
+    {
+        disconnect(this, SIGNAL(dataStatusChanged(ETypeRxStatus)), pDlg, SLOT(setStatus(ETypeRxStatus)));
+        pDlg = NULL;
+    }
 
     switch(iAppIdent)
     {
     case DAB_AT_EPG:
+        pEPGDlg->setServiceInformation(Parameters.ServiceInformation, iAudioServiceID);
         pDlg = pEPGDlg;
         break;
     case DAB_AT_BROADCASTWEBSITE:
 #ifdef QT_WEBKIT_LIB
+        pBWSDlg->setDecoder(DataDecoder);
+        pBWSDlg->setServiceInformation(service);
+        pBWSDlg->setSavePath(QString::fromUtf8(Parameters.GetDataDirectory("MOT").c_str()));
         pDlg = pBWSDlg;
 #endif
         break;
     case DAB_AT_JOURNALINE:
+        pJLDlg->setDecoder(DataDecoder);
+        pJLDlg->setServiceInformation(service, iAudioServiceID);
+        pJLDlg->setSavePath(QString::fromUtf8(Parameters.GetDataDirectory("Journaline").c_str()));
         pDlg = pJLDlg;
         break;
     case DAB_AT_MOTSLIDESHOW:
+        pSlideShowDlg->setDecoder(motdec);
+        pSlideShowDlg->setServiceInformation(service);
+        pSlideShowDlg->setSavePath(QString::fromUtf8(Parameters.GetDataDirectory("MOT").c_str()));
         pDlg = pSlideShowDlg;
         break;
     }
 
     if(pDlg != NULL)
+    {
         Parameters.SetCurSelDataService(shortId);
+    }
 
     CService::ETyOServ eAudDataFlag = Parameters.Service[shortId].eAudDataFlag;
 
@@ -1034,6 +1070,7 @@ void FDRMDialog::OnSelectDataService(int shortId)
     {
         if (pDlg != pEPGDlg)
             iLastMultimediaServiceSelected = shortId;
+        connect(this, SIGNAL(dataStatusChanged(ETypeRxStatus)), pDlg, SLOT(setStatus(ETypeRxStatus)));
         pDlg->show();
     }
     else
