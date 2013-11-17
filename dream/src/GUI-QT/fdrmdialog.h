@@ -63,6 +63,7 @@
 #include "../DrmReceiver.h"
 #include "../util/Vector.h"
 #include "../datadecoding/DataDecoder.h"
+#include "serviceselector.h"
 
 /* Classes ********************************************************************/
 class BWSViewer;
@@ -86,7 +87,6 @@ protected:
     CDRMReceiver&		DRMReceiver;
     QTimer				Timer;
     QTimer				TimerClose;
-    vector<QLabel*>		serviceLabels;
 
     CLogging*			pLogging;
     systemevalDlg*		pSysEvalDlg;
@@ -101,7 +101,6 @@ protected:
     FMDialog*			pFMDlg;
     GeneralSettingsDlg* pGeneralSettingsDlg;
     QMenuBar*			pMenu;
-    QButtonGroup*		pButtonGroup;
     QMenu*				pReceiverModeMenu;
     QMenu*				pSettingsMenu;
     QMenu*				pPlotStyleMenu;
@@ -118,6 +117,8 @@ protected:
     CScheduler* 	    pScheduler;
     QTimer*		        pScheduleTimer;
     int                 iCurrentFrequency;
+    ServiceSelector*    pServiceSelector;
+    QTabWidget*         pServiceTabs;
 
     void SetStatus(CMultColorLED* LED, ETypeRxStatus state);
     virtual void        eventClose(QCloseEvent* ce);
@@ -156,7 +157,6 @@ private slots:
     void OnTimerClose();
     void OnSelectAudioService(int);
     void OnSelectDataService(int);
-    void OnViewMultimediaDlg();
     void OnMenuSetDisplayColor();
     void OnNewAcquisition();
     void OnSwitchMode(int);
@@ -181,6 +181,8 @@ private slots:
     void onSetReverbEffect(bool);
     void onSetRecFilter(bool);
     void onSetIntCons(bool);
+    void on_action_Multimedia_Dialog_triggered();
+    void on_actionSingle_Window_Mode_triggered(bool checked);
 
 signals:
     void dataStatusChanged(ETypeRxStatus);
