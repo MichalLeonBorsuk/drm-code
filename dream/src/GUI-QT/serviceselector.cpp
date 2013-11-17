@@ -1,5 +1,8 @@
 #include "serviceselector.h"
 #include "ui_serviceselector.h"
+#include "../Parameter.h"
+#include "../util-QT/Util.h"
+#include <../datadecoding/DataDecoder.h>
 
 ServiceSelector::ServiceSelector(QWidget *parent) :
     QWidget(parent),
@@ -53,10 +56,77 @@ ServiceSelector::~ServiceSelector()
     delete ui;
 }
 
-void ServiceSelector::setLabel(int i, const QString& label)
+void ServiceSelector::setLabel(int short_id, const CService& service,
+       double rAudioBitRate, double rDataBitRate, bool bAFS, bool bCanDecode)
 {
-    serviceLabels[i]->setText(label);
-    pButtonGroup->button(i)->setEnabled(label != "");
+    QString text;
+
+    /* Check, if service is used */
+    if (service.IsActive())
+    {
+        /* Do UTF-8 to string conversion with the label strings */
+        QString strLabel = QString().fromUtf8(service.strLabel.c_str());
+
+        /* Label for service selection button (service label, codec
+           and Mono / Stereo information) */
+        QString strCodec = GetCodecString(service);
+        QString strType = GetTypeString(service);
+        text = strLabel;
+        if (!strCodec.isEmpty() || !strType.isEmpty())
+            text += "  |   " + strCodec + " " + strType;
+
+        /* Bit-rate (only show if greater than 0) */
+        if (rAudioBitRate > (_REAL) 0.0)
+        {
+            text += " (" + QString().setNum(rAudioBitRate, 'f', 2) + " kbps)";
+        }
+
+        /* Audio service */
+        if ((service.eAudDataFlag == CService::SF_AUDIO))
+        {
+            /* Report missing codec */
+            if (!bCanDecode)
+                text += tr(" [no codec available]");
+
+            /* Show, if a multimedia stream is connected to this service */
+            if (service.DataParam.iStreamID != STREAM_ID_NOT_USED)
+            {
+                if (service.DataParam.iUserAppIdent == DAB_AT_EPG)
+                    text += tr(" + EPG"); /* EPG service */
+                else
+                {
+                    text += tr(" + MM"); /* other multimedia service */
+                }
+
+                /* Bit-rate of connected data stream */
+                text += " (" + QString().setNum(rDataBitRate, 'f', 2) + " kbps)";
+            }
+        }
+        /* Data service */
+        else
+        {
+            if (service.DataParam.ePacketModInd == CDataParam::PM_PACKET_MODE)
+            {
+                if (service.DataParam.eAppDomain == CDataParam::AD_DAB_SPEC_APP)
+                {
+                    switch (service.DataParam.iUserAppIdent)
+                    {
+                    case DAB_AT_BROADCASTWEBSITE:
+                    case DAB_AT_JOURNALINE:
+                    case DAB_AT_MOTSLIDESHOW:
+                        break;
+                    }
+                }
+            }
+        }
+
+        if(bAFS)
+        {
+            text += tr(" + AFS");
+        }
+    }
+    serviceLabels[short_id]->setText(text);
+    pButtonGroup->button(short_id)->setEnabled(text != "");
 }
 
 void ServiceSelector::check(int i)

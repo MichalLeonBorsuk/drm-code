@@ -10,6 +10,8 @@ namespace Ui {
 class ServiceSelector;
 }
 
+class CService;
+
 class ServiceSelector : public QWidget
 {
     Q_OBJECT
@@ -17,7 +19,7 @@ class ServiceSelector : public QWidget
 public:
     explicit ServiceSelector(QWidget *parent = 0);
     ~ServiceSelector();
-    void setLabel(int, const QString&);
+    void setLabel(int, const CService&, double, double, bool, bool);
     void check(int i);
     void disableAll();
 

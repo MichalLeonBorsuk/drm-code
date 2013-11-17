@@ -137,9 +137,6 @@ protected:
     void		ChangeGUIModeToAM();
     void		ChangeGUIModeToFM();
 
-    QString	GetCodecString(const CService&);
-    QString	GetTypeString(const CService&);
-    QString serviceSelector(CParameter&, int);
     void showTextMessage(const QString&);
     void showServiceInfo(const CService&);
     void startLogging();
@@ -183,6 +180,8 @@ private slots:
     void onSetIntCons(bool);
     void on_action_Multimedia_Dialog_triggered();
     void on_actionSingle_Window_Mode_triggered(bool checked);
+    void onCurrentIndexChanged(int);
+    void serviceTabsSetLabel(int, const QString&);
 
 signals:
     void dataStatusChanged(ETypeRxStatus);

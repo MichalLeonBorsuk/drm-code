@@ -51,16 +51,14 @@ public slots:
 protected:
     virtual void eventShow(QShowEvent*);
     virtual void eventHide(QHideEvent*);
-    QTimer        Timer;
     QTextDocument document;
 //    QString     strCurrentSavePath;
 
 private slots:
-    void OnButtonStepBack();
-    void OnSave();
-    void OnSaveAll();
-    void OnClearAll();
-    void OnSetFont();
+    void on_actionSave_triggered();
+    void on_actionSave_All_triggered();
+    void on_actionClear_All_triggered();
+    void on_actionSet_Font_triggered();
 };
 
 #endif

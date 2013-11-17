@@ -32,6 +32,7 @@
 #include <QString>
 
 class CDRMTransceiver;
+class CService;
 
 QString VerifyFilename(QString filename);
 
@@ -46,5 +47,8 @@ QString& Linkify(QString& text);
 void CreateDirectories(const QString& strFilename);
 
 void RestartTransceiver(CDRMTransceiver *DRMTransceiver);
+
+QString	GetCodecString(const CService&);
+QString	GetTypeString(const CService&);
 
 #endif // __UTIL_QT_UTIL_H

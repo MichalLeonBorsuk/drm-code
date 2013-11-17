@@ -269,6 +269,7 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& Settings,
     pServiceTabs = new QTabWidget(this);
     verticalLayout->addWidget(pServiceTabs);
     pServiceTabs->hide();
+    connect(pServiceTabs, SIGNAL(currentChanged(int)), this, SLOT(onCurrentIndexChanged(int)));
 
     ClearDisplay();
 
@@ -319,6 +320,39 @@ void FDRMDialog::on_actionSingle_Window_Mode_triggered(bool checked)
         pServiceTabs->hide();
         pServiceSelector->show();
     }
+}
+
+void FDRMDialog::serviceTabsSetLabel(int short_id, const QString& l)
+{
+    if(l!="")
+    {
+        if(pServiceTabs->count()<short_id+1)
+        {
+            int index = pServiceTabs->addTab(new QLabel(QString("short id %1").arg(short_id)), l);
+            pServiceTabs->tabBar()->setTabData(index, short_id);
+            // TODO add tabs for data components of audio services
+        }
+        else
+        {
+            // TODO
+        }
+    }
+}
+
+void FDRMDialog::onCurrentIndexChanged(int index)
+{
+    int short_id = pServiceTabs->tabBar()->tabData(index).toInt();
+    CParameter* p = DRMReceiver.GetParameters();
+    p->Lock();
+    if(p->Service[short_id].eAudDataFlag == CService::SF_AUDIO)
+    {
+        p->SetCurSelAudioService(short_id);
+    }
+    else
+    {
+        // TODO
+    }
+    p->Unlock();
 }
 
 void FDRMDialog::on_actionGeneralSettings_triggered()
@@ -733,95 +767,6 @@ void FDRMDialog::showServiceInfo(const CService& service)
         LabelCountryCode->setText("");
 }
 
-QString FDRMDialog::serviceSelector(CParameter& Parameters, int i)
-{
-    Parameters.Lock();
-
-    CService service = Parameters.Service[i];
-    const _REAL rAudioBitRate = Parameters.GetBitRateKbps(i, FALSE);
-    const _REAL rDataBitRate = Parameters.GetBitRateKbps(i, TRUE);
-
-    /* detect if AFS mux information is available TODO - align to service */
-    bool bAFS = ((i==0) && (
-                     (Parameters.AltFreqSign.vecMultiplexes.size() > 0)
-                     || (Parameters.AltFreqSign.vecOtherServices.size() > 0)
-                 ));
-
-    Parameters.Unlock();
-
-    QString text;
-
-    /* Check, if service is used */
-    if (service.IsActive())
-    {
-        /* Do UTF-8 to string conversion with the label strings */
-        QString strLabel = QString().fromUtf8(service.strLabel.c_str());
-
-        /* Label for service selection button (service label, codec
-           and Mono / Stereo information) */
-		QString strCodec = GetCodecString(service);
-		QString strType = GetTypeString(service);
-		text = strLabel;
-		if (!strCodec.isEmpty() || !strType.isEmpty())
-			text += "  |   " + strCodec + " " + strType;
-
-        /* Bit-rate (only show if greater than 0) */
-        if (rAudioBitRate > (_REAL) 0.0)
-        {
-            text += " (" + QString().setNum(rAudioBitRate, 'f', 2) + " kbps)";
-        }
-
-        /* Audio service */
-        if ((service.eAudDataFlag == CService::SF_AUDIO))
-        {
-            /* Report missing codec */
-            if (!DRMReceiver.GetAudSorceDec()->CanDecode(service.AudioParam.eAudioCoding))
-                text += tr(" [no codec available]");
-
-            /* Show, if a multimedia stream is connected to this service */
-            if (service.DataParam.iStreamID != STREAM_ID_NOT_USED)
-            {
-                if (service.DataParam.iUserAppIdent == DAB_AT_EPG)
-                    text += tr(" + EPG"); /* EPG service */
-                else
-                {
-                    text += tr(" + MM"); /* other multimedia service */
-                    /* Set multimedia service bit */
-                    iMultimediaServiceBit |= 1 << i;
-                }
-
-                /* Bit-rate of connected data stream */
-                text += " (" + QString().setNum(rDataBitRate, 'f', 2) + " kbps)";
-            }
-        }
-        /* Data service */
-        else
-        {
-            if (service.DataParam.ePacketModInd == CDataParam::PM_PACKET_MODE)
-            {
-                if (service.DataParam.eAppDomain == CDataParam::AD_DAB_SPEC_APP)
-                {
-                    switch (service.DataParam.iUserAppIdent)
-                    {
-                    case DAB_AT_BROADCASTWEBSITE:
-                    case DAB_AT_JOURNALINE:
-                    case DAB_AT_MOTSLIDESHOW:
-                        /* Set multimedia service bit */
-                        iMultimediaServiceBit |= 1 << i;
-                        break;
-                    }
-                }
-            }
-        }
-
-        if(bAFS)
-        {
-            text += tr(" + AFS");
-        }
-    }
-    return text;
-}
-
 void FDRMDialog::UpdateDisplay()
 {
     CParameter& Parameters = *(DRMReceiver.GetParameters());
@@ -842,7 +787,36 @@ void FDRMDialog::UpdateDisplay()
     int i, iFirstAudioService=-1, iFirstDataService=-1;
     for(i=0; i < MAX_NUM_SERVICES; i++)
     {
-        pServiceSelector->setLabel(i, serviceSelector(Parameters, i));
+
+        const CService& service = Parameters.Service[i];
+        const _REAL rAudioBitRate = Parameters.GetBitRateKbps(i, FALSE);
+        const _REAL rDataBitRate = Parameters.GetBitRateKbps(i, TRUE);
+
+        /* detect if AFS mux information is available TODO - align to service */
+        bool bAFS = ((i==0) && (
+                         (Parameters.AltFreqSign.vecMultiplexes.size() > 0)
+                         || (Parameters.AltFreqSign.vecOtherServices.size() > 0)
+                     ));
+        bool bCanDecodeAudio = DRMReceiver.GetAudSorceDec()->CanDecode(service.AudioParam.eAudioCoding);
+        if (service.DataParam.ePacketModInd == CDataParam::PM_PACKET_MODE)
+        {
+            if (service.DataParam.eAppDomain == CDataParam::AD_DAB_SPEC_APP)
+            {
+                switch (service.DataParam.iUserAppIdent)
+                {
+                case DAB_AT_BROADCASTWEBSITE:
+                case DAB_AT_JOURNALINE:
+                case DAB_AT_MOTSLIDESHOW:
+                    /* Set multimedia service bit */
+                    iMultimediaServiceBit |= 1 << i;
+                    break;
+                default:
+                    ;
+                }
+            }
+        }
+        pServiceSelector->setLabel(i, service, rAudioBitRate, rDataBitRate, bAFS, bCanDecodeAudio);
+        serviceTabsSetLabel(i, QString::fromUtf8(service.strLabel.c_str()));
         if (!bServiceIsValid && (iFirstAudioService == -1 || iFirstDataService == -1))
         {
             Parameters.Lock();
@@ -891,6 +865,7 @@ void FDRMDialog::UpdateDisplay()
         Parameters.Unlock();
 
         pServiceSelector->check(iCurSelAudioServ);
+        // no need to do anything with service tabs here, as they naturally show which one is active
 
         /* If we have text messages */
         if (audioService.AudioParam.bTextflag == TRUE)
@@ -969,6 +944,7 @@ void FDRMDialog::ClearDisplay()
     /* No signal is currently received ---------------------------------- */
     /* Disable service buttons and associated labels */
     pServiceSelector->disableAll();
+    pServiceTabs->clear();
 
     /* Main text labels */
     LabelBitrate->setText("");
@@ -1244,194 +1220,6 @@ void FDRMDialog::eventClose(QCloseEvent* ce)
     }
     else
         ce->ignore();
-}
-
-QString FDRMDialog::GetCodecString(const CService& service)
-{
-    QString strReturn;
-
-    /* First check if it is audio or data service */
-    if (service.eAudDataFlag == CService::SF_AUDIO)
-    {
-        /* Audio service */
-        const CAudioParam::EAudSamRat eSamRate = service.AudioParam.eAudioSamplRate;
-
-        /* Audio coding */
-        switch (service.AudioParam.eAudioCoding)
-        {
-        case CAudioParam::AC_NONE:
-            break;
-
-        case CAudioParam::AC_AAC:
-            /* Only 12 and 24 kHz sample rates are supported for AAC encoding */
-            if (eSamRate == CAudioParam::AS_12KHZ)
-                strReturn = "aac";
-            else
-                strReturn = "AAC";
-            break;
-
-        case CAudioParam::AC_CELP:
-            /* Only 8 and 16 kHz sample rates are supported for CELP encoding */
-            if (eSamRate == CAudioParam::AS_8_KHZ)
-                strReturn = "celp";
-            else
-                strReturn = "CELP";
-            break;
-
-        case CAudioParam::AC_HVXC:
-            strReturn = "HVXC";
-            break;
-
-		case CAudioParam::AC_OPUS:
-			strReturn = "OPUS ";
-			/* Opus Audio sub codec */
-			switch (service.AudioParam.eOPUSSubCod)
-			{
-				case CAudioParam::OS_SILK:
-					strReturn += "SILK ";
-					break;
-				case CAudioParam::OS_HYBRID:
-					strReturn += "HYBRID ";
-					break;
-				case CAudioParam::OS_CELT:
-					strReturn += "CELT ";
-					break;
-			}
-			/* Opus Audio bandwidth */
-			switch (service.AudioParam.eOPUSBandwidth)
-			{
-				case CAudioParam::OB_NB:
-					strReturn += "NB";
-					break;
-				case CAudioParam::OB_MB:
-					strReturn += "MB";
-					break;
-				case CAudioParam::OB_WB:
-					strReturn += "WB";
-					break;
-				case CAudioParam::OB_SWB:
-					strReturn += "SWB";
-					break;
-				case CAudioParam::OB_FB:
-					strReturn += "FB";
-					break;
-			}
-        }
-
-        /* SBR */
-        if (service.AudioParam.eSBRFlag == CAudioParam::SB_USED)
-        {
-            strReturn += "+";
-        }
-    }
-    else
-    {
-        /* Data service */
-        strReturn = "Data:";
-    }
-
-    return strReturn;
-}
-
-QString FDRMDialog::GetTypeString(const CService& service)
-{
-    QString strReturn;
-
-    /* First check if it is audio or data service */
-    if (service.eAudDataFlag == CService::SF_AUDIO)
-    {
-        /* Audio service */
-        switch (service.AudioParam.eAudioCoding)
-        {
-        case CAudioParam::AC_NONE:
-            break;
-
-        case CAudioParam::AC_OPUS:
-            /* Opus channels configuration */
-            switch (service.AudioParam.eOPUSChan)
-            {
-            case CAudioParam::OC_MONO:
-            strReturn = "MONO";
-            break;
-
-            case CAudioParam::OC_STEREO:
-            strReturn = "STEREO";
-            break;
-            }
-            break;
-
-        default:
-            /* Mono-Stereo */
-            switch (service.AudioParam.eAudioMode)
-            {
-            case CAudioParam::AM_MONO:
-                strReturn = "Mono";
-                break;
-
-            case CAudioParam::AM_P_STEREO:
-                strReturn = "P-Stereo";
-                break;
-
-            case CAudioParam::AM_STEREO:
-                strReturn = "Stereo";
-                break;
-            }
-        }
-    }
-    else
-    {
-        /* Data service */
-        if (service.DataParam.ePacketModInd == CDataParam::PM_PACKET_MODE)
-        {
-            if (service.DataParam.eAppDomain == CDataParam::AD_DAB_SPEC_APP)
-            {
-                switch (service.DataParam.iUserAppIdent)
-                {
-                case 1:
-                    strReturn = tr("Dynamic labels");
-                    break;
-
-                case DAB_AT_MOTSLIDESHOW:
-                    strReturn = tr("MOT Slideshow");
-                    break;
-
-                case DAB_AT_BROADCASTWEBSITE:
-                    strReturn = tr("MOT WebSite");
-                    break;
-
-                case DAB_AT_TPEG:
-                    strReturn = tr("TPEG");
-                    break;
-
-                case DAB_AT_DGPS:
-                    strReturn = tr("DGPS");
-                    break;
-
-                case DAB_AT_TMC:
-                    strReturn = tr("TMC");
-                    break;
-
-                case DAB_AT_EPG:
-                    strReturn = tr("EPG - Electronic Programme Guide");
-                    break;
-
-                case DAB_AT_JAVA:
-                    strReturn = tr("Java");
-                    break;
-
-                case DAB_AT_JOURNALINE: /* Journaline */
-                    strReturn = tr("Journaline");
-                    break;
-                }
-            }
-            else
-                strReturn = tr("Unknown Service");
-        }
-        else
-            strReturn = tr("Unknown Service");
-    }
-
-    return strReturn;
 }
 
 void FDRMDialog::onSaveAudio(const string& s)

@@ -37,22 +37,16 @@ JLViewer::JLViewer(CSettings& Settings, QWidget* parent):
     setupUi(this);
 
     connect(buttonOk, SIGNAL(clicked()), this, SLOT(close()));
-    textBrowser->setDocument(&document);
-
-    connect(actionClear_All, SIGNAL(triggered()), SLOT(OnClearAll()));
-    connect(actionSave, SIGNAL(triggered()), SLOT(OnSave()));
-    connect(actionSave_All, SIGNAL(triggered()), SLOT(OnSaveAll()));
     connect(actionClose, SIGNAL(triggered()), SLOT(close()));
-    connect(actionSet_Font, SIGNAL(triggered()), SLOT(OnSetFont()));
+    connect(ButtonStepBack, SIGNAL(clicked()), textBrowser, SLOT(backward()));
+    connect(textBrowser, SIGNAL(backwardAvailable(bool)), ButtonStepBack, SLOT(setEnabled(bool)));
+
+    textBrowser->setDocument(&document);
 
     /* Update time for color LED */
     LEDStatus->SetUpdateTime(1000);
 
-    /* Connect controls */
-    connect(ButtonStepBack, SIGNAL(clicked()), this, SLOT(OnButtonStepBack()));
-    connect(textBrowser, SIGNAL(backwardAvailable(bool)), ButtonStepBack, SLOT(setEnabled(bool)));
-
-    OnClearAll();
+    on_actionClear_All_triggered();
 }
 
 JLViewer::~JLViewer()
@@ -155,20 +149,15 @@ void JLViewer::eventHide(QHideEvent*)
     putSetting("fontitalic", fontTextBrowser.italic());
 }
 
-void JLViewer::OnButtonStepBack()
-{
-    textBrowser->backward();
-}
-
-void JLViewer::OnSave()
+void JLViewer::on_actionSave_triggered()
 {
 }
 
-void JLViewer::OnSaveAll()
+void JLViewer::on_actionSave_All_triggered()
 {
 }
 
-void JLViewer::OnClearAll()
+void JLViewer::on_actionClear_All_triggered()
 {
     actionClear_All->setEnabled(false);
     actionSave->setEnabled(false);
@@ -179,7 +168,7 @@ void JLViewer::OnClearAll()
     // TODO - clear JL object cache ?
 }
 
-void JLViewer::OnSetFont()
+void JLViewer::on_actionSet_Font_triggered()
 {
     bool bok;
 
