@@ -43,17 +43,16 @@
 
 /* Implementation *************************************************************/
 #ifdef HAVE_LIBHAMLIB
-StationsDlg::StationsDlg(CDRMReceiver& DRMReceiver, CSettings& Settings, CRig& Rig, QMap<QWidget*,QString>& parents):
+StationsDlg::StationsDlg(CSettings& Settings, CRig& Rig, QMap<QWidget*,QString>& parents):
 CWindow(parents, Settings, "Stations"),
-DRMReceiver(DRMReceiver), Rig(Rig),
+Rig(Rig),
 #else
-StationsDlg::StationsDlg(CDRMReceiver& DRMReceiver, CSettings& Settings, QMap<QWidget*,QString>& parents):
+StationsDlg::StationsDlg(CSettings& Settings, QMap<QWidget*,QString>& parents):
 CWindow(parents, Settings, "Stations"),
-DRMReceiver(DRMReceiver),
 #endif
 greenCube(":/icons/greenCube.png"), redCube(":/icons/redCube.png"),
 orangeCube(":/icons/orangeCube.png"), pinkCube(":/icons/pinkCube.png"),
-bReInitOnFrequencyChange(FALSE)
+eRecMode(RM_NONE)
 {
 	setupUi(this);
 #if QWT_VERSION < 0x060100
@@ -256,6 +255,42 @@ void StationsDlg::LoadSchedule()
     );
 }
 
+void StationsDlg::SetFrequency(int f)
+{
+    QwtCounterFrequency->setValue(f);
+}
+
+void StationsDlg::OnSwitchMode(int m)
+{
+    ERecMode eNewRecMode = ERecMode(m);
+    if(eNewRecMode != eRecMode)
+    {
+        CSchedule::ESchedMode eSchedM = schedule.GetSchedMode();
+        bool bIsDRM = eNewRecMode == RM_DRM;
+        /* Store previous columns settings */
+        if (eSchedM != CSchedule::SM_NONE)
+        {
+            ColumnParamToStr(bIsDRM?strColumnParamdrm:strColumnParamanalog);
+        }
+        /* get sorting and filtering behaviour */
+        switch (eNewRecMode)
+        {
+        case RM_DRM:
+            schedule.SetSchedMode(CSchedule::SM_DRM);
+            break;
+
+        case RM_AM:
+            schedule.SetSchedMode(CSchedule::SM_ANALOG);
+            break;
+        default: // can't happen!
+            ;
+        }
+        /* Restore columns settings */
+        ColumnParamFromStr(bIsDRM?strColumnParamdrm:strColumnParamanalog);
+    }
+    eRecMode = eNewRecMode;
+}
+
 void StationsDlg::eventClose(QCloseEvent*)
 {
 	/* Save settings */
@@ -271,32 +306,12 @@ void StationsDlg::eventHide(QHideEvent*)
 
 void StationsDlg::eventShow(QShowEvent*)
 {
-	QwtCounterFrequency->setValue(DRMReceiver.GetFrequency());
 	bool ensmeter = false;
 	ensmeter = actionEnable_S_Meter->isChecked();
 	if(ensmeter)
 		EnableSMeter();
 	else
 		DisableSMeter();
-    CSchedule::ESchedMode eSchedM = schedule.GetSchedMode();
-    ERecMode eRecM = DRMReceiver.GetReceiverMode();
-    bool bIsDRM = eRecM == RM_DRM;
-    if (
-        (eSchedM == CSchedule::SM_DRM && !bIsDRM)
-    ||
-        (eSchedM == CSchedule::SM_ANALOG && bIsDRM)
-    )
-    {
-        /* Store previous columns settings */
-        if (eSchedM != CSchedule::SM_NONE)
-        {
-            ColumnParamToStr(bIsDRM?strColumnParamdrm:strColumnParamanalog);
-        }
-        // change mode
-        schedule.SetSchedMode(bIsDRM?CSchedule::SM_DRM:CSchedule::SM_ANALOG);
-        /* Restore columns settings */
-        ColumnParamFromStr(bIsDRM?strColumnParamdrm:strColumnParamanalog);
-    }
     if(schedule.GetNumberOfStations()==0)
 	{
         QString s = "";
@@ -335,15 +350,6 @@ void StationsDlg::OnTimer()
 	/* Only apply if time label does not show the correct time */
 	if (TextLabelUTCTime->text().compare(strUTCTime))
 		TextLabelUTCTime->setText(strUTCTime);
-
-	/* frequency could be changed by evaluation dialog or RSCI */
-	int iFrequency = DRMReceiver.GetFrequency();
-	int iCurFrequency = QwtCounterFrequency->value();
-
-	if (iFrequency != iCurFrequency)
-	{
-		QwtCounterFrequency->setValue(iFrequency);
-	}
 
 	/* reload schedule on minute boundaries */
 	if (ltime % 60 == 0)
@@ -387,20 +393,6 @@ void StationsDlg::LoadSettings()
 		break;
 	}
 
-	/* get sorting and filtering behaviour */
-	ERecMode eRecSM = DRMReceiver.GetReceiverMode();
-	switch (eRecSM)
-	{
-	case RM_DRM:
-		schedule.SetSchedMode(CSchedule::SM_DRM);
-		break;
-
-	case RM_AM:
-		schedule.SetSchedMode(CSchedule::SM_ANALOG);
-		break;
-	default: // can't happen!
-		;
-	}
 	iSortColumndrm = getSetting("sortcolumndrm", 0);
 	bCurrentSortAscendingdrm = getSetting("sortascendingdrm", true);
 	strColumnParamdrm = getSetting("columnparamdrm", QString());
@@ -574,11 +566,7 @@ void StationsDlg::UpdateTransmissionStatus()
 
 void StationsDlg::OnFreqCntNewValue(double dVal)
 {
-	int iFrequency = DRMReceiver.GetFrequency();
-	int newFreq = int(dVal);
-
-	if(newFreq != iFrequency) // avoid double tuning via RSCI
-		DRMReceiver.SetFrequency(int(dVal));
+    emit frequencyChanged(floor(dVal));
 }
 
 void StationsDlg::OnHeaderClicked(int c)
@@ -675,43 +663,14 @@ void StationsDlg::ColumnParamToStr(QString& strColumnParam)
 	}
 }
 
-void StationsDlg::SetFrequencyFromGUI(int iFreq)
-{
-	QwtCounterFrequency->setValue(iFreq);
-
-	/* If the mode has changed re-initialise the receiver */
-	ERecMode eCurrentMode = DRMReceiver.GetReceiverMode();
-
-	/* if "bReInitOnFrequencyChange" is not true, initiate a reinit when
-	schedule mode is different from receiver mode */
-	switch (schedule.GetSchedMode())
-	{
-	case CSchedule::SM_NONE:
-		break;
-
-	case CSchedule::SM_DRM:
-		if (eCurrentMode != RM_DRM)
-			DRMReceiver.SetReceiverMode(RM_DRM);
-		if (bReInitOnFrequencyChange)
-			DRMReceiver.RequestNewAcquisition();
-		break;
-
-	case CSchedule::SM_ANALOG:
-		if (eCurrentMode != RM_AM)
-			DRMReceiver.SetReceiverMode(RM_AM);
-		if (bReInitOnFrequencyChange)
-			DRMReceiver.RequestNewAcquisition();
-		break;
-	}
-}
-
 void StationsDlg::on_ListViewStations_itemSelectionChanged()
 {
 	QList<QTreeWidgetItem *> items =  ListViewStations->selectedItems();
 	if(items.size()==1)
 	{
-		SetFrequencyFromGUI(QString(items.first()->text(3)).toInt());
-	}
+        int iFreq = QString(items.first()->text(3)).toInt();
+        QwtCounterFrequency->setValue(iFreq);
+    }
 }
 
 void StationsDlg::OnSMeterMenu(int iID)

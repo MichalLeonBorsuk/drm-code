@@ -34,6 +34,7 @@
 #include <QEvent>
 #include <QShowEvent>
 #include <QCloseEvent>
+#include <QMessageBox>
 #include "SlideShowViewer.h"
 #include "JLViewer.h"
 #ifdef QT_WEBKIT_LIB
@@ -66,7 +67,7 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& Settings,
     pSysTray(NULL), pCurrentWindow(this),
     iMultimediaServiceBit(0),
     iLastMultimediaServiceSelected(-1),
-    pScheduler(NULL), pScheduleTimer(NULL)
+    pScheduler(NULL), pScheduleTimer(NULL),iCurrentFrequency(-1)
 {
     setupUi(this);
 
@@ -97,13 +98,21 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& Settings,
 
     /* Stations window */
 #ifdef HAVE_LIBHAMLIB
-    pStationsDlg = new StationsDlg(DRMReceiver, Settings, rig, parents);
+    pStationsDlg = new StationsDlg(Settings, rig, parents);
 #else
-    pStationsDlg = new StationsDlg(DRMReceiver, Settings, parents);
+    pStationsDlg = new StationsDlg(Settings, parents);
 #endif
+    connect(pStationsDlg, SIGNAL(frequencyChanged(int)), this, SLOT(OnGUISetFrequency(int)));
+    connect(this, SIGNAL(frequencyChanged(int)), pStationsDlg, SLOT(SetFrequency(int)));
 
     /* Live Schedule window */
-    pLiveScheduleDlg = new LiveScheduleDlg(DRMReceiver, Settings, parents);
+    pLiveScheduleDlg = new LiveScheduleDlg(Settings, parents);
+    pLiveScheduleDlg->setSavePath(QString::fromUtf8(DRMReceiver.GetParameters()->GetDataDirectory("AFS").c_str()));
+    connect(this, SIGNAL(position(double,double)), pLiveScheduleDlg, SLOT(setLocation(double, double)));
+    connect(this, SIGNAL(position(double,double)), pLiveScheduleDlg, SLOT(setLocation(double, double)));
+    connect(this, SIGNAL(AFS(const CAltFreqSign&)), pLiveScheduleDlg, SLOT(setAFS(const CAltFreqSign&)));
+    connect(this, SIGNAL(serviceInformation(const map <uint32_t,CServiceInformation>)),
+            pLiveScheduleDlg, SLOT(setServiceInformation(const map <uint32_t,CServiceInformation>)));
 
     /* MOT broadcast website viewer window */
 #ifdef QT_WEBKIT_LIB
@@ -240,6 +249,10 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& Settings,
     connect(pFMDlg, SIGNAL(ViewStationsDlg()), pStationsDlg, SLOT(show()));
     connect(pFMDlg, SIGNAL(ViewLiveScheduleDlg()), pLiveScheduleDlg, SLOT(show()));
 
+    connect(pAnalogDemDlg, SIGNAL(SwitchMode(int)), pStationsDlg, SLOT(OnSwitchMode(int)));
+    connect(pFMDlg, SIGNAL(SwitchMode(int)), pStationsDlg, SLOT(OnSwitchMode(int)));
+    connect(this, SIGNAL(SwitchMode(int)), pStationsDlg, SLOT(OnSwitchMode(int)));
+
     connect(&Timer, SIGNAL(timeout()), this, SLOT(OnTimer()));
     connect(&TimerClose, SIGNAL(timeout()), this, SLOT(OnTimerClose()));
 
@@ -346,6 +359,11 @@ void FDRMDialog::OnWhatsThis()
     QWhatsThis::enterWhatsThisMode();
 }
 
+void FDRMDialog::OnGUISetFrequency(int f)
+{
+    DRMReceiver.SetFrequency(f);
+}
+
 void FDRMDialog::OnSwitchToFM()
 {
     OnSwitchMode(RM_FM);
@@ -397,6 +415,14 @@ void FDRMDialog::UpdateDRM_GUI()
 	    SetStatus(CLED_MSC, Parameters.AudioComponentStatus[iShortID].GetStatus());
 	else
 	    SetStatus(CLED_MSC, Parameters.DataComponentStatus[iShortID].GetStatus());
+
+    gps_data_t gps_data = Parameters.gps_data;
+    if(gps_data.status&LATLON_SET)
+        emit position(gps_data.fix.latitude, gps_data.fix.longitude);
+
+    // NB following is not efficient - TODO - have a better idea
+    emit AFS(Parameters.AltFreqSign);
+    emit serviceInformation(Parameters.ServiceInformation);
 
     Parameters.Unlock();
 
@@ -477,9 +503,12 @@ void FDRMDialog::OnTimer()
     }
 
     // do this here so GUI has initialised before we might pop up a message box
-    if(pScheduler!=NULL)
-        return;
+    if(pScheduler)
+        intitialiseSchedule();
+}
 
+void FDRMDialog::intitialiseSchedule()
+{
     string schedfile = Settings.Get("command", "schedule", string());
     if(schedfile != "")
     {
@@ -571,6 +600,8 @@ void FDRMDialog::showServiceInfo(const CService& service)
     /* Service label (UTF-8 encoded string -> convert) */
     QString ServiceLabel(QString::fromUtf8(service.strLabel.c_str()));
     LabelServiceLabel->setText(ServiceLabel);
+
+    pLiveScheduleDlg->setLabel(ServiceLabel);
 
     /* Service ID (plot number in hexadecimal format) */
     const long iServiceID = (long) service.iServiceID;
@@ -881,6 +912,14 @@ void FDRMDialog::UpdateDisplay()
     ETypeRxStatus status = Parameters.DataComponentStatus[iCurSelDataServ].GetStatus();
     Parameters.Unlock();
     emit dataStatusChanged(status);
+
+
+    int iFreq = DRMReceiver.GetFrequency();
+    if(iFreq != iCurrentFrequency)
+    {
+        emit frequencyChanged(iFreq);
+        iCurrentFrequency = iFreq;
+    }
 }
 
 void FDRMDialog::ClearDisplay()
@@ -948,6 +987,7 @@ void FDRMDialog::ChangeGUIModeToAM()
     CSysTray::Stop(pSysTray, tr("Dream AM"));
     pCurrentWindow = pAnalogDemDlg;
     pCurrentWindow->eventUpdate();
+    emit SwitchMode(RM_AM);
     pCurrentWindow->show();
 }
 
@@ -959,6 +999,7 @@ void FDRMDialog::ChangeGUIModeToFM()
     pCurrentWindow = pFMDlg;
     pCurrentWindow->eventUpdate();
     pCurrentWindow->show();
+    emit SwitchMode(RM_FM);
 }
 
 void FDRMDialog::eventUpdate()

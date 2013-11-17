@@ -296,7 +296,7 @@ CDRMLiveSchedule::LoadServiceDefinition(const CServiceDefinition& service,
 }
 
 void
-CDRMLiveSchedule::LoadAFSInformations(const CAltFreqSign& AltFreqSign)
+CDRMLiveSchedule::LoadAFSInformation(const CAltFreqSign& AltFreqSign)
 {
     size_t i;
 
@@ -327,14 +327,14 @@ CDRMLiveSchedule::LoadAFSInformations(const CAltFreqSign& AltFreqSign)
     }
 }
 
-LiveScheduleDlg::LiveScheduleDlg(CDRMReceiver& DRMReceiver, CSettings& Settings,
+LiveScheduleDlg::LiveScheduleDlg(CSettings& Settings,
                                  QMap<QWidget*,QString>& parents):
     CWindow(parents, Settings, "Live Schedule"),
-    DRMReceiver(DRMReceiver),
     smallGreenCube(":/icons/smallGreenCube.png"),
     greenCube(":/icons/greenCube.png"), redCube(":/icons/redCube.png"),
     orangeCube(":/icons/orangeCube.png"), pinkCube(":/icons/pinkCube.png"),
-    vecpListItems(), iColStationID(1), iWidthColStationID(0)
+    vecpListItems(), iColStationID(1), iWidthColStationID(0),strStationName(""),
+    serviceInformation()
 {
     setupUi(this);
 
@@ -393,6 +393,35 @@ LiveScheduleDlg::~LiveScheduleDlg()
 {
 }
 
+void LiveScheduleDlg::setSavePath(const QString& s)
+{
+    /* Retrieve the setting saved into the .ini file */
+    strCurrentSavePath = s;
+
+    /* and make sure it exists */
+    CreateDirectories(strCurrentSavePath);
+}
+
+void LiveScheduleDlg::setLocation(double lat, double lng)
+{
+    DRMSchedule.SetReceiverCoordinates(lat, lng);
+}
+
+void LiveScheduleDlg::setAFS(const CAltFreqSign& altFreqSign)
+{
+    DRMSchedule.LoadAFSInformation(altFreqSign);
+}
+
+void LiveScheduleDlg::setServiceInformation(const map <uint32_t,CServiceInformation> si)
+{
+    serviceInformation = si;
+}
+
+void LiveScheduleDlg::setLabel(const QString&s)
+{
+    strStationName = s;
+}
+
 void
 LiveScheduleDlg::LoadSettings()
 {
@@ -400,12 +429,6 @@ LiveScheduleDlg::LoadSettings()
     iCurrentSortColumn = getSetting("sortcolumn", 0);
     bCurrentSortAscending = getSetting("sortascending", true);
     ListViewStations->sortItems(iCurrentSortColumn, bCurrentSortAscending?Qt::AscendingOrder:Qt::DescendingOrder);
-
-    /* Retrieve the setting saved into the .ini file */
-    strCurrentSavePath = QString::fromUtf8(DRMReceiver.GetParameters()->GetDataDirectory("AFS").c_str());
-
-    /* and make sure it exists */
-	CreateDirectories(strCurrentSavePath);
 
     /* Set stations in list view which are active right now */
     bool bShowAll = getSetting("showall", false);
@@ -507,17 +530,6 @@ LiveScheduleDlg::OnShowPreviewMenu(int iID)
 void
 LiveScheduleDlg::OnTimerList()
 {
-    CParameter& Parameters = *DRMReceiver.GetParameters();
-
-    Parameters.Lock();
-    /* Get current receiver latitude and longitude if defined */
-    if (Parameters.gps_data.set&LATLON_SET)
-    {
-        DRMSchedule.SetReceiverCoordinates(
-		Parameters.gps_data.fix.latitude, Parameters.gps_data.fix.longitude);
-    }
-    Parameters.Unlock();
-
     /* Update schedule and list view */
     LoadSchedule();
 }
@@ -570,11 +582,6 @@ LiveScheduleDlg::LoadSchedule()
     }
     vecpListItems.clear();
 
-    CParameter& Parameters = *DRMReceiver.GetParameters();
-    Parameters.Lock();
-    DRMSchedule.LoadAFSInformations(Parameters.AltFreqSign);
-    Parameters.Unlock();
-
     /* Init vector for storing the pointer to the list view items */
     const int iNumStations = DRMSchedule.GetStationNumber();
 
@@ -592,23 +599,8 @@ LiveScheduleDlg::LoadSchedule()
 
     if (iNumStations > 0)
     {
-        Parameters.Lock();
-        /* Get current service */
-        const int iCurSelAudioServ =
-            Parameters.GetCurSelAudioService();
-
-        if (Parameters.Service[iCurSelAudioServ].IsActive())
-        {
-            /* Do UTF-8 to string conversion with the label strings */
-            QString strStationName = QString().fromUtf8(
-				Parameters.Service[iCurSelAudioServ].strLabel.c_str()
-				);
-
-            /* add station name on the title of the dialog */
-            if (strStationName != "")
-                strTitle += " [" + strStationName.trimmed() + "]";
-        }
-        Parameters.Unlock();
+        if (strStationName != "")
+            strTitle += " [" + strStationName.trimmed() + "]";
     }
 
 	setWindowTitle(strTitle);
@@ -648,14 +640,6 @@ LiveScheduleDlg::eventShow(QShowEvent*)
 void
 LiveScheduleDlg::SetStationsView()
 {
-    /* Set lock because of list view items. These items could be changed
-       by another thread */
-    CParameter& Parameters = *DRMReceiver.GetParameters();
-    Parameters.Lock();
-    int sNo = Parameters.GetCurSelAudioService();
-    string thisServiceLabel = Parameters.Service[sNo].strLabel;
-    Parameters.Unlock();
-
     ListItemsMutex.lock();
 
     const int iNumStations = DRMSchedule.GetStationNumber();
@@ -681,17 +665,15 @@ LiveScheduleDlg::SetStationsView()
                 {
                     bHaveOtherServiceIDs = TRUE;
 
-                    Parameters.Lock();
                     map <uint32_t,CServiceInformation>::const_iterator
-                    si = Parameters.ServiceInformation.find(item.iServiceID);
-                    if(si != Parameters.ServiceInformation.end())
+                    si = serviceInformation.find(item.iServiceID);
+                    if(si != serviceInformation.end())
                         name = QString::fromUtf8(si->second.label.begin()->c_str());
                     else
                     {
                         ulong sid = item.iServiceID;
                         name = QString("(%1)").arg(sid, 0, 16);
                     }
-                    Parameters.Unlock();
                 }
 
                 vecpListItems[i] = new MyListLiveViewItem(ListViewStations,
@@ -793,19 +775,6 @@ LiveScheduleDlg::OnSave()
 {
     QString strFilename;
     QString strSchedule = "";
-    QString strValue = "";
-
-    CParameter& Parameters = *DRMReceiver.GetParameters();
-
-    Parameters.Lock();
-
-    const int iCurSelAudioServ =
-        Parameters.GetCurSelAudioService();
-    /* Do UTF-8 to QString (UNICODE) conversion with the station name strings */
-    QString strStationName =
-        QString().fromUtf8(Parameters.Service[iCurSelAudioServ].strLabel.c_str());
-
-    Parameters.Unlock();
 
     /* Lock mutex for use the vecpListItems */
     ListItemsMutex.lock();
