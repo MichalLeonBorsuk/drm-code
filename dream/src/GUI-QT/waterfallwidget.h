@@ -2,12 +2,12 @@
 #define WATERFALLWIDGET_H
 
 #include <QWidget>
-#include <QPaintEvent>
-#include <QResizeEvent>
 #include <QPixmap>
-#include <QRect>
 #include <vector>
 #include <../GlobalDefinitions.h>
+
+class QPaintEvent;
+class QResizeEvent;
 
 class SimpleWaterfallWidget : public QWidget
 {
@@ -35,9 +35,9 @@ public slots:
 
 protected:
     QPixmap Canvas;
-    QImage image;
-    void     paintEvent(QPaintEvent *);
-    void     resizeEvent(QResizeEvent *);
+    QImage  image;
+    void    paintEvent(QPaintEvent *);
+    void    resizeEvent(QResizeEvent *);
 };
 
 #endif // WATERFALLWIDGET_H
