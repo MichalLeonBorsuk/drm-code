@@ -168,6 +168,19 @@ private slots:
     void OnSysTrayActivated(QSystemTrayIcon::ActivationReason);
     void OnGUISetFrequency(int);
     void intitialiseSchedule();
+    void on_actionGeneralSettings_triggered();
+    void onUserEnteredPosition(double, double);
+    void onUseGPSd(const QString&);
+    void onSaveAudio(const string&);
+    void onMuteAudio(bool);
+    void onSetTimeInt(CChannelEstimation::ETypeIntTime);
+    void onSetFreqInt(CChannelEstimation::ETypeIntFreq);
+    void onSetTiSyncTracType(CTimeSyncTrack::ETypeTiSyncTrac);
+    void onSetNumMSCMLCIterations(int);
+    void onSetFlippedSpectrum(bool);
+    void onSetReverbEffect(bool);
+    void onSetRecFilter(bool);
+    void onSetIntCons(bool);
 
 signals:
     void dataStatusChanged(ETypeRxStatus);

@@ -43,28 +43,31 @@ class GeneralSettingsDlg : public QDialog, public Ui_CGeneralSettingsDlgBase
 	Q_OBJECT
 
 public:
-	GeneralSettingsDlg(CParameter& NParam, CSettings& NSettings, 
-		QWidget* parent = 0);
+    GeneralSettingsDlg(CSettings& NSettings, QWidget* parent = 0);
 	virtual ~GeneralSettingsDlg();
+public slots:
+    void onPosition(double latitude, double longitude);
+    void onGPSd(const QString&, bool);
 
 protected:
-	virtual void	showEvent(QShowEvent* pEvent);
-	virtual void	hideEvent(QHideEvent* pEvent);
+    void	showEvent(QShowEvent* pEvent);
+    void	hideEvent(QHideEvent* pEvent);
 
 	_BOOLEAN 	ValidInput(const QLineEdit* le);
 	QString 	ExtractDigits(const QString strS, const int iStart, const int iDigits);
-	void		ExtractReceiverCoordinates();
 
 	void			AddWhatsThisHelp();
-
-	CParameter&		Parameters;
 	CSettings&		Settings;
 
-public slots:
-	void CheckSN(const QString& NewText);
-	void CheckEW(const QString& NewText);
-	void ButtonOkClicked();
-	void OnCheckBoxUseGPS();
+private slots:
+    void on_EdtLatitudeNS_textChanged(const QString&);
+    void on_EdtLongitudeEW_textChanged(const QString&);
+    void on_buttonOk_clicked();
+    void on_CheckBoxUseGPS_stateChanged(int);
+signals:
+    void useGPSd(const QString&);
+    void position(double, double);
+
 };
 
 #endif
