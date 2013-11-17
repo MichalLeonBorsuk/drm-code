@@ -133,7 +133,7 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& Settings,
     pSysEvalDlg = new systemevalDlg(DRMReceiver, Settings, this);
 
     /* general settings window */
-    pGeneralSettingsDlg = new GeneralSettingsDlg(Parameters, Settings, this);
+    pGeneralSettingsDlg = new GeneralSettingsDlg(Settings, this);
 
     /* Multimedia settings window */
     pMultSettingsDlg = new MultSettingsDlg(Parameters, Settings, this);
@@ -148,7 +148,6 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& Settings,
     action_Multimedia_Dialog->setEnabled(false);
 
     connect(actionMultimediaSettings, SIGNAL(triggered()), pMultSettingsDlg, SLOT(show()));
-    connect(actionGeneralSettings, SIGNAL(triggered()), pGeneralSettingsDlg, SLOT(show()));
 
     connect(actionAM, SIGNAL(triggered()), this, SLOT(OnSwitchToAM()));
     connect(actionFM, SIGNAL(triggered()), this, SLOT(OnSwitchToFM()));
@@ -253,6 +252,20 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& Settings,
     connect(pFMDlg, SIGNAL(SwitchMode(int)), pStationsDlg, SLOT(OnSwitchMode(int)));
     connect(this, SIGNAL(SwitchMode(int)), pStationsDlg, SLOT(OnSwitchMode(int)));
 
+    connect(pSysEvalDlg, SIGNAL(saveAudio(const string&)), this, SLOT(onSaveAudio(const string&)));
+    connect(pSysEvalDlg, SIGNAL(muteAudio(bool)), this, SLOT(onMuteAudio(bool)));
+    connect(pSysEvalDlg, SIGNAL(setReverbEffect(bool)), this, SLOT(onSetReverbEffect(bool)));
+    connect(pSysEvalDlg, SIGNAL(setRecFilter(bool)), this, SLOT(onSetRecFilter(bool)));
+    connect(pSysEvalDlg, SIGNAL(setFlippedSpectrum(bool)), this, SLOT(onSetFlippedSpectrum(bool)));
+    connect(pSysEvalDlg, SIGNAL(setIntCons(bool)), this, SLOT(onSetIntCons(bool)));
+    connect(pSysEvalDlg, SIGNAL(setNumMSCMLCIterations(int)), this, SLOT(onSetNumMSCMLCIterations(int)));
+    connect(pSysEvalDlg, SIGNAL(setTimeInt(CChannelEstimation::ETypeIntTime)),
+            this, SLOT(onSetTimeInt(CChannelEstimation::ETypeIntTime)));
+    connect(pSysEvalDlg, SIGNAL(setFreqInt(CChannelEstimation::ETypeIntFreq)),
+            this, SLOT(onSetFreqInt(CChannelEstimation::ETypeIntFreq)));
+    connect(pSysEvalDlg, SIGNAL(setTiSyncTracType(CTimeSyncTrack::ETypeTiSyncTrac)),
+            this, SLOT(onSetTiSyncTracType(CTimeSyncTrack::ETypeTiSyncTrac)));
+
     connect(&Timer, SIGNAL(timeout()), this, SLOT(OnTimer()));
     connect(&TimerClose, SIGNAL(timeout()), this, SLOT(OnTimerClose()));
 
@@ -280,15 +293,6 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& Settings,
     Timer.start(GUI_CONTROL_UPDATE_TIME);
 }
 
-void FDRMDialog::setBars(int bars)
-{
-	onebar->setAutoFillBackground(bars>0);
-	twobars->setAutoFillBackground(bars>1);
-	threebars->setAutoFillBackground(bars>2);
-	fourbars->setAutoFillBackground(bars>3);
-	fivebars->setAutoFillBackground(bars>4);
-}
-
 FDRMDialog::~FDRMDialog()
 {
     /* Destroying logger */
@@ -296,6 +300,55 @@ FDRMDialog::~FDRMDialog()
     /* Destroying top level windows, children are automaticaly destroyed */
     delete pAnalogDemDlg;
     delete pFMDlg;
+}
+
+void FDRMDialog::setBars(int bars)
+{
+    onebar->setAutoFillBackground(bars>0);
+    twobars->setAutoFillBackground(bars>1);
+    threebars->setAutoFillBackground(bars>2);
+    fourbars->setAutoFillBackground(bars>3);
+    fivebars->setAutoFillBackground(bars>4);
+}
+
+void FDRMDialog::on_actionGeneralSettings_triggered()
+{
+    CParameter& Parameters = *DRMReceiver.GetParameters();
+    Parameters.Lock();
+    pGeneralSettingsDlg->onPosition(Parameters.gps_data.fix.latitude, Parameters.gps_data.fix.longitude);
+    QString gpsd = QString("%1:%2").arg(Parameters.gps_host.c_str()).arg(Parameters.gps_port.c_str());
+    pGeneralSettingsDlg->onGPSd(gpsd, false);
+    Parameters.Unlock();
+    pGeneralSettingsDlg->show();
+}
+
+void FDRMDialog::onUserEnteredPosition(double lat, double lng)
+{
+    CParameter& Parameters = *DRMReceiver.GetParameters();
+    Parameters.Lock();
+    Parameters.gps_data.fix.latitude = lat;
+    Parameters.gps_data.fix.longitude = lng;
+    Parameters.Unlock();
+}
+
+void FDRMDialog::onUseGPSd(const QString& s)
+{
+    CParameter& Parameters = *DRMReceiver.GetParameters();
+    Parameters.Lock();
+    QStringList l = s.split(":");
+    string host=l[0].toUtf8().constData();
+    if(Parameters.gps_host != host)
+    {
+        Parameters.restart_gpsd = true;
+        Parameters.gps_host=host;
+    }
+    string port=l[0].toUtf8().constData();
+    if(Parameters.gps_port != port)
+    {
+        Parameters.restart_gpsd = true;
+        Parameters.gps_port=port;
+    }
+    Parameters.Unlock();
 }
 
 void FDRMDialog::OnSysTrayActivated(QSystemTrayIcon::ActivationReason reason)
@@ -1398,6 +1451,81 @@ QString FDRMDialog::GetTypeString(const CService& service)
     }
 
     return strReturn;
+}
+
+void FDRMDialog::onSaveAudio(const string& s)
+{
+    if(s!="")
+        DRMReceiver.GetWriteData()->StartWriteWaveFile(s);
+    else
+        DRMReceiver.GetWriteData()->StopWriteWaveFile();
+}
+
+void FDRMDialog::onMuteAudio(bool b)
+{
+    /* Set parameter in working thread module */
+    DRMReceiver.GetWriteData()->MuteAudio(b);
+}
+
+void FDRMDialog::onSetTimeInt(CChannelEstimation::ETypeIntTime)
+{
+    if (DRMReceiver.GetTimeInt() != CChannelEstimation::TWIENER)
+        DRMReceiver.SetTimeInt(CChannelEstimation::TWIENER);
+
+}
+
+void FDRMDialog::onSetFreqInt(CChannelEstimation::ETypeIntFreq)
+{
+    if (DRMReceiver.GetFreqInt() != CChannelEstimation::FLINEAR)
+        DRMReceiver.SetFreqInt(CChannelEstimation::FLINEAR);
+
+}
+
+void FDRMDialog::onSetTiSyncTracType(CTimeSyncTrack::ETypeTiSyncTrac)
+{
+    if (DRMReceiver.GetTiSyncTracType() !=
+            CTimeSyncTrack::TSENERGY)
+    {
+        DRMReceiver.SetTiSyncTracType(CTimeSyncTrack::TSENERGY);
+    }
+
+}
+
+void FDRMDialog::onSetNumMSCMLCIterations(int value)
+{
+    /* Set new value in working thread module */
+    DRMReceiver.GetMSCMLC()->SetNumIterations(value);
+
+}
+
+void FDRMDialog::onSetFlippedSpectrum(bool b)
+{
+    /* Set parameter in working thread module */
+    DRMReceiver.GetReceiveData()->SetFlippedSpectrum(b);
+
+}
+
+void FDRMDialog::onSetReverbEffect(bool b)
+{
+    /* Set parameter in working thread module */
+    DRMReceiver.GetAudSorceDec()->SetReverbEffect(b);
+
+}
+
+void FDRMDialog::onSetRecFilter(bool b)
+{
+    /* Set parameter in working thread module */
+    DRMReceiver.GetFreqSyncAcq()->SetRecFilter(b);
+
+    /* If filter status is changed, a new aquisition is necessary */
+    DRMReceiver.RequestNewAcquisition();
+}
+
+void FDRMDialog::onSetIntCons(bool b)
+{
+    /* Set parameter in working thread module */
+    DRMReceiver.SetIntCons(b);
+
 }
 
 void FDRMDialog::SetDisplayColor(const QColor newColor)

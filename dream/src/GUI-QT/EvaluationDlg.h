@@ -50,13 +50,14 @@ class systemevalDlg : public CWindow, public Ui_SystemEvaluationWindow
 	Q_OBJECT
 
 public:
-	systemevalDlg(CDRMReceiver&, CSettings&, QWidget* parent = 0);
+    systemevalDlg(CDRMReceiver&, CSettings&, QWidget* parent = 0);
 	virtual ~systemevalDlg();
 
 	void SetStatus(CMultColorLED*, ETypeRxStatus);
 
 protected:
-	CDRMReceiver&	DRMReceiver;
+    CDRMReceiver&   DRMReceiver;
+    CParameter&     Parameters;
 
 	QTimer			Timer;
 	CDRMPlot*		MainPlot;
@@ -64,15 +65,15 @@ protected:
 	virtual void	eventShow(QShowEvent* pEvent);
 	virtual void	eventHide(QHideEvent* pEvent);
 	void			UpdateGPS(CParameter&);
-	void			UpdateControls();
+    void			setControls(CSettings& s);
 	void			AddWhatsThisHelp();
 	CDRMPlot*		OpenChartWin(CDRMPlot::ECharType eNewType);
 	QTreeWidgetItem* FindItemByECharType(CDRMPlot::ECharType eCharType);
 	string			ECharTypeToPlotName(CDRMPlot::ECharType eCharType);
 	CDRMPlot::ECharType PlotNameToECharType(const string& PlotName);
 
-	QString			GetRobModeStr();
-	QString			GetSpecOccStr();
+    QString			GetRobModeStr(ERobMode);
+    QString			GetSpecOccStr(ESpecOcc v);
 
 	QMenu*			pTreeWidgetContextMenu;
 	CDRMPlot::ECharType eCurCharType, eNewCharType;
@@ -103,6 +104,16 @@ public slots:
 signals:
 	void startLogging();
 	void stopLogging();
+    void saveAudio(const string&);
+    void setTimeInt(CChannelEstimation::ETypeIntTime);
+    void setFreqInt(CChannelEstimation::ETypeIntFreq);
+    void setTiSyncTracType(CTimeSyncTrack::ETypeTiSyncTrac);
+    void setNumMSCMLCIterations(int);
+    void setFlippedSpectrum(bool);
+    void setReverbEffect(bool);
+    void setRecFilter(bool);
+    void setIntCons(bool);
+    void muteAudio(bool);
 };
 
 #endif
