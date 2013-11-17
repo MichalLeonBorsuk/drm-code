@@ -35,15 +35,13 @@
 /* Qt includes */
 #include <QTimer>
 #include <QObject>
-#include <QPainter>
 #include <QDialog>
 #include <QResizeEvent>
-#include <QPaintEvent>
-#include <QPixmap>
 #include <QHideEvent>
 #include <QMouseEvent>
 #include <QShowEvent>
 #include <QIcon>
+#include <QTreeWidget>
 
 /* Qwt includes */
 #include <qwt_global.h>
@@ -65,10 +63,10 @@
 #endif
 
 /* Other includes */
-#include "../resample/Resample.h"
 #include "../util/Vector.h"
 #include "../Parameter.h"
 #include "../DrmReceiver.h"
+#include "waterfallwidget.h"
 
 
 /* Definitions ****************************************************************/
@@ -226,29 +224,6 @@ signals:
 };
 
 
-class CWidget : public QWidget
-{
-	Q_OBJECT
-public:
-	CWidget(QWidget* parent, const QPixmap& Pixmap)
-		: QWidget(parent), Pixmap(Pixmap)
-	{ setAttribute(Qt::WA_OpaquePaintEvent, true);
-	  setAttribute(Qt::WA_TransparentForMouseEvents, true);
-	  setCursor(Qt::CrossCursor); show(); }
-	virtual ~CWidget() {}
-protected:
-	QPainter Painter;
-	const QPixmap& Pixmap;
-	void paintEvent(QPaintEvent *)
-	{
-		if (Painter.begin(this))
-		{
-			Painter.drawPixmap(0, 0, Pixmap);
-			Painter.end();
-		}
-	}
-};
-
 
 class CDRMPlot : public QObject
 {
@@ -289,7 +264,8 @@ public:
 	void UpdateAnalogBWMarker();
 	void SetPlotStyle(const int iNewStyleID);
 
-	void setCaption(const QString& s) { if (DialogPlot) DialogPlot->setWindowTitle(s); }
+    void setupTreeWidget(QTreeWidget* tw);
+    void setCaption(const QString& s) { if (DialogPlot) DialogPlot->setWindowTitle(s); }
 	void setIcon(const QIcon& s) { if (DialogPlot) DialogPlot->setWindowIcon(s); }
 	void setGeometry(const QRect& g) { if (DialogPlot) DialogPlot->setGeometry(g); }
 	bool isVisible() { if (DialogPlot) return DialogPlot->isVisible(); else return FALSE; }
@@ -382,14 +358,7 @@ protected:
 	CDRMReceiver	*pDRMRec;
 
 	/* Waterfall spectrum stuff */
-	QPixmap			Canvas;
-	QImage			Image;
-	QColor			BackgroundColor;
-	CSpectrumResample	Resample;
-	CWidget*		WaterfallWidget;
-	QRect			LastPlotCanvRect;
-	int				scaleWidth;
-	QRgb*			imageData;
+    WaterfallWidget* waterfallWidget;
 	int				iAudSampleRate;
 	int				iSigSampleRate;
 	int				iLastXoredSampleRate;

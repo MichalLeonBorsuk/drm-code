@@ -648,7 +648,8 @@ HEADERS += \
     src/GUI-QT/SlideShowViewer.h \
     src/GUI-QT/SoundCardSelMenu.h \
     src/GUI-QT/StationsDlg.h \
-    src/GUI-QT/TransmDlg.h
+    src/GUI-QT/TransmDlg.h \
+    src/GUI-QT/waterfallwidget.h
 SOURCES += \
     src/GUI-QT/AnalogDemDlg.cpp \
     src/GUI-QT/CodecParams.cpp \
@@ -669,7 +670,8 @@ SOURCES += \
     src/GUI-QT/SlideShowViewer.cpp \
     src/GUI-QT/SoundCardSelMenu.cpp \
     src/GUI-QT/StationsDlg.cpp \
-    src/GUI-QT/TransmDlg.cpp
+    src/GUI-QT/TransmDlg.cpp \
+    src/GUI-QT/waterfallwidget.cpp
 }
 !sound {
     error("no usable audio interface found - install pulseaudio or portaudio dev package")
