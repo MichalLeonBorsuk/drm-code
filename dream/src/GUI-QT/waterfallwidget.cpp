@@ -1,5 +1,7 @@
 #include "waterfallwidget.h"
 #include <QPainter>
+#include <QPaintEvent>
+#include <QResizeEvent>
 #include <../matlib/MatlibStdToolbox.h>
 #include <algorithm>
 
