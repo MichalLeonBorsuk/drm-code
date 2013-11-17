@@ -117,6 +117,7 @@ protected:
     QTimer				TimerSysTray;
     CScheduler* 	    pScheduler;
     QTimer*		        pScheduleTimer;
+    int                 iCurrentFrequency;
 
     void SetStatus(CMultColorLED* LED, ETypeRxStatus state);
     virtual void        eventClose(QCloseEvent* ce);
@@ -148,7 +149,7 @@ protected:
     void SysTrayToolTip(const QString&, const QString&);
 	void setBars(int);
 
-public slots:
+private slots:
     void OnTimer();
     void OnScheduleTimer();
     void OnSysTrayTimer();
@@ -165,9 +166,17 @@ public slots:
     void OnSoundFileChanged(CDRMReceiver::ESFStatus) {UpdateWindowTitle(); ClearDisplay();}
     void OnWhatsThis();
     void OnSysTrayActivated(QSystemTrayIcon::ActivationReason);
+    void OnGUISetFrequency(int);
+    void intitialiseSchedule();
+
 signals:
     void dataStatusChanged(ETypeRxStatus);
     void plotStyleChanged(int);
+    void frequencyChanged(int);
+    void SwitchMode(int);
+    void position(double,double);
+    void AFS(const CAltFreqSign&);
+    void serviceInformation(const map <uint32_t,CServiceInformation>);
 };
 
 #endif // _FDRMDIALOG_H_

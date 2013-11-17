@@ -35,7 +35,6 @@
 
 #include "DialogUtil.h"
 #include "CWindow.h"
-#include "../DrmReceiver.h"
 #include "Schedule.h"
 
 /* Definitions ****************************************************************/
@@ -46,11 +45,14 @@ class StationsDlg : public CWindow, public Ui_StationsDlgbase
 
 public:
 #ifdef HAVE_LIBHAMLIB
-	StationsDlg(CDRMReceiver&, CSettings&, CRig&, QMap<QWidget*,QString>&);
+    StationsDlg(CSettings&, CRig&, QMap<QWidget*,QString>&);
 #else
-	StationsDlg(CDRMReceiver&, CSettings&, QMap<QWidget*,QString>&);
+    StationsDlg(CSettings&, QMap<QWidget*,QString>&);
 #endif
 	virtual ~StationsDlg();
+public slots:
+    void SetFrequency(int);
+    void OnSwitchMode(int);
 
 protected:
 	virtual void	eventClose(QCloseEvent* pEvent);
@@ -62,7 +64,6 @@ protected:
     void			LoadScheduleView();
     void			UpdateTransmissionStatus();
     void			LoadFilters();
-	void			SetFrequencyFromGUI(int);
 	void			AddWhatsThisHelp();
 	void			EnableSMeter();
 	void			DisableSMeter();
@@ -79,7 +80,6 @@ protected:
 	QString			strColumnParamdrm;
 	QString			strColumnParamanalog;
 
-	CDRMReceiver&	DRMReceiver;
 #ifdef HAVE_LIBHAMLIB
 	CRig&			Rig;
 #endif
@@ -94,16 +94,18 @@ protected:
 	QActionGroup*	showGroup;
 	QNetworkAccessManager *manager;
 	QTimer			Timer;
-	_BOOLEAN		bReInitOnFrequencyChange;
 
 	QMutex			ListItemsMutex;
 
 	QString			okMessage, badMessage;
+    ERecMode        eRecMode;
 
 signals:
 	void subscribeRig();
 	void unsubscribeRig();
-public slots:
+    void frequencyChanged(int);
+
+private slots:
 	void OnSigStr(double);
 	void OnTimer();
 	void OnSMeterMenu(int iID);

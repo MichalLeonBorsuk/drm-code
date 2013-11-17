@@ -30,21 +30,9 @@
 
 #include "ui_LiveScheduleWindow.h"
 #include "CWindow.h"
-#include "../DrmReceiver.h"
-#include <QSignalMapper>
-#include <QDialog>
-#include <QTreeWidget>
-#include <QPixmap>
-#include <QRadioButton>
 #include <QTimer>
-#include <QMessageBox>
-#include <QMenuBar>
-#include <QLayout>
-#include <QLabel>
-#include <QCheckBox>
-#include <QThread>
-#include <vector>
-
+#include <QSignalMapper>
+#include <../Parameter.h>
 
 /* Definitions ****************************************************************/
 /* Define the timer interval of updating the list view */
@@ -97,7 +85,7 @@ public:
 	CLiveScheduleItem& GetItem(const int iPos) {return StationsTable[iPos];}
 	StationState CheckState(const int iPos);
 
-	void LoadAFSInformations(const CAltFreqSign& AltFreqSign);
+    void LoadAFSInformation(const CAltFreqSign& AltFreqSign);
 
 	void LoadServiceDefinition(const CServiceDefinition& service,
 			const CAltFreqSign& AltFreqSign, const uint32_t iServiceID=SERV_ID_NOT_USED);
@@ -143,8 +131,14 @@ class LiveScheduleDlg : public CWindow, public Ui_LiveScheduleWindow
 	Q_OBJECT
 
 public:
-	LiveScheduleDlg(CDRMReceiver&, CSettings&, QMap<QWidget*,QString>&);
+    LiveScheduleDlg(CSettings&, QMap<QWidget*,QString>&);
 	virtual ~LiveScheduleDlg();
+    void setSavePath(const QString&);
+public slots:
+    void setLocation(double, double);
+    void setAFS(const CAltFreqSign& altFreqSign);
+    void setLabel(const QString&);
+    void setServiceInformation(const map <uint32_t,CServiceInformation>);
 
 protected:
 	virtual void	eventClose(QCloseEvent* pEvent);
@@ -163,7 +157,6 @@ protected:
 	bool			showAll();
 	int				currentSortColumn();
 
-	CDRMReceiver&		DRMReceiver;
 	CDRMLiveSchedule	DRMSchedule;
 	QTimer			TimerList;
 	QTimer			TimerUTCLabel;
@@ -182,6 +175,8 @@ protected:
 	QString			strCurrentSavePath;
 	int				iColStationID;
 	int				iWidthColStationID;
+    QString         strStationName;
+    map <uint32_t,CServiceInformation> serviceInformation;
 
 public slots:
 	void OnTimerList();
