@@ -32,19 +32,8 @@
 
 #include "ui_EPGDlgbase.h"
 #include "CWindow.h"
-#include "../DrmReceiver.h"
-#include "../util-QT/EPG.h"
-#include <QWidget>
-#include <QDateTime>
-#include <QPushButton>
-#include <QSpinBox>
-#include <QComboBox>
-#include <QStringList>
-#include <QMessageBox>
-#include <QLabel>
+#include <../Parameter.h>
 #include <QTimer>
-#include <QPixmap>
-#include <QTreeWidget>
 #include <map>
 
 
@@ -64,39 +53,41 @@
 
 /* Classes ********************************************************************/
 
+class EPG;
+class QDomDocument;
+
 class EPGDlg : public CWindow, public Ui_CEPGDlgbase
 {
     Q_OBJECT
 
 public:
-    EPGDlg(CDRMReceiver&, CSettings&, QWidget* parent = 0);
+    EPGDlg(CSettings&, QWidget* parent = 0);
     virtual ~EPGDlg();
-
-    void select();
+    void setServiceInformation(const map<uint32_t,CServiceInformation>&, uint32_t);
+    void setDecoder(EPG*);
 
 protected:
-    virtual void eventShow(QShowEvent*);
-    virtual void eventHide(QHideEvent*);
+    virtual void eventShow();
+    virtual void eventHide();
     void setActive(QTreeWidgetItem*);
     bool isActive(QTreeWidgetItem*);
 
-    virtual QString getFileName(const QDate& date, uint32_t sid, bool bAdvanced);
-    virtual QString getFileName_etsi(const QDate& date, uint32_t sid, bool bAdvanced);
-    virtual QDomDocument* getFile (const QString&);
-    virtual QDomDocument* getFile (const QDate& date, uint32_t sid, bool bAdvanced);
+    QString getFileName(const QDate& date, uint32_t sid, bool bAdvanced);
+    QString getFileName_etsi(const QDate& date, uint32_t sid, bool bAdvanced);
+    QDomDocument* getFile (const QString&);
+    QDomDocument* getFile (const QDate& date, uint32_t sid, bool bAdvanced);
+    void select();
 
-    bool do_updates;
-    EPG epg;
-    CDRMReceiver&	DRMReceiver;
-    QTimer		Timer;
-    map<QString,uint32_t> sids;
-    QIcon		greenCube;
-    QTreeWidgetItem*	next;
+    bool                  do_updates;
+    EPG*                  pEpg;
+    QTimer		          Timer;
+    QIcon		          greenCube;
+    QTreeWidgetItem*	  next;
 
 signals:
     void NowNext(QString);
 
-public slots:
+private slots:
     void on_channel_activated(const QString&);
     void on_dateEdit_dateChanged(const QDate&);
     void OnTimer();

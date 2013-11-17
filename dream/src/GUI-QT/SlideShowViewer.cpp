@@ -29,21 +29,15 @@
 #include "SlideShowViewer.h"
 #include "../util-QT/Util.h"
 #include "../datadecoding/DABMOT.h"
-#include "../datadecoding/DataDecoder.h"
 #include <QFileDialog>
 
-SlideShowViewer::SlideShowViewer(CDRMReceiver& rec, CSettings& Settings, QWidget* parent):
+SlideShowViewer::SlideShowViewer(CSettings& Settings, QWidget* parent):
     CWindow(parent, Settings, "SlideShow"),
-    receiver(rec), vecImages(), vecImageNames(), iCurImagePos(-1),
-    bClearMOTCache(false), iLastServiceID(0), bLastServiceValid(false)
+    vecImages(), vecImageNames(), iCurImagePos(-1),
+    bClearMOTCache(false), iLastServiceID(0), bLastServiceValid(false),
+    motdec(NULL)
 {
     setupUi(this);
-
-    /* Get MOT save path */
-    CParameter& Parameters = *receiver.GetParameters();
-    Parameters.Lock();
-    strCurrentSavePath = QString::fromUtf8(Parameters.GetDataDirectory("MOT").c_str());
-    Parameters.Unlock();
 
     /* Update time for color LED */
     LEDStatus->SetUpdateTime(1000);
@@ -58,7 +52,6 @@ SlideShowViewer::SlideShowViewer(CDRMReceiver& rec, CSettings& Settings, QWidget
     connect(actionSave, SIGNAL(triggered()), SLOT(OnSave()));
     connect(actionSave_All, SIGNAL(triggered()), SLOT(OnSaveAll()));
     connect(actionClose, SIGNAL(triggered()), SLOT(close()));
-    connect(&Timer, SIGNAL(timeout()), this, SLOT(OnTimer()));
 
     OnClearAll();
 }
@@ -67,17 +60,23 @@ SlideShowViewer::~SlideShowViewer()
 {
 }
 
-void SlideShowViewer::OnTimer()
+void SlideShowViewer::setSavePath(const QString& s)
 {
-    /* Get current service parameters */
-    uint32_t iServiceID; bool bServiceValid; QString strLabel; ETypeRxStatus eStatus;
-    int shortID; int iPacketID;
-    GetServiceParams(&iServiceID, &bServiceValid, &strLabel, &eStatus, &shortID, &iPacketID);
+    strCurrentSavePath = s;
+}
 
-    /* Update the window title if something have changed */
-    if (iLastServiceID != iServiceID || bLastServiceValid != bServiceValid || strLastLabel != strLabel)
-        UpdateWindowTitle(iServiceID, bServiceValid, strLabel);
+void SlideShowViewer::setServiceInformation(const CService& service)
+{
+    UpdateWindowTitle(service.iServiceID, true, QString().fromUtf8(service.strLabel.c_str()).trimmed());
+}
 
+void SlideShowViewer::setDecoder(CMOTDABDec* dec)
+{
+    motdec = dec;
+}
+
+void SlideShowViewer::setStatus(ETypeRxStatus eStatus)
+{
     switch(eStatus)
     {
     case NOT_PRESENT:
@@ -97,17 +96,8 @@ void SlideShowViewer::OnTimer()
         break;
     }
 
-    CDataDecoder* DataDecoder = receiver.GetDataDecoder();
-    if (DataDecoder == NULL)
-    {
-        qDebug("can't get data decoder from receiver");
-        return;
-    }
-
-    CMOTDABDec* motdec = DataDecoder->getApplication(iPacketID);
     if (motdec == NULL)
     {
-        qDebug("can't get MOT decoder for short id %d, packetId %d", shortID, iPacketID);
         return;
     }
 
@@ -211,26 +201,6 @@ void SlideShowViewer::OnClearAll()
     bClearMOTCache = true;
 }
 
-void SlideShowViewer::eventShow(QShowEvent*)
-{
-    /* Update window title */
-    uint32_t iServiceID; bool bServiceValid; QString strLabel;
-    GetServiceParams(&iServiceID, &bServiceValid, &strLabel);
-    UpdateWindowTitle(iServiceID, bServiceValid, strLabel);
-
-    /* Update window */
-    OnTimer();
-
-    /* Activate real-time timer when window is shown */
-    Timer.start(GUI_CONTROL_UPDATE_TIME);
-}
-
-void SlideShowViewer::eventHide(QHideEvent*)
-{
-    /* Deactivate real-time timer so that it does not get new pictures */
-    Timer.stop();
-}
-
 void SlideShowViewer::SetImage(int pos)
 {
     if(vecImages.size()==0)
@@ -314,36 +284,6 @@ void SlideShowViewer::ClearMOTCache(CMOTDABDec *motdec)
     CMOTObject	NewObj;
     while (motdec->NewObjectAvailable())
         motdec->GetNextObject(NewObj);
-}
-
-void SlideShowViewer::GetServiceParams(uint32_t* iServiceID, bool* bServiceValid, QString* strLabel, ETypeRxStatus* eStatus, int* shortID, int* iPacketID)
-{
-    CParameter& Parameters = *receiver.GetParameters();
-    Parameters.Lock();
-
-        /* Get current audio service */
-        const int iCurSelAudioServ = Parameters.GetCurSelAudioService();
-        const uint32_t iAudioServiceID = Parameters.Service[iCurSelAudioServ].iServiceID;
-
-        /* Get current data service */
-        const int iCurSelDataServ = Parameters.GetCurSelDataService();
-        const CService service = Parameters.Service[iCurSelDataServ];
-
-        if (eStatus)
-            *eStatus = Parameters.DataComponentStatus[iCurSelDataServ].GetStatus();
-        if (iPacketID)
-            *iPacketID = Parameters.GetDataParam(iCurSelDataServ).iPacketID;
-    Parameters.Unlock();
-
-    if (iServiceID)
-        *iServiceID = service.iServiceID != iAudioServiceID ? service.iServiceID : 0;
-    if (bServiceValid)
-        *bServiceValid = service.IsActive() && service.eAudDataFlag == CService::SF_DATA;
-    /* Do UTF-8 to QString (UNICODE) conversion with the label strings */
-    if (strLabel)
-        *strLabel = QString().fromUtf8(service.strLabel.c_str()).trimmed();
-    if (shortID)
-        *shortID = iCurSelDataServ;
 }
 
 void SlideShowViewer::UpdateWindowTitle(const uint32_t iServiceID, const bool bServiceValid, QString strLabel)

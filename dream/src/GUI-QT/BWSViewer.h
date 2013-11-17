@@ -39,11 +39,8 @@
 #include <QNetworkRequest>
 #include <string>
 
-
 class CMOTObject;
-class CDRMReceiver;
 class CDataDecoder;
-
 
 class CWebsiteObject
 {
@@ -122,8 +119,8 @@ public:
     CNetworkAccessManager(QObject* parent, CWebsiteCache& cache,
         CCounter& waitobjs, const bool& bAllowExternalContent, const QString& strCacheHost)
         : QNetworkAccessManager(parent), cache(cache), waitobjs(waitobjs),
-        bAllowExternalContent(bAllowExternalContent), strCacheHost(strCacheHost) {};
-    virtual ~CNetworkAccessManager() {};
+        bAllowExternalContent(bAllowExternalContent), strCacheHost(strCacheHost) {}
+    virtual ~CNetworkAccessManager() {}
 
 protected:
     QNetworkReply *createRequest(Operation op, const QNetworkRequest & req, QIODevice *);
@@ -139,13 +136,17 @@ class BWSViewer : public CWindow, public Ui_BWSViewer
     Q_OBJECT
 
 public:
-    BWSViewer(CDRMReceiver&, CSettings&, QWidget* parent = 0);
+    BWSViewer(CSettings&, QWidget* parent = 0);
     virtual ~BWSViewer();
+public slots:
+    void setSavePath(const QString&);
+    void setStatus(ETypeRxStatus);
+    void setDecoder(CDataDecoder* dec);
+    void setServiceInformation(const CService&);
 
 protected:
     CNetworkAccessManager nam;
     QTimer          Timer;
-    CDRMReceiver&   receiver;
     CDataDecoder*   decoder;
     CWebsiteCache   cache;
     bool            bHomeSet;
@@ -163,21 +164,19 @@ protected:
     bool            bLastServiceValid;
     uint32_t        iLastValidServiceID;
     QString         strLastLabel;
+    QString         strCurrentSavePath;
 
     bool Changed();
     void SaveMOTObject(const QString& strObjName, const CMOTObject& obj);
     bool RemoveDir(const QString &dirName, int level = 0);
-    void SetupSavePath(QString& strSavePath);
     void UpdateButtons();
     void UpdateStatus();
     void UpdateWindowTitle(const uint32_t iServiceID, const bool bServiceValid, QString strLabel);
     QString ObjectStr(unsigned int count);
-    void GetServiceParams(uint32_t* iServiceID=NULL, bool* bServiceValid=NULL, QString* strLabel=NULL, ETypeRxStatus* eStatus=NULL);
     virtual void eventShow(QShowEvent*);
     virtual void eventHide(QHideEvent*);
 
-public slots:
-    void OnTimer();
+private slots:
     void OnClearCache();
     void OnHome();
     void OnStopRefresh();

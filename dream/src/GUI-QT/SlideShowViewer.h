@@ -31,27 +31,29 @@
 
 #include "ui_SlideShowViewer.h"
 #include "CWindow.h"
-#include "../DrmReceiver.h"
+#include "../Parameter.h"
+
+class CMOTDABDec;
 
 class SlideShowViewer : public CWindow, public Ui_SlideShowViewer
 {
     Q_OBJECT
 
 public:
-    SlideShowViewer(CDRMReceiver&, CSettings&, QWidget* parent = 0);
+    SlideShowViewer(CSettings&, QWidget* parent = 0);
     virtual ~SlideShowViewer();
+public slots:
+    void setSavePath(const QString&);
+    void setStatus(ETypeRxStatus);
+    void setDecoder(CMOTDABDec*);
+    void setServiceInformation(const CService&);
 
 protected:
-    virtual void            eventShow(QShowEvent*);
-    virtual void            eventHide(QHideEvent*);
     void                    SetImage(int);
     void                    UpdateButtons();
     void                    ClearMOTCache(CMOTDABDec *motdec);
-    void                    GetServiceParams(uint32_t* iServiceID, bool* bServiceValid, QString* strLabel, ETypeRxStatus* eStatus=NULL, int* shortID=NULL, int* iPacketID=NULL);
     void                    UpdateWindowTitle(const uint32_t iServiceID, const bool bServiceValid, QString strLabel);
-    QTimer                  Timer;
     QString                 strCurrentSavePath;
-    CDRMReceiver&           receiver;
     std::vector<QPixmap>    vecImages;
     std::vector<QString>    vecImageNames;
     int                     iCurImagePos;
@@ -60,9 +62,9 @@ protected:
     uint32_t                iCurrentDataServiceID;
     bool                    bLastServiceValid;
     QString                 strLastLabel;
+    CMOTDABDec*             motdec;
 
-public slots:
-    void OnTimer();
+private slots:
     void OnButtonStepBack();
     void OnButtonStepForward();
     void OnButtonJumpBegin();
