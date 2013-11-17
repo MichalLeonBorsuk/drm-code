@@ -35,6 +35,8 @@
 #include <QShowEvent>
 #include <QCloseEvent>
 #include <QMessageBox>
+#include <QTableWidget>
+
 #include "SlideShowViewer.h"
 #include "JLViewer.h"
 #ifdef QT_WEBKIT_LIB
@@ -63,7 +65,7 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& Settings,
     :
     CWindow(parent, Settings, "DRM"),
     DRMReceiver(NDRMR),
-    serviceLabels(4), pLogging(NULL),
+    pLogging(NULL),
     pSysTray(NULL), pCurrentWindow(this),
     iMultimediaServiceBit(0),
     iLastMultimediaServiceSelected(-1),
@@ -139,12 +141,10 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& Settings,
     pMultSettingsDlg = new MultSettingsDlg(Parameters, Settings, this);
 
     connect(action_Evaluation_Dialog, SIGNAL(triggered()), pSysEvalDlg, SLOT(show()));
-    connect(action_Multimedia_Dialog, SIGNAL(triggered()), this, SLOT(OnViewMultimediaDlg()));
     connect(action_Stations_Dialog, SIGNAL(triggered()), pStationsDlg, SLOT(show()));
     connect(action_Live_Schedule_Dialog, SIGNAL(triggered()), pLiveScheduleDlg, SLOT(show()));
     connect(action_Programme_Guide_Dialog, SIGNAL(triggered()), pEPGDlg, SLOT(show()));
     connect(actionExit, SIGNAL(triggered()), this, SLOT(close()));
-
     action_Multimedia_Dialog->setEnabled(false);
 
     connect(actionMultimediaSettings, SIGNAL(triggered()), pMultSettingsDlg, SLOT(show()));
@@ -186,15 +186,6 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& Settings,
 
     connect(this, SIGNAL(plotStyleChanged(int)), pSysEvalDlg, SLOT(UpdatePlotStyle(int)));
     connect(this, SIGNAL(plotStyleChanged(int)), pAnalogDemDlg, SLOT(UpdatePlotStyle(int)));
-
-    pButtonGroup = new QButtonGroup(this);
-    pButtonGroup->setExclusive(true);
-    pButtonGroup->addButton(PushButtonService1, 0);
-    pButtonGroup->addButton(PushButtonService2, 1);
-    pButtonGroup->addButton(PushButtonService3, 2);
-    pButtonGroup->addButton(PushButtonService4, 3);
-    connect(pButtonGroup, SIGNAL(buttonClicked(int)), this, SLOT(OnSelectAudioService(int)));
-    connect(pButtonGroup, SIGNAL(buttonClicked(int)), this, SLOT(OnSelectDataService(int)));
 
     connect(pFMDlg, SIGNAL(About()), this, SLOT(OnHelpAbout()));
     connect(pAnalogDemDlg, SIGNAL(About()), this, SLOT(OnHelpAbout()));
@@ -269,10 +260,15 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& Settings,
     connect(&Timer, SIGNAL(timeout()), this, SLOT(OnTimer()));
     connect(&TimerClose, SIGNAL(timeout()), this, SLOT(OnTimerClose()));
 
-    serviceLabels[0] = TextMiniService1;
-    serviceLabels[1] = TextMiniService2;
-    serviceLabels[2] = TextMiniService3;
-    serviceLabels[3] = TextMiniService4;
+    // Multi-window GUI
+    pServiceSelector = new ServiceSelector(this);
+    verticalLayout->addWidget(pServiceSelector);
+    connect(pServiceSelector, SIGNAL(audioServiceSelected(int)), this, SLOT(OnSelectAudioService(int)));
+    connect(pServiceSelector, SIGNAL(dataServiceSelected(int)), this, SLOT(OnSelectDataService(int)));
+    // Single-window GUI
+    pServiceTabs = new QTabWidget(this);
+    verticalLayout->addWidget(pServiceTabs);
+    pServiceTabs->hide();
 
     ClearDisplay();
 
@@ -309,6 +305,20 @@ void FDRMDialog::setBars(int bars)
     threebars->setAutoFillBackground(bars>2);
     fourbars->setAutoFillBackground(bars>3);
     fivebars->setAutoFillBackground(bars>4);
+}
+
+void FDRMDialog::on_actionSingle_Window_Mode_triggered(bool checked)
+{
+    if(checked)
+    {
+        pServiceSelector->hide();
+        pServiceTabs->show();
+    }
+    else
+    {
+        pServiceTabs->hide();
+        pServiceSelector->show();
+    }
 }
 
 void FDRMDialog::on_actionGeneralSettings_triggered()
@@ -808,25 +818,6 @@ QString FDRMDialog::serviceSelector(CParameter& Parameters, int i)
         {
             text += tr(" + AFS");
         }
-
-        switch (i)
-        {
-        case 0:
-            PushButtonService1->setEnabled(TRUE);
-            break;
-
-        case 1:
-            PushButtonService2->setEnabled(TRUE);
-            break;
-
-        case 2:
-            PushButtonService3->setEnabled(TRUE);
-            break;
-
-        case 3:
-            PushButtonService4->setEnabled(TRUE);
-            break;
-        }
     }
     return text;
 }
@@ -851,9 +842,7 @@ void FDRMDialog::UpdateDisplay()
     int i, iFirstAudioService=-1, iFirstDataService=-1;
     for(i=0; i < MAX_NUM_SERVICES; i++)
     {
-        QString label = serviceSelector(Parameters, i);
-        serviceLabels[i]->setText(label);
-        pButtonGroup->button(i)->setEnabled(label != "");
+        pServiceSelector->setLabel(i, serviceSelector(Parameters, i));
         if (!bServiceIsValid && (iFirstAudioService == -1 || iFirstDataService == -1))
         {
             Parameters.Lock();
@@ -901,7 +890,7 @@ void FDRMDialog::UpdateDisplay()
         audioService = Parameters.Service[iCurSelAudioServ];
         Parameters.Unlock();
 
-        pButtonGroup->button(iCurSelAudioServ)->setChecked(true);
+        pServiceSelector->check(iCurSelAudioServ);
 
         /* If we have text messages */
         if (audioService.AudioParam.bTextflag == TRUE)
@@ -979,15 +968,7 @@ void FDRMDialog::ClearDisplay()
 {
     /* No signal is currently received ---------------------------------- */
     /* Disable service buttons and associated labels */
-    pButtonGroup->setExclusive(FALSE);
-    for(size_t i=0; i<serviceLabels.size(); i++)
-    {
-        QPushButton* button = (QPushButton*)pButtonGroup->button(i);
-        if (button && button->isEnabled()) button->setEnabled(FALSE);
-        if (button && button->isChecked()) button->setChecked(FALSE);
-        serviceLabels[i]->setText("");
-    }
-    pButtonGroup->setExclusive(TRUE);
+    pServiceSelector->disableAll();
 
     /* Main text labels */
     LabelBitrate->setText("");
@@ -1176,7 +1157,7 @@ void FDRMDialog::OnSelectDataService(int shortId)
     }
 }
 
-void FDRMDialog::OnViewMultimediaDlg()
+void FDRMDialog::on_action_Multimedia_Dialog_triggered()
 {
     /* Check if multimedia service is available */
     if (iMultimediaServiceBit != 0)
@@ -1634,25 +1615,6 @@ void FDRMDialog::AddWhatsThisHelp()
            "transmitted in a different logical channel of a DRM stream. On the "
            "right, the ID number connected with this service is shown.");
 
-
-    /* Service Selectors */
-    const QString strServiceSel =
-        tr("<b>Service Selectors:</b> In a DRM stream up to "
-           "four services can be carried. The service can be an audio service, "
-           "a data service or an audio service with data. "
-           "Audio services can have associated text messages, in addition to any data component. "
-           "If a Multimedia data service is selected, the Multimedia Dialog will automatically show up. "
-           "On the right of each service selection button a short description of the service is shown. "
-           "If an audio service has associated Multimedia data, \"+ MM\" is added to this text. "
-           "If such a service is selected, opening the Multimedia Dialog will allow the data to be viewed "
-           "while the audio is still playing. If the data component of a service is not Multimedia, "
-           "but an EPG (Electronic Programme Guide) \"+ EPG\" is added to the description. "
-           "The accumulated Programme Guides for all stations can be viewed by opening the Programme Guide Dialog. "
-           "The selected channel in the Programme Guide Dialog defaults to the station being received. "
-           "If Alternative Frequency Signalling is available, \"+ AFS\" is added to the description. "
-           "In this case the alternative frequencies can be viewed by opening the Live Schedule Dialog."
-          );
-
     TextTextMessage->setWhatsThis(strTextMessage);
     TextLabelInputLevel->setWhatsThis(strInputLevel);
     ProgrInputLevel->setWhatsThis(strInputLevel);
@@ -1668,14 +1630,6 @@ void FDRMDialog::AddWhatsThisHelp()
     LabelLanguage->setWhatsThis(strStationLabelOther);
     LabelCountryCode->setWhatsThis(strStationLabelOther);
     FrameAudioDataParams->setWhatsThis(strStationLabelOther);
-    PushButtonService1->setWhatsThis(strServiceSel);
-    PushButtonService2->setWhatsThis(strServiceSel);
-    PushButtonService3->setWhatsThis(strServiceSel);
-    PushButtonService4->setWhatsThis(strServiceSel);
-    TextMiniService1->setWhatsThis(strServiceSel);
-    TextMiniService2->setWhatsThis(strServiceSel);
-    TextMiniService3->setWhatsThis(strServiceSel);
-    TextMiniService4->setWhatsThis(strServiceSel);
 
     const QString strBars = tr("from 1 to 5 bars indicates WMER in the range 8 to 24 dB");
 	onebar->setWhatsThis(strBars);

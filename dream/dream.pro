@@ -493,7 +493,8 @@ HEADERS += \
     src/util/Settings.h \
     src/util/Utilities.h \
     src/util/Vector.h \
-    src/Version.h
+    src/Version.h \
+    src/GUI-QT/serviceselector.h
 SOURCES += \
     src/AMDemodulation.cpp \
     src/AMSSDemodulation.cpp \
@@ -593,7 +594,8 @@ SOURCES += \
     src/util/Reassemble.cpp \
     src/util/Settings.cpp \
     src/util/Utilities.cpp \
-    src/Version.cpp
+    src/Version.cpp \
+    src/GUI-QT/serviceselector.cpp
 !console {
 HEADERS += \
     src/GUI-QT/Logging.h \
@@ -763,3 +765,6 @@ OTHER_FILES += \
     android/res/values-pl/strings.xml \
     android/AndroidManifest.xml \
     windows/dream.iss
+
+FORMS += \
+    src/GUI-QT/serviceselector.ui
