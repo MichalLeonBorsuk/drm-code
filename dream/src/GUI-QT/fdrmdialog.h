@@ -191,6 +191,7 @@ signals:
     void position(double,double);
     void AFS(const CAltFreqSign&);
     void serviceInformation(const map <uint32_t,CServiceInformation>);
+    void textMessageChanged(const QString&);
 };
 
 #endif // _FDRMDIALOG_H_

@@ -15,8 +15,12 @@ signals:
 
 public slots:
     void onServiceChanged(int, const CService&);
+    void setText(QString);
 private slots:
     void on_currentChanged(int);
+private:
+    void addAudioTab(int, const CService&);
+    void addDataTab(int, const CService&, bool);
 };
 
 #endif // DREAMTABWIDGET_H

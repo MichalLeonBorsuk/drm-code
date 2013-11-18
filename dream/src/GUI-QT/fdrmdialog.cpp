@@ -266,6 +266,8 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& Settings,
     connect(pServiceSelector, SIGNAL(audioServiceSelected(int)), this, SLOT(OnSelectAudioService(int)));
     connect(pServiceSelector, SIGNAL(dataServiceSelected(int)), this, SLOT(OnSelectDataService(int)));
     connect(this, SIGNAL(serviceChanged(int,const CService&)), pServiceSelector, SLOT(onServiceChanged(int, const CService&)));
+    connect(this, SIGNAL(textMessageChanged(QString)), TextTextMessage, SLOT(setText(QString)));
+
     // Single-window GUI
     pServiceTabs = new DreamTabWidget(this);
     verticalLayout->addWidget(pServiceTabs);
@@ -273,6 +275,7 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& Settings,
     connect(pServiceTabs, SIGNAL(audioServiceSelected(int)), this, SLOT(OnSelectAudioService(int)));
     //connect(pServiceTabs, SIGNAL(dataServiceSelected(int)), this, SLOT(OnSelectDataService(int)));
     connect(this, SIGNAL(serviceChanged(int, const CService&)), pServiceTabs, SLOT(onServiceChanged(int, const CService&)));
+    connect(this, SIGNAL(textMessageChanged(QString)), pServiceTabs, SLOT(setText(QString)));
 
     ClearDisplay();
 
@@ -316,12 +319,14 @@ void FDRMDialog::on_actionSingle_Window_Mode_triggered(bool checked)
     if(checked)
     {
         pServiceSelector->hide();
+        TextTextMessage->hide();
         pServiceTabs->show();
     }
     else
     {
         pServiceTabs->hide();
         pServiceSelector->show();
+        TextTextMessage->show();
     }
     Settings.Put("GUI", "singlewindow", checked);
 }
@@ -659,8 +664,7 @@ void FDRMDialog::showTextMessage(const QString& textMessage)
     }
     Linkify(formattedMessage);
     formattedMessage = "<center>" + formattedMessage + "</center>";
-    TextTextMessage->setText(formattedMessage);
-
+    emit textMessageChanged(formattedMessage);
 }
 
 void FDRMDialog::showServiceInfo(const CService& service)
@@ -850,7 +854,7 @@ void FDRMDialog::UpdateDisplay()
             TextTextMessage->setEnabled(FALSE);
 
             /* Clear Text */
-            TextTextMessage->setText("");
+            emit textMessageChanged("");
         }
 
         /* Check whether service parameters were received yet */

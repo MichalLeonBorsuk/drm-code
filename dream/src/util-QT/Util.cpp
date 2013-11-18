@@ -337,56 +337,63 @@ QString GetTypeString(const CService& service)
     }
     else
     {
-        /* Data service */
-        if (service.DataParam.ePacketModInd == CDataParam::PM_PACKET_MODE)
+        strReturn = GetDataTypeString(service);
+    }
+    return strReturn;
+}
+
+QString GetDataTypeString(const CService& service)
+{
+    QString strReturn;
+    /* Data service */
+    if (service.DataParam.ePacketModInd == CDataParam::PM_PACKET_MODE)
+    {
+        if (service.DataParam.eAppDomain == CDataParam::AD_DAB_SPEC_APP)
         {
-            if (service.DataParam.eAppDomain == CDataParam::AD_DAB_SPEC_APP)
+            switch (service.DataParam.iUserAppIdent)
             {
-                switch (service.DataParam.iUserAppIdent)
-                {
-                case 1:
-                    strReturn = QObject::tr("Dynamic labels");
-                    break;
+            case 1:
+                strReturn = QObject::tr("Dynamic labels");
+                break;
 
-                case DAB_AT_MOTSLIDESHOW:
-                    strReturn = QObject::tr("MOT Slideshow");
-                    break;
+            case DAB_AT_MOTSLIDESHOW:
+                strReturn = QObject::tr("MOT Slideshow");
+                break;
 
-                case DAB_AT_BROADCASTWEBSITE:
-                    strReturn = QObject::tr("MOT WebSite");
-                    break;
+            case DAB_AT_BROADCASTWEBSITE:
+                strReturn = QObject::tr("MOT WebSite");
+                break;
 
-                case DAB_AT_TPEG:
-                    strReturn = QObject::tr("TPEG");
-                    break;
+            case DAB_AT_TPEG:
+                strReturn = QObject::tr("TPEG");
+                break;
 
-                case DAB_AT_DGPS:
-                    strReturn = QObject::tr("DGPS");
-                    break;
+            case DAB_AT_DGPS:
+                strReturn = QObject::tr("DGPS");
+                break;
 
-                case DAB_AT_TMC:
-                    strReturn = QObject::tr("TMC");
-                    break;
+            case DAB_AT_TMC:
+                strReturn = QObject::tr("TMC");
+                break;
 
-                case DAB_AT_EPG:
-                    strReturn = QObject::tr("EPG - ElecQObject::tronic Programme Guide");
-                    break;
+            case DAB_AT_EPG:
+                strReturn = QObject::tr("EPG - ElecQObject::tronic Programme Guide");
+                break;
 
-                case DAB_AT_JAVA:
-                    strReturn = QObject::tr("Java");
-                    break;
+            case DAB_AT_JAVA:
+                strReturn = QObject::tr("Java");
+                break;
 
-                case DAB_AT_JOURNALINE: /* Journaline */
-                    strReturn = QObject::tr("Journaline");
-                    break;
-                }
+            case DAB_AT_JOURNALINE: /* Journaline */
+                strReturn = QObject::tr("Journaline");
+                break;
             }
-            else
-                strReturn = QObject::tr("Unknown Service");
         }
         else
             strReturn = QObject::tr("Unknown Service");
     }
+    else
+        strReturn = QObject::tr("Unknown Service");
 
     return strReturn;
 }
