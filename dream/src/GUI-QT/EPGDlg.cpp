@@ -30,6 +30,7 @@
 #include "EPGDlg.h"
 #include "../util-QT/EPG.h"
 #include "../datadecoding/epgutil.h"
+#include <QFile>
 #include <set>
 
 EPGDlg::EPGDlg(CSettings& Settings, QWidget* parent):
