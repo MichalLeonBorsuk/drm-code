@@ -50,5 +50,6 @@ void RestartTransceiver(CDRMTransceiver *DRMTransceiver);
 
 QString	GetCodecString(const CService&);
 QString	GetTypeString(const CService&);
+QString GetDataTypeString(const CService&);
 
 #endif // __UTIL_QT_UTIL_H
