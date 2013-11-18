@@ -56,9 +56,9 @@ ServiceSelector::~ServiceSelector()
     delete ui;
 }
 
-void ServiceSelector::setLabel(int short_id, const CService& service,
-       double rAudioBitRate, double rDataBitRate, bool bAFS, bool bCanDecode)
+void ServiceSelector::onServiceChanged(int short_id, const CService& service)
 {
+    bool bAFS=false; // TODO
     QString text;
 
     /* Check, if service is used */
@@ -76,16 +76,16 @@ void ServiceSelector::setLabel(int short_id, const CService& service,
             text += "  |   " + strCodec + " " + strType;
 
         /* Bit-rate (only show if greater than 0) */
-        if (rAudioBitRate > (_REAL) 0.0)
+        if (service.AudioParam.rBitRate > (_REAL) 0.0)
         {
-            text += " (" + QString().setNum(rAudioBitRate, 'f', 2) + " kbps)";
+            text += " (" + QString().setNum(service.AudioParam.rBitRate, 'f', 2) + " kbps)";
         }
 
         /* Audio service */
         if ((service.eAudDataFlag == CService::SF_AUDIO))
         {
             /* Report missing codec */
-            if (!bCanDecode)
+            if (!service.AudioParam.bCanDecode)
                 text += tr(" [no codec available]");
 
             /* Show, if a multimedia stream is connected to this service */
@@ -99,7 +99,7 @@ void ServiceSelector::setLabel(int short_id, const CService& service,
                 }
 
                 /* Bit-rate of connected data stream */
-                text += " (" + QString().setNum(rDataBitRate, 'f', 2) + " kbps)";
+                text += " (" + QString().setNum(service.DataParam.rBitRate, 'f', 2) + " kbps)";
             }
         }
         /* Data service */

@@ -70,6 +70,7 @@ class BWSViewer;
 class JLViewer;
 class SlideShowViewer;
 class CScheduler;
+class DreamTabWidget;
 
 class FDRMDialog : public CWindow, public Ui_DRMMainWindow
 {
@@ -118,7 +119,7 @@ protected:
     QTimer*		        pScheduleTimer;
     int                 iCurrentFrequency;
     ServiceSelector*    pServiceSelector;
-    QTabWidget*         pServiceTabs;
+    DreamTabWidget*     pServiceTabs;
 
     void SetStatus(CMultColorLED* LED, ETypeRxStatus state);
     virtual void        eventClose(QCloseEvent* ce);
@@ -164,7 +165,7 @@ private slots:
     void OnWhatsThis();
     void OnSysTrayActivated(QSystemTrayIcon::ActivationReason);
     void OnGUISetFrequency(int);
-    void intitialiseSchedule();
+    void initialiseSchedule();
     void on_actionGeneralSettings_triggered();
     void onUserEnteredPosition(double, double);
     void onUseGPSd(const QString&);
@@ -180,10 +181,9 @@ private slots:
     void onSetIntCons(bool);
     void on_action_Multimedia_Dialog_triggered();
     void on_actionSingle_Window_Mode_triggered(bool checked);
-    void onCurrentIndexChanged(int);
-    void serviceTabsSetLabel(int, const QString&);
 
 signals:
+    void serviceChanged(int, const CService&);
     void dataStatusChanged(ETypeRxStatus);
     void plotStyleChanged(int);
     void frequencyChanged(int);
