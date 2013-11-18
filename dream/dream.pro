@@ -7,11 +7,11 @@ LIBS += -L$$OUT_PWD/lib
 INCLUDEPATH += $$OUT_PWD/include
 contains(QT_VERSION, ^4\\..*) {
     CONFIG += qt qt4
-    VERSION_MESSAGE = Qt 4
+    VERSION_MESSAGE = Qt $$QT_VERSION
 }
 contains(QT_VERSION, ^5\\..*) {
     CONFIG += qt qt5
-    VERSION_MESSAGE = Qt 5
+    VERSION_MESSAGE = Qt $$QT_VERSION
 }
 CONFIG(debug, debug|release) {
     DEBUG_MESSAGE = debug

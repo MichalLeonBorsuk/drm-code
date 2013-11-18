@@ -329,7 +329,7 @@ void FDRMDialog::serviceTabsSetLabel(int short_id, const QString& l)
         if(pServiceTabs->count()<short_id+1)
         {
             int index = pServiceTabs->addTab(new QLabel(QString("short id %1").arg(short_id)), l);
-            pServiceTabs->tabBar()->setTabData(index, short_id);
+            // TODO 4.7 compat pServiceTabs->tabBar()->setTabData(index, short_id);
             // TODO add tabs for data components of audio services
         }
         else
@@ -341,7 +341,7 @@ void FDRMDialog::serviceTabsSetLabel(int short_id, const QString& l)
 
 void FDRMDialog::onCurrentIndexChanged(int index)
 {
-    int short_id = pServiceTabs->tabBar()->tabData(index).toInt();
+    int short_id = 0;// TODO 4.7 compat pServiceTabs->tabBar()->tabData(index).toInt();
     CParameter* p = DRMReceiver.GetParameters();
     p->Lock();
     if(p->Service[short_id].eAudDataFlag == CService::SF_AUDIO)
