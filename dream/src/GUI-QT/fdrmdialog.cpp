@@ -35,7 +35,7 @@
 #include <QShowEvent>
 #include <QCloseEvent>
 #include <QMessageBox>
-#include <QTableWidget>
+#include "dreamtabwidget.h"
 
 #include "SlideShowViewer.h"
 #include "JLViewer.h"
@@ -265,11 +265,14 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& Settings,
     verticalLayout->addWidget(pServiceSelector);
     connect(pServiceSelector, SIGNAL(audioServiceSelected(int)), this, SLOT(OnSelectAudioService(int)));
     connect(pServiceSelector, SIGNAL(dataServiceSelected(int)), this, SLOT(OnSelectDataService(int)));
+    connect(this, SIGNAL(serviceChanged(int,const CService&)), pServiceSelector, SLOT(onServiceChanged(int, const CService&)));
     // Single-window GUI
-    pServiceTabs = new QTabWidget(this);
+    pServiceTabs = new DreamTabWidget(this);
     verticalLayout->addWidget(pServiceTabs);
     pServiceTabs->hide();
-    connect(pServiceTabs, SIGNAL(currentChanged(int)), this, SLOT(onCurrentIndexChanged(int)));
+    connect(pServiceTabs, SIGNAL(audioServiceSelected(int)), this, SLOT(OnSelectAudioService(int)));
+    //connect(pServiceTabs, SIGNAL(dataServiceSelected(int)), this, SLOT(OnSelectDataService(int)));
+    connect(this, SIGNAL(serviceChanged(int, const CService&)), pServiceTabs, SLOT(onServiceChanged(int, const CService&)));
 
     ClearDisplay();
 
@@ -320,39 +323,7 @@ void FDRMDialog::on_actionSingle_Window_Mode_triggered(bool checked)
         pServiceTabs->hide();
         pServiceSelector->show();
     }
-}
-
-void FDRMDialog::serviceTabsSetLabel(int short_id, const QString& l)
-{
-    if(l!="")
-    {
-        if(pServiceTabs->count()<short_id+1)
-        {
-            int index = pServiceTabs->addTab(new QLabel(QString("short id %1").arg(short_id)), l);
-            // TODO 4.7 compat pServiceTabs->tabBar()->setTabData(index, short_id);
-            // TODO add tabs for data components of audio services
-        }
-        else
-        {
-            // TODO
-        }
-    }
-}
-
-void FDRMDialog::onCurrentIndexChanged(int index)
-{
-    int short_id = 0;// TODO 4.7 compat pServiceTabs->tabBar()->tabData(index).toInt();
-    CParameter* p = DRMReceiver.GetParameters();
-    p->Lock();
-    if(p->Service[short_id].eAudDataFlag == CService::SF_AUDIO)
-    {
-        p->SetCurSelAudioService(short_id);
-    }
-    else
-    {
-        // TODO
-    }
-    p->Unlock();
+    Settings.Put("GUI", "singlewindow", checked);
 }
 
 void FDRMDialog::on_actionGeneralSettings_triggered()
@@ -601,10 +572,10 @@ void FDRMDialog::OnTimer()
 
     // do this here so GUI has initialised before we might pop up a message box
     if(pScheduler)
-        intitialiseSchedule();
+        initialiseSchedule();
 }
 
-void FDRMDialog::intitialiseSchedule()
+void FDRMDialog::initialiseSchedule()
 {
     string schedfile = Settings.Get("command", "schedule", string());
     if(schedfile != "")
@@ -788,16 +759,16 @@ void FDRMDialog::UpdateDisplay()
     for(i=0; i < MAX_NUM_SERVICES; i++)
     {
 
-        const CService& service = Parameters.Service[i];
-        const _REAL rAudioBitRate = Parameters.GetBitRateKbps(i, FALSE);
-        const _REAL rDataBitRate = Parameters.GetBitRateKbps(i, TRUE);
+        CService& service = Parameters.Service[i];
+        service.AudioParam.rBitRate = Parameters.GetBitRateKbps(i, FALSE);
+        service.AudioParam.bCanDecode = DRMReceiver.GetAudSorceDec()->CanDecode(service.AudioParam.eAudioCoding);
+        service.DataParam.rBitRate = Parameters.GetBitRateKbps(i, TRUE);
 
         /* detect if AFS mux information is available TODO - align to service */
         bool bAFS = ((i==0) && (
                          (Parameters.AltFreqSign.vecMultiplexes.size() > 0)
                          || (Parameters.AltFreqSign.vecOtherServices.size() > 0)
                      ));
-        bool bCanDecodeAudio = DRMReceiver.GetAudSorceDec()->CanDecode(service.AudioParam.eAudioCoding);
         if (service.DataParam.ePacketModInd == CDataParam::PM_PACKET_MODE)
         {
             if (service.DataParam.eAppDomain == CDataParam::AD_DAB_SPEC_APP)
@@ -815,8 +786,7 @@ void FDRMDialog::UpdateDisplay()
                 }
             }
         }
-        pServiceSelector->setLabel(i, service, rAudioBitRate, rDataBitRate, bAFS, bCanDecodeAudio);
-        serviceTabsSetLabel(i, QString::fromUtf8(service.strLabel.c_str()));
+        emit serviceChanged(i, service); // TODO emit only when changed
         if (!bServiceIsValid && (iFirstAudioService == -1 || iFirstDataService == -1))
         {
             Parameters.Lock();
@@ -1022,6 +992,12 @@ void FDRMDialog::eventUpdate()
 
 void FDRMDialog::eventShow(QShowEvent*)
 {
+    if(Settings.Get("GUI", "singlewindow", 0))
+    {
+        actionSingle_Window_Mode->setChecked(true); // does not emit trigger signal
+        on_actionSingle_Window_Mode_triggered(true);
+    }
+
     /* Set timer for real-time controls */
     OnTimer();
     Timer.start(GUI_CONTROL_UPDATE_TIME);

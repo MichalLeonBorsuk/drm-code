@@ -493,8 +493,7 @@ HEADERS += \
     src/util/Settings.h \
     src/util/Utilities.h \
     src/util/Vector.h \
-    src/Version.h \
-    src/GUI-QT/serviceselector.h
+    src/Version.h
 SOURCES += \
     src/AMDemodulation.cpp \
     src/AMSSDemodulation.cpp \
@@ -594,8 +593,7 @@ SOURCES += \
     src/util/Reassemble.cpp \
     src/util/Settings.cpp \
     src/util/Utilities.cpp \
-    src/Version.cpp \
-    src/GUI-QT/serviceselector.cpp
+    src/Version.cpp
 !console {
 HEADERS += \
     src/GUI-QT/Logging.h \
@@ -651,7 +649,9 @@ HEADERS += \
     src/GUI-QT/SoundCardSelMenu.h \
     src/GUI-QT/StationsDlg.h \
     src/GUI-QT/TransmDlg.h \
-    src/GUI-QT/waterfallwidget.h
+    src/GUI-QT/waterfallwidget.h \
+    src/GUI-QT/serviceselector.h \
+    src/GUI-QT/dreamtabwidget.h
 SOURCES += \
     src/GUI-QT/AnalogDemDlg.cpp \
     src/GUI-QT/CodecParams.cpp \
@@ -673,7 +673,9 @@ SOURCES += \
     src/GUI-QT/SoundCardSelMenu.cpp \
     src/GUI-QT/StationsDlg.cpp \
     src/GUI-QT/TransmDlg.cpp \
-    src/GUI-QT/waterfallwidget.cpp
+    src/GUI-QT/waterfallwidget.cpp \
+    src/GUI-QT/serviceselector.cpp \
+    src/GUI-QT/dreamtabwidget.cpp
 }
 !sound {
     error("no usable audio interface found - install pulseaudio or portaudio dev package")

@@ -142,55 +142,9 @@ public:
             eOPUSBandwidth(OB_FB), eOPUSSubCod(OS_SILK), eOPUSChan(OC_STEREO),
             eOPUSSignal(OG_MUSIC), eOPUSApplication(OA_AUDIO),
             bOPUSForwardErrorCorrection(FALSE), bOPUSRequestReset(FALSE),
-            bParamChanged(FALSE)
+            bParamChanged(FALSE),
+            rBitRate(0.0),bCanDecode(false)
     {
-    }
-    CAudioParam(const CAudioParam& ap):
-            strTextMessage(ap.strTextMessage),
-            iStreamID(ap.iStreamID),
-            eAudioCoding(ap.eAudioCoding),
-            eSBRFlag(ap.eSBRFlag),
-            eAudioSamplRate(ap.eAudioSamplRate),
-            bTextflag(ap.bTextflag),
-            bEnhanceFlag(ap.bEnhanceFlag),
-            eAudioMode(ap.eAudioMode),
-            iCELPIndex(ap.iCELPIndex),
-            bCELPCRC(ap.bCELPCRC),
-            eHVXCRate(ap.eHVXCRate),
-            bHVXCCRC(ap.bHVXCCRC),
-            eOPUSBandwidth(ap.eOPUSBandwidth),
-            eOPUSSubCod(ap.eOPUSSubCod),
-            eOPUSChan(ap.eOPUSChan),
-            eOPUSSignal(ap.eOPUSSignal),
-            eOPUSApplication(ap.eOPUSApplication),
-            bOPUSForwardErrorCorrection(ap.bOPUSForwardErrorCorrection),
-            bOPUSRequestReset(ap.bOPUSRequestReset),
-            bParamChanged(ap.bParamChanged)
-    {
-    }
-    CAudioParam& operator=(const CAudioParam& ap)
-    {
-        strTextMessage = ap.strTextMessage;
-        iStreamID = ap.iStreamID;
-        eAudioCoding = ap.eAudioCoding;
-        eSBRFlag = ap.eSBRFlag;
-        eAudioSamplRate = ap.eAudioSamplRate;
-        bTextflag =	ap.bTextflag;
-        bEnhanceFlag = ap.bEnhanceFlag;
-        eAudioMode = ap.eAudioMode;
-        iCELPIndex = ap.iCELPIndex;
-        bCELPCRC = ap.bCELPCRC;
-        eHVXCRate = ap.eHVXCRate;
-        bHVXCCRC = ap.bHVXCCRC;
-        eOPUSBandwidth = ap.eOPUSBandwidth;
-        eOPUSSubCod = ap.eOPUSSubCod;
-        eOPUSChan = ap.eOPUSChan;
-        eOPUSSignal = ap.eOPUSSignal;
-        eOPUSApplication = ap.eOPUSApplication;
-        bOPUSForwardErrorCorrection = ap.bOPUSForwardErrorCorrection;
-        bOPUSRequestReset = ap.bOPUSRequestReset;
-        bParamChanged = ap.bParamChanged;
-        return *this;
     }
 
     /* Text-message */
@@ -226,6 +180,8 @@ public:
 
     /* CAudioParam has changed */
     _BOOLEAN bParamChanged;
+    double rBitRate;
+    bool bCanDecode;
 
     /* This function is needed for detection changes in the class */
     _BOOLEAN operator!=(const CAudioParam AudioParam)
@@ -297,6 +253,8 @@ public:
     // "DAB specified application" not yet implemented!!!
     EApplDomain eAppDomain;	/* Application domain */
     int iUserAppIdent;		/* User application identifier, only DAB */
+    double rBitRate;
+    bool bCanDecode;
 
     CDataParam():
             iStreamID(STREAM_ID_NOT_USED),
@@ -305,31 +263,10 @@ public:
             iPacketID(0),
             iPacketLen(0),
             eAppDomain(AD_DAB_SPEC_APP),
-            iUserAppIdent(0)
+            iUserAppIdent(0),
+            rBitRate(0.0),bCanDecode(false)
     {
     }
-    CDataParam(const CDataParam& DataParam):
-            iStreamID(DataParam.iStreamID),
-            ePacketModInd(DataParam.ePacketModInd),
-            eDataUnitInd(DataParam.eDataUnitInd),
-            iPacketID(DataParam.iPacketID),
-            iPacketLen(DataParam.iPacketLen),
-            eAppDomain(DataParam.eAppDomain),
-            iUserAppIdent(DataParam.iUserAppIdent)
-    {
-    }
-    CDataParam& operator=(const CDataParam& DataParam)
-    {
-        iStreamID = DataParam.iStreamID;
-        ePacketModInd = DataParam.ePacketModInd;
-        eDataUnitInd = DataParam.eDataUnitInd;
-        iPacketID = DataParam.iPacketID;
-        iPacketLen = DataParam.iPacketLen;
-        eAppDomain = DataParam.eAppDomain;
-        iUserAppIdent = DataParam.iUserAppIdent;
-        return *this;
-    }
-
     /* This function is needed to detect changes in the data service */
     _BOOLEAN operator!=(const CDataParam DataParam)
     {
@@ -371,28 +308,6 @@ public:
             strCountryCode(), strLanguageCode(), strLabel(),
             AudioParam(), DataParam()
     {
-    }
-    CService(const CService& s):
-            iServiceID(s.iServiceID), eCAIndication(s.eCAIndication),
-            iLanguage(s.iLanguage), eAudDataFlag(s.eAudDataFlag),
-            iServiceDescr(s.iServiceDescr), strCountryCode(s.strCountryCode),
-            strLanguageCode(s.strLanguageCode), strLabel(s.strLabel),
-            AudioParam(s.AudioParam), DataParam(s.DataParam)
-    {
-    }
-    CService& operator=(const CService& s)
-    {
-        iServiceID = s.iServiceID;
-        eCAIndication = s.eCAIndication;
-        iLanguage = s.iLanguage;
-        eAudDataFlag = s.eAudDataFlag;
-        iServiceDescr = s.iServiceDescr;
-        strCountryCode = s.strCountryCode;
-        strLanguageCode = s.strLanguageCode;
-        strLabel = s.strLabel;
-        AudioParam = s.AudioParam;
-        DataParam = s.DataParam;
-        return *this;
     }
 
     _BOOLEAN IsActive() const

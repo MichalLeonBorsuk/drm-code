@@ -19,10 +19,10 @@ class ServiceSelector : public QWidget
 public:
     explicit ServiceSelector(QWidget *parent = 0);
     ~ServiceSelector();
-    void setLabel(int, const CService&, double, double, bool, bool);
     void check(int i);
     void disableAll();
-
+public slots:
+    void onServiceChanged(int, const CService&);
 private:
     Ui::ServiceSelector* ui;
     QButtonGroup*		 pButtonGroup;
