@@ -73,6 +73,10 @@
 #endif
 
 class CDRMReceiver;
+class CDataDecoder;
+
+/* SI: Symbol Interleaver */
+enum ESymIntMod { SI_LONG, SI_SHORT };
 
 /* CS: Coding Scheme */
 enum ECodScheme { CS_1_SM, CS_2_SM, CS_3_SM, CS_3_HMSYM, CS_3_HMMIX };
@@ -157,6 +161,7 @@ public:
     EAudSamRat eAudioSamplRate;	/* Audio sampling rate */
     _BOOLEAN bTextflag;		/* Indicates whether a text message is present or not */
     _BOOLEAN bEnhanceFlag;	/* Enhancement flag */
+    bool bCA;               /* Conditional Access */
 
     /* For AAC: Mono, LC Stereo, Stereo --------------------------------- */
     EAudMode eAudioMode;	/* Audio mode */
@@ -255,6 +260,7 @@ public:
     int iUserAppIdent;		/* User application identifier, only DAB */
     double rBitRate;
     bool bCanDecode;
+    CDataDecoder* pDecoder;
 
     CDataParam():
             iStreamID(STREAM_ID_NOT_USED),
@@ -264,9 +270,11 @@ public:
             iPacketLen(0),
             eAppDomain(AD_DAB_SPEC_APP),
             iUserAppIdent(0),
-            rBitRate(0.0),bCanDecode(false)
+            rBitRate(0.0),bCanDecode(false),
+            pDecoder(NULL)
     {
     }
+
     /* This function is needed to detect changes in the data service */
     _BOOLEAN operator!=(const CDataParam DataParam)
     {
@@ -919,9 +927,6 @@ public:
     /* Enumerations --------------------------------------------------------- */
     /* AS: AFS in SDC is valid or not */
     enum EAFSVali { AS_VALID, AS_NOT_VALID };
-
-    /* SI: Symbol Interleaver */
-    enum ESymIntMod { SI_LONG, SI_SHORT };
 
     /* CT: Current Time */
     enum ECurTime { CT_OFF, CT_LOCAL, CT_UTC, CT_UTC_OFFSET };

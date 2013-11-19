@@ -144,7 +144,7 @@ void CIdealChanEst::InitInternal(CParameter& Parameters)
 	iStartCnt = 20;
 
 	/* Additional delay from long interleaving has to be considered */
-	if (Parameters.GetInterleaverDepth() == CParameter::SI_LONG)
+    if (Parameters.GetInterleaverDepth() == SI_LONG)
 		iStartCnt += Parameters.CellMappingTable.iNumSymPerFrame * D_LENGTH_LONG_INTERL;
 
 

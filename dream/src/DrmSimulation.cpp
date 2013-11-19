@@ -95,7 +95,7 @@ CDRMSimulation::CDRMSimulation() : iSimTime(0), iSimNumErrors(0),
     Parameters.MSCPrLe.iPartB = 1;
     Parameters.MSCPrLe.iHierarch = 0;
 
-    Parameters.eSymbolInterlMode = CParameter::SI_SHORT;
+    Parameters.eSymbolInterlMode = SI_SHORT;
     Parameters.eMSCCodingScheme = CS_3_SM;
     Parameters.eSDCCodingScheme = CS_2_SM;
 

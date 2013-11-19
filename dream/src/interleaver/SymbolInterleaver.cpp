@@ -81,11 +81,11 @@ void CSymbInterleaver::InitInternal(CParameter& TransmParam)
 	/* Set interleaver depth */
 	switch (TransmParam.eSymbolInterlMode)
 	{
-	case CParameter::SI_LONG:
+    case SI_LONG:
 		iD = D_LENGTH_LONG_INTERL;
 		break;
 
-	case CParameter::SI_SHORT:
+    case SI_SHORT:
 		iD = D_LENGTH_SHORT_INTERL;
 		break;
 	}
@@ -168,11 +168,11 @@ void CSymbDeinterleaver::InitInternal(CParameter& Parameters)
 	/* Set interleaver depth */
 	switch (Parameters.eSymbolInterlMode)
 	{
-	case CParameter::SI_LONG:
+    case SI_LONG:
 		iD = D_LENGTH_LONG_INTERL;
 		break;
 
-	case CParameter::SI_SHORT:
+    case SI_SHORT:
 		iD = D_LENGTH_SHORT_INTERL;
 		break;
 	}
