@@ -30,6 +30,8 @@
 #define __UTIL_QT_UTIL_H
 
 #include <QString>
+#include "MultColorLED.h"
+#include <../Parameter.h>
 
 class CDRMTransceiver;
 class CService;
@@ -51,5 +53,6 @@ void RestartTransceiver(CDRMTransceiver *DRMTransceiver);
 QString	GetCodecString(const CService&);
 QString	GetTypeString(const CService&);
 QString GetDataTypeString(const CService&);
+void SetStatus(CMultColorLED*, ETypeRxStatus);
 
 #endif // __UTIL_QT_UTIL_H

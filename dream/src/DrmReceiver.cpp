@@ -1113,7 +1113,7 @@ CDRMReceiver::SetInStartMode()
     Parameters.InitCellMapTable(RM_ROBUSTNESS_MODE_B, SO_3);
 
     /* Set initial MLC parameters */
-    Parameters.SetInterleaverDepth(CParameter::SI_LONG);
+    Parameters.SetInterleaverDepth(SI_LONG);
     Parameters.SetMSCCodingScheme(CS_3_SM);
     Parameters.SetSDCCodingScheme(CS_2_SM);
 

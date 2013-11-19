@@ -28,7 +28,8 @@
 
 #include "JLViewer.h"
 #include "jlbrowser.h"
-#include "../datadecoding/DataDecoder.h"
+#include <../datadecoding/DataDecoder.h>
+#include <../util-QT/Util.h>
 #include <QFontDialog>
 
 JLViewer::JLViewer(CSettings& Settings, QWidget* parent):
@@ -95,24 +96,7 @@ void JLViewer::setServiceInformation(const CService& service, uint32_t iAudioSer
 
 void JLViewer::setStatus(ETypeRxStatus status)
 {
-    switch(status)
-    {
-    case NOT_PRESENT:
-        LEDStatus->Reset();
-        break;
-
-    case CRC_ERROR:
-        LEDStatus->SetLight(CMultColorLED::RL_RED);
-        break;
-
-    case DATA_ERROR:
-        LEDStatus->SetLight(CMultColorLED::RL_YELLOW);
-        break;
-
-    case RX_OK:
-        LEDStatus->SetLight(CMultColorLED::RL_GREEN);
-        break;
-    }
+    SetStatus(LEDStatus, status);
 
     if(textBrowser->changed())
     {

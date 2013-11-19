@@ -377,7 +377,7 @@ QString GetDataTypeString(const CService& service)
                 break;
 
             case DAB_AT_EPG:
-                strReturn = QObject::tr("EPG - ElecQObject::tronic Programme Guide");
+                strReturn = QObject::tr("EPG - Electronic Programme Guide");
                 break;
 
             case DAB_AT_JAVA:
@@ -397,3 +397,26 @@ QString GetDataTypeString(const CService& service)
 
     return strReturn;
 }
+
+void SetStatus(CMultColorLED* LED, ETypeRxStatus state)
+{
+    switch(state)
+    {
+    case NOT_PRESENT:
+        LED->Reset(); /* GREY */
+        break;
+
+    case CRC_ERROR:
+        LED->SetLight(CMultColorLED::RL_RED);
+        break;
+
+    case DATA_ERROR:
+        LED->SetLight(CMultColorLED::RL_YELLOW);
+        break;
+
+    case RX_OK:
+        LED->SetLight(CMultColorLED::RL_GREEN);
+        break;
+    }
+}
+

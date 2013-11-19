@@ -72,19 +72,24 @@ class SlideShowViewer;
 class CScheduler;
 class DreamTabWidget;
 
-class FDRMDialog : public CWindow, public Ui_DRMMainWindow
+namespace Ui {
+class DRMMainWindow;
+}
+
+class FDRMDialog : public CWindow
 {
     Q_OBJECT
 
 public:
 #ifdef HAVE_LIBHAMLIB
-    FDRMDialog(CDRMReceiver&, CSettings&, CRig&, QWidget* parent = 0);
+    explicit FDRMDialog(CDRMReceiver&, CSettings&, CRig&, QWidget* parent = 0);
 #else
-    FDRMDialog(CDRMReceiver&, CSettings&, QWidget* parent = 0);
+    explicit FDRMDialog(CDRMReceiver&, CSettings&, QWidget* parent = 0);
 #endif
-    virtual ~FDRMDialog();
+    ~FDRMDialog();
 
-protected:
+private:
+    Ui::DRMMainWindow*  ui;
     CDRMReceiver&		DRMReceiver;
     QTimer				Timer;
     QTimer				TimerClose;
@@ -138,7 +143,7 @@ protected:
     void		ChangeGUIModeToAM();
     void		ChangeGUIModeToFM();
 
-    void showTextMessage(const QString&);
+    QString formatTextMessage(const QString&) const;
     void showServiceInfo(const CService&);
     void startLogging();
     void stopLogging();
@@ -181,17 +186,18 @@ private slots:
     void onSetIntCons(bool);
     void on_action_Multimedia_Dialog_triggered();
     void on_actionSingle_Window_Mode_triggered(bool checked);
+    void onTextMessageChanged(int, QString);
 
 signals:
     void serviceChanged(int, const CService&);
-    void dataStatusChanged(ETypeRxStatus);
+    void dataStatusChanged(int, ETypeRxStatus);
     void plotStyleChanged(int);
     void frequencyChanged(int);
     void SwitchMode(int);
     void position(double,double);
     void AFS(const CAltFreqSign&);
     void serviceInformation(const map <uint32_t,CServiceInformation>);
-    void textMessageChanged(const QString&);
+    void textMessageChanged(int, const QString&);
 };
 
 #endif // _FDRMDIALOG_H_

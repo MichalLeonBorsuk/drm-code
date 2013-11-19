@@ -627,7 +627,17 @@ FORMS += \
     SlideShowViewer.ui \
     StationsDlgbase.ui \
     systemevalDlgbase.ui \
-    TransmDlgbase.ui
+    TransmDlgbase.ui \
+    serviceselector.ui \
+    channelwidget.ui \
+    bwsviewerwidget.ui \
+    audiodetailwidget.ui \
+    drmoptions.ui \
+    drmdisplay.ui \
+    drmdetail.ui \
+    liveschedulewidget.ui \
+    journalineviewer.ui
+
 HEADERS += \
     src/GUI-QT/AnalogDemDlg.h \
     src/GUI-QT/CodecParams.h \
@@ -651,7 +661,14 @@ HEADERS += \
     src/GUI-QT/TransmDlg.h \
     src/GUI-QT/waterfallwidget.h \
     src/GUI-QT/serviceselector.h \
-    src/GUI-QT/dreamtabwidget.h
+    src/GUI-QT/dreamtabwidget.h \
+    src/GUI-QT/channelwidget.h \
+    src/GUI-QT/bwsviewerwidget.h \
+    src/GUI-QT/audiodetailwidget.h \
+    src/GUI-QT/drmoptions.h \
+    src/GUI-QT/drmdisplay.h \
+    src/GUI-QT/drmdetail.h \
+    src/GUI-QT/journalineviewer.h
 SOURCES += \
     src/GUI-QT/AnalogDemDlg.cpp \
     src/GUI-QT/CodecParams.cpp \
@@ -675,98 +692,17 @@ SOURCES += \
     src/GUI-QT/TransmDlg.cpp \
     src/GUI-QT/waterfallwidget.cpp \
     src/GUI-QT/serviceselector.cpp \
-    src/GUI-QT/dreamtabwidget.cpp
+    src/GUI-QT/dreamtabwidget.cpp \
+    src/GUI-QT/channelwidget.cpp \
+    src/GUI-QT/bwsviewerwidget.cpp \
+    src/GUI-QT/audiodetailwidget.cpp \
+    src/GUI-QT/drmoptions.cpp \
+    src/GUI-QT/drmdisplay.cpp \
+    src/GUI-QT/drmdetail.cpp \
+    src/GUI-QT/journalineviewer.cpp
 }
 !sound {
     error("no usable audio interface found - install pulseaudio or portaudio dev package")
 }
 
-OTHER_FILES += \
-    android/AndroidManifest.xml \
-    android/res/layout/splash.xml \
-    android/res/values/libs.xml \
-    android/res/values/strings.xml \
-    android/res/values-de/strings.xml \
-    android/res/values-el/strings.xml \
-    android/res/values-es/strings.xml \
-    android/res/values-et/strings.xml \
-    android/res/values-fa/strings.xml \
-    android/res/values-fr/strings.xml \
-    android/res/values-id/strings.xml \
-    android/res/values-it/strings.xml \
-    android/res/values-ja/strings.xml \
-    android/res/values-ms/strings.xml \
-    android/res/values-nb/strings.xml \
-    android/res/values-nl/strings.xml \
-    android/res/values-pl/strings.xml \
-    android/res/values-pt-rBR/strings.xml \
-    android/res/values-ro/strings.xml \
-    android/res/values-rs/strings.xml \
-    android/res/values-ru/strings.xml \
-    android/res/values-zh-rCN/strings.xml \
-    android/res/values-zh-rTW/strings.xml \
-    android/src/org/kde/necessitas/ministro/IMinistro.aidl \
-    android/src/org/kde/necessitas/ministro/IMinistroCallback.aidl \
-    android/src/org/qtproject/qt5/android/bindings/QtActivity.java \
-    android/src/org/qtproject/qt5/android/bindings/QtApplication.java \
-    android/version.xml \
-    android/AndroidManifest.xml \
-    android/res/layout/splash.xml \
-    android/res/values/libs.xml \
-    android/res/values/strings.xml \
-    android/res/values-de/strings.xml \
-    android/res/values-el/strings.xml \
-    android/res/values-es/strings.xml \
-    android/res/values-et/strings.xml \
-    android/res/values-fa/strings.xml \
-    android/res/values-fr/strings.xml \
-    android/res/values-id/strings.xml \
-    android/res/values-it/strings.xml \
-    android/res/values-ja/strings.xml \
-    android/res/values-ms/strings.xml \
-    android/res/values-nb/strings.xml \
-    android/res/values-nl/strings.xml \
-    android/res/values-pl/strings.xml \
-    android/res/values-pt-rBR/strings.xml \
-    android/res/values-ro/strings.xml \
-    android/res/values-rs/strings.xml \
-    android/res/values-ru/strings.xml \
-    android/res/values-zh-rCN/strings.xml \
-    android/res/values-zh-rTW/strings.xml \
-    android/src/org/kde/necessitas/ministro/IMinistro.aidl \
-    android/src/org/kde/necessitas/ministro/IMinistroCallback.aidl \
-    android/src/org/qtproject/qt5/android/bindings/QtActivity.java \
-    android/src/org/qtproject/qt5/android/bindings/QtApplication.java \
-    android/version.xml \
-    android/src/org/kde/necessitas/ministro/IMinistro.aidl \
-    android/src/org/kde/necessitas/ministro/IMinistroCallback.aidl \
-    android/src/org/qtproject/qt5/android/bindings/QtActivity.java \
-    android/src/org/qtproject/qt5/android/bindings/QtApplication.java \
-    android/version.xml \
-    android/res/values-es/strings.xml \
-    android/res/values-id/strings.xml \
-    android/res/values-ja/strings.xml \
-    android/res/values-nl/strings.xml \
-    android/res/values-rs/strings.xml \
-    android/res/values-de/strings.xml \
-    android/res/values-pt-rBR/strings.xml \
-    android/res/values-et/strings.xml \
-    android/res/layout/splash.xml \
-    android/res/values-it/strings.xml \
-    android/res/values-nb/strings.xml \
-    android/res/values-ro/strings.xml \
-    android/res/values-zh-rCN/strings.xml \
-    android/res/values-zh-rTW/strings.xml \
-    android/res/values-ru/strings.xml \
-    android/res/values-fa/strings.xml \
-    android/res/values-fr/strings.xml \
-    android/res/values-ms/strings.xml \
-    android/res/values-el/strings.xml \
-    android/res/values/libs.xml \
-    android/res/values/strings.xml \
-    android/res/values-pl/strings.xml \
-    android/AndroidManifest.xml \
-    windows/dream.iss
-
-FORMS += \
-    src/GUI-QT/serviceselector.ui
+OTHER_FILES += windows/dream.iss

@@ -207,11 +207,11 @@ TransmDialog::TransmDialog(CSettings& Settings,	QWidget* parent)
 
 	switch (Parameters.eSymbolInterlMode)
 	{
-	case CParameter::SI_LONG:
+    case SI_LONG:
 		ComboBoxMSCInterleaver->setCurrentIndex(0);
 		break;
 
-	case CParameter::SI_SHORT:
+    case SI_SHORT:
 		ComboBoxMSCInterleaver->setCurrentIndex(1);
 		break;
 	}
@@ -1004,11 +1004,11 @@ void TransmDialog::OnComboBoxMSCInterleaverActivated(int iID)
 	switch (iID)
 	{
 	case 0:
-		Parameters.eSymbolInterlMode = CParameter::SI_LONG;
+        Parameters.eSymbolInterlMode = SI_LONG;
 		break;
 
 	case 1:
-		Parameters.eSymbolInterlMode = CParameter::SI_SHORT;
+        Parameters.eSymbolInterlMode = SI_SHORT;
 		break;
 	}
 	Parameters.Unlock();

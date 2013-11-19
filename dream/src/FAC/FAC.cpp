@@ -96,11 +96,11 @@ void CFACTransmit::FACParam(CVector<_BINARY>* pbiFACData, CParameter& Parameter)
     /* Interleaver depth flag */
     switch (Parameter.eSymbolInterlMode)
     {
-    case CParameter::SI_LONG:
+    case SI_LONG:
         (*pbiFACData).Enqueue(0 /* 0 */, 1);
         break;
 
-    case CParameter::SI_SHORT:
+    case SI_SHORT:
         (*pbiFACData).Enqueue(1 /* 1 */, 1);
         break;
     }
@@ -459,11 +459,11 @@ _BOOLEAN CFACReceive::FACParam(CVector<_BINARY>* pbiFACData,
         switch ((*pbiFACData).Separate(1))
         {
         case 0: /* 0 */
-            Parameter.SetInterleaverDepth(CParameter::SI_LONG);
+            Parameter.SetInterleaverDepth(SI_LONG);
             break;
 
         case 1: /* 1 */
-            Parameter.SetInterleaverDepth(CParameter::SI_SHORT);
+            Parameter.SetInterleaverDepth(SI_SHORT);
             break;
         }
 

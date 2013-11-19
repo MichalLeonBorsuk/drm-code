@@ -600,11 +600,11 @@ void systemevalDlg::OnTimer()
         /* Interleaver Depth #################### */
         switch (Parameters.eSymbolInterlMode)
         {
-        case CParameter::SI_LONG:
+        case SI_LONG:
             strFACInfo = tr("2 s (Long Interleaving)");
             break;
 
-        case CParameter::SI_SHORT:
+        case SI_SHORT:
             strFACInfo = tr("400 ms (Short Interleaving)");
             break;
 
