@@ -29,43 +29,29 @@
 #ifndef _FDRMDIALOG_H_
 #define _FDRMDIALOG_H_
 
-#include <QLabel>
-#include <QPushButton>
-#include <QTimer>
-#include <QString>
-#include <QMenuBar>
-#include <QLayout>
-#include <QPalette>
-#include <QColorDialog>
-#include <QActionGroup>
-#include <QSignalMapper>
-#include <QDialog>
-#include <QMenu>
-#include <QShowEvent>
-#include <QHideEvent>
-#include <QCloseEvent>
-#include <qwt_thermo.h>
-#include "ui_DRMMainWindow.h"
 
 #include "CWindow.h"
-#include "EvaluationDlg.h"
-#include "SoundCardSelMenu.h"
-#include "DialogUtil.h"
-#include "StationsDlg.h"
-#include "LiveScheduleDlg.h"
-#include "EPGDlg.h"
-#include "fmdialog.h"
-#include "AnalogDemDlg.h"
-#include "MultSettingsDlg.h"
-#include "GeneralSettingsDlg.h"
-#include "MultColorLED.h"
-#include "Logging.h"
-#include "../DrmReceiver.h"
-#include "../util/Vector.h"
-#include "../datadecoding/DataDecoder.h"
-#include "serviceselector.h"
+#include <QTimer>
+#include <QSystemTrayIcon>
+#include <../DrmReceiver.h>
 
 /* Classes ********************************************************************/
+class CDRMReceiver;
+class CLogging;
+class EPGDlg;
+class MultSettingsDlg;
+class CMultColorLED;
+class CSoundCardSelMenu;
+class CAboutDlg;
+class ServiceSelector;
+class StationsDlg;
+class LiveScheduleDlg;
+class AnalogDemDlg;
+class FMDialog;
+class systemevalDlg;
+class GeneralSettingsDlg;
+class CSysTray;
+class CFileMenu;
 class BWSViewer;
 class JLViewer;
 class SlideShowViewer;
@@ -114,9 +100,7 @@ private:
     CWindow*            pCurrentWindow;
     CFileMenu*			pFileMenu;
     CSoundCardSelMenu*	pSoundCardMenu;
-    CAboutDlg		    AboutDlg;
-    int			        iMultimediaServiceBit;
-    int			        iLastMultimediaServiceSelected;
+    CAboutDlg*		    pAboutDlg;
     QString             SysTrayTitle;
     QString             SysTrayMessage;
     QTimer				TimerSysTray;
@@ -125,8 +109,8 @@ private:
     int                 iCurrentFrequency;
     ServiceSelector*    pServiceSelector;
     DreamTabWidget*     pServiceTabs;
+    QWidget*            pMultimediaWindow;
 
-    void SetStatus(CMultColorLED* LED, ETypeRxStatus state);
     virtual void        eventClose(QCloseEvent* ce);
     virtual void        eventHide(QHideEvent* pEvent);
     virtual void        eventShow(QShowEvent* pEvent);
@@ -165,9 +149,9 @@ private slots:
     void OnSwitchMode(int);
     void OnSwitchToFM();
     void OnSwitchToAM();
-    void OnHelpAbout() {AboutDlg.show();}
-    void OnSoundFileChanged(CDRMReceiver::ESFStatus) {UpdateWindowTitle(); ClearDisplay();}
     void OnWhatsThis();
+    void OnHelpAbout();
+    void OnSoundFileChanged(CDRMReceiver::ESFStatus);
     void OnSysTrayActivated(QSystemTrayIcon::ActivationReason);
     void OnGUISetFrequency(int);
     void initialiseSchedule();
@@ -196,6 +180,7 @@ signals:
     void SwitchMode(int);
     void position(double,double);
     void AFS(const CAltFreqSign&);
+    void setAFS(bool);
     void serviceInformation(const map <uint32_t,CServiceInformation>);
     void textMessageChanged(int, const QString&);
 };

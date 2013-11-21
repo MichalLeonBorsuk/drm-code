@@ -44,7 +44,7 @@ public:
     ~JLViewer();
 public slots:
     void setSavePath(const QString&);
-    void setStatus(ETypeRxStatus);
+    void setStatus(int, ETypeRxStatus);
     void setDecoder(CDataDecoder* dec);
     void setServiceInformation(const CService&, uint32_t);
 

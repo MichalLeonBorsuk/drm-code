@@ -94,7 +94,7 @@ void JLViewer::setServiceInformation(const CService& service, uint32_t iAudioSer
     setWindowTitle(strTitle);
 }
 
-void JLViewer::setStatus(ETypeRxStatus status)
+void JLViewer::setStatus(int, ETypeRxStatus status)
 {
     SetStatus(LEDStatus, status);
 
