@@ -28,83 +28,67 @@
 
 #include "bwsviewerwidget.h"
 #include "ui_bwsviewerwidget.h"
-#include <../datadecoding/DataDecoder.h>
-#include <../util-QT/Util.h>
-#include <QWebHistory>
-#include <QMessageBox>
+#include "../DrmReceiver.h"
+#include "../util-QT/Util.h"
+#include "../datadecoding/DataDecoder.h"
+#include <QDir>
 #include <QFile>
+#include <QMessageBox>
+#include <QWebHistory>
+
+#define CACHE_HOST          "127.0.0.1" /* Not an actual server, MUST be set to "127.0.0.1" */
+
+#define ICON_REFRESH        ":/icons/Refresh.png"
+#define ICON_STOP           ":/icons/Stop.png"
+
+#undef ENABLE_HACK
+#define ENABLE_HACK /* Do we really need these hack unless for vtc trial sample? */
+
 
 BWSViewerWidget::BWSViewerWidget(int s, QWidget* parent):
     QWidget(parent),
     ui(new Ui::BWSViewerWidget),
-    short_id(s),decoder(NULL),service(),
+    decoder(NULL),
     nam(this, cache, waitobjs, bAllowExternalContent, strCacheHost),
     bHomeSet(false), bPageLoading(false),
     bSaveFileToDisk(false), bRestrictedProfile(false), bAllowExternalContent(true),
     bClearCacheOnNewService(true), bDirectoryIndexChanged(false),
-    iLastAwaitingOjects(0), strCacheHost("127.0.0.1"),
-    strCurrentSavePath()
+    iLastAwaitingOjects(0), strCacheHost(CACHE_HOST),
+    iLastServiceID(0), iCurrentDataServiceID(0), bLastServiceValid(false), iLastValidServiceID(0),
+    Timer()
 {
     ui->setupUi(this);
+
+    /* Setup webView */
+    ui->webView->page()->setNetworkAccessManager(&nam);
+    ui->webView->pageAction(QWebPage::OpenLinkInNewWindow)->setVisible(false);
+    ui->webView->pageAction(QWebPage::DownloadLinkToDisk)->setVisible(false);
+    ui->webView->pageAction(QWebPage::OpenImageInNewWindow)->setVisible(false);
+    ui->webView->pageAction(QWebPage::DownloadImageToDisk)->setVisible(false);
+
+    /* Update time for color LED */
+    ui->LEDStatus->SetUpdateTime(1000);
+
+    /* Update various buttons and labels */
+    ui->buttonClearCache->setEnabled(false);
+    ui->labelTitle->setText("");
+    Update();
+
+    /* Connect controls */
+    connect(ui->buttonStepBack, SIGNAL(clicked()), this, SLOT(OnBack()));
+    connect(ui->buttonStepForward, SIGNAL(clicked()), this, SLOT(OnForward()));
+    connect(ui->buttonHome, SIGNAL(clicked()), this, SLOT(OnHome()));
+    connect(ui->buttonStopRefresh, SIGNAL(clicked()), this, SLOT(OnStopRefresh()));
+    connect(ui->buttonClearCache, SIGNAL(clicked()), this, SLOT(OnClearCache()));
+    connect(ui->webView, SIGNAL(loadStarted()), this, SLOT(OnWebViewLoadStarted()));
+    connect(ui->webView, SIGNAL(loadFinished(bool)), this, SLOT(OnWebViewLoadFinished(bool)));
+    connect(ui->webView, SIGNAL(titleChanged(const QString &)), this, SLOT(OnWebViewTitleChanged(const QString &)));
+    connect(&Timer, SIGNAL(timeout()), this, SLOT(OnTimer()));
 }
 
 BWSViewerWidget::~BWSViewerWidget()
 {
     delete ui;
-}
-
-void BWSViewerWidget::setDecoder(CDataDecoder* dec)
-{
-    if(dec)
-        decoder = dec->getApplication(service.DataParam.iPacketID);
-}
-
-void BWSViewerWidget::setStatus(int s, ETypeRxStatus status)
-{
-    if(s==short_id)
-    {
-        SetStatus(ui->LEDStatus, status);
-        if (Changed())
-        {
-            if (bDirectoryIndexChanged)
-            {
-                bDirectoryIndexChanged = false;
-                if (!bHomeSet)
-                {
-                    bHomeSet = true;
-                    OnHome();
-                }
-            }
-            Update();
-            ui->buttonClearCache->setEnabled(true);
-        }
-        else
-        {
-            unsigned int iAwaitingOjects = waitobjs;
-            if (iLastAwaitingOjects != iAwaitingOjects)
-            {
-                iLastAwaitingOjects = iAwaitingOjects;
-                UpdateStatus();
-            }
-        }
-    }
-}
-
-void BWSViewerWidget::setServiceInformation(CService s)
-{
-    service = s; // make a copy we can keep
-
-    QString strLabel = QString().fromUtf8(service.strLabel.c_str()).trimmed();
-    UpdateWindowTitle(service.iServiceID, true, strLabel);
-
-    // assume it is a new service
-    OnClearCache();
-}
-
-void BWSViewerWidget::setSavePath(const QString& s)
-{
-    /* Append service ID to MOT save path */
-    strCurrentSavePath = s + QString().setNum(service.iServiceID, 16).toUpper().rightJustified(8, '0') + "/";
 }
 
 void BWSViewerWidget::UpdateButtons()
@@ -113,7 +97,7 @@ void BWSViewerWidget::UpdateButtons()
     ui->buttonStepForward->setEnabled(ui->webView->history()->canGoForward());
     ui->buttonHome->setEnabled(bHomeSet);
     ui->buttonStopRefresh->setEnabled(bHomeSet);
-    ui->buttonStopRefresh->setIcon(QIcon(bPageLoading ? ":/icons/Stop.png" : ":/icons/Refresh.png"));
+    ui->buttonStopRefresh->setIcon(QIcon(bPageLoading ? ICON_STOP : ICON_REFRESH));
 }
 
 QString BWSViewerWidget::ObjectStr(unsigned int count)
@@ -143,6 +127,9 @@ void BWSViewerWidget::UpdateStatus()
 void BWSViewerWidget::UpdateWindowTitle(const uint32_t iServiceID, const bool bServiceValid, QString strLabel)
 {
     QString strTitle("MOT Broadcast Website");
+    iLastServiceID = iServiceID;
+    bLastServiceValid = bServiceValid;
+    QString strLastLabel = strLabel;
     if (bServiceValid)
     {
         if (strLabel != "")
@@ -163,6 +150,57 @@ void BWSViewerWidget::Update()
 {
     UpdateStatus();
     UpdateButtons();
+}
+
+void BWSViewerWidget::OnTimer()
+{
+    QString strLastLabel;
+
+    /* Get current service parameters */
+    uint32_t iServiceID; bool bServiceValid; QString strLabel; ETypeRxStatus eStatus;
+    GetServiceParams(&iServiceID, &bServiceValid, &strLabel, &eStatus);
+
+    /* Set current data service ID */
+    iCurrentDataServiceID = bServiceValid ? iServiceID : 0;
+
+    /* Check for new valid data service */
+    if (bServiceValid && iLastValidServiceID != iServiceID)
+    {
+        iLastValidServiceID = iServiceID;
+        if (bClearCacheOnNewService)
+            OnClearCache();
+    }
+
+    /* Update the window title if something have changed */
+    if (iLastServiceID != iServiceID || bLastServiceValid != bServiceValid || strLastLabel != strLabel)
+        UpdateWindowTitle(iServiceID, bServiceValid, strLabel);
+
+    SetStatus(ui->LEDStatus, eStatus);
+
+    if (Changed())
+    {
+        if (bDirectoryIndexChanged)
+        {
+            bDirectoryIndexChanged = false;
+            if (!bHomeSet)
+            {
+                bHomeSet = true;
+                OnHome();
+            }
+        }
+        Update();
+        ui->buttonClearCache->setEnabled(true);
+        //actionClear_Cache->setEnabled(true);
+    }
+    else
+    {
+        unsigned int iAwaitingOjects = waitobjs;
+        if (iLastAwaitingOjects != iAwaitingOjects)
+        {
+            iLastAwaitingOjects = iAwaitingOjects;
+            UpdateStatus();
+        }
+    }
 }
 
 void BWSViewerWidget::OnHome()
@@ -211,8 +249,9 @@ void BWSViewerWidget::OnWebViewLoadStarted()
     QTimer::singleShot(20, this, SLOT(Update()));
 }
 
-void BWSViewerWidget::OnWebViewLoadFinished(bool)
+void BWSViewerWidget::OnWebViewLoadFinished(bool ok)
 {
+    (void)ok;
     bPageLoading = false;
     QTimer::singleShot(20, this, SLOT(Update()));
 }
@@ -242,6 +281,27 @@ void BWSViewerWidget::OnClearCacheOnNewService(bool isChecked)
     bClearCacheOnNewService = isChecked;
 }
 
+void BWSViewerWidget::showEvent(QShowEvent*)
+{
+
+    /* Update window title */
+    uint32_t iServiceID; bool bServiceValid; QString strLabel;
+    GetServiceParams(&iServiceID, &bServiceValid, &strLabel);
+    UpdateWindowTitle(iServiceID, bServiceValid, strLabel);
+
+    /* Update window content */
+    OnTimer();
+
+    /* Activate real-time timer when window is shown */
+    Timer.start(GUI_CONTROL_UPDATE_TIME);
+}
+
+void BWSViewerWidget::hideEvent(QHideEvent*)
+{
+    /* Deactivate real-time timer so that it does not get new pictures */
+    Timer.stop();
+}
+
 bool BWSViewerWidget::Changed()
 {
     bool bChanged = false;
@@ -250,31 +310,32 @@ bool BWSViewerWidget::Changed()
         CMOTObject obj;
 
         /* Poll the data decoder module for new object */
-        while(decoder->NewObjectAvailable())
+        while (decoder->GetMOTObject(obj, CDataDecoder::AT_BROADCASTWEBSITE) == TRUE)
         {
-            decoder->GetNextObject(obj);
             /* Get the current directory */
             CMOTDirectory MOTDir;
-            decoder->GetDirectory(MOTDir);
-            /* ETSI TS 101 498-1 Section 5.5.1 */
-
-            /* Checks if the DirectoryIndex has values */
-            if (MOTDir.DirectoryIndex.size() > 0)
+            if (decoder->GetMOTDirectory(MOTDir, CDataDecoder::AT_BROADCASTWEBSITE) == TRUE)
             {
-                QString strNewDirectoryIndex;
-                /* TODO proper profile handling */
-                if(MOTDir.DirectoryIndex.find(UNRESTRICTED_PC_PROFILE) != MOTDir.DirectoryIndex.end())
-                    strNewDirectoryIndex =
-                        MOTDir.DirectoryIndex[UNRESTRICTED_PC_PROFILE].c_str();
-                else if(MOTDir.DirectoryIndex.find(BASIC_PROFILE) != MOTDir.DirectoryIndex.end())
-                    strNewDirectoryIndex =
-                        MOTDir.DirectoryIndex[BASIC_PROFILE].c_str();
+                /* ETSI TS 101 498-1 Section 5.5.1 */
+
+                /* Checks if the DirectoryIndex has values */
+                if (MOTDir.DirectoryIndex.size() > 0)
+                {
+                    QString strNewDirectoryIndex;
+                    /* TODO proper profile handling */
+                    if(MOTDir.DirectoryIndex.find(UNRESTRICTED_PC_PROFILE) != MOTDir.DirectoryIndex.end())
+                        strNewDirectoryIndex =
+                            MOTDir.DirectoryIndex[UNRESTRICTED_PC_PROFILE].c_str();
+                    else if(MOTDir.DirectoryIndex.find(BASIC_PROFILE) != MOTDir.DirectoryIndex.end())
+                        strNewDirectoryIndex =
+                            MOTDir.DirectoryIndex[BASIC_PROFILE].c_str();
 #ifdef ENABLE_HACK
-                if (strNewDirectoryIndex == "not_here.html") /* Hack needed for vtc trial sample */
-                    strNewDirectoryIndex = "index.html";
+                    if (strNewDirectoryIndex == "not_here.html") /* Hack needed for vtc trial sample */
+                        strNewDirectoryIndex = "index.html";
 #endif
-                if (!strNewDirectoryIndex.isNull())
-                    bDirectoryIndexChanged |= cache.SetDirectoryIndex(strNewDirectoryIndex);
+                    if (!strNewDirectoryIndex.isNull())
+                        bDirectoryIndexChanged |= cache.SetDirectoryIndex(strNewDirectoryIndex);
+                }
             }
 
             /* Get object name */
@@ -287,7 +348,7 @@ bool BWSViewerWidget::Changed()
             if (strObjName.endsWith(".stm", Qt::CaseInsensitive) && !strContentType.compare("application/octet-stream", Qt::CaseInsensitive))
                 strContentType = "text/html";
 #endif
-            /* Add received MOT object to ui->webView */
+            /* Add received MOT object to webView */
             cache.AddObject(strObjName, strContentType, obj.Body.vecData);
 
             /* Store received MOT object on disk */
@@ -305,6 +366,11 @@ void BWSViewerWidget::SaveMOTObject(const QString& strObjName,
                               const CMOTObject& obj)
 {
     const CVector<_BYTE>& vecbRawData = obj.Body.vecData;
+
+    QString strCurrentSavePath;
+
+    /* Set up save path */
+    //SetupSavePath(strCurrentSavePath);
 
     /* Generate safe filename */
     QString strFileName = strCurrentSavePath + VerifyHtmlPath(strObjName);
@@ -331,3 +397,42 @@ void BWSViewerWidget::SaveMOTObject(const QString& strObjName,
         QMessageBox::information(this, file.errorString(), strFileName);
     }
 }
+
+void BWSViewerWidget::SetupSavePath(QString& s)
+{
+    s=strCurrentSavePath+s;
+}
+
+void BWSViewerWidget::GetServiceParams(uint32_t* iServiceID, bool* bServiceValid, QString* strLabel, ETypeRxStatus* eStatus)
+{
+    if (eStatus)
+        *eStatus = status;
+    if (iServiceID)
+        *iServiceID = service.iServiceID;
+    if (bServiceValid)
+        *bServiceValid = service.IsActive() && service.eAudDataFlag == CService::SF_DATA;
+    /* Do UTF-8 to QString (UNICODE) conversion with the label strings */
+    if (strLabel)
+        *strLabel = QString().fromUtf8(service.strLabel.c_str()).trimmed();
+}
+
+void BWSViewerWidget::setDecoder(CDataDecoder* dec)
+{
+    decoder = dec;
+}
+
+void BWSViewerWidget::setServiceInformation(CService s)
+{
+    service = s;
+}
+
+void BWSViewerWidget::setStatus(int, ETypeRxStatus s)
+{
+    status = s;
+}
+
+void BWSViewerWidget::setSavePath(const QString&)
+{
+
+}
+

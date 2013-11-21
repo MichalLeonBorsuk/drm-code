@@ -2,6 +2,7 @@
 #define BWSVIEWER_H
 
 #include <QWidget>
+#include <QTimer>
 #include <../Parameter.h>
 #include "BWSViewer.h"
 
@@ -11,7 +12,6 @@ class BWSViewerWidget;
 
 class CDataDecoder;
 class CMOTObject;
-class CMOTDABDec;
 class QShowEvent;
 class QHideEvent;
 
@@ -29,9 +29,9 @@ public slots:
     void setSavePath(const QString&);
 private:
     Ui::BWSViewerWidget* ui;
-    int         short_id;
-    CMOTDABDec* decoder;
-    CService    service;
+    int             short_id;
+    CDataDecoder*   decoder;
+    CService        service;
     CNetworkAccessManager nam;
     CWebsiteCache   cache;
     bool            bHomeSet;
@@ -44,7 +44,10 @@ private:
     unsigned int    iLastAwaitingOjects;
     CCounter        waitobjs;
     const QString   strCacheHost;
+    int iLastServiceID, iCurrentDataServiceID, bLastServiceValid, iLastValidServiceID;
     QString         strCurrentSavePath;
+    QTimer          Timer;
+    ETypeRxStatus   status;
 
     bool Changed();
     void SaveMOTObject(const QString& strObjName, const CMOTObject& obj);
@@ -53,6 +56,10 @@ private:
     void UpdateStatus();
     void UpdateWindowTitle(const uint32_t iServiceID, const bool bServiceValid, QString strLabel);
     QString ObjectStr(unsigned int count);
+    void SetupSavePath(QString& strSavePath);
+    void GetServiceParams(uint32_t* iServiceID, bool* bServiceValid, QString* strLabel, ETypeRxStatus* eStatus=0);
+    void showEvent(QShowEvent *);
+    void hideEvent(QHideEvent *);
 
 private slots:
     void OnClearCache();
@@ -68,6 +75,7 @@ private slots:
     void OnWebViewLoadFinished(bool ok);
     void OnWebViewTitleChanged(const QString& title);
     void Update();
+    void OnTimer();
 };
 
 #endif // BWSVIEWER_H
