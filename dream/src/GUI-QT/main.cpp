@@ -178,6 +178,8 @@ main(int argc, char **argv)
 			/* Set main window */
 			app.exec();
 
+            delete pMainDlg;
+
 #ifdef HAVE_LIBHAMLIB
 			if(DRMReceiver.GetDownstreamRSCIOutEnabled())
 			{
