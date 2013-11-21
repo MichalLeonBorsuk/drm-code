@@ -113,7 +113,7 @@ void ChannelWidget::setCodeRate(int b, int a)
 
 void ChannelWidget::setNumIterations(int n)
 {
-    ui->drmOptions->noOfIterationsChanged(n);
+    ui->drmOptions->setNumIterations(n);
 }
 
 void ChannelWidget::setTimeInt(CChannelEstimation::ETypeIntTime e)
