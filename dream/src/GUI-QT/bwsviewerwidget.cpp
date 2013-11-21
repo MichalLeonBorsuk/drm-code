@@ -32,6 +32,7 @@
 #include <../util-QT/Util.h>
 #include <QWebHistory>
 #include <QMessageBox>
+#include <QFile>
 
 BWSViewerWidget::BWSViewerWidget(int s, QWidget* parent):
     QWidget(parent),
