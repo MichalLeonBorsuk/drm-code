@@ -82,7 +82,8 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& Settings,
     CWindow(parent, Settings, "DRM"),
     ui(new Ui::DRMMainWindow),
     DRMReceiver(NDRMR),
-    pLogging(NULL),
+    Timer(),TimerClose(),
+    pLogging(NULL),pSysEvalDlg(NULL),pBWSDlg(NULL),
     pSysTray(NULL), pCurrentWindow(this),
     pScheduler(NULL), pScheduleTimer(NULL),iCurrentFrequency(-1),
     pMultimediaWindow(NULL)
@@ -133,11 +134,6 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& Settings,
     connect(this, SIGNAL(AFS(const CAltFreqSign&)), pLiveScheduleDlg, SLOT(setAFS(const CAltFreqSign&)));
     connect(this, SIGNAL(serviceInformation(const map <uint32_t,CServiceInformation>)),
             pLiveScheduleDlg, SLOT(setServiceInformation(const map <uint32_t,CServiceInformation>)));
-
-    /* MOT broadcast website viewer window */
-#ifdef QT_WEBKIT_LIB
-    pBWSDlg = new BWSViewer(DRMReceiver, Settings, this);
-#endif
 
     /* Journaline viewer window */
     pJLDlg = new JLViewer(Settings, this);
@@ -341,15 +337,15 @@ void FDRMDialog::on_actionSingle_Window_Mode_triggered(bool checked)
         pServiceSelector->hide();
         ui->TextTextMessage->hide();
         pServiceTabs->show();
-        //ui->menu_View->hide();
-        ui->actionMultimediaSettings->setEnabled(false);
+        ui->menu_View->menuAction()->setVisible(false);
+        ui->action_Multimedia_Dialog->setEnabled(false);
     }
     else
     {
         pServiceTabs->hide();
         pServiceSelector->show();
         ui->TextTextMessage->show();
-        //ui->menu_View->show();
+        ui->menu_View->menuAction()->setVisible(true);
         // TODO enable multimedia menu option if there is a data service we can decode
     }
     Settings.Put("GUI", "singlewindow", checked);
@@ -1084,6 +1080,8 @@ void FDRMDialog::on_action_Multimedia_Dialog_triggered()
         break;
     case DAB_AT_BROADCASTWEBSITE:
 #ifdef QT_WEBKIT_LIB
+        if(pBWSDlg==NULL)
+            pBWSDlg = new BWSViewer(DRMReceiver, Settings, this);
         //pBWSDlg->setDecoder(DataDecoder);
         //pBWSDlg->setServiceInformation(service);
         //pBWSDlg->setSavePath(QString::fromUtf8(Parameters.GetDataDirectory("MOT").c_str()));
