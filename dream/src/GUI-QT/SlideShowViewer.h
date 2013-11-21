@@ -44,7 +44,7 @@ public:
     virtual ~SlideShowViewer();
 public slots:
     void setSavePath(const QString&);
-    void setStatus(ETypeRxStatus);
+    void setStatus(int, ETypeRxStatus);
     void setDecoder(CMOTDABDec*);
     void setServiceInformation(const CService&);
 

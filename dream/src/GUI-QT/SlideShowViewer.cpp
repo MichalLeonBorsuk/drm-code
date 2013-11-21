@@ -75,7 +75,7 @@ void SlideShowViewer::setDecoder(CMOTDABDec* dec)
     motdec = dec;
 }
 
-void SlideShowViewer::setStatus(ETypeRxStatus eStatus)
+void SlideShowViewer::setStatus(int, ETypeRxStatus eStatus)
 {
     switch(eStatus)
     {

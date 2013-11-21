@@ -763,7 +763,7 @@ CMOTDABDec::AddDataUnit(CVector < _BINARY > &vecbiNewData)
 
 		vecbiNewData.Separate(iLenEndUserAddress);
 	}
-	//cerr << "MOT: new data unit, tid " << TransportID << " CRC " << bCRCOk << " DG" << iDataGroupType << endl;
+    cerr << "MOT: new data unit, tid " << TransportID << " CRC " << bCRCOk << " DG" << iDataGroupType << endl;
 
 	/* MSC data group data field -------------------------------------------- */
 	/* If CRC is not used enter if-block, if CRC flag is used, it must be ok to
@@ -860,7 +860,7 @@ CMOTDABDec::AddDataUnit(CVector < _BINARY > &vecbiNewData)
 					MOTHeaders.clear();
 					MOTDirectory.TransportID = -1;	/* forced reset */
 					MOTmode = directoryMode;
-					//cout << "Reset " << MOTDirectory << endl;
+                    cout << "Reset " << MOTDirectory << endl;
 				}
 
 				/* The carousel is changing */
@@ -888,7 +888,7 @@ CMOTDABDec::AddDataUnit(CVector < _BINARY > &vecbiNewData)
 					/* have we got the full directory ? */
 					if (MOTDirectoryEntity.Ready())
 					{
-						//cout << "Ready " << MOTDirectory << endl;
+                        cout << "Ready " << MOTDirectory << endl;
 						ProcessDirectory(MOTDirectoryEntity);
 						MOTDirectory.TransportID = TransportID;
 					}			/* END IF HAVE ALL OF THE NEW DIRECTORY */
