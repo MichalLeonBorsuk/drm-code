@@ -92,10 +92,6 @@ private:
     AnalogDemDlg*		pAnalogDemDlg;
     FMDialog*			pFMDlg;
     GeneralSettingsDlg* pGeneralSettingsDlg;
-    QMenuBar*			pMenu;
-    QMenu*				pReceiverModeMenu;
-    QMenu*				pSettingsMenu;
-    QMenu*				pPlotStyleMenu;
     CSysTray*           pSysTray;
     CWindow*            pCurrentWindow;
     CFileMenu*			pFileMenu;

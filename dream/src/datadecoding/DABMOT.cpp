@@ -763,7 +763,7 @@ CMOTDABDec::AddDataUnit(CVector < _BINARY > &vecbiNewData)
 
 		vecbiNewData.Separate(iLenEndUserAddress);
 	}
-    cerr << "MOT: new data unit, tid " << TransportID << " CRC " << bCRCOk << " DG" << iDataGroupType << endl;
+    //cerr << "MOT: new data unit, tid " << TransportID << " CRC " << bCRCOk << " DG" << iDataGroupType << endl;
 
 	/* MSC data group data field -------------------------------------------- */
 	/* If CRC is not used enter if-block, if CRC flag is used, it must be ok to
@@ -798,7 +798,7 @@ CMOTDABDec::AddDataUnit(CVector < _BINARY > &vecbiNewData)
 				{
 					/* mode change, throw away any directory */
 					MOTDirectory.Reset();
-					//cout << "Reset " << MOTDirectory << endl;
+                    //cerr << "Reset " << MOTDirectory << endl;
 				}
 				MOTmode = headerMode;
 
@@ -860,14 +860,14 @@ CMOTDABDec::AddDataUnit(CVector < _BINARY > &vecbiNewData)
 					MOTHeaders.clear();
 					MOTDirectory.TransportID = -1;	/* forced reset */
 					MOTmode = directoryMode;
-                    cout << "Reset " << MOTDirectory << endl;
+                    //cerr << "Reset " << MOTDirectory << endl;
 				}
 
 				/* The carousel is changing */
 				if (MOTDirectory.TransportID != TransportID)
 				{
 					/* we never got all the previous directory */
-					cout << " we never got all the previous directory " << TransportID << ", " << MOTDirectory.  TransportID << endl;
+                    //cerr << " we never got all the previous directory " << TransportID << ", " << MOTDirectory.  TransportID << endl;
 					MOTDirectory.Reset();
 					MOTDirectory.TransportID = TransportID;
 					MOTDirectoryEntity.Reset();
@@ -888,7 +888,7 @@ CMOTDABDec::AddDataUnit(CVector < _BINARY > &vecbiNewData)
 					/* have we got the full directory ? */
 					if (MOTDirectoryEntity.Ready())
 					{
-                        cout << "Ready " << MOTDirectory << endl;
+                        //cerr << "Ready " << MOTDirectory << endl;
 						ProcessDirectory(MOTDirectoryEntity);
 						MOTDirectory.TransportID = TransportID;
 					}			/* END IF HAVE ALL OF THE NEW DIRECTORY */
@@ -1015,7 +1015,7 @@ CMOTDABDec::ProcessDirectory(CBitReassembler & MOTDir)
 	}
 	MOTCarousel.erase(MOTCarousel.begin(), MOTCarousel.end());
 
-	//cout << "decode directory " << MOTDirectory.  iNumberOfObjects << " === " << MOTDirectory.vecObjects.size() << " {";
+    //cerr << "decode directory " << MOTDirectory.  iNumberOfObjects << " === " << MOTDirectory.vecObjects.size() << " {";
 
 	MOTDirectory.vecObjects.clear();
 
@@ -1030,10 +1030,10 @@ CMOTDABDec::ProcessDirectory(CBitReassembler & MOTDir)
 			MOTCarousel[tid].Body = b->second;
 		/* mark objects which are in the new directory */
 		MOTDirectory.vecObjects.push_back(tid);
-		//cout << tid << " ";
+        //cerr << tid << " ";
 		DeliverIfReady(tid);
 	}
-	//cout << "}" << endl;
+    //cerr << "}" << endl;
 
 }
 
