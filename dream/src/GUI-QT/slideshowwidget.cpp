@@ -26,73 +26,64 @@
  *
 \******************************************************************************/
 
-#include "SlideShowViewer.h"
+#include "slideshowwidget.h"
+#include "ui_slideshowwidget.h"
 #include "../util-QT/Util.h"
+#include <../datadecoding/DataDecoder.h>
 #include "../datadecoding/DABMOT.h"
-#include "../datadecoding/DataDecoder.h"
 #include <QFileDialog>
 
-SlideShowViewer::SlideShowViewer(CSettings& Settings, QWidget* parent):
-    CWindow(parent, Settings, "SlideShow"),
+SlideShowWidget::SlideShowWidget(QWidget *parent) :
+    QWidget(parent),
+    ui(new Ui::SlideShowWidget),
     vecImages(), vecImageNames(), iCurImagePos(-1),
-    bClearMOTCache(false), iLastServiceID(0), bLastServiceValid(false),
+    bClearMOTCache(false),
     motdec(NULL)
 {
-    setupUi(this);
-
-    /* Update time for color LED */
-    LEDStatus->SetUpdateTime(1000);
-
-    /* Connect controls */
-    connect(ButtonStepBack, SIGNAL(clicked()), this, SLOT(OnButtonStepBack()));
-    connect(ButtonStepForward, SIGNAL(clicked()), this, SLOT(OnButtonStepForward()));
-    connect(ButtonJumpBegin, SIGNAL(clicked()), this, SLOT(OnButtonJumpBegin()));
-    connect(ButtonJumpEnd, SIGNAL(clicked()), this, SLOT(OnButtonJumpEnd()));
-    connect(buttonOk, SIGNAL(clicked()), this, SLOT(close()));
-    connect(actionClear_All, SIGNAL(triggered()), SLOT(OnClearAll()));
-    connect(actionSave, SIGNAL(triggered()), SLOT(OnSave()));
-    connect(actionSave_All, SIGNAL(triggered()), SLOT(OnSaveAll()));
-    connect(actionClose, SIGNAL(triggered()), SLOT(close()));
-
-    OnClearAll();
+    ui->setupUi(this);
+    ui->LEDStatus->SetUpdateTime(1000);
+    connect(ui->buttonOk, SIGNAL(clicked()), this, SLOT(close()));
 }
 
-SlideShowViewer::~SlideShowViewer()
+SlideShowWidget::~SlideShowWidget()
 {
+    delete ui;
 }
 
-void SlideShowViewer::setSavePath(const QString& s)
+void SlideShowWidget::setSavePath(const QString& s)
 {
     strCurrentSavePath = s;
 }
 
-void SlideShowViewer::setServiceInformation(const CService& service)
+void SlideShowWidget::setServiceInformation(int s, CService sv)
 {
+    short_id = s;
+    service = sv;
     if(service.DataParam.pDecoder)
         motdec = service.DataParam.pDecoder->getApplication(service.DataParam.iPacketID);
-    UpdateWindowTitle(service.iServiceID, true, QString().fromUtf8(service.strLabel.c_str()).trimmed());
+    QString strLabel = QString().fromUtf8(service.strLabel.c_str()).trimmed();
+    QString strTitle("MOT Slide Show");
+    QString strServiceID;
+
+    if (service.iServiceID != 0)
+    {
+        if (strLabel != "")
+            strLabel += " - ";
+
+        /* Service ID (plot number in hexadecimal format) */
+        strServiceID = "ID:" +
+                       QString().setNum(service.iServiceID, 16).toUpper();
+    }
+
+    /* Add the description on the title of the dialog */
+    if (strLabel != "" || strServiceID != "")
+        strTitle += " [" + strLabel + strServiceID + "]";
+    setWindowTitle(strTitle);
 }
 
-void SlideShowViewer::setStatus(int, ETypeRxStatus eStatus)
+void SlideShowWidget::setStatus(int, ETypeRxStatus eStatus)
 {
-    switch(eStatus)
-    {
-    case NOT_PRESENT:
-        LEDStatus->Reset(); /* GREY */
-        break;
-
-    case CRC_ERROR:
-        LEDStatus->SetLight(CMultColorLED::RL_RED);
-        break;
-
-    case DATA_ERROR:
-        LEDStatus->SetLight(CMultColorLED::RL_YELLOW);
-        break;
-
-    case RX_OK:
-        LEDStatus->SetLight(CMultColorLED::RL_GREEN);
-        break;
-    }
+    SetStatus(ui->LEDStatus, eStatus);
 
     if (motdec == NULL)
     {
@@ -102,7 +93,7 @@ void SlideShowViewer::setStatus(int, ETypeRxStatus eStatus)
     if (bClearMOTCache)
     {
         bClearMOTCache = false;
-        ClearMOTCache(motdec);
+        ClearCache();
     }
 
     /* Poll the data decoder module for new picture */
@@ -133,27 +124,27 @@ void SlideShowViewer::setStatus(int, ETypeRxStatus eStatus)
     }
 }
 
-void SlideShowViewer::OnButtonStepBack()
+void SlideShowWidget::on_ButtonStepBack_clicked()
 {
     SetImage(iCurImagePos-1);
 }
 
-void SlideShowViewer::OnButtonStepForward()
+void SlideShowWidget::on_ButtonStepForward_clicked()
 {
     SetImage(iCurImagePos+1);
 }
 
-void SlideShowViewer::OnButtonJumpBegin()
+void SlideShowWidget::on_ButtonJumpBegin_clicked()
 {
     SetImage(0);
 }
 
-void SlideShowViewer::OnButtonJumpEnd()
+void SlideShowWidget::on_ButtonJumpEnd_clicked()
 {
     SetImage(vecImages.size()-1);
 }
 
-void SlideShowViewer::OnSave()
+void SlideShowWidget::OnSave()
 {
     /* Create directory for storing the file (if not exists) */
     CreateDirectories(strCurrentSavePath);
@@ -171,7 +162,7 @@ void SlideShowViewer::OnSave()
     }
 }
 
-void SlideShowViewer::OnSaveAll()
+void SlideShowWidget::OnSaveAll()
 {
     /* Create directory for storing the files (if not exists) */
     CreateDirectories(strCurrentSavePath);
@@ -189,17 +180,17 @@ void SlideShowViewer::OnSaveAll()
     }
 }
 
-void SlideShowViewer::OnClearAll()
+void SlideShowWidget::OnClearAll()
 {
     vecImages.clear();
     vecImageNames.clear();
     iCurImagePos = -1;
     UpdateButtons();
-    LabelTitle->setText("");
+    ui->LabelTitle->setText("");
     bClearMOTCache = true;
 }
 
-void SlideShowViewer::SetImage(int pos)
+void SlideShowWidget::SetImage(int pos)
 {
     if(vecImages.size()==0)
         return;
@@ -208,53 +199,40 @@ void SlideShowViewer::SetImage(int pos)
     if(pos>int(vecImages.size()-1))
         pos = vecImages.size()-1;
     iCurImagePos = pos;
-    Image->setPixmap(vecImages[pos]);
+    ui->Image->setPixmap(vecImages[pos]);
     QString imagename = vecImageNames[pos];
-    Image->setToolTip(imagename);
+    ui->Image->setToolTip(imagename);
     imagename =  "<b>" + imagename + "</b>";
     Linkify(imagename);
-    LabelTitle->setText(imagename);
+    ui->LabelTitle->setText(imagename);
     UpdateButtons();
 }
 
-void SlideShowViewer::UpdateButtons()
+void SlideShowWidget::UpdateButtons()
 {
-    /* Set enable menu entry for saving a picture */
-    if (iCurImagePos < 0)
-    {
-        actionClear_All->setEnabled(false);
-        actionSave->setEnabled(false);
-        actionSave_All->setEnabled(false);
-    }
-    else
-    {
-        actionClear_All->setEnabled(true);
-        actionSave->setEnabled(true);
-        actionSave_All->setEnabled(true);
-    }
 
     if (iCurImagePos <= 0)
     {
         /* We are already at the beginning */
-        ButtonStepBack->setEnabled(false);
-        ButtonJumpBegin->setEnabled(false);
+        ui->ButtonStepBack->setEnabled(false);
+        ui->ButtonJumpBegin->setEnabled(false);
     }
     else
     {
-        ButtonStepBack->setEnabled(true);
-        ButtonJumpBegin->setEnabled(true);
+        ui->ButtonStepBack->setEnabled(true);
+        ui->ButtonJumpBegin->setEnabled(true);
     }
 
     if (iCurImagePos == int(vecImages.size()-1))
     {
         /* We are already at the end */
-        ButtonStepForward->setEnabled(false);
-        ButtonJumpEnd->setEnabled(false);
+        ui->ButtonStepForward->setEnabled(false);
+        ui->ButtonJumpEnd->setEnabled(false);
     }
     else
     {
-        ButtonStepForward->setEnabled(true);
-        ButtonJumpEnd->setEnabled(true);
+        ui->ButtonStepForward->setEnabled(true);
+        ui->ButtonJumpEnd->setEnabled(true);
     }
 
     QString strTotImages = QString().setNum(vecImages.size());
@@ -265,49 +243,24 @@ void SlideShowViewer::UpdateButtons()
     for (int i = 0; i < (strTotImages.length() - strNumImage.length()); i++)
         strSep += " ";
 
-    LabelCurPicNum->setText(strSep + strNumImage + "/" + strTotImages);
+    ui->LabelCurPicNum->setText(strSep + strNumImage + "/" + strTotImages);
 
     /* If no picture was received, show the following text */
     if (iCurImagePos < 0)
     {
         /* Init text browser window */
-        Image->setText("<center>" + tr("MOT Slideshow Viewer") + "</center>");
-        Image->setToolTip("");
+        ui->Image->setText("<center>" + tr("MOT Slideshow Viewer") + "</center>");
+        ui->Image->setToolTip("");
     }
 }
 
-void SlideShowViewer::ClearMOTCache(CMOTDABDec *motdec)
+void SlideShowWidget::ClearCache()
 {
+    if(motdec==NULL)
+        return;
+
     /* Remove all object from cache */
     CMOTObject	NewObj;
     while (motdec->NewObjectAvailable())
         motdec->GetNextObject(NewObj);
 }
-
-void SlideShowViewer::UpdateWindowTitle(const uint32_t iServiceID, const bool bServiceValid, QString strLabel)
-{
-    QString strTitle("MOT Slide Show");
-    iLastServiceID = iServiceID;
-    bLastServiceValid = bServiceValid;
-    strLastLabel = strLabel;
-    if (bServiceValid)
-    {
-        QString strServiceID;
-
-        if (iServiceID != 0)
-        {
-            if (strLabel != "")
-                strLabel += " - ";
-
-            /* Service ID (plot number in hexadecimal format) */
-            strServiceID = "ID:" +
-                           QString().setNum(iServiceID, 16).toUpper();
-        }
-
-        /* Add the description on the title of the dialog */
-        if (strLabel != "" || strServiceID != "")
-            strTitle += " [" + strLabel + strServiceID + "]";
-    }
-    setWindowTitle(strTitle);
-}
-

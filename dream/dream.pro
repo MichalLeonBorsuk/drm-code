@@ -38,7 +38,9 @@ gui {
     RESOURCES = src/GUI-QT/res/icons.qrc
     QT += network xml
     qt4:QT += webkit
-    qt5:QT += widgets webkitwidgets
+    qt5 {
+        QT += widgets webkitwidgets
+    }
     INCLUDEPATH += src/GUI-QT
     VPATH += src/GUI-QT
     win32:RC_FILE = windows/dream.rc
@@ -288,7 +290,8 @@ hamlib {
      message("with hamlib")
 }
 qwt {
-    DEFINES += QWT_NO_SVG
+    #DEFINES += QWT_NO_SVG
+    QT += svg
     macx {
         LIBS += -framework qwt
    }
@@ -493,7 +496,8 @@ HEADERS += \
     src/util/Settings.h \
     src/util/Utilities.h \
     src/util/Vector.h \
-    src/Version.h
+    src/Version.h \
+    src/GUI-QT/slideshowwidget.h
 SOURCES += \
     src/AMDemodulation.cpp \
     src/AMSSDemodulation.cpp \
@@ -593,7 +597,8 @@ SOURCES += \
     src/util/Reassemble.cpp \
     src/util/Settings.cpp \
     src/util/Utilities.cpp \
-    src/Version.cpp
+    src/Version.cpp \
+    src/GUI-QT/slideshowwidget.cpp
 !console {
 HEADERS += \
     src/GUI-QT/Logging.h \
@@ -701,8 +706,12 @@ SOURCES += \
     src/GUI-QT/drmdetail.cpp \
     src/GUI-QT/journalineviewer.cpp
 }
+message(With Qt components $$QT)
 !sound {
     error("no usable audio interface found - install pulseaudio or portaudio dev package")
 }
 
 OTHER_FILES += windows/dream.iss
+
+FORMS += \
+    src/GUI-QT/slideshowwidget.ui

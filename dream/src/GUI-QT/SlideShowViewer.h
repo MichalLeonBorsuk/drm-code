@@ -45,7 +45,6 @@ public:
 public slots:
     void setSavePath(const QString&);
     void setStatus(int, ETypeRxStatus);
-    void setDecoder(CMOTDABDec*);
     void setServiceInformation(const CService&);
 
 protected:
