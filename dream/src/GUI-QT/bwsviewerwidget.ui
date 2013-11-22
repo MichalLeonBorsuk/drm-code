@@ -206,8 +206,8 @@
         <string/>
        </property>
        <property name="icon">
-        <iconset>
-         <normaloff>../../../workspace/dream/src/GUI-QT/res/StepBack.png</normaloff>../../../workspace/dream/src/GUI-QT/res/StepBack.png</iconset>
+        <iconset resource="res/icons.qrc">
+         <normaloff>:/icons/StepBack.png</normaloff>:/icons/StepBack.png</iconset>
        </property>
        <property name="iconSize">
         <size>
@@ -229,8 +229,8 @@
         <string/>
        </property>
        <property name="icon">
-        <iconset>
-         <normaloff>../../../workspace/dream/src/GUI-QT/res/StepForw.png</normaloff>../../../workspace/dream/src/GUI-QT/res/StepForw.png</iconset>
+        <iconset resource="res/icons.qrc">
+         <normaloff>:/icons/StepForw.png</normaloff>:/icons/StepForw.png</iconset>
        </property>
        <property name="iconSize">
         <size>
@@ -252,8 +252,8 @@
         <string/>
        </property>
        <property name="icon">
-        <iconset>
-         <normaloff>../../../workspace/dream/src/GUI-QT/res/Home.png</normaloff>../../../workspace/dream/src/GUI-QT/res/Home.png</iconset>
+        <iconset resource="res/icons.qrc">
+         <normaloff>:/icons/Home.png</normaloff>:/icons/Home.png</iconset>
        </property>
        <property name="iconSize">
         <size>
@@ -275,8 +275,9 @@
         <string/>
        </property>
        <property name="icon">
-        <iconset>
-         <normaloff>../../../workspace/dream/src/GUI-QT/res/Refresh.png</normaloff>../../../workspace/dream/src/GUI-QT/res/Refresh.png</iconset>
+        <iconset resource="res/icons.qrc">
+         <normaloff>:/icons/Refresh.png</normaloff>
+         <normalon>:/icons/Stop.png</normalon>:/icons/Refresh.png</iconset>
        </property>
        <property name="iconSize">
         <size>
@@ -331,6 +332,8 @@
    <header>MultColorLED.h</header>
   </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="res/icons.qrc"/>
+ </resources>
  <connections/>
 </ui>

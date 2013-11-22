@@ -112,11 +112,11 @@ class BWSViewerWidget : public QWidget
     Q_OBJECT
 
 public:
-    explicit BWSViewerWidget(int, QWidget* parent = 0);
+    explicit BWSViewerWidget(QWidget* parent = 0);
     ~BWSViewerWidget();
 public slots:
     void setDecoder(CDataDecoder*);
-    void setServiceInformation(CService s);
+    void setServiceInformation(int, CService);
     void setStatus(int, ETypeRxStatus);
     void setSavePath(const QString&);
 private:
