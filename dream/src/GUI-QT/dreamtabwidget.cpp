@@ -6,6 +6,7 @@
 #include <../util-QT/Util.h>
 #include "journalineviewer.h"
 #include "bwsviewerwidget.h"
+#include "slideshowwidget.h"
 #include "EPGDlg.h"
 #include <../datadecoding/DataDecoder.h>
 
@@ -88,6 +89,13 @@ void DreamTabWidget::addDataTab(int short_id, const CService& service, int iAudi
             switch (service.DataParam.iUserAppIdent)
             {
             case DAB_AT_MOTSLIDESHOW:
+            {
+                SlideShowWidget* p = new SlideShowWidget();
+                p->setServiceInformation(short_id, service);
+                //p->setSavePath(QString::fromUtf8(Parameters.GetDataDirectory("Journaline").c_str()));
+                connect(pController, SIGNAL(dataStatusChanged(int, ETypeRxStatus)), p, SLOT(setStatus(int, ETypeRxStatus)));
+                pApp = p;
+            }
                 break;
 
             case DAB_AT_BROADCASTWEBSITE:

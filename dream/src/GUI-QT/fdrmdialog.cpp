@@ -1064,7 +1064,6 @@ void FDRMDialog::on_action_Multimedia_Dialog_triggered()
     int shortID = Parameters.GetCurSelDataService();
     CService service = Parameters.Service[shortID];
 
-    CMOTDABDec* motdec = DataDecoder->getApplication(service.DataParam.iPacketID);
     int iAppIdent = Parameters.Service[shortID].DataParam.iUserAppIdent;
 
     if(pMultimediaWindow)
@@ -1089,13 +1088,12 @@ void FDRMDialog::on_action_Multimedia_Dialog_triggered()
 #endif
         break;
     case DAB_AT_JOURNALINE:
-        pJLDlg->setDecoder(DataDecoder);
         pJLDlg->setServiceInformation(service, iAudioServiceID);
+        pJLDlg->setDecoder(DataDecoder);
         pJLDlg->setSavePath(QString::fromUtf8(Parameters.GetDataDirectory("Journaline").c_str()));
         pMultimediaWindow = pJLDlg;
         break;
     case DAB_AT_MOTSLIDESHOW:
-        pSlideShowDlg->setDecoder(motdec);
         pSlideShowDlg->setServiceInformation(service);
         pSlideShowDlg->setSavePath(QString::fromUtf8(Parameters.GetDataDirectory("MOT").c_str()));
         pMultimediaWindow = pSlideShowDlg;
