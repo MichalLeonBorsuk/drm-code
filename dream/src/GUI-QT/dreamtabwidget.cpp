@@ -92,9 +92,9 @@ void DreamTabWidget::addDataTab(int short_id, const CService& service, int iAudi
 
             case DAB_AT_BROADCASTWEBSITE:
             {
-                BWSViewerWidget* p = new BWSViewerWidget(short_id);
+                BWSViewerWidget* p = new BWSViewerWidget();
                 p->setDecoder(service.DataParam.pDecoder);
-                p->setServiceInformation(service);
+                p->setServiceInformation(short_id, service);
                 //p->setSavePath(QString::fromUtf8(Parameters.GetDataDirectory("Journaline").c_str()));
                 connect(pController, SIGNAL(dataStatusChanged(int, ETypeRxStatus)), p, SLOT(setStatus(int, ETypeRxStatus)));
                 pApp = p;

@@ -45,10 +45,10 @@
 #define ENABLE_HACK /* Do we really need these hack unless for vtc trial sample? */
 
 
-BWSViewerWidget::BWSViewerWidget(int s, QWidget* parent):
+BWSViewerWidget::BWSViewerWidget(QWidget* parent):
     QWidget(parent),
     ui(new Ui::BWSViewerWidget),
-    short_id(s),decoder(NULL),
+    short_id(-1),decoder(NULL),
     nam(this, cache, waitobjs, bAllowExternalContent, strCacheHost),
     bHomeSet(false), bPageLoading(false),
     bSaveFileToDisk(false), bRestrictedProfile(false), bAllowExternalContent(true),
@@ -421,8 +421,9 @@ void BWSViewerWidget::setDecoder(CDataDecoder* dec)
     decoder = dec;
 }
 
-void BWSViewerWidget::setServiceInformation(CService s)
+void BWSViewerWidget::setServiceInformation(int i, CService s)
 {
+    short_id = i;
     service = s;
 }
 
