@@ -53,6 +53,7 @@ public:
 public slots:
     void SetFrequency(int);
     void OnSwitchMode(int);
+    ERecMode mode() { return eRecMode; }
 
 protected:
 	virtual void	eventClose(QCloseEvent* pEvent);

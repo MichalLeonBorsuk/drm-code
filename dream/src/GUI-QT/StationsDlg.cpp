@@ -411,7 +411,11 @@ void StationsDlg::LoadSettings()
 
 void StationsDlg::SaveSettings()
 {
-	Settings.Put("Hamlib", "ensmeter", actionEnable_S_Meter->isChecked());
+    if(schedule.GetSchedMode()==CSchedule::SM_DRM)
+        ColumnParamToStr(strColumnParamdrm);
+    else
+        ColumnParamToStr(strColumnParamanalog);
+    Settings.Put("Hamlib", "ensmeter", actionEnable_S_Meter->isChecked());
 	putSetting("showall", actionShowAllStations->isChecked());
 	putSetting("DRM URL", schedule.qurldrm.toString());
 	putSetting("ANALOG URL", schedule.qurlanalog.toString());
