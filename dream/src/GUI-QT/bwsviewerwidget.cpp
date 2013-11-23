@@ -36,14 +36,8 @@
 #include <QMessageBox>
 #include <QWebHistory>
 
-#define CACHE_HOST          "127.0.0.1" /* Not an actual server, MUST be set to "127.0.0.1" */
-
-#define ICON_REFRESH        ":/icons/Refresh.png"
-#define ICON_STOP           ":/icons/Stop.png"
-
 #undef ENABLE_HACK
 #define ENABLE_HACK /* Do we really need these hack unless for vtc trial sample? */
-
 
 BWSViewerWidget::BWSViewerWidget(QWidget* parent):
     QWidget(parent),
@@ -53,7 +47,7 @@ BWSViewerWidget::BWSViewerWidget(QWidget* parent):
     bHomeSet(false), bPageLoading(false),
     bSaveFileToDisk(false), bRestrictedProfile(false), bAllowExternalContent(true),
     bClearCacheOnNewService(true), bDirectoryIndexChanged(false),
-    iLastAwaitingOjects(0), strCacheHost(CACHE_HOST),
+    iLastAwaitingOjects(0), strCacheHost("127.0.0.1"),
     bLastServiceValid(false), iLastServiceID(0), iCurrentDataServiceID(0), iLastValidServiceID(0),
     Timer()
 {
@@ -97,7 +91,8 @@ void BWSViewerWidget::UpdateButtons()
     ui->buttonStepForward->setEnabled(ui->webView->history()->canGoForward());
     ui->buttonHome->setEnabled(bHomeSet);
     ui->buttonStopRefresh->setEnabled(bHomeSet);
-    ui->buttonStopRefresh->setIcon(QIcon(bPageLoading ? ICON_STOP : ICON_REFRESH));
+    ui->buttonStopRefresh->setChecked(!bPageLoading);
+    //ui->buttonStopRefresh->setIcon(QIcon(bPageLoading ? ICON_STOP : ICON_REFRESH));
 }
 
 QString BWSViewerWidget::ObjectStr(unsigned int count)

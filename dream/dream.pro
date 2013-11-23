@@ -497,7 +497,8 @@ HEADERS += \
     src/util/Utilities.h \
     src/util/Vector.h \
     src/Version.h \
-    src/GUI-QT/slideshowwidget.h
+    src/GUI-QT/slideshowwidget.h \
+    src/GUI-QT/engineeringtabwidget.h
 SOURCES += \
     src/AMDemodulation.cpp \
     src/AMSSDemodulation.cpp \
@@ -598,7 +599,8 @@ SOURCES += \
     src/util/Settings.cpp \
     src/util/Utilities.cpp \
     src/Version.cpp \
-    src/GUI-QT/slideshowwidget.cpp
+    src/GUI-QT/slideshowwidget.cpp \
+    src/GUI-QT/engineeringtabwidget.cpp
 !console {
 HEADERS += \
     src/GUI-QT/Logging.h \

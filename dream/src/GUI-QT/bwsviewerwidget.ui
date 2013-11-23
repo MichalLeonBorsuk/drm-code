@@ -265,6 +265,9 @@
      </item>
      <item>
       <widget class="QToolButton" name="buttonStopRefresh">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
        <property name="sizePolicy">
         <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
          <horstretch>0</horstretch>
@@ -284,6 +287,15 @@
          <width>16</width>
          <height>16</height>
         </size>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
+       </property>
+       <property name="checked">
+        <bool>false</bool>
+       </property>
+       <property name="autoRaise">
+        <bool>false</bool>
        </property>
       </widget>
      </item>
@@ -329,7 +341,7 @@
   <customwidget>
    <class>CMultColorLED</class>
    <extends>QWidget</extends>
-   <header>MultColorLED.h</header>
+   <header location="global">MultColorLED.h</header>
   </customwidget>
  </customwidgets>
  <resources>

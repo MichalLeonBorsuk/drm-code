@@ -9119,6 +9119,7 @@
     <addaction name="actionDRM"/>
     <addaction name="separator"/>
     <addaction name="actionSingle_Window_Mode"/>
+    <addaction name="actionEngineering_Mode"/>
     <addaction name="actionDisplayColor"/>
     <addaction name="menuPlot_Style"/>
     <addaction name="separator"/>
@@ -9274,6 +9275,14 @@
    </property>
    <property name="text">
     <string>Single Window Mode</string>
+   </property>
+  </action>
+  <action name="actionEngineering_Mode">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Engineering Mode</string>
    </property>
   </action>
  </widget>

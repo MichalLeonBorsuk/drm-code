@@ -57,6 +57,7 @@ class JLViewer;
 class SlideShowViewer;
 class CScheduler;
 class DreamTabWidget;
+class EngineeringTabWidget;
 
 namespace Ui {
 class DRMMainWindow;
@@ -105,6 +106,7 @@ private:
     int                 iCurrentFrequency;
     ServiceSelector*    pServiceSelector;
     DreamTabWidget*     pServiceTabs;
+    EngineeringTabWidget* pEngineeringTabs;
     QWidget*            pMultimediaWindow;
 
     virtual void        eventClose(QCloseEvent* ce);
@@ -165,7 +167,8 @@ private slots:
     void onSetRecFilter(bool);
     void onSetIntCons(bool);
     void on_action_Multimedia_Dialog_triggered();
-    void on_actionSingle_Window_Mode_triggered(bool checked);
+    void on_actionSingle_Window_Mode_triggered(bool);
+    void on_actionEngineering_Mode_triggered(bool);
     void onTextMessageChanged(int, QString);
 
 signals:
