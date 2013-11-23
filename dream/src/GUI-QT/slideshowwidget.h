@@ -23,19 +23,22 @@ public slots:
     void setServiceInformation(int, CService);
 
 private:
+
+    struct Img {
+        QPixmap pic;
+        QString name;
+    };
+
     Ui::SlideShowWidget *ui;
     QString                 strCurrentSavePath;
-    std::vector<QPixmap>    vecImages;
-    std::vector<QString>    vecImageNames;
+    vector<Img>             pics;
     int                     iCurImagePos;
     bool                    bClearMOTCache;
     CMOTDABDec*             motdec;
     int                     short_id;
-    CService                service;
 
     void                    SetImage(int);
     void                    UpdateButtons();
-    void                    ClearCache();
 
 private slots:
     void on_ButtonStepBack_clicked();

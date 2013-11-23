@@ -39,6 +39,7 @@
 #include "ui_DRMMainWindow.h"
 
 #include "dreamtabwidget.h"
+#include "engineeringtabwidget.h"
 #include "SlideShowViewer.h"
 #include "JLViewer.h"
 #ifdef QT_WEBKIT_LIB
@@ -86,7 +87,8 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& Settings,
     pLogging(NULL),pSysEvalDlg(NULL),pBWSDlg(NULL),
     pSysTray(NULL), pCurrentWindow(this),
     pScheduler(NULL), pScheduleTimer(NULL),iCurrentFrequency(-1),
-    pMultimediaWindow(NULL)
+    pMultimediaWindow(NULL),
+    pServiceTabs(NULL),pEngineeringTabs(NULL)
 {
     ui->setupUi(this);
 
@@ -243,6 +245,7 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& Settings,
     ui->CLED_MSC->SetUpdateTime(600);
 
     connect(this, SIGNAL(setAFS(bool)), ui->labelAFS, SLOT(setEnabled(bool)));
+    connect(this, SIGNAL(setAFS(bool)), ui->action_Live_Schedule_Dialog, SLOT(setEnabled(bool)));
 
     connect(pAnalogDemDlg, SIGNAL(SwitchMode(int)), this, SLOT(OnSwitchMode(int)));
     connect(pAnalogDemDlg, SIGNAL(NewAMAcquisition()), this, SLOT(OnNewAcquisition()));
@@ -328,6 +331,23 @@ void FDRMDialog::setBars(int bars)
     ui->threebars->setAutoFillBackground(bars>2);
     ui->fourbars->setAutoFillBackground(bars>3);
     ui->fivebars->setAutoFillBackground(bars>4);
+}
+
+void FDRMDialog::on_actionEngineering_Mode_triggered(bool checked)
+{
+    if(checked)
+    {
+        if(pEngineeringTabs==NULL)
+        {
+            pEngineeringTabs = new EngineeringTabWidget();
+            ui->verticalLayout->addWidget(pEngineeringTabs);
+        }
+        pEngineeringTabs->show();
+    }
+    else
+    {
+        pEngineeringTabs->hide();
+    }
 }
 
 void FDRMDialog::on_actionSingle_Window_Mode_triggered(bool checked)
@@ -1094,7 +1114,7 @@ void FDRMDialog::on_action_Multimedia_Dialog_triggered()
         pMultimediaWindow = pJLDlg;
         break;
     case DAB_AT_MOTSLIDESHOW:
-        pSlideShowDlg->setServiceInformation(service);
+        pSlideShowDlg->setServiceInformation(shortID, service);
         pSlideShowDlg->setSavePath(QString::fromUtf8(Parameters.GetDataDirectory("MOT").c_str()));
         pMultimediaWindow = pSlideShowDlg;
         break;

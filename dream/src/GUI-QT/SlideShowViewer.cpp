@@ -35,8 +35,7 @@
 SlideShowViewer::SlideShowViewer(CSettings& Settings, QWidget* parent):
     CWindow(parent, Settings, "SlideShow"),
     vecImages(), vecImageNames(), iCurImagePos(-1),
-    bClearMOTCache(false), iLastServiceID(0), bLastServiceValid(false),
-    motdec(NULL)
+    bClearMOTCache(false),decoder(NULL)
 {
     setupUi(this);
 
@@ -53,6 +52,7 @@ SlideShowViewer::SlideShowViewer(CSettings& Settings, QWidget* parent):
     connect(actionSave, SIGNAL(triggered()), SLOT(OnSave()));
     connect(actionSave_All, SIGNAL(triggered()), SLOT(OnSaveAll()));
     connect(actionClose, SIGNAL(triggered()), SLOT(close()));
+    connect(&Timer, SIGNAL(timeout()), this, SLOT(OnTimer()));
 
     OnClearAll();
 }
@@ -61,56 +61,25 @@ SlideShowViewer::~SlideShowViewer()
 {
 }
 
-void SlideShowViewer::setSavePath(const QString& s)
+void SlideShowViewer::OnTimer()
 {
-    strCurrentSavePath = s;
-}
-
-void SlideShowViewer::setServiceInformation(const CService& service)
-{
-    if(service.DataParam.pDecoder)
-        motdec = service.DataParam.pDecoder->getApplication(service.DataParam.iPacketID);
-    UpdateWindowTitle(service.iServiceID, true, QString().fromUtf8(service.strLabel.c_str()).trimmed());
-}
-
-void SlideShowViewer::setStatus(int, ETypeRxStatus eStatus)
-{
-    switch(eStatus)
-    {
-    case NOT_PRESENT:
-        LEDStatus->Reset(); /* GREY */
-        break;
-
-    case CRC_ERROR:
-        LEDStatus->SetLight(CMultColorLED::RL_RED);
-        break;
-
-    case DATA_ERROR:
-        LEDStatus->SetLight(CMultColorLED::RL_YELLOW);
-        break;
-
-    case RX_OK:
-        LEDStatus->SetLight(CMultColorLED::RL_GREEN);
-        break;
-    }
-
-    if (motdec == NULL)
-    {
+    if(decoder==NULL)
         return;
-    }
 
     if (bClearMOTCache)
     {
         bClearMOTCache = false;
-        ClearMOTCache(motdec);
+        CMOTObject	NewObj;
+        while (decoder->GetMOTObject(NewObj, CDataDecoder::AT_MOTSLIDESHOW))
+        {
+        }
     }
 
-    /* Poll the data decoder module for new picture */
-    if(motdec->NewObjectAvailable())
-    {
-        CMOTObject	NewObj;
-        motdec->GetNextObject(NewObj);
+    CMOTObject NewObj;
 
+    /* Poll the data decoder module for new object */
+    if (decoder->GetMOTObject(NewObj, CDataDecoder::AT_MOTSLIDESHOW) == TRUE)
+    {
         /* Store received picture */
         int iCurNumPict = vecImageNames.size();
         CVector<_BYTE>& imagedata = NewObj.Body.vecData;
@@ -199,6 +168,21 @@ void SlideShowViewer::OnClearAll()
     bClearMOTCache = true;
 }
 
+void SlideShowViewer::eventShow(QShowEvent*)
+{
+    /* Update window */
+    OnTimer();
+
+    /* Activate real-time timer when window is shown */
+    Timer.start(GUI_CONTROL_UPDATE_TIME);
+}
+
+void SlideShowViewer::eventHide(QHideEvent*)
+{
+    /* Deactivate real-time timer so that it does not get new pictures */
+    Timer.stop();
+}
+
 void SlideShowViewer::SetImage(int pos)
 {
     if(vecImages.size()==0)
@@ -276,38 +260,37 @@ void SlideShowViewer::UpdateButtons()
     }
 }
 
-void SlideShowViewer::ClearMOTCache(CMOTDABDec *motdec)
+void SlideShowViewer::setSavePath(const QString& s)
 {
-    /* Remove all object from cache */
-    CMOTObject	NewObj;
-    while (motdec->NewObjectAvailable())
-        motdec->GetNextObject(NewObj);
+    strCurrentSavePath = s;
 }
 
-void SlideShowViewer::UpdateWindowTitle(const uint32_t iServiceID, const bool bServiceValid, QString strLabel)
+void SlideShowViewer::setStatus(int i, ETypeRxStatus s)
 {
+    if(i==short_id)
+        SetStatus(LEDStatus, s);
+}
+
+void SlideShowViewer::setServiceInformation(int i, CService s)
+{
+    short_id = i;
+    service = s;
+    decoder = service.DataParam.pDecoder;
     QString strTitle("MOT Slide Show");
-    iLastServiceID = iServiceID;
-    bLastServiceValid = bServiceValid;
-    strLastLabel = strLabel;
-    if (bServiceValid)
+    QString strServiceID;
+    QString strLabel = QString::fromUtf8(service.strLabel.c_str());
+    if (service.iServiceID != 0)
     {
-        QString strServiceID;
+        if (strLabel != "")
+            strLabel += " - ";
 
-        if (iServiceID != 0)
-        {
-            if (strLabel != "")
-                strLabel += " - ";
-
-            /* Service ID (plot number in hexadecimal format) */
-            strServiceID = "ID:" +
-                           QString().setNum(iServiceID, 16).toUpper();
-        }
-
-        /* Add the description on the title of the dialog */
-        if (strLabel != "" || strServiceID != "")
-            strTitle += " [" + strLabel + strServiceID + "]";
+        /* Service ID (plot number in hexadecimal format) */
+        strServiceID = "ID:" +
+                       QString().setNum(service.iServiceID, 16).toUpper();
     }
+
+    /* Add the description on the title of the dialog */
+    if (strLabel != "" || strServiceID != "")
+        strTitle += " [" + strLabel + strServiceID + "]";
     setWindowTitle(strTitle);
 }
-

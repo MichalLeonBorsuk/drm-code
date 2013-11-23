@@ -36,13 +36,12 @@
 SlideShowWidget::SlideShowWidget(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::SlideShowWidget),
-    vecImages(), vecImageNames(), iCurImagePos(-1),
+    pics(), iCurImagePos(-1),
     bClearMOTCache(false),
     motdec(NULL)
 {
     ui->setupUi(this);
     ui->LEDStatus->SetUpdateTime(1000);
-    connect(ui->buttonOk, SIGNAL(clicked()), this, SLOT(close()));
 }
 
 SlideShowWidget::~SlideShowWidget()
@@ -55,10 +54,9 @@ void SlideShowWidget::setSavePath(const QString& s)
     strCurrentSavePath = s;
 }
 
-void SlideShowWidget::setServiceInformation(int s, CService sv)
+void SlideShowWidget::setServiceInformation(int s, CService service)
 {
     short_id = s;
-    service = sv;
     if(service.DataParam.pDecoder)
         motdec = service.DataParam.pDecoder->getApplication(service.DataParam.iPacketID);
     QString strLabel = QString().fromUtf8(service.strLabel.c_str()).trimmed();
@@ -81,46 +79,55 @@ void SlideShowWidget::setServiceInformation(int s, CService sv)
     setWindowTitle(strTitle);
 }
 
-void SlideShowWidget::setStatus(int, ETypeRxStatus eStatus)
+void SlideShowWidget::setStatus(int i, ETypeRxStatus eStatus)
 {
-    SetStatus(ui->LEDStatus, eStatus);
+    if(short_id == i)
+        SetStatus(ui->LEDStatus, eStatus);
 
     if (motdec == NULL)
     {
         return;
     }
-
     if (bClearMOTCache)
     {
         bClearMOTCache = false;
-        ClearCache();
-    }
-
-    /* Poll the data decoder module for new picture */
-    if(motdec->NewObjectAvailable())
-    {
-        CMOTObject	NewObj;
-        motdec->GetNextObject(NewObj);
-
-        /* Store received picture */
-        int iCurNumPict = vecImageNames.size();
-        CVector<_BYTE>& imagedata = NewObj.Body.vecData;
-
-        /* Load picture in QT format */
-        QPixmap pic;
-        if (pic.loadFromData(&imagedata[0], imagedata.size()))
+        /* Remove all object from cache */
+        while (motdec->NewObjectAvailable())
         {
-            /* Set new picture in source factory */
-            vecImages.push_back(pic);
-            vecImageNames.push_back(NewObj.strName.c_str());
+            CMOTObject	NewObj;
+            motdec->GetNextObject(NewObj);
         }
+    }
+    else
+    {
+        /* Poll the data decoder module for one new picture */
+        if(motdec->NewObjectAvailable())
+        {
+            CMOTObject	NewObj;
+            motdec->GetNextObject(NewObj);
 
-        /* If the last received picture was selected, automatically show
-           new picture */
-        if (iCurImagePos == iCurNumPict - 1)
-            SetImage(iCurNumPict);
-        else
-            UpdateButtons();
+            /* Store received picture */
+            int iCurNumPict = pics.size();
+            CVector<_BYTE>& imagedata = NewObj.Body.vecData;
+
+            /* Load picture in QT format */
+            QPixmap pic;
+            if (pic.loadFromData(&imagedata[0], imagedata.size()))
+            {
+                /* Set new picture in source factory */
+                Img p;
+                p.pic = pic;
+                p.name = QString::fromUtf8(NewObj.strName.c_str());
+                pics.push_back(p);
+            }
+
+            /* If the last received picture was selected, automatically show
+               new picture */
+            if (iCurImagePos == iCurNumPict - 1)
+                SetImage(iCurNumPict);
+            else
+                UpdateButtons();
+        }
     }
 }
 
@@ -141,7 +148,7 @@ void SlideShowWidget::on_ButtonJumpBegin_clicked()
 
 void SlideShowWidget::on_ButtonJumpEnd_clicked()
 {
-    SetImage(vecImages.size()-1);
+    SetImage(pics.size()-1);
 }
 
 void SlideShowWidget::OnSave()
@@ -149,14 +156,14 @@ void SlideShowWidget::OnSave()
     /* Create directory for storing the file (if not exists) */
     CreateDirectories(strCurrentSavePath);
 
-    QString strFilename = strCurrentSavePath + VerifyFilename(vecImageNames[iCurImagePos]);
+    QString strFilename = strCurrentSavePath + VerifyFilename(pics[iCurImagePos].name);
     strFilename = QFileDialog::getSaveFileName(this,
         tr("Save File"), strFilename, tr("Images (*.png *.jpg)"));
 
     /* Check if user not hit the cancel button */
     if (!strFilename.isEmpty())
     {
-        vecImages[iCurImagePos].save(strFilename);
+        pics[iCurImagePos].pic.save(strFilename);
 
         strCurrentSavePath = QFileInfo(strFilename).path() + "/";
     }
@@ -175,15 +182,14 @@ void SlideShowWidget::OnSaveAll()
     {
         strCurrentSavePath = strDirectory + "/";
 
-        for(size_t i=0; i<vecImages.size(); i++)
-            vecImages[i].save(strCurrentSavePath + VerifyFilename(vecImageNames[i]));
+        for(size_t i=0; i<pics.size(); i++)
+            pics[i].pic.save(strCurrentSavePath + VerifyFilename(pics[i].name));
     }
 }
 
 void SlideShowWidget::OnClearAll()
 {
-    vecImages.clear();
-    vecImageNames.clear();
+    pics.clear();
     iCurImagePos = -1;
     UpdateButtons();
     ui->LabelTitle->setText("");
@@ -192,15 +198,15 @@ void SlideShowWidget::OnClearAll()
 
 void SlideShowWidget::SetImage(int pos)
 {
-    if(vecImages.size()==0)
+    if(pics.size()==0)
         return;
     if(pos<0)
         pos = 0;
-    if(pos>int(vecImages.size()-1))
-        pos = vecImages.size()-1;
+    if(pos>int(pics.size()-1))
+        pos = pics.size()-1;
     iCurImagePos = pos;
-    ui->Image->setPixmap(vecImages[pos]);
-    QString imagename = vecImageNames[pos];
+    ui->Image->setPixmap(pics[pos].pic);
+    QString imagename = pics[pos].name;
     ui->Image->setToolTip(imagename);
     imagename =  "<b>" + imagename + "</b>";
     Linkify(imagename);
@@ -223,7 +229,7 @@ void SlideShowWidget::UpdateButtons()
         ui->ButtonJumpBegin->setEnabled(true);
     }
 
-    if (iCurImagePos == int(vecImages.size()-1))
+    if (iCurImagePos == int(pics.size()-1))
     {
         /* We are already at the end */
         ui->ButtonStepForward->setEnabled(false);
@@ -235,7 +241,7 @@ void SlideShowWidget::UpdateButtons()
         ui->ButtonJumpEnd->setEnabled(true);
     }
 
-    QString strTotImages = QString().setNum(vecImages.size());
+    QString strTotImages = QString().setNum(pics.size());
     QString strNumImage = QString().setNum(iCurImagePos + 1);
 
     QString strSep("");
@@ -252,15 +258,4 @@ void SlideShowWidget::UpdateButtons()
         ui->Image->setText("<center>" + tr("MOT Slideshow Viewer") + "</center>");
         ui->Image->setToolTip("");
     }
-}
-
-void SlideShowWidget::ClearCache()
-{
-    if(motdec==NULL)
-        return;
-
-    /* Remove all object from cache */
-    CMOTObject	NewObj;
-    while (motdec->NewObjectAvailable())
-        motdec->GetNextObject(NewObj);
 }
