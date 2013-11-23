@@ -639,7 +639,6 @@
        </layout>
       </item>
      </layout>
-     <zorder>layoutWidget</zorder>
      <zorder>TextLabelLEDMSCCRC</zorder>
      <zorder>LEDMSC</zorder>
     </widget>
