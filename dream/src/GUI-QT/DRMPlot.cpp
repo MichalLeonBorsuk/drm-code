@@ -481,8 +481,8 @@ void CDRMPlot::activate()
 	bActive = TRUE;
 
 	/* Force re-initialization */
-    //InitCharType = NONE_OLD;
-    //SetupChart(CurCharType);
+	InitCharType = NONE_OLD;
+	SetupChart(CurCharType);
 
 	/* Activate real-time timers when window is shown */
 	TimerChart.start();

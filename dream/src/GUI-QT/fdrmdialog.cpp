@@ -87,8 +87,8 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& Settings,
     pLogging(NULL),pSysEvalDlg(NULL),pBWSDlg(NULL),
     pSysTray(NULL), pCurrentWindow(this),
     pScheduler(NULL), pScheduleTimer(NULL),iCurrentFrequency(-1),
-    pMultimediaWindow(NULL),
-    pServiceTabs(NULL),pEngineeringTabs(NULL)
+    pServiceTabs(NULL), pEngineeringTabs(NULL),
+    pMultimediaWindow(NULL)
 {
     ui->setupUi(this);
 
@@ -1201,28 +1201,22 @@ void FDRMDialog::onMuteAudio(bool b)
     DRMReceiver.GetWriteData()->MuteAudio(b);
 }
 
-void FDRMDialog::onSetTimeInt(CChannelEstimation::ETypeIntTime)
+void FDRMDialog::onSetTimeInt(CChannelEstimation::ETypeIntTime eTypeIntTime)
 {
-    if (DRMReceiver.GetTimeInt() != CChannelEstimation::TWIENER)
-        DRMReceiver.SetTimeInt(CChannelEstimation::TWIENER);
-
+    if (DRMReceiver.GetTimeInt() != eTypeIntTime)
+        DRMReceiver.SetTimeInt(eTypeIntTime);
 }
 
-void FDRMDialog::onSetFreqInt(CChannelEstimation::ETypeIntFreq)
+void FDRMDialog::onSetFreqInt(CChannelEstimation::ETypeIntFreq eTypeIntFreq)
 {
-    if (DRMReceiver.GetFreqInt() != CChannelEstimation::FLINEAR)
-        DRMReceiver.SetFreqInt(CChannelEstimation::FLINEAR);
-
+    if (DRMReceiver.GetFreqInt() != eTypeIntFreq)
+        DRMReceiver.SetFreqInt(eTypeIntFreq);
 }
 
-void FDRMDialog::onSetTiSyncTracType(CTimeSyncTrack::ETypeTiSyncTrac)
+void FDRMDialog::onSetTiSyncTracType(CTimeSyncTrack::ETypeTiSyncTrac eTypeTiSyncTrac)
 {
-    if (DRMReceiver.GetTiSyncTracType() !=
-            CTimeSyncTrack::TSENERGY)
-    {
-        DRMReceiver.SetTiSyncTracType(CTimeSyncTrack::TSENERGY);
-    }
-
+    if (DRMReceiver.GetTiSyncTracType() != eTypeTiSyncTrac)
+        DRMReceiver.SetTiSyncTracType(eTypeTiSyncTrac);
 }
 
 void FDRMDialog::onSetNumMSCMLCIterations(int value)
