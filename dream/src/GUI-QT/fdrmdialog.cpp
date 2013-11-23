@@ -529,6 +529,8 @@ void FDRMDialog::UpdateDRM_GUI()
     {
         ClearDisplay();
     }
+    if(pStationsDlg && pStationsDlg->mode()!=RM_DRM)
+        pStationsDlg->OnSwitchMode(RM_DRM);
 }
 
 void FDRMDialog::startLogging()
