@@ -38,8 +38,9 @@
 /* Ensure that the given filename is secure */
 QString VerifyFilename(QString filename)
 {
-    filename.replace(QRegExp(PATH_SEPARATOR), "_"); /* replace unix-like path separator with '_' */
+    filename.replace(QRegExp("/"), "_"); /* replace unix-like path separator with '_' */
 #ifdef _WIN32
+    filename.replace(QRegExp("\\\\"), "_"); /* replace windows path separator with '_' */
     filename.replace(QRegExp(":"), "_"); /* replace ':' with '_' */
 #endif
     return filename;
