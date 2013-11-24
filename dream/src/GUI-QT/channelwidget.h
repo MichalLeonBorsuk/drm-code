@@ -4,10 +4,10 @@
 #include <QWidget>
 #include <QTreeWidgetItem>
 #include <../Parameter.h>
-#include <../chanest/ChannelEstimation.h>
-#include <../chanest/ChanEstTime.h>
+#include "receivercontroller.h"
 
 class CDRMPlot;
+class ReceiverController;
 
 namespace Ui {
 class ChannelWidget;
@@ -18,18 +18,17 @@ class ChannelWidget : public QWidget
     Q_OBJECT
 
 public:
-    explicit ChannelWidget(CDRMReceiver*, QWidget *parent = 0);
+    explicit ChannelWidget(ReceiverController*, QWidget *parent = 0);
     ~ChannelWidget();
+    void connectController(ReceiverController*);
 
 private:
     Ui::ChannelWidget *ui;
     CDRMPlot *pMainPlot;
-    CDRMReceiver* pDRMReceiver;
-    int iPlotStyle;
 public slots:
     void setActive(bool);
     void setLEDFAC(ETypeRxStatus);
-    void on_DRMMainWindow_SDCChanged(ETypeRxStatus status);
+    void setLEDSDC(ETypeRxStatus);
     void setLEDFrameSync(ETypeRxStatus status);
     void setLEDTimeSync(ETypeRxStatus status);
     void setLEDIOInterface(ETypeRxStatus status);
@@ -41,10 +40,12 @@ public slots:
     void setChannel(ERobMode, ESpecOcc, ESymIntMod, ECodScheme, ECodScheme);
     void setCodeRate(int,int);
     void setPlotStyle(int);
+    void on_channelConfigurationChanged(ChannelConfiguration);
+    void on_channelReceptionChanged(Reception);
     void setNumIterations(int);
-    void setTimeInt(CChannelEstimation::ETypeIntTime);
-    void setFreqInt(CChannelEstimation::ETypeIntFreq);
-    void setTiSyncTrac(CTimeSyncTrack::ETypeTiSyncTrac);
+    void setTimeInt(int);
+    void setFreqInt(int);
+    void setTiSyncTrac(int);
     void setRecFilterEnabled(bool);
     void setIntConsEnabled(bool);
     void setFlipSpectrumEnabled(bool);
@@ -54,17 +55,6 @@ private slots:
     void on_showOptions_toggled(bool);
 
 signals:
-    void noOfIterationsChanged(int);
-    void TimeLinear();
-    void TimeWiener();
-    void FrequencyLinear();
-    void FrequencyDft();
-    void FrequencyWiener();
-    void TiSyncEnergy();
-    void TiSyncFirstPeak();
-    void FlipSpectrum(int);
-    void RecFilter(int);
-    void ModiMetric(int);
 };
 
 #endif // ChannelWidget_H

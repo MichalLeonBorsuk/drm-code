@@ -152,12 +152,12 @@ private slots:
     void on_MSCChanged(ETypeRxStatus);
     void on_SDCChanged(ETypeRxStatus);
     void on_FACChanged(ETypeRxStatus);
-    void on_WMERChanged(double);
     void on_InputSignalLevelChanged(double);
     void on_modeChanged(int);
     void on_serviceChanged(int, const CService&);
     void on_signalLost();
     void on_frequencyChanged(int);
+    void on_channelReceptionChanged(Reception);
 
 signals:
     void plotStyleChanged(int);

@@ -3,21 +3,52 @@
 #include <QTabBar>
 #include "DRMPlot.h"
 
-ChannelWidget::ChannelWidget(CDRMReceiver* prx, QWidget *parent) :
+ChannelWidget::ChannelWidget(ReceiverController* c, QWidget *parent) :
     QWidget(parent),
-    ui(new Ui::ChannelWidget),pMainPlot(NULL),pDRMReceiver(prx),iPlotStyle(0)
+    ui(new Ui::ChannelWidget),
+    pMainPlot(NULL)
 {
     ui->setupUi(this);
-    pMainPlot = new CDRMPlot(NULL, ui->plot);
-    pMainPlot->SetRecObj(pDRMReceiver);
+    pMainPlot = new CDRMPlot(NULL, ui->plot, c); // must be after setupUi
     pMainPlot->setupTreeWidget(ui->chartSelector);
     pMainPlot->SetupChart(CDRMPlot::INPUT_SIG_PSD);
     ui->drmDetail->hideMSCParams(true);
+    connectController(c);
 }
 
 ChannelWidget::~ChannelWidget()
 {
     delete ui;
+}
+
+void ChannelWidget::connectController(ReceiverController* controller)
+{
+    // Display
+    connect(controller, SIGNAL(MSCChanged(ETypeRxStatus)), ui->drmDetail, SLOT(setLEDMSC(ETypeRxStatus)));
+    connect(controller, SIGNAL(SDCChanged(ETypeRxStatus)), ui->drmDetail, SLOT(setLEDSDC(ETypeRxStatus)));
+    connect(controller, SIGNAL(FACChanged(ETypeRxStatus)), ui->drmDetail, SLOT(setLEDFAC(ETypeRxStatus)));
+    connect(controller, SIGNAL(FSyncChanged(ETypeRxStatus)), ui->drmDetail, SLOT(setLEDFrameSync(ETypeRxStatus)));
+    connect(controller, SIGNAL(TSyncChanged(ETypeRxStatus)), ui->drmDetail, SLOT(setLEDTimeSync(ETypeRxStatus)));
+    connect(controller, SIGNAL(InputStatusChanged(ETypeRxStatus)), ui->drmDetail, SLOT(setLEDIOInterface(ETypeRxStatus)));
+    connect(controller, SIGNAL(channelConfigurationChanged(ChannelConfiguration)), this, SLOT(on_channelConfigurationChanged(ChannelConfiguration)));
+    connect(controller, SIGNAL(channelReceptionChanged(Reception)), this, SLOT(on_channelReceptionChanged(Reception)));
+
+    // Controls
+    connect(ui->drmOptions, SIGNAL(recFilter(bool)), controller, SLOT(setRecFilter(bool)));
+    connect(ui->drmOptions, SIGNAL(flipSpectrum(bool)), controller, SLOT(setFlippedSpectrum(bool)));
+    connect(ui->drmOptions, SIGNAL(modiMetric(bool)), controller, SLOT(setIntCons(bool)));
+    connect(ui->drmOptions, SIGNAL(noOfIterationsChanged(int)), controller, SLOT(setNumMSCMLCIterations(int)));
+    connect(ui->drmOptions, SIGNAL(timeIntChanged(int)), controller, SLOT(setTimeInt(int)));
+    connect(ui->drmOptions, SIGNAL(freqIntChanged(int)), controller, SLOT(setFreqInt(int)));
+    connect(ui->drmOptions, SIGNAL(timeSyncChanged(int)), controller, SLOT(setTiSyncTracType(int)));
+    // Control revertives
+    connect(controller, SIGNAL(numMSCMLCIterationsChanged(int)), this, SLOT(setNumIterations(int)));
+    connect(controller, SIGNAL(timeIntChanged(int)), this, SLOT(setTimeInt(int)));
+    connect(controller, SIGNAL(freqIntChanged(int)), this, SLOT(setFreqInt(int)));
+    connect(controller, SIGNAL(tiSyncTracTypeChanged(int)), this, SLOT(setTiSyncTrac(int)));
+    connect(controller, SIGNAL(recFilterChanged(bool)), this, SLOT(setRecFilterEnabled(bool)));
+    connect(controller, SIGNAL(intConsChanged(bool)), this, SLOT(setIntConsEnabled(bool)));
+    connect(controller, SIGNAL(flippedSpectrumChanged(bool)), this, SLOT(setFlipSpectrumEnabled(bool)));
 }
 
 void ChannelWidget::setActive(bool active)
@@ -39,6 +70,22 @@ void ChannelWidget::on_showOptions_toggled(bool enabled)
         ui->drmOptions->hide();
 }
 
+void ChannelWidget::on_channelConfigurationChanged(ChannelConfiguration c)
+{
+    setChannel(ERobMode(c.robm), ESpecOcc(c.mode), ESymIntMod(c.interl),
+               ECodScheme(c.sdcConst), ECodScheme(c.mscConst));
+    setCodeRate(c.protLev.iPartA, c.protLev.iPartB);
+}
+
+void ChannelWidget::on_channelReceptionChanged(Reception r)
+{
+    setSNR(r.snr);
+    setMER(r.mer, r.wmer);
+    setDelay_Doppler(r.sigmaEstimate, r.minDelay);
+    setSampleFrequencyOffset(r.sampleOffset, r.sampleRate);
+    setFrequencyOffset(r.dcOffset);
+}
+
 void ChannelWidget::on_chartSelector_currentItemChanged(QTreeWidgetItem *curr)
 {
     /* Make sure we have a non root item */
@@ -56,7 +103,7 @@ void ChannelWidget::setLEDFAC(ETypeRxStatus status)
     ui->drmDetail->setLEDFAC(status);
 }
 
-void ChannelWidget::on_DRMMainWindow_SDCChanged(ETypeRxStatus status)
+void ChannelWidget::setLEDSDC(ETypeRxStatus status)
 {
     ui->drmDetail->setLEDSDC(status);
 }
@@ -116,19 +163,19 @@ void ChannelWidget::setNumIterations(int n)
     ui->drmOptions->setNumIterations(n);
 }
 
-void ChannelWidget::setTimeInt(CChannelEstimation::ETypeIntTime e)
+void ChannelWidget::setTimeInt(int e)
 {
-    ui->drmOptions->setTimeInt(e);
+    ui->drmOptions->setTimeInt(CChannelEstimation::ETypeIntTime(e));
 }
 
-void ChannelWidget::setFreqInt(CChannelEstimation::ETypeIntFreq e)
+void ChannelWidget::setFreqInt(int e)
 {
-    ui->drmOptions->setFreqInt(e);
+    ui->drmOptions->setFreqInt(CChannelEstimation::ETypeIntFreq(e));
 }
 
-void ChannelWidget::setTiSyncTrac(CTimeSyncTrack::ETypeTiSyncTrac e)
+void ChannelWidget::setTiSyncTrac(int e)
 {
-    ui->drmOptions->setTiSyncTrac(e);
+    ui->drmOptions->setTiSyncTrac(CTimeSyncTrack::ETypeTiSyncTrac(e));
 }
 
 void ChannelWidget::setRecFilterEnabled(bool b)
@@ -148,9 +195,5 @@ void ChannelWidget::setFlipSpectrumEnabled(bool b)
 
 void ChannelWidget::setPlotStyle(int n)
 {
-    /* Save the new style */
-    iPlotStyle = n;
-    /* Update main plot window */
-    if(pMainPlot)
-        pMainPlot->SetPlotStyle(iPlotStyle);
+    pMainPlot->SetPlotStyle(n);
 }

@@ -84,7 +84,7 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& Settings,
     CWindow(parent, Settings, "DRM"),
     ui(new Ui::DRMMainWindow),
     DRMReceiver(NDRMR),
-    controller(new ReceiverController(&NDRMR, this)),
+    controller(new ReceiverController(&NDRMR, Settings, this)),
     TimerClose(),
     pLogging(NULL),pSysEvalDlg(NULL),pBWSDlg(NULL),
     pSysTray(NULL),
@@ -116,7 +116,7 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& Settings,
     connect(pFileMenu, SIGNAL(soundFileChanged(CDRMReceiver::ESFStatus)), this, SLOT(OnSoundFileChanged(CDRMReceiver::ESFStatus)));
 
     /* Analog demodulation window */
-    pAnalogDemDlg = new AnalogDemDlg(DRMReceiver, Settings, pFileMenu, pSoundCardMenu);
+    pAnalogDemDlg = new AnalogDemDlg(controller, Settings, pFileMenu, pSoundCardMenu);
 
     /* Parent list for Stations and Live Schedule window */
 	QMap <QWidget*,QString> parents;
@@ -147,7 +147,7 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& Settings,
     pEPGDlg->setDecoder(new EPG(Parameters, sDataFilesDirectory));
 
     /* Evaluation window */
-    pSysEvalDlg = new systemevalDlg(DRMReceiver, Settings, this);
+    pSysEvalDlg = new systemevalDlg(controller, Settings, this);
 
     /* general settings window */
     pGeneralSettingsDlg = new GeneralSettingsDlg(Settings, this);
@@ -293,7 +293,7 @@ void FDRMDialog::connectController()
     connect(controller, SIGNAL(MSCChanged(ETypeRxStatus)), this, SLOT(on_MSCChanged(ETypeRxStatus)));
     connect(controller, SIGNAL(SDCChanged(ETypeRxStatus)), this, SLOT(on_SDCChanged(ETypeRxStatus)));
     connect(controller, SIGNAL(FACChanged(ETypeRxStatus)), this, SLOT(on_FACChanged(ETypeRxStatus)));
-    connect(controller, SIGNAL(WMERChanged(double)), this, SLOT(on_WMERChanged(double)));
+    connect(controller, SIGNAL(channelReceptionChanged(Reception)), this, SLOT(on_channelReceptionChanged(Reception)));
     connect(controller, SIGNAL(InputSignalLevelChanged(double)), this, SLOT(on_InputSignalLevelChanged(double)));
     connect(controller, SIGNAL(serviceChanged(int, const CService&)), this, SLOT(on_serviceChanged(int, const CService&)));
     connect(controller, SIGNAL(signalLost()), this, SLOT(on_signalLost()));
@@ -335,17 +335,18 @@ void FDRMDialog::on_actionEngineering_Mode_triggered(bool checked)
     {
         if(pEngineeringTabs==NULL)
         {
-            pEngineeringTabs = new EngineeringTabWidget(&DRMReceiver);
+            pEngineeringTabs = new EngineeringTabWidget(controller);
             ui->verticalLayout->addWidget(pEngineeringTabs);
         }
         pEngineeringTabs->show();
     }
     else
     {
-        pEngineeringTabs->hide();
+        if(pEngineeringTabs)
+            pEngineeringTabs->hide();
     }
+    Settings.Put("GUI", "engineering", checked);
 }
-
 
 void FDRMDialog::on_actionSingle_Window_Mode_triggered(bool checked)
 {
@@ -509,17 +510,17 @@ void FDRMDialog::on_MSCChanged(ETypeRxStatus s)
     SetStatus(ui->CLED_MSC, s);
 }
 
-void FDRMDialog::on_WMERChanged(double rWMERMSC)
+void FDRMDialog::on_channelReceptionChanged(Reception r)
 {
-    if(rWMERMSC>WMERSteps[4])
+    if(r.wmer>WMERSteps[4])
         setBars(5);
-    else if(rWMERMSC>WMERSteps[3])
+    else if(r.wmer>WMERSteps[3])
         setBars(4);
-    else if(rWMERMSC>WMERSteps[2])
+    else if(r.wmer>WMERSteps[2])
         setBars(3);
-    else if(rWMERMSC>WMERSteps[1])
+    else if(r.wmer>WMERSteps[1])
         setBars(2);
-    else if(rWMERMSC>WMERSteps[0])
+    else if(r.wmer>WMERSteps[0])
         setBars(1);
     else
         setBars(0);
@@ -916,9 +917,12 @@ void FDRMDialog::eventUpdate()
 
 void FDRMDialog::eventShow(QShowEvent*)
 {
-    bool b = Settings.Get("GUI", "singlewindow", 0);
+    bool b = Settings.Get("GUI", "singlewindow", false);
     ui->actionSingle_Window_Mode->setChecked(b); // does not emit trigger signal
     on_actionSingle_Window_Mode_triggered(b);
+    b = Settings.Get("GUI", "engineering", false);
+    ui->actionEngineering_Mode->setChecked(b); // does not emit trigger signal
+    on_actionEngineering_Mode_triggered(b);
 }
 
 void FDRMDialog::eventHide(QHideEvent*)

@@ -1,14 +1,28 @@
 #include "ReceiverController.h"
 
-ReceiverController::ReceiverController(CDRMReceiver* p, QObject *parent) :
+ReceiverController::ReceiverController(CDRMReceiver* p, CSettings& s, QObject *parent) :
     QObject(parent),
     timer(),
     receiver(p),
     iCurrentFrequency(-1),
-    currentMode(RM_NONE)
+    currentMode(RM_NONE),
+    settings(s)
 {
     setObjectName("controller");
     connect(&timer, SIGNAL(timeout()), SLOT(on_timer()));
+}
+
+void ReceiverController::setControls()
+{
+    // initialise from settings here so multiple panels are synced
+    emit numMSCMLCIterationsChanged(settings.Get("Receiver", "mlciter", 1));
+    emit timeIntChanged(settings.Get("Receiver", "timeint", 1));
+    emit freqIntChanged(settings.Get("Receiver", "freqint", 1));
+    emit tiSyncTracTypeChanged(settings.Get("Receiver", "timesync", 1));
+
+    emit recFilterChanged(settings.Get("Receiver", "filter", FALSE));
+    emit intConsChanged(settings.Get("Receiver", "modemetric", FALSE));
+    emit flippedSpectrumChanged(settings.Get("Receiver", "flipspectrum", FALSE));
 }
 
 void ReceiverController::on_timer()
@@ -18,10 +32,9 @@ void ReceiverController::on_timer()
 
     /* Input level meter */
     double sigstr = Parameters.GetIFSignalLevel();
-    double rWMERMSC = Parameters.rWMERMSC;
 
     /* LEDs */
-    ETypeRxStatus msc,sdc,fac;
+    ETypeRxStatus msc,sdc,fac,fsync,tsync,inp,outp;
     fac = Parameters.ReceiveStatus.FAC.GetStatus();
     sdc = Parameters.ReceiveStatus.SDC.GetStatus();
     int iShortID = Parameters.GetCurSelAudioService();
@@ -29,6 +42,11 @@ void ReceiverController::on_timer()
         msc = Parameters.AudioComponentStatus[iShortID].GetStatus();
     else
         msc = Parameters.DataComponentStatus[iShortID].GetStatus();
+    fsync = Parameters.ReceiveStatus.FSync.GetStatus();
+    tsync = Parameters.ReceiveStatus.TSync.GetStatus();
+    inp = Parameters.ReceiveStatus.InterfaceI.GetStatus();
+    outp = Parameters.ReceiveStatus.InterfaceO.GetStatus();
+
     /* detect if AFS mux information is available */
     bool bAFS = (Parameters.AltFreqSign.vecMultiplexes.size() > 0)
              || (Parameters.AltFreqSign.vecOtherServices.size() > 0);
@@ -36,13 +54,38 @@ void ReceiverController::on_timer()
 
     map<uint32_t,CServiceInformation> si = Parameters.ServiceInformation;
 
+    Reception reception;
+
+    reception.snr = Parameters.GetSNR();
+    reception.mer = Parameters.rMER;
+    reception.wmer = Parameters.rWMERMSC;
+    reception.sigmaEstimate = Parameters.rSigmaEstimate;
+    reception.minDelay = Parameters.rMinDelay;
+    reception.sampleOffset = Parameters.rResampleOffset;
+    reception.sampleRate = Parameters.GetSigSampleRate();
+    reception.dcOffset = receiver->GetReceiveData()->ConvertFrequency(Parameters.GetDCFrequency());
+    reception.rdop = Parameters.rRdop;
+
+    ChannelConfiguration channel;
+
+    channel.robm = Parameters.GetWaveMode();
+    channel.mode = Parameters.GetSpectrumOccup();
+    channel.interl = Parameters.eSymbolInterlMode;
+    channel.sdcConst = Parameters.eSDCCodingScheme;
+    channel.mscConst = Parameters.eMSCCodingScheme;
+    channel.protLev = Parameters.MSCPrLe;
+
     Parameters.Unlock();
 
-    emit WMERChanged(rWMERMSC);
     emit InputSignalLevelChanged(sigstr);
     emit FACChanged(fac);
     emit SDCChanged(sdc);
     emit MSCChanged(msc);
+    emit FSyncChanged(fsync);
+    emit TSyncChanged(tsync);
+    emit InputStatusChanged(inp);
+    emit OutputStatusChanged(outp);
+
     emit setAFS(bAFS);
     // NB following is not efficient - TODO - have a better idea
     if(bAFS)
@@ -71,6 +114,9 @@ void ReceiverController::on_timer()
             ;
         }
 
+        emit channelReceptionChanged(reception);
+        emit channelConfigurationChanged(channel);
+
         int iFreq = receiver->GetFrequency();
         if(iFreq != iCurrentFrequency)
         {
@@ -82,7 +128,17 @@ void ReceiverController::on_timer()
     {
         emit signalLost();
     }
+
+    /* Time, date ####################
+    if ((Parameters.iUTCHour == 0) &&
+            (Parameters.iUTCMin == 0) &&
+            (Parameters.iDay == 0) &&
+            (Parameters.iMonth == 0) &&
+            (Parameters.iYear == 0))
+            */
 }
+
+
 
 void ReceiverController::updateDRM(CParameter& Parameters)
 {
@@ -156,20 +212,23 @@ void ReceiverController::muteAudio(bool b)
     receiver->GetWriteData()->MuteAudio(b);
 }
 
-void ReceiverController::setTimeInt(CChannelEstimation::ETypeIntTime e)
+void ReceiverController::setTimeInt(int v)
 {
+    CChannelEstimation::ETypeIntTime e = CChannelEstimation::ETypeIntTime(v);
     if (receiver->GetTimeInt() != e)
         receiver->SetTimeInt(e);
 }
 
-void ReceiverController::setFreqInt(CChannelEstimation::ETypeIntFreq e)
+void ReceiverController::setFreqInt(int v)
 {
+    CChannelEstimation::ETypeIntFreq e = CChannelEstimation::ETypeIntFreq(v);
     if (receiver->GetFreqInt() != e)
         receiver->SetFreqInt(e);
 }
 
-void ReceiverController::setTiSyncTracType(CTimeSyncTrack::ETypeTiSyncTrac e)
+void ReceiverController::setTiSyncTracType(int v)
 {
+    CTimeSyncTrack::ETypeTiSyncTrac e = CTimeSyncTrack::ETypeTiSyncTrac(v);
     if (receiver->GetTiSyncTracType() != e)
         receiver->SetTiSyncTracType(e);
 }

@@ -41,10 +41,10 @@
 #include <QShowEvent>
 
 /* Implementation *************************************************************/
-systemevalDlg::systemevalDlg(CDRMReceiver& r, CSettings& Settings,
+systemevalDlg::systemevalDlg(ReceiverController* rc, CSettings& Settings,
                              QWidget* parent) :
     CWindow(parent, Settings, "System Evaluation"),
-    DRMReceiver(r),Parameters(*r.GetParameters()),
+    controller(rc),Parameters(*rc->getReceiver()->GetParameters()),
     eNewCharType(CDRMPlot::NONE_OLD)
 {
     setupUi(this);
@@ -57,8 +57,7 @@ systemevalDlg::systemevalDlg(CDRMReceiver& r, CSettings& Settings,
     /* Init main plot */
     iPlotStyle = getSetting("plotstyle", 0, true);
     putSetting("plotstyle", iPlotStyle, true);
-    MainPlot = new CDRMPlot(NULL, plot);
-    MainPlot->SetRecObj(&DRMReceiver);
+    MainPlot = new CDRMPlot(NULL, plot, controller);
     MainPlot->SetPlotStyle(iPlotStyle);
 
     /* Update times for colour LEDs */
@@ -116,7 +115,7 @@ systemevalDlg::systemevalDlg(CDRMReceiver& r, CSettings& Settings,
 
     /* If MDI in is enabled, disable some of the controls and use different
        initialization for the chart and chart selector */
-    if (DRMReceiver.GetRSIIn()->GetInEnabled() == TRUE)
+    if (controller->getReceiver()->GetRSIIn()->GetInEnabled() == TRUE)
     {
         SliderNoOfIterations->setEnabled(FALSE);
 
@@ -201,12 +200,9 @@ void systemevalDlg::connectController(ReceiverController* controller)
     connect(this, SIGNAL(setFlippedSpectrum(bool)), controller, SLOT(setFlippedSpectrum(bool)));
     connect(this, SIGNAL(setIntCons(bool)), controller, SLOT(setIntCons(bool)));
     connect(this, SIGNAL(setNumMSCMLCIterations(int)), controller, SLOT(setNumMSCMLCIterations(int)));
-    connect(this, SIGNAL(setTimeInt(CChannelEstimation::ETypeIntTime)),
-            controller, SLOT(setTimeInt(CChannelEstimation::ETypeIntTime)));
-    connect(this, SIGNAL(setFreqInt(CChannelEstimation::ETypeIntFreq)),
-            controller, SLOT(setFreqInt(CChannelEstimation::ETypeIntFreq)));
-    connect(this, SIGNAL(setTiSyncTracType(CTimeSyncTrack::ETypeTiSyncTrac)),
-            controller, SLOT(setTiSyncTracType(CTimeSyncTrack::ETypeTiSyncTrac)));
+    connect(this, SIGNAL(setTimeInt(int)), controller, SLOT(setTimeInt(int)));
+    connect(this, SIGNAL(setFreqInt(int)), controller, SLOT(setFreqInt(int)));
+    connect(this, SIGNAL(setTiSyncTracType(int)), controller, SLOT(setTiSyncTracType(int)));
 }
 
 systemevalDlg::~systemevalDlg()
@@ -412,7 +408,7 @@ void systemevalDlg::OnCustomContextMenuRequested(const QPoint& p)
 CDRMPlot* systemevalDlg::OpenChartWin(CDRMPlot::ECharType eNewType)
 {
     /* Create new chart window */
-    CDRMPlot* pNewChartWin = new CDRMPlot(this, NULL);
+    CDRMPlot* pNewChartWin = new CDRMPlot(this, NULL, controller);
     pNewChartWin->setCaption(tr("Chart Window"));
 
     /* Set correct icon (use the same as this dialog) */
@@ -420,7 +416,6 @@ CDRMPlot* systemevalDlg::OpenChartWin(CDRMPlot::ECharType eNewType)
     pNewChartWin->setIcon(icon);
 
     /* Set receiver object and correct chart type */
-    pNewChartWin->SetRecObj(&DRMReceiver);
     pNewChartWin->SetupChart(eNewType);
 
     /* Set plot style*/
@@ -564,12 +559,12 @@ void systemevalDlg::OnTimer()
                                      DRMReceiver.GetFACMLC()->GetAccMetric(), 'f', 2));
 #else
         /* DC frequency */
-        ValueFreqOffset->setText(QString().setNum(DRMReceiver.GetReceiveData()->
+        ValueFreqOffset->setText(QString().setNum(controller->getReceiver()->GetReceiveData()->
                                      ConvertFrequency(Parameters.GetDCFrequency()), 'f', 2) + " Hz");
 #endif
 
         /* If MDI in is enabled, do not show any synchronization parameter */
-        if (DRMReceiver.GetRSIIn()->GetInEnabled() == TRUE)
+        if (controller->getReceiver()->GetRSIIn()->GetInEnabled() == TRUE)
         {
             ValueSNR->setText("<b>---</b>");
             if (Parameters.vecrRdelThresholds.GetSize() > 0)
