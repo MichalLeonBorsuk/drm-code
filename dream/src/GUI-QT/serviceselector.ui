@@ -77,7 +77,7 @@
         <enum>QFrame::Sunken</enum>
        </property>
        <property name="text">
-        <string>TextMiniService1</string>
+        <string/>
        </property>
        <property name="textFormat">
         <enum>Qt::PlainText</enum>
@@ -152,7 +152,7 @@
         <enum>QFrame::Sunken</enum>
        </property>
        <property name="text">
-        <string>TextMiniService2</string>
+        <string/>
        </property>
        <property name="textFormat">
         <enum>Qt::PlainText</enum>
@@ -227,7 +227,7 @@
         <enum>QFrame::Sunken</enum>
        </property>
        <property name="text">
-        <string>TextMiniService3</string>
+        <string/>
        </property>
        <property name="textFormat">
         <enum>Qt::PlainText</enum>
@@ -302,7 +302,7 @@
         <enum>QFrame::Sunken</enum>
        </property>
        <property name="text">
-        <string>TextMiniService4</string>
+        <string/>
        </property>
        <property name="textFormat">
         <enum>Qt::PlainText</enum>

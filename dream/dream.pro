@@ -625,7 +625,6 @@ FORMS += \
     CodecParams.ui \
     DRMMainWindow.ui \
     EPGDlgbase.ui \
-    FMMainWindow.ui \
     GeneralSettingsDlgbase.ui \
     JLViewer.ui \
     LiveScheduleWindow.ui \
@@ -654,7 +653,6 @@ HEADERS += \
     src/GUI-QT/EPGDlg.h \
     src/GUI-QT/EvaluationDlg.h \
     src/GUI-QT/fdrmdialog.h \
-    src/GUI-QT/fmdialog.h \
     src/GUI-QT/GeneralSettingsDlg.h \
     src/GUI-QT/jlbrowser.h \
     src/GUI-QT/JLViewer.h \
@@ -688,7 +686,6 @@ SOURCES += \
     src/GUI-QT/EPGDlg.cpp \
     src/GUI-QT/EvaluationDlg.cpp \
     src/GUI-QT/fdrmdialog.cpp \
-    src/GUI-QT/fmdialog.cpp \
     src/GUI-QT/GeneralSettingsDlg.cpp \
     src/GUI-QT/jlbrowser.cpp \
     src/GUI-QT/JLViewer.cpp \

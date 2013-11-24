@@ -48,7 +48,6 @@ class ServiceSelector;
 class StationsDlg;
 class LiveScheduleDlg;
 class AnalogDemDlg;
-class FMDialog;
 class systemevalDlg;
 class GeneralSettingsDlg;
 class CSysTray;
@@ -92,7 +91,6 @@ private:
     LiveScheduleDlg*	pLiveScheduleDlg;
     EPGDlg*				pEPGDlg;
     AnalogDemDlg*		pAnalogDemDlg;
-    FMDialog*			pFMDlg;
     GeneralSettingsDlg* pGeneralSettingsDlg;
     CSysTray*           pSysTray;
     CFileMenu*			pFileMenu;
@@ -108,6 +106,7 @@ private:
     DreamTabWidget*     pServiceTabs;
     EngineeringTabWidget* pEngineeringTabs;
     QWidget*            pMultimediaWindow;
+    QString             baseWindowTitle;
 
     virtual void        eventClose(QCloseEvent* ce);
     virtual void        eventHide(QHideEvent* pEvent);
@@ -134,10 +133,12 @@ private slots:
     void OnTimerClose();
     void OnSelectDataService(int);
     void OnMenuSetDisplayColor();
-    void OnSwitchToFM();
     void OnSwitchToAM();
+    void OnSwitchToDRM();
+    void OnSwitchToFM();
     void OnWhatsThis();
     void OnHelpAbout();
+    void tune();
     void OnSoundFileChanged(CDRMReceiver::ESFStatus);
     void OnSysTrayActivated(QSystemTrayIcon::ActivationReason);
     void initialiseSchedule();
@@ -156,9 +157,11 @@ private slots:
     void on_modeChanged(int);
     void on_serviceChanged(int, const CService&);
     void on_signalLost();
+    void on_frequencyChanged(int);
 
 signals:
     void plotStyleChanged(int);
+    void frequencyChanged(int);
 };
 
 #endif // _FDRMDIALOG_H_
