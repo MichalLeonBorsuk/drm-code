@@ -56,7 +56,7 @@ void ChannelWidget::setLEDFAC(ETypeRxStatus status)
     ui->drmDetail->setLEDFAC(status);
 }
 
-void ChannelWidget::setLEDSDC(ETypeRxStatus status)
+void ChannelWidget::on_DRMMainWindow_SDCChanged(ETypeRxStatus status)
 {
     ui->drmDetail->setLEDSDC(status);
 }

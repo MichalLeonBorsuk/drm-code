@@ -44,6 +44,7 @@
 
 
 /* Classes ********************************************************************/
+class ReceiverController;
 
 class systemevalDlg : public CWindow, public Ui_SystemEvaluationWindow
 {
@@ -52,8 +53,7 @@ class systemevalDlg : public CWindow, public Ui_SystemEvaluationWindow
 public:
     systemevalDlg(CDRMReceiver&, CSettings&, QWidget* parent = 0);
 	virtual ~systemevalDlg();
-
-	void SetStatus(CMultColorLED*, ETypeRxStatus);
+    void            connectController(ReceiverController*);
 
 protected:
     CDRMReceiver&   DRMReceiver;
@@ -66,7 +66,7 @@ protected:
 	virtual void	eventHide(QHideEvent* pEvent);
 	void			UpdateGPS(CParameter&);
     void			setControls(CSettings& s);
-	void			AddWhatsThisHelp();
+    void			AddWhatsThisHelp();
 	CDRMPlot*		OpenChartWin(CDRMPlot::ECharType eNewType);
 	QTreeWidgetItem* FindItemByECharType(CDRMPlot::ECharType eCharType);
 	string			ECharTypeToPlotName(CDRMPlot::ECharType eCharType);

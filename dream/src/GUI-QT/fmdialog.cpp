@@ -118,9 +118,30 @@ void FMDialog::OnWhatsThis()
 	QWhatsThis::enterWhatsThisMode();
 }
 
+void FMDialog::on_modeChanged(int value)
+{
+    switch(ERecMode(value))
+    {
+    case RM_DRM:
+        hide();
+        break;
+    case RM_AM:
+        hide();
+        break;
+    case RM_FM:
+        if(isVisible())
+            update();
+        else
+            show();
+        break;
+    case RM_NONE: // wait until working thread starts operating
+        break;
+    }
+}
+
 void FMDialog::OnSwitchToDRM()
 {
-	emit SwitchMode(RM_DRM);
+    emit SwitchMode(RM_DRM);
 }
 
 void FMDialog::OnSwitchToAM()

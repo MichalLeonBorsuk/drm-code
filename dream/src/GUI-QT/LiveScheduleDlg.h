@@ -137,7 +137,7 @@ public:
 public slots:
     void setLocation(double, double);
     void setAFS(const CAltFreqSign& altFreqSign);
-    void setLabel(const QString&);
+    void setService(int, const CService&);
     void setServiceInformation(const map <uint32_t,CServiceInformation>);
 
 protected:

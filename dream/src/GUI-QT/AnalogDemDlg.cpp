@@ -191,6 +191,27 @@ void AnalogDemDlg::OnWhatsThis()
 	QWhatsThis::enterWhatsThisMode();
 }
 
+void AnalogDemDlg::on_modeChanged(int value)
+{
+    switch(ERecMode(value))
+    {
+    case RM_DRM:
+        hide();
+        break;
+    case RM_AM:
+        if(isVisible())
+            update();
+        else
+            show();
+        break;
+    case RM_FM:
+        hide();
+        break;
+    case RM_NONE: // wait until working thread starts operating
+        break;
+    }
+}
+
 void AnalogDemDlg::OnSwitchToDRM()
 {
 	emit SwitchMode(RM_DRM);

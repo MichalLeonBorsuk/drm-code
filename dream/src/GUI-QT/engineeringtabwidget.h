@@ -3,11 +3,13 @@
 
 #include <QTabWidget>
 
+class CDRMReceiver;
+
 class EngineeringTabWidget : public QTabWidget
 {
     Q_OBJECT
 public:
-    explicit EngineeringTabWidget(QWidget *parent = 0);
+    explicit EngineeringTabWidget(CDRMReceiver*, QWidget *parent = 0);
 
 signals:
 

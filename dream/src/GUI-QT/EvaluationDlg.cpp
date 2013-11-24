@@ -28,6 +28,8 @@
 
 #include "EvaluationDlg.h"
 #include "DialogUtil.h"
+#include "receivercontroller.h"
+#include "../util-QT/Util.h"
 #ifdef HAVE_LIBHAMLIB
 # include "../util-QT/Rig.h"
 #endif
@@ -188,6 +190,23 @@ systemevalDlg::systemevalDlg(CDRMReceiver& r, CSettings& Settings,
 
     /* Force update */
     OnTimer();
+}
+
+void systemevalDlg::connectController(ReceiverController* controller)
+{
+    connect(this, SIGNAL(saveAudio(const string&)), controller, SLOT(setSaveAudio(const string&)));
+    connect(this, SIGNAL(muteAudio(bool)), controller, SLOT(muteAudio(bool)));
+    connect(this, SIGNAL(setReverbEffect(bool)), controller, SLOT(setReverbEffect(bool)));
+    connect(this, SIGNAL(setRecFilter(bool)), controller, SLOT(setRecFilter(bool)));
+    connect(this, SIGNAL(setFlippedSpectrum(bool)), controller, SLOT(setFlippedSpectrum(bool)));
+    connect(this, SIGNAL(setIntCons(bool)), controller, SLOT(setIntCons(bool)));
+    connect(this, SIGNAL(setNumMSCMLCIterations(int)), controller, SLOT(setNumMSCMLCIterations(int)));
+    connect(this, SIGNAL(setTimeInt(CChannelEstimation::ETypeIntTime)),
+            controller, SLOT(setTimeInt(CChannelEstimation::ETypeIntTime)));
+    connect(this, SIGNAL(setFreqInt(CChannelEstimation::ETypeIntFreq)),
+            controller, SLOT(setFreqInt(CChannelEstimation::ETypeIntFreq)));
+    connect(this, SIGNAL(setTiSyncTracType(CTimeSyncTrack::ETypeTiSyncTrac)),
+            controller, SLOT(setTiSyncTracType(CTimeSyncTrack::ETypeTiSyncTrac)));
 }
 
 systemevalDlg::~systemevalDlg()
@@ -450,28 +469,6 @@ string systemevalDlg::ECharTypeToPlotName(CDRMPlot::ECharType eCharType)
     if (item != NULL)
         return item->text(0).toStdString();
     return string();
-}
-
-void systemevalDlg::SetStatus(CMultColorLED* LED, ETypeRxStatus state)
-{
-    switch(state)
-    {
-    case NOT_PRESENT:
-        LED->Reset(); /* GREY */
-        break;
-
-    case CRC_ERROR:
-        LED->SetLight(CMultColorLED::RL_RED);
-        break;
-
-    case DATA_ERROR:
-        LED->SetLight(CMultColorLED::RL_YELLOW);
-        break;
-
-    case RX_OK:
-        LED->SetLight(CMultColorLED::RL_GREEN);
-        break;
-    }
 }
 
 void systemevalDlg::OnTimer()

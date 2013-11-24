@@ -58,7 +58,6 @@ ServiceSelector::~ServiceSelector()
 
 void ServiceSelector::onServiceChanged(int short_id, const CService& service)
 {
-    bool bAFS=false; // TODO
     QString text;
 
     /* Check, if service is used */
@@ -118,11 +117,6 @@ void ServiceSelector::onServiceChanged(int short_id, const CService& service)
                     }
                 }
             }
-        }
-
-        if(bAFS)
-        {
-            text += tr(" + AFS");
         }
     }
     serviceLabels[short_id]->setText(text);

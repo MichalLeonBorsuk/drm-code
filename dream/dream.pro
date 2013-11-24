@@ -185,6 +185,7 @@ unix:!cross_compile {
 }
 win32 {
     LIBS += -lfftw3-3
+    OTHER_FILES += windows/dream.iss windows/dream.rc
     !multimedia {
         exists($$OUT_PWD/include/portaudio.h) {
           CONFIG += portaudio sound
@@ -496,9 +497,8 @@ HEADERS += \
     src/util/Settings.h \
     src/util/Utilities.h \
     src/util/Vector.h \
-    src/Version.h \
-    src/GUI-QT/slideshowwidget.h \
-    src/GUI-QT/engineeringtabwidget.h
+    src/Version.h
+
 SOURCES += \
     src/AMDemodulation.cpp \
     src/AMSSDemodulation.cpp \
@@ -598,9 +598,8 @@ SOURCES += \
     src/util/Reassemble.cpp \
     src/util/Settings.cpp \
     src/util/Utilities.cpp \
-    src/Version.cpp \
-    src/GUI-QT/slideshowwidget.cpp \
-    src/GUI-QT/engineeringtabwidget.cpp
+    src/Version.cpp
+
 !console {
 HEADERS += \
     src/GUI-QT/Logging.h \
@@ -643,7 +642,8 @@ FORMS += \
     drmdisplay.ui \
     drmdetail.ui \
     liveschedulewidget.ui \
-    journalineviewer.ui
+    journalineviewer.ui \
+    slideshowwidget.ui
 
 HEADERS += \
     src/GUI-QT/AnalogDemDlg.h \
@@ -675,7 +675,10 @@ HEADERS += \
     src/GUI-QT/drmoptions.h \
     src/GUI-QT/drmdisplay.h \
     src/GUI-QT/drmdetail.h \
-    src/GUI-QT/journalineviewer.h
+    src/GUI-QT/journalineviewer.h \
+    src/GUI-QT/slideshowwidget.h \
+    src/GUI-QT/engineeringtabwidget.h \
+    src/GUI-QT/receivercontroller.h
 SOURCES += \
     src/GUI-QT/AnalogDemDlg.cpp \
     src/GUI-QT/CodecParams.cpp \
@@ -706,14 +709,12 @@ SOURCES += \
     src/GUI-QT/drmoptions.cpp \
     src/GUI-QT/drmdisplay.cpp \
     src/GUI-QT/drmdetail.cpp \
-    src/GUI-QT/journalineviewer.cpp
+    src/GUI-QT/journalineviewer.cpp \
+    src/GUI-QT/slideshowwidget.cpp \
+    src/GUI-QT/engineeringtabwidget.cpp \
+    src/GUI-QT/receivercontroller.cpp
 }
 message(With Qt components $$QT)
 !sound {
     error("no usable audio interface found - install pulseaudio or portaudio dev package")
 }
-
-OTHER_FILES += windows/dream.iss
-
-FORMS += \
-    src/GUI-QT/slideshowwidget.ui
