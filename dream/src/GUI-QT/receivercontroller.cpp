@@ -1,4 +1,4 @@
-#include "ReceiverController.h"
+#include "receivercontroller.h"
 
 ReceiverController::ReceiverController(CDRMReceiver* p, CSettings& s, QObject *parent) :
     QObject(parent),
