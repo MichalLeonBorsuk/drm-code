@@ -1623,12 +1623,6 @@ CDRMReceiver::LoadSettings()
 
     Parameters.GenerateReceiverID();
 
-    /* Data files directory */
-    string sDataFilesDirectory = s.Get(
-        "Receiver", "datafilesdirectory", Parameters.GetDataDirectory());
-    Parameters.SetDataDirectory(sDataFilesDirectory);
-    s.Put("Receiver", "datafilesdirectory", Parameters.GetDataDirectory());
-
     /* Receiver ------------------------------------------------------------- */
 
     /* Sound card audio sample rate, some settings below depends on this one */
@@ -1948,8 +1942,6 @@ CDRMReceiver::SaveSettings()
 
     /* Serial Number */
     s.Put("Receiver", "serialnumber", Parameters.sSerialNumber);
-
-    s.Put("Receiver", "datafilesdirectory", Parameters.GetDataDirectory());
 
     /* GPS */
     if(Parameters.gps_data.set & LATLON_SET) {

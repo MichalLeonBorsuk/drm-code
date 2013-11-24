@@ -35,7 +35,8 @@
 CDataDecoder::CDataDecoder ():iServPacketID (0), DoNotProcessData (TRUE),
 	Journaline(*new CJournaline()),
 	Experiment(*new CExperiment()),
-	iOldJournalineServiceID (0)
+    iOldJournalineServiceID (0),
+    strDataDirectory(DEFAULT_DATA_FILES_DIRECTORY)
 {
 		for(size_t i=0; i<MAX_NUM_PACK_PER_STREAM; i++)
 			eAppType[i] = AT_NOT_SUP;
@@ -320,7 +321,7 @@ CDataDecoder::DecodeEPG(const CParameter & Parameters)
 			fileName = NewObj.strName;
 		}
 
-		string path = Parameters.GetDataDirectory("EPG") + fileName;
+        string path = strDataDirectory+"/EPG/"+fileName;
 		mkdirs(path);
 		//cerr << "writing EPG file " << path << endl;
 		FILE *f = fopen(path.c_str(), "wb");

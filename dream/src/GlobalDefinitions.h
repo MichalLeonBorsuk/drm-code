@@ -344,5 +344,13 @@ inline _SAMPLE Real2Sample(const _REAL rInput)
     return (_SAMPLE) rInput;
 }
 
+#ifdef _WIN32
+# define PATH_SEPARATOR "\\"
+# define PATH_SEPARATORS "/\\"
+#else
+# define PATH_SEPARATOR "/"
+# define PATH_SEPARATORS "/"
+#endif
+#define DEFAULT_DATA_FILES_DIRECTORY "data" PATH_SEPARATOR
 
 #endif // !defined(DEF_H__3B0BA660_CA63_4344_BB2B_23E7A0D31912__INCLUDED_)

@@ -39,6 +39,10 @@
 #endif
 using namespace std;
 
+#ifdef _WIN32
+# define mkdir(a,b) _mkdir(a)
+#endif
+
 void
 mkdirs (const string & path)
 {
@@ -54,13 +58,8 @@ mkdirs (const string & path)
 	      return;
 	  string dir = path.substr (p, q - p);
 	  left += sep + dir;
-#ifdef _WIN32
-	  sep = "\\";
-	  _mkdir (left.c_str ());
-#else
-	  sep = "/";
+      sep = PATH_SEPARATOR;
 	  mkdir (left.c_str (), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
-#endif
 	  p = q + 1;
       }
 }

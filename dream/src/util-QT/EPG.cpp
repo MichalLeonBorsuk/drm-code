@@ -1226,7 +1226,8 @@ EPG::genre_list[] = {
     {0, 0},
 };
 
-EPG::EPG(CParameter& NParameters):Parameters(NParameters)
+EPG::EPG(CParameter& NParameters, const string& savePath):
+    Parameters(NParameters)
 {
     for (int i = 0; true; i++)
     {
@@ -1234,7 +1235,7 @@ EPG::EPG(CParameter& NParameters):Parameters(NParameters)
             break;
         genres[genre_list[i].genre] = genre_list[i].desc;
     }
-    dir = Parameters.GetDataDirectory("EPG").c_str();
+    dir = QString::fromUtf8((savePath+"/EPG").c_str());
     CreateDirectories(dir);
     servicesFilename = dir + "services.xml";
     loadChannels (servicesFilename);

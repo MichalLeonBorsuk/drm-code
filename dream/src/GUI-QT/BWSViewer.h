@@ -68,11 +68,12 @@ protected:
     bool            bLastServiceValid;
     uint32_t        iLastValidServiceID;
     QString         strLastLabel;
+    QString         strDataDir;
 
     bool Changed();
     void SaveMOTObject(const QString& strObjName, const CMOTObject& obj);
     bool RemoveDir(const QString &dirName, int level = 0);
-    void SetupSavePath(QString& strSavePath);
+    QString savePath();
     void UpdateButtons();
     void UpdateStatus();
     void UpdateWindowTitle(const uint32_t iServiceID, const bool bServiceValid, QString strLabel);

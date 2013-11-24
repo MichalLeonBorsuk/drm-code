@@ -393,15 +393,6 @@ LiveScheduleDlg::~LiveScheduleDlg()
 {
 }
 
-void LiveScheduleDlg::setSavePath(const QString& s)
-{
-    /* Retrieve the setting saved into the .ini file */
-    strCurrentSavePath = s;
-
-    /* and make sure it exists */
-    CreateDirectories(strCurrentSavePath);
-}
-
 void LiveScheduleDlg::setLocation(double lat, double lng)
 {
     DRMSchedule.SetReceiverCoordinates(lat, lng);
@@ -428,6 +419,15 @@ void LiveScheduleDlg::setService(int, const CService& service)
 void
 LiveScheduleDlg::LoadSettings()
 {
+    // save path
+
+    string sDataFilesDirectory = Settings.Get(
+                "Receiver", "datafilesdirectory", string(DEFAULT_DATA_FILES_DIRECTORY));
+    strCurrentSavePath = QString::fromUtf8(sDataFilesDirectory.c_str());
+
+    /* and make sure it exists */
+    CreateDirectories(strCurrentSavePath);
+
     /* Set sorting behaviour of the list */
     iCurrentSortColumn = getSetting("sortcolumn", 0);
     bCurrentSortAscending = getSetting("sortascending", true);
@@ -840,7 +840,7 @@ LiveScheduleDlg::OnSave()
                 QTextStream TextStream(&FileObj);
                 TextStream << strText;	/* Actual writing */
                 FileObj.close();
-                strCurrentSavePath = QFileInfo(strFilename).path() + "/";
+                strCurrentSavePath = QFileInfo(strFilename).path() + PATH_SEPARATOR;
             }
         }
     }

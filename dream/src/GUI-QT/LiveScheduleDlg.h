@@ -133,7 +133,7 @@ class LiveScheduleDlg : public CWindow, public Ui_LiveScheduleWindow
 public:
     LiveScheduleDlg(CSettings&, QMap<QWidget*,QString>&);
 	virtual ~LiveScheduleDlg();
-    void setSavePath(const QString&);
+
 public slots:
     void setLocation(double, double);
     void setAFS(const CAltFreqSign& altFreqSign);

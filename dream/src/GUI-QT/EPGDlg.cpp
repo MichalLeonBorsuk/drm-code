@@ -287,7 +287,7 @@ QString EPGDlg::getFileName(const QDate& date, uint32_t sid, bool bAdvanced)
     d.year = date.year();
     d.month = date.month();
     d.day = date.day();
-    return pEpg->dir + "/" + epgFilename(d, sid, 1, bAdvanced).c_str();
+    return pEpg->dir + PATH_SEPARATOR + epgFilename(d, sid, 1, bAdvanced).c_str();
 }
 
 QString EPGDlg::getFileName_etsi(const QDate& date, uint32_t sid, bool bAdvanced)
@@ -296,7 +296,7 @@ QString EPGDlg::getFileName_etsi(const QDate& date, uint32_t sid, bool bAdvanced
     d.year = date.year();
     d.month = date.month();
     d.day = date.day();
-    return pEpg->dir + "/" + epgFilename_etsi(d, sid, 1, bAdvanced).c_str();
+    return pEpg->dir + PATH_SEPARATOR + epgFilename_etsi(d, sid, 1, bAdvanced).c_str();
 }
 
 QDomDocument*

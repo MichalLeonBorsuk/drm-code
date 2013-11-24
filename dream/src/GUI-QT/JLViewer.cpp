@@ -37,6 +37,11 @@ JLViewer::JLViewer(CSettings& Settings, QWidget* parent):
 {
     setupUi(this);
 
+    string p = Settings.Get(
+                "Receiver", "datafilesdirectory", string(DEFAULT_DATA_FILES_DIRECTORY));
+
+    strCurrentSavePath = QString::fromUtf8((p+PATH_SEPARATOR+"Journaline").c_str());
+
     connect(buttonOk, SIGNAL(clicked()), this, SLOT(close()));
     connect(actionClose, SIGNAL(triggered()), SLOT(close()));
     connect(ButtonStepBack, SIGNAL(clicked()), textBrowser, SLOT(backward()));
@@ -52,11 +57,6 @@ JLViewer::JLViewer(CSettings& Settings, QWidget* parent):
 
 JLViewer::~JLViewer()
 {
-}
-
-void JLViewer::setSavePath(const QString&)
-{
-    //    strCurrentSavePath = s;
 }
 
 void JLViewer::setDecoder(CDataDecoder* dec)

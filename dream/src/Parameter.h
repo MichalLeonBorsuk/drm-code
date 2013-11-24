@@ -1100,12 +1100,8 @@ public:
     /* Serial number and received ID */
     string sReceiverID;
     string sSerialNumber;
-protected:
-    string sDataFilesDirectory;
-public:
 
-    string GetDataDirectory(const char* pcChildDirectory = NULL) const;
-    void SetDataDirectory(string sNewDataFilesDirectory);
+public:
 
     /* Parameters controlled by SDC ----------------------------------------- */
     void SetAudioParam(const int iShortID, const CAudioParam& NewAudParam);

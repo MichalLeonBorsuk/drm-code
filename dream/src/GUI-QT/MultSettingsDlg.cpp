@@ -75,13 +75,18 @@ void MultSettingsDlg::showEvent(QShowEvent*)
     SetDataDirectoryControls();
 }
 
-void MultSettingsDlg::ClearCache(QString sPath, QString sFilter = "", _BOOLEAN bDeleteDirs)
+void MultSettingsDlg::ClearCache(string subdir, QString sFilter = "", _BOOLEAN bDeleteDirs)
 {
-	/* Delete files into sPath directory with scan recursive */
+    /* Delete files into sPath directory with scan recursive */
+    string p = Settings.Get("Receiver", "datafilesdirectory", string(DEFAULT_DATA_FILES_DIRECTORY));
 
-	QDir dir(sPath);
+    QDir dir(QString::fromUtf8((p+PATH_SEPARATOR+subdir).c_str()));
+    ClearCache(dir, sFilter, bDeleteDirs);
+}
 
-	/* Check if the directory exists */
+void MultSettingsDlg::ClearCache(QDir dir, QString sFilter = "", _BOOLEAN bDeleteDirs)
+{
+    /* Check if the directory exists */
 	if (dir.exists())
 	{
 		dir.setFilter(QDir::Files | QDir::Dirs | QDir::NoSymLinks);
@@ -101,7 +106,7 @@ void MultSettingsDlg::ClearCache(QString sPath, QString sFilter = "", _BOOLEAN b
 			{
 				if(fi->fileName()!="." && fi->fileName()!="..")
 				{
-					ClearCache(fi->filePath(), sFilter, bDeleteDirs);
+                    ClearCache(QDir(fi->filePath()), sFilter, bDeleteDirs);
 
 					/* Eventually delete the directory */
 					if (bDeleteDirs == TRUE)
@@ -123,37 +128,33 @@ void MultSettingsDlg::OnbuttonChooseDir()
 	/* Check if user not hit the cancel button */
 	if (!strFilename.isEmpty())
 	{
-#ifdef _WIN32
-		strFilename.replace(QRegExp("/"), "\\");
-#endif
-		Parameters.SetDataDirectory(string(strFilename.toUtf8().constData()));
-		SetDataDirectoryControls();
+        strFilename.replace(QRegExp("/"), PATH_SEPARATOR);
+        Settings.Put("Receiver", "datafilesdirectory",
+                    string(strFilename.toUtf8().constData())
+                     );
+        SetDataDirectoryControls();
 	}
 }
 
 void MultSettingsDlg::OnbuttonClearCacheMOT()
 {
-	/* Delete all files and directories in the MOT directory */
-	ClearCache(QString::fromUtf8(Parameters.GetDataDirectory("MOT").c_str()), "", TRUE);
+    ClearCache("MOT", "", TRUE);
 }
 
 void MultSettingsDlg::OnbuttonClearCacheEPG()
 {
 	/* Delete all EPG files */
-	ClearCache(QString::fromUtf8(Parameters.GetDataDirectory("EPG").c_str()), "*.EHA;*.EHB");
+    ClearCache("EPG", "*.EHA;*.EHB");
 }
 
 void MultSettingsDlg::SetDataDirectoryControls()
 {
-	QString strFilename(QString::fromUtf8(Parameters.GetDataDirectory().c_str()));
-#undef PATH_SEP
-#ifdef _WIN32
-	strFilename.replace(QRegExp("/"), "\\");
-# define PATH_SEP '\\'
-#else
-# define PATH_SEP '/'
-#endif
-	if (!strFilename.isEmpty() && strFilename.at(strFilename.length()-1) == QChar(PATH_SEP))
+    QString sep(PATH_SEPARATOR);
+    /* Delete files into sPath directory with scan recursive */
+    string p = Settings.Get("Receiver", "datafilesdirectory", string(DEFAULT_DATA_FILES_DIRECTORY));
+    QString strFilename = QString::fromUtf8(p.c_str());
+    strFilename.replace(QRegExp("/"), sep);
+    if (!strFilename.isEmpty() && strFilename.at(strFilename.length()-1) == QChar(sep[0]))
 		strFilename.remove(strFilename.length()-1, 1);
 	TextLabelDir->setToolTip(strFilename);
 	TextLabelDir->setText(strFilename);
