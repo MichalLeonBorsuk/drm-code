@@ -9,6 +9,7 @@
 #include "slideshowwidget.h"
 #include "EPGDlg.h"
 #include <../datadecoding/DataDecoder.h>
+#include "receivercontroller.h"
 
 DreamTabWidget::DreamTabWidget(QWidget *parent) :
     QTabWidget(parent)
@@ -82,6 +83,7 @@ void DreamTabWidget::addDataTab(int short_id, const CService& service, int iAudi
     // for now, the main window will be sending us update events.
     while(pController && pController->objectName()!=wantedName)
         pController = pController->parent();
+    ReceiverController* control = pController->findChild<ReceiverController*>("controller");
     if (service.DataParam.ePacketModInd == CDataParam::PM_PACKET_MODE)
     {
         if (service.DataParam.eAppDomain == CDataParam::AD_DAB_SPEC_APP)
@@ -93,7 +95,7 @@ void DreamTabWidget::addDataTab(int short_id, const CService& service, int iAudi
                 SlideShowWidget* p = new SlideShowWidget();
                 p->setServiceInformation(short_id, service);
                 //p->setSavePath(QString::fromUtf8(Parameters.GetDataDirectory("Journaline").c_str()));
-                connect(pController, SIGNAL(dataStatusChanged(int, ETypeRxStatus)), p, SLOT(setStatus(int, ETypeRxStatus)));
+                connect(control, SIGNAL(dataStatusChanged(int, ETypeRxStatus)), p, SLOT(setStatus(int, ETypeRxStatus)));
                 pApp = p;
             }
                 break;
@@ -104,7 +106,7 @@ void DreamTabWidget::addDataTab(int short_id, const CService& service, int iAudi
                 p->setDecoder(service.DataParam.pDecoder);
                 p->setServiceInformation(short_id, service);
                 //p->setSavePath(QString::fromUtf8(Parameters.GetDataDirectory("Journaline").c_str()));
-                connect(pController, SIGNAL(dataStatusChanged(int, ETypeRxStatus)), p, SLOT(setStatus(int, ETypeRxStatus)));
+                connect(control, SIGNAL(dataStatusChanged(int, ETypeRxStatus)), p, SLOT(setStatus(int, ETypeRxStatus)));
                 pApp = p;
             }
                 break;
@@ -118,7 +120,7 @@ void DreamTabWidget::addDataTab(int short_id, const CService& service, int iAudi
                 p->setDecoder(service.DataParam.pDecoder);
                 p->setServiceInformation(service, iAudioServiceID);
                 //p->setSavePath(QString::fromUtf8(Parameters.GetDataDirectory("Journaline").c_str()));
-                connect(pController, SIGNAL(dataStatusChanged(int, ETypeRxStatus)), p, SLOT(setStatus(int, ETypeRxStatus)));
+                connect(control, SIGNAL(dataStatusChanged(int, ETypeRxStatus)), p, SLOT(setStatus(int, ETypeRxStatus)));
                 pApp = p;
             }
             break;

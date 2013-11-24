@@ -34,6 +34,7 @@
 #include <QTimer>
 #include <QSystemTrayIcon>
 #include <../DrmReceiver.h>
+#include "receivercontroller.h"
 
 /* Classes ********************************************************************/
 class CDRMReceiver;
@@ -78,7 +79,7 @@ public:
 private:
     Ui::DRMMainWindow*  ui;
     CDRMReceiver&		DRMReceiver;
-    QTimer				Timer;
+    ReceiverController* controller;
     QTimer				TimerClose;
 
     CLogging*			pLogging;
@@ -94,7 +95,6 @@ private:
     FMDialog*			pFMDlg;
     GeneralSettingsDlg* pGeneralSettingsDlg;
     CSysTray*           pSysTray;
-    CWindow*            pCurrentWindow;
     CFileMenu*			pFileMenu;
     CSoundCardSelMenu*	pSoundCardMenu;
     CAboutDlg*		    pAboutDlg;
@@ -114,19 +114,11 @@ private:
     virtual void        eventShow(QShowEvent* pEvent);
     virtual void        eventUpdate();
     void		AddWhatsThisHelp();
-    void		UpdateDRM_GUI();
-    void		UpdateDisplay();
-    void		ClearDisplay();
     void		UpdateWindowTitle();
 
     void		SetDisplayColor(const QColor newColor);
 
-    void		ChangeGUIModeToDRM();
-    void		ChangeGUIModeToAM();
-    void		ChangeGUIModeToFM();
-
     QString formatTextMessage(const QString&) const;
-    void showServiceInfo(const CService&);
     void startLogging();
     void stopLogging();
     void SysTrayCreate();
@@ -134,54 +126,39 @@ private:
     void SysTrayStop(const QString&);
     void SysTrayToolTip(const QString&, const QString&);
 	void setBars(int);
+    void connectController();
 
 private slots:
-    void OnTimer();
     void OnScheduleTimer();
     void OnSysTrayTimer();
     void OnTimerClose();
-    void OnSelectAudioService(int);
     void OnSelectDataService(int);
     void OnMenuSetDisplayColor();
-    void OnNewAcquisition();
-    void OnSwitchMode(int);
     void OnSwitchToFM();
     void OnSwitchToAM();
     void OnWhatsThis();
     void OnHelpAbout();
     void OnSoundFileChanged(CDRMReceiver::ESFStatus);
     void OnSysTrayActivated(QSystemTrayIcon::ActivationReason);
-    void OnGUISetFrequency(int);
     void initialiseSchedule();
     void on_actionGeneralSettings_triggered();
     void onUserEnteredPosition(double, double);
     void onUseGPSd(const QString&);
-    void onSaveAudio(const string&);
-    void onMuteAudio(bool);
-    void onSetTimeInt(CChannelEstimation::ETypeIntTime);
-    void onSetFreqInt(CChannelEstimation::ETypeIntFreq);
-    void onSetTiSyncTracType(CTimeSyncTrack::ETypeTiSyncTrac);
-    void onSetNumMSCMLCIterations(int);
-    void onSetFlippedSpectrum(bool);
-    void onSetReverbEffect(bool);
-    void onSetRecFilter(bool);
-    void onSetIntCons(bool);
     void on_action_Multimedia_Dialog_triggered();
     void on_actionSingle_Window_Mode_triggered(bool);
     void on_actionEngineering_Mode_triggered(bool);
-    void onTextMessageChanged(int, QString);
+    void on_textMessageChanged(int, QString);
+    void on_MSCChanged(ETypeRxStatus);
+    void on_SDCChanged(ETypeRxStatus);
+    void on_FACChanged(ETypeRxStatus);
+    void on_WMERChanged(double);
+    void on_InputSignalLevelChanged(double);
+    void on_modeChanged(int);
+    void on_serviceChanged(int, const CService&);
+    void on_signalLost();
 
 signals:
-    void serviceChanged(int, const CService&);
-    void dataStatusChanged(int, ETypeRxStatus);
     void plotStyleChanged(int);
-    void frequencyChanged(int);
-    void SwitchMode(int);
-    void position(double,double);
-    void AFS(const CAltFreqSign&);
-    void setAFS(bool);
-    void serviceInformation(const map <uint32_t,CServiceInformation>);
-    void textMessageChanged(int, const QString&);
 };
 
 #endif // _FDRMDIALOG_H_

@@ -29,7 +29,7 @@ private:
 public slots:
     void setActive(bool);
     void setLEDFAC(ETypeRxStatus);
-    void setLEDSDC(ETypeRxStatus status);
+    void on_DRMMainWindow_SDCChanged(ETypeRxStatus status);
     void setLEDFrameSync(ETypeRxStatus status);
     void setLEDTimeSync(ETypeRxStatus status);
     void setLEDIOInterface(ETypeRxStatus status);

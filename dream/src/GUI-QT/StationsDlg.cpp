@@ -306,6 +306,9 @@ void StationsDlg::eventHide(QHideEvent*)
 
 void StationsDlg::eventShow(QShowEvent*)
 {
+    if(schedule.GetSchedMode()==CSchedule::SM_NONE)
+        return; // wait until initialised
+
 	bool ensmeter = false;
 	ensmeter = actionEnable_S_Meter->isChecked();
 	if(ensmeter)
@@ -314,7 +317,6 @@ void StationsDlg::eventShow(QShowEvent*)
 		DisableSMeter();
     if(schedule.GetNumberOfStations()==0)
 	{
-        QString s = "";
         if(QFile::exists(schedule.schedFileName))
 		{
             LoadSchedule();

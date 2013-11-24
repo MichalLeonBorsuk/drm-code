@@ -99,7 +99,8 @@ public slots:
 	void OnMenuSetDisplayColor();
 	void OnSwitchToDRM();
 	void OnSwitchToAM();
-	void OnHelpAbout() {emit About();}
+    void on_modeChanged(int);
+    void OnHelpAbout() {emit About();}
 	void OnWhatsThis();
 
 signals:

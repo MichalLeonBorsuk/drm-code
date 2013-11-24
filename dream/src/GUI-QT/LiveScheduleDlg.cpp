@@ -417,9 +417,12 @@ void LiveScheduleDlg::setServiceInformation(const map <uint32_t,CServiceInformat
     serviceInformation = si;
 }
 
-void LiveScheduleDlg::setLabel(const QString&s)
+void LiveScheduleDlg::setService(int, const CService& service)
 {
-    strStationName = s;
+    if(service.IsActive())
+    {
+        strStationName = QString::fromUtf8(service.strLabel.c_str());
+    }
 }
 
 void
