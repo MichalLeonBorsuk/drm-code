@@ -7,12 +7,13 @@
 #include "journalineviewer.h"
 #include "bwsviewerwidget.h"
 #include "slideshowwidget.h"
+#include "audiodetailwidget.h"
 #include "EPGDlg.h"
 #include <../datadecoding/DataDecoder.h>
 #include "receivercontroller.h"
 
-DreamTabWidget::DreamTabWidget(QWidget *parent) :
-    QTabWidget(parent)
+DreamTabWidget::DreamTabWidget(ReceiverController* rc, QWidget *parent) :
+    QTabWidget(parent),controller(rc)
 {
     connect(this, SIGNAL(currentChanged(int)), this, SLOT(on_currentChanged(int)));
 }
@@ -55,14 +56,18 @@ void DreamTabWidget::setText(int short_id, QString text)
     for(int i=0; i<count(); i++)
     {
         if(short_id==tabBar()->tabData(i).toInt())
-            ((QLabel*)widget(i))->setText(text);
+        {
+            AudioDetailWidget* adw = (AudioDetailWidget*)widget(i);
+            adw->setTextMessage(text);
+        }
     }
 }
 
 void DreamTabWidget::addAudioTab(int short_id, const CService& service)
 {
     QString l = QString::fromUtf8(service.strLabel.c_str());
-    int index = addTab(new QLabel(QString("short id %1").arg(short_id)), l);
+    //int index = addTab(new QLabel(QString("short id %1").arg(short_id)), l);
+    int index = addTab(new AudioDetailWidget(controller), l);
     tabBar()->setTabData(index, short_id);
 }
 
@@ -78,12 +83,6 @@ void DreamTabWidget::addDataTab(int short_id, const CService& service, int iAudi
                                    .arg(service.DataParam.iStreamID)
                                    .arg(service.DataParam.iPacketID));
     QWidget* pApp = defaultApp;
-    QObject* pController = parent();
-    QString wantedName = "DRMMainWindow";
-    // for now, the main window will be sending us update events.
-    while(pController && pController->objectName()!=wantedName)
-        pController = pController->parent();
-    ReceiverController* control = pController->findChild<ReceiverController*>("controller");
     if (service.DataParam.ePacketModInd == CDataParam::PM_PACKET_MODE)
     {
         if (service.DataParam.eAppDomain == CDataParam::AD_DAB_SPEC_APP)
@@ -94,8 +93,7 @@ void DreamTabWidget::addDataTab(int short_id, const CService& service, int iAudi
             {
                 SlideShowWidget* p = new SlideShowWidget();
                 p->setServiceInformation(short_id, service);
-                //p->setSavePath(QString::fromUtf8(Parameters.GetDataDirectory("Journaline").c_str()));
-                connect(control, SIGNAL(dataStatusChanged(int, ETypeRxStatus)), p, SLOT(setStatus(int, ETypeRxStatus)));
+                connect(controller, SIGNAL(dataStatusChanged(int, ETypeRxStatus)), p, SLOT(setStatus(int, ETypeRxStatus)));
                 pApp = p;
             }
                 break;
@@ -105,8 +103,7 @@ void DreamTabWidget::addDataTab(int short_id, const CService& service, int iAudi
                 BWSViewerWidget* p = new BWSViewerWidget();
                 p->setDecoder(service.DataParam.pDecoder);
                 p->setServiceInformation(short_id, service);
-                //p->setSavePath(QString::fromUtf8(Parameters.GetDataDirectory("Journaline").c_str()));
-                connect(control, SIGNAL(dataStatusChanged(int, ETypeRxStatus)), p, SLOT(setStatus(int, ETypeRxStatus)));
+                connect(controller, SIGNAL(dataStatusChanged(int, ETypeRxStatus)), p, SLOT(setStatus(int, ETypeRxStatus)));
                 pApp = p;
             }
                 break;
@@ -119,8 +116,7 @@ void DreamTabWidget::addDataTab(int short_id, const CService& service, int iAudi
                 JournalineViewer* p = new JournalineViewer(short_id);
                 p->setDecoder(service.DataParam.pDecoder);
                 p->setServiceInformation(service, iAudioServiceID);
-                //p->setSavePath(QString::fromUtf8(Parameters.GetDataDirectory("Journaline").c_str()));
-                connect(control, SIGNAL(dataStatusChanged(int, ETypeRxStatus)), p, SLOT(setStatus(int, ETypeRxStatus)));
+                connect(controller, SIGNAL(dataStatusChanged(int, ETypeRxStatus)), p, SLOT(setStatus(int, ETypeRxStatus)));
                 pApp = p;
             }
             break;

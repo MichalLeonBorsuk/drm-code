@@ -11,13 +11,6 @@ class AudioDetailWidget;
 class CDRMPlot;
 class ReceiverController;
 
-#ifdef QT_QUICK_LIB
-class QQuickView;
-class QQuickItem;
-#else
-class QLabel;
-#endif
-
 class AudioDetailWidget : public QWidget
 {
     Q_OBJECT
@@ -32,8 +25,8 @@ signals:
     void listen(int);
 public slots:
     void setPlotStyle(int);
-    void setDescription(const QString&);
     void setRxStatus(int, ETypeRxStatus);
+    void setTextMessage(const QString&);
 private:
     Ui::AudioDetailWidget *ui;
     int short_id;
@@ -41,12 +34,6 @@ private:
     CDRMPlot *pMainPlot;
     ReceiverController* controller;
     int iPlotStyle;
-#ifdef QT_QUICK_LIB
-    QQuickView *view;
-    QQuickItem* userModeDisplay;
-#else
-    QLabel* description;
-#endif
     void updateEngineeringModeDisplay(int, const CService&);
     void updateUserModeDisplay(int, const CService&);
     void addItem(const QString&, const QString&);

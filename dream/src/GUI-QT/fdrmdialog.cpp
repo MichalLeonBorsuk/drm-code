@@ -346,6 +346,8 @@ void FDRMDialog::on_actionEngineering_Mode_triggered(bool checked)
             pEngineeringTabs->hide();
     }
     Settings.Put("GUI", "engineering", checked);
+    QApplication::processEvents();
+    resize(0,0);
 }
 
 void FDRMDialog::on_actionSingle_Window_Mode_triggered(bool checked)
@@ -354,7 +356,7 @@ void FDRMDialog::on_actionSingle_Window_Mode_triggered(bool checked)
     {
         if(pServiceTabs==NULL)
         {
-            pServiceTabs = new DreamTabWidget(this);
+            pServiceTabs = new DreamTabWidget(controller, this);
             ui->verticalLayout->addWidget(pServiceTabs);
             connect(pServiceTabs, SIGNAL(audioServiceSelected(int)), controller, SLOT(selectAudioService(int)));
             connect(pServiceTabs, SIGNAL(dataServiceSelected(int)), this, SLOT(OnSelectDataService(int)));
@@ -367,6 +369,17 @@ void FDRMDialog::on_actionSingle_Window_Mode_triggered(bool checked)
         pServiceTabs->show();
         ui->menu_View->menuAction()->setVisible(false);
         ui->action_Multimedia_Dialog->setEnabled(false);
+        //============ try this ========================
+        QWidget* widget = pServiceTabs->currentWidget();
+        if(widget)
+        {
+            widget->parentWidget()->layout()->invalidate();
+            QWidget *parent = widget->parentWidget();
+            while (parent) {
+                parent->adjustSize();
+                parent = parent->parentWidget();
+            }
+        }
     }
     else
     {
@@ -387,6 +400,8 @@ void FDRMDialog::on_actionSingle_Window_Mode_triggered(bool checked)
         // TODO enable multimedia menu option if there is a data service we can decode
     }
     Settings.Put("GUI", "singlewindow", checked);
+    QApplication::processEvents();
+    resize(0,0);
 }
 
 void FDRMDialog::on_actionGeneralSettings_triggered()
