@@ -30,17 +30,117 @@
 \******************************************************************************/
 
 #include "DRMPlot.h"
-#include "../DRMSignalIO.h"
+#include "../DrmReceiver.h"
+#include "waterfallwidget.h"
+#include <QTreeWidget>
+#include <QResizeEvent>
 #include <cmath>
 #include <algorithm>
 #include <QHBoxLayout>
+#include <qwt_legend.h>
+#include <qwt_plot_picker.h>
+#include <qwt_picker_machine.h>
+#include <qwt_symbol.h>
+
+/* Define the FAC/SDC/MSC Symbol size */
+#if QWT_VERSION < 0x060000
+# define FAC_SYMBOL_SIZE 5
+# define SDC_SYMBOL_SIZE 5
+# define MSC_SYMBOL_SIZE 2
+# define ALL_FAC_SYMBOL_SIZE 5
+# define ALL_SDC_SYMBOL_SIZE 4
+# define ALL_MSC_SYMBOL_SIZE 2
+#else
+# define FAC_SYMBOL_SIZE 4
+# define SDC_SYMBOL_SIZE 4
+# define MSC_SYMBOL_SIZE 2
+# define ALL_FAC_SYMBOL_SIZE 4
+# define ALL_SDC_SYMBOL_SIZE 4
+# define ALL_MSC_SYMBOL_SIZE 2
+#endif
+
+/* Window margin for chart */
+#define WINDOW_MARGIN 10
+
+/* Sometime between Qwt version some name may change, we fix this */
+#if QWT_VERSION < 0x050200
+# define LOWERBOUND lBound
+# define UPPERBOUND hBound
+#else
+# define LOWERBOUND lowerBound
+# define UPPERBOUND upperBound
+#endif
+#if QWT_VERSION < 0x060000
+# define SETDATA setData
+#else
+# define SETDATA setSamples
+#endif
+#if QWT_VERSION < 0x060100
+# define SETMAJORPEN setMajPen
+# define SETMINORPEN setMinPen
+#else
+# define SETMAJORPEN setMajorPen
+# define SETMINORPEN setMinorPen
+#endif
+
+/* Set workaround flag for Qwt version 5.0.0 and 5.0.1 */
+/* QwtPlotCurve::Xfy seems broken on these versions */
+#if QWT_VERSION < 0x050002
+# define QWT_WORKAROUND_XFY
+#endif
+
+
+/* Define the plot color profiles */
+/* BLUEWHITE */
+#define BLUEWHITE_MAIN_PEN_COLOR_PLOT			Qt::blue
+#define BLUEWHITE_MAIN_PEN_COLOR_CONSTELLATION	Qt::blue
+#define BLUEWHITE_BCKGRD_COLOR_PLOT				Qt::white
+#define BLUEWHITE_MAIN_GRID_COLOR_PLOT			Qt::gray
+#define BLUEWHITE_SPEC_LINE1_COLOR_PLOT			Qt::red
+#define BLUEWHITE_SPEC_LINE2_COLOR_PLOT			Qt::black
+#define BLUEWHITE_PASS_BAND_COLOR_PLOT			QColor(192, 192, 255)
+
+/* GREENBLACK */
+#define GREENBLACK_MAIN_PEN_COLOR_PLOT			Qt::green
+#define GREENBLACK_MAIN_PEN_COLOR_CONSTELLATION	Qt::red
+#define GREENBLACK_BCKGRD_COLOR_PLOT			Qt::black
+#define GREENBLACK_MAIN_GRID_COLOR_PLOT			QColor(128, 0, 0)
+#define GREENBLACK_SPEC_LINE1_COLOR_PLOT		Qt::yellow
+#define GREENBLACK_SPEC_LINE2_COLOR_PLOT		Qt::blue
+#define GREENBLACK_PASS_BAND_COLOR_PLOT			QColor(0, 96, 0)
+
+/* BLACKGREY */
+#define BLACKGREY_MAIN_PEN_COLOR_PLOT			Qt::black
+#define BLACKGREY_MAIN_PEN_COLOR_CONSTELLATION	Qt::green
+#define BLACKGREY_BCKGRD_COLOR_PLOT				Qt::gray
+#define BLACKGREY_MAIN_GRID_COLOR_PLOT			Qt::white
+#define BLACKGREY_SPEC_LINE1_COLOR_PLOT			Qt::blue
+#define BLACKGREY_SPEC_LINE2_COLOR_PLOT			Qt::yellow
+#define BLACKGREY_PASS_BAND_COLOR_PLOT			QColor(128, 128, 128)
+
+
+/* Maximum and minimum values of x-axis of input spectrum plots */
+#define MIN_VAL_INP_SPEC_Y_AXIS_DB				((double) -120.0)
+#define MAX_VAL_INP_SPEC_Y_AXIS_DB				((double) 0.0)
+
+/* Maximum and minimum values of x-axis of input PSD (shifted) */
+#define MIN_VAL_SHIF_PSD_Y_AXIS_DB				((double) -85.0)
+#define MAX_VAL_SHIF_PSD_Y_AXIS_DB				((double) -35.0)
+
+/* Maximum and minimum values of x-axis of SNR spectrum */
+#define MIN_VAL_SNR_SPEC_Y_AXIS_DB				((double) 0.0)
+#define MAX_VAL_SNR_SPEC_Y_AXIS_DB				((double) 35.0)
+
+/* Definitions ****************************************************************/
+#define GUI_CONTROL_UPDATE_WATERFALL			100	/* Milliseconds */
 
 /* Implementation *************************************************************/
-CDRMPlot::CDRMPlot(QWidget* parent, QwtPlot* SuppliedPlot) :
+CDRMPlot::CDRMPlot(QWidget* parent, QwtPlot* SuppliedPlot, ReceiverController* rc) :
+    controller(rc),
 	SuppliedPlot(SuppliedPlot), DialogPlot(NULL), bActive(FALSE),
 	CurCharType(NONE_OLD), InitCharType(NONE_OLD),
 	eLastSDCCodingScheme((ECodScheme)-1), eLastMSCCodingScheme((ECodScheme)-1),
-	bLastAudioDecoder(FALSE), pDRMRec(NULL),
+    bLastAudioDecoder(FALSE), pDRMRec(rc->getReceiver()),
     waterfallWidget(NULL), iAudSampleRate(0), iSigSampleRate(0),
 	iLastXoredSampleRate(0), iLastChanMode(-1)
 {
@@ -169,7 +269,10 @@ CDRMPlot::~CDRMPlot()
 
 void CDRMPlot::UpdateAnalogBWMarker()
 {
-	if (CurCharType == INPUT_SIG_PSD_ANALOG)
+    if(pDRMRec==NULL)
+        return;
+
+    if (CurCharType == INPUT_SIG_PSD_ANALOG)
 	{
 		_REAL rCenterFreq, rBandwidth;
 		/* Get data and parameters from modules */
@@ -183,7 +286,9 @@ void CDRMPlot::UpdateAnalogBWMarker()
 
 void CDRMPlot::OnTimerChart()
 {
-	CParameter& Parameters = *pDRMRec->GetParameters();
+    if(pDRMRec==NULL)
+        return;
+    CParameter& Parameters = *pDRMRec->GetParameters();
 	/* Update only performed when running */
 	if (Parameters.eRunState != CParameter::RUNNING)
 		return;
@@ -661,11 +766,11 @@ void CDRMPlot::SetupAvIR()
 	plot->setAxisTitle(QwtPlot::yLeft, tr("IR [dB]"));
 
 	/* Curves color */
-	curve1.setPen(QPen(SpecLine1ColorPlot, 1, MARKER_STYLE));
-	curve2.setPen(QPen(SpecLine1ColorPlot, 1, MARKER_STYLE));
-	curve3.setPen(QPen(SpecLine2ColorPlot, 1, MARKER_STYLE));
-	curve4.setPen(QPen(SpecLine2ColorPlot, 1, MARKER_STYLE));
-	curve5.setPen(QPen(SpecLine1ColorPlot, 1, MARKER_STYLE));
+    curve1.setPen(QPen(SpecLine1ColorPlot, 1, Qt::DashLine));
+    curve2.setPen(QPen(SpecLine1ColorPlot, 1, Qt::DashLine));
+    curve3.setPen(QPen(SpecLine2ColorPlot, 1, Qt::DashLine));
+    curve4.setPen(QPen(SpecLine2ColorPlot, 1, Qt::DashLine));
+    curve5.setPen(QPen(SpecLine1ColorPlot, 1, Qt::DashLine));
 	main1curve.setPen(QPen(MainPenColorPlot, 2, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
 
 	/* Curves title */
@@ -1017,7 +1122,7 @@ void CDRMPlot::SetupPSD()
 	curve1.SETDATA(dX, dY, 2);
 
 	/* Insert line for DC carrier */
-	curve1.setPen(QPen(SpecLine1ColorPlot, 1, MARKER_STYLE));
+    curve1.setPen(QPen(SpecLine1ColorPlot, 1, Qt::DashLine));
 	curve1.attach(plot);
 
 	/* Curve color */
@@ -1067,7 +1172,7 @@ void CDRMPlot::SetupInpSpec()
 		MAX_VAL_INP_SPEC_Y_AXIS_DB);
 
 	/* Insert line for DC carrier */
-	curve1.setPen(QPen(SpecLine1ColorPlot, 1, MARKER_STYLE));
+    curve1.setPen(QPen(SpecLine1ColorPlot, 1, Qt::DashLine));
 	curve1.attach(plot);
 
 	/* Curve color */
@@ -1126,7 +1231,7 @@ void CDRMPlot::SetupInpPSD(_BOOLEAN bAnalog)
 	}
 
 	/* Insert line for DC carrier */
-	curve1.setPen(QPen(SpecLine1ColorPlot, 1, MARKER_STYLE));
+    curve1.setPen(QPen(SpecLine1ColorPlot, 1, Qt::DashLine));
 	curve1.attach(plot);
 
 	/* Curve color */
@@ -1634,4 +1739,14 @@ void CDRMPlot::AddWhatsThisHelpChar(const ECharType NCharType)
 
 	/* Main plot */
 	plot->setWhatsThis(strCurPlotHelp);
+}
+
+void QwtPlotDialog::resizeEvent(QResizeEvent *e)
+{
+    QRect rf(0, 0, e->size().width(), e->size().height());
+    Frame->setGeometry(rf);
+    QRect rp(rf.x()+WINDOW_BORDER, rf.y()+WINDOW_BORDER,
+        rf.width()-WINDOW_BORDER*2,
+        rf.height()-WINDOW_BORDER*2);
+    Plot->setGeometry(rp);
 }

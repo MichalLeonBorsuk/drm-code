@@ -2,6 +2,7 @@
 #include "ui_audiodetailwidget.h"
 #include <../util-QT/Util.h>
 #include <../tables/TableFAC.h>
+#include <../DrmReceiver.h>
 #include "DRMPlot.h"
 #include <QFileDialog>
 #ifdef QT_QUICK_LIB
@@ -9,10 +10,10 @@
 # include <QQuickItem>
 #endif
 
-AudioDetailWidget::AudioDetailWidget(CDRMReceiver* prx, QWidget *parent) :
+AudioDetailWidget::AudioDetailWidget(ReceiverController* rc, QWidget *parent) :
     QWidget(parent),
     ui(new Ui::AudioDetailWidget),short_id(-1),
-    engineeringMode(false),pMainPlot(NULL),pDRMReceiver(prx),iPlotStyle(0)
+    engineeringMode(false),pMainPlot(NULL),controller(rc),iPlotStyle(0)
 {
     ui->setupUi(this);
     QSizePolicy sizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
@@ -54,8 +55,7 @@ void AudioDetailWidget::setEngineering(bool eng)
     {
         if(pMainPlot==NULL)
         {
-            pMainPlot = new CDRMPlot(NULL, ui->plot);
-            pMainPlot->SetRecObj(pDRMReceiver);
+            pMainPlot = new CDRMPlot(NULL, ui->plot, controller);
             pMainPlot->SetPlotStyle(iPlotStyle);
             pMainPlot->SetupChart(CDRMPlot::AUDIO_SPECTRUM);
         }
@@ -127,13 +127,13 @@ void AudioDetailWidget::on_buttonListen_clicked()
 void AudioDetailWidget::on_mute_stateChanged(int state)
 {
     /* Set parameter in working thread module */
-    pDRMReceiver->GetWriteData()->MuteAudio(state == Qt::Checked);
+    controller->getReceiver()->GetWriteData()->MuteAudio(state == Qt::Checked);
 }
 
 void AudioDetailWidget::on_reverb_stateChanged(int state)
 {
     /* Set parameter in working thread module */
-    pDRMReceiver->GetAudSorceDec()->SetReverbEffect(state == Qt::Checked);
+    controller->getReceiver()->GetAudSorceDec()->SetReverbEffect(state == Qt::Checked);
 }
 
 void AudioDetailWidget::on_save_stateChanged(int state)
@@ -152,7 +152,7 @@ void AudioDetailWidget::on_save_stateChanged(int state)
         if (!strFileName.isEmpty())
         {
             string s = strFileName.toUtf8().constData();
-            pDRMReceiver->GetWriteData()->StartWriteWaveFile(s);
+            controller->getReceiver()->GetWriteData()->StartWriteWaveFile(s);
         }
         else
         {
@@ -161,7 +161,7 @@ void AudioDetailWidget::on_save_stateChanged(int state)
         }
     }
     else
-        pDRMReceiver->GetWriteData()->StopWriteWaveFile();
+        controller->getReceiver()->GetWriteData()->StopWriteWaveFile();
 }
 
 void AudioDetailWidget::setPlotStyle(int n)

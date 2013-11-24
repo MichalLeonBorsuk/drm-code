@@ -35,16 +35,12 @@ private slots:
 
 signals:
     void noOfIterationsChanged(int);
-    void TimeLinear();
-    void TimeWiener();
-    void FrequencyLinear();
-    void FrequencyDft();
-    void FrequencyWiener();
-    void TiSyncEnergy();
-    void TiSyncFirstPeak();
-    void FlipSpectrum(int);
-    void RecFilter(int);
-    void ModiMetric(int);
+    void timeIntChanged(int);
+    void freqIntChanged(int);
+    void timeSyncChanged(int);
+    void flipSpectrum(bool);
+    void recFilter(bool);
+    void modiMetric(bool);
 };
 
 #endif // DRMOPTIONS_H

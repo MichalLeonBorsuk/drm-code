@@ -50,6 +50,7 @@
 
 /* Classes ********************************************************************/
 
+class ReceiverController;
 
 /* AMSS dialog -------------------------------------------------------------- */
 class CAMSSDlg : public CWindow, public Ui_CAMSSDlgBase
@@ -80,12 +81,11 @@ class AnalogDemDlg : public CWindow, public Ui_AMMainWindow
 	Q_OBJECT
 
 public:
-	AnalogDemDlg(CDRMReceiver&, CSettings&, CFileMenu*, CSoundCardSelMenu*,
+    AnalogDemDlg(ReceiverController*, CSettings&, CFileMenu*, CSoundCardSelMenu*,
 	QWidget* parent = 0);
 
 protected:
-	CDRMReceiver&		DRMReceiver;
-
+    ReceiverController* controller;
 	QTimer				Timer;
 	QTimer				TimerPLLPhaseDial;
 	QTimer				TimerClose;

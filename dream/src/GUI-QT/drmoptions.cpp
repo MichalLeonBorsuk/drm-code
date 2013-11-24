@@ -1,5 +1,6 @@
 #include "drmoptions.h"
 #include "ui_drmoptions.h"
+#include <QButtonGroup>
 
 DRMOptions::DRMOptions(QWidget *parent) :
     QWidget(parent),
@@ -11,28 +12,23 @@ DRMOptions::DRMOptions(QWidget *parent) :
     ui->SliderNoOfIterations->setValue(0);
     ui->TextNumOfIterations->setText(tr("MLC: Number of Iterations: ") + QString().setNum(0));
 
-    connect(ui->RadioButtonTiLinear, SIGNAL(clicked()), this, SIGNAL(TimeLinear()));
-    connect(ui->RadioButtonTiWiener, SIGNAL(clicked()),
-            this, SIGNAL(TimeWiener()));
-    connect(ui->RadioButtonFreqLinear, SIGNAL(clicked()),
-            this, SIGNAL(FrequencyLinear()));
-    connect(ui->RadioButtonFreqDFT, SIGNAL(clicked()),
-            this, SIGNAL(FrequencyDft()));
-    connect(ui->RadioButtonFreqWiener, SIGNAL(clicked()),
-            this, SIGNAL(FrequencyWiener()));
-    connect(ui->RadioButtonTiSyncEnergy, SIGNAL(clicked()),
-            this, SIGNAL(TiSyncEnergy()));
-    connect(ui->RadioButtonTiSyncFirstPeak, SIGNAL(clicked()),
-            this, SIGNAL(TiSyncFirstPeak()));
+    QButtonGroup* ti = new QButtonGroup(this);
+    ti->addButton(ui->RadioButtonTiLinear, CChannelEstimation::TLINEAR);
+    ti->addButton(ui->RadioButtonTiWiener, CChannelEstimation::TWIENER);
+    connect(ti, SIGNAL(buttonClicked(int)), this, SIGNAL(timeIntChanged(int)));
+    QButtonGroup* fr = new QButtonGroup(this);
+    fr->addButton(ui->RadioButtonFreqLinear, CChannelEstimation::FLINEAR);
+    fr->addButton(ui->RadioButtonFreqDFT, CChannelEstimation::FDFTFILTER);
+    fr->addButton(ui->RadioButtonFreqWiener, CChannelEstimation::FWIENER);
+    connect(fr, SIGNAL(buttonClicked(int)), this, SIGNAL(freqIntChanged(int)));
+    QButtonGroup* ts = new QButtonGroup(this);
+    ts->addButton(ui->RadioButtonTiSyncEnergy, CTimeSyncTrack::TSENERGY);
+    ts->addButton(ui->RadioButtonTiSyncFirstPeak, CTimeSyncTrack::TSFIRSTPEAK);
+    connect(ts, SIGNAL(buttonClicked(int)), this, SIGNAL(timeSyncChanged(int)));
     /* Check boxes */
-    connect(ui->CheckBoxFlipSpec, SIGNAL(stateChanged(int)),
-            this, SIGNAL(FlipSpectrum(int)));
-    connect(ui->CheckBoxRecFilter, SIGNAL(stateChanged(int)),
-            this, SIGNAL(RecFilter(int)));
-    connect(ui->CheckBoxModiMetric, SIGNAL(stateChanged(int)),
-            this, SIGNAL(ModiMetric(int)));
-
-
+    connect(ui->CheckBoxFlipSpec, SIGNAL(clicked(bool)), this, SIGNAL(flipSpectrum(bool)));
+    connect(ui->CheckBoxRecFilter, SIGNAL(clicked(bool)), this, SIGNAL(recFilter(bool)));
+    connect(ui->CheckBoxModiMetric, SIGNAL(clicked(bool)), this, SIGNAL(modiMetric(bool)));
 }
 
 DRMOptions::~DRMOptions()

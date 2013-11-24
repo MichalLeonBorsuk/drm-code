@@ -32,145 +32,14 @@
 #ifndef __DRMPLOT_QWT5_H
 #define __DRMPLOT_QWT5_H
 
-/* Qt includes */
 #include <QTimer>
-#include <QObject>
 #include <QDialog>
-#include <QResizeEvent>
-#include <QHideEvent>
-#include <QMouseEvent>
-#include <QShowEvent>
-#include <QIcon>
-#include <QTreeWidget>
-
-/* Qwt includes */
-#include <qwt_global.h>
-#if QWT_VERSION < 0x050000
-# error QWT_VERSION < 0x050000
-#endif
-#include <qwt_legend.h>
 #include <qwt_plot.h>
-#include <qwt_plot_canvas.h>
 #include <qwt_plot_curve.h>
 #include <qwt_plot_grid.h>
-#include <qwt_plot_layout.h>
-#include <qwt_plot_marker.h>
-#include <qwt_plot_picker.h>
-#include <qwt_scale_draw.h>
-#include <qwt_symbol.h>
-#if QWT_VERSION >= 0x060000
-# include <qwt_picker_machine.h>
-#endif
-
-/* Other includes */
-#include "../util/Vector.h"
-#include "../Parameter.h"
-#include "../DrmReceiver.h"
-#include "waterfallwidget.h"
-
-
-/* Definitions ****************************************************************/
-#define GUI_CONTROL_UPDATE_WATERFALL			100	/* Milliseconds */
-
-
-/* Define the plot color profiles */
-/* BLUEWHITE */
-#define BLUEWHITE_MAIN_PEN_COLOR_PLOT			Qt::blue
-#define BLUEWHITE_MAIN_PEN_COLOR_CONSTELLATION	Qt::blue
-#define BLUEWHITE_BCKGRD_COLOR_PLOT				Qt::white
-#define BLUEWHITE_MAIN_GRID_COLOR_PLOT			Qt::gray
-#define BLUEWHITE_SPEC_LINE1_COLOR_PLOT			Qt::red
-#define BLUEWHITE_SPEC_LINE2_COLOR_PLOT			Qt::black
-#define BLUEWHITE_PASS_BAND_COLOR_PLOT			QColor(192, 192, 255)
-
-/* GREENBLACK */
-#define GREENBLACK_MAIN_PEN_COLOR_PLOT			Qt::green
-#define GREENBLACK_MAIN_PEN_COLOR_CONSTELLATION	Qt::red
-#define GREENBLACK_BCKGRD_COLOR_PLOT			Qt::black
-#define GREENBLACK_MAIN_GRID_COLOR_PLOT			QColor(128, 0, 0)
-#define GREENBLACK_SPEC_LINE1_COLOR_PLOT		Qt::yellow
-#define GREENBLACK_SPEC_LINE2_COLOR_PLOT		Qt::blue
-#define GREENBLACK_PASS_BAND_COLOR_PLOT			QColor(0, 96, 0)
-
-/* BLACKGREY */
-#define BLACKGREY_MAIN_PEN_COLOR_PLOT			Qt::black
-#define BLACKGREY_MAIN_PEN_COLOR_CONSTELLATION	Qt::green
-#define BLACKGREY_BCKGRD_COLOR_PLOT				Qt::gray
-#define BLACKGREY_MAIN_GRID_COLOR_PLOT			Qt::white
-#define BLACKGREY_SPEC_LINE1_COLOR_PLOT			Qt::blue
-#define BLACKGREY_SPEC_LINE2_COLOR_PLOT			Qt::yellow
-#define BLACKGREY_PASS_BAND_COLOR_PLOT			QColor(128, 128, 128)
-
-
-/* Maximum and minimum values of x-axis of input spectrum plots */
-#define MIN_VAL_INP_SPEC_Y_AXIS_DB				((double) -120.0)
-#define MAX_VAL_INP_SPEC_Y_AXIS_DB				((double) 0.0)
-
-/* Maximum and minimum values of x-axis of input PSD (shifted) */
-#define MIN_VAL_SHIF_PSD_Y_AXIS_DB				((double) -85.0)
-#define MAX_VAL_SHIF_PSD_Y_AXIS_DB				((double) -35.0)
-
-/* Maximum and minimum values of x-axis of SNR spectrum */
-#define MIN_VAL_SNR_SPEC_Y_AXIS_DB				((double) 0.0)
-#define MAX_VAL_SNR_SPEC_Y_AXIS_DB				((double) 35.0)
-
-
-/* Define the FAC/SDC/MSC Symbol size */
-#if QWT_VERSION < 0x060000
-# define FAC_SYMBOL_SIZE 5
-# define SDC_SYMBOL_SIZE 5
-# define MSC_SYMBOL_SIZE 2
-# define ALL_FAC_SYMBOL_SIZE 5
-# define ALL_SDC_SYMBOL_SIZE 4
-# define ALL_MSC_SYMBOL_SIZE 2
-#else
-# define FAC_SYMBOL_SIZE 4
-# define SDC_SYMBOL_SIZE 4
-# define MSC_SYMBOL_SIZE 2
-# define ALL_FAC_SYMBOL_SIZE 4
-# define ALL_SDC_SYMBOL_SIZE 4
-# define ALL_MSC_SYMBOL_SIZE 2
-#endif
-
-
-/* Define the style of marker */
-#define MARKER_STYLE Qt::DashLine
-
-
-/* Define the plot font size */
-#define PLOT_FONT_SIZE 8
-
-
-/* Sometime between Qwt version some name may change, we fix this */
-#if QWT_VERSION < 0x050200
-# define LOWERBOUND lBound
-# define UPPERBOUND hBound
-#else
-# define LOWERBOUND lowerBound
-# define UPPERBOUND upperBound
-#endif
-#if QWT_VERSION < 0x060000
-# define SETDATA setData
-#else
-# define SETDATA setSamples
-#endif
-#if QWT_VERSION < 0x060100
-# define SETMAJORPEN setMajPen
-# define SETMINORPEN setMinPen
-#else
-# define SETMAJORPEN setMajorPen
-# define SETMINORPEN setMinorPen
-#endif
-
-/* Set workaround flag for Qwt version 5.0.0 and 5.0.1 */
-/* QwtPlotCurve::Xfy seems broken on these versions */
-#if QWT_VERSION < 0x050002
-# define QWT_WORKAROUND_XFY
-#endif
-
-
-/* Window margin for chart */
-#define WINDOW_MARGIN 10
+#include <../Parameter.h>
+#include <../util/Vector.h>
+#include "receivercontroller.h"
 
 /* Window size for standalone chart */
 #define WINDOW_CHART_WIDTH 256
@@ -179,9 +48,17 @@
 /* Window border for standalone chart */
 #define WINDOW_BORDER 1
 
+/* Define the plot font size */
+#define PLOT_FONT_SIZE 8
 
 /* Classes ********************************************************************/
 
+class WaterfallWidget;
+class CDRMReceiver;
+class QTreeWidget;
+class QResizeEvent;
+class QwtPlotPicker;
+class QwtLegend;
 
 /* This class is needed to handle events for standalone window chart */
 class QwtPlotDialog : public QDialog
@@ -189,7 +66,7 @@ class QwtPlotDialog : public QDialog
 	Q_OBJECT
 
 public:
-	QwtPlotDialog(QWidget* parent) : QDialog(parent)
+    QwtPlotDialog(QWidget* parent) : QDialog(parent)
 	{
 		setWindowFlags(Qt::Window);
 		resize(WINDOW_CHART_WIDTH, WINDOW_CHART_HEIGHT);
@@ -197,9 +74,8 @@ public:
 		Frame->setFrameStyle(QFrame::Panel|QFrame::Sunken);
 		Frame->setLineWidth(WINDOW_BORDER);
 		Plot = new QwtPlot(Frame);
-		/*fprintf(stderr, "QwtPlotDialog()\n");*/
 	}
-	~QwtPlotDialog() { /*fprintf(stderr, "~QwtPlotDialog()\n");*/ }
+    ~QwtPlotDialog() { }
 	QwtPlot *GetPlot() { return Plot; }
 	void show() { QDialog::show(); emit activate(); }
 	void hide() { emit deactivate(); QDialog::hide(); }
@@ -208,22 +84,12 @@ protected:
 	QFrame *Frame;
 	QwtPlot *Plot;
 	void reject() { emit deactivate(); QDialog::reject(); }
-	void resizeEvent(QResizeEvent *e)
-	{
-		QRect rf(0, 0, e->size().width(), e->size().height());
-		Frame->setGeometry(rf);
-		QRect rp(rf.x()+WINDOW_BORDER, rf.y()+WINDOW_BORDER,
-			rf.width()-WINDOW_BORDER*2,
-			rf.height()-WINDOW_BORDER*2);
-		Plot->setGeometry(rp);
-	}
+    void resizeEvent(QResizeEvent *e);
 
 signals:
 	void activate();
 	void deactivate();
 };
-
-
 
 class CDRMPlot : public QObject
 {
@@ -251,13 +117,10 @@ public:
 		NONE_OLD = 16 /* None must always be the last element! (see settings) */
 	};
 
-	CDRMPlot(QWidget*, QwtPlot*);
+    CDRMPlot(QWidget*, QwtPlot*, ReceiverController*);
 	~CDRMPlot();
 
 	QwtPlot         *plot;
-
-	/* This function has to be called before chart can be used! */
-	void SetRecObj(CDRMReceiver* pNDRMRec) {pDRMRec = pNDRMRec;}
 
 	void SetupChart(const ECharType eNewType);
 	ECharType GetChartType() const { return CurCharType; }
@@ -322,6 +185,7 @@ protected:
 
 	void AddWhatsThisHelpChar(const ECharType NCharType);
 
+    ReceiverController* controller;
 	QwtPlot         *SuppliedPlot;
 	QwtPlotDialog   *DialogPlot;
 

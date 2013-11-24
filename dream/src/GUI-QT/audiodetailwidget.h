@@ -9,6 +9,8 @@ class AudioDetailWidget;
 }
 
 class CDRMPlot;
+class ReceiverController;
+
 #ifdef QT_QUICK_LIB
 class QQuickView;
 class QQuickItem;
@@ -21,7 +23,7 @@ class AudioDetailWidget : public QWidget
     Q_OBJECT
 
 public:
-    explicit AudioDetailWidget(CDRMReceiver*, QWidget * = 0);
+    explicit AudioDetailWidget(ReceiverController*, QWidget * = 0);
     ~AudioDetailWidget();
     void updateDisplay(int, const CService&);
     void setEngineering(bool);
@@ -37,7 +39,7 @@ private:
     int short_id;
     bool engineeringMode;
     CDRMPlot *pMainPlot;
-    CDRMReceiver* pDRMReceiver;
+    ReceiverController* controller;
     int iPlotStyle;
 #ifdef QT_QUICK_LIB
     QQuickView *view;

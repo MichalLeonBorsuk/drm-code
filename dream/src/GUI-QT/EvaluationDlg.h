@@ -51,12 +51,12 @@ class systemevalDlg : public CWindow, public Ui_SystemEvaluationWindow
 	Q_OBJECT
 
 public:
-    systemevalDlg(CDRMReceiver&, CSettings&, QWidget* parent = 0);
+    systemevalDlg(ReceiverController*, CSettings&, QWidget* parent = 0);
 	virtual ~systemevalDlg();
     void            connectController(ReceiverController*);
 
 protected:
-    CDRMReceiver&   DRMReceiver;
+    ReceiverController* controller;
     CParameter&     Parameters;
 
 	QTimer			Timer;
@@ -105,9 +105,9 @@ signals:
 	void startLogging();
 	void stopLogging();
     void saveAudio(const string&);
-    void setTimeInt(CChannelEstimation::ETypeIntTime);
-    void setFreqInt(CChannelEstimation::ETypeIntFreq);
-    void setTiSyncTracType(CTimeSyncTrack::ETypeTiSyncTrac);
+    void setTimeInt(int);
+    void setFreqInt(int);
+    void setTiSyncTracType(int);
     void setNumMSCMLCIterations(int);
     void setFlippedSpectrum(bool);
     void setReverbEffect(bool);
