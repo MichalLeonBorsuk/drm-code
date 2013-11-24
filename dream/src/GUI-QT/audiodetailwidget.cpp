@@ -5,10 +5,6 @@
 #include <../DrmReceiver.h>
 #include "DRMPlot.h"
 #include <QFileDialog>
-#ifdef QT_QUICK_LIB
-# include <QQuickView>
-# include <QQuickItem>
-#endif
 
 AudioDetailWidget::AudioDetailWidget(ReceiverController* rc, QWidget *parent) :
     QWidget(parent),
@@ -17,29 +13,10 @@ AudioDetailWidget::AudioDetailWidget(ReceiverController* rc, QWidget *parent) :
 {
     ui->setupUi(this);
     QSizePolicy sizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-#ifdef QT_QUICK_LIB
-    view = new QQuickView();
-    QWidget* widget = QWidget::createWindowContainer(view, ui->userMode);
-    view->setSource(QUrl("qrc:/qml/usermodeaudiodetail.qml"));
-    if(view->status()!=QQuickView::Ready)
-        qDebug("can't initialise view");
-    widget->setMinimumSize(500,100);
-    widget->setSizePolicy(sizePolicy);
-    userModeDisplay = view->rootObject();
-#else
-    description = new QLabel(ui->userMode);
-    description->setMinimumSize(500,100);
-    description->setSizePolicy(sizePolicy);
-#endif
 }
 
 AudioDetailWidget::~AudioDetailWidget()
 {
-#ifdef QT_QUICK_LIB
-    delete view;
-#else
-    delete description;
-#endif
     delete ui;
 }
 
@@ -69,13 +46,9 @@ void AudioDetailWidget::setEngineering(bool eng)
     update();
 }
 
-void AudioDetailWidget::setDescription(const QString& desc)
+void AudioDetailWidget::setTextMessage(const QString& s)
 {
-#ifdef QT_QUICK_LIB
-    userModeDisplay->setProperty("text", desc);
-#else
-    description->setText(desc);
-#endif
+    ui->textMessage->setText(s);
 }
 
 void AudioDetailWidget::setRxStatus(int sid, ETypeRxStatus s)
