@@ -828,7 +828,6 @@ void CWriteIQFile::OpenFile(CParameter& Parameters)
     struct tm* gmtCur = gmtime(&ltime);
 
     stringstream filename;
-    filename << Parameters.GetDataDirectory();
     filename << Parameters.sReceiverID << "_";
     filename << setw(4) << setfill('0') << gmtCur->tm_year + 1900 << "-" << setw(2) << setfill('0')<< gmtCur->tm_mon + 1;
     filename << "-" << setw(2) << setfill('0')<< gmtCur->tm_mday << "_";
