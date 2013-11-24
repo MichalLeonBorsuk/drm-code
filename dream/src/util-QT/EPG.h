@@ -39,7 +39,7 @@
 class EPG
 {
   public:
-    EPG (CParameter&);
+    EPG (CParameter&, const string&);
     virtual ~ EPG ()
     {
 	saveChannels (servicesFilename);

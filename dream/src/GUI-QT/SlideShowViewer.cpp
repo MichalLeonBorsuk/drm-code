@@ -39,6 +39,11 @@ SlideShowViewer::SlideShowViewer(CSettings& Settings, QWidget* parent):
 {
     setupUi(this);
 
+    string p = Settings.Get(
+                "Receiver", "datafilesdirectory", string(DEFAULT_DATA_FILES_DIRECTORY));
+
+    strCurrentSavePath = QString::fromUtf8((p+PATH_SEPARATOR+"MOT").c_str());
+
     /* Update time for color LED */
     LEDStatus->SetUpdateTime(1000);
 
@@ -136,7 +141,7 @@ void SlideShowViewer::OnSave()
     {
         vecImages[iCurImagePos].save(strFilename);
 
-        strCurrentSavePath = QFileInfo(strFilename).path() + "/";
+        strCurrentSavePath = QFileInfo(strFilename).path() + PATH_SEPARATOR;
     }
 }
 
@@ -151,7 +156,7 @@ void SlideShowViewer::OnSaveAll()
     /* Check if user not hit the cancel button */
     if (!strDirectory.isEmpty())
     {
-        strCurrentSavePath = strDirectory + "/";
+        strCurrentSavePath = strDirectory + PATH_SEPARATOR;
 
         for(size_t i=0; i<vecImages.size(); i++)
             vecImages[i].save(strCurrentSavePath + VerifyFilename(vecImageNames[i]));
@@ -249,7 +254,7 @@ void SlideShowViewer::UpdateButtons()
     for (int i = 0; i < (strTotImages.length() - strNumImage.length()); i++)
         strSep += " ";
 
-    LabelCurPicNum->setText(strSep + strNumImage + "/" + strTotImages);
+    LabelCurPicNum->setText(strSep + strNumImage + PATH_SEPARATOR + strTotImages);
 
     /* If no picture was received, show the following text */
     if (iCurImagePos < 0)
@@ -258,11 +263,6 @@ void SlideShowViewer::UpdateButtons()
         Image->setText("<center>" + tr("MOT Slideshow Viewer") + "</center>");
         Image->setToolTip("");
     }
-}
-
-void SlideShowViewer::setSavePath(const QString& s)
-{
-    strCurrentSavePath = s;
 }
 
 void SlideShowViewer::setStatus(int i, ETypeRxStatus s)

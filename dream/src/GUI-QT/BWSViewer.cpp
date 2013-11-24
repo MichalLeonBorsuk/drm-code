@@ -55,6 +55,9 @@ BWSViewer::BWSViewer(CDRMReceiver& rec, CSettings& Settings, QWidget* parent):
     iLastServiceID(0), iCurrentDataServiceID(0), bLastServiceValid(false), iLastValidServiceID(0)
 {
     setupUi(this);
+    string sDataFilesDirectory = Settings.Get(
+                "Receiver", "datafilesdirectory", string(DEFAULT_DATA_FILES_DIRECTORY));
+    strDataDir = QString::fromUtf8(sDataFilesDirectory.c_str());
 
     /* Setup webView */
     webView->page()->setNetworkAccessManager(&nam);
@@ -413,10 +416,7 @@ void BWSViewer::SaveMOTObject(const QString& strObjName,
 {
     const CVector<_BYTE>& vecbRawData = obj.Body.vecData;
 
-    QString strCurrentSavePath;
-
-    /* Set up save path */
-    SetupSavePath(strCurrentSavePath);
+    QString strCurrentSavePath = savePath();
 
     /* Generate safe filename */
     QString strFileName = strCurrentSavePath + VerifyHtmlPath(strObjName);
@@ -444,11 +444,10 @@ void BWSViewer::SaveMOTObject(const QString& strObjName,
 	}
 }
 
-void BWSViewer::SetupSavePath(QString& strSavePath)
+QString BWSViewer::savePath()
 {
     /* Append service ID to MOT save path */
-    strSavePath = strSavePath.setNum(iCurrentDataServiceID, 16).toUpper().rightJustified(8, '0');
-    strSavePath = QString::fromUtf8((*receiver.GetParameters()).GetDataDirectory("MOT").c_str()) + strSavePath + "/";
+    return strDataDir+QString("/MOT/%2/").arg(iCurrentDataServiceID, 16).toUpper();
 }
 
 void BWSViewer::GetServiceParams(uint32_t* iServiceID, bool* bServiceValid, QString* strLabel, ETypeRxStatus* eStatus)

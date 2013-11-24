@@ -41,7 +41,6 @@ public:
     SlideShowViewer(CSettings&, QWidget* parent = 0);
     virtual ~SlideShowViewer();
 public slots:
-    void setSavePath(const QString&);
     void setStatus(int, ETypeRxStatus);
     void setServiceInformation(int, CService);
 

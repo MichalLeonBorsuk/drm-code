@@ -132,7 +132,6 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& Settings,
 
     /* Live Schedule window */
     pLiveScheduleDlg = new LiveScheduleDlg(Settings, parents);
-    pLiveScheduleDlg->setSavePath(QString::fromUtf8(DRMReceiver.GetParameters()->GetDataDirectory("AFS").c_str()));
 
     /* Journaline viewer window */
     pJLDlg = new JLViewer(Settings, this);
@@ -141,8 +140,11 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& Settings,
     pSlideShowDlg = new SlideShowViewer(Settings, this);
 
     /* Programme Guide Window */
+    string sDataFilesDirectory = Settings.Get(
+                "Receiver", "datafilesdirectory", string(DEFAULT_DATA_FILES_DIRECTORY));
+
     pEPGDlg = new EPGDlg(Settings, this);
-    pEPGDlg->setDecoder(new EPG(Parameters));
+    pEPGDlg->setDecoder(new EPG(Parameters, sDataFilesDirectory));
 
     /* Evaluation window */
     pSysEvalDlg = new systemevalDlg(DRMReceiver, Settings, this);
@@ -970,19 +972,16 @@ void FDRMDialog::on_action_Multimedia_Dialog_triggered()
             pBWSDlg = new BWSViewer(DRMReceiver, Settings, this);
         //pBWSDlg->setDecoder(DataDecoder);
         //pBWSDlg->setServiceInformation(service);
-        //pBWSDlg->setSavePath(QString::fromUtf8(Parameters.GetDataDirectory("MOT").c_str()));
         pMultimediaWindow = pBWSDlg;
 #endif
         break;
     case DAB_AT_JOURNALINE:
         pJLDlg->setServiceInformation(service, iAudioServiceID);
         pJLDlg->setDecoder(DataDecoder);
-        pJLDlg->setSavePath(QString::fromUtf8(Parameters.GetDataDirectory("Journaline").c_str()));
         pMultimediaWindow = pJLDlg;
         break;
     case DAB_AT_MOTSLIDESHOW:
         pSlideShowDlg->setServiceInformation(shortID, service);
-        pSlideShowDlg->setSavePath(QString::fromUtf8(Parameters.GetDataDirectory("MOT").c_str()));
         pMultimediaWindow = pSlideShowDlg;
         break;
     }

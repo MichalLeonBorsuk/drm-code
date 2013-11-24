@@ -165,7 +165,7 @@ void SlideShowWidget::OnSave()
     {
         pics[iCurImagePos].pic.save(strFilename);
 
-        strCurrentSavePath = QFileInfo(strFilename).path() + "/";
+        strCurrentSavePath = QFileInfo(strFilename).path() + PATH_SEPARATOR;
     }
 }
 
@@ -180,7 +180,7 @@ void SlideShowWidget::OnSaveAll()
     /* Check if user not hit the cancel button */
     if (!strDirectory.isEmpty())
     {
-        strCurrentSavePath = strDirectory + "/";
+        strCurrentSavePath = strDirectory + PATH_SEPARATOR;
 
         for(size_t i=0; i<pics.size(); i++)
             pics[i].pic.save(strCurrentSavePath + VerifyFilename(pics[i].name));
@@ -249,7 +249,7 @@ void SlideShowWidget::UpdateButtons()
     for (int i = 0; i < (strTotImages.length() - strNumImage.length()); i++)
         strSep += " ";
 
-    ui->LabelCurPicNum->setText(strSep + strNumImage + "/" + strTotImages);
+    ui->LabelCurPicNum->setText(strSep + strNumImage + PATH_SEPARATOR + strTotImages);
 
     /* If no picture was received, show the following text */
     if (iCurImagePos < 0)

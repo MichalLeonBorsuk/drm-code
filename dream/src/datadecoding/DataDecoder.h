@@ -80,6 +80,7 @@ class CDataDecoder:public CReceiverModul < _BINARY, _BINARY >
     {
 		return eAppType[iServPacketID];
     }
+    void setDataDirectory(const string& s) { strDataDirectory = s; }
 
   protected:
     class CDataUnit
@@ -111,6 +112,7 @@ class CDataDecoder:public CReceiverModul < _BINARY, _BINARY >
     CJournaline& Journaline;
     CExperiment& Experiment;
     uint32_t iOldJournalineServiceID;
+    string strDataDirectory;
 
     EAppType eAppType[MAX_NUM_PACK_PER_STREAM];
 

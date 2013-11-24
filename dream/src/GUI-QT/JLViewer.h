@@ -43,7 +43,6 @@ public:
     JLViewer(CSettings&, QWidget* parent = 0);
     ~JLViewer();
 public slots:
-    void setSavePath(const QString&);
     void setStatus(int, ETypeRxStatus);
     void setDecoder(CDataDecoder* dec);
     void setServiceInformation(const CService&, uint32_t);
@@ -52,7 +51,7 @@ protected:
     virtual void eventShow(QShowEvent*);
     virtual void eventHide(QHideEvent*);
     QTextDocument document;
-//    QString     strCurrentSavePath;
+    QString       strCurrentSavePath;
 
 private slots:
     void on_actionSave_triggered();
