@@ -269,18 +269,18 @@ void StationsDlg::OnSwitchMode(int m)
         bool bIsDRM = eNewRecMode == RM_DRM;
         /* Store previous columns settings */
         if (eSchedM != CSchedule::SM_NONE)
-        {
             ColumnParamToStr(bIsDRM?strColumnParamdrm:strColumnParamanalog);
-        }
         /* get sorting and filtering behaviour */
         switch (eNewRecMode)
         {
         case RM_DRM:
             schedule.SetSchedMode(CSchedule::SM_DRM);
             break;
-
         case RM_AM:
             schedule.SetSchedMode(CSchedule::SM_ANALOG);
+            break;
+        case RM_FM:
+            schedule.SetSchedMode(CSchedule::SM_NONE); /* TODO */
             break;
         default: // can't happen!
             ;
@@ -306,36 +306,15 @@ void StationsDlg::eventHide(QHideEvent*)
 
 void StationsDlg::eventShow(QShowEvent*)
 {
-    if(schedule.GetSchedMode()==CSchedule::SM_NONE)
-        return; // wait until initialised
-
-	bool ensmeter = false;
-	ensmeter = actionEnable_S_Meter->isChecked();
-	if(ensmeter)
-		EnableSMeter();
-	else
-		DisableSMeter();
-    if(schedule.GetNumberOfStations()==0)
-	{
-        if(QFile::exists(schedule.schedFileName))
-		{
-            LoadSchedule();
-        }
-        else
-        {
-            QMessageBox::information(this, "Dream", tr("The schedule file "
-            " could not be found or contains no data.\n"
-            "No stations can be displayed.\n"
-            "Try to download this file by using the 'Update' menu."),
-            QMessageBox::Ok);
-            actionGetUpdate->setText(tr("&Get Update ..."));
-        }
-    }
-    LoadScheduleView();
-    UpdateTransmissionStatus();
     /* Activate real-time timer when window is shown */
     Timer.start(500 /* twice a second - nyquist for catching minute boundaries */);
-    QTimer::singleShot(1000, this, SLOT(OnTimer()));
+
+    if(actionEnable_S_Meter->isChecked())
+        EnableSMeter();
+    else
+        DisableSMeter();
+
+	QTimer::singleShot(1000, this, SLOT(OnUpdate()));
 }
 
 void StationsDlg::OnTimer()
@@ -355,9 +334,38 @@ void StationsDlg::OnTimer()
 
 	/* reload schedule on minute boundaries */
 	if (ltime % 60 == 0)
-	{
         UpdateTransmissionStatus();
-	}
+}
+
+void StationsDlg::OnUpdate()
+{
+    if (!isVisible())
+        return;
+
+    if (schedule.GetSchedMode()==CSchedule::SM_NONE)
+    {
+	    ListViewStations->clear();
+        return;
+    }
+
+    if (schedule.GetNumberOfStations()==0)
+    {
+        if(QFile::exists(schedule.schedFileName))
+        {
+            LoadSchedule();
+        }
+        else
+        {
+            QMessageBox::information(this, "Dream", tr("The schedule file "
+            " could not be found or contains no data.\n"
+            "No stations can be displayed.\n"
+            "Try to download this file by using the 'Update' menu."),
+            QMessageBox::Ok);
+            actionGetUpdate->setText(tr("&Get Update ..."));
+        }
+    }
+    LoadScheduleView();
+    UpdateTransmissionStatus();
 }
 
 void StationsDlg::LoadSettings()

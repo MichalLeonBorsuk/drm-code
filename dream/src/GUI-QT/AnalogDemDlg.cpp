@@ -191,27 +191,6 @@ void AnalogDemDlg::OnWhatsThis()
 	QWhatsThis::enterWhatsThisMode();
 }
 
-void AnalogDemDlg::on_modeChanged(int value)
-{
-    switch(ERecMode(value))
-    {
-    case RM_DRM:
-        hide();
-        break;
-    case RM_AM:
-        if(isVisible())
-            update();
-        else
-            show();
-        break;
-    case RM_FM:
-        hide();
-        break;
-    case RM_NONE: // wait until working thread starts operating
-        break;
-    }
-}
-
 void AnalogDemDlg::OnSwitchToDRM()
 {
 	emit SwitchMode(RM_DRM);
@@ -415,12 +394,6 @@ void AnalogDemDlg::OnTimer()
 {
     switch(controller->getReceiver()->GetReceiverMode())
 	{
-	case RM_DRM:
-		this->hide();
-		break;
-	case RM_FM:
-		this->hide();
-		break;
 	case RM_AM:
 		/* Carrier frequency of AM signal */
 		ButtonFreqOffset->setText(QString().setNum(
@@ -428,6 +401,8 @@ void AnalogDemDlg::OnTimer()
                 controller->getReceiver()->GetAMDemod()->GetCurMixFreqOffs())
 			, 'f', 2) + " Hz");
 		break;
+	case RM_DRM:
+	case RM_FM:
 	case RM_NONE:
 		break;
 	}

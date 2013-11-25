@@ -184,6 +184,11 @@ void ReceiverController::setMode(int newMode)
     receiver->SetReceiverMode(ERecMode(newMode));
 }
 
+int ReceiverController::getMode() const
+{
+    return currentMode;
+}
+
 void ReceiverController::selectAudioService(int shortId)
 {
     CParameter& Parameters = *receiver->GetParameters();

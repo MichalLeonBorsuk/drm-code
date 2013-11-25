@@ -31,6 +31,7 @@ public:
     explicit ReceiverController(CDRMReceiver*, CSettings&, QObject *parent = 0);
     // TODO - remove this:
     CDRMReceiver* getReceiver() { return receiver; }
+    int getMode() const;
 
 signals:
     void serviceChanged(int, const CService&);

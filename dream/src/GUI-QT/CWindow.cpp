@@ -179,13 +179,22 @@ void CWindow::toggleVisibility()
 	setVisible(!isVisible());
 }
 
+void CWindow::setSettingsTag(const QString& tag)
+{
+//	printf("################################ CWindow::setSettingTag(%s)\n", string(tag.toLocal8Bit()).c_str());
+	settingsTag = tag;
+}
+
 void CWindow::loadWindowGeometry()
 {
 	CWinGeom s;
-	Settings.Get(getSection(), s);
+	Settings.Get(getTagSection(), s);
 	const QRect WinGeom(s.iXPos, s.iYPos, s.iWSize, s.iHSize);
 	if (WinGeom.isValid() && !WinGeom.isEmpty() && !WinGeom.isNull())
+	{
 		setGeometry(WinGeom);
+//		printf("################################ CWindow::loadWindowGeometry(%s): x=%i y=%i w=%i h=%i\n", getSection().c_str(), s.iXPos, s.iYPos, s.iWSize, s.iHSize);
+	}
 }
 void CWindow::saveWindowGeometry()
 {
@@ -195,7 +204,8 @@ void CWindow::saveWindowGeometry()
 	s.iYPos = WinGeom.y();
 	s.iHSize = WinGeom.height();
 	s.iWSize = WinGeom.width();
-	Settings.Put(getSection(), s);
+	Settings.Put(getTagSection(), s);
+//	printf("################################ CWindow::saveWindowGeometry(%s): x=%i y=%i w=%i h=%i\n", getSection().c_str(), s.iXPos, s.iYPos, s.iWSize, s.iHSize);
 }
 
 void CWindow::OnShowWindow(QWidget* window, bool bVisible)
@@ -203,13 +213,13 @@ void CWindow::OnShowWindow(QWidget* window, bool bVisible)
 //	printf("################################ CWindow::OnShowWindow(%s) bVisible=%i\n", getSection().c_str(), bVisible);
 	if (parents.contains(window))
 	{
-		const QString key = QString("visible") + parents[window];
+		const QString key = QString("visible") + settingsTag;
 		if (!bVisible)
 			putSetting(key, isVisible());
 		if (!bVisible || getSetting(key, false))
 		{
-			if (bVisible)
-				loadWindowGeometry();
+//			if (bVisible)
+//				loadWindowGeometry();
 			QMainWindow::setVisible(bVisible);
 		}
 	}
@@ -246,9 +256,13 @@ void CWindow::setVisible(bool visible)
 	}
 }
 
+string CWindow::getTagSection(const bool bCommon) const
+{
+	return getSection(bCommon) + string(settingsTag.toLocal8Bit());
+}
 string CWindow::getSection(const bool bCommon) const
 {
-	return bCommon ? string("Dialog") : string(windowName.toLocal8Bit() + " Dialog");
+	return bCommon ? string("GUI") : string(windowName.toLocal8Bit() + " Dialog");
 }
 QString CWindow::getSetting(const QString& key, const QString& defvalue, const bool bCommon)
 {
