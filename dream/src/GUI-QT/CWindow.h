@@ -82,6 +82,7 @@ public:
 	CWindow(QMap<QWidget*,QString>& parents, CSettings& Settings, const QString& windowName);
 	virtual ~CWindow();
 	void toggleVisibility();
+	void setSettingsTag(const QString& tag);
 	QString getSetting(const QString& key, const QString& defvalue, const bool bCommon=false);
 	bool getSetting(const QString& key, const bool defvalue, const bool bCommon=false);
 	int getSetting(const QString& key, const int defvalue, const bool bCommon=false);
@@ -103,8 +104,10 @@ private:
 #endif
 	void loadWindowGeometry();
 	void saveWindowGeometry();
+	string getTagSection(const bool bCommon=false) const;
 	string getSection(const bool bCommon=false) const;
 	QMap <QWidget*, QString> parents;
+	QString settingsTag;
 	const QString windowName;
 	CEventFilter ef;
 

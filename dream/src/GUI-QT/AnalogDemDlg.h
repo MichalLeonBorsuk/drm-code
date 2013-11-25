@@ -123,8 +123,7 @@ public slots:
 	void on_SpinBoxNoiRedLevel_valueChanged(int value);
 	void OnSwitchToDRM();
 	void OnSwitchToFM();
-    void on_modeChanged(int);
-    void OnHelpAbout() {emit About();}
+	void OnHelpAbout() {emit About();}
 	void OnWhatsThis();
 
 signals:

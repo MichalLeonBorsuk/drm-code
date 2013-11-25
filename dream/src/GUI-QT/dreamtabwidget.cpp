@@ -58,6 +58,7 @@ void DreamTabWidget::setText(int short_id, QString text)
         if(short_id==tabBar()->tabData(i).toInt())
         {
             AudioDetailWidget* adw = (AudioDetailWidget*)widget(i);
+            Linkify(text);
             adw->setTextMessage(text);
         }
     }

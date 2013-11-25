@@ -271,7 +271,6 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& Settings,
 
 	/* Activate real-time timers */
     controller->start(GUI_CONTROL_UPDATE_TIME);
-    show();
 }
 
 FDRMDialog::~FDRMDialog()
@@ -316,7 +315,6 @@ void FDRMDialog::connectController()
 
     // AM
     connect(pAnalogDemDlg, SIGNAL(SwitchMode(int)), controller, SLOT(setMode(int)));
-    connect(controller, SIGNAL(mode(int)), pAnalogDemDlg, SLOT(on_modeChanged(int)));
     connect(pAnalogDemDlg, SIGNAL(NewAMAcquisition()), controller, SLOT(triggerNewAcquisition()));
 }
 
@@ -345,14 +343,21 @@ void FDRMDialog::on_actionEngineering_Mode_triggered(bool checked)
         if(pEngineeringTabs)
             pEngineeringTabs->hide();
     }
-    Settings.Put("GUI", "engineering", checked);
-    QApplication::processEvents();
-    resize(0,0);
+    putSetting("engineering", checked, true);
+//    QApplication::processEvents();
+//    resize(0,0);
 }
 
 void FDRMDialog::on_actionSingle_Window_Mode_triggered(bool checked)
 {
-    if(checked)
+    putSetting("singlewindow", checked, true);
+    changeRecMode(controller->getMode(), true);
+}
+
+void FDRMDialog::setupWindowMode()
+{
+    bool bSingleWindowMode = getSetting("singlewindow", false, true);
+    if(bSingleWindowMode)
     {
         if(pServiceTabs==NULL)
         {
@@ -363,10 +368,7 @@ void FDRMDialog::on_actionSingle_Window_Mode_triggered(bool checked)
             connect(controller, SIGNAL(serviceChanged(int, const CService&)), pServiceTabs, SLOT(onServiceChanged(int, const CService&)));
             connect(controller, SIGNAL(textMessageChanged(int, QString)), pServiceTabs, SLOT(setText(int, QString)));
         }
-        if(pServiceSelector)
-            pServiceSelector->hide();
         ui->TextTextMessage->hide();
-        pServiceTabs->show();
         ui->menu_View->menuAction()->setVisible(false);
         ui->action_Multimedia_Dialog->setEnabled(false);
         //============ try this ========================
@@ -392,16 +394,15 @@ void FDRMDialog::on_actionSingle_Window_Mode_triggered(bool checked)
             connect(controller, SIGNAL(serviceChanged(int,const CService&)), pServiceSelector, SLOT(onServiceChanged(int, const CService&)));
             connect(controller, SIGNAL(textMessageChanged(int, QString)), this, SLOT(on_textMessageChanged(int, QString)));
         }
-        if(pServiceTabs)
-            pServiceTabs->hide();
-        pServiceSelector->show();
         ui->TextTextMessage->show();
         ui->menu_View->menuAction()->setVisible(true);
         // TODO enable multimedia menu option if there is a data service we can decode
     }
-    Settings.Put("GUI", "singlewindow", checked);
-    QApplication::processEvents();
-    resize(0,0);
+    bool bFmMode = ERecMode(controller->getMode()) == RM_FM;
+    if (pServiceSelector)
+        pServiceSelector->setVisible(!bFmMode && !bSingleWindowMode);
+    if (pServiceTabs)
+        pServiceTabs->setVisible(!bFmMode && bSingleWindowMode);
 }
 
 void FDRMDialog::on_actionGeneralSettings_triggered()
@@ -729,48 +730,69 @@ void FDRMDialog::on_serviceChanged(int short_id, const CService& service)
 
 void FDRMDialog::on_modeChanged(int value)
 {
-    switch(ERecMode(value))
+    changeRecMode(value, false);
+}
+
+void FDRMDialog::changeRecMode(int iRecMode, bool bWindowModeChanged)
+{
+    CWindow *pToShow=NULL, *pToHide=NULL;
+    QString settingsTag;
+    bool bSingleWindowMode = getSetting("singlewindow", false, true);
+
+    if (pAnalogDemDlg->isVisible())
+        pToHide = pAnalogDemDlg;
+    else if (isVisible() && (bWindowModeChanged || !bSingleWindowMode || ERecMode(iRecMode)==RM_AM))
+        pToHide = this;
+    if (pToHide)
+        pToHide->hide();
+
+    if (bSingleWindowMode && bWindowModeChanged && pStationsDlg->isVisible())
+        pStationsDlg->hide();
+
+    switch(ERecMode(iRecMode))
     {
     case RM_DRM:
+        settingsTag = bSingleWindowMode ? "" : " DRM";
         baseWindowTitle = tr("Dream DRM Receiver");
         ui->actionDRM->setVisible(false);
         ui->actionFM->setVisible(true);
         ui->lineEditFrequency->setVisible(false);
         ui->LabelServiceLabel->setVisible(true);
-        on_actionSingle_Window_Mode_triggered(
-                    ui->actionSingle_Window_Mode->isChecked()
-                    );
-        if(isVisible())
-            update();
-        else
-            show();
+        pToShow = this;
         CSysTray::Start(pSysTray);
         break;
     case RM_AM:
+        settingsTag = " AM";
         baseWindowTitle = tr("Analog Demodulation");
-        hide();
         // for later:
         ((QDoubleValidator*)ui->lineEditFrequency->validator())->setRange(0.1,26.1, 3);
+        pToShow = pAnalogDemDlg;
         CSysTray::Stop(pSysTray, tr("Dream AM"));
         break;
     case RM_FM:
+        settingsTag = bSingleWindowMode ? "" : " FM";
         baseWindowTitle = tr("Dream FM Receiver");
         ui->actionDRM->setVisible(true);
         ui->actionFM->setVisible(false);
         ((QDoubleValidator*)ui->lineEditFrequency->validator())->setRange(65.8,108.0, 1);
         ui->lineEditFrequency->setVisible(true);
         ui->LabelServiceLabel->setVisible(false); // until we have RDS
-        if(pServiceSelector)
-            pServiceSelector->hide();
-        if(pServiceTabs)
-            pServiceTabs->hide();
-        // TODO shrink window to min
+        pToShow = this;
         CSysTray::Stop(pSysTray, tr("Dream FM"));
         break;
     case RM_NONE: // wait until working thread starts operating
         break;
     }
-    UpdateWindowTitle();
+
+    pStationsDlg->setSettingsTag(settingsTag);
+    setSettingsTag(settingsTag);
+
+    if (pToShow)
+    {
+        pToShow->eventUpdate();
+//        pToShow->update();
+        pToShow->show();
+    }
 
     // do this once only
     if(pScheduler==NULL)
@@ -913,11 +935,10 @@ void FDRMDialog::on_signalLost()
 
 void FDRMDialog::UpdateWindowTitle()
 {
-    QString windowName, fileName(QString::fromLocal8Bit(DRMReceiver.GetInputFileName().c_str()));
+    QString fileName(QString::fromLocal8Bit(DRMReceiver.GetInputFileName().c_str()));
     const bool bInputFile = fileName != "";
     fileName = bInputFile ? QDir(fileName).dirName() : "";
-    windowName = baseWindowTitle;
-    windowName = bInputFile ? fileName + " - " + windowName : windowName;
+    QString windowName(bInputFile ? fileName + " - " + baseWindowTitle : baseWindowTitle);
     setWindowTitle(windowName);
     pAnalogDemDlg->setWindowTitle(windowName);
 }
@@ -926,18 +947,19 @@ void FDRMDialog::eventUpdate()
 {
     /* Put (re)initialization code here for the settings that might have
        be changed by another top level window. Called on mode switch */
+    UpdateWindowTitle();
     pFileMenu->UpdateMenu();
     SetDisplayColor(CRGBConversion::int2RGB(getSetting("colorscheme", 0xff0000, true)));
+    bool b = getSetting("singlewindow", false, true);
+    ui->actionSingle_Window_Mode->setChecked(b); // does not emit trigger signal
+    b = getSetting("engineering", false, true);
+    ui->actionEngineering_Mode->setChecked(b); // does not emit trigger signal
+    on_actionEngineering_Mode_triggered(b);
+    setupWindowMode();
 }
 
 void FDRMDialog::eventShow(QShowEvent*)
 {
-    bool b = Settings.Get("GUI", "singlewindow", false);
-    ui->actionSingle_Window_Mode->setChecked(b); // does not emit trigger signal
-    on_actionSingle_Window_Mode_triggered(b);
-    b = Settings.Get("GUI", "engineering", false);
-    ui->actionEngineering_Mode->setChecked(b); // does not emit trigger signal
-    on_actionEngineering_Mode_triggered(b);
 }
 
 void FDRMDialog::eventHide(QHideEvent*)

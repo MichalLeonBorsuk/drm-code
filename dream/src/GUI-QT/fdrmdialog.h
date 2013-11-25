@@ -124,8 +124,10 @@ private:
     void SysTrayStart();
     void SysTrayStop(const QString&);
     void SysTrayToolTip(const QString&, const QString&);
-	void setBars(int);
+    void setBars(int);
     void connectController();
+    void setupWindowMode();
+    void changeRecMode(int, bool);
 
 private slots:
     void OnScheduleTimer();

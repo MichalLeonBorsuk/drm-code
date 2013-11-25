@@ -109,6 +109,7 @@ signals:
 private slots:
 	void OnSigStr(double);
 	void OnTimer();
+	void OnUpdate();
 	void OnSMeterMenu(int iID);
 	void OnSMeterMenu();
 	void OnUrlFinished(QNetworkReply*);
