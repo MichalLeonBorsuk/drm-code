@@ -17,6 +17,7 @@
 #define STREAM_POS 129
 #define AFS_POS 130
 #define GPS_POS 131
+#define MAX_ENGINEERING_POS 192
 
 DreamTabWidget::DreamTabWidget(ReceiverController* rc, QWidget *parent) :
     QTabWidget(parent),controller(rc),eng(false)
@@ -64,6 +65,12 @@ void DreamTabWidget::onServiceChanged(int short_id, const CService& service)
         {
             setTabText(dataIndex, l);
         }
+    }
+    /// reorder tabs
+    for(int i=0; i<tabBar()->count(); i++)
+    {
+        int n = tabBar()->tabData(i).toInt();
+        tabBar()->moveTab(i, n);
     }
 }
 
@@ -139,15 +146,18 @@ QWidget* DreamTabWidget::makePacketApp(int short_id, const CService& service) co
     return pApp;
 }
 
-void DreamTabWidget::setText(int short_id, QString text)
+void DreamTabWidget::setText(int short_id, const QString& text)
 {
-    for(int i=0; i<count(); i++)
+    QString t = Linkify(text);
+    QTabBar* tb = tabBar();
+    for(int i=0; i<tb->count(); i++)
     {
-        if(short_id==tabBar()->tabData(i).toInt())
+        int n = tb->tabData(i).toInt();
+        if(short_id==n)
         {
-            AudioDetailWidget* adw = (AudioDetailWidget*)widget(i);
-            Linkify(text);
-            adw->setTextMessage(text);
+            AudioDetailWidget* adw = dynamic_cast<AudioDetailWidget*>(widget(i));
+            if(adw)
+                adw->setTextMessage(t);
         }
     }
 }
@@ -162,21 +172,36 @@ void DreamTabWidget::on_engineeringMode(bool b)
         pCh->setPlotStyle(iPlotStyle);
         controller->setControls(); // new controls so fill their values from the receiver controller
         //connect(parent, SIGNAL(plotStyleChanged(int)), pCh, SLOT(setPlotStyle(int)));
-        int index = addTab(pCh, "Channel");
-        tabBar()->setTabData(index, CHANNEL_POS);
+        tabBar()->setTabData(addTab(pCh, "Channel"), CHANNEL_POS);
         tabBar()->setTabData(addTab(new QLabel("Streams"), "Streams"), STREAM_POS);
         tabBar()->setTabData(addTab(new QLabel("AFS"), "AFS"), AFS_POS);
         tabBar()->setTabData(addTab(new QLabel("GPS"), "GPS"), GPS_POS);
     }
     else
     {
-        for(int i=0; i<tabBar()->count(); i++)
-            if(tabBar()->tabData(i).toInt())
-        tabBar()->removeTab(i);
-
+        for(int i=tabBar()->count()-1; i>=0; --i)
+        {
+            int n = tabBar()->tabData(i).toInt();
+            if((CHANNEL_POS<=n) && (n<=MAX_ENGINEERING_POS))
+            {
+                tabBar()->removeTab(i);
+            }
+        }
     }
     QList<AudioDetailWidget*> list = findChildren<AudioDetailWidget*>();
     for (int i = 0; i < list.size(); ++i) {
-        list[i]->setEngineering(eng);
+       list[i]->setEngineering(eng);
+    }
+}
+
+void DreamTabWidget::removeServices()
+{
+    for(int i=tabBar()->count()-1; i>=0; --i)
+    {
+        int n = tabBar()->tabData(i).toInt();
+        if(n<CHANNEL_POS)
+        {
+            tabBar()->removeTab(i);
+        }
     }
 }

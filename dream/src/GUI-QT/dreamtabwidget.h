@@ -16,8 +16,9 @@ signals:
 
 public slots:
     void onServiceChanged(int, const CService&);
-    void setText(int, QString);
+    void setText(int, const QString&);
     void on_engineeringMode(bool);
+    void removeServices();
 private slots:
     void on_currentChanged(int);
 private:

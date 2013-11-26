@@ -91,8 +91,9 @@ bool IsUrlDirectory(QString url)
 /* Convert all www. or http:// or email to real
    clickable link, for use with QLabel and such.
    Code by David Flamand */
-QString& Linkify(QString& text, QString linkColor)
+QString Linkify(const QString& t, QString linkColor)
 {
+    QString text(t);
     int i, j, posWWW=-2, posHTTP=-2, posMAIL=-2, posBegin, posEnd, size;
     if (!linkColor.isEmpty())
         linkColor = " style=\"color: " + linkColor + ";\"";

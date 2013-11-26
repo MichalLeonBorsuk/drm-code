@@ -13,6 +13,7 @@ AudioDetailWidget::AudioDetailWidget(ReceiverController* rc, QWidget *parent) :
 {
     ui->setupUi(this);
     QSizePolicy sizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    connect(rc, SIGNAL(serviceChanged(int,CService)), this, SLOT(updateDisplay(int,CService)));
 }
 
 AudioDetailWidget::~AudioDetailWidget()
@@ -59,7 +60,7 @@ void AudioDetailWidget::setRxStatus(int sid, ETypeRxStatus s)
     }
 }
 
-void AudioDetailWidget::updateDisplay(int id, const CService& s)
+void AudioDetailWidget::updateDisplay(int id, CService s)
 {
     short_id = id;
     if(engineeringMode)
