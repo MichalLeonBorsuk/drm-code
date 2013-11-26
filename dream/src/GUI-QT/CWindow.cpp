@@ -210,12 +210,12 @@ void CWindow::saveWindowGeometry()
 
 void CWindow::OnShowWindow(QWidget* window, bool bVisible)
 {
-//	printf("################################ CWindow::OnShowWindow(%s) bVisible=%i\n", getSection().c_str(), bVisible);
+//	printf("################################ CWindow::OnShowWindow(%s) settingsTag='%s' bVisible=%i window=%p\n", getSection().c_str(), string(settingsTag.toLocal8Bit()).c_str(), bVisible, window);
 	if (parents.contains(window))
 	{
 		if (settingsTag == CWINDOW_HIDE)
 			QMainWindow::setVisible(false);
-		else if (settingsTag != CWINDOW_NOVISSAVE)
+		else
 		{
 			const QString key = QString("visible") + settingsTag;
 			if (!bVisible)

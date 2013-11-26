@@ -328,8 +328,8 @@ CDRMLiveSchedule::LoadAFSInformation(const CAltFreqSign& AltFreqSign)
 }
 
 LiveScheduleDlg::LiveScheduleDlg(CSettings& Settings,
-                                 QMap<QWidget*,QString>& parents):
-    CWindow(parents, Settings, "Live Schedule"),
+                                 QWidget* parent/*QMap<QWidget*,QString>& parents*/):
+    CWindow(parent/*parents*/, Settings, "Live Schedule"),
     smallGreenCube(":/icons/smallGreenCube.png"),
     greenCube(":/icons/greenCube.png"), redCube(":/icons/redCube.png"),
     orangeCube(":/icons/orangeCube.png"), pinkCube(":/icons/pinkCube.png"),
