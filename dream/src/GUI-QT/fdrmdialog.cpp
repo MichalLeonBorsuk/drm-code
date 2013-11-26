@@ -554,14 +554,7 @@ void FDRMDialog::on_InputSignalLevelChanged(double d)
 {
     ui->ProgrInputLevel->setValue(d);
 }
-#if 0
-void FDRMDialog::UpdateDRM_GUI()
-{
-    if (isVisible() == false)
-        ChangeGUIModeToDRM();
 
-}
-#endif
 void FDRMDialog::startLogging()
 {
     pSysEvalDlg->CheckBoxWriteLog->setChecked(true);
@@ -699,6 +692,14 @@ void FDRMDialog::on_serviceChanged(int short_id, const CService& service)
                 strBitrate += " EEP";
             }
             ui->LabelBitrate->setText(strBitrate);
+
+            /* Service selector auto selection */
+            if (pServiceSelector && 
+                service.AudioParam.iStreamID != STREAM_ID_NOT_USED &&
+                service.eAudDataFlag == CService::SF_AUDIO)
+            {
+                pServiceSelector->check(short_id);
+            }
         }
         else
         {
