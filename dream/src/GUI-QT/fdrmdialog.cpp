@@ -941,7 +941,7 @@ void FDRMDialog::on_signalLost()
     if(pServiceSelector)
         pServiceSelector->disableAll();
     if(pServiceTabs)
-        pServiceTabs->clear();
+        pServiceTabs->removeServices();
 
     /* Main text labels */
     ui->LabelBitrate->setText("");

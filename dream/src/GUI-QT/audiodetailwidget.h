@@ -18,8 +18,6 @@ class AudioDetailWidget : public QWidget
 public:
     explicit AudioDetailWidget(ReceiverController*, QWidget * = 0);
     ~AudioDetailWidget();
-    void updateDisplay(int, const CService&);
-    void setEngineering(bool);
 
 signals:
     void listen(int);
@@ -27,6 +25,8 @@ public slots:
     void setPlotStyle(int);
     void setRxStatus(int, ETypeRxStatus);
     void setTextMessage(const QString&);
+    void updateDisplay(int, CService);
+    void setEngineering(bool);
 private:
     Ui::AudioDetailWidget *ui;
     int short_id;
