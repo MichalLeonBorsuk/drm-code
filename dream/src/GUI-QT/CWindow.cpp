@@ -215,7 +215,7 @@ void CWindow::OnShowWindow(QWidget* window, bool bVisible)
 	{
 		if (settingsTag == CWINDOW_HIDE)
 			QMainWindow::setVisible(false);
-		else
+		else if (settingsTag != CWINDOW_NOVISSAVE)
 		{
 			const QString key = QString("visible") + settingsTag;
 			if (!bVisible)

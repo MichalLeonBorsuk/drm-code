@@ -783,7 +783,7 @@ void FDRMDialog::changeRecMode(int iRecMode, bool bWindowModeChanged)
     {
     case RM_DRM:
         pToShow = this;
-        settingsTag = bSingleWindowMode ? "" : " DRM";
+        settingsTag = bSingleWindowMode ? CWINDOW_NOTAG : " DRM";
         baseWindowTitle = tr("Dream DRM Receiver");
         CSysTray::Start(pSysTray);
         break;
@@ -795,7 +795,7 @@ void FDRMDialog::changeRecMode(int iRecMode, bool bWindowModeChanged)
         break;
     case RM_FM:
         pToShow = this;
-        settingsTag = bSingleWindowMode ? "" : " FM";
+        settingsTag = bSingleWindowMode ? CWINDOW_NOTAG : " FM";
         baseWindowTitle = tr("Dream FM Receiver");
         CSysTray::Stop(pSysTray, baseWindowTitle);
         break;
@@ -806,13 +806,14 @@ void FDRMDialog::changeRecMode(int iRecMode, bool bWindowModeChanged)
     setSettingsTag(settingsTag);
     settingsTag = bSingleWindowMode ? CWINDOW_HIDE : settingsTag;
     if (pStationsDlg)     pStationsDlg->setSettingsTag(settingsTag);
-    settingsTag = bSingleWindowMode ? CWINDOW_HIDE : "";
+    settingsTag = bSingleWindowMode ? CWINDOW_HIDE : CWINDOW_NOTAG;
+    if (pSysEvalDlg)      pSysEvalDlg->setSettingsTag(settingsTag);
+    settingsTag = bSingleWindowMode ? CWINDOW_HIDE : CWINDOW_NOVISSAVE;
     if (pLiveScheduleDlg) pLiveScheduleDlg->setSettingsTag(settingsTag);
     if (pJLDlg)           pJLDlg->setSettingsTag(settingsTag);
     if (pLiveScheduleDlg) pLiveScheduleDlg->setSettingsTag(settingsTag);
     if (pSlideShowDlg)    pSlideShowDlg->setSettingsTag(settingsTag);
     if (pEPGDlg)          pEPGDlg->setSettingsTag(settingsTag);
-    if (pSysEvalDlg)      pSysEvalDlg->setSettingsTag(settingsTag);
     if (pBWSDlg)          pBWSDlg->setSettingsTag(settingsTag);
 
     if (pToShow)

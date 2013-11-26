@@ -47,6 +47,8 @@
 
 #define EVENT_FILTER(e) do { if (!ef.isValid((QEvent*)e)) return; } while(0)
 #define CWINDOW_HIDE "*"
+#define CWINDOW_NOVISSAVE "%"
+#define CWINDOW_NOTAG ""
 
 
 /* Classes ********************************************************************/
