@@ -345,7 +345,7 @@ void FDRMDialog::on_actionEngineering_Mode_triggered(bool checked)
     }
     putSetting("engineering", checked, true);
 //    QApplication::processEvents();
-//    resize(0,0);
+//    resize(0,0); /* not working on linux */
 }
 
 void FDRMDialog::on_actionSingle_Window_Mode_triggered(bool checked)
@@ -368,8 +368,6 @@ void FDRMDialog::setupWindowMode()
             connect(controller, SIGNAL(serviceChanged(int, const CService&)), pServiceTabs, SLOT(onServiceChanged(int, const CService&)));
             connect(controller, SIGNAL(textMessageChanged(int, QString)), pServiceTabs, SLOT(setText(int, QString)));
         }
-        ui->TextTextMessage->hide();
-        ui->menu_View->menuAction()->setVisible(false);
         ui->action_Multimedia_Dialog->setEnabled(false);
         //============ try this ========================
         QWidget* widget = pServiceTabs->currentWidget();
@@ -394,11 +392,21 @@ void FDRMDialog::setupWindowMode()
             connect(controller, SIGNAL(serviceChanged(int,const CService&)), pServiceSelector, SLOT(onServiceChanged(int, const CService&)));
             connect(controller, SIGNAL(textMessageChanged(int, QString)), this, SLOT(on_textMessageChanged(int, QString)));
         }
-        ui->TextTextMessage->show();
-        ui->menu_View->menuAction()->setVisible(true);
         // TODO enable multimedia menu option if there is a data service we can decode
+//        ui->action_Multimedia_Dialog->setEnabled(TODO);
     }
+//    bool bAmMode = ERecMode(controller->getMode()) == RM_AM;
     bool bFmMode = ERecMode(controller->getMode()) == RM_FM;
+    ui->menu_View->menuAction()->setVisible(!bSingleWindowMode);
+    ui->actionDRM->setVisible(bFmMode);
+    ui->actionFM->setVisible(!bFmMode);
+    ui->lineEditFrequency->setVisible(bFmMode);
+    ui->LabelServiceLabel->setVisible(!bFmMode); // until we have RDS
+    ui->TextTextMessage->setVisible(!bFmMode && !bSingleWindowMode);  
+//    if (bAmMode)
+//        ((QDoubleValidator*)ui->lineEditFrequency->validator())->setRange(0.1, 26.1, 3); // for later:
+    if (bFmMode)
+        ((QDoubleValidator*)ui->lineEditFrequency->validator())->setRange(65.8, 108.0, 1);
     if (pServiceSelector)
         pServiceSelector->setVisible(!bFmMode && !bSingleWindowMode);
     if (pServiceTabs)
@@ -752,33 +760,22 @@ void FDRMDialog::changeRecMode(int iRecMode, bool bWindowModeChanged)
     switch(ERecMode(iRecMode))
     {
     case RM_DRM:
+        pToShow = this;
         settingsTag = bSingleWindowMode ? "" : " DRM";
         baseWindowTitle = tr("Dream DRM Receiver");
-        ui->actionDRM->setVisible(false);
-        ui->actionFM->setVisible(true);
-        ui->lineEditFrequency->setVisible(false);
-        ui->LabelServiceLabel->setVisible(true);
-        pToShow = this;
         CSysTray::Start(pSysTray);
         break;
     case RM_AM:
+        pToShow = pAnalogDemDlg;
         settingsTag = " AM";
         baseWindowTitle = tr("Analog Demodulation");
-        // for later:
-        ((QDoubleValidator*)ui->lineEditFrequency->validator())->setRange(0.1,26.1, 3);
-        pToShow = pAnalogDemDlg;
-        CSysTray::Stop(pSysTray, tr("Dream AM"));
+        CSysTray::Stop(pSysTray, baseWindowTitle);
         break;
     case RM_FM:
+        pToShow = this;
         settingsTag = bSingleWindowMode ? "" : " FM";
         baseWindowTitle = tr("Dream FM Receiver");
-        ui->actionDRM->setVisible(true);
-        ui->actionFM->setVisible(false);
-        ((QDoubleValidator*)ui->lineEditFrequency->validator())->setRange(65.8,108.0, 1);
-        ui->lineEditFrequency->setVisible(true);
-        ui->LabelServiceLabel->setVisible(false); // until we have RDS
-        pToShow = this;
-        CSysTray::Stop(pSysTray, tr("Dream FM"));
+        CSysTray::Stop(pSysTray, baseWindowTitle);
         break;
     case RM_NONE: // wait until working thread starts operating
         break;
@@ -890,7 +887,7 @@ QString FDRMDialog::formatTextMessage(const QString& textMessage) const
             formattedMessage += textMessage[int(i)];
         }
     }
-    Linkify(formattedMessage);
+    Linkify(formattedMessage, "#0080FF");
     return "<center>" + formattedMessage + "</center>";
 }
 

@@ -44,7 +44,7 @@ QString UrlEncodePath(QString url);
 
 bool IsUrlDirectory(QString url);
 
-QString& Linkify(QString& text);
+QString& Linkify(QString& text, QString linkColor=QString());
 
 void CreateDirectories(const QString& strFilename);
 
