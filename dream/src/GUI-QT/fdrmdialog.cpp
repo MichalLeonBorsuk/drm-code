@@ -142,7 +142,6 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& Settings,
     /* Programme Guide Window */
     string sDataFilesDirectory = Settings.Get(
                 "Receiver", "datafilesdirectory", string(DEFAULT_DATA_FILES_DIRECTORY));
-
     pEPGDlg = new EPGDlg(Settings, this);
     pEPGDlg->setDecoder(new EPG(Parameters, sDataFilesDirectory));
 
@@ -780,9 +779,6 @@ void FDRMDialog::changeRecMode(int iRecMode, bool bWindowModeChanged)
     if (pToHide)
         pToHide->hide();
 
-    if (bSingleWindowMode && bWindowModeChanged && pStationsDlg->isVisible())
-        pStationsDlg->hide();
-
     switch(ERecMode(iRecMode))
     {
     case RM_DRM:
@@ -807,13 +803,21 @@ void FDRMDialog::changeRecMode(int iRecMode, bool bWindowModeChanged)
         break;
     }
 
-    pStationsDlg->setSettingsTag(settingsTag);
     setSettingsTag(settingsTag);
+    settingsTag = bSingleWindowMode ? CWINDOW_HIDE : settingsTag;
+    if (pStationsDlg)     pStationsDlg->setSettingsTag(settingsTag);
+    settingsTag = bSingleWindowMode ? CWINDOW_HIDE : "";
+    if (pLiveScheduleDlg) pLiveScheduleDlg->setSettingsTag(settingsTag);
+    if (pJLDlg)           pJLDlg->setSettingsTag(settingsTag);
+    if (pLiveScheduleDlg) pLiveScheduleDlg->setSettingsTag(settingsTag);
+    if (pSlideShowDlg)    pSlideShowDlg->setSettingsTag(settingsTag);
+    if (pEPGDlg)          pEPGDlg->setSettingsTag(settingsTag);
+    if (pSysEvalDlg)      pSysEvalDlg->setSettingsTag(settingsTag);
+    if (pBWSDlg)          pBWSDlg->setSettingsTag(settingsTag);
 
     if (pToShow)
     {
         pToShow->eventUpdate();
-//        pToShow->update();
         pToShow->show();
     }
 

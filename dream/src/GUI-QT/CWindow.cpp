@@ -213,14 +213,19 @@ void CWindow::OnShowWindow(QWidget* window, bool bVisible)
 //	printf("################################ CWindow::OnShowWindow(%s) bVisible=%i\n", getSection().c_str(), bVisible);
 	if (parents.contains(window))
 	{
-		const QString key = QString("visible") + settingsTag;
-		if (!bVisible)
-			putSetting(key, isVisible());
-		if (!bVisible || getSetting(key, false))
+		if (settingsTag == CWINDOW_HIDE)
+			QMainWindow::setVisible(false);
+		else
 		{
-//			if (bVisible)
-//				loadWindowGeometry();
-			QMainWindow::setVisible(bVisible);
+			const QString key = QString("visible") + settingsTag;
+			if (!bVisible)
+				putSetting(key, isVisible());
+			if (!bVisible || getSetting(key, false))
+			{
+	//			if (bVisible)
+	//				loadWindowGeometry();
+				QMainWindow::setVisible(bVisible);
+			}
 		}
 	}
 }
