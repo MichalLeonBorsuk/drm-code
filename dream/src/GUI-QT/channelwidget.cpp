@@ -51,15 +51,16 @@ void ChannelWidget::connectController(ReceiverController* controller)
     connect(controller, SIGNAL(flippedSpectrumChanged(bool)), this, SLOT(setFlipSpectrumEnabled(bool)));
 }
 
-void ChannelWidget::setActive(bool active)
+
+void ChannelWidget::showEvent(QShowEvent*)
 {
-    if(active)
-    {
-        on_chartSelector_currentItemChanged(ui->chartSelector->currentItem());
-        pMainPlot->activate();
-    }
-    else
-        pMainPlot->deactivate();
+    on_chartSelector_currentItemChanged(ui->chartSelector->currentItem());
+    pMainPlot->activate();
+}
+
+void ChannelWidget::hideEvent(QHideEvent*)
+{
+    pMainPlot->deactivate();
 }
 
 void ChannelWidget::on_showOptions_toggled(bool enabled)

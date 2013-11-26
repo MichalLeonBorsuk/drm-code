@@ -8,7 +8,6 @@ EngineeringTabWidget::EngineeringTabWidget(ReceiverController* controller, QWidg
     int iPlotStyle = 0;// TODO set from menu
     ChannelWidget* pCh = new ChannelWidget(controller);
     pCh->setPlotStyle(iPlotStyle);
-    pCh->setActive(true); // TODO - make active only when visible
     controller->setControls(); // new controls so fill their values from the receiver controller
     //connect(parent, SIGNAL(plotStyleChanged(int)), pCh, SLOT(setPlotStyle(int)));
     addTab(pCh, "Channel");

@@ -9,35 +9,60 @@
 #include "slideshowwidget.h"
 #include "audiodetailwidget.h"
 #include "EPGDlg.h"
+#include "channelwidget.h"
 #include <../datadecoding/DataDecoder.h>
 #include "receivercontroller.h"
 
+#define CHANNEL_POS 128
+#define STREAM_POS 129
+#define AFS_POS 130
+#define GPS_POS 131
+
 DreamTabWidget::DreamTabWidget(ReceiverController* rc, QWidget *parent) :
-    QTabWidget(parent),controller(rc)
+    QTabWidget(parent),controller(rc),eng(false)
 {
     connect(this, SIGNAL(currentChanged(int)), this, SLOT(on_currentChanged(int)));
 }
 
 void DreamTabWidget::onServiceChanged(int short_id, const CService& service)
 {
+    int audioIndex = -1;
+    for(int i=0; i<count(); i++)
+    {
+        if(tabBar()->tabData(i).toInt()==short_id)
+            audioIndex = i;
+    }
+    int dataIndex = -1;
+    for(int i=0; i<count(); i++)
+    {
+        if((tabBar()->tabData(i).toInt())==4+short_id)
+            dataIndex = i;
+    }
     if(service.strLabel!="")
     {
-        if(count()<short_id+1)
+        QString l = QString::fromUtf8(service.strLabel.c_str());
+        if((audioIndex==-1) && (service.AudioParam.iStreamID!=STREAM_ID_NOT_USED))
         {
-            if(service.eAudDataFlag==CService::SF_AUDIO)
-            {
-                addAudioTab(short_id, service);
-                if(service.DataParam.iStreamID!=STREAM_ID_NOT_USED)
-                    addDataTab(short_id, service, service.iServiceID);
-            }
-            else
-            {
-                addDataTab(short_id, service, -1);
-            }
+            AudioDetailWidget* pApp = new AudioDetailWidget(controller);
+            pApp->setEngineering(eng);
+            tabBar()->setTabData(addTab(pApp, l), short_id);
         }
         else
         {
-            // TODO
+            setTabText(audioIndex, l);
+        }
+        if(service.eAudDataFlag==CService::SF_AUDIO)
+        {
+            l = l + " " + GetDataTypeString(service);
+        }
+        if((dataIndex==-1) && (service.DataParam.iStreamID!=STREAM_ID_NOT_USED))
+        {
+            QWidget* pApp = makeDataApp(short_id, service);
+            tabBar()->setTabData(addTab(pApp, l), 4+short_id);
+        }
+        else
+        {
+            setTabText(dataIndex, l);
         }
     }
 }
@@ -45,10 +70,73 @@ void DreamTabWidget::onServiceChanged(int short_id, const CService& service)
 void DreamTabWidget::on_currentChanged(int index)
 {
     int short_id = tabBar()->tabData(index).toInt();
+    if(short_id>=CHANNEL_POS)
+        return; // it is not a service tab
     if(short_id<4)
         emit audioServiceSelected(short_id);
     else
         emit dataServiceSelected(short_id-4);
+}
+
+QWidget* DreamTabWidget::makeDataApp(int short_id, const CService& service) const
+{
+    QWidget* pApp = NULL;
+    if (service.DataParam.ePacketModInd == CDataParam::PM_PACKET_MODE)
+        pApp = makePacketApp(short_id, service);
+    if(pApp==NULL)
+    {
+        pApp = new QLabel(QString("short id %1 stream %2 packet id %3")
+                                       .arg(short_id)
+                                       .arg(service.DataParam.iStreamID)
+                                       .arg(service.DataParam.iPacketID));
+    }
+    return pApp;
+}
+
+QWidget* DreamTabWidget::makePacketApp(int short_id, const CService& service) const
+{
+    QWidget *pApp = NULL;
+    if (service.DataParam.eAppDomain == CDataParam::AD_DAB_SPEC_APP)
+    {
+        switch (service.DataParam.iUserAppIdent)
+        {
+        case DAB_AT_MOTSLIDESHOW:
+        {
+            SlideShowWidget* p = new SlideShowWidget();
+            p->setServiceInformation(short_id, service);
+            connect(controller, SIGNAL(dataStatusChanged(int, ETypeRxStatus)), p, SLOT(setStatus(int, ETypeRxStatus)));
+            pApp = p;
+        }
+            break;
+
+        case DAB_AT_BROADCASTWEBSITE:
+        {
+            BWSViewerWidget* p = new BWSViewerWidget();
+            p->setDecoder(service.DataParam.pDecoder);
+            p->setServiceInformation(short_id, service);
+            connect(controller, SIGNAL(dataStatusChanged(int, ETypeRxStatus)), p, SLOT(setStatus(int, ETypeRxStatus)));
+            pApp = p;
+        }
+            break;
+
+        case DAB_AT_EPG:
+            break;
+
+        case DAB_AT_JOURNALINE:
+        {
+            JournalineViewer* p = new JournalineViewer(short_id);
+            p->setDecoder(service.DataParam.pDecoder);
+            p->setServiceInformation(service, service.iServiceID);
+            connect(controller, SIGNAL(dataStatusChanged(int, ETypeRxStatus)), p, SLOT(setStatus(int, ETypeRxStatus)));
+            pApp = p;
+        }
+        break;
+
+        default:
+            ;
+        }
+    }
+    return pApp;
 }
 
 void DreamTabWidget::setText(int short_id, QString text)
@@ -64,69 +152,31 @@ void DreamTabWidget::setText(int short_id, QString text)
     }
 }
 
-void DreamTabWidget::addAudioTab(int short_id, const CService& service)
+void DreamTabWidget::on_engineeringMode(bool b)
 {
-    QString l = QString::fromUtf8(service.strLabel.c_str());
-    //int index = addTab(new QLabel(QString("short id %1").arg(short_id)), l);
-    int index = addTab(new AudioDetailWidget(controller), l);
-    tabBar()->setTabData(index, short_id);
-}
-
-void DreamTabWidget::addDataTab(int short_id, const CService& service, int iAudioServiceID)
-{
-    QString l = QString::fromUtf8(service.strLabel.c_str());
-    if(iAudioServiceID>=0)
+    eng = b;
+    if(eng)
     {
-        l = l + " " + GetDataTypeString(service);
+        int iPlotStyle = 0;// TODO set from menu
+        ChannelWidget* pCh = new ChannelWidget(controller);
+        pCh->setPlotStyle(iPlotStyle);
+        controller->setControls(); // new controls so fill their values from the receiver controller
+        //connect(parent, SIGNAL(plotStyleChanged(int)), pCh, SLOT(setPlotStyle(int)));
+        int index = addTab(pCh, "Channel");
+        tabBar()->setTabData(index, CHANNEL_POS);
+        tabBar()->setTabData(addTab(new QLabel("Streams"), "Streams"), STREAM_POS);
+        tabBar()->setTabData(addTab(new QLabel("AFS"), "AFS"), AFS_POS);
+        tabBar()->setTabData(addTab(new QLabel("GPS"), "GPS"), GPS_POS);
     }
-    QLabel* defaultApp = new QLabel(QString("short id %1 stream %2 packet id %3")
-                                   .arg(short_id)
-                                   .arg(service.DataParam.iStreamID)
-                                   .arg(service.DataParam.iPacketID));
-    QWidget* pApp = defaultApp;
-    if (service.DataParam.ePacketModInd == CDataParam::PM_PACKET_MODE)
+    else
     {
-        if (service.DataParam.eAppDomain == CDataParam::AD_DAB_SPEC_APP)
-        {
-            switch (service.DataParam.iUserAppIdent)
-            {
-            case DAB_AT_MOTSLIDESHOW:
-            {
-                SlideShowWidget* p = new SlideShowWidget();
-                p->setServiceInformation(short_id, service);
-                connect(controller, SIGNAL(dataStatusChanged(int, ETypeRxStatus)), p, SLOT(setStatus(int, ETypeRxStatus)));
-                pApp = p;
-            }
-                break;
+        for(int i=0; i<tabBar()->count(); i++)
+            if(tabBar()->tabData(i).toInt())
+        tabBar()->removeTab(i);
 
-            case DAB_AT_BROADCASTWEBSITE:
-            {
-                BWSViewerWidget* p = new BWSViewerWidget();
-                p->setDecoder(service.DataParam.pDecoder);
-                p->setServiceInformation(short_id, service);
-                connect(controller, SIGNAL(dataStatusChanged(int, ETypeRxStatus)), p, SLOT(setStatus(int, ETypeRxStatus)));
-                pApp = p;
-            }
-                break;
-
-            case DAB_AT_EPG:
-                break;
-
-            case DAB_AT_JOURNALINE:
-            {
-                JournalineViewer* p = new JournalineViewer(short_id);
-                p->setDecoder(service.DataParam.pDecoder);
-                p->setServiceInformation(service, iAudioServiceID);
-                connect(controller, SIGNAL(dataStatusChanged(int, ETypeRxStatus)), p, SLOT(setStatus(int, ETypeRxStatus)));
-                pApp = p;
-            }
-            break;
-
-            default:
-                ;
-            }
-        }
     }
-    int index = addTab(pApp, l);
-    tabBar()->setTabData(index, 4+short_id);
+    QList<AudioDetailWidget*> list = findChildren<AudioDetailWidget*>();
+    for (int i = 0; i < list.size(); ++i) {
+        list[i]->setEngineering(eng);
+    }
 }

@@ -17,13 +17,15 @@ signals:
 public slots:
     void onServiceChanged(int, const CService&);
     void setText(int, QString);
+    void on_engineeringMode(bool);
 private slots:
     void on_currentChanged(int);
 private:
     ReceiverController* controller;
+    bool eng;
 
-    void addAudioTab(int, const CService&);
-    void addDataTab(int, const CService&, int);
+    QWidget* makeDataApp(int short_id, const CService& service) const;
+    QWidget* makePacketApp(int short_id, const CService& service) const;
 };
 
 #endif // DREAMTABWIDGET_H

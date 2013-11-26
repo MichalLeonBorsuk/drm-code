@@ -26,7 +26,6 @@ private:
     Ui::ChannelWidget *ui;
     CDRMPlot *pMainPlot;
 public slots:
-    void setActive(bool);
     void setLEDFAC(ETypeRxStatus);
     void setLEDSDC(ETypeRxStatus);
     void setLEDFrameSync(ETypeRxStatus status);
@@ -53,6 +52,8 @@ public slots:
 private slots:
     void on_chartSelector_currentItemChanged(QTreeWidgetItem *);
     void on_showOptions_toggled(bool);
+    void showEvent(QShowEvent*);
+    void hideEvent(QHideEvent*);
 
 signals:
 };
