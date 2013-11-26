@@ -329,19 +329,28 @@ void FDRMDialog::setBars(int bars)
 
 void FDRMDialog::on_actionEngineering_Mode_triggered(bool checked)
 {
-    if(checked)
+    if(ui->actionSingle_Window_Mode->isChecked())
     {
-        if(pEngineeringTabs==NULL)
-        {
-            pEngineeringTabs = new EngineeringTabWidget(controller);
-            ui->verticalLayout->addWidget(pEngineeringTabs);
-        }
-        pEngineeringTabs->show();
+        if(pServiceTabs==NULL)
+            setupWindowMode();
+        pServiceTabs->on_engineeringMode(checked);
     }
     else
     {
-        if(pEngineeringTabs)
-            pEngineeringTabs->hide();
+        if(checked)
+        {
+            if(pEngineeringTabs==NULL)
+            {
+                pEngineeringTabs = new EngineeringTabWidget(controller);
+                ui->verticalLayout->addWidget(pEngineeringTabs);
+            }
+            pEngineeringTabs->show();
+        }
+        else
+        {
+            if(pEngineeringTabs)
+                pEngineeringTabs->hide();
+        }
     }
     putSetting("engineering", checked, true);
 //    QApplication::processEvents();
@@ -958,6 +967,7 @@ void FDRMDialog::eventUpdate()
 
 void FDRMDialog::eventShow(QShowEvent*)
 {
+    eventUpdate(); // make sure engineering and service widgets are initialised
 }
 
 void FDRMDialog::eventHide(QHideEvent*)
