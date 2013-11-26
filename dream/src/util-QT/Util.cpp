@@ -91,9 +91,11 @@ bool IsUrlDirectory(QString url)
 /* Convert all www. or http:// or email to real
    clickable link, for use with QLabel and such.
    Code by David Flamand */
-QString& Linkify(QString& text)
+QString& Linkify(QString& text, QString linkColor)
 {
     int i, j, posWWW=-2, posHTTP=-2, posMAIL=-2, posBegin, posEnd, size;
+    if (!linkColor.isEmpty())
+        linkColor = " style=\"color: " + linkColor + ";\"";
     size = text.size();
     for (i = 0; i < size;)
     {
@@ -131,11 +133,11 @@ QString& Linkify(QString& text)
             QStringRef rawLink(&text, posBegin, rawLinkSize);
             QString newLink;
             if (posBegin == posMAIL)
-                newLink = "<a href=\"mailto:%1\">%1</a>";
+                newLink = "<a href=\"mailto:%1\"" + linkColor + ">%1</a>";
             else if (posBegin == posWWW)
-                newLink = "<a href=\"http://%1\">%1</a>";
+                newLink = "<a href=\"http://%1\"" + linkColor + ">%1</a>";
             else /* posBegin == posHTTP */
-                newLink = "<a href=\"%1\">%1</a>";
+                newLink = "<a href=\"%1\"" + linkColor + ">%1</a>";
             newLink = newLink.arg(rawLink.toString());
             const int newLinkSize = newLink.size();
             text.replace(posBegin, rawLinkSize, newLink);
