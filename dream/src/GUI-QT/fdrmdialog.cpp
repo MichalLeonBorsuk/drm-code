@@ -131,7 +131,7 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& Settings,
 #endif
 
     /* Live Schedule window */
-    pLiveScheduleDlg = new LiveScheduleDlg(Settings, parents);
+    pLiveScheduleDlg = new LiveScheduleDlg(Settings, this/*parents*/); // TODO not sure about that one
 
     /* Journaline viewer window */
     pJLDlg = new JLViewer(Settings, this);
@@ -808,13 +808,12 @@ void FDRMDialog::changeRecMode(int iRecMode, bool bWindowModeChanged)
     if (pStationsDlg)     pStationsDlg->setSettingsTag(settingsTag);
     settingsTag = bSingleWindowMode ? CWINDOW_HIDE : CWINDOW_NOTAG;
     if (pSysEvalDlg)      pSysEvalDlg->setSettingsTag(settingsTag);
-    settingsTag = bSingleWindowMode ? CWINDOW_HIDE : CWINDOW_NOVISSAVE;
-    if (pLiveScheduleDlg) pLiveScheduleDlg->setSettingsTag(settingsTag);
-    if (pJLDlg)           pJLDlg->setSettingsTag(settingsTag);
-    if (pLiveScheduleDlg) pLiveScheduleDlg->setSettingsTag(settingsTag);
-    if (pSlideShowDlg)    pSlideShowDlg->setSettingsTag(settingsTag);
-    if (pEPGDlg)          pEPGDlg->setSettingsTag(settingsTag);
+    settingsTag = CWINDOW_HIDE;
     if (pBWSDlg)          pBWSDlg->setSettingsTag(settingsTag);
+    if (pEPGDlg)          pEPGDlg->setSettingsTag(settingsTag);
+    if (pJLDlg)           pJLDlg->setSettingsTag(settingsTag);
+    if (pLiveScheduleDlg) pLiveScheduleDlg->setSettingsTag(settingsTag); // TODO not sure about that one
+    if (pSlideShowDlg)    pSlideShowDlg->setSettingsTag(settingsTag);
 
     if (pToShow)
     {

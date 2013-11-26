@@ -131,7 +131,7 @@ class LiveScheduleDlg : public CWindow, public Ui_LiveScheduleWindow
 	Q_OBJECT
 
 public:
-    LiveScheduleDlg(CSettings&, QMap<QWidget*,QString>&);
+    LiveScheduleDlg(CSettings&, QWidget*/*QMap<QWidget*,QString>&*/);
 	virtual ~LiveScheduleDlg();
 
 public slots:
