@@ -170,6 +170,22 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& Settings,
 
     connect(ui->actionDisplayColor, SIGNAL(triggered()), this, SLOT(OnMenuSetDisplayColor()));
 
+    /* Message Color settings */
+    QSignalMapper* messageColorMapper = new QSignalMapper(this);
+    QActionGroup* messageColorGroup = new QActionGroup(this);
+    messageColorGroup->addAction(ui->actionBlackOnWhite);
+    messageColorGroup->addAction(ui->actionWhiteOnBlack);
+    messageColorMapper->setMapping(ui->actionBlackOnWhite, 0);
+    messageColorMapper->setMapping(ui->actionWhiteOnBlack, 1);
+    connect(ui->actionWhiteOnBlack, SIGNAL(triggered()), messageColorMapper, SLOT(map()));
+    connect(ui->actionBlackOnWhite, SIGNAL(triggered()), messageColorMapper, SLOT(map()));
+    connect(messageColorMapper, SIGNAL(mapped(int)), this, SLOT(OnMenuMessageColor(int)));
+    int c = getSetting("messagecolor", int(0), true);
+    switch(c) {
+    case 0: ui->actionBlackOnWhite->setChecked(true); break;
+    case 1: ui->actionWhiteOnBlack->setChecked(true); break; }
+    OnMenuMessageColor(c);
+
     /* Plot style settings */
     QSignalMapper* plotStyleMapper = new QSignalMapper(this);
     QActionGroup* plotStyleGroup = new QActionGroup(this);
@@ -329,11 +345,11 @@ void FDRMDialog::setBars(int bars)
 
 void FDRMDialog::on_actionEngineering_Mode_triggered(bool checked)
 {
+    putSetting("engineering", checked, true);
     if(ui->actionSingle_Window_Mode->isChecked())
     {
-        if(pServiceTabs==NULL)
-            setupWindowMode();
-        pServiceTabs->on_engineeringMode(checked);
+        if(pServiceTabs)
+            pServiceTabs->on_engineeringMode(checked);
     }
     else
     {
@@ -352,7 +368,6 @@ void FDRMDialog::on_actionEngineering_Mode_triggered(bool checked)
                 pEngineeringTabs->hide();
         }
     }
-    putSetting("engineering", checked, true);
 //    QApplication::processEvents();
 //    resize(0,0); /* not working on linux */
 }
@@ -411,7 +426,8 @@ void FDRMDialog::setupWindowMode()
     ui->actionFM->setVisible(!bFmMode);
     ui->lineEditFrequency->setVisible(bFmMode);
     ui->LabelServiceLabel->setVisible(!bFmMode); // until we have RDS
-    ui->TextTextMessage->setVisible(!bFmMode && !bSingleWindowMode);  
+    ui->TextTextMessage->setVisible(!bFmMode && !bSingleWindowMode);
+    ui->menuMessage_Color->menuAction()->setVisible(!bFmMode && !bSingleWindowMode);
 //    if (bAmMode)
 //        ((QDoubleValidator*)ui->lineEditFrequency->validator())->setRange(0.1, 26.1, 3); // for later:
     if (bFmMode)
@@ -897,7 +913,7 @@ QString FDRMDialog::formatTextMessage(const QString& textMessage) const
             formattedMessage += textMessage[int(i)];
         }
     }
-    Linkify(formattedMessage, "#0080FF");
+    Linkify(formattedMessage, ui->actionBlackOnWhite->isChecked() ? "#0000FF" : "#0080FF");
     return "<center>" + formattedMessage + "</center>";
 }
 
@@ -961,13 +977,13 @@ void FDRMDialog::eventUpdate()
     ui->actionSingle_Window_Mode->setChecked(b); // does not emit trigger signal
     b = getSetting("engineering", false, true);
     ui->actionEngineering_Mode->setChecked(b); // does not emit trigger signal
-    on_actionEngineering_Mode_triggered(b);
     setupWindowMode();
+    on_actionEngineering_Mode_triggered(b); // depend on setupWindowMode() for pServiceTabs
 }
 
 void FDRMDialog::eventShow(QShowEvent*)
 {
-    eventUpdate(); // make sure engineering and service widgets are initialised
+//    eventUpdate(); TODO not always working and not the best place to do that // make sure engineering and service widgets are initialised
 }
 
 void FDRMDialog::eventHide(QHideEvent*)
@@ -1059,6 +1075,15 @@ void FDRMDialog::OnMenuSetDisplayColor()
         SetDisplayColor(newColor);
         putSetting("colorscheme", CRGBConversion::RGB2int(newColor), true);
     }
+}
+
+void FDRMDialog::OnMenuMessageColor(int index)
+{
+    QPalette palette(ui->TextTextMessage->palette());
+    palette.setColor(QPalette::Window,     QColor(index==0 ? "#FFFFFF" : "#000000"));
+    palette.setColor(QPalette::WindowText, QColor(index==0 ? "#000000" : "#FFFFFF"));
+    ui->TextTextMessage->setPalette(palette);
+    putSetting("messagecolor", index, true);
 }
 
 void FDRMDialog::eventClose(QCloseEvent* ce)

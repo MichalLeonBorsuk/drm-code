@@ -4346,9 +4346,9 @@
             <colorrole role="WindowText">
              <brush brushstyle="SolidPattern">
               <color alpha="255">
-               <red>255</red>
-               <green>255</green>
-               <blue>255</blue>
+               <red>0</red>
+               <green>0</green>
+               <blue>0</blue>
               </color>
              </brush>
             </colorrole>
@@ -4436,9 +4436,9 @@
             <colorrole role="Window">
              <brush brushstyle="SolidPattern">
               <color alpha="255">
-               <red>0</red>
-               <green>0</green>
-               <blue>0</blue>
+               <red>255</red>
+               <green>255</green>
+               <blue>255</blue>
               </color>
              </brush>
             </colorrole>
@@ -4474,9 +4474,9 @@
             <colorrole role="WindowText">
              <brush brushstyle="SolidPattern">
               <color alpha="255">
-               <red>255</red>
-               <green>255</green>
-               <blue>255</blue>
+               <red>0</red>
+               <green>0</green>
+               <blue>0</blue>
               </color>
              </brush>
             </colorrole>
@@ -4564,9 +4564,9 @@
             <colorrole role="Window">
              <brush brushstyle="SolidPattern">
               <color alpha="255">
-               <red>0</red>
-               <green>0</green>
-               <blue>0</blue>
+               <red>255</red>
+               <green>255</green>
+               <blue>255</blue>
               </color>
              </brush>
             </colorrole>
@@ -4683,18 +4683,18 @@
             <colorrole role="Base">
              <brush brushstyle="SolidPattern">
               <color alpha="255">
-               <red>0</red>
-               <green>0</green>
-               <blue>0</blue>
+               <red>255</red>
+               <green>255</green>
+               <blue>255</blue>
               </color>
              </brush>
             </colorrole>
             <colorrole role="Window">
              <brush brushstyle="SolidPattern">
               <color alpha="255">
-               <red>0</red>
-               <green>0</green>
-               <blue>0</blue>
+               <red>255</red>
+               <green>255</green>
+               <blue>255</blue>
               </color>
              </brush>
             </colorrole>
@@ -9187,6 +9187,13 @@
      <addaction name="actionGreenBlack"/>
      <addaction name="actionBlackGrey"/>
     </widget>
+    <widget class="QMenu" name="menuMessage_Color">
+     <property name="title">
+      <string>Message Color</string>
+     </property>
+     <addaction name="actionBlackOnWhite"/>
+     <addaction name="actionWhiteOnBlack"/>
+    </widget>
     <addaction name="actionDRM"/>
     <addaction name="actionAM"/>
     <addaction name="actionFM"/>
@@ -9196,6 +9203,7 @@
     <addaction name="actionEngineering_Mode"/>
     <addaction name="actionDisplayColor"/>
     <addaction name="menuPlot_Style"/>
+    <addaction name="menuMessage_Color"/>
     <addaction name="separator"/>
     <addaction name="actionMultimediaSettings"/>
     <addaction name="actionGeneralSettings"/>
@@ -9362,6 +9370,22 @@
   <action name="actionDRM">
    <property name="text">
     <string>DRM (digital)</string>
+   </property>
+  </action>
+  <action name="actionBlackOnWhite">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Black on White</string>
+   </property>
+  </action>
+  <action name="actionWhiteOnBlack">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>White on Black</string>
    </property>
   </action>
  </widget>
