@@ -987,7 +987,6 @@ void FDRMDialog::eventUpdate()
 
 void FDRMDialog::eventShow(QShowEvent*)
 {
-//    eventUpdate(); TODO not always working and not the best place to do that // make sure engineering and service widgets are initialised
 }
 
 void FDRMDialog::eventHide(QHideEvent*)
