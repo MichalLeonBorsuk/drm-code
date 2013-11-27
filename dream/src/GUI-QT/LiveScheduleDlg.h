@@ -139,6 +139,7 @@ public slots:
     void setAFS(const CAltFreqSign& altFreqSign);
     void setService(int, const CService&);
     void setServiceInformation(const map <uint32_t,CServiceInformation>);
+    void setFrequency(int);
 
 protected:
 	virtual void	eventClose(QCloseEvent* pEvent);

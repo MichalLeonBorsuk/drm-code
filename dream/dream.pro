@@ -497,7 +497,8 @@ HEADERS += \
     src/util/Settings.h \
     src/util/Utilities.h \
     src/util/Vector.h \
-    src/Version.h
+    src/Version.h \
+    src/GUI-QT/stationswidget.h
 
 SOURCES += \
     src/AMDemodulation.cpp \
@@ -598,7 +599,8 @@ SOURCES += \
     src/util/Reassemble.cpp \
     src/util/Settings.cpp \
     src/util/Utilities.cpp \
-    src/Version.cpp
+    src/Version.cpp \
+    src/GUI-QT/stationswidget.cpp
 
 !console {
 HEADERS += \
@@ -715,3 +717,6 @@ message(With Qt components $$QT)
 !sound {
     error("no usable audio interface found - install pulseaudio or portaudio dev package")
 }
+
+FORMS += \
+    src/GUI-QT/stationswidget.ui
