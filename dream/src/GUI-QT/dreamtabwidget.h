@@ -27,6 +27,7 @@ private:
 
     QWidget* makeDataApp(int short_id, const CService& service) const;
     QWidget* makePacketApp(int short_id, const CService& service) const;
+    void add(QWidget* w, const QString& l, int ordering);
 };
 
 #endif // DREAMTABWIDGET_H
