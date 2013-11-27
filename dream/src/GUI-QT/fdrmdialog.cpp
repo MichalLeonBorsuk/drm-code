@@ -772,6 +772,16 @@ void FDRMDialog::changeRecMode(int iRecMode, bool bWindowModeChanged)
     QString settingsTag;
     bool bSingleWindowMode = getSetting("singlewindow", false, true);
 
+    // Prevent previous layout to interfere with new window size
+    if (bWindowModeChanged)
+    {
+        if (pServiceSelector)
+            pServiceSelector->hide();
+        if (pServiceTabs)
+            pServiceTabs->hide();
+        QApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+    }
+
     if (pAnalogDemDlg->isVisible())
         pToHide = pAnalogDemDlg;
     else if (isVisible() && (bWindowModeChanged || !bSingleWindowMode || ERecMode(iRecMode)==RM_AM))
