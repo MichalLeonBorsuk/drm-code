@@ -416,6 +416,11 @@ void LiveScheduleDlg::setService(int, const CService& service)
     }
 }
 
+void LiveScheduleDlg::setFrequency(int)
+{
+
+}
+
 void
 LiveScheduleDlg::LoadSettings()
 {

@@ -4,6 +4,7 @@
 #include <QTabWidget>
 class CService;
 class ReceiverController;
+class StationsWidget;
 
 class DreamTabWidget : public QTabWidget
 {
@@ -23,6 +24,7 @@ private slots:
     void on_currentChanged(int);
 private:
     ReceiverController* controller;
+    StationsWidget*     stations;
     bool eng;
 
     QWidget* makeDataApp(int short_id, const CService& service) const;

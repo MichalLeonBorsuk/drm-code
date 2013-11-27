@@ -318,9 +318,10 @@ void FDRMDialog::connectController()
     // stations
     connect(pStationsDlg, SIGNAL(frequencyChanged(int)), controller, SLOT(setFrequency(int)));
     connect(controller, SIGNAL(mode(int)), pStationsDlg, SLOT(OnSwitchMode(int)));
+    connect(controller, SIGNAL(frequencyChanged(int)), pStationsDlg, SLOT(SetFrequency(int)));
 
     // AFS
-    connect(controller, SIGNAL(frequencyChanged(int)), pStationsDlg, SLOT(SetFrequency(int)));
+    connect(controller, SIGNAL(frequencyChanged(int)), pLiveScheduleDlg, SLOT(setFrequency(int)));
     connect(controller, SIGNAL(serviceChanged(int, const CService&)), pLiveScheduleDlg, SLOT(setService(int, const CService&)));
     connect(controller, SIGNAL(position(double,double)), pLiveScheduleDlg, SLOT(setLocation(double, double)));
     connect(controller, SIGNAL(position(double,double)), pLiveScheduleDlg, SLOT(setLocation(double, double)));

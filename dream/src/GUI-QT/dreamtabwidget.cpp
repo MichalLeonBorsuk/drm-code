@@ -12,16 +12,22 @@
 #include "channelwidget.h"
 #include <../datadecoding/DataDecoder.h>
 #include "receivercontroller.h"
+#include "stationswidget.h"
 
 #define CHANNEL_POS 128
 #define STREAM_POS 129
 #define AFS_POS 130
 #define GPS_POS 131
 #define MAX_ENGINEERING_POS 192
+#define STATIONS_POS 193
+#define LIVE_STATIONS_POS 194
 
 DreamTabWidget::DreamTabWidget(ReceiverController* rc, QWidget *parent) :
-    QTabWidget(parent),controller(rc),eng(false)
+    QTabWidget(parent),controller(rc),
+    stations(new StationsWidget(rc)),
+    eng(false)
 {
+    //TODO add(stations, "Stations", STATIONS_POS);
     connect(this, SIGNAL(currentChanged(int)), this, SLOT(on_currentChanged(int)));
 }
 
@@ -41,7 +47,7 @@ void DreamTabWidget::onServiceChanged(int short_id, const CService& service)
     }
     QString l;
     if(service.strLabel=="")
-        l = QString("%1").arg(service.iServiceID,4,16,'0');
+        l = QString("%1").arg(service.iServiceID,4,16,QChar('0'));
     else
         l = QString::fromUtf8(service.strLabel.c_str());
     if(audioIndex!=-1)
