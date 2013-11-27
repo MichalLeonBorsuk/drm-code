@@ -148,7 +148,8 @@ QWidget* DreamTabWidget::makePacketApp(int short_id, const CService& service) co
 
 void DreamTabWidget::setText(int short_id, const QString& text)
 {
-    QString t = Linkify(text);
+    QString t(text);
+    Linkify(t);
     QTabBar* tb = tabBar();
     for(int i=0; i<tb->count(); i++)
     {
