@@ -345,7 +345,8 @@ void FDRMDialog::setBars(int bars)
 
 void FDRMDialog::on_actionEngineering_Mode_triggered(bool checked)
 {
-    putSetting("engineering", checked, true);
+    bool bSingle = getSetting("singlewindow", false, true);
+    putSetting(bSingle ? "engineeringsingle" : "engineeringmulti", checked, true);
     if(ui->actionSingle_Window_Mode->isChecked())
     {
         if(pServiceTabs)
@@ -988,9 +989,9 @@ void FDRMDialog::eventUpdate()
     UpdateWindowTitle();
     pFileMenu->UpdateMenu();
     SetDisplayColor(CRGBConversion::int2RGB(getSetting("colorscheme", 0xff0000, true)));
-    bool b = getSetting("singlewindow", false, true);
-    ui->actionSingle_Window_Mode->setChecked(b); // does not emit trigger signal
-    b = getSetting("engineering", false, true);
+    bool bSingle = getSetting("singlewindow", false, true);
+    ui->actionSingle_Window_Mode->setChecked(bSingle); // does not emit trigger signal
+    bool b = getSetting(bSingle ? "engineeringsingle" : "engineeringmulti", false, true);
     ui->actionEngineering_Mode->setChecked(b); // does not emit trigger signal
     setupWindowMode();
     on_actionEngineering_Mode_triggered(b); // depend on setupWindowMode() for pServiceTabs
