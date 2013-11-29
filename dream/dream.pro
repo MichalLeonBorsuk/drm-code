@@ -644,10 +644,7 @@ FORMS += \
     journalineviewer.ui \
     slideshowwidget.ui \
     src/GUI-QT/stationswidget.ui \
-    src/GUI-QT/gpswidget.ui \
-    src/GUI-QT/stationswidget.h \
-    src/GUI-QT/gpswidget.h \
-    src/GUI-QT/afswidget.h
+    src/GUI-QT/gpswidget.ui
 
 HEADERS += \
     src/GUI-QT/AnalogDemDlg.h \
@@ -681,7 +678,11 @@ HEADERS += \
     src/GUI-QT/journalineviewer.h \
     src/GUI-QT/slideshowwidget.h \
     src/GUI-QT/engineeringtabwidget.h \
-    src/GUI-QT/receivercontroller.h
+    src/GUI-QT/receivercontroller.h \
+    src/GUI-QT/stationswidget.h \
+    src/GUI-QT/gpswidget.h \
+    src/GUI-QT/afswidget.h
+
 SOURCES += \
     src/GUI-QT/AnalogDemDlg.cpp \
     src/GUI-QT/CodecParams.cpp \
