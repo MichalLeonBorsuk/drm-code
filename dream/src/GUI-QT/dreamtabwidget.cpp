@@ -10,6 +10,8 @@
 #include "audiodetailwidget.h"
 #include "EPGDlg.h"
 #include "channelwidget.h"
+#include "gpswidget.h"
+#include "afswidget.h"
 #include <../datadecoding/DataDecoder.h>
 #include "receivercontroller.h"
 #include "stationswidget.h"
@@ -27,55 +29,74 @@ DreamTabWidget::DreamTabWidget(ReceiverController* rc, QWidget *parent) :
     stations(new StationsWidget(rc)),
     eng(false)
 {
-    //TODO add(stations, "Stations", STATIONS_POS);
+    add(stations, "Stations", STATIONS_POS);
     connect(this, SIGNAL(currentChanged(int)), this, SLOT(on_currentChanged(int)));
 }
 
 void DreamTabWidget::onServiceChanged(int short_id, const CService& service)
 {
-    int audioIndex = -1;
-    for(int i=0; i<count(); i++)
-    {
-        if(tabBar()->tabData(i).toInt()==short_id)
-            audioIndex = i;
-    }
-    int dataIndex = -1;
-    for(int i=0; i<count(); i++)
-    {
-        if((tabBar()->tabData(i).toInt())==(4+short_id))
-            dataIndex = i;
-    }
+    // label can be updated independently of other service parameters
     QString l;
     if(service.strLabel=="")
         l = QString("%1").arg(service.iServiceID,4,16,QChar('0'));
     else
         l = QString::fromUtf8(service.strLabel.c_str());
-    if(audioIndex!=-1)
+
+    // ? is count() always the same as tabBar->count() ???????????
+    QTabBar* tb = tabBar();
+    // if this is an audio service, create it or update the label
+    if(service.AudioParam.iStreamID!=STREAM_ID_NOT_USED)
     {
-        setTabText(audioIndex, l);
-    }
-    else
-    {
-       if(service.AudioParam.iStreamID!=STREAM_ID_NOT_USED)
-       {
-           AudioDetailWidget* pApp = new AudioDetailWidget(controller);
-           pApp->setEngineering(eng);
-           add(pApp, l, short_id);
-       }
-    }
-    if(service.eAudDataFlag==CService::SF_AUDIO)
-    {
-        l = l + " " + GetDataTypeString(service);
-    }
-    if(dataIndex!=-1)
-    {
-        setTabText(dataIndex, l);
-    }
-    else
-    {
-        if(service.DataParam.iStreamID!=STREAM_ID_NOT_USED)
+        int audioIndex = -1;
+        for(int i=0; i<tb->count(); i++)
         {
-           add(makeDataApp(short_id, service), l, 4+short_id);
+            if(tb->tabData(i).toInt()==short_id)
+                audioIndex = i;
+        }
+        if(audioIndex==-1)
+        {
+            AudioDetailWidget* pApp = new AudioDetailWidget(controller);
+            pApp->setEngineering(eng);
+            add(pApp, l, short_id);
+        }
+        else
+        {
+            setTabText(audioIndex, l);
+        }
+    }
+    if(service.DataParam.iStreamID!=STREAM_ID_NOT_USED)
+    {
+        // if this is an audio service wih a data component, add the app name to the label
+        if(service.eAudDataFlag==CService::SF_AUDIO)
+        {
+            l = l + " " + GetDataTypeString(service);
+        }
+        int dataIndex = -1;
+        for(int i=0; i<tb->count(); i++)
+        {
+            if((tb->tabData(i).toInt())==(4+short_id))
+                dataIndex = i;
+        }
+        // if there is a data component, create it or update the label
+        if(dataIndex==-1)
+        {
+            add(makeDataApp(short_id, service), l, 4+short_id);
+        }
+        else
+        {
+            setTabText(dataIndex, l);
+        }
+    }
+}
+
+void DreamTabWidget::removeServices()
+{
+    for(int i=tabBar()->count()-1; i>=0; --i)
+    {
+        int n = tabBar()->tabData(i).toInt();
+        if(n<CHANNEL_POS)
+        {
+            removeTab(i);
         }
     }
 }
@@ -93,8 +114,8 @@ void DreamTabWidget::on_currentChanged(int index)
 
 void DreamTabWidget::add(QWidget* w, const QString& l, int ordering)
 {
-    int before = count();
-    for(int i=0; i<count(); i++)
+    int before = tabBar()->count();
+    for(int i=0; i<tabBar()->count(); i++)
     {
         if(tabBar()->tabData(i).toInt()>ordering)
         {
@@ -186,18 +207,20 @@ void DreamTabWidget::setText(int short_id, const QString& text)
 
 void DreamTabWidget::on_engineeringMode(bool b)
 {
+    if(eng==b)
+        return;
     eng = b;
     if(eng)
     {
         int iPlotStyle = 0;// TODO set from menu
         ChannelWidget* pCh = new ChannelWidget(controller);
         pCh->setPlotStyle(iPlotStyle);
-        controller->setControls(); // new controls so fill their values from the receiver controller
         //connect(parent, SIGNAL(plotStyleChanged(int)), pCh, SLOT(setPlotStyle(int)));
         add(pCh, "Channel", CHANNEL_POS);
         add(new QLabel("Streams"), "Streams", STREAM_POS);
-        add(new QLabel("AFS"), "AFS", AFS_POS);
-        add(new QLabel("GPS"), "GPS", GPS_POS);
+        add(new AFSWidget(controller), "AFS", AFS_POS);
+        add(new GPSWidget(controller), "GPS", GPS_POS);
+        controller->setControls(); // new controls so fill their values from the receiver controller
     }
     else
     {
@@ -206,24 +229,12 @@ void DreamTabWidget::on_engineeringMode(bool b)
             int n = tabBar()->tabData(i).toInt();
             if((CHANNEL_POS<=n) && (n<=MAX_ENGINEERING_POS))
             {
-                tabBar()->removeTab(i);
+                removeTab(i);
             }
         }
     }
     QList<AudioDetailWidget*> list = findChildren<AudioDetailWidget*>();
     for (int i = 0; i < list.size(); ++i) {
        list[i]->setEngineering(eng);
-    }
-}
-
-void DreamTabWidget::removeServices()
-{
-    for(int i=tabBar()->count()-1; i>=0; --i)
-    {
-        int n = tabBar()->tabData(i).toInt();
-        if(n<CHANNEL_POS)
-        {
-            tabBar()->removeTab(i);
-        }
     }
 }

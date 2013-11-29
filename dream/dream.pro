@@ -497,8 +497,7 @@ HEADERS += \
     src/util/Settings.h \
     src/util/Utilities.h \
     src/util/Vector.h \
-    src/Version.h \
-    src/GUI-QT/stationswidget.h
+    src/Version.h
 
 SOURCES += \
     src/AMDemodulation.cpp \
@@ -599,8 +598,7 @@ SOURCES += \
     src/util/Reassemble.cpp \
     src/util/Settings.cpp \
     src/util/Utilities.cpp \
-    src/Version.cpp \
-    src/GUI-QT/stationswidget.cpp
+    src/Version.cpp
 
 !console {
 HEADERS += \
@@ -644,7 +642,12 @@ FORMS += \
     drmdetail.ui \
     liveschedulewidget.ui \
     journalineviewer.ui \
-    slideshowwidget.ui
+    slideshowwidget.ui \
+    src/GUI-QT/stationswidget.ui \
+    src/GUI-QT/gpswidget.ui \
+    src/GUI-QT/stationswidget.h \
+    src/GUI-QT/gpswidget.h \
+    src/GUI-QT/afswidget.h
 
 HEADERS += \
     src/GUI-QT/AnalogDemDlg.h \
@@ -711,12 +714,12 @@ SOURCES += \
     src/GUI-QT/journalineviewer.cpp \
     src/GUI-QT/slideshowwidget.cpp \
     src/GUI-QT/engineeringtabwidget.cpp \
-    src/GUI-QT/receivercontroller.cpp
+    src/GUI-QT/receivercontroller.cpp \
+    src/GUI-QT/stationswidget.cpp \
+    src/GUI-QT/gpswidget.cpp \
+    src/GUI-QT/afswidget.cpp
 }
 message(With Qt components $$QT)
 !sound {
     error("no usable audio interface found - install pulseaudio or portaudio dev package")
 }
-
-FORMS += \
-    src/GUI-QT/stationswidget.ui
