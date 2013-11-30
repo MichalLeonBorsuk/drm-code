@@ -29,13 +29,13 @@
 #define __StationsDlg_H
 
 #include <QSignalMapper>
-#include <QNetworkAccessManager>
 #include <QTimer>
 #include "ui_StationsDlgbase.h"
 
 #include "DialogUtil.h"
 #include "CWindow.h"
 #include "Schedule.h"
+#include "../util-QT/scheduleloader.h"
 
 /* Definitions ****************************************************************/
 
@@ -56,6 +56,17 @@ public slots:
     ERecMode mode() { return eRecMode; }
 
 protected:
+    struct Params {
+        bool        bCurrentSortAscending;
+        int			iSortColumn;
+        QString		strColumnParam;
+        QString		targetFilter;
+        QString		languageFilter;
+        QString		countryFilter;
+        QString		url;
+        QString		filename;
+    };
+
 	virtual void	eventClose(QCloseEvent* pEvent);
 	virtual void	eventHide(QHideEvent* pEvent);
 	virtual void	eventShow(QShowEvent* pEvent);
@@ -64,27 +75,22 @@ protected:
     void			LoadSchedule();
     void			LoadScheduleView();
     void			UpdateTransmissionStatus();
-    void			LoadFilters();
 	void			AddWhatsThisHelp();
 	void			EnableSMeter();
 	void			DisableSMeter();
-	_BOOLEAN		showAll();
-	_BOOLEAN		GetSortAscending();
-	void			SetSortAscending(_BOOLEAN b);
+    bool    		showAll();
+    bool            GetSortAscending();
+    void			SetSortAscending(bool);
 	void			ColumnParamFromStr(const QString& strColumnParam);
 	void			ColumnParamToStr(QString& strColumnParam);
 	int				currentSortColumn();
-	_BOOLEAN		bCurrentSortAscendingdrm;
-	_BOOLEAN		bCurrentSortAscendinganalog;
-	int				iSortColumndrm;
-	int				iSortColumnanalog;
-	QString			strColumnParamdrm;
-	QString			strColumnParamanalog;
+    Params          params[RM_NONE+1];
 
 #ifdef HAVE_LIBHAMLIB
 	CRig&			Rig;
 #endif
 	CSchedule		schedule;
+    ScheduleLoader  scheduleLoader;
 	QIcon			greenCube;
 	QIcon			redCube;
 	QIcon			orangeCube;
@@ -93,7 +99,6 @@ protected:
 	QActionGroup*	previewGroup;
 	QSignalMapper*	showMapper;
 	QActionGroup*	showGroup;
-	QNetworkAccessManager *manager;
 	QTimer			Timer;
 
 	QMutex			ListItemsMutex;
@@ -110,9 +115,9 @@ private slots:
 	void OnSigStr(double);
 	void OnTimer();
 	void OnUpdate();
-	void OnSMeterMenu(int iID);
+    void OnFileReady();
+    void OnSMeterMenu(int iID);
 	void OnSMeterMenu();
-	void OnUrlFinished(QNetworkReply*);
 	void OnShowStationsMenu(int iID);
 	void OnShowPreviewMenu(int iID);
 	void OnFreqCntNewValue(double dVal);

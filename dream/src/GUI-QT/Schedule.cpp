@@ -47,47 +47,18 @@
 
 CSchedule::CSchedule():
 ListTargets(), ListCountries(), ListLanguages(),
-StationsTable(),eSchedMode(SM_NONE),iSecondsPreviewdrm(0),iSecondsPreviewanalog(0)
+  StationsTable(),iSecondsPreview(0)
 {
-	SetAnalogUrl();
 }
 
 void CSchedule::SetSecondsPreview(int iSec)
 {
-    if(eSchedMode==SM_NONE)
-        return;
-    if(eSchedMode==SM_DRM)
-		iSecondsPreviewdrm = iSec;
-	else
-		iSecondsPreviewanalog = iSec;
+    iSecondsPreview = iSec;
 }
 
-int CSchedule::GetSecondsPreview()
+int CSchedule::GetSecondsPreview() const
 {
-    if(eSchedMode==SM_NONE)
-        return 0;
-    if(eSchedMode==SM_DRM)
-		return iSecondsPreviewdrm;
-	else
-		return iSecondsPreviewanalog;
-}
-
-void CSchedule::SetSchedMode(const ESchedMode eNewSchM)
-{
-	eSchedMode = eNewSchM;
-	StationsTable.clear();
-	if(eSchedMode==SM_DRM)
-	{
-		schedFileName = DRMSCHEDULE_INI_FILE_NAME;
-	}
-    else if(eSchedMode==SM_ANALOG)
-	{
-		schedFileName = AMSCHEDULE_CSV_FILE_NAME;
-	}
-    else
-    {
-        schedFileName = "";
-    }
+    return iSecondsPreview;
 }
 
 void CSchedule::UpdateStringListForFilter(const CStationsItem& StationsItem)
@@ -102,7 +73,7 @@ void CSchedule::UpdateStringListForFilter(const CStationsItem& StationsItem)
 		ListLanguages.append(StationsItem.strLanguage);
 }
 
-void CSchedule::LoadSchedule()
+void CSchedule::LoadSchedule(const QString & schedFileName)
 {
 	string filename(schedFileName.toUtf8().constData());
 	QApplication::setOverrideCursor(Qt::BusyCursor);
@@ -443,20 +414,14 @@ Station::EState CSchedule::GetState(const int iPos)
 
 bool CSchedule::CheckFilter(const int iPos)
 {
-	const CStationsItem& station = StationsTable[iPos];
-	if(eSchedMode==SM_DRM && targetFilterdrm != "" && targetFilterdrm != station.strTarget)
-		return false;
-	if(eSchedMode==SM_DRM && countryFilterdrm != "" && countryFilterdrm != station.strCountry)
-		return false;
-	if(eSchedMode==SM_DRM && languageFilterdrm != "" && languageFilterdrm != station.strLanguage)
-		return false;
-	if(eSchedMode==SM_ANALOG && targetFilteranalog != "" && targetFilteranalog != station.strTarget)
-		return false;
-	if(eSchedMode==SM_ANALOG && countryFilteranalog != "" && countryFilteranalog != station.strCountry)
-		return false;
-	if(eSchedMode==SM_ANALOG && languageFilteranalog != "" && languageFilteranalog != station.strLanguage)
-		return false;
-	return true;
+    const CStationsItem& station = StationsTable[iPos];
+    if(targetFilter != "" && targetFilter != station.strTarget)
+        return false;
+    if(countryFilter != "" && countryFilter != station.strCountry)
+        return false;
+    if(languageFilter != "" && languageFilter != station.strLanguage)
+        return false;
+    return true;
 }
 
 Station::EState CStationsItem::stateAt(time_t ltime, int previewSeconds) const
@@ -592,63 +557,3 @@ void CStationsItem::SetDaysFlagString(const QString& strNewDaysFlags)
 		}
 	}
 }
-
-void CSchedule::SetAnalogUrl()
-{
-	QDate d = QDate::currentDate();
-	int month = d.month();
-	int year = 0;
-	char season = 0;
-
-	// transitions last sunday in March and October
-	switch(month) {
-	case 1:
-	case 2:
-		year = d.year()-1;
-		season = 'b';
-		break;
-	case 3: {
-		QDate s = d;
-		s.setDate(d.year(), month+1, 1);
-		s = s.addDays(0-s.dayOfWeek());
-		if(d<s) {
-			year = d.year()-1;
-			season = 'b';
-		} else {
-			year = d.year();
-			season = 'a';
-		}
-			}
-			break;
-	case 4:
-	case 5:
-	case 6:
-	case 7:
-	case 8:
-	case 9:
-		year = d.year();
-		season = 'a';
-		break;
-	case 10: {
-		QDate s = d;
-		s.setDate(d.year(), month+1, 1);
-		int n = s.dayOfWeek();
-		s = s.addDays(0-n);
-		if(d<s) {
-			year = d.year();
-			season = 'a';
-		} else {
-			year = d.year();
-			season = 'b';
-		}
-			 }
-			 break;
-	case 11:
-	case 12:
-		year = d.year();
-		season = 'b';
-	}
-	if (season)
-		qurlanalog = QUrl(QString("http://eibispace.de/dx/sked-%1%2.csv").arg(season).arg(year-2000,2));
-}
-

@@ -81,6 +81,14 @@ public slots:
     void setReverbEffect(bool);
     void setRecFilter(bool);
     void setIntCons(bool);
+    void setAnalogModulation(int i);
+    void setAnalogAGC(int i);
+    void setAnalogNoiseReduction(int i);
+    void setAMFilterBW(int value);
+    void setEnableAutoFreqAcq(bool b);
+    void setEnablePLL(bool b);
+    void setAMDemodAcq(double dVal);
+    void setNoiRedLevel(int value);
 
 private:
     QTimer        timer;

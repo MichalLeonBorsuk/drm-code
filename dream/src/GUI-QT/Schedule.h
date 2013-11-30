@@ -29,9 +29,9 @@
 #ifndef __SCHEDULE_H
 #define __SCHEDULE_H
 
-#include <QNetworkAccessManager>
+#include <QString>
+#include <QStringList>
 #include <QUrl>
-#include <QTreeWidgetItem>
 #include "../util/Vector.h"
 
 /* Definitions ****************************************************************/
@@ -66,30 +66,7 @@
 
 namespace Station {
 	enum EState {IS_ACTIVE, IS_INACTIVE, IS_PREVIEW, IS_SOON_INACTIVE};
-};
-
-/* Classes ********************************************************************/
-class CaseInsensitiveTreeWidgetItem : public QTreeWidgetItem
-{
-public:
-	CaseInsensitiveTreeWidgetItem(QTreeWidget* parent=0) : QTreeWidgetItem(parent)
-	{
-	}
-
-	bool operator< ( const QTreeWidgetItem & rhs) const
-	{
-		// bug 29 - sort frequency and power numerically
-		int col = treeWidget()->sortColumn();
-		if (col == 0) // online/offline
-			return data(0, Qt::UserRole).toInt() < rhs.data(0, Qt::UserRole).toInt();
-		else if (col == 3) // integer frequency
-			return text( col ).toInt() < rhs.text( col ).toInt();
-		else if (col == 4) // real power
-			return text( col ).toDouble() < rhs.text( col ).toDouble();
-		else
-			return text( col ).toLower() < rhs.text( col ).toLower();
-	}
-};
+}
 
 class CStationsItem
 {
@@ -134,47 +111,41 @@ public:
 	_REAL	rPower;
 };
 
-
 class CSchedule
 {
 public:
-	CSchedule();
-	virtual ~CSchedule() {}
+    CSchedule();
+    virtual ~CSchedule() {}
 
-	enum ESchedMode {SM_NONE, SM_DRM, SM_ANALOG};
+    void ReadINIFile(FILE* pFile);
+    void ReadCSVFile(FILE* pFile);
 
-	void ReadINIFile(FILE* pFile);
-	void ReadCSVFile(FILE* pFile);
-	ESchedMode GetSchedMode() {return eSchedMode;}
-	void SetSchedMode(const ESchedMode);
+    int GetNumberOfStations() {return StationsTable.size();}
+    CStationsItem& GetItem(const int iPos) {return StationsTable[iPos];}
+    Station::EState GetState(const int iPos);
+    bool CheckFilter(const int iPos);
 
-	int GetNumberOfStations() {return StationsTable.size();}
-	CStationsItem& GetItem(const int iPos) {return StationsTable[iPos];}
-	Station::EState GetState(const int iPos);
-	bool CheckFilter(const int iPos);
+    void setCountryFilter(const QString& s) { countryFilter = s; }
+    QString getCountryFilter() const { return countryFilter; }
+    void setLanguageFilter(const QString& s) { languageFilter = s; }
+    QString getLanguageFilter() const { return languageFilter; }
+    void setTargetFilter(const QString& s) { targetFilter = s; }
+    QString getTargetFilter() const { return targetFilter; }
+    void SetSecondsPreview(int iSec);
+    int GetSecondsPreview() const;
+    void LoadSchedule(const QString&);
+    void clear() { StationsTable.clear(); }
 
-	void SetSecondsPreview(int iSec);
-	int GetSecondsPreview();
-	void UpdateStringListForFilter(const CStationsItem& StationsItem);
-	void LoadSchedule();
-
-	QStringList		ListTargets;
-	QStringList		ListCountries;
-	QStringList		ListLanguages;
-
-	QString			countryFilterdrm, targetFilterdrm, languageFilterdrm;
-	QString			countryFilteranalog, targetFilteranalog, languageFilteranalog;
-	QString			schedFileName;
-	QUrl			qurldrm, qurlanalog;
+    QStringList		ListTargets;
+    QStringList		ListCountries;
+    QStringList		ListLanguages;
 
 protected:
-	void			SetAnalogUrl();
+    void UpdateStringListForFilter(const CStationsItem& StationsItem);
 
-	vector<CStationsItem>	StationsTable;
-	ESchedMode		eSchedMode;
-
-	/* Minutes for stations preview in seconds if zero then only show active */
-	int iSecondsPreviewdrm;
-	int iSecondsPreviewanalog;
+    vector<CStationsItem>	StationsTable;
+    QString                 countryFilter, targetFilter, languageFilter;
+    int                     iSecondsPreview;
 };
+
 #endif
