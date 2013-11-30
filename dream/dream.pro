@@ -720,7 +720,7 @@ SOURCES += \
     src/GUI-QT/gpswidget.cpp \
     src/GUI-QT/afswidget.cpp
 }
-message(With Qt components $$QT)
+!isEmpty(QT):message(With Qt components: $$QT)
 !sound {
     error("no usable audio interface found - install pulseaudio or portaudio dev package")
 }

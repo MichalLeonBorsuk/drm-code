@@ -11,12 +11,18 @@
  *  compatible with ANSI terminal.
  *  For best results stderr should be redirected to file or /dev/null
  *
- * Currently defined Keys:
- *  SPACEBAR  switch between signal info and service info
- *  F         display both signal info and service info
- *  N         toggle no display
+ * Defined Keys:
+ *  SPACEBAR  toggle display
+ *  I         toggle signal info
+ *  S         toggle service info
+ *  F         display signal info and service info
+ *  N         new acquisition
  *  1 2 3 4   audio service selection
  *  CTRL-C Q  quit
+ *
+ * Defined Signals:
+ *  SIGINT SIGHUP SIGTERM SIGQUIT  quit
+ *  SIGUSR1                        new acquisition
  *
  ******************************************************************************
  *
@@ -62,9 +68,10 @@
 #define TTY_DEVICE "/dev/tty"
 
 /* misc defines */
-#define MODE_SCREEN 0x01
-#define MODE_BOTH 0x02
-#define MODE_NO_DISPLAY 0x04
+#define MODE_SIGNAL 0x01
+#define MODE_SERVICE 0x02
+#define MODE_NODISPLAY 0x04
+#define DEFAULT_MODE (MODE_SIGNAL /*| MODE_SERVICE*/)
 
 #define REPLACE_CHAR(str, from, to) \
 	for (size_t pos=0;;) { \
@@ -103,6 +110,8 @@ struct termios CConsoleIO::old_tio;
 void
 CConsoleIO::Enter(CDRMReceiver* pDRMReceiver)
 {
+	mode = DEFAULT_MODE;
+
 	CConsoleIO::pDRMReceiver = pDRMReceiver;
 
 	/* Signals to ignore */
@@ -111,6 +120,10 @@ CConsoleIO::Enter(CDRMReceiver* pDRMReceiver)
 	sigemptyset(&sigact.sa_mask);
 	sigact.sa_flags = 0;
 	sigaction(SIGPIPE, &sigact, NULL);
+	sigaction(SIGINT,  &sigact, NULL);
+	sigaction(SIGHUP,  &sigact, NULL);
+	sigaction(SIGTERM, &sigact, NULL);
+	sigaction(SIGQUIT, &sigact, NULL);
 	sigaction(SIGUSR1, &sigact, NULL);
 	sigaction(SIGUSR2, &sigact, NULL);
 
@@ -120,7 +133,8 @@ CConsoleIO::Enter(CDRMReceiver* pDRMReceiver)
 	sigaddset(&sigset, SIGHUP);
 	sigaddset(&sigset, SIGTERM);
 	sigaddset(&sigset, SIGQUIT);
-	pthread_sigmask(SIG_SETMASK, &sigset, NULL);
+	sigaddset(&sigset, SIGUSR1);
+	pthread_sigmask(SIG_BLOCK, &sigset, NULL);
 
 	/* TTY opening */
 	tty = open(TTY_DEVICE, O_RDWR | O_NONBLOCK);
@@ -155,13 +169,20 @@ void
 CConsoleIO::Update()
 {
 	/* Check for pending signals */
-	if (!sigpending(&sigset)) {
+	if (!sigpending(&sigset))
+	{
+		pthread_sigmask(SIG_UNBLOCK, &sigset, NULL);
+		pthread_sigmask(SIG_BLOCK,   &sigset, NULL);
 		if (sigismember(&sigset, SIGINT) ||
 			sigismember(&sigset, SIGHUP) ||
 			sigismember(&sigset, SIGTERM) ||
 			sigismember(&sigset, SIGQUIT)) {
 			pDRMReceiver->Stop();
 			return;
+		}
+		if (sigismember(&sigset, SIGUSR1))
+		{
+			pDRMReceiver->RequestNewAcquisition();
 		}
 	}
 
@@ -185,37 +206,54 @@ CConsoleIO::Update()
 			pDRMReceiver->Stop();
 			return;
 		}
-		if (key == ' ')
-		{
-			if (mode & MODE_NO_DISPLAY)
-				mode ^= MODE_NO_DISPLAY;
-			else
-				if (mode & MODE_BOTH)
-					mode ^= MODE_BOTH;
-				else
-					mode = mode ^ MODE_SCREEN;
-			cprintf(CLEAR);
-			time = 0;
-		}
 		if (key >= '1' && key <= '4')
 		{
 			Parameters.SetCurSelAudioService(key - '1');
 		}
-		if (key == 'n' || key == 'N')
+		if (key == ' ')
 		{
-			mode ^= MODE_NO_DISPLAY;
+			mode ^= MODE_NODISPLAY;
 			cwrite(CLEAR HOME);
 			time = 0;
 		}
 		if (key == 'f' || key == 'F')
 		{
-			mode ^= MODE_BOTH;
+			mode &= ~MODE_NODISPLAY;
+			mode |= MODE_SIGNAL | MODE_SERVICE;
+			cwrite(CLEAR HOME);
+			time = 0;
+		}
+		if (key == 'i' || key == 'I')
+		{
+			if (mode & MODE_NODISPLAY)
+			{
+				mode &= ~MODE_NODISPLAY;
+				mode |= MODE_SIGNAL;
+			}
+			else
+				mode ^= MODE_SIGNAL;
 			cwrite(CLEAR);
 			time = 0;
 		}
+		if (key == 's' || key == 'S')
+		{
+			if (mode & MODE_NODISPLAY)
+			{
+				mode &= ~MODE_NODISPLAY;
+				mode |= MODE_SERVICE;
+			}
+			else
+				mode ^= MODE_SERVICE;
+			cwrite(CLEAR);
+			time = 0;
+		}
+		if (key == 'n' || key == 'N')
+		{
+			pDRMReceiver->RequestNewAcquisition();
+		}
 	}
 
-	if (mode & MODE_NO_DISPLAY)
+	if (mode & MODE_NODISPLAY)
 		return;
 
 	struct timespec ts;
@@ -226,14 +264,14 @@ CConsoleIO::Update()
 		return;
 	time = curtime;
 
-    char msc = ETypeRxStatus2char(Parameters.ReceiveStatus.SLAudio.GetStatus());
-    char sdc = ETypeRxStatus2char(Parameters.ReceiveStatus.SDC.GetStatus());
-    char fac = ETypeRxStatus2char(Parameters.ReceiveStatus.FAC.GetStatus());
-    char time = ETypeRxStatus2char(Parameters.ReceiveStatus.TSync.GetStatus());
-    char frame = ETypeRxStatus2char(Parameters.ReceiveStatus.FSync.GetStatus());
-    ETypeRxStatus soundCardStatusI = Parameters.ReceiveStatus.InterfaceI.GetStatus(); /* Input */
-    ETypeRxStatus soundCardStatusO = Parameters.ReceiveStatus.InterfaceO.GetStatus(); /* Output */
-    char inter = ETypeRxStatus2char(soundCardStatusO == NOT_PRESENT ||
+	char msc = ETypeRxStatus2char(Parameters.ReceiveStatus.SLAudio.GetStatus());
+	char sdc = ETypeRxStatus2char(Parameters.ReceiveStatus.SDC.GetStatus());
+	char fac = ETypeRxStatus2char(Parameters.ReceiveStatus.FAC.GetStatus());
+	char time = ETypeRxStatus2char(Parameters.ReceiveStatus.TSync.GetStatus());
+	char frame = ETypeRxStatus2char(Parameters.ReceiveStatus.FSync.GetStatus());
+	ETypeRxStatus soundCardStatusI = Parameters.ReceiveStatus.InterfaceI.GetStatus(); /* Input */
+	ETypeRxStatus soundCardStatusO = Parameters.ReceiveStatus.InterfaceO.GetStatus(); /* Output */
+	char inter = ETypeRxStatus2char(soundCardStatusO == NOT_PRESENT ||
 		(soundCardStatusI != NOT_PRESENT && soundCardStatusI != RX_OK) ? soundCardStatusI : soundCardStatusO);
 	cprintf(HOME "        IO:%c  Time:%c  Frame:%c  FAC:%c  SDC:%c  MSC:%c" NL, inter, time, frame, fac, sdc, msc);
 
@@ -243,7 +281,7 @@ CConsoleIO::Update()
 	else
 		cprintf("                   IF Level: " NA NL);
 
-	if (!(mode & MODE_SCREEN) || mode & MODE_BOTH)
+	if (mode & MODE_SIGNAL)
 	{
 		int signal = pDRMReceiver->GetAcquiState() == AS_WITH_SIGNAL;
 		if (signal)
@@ -289,9 +327,9 @@ CConsoleIO::Update()
 
 			const char *strInter;
 		    switch (Parameters.eSymbolInterlMode) {
-		    case CParameter::SI_LONG:  strInter = "2 s";    break;
-		    case CParameter::SI_SHORT: strInter = "400 ms"; break;
-		    default:                   strInter = "?";      }
+		    case SI_LONG:  strInter = "2 s";    break;
+		    case SI_SHORT: strInter = "400 ms"; break;
+		    default:       strInter = "?";      }
 			cprintf("          Interleaver Depth: %s" NL, strInter);
 
 			const char *strSDC;
@@ -341,9 +379,9 @@ CConsoleIO::Update()
 					"       Received time - date: " NA CL);
 		}
 	}
-	if (mode & MODE_SCREEN || mode & MODE_BOTH)
+	if (mode & MODE_SERVICE)
 	{
-		if (mode & MODE_BOTH)
+		if (mode & MODE_SIGNAL)
 			cprintf(NL);
 		cprintf(NL "Service:" NL);
 		const char* strTextMessage = NULL;
