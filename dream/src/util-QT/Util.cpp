@@ -30,6 +30,7 @@
 #include "../DrmTransceiver.h"
 #include "../datadecoding/DataDecoder.h"
 #include <QRegExp>
+#include <QDate>
 #include <QUrl>
 #include <QDir>
 #include <QFileInfo>
@@ -423,4 +424,63 @@ void SetStatus(CMultColorLED* LED, ETypeRxStatus state)
     }
 }
 #endif
+
+QString getAMScheduleUrl()
+{
+    QDate d = QDate::currentDate();
+    int month = d.month();
+    int year = 0;
+    char season = 'a';
+
+    // transitions last sunday in March and October
+    switch(month) {
+    case 1:
+    case 2:
+        year = d.year()-1;
+        season = 'b';
+        break;
+    case 3: {
+        QDate s = d;
+        s.setDate(d.year(), month+1, 1);
+        s = s.addDays(0-s.dayOfWeek());
+        if(d<s) {
+            year = d.year()-1;
+            season = 'b';
+        } else {
+            year = d.year();
+            season = 'a';
+        }
+            }
+            break;
+    case 4:
+    case 5:
+    case 6:
+    case 7:
+    case 8:
+    case 9:
+        year = d.year();
+        season = 'a';
+        break;
+    case 10: {
+        QDate s = d;
+        s.setDate(d.year(), month+1, 1);
+        int n = s.dayOfWeek();
+        s = s.addDays(0-n);
+        if(d<s) {
+            year = d.year();
+            season = 'a';
+        } else {
+            year = d.year();
+            season = 'b';
+        }
+             }
+             break;
+    case 11:
+    case 12:
+        year = d.year();
+        season = 'b';
+    }
+    return QString("http://eibispace.de/dx/sked-%1%2.csv").arg(season).arg(year-2000,2);
+}
+
 

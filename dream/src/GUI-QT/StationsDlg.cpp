@@ -27,14 +27,14 @@
 #include "StationsDlg.h"
 #include "../tables/TableStations.h"
 #include "DialogUtil.h"
+#include "stationswidget.h"
 #ifdef HAVE_LIBHAMLIB
 # include "../util-QT/Rig.h"
 # include "RigDlg.h"
 #endif
+#include "../util-QT/Util.h"
 #include <QHideEvent>
 #include <QShowEvent>
-#include <QNetworkRequest>
-#include <QNetworkReply>
 #include <QApplication>
 #include <QDateTime>
 #include <QMessageBox>
@@ -50,6 +50,7 @@ Rig(Rig),
 StationsDlg::StationsDlg(CSettings& Settings, QMap<QWidget*,QString>& parents):
 CWindow(parents, Settings, "Stations"),
 #endif
+schedule(),scheduleLoader(),
 greenCube(":/icons/greenCube.png"), redCube(":/icons/redCube.png"),
 orangeCube(":/icons/orangeCube.png"), pinkCube(":/icons/pinkCube.png"),
 eRecMode(RM_NONE)
@@ -130,7 +131,6 @@ eRecMode(RM_NONE)
 	connect(previewMapper, SIGNAL(mapped(int)), this, SLOT(OnShowPreviewMenu(int)));
 	connect(ListViewStations->header(), SIGNAL(sectionClicked(int)), this, SLOT(OnHeaderClicked(int)));
 
-	//connect(actionGetUpdate, SIGNAL(triggered()), this, SLOT(OnGetUpdate()));
 # ifdef HAVE_LIBHAMLIB
 	RigDlg *pRigDlg = new RigDlg(Rig, this);
 	connect(actionChooseRig, SIGNAL(triggered()), pRigDlg, SLOT(show()));
@@ -143,26 +143,29 @@ eRecMode(RM_NONE)
 	/* Init progress bar for input s-meter */
 	InitSMeter(this, ProgrSigStrength);
 
-	manager = new QNetworkAccessManager(this);
-	connect(manager, SIGNAL(finished(QNetworkReply*)), this, SLOT(OnUrlFinished(QNetworkReply*)));
-
 	/* Connections ---------------------------------------------------------- */
 
 	connect(&Timer, SIGNAL(timeout()), this, SLOT(OnTimer()));
 	connect(QwtCounterFrequency, SIGNAL(valueChanged(double)),
 		this, SLOT(OnFreqCntNewValue(double)));
+    connect(&scheduleLoader, SIGNAL(fileReady()), this, SLOT(OnFileReady()));
 
-	okMessage = tr("Update successful.");
-	badMessage =
-		tr("Update failed. The following things may caused the "
-		"failure:\n"
-		"\t- the internet connection was not set up properly\n"
-		"\t- the server is currently not available\n"
-		"\t- the file 'schedule.ini' could not be written");
 }
 
 StationsDlg::~StationsDlg()
 {
+}
+
+void StationsDlg::on_actionGetUpdate_triggered()
+{
+    scheduleLoader.fetch(params[eRecMode].url, params[eRecMode].filename);
+}
+
+void StationsDlg::OnFileReady()
+{
+    LoadSchedule();
+    LoadScheduleView();
+    UpdateTransmissionStatus();
 }
 
 void StationsDlg::OnShowStationsMenu(int iID)
@@ -179,77 +182,31 @@ void StationsDlg::OnShowPreviewMenu(int iID)
 
 void StationsDlg::on_ComboBoxFilterTarget_activated(const QString& s)
 {
-	if (schedule.GetSchedMode() == CSchedule::SM_DRM)
-		schedule.targetFilterdrm = s;
-	else
-		schedule.targetFilteranalog = s;
+    params[eRecMode].targetFilter = s;
+    schedule.setTargetFilter(s);
     UpdateTransmissionStatus();
 }
 
 void StationsDlg::on_ComboBoxFilterCountry_activated(const QString& s)
 {
-	if (schedule.GetSchedMode() == CSchedule::SM_DRM)
-		schedule.countryFilterdrm = s;
-	else
-		schedule.countryFilteranalog = s;
+    params[eRecMode].countryFilter = s;
+    schedule.setCountryFilter(s);
     UpdateTransmissionStatus();
 }
 
 void StationsDlg::on_ComboBoxFilterLanguage_activated(const QString& s)
 {
-	if (schedule.GetSchedMode() == CSchedule::SM_DRM)
-		schedule.languageFilterdrm = s;
-	else
-		schedule.languageFilteranalog = s;
+    params[eRecMode].languageFilter = s;
+    schedule.setLanguageFilter(s);
     UpdateTransmissionStatus();
 }
 
-void StationsDlg::on_actionGetUpdate_triggered()
-{
-	const bool bDrmMode = schedule.GetSchedMode() == CSchedule::SM_DRM;
-	QUrl& qurl(bDrmMode ? schedule.qurldrm : schedule.qurlanalog);
-	if (QMessageBox::information(this, tr("Dream Schedule Update"),
-		tr("Dream tries to download the newest schedule\n"
-		"Your computer must be connected to the internet.\n\n"
-		"The current file will be overwritten.\n"
-		"Do you want to continue?"),
-		QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes )
-	{
-		/* Try to download the current schedule. Copy the file to the
-		current working directory (which is "QDir().absFilePath(NULL)") */
-		manager->get(QNetworkRequest(qurl));
-	}
-}
-
-void StationsDlg::OnUrlFinished(QNetworkReply* reply)
-{
-	if(reply->error()==QNetworkReply::NoError)
-	{
-		QFile f(schedule.schedFileName);
-		if(f.open(QIODevice::WriteOnly)) {
-			f.write(reply->readAll());
-			f.close();
-			/* Notify the user that update was successful */
-			QMessageBox::information(this, "Dream", okMessage, QMessageBox::Ok);
-            /* Read file */
-            LoadSchedule();
-            LoadScheduleView();
-            UpdateTransmissionStatus();
-        } else {
-			QMessageBox::information(this, "Dream", tr("Can't save new schedule"), QMessageBox::Ok);
-		}
-	}
-	else
-	{
-		QMessageBox::information(this, "Dream", badMessage, QMessageBox::Ok);
-	}
-}
 
 void StationsDlg::LoadSchedule()
 {
-    schedule.LoadSchedule();
+    schedule.LoadSchedule(params[eRecMode].filename);
     /* add last update information on menu item */
-    QFileInfo f = QFileInfo(schedule.schedFileName);
+    QFileInfo f = QFileInfo(params[eRecMode].filename);
     actionGetUpdate->setText(
        tr("&Get Update (last update: %1)...").arg(f.lastModified().date().toString())
     );
@@ -265,30 +222,21 @@ void StationsDlg::OnSwitchMode(int m)
     ERecMode eNewRecMode = ERecMode(m);
     if(eNewRecMode != eRecMode)
     {
-        CSchedule::ESchedMode eSchedM = schedule.GetSchedMode();
-        bool bIsDRM = eNewRecMode == RM_DRM;
-        /* Store previous columns settings */
-        if (eSchedM != CSchedule::SM_NONE)
-            ColumnParamToStr(bIsDRM?strColumnParamdrm:strColumnParamanalog);
-        /* get sorting and filtering behaviour */
-        switch (eNewRecMode)
+        ColumnParamToStr(params[eRecMode].strColumnParam);
+        eRecMode = eNewRecMode;
+        if(isVisible())
         {
-        case RM_DRM:
-            schedule.SetSchedMode(CSchedule::SM_DRM);
-            break;
-        case RM_AM:
-            schedule.SetSchedMode(CSchedule::SM_ANALOG);
-            break;
-        case RM_FM:
-            schedule.SetSchedMode(CSchedule::SM_NONE); /* TODO */
-            break;
-        default: // can't happen!
-            ;
+            schedule.LoadSchedule(params[eRecMode].filename);
+            schedule.setCountryFilter(params[eRecMode].countryFilter);
+            schedule.setLanguageFilter(params[eRecMode].languageFilter);
+            schedule.setTargetFilter(params[eRecMode].targetFilter);
         }
-        /* Restore columns settings */
-        ColumnParamFromStr(bIsDRM?strColumnParamdrm:strColumnParamanalog);
+        else
+        {
+            schedule.clear();
+        }
+        ColumnParamFromStr(params[eRecMode].strColumnParam);
     }
-    eRecMode = eNewRecMode;
 }
 
 void StationsDlg::eventClose(QCloseEvent*)
@@ -342,15 +290,9 @@ void StationsDlg::OnUpdate()
     if (!isVisible())
         return;
 
-    if (schedule.GetSchedMode()==CSchedule::SM_NONE)
-    {
-	    ListViewStations->clear();
-        return;
-    }
-
     if (schedule.GetNumberOfStations()==0)
     {
-        if(QFile::exists(schedule.schedFileName))
+        if(QFile::exists(params[eRecMode].filename))
         {
             LoadSchedule();
         }
@@ -403,74 +345,45 @@ void StationsDlg::LoadSettings()
 		break;
 	}
 
-	iSortColumndrm = getSetting("sortcolumndrm", 0);
-	bCurrentSortAscendingdrm = getSetting("sortascendingdrm", true);
-	strColumnParamdrm = getSetting("columnparamdrm", QString());
-	iSortColumnanalog = getSetting("sortcolumnanalog", 0);
-	bCurrentSortAscendinganalog = getSetting("sortascendinganalog", true);
-	strColumnParamanalog = getSetting("columnparamanalog", QString());
-
-	schedule.qurldrm = QUrl(getSetting("DRM URL", QString(DRM_SCHEDULE_URL)));
-	schedule.targetFilterdrm = getSetting("targetfilterdrm", QString());
-	schedule.countryFilterdrm = getSetting("countryfilterdrm", QString());
-	schedule.languageFilterdrm = getSetting("languagefilterdrm", QString());
-	schedule.targetFilteranalog = getSetting("targetfilteranalog", QString());
-	schedule.countryFilteranalog = getSetting("countryfilteranalog", QString());
-	schedule.languageFilteranalog = getSetting("languagefilteranalog", QString());
+    params[RM_DRM].iSortColumn = getSetting("sortcolumndrm", 0);
+    params[RM_DRM].bCurrentSortAscending = getSetting("sortascendingdrm", true);
+    params[RM_DRM].strColumnParam = getSetting("columnparamdrm", QString());
+    params[RM_AM].iSortColumn = getSetting("sortcolumnanalog", 0);
+    params[RM_AM].bCurrentSortAscending = getSetting("sortascendinganalog", true);
+    params[RM_AM].strColumnParam = getSetting("columnparamanalog", QString());
+    params[RM_DRM].url = getSetting("DRM URL", QString(DRM_SCHEDULE_URL));
+    params[RM_DRM].targetFilter = getSetting("targetfilterdrm", QString());
+    params[RM_DRM].countryFilter = getSetting("countryfilterdrm", QString());
+    params[RM_DRM].languageFilter = getSetting("languagefilterdrm", QString());
+    params[RM_AM].targetFilter = getSetting("targetfilteranalog", QString());
+    params[RM_AM].countryFilter = getSetting("countryfilteranalog", QString());
+    params[RM_AM].languageFilter = getSetting("languagefilteranalog", QString());
+    params[RM_AM].filename = getSetting("schedulefilenameanalog", QString(AMSCHEDULE_CSV_FILE_NAME));
+    params[RM_DRM].filename = getSetting("schedulefilenamedrm", QString(DRMSCHEDULE_INI_FILE_NAME));
 }
 
 void StationsDlg::SaveSettings()
 {
-    if(schedule.GetSchedMode()==CSchedule::SM_DRM)
-        ColumnParamToStr(strColumnParamdrm);
-    else
-        ColumnParamToStr(strColumnParamanalog);
+    ColumnParamToStr(params[eRecMode].strColumnParam);
     Settings.Put("Hamlib", "ensmeter", actionEnable_S_Meter->isChecked());
 	putSetting("showall", actionShowAllStations->isChecked());
-	putSetting("DRM URL", schedule.qurldrm.toString());
-	putSetting("ANALOG URL", schedule.qurlanalog.toString());
-	putSetting("sortcolumndrm", iSortColumndrm);
-	putSetting("sortascendingdrm", bCurrentSortAscendingdrm);
-	putSetting("columnparamdrm", strColumnParamdrm);
-	putSetting("sortcolumnanalog", iSortColumnanalog);
-	putSetting("sortascendinganalog", bCurrentSortAscendinganalog);
-	putSetting("columnparamanalog", strColumnParamanalog);
-	putSetting("targetfilterdrm", schedule.targetFilterdrm);
-	putSetting("countryfilterdrm", schedule.countryFilterdrm);
-	putSetting("languagefilterdrm", schedule.languageFilterdrm);
-	putSetting("targetfilteranalog", schedule.targetFilteranalog);
-	putSetting("countryfilteranalog", schedule.countryFilteranalog);
-	putSetting("languagefilteranalog", schedule.languageFilteranalog);
+    putSetting("DRM URL", params[RM_DRM].url);
+    putSetting("ANALOG URL", params[RM_AM].url);
+    putSetting("sortcolumndrm", params[RM_DRM].iSortColumn);
+    putSetting("sortascendingdrm", params[RM_DRM].bCurrentSortAscending);
+    putSetting("columnparamdrm", params[RM_DRM].strColumnParam);
+    putSetting("sortcolumnanalog", params[RM_AM].iSortColumn);
+    putSetting("sortascendinganalog", params[RM_AM].bCurrentSortAscending);
+    putSetting("columnparamanalog", params[RM_AM].strColumnParam);
+    putSetting("targetfilterdrm", params[RM_DRM].targetFilter);
+    putSetting("countryfilterdrm", params[RM_DRM].countryFilter);
+    putSetting("languagefilterdrm", params[RM_DRM].languageFilter);
+    putSetting("targetfilteranalog", params[RM_AM].targetFilter);
+    putSetting("countryfilteranalog", params[RM_AM].countryFilter);
+    putSetting("languagefilteranalog", params[RM_AM].languageFilter);
 
 	/* Store preview settings */
 	putSetting("preview", schedule.GetSecondsPreview());
-}
-
-void StationsDlg::LoadFilters()
-{
-	ComboBoxFilterTarget->clear();
-	ComboBoxFilterCountry->clear();
-	ComboBoxFilterLanguage->clear();
-	ComboBoxFilterTarget->addItems(schedule.ListTargets);
-	ComboBoxFilterCountry->addItems(schedule.ListCountries);
-	ComboBoxFilterLanguage->addItems(schedule.ListLanguages);
-
-	QString targetFilter,countryFilter,languageFilter;
-	if(schedule.GetSchedMode()==CSchedule::SM_DRM)
-	{
-		targetFilter=schedule.targetFilterdrm;
-		countryFilter=schedule.countryFilterdrm;
-		languageFilter=schedule.languageFilterdrm;
-	}
-	else
-	{
-		targetFilter=schedule.targetFilteranalog;
-		countryFilter=schedule.countryFilteranalog;
-		languageFilter=schedule.languageFilteranalog;
-	}
-	ComboBoxFilterTarget->setCurrentIndex(ComboBoxFilterTarget->findText(targetFilter));
-	ComboBoxFilterCountry->setCurrentIndex(ComboBoxFilterCountry->findText(countryFilter));
-	ComboBoxFilterLanguage->setCurrentIndex(ComboBoxFilterLanguage->findText(languageFilter));
 }
 
 void StationsDlg::LoadScheduleView()
@@ -509,20 +422,26 @@ void StationsDlg::LoadScheduleView()
 		item->setTextAlignment(3, Qt::AlignRight | Qt::AlignVCenter);
 		item->setTextAlignment(4, Qt::AlignRight | Qt::AlignVCenter);
 	}
-	int c;
-	bool b;
-	if(schedule.GetSchedMode()==CSchedule::SM_DRM)
-	{
-		b = bCurrentSortAscendingdrm;
-		c = iSortColumndrm;
-	}
-	else
-	{
-		b = bCurrentSortAscendinganalog;
-		c = iSortColumnanalog;
-	}
-	ListViewStations->sortByColumn(c, b ? Qt::AscendingOrder : Qt::DescendingOrder);
-	LoadFilters();
+    ListViewStations->sortByColumn(
+            params[eRecMode].iSortColumn,
+            params[eRecMode].bCurrentSortAscending ? Qt::AscendingOrder : Qt::DescendingOrder
+   );
+
+    // Load Filters(
+    ComboBoxFilterTarget->clear();
+    ComboBoxFilterCountry->clear();
+    ComboBoxFilterLanguage->clear();
+    ComboBoxFilterTarget->addItems(schedule.ListTargets);
+    ComboBoxFilterCountry->addItems(schedule.ListCountries);
+    ComboBoxFilterLanguage->addItems(schedule.ListLanguages);
+
+    QString s;
+    s = schedule.getTargetFilter();
+    int i;
+    i = ComboBoxFilterTarget->findText(s);
+    ComboBoxFilterTarget->setCurrentIndex(i);
+    ComboBoxFilterCountry->setCurrentIndex(ComboBoxFilterCountry->findText(schedule.getCountryFilter()));
+    ComboBoxFilterLanguage->setCurrentIndex(ComboBoxFilterLanguage->findText(schedule.getLanguageFilter()));
 }
 
 void StationsDlg::UpdateTransmissionStatus()
@@ -591,34 +510,22 @@ void StationsDlg::OnHeaderClicked(int c)
 	else
 		SetSortAscending(true);
 	/* Store the column of sorting */
-	if (schedule.GetSchedMode() == CSchedule::SM_DRM)
-		iSortColumndrm = c;
-	else
-		iSortColumnanalog = c;
+    params[eRecMode].iSortColumn = c;
 }
 
 int StationsDlg::currentSortColumn()
 {
-	if (schedule.GetSchedMode() == CSchedule::SM_DRM)
-		return iSortColumndrm;
-	else
-		return iSortColumnanalog;
+    return params[eRecMode].iSortColumn;
 }
 
-void StationsDlg::SetSortAscending(_BOOLEAN b)
+void StationsDlg::SetSortAscending(bool b)
 {
-	if (schedule.GetSchedMode() == CSchedule::SM_DRM)
-		bCurrentSortAscendingdrm = b;
-	else
-		bCurrentSortAscendinganalog = b;
+    params[eRecMode].bCurrentSortAscending = b;
 }
 
-_BOOLEAN StationsDlg::GetSortAscending()
+bool StationsDlg::GetSortAscending()
 {
-	if (schedule.GetSchedMode() == CSchedule::SM_DRM)
-		return bCurrentSortAscendingdrm;
-	else
-		return bCurrentSortAscendinganalog;
+    return params[eRecMode].bCurrentSortAscending;
 }
 
 void StationsDlg::ColumnParamFromStr(const QString& strColumnParam)
@@ -772,7 +679,7 @@ void StationsDlg::AddWhatsThisHelp()
 	ProgrSigStrength->setWhatsThis(strSMeter);
 }
 
-_BOOLEAN StationsDlg::showAll()
+bool StationsDlg::showAll()
 {
 	return actionShowAllStations->isChecked();
 }

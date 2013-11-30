@@ -59,4 +59,6 @@ QString GetDataTypeString(const CService&);
 void SetStatus(CMultColorLED*, ETypeRxStatus);
 #endif
 
+QString getAMScheduleUrl();
+
 #endif // __UTIL_QT_UTIL_H

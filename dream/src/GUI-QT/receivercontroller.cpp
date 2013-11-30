@@ -267,3 +267,47 @@ void ReceiverController::setIntCons(bool b)
     /* Set parameter in working thread module */
     receiver->SetIntCons(b);
 }
+
+// AM
+
+void ReceiverController::setAnalogModulation(int i)
+{
+    receiver->GetAMDemod()->SetDemodType(CAMDemodulation::EDemodType(i));
+}
+
+void ReceiverController::setAnalogAGC(int i)
+{
+    receiver->GetAMDemod()->SetAGCType(CAGC::EType(i));
+}
+
+void ReceiverController::setAnalogNoiseReduction(int i)
+{
+    receiver->GetAMDemod()->SetNoiRedType(CAMDemodulation::ENoiRedType(i));
+}
+
+void ReceiverController::setAMFilterBW(int value)
+{
+    receiver->SetAMFilterBW(value);
+}
+
+void ReceiverController::setEnableAutoFreqAcq(bool b)
+{
+    /* Set parameter in working thread module */
+    receiver->GetAMDemod()->EnableAutoFreqAcq(b);
+}
+
+void ReceiverController::setEnablePLL(bool b)
+{
+    /* Set parameter in working thread module */
+    receiver->GetAMDemod()->EnablePLL(b);
+}
+
+void ReceiverController::setAMDemodAcq(double dVal)
+{
+    receiver->SetAMDemodAcq(dVal);
+}
+
+void ReceiverController::setNoiRedLevel(int value)
+{
+    receiver->GetAMDemod()->SetNoiRedLevel(value);
+}

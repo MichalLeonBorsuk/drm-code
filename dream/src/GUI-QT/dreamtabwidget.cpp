@@ -12,6 +12,7 @@
 #include "channelwidget.h"
 #include "gpswidget.h"
 #include "afswidget.h"
+#include "amwidget.h"
 #include <../datadecoding/DataDecoder.h>
 #include "receivercontroller.h"
 #include "stationswidget.h"
@@ -20,9 +21,12 @@
 #define STREAM_POS 129
 #define AFS_POS 130
 #define GPS_POS 131
+#define AM_POS 132
+#define AMSS_POS 133
 #define MAX_ENGINEERING_POS 192
 #define STATIONS_POS 193
 #define LIVE_STATIONS_POS 194
+#define AM_POS 132
 
 DreamTabWidget::DreamTabWidget(ReceiverController* rc, QWidget *parent) :
     QTabWidget(parent),controller(rc),
@@ -220,6 +224,7 @@ void DreamTabWidget::on_engineeringMode(bool b)
         add(new QLabel("Streams"), "Streams", STREAM_POS);
         add(new AFSWidget(controller), "AFS", AFS_POS);
         add(new GPSWidget(controller), "GPS", GPS_POS);
+        add(new AMWidget(controller), "AM", AM_POS);
         controller->setControls(); // new controls so fill their values from the receiver controller
     }
     else
