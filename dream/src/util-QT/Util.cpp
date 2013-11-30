@@ -400,6 +400,7 @@ QString GetDataTypeString(const CService& service)
     return strReturn;
 }
 
+#ifdef QT_GUI_LIB
 void SetStatus(CMultColorLED* LED, ETypeRxStatus state)
 {
     switch(state)
@@ -421,4 +422,5 @@ void SetStatus(CMultColorLED* LED, ETypeRxStatus state)
         break;
     }
 }
+#endif
 
