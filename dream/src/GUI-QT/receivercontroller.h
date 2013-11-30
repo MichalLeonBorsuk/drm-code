@@ -22,6 +22,7 @@ struct ChannelConfiguration {
     int interl;
     int sdcConst, mscConst;
     CMSCProtLev protLev;
+    int nData, nAudio;
 };
 
 class ReceiverController : public QObject
