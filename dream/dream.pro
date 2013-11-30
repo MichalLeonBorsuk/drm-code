@@ -645,7 +645,8 @@ FORMS += \
     slideshowwidget.ui \
     stationswidget.ui \
     gpswidget.ui \
-    amwidget.ui
+    amwidget.ui \
+    streamwidget.ui
 
 HEADERS += \
     src/GUI-QT/AnalogDemDlg.h \
@@ -684,7 +685,8 @@ HEADERS += \
     src/GUI-QT/gpswidget.h \
     src/GUI-QT/afswidget.h \
     src/util-QT/scheduleloader.h \
-    src/GUI-QT/amwidget.h
+    src/GUI-QT/amwidget.h \
+    src/GUI-QT/streamwidget.h
 
 SOURCES += \
     src/GUI-QT/AnalogDemDlg.cpp \
@@ -723,7 +725,8 @@ SOURCES += \
     src/GUI-QT/stationswidget.cpp \
     src/GUI-QT/gpswidget.cpp \
     src/GUI-QT/afswidget.cpp \
-    src/GUI-QT/amwidget.cpp
+    src/GUI-QT/amwidget.cpp \
+    src/GUI-QT/streamwidget.cpp
 }
 !isEmpty(QT):message(With Qt components: $$QT)
 !sound {

@@ -10,6 +10,7 @@
 #include "audiodetailwidget.h"
 #include "EPGDlg.h"
 #include "channelwidget.h"
+#include "streamwidget.h"
 #include "gpswidget.h"
 #include "afswidget.h"
 #include "amwidget.h"
@@ -221,7 +222,7 @@ void DreamTabWidget::on_engineeringMode(bool b)
         pCh->setPlotStyle(iPlotStyle);
         //connect(parent, SIGNAL(plotStyleChanged(int)), pCh, SLOT(setPlotStyle(int)));
         add(pCh, "Channel", CHANNEL_POS);
-        add(new QLabel("Streams"), "Streams", STREAM_POS);
+        add(new StreamWidget(controller), "Streams", STREAM_POS);
         add(new AFSWidget(controller), "AFS", AFS_POS);
         add(new GPSWidget(controller), "GPS", GPS_POS);
         add(new AMWidget(controller), "AM", AM_POS);

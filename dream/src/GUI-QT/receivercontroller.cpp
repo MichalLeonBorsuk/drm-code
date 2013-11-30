@@ -74,6 +74,8 @@ void ReceiverController::on_timer()
     channel.sdcConst = Parameters.eSDCCodingScheme;
     channel.mscConst = Parameters.eMSCCodingScheme;
     channel.protLev = Parameters.MSCPrLe;
+    channel.nAudio = Parameters.iNumAudioService;
+    channel.nData = Parameters.iNumDataService;
 
     Parameters.Unlock();
 
