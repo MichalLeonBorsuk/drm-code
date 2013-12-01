@@ -222,7 +222,7 @@ void StationsDlg::OnSwitchMode(int m)
     ERecMode eNewRecMode = ERecMode(m);
     if(eNewRecMode != eRecMode)
     {
-        ColumnParamToStr(params[eRecMode].strColumnParam);
+        ColumnParamToStr(ListViewStations, params[eRecMode].strColumnParam);
         eRecMode = eNewRecMode;
         if(isVisible())
         {
@@ -235,7 +235,7 @@ void StationsDlg::OnSwitchMode(int m)
         {
             schedule.clear();
         }
-        ColumnParamFromStr(params[eRecMode].strColumnParam);
+        ColumnParamFromStr(ListViewStations, params[eRecMode].strColumnParam);
     }
 }
 
@@ -364,7 +364,7 @@ void StationsDlg::LoadSettings()
 
 void StationsDlg::SaveSettings()
 {
-    ColumnParamToStr(params[eRecMode].strColumnParam);
+    ColumnParamToStr(ListViewStations, params[eRecMode].strColumnParam);
     Settings.Put("Hamlib", "ensmeter", actionEnable_S_Meter->isChecked());
 	putSetting("showall", actionShowAllStations->isChecked());
     putSetting("DRM URL", params[RM_DRM].url);
@@ -526,62 +526,6 @@ void StationsDlg::SetSortAscending(bool b)
 bool StationsDlg::GetSortAscending()
 {
     return params[eRecMode].bCurrentSortAscending;
-}
-
-void StationsDlg::ColumnParamFromStr(const QString& strColumnParam)
-{
-	QStringList list(strColumnParam.split(QChar('|')));
-	const int n = list.count(); /* width and position */
-	if (n == 2)
-	{
-		for (int j = 0; j < n; j++)
-		{
-			int c = ListViewStations->header()->count();
-			QStringList values(list[j].split(QChar(',')));
-			const int lc = (int)values.count();
-			if (lc < c)
-				c = lc;
-			for (int i = 0; i < c; i++)
-			{
-				int v = values[i].toInt();
-				if (!j) /* width*/
-					ListViewStations->header()->resizeSection(i, v);
-				else /* position */
-					ListViewStations->header()->moveSection(ListViewStations->header()->visualIndex(i), v);
-			}
-		}
-	}
-	else
-	{
-		ListViewStations->header()->resizeSections(QHeaderView::ResizeToContents);
-		ListViewStations->header()->resizeSections(QHeaderView::Interactive);
-		ListViewStations->header()->resizeSection(0, ListViewStations->header()->minimumSectionSize());
-	}
-}
-
-void StationsDlg::ColumnParamToStr(QString& strColumnParam)
-{
-	strColumnParam = "";
-	const int n = 2; /* width and position */
-	for (int j = 0; j < n; j++)
-	{
-		const int c = ListViewStations->header()->count();
-		for (int i = 0; i < c; i++)
-		{
-			int v;
-			if (!j) /* width*/
-				v = ListViewStations->header()->sectionSize(i);
-			else /* position */
-				v = ListViewStations->header()->visualIndex(i);
-			QString strValue;
-			strValue.setNum(v);
-			strColumnParam += strValue;
-			if (i < (c-1))
-				strColumnParam += ",";
-		}
-		if (j < (n-1))
-			strColumnParam += "|";
-	}
 }
 
 void StationsDlg::on_ListViewStations_itemSelectionChanged()

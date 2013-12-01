@@ -133,7 +133,7 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& Settings,
 #endif
 
     /* Live Schedule window */
-    pLiveScheduleDlg = new LiveScheduleDlg(Settings, this/*parents*/); // TODO not sure about that one
+    pLiveScheduleDlg = new LiveScheduleDlg(Settings, parents);
 
     /* Journaline viewer window */
     pJLDlg = new JLViewer(Settings, this);
@@ -817,19 +817,16 @@ void FDRMDialog::changeRecMode(int iRecMode, bool bWindowModeChanged)
         break;
     }
 
-    setSettingsTag(settingsTag);
-    settingsTag = bSingleWindowMode ? CWINDOW_HIDE : settingsTag;
-    if (pStationsDlg)     pStationsDlg->setSettingsTag(settingsTag);
-    settingsTag = bSingleWindowMode ? CWINDOW_HIDE : CWINDOW_NOTAG;
-    if (pSysEvalDlg)      pSysEvalDlg->setSettingsTag(settingsTag);
-    settingsTag = CWINDOW_HIDE;
+    setSettingsTag(settingsTag, false);
+    if (pStationsDlg)     pStationsDlg->setSettingsTag(settingsTag, bSingleWindowMode);
+    if (pLiveScheduleDlg) pLiveScheduleDlg->setSettingsTag(settingsTag, true);
+    if (pSysEvalDlg)      pSysEvalDlg->setSettingsTag(CWINDOW_NOTAG, bSingleWindowMode);
 #ifdef QT_WEBKIT_LIB
-    if (pBWSDlg)          pBWSDlg->setSettingsTag(settingsTag);
+    if (pBWSDlg)          pBWSDlg->setSettingsTag(settingsTag, true);
 #endif
-    if (pEPGDlg)          pEPGDlg->setSettingsTag(settingsTag);
-    if (pJLDlg)           pJLDlg->setSettingsTag(settingsTag);
-    if (pLiveScheduleDlg) pLiveScheduleDlg->setSettingsTag(settingsTag); // TODO not sure about that one
-    if (pSlideShowDlg)    pSlideShowDlg->setSettingsTag(settingsTag);
+    if (pEPGDlg)          pEPGDlg->setSettingsTag(settingsTag, true);
+    if (pJLDlg)           pJLDlg->setSettingsTag(settingsTag, true);
+    if (pSlideShowDlg)    pSlideShowDlg->setSettingsTag(settingsTag, true);
 
     if (pToShow)
     {

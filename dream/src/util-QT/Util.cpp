@@ -35,6 +35,10 @@
 #include <QDir>
 #include <QFileInfo>
 #include <QCoreApplication>
+#include <QStringList>
+#ifdef QT_GUI_LIB
+# include <QHeaderView>
+#endif
 
 /* Ensure that the given filename is secure */
 QString VerifyFilename(QString filename)
@@ -401,30 +405,6 @@ QString GetDataTypeString(const CService& service)
     return strReturn;
 }
 
-#ifdef QT_GUI_LIB
-void SetStatus(CMultColorLED* LED, ETypeRxStatus state)
-{
-    switch(state)
-    {
-    case NOT_PRESENT:
-        LED->Reset(); /* GREY */
-        break;
-
-    case CRC_ERROR:
-        LED->SetLight(CMultColorLED::RL_RED);
-        break;
-
-    case DATA_ERROR:
-        LED->SetLight(CMultColorLED::RL_YELLOW);
-        break;
-
-    case RX_OK:
-        LED->SetLight(CMultColorLED::RL_GREEN);
-        break;
-    }
-}
-#endif
-
 QString getAMScheduleUrl()
 {
     QDate d = QDate::currentDate();
@@ -483,4 +463,83 @@ QString getAMScheduleUrl()
     return QString("http://eibispace.de/dx/sked-%1%2.csv").arg(season).arg(year-2000,2);
 }
 
+#ifdef QT_GUI_LIB
+void SetStatus(CMultColorLED* LED, ETypeRxStatus state)
+{
+    switch(state)
+    {
+    case NOT_PRESENT:
+        LED->Reset(); /* GREY */
+        break;
+
+    case CRC_ERROR:
+        LED->SetLight(CMultColorLED::RL_RED);
+        break;
+
+    case DATA_ERROR:
+        LED->SetLight(CMultColorLED::RL_YELLOW);
+        break;
+
+    case RX_OK:
+        LED->SetLight(CMultColorLED::RL_GREEN);
+        break;
+    }
+}
+
+void ColumnParamFromStr(QTreeWidget* treeWidget, const QString& strColumnParam)
+{
+    QStringList list(strColumnParam.split(QChar('|')));
+    const int n = list.count(); /* width and position */
+    if (n == 2)
+    {
+        for (int j = 0; j < n; j++)
+        {
+            int c = treeWidget->header()->count();
+            QStringList values(list[j].split(QChar(',')));
+            const int lc = (int)values.count();
+            if (lc < c)
+                c = lc;
+            for (int i = 0; i < c; i++)
+            {
+                int v = values[i].toInt();
+                if (!j) /* width*/
+                    treeWidget->header()->resizeSection(i, v);
+                else /* position */
+                    treeWidget->header()->moveSection(treeWidget->header()->visualIndex(i), v);
+            }
+        }
+    }
+    else
+    {
+        treeWidget->header()->resizeSections(QHeaderView::ResizeToContents);
+        treeWidget->header()->resizeSections(QHeaderView::Interactive);
+        treeWidget->header()->resizeSection(0, treeWidget->header()->minimumSectionSize());
+    }
+}
+
+void ColumnParamToStr(QTreeWidget* treeWidget, QString& strColumnParam)
+{
+    strColumnParam = "";
+    const int n = 2; /* width and position */
+    for (int j = 0; j < n; j++)
+    {
+        const int c = treeWidget->header()->count();
+        for (int i = 0; i < c; i++)
+        {
+            int v;
+            if (!j) /* width*/
+                v = treeWidget->header()->sectionSize(i);
+            else /* position */
+                v = treeWidget->header()->visualIndex(i);
+            QString strValue;
+            strValue.setNum(v);
+            strColumnParam += strValue;
+            if (i < (c-1))
+                strColumnParam += ",";
+        }
+        if (j < (n-1))
+            strColumnParam += "|";
+    }
+}
+#endif
 
