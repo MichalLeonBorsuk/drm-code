@@ -409,7 +409,9 @@ void CSchedule::ReadCSVFile(FILE* pFile)
 
 Station::EState CSchedule::GetState(const int iPos)
 {
-	return StationsTable[iPos].stateAt(time(NULL), GetSecondsPreview());
+    if(StationsTable.size()>iPos)
+        return StationsTable[iPos].stateAt(time(NULL), GetSecondsPreview());
+    return Station::IS_INACTIVE;
 }
 
 bool CSchedule::CheckFilter(const int iPos)
