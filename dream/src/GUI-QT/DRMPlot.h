@@ -37,6 +37,9 @@
 #include <qwt_plot.h>
 #include <qwt_plot_curve.h>
 #include <qwt_plot_grid.h>
+#if QWT_VERSION < 0x060000
+#include <qwt_symbol.h>
+#endif
 #include <../Parameter.h>
 #include <../util/Vector.h>
 #include "receivercontroller.h"
