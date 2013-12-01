@@ -86,12 +86,13 @@ linux-* {
     LIBS += -ldl -lrt
 }
 android {
-    CONFIG += openSL sound
-    SOURCES += src/android/platform_util.cpp src/android/soundin.cpp src/android/soundout.cpp
-    HEADERS += src/android/platform_util.h src/android/soundin.h src/android/soundout.h
+    #CONFIG += openSL sound
+    SOURCES += src/android/platform_util.cpp
+    HEADERS += src/android/platform_util.h
     QT -= webkitwidgets
     QT += svg
-    LIBS += -lOpenSLES
+    QT += multimedia
+    CONFIG += sound
 }
 unix {
     target.path = /usr/bin
@@ -370,6 +371,9 @@ pulseaudio {
 }
 openSL {
     DEFINES += USE_OPENSL
+    SOURCES=src/android/soundin.cpp src/android/soundout.cpp
+    HEADERS=src/android/soundin.h src/android/soundout.h
+    LIBS += -lOpenSLES
     message("with openSL")
 }
 consoleio {
@@ -614,9 +618,9 @@ SOURCES += \
 }
 gui {
     contains(QT, webkitwidgets)|contains(QT,webkit) {
-        FORMS += BWSViewer.ui
-        HEADERS += src/GUI-QT/BWSViewer.h
-        SOURCES += src/GUI-QT/BWSViewer.cpp
+        FORMS += BWSViewer.ui bwsviewerwidget.ui
+        HEADERS += src/GUI-QT/BWSViewer.h src/GUI-QT/bwsviewerwidget.h
+        SOURCES += src/GUI-QT/BWSViewer.cpp src/GUI-QT/bwsviewerwidget.cpp
     }
 FORMS += \
     AboutDlgbase.ui \
@@ -635,7 +639,6 @@ FORMS += \
     TransmDlgbase.ui \
     serviceselector.ui \
     channelwidget.ui \
-    bwsviewerwidget.ui \
     audiodetailwidget.ui \
     drmoptions.ui \
     drmdisplay.ui \
@@ -672,7 +675,6 @@ HEADERS += \
     src/GUI-QT/serviceselector.h \
     src/GUI-QT/dreamtabwidget.h \
     src/GUI-QT/channelwidget.h \
-    src/GUI-QT/bwsviewerwidget.h \
     src/GUI-QT/audiodetailwidget.h \
     src/GUI-QT/drmoptions.h \
     src/GUI-QT/drmdisplay.h \
@@ -712,7 +714,6 @@ SOURCES += \
     src/GUI-QT/serviceselector.cpp \
     src/GUI-QT/dreamtabwidget.cpp \
     src/GUI-QT/channelwidget.cpp \
-    src/GUI-QT/bwsviewerwidget.cpp \
     src/GUI-QT/audiodetailwidget.cpp \
     src/GUI-QT/drmoptions.cpp \
     src/GUI-QT/drmdisplay.cpp \

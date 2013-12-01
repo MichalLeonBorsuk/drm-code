@@ -5,7 +5,9 @@
 #include "../Parameter.h"
 #include <../util-QT/Util.h>
 #include "journalineviewer.h"
-#include "bwsviewerwidget.h"
+#ifdef QT_WEBKIT_LIB
+# include "bwsviewerwidget.h"
+#endif
 #include "slideshowwidget.h"
 #include "audiodetailwidget.h"
 #include "EPGDlg.h"
@@ -165,11 +167,13 @@ QWidget* DreamTabWidget::makePacketApp(int short_id, const CService& service) co
 
         case DAB_AT_BROADCASTWEBSITE:
         {
+#ifdef QT_WEBKIT_LIB
             BWSViewerWidget* p = new BWSViewerWidget();
             p->setDecoder(service.DataParam.pDecoder);
             p->setServiceInformation(short_id, service);
             connect(controller, SIGNAL(dataStatusChanged(int, ETypeRxStatus)), p, SLOT(setStatus(int, ETypeRxStatus)));
             pApp = p;
+#endif
         }
             break;
 

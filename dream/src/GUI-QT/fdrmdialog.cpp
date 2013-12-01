@@ -3,7 +3,7 @@
  * Copyright (c) 2001
  *
  * Author(s):
- *	Volker Fischer, Andrea Russo
+ *	Volker Fischer, Andrea Russo, David Flamand, Julian Cable
  *
  * Description:
  *
@@ -71,6 +71,8 @@
 // static _REAL WMERSteps[] = {8.0, 12.0, 16.0, 20.0, 24.0};
 // David's values
 static _REAL WMERSteps[] = {6.0, 12.0, 18.0, 24.0, 30.0};
+
+static const bool DEFAULT_TO_SINGLE_WINDOW_MODE=true;
 
 /* Implementation *************************************************************/
 #ifdef HAVE_LIBHAMLIB
@@ -345,7 +347,7 @@ void FDRMDialog::setBars(int bars)
 
 void FDRMDialog::on_actionEngineering_Mode_triggered(bool checked)
 {
-    bool bSingle = getSetting("singlewindow", false, true);
+    bool bSingle = getSetting("singlewindow", DEFAULT_TO_SINGLE_WINDOW_MODE, true);
     putSetting(bSingle ? "engineeringsingle" : "engineeringmulti", checked, true);
     if(ui->actionSingle_Window_Mode->isChecked())
     {
@@ -381,7 +383,7 @@ void FDRMDialog::on_actionSingle_Window_Mode_triggered(bool checked)
 
 void FDRMDialog::setupWindowMode()
 {
-    bool bSingleWindowMode = getSetting("singlewindow", false, true);
+    bool bSingleWindowMode = getSetting("singlewindow", DEFAULT_TO_SINGLE_WINDOW_MODE, true);
     if(bSingleWindowMode)
     {
         if(pServiceTabs==NULL)
@@ -772,7 +774,7 @@ void FDRMDialog::changeRecMode(int iRecMode, bool bWindowModeChanged)
 {
     CWindow *pToShow=NULL, *pToHide=NULL;
     QString settingsTag;
-    bool bSingleWindowMode = getSetting("singlewindow", false, true);
+    bool bSingleWindowMode = getSetting("singlewindow", DEFAULT_TO_SINGLE_WINDOW_MODE, true);
 
     // Prevent previous layout to interfere with new window size
     if (bWindowModeChanged)
@@ -821,7 +823,9 @@ void FDRMDialog::changeRecMode(int iRecMode, bool bWindowModeChanged)
     settingsTag = bSingleWindowMode ? CWINDOW_HIDE : CWINDOW_NOTAG;
     if (pSysEvalDlg)      pSysEvalDlg->setSettingsTag(settingsTag);
     settingsTag = CWINDOW_HIDE;
+#ifdef QT_WEBKIT_LIB
     if (pBWSDlg)          pBWSDlg->setSettingsTag(settingsTag);
+#endif
     if (pEPGDlg)          pEPGDlg->setSettingsTag(settingsTag);
     if (pJLDlg)           pJLDlg->setSettingsTag(settingsTag);
     if (pLiveScheduleDlg) pLiveScheduleDlg->setSettingsTag(settingsTag); // TODO not sure about that one
@@ -989,7 +993,7 @@ void FDRMDialog::eventUpdate()
     UpdateWindowTitle();
     pFileMenu->UpdateMenu();
     SetDisplayColor(CRGBConversion::int2RGB(getSetting("colorscheme", 0xff0000, true)));
-    bool bSingle = getSetting("singlewindow", false, true);
+    bool bSingle = getSetting("singlewindow", DEFAULT_TO_SINGLE_WINDOW_MODE, true);
     ui->actionSingle_Window_Mode->setChecked(bSingle); // does not emit trigger signal
     bool b = getSetting(bSingle ? "engineeringsingle" : "engineeringmulti", false, true);
     ui->actionEngineering_Mode->setChecked(b); // does not emit trigger signal
