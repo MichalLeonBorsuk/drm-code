@@ -81,9 +81,7 @@ protected:
     bool    		showAll();
     bool            GetSortAscending();
     void			SetSortAscending(bool);
-	void			ColumnParamFromStr(const QString& strColumnParam);
-	void			ColumnParamToStr(QString& strColumnParam);
-	int				currentSortColumn();
+    int				currentSortColumn();
     Params          params[RM_NONE+1];
 
 #ifdef HAVE_LIBHAMLIB

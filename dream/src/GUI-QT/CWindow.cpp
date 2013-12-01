@@ -74,14 +74,14 @@ bool CEventFilter::isValid(const QEvent* event)
 /* CWindow ------------------------------------------------------------------ */
 
 CWindow::CWindow(QWidget* parent, CSettings& Settings, const QString& windowName) :
-	QMainWindow(), parents(), windowName(windowName), Settings(Settings)
+	QMainWindow(), parents(), windowName(windowName), bHide(false), Settings(Settings)
 {
 	if (parent != NULL)
 		parents[parent] = "";
 	init();
 }
 CWindow::CWindow(QMap<QWidget*,QString>& parents, CSettings& Settings, const QString& windowName) :
-	QMainWindow(), parents(parents), windowName(windowName), Settings(Settings)
+	QMainWindow(), parents(parents), windowName(windowName), bHide(false), Settings(Settings)
 {
 	init();
 }
@@ -179,10 +179,11 @@ void CWindow::toggleVisibility()
 	setVisible(!isVisible());
 }
 
-void CWindow::setSettingsTag(const QString& tag)
+void CWindow::setSettingsTag(const QString& tag, bool hide)
 {
 //	printf("################################ CWindow::setSettingTag(%s)\n", string(tag.toLocal8Bit()).c_str());
 	settingsTag = tag;
+	bHide = hide;
 }
 
 void CWindow::loadWindowGeometry()
@@ -213,7 +214,7 @@ void CWindow::OnShowWindow(QWidget* window, bool bVisible)
 //	printf("################################ CWindow::OnShowWindow(%s) settingsTag='%s' bVisible=%i window=%p\n", getSection().c_str(), string(settingsTag.toLocal8Bit()).c_str(), bVisible, window);
 	if (parents.contains(window))
 	{
-		if (settingsTag == CWINDOW_HIDE)
+		if (bHide)
 			QMainWindow::setVisible(false);
 		else
 		{

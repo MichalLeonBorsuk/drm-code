@@ -46,7 +46,6 @@
 /* Definitions ****************************************************************/
 
 #define EVENT_FILTER(e) do { if (!ef.isValid((QEvent*)e)) return; } while(0)
-#define CWINDOW_HIDE "*"
 #define CWINDOW_NOTAG ""
 
 
@@ -84,7 +83,7 @@ public:
 	CWindow(QMap<QWidget*,QString>& parents, CSettings& Settings, const QString& windowName);
 	virtual ~CWindow();
 	void toggleVisibility();
-	void setSettingsTag(const QString& tag);
+	void setSettingsTag(const QString& tag, bool hide);
 	QString getSetting(const QString& key, const QString& defvalue, const bool bCommon=false);
 	bool getSetting(const QString& key, const bool defvalue, const bool bCommon=false);
 	int getSetting(const QString& key, const int defvalue, const bool bCommon=false);
@@ -111,6 +110,7 @@ private:
 	QMap <QWidget*, QString> parents;
 	QString settingsTag;
 	const QString windowName;
+	bool bHide;
 	CEventFilter ef;
 
 protected:

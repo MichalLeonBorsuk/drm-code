@@ -328,8 +328,8 @@ CDRMLiveSchedule::LoadAFSInformation(const CAltFreqSign& AltFreqSign)
 }
 
 LiveScheduleDlg::LiveScheduleDlg(CSettings& Settings,
-                                 QWidget* parent/*QMap<QWidget*,QString>& parents*/):
-    CWindow(parent/*parents*/, Settings, "Live Schedule"),
+                                 QMap<QWidget*,QString>& parents):
+    CWindow(parents, Settings, "Live Schedule"),
     smallGreenCube(":/icons/smallGreenCube.png"),
     greenCube(":/icons/greenCube.png"), redCube(":/icons/redCube.png"),
     orangeCube(":/icons/orangeCube.png"), pinkCube(":/icons/pinkCube.png"),
@@ -438,6 +438,10 @@ LiveScheduleDlg::LoadSettings()
     bCurrentSortAscending = getSetting("sortascending", true);
     ListViewStations->sortItems(iCurrentSortColumn, bCurrentSortAscending?Qt::AscendingOrder:Qt::DescendingOrder);
 
+    /* Set column order and size settings */
+    QString strColumnParam = getSetting("columnparam", QString());
+    ColumnParamFromStr(ListViewStations, strColumnParam);
+
     /* Set stations in list view which are active right now */
     bool bShowAll = getSetting("showall", false);
     int iPrevSecs = getSetting("preview", 0);
@@ -476,6 +480,11 @@ LiveScheduleDlg::SaveSettings()
     /* Store sort settings */
     putSetting("sortcolumn", iCurrentSortColumn);
     putSetting("sortascending", bCurrentSortAscending);
+
+    /* Store column order and size settings */
+    QString strColumnParam;
+    ColumnParamToStr(ListViewStations, strColumnParam);
+    putSetting("columnparam", strColumnParam);
 
     /* Store preview settings */
     putSetting("showall", showAll());

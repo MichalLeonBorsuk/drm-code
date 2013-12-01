@@ -293,7 +293,7 @@ CConsoleIO::Update()
 			_REAL rMER = Parameters.rMER;
 			cprintf("         MSC WMER / MSC MER: %.1f dB / %.1f dB" NL, rWMERMSC, rMER);
 
-			_REAL rDCFreq = Parameters.GetDCFrequency();
+			_REAL rDCFreq = pDRMReceiver->GetReceiveData()->ConvertFrequency(Parameters.GetDCFrequency());
 			cprintf(" DC Frequency of DRM Signal: %.2f Hz" NL, rDCFreq);
 
 		    _REAL rCurSamROffs = Parameters.rResampleOffset;

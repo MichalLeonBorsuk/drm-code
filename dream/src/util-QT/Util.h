@@ -32,6 +32,7 @@
 #include <QString>
 #ifdef QT_GUI_LIB
 # include "../GUI-QT/MultColorLED.h"
+# include <QTreeWidget>
 #endif
 #include "../Parameter.h"
 
@@ -55,10 +56,13 @@ void RestartTransceiver(CDRMTransceiver *DRMTransceiver);
 QString	GetCodecString(const CService&);
 QString	GetTypeString(const CService&);
 QString GetDataTypeString(const CService&);
-#ifdef QT_GUI_LIB
-void SetStatus(CMultColorLED*, ETypeRxStatus);
-#endif
 
 QString getAMScheduleUrl();
+
+#ifdef QT_GUI_LIB
+void SetStatus(CMultColorLED*, ETypeRxStatus);
+void ColumnParamFromStr(QTreeWidget* treeWidget, const QString& strColumnParam);
+void ColumnParamToStr(QTreeWidget* treeWidget, QString& strColumnParam);
+#endif
 
 #endif // __UTIL_QT_UTIL_H
