@@ -333,7 +333,7 @@ LiveScheduleDlg::LiveScheduleDlg(CSettings& Settings,
     smallGreenCube(":/icons/smallGreenCube.png"),
     greenCube(":/icons/greenCube.png"), redCube(":/icons/redCube.png"),
     orangeCube(":/icons/orangeCube.png"), pinkCube(":/icons/pinkCube.png"),
-    vecpListItems(), iColStationID(1), iWidthColStationID(0),strStationName(""),
+    vecpListItems(), iColStationID(1), iWidthColStationID(0), bDisableFrequencyChange(false),
     serviceInformation()
 {
     setupUi(this);
@@ -346,6 +346,7 @@ LiveScheduleDlg::LiveScheduleDlg(CSettings& Settings,
 
     /* Clear list box for file names and set up columns */
     ListViewStations->clear();
+	ListViewStations->setSortingEnabled(true);
 
     connect(actionSave,  SIGNAL(triggered()), this, SLOT(OnSave()));
 
@@ -374,6 +375,7 @@ LiveScheduleDlg::LiveScheduleDlg(CSettings& Settings,
     connect(action15minutes, SIGNAL(triggered()), previewMapper, SLOT(map()));
     connect(action30minutes, SIGNAL(triggered()), previewMapper, SLOT(map()));
     connect(previewMapper, SIGNAL(mapped(int)), this, SLOT(OnShowPreviewMenu(int)));
+    connect(ListViewStations->header(), SIGNAL(sectionClicked(int)), this, SLOT(OnHeaderClicked(int)));
 
     connect(buttonOk,  SIGNAL(clicked()), this, SLOT(close()));
     //connect(actionGetUpdate, SIGNAL(triggered()), this, SLOT(OnGetUpdate()));
@@ -416,9 +418,12 @@ void LiveScheduleDlg::setService(int, const CService& service)
     }
 }
 
-void LiveScheduleDlg::setFrequency(int)
+void LiveScheduleDlg::setFrequency(int f)
 {
-
+    if (f > 30000)
+        labelFrequency->setText(QString::number((double)f / 1000) + tr(" MHz"));
+    else
+        labelFrequency->setText(QString::number(f) + tr(" kHz"));
 }
 
 void
@@ -583,6 +588,8 @@ MyListLiveViewItem::key(int column, bool ascending) const
 void
 LiveScheduleDlg::LoadSchedule()
 {
+    bDisableFrequencyChange = true;
+
     /* Lock mutex for modifying the vecpListItems */
     ListItemsMutex.lock();
 
@@ -608,6 +615,8 @@ LiveScheduleDlg::LoadSchedule()
     /* Unlock BEFORE calling the stations view update because in this function
        the mutex is locked, too! */
     ListItemsMutex.unlock();
+
+    bDisableFrequencyChange = false;
 
     /* Update list view */
     SetStationsView();
@@ -776,6 +785,22 @@ LiveScheduleDlg::OnHeaderClicked(int c)
         bCurrentSortAscending = TRUE;
 
     iCurrentSortColumn = c;
+}
+
+void
+LiveScheduleDlg::on_ListViewStations_itemSelectionChanged()
+{
+    if (!bDisableFrequencyChange)
+    {
+	    QList<QTreeWidgetItem *> items =  ListViewStations->selectedItems();
+	    if(items.size()==1 && items.first()->isSelected())
+	    {
+            double dFreq = QString(items.first()->text(0)).toDouble();
+            if (!items.first()->text(2).compare("FM"))
+                dFreq *= 1000;
+            emit frequencyChanged((int)floor(dFreq));
+        }
+    }
 }
 
 QString

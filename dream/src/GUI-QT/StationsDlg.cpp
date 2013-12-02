@@ -572,6 +572,11 @@ void StationsDlg::OnSigStr(double rCurSigStr)
 	ProgrSigStrength->setValue(rCurSigStr);
 }
 
+bool StationsDlg::showAll()
+{
+	return actionShowAllStations->isChecked();
+}
+
 void StationsDlg::AddWhatsThisHelp()
 {
 	/* Stations List */
@@ -621,9 +626,4 @@ void StationsDlg::AddWhatsThisHelp()
 	TextLabelUTCTime->setWhatsThis(strTime);
 	TextLabelSMeter->setWhatsThis(strSMeter);
 	ProgrSigStrength->setWhatsThis(strSMeter);
-}
-
-bool StationsDlg::showAll()
-{
-	return actionShowAllStations->isChecked();
 }
