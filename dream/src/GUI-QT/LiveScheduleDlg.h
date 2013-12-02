@@ -176,8 +176,12 @@ protected:
 	QString			strCurrentSavePath;
 	int				iColStationID;
 	int				iWidthColStationID;
+	bool			bDisableFrequencyChange;
     QString         strStationName;
     map <uint32_t,CServiceInformation> serviceInformation;
+
+signals:
+    void frequencyChanged(int);
 
 public slots:
 	void OnTimerList();
@@ -187,6 +191,7 @@ public slots:
 	void OnHeaderClicked(int c);
 	void OnSave();
 	void OnCheckFreeze();
+	void on_ListViewStations_itemSelectionChanged();
 };
 
 #endif

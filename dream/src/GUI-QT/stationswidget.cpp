@@ -1,6 +1,7 @@
 #include "stationswidget.h"
 #include <ui_stationswidget.h>
-#include <../util/Settings.h>
+#include "../util/Settings.h"
+#include "../util-QT/Util.h" /* TODO for ColumnParamToStr and ColumnParamFromStr */
 #include "receivercontroller.h"
 #include <QNetworkAccessManager>
 #include <QNetworkRequest>
@@ -77,62 +78,6 @@ StationsWidget::~StationsWidget()
 void StationsWidget::SetFrequency(int f)
 {
 //    ui->frequency->setValue(f);
-}
-
-void StationsWidget::columnParamFromStr(const QString& strColumnParam)
-{
-    QStringList list(strColumnParam.split(QChar('|')));
-    const int n = list.count(); /* width and position */
-    if (n == 2)
-    {
-        for (int j = 0; j < n; j++)
-        {
-            int c = ui->stations->header()->count();
-            QStringList values(list[j].split(QChar(',')));
-            const int lc = (int)values.count();
-            if (lc < c)
-                c = lc;
-            for (int i = 0; i < c; i++)
-            {
-                int v = values[i].toInt();
-                if (!j) /* width*/
-                    ui->stations->header()->resizeSection(i, v);
-                else /* position */
-                    ui->stations->header()->moveSection(ui->stations->header()->visualIndex(i), v);
-            }
-        }
-    }
-    else
-    {
-        ui->stations->header()->resizeSections(QHeaderView::ResizeToContents);
-        ui->stations->header()->resizeSections(QHeaderView::Interactive);
-        ui->stations->header()->resizeSection(0, ui->stations->header()->minimumSectionSize());
-    }
-}
-
-void StationsWidget::columnParamToStr(QString& strColumnParam)
-{
-    strColumnParam = "";
-    const int n = 2; /* width and position */
-    for (int j = 0; j < n; j++)
-    {
-        const int c = ui->stations->header()->count();
-        for (int i = 0; i < c; i++)
-        {
-            int v;
-            if (!j) /* width*/
-                v = ui->stations->header()->sectionSize(i);
-            else /* position */
-                v = ui->stations->header()->visualIndex(i);
-            QString strValue;
-            strValue.setNum(v);
-            strColumnParam += strValue;
-            if (i < (c-1))
-                strColumnParam += ",";
-        }
-        if (j < (n-1))
-            strColumnParam += "|";
-    }
 }
 
 void StationsWidget::on_comboBoxFilterTarget_activated(const QString& s)

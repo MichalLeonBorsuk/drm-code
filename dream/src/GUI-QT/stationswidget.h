@@ -6,8 +6,8 @@
 #include <QMutex>
 #include <QTimer>
 #include "Schedule.h"
-#include <../Parameter.h>
-#include <../util-QT/scheduleloader.h>
+#include "../Parameter.h"
+#include "../util-QT/scheduleloader.h"
 
 namespace Ui {
 class StationsWidget;
@@ -65,8 +65,6 @@ private:
     int			iSortColumn;
     QString     strColumnParam, drm_url;
 
-    void		columnParamFromStr(const QString& strColumnParam);
-    void		columnParamToStr(QString& strColumnParam);
     void        updateTransmissionStatus();
     void        AddWhatsThisHelp();
     bool        showAll();
