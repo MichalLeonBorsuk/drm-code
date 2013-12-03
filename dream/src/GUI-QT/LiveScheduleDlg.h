@@ -59,16 +59,17 @@ class CLiveScheduleItem
 {
 public:
 	CLiveScheduleItem() : strFreq(""), strTarget(""), iServiceID(SERV_ID_NOT_USED),
-	strSystem(""), bInsideTargetArea(FALSE) {}
+	strSystem(""), bInsideTargetArea(false) {}
 
-	_BOOLEAN IsActive(const time_t ltime);
+	bool IsActive(const time_t ltime);
+	bool operator==(const CLiveScheduleItem& item);
 
-	string		strFreq;
-	string		strTarget;
-	uint32_t	iServiceID;
-	string		strSystem;
-	_BOOLEAN	bInsideTargetArea;
-	CAltFreqSched Schedule;
+	string			strFreq;
+	string			strTarget;
+	uint32_t		iServiceID;
+	string			strSystem;
+	bool			bInsideTargetArea;
+	CAltFreqSched	Schedule;
 };
 
 class CDRMLiveSchedule
@@ -114,16 +115,20 @@ protected:
 class MyListLiveViewItem : public QTreeWidgetItem
 {
 public:
-	MyListLiveViewItem(QTreeWidget* parent, QString s1, QString s2 = QString::null,
+	MyListLiveViewItem(QTreeWidget* parent, 
+		const CLiveScheduleItem& liveScheduleItem = CLiveScheduleItem(),
+		QString s1 = QString::null, QString s2 = QString::null,
 		QString s3 = QString::null, QString s4 = QString::null,
 		QString s5 = QString::null, QString s6 = QString::null,
-		QString s7 = QString::null, QString s8 = QString::null) :	
-	QTreeWidgetItem(parent, QStringList() << s1 << s2 << s3 << s4 << s5 << s6 << s7 << s8)
+		QString s7 = QString::null, QString s8 = QString::null) :
+	QTreeWidgetItem(parent, QStringList() << s1 << s2 << s3 << s4 << s5 << s6 << s7 << s8),
+	liveScheduleItem(liveScheduleItem)
 	{}
 
 	/* Custom "key()" function for correct sorting behaviour */
 	virtual QString key(int column, bool ascending) const;
 	void setPixmap(int col, QPixmap p) { setIcon(col, p); }
+	CLiveScheduleItem liveScheduleItem;
 };
 
 class LiveScheduleDlg : public CWindow, public Ui_LiveScheduleWindow
