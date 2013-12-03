@@ -593,6 +593,15 @@ LiveScheduleDlg::LoadSchedule()
     /* Lock mutex for modifying the vecpListItems */
     ListItemsMutex.lock();
 
+    /* Get selected item */
+    CLiveScheduleItem liveScheduleItem;
+    QList<QTreeWidgetItem *> items =  ListViewStations->selectedItems();
+    if (items.size() == 1)
+        liveScheduleItem = ((MyListLiveViewItem*)items[0])->liveScheduleItem;
+
+    /* Prevent itemSelectionChanged() when an item is deleted */
+    ListViewStations->setCurrentIndex(QModelIndex());
+
     /* save the state of the station id column in case we want it later */
     iWidthColStationID = ListViewStations->columnWidth(iColStationID);
 
@@ -612,14 +621,25 @@ LiveScheduleDlg::LoadSchedule()
     vecpListItems.resize(iNumStations, NULL);
 
     actionSave->setEnabled(iNumStations > 0);
+
     /* Unlock BEFORE calling the stations view update because in this function
        the mutex is locked, too! */
     ListItemsMutex.unlock();
 
-    bDisableFrequencyChange = false;
-
     /* Update list view */
     SetStationsView();
+
+    /* Restore selected item */
+    for (int i=0; i<ListViewStations->topLevelItemCount(); ++i)
+    {
+        MyListLiveViewItem *item = (MyListLiveViewItem*)ListViewStations->topLevelItem(i);
+        if (item->liveScheduleItem == liveScheduleItem) {
+            item->setSelected(true);
+            break;
+        }
+    }
+
+    bDisableFrequencyChange = false;
 
     QString strTitle = tr("Live Schedule");
 
@@ -703,13 +723,13 @@ LiveScheduleDlg::SetStationsView()
                 }
 
                 vecpListItems[i] = new MyListLiveViewItem(ListViewStations,
+                        item /* CLiveScheduleItem item */ ,
                         QString(item.strFreq.c_str()) /* freq. */ ,
                         name /* station name or id or blank */ ,
                         QString(item.strSystem.c_str()) /* system */ ,
                         ExtractTime(item.Schedule) /* time */,
                         QString(item.strTarget.c_str()) /* target */ ,
-                        ExtractDaysFlagString(item.Schedule.iDayCode) /* Show list of days */
-                                                         );
+                        ExtractDaysFlagString(item.Schedule.iDayCode) /* Show list of days */ );
 
                 /* Set flag for sorting the list */
                 bListHastChanged = TRUE;
@@ -792,9 +812,9 @@ LiveScheduleDlg::on_ListViewStations_itemSelectionChanged()
 {
     if (!bDisableFrequencyChange)
     {
-	    QList<QTreeWidgetItem *> items =  ListViewStations->selectedItems();
-	    if(items.size()==1 && items.first()->isSelected())
-	    {
+        QList<QTreeWidgetItem*> items(ListViewStations->selectedItems());
+        if (items.size() == 1)
+        {
             double dFreq = QString(items.first()->text(0)).toDouble();
             if (!items.first()->text(2).compare("FM"))
                 dFreq *= 1000;
@@ -950,14 +970,27 @@ CDRMLiveSchedule::StationState CDRMLiveSchedule::CheckState(const int iPos)
     }
 }
 
-_BOOLEAN
+bool
 CDRMLiveSchedule::IsActive(const int iPos, const time_t ltime)
 {
     return StationsTable[iPos].IsActive(ltime);
 }
 
-_BOOLEAN
+bool
 CLiveScheduleItem::IsActive(const time_t ltime)
 {
     return Schedule.IsActive(ltime);
 }
+
+bool
+CLiveScheduleItem::operator==(const CLiveScheduleItem& item)
+{
+	return
+	    strFreq == item.strFreq &&
+	    strTarget == item.strTarget &&
+	    iServiceID == item.iServiceID &&
+	    strSystem == item.strSystem &&
+	    bInsideTargetArea == item.bInsideTargetArea &&
+	    Schedule == item.Schedule;
+}
+
