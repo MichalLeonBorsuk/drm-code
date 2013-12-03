@@ -237,6 +237,7 @@ void StationsWidget::loadScheduleView(QTreeWidgetItem* parent)
 
 void StationsWidget::updateTransmissionStatus()
 {
+    return; // until rewritten for heirarchy of items.
     Timer.stop();
     mutex.lock();
     bool bShowAll = showAll();
