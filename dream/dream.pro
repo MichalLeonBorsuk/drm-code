@@ -86,6 +86,7 @@ linux-* {
     LIBS += -ldl -lrt
 }
 android {
+    ANDROID_PACKAGE_SOURCE_DIR=$$PWD/android
     #CONFIG += openSL sound
     SOURCES += src/android/platform_util.cpp
     HEADERS += src/android/platform_util.h
