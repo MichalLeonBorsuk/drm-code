@@ -93,6 +93,7 @@ android {
     QT += svg
     QT += multimedia
     CONFIG += sound
+    CONFIG += crosscompile
 }
 unix {
     target.path = /usr/bin
@@ -195,21 +196,6 @@ win32 {
           CONFIG += mmsystem sound
         }
     }
-    exists($$OUT_PWD/include/speex/speex_preprocess.h) {
-      CONFIG += speexdsp
-    }
-    exists($$OUT_PWD/include/hamlib/rig.h) {
-      CONFIG += hamlib
-    }
-    exists($$OUT_PWD/include/pcap.h) {
-      CONFIG += pcap
-    }
-    exists($$OUT_PWD/include/sndfile.h) {
-        CONFIG += sndfile
-    }
-    exists($$OUT_PWD/include/opus/opus.h) {
-        CONFIG += opus
-    }
     LIBS += -lsetupapi -lwsock32 -lws2_32 -lzdll -ladvapi32 -luser32
     DEFINES += HAVE_SETUPAPI \
     HAVE_LIBZ _CRT_SECURE_NO_WARNINGS
@@ -227,6 +213,23 @@ win32 {
     g++ {
          DEFINES += HAVE_STDINT_H
          LIBS += -lz
+    }
+}
+win32|crosscompile {
+    exists($$OUT_PWD/include/speex/speex_preprocess.h) {
+      CONFIG += speexdsp
+    }
+    exists($$OUT_PWD/include/hamlib/rig.h) {
+      CONFIG += hamlib
+    }
+    exists($$OUT_PWD/include/pcap.h) {
+      CONFIG += pcap
+    }
+    exists($$OUT_PWD/include/sndfile.h) {
+        CONFIG += sndfile
+    }
+    exists($$OUT_PWD/include/opus/opus.h) {
+        CONFIG += opus
     }
 }
 exists($$OUT_PWD/include/neaacdec.h) {
@@ -253,6 +256,7 @@ sndfile {
      unix:LIBS += -lsndfile
      win32-msvc*:LIBS += libsndfile-1.lib
      win32-g++:LIBS += -lsndfile-1
+    android:LIBS += -lvorbis -lvorbisenc -lvorbisfile -lFLAC -logg
      message("with libsndfile")
 }
 speexdsp {
@@ -733,3 +737,6 @@ SOURCES += \
 !sound {
     error("no usable audio interface found - install pulseaudio or portaudio dev package")
 }
+
+OTHER_FILES += \
+    android/AndroidManifest.xml
