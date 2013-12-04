@@ -288,6 +288,7 @@ void CReceiveData::ProcessDataInternal(CParameter& Parameters)
     /* Get data from sound interface. The read function must be a
        blocking function! */
     bool bBad = true;
+    bool bError = false;
 #ifdef QT_MULTIMEDIA_LIB
     if(pIODevice)
     {
@@ -297,18 +298,20 @@ void CReceiveData::ProcessDataInternal(CParameter& Parameters)
             bBad = false;
     }
     else
-        return;
+        bError = true;
 #else
-    if (pSound == NULL)
+    if (pSound)
     {
         bBad = pSound->Read(vecsSoundBuffer);
     }
     else
-        return;
+        bError = true;
 #endif
     Parameters.Lock();
-    Parameters.ReceiveStatus.InterfaceI.SetStatus(bBad ? CRC_ERROR : RX_OK); /* Red light */
+    Parameters.ReceiveStatus.InterfaceI.SetStatus(bBad || bError ? CRC_ERROR : RX_OK); /* Red light */
     Parameters.Unlock();
+    if (bError)
+        return;
 
     /* Upscale if ratio greater than one */
     if (iUpscaleRatio > 1)
