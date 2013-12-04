@@ -52,7 +52,7 @@ gui {
 message($$VERSION_MESSAGE $$DEBUG_MESSAGE $$UI_MESSAGE)
 qt:multimedia {
     QT += multimedia
-    CONFIG += sound
+    CONFIG += qtaudio sound
 }
 unix:!cross_compile {
     UNAME = $$system(uname -s)
@@ -387,6 +387,12 @@ consoleio {
     SOURCES += src/linux/ConsoleIO.cpp
     LIBS += -lpthread
     message("with terminal user interface")
+}
+qtaudio {
+    DEFINES += USE_QTAUDIO
+    HEADERS += src/sound/qtaudio.h
+    SOURCES += src/sound/qtaudio.cpp
+    message("with Qt audio")
 }
 HEADERS += \
     src/AMDemodulation.h \

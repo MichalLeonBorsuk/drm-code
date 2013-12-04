@@ -59,10 +59,6 @@
 #include "sound/soundinterface.h"
 #include "PlotManager.h"
 #include "DrmTransceiver.h"
-#ifdef QT_MULTIMEDIA_LIB
-#include <QAudioInput>
-#include <QAudioOutput>
-#endif
 
 /* Definitions ****************************************************************/
 /* Number of FAC frames until the acquisition is activated in case a signal
@@ -153,10 +149,6 @@ public:
     void					ClearInputFile();
     ESFStatus				GetInputStatus();
     string					GetInputFileName();
-#ifdef QT_MULTIMEDIA_LIB
-    void					SetInputDevice(const QAudioDeviceInfo&);
-    void					SetOutputDevice(const QAudioDeviceInfo&);
-#endif
     void					RequestNewAcquisition() {
         bRestartFlag = TRUE;
     }
@@ -451,10 +443,6 @@ protected:
     string					rsiOrigin;
     string					sSoundFile;
     int						iPrevSigSampleRate; /* sample rate before sound file */
-#ifdef QT_MULTIMEDIA_LIB
-    QAudioInput *pAudioInput;
-    QAudioOutput *pAudioOutput;
-#endif
 };
 
 

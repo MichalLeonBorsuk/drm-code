@@ -67,14 +67,6 @@ void CReadData::InitInternal(CParameter& Parameters)
 }
 
 /* Receiver ----------------------------------------------------------------- */
-#ifdef QT_MULTIMEDIA_LIB
-void
-CWriteData::SetSoundInterface(QIODevice* p)
-{
-    pIODevice = p;
-}
-#endif
-
 
 void CWriteData::ProcessDataInternal(CParameter& Parameters)
 {
@@ -151,18 +143,7 @@ void CWriteData::ProcessDataInternal(CParameter& Parameters)
 
     /* Put data to sound card interface. Show sound card state on GUI */
 
-#ifdef QT_MULTIMEDIA_LIB
-    bool bBad = true;
-    if(pIODevice)
-    {
-        qint64 n = 2*vecsTmpAudData.Size();
-        int m = pIODevice->write((char*)&vecsTmpAudData[0], n);
-        if(m==n)
-            bBad = false;
-    }
-#else
     const _BOOLEAN bBad = pSound->Write(vecsTmpAudData);
-#endif
     Parameters.Lock();
     Parameters.ReceiveStatus.InterfaceO.SetStatus(bBad ? DATA_ERROR : RX_OK); /* Yellow light */
     Parameters.Unlock();
@@ -243,9 +224,6 @@ void CWriteData::InitInternal(CParameter& Parameters)
 }
 
 CWriteData::CWriteData(CSoundOutInterface* pNS) :
-#ifdef QT_MULTIMEDIA_LIB
-        pIODevice(NULL),
-#endif
         pSound(pNS), /* Sound interface */
         bMuteAudio(FALSE), bDoWriteWaveFile(FALSE),
         bSoundBlocking(FALSE), bNewSoundBlocking(FALSE),

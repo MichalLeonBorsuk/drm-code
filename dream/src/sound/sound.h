@@ -29,7 +29,7 @@
 #ifndef _SOUND_H
 #define _SOUND_H
 
-#if defined(WIN32) && !defined(USE_PORTAUDIO) && !defined(USE_JACK) && !defined(QT_MULTIMEDIA_LIB)
+#if defined(WIN32) && !defined(USE_PORTAUDIO) && !defined(USE_JACK) && !defined(USE_QTAUDIO)
 /* mmsystem sound interface */
 # include "../windows/Sound.h"
 #else
@@ -69,7 +69,13 @@ typedef COpenSLESIn CSoundIn;
 typedef COpenSLESOut CSoundOut;
 # endif
 
-# if defined(QT_MULTIMEDIA_LIB) || (!defined(USE_OSS) && !defined(USE_ALSA) && !defined(USE_JACK) && !defined(USE_PULSEAUDIO) && !defined(USE_PORTAUDIO) && !defined(USE_OPENSL))
+# ifdef USE_QTAUDIO
+#  include "qtaudio.h"
+typedef CSoundInQT CSoundIn;
+typedef CSoundOutQT CSoundOut;
+# endif
+
+# if !defined(USE_OSS) && !defined(USE_ALSA) && !defined(USE_JACK) && !defined(USE_PULSEAUDIO) && !defined(USE_PORTAUDIO) && !defined(USE_OPENSL) && !defined(USE_QTAUDIO)
 #  include "soundnull.h"
 typedef CSoundInNull CSoundIn;
 typedef CSoundOutNull CSoundOut;
