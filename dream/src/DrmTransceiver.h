@@ -32,9 +32,6 @@
 #include "Parameter.h"
 #include "util/Settings.h"
 #include "sound/soundinterface.h"
-#ifdef QT_MULTIMEDIA_LIB
-# include <QAudioDeviceInfo>
-#endif
 
 class CDRMTransceiver
 {
@@ -77,10 +74,6 @@ public:
 	virtual _BOOLEAN				IsTransmitter() const {
 		return bTransmitter;
 	}
-#ifdef QT_MULTIMEDIA_LIB
-    virtual void SetInputDevice(const QAudioDeviceInfo&) = 0;
-    virtual void SetOutputDevice(const QAudioDeviceInfo&) = 0;
-#endif
 
 protected:
     virtual void CloseSoundInterfaces()

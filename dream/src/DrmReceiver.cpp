@@ -40,10 +40,6 @@
 #include "sound/sound.h"
 #include "sound/soundnull.h"
 #include "sound/audiofilein.h"
-#ifdef QT_MULTIMEDIA_LIB
-#include <QAudioFormat>
-#include <QIODevice>
-#endif
 #ifdef HAVE_LIBHAMLIB
 # ifdef QT_CORE_LIB // TODO should not have dependency to qt here
 #  include "util-QT/Rig.h"
@@ -79,10 +75,6 @@ CDRMReceiver::CDRMReceiver(CSettings* pSettings) : CDRMTransceiver(pSettings, ne
     pRig(NULL),
 #endif
     PlotManager(), iPrevSigSampleRate(0)
-#ifdef QT_MULTIMEDIA_LIB
-  ,pAudioInput(NULL),pAudioOutput(NULL)
-#endif
-
 {
     Parameters.SetReceiver(this);
     downstreamRSCI.SetReceiver(this);
@@ -397,48 +389,6 @@ CDRMReceiver::Run()
         }
     }
 }
-
-#ifdef QT_MULTIMEDIA_LIB
-void
-CDRMReceiver::SetInputDevice(const QAudioDeviceInfo& di)
-{
-    QAudioFormat format;
-    format.setSampleRate(Parameters.GetSoundCardSigSampleRate());
-    format.setSampleSize(16);
-    format.setSampleType(QAudioFormat::SignedInt);
-    format.setChannelCount(2); // TODO
-    format.setByteOrder(QAudioFormat::LittleEndian);
-    format.setCodec("audio/pcm");
-    QAudioFormat nearestFormat = di.nearestFormat(format);
-    pAudioInput = new QAudioInput(di, nearestFormat);
-    ReceiveData.SetSoundInterface(pAudioInput);
-}
-
-void
-CDRMReceiver::SetOutputDevice(const QAudioDeviceInfo& di)
-{
-    QAudioFormat format;
-    format.setSampleRate(Parameters.GetAudSampleRate());
-    format.setSampleSize(16);
-    format.setSampleType(QAudioFormat::SignedInt);
-    format.setChannelCount(2); // TODO
-    format.setByteOrder(QAudioFormat::LittleEndian);
-    format.setCodec("audio/pcm");
-    QAudioFormat nearestFormat = di.nearestFormat(format);
-    pAudioOutput = new QAudioOutput(di, nearestFormat);
-    pAudioOutput->setBufferSize(1000000);
-    QIODevice* pIODevice = pAudioOutput->start();
-    int n = pAudioOutput->bufferSize();
-    if(pAudioOutput->error()==QAudio::NoError)
-    {
-        WriteData.SetSoundInterface(pIODevice);
-    }
-    else
-    {
-        qDebug("Can't open audio output");
-    }
-}
-#endif
 
 void
 CDRMReceiver::SetInput()
@@ -1081,10 +1031,6 @@ CDRMReceiver::CloseSoundInterfaces()
 {
     pSoundInInterface->Close();
     pSoundOutInterface->Close();
-#ifdef QT_MULTIMEDIA_LIB
-    if(pAudioInput) pAudioInput->stop();
-    if(pAudioOutput) pAudioOutput->stop();
-#endif
 }
 
 void

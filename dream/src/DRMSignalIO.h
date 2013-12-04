@@ -30,10 +30,6 @@
 #define DRMSIGNALIO_H__3B0BA660_CA63_4344_B_23E7A0D31912__INCLUDED_
 
 #include "sound/soundinterface.h"
-#ifdef QT_MULTIMEDIA_LIB
-#include <QAudioInput>
-#include <QIODevice>
-#endif
 #include "Parameter.h"
 #include "matlib/Matlib.h"
 #include "IQInputFilter.h"
@@ -160,12 +156,8 @@ public:
                     };
 
     CReceiveData() :
-#ifdef QT_MULTIMEDIA_LIB
-        pIODevice(NULL),
-#endif
-        pSound(NULL),
-        vecrInpData(INPUT_DATA_VECTOR_SIZE, (_REAL) 0.0),
-            bFippedSpectrum(FALSE), eInChanSelection(CS_MIX_CHAN), iPhase(0)
+        pSound(NULL), vecrInpData(INPUT_DATA_VECTOR_SIZE, (_REAL) 0.0),
+        bFippedSpectrum(FALSE), eInChanSelection(CS_MIX_CHAN), iPhase(0)
     {}
     virtual ~CReceiveData();
 
@@ -193,9 +185,6 @@ public:
     void SetSoundInterface(CSoundInInterface* pS) {
         pSound = pS;
     }
-#ifdef QT_MULTIMEDIA_LIB
-    void SetSoundInterface(QAudioInput *);
-#endif
     void SetInChanSel(const EInChanSel eNS) {
         eInChanSelection = eNS;
     }
@@ -206,10 +195,6 @@ public:
 protected:
     CSignalLevelMeter		SignalLevelMeter;
 
-#ifdef QT_MULTIMEDIA_LIB
-    QAudioInput*            pAudioInput;
-    QIODevice*              pIODevice;
-#endif
     CSoundInInterface*		pSound;
     CVector<_SAMPLE>		vecsSoundBuffer;
 

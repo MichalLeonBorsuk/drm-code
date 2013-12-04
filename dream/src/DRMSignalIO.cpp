@@ -29,9 +29,6 @@
 #include "DRMSignalIO.h"
 #include "UpsampleFilter.h"
 #include <iostream>
-#ifdef QT_MULTIMEDIA_LIB
-#include <QBuffer>
-#endif
 
 
 const static int SineTable[] = { 0, 1, 0, -1, 0 };
@@ -247,24 +244,6 @@ void CTransmitData::HilbertFilt(_COMPLEX& vecData)
 //inline _REAL sample2real(_SAMPLE s) { return _REAL(s)/32768.0; }
 inline _REAL sample2real(_SAMPLE s) { return _REAL(s); }
 
-#ifdef QT_MULTIMEDIA_LIB
-void
-CReceiveData::SetSoundInterface(QAudioInput *p)
-{
-    pAudioInput = p;
-    pIODevice = pAudioInput->start();
-    if(pAudioInput->error()==QAudio::NoError)
-    {
-        pIODevice->open(QIODevice::ReadOnly);
-        qDebug("audio input open");
-    }
-    else
-    {
-        qDebug("Can't open audio input");
-    }
-}
-#endif
-
 void CReceiveData::ProcessDataInternal(CParameter& Parameters)
 {
     int i;
@@ -289,24 +268,10 @@ void CReceiveData::ProcessDataInternal(CParameter& Parameters)
        blocking function! */
     bool bBad = true;
     bool bError = false;
-#ifdef QT_MULTIMEDIA_LIB
-    if(pIODevice)
-    {
-        qint64 n = 2*vecsSoundBuffer.Size();
-        int m = pIODevice->read((char*)&vecsSoundBuffer[0], n);
-        if(m==n)
-            bBad = false;
-    }
-    else
-        bError = true;
-#else
     if (pSound)
-    {
         bBad = pSound->Read(vecsSoundBuffer);
-    }
     else
         bError = true;
-#endif
     Parameters.Lock();
     Parameters.ReceiveStatus.InterfaceI.SetStatus(bBad || bError ? CRC_ERROR : RX_OK); /* Red light */
     Parameters.Unlock();

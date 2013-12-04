@@ -74,10 +74,6 @@ public:
     _REAL GetCarOffset() {
         return rDefCarOffset;
     }
-#ifdef QT_MULTIMEDIA_LIB
-    void SetInputDevice(const QAudioDeviceInfo&) {}
-    void SetOutputDevice(const QAudioDeviceInfo&) {}
-#endif
 
 protected:
     void Run();
