@@ -39,6 +39,7 @@ class CRig :
 {
 	Q_OBJECT
 public:
+	static void SetFrequencyCallback(void* sfCallbackParam, int iNewFreqkHz);
 	CRig(CParameter* np);
 	void LoadSettings(CSettings&);
 	void SaveSettings(CSettings&);

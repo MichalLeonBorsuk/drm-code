@@ -40,11 +40,6 @@
 #include "sound/sound.h"
 #include "sound/soundnull.h"
 #include "sound/audiofilein.h"
-#ifdef HAVE_LIBHAMLIB
-# ifdef QT_CORE_LIB // TODO should not have dependency to qt here
-#  include "util-QT/Rig.h"
-# endif
-#endif
 #ifdef USE_CONSOLEIO
 # include "linux/ConsoleIO.h"
 #endif
@@ -70,10 +65,7 @@ CDRMReceiver::CDRMReceiver(CSettings* pSettings) : CDRMTransceiver(pSettings, ne
     iDataStreamID(STREAM_ID_NOT_USED), bRestartFlag(TRUE),
     rInitResampleOffset((_REAL) 0.0),
     iBwAM(10000), iBwLSB(5000), iBwUSB(5000), iBwCW(150), iBwFM(6000),
-    time_keeper(0),
-#ifdef HAVE_LIBHAMLIB
-    pRig(NULL),
-#endif
+    time_keeper(0), sfCallback(NULL), sfCallbackParam(NULL),
     PlotManager(), iPrevSigSampleRate(0)
 {
     Parameters.SetReceiver(this);
@@ -1468,16 +1460,11 @@ void CDRMReceiver::SetFrequency(int iNewFreqkHz)
     Parameters.Unlock();
 
     if (pUpstreamRSCI->GetOutEnabled() == TRUE)
-    {
         pUpstreamRSCI->SetFrequency(iNewFreqkHz);
-    }
 
-#ifdef HAVE_LIBHAMLIB
-# ifdef QT_CORE_LIB // TODO should not have dependency to qt here
-    if(pRig)
-        pRig->SetFrequency(iNewFreqkHz);
-# endif
-#endif
+    if (sfCallback)
+        sfCallback(sfCallbackParam, iNewFreqkHz);
+
 #if 0
 	{
 		FCD_MODE_ENUM fme;

@@ -154,22 +154,22 @@ main(int argc, char **argv)
 
 #ifdef HAVE_LIBHAMLIB
 			CRig rig(DRMReceiver.GetParameters());
+
 			rig.LoadSettings(Settings); // must be before DRMReceiver for G313
-#endif
+
 			DRMReceiver.LoadSettings();
 
-#ifdef HAVE_LIBHAMLIB
-			DRMReceiver.SetRig(&rig);
+			DRMReceiver.SetSFCallback(&CRig::SetFrequencyCallback, (void*)&rig);
 
-			if(DRMReceiver.GetDownstreamRSCIOutEnabled())
-			{
+			if (DRMReceiver.GetDownstreamRSCIOutEnabled())
 				rig.subscribe();
-			}
+
 			FDRMDialog *pMainDlg = new FDRMDialog(DRMReceiver, Settings, rig);
 #else
+			DRMReceiver.LoadSettings();
+
 			FDRMDialog *pMainDlg = new FDRMDialog(DRMReceiver, Settings);
 #endif
-			(void)pMainDlg;
 
 			/* Start working thread */
 			CRx rx(DRMReceiver);

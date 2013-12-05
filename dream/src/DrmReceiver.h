@@ -77,6 +77,9 @@
 #define LEN_HIST_PLOT_SYNC_PARMS		2250
 
 
+typedef void (SFCallback)(void*, int);
+
+
 /* Classes ********************************************************************/
 class CSettings;
 class CRig;
@@ -171,11 +174,10 @@ public:
     void					SetAMDemodType(CAMDemodulation::EDemodType);
     void					SetAMFilterBW(int iBw);
     void					SetAMDemodAcq(_REAL rNewNorCen);
-#ifdef HAVE_LIBHAMLIB
-    void	 				SetRig(CRig* n) {
-        pRig=n;
+    void	 				SetSFCallback(SFCallback* psfCallback, void* psfCallbackParam) {
+        sfCallback = psfCallback;
+        sfCallbackParam = psfCallbackParam;
     }
-#endif
     void	 				SetFrequency(int);
     int		 				GetFrequency() {
         return Parameters.GetFrequency();
@@ -435,9 +437,8 @@ protected:
     int						iBwCW;
     int						iBwFM;
     time_t					time_keeper;
-#ifdef HAVE_LIBHAMLIB
-    CRig*					pRig;
-#endif
+    SFCallback*				sfCallback;
+    void*					sfCallbackParam;
 
     CPlotManager			PlotManager;
     string					rsiOrigin;
