@@ -33,49 +33,57 @@
 class QIODevice;
 class QAudioInput;
 class QAudioOutput;
+class QAudioDeviceInfo;
 
 /* Classes ********************************************************************/
 
-class CSoundInQT : public CSoundInInterface
+class CSoundCommonQT : public CSelectionInterface
+{
+public:
+    CSoundCommonQT(bool bInput);
+    virtual ~CSoundCommonQT();
+    virtual void        Enumerate(vector<string>&, vector<string>&);
+    virtual string      GetDev();
+    virtual void        SetDev(string);
+protected:
+    bool                isDeviceGood(const QAudioDeviceInfo &di) const;
+    bool                bInput;
+    string              sDev;
+    bool                bDevChanged;
+    int                 iSampleRate;
+    int                 iBufferSize;
+    _BOOLEAN            bBlocking;
+    QIODevice*          pIODevice;
+};
+
+class CSoundInQT : public CSoundInInterface, CSoundCommonQT
 {
 public:
     CSoundInQT();
     virtual ~CSoundInQT();
+    virtual void        Enumerate(vector<string>&n, vector<string>&d) { CSoundCommonQT::Enumerate(n, d); }
+    virtual string      GetDev() { return CSoundCommonQT::GetDev(); }
+    virtual void        SetDev(string s) { CSoundCommonQT::SetDev(s); }
     virtual _BOOLEAN    Init(int, int, _BOOLEAN);
     virtual _BOOLEAN    Read(CVector<short>&);
-    virtual void        Enumerate(vector<string>&choices, vector<string>&);
-    virtual string      GetDev();
-    virtual void        SetDev(string);
     virtual void        Close();
 private:
-    string              sDev;
-    bool                bDevChanged;
-    int                 iSampleRate;
-    int                 iBufferSize;
-    _BOOLEAN            bBlocking;
     QAudioInput*        pAudioInput;
-    QIODevice*          pIODevice;
 };
 
-class CSoundOutQT : public CSoundOutInterface
+class CSoundOutQT : public CSoundOutInterface, CSoundCommonQT
 {
 public:
     CSoundOutQT();
     virtual ~CSoundOutQT();
+    virtual void        Enumerate(vector<string>&n, vector<string>&d) { CSoundCommonQT::Enumerate(n, d); }
+    virtual string      GetDev() { return CSoundCommonQT::GetDev(); }
+    virtual void        SetDev(string s) { CSoundCommonQT::SetDev(s); }
     virtual _BOOLEAN    Init(int, int, _BOOLEAN);
     virtual _BOOLEAN    Write(CVector<short>&);
-    virtual void        Enumerate(vector<string>& choices, vector<string>&);
-    virtual string      GetDev();
-    virtual void        SetDev(string);
     virtual void        Close();
 private:
-    string              sDev;
-    bool                bDevChanged;
-    int                 iSampleRate;
-    int                 iBufferSize;
-    _BOOLEAN            bBlocking;
     QAudioOutput*       pAudioOutput;
-    QIODevice*          pIODevice;
 };
 
 #endif // _QTAUDIO_H

@@ -32,12 +32,76 @@
 #include <QAudioDeviceInfo>
 #include <QAudioFormat>
 
+
+/**********************************/
+/* QT Audio Common Implementation */
+
+CSoundCommonQT::CSoundCommonQT(bool bInput) :
+    bInput(bInput), bDevChanged(false),
+    iSampleRate(0), iBufferSize(0), bBlocking(FALSE),
+    pIODevice(NULL)
+{
+}
+
+CSoundCommonQT::~CSoundCommonQT()
+{
+}
+
+bool CSoundCommonQT::isDeviceGood(const QAudioDeviceInfo &di) const
+{
+    return
+        di.supportedChannelCounts().contains(2) &&
+        di.supportedSampleSizes().contains(16) &&
+        di.supportedSampleTypes().contains(QAudioFormat::SignedInt) &&
+        di.supportedByteOrders().contains(QAudioFormat::LittleEndian) &&
+        di.supportedCodecs().contains("audio/pcm") && (
+        di.supportedSampleRates().contains(24000) ||
+        di.supportedSampleRates().contains(48000) ||
+        di.supportedSampleRates().contains(96000) ||
+        di.supportedSampleRates().contains(192000) );
+}
+
+void CSoundCommonQT::Enumerate(vector<string>& names, vector<string>& descriptions)
+{
+    names.clear();
+    descriptions.clear();
+
+    const QAudioDeviceInfo& di(bInput ? QAudioDeviceInfo::defaultInputDevice() : QAudioDeviceInfo::defaultOutputDevice());
+    if (isDeviceGood(di))
+        names.push_back(""); /* Default device */
+
+    foreach(const QAudioDeviceInfo& di, QAudioDeviceInfo::availableDevices(bInput ? QAudio::AudioInput : QAudio::AudioOutput))
+    {
+        if (isDeviceGood(di))
+        {
+            string name(di.deviceName().toLocal8Bit().constData());
+//            qDebug("CSoundCommonQT::Enumerate() %i name=%s", bInput, name.c_str());
+            names.push_back(name);
+        }
+    }
+}
+
+string CSoundCommonQT::GetDev()
+{
+    return sDev;
+}
+
+void CSoundCommonQT::SetDev(string sNewDev)
+{
+//    qDebug("CSoundCommonQT::SetDev() name=%s", sNewDev.c_str());
+    if (sDev != sNewDev)
+    {
+        sDev = sNewDev;
+        bDevChanged = true;
+    }
+}
+
+
 /******************************/
 /* QT Audio In Implementation */
 
 CSoundInQT::CSoundInQT() :
-    bDevChanged(false), iSampleRate(0), iBufferSize(0), bBlocking(FALSE),
-    pAudioInput(NULL), pIODevice(NULL)
+    CSoundCommonQT(true), pAudioInput(NULL)
 {
 }
 
@@ -128,34 +192,6 @@ _BOOLEAN CSoundInQT::Read(CVector<short>& vecsSoundBuffer)
     return bError;
 }
 
-void CSoundInQT::Enumerate(vector<string>& names, vector<string>& descriptions)
-{
-    names.clear();
-    descriptions.clear();
-    names.push_back(""); /* Default device */
-    foreach(const QAudioDeviceInfo& di, QAudioDeviceInfo::availableDevices(QAudio::AudioInput))
-    {
-        string name(di.deviceName().toLocal8Bit().constData());
-//        qDebug("CSoundInQT::Enumerate() name=%s", name.c_str());
-        names.push_back(name);
-    }
-}
-
-string CSoundInQT::GetDev()
-{
-    return sDev;
-}
-
-void CSoundInQT::SetDev(string sNewDev)
-{
-//    qDebug("CSoundInQT::SetDev() name=%s", sNewDev.c_str());
-    if (sDev != sNewDev)
-    {
-        sDev = sNewDev;
-        bDevChanged = true;
-    }
-}
-
 void CSoundInQT::Close()
 {
 //    qDebug("CSoundInQT::Close()");
@@ -174,8 +210,7 @@ void CSoundInQT::Close()
 /* QT Audio Out Implementation */
 
 CSoundOutQT::CSoundOutQT() :
-    bDevChanged(false), iSampleRate(0), iBufferSize(0), bBlocking(FALSE),
-    pAudioOutput(NULL), pIODevice(NULL)
+    CSoundCommonQT(false), pAudioOutput(NULL)
 {
 }
 
@@ -264,34 +299,6 @@ _BOOLEAN CSoundOutQT::Write(CVector<short>& vecsSoundBuffer)
         bError = len != 0;
     }
     return bError;
-}
-
-void CSoundOutQT::Enumerate(vector<string>& names, vector<string>& descriptions)
-{
-    names.clear();
-    descriptions.clear();
-    names.push_back(""); /* Default device */
-    foreach(const QAudioDeviceInfo& di, QAudioDeviceInfo::availableDevices(QAudio::AudioOutput))
-    {
-        string name(di.deviceName().toLocal8Bit().constData());
-//        qDebug("CSoundOutQT::Enumerate() name=%s", name.c_str());
-        names.push_back(name);
-    }
-}
-
-string CSoundOutQT::GetDev()
-{
-    return sDev;
-}
-
-void CSoundOutQT::SetDev(string sNewDev)
-{
-//    qDebug("CSoundOutQT::SetDev() name=%s", sNewDev.c_str());
-    if (sDev != sNewDev)
-    {
-        sDev = sNewDev;
-        bDevChanged = true;
-    }
 }
 
 void CSoundOutQT::Close()
