@@ -28,6 +28,12 @@
 
 #include "Rig.h"
 
+
+void CRig::SetFrequencyCallback(void* sfCallbackParam, int iNewFreqkHz)
+{
+    ((CRig*)sfCallbackParam)->SetFrequency(iNewFreqkHz);
+}
+
 CRig::CRig(CParameter* np):
 #ifdef HAVE_LIBHAMLIB
     Hamlib(), timer(new QTimer()),
