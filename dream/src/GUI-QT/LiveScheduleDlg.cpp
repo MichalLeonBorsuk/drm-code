@@ -35,6 +35,8 @@
 #include <QShowEvent>
 #include "../util-QT/Util.h"
 
+#define UTF8_DEGREE_SIGN "\xc2\xb0"
+
 /* Implementation *************************************************************/
 
 QString
@@ -189,7 +191,7 @@ CDRMLiveSchedule::DecodeTargets(const vector < CAltFreqRegion >
 
             int iLatitudeMed = (iLatitude + (iLatitudeEx / 2));
 
-            ssRegions << "latitude " << abs(iLatitudeMed) << "\xb0 ";
+            ssRegions << "latitude " << abs(iLatitudeMed) << UTF8_DEGREE_SIGN " ";
 
             if (iLatitudeMed < 0)
                 ssRegions << 'S';
@@ -201,7 +203,7 @@ CDRMLiveSchedule::DecodeTargets(const vector < CAltFreqRegion >
             if (iLongitudeMed >= 180)
                 iLongitudeMed = iLongitudeMed - 360;
 
-            ssRegions << " longitude " << abs(iLongitudeMed) << "\xb0 ";
+            ssRegions << " longitude " << abs(iLongitudeMed) << UTF8_DEGREE_SIGN " ";
 
             if (iLongitudeMed < 0)
                 ssRegions << 'W';
@@ -447,6 +449,9 @@ LiveScheduleDlg::LoadSettings()
     QString strColumnParam = getSetting("columnparam", QString());
     ColumnParamFromStr(ListViewStations, strColumnParam);
 
+    /* Get station id column width */
+    iWidthColStationID = ListViewStations->columnWidth(iColStationID);
+
     /* Set stations in list view which are active right now */
     bool bShowAll = getSetting("showall", false);
     int iPrevSecs = getSetting("preview", 0);
@@ -485,6 +490,9 @@ LiveScheduleDlg::SaveSettings()
     /* Store sort settings */
     putSetting("sortcolumn", iCurrentSortColumn);
     putSetting("sortascending", bCurrentSortAscending);
+
+    /* Restore station id column width */
+    ListViewStations->setColumnWidth(iColStationID, iWidthColStationID);
 
     /* Store column order and size settings */
     QString strColumnParam;
@@ -603,7 +611,9 @@ LiveScheduleDlg::LoadSchedule()
     ListViewStations->setCurrentIndex(QModelIndex());
 
     /* save the state of the station id column in case we want it later */
-    iWidthColStationID = ListViewStations->columnWidth(iColStationID);
+    int width = ListViewStations->columnWidth(iColStationID);
+    if (width)
+        iWidthColStationID = width;
 
     /* Delete all old list view items (it is important that the vector
        "vecpListItems" was initialized to 0 at creation of the global object
@@ -705,7 +715,7 @@ LiveScheduleDlg::SetStationsView()
             {
                 /* Generate new list item with all necessary column entries */
                 const CLiveScheduleItem& item = DRMSchedule.GetItem(i);
-                QString name = "";
+                QString name;
 
                 if(item.iServiceID != SERV_ID_NOT_USED)
                 {
@@ -724,11 +734,11 @@ LiveScheduleDlg::SetStationsView()
 
                 vecpListItems[i] = new MyListLiveViewItem(ListViewStations,
                         item /* CLiveScheduleItem item */ ,
-                        QString(item.strFreq.c_str()) /* freq. */ ,
+                        QString::fromUtf8(item.strFreq.c_str()) /* freq. */ ,
                         name /* station name or id or blank */ ,
-                        QString(item.strSystem.c_str()) /* system */ ,
+                        QString::fromUtf8(item.strSystem.c_str()) /* system */ ,
                         ExtractTime(item.Schedule) /* time */,
-                        QString(item.strTarget.c_str()) /* target */ ,
+                        QString::fromUtf8(item.strTarget.c_str()) /* target */ ,
                         ExtractDaysFlagString(item.Schedule.iDayCode) /* Show list of days */ );
 
                 /* Set flag for sorting the list */
@@ -779,15 +789,7 @@ LiveScheduleDlg::SetStationsView()
         }
     }
 
-
-    if(bHaveOtherServiceIDs)
-    {
-        ListViewStations->setColumnWidth(iColStationID, iWidthColStationID);
-    }
-    else
-    {
-        ListViewStations->setColumnWidth(iColStationID, 0);
-    }
+    ListViewStations->setColumnWidth(iColStationID, bHaveOtherServiceIDs ? iWidthColStationID : 0);
 
     /* Sort the list if items have changed */
     if(bListHastChanged)
