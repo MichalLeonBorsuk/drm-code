@@ -66,6 +66,7 @@
 #include "Logging.h"
 #include "../datadecoding/DataDecoder.h"
 #include "serviceselector.h"
+#include "ThemeCustomizer.h"
 
 // Simone's values
 // static _REAL WMERSteps[] = {8.0, 12.0, 16.0, 20.0, 24.0};
@@ -288,6 +289,8 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& Settings,
 
 	/* Activate real-time timers */
     controller->start(GUI_CONTROL_UPDATE_TIME);
+
+    APPLY_CUSTOM_THEME();
 }
 
 FDRMDialog::~FDRMDialog()
