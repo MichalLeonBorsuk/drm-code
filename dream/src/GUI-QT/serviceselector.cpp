@@ -3,6 +3,7 @@
 #include "../Parameter.h"
 #include "../util-QT/Util.h"
 #include <../datadecoding/DataDecoder.h>
+#include "ThemeCustomizer.h"
 
 ServiceSelector::ServiceSelector(QWidget *parent) :
     QWidget(parent),
@@ -49,6 +50,8 @@ ServiceSelector::ServiceSelector(QWidget *parent) :
     ui->TextMiniService2->setWhatsThis(strServiceSel);
     ui->TextMiniService3->setWhatsThis(strServiceSel);
     ui->TextMiniService4->setWhatsThis(strServiceSel);
+
+    APPLY_CUSTOM_THEME();
 }
 
 ServiceSelector::~ServiceSelector()

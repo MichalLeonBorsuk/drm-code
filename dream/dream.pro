@@ -699,7 +699,8 @@ HEADERS += \
     src/GUI-QT/afswidget.h \
     src/util-QT/scheduleloader.h \
     src/GUI-QT/amwidget.h \
-    src/GUI-QT/streamwidget.h
+    src/GUI-QT/streamwidget.h \
+    src/GUI-QT/ThemeCustomizer.h
 
 SOURCES += \
     src/GUI-QT/AnalogDemDlg.cpp \
@@ -738,7 +739,8 @@ SOURCES += \
     src/GUI-QT/gpswidget.cpp \
     src/GUI-QT/afswidget.cpp \
     src/GUI-QT/amwidget.cpp \
-    src/GUI-QT/streamwidget.cpp
+    src/GUI-QT/streamwidget.cpp \
+    src/GUI-QT/ThemeCustomizer.cpp
 }
 !isEmpty(QT):message(With Qt components: $$QT)
 !sound {
