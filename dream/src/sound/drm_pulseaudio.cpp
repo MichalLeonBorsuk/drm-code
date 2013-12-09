@@ -67,7 +67,9 @@
 /* stdin/stdout ***************************************************************/
 
 #ifdef ENABLE_STDIN_STDOUT
-# define STDIN_STDOUT_DEVICE_NAME "-"
+# define STDIN_STDOUT_DEVICE_NAME        "-" /* assumed to be stereo (for backward compatibility) */
+# define STDIN_STDOUT_DEVICE_NAME_MONO   "-1"
+# define STDIN_STDOUT_DEVICE_NAME_STEREO "-2"
 static int StdoutWrite(const char *buf, ssize_t count)
 {
 	ssize_t chunk;
@@ -690,6 +692,7 @@ CSoundPulse::CSoundPulse(_BOOLEAN bPlayback)
 	: bPlayback(bPlayback), bChangDev(TRUE)
 #ifdef ENABLE_STDIN_STDOUT
 	, bStdinStdout(FALSE)
+	, bMono(FALSE)
 #endif
 {
 }
@@ -748,7 +751,12 @@ _BOOLEAN CSoundPulse::IsDefaultDevice()
 #ifdef ENABLE_STDIN_STDOUT
 _BOOLEAN CSoundPulse::IsStdinStdout()
 {
-	bStdinStdout = sCurrentDevice == STDIN_STDOUT_DEVICE_NAME;
+	bMono =
+		sCurrentDevice == STDIN_STDOUT_DEVICE_NAME_MONO;
+	bStdinStdout =
+		sCurrentDevice == STDIN_STDOUT_DEVICE_NAME ||
+		sCurrentDevice == STDIN_STDOUT_DEVICE_NAME_MONO ||
+		sCurrentDevice == STDIN_STDOUT_DEVICE_NAME_STEREO;
 	return bStdinStdout;
 }
 #endif
@@ -827,7 +835,18 @@ _BOOLEAN CSoundInPulse::Read(CVector<_SAMPLE>& psData)
 #ifdef ENABLE_STDIN_STDOUT
 	/* Stdin support */
 	if (bStdinStdout)
-		return StdinRead((char*)&psData[0], iBufferSize);
+	{
+		if (!bMono)
+			return StdinRead((char*)&psData[0], iBufferSize);
+		else
+		{
+			int sample = iBufferSize / BYTES_PER_SAMPLE;
+			_BOOLEAN ret = StdinRead((char*)&psData[0], iBufferSize/2);
+			for (int i=sample-2, j=i/2; i>=0; i-=2, j--)
+				psData[i] = psData[i+1] = psData[j];
+			return ret;
+		}
+	}
 #endif
 
 	/* Check if device must be opened or reinitialized */
@@ -939,7 +958,20 @@ _BOOLEAN CSoundOutPulse::Write(CVector<_SAMPLE>& psData)
 #ifdef ENABLE_STDIN_STDOUT
 	/* Stdout support */
 	if (bStdinStdout)
-		return StdoutWrite((char*)&psData[0], iBufferSize);
+	{
+		if (!bMono)
+			return StdoutWrite((char*)&psData[0], iBufferSize);
+		else
+		{
+			for (int i=0, j=0; i<iBufferSize; i+=2, j++)
+			{
+				int value = ((int)psData[i] + (int)psData[i+1]) / 2;
+				psData[j] = (_SAMPLE)value;
+			}
+			_BOOLEAN ret = StdoutWrite((char*)&psData[0], iBufferSize/2);
+			return ret;
+		}
+	}
 #endif
 
 	/* Check if device must be opened or reinitialized */
