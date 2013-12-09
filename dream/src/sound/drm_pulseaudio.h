@@ -88,6 +88,7 @@ protected:
 #ifdef ENABLE_STDIN_STDOUT
 	_BOOLEAN		IsStdinStdout();
 	_BOOLEAN		bStdinStdout;
+	_BOOLEAN		bMono;
 #endif
 };
 
