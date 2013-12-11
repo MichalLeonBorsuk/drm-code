@@ -25,7 +25,7 @@ static QColor fromReal(_REAL val)
 
     return QColor::fromHsv(hue, sat, sat);
 }
-
+#if 0
 SimpleWaterfallWidget::SimpleWaterfallWidget(QWidget *parent) :
     QWidget(parent),Canvas()
 {
@@ -91,9 +91,9 @@ void SimpleWaterfallWidget::updatePlot(const vector<_REAL>& vec, _REAL min, _REA
     painter.end();
     update();
 }
-
+#endif
 WaterfallWidget::WaterfallWidget(QWidget *parent) :
-    QWidget(parent),Canvas(),image()
+    QWidget(parent), resizeGlitch(false)
 {
     setAttribute(Qt::WA_OpaquePaintEvent, true);
     setAttribute(Qt::WA_TransparentForMouseEvents, true);
@@ -109,9 +109,17 @@ void WaterfallWidget::paintEvent(QPaintEvent *)
 
 void WaterfallWidget::resizeEvent(QResizeEvent *e)
 {
+    // prevent resize glitch when the widget is created,
+    // the fist resizeEvent() is bogus
+    if(!resizeGlitch)
+    {
+        resizeGlitch = true;
+        return;
+    }
+
     QPixmap tmp = Canvas;
     Canvas = QPixmap(e->size());
-    image = QImage( e->size().width(), 1, QImage::Format_RGB32);
+    image = QImage(e->size().width(), 1, QImage::Format_RGB32);
 
     // first time ever - initialise to black
     if(tmp.size().width()==0)
@@ -129,16 +137,19 @@ void WaterfallWidget::resizeEvent(QResizeEvent *e)
     QPainter p(&Canvas);
     QPoint origin(0,0);
     QSize top(Canvas.width(), tmp.height());
-        p.drawPixmap(QRect(origin, top), tmp, QRect(origin, tmp.size()));
+    p.drawPixmap(QRect(origin, top), tmp);
 }
 
 void WaterfallWidget::updatePlot(const vector<_REAL>& vec, _REAL min, _REAL max)
 {
+    int w = image.width();
+    if (w == 0)
+        return;
+
     QPainter painter;
     if(!painter.begin(&Canvas)) // David had problems on Linux without this
         return;
 
-    int w = image.width();
     /* Scroll Canvas */
     Canvas.scroll(0, 1, Canvas.rect());
 
