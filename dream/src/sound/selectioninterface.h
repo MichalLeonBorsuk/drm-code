@@ -1,12 +1,12 @@
 /******************************************************************************\
  * British Broadcasting Corporation
- * Copyright (c) 2007
+ * Copyright (c) 2007, 2013
  *
  * Author(s):
- *	Julian Cable
+ *  Julian Cable, David Flamand
  *
  * Decription:
- * sound interfaces
+ *  sound interfaces
  *
  ******************************************************************************
  *
@@ -31,15 +31,45 @@
 
 #include "../GlobalDefinitions.h"
 #include <vector>
+#include <map>
 #include <string>
+
+typedef struct {
+    string          name;
+    string          desc; /* description is optional, set to empty string when not used */
+    map<int,bool>   samplerates;
+} deviceprop;
 
 class CSelectionInterface
 {
 public:
-    virtual 			~CSelectionInterface() {}
-    virtual void		Enumerate(vector<string>& names, vector<string>& descriptions)=0;
-    virtual string		GetDev()=0;
-    virtual void		SetDev(string sNewDev)=0;
+    virtual             ~CSelectionInterface() {}
+    /* new/updated interface should reimplement that one */
+    virtual void        Enumerate(vector<deviceprop>& devs, const int* desiredsamplerate)
+    {
+        vector<string> names;
+        vector<string> descriptions;
+        Enumerate(names, descriptions);
+        deviceprop dp;
+        for (const int* dsr=desiredsamplerate; *dsr; dsr++)
+            dp.samplerates[abs(*dsr)] = true;
+        devs.clear();
+        for (size_t i=0; i<names.size(); i++)
+        {
+            dp.name = names.at(i);
+            dp.desc = i<descriptions.size() ? descriptions.at(i) : "";
+            devs.push_back(dp);
+        }
+    };
+    virtual string      GetDev()=0;
+    virtual void        SetDev(string sNewDev)=0;
+protected:
+    /* for backward compatibility */
+    virtual void        Enumerate(vector<string>& names, vector<string>& descriptions)
+    {
+        (void)names;
+        (void)descriptions;
+    }
 };
 
 #endif

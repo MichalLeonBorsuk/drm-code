@@ -33,6 +33,13 @@
 #include <QAudioFormat>
 
 
+// TODO do the conversion if the device support mono only
+
+// On linux with pulseaudio, sample rate can range from 1Hz to 192kHz,
+//  supportedSampleRates() return only standard sample rate for output and 48kHz for input.
+// TODO isSampleRateSupported() hack is very ugly
+
+
 /**********************************/
 /* QT Audio Common Implementation */
 
@@ -47,7 +54,7 @@ CSoundCommonQT::~CSoundCommonQT()
 {
 }
 
-void CSoundCommonQT::sleep(unsigned long len)
+void CSoundCommonQT::sleep(unsigned long len) const
 {
     /* 1000000 = number of usec. in sec., 2 = channels */
     qint64 timeToSleep = (qint64)len * (1000000 / sizeof(short) / 2) / iSampleRate;
@@ -60,36 +67,71 @@ void CSoundCommonQT::sleep(unsigned long len)
         QThread::usleep((unsigned long)timeToSleep);
 }
 
-bool CSoundCommonQT::isDeviceGood(const QAudioDeviceInfo &di) const
+bool CSoundCommonQT::isSampleRateSupported(const QAudioDeviceInfo &di, int samplerate) const
 {
+    samplerate = abs(samplerate);
+#if defined(__linux__) && !defined(__ANDROID__)
+    (void)di;
+    return samplerate >= 1 && samplerate <= 192000;
+#else
+    return di.supportedSampleRates().contains(samplerate);
+#endif
+}
+
+bool CSoundCommonQT::isDeviceGood(const QAudioDeviceInfo &di, const int *desiredsamplerate) const
+{
+    bool bSampleRateOk = false;
+    for (const int* dsr=desiredsamplerate; *dsr; dsr++)
+    {
+        int samplerate = abs(*dsr);
+        if (isSampleRateSupported(di, samplerate))
+        {
+            bSampleRateOk = true;
+            break;
+        }
+    }
     return
-        di.supportedChannelCounts().contains(2) &&
+        bSampleRateOk &&
+        di.supportedChannelCounts().contains(2) && // TODO
         di.supportedSampleSizes().contains(16) &&
         di.supportedSampleTypes().contains(QAudioFormat::SignedInt) &&
         di.supportedByteOrders().contains(QAudioFormat::LittleEndian) &&
-        di.supportedCodecs().contains("audio/pcm") && (
-        di.supportedSampleRates().contains(24000) ||
-        di.supportedSampleRates().contains(48000) ||
-        di.supportedSampleRates().contains(96000) ||
-        di.supportedSampleRates().contains(192000) );
+        di.supportedCodecs().contains("audio/pcm");
 }
 
-void CSoundCommonQT::Enumerate(vector<string>& names, vector<string>& descriptions)
+void CSoundCommonQT::setSamplerate(deviceprop& dp, const QAudioDeviceInfo &di, const int *desiredsamplerate) const
 {
-    names.clear();
-    descriptions.clear();
+    dp.samplerates.clear();
+    for (const int* dsr=desiredsamplerate; *dsr; dsr++)
+    {
+        int samplerate = abs(*dsr);
+        dp.samplerates[samplerate] = isSampleRateSupported(di, samplerate);
+    }
+}
 
+void CSoundCommonQT::Enumerate(vector<deviceprop>& devs, const int *desiredsamplerate)
+{
+    devs.clear();
+    deviceprop dp;
+
+    /* Default device */
     const QAudioDeviceInfo& di(bInput ? QAudioDeviceInfo::defaultInputDevice() : QAudioDeviceInfo::defaultOutputDevice());
-    if (isDeviceGood(di))
-        names.push_back(""); /* Default device */
+    if (isDeviceGood(di, desiredsamplerate))
+    {
+        dp.name = ""; /* empty string for default device */
+        setSamplerate(dp, di, desiredsamplerate);
+        devs.push_back(dp);
+    }
 
     foreach(const QAudioDeviceInfo& di, QAudioDeviceInfo::availableDevices(bInput ? QAudio::AudioInput : QAudio::AudioOutput))
     {
-        if (isDeviceGood(di))
+        if (isDeviceGood(di, desiredsamplerate))
         {
             string name(di.deviceName().toLocal8Bit().constData());
 //            qDebug("CSoundCommonQT::Enumerate() %i name=%s", bInput, name.c_str());
-            names.push_back(name);
+            dp.name = name;
+            setSamplerate(dp, di, desiredsamplerate);
+            devs.push_back(dp);
         }
     }
 }

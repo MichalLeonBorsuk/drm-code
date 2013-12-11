@@ -60,10 +60,18 @@ protected:
     QMenu*				menuSigDevice;
     QMenu*				menuSigSampleRate;
     const bool			bReceiver;
+    vector<deviceprop>  inputDevs;
+    vector<deviceprop>  outputDevs;
+    vector<QAction*>    inputSampleRate;
+    vector<QAction*>    outputSampleRate;
+    deviceprop*         curInputDev;
+    deviceprop*         curOutputDev;
 
-    QMenu* InitDevice(QMenu* self, QMenu* parent, const QString& text, bool bInput);
+    QMenu* InitDevice(QMenu* self, QMenu* parent, const QString& text, const int* deriredsamplerate, const bool bInput);
     QMenu* InitChannel(QMenu* parent, const QString& text, const int iChanSel, const CHANSEL* ChanSel);
-    QMenu* InitSampleRate(QMenu* parent, const QString& text, const int iCurrentSampleRate, const int* SampleRate);
+    QMenu* InitSampleRate(QMenu* parent, const QString& text, const int iCurrentSampleRate, const int* SampleRate, const bool bInput);
+    deviceprop* AsDeviceProp(QAction* action);
+    void UpdateSampleRate(const bool bInput);
 
 public slots:
     void OnSoundInChannel(QAction*);
