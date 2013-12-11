@@ -46,6 +46,7 @@ public:
     virtual string      GetDev();
     virtual void        SetDev(string);
 protected:
+    void                sleep(unsigned long len);
     bool                isDeviceGood(const QAudioDeviceInfo &di) const;
     bool                bInput;
     string              sDev;
@@ -56,7 +57,7 @@ protected:
     QIODevice*          pIODevice;
 };
 
-class CSoundInQT : public CSoundInInterface, CSoundCommonQT
+class CSoundInQT : public CSoundCommonQT, public CSoundInInterface
 {
 public:
     CSoundInQT();
@@ -71,7 +72,7 @@ private:
     QAudioInput*        pAudioInput;
 };
 
-class CSoundOutQT : public CSoundOutInterface, CSoundCommonQT
+class CSoundOutQT : public CSoundCommonQT, public CSoundOutInterface
 {
 public:
     CSoundOutQT();
