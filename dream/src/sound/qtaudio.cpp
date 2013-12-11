@@ -47,6 +47,19 @@ CSoundCommonQT::~CSoundCommonQT()
 {
 }
 
+void CSoundCommonQT::sleep(unsigned long len)
+{
+    /* 1000000 = number of usec. in sec., 2 = channels */
+    qint64 timeToSleep = (qint64)len * (1000000 / sizeof(short) / 2) / iSampleRate;
+    /* timeToSleep is the worst case time, zero is the best case time,
+       so let divide this time by 2 to have a mean between worst and best case time,
+       pros: latency and jitter on input is improved, and output will have less chance to underflow
+       cons: function call increased, increased overhead */
+    timeToSleep /= 2;
+    if (timeToSleep)
+        QThread::usleep((unsigned long)timeToSleep);
+}
+
 bool CSoundCommonQT::isDeviceGood(const QAudioDeviceInfo &di) const
 {
     return
@@ -173,19 +186,16 @@ _BOOLEAN CSoundInQT::Read(CVector<short>& vecsSoundBuffer)
     }
     if (pIODevice)
     {
-        qint64 len = 2*vecsSoundBuffer.Size(); /* 2 = bytes per sample */
+        qint64 len = sizeof(short) * vecsSoundBuffer.Size();
         for (int pos=0;;) {
             int ret = (int)pIODevice->read((char*)&vecsSoundBuffer[pos], len);
             if (ret < 0)
                 break;
-            pos += ret/2; /* 2 = bytes per sample */
+            pos += ret/sizeof(short);
             len -= ret;
             if (len <= 0)
                 break;
-            /* 1000000 = number of usec. in sec., 4 = bytes per sample * channels */
-            qint64 timeToSleep = len * (1000000 / 4) / iSampleRate;
-            if (timeToSleep)
-                QThread::usleep((unsigned long)timeToSleep);
+            sleep((unsigned long)len);
         }
         bError = len != 0;
     }
@@ -282,19 +292,16 @@ _BOOLEAN CSoundOutQT::Write(CVector<short>& vecsSoundBuffer)
     }
     if (pIODevice)
     {
-        qint64 len = 2*vecsSoundBuffer.Size(); /* 2 = bytes per sample */
+        qint64 len = sizeof(short) * vecsSoundBuffer.Size();
         for (int pos=0;;) {
             int ret = (int)pIODevice->write((char*)&vecsSoundBuffer[pos], len);
             if (ret < 0)
                 break;
-            pos += ret/2; /* 2 = bytes per sample */
+            pos += ret/sizeof(short);
             len -= ret;
             if (len <= 0)
                 break;
-            /* 1000000 = number of usec. in sec., 4 = bytes per sample * channels */
-            qint64 timeToSleep = len * (1000000 / 4) / iSampleRate;
-            if (timeToSleep)
-                QThread::usleep((unsigned long)timeToSleep);
+            sleep((unsigned long)len);
         }
         bError = len != 0;
     }
