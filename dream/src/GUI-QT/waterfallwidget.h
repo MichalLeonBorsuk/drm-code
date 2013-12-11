@@ -9,6 +9,7 @@
 class QPaintEvent;
 class QResizeEvent;
 
+#if 0
 class SimpleWaterfallWidget : public QWidget
 {
     Q_OBJECT
@@ -23,7 +24,7 @@ protected:
     void     paintEvent(QPaintEvent *);
     void     resizeEvent(QResizeEvent *);
 };
-
+#endif
 class WaterfallWidget : public QWidget
 {
     Q_OBJECT
@@ -38,6 +39,7 @@ protected:
     QImage  image;
     void    paintEvent(QPaintEvent *);
     void    resizeEvent(QResizeEvent *);
+    bool    resizeGlitch;
 };
 
 #endif // WATERFALLWIDGET_H
