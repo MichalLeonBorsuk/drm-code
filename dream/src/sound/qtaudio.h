@@ -42,12 +42,14 @@ class CSoundCommonQT : public CSelectionInterface
 public:
     CSoundCommonQT(bool bInput);
     virtual ~CSoundCommonQT();
-    virtual void        Enumerate(vector<string>&, vector<string>&);
+    virtual void        Enumerate(vector<deviceprop>&, const int*);
     virtual string      GetDev();
     virtual void        SetDev(string);
 protected:
-    void                sleep(unsigned long len);
-    bool                isDeviceGood(const QAudioDeviceInfo &di) const;
+    void                sleep(unsigned long len) const;
+    bool                isSampleRateSupported(const QAudioDeviceInfo &di, int samplerate) const;
+    bool                isDeviceGood(const QAudioDeviceInfo &di, const int *desiredsamplerate) const;
+    void                setSamplerate(deviceprop& dp, const QAudioDeviceInfo &di, const int *desiredsamplerate) const;
     bool                bInput;
     string              sDev;
     bool                bDevChanged;
@@ -62,7 +64,7 @@ class CSoundInQT : public CSoundCommonQT, public CSoundInInterface
 public:
     CSoundInQT();
     virtual ~CSoundInQT();
-    virtual void        Enumerate(vector<string>&n, vector<string>&d) { CSoundCommonQT::Enumerate(n, d); }
+    virtual void        Enumerate(vector<deviceprop>& dp, const int* dsr) { CSoundCommonQT::Enumerate(dp, dsr); }
     virtual string      GetDev() { return CSoundCommonQT::GetDev(); }
     virtual void        SetDev(string s) { CSoundCommonQT::SetDev(s); }
     virtual _BOOLEAN    Init(int, int, _BOOLEAN);
@@ -77,7 +79,7 @@ class CSoundOutQT : public CSoundCommonQT, public CSoundOutInterface
 public:
     CSoundOutQT();
     virtual ~CSoundOutQT();
-    virtual void        Enumerate(vector<string>&n, vector<string>&d) { CSoundCommonQT::Enumerate(n, d); }
+    virtual void        Enumerate(vector<deviceprop>& dp, const int* dsr) { CSoundCommonQT::Enumerate(dp, dsr); }
     virtual string      GetDev() { return CSoundCommonQT::GetDev(); }
     virtual void        SetDev(string s) { CSoundCommonQT::SetDev(s); }
     virtual _BOOLEAN    Init(int, int, _BOOLEAN);

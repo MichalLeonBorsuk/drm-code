@@ -96,22 +96,29 @@ CSoundCardSelMenu::CSoundCardSelMenu(CDRMTransceiver& DRMTransceiver,
     CFileMenu* pFileMenu, QWidget* parent) : QMenu(parent),
     DRMTransceiver(DRMTransceiver), Parameters(*DRMTransceiver.GetParameters()),
     menuSigInput(NULL), menuSigDevice(NULL), menuSigSampleRate(NULL),
-    bReceiver(DRMTransceiver.IsReceiver())
+    bReceiver(DRMTransceiver.IsReceiver()),
+    curInputDev(NULL), curOutputDev(NULL)
 {
     setTitle(tr("Sound Card"));
     if (bReceiver)
     {   /* Receiver */
         Parameters.Lock();
+            /* Menu Entries */
             menuSigInput = addMenu(tr("Signal Input"));
             QMenu* menuAudOutput = addMenu(tr("Audio Output"));
-            menuSigDevice = InitDevice(NULL, menuSigInput, tr("Device"), true);
+            /* Device List */
+            menuSigDevice = InitDevice(NULL, menuSigInput, tr("Device"), SignalSampleRateTable, true);
             connect(menuSigDevice, SIGNAL(triggered(QAction*)), this, SLOT(OnSoundInDevice(QAction*)));
-            connect(InitDevice(NULL, menuAudOutput, tr("Device"), false), SIGNAL(triggered(QAction*)), this, SLOT(OnSoundOutDevice(QAction*)));
+            connect(InitDevice(NULL, menuAudOutput, tr("Device"), AudioSampleRateTable, false), SIGNAL(triggered(QAction*)), this, SLOT(OnSoundOutDevice(QAction*)));
+            /* Sample Rate List */
+            menuSigSampleRate = InitSampleRate(menuSigInput, tr("Sample Rate"), Parameters.GetSoundCardSigSampleRate(), SignalSampleRateTable, true);
+            connect(menuSigSampleRate, SIGNAL(triggered(QAction*)), this, SLOT(OnSoundSampleRate(QAction*)));
+            QMenu* menuAudSampleRate = InitSampleRate(menuAudOutput, tr("Sample Rate"), Parameters.GetAudSampleRate(), AudioSampleRateTable, false);
+            connect(menuAudSampleRate, SIGNAL(triggered(QAction*)), this, SLOT(OnSoundSampleRate(QAction*)));
+            /* Channel List */
             connect(InitChannel(menuSigInput, tr("Channel"), (int)((CDRMReceiver&)DRMTransceiver).GetReceiveData()->GetInChanSel(), InputChannelTable), SIGNAL(triggered(QAction*)), this, SLOT(OnSoundInChannel(QAction*)));
             connect(InitChannel(menuAudOutput, tr("Channel"), (int)((CDRMReceiver&)DRMTransceiver).GetWriteData()->GetOutChanSel(), OutputChannelTable), SIGNAL(triggered(QAction*)), this, SLOT(OnSoundOutChannel(QAction*)));
-            menuSigSampleRate = InitSampleRate(menuSigInput, tr("Sample Rate"), Parameters.GetSoundCardSigSampleRate(), SignalSampleRateTable);
-            connect(menuSigSampleRate, SIGNAL(triggered(QAction*)), this, SLOT(OnSoundSampleRate(QAction*)));
-            connect(InitSampleRate(menuAudOutput, tr("Sample Rate"), Parameters.GetAudSampleRate(), AudioSampleRateTable), SIGNAL(triggered(QAction*)), this, SLOT(OnSoundSampleRate(QAction*)));
+            /* Upscale checkbox */
             QAction *actionUpscale = menuSigInput->addAction(tr("2:1 upscale"));
             actionUpscale->setCheckable(true);
             actionUpscale->setChecked(Parameters.GetSigUpscaleRatio() == 2);
@@ -122,13 +129,19 @@ CSoundCardSelMenu::CSoundCardSelMenu(CDRMTransceiver& DRMTransceiver,
     }
     else
     {   /* Transmitter */
+        /* Menu Entries */
         QMenu* menuAudio = addMenu(tr("Audio Input"));
         QMenu* menuSignal = addMenu(tr("Signal Output"));
-        connect(InitDevice(NULL, menuAudio, tr("Device"), true), SIGNAL(triggered(QAction*)), this, SLOT(OnSoundInDevice(QAction*)));
-        connect(InitDevice(NULL, menuSignal, tr("Device"), false), SIGNAL(triggered(QAction*)), this, SLOT(OnSoundOutDevice(QAction*)));
-        connect(InitSampleRate(menuAudio, tr("Sample Rate"), Parameters.GetAudSampleRate(), AudioSampleRateTable), SIGNAL(triggered(QAction*)), this, SLOT(OnSoundSampleRate(QAction*)));
-        connect(InitSampleRate(menuSignal, tr("Sample Rate"), Parameters.GetSigSampleRate(), SignalSampleRateTable), SIGNAL(triggered(QAction*)), this, SLOT(OnSoundSampleRate(QAction*)));
+        /* Device List */
+        connect(InitDevice(NULL, menuAudio, tr("Device"), AudioSampleRateTable, true), SIGNAL(triggered(QAction*)), this, SLOT(OnSoundInDevice(QAction*)));
+        connect(InitDevice(NULL, menuSignal, tr("Device"), SignalSampleRateTable, false), SIGNAL(triggered(QAction*)), this, SLOT(OnSoundOutDevice(QAction*)));
+        /* Sample Rate List */
+        connect(InitSampleRate(menuAudio, tr("Sample Rate"), Parameters.GetAudSampleRate(), AudioSampleRateTable, true), SIGNAL(triggered(QAction*)), this, SLOT(OnSoundSampleRate(QAction*)));
+        connect(InitSampleRate(menuSignal, tr("Sample Rate"), Parameters.GetSigSampleRate(), SignalSampleRateTable, false), SIGNAL(triggered(QAction*)), this, SLOT(OnSoundSampleRate(QAction*)));
     }
+    /* Update Sample Rate */
+    UpdateSampleRate(true);
+    UpdateSampleRate(false);
 }
 
 void CSoundCardSelMenu::OnSoundInDevice(QAction* action)
@@ -136,16 +149,20 @@ void CSoundCardSelMenu::OnSoundInDevice(QAction* action)
     Parameters.Lock();
     QString inputName;
     CSelectionInterface* pSoundInIF = DRMTransceiver.GetSoundInInterface();
-    pSoundInIF->SetDev(action->data().toString().toLocal8Bit().constData());
+    curInputDev = AsDeviceProp(action);
+    pSoundInIF->SetDev(curInputDev->name);
     Parameters.Unlock();
+    UpdateSampleRate(true);
 }
 
 void CSoundCardSelMenu::OnSoundOutDevice(QAction* action)
 {
     Parameters.Lock();
     CSelectionInterface* pSoundOutIF = DRMTransceiver.GetSoundOutInterface();
-    pSoundOutIF->SetDev(action->data().toString().toLocal8Bit().constData());
+    curOutputDev = AsDeviceProp(action);
+    pSoundOutIF->SetDev(curOutputDev->name);
     Parameters.Unlock();
+    UpdateSampleRate(false);
 }
 
 void CSoundCardSelMenu::OnSoundInChannel(QAction* action)
@@ -193,34 +210,36 @@ void CSoundCardSelMenu::OnSoundSignalUpscale(bool bChecked)
     emit sampleRateChanged();
 }
 
-QMenu* CSoundCardSelMenu::InitDevice(QMenu* self, QMenu* parent, const QString& text, bool bInput)
+QMenu* CSoundCardSelMenu::InitDevice(QMenu* self, QMenu* parent, const QString& text, const int* deriredsamplerate, const bool bInput)
 {
     QMenu* menu = self != NULL ? self : parent->addMenu(text);
     menu->clear();
     QActionGroup* group = NULL;
     CSelectionInterface* intf = bInput ? (CSelectionInterface*)DRMTransceiver.GetSoundInInterface() : (CSelectionInterface*)DRMTransceiver.GetSoundOutInterface();
-    vector<string> names;
-    vector<string> descriptions;
-    intf->Enumerate(names, descriptions);
-    int iNumSoundDev = names.size();
-    int iNumDescriptions = descriptions.size(); /* descriptions are optional */
+    vector<deviceprop>& devs(bInput ? inputDevs : outputDevs);
+    intf->Enumerate(devs, deriredsamplerate);
+    int iNumSoundDev = devs.size();
     string sDefaultDev = intf->GetDev();
+    deviceprop** curDev = bInput ? &curInputDev : &curOutputDev;
+    *curDev = NULL;
     for (int i = 0; i < iNumSoundDev; i++)
     {
-        QString name(QString::fromLocal8Bit(names[i].c_str()));
-        QString desc(i < iNumDescriptions ? QString::fromLocal8Bit(descriptions[i].c_str()) : QString());
+        QString name(QString::fromLocal8Bit(devs[i].name.c_str()));
+        QString desc(QString::fromLocal8Bit(devs[i].desc.c_str()));
         QAction* m = menu->addAction(name.isEmpty() ? tr("[default]") : name + (desc.isEmpty() ? desc : " [" + desc + "]"));
-        m->setData(name);
+        m->setData(qVariantFromValue((void*)&devs[i]));
         m->setCheckable(true);
-//        if (name.isEmpty())
-//            menu->setDefaultAction(m);
-        if (names[i] == sDefaultDev)
+        if (devs[i].name == sDefaultDev)
+        {
             m->setChecked(true);
+            *curDev = &devs[i];
+        }
         if (group == NULL)
             group = new QActionGroup(m);
         group->addAction(m);
-//printf("CSoundCardSelMenu::InitDevice() %s\n", name.toUtf8().constData());
+//printf("CSoundCardSelMenu::InitDevice() %s\n", devs[i].name.c_str());
     }
+    UpdateSampleRate(bInput);
     return menu;
 }
 
@@ -241,10 +260,12 @@ QMenu* CSoundCardSelMenu::InitChannel(QMenu* parent, const QString& text, const 
     return menu;
 }
 
-QMenu* CSoundCardSelMenu::InitSampleRate(QMenu* parent, const QString& text, const int iCurrentSampleRate, const int* SampleRate)
+QMenu* CSoundCardSelMenu::InitSampleRate(QMenu* parent, const QString& text, const int iCurrentSampleRate, const int* SampleRate, const bool bInput)
 {
     QMenu* menu = parent->addMenu(text);
     QActionGroup* group = new QActionGroup(parent);
+    vector<QAction*>& actionSampleRate(bInput ? inputSampleRate : outputSampleRate);
+    actionSampleRate.clear();
     for (int i = 0; SampleRate[i]; i++)
     {
         const int iSampleRate = SampleRate[i];
@@ -257,6 +278,7 @@ QMenu* CSoundCardSelMenu::InitSampleRate(QMenu* parent, const QString& text, con
         if (iAbsSampleRate == iCurrentSampleRate)
             m->setChecked(true);
         group->addAction(m);
+        actionSampleRate.push_back(m);
     }
     return menu;
 }
@@ -280,8 +302,27 @@ void CSoundCardSelMenu::OnSoundFileChanged(CDRMReceiver::ESFStatus eStatus)
         if (bReceiver)
         {
             Parameters.Lock();
-                InitDevice(menuSigDevice, menuSigInput, tr("Device"), true);
+                InitDevice(menuSigDevice, menuSigInput, tr("Device"), SignalSampleRateTable, true);
             Parameters.Unlock();
+        }
+    }
+}
+
+deviceprop* CSoundCardSelMenu::AsDeviceProp(QAction* action)
+{
+	return (deviceprop*)action->data().value<void*>();
+}
+
+void CSoundCardSelMenu::UpdateSampleRate(const bool bInput)
+{
+    deviceprop* dev = bInput ? curInputDev : curOutputDev;
+    if (dev)
+    {
+        vector<QAction*>& actionSampleRate(bInput ? inputSampleRate : outputSampleRate);
+        for (size_t i = 0; i < actionSampleRate.size(); i++)
+        {
+            int samplerate = abs(actionSampleRate[i]->data().toInt());
+            actionSampleRate[i]->setEnabled(dev->samplerates[samplerate] == true);
         }
     }
 }
