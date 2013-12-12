@@ -218,6 +218,7 @@ _BOOLEAN CSoundInQT::Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewB
     if (bDevChanged || !pAudioInput)
     {
         bDevChanged = false;
+        pIODevice = NULL;
         QAudioDeviceInfo di = getDevice();
         QAudioFormat format = getFormat();
         pAudioInput = new QAudioInput(di, format);
@@ -307,6 +308,7 @@ _BOOLEAN CSoundOutQT::Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNew
     if (bDevChanged || !pAudioOutput)
     {
         bDevChanged = false;
+        pIODevice = NULL;
         QAudioDeviceInfo di = getDevice();
         QAudioFormat format = getFormat();
         pAudioOutput = new QAudioOutput(di, format);
