@@ -184,11 +184,11 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& Settings,
     connect(ui->actionWhiteOnBlack, SIGNAL(triggered()), messageColorMapper, SLOT(map()));
     connect(ui->actionBlackOnWhite, SIGNAL(triggered()), messageColorMapper, SLOT(map()));
     connect(messageColorMapper, SIGNAL(mapped(int)), this, SLOT(OnMenuMessageColor(int)));
-    int c = getSetting("messagecolor", DEFAULT_MESSAGE_COLOR, true);
-    switch(c) {
+    int iMessageColor = getSetting("messagecolor", DEFAULT_MESSAGE_COLOR, true);
+    switch(iMessageColor) {
     case 0: ui->actionBlackOnWhite->setChecked(true); break;
     case 1: ui->actionWhiteOnBlack->setChecked(true); break; }
-    OnMenuMessageColor(c);
+    OnMenuMessageColor(iMessageColor);
 
     /* Plot style settings */
     QSignalMapper* plotStyleMapper = new QSignalMapper(this);
@@ -203,24 +203,17 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& Settings,
     connect(ui->actionGreenBlack, SIGNAL(triggered()), plotStyleMapper, SLOT(map()));
     connect(ui->actionBlackGrey, SIGNAL(triggered()), plotStyleMapper, SLOT(map()));
     connect(plotStyleMapper, SIGNAL(mapped(int)), this, SIGNAL(plotStyleChanged(int)));
-    switch(getSetting("plotstyle", DEFAULT_PLOT_STYLE, true))
-    {
-    case 0:
-        ui->actionBlueWhite->setChecked(true);
-        break;
-    case 1:
-        ui->actionGreenBlack->setChecked(true);
-        break;
-    case 2:
-        ui->actionBlackGrey->setChecked(true);
-        break;
-    }
+    connect(this, SIGNAL(plotStyleChanged(int)), pSysEvalDlg, SLOT(UpdatePlotStyle(int)));
+    connect(this, SIGNAL(plotStyleChanged(int)), pAnalogDemDlg, SLOT(UpdatePlotStyle(int)));
+    int iPlotStyle = getSetting("plotstyle", DEFAULT_PLOT_STYLE, true);
+    switch(iPlotStyle) {
+    case 0: ui->actionBlueWhite->setChecked(true);  break;
+    case 1: ui->actionGreenBlack->setChecked(true); break;
+    case 2: ui->actionBlackGrey->setChecked(true);  break; }
+    emit plotStyleChanged(iPlotStyle);
 
     connect(ui->actionAbout_Dream, SIGNAL(triggered()), this, SLOT(OnHelpAbout()));
     connect(ui->actionWhats_This, SIGNAL(triggered()), this, SLOT(OnWhatsThis()));
-
-    connect(this, SIGNAL(plotStyleChanged(int)), pSysEvalDlg, SLOT(UpdatePlotStyle(int)));
-    connect(this, SIGNAL(plotStyleChanged(int)), pAnalogDemDlg, SLOT(UpdatePlotStyle(int)));
 
     connect(pAnalogDemDlg, SIGNAL(About()), this, SLOT(OnHelpAbout()));
 

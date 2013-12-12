@@ -46,7 +46,7 @@ systemevalDlg::systemevalDlg(ReceiverController* rc, CSettings& Settings,
                              QWidget* parent) :
     CWindow(parent, Settings, "System Evaluation"),
     controller(rc),Parameters(*rc->getReceiver()->GetParameters()),
-    eNewCharType(CDRMPlot::NONE_OLD)
+    eNewCharType(CDRMPlot::NONE_OLD), iPlotStyle(0)
 {
     setupUi(this);
 
@@ -56,10 +56,7 @@ systemevalDlg::systemevalDlg(ReceiverController* rc, CSettings& Settings,
     /* Init controls -------------------------------------------------------- */
 
     /* Init main plot */
-    iPlotStyle = getSetting("plotstyle", 0, true);
-    putSetting("plotstyle", iPlotStyle, true);
     MainPlot = new CDRMPlot(NULL, plot, controller);
-    MainPlot->SetPlotStyle(iPlotStyle);
 
     /* Update times for colour LEDs */
     LEDFAC->SetUpdateTime(1500);
@@ -369,8 +366,6 @@ void systemevalDlg::eventHide(QHideEvent*)
 
 void systemevalDlg::UpdatePlotStyle(int iPlotStyle)
 {
-    /* Save the new style */
-    putSetting("plotstyle", iPlotStyle, true);
     this->iPlotStyle = iPlotStyle;
 
     /* Update chart windows */
