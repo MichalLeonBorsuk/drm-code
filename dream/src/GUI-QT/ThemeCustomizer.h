@@ -35,9 +35,10 @@ class QWidget;
 
 #ifdef USE_THEMECUSTOMIZER
 # define APPLY_CUSTOM_THEME() ApplyCustomTheme(this, ui)
+# define APPLY_CUSTOM_THEME_NO_UI() ApplyCustomTheme(this, NULL)
 void ApplyCustomTheme(QWidget *widget, void* pUi);
 #else
 # define APPLY_CUSTOM_THEME()
+# define APPLY_CUSTOM_THEME_NO_UI()
 #endif
-
 

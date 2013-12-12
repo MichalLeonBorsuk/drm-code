@@ -39,6 +39,7 @@
 #include <QFileDialog>
 #include <QHideEvent>
 #include <QShowEvent>
+#include "ThemeCustomizer.h"
 
 /* Implementation *************************************************************/
 systemevalDlg::systemevalDlg(ReceiverController* rc, CSettings& Settings,
@@ -189,6 +190,8 @@ systemevalDlg::systemevalDlg(ReceiverController* rc, CSettings& Settings,
 
     /* Force update */
     OnTimer();
+
+    APPLY_CUSTOM_THEME_NO_UI();
 }
 
 void systemevalDlg::connectController(ReceiverController* controller)
