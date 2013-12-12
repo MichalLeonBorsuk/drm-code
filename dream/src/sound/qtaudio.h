@@ -49,16 +49,19 @@ public:
 protected:
     void                sleep(int len) const;
     bool                isSampleRateSupported(const QAudioDeviceInfo &di, int samplerate) const;
-    bool                isDeviceGood(const QAudioDeviceInfo &di, const int *desiredsamplerate) const;
-    void                setSamplerate(deviceprop& dp, const QAudioDeviceInfo &di, const int *desiredsamplerate) const;
+    bool                isDeviceGood(const QAudioDeviceInfo &di, const int *desiredsamplerates) const;
+    void                setSamplerate(deviceprop& dp, const QAudioDeviceInfo &di, const int *desiredsamplerates) const;
     QAudioDeviceInfo    getDevice();
     QAudioFormat        getFormat();
+    void                dumpAudioDeviceInfo(QAudioDeviceInfo di);
+    void                dumpAudioFormat(QAudioFormat format);
     bool                bInput;
     string              sDev;
     bool                bDevChanged;
     int                 iSampleRate;
     int                 iBufferSize;
     _BOOLEAN            bBlocking;
+    int                 iFrameSize;
     QIODevice*          pIODevice;
 };
 

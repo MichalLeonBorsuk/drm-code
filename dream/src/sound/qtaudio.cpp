@@ -32,13 +32,13 @@
 #include <QAudioDeviceInfo>
 #include <QAudioFormat>
 
-
-#define BUFFER_LEN_IN_SEC 2 /* 2 sec. audio buffer */
+#define INPUT_BUFFER_LEN_IN_SEC 2
+#define OUTPUT_BUFFER_LEN_IN_SEC 2
 
 // TODO do the conversion if the device support mono only
 
 // On linux with pulseaudio, sample rate can range from 1Hz to 192kHz,
-//  but supportedSampleRates() return only standard sample rate (11025 22050 44100 48000).
+//  but supportedSampleRates() return only standard sample rate (8000 11025 22050 44100 48000).
 // TODO isSampleRateSupported() hack is very ugly
 
 
@@ -48,7 +48,7 @@
 CSoundCommonQT::CSoundCommonQT(bool bInput) :
     bInput(bInput), bDevChanged(false),
     iSampleRate(0), iBufferSize(0), bBlocking(FALSE),
-    pIODevice(NULL)
+    iFrameSize(0), pIODevice(NULL)
 {
 }
 
@@ -59,7 +59,7 @@ CSoundCommonQT::~CSoundCommonQT()
 void CSoundCommonQT::sleep(int len) const
 {
     /* 1000000 = number of usec. in sec., 2 = channels */
-    qint64 timeToSleep = (qint64)len * (1000000 / sizeof(short) / 2) / iSampleRate;
+    qint64 timeToSleep = (qint64)len * (1000000 / iFrameSize) / iSampleRate;
     /* timeToSleep is the worst case time, zero is the best case time,
        so let divide this time by 2 to have a mean between worst and best case time,
        pros: latency and jitter on input is improved, and output will have less chance to underflow
@@ -80,10 +80,10 @@ bool CSoundCommonQT::isSampleRateSupported(const QAudioDeviceInfo &di, int sampl
 #endif
 }
 
-bool CSoundCommonQT::isDeviceGood(const QAudioDeviceInfo &di, const int *desiredsamplerate) const
+bool CSoundCommonQT::isDeviceGood(const QAudioDeviceInfo &di, const int *desiredsamplerates) const
 {
     bool bSampleRateOk = false;
-    for (const int* dsr=desiredsamplerate; *dsr; dsr++)
+    for (const int* dsr=desiredsamplerates; *dsr; dsr++)
     {
         int samplerate = abs(*dsr);
         if (isSampleRateSupported(di, samplerate))
@@ -101,10 +101,10 @@ bool CSoundCommonQT::isDeviceGood(const QAudioDeviceInfo &di, const int *desired
         di.supportedCodecs().contains("audio/pcm");
 }
 
-void CSoundCommonQT::setSamplerate(deviceprop& dp, const QAudioDeviceInfo &di, const int *desiredsamplerate) const
+void CSoundCommonQT::setSamplerate(deviceprop& dp, const QAudioDeviceInfo &di, const int *desiredsamplerates) const
 {
     dp.samplerates.clear();
-    for (const int* dsr=desiredsamplerate; *dsr; dsr++)
+    for (const int* dsr=desiredsamplerates; *dsr; dsr++)
     {
         int samplerate = abs(*dsr);
         dp.samplerates[samplerate] = isSampleRateSupported(di, samplerate);
@@ -130,6 +130,8 @@ QAudioDeviceInfo CSoundCommonQT::getDevice()
             }
         }
     }
+    dumpAudioDeviceInfo(di);
+    dumpAudioFormat(di.preferredFormat());
     return di;
 }
 
@@ -139,34 +141,110 @@ QAudioFormat CSoundCommonQT::getFormat()
     format.setSampleRate(iSampleRate);
     format.setSampleSize(16);
     format.setSampleType(QAudioFormat::SignedInt);
-    format.setChannelCount(2);
+    format.setChannelCount(2); // TODO
     format.setByteOrder(QAudioFormat::LittleEndian);
     format.setCodec("audio/pcm");
     return format;
 }
 
-void CSoundCommonQT::Enumerate(vector<deviceprop>& devs, const int *desiredsamplerate)
+void CSoundCommonQT::dumpAudioDeviceInfo(QAudioDeviceInfo di)
+{
+    string codec;
+    for (int i=0; i<di.supportedCodecs().size(); ++i)
+        codec += string(di.supportedCodecs().at(i).toLocal8Bit().constData()) + " ";
+    string channel; QList<int> channellist = di.supportedChannelCounts();
+    for (QList<int>::iterator i= channellist.begin(); i != channellist.end(); ++i)
+        channel += string(QString::number(*i).toLocal8Bit().constData()) + " ";
+    string samplesize; QList<int> sizelist = di.supportedSampleSizes();
+    for (QList<int>::iterator i= sizelist.begin(); i != sizelist.end(); ++i)
+        samplesize += string(QString::number(*i).toLocal8Bit().constData()) + " ";
+    string samplerate; QList<int> ratelist = di.supportedSampleRates();
+    for (QList<int>::iterator i= ratelist.begin(); i != ratelist.end(); ++i)
+        samplerate += string(QString::number(*i).toLocal8Bit().constData()) + " ";
+    string byteorder; QList<QAudioFormat::Endian> orderlist = di.supportedByteOrders();
+    for (QList<QAudioFormat::Endian>::iterator i= orderlist.begin(); i != orderlist.end(); ++i)
+        switch (*i) {
+        case QAudioFormat::BigEndian:    byteorder += "BigEndian ";    break;
+        case QAudioFormat::LittleEndian: byteorder += "LittleEndian "; break; }
+    string sampletype; QList<QAudioFormat::SampleType> typelist = di.supportedSampleTypes();
+    for (QList<QAudioFormat::SampleType>::iterator i= typelist.begin(); i != typelist.end(); ++i)
+        switch (*i) {
+        case QAudioFormat::Unknown:     sampletype += "Unknown ";     break;
+        case QAudioFormat::SignedInt:   sampletype += "SignedInt ";   break;
+        case QAudioFormat::UnSignedInt: sampletype += "UnSignedInt "; break;
+        case QAudioFormat::Float:       sampletype += "Float ";       break; }
+    qDebug(
+        "CSoundCommonQT::dumpAudioDeviceInfo():\n"
+        "    input/output = %s\n"
+        "    name = %s\n"
+        "    codec = %s\n"
+        "    channel = %s\n"
+        "    sample size = %s\n"
+        "    sample rate = %s\n"
+        "    byte order = %s\n"
+        "    sample type = %s"
+        , bInput ? "input" : "output"
+        , string(di.deviceName().toLocal8Bit().constData()).c_str()
+        , codec.c_str()
+        , channel.c_str()
+        , samplesize.c_str()
+        , samplerate.c_str()
+        , byteorder.c_str()
+        , sampletype.c_str()
+    );
+}
+
+void CSoundCommonQT::dumpAudioFormat(QAudioFormat format)
+{
+    string byteorder;
+    switch (format.byteOrder()) {
+    case QAudioFormat::BigEndian:    byteorder += "BigEndian ";    break;
+    case QAudioFormat::LittleEndian: byteorder += "LittleEndian "; break; }
+    string sampletype;
+    switch (format.sampleType()) {
+    case QAudioFormat::Unknown:     sampletype += "Unknown ";     break;
+    case QAudioFormat::SignedInt:   sampletype += "SignedInt ";   break;
+    case QAudioFormat::UnSignedInt: sampletype += "UnSignedInt "; break;
+    case QAudioFormat::Float:       sampletype += "Float ";       break; }
+    qDebug(
+        "CSoundCommonQT::dumpAudioFormat():\n"
+        "    codec = %s\n"
+        "    channel = %i\n"
+        "    sample size = %i\n"
+        "    sample rate = %i\n"
+        "    byte order = %s\n"
+        "    sample type = %s"
+        , string(format.codec().toLocal8Bit().constData()).c_str()
+        , format.channelCount()
+        , format.sampleSize()
+        , format.sampleRate()
+        , byteorder.c_str()
+        , sampletype.c_str()
+    );
+}
+
+void CSoundCommonQT::Enumerate(vector<deviceprop>& devs, const int *desiredsamplerates)
 {
     devs.clear();
     deviceprop dp;
 
     /* Default device */
     const QAudioDeviceInfo& di(bInput ? QAudioDeviceInfo::defaultInputDevice() : QAudioDeviceInfo::defaultOutputDevice());
-    if (isDeviceGood(di, desiredsamplerate))
+    if (isDeviceGood(di, desiredsamplerates))
     {
         dp.name = DEFAULT_DEVICE_NAME;
-        setSamplerate(dp, di, desiredsamplerate);
+        setSamplerate(dp, di, desiredsamplerates);
         devs.push_back(dp);
     }
 
     foreach(const QAudioDeviceInfo& di, QAudioDeviceInfo::availableDevices(bInput ? QAudio::AudioInput : QAudio::AudioOutput))
     {
-        if (isDeviceGood(di, desiredsamplerate))
+        if (isDeviceGood(di, desiredsamplerates))
         {
             string name(di.deviceName().toLocal8Bit().constData());
 //            qDebug("CSoundCommonQT::Enumerate() %i name=%s", bInput, name.c_str());
             dp.name = name;
-            setSamplerate(dp, di, desiredsamplerate);
+            setSamplerate(dp, di, desiredsamplerates);
             devs.push_back(dp);
         }
     }
@@ -222,12 +300,12 @@ _BOOLEAN CSoundInQT::Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewB
         QAudioDeviceInfo di = getDevice();
         QAudioFormat format = getFormat();
         pAudioInput = new QAudioInput(di, format);
+        /* make sure we have the requested format */
         if (pAudioInput->format() == format)
         {
-            int size = iSampleRate * (int)sizeof(short) * pAudioInput->format().channelCount() * BUFFER_LEN_IN_SEC;
-            pAudioInput->setBufferSize(size);
+            iFrameSize = pAudioInput->format().channelCount() * pAudioInput->format().sampleSize() / 8;
+            pAudioInput->setBufferSize(iSampleRate * iFrameSize * INPUT_BUFFER_LEN_IN_SEC);
             QIODevice* pIODevice = pAudioInput->start();
-    //        int n = pAudioInput->bufferSize();
             if (pAudioInput->error() == QAudio::NoError)
                 this->pIODevice = pIODevice;
             else
@@ -312,12 +390,12 @@ _BOOLEAN CSoundOutQT::Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNew
         QAudioDeviceInfo di = getDevice();
         QAudioFormat format = getFormat();
         pAudioOutput = new QAudioOutput(di, format);
+        /* make sure we have the requested format */
         if (pAudioOutput->format() == format)
         {
-            int size = iSampleRate * (int)sizeof(short) * pAudioOutput->format().channelCount() * BUFFER_LEN_IN_SEC;
-            pAudioOutput->setBufferSize(size);
+            iFrameSize = pAudioOutput->format().channelCount() * pAudioOutput->format().sampleSize() / 8;
+            pAudioOutput->setBufferSize(iSampleRate * iFrameSize * OUTPUT_BUFFER_LEN_IN_SEC);
             QIODevice* pIODevice = pAudioOutput->start();
-    //        int n = pAudioOutput->bufferSize();
             if (pAudioOutput->error() == QAudio::NoError)
                 this->pIODevice = pIODevice;
             else
