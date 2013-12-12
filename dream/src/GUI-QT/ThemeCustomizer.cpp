@@ -34,6 +34,25 @@
 #include <QFrame>
 #include "ui_DRMMainWindow.h"
 #include "ui_serviceselector.h"
+#include "EvaluationDlg.h"
+
+/*
+	TODO light theme, only dark theme is currently inplemented
+*/
+
+static QPalette BasePalette(QWidget *widget)
+{
+	QPalette palette(widget->palette());
+	palette.setColor(QPalette::Base,       QColor("#000000"));
+	palette.setColor(QPalette::Text,       QColor("#FFFFFF"));
+	palette.setColor(QPalette::Window,     QColor("#000000"));
+	palette.setColor(QPalette::WindowText, QColor("#FFFFFF"));
+	palette.setColor(QPalette::Button,     QColor("#212421"));
+	palette.setColor(QPalette::ButtonText, QColor("#FFFFFF"));
+	palette.setColor(QPalette::Disabled, QPalette::ButtonText, QColor("#616361"));
+	widget->setPalette(palette);	
+	return palette;
+}
 
 void ApplyCustomTheme(QWidget *widget, void* pUi)
 {
@@ -41,13 +60,8 @@ void ApplyCustomTheme(QWidget *widget, void* pUi)
 	if (name == "DRMMainWindow")
 	{
 		Ui::DRMMainWindow* ui = (Ui::DRMMainWindow*)pUi;
-		QPalette palette(widget->palette());
-		palette.setColor(QPalette::Window,     QColor("#000000"));
-		palette.setColor(QPalette::WindowText, QColor("#FFFFFF"));
-		palette.setColor(QPalette::Button,     QColor("#212421"));
-		palette.setColor(QPalette::ButtonText, QColor("#FFFFFF"));
-		palette.setColor(QPalette::Disabled, QPalette::ButtonText, QColor("#616361"));
-		widget->setPalette(palette);
+		QPalette palette(BasePalette(widget));
+		ui->centralwidget->layout()->setMargin(0);
 		ui->FrameMainDisplay->layout()->setMargin(0);
 		ui->FrameMainDisplay->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 		ui->TextTextMessage->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Ignored);
@@ -93,6 +107,12 @@ void ApplyCustomTheme(QWidget *widget, void* pUi)
 		ui->TextMiniService4->setFrameShadow(QFrame::Sunken);
 		ui->TextMiniService4->setPalette(palette);
 		widget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
+	}
+	else if (name == "SystemEvaluationWindow")
+	{
+		systemevalDlg* ui = (systemevalDlg*)widget;
+		QPalette palette(BasePalette(widget));
+		ui->centralwidget->layout()->setMargin(0);
 	}
 }
 
