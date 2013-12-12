@@ -74,6 +74,8 @@
 static _REAL WMERSteps[] = {6.0, 12.0, 18.0, 24.0, 30.0};
 
 static const bool DEFAULT_TO_SINGLE_WINDOW_MODE=true;
+static const int DEFAULT_PLOT_STYLE=0; /* 0 = blue/white, 1 = green/black, 2 = black/grey */
+static const int DEFAULT_MESSAGE_COLOR=0; /* 0 = black on white , 1 = white on black */
 
 /* Implementation *************************************************************/
 #ifdef HAVE_LIBHAMLIB
@@ -182,7 +184,7 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& Settings,
     connect(ui->actionWhiteOnBlack, SIGNAL(triggered()), messageColorMapper, SLOT(map()));
     connect(ui->actionBlackOnWhite, SIGNAL(triggered()), messageColorMapper, SLOT(map()));
     connect(messageColorMapper, SIGNAL(mapped(int)), this, SLOT(OnMenuMessageColor(int)));
-    int c = getSetting("messagecolor", int(0), true);
+    int c = getSetting("messagecolor", DEFAULT_MESSAGE_COLOR, true);
     switch(c) {
     case 0: ui->actionBlackOnWhite->setChecked(true); break;
     case 1: ui->actionWhiteOnBlack->setChecked(true); break; }
@@ -201,7 +203,7 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& Settings,
     connect(ui->actionGreenBlack, SIGNAL(triggered()), plotStyleMapper, SLOT(map()));
     connect(ui->actionBlackGrey, SIGNAL(triggered()), plotStyleMapper, SLOT(map()));
     connect(plotStyleMapper, SIGNAL(mapped(int)), this, SIGNAL(plotStyleChanged(int)));
-    switch(getSetting("plotstyle", int(0), true))
+    switch(getSetting("plotstyle", DEFAULT_PLOT_STYLE, true))
     {
     case 0:
         ui->actionBlueWhite->setChecked(true);
