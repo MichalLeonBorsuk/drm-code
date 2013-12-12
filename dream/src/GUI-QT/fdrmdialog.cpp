@@ -1196,6 +1196,8 @@ void FDRMDialog::SetDisplayColor(const QColor newColor)
         /* Set new palette */
         vecpWidgets[i]->setPalette(CurPal);
     }
+
+    APPLY_CUSTOM_THEME();
 }
 
 void FDRMDialog::AddWhatsThisHelp()
