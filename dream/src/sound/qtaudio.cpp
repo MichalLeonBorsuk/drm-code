@@ -33,10 +33,12 @@
 #include <QAudioFormat>
 
 
+#define BUFFER_LEN_IN_SEC 2 /* 2 sec. audio buffer */
+
 // TODO do the conversion if the device support mono only
 
 // On linux with pulseaudio, sample rate can range from 1Hz to 192kHz,
-//  supportedSampleRates() return only standard sample rate for output and 48kHz for input.
+//  but supportedSampleRates() return only standard sample rate (11025 22050 44100 48000).
 // TODO isSampleRateSupported() hack is very ugly
 
 
@@ -54,7 +56,7 @@ CSoundCommonQT::~CSoundCommonQT()
 {
 }
 
-void CSoundCommonQT::sleep(unsigned long len) const
+void CSoundCommonQT::sleep(int len) const
 {
     /* 1000000 = number of usec. in sec., 2 = channels */
     qint64 timeToSleep = (qint64)len * (1000000 / sizeof(short) / 2) / iSampleRate;
@@ -109,6 +111,40 @@ void CSoundCommonQT::setSamplerate(deviceprop& dp, const QAudioDeviceInfo &di, c
     }
 }
 
+QAudioDeviceInfo CSoundCommonQT::getDevice()
+{
+    QAudioDeviceInfo di;
+    if (sDev == DEFAULT_DEVICE_NAME)
+        di = bInput ? QAudioDeviceInfo::defaultInputDevice() : QAudioDeviceInfo::defaultOutputDevice();
+    else
+    {
+        QAudio::Mode mode = bInput ? QAudio::AudioInput : QAudio::AudioOutput;
+        foreach(const QAudioDeviceInfo& tdi, QAudioDeviceInfo::availableDevices(mode))
+        {
+            string name(tdi.deviceName().toLocal8Bit().constData());
+//            qDebug("CSoundCommonQT::getDevice() %i name=%s", bInput, name.c_str());
+            if (name == sDev)
+            {
+                di = tdi;
+                break;
+            }
+        }
+    }
+    return di;
+}
+
+QAudioFormat CSoundCommonQT::getFormat()
+{
+    QAudioFormat format;
+    format.setSampleRate(iSampleRate);
+    format.setSampleSize(16);
+    format.setSampleType(QAudioFormat::SignedInt);
+    format.setChannelCount(2);
+    format.setByteOrder(QAudioFormat::LittleEndian);
+    format.setCodec("audio/pcm");
+    return format;
+}
+
 void CSoundCommonQT::Enumerate(vector<deviceprop>& devs, const int *desiredsamplerate)
 {
     devs.clear();
@@ -118,7 +154,7 @@ void CSoundCommonQT::Enumerate(vector<deviceprop>& devs, const int *desiredsampl
     const QAudioDeviceInfo& di(bInput ? QAudioDeviceInfo::defaultInputDevice() : QAudioDeviceInfo::defaultOutputDevice());
     if (isDeviceGood(di, desiredsamplerate))
     {
-        dp.name = ""; /* empty string for default device */
+        dp.name = DEFAULT_DEVICE_NAME;
         setSamplerate(dp, di, desiredsamplerate);
         devs.push_back(dp);
     }
@@ -181,40 +217,23 @@ _BOOLEAN CSoundInQT::Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewB
 
     if (bDevChanged || !pAudioInput)
     {
-        bool found=false;
-        QAudioDeviceInfo di, diFirst;
-        foreach(const QAudioDeviceInfo& tdi, QAudioDeviceInfo::availableDevices(QAudio::AudioInput))
-        {
-            string name(tdi.deviceName().toLocal8Bit().constData());
-//            qDebug("CSoundInQT::Init() name=%s", name.c_str());
-            if (name == sDev)
-            {
-                di = tdi;
-                found = true;
-                break;
-            }
-        }
-        if (!found)
-            di = QAudioDeviceInfo::defaultInputDevice();
-
         bDevChanged = false;
-
-        QAudioFormat format;
-        format.setSampleRate(iSampleRate);
-        format.setSampleSize(16);
-        format.setSampleType(QAudioFormat::SignedInt);
-        format.setChannelCount(2);
-        format.setByteOrder(QAudioFormat::LittleEndian);
-        format.setCodec("audio/pcm");
-        QAudioFormat nearestFormat = di.nearestFormat(format);
-        pAudioInput = new QAudioInput(di, nearestFormat);
-        pAudioInput->setBufferSize(iSampleRate * 4 * 2); /* 2 sec. audio buffer */
-        QIODevice* pIODevice = pAudioInput->start();
-//        int n = pAudioInput->bufferSize();
-        if (pAudioInput->error() == QAudio::NoError)
-            this->pIODevice = pIODevice;
+        QAudioDeviceInfo di = getDevice();
+        QAudioFormat format = getFormat();
+        pAudioInput = new QAudioInput(di, format);
+        if (pAudioInput->format() == format)
+        {
+            int size = iSampleRate * (int)sizeof(short) * pAudioInput->format().channelCount() * BUFFER_LEN_IN_SEC;
+            pAudioInput->setBufferSize(size);
+            QIODevice* pIODevice = pAudioInput->start();
+    //        int n = pAudioInput->bufferSize();
+            if (pAudioInput->error() == QAudio::NoError)
+                this->pIODevice = pIODevice;
+            else
+                qDebug("CSoundInQT::Init() Can't open audio input (error = %i)", (int)pAudioInput->error());
+        }
         else
-            qDebug("CSoundInQT::Init() Can't open audio input");
+            qDebug("CSoundInQT::Init() Can't open audio input (bad format)");
     }
     return bChanged;
 }
@@ -228,7 +247,7 @@ _BOOLEAN CSoundInQT::Read(CVector<short>& vecsSoundBuffer)
     }
     if (pIODevice)
     {
-        qint64 len = sizeof(short) * vecsSoundBuffer.Size();
+        int len = (int)(sizeof(short) * vecsSoundBuffer.Size());
         for (int pos=0;;) {
             int ret = (int)pIODevice->read((char*)&vecsSoundBuffer[pos], len);
             if (ret < 0)
@@ -237,7 +256,7 @@ _BOOLEAN CSoundInQT::Read(CVector<short>& vecsSoundBuffer)
             len -= ret;
             if (len <= 0)
                 break;
-            sleep((unsigned long)len);
+            sleep(len);
         }
         bError = len != 0;
     }
@@ -287,40 +306,23 @@ _BOOLEAN CSoundOutQT::Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNew
 
     if (bDevChanged || !pAudioOutput)
     {
-        bool found=false;
-        QAudioDeviceInfo di, diFirst;
-        foreach(const QAudioDeviceInfo& tdi, QAudioDeviceInfo::availableDevices(QAudio::AudioOutput))
-        {
-            string name(tdi.deviceName().toLocal8Bit().constData());
-//            qDebug("CSoundOutQT::Init() name=%s", name.c_str());
-            if (name == sDev)
-            {
-                di = tdi;
-                found = true;
-                break;
-            }
-        }
-        if (!found)
-            di = QAudioDeviceInfo::defaultOutputDevice();
-
         bDevChanged = false;
-
-        QAudioFormat format;
-        format.setSampleRate(iSampleRate);
-        format.setSampleSize(16);
-        format.setSampleType(QAudioFormat::SignedInt);
-        format.setChannelCount(2);
-        format.setByteOrder(QAudioFormat::LittleEndian);
-        format.setCodec("audio/pcm");
-        QAudioFormat nearestFormat = di.nearestFormat(format);
-        pAudioOutput = new QAudioOutput(di, nearestFormat);
-        pAudioOutput->setBufferSize(iSampleRate * 4 * 2); /* 2 sec. audio buffer */
-        QIODevice* pIODevice = pAudioOutput->start();
-//        int n = pAudioOutput->bufferSize();
-        if (pAudioOutput->error() == QAudio::NoError)
-            this->pIODevice = pIODevice;
+        QAudioDeviceInfo di = getDevice();
+        QAudioFormat format = getFormat();
+        pAudioOutput = new QAudioOutput(di, format);
+        if (pAudioOutput->format() == format)
+        {
+            int size = iSampleRate * (int)sizeof(short) * pAudioOutput->format().channelCount() * BUFFER_LEN_IN_SEC;
+            pAudioOutput->setBufferSize(size);
+            QIODevice* pIODevice = pAudioOutput->start();
+    //        int n = pAudioOutput->bufferSize();
+            if (pAudioOutput->error() == QAudio::NoError)
+                this->pIODevice = pIODevice;
+            else
+                qDebug("CSoundInQT::Init() Can't open audio output (error = %i)", (int)pAudioOutput->error());
+        }
         else
-            qDebug("CSoundOutQT::Init() Can't open audio output");
+            qDebug("CSoundInQT::Init() Can't open audio output (bad format)");
     }
     return bChanged;
 }
@@ -334,7 +336,7 @@ _BOOLEAN CSoundOutQT::Write(CVector<short>& vecsSoundBuffer)
     }
     if (pIODevice)
     {
-        qint64 len = sizeof(short) * vecsSoundBuffer.Size();
+        int len = (int)(sizeof(short) * vecsSoundBuffer.Size());
         for (int pos=0;;) {
             int ret = (int)pIODevice->write((char*)&vecsSoundBuffer[pos], len);
             if (ret < 0)
@@ -343,7 +345,7 @@ _BOOLEAN CSoundOutQT::Write(CVector<short>& vecsSoundBuffer)
             len -= ret;
             if (len <= 0)
                 break;
-            sleep((unsigned long)len);
+            sleep(len);
         }
         bError = len != 0;
     }

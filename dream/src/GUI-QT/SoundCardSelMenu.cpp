@@ -226,7 +226,7 @@ QMenu* CSoundCardSelMenu::InitDevice(QMenu* self, QMenu* parent, const QString& 
     {
         QString name(QString::fromLocal8Bit(devs[i].name.c_str()));
         QString desc(QString::fromLocal8Bit(devs[i].desc.c_str()));
-        QAction* m = menu->addAction(name.isEmpty() ? tr("[default]") : name + (desc.isEmpty() ? desc : " [" + desc + "]"));
+        QAction* m = menu->addAction(name == DEFAULT_DEVICE_NAME ? tr("[default]") : name + (desc.isEmpty() ? desc : " [" + desc + "]"));
         m->setData(qVariantFromValue((void*)&devs[i]));
         m->setCheckable(true);
         if (devs[i].name == sDefaultDev)
