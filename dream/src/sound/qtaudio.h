@@ -33,6 +33,7 @@
 class QIODevice;
 class QAudioInput;
 class QAudioOutput;
+class QAudioFormat;
 class QAudioDeviceInfo;
 
 /* Classes ********************************************************************/
@@ -46,10 +47,12 @@ public:
     virtual string      GetDev();
     virtual void        SetDev(string);
 protected:
-    void                sleep(unsigned long len) const;
+    void                sleep(int len) const;
     bool                isSampleRateSupported(const QAudioDeviceInfo &di, int samplerate) const;
     bool                isDeviceGood(const QAudioDeviceInfo &di, const int *desiredsamplerate) const;
     void                setSamplerate(deviceprop& dp, const QAudioDeviceInfo &di, const int *desiredsamplerate) const;
+    QAudioDeviceInfo    getDevice();
+    QAudioFormat        getFormat();
     bool                bInput;
     string              sDev;
     bool                bDevChanged;

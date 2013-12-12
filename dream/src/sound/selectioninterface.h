@@ -34,6 +34,8 @@
 #include <map>
 #include <string>
 
+#define DEFAULT_DEVICE_NAME ""
+
 typedef struct {
     string          name;
     string          desc; /* description is optional, set to empty string when not used */
