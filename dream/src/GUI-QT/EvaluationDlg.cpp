@@ -188,7 +188,7 @@ systemevalDlg::systemevalDlg(ReceiverController* rc, CSettings& Settings,
     /* Force update */
     OnTimer();
 
-    APPLY_CUSTOM_THEME_NO_UI();
+    APPLY_CUSTOM_THEME();
 }
 
 void systemevalDlg::connectController(ReceiverController* controller)

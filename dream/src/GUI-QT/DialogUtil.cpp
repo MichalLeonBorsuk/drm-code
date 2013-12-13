@@ -85,6 +85,7 @@
 #ifndef _WIN32
 # include <fftw3.h>
 #endif
+#include "ThemeCustomizer.h"
 
 QString VersionString(QWidget* parent)
 {
@@ -290,6 +291,8 @@ CAboutDlg::CAboutDlg(QWidget* parent):
 
     /* Set copyright year in about dialog */
     TextLabelCopyright->setText("Copyright (C) 2001 - 2013");
+
+    APPLY_CUSTOM_THEME();
 }
 
 /* Help Usage --------------------------------------------------------------- */

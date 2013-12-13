@@ -90,21 +90,18 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& Settings,
     ui(new Ui::DRMMainWindow),
     DRMReceiver(NDRMR),
     controller(new ReceiverController(&NDRMR, Settings, this)),
-    TimerClose(),
-    pLogging(NULL),pSysEvalDlg(NULL),pBWSDlg(NULL),
-    pSysTray(NULL),
-    pScheduler(NULL), pScheduleTimer(NULL),iCurrentFrequency(-1),
-    pServiceSelector(NULL),pServiceTabs(NULL),pEngineeringTabs(NULL),
+    pLogging(NULL), pSysEvalDlg(NULL), pBWSDlg(NULL),
+    pSysTray(NULL), pAboutDlg(NULL),
+    pScheduler(NULL), pScheduleTimer(NULL), iCurrentFrequency(-1),
+    pServiceSelector(NULL), pServiceTabs(NULL), pEngineeringTabs(NULL),
     pMultimediaWindow(NULL),
-    baseWindowTitle(tr("Dream DRM Receivvr"))
+    baseWindowTitle(tr("Dream DRM Receiver"))
 {
     ui->setupUi(this);
     ui->lineEditFrequency->setVisible(false);
     QDoubleValidator* fvalid = new QDoubleValidator(this);
     ui->lineEditFrequency->setValidator(fvalid);
     connect(ui->lineEditFrequency, SIGNAL(returnPressed ()), this, SLOT(tune()));
-
-    pAboutDlg = new CAboutDlg(this);
 
     /* Set help text for the controls */
     AddWhatsThisHelp();
@@ -285,7 +282,7 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& Settings,
 	/* Activate real-time timers */
     controller->start(GUI_CONTROL_UPDATE_TIME);
 
-    APPLY_CUSTOM_THEME();
+    APPLY_CUSTOM_THEME_UI();
 }
 
 FDRMDialog::~FDRMDialog()
@@ -1131,7 +1128,8 @@ void FDRMDialog::eventClose(QCloseEvent* ce)
     if (DRMReceiver.GetParameters()->eRunState == CParameter::STOPPED)
     {
         TimerClose.stop();
-        pAboutDlg->close();
+        if (pAboutDlg)
+            pAboutDlg->close();
         pAnalogDemDlg->close();
         ce->accept();
     }
@@ -1192,7 +1190,7 @@ void FDRMDialog::SetDisplayColor(const QColor newColor)
         vecpWidgets[i]->setPalette(CurPal);
     }
 
-    APPLY_CUSTOM_THEME();
+    APPLY_CUSTOM_THEME_UI();
 }
 
 void FDRMDialog::AddWhatsThisHelp()
@@ -1275,6 +1273,8 @@ void FDRMDialog::AddWhatsThisHelp()
 
 void FDRMDialog::OnHelpAbout()
 {
+    if (!pAboutDlg)
+        pAboutDlg = new CAboutDlg(this);
     pAboutDlg->show();
 }
 
