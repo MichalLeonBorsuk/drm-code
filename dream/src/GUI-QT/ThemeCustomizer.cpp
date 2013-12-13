@@ -43,7 +43,7 @@
 static QPalette BasePalette(QWidget *widget)
 {
 	QPalette palette(widget->palette());
-	palette.setColor(QPalette::Base,       QColor("#000000"));
+	palette.setColor(QPalette::Base,       QColor("#212421"));
 	palette.setColor(QPalette::Text,       QColor("#FFFFFF"));
 	palette.setColor(QPalette::Window,     QColor("#000000"));
 	palette.setColor(QPalette::WindowText, QColor("#FFFFFF"));
@@ -52,6 +52,13 @@ static QPalette BasePalette(QWidget *widget)
 	palette.setColor(QPalette::Disabled, QPalette::ButtonText, QColor("#616361"));
 	widget->setPalette(palette);	
 	return palette;
+}
+
+static void SetFontSize(QWidget *widget, int fontSize)
+{
+	QFont font(widget->font());
+	font.setPointSize(fontSize);
+	widget->setFont(font);
 }
 
 void ApplyCustomTheme(QWidget *widget, void* pUi)
@@ -63,15 +70,13 @@ void ApplyCustomTheme(QWidget *widget, void* pUi)
 		QPalette palette(BasePalette(widget));
 		ui->centralwidget->layout()->setMargin(0);
 		ui->FrameMainDisplay->layout()->setMargin(0);
+		ui->FrameMainDisplay->setFrameShape(QFrame::NoFrame);
 		ui->FrameMainDisplay->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 		ui->TextTextMessage->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Ignored);
 		palette = ui->TextTextMessage->palette();
 		palette.setColor(QPalette::Disabled, QPalette::Light, QColor("#616361"));
 		palette.setColor(QPalette::Disabled, QPalette::Dark,  QColor("#616361"));
 		ui->TextTextMessage->setPalette(palette);
-		QFont font(ui->ProgrInputLevel->font());
-		font.setPointSize(font.pointSize()-1);
-		ui->ProgrInputLevel->setFont(font);
 		ui->onebar->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Preferred);
 		ui->onebar->setMinimumSize(0, 6);
 		ui->onebar->setMaximumSize(16777215, 6);
@@ -87,6 +92,18 @@ void ApplyCustomTheme(QWidget *widget, void* pUi)
 		ui->fivebars->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Preferred);
 		ui->fivebars->setMinimumSize(0, 6);
 		ui->fivebars->setMaximumSize(16777215, 30);
+		SetFontSize(ui->TextLabelInputLevel, 12);
+		SetFontSize(ui->ProgrInputLevel, 15);
+		SetFontSize(ui->LabelBitrate, 15);
+		SetFontSize(ui->LabelCodec, 15);
+		SetFontSize(ui->LabelStereoMono, 15);
+		SetFontSize(ui->LabelLanguage, 15);
+		SetFontSize(ui->LabelCountryCode, 15);
+		SetFontSize(ui->LabelProgrType, 15);
+		SetFontSize(ui->LabelServiceID, 15);
+		SetFontSize(ui->labelAFS, 13);
+		SetFontSize(ui->LabelServiceLabel, 22);
+		SetFontSize(ui->TextTextMessage, 16);
 	}
 	else if (name == "ServiceSelector")
 	{
@@ -107,12 +124,16 @@ void ApplyCustomTheme(QWidget *widget, void* pUi)
 		ui->TextMiniService4->setFrameShadow(QFrame::Sunken);
 		ui->TextMiniService4->setPalette(palette);
 		widget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
+		SetFontSize(widget, 18);
 	}
 	else if (name == "SystemEvaluationWindow")
 	{
 		systemevalDlg* ui = (systemevalDlg*)widget;
 		QPalette palette(BasePalette(widget));
 		ui->centralwidget->layout()->setMargin(0);
+		palette.setColor(QPalette::Base, QColor("#000000"));
+		ui->chartSelector->setPalette(palette);
+		SetFontSize(widget, 7);
 	}
 }
 
