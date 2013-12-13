@@ -56,6 +56,7 @@
 # include <qwt_round_scale_draw.h>
 #endif
 #include "receivercontroller.h"
+#include "ThemeCustomizer.h"
 
 /* Implementation *************************************************************/
 AnalogDemDlg::AnalogDemDlg(ReceiverController* rc, CSettings& Settings,
@@ -184,6 +185,8 @@ AnalogDemDlg::AnalogDemDlg(ReceiverController* rc, CSettings& Settings,
 		this, SLOT(OnTimerClose()));
 
 	/* Don't activate real-time timers, wait for show event */
+
+    APPLY_CUSTOM_THEME();
 }
 
 void AnalogDemDlg::OnWhatsThis()
@@ -829,6 +832,10 @@ CAMSSDlg::CAMSSDlg(CDRMReceiver& NDRMR, CSettings& Settings, QWidget* parent) :
 		this, SLOT(OnTimer()));
 	connect(&TimerPLLPhaseDial, SIGNAL(timeout()),
 		this, SLOT(OnTimerPLLPhaseDial()));
+	/* Buttons */
+	connect(buttonOk, SIGNAL(clicked()), this, SLOT(close()));
+
+    APPLY_CUSTOM_THEME();
 }
 
 void CAMSSDlg::eventHide(QHideEvent*)

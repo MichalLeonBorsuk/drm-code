@@ -40,6 +40,7 @@
 #include <QMessageBox>
 #include <QFileInfo>
 #include <cmath>
+#include "ThemeCustomizer.h"
 
 /* Implementation *************************************************************/
 #ifdef HAVE_LIBHAMLIB
@@ -85,8 +86,8 @@ eRecMode(RM_NONE)
 
 	ListViewStations->setAllColumnsShowFocus(true);
 	ListViewStations->setColumnCount(9);
-	ListViewStations->setRootIsDecorated ( false );
-	ListViewStations->setSortingEnabled ( true );
+	ListViewStations->setRootIsDecorated(false);
+	ListViewStations->setSortingEnabled(true);
 	QStringList headers;
 	headers
 		<< QString() /* icon, enable sorting by online/offline */
@@ -150,6 +151,7 @@ eRecMode(RM_NONE)
 		this, SLOT(OnFreqCntNewValue(double)));
     connect(&scheduleLoader, SIGNAL(fileReady()), this, SLOT(OnFileReady()));
 
+    APPLY_CUSTOM_THEME();
 }
 
 StationsDlg::~StationsDlg()

@@ -157,8 +157,7 @@ Institute for Communication Technology</string>
               </widget>
              </item>
              <item>
-              <widget class="QwtThermo" name="ProgrInputLevel">
-              </widget>
+              <widget class="QwtThermo" name="ProgrInputLevel" native="true"/>
              </item>
             </layout>
            </item>
@@ -1303,9 +1302,6 @@ Institute for Communication Technology</string>
         <property name="text">
          <string>&amp;Start</string>
         </property>
-        <property name="autoDefault">
-         <bool>true</bool>
-        </property>
         <property name="default">
          <bool>true</bool>
         </property>
@@ -1351,12 +1347,6 @@ Institute for Communication Technology</string>
        <widget class="QPushButton" name="ButtonClose">
         <property name="text">
          <string>&amp;Close</string>
-        </property>
-        <property name="autoDefault">
-         <bool>true</bool>
-        </property>
-        <property name="default">
-         <bool>false</bool>
         </property>
        </widget>
       </item>

@@ -32,6 +32,7 @@
 #include "../datadecoding/epgutil.h"
 #include <QFile>
 #include <set>
+#include "ThemeCustomizer.h"
 
 EPGDlg::EPGDlg(CSettings& Settings, QWidget* parent):
     CWindow(parent, Settings, "EPG"),
@@ -49,6 +50,8 @@ EPGDlg::EPGDlg(CSettings& Settings, QWidget* parent):
     connect(&Timer, SIGNAL(timeout()), this, SLOT(OnTimer()));
 
     TextEPGDisabled->hide();
+
+    APPLY_CUSTOM_THEME();
 }
 
 EPGDlg::~EPGDlg()

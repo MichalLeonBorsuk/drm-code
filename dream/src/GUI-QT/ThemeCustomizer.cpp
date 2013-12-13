@@ -32,27 +32,23 @@
 #include <QPalette>
 #include <QFont>
 #include <QFrame>
+#include <QDesktopWidget>
 #include "ui_DRMMainWindow.h"
 #include "ui_serviceselector.h"
 #include "EvaluationDlg.h"
+#include "AnalogDemDlg.h"
+#include "DialogUtil.h"
+#include "StationsDlg.h"
+#include "EPGDlg.h"
 
-/*
-	TODO light theme, only dark theme is currently inplemented
-*/
+#define WINDOW_BORDER_MARGIN 0
 
-static QPalette BasePalette(QWidget *widget)
-{
-	QPalette palette(widget->palette());
-	palette.setColor(QPalette::Base,       QColor("#212421"));
-	palette.setColor(QPalette::Text,       QColor("#FFFFFF"));
-	palette.setColor(QPalette::Window,     QColor("#000000"));
-	palette.setColor(QPalette::WindowText, QColor("#FFFFFF"));
-	palette.setColor(QPalette::Button,     QColor("#212421"));
-	palette.setColor(QPalette::ButtonText, QColor("#FFFFFF"));
-	palette.setColor(QPalette::Disabled, QPalette::ButtonText, QColor("#616361"));
-	widget->setPalette(palette);	
-	return palette;
-}
+//
+// TODO list:
+//  light theme, only dark theme is currently inplemented.
+//  theme selection menu.
+//  scaling font with screen size.
+//
 
 static void SetFontSize(QWidget *widget, int fontSize)
 {
@@ -61,21 +57,49 @@ static void SetFontSize(QWidget *widget, int fontSize)
 	widget->setFont(font);
 }
 
+static QPalette BaseSetup(QWidget *widget)
+{
+	QPalette palette(widget->palette());
+	palette.setColor(QPalette::Base,       QColor("#212421"));
+	palette.setColor(QPalette::Text,       QColor("#FFFFFF"));
+	palette.setColor(QPalette::Window,     QColor("#000000"));
+	palette.setColor(QPalette::WindowText, QColor("#FFFFFF"));
+	palette.setColor(QPalette::Button,     QColor("#212421"));
+	palette.setColor(QPalette::ButtonText, QColor("#FFFFFF"));
+	palette.setColor(QPalette::Light,      QColor("#616361"));
+	palette.setColor(QPalette::Dark,       QColor("#616361"));
+	palette.setColor(QPalette::Disabled, QPalette::ButtonText, QColor("#616361"));
+	widget->setPalette(palette);	
+	SetFontSize(widget, 13);
+	return palette;
+}
+
+static void QFrameSetup(QFrame *widget)
+{
+	widget->setFrameShape(QFrame::Panel);
+	widget->setFrameShadow(QFrame::Sunken);
+}
+
 void ApplyCustomTheme(QWidget *widget, void* pUi)
 {
 	QString name(widget->objectName());
 	if (name == "DRMMainWindow")
 	{
 		Ui::DRMMainWindow* ui = (Ui::DRMMainWindow*)pUi;
-		QPalette palette(BasePalette(widget));
-		ui->centralwidget->layout()->setMargin(0);
+		QPalette prevPalette(ui->TextTextMessage->palette());
+		QPalette basePalette(BaseSetup(widget));
+		ui->centralwidget->layout()->setMargin(WINDOW_BORDER_MARGIN);
 		ui->FrameMainDisplay->layout()->setMargin(0);
 		ui->FrameMainDisplay->setFrameShape(QFrame::NoFrame);
 		ui->FrameMainDisplay->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 		ui->TextTextMessage->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Ignored);
-		palette = ui->TextTextMessage->palette();
-		palette.setColor(QPalette::Disabled, QPalette::Light, QColor("#616361"));
-		palette.setColor(QPalette::Disabled, QPalette::Dark,  QColor("#616361"));
+		QPalette palette(ui->TextTextMessage->palette());
+		palette.setColor(QPalette::Active,   QPalette::Light, prevPalette.color(QPalette::Active,   QPalette::Light));
+		palette.setColor(QPalette::Active,   QPalette::Dark,  prevPalette.color(QPalette::Active,   QPalette::Dark));
+		palette.setColor(QPalette::Inactive, QPalette::Light, prevPalette.color(QPalette::Inactive, QPalette::Light));
+		palette.setColor(QPalette::Inactive, QPalette::Dark,  prevPalette.color(QPalette::Inactive, QPalette::Dark));
+		palette.setColor(QPalette::Disabled, QPalette::Light, basePalette.color(QPalette::Disabled, QPalette::Light));
+		palette.setColor(QPalette::Disabled, QPalette::Dark,  basePalette.color(QPalette::Disabled, QPalette::Dark));
 		ui->TextTextMessage->setPalette(palette);
 		ui->onebar->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Preferred);
 		ui->onebar->setMinimumSize(0, 6);
@@ -103,38 +127,107 @@ void ApplyCustomTheme(QWidget *widget, void* pUi)
 		SetFontSize(ui->LabelServiceID, 15);
 		SetFontSize(ui->labelAFS, 13);
 		SetFontSize(ui->LabelServiceLabel, 22);
+		SetFontSize(ui->lineEditFrequency, 24);
 		SetFontSize(ui->TextTextMessage, 16);
 	}
 	else if (name == "ServiceSelector")
 	{
 		Ui::ServiceSelector* ui = (Ui::ServiceSelector*)pUi;
 		QPalette palette(widget->palette());
-		palette.setColor(QPalette::Light, QColor("#616361"));
-		palette.setColor(QPalette::Dark,  QColor("#616361"));
-		ui->TextMiniService1->setFrameShape(QFrame::Panel);
-		ui->TextMiniService1->setFrameShadow(QFrame::Sunken);
-		ui->TextMiniService1->setPalette(palette);
-		ui->TextMiniService2->setFrameShape(QFrame::Panel);
-		ui->TextMiniService2->setFrameShadow(QFrame::Sunken);
-		ui->TextMiniService2->setPalette(palette);
-		ui->TextMiniService3->setFrameShape(QFrame::Panel);
-		ui->TextMiniService3->setFrameShadow(QFrame::Sunken);
-		ui->TextMiniService3->setPalette(palette);
-		ui->TextMiniService4->setFrameShape(QFrame::Panel);
-		ui->TextMiniService4->setFrameShadow(QFrame::Sunken);
-		ui->TextMiniService4->setPalette(palette);
+		QFrameSetup(ui->TextMiniService1);
+		QFrameSetup(ui->TextMiniService2);
+		QFrameSetup(ui->TextMiniService3);
+		QFrameSetup(ui->TextMiniService4);
 		widget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
 		SetFontSize(widget, 18);
 	}
 	else if (name == "SystemEvaluationWindow")
 	{
 		systemevalDlg* ui = (systemevalDlg*)widget;
-		QPalette palette(BasePalette(widget));
-		ui->centralwidget->layout()->setMargin(0);
-		palette.setColor(QPalette::Base, QColor("#000000"));
+		BaseSetup(widget);
+		ui->centralwidget->layout()->setMargin(WINDOW_BORDER_MARGIN);
+		QFrameSetup(ui->FrameParamStatusLEDs);
+		QFrameSetup(ui->FrameParamStatusLEDs_2);
+		QFrameSetup(ui->FrameFACParams);
+/*		palette.setColor(QPalette::Window, "#FFFFFF");
+		palette.setColor(QPalette::Base, "#FFFFFF");
+		palette.setColor(QPalette::Button, "#FFFFFF");
+		palette.setColor(QPalette::AlternateBase, "#FFFFFF");
+		palette.setColor(QPalette::Mid, "#FFFFFF");
+		palette.setColor(QPalette::Shadow, "#FFFFFF");
+		palette.setColor(QPalette::Midlight, "#FFFFFF");
+		palette.setColor(QPalette::Highlight, "#FFFFFF");
+		palette.setColor(QPalette::Light, "#FFFFFF");
+		palette.setColor(QPalette::Dark, "#FFFFFF");
+		palette.setColor(QPalette::NoRole, "#FFFFFF");
+		ui->ButtonGroupChanEstFreqInt->setPalette(palette);
+		ui->RadioButtonFreqWiener->setPalette(palette);
+*/		QPalette palette(ui->chartSelector->palette());
+		palette.setColor(QPalette::Base, palette.color(QPalette::Window));
 		ui->chartSelector->setPalette(palette);
+		QFrameSetup(ui->chartSelector);
+		ui->buttonOk->setDefault(false);
+		SetFontSize(ui->buttonOk, 13);
 		SetFontSize(widget, 7);
 	}
+	else if (name == "AMMainWindow")
+	{
+		AnalogDemDlg* ui = (AnalogDemDlg*)widget;
+		BaseSetup(widget);
+		ui->centralwidget->layout()->setMargin(WINDOW_BORDER_MARGIN);
+		QFrameSetup(ui->frame);
+		QFrameSetup(ui->frame_2);
+		ui->ButtonDRM->setDefault(false);
+	}
+	else if (name == "CAMSSDlgBase")
+	{
+		CAMSSDlg* ui = (CAMSSDlg*)widget;
+		BaseSetup(widget);
+		ui->centralwidget->layout()->setMargin(WINDOW_BORDER_MARGIN);
+		QFrameSetup(ui->FrameMainDisplay);
+		QColor color(ui->TextAMSSInfo->palette().color(QPalette::WindowText));
+		QPalette palette(ui->FrameMainDisplay->palette());
+		palette.setColor(QPalette::Light, color);
+		palette.setColor(QPalette::Dark, color);
+		ui->FrameMainDisplay->setPalette(palette);
+		ui->FrameMainDisplay->setLineWidth(2);
+		ui->buttonOk->setDefault(false);
+		SetFontSize(ui->TextAMSSTimeDate, 12);
+		SetFontSize(ui->TextAMSSServiceLabel, 22);
+		SetFontSize(ui->TextAMSSLanguage, 15);
+		SetFontSize(ui->TextAMSSCountryCode, 15);
+		SetFontSize(ui->TextAMSSAMCarrierMode, 15);
+		SetFontSize(ui->TextAMSSInfo, 15);
+		SetFontSize(ui->TextAMSSServiceID, 15);
+	}
+	else if (name == "CAboutDlgBase")
+	{
+		CAboutDlg* ui = (CAboutDlg*)widget;
+		BaseSetup(widget);
+		widget->layout()->setMargin(WINDOW_BORDER_MARGIN);
+		QWidget* parent = widget->parentWidget();
+		if (parent)
+			widget->setGeometry(parent->geometry());
+		ui->setSizeGripEnabled(false);
+		ui->buttonOk->setDefault(false);
+	}
+	else if (name == "StationsDlgbase")
+	{
+		StationsDlg* ui = (StationsDlg*)widget;
+		BaseSetup(widget);
+		ui->centralwidget->layout()->setMargin(WINDOW_BORDER_MARGIN);
+		QFrameSetup(ui->TextLabelUTCTime);
+		ui->buttonOk->setDefault(false);
+	}
+	else if (name == "CEPGDlgbase")
+	{
+		EPGDlg* ui = (EPGDlg*)widget;
+		BaseSetup(widget);
+		ui->centralwidget->layout()->setMargin(WINDOW_BORDER_MARGIN);
+		QFrameSetup(ui->frame);
+		ui->buttonOk->setDefault(false);
+	}
+// TODO BWSViewer CodecParams CGeneralSettingsDlgBase JLViewer LiveScheduleWindow CMultSettingsDlgBase RigDlg SlideShowViewer TransmDlgBase
 }
 
 #endif

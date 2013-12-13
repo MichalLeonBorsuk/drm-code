@@ -51,7 +51,7 @@ ServiceSelector::ServiceSelector(QWidget *parent) :
     ui->TextMiniService3->setWhatsThis(strServiceSel);
     ui->TextMiniService4->setWhatsThis(strServiceSel);
 
-    APPLY_CUSTOM_THEME();
+    APPLY_CUSTOM_THEME_UI();
 }
 
 ServiceSelector::~ServiceSelector()
