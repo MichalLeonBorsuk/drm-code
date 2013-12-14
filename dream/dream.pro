@@ -38,9 +38,7 @@ gui {
     RESOURCES = src/GUI-QT/res/icons.qrc
     QT += network xml
     qt4:QT += webkit
-    qt5 {
-        QT += widgets webkitwidgets
-    }
+    qt5:QT += widgets webkitwidgets
     INCLUDEPATH += src/GUI-QT
     VPATH += src/GUI-QT
     win32:RC_FILE = windows/dream.rc
@@ -51,7 +49,6 @@ gui {
 }
 message($$VERSION_MESSAGE $$DEBUG_MESSAGE $$UI_MESSAGE)
 qt:multimedia {
-    QT += multimedia
     CONFIG += qtaudio sound
 }
 unix:!cross_compile {
@@ -64,7 +61,7 @@ macx {
     LIBS += -framework CoreFoundation -framework CoreServices
     LIBS += -framework CoreAudio -framework AudioToolbox -framework AudioUnit
     CONFIG += pcap
-    !multimedia:CONFIG += portaudio sound
+    !sound:CONFIG += portaudio sound
     !qt5:!contains(QT_VERSION, ^4\\.8.*) {
       exists(/opt/local/include/sndfile.h) {
         CONFIG += sndfile
@@ -76,7 +73,7 @@ macx {
         CONFIG += hamlib
       }
       contains(QT_VERSION, ^4\\.7.*) {
-	QT += phonon opengl svg
+        QT += phonon opengl svg
         DEFINES -= QWT_NO_SVG
         QMAKE_LFLAGS += -bind_at_load
       }
@@ -87,13 +84,12 @@ linux-* {
 }
 android {
     ANDROID_PACKAGE_SOURCE_DIR=$$PWD/android
-    #CONFIG += openSL sound
     SOURCES += src/android/platform_util.cpp
     HEADERS += src/android/platform_util.h
     QT -= webkitwidgets
     QT += svg
-    QT += multimedia
-    CONFIG += sound
+    #CONFIG += openSL sound
+    CONFIG += qtaudio sound
     CONFIG += crosscompile
 }
 unix {
@@ -106,21 +102,20 @@ unix {
     tui:console {
       CONFIG += consoleio
     }
-    LIBS += -lfftw3
-    LIBS += -lz
+    LIBS += -lz -lfftw3
     SOURCES += src/linux/Pacer.cpp
     DEFINES += HAVE_DLFCN_H \
-           HAVE_MEMORY_H \
-           HAVE_STDINT_H \
-           HAVE_STDLIB_H
+               HAVE_MEMORY_H \
+               HAVE_STDINT_H \
+               HAVE_STDLIB_H
     DEFINES += HAVE_STRINGS_H \
-           HAVE_STRING_H \
-           STDC_HEADERS
+               HAVE_STRING_H \
+               STDC_HEADERS
     DEFINES += HAVE_INTTYPES_H \
-           HAVE_STDINT_H \
-           HAVE_SYS_STAT_H \
-           HAVE_SYS_TYPES_H \
-           HAVE_UNISTD_H
+               HAVE_STDINT_H \
+               HAVE_SYS_STAT_H \
+               HAVE_SYS_TYPES_H \
+               HAVE_UNISTD_H
     DEFINES += HAVE_LIBZ
 }
 unix:!cross_compile {
@@ -189,7 +184,7 @@ unix:!cross_compile {
 win32 {
     LIBS += -lfftw3-3
     OTHER_FILES += windows/dream.iss windows/dream.rc
-    !multimedia {
+    !sound {
         exists($$OUT_PWD/include/portaudio.h) {
           CONFIG += portaudio sound
         }
@@ -257,7 +252,7 @@ sndfile {
      unix:LIBS += -lsndfile
      win32-msvc*:LIBS += libsndfile-1.lib
      win32-g++:LIBS += -lsndfile-1
-    android:LIBS += -lvorbis -lvorbisenc -lvorbisfile -lFLAC -logg
+     android:LIBS += -lvorbis -lvorbisenc -lvorbisfile -lFLAC -logg
      message("with libsndfile")
 }
 speexdsp {
@@ -319,14 +314,14 @@ qwt {
           exists(/Library/Frameworks/qwt.framework) {
             INCLUDEPATH += /Library/Frameworks/qwt.framework/Versions/6/Headers
           }
-	}
+        }
         exists(/usr/include/qwt/qwt.h) {
             INCLUDEPATH += /usr/include/qwt
         }
         exists(/usr/local/include/qwt/qwt.h) {
             INCLUDEPATH += /usr/local/include/qwt
         }
-	qt4 {
+        qt4 {
             exists(/usr/include/qwt5/qwt.h) {
                 INCLUDEPATH += /usr/include/qwt5
             }
@@ -344,10 +339,10 @@ qwt {
 alsa {
     DEFINES += USE_ALSA
     HEADERS += src/linux/soundsrc.h \
-    src/linux/soundin.h \
-    src/linux/soundout.h
+               src/linux/soundin.h \
+               src/linux/soundout.h
     SOURCES += src/linux/alsa.cpp \
-    src/linux/soundsrc.cpp
+               src/linux/soundsrc.cpp
     message("with alsa")
 }
 mmsystem {
@@ -359,9 +354,9 @@ mmsystem {
 portaudio {
     DEFINES += USE_PORTAUDIO
     HEADERS += src/sound/pa_ringbuffer.h \
-    src/sound/drm_portaudio.h
+               src/sound/drm_portaudio.h
     SOURCES += src/sound/drm_portaudio.cpp \
-    src/sound/pa_ringbuffer.c
+               src/sound/pa_ringbuffer.c
     LIBS += -lportaudio
     unix:PKGCONFIG += portaudio-2.0
     message("with portaudio")
@@ -376,10 +371,19 @@ pulseaudio {
 }
 openSL {
     DEFINES += USE_OPENSL
-    SOURCES=src/android/soundin.cpp src/android/soundout.cpp
-    HEADERS=src/android/soundin.h src/android/soundout.h
+    HEADERS += src/android/soundin.h \
+               src/android/soundout.h
+    SOURCES += src/android/soundin.cpp \
+               src/android/soundout.cpp
     LIBS += -lOpenSLES
     message("with openSL")
+}
+qtaudio {
+    DEFINES += USE_QTAUDIO
+    HEADERS += src/sound/qtaudio.h
+    SOURCES += src/sound/qtaudio.cpp
+    QT += multimedia
+    message("with Qt audio")
 }
 consoleio {
     DEFINES += USE_CONSOLEIO
@@ -387,12 +391,6 @@ consoleio {
     SOURCES += src/linux/ConsoleIO.cpp
     LIBS += -lpthread
     message("with terminal user interface")
-}
-qtaudio {
-    DEFINES += USE_QTAUDIO
-    HEADERS += src/sound/qtaudio.h
-    SOURCES += src/sound/qtaudio.cpp
-    message("with Qt audio")
 }
 HEADERS += \
     src/AMDemodulation.h \
@@ -742,10 +740,9 @@ SOURCES += \
     src/GUI-QT/streamwidget.cpp \
     src/GUI-QT/ThemeCustomizer.cpp
 }
+
 !isEmpty(QT):message(With Qt components: $$QT)
-!sound {
-    error("no usable audio interface found - install pulseaudio or portaudio dev package")
-}
+!sound:error("no usable audio interface found - install pulseaudio or portaudio dev package")
 
 OTHER_FILES += \
     android/AndroidManifest.xml
