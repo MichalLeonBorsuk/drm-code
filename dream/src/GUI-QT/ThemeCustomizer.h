@@ -25,8 +25,6 @@
  *
 \******************************************************************************/
 
-class QWidget;
-
 //#ifdef __ANDROID__
 //# define USE_THEMECUSTOMIZER
 //#else
@@ -36,7 +34,8 @@ class QWidget;
 #ifdef USE_THEMECUSTOMIZER
 # define APPLY_CUSTOM_THEME() ApplyCustomTheme(this, NULL)
 # define APPLY_CUSTOM_THEME_UI() ApplyCustomTheme(this, ui)
-void ApplyCustomTheme(QWidget *widget, void* pUi);
+class QWidget;
+void ApplyCustomTheme(QWidget* widget, void* pUi);
 #else
 # define APPLY_CUSTOM_THEME()
 # define APPLY_CUSTOM_THEME_UI()
