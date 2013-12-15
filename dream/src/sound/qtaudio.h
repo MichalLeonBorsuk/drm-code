@@ -53,8 +53,8 @@ protected:
     void                setSamplerate(deviceprop& dp, const QAudioDeviceInfo &di, const int *desiredsamplerates) const;
     QAudioDeviceInfo    getDevice();
     QAudioFormat        getFormat();
-    void                dumpAudioDeviceInfo(QAudioDeviceInfo di);
-    void                dumpAudioFormat(QAudioFormat format);
+    void                dumpAudioDeviceInfo(QAudioDeviceInfo di, const char* text);
+    void                dumpAudioFormat(QAudioFormat format, const char* text);
     bool                bInput;
     string              sDev;
     bool                bDevChanged;
