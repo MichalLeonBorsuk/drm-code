@@ -1008,13 +1008,12 @@ public:
     void SetNewAudSampleRate(int sr)
     {
         /* Perform range check */
-        if      (sr < 8000)   sr = 8000;
+        if      (sr < 22050)  sr = 22050;
         else if (sr > 192000) sr = 192000;
-        /* Audio sample rate must be a multiple of 25,
-           set to the nearest multiple of 25 */
-        // TODO AM Demod still have issue with some sample rate
-        // The buffering system is not enough flexible
-        sr = (sr + 12) / 25 * 25; // <- ok for DRM mode
+        /* Audio sample rate must be a multiple of 50,
+           set to the nearest multiple of 50,
+           a limitation from buffering system */
+        sr = (sr + 25) / 50 * 50;
         iNewAudSampleRate = sr;
     }
     void SetNewSigSampleRate(int sr)

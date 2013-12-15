@@ -32,8 +32,14 @@
 #include <QAudioDeviceInfo>
 #include <QAudioFormat>
 
+/* some system might need this for proper sample rate listing */
+#if defined(__linux__) && !defined(__ANDROID__)
+# define QTAUDIO_SAMPLERATE_HACK
+#endif
+
 #define INPUT_BUFFER_LEN_IN_SEC 2
 #define OUTPUT_BUFFER_LEN_IN_SEC 2
+
 
 // TODO do the conversion if the device support mono only
 
@@ -72,7 +78,7 @@ void CSoundCommonQT::sleep(int len) const
 bool CSoundCommonQT::isSampleRateSupported(const QAudioDeviceInfo &di, int samplerate) const
 {
     samplerate = abs(samplerate);
-#if defined(__linux__) && !defined(__ANDROID__)
+#ifdef QTAUDIO_SAMPLERATE_HACK
     (void)di;
     return samplerate >= 1 && samplerate <= 192000;
 #else
@@ -130,8 +136,8 @@ QAudioDeviceInfo CSoundCommonQT::getDevice()
             }
         }
     }
-    dumpAudioDeviceInfo(di);
-    dumpAudioFormat(di.preferredFormat());
+    dumpAudioDeviceInfo(di, "CSoundCommonQT::getDevice(): di");
+    dumpAudioFormat(di.preferredFormat(), "CSoundCommonQT::getDevice(): di.preferredFormat()");
     return di;
 }
 
@@ -147,7 +153,7 @@ QAudioFormat CSoundCommonQT::getFormat()
     return format;
 }
 
-void CSoundCommonQT::dumpAudioDeviceInfo(QAudioDeviceInfo di)
+void CSoundCommonQT::dumpAudioDeviceInfo(QAudioDeviceInfo di, const char* text)
 {
     string codec;
     for (int i=0; i<di.supportedCodecs().size(); ++i)
@@ -174,7 +180,8 @@ void CSoundCommonQT::dumpAudioDeviceInfo(QAudioDeviceInfo di)
         case QAudioFormat::UnSignedInt: sampletype += "UnSignedInt "; break;
         case QAudioFormat::Float:       sampletype += "Float ";       break; }
     qDebug(
-        "CSoundCommonQT::dumpAudioDeviceInfo():\n"
+        "%s\n"
+        "  CSoundCommonQT::dumpAudioDeviceInfo():\n"
         "    input/output = %s\n"
         "    name = %s\n"
         "    codec = %s\n"
@@ -183,6 +190,7 @@ void CSoundCommonQT::dumpAudioDeviceInfo(QAudioDeviceInfo di)
         "    sample rate = %s\n"
         "    byte order = %s\n"
         "    sample type = %s"
+        , text
         , bInput ? "input" : "output"
         , string(di.deviceName().toLocal8Bit().constData()).c_str()
         , codec.c_str()
@@ -194,7 +202,7 @@ void CSoundCommonQT::dumpAudioDeviceInfo(QAudioDeviceInfo di)
     );
 }
 
-void CSoundCommonQT::dumpAudioFormat(QAudioFormat format)
+void CSoundCommonQT::dumpAudioFormat(QAudioFormat format, const char* text)
 {
     string byteorder;
     switch (format.byteOrder()) {
@@ -207,13 +215,15 @@ void CSoundCommonQT::dumpAudioFormat(QAudioFormat format)
     case QAudioFormat::UnSignedInt: sampletype += "UnSignedInt "; break;
     case QAudioFormat::Float:       sampletype += "Float ";       break; }
     qDebug(
-        "CSoundCommonQT::dumpAudioFormat():\n"
+        "%s\n"
+        "  CSoundCommonQT::dumpAudioFormat():\n"
         "    codec = %s\n"
         "    channel = %i\n"
         "    sample size = %i\n"
         "    sample rate = %i\n"
         "    byte order = %s\n"
         "    sample type = %s"
+        , text
         , string(format.codec().toLocal8Bit().constData()).c_str()
         , format.channelCount()
         , format.sampleSize()
@@ -321,9 +331,7 @@ _BOOLEAN CSoundInQT::Read(CVector<short>& vecsSoundBuffer)
 {
     _BOOLEAN bError = TRUE;
     if (bDevChanged)
-    {
         Init(iSampleRate, iBufferSize, bBlocking);
-    }
     if (pIODevice)
     {
         int len = (int)(sizeof(short) * vecsSoundBuffer.Size());
@@ -411,9 +419,7 @@ _BOOLEAN CSoundOutQT::Write(CVector<short>& vecsSoundBuffer)
 {
     _BOOLEAN bError = TRUE;
     if (bDevChanged)
-    {
         Init(iSampleRate, iBufferSize, bBlocking);
-    }
     if (pIODevice)
     {
         int len = (int)(sizeof(short) * vecsSoundBuffer.Size());
