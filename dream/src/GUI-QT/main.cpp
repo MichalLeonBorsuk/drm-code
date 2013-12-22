@@ -153,13 +153,11 @@ main(int argc, char **argv)
 			   ready before the GUI thread */
 
 #ifdef HAVE_LIBHAMLIB
-			CRig rig(DRMReceiver.GetParameters());
-
-			rig.LoadSettings(Settings); // must be before DRMReceiver for G313
+			CRig rig(&Settings, DRMReceiver.GetParameters()); // must be before DRMReceiver.LoadSettings() for G313
 
 			DRMReceiver.LoadSettings();
 
-			DRMReceiver.SetSFCallback(&CRig::SetFrequencyCallback, (void*)&rig);
+			DRMReceiver.SetSFCallback(&CRig::SetFrequencyCallback, &rig);
 
 			if (DRMReceiver.GetDownstreamRSCIOutEnabled())
 				rig.subscribe();
@@ -182,10 +180,7 @@ main(int argc, char **argv)
 
 #ifdef HAVE_LIBHAMLIB
 			if(DRMReceiver.GetDownstreamRSCIOutEnabled())
-			{
 				rig.unsubscribe();
-			}
-			rig.SaveSettings(Settings);
 #endif
 			DRMReceiver.SaveSettings();
 		}
@@ -278,8 +273,8 @@ main(int argc, char **argv)
 			DRMReceiver.LoadSettings();
 
 #ifdef _WIN32
-	WSADATA wsaData;
-	(void)WSAStartup(MAKEWORD(2,2), &wsaData);
+			WSADATA wsaData;
+			(void)WSAStartup(MAKEWORD(2,2), &wsaData);
 #endif
 #ifdef QT_CORE_LIB
 			QCoreApplication app(argc, argv);

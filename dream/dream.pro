@@ -141,7 +141,8 @@ unix:!cross_compile {
       packagesExist(hamlib) {
         CONFIG += hamlib
       }
-      packagesExist(gpsd) {
+#      packagesExist(gpsd) { ### proper package name ??? ###
+      packagesExist(libgps) {
         CONFIG += gps
       }
       packagesExist(pcap) {

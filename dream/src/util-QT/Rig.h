@@ -30,19 +30,20 @@
 #define __RIG_H
 
 #include "../Parameter.h"
-#include "../util/Hamlib.h"
+#include "../util/Settings.h"
+#ifdef HAVE_LIBHAMLIB
+# include "../util/Hamlib.h"
+#endif
 #include <QObject>
 #include <QTimer>
 
-class CRig :
-	public QObject
+class CRig : public QObject
 {
 	Q_OBJECT
 public:
 	static void SetFrequencyCallback(void* sfCallbackParam, int iNewFreqkHz);
-	CRig(CParameter* np);
-	void LoadSettings(CSettings&);
-	void SaveSettings(CSettings&);
+	CRig(CSettings* pSettings, CParameter* pParameters);
+	~CRig();
 	void SetFrequency(int);
 #ifdef HAVE_LIBHAMLIB
 	void GetRigList(map<rig_model_t,CHamlib::SDrRigCaps>& r) { Hamlib.GetRigList(r); }
@@ -58,11 +59,12 @@ public:
 
 protected:
 	CHamlib Hamlib;
-	QTimer* timer;
+	QTimer timer;
 #endif
 protected:
-	int subscribers;
+	CSettings* pSettings;
 	CParameter* pParameters;
+	int subscribers;
 
 signals:
     void sigstr(double);
