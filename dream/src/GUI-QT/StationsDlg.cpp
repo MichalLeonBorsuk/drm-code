@@ -136,7 +136,8 @@ eRecMode(RM_NONE)
 	RigDlg *pRigDlg = new RigDlg(Rig, this);
 	connect(actionChooseRig, SIGNAL(triggered()), pRigDlg, SLOT(show()));
 # else
-	actionChooseRig->setEnabled(false);
+//	actionChooseRig->setEnabled(false);
+	actionChooseRig->setVisible(false);
 # endif
 	connect(buttonOk, SIGNAL(clicked()), this, SLOT(close()));
 	connect(actionEnable_S_Meter, SIGNAL(triggered()), this, SLOT(OnSMeterMenu()));

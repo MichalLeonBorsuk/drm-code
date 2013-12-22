@@ -34,14 +34,19 @@ void CRig::SetFrequencyCallback(void* sfCallbackParam, int iNewFreqkHz)
     ((CRig*)sfCallbackParam)->SetFrequency(iNewFreqkHz);
 }
 
-CRig::CRig(CParameter* np):
-#ifdef HAVE_LIBHAMLIB
-    Hamlib(), timer(new QTimer()),
-#endif
-    subscribers(0),pParameters(np)
+CRig::CRig(CSettings* pSettings, CParameter* pParameters) :
+    pSettings(pSettings), pParameters(pParameters), subscribers(0)
 {
 #ifdef HAVE_LIBHAMLIB
-    connect(timer, SIGNAL(timeout()), this, SLOT(onTimer()));
+    connect(&timer, SIGNAL(timeout()), this, SLOT(onTimer()));
+    Hamlib.LoadSettings(*pSettings);
+#endif
+}
+
+CRig::~CRig()
+{
+#ifdef HAVE_LIBHAMLIB
+    Hamlib.SaveSettings(*pSettings);
 #endif
 }
 
@@ -58,7 +63,7 @@ void CRig::subscribe()
     if(subscribers>0)
 	{
 #ifdef HAVE_LIBHAMLIB
-        timer->start(1000);
+        timer.start(1000);
 #endif
 	}
 }
@@ -80,7 +85,7 @@ void CRig::unsubscribe()
     if(subscribers<=0)
     {
 #ifdef HAVE_LIBHAMLIB
-        timer->stop();
+        timer.stop();
         emit sigstr(-1000.0);
 #endif
     }
@@ -100,24 +105,6 @@ void CRig::onTimer()
     }
     else
         emit sigstr(-1000.0);
-#endif
-}
-
-void CRig::LoadSettings(CSettings& s)
-{
-#ifdef HAVE_LIBHAMLIB
-    Hamlib.LoadSettings(s);
-#else
-    (void)s;
-#endif
-}
-
-void CRig::SaveSettings(CSettings& s)
-{
-#ifdef HAVE_LIBHAMLIB
-    Hamlib.SaveSettings(s);
-#else
-    (void)s;
 #endif
 }
 
