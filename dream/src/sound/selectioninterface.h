@@ -37,10 +37,12 @@
 #define DEFAULT_DEVICE_NAME ""
 
 typedef struct {
-    string          name;
-    string          desc; /* description is optional, set to empty string when not used */
-    map<int,bool>   samplerates;
+    string          name; /* unique name that identify the device */
+    string          desc; /* optional device description, set to empty string when not used */
+    map<int,bool>   samplerates; /* supported sample rates by the device */
 } deviceprop;
+
+// TODO update sound interface backend that use old api, remove old Enumerate(names, descs) and make this class pure virtual
 
 class CSelectionInterface
 {
