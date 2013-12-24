@@ -40,6 +40,8 @@
 #include "DialogUtil.h"
 #include "StationsDlg.h"
 #include "EPGDlg.h"
+#include "GeneralSettingsDlg.h"
+#include "MultSettingsDlg.h"
 
 #define WINDOW_BORDER_MARGIN 0
 
@@ -227,7 +229,29 @@ void ApplyCustomTheme(QWidget *widget, void* pUi)
 		QFrameSetup(ui->frame);
 		ui->buttonOk->setDefault(false);
 	}
-// TODO BWSViewer CodecParams CGeneralSettingsDlgBase JLViewer LiveScheduleWindow CMultSettingsDlgBase RigDlg SlideShowViewer TransmDlgBase
+	else if (name == "CGeneralSettingsDlgBase")
+	{
+		GeneralSettingsDlg* ui = (GeneralSettingsDlg*)widget;
+		BaseSetup(widget);
+		widget->layout()->setMargin(WINDOW_BORDER_MARGIN);
+		QWidget* parent = widget->parentWidget();
+		if (parent)
+			widget->setGeometry(parent->geometry());
+		ui->setSizeGripEnabled(false);
+		ui->buttonOk->setDefault(false);
+	}
+	else if (name == "CMultSettingsDlgBase")
+	{
+		MultSettingsDlg* ui = (MultSettingsDlg*)widget;
+		BaseSetup(widget);
+		widget->layout()->setMargin(WINDOW_BORDER_MARGIN);
+		QWidget* parent = widget->parentWidget();
+		if (parent)
+			widget->setGeometry(parent->geometry());
+		ui->setSizeGripEnabled(false);
+		ui->buttonOk->setDefault(false);
+	}
+// TODO BWSViewer CodecParams JLViewer LiveScheduleWindow RigDlg SlideShowViewer TransmDlgBase
 }
 
 #endif

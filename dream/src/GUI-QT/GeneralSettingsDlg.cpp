@@ -34,6 +34,7 @@
 #include <QCheckBox>
 #include <QShowEvent>
 #include <QHideEvent>
+#include "ThemeCustomizer.h"
 
 /* Implementation *************************************************************/
 
@@ -52,6 +53,8 @@ GeneralSettingsDlg::GeneralSettingsDlg(CSettings& NSettings, QWidget* parent) :
 
     /* Set help text for the controls */
     AddWhatsThisHelp();
+
+    APPLY_CUSTOM_THEME();
 }
 
 GeneralSettingsDlg::~GeneralSettingsDlg()

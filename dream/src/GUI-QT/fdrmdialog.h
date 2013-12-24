@@ -86,12 +86,12 @@ private:
     BWSViewer*			pBWSDlg;
     JLViewer*			pJLDlg;
     SlideShowViewer*	pSlideShowDlg;
-    MultSettingsDlg*	pMultSettingsDlg;
     StationsDlg*		pStationsDlg;
     LiveScheduleDlg*	pLiveScheduleDlg;
     EPGDlg*				pEPGDlg;
     AnalogDemDlg*		pAnalogDemDlg;
     GeneralSettingsDlg* pGeneralSettingsDlg;
+    MultSettingsDlg*	pMultSettingsDlg;
     CSysTray*           pSysTray;
     CFileMenu*			pFileMenu;
     CSoundCardSelMenu*	pSoundCardMenu;
@@ -146,6 +146,7 @@ private slots:
     void OnSysTrayActivated(QSystemTrayIcon::ActivationReason);
     void initialiseSchedule();
     void on_actionGeneralSettings_triggered();
+    void on_actionMultimediaSettings_triggered();
     void onUserEnteredPosition(double, double);
     void onUseGPSd(const QString&);
     void on_action_Multimedia_Dialog_triggered();

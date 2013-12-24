@@ -31,6 +31,7 @@
 #include <QHideEvent>
 #include <QLabel>
 #include <QToolTip>
+#include "ThemeCustomizer.h"
 
 /* Implementation *************************************************************/
 
@@ -60,6 +61,8 @@ MultSettingsDlg::MultSettingsDlg(CParameter& NP, CSettings& NSettings,
 		this, SLOT(OnbuttonClearCacheEPG()));
 
 	EdtSecRefresh->setValidator(new QIntValidator(MIN_MOT_BWS_REFRESH_TIME, MAX_MOT_BWS_REFRESH_TIME, EdtSecRefresh));
+
+	APPLY_CUSTOM_THEME();
 }
 
 MultSettingsDlg::~MultSettingsDlg()

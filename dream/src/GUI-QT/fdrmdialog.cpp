@@ -91,6 +91,7 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& Settings,
     DRMReceiver(NDRMR),
     controller(new ReceiverController(&NDRMR, Settings, this)),
     pLogging(NULL), pSysEvalDlg(NULL), pBWSDlg(NULL),
+    pGeneralSettingsDlg(NULL), pMultSettingsDlg(NULL),
     pSysTray(NULL), pAboutDlg(NULL),
     pScheduler(NULL), pScheduleTimer(NULL), iCurrentFrequency(-1),
     pServiceSelector(NULL), pServiceTabs(NULL), pEngineeringTabs(NULL),
@@ -150,20 +151,12 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& Settings,
     /* Evaluation window */
     pSysEvalDlg = new systemevalDlg(controller, Settings, this);
 
-    /* general settings window */
-    pGeneralSettingsDlg = new GeneralSettingsDlg(Settings, this);
-
-    /* Multimedia settings window */
-    pMultSettingsDlg = new MultSettingsDlg(Parameters, Settings, this);
-
     connect(ui->action_Evaluation_Dialog, SIGNAL(triggered()), pSysEvalDlg, SLOT(show()));
     connect(ui->action_Stations_Dialog, SIGNAL(triggered()), pStationsDlg, SLOT(show()));
     connect(ui->action_Live_Schedule_Dialog, SIGNAL(triggered()), pLiveScheduleDlg, SLOT(show()));
     connect(ui->action_Programme_Guide_Dialog, SIGNAL(triggered()), pEPGDlg, SLOT(show()));
     connect(ui->actionExit, SIGNAL(triggered()), this, SLOT(close()));
     ui->action_Multimedia_Dialog->setEnabled(false);
-
-    connect(ui->actionMultimediaSettings, SIGNAL(triggered()), pMultSettingsDlg, SLOT(show()));
 
     connect(ui->actionAM, SIGNAL(triggered()), this, SLOT(OnSwitchToAM()));
     connect(ui->actionDRM, SIGNAL(triggered()), this, SLOT(OnSwitchToDRM()));
@@ -439,6 +432,8 @@ void FDRMDialog::setupWindowMode()
 
 void FDRMDialog::on_actionGeneralSettings_triggered()
 {
+    if (pGeneralSettingsDlg == NULL)
+        pGeneralSettingsDlg = new GeneralSettingsDlg(Settings, this);
     CParameter& Parameters = *DRMReceiver.GetParameters();
     Parameters.Lock();
     pGeneralSettingsDlg->onPosition(Parameters.gps_data.fix.latitude, Parameters.gps_data.fix.longitude);
@@ -446,6 +441,13 @@ void FDRMDialog::on_actionGeneralSettings_triggered()
     pGeneralSettingsDlg->onGPSd(gpsd, false);
     Parameters.Unlock();
     pGeneralSettingsDlg->show();
+}
+
+void FDRMDialog::on_actionMultimediaSettings_triggered()
+{
+    if (pMultSettingsDlg == NULL)
+        pMultSettingsDlg = new MultSettingsDlg(*DRMReceiver.GetParameters(), Settings, this);
+    pMultSettingsDlg->show();
 }
 
 void FDRMDialog::onUserEnteredPosition(double lat, double lng)
