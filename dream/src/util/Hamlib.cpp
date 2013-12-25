@@ -279,8 +279,12 @@ CHamlib::GetPortList(map < string, string > &ports)
 		(void) IOObjectRelease(modemService);
     }
 #elif defined(__unix__)
+// TODO find better way to enumerate serial device
 	_BOOLEAN bOK = FALSE;
-	FILE *p = popen("hal-find-by-capability --capability serial", "r");
+// hal-find-by-capability no longer available on recent linux distro, give an shell error message.
+// now check if the command exist before executing
+//	FILE *p = popen("hal-find-by-capability --capability serial", "r");
+	FILE *p = popen("type hal-find-by-capability >/dev/null 2>&1 && hal-find-by-capability --capability serial", "r");
 	if (p != NULL)
 	{
 		while (!feof(p))
@@ -291,7 +295,10 @@ CHamlib::GetPortList(map < string, string > &ports)
 			if (strlen(buf) > 0)
 			{
 				string s =
-					string("hal-get-property --key serial.device --udi ") +
+// hal-get-property no longer available on recent linux distro, give an shell error message.
+// now check if the command exist before executing
+//					string("hal-get-property --key serial.device --udi ") +
+					string("type hal-get-property >/dev/null 2>&1 && hal-get-property --key serial.device --udi ") +
 					buf;
 				FILE *p2 = popen(s.c_str(), "r");
 				if (p2 != NULL)
