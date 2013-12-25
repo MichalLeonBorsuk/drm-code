@@ -9197,20 +9197,28 @@
     <property name="title">
      <string>&amp;Settings</string>
     </property>
-    <widget class="QMenu" name="menuPlot_Style">
+    <widget class="QMenu" name="menuAppearance">
      <property name="title">
-      <string>Plot Style</string>
+      <string>Appearance</string>
      </property>
-     <addaction name="actionBlueWhite"/>
-     <addaction name="actionGreenBlack"/>
-     <addaction name="actionBlackGrey"/>
-    </widget>
-    <widget class="QMenu" name="menuMessage_Color">
-     <property name="title">
-      <string>Message Color</string>
-     </property>
-     <addaction name="actionBlackOnWhite"/>
-     <addaction name="actionWhiteOnBlack"/>
+     <widget class="QMenu" name="menuMessage_Style">
+      <property name="title">
+       <string>Message Style</string>
+      </property>
+      <addaction name="actionBlackOnWhite"/>
+      <addaction name="actionWhiteOnBlack"/>
+     </widget>
+     <widget class="QMenu" name="menuPlot_Style">
+      <property name="title">
+       <string>Plot Style</string>
+      </property>
+      <addaction name="actionBlueWhite"/>
+      <addaction name="actionGreenBlack"/>
+      <addaction name="actionBlackGrey"/>
+     </widget>
+     <addaction name="actionDisplayColor"/>
+     <addaction name="menuMessage_Style"/>
+     <addaction name="menuPlot_Style"/>
     </widget>
     <addaction name="actionDRM"/>
     <addaction name="actionAM"/>
@@ -9219,12 +9227,10 @@
     <addaction name="separator"/>
     <addaction name="actionSingle_Window_Mode"/>
     <addaction name="actionEngineering_Mode"/>
-    <addaction name="actionDisplayColor"/>
-    <addaction name="menuPlot_Style"/>
-    <addaction name="menuMessage_Color"/>
     <addaction name="separator"/>
     <addaction name="actionMultimediaSettings"/>
     <addaction name="actionGeneralSettings"/>
+    <addaction name="menuAppearance"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
