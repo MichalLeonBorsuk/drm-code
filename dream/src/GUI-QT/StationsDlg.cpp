@@ -567,9 +567,11 @@ void StationsDlg::OnSigStr(double rCurSigStr)
 
 void StationsDlg::on_actionChooseRig_triggered()
 {
+#ifdef HAVE_LIBHAMLIB
 	if (pRigDlg == NULL)
 		pRigDlg = new RigDlg(Rig, this);
 	pRigDlg->show();
+#endif
 }
 
 bool StationsDlg::showAll()
