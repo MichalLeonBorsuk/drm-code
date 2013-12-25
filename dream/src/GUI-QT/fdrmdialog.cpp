@@ -75,7 +75,7 @@ static _REAL WMERSteps[] = {6.0, 12.0, 18.0, 24.0, 30.0};
 
 static const bool DEFAULT_TO_SINGLE_WINDOW_MODE=true;
 static const int DEFAULT_PLOT_STYLE=0; /* 0 = blue/white, 1 = green/black, 2 = black/grey */
-static const int DEFAULT_MESSAGE_COLOR=0; /* 0 = black on white , 1 = white on black */
+static const int DEFAULT_MESSAGE_STYLE=0; /* 0 = black on white , 1 = white on black */
 
 /* Implementation *************************************************************/
 #ifdef HAVE_LIBHAMLIB
@@ -164,21 +164,21 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& Settings,
 
     connect(ui->actionDisplayColor, SIGNAL(triggered()), this, SLOT(OnMenuSetDisplayColor()));
 
-    /* Message Color settings */
-    QSignalMapper* messageColorMapper = new QSignalMapper(this);
-    QActionGroup* messageColorGroup = new QActionGroup(this);
-    messageColorGroup->addAction(ui->actionBlackOnWhite);
-    messageColorGroup->addAction(ui->actionWhiteOnBlack);
-    messageColorMapper->setMapping(ui->actionBlackOnWhite, 0);
-    messageColorMapper->setMapping(ui->actionWhiteOnBlack, 1);
-    connect(ui->actionWhiteOnBlack, SIGNAL(triggered()), messageColorMapper, SLOT(map()));
-    connect(ui->actionBlackOnWhite, SIGNAL(triggered()), messageColorMapper, SLOT(map()));
-    connect(messageColorMapper, SIGNAL(mapped(int)), this, SLOT(OnMenuMessageColor(int)));
-    int iMessageColor = getSetting("messagecolor", DEFAULT_MESSAGE_COLOR, true);
-    switch(iMessageColor) {
+    /* Message style settings */
+    QSignalMapper* messageStyleMapper = new QSignalMapper(this);
+    QActionGroup* messageStyleGroup = new QActionGroup(this);
+    messageStyleGroup->addAction(ui->actionBlackOnWhite);
+    messageStyleGroup->addAction(ui->actionWhiteOnBlack);
+    messageStyleMapper->setMapping(ui->actionBlackOnWhite, 0);
+    messageStyleMapper->setMapping(ui->actionWhiteOnBlack, 1);
+    connect(ui->actionWhiteOnBlack, SIGNAL(triggered()), messageStyleMapper, SLOT(map()));
+    connect(ui->actionBlackOnWhite, SIGNAL(triggered()), messageStyleMapper, SLOT(map()));
+    connect(messageStyleMapper, SIGNAL(mapped(int)), this, SLOT(OnMenuMessageStyle(int)));
+    int iMessageStyle = getSetting("messagestyle", DEFAULT_MESSAGE_STYLE, true);
+    switch(iMessageStyle) {
     case 0: ui->actionBlackOnWhite->setChecked(true); break;
     case 1: ui->actionWhiteOnBlack->setChecked(true); break; }
-    OnMenuMessageColor(iMessageColor);
+    OnMenuMessageStyle(iMessageStyle);
 
     /* Plot style settings */
     QSignalMapper* plotStyleMapper = new QSignalMapper(this);
@@ -195,6 +195,7 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& Settings,
     connect(plotStyleMapper, SIGNAL(mapped(int)), this, SIGNAL(plotStyleChanged(int)));
     connect(this, SIGNAL(plotStyleChanged(int)), pSysEvalDlg, SLOT(UpdatePlotStyle(int)));
     connect(this, SIGNAL(plotStyleChanged(int)), pAnalogDemDlg, SLOT(UpdatePlotStyle(int)));
+    connect(this, SIGNAL(plotStyleChanged(int)), this, SLOT(OnMenuPlotStyle(int)));
     int iPlotStyle = getSetting("plotstyle", DEFAULT_PLOT_STYLE, true);
     switch(iPlotStyle) {
     case 0: ui->actionBlueWhite->setChecked(true);  break;
@@ -419,7 +420,7 @@ void FDRMDialog::setupWindowMode()
     ui->lineEditFrequency->setVisible(bFmMode);
     ui->LabelServiceLabel->setVisible(!bFmMode); // until we have RDS
     ui->TextTextMessage->setVisible(!bFmMode && !bSingleWindowMode);
-    ui->menuMessage_Color->menuAction()->setVisible(!bFmMode && !bSingleWindowMode);
+    ui->menuMessage_Style->menuAction()->setVisible(!bFmMode && !bSingleWindowMode);
 //    if (bAmMode)
 //        ((QDoubleValidator*)ui->lineEditFrequency->validator())->setRange(0.1, 26.1, 3); // for later:
     if (bFmMode)
@@ -1091,13 +1092,18 @@ void FDRMDialog::OnMenuSetDisplayColor()
     }
 }
 
-void FDRMDialog::OnMenuMessageColor(int index)
+void FDRMDialog::OnMenuMessageStyle(int index)
 {
     QPalette palette(ui->TextTextMessage->palette());
     palette.setColor(QPalette::Window,     QColor(index==0 ? "#FFFFFF" : "#000000"));
     palette.setColor(QPalette::WindowText, QColor(index==0 ? "#000000" : "#FFFFFF"));
     ui->TextTextMessage->setPalette(palette);
-    putSetting("messagecolor", index, true);
+    putSetting("messagestyle", index, true);
+}
+
+void FDRMDialog::OnMenuPlotStyle(int index)
+{
+    putSetting("plotstyle", index, true);
 }
 
 void FDRMDialog::eventClose(QCloseEvent* ce)

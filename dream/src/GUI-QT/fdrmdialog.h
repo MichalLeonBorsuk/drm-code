@@ -135,7 +135,8 @@ private slots:
     void OnTimerClose();
     void OnSelectDataService(int);
     void OnMenuSetDisplayColor();
-    void OnMenuMessageColor(int);
+    void OnMenuMessageStyle(int);
+    void OnMenuPlotStyle(int);
     void OnSwitchToAM();
     void OnSwitchToDRM();
     void OnSwitchToFM();

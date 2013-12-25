@@ -91,18 +91,11 @@ AnalogDemDlg::AnalogDemDlg(ReceiverController* rc, CSettings& Settings,
 	/* Init main plot */
 	bool waterfall = getSetting("waterfall", false);
 	ButtonWaterfall->setChecked(waterfall);
-	if(MainPlot)
-	{
-		MainPlot->SetPlotStyle(getSetting("plotstyle", 0, true));
-		MainPlot->SetupChart(waterfall?CDRMPlot::INP_SPEC_WATERF:CDRMPlot::INPUT_SIG_PSD_ANALOG);
-	}
+	MainPlot->SetupChart(waterfall ? CDRMPlot::INP_SPEC_WATERF : CDRMPlot::INPUT_SIG_PSD_ANALOG);
 
 	/* Add tool tip to show the user the possibility of choosing the AM IF */
 	QString ptt = tr("Click on the plot to set the demodulation frequency");
-	if(MainPlot)
-	{
-		MainPlot->plot->setToolTip(ptt);
-	}
+	MainPlot->plot->setToolTip(ptt);
 
 	/* Init bandwidth slider */
 	UpdateSliderBandwidth();
