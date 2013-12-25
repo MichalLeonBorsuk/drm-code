@@ -42,7 +42,9 @@
 #include "EPGDlg.h"
 #include "GeneralSettingsDlg.h"
 #include "MultSettingsDlg.h"
-#include "BWSViewer.h"
+#ifdef HAVE_QTWEBKIT
+# include "BWSViewer.h"
+#endif
 #include "JLViewer.h"
 #include "LiveScheduleDlg.h"
 #include "SlideShowViewer.h"
@@ -260,6 +262,7 @@ void ApplyCustomTheme(QWidget *widget, void* pUi)
 		ui->setSizeGripEnabled(false);
 		ui->buttonOk->setDefault(false);
 	}
+#ifdef HAVE_QTWEBKIT
 	else if (name == "BWSViewer")
 	{
 		BWSViewer* ui = (BWSViewer*)widget;
@@ -270,6 +273,7 @@ void ApplyCustomTheme(QWidget *widget, void* pUi)
 		ui->webView->setPalette(palette);
 		QFrameSetup(ui->frame);
 	}
+#endif
 	else if (name == "JLViewer")
 	{
 		JLViewer* ui = (JLViewer*)widget;

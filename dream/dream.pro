@@ -631,6 +631,7 @@ gui {
         FORMS += BWSViewer.ui bwsviewerwidget.ui
         HEADERS += src/GUI-QT/BWSViewer.h src/GUI-QT/bwsviewerwidget.h
         SOURCES += src/GUI-QT/BWSViewer.cpp src/GUI-QT/bwsviewerwidget.cpp
+        DEFINES += HAVE_QTWEBKIT
     }
 FORMS += \
     AboutDlgbase.ui \
