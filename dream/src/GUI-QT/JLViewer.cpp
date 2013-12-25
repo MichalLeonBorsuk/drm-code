@@ -31,6 +31,7 @@
 #include <../datadecoding/DataDecoder.h>
 #include <../util-QT/Util.h>
 #include <QFontDialog>
+#include "ThemeCustomizer.h"
 
 JLViewer::JLViewer(CSettings& Settings, QWidget* parent):
     CWindow(parent, Settings, "Journaline")
@@ -53,6 +54,8 @@ JLViewer::JLViewer(CSettings& Settings, QWidget* parent):
     LEDStatus->SetUpdateTime(1000);
 
     on_actionClear_All_triggered();
+
+    APPLY_CUSTOM_THEME();
 }
 
 JLViewer::~JLViewer()

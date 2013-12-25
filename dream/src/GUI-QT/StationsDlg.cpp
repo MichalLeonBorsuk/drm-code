@@ -46,7 +46,7 @@
 #ifdef HAVE_LIBHAMLIB
 StationsDlg::StationsDlg(CSettings& Settings, CRig& Rig, QMap<QWidget*,QString>& parents):
 CWindow(parents, Settings, "Stations"),
-Rig(Rig),
+Rig(Rig), pRigDlg(NULL),
 #else
 StationsDlg::StationsDlg(CSettings& Settings, QMap<QWidget*,QString>& parents):
 CWindow(parents, Settings, "Stations"),
@@ -132,15 +132,10 @@ eRecMode(RM_NONE)
 	connect(previewMapper, SIGNAL(mapped(int)), this, SLOT(OnShowPreviewMenu(int)));
 	connect(ListViewStations->header(), SIGNAL(sectionClicked(int)), this, SLOT(OnHeaderClicked(int)));
 
-# ifdef HAVE_LIBHAMLIB
-	RigDlg *pRigDlg = new RigDlg(Rig, this);
-	connect(actionChooseRig, SIGNAL(triggered()), pRigDlg, SLOT(show()));
-# else
-//	actionChooseRig->setEnabled(false);
+#ifndef HAVE_LIBHAMLIB
 	actionChooseRig->setVisible(false);
-# endif
+#endif
 	connect(buttonOk, SIGNAL(clicked()), this, SLOT(close()));
-	connect(actionEnable_S_Meter, SIGNAL(triggered()), this, SLOT(OnSMeterMenu()));
 
 	/* Init progress bar for input s-meter */
 	InitSMeter(this, ProgrSigStrength);
@@ -541,12 +536,7 @@ void StationsDlg::on_ListViewStations_itemSelectionChanged()
     }
 }
 
-void StationsDlg::OnSMeterMenu(int iID)
-{
-	(void)iID;
-}
-
-void StationsDlg::OnSMeterMenu()
+void StationsDlg::on_actionEnable_S_Meter_triggered()
 {
 	if(actionEnable_S_Meter->isChecked())
 		EnableSMeter();
@@ -573,6 +563,13 @@ void StationsDlg::DisableSMeter()
 void StationsDlg::OnSigStr(double rCurSigStr)
 {
 	ProgrSigStrength->setValue(rCurSigStr);
+}
+
+void StationsDlg::on_actionChooseRig_triggered()
+{
+	if (pRigDlg == NULL)
+		pRigDlg = new RigDlg(Rig, this);
+	pRigDlg->show();
 }
 
 bool StationsDlg::showAll()

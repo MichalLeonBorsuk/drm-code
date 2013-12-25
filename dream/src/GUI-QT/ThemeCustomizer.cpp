@@ -42,6 +42,14 @@
 #include "EPGDlg.h"
 #include "GeneralSettingsDlg.h"
 #include "MultSettingsDlg.h"
+#include "BWSViewer.h"
+#include "JLViewer.h"
+#include "LiveScheduleDlg.h"
+#include "SlideShowViewer.h"
+#ifdef HAVE_LIBHAMLIB
+# include "RigDlg.h"
+#endif
+
 
 #define WINDOW_BORDER_MARGIN 0
 
@@ -57,6 +65,13 @@ static void SetFontSize(QWidget *widget, int fontSize)
 	QFont font(widget->font());
 	font.setPointSize(fontSize);
 	widget->setFont(font);
+}
+
+static void ResizeWidget(QWidget *widget)
+{
+	QWidget* parent = widget->parentWidget();
+	if (parent)
+		widget->setGeometry(parent->geometry());
 }
 
 static QPalette BaseSetup(QWidget *widget)
@@ -207,9 +222,7 @@ void ApplyCustomTheme(QWidget *widget, void* pUi)
 		CAboutDlg* ui = (CAboutDlg*)widget;
 		BaseSetup(widget);
 		widget->layout()->setMargin(WINDOW_BORDER_MARGIN);
-		QWidget* parent = widget->parentWidget();
-		if (parent)
-			widget->setGeometry(parent->geometry());
+		ResizeWidget(widget);
 		ui->setSizeGripEnabled(false);
 		ui->buttonOk->setDefault(false);
 	}
@@ -234,9 +247,7 @@ void ApplyCustomTheme(QWidget *widget, void* pUi)
 		GeneralSettingsDlg* ui = (GeneralSettingsDlg*)widget;
 		BaseSetup(widget);
 		widget->layout()->setMargin(WINDOW_BORDER_MARGIN);
-		QWidget* parent = widget->parentWidget();
-		if (parent)
-			widget->setGeometry(parent->geometry());
+		ResizeWidget(widget);
 		ui->setSizeGripEnabled(false);
 		ui->buttonOk->setDefault(false);
 	}
@@ -245,13 +256,56 @@ void ApplyCustomTheme(QWidget *widget, void* pUi)
 		MultSettingsDlg* ui = (MultSettingsDlg*)widget;
 		BaseSetup(widget);
 		widget->layout()->setMargin(WINDOW_BORDER_MARGIN);
-		QWidget* parent = widget->parentWidget();
-		if (parent)
-			widget->setGeometry(parent->geometry());
+		ResizeWidget(widget);
 		ui->setSizeGripEnabled(false);
 		ui->buttonOk->setDefault(false);
 	}
-// TODO BWSViewer CodecParams JLViewer LiveScheduleWindow RigDlg SlideShowViewer TransmDlgBase
+	else if (name == "BWSViewer")
+	{
+		BWSViewer* ui = (BWSViewer*)widget;
+		ui->centralwidget->layout()->setMargin(WINDOW_BORDER_MARGIN);
+		QPalette palette(BaseSetup(widget));
+		palette.setColor(QPalette::Base, QColor("#FFFFFF"));
+		palette.setColor(QPalette::Text, QColor("#000000"));
+		ui->webView->setPalette(palette);
+		QFrameSetup(ui->frame);
+	}
+	else if (name == "JLViewer")
+	{
+		JLViewer* ui = (JLViewer*)widget;
+		ui->centralwidget->layout()->setMargin(WINDOW_BORDER_MARGIN);
+		QPalette palette(BaseSetup(widget));
+		palette.setColor(QPalette::Base, QColor("#FFFFFF"));
+		palette.setColor(QPalette::Text, QColor("#000000"));
+		ui->textBrowser->setPalette(palette);
+		QFrameSetup(ui->textBrowser);
+	}
+	else if (name == "LiveScheduleWindow")
+	{
+		LiveScheduleDlg* ui = (LiveScheduleDlg*)widget;
+		ui->centralwidget->layout()->setMargin(WINDOW_BORDER_MARGIN);
+		BaseSetup(widget);
+		QFrameSetup(ui->TextLabelUTCTime);
+		QFrameSetup(ui->labelFrequency);
+	}
+	else if (name == "SlideShowViewer")
+	{
+		SlideShowViewer* ui = (SlideShowViewer*)widget;
+		ui->centralwidget->layout()->setMargin(WINDOW_BORDER_MARGIN);
+		BaseSetup(widget);
+		QFrameSetup(ui->frame);
+	}
+#ifdef HAVE_LIBHAMLIB
+	else if (name == "RigDlg")
+	{
+		RigDlg* ui = (RigDlg*)widget;
+		widget->layout()->setMargin(WINDOW_BORDER_MARGIN);
+		BaseSetup(widget);
+		ResizeWidget(widget);
+		ui->setSizeGripEnabled(false);
+	}
+#endif
+// TODO CodecParams TransmDlgBase
 }
 
 #endif
