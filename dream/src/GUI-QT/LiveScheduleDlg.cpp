@@ -34,6 +34,7 @@
 #include <QHideEvent>
 #include <QShowEvent>
 #include "../util-QT/Util.h"
+#include "ThemeCustomizer.h"
 
 #define UTF8_DEGREE_SIGN "\xc2\xb0"
 
@@ -391,6 +392,8 @@ LiveScheduleDlg::LiveScheduleDlg(CSettings& Settings,
 
     /* Init UTC time shown with a label control */
     OnTimerUTCLabel();
+
+    APPLY_CUSTOM_THEME();
 }
 
 LiveScheduleDlg::~LiveScheduleDlg()

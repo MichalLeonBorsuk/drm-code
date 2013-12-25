@@ -31,6 +31,7 @@
 #include "../datadecoding/DABMOT.h"
 #include "../datadecoding/DataDecoder.h"
 #include <QFileDialog>
+#include "ThemeCustomizer.h"
 
 SlideShowViewer::SlideShowViewer(CSettings& Settings, QWidget* parent):
     CWindow(parent, Settings, "SlideShow"),
@@ -60,6 +61,8 @@ SlideShowViewer::SlideShowViewer(CSettings& Settings, QWidget* parent):
     connect(&Timer, SIGNAL(timeout()), this, SLOT(OnTimer()));
 
     OnClearAll();
+
+    APPLY_CUSTOM_THEME();
 }
 
 SlideShowViewer::~SlideShowViewer()

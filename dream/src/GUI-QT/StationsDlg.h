@@ -39,6 +39,8 @@
 
 /* Definitions ****************************************************************/
 
+class RigDlg;
+
 class StationsDlg : public CWindow, public Ui_StationsDlgbase
 {
 	Q_OBJECT
@@ -86,6 +88,7 @@ protected:
 
 #ifdef HAVE_LIBHAMLIB
 	CRig&			Rig;
+	RigDlg			*pRigDlg;
 #endif
 	CSchedule		schedule;
     ScheduleLoader  scheduleLoader;
@@ -114,8 +117,6 @@ private slots:
 	void OnTimer();
 	void OnUpdate();
     void OnFileReady();
-    void OnSMeterMenu(int iID);
-	void OnSMeterMenu();
 	void OnShowStationsMenu(int iID);
 	void OnShowPreviewMenu(int iID);
 	void OnFreqCntNewValue(double dVal);
@@ -125,5 +126,7 @@ private slots:
 	void on_ComboBoxFilterTarget_activated(const QString&);
 	void on_ComboBoxFilterCountry_activated(const QString&);
 	void on_ComboBoxFilterLanguage_activated(const QString&);
+	void on_actionEnable_S_Meter_triggered();
+	void on_actionChooseRig_triggered();
 };
 #endif

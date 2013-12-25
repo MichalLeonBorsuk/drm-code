@@ -32,6 +32,7 @@
 #include "RigDlg.h"
 #include "DialogUtil.h"
 #include <QTreeWidgetItem>
+#include "ThemeCustomizer.h"
 
 /* Implementation *************************************************************/
 
@@ -85,6 +86,8 @@ RigDlg::RigDlg(CRig& nrig, QWidget* parent) :
     rigTypes->sortItems(9, Qt::AscendingOrder);
 
    	InitSMeter(this, sMeter);
+
+    APPLY_CUSTOM_THEME();
 }
 
 RigDlg::~RigDlg()

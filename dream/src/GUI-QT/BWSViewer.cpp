@@ -34,6 +34,7 @@
 #include <QFile>
 #include <QMessageBox>
 #include <QWebHistory>
+#include "ThemeCustomizer.h"
 
 
 #define CACHE_HOST          "127.0.0.1" /* Not an actual server, MUST be set to "127.0.0.1" */
@@ -92,6 +93,8 @@ BWSViewer::BWSViewer(CDRMReceiver& rec, CSettings& Settings, QWidget* parent):
     connect(webView, SIGNAL(loadFinished(bool)), this, SLOT(OnWebViewLoadFinished(bool)));
     connect(webView, SIGNAL(titleChanged(const QString &)), this, SLOT(OnWebViewTitleChanged(const QString &)));
     connect(&Timer, SIGNAL(timeout()), this, SLOT(OnTimer()));
+
+    APPLY_CUSTOM_THEME();
 }
 
 BWSViewer::~BWSViewer()
