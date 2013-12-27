@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>675</width>
-    <height>325</height>
+    <width>663</width>
+    <height>289</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -3407,7 +3407,7 @@
       </layout>
      </widget>
     </item>
-    <item row="1" column="1" rowspan="2">
+    <item row="1" column="1">
      <layout class="QVBoxLayout">
       <property name="spacing">
        <number>6</number>
@@ -3607,7 +3607,7 @@
       </item>
      </layout>
     </item>
-    <item row="2" column="0">
+    <item row="2" column="0" colspan="2">
      <layout class="QHBoxLayout" name="horizontalLayout_2">
       <item>
        <widget class="QLabel" name="TextLabelCurrentBlock">

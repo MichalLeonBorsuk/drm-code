@@ -142,8 +142,6 @@ AnalogDemDlg::AnalogDemDlg(ReceiverController* rc, CSettings& Settings,
 		this, SLOT(OnSwitchToDRM()));
 	connect(ButtonAMSS, SIGNAL(clicked()),
 		&AMSSDlg, SLOT(show()));
-	connect(ButtonWaterfall, SIGNAL(clicked()),
-		this, SLOT(OnButtonWaterfall()));
 	connect(MainPlot, SIGNAL(xAxisValSet(double)),
 		this, SLOT(OnChartxAxisValSet(double)));
 
@@ -218,13 +216,13 @@ void AnalogDemDlg::eventShow(QShowEvent*)
 	UpdateControls();
 
     /* Notify the MainPlot of showEvent */
-    if(MainPlot) MainPlot->activate();
+    MainPlot->activate();
 }
 
 void AnalogDemDlg::eventHide(QHideEvent*)
 {
     /* Notify the MainPlot of hideEvent */
-    if(MainPlot) MainPlot->deactivate();
+    MainPlot->deactivate();
 
 	/* stop real-time timers */
 	Timer.stop();
@@ -350,7 +348,7 @@ void AnalogDemDlg::UpdateControls()
 
 	/* Set filter bandwidth */
     SliderBandwidth->setValue(controller->getReceiver()->GetAMDemod()->GetFilterBW());
-	TextLabelBandWidth->setText(QString().setNum(
+	ButtonBandWidth->setText(QString().setNum(
         controller->getReceiver()->GetAMDemod()->GetFilterBW()) +	tr(" Hz"));
 
 	/* Update check boxes */
@@ -372,8 +370,7 @@ void AnalogDemDlg::UpdateSliderBandwidth()
 void AnalogDemDlg::UpdatePlotStyle(int iPlotstyle)
 {
 	/* Update main plot window */
-	if(MainPlot)
-		MainPlot->SetPlotStyle(iPlotstyle);
+	MainPlot->SetPlotStyle(iPlotstyle);
 }
 
 void AnalogDemDlg::OnSampleRateChanged()
@@ -526,10 +523,10 @@ void AnalogDemDlg::OnSliderBWChange(int value)
 {
 	/* Set new filter in processing module */
     controller->getReceiver()->SetAMFilterBW(value);
-	TextLabelBandWidth->setText(QString().setNum(value) + tr(" Hz"));
+	ButtonBandWidth->setText(QString().setNum(value) + tr(" Hz"));
 
 	/* Update chart */
-	if(MainPlot) MainPlot->UpdateAnalogBWMarker();
+	MainPlot->UpdateAnalogBWMarker();
 }
 
 void AnalogDemDlg::OnCheckAutoFreqAcq()
@@ -589,13 +586,13 @@ void AnalogDemDlg::OnChartxAxisValSet(double dVal)
     controller->getReceiver()->SetAMDemodAcq(dVal);
 
 	/* Update chart */
-	if(MainPlot) MainPlot->UpdateAnalogBWMarker();
+	MainPlot->UpdateAnalogBWMarker();
 }
 
-void AnalogDemDlg::OnButtonWaterfall()
+void AnalogDemDlg::on_ButtonWaterfall_clicked(bool checked)
 {
 	/* Toggle between normal spectrum plot and waterfall spectrum plot */
-	if (MainPlot && ButtonWaterfall->isChecked())
+	if (checked)
 		MainPlot->SetupChart(CDRMPlot::INP_SPEC_WATERF);
 	else
 		MainPlot->SetupChart(CDRMPlot::INPUT_SIG_PSD_ANALOG);
@@ -606,17 +603,33 @@ void AnalogDemDlg::on_ButtonFreqOffset_clicked(bool)
 {
 	bool ok = false;
 	const double prev_freq =
-        controller->getReceiver()->GetReceiveData()->ConvertFrequency(
-            controller->getReceiver()->GetAMDemod()->GetCurMixFreqOffs());
+		controller->getReceiver()->GetReceiveData()->ConvertFrequency(
+			controller->getReceiver()->GetAMDemod()->GetCurMixFreqOffs());
 	const double new_freq = QInputDialog::getDouble(this, this->windowTitle(),
-		LabelFreqOffset->text(), prev_freq, -1e6, 1e6, 2, &ok);
+		groupBoxCF->title(), prev_freq, -1e6, 1e6, 2, &ok);
 	if (ok)
 	{
 		const _REAL conv_freq =
-            controller->getReceiver()->GetReceiveData()->ConvertFrequency(new_freq, TRUE);
+			controller->getReceiver()->GetReceiveData()->ConvertFrequency(new_freq, TRUE);
 		const double dVal = conv_freq /
-            (controller->getReceiver()->GetParameters()->GetSigSampleRate() / 2);
+			(controller->getReceiver()->GetParameters()->GetSigSampleRate() / 2);
 		OnChartxAxisValSet(dVal);
+	}
+}
+
+/* Manual band width input box */
+void AnalogDemDlg::on_ButtonBandWidth_clicked(bool)
+{
+	bool ok = false;
+	const int sr2 = controller->getReceiver()->GetParameters()->GetSigSampleRate() / 2;
+	const int prev_bw = controller->getReceiver()->GetAMDemod()->GetFilterBW();
+	const int new_bw = QInputDialog::getInt(this, this->windowTitle(),
+		groupBoxBW->title(), prev_bw, 0, sr2, 2, &ok);
+	if (ok)
+	{
+		controller->getReceiver()->GetAMDemod()->SetFilterBW(new_bw);
+		ButtonBandWidth->setText(QString().setNum(
+			controller->getReceiver()->GetAMDemod()->GetFilterBW()) + tr(" Hz"));
 	}
 }
 
@@ -724,7 +737,7 @@ void AnalogDemDlg::AddWhatsThisHelp()
     RadioButtonAGCSlow->setWhatsThis(strAGC);
     RadioButtonAGCMed->setWhatsThis(strAGC);
     RadioButtonAGCFast->setWhatsThis(strAGC);
-    TextLabelBandWidth->setWhatsThis(strFilterBW);
+    ButtonBandWidth->setWhatsThis(strFilterBW);
     SliderBandwidth->setWhatsThis(strFilterBW);
     RadioButtonDemAM->setWhatsThis(strDemodType);
     RadioButtonDemLSB->setWhatsThis(strDemodType);
@@ -738,7 +751,7 @@ void AnalogDemDlg::AddWhatsThisHelp()
     CheckBoxPLL->setWhatsThis(strPLL);
     PhaseDial->setWhatsThis(strPLL);
     TextLabelPhaseOffset->setWhatsThis(strPLL);
-    LabelFreqOffset->setWhatsThis(strTextFreqOffset);
+    ButtonFreqOffset->setWhatsThis(strTextFreqOffset);
     ButtonFreqOffset->setWhatsThis(strTextFreqOffset);
     CheckBoxSaveAudioWave->setWhatsThis(strCheckBoxSaveAudioWave);
     groupBoxNoiseReduction->setWhatsThis(strNoiseReduction);
