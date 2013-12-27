@@ -109,23 +109,23 @@ public slots:
 	void OnTimer();
 	void OnTimerPLLPhaseDial();
 	void OnTimerClose();
-	void OnRadioDemodulation(int iID);
-	void OnRadioAGC(int iID);
-	void OnCheckBoxMuteAudio();
-	void OnCheckSaveAudioWAV();
-	void OnCheckAutoFreqAcq();
-	void OnCheckPLL();
 	void OnChartxAxisValSet(double dVal);
-	void OnSliderBWChange(int value);
-	void OnRadioNoiRed(int iID);
-	void on_ButtonWaterfall_clicked(bool);
-	void on_ButtonFreqOffset_clicked(bool);
-	void on_ButtonBandWidth_clicked(bool);
-	void on_SpinBoxNoiRedLevel_valueChanged(int value);
 	void OnSwitchToDRM();
 	void OnSwitchToFM();
 	void OnHelpAbout() {emit About();}
 	void OnWhatsThis();
+	void on_CheckBoxMuteAudio_clicked(bool);
+	void on_CheckBoxSaveAudioWave_clicked(bool);
+	void on_CheckBoxAutoFreqAcq_clicked(bool);
+	void on_CheckBoxPLL_clicked(bool);
+	void on_ButtonWaterfall_clicked(bool);
+	void on_ButtonFreqOffset_clicked(bool);
+	void on_ButtonBandWidth_clicked(bool);
+	void on_SpinBoxNoiRedLevel_valueChanged(int);
+	void on_SliderBandwidth_valueChanged(int);
+	void on_ButtonGroupDemodulation_buttonClicked(int);
+	void on_ButtonGroupAGC_buttonClicked(int);
+	void on_ButtonGroupNoiseReduction_buttonClicked(int);
 
 signals:
 	void SwitchMode(int);
