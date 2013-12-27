@@ -118,8 +118,9 @@ public slots:
 	void OnChartxAxisValSet(double dVal);
 	void OnSliderBWChange(int value);
 	void OnRadioNoiRed(int iID);
-	void OnButtonWaterfall();
+	void on_ButtonWaterfall_clicked(bool);
 	void on_ButtonFreqOffset_clicked(bool);
+	void on_ButtonBandWidth_clicked(bool);
 	void on_SpinBoxNoiRedLevel_valueChanged(int value);
 	void OnSwitchToDRM();
 	void OnSwitchToFM();
