@@ -136,7 +136,6 @@ AnalogDemDlg::AnalogDemDlg(ReceiverController* rc, CSettings& Settings,
 	/* Update controls */
 	UpdateControls();
 
-
 	/* Connect controls ----------------------------------------------------- */
 	connect(ButtonDRM, SIGNAL(clicked()),
 		this, SLOT(OnSwitchToDRM()));
@@ -144,28 +143,6 @@ AnalogDemDlg::AnalogDemDlg(ReceiverController* rc, CSettings& Settings,
 		&AMSSDlg, SLOT(show()));
 	connect(MainPlot, SIGNAL(xAxisValSet(double)),
 		this, SLOT(OnChartxAxisValSet(double)));
-
-	/* Button groups */
-	connect(ButtonGroupDemodulation, SIGNAL(buttonClicked(int)),
-		this, SLOT(OnRadioDemodulation(int)));
-	connect(ButtonGroupAGC, SIGNAL(buttonClicked(int)),
-		this, SLOT(OnRadioAGC(int)));
-	connect(ButtonGroupNoiseReduction, SIGNAL(buttonClicked(int)),
-		this, SLOT(OnRadioNoiRed(int)));
-
-	/* Slider */
-	connect(SliderBandwidth, SIGNAL(valueChanged(int)),
-		this, SLOT(OnSliderBWChange(int)));
-
-	/* Check boxes */
-	connect(CheckBoxMuteAudio, SIGNAL(clicked()),
-		this, SLOT(OnCheckBoxMuteAudio()));
-	connect(CheckBoxSaveAudioWave, SIGNAL(clicked()),
-		this, SLOT(OnCheckSaveAudioWAV()));
-	connect(CheckBoxAutoFreqAcq, SIGNAL(clicked()),
-		this, SLOT(OnCheckAutoFreqAcq()));
-	connect(CheckBoxPLL, SIGNAL(clicked()),
-		this, SLOT(OnCheckPLL()));
 
 	/* Timers */
 	connect(&Timer, SIGNAL(timeout()),
@@ -431,7 +408,7 @@ void AnalogDemDlg::OnTimerClose()
 		close();
 }
 
-void AnalogDemDlg::OnRadioDemodulation(int iID)
+void AnalogDemDlg::on_ButtonGroupDemodulation_buttonClicked(int iID)
 {
 	iID = -iID - 2; // TODO understand why
 	/* DRMReceiver takes care of setting appropriate filter BW */
@@ -462,7 +439,7 @@ void AnalogDemDlg::OnRadioDemodulation(int iID)
 	UpdateControls();
 }
 
-void AnalogDemDlg::OnRadioAGC(int iID)
+void AnalogDemDlg::on_ButtonGroupAGC_buttonClicked(int iID)
 {
 	iID = -iID - 2; // TODO understand why
 	switch (iID)
@@ -485,7 +462,7 @@ void AnalogDemDlg::OnRadioAGC(int iID)
 	}
 }
 
-void AnalogDemDlg::OnRadioNoiRed(int iID)
+void AnalogDemDlg::on_ButtonGroupNoiseReduction_buttonClicked(int iID)
 {
 	iID = -iID - 2; // TODO understand why
 	switch (iID)
@@ -519,7 +496,7 @@ void AnalogDemDlg::OnRadioNoiRed(int iID)
 #endif
 }
 
-void AnalogDemDlg::OnSliderBWChange(int value)
+void AnalogDemDlg::on_SliderBandwidth_valueChanged(int value)
 {
 	/* Set new filter in processing module */
     controller->getReceiver()->SetAMFilterBW(value);
@@ -529,31 +506,31 @@ void AnalogDemDlg::OnSliderBWChange(int value)
 	MainPlot->UpdateAnalogBWMarker();
 }
 
-void AnalogDemDlg::OnCheckAutoFreqAcq()
+void AnalogDemDlg::on_CheckBoxAutoFreqAcq_clicked(bool checked)
 {
 	/* Set parameter in working thread module */
-    controller->getReceiver()->GetAMDemod()->EnableAutoFreqAcq(CheckBoxAutoFreqAcq->isChecked());
+    controller->getReceiver()->GetAMDemod()->EnableAutoFreqAcq(checked);
 }
 
-void AnalogDemDlg::OnCheckPLL()
+void AnalogDemDlg::on_CheckBoxPLL_clicked(bool checked)
 {
 	/* Set parameter in working thread module */
-    controller->getReceiver()->GetAMDemod()->EnablePLL(CheckBoxPLL->isChecked());
+    controller->getReceiver()->GetAMDemod()->EnablePLL(checked);
 }
 
-void AnalogDemDlg::OnCheckBoxMuteAudio()
+void AnalogDemDlg::on_CheckBoxMuteAudio_clicked(bool checked)
 {
 	/* Set parameter in working thread module */
-    controller->getReceiver()->GetWriteData()->MuteAudio(CheckBoxMuteAudio->isChecked());
+    controller->getReceiver()->GetWriteData()->MuteAudio(checked);
 }
 
-void AnalogDemDlg::OnCheckSaveAudioWAV()
+void AnalogDemDlg::on_CheckBoxSaveAudioWave_clicked(bool checked)
 {
 /*
 	This code is copied in systemevalDlg.cpp. If you do changes here, you should
 	apply the changes in the other file, too
 */
-	if (CheckBoxSaveAudioWave->isChecked() == TRUE)
+	if (checked)
 	{
 		/* Show "save file" dialog */
 		QString strFileName =
@@ -567,7 +544,7 @@ void AnalogDemDlg::OnCheckSaveAudioWAV()
 		else
 		{
 			/* User hit the cancel button, uncheck the button */
-			CheckBoxSaveAudioWave->setChecked(FALSE);
+			CheckBoxSaveAudioWave->setChecked(false);
 		}
 	}
 	else
@@ -606,7 +583,7 @@ void AnalogDemDlg::on_ButtonFreqOffset_clicked(bool)
 		controller->getReceiver()->GetReceiveData()->ConvertFrequency(
 			controller->getReceiver()->GetAMDemod()->GetCurMixFreqOffs());
 	const double new_freq = QInputDialog::getDouble(this, this->windowTitle(),
-		groupBoxCF->title(), prev_freq, -1e6, 1e6, 2, &ok);
+		LabelCarrierFrequency->text(), prev_freq, -1e6, 1e6, 2, &ok);
 	if (ok)
 	{
 		const _REAL conv_freq =
@@ -628,8 +605,7 @@ void AnalogDemDlg::on_ButtonBandWidth_clicked(bool)
 	if (ok)
 	{
 		controller->getReceiver()->GetAMDemod()->SetFilterBW(new_bw);
-		ButtonBandWidth->setText(QString().setNum(
-			controller->getReceiver()->GetAMDemod()->GetFilterBW()) + tr(" Hz"));
+		SliderBandwidth->setValue(controller->getReceiver()->GetAMDemod()->GetFilterBW());
 	}
 }
 
