@@ -45,12 +45,13 @@ CParameter::CParameter():
     sReceiverID("                "),
     sSerialNumber(),
     eTransmitCurrentTime(CT_OFF),
-    MSCPrLe(),
+    MSCPrLe(),bSDCCodeRateOneQuarter(false),
     Stream(MAX_NUM_STREAMS), Service(MAX_NUM_SERVICES),
 	AudioComponentStatus(MAX_NUM_SERVICES),DataComponentStatus(MAX_NUM_SERVICES),
     iNumBitsHierarchFrameTotal(0),
     iNumDecodedBitsMSC(0),
     iNumSDCBitsPerSFrame(0),
+    iNumFACBitsPerBlock(NUM_FAC_BITS_PER_BLOCK_DRM30), // assume DRM30
     iNumAudioDecoderBits(0),
     iNumDataDecoderBits(0),
     iYear(0),
@@ -154,11 +155,12 @@ CParameter::CParameter(const CParameter& p):
     sReceiverID(p.sReceiverID),
     sSerialNumber(p.sSerialNumber),
     eTransmitCurrentTime(p.eTransmitCurrentTime),
-    MSCPrLe(p.MSCPrLe),
+    MSCPrLe(p.MSCPrLe),bSDCCodeRateOneQuarter(p.bSDCCodeRateOneQuarter),
     Stream(p.Stream), Service(p.Service),
 	AudioComponentStatus(p.AudioComponentStatus),DataComponentStatus(p.DataComponentStatus),
 	iNumBitsHierarchFrameTotal(p.iNumBitsHierarchFrameTotal),
     iNumDecodedBitsMSC(p.iNumDecodedBitsMSC),
+    iNumFACBitsPerBlock(p.iNumFACBitsPerBlock),
     iNumSDCBitsPerSFrame(p.iNumSDCBitsPerSFrame),
     iNumAudioDecoderBits(p.iNumAudioDecoderBits),
     iNumDataDecoderBits(p.iNumDataDecoderBits),
@@ -242,7 +244,7 @@ CParameter::CParameter(const CParameter& p):
     LastAudioService(p.LastAudioService),
     LastDataService(p.LastDataService)
 //, Mutex() // jfbc: I don't think this state should be copied
-  ,lenient_RSCI(p.lenient_RSCI)
+   ,lenient_RSCI(p.lenient_RSCI)
 {
     CellMappingTable.MakeTable(eRobustnessMode, eSpectOccup, iSigSampleRate);
     matcReceivedPilotValues = p.matcReceivedPilotValues; // TODO
@@ -263,6 +265,7 @@ CParameter& CParameter::operator=(const CParameter& p)
     sSerialNumber = p.sSerialNumber;
     eTransmitCurrentTime = p.eTransmitCurrentTime;
     MSCPrLe = p.MSCPrLe;
+    bSDCCodeRateOneQuarter = p.bSDCCodeRateOneQuarter;
     Stream = p.Stream;
     Service = p.Service;
 	AudioComponentStatus = p.AudioComponentStatus;
@@ -270,6 +273,7 @@ CParameter& CParameter::operator=(const CParameter& p)
     iNumBitsHierarchFrameTotal = p.iNumBitsHierarchFrameTotal;
     iNumDecodedBitsMSC = p.iNumDecodedBitsMSC;
     iNumSDCBitsPerSFrame = p.iNumSDCBitsPerSFrame;
+    iNumFACBitsPerBlock = p.iNumFACBitsPerBlock;
     iNumAudioDecoderBits = p.iNumAudioDecoderBits;
     iNumDataDecoderBits = p.iNumDataDecoderBits;
     iYear = p.iYear;

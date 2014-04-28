@@ -76,7 +76,7 @@ class CDRMReceiver;
 class CDataDecoder;
 
 /* SI: Symbol Interleaver */
-enum ESymIntMod { SI_LONG, SI_SHORT };
+enum ESymIntMod { SI_LONG, SI_SHORT, SI_MODE_E };
 
 /* CS: Coding Scheme */
 enum ECodScheme { CS_1_SM, CS_2_SM, CS_3_SM, CS_3_HMSYM, CS_3_HMMIX };
@@ -110,7 +110,7 @@ class CAudioParam
 public:
 
     /* AC: Audio Coding */
-    enum EAudCod { AC_NONE, AC_AAC, AC_CELP, AC_HVXC, AC_OPUS };
+    enum EAudCod { AC_NONE, AC_AAC, AC_CELP, AC_HVXC, AC_xHE_AAC, AC_OPUS };
 
     /* SB: SBR */
     enum ESBRFlag { SB_NOT_USED, SB_USED };
@@ -122,7 +122,10 @@ public:
     enum EHVXCRate { HR_2_KBIT, HR_4_KBIT };
 
     /* AS: Audio Sampling rate */
-    enum EAudSamRat { AS_8_KHZ, AS_12KHZ, AS_16KHZ, AS_24KHZ, AS_48KHZ };
+    enum EAudSamRat { AS_8_KHZ, AS_12KHZ, AS_16KHZ, AS_24KHZ, AS_48KHZ,
+                      AS_9_6_KHZ, AS_19_2KHZ, AS_32KHZ, AS_38_4KHZ,
+                      AS_RESERVED
+                    };
 
     /* OB: Opus Audio Bandwidth, coded in audio data stream */
     enum EOPUSBandwidth { OB_NB, OB_MB, OB_WB, OB_SWB, OB_FB };
@@ -1116,6 +1119,8 @@ public:
 
     /* Protection levels for MSC */
     CMSCProtLev MSCPrLe;
+    /* Protection levels for SDC */
+    bool bSDCCodeRateOneQuarter;
 
     vector<CStream> Stream;
     vector<CService> Service;
@@ -1129,6 +1134,7 @@ public:
     int iNumBitsHierarchFrameTotal;
     int iNumDecodedBitsMSC;
     int iNumSDCBitsPerSFrame;	/* Number of SDC bits per super-frame */
+    int iNumFACBitsPerBlock;	/* Number of FAC bits per block 72 for DRM30 120 for DRM+ */
     int iNumAudioDecoderBits;	/* Number of input bits for audio module */
     int iNumDataDecoderBits;	/* Number of input bits for data decoder module */
 

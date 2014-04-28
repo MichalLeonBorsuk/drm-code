@@ -61,7 +61,9 @@ CTagPacketDecoder::DecodeAFPacket(CVectorEx<_BINARY>& vecbiAFPkt)
 	CCRC CRCObject;
 	// FIXME: is this length always the correct length? In the actual packet
 	// there is also a value for the length included!!!???!???
-	int iLenAFPkt = vecbiAFPkt.Size();
+    int iLenAFPktBits = vecbiAFPkt.Size();
+    int iLenAFPktBytes = iLenAFPktBits/SIZEOF__BYTE;
+    int iLenPayloadBytes = iLenAFPktBytes - 12;
 
 	/* We do the CRC check at the beginning no matter if it is used or not
 	   since we have to reset bit access for that */
@@ -72,7 +74,7 @@ CTagPacketDecoder::DecodeAFPacket(CVectorEx<_BINARY>& vecbiAFPkt)
 	CRCObject.Reset(16);
 
 	/* "- 2": 16 bits for CRC at the end */
-	for (i = 0; i < iLenAFPkt / SIZEOF__BYTE - 2; i++)
+    for (i = 0; i < iLenAFPktBytes - 2; i++)
 	{
 		CRCObject.AddByte((_BYTE) vecbiAFPkt.Separate(SIZEOF__BYTE));
 	}
@@ -100,6 +102,10 @@ CTagPacketDecoder::DecodeAFPacket(CVectorEx<_BINARY>& vecbiAFPkt)
 
 	/* LEN: length of the payload, in bytes (4 bytes long -> 32 bits) */
 	const int iPayLLen = (int) vecbiAFPkt.Separate(32);
+    if(iLenPayloadBytes != iPayLLen)
+    {
+        // TODO
+    }
 
 	/* SEQ: sequence number. Each AF Packet shall increment the sequence number
 	   by one for each packet sent, regardless of content. There shall be no

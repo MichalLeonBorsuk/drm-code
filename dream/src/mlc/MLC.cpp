@@ -495,7 +495,7 @@ void CMLC::CalculateParam(CParameter& Parameter, int iNewChannelType)
 
         /* iM: Number of bits each level ------------------------------------ */
         iM[0][0] = 0;
-        iM[0][1] = NUM_FAC_BITS_PER_BLOCK;
+        iM[0][1] = Parameter.iNumFACBitsPerBlock;
 
 
         /* iL: Number of bits each protection level ------------------------- */

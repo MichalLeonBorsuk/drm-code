@@ -86,9 +86,9 @@ class CRig;
 
 class CSplitFAC : public CSplitModul<_BINARY>
 {
-    void SetInputBlockSize(CParameter&)
+    void SetInputBlockSize(CParameter& p)
     {
-        this->iInputBlockSize = NUM_FAC_BITS_PER_BLOCK;
+        this->iInputBlockSize = p.iNumFACBitsPerBlock;
     }
 };
 

@@ -667,7 +667,7 @@ void CGenerateFACData::InitInternal(CParameter& TransmParam)
     FACTransmit.Init(TransmParam);
 
     /* Define block-size for output */
-    iOutputBlockSize = NUM_FAC_BITS_PER_BLOCK;
+    iOutputBlockSize = TransmParam.iNumFACBitsPerBlock;
 }
 
 /* Receiver */
@@ -709,7 +709,7 @@ void CUtilizeFACData::InitInternal(CParameter& Parameters)
     bCRCOk = FALSE;
 
     /* Define block-size for input */
-    iInputBlockSize = NUM_FAC_BITS_PER_BLOCK;
+    iInputBlockSize = Parameters.iNumFACBitsPerBlock;
 }
 
 

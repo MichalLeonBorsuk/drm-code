@@ -180,14 +180,14 @@ CTagItemGeneratorFAC::GenTag(CParameter & Parameter, CSingleBuffer < _BINARY > &
 	else
 	{
 		/* Length: 9 bytes = 72 bits */
-		PrepareTag(NUM_FAC_BITS_PER_BLOCK);
-		CVectorEx < _BINARY > *pvecbiFACData = FACData.Get(NUM_FAC_BITS_PER_BLOCK);
+        PrepareTag(Parameter.iNumFACBitsPerBlock);
+        CVectorEx < _BINARY > *pvecbiFACData = FACData.Get(Parameter.iNumFACBitsPerBlock);
 
 		/* Channel parameters, service parameters, CRC */
 		pvecbiFACData->ResetBitAccess();
 
-		/* FAC data is always 72 bits long which is 9 bytes, copy data byte-wise */
-		for (int i = 0; i < NUM_FAC_BITS_PER_BLOCK / SIZEOF__BYTE; i++)
+        /* FAC data is always n bytes, copy data byte-wise */
+        for (int i = 0; i < Parameter.iNumFACBitsPerBlock / SIZEOF__BYTE; i++)
 			Enqueue(pvecbiFACData->Separate(SIZEOF__BYTE), SIZEOF__BYTE);
 	}
 }

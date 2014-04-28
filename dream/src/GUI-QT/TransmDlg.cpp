@@ -169,6 +169,10 @@ TransmDialog::TransmDialog(CSettings& Settings,	QWidget* parent)
 		RadioButtonRMD->setChecked(TRUE);
 		break;
 
+    case RM_ROBUSTNESS_MODE_E:
+        // TODO
+        break;
+
 	case RM_NO_MODE_DETECTED:
 		break;
 	}
@@ -199,7 +203,11 @@ TransmDialog::TransmDialog(CSettings& Settings,	QWidget* parent)
 	case SO_5:
 		RadioButtonBandwidth20->setChecked(TRUE);
 		break;
-	}
+
+    case SO_6:
+        // TODO
+        break;
+    }
 
 	/* MSC interleaver mode */
 	ComboBoxMSCInterleaver->insertItem(0, tr("2 s (Long Interleaving)"));

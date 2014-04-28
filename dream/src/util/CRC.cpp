@@ -101,7 +101,7 @@ uint32_t CCRC::GetCRC()
 
 _BOOLEAN CCRC::CheckCRC(const uint32_t iCRC)
 {
-	if (iCRC == GetCRC())
+    if (iCRC == GetCRC())
 		return TRUE;
 	else
 		return FALSE;
