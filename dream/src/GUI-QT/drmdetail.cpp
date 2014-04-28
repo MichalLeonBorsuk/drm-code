@@ -136,8 +136,11 @@ void DRMDetail::setFrequencyOffset(double rOffset)
 void DRMDetail::setChannel(ERobMode robm, ESpecOcc specocc, ESymIntMod eSymbolInterlMode, ECodScheme eSDCCodingScheme, ECodScheme eMSCCodingScheme)
 {
     QString strFACInfo;
+    ERobMode er = robm;
+    if(specocc == SO_6)
+        er = RM_ROBUSTNESS_MODE_E;
 
-    ui->FACDRMModeBWV->setText(GetRobModeStr(robm) + " / " + GetSpecOccStr(specocc));
+    ui->FACDRMModeBWV->setText(GetRobModeStr(er) + " / " + GetSpecOccStr(specocc));
 
     /* Interleaver Depth #################### */
     switch (eSymbolInterlMode)
@@ -149,11 +152,10 @@ void DRMDetail::setChannel(ERobMode robm, ESpecOcc specocc, ESymIntMod eSymbolIn
     case SI_SHORT:
         strFACInfo = tr("400 ms (Short Interleaving)");
         break;
-#if 0
     case SI_MODE_E:
         strFACInfo = tr("600 ms");
         break;
-#endif
+
     default:
         strFACInfo = "?";
     }
@@ -174,7 +176,7 @@ void DRMDetail::setChannel(ERobMode robm, ESpecOcc specocc, ESymIntMod eSymbolIn
         break;
 
     default:
-        strFACInfo = "? / ";
+        strFACInfo = "? / ?";
     }
 
     /* MSC */
@@ -231,6 +233,10 @@ QString	DRMDetail::GetRobModeStr(ERobMode e)
         return "D";
         break;
 
+    case RM_ROBUSTNESS_MODE_E:
+        return "E";
+        break;
+
     default:
         return "?";
     }
@@ -262,6 +268,10 @@ QString	DRMDetail::GetSpecOccStr(ESpecOcc e)
 
     case SO_5:
         return "20 kHz";
+        break;
+
+    case SO_6:
+        return "100 kHz";
         break;
 
     default:

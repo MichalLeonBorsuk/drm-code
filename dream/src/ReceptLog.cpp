@@ -113,6 +113,10 @@ CReceptLog::GetRobModeStr()
         chRobMode = 'D';
         break;
 
+    case RM_ROBUSTNESS_MODE_E:
+        chRobMode = 'E';
+        break;
+
     case RM_NO_MODE_DETECTED:
         chRobMode = 'X';
         break;

@@ -94,15 +94,21 @@ void CTagItemDecoderLoFrCnt::DecodeTag(CVector<_BINARY>& vecbiTag, const int iLe
 string CTagItemDecoderFAC::GetTagName(void) {return "fac_";}
 void CTagItemDecoderFAC::DecodeTag(CVector<_BINARY>& vecbiTag, const int iLen)
 {
-	/* Fast access channel (fac_) always 9 bytes long */
-	if (iLen != NUM_FAC_BITS_PER_BLOCK)
+    /* Fast access channel (fac_) either 9 or 13 bytes long */
+    if (
+        (iLen != NUM_FAC_BITS_PER_BLOCK_DRM30)
+        &&
+        (iLen != NUM_FAC_BITS_PER_BLOCK_DRMPLUS)
+    )
+    {
 		return; // TODO: error handling!!!!!!!!!!!!!!!!!!!!!!
+    }
 
 	/* Copy incoming FAC data */
-	vecbidata.Init(NUM_FAC_BITS_PER_BLOCK);
+    vecbidata.Init(iLen);
 	vecbidata.ResetBitAccess();
 
-	for (int i = 0; i < NUM_FAC_BITS_PER_BLOCK / SIZEOF__BYTE; i++)
+    for (int i = 0; i < iLen / SIZEOF__BYTE; i++)
 	{
 		vecbidata.
 			Enqueue(vecbiTag.Separate(SIZEOF__BYTE), SIZEOF__BYTE);

@@ -89,14 +89,14 @@ void CDecodeRSIMDI::ProcessDataInternal(CParameter& Parameters)
 		/* Copy incoming MDI FAC data */
 		pvecOutputData->ResetBitAccess();
 		vecbiFACData.ResetBitAccess();
+        int n = vecbiFACData.Size(); // 72 for DRM30, 120 for DRM+
 
-		/* FAC data is always 72 bits long which is 9 bytes, copy data
-		   byte-wise */
-		for (int i = 0; i < NUM_FAC_BITS_PER_BLOCK / SIZEOF__BYTE; i++)
+        /* copy data byte-wise */
+        for (int i = 0; i < n / SIZEOF__BYTE; i++)
 		{
 			pvecOutputData->Enqueue(vecbiFACData.Separate(SIZEOF__BYTE), SIZEOF__BYTE);
 		}
-		iOutputBlockSize = NUM_FAC_BITS_PER_BLOCK;
+        iOutputBlockSize = n;
 	}
 	else
 	{
@@ -219,7 +219,7 @@ void CDecodeRSIMDI::InitInternal(CParameter& Parameters)
 {
 	Parameters.Lock();
 
-	iOutputBlockSize = NUM_FAC_BITS_PER_BLOCK;
+    iOutputBlockSize = Parameters.iNumFACBitsPerBlock;
 	//iOutputBlockSize2 = Parameters.iNumSDCBitsPerSFrame;
 	iMaxOutputBlockSize2 = 1024;
 	size_t numstreams = Parameters.Stream.size();

@@ -316,7 +316,7 @@ void COFDMCellDemapping::InitInternal(CParameter& Parameters)
 	   otherwise the buffers could overrun */
 	/* FAC, one block is exactly finished when last symbol with FAC cells is
 	   processed */
-	iMaxOutputBlockSize2 = NUM_FAC_BITS_PER_BLOCK;
+    iMaxOutputBlockSize2 = Parameters.iNumFACBitsPerBlock;
 	/* SDC, one block is exactly finished when last symbol with SDC cells is
 	   processed */
 	iMaxOutputBlockSize3 = Param.iNumSDCCellsPerSFrame;

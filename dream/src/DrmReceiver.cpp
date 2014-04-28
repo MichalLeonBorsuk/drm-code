@@ -210,6 +210,14 @@ CDRMReceiver::Run()
         {
             time_keeper = time(NULL);
             DecodeRSIMDI.ProcessData(Parameters, RSIPacketBuf, FACDecBuf, SDCDecBuf, MSCDecBuf);
+            // HACK until understand where it should go
+            int n = FACDecBuf.GetFillLevel();
+            if(n != Parameters.iNumFACBitsPerBlock)
+            {
+                Parameters.iNumFACBitsPerBlock = n;
+                SplitFAC.SetInitFlag();
+                UtilizeFACData.SetInitFlag();
+            }
             PlotManager.UpdateParamHistoriesRSIIn();
             bFrameToSend = TRUE;
         }
@@ -1210,7 +1218,6 @@ CDRMReceiver::InitsForAllModules()
     }
 
     /* Set init flags */
-    SplitFAC.SetInitFlag();
     SplitSDC.SetInitFlag();
     for (size_t i = 0; i < MSCDecBuf.size(); i++)
     {
@@ -1233,6 +1240,7 @@ CDRMReceiver::InitsForAllModules()
     OFDMCellDemapping.SetInitFlag();
     FACMLCDecoder.SetInitFlag();
     UtilizeFACData.SetInitFlag();
+    SplitFAC.SetInitFlag();
     SDCMLCDecoder.SetInitFlag();
     UtilizeSDCData.SetInitFlag();
     SymbDeinterleaver.SetInitFlag();

@@ -910,15 +910,12 @@ _BOOLEAN CSDCReceive::DataEntityType9(CVector<_BINARY>* pbiData,
                                       CParameter& Parameter,
                                       const _BOOLEAN)
 {
-    /* Check length -> must be 2 bytes */
-    if (iLengthOfBody != 2)
+    /* Check length -> must be at least 2 bytes */
+    if (iLengthOfBody < 2)
         return TRUE;
 
     /* Init error flag with "no error" */
     _BOOLEAN bError = FALSE;
-
-    /* Init bAudioSamplingRateValue7 flag to FALSE */
-    _BOOLEAN bAudioSamplingRateValue7 = FALSE;
 
     /* Short ID (the short ID is the index of the service-array) */
     const int iTempShortID = (*pbiData).Separate(2);
@@ -947,7 +944,7 @@ _BOOLEAN CSDCReceive::DataEntityType9(CVector<_BINARY>* pbiData,
         break;
 
     default: /* 11 */
-        bError = TRUE;
+        AudParam.eAudioCoding = CAudioParam::AC_xHE_AAC;
         break;
     }
 
@@ -1032,43 +1029,64 @@ _BOOLEAN CSDCReceive::DataEntityType9(CVector<_BINARY>* pbiData,
         }
         break;
 
-    default:
-        bError = TRUE;
+    case CAudioParam::AC_xHE_AAC:
+        /* Channel type */
+        switch ((*pbiData).Separate(2))
+        {
+        case 0: /* 00 */
+            AudParam.eAudioMode = CAudioParam::AM_MONO;
+            break;
+
+        case 1: /* 01 reserved */
+            AudParam.eAudioMode = CAudioParam::AM_STEREO;
+            bError = TRUE;
+            break;
+
+        case 2: /* 10 */
+            AudParam.eAudioMode = CAudioParam::AM_STEREO;
+            break;
+
+        case 3: /* 11 reserved */
+            AudParam.eAudioMode = CAudioParam::AM_STEREO;
+            bError = TRUE;
+            break;
+        }
         break;
     }
 
     /* Audio sampling rate */
-    switch ((*pbiData).Separate(3))
+    if(AudParam.eAudioCoding!=CAudioParam::AC_xHE_AAC)
     {
-    case 0: /* 000 */
-        AudParam.eAudioSamplRate = CAudioParam::AS_8_KHZ;
-        break;
-
-    case 1: /* 001 */
-        AudParam.eAudioSamplRate = CAudioParam::AS_12KHZ;
-        break;
-
-    case 2: /* 010 */
-        AudParam.eAudioSamplRate = CAudioParam::AS_16KHZ;
-        break;
-
-    case 3: /* 011 */
-        AudParam.eAudioSamplRate = CAudioParam::AS_24KHZ;
-        break;
-
-    case 5: /* 101 */
-        AudParam.eAudioSamplRate = CAudioParam::AS_48KHZ;
-        break;
-
-    case 7: /* 111 */
-        bAudioSamplingRateValue7 = TRUE;
-    default: /* reserved */
-        bError = TRUE;
-        break;
+        CAudioParam::EAudSamRat sr[] = {
+            CAudioParam::AS_8_KHZ,
+            CAudioParam::AS_12KHZ,
+            CAudioParam::AS_16KHZ,
+            CAudioParam::AS_24KHZ,
+            CAudioParam::AS_48KHZ,
+            CAudioParam::AS_RESERVED,
+            CAudioParam::AS_RESERVED,
+            CAudioParam::AS_RESERVED
+        };
+        AudParam.eAudioSamplRate = sr[(*pbiData).Separate(3)];
+    }
+    else
+    {
+        CAudioParam::EAudSamRat sr[] = {
+            CAudioParam::AS_9_6_KHZ,
+            CAudioParam::AS_12KHZ,
+            CAudioParam::AS_16KHZ,
+            CAudioParam::AS_19_2KHZ,
+            CAudioParam::AS_48KHZ,
+            CAudioParam::AS_32KHZ,
+            CAudioParam::AS_38_4KHZ,
+            CAudioParam::AS_48KHZ
+        };
+        AudParam.eAudioSamplRate = sr[(*pbiData).Separate(3)];
     }
 
     /* XXX EXPERIMENTAL THIS IS NOT PART OF DRM STANDARD XXX */
-    if (bAudioSamplingRateValue7 && AudParam.eAudioCoding == CAudioParam::AC_AAC) {
+    if (AudParam.eAudioSamplRate ==  CAudioParam::AS_RESERVED
+            && AudParam.eAudioCoding == CAudioParam::AC_AAC) {
         bError = AudParam.eSBRFlag != CAudioParam::SB_NOT_USED || AudParam.eAudioMode != CAudioParam::AM_MONO;
         AudParam.eAudioCoding = CAudioParam::AC_OPUS;
         AudParam.eAudioMode = CAudioParam::AM_STEREO;
@@ -1114,6 +1132,9 @@ _BOOLEAN CSDCReceive::DataEntityType9(CVector<_BINARY>* pbiData,
 
     /* rfa 1 bit */
     (*pbiData).Separate(1);
+
+    /* n bytes codec specific */
+    (*pbiData).Separate((iLengthOfBody-2)*SIZEOF__BYTE);
 
     /* Set new parameters in global struct */
     if (bError == FALSE)

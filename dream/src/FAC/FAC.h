@@ -60,10 +60,12 @@ public:
     CFACReceive() {}
     virtual ~CFACReceive() {}
 
-    /* "pbiFACData" contains 72 bits */
-    _BOOLEAN FACParam(CVector<_BINARY>* pbiFACData, CParameter& Parameter);
+    /* "pbiFACData" contains 72 or 120 bits */
+    bool FACParam(CVector<_BINARY>* pbiFACData, CParameter& Parameter);
 
 protected:
+    void ChannelParam(CVector<_BINARY>* pbiFACData, CParameter& Parameter);
+    void ServiceParam(CVector<_BINARY>* pbiFACData, CParameter& Parameter);
     CCRC CRCObject;
 };
 
