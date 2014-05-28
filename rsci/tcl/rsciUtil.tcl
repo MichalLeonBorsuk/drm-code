@@ -224,6 +224,8 @@ proc WriteDataBlock {dataBlock type} {
 	file mkdir [file dirname $fileName]
 
 	# Open file for appended writing
+
+	syslog "info" $fileName
 	set fid [open $fileName a]
 
 	# Set to binary encoding
