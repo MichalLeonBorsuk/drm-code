@@ -2,8 +2,6 @@
 # General settings
 #***************************************************************************************
 
-package require platform
-
 set config_dir [file dirname $argv0]
 set config_dir "."
 
@@ -16,10 +14,10 @@ proc source_if_exists { dir var } {
 }
 
 #** Receiver name
-set RX_NAME "BBCtst"
+set RX_NAME "BBCBS"
 
-set LATITUDE 51.511118
-set LONGITUDE -0.119690
+set LATITUDE 51.5874
+set LONGITUDE 0.173
 
 # Specify here, which version of the SE127 protocol the receiver provides.
 # Options are: 
@@ -32,12 +30,12 @@ set UDP_PACKAGE UDP
 
 
 #specifies whether to gzip dt2 files before sending    
-set GZIP_DT2_FILES 0
+set GZIP_DT2_FILES 1
 
 # Specify whether data should be logged in realtime
 # 1: Log data every 400 ms into ASCII log file in log/ directory (causes big files!)
 # 0: Do not log data (default)
-set REAL_TIME_LOG 0
+set REAL_TIME_LOG 1
 
 # Specify whether IQ data should be recorded.
 # 1: Record IQ file (takes a lot of disk space!)
@@ -54,7 +52,7 @@ set AFS_ERROR_BEEP 1
 
 # Specify whether the computer should set the receiver time every 24h (1=yes, 0=no)
 # Set to '0' if receiver is running on the same computer as the scripts!
-set ADJUST_RECEIVER_TIME 1
+set ADJUST_RECEIVER_TIME 0
 
 
 # Setting connection protocol for control and status
@@ -82,7 +80,7 @@ set PORT_BASE 30000
 set RECORD_STATUS_PORT [expr $PORT_BASE + 1]
 set RECORD_CONTROL_PORT [expr $PORT_BASE + 2]
 set FORWARD_STATUS_PORT [expr $PORT_BASE + 101]
-set FORWARD_CONTROL_PORT [expr $PORT_BASE + 102]
+set FORWARD_CONTROL_PORT $RECORD_CONTROL_PORT
 
 # Setting for communication with Theseus server
 set SERVER_ADDRESS 127.0.0.1
@@ -113,21 +111,6 @@ set BANDSCAN_STEP_TIME 2
 # The format needs to be hh:mm:ss for both values.
 set INTERNET_CONNECTION_START "00:00:00";# default is "00:00:00"
 set INTERNET_CONNECTION_END "23:59:00";# default is "23:59:00"
-
-#***************************************************************************************
-# OS-specific functions
-#***************************************************************************************
-
-if { [string first "windows" [string tolower [platform::generic]]] != -1 } {
-	set OS_CODE windows.tcl
-} else {
-	if { [string first "win32" [string tolower [platform::generic]]] != -1 } {
-		set OS_CODE windows.tcl
-	} else {
-    	set OS_CODE unix.tcl
-	}
-}
-
 
 #***************************************************************************************
 # Receiver-specific functions
@@ -193,10 +176,6 @@ if {$USE_EXTERNAL_SIGNAL_STRENGTH == "1"} {
 	source_if_exists $config_dir "RECEIVER_CODE"
 	source_if_exists $config_dir "THOMCAST_CTRL"
 }
-
-if {$OS_CODE==""} { puts "No operating system specified... Exiting."; exit }
-source_if_exists $config_dir "OS_CODE"
-
 
 # Constants
 set TX_FRAME_LENGTH 0.4; # Transmission frame length in s *** temporary ***
