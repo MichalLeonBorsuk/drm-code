@@ -377,8 +377,7 @@ CHamlib::LoadSettings(CSettings & s)
 			string kwd, val;
 #ifdef __linux__
 			kwd = "if_path";
-			val = "/tmp/g313";
-			s.Put("Hamlib", kwd, val);
+            val = "/tmp/g313if";
 #endif
 #ifdef _WIN32
 			kwd = "wodeviceid";
