@@ -88,6 +88,8 @@ void CSymbInterleaver::InitInternal(CParameter& TransmParam)
     case SI_SHORT:
 		iD = D_LENGTH_SHORT_INTERL;
 		break;
+    case SI_MODE_E: // TODO
+		;
 	}
 
 	/* Always allocate memory for long interleaver case (interleaver memory) */
@@ -175,6 +177,8 @@ void CSymbDeinterleaver::InitInternal(CParameter& Parameters)
     case SI_SHORT:
 		iD = D_LENGTH_SHORT_INTERL;
 		break;
+    case SI_MODE_E: // TODO
+		;
 	}
 
 	/* Always allocate memory for long interleaver case (interleaver memory) */

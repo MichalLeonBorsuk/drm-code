@@ -207,6 +207,8 @@ CDRMBandpassFilt::Init(int iSampleRate, int iNewBlockSize, _REAL rOffsetHz,
 		rNormCurFreqOffset =
 			(rOffsetHz + (CReal) 5000.0) / iSampleRate;
 		break;
+	case SO_6: // TODO
+		;
 	}
 
 	/* FFT plan is initialized with the long length */

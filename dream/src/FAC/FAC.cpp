@@ -107,6 +107,8 @@ void CFACTransmit::FACParam(CVector<_BINARY>* pbiFACData, CParameter& Parameter)
     case SI_SHORT:
         (*pbiFACData).Enqueue(1 /* 1 */, 1);
         break;
+    case SI_MODE_E: // TODO
+	;
     }
 
     /* MSC mode */

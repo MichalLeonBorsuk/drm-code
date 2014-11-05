@@ -70,6 +70,12 @@ bool NullCodec::DecOpen(CAudioParam& AudioParam, int *iAudioSampleRate, int *iLe
 	case CAudioParam::AS_48KHZ:
 		iSampleRate = 48000;
 		break;
+        case CAudioParam::AS_19_2KHZ: // TODO
+        case CAudioParam::AS_32KHZ: // TODO
+        case CAudioParam::AS_38_4KHZ: // TODO
+        case CAudioParam::AS_9_6_KHZ: // TODO
+        case CAudioParam::AS_RESERVED: // can't happen
+		;
 	}
 	*iAudioSampleRate = iSampleRate;
     *iLenDecOutPerChan = AUD_DEC_TRANSFROM_LENGTH;

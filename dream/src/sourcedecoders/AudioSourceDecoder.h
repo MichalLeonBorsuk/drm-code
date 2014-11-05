@@ -140,6 +140,7 @@ public:
         case CAudioParam::AC_CELP: return bCanDecodeCELP;
         case CAudioParam::AC_HVXC: return bCanDecodeHVXC;
         case CAudioParam::AC_OPUS: return bCanDecodeOPUS;
+        case CAudioParam::AC_xHE_AAC: return false;
         }
         return false;
     }

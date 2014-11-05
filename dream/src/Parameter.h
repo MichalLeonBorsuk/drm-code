@@ -230,6 +230,7 @@ public:
 
         case AC_NONE:
         case AC_OPUS:
+        case AC_xHE_AAC: // TODO
             break;
         }
         return FALSE;
