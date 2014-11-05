@@ -86,6 +86,9 @@ void CCellMappingTable::MakeTable(
 	case SO_5:
 		iSpecOccArrayIndex = 5;
 		break;
+	case SO_6:
+		iSpecOccArrayIndex = 6;
+		break;
 	}
 
 	/* The robust mode defines all other parameters */

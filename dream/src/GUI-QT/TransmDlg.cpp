@@ -222,6 +222,8 @@ TransmDialog::TransmDialog(CSettings& Settings,	QWidget* parent)
     case SI_SHORT:
 		ComboBoxMSCInterleaver->setCurrentIndex(1);
 		break;
+    case SI_MODE_E: // TODO
+		;
 	}
 
 	/* MSC Constellation Scheme */

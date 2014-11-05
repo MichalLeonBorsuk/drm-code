@@ -646,6 +646,12 @@ void CSDCTransmit::DataEntityType9(CVector<_BINARY>& vecbiData, int ServiceID,
         case CAudioParam::AS_48KHZ:
             vecbiData.Enqueue(5 /* 101 */, 3);
             break;
+        case CAudioParam::AS_19_2KHZ: // TODO
+        case CAudioParam::AS_32KHZ: // TODO
+        case CAudioParam::AS_38_4KHZ: // TODO
+        case CAudioParam::AS_9_6_KHZ: // TODO
+        case CAudioParam::AS_RESERVED: // can't happen
+	    ;
         }
     }
 

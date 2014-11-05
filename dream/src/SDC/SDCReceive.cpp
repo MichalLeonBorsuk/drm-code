@@ -1052,6 +1052,9 @@ _BOOLEAN CSDCReceive::DataEntityType9(CVector<_BINARY>* pbiData,
             break;
         }
         break;
+    case CAudioParam::AC_NONE: // can't happen
+    case CAudioParam::AC_OPUS: // can't happen
+	;
     }
 
     /* Audio sampling rate */

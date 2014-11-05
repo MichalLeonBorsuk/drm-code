@@ -280,6 +280,10 @@ QString GetCodecString(const CService& service)
                     strReturn += "FB";
                     break;
             }
+            break;
+
+        case CAudioParam::AC_xHE_AAC:
+            strReturn = "xHE AAC ";
         }
 
         /* SBR */
