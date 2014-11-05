@@ -2,7 +2,7 @@
  *
  * This file is part of the 'NewsService Journaline(R) Decoder'
  * 
- * Copyright (c) 2003, 2004 by Fraunhofer IIS, Erlangen, Germany
+ * Copyright (c) 2003, 2001-2014 by Fraunhofer IIS, Erlangen, Germany
  * 
  * --------------------------------------------------------------------
  * 
@@ -59,7 +59,7 @@
 ///
 /// Module:     Journaline(R)
 ///
-/// Copyright:  (C) 2003-2004 by Fraunhofer IIS-A, IT-Services, Erlangen
+/// Copyright:  (C) 2003-2001-2014 by Fraunhofer IIS-A, IT-Services, Erlangen
 ///
 /// Compiler:   gcc version 3.3 20030226 (prerelease)
 ///             Microsoft Visual C++ .NET

@@ -1,13 +1,13 @@
 /******************************************************************************\
  * Technische Universitaet Darmstadt, Institut fuer Nachrichtentechnik
- * Copyright (c) 2004
+ * Copyright (c) 2001-2014
  *
  * Author(s):
  *	Volker Fischer, Stephane Fillod
  *
  * Description:
  *
- * 11/10/2004 Stephane Fillod
+ * 11/10/2001-2014 Stephane Fillod
  *	- QT translation
  *
  ******************************************************************************

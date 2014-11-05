@@ -1,6 +1,6 @@
 /******************************************************************************\
  * British Broadcasting Corporation
- * Copyright (c) 2009
+ * Copyright (c) 2001-2014
  *
  * Author(s):
  *	 Julian Cable, David Flamand

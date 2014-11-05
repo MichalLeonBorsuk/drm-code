@@ -1,6 +1,6 @@
 /******************************************************************************\
  * British Broadcasting Corporation
- * Copyright (c) 2012
+ * Copyright (c) 2001-2014
  *
  * Author(s):
  *	Volker Fischer, Julian Cable

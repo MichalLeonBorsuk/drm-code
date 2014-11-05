@@ -1,6 +1,6 @@
 /******************************************************************************\
  * Technische Universitaet Darmstadt, Institut fuer Nachrichtentechnik
- * Copyright (c) 2001-2005
+ * Copyright (c) 2001-2014
  *
  * Author(s):
  *	Volker Fischer, Andrew Murphy, David Flamand
@@ -8,7 +8,7 @@
  * Description:
  *	See SDC.cpp
  *
- * 11/30/2012 David Flamand, added transmit data entity type 8
+ * 11/30/2001-2014 David Flamand, added transmit data entity type 8
  *
  * 11/21/2005 Andrew Murphy, BBC Research & Development, 2005
  *	- AMSS data entity groups (no AFS index), added eSDCType, data type 11

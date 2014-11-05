@@ -1,6 +1,6 @@
 /******************************************************************************\
  * Technische Universitaet Darmstadt, Institut fuer Nachrichtentechnik
- * Copyright (c) 2001-2005
+ * Copyright (c) 2001-2014
  *
  * Author(s):
  *	Volker Fischer, Andrew Murphy, Julian Cable

@@ -1,6 +1,6 @@
 /******************************************************************************\
  * BBC World Service
- * Copyright (c) 2006
+ * Copyright (c) 2001-2014
  *
  * Author(s):
  *	Julian Cable

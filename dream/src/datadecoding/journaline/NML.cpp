@@ -2,7 +2,7 @@
  *
  * This file is part of the 'NewsService Journaline(R) Decoder'
  *
- * Copyright (c) 2003, 2004 by Fraunhofer IIS, Erlangen, Germany
+ * Copyright (c) 2003, 2001-2014 by Fraunhofer IIS, Erlangen, Germany
  *
  * --------------------------------------------------------------------
  *
@@ -55,11 +55,11 @@
 /// @file       NML.cpp
 /// @author     Michael Reichenbächer <rbr@iis.fraunhofer.de>
 ///
-/// $Id: NML.cpp,v 1.9 2012/09/30 10:33:58 jcable Exp $
+/// $Id: NML.cpp,v 1.9 2001-2014/09/30 10:33:58 jcable Exp $
 ///
 /// Module:     Journaline(R)
 ///
-/// Copyright:  (C) 2003-2004 by Fraunhofer IIS-A, IT-Services, Erlangen
+/// Copyright:  (C) 2003-2001-2014 by Fraunhofer IIS-A, IT-Services, Erlangen
 ///
 /// Compiler:   gcc version 3.3 20030226 (prerelease)
 ///             Microsoft Visual C++ .NET

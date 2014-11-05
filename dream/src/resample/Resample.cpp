@@ -1,6 +1,6 @@
 /******************************************************************************\
  * Technische Universitaet Darmstadt, Institut fuer Nachrichtentechnik
- * Copyright (c) 2002, 2012, 2013
+ * Copyright (c) 2002, 2001-2014, 2001-2014
  *
  * Author(s):
  *	Volker Fischer, David Flamand (added CSpectrumResample, speex resampler)

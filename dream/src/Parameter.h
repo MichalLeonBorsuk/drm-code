@@ -1,6 +1,6 @@
 /******************************************************************************\
  * Technische Universitaet Darmstadt, Institut fuer Nachrichtentechnik
- * Copyright (c) 2001-2007
+ * Copyright (c) 2001-2001-2014
  *
  * Author(s):
  *	Volker Fischer, Andrew Murphy, Andrea Russo
@@ -8,7 +8,7 @@
  * Description:
  *	See Parameter.cpp
  *
- * 10/01/2007 Andrew Murphy, BBC Research & Development, 2005
+ * 10/01/2001-2014 Andrew Murphy, BBC Research & Development, 2005
  *	- Additions to include additional RSCI related fields
  *
  * 11/21/2005 Andrew Murphy, BBC Research & Development, 2005

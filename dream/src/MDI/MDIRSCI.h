@@ -1,6 +1,6 @@
 /******************************************************************************\
  * British Broadcasting Corporation
- * Copyright (c) 2007
+ * Copyright (c) 2001-2014
  *
  * Author(s):
  *	Volker Fischer, Oliver Haffenden, Julian Cable, Andrew Murphy

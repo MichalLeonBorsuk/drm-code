@@ -1,6 +1,6 @@
 /******************************************************************************\
  * British Broadcasting Corporation
- * Copyright (c) 2007
+ * Copyright (c) 2001-2014
  *
  * Author(s):
  *	Volker Fischer, Andrew Murphy, Andrea Russo, Oliver Haffenden
