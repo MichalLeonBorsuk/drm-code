@@ -1,6 +1,6 @@
 /******************************************************************************\
  * Technische Universitaet Darmstadt, Institut fuer Nachrichtentechnik
- * Copyright (c) 2007
+ * Copyright (c) 2001-2014
  *
  * Author(s):
  *	Volker Fischer, Oliver Haffenden, Andrew Murphy
@@ -314,7 +314,7 @@ protected:
 	int iStreamNumber;
 };
 
-//andrewm - 7/11/2006
+//andrewm - 7/11/2001-2014
 class CTagItemGeneratorGPS : public CTagItemGeneratorWithProfiles /* rgps */
 {
 public:
@@ -324,7 +324,7 @@ protected:
 	virtual string GetProfiles(); // Return a string containing the set of profiles for this tag
 };
 
-// oliver 17/1/2007
+// oliver 17/1/2001-2014
 class CTagItemGeneratorPowerSpectralDensity : public CTagItemGeneratorWithProfiles /* rpsd */
 {
 public:

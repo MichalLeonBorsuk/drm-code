@@ -2,7 +2,7 @@
  *
  * This file is part of the 'NewsService Journaline(R) Decoder'
  * 
- * Copyright (c) 2003, 2004 by Fraunhofer IIS, Erlangen, Germany
+ * Copyright (c) 2003, 2001-2014 by Fraunhofer IIS, Erlangen, Germany
  * 
  * --------------------------------------------------------------------
  * 
@@ -64,11 +64,11 @@
  *
  * Author:      Monica Redon Segrera and Nuria Llombart Juan
  *
- * Copyright:  (C) 2003-2004 by Fraunhofer IIS-A, IT-Services, Erlangen
+ * Copyright:  (C) 2003-2001-2014 by Fraunhofer IIS-A, IT-Services, Erlangen
  *
  * Created:     2001-02-01
  *
- * Version:     2004-03-02
+ * Version:     2001-2014-03-02
  */
 
 #include "crc_8_16.h"
@@ -152,7 +152,7 @@ static const unsigned char CRC_Table_8[256] = {
  *
  * CreationDate: 2001-02-02
  *
- * Version:      2004-03-02
+ * Version:      2001-2014-03-02
  *
  * @param usCRC_Table
  *   the table is returned into an array of length 256
@@ -201,7 +201,7 @@ void CRC_Init_16(unsigned short usCRC_Table[])
  *
  * CreationDate: 2001-02-02
  *
- * Version:      2004-03-02
+ * Version:      2001-2014-03-02
  *
  * @param ucCRC_Table
  *   the table is returned into an array of length 256
@@ -252,7 +252,7 @@ void CRC_Init_8(unsigned char ucCRC_Table[])
  *
  * CreationDate: 2001-02-02
  *
- * Version:      2004-03-02
+ * Version:      2001-2014-03-02
  *
  * @param cDataPointer
  *   pointer to the first data byte.
@@ -300,7 +300,7 @@ unsigned short CRC_Build_16(const unsigned char *cDataPointer,
  *
  * CreationDate: 2001-02-02
  *
- * Version:      2004-03-02
+ * Version:      2001-2014-03-02
  *
  * @param cDataPointer
  *   pointer to the first data byte.
@@ -342,7 +342,7 @@ unsigned char CRC_Build_8(const unsigned char *cDataPointer,
  *
  * CreationDate: 2001-02-02
  *
- * Version:      2004-03-02
+ * Version:      2001-2014-03-02
  *
  * @param cDataPointer
  *   pointer to the first data byte.
@@ -376,7 +376,7 @@ char CRC_Check_16(const unsigned char *cDataPointer,
  *
  * CreationDate: 2001-02-02
  *
- * Version:      2004-03-02
+ * Version:      2001-2014-03-02
  *
  * @param cDataPointer
  *   pointer to the first data byte.

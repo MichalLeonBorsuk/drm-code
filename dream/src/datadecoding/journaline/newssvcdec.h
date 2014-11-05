@@ -2,7 +2,7 @@
  *
  * This file is part of the 'NewsService Journaline(R) Decoder'
  * 
- * Copyright (c) 2003, 2004 by Fraunhofer IIS, Erlangen, Germany
+ * Copyright (c) 2003, 2001-2014 by Fraunhofer IIS, Erlangen, Germany
  * 
  * --------------------------------------------------------------------
  * 
@@ -67,7 +67,7 @@
  *
  * Creation date:  2003-08-02
  *
- * Last modified:  2004-02-16 (rbr)
+ * Last modified:  2001-2014-02-16 (rbr)
  *
  * The Journaline(R) news service decoder will accept
  * Journaline(R) objects conforming to the

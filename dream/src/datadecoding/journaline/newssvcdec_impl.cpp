@@ -2,7 +2,7 @@
  *
  * This file is part of the 'NewsService Journaline(R) Decoder'
  *
- * Copyright (c) 2003, 2004 by Fraunhofer IIS, Erlangen, Germany
+ * Copyright (c) 2003, 2001-2014 by Fraunhofer IIS, Erlangen, Germany
  *
  * --------------------------------------------------------------------
  *

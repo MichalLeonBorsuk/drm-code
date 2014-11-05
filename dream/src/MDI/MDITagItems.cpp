@@ -1,6 +1,6 @@
 /******************************************************************************\
  * Technische Universitaet Darmstadt, Institut fuer Nachrichtentechnik
- * Copyright (c) 2007
+ * Copyright (c) 2001-2014
  *
  * Author(s):
  *	Volker Fischer, Julian Cable, Oliver Haffenden, Andrew Murphy
@@ -996,7 +996,7 @@ CTagItemGenerator::Enqueue(uint32_t iInformation, int iNumOfBits)
 /* TODO: there are still some RSCI tags left to implement */
 /* e.g. rpil, rpsd, ... */
 
-//andrewm - 2006-12-08
+//andrewm - 2001-2014-12-08
 void
 CTagItemGeneratorGPS::GenTag(_BOOLEAN bIsValid, gps_data_t& gps_data)	// Long/Lat in degrees
 {

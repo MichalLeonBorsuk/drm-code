@@ -2,7 +2,7 @@
  *
  * This file is part of the 'NewsService Journaline(R) Decoder'
  * 
- * Copyright (c) 2003, 2004 by Fraunhofer IIS, Erlangen, Germany
+ * Copyright (c) 2003, 2001-2014 by Fraunhofer IIS, Erlangen, Germany
  * 
  * --------------------------------------------------------------------
  * 
@@ -60,11 +60,11 @@
  *
  * Author:      Monica Redon Segrera and Nuria Llombart Juan
  *
- * Copyright:  (C) 2003-2004 by Fraunhofer IIS-A, IT-Services, Erlangen
+ * Copyright:  (C) 2003-2001-2014 by Fraunhofer IIS-A, IT-Services, Erlangen
  *
  * Created:     2001-01-02
  *
- * Version:     2004-03-02
+ * Version:     2001-2014-03-02
  */
 
 #include <stdio.h>

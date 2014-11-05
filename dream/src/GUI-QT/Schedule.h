@@ -1,6 +1,6 @@
 /******************************************************************************\
  * British Broadcasting Corporation
- * Copyright (c) 2013
+ * Copyright (c) 2001-2014
  *
  * Author(s):
  *	Volker Fischer, Stephane Fillod, Tomi Manninen, Andrea Russo,Julian Cable

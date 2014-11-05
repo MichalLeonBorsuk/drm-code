@@ -1,6 +1,6 @@
 /******************************************************************************\
  * Technische Universitaet Darmstadt, Institut fuer Nachrichtentechnik
- * Copyright (c) 2004
+ * Copyright (c) 2001-2014
  *
  * Author(s):
  *	Volker Fischer
@@ -321,7 +321,7 @@ CModJulDate::Get(const uint32_t iYear, const uint32_t iMonth, const uint32_t iDa
 \******************************************************************************/
 /*
 	The following code is based on "JCRev: John Chowning's reverberator class"
-	by Perry R. Cook and Gary P. Scavone, 1995 - 2004
+	by Perry R. Cook and Gary P. Scavone, 1995 - 2001-2014
 	which is in "The Synthesis ToolKit in C++ (STK)"
 	http://ccrma.stanford.edu/software/stk
 

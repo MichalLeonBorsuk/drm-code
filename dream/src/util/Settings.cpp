@@ -1,6 +1,6 @@
 /******************************************************************************\
  * Technische Universitaet Darmstadt, Institut fuer Nachrichtentechnik
- * Copyright (c) 2001-2007
+ * Copyright (c) 2001-2001-2014
  *
  * Author(s):
  *	Volker Fischer, Tomi Manninen, Stephane Fillod, Robert Kesterson,
@@ -8,11 +8,11 @@
  *
  * Description:
  *
- * 10/01/2007
+ * 10/01/2001-2014
  *  - parameters for rsci by Andrew Murphy
- * 07/27/2004
+ * 07/27/2001-2014
  *  - included stlini routines written by Robert Kesterson
- * 04/15/2004 Tomi Manninen, Stephane Fillod
+ * 04/15/2001-2014 Tomi Manninen, Stephane Fillod
  *  - Hamlib
  * 10/03/2003 Tomi Manninen / OH2BNS
  *  - Initial (basic) code for command line argument parsing (argv)

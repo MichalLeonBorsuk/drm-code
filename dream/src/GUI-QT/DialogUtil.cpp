@@ -1,7 +1,7 @@
 /******************************************************************************\
  * Technische Universitaet Darmstadt, Institut fuer Nachrichtentechnik
  * British Broadcasting Corporation
- * Copyright (c) 2001-2013
+ * Copyright (c) 2001-2001-2014
  *
  * Author(s):
  *	Volker Fischer, Julian Cable
@@ -217,7 +217,7 @@ CAboutDlg::CAboutDlg(QWidget* parent):
         "<center><b>HISTORY</b></center><br>"
         "The Dream software development was started at <i>Darmstadt University "
         "of Technology</i> at the Institute of Communication Technology by <i>Volker "
-        "Fischer</i> and <i>Alexander Kurpiers</i> in 2001-2005. "
+        "Fischer</i> and <i>Alexander Kurpiers</i> in 2001-2014. "
         "The core digital signal processing and most of the GUI were the "
         "result of this development.<br>In 2005, <i>Andrew Murphy</i> of the <i>British "
         "Broadcasting Corporation</i> added code for an "
@@ -290,7 +290,7 @@ CAboutDlg::CAboutDlg(QWidget* parent):
     TextLabelAuthorNames->setText("Volker Fischer, Alexander Kurpiers, Andrea Russo\nJulian Cable, Andrew Murphy, Oliver Haffenden, David Flamand");
 
     /* Set copyright year in about dialog */
-    TextLabelCopyright->setText("Copyright (C) 2001 - 2013");
+    TextLabelCopyright->setText("Copyright (C) 2001 - 2001-2014");
 
     APPLY_CUSTOM_THEME();
 }
