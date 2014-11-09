@@ -77,6 +77,7 @@ StationsWidget::~StationsWidget()
 
 void StationsWidget::SetFrequency(int f)
 {
+    (void)f; // TODO
 //    ui->frequency->setValue(f);
 }
 

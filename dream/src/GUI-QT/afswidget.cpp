@@ -4,10 +4,12 @@
 AFSWidget::AFSWidget(ReceiverController* rc, QWidget *parent) :
     QTreeWidget(parent)
 {
+    (void)rc; // TODO
 }
 
 void sdItem(QTreeWidgetItem* w, const CServiceDefinition& sd, const CAltFreqSign& a)
 {
+    (void)a; // TODO
     for(size_t i=0; i<sd.veciFrequencies.size(); i++)
     {
         int f = sd.veciFrequencies[i];

@@ -463,6 +463,8 @@ void CFACReceive::ChannelParam(CVector<_BINARY>* pbiFACData, CParameter& Paramet
     bool bModeE;
     int reconfig_index;
     int toggle_flag;
+    (void)reconfig_index; // TODO support reconfiguration announcements
+    (void) toggle_flag; // TODO make use of the toggle flag
 
     Parameter.Lock();
 
