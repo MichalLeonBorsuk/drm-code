@@ -258,7 +258,7 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& Settings,
     connect(&TimerClose, SIGNAL(timeout()), this, SLOT(OnTimerClose()));
 
     // clear display
-    on_signalLost();
+    OnSignalLost();
 
     /* System tray setup */
     pSysTray = CSysTray::Create(
@@ -295,15 +295,15 @@ void FDRMDialog::connectController()
     connect(ui->actionReset, SIGNAL(triggered()), controller, SLOT(triggerNewAcquisition()));
 
     // mainwindow
-    connect(controller, SIGNAL(MSCChanged(ETypeRxStatus)), this, SLOT(on_MSCChanged(ETypeRxStatus)));
-    connect(controller, SIGNAL(SDCChanged(ETypeRxStatus)), this, SLOT(on_SDCChanged(ETypeRxStatus)));
-    connect(controller, SIGNAL(FACChanged(ETypeRxStatus)), this, SLOT(on_FACChanged(ETypeRxStatus)));
-    connect(controller, SIGNAL(channelReceptionChanged(Reception)), this, SLOT(on_channelReceptionChanged(Reception)));
-    connect(controller, SIGNAL(InputSignalLevelChanged(double)), this, SLOT(on_InputSignalLevelChanged(double)));
-    connect(controller, SIGNAL(serviceChanged(int, const CService&)), this, SLOT(on_serviceChanged(int, const CService&)));
-    connect(controller, SIGNAL(signalLost()), this, SLOT(on_signalLost()));
-    connect(controller, SIGNAL(mode(int)), this, SLOT(on_modeChanged(int)));
-    connect(controller, SIGNAL(frequencyChanged(int)), this, SLOT(on_frequencyChanged(int)));
+    connect(controller, SIGNAL(MSCChanged(ETypeRxStatus)), this, SLOT(OnMSCChanged(ETypeRxStatus)));
+    connect(controller, SIGNAL(SDCChanged(ETypeRxStatus)), this, SLOT(OnSDCChanged(ETypeRxStatus)));
+    connect(controller, SIGNAL(FACChanged(ETypeRxStatus)), this, SLOT(OnFACChanged(ETypeRxStatus)));
+    connect(controller, SIGNAL(channelReceptionChanged(Reception)), this, SLOT(OnChannelReceptionChanged(Reception)));
+    connect(controller, SIGNAL(InputSignalLevelChanged(double)), this, SLOT(OnInputSignalLevelChanged(double)));
+    connect(controller, SIGNAL(serviceChanged(int, const CService&)), this, SLOT(OnServiceChanged(int, const CService&)));
+    connect(controller, SIGNAL(signalLost()), this, SLOT(OnSignalLost()));
+    connect(controller, SIGNAL(mode(int)), this, SLOT(OnModeChanged(int)));
+    connect(controller, SIGNAL(frequencyChanged(int)), this, SLOT(OnFrequencyChanged(int)));
     connect(this, SIGNAL(frequencyChanged(int)), controller, SLOT(setFrequency(int)));
 
     // stations
@@ -407,7 +407,7 @@ void FDRMDialog::setupWindowMode()
             connect(pServiceSelector, SIGNAL(audioServiceSelected(int)), controller, SLOT(selectAudioService(int)));
             connect(pServiceSelector, SIGNAL(dataServiceSelected(int)), this, SLOT(OnSelectDataService(int)));
             connect(controller, SIGNAL(serviceChanged(int,const CService&)), pServiceSelector, SLOT(onServiceChanged(int, const CService&)));
-            connect(controller, SIGNAL(textMessageChanged(int, QString)), this, SLOT(on_textMessageChanged(int, QString)));
+            connect(controller, SIGNAL(textMessageChanged(int, QString)), this, SLOT(OnTextMessageChanged(int, const QString&)));
         }
         // TODO enable multimedia menu option if there is a data service we can decode
 //        ui->action_Multimedia_Dialog->setEnabled(TODO);
@@ -546,22 +546,22 @@ void FDRMDialog::OnSwitchToFM()
     controller->setMode(RM_FM);
 }
 
-void FDRMDialog::on_SDCChanged(ETypeRxStatus s)
+void FDRMDialog::OnSDCChanged(ETypeRxStatus s)
 {
     SetStatus(ui->CLED_SDC, s);
 }
 
-void FDRMDialog::on_FACChanged(ETypeRxStatus s)
+void FDRMDialog::OnFACChanged(ETypeRxStatus s)
 {
     SetStatus(ui->CLED_FAC, s);
 }
 
-void FDRMDialog::on_MSCChanged(ETypeRxStatus s)
+void FDRMDialog::OnMSCChanged(ETypeRxStatus s)
 {
     SetStatus(ui->CLED_MSC, s);
 }
 
-void FDRMDialog::on_channelReceptionChanged(Reception r)
+void FDRMDialog::OnChannelReceptionChanged(Reception r)
 {
     if(r.wmer>WMERSteps[4])
         setBars(5);
@@ -577,7 +577,7 @@ void FDRMDialog::on_channelReceptionChanged(Reception r)
         setBars(0);
 }
 
-void FDRMDialog::on_InputSignalLevelChanged(double d)
+void FDRMDialog::OnInputSignalLevelChanged(double d)
 {
     ui->ProgrInputLevel->setValue(d);
 }
@@ -620,7 +620,7 @@ void FDRMDialog::OnScheduleTimer()
     }
 }
 
-void FDRMDialog::on_serviceChanged(int short_id, const CService& service)
+void FDRMDialog::OnServiceChanged(int short_id, const CService& service)
 {
     if(short_id==DRMReceiver.GetParameters()->GetCurSelAudioService())
     {
@@ -764,7 +764,7 @@ void FDRMDialog::on_serviceChanged(int short_id, const CService& service)
     }
 }
 
-void FDRMDialog::on_modeChanged(int value)
+void FDRMDialog::OnModeChanged(int value)
 {
     changeRecMode(value, false);
 }
@@ -881,7 +881,7 @@ void FDRMDialog::OnTimerClose()
         close();
 }
 
-void FDRMDialog::on_textMessageChanged(int short_id, QString text)
+void FDRMDialog::OnTextMessageChanged(int short_id, const QString& text)
 {
     if(short_id==DRMReceiver.GetParameters()->GetCurSelAudioService())
     {
@@ -939,14 +939,14 @@ void FDRMDialog::tune()
     emit frequencyChanged(floor(1000.0*f));
 }
 
-void FDRMDialog::on_frequencyChanged(int freq)
+void FDRMDialog::OnFrequencyChanged(int freq)
 {
     // TODO - add a MHz suffix without messing up editing
     QString fs = QString("%1").arg(double(freq)/1000.0, 5, 'f', 1);
     ui->lineEditFrequency->setText(fs);
 }
 
-void FDRMDialog::on_signalLost()
+void FDRMDialog::OnSignalLost()
 {
     /* No signal is currently received ---------------------------------- */
     /* Disable service buttons and associated labels */
@@ -1289,5 +1289,5 @@ void FDRMDialog::OnHelpAbout()
 void FDRMDialog::OnSoundFileChanged(CDRMReceiver::ESFStatus)
 {
     UpdateWindowTitle();
-    on_signalLost();
+    OnSignalLost();
 }

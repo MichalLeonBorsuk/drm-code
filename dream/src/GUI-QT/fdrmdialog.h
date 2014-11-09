@@ -153,16 +153,16 @@ private slots:
     void on_action_Multimedia_Dialog_triggered();
     void on_actionSingle_Window_Mode_triggered(bool);
     void on_actionEngineering_Mode_triggered(bool);
-    void on_textMessageChanged(int, QString);
-    void on_MSCChanged(ETypeRxStatus);
-    void on_SDCChanged(ETypeRxStatus);
-    void on_FACChanged(ETypeRxStatus);
-    void on_InputSignalLevelChanged(double);
-    void on_modeChanged(int);
-    void on_serviceChanged(int, const CService&);
-    void on_signalLost();
-    void on_frequencyChanged(int);
-    void on_channelReceptionChanged(Reception);
+    void OnTextMessageChanged(int, const QString&);
+    void OnMSCChanged(ETypeRxStatus);
+    void OnSDCChanged(ETypeRxStatus);
+    void OnFACChanged(ETypeRxStatus);
+    void OnInputSignalLevelChanged(double);
+    void OnModeChanged(int);
+    void OnServiceChanged(int, const CService&);
+    void OnSignalLost();
+    void OnFrequencyChanged(int);
+    void OnChannelReceptionChanged(Reception);
 
 signals:
     void plotStyleChanged(int);
