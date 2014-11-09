@@ -43,7 +43,7 @@ signals:
     void AFS(const CAltFreqSign&);
     void setAFS(bool);
     void serviceInformation(const map <uint32_t,CServiceInformation>);
-    void textMessageChanged(int, const QString&);
+    void textMessageChanged(int, QString);
     void MSCChanged(ETypeRxStatus);
     void SDCChanged(ETypeRxStatus);
     void FACChanged(ETypeRxStatus);
