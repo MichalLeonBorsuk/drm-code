@@ -132,6 +132,7 @@ void AMWidget::hideEvent(QHideEvent*)
     if(MainPlot) MainPlot->deactivate();
 
     bool waterfall = ui->checkBoxWaterFall->isChecked();
+    (void)waterfall;
     // TODO putSetting("waterfall", waterfall);
 }
 
