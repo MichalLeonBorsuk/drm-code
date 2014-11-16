@@ -98,6 +98,7 @@ public:
 protected:
     CDRMTransceiver&	DRMTransceiver;
     QAction*			actionOpenFile;
+    QAction*			actionOpenRSCI;
     QAction*			actionCloseFile;
     const bool			bReceiver;
 	QString				strLastSoundPath;
@@ -105,6 +106,7 @@ protected:
 
 public slots:
     void OnOpenFile();
+    void OnOpenRSCI();
     void OnCloseFile();
 
 signals:

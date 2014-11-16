@@ -31,15 +31,11 @@
 #include "../DrmReceiver.h"
 #include "../DrmTransmitter.h"
 #include "SoundCardSelMenu.h"
+#include "openrscidialog.h"
 #include "DialogUtil.h"
 #include <QFileDialog>
 #include "../util-QT/Util.h"
 
-#ifdef HAVE_LIBPCAP
-# define PCAP_FILES " *.pcap"
-#else
-# define PCAP_FILES ""
-#endif
 #ifdef HAVE_LIBSNDFILE
 # define SND_FILES "*.aif* *.au *.flac *.ogg *.rf64 *.snd *.wav"
 #else
@@ -47,9 +43,6 @@
 #endif
 #define SND_FILE1 SND_FILES " "
 #define SND_FILE2 "Sound Files (" SND_FILES ");;"
-#define RSCI_FILES "*.rsA *.rsB *.rsC *.rsD *.rsQ *.rsM" PCAP_FILES
-#define RSCI_FILE1 RSCI_FILES " "
-#define RSCI_FILE2 "MDI/RSCI Files (" RSCI_FILES ");;"
 
 
 static const CHANSEL InputChannelTable[] =
@@ -337,10 +330,9 @@ CFileMenu::CFileMenu(CDRMTransceiver& DRMTransceiver, QMainWindow* parent,
     setTitle(tr("&File"));
     if (bReceiver)
     {
-        QString openFile(tr("&Open File..."));
-        QString closeFile(tr("&Close File"));
-        actionOpenFile = addAction(openFile, this, SLOT(OnOpenFile()), QKeySequence(tr("Alt+O")));
-        actionCloseFile = addAction(closeFile, this, SLOT(OnCloseFile()), QKeySequence(tr("Alt+C")));
+        actionOpenFile = addAction(tr("&Open Sound File..."), this, SLOT(OnOpenFile()), QKeySequence(tr("Alt+O")));
+        actionOpenRSCI = addAction(tr("&Open RSCI File or Stream..."), this, SLOT(OnOpenRSCI()), QKeySequence(tr("Ctrl+O")));
+        actionCloseFile = addAction(tr("&Close File"), this, SLOT(OnCloseFile()), QKeySequence(tr("Alt+C")));
         addSeparator();
     }
     addAction(tr("&Exit"), parent, SLOT(close()), QKeySequence(tr("Alt+X")));
@@ -353,15 +345,13 @@ void CFileMenu::OnOpenFile()
 #define FILE_FILTER \
 	"Supported Files (" \
 	SND_FILE1 \
-	RSCI_FILE1 \
 	");;" \
 	SND_FILE2 \
-	RSCI_FILE2 \
 	"All Files (*)"
     if (bReceiver)
     {
 	    QString filename = QFileDialog::getOpenFileName(this, tr("Open File"), strLastSoundPath, tr(FILE_FILTER));
-	    /* Check if user not hit the cancel button */
+        /* Check if user has hit the cancel button */
 	    if (!filename.isEmpty())
 	    {
 			strLastSoundPath = filename;
@@ -369,6 +359,32 @@ void CFileMenu::OnOpenFile()
 		    RestartTransceiver(&DRMTransceiver);
             UpdateMenu();
 	    }
+    }
+}
+
+void CFileMenu::OnOpenRSCI()
+{
+    if (bReceiver)
+    {
+        OpenRSCIDialog* rdlg = new OpenRSCIDialog(this);
+        rdlg->setPath(strLastRsciPath);
+        int r = rdlg->exec();
+        if(r==QDialog::Accepted) {
+            /* Check if user has hit chosen a file */
+            QString filename = rdlg->getFile();
+            qDebug(filename.toLocal8Bit().constData());
+            if(filename != "")
+            {
+                strLastSoundPath = filename;
+                ((CDRMReceiver&)DRMTransceiver).SetRsciInput(string(filename.toLocal8Bit().constData()));
+                RestartTransceiver(&DRMTransceiver);
+                UpdateMenu();
+            }
+            else
+            {
+                // network open
+            }
+        }
     }
 }
 
