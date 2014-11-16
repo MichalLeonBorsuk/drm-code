@@ -38,7 +38,7 @@ gui {
     RESOURCES = src/GUI-QT/res/icons.qrc
     QT += network xml
     qt4:QT += webkit
-    qt5:QT += widgets webkitwidgets positioning
+    qt5:QT += widgets webkitwidgets
     INCLUDEPATH += src/GUI-QT
     VPATH += src/GUI-QT
     win32:RC_FILE = windows/dream.rc
@@ -615,18 +615,21 @@ SOURCES += \
     src/Version.cpp
 
 !console {
+    qt5 {
+        QT += positioning
+        HEADERS += src/util-QT/cpos.h
+        SOURCES += src/util-QT/cpos.cpp
+    }
 HEADERS += \
     src/GUI-QT/Logging.h \
     src/util-QT/epgdec.h \
     src/util-QT/EPG.h \
-    src/util-QT/Util.h \
-    src/util-QT/cpos.h
+    src/util-QT/Util.h
 SOURCES += \
     src/GUI-QT/Logging.cpp \
     src/util-QT/EPG.cpp \
     src/util-QT/epgdec.cpp \
-    src/util-QT/Util.cpp \
-    src/util-QT/cpos.cpp
+    src/util-QT/Util.cpp
 }
 gui {
     contains(QT, webkitwidgets)|contains(QT,webkit) {
