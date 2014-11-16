@@ -68,6 +68,9 @@
 #define SATELLITE_SET   0x00010000u
 	gps_fix_t fix;
 	int    status; 
+#define STATUS_NO_FIX	0	/* no */
+#define STATUS_FIX	1	/* yes, without DGPS */
+#define STATUS_DGPS_FIX	2	/* yes, with DGPS */
 	int satellites_used;
     };
 #endif

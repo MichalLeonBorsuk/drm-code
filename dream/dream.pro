@@ -38,7 +38,7 @@ gui {
     RESOURCES = src/GUI-QT/res/icons.qrc
     QT += network xml
     qt4:QT += webkit
-    qt5:QT += widgets webkitwidgets
+    qt5:QT += widgets webkitwidgets positioning
     INCLUDEPATH += src/GUI-QT
     VPATH += src/GUI-QT
     win32:RC_FILE = windows/dream.rc
@@ -619,12 +619,14 @@ HEADERS += \
     src/GUI-QT/Logging.h \
     src/util-QT/epgdec.h \
     src/util-QT/EPG.h \
-    src/util-QT/Util.h
+    src/util-QT/Util.h \
+    src/util-QT/cpos.h
 SOURCES += \
     src/GUI-QT/Logging.cpp \
     src/util-QT/EPG.cpp \
     src/util-QT/epgdec.cpp \
-    src/util-QT/Util.cpp
+    src/util-QT/Util.cpp \
+    src/util-QT/cpos.cpp
 }
 gui {
     contains(QT, webkitwidgets)|contains(QT,webkit) {
@@ -660,7 +662,8 @@ FORMS += \
     stationswidget.ui \
     gpswidget.ui \
     amwidget.ui \
-    streamwidget.ui
+    streamwidget.ui \
+    openrscidialog.ui
 
 HEADERS += \
     src/GUI-QT/AnalogDemDlg.h \
@@ -700,7 +703,8 @@ HEADERS += \
     src/util-QT/scheduleloader.h \
     src/GUI-QT/amwidget.h \
     src/GUI-QT/streamwidget.h \
-    src/GUI-QT/ThemeCustomizer.h
+    src/GUI-QT/ThemeCustomizer.h \
+    src/GUI-QT/openrscidialog.h
 
 SOURCES += \
     src/GUI-QT/AnalogDemDlg.cpp \
@@ -740,7 +744,8 @@ SOURCES += \
     src/GUI-QT/afswidget.cpp \
     src/GUI-QT/amwidget.cpp \
     src/GUI-QT/streamwidget.cpp \
-    src/GUI-QT/ThemeCustomizer.cpp
+    src/GUI-QT/ThemeCustomizer.cpp \
+    src/GUI-QT/openrscidialog.cpp
 }
 
 !isEmpty(QT):message(With Qt components: $$QT)
