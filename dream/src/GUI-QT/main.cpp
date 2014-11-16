@@ -64,8 +64,12 @@ public:
 	{}
 	void run();
 private:
-	CDRMReceiver& rx;
+    CDRMReceiver& rx;
 };
+
+# ifdef QT_POSITIONING_LIB
+#  include <../util-QT/cpos.h>
+# endif
 
 void
 CRx::run()
@@ -169,8 +173,11 @@ main(int argc, char **argv)
 			FDRMDialog *pMainDlg = new FDRMDialog(DRMReceiver, Settings);
 #endif
 
-			/* Start working thread */
-			CRx rx(DRMReceiver);
+#ifdef QT_POSITIONING_LIB
+            CPos pos(&DRMReceiver.GetParameters()->gps_data);
+#endif
+            /* Start working thread */
+			CRx rx(DRMReceiver);            
 			rx.start();
 
 			/* Set main window */
