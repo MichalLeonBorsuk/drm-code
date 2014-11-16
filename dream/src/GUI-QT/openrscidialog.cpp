@@ -35,16 +35,18 @@ void OpenRSCIDialog::accept()
     QDialog::accept();
 }
 
-#ifdef HAVE_LIBPCAP
-# define PCAP_FILES " *.pcap"
-#else
-# define PCAP_FILES ""
-#endif
-#define RSCI_FILES "*.rsA *.rsB *.rsC *.rsD *.rsQ *.rsM" PCAP_FILES
-#define RSCI_FILE1 RSCI_FILES " "
-#define RSCI_FILE2 "MDI/RSCI Files (" RSCI_FILES ");;"
-#
 void OpenRSCIDialog::OnChooseFile()
 {
-    path = QFileDialog::getOpenFileName(this, tr("Open File"), file, tr("Supported Files (" RSCI_FILE1 " );; " RSCI_FILE2 " All Files (*)"));
+    QString rawtypes = "*.rsA *.rsB *.rsC *.rsD *.rsQ *.rsM";
+    QString supportedtypes = rawtypes;
+#ifdef HAVE_LIBPCAP
+    supportedtypes.append(" *.pcap");
+#endif
+    QString filter = tr("Supported Files (%1);;").arg(supportedtypes);
+#ifdef HAVE_LIBPCAP
+    filter.append(tr(" Capture Files (*.pcap);;"));
+#endif
+    filter.append(tr(" Raw Files (%1);;").arg(rawtypes));
+    filter.append(" All Files (*)");
+    path = QFileDialog::getOpenFileName(this, tr("Open File"), file, filter);
 }
