@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>663</width>
+    <width>669</width>
     <height>289</height>
    </rect>
   </property>
@@ -456,7 +456,16 @@
        <enum>QFrame::Raised</enum>
       </property>
       <layout class="QGridLayout">
-       <property name="margin">
+       <property name="leftMargin">
+        <number>6</number>
+       </property>
+       <property name="topMargin">
+        <number>6</number>
+       </property>
+       <property name="rightMargin">
+        <number>6</number>
+       </property>
+       <property name="bottomMargin">
         <number>6</number>
        </property>
        <property name="spacing">
@@ -467,7 +476,16 @@
          <property name="spacing">
           <number>6</number>
          </property>
-         <property name="margin">
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
           <number>0</number>
          </property>
          <item>
@@ -1731,7 +1749,16 @@
          <property name="spacing">
           <number>6</number>
          </property>
-         <property name="margin">
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
           <number>0</number>
          </property>
          <item>
@@ -3412,7 +3439,16 @@
       <property name="spacing">
        <number>6</number>
       </property>
-      <property name="margin">
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+      <property name="topMargin">
+       <number>0</number>
+      </property>
+      <property name="rightMargin">
+       <number>0</number>
+      </property>
+      <property name="bottomMargin">
        <number>0</number>
       </property>
       <item>
@@ -3420,7 +3456,16 @@
         <property name="spacing">
          <number>6</number>
         </property>
-        <property name="margin">
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
          <number>0</number>
         </property>
         <item>
@@ -3493,7 +3538,16 @@
         <property name="spacing">
          <number>6</number>
         </property>
-        <property name="margin">
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
          <number>0</number>
         </property>
         <item>
@@ -3522,26 +3576,7 @@
     <item row="1" column="2" rowspan="2">
      <layout class="QVBoxLayout" name="verticalLayout">
       <item>
-       <widget class="QLabel" name="TextLabelPhaseOffsetAMSS">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="text">
-         <string>AMSS Offset</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-        <property name="wordWrap">
-         <bool>false</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QwtDial" name="PhaseDialAMSS" native="true">
+       <widget class="QFrame" name="phaseFrame">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
           <horstretch>0</horstretch>
@@ -3557,9 +3592,27 @@
         <property name="focusPolicy">
          <enum>Qt::NoFocus</enum>
         </property>
-        <property name="lineWidth" stdset="0">
-         <number>4</number>
-        </property>
+        <layout class="QVBoxLayout" name="verticalLayout_2">
+         <item>
+          <widget class="QLabel" name="TextLabelPhaseOffsetAMSS">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>AMSS Offset</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+           <property name="wordWrap">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </widget>
       </item>
       <item>
@@ -3580,7 +3633,16 @@
         <property name="spacing">
          <number>0</number>
         </property>
-        <property name="margin">
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
          <number>0</number>
         </property>
         <item>
@@ -3690,13 +3752,6 @@
    </layout>
   </widget>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>QwtDial</class>
-   <extends>QWidget</extends>
-   <header>qwt_dial.h</header>
-  </customwidget>
- </customwidgets>
  <resources>
   <include location="res/icons.qrc"/>
  </resources>

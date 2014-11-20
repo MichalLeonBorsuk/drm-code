@@ -51,43 +51,43 @@ Rig(Rig), pRigDlg(NULL),
 StationsDlg::StationsDlg(CSettings& Settings, QMap<QWidget*,QString>& parents):
 CWindow(parents, Settings, "Stations"),
 #endif
+ui(new Ui::StationsDlgbase),
 schedule(),scheduleLoader(),
 greenCube(":/icons/greenCube.png"), redCube(":/icons/redCube.png"),
 orangeCube(":/icons/orangeCube.png"), pinkCube(":/icons/pinkCube.png"),
 eRecMode(RM_NONE)
 {
-	setupUi(this);
+    ui->setupUi(this);
 #if QWT_VERSION < 0x060100
-    ProgrSigStrength->setScalePosition(QwtThermo::TopScale);
+    ui->ProgrSigStrength->setScalePosition(QwtThermo::TopScale);
 #else
-    ProgrSigStrength->setScalePosition(QwtThermo::TrailingScale);
+    ui->ProgrSigStrength->setScalePosition(QwtThermo::TrailingScale);
 #endif
-
 	/* Load settings */
 	LoadSettings();
 
 	/* Set help text for the controls */
 	AddWhatsThisHelp();
 
-	ProgrSigStrength->hide();
-	TextLabelSMeter->hide();
+    ui->ProgrSigStrength->hide();
+    ui->TextLabelSMeter->hide();
 
 	/* Set up frequency selector control (QWTCounter control) */
 #if QWT_VERSION < 0x060100
-	QwtCounterFrequency->setRange(0.0, MAX_RF_FREQ, 1.0);
+    ui->QwtCounterFrequency->setRange(0.0, MAX_RF_FREQ, 1.0);
 #else
-	QwtCounterFrequency->setRange(0.0, MAX_RF_FREQ);
-	QwtCounterFrequency->setSingleStep(1.0);
+    ui->QwtCounterFrequency->setRange(0.0, MAX_RF_FREQ);
+    ui->QwtCounterFrequency->setSingleStep(1.0);
 #endif
-	QwtCounterFrequency->setNumButtons(3); /* Three buttons on each side */
-	QwtCounterFrequency->setIncSteps(QwtCounter::Button1, 1); /* Increment */
-	QwtCounterFrequency->setIncSteps(QwtCounter::Button2, 10);
-	QwtCounterFrequency->setIncSteps(QwtCounter::Button3, 100);
+    ui->QwtCounterFrequency->setNumButtons(3); /* Three buttons on each side */
+    ui->QwtCounterFrequency->setIncSteps(QwtCounter::Button1, 1); /* Increment */
+    ui->QwtCounterFrequency->setIncSteps(QwtCounter::Button2, 10);
+    ui->QwtCounterFrequency->setIncSteps(QwtCounter::Button3, 100);
 
-	ListViewStations->setAllColumnsShowFocus(true);
-	ListViewStations->setColumnCount(9);
-	ListViewStations->setRootIsDecorated(false);
-	ListViewStations->setSortingEnabled(true);
+    ui->ListViewStations->setAllColumnsShowFocus(true);
+    ui->ListViewStations->setColumnCount(9);
+    ui->ListViewStations->setRootIsDecorated(false);
+    ui->ListViewStations->setSortingEnabled(true);
 	QStringList headers;
 	headers
 		<< QString() /* icon, enable sorting by online/offline */
@@ -100,50 +100,50 @@ eRecMode(RM_NONE)
 		<< tr("Site")
 		<< tr("Language")
 		<< tr("Days");
-	ListViewStations->setHeaderLabels(headers);
-	ListViewStations->headerItem()->setTextAlignment(2, Qt::AlignRight | Qt::AlignVCenter);
-	ListViewStations->headerItem()->setTextAlignment(3, Qt::AlignRight | Qt::AlignVCenter);
-	ListViewStations->headerItem()->setTextAlignment(4, Qt::AlignRight | Qt::AlignVCenter);
+    ui->ListViewStations->setHeaderLabels(headers);
+    ui->ListViewStations->headerItem()->setTextAlignment(2, Qt::AlignRight | Qt::AlignVCenter);
+    ui->ListViewStations->headerItem()->setTextAlignment(3, Qt::AlignRight | Qt::AlignVCenter);
+    ui->ListViewStations->headerItem()->setTextAlignment(4, Qt::AlignRight | Qt::AlignVCenter);
 
 	previewMapper = new QSignalMapper(this);
 	previewGroup = new QActionGroup(this);
 	showMapper = new QSignalMapper(this);
 	showGroup = new QActionGroup(this);
-	showGroup->addAction(actionShowOnlyActiveStations);
-	showMapper->setMapping(actionShowOnlyActiveStations, 0);
-	showGroup->addAction(actionShowAllStations);
-	showMapper->setMapping(actionShowAllStations, 1);
-	connect(actionClose, SIGNAL(triggered()), SLOT(close()));
-	connect(actionShowAllStations, SIGNAL(triggered()), showMapper, SLOT(map()));
-	connect(actionShowOnlyActiveStations, SIGNAL(triggered()), showMapper, SLOT(map()));
+    showGroup->addAction(ui->actionShowOnlyActiveStations);
+    showMapper->setMapping(ui->actionShowOnlyActiveStations, 0);
+    showGroup->addAction(ui->actionShowAllStations);
+    showMapper->setMapping(ui->actionShowAllStations, 1);
+    connect(ui->actionClose, SIGNAL(triggered()), SLOT(close()));
+    connect(ui->actionShowAllStations, SIGNAL(triggered()), showMapper, SLOT(map()));
+    connect(ui->actionShowOnlyActiveStations, SIGNAL(triggered()), showMapper, SLOT(map()));
 	connect(showMapper, SIGNAL(mapped(int)), this, SLOT(OnShowStationsMenu(int)));
-	previewGroup->addAction(actionDisabled);
-	previewMapper->setMapping(actionDisabled, 0);
-	previewGroup->addAction(action5minutes);
-	previewMapper->setMapping(action5minutes, NUM_SECONDS_PREV_5MIN);
-	previewGroup->addAction(action15minutes);
-	previewMapper->setMapping(action15minutes, NUM_SECONDS_PREV_15MIN);
-	previewGroup->addAction(action30minutes);
-	previewMapper->setMapping(action30minutes, NUM_SECONDS_PREV_30MIN);
-	connect(actionDisabled, SIGNAL(triggered()), previewMapper, SLOT(map()));
-	connect(action5minutes, SIGNAL(triggered()), previewMapper, SLOT(map()));
-	connect(action15minutes, SIGNAL(triggered()), previewMapper, SLOT(map()));
-	connect(action30minutes, SIGNAL(triggered()), previewMapper, SLOT(map()));
+    previewGroup->addAction(ui->actionDisabled);
+    previewMapper->setMapping(ui->actionDisabled, 0);
+    previewGroup->addAction(ui->action5minutes);
+    previewMapper->setMapping(ui->action5minutes, NUM_SECONDS_PREV_5MIN);
+    previewGroup->addAction(ui->action15minutes);
+    previewMapper->setMapping(ui->action15minutes, NUM_SECONDS_PREV_15MIN);
+    previewGroup->addAction(ui->action30minutes);
+    previewMapper->setMapping(ui->action30minutes, NUM_SECONDS_PREV_30MIN);
+    connect(ui->actionDisabled, SIGNAL(triggered()), previewMapper, SLOT(map()));
+    connect(ui->action5minutes, SIGNAL(triggered()), previewMapper, SLOT(map()));
+    connect(ui->action15minutes, SIGNAL(triggered()), previewMapper, SLOT(map()));
+    connect(ui->action30minutes, SIGNAL(triggered()), previewMapper, SLOT(map()));
 	connect(previewMapper, SIGNAL(mapped(int)), this, SLOT(OnShowPreviewMenu(int)));
-	connect(ListViewStations->header(), SIGNAL(sectionClicked(int)), this, SLOT(OnHeaderClicked(int)));
+    connect(ui->ListViewStations->header(), SIGNAL(sectionClicked(int)), this, SLOT(OnHeaderClicked(int)));
 
 #ifndef HAVE_LIBHAMLIB
-	actionChooseRig->setVisible(false);
+    ui->actionChooseRig->setVisible(false);
 #endif
-	connect(buttonOk, SIGNAL(clicked()), this, SLOT(close()));
+    connect(ui->buttonOk, SIGNAL(clicked()), this, SLOT(close()));
 
 	/* Init progress bar for input s-meter */
-	InitSMeter(this, ProgrSigStrength);
+    InitSMeter(this, ui->ProgrSigStrength);
 
 	/* Connections ---------------------------------------------------------- */
 
 	connect(&Timer, SIGNAL(timeout()), this, SLOT(OnTimer()));
-	connect(QwtCounterFrequency, SIGNAL(valueChanged(double)),
+    connect(ui->QwtCounterFrequency, SIGNAL(valueChanged(double)),
 		this, SLOT(OnFreqCntNewValue(double)));
     connect(&scheduleLoader, SIGNAL(fileReady()), this, SLOT(OnFileReady()));
 
@@ -205,14 +205,14 @@ void StationsDlg::LoadSchedule()
     schedule.LoadSchedule(params[eRecMode].filename);
     /* add last update information on menu item */
     QFileInfo f = QFileInfo(params[eRecMode].filename);
-    actionGetUpdate->setText(
+    ui->actionGetUpdate->setText(
        tr("&Get Update (last update: %1)...").arg(f.lastModified().date().toString())
     );
 }
 
 void StationsDlg::SetFrequency(int f)
 {
-    QwtCounterFrequency->setValue(f);
+    ui->QwtCounterFrequency->setValue(f);
 }
 
 void StationsDlg::OnSwitchMode(int m)
@@ -220,7 +220,7 @@ void StationsDlg::OnSwitchMode(int m)
     ERecMode eNewRecMode = ERecMode(m);
     if(eNewRecMode != eRecMode)
     {
-        ColumnParamToStr(ListViewStations, params[eRecMode].strColumnParam);
+        ColumnParamToStr(ui->ListViewStations, params[eRecMode].strColumnParam);
         eRecMode = eNewRecMode;
         if(isVisible())
         {
@@ -233,7 +233,7 @@ void StationsDlg::OnSwitchMode(int m)
         {
             schedule.clear();
         }
-        ColumnParamFromStr(ListViewStations, params[eRecMode].strColumnParam);
+        ColumnParamFromStr(ui->ListViewStations, params[eRecMode].strColumnParam);
     }
 }
 
@@ -255,7 +255,7 @@ void StationsDlg::eventShow(QShowEvent*)
     /* Activate real-time timer when window is shown */
     Timer.start(500 /* twice a second - nyquist for catching minute boundaries */);
 
-    if(actionEnable_S_Meter->isChecked())
+    if(ui->actionEnable_S_Meter->isChecked())
         EnableSMeter();
     else
         DisableSMeter();
@@ -275,8 +275,8 @@ void StationsDlg::OnTimer()
 		gmtCur->tm_hour, gmtCur->tm_min);
 
 	/* Only apply if time label does not show the correct time */
-	if (TextLabelUTCTime->text().compare(strUTCTime))
-		TextLabelUTCTime->setText(strUTCTime);
+    if (ui->TextLabelUTCTime->text().compare(strUTCTime))
+        ui->TextLabelUTCTime->setText(strUTCTime);
 
 	/* reload schedule on minute boundaries */
 	if (ltime % 60 == 0)
@@ -301,7 +301,7 @@ void StationsDlg::OnUpdate()
             "No stations can be displayed.\n"
             "Try to download this file by using the 'Update' menu."),
             QMessageBox::Ok);
-            actionGetUpdate->setText(tr("&Get Update ..."));
+            ui->actionGetUpdate->setText(tr("&Get Update ..."));
         }
     }
     LoadScheduleView();
@@ -313,33 +313,33 @@ void StationsDlg::LoadSettings()
 	/* S-meter settings */
 	bool ensmeter = Settings.Get("Hamlib", "ensmeter", false);
 
-	actionEnable_S_Meter->setChecked(ensmeter);
+    ui->actionEnable_S_Meter->setChecked(ensmeter);
 
 	bool showAll = getSetting("showall", false);
 	int iPrevSecs = getSetting("preview", NUM_SECONDS_PREV_5MIN);
 	schedule.SetSecondsPreview(iPrevSecs);
 
 	if(showAll)
-		actionShowAllStations->setChecked(true);
+        ui->actionShowAllStations->setChecked(true);
 	else
-		actionShowOnlyActiveStations->setChecked(true);
+        ui->actionShowOnlyActiveStations->setChecked(true);
 
 	switch (iPrevSecs)
 	{
 	case NUM_SECONDS_PREV_5MIN:
-		action5minutes->setChecked(true);
+        ui->action5minutes->setChecked(true);
 		break;
 
 	case NUM_SECONDS_PREV_15MIN:
-		action15minutes->setChecked(true);
+        ui->action15minutes->setChecked(true);
 		break;
 
 	case NUM_SECONDS_PREV_30MIN:
-		action30minutes->setChecked(true);
+        ui->action30minutes->setChecked(true);
 		break;
 
 	default: /* case 0, also takes care of out of value parameters */
-		actionDisabled->setChecked(true);
+        ui->actionDisabled->setChecked(true);
 		break;
 	}
 
@@ -362,9 +362,9 @@ void StationsDlg::LoadSettings()
 
 void StationsDlg::SaveSettings()
 {
-    ColumnParamToStr(ListViewStations, params[eRecMode].strColumnParam);
-    Settings.Put("Hamlib", "ensmeter", actionEnable_S_Meter->isChecked());
-	putSetting("showall", actionShowAllStations->isChecked());
+    ColumnParamToStr(ui->ListViewStations, params[eRecMode].strColumnParam);
+    Settings.Put("Hamlib", "ensmeter", ui->actionEnable_S_Meter->isChecked());
+    putSetting("showall", ui->actionShowAllStations->isChecked());
     putSetting("DRM URL", params[RM_DRM].url);
     putSetting("ANALOG URL", params[RM_AM].url);
     putSetting("sortcolumndrm", params[RM_DRM].iSortColumn);
@@ -386,7 +386,7 @@ void StationsDlg::SaveSettings()
 
 void StationsDlg::LoadScheduleView()
 {
-    ListViewStations->clear();
+    ui->ListViewStations->clear();
     for (int i = 0; i < schedule.GetNumberOfStations(); i++)
 	{
 		const CStationsItem& station = schedule.GetItem(i);
@@ -405,7 +405,7 @@ void StationsDlg::LoadScheduleView()
 		QString strTimes = QString().sprintf("%04d-%04d", station.StartTime(), station.StopTime());
 
 		/* Generate new list station with all necessary column entries */
-		QTreeWidgetItem* item = new CaseInsensitiveTreeWidgetItem(ListViewStations);
+        QTreeWidgetItem* item = new CaseInsensitiveTreeWidgetItem(ui->ListViewStations);
 		item->setText(1, station.strName);
 		item->setText(2, strTimes /* time */);
 		item->setText(3, QString().setNum(station.iFreq) /* freq. */);
@@ -420,26 +420,26 @@ void StationsDlg::LoadScheduleView()
 		item->setTextAlignment(3, Qt::AlignRight | Qt::AlignVCenter);
 		item->setTextAlignment(4, Qt::AlignRight | Qt::AlignVCenter);
 	}
-    ListViewStations->sortByColumn(
+    ui->ListViewStations->sortByColumn(
             params[eRecMode].iSortColumn,
             params[eRecMode].bCurrentSortAscending ? Qt::AscendingOrder : Qt::DescendingOrder
    );
 
     // Load Filters(
-    ComboBoxFilterTarget->clear();
-    ComboBoxFilterCountry->clear();
-    ComboBoxFilterLanguage->clear();
-    ComboBoxFilterTarget->addItems(schedule.ListTargets);
-    ComboBoxFilterCountry->addItems(schedule.ListCountries);
-    ComboBoxFilterLanguage->addItems(schedule.ListLanguages);
+    ui->ComboBoxFilterTarget->clear();
+    ui->ComboBoxFilterCountry->clear();
+    ui->ComboBoxFilterLanguage->clear();
+    ui->ComboBoxFilterTarget->addItems(schedule.ListTargets);
+    ui->ComboBoxFilterCountry->addItems(schedule.ListCountries);
+    ui->ComboBoxFilterLanguage->addItems(schedule.ListLanguages);
 
     QString s;
     s = schedule.getTargetFilter();
     int i;
-    i = ComboBoxFilterTarget->findText(s);
-    ComboBoxFilterTarget->setCurrentIndex(i);
-    ComboBoxFilterCountry->setCurrentIndex(ComboBoxFilterCountry->findText(schedule.getCountryFilter()));
-    ComboBoxFilterLanguage->setCurrentIndex(ComboBoxFilterLanguage->findText(schedule.getLanguageFilter()));
+    i = ui->ComboBoxFilterTarget->findText(s);
+    ui->ComboBoxFilterTarget->setCurrentIndex(i);
+    ui->ComboBoxFilterCountry->setCurrentIndex(ui->ComboBoxFilterCountry->findText(schedule.getCountryFilter()));
+    ui->ComboBoxFilterLanguage->setCurrentIndex(ui->ComboBoxFilterLanguage->findText(schedule.getLanguageFilter()));
 }
 
 void StationsDlg::UpdateTransmissionStatus()
@@ -448,10 +448,10 @@ void StationsDlg::UpdateTransmissionStatus()
 	ListItemsMutex.lock();
 
 	bool bShowAll = showAll();
-	ListViewStations->setSortingEnabled(false);
-    for (int i = 0; i < ListViewStations->topLevelItemCount(); i++)
+    ui->ListViewStations->setSortingEnabled(false);
+    for (int i = 0; i < ui->ListViewStations->topLevelItemCount(); i++)
 	{
-		QTreeWidgetItem* item = ListViewStations->topLevelItem(i);
+        QTreeWidgetItem* item = ui->ListViewStations->topLevelItem(i);
 		int scheduleItem = item->data(1, Qt::UserRole).toInt();
 
 		Station::EState iState = schedule.GetState(scheduleItem);
@@ -488,9 +488,9 @@ void StationsDlg::UpdateTransmissionStatus()
 			item->setHidden(true);
 		}
 	}
-	ListViewStations->setSortingEnabled(true);
-	ListViewStations->sortItems(ListViewStations->sortColumn(), GetSortAscending()?Qt::AscendingOrder:Qt::DescendingOrder);
-	ListViewStations->setFocus();
+    ui->ListViewStations->setSortingEnabled(true);
+    ui->ListViewStations->sortItems(ui->ListViewStations->sortColumn(), GetSortAscending()?Qt::AscendingOrder:Qt::DescendingOrder);
+    ui->ListViewStations->setFocus();
 	ListItemsMutex.unlock();
 	Timer.start();
 }
@@ -528,17 +528,17 @@ bool StationsDlg::GetSortAscending()
 
 void StationsDlg::on_ListViewStations_itemSelectionChanged()
 {
-	QList<QTreeWidgetItem *> items =  ListViewStations->selectedItems();
+    QList<QTreeWidgetItem *> items =  ui->ListViewStations->selectedItems();
 	if(items.size()==1)
 	{
         int iFreq = QString(items.first()->text(3)).toInt();
-        QwtCounterFrequency->setValue(iFreq);
+        ui->QwtCounterFrequency->setValue(iFreq);
     }
 }
 
 void StationsDlg::on_actionEnable_S_Meter_triggered()
 {
-	if(actionEnable_S_Meter->isChecked())
+    if(ui->actionEnable_S_Meter->isChecked())
 		EnableSMeter();
 	else
 		DisableSMeter();
@@ -546,23 +546,23 @@ void StationsDlg::on_actionEnable_S_Meter_triggered()
 
 void StationsDlg::EnableSMeter()
 {
-	TextLabelSMeter->setEnabled(TRUE);
-	ProgrSigStrength->setEnabled(TRUE);
-	TextLabelSMeter->show();
-	ProgrSigStrength->show();
+    ui->TextLabelSMeter->setEnabled(TRUE);
+    ui->ProgrSigStrength->setEnabled(TRUE);
+    ui->TextLabelSMeter->show();
+    ui->ProgrSigStrength->show();
 	emit subscribeRig();
 }
 
 void StationsDlg::DisableSMeter()
 {
-	TextLabelSMeter->hide();
-	ProgrSigStrength->hide();
+    ui->TextLabelSMeter->hide();
+    ui->ProgrSigStrength->hide();
 	emit unsubscribeRig();
 }
 
 void StationsDlg::OnSigStr(double rCurSigStr)
 {
-	ProgrSigStrength->setValue(rCurSigStr);
+    ui->ProgrSigStrength->setValue(rCurSigStr);
 }
 
 void StationsDlg::on_actionChooseRig_triggered()
@@ -576,7 +576,7 @@ void StationsDlg::on_actionChooseRig_triggered()
 
 bool StationsDlg::showAll()
 {
-	return actionShowAllStations->isChecked();
+    return ui->actionShowAllStations->isChecked();
 }
 
 void StationsDlg::AddWhatsThisHelp()
@@ -623,9 +623,9 @@ void StationsDlg::AddWhatsThisHelp()
 		"front-ends controlled by hamlib support this feature. If the s-meter "
 		"is not available, the controls are disabled.");
 
-	ListViewStations->setWhatsThis(strList);
-	QwtCounterFrequency->setWhatsThis(strCounter);
-	TextLabelUTCTime->setWhatsThis(strTime);
-	TextLabelSMeter->setWhatsThis(strSMeter);
-	ProgrSigStrength->setWhatsThis(strSMeter);
+    ui->ListViewStations->setWhatsThis(strList);
+    ui->QwtCounterFrequency->setWhatsThis(strCounter);
+    ui->TextLabelUTCTime->setWhatsThis(strTime);
+    ui->TextLabelSMeter->setWhatsThis(strSMeter);
+    ui->ProgrSigStrength->setWhatsThis(strSMeter);
 }
