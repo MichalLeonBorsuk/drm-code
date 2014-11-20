@@ -67,7 +67,9 @@
 /*                                                                            */
 /******************************************************************************/
 
-#include <stdlib.h>
+#include <cstring>
+#include <cstdio>
+#include <cstdlib>
 #include "mex.h"
 #include "zlib.h"
 #include "journaline_20040318/NML.h"

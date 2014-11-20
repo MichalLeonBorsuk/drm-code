@@ -167,6 +167,8 @@ settings(2);
 ENABLE_GUI = settings_handler(6,4);
 
 if (ENABLE_GUI)
+
+    graphics_toolkit fltk;
     
     if (isempty(findobj('Tag','radio_gui')))
         radio_gui;

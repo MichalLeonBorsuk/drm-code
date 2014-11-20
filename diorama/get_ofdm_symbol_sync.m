@@ -32,7 +32,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%                                                                            %
-%%  get_ofdm_symbol.m                                                         %
+%%  get_ofdm_symbol_sync.m                                                         %
 %%                                                                            %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%                                                                            %
@@ -47,7 +47,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function [out, delta_time_offset_integer, time_offset_fractional, freq_offset, delta_time_offset_I, phi_freq_correction_last, symbol_position_offset] = ...
-   get_ofdm_symbol( in, Ts, Tu, H, delta_freq_offset, time_offset_fractional, freq_offset, delta_time_offset_I, phi_freq_correction_last)
+   get_ofdm_symbol_sync( in, Ts, Tu, H, delta_freq_offset, time_offset_fractional, freq_offset, delta_time_offset_I, phi_freq_correction_last)
 
 global TIME_SYNC_ENABLE FREQ_SYNC_ENABLE
 

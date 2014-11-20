@@ -234,7 +234,7 @@ end
 
 if (~CHANNELDECODING) 
     frame_index = mod(frame_index, 6) + 1;
-    if (exist('symbol_period') & exist('symbols_per_frame'))
+    if (exist('symbol_period') && exist('symbols_per_frame'))
         transmission_frame_buffer_writeptr = rem (transmission_frame_buffer_writeptr - 1 + symbol_period * symbols_per_frame, symbol_period * symbols_per_frame * 6) + 1;
     end
     SNR_estimation_valid = 0;
@@ -297,7 +297,7 @@ spectrum_occupancy_new = channel_parameters(4:7)*[8;4;2;1];
 sdc_mode_new = channel_parameters(11);      
 number_of_services = channel_parameters(12:15)*[8;4;2;1];
 
-if (spectrum_occupancy_new > 5 | number_of_services == 11 | number_of_services == 14) 
+if (spectrum_occupancy_new > 5 || number_of_services == 11 || number_of_services == 14) 
     spectrum_occupancy = -1;
     fac_valid = 0;
     message(PRINTTIME <= VERBOSE_LEVEL,sprintf('%5.0fms - FAC decoding, FAC consistence error\n', toctic * 1000));
@@ -317,7 +317,7 @@ end
 %     fprintf(1,'| Rfu:                      | %i |\n',channel_parameters(19:20)*[2;1]);
 %     fprintf(1,'+---------------------------+---+\n');
 
-if ((spectrum_occupancy ~= spectrum_occupancy_new) | (robustness_mode_old ~= robustness_mode))
+if ((spectrum_occupancy ~= spectrum_occupancy_new) || (robustness_mode_old ~= robustness_mode))
     spectrum_occupancy = spectrum_occupancy_new;
     SDC_Demapper = Create_SDC_Demapper(robustness_mode, spectrum_occupancy, K_dc, K_modulo);
     interleaver_depth = interleaver_depth_new;
@@ -421,7 +421,7 @@ if (identity == 0) % SDC cells only in the first frame of a superframe
         [multiplex_description_new, application_information, audio_information, time_and_date, sdc_updates] = ...
             get_SDC_data (sdc_data(1:SDC_data_length * 8 + 4), msc_mode, multiplex_description, application_information, audio_information, time_and_date);
         
-        if (sdc_updates(1) & (~isequal(multiplex_description_new, multiplex_description)))
+        if (sdc_updates(1) && (~isequal(multiplex_description_new, multiplex_description)))
             msc_parameters_changed = 1;
             msc_parameters_valid = 1;
             multiplex_description = multiplex_description_new;
@@ -498,7 +498,7 @@ message(PRINTTIME <= VERBOSE_LEVEL,sprintf('%5.0fms - FAC/SDC decoding, mode %s,
 
 N_MUX = size(MSC_Demapper, 2);
 % MSC parameter assignment: sizes, interleavers, puncturing
-if (msc_parameters_changed & msc_parameters_valid)
+if (msc_parameters_changed && msc_parameters_valid)
     if (msc_mode == 0)  % 64-QAM SM
         rylcm = RYlcmSM64(multiplex_description.PL_PartA + 1);
         ratesA = RatesSM64(multiplex_description.PL_PartA + 1,:);
@@ -570,7 +570,7 @@ if (msc_parameters_valid)
     if (~enough_frames)
         
                
-        transfer_function_MSC(find(MSC_Demapper(frame_index,:) > max_index_equal_samples | MSC_Demapper(frame_index,:) < min_index_equal_samples)) = 0;
+        transfer_function_MSC(find(MSC_Demapper(frame_index,:) > max_index_equal_samples || MSC_Demapper(frame_index,:) < min_index_equal_samples)) = 0;
         
         
         SNR_estimation = abs(transfer_function_MSC);        % assuming white noise
@@ -645,7 +645,7 @@ if (PLOT_CONSTELLATIONS)
    plot_constellations(2);
 end
 
-if (enough_frames & msc_parameters_valid)
+if (enough_frames && msc_parameters_valid)
     
     message(PRINTTIME <= VERBOSE_LEVEL,sprintf('%5.0fms - MSC decoding, ',toctic*1000));
     message(1 <= VERBOSE_LEVEL,sprintf('frame# %d - iter: %d - MSC MER: %2.1f dB - MSC WMER: %2.1f dB\n', frame_count, iterations, -10*log10(calc_variance), -10*log10(calc_weighted_variance)));

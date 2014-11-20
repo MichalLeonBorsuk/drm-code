@@ -2,7 +2,7 @@ function make(varargin)
 
 if (nargin == 0)
     compflags = '';
-elseif ((nargin == 1) & (ischar(varargin{1})))
+elseif ((nargin == 1) && (ischar(varargin{1})))
     compflags = varargin{1};
 else
     error(['Too many arguments for ', pwd , filesep,mfilename, '.m']);
@@ -29,23 +29,22 @@ if( exist('drm_aacdecode.c') )
           cd ('..\..'); 
       end
       eval(['mex ', compflags, ' drm_aacdecode.c libfaad2.lib']);
-   elseif (isequal(computer,'GLNX86')|isequal(computer,'LNX86'))
+   elseif (isequal(computer,'GLNX86')||isequal(computer,'LNX86')||isequal(computer,'x86_64-pc-linux-gnu'))
        
       clear drm_aacdecode.mexglx;
        
-      cd ('faad2');
-      [unix_status, unix_result] = unix('autoreconf -vif > /dev/null 2>&1');
-      if (unix_status ~= 0)
-          error([pwd, filesep,mfilename, '.m: Error using autoreconf. Maybe not found on the search path!']);
-      end
-      [unix_status, unix_result] = unix('./configure --with-drm > /dev/null 2>&1');
-      if (unix_status ~= 0)
-          error([pwd, filesep,mfilename, '.m: Error using ./configure.']);
-      end
-      [unix_status, unix_result] = unix('make > /dev/null 2>&1');
-      cd ('..');
+%      cd ('faad2');
+%      [unix_status, unix_result] = unix('autoreconf -vif > /dev/null 2>&1');
+%      if (unix_status ~= 0)
+%          error([pwd, filesep,mfilename, '.m: Error using autoreconf. Maybe not found on the search path!']);
+%      end
+%      [unix_status, unix_result] = unix('CFLAGS=-fPIC ./configure --without-xmms --without-mpeg4ip --with-drm > /dev/null 2>&1');
+%      if (unix_status ~= 0)
+%          error([pwd, filesep,mfilename, '.m: Error using ./configure.']);
+%      end
+%      [unix_status, unix_result] = unix('make > /dev/null 2>&1');
+%      cd ('..');
       eval(['mex ', compflags, ' drm_aacdecode.c faad2/libfaad/.libs/libfaad.a -D_LINUX_']); 
    end
    fprintf(1,'ok\n');
 end
-

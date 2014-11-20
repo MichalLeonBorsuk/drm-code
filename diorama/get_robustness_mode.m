@@ -111,7 +111,7 @@ end
 % now decide for one mode
 [max_abs_gamma_rel_list_sorted, robustness_mode_index] = sort( max_abs_gamma_rel_list );
 % check consistence and set mode if reliable
-if( (max_abs_gamma_rel_list_sorted(4)>0.6) & (max_abs_gamma_rel_list_sorted(3)<0.4) )
+if( (max_abs_gamma_rel_list_sorted(4)>0.6) && (max_abs_gamma_rel_list_sorted(3)<0.4) )
    robustness_mode = robustness_mode_index(4);
    
    % set the appropriate parameter
@@ -165,7 +165,7 @@ else
 end
 
 %check reliability
-if ( (abs(samplerate_offset)>SAMPLERATE_OFFSET_MAX) | (time_offset<0) )
+if ( (abs(samplerate_offset)>SAMPLERATE_OFFSET_MAX) || (time_offset<0) )
    robustness_mode = 0;
    time_offset = 0;
    samplerate_offset = 0;

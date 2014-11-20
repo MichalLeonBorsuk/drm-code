@@ -44,7 +44,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%                                                                            %
-%%  input_data_writing.m                                                      %
+%%  input_data_reading.m                                                      %
 %%                                                                            %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%  Description:                                                              %
@@ -54,7 +54,7 @@
 %%                                                                            %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function input_data_writing()
+function input_data_reading()
 
 %*******************************************************************************
 %* constant global variables                                                   *
@@ -98,7 +98,7 @@ global smp_rate_conv_fft_phase_diff
 global smp_rate_conv_fft_phase_offset
 global smp_rate_conv_in_out_delay
 
-% input_data_reading --> output_data_writin
+% input_data_reading --> output_data_writing
 global smp_rate_conv_rec_phase_offset
 
 %*******************************************************************************
@@ -230,8 +230,8 @@ elseif ( actual_input_source == INPUT_SOURCE_FILE )	%file input
         return;
       end
       temp = fread(wav_fid,44,'uint8');
-      if length(temp == 44) & isequal(temp([1:4,9:16])','RIFFWAVEfmt ')
-          if (temp(23) == 1) | (temp(23) == 2)
+      if length(temp == 44) && isequal(temp([1:4,9:16])','RIFFWAVEfmt ')
+          if (temp(23) == 1) || (temp(23) == 2)
               wave_channels = temp(23);
               wave_offset = 44;
               wave_type = 'WAV file format';
@@ -393,7 +393,7 @@ end
 
 RECORD_INPUT = settings_handler(4,19);
 
-if (RECORD_INPUT & input_data_valid) 
+if (RECORD_INPUT && input_data_valid) 
     
     if (~RECORD_INPUT_last)
         

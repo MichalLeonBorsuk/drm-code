@@ -363,7 +363,7 @@ if( ~is_time_sync )
    
 	message(PRINTTIME<=VERBOSE_LEVEL,sprintf('%5.0fms - time sync & fractional frequ. sync, sample rate offset estimation: %.0f ppm, robustness_mode: %s\n', toctic * 1000, (1/(samplerate_offset_estimation+1)-1)*1e6, robustness_mode_string_list{robustness_mode+1} ));   
 
-   if ( (abs(samplerate_offset_estimation)>200e-6) & (input_source==INPUT_SOURCE_SOUNDCARD) & (robustness_mode>0) )
+   if ( (abs(samplerate_offset_estimation)>200e-6) && (input_source==INPUT_SOURCE_SOUNDCARD) && (robustness_mode>0) )
       % samplerate offset is to big. We have to correct this in the recording module applying sample-rate-conversion
       % so, throw away all samples and get new one, which have been resampled
    	N_samples_needed = N_symbols_mode_detection*320;

@@ -66,13 +66,13 @@
 function varargout = wavplayex(varargin)
 
 if (nargin>0)
-	if ( (size(varargin{1},1)>2) & (size(varargin{1},2)==2) )
+	if ( (size(varargin{1},1)>2) && (size(varargin{1},2)==2) )
    	warning('input matrix has been transposed - wavplayex expects that audio data is a 2-by-N matrix for stereo');
    	varargin{1} = transpose(varargin{1});
 	end
 end
 
-if (isequal(computer,'GLNX86')|isequal(computer,'LNX86'))
+if (isequal(computer,'GLNX86')||isequal(computer,'LNX86')||isequal(computer,'x86_64-pc-linux-gnu'))
    if (nargin==0)
       wavio_linux(1);
    else

@@ -85,7 +85,7 @@ elseif (text_message.stream_no > 0)
         else
             text_message.CRC_error = 1;
         end
-        if (((text_message.first_last_flag == 1)&(text_message.first_seg_received == 1)) | (text_message.first_last_flag == 3))
+        if (((text_message.first_last_flag == 1)&&(text_message.first_seg_received == 1)) || (text_message.first_last_flag == 3))
             text_message.string = '';
             for seg_no=1:8
                 text_message.string = [text_message.string,char(text_message.segments{seg_no})];

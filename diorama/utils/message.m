@@ -42,7 +42,7 @@ arg_ptr = 1;
 print_flag = logical(1);
 
 for arg_ptr = 1:nargin
-    if ( isnumeric(varargin{arg_ptr})|islogical(varargin{arg_ptr}) )
+    if ( isnumeric(varargin{arg_ptr})||islogical(varargin{arg_ptr}) )
         print_flag = varargin{arg_ptr};
     elseif (isequal(varargin{arg_ptr},'flush'))
         fprintf(1,'%s',char(MESSAGE));
