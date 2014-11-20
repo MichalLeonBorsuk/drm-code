@@ -1,0 +1,8 @@
+LIBRARY  journaline_decode_dll.dll
+EXPORTS
+;
+; journaline_decode_dll exports
+;
+journaline_decode			@1
+journaline_decode_exit		@2
+free_output					@3
