@@ -106,7 +106,7 @@ while (SDCi + 12 <= length(sdc_data))
     switch data_entity_type
         
     case 0      % Multiplex description data entity - type 0: every SDC block
-       			if (length_of_body==0) | (SDCi + 28 > length(sdc_data)) | (SDCi + 4 + 8 * length_of_body > length(sdc_data))
+       			if (length_of_body==0) || (SDCi + 28 > length(sdc_data)) || (SDCi + 4 + 8 * length_of_body > length(sdc_data))
                     break;
                 end
                 
@@ -114,7 +114,7 @@ while (SDCi + 12 <= length(sdc_data))
                 multiplex_description.PL_PartB = sdc_data(SDCi + 2:SDCi + 3)*(2.^[1:-1:0]');
                 SDCi = SDCi + 4;
                 % Number of streams: length_of_body/3
-                if (msc_mode == 0 | msc_mode == 3)
+                if (msc_mode == 0 || msc_mode == 3)
                    % No hierarchical modulation
                    multiplex_description.stream_lengths = ...
                        [sdc_data(SDCi:SDCi + 11)*(2.^[11:-1:0]');sdc_data(SDCi+12:SDCi + 23)*(2.^[11:-1:0]')];
@@ -133,7 +133,7 @@ while (SDCi + 12 <= length(sdc_data))
                 end
                 SDCi = SDCi + 8 * length_of_body;
     case 1      % Label data entity - type 1: every SDC block
-                if (SDCi + 4 > length(sdc_data)) | (SDCi + 4 + 8 * length_of_body > length(sdc_data))
+                if (SDCi + 4 > length(sdc_data)) || (SDCi + 4 + 8 * length_of_body > length(sdc_data))
                     break;
                 end
                 ID = sdc_data(SDCi:SDCi + 1)*(2.^[1:-1:0]');
@@ -141,7 +141,7 @@ while (SDCi + 12 <= length(sdc_data))
                 application_information.label{ID+1} = char((reshape(sdc_data(SDCi:SDCi + 8 * length_of_body - 1),8,length_of_body)'*(2.^[7:-1:0]'))');
                 SDCi = SDCi + 8 * length_of_body;
     case 5      % Application information data entity - type 5: as required
-                if (SDCi + 12 > length(sdc_data)) | (SDCi + 4 + 8 * length_of_body > length(sdc_data))
+                if (SDCi + 12 > length(sdc_data)) || (SDCi + 4 + 8 * length_of_body > length(sdc_data))
                     break;
                 end
                 ID = sdc_data(SDCi:SDCi + 1)*(2.^[1:-1:0]');
@@ -166,7 +166,7 @@ while (SDCi + 12 <= length(sdc_data))
                 end                
                 SDCi = SDCi + 8 * length_of_body;  
     case 8      % Time and date information data entity - type 8: once per minute
-                if (SDCi + 28 > length(sdc_data)) | (length_of_body ~= 3)
+                if (SDCi + 28 > length(sdc_data)) || (length_of_body ~= 3)
                     break;
                 end
                 [time_and_date.day,time_and_date.month,time_and_date.year] = MJD2Gregorian(sdc_data(SDCi:SDCi + 16)*(2.^[16:-1:0]'));
@@ -174,7 +174,7 @@ while (SDCi + 12 <= length(sdc_data))
                 time_and_date.minutes = sdc_data(SDCi+22:SDCi + 27)*(2.^[5:-1:0]');
                 SDCi = SDCi + 4 + 8 * length_of_body;            
     case 9      % Audio information data entity - type 9: every SDC block
-                if (SDCi + 20 > length(sdc_data)) | (length_of_body ~= 2)
+                if (SDCi + 20 > length(sdc_data)) || (length_of_body ~= 2)
                     break;
                 end
                 ID = sdc_data(SDCi:SDCi + 1)*(2.^[1:-1:0]');
@@ -190,7 +190,7 @@ while (SDCi + 12 <= length(sdc_data))
                 audio_information.coder_field(ID+1) = sdc_data(SDCi + 10:SDCi + 14)*(2.^[4:-1:0]');
                 SDCi = SDCi + 8 * length_of_body;             
     case 12     % Language and country data entity - type 12: standard
-                if (SDCi + 44 > length(sdc_data)) | (length_of_body ~= 5)
+                if (SDCi + 44 > length(sdc_data)) || (length_of_body ~= 5)
                     break;
                 end
                 ID = sdc_data(SDCi:SDCi + 1)*(2.^[1:-1:0]');

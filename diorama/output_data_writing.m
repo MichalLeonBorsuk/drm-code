@@ -213,7 +213,7 @@ end
    
 if (WRITEWAV) 
 
-	if ((start_playing) | (~WRITEWAV_last))
+	if ((start_playing) || (~WRITEWAV_last))
       
       waveformat_bitsPerSample = 16;
    	waveformat_samplerate = output_sampling_rate;
@@ -293,7 +293,7 @@ WRITEWAV_last = WRITEWAV;
 
 if (PLAYWAV)
    
-   if (~PLAYWAV_last & (output_samples_buffer_data_valid==1) & (~start_playing) )
+   if (~PLAYWAV_last && (output_samples_buffer_data_valid==1) && (~start_playing) )
       start_play_time = clockex;
       wavplayex;	%restart play thread
       wavplayex(zeros(channels,floor(output_sampling_rate*MEAN_PLAYBUFFER_MS/1000)),output_sampling_rate,1); %delay to fill buffer
@@ -320,7 +320,7 @@ if (PLAYWAV)
 			 10.^(( [1:num_frames*samples_per_audioframe;1:num_frames*samples_per_audioframe]/(num_frames*samples_per_audioframe)*40 - 40 )/20 ) );
 	end
 
-	if ( (output_samples_buffer_data_valid==1) & (~stop_playing) ) 
+	if ( (output_samples_buffer_data_valid==1) && (~stop_playing) ) 
       
       if (input_source==INPUT_SOURCE_SOUNDCARD) 
          
@@ -424,7 +424,7 @@ if (sdc_data_valid)
             show_signal_info(2,25 + (service_ID - 1) * 3,audio_service_message);
         end
         
-        if (~ismember(service_ID,stream_information.data_services) | show_audio_label)
+        if (~ismember(service_ID,stream_information.data_services) || show_audio_label)
                 show_signal_info(2,23 + (service_ID - 1) * 3, sprintf('%s - %s audio - %s %s %s %s - %4.2f kbit/s', ... 
                     application_information.label{service_ID}, audio_coding_codes{audio_coding + 1}, ...
                     application_information.language{service_ID},application_information.country{service_ID}, ...
@@ -457,7 +457,7 @@ if (sdc_data_valid)
         message(2 <= VERBOSE_LEVEL,sprintf('          %d: %s - %s - %4.2f kbit/s\n', service_ID, application_information.label{service_ID}, service_type, ...
                 application_information.bytes_per_frame(service_ID) * 8 / 1000 / 0.4 ));
         
-        if (~ismember(service_ID,stream_information.audio_services) | ~show_audio_label)
+        if (~ismember(service_ID,stream_information.audio_services) || ~show_audio_label)
             show_signal_info(2,23 + (service_ID - 1) * 3,sprintf('%s - %s - %4.2f kbit/s\n', application_information.label{service_ID}, service_type, ...
                 application_information.bytes_per_frame(service_ID) * 8 / 1000 / 0.4 ));
         end

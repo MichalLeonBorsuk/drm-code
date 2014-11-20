@@ -55,6 +55,7 @@
 
 #include <linux/ioctl.h>
 #include <unistd.h>
+#include <stdio.h>
 #include <fcntl.h>
 #ifdef _ALSA_
 #include <alsa/asoundlib.h>

@@ -174,7 +174,7 @@ if (isempty(gui_variable_values))
     
 end
 
-if (isempty(gui_found) &  ~isempty(findobj('Tag','radio_gui')))
+if (isempty(gui_found) &&  ~isempty(findobj('Tag','radio_gui')))
   
     gui_element_handles{1} = findobj('Tag','input_spectrum_checkbox');
     gui_element_handles{2} = findobj('Tag','synchronisation_checkbox');
@@ -208,7 +208,8 @@ if (isempty(gui_found) &  ~isempty(findobj('Tag','radio_gui')))
     gui_element_handles{30} = findobj('Tag','audio_service_popupmenu');
     gui_element_handles{31} = findobj('Tag','audio_service_popupmenu');
 
-    gui_found = 1;
+    %gui_found = 1; TODO
+    gui_found = 0;
     
 end
 
@@ -279,8 +280,8 @@ case 1          % GUI call
                 input_filename = '';
             end
                         
-            if (isequal(exist(new_input_filename),2) & isequal(event_value,1))
-                if (~isequal(new_input_filename, input_filename) | gui_variable_values{13} ~=1)
+            if (isequal(exist(new_input_filename),2) && isequal(event_value,1))
+                if (~isequal(new_input_filename, input_filename) || gui_variable_values{13} ~=1)
                     run_command = RUN_COMMAND_RESTART;
                 end
                 run_command = RUN_COMMAND_RESTART;
@@ -486,7 +487,8 @@ case 6      % get single values
 case 7      % set single values
     
     if (~isempty(gui_found))
-        set(gui_element_handles{varargin{2}}, gui_element_propertynames{varargin{2}}, varargin{3});
+        % TODO
+        %set(gui_element_handles{varargin{2}}, gui_element_propertynames{varargin{2}}, varargin{3});
     end
     gui_variable_values{varargin{2}} = varargin{3};    
     

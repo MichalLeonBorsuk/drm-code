@@ -63,7 +63,7 @@ MY_INIT_FILENAME = 'equalization_init.mat';
 VERBOSE_LEVEL = settings_handler(4,14);
 
 
-if ( ~exist(MY_INIT_FILENAME,'file') | create_new_file )
+if ( ~exist(MY_INIT_FILENAME,'file') || create_new_file )
    
 	if ( ~create_new_file )
 		message_(0<=VERBOSE_LEVEL, sprintf('file not found: "%s" - rendering new data', MY_INIT_FILENAME)); 

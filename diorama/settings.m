@@ -10,7 +10,7 @@ FREQ_SYNC_ENABLE = 1;
 SRC_ENABLE = 1;	%Sample Rate Conversion
 %%%% WORKARROUND, End %%%%%
 
-DEBUG = 0;
+DEBUG = 1;
 VERBOSE_LEVEL = 0;
 PRINTTIME = 1;
 PLOT_INPUT_SPECTRUM = 0;
@@ -25,7 +25,7 @@ EQUALIZATION = 1;
 CHANNELDECODING = 1;
 SOURCEDECODING = 1;
 PLAYWAV = 1;
-WRITEWAV = 0;
+WRITEWAV = 1;
 SNR_MAX_DB = 30;
 SAMPLERATE_OFFSET_INIT_PPM = 0;
 SOFT_MSD = 0;
@@ -41,15 +41,16 @@ RECORD_INPUT = 0;
 JINGLE_BEGIN_FILENAME = 'sounds/blurb_24kHz.wav';
 JINGLE_END_FILENAME = 'sounds/schluerf_400ms_24kHz_mono.wav';
 CONVENIENCE_NOISE_FILENAME = 'sounds/noise_filtered_48kHz_mono.wav';
-SHOW_SIGNAL_INFO = 1;
+SHOW_SIGNAL_INFO = 0;
 SHOW_ABOUT = 0;
 STORE_NEWS = 1;
 
 % general
 INPUT_SOURCE_SOUNDCARD=0; INPUT_SOURCE_FILE=1; INPUT_SOURCE_TESTSIGNAL=2;
 
-input_source = INPUT_SOURCE_SOUNDCARD;
-input_filename = '';
+%input_source = INPUT_SOURCE_SOUNDCARD;
+input_source = INPUT_SOURCE_FILE;
+input_filename = 'rtl.wav';
 
 offset_smp = 10000;
 
@@ -57,7 +58,7 @@ offset_smp = 10000;
 % settings(1): only GUI variables; settings(2): only non-GUI variables;
 % settings: all variables
 
-if (nargin == 0) | (varargin{1} == 1)
+if (nargin == 0) || (varargin{1} == 1)
     
     settings_handler (3, {  PLOT_INPUT_SPECTRUM, PLOT_SYNCHRONISATION, PLOT_CONSTELLATIONS, PLOT_CHANNELESTIMATION, ...
                             PLOT_SNR_SPECTRUM, FLIP_SPECTRUM, WRITEWAV, PLAYWAV, ENABLE_SERVICE1, ENABLE_SERVICE2, ...
@@ -66,7 +67,7 @@ if (nargin == 0) | (varargin{1} == 1)
                             SHOW_ABOUT, 0, 0, input_filename, DATA_STORAGE_PATH, 0, 1, 'N/A'});
 end
 
-if (nargin == 0) | (varargin{1} == 2)
+if (nargin == 0) || (varargin{1} == 2)
     
     settings_handler (5, {  SNR_MAX_DB, SAMPLERATE_OFFSET_INIT_PPM, SOFT_MSD, ENABLE_GUI, UTILS_PATH, ...
                             JINGLE_BEGIN_FILENAME, JINGLE_END_FILENAME, CONVENIENCE_NOISE_FILENAME, ...

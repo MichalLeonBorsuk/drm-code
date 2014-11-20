@@ -2,18 +2,18 @@ function make(varargin)
 
 if (nargin == 0)
     compflags = '';
-elseif ((nargin == 1) & (ischar(varargin{1})))
+elseif ((nargin == 1) && (ischar(varargin{1})))
     compflags = varargin{1};
 else
     error(['Too many arguments for ', pwd , filesep,mfilename, '.m']);
 end
 
-if (isequal(computer,'GLNX86')|isequal(computer,'LNX86'))
+if (isequal(computer,'GLNX86')||isequal(computer,'LNX86')||isequal(computer,'x86_64-pc-linux-gnu'))
 	% compile, if its not already done
     
-    clear crc8.mexglx;
-    clear crc16.mexglx;
-    clear crc16_bytewise.mexglx;
+    clear crc8.mex;
+    clear crc16.mex;
+    clear crc16_bytewise.mex;
     
 	if (exist('crc8.c'))
 	fprintf(1,'crc8... ');

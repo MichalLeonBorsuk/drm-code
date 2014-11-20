@@ -30,7 +30,7 @@
 %%                                                                            %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function result = figure_procedure( varargin )
+function result = show_signal_info( varargin )
 % (-1) close figure and reset figure properties, result should be zero
 % (0) close figure, result should be zero
 % (1) create empty figure without data if not allready open, result==handle to figure
@@ -174,7 +174,7 @@ case 2,
             
         case 10,
             
-            if (varargin{3} == 0 | isnan(varargin{3}))
+            if (varargin{3} == 0 || isnan(varargin{3}))
                 new_rms_bars = 0;
             else
                 new_rms_bars = floor(log(varargin{3}*5000) / log(rms_max * 5000) * rms_total);
@@ -767,6 +767,7 @@ case 1,
             'TooltipString','Audio Frame Error Rate', ...
             'Style','text');
         
+        disp(value_strings{1})
         value_handles(1) = uicontrol('Parent',hnd_this_figure, ...
             'Units','normalized', ...
             'BackgroundColor',bg_color, ...

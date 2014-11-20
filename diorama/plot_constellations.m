@@ -37,7 +37,7 @@
 %%                                                                            %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function result = figure_procedure( varargin )
+function result = plot_constellations( varargin )
 % (-1) close figure and reset figure properties, result should be zero
 % (0) close figure, result should be zero
 % (1) create empty figure without data if not allready open, result==handle to figure
@@ -239,14 +239,14 @@ case {1,2,3}
             'String','MSC', 'Style','text', ...
             'TooltipString','Plot MSC constellation'); 
         
-        if (hist_view == 0 & ~isempty(findobj('Tag','view_mode_radiobutton')))
+        if (hist_view == 0 && ~isempty(findobj('Tag','view_mode_radiobutton')))
             delete(findobj('Tag','view_mode_radiobutton'));
         end
     
     end
     
     
-    if (hist_view == 1 & (length(checkbox_handles) < 6 | checkbox_handles(5) == 0))
+    if (hist_view == 1 && (length(checkbox_handles) < 6 | checkbox_handles(5) == 0))
         checkbox_handles(5) = uicontrol('Parent',hnd_this_figure, ...
             'Units','normalized', 'BackgroundColor',[0.8 0.8 0.8], ...
             'Position',[0.75 0.25 0.03 0.05], 'Style','radiobutton', ...
@@ -268,7 +268,7 @@ case {1,2,3}
             'String','3D', 'Style','text', 'Tag', 'view_mode_radiobutton', ...
             'TooltipString','3D view of histogram');             
     end
-    if (hist_view == 0 & length(checkbox_handles) > 4 & checkbox_handles(5) ~= 0)
+    if (hist_view == 0 && length(checkbox_handles) > 4 & checkbox_handles(5) ~= 0)
         delete(findobj('Tag','view_mode_radiobutton'));
         checkbox_handles([5,6])=[0,0];
     end
@@ -302,7 +302,7 @@ case {1,2,3}
    end
    
    call_count = rem(call_count + 1, plot_period(plot_selection));
-   if (call_count ~= 1 & hist_view == 1)
+   if (call_count ~= 1 && hist_view == 1)
        is_in_use = [];
        return;
    end
@@ -448,7 +448,7 @@ case 4     % FAC cells
     
 case 5     % SDC cells
 
-    if (isempty(sdc_mode) | ~isequal(varargin{3},sdc_mode))
+    if (isempty(sdc_mode) || ~isequal(varargin{3},sdc_mode))
         redraw = 1;
         data_available(3) = 0;
     end
@@ -476,7 +476,7 @@ case 5     % SDC cells
     data_available(3) = 1;
     
 case 6     % MSC cells
-    if (isempty(msc_mode) | ~isequal(varargin{3},msc_mode))
+    if (isempty(msc_mode) || ~isequal(varargin{3},msc_mode))
         redraw = 1;
         data_available(4) = 0;
     end
