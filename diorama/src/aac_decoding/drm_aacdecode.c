@@ -48,8 +48,7 @@
 #include <stdlib.h>
 #include "mex.h"
 #include <memory.h>
-
-#include "neaacdec.h"
+#include <neaacdec.h>
 
 
 #define NARGS_RHS_STR "1"

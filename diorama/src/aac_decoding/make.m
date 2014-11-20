@@ -18,7 +18,7 @@ if( exist('drm_aacdecode.c') )
       if (~exist('libfaad2.dll'))
           cd ('faad2\libfaad');
           
-          [dos_status, dos_result] = dos('nmake /help');
+          [dos_status, dos_result] = dos('nmake /help')
           if (dos_status ~= 0)
               error ([pwd, filesep,mfilename, '.m: Cannot find nmake on your search path']);
           end
@@ -31,20 +31,9 @@ if( exist('drm_aacdecode.c') )
       eval(['mex ', compflags, ' drm_aacdecode.c libfaad2.lib']);
    elseif (isequal(computer,'GLNX86')||isequal(computer,'LNX86')||isequal(computer,'x86_64-pc-linux-gnu'))
        
-      clear drm_aacdecode.mexglx;
+      clear drm_aacdecode.mex;
        
-%      cd ('faad2');
-%      [unix_status, unix_result] = unix('autoreconf -vif > /dev/null 2>&1');
-%      if (unix_status ~= 0)
-%          error([pwd, filesep,mfilename, '.m: Error using autoreconf. Maybe not found on the search path!']);
-%      end
-%      [unix_status, unix_result] = unix('CFLAGS=-fPIC ./configure --without-xmms --without-mpeg4ip --with-drm > /dev/null 2>&1');
-%      if (unix_status ~= 0)
-%          error([pwd, filesep,mfilename, '.m: Error using ./configure.']);
-%      end
-%      [unix_status, unix_result] = unix('make > /dev/null 2>&1');
-%      cd ('..');
-      eval(['mex ', compflags, ' drm_aacdecode.c faad2/libfaad/.libs/libfaad.a -D_LINUX_']); 
+      eval(['mex ', compflags, ' drm_aacdecode.c -lfaad_drm -D_LINUX_']); 
    end
    fprintf(1,'ok\n');
 end
