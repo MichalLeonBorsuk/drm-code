@@ -38,7 +38,7 @@ gui {
     RESOURCES = src/GUI-QT/res/icons.qrc
     QT += network xml
     qt4:QT += webkit
-    qt5:QT += widgets webkitwidgets
+    qt5:QT += widgets webkitwidgets printsupport
     INCLUDEPATH += src/GUI-QT
     VPATH += src/GUI-QT
     win32:RC_FILE = windows/dream.rc
@@ -46,6 +46,7 @@ gui {
     CONFIG += qwt
     UI_DIR = ui
     MOC_DIR = moc
+    LIBS += -lqcustomplot
 }
 message($$VERSION_MESSAGE $$DEBUG_MESSAGE $$UI_MESSAGE)
 qt:multimedia {
@@ -168,10 +169,6 @@ unix:!cross_compile {
       exists(/usr/local/include/gps.h) {
         CONFIG += gps
       }
-      exists(/usr/include/pcap.h) | \
-      exists(/usr/local/include/pcap.h) {
-        CONFIG += pcap
-      }
       exists(/usr/include/opus/opus.h) | \
       exists(/usr/local/include/opus/opus.h) {
        CONFIG += opus
@@ -180,6 +177,10 @@ unix:!cross_compile {
       exists(/usr/local/include/speex/speex_preprocess.h) {
        CONFIG += speexdsp
       }
+    }
+    exists(/usr/include/pcap.h) | \
+    exists(/usr/local/include/pcap.h) {
+       CONFIG += pcap
     }
 }
 win32 {
@@ -321,6 +322,13 @@ qwt {
         }
         exists(/usr/local/include/qwt/qwt.h) {
             INCLUDEPATH += /usr/local/include/qwt
+        }
+        qt5 {
+            exists(/usr/local/qwt-6.1.1/include/qwt.h) {
+                INCLUDEPATH -= /usr/include/qwt
+		INCLUDEPATH += /usr/local/qwt-6.1.1/include
+		LIBS += -L/usr/local/qwt-6.1.1/lib
+            }
         }
         qt4 {
             exists(/usr/include/qwt5/qwt.h) {

@@ -209,26 +209,74 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& Settings,
     connect(pAnalogDemDlg, SIGNAL(About()), this, SLOT(OnHelpAbout()));
 
     /* Init progress bar for input signal level */
-#if QWT_VERSION < 0x060100
+#ifdef QWT_VERSION
+# if QWT_VERSION < 0x060100
     ui->ProgrInputLevel->setRange(-50.0, 0.0);
     ui->ProgrInputLevel->setOrientation(Qt::Vertical, QwtThermo::LeftScale);
-#else
+# else
     ui->ProgrInputLevel->setScale(-50.0, 0.0);
     ui->ProgrInputLevel->setOrientation(Qt::Vertical);
     ui->ProgrInputLevel->setScalePosition(QwtThermo::TrailingScale);
-#endif
+# endif
     ui->ProgrInputLevel->setAlarmLevel(-12.5);
     QColor alarmColor(QColor(255, 0, 0));
     QColor fillColor(QColor(0, 190, 0));
-#if QWT_VERSION < 0x060000
+# if QWT_VERSION < 0x060000
     ui->ProgrInputLevel->setAlarmColor(alarmColor);
     ui->ProgrInputLevel->setFillColor(fillColor);
-#else
+# else
     QPalette newPalette = ui->FrameMainDisplay->palette();
     newPalette.setColor(QPalette::Base, newPalette.color(QPalette::Window));
     newPalette.setColor(QPalette::ButtonText, fillColor);
     newPalette.setColor(QPalette::Highlight, alarmColor);
     ui->ProgrInputLevel->setPalette(newPalette);
+# endif
+#else
+    QFont font = ui->ProgrInputLevel->font();
+    font.setPointSizeF(7.0);
+    QPen pen;
+    pen.setWidthF(1.2);
+    pen.setColor(QColor(255, 0, 0));
+    ui->ProgrInputLevel->setBackground(Qt::black);
+    ui->ProgrInputLevel->yAxis->setPadding(0);
+
+    ui->ProgrInputLevel->axisRect(0)->setAutoMargins(QCP::msLeft);
+    ui->ProgrInputLevel->axisRect(0)->setMargins(QMargins(0,7,3,5));
+
+    QVector<QString> labels; labels << "-50" << "0";
+    QVector<double> ticks; ticks << 0 << 50;
+    ui->ProgrInputLevel->yAxis->setRange(0, 50);
+    ui->ProgrInputLevel->yAxis->setAutoTicks(false);
+    ui->ProgrInputLevel->yAxis->setAutoSubTicks(false);
+    ui->ProgrInputLevel->yAxis->setAutoTickLabels(false);
+    ui->ProgrInputLevel->yAxis->setTickVector(ticks);
+    ui->ProgrInputLevel->yAxis->setTickVectorLabels(labels);
+    ui->ProgrInputLevel->yAxis->setBasePen(pen);
+    ui->ProgrInputLevel->yAxis->setTickLengthIn(0);
+    ui->ProgrInputLevel->yAxis->setTickLengthOut(6);
+    ui->ProgrInputLevel->yAxis->setTickPen(pen);
+    ui->ProgrInputLevel->yAxis->setTickLabelPadding(1);
+    ui->ProgrInputLevel->yAxis->setTickLabelColor(Qt::red);
+    ui->ProgrInputLevel->yAxis->setTickLabelFont(font);
+    ui->ProgrInputLevel->yAxis->setSubTickCount(4);
+    ui->ProgrInputLevel->yAxis->setSubTickLengthIn(0);
+    ui->ProgrInputLevel->yAxis->setSubTickLengthOut(3);
+    ui->ProgrInputLevel->yAxis->setSubTickPen(pen);
+    ui->ProgrInputLevel->yAxis->setOffset(3);
+    ui->ProgrInputLevel->yAxis->grid()->setVisible(false);
+
+    ui->ProgrInputLevel->xAxis->setRange(0, 0.5);
+    ui->ProgrInputLevel->xAxis->setVisible(false);
+
+    QCPBars *bars = new QCPBars(ui->ProgrInputLevel->xAxis, ui->ProgrInputLevel->yAxis);
+    ui->ProgrInputLevel->addPlottable(bars);
+    bars->setName("dB");
+    bars->setPen(pen);
+    bars->setWidth(0.5);
+    bars->setBrush(Qt::green);//QColor(0, 255, 0, 100));
+    QVector<double> k,v;
+    v << 20.0; k << 0;
+    bars->setData(k, v);
 #endif
 
 #ifdef HAVE_LIBHAMLIB
@@ -579,7 +627,16 @@ void FDRMDialog::OnChannelReceptionChanged(Reception r)
 
 void FDRMDialog::OnInputSignalLevelChanged(double d)
 {
+#ifdef QWT_VERSION
     ui->ProgrInputLevel->setValue(d);
+#else
+    QVector<double> v, k;
+    d += 50.0;
+    v << d; k << 0;
+    QCPBars* bars = qobject_cast<QCPBars*>(ui->ProgrInputLevel->plottable(0));
+    bars->setData(k, v);
+    ui->ProgrInputLevel->replot();
+#endif
 }
 
 void FDRMDialog::startLogging()

@@ -50,6 +50,18 @@
 
 /* Classes ********************************************************************/
 
+class PhaseGauge : public QWidget
+{
+    Q_OBJECT
+
+public:
+    PhaseGauge(QWidget* parent = 0):QWidget(parent),angle(0.0) {}
+    void setValue(double d) { angle = d; update(); }
+    void paintEvent(QPaintEvent *);
+private:
+    double angle;
+};
+
 class ReceiverController;
 
 /* AMSS dialog -------------------------------------------------------------- */
@@ -65,7 +77,9 @@ protected:
 
 	QTimer			Timer;
 	QTimer			TimerPLLPhaseDial;
-	void			AddWhatsThisHelp();
+    PhaseGauge*     phaseGauge;
+
+    void			AddWhatsThisHelp();
 	virtual void	eventShow(QShowEvent*);
 	virtual void	eventHide(QHideEvent*);
 
@@ -93,10 +107,12 @@ protected:
     CDRMPlot*			MainPlot;
 	CFileMenu*			pFileMenu;
 	CSoundCardSelMenu*	pSoundCardMenu;
+    PhaseGauge*         phaseGauge;
 
 	void UpdateControls();
 	void UpdateSliderBandwidth();
 	void AddWhatsThisHelp();
+    void initPhaseDial();
 	virtual void eventClose(QCloseEvent* pEvent);
 	virtual void eventShow(QShowEvent* pEvent);
 	virtual void eventHide(QHideEvent* pEvent);

@@ -41,7 +41,11 @@
 
 class RigDlg;
 
-class StationsDlg : public CWindow, public Ui_StationsDlgbase
+namespace Ui {
+  class StationsDlgbase;
+}
+
+class StationsDlg : public CWindow
 {
 	Q_OBJECT
 
@@ -57,6 +61,8 @@ public slots:
     void OnSwitchMode(int);
     ERecMode mode() { return eRecMode; }
 
+private:
+    Ui::StationsDlgbase* ui;
 protected:
     struct Params {
         bool        bCurrentSortAscending;

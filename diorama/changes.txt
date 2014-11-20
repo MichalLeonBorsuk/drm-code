@@ -1,0 +1,228 @@
+get_SDC_data.m
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Last change: 30.03.2005, 18:00                                             %
+%% By         : Torsten Schorr                                                %
+%% Description: Fixed bug concerning stream lengths of more than two streams  %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+channel_decoding.m
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Last change: 31.03.2005, 15:40                                             %
+%% By         : Torsten Schorr                                                %
+%% Description: Fixed problem with non-subsequent data services               %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+source_decoding.m
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Last change: 31.03.2005, 15:30                                             %
+%% By         : Torsten Schorr                                                %
+%% Description: Fixed empty user_application_identifier (old DRM standard)    %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+source_decoding.m
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Last change: 01.04.2005, 15:37                                             %
+%% By         : Torsten Schorr                                                %
+%% Description: Included demultiplexing of UEP AAC frames                     %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+radioloop.m
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Last change: 04.04.2005, 11:00                                             %
+%% By         : Andreas Dittrich                                              %
+%% Description: removed tic command, is now handled by toctic                 %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+toctic.m
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Last change: 04.04.2005, 11:20                                             %
+%% By         : Andreas Dittrich                                              %
+%% Description: replaced global variable TICTOC by TOCTIC_ and added a check  %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+output_data_writing.m
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Last change: 06.04.2005, 16:60                                             %
+%% By         : Torsten Schorr, Andreas Dittrich                              %
+%% Description: support of stereo playback and wavewrite                      %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+equalization_init.m
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Last change: 19.04.2005, 11:50                                             %
+%% By         : Andreas Dittrich                                              %
+%% Description: small parameter adjustments of                                %
+%% sigmaq_noise_list, f_cut_t, f_cut_k and disabled filter renormalization    %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+get_ofdm_symbol_sync.m
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Last change: 19.04.2005, 11:50                                             %
+%% By         : Andreas Dittrich                                              %
+%% Description: modified timing sync algorithm                                %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+plot_channelestimation.m
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%  Last change: 19.04.2005, 16:30                                            %
+%%  By         : Andreas Dittrich                                             %
+%%  Description: small changes in display of impulse response and guard int.  %
+%%               new: optional log-plot of impulse response                   %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+wavrecord_directx.c
+/******************************************************************************/
+/*  Last change: 21.04.2005, 16:30                                            */
+/*  By         : Andreas Dittrich                                             */
+/*  Description: workaround: negative record cursor increment detection       */
+/******************************************************************************/
+
+output_data_writing.m
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%  Last change: 27.04.2005                                                   %
+%%  By         : Torsten Schorr                                               %
+%%  Description: included show_signal_info                                    %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+channel_decoding.m
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%  Last change: 27.04.2005                                                   %
+%%  By         : Torsten Schorr                                               %
+%%  Description: included show_signal_info                                    %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+source_decoding.m
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%  Last change: 27.04.2005                                                   %
+%%  By         : Torsten Schorr                                               %
+%%  Description: included show_signal_info, CRC error count                   %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+input_data_reading.m
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%  Last change: 27.04.2005                                                   %
+%%  By         : Torsten Schorr                                               %
+%%  Description: included input_data_valid                                    %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+wavio_linux.c
+/******************************************************************************/
+/*  Last change: 27.04.2005, 22:00                                            */
+/*  By         : Torsten Schorr                                               */
+/*  Description: unlocking mutex when canceling playback thread which wasn't  */
+/*               fed with data yet                                            */
+/******************************************************************************/
+
+radio_loop.m
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Last change: 28.04.2005, 10:00                                             %
+%% By         : Torsten Schorr                                                %
+%% Description: included show_signal_info                                     %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+event_handler.m
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Last change: 28.04.2005, 10:15                                             %
+%% By         : Torsten Schorr                                                %
+%% Description: included show_signal_info and about box                       %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+get_SDC_data.m
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Last change: 28.04.2005, 11:15                                             %
+%% By         : Torsten Schorr                                                %
+%% Description: handling of missing multiplex description                     %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+channel_decoding.m
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Last change: 28.04.2005, 11:15                                             %
+%% By         : Torsten Schorr                                                %
+%% Description: handling of missing multiplex description                     %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+input_data_reading.m
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Last change: 28.04.2005, 16:00                                             %
+%% By         : Torsten Schorr                                                %
+%% Description: message output corrected                                      %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+plot_input_spectrum.m
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%  Last change: 29.04.2005, 16:00                                            %
+%%  By         : Andreas Dittrich                                             %
+%%  Description: smaller windows size and new default position                %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+plot_channelestimation
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%  Last change: 29.04.2005, 16:00                                            %
+%%  By         : Andreas Dittrich                                             %
+%%  Description: small changes in display of impulse response and guard int.  %
+%%               new: optional log-plot of impulse response                   %
+%%               smaller windows size                                         %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+plot_constellation.m
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Last change: 29.04.2005, 19:10                                             %
+%% By         : Torsten Schorr                                                %
+%% Description: smaller window size                                           %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+source_decoding.m
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%  Last change: 29.04.2005                                                   %
+%%  By         : Torsten Schorr                                               %
+%%  Description: Unequal Error Protection                                     %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+demodulation_and_equalization.m
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%  Last change: 02.05.2005, 11:30                                            %
+%%               included show_signal_info                                    %
+%%  By         : Andreas Dittrich                                             %
+%%  Description: small changes because of modified calling arguments in       %
+%%               get_ofdm_symbol_sync.m and plot_channelestimation.m          %
+%%               fixed bug in spectrum-occupancy-estimation                   %
+%%               display of sample-rate-offset and frequency instead of       %
+%%               sample-rate-offset-correction / frequ.-off.-correction       %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+plot_synchronisation.m
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%  Last change: 02.05.2005, 11:30                                            %
+%%  By         : Andreas Dittrich                                             %
+%%  Description: smaller windows size and new default position                %
+%%               display of frequency offset instead of freq. off. correction %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+input_data_reading.m
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%  Last change: 02.05.2005, 20:00                                            %
+%%  By         : Andreas Dittrich                                             %
+%%  Description: info message because of wrong inputfile-sample-rate,         %
+%%               default sample rate offset defined in settings.m             %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+get_robustness_mode.m
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%  Last change: 03.05.2005, 09:30                                            %
+%%  By         : Andreas Dittrich                                             %
+%%  Description: lowered reliability level of robustness mode detection       %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+source_decoding.m
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%  Last change: 10.05.2005                                                   %
+%%  By         : Torsten Schorr                                               %
+%%  Description: Fixed problems in web site reception                         %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+source_decoding.m
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%  Last change: 12.05.2005, 10:15                                            %
+%%  By         : Andreas Dittrich                                             %
+%%  Description: Fixed Bug in convienience-noice generation                   %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
