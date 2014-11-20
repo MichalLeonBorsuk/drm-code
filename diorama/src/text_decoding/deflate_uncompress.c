@@ -59,8 +59,8 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <zlib.h>
 #include "mex.h"
-#include "zlib.h"
 
 #define Nargs_rhs_str "1"
 #define Nargs_rhs 1

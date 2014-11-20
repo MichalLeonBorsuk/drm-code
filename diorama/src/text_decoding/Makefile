@@ -49,7 +49,7 @@
 CC=gcc
 LD=g++
 MAKE=/usr/bin/make
-VPATH=journaline_20040318/
+VPATH=../../../dream/src/datadecoding/journaline/
 
 BINDIR = .
 
@@ -69,15 +69,12 @@ CXXFLAGS=$(DEFINES) $(INCLUDES) -g3 -O -Wunused -c -fPIC\
   -Wno-long-long -Wold-style-cast -Woverloaded-virtual \
   -Wreturn-type -Wuninitialized -ffor-scope
 
-dll: obj
-	ar rcs libjournaline_decode_dll.a $(OBJFILES) 
-  
 all: obj
 
 tests: obj
 
 clean:
-	-rm  $(OBJFILES) *~
+	-rm  $(OBJFILES)
 
 .PHONY: obj
 obj: $(OBJFILES)

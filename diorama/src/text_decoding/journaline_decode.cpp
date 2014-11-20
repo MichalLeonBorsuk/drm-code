@@ -27,7 +27,7 @@
 
 /******************************************************************************/
 /*                                                                            */
-/*  journaline_decode.c                                                       */
+/*  journaline_decode.cpp                                                       */
 /*                                                                            */
 /******************************************************************************/
 /*  Description:                                                              */
@@ -70,11 +70,11 @@
 #include <cstring>
 #include <cstdio>
 #include <cstdlib>
+#include <zlib.h>
 #include "mex.h"
-#include "zlib.h"
-#include "journaline_20040318/NML.h"
-#include "journaline_20040318/newssvcdec.h"
-#include "journaline_20040318/dabdatagroupdecoder.h"
+#include "journaline/NML.h"
+#include "journaline/newssvcdec.h"
+#include "journaline/dabdatagroupdecoder.h"
 #include "journaline_decode.h"
 
 
@@ -274,7 +274,7 @@ void object_avail_callback(unsigned long number_of_elements, NEWS_SVC_DEC_obj_av
 	struct Objects_Available *objects_avail =  (struct Objects_Available *)input;
 	
 	objects_avail->number_of_elements = number_of_elements;
-	objects_avail->chg_list = (NEWS_SVC_DEC_obj_availability_t *)new(NEWS_SVC_DEC_obj_availability_t[number_of_elements]);
+	objects_avail->chg_list = static_cast<NEWS_SVC_DEC_obj_availability_t *>(new NEWS_SVC_DEC_obj_availability_t[number_of_elements]);
 	memcpy(objects_avail->chg_list, chg_list, number_of_elements * sizeof(NEWS_SVC_DEC_obj_availability_t));
 	//mexPrintf("object_avail_callback. status = %i, %i\n", chg_list->status, NEWS_SVC_DEC_OBJ_RECEIVED);
 	return;
@@ -529,7 +529,7 @@ int update_watchlist(int objID, NEWS_SVC_DEC_obj_availability_t **list, int *len
 		}
 	}
 	if ((int)((*length - 1)/list_extension) != (int)((*length)/list_extension)) {
-		help_ptr = (NEWS_SVC_DEC_obj_availability_t *)new(NEWS_SVC_DEC_obj_availability_t[*length + list_extension]);
+		help_ptr = static_cast<NEWS_SVC_DEC_obj_availability_t *>(new NEWS_SVC_DEC_obj_availability_t[*length + list_extension]);
 		memcpy(help_ptr, *list, (*length) * sizeof(NEWS_SVC_DEC_obj_availability_t));
 		delete (*list);
 		*list = help_ptr;

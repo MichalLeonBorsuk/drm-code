@@ -52,7 +52,7 @@
 /******************************************************************************/
 
 
-char *HTML_title_template = "\
+const char *HTML_title_template = "\
 <html>\n\
 \t<head>\n\
 \t\t<meta http-equiv=\"content-Type\" content=\"text/html; charset=utf-8\" />\n\
@@ -61,7 +61,7 @@ char *HTML_title_template = "\
 \t<body bgcolor=\"#CAE8FF\">\n\
 \t\t<font face=\"Arial,Helvetica\" color=\"#425294\">\n";
 
-char *HTML_title_refresh_template = "\
+const char *HTML_title_refresh_template = "\
 <html>\n\
 \t<head>\n\
 \t\t<meta http-equiv=\"content-Type\" content=\"text/html; charset=utf-8\" />\n\
@@ -71,7 +71,7 @@ char *HTML_title_refresh_template = "\
 \t<body bgcolor=\"#CAE8FF\">\n\
 \t\t<font face=\"Arial,Helvetica\" color=\"#425294\">\n";
 
-char *HTML_end_template = "\
+const char *HTML_end_template = "\
 \t\t<br/><br/>\n\
 \t\t</font>\n\
 \t\t<hr/>\n\
@@ -88,9 +88,9 @@ char *HTML_end_template = "\
 \t</body>\n\
 </html>\n";
 
-char *HTML_heading_template = "\t\t<h1>%s</h1>\n";
-char *HTML_link_template = "\t\t<p><a href=\"%04x.html\">%s</a></p>\n";
-char *HTML_item_template = "\t\t<p>%s</p>\n";
+const char *HTML_heading_template = "\t\t<h1>%s</h1>\n";
+const char *HTML_link_template = "\t\t<p><a href=\"%04x.html\">%s</a></p>\n";
+const char *HTML_item_template = "\t\t<p>%s</p>\n";
 
 const char *mstruct_field_name0 = "filename";
 const char *mstruct_field_name1 = "update";
@@ -100,17 +100,10 @@ const char *mstruct_field_names[] = {mstruct_field_name0, mstruct_field_name1, m
 
 #define PROGNAME "journaline_decode"
 
-#ifdef _LINUX_
-/*extern "C" */int showDdNewsSvcDecErr = 0;
-/*extern "C" */int showDdNewsSvcDecInfo = 0;
-/*extern "C" */int showDdDabDgDecErr = 0;
-/*extern "C" */int showDdDabDgDecInfo = 0;
-#else
-extern "C" int showDdNewsSvcDecErr = 0;
-extern "C" int showDdNewsSvcDecInfo = 0;
-extern "C" int showDdDabDgDecErr = 0;
-extern "C" int showDdDabDgDecInfo = 0;
-#endif
+extern "C" int showDdNewsSvcDecErr;
+extern "C" int showDdNewsSvcDecInfo;
+extern "C" int showDdDabDgDecErr;
+extern "C" int showDdDabDgDecInfo;
 
 static int firstcall = 1;
 
