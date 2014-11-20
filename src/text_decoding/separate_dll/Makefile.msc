@@ -1,0 +1,41 @@
+# Usage:
+#   nmake -f Makefile.msc            (standard build)
+
+CC = cl
+CPP = cl
+LD = link
+CFLAGS  = /GX /MD /O2 /DLINUX /DFHG_USEFLATDIRSTRUCT /DWIN32 /Ijournaline_20040318 /Ijournaline_20040318\zlib-1.2.1
+LDFLAGS = /dll /def:journaline_decode_dll.def
+
+OBJS = journaline_decode_dll.obj dabdgdec_impl.obj newsobject.obj newssvcdec_impl.obj crc_8_16.obj NML.obj Splitter.obj log.obj 
+
+
+dll: $(OBJS)
+     $(LD) $(LDFLAGS) $(OBJS) journaline_20040318\zlib-1.2.1\zdll.lib
+	 del *.obj
+
+
+
+dabdgdec_impl.obj: {journaline_20040318}dabdgdec_impl.c {journaline_20040318}dabdgdec_impl.h
+	$(CC) -c $(CFLAGS) journaline_20040318\$*.c
+
+newsobject.obj: {journaline_20040318}newsobject.cpp {journaline_20040318}newsobject.h
+	$(CC) -c $(CFLAGS) journaline_20040318\$*.cpp
+
+newssvcdec_impl.obj: {journaline_20040318}newssvcdec_impl.cpp {journaline_20040318}newssvcdec_impl.h {journaline_20040318}newssvcdec.h
+	$(CC) -c $(CFLAGS) journaline_20040318\$*.cpp
+
+crc_8_16.obj: {journaline_20040318}crc_8_16.c {journaline_20040318}crc_8_16.h
+	$(CC) -c $(CFLAGS) journaline_20040318\$*.c
+
+NML.obj: {journaline_20040318}NML.cpp {journaline_20040318}NML.h
+	$(CC) -c $(CFLAGS) journaline_20040318\$*.cpp
+
+Splitter.obj: {journaline_20040318}Splitter.cpp {journaline_20040318}Splitter.h
+	$(CC) -c $(CFLAGS) journaline_20040318\$*.cpp
+
+log.obj: {journaline_20040318}log.c {journaline_20040318}log.h
+	$(CC) -c $(CFLAGS) journaline_20040318\$*.c
+
+journaline_decode_dll.obj: journaline_decode_dll.cpp journaline_decode_dll.h journaline_decode.h
+	$(CC) -c $(CFLAGS) $*.cpp
