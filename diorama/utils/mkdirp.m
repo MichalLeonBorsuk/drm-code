@@ -45,6 +45,6 @@ msg = '';
 
 if (isequal(computer,'PCWIN'))
    [status] = dos(['mkdir "' fulldir '"']);
-elseif (isequal(computer,'GLNX86')|isequal(computer,'LNX86'))
+elseif (isequal(computer,'GLNX86')||isequal(computer,'LNX86')||isequal(computer,'x86_64-pc-linux-gnu'))
    [status] = unix(['mkdir -p ' fulldir]);
 end

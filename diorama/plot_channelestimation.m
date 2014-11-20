@@ -44,7 +44,7 @@
 %%                                                                            %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function result = figure_procedure( varargin )
+function result = plot_channelestimation( varargin )
 % (-1) close figure and reset figure properties, result should be zero
 % (0) close figure, result should be zero
 % (1) create empty figure without data if not allready open, result==handle to figure
@@ -308,7 +308,7 @@ case 2,
          set( hnd_channelestimation_phase_pilots, 'YDATA', angle(X_normalized_training_cells)/pi );
          
          
-         if ( (Tu~=Tu_last) | (Tg~=Tg_last) | (Tc~=length_h_last) )
+         if ( (Tu~=Tu_last) || (Tg~=Tg_last) || (Tc~=length_h_last) )
 	         set( get(hnd_channelestimation_impulse,'Parent'), 'XLim', [-Tg/12,Tg/12] );
    	      set( get(hnd_channelestimation_power,'Parent'), 'XLim', [-Tu/2,+Tu/2] );
             set( get(hnd_channelestimation_phase,'Parent'), 'XLim', [-Tu/2,+Tu/2] );

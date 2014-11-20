@@ -30,7 +30,7 @@
 %%                                                                            %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function result = figure_procedure( varargin )
+function result = about( varargin )
 % (-1) close figure and reset figure properties, result should be zero
 % (0) close figure, result should be zero
 % (1) create empty figure without data if not allready open, result==handle to figure

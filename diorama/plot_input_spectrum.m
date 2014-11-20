@@ -36,7 +36,7 @@
 %%                                                                            %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function result = figure_procedure( varargin )
+function result = plot_input_spectrum( varargin )
 % (-1) close figure and reset figure properties, result should be zero
 % (0) close figure, result should be zero
 % (1) create empty figure without data if not allready open, result==handle to figure
@@ -160,7 +160,7 @@ case 2,
    N1_temp2 = 2^7;
    N2_temp2 = min( floor( (rs_buffer_writeptr-1)/N1_temp2 ), 10 );
       
-   if ( (N2_temp>0) & (N2_temp2>0) )	%is data valid to plot?
+   if ( (N2_temp>0) && (N2_temp2>0) )	%is data valid to plot?
       temp = reshape( input_samples_buffer(1:(N1_temp*N2_temp)), N1_temp, N2_temp )';
       temp = 10*log10( mean( abs(fft(temp,[],2)).^2,1) + 1e-8 ) - 10*log10(N1_temp);
       temp2 = reshape( rs_buffer(1:(N1_temp2*N2_temp2)), N1_temp2, N2_temp2 ).';

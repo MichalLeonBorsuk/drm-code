@@ -31,7 +31,7 @@
 %%                                                                            %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function result = figure_procedure( varargin )
+function result = plot_snr_spectrum( varargin )
 % (-1) close figure and reset figure properties, result should be zero
 % (0) close figure, result should be zero
 % (1) create empty figure without data if not allready open, result==handle to figure
@@ -153,7 +153,7 @@ case 2,
        delete(hnd_nodatatext);
    end
    
-   if (~isequal(symbol_period, symbol_period_old) | ~isequal(K_dc, K_dc_old))
+   if (~isequal(symbol_period, symbol_period_old) || ~isequal(K_dc, K_dc_old))
        subhandles_valid = [];
     end
      
