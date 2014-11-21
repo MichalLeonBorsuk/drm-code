@@ -268,7 +268,7 @@ case {1,2,3}
             'String','3D', 'Style','text', 'Tag', 'view_mode_radiobutton', ...
             'TooltipString','3D view of histogram');             
     end
-    if (hist_view == 0 && length(checkbox_handles) > 4 & checkbox_handles(5) ~= 0)
+    if ((hist_view == 0) && (length(checkbox_handles) > 4) && (checkbox_handles(5) ~= 0))
         delete(findobj('Tag','view_mode_radiobutton'));
         checkbox_handles([5,6])=[0,0];
     end
