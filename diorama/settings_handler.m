@@ -380,7 +380,7 @@ case 1          % GUI call
                 last_data_storage_path = fullfile(last_data_storage_path, path_tail);
             end
 
-%             if (isequal(exist('uigetdir.m'),2) | isequal(exist('uigetdir'),3) | isequal(exist('uigetdir'),5))
+%             if (isequal(exist('uigetdir.m'),2) || isequal(exist('uigetdir'),3) || isequal(exist('uigetdir'),5))
 %                 new_data_storage_path = uigetdir(last_data_storage_path,'Select path to store decoded data');
 %             else
                 save_pwd = pwd;

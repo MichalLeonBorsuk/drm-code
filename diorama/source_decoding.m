@@ -480,7 +480,7 @@ for data_stream = stream_information.data_streams
                                     [data_units_assembly{corresponding_service}.data_unit, packet(2:end-2)];
                             else
                                 useful_bytes = double(packet(2));
-                                if ~((useful_bytes == 1) & (packet(3) == 0))
+                                if ~((useful_bytes == 1) && (packet(3) == 0))
                                     data_units_assembly{corresponding_service}.data_unit =...
                                         [data_units_assembly{corresponding_service}.data_unit, packet(3:2+useful_bytes)];
                                 end

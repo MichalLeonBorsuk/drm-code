@@ -27,7 +27,7 @@ for(k=1:N_blocks)
    [x,Zi] = filter(B,A,x,Zi);
    
    [bufferlevel] = wavplayex(x,Fs);
-   if ((k>1) & (bufferlevel==0)) warning('wavplayex: bufferlevel underrun'); end
+   if ((k>1) && (bufferlevel==0)) warning('wavplayex: bufferlevel underrun'); end
    
    x = wavrecordex(blocksize, Fs, Ch );
    

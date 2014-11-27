@@ -168,7 +168,7 @@ ENABLE_GUI = settings_handler(6,4);
 
 if (ENABLE_GUI)
 
-    graphics_toolkit qt;
+    %graphics_toolkit qt;
     
     if (isempty(findobj('Tag','radio_gui')))
         radio_gui;
