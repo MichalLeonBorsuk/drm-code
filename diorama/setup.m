@@ -2,7 +2,7 @@ function setup(varargin)
 
 if (nargin == 0)
     compflags = '';
-elseif ((nargin == 1) & (ischar(varargin{1})))
+elseif ((nargin == 1) && (ischar(varargin{1})))
     compflags = varargin{1};
 else
     error(['Too many arguments for ', pwd , filesep,mfilename, '.m']);

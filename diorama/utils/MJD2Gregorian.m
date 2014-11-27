@@ -75,8 +75,8 @@ year = 100 * ( N - 49 ) + I + L;
 % year = RY + 1;
 % month = floor((RD+1)/30) + 1;
 % if (month > 12) month = month - 1; end
-% LYC = (N1 == 3) & (month > 2);          % leap year correction;
+% LYC = (N1 == 3) && (month > 2);          % leap year correction;
 % day = RD - 30*(month-1) - (LYC + MC(month));
 % if (day < 1) month = month - 1; end
-% LYC = (N1 == 3) & (month > 2);          % leap year correction;
+% LYC = (N1 == 3) && (month > 2);          % leap year correction;
 % day = RD - 30*(month-1) - (LYC + MC(month));

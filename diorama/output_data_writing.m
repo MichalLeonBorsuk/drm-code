@@ -371,7 +371,7 @@ if (PLAYWAV)
 		end
       
       % if you have choppy play and it does not stop without a break enable the following line
-		if (0) %( (playtime_delay_ms==0) & (etime(clockex,start_play_time)>0.2) )  %buffer underrun => insert silence
+		if (0) %( (playtime_delay_ms==0) && (etime(clockex,start_play_time)>0.2) )  %buffer underrun => insert silence
          playtime_delay_ms = wavplayex(zeros(channels,output_sampling_rate/4),output_sampling_rate,1); %1/4 of a second delay to fill buffer
       end
          
@@ -408,7 +408,7 @@ if (sdc_data_valid)
     for service_ID = stream_information.audio_services
         audio_coding = audio_information.audio_coding(service_ID);
         audio_service_message = text_message.string;
-        audio_service_message(find(audio_service_message < 32 | audio_service_message > 126)) = 32;
+        audio_service_message(find(audio_service_message < 32 || audio_service_message > 126)) = 32;
         
         SBR_flag = audio_information.SBR_flag(service_ID);
         audio_mode = audio_information.audio_mode(service_ID);

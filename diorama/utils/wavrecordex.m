@@ -61,7 +61,7 @@
 
 function varargout = wavrecordex(varargin)
 
-if (isequal(computer,'GLNX86')|isequal(computer,'LNX86'))
+if (isequal(computer,'GLNX86')||isequal(computer,'LNX86')||isequal(computer,'x86_64-pc-linux-gnu'))
    if (nargin==0)
       wavio_linux(0);
    else
