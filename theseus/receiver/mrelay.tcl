@@ -1,5 +1,5 @@
 # copies an RSCI or MDI multicast stream to a unicast destination, dropping duplicate packets
-# Call with: tclsh mrelay.tcl 
+# Call with: tclsh mrelay.tcl
 
 set source_port 9998
 set source_ip 233.11.2.0
@@ -15,13 +15,12 @@ proc udpEventHandler {sock} {
     global last_seq
     global dest_sock
     set pkt [read $sock]
-    set peer [fconfigure $sock -peer]
-    binary scan $pkt "a2IScA" sync len seq ar pt
+    if {0 == [string length $pkt]} { return }
+    binary scan $pkt "a2IS" sync len seq
     if {$seq != $last_seq} {
-        puts "$sync $seq"
-        set last_seq $seq
-        puts -nonewline $dest_sock $pkt
-    }
+         set last_seq $seq
+         puts -nonewline $dest_sock $pkt
+     }
     return
 }
 
