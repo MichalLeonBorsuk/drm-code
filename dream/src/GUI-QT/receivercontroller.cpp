@@ -1,15 +1,16 @@
 #include "receivercontroller.h"
+#include <QDebug>
+#include <QTime>
 
 ReceiverController::ReceiverController(CDRMReceiver* p, CSettings& s, QObject *parent) :
     QObject(parent),
-    timer(),
     receiver(p),
     iCurrentFrequency(-1),
     currentMode(RM_NONE),
     settings(s)
 {
     setObjectName("controller");
-    connect(&timer, SIGNAL(timeout()), SLOT(on_timer()));
+    connect(this, SIGNAL(dataAvailable()), this, SLOT(on_new_data()), Qt::QueuedConnection);
 }
 
 void ReceiverController::setControls()
@@ -25,78 +26,9 @@ void ReceiverController::setControls()
     emit flippedSpectrumChanged(settings.Get("Receiver", "flipspectrum", FALSE));
 }
 
-void ReceiverController::on_timer()
+void ReceiverController::on_new_data()
 {
-    CParameter& Parameters = *receiver->GetParameters();
-    Parameters.Lock();
-
-    /* Input level meter */
-    double sigstr = Parameters.GetIFSignalLevel();
-
-    /* LEDs */
-    ETypeRxStatus msc,sdc,fac,fsync,tsync,inp,outp;
-    fac = Parameters.ReceiveStatus.FAC.GetStatus();
-    sdc = Parameters.ReceiveStatus.SDC.GetStatus();
-    int iShortID = Parameters.GetCurSelAudioService();
-    if(Parameters.Service[iShortID].eAudDataFlag == CService::SF_AUDIO)
-        msc = Parameters.AudioComponentStatus[iShortID].GetStatus();
-    else
-        msc = Parameters.DataComponentStatus[iShortID].GetStatus();
-    fsync = Parameters.ReceiveStatus.FSync.GetStatus();
-    tsync = Parameters.ReceiveStatus.TSync.GetStatus();
-    inp = Parameters.ReceiveStatus.InterfaceI.GetStatus();
-    outp = Parameters.ReceiveStatus.InterfaceO.GetStatus();
-
-    /* detect if AFS mux information is available */
-    bool bAFS = (Parameters.AltFreqSign.vecMultiplexes.size() > 0)
-             || (Parameters.AltFreqSign.vecOtherServices.size() > 0);
-    gps_data_t gps_data = Parameters.gps_data;
-
-    map<uint32_t,CServiceInformation> si = Parameters.ServiceInformation;
-
-    Reception reception;
-
-    reception.snr = Parameters.GetSNR();
-    reception.mer = Parameters.rMER;
-    reception.wmer = Parameters.rWMERMSC;
-    reception.sigmaEstimate = Parameters.rSigmaEstimate;
-    reception.minDelay = Parameters.rMinDelay;
-    reception.sampleOffset = Parameters.rResampleOffset;
-    reception.sampleRate = Parameters.GetSigSampleRate();
-    reception.dcOffset = receiver->GetReceiveData()->ConvertFrequency(Parameters.GetDCFrequency());
-    reception.rdop = Parameters.rRdop;
-
-    ChannelConfiguration channel;
-
-    channel.robm = Parameters.GetWaveMode();
-    channel.mode = Parameters.GetSpectrumOccup();
-    channel.interl = Parameters.eSymbolInterlMode;
-    channel.sdcConst = Parameters.eSDCCodingScheme;
-    channel.mscConst = Parameters.eMSCCodingScheme;
-    channel.protLev = Parameters.MSCPrLe;
-    channel.nAudio = Parameters.iNumAudioService;
-    channel.nData = Parameters.iNumDataService;
-
-    Parameters.Unlock();
-
-    emit InputSignalLevelChanged(sigstr);
-    emit FACChanged(fac);
-    emit SDCChanged(sdc);
-    emit MSCChanged(msc);
-    emit FSyncChanged(fsync);
-    emit TSyncChanged(tsync);
-    emit InputStatusChanged(inp);
-    emit OutputStatusChanged(outp);
-
-    emit setAFS(bAFS);
-    // NB following is not efficient - TODO - have a better idea
-    if(bAFS)
-        emit AFS(Parameters.AltFreqSign);
-
-    if(gps_data.status&LATLON_SET)
-        emit position(gps_data.fix.latitude, gps_data.fix.longitude);
-
-    emit serviceInformation(si);
+    //qDebug() << QTime::currentTime().toString("hh:mm:ss.zzz");
 
     ERecMode newMode = receiver->GetReceiverMode();
     if(newMode!=currentMode)
@@ -105,31 +37,124 @@ void ReceiverController::on_timer()
         emit mode(currentMode);
     }
 
-    /* Check if receiver does receive a signal */
-    if(receiver->GetAcquiState() == AS_WITH_SIGNAL)
+    CParameter& Parameters = *receiver->GetParameters();
+    Parameters.Lock();
+
+    /* Input level meter */
+    double sigstr = Parameters.GetIFSignalLevel();
+    gps_data_t gps_data = Parameters.gps_data;
+    if(gps_data.status&LATLON_SET)
+        emit position(gps_data.fix.latitude, gps_data.fix.longitude);
+
+    Parameters.Unlock();
+
+    if(currentMode == RM_DRM)
     {
-        switch(Parameters.GetReceiverMode())
+        Parameters.Lock();
+        /* LEDs */
+        ETypeRxStatus msc,sdc,fac,fsync,tsync,inp,outp;
+        fac = Parameters.ReceiveStatus.FAC.GetStatus();
+        sdc = Parameters.ReceiveStatus.SDC.GetStatus();
+        int iShortID = Parameters.GetCurSelAudioService();
+        if(Parameters.Service[iShortID].eAudDataFlag == CService::SF_AUDIO)
+            msc = Parameters.AudioComponentStatus[iShortID].GetStatus();
+        else
+            msc = Parameters.DataComponentStatus[iShortID].GetStatus();
+        fsync = Parameters.ReceiveStatus.FSync.GetStatus();
+        tsync = Parameters.ReceiveStatus.TSync.GetStatus();
+        inp = Parameters.ReceiveStatus.InterfaceI.GetStatus();
+        outp = Parameters.ReceiveStatus.InterfaceO.GetStatus();
+
+        /* detect if AFS mux information is available */
+        bool bAFS = (Parameters.AltFreqSign.vecMultiplexes.size() > 0)
+                 || (Parameters.AltFreqSign.vecOtherServices.size() > 0);
+
+        map<uint32_t,CServiceInformation> si = Parameters.ServiceInformation;
+
+        Reception reception;
+
+        reception.snr = Parameters.GetSNR();
+        reception.mer = Parameters.rMER;
+        reception.wmer = Parameters.rWMERMSC;
+        reception.sigmaEstimate = Parameters.rSigmaEstimate;
+        reception.minDelay = Parameters.rMinDelay;
+        reception.sampleOffset = Parameters.rResampleOffset;
+        reception.sampleRate = Parameters.GetSigSampleRate();
+        reception.dcOffset = receiver->GetReceiveData()->ConvertFrequency(Parameters.GetDCFrequency());
+        reception.rdop = Parameters.rRdop;
+
+        ChannelConfiguration channel;
+
+        channel.robm = Parameters.GetWaveMode();
+        channel.mode = Parameters.GetSpectrumOccup();
+        channel.interl = Parameters.eSymbolInterlMode;
+        channel.sdcConst = Parameters.eSDCCodingScheme;
+        channel.mscConst = Parameters.eMSCCodingScheme;
+        channel.protLev = Parameters.MSCPrLe;
+        channel.nAudio = Parameters.iNumAudioService;
+        channel.nData = Parameters.iNumDataService;
+
+        Parameters.Unlock();
+
+
+        emit InputSignalLevelChanged(sigstr);
+        emit FACChanged(fac);
+        emit SDCChanged(sdc);
+        emit MSCChanged(msc);
+        emit FSyncChanged(fsync);
+        emit TSyncChanged(tsync);
+        emit InputStatusChanged(inp);
+        emit OutputStatusChanged(outp);
+
+        emit setAFS(bAFS);
+        // NB following is not efficient - TODO - have a better idea
+        if(bAFS)
+            emit AFS(Parameters.AltFreqSign);
+        emit serviceInformation(si);
+
+        /* Check if receiver does receive a signal */
+        if(receiver->GetAcquiState() == AS_WITH_SIGNAL)
         {
-        case RM_DRM:
             updateDRM(Parameters);
-        default:
-            ;
+
+            emit channelReceptionChanged(reception);
+            emit channelConfigurationChanged(channel);
+
+            int iFreq = receiver->GetFrequency();
+            if(iFreq != iCurrentFrequency)
+            {
+                emit frequencyChanged(iFreq);
+                iCurrentFrequency = iFreq;
+            }
         }
-
-        emit channelReceptionChanged(reception);
-        emit channelConfigurationChanged(channel);
-
-        int iFreq = receiver->GetFrequency();
-        if(iFreq != iCurrentFrequency)
+        else
         {
-            emit frequencyChanged(iFreq);
-            iCurrentFrequency = iFreq;
+            emit signalLost();
         }
     }
-    else
+
+    if(currentMode == RM_AM)
     {
-        emit signalLost();
+        Parameters.Lock();
+        // TODO fetch
+        Parameters.Unlock();
+        // TODO emit
+        int newAMfilterBW = receiver->GetAMDemod()->GetFilterBW();
+        if(newAMfilterBW != currentAMfilterBW)
+        {
+            currentAMfilterBW = newAMfilterBW;
+            emit amFilterBandwidthChanged(currentAMfilterBW);
+        }
     }
+
+    if(currentMode == RM_FM)
+    {
+        Parameters.Lock();
+        // TODO fetch
+        Parameters.Unlock();
+        // TODO emit
+    }
+
 
     /* Time, date ####################
     if ((Parameters.iUTCHour == 0) &&

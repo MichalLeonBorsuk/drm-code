@@ -34,19 +34,26 @@
 #include "ui_AMSSDlgbase.h"
 #include "CWindow.h"
 #include "SoundCardSelMenu.h"
-#include "DRMPlot.h"
 #include "../GlobalDefinitions.h"
 #include "../DrmReceiver.h"
 #include "../tables/TableAMSS.h"
 #include <QTimer>
 #include <QDialog>
 #include <QButtonGroup>
-
+#if QT_VERSION > 0x050000
+# include "amspectrumplot.h" // use QCustomPlot instead of Qwt for QT5
+#else
+# include "DRMPlot.h"
+#endif
 
 /* Definitions ****************************************************************/
 /* Update time of PLL phase dial control */
 #define PLL_PHASE_DIAL_UPDATE_TIME				100
 
+namespace Ui {
+    class CAMSSDlgBase;
+    class AMMainWindow;
+}
 
 /* Classes ********************************************************************/
 
@@ -65,7 +72,7 @@ private:
 class ReceiverController;
 
 /* AMSS dialog -------------------------------------------------------------- */
-class CAMSSDlg : public CWindow, public Ui_CAMSSDlgBase
+class CAMSSDlg : public CWindow
 {
 	Q_OBJECT
 
@@ -73,6 +80,7 @@ public:
 	CAMSSDlg(CDRMReceiver&, CSettings&, QWidget* parent = 0);
 
 protected:
+    Ui::CAMSSDlgBase* ui;
 	CDRMReceiver&	DRMReceiver;
 
 	QTimer			Timer;
@@ -90,7 +98,7 @@ public slots:
 
 
 /* Analog demodulation dialog ----------------------------------------------- */
-class AnalogDemDlg : public CWindow, public Ui_AMMainWindow
+class AnalogDemDlg : public CWindow
 {
 	Q_OBJECT
 
@@ -99,19 +107,26 @@ public:
 	QWidget* parent = 0);
 
 protected:
+    Ui::AMMainWindow*   ui;
     ReceiverController* controller;
 	QTimer				Timer;
 	QTimer				TimerPLLPhaseDial;
 	QTimer				TimerClose;
 	CAMSSDlg			AMSSDlg;
-    CDRMPlot*			MainPlot;
 	CFileMenu*			pFileMenu;
 	CSoundCardSelMenu*	pSoundCardMenu;
     PhaseGauge*         phaseGauge;
+    int                 subSampleCount;
+#ifdef QCP_LIB_DECL
+    AMSpectrumPlot*     plot;
+#else
+    CDRMPlot*			MainPlot;
+#endif
 
 	void UpdateControls();
 	void UpdateSliderBandwidth();
-	void AddWhatsThisHelp();
+    void updateAnalogBWMarker();
+    void AddWhatsThisHelp();
     void initPhaseDial();
 	virtual void eventClose(QCloseEvent* pEvent);
 	virtual void eventShow(QShowEvent* pEvent);
@@ -134,7 +149,7 @@ public slots:
 	void on_CheckBoxSaveAudioWave_clicked(bool);
 	void on_CheckBoxAutoFreqAcq_clicked(bool);
 	void on_CheckBoxPLL_clicked(bool);
-	void on_ButtonWaterfall_clicked(bool);
+    void on_checkBoxWaterfall_toggled(bool);
 	void on_ButtonFreqOffset_clicked(bool);
 	void on_ButtonBandWidth_clicked(bool);
 	void on_SpinBoxNoiRedLevel_valueChanged(int);
@@ -142,6 +157,9 @@ public slots:
 	void on_ButtonGroupDemodulation_buttonClicked(int);
 	void on_ButtonGroupAGC_buttonClicked(int);
 	void on_ButtonGroupNoiseReduction_buttonClicked(int);
+#ifdef QCP_LIB_DECL
+    void on_plotClick(QCPAbstractPlottable *, QMouseEvent *);
+#endif
 
 signals:
 	void SwitchMode(int);

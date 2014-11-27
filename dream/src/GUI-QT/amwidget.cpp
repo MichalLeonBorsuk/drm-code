@@ -28,10 +28,10 @@
 #include "amwidget.h"
 #include "ui_amwidget.h"
 #include "receivercontroller.h"
-
 #include "DRMPlot.h"
+#include "cdrmplotqcp.h"
+#include "cdrmplotqwt.h"
 #include <qwt_plot_layout.h>
-#include "receivercontroller.h"
 #include <QInputDialog>
 
 AMWidget::AMWidget(ReceiverController* rc, QWidget *parent) :
@@ -45,7 +45,7 @@ AMWidget::AMWidget(ReceiverController* rc, QWidget *parent) :
     AddWhatsThisHelp();
 
     ui->sliderBandwidth->setTickPosition(QSlider::TicksBothSides);
-    MainPlot = new CDRMPlot(NULL, ui->plot, controller);
+    MainPlot = new CDRMPlotQwt(NULL, ui->plot, controller);
 
     /* Init main plot */
     bool waterfall = false; // TODO getSetting("waterfall", false);
@@ -56,18 +56,11 @@ AMWidget::AMWidget(ReceiverController* rc, QWidget *parent) :
         MainPlot->SetupChart(waterfall?CDRMPlot::INP_SPEC_WATERF:CDRMPlot::INPUT_SIG_PSD_ANALOG);
     }
 
-    /* Add tool tip to show the user the possibility of choosing the AM IF */
-    QString ptt = tr("Click on the plot to set the demodulation frequency");
-    if(MainPlot)
-    {
-        MainPlot->plot->setToolTip(ptt);
-    }
-
     /* Init bandwidth slider */
+    ui->sliderBandwidth->setRange(0, controller->getReceiver()->GetParameters()->GetSigSampleRate() / 2); // TODO
+
     // TODO from settings
-    ui->sliderBandwidth->setTickPosition(QSlider::TicksBothSides);
-    ui->sliderBandwidth->setTickInterval(1000); /* Each kHz a tick */
-    ui->sliderBandwidth->setPageStep(1000); /* Hz */
+
     ui->buttonGroupDemodulation->setId(ui->radioButtonDemAM, CAMDemodulation::DT_AM);
     ui->buttonGroupDemodulation->setId(ui->radioButtonDemLSB, CAMDemodulation::DT_LSB);
     ui->buttonGroupDemodulation->setId(ui->radioButtonDemUSB, CAMDemodulation::DT_USB);
@@ -89,7 +82,7 @@ AMWidget::AMWidget(ReceiverController* rc, QWidget *parent) :
     ui->spinBoxNoiRedLevel->hide();
 #endif
 
-    connect(MainPlot, SIGNAL(xAxisValSet(double)),
+    connect(static_cast<CDRMPlotQwt*>(MainPlot), SIGNAL(xAxisValSet(double)),
         this, SLOT(OnChartxAxisValSet(double)));
 
     /* Button groups */
@@ -118,6 +111,8 @@ void AMWidget::connectController(ReceiverController* controller)
     connect(this, SIGNAL(enableAutoFreqAcq(bool)), controller, SLOT(setEnableAutoFreqAcq(bool)));
     connect(this, SIGNAL(enablePLL(bool)), controller, SLOT(setEnablePLL(bool)));
     connect(this, SIGNAL(AMDemodAcq(double)), controller, SLOT(setAMDemodAcq(double)));
+
+    connect(controller, SIGNAL(amFilterBandwidthChanged(int)), this, SLOT(on_amFilterBandwidthChanged(int)));
 }
 
 void AMWidget::showEvent(QShowEvent*)
@@ -175,10 +170,12 @@ void AMWidget::on_sliderBandwidth_valueChanged(int value)
 {
     /* Set new filter in processing module */
     emit AMFilterBW(value);
-    ui->textLabelBandWidth->setText(QString().setNum(value) + tr(" Hz"));
+    on_amFilterBandwidthChanged(value); // because widget shows in DRM mode in single window mode
+}
 
-    /* Update chart */
-    if(MainPlot) MainPlot->UpdateAnalogBWMarker();
+void AMWidget::on_amFilterBandwidthChanged(int value)
+{
+    ui->textLabelBandWidth->setText(tr("%1 Hz").arg(value));
 }
 
 void AMWidget::on_checkBoxAutoFreqAcq_stateChanged(int i)
@@ -201,9 +198,6 @@ void AMWidget::OnChartxAxisValSet(double dVal)
 
     /* Set new frequency in receiver module */
     emit AMDemodAcq(dVal);
-
-    /* Update chart */
-    if(MainPlot) MainPlot->UpdateAnalogBWMarker();
 }
 
 void AMWidget::on_checkBoxWaterFall_stateChanged(int)

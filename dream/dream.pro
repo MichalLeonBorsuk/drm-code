@@ -519,7 +519,10 @@ HEADERS += \
     src/util/Settings.h \
     src/util/Utilities.h \
     src/util/Vector.h \
-    src/Version.h
+    src/Version.h \
+    src/GUI-QT/amspectrumplot.h \
+    src/GUI-QT/cdrmplotqwt.h \
+    src/GUI-QT/cdrmplotqcp.h
 
 SOURCES += \
     src/AMDemodulation.cpp \
@@ -620,7 +623,10 @@ SOURCES += \
     src/util/Reassemble.cpp \
     src/util/Settings.cpp \
     src/util/Utilities.cpp \
-    src/Version.cpp
+    src/Version.cpp \
+    src/GUI-QT/amspectrumplot.cpp \
+    src/GUI-QT/cdrmplotqwt.cpp \
+    src/GUI-QT/cdrmplotqcp.cpp
 
 !console {
     qt5 {

@@ -51,6 +51,7 @@
 #include <QInputDialog>
 #include "receivercontroller.h"
 #include "ThemeCustomizer.h"
+#include "cdrmplotqwt.h"
 
 void PhaseGauge::paintEvent(QPaintEvent *)
 {
@@ -85,73 +86,80 @@ void PhaseGauge::paintEvent(QPaintEvent *)
 /* Implementation *************************************************************/
 AnalogDemDlg::AnalogDemDlg(ReceiverController* rc, CSettings& Settings,
 	CFileMenu* pFileMenu, CSoundCardSelMenu* pSoundCardMenu, QWidget* parent) :
-    CWindow(parent, Settings, "AM"),
+    CWindow(parent, Settings, "AM"), ui(new Ui::AMMainWindow),
     controller(rc),
-    AMSSDlg(*rc->getReceiver(), Settings, this), MainPlot(NULL),
-    pFileMenu(pFileMenu), pSoundCardMenu(pSoundCardMenu)
+    AMSSDlg(*rc->getReceiver(), Settings, NULL),
+    pFileMenu(pFileMenu), pSoundCardMenu(pSoundCardMenu),subSampleCount(0),
+#ifdef QCP_LIB_DECL
+    plot(NULL)
+#else
+    MainPlot(NULL)
+#endif
 {
-    setupUi(this);
+    ui->setupUi(this);
 
 	/* Add file and sound card menu */
-    menuBar()->insertMenu(menu_View->menuAction(), pFileMenu);
-    menu_Settings->addMenu(pSoundCardMenu);
+    menuBar()->insertMenu(ui->menu_View->menuAction(), pFileMenu);
+    ui->menu_Settings->addMenu(pSoundCardMenu);
 
-    connect(action_Stations_Dialog, SIGNAL(triggered()), this, SIGNAL(ViewStationsDlg()));
-    connect(action_Live_Schedule_Dialog, SIGNAL(triggered()), this, SIGNAL(ViewLiveScheduleDlg()));
-    connect(actionExit, SIGNAL(triggered()), this, SLOT(close()));
-    connect(actionAM, SIGNAL(triggered()), this, SIGNAL(NewAMAcquisition()));
-    connect(actionFM, SIGNAL(triggered()), this, SLOT(OnSwitchToFM()));
-    connect(actionDRM, SIGNAL(triggered()), this, SLOT(OnSwitchToDRM()));
+    connect(ui->action_Stations_Dialog, SIGNAL(triggered()), this, SIGNAL(ViewStationsDlg()));
+    connect(ui->action_Live_Schedule_Dialog, SIGNAL(triggered()), this, SIGNAL(ViewLiveScheduleDlg()));
+    connect(ui->actionExit, SIGNAL(triggered()), this, SLOT(close()));
+    connect(ui->actionAM, SIGNAL(triggered()), this, SIGNAL(NewAMAcquisition()));
+    connect(ui->actionFM, SIGNAL(triggered()), this, SLOT(OnSwitchToFM()));
+    connect(ui->actionDRM, SIGNAL(triggered()), this, SLOT(OnSwitchToDRM()));
 	connect(pFileMenu, SIGNAL(soundFileChanged(CDRMReceiver::ESFStatus)), this, SLOT(OnSoundFileChanged(CDRMReceiver::ESFStatus)));
 	connect(pSoundCardMenu, SIGNAL(sampleRateChanged()), this, SLOT(OnSampleRateChanged()));
-    connect(actionAbout_Dream, SIGNAL(triggered()), this, SLOT(OnHelpAbout()));
-    connect(actionWhats_This, SIGNAL(triggered()), this, SLOT(OnWhatsThis()));
-    SliderBandwidth->setTickPosition(QSlider::TicksBothSides);
-    MainPlot = new CDRMPlot(NULL, plot, controller);
+    connect(ui->actionAbout_Dream, SIGNAL(triggered()), this, SLOT(OnHelpAbout()));
+    connect(ui->actionWhats_This, SIGNAL(triggered()), this, SLOT(OnWhatsThis()));
 
-	/* Init main plot */
-	bool waterfall = getSetting("waterfall", false);
-    ButtonWaterfall->setChecked(waterfall);
-	MainPlot->SetupChart(waterfall ? CDRMPlot::INP_SPEC_WATERF : CDRMPlot::INPUT_SIG_PSD_ANALOG);
+    /* Init main plot */
+    bool waterfall = getSetting("waterfall", false);
+    ui->checkBoxWaterfall->setChecked(waterfall);
 
-	/* Add tool tip to show the user the possibility of choosing the AM IF */
-	QString ptt = tr("Click on the plot to set the demodulation frequency");
-	MainPlot->plot->setToolTip(ptt);
+#ifdef QCP_LIB_DECL
+    plot = new AMSpectrumPlot(this);
+    int sr = controller->getReceiver()->GetParameters()->GetSigSampleRate();
+    double dXScaleMin = controller->getReceiver()->GetReceiveData()->ConvertFrequency(0.0) / 1000;
+    double dXScaleMax = controller->getReceiver()->GetReceiveData()->ConvertFrequency(double(sr) / 2) / 1000;
+    plot->xAxis->setRange(dXScaleMin, dXScaleMax);
+    plot->setMarkersVisible(true);
+    ui->frame->layout()->replaceWidget(ui->plot,plot);
+    ui->plot->hide();
+    connect(plot, SIGNAL(plottableClick(QCPAbstractPlottable*,QMouseEvent*)), this, SLOT(on_plotClick(QCPAbstractPlottable*,QMouseEvent*)));
+    plot->setWaterfallMode(waterfall);
+#else
+    MainPlot = new CDRMPlotQwt(NULL, ui->plot, controller);
+    MainPlot->SetupChart(waterfall ? CDRMPlot::INP_SPEC_WATERF : CDRMPlot::INPUT_SIG_PSD_ANALOG);
+    connect(MainPlot, SIGNAL(xAxisValSet(double)), this, SLOT(OnChartxAxisValSet(double)));
+#endif
 
 	/* Init bandwidth slider */
 	UpdateSliderBandwidth();
-    SliderBandwidth->setTickPosition(QSlider::TicksBothSides);
-    SliderBandwidth->setTickInterval(1000); /* Each kHz a tick */
-    SliderBandwidth->setPageStep(1000); /* Hz */
 
     /* Init PLL phase dial control */
     initPhaseDial();
 
 #ifdef HAVE_SPEEX
-    SpinBoxNoiRedLevel->setValue(controller->getReceiver()->GetAMDemod()->GetNoiRedLevel());
+    ui->SpinBoxNoiRedLevel->setValue(controller->getReceiver()->GetAMDemod()->GetNoiRedLevel());
 #else
-    RadioButtonNoiRedSpeex->hide();
-    SpinBoxNoiRedLevel->hide();
+    ui->RadioButtonNoiRedSpeex->hide();
+    ui->SpinBoxNoiRedLevel->hide();
 #endif
 
 	/* Update controls */
 	UpdateControls();
 
 	/* Connect controls ----------------------------------------------------- */
-    connect(ButtonDRM, SIGNAL(clicked()),
+    connect(ui->ButtonDRM, SIGNAL(clicked()),
 		this, SLOT(OnSwitchToDRM()));
-    connect(ButtonAMSS, SIGNAL(clicked()),
+    connect(ui->ButtonAMSS, SIGNAL(clicked()),
 		&AMSSDlg, SLOT(show()));
-	connect(MainPlot, SIGNAL(xAxisValSet(double)),
-		this, SLOT(OnChartxAxisValSet(double)));
 
 	/* Timers */
-	connect(&Timer, SIGNAL(timeout()),
-		this, SLOT(OnTimer()));
-	connect(&TimerPLLPhaseDial, SIGNAL(timeout()),
-		this, SLOT(OnTimerPLLPhaseDial()));
-	connect(&TimerClose, SIGNAL(timeout()),
-		this, SLOT(OnTimerClose()));
+    //connect(&Timer, SIGNAL(timeout()),this, SLOT(OnTimer()));
+    //connect(&TimerPLLPhaseDial, SIGNAL(timeout()),this, SLOT(OnTimerPLLPhaseDial()));
+	connect(&TimerClose, SIGNAL(timeout()),this, SLOT(OnTimerClose()));
 
     /* Set help text for the controls */
     AddWhatsThisHelp();
@@ -165,7 +173,7 @@ void AnalogDemDlg::initPhaseDial()
     phaseGauge = new PhaseGauge(this);
     phaseGauge->setMinimumHeight(100);
     phaseGauge->setMinimumWidth(100);
-    controlsFrame->layout()->addWidget(phaseGauge);
+    ui->controlsFrame->layout()->addWidget(phaseGauge);
 }
 
 void AnalogDemDlg::OnWhatsThis()
@@ -193,30 +201,39 @@ void AnalogDemDlg::eventUpdate()
 
 void AnalogDemDlg::eventShow(QShowEvent*)
 {
-	OnTimer();
+    connect(controller, SIGNAL(dataAvailable()),this, SLOT(OnTimer()));
+
+    OnTimer();
 	OnTimerPLLPhaseDial();
 	/* Set correct schedule */
 
 	/* Activate real-time timers */
-	Timer.start(GUI_CONTROL_UPDATE_TIME);
-	TimerPLLPhaseDial.start(PLL_PHASE_DIAL_UPDATE_TIME);
+    //Timer.start(GUI_CONTROL_UPDATE_TIME);
+    //TimerPLLPhaseDial.start(PLL_PHASE_DIAL_UPDATE_TIME);
 
 	UpdateControls();
 
     /* Notify the MainPlot of showEvent */
+
+#ifdef QCP_LIB_DECL
+#else
     MainPlot->activate();
+#endif
 }
 
 void AnalogDemDlg::eventHide(QHideEvent*)
 {
     /* Notify the MainPlot of hideEvent */
+#ifdef QCP_LIB_DECL
+#else
     MainPlot->deactivate();
-
+#endif
 	/* stop real-time timers */
-	Timer.stop();
+    disconnect(controller, SIGNAL(dataAvailable()),this, SLOT(OnTimer()));
+    //Timer.stop();
 	TimerPLLPhaseDial.stop();
 
-    bool waterfall = ButtonWaterfall->isChecked();
+    bool waterfall = ui->checkBoxWaterfall->isChecked();
 	putSetting("waterfall", waterfall);
 }
 
@@ -225,7 +242,7 @@ void AnalogDemDlg::eventClose(QCloseEvent* ce)
 	if (!TimerClose.isActive())
 	{
 		/* Stop real-time timers */
-		Timer.stop();
+        //Timer.stop();
 		TimerPLLPhaseDial.stop();
 
 		/* Tell every other window to close too */
@@ -251,28 +268,28 @@ void AnalogDemDlg::UpdateControls()
     switch (controller->getReceiver()->GetAMDemod()->GetDemodType())
 	{
 	case CAMDemodulation::DT_AM:
-        if (!RadioButtonDemAM->isChecked())
-            RadioButtonDemAM->setChecked(TRUE);
+        if (!ui->RadioButtonDemAM->isChecked())
+            ui->RadioButtonDemAM->setChecked(TRUE);
 		break;
 
 	case CAMDemodulation::DT_LSB:
-        if (!RadioButtonDemLSB->isChecked())
-            RadioButtonDemLSB->setChecked(TRUE);
+        if (!ui->RadioButtonDemLSB->isChecked())
+            ui->RadioButtonDemLSB->setChecked(TRUE);
 		break;
 
 	case CAMDemodulation::DT_USB:
-        if (!RadioButtonDemUSB->isChecked())
-            RadioButtonDemUSB->setChecked(TRUE);
+        if (!ui->RadioButtonDemUSB->isChecked())
+            ui->RadioButtonDemUSB->setChecked(TRUE);
 		break;
 
 	case CAMDemodulation::DT_CW:
-        if (!RadioButtonDemCW->isChecked())
-            RadioButtonDemCW->setChecked(TRUE);
+        if (!ui->RadioButtonDemCW->isChecked())
+            ui->RadioButtonDemCW->setChecked(TRUE);
 		break;
 
 	case CAMDemodulation::DT_FM:
-        if (!RadioButtonDemFM->isChecked())
-            RadioButtonDemFM->setChecked(TRUE);
+        if (!ui->RadioButtonDemFM->isChecked())
+            ui->RadioButtonDemFM->setChecked(TRUE);
 		break;
 	}
 
@@ -280,23 +297,23 @@ void AnalogDemDlg::UpdateControls()
     switch (controller->getReceiver()->GetAMDemod()->GetAGCType())
 	{
 	case CAGC::AT_NO_AGC:
-        if (!RadioButtonAGCOff->isChecked())
-            RadioButtonAGCOff->setChecked(TRUE);
+        if (!ui->RadioButtonAGCOff->isChecked())
+            ui->RadioButtonAGCOff->setChecked(TRUE);
 		break;
 
 	case CAGC::AT_SLOW:
-        if (!RadioButtonAGCSlow->isChecked())
-            RadioButtonAGCSlow->setChecked(TRUE);
+        if (!ui->RadioButtonAGCSlow->isChecked())
+            ui->RadioButtonAGCSlow->setChecked(TRUE);
 		break;
 
 	case CAGC::AT_MEDIUM:
-        if (!RadioButtonAGCMed->isChecked())
-            RadioButtonAGCMed->setChecked(TRUE);
+        if (!ui->RadioButtonAGCMed->isChecked())
+            ui->RadioButtonAGCMed->setChecked(TRUE);
 		break;
 
 	case CAGC::AT_FAST:
-        if (!RadioButtonAGCFast->isChecked())
-            RadioButtonAGCFast->setChecked(TRUE);
+        if (!ui->RadioButtonAGCFast->isChecked())
+            ui->RadioButtonAGCFast->setChecked(TRUE);
 		break;
 	}
 
@@ -304,61 +321,65 @@ void AnalogDemDlg::UpdateControls()
     switch (controller->getReceiver()->GetAMDemod()->GetNoiRedType())
 	{
 	case CAMDemodulation::NR_OFF:
-        if (!RadioButtonNoiRedOff->isChecked())
-            RadioButtonNoiRedOff->setChecked(TRUE);
+        if (!ui->RadioButtonNoiRedOff->isChecked())
+            ui->RadioButtonNoiRedOff->setChecked(TRUE);
 		break;
 
 	case CAMDemodulation::NR_LOW:
-        if (!RadioButtonNoiRedLow->isChecked())
-            RadioButtonNoiRedLow->setChecked(TRUE);
+        if (!ui->RadioButtonNoiRedLow->isChecked())
+            ui->RadioButtonNoiRedLow->setChecked(TRUE);
 		break;
 
 	case CAMDemodulation::NR_MEDIUM:
-        if (!RadioButtonNoiRedMed->isChecked())
-            RadioButtonNoiRedMed->setChecked(TRUE);
+        if (!ui->RadioButtonNoiRedMed->isChecked())
+            ui->RadioButtonNoiRedMed->setChecked(TRUE);
 		break;
 
 	case CAMDemodulation::NR_HIGH:
-        if (!RadioButtonNoiRedHigh->isChecked())
-            RadioButtonNoiRedHigh->setChecked(TRUE);
+        if (!ui->RadioButtonNoiRedHigh->isChecked())
+            ui->RadioButtonNoiRedHigh->setChecked(TRUE);
 		break;
 
 	case CAMDemodulation::NR_SPEEX:
-        if (!RadioButtonNoiRedSpeex->isChecked())
-            RadioButtonNoiRedSpeex->setChecked(TRUE);
+        if (!ui->RadioButtonNoiRedSpeex->isChecked())
+            ui->RadioButtonNoiRedSpeex->setChecked(TRUE);
 		break;
 	}
 
 #ifdef HAVE_SPEEX
 	/* Set speex spinbox enable state */
-    SpinBoxNoiRedLevel->setEnabled(RadioButtonNoiRedSpeex->isChecked());
+    ui->SpinBoxNoiRedLevel->setEnabled(RadioButtonNoiRedSpeex->isChecked());
 #endif
 
 	/* Set filter bandwidth */
-    SliderBandwidth->setValue(controller->getReceiver()->GetAMDemod()->GetFilterBW());
-    ButtonBandWidth->setText(QString().setNum(
+    ui->SliderBandwidth->setValue(controller->getReceiver()->GetAMDemod()->GetFilterBW());
+    ui->ButtonBandWidth->setText(QString().setNum(
         controller->getReceiver()->GetAMDemod()->GetFilterBW()) +	tr(" Hz"));
 
 	/* Update check boxes */
-    CheckBoxMuteAudio->setChecked(controller->getReceiver()->GetWriteData()->GetMuteAudio());
-    CheckBoxSaveAudioWave->
+    ui->CheckBoxMuteAudio->setChecked(controller->getReceiver()->GetWriteData()->GetMuteAudio());
+    ui->CheckBoxSaveAudioWave->
         setChecked(controller->getReceiver()->GetWriteData()->GetIsWriteWaveFile());
 
-    CheckBoxAutoFreqAcq->
+    ui->CheckBoxAutoFreqAcq->
         setChecked(controller->getReceiver()->GetAMDemod()->AutoFreqAcqEnabled());
 
-    CheckBoxPLL->setChecked(controller->getReceiver()->GetAMDemod()->PLLEnabled());
+    ui->CheckBoxPLL->setChecked(controller->getReceiver()->GetAMDemod()->PLLEnabled());
 }
 
 void AnalogDemDlg::UpdateSliderBandwidth()
 {
-    SliderBandwidth->setRange(0, controller->getReceiver()->GetParameters()->GetSigSampleRate() / 2);
+    ui->SliderBandwidth->setRange(0, controller->getReceiver()->GetParameters()->GetSigSampleRate() / 2);
 }
 
 void AnalogDemDlg::UpdatePlotStyle(int iPlotstyle)
 {
-	/* Update main plot window */
+#ifdef QCP_LIB_DECL
+    // TODO
+#else
+    /* Update main plot window */
 	MainPlot->SetPlotStyle(iPlotstyle);
+#endif
 }
 
 void AnalogDemDlg::OnSampleRateChanged()
@@ -373,20 +394,43 @@ void AnalogDemDlg::OnSoundFileChanged(CDRMReceiver::ESFStatus)
 
 void AnalogDemDlg::OnTimer()
 {
-    switch(controller->getReceiver()->GetReceiverMode())
-	{
-	case RM_AM:
-		/* Carrier frequency of AM signal */
-        ButtonFreqOffset->setText(QString().setNum(
-            controller->getReceiver()->GetReceiveData()->ConvertFrequency(
-                controller->getReceiver()->GetAMDemod()->GetCurMixFreqOffs())
-			, 'f', 2) + " Hz");
-		break;
-	case RM_DRM:
-	case RM_FM:
-	case RM_NONE:
-		break;
-	}
+    if(subSampleCount==0)
+    {
+        subSampleCount=20;
+    }
+    else
+    {
+        subSampleCount--;
+    }
+
+    if(controller->getReceiver()->GetReceiverMode() != RM_AM)
+        return;
+
+    double rDCFreq = controller->getReceiver()->GetAMDemod()->GetCurMixFreqOffs();
+    double f = controller->getReceiver()->GetReceiveData()->ConvertFrequency(rDCFreq);
+    CVector<_REAL>	vecrData, vecrScale;
+
+    if(subSampleCount == 0) {
+        /* Carrier frequency of AM signal */
+        ui->ButtonFreqOffset->setText(QString().setNum(f, 'f', 2) + " Hz");
+#ifdef QCP_LIB_DECL
+        if(!ui->checkBoxWaterfall->isChecked()) {
+            controller->getReceiver()->GetPlotManager()->GetInputPSD(vecrData, vecrScale);
+            plot->updateSpectrum(vecrData, vecrScale);
+            plot->updateDCCarrier(f/1000.0);
+            updateAnalogBWMarker();
+        }
+#endif
+    }
+    if(subSampleCount==0 || subSampleCount == 10) { // Fast Update
+#ifdef QCP_LIB_DECL
+        if(ui->checkBoxWaterfall->isChecked()) {
+            controller->getReceiver()->GetReceiveData()->GetInputSpec(vecrData, vecrScale);
+            plot->updateSpectrum(vecrData, vecrScale);
+        }
+#endif
+        OnTimerPLLPhaseDial();
+    }
 }
 
 void AnalogDemDlg::OnTimerPLLPhaseDial()
@@ -397,20 +441,12 @@ void AnalogDemDlg::OnTimerPLLPhaseDial()
 	{
 		/* Set current PLL phase (convert radiant in degree) */
         phaseGauge->setValue(rCurPLLPhase * (CReal) 360.0 / (2 * crPi));
-
-		/* Check if control is enabled */
-        if (!phaseGauge->isEnabled())
-            phaseGauge->setEnabled(true);
 	}
 	else
 	{
 		/* Reset dial */
-        double d = 360.0*double(qrand())/double(RAND_MAX);
+        double d = 0.0; // 360.0*double(qrand())/double(RAND_MAX);
         phaseGauge->setValue(d);
-
-		/* Check if control is disabled */
-        if (phaseGauge->isEnabled())
-            phaseGauge->setEnabled(false);
 	}
 }
 
@@ -424,28 +460,9 @@ void AnalogDemDlg::on_ButtonGroupDemodulation_buttonClicked(int iID)
 {
 	iID = -iID - 2; // TODO understand why
 	/* DRMReceiver takes care of setting appropriate filter BW */
-	switch (iID)
-	{
-	case 0:
-        controller->getReceiver()->SetAMDemodType(CAMDemodulation::DT_AM);
-		break;
-
-	case 1:
-        controller->getReceiver()->SetAMDemodType(CAMDemodulation::DT_LSB);
-		break;
-
-	case 2:
-        controller->getReceiver()->SetAMDemodType(CAMDemodulation::DT_USB);
-		break;
-
-	case 3:
-        controller->getReceiver()->SetAMDemodType(CAMDemodulation::DT_CW);
-		break;
-
-	case 4:
-        controller->getReceiver()->SetAMDemodType(CAMDemodulation::DT_FM);
-		break;
-	}
+    CAMDemodulation::EDemodType n[] = {CAMDemodulation::DT_AM,CAMDemodulation::DT_LSB,CAMDemodulation::DT_USB,
+                                       CAMDemodulation::DT_CW,CAMDemodulation::DT_FM};
+    controller->setAnalogModulation(n[iID]);
 
 	/* Update controls */
 	UpdateControls();
@@ -454,53 +471,18 @@ void AnalogDemDlg::on_ButtonGroupDemodulation_buttonClicked(int iID)
 void AnalogDemDlg::on_ButtonGroupAGC_buttonClicked(int iID)
 {
 	iID = -iID - 2; // TODO understand why
-	switch (iID)
-	{
-	case 0:
-        controller->getReceiver()->GetAMDemod()->SetAGCType(CAGC::AT_NO_AGC);
-		break;
-
-	case 1:
-        controller->getReceiver()->GetAMDemod()->SetAGCType(CAGC::AT_SLOW);
-		break;
-
-	case 2:
-        controller->getReceiver()->GetAMDemod()->SetAGCType(CAGC::AT_MEDIUM);
-		break;
-
-	case 3:
-        controller->getReceiver()->GetAMDemod()->SetAGCType(CAGC::AT_FAST);
-		break;
-	}
+    const CAGC::EType n[] = { CAGC::AT_NO_AGC,CAGC::AT_SLOW,CAGC::AT_MEDIUM,CAGC::AT_FAST};
+    controller->setAnalogAGC(n[iID]);
 }
 
 void AnalogDemDlg::on_ButtonGroupNoiseReduction_buttonClicked(int iID)
 {
-	iID = -iID - 2; // TODO understand why
-	switch (iID)
-	{
-	case 0:
-        controller->getReceiver()->GetAMDemod()->SetNoiRedType(CAMDemodulation::NR_OFF);
-		break;
-
-	case 1:
-        controller->getReceiver()->GetAMDemod()->SetNoiRedType(CAMDemodulation::NR_LOW);
-		break;
-
-	case 2:
-        controller->getReceiver()->GetAMDemod()->SetNoiRedType(CAMDemodulation::NR_MEDIUM);
-		break;
-
-	case 3:
-        controller->getReceiver()->GetAMDemod()->SetNoiRedType(CAMDemodulation::NR_HIGH);
-		break;
-
-#ifdef HAVE_SPEEX
-	case 4:
-        controller->getReceiver()->GetAMDemod()->SetNoiRedType(CAMDemodulation::NR_SPEEX);
-		break;
-#endif
-	}
+	iID = -iID - 2; // TODO understand why    
+    const CAMDemodulation::ENoiRedType n[] = { CAMDemodulation::NR_OFF,CAMDemodulation::NR_LOW,
+                                         CAMDemodulation::NR_MEDIUM,CAMDemodulation::NR_HIGH,
+                                         CAMDemodulation::NR_SPEEX
+                                       };
+    controller->setAnalogNoiseReduction(n[iID]);
 
 #ifdef HAVE_SPEEX
 	/* Set speex spinbox enable state */
@@ -511,29 +493,41 @@ void AnalogDemDlg::on_ButtonGroupNoiseReduction_buttonClicked(int iID)
 void AnalogDemDlg::on_SliderBandwidth_valueChanged(int value)
 {
 	/* Set new filter in processing module */
-    controller->getReceiver()->SetAMFilterBW(value);
-    ButtonBandWidth->setText(QString().setNum(value) + tr(" Hz"));
+    controller->setAMFilterBW(value);
+    ui->ButtonBandWidth->setText(tr("%1 Hz").arg(value));
+    updateAnalogBWMarker();
+}
 
-	/* Update chart */
+void AnalogDemDlg::updateAnalogBWMarker()
+{
+#ifdef QCP_LIB_DECL
+    double rCenterFreq, rBandwidth;
+    controller->getReceiver()->GetAMDemod()->GetBWParameters(rCenterFreq, rBandwidth);
+    int sampleRate = controller->getReceiver()->GetParameters()->GetSigSampleRate();
+    rCenterFreq = controller->getReceiver()->GetReceiveData()->ConvertFrequency(rCenterFreq * sampleRate) / 1000.0;
+    rBandwidth = controller->getReceiver()->GetReceiveData()->ConvertFrequency(rBandwidth * sampleRate) / 1000.0;
+    plot->updateBWMarker(rCenterFreq, rBandwidth);
+#else
 	MainPlot->UpdateAnalogBWMarker();
+#endif
 }
 
 void AnalogDemDlg::on_CheckBoxAutoFreqAcq_clicked(bool checked)
 {
 	/* Set parameter in working thread module */
-    controller->getReceiver()->GetAMDemod()->EnableAutoFreqAcq(checked);
+    controller->setEnableAutoFreqAcq(checked);
 }
 
 void AnalogDemDlg::on_CheckBoxPLL_clicked(bool checked)
 {
 	/* Set parameter in working thread module */
-    controller->getReceiver()->GetAMDemod()->EnablePLL(checked);
+    controller->setEnablePLL(checked);
 }
 
 void AnalogDemDlg::on_CheckBoxMuteAudio_clicked(bool checked)
 {
 	/* Set parameter in working thread module */
-    controller->getReceiver()->GetWriteData()->MuteAudio(checked);
+    controller->muteAudio(checked);
 }
 
 void AnalogDemDlg::on_CheckBoxSaveAudioWave_clicked(bool checked)
@@ -550,41 +544,63 @@ void AnalogDemDlg::on_CheckBoxSaveAudioWave_clicked(bool checked)
 		/* Check if user not hit the cancel button */
 		if (!strFileName.isEmpty())
 		{
-            controller->getReceiver()->GetWriteData()->
-				StartWriteWaveFile(strFileName.toLocal8Bit().constData());
+            controller->setSaveAudio(strFileName.toLocal8Bit().constData());
 		}
 		else
 		{
 			/* User hit the cancel button, uncheck the button */
-            CheckBoxSaveAudioWave->setChecked(false);
+            ui->CheckBoxSaveAudioWave->setChecked(false);
 		}
 	}
 	else
-        controller->getReceiver()->GetWriteData()->StopWriteWaveFile();
+        controller->setSaveAudio("");
 }
+
+#ifdef QCP_LIB_DECL
+void AnalogDemDlg::on_plotClick(QCPAbstractPlottable *, QMouseEvent *event)
+{
+    double d = plot->xAxis->pixelToCoord(event->x());
+    double dVal = d / abs(plot->xAxis->range().lower-plot->xAxis->range().upper);
+    if (dVal < 0.0)
+        dVal = 0.0;
+    else if (dVal > 1.0)
+        dVal = 1.0;
+    controller->setAMDemodAcq(dVal);
+    updateAnalogBWMarker();
+    double rDCFreq = controller->getReceiver()->GetAMDemod()->GetCurMixFreqOffs();
+    double f = controller->getReceiver()->GetReceiveData()->ConvertFrequency(rDCFreq) / 1000;
+    plot->updateDCCarrier(f);
+}
+#endif
 
 void AnalogDemDlg::OnChartxAxisValSet(double dVal)
 {
-	/* Perform range check */
+#ifndef QCP_LIB_DECL
+    /* Perform range check */
 	if (dVal < 0.0)
 		dVal = 0.0;
 	else if (dVal > 1.0)
 		dVal = 1.0;
-
+qDebug() << dVal;
 	/* Set new frequency in receiver module */
     controller->getReceiver()->SetAMDemodAcq(dVal);
 
 	/* Update chart */
-	MainPlot->UpdateAnalogBWMarker();
+    MainPlot->UpdateAnalogBWMarker();
+#endif
 }
 
-void AnalogDemDlg::on_ButtonWaterfall_clicked(bool checked)
+void AnalogDemDlg::on_checkBoxWaterfall_toggled(bool checked)
 {
     /* Toggle between normal spectrum plot and waterfall spectrum plot */
-	if (checked)
+#ifdef QCP_LIB_DECL
+    if(plot) plot->setWaterfallMode(checked);
+#else
+    if (checked)
 		MainPlot->SetupChart(CDRMPlot::INP_SPEC_WATERF);
 	else
 		MainPlot->SetupChart(CDRMPlot::INPUT_SIG_PSD_ANALOG);
+#endif
 }
 
 /* Manual carrier frequency input box */
@@ -595,7 +611,7 @@ void AnalogDemDlg::on_ButtonFreqOffset_clicked(bool)
 		controller->getReceiver()->GetReceiveData()->ConvertFrequency(
 			controller->getReceiver()->GetAMDemod()->GetCurMixFreqOffs());
 	const double new_freq = QInputDialog::getDouble(this, this->windowTitle(),
-        LabelCarrierFrequency->text(), prev_freq, -1e6, 1e6, 2, &ok);
+        ui->LabelCarrierFrequency->text(), prev_freq, -1e6, 1e6, 2, &ok);
 	if (ok)
 	{
 		const _REAL conv_freq =
@@ -613,17 +629,18 @@ void AnalogDemDlg::on_ButtonBandWidth_clicked(bool)
 	const int sr2 = controller->getReceiver()->GetParameters()->GetSigSampleRate() / 2;
 	const int prev_bw = controller->getReceiver()->GetAMDemod()->GetFilterBW();
 	const int new_bw = QInputDialog::getInt(this, this->windowTitle(),
-        groupBoxBW->title(), prev_bw, 0, sr2, 2, &ok);
+        ui->groupBoxBW->title(), prev_bw, 0, sr2, 2, &ok);
 	if (ok)
 	{
-		controller->getReceiver()->GetAMDemod()->SetFilterBW(new_bw);
-        SliderBandwidth->setValue(controller->getReceiver()->GetAMDemod()->GetFilterBW());
+        controller->getReceiver()->GetAMDemod()->SetFilterBW(new_bw);
+        //controller->setAMFilterBW(new_bw); TODO
+        ui->SliderBandwidth->setValue(controller->getReceiver()->GetAMDemod()->GetFilterBW());
 	}
 }
 
 void AnalogDemDlg::on_SpinBoxNoiRedLevel_valueChanged(int value)
 {
-    controller->getReceiver()->GetAMDemod()->SetNoiRedLevel(value);
+    controller->setAnalogNoiseReduction(value);
 }
 
 void AnalogDemDlg::AddWhatsThisHelp()
@@ -717,35 +734,35 @@ void AnalogDemDlg::AddWhatsThisHelp()
 		"If the Auto Frequency Acquisition is enabled, the largest peak "
 		"near the curser is selected.");
 
-    RadioButtonNoiRedOff->setWhatsThis(strNoiseReduction);
-    RadioButtonNoiRedLow->setWhatsThis(strNoiseReduction);
-    RadioButtonNoiRedMed->setWhatsThis(strNoiseReduction);
-    RadioButtonNoiRedHigh->setWhatsThis(strNoiseReduction);
-    RadioButtonAGCOff->setWhatsThis(strAGC);
-    RadioButtonAGCSlow->setWhatsThis(strAGC);
-    RadioButtonAGCMed->setWhatsThis(strAGC);
-    RadioButtonAGCFast->setWhatsThis(strAGC);
-    ButtonBandWidth->setWhatsThis(strFilterBW);
-    SliderBandwidth->setWhatsThis(strFilterBW);
-    RadioButtonDemAM->setWhatsThis(strDemodType);
-    RadioButtonDemLSB->setWhatsThis(strDemodType);
-    RadioButtonDemUSB->setWhatsThis(strDemodType);
-    RadioButtonDemCW->setWhatsThis(strDemodType);
-    RadioButtonDemFM->setWhatsThis(strDemodType);
-    GroupBoxAutoFreqAcq->setWhatsThis(strAutoFreqAcqu);
-    CheckBoxAutoFreqAcq->setWhatsThis(strAutoFreqAcqu);
-    CheckBoxMuteAudio->setWhatsThis(strCheckBoxMuteAudio);
-    GroupBoxPLL->setWhatsThis(strPLL);
-    CheckBoxPLL->setWhatsThis(strPLL);
+    ui->RadioButtonNoiRedOff->setWhatsThis(strNoiseReduction);
+    ui->RadioButtonNoiRedLow->setWhatsThis(strNoiseReduction);
+    ui->RadioButtonNoiRedMed->setWhatsThis(strNoiseReduction);
+    ui->RadioButtonNoiRedHigh->setWhatsThis(strNoiseReduction);
+    ui->RadioButtonAGCOff->setWhatsThis(strAGC);
+    ui->RadioButtonAGCSlow->setWhatsThis(strAGC);
+    ui->RadioButtonAGCMed->setWhatsThis(strAGC);
+    ui->RadioButtonAGCFast->setWhatsThis(strAGC);
+    ui->ButtonBandWidth->setWhatsThis(strFilterBW);
+    ui->SliderBandwidth->setWhatsThis(strFilterBW);
+    ui->RadioButtonDemAM->setWhatsThis(strDemodType);
+    ui->RadioButtonDemLSB->setWhatsThis(strDemodType);
+    ui->RadioButtonDemUSB->setWhatsThis(strDemodType);
+    ui->RadioButtonDemCW->setWhatsThis(strDemodType);
+    ui->RadioButtonDemFM->setWhatsThis(strDemodType);
+    ui->GroupBoxAutoFreqAcq->setWhatsThis(strAutoFreqAcqu);
+    ui->CheckBoxAutoFreqAcq->setWhatsThis(strAutoFreqAcqu);
+    ui->CheckBoxMuteAudio->setWhatsThis(strCheckBoxMuteAudio);
+    ui->GroupBoxPLL->setWhatsThis(strPLL);
+    ui->CheckBoxPLL->setWhatsThis(strPLL);
     phaseGauge->setWhatsThis(strPLL);
-    TextLabelPhaseOffset->setWhatsThis(strPLL);
-    ButtonFreqOffset->setWhatsThis(strTextFreqOffset);
-    ButtonFreqOffset->setWhatsThis(strTextFreqOffset);
-    CheckBoxSaveAudioWave->setWhatsThis(strCheckBoxSaveAudioWave);
-    groupBoxNoiseReduction->setWhatsThis(strNoiseReduction);
-    groupBoxAGC->setWhatsThis(strAGC);
-    groupBoxDemodulation->setWhatsThis(strDemodType);
-    groupBoxBW->setWhatsThis(strFilterBW);
+    ui->TextLabelPhaseOffset->setWhatsThis(strPLL);
+    ui->ButtonFreqOffset->setWhatsThis(strTextFreqOffset);
+    ui->ButtonFreqOffset->setWhatsThis(strTextFreqOffset);
+    ui->CheckBoxSaveAudioWave->setWhatsThis(strCheckBoxSaveAudioWave);
+    ui->groupBoxNoiseReduction->setWhatsThis(strNoiseReduction);
+    ui->groupBoxAGC->setWhatsThis(strAGC);
+    ui->groupBoxDemodulation->setWhatsThis(strDemodType);
+    ui->groupBoxBW->setWhatsThis(strFilterBW);
 }
 
 
@@ -770,40 +787,41 @@ void AnalogDemDlg::AddWhatsThisHelp()
 	Added phase offset display for AMSS demodulation loop.
 */
 CAMSSDlg::CAMSSDlg(CDRMReceiver& NDRMR, CSettings& Settings, QWidget* parent) :
-	CWindow(parent, Settings, "AMSS"),
+    CWindow(parent, Settings, "AMSS"), ui(new Ui::CAMSSDlgBase),
     DRMReceiver(NDRMR)
 {
-    setupUi(this);
+    ui->setupUi(this);
+
+    setWindowFlags(Qt::Window); // window was not decorated.
 
     /* Init AMSS PLL phase dial control */
     phaseGauge = new PhaseGauge(this);
     phaseGauge->setMinimumHeight(100);
     phaseGauge->setMinimumWidth(100);
-    phaseFrame->layout()->addWidget(phaseGauge);
+    ui->phaseFrame->layout()->addWidget(phaseGauge);
 
     /* Set help text for the controls */
     AddWhatsThisHelp();
 
 
-    TextAMSSServiceLabel->setText("");
-    TextAMSSCountryCode->setText("");
-    TextAMSSTimeDate->setText("");
-    TextAMSSLanguage->setText("");
-    TextAMSSServiceID->setText("");
-    TextAMSSAMCarrierMode->setText("");
-    TextAMSSInfo->setText("");
+    ui->TextAMSSServiceLabel->setText("");
+    ui->TextAMSSCountryCode->setText("");
+    ui->TextAMSSTimeDate->setText("");
+    ui->TextAMSSLanguage->setText("");
+    ui->TextAMSSServiceID->setText("");
+    ui->TextAMSSAMCarrierMode->setText("");
+    ui->TextAMSSInfo->setText("");
 
-    ListBoxAMSSAFSList->setEnabled(FALSE);
+    ui->ListBoxAMSSAFSList->setEnabled(FALSE);
 
 
 	/* Connect controls ----------------------------------------------------- */
 	/* Timers */
-	connect(&Timer, SIGNAL(timeout()),
-		this, SLOT(OnTimer()));
+    connect(&Timer, SIGNAL(timeout()),this, SLOT(OnTimer()));
 	connect(&TimerPLLPhaseDial, SIGNAL(timeout()),
 		this, SLOT(OnTimerPLLPhaseDial()));
 	/* Buttons */
-    connect(buttonOk, SIGNAL(clicked()), this, SLOT(close()));
+    connect(ui->buttonOk, SIGNAL(clicked()), this, SLOT(close()));
 
     APPLY_CUSTOM_THEME();
 }
@@ -821,7 +839,7 @@ void CAMSSDlg::eventShow(QShowEvent*)
 	OnTimerPLLPhaseDial();
 
 	/* Activate real-time timers */
-	Timer.start(GUI_CONTROL_UPDATE_TIME);
+    //Timer.start(GUI_CONTROL_UPDATE_TIME);
 	TimerPLLPhaseDial.start(PLL_PHASE_DIAL_UPDATE_TIME);
 }
 
@@ -836,23 +854,23 @@ void CAMSSDlg::OnTimer()
 	if ((Parameters.Service[0].IsActive()) && (Parameters.Service[0].strLabel != ""))
 	{
 		/* Service label (UTF-8 encoded string -> convert) */
-        TextAMSSServiceLabel->setText(QString().fromUtf8(
+        ui->TextAMSSServiceLabel->setText(QString().fromUtf8(
 			Parameters.Service[0].strLabel.c_str()
 		));
 	}
 	else
-        TextAMSSServiceLabel->setText(tr(""));
+        ui->TextAMSSServiceLabel->setText(tr(""));
 
 	/* Country code */
 	const string strCntryCode = Parameters.Service[0].strCountryCode; /* must be of 2 lowercase chars */
 
 	if ((Parameters.Service[0].IsActive()) && (!strCntryCode.empty()) && (strCntryCode != "--"))
 	{
-        TextAMSSCountryCode->
+        ui->TextAMSSCountryCode->
 			setText(QString(GetISOCountryName(strCntryCode).c_str()));
 	}
 	else
-        TextAMSSCountryCode->setText("");
+        ui->TextAMSSCountryCode->setText("");
 
 	/* SDC Language code */
 
@@ -861,13 +879,13 @@ void CAMSSDlg::OnTimer()
 		const string strLangCode = Parameters.Service[0].strLanguageCode; /* must be of 3 lowercase chars */
 
 		if ((!strLangCode.empty()) && (strLangCode != "---"))
-             TextAMSSLanguage->
+             ui->TextAMSSLanguage->
 				setText(QString(GetISOLanguageName(strLangCode).c_str()));
 		else
-            TextAMSSLanguage->setText(QString(strTableLanguageCode[Parameters.Service[0].iLanguage].c_str()));
+            ui->TextAMSSLanguage->setText(QString(strTableLanguageCode[Parameters.Service[0].iLanguage].c_str()));
 	}
 	else
-        TextAMSSLanguage->setText("");
+        ui->TextAMSSLanguage->setText("");
 
 	/* Time, date */
 	if ((Parameters.iUTCHour == 0) &&
@@ -877,7 +895,7 @@ void CAMSSDlg::OnTimer()
 		(Parameters.iYear == 0))
 	{
 		/* No time service available */
-        TextAMSSTimeDate->setText("");
+        ui->TextAMSSTimeDate->setText("");
 	}
 	else
 	{
@@ -885,7 +903,7 @@ void CAMSSDlg::OnTimer()
 		DateTime.setDate(QDate(Parameters.iYear, Parameters.iMonth, Parameters.iDay));
 		DateTime.setTime(QTime(Parameters.iUTCHour, Parameters.iUTCMin));
 
-        TextAMSSTimeDate->setText(DateTime.toString());
+        ui->TextAMSSTimeDate->setText(DateTime.toString());
 	}
 
 	/* Get number of alternative services */
@@ -894,10 +912,10 @@ void CAMSSDlg::OnTimer()
 	if (iNumAltServices != 0)
 	{
 		QString val = QString().setNum((long) iNumAltServices);
-        ListBoxAMSSAFSList->insertItem(10, val);
+        ui->ListBoxAMSSAFSList->insertItem(10, val);
 
-        ListBoxAMSSAFSList->clear();
-        ListBoxAMSSAFSList->setEnabled(TRUE);
+        ui->ListBoxAMSSAFSList->clear();
+        ui->ListBoxAMSSAFSList->setEnabled(TRUE);
 
 		QString freqEntry;
 
@@ -1045,55 +1063,55 @@ void CAMSSDlg::OnTimer()
 			{
 				freqEntry += " (alt service)";
 			}
-            ListBoxAMSSAFSList->insertItem(0, freqEntry);
+            ui->ListBoxAMSSAFSList->insertItem(0, freqEntry);
 		}
 	}
 	else
 	{
-        ListBoxAMSSAFSList->clear();
-        ListBoxAMSSAFSList->setEnabled(FALSE);
+        ui->ListBoxAMSSAFSList->clear();
+        ui->ListBoxAMSSAFSList->setEnabled(FALSE);
 	}
 
-    TextAMSSServiceID->setText("");
-    TextAMSSAMCarrierMode->setText("");
+    ui->TextAMSSServiceID->setText("");
+    ui->TextAMSSAMCarrierMode->setText("");
 
     if (DRMReceiver.GetAMSSDecode()->GetLockStatus() == CAMSSDecode::NO_SYNC
 	|| Parameters.Service[0].iServiceID == SERV_ID_NOT_USED
 	)
 	{
-        TextAMSSInfo->setText(tr("No AMSS detected"));
+        ui->TextAMSSInfo->setText(tr("No AMSS detected"));
 	}
 	else
 	{
-        TextAMSSInfo->setText(tr("Awaiting AMSS data..."));
+        ui->TextAMSSInfo->setText(tr("Awaiting AMSS data..."));
 
 		/* Display 'block 1' info */
         if (DRMReceiver.GetAMSSDecode()->GetBlock1Status())
 		{
-            TextAMSSInfo->setText("");
+            ui->TextAMSSInfo->setText("");
 
-            TextAMSSLanguage->setText(QString(strTableLanguageCode[DRMReceiver.
+            ui->TextAMSSLanguage->setText(QString(strTableLanguageCode[DRMReceiver.
 				GetParameters()->Service[0].iLanguage].c_str()));
 
-            TextAMSSServiceID->setText("ID:" + QString().setNum(
+            ui->TextAMSSServiceID->setText("ID:" + QString().setNum(
 				(long) Parameters.Service[0].iServiceID, 16).toUpper());
 
-            TextAMSSAMCarrierMode->setText(QString(strTableAMSSCarrierMode[DRMReceiver.
+            ui->TextAMSSAMCarrierMode->setText(QString(strTableAMSSCarrierMode[DRMReceiver.
 				GetParameters()->iAMSSCarrierMode].c_str()));
 		}
 	}
 
-    TextDataEntityGroupStatus->setText(DRMReceiver.GetAMSSDecode()->
+    ui->TextDataEntityGroupStatus->setText(DRMReceiver.GetAMSSDecode()->
 		GetDataEntityGroupStatus());
 
-    TextCurrentBlock->setText(QString().setNum(DRMReceiver.GetAMSSDecode()->
+    ui->TextCurrentBlock->setText(QString().setNum(DRMReceiver.GetAMSSDecode()->
 		GetCurrentBlock(), 10));
 
-    TextBlockBits->setText(DRMReceiver.GetAMSSDecode()->GetCurrentBlockBits());
+    ui->TextBlockBits->setText(DRMReceiver.GetAMSSDecode()->GetCurrentBlockBits());
 
     int val = DRMReceiver.GetAMSSDecode()->GetPercentageDataEntityGroupComplete();
 	Parameters.Unlock();
-    ProgressBarAMSS->setValue(val);
+    ui->ProgressBarAMSS->setValue(val);
 }
 
 void CAMSSDlg::OnTimerPLLPhaseDial()

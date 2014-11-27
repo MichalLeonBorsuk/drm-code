@@ -150,7 +150,7 @@ main(int argc, char **argv)
 		string mode = Settings.Get("command", "mode", string());
 		if (mode == "receive")
 		{
-			CDRMReceiver DRMReceiver(&Settings);
+            CDRMReceiver DRMReceiver(&Settings);
 
 			/* First, initialize the working thread. This should be done in an extra
 			   routine since we cannot 100% assume that the working thread is
@@ -176,8 +176,11 @@ main(int argc, char **argv)
 #ifdef QT_POSITIONING_LIB
             CPos pos(&DRMReceiver.GetParameters()->gps_data);
 #endif
+            CController* c = pMainDlg->getController();
+            DRMReceiver.setController(c);
+
             /* Start working thread */
-			CRx rx(DRMReceiver);            
+            CRx rx(DRMReceiver);
 			rx.start();
 
 			/* Set main window */

@@ -321,9 +321,6 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& Settings,
 	/* clear signal strenght */
 	setBars(0);
 
-	/* Activate real-time timers */
-    controller->start(GUI_CONTROL_UPDATE_TIME);
-
     APPLY_CUSTOM_THEME_UI();
 }
 
