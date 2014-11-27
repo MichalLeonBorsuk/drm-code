@@ -92,66 +92,24 @@ void SimpleWaterfallWidget::updatePlot(const vector<_REAL>& vec, _REAL min, _REA
     update();
 }
 #endif
-WaterfallWidget::WaterfallWidget(QWidget *parent) :
-    QWidget(parent), resizeGlitch(false)
+
+WaterFallPlot::WaterFallPlot()
 {
-    setAttribute(Qt::WA_OpaquePaintEvent, true);
-    setAttribute(Qt::WA_TransparentForMouseEvents, true);
-    setCursor(Qt::CrossCursor);
-    setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+
 }
 
-void WaterfallWidget::paintEvent(QPaintEvent *)
-{
-    QPainter painter(this);
-    painter.drawPixmap(0, 0, Canvas);
-}
-
-void WaterfallWidget::resizeEvent(QResizeEvent *e)
-{
-    // prevent resize glitch when the widget is created,
-    // the fist resizeEvent() is bogus
-    if(!resizeGlitch)
-    {
-        resizeGlitch = true;
-        return;
-    }
-
-    QPixmap tmp = Canvas;
-    Canvas = QPixmap(e->size());
-    image = QImage(e->size().width(), 1, QImage::Format_RGB32);
-
-    // first time ever - initialise to black
-    if(tmp.size().width()==0)
-    {
-        tmp = QPixmap(e->size());
-        // always use a black background
-        tmp.fill(QColor::fromRgb(0, 0, 0));
-    }
-    // vertical stretch - fill below old with black
-    if(Canvas.height()>tmp.height())
-        Canvas.fill(QColor::fromRgb(0, 0, 0));
-
-    // copy old data, scaling to fit horizontally but making space below
-    // TODO - the width scaling is slightly off.
-    QPainter p(&Canvas);
-    QPoint origin(0,0);
-    QSize top(Canvas.width(), tmp.height());
-    p.drawPixmap(QRect(origin, top), tmp);
-}
-
-void WaterfallWidget::updatePlot(const vector<_REAL>& vec, _REAL min, _REAL max)
+void WaterFallPlot::updatePlot(const std::vector<_REAL>& vec, _REAL min, _REAL max)
 {
     int w = image.width();
     if (w == 0)
         return;
 
     QPainter painter;
-    if(!painter.begin(&Canvas)) // David had problems on Linux without this
+    if(!painter.begin(&pixmap)) // David had problems on Linux without this
         return;
 
     /* Scroll Canvas */
-    Canvas.scroll(0, 1, Canvas.rect());
+    pixmap.scroll(0, 1, pixmap.rect());
 
     // cast from u_char (8bits wide) to QRgb (probably 24bits wide)
     QRgb* scanLine = ((QRgb*)image.scanLine(0));
@@ -177,5 +135,63 @@ void WaterfallWidget::updatePlot(const vector<_REAL>& vec, _REAL min, _REAL max)
     }
     painter.drawImage(0, 0, image);
     painter.end();
+}
+
+void WaterFallPlot::resize(QSize size)
+{
+    QPixmap tmp = pixmap;
+    pixmap = QPixmap(size);
+    image = QImage(size.width(), 1, QImage::Format_RGB32);
+
+    // first time ever - initialise to black
+    if(tmp.size().width()==0)
+    {
+        tmp = QPixmap(size);
+        // always use a black background
+        tmp.fill(QColor::fromRgb(0, 0, 0));
+    }
+    // vertical stretch - fill below old with black
+    if(pixmap.height()>tmp.height())
+        pixmap.fill(QColor::fromRgb(0, 0, 0));
+    // copy old data, scaling to fit horizontally but making space below
+    // TODO - the width scaling is slightly off.
+    QPainter p(&pixmap);
+    QPoint origin(0,0);
+    QSize top(pixmap.width(), tmp.height());
+    p.drawPixmap(QRect(origin, top), tmp);
+
+}
+
+WaterfallWidget::WaterfallWidget(QWidget *parent) :
+    QWidget(parent), resizeGlitch(false)
+{
+    setAttribute(Qt::WA_OpaquePaintEvent, true);
+    setAttribute(Qt::WA_TransparentForMouseEvents, true);
+    setCursor(Qt::CrossCursor);
+    setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+}
+
+void WaterfallWidget::paintEvent(QPaintEvent *)
+{
+    QPainter painter(this);
+    painter.drawPixmap(0, 0, plot.pixmap);
+}
+
+void WaterfallWidget::resizeEvent(QResizeEvent *e)
+{
+    // prevent resize glitch when the widget is created,
+    // the fist resizeEvent() is bogus
+    if(!resizeGlitch)
+    {
+        resizeGlitch = true;
+        return;
+    }
+
+    plot.resize(e->size());
+}
+
+void WaterfallWidget::updatePlot(const vector<_REAL>& vec, _REAL min, _REAL max)
+{
+    plot.updatePlot(vec, min, max);
     update();
 }

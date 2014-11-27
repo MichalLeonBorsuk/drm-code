@@ -42,6 +42,7 @@ public slots:
     void on_checkBoxPLL_stateChanged(int);
     void on_buttonFreqOffset_clicked();
     void on_spinBoxNoiRedLevel_valueChanged(int value);
+    void on_amFilterBandwidthChanged(int value);
 
 signals:
     void modulation(int);

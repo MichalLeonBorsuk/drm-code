@@ -2,7 +2,6 @@
 #define RECEIVERCONTROLLER_H
 
 #include <QObject>
-#include <QTimer>
 #include <../DrmReceiver.h>
 #include <../util/Settings.h>
 
@@ -25,7 +24,7 @@ struct ChannelConfiguration {
     int nData, nAudio;
 };
 
-class ReceiverController : public QObject
+class ReceiverController : public QObject, public CController
 {
     Q_OBJECT
 public:
@@ -62,10 +61,10 @@ signals:
     void flippedSpectrumChanged(bool);
     void recFilterChanged(bool);
     void intConsChanged(bool);
+    void amFilterBandwidthChanged(int);
+    void dataAvailable();
 
 public slots:
-    void start(int ms) { timer.start(ms); }
-    void stop() { timer.stop(); }
     void setControls();
     void selectDataService(int);
     void selectAudioService(int);
@@ -92,14 +91,14 @@ public slots:
     void setNoiRedLevel(int value);
 
 private:
-    QTimer        timer;
     CDRMReceiver* receiver;
     int           iCurrentFrequency;
+    int           currentAMfilterBW;
     ERecMode      currentMode;
     CSettings&    settings;
 
 private slots:
-    void on_timer();
+    void on_new_data();
     void updateDRM(CParameter&);
 };
 

@@ -3,7 +3,9 @@
 #include <../util-QT/Util.h>
 #include <../tables/TableFAC.h>
 #include <../DrmReceiver.h>
+#include "receivercontroller.h"
 #include "DRMPlot.h"
+#include "cdrmplotqwt.h"
 #include <QFileDialog>
 
 AudioDetailWidget::AudioDetailWidget(ReceiverController* rc, QWidget *parent) :
@@ -33,7 +35,7 @@ void AudioDetailWidget::setEngineering(bool eng)
     {
         if(pMainPlot==NULL)
         {
-            pMainPlot = new CDRMPlot(NULL, ui->plot, controller);
+            pMainPlot = new CDRMPlotQwt(NULL, ui->plot, controller);
             pMainPlot->SetPlotStyle(iPlotStyle);
             pMainPlot->SetupChart(CDRMPlot::AUDIO_SPECTRUM);
         }

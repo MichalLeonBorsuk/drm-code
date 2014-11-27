@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>715</width>
+    <width>889</width>
     <height>433</height>
    </rect>
   </property>
@@ -72,8 +72,17 @@
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
+        <property name="pageStep">
+         <number>1000</number>
+        </property>
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="tickPosition">
+         <enum>QSlider::TicksBothSides</enum>
+        </property>
+        <property name="tickInterval">
+         <number>1000</number>
         </property>
        </widget>
       </item>
@@ -416,8 +425,8 @@
  <resources/>
  <connections/>
  <buttongroups>
-  <buttongroup name="buttonGroupAGC"/>
   <buttongroup name="buttonGroupNoiseReduction"/>
+  <buttongroup name="buttonGroupAGC"/>
   <buttongroup name="buttonGroupDemodulation"/>
  </buttongroups>
 </ui>

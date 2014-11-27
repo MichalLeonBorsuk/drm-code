@@ -75,6 +75,8 @@ public:
 #endif
     ~FDRMDialog();
 
+    ReceiverController* getController() { return controller; }
+
 private:
     Ui::DRMMainWindow*  ui;
     CDRMReceiver&		DRMReceiver;

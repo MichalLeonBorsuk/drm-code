@@ -40,6 +40,9 @@
 #include <QHideEvent>
 #include <QShowEvent>
 #include "ThemeCustomizer.h"
+#include "cdrmplotqwt.h"
+#include "cdrmplotqcp.h"
+#define USE_QCUSTOMPLOT
 
 /* Implementation *************************************************************/
 systemevalDlg::systemevalDlg(ReceiverController* rc, CSettings& Settings,
@@ -56,7 +59,15 @@ systemevalDlg::systemevalDlg(ReceiverController* rc, CSettings& Settings,
     /* Init controls -------------------------------------------------------- */
 
     /* Init main plot */
-    MainPlot = new CDRMPlot(NULL, plot, controller);
+#ifdef USE_QCUSTOMPLOT
+    QCustomPlot* plot = new QCustomPlot(this);
+    framePlot->layout()->addWidget(plot);
+    MainPlot = new CDRMPlotQCP(plot); //(NULL, plot, controller);
+#else
+    QwtPlot* plot = new QwtPlot(this);
+    framePlot->layout()->addWidget(plot);
+    MainPlot = new CDRMPlotQwt(NULL, plot, controller);
+#endif
 
     /* Update times for colour LEDs */
     LEDFAC->SetUpdateTime(1500);
@@ -69,41 +80,7 @@ systemevalDlg::systemevalDlg(ReceiverController* rc, CSettings& Settings,
     /* Initialise controls */
     setControls(Settings);
 
-    /* Set the Char Type of each selectable item */
-    QTreeWidgetItemIterator it(chartSelector, QTreeWidgetItemIterator::NoChildren);
-    for (; *it; it++)
-    {
-        if ((*it)->text(0) == tr("SNR Spectrum"))
-            (*it)->setData(0,  Qt::UserRole, CDRMPlot::SNR_SPECTRUM);
-        if ((*it)->text(0) == tr("Audio Spectrum"))
-            (*it)->setData(0,  Qt::UserRole, CDRMPlot::AUDIO_SPECTRUM);
-        if ((*it)->text(0) == tr("Shifted PSD"))
-            (*it)->setData(0,  Qt::UserRole, CDRMPlot::POWER_SPEC_DENSITY);
-        if ((*it)->text(0) == tr("Waterfall Input Spectrum"))
-            (*it)->setData(0,  Qt::UserRole, CDRMPlot::INP_SPEC_WATERF);
-        if ((*it)->text(0) == tr("Input Spectrum"))
-            (*it)->setData(0,  Qt::UserRole, CDRMPlot::INPUTSPECTRUM_NO_AV);
-        if ((*it)->text(0) == tr("Input PSD"))
-            (*it)->setData(0,  Qt::UserRole, CDRMPlot::INPUT_SIG_PSD);
-        if ((*it)->text(0) == tr("MSC"))
-            (*it)->setData(0,  Qt::UserRole, CDRMPlot::MSC_CONSTELLATION);
-        if ((*it)->text(0) == tr("SDC"))
-            (*it)->setData(0,  Qt::UserRole, CDRMPlot::SDC_CONSTELLATION);
-        if ((*it)->text(0) == tr("FAC"))
-            (*it)->setData(0,  Qt::UserRole, CDRMPlot::FAC_CONSTELLATION);
-        if ((*it)->text(0) == tr("FAC / SDC / MSC"))
-            (*it)->setData(0,  Qt::UserRole, CDRMPlot::ALL_CONSTELLATION);
-        if ((*it)->text(0) == tr("Frequency / Sample Rate"))
-            (*it)->setData(0,  Qt::UserRole, CDRMPlot::FREQ_SAM_OFFS_HIST);
-        if ((*it)->text(0) == tr("Delay / Doppler"))
-            (*it)->setData(0,  Qt::UserRole, CDRMPlot::DOPPLER_DELAY_HIST);
-        if ((*it)->text(0) == tr("SNR / Audio"))
-            (*it)->setData(0,  Qt::UserRole, CDRMPlot::SNR_AUDIO_HIST);
-        if ((*it)->text(0) == tr("Transfer Function"))
-            (*it)->setData(0,  Qt::UserRole, CDRMPlot::TRANSFERFUNCTION);
-        if ((*it)->text(0) == tr("Impulse Response"))
-            (*it)->setData(0,  Qt::UserRole, CDRMPlot::AVERAGED_IR);
-    }
+    MainPlot->setupTreeWidget(chartSelector);
 
     /* Expand all items */
     chartSelector->expandAll();
@@ -221,7 +198,7 @@ void systemevalDlg::setControls(CSettings& s)
     {
         /* Update slider and label */
         SliderNoOfIterations->setValue(iNumIt);
-        TextNumOfIterations->setText(tr("MLC: Number of Iterations: ") +
+        TextNumOfIterations->setText(tr("MLC Iterations: ") +
                                      QString().setNum(iNumIt));
     }
 
@@ -406,7 +383,7 @@ void systemevalDlg::OnCustomContextMenuRequested(const QPoint& p)
 CDRMPlot* systemevalDlg::OpenChartWin(CDRMPlot::ECharType eNewType)
 {
     /* Create new chart window */
-    CDRMPlot* pNewChartWin = new CDRMPlot(this, NULL, controller);
+    CDRMPlot* pNewChartWin = new CDRMPlotQwt(this, NULL, controller);
     pNewChartWin->setCaption(tr("Chart Window"));
 
     /* Set correct icon (use the same as this dialog) */
@@ -466,6 +443,11 @@ string systemevalDlg::ECharTypeToPlotName(CDRMPlot::ECharType eCharType)
 
 void systemevalDlg::OnTimer()
 {
+#ifdef USE_QCUSTOMPLOT
+    MainPlot->update(controller);
+#endif
+
+
     Parameters.Lock();
 
         SetStatus(LEDFAC, Parameters.ReceiveStatus.FAC.GetStatus());
@@ -832,7 +814,7 @@ void systemevalDlg::OnSliderIterChange(int value)
 {
     emit setNumMSCMLCIterations(value);
     /* Show the new value in the label control */
-    TextNumOfIterations->setText(tr("MLC: Number of Iterations: ") +
+    TextNumOfIterations->setText(tr("MLC Iterations: ") +
                                  QString().setNum(value));
 }
 

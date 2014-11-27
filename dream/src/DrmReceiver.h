@@ -132,6 +132,11 @@ protected:
     virtual void ProcessDataInternal(CParameter&);
 };
 
+class CController {
+public:
+    virtual void dataAvailable() = 0;
+};
+
 class CDRMReceiver : public CDRMTransceiver
 {
 public:
@@ -144,6 +149,7 @@ public:
     void					LoadSettings(); // can write to settings to set defaults
     void					SaveSettings();
     void					Start();
+    void                    setController(CController *c) { controller = c; }
     void					SetRsciInput(const string& rsciInput);
     void					ClearRsciInput();
     void					SetSoundFile(const string& soundFile);
@@ -334,6 +340,7 @@ protected:
     void					saveSDCtoFile();
     void                    CloseSoundInterfaces();
 
+    CController*            controller;
     /* Modules */
     CReceiveData			ReceiveData;
     CWriteData				WriteData;

@@ -1,7 +1,7 @@
 #include "channelwidget.h"
 #include "ui_channelwidget.h"
 #include <QTabBar>
-#include "DRMPlot.h"
+#include "cdrmplotqwt.h"
 
 ChannelWidget::ChannelWidget(ReceiverController* c, QWidget *parent) :
     QWidget(parent),
@@ -9,7 +9,7 @@ ChannelWidget::ChannelWidget(ReceiverController* c, QWidget *parent) :
     pMainPlot(NULL)
 {
     ui->setupUi(this);
-    pMainPlot = new CDRMPlot(NULL, ui->plot, c); // must be after setupUi
+    pMainPlot = new CDRMPlotQwt(NULL, ui->plot, c); // must be after setupUi
     pMainPlot->setupTreeWidget(ui->chartSelector);
     pMainPlot->SetupChart(CDRMPlot::INPUT_SIG_PSD);
     ui->drmDetail->hideMSCParams(true);

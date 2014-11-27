@@ -50,7 +50,9 @@ const int
 CDRMReceiver::MAX_UNLOCKED_COUNT = 2;
 
 /* Implementation *************************************************************/
-CDRMReceiver::CDRMReceiver(CSettings* pSettings) : CDRMTransceiver(pSettings, new CSoundInNull, new CSoundOut),
+CDRMReceiver::CDRMReceiver(CSettings* pSettings) :
+    CDRMTransceiver(pSettings, new CSoundInNull, new CSoundOut),
+    controller(NULL),
     ReceiveData(), WriteData(pSoundOutInterface),
     FreqSyncAcq(),
     ChannelEstimation(),
@@ -336,7 +338,7 @@ CDRMReceiver::Run()
     }
 
     /* Output to downstream RSCI */
-    if (downstreamRSCI.GetOutEnabled())
+    if (true) // downstreamRSCI.GetOutEnabled())
     {
         switch (eReceiverMode)
         {
@@ -351,24 +353,34 @@ CDRMReceiver::Run()
                     if (iUnlockedCount < MAX_UNLOCKED_COUNT)
                         iUnlockedCount++;
                     else
-                        downstreamRSCI.SendUnlockedFrame(Parameters);
+                    {
+                        if (downstreamRSCI.GetOutEnabled())
+                            downstreamRSCI.SendUnlockedFrame(Parameters);
+                        if(controller) controller->dataAvailable();
+                    }
                 }
             }
             else if (bFrameToSend)
             {
-                downstreamRSCI.SendLockedFrame(Parameters, FACSendBuf, SDCSendBuf, MSCSendBuf);
+                if (downstreamRSCI.GetOutEnabled())
+                    downstreamRSCI.SendLockedFrame(Parameters, FACSendBuf, SDCSendBuf, MSCSendBuf);
+                if(controller) controller->dataAvailable();
                 iUnlockedCount = 0;
                 bFrameToSend = FALSE;
             }
             break;
         case RM_AM:
         case RM_FM:
-            /* Encode audio for RSI output */
-            if (AudioSourceEncoder.ProcessData(Parameters, AMSoEncBuf, MSCSendBuf[0]))
-                bFrameToSend = TRUE;
+            if (downstreamRSCI.GetOutEnabled())
+            {
+                /* Encode audio for RSI output */
+                if (AudioSourceEncoder.ProcessData(Parameters, AMSoEncBuf, MSCSendBuf[0]))
+                    bFrameToSend = TRUE;
 
-            if (bFrameToSend)
-                downstreamRSCI.SendAMFrame(Parameters, MSCSendBuf[0]);
+                if (bFrameToSend)
+                    downstreamRSCI.SendAMFrame(Parameters, MSCSendBuf[0]);
+            }
+            if(controller) controller->dataAvailable();
             break;
         case RM_NONE:
             break;

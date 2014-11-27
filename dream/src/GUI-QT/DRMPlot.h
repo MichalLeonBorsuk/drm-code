@@ -29,220 +29,91 @@
  *
 \******************************************************************************/
 
-#ifndef __DRMPLOT_QWT5_H
-#define __DRMPLOT_QWT5_H
+#ifndef __DRMPLOT_H
+#define __DRMPLOT_H
 
-#include <QTimer>
-#include <QDialog>
-#include <qwt_plot.h>
-#include <qwt_plot_curve.h>
-#include <qwt_plot_grid.h>
-#if QWT_VERSION < 0x060000
-#include <qwt_symbol.h>
-#endif
 #include <../Parameter.h>
-#include <../util/Vector.h>
-#include "receivercontroller.h"
+#include <QColor>
 
-/* Window size for standalone chart */
-#define WINDOW_CHART_WIDTH 256
-#define WINDOW_CHART_HEIGHT 256
-
-/* Window border for standalone chart */
-#define WINDOW_BORDER 1
-
-/* Define the plot font size */
-#define PLOT_FONT_SIZE 8
-
-/* Classes ********************************************************************/
-
-class WaterfallWidget;
-class CDRMReceiver;
 class QTreeWidget;
-class QResizeEvent;
-class QwtPlotPicker;
-class QwtLegend;
+class QIcon;
+class QRect;
+class ReceiverController;
 
-/* This class is needed to handle events for standalone window chart */
-class QwtPlotDialog : public QDialog
+class CDRMPlot
 {
-	Q_OBJECT
 
 public:
-    QwtPlotDialog(QWidget* parent) : QDialog(parent)
-	{
-		setWindowFlags(Qt::Window);
-		resize(WINDOW_CHART_WIDTH, WINDOW_CHART_HEIGHT);
-		Frame = new QFrame(this);
-		Frame->setFrameStyle(QFrame::Panel|QFrame::Sunken);
-		Frame->setLineWidth(WINDOW_BORDER);
-		Plot = new QwtPlot(Frame);
-	}
-    ~QwtPlotDialog() { }
-	QwtPlot *GetPlot() { return Plot; }
-	void show() { QDialog::show(); emit activate(); }
-	void hide() { emit deactivate(); QDialog::hide(); }
+    enum ECharType
+    {
+        INPUT_SIG_PSD = 0, /* default */
+        TRANSFERFUNCTION = 1,
+        FAC_CONSTELLATION = 2,
+        SDC_CONSTELLATION = 3,
+        MSC_CONSTELLATION = 4,
+        POWER_SPEC_DENSITY = 5,
+        INPUTSPECTRUM_NO_AV = 6,
+        AUDIO_SPECTRUM = 7,
+        FREQ_SAM_OFFS_HIST = 8,
+        DOPPLER_DELAY_HIST = 9,
+        ALL_CONSTELLATION = 10,
+        SNR_AUDIO_HIST = 11,
+        AVERAGED_IR = 12,
+        SNR_SPECTRUM = 13,
+        INPUT_SIG_PSD_ANALOG = 14,
+        INP_SPEC_WATERF = 15,
+        NONE_OLD = 16 /* None must always be the last element! (see settings) */
+    };
 
-protected:
-	QFrame *Frame;
-	QwtPlot *Plot;
-	void reject() { emit deactivate(); QDialog::reject(); }
-    void resizeEvent(QResizeEvent *e);
+    CDRMPlot():CurCharType(NONE_OLD){}
+    virtual ~CDRMPlot() {}
 
-signals:
-	void activate();
-	void deactivate();
-};
+    virtual void setCaption(const QString& s)=0;
+    virtual void setIcon(const QIcon& s)=0;
+    virtual void setGeometry(const QRect& g)=0;
+    virtual bool isVisible() const = 0;
+    virtual const QRect geometry() const = 0;
+    virtual void show()=0;
+    virtual void close()=0;
+    virtual void activate()=0;
+    virtual void deactivate()=0;
 
-class CDRMPlot : public QObject
-{
-	Q_OBJECT
-
-public:
-	enum ECharType
-	{
-		INPUT_SIG_PSD = 0, /* default */
-		TRANSFERFUNCTION = 1,
-		FAC_CONSTELLATION = 2,
-		SDC_CONSTELLATION = 3,
-		MSC_CONSTELLATION = 4,
-		POWER_SPEC_DENSITY = 5,
-		INPUTSPECTRUM_NO_AV = 6,
-		AUDIO_SPECTRUM = 7,
-		FREQ_SAM_OFFS_HIST = 8,
-		DOPPLER_DELAY_HIST = 9,
-		ALL_CONSTELLATION = 10,
-		SNR_AUDIO_HIST = 11,
-		AVERAGED_IR = 12,
-		SNR_SPECTRUM = 13,
-		INPUT_SIG_PSD_ANALOG = 14,
-		INP_SPEC_WATERF = 15,
-		NONE_OLD = 16 /* None must always be the last element! (see settings) */
-	};
-
-    CDRMPlot(QWidget*, QwtPlot*, ReceiverController*);
-	~CDRMPlot();
-
-	QwtPlot         *plot;
-
-	void SetupChart(const ECharType eNewType);
-	ECharType GetChartType() const { return CurCharType; }
-	void UpdateAnalogBWMarker();
-	void SetPlotStyle(const int iNewStyleID);
-
+    virtual void SetupChart(const ECharType eNewType);
     void setupTreeWidget(QTreeWidget* tw);
-    void setCaption(const QString& s) { if (DialogPlot) DialogPlot->setWindowTitle(s); }
-	void setIcon(const QIcon& s) { if (DialogPlot) DialogPlot->setWindowIcon(s); }
-	void setGeometry(const QRect& g) { if (DialogPlot) DialogPlot->setGeometry(g); }
-	bool isVisible() { if (DialogPlot) return DialogPlot->isVisible(); else return FALSE; }
-	const QRect geometry() { if (DialogPlot) return DialogPlot->geometry(); else return QRect(); }
-	void close() { if (DialogPlot) delete this; }
-	void hide() { if (DialogPlot) DialogPlot->hide(); }
-	void show() { if (DialogPlot) DialogPlot->show(); }
-
+    void SetPlotStyle(const int iNewStyleID);
+    void update(ReceiverController* rc);
+    ECharType GetChartType() const { return CurCharType; }
 
 protected:
-	void SetVerticalBounds(
-		const _REAL rStartGuard, const _REAL rEndGuard,
-		const _REAL rBeginIR, const _REAL rEndIR);
-	void SetHorizontalBounds( _REAL rScaleMin, _REAL rScaleMax, _REAL rLowerB, _REAL rHigherB);
-	void SetInpSpecWaterf(CVector<_REAL>& vecrData, CVector<_REAL>& vecrScale);
-	void SetDCCarrier(const _REAL rDCFreq);
-	void SetBWMarker(const _REAL rBWCenter, const _REAL rBWWidth);
-	void AutoScale(CVector<_REAL>& vecrData, CVector<_REAL>& vecrData2,
-		CVector<_REAL>& vecrScale);
-	void AutoScale2(CVector<_REAL>& vecrData,
-		CVector<_REAL>& vecrData2,
-		CVector<_REAL>& vecrScale);
-	void AutoScale3(CVector<_REAL>& vecrData, CVector<_REAL>& vecrScale);
-	void SetData(CVector<_REAL>& vecrData, CVector<_REAL>& vecrScale);
-	void SetData(CVector<_REAL>& vecrData1, CVector<_REAL>& vecrData2,
-		CVector<_REAL>& vecrScale);
-	void SetData(QwtPlotCurve& curve, CVector<_COMPLEX>& veccData);
-	void SetData(CVector<_COMPLEX>& veccData);
-	void SetData(CVector<_COMPLEX>& veccMSCConst,
-		CVector<_COMPLEX>& veccSDCConst,
-		CVector<_COMPLEX>& veccFACConst);
-	void SetGrid(double div, int step, int substep);
-	void SetQAMGrid(const ECodScheme eCoSc);
+    virtual void applyColors()=0;
+    virtual void replot()=0;
+    virtual void clearPlots()=0;
+    virtual void setupBasicPlot(const char* titleText,
+                        const char* xText, const char* yText, const char* legendText,
+                        double left, double right, double bottom, double top)=0;
+    virtual void add2ndGraph(const char* axisText, const char* legendText, double bottom, double top)=0;
+    virtual void addxMarker(QColor color, double initialPos)=0;
+    virtual void addyMarker(QColor color, double initialPos)=0;
+    virtual void setupConstPlot(const char* text, ECodScheme eNewCoSc)=0;
+    virtual void addConstellation(const char* legendText, int n)=0;
+    virtual void setupWaterfall()=0;
+    virtual void setQAMGrid(const ECodScheme eCoSc)=0;
+    virtual void setData(int n, CVector<_COMPLEX>& veccData)=0;
+    virtual void setData(int n, CVector<_REAL>& vecrData, CVector<_REAL>& vecrScale, bool autoScale=false, const QString& axisLabel="")=0;
+    virtual void setxMarker(int n, _REAL r)=0;
+    virtual void setxMarker(int n, _REAL c, _REAL b)=0;
+    virtual void setyMarker(int n, _REAL r)=0;
+    virtual void updateWaterfall(CVector<_REAL>& vecrData, CVector<_REAL>& vecrScale)=0;
 
-	void PlotDefaults();
-	void PlotForceUpdate();
-	void PlotSetLegendFont();
+    ECharType		CurCharType;
+    QColor			MainPenColorPlot;
+    QColor			MainPenColorConst;
+    QColor			MainGridColorPlot;
+    QColor			SpecLine1ColorPlot;
+    QColor			SpecLine2ColorPlot;
+    QColor			PassBandColorPlot;
+    QColor			BckgrdColorPlot;
 
-	void SetupAvIR();
-	void SetupTranFct();
-	void SetupAudioSpec(_BOOLEAN bAudioDecoder);
-	void SetupFreqSamOffsHist();
-	void SetupDopplerDelayHist();
-	void SetupSNRAudHist();
-	void SetupPSD();
-	void SetupSNRSpectrum();
-	void SetupInpSpec();
-	void SetupFACConst();
-	void SetupSDCConst(const ECodScheme eNewCoSc);
-	void SetupMSCConst(const ECodScheme eNewCoSc);
-	void SetupAllConst();
-	void SetupInpPSD(_BOOLEAN bAnalog = FALSE);
-	void SetupInpSpecWaterf();
-
-	void AddWhatsThisHelpChar(const ECharType NCharType);
-
-    ReceiverController* controller;
-	QwtPlot         *SuppliedPlot;
-	QwtPlotDialog   *DialogPlot;
-
-	bool            bActive;
-
-    /* Colors */
-	QColor			MainPenColorPlot;
-	QColor			MainPenColorConst;
-	QColor			MainGridColorPlot;
-	QColor			SpecLine1ColorPlot;
-	QColor			SpecLine2ColorPlot;
-	QColor			PassBandColorPlot;
-	QColor			BckgrdColorPlot;
-
-	ECharType		CurCharType;
-	ECharType		InitCharType;
-	ECodScheme		eLastSDCCodingScheme;
-	ECodScheme		eLastMSCCodingScheme;
-	_BOOLEAN		bLastAudioDecoder;
-
-	QwtText			leftTitle, rightTitle, bottomTitle;
-
-	QwtPlotCurve	main1curve, main2curve;
-	QwtPlotCurve	curve1, curve2, curve3, curve4, curve5;
-	QwtPlotCurve	hcurvegrid, vcurvegrid;
-	QwtPlotGrid		grid;
-#if QWT_VERSION < 0x060000
-	QwtSymbol		MarkerSym1, MarkerSym2, MarkerSym3;
-#endif
-	QwtPlotPicker	*picker;
-	QwtLegend		*legend;
-
-	QTimer			TimerChart;
-	CDRMReceiver	*pDRMRec;
-
-	/* Waterfall spectrum stuff */
-    WaterfallWidget* waterfallWidget;
-	int				iAudSampleRate;
-	int				iSigSampleRate;
-	int				iLastXoredSampleRate;
-	int				iLastChanMode;
-
-public slots:
-#if QWT_VERSION < 0x060000
-	void OnSelected(const QwtDoublePoint &pos);
-#else
-	void OnSelected(const QPointF &pos);
-#endif
-	void OnTimerChart();
-	void activate();
-	void deactivate();
-
-signals:
-	void xAxisValSet(double);
 };
 
 
