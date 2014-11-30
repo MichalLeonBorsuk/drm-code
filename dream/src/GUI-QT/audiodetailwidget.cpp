@@ -47,7 +47,8 @@ void AudioDetailWidget::setEngineering(bool eng)
         if(pMainPlot==NULL)
         {
             pMainPlot = CDRMPlot::createPlot(ui->plot->parentWidget());
-            ui->plot->parentWidget()->layout()->replaceWidget(ui->plot, pMainPlot->widget());
+            ui->plot->parentWidget()->layout()->removeWidget(ui->plot);
+            ui->plot->parentWidget()->layout()->addWidget(pMainPlot->widget());
             pMainPlot->SetPlotStyle(iPlotStyle);
             pMainPlot->SetupChart(CDRMPlot::AUDIO_SPECTRUM);
             connect(controller, SIGNAL(dataAvailable()), this, SLOT(on_new_data()));

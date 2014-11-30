@@ -62,7 +62,8 @@ TransmDialog::TransmDialog(CSettings& Settings,	QWidget* parent)
 
 	/* Init progress bar for input signal level */
     inputLevel = LevelMeter::createLevelMeter(ProgrInputLevel->parentWidget());
-    ProgrInputLevel->parentWidget()->layout()->replaceWidget(ProgrInputLevel, inputLevel->widget());
+    ProgrInputLevel->parentWidget()->layout()->removeWidget(ProgrInputLevel);
+    ProgrInputLevel->parentWidget()->layout()->addWidget(inputLevel->widget());
 
 	/* Init progress bar for current transmitted picture */
 	ProgressBarCurPict->setRange(0, 100);

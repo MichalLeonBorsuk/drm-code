@@ -118,7 +118,8 @@ AnalogDemDlg::AnalogDemDlg(ReceiverController* rc, CSettings& Settings,
     ui->checkBoxWaterfall->setChecked(waterfall);
 
     MainPlot = CDRMPlot::createPlot(ui->plot->parentWidget());
-    ui->plot->parentWidget()->layout()->replaceWidget(ui->plot, MainPlot->widget());
+    ui->plot->parentWidget()->layout()->removeWidget(ui->plot);
+    ui->plot->parentWidget()->layout()->addWidget(MainPlot->widget());
     MainPlot->SetupChart(waterfall ? CDRMPlot::INP_SPEC_WATERF : CDRMPlot::INPUT_SIG_PSD_ANALOG);
     //connect(, SIGNAL(xAxisValSet(double)), this, SLOT(OnChartxAxisValSet(double)));
 #if 0

@@ -209,8 +209,9 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& Settings,
     connect(pAnalogDemDlg, SIGNAL(About()), this, SLOT(OnHelpAbout()));
 
     /* Init progress bar for input signal level */
-    inputLevel = LevelMeter::createLevelMeter(ui->ProgrInputLevel->parentWidget());
-    ui->ProgrInputLevel->parentWidget()->layout()->replaceWidget(ui->ProgrInputLevel, inputLevel->widget());
+    inputLevel = LevelMeter::createLevelMeter(ui->ProgrInputLevel);
+    //ui->ProgrInputLevel->parentWidget()->layout()->removeWidget(ui->ProgrInputLevel);
+    //ui->ProgrInputLevel->parentWidget()->layout()->addWidget(inputLevel->widget());
 
 #ifdef HAVE_LIBHAMLIB
     connect(pStationsDlg, SIGNAL(subscribeRig()), &rig, SLOT(subscribe()));
@@ -1137,7 +1138,7 @@ void FDRMDialog::SetDisplayColor(const QColor newColor)
     vecpWidgets.push_back(ui->LabelCountryCode);
     vecpWidgets.push_back(ui->LabelServiceID);
     vecpWidgets.push_back(ui->TextLabelInputLevel);
-    vecpWidgets.push_back(ui->ProgrInputLevel);
+    //vecpWidgets.push_back(ui->ProgrInputLevel);
     vecpWidgets.push_back(ui->CLED_FAC);
     vecpWidgets.push_back(ui->CLED_SDC);
     vecpWidgets.push_back(ui->CLED_MSC);

@@ -10,7 +10,8 @@ DRMDisplay::DRMDisplay(QWidget *parent) :
     ui->setupUi(this);
     /* Init progress bar for input signal level */
     inputLevel = LevelMeter::createLevelMeter(ui->ProgrInputLevel->parentWidget());
-    ui->ProgrInputLevel->parentWidget()->layout()->replaceWidget(ui->ProgrInputLevel, inputLevel->widget());
+    ui->ProgrInputLevel->parentWidget()->layout()->removeWidget(ui->ProgrInputLevel);
+    ui->ProgrInputLevel->parentWidget()->layout()->addWidget(inputLevel->widget());
     /* Update times for color LEDs */
     ui->CLED_FAC->SetUpdateTime(1500);
     ui->CLED_SDC->SetUpdateTime(1500);

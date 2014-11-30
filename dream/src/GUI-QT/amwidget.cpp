@@ -39,7 +39,8 @@ AMWidget::AMWidget(ReceiverController* rc, QWidget *parent) :
     ui->setupUi(this);
 
     MainPlot = CDRMPlot::createPlot(ui->plot->parentWidget());
-    ui->plot->parentWidget()->layout()->replaceWidget(ui->plot, MainPlot->widget());
+    ui->plot->parentWidget()->layout()->removeWidget(ui->plot);
+    ui->plot->parentWidget()->layout()->addWidget(MainPlot->widget());
 
     //connect(static_cast<CDRMPlotQwt*>(MainPlot), SIGNAL(xAxisValSet(double)), this, SLOT(OnChartxAxisValSet(double)));
     // TODO signal from plot

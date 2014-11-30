@@ -10,7 +10,8 @@ ChannelWidget::ChannelWidget(ReceiverController* c, QWidget *parent) :
 {
     ui->setupUi(this);
     pMainPlot = CDRMPlot::createPlot(ui->plot->parentWidget());
-    ui->plot->parentWidget()->layout()->replaceWidget(ui->plot, pMainPlot->widget());
+    ui->plot->parentWidget()->layout()->removeWidget(ui->plot);
+    ui->plot->parentWidget()->layout()->addWidget(pMainPlot->widget());
     pMainPlot->setupTreeWidget(ui->chartSelector);
     pMainPlot->SetupChart(CDRMPlot::INPUT_SIG_PSD);
     ui->drmDetail->hideMSCParams(true);
