@@ -81,7 +81,7 @@
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout_3">
       <item>
-       <widget class="QwtThermo" name="sMeter" native="true"/>
+       <widget class="QWidget" name="sMeter" native="true"/>
       </item>
      </layout>
     </widget>
@@ -114,13 +114,6 @@
    </item>
   </layout>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>QwtThermo</class>
-   <extends>QWidget</extends>
-   <header>qwt_thermo.h</header>
-  </customwidget>
- </customwidgets>
  <resources>
   <include location="res/icons.qrc"/>
  </resources>

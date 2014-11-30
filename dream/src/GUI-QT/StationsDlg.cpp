@@ -58,31 +58,16 @@ orangeCube(":/icons/orangeCube.png"), pinkCube(":/icons/pinkCube.png"),
 eRecMode(RM_NONE)
 {
     ui->setupUi(this);
-#if QWT_VERSION < 0x060100
-    ui->ProgrSigStrength->setScalePosition(QwtThermo::TopScale);
-#else
-    ui->ProgrSigStrength->setScalePosition(QwtThermo::TrailingScale);
-#endif
-	/* Load settings */
-	LoadSettings();
-
-	/* Set help text for the controls */
-	AddWhatsThisHelp();
-
+    inputLevel = SMeter::createSMeter(ui->ProgrSigStrength->parentWidget());
+    ui->ProgrSigStrength->parentWidget()->layout()->replaceWidget(ui->ProgrSigStrength, inputLevel->widget());
     ui->ProgrSigStrength->hide();
-    ui->TextLabelSMeter->hide();
 
-	/* Set up frequency selector control (QWTCounter control) */
-#if QWT_VERSION < 0x060100
-    ui->QwtCounterFrequency->setRange(0.0, MAX_RF_FREQ, 1.0);
-#else
-    ui->QwtCounterFrequency->setRange(0.0, MAX_RF_FREQ);
-    ui->QwtCounterFrequency->setSingleStep(1.0);
-#endif
-    ui->QwtCounterFrequency->setNumButtons(3); /* Three buttons on each side */
-    ui->QwtCounterFrequency->setIncSteps(QwtCounter::Button1, 1); /* Increment */
-    ui->QwtCounterFrequency->setIncSteps(QwtCounter::Button2, 10);
-    ui->QwtCounterFrequency->setIncSteps(QwtCounter::Button3, 100);
+    /* Load settings */
+    LoadSettings();
+
+    /* Set help text for the controls */
+    AddWhatsThisHelp();
+    ui->TextLabelSMeter->hide();
 
     ui->ListViewStations->setAllColumnsShowFocus(true);
     ui->ListViewStations->setColumnCount(9);
@@ -137,14 +122,12 @@ eRecMode(RM_NONE)
 #endif
     connect(ui->buttonOk, SIGNAL(clicked()), this, SLOT(close()));
 
-	/* Init progress bar for input s-meter */
-    InitSMeter(this, ui->ProgrSigStrength);
-
 	/* Connections ---------------------------------------------------------- */
 
 	connect(&Timer, SIGNAL(timeout()), this, SLOT(OnTimer()));
-    connect(ui->QwtCounterFrequency, SIGNAL(valueChanged(double)),
+    connect(ui->spinBoxFrequency, SIGNAL(valueChanged(double)),
 		this, SLOT(OnFreqCntNewValue(double)));
+    connect(ui->checkBoxFrequencyStep, SIGNAL(toggled(bool)), this, SLOT(setFine(bool)));
     connect(&scheduleLoader, SIGNAL(fileReady()), this, SLOT(OnFileReady()));
 
     APPLY_CUSTOM_THEME();
@@ -152,6 +135,11 @@ eRecMode(RM_NONE)
 
 StationsDlg::~StationsDlg()
 {
+}
+
+void StationsDlg::setFine(bool on)
+{
+    ui->spinBoxFrequency->setSingleStep(on?1.0:10.0);
 }
 
 void StationsDlg::on_actionGetUpdate_triggered()
@@ -212,7 +200,7 @@ void StationsDlg::LoadSchedule()
 
 void StationsDlg::SetFrequency(int f)
 {
-    ui->QwtCounterFrequency->setValue(f);
+    ui->spinBoxFrequency->setValue(f);
 }
 
 void StationsDlg::OnSwitchMode(int m)
@@ -532,7 +520,7 @@ void StationsDlg::on_ListViewStations_itemSelectionChanged()
 	if(items.size()==1)
 	{
         int iFreq = QString(items.first()->text(3)).toInt();
-        ui->QwtCounterFrequency->setValue(iFreq);
+        ui->spinBoxFrequency->setValue(iFreq);
     }
 }
 
@@ -562,7 +550,7 @@ void StationsDlg::DisableSMeter()
 
 void StationsDlg::OnSigStr(double rCurSigStr)
 {
-    ui->ProgrSigStrength->setValue(rCurSigStr);
+    inputLevel->setLevel(rCurSigStr);
 }
 
 void StationsDlg::on_actionChooseRig_triggered()
@@ -605,9 +593,8 @@ void StationsDlg::AddWhatsThisHelp()
 	QString strCounter =
 		tr("<b>Frequency Counter:</b> The current frequency "
 		"value can be changed by using this counter. The tuning steps are "
-		"100 kHz for the  buttons with three arrows, 10 kHz for the "
-		"buttons with two arrows and 1 kHz for the buttons having only "
-		"one arrow. By keeping the button pressed, the values are "
+        "10 kHz when the 'fine' check box is clear and 1 kHz when it is checked."
+        "By keeping the button pressed, the values are "
 		"increased / decreased automatically.");
 
 	/* UTC time label */
@@ -624,7 +611,7 @@ void StationsDlg::AddWhatsThisHelp()
 		"is not available, the controls are disabled.");
 
     ui->ListViewStations->setWhatsThis(strList);
-    ui->QwtCounterFrequency->setWhatsThis(strCounter);
+    ui->spinBoxFrequency->setWhatsThis(strCounter);
     ui->TextLabelUTCTime->setWhatsThis(strTime);
     ui->TextLabelSMeter->setWhatsThis(strSMeter);
     ui->ProgrSigStrength->setWhatsThis(strSMeter);

@@ -5,8 +5,8 @@
 #include <../DrmReceiver.h>
 #include "receivercontroller.h"
 #include "DRMPlot.h"
-#include "cdrmplotqwt.h"
 #include <QFileDialog>
+#include <QDebug>
 
 AudioDetailWidget::AudioDetailWidget(ReceiverController* rc, QWidget *parent) :
     QWidget(parent),
@@ -28,6 +28,17 @@ void AudioDetailWidget::addItem(const QString& key, const QString& val)
     ui->treeWidget->addTopLevelItem((new QTreeWidgetItem(QStringList() << key << val)));
 }
 
+void AudioDetailWidget::on_new_data()
+{
+    /*
+    if(sender())
+    {
+        ReceiverController* rc = qobject_cast<ReceiverController*>(sender());
+    }*/
+    if(pMainPlot)
+        pMainPlot->update(controller);
+}
+
 void AudioDetailWidget::setEngineering(bool eng)
 {
     engineeringMode = eng;
@@ -35,16 +46,16 @@ void AudioDetailWidget::setEngineering(bool eng)
     {
         if(pMainPlot==NULL)
         {
-            pMainPlot = new CDRMPlotQwt(NULL, ui->plot, controller);
+            pMainPlot = CDRMPlot::createPlot(ui->plot->parentWidget());
+            ui->plot->parentWidget()->layout()->replaceWidget(ui->plot, pMainPlot->widget());
             pMainPlot->SetPlotStyle(iPlotStyle);
             pMainPlot->SetupChart(CDRMPlot::AUDIO_SPECTRUM);
+            connect(controller, SIGNAL(dataAvailable()), this, SLOT(on_new_data()));
         }
-        pMainPlot->activate();
     }
     else
     {
-        if(pMainPlot)
-            pMainPlot->deactivate();
+        disconnect(controller, SIGNAL(dataAvailable()), this, SLOT(on_new_data()));
     }
     update();
 }

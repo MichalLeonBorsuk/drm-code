@@ -5094,7 +5094,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QwtThermo" name="ProgrInputLevel" native="true">
+         <widget class="QWidget" name="ProgrInputLevel" native="true">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
             <horstretch>0</horstretch>
@@ -9057,11 +9057,6 @@
   </layout>
  </widget>
  <customwidgets>
-  <customwidget>
-   <class>QwtThermo</class>
-   <extends>QWidget</extends>
-   <header>qwt_thermo.h</header>
-  </customwidget>
   <customwidget>
    <class>CMultColorLED</class>
    <extends>QWidget</extends>

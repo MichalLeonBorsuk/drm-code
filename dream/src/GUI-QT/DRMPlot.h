@@ -4,12 +4,10 @@
  *
  * Original Author(s):
  *	Volker Fischer
- *
- * Qwt 5-6 conversion Author(s):
- *  David Flamand
+ * Refactored by Julian Cable
  *
  * Description:
- *	Custom settings of the qwt-plot, Support Qwt version 5.0.0 to 6.1.0(+)
+ *	Base class for plots
  *
  ******************************************************************************
  *
@@ -34,6 +32,27 @@
 
 #include <../Parameter.h>
 #include <QColor>
+#include <QDialog>
+#include <QFrame>
+
+/* Window size for standalone chart */
+#define WINDOW_CHART_WIDTH 256
+#define WINDOW_CHART_HEIGHT 256
+
+/* Maximum and minimum values of x-axis of input spectrum plots */
+#define MIN_VAL_INP_SPEC_Y_AXIS_DB				((double) -120.0)
+#define MAX_VAL_INP_SPEC_Y_AXIS_DB				((double) 0.0)
+
+/* Maximum and minimum values of x-axis of input PSD (shifted) */
+#define MIN_VAL_SHIF_PSD_Y_AXIS_DB				((double) -85.0)
+#define MAX_VAL_SHIF_PSD_Y_AXIS_DB				((double) -35.0)
+
+/* Maximum and minimum values of x-axis of SNR spectrum */
+#define MIN_VAL_SNR_SPEC_Y_AXIS_DB				((double) 0.0)
+#define MAX_VAL_SNR_SPEC_Y_AXIS_DB				((double) 35.0)
+
+/* Window border for standalone chart */
+#define WINDOW_BORDER 1
 
 class QTreeWidget;
 class QIcon;
@@ -42,7 +61,6 @@ class ReceiverController;
 
 class CDRMPlot
 {
-
 public:
     enum ECharType
     {
@@ -68,21 +86,15 @@ public:
     CDRMPlot():CurCharType(NONE_OLD){}
     virtual ~CDRMPlot() {}
 
-    virtual void setCaption(const QString& s)=0;
-    virtual void setIcon(const QIcon& s)=0;
-    virtual void setGeometry(const QRect& g)=0;
-    virtual bool isVisible() const = 0;
-    virtual const QRect geometry() const = 0;
-    virtual void show()=0;
-    virtual void close()=0;
-    virtual void activate()=0;
-    virtual void deactivate()=0;
-
-    virtual void SetupChart(const ECharType eNewType);
+    void SetupChart(const ECharType eNewType);
     void setupTreeWidget(QTreeWidget* tw);
     void SetPlotStyle(const int iNewStyleID);
     void update(ReceiverController* rc);
-    ECharType GetChartType() const { return CurCharType; }
+    ECharType getChartType() const { return CurCharType; }
+    virtual QWidget* widget() const =0;
+
+    // Factory
+    static CDRMPlot* createPlot(QWidget* parent);
 
 protected:
     virtual void applyColors()=0;
@@ -93,19 +105,23 @@ protected:
                         double left, double right, double bottom, double top)=0;
     virtual void add2ndGraph(const char* axisText, const char* legendText, double bottom, double top)=0;
     virtual void addxMarker(QColor color, double initialPos)=0;
+    virtual void addBwMarker()=0;
     virtual void addyMarker(QColor color, double initialPos)=0;
-    virtual void setupConstPlot(const char* text, ECodScheme eNewCoSc)=0;
+    virtual void setupConstPlot(const char* text)=0;
     virtual void addConstellation(const char* legendText, int n)=0;
     virtual void setupWaterfall()=0;
-    virtual void setQAMGrid(const ECodScheme eCoSc)=0;
+    virtual void setQAMGrid(double div, int step, int substep)=0;
     virtual void setData(int n, CVector<_COMPLEX>& veccData)=0;
     virtual void setData(int n, CVector<_REAL>& vecrData, CVector<_REAL>& vecrScale, bool autoScale=false, const QString& axisLabel="")=0;
     virtual void setxMarker(int n, _REAL r)=0;
-    virtual void setxMarker(int n, _REAL c, _REAL b)=0;
+    virtual void setBwMarker(int n, _REAL c, _REAL b)=0;
     virtual void setyMarker(int n, _REAL r)=0;
     virtual void updateWaterfall(CVector<_REAL>& vecrData, CVector<_REAL>& vecrScale)=0;
+    virtual void setWhatsThis(const QString&)=0;
+    void addWhatsThisHelp();
 
     ECharType		CurCharType;
+    int             iSigSampleRate;
     QColor			MainPenColorPlot;
     QColor			MainPenColorConst;
     QColor			MainGridColorPlot;
@@ -115,6 +131,5 @@ protected:
     QColor			BckgrdColorPlot;
 
 };
-
 
 #endif

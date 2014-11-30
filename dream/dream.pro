@@ -38,15 +38,13 @@ gui {
     RESOURCES = src/GUI-QT/res/icons.qrc
     QT += network xml
     qt4:QT += webkit
-    qt5:QT += widgets webkitwidgets printsupport
+    qt5:QT += widgets webkitwidgets
     INCLUDEPATH += src/GUI-QT
     VPATH += src/GUI-QT
     win32:RC_FILE = windows/dream.rc
     macx:RC_FILE = src/GUI-QT/res/macicons.icns
-    CONFIG += qwt
     UI_DIR = ui
     MOC_DIR = moc
-    LIBS += -lqcustomplot
 }
 message($$VERSION_MESSAGE $$DEBUG_MESSAGE $$UI_MESSAGE)
 qt:multimedia {
@@ -293,8 +291,17 @@ hamlib {
      }
      message("with hamlib")
 }
+qcustomplot {
+    QT += printsupport
+    DEFINES += WITH_QCUSTOMPLOT
+    LIBS += -lqcustomplot
+    HEADERS += src/GUI-QT/amspectrumplot.h src/GUI-QT/cdrmplotqcp.h src/GUI-QT/qcplevelmeter.h src/GUI-QT/qcpsmeter.h
+    SOURCES += src/GUI-QT/amspectrumplot.cpp src/GUI-QT/cdrmplotqcp.cpp src/GUI-QT/qcplevelmeter.cpp src/GUI-QT/qcpsmeter.cpp
+}
 qwt {
     #DEFINES += QWT_NO_SVG
+    HEADERS += src/GUI-QT/cdrmplotqwt.h src/GUI-QT/qwtlevelmeter.h src/GUI-QT/qwtsmeter.h
+    SOURCES += src/GUI-QT/cdrmplotqwt.cpp src/GUI-QT/qwtlevelmeter.cpp src/GUI-QT/qwtsmeter.cpp
     QT += svg
     macx {
         LIBS += -framework qwt
@@ -520,9 +527,7 @@ HEADERS += \
     src/util/Utilities.h \
     src/util/Vector.h \
     src/Version.h \
-    src/GUI-QT/amspectrumplot.h \
-    src/GUI-QT/cdrmplotqwt.h \
-    src/GUI-QT/cdrmplotqcp.h
+    src/GUI-QT/chartdialog.h
 
 SOURCES += \
     src/AMDemodulation.cpp \
@@ -624,9 +629,7 @@ SOURCES += \
     src/util/Settings.cpp \
     src/util/Utilities.cpp \
     src/Version.cpp \
-    src/GUI-QT/amspectrumplot.cpp \
-    src/GUI-QT/cdrmplotqwt.cpp \
-    src/GUI-QT/cdrmplotqcp.cpp
+    src/GUI-QT/chartdialog.cpp
 
 !console {
     qt5 {
@@ -770,3 +773,6 @@ SOURCES += \
 
 OTHER_FILES += \
     android/AndroidManifest.xml
+
+FORMS += \
+    src/GUI-QT/chartdialog.ui

@@ -1,6 +1,7 @@
 #include "drmdisplay.h"
 #include "ui_drmdisplay.h"
-#include <../util-QT/Util.h>
+#include "../util-QT/Util.h"
+#include "DialogUtil.h"
 
 DRMDisplay::DRMDisplay(QWidget *parent) :
     QWidget(parent),
@@ -8,27 +9,8 @@ DRMDisplay::DRMDisplay(QWidget *parent) :
 {
     ui->setupUi(this);
     /* Init progress bar for input signal level */
-#if QWT_VERSION < 0x060100
-    ui->ProgrInputLevel->setRange(-50.0, 0.0);
-    ui->ProgrInputLevel->setOrientation(Qt::Vertical, QwtThermo::LeftScale);
-#else
-    ui->ProgrInputLevel->setScale(-50.0, 0.0);
-    ui->ProgrInputLevel->setOrientation(Qt::Vertical);
-    ui->ProgrInputLevel->setScalePosition(QwtThermo::TrailingScale);
-#endif
-    ui->ProgrInputLevel->setAlarmLevel(-12.5);
-    QColor alarmColor(QColor(255, 0, 0));
-    QColor fillColor(QColor(0, 190, 0));
-#if QWT_VERSION < 0x060000
-    ui->ProgrInputLevel->setAlarmColor(alarmColor);
-    ui->ProgrInputLevel->setFillColor(fillColor);
-#else
-    QPalette newPalette = ui->ProgrInputLevel->palette();
-    newPalette.setColor(QPalette::Base, newPalette.color(QPalette::Window));
-    newPalette.setColor(QPalette::ButtonText, fillColor);
-    newPalette.setColor(QPalette::Highlight, alarmColor);
-    ui->ProgrInputLevel->setPalette(newPalette);
-#endif
+    inputLevel = LevelMeter::createLevelMeter(ui->ProgrInputLevel->parentWidget());
+    ui->ProgrInputLevel->parentWidget()->layout()->replaceWidget(ui->ProgrInputLevel, inputLevel->widget());
     /* Update times for color LEDs */
     ui->CLED_FAC->SetUpdateTime(1500);
     ui->CLED_SDC->SetUpdateTime(1500);
@@ -50,10 +32,10 @@ void DRMDisplay::setBars(int bars)
     ui->fivebars->setAutoFillBackground(bars>4);
 }
 
-void DRMDisplay::setLevel(_REAL level)
+void DRMDisplay::setLevel(double level)
 {
     /* Input level meter */
-    ui->ProgrInputLevel->setValue(level);
+    inputLevel->setLevel(level);
 }
 
 void DRMDisplay::showReceptionStatus(ETypeRxStatus fac, ETypeRxStatus sdc, ETypeRxStatus msc)

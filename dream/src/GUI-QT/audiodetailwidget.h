@@ -27,6 +27,7 @@ public slots:
     void setTextMessage(const QString&);
     void updateDisplay(int, CService);
     void setEngineering(bool);
+    void on_new_data();
 private:
     Ui::AudioDetailWidget *ui;
     int short_id;

@@ -1,7 +1,7 @@
 #include "channelwidget.h"
 #include "ui_channelwidget.h"
 #include <QTabBar>
-#include "cdrmplotqwt.h"
+#include "DRMPlot.h"
 
 ChannelWidget::ChannelWidget(ReceiverController* c, QWidget *parent) :
     QWidget(parent),
@@ -9,7 +9,8 @@ ChannelWidget::ChannelWidget(ReceiverController* c, QWidget *parent) :
     pMainPlot(NULL)
 {
     ui->setupUi(this);
-    pMainPlot = new CDRMPlotQwt(NULL, ui->plot, c); // must be after setupUi
+    pMainPlot = CDRMPlot::createPlot(ui->plot->parentWidget());
+    ui->plot->parentWidget()->layout()->replaceWidget(ui->plot, pMainPlot->widget());
     pMainPlot->setupTreeWidget(ui->chartSelector);
     pMainPlot->SetupChart(CDRMPlot::INPUT_SIG_PSD);
     ui->drmDetail->hideMSCParams(true);
@@ -19,6 +20,16 @@ ChannelWidget::ChannelWidget(ReceiverController* c, QWidget *parent) :
 ChannelWidget::~ChannelWidget()
 {
     delete ui;
+}
+
+void ChannelWidget::on_new_data()
+{
+    if(sender())
+    {
+        ReceiverController* rc = qobject_cast<ReceiverController*>(sender());
+        if(pMainPlot!=NULL && rc != NULL)
+            pMainPlot->update(rc);
+    }
 }
 
 void ChannelWidget::connectController(ReceiverController* controller)
@@ -49,18 +60,19 @@ void ChannelWidget::connectController(ReceiverController* controller)
     connect(controller, SIGNAL(recFilterChanged(bool)), this, SLOT(setRecFilterEnabled(bool)));
     connect(controller, SIGNAL(intConsChanged(bool)), this, SLOT(setIntConsEnabled(bool)));
     connect(controller, SIGNAL(flippedSpectrumChanged(bool)), this, SLOT(setFlipSpectrumEnabled(bool)));
+
+    connect(controller, SIGNAL(dataAvailable()), this, SLOT(on_new_data()));
+
 }
 
 
 void ChannelWidget::showEvent(QShowEvent*)
 {
     on_chartSelector_currentItemChanged(ui->chartSelector->currentItem());
-    pMainPlot->activate();
 }
 
 void ChannelWidget::hideEvent(QHideEvent*)
 {
-    pMainPlot->deactivate();
 }
 
 void ChannelWidget::on_showOptions_toggled(bool enabled)

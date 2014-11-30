@@ -41,20 +41,17 @@ RigDlg::RigDlg(CRig& nrig, QWidget* parent) :
     rig(nrig), rigmap(), bComboBoxPortMutex(FALSE)
 {
     setAttribute(Qt::WA_QuitOnClose, false);
-    setupUi(this);
-#if QWT_VERSION < 0x060100
-    sMeter->setScalePosition(QwtThermo::TopScale);
-#else
-    sMeter->setScalePosition(QwtThermo::TrailingScale);
-#endif
+    ui->setupUi(this);
+
+    sMeter = SMeter::createSMeter(ui->sMeter->parentWidget());
+    ui->sMeter->parentWidget()->layout()->replaceWidget(ui->sMeter, sMeter->widget());
 
     map<rig_model_t,CHamlib::SDrRigCaps> r;
-
     rig.GetRigList(r);
-    modified->setEnabled(false);
+    ui->modified->setEnabled(false);
     //rigTypes->setColumnCount(2);
-    rigTypes->setSortingEnabled(false);
-    QTreeWidgetItem* none = new QTreeWidgetItem(rigTypes);
+    ui->rigTypes->setSortingEnabled(false);
+    QTreeWidgetItem* none = new QTreeWidgetItem(ui->rigTypes);
 	none->setText(0, "None");
 	none->setData(0, Qt::UserRole, RIG_MODEL_NONE);
     for(map<rig_model_t,CHamlib::SDrRigCaps>::const_iterator i=r.begin(); i!=r.end(); i++)
@@ -66,10 +63,10 @@ RigDlg::RigDlg(CRig& nrig, QWidget* parent) :
         {
             continue;
         }
-        QList<QTreeWidgetItem *> l = rigTypes->findItems(rc.strManufacturer.c_str(), Qt::MatchFixedString);
+        QList<QTreeWidgetItem *> l = ui->rigTypes->findItems(rc.strManufacturer.c_str(), Qt::MatchFixedString);
         if(l.size()==0)
         {
-            mfr = new QTreeWidgetItem(rigTypes);
+            mfr = new QTreeWidgetItem(ui->rigTypes);
             mfr->setText(0,rc.strManufacturer.c_str());
 			mfr->setFlags(mfr->flags() & ~Qt::ItemIsSelectable);
         }
@@ -82,10 +79,10 @@ RigDlg::RigDlg(CRig& nrig, QWidget* parent) :
 		model->setData(0, Qt::UserRole, model_num);
 		rigmap[model_num] = rc.strModelName;
     }
-    rigTypes->setSortingEnabled(false);
-    rigTypes->sortItems(9, Qt::AscendingOrder);
+    ui->rigTypes->setSortingEnabled(false);
+    ui->rigTypes->sortItems(9, Qt::AscendingOrder);
 
-   	InitSMeter(this, sMeter);
+    // TODO InitSMeter(this, sMeter);
 
     APPLY_CUSTOM_THEME();
 }
@@ -100,23 +97,23 @@ void RigDlg::showEvent(QShowEvent*)
 	bComboBoxPortMutex = TRUE;
 	map<string,string> ports;
 	rig.GetPortList(ports);
-	comboBoxPort->clear();
+    ui->comboBoxPort->clear();
 	prev_port = rig.GetComPort();
 	int index = -1;
 	for (map<string,string>::const_iterator i=ports.begin(); i!=ports.end(); i++)
 	{
-		comboBoxPort->addItem(i->first.c_str(), i->second.c_str());
+        ui->comboBoxPort->addItem(i->first.c_str(), i->second.c_str());
 		if (i->second.compare(prev_port) == 0)
-			index = comboBoxPort->count() - 1; /* index is zero based */
+            index = ui->comboBoxPort->count() - 1; /* index is zero based */
 	}
 	if (index != -1)
 	{
-		comboBoxPort->setCurrentIndex(index);
+        ui->comboBoxPort->setCurrentIndex(index);
 	}
 	else
 	{	/* Add the port to the list if not found */
-		comboBoxPort->addItem(prev_port.c_str(), prev_port.c_str());
-		comboBoxPort->setCurrentIndex(comboBoxPort->findText(prev_port.c_str()));
+        ui->comboBoxPort->addItem(prev_port.c_str(), prev_port.c_str());
+        ui->comboBoxPort->setCurrentIndex(ui->comboBoxPort->findText(prev_port.c_str()));
 	}
 	bComboBoxPortMutex = FALSE;
 
@@ -124,7 +121,7 @@ void RigDlg::showEvent(QShowEvent*)
     prev_rig_model = rig.GetHamlibModelID();
     if (prev_rig_model == RIG_MODEL_NONE)
     {
-        rigTypes->setCurrentItem(rigTypes->topLevelItem(0)); /* None */
+        ui->rigTypes->setCurrentItem(ui->rigTypes->topLevelItem(0)); /* None */
     }
     else
     {
@@ -132,10 +129,10 @@ void RigDlg::showEvent(QShowEvent*)
         if(m!=rigmap.end())
         {
             QString name(m->second.c_str());
-            QList<QTreeWidgetItem *> l = rigTypes->findItems(name, Qt::MatchExactly | Qt::MatchRecursive);
+            QList<QTreeWidgetItem *> l = ui->rigTypes->findItems(name, Qt::MatchExactly | Qt::MatchRecursive);
             if(l.size()>0) {
-                rigTypes->setCurrentItem(l.front());
-                selectedRigType->setText(name);
+                ui->rigTypes->setCurrentItem(l.front());
+                ui->selectedRigType->setText(name);
             }
         }
     }
@@ -151,10 +148,10 @@ void RigDlg::hideEvent(QHideEvent*)
 void
 RigDlg::on_rigTypes_itemSelectionChanged()
 {
-	QList<QTreeWidgetItem*> l = rigTypes->selectedItems();
+    QList<QTreeWidgetItem*> l = ui->rigTypes->selectedItems();
 	if(l.count()==1) {
 		const QTreeWidgetItem* item = l.first();
-		selectedRigType->setText(item->text(0));
+        ui->selectedRigType->setText(item->text(0));
 		rig.SetHamlibModelID(item->data(0, Qt::UserRole).toInt());
 	}
 }
@@ -168,8 +165,8 @@ RigDlg::on_modified_stateChanged(int state)
 void
 RigDlg::on_testRig_clicked()
 {
-	rig.SetComPort(comboBoxPort->itemData(comboBoxPort->currentIndex()).toString().toStdString());
-	rig.SetHamlibModelID(rigTypes->currentItem()->data(0, Qt::UserRole).toInt());
+    rig.SetComPort(ui->comboBoxPort->itemData(ui->comboBoxPort->currentIndex()).toString().toStdString());
+    rig.SetHamlibModelID(ui->rigTypes->currentItem()->data(0, Qt::UserRole).toInt());
 	rig.subscribe();
 }
 
@@ -177,7 +174,7 @@ void
 RigDlg::on_buttonBox_accepted()
 {
 	rig.SetComPort(getComboBoxComPort().toStdString());
-	rig.SetHamlibModelID(rigTypes->currentItem()->data(0, Qt::UserRole).toInt());
+    rig.SetHamlibModelID(ui->rigTypes->currentItem()->data(0, Qt::UserRole).toInt());
 	rig.unsubscribe();
 	close();
 }
@@ -202,16 +199,16 @@ QString
 RigDlg::getComboBoxComPort()
 {
 	QString strPort;
-	const int index = comboBoxPort->currentIndex();
-	if (comboBoxPort->currentText().compare(comboBoxPort->itemText(index)))
-		strPort = comboBoxPort->currentText();
+    const int index = ui->comboBoxPort->currentIndex();
+    if (ui->comboBoxPort->currentText().compare(ui->comboBoxPort->itemText(index)))
+        strPort = ui->comboBoxPort->currentText();
 	else
-		strPort = comboBoxPort->itemData(index).toString();
+        strPort = ui->comboBoxPort->itemData(index).toString();
 	return strPort;
 }
 
 void
 RigDlg::onSigstr(double r)
 {
-	sMeter->setValue(r);
+    sMeter->setLevel(r);
 }

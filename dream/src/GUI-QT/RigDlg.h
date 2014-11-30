@@ -36,11 +36,13 @@
 #include <set>
 #include <map>
 
-/* Definitions ****************************************************************/
+namespace Ui {
+    class RigDlg;
+}
 
-/* Classes ********************************************************************/
+class SMeter;
 
-class RigDlg : public QDialog, public Ui_RigDlg
+class RigDlg : public QDialog
 {
 	Q_OBJECT
 
@@ -53,11 +55,14 @@ protected:
     void		hideEvent(QHideEvent* pEvent);
     QString		getComboBoxComPort();
 
+    Ui::RigDlg* ui;
+
     CRig&		rig;
     rig_model_t		prev_rig_model;
     string		prev_port;
     map<rig_model_t,string> rigmap;
     _BOOLEAN	bComboBoxPortMutex;
+    SMeter*     sMeter;
 
 public slots:
     void		on_rigTypes_itemSelectionChanged(); 
