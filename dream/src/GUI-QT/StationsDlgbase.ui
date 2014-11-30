@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>621</width>
+    <width>629</width>
     <height>427</height>
    </rect>
   </property>
@@ -111,16 +111,6 @@
          <number>0</number>
         </property>
         <item>
-         <widget class="QWidget" name="widget_2" native="true">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-         </widget>
-        </item>
-        <item>
          <layout class="QHBoxLayout" name="horizontalLayout_2">
           <property name="spacing">
            <number>6</number>
@@ -154,37 +144,25 @@
            </widget>
           </item>
           <item>
-           <widget class="QwtCounter" name="QwtCounterFrequency" native="true">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Fixed" vsizetype="Maximum">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
+           <widget class="QDoubleSpinBox" name="spinBoxFrequency">
+            <property name="suffix">
+             <string> kHz</string>
             </property>
-            <property name="minimumSize">
-             <size>
-              <width>168</width>
-              <height>0</height>
-             </size>
+            <property name="decimals">
+             <number>0</number>
+            </property>
+            <property name="maximum">
+             <double>30000.000000000000000</double>
+            </property>
+            <property name="value">
+             <double>12000.000000000000000</double>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QLabel" name="TextLabel1">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Minimum" vsizetype="Maximum">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
+           <widget class="QCheckBox" name="checkBoxFrequencyStep">
             <property name="text">
-             <string>kHz</string>
-            </property>
-            <property name="wordWrap">
-             <bool>false</bool>
-            </property>
-            <property name="buddy">
-             <cstring>QwtCounterFrequency</cstring>
+             <string>Fine</string>
             </property>
            </widget>
           </item>
@@ -223,7 +201,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QwtThermo" name="ProgrSigStrength" native="true">
+       <widget class="QWidget" name="ProgrSigStrength" native="true">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Maximum">
           <horstretch>0</horstretch>
@@ -235,9 +213,6 @@
           <width>150</width>
           <height>0</height>
          </size>
-        </property>
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
         </property>
        </widget>
       </item>
@@ -293,8 +268,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>621</width>
-     <height>25</height>
+     <width>629</width>
+     <height>23</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuView">
@@ -405,18 +380,6 @@
    </property>
   </action>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>QwtCounter</class>
-   <extends>QWidget</extends>
-   <header>qwt_counter.h</header>
-  </customwidget>
-  <customwidget>
-   <class>QwtThermo</class>
-   <extends>QWidget</extends>
-   <header>qwt_thermo.h</header>
-  </customwidget>
- </customwidgets>
  <resources>
   <include location="res/icons.qrc"/>
  </resources>

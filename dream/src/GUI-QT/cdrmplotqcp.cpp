@@ -1,7 +1,7 @@
 #include "cdrmplotqcp.h"
 #include <qcustomplot.h>
 
-CDRMPlotQCP::CDRMPlotQCP(QCustomPlot *plot):CDRMPlot(),plot(NULL),wfplot(NULL),wfitem(NULL),
+CDRMPlotQCP::CDRMPlotQCP(QWidget* parent):CDRMPlot(),plot(new QCustomPlot(parent)),wfplot(NULL),wfitem(NULL),
     title(NULL),hlines(),vlines()
 {
     SetPlotStyle(0); // TODO - get from settings?
@@ -47,57 +47,14 @@ void CDRMPlotQCP::replot()
     plot->replot();
 }
 
-void CDRMPlotQCP::SetPlotStyle(const int iNewStyleID)
-{
-}
-
-void CDRMPlotQCP::setCaption(const QString& s)
-{
-}
-
-void CDRMPlotQCP::setIcon(const QIcon& s)
-{
-}
-
-void CDRMPlotQCP::setGeometry(const QRect& g)
-{
-}
-
-const QRect CDRMPlotQCP::geometry() const
-{
-    return QRect();
-}
-
-bool CDRMPlotQCP::isVisible() const
-{
-    return false;
-}
-
-void CDRMPlotQCP::close()
-{
-}
-
-void CDRMPlotQCP::hide()
-{
-}
-
-void CDRMPlotQCP::show()
-{
-}
-
-void CDRMPlotQCP::activate()
-{
-
-}
-
-void CDRMPlotQCP::deactivate()
-{
-
-}
-
 void CDRMPlotQCP::applyColors()
 {
-
+    /*
+     * set background to BckgrdColorPlot
+     * set gridlines to MainGridColorPlot
+     * re-initialise plotting system
+     */
+    plot->axisRect()->setBackground(BckgrdColorPlot);
 }
 
 void CDRMPlotQCP::setupBasicPlot(const char* titleText, const char* xText, const char* yText, const char* legendText,
@@ -108,7 +65,10 @@ void CDRMPlotQCP::setupBasicPlot(const char* titleText, const char* xText, const
     plot->xAxis->setLabel(QObject::tr(xText));
     plot->xAxis->setRange(left, right);
 
+    plot->xAxis->setVisible(true);
     plot->xAxis2->setVisible(false);
+    plot->yAxis->setVisible(true);
+    plot->yAxis2->setVisible(false);
 
     plot->yAxis->setRange(bottom, top);
     plot->yAxis->setLabel(QObject::tr(yText));
@@ -148,6 +108,18 @@ void CDRMPlotQCP::addxMarker(QColor color, double initialPos)
     vlines << l;
 }
 
+void CDRMPlotQCP::addBwMarker()
+{
+    QCPBars* bw = new QCPBars(plot->xAxis, plot->yAxis);
+    bw->setBrush(QBrush(QColor(192, 192, 255, 125)));
+    bw->setPen(QPen(Qt::NoPen));
+    plot->addPlottable(bw);
+    if(plot->addLayer("bw")) {
+        bw->setLayer("bw");
+    }
+    bars << bw;
+}
+
 void CDRMPlotQCP::addyMarker(QColor color, double initialPos)
 {
     QCPItemLine* l = new QCPItemLine(plot);
@@ -170,28 +142,8 @@ void CDRMPlotQCP::setupWaterfall()
     plot->yAxis->setVisible(false);
 }
 
-void CDRMPlotQCP::setQAMGrid(const ECodScheme eCoSc)
+void CDRMPlotQCP::setQAMGrid(double div, int step, int substep)
 {
-    double div;
-    int step;
-    int substep = 4;
-    switch (eCoSc)
-    {
-    case CS_1_SM: /* QAM4 */
-        div = 2.0 / sqrt(2.0);
-        step = 1;
-        break;
-
-    case CS_2_SM: /* QAM16 */
-        div = 4.0 / sqrt(10.0);
-        step = 2;
-        break;
-
-    default: /* QAM64 */
-        div = 8.0 / sqrt(42.0);
-        step = 4;
-        break;
-    }
     int i;
     double pos;
     QVector <double> ticks;
@@ -219,7 +171,7 @@ void CDRMPlotQCP::setQAMGrid(const ECodScheme eCoSc)
     plot->yAxis->setTickVector(ticks);
 }
 
-void CDRMPlotQCP::setupConst()
+void CDRMPlotQCP::setupConstPlot(const char* text)
 {
     plot->yAxis2->setVisible(false);
 
@@ -231,12 +183,6 @@ void CDRMPlotQCP::setupConst()
     plot->yAxis->setVisible(true);
     plot->yAxis->setLabel(QObject::tr("Imaginary"));
     plot->legend->setVisible(false);
-}
-
-void CDRMPlotQCP::setupConstPlot(const char* text, ECodScheme eNewCoSc)
-{
-    setupConst();
-    setQAMGrid(eNewCoSc);
     title->setText(QObject::tr(text));
 }
 
@@ -291,8 +237,114 @@ void CDRMPlotQCP::setData(int n, CVector<_REAL>& vecrData, CVector<_REAL>& vecrS
     }
     plot->graph(n)->setData(k, v);
     if(autoScale)
-        plot->graph(n)->rescaleKeyAxis(true, true);
-    plot->graph(n)->rescaleValueAxis(true);
+    {
+        //plot->graph(n)->rescaleKeyAxis(true, true);
+        //plot->graph(n)->rescaleValueAxis(true);
+        switch (CurCharType)
+        {
+        case FREQ_SAM_OFFS_HIST:
+            /* Customized auto-scaling. We adjust the y scale so that it is not larger than rMinScaleRange"  */
+            if(n==0)
+            {
+                const _REAL rMinScaleRange = 1.0; /* Hz */
+                /* Get maximum and minimum values */
+                _REAL MaxFreq = -_MAXREAL;
+                _REAL MinFreq = _MAXREAL;
+                for (int i = 0; i < vecrScale.Size(); i++)
+                {
+                    if (vecrData[i] > MaxFreq)
+                        MaxFreq = vecrData[i];
+
+                    if (vecrData[i] < MinFreq)
+                        MinFreq = vecrData[i];
+                }
+                /* Apply scale to plot */
+                plot->yAxis->setRange(floor(MinFreq / rMinScaleRange), ceil(MaxFreq / rMinScaleRange));
+                plot->xAxis->setRange(vecrScale[0], 0.0);
+            }
+            else
+            {
+                const _REAL rMinScaleRange = (_REAL) 1.0; /* Hz */
+                _REAL MaxSam = -_MAXREAL;
+                _REAL MinSam = _MAXREAL;
+                for (int i = 0; i < vecrScale.Size(); i++)
+                {
+                    if (vecrData[i] > MaxSam)
+                        MaxSam = vecrData[i];
+
+                    if (vecrData[i] < MinSam)
+                        MinSam = vecrData[i];
+                }
+                plot->yAxis2->setRange(floor(MinSam / rMinScaleRange), ceil(MaxSam / rMinScaleRange));
+            }
+            break;
+        case SNR_AUDIO_HIST:
+            /* Customized auto-scaling. We adjust the y scale maximum so that it is not more than "rMaxDisToMax" to the curve */
+            if(n==0)
+            {
+                const int iMaxDisToMax = 5; /* dB */
+                const int iMinValueSNRYScale = 15; /* dB */
+
+                /* Get maximum value */
+                _REAL MaxSNR = -_MAXREAL;
+
+                for (int i = 0; i < vecrScale.Size(); i++)
+                {
+                    if (vecrData[i] > MaxSNR)
+                        MaxSNR = vecrData[i];
+                }
+
+                /* Quantize scale to a multiple of "iMaxDisToMax" */
+                double dMaxYScaleSNR = (ceil(MaxSNR / iMaxDisToMax) * iMaxDisToMax);
+
+                /* Bound at the minimum allowed value */
+                if (dMaxYScaleSNR < (double) iMinValueSNRYScale)
+                    dMaxYScaleSNR = (double) iMinValueSNRYScale;
+
+                /* Ratio between the maximum values for audio and SNR. The ratio should be
+                   chosen so that the audio curve is not in the same range as the SNR curve
+                   under "normal" conditions to increase readability of curves.
+                   Since at very low SNRs, no audio can received anyway so we do not have to
+                   check whether the audio y-scale is in range of the curve */
+                const _REAL rRatioAudSNR = 1.5;
+                const double dMaxYScaleAudio = dMaxYScaleSNR * rRatioAudSNR;
+
+                /* Apply scale to plot */
+                plot->yAxis->setRange(0.0, dMaxYScaleSNR);
+                plot->yAxis->setRange(0.0, dMaxYScaleAudio);
+                plot->xAxis->setRange(vecrScale[0], 0.0);
+            }
+            break;
+        case SNR_SPECTRUM:
+            /* Fixed / variable scale (if SNR is in range, use fixed scale otherwise enlarge scale) */
+            if(n==0)
+            {
+                const int iSize = vecrScale.Size();
+                /* Get maximum value */
+                _REAL rMaxSNR = -_MAXREAL;
+                for (int i = 0; i < iSize; i++)
+                {
+                    if (vecrData[i] > rMaxSNR)
+                        rMaxSNR = vecrData[i];
+                }
+
+                double dMaxScaleYAxis = MAX_VAL_SNR_SPEC_Y_AXIS_DB;
+
+                if (rMaxSNR > dMaxScaleYAxis)
+                {
+                    const double rEnlareStep = (double) 10.0; /* dB */
+                    dMaxScaleYAxis = ceil(rMaxSNR / rEnlareStep) * rEnlareStep;
+                }
+
+                /* Set scale */
+                plot->yAxis->setRange(MIN_VAL_SNR_SPEC_Y_AXIS_DB, dMaxScaleYAxis);
+                plot->xAxis->setRange(0.0, vecrScale.Size());
+            }
+            break;
+        default:
+            ; // TODO - normal, not custom autoscaling
+        }
+    }
     if(axisLabel != "") {
         if(n==0)
             plot->yAxis->setLabel(axisLabel);
@@ -307,7 +359,7 @@ void CDRMPlotQCP::setxMarker(int n, _REAL r)
     vlines[n]->end->setCoords(r, plot->yAxis->range().upper);
 }
 
-void CDRMPlotQCP::setxMarker(int n, _REAL c, _REAL w)
+void CDRMPlotQCP::setBwMarker(int n, _REAL c, _REAL w)
 {
     QVector<double>	x, y;
     x << c;

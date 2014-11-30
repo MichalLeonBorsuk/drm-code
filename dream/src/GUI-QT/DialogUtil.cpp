@@ -44,6 +44,13 @@
 #ifdef HAVE_LIBHAMLIB
 # include "../util-QT/Rig.h"
 #endif
+#ifdef WITH_QCUSTOMPLOT
+# include "qcplevelmeter.h"
+# include "qcpsmeter.h"
+#else
+# include "qwtlevelmeter.h"
+# include "qwtsmeter.h"
+#endif
 
 /* to extract the library version */
 #ifdef USE_ALSA
@@ -67,8 +74,11 @@
 #ifdef HAVE_LIBFREEIMAGE
 # include <FreeImage.h>
 #endif
-#ifdef QT_GUI_LIB
+#ifdef WITH_QCUSTOMPLOT
+# include <qcustomplot.h>
+#else
 # include <qwt_global.h>
+# include <qwt_thermo.h>
 #endif
 #ifdef USE_OPUS_LIBRARY
 # include "../sourcedecoders/opus_codec.h"
@@ -169,9 +179,12 @@ CAboutDlg::CAboutDlg(QWidget* parent):
 #ifdef QT_CORE_LIB
         "<li><b>Qt</b> (" + QString(QT_VERSION_STR) + ") <i>http://qt-project.org</i></li>"
 #endif
-#ifdef QT_GUI_LIB
+#ifdef QWT_VERSION
         "<li><b>QWT</b> (" + QString(QWT_VERSION_STR) + ") <i>Dream is based in part on the work of the Qwt "
         "project (http://qwt.sf.net).</i></li>"
+#endif
+#ifdef WITH_QCUSTOMPLOT
+        "<li><b>QCustomPlot</b> <i>http://www.qcustomplot.com</i></li>"
 #endif
 #ifdef HAVE_LIBHAMLIB
         "<li><b>Hamlib</b> (" + QString(hamlib_version) + ") <i>http://hamlib.sourceforge.net</i></li>"
@@ -430,30 +443,20 @@ void CSysTray::SetToolTip(CSysTray* pSysTray, const QString& Title, const QStrin
     }
 }
 
-/* -------------------------------------------------------------------------- */
-
-void InitSMeter(QWidget* parent, QwtThermo* sMeter)
+LevelMeter* LevelMeter::createLevelMeter(QWidget* parent)
 {
-#if QWT_VERSION < 0x060100
-    sMeter->setRange(S_METER_THERMO_MIN, S_METER_THERMO_MAX);
-    sMeter->setScale(S_METER_THERMO_MIN, S_METER_THERMO_MAX, 10.0);
+#ifdef QWT_VERSION
+    return new QwtLevelMeter(parent);
 #else
-    sMeter->setScale(S_METER_THERMO_MIN, S_METER_THERMO_MAX);
-    sMeter->setScaleStepSize(10.0);
+    return new QCPLevelMeter(parent);
 #endif
-    sMeter->setAlarmLevel(S_METER_THERMO_ALARM);
-    sMeter->setAlarmLevel(-12.5);
-    sMeter->setAlarmEnabled(TRUE);
-    sMeter->setValue(S_METER_THERMO_MIN);
-#if QWT_VERSION < 0x060000
-    (void)parent;
-    sMeter->setAlarmColor(QColor(255, 0, 0));
-    sMeter->setFillColor(QColor(0, 190, 0));
+}
+
+SMeter* SMeter::createSMeter(QWidget* parent)
+{
+#ifdef QWT_VERSION
+    return new QwtSMeter(parent);
 #else
-    QPalette newPalette = parent->palette();
-    newPalette.setColor(QPalette::Base, newPalette.color(QPalette::Window));
-    newPalette.setColor(QPalette::ButtonText, QColor(0, 190, 0));
-    newPalette.setColor(QPalette::Highlight,  QColor(255, 0, 0));
-    sMeter->setPalette(newPalette);
+    return new QCPSMeter(parent);
 #endif
 }

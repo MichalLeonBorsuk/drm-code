@@ -48,6 +48,7 @@ public slots:
     void setRecFilterEnabled(bool);
     void setIntConsEnabled(bool);
     void setFlipSpectrumEnabled(bool);
+    void on_new_data();
 
 private slots:
     void on_chartSelector_currentItemChanged(QTreeWidgetItem *);

@@ -51,7 +51,6 @@
 #include <QTimer>
 #include <QMainWindow>
 #include <QMenu>
-#include <qwt_thermo.h>
 
 
 /* Classes ********************************************************************/
@@ -115,6 +114,7 @@ protected:
 	int					iServiceDescr;
 	_BOOLEAN			bCloseRequested;
 	int					iButtonCodecState;
+    LevelMeter*         inputLevel;
 
 	void				ShowButtonCodec(_BOOLEAN bShow, int iKey);
 	_BOOLEAN			GetMessageText(const int iID);

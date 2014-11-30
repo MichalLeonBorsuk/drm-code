@@ -237,25 +237,6 @@
        </item>
       </widget>
      </item>
-     <item row="0" column="1" rowspan="2">
-      <widget class="QwtPlot" name="plot">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="frameShape">
-        <enum>QFrame::NoFrame</enum>
-       </property>
-       <property name="frameShadow">
-        <enum>QFrame::Plain</enum>
-       </property>
-       <property name="lineWidth">
-        <number>0</number>
-       </property>
-      </widget>
-     </item>
      <item row="1" column="0">
       <widget class="QToolButton" name="showOptions">
        <property name="text">
@@ -266,6 +247,16 @@
        </property>
        <property name="checked">
         <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="1" rowspan="2">
+      <widget class="QWidget" name="plot" native="true">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
        </property>
       </widget>
      </item>
@@ -314,12 +305,6 @@
    <class>DRMDetail</class>
    <extends>QWidget</extends>
    <header>drmdetail.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>QwtPlot</class>
-   <extends>QFrame</extends>
-   <header>qwt_plot.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

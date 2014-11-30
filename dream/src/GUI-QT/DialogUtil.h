@@ -45,8 +45,6 @@
 #include <QTimer>
 #include <QAction>
 
-#include <qwt_thermo.h> /* S-Meter */
-
 class CRig;
 typedef int rig_model_t;
 
@@ -128,12 +126,25 @@ public:
 	}
 };
 
+class LevelMeter
+{
+public:
+    static LevelMeter* createLevelMeter(QWidget* parent=0);
+    virtual void setLevel(double level)=0;
+    virtual QWidget* widget()=0;
+};
 
 /* s-meter thermo parameters */
-#define S_METER_THERMO_MIN				((_REAL) -60.0) /* dB */
-#define S_METER_THERMO_MAX				((_REAL) 60.0) /* dB */
-#define S_METER_THERMO_ALARM			((_REAL) 0.0) /* dB */
+#define S_METER_THERMO_MIN				double( -60.0) /* dB */
+#define S_METER_THERMO_MAX				double( 60.0) /* dB */
+#define S_METER_THERMO_ALARM			double(0.0) /* dB */
 
-void InitSMeter(QWidget* parent, QwtThermo* sMeter);
+class SMeter
+{
+public:
+    static SMeter* createSMeter(QWidget* parent=0);
+    virtual void setLevel(double level)=0;
+    virtual QWidget* widget()=0;
+};
 
 #endif // DIALOGUTIL_H__FD6B23452398345OIJ9453_804E1606C2AC__INCLUDED_

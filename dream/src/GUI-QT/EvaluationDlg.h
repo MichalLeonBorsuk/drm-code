@@ -31,12 +31,12 @@
 
 #include "ui_systemevalDlgbase.h"
 #include "CWindow.h"
-#include "DRMPlot.h"
-#include "DialogUtil.h"
 #include "MultColorLED.h"
 #include "../GlobalDefinitions.h"
 #include "../util/Vector.h"
 #include "../DrmReceiver.h"
+#include "DRMPlot.h"
+#include "chartdialog.h"
 
 /* Definitions ****************************************************************/
 /* Define this macro if you prefer the QT-type of displaying date and time */
@@ -67,7 +67,7 @@ protected:
 	void			UpdateGPS(CParameter&);
     void			setControls(CSettings& s);
     void			AddWhatsThisHelp();
-	CDRMPlot*		OpenChartWin(CDRMPlot::ECharType eNewType);
+    ChartDialog*	OpenChartWin(CDRMPlot::ECharType eNewType);
 	QTreeWidgetItem* FindItemByECharType(CDRMPlot::ECharType eCharType);
 	string			ECharTypeToPlotName(CDRMPlot::ECharType eCharType);
 	CDRMPlot::ECharType PlotNameToECharType(const string& PlotName);
@@ -78,7 +78,7 @@ protected:
 	QMenu*			pTreeWidgetContextMenu;
 	CDRMPlot::ECharType eCurCharType, eNewCharType;
 	int				iPlotStyle;
-	vector<CDRMPlot*>	vecpDRMPlots;
+    vector<ChartDialog*>	vecpDRMPlots;
 
 public slots:
 	void OnTimer();
@@ -100,6 +100,7 @@ public slots:
 	void OnListSelChanged(QTreeWidgetItem*, QTreeWidgetItem*);
 	void OnTreeWidgetContMenu(bool);
 	void OnCustomContextMenuRequested(const QPoint&);
+    void OnDataAvailable();
 	void UpdatePlotStyle(int);
 signals:
 	void startLogging();
@@ -114,6 +115,7 @@ signals:
     void setRecFilter(bool);
     void setIntCons(bool);
     void muteAudio(bool);
+    void dataAvailable(ReceiverController* rc);
 };
 
 #endif

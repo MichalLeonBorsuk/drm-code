@@ -40,11 +40,7 @@
 #include <QTimer>
 #include <QDialog>
 #include <QButtonGroup>
-#if QT_VERSION > 0x050000
-# include "amspectrumplot.h" // use QCustomPlot instead of Qwt for QT5
-#else
 # include "DRMPlot.h"
-#endif
 
 /* Definitions ****************************************************************/
 /* Update time of PLL phase dial control */
@@ -117,15 +113,10 @@ protected:
 	CSoundCardSelMenu*	pSoundCardMenu;
     PhaseGauge*         phaseGauge;
     int                 subSampleCount;
-#ifdef QCP_LIB_DECL
-    AMSpectrumPlot*     plot;
-#else
     CDRMPlot*			MainPlot;
-#endif
 
 	void UpdateControls();
 	void UpdateSliderBandwidth();
-    void updateAnalogBWMarker();
     void AddWhatsThisHelp();
     void initPhaseDial();
 	virtual void eventClose(QCloseEvent* pEvent);
@@ -157,9 +148,7 @@ public slots:
 	void on_ButtonGroupDemodulation_buttonClicked(int);
 	void on_ButtonGroupAGC_buttonClicked(int);
 	void on_ButtonGroupNoiseReduction_buttonClicked(int);
-#ifdef QCP_LIB_DECL
-    void on_plotClick(QCPAbstractPlottable *, QMouseEvent *);
-#endif
+    void on_new_data();
 
 signals:
 	void SwitchMode(int);

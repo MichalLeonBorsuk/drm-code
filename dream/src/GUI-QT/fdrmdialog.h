@@ -35,6 +35,7 @@
 #include <QSystemTrayIcon>
 #include <../DrmReceiver.h>
 #include "receivercontroller.h"
+#include "DialogUtil.h"
 
 /* Classes ********************************************************************/
 class CDRMReceiver;
@@ -109,6 +110,7 @@ private:
     EngineeringTabWidget* pEngineeringTabs;
     QWidget*            pMultimediaWindow;
     QString             baseWindowTitle;
+    LevelMeter*         inputLevel;
 
     virtual void        eventClose(QCloseEvent* ce);
     virtual void        eventHide(QHideEvent* pEvent);

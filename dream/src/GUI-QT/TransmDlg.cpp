@@ -49,12 +49,6 @@ TransmDialog::TransmDialog(CSettings& Settings,	QWidget* parent)
 	bCloseRequested(FALSE), iButtonCodecState(0)
 {
 	setupUi(this);
-#if QWT_VERSION < 0x060100
-    ProgrInputLevel->setScalePosition(QwtThermo::BottomScale);
-#else
-    ProgrInputLevel->setScalePosition(QwtThermo::LeadingScale);
-#endif
-
 	/* Load transmitter settings */
 	DRMTransmitter.LoadSettings();
 
@@ -67,25 +61,8 @@ TransmDialog::TransmDialog(CSettings& Settings,	QWidget* parent)
 	UpdateMSCProtLevCombo();
 
 	/* Init progress bar for input signal level */
-#if QWT_VERSION < 0x060100
-	ProgrInputLevel->setRange(-50.0, 0.0);
-    ProgrInputLevel->setOrientation(Qt::Horizontal, QwtThermo::BottomScale);
-#else
-	ProgrInputLevel->setScale(-50.0, 0.0);
-    ProgrInputLevel->setOrientation(Qt::Horizontal);
-    ProgrInputLevel->setScalePosition(QwtThermo::LeadingScale);
-#endif
-	ProgrInputLevel->setAlarmLevel(-5.0);
-#if QWT_VERSION < 0x060000
-	ProgrInputLevel->setAlarmColor(QColor(255, 0, 0));
-	ProgrInputLevel->setFillColor(QColor(0, 190, 0));
-#else
-	QPalette newPalette = palette();
-	newPalette.setColor(QPalette::Base, newPalette.color(QPalette::Window));
-	newPalette.setColor(QPalette::ButtonText, QColor(0, 190, 0));
-	newPalette.setColor(QPalette::Highlight,  QColor(255, 0, 0));
-	ProgrInputLevel->setPalette(newPalette);
-#endif
+    inputLevel = LevelMeter::createLevelMeter(ProgrInputLevel->parentWidget());
+    ProgrInputLevel->parentWidget()->layout()->replaceWidget(ProgrInputLevel, inputLevel->widget());
 
 	/* Init progress bar for current transmitted picture */
 	ProgressBarCurPict->setRange(0, 100);
@@ -550,8 +527,7 @@ void TransmDialog::OnTimer()
 	/* Set value for input level meter (only in "start" mode) */
 	if (bIsStarted == TRUE)
 	{
-		ProgrInputLevel->
-			setValue(TransThread.DRMTransmitter.GetReadData()->GetLevelMeter());
+        inputLevel->setLevel(TransThread.DRMTransmitter.GetReadData()->GetLevelMeter());
 
 		string strCPictureName;
 		_REAL rCPercent;
@@ -1365,7 +1341,7 @@ void TransmDialog::EnableAllControlsForSet()
 	GroupInput->setEnabled(FALSE); /* For run-mode */
 
 	/* Reset status bars */
-	ProgrInputLevel->setValue(RET_VAL_LOG_0);
+    inputLevel->setLevel(RET_VAL_LOG_0);
 	ProgressBarCurPict->setValue(0);
 	TextLabelCurPict->setText("");
 }

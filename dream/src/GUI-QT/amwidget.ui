@@ -30,7 +30,7 @@
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout_4">
       <item>
-       <widget class="QwtPlot" name="plot">
+       <widget class="QWidget" name="plot" native="true">
         <property name="sizePolicy">
          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
           <horstretch>0</horstretch>
@@ -414,19 +414,11 @@
    </item>
   </layout>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>QwtPlot</class>
-   <extends>QFrame</extends>
-   <header>qwt_plot.h</header>
-   <container>1</container>
-  </customwidget>
- </customwidgets>
  <resources/>
  <connections/>
  <buttongroups>
-  <buttongroup name="buttonGroupNoiseReduction"/>
-  <buttongroup name="buttonGroupAGC"/>
   <buttongroup name="buttonGroupDemodulation"/>
+  <buttongroup name="buttonGroupAGC"/>
+  <buttongroup name="buttonGroupNoiseReduction"/>
  </buttongroups>
 </ui>

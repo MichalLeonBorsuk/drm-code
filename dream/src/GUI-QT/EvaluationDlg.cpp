@@ -40,9 +40,7 @@
 #include <QHideEvent>
 #include <QShowEvent>
 #include "ThemeCustomizer.h"
-#include "cdrmplotqwt.h"
-#include "cdrmplotqcp.h"
-#define USE_QCUSTOMPLOT
+#include "DialogUtil.h"
 
 /* Implementation *************************************************************/
 systemevalDlg::systemevalDlg(ReceiverController* rc, CSettings& Settings,
@@ -59,15 +57,8 @@ systemevalDlg::systemevalDlg(ReceiverController* rc, CSettings& Settings,
     /* Init controls -------------------------------------------------------- */
 
     /* Init main plot */
-#ifdef USE_QCUSTOMPLOT
-    QCustomPlot* plot = new QCustomPlot(this);
-    framePlot->layout()->addWidget(plot);
-    MainPlot = new CDRMPlotQCP(plot); //(NULL, plot, controller);
-#else
-    QwtPlot* plot = new QwtPlot(this);
-    framePlot->layout()->addWidget(plot);
-    MainPlot = new CDRMPlotQwt(NULL, plot, controller);
-#endif
+    MainPlot = CDRMPlot::createPlot(framePlot);
+    framePlot->layout()->addWidget(MainPlot->widget());
 
     /* Update times for colour LEDs */
     LEDFAC->SetUpdateTime(1500);
@@ -277,7 +268,7 @@ void systemevalDlg::eventShow(QShowEvent*)
         const QRect WinGeom(c.iXPos, c.iYPos, c.iWSize, c.iHSize);
 
         /* Open the new chart window */
-        CDRMPlot* pNewChartWin = OpenChartWin(eNewType);
+        ChartDialog* pNewChartWin = OpenChartWin(eNewType);
 
         /* and restore its geometry */
         if (WinGeom.isValid() && !WinGeom.isEmpty() && !WinGeom.isNull())
@@ -287,20 +278,20 @@ void systemevalDlg::eventShow(QShowEvent*)
         vecpDRMPlots.push_back(pNewChartWin);
 
 		/* Show new window */
-		pNewChartWin->show();
+        pNewChartWin->show();
     }
 
     /* Activate real-time timer */
     Timer.start(GUI_CONTROL_UPDATE_TIME);
 
-    /* Notify the MainPlot of showEvent */
-    MainPlot->activate();
+    // pass data available events on to plots
+    connect(controller, SIGNAL(dataAvailable()), this, SLOT(OnDataAvailable()));
 }
 
 void systemevalDlg::eventHide(QHideEvent*)
 {
-    /* Notify the MainPlot of hideEvent */
-    MainPlot->deactivate();
+    // stop passing data available events on to plots
+    disconnect(controller, SIGNAL(dataAvailable()), this, SLOT(OnDataAvailable()));
 
     /* Stop the real-time timer */
     Timer.stop();
@@ -325,7 +316,7 @@ void systemevalDlg::eventHide(QHideEvent*)
 
             s << "Chart Window " << iNumOpenCharts;
             Settings.Put(s.str(), c);
-            Settings.Put(s.str(), "plottype", ECharTypeToPlotName(vecpDRMPlots[i]->GetChartType()));
+            Settings.Put(s.str(), "plottype", ECharTypeToPlotName(vecpDRMPlots[i]->getChartType()));
 
             iNumOpenCharts++;
         }
@@ -358,7 +349,7 @@ void systemevalDlg::OnTreeWidgetContMenu(bool)
     if (eNewCharType != CDRMPlot::NONE_OLD)
     {
         /* Open the new chart */
-		CDRMPlot* pNewChartWin = OpenChartWin(eNewCharType);
+        ChartDialog* pNewChartWin = OpenChartWin(eNewCharType);
         vecpDRMPlots.push_back(pNewChartWin);
 
 		/* Show new window */
@@ -380,21 +371,23 @@ void systemevalDlg::OnCustomContextMenuRequested(const QPoint& p)
     }
 }
 
-CDRMPlot* systemevalDlg::OpenChartWin(CDRMPlot::ECharType eNewType)
+ChartDialog *systemevalDlg::OpenChartWin(CDRMPlot::ECharType eNewType)
 {
     /* Create new chart window */
-    CDRMPlot* pNewChartWin = new CDRMPlotQwt(this, NULL, controller);
-    pNewChartWin->setCaption(tr("Chart Window"));
+    ChartDialog* pNewChartWin = new ChartDialog(NULL);
+    pNewChartWin->setWindowTitle(tr("Chart Window"));
 
     /* Set correct icon (use the same as this dialog) */
     const QIcon& icon = windowIcon();
-    pNewChartWin->setIcon(icon);
+    pNewChartWin->setWindowIcon(icon);
 
     /* Set receiver object and correct chart type */
     pNewChartWin->SetupChart(eNewType);
 
     /* Set plot style*/
     pNewChartWin->SetPlotStyle(iPlotStyle);
+
+    connect(this, SIGNAL(dataAvailable(ReceiverController*)), pNewChartWin, SLOT(update(ReceiverController*)));
 
     return pNewChartWin;
 }
@@ -441,13 +434,16 @@ string systemevalDlg::ECharTypeToPlotName(CDRMPlot::ECharType eCharType)
     return string();
 }
 
+void systemevalDlg::OnDataAvailable()
+{
+    MainPlot->update(controller);
+    emit dataAvailable(controller);
+}
+
 void systemevalDlg::OnTimer()
 {
-#ifdef USE_QCUSTOMPLOT
-    MainPlot->update(controller);
-#endif
 
-
+    // TODO replace this with signal driven processing
     Parameters.Lock();
 
         SetStatus(LEDFAC, Parameters.ReceiveStatus.FAC.GetStatus());

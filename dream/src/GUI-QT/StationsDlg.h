@@ -112,6 +112,7 @@ protected:
 
 	QString			okMessage, badMessage;
     ERecMode        eRecMode;
+    SMeter*         inputLevel;
 
 signals:
 	void subscribeRig();
@@ -119,7 +120,8 @@ signals:
     void frequencyChanged(int);
 
 private slots:
-	void OnSigStr(double);
+    void setFine(bool on);
+    void OnSigStr(double);
 	void OnTimer();
 	void OnUpdate();
     void OnFileReady();

@@ -5,6 +5,8 @@
 #include <../Parameter.h>
 #include <MultColorLED.h>
 
+class LevelMeter;
+
 namespace Ui {
 class DRMDisplay;
 }
@@ -17,16 +19,18 @@ public:
     explicit DRMDisplay(QWidget *parent = 0);
     ~DRMDisplay();
     void setBars(int);
-    void setLevel(_REAL);
     void showReceptionStatus(ETypeRxStatus fac, ETypeRxStatus sdc, ETypeRxStatus msc);
     void showTextMessage(const QString&);
     void showServiceInfo(const CService&);
     void setBitRate(_REAL rBitRate, _REAL rPartABLenRat);
     void clearDisplay(const QString& serviceLabel);
     void SetDisplayColor(const QColor&);
+public slots:
+    void setLevel(double);
 
 private:
     Ui::DRMDisplay *ui;
+    LevelMeter* inputLevel;
     void AddWhatsThisHelp();
 };
 

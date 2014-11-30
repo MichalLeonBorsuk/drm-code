@@ -29,9 +29,6 @@
 #include "ui_amwidget.h"
 #include "receivercontroller.h"
 #include "DRMPlot.h"
-#include "cdrmplotqcp.h"
-#include "cdrmplotqwt.h"
-#include <qwt_plot_layout.h>
 #include <QInputDialog>
 
 AMWidget::AMWidget(ReceiverController* rc, QWidget *parent) :
@@ -41,11 +38,16 @@ AMWidget::AMWidget(ReceiverController* rc, QWidget *parent) :
 {
     ui->setupUi(this);
 
+    MainPlot = CDRMPlot::createPlot(ui->plot->parentWidget());
+    ui->plot->parentWidget()->layout()->replaceWidget(ui->plot, MainPlot->widget());
+
+    //connect(static_cast<CDRMPlotQwt*>(MainPlot), SIGNAL(xAxisValSet(double)), this, SLOT(OnChartxAxisValSet(double)));
+    // TODO signal from plot
+
     /* Set help text for the controls */
     AddWhatsThisHelp();
 
-    ui->sliderBandwidth->setTickPosition(QSlider::TicksBothSides);
-    MainPlot = new CDRMPlotQwt(NULL, ui->plot, controller);
+    ui->sliderBandwidth->setTickPosition(QSlider::TicksBothSides);    
 
     /* Init main plot */
     bool waterfall = false; // TODO getSetting("waterfall", false);
@@ -82,9 +84,6 @@ AMWidget::AMWidget(ReceiverController* rc, QWidget *parent) :
     ui->spinBoxNoiRedLevel->hide();
 #endif
 
-    connect(static_cast<CDRMPlotQwt*>(MainPlot), SIGNAL(xAxisValSet(double)),
-        this, SLOT(OnChartxAxisValSet(double)));
-
     /* Button groups */
     connect(ui->buttonGroupDemodulation, SIGNAL(buttonClicked(int)),
         this, SLOT(OnRadioDemodulation(int)));
@@ -101,6 +100,12 @@ AMWidget::~AMWidget()
     delete ui;
 }
 
+void AMWidget::on_new_data()
+{
+    if(MainPlot)
+        MainPlot->update(controller);
+}
+
 void AMWidget::connectController(ReceiverController* controller)
 {
     connect(this, SIGNAL(AGC(int)), controller, SLOT(setAnalogAGC(int)));
@@ -113,19 +118,15 @@ void AMWidget::connectController(ReceiverController* controller)
     connect(this, SIGNAL(AMDemodAcq(double)), controller, SLOT(setAMDemodAcq(double)));
 
     connect(controller, SIGNAL(amFilterBandwidthChanged(int)), this, SLOT(on_amFilterBandwidthChanged(int)));
+    connect(controller, SIGNAL(dataAvailable()), this, SLOT(on_new_data()));
 }
 
 void AMWidget::showEvent(QShowEvent*)
 {
-    /* Notify the MainPlot of showEvent */
-    if(MainPlot) MainPlot->activate();
 }
 
 void AMWidget::hideEvent(QHideEvent*)
 {
-    /* Notify the MainPlot of hideEvent */
-    if(MainPlot) MainPlot->deactivate();
-
     bool waterfall = ui->checkBoxWaterFall->isChecked();
     (void)waterfall;
     // TODO putSetting("waterfall", waterfall);
