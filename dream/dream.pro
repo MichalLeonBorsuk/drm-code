@@ -13,6 +13,9 @@ contains(QT_VERSION, ^5\\..*) {
     CONFIG += qt qt5
     VERSION_MESSAGE = Qt $$QT_VERSION
 }
+contains(QT_VERSION, ^5\\.3\\..*) {
+    CONFIG += qt5.3
+}
 CONFIG(debug, debug|release) {
     DEBUG_MESSAGE = debug
 }
@@ -632,7 +635,7 @@ SOURCES += \
     src/GUI-QT/chartdialog.cpp
 
 !console {
-    qt5 {
+    qt5.3 {
         QT += positioning
         HEADERS += src/util-QT/cpos.h
         SOURCES += src/util-QT/cpos.cpp

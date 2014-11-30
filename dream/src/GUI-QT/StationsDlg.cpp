@@ -59,7 +59,8 @@ eRecMode(RM_NONE)
 {
     ui->setupUi(this);
     inputLevel = SMeter::createSMeter(ui->ProgrSigStrength->parentWidget());
-    ui->ProgrSigStrength->parentWidget()->layout()->replaceWidget(ui->ProgrSigStrength, inputLevel->widget());
+    ui->ProgrSigStrength->parentWidget()->layout()->removeWidget(ui->ProgrSigStrength);
+    ui->ProgrSigStrength->parentWidget()->layout()->addWidget(inputLevel->widget());
     ui->ProgrSigStrength->hide();
 
     /* Load settings */
