@@ -58,10 +58,9 @@ orangeCube(":/icons/orangeCube.png"), pinkCube(":/icons/pinkCube.png"),
 eRecMode(RM_NONE)
 {
     ui->setupUi(this);
-    inputLevel = SMeter::createSMeter(ui->ProgrSigStrength->parentWidget());
-    ui->ProgrSigStrength->parentWidget()->layout()->removeWidget(ui->ProgrSigStrength);
-    ui->ProgrSigStrength->parentWidget()->layout()->addWidget(inputLevel->widget());
-    ui->ProgrSigStrength->hide();
+    inputLevel = SMeter::createSMeter();
+    ui->sMeterLayout->addWidget(inputLevel->widget());
+    inputLevel->widget()->hide();
 
     /* Load settings */
     LoadSettings();
@@ -536,16 +535,16 @@ void StationsDlg::on_actionEnable_S_Meter_triggered()
 void StationsDlg::EnableSMeter()
 {
     ui->TextLabelSMeter->setEnabled(TRUE);
-    ui->ProgrSigStrength->setEnabled(TRUE);
+    inputLevel->widget()->setEnabled(TRUE);
     ui->TextLabelSMeter->show();
-    ui->ProgrSigStrength->show();
+    inputLevel->widget()->show();
 	emit subscribeRig();
 }
 
 void StationsDlg::DisableSMeter()
 {
     ui->TextLabelSMeter->hide();
-    ui->ProgrSigStrength->hide();
+    inputLevel->widget()->hide();
 	emit unsubscribeRig();
 }
 
@@ -615,5 +614,5 @@ void StationsDlg::AddWhatsThisHelp()
     ui->spinBoxFrequency->setWhatsThis(strCounter);
     ui->TextLabelUTCTime->setWhatsThis(strTime);
     ui->TextLabelSMeter->setWhatsThis(strSMeter);
-    ui->ProgrSigStrength->setWhatsThis(strSMeter);
+    inputLevel->widget()->setWhatsThis(strSMeter);
 }

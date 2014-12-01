@@ -99,6 +99,11 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& Settings,
     baseWindowTitle(tr("Dream DRM Receiver"))
 {
     ui->setupUi(this);
+
+    /* Init progress bar for input signal level */
+    inputLevel = LevelMeter::createLevelMeter();
+    ui->levelMeterLayout->addWidget(inputLevel->widget());
+
     ui->lineEditFrequency->setVisible(false);
     QDoubleValidator* fvalid = new QDoubleValidator(this);
     ui->lineEditFrequency->setValidator(fvalid);
@@ -207,11 +212,6 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& Settings,
     connect(ui->actionWhats_This, SIGNAL(triggered()), this, SLOT(OnWhatsThis()));
 
     connect(pAnalogDemDlg, SIGNAL(About()), this, SLOT(OnHelpAbout()));
-
-    /* Init progress bar for input signal level */
-    inputLevel = LevelMeter::createLevelMeter(ui->ProgrInputLevel);
-    //ui->ProgrInputLevel->parentWidget()->layout()->removeWidget(ui->ProgrInputLevel);
-    //ui->ProgrInputLevel->parentWidget()->layout()->addWidget(inputLevel->widget());
 
 #ifdef HAVE_LIBHAMLIB
     connect(pStationsDlg, SIGNAL(subscribeRig()), &rig, SLOT(subscribe()));
@@ -330,7 +330,7 @@ void FDRMDialog::on_actionEngineering_Mode_triggered(bool checked)
             if(pEngineeringTabs==NULL)
             {
                 pEngineeringTabs = new EngineeringTabWidget(controller);
-                ui->verticalLayout->addWidget(pEngineeringTabs);
+                ui->controlsLayout->addWidget(pEngineeringTabs);
             }
             pEngineeringTabs->show();
         }
@@ -358,7 +358,7 @@ void FDRMDialog::setupWindowMode()
         if(pServiceTabs==NULL)
         {
             pServiceTabs = new DreamTabWidget(controller, this);
-            ui->verticalLayout->addWidget(pServiceTabs);
+            ui->controlsLayout->addWidget(pServiceTabs);
             connect(pServiceTabs, SIGNAL(audioServiceSelected(int)), controller, SLOT(selectAudioService(int)));
             connect(pServiceTabs, SIGNAL(dataServiceSelected(int)), this, SLOT(OnSelectDataService(int)));
             connect(controller, SIGNAL(serviceChanged(int, const CService&)), pServiceTabs, SLOT(onServiceChanged(int, const CService&)));
@@ -382,7 +382,7 @@ void FDRMDialog::setupWindowMode()
         if(pServiceSelector==NULL)
         {
             pServiceSelector = new ServiceSelector(this);
-            ui->verticalLayout->addWidget(pServiceSelector);
+            ui->controlsLayout->addWidget(pServiceSelector);
             connect(pServiceSelector, SIGNAL(audioServiceSelected(int)), controller, SLOT(selectAudioService(int)));
             connect(pServiceSelector, SIGNAL(dataServiceSelected(int)), this, SLOT(OnSelectDataService(int)));
             connect(controller, SIGNAL(serviceChanged(int,const CService&)), pServiceSelector, SLOT(onServiceChanged(int, const CService&)));
@@ -1234,7 +1234,7 @@ void FDRMDialog::AddWhatsThisHelp()
 
     ui->TextTextMessage->setWhatsThis(strTextMessage);
     ui->TextLabelInputLevel->setWhatsThis(strInputLevel);
-    ui->ProgrInputLevel->setWhatsThis(strInputLevel);
+    inputLevel->widget()->setWhatsThis(strInputLevel);
     ui->CLED_MSC->setWhatsThis(strStatusLEDS);
     ui->CLED_SDC->setWhatsThis(strStatusLEDS);
     ui->CLED_FAC->setWhatsThis(strStatusLEDS);

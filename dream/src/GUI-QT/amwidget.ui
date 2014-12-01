@@ -15,32 +15,7 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_5">
    <item>
-    <widget class="QFrame" name="frame">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="frameShape">
-      <enum>QFrame::StyledPanel</enum>
-     </property>
-     <property name="frameShadow">
-      <enum>QFrame::Raised</enum>
-     </property>
-     <layout class="QHBoxLayout" name="horizontalLayout_4">
-      <item>
-       <widget class="QWidget" name="plot" native="true">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </widget>
+    <layout class="QVBoxLayout" name="plotLayout"/>
    </item>
    <item>
     <widget class="QGroupBox" name="groupBoxBW">
@@ -417,8 +392,8 @@
  <resources/>
  <connections/>
  <buttongroups>
-  <buttongroup name="buttonGroupDemodulation"/>
   <buttongroup name="buttonGroupAGC"/>
+  <buttongroup name="buttonGroupDemodulation"/>
   <buttongroup name="buttonGroupNoiseReduction"/>
  </buttongroups>
 </ui>
