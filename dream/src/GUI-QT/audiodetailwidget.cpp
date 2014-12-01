@@ -46,10 +46,10 @@ void AudioDetailWidget::setEngineering(bool eng)
     {
         if(pMainPlot==NULL)
         {
-            pMainPlot = CDRMPlot::createPlot();
+            pMainPlot = new CDRMPlot();
             ui->plotLayout->addWidget(pMainPlot->widget());
             pMainPlot->SetPlotStyle(iPlotStyle);
-            pMainPlot->SetupChart(CDRMPlot::AUDIO_SPECTRUM);
+            pMainPlot->SetupChart(AUDIO_SPECTRUM);
             connect(controller, SIGNAL(dataAvailable()), this, SLOT(on_new_data()));
         }
     }

@@ -2,7 +2,7 @@
 #include "ui_chartdialog.h"
 
 ChartDialog::ChartDialog(QWidget *parent) :
-    QDialog(parent), plot(CDRMPlot::createPlot(parent)),
+    QDialog(parent), plot(new CDRMPlot(parent)),
     ui(new Ui::ChartDialog)
 {
     ui->setupUi(this);

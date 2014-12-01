@@ -54,82 +54,110 @@
 /* Window border for standalone chart */
 #define WINDOW_BORDER 1
 
+namespace Plot {
+    enum EAxis
+    {
+        bottom = 0,
+        left = 1,
+        top = 2,
+        right = 3
+    };
+    enum EPolicy {
+        fixed = 0,
+        min = 1,         // adjust the scale so that it is not larger than rMinScaleRange"
+        fit = 2,         // adjust the scale maximum so that it is not more than "rMaxDisToMax"
+        enlarge = 3,      // enlarge scale if needed
+        first = 4,
+        last = 5
+    };
+}
+
+enum ECharType
+{
+    INPUT_SIG_PSD = 0, /* default */
+    TRANSFERFUNCTION = 1,
+    FAC_CONSTELLATION = 2,
+    SDC_CONSTELLATION = 3,
+    MSC_CONSTELLATION = 4,
+    POWER_SPEC_DENSITY = 5,
+    INPUTSPECTRUM_NO_AV = 6,
+    AUDIO_SPECTRUM = 7,
+    FREQ_SAM_OFFS_HIST = 8,
+    DOPPLER_DELAY_HIST = 9,
+    ALL_CONSTELLATION = 10,
+    SNR_AUDIO_HIST = 11,
+    AVERAGED_IR = 12,
+    SNR_SPECTRUM = 13,
+    INPUT_SIG_PSD_ANALOG = 14,
+    INP_SPEC_WATERF = 15,
+    NONE_OLD = 16 /* None must always be the last element! (see settings) */
+};
+
 class QTreeWidget;
 class QIcon;
 class QRect;
 class ReceiverController;
 
-class CDRMPlot
+class PlotInterface
 {
 public:
-    enum ECharType
-    {
-        INPUT_SIG_PSD = 0, /* default */
-        TRANSFERFUNCTION = 1,
-        FAC_CONSTELLATION = 2,
-        SDC_CONSTELLATION = 3,
-        MSC_CONSTELLATION = 4,
-        POWER_SPEC_DENSITY = 5,
-        INPUTSPECTRUM_NO_AV = 6,
-        AUDIO_SPECTRUM = 7,
-        FREQ_SAM_OFFS_HIST = 8,
-        DOPPLER_DELAY_HIST = 9,
-        ALL_CONSTELLATION = 10,
-        SNR_AUDIO_HIST = 11,
-        AVERAGED_IR = 12,
-        SNR_SPECTRUM = 13,
-        INPUT_SIG_PSD_ANALOG = 14,
-        INP_SPEC_WATERF = 15,
-        NONE_OLD = 16 /* None must always be the last element! (see settings) */
-    };
-
-    CDRMPlot():CurCharType(NONE_OLD){}
-    virtual ~CDRMPlot() {}
-
-    void SetupChart(const ECharType eNewType);
-    void setupTreeWidget(QTreeWidget* tw);
-    void SetPlotStyle(const int iNewStyleID);
-    void update(ReceiverController* rc);
-    ECharType getChartType() const { return CurCharType; }
-    virtual QWidget* widget() const =0;
-
-    // Factory
-    static CDRMPlot* createPlot(QWidget* parent=0);
-
-protected:
-    virtual void applyColors()=0;
+    virtual void applyColors(QColor MainGridColorPlot, QColor BckgrdColorPlot)=0;
     virtual void replot()=0;
     virtual void clearPlots()=0;
     virtual void setupBasicPlot(const char* titleText,
                         const char* xText, const char* yText, const char* legendText,
-                        double left, double right, double bottom, double top)=0;
-    virtual void add2ndGraph(const char* axisText, const char* legendText, double bottom, double top)=0;
+                        double left, double right, double bottom, double top, QColor pc, QColor bc)=0;
+    virtual void add2ndGraph(const char* axisText, const char* legendText, double bottom, double top, QColor pc)=0;
     virtual void addxMarker(QColor color, double initialPos)=0;
-    virtual void addBwMarker()=0;
+    virtual void addBwMarker(QColor c)=0;
     virtual void addyMarker(QColor color, double initialPos)=0;
     virtual void setupConstPlot(const char* text)=0;
     virtual void addConstellation(const char* legendText, int n)=0;
     virtual void setupWaterfall()=0;
     virtual void setQAMGrid(double div, int step, int substep)=0;
     virtual void setData(int n, CVector<_COMPLEX>& veccData)=0;
-    virtual void setData(int n, CVector<_REAL>& vecrData, CVector<_REAL>& vecrScale, bool autoScale=false, const QString& axisLabel="")=0;
+    virtual void setData(int n, CVector<_REAL>& vecrData, CVector<_REAL>& vecrScale, const QString& axisLabel="")=0;
     virtual void setxMarker(int n, _REAL r)=0;
     virtual void setBwMarker(int n, _REAL c, _REAL b)=0;
     virtual void setyMarker(int n, _REAL r)=0;
     virtual void updateWaterfall(CVector<_REAL>& vecrData, CVector<_REAL>& vecrScale)=0;
     virtual void setWhatsThis(const QString&)=0;
+    /* adjust the scale so that it is not larger than rMinScaleRange"  */
+    virtual void setAutoScalePolicy(Plot::EAxis axis, Plot::EPolicy pol, double limit)=0;
+    virtual QWidget* widget() const =0;
+};
+
+class CDRMPlot: public QObject
+{
+    Q_OBJECT
+public:
+    CDRMPlot(QWidget* parent=0);
+    virtual ~CDRMPlot();
+
+    void SetupChart(const ECharType eNewType);
+    void setupTreeWidget(QTreeWidget* tw);
+    void SetPlotStyle(const int iNewStyleID);
+    void update(ReceiverController* rc);
+    ECharType getChartType() const { return CurCharType; }
+    virtual QWidget* widget() const { return plot->widget(); }
+
+signals:
+    void plotClicked(double_t);
+
+protected:
     void addWhatsThisHelp();
 
     ECharType		CurCharType;
     int             iSigSampleRate;
     QColor			MainPenColorPlot;
-    QColor			MainPenColorConst;
     QColor			MainGridColorPlot;
     QColor			SpecLine1ColorPlot;
     QColor			SpecLine2ColorPlot;
     QColor			PassBandColorPlot;
     QColor			BckgrdColorPlot;
-
+    PlotInterface*  plot;
+private slots:
+    void on_plotClicked(double d);
 };
 
 #endif

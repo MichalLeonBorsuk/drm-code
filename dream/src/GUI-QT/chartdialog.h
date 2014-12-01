@@ -15,10 +15,10 @@ class ChartDialog : public QDialog
 public:
     explicit ChartDialog(QWidget *parent = 0);
     ~ChartDialog();
-    void SetupChart(const CDRMPlot::ECharType eNewType) { plot->SetupChart(eNewType); }
+    void SetupChart(const ECharType eNewType) { plot->SetupChart(eNewType); }
     CDRMPlot *GetPlot() { return plot; }
     void SetPlotStyle(const int iNewStyleID) { plot->SetPlotStyle(iNewStyleID); }
-    CDRMPlot::ECharType getChartType() const { return plot->getChartType(); }
+    ECharType getChartType() const { return plot->getChartType(); }
 public slots:
     void update(ReceiverController* rc) { plot->update(rc); }
 

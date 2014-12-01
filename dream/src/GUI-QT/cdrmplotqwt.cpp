@@ -95,7 +95,7 @@
 
 /* Implementation *************************************************************/
 CDRMPlotQwt::CDRMPlotQwt(QWidget* parent) :
-    CDRMPlot(), plot(new QwtPlot(parent)),
+    plot(new QwtPlot(parent)),
     InitCharType(NONE_OLD),
     eLastSDCCodingScheme((ECodScheme)-1), eLastMSCCodingScheme((ECodScheme)-1),
     bLastAudioDecoder(FALSE),
@@ -194,7 +194,7 @@ CDRMPlotQwt::CDRMPlotQwt(QWidget* parent) :
 #endif
 
     /* Set default style */
-    SetPlotStyle(0);
+    //SetPlotStyle(0);
 
     /* Connections */
 #if QWT_VERSION < 0x060000
@@ -210,7 +210,7 @@ CDRMPlotQwt::~CDRMPlotQwt()
 {
 }
 
-void CDRMPlotQwt::applyColors()
+void CDRMPlotQwt::applyColors(QColor MainGridColorPlot, QColor BckgrdColorPlot)
 {
     /* Apply colors */
     grid.SETMAJORPEN(QPen(MainGridColorPlot, 0, Qt::DotLine));
@@ -275,15 +275,7 @@ void CDRMPlotQwt::OnSelected(const QPointF &pos)
     /* Check if dMaxxBottom is valid */
     if (dMaxxBottom > 0.0)
     {
-        /* Get frequency from current cursor position */
-        double dFreq = pos.x();
-
-        /* Emit signal containing normalized selected frequency */
-        /* TODO
-        emit xAxisValSet(
-            pDRMRec->GetReceiveData()->ConvertFrequency(dFreq * 1000, TRUE) /
-            pDRMRec->GetReceiveData()->ConvertFrequency(dMaxxBottom * 1000, TRUE));
-            */
+        emit plotClicked(pos.x());
     }
 }
 
@@ -341,15 +333,16 @@ void CDRMPlotQwt::clearPlots()
 
 void CDRMPlotQwt::setupBasicPlot(const char* titleText,
                     const char* xText, const char* yText, const char* legendText,
-                    double left, double right, double bottom, double top)
+                    double left, double right, double bottom, double top,
+                                 QColor pc, QColor bc)
 {
     grid.enableX(TRUE);
     grid.enableY(TRUE);
-    grid.SETMAJORPEN(QPen(MainGridColorPlot, 0, Qt::DotLine));
-    grid.SETMINORPEN(QPen(MainGridColorPlot, 0, Qt::DotLine));
+    grid.SETMAJORPEN(QPen(pc, 0, Qt::DotLine));
+    grid.SETMINORPEN(QPen(pc, 0, Qt::DotLine));
     main1curve.setItemAttribute(QwtPlotItem::Legend, false);
     main2curve.setItemAttribute(QwtPlotItem::Legend, false);
-    plot->setCanvasBackground(QColor(BckgrdColorPlot));
+    plot->setCanvasBackground(bc);
 
     plot->setTitle(titleText);
     plot->enableAxis(QwtPlot::yRight, FALSE);
@@ -362,21 +355,23 @@ void CDRMPlotQwt::setupBasicPlot(const char* titleText,
     plot->setAxisScale(QwtPlot::yLeft, bottom, top);
 
     /* Curve color */
-    main1curve.setPen(QPen(MainPenColorPlot, 2, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+    main1curve.setPen(QPen(pc, 2, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
 
     /* Add main curve */
     main1curve.setTitle(legendText);
     main1curve.attach(plot);
+
+    for(int i=0; i<4; i++) { policy[i] = Plot::fixed; }
 }
 
-void CDRMPlotQwt::add2ndGraph(const char* axisText, const char* legendText, double bottom, double top)
+void CDRMPlotQwt::add2ndGraph(const char* axisText, const char* legendText, double bottom, double top, QColor pc)
 {
     plot->enableAxis(QwtPlot::yRight);
     plot->setAxisTitle(QwtPlot::yRight, axisText);
     plot->setAxisScale(QwtPlot::yRight, bottom, top);
 
     /* Curve colors */
-    main2curve.setPen(QPen(SpecLine2ColorPlot, 1, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+    main2curve.setPen(QPen(pc, 1, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
 
     /* Set legends */
     main1curve.setItemAttribute(QwtPlotItem::Legend, true);
@@ -420,11 +415,9 @@ void CDRMPlotQwt::addxMarker(QColor color, double initialPos)
     nCurves++;
 }
 
-void CDRMPlotQwt::addBwMarker()
+void CDRMPlotQwt::addBwMarker(QColor c)
 {
-    QColor color = PassBandColorPlot;
-    color.setAlpha(125);
-    QBrush brush(color);
+    QBrush brush(c);
     brush.setStyle(Qt::SolidPattern);
     curve2.setBrush(brush);
     curve2.setBaseline(MIN_VAL_INP_SPEC_Y_AXIS_DB);
@@ -479,20 +472,20 @@ void CDRMPlotQwt::addConstellation(const char *legendText, int c)
     case 0:
         MarkerSym->setStyle(QwtSymbol::Ellipse);
         MarkerSym->setSize(ALL_FAC_SYMBOL_SIZE);
-        MarkerSym->setPen(QPen(SpecLine2ColorPlot));
-        MarkerSym->setBrush(QBrush(SpecLine2ColorPlot));
+        MarkerSym->setPen(QPen(Qt::black));
+        MarkerSym->setBrush(QBrush(Qt::black));
         break;
     case 1:
         MarkerSym->setStyle(QwtSymbol::XCross);
         MarkerSym->setSize(ALL_SDC_SYMBOL_SIZE);
-        MarkerSym->setPen(QPen(SpecLine1ColorPlot));
-        MarkerSym->setBrush(QBrush(SpecLine1ColorPlot));
+        MarkerSym->setPen(QPen(Qt::red));
+        MarkerSym->setBrush(QBrush(Qt::red));
         break;
     case 2:
         MarkerSym->setStyle(QwtSymbol::Rect);
         MarkerSym->setSize(ALL_MSC_SYMBOL_SIZE);
-        MarkerSym->setPen(QPen(MainPenColorConst));
-        MarkerSym->setBrush(QBrush(MainPenColorConst));
+        MarkerSym->setPen(QPen(Qt::blue));
+        MarkerSym->setBrush(QBrush(Qt::blue));
         break;
     }
     curve->setPen(QPen(Qt::NoPen));
@@ -542,114 +535,122 @@ void CDRMPlotQwt::setupWaterfall()
     plot->setAxisScale(QwtPlot::xBottom, 0.0, double(iSigSampleRate)/2.0);
 }
 
-void CDRMPlotQwt::setData(int n, CVector<_REAL>& vecrData, CVector<_REAL>& vecrScale, bool autoScale, const QString &axisLabel)
+void CDRMPlotQwt::setData(int n, CVector<_REAL>& vecrData, CVector<_REAL>& vecrScale, const QString &axisLabel)
 {
-    if(autoScale)
+    if(n==0)
     {
-        switch (CurCharType)
+        if(policy[Plot::left]==Plot::min)
         {
-        case FREQ_SAM_OFFS_HIST:
-            /* Customized auto-scaling. We adjust the y scale so that it is not larger than rMinScaleRange"  */
-            if(n==0)
+            /* Get maximum and minimum values */
+            _REAL MaxFreq = -_MAXREAL;
+            _REAL MinFreq = _MAXREAL;
+            for (int i = 0; i < vecrScale.Size(); i++)
             {
-                const _REAL rMinScaleRange = 1.0; /* Hz */
+                if (vecrData[i] > MaxFreq)
+                    MaxFreq = vecrData[i];
 
-                /* Get maximum and minimum values */
-                _REAL MaxFreq = -_MAXREAL;
-                _REAL MinFreq = _MAXREAL;
-                for (int i = 0; i < vecrScale.Size(); i++)
-                {
-                    if (vecrData[i] > MaxFreq)
-                        MaxFreq = vecrData[i];
-
-                    if (vecrData[i] < MinFreq)
-                        MinFreq = vecrData[i];
-                }
-                /* Apply scale to plot */
-                plot->setAxisScale(QwtPlot::yLeft, floor(MinFreq / rMinScaleRange), ceil(MaxFreq / rMinScaleRange));
-                plot->setAxisScale(QwtPlot::xBottom, vecrScale[0], 0.0);
+                if (vecrData[i] < MinFreq)
+                    MinFreq = vecrData[i];
             }
-            else
+            /* Apply scale to plot */
+            plot->setAxisScale(QwtPlot::yLeft, floor(MinFreq / limit[Plot::left]), ceil(MaxFreq / limit[Plot::left]));
+        }
+        if(policy[Plot::left]==Plot::fit)
+        {
+            const int iMaxDisToMax = limit[Plot::left]; /* dB */
+
+            /* Get maximum value */
+            _REAL MaxSNR = -_MAXREAL;
+
+            for (int i = 0; i < vecrScale.Size(); i++)
             {
-                const _REAL rMinScaleRange = (_REAL) 1.0; /* Hz */
-                _REAL MaxSam = -_MAXREAL;
-                _REAL MinSam = _MAXREAL;
-                for (int i = 0; i < vecrScale.Size(); i++)
-                {
-                    if (vecrData[i] > MaxSam)
-                        MaxSam = vecrData[i];
-
-                    if (vecrData[i] < MinSam)
-                        MinSam = vecrData[i];
-                }
-                plot->setAxisScale(QwtPlot::yRight, floor(MinSam / rMinScaleRange), ceil(MaxSam / rMinScaleRange));
+                if (vecrData[i] > MaxSNR)
+                    MaxSNR = vecrData[i];
             }
-            break;
-        case SNR_AUDIO_HIST:
-            /* Customized auto-scaling. We adjust the y scale maximum so that it is not more than "rMaxDisToMax" to the curve */
-            if(n==0)
+
+            /* Quantize scale to a multiple of "iMaxDisToMax" */
+            double dMaxYScaleSNR = (ceil(MaxSNR / iMaxDisToMax) * iMaxDisToMax);
+
+            const int iMinValueSNRYScale = 15; /* dB */
+            /* Bound at the minimum allowed value */
+            if (dMaxYScaleSNR < (double) iMinValueSNRYScale)
+                dMaxYScaleSNR = (double) iMinValueSNRYScale;
+
+            const _REAL rRatioAudSNR = 1.5;
+            const double dMaxYScaleAudio = dMaxYScaleSNR * rRatioAudSNR;
+
+            /* Apply scale to plot */
+            plot->setAxisScale(QwtPlot::yLeft, 0.0, dMaxYScaleSNR);
+        }
+        if(policy[Plot::left]==Plot::enlarge)
+        {
+            const int iSize = vecrScale.Size();
+            /* Get maximum value */
+            _REAL rMaxSNR = -_MAXREAL;
+            for (int i = 0; i < iSize; i++)
             {
-                const int iMaxDisToMax = 5; /* dB */
-                const int iMinValueSNRYScale = 15; /* dB */
-
-                /* Get maximum value */
-                _REAL MaxSNR = -_MAXREAL;
-
-                for (int i = 0; i < vecrScale.Size(); i++)
-                {
-                    if (vecrData[i] > MaxSNR)
-                        MaxSNR = vecrData[i];
-                }
-
-                /* Quantize scale to a multiple of "iMaxDisToMax" */
-                double dMaxYScaleSNR = (ceil(MaxSNR / iMaxDisToMax) * iMaxDisToMax);
-
-                /* Bound at the minimum allowed value */
-                if (dMaxYScaleSNR < (double) iMinValueSNRYScale)
-                    dMaxYScaleSNR = (double) iMinValueSNRYScale;
-
-                /* Ratio between the maximum values for audio and SNR. The ratio should be
-                   chosen so that the audio curve is not in the same range as the SNR curve
-                   under "normal" conditions to increase readability of curves.
-                   Since at very low SNRs, no audio can received anyway so we do not have to
-                   check whether the audio y-scale is in range of the curve */
-                const _REAL rRatioAudSNR = 1.5;
-                const double dMaxYScaleAudio = dMaxYScaleSNR * rRatioAudSNR;
-
-                /* Apply scale to plot */
-                plot->setAxisScale(QwtPlot::yLeft, 0.0, dMaxYScaleSNR);
-                plot->setAxisScale(QwtPlot::yRight, 0.0, dMaxYScaleAudio);
-                plot->setAxisScale(QwtPlot::xBottom, vecrScale[0], 0.0);
+                if (vecrData[i] > rMaxSNR)
+                    rMaxSNR = vecrData[i];
             }
-            break;
-        case SNR_SPECTRUM:
-            /* Fixed / variable scale (if SNR is in range, use fixed scale otherwise enlarge scale) */
-            if(n==0)
+
+            double dMaxScaleYAxis = MAX_VAL_SNR_SPEC_Y_AXIS_DB;
+
+            if (rMaxSNR > dMaxScaleYAxis)
             {
-                const int iSize = vecrScale.Size();
-                /* Get maximum value */
-                _REAL rMaxSNR = -_MAXREAL;
-                for (int i = 0; i < iSize; i++)
-                {
-                    if (vecrData[i] > rMaxSNR)
-                        rMaxSNR = vecrData[i];
-                }
-
-                double dMaxScaleYAxis = MAX_VAL_SNR_SPEC_Y_AXIS_DB;
-
-                if (rMaxSNR > dMaxScaleYAxis)
-                {
-                    const double rEnlareStep = (double) 10.0; /* dB */
-                    dMaxScaleYAxis = ceil(rMaxSNR / rEnlareStep) * rEnlareStep;
-                }
-
-                /* Set scale */
-                plot->setAxisScale(QwtPlot::yLeft, MIN_VAL_SNR_SPEC_Y_AXIS_DB, dMaxScaleYAxis);
-                plot->setAxisScale(QwtPlot::xBottom, 0.0, vecrScale.Size());
+                const double rEnlareStep = (double) 10.0; /* dB */
+                dMaxScaleYAxis = ceil(rMaxSNR / rEnlareStep) * rEnlareStep;
             }
-            break;
-        default:
-            ; // TODO - normal, not custom autoscaling
+
+            /* Set scale */
+            plot->setAxisScale(QwtPlot::yLeft, MIN_VAL_SNR_SPEC_Y_AXIS_DB, dMaxScaleYAxis);
+        }
+        if(policy[Plot::bottom]==Plot::first)
+        {
+            plot->setAxisScale(QwtPlot::xBottom, vecrScale[0], 0.0);
+        }
+        if(policy[Plot::bottom]==Plot::last)
+        {
+            plot->setAxisScale(QwtPlot::xBottom, 0.0, vecrScale.Size());
+        }
+    }
+    if(n==1)
+    {
+        if(policy[Plot::right]==Plot::min)
+        {
+            _REAL MaxSam = -_MAXREAL;
+            _REAL MinSam = _MAXREAL;
+            for (int i = 0; i < vecrScale.Size(); i++)
+            {
+                if (vecrData[i] > MaxSam)
+                    MaxSam = vecrData[i];
+
+                if (vecrData[i] < MinSam)
+                    MinSam = vecrData[i];
+            }
+            plot->setAxisScale(QwtPlot::yRight, floor(MinSam / limit[Plot::right]), ceil(MaxSam / limit[Plot::right]));
+        }
+        if(policy[Plot::right]==Plot::fit)
+        {
+            const int iMaxDisToMax = limit[Plot::right];
+
+            /* Get maximum value */
+            _REAL Max = -_MAXREAL;
+
+            for (int i = 0; i < vecrScale.Size(); i++)
+            {
+                if (vecrData[i] > Max)
+                    Max = vecrData[i];
+            }
+
+            /* Quantize scale to a multiple of "iMaxDisToMax" */
+            double dMaxYScale = (ceil(Max / iMaxDisToMax) * iMaxDisToMax);
+
+            double MinValueYScale = 15; /* dB */
+            /* Bound at the minimum allowed value */
+            if (dMaxYScale < MinValueYScale)
+                dMaxYScale = MinValueYScale;
+
+            plot->setAxisScale(QwtPlot::yRight, 0.0, dMaxYScale);
         }
     }
     const int size = vecrData.Size();
@@ -746,4 +747,10 @@ void CDRMPlotQwt::updateWaterfall(CVector<_REAL>& vecrData, CVector<_REAL>& vecr
         return;
     waterfallWidget->updatePlot(vecrData, MIN_VAL_INP_SPEC_Y_AXIS_DB, MAX_VAL_INP_SPEC_Y_AXIS_DB);
     (void)vecrScale;
+}
+
+void CDRMPlotQwt::setAutoScalePolicy(Plot::EAxis axis, Plot::EPolicy policy, double limit)
+{
+    this->policy[axis] = policy;
+    this->limit[axis] = limit;
 }

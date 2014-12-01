@@ -3,11 +3,13 @@
 
 QCPLevelMeter::QCPLevelMeter(QWidget* parent):QCustomPlot(parent)
 {
-    QFont font = parent->font();
+    QFont font;
+    if(parent)
+        font = parent->font();
     font.setPointSizeF(7.0);
     QPen pen;
     pen.setWidthF(1.2);
-    pen.setColor(QColor(255, 0, 0));
+    pen.setColor(Qt::red);
     setBackground(Qt::black);
     yAxis->setPadding(0);
 
