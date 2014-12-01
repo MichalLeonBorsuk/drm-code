@@ -17,11 +17,12 @@ QwtSMeter::QwtSMeter(QWidget *parent) :
     setAlarmEnabled(true);
     setValue(S_METER_THERMO_MIN);
 # if QWT_VERSION < 0x060000
-    (void)parent;
     setAlarmColor(QColor(255, 0, 0));
     setFillColor(QColor(0, 190, 0));
 # else
-    QPalette newPalette = parent->palette();
+    QPalette newPalette;
+    if(parent)
+        newPalette = parent->palette();
     newPalette.setColor(QPalette::Base, newPalette.color(QPalette::Window));
     newPalette.setColor(QPalette::ButtonText, QColor(0, 190, 0));
     newPalette.setColor(QPalette::Highlight,  QColor(255, 0, 0));

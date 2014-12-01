@@ -211,7 +211,7 @@ Institute for Communication Technology</string>
               </widget>
              </item>
              <item>
-              <widget class="QWidget" name="ProgrInputLevel" native="true"/>
+              <layout class="QVBoxLayout" name="levelMeterLayout"/>
              </item>
             </layout>
            </item>
@@ -1724,9 +1724,9 @@ Institute for Communication Technology</string>
  </connections>
  <buttongroups>
   <buttongroup name="ButtonGroupRobustnessMode"/>
-  <buttongroup name="ButtonGroupBandwidth"/>
-  <buttongroup name="ButtonGroupCodec"/>
   <buttongroup name="ButtonGroupOutput"/>
+  <buttongroup name="ButtonGroupBandwidth"/>
   <buttongroup name="ButtonGroupCurrentTime"/>
+  <buttongroup name="ButtonGroupCodec"/>
  </buttongroups>
 </ui>

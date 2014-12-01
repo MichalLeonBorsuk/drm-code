@@ -18,7 +18,7 @@
     <normaloff>:/icons/MainIcon.svg</normaloff>:/icons/MainIcon.svg</iconset>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QVBoxLayout" name="verticalLayout_6">
+   <layout class="QVBoxLayout" name="verticalLayout_2">
     <item>
      <layout class="QHBoxLayout" name="display">
       <property name="spacing">
@@ -990,7 +990,7 @@
       <item>
        <widget class="QTreeWidget" name="chartSelector">
         <property name="sizePolicy">
-         <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
+         <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
@@ -1182,37 +1182,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QFrame" name="framePlot">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="frameShape">
-         <enum>QFrame::Panel</enum>
-        </property>
-        <property name="frameShadow">
-         <enum>QFrame::Sunken</enum>
-        </property>
-        <layout class="QVBoxLayout" name="verticalLayout_2">
-         <property name="spacing">
-          <number>0</number>
-         </property>
-         <property name="leftMargin">
-          <number>0</number>
-         </property>
-         <property name="topMargin">
-          <number>0</number>
-         </property>
-         <property name="rightMargin">
-          <number>0</number>
-         </property>
-         <property name="bottomMargin">
-          <number>0</number>
-         </property>
-        </layout>
-       </widget>
+       <layout class="QVBoxLayout" name="plotLayout"/>
       </item>
      </layout>
     </item>
@@ -1815,7 +1785,7 @@
   <customwidget>
    <class>CMultColorLED</class>
    <extends>QWidget</extends>
-   <header>MultColorLED.h</header>
+   <header location="global">MultColorLED.h</header>
   </customwidget>
  </customwidgets>
  <resources>

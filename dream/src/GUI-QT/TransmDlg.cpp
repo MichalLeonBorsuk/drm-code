@@ -52,18 +52,17 @@ TransmDialog::TransmDialog(CSettings& Settings,	QWidget* parent)
 	/* Load transmitter settings */
 	DRMTransmitter.LoadSettings();
 
-	/* Set help text for the controls */
+    /* Init progress bar for input signal level */
+    inputLevel = LevelMeter::createLevelMeter();
+    levelMeterLayout->addWidget(inputLevel->widget());
+
+    /* Set help text for the controls */
 	AddWhatsThisHelp();
 
 	/* Init controls with default settings */
 	ButtonStartStop->setText(tr("&Start"));
 	OnButtonClearAllText();
 	UpdateMSCProtLevCombo();
-
-	/* Init progress bar for input signal level */
-    inputLevel = LevelMeter::createLevelMeter(ProgrInputLevel->parentWidget());
-    ProgrInputLevel->parentWidget()->layout()->removeWidget(ProgrInputLevel);
-    ProgrInputLevel->parentWidget()->layout()->addWidget(inputLevel->widget());
 
 	/* Init progress bar for current transmitted picture */
 	ProgressBarCurPict->setRange(0, 100);
@@ -1388,7 +1387,7 @@ void TransmDialog::AddWhatsThisHelp()
 		"the meter turns from green to red.");
 
 	TextLabelAudioLevel->setWhatsThis(strInputLevel);
-	ProgrInputLevel->setWhatsThis(strInputLevel);
+    inputLevel->widget()->setWhatsThis(strInputLevel);
 
 	/* Progress Bar */
 	const QString strProgressBar =

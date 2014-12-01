@@ -9,9 +9,8 @@ DRMDisplay::DRMDisplay(QWidget *parent) :
 {
     ui->setupUi(this);
     /* Init progress bar for input signal level */
-    inputLevel = LevelMeter::createLevelMeter(ui->ProgrInputLevel->parentWidget());
-    ui->ProgrInputLevel->parentWidget()->layout()->removeWidget(ui->ProgrInputLevel);
-    ui->ProgrInputLevel->parentWidget()->layout()->addWidget(inputLevel->widget());
+    inputLevel = LevelMeter::createLevelMeter();
+    ui->levelMeterLayout->addWidget(inputLevel->widget());
     /* Update times for color LEDs */
     ui->CLED_FAC->SetUpdateTime(1500);
     ui->CLED_SDC->SetUpdateTime(1500);
@@ -214,7 +213,7 @@ void DRMDisplay::SetDisplayColor(const QColor& newColor)
     vecpWidgets.push_back(ui->LabelCountryCode);
     vecpWidgets.push_back(ui->LabelServiceID);
     vecpWidgets.push_back(ui->TextLabelInputLevel);
-    vecpWidgets.push_back(ui->ProgrInputLevel);
+    //vecpWidgets.push_back(ui->ProgrInputLevel);
     vecpWidgets.push_back(ui->CLED_FAC);
     vecpWidgets.push_back(ui->CLED_SDC);
     vecpWidgets.push_back(ui->CLED_MSC);
@@ -310,7 +309,7 @@ void DRMDisplay::AddWhatsThisHelp()
 
     ui->TextTextMessage->setWhatsThis(strTextMessage);
     ui->TextLabelInputLevel->setWhatsThis(strInputLevel);
-    ui->ProgrInputLevel->setWhatsThis(strInputLevel);
+    inputLevel->widget()->setWhatsThis(strInputLevel);
     ui->CLED_MSC->setWhatsThis(strStatusLEDS);
     ui->CLED_SDC->setWhatsThis(strStatusLEDS);
     ui->CLED_FAC->setWhatsThis(strStatusLEDS);

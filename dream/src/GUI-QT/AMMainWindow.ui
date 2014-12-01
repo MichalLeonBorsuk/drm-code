@@ -35,14 +35,7 @@
       </property>
       <layout class="QHBoxLayout" name="horizontalLayout">
        <item>
-        <widget class="QWidget" name="plot" native="true">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-        </widget>
+        <layout class="QVBoxLayout" name="plotLayout"/>
        </item>
        <item>
         <widget class="QFrame" name="controlsFrame">
@@ -656,8 +649,8 @@ Phase Offset</string>
  </resources>
  <connections/>
  <buttongroups>
+  <buttongroup name="ButtonGroupDemodulation"/>
   <buttongroup name="ButtonGroupAGC"/>
   <buttongroup name="ButtonGroupNoiseReduction"/>
-  <buttongroup name="ButtonGroupDemodulation"/>
  </buttongroups>
 </ui>

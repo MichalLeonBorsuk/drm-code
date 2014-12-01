@@ -57,8 +57,8 @@ systemevalDlg::systemevalDlg(ReceiverController* rc, CSettings& Settings,
     /* Init controls -------------------------------------------------------- */
 
     /* Init main plot */
-    MainPlot = CDRMPlot::createPlot(framePlot);
-    framePlot->layout()->addWidget(MainPlot->widget());
+    MainPlot = CDRMPlot::createPlot();
+    plotLayout->addWidget(MainPlot->widget());
 
     /* Update times for colour LEDs */
     LEDFAC->SetUpdateTime(1500);

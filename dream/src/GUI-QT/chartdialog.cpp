@@ -6,8 +6,6 @@ ChartDialog::ChartDialog(QWidget *parent) :
     ui(new Ui::ChartDialog)
 {
     ui->setupUi(this);
-    plot->widget()->setParent(this);
-    ui->gridLayout->removeWidget(ui->widget);
     ui->gridLayout->addWidget(plot->widget());
 }
 

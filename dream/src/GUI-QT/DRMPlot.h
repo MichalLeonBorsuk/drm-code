@@ -94,7 +94,7 @@ public:
     virtual QWidget* widget() const =0;
 
     // Factory
-    static CDRMPlot* createPlot(QWidget* parent);
+    static CDRMPlot* createPlot(QWidget* parent=0);
 
 protected:
     virtual void applyColors()=0;

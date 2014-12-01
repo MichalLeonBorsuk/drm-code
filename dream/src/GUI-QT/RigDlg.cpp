@@ -43,8 +43,8 @@ RigDlg::RigDlg(CRig& nrig, QWidget* parent) :
     setAttribute(Qt::WA_QuitOnClose, false);
     ui->setupUi(this);
 
-    sMeter = SMeter::createSMeter(ui->sMeter->parentWidget());
-    ui->sMeter->parentWidget()->layout()->replaceWidget(ui->sMeter, sMeter->widget());
+    sMeter = SMeter::createSMeter();
+    ui->sMeterLayout->addWidget(sMeter->widget());
 
     map<rig_model_t,CHamlib::SDrRigCaps> r;
     rig.GetRigList(r);
