@@ -38,7 +38,7 @@ AMWidget::AMWidget(ReceiverController* rc, QWidget *parent) :
 {
     ui->setupUi(this);
 
-    MainPlot = CDRMPlot::createPlot();
+    MainPlot = new CDRMPlot();
     ui->plotLayout->addWidget(MainPlot->widget());
 
     //connect(static_cast<CDRMPlotQwt*>(MainPlot), SIGNAL(xAxisValSet(double)), this, SLOT(OnChartxAxisValSet(double)));
@@ -55,7 +55,7 @@ AMWidget::AMWidget(ReceiverController* rc, QWidget *parent) :
     if(MainPlot)
     {
         //TODOMainPlot->SetPlotStyle(getSetting("plotstyle", 0, true));
-        MainPlot->SetupChart(waterfall?CDRMPlot::INP_SPEC_WATERF:CDRMPlot::INPUT_SIG_PSD_ANALOG);
+        MainPlot->SetupChart(waterfall?INP_SPEC_WATERF:INPUT_SIG_PSD_ANALOG);
     }
 
     /* Init bandwidth slider */
@@ -205,9 +205,9 @@ void AMWidget::on_checkBoxWaterFall_stateChanged(int)
 {
     /* Toggle between normal spectrum plot and waterfall spectrum plot */
     if (MainPlot && ui->checkBoxWaterFall->isChecked())
-        MainPlot->SetupChart(CDRMPlot::INP_SPEC_WATERF);
+        MainPlot->SetupChart(INP_SPEC_WATERF);
     else
-        MainPlot->SetupChart(CDRMPlot::INPUT_SIG_PSD_ANALOG);
+        MainPlot->SetupChart(INPUT_SIG_PSD_ANALOG);
 }
 
 /* Manual carrier frequency input box */

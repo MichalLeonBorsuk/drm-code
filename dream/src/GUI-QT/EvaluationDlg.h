@@ -67,16 +67,16 @@ protected:
 	void			UpdateGPS(CParameter&);
     void			setControls(CSettings& s);
     void			AddWhatsThisHelp();
-    ChartDialog*	OpenChartWin(CDRMPlot::ECharType eNewType);
-	QTreeWidgetItem* FindItemByECharType(CDRMPlot::ECharType eCharType);
-	string			ECharTypeToPlotName(CDRMPlot::ECharType eCharType);
-	CDRMPlot::ECharType PlotNameToECharType(const string& PlotName);
+    ChartDialog*	OpenChartWin(ECharType eNewType);
+    QTreeWidgetItem* FindItemByECharType(ECharType eCharType);
+    string			ECharTypeToPlotName(ECharType eCharType);
+    ECharType       PlotNameToECharType(const string& PlotName);
 
     QString			GetRobModeStr(ERobMode);
     QString			GetSpecOccStr(ESpecOcc v);
 
 	QMenu*			pTreeWidgetContextMenu;
-	CDRMPlot::ECharType eCurCharType, eNewCharType;
+    ECharType       eCurCharType, eNewCharType;
 	int				iPlotStyle;
     vector<ChartDialog*>	vecpDRMPlots;
 

@@ -47,7 +47,7 @@ systemevalDlg::systemevalDlg(ReceiverController* rc, CSettings& Settings,
                              QWidget* parent) :
     CWindow(parent, Settings, "System Evaluation"),
     controller(rc),Parameters(*rc->getReceiver()->GetParameters()),
-    eNewCharType(CDRMPlot::NONE_OLD), iPlotStyle(0)
+    eNewCharType(NONE_OLD), iPlotStyle(0)
 {
     setupUi(this);
 
@@ -57,7 +57,7 @@ systemevalDlg::systemevalDlg(ReceiverController* rc, CSettings& Settings,
     /* Init controls -------------------------------------------------------- */
 
     /* Init main plot */
-    MainPlot = CDRMPlot::createPlot();
+    MainPlot = new CDRMPlot();
     plotLayout->addWidget(MainPlot->widget());
 
     /* Update times for colour LEDs */
@@ -92,7 +92,7 @@ systemevalDlg::systemevalDlg(ReceiverController* rc, CSettings& Settings,
         GroupBoxInterfRej->setEnabled(FALSE);
 
         /* Only audio spectrum makes sence for MDI in */
-        eCurCharType = CDRMPlot::AUDIO_SPECTRUM;
+        eCurCharType = AUDIO_SPECTRUM;
     }
 
     /* Init context menu for tree widget */
@@ -260,7 +260,7 @@ void systemevalDlg::eventShow(QShowEvent*)
         s << "Chart Window " << i;
 
         /* get the chart type */
-        const CDRMPlot::ECharType eNewType = PlotNameToECharType(Settings.Get(s.str(), "plottype", string()));
+        const ECharType eNewType = PlotNameToECharType(Settings.Get(s.str(), "plottype", string()));
 
         /* get window geometry data */
         CWinGeom c;
@@ -346,7 +346,7 @@ void systemevalDlg::UpdatePlotStyle(int iPlotStyle)
 
 void systemevalDlg::OnTreeWidgetContMenu(bool)
 {
-    if (eNewCharType != CDRMPlot::NONE_OLD)
+    if (eNewCharType != NONE_OLD)
     {
         /* Open the new chart */
         ChartDialog* pNewChartWin = OpenChartWin(eNewCharType);
@@ -355,7 +355,7 @@ void systemevalDlg::OnTreeWidgetContMenu(bool)
 		/* Show new window */
 		pNewChartWin->show();
 
-        eNewCharType = CDRMPlot::NONE_OLD;
+        eNewCharType = NONE_OLD;
     }
 }
 
@@ -366,12 +366,12 @@ void systemevalDlg::OnCustomContextMenuRequested(const QPoint& p)
     if (index.parent() != QModelIndex())
     {
         /* Popup the context menu */
-        eNewCharType = CDRMPlot::ECharType(index.data(Qt::UserRole).toInt());
+        eNewCharType = ECharType(index.data(Qt::UserRole).toInt());
         pTreeWidgetContextMenu->exec(QCursor::pos());
     }
 }
 
-ChartDialog *systemevalDlg::OpenChartWin(CDRMPlot::ECharType eNewType)
+ChartDialog *systemevalDlg::OpenChartWin(ECharType eNewType)
 {
     /* Create new chart window */
     ChartDialog* pNewChartWin = new ChartDialog(NULL);
@@ -392,7 +392,7 @@ ChartDialog *systemevalDlg::OpenChartWin(CDRMPlot::ECharType eNewType)
     return pNewChartWin;
 }
 
-QTreeWidgetItem* systemevalDlg::FindItemByECharType(CDRMPlot::ECharType eCharType)
+QTreeWidgetItem* systemevalDlg::FindItemByECharType(ECharType eCharType)
 {
     for (int i = 0;; i++)
     {
@@ -402,31 +402,31 @@ QTreeWidgetItem* systemevalDlg::FindItemByECharType(CDRMPlot::ECharType eCharTyp
         for (int j = 0; j < item->childCount(); j++)
         {
             QTreeWidgetItem* subitem = item->child(j);
-            CDRMPlot::ECharType eCurCharType = CDRMPlot::ECharType(subitem->data(0, Qt::UserRole).toInt());
+            ECharType eCurCharType = ECharType(subitem->data(0, Qt::UserRole).toInt());
             if (eCurCharType == eCharType)
                 return subitem;
         }
     }
 }
 
-CDRMPlot::ECharType systemevalDlg::PlotNameToECharType(const string& PlotName)
+ECharType systemevalDlg::PlotNameToECharType(const string& PlotName)
 {
     QString plotName(PlotName.c_str());
     for (int i = 0;; i++)
     {
         QTreeWidgetItem* item = chartSelector->topLevelItem(i);
         if (item == NULL)
-            return CDRMPlot::AUDIO_SPECTRUM; /* safe value */
+            return AUDIO_SPECTRUM; /* safe value */
         for (int j = 0; j < item->childCount(); j++)
         {
             QTreeWidgetItem* subitem = item->child(j);
             if (plotName == subitem->text(0))
-                return CDRMPlot::ECharType(subitem->data(0, Qt::UserRole).toInt());
+                return ECharType(subitem->data(0, Qt::UserRole).toInt());
         }
     }
 }
 
-string systemevalDlg::ECharTypeToPlotName(CDRMPlot::ECharType eCharType)
+string systemevalDlg::ECharTypeToPlotName(ECharType eCharType)
 {
     QTreeWidgetItem* item = FindItemByECharType(eCharType);
     if (item != NULL)
@@ -820,7 +820,7 @@ void systemevalDlg::OnListSelChanged(QTreeWidgetItem *curr, QTreeWidgetItem *)
     if (curr && curr->parent())
     {
         /* Get chart type from selected item */
-        eCurCharType = CDRMPlot::ECharType(curr->data(0, Qt::UserRole).toInt());
+        eCurCharType = ECharType(curr->data(0, Qt::UserRole).toInt());
         /* Setup chart */
         MainPlot->SetupChart(eCurCharType);
     }

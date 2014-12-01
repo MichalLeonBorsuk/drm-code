@@ -46,7 +46,7 @@
 #define BLUEWHITE_MAIN_GRID_COLOR_PLOT			Qt::gray
 #define BLUEWHITE_SPEC_LINE1_COLOR_PLOT			Qt::red
 #define BLUEWHITE_SPEC_LINE2_COLOR_PLOT			Qt::black
-#define BLUEWHITE_PASS_BAND_COLOR_PLOT			QColor(192, 192, 255)
+#define BLUEWHITE_PASS_BAND_COLOR_PLOT			QColor(192, 192, 255, 125)
 
 /* GREENBLACK */
 #define GREENBLACK_MAIN_PEN_COLOR_PLOT			Qt::green
@@ -55,7 +55,7 @@
 #define GREENBLACK_MAIN_GRID_COLOR_PLOT			QColor(128, 0, 0)
 #define GREENBLACK_SPEC_LINE1_COLOR_PLOT		Qt::yellow
 #define GREENBLACK_SPEC_LINE2_COLOR_PLOT		Qt::blue
-#define GREENBLACK_PASS_BAND_COLOR_PLOT			QColor(0, 96, 0)
+#define GREENBLACK_PASS_BAND_COLOR_PLOT			QColor(0, 96, 0, 125)
 
 /* BLACKGREY */
 #define BLACKGREY_MAIN_PEN_COLOR_PLOT			Qt::black
@@ -64,16 +64,31 @@
 #define BLACKGREY_MAIN_GRID_COLOR_PLOT			Qt::white
 #define BLACKGREY_SPEC_LINE1_COLOR_PLOT			Qt::blue
 #define BLACKGREY_SPEC_LINE2_COLOR_PLOT			Qt::yellow
-#define BLACKGREY_PASS_BAND_COLOR_PLOT			QColor(128, 128, 128)
+#define BLACKGREY_PASS_BAND_COLOR_PLOT			QColor(128, 128, 128, 125)
 
-
-CDRMPlot* CDRMPlot::createPlot(QWidget* parent)
+CDRMPlot::CDRMPlot(QWidget* parent):QObject(parent),CurCharType(NONE_OLD)
 {
 #ifdef WITH_QCUSTOMPLOT
-    return new CDRMPlotQCP(parent);
+    CDRMPlotQCP* p = new CDRMPlotQCP(parent);
+    connect(p, SIGNAL(plotClicked(double)), this, SLOT(on_plotClicked(double)));
+    plot = p;
 #else
-    return new CDRMPlotQwt(parent);
+    CDRMPlotQwt* p = new CDRMPlotQwt(parent);
+    connect(p, SIGNAL(plotClicked(double)), this, SLOT(on_plotClicked(double)));
+    plot = p;
 #endif
+    SetPlotStyle(0);
+}
+
+void CDRMPlot::on_plotClicked(double d)
+{
+    double df = d; //controller->getReceiver()->GetReceiveData()->ConvertFrequency(d * 1000, TRUE);
+    emit plotClicked(df);
+}
+
+CDRMPlot::~CDRMPlot()
+{
+
 }
 
 void CDRMPlot::SetupChart(const ECharType eNewType)
@@ -81,109 +96,126 @@ void CDRMPlot::SetupChart(const ECharType eNewType)
     if(eNewType == CurCharType)
         return;
 
-    clearPlots();
+    plot->clearPlots();
 
     switch (eNewType)
     {
     case AVERAGED_IR:
-        setupBasicPlot("Channel Impulse Response","Time [ms]", "Input IR [dB]", "Input IR", -3.0, 8.0, -20.0, 45.0);
+        plot->setupBasicPlot("Channel Impulse Response","Time [ms]", "Input IR [dB]", "Input IR",
+                             -3.0, 8.0, -20.0, 45.0, MainPenColorPlot, BckgrdColorPlot);
         // left bound of guard interval
-        addxMarker(SpecLine1ColorPlot, 1.0);
+        plot->addxMarker(SpecLine1ColorPlot, 1.0);
         // right bound of guard interval
-        addxMarker(SpecLine1ColorPlot, 2.0);
+        plot->addxMarker(SpecLine1ColorPlot, 2.0);
         // Estimated beginning of impulse response
-        addxMarker(SpecLine2ColorPlot, 3.0);
+        plot->addxMarker(SpecLine2ColorPlot, 3.0);
         // Estimated end of impulse response
-        addxMarker(SpecLine2ColorPlot, 4.0);
+        plot->addxMarker(SpecLine2ColorPlot, 4.0);
         /* the peak detection bound from timing tracking */
-        addyMarker(SpecLine1ColorPlot, 30.0);
+        plot->addyMarker(SpecLine1ColorPlot, 30.0);
         break;
 
     case TRANSFERFUNCTION:
-        setupBasicPlot("Channel Transfer Function / Group Delay","Carrier Index", "TF [dB]", "Transf. Fct.", 0.0, 200.0,
-                       MIN_VAL_SHIF_PSD_Y_AXIS_DB, MAX_VAL_SHIF_PSD_Y_AXIS_DB);
-        add2ndGraph("Group Delay [ms]", "Group Del.", -50.0, 50.0);
+        plot->setupBasicPlot("Channel Transfer Function / Group Delay","Carrier Index", "TF [dB]", "Transf. Fct.",
+                             0.0, 200.0,
+                       MIN_VAL_SHIF_PSD_Y_AXIS_DB, MAX_VAL_SHIF_PSD_Y_AXIS_DB,
+                              MainPenColorPlot, BckgrdColorPlot);
+        plot->add2ndGraph("Group Delay [ms]", "Group Del.", -50.0, 50.0, SpecLine1ColorPlot);
         break;
 
     case POWER_SPEC_DENSITY:
-        setupBasicPlot("Shifted Power Spectral Density of Input Signal","Frequency [kHz]","PSD [dB]","Input Spectrum", 0.0, 24.0,
-                       MIN_VAL_SHIF_PSD_Y_AXIS_DB, MAX_VAL_SHIF_PSD_Y_AXIS_DB);
-        addxMarker(SpecLine1ColorPlot, 1.0);
+        plot->setupBasicPlot("Shifted Power Spectral Density of Input Signal","Frequency [kHz]","PSD [dB]","Input Spectrum", 0.0, 24.0,
+                       MIN_VAL_SHIF_PSD_Y_AXIS_DB, MAX_VAL_SHIF_PSD_Y_AXIS_DB, MainPenColorPlot, BckgrdColorPlot);
+        plot->addxMarker(SpecLine1ColorPlot, 1.0);
         break;
 
     case SNR_SPECTRUM:
-        setupBasicPlot("SNR Spectrum (Weighted MER on MSC Cells)","Carrier Index","WMER [dB]","SNR Spectrum", 0.0, 10.0, 20.0, 25.0);
+        plot->setupBasicPlot("SNR Spectrum (Weighted MER on MSC Cells)","Carrier Index","WMER [dB]","SNR Spectrum",0.0, 10.0, 20.0, 25.0,  MainPenColorPlot, BckgrdColorPlot);
+        plot->setAutoScalePolicy(Plot::left, Plot::enlarge, 0.0);
+        plot->setAutoScalePolicy(Plot::bottom, Plot::last, 0.0);
         break;
 
     case INPUTSPECTRUM_NO_AV:
-        setupBasicPlot("Input Spectrum","Frequency [kHz]","Input Spectrum [dB]","Input Spectrum", 0.0, 24.0,
-                       MIN_VAL_INP_SPEC_Y_AXIS_DB, 1.0);
-        addxMarker(SpecLine1ColorPlot, 1.0);
+        plot->setupBasicPlot("Input Spectrum","Frequency [kHz]","Input Spectrum [dB]","Input Spectrum", 0.0, 24.0,
+                       MIN_VAL_INP_SPEC_Y_AXIS_DB, 1.0,  MainPenColorPlot, BckgrdColorPlot);
+        plot->addxMarker(SpecLine1ColorPlot, 1.0);
         break;
 
     case INP_SPEC_WATERF:
-        setupWaterfall();
+        plot->setupWaterfall();
         break;
 
     case INPUT_SIG_PSD:
-        setupBasicPlot("Input PSD","Frequency [kHz]", "Input PSD [dB]", "Input PSD", 0.0, 24.0,
-                       MIN_VAL_INP_SPEC_Y_AXIS_DB, MAX_VAL_INP_SPEC_Y_AXIS_DB);
-        addxMarker(SpecLine1ColorPlot, 1.0);
+        plot->setupBasicPlot("Input PSD","Frequency [kHz]", "Input PSD [dB]", "Input PSD", 0.0, 24.0,
+                       MIN_VAL_INP_SPEC_Y_AXIS_DB, MAX_VAL_INP_SPEC_Y_AXIS_DB,  MainPenColorPlot, BckgrdColorPlot);
+        plot->addxMarker(SpecLine1ColorPlot, 1.0);
         break;
 
     case INPUT_SIG_PSD_ANALOG:
-        setupBasicPlot("Input PSD","Frequency [kHz]", "Input PSD [dB]", "Input PSD", 0.0, 24.0,
-                       MIN_VAL_INP_SPEC_Y_AXIS_DB, MAX_VAL_INP_SPEC_Y_AXIS_DB);
-        addxMarker(SpecLine1ColorPlot, 1.0);
-        addBwMarker();
+        plot->setupBasicPlot("Input PSD","Frequency [kHz]", "Input PSD [dB]", "Input PSD", 0.0, 24.0,
+                       MIN_VAL_INP_SPEC_Y_AXIS_DB, MAX_VAL_INP_SPEC_Y_AXIS_DB,  MainPenColorPlot, BckgrdColorPlot);
+        plot->addxMarker(SpecLine1ColorPlot, 1.0);
+        plot->addBwMarker(PassBandColorPlot);
         break;
 
     case AUDIO_SPECTRUM:
-        setupBasicPlot("Audio Spectrum", "Frequency [kHz]", "AS [dB]", "Audio Spectrum", 0.0, 20.0, -100.0, -20.0);
+        plot->setupBasicPlot("Audio Spectrum", "Frequency [kHz]", "AS [dB]", "Audio Spectrum",
+                             0.0, 20.0, -100.0, -20.0, MainPenColorPlot, BckgrdColorPlot);
         break;
 
     case FREQ_SAM_OFFS_HIST:
-        setupBasicPlot("Rel. Frequency Offset / Sample Rate Offset History",
-                       "Time [ms]", "Freq. Offset [Hz]", "Freq", 0.0, 4.0, -2.0, 0.0);
-        add2ndGraph("Sample Rate Offset [Hz]", "Samp.", 0.0, 1.0);
+        plot->setupBasicPlot("Rel. Frequency Offset / Sample Rate Offset History",
+                       "Time [ms]", "Freq. Offset [Hz]", "Freq", 0.0, 4.0, -2.0, 0.0, MainPenColorPlot, BckgrdColorPlot);
+        plot->add2ndGraph("Sample Rate Offset [Hz]", "Samp.", 0.0, 1.0, SpecLine1ColorPlot);
+        plot->setAutoScalePolicy(Plot::left, Plot::min, 1.0);
+        plot->setAutoScalePolicy(Plot::right, Plot::min, 1.0);
+        plot->setAutoScalePolicy(Plot::bottom, Plot::first, 0.0);
         break;
 
     case DOPPLER_DELAY_HIST:
-        setupBasicPlot("Delay / Doppler History",
-                       "Time [min]", "Delay [ms]", "Delay", -15.0, 0.0, 0.0, 10.0);
-        add2ndGraph("Doppler [Hz]", "Doppler", 0.0, 4.0);
+        plot->setupBasicPlot("Delay / Doppler History",
+                       "Time [min]", "Delay [ms]", "Delay", -15.0, 0.0, 0.0, 10.0, MainPenColorPlot, BckgrdColorPlot);
+        plot->add2ndGraph("Doppler [Hz]", "Doppler", 0.0, 4.0, SpecLine1ColorPlot);
         break;
 
     case SNR_AUDIO_HIST:
-        setupBasicPlot("SNR / Correctly Decoded Audio History",
-                       "Time [min]", "SNR [dB[", "SNR", -15.0, 0.0, 0.0, 1.0);
-        add2ndGraph("Corr. Dec. Audio / DRM-Frame", "Audio", 0.0, 1.0);
+        plot->setupBasicPlot("SNR / Correctly Decoded Audio History",
+                       "Time [min]", "SNR [dB[", "SNR", -15.0, 0.0, 0.0, 1.0, MainPenColorPlot, BckgrdColorPlot);
+        plot->add2ndGraph("Corr. Dec. Audio / DRM-Frame", "Audio", 0.0, 1.0, SpecLine1ColorPlot);
+        /* Ratio between the maximum values for audio and SNR. The ratio should be
+           chosen so that the audio curve is not in the same range as the SNR curve
+           under "normal" conditions to increase readability of curves.
+           Since at very low SNRs, no audio can received anyway so we do not have to
+           check whether the audio y-scale is in range of the curve */
+        plot->setAutoScalePolicy(Plot::left, Plot::fit, 5.0);
+        plot->setAutoScalePolicy(Plot::right, Plot::fit, 7.5); // TODO
+        plot->setAutoScalePolicy(Plot::bottom, Plot::first, 0.0);
         break;
 
     case FAC_CONSTELLATION:
-        setupConstPlot("FAC Constellation");
-        setQAMGrid(2.0 / sqrt(2.0), 1, 4); /* QAM4 */
-        addConstellation("FAC", 0);
+        plot->setupConstPlot("FAC Constellation");
+        plot->setQAMGrid(2.0 / sqrt(2.0), 1, 4); /* QAM4 */
+        plot->addConstellation("FAC", 0);
         break;
 
     case SDC_CONSTELLATION:
-        setupConstPlot("SDC Constellation");
-        setQAMGrid(4.0 / sqrt(10.0), 2, 4); /* QAM16 */
-        addConstellation("SDC", 1);
+        plot->setupConstPlot("SDC Constellation");
+        plot->setQAMGrid(4.0 / sqrt(10.0), 2, 4); /* QAM16 */
+        plot->addConstellation("SDC", 1);
         break;
 
     case MSC_CONSTELLATION:
-        setupConstPlot("MSC Constellation");
-        setQAMGrid(8.0 / sqrt(42.0), 4, 4); /* QAM64 */
-        addConstellation("MSC", 2);
+        plot->setupConstPlot("MSC Constellation");
+        plot->setQAMGrid(8.0 / sqrt(42.0), 4, 4); /* QAM64 */
+        plot->addConstellation("MSC", 2);
         break;
 
     case ALL_CONSTELLATION:
-        setupConstPlot("FAC / SDC / MSC Constellation");
-        setQAMGrid(8.0 / sqrt(42.0), 4, 4); /* QAM64 */
-        addConstellation("FAC", 0);
-        addConstellation("SDC", 1);
-        addConstellation("MSC", 2);
+        plot->setupConstPlot("FAC / SDC / MSC Constellation");
+        plot->setQAMGrid(8.0 / sqrt(42.0), 4, 4); /* QAM64 */
+        plot->addConstellation("FAC", 0);
+        plot->addConstellation("SDC", 1);
+        plot->addConstellation("MSC", 2);
         break;
 
     case NONE_OLD:
@@ -191,7 +223,7 @@ void CDRMPlot::SetupChart(const ECharType eNewType)
     }
     CurCharType = eNewType;
     addWhatsThisHelp();
-    replot();
+    plot->replot();
 }
 
 void CDRMPlot::update(ReceiverController* rc)
@@ -212,45 +244,45 @@ void CDRMPlot::update(ReceiverController* rc)
     case AVERAGED_IR:
         rc->getReceiver()->GetPlotManager()->GetAvPoDeSp(vecrData, vecrScale, rLowerBound, rHigherBound,
             rStartGuard, rEndGuard, rPDSBegin, rPDSEnd);
-        setData(0, vecrData, vecrScale, true);
-        setxMarker(0, rStartGuard);
-        setxMarker(1, rEndGuard);
-        setxMarker(2, rPDSBegin);
-        setxMarker(3, rPDSEnd);
-        setyMarker(0, Max(rLowerBound, rHigherBound));
+        plot->setData(0, vecrData, vecrScale);
+        plot->setxMarker(0, rStartGuard);
+        plot->setxMarker(1, rEndGuard);
+        plot->setxMarker(2, rPDSBegin);
+        plot->setxMarker(3, rPDSEnd);
+        plot->setyMarker(0, Max(rLowerBound, rHigherBound));
         break;
 
     case TRANSFERFUNCTION:
         rc->getReceiver()->GetPlotManager()->GetTransferFunction(vecrData, vecrData2, vecrScale);
-        setData(0, vecrData, vecrScale, true);
-        setData(1, vecrData2, vecrScale);
+        plot->setData(0, vecrData, vecrScale);
+        plot->setData(1, vecrData2, vecrScale);
         break;
 
     case POWER_SPEC_DENSITY:
         rc->getReceiver()->GetOFDMDemod()->GetPowDenSpec(vecrData, vecrScale);
-        setData(0, vecrData, vecrScale);
+        plot->setData(0, vecrData, vecrScale);
         break;
 
     case SNR_SPECTRUM:
         rc->getReceiver()->GetPlotManager()->GetSNRProfile(vecrData, vecrScale);
-        setData(0, vecrData, vecrScale, true);
+        plot->setData(0, vecrData, vecrScale);
         break;
 
     case INPUTSPECTRUM_NO_AV:
         rc->getReceiver()->GetReceiveData()->GetInputSpec(vecrData, vecrScale);
-        setxMarker(0, rDCFrequency);
-        setData(0, vecrData, vecrScale);
+        plot->setxMarker(0, rDCFrequency);
+        plot->setData(0, vecrData, vecrScale);
         break;
 
     case INP_SPEC_WATERF:
         rc->getReceiver()->GetReceiveData()->GetInputSpec(vecrData, vecrScale);
-        updateWaterfall(vecrData, vecrScale);
+        plot->updateWaterfall(vecrData, vecrScale);
         break;
 
     case INPUT_SIG_PSD:
         rc->getReceiver()->GetPlotManager()->GetInputPSD(vecrData, vecrScale);
-        setxMarker(0, rDCFrequency);
-        setData(0, vecrData, vecrScale);
+        plot->setxMarker(0, rDCFrequency);
+        plot->setData(0, vecrData, vecrScale);
         break;
 
     case INPUT_SIG_PSD_ANALOG:
@@ -259,7 +291,7 @@ void CDRMPlot::update(ReceiverController* rc)
         {
             double f1 = rc->getReceiver()->GetAMDemod()->GetCurMixFreqOffs();
             double f2 = rc->getReceiver()->GetReceiveData()->ConvertFrequency(f1) / 1000.0;
-            setxMarker(0, f2);
+            plot->setxMarker(0, f2);
         }
         {
             double rCenterFreq, rBandwidth;
@@ -268,101 +300,101 @@ void CDRMPlot::update(ReceiverController* rc)
             int sampleRate = rc->getReceiver()->GetParameters()->GetSigSampleRate();
             c = rc->getReceiver()->GetReceiveData()->ConvertFrequency(rCenterFreq * sampleRate) / 1000.0;
             b = rc->getReceiver()->GetReceiveData()->ConvertFrequency(rBandwidth * sampleRate) / 1000.0;
-            setBwMarker(0, c, b);
+            plot->setBwMarker(0, c, b);
         }
-        setData(0, vecrData, vecrScale);
+        plot->setData(0, vecrData, vecrScale);
         break;
 
     case AUDIO_SPECTRUM:
         if(rc->getReceiver()->GetParameters()->audiodecoder.empty())
         {
             vecrData.Init(0); vecrScale.Init(0);
-            setData(0, vecrData, vecrScale, true, "No codec");
+            plot->setData(0, vecrData, vecrScale, "No codec");
         }
         else
         {
             rc->getReceiver()->GetWriteData()->GetAudioSpec(vecrData, vecrScale);
-            setData(0, vecrData, vecrScale, true, "AS [dB]");
+            plot->setData(0, vecrData, vecrScale, "AS [dB]");
         }
         break;
 
     case FREQ_SAM_OFFS_HIST:
         rc->getReceiver()->GetPlotManager()->GetFreqSamOffsHist(vecrData, vecrData2, vecrScale, rFreqAcquVal);
         // TODO AutoScale(vecrData, vecrData2, vecrScale);
-        setData(0, vecrData, vecrScale, true,
+        plot->setData(0, vecrData, vecrScale,
             QString("Freq. Offset [Hz] rel. to %1 Hz").arg(rc->getReceiver()->GetReceiveData()->ConvertFrequency(rFreqAcquVal)));
-        setData(1, vecrData2, vecrScale, true);
+        plot->setData(1, vecrData2, vecrScale);
         break;
 
     case DOPPLER_DELAY_HIST:
         rc->getReceiver()->GetPlotManager()->GetDopplerDelHist(vecrData, vecrData2, vecrScale);
-        setData(0, vecrData, vecrScale, true);
-        setData(1, vecrData2, vecrScale);
+        plot->setData(0, vecrData, vecrScale);
+        plot->setData(1, vecrData2, vecrScale);
         break;
 
     case SNR_AUDIO_HIST:
         rc->getReceiver()->GetPlotManager()->GetSNRHist(vecrData, vecrData2, vecrScale);
         // TODO AutoScale2(vecrData, vecrData2, vecrScale);
-        setData(0, vecrData, vecrScale, true);
-        setData(1, vecrData2, vecrScale);
+        plot->setData(0, vecrData, vecrScale);
+        plot->setData(1, vecrData2, vecrScale);
         break;
 
     case FAC_CONSTELLATION:
         rc->getReceiver()->GetFACMLC()->GetVectorSpace(veccData);
-        setData(0, veccData);
+        plot->setData(0, veccData);
         break;
 
     case SDC_CONSTELLATION:
         switch (rc->getReceiver()->GetParameters()->eSDCCodingScheme)
         {
         case CS_1_SM:
-            setQAMGrid(2.0 / sqrt(2.0), 1, 4); /* QAM4 */
+            plot->setQAMGrid(2.0 / sqrt(2.0), 1, 4); /* QAM4 */
             break;
 
         case CS_2_SM:
-            setQAMGrid(4.0 / sqrt(10.0), 2, 4); /* QAM16 */
+            plot->setQAMGrid(4.0 / sqrt(10.0), 2, 4); /* QAM16 */
             break;
 
         default:
-            setQAMGrid(8.0 / sqrt(42.0), 4, 4); /* QAM64 */
+            plot->setQAMGrid(8.0 / sqrt(42.0), 4, 4); /* QAM64 */
             break;
         }
         rc->getReceiver()->GetSDCMLC()->GetVectorSpace(veccData);
-        setData(0, veccData);
+        plot->setData(0, veccData);
         break;
 
     case MSC_CONSTELLATION:
         switch (rc->getReceiver()->GetParameters()->eMSCCodingScheme)
         {
         case CS_1_SM:
-            setQAMGrid(2.0 / sqrt(2.0), 1, 4); /* QAM4 */
+            plot->setQAMGrid(2.0 / sqrt(2.0), 1, 4); /* QAM4 */
             break;
 
         case CS_2_SM:
-            setQAMGrid(4.0 / sqrt(10.0), 2, 4); /* QAM16 */
+            plot->setQAMGrid(4.0 / sqrt(10.0), 2, 4); /* QAM16 */
             break;
 
         default:
-            setQAMGrid(8.0 / sqrt(42.0), 4, 4); /* QAM64 */
+            plot->setQAMGrid(8.0 / sqrt(42.0), 4, 4); /* QAM64 */
             break;
         }
         rc->getReceiver()->GetMSCMLC()->GetVectorSpace(veccData);
-        setData(0, veccData);
+        plot->setData(0, veccData);
         break;
 
     case ALL_CONSTELLATION:
         rc->getReceiver()->GetFACMLC()->GetVectorSpace(veccData);
-        setData(0, veccData);
+        plot->setData(0, veccData);
         rc->getReceiver()->GetSDCMLC()->GetVectorSpace(veccData);
-        setData(1, veccData);
+        plot->setData(1, veccData);
         rc->getReceiver()->GetMSCMLC()->GetVectorSpace(veccData);
-        setData(2, veccData);
+        plot->setData(2, veccData);
         break;
 
     case NONE_OLD:
         break;
     }
-    replot();
+    plot->replot();
 }
 
 void CDRMPlot::setupTreeWidget(QTreeWidget* tw)
@@ -372,35 +404,35 @@ void CDRMPlot::setupTreeWidget(QTreeWidget* tw)
     for (; *it; it++)
     {
         if ((*it)->text(0) == QObject::QObject::tr("SNR Spectrum"))
-            (*it)->setData(0,  Qt::UserRole, CDRMPlot::SNR_SPECTRUM);
+            (*it)->setData(0,  Qt::UserRole, SNR_SPECTRUM);
         if ((*it)->text(0) == QObject::QObject::tr("Audio Spectrum"))
-            (*it)->setData(0,  Qt::UserRole, CDRMPlot::AUDIO_SPECTRUM);
+            (*it)->setData(0,  Qt::UserRole, AUDIO_SPECTRUM);
         if ((*it)->text(0) == QObject::QObject::tr("Shifted PSD"))
-            (*it)->setData(0,  Qt::UserRole, CDRMPlot::POWER_SPEC_DENSITY);
+            (*it)->setData(0,  Qt::UserRole, POWER_SPEC_DENSITY);
         if ((*it)->text(0) == QObject::QObject::tr("Waterfall Input Spectrum"))
-            (*it)->setData(0,  Qt::UserRole, CDRMPlot::INP_SPEC_WATERF);
+            (*it)->setData(0,  Qt::UserRole, INP_SPEC_WATERF);
         if ((*it)->text(0) == QObject::QObject::tr("Input Spectrum"))
-            (*it)->setData(0,  Qt::UserRole, CDRMPlot::INPUTSPECTRUM_NO_AV);
+            (*it)->setData(0,  Qt::UserRole, INPUTSPECTRUM_NO_AV);
         if ((*it)->text(0) == QObject::QObject::tr("Input PSD"))
-            (*it)->setData(0,  Qt::UserRole, CDRMPlot::INPUT_SIG_PSD);
+            (*it)->setData(0,  Qt::UserRole, INPUT_SIG_PSD);
         if ((*it)->text(0) == QObject::QObject::tr("MSC"))
-            (*it)->setData(0,  Qt::UserRole, CDRMPlot::MSC_CONSTELLATION);
+            (*it)->setData(0,  Qt::UserRole, MSC_CONSTELLATION);
         if ((*it)->text(0) == QObject::QObject::tr("SDC"))
-            (*it)->setData(0,  Qt::UserRole, CDRMPlot::SDC_CONSTELLATION);
+            (*it)->setData(0,  Qt::UserRole, SDC_CONSTELLATION);
         if ((*it)->text(0) == QObject::QObject::tr("FAC"))
-            (*it)->setData(0,  Qt::UserRole, CDRMPlot::FAC_CONSTELLATION);
+            (*it)->setData(0,  Qt::UserRole, FAC_CONSTELLATION);
         if ((*it)->text(0) == QObject::QObject::tr("FAC / SDC / MSC"))
-            (*it)->setData(0,  Qt::UserRole, CDRMPlot::ALL_CONSTELLATION);
+            (*it)->setData(0,  Qt::UserRole, ALL_CONSTELLATION);
         if ((*it)->text(0) == QObject::QObject::tr("Frequency / Sample Rate"))
-            (*it)->setData(0,  Qt::UserRole, CDRMPlot::FREQ_SAM_OFFS_HIST);
+            (*it)->setData(0,  Qt::UserRole, FREQ_SAM_OFFS_HIST);
         if ((*it)->text(0) == QObject::QObject::tr("Delay / Doppler"))
-            (*it)->setData(0,  Qt::UserRole, CDRMPlot::DOPPLER_DELAY_HIST);
+            (*it)->setData(0,  Qt::UserRole, DOPPLER_DELAY_HIST);
         if ((*it)->text(0) == QObject::QObject::tr("SNR / Audio"))
-            (*it)->setData(0,  Qt::UserRole, CDRMPlot::SNR_AUDIO_HIST);
+            (*it)->setData(0,  Qt::UserRole, SNR_AUDIO_HIST);
         if ((*it)->text(0) == QObject::QObject::tr("Transfer Function"))
-            (*it)->setData(0,  Qt::UserRole, CDRMPlot::TRANSFERFUNCTION);
+            (*it)->setData(0,  Qt::UserRole, TRANSFERFUNCTION);
         if ((*it)->text(0) == QObject::QObject::tr("Impulse Response"))
-            (*it)->setData(0,  Qt::UserRole, CDRMPlot::AVERAGED_IR);
+            (*it)->setData(0,  Qt::UserRole, AVERAGED_IR);
     }
 
     /* Expand all items */
@@ -413,7 +445,6 @@ void CDRMPlot::SetPlotStyle(const int iNewStyleID)
     {
     case 1:
         MainPenColorPlot = GREENBLACK_MAIN_PEN_COLOR_PLOT;
-        MainPenColorConst = GREENBLACK_MAIN_PEN_COLOR_CONSTELLATION;
         BckgrdColorPlot = GREENBLACK_BCKGRD_COLOR_PLOT;
         MainGridColorPlot = GREENBLACK_MAIN_GRID_COLOR_PLOT;
         SpecLine1ColorPlot = GREENBLACK_SPEC_LINE1_COLOR_PLOT;
@@ -423,7 +454,6 @@ void CDRMPlot::SetPlotStyle(const int iNewStyleID)
 
     case 2:
         MainPenColorPlot = BLACKGREY_MAIN_PEN_COLOR_PLOT;
-        MainPenColorConst = BLACKGREY_MAIN_PEN_COLOR_CONSTELLATION;
         BckgrdColorPlot = BLACKGREY_BCKGRD_COLOR_PLOT;
         MainGridColorPlot = BLACKGREY_MAIN_GRID_COLOR_PLOT;
         SpecLine1ColorPlot = BLACKGREY_SPEC_LINE1_COLOR_PLOT;
@@ -434,7 +464,6 @@ void CDRMPlot::SetPlotStyle(const int iNewStyleID)
     case 0: /* 0 is default */
     default:
         MainPenColorPlot = BLUEWHITE_MAIN_PEN_COLOR_PLOT;
-        MainPenColorConst = BLUEWHITE_MAIN_PEN_COLOR_CONSTELLATION;
         BckgrdColorPlot = BLUEWHITE_BCKGRD_COLOR_PLOT;
         MainGridColorPlot = BLUEWHITE_MAIN_GRID_COLOR_PLOT;
         SpecLine1ColorPlot = BLUEWHITE_SPEC_LINE1_COLOR_PLOT;
@@ -442,7 +471,7 @@ void CDRMPlot::SetPlotStyle(const int iNewStyleID)
         PassBandColorPlot = BLUEWHITE_PASS_BAND_COLOR_PLOT;
         break;
     }
-    applyColors();
+    plot->applyColors(MainPenColorPlot, BckgrdColorPlot);
 }
 
 void CDRMPlot::addWhatsThisHelp()
@@ -595,5 +624,5 @@ void CDRMPlot::addWhatsThisHelp()
         break;
     }
 
-    setWhatsThis(strCurPlotHelp);
+    plot->setWhatsThis(strCurPlotHelp);
 }

@@ -9,10 +9,10 @@ ChannelWidget::ChannelWidget(ReceiverController* c, QWidget *parent) :
     pMainPlot(NULL)
 {
     ui->setupUi(this);
-    pMainPlot = CDRMPlot::createPlot();
+    pMainPlot = new CDRMPlot();
     ui->plotLayout->addWidget(pMainPlot->widget());
     pMainPlot->setupTreeWidget(ui->chartSelector);
-    pMainPlot->SetupChart(CDRMPlot::INPUT_SIG_PSD);
+    pMainPlot->SetupChart(INPUT_SIG_PSD);
     ui->drmDetail->hideMSCParams(true);
     connectController(c);
 }
@@ -105,7 +105,7 @@ void ChannelWidget::on_chartSelector_currentItemChanged(QTreeWidgetItem *curr)
     if (curr && curr->parent())
     {
         /* Get chart type from selected item */
-         CDRMPlot::ECharType eCurCharType = CDRMPlot::ECharType(curr->data(0, Qt::UserRole).toInt());
+         ECharType eCurCharType = ECharType(curr->data(0, Qt::UserRole).toInt());
         /* Setup chart */
         pMainPlot->SetupChart(eCurCharType);
     }

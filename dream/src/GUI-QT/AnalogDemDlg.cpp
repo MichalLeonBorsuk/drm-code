@@ -117,10 +117,10 @@ AnalogDemDlg::AnalogDemDlg(ReceiverController* rc, CSettings& Settings,
     bool waterfall = getSetting("waterfall", false);
     ui->checkBoxWaterfall->setChecked(waterfall);
 
-    MainPlot = CDRMPlot::createPlot();
+    MainPlot = new CDRMPlot();
     ui->plotLayout->addWidget(MainPlot->widget());
-    MainPlot->SetupChart(waterfall ? CDRMPlot::INP_SPEC_WATERF : CDRMPlot::INPUT_SIG_PSD_ANALOG);
-    //connect(, SIGNAL(xAxisValSet(double)), this, SLOT(OnChartxAxisValSet(double)));
+    MainPlot->SetupChart(waterfall ? INP_SPEC_WATERF : INPUT_SIG_PSD_ANALOG);
+    connect(MainPlot, SIGNAL(plotClicked(double)), controller, SLOT(setAMDemodAcq(double)));
 #if 0
     plot = new AMSpectrumPlot(ui->plot->parentWidget());
     ui->plot->layout()->replaceWidget(ui->plot, plot);
@@ -569,7 +569,7 @@ void AnalogDemDlg::OnChartxAxisValSet(double dVal) // TODO this is QwtPlot speci
 void AnalogDemDlg::on_checkBoxWaterfall_toggled(bool checked)
 {
     /* Toggle between normal spectrum plot and waterfall spectrum plot */
-    MainPlot->SetupChart(checked?CDRMPlot::INP_SPEC_WATERF:CDRMPlot::INPUT_SIG_PSD_ANALOG);
+    MainPlot->SetupChart(checked?INP_SPEC_WATERF:INPUT_SIG_PSD_ANALOG);
 }
 
 /* Manual carrier frequency input box */
