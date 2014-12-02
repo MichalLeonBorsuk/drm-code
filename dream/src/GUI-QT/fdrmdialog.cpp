@@ -73,7 +73,7 @@
 // David's values
 static _REAL WMERSteps[] = {6.0, 12.0, 18.0, 24.0, 30.0};
 
-static const bool DEFAULT_TO_SINGLE_WINDOW_MODE=true;
+static const bool DEFAULT_TO_SINGLE_WINDOW_MODE=false;
 static const int DEFAULT_PLOT_STYLE=0; /* 0 = blue/white, 1 = green/black, 2 = black/grey */
 static const int DEFAULT_MESSAGE_STYLE=0; /* 0 = black on white , 1 = white on black */
 

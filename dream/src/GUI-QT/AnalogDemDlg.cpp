@@ -30,28 +30,13 @@
 
 #include "AnalogDemDlg.h"
 #include "DRMPlot.h"
-#include <QMessageBox>
-#include <QMenuBar>
-#include <QString>
-#include <QLabel>
-#include <QRadioButton>
-#include <QCheckBox>
-#include <QToolTip>
-#include <QButtonGroup>
-#include <QPushButton>
-#include <QCheckBox>
-#include <QFileDialog>
-#include <QSlider>
-#include <QLayout>
-#include <QProgressBar>
-#include <QComboBox>
-#include <QWhatsThis>
-#include <QDateTime>
-#include <QCloseEvent>
-#include <QInputDialog>
-#include <QPainter>
 #include "receivercontroller.h"
 #include "ThemeCustomizer.h"
+#include <QPainter>
+#include <QWhatsThis>
+#include <QFileDialog>
+#include <QInputDialog>
+#include <QDateTime>
 
 void PhaseGauge::paintEvent(QPaintEvent *)
 {
@@ -90,11 +75,7 @@ AnalogDemDlg::AnalogDemDlg(ReceiverController* rc, CSettings& Settings,
     controller(rc),
     AMSSDlg(*rc->getReceiver(), Settings, NULL),
     pFileMenu(pFileMenu), pSoundCardMenu(pSoundCardMenu),subSampleCount(0),
-#ifdef QCP_LIB_DECL
-    plot(NULL)
-#else
     MainPlot(NULL)
-#endif
 {
     ui->setupUi(this);
 
@@ -120,18 +101,7 @@ AnalogDemDlg::AnalogDemDlg(ReceiverController* rc, CSettings& Settings,
     MainPlot = new CDRMPlot();
     ui->plotLayout->addWidget(MainPlot->widget());
     MainPlot->SetupChart(waterfall ? INP_SPEC_WATERF : INPUT_SIG_PSD_ANALOG);
-    connect(MainPlot, SIGNAL(plotClicked(double)), controller, SLOT(setAMDemodAcq(double)));
-#if 0
-    plot = new AMSpectrumPlot(ui->plot->parentWidget());
-    ui->plot->layout()->replaceWidget(ui->plot, plot);
-    int sr = controller->getReceiver()->GetParameters()->GetSigSampleRate();
-    double dXScaleMin = controller->getReceiver()->GetReceiveData()->ConvertFrequency(0.0) / 1000;
-    double dXScaleMax = controller->getReceiver()->GetReceiveData()->ConvertFrequency(double(sr) / 2) / 1000;
-    plot->xAxis->setRange(dXScaleMin, dXScaleMax);
-    plot->setMarkersVisible(true);
-    connect(plot, SIGNAL(plottableClick(QCPAbstractPlottable*,QMouseEvent*)), this, SLOT(on_plotClick(QCPAbstractPlottable*,QMouseEvent*)));
-    plot->setWaterfallMode(waterfall);
-#endif
+    connect(MainPlot, SIGNAL(plotClicked(double)), this, SLOT(OnPlotClicked(double)));
 
 	/* Init bandwidth slider */
 	UpdateSliderBandwidth();
@@ -154,11 +124,6 @@ AnalogDemDlg::AnalogDemDlg(ReceiverController* rc, CSettings& Settings,
 		this, SLOT(OnSwitchToDRM()));
     connect(ui->ButtonAMSS, SIGNAL(clicked()),
 		&AMSSDlg, SLOT(show()));
-
-	/* Timers */
-    //connect(&Timer, SIGNAL(timeout()),this, SLOT(OnTimer()));
-    //connect(&TimerPLLPhaseDial, SIGNAL(timeout()),this, SLOT(OnTimerPLLPhaseDial()));
-	connect(&TimerClose, SIGNAL(timeout()),this, SLOT(OnTimerClose()));
 
     connect(controller, SIGNAL(dataAvailable()), this, SLOT(on_new_data()));
 
@@ -203,18 +168,7 @@ void AnalogDemDlg::eventUpdate()
 void AnalogDemDlg::eventShow(QShowEvent*)
 {
     connect(controller, SIGNAL(dataAvailable()),this, SLOT(OnTimer()));
-
-    OnTimer();
-	OnTimerPLLPhaseDial();
-	/* Set correct schedule */
-
-	/* Activate real-time timers */
-    //Timer.start(GUI_CONTROL_UPDATE_TIME);
-    //TimerPLLPhaseDial.start(PLL_PHASE_DIAL_UPDATE_TIME);
-
 	UpdateControls();
-
-    /* Notify the MainPlot of showEvent */
 }
 
 void AnalogDemDlg::eventHide(QHideEvent*)
@@ -222,9 +176,6 @@ void AnalogDemDlg::eventHide(QHideEvent*)
     /* Notify the MainPlot of hideEvent */
 	/* stop real-time timers */
     disconnect(controller, SIGNAL(dataAvailable()),this, SLOT(OnTimer()));
-    //Timer.stop();
-	TimerPLLPhaseDial.stop();
-
     bool waterfall = ui->checkBoxWaterfall->isChecked();
 	putSetting("waterfall", waterfall);
 }
@@ -366,12 +317,7 @@ void AnalogDemDlg::UpdateSliderBandwidth()
 
 void AnalogDemDlg::UpdatePlotStyle(int iPlotstyle)
 {
-#ifdef QCP_LIB_DECL
-    // TODO
-#else
-    /* Update main plot window */
 	MainPlot->SetPlotStyle(iPlotstyle);
-#endif
 }
 
 void AnalogDemDlg::OnSampleRateChanged()
@@ -410,22 +356,8 @@ void AnalogDemDlg::OnTimer()
     if(subSampleCount == 0) {
         /* Carrier frequency of AM signal */
         ui->ButtonFreqOffset->setText(QString().setNum(f, 'f', 2) + " Hz");
-#ifdef QCP_LIB_DECL
-        if(!ui->checkBoxWaterfall->isChecked()) {
-            controller->getReceiver()->GetPlotManager()->GetInputPSD(vecrData, vecrScale);
-            plot->updateSpectrum(vecrData, vecrScale);
-            plot->updateDCCarrier(f/1000.0);
-            updateAnalogBWMarker();
-        }
-#endif
     }
     if(subSampleCount==0 || subSampleCount == 10) { // Fast Update
-#ifdef QCP_LIB_DECL
-        if(ui->checkBoxWaterfall->isChecked()) {
-            controller->getReceiver()->GetReceiveData()->GetInputSpec(vecrData, vecrScale);
-            plot->updateSpectrum(vecrData, vecrScale);
-        }
-#endif
         OnTimerPLLPhaseDial();
     }
 }
@@ -538,34 +470,6 @@ void AnalogDemDlg::on_CheckBoxSaveAudioWave_clicked(bool checked)
         controller->setSaveAudio("");
 }
 
-#ifdef QCP_LIB_DECL
-void AnalogDemDlg::on_plotClick(QCPAbstractPlottable *, QMouseEvent *event)
-{
-    double d = plot->xAxis->pixelToCoord(event->x());
-    double dVal = d / abs(plot->xAxis->range().lower-plot->xAxis->range().upper);
-    if (dVal < 0.0)
-        dVal = 0.0;
-    else if (dVal > 1.0)
-        dVal = 1.0;
-    controller->setAMDemodAcq(dVal);
-    updateAnalogBWMarker();
-    double rDCFreq = controller->getReceiver()->GetAMDemod()->GetCurMixFreqOffs();
-    double f = controller->getReceiver()->GetReceiveData()->ConvertFrequency(rDCFreq) / 1000;
-    plot->updateDCCarrier(f);
-}
-#endif
-
-void AnalogDemDlg::OnChartxAxisValSet(double dVal) // TODO this is QwtPlot specific
-{
-    /* Perform range check */
-	if (dVal < 0.0)
-		dVal = 0.0;
-	else if (dVal > 1.0)
-		dVal = 1.0;
-	/* Set new frequency in receiver module */
-    controller->getReceiver()->SetAMDemodAcq(dVal);
-}
-
 void AnalogDemDlg::on_checkBoxWaterfall_toggled(bool checked)
 {
     /* Toggle between normal spectrum plot and waterfall spectrum plot */
@@ -583,12 +487,22 @@ void AnalogDemDlg::on_ButtonFreqOffset_clicked(bool)
         ui->LabelCarrierFrequency->text(), prev_freq, -1e6, 1e6, 2, &ok);
 	if (ok)
 	{
-		const _REAL conv_freq =
-			controller->getReceiver()->GetReceiveData()->ConvertFrequency(new_freq, TRUE);
-		const double dVal = conv_freq /
-			(controller->getReceiver()->GetParameters()->GetSigSampleRate() / 2);
-		OnChartxAxisValSet(dVal);
+        OnPlotClicked(new_freq);
 	}
+}
+
+void AnalogDemDlg::OnPlotClicked(double d)
+{
+    const _REAL conv_freq =
+        controller->getReceiver()->GetReceiveData()->ConvertFrequency(d, TRUE);
+    double dVal = conv_freq /
+        (controller->getReceiver()->GetParameters()->GetSigSampleRate() / 2);
+    if (dVal < 0.0)
+        dVal = 0.0;
+    else if (dVal > 1.0)
+        dVal = 1.0;
+    /* Set new frequency in receiver module */
+    controller->setAMDemodAcq(dVal);
 }
 
 /* Manual band width input box */

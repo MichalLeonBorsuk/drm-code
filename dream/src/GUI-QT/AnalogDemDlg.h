@@ -105,7 +105,6 @@ public:
 protected:
     Ui::AMMainWindow*   ui;
     ReceiverController* controller;
-	QTimer				Timer;
 	QTimer				TimerPLLPhaseDial;
 	QTimer				TimerClose;
 	CAMSSDlg			AMSSDlg;
@@ -128,11 +127,11 @@ public slots:
 	void UpdatePlotStyle(int);
 	void OnSampleRateChanged();
 	void OnSoundFileChanged(CDRMReceiver::ESFStatus);
-	void OnTimer();
-	void OnTimerPLLPhaseDial();
+    void OnTimer();
+    void OnTimerPLLPhaseDial();
 	void OnTimerClose();
-	void OnChartxAxisValSet(double dVal);
-	void OnSwitchToDRM();
+    void OnPlotClicked(double dVal);
+    void OnSwitchToDRM();
 	void OnSwitchToFM();
 	void OnHelpAbout() {emit About();}
 	void OnWhatsThis();

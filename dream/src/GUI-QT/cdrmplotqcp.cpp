@@ -393,10 +393,5 @@ void CDRMPlotQCP::setAutoScalePolicy(Plot::EAxis axis, Plot::EPolicy policy, dou
 void CDRMPlotQCP::on_plotClick(QCPAbstractPlottable *, QMouseEvent *event)
 {
     double d = plot->xAxis->pixelToCoord(event->x());
-    double dVal = d / abs(plot->xAxis->range().lower-plot->xAxis->range().upper);
-    if (dVal < 0.0)
-        dVal = 0.0;
-    else if (dVal > 1.0)
-        dVal = 1.0;
-    emit plotClicked(dVal);
+    emit plotClicked(d);
 }

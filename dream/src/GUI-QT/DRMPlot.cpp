@@ -82,7 +82,7 @@ CDRMPlot::CDRMPlot(QWidget* parent):QObject(parent),CurCharType(NONE_OLD)
 
 void CDRMPlot::on_plotClicked(double d)
 {
-    double df = d; //controller->getReceiver()->GetReceiveData()->ConvertFrequency(d * 1000, TRUE);
+    double df = 1000.0 * d; // kHz to Hz
     emit plotClicked(df);
 }
 
