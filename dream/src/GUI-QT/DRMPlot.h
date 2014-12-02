@@ -142,7 +142,7 @@ public:
     virtual QWidget* widget() const { return plot->widget(); }
 
 signals:
-    void plotClicked(double_t);
+    void plotClicked(double);
 
 protected:
     void addWhatsThisHelp();
