@@ -382,7 +382,7 @@ ChartDialog *systemevalDlg::OpenChartWin(ECharType eNewType)
     pNewChartWin->setWindowIcon(icon);
 
     /* Set receiver object and correct chart type */
-    pNewChartWin->SetupChart(eNewType);
+    pNewChartWin->SetupChart(eNewType, controller->getReceiver()->GetParameters()->GetSigSampleRate());
 
     /* Set plot style*/
     pNewChartWin->SetPlotStyle(iPlotStyle);
@@ -822,7 +822,7 @@ void systemevalDlg::OnListSelChanged(QTreeWidgetItem *curr, QTreeWidgetItem *)
         /* Get chart type from selected item */
         eCurCharType = ECharType(curr->data(0, Qt::UserRole).toInt());
         /* Setup chart */
-        MainPlot->SetupChart(eCurCharType);
+        MainPlot->SetupChart(eCurCharType, controller->getReceiver()->GetParameters()->GetSigSampleRate());
     }
 }
 

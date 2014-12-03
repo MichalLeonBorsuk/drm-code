@@ -12,7 +12,8 @@ ChannelWidget::ChannelWidget(ReceiverController* c, QWidget *parent) :
     pMainPlot = new CDRMPlot();
     ui->plotLayout->addWidget(pMainPlot->widget());
     pMainPlot->setupTreeWidget(ui->chartSelector);
-    pMainPlot->SetupChart(INPUT_SIG_PSD);
+    sr = c->getReceiver()->GetParameters()->GetSigSampleRate();
+    pMainPlot->SetupChart(INPUT_SIG_PSD, sr);
     ui->drmDetail->hideMSCParams(true);
     connectController(c);
 }
@@ -107,7 +108,7 @@ void ChannelWidget::on_chartSelector_currentItemChanged(QTreeWidgetItem *curr)
         /* Get chart type from selected item */
          ECharType eCurCharType = ECharType(curr->data(0, Qt::UserRole).toInt());
         /* Setup chart */
-        pMainPlot->SetupChart(eCurCharType);
+        pMainPlot->SetupChart(eCurCharType, sr);
     }
 }
 

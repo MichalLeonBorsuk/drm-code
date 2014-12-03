@@ -27,7 +27,7 @@ protected:
     void addyMarker(QColor color, double initialPos);
     void setupConstPlot(const char* text);
     void addConstellation(const char* legendText, int n);
-    void setupWaterfall();
+    void setupWaterfall(double sr);
     void setData(int n, CVector<_COMPLEX>& veccData);
     void setData(int n, CVector<_REAL>& vecrData, CVector<_REAL>& vecrScale, const QString& axisLabel="");
     void setxMarker(int n, _REAL r);

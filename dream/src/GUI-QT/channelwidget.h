@@ -25,6 +25,7 @@ public:
 private:
     Ui::ChannelWidget *ui;
     CDRMPlot *pMainPlot;
+    int sr;
 public slots:
     void setLEDFAC(ETypeRxStatus);
     void setLEDSDC(ETypeRxStatus);

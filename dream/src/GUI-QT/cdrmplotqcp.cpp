@@ -131,7 +131,7 @@ void CDRMPlotQCP::addyMarker(QColor color, double initialPos)
     hlines << l;
 }
 
-void CDRMPlotQCP::setupWaterfall()
+void CDRMPlotQCP::setupWaterfall(double sr)
 {
     title->setText(QObject::tr("Waterfall Spectrum"));
     wfitem = new QCPItemPixmap(plot);
@@ -140,6 +140,7 @@ void CDRMPlotQCP::setupWaterfall()
     plot->addItem(wfitem);
     plot->legend->setVisible(false);
     plot->xAxis->setLabel(QObject::tr("Frequency [kHz]"));
+    plot->xAxis->setRange(0.0, sr);
     plot->yAxis->setVisible(false);
 }
 
