@@ -113,7 +113,7 @@ public:
     virtual void addyMarker(QColor color, double initialPos)=0;
     virtual void setupConstPlot(const char* text)=0;
     virtual void addConstellation(const char* legendText, int n)=0;
-    virtual void setupWaterfall()=0;
+    virtual void setupWaterfall(double)=0;
     virtual void setQAMGrid(double div, int step, int substep)=0;
     virtual void setData(int n, CVector<_COMPLEX>& veccData)=0;
     virtual void setData(int n, CVector<_REAL>& vecrData, CVector<_REAL>& vecrScale, const QString& axisLabel="")=0;
@@ -134,7 +134,7 @@ public:
     CDRMPlot(QWidget* parent=0);
     virtual ~CDRMPlot();
 
-    void SetupChart(const ECharType eNewType);
+    void SetupChart(const ECharType eNewType, int sampleRate);
     void setupTreeWidget(QTreeWidget* tw);
     void SetPlotStyle(const int iNewStyleID);
     void update(ReceiverController* rc);

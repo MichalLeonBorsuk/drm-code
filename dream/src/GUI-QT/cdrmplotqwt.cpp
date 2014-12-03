@@ -407,10 +407,15 @@ void CDRMPlotQwt::addxMarker(QColor color, double initialPos)
     }
     curve->setPen(QPen(color, 1, Qt::DashLine));
     curve->attach(plot);
+#if QWT_VERSION < 0x060100
+    QwtScaleDiv* psd = plot->axisScaleDiv(QwtPlot::yLeft);
+    QwtScaleDiv& sd = *psd;
+#else
     QwtScaleDiv sd = plot->axisScaleDiv(QwtPlot::yLeft);
+#endif
     QVector<double> xData, yData;
     xData << initialPos << initialPos;
-    yData << sd.lowerBound() << sd.upperBound();
+    yData << sd.LOWERBOUND() << sd.UPPERBOUND();
     curve->SETDATA(xData, yData);
     nCurves++;
 }
@@ -432,9 +437,9 @@ void CDRMPlotQwt::addyMarker(QColor color, double initialPos)
 {
     yMarker.setPen(QPen(color, 1, Qt::DashLine));
     yMarker.attach(plot);
-    QwtScaleDiv sd = plot->axisScaleDiv(QwtPlot::xBottom);
+    QwtScaleDiv* sd = plot->axisScaleDiv(QwtPlot::xBottom);
     QVector<double> xData, yData;
-    xData << sd.lowerBound() << sd.upperBound();
+    xData << sd->lowerBound() << sd->upperBound();
     yData << initialPos << initialPos;
     yMarker.SETDATA(xData, yData);
 }
@@ -502,8 +507,9 @@ void CDRMPlotQwt::addConstellation(const char *legendText, int c)
     }
 }
 
-void CDRMPlotQwt::setupWaterfall()
+void CDRMPlotQwt::setupWaterfall(double)
 {
+// TODO scale by sample rate
     /* Init chart for waterfall input spectrum */
     plot->setTitle(tr("Waterfall Input Spectrum"));
     plot->enableAxis(QwtPlot::yRight, FALSE);
@@ -710,10 +716,15 @@ void CDRMPlotQwt::setxMarker(int n, _REAL r)
     default:
         ;
     }
+#if QWT_VERSION < 0x060100
+    QwtScaleDiv* psd = plot->axisScaleDiv(QwtPlot::yLeft);
+    QwtScaleDiv& sd = *psd;
+#else
     QwtScaleDiv sd = plot->axisScaleDiv(QwtPlot::yLeft);
+#endif
     QVector<double> xData, yData;
     xData << r << r;
-    yData << sd.lowerBound() << sd.upperBound();
+    yData << sd.LOWERBOUND() << sd.UPPERBOUND();
     curve->SETDATA(xData, yData);
 }
 
@@ -733,9 +744,9 @@ void CDRMPlotQwt::setBwMarker(int n, _REAL c, _REAL b)
 
 void CDRMPlotQwt::setyMarker(int n, _REAL r)
 {
-    QwtScaleDiv sd = plot->axisScaleDiv(QwtPlot::yLeft);
+    QwtScaleDiv* sd = plot->axisScaleDiv(QwtPlot::yLeft);
     QVector<double> xData, yData;
-    xData << sd.lowerBound() << sd.upperBound();
+    xData << sd->lowerBound() << sd->upperBound();
     yData << r << r;
     yMarker.SETDATA(xData, yData);
 }

@@ -55,7 +55,7 @@ AMWidget::AMWidget(ReceiverController* rc, QWidget *parent) :
     if(MainPlot)
     {
         //TODOMainPlot->SetPlotStyle(getSetting("plotstyle", 0, true));
-        MainPlot->SetupChart(waterfall?INP_SPEC_WATERF:INPUT_SIG_PSD_ANALOG);
+        MainPlot->SetupChart(waterfall?INP_SPEC_WATERF:INPUT_SIG_PSD_ANALOG, controller->getReceiver()->GetParameters()->GetSigSampleRate());
     }
 
     /* Init bandwidth slider */
@@ -205,9 +205,9 @@ void AMWidget::on_checkBoxWaterFall_stateChanged(int)
 {
     /* Toggle between normal spectrum plot and waterfall spectrum plot */
     if (MainPlot && ui->checkBoxWaterFall->isChecked())
-        MainPlot->SetupChart(INP_SPEC_WATERF);
+        MainPlot->SetupChart(INP_SPEC_WATERF, controller->getReceiver()->GetParameters()->GetSigSampleRate());
     else
-        MainPlot->SetupChart(INPUT_SIG_PSD_ANALOG);
+        MainPlot->SetupChart(INPUT_SIG_PSD_ANALOG, controller->getReceiver()->GetParameters()->GetSigSampleRate());
 }
 
 /* Manual carrier frequency input box */

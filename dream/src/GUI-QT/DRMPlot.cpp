@@ -91,10 +91,12 @@ CDRMPlot::~CDRMPlot()
 
 }
 
-void CDRMPlot::SetupChart(const ECharType eNewType)
+void CDRMPlot::SetupChart(const ECharType eNewType, int sampleRate)
 {
     if(eNewType == CurCharType)
         return;
+
+    double sr = double(sampleRate) / 2000.0;
 
     plot->clearPlots();
 
@@ -124,7 +126,7 @@ void CDRMPlot::SetupChart(const ECharType eNewType)
         break;
 
     case POWER_SPEC_DENSITY:
-        plot->setupBasicPlot("Shifted Power Spectral Density of Input Signal","Frequency [kHz]","PSD [dB]","Input Spectrum", 0.0, 24.0,
+        plot->setupBasicPlot("Shifted Power Spectral Density of Input Signal","Frequency [kHz]","PSD [dB]","Input Spectrum", 0.0, sr,
                        MIN_VAL_SHIF_PSD_Y_AXIS_DB, MAX_VAL_SHIF_PSD_Y_AXIS_DB, MainPenColorPlot, BckgrdColorPlot);
         plot->addxMarker(SpecLine1ColorPlot, 1.0);
         break;
@@ -136,23 +138,23 @@ void CDRMPlot::SetupChart(const ECharType eNewType)
         break;
 
     case INPUTSPECTRUM_NO_AV:
-        plot->setupBasicPlot("Input Spectrum","Frequency [kHz]","Input Spectrum [dB]","Input Spectrum", 0.0, 24.0,
+        plot->setupBasicPlot("Input Spectrum","Frequency [kHz]","Input Spectrum [dB]","Input Spectrum", 0.0, sr,
                        MIN_VAL_INP_SPEC_Y_AXIS_DB, 1.0,  MainPenColorPlot, BckgrdColorPlot);
         plot->addxMarker(SpecLine1ColorPlot, 1.0);
         break;
 
     case INP_SPEC_WATERF:
-        plot->setupWaterfall();
+        plot->setupWaterfall(sr);
         break;
 
     case INPUT_SIG_PSD:
-        plot->setupBasicPlot("Input PSD","Frequency [kHz]", "Input PSD [dB]", "Input PSD", 0.0, 24.0,
+        plot->setupBasicPlot("Input PSD","Frequency [kHz]", "Input PSD [dB]", "Input PSD", 0.0, sr,
                        MIN_VAL_INP_SPEC_Y_AXIS_DB, MAX_VAL_INP_SPEC_Y_AXIS_DB,  MainPenColorPlot, BckgrdColorPlot);
         plot->addxMarker(SpecLine1ColorPlot, 1.0);
         break;
 
     case INPUT_SIG_PSD_ANALOG:
-        plot->setupBasicPlot("Input PSD","Frequency [kHz]", "Input PSD [dB]", "Input PSD", 0.0, 24.0,
+        plot->setupBasicPlot("Input PSD","Frequency [kHz]", "Input PSD [dB]", "Input PSD", 0.0, sr,
                        MIN_VAL_INP_SPEC_Y_AXIS_DB, MAX_VAL_INP_SPEC_Y_AXIS_DB,  MainPenColorPlot, BckgrdColorPlot);
         plot->addxMarker(SpecLine1ColorPlot, 1.0);
         plot->addBwMarker(PassBandColorPlot);

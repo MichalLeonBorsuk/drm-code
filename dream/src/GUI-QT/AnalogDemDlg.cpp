@@ -100,7 +100,7 @@ AnalogDemDlg::AnalogDemDlg(ReceiverController* rc, CSettings& Settings,
 
     MainPlot = new CDRMPlot();
     ui->plotLayout->addWidget(MainPlot->widget());
-    MainPlot->SetupChart(waterfall ? INP_SPEC_WATERF : INPUT_SIG_PSD_ANALOG);
+    MainPlot->SetupChart(waterfall ? INP_SPEC_WATERF : INPUT_SIG_PSD_ANALOG, controller->getReceiver()->GetParameters()->GetSigSampleRate());
     connect(MainPlot, SIGNAL(plotClicked(double)), this, SLOT(OnPlotClicked(double)));
 
 	/* Init bandwidth slider */
@@ -473,7 +473,7 @@ void AnalogDemDlg::on_CheckBoxSaveAudioWave_clicked(bool checked)
 void AnalogDemDlg::on_checkBoxWaterfall_toggled(bool checked)
 {
     /* Toggle between normal spectrum plot and waterfall spectrum plot */
-    MainPlot->SetupChart(checked?INP_SPEC_WATERF:INPUT_SIG_PSD_ANALOG);
+    MainPlot->SetupChart(checked?INP_SPEC_WATERF:INPUT_SIG_PSD_ANALOG, controller->getReceiver()->GetParameters()->GetSigSampleRate());
 }
 
 /* Manual carrier frequency input box */

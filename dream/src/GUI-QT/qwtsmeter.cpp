@@ -7,10 +7,12 @@ QwtSMeter::QwtSMeter(QWidget *parent) :
     setRange(S_METER_THERMO_MIN, S_METER_THERMO_MAX);
     setScale(S_METER_THERMO_MIN, S_METER_THERMO_MAX, 10.0);
     setScalePosition(QwtThermo::TopScale);
+    setOrientation(Qt::Horizontal, QwtThermo::TopScale);
 # else
     setScale(S_METER_THERMO_MIN, S_METER_THERMO_MAX);
     setScaleStepSize(10.0);
     setScalePosition(QwtThermo::TrailingScale);
+    setOrientation(Qt::Horizontal);
 # endif
     setAlarmLevel(S_METER_THERMO_ALARM);
     setAlarmLevel(-12.5);
@@ -28,5 +30,4 @@ QwtSMeter::QwtSMeter(QWidget *parent) :
     newPalette.setColor(QPalette::Highlight,  QColor(255, 0, 0));
     setPalette(newPalette);
 # endif
-    setOrientation(Qt::Horizontal);
 }
