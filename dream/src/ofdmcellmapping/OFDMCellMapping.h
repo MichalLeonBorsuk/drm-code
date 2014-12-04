@@ -60,6 +60,7 @@ public:
 	virtual ~COFDMCellDemapping() {}
 
 protected:
+    int     iNumFACCells;
 	int		iNumSymPerFrame;
 	int		iNumCarrier;
 	int		iNumUsefMSCCellsPerFrame;

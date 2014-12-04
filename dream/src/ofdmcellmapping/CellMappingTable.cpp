@@ -202,7 +202,33 @@ void CCellMappingTable::MakeTable(
 		ScatPilots.piGainTable = &iScatPilGainRobModD[iSpecOccArrayIndex][0];
 		break;
 
-	default:
+    case RM_ROBUSTNESS_MODE_E:
+        iCarrierKmin = iTableCarrierKmin[iSpecOccArrayIndex][3]; // TODO
+        iCarrierKmax = iTableCarrierKmax[iSpecOccArrayIndex][3]; // TODO
+
+        iFFTSizeN = RME_FFT_SIZE_N;
+        RatioTgTu.iEnum = RME_ENUM_TG_TU;
+        RatioTgTu.iDenom = RME_DENOM_TG_TU;
+
+        iNumSymPerFrame = RME_NUM_SYM_PER_FRAME;
+        iNumSymbolsPerSuperframe = iNumSymPerFrame * NUM_FRAMES_IN_SUPERFRAME; // TODO
+        piTableFAC = &iTableFACRobModE[0][0];
+        iNumTimePilots = RMD_NUM_TIME_PIL; // TODO
+        piTableTimePilots = &iTableTimePilRobModD[0][0]; // TODO
+        piTableFreqPilots = &iTableFreqPilRobModD[0][0]; // TODO
+        iScatPilTimeInt = RMD_SCAT_PIL_TIME_INT; // TODO
+        iScatPilFreqInt = RMD_SCAT_PIL_FREQ_INT; // TODO
+
+        /* Scattered pilots phase definition */
+        ScatPilots.piConst = iTableScatPilConstRobModD; // TODO
+        ScatPilots.iColSizeWZ = SIZE_COL_WZ_ROB_MOD_D; // TODO
+        ScatPilots.piW = &iScatPilWRobModD[0][0]; // TODO
+        ScatPilots.piZ = &iScatPilZRobModD[0][0]; // TODO
+        ScatPilots.iQ = iScatPilQRobModD; // TODO
+
+        ScatPilots.piGainTable = &iScatPilGainRobModD[iSpecOccArrayIndex][0]; // TODO
+        break;
+    default:
 		break;
 	}
 
@@ -310,18 +336,18 @@ void CCellMappingTable::MakeTable(
 
 			/* FAC ---------------------------------------------------------- */
 			/* FAC positions are defined in a table */
-			if (iFACCounter < NUM_FAC_CELLS)
-			{
-				/* piTableFAC[x * 2]: first column; piTableFAC[x * 2 + 1]:
-				   second column */
-				if (piTableFAC[iFACCounter * 2] * iNumCarrier +
-					piTableFAC[iFACCounter * 2 + 1] == iFrameSym *
-					iNumCarrier + iCar)
-				{
-					iFACCounter++;
-					matiMapTab[iSym][iCarArrInd] = CM_FAC;
-				}
-			}
+            if (iFACCounter < (eNewRobustnessMode==RM_ROBUSTNESS_MODE_E)?NUM_FAC_CELLS_DRMPLUS:NUM_FAC_CELLS_DRM30)
+            {
+                /* piTableFAC[x * 2]: first column; piTableFAC[x * 2 + 1]:
+                   second column */
+                if (piTableFAC[iFACCounter * 2] * iNumCarrier +
+                    piTableFAC[iFACCounter * 2 + 1] == iFrameSym *
+                    iNumCarrier + iCar)
+                {
+                    iFACCounter++;
+                    matiMapTab[iSym][iCarArrInd] = CM_FAC;
+                }
+            }
 
 
 			/* Scattered pilots --------------------------------------------- */

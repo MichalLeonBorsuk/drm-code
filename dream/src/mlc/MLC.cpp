@@ -471,9 +471,9 @@ void CMLC::CalculateParam(CParameter& Parameter, int iNewChannelType)
         /* FAC ********************************************************************/
     case CT_FAC:
         eCodingScheme = CS_1_SM;
-        iN_mux = NUM_FAC_CELLS;
+        iN_mux = NUM_FAC_CELLS_DRM30;
 
-        iNumEncBits = NUM_FAC_CELLS * 2;
+        iNumEncBits = NUM_FAC_CELLS_DRM30 * 2;
 
         iLevels = 1;
 

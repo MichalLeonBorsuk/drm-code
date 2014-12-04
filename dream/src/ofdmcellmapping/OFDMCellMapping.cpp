@@ -241,7 +241,7 @@ void COFDMCellDemapping::ProcessDataInternal(CParameter& Parameters)
 		   output cyclic-buffer. An incorrect number of FAC cells can be if
 		   the "iSymbolCounterAbs" was changed, e.g. by the synchronization
 		   units */
-		if (iFACCellCounter != NUM_FAC_CELLS)
+        if (iFACCellCounter != iNumFACCells)
 			SetBufReset2(); /* FAC: buffer number 2 */
 
 		/* Reset FAC cell counter */
@@ -293,6 +293,11 @@ void COFDMCellDemapping::ProcessDataInternal(CParameter& Parameters)
 void COFDMCellDemapping::InitInternal(CParameter& Parameters)
 {
 	const CCellMappingTable& Param = Parameters.CellMappingTable;
+
+    if(Parameters.GetWaveMode() == RM_ROBUSTNESS_MODE_E)
+        iNumFACCells = NUM_FAC_CELLS_DRMPLUS;
+    else
+        iNumFACCells = NUM_FAC_CELLS_DRM30;
 
 	iNumSymPerFrame = Param.iNumSymPerFrame;
 	iNumCarrier = Param.iNumCarrier;

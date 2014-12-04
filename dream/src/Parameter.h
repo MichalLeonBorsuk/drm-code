@@ -1295,7 +1295,7 @@ protected:
     int iCurSelAudioService;
     int iCurSelDataService;
 
-    ERobMode eRobustnessMode;	/* E.g.: Mode A, B, C or D */
+    ERobMode eRobustnessMode;	/* E.g.: Mode A, B, C, D or E */
     ESpecOcc eSpectOccup;
 
     /* For resync to last service------------------------------------------- */
