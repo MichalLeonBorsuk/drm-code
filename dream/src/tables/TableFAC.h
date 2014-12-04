@@ -39,6 +39,7 @@
    65 [number of cells] * 2 [4-QAM] * 0.6 [code-rate] - 6 [tailbits] = 72 */
 #define NUM_FAC_BITS_PER_BLOCK_DRM30	72
 #define NUM_FAC_BITS_PER_BLOCK_DRMPLUS 120
+extern const int iTableNumOfFACbitsPerBlock[];
 
 /* iTableNumOfServices[a][b]
    a: Number of audio services

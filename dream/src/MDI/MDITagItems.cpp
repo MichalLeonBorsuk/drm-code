@@ -179,7 +179,7 @@ CTagItemGeneratorFAC::GenTag(CParameter & Parameter, CSingleBuffer < _BINARY > &
 	}
 	else
 	{
-		/* Length: 9 bytes = 72 bits */
+        /* Length: 9 bytes = 72 bits or 15 bytes = 120 */
         PrepareTag(Parameter.iNumFACBitsPerBlock);
         CVectorEx < _BINARY > *pvecbiFACData = FACData.Get(Parameter.iNumFACBitsPerBlock);
 
