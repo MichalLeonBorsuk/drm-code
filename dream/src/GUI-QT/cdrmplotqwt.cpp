@@ -413,10 +413,12 @@ void CDRMPlotQwt::addxMarker(QColor color, double initialPos)
     }
     curve->setPen(QPen(color, 1, Qt::DashLine));
     curve->attach(plot);
-    QVector<double> xData, yData;
-    xData << initialPos << initialPos;
+    QVector<double> yData;
     yData = getBounds(QwtPlot::yLeft);
-    curve->SETDATA(xData, yData);
+    double x[2], y[2];
+    x[0] = x[1] = initialPos;
+    y[0] = yData[0]; y[1] = yData[1];
+    curve->SETDATA(x, y, 2);
     nCurves++;
 }
 
@@ -437,10 +439,12 @@ void CDRMPlotQwt::addyMarker(QColor color, double initialPos)
 {
     yMarker.setPen(QPen(color, 1, Qt::DashLine));
     yMarker.attach(plot);
-    QVector<double> xData, yData;
+    QVector<double> xData;
     xData = getBounds(QwtPlot::xBottom);
-    yData << initialPos << initialPos;
-    yMarker.SETDATA(xData, yData);
+    double x[2], y[2];
+    x[0] = xData[0]; x[1] = xData[1];
+    y[0] = y[1] = initialPos;
+    yMarker.SETDATA(x, y, 2);
 }
 
 void CDRMPlotQwt::setupConstPlot(const char* text)
@@ -694,20 +698,25 @@ void CDRMPlotQwt::setxMarker(int n, _REAL r)
     default:
         ;
     }
-    QVector<double> xData, yData;
-    xData << r << r;
+    QVector<double> yData;
     yData = getBounds(QwtPlot::yLeft);
-    curve->SETDATA(xData, yData);
+    double x[2], y[2];
+    x[0] = x[1] = r;
+    y[0] = yData[0]; y[1] = yData[1];
+    curve->SETDATA(x, y, 2);
 }
 
 void CDRMPlotQwt::setBwMarker(int n, _REAL c, _REAL b)
 {
     (void)n; // TODO support more than one marker
-    QVector<double> xData, yData;
-    xData << c - b/2.0 << c + b/2.0;
+    QVector<double> yData;
     yData = getBounds(QwtPlot::yLeft);
     yData[0] = yData[1];
-    curve2.SETDATA(xData, yData);
+    double x[2], y[2];
+    x[0] = c - b/2.0;
+    x[1] = c + b/2.0;
+    y[0] = y[1] = yData[1];
+    curve2.SETDATA(x, y, 2);
 }
 
 
