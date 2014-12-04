@@ -41,7 +41,6 @@
 #include <qwt_legend.h>
 #include <qwt_plot_picker.h>
 #include <qwt_picker_machine.h>
-#include <qwt_symbol.h>
 
 /* Define the FAC/SDC/MSC Symbol size */
 #if QWT_VERSION < 0x060000
@@ -64,13 +63,6 @@
 #define WINDOW_MARGIN 10
 
 /* Sometime between Qwt version some name may change, we fix this */
-#if QWT_VERSION < 0x050200
-# define LOWERBOUND lBound
-# define UPPERBOUND hBound
-#else
-# define LOWERBOUND lowerBound
-# define UPPERBOUND upperBound
-#endif
 #if QWT_VERSION < 0x060000
 # define SETDATA setData
 #else
@@ -193,8 +185,18 @@ CDRMPlotQwt::CDRMPlotQwt(QWidget* parent) :
     picker->setStateMachine(machine);
 #endif
 
-    /* Set default style */
-    //SetPlotStyle(0);
+    markerSym[0].setStyle(QwtSymbol::Ellipse);
+    markerSym[0].setSize(ALL_FAC_SYMBOL_SIZE);
+    markerSym[0].setPen(QPen(Qt::black));
+    markerSym[0].setBrush(QBrush(Qt::black));
+    markerSym[1].setStyle(QwtSymbol::XCross);
+    markerSym[1].setSize(ALL_SDC_SYMBOL_SIZE);
+    markerSym[1].setPen(QPen(Qt::red));
+    markerSym[1].setBrush(QBrush(Qt::red));
+    markerSym[2].setStyle(QwtSymbol::Rect);
+    markerSym[2].setSize(ALL_MSC_SYMBOL_SIZE);
+    markerSym[2].setPen(QPen(Qt::blue));
+    markerSym[2].setBrush(QBrush(Qt::blue));
 
     /* Connections */
 #if QWT_VERSION < 0x060000
@@ -267,9 +269,13 @@ void CDRMPlotQwt::OnSelected(const QPointF &pos)
 {
     /* Send normalized frequency to receiver */
 #if QWT_VERSION < 0x060100
-    const double dMaxxBottom = plot->axisScaleDiv(QwtPlot::xBottom)->UPPERBOUND();
+# if QWT_VERSION < 0x050200
+    const double dMaxxBottom = plot->axisScaleDiv(QwtPlot::xBottom)->hBound();
+# else
+    const double dMaxxBottom = plot->axisScaleDiv(QwtPlot::xBottom)->upperBound();
+#endif
 #else
-    const double dMaxxBottom = plot->axisScaleDiv(QwtPlot::xBottom).UPPERBOUND();
+    const double dMaxxBottom = plot->axisScaleDiv(QwtPlot::xBottom).upperBound();
 #endif
 
     /* Check if dMaxxBottom is valid */
@@ -407,15 +413,9 @@ void CDRMPlotQwt::addxMarker(QColor color, double initialPos)
     }
     curve->setPen(QPen(color, 1, Qt::DashLine));
     curve->attach(plot);
-#if QWT_VERSION < 0x060100
-    QwtScaleDiv* psd = plot->axisScaleDiv(QwtPlot::yLeft);
-    QwtScaleDiv& sd = *psd;
-#else
-    QwtScaleDiv sd = plot->axisScaleDiv(QwtPlot::yLeft);
-#endif
     QVector<double> xData, yData;
     xData << initialPos << initialPos;
-    yData << sd.LOWERBOUND() << sd.UPPERBOUND();
+    yData = getBounds(QwtPlot::yLeft);
     curve->SETDATA(xData, yData);
     nCurves++;
 }
@@ -437,9 +437,8 @@ void CDRMPlotQwt::addyMarker(QColor color, double initialPos)
 {
     yMarker.setPen(QPen(color, 1, Qt::DashLine));
     yMarker.attach(plot);
-    QwtScaleDiv* sd = plot->axisScaleDiv(QwtPlot::xBottom);
     QVector<double> xData, yData;
-    xData << sd->lowerBound() << sd->upperBound();
+    xData = getBounds(QwtPlot::xBottom);
     yData << initialPos << initialPos;
     yMarker.SETDATA(xData, yData);
 }
@@ -456,7 +455,6 @@ void CDRMPlotQwt::setupConstPlot(const char* text)
 void CDRMPlotQwt::addConstellation(const char *legendText, int c)
 {
     QwtPlotCurve* curve;
-    QwtSymbol *MarkerSym = new QwtSymbol();
     switch(nCurves)
     {
     case 0:
@@ -472,29 +470,12 @@ void CDRMPlotQwt::addConstellation(const char *legendText, int c)
         curve = &curve4;
         break;
     }
-    switch(c)
-    {
-    case 0:
-        MarkerSym->setStyle(QwtSymbol::Ellipse);
-        MarkerSym->setSize(ALL_FAC_SYMBOL_SIZE);
-        MarkerSym->setPen(QPen(Qt::black));
-        MarkerSym->setBrush(QBrush(Qt::black));
-        break;
-    case 1:
-        MarkerSym->setStyle(QwtSymbol::XCross);
-        MarkerSym->setSize(ALL_SDC_SYMBOL_SIZE);
-        MarkerSym->setPen(QPen(Qt::red));
-        MarkerSym->setBrush(QBrush(Qt::red));
-        break;
-    case 2:
-        MarkerSym->setStyle(QwtSymbol::Rect);
-        MarkerSym->setSize(ALL_MSC_SYMBOL_SIZE);
-        MarkerSym->setPen(QPen(Qt::blue));
-        MarkerSym->setBrush(QBrush(Qt::blue));
-        break;
-    }
     curve->setPen(QPen(Qt::NoPen));
-    curve->setSymbol(MarkerSym);
+#if QWT_VERSION < 0x060000
+    curve->setSymbol(markerSym[c]);
+#else
+    curve->setSymbol(&markerSym[c]);
+#endif
     curve->setTitle(legendText);
     curve->setLegendAttribute(QwtPlotCurve::LegendShowSymbol, true);
     curve->attach(plot);
@@ -566,49 +547,46 @@ void CDRMPlotQwt::setData(int n, CVector<_REAL>& vecrData, CVector<_REAL>& vecrS
             const int iMaxDisToMax = limit[Plot::left]; /* dB */
 
             /* Get maximum value */
-            _REAL MaxSNR = -_MAXREAL;
+            _REAL Max = -_MAXREAL;
 
             for (int i = 0; i < vecrScale.Size(); i++)
             {
-                if (vecrData[i] > MaxSNR)
-                    MaxSNR = vecrData[i];
+                if (vecrData[i] > Max)
+                    Max = vecrData[i];
             }
 
             /* Quantize scale to a multiple of "iMaxDisToMax" */
-            double dMaxYScaleSNR = (ceil(MaxSNR / iMaxDisToMax) * iMaxDisToMax);
+            double dMaxYScale = (ceil(Max / iMaxDisToMax) * iMaxDisToMax);
 
-            const int iMinValueSNRYScale = 15; /* dB */
+            const int iMinValueYScale = 15; /* dB */
             /* Bound at the minimum allowed value */
-            if (dMaxYScaleSNR < (double) iMinValueSNRYScale)
-                dMaxYScaleSNR = (double) iMinValueSNRYScale;
-
-            const _REAL rRatioAudSNR = 1.5;
-            const double dMaxYScaleAudio = dMaxYScaleSNR * rRatioAudSNR;
+            if (dMaxYScale < (double) iMinValueYScale)
+                dMaxYScale = (double) iMinValueYScale;
 
             /* Apply scale to plot */
-            plot->setAxisScale(QwtPlot::yLeft, 0.0, dMaxYScaleSNR);
+            plot->setAxisScale(QwtPlot::yLeft, 0.0, dMaxYScale);
         }
         if(policy[Plot::left]==Plot::enlarge)
         {
             const int iSize = vecrScale.Size();
             /* Get maximum value */
-            _REAL rMaxSNR = -_MAXREAL;
+            _REAL rMax = -_MAXREAL;
             for (int i = 0; i < iSize; i++)
             {
-                if (vecrData[i] > rMaxSNR)
-                    rMaxSNR = vecrData[i];
+                if (vecrData[i] > rMax)
+                    rMax = vecrData[i];
             }
 
             double dMaxScaleYAxis = MAX_VAL_SNR_SPEC_Y_AXIS_DB;
 
-            if (rMaxSNR > dMaxScaleYAxis)
+            if (rMax > dMaxScaleYAxis)
             {
                 const double rEnlareStep = (double) 10.0; /* dB */
-                dMaxScaleYAxis = ceil(rMaxSNR / rEnlareStep) * rEnlareStep;
+                dMaxScaleYAxis = ceil(rMax / rEnlareStep) * rEnlareStep;
             }
 
             /* Set scale */
-            plot->setAxisScale(QwtPlot::yLeft, MIN_VAL_SNR_SPEC_Y_AXIS_DB, dMaxScaleYAxis);
+            plot->setAxisScale(QwtPlot::yLeft, 0.0, dMaxScaleYAxis);
         }
         if(policy[Plot::bottom]==Plot::first)
         {
@@ -623,17 +601,17 @@ void CDRMPlotQwt::setData(int n, CVector<_REAL>& vecrData, CVector<_REAL>& vecrS
     {
         if(policy[Plot::right]==Plot::min)
         {
-            _REAL MaxSam = -_MAXREAL;
-            _REAL MinSam = _MAXREAL;
+            _REAL Max = -_MAXREAL;
+            _REAL Min = _MAXREAL;
             for (int i = 0; i < vecrScale.Size(); i++)
             {
-                if (vecrData[i] > MaxSam)
-                    MaxSam = vecrData[i];
+                if (vecrData[i] > Max)
+                    Max = vecrData[i];
 
-                if (vecrData[i] < MinSam)
-                    MinSam = vecrData[i];
+                if (vecrData[i] < Min)
+                    Min = vecrData[i];
             }
-            plot->setAxisScale(QwtPlot::yRight, floor(MinSam / limit[Plot::right]), ceil(MaxSam / limit[Plot::right]));
+            plot->setAxisScale(QwtPlot::yRight, floor(Min / limit[Plot::right]), ceil(Max / limit[Plot::right]));
         }
         if(policy[Plot::right]==Plot::fit)
         {
@@ -716,37 +694,28 @@ void CDRMPlotQwt::setxMarker(int n, _REAL r)
     default:
         ;
     }
-#if QWT_VERSION < 0x060100
-    QwtScaleDiv* psd = plot->axisScaleDiv(QwtPlot::yLeft);
-    QwtScaleDiv& sd = *psd;
-#else
-    QwtScaleDiv sd = plot->axisScaleDiv(QwtPlot::yLeft);
-#endif
     QVector<double> xData, yData;
     xData << r << r;
-    yData << sd.LOWERBOUND() << sd.UPPERBOUND();
+    yData = getBounds(QwtPlot::yLeft);
     curve->SETDATA(xData, yData);
 }
 
 void CDRMPlotQwt::setBwMarker(int n, _REAL c, _REAL b)
 {
-    double	dX[2], dY[2];
-    dX[0] = c - b/2.0;
-    dX[1] = c + b/2.0;
-
-    /* Take the min-max values from scale to get vertical line */
-    dY[0] = MAX_VAL_INP_SPEC_Y_AXIS_DB;
-    dY[1] = MAX_VAL_INP_SPEC_Y_AXIS_DB;
-
-    curve2.SETDATA(dX, dY, 2);
+    (void)n; // TODO support more than one marker
+    QVector<double> xData, yData;
+    xData << c - b/2.0 << c + b/2.0;
+    yData = getBounds(QwtPlot::yLeft);
+    yData[0] = yData[1];
+    curve2.SETDATA(xData, yData);
 }
 
 
 void CDRMPlotQwt::setyMarker(int n, _REAL r)
 {
-    QwtScaleDiv* sd = plot->axisScaleDiv(QwtPlot::yLeft);
+    (void)n; // TODO support more than one marker
     QVector<double> xData, yData;
-    xData << sd->lowerBound() << sd->upperBound();
+    xData = getBounds(QwtPlot::xBottom);
     yData << r << r;
     yMarker.SETDATA(xData, yData);
 }
@@ -764,4 +733,21 @@ void CDRMPlotQwt::setAutoScalePolicy(Plot::EAxis axis, Plot::EPolicy policy, dou
 {
     this->policy[axis] = policy;
     this->limit[axis] = limit;
+}
+
+QVector<double> CDRMPlotQwt::getBounds(QwtPlot::Axis axis)
+{
+#if QWT_VERSION < 0x060100
+    QwtScaleDiv* psd = plot->axisScaleDiv(axis);
+    QwtScaleDiv& sd = *psd;
+#else
+    QwtScaleDiv sd = plot->axisScaleDiv(axis);
+#endif
+    QVector<double> data;
+#if QWT_VERSION < 0x050200
+    data << sd.lBound() << sd.hBound();
+#else
+    data << sd.lowerBound() << sd.upperBound();
+#endif
+    return data;
 }

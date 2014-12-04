@@ -38,9 +38,7 @@
 #include <qwt_plot.h>
 #include <qwt_plot_curve.h>
 #include <qwt_plot_grid.h>
-#if QWT_VERSION < 0x060000
 #include <qwt_symbol.h>
-#endif
 #include <../util/Vector.h>
 
 /* Define the plot font size */
@@ -94,6 +92,7 @@ protected:
     void setAutoScalePolicy(Plot::EAxis axis, Plot::EPolicy policy, double limit);
 
     void AddWhatsThisHelpChar(const ECharType NCharType);
+    QVector<double> getBounds(QwtPlot::Axis axis);
 
     Plot::EPolicy   policy[4];
     double          limit[4];
@@ -111,6 +110,7 @@ protected:
     QwtPlotPicker	*picker;
     QwtLegend		*legend;
     int             nCurves;
+    QwtSymbol       markerSym[3];
 
     /* Waterfall spectrum stuff */
     WaterfallWidget* waterfallWidget;
