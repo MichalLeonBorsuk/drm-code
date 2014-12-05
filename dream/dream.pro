@@ -35,6 +35,7 @@ qtconsole {
 }
 !console:!qtconsole {
     CONFIG += gui
+    !qcustomplot:CONFIG += qwt
     UI_MESSAGE = GUI mode
 }
 gui {
@@ -295,6 +296,7 @@ hamlib {
      message("with hamlib")
 }
 qcustomplot {
+    message("with QCustomPlot")
     QT += printsupport
     DEFINES += WITH_QCUSTOMPLOT
     LIBS += -lqcustomplot
@@ -302,6 +304,7 @@ qcustomplot {
     SOURCES += src/GUI-QT/amspectrumplot.cpp src/GUI-QT/cdrmplotqcp.cpp src/GUI-QT/qcplevelmeter.cpp src/GUI-QT/qcpsmeter.cpp
 }
 qwt {
+    message("with Qwt")
     #DEFINES += QWT_NO_SVG
     HEADERS += src/GUI-QT/cdrmplotqwt.h src/GUI-QT/qwtlevelmeter.h src/GUI-QT/qwtsmeter.h
     SOURCES += src/GUI-QT/cdrmplotqwt.cpp src/GUI-QT/qwtlevelmeter.cpp src/GUI-QT/qwtsmeter.cpp

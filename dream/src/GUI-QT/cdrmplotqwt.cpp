@@ -91,8 +91,7 @@ CDRMPlotQwt::CDRMPlotQwt(QWidget* parent) :
     InitCharType(NONE_OLD),
     eLastSDCCodingScheme((ECodScheme)-1), eLastMSCCodingScheme((ECodScheme)-1),
     bLastAudioDecoder(FALSE),
-    waterfallWidget(NULL), iAudSampleRate(0), iSigSampleRate(0),
-    iLastXoredSampleRate(0), iLastChanMode(-1)
+    waterfallWidget(NULL)
 {
     /* Create new plot if none is supplied */
     if (plot == NULL)
@@ -492,9 +491,8 @@ void CDRMPlotQwt::addConstellation(const char *legendText, int c)
     }
 }
 
-void CDRMPlotQwt::setupWaterfall(double)
+void CDRMPlotQwt::setupWaterfall(double sr)
 {
-// TODO scale by sample rate
     /* Init chart for waterfall input spectrum */
     plot->setTitle(tr("Waterfall Input Spectrum"));
     plot->enableAxis(QwtPlot::yRight, FALSE);
@@ -523,7 +521,7 @@ void CDRMPlotQwt::setupWaterfall(double)
     plot->setCanvasBackground(c);
 
     /* Fixed scale DC to 50% sample rate in kHz */
-    plot->setAxisScale(QwtPlot::xBottom, 0.0, double(iSigSampleRate)/2.0);
+    plot->setAxisScale(QwtPlot::xBottom, 0.0, sr);
 }
 
 void CDRMPlotQwt::setData(int n, CVector<_REAL>& vecrData, CVector<_REAL>& vecrScale, const QString &axisLabel)
