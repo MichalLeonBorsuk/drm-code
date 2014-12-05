@@ -95,13 +95,13 @@ AnalogDemDlg::AnalogDemDlg(ReceiverController* rc, CSettings& Settings,
     connect(ui->actionWhats_This, SIGNAL(triggered()), this, SLOT(OnWhatsThis()));
 
     /* Init main plot */
-    bool waterfall = getSetting("waterfall", false);
-    ui->checkBoxWaterfall->setChecked(waterfall);
 
     MainPlot = new CDRMPlot();
     ui->plotLayout->addWidget(MainPlot->widget());
-    MainPlot->SetupChart(waterfall ? INP_SPEC_WATERF : INPUT_SIG_PSD_ANALOG, controller->getReceiver()->GetParameters()->GetSigSampleRate());
     connect(MainPlot, SIGNAL(plotClicked(double)), this, SLOT(OnPlotClicked(double)));
+
+    bool waterfall = getSetting("waterfall", false);
+    ui->checkBoxWaterfall->setChecked(waterfall);
 
 	/* Init bandwidth slider */
 	UpdateSliderBandwidth();
@@ -169,6 +169,7 @@ void AnalogDemDlg::eventShow(QShowEvent*)
 {
     connect(controller, SIGNAL(dataAvailable()),this, SLOT(OnTimer()));
 	UpdateControls();
+    on_checkBoxWaterfall_toggled(ui->checkBoxWaterfall->isChecked());
 }
 
 void AnalogDemDlg::eventHide(QHideEvent*)
@@ -295,9 +296,10 @@ void AnalogDemDlg::UpdateControls()
 #endif
 
 	/* Set filter bandwidth */
-    ui->SliderBandwidth->setValue(controller->getReceiver()->GetAMDemod()->GetFilterBW());
-    ui->ButtonBandWidth->setText(QString().setNum(
-        controller->getReceiver()->GetAMDemod()->GetFilterBW()) +	tr(" Hz"));
+
+    int fbw = controller->getReceiver()->GetAMDemod()->GetFilterBW();
+    ui->SliderBandwidth->setValue(fbw);
+    ui->ButtonBandWidth->setText(tr("%1 Hz").arg(fbw));
 
 	/* Update check boxes */
     ui->CheckBoxMuteAudio->setChecked(controller->getReceiver()->GetWriteData()->GetMuteAudio());
@@ -323,16 +325,19 @@ void AnalogDemDlg::UpdatePlotStyle(int iPlotstyle)
 void AnalogDemDlg::OnSampleRateChanged()
 {
 	UpdateSliderBandwidth();
+    on_checkBoxWaterfall_toggled(ui->checkBoxWaterfall->isChecked());
 }
 
 void AnalogDemDlg::OnSoundFileChanged(CDRMReceiver::ESFStatus)
 {
 	UpdateSliderBandwidth();
+    on_checkBoxWaterfall_toggled(ui->checkBoxWaterfall->isChecked());
 }
 
 void AnalogDemDlg::on_new_data()
 {
     MainPlot->update(controller);
+    UpdateControls();
 }
 
 void AnalogDemDlg::OnTimer()
@@ -393,7 +398,6 @@ void AnalogDemDlg::on_ButtonGroupDemodulation_buttonClicked(int iID)
                                        CAMDemodulation::DT_CW,CAMDemodulation::DT_FM};
     controller->setAnalogModulation(n[iID]);
 
-	/* Update controls */
 	UpdateControls();
 }
 
@@ -472,8 +476,9 @@ void AnalogDemDlg::on_CheckBoxSaveAudioWave_clicked(bool checked)
 
 void AnalogDemDlg::on_checkBoxWaterfall_toggled(bool checked)
 {
+    int sr = controller->getReceiver()->GetParameters()->GetSigSampleRate();
     /* Toggle between normal spectrum plot and waterfall spectrum plot */
-    MainPlot->SetupChart(checked?INP_SPEC_WATERF:INPUT_SIG_PSD_ANALOG, controller->getReceiver()->GetParameters()->GetSigSampleRate());
+    MainPlot->SetupChart(checked?INP_SPEC_WATERF:INPUT_SIG_PSD_ANALOG, sr);
 }
 
 /* Manual carrier frequency input box */
@@ -515,9 +520,7 @@ void AnalogDemDlg::on_ButtonBandWidth_clicked(bool)
         ui->groupBoxBW->title(), prev_bw, 0, sr2, 2, &ok);
 	if (ok)
 	{
-        controller->getReceiver()->GetAMDemod()->SetFilterBW(new_bw);
-        //controller->setAMFilterBW(new_bw); TODO
-        ui->SliderBandwidth->setValue(controller->getReceiver()->GetAMDemod()->GetFilterBW());
+        controller->setAMFilterBW(new_bw);
 	}
 }
 

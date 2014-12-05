@@ -80,7 +80,7 @@ protected:
     void addyMarker(QColor color, double initialPos);
     void setupConstPlot(const char* text);
     void addConstellation(const char* legendText, int n);
-    void setupWaterfall(double);
+    void setupWaterfall(double sr);
     void setData(int n, CVector<_COMPLEX>& veccData);
     void setData(int n, CVector<_REAL>& vecrData, CVector<_REAL>& vecrScale, const QString& axisLabel="");
     void setxMarker(int n, _REAL r);
@@ -114,10 +114,6 @@ protected:
 
     /* Waterfall spectrum stuff */
     WaterfallWidget* waterfallWidget;
-    int				iAudSampleRate;
-    int				iSigSampleRate;
-    int				iLastXoredSampleRate;
-    int				iLastChanMode;
 
 private slots:
 #if QWT_VERSION < 0x060000
