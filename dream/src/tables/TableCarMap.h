@@ -72,19 +72,15 @@ extern const int iTableTimePilRobModC[RMC_NUM_TIME_PIL][2];
 #define RMD_NUM_TIME_PIL	21
 extern const int iTableTimePilRobModD[RMD_NUM_TIME_PIL][2];
 
+#define RME_NUM_TIME_PIL	21
+extern const int iTableTimePilRobModE[RME_NUM_TIME_PIL][2];
+
 /* Scattered pilots ***********************************************************/
 /* Definitions for the positions of scattered pilots */
-#define RMA_SCAT_PIL_FREQ_INT	4
-#define RMA_SCAT_PIL_TIME_INT	5
+#define SCAT_PIL_FREQ_INT	1
+#define SCAT_PIL_TIME_INT	2
 
-#define RMB_SCAT_PIL_FREQ_INT	2
-#define RMB_SCAT_PIL_TIME_INT	3
-
-#define RMC_SCAT_PIL_FREQ_INT	2
-#define RMC_SCAT_PIL_TIME_INT	2
-
-#define RMD_SCAT_PIL_FREQ_INT	1
-#define RMD_SCAT_PIL_TIME_INT	3
+extern const int iTableGainCellSubset[4][5];
 
 /* Phase definitions of scattered pilots ------------------------------------ */
 extern const int iTableScatPilConstRobModA[3];
@@ -95,39 +91,45 @@ extern const int iTableScatPilConstRobModC[3];
 
 extern const int iTableScatPilConstRobModD[3];
 
+extern const int iTableScatPilConstRobModE[3];
+
 #define SIZE_ROW_WZ_ROB_MOD_A	5
 #define SIZE_COL_WZ_ROB_MOD_A	3
 extern const int iScatPilWRobModA[SIZE_ROW_WZ_ROB_MOD_A][SIZE_COL_WZ_ROB_MOD_A];
 extern const int iScatPilZRobModA[SIZE_ROW_WZ_ROB_MOD_A][SIZE_COL_WZ_ROB_MOD_A];
-extern const int iScatPilQRobModA;
+extern const int iScatPilQRobModA[SIZE_ROW_WZ_ROB_MOD_A][SIZE_COL_WZ_ROB_MOD_A];
 
 #define SIZE_ROW_WZ_ROB_MOD_B	3
 #define SIZE_COL_WZ_ROB_MOD_B	5
 extern const int iScatPilWRobModB[SIZE_ROW_WZ_ROB_MOD_B][SIZE_COL_WZ_ROB_MOD_B];
 extern const int iScatPilZRobModB[SIZE_ROW_WZ_ROB_MOD_B][SIZE_COL_WZ_ROB_MOD_B];
-extern const int iScatPilQRobModB;
+extern const int iScatPilQRobModB[SIZE_ROW_WZ_ROB_MOD_B][SIZE_COL_WZ_ROB_MOD_B];
 
 #define SIZE_ROW_WZ_ROB_MOD_C	2
 #define SIZE_COL_WZ_ROB_MOD_C	10
 extern const int iScatPilWRobModC[SIZE_ROW_WZ_ROB_MOD_C][SIZE_COL_WZ_ROB_MOD_C];
 extern const int iScatPilZRobModC[SIZE_ROW_WZ_ROB_MOD_C][SIZE_COL_WZ_ROB_MOD_C];
-extern const int iScatPilQRobModC;
+extern const int iScatPilQRobModC[SIZE_ROW_WZ_ROB_MOD_C][SIZE_COL_WZ_ROB_MOD_C];
 
 #define SIZE_ROW_WZ_ROB_MOD_D	3
 #define SIZE_COL_WZ_ROB_MOD_D	8
 extern const int iScatPilWRobModD[SIZE_ROW_WZ_ROB_MOD_D][SIZE_COL_WZ_ROB_MOD_D];
 extern const int iScatPilZRobModD[SIZE_ROW_WZ_ROB_MOD_D][SIZE_COL_WZ_ROB_MOD_D];
-extern const int iScatPilQRobModD;
+extern const int iScatPilQRobModD[SIZE_ROW_WZ_ROB_MOD_D][SIZE_COL_WZ_ROB_MOD_D];
+
+#define SIZE_ROW_WZQ_ROB_MOD_E	4
+#define SIZE_COL_WZQ_ROB_MOD_E	10
+extern const int ModeEW1024[SIZE_ROW_WZQ_ROB_MOD_E][SIZE_COL_WZQ_ROB_MOD_E];
+extern const int ModeEZ256[SIZE_ROW_WZQ_ROB_MOD_E][SIZE_COL_WZQ_ROB_MOD_E];
+extern const int ModeEQ1024[SIZE_ROW_WZQ_ROB_MOD_E][SIZE_COL_WZQ_ROB_MOD_E];
 
 /* Gain definitions of scattered pilots ------------------------------------- */
 #define NUM_BOOSTED_SCAT_PILOTS		4
 extern const int iScatPilGainRobModA[6][NUM_BOOSTED_SCAT_PILOTS];
-
 extern const int iScatPilGainRobModB[6][NUM_BOOSTED_SCAT_PILOTS];
-
 extern const int iScatPilGainRobModC[6][NUM_BOOSTED_SCAT_PILOTS];
-
 extern const int iScatPilGainRobModD[6][NUM_BOOSTED_SCAT_PILOTS];
+extern const int iScatPilGainRobModE[6][NUM_BOOSTED_SCAT_PILOTS];
 
 /* Dummy cells for the MSC ****************************************************/
 /* Already normalized */
@@ -137,8 +139,8 @@ extern const _COMPLEX cDummyCells16QAM[2];
 
 
 /* Spectrum occupancy, carrier numbers for each mode **************************/
-extern const int iTableCarrierKmin[6][4];
+extern const int iTableCarrierKmin[6][5];
 
-extern const int iTableCarrierKmax[6][4];
+extern const int iTableCarrierKmax[6][5];
 
 #endif // !defined(TABLE_CAR_MAP_H__3B0_CA63_4344_BB2B_23E7912__INCLUDED_)

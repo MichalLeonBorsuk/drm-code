@@ -478,6 +478,11 @@ void CTimeSyncTrack::Init(CParameter& Parameters, int iNewSymbDelay)
 		rConst2 = pow((_REAL) 10.0, (_REAL) TETA2_DIST_FROM_MIN_DB / 10);
 	}
 
+    if (Parameters.GetWaveMode() == RM_ROBUSTNESS_MODE_E)
+    {
+        // TODO MODE E
+    }
+
 	/* Define start point for rotation of detection vector for acausal taps.
 	   Per definition is this point somewhere in the region after the
 	   actual guard-interval window */

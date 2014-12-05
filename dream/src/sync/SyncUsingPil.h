@@ -88,11 +88,11 @@ protected:
 	CReal					rNormConstFOE;
 	CReal					rSampleFreqEst;
 
-	int						iSymbCntFraSy;
-	int						iInitCntFraSy;
+    unsigned int			iSymbCntFraSy;
+    unsigned int			iInitCntFraSy;
 
-	int						iNumSymPerFrame;
-	int						iNumCarrier;
+    unsigned int			iNumSymPerFrame;
+    int         			iNumCarrier;
 
 	_BOOLEAN				bBadFrameSync;
 	_BOOLEAN				bInitFrameSync;
@@ -103,7 +103,7 @@ protected:
 	_BOOLEAN				bAquisition;
 	_BOOLEAN				bTrackPil;
 
-	int						iMiddleOfInterval;
+    unsigned int            iMiddleOfInterval;
 
 	CReal					rLamFreqOff;
 	CComplex				cFreqOffVec;

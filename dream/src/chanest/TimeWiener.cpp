@@ -292,7 +292,12 @@ int CTimeWiener::Init(CParameter& Parameters)
 		iLengthWiener = LEN_WIENER_FILT_TIME_RMD;
 		rSigmaMax = MAX_SIGMA_RMD;
 		break;
-	
+
+    case RM_ROBUSTNESS_MODE_E:
+        iLengthWiener = LEN_WIENER_FILT_TIME_RME;
+        rSigmaMax = MAX_SIGMA_RME;
+        break;
+
 	default:
 		break;
 	}

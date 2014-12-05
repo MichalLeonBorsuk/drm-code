@@ -32,8 +32,6 @@
 /* Implementation *************************************************************/
 void CSyncUsingPil::ProcessDataInternal(CParameter& Parameters)
 {
-	int i;
-
 	Parameters.Lock(); 
 
 	/**************************************************************************\
@@ -46,7 +44,7 @@ void CSyncUsingPil::ProcessDataInternal(CParameter& Parameters)
 		/* DRM frame synchronization based on time pilots ------------------- */
 		/* Calculate correlation of received cells with pilot pairs */
 		CReal rResultPilPairCorr = (CReal) 0.0;
-		for (i = 0; i < iNumPilPairs; i++)
+        for (int i = 0; i < iNumPilPairs; i++)
 		{
 			/* Actual correlation */
 			const CComplex cCorrRes = (*pvecInputData)[vecPilCorr[i].iIdx1] *
@@ -68,9 +66,9 @@ void CSyncUsingPil::ProcessDataInternal(CParameter& Parameters)
 		else
 		{
 			/* Search for maximum */
-			int iMaxIndex = 0;
+            unsigned int iMaxIndex = 0;
 			CReal rMaxValue = -_MAXREAL;
-			for (i = 0; i < iNumSymPerFrame; i++)
+            for (unsigned int i = 0; i < iNumSymPerFrame; i++)
 			{
 				if (vecrCorrHistory[i] > rMaxValue)
 				{
@@ -171,7 +169,7 @@ void CSyncUsingPil::ProcessDataInternal(CParameter& Parameters)
 	{
 		CComplex cFreqOffEstVecSym = CComplex((CReal) 0.0, (CReal) 0.0);
 
-		for (i = 0; i < NUM_FREQ_PILOTS; i++)
+        for (unsigned int i = 0; i < NUM_FREQ_PILOTS; i++)
 		{
 			/* The old pilots must be rotated due to timing corrections */
 			const CComplex cOldFreqPilCorr =
@@ -295,7 +293,7 @@ fflush(pFile);
 
 		/* Copy data from input to the output. Data is not modified in this
 		   module */
-		for (i = 0; i < iOutputBlockSize; i++)
+        for (int i = 0; i < iOutputBlockSize; i++)
 			(*pvecOutputData)[i] = (*pvecInputData)[i];
 	}
 

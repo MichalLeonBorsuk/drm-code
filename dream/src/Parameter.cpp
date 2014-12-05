@@ -587,6 +587,10 @@ _BOOLEAN CParameter::SetWaveMode(const ERobMode eNewWaveMode)
         /* Set spectrum occupance to a valid parameter */
         eSpectOccup = SO_3;
     }
+    if (eNewWaveMode == RM_ROBUSTNESS_MODE_E)
+    {
+        eSpectOccup = SO_6;
+    }
 
     /* Apply changes only if new paramter differs from old one */
     if (eRobustnessMode != eNewWaveMode)
@@ -620,6 +624,11 @@ void CParameter::SetSpectrumOccup(ESpecOcc eNewSpecOcc)
     {
         /* Set spectrum occupance to a valid parameter */
         eNewSpecOcc = SO_3;
+    }
+    if (eRobustnessMode == RM_ROBUSTNESS_MODE_E)
+    {
+        /* Set spectrum occupance to a valid parameter */
+        eNewSpecOcc = SO_6;
     }
 
     /* Apply changes only if new paramter differs from old one */

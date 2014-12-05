@@ -285,11 +285,6 @@ void CDRMPlot::update(ReceiverController* rc)
         rc->getReceiver()->GetPlotManager()->GetInputPSD(vecrData, vecrScale);
         plot->setxMarker(0, rDCFrequency);
         plot->setData(0, vecrData, vecrScale);
-        {
-        int sampleRate = rc->getReceiver()->GetParameters()->GetSigSampleRate();
-        double c = rc->getReceiver()->GetReceiveData()->ConvertFrequency(sampleRate);
-        qDebug() << sampleRate << " Hz " << c << " Hz";
-        }
         break;
 
     case INPUT_SIG_PSD_ANALOG:

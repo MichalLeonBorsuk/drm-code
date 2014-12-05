@@ -45,7 +45,8 @@
 #define DEFAULT_SOUNDCRD_SAMPLE_RATE	48000	// Hz
 
 /* DRM parameters */
-#define NUM_FRAMES_IN_SUPERFRAME		3
+#define NUM_FRAMES_IN_SUPERFRAME_DRM30		3
+#define NUM_FRAMES_IN_SUPERFRAME_DRMPLUS	4
 
 #define RMA_FFT_SIZE_N					1152	// RMB: Robustness Mode A
 #define RMA_NUM_SYM_PER_FRAME			15
@@ -67,8 +68,8 @@
 #define RMD_ENUM_TG_TU					11
 #define RMD_DENOM_TG_TU					14
 
-#define RME_FFT_SIZE_N					0 // TODO		// RME: Robustness Mode E
-#define RME_NUM_SYM_PER_FRAME			0 // TODO
+#define RME_FFT_SIZE_N					0 // TODO MODE E
+#define RME_NUM_SYM_PER_FRAME           40 // TABLE 47
 #define RME_ENUM_TG_TU					1 // 4.4.2.2 Table 2
 #define RME_DENOM_TG_TU					9 // 4.4.2.2 Table 2
 

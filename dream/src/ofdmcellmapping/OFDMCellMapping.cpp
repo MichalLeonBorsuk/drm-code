@@ -42,6 +42,10 @@ void COFDMCellMapping::ProcessDataInternal(CParameter& TransmParam)
 	int iSymbolCounterAbs =
 		TransmParam.iFrameIDTransm * iNumSymPerFrame + iSymbolCounter;
 
+    int iNumFramesPerSuperframe = NUM_FRAMES_IN_SUPERFRAME_DRM30;
+    if(TransmParam.GetWaveMode()==RM_ROBUSTNESS_MODE_E)
+        iNumFramesPerSuperframe = NUM_FRAMES_IN_SUPERFRAME_DRMPLUS;
+
 	/* Init temporary counter */
 	int iDummyCellCounter = 0;
 	int iMSCCounter = 0;
@@ -98,7 +102,7 @@ void COFDMCellMapping::ProcessDataInternal(CParameter& TransmParam)
 
 		/* Increase frame-counter (ID) (Used also in FAC.cpp) */
 		TransmParam.iFrameIDTransm++;
-		if (TransmParam.iFrameIDTransm == NUM_FRAMES_IN_SUPERFRAME)
+        if (TransmParam.iFrameIDTransm == iNumFramesPerSuperframe)
 			TransmParam.iFrameIDTransm = 0;
 	}
 
@@ -165,6 +169,10 @@ void COFDMCellDemapping::ProcessDataInternal(CParameter& Parameters)
 	iOutputBlockSize = Param.veciNumMSCSym[iSymbolCounterAbs];
 	iOutputBlockSize2 = Param.veciNumFACSym[iSymbolCounterAbs];
 	iOutputBlockSize3 = Param.veciNumSDCSym[iSymbolCounterAbs];
+
+    int iNumFramesPerSuperframe = NUM_FRAMES_IN_SUPERFRAME_DRM30;
+    if(Parameters.GetWaveMode()==RM_ROBUSTNESS_MODE_E)
+        iNumFramesPerSuperframe = NUM_FRAMES_IN_SUPERFRAME_DRMPLUS;
 
 	/* Demap data from the cells */
 	int iMSCCounter = 0;
@@ -250,12 +258,12 @@ void COFDMCellDemapping::ProcessDataInternal(CParameter& Parameters)
 		/* Frame ID of this FAC block stands for the "current" block. We need
 		   the ID of the next block, therefore we have to add "1" */
 		int iNewFrameID = Parameters.iFrameIDReceiv + 1;
-		if (iNewFrameID == NUM_FRAMES_IN_SUPERFRAME)
+        if (iNewFrameID == iNumFramesPerSuperframe)
 			iNewFrameID = 0;
 
 		/* Increment internal frame ID and take care of wrap around */
 		iCurrentFrameID++;
-		if (iCurrentFrameID == NUM_FRAMES_IN_SUPERFRAME)
+        if (iCurrentFrameID == iNumFramesPerSuperframe)
 			iCurrentFrameID = 0;
 
 		/* Check if frame ID has changed, if yes, reset output buffers to avoid
@@ -276,7 +284,7 @@ void COFDMCellDemapping::ProcessDataInternal(CParameter& Parameters)
 			/* Super-frame bound reached, test cell-counters (same as with the
 			   FAC cells, see above) */
 			if (iMSCCellCounter != iNumUsefMSCCellsPerFrame *
-				NUM_FRAMES_IN_SUPERFRAME)
+                iNumFramesPerSuperframe)
 			{
 				SetBufReset1(); /* MSC: buffer number 1 */
 			}

@@ -692,7 +692,10 @@ void CUtilizeFACData::ProcessDataInternal(CParameter& Parameters)
            no FAC data is used, we have to increase the counter here */
         Parameters.iFrameIDReceiv++;
 
-        if (Parameters.iFrameIDReceiv == NUM_FRAMES_IN_SUPERFRAME)
+        ERobMode rob_mode = Parameters.GetWaveMode();
+        int iNumFramesInSuperframe = (rob_mode==RM_ROBUSTNESS_MODE_E)?NUM_FRAMES_IN_SUPERFRAME_DRMPLUS:NUM_FRAMES_IN_SUPERFRAME_DRM30;
+
+        if (Parameters.iFrameIDReceiv == iNumFramesInSuperframe)
             Parameters.iFrameIDReceiv = 0;
     }
 }
@@ -702,8 +705,11 @@ void CUtilizeFACData::InitInternal(CParameter& Parameters)
 
 // This should be in FAC class in an Init() routine which has to be defined, this
 // would be cleaner code! TODO
+    ERobMode rob_mode = Parameters.GetWaveMode();
+    int iNumFramesInSuperframe = (rob_mode==RM_ROBUSTNESS_MODE_E)?NUM_FRAMES_IN_SUPERFRAME_DRMPLUS:NUM_FRAMES_IN_SUPERFRAME_DRM30;
+
     /* Init frame ID so that a "0" comes after increasing the init value once */
-    Parameters.iFrameIDReceiv = NUM_FRAMES_IN_SUPERFRAME - 1;
+    Parameters.iFrameIDReceiv = iNumFramesInSuperframe - 1;
 
     /* Reset flag */
     bCRCOk = FALSE;

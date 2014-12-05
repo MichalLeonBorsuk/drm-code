@@ -198,9 +198,9 @@ typedef unsigned int					_MESSAGE_IDENT;
 
 /* Global enumerations ------------------------------------------------------ */
 enum ESpecOcc {SO_0, SO_1, SO_2, SO_3, SO_4, SO_5, SO_6}; /* SO: Spectrum Occupancy */
-enum ERobMode {RM_ROBUSTNESS_MODE_A, RM_ROBUSTNESS_MODE_B,
-               RM_ROBUSTNESS_MODE_C, RM_ROBUSTNESS_MODE_D, RM_ROBUSTNESS_MODE_E,
-               RM_NO_MODE_DETECTED
+enum ERobMode {RM_ROBUSTNESS_MODE_A=0, RM_ROBUSTNESS_MODE_B=1,
+               RM_ROBUSTNESS_MODE_C=2, RM_ROBUSTNESS_MODE_D=3, RM_ROBUSTNESS_MODE_E=4,
+               RM_NO_MODE_DETECTED=-1
               }; /* RM: Robustness Mode */
 
 

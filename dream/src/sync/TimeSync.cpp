@@ -911,36 +911,16 @@ int CTimeSync::GetIndFromRMode(ERobMode eNewMode)
 {
 	/* Get the robustness mode index. We define:
 	   A: 0, B: 1, C: 2, D: 3 */
-	switch (eNewMode)
-	{
-	case RM_ROBUSTNESS_MODE_A:
-		return 0;
-	case RM_ROBUSTNESS_MODE_B:
-		return 1;
-	case RM_ROBUSTNESS_MODE_C:
-		return 2;
-	case RM_ROBUSTNESS_MODE_D:
-		return 3;
-	default:
-		return 0;
-	}
+    if(int(eNewMode)<0)
+        return 0;
+    if(int(eNewMode>int(RM_ROBUSTNESS_MODE_E)))
+        return 0;
+    return int(eNewMode);
 }
 
 ERobMode CTimeSync::GetRModeFromInd(int iNewInd)
 {
 	/* Get the robustness mode index. We define:
-	   A: 0, B: 1, C: 2, D: 3 */
-	switch (iNewInd)
-	{
-	case 0:
-		return RM_ROBUSTNESS_MODE_A;
-	case 1:
-		return RM_ROBUSTNESS_MODE_B;
-	case 2:
-		return RM_ROBUSTNESS_MODE_C;
-	case 3:
-		return RM_ROBUSTNESS_MODE_D;
-	default:
-		return RM_ROBUSTNESS_MODE_A;
-	}
+	   A: 0, B: 1, C: 2, D: 3 */    
+    return ERobMode(iNewInd);
 }

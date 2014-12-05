@@ -151,28 +151,7 @@ void CTagItemDecoderRobMod::DecodeTag(CVector<_BINARY>& vecbiTag, const int iLen
 	if (iLen != 8)
 		return; // TODO: error handling!!!!!!!!!!!!!!!!!!!!!!
 
-	switch (vecbiTag.Separate(8))
-	{
-	case 0:
-		/* Robustness mode A */
-		eRobMode = RM_ROBUSTNESS_MODE_A;
-		break;
-
-	case 1:
-		/* Robustness mode B */
-		eRobMode = RM_ROBUSTNESS_MODE_B;
-		break;
-
-	case 2:
-		/* Robustness mode C */
-		eRobMode = RM_ROBUSTNESS_MODE_C;
-		break;
-
-	case 3:
-		/* Robustness mode D */
-		eRobMode = RM_ROBUSTNESS_MODE_D;
-		break;
-	}
+    eRobMode = ERobMode(vecbiTag.Separate(8));
 
 	SetReady(TRUE);
 }

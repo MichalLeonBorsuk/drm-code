@@ -85,13 +85,13 @@ public:
 	CMatrix<int>		matiMapTab; 
 	CMatrix<_COMPLEX>	matcPilotCells;
 
-	int					iNumSymbolsPerSuperframe;
-	int					iNumSymPerFrame; /* Number of symbols per frame */
-	int					iNumCarrier;
+    unsigned int		iNumSymbolsPerSuperframe;
+    unsigned int		iNumSymPerFrame; /* Number of symbols per frame */
+    unsigned int		iNumCarrier;
 	int					iScatPilTimeInt; /* Time interpolation */
 	int					iScatPilFreqInt; /* Frequency interpolation */
 
-	int					iMaxNumMSCSym; /* Max number of MSC cells in a symbol */
+    unsigned int		iMaxNumMSCSym; /* Max number of MSC cells in a symbol */
 
 	/* Number of MSC cells in a symbol */
 	CVector<int>		veciNumMSCSym; 
@@ -125,14 +125,14 @@ protected:
 	struct CScatPilots
 	{	
 		CScatPilots(): piConst(NULL), iColSizeWZ(0), piW(NULL), piZ(NULL),
-		iQ(0),piGainTable(NULL) {}
+        piQ(NULL),piGainTable(NULL) {}
 
 		/* For the pase */
 		const int*  piConst;
 		int			iColSizeWZ;
 		const int*	piW;
 		const int*	piZ;
-		int			iQ;
+        const int*  piQ;
 
 		/* For the gain */
 		const int*	piGainTable;
