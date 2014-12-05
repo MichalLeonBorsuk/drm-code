@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>484</width>
-    <height>207</height>
+    <height>215</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -8868,6 +8868,7 @@
      <addaction name="menuPlot_Style"/>
     </widget>
     <addaction name="actionDRM"/>
+    <addaction name="actionDRMPlus"/>
     <addaction name="actionAM"/>
     <addaction name="actionFM"/>
     <addaction name="actionReset"/>
@@ -9039,6 +9040,12 @@
    </property>
   </action>
   <action name="actionDRM">
+   <property name="checkable">
+    <bool>false</bool>
+   </property>
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>DRM (digital)</string>
    </property>
@@ -9057,6 +9064,17 @@
    </property>
    <property name="text">
     <string>White on Black</string>
+   </property>
+  </action>
+  <action name="actionDRMPlus">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>DRM+</string>
    </property>
   </action>
  </widget>

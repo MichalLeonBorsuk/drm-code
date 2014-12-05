@@ -211,6 +211,11 @@ void ReceiverController::setMode(int newMode)
     receiver->SetReceiverMode(ERecMode(newMode));
 }
 
+void ReceiverController::setRobustnesMode(ERobMode eRobMode)
+{
+    receiver->GetParameters()->SetWaveMode(eRobMode);
+}
+
 int ReceiverController::getMode() const
 {
     return currentMode;
