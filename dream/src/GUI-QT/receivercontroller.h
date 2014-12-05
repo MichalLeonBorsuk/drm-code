@@ -70,6 +70,7 @@ public slots:
     void selectAudioService(int);
     void triggerNewAcquisition();
     void setMode(int);
+    void setRobustnesMode(ERobMode eRobMode);
     void setFrequency(int);
     void muteAudio(bool);
     void setSaveAudio(const string&);

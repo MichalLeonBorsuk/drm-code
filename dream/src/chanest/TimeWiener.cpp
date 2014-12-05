@@ -261,7 +261,7 @@ int CTimeWiener::Init(CParameter& Parameters)
 
 	/* Set local parameters */
 	const CCellMappingTable& Param = Parameters.CellMappingTable;
-	iNumCarrier = Param.iNumCarrier;
+    iNumCarrier = Param.iNumCarrier;
 	iScatPilTimeInt = Param.iScatPilTimeInt;
 	iScatPilFreqInt = Param.iScatPilFreqInt;
 	iNumSymPerFrame = Param.iNumSymPerFrame;
@@ -276,22 +276,22 @@ int CTimeWiener::Init(CParameter& Parameters)
 	case RM_ROBUSTNESS_MODE_A:
 		iLengthWiener = LEN_WIENER_FILT_TIME_RMA;
 		rSigmaMax = MAX_SIGMA_RMA;
-		break;
+        break;
 
 	case RM_ROBUSTNESS_MODE_B:
 		iLengthWiener = LEN_WIENER_FILT_TIME_RMB;
 		rSigmaMax = MAX_SIGMA_RMB;
-		break;
+        break;
 
 	case RM_ROBUSTNESS_MODE_C:
 		iLengthWiener = LEN_WIENER_FILT_TIME_RMC;
 		rSigmaMax = MAX_SIGMA_RMC;
-		break;
+        break;
 
 	case RM_ROBUSTNESS_MODE_D:
 		iLengthWiener = LEN_WIENER_FILT_TIME_RMD;
 		rSigmaMax = MAX_SIGMA_RMD;
-		break;
+        break;
 
     case RM_ROBUSTNESS_MODE_E:
         iLengthWiener = LEN_WIENER_FILT_TIME_RME;
@@ -474,24 +474,36 @@ void CTimeWiener::GenFiltPhaseTable(const CMatrix<int>& matiMapTab,
 	/* Init matrix */
 	matiFiltPhaseTable.Init(iNumCarrier, iNumSymPerFrame);
 
-	/* Get the index of first symbol in a super-frame on where the first cell
-	   (carrier-index = 0) is a pilot. This is needed for determining the
-	   correct filter phase for the convolution */
-	int iFirstSymWithPilot = 0;
-	while (!_IsScatPil(matiMapTab[iFirstSymWithPilot][0]))
-		iFirstSymWithPilot++;
 
-	for (int i = 0; i < iNumCarrier; i++)
-	{
-		for (int j = 0; j < iNumSymPerFrame; j++)
-		{
-			/* Calculate filter phases for Wiener filter for each OFDM cell in
-			   a DRM frame */
-			matiFiltPhaseTable[i][j] = (iScatPilTimeInt -
-				(iNumSymPerFrame - j + iFirstSymWithPilot + i) %
-				iScatPilTimeInt) % iScatPilTimeInt;
-		}
-	}
+    /* Get the index of first symbol in a super-frame on where the first cell
+       (carrier-index = 0) is a pilot. This is needed for determining the
+       correct filter phase for the convolution
+
+       Note: Mode E has no frequency reference pilots.s
+    */
+    int iFirstSymWithPilot = -1;
+    for(int i=0; i<matiMapTab.NumRows(); i++) {
+        if (_IsScatPil(matiMapTab[i][0]))
+        {
+            iFirstSymWithPilot = i;
+            break;
+        }
+    }
+
+    if(iFirstSymWithPilot>=0)
+    {
+        for (int i = 0; i < iNumCarrier; i++)
+        {
+            for (int j = 0; j < iNumSymPerFrame; j++)
+            {
+                /* Calculate filter phases for Wiener filter for each OFDM cell in
+                   a DRM frame */
+                matiFiltPhaseTable[i][j] = (iScatPilTimeInt -
+                    (iNumSymPerFrame - j + iFirstSymWithPilot + i) %
+                    iScatPilTimeInt) % iScatPilTimeInt;
+            }
+        }
+    }
 }
 
 _REAL CTimeWiener::UpdateFilterCoef(const _REAL rNewSNR, const _REAL rNewSigma)
