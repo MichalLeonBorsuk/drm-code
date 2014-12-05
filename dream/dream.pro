@@ -311,8 +311,8 @@ qwt {
     QT += svg
     macx {
         LIBS += -framework qwt
-   }
-   else {
+    }
+    else {
         win32:CONFIG(debug, debug|release) {
             # win debug
             LIBS += -lqwtd
@@ -320,8 +320,8 @@ qwt {
             # unix | win release
             LIBS += -lqwt
         }
-   }
-   !crosscompile {
+    }
+    !crosscompile {
         macx {
           exists(/opt/local/Library/Frameworks/qwt.framework) {
             INCLUDEPATH += /opt/local/Library/Frameworks/qwt.framework/Versions/6/Headers

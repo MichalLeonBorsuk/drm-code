@@ -823,6 +823,10 @@ void CChannelEstimation::InitInternal(CParameter& Parameters)
         iLengthWiener = LEN_WIENER_FILT_FREQ_RMD;
         break;
 
+    case RM_ROBUSTNESS_MODE_E:
+        iLengthWiener = LEN_WIENER_FILT_FREQ_RME;
+        break;
+
     default:
         break;
     }
@@ -1280,7 +1284,7 @@ void CChannelEstimation::GetAvPoDeSp(CVector<_REAL>& vecrData,
 }
 
 void CChannelEstimation::UpdateRSIPilotStore(CParameter& Parameters, CVectorEx<_COMPLEX>* pvecInputData,
-        CVector<int>& veciMapTab, CVector<_COMPLEX>& veccPilotCells, const int iSymbolCounter)
+        CVector<int>& veciMapTab, CVector<_COMPLEX>& veccPilotCells, const unsigned int iSymbolCounter)
 {
     int			i;
     int			iPiHiIdx;

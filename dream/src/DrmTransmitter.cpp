@@ -406,6 +406,7 @@ void CDRMTransmitter::LoadSettings()
     else if (value == "RM_ROBUSTNESS_MODE_B") { eRobustnessMode = RM_ROBUSTNESS_MODE_B; }
     else if (value == "RM_ROBUSTNESS_MODE_C") { eRobustnessMode = RM_ROBUSTNESS_MODE_C; }
     else if (value == "RM_ROBUSTNESS_MODE_D") { eRobustnessMode = RM_ROBUSTNESS_MODE_D; }
+    else if (value == "RM_ROBUSTNESS_MODE_E") { eRobustnessMode = RM_ROBUSTNESS_MODE_E; }
     /* Spectrum occupancy */
     value = s.Get(Transmitter, "spectocc", string("SO_3"));
     if      (value == "SO_0") { eSpectOccup = SO_0; }
@@ -548,6 +549,7 @@ void CDRMTransmitter::SaveSettings()
     case RM_ROBUSTNESS_MODE_B: value = "RM_ROBUSTNESS_MODE_B"; break;
     case RM_ROBUSTNESS_MODE_C: value = "RM_ROBUSTNESS_MODE_C"; break;
     case RM_ROBUSTNESS_MODE_D: value = "RM_ROBUSTNESS_MODE_D"; break;
+    case RM_ROBUSTNESS_MODE_E: value = "RM_ROBUSTNESS_MODE_E"; break;
     default: value = ""; }
     s.Put(Transmitter, "robustness", value);
 	

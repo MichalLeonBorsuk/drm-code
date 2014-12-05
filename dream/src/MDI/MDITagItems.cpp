@@ -325,27 +325,7 @@ CTagItemGeneratorRobMod::GenTag(ERobMode eCurRobMode)
 	PrepareTag(SIZEOF__BYTE);
 
 	/* Robustness mode */
-	switch (eCurRobMode)
-	{
-	case RM_ROBUSTNESS_MODE_A:
-		Enqueue((uint32_t) 0, 8);
-		break;
-
-	case RM_ROBUSTNESS_MODE_B:
-		Enqueue((uint32_t) 1, 8);
-		break;
-
-	case RM_ROBUSTNESS_MODE_C:
-		Enqueue((uint32_t) 2, 8);
-		break;
-
-	case RM_ROBUSTNESS_MODE_D:
-		Enqueue((uint32_t) 3, 8);
-		break;
-
-	default:
-		break;
-	}
+    Enqueue((uint32_t)eCurRobMode, 8);
 }
 
 string

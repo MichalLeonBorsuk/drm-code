@@ -45,6 +45,7 @@
 #define LEN_WIENER_FILT_FREQ_RMB		11
 #define LEN_WIENER_FILT_FREQ_RMC		11
 #define LEN_WIENER_FILT_FREQ_RMD		13
+#define LEN_WIENER_FILT_FREQ_RME		0 // TODO MODE E
 
 /* Time constant for IIR averaging of fast signal power estimation */
 #define TICONST_SNREST_FAST				((CReal) 30.0) /* sec */
@@ -239,7 +240,7 @@ protected:
     /* OPH: RSCI interference tag calculation */
     void CalculateRint(CParameter& Parameters);
     void UpdateRSIPilotStore(CParameter& Parameters, CVectorEx<_COMPLEX>* pvecInputData,
-                             CVector<int>& veciMapTab, CVector<_COMPLEX>& veccPilotCells, const int iSymbolCounter);
+                             CVector<int>& veciMapTab, CVector<_COMPLEX>& veccPilotCells, const unsigned int iSymbolCounter);
 
     CMatrix<_COMPLEX>	matcRSIPilotStore;
     int iTimeDiffAccuRSI; /* Accumulator for time differences for RSI pilot output */

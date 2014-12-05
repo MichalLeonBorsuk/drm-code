@@ -382,7 +382,7 @@ protected:
 
     /* OPH: counter to count symbols within a frame in order to generate */
     /* RSCI output */
-    int							iFreeSymbolCounter;
+    unsigned int				iFreeSymbolCounter;
     int							iAudSampleRate;
     int							iSigSampleRate;
     int							iBandwidth;

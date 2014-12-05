@@ -49,6 +49,7 @@
 #define LEN_WIENER_FILT_TIME_RMB		7
 #define LEN_WIENER_FILT_TIME_RMC		9
 #define LEN_WIENER_FILT_TIME_RMD		9
+#define LEN_WIENER_FILT_TIME_RME		0 // TODO MODE E
 
 /* Maximum values for doppler for a specific robustness mode.
    Parameters found by looking at resulting filter coefficients. The values
@@ -60,6 +61,7 @@
 #define MAX_SIGMA_RMB					((_REAL) 2.7 /* Hz */ / 2)
 #define MAX_SIGMA_RMC					((_REAL) 5.7 /* Hz */ / 2)
 #define MAX_SIGMA_RMD					((_REAL) 4.5 /* Hz */ / 2)
+#define MAX_SIGMA_RME					((_REAL) 0.0 /* Hz */ / 2) // TODO MODE E
 
 /* Define a lower bound for the doppler */
 #define LOW_BOUND_SIGMA					((_REAL) 0.1 /* Hz */ / 2)

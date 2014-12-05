@@ -147,6 +147,12 @@ TransmDialog::TransmDialog(CSettings& Settings,	QWidget* parent)
 		break;
 
     case RM_ROBUSTNESS_MODE_E:
+        RadioButtonBandwidth45->setEnabled(FALSE);
+        RadioButtonBandwidth5->setEnabled(FALSE);
+        RadioButtonBandwidth9->setEnabled(FALSE);
+        RadioButtonBandwidth10->setEnabled(FALSE);
+        RadioButtonBandwidth18->setEnabled(FALSE);
+        RadioButtonBandwidth20->setEnabled(FALSE);
         // TODO
         break;
 

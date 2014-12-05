@@ -912,6 +912,10 @@ QString	systemevalDlg::GetRobModeStr(ERobMode v)
         return "D";
         break;
 
+    case RM_ROBUSTNESS_MODE_E:
+        return "E";
+        break;
+
     default:
         return "?";
     }

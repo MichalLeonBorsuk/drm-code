@@ -555,6 +555,7 @@ CDRMReceiver::DemodulateDRM(_BOOLEAN& bEnoughData)
         bEnoughData = TRUE;
     }
 
+    // TODO MODE E
     /* Frequency synchronization acquisition -------------------- */
     if (FreqSyncAcq.ProcessData(Parameters, InpResBuf, FreqSyncAcqBuf))
     {

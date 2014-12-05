@@ -478,9 +478,9 @@ void CDRMPlotQwt::addConstellation(const char *legendText, int c)
     curve->setSymbol(markerSym[c]);
 #else
     curve->setSymbol(&markerSym[c]);
+    curve->setLegendAttribute(QwtPlotCurve::LegendShowSymbol, true);
 #endif
     curve->setTitle(legendText);
-    curve->setLegendAttribute(QwtPlotCurve::LegendShowSymbol, true);
     curve->attach(plot);
     nCurves++;
     if(nCurves>1)

@@ -313,7 +313,8 @@ CConsoleIO::Update()
 			case RM_ROBUSTNESS_MODE_B: strRob = "B"; break;
 			case RM_ROBUSTNESS_MODE_C: strRob = "C"; break;
 			case RM_ROBUSTNESS_MODE_D: strRob = "D"; break;
-			default:                   strRob = "?"; }
+            case RM_ROBUSTNESS_MODE_E: strRob = "E"; break;
+            default:                   strRob = "?"; }
 			const char *strOcc;
 			switch (Parameters.GetSpectrumOccup()) {
 			case SO_0: strOcc = "4.5 kHz"; break;
