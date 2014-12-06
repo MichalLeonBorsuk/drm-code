@@ -293,7 +293,7 @@ const int iTableGainCellSubset[4][5] = {
     {20, 6, 4, 3, 16}
 };
 #else
-const GainCellSubset gainCellSubsets[5] {
+const GainCellSubset gainCellSubsets[5]={
     {2, 4, 5, 20},
     {1, 2, 3,  6},
     {1, 2, 2,  4},
