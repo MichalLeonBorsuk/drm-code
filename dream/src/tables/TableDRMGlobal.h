@@ -68,7 +68,7 @@
 #define RMD_ENUM_TG_TU					11
 #define RMD_DENOM_TG_TU					14
 
-#define RME_FFT_SIZE_N					0 // TODO MODE E
+#define RME_FFT_SIZE_N					448 // TODO MODE E
 #define RME_NUM_SYM_PER_FRAME           40 // TABLE 47
 #define RME_ENUM_TG_TU					1 // 4.4.2.2 Table 2
 #define RME_DENOM_TG_TU					9 // 4.4.2.2 Table 2

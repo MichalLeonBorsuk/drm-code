@@ -141,6 +141,9 @@ protected:
 
 	virtual void InitInternal(CParameter& Parameters);
 	virtual void ProcessDataInternal(CParameter& Parameters);
+    bool AcquireModeABCD(const CRealVector& vecrPSD, _REAL& offset);
+    bool AcquireModeE(const CRealVector& vecrPSD, _REAL& offset);
+
 };
 
 

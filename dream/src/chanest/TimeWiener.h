@@ -49,7 +49,7 @@
 #define LEN_WIENER_FILT_TIME_RMB		7
 #define LEN_WIENER_FILT_TIME_RMC		9
 #define LEN_WIENER_FILT_TIME_RMD		9
-#define LEN_WIENER_FILT_TIME_RME		0 // TODO MODE E
+#define LEN_WIENER_FILT_TIME_RME		9 // TODO MODE E
 
 /* Maximum values for doppler for a specific robustness mode.
    Parameters found by looking at resulting filter coefficients. The values
