@@ -515,8 +515,8 @@ void CTimeSyncTrack::Init(CParameter& Parameters, int iNewSymbDelay)
 	/* Inits for sample rate offset estimation ------------------------------ */
 	/* Calculate number of symbols for a given time span as defined for the
 	   length of the sample rate offset estimation history size */
-	iLenCorrectionHist = (int) ((_REAL) Parameters.GetSigSampleRate() *
-		HIST_LEN_SAM_OFF_EST_TI_CORR / Parameters.CellMappingTable.iSymbolBlockSize);
+    iLenCorrectionHist = int(_REAL(Parameters.GetSigSampleRate() *
+        HIST_LEN_SAM_OFF_EST_TI_CORR) / _REAL(Parameters.CellMappingTable.iSymbolBlockSize));
 
 	/* Init count for acquisition */
 	iResOffAcqCntMax = (int) ((_REAL) Parameters.GetSigSampleRate() *

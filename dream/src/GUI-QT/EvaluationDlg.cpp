@@ -444,6 +444,7 @@ void systemevalDlg::OnTimer()
 {
 
     // TODO replace this with signal driven processing
+    OnDataAvailable(); // for Mode E until working
     Parameters.Lock();
 
         SetStatus(LEDFAC, Parameters.ReceiveStatus.FAC.GetStatus());
