@@ -292,7 +292,7 @@ void AnalogDemDlg::UpdateControls()
 
 #ifdef HAVE_SPEEX
 	/* Set speex spinbox enable state */
-    ui->SpinBoxNoiRedLevel->setEnabled(RadioButtonNoiRedSpeex->isChecked());
+    ui->SpinBoxNoiRedLevel->setEnabled(ui->RadioButtonNoiRedSpeex->isChecked());
 #endif
 
 	/* Set filter bandwidth */
@@ -419,7 +419,7 @@ void AnalogDemDlg::on_ButtonGroupNoiseReduction_buttonClicked(int iID)
 
 #ifdef HAVE_SPEEX
 	/* Set speex spinbox enable state */
-    SpinBoxNoiRedLevel->setEnabled(RadioButtonNoiRedSpeex->isChecked());
+    ui->SpinBoxNoiRedLevel->setEnabled(ui->RadioButtonNoiRedSpeex->isChecked());
 #endif
 }
 
