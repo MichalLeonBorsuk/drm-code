@@ -173,8 +173,7 @@ protected:
 
     int						iLenHistBuff;
 
-    int						iScatPilFreqInt; /* Frequency interpolation */
-    int						iScatPilTimeInt; /* Time interpolation */
+    GainCellSubset			gcs;
 
     CComplexVector			veccChanEst;
     CRealVector				vecrSqMagChanEst;

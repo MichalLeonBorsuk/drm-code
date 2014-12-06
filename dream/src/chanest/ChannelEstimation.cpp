@@ -144,19 +144,19 @@ void CChannelEstimation::ProcessDataInternal(CParameter& Parameters)
         /* Set first pilot position */
         veccChanEst[0] = veccPilots[0];
 
-        for (j = 0, k = 1; j < iNumCarrier - iScatPilFreqInt;
-                j += iScatPilFreqInt, k++)
+        for (j = 0, k = 1; j < iNumCarrier - gcs.f;
+                j += gcs.f, k++)
         {
             /* Set values at second time pilot position in cluster */
-            veccChanEst[j + iScatPilFreqInt] = veccPilots[k];
+            veccChanEst[j + gcs.f] = veccPilots[k];
 
             /* Interpolation cluster */
-            for (i = 1; i < iScatPilFreqInt; i++)
+            for (i = 1; i < gcs.f; i++)
             {
                 /* E.g.: c(x) = (c_4 - c_0) / 4 * x + c_0 */
                 veccChanEst[j + i] =
-                    (veccChanEst[j + iScatPilFreqInt] - veccChanEst[j]) /
-                    (_REAL) (iScatPilFreqInt) * (_REAL) i + veccChanEst[j];
+                    (veccChanEst[j + gcs.f] - veccChanEst[j]) /
+                    (_REAL) (gcs.f) * (_REAL) i + veccChanEst[j];
             }
         }
         break;
@@ -176,7 +176,7 @@ void CChannelEstimation::ProcessDataInternal(CParameter& Parameters)
         /* ---------------------------------------------------------------------
            Put all pilots at the beginning of the vector. The "real" length of
            the input vector is longer than the number of pilots, but we
-           calculate the FFT only over "iNumCarrier / iScatPilFreqInt + 1"
+           calculate the FFT only over "iNumCarrier / gcs.f + 1"
            values (this is the number of pilot positions) */
         /* Weighting pilots with window */
         veccPilots *= vecrDFTWindow;
@@ -501,7 +501,7 @@ void CChannelEstimation::ProcessDataInternal(CParameter& Parameters)
         }
 
         /* Return delay in ms */
-        _REAL rDelayScale = _REAL(iFFTSizeN) / _REAL(iSampleRate * iNumIntpFreqPil * iScatPilFreqInt) * 1000.0;
+        _REAL rDelayScale = _REAL(iFFTSizeN) / _REAL(iSampleRate * iNumIntpFreqPil * gcs.f) * 1000.0;
         Parameters.rMinDelay = rMinDelay * rDelayScale;
         Parameters.rMaxDelay = rMaxDelay * rDelayScale;
 
@@ -605,8 +605,7 @@ void CChannelEstimation::InitInternal(CParameter& Parameters)
 {
     Parameters.Lock();
     /* Get parameters from global struct */
-    iScatPilTimeInt = Parameters.CellMappingTable.iScatPilTimeInt;
-    iScatPilFreqInt = Parameters.CellMappingTable.iScatPilFreqInt;
+    gcs = Parameters.CellMappingTable.gcs;
     iNumIntpFreqPil = Parameters.CellMappingTable.iNumIntpFreqPil;
     iNumCarrier = Parameters.CellMappingTable.iNumCarrier;
     iFFTSizeN = Parameters.CellMappingTable.iFFTSizeN;
@@ -635,7 +634,7 @@ void CChannelEstimation::InitInternal(CParameter& Parameters)
 
     /* FFT must be longer than "iNumCarrier" because of zero padding effect (
        not in robustness mode D! -> "iLongLenFreq = iNumCarrier") */
-    iLongLenFreq = iNumCarrier + iScatPilFreqInt - 1;
+    iLongLenFreq = iNumCarrier + gcs.f - 1;
 
     /* Init vector for received data at pilot positions */
     veccPilots.Init(iNumIntpFreqPil);
@@ -689,7 +688,7 @@ void CChannelEstimation::InitInternal(CParameter& Parameters)
 
     const int iOvlSamOneSideShort =
         (int) Ceil(rWinExpFact * iNumIntpFreqPil / 2);
-    const int iOvlSamOneSideLong = iOvlSamOneSideShort * iScatPilFreqInt;
+    const int iOvlSamOneSideLong = iOvlSamOneSideShort * gcs.f;
 
     const int iExpWinLenShort = iNumIntpFreqPil + 2 * iOvlSamOneSideShort;
     const int iExpWinLenLong = iNumCarrier + 2 * iOvlSamOneSideLong;
@@ -844,7 +843,7 @@ void CChannelEstimation::InitInternal(CParameter& Parameters)
     veciPilOffTab.Init(iNumCarrier);
 
     /* Number of different wiener filters */
-    iNumWienerFilt = (iLengthWiener - 1) * iScatPilFreqInt + 1;
+    iNumWienerFilt = (iLengthWiener - 1) * gcs.f + 1;
 
     /* Allocate temporary matlib vector for filter coefficients */
     matcWienerFilter.Init(iNumWienerFilt, iLengthWiener);
@@ -877,7 +876,7 @@ void CChannelEstimation::InitInternal(CParameter& Parameters)
 
 
     /* inits for RSCI pilot store */
-    matcRSIPilotStore.Init(iNumSymPerFrame / iScatPilTimeInt, iNumCarrier/iScatPilFreqInt + 1,
+    matcRSIPilotStore.Init(iNumSymPerFrame / gcs.t, iNumCarrier/gcs.f + 1,
                            _COMPLEX(_REAL(0.0),_REAL(0.0)));
     iTimeDiffAccuRSI = 0;
 
@@ -950,7 +949,7 @@ void CChannelEstimation::UpdateWienerFiltCoef(CReal rNewSNR, CReal rRatPDSLen,
     /* Calculate all possible wiener filters */
     for (j = 0; j < iNumWienerFilt; j++)
     {
-        matcWienerFilter[j] = FreqOptimalFilter(iScatPilFreqInt, j, rNewSNR,
+        matcWienerFilter[j] = FreqOptimalFilter(gcs.f, j, rNewSNR,
                                                 rRatPDSLen, rRatPDSOffs, iLengthWiener);
     }
 
@@ -975,7 +974,7 @@ void CChannelEstimation::UpdateWienerFiltCoef(CReal rNewSNR, CReal rRatPDSLen,
     {
         /* We define the current pilot position as the last pilot which the
            index "j" has passed */
-        iCurPil = (int) (j / iScatPilFreqInt);
+        iCurPil = (int) (j / gcs.f);
 
         /* Consider special cases at the edges of the DRM spectrum */
         if (iCurPil < iPilOffset)
@@ -1014,7 +1013,7 @@ void CChannelEstimation::UpdateWienerFiltCoef(CReal rNewSNR, CReal rRatPDSLen,
 
         /* Difference between the position of the first pilot (for filtering)
            and the position of the observed carrier */
-        iDiff = j - veciPilOffTab[j] * iScatPilFreqInt;
+        iDiff = j - veciPilOffTab[j] * gcs.f;
 
         /* Copy correct filter in matrix */
         for (i = 0; i < iLengthWiener; i++)
@@ -1114,7 +1113,7 @@ _REAL CChannelEstimation::GetDelay() const
 {
     /* Delay in ms */
     return rLenPDSEst * iFFTSizeN /
-           (iSampleRate * iNumIntpFreqPil * iScatPilFreqInt) * 1000;
+           (iSampleRate * iNumIntpFreqPil * gcs.f) * 1000;
 }
 
 _REAL CChannelEstimation::GetMinDelay()
@@ -1134,7 +1133,7 @@ _REAL CChannelEstimation::GetMinDelay()
 
     /* Return delay in ms */
     return rMinDelay * iFFTSizeN /
-           (iSampleRate * iNumIntpFreqPil * iScatPilFreqInt) * 1000;
+           (iSampleRate * iNumIntpFreqPil * gcs.f) * 1000;
 }
 #endif
 
@@ -1304,27 +1303,24 @@ void CChannelEstimation::UpdateRSIPilotStore(CParameter& Parameters, CVectorEx<_
 
 
     /* calculate the spacing between scattered pilots in a given symbol */
-    int iScatPilFreqSpacing = iScatPilFreqInt * iScatPilTimeInt;
+    //int gcs.m = gcs.f * gcs.t;
 
     /* Data is stored in the array with one row per pilot repetition, and in freq order in each row */
     /* Each row has one element per pilot-bearing carrier */
     /* This avoids having a jagged array with different lengths in different rows */
-    int iRow = iSymbolCounter / Parameters.CellMappingTable.iScatPilTimeInt;
-
-    int iScatPilFreqInt = Parameters.CellMappingTable.iScatPilFreqInt;
-
+    int iRow = iSymbolCounter / gcs.t;
 
     /* Find the first pilot */
     int iFirstPilotCarrier = 0;
 
     while (!_IsScatPil(veciMapTab[iFirstPilotCarrier]) )
-        iFirstPilotCarrier += iScatPilFreqInt;
+        iFirstPilotCarrier += gcs.f;
 
 
     /* Fill in the matrix for channel estimates at the pilot positions -------- */
     /* Step by the pilot spacing in a given symbol */
-    for (i = iFirstPilotCarrier, iPiHiIdx = iFirstPilotCarrier/iScatPilFreqInt;
-            i < iNumCarrier; i += iScatPilFreqSpacing, iPiHiIdx+=iScatPilTimeInt)
+    for (i = iFirstPilotCarrier, iPiHiIdx = iFirstPilotCarrier/gcs.f;
+            i < iNumCarrier; i += gcs.m, iPiHiIdx+=gcs.t)
     {
         /* Identify and calculate transfer function at the pilot positions */
         if (_IsScatPil(veciMapTab[i])) /* This will almost always be true */
@@ -1351,17 +1347,17 @@ void CChannelEstimation::UpdateRSIPilotStore(CParameter& Parameters, CVectorEx<_
     if (iSymbolCounter == Parameters.CellMappingTable.iNumSymPerFrame - 1)
     {
         /* copy into CParam object */
-        Parameters.matcReceivedPilotValues.Init(iNumSymPerFrame / iScatPilTimeInt, iNumCarrier/iScatPilFreqInt + 1,
+        Parameters.matcReceivedPilotValues.Init(iNumSymPerFrame / gcs.t, iNumCarrier/gcs.f + 1,
                 _COMPLEX(_REAL(0.0),_REAL(0.0)));
         Parameters.matcReceivedPilotValues = matcRSIPilotStore;
         /* copy it a row at a time (vector provides an assignment operator)
-        for (i=0; i<iNumSymPerFrame / iScatPilTimeInt; i++)
+        for (i=0; i<iNumSymPerFrame / gcs.t; i++)
         	Parameters.matcReceivedPilotValues[i] = matcRSIPilotStore[i];
         */
 
 
         /* clear the local copy */
-        matcRSIPilotStore.Init(iNumSymPerFrame / iScatPilTimeInt, iNumCarrier/iScatPilFreqInt + 1,
+        matcRSIPilotStore.Init(iNumSymPerFrame / gcs.t, iNumCarrier/gcs.f + 1,
                                _COMPLEX(_REAL(0.0),_REAL(0.0)));
 
     }

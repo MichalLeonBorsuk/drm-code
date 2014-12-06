@@ -88,8 +88,9 @@ public:
     unsigned int		iNumSymbolsPerSuperframe;
     unsigned int		iNumSymPerFrame; /* Number of symbols per frame */
     unsigned int		iNumCarrier;
-	int					iScatPilTimeInt; /* Time interpolation */
-	int					iScatPilFreqInt; /* Frequency interpolation */
+    GainCellSubset      gcs;
+    //int					iScatPilTimeInt; /* Time interpolation */
+    //int					iScatPilFreqInt; /* Frequency interpolation */
 
     unsigned int		iMaxNumMSCSym; /* Max number of MSC cells in a symbol */
 
