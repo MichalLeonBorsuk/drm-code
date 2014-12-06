@@ -432,7 +432,7 @@ void CTimeSyncTrack::Process(CParameter& Parameters,
 void CTimeSyncTrack::Init(CParameter& Parameters, int iNewSymbDelay)
 {
 	iNumCarrier = Parameters.CellMappingTable.iNumCarrier;
-	iScatPilFreqInt = Parameters.CellMappingTable.iScatPilFreqInt;
+    iScatPilFreqInt = Parameters.CellMappingTable.gcs.f;
 	iNumIntpFreqPil = Parameters.CellMappingTable.iNumIntpFreqPil;
 	iDFTSize = Parameters.CellMappingTable.iFFTSizeN;
 
@@ -728,7 +728,7 @@ void CTimeSyncTrack::CalculateRdel(CParameter& Parameters)
 		CReal rInterval =
 			((_REAL) (vecrIntervalEnd[j] - vecrIntervalStart[j])) *
 			Parameters.CellMappingTable.iFFTSizeN / (Parameters.GetSigSampleRate() *
-			Parameters.CellMappingTable.iNumIntpFreqPil * Parameters.CellMappingTable.iScatPilFreqInt) * 1000;
+            Parameters.CellMappingTable.iNumIntpFreqPil * Parameters.CellMappingTable.gcs.f) * 1000;
 
 		/* Clip the delay interval values for display purposes */
 		if (rInterval < (CReal) -9.9)

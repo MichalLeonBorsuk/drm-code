@@ -79,8 +79,12 @@ extern const int iTableTimePilRobModE[RME_NUM_TIME_PIL][2];
 /* Definitions for the positions of scattered pilots */
 #define SCAT_PIL_FREQ_INT	1
 #define SCAT_PIL_TIME_INT	2
-
+#if 0
 extern const int iTableGainCellSubset[4][5];
+#else
+struct GainCellSubset { int c; int f; int t; int m; };
+extern const GainCellSubset gainCellSubsets[5];
+#endif
 
 /* Phase definitions of scattered pilots ------------------------------------ */
 extern const int iTableScatPilConstRobModA[3];

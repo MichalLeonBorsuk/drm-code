@@ -124,10 +124,10 @@ int CTimeLinear::Init(CParameter& Parameter)
 	/* Get parameters from global struct */
 	iNumCarrier = Parameter.CellMappingTable.iNumCarrier;
 	iNumIntpFreqPil = Parameter.CellMappingTable.iNumIntpFreqPil;
-	iScatPilFreqInt = Parameter.CellMappingTable.iScatPilFreqInt;
+    iScatPilFreqInt = Parameter.CellMappingTable.gcs.f;
 
 	/* Set length of history-buffer according to time-int-index */
-	iLenHistBuff = Parameter.CellMappingTable.iScatPilTimeInt + 1;
+    iLenHistBuff = Parameter.CellMappingTable.gcs.t + 1;
 	
 	/* Init timing correction history with zeros */
 	iLenTiCorrHist = iLenHistBuff - 1;

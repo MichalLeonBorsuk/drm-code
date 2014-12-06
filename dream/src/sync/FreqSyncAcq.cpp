@@ -177,6 +177,7 @@ bool CFreqSyncAcq::AcquireModeABCD(const CRealVector& vecrPSD, _REAL& offset)
 
 bool CFreqSyncAcq::AcquireModeE(const CRealVector& vecrPSD, _REAL& offset)
 {
+    offset = .01;
     return false; // TODO MODE E
 }
 

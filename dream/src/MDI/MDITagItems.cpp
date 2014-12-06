@@ -1208,8 +1208,7 @@ CTagItemGeneratorPilots::GenTag(CParameter & Parameter)
 {
 	const CCellMappingTable& Param = Parameter.CellMappingTable;
 	// Get parameters from parameter struct
-	int iScatPilTimeInt = Param.iScatPilTimeInt;
-	int iScatPilFreqInt = Param.iScatPilFreqInt;
+    GainCellSubset gcs = Param.gcs;
 	int iNumCarrier = Param.iNumCarrier;
 	int iNumSymPerFrame = Param.iNumSymPerFrame;
 	/* do we need these ? */
@@ -1217,15 +1216,14 @@ CTagItemGeneratorPilots::GenTag(CParameter & Parameter)
 	//int iFFTSizeN = Param.iFFTSizeN;
 
 	// calculate the spacing between scattered pilots in a given symbol
-	int iScatPilFreqSpacing = iScatPilFreqInt * iScatPilTimeInt;
 
 	// Calculate how long the tag will be and write the fields that apply to the whole frame
 
 	// Total number of pilots = number of pilot bearing carriers * number of pilot pattern repeats per frame
 	// NB the DC carrier in mode D is INCLUDED in this calculation (and in the tag)
 	int iTotalNumPilots =
-		((iNumCarrier - 1) / iScatPilFreqInt +
-		 1) * iNumSymPerFrame / iScatPilTimeInt;
+        ((iNumCarrier - 1) / gcs.f +
+         1) * iNumSymPerFrame / gcs.t;
 
 	int iTagLen = 4 * SIZEOF__BYTE;	// first 4 bytes apply to the whole frame
 	iTagLen += iNumSymPerFrame * 4 * SIZEOF__BYTE;	// 4 bytes at start of each symbol (spec typo?)
@@ -1237,22 +1235,22 @@ CTagItemGeneratorPilots::GenTag(CParameter & Parameter)
 
 	// fields for the whole frame
 	Enqueue((uint32_t) iNumSymPerFrame, SIZEOF__BYTE);	// SN = number of symbols
-	Enqueue((uint32_t) iScatPilTimeInt, SIZEOF__BYTE);	// SR = symbol repetition
+    Enqueue((uint32_t) gcs.t, SIZEOF__BYTE);	// SR = symbol repetition
 	Enqueue((uint32_t) 0, 2 * SIZEOF__BYTE);	// rfu
 
 	// Check that the matrix has the expected dimensions (in case of a mode change)
 	if (Parameter.matcReceivedPilotValues.NumRows() !=
-		iNumSymPerFrame / iScatPilTimeInt
+        iNumSymPerFrame / gcs.t
 		|| Parameter.matcReceivedPilotValues.NumColumns() !=
-		((iNumCarrier - 1) / iScatPilFreqInt + 1))
+        ((iNumCarrier - 1) / gcs.f + 1))
 	{
 		GenEmptyTag();
 #if 0
 		log.GetStatus("Wrong size: %d x %d, expected %d x %d",
 				  Parameter.matcReceivedPilotValues.NumRows(),
 				  Parameter.matcReceivedPilotValues.NumColumns(),
-				  iNumSymPerFrame / iScatPilTimeInt,
-				  ((iNumCarrier - 1) / iScatPilFreqInt + 1));
+                  iNumSymPerFrame / gcs.t,
+                  ((iNumCarrier - 1) / gcs.f + 1));
 #endif
 		return;
 	}
@@ -1262,7 +1260,7 @@ CTagItemGeneratorPilots::GenTag(CParameter & Parameter)
 		 iSymbolNumber++)
 	{
 		// Which row of the matrix?
-		int iRow = iSymbolNumber / iScatPilTimeInt;
+        int iRow = iSymbolNumber / gcs.t;
 		int i, iCarrier;
 
 		// Find the first pilot in this symbol (this could be calculated directly,
@@ -1271,7 +1269,7 @@ CTagItemGeneratorPilots::GenTag(CParameter & Parameter)
 
 		while (!_IsScatPil(Param.matiMapTab[iSymbolNumber][iFirstPilotCarrier]))
 		{
-			iFirstPilotCarrier += iScatPilFreqInt;
+            iFirstPilotCarrier += gcs.f;
 		}
 
 		// Find the biggest value we need to represent for this symbol
@@ -1279,10 +1277,10 @@ CTagItemGeneratorPilots::GenTag(CParameter & Parameter)
 		_REAL rMax = _REAL(0.0);
 		int iNumPilots = 0;
 
-		// Start from first pilot and step by the pilot spacing (iScatPilFreqInt*iScatPilTimeInt)
-		for (i = iFirstPilotCarrier / iScatPilFreqInt, iCarrier =
+        // Start from first pilot and step by the pilot spacing (gcs.f*gcs.t)
+        for (i = iFirstPilotCarrier / gcs.f, iCarrier =
 			 iFirstPilotCarrier; iCarrier < iNumCarrier;
-			 i += iScatPilTimeInt, iCarrier += iScatPilFreqSpacing)
+             i += gcs.t, iCarrier += gcs.m)
 		{
 			iNumPilots++;
 			// Is it really a pilot? This will be false only in Mode D for the DC carrier
@@ -1310,9 +1308,9 @@ CTagItemGeneratorPilots::GenTag(CParameter & Parameter)
 		Enqueue((uint32_t) rExponent, 2 * SIZEOF__BYTE);
 
 		// Step through the pilots again and write the values
-		for (i = iFirstPilotCarrier / iScatPilFreqInt, iCarrier =
+        for (i = iFirstPilotCarrier / gcs.f, iCarrier =
 			 iFirstPilotCarrier; iCarrier < iNumCarrier;
-			 i += iScatPilTimeInt, iCarrier += iScatPilFreqSpacing)
+             i += gcs.t, iCarrier += gcs.m)
 		{
 			Enqueue((uint32_t)
 					(Parameter.matcReceivedPilotValues[iRow][i].real() *

@@ -110,8 +110,9 @@ void CCellMappingTable::MakeTable(
 		iNumTimePilots = RMA_NUM_TIME_PIL;
 		piTableTimePilots = &iTableTimePilRobModA[0][0];
 		piTableFreqPilots = &iTableFreqPilRobModA[0][0];
-        iScatPilTimeInt = iTableGainCellSubset[SCAT_PIL_TIME_INT][eNewRobustnessMode];
-        iScatPilFreqInt = iTableGainCellSubset[SCAT_PIL_FREQ_INT][eNewRobustnessMode];
+        //iScatPilTimeInt = iTableGainCellSubset[SCAT_PIL_TIME_INT][eNewRobustnessMode];
+        //iScatPilFreqInt = iTableGainCellSubset[SCAT_PIL_FREQ_INT][eNewRobustnessMode];
+        gcs = gainCellSubsets[eNewRobustnessMode];
 
 		/* Scattered pilots phase definition */
 		ScatPilots.piConst = iTableScatPilConstRobModA;
@@ -138,8 +139,9 @@ void CCellMappingTable::MakeTable(
 		iNumTimePilots = RMB_NUM_TIME_PIL;
 		piTableTimePilots = &iTableTimePilRobModB[0][0];
 		piTableFreqPilots = &iTableFreqPilRobModB[0][0];
-        iScatPilTimeInt = iTableGainCellSubset[SCAT_PIL_TIME_INT][eNewRobustnessMode];
-        iScatPilFreqInt = iTableGainCellSubset[SCAT_PIL_FREQ_INT][eNewRobustnessMode];
+        //iScatPilTimeInt = iTableGainCellSubset[SCAT_PIL_TIME_INT][eNewRobustnessMode];
+        //iScatPilFreqInt = iTableGainCellSubset[SCAT_PIL_FREQ_INT][eNewRobustnessMode];
+        gcs = gainCellSubsets[eNewRobustnessMode];
 
 		/* Scattered pilots phase definition */
 		ScatPilots.piConst = iTableScatPilConstRobModB;
@@ -166,8 +168,9 @@ void CCellMappingTable::MakeTable(
 		iNumTimePilots = RMC_NUM_TIME_PIL;
 		piTableTimePilots = &iTableTimePilRobModC[0][0];
 		piTableFreqPilots = &iTableFreqPilRobModC[0][0];
-        iScatPilTimeInt = iTableGainCellSubset[SCAT_PIL_TIME_INT][eNewRobustnessMode];
-        iScatPilFreqInt = iTableGainCellSubset[SCAT_PIL_FREQ_INT][eNewRobustnessMode];
+        //iScatPilTimeInt = iTableGainCellSubset[SCAT_PIL_TIME_INT][eNewRobustnessMode];
+        //iScatPilFreqInt = iTableGainCellSubset[SCAT_PIL_FREQ_INT][eNewRobustnessMode];
+        gcs = gainCellSubsets[eNewRobustnessMode];
 
 		/* Scattered pilots phase definition */
 		ScatPilots.piConst = iTableScatPilConstRobModC;
@@ -194,8 +197,9 @@ void CCellMappingTable::MakeTable(
 		iNumTimePilots = RMD_NUM_TIME_PIL;
 		piTableTimePilots = &iTableTimePilRobModD[0][0];
 		piTableFreqPilots = &iTableFreqPilRobModD[0][0];
-        iScatPilTimeInt = iTableGainCellSubset[SCAT_PIL_TIME_INT][eNewRobustnessMode];
-        iScatPilFreqInt = iTableGainCellSubset[SCAT_PIL_FREQ_INT][eNewRobustnessMode];
+        //iScatPilTimeInt = iTableGainCellSubset[SCAT_PIL_TIME_INT][eNewRobustnessMode];
+        //iScatPilFreqInt = iTableGainCellSubset[SCAT_PIL_FREQ_INT][eNewRobustnessMode];
+        gcs = gainCellSubsets[eNewRobustnessMode];
 
 		/* Scattered pilots phase definition */
 		ScatPilots.piConst = iTableScatPilConstRobModD;
@@ -222,8 +226,9 @@ void CCellMappingTable::MakeTable(
         iNumTimePilots = RME_NUM_TIME_PIL;
         piTableTimePilots = &iTableTimePilRobModE[0][0];
         piTableFreqPilots = NULL;
-        iScatPilTimeInt = iTableGainCellSubset[SCAT_PIL_TIME_INT][eNewRobustnessMode];
-        iScatPilFreqInt = iTableGainCellSubset[SCAT_PIL_FREQ_INT][eNewRobustnessMode];
+        //iScatPilTimeInt = iTableGainCellSubset[SCAT_PIL_TIME_INT][eNewRobustnessMode];
+        //iScatPilFreqInt = iTableGainCellSubset[SCAT_PIL_FREQ_INT][eNewRobustnessMode];
+        gcs = gainCellSubsets[eNewRobustnessMode];
 
         /* Scattered pilots phase definition */
         ScatPilots.piConst = iTableScatPilConstRobModE;
@@ -265,8 +270,9 @@ void CCellMappingTable::MakeTable(
 	/* Calculate number of time-interploated frequency pilots. Special case
 	   with robustness mode D: pilots in all carriers! BUT: DC carrier is
 	   counted as a pilot in that case!!! Be aware of that! */
-	if (iScatPilFreqInt > 1)
-		iNumIntpFreqPil = (int) ((_REAL) iNumCarrier / iScatPilFreqInt + 1);
+    // TODO MODE E
+    if (gcs.f > 1)
+        iNumIntpFreqPil = (int) ((_REAL) iNumCarrier / gcs.f + 1);
 	else
 		iNumIntpFreqPil = iNumCarrier;
 
@@ -301,11 +307,12 @@ void CCellMappingTable::MakeTable(
 			iFACCounter = 0;
 
 		/* Calculate the start value of "p" in equation for gain reference
-		   cells in Table 90 (8.4.4.1) */
+           cells in ES 201 980 V4.1.1 Table 58 (8.4.4.1) */
+        // TODO MODE E - do we need the c or m fields of this table here?
 		iScatPilotsCounter = (int) ((_REAL) (iCarrierKmin -
-			(int) ((_REAL) iScatPilFreqInt / 2 + .5) -
-			iScatPilFreqInt * mod(iFrameSym, iScatPilTimeInt)
-			) / (iScatPilFreqInt * iScatPilTimeInt));
+            (int) ((_REAL) gcs.f / 2 + .5) -
+            gcs.f * mod(iFrameSym, gcs.t)
+            ) / (gcs.f * gcs.t));
 
 		for (iCar = iCarrierKmin; iCar < iCarrierKmax + 1; iCar++)
 		{
@@ -380,13 +387,14 @@ void CCellMappingTable::MakeTable(
 			/* The rule for calculating the scattered pilots is defined in the
 			   specification in the following form:
 			   e.g.: k = 2 + 4 * (s mod 5) + 20 * p
+               This is represented by the GainCellSubset struct as:
+               k = c + f * (s mod t) + m * p
 			   We define a "frequency-" (FreqInt) and "time-interpolation"
 			   (TimeInt). In this example, "4" is the FreqInt and "5" is the
 			   TimeInt. The first term "2" is the half of the FreqInt, rounded
 			   towards infinity. The parameter "20" is FreqInt * TimeInt */
-			if (iCar == (int) ((_REAL) iScatPilFreqInt / 2 + .5) +
-				iScatPilFreqInt * mod(iFrameSym, iScatPilTimeInt) +
-				iScatPilFreqInt * iScatPilTimeInt * iScatPilotsCounter)
+            int k = gcs.c + gcs.f * mod(iFrameSym, gcs.t) + gcs.m * iScatPilotsCounter;
+            if (iCar == k)
 			{
 				iScatPilotsCounter++;
 

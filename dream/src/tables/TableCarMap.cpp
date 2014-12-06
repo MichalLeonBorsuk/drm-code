@@ -285,13 +285,22 @@ const int iTableTimePilRobModE[RME_NUM_TIME_PIL][2] = {
 /* Scattered pilots ***********************************************************/
 /* Definitions for the positions of scattered pilots */
 // ES 201 980 V4.1.1 TABLE 58
+#if 0
 const int iTableGainCellSubset[4][5] = {
     { 2, 1, 1, 1,  2},
     { 4, 2, 2, 1,  4},
     { 5, 3, 2, 3,  4},
     {20, 6, 4, 3, 16}
 };
-
+#else
+const GainCellSubset gainCellSubsets[5] {
+    {2, 4, 5, 20},
+    {1, 2, 3,  6},
+    {1, 2, 2,  4},
+    {1, 1, 3,  3},
+    {2, 4, 4, 16}
+};
+#endif
 /* Phase definitions of scattered pilots ------------------------------------ */
 // ES 201 980 V4.1.1 TABLE 60
 const int iTableScatPilConstRobModA[3] = {4, 5, 2};

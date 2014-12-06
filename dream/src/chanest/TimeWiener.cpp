@@ -262,8 +262,8 @@ int CTimeWiener::Init(CParameter& Parameters)
 	/* Set local parameters */
 	const CCellMappingTable& Param = Parameters.CellMappingTable;
     iNumCarrier = Param.iNumCarrier;
-	iScatPilTimeInt = Param.iScatPilTimeInt;
-	iScatPilFreqInt = Param.iScatPilFreqInt;
+    iScatPilTimeInt = Param.gcs.t;
+    iScatPilFreqInt = Param.gcs.f;
 	iNumSymPerFrame = Param.iNumSymPerFrame;
 	const int iNumIntpFreqPil = Param.iNumIntpFreqPil;
 
