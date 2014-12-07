@@ -405,35 +405,35 @@ void CDRMPlot::setupTreeWidget(QTreeWidget* tw)
     QTreeWidgetItemIterator it(tw, QTreeWidgetItemIterator::NoChildren);
     for (; *it; it++)
     {
-        if ((*it)->text(0) == QObject::QObject::tr("SNR Spectrum"))
+        if ((*it)->text(0) == tr("SNR Spectrum"))
             (*it)->setData(0,  Qt::UserRole, SNR_SPECTRUM);
-        if ((*it)->text(0) == QObject::QObject::tr("Audio Spectrum"))
+        if ((*it)->text(0) == tr("Audio Spectrum"))
             (*it)->setData(0,  Qt::UserRole, AUDIO_SPECTRUM);
-        if ((*it)->text(0) == QObject::QObject::tr("Shifted PSD"))
+        if ((*it)->text(0) == tr("Shifted PSD"))
             (*it)->setData(0,  Qt::UserRole, POWER_SPEC_DENSITY);
-        if ((*it)->text(0) == QObject::QObject::tr("Waterfall Input Spectrum"))
+        if ((*it)->text(0) == tr("Waterfall Input Spectrum"))
             (*it)->setData(0,  Qt::UserRole, INP_SPEC_WATERF);
-        if ((*it)->text(0) == QObject::QObject::tr("Input Spectrum"))
+        if ((*it)->text(0) == tr("Input Spectrum"))
             (*it)->setData(0,  Qt::UserRole, INPUTSPECTRUM_NO_AV);
-        if ((*it)->text(0) == QObject::QObject::tr("Input PSD"))
+        if ((*it)->text(0) == tr("Input PSD"))
             (*it)->setData(0,  Qt::UserRole, INPUT_SIG_PSD);
-        if ((*it)->text(0) == QObject::QObject::tr("MSC"))
+        if ((*it)->text(0) == tr("MSC"))
             (*it)->setData(0,  Qt::UserRole, MSC_CONSTELLATION);
-        if ((*it)->text(0) == QObject::QObject::tr("SDC"))
+        if ((*it)->text(0) == tr("SDC"))
             (*it)->setData(0,  Qt::UserRole, SDC_CONSTELLATION);
-        if ((*it)->text(0) == QObject::QObject::tr("FAC"))
+        if ((*it)->text(0) == tr("FAC"))
             (*it)->setData(0,  Qt::UserRole, FAC_CONSTELLATION);
-        if ((*it)->text(0) == QObject::QObject::tr("FAC / SDC / MSC"))
+        if ((*it)->text(0) == tr("FAC / SDC / MSC"))
             (*it)->setData(0,  Qt::UserRole, ALL_CONSTELLATION);
-        if ((*it)->text(0) == QObject::QObject::tr("Frequency / Sample Rate"))
+        if ((*it)->text(0) == tr("Frequency / Sample Rate"))
             (*it)->setData(0,  Qt::UserRole, FREQ_SAM_OFFS_HIST);
-        if ((*it)->text(0) == QObject::QObject::tr("Delay / Doppler"))
+        if ((*it)->text(0) == tr("Delay / Doppler"))
             (*it)->setData(0,  Qt::UserRole, DOPPLER_DELAY_HIST);
-        if ((*it)->text(0) == QObject::QObject::tr("SNR / Audio"))
+        if ((*it)->text(0) == tr("SNR / Audio"))
             (*it)->setData(0,  Qt::UserRole, SNR_AUDIO_HIST);
-        if ((*it)->text(0) == QObject::QObject::tr("Transfer Function"))
+        if ((*it)->text(0) == tr("Transfer Function"))
             (*it)->setData(0,  Qt::UserRole, TRANSFERFUNCTION);
-        if ((*it)->text(0) == QObject::QObject::tr("Impulse Response"))
+        if ((*it)->text(0) == tr("Impulse Response"))
             (*it)->setData(0,  Qt::UserRole, AVERAGED_IR);
     }
 
