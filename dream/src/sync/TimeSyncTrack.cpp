@@ -465,22 +465,23 @@ void CTimeSyncTrack::Init(CParameter& Parameters, int iNewSymbDelay)
 	vecrHammingWindow.Init(iNumIntpFreqPil);
 	vecrHammingWindow = Hamming(iNumIntpFreqPil);
 
-	/* Weights for peak bound calculation, in Eq. (19), special values for
-	   robustness mode D! */
-	if (Parameters.GetWaveMode() == RM_ROBUSTNESS_MODE_D)
+    /* Weights for peak bound calculation, in Eq. (19),
+     * special values for robustness mode D!
+     */
+    switch (Parameters.GetWaveMode())
 	{
-		rConst1 = pow((_REAL) 10.0, (_REAL) -TETA1_DIST_FROM_MAX_DB_RMD / 10);
+    case RM_ROBUSTNESS_MODE_A:
+    case RM_ROBUSTNESS_MODE_B:
+    case RM_ROBUSTNESS_MODE_C:
+        rConst1 = pow((_REAL) 10.0, (_REAL) -TETA1_DIST_FROM_MAX_DB / 10);
+        rConst2 = pow((_REAL) 10.0, (_REAL) TETA2_DIST_FROM_MIN_DB / 10);
+        break;
+    case RM_ROBUSTNESS_MODE_D:
+        rConst1 = pow((_REAL) 10.0, (_REAL) -TETA1_DIST_FROM_MAX_DB_RMD / 10);
 		rConst2 = pow((_REAL) 10.0, (_REAL) TETA2_DIST_FROM_MIN_DB_RMD / 10);
-	}
-	else
-	{
-		rConst1 = pow((_REAL) 10.0, (_REAL) -TETA1_DIST_FROM_MAX_DB / 10);
-		rConst2 = pow((_REAL) 10.0, (_REAL) TETA2_DIST_FROM_MIN_DB / 10);
-	}
-
-    if (Parameters.GetWaveMode() == RM_ROBUSTNESS_MODE_E)
-    {
-        // TODO MODE E
+        break;
+    case RM_ROBUSTNESS_MODE_E:
+        ;; // TODO MODE E
     }
 
 	/* Define start point for rotation of detection vector for acausal taps.
