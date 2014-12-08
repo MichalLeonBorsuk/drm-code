@@ -62,6 +62,10 @@ public slots:
     ERecMode mode() { return eRecMode; }
 
 private:
+#ifdef HAVE_LIBHAMLIB
+    CRig&			Rig;
+    RigDlg			*pRigDlg;
+#endif
     Ui::StationsDlgbase* ui;
 protected:
     struct Params {
@@ -92,10 +96,6 @@ protected:
     int				currentSortColumn();
     Params          params[RM_NONE+1];
 
-#ifdef HAVE_LIBHAMLIB
-	CRig&			Rig;
-	RigDlg			*pRigDlg;
-#endif
 	CSchedule		schedule;
     ScheduleLoader  scheduleLoader;
 	QIcon			greenCube;
