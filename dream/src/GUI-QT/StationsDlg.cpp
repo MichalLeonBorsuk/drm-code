@@ -46,13 +46,12 @@
 #ifdef HAVE_LIBHAMLIB
 StationsDlg::StationsDlg(CSettings& Settings, CRig& Rig, QMap<QWidget*,QString>& parents):
 CWindow(parents, Settings, "Stations"),
-ui(new Ui::StationsDlgbase),
 Rig(Rig), pRigDlg(NULL),
 #else
 StationsDlg::StationsDlg(CSettings& Settings, QMap<QWidget*,QString>& parents):
 CWindow(parents, Settings, "Stations"),
 #endif
-schedule(),scheduleLoader(),
+ui(new Ui::StationsDlgbase),schedule(),scheduleLoader(),
 greenCube(":/icons/greenCube.png"), redCube(":/icons/redCube.png"),
 orangeCube(":/icons/orangeCube.png"), pinkCube(":/icons/pinkCube.png"),
 eRecMode(RM_NONE)
