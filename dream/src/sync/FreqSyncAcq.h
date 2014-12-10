@@ -73,7 +73,8 @@ class FreqOffsetModeABCD
 {
 public:
     FreqOffsetModeABCD():veciTableFreqPilots(3){}
-    void init(int iHalfBuffer, double rCenterFreq,  double rWinSize, int iSampleRate);
+    void init(int iHalfBuffer, int iSampleRate);
+    void setSearchWindow(_REAL rNewCenterFreq, _REAL rNewWinSize) { rCenterFreq = rNewCenterFreq; rWinSize = rNewWinSize; }
     bool calcOffset(const CRealVector& vecrPSD, int& offset);
 private:
     int							iStartDCSearch;
@@ -84,6 +85,7 @@ private:
     CRealVector					vecrPSDPilCor;
     CVector<int>				veciPeakIndex;
     int							iSearchWinSize;
+    double                      rCenterFreq, rWinSize;
 };
 
 class FreqOffsetModeE
@@ -96,17 +98,15 @@ class CFreqSyncAcq : public CReceiverModul<_REAL, _COMPLEX>
 {
 public:
 	CFreqSyncAcq() : 
-		bAquisition(FALSE), bSyncInput(FALSE),
-		rCenterFreq(0), rWinSize(0),
-		bUseRecFilter(FALSE)
+        acquired(false), bSyncInput(FALSE),bUseRecFilter(FALSE)
 		{}
 	virtual ~CFreqSyncAcq() {}
 
 	void SetSearchWindow(_REAL rNewCenterFreq, _REAL rNewWinSize);
 
 	void StartAcquisition();
-	void StopAcquisition() {bAquisition = FALSE;}
-	_BOOLEAN GetAcquisition() {return bAquisition;}
+    void StopAcquisition() {acquired = true;}
+    _BOOLEAN GetAcquisition() {return !acquired;}
 
 	void SetRecFilter(const _BOOLEAN bNewF) {bUseRecFilter = bNewF;}
 	_BOOLEAN GetRecFilter() {return bUseRecFilter;}
@@ -129,16 +129,15 @@ protected:
 
 	int							iFFTSize;
 
-	_BOOLEAN					bAquisition;
+    bool    					acquired;
 
 	int							iAquisitionCounter;
 	int							iAverageCounter;
 
 	_BOOLEAN					bSyncInput;
 
-	_REAL						rCenterFreq;
-	_REAL						rWinSize;
     int							iHalfBuffer;
+    int                         iSampleRate;
 
 	_COMPLEX					cCurExp;
 	_REAL						rInternIFNorm;

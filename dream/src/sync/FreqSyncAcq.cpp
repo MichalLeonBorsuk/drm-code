@@ -32,7 +32,7 @@
 #include "FreqSyncAcq.h"
 
 /* Implementation *************************************************************/
-void FreqOffsetModeABCD::init(int iHalfBuffer, double rCenterFreq,  double rWinSize, int iSampleRate)
+void FreqOffsetModeABCD::init(int iHalfBuffer, int iSampleRate)
 {
     /* Allocate memory for PSD after pilot correlation */
     vecrPSDPilCor.Init(iHalfBuffer);
@@ -216,16 +216,16 @@ bool FreqOffsetModeABCD::calcOffset(const CRealVector& vecrPSD, int& offset)
             /* Calculate frequency offset and set output parameter
                for offset */
             offset = iMaxIndex;
-            return false;
+            return true;
         }
     }
-    return true;
+    return false;
 }
 
 bool FreqOffsetModeE::calcOffset(const CRealVector& vecrPSD, int& offset)
 {
     offset = 0;
-    return false; // TODO MODE E
+    return true; // TODO MODE E
 }
 
 void CFreqSyncAcq::ProcessDataInternal(CParameter& Parameters)
@@ -240,7 +240,7 @@ void CFreqSyncAcq::ProcessDataInternal(CParameter& Parameters)
         iFreeSymbolCounter = 0;
     }
 
-    if (bAquisition == TRUE)
+    if (!acquired)
     {
 
         /* Do not transfer any data to the next block if no frequency
@@ -356,11 +356,11 @@ void CFreqSyncAcq::ProcessDataInternal(CParameter& Parameters)
 
                 int offset = 0;
                 if(Parameters.GetWaveMode()==RM_ROBUSTNESS_MODE_E)
-                    bAquisition = modeE.calcOffset(vecrPSD, offset);
+                    acquired = modeE.calcOffset(vecrPSD, offset);
                 else
-                    bAquisition = modeABCD.calcOffset(vecrPSD, offset);
+                    acquired = modeABCD.calcOffset(vecrPSD, offset);
 
-                if(bAquisition==FALSE)
+                if(acquired)
                 {
                     Parameters.rFreqOffsetAcqui = (_REAL) offset / iFrAcFFTSize;
 ;
@@ -465,8 +465,8 @@ void CFreqSyncAcq::InitInternal(CParameter& Parameters)
     iHalfBuffer = iFrAcFFTSize / 2 + 1;
 
 
-    modeABCD.init(iHalfBuffer, rCenterFreq, rWinSize, iSampleRate)
-            ;
+    modeABCD.init(iHalfBuffer, iSampleRate);
+
     /* Init vectors and FFT-plan -------------------------------------------- */
     /* Allocate memory for FFT-histories and init with zeros */
     iHistBufSize = iFrAcFFTSize * NUM_BLOCKS_USED_FOR_AV;
@@ -515,9 +515,7 @@ void CFreqSyncAcq::InitInternal(CParameter& Parameters)
 
 void CFreqSyncAcq::SetSearchWindow(_REAL rNewCenterFreq, _REAL rNewWinSize)
 {
-    /* Set internal parameters */
-    rCenterFreq = rNewCenterFreq;
-    rWinSize = rNewWinSize;
+    modeABCD.setSearchWindow(rNewCenterFreq, rNewWinSize);
 
     /* Set flag to initialize the module to the new parameters */
     SetInitFlag();
@@ -526,7 +524,7 @@ void CFreqSyncAcq::SetSearchWindow(_REAL rNewCenterFreq, _REAL rNewWinSize)
 void CFreqSyncAcq::StartAcquisition()
 {
     /* Set flag so that the actual acquisition routine is entered */
-    bAquisition = TRUE;
+    acquired = false;
 
     /* Reset (or init) counters */
     iAquisitionCounter = NUM_BLOCKS_4_FREQ_ACQU;
