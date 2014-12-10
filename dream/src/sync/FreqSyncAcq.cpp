@@ -32,7 +32,54 @@
 #include "FreqSyncAcq.h"
 
 /* Implementation *************************************************************/
-bool CFreqSyncAcq::AcquireModeABCD(const CRealVector& vecrPSD, _REAL& offset)
+void FreqOffsetModeABCD::init(int iHalfBuffer, double rCenterFreq,  double rWinSize, int iSampleRate)
+{
+    /* Allocate memory for PSD after pilot correlation */
+    vecrPSDPilCor.Init(iHalfBuffer);
+
+    /* Index memory for detected peaks (assume worst case with the size) */
+    veciPeakIndex.Init(iHalfBuffer);
+
+    /* -------------------------------------------------------------------------
+       Set start- and endpoint of search window for DC carrier after the
+       correlation with the known pilot structure */
+    /* Normalize the desired position and window size which are in Hertz */
+    const _REAL rNormDesPos   = rCenterFreq < 0.0 ? 0.5 : rCenterFreq / iSampleRate * 2;
+    const _REAL rNormHalfWinSize = rWinSize < 0.0 ? 0.5 : rWinSize    / iSampleRate;
+
+    /* We using parameters from robustness mode B as pattern for the desired
+       frequency pilot positions */
+    veciTableFreqPilots[0] =
+        iTableFreqPilRobModB[0][0] * NUM_BLOCKS_4_FREQ_ACQU;
+    veciTableFreqPilots[1] =
+        iTableFreqPilRobModB[1][0] * NUM_BLOCKS_4_FREQ_ACQU;
+    veciTableFreqPilots[2] =
+        iTableFreqPilRobModB[2][0] * NUM_BLOCKS_4_FREQ_ACQU;
+    /* Search window is smaller than haft-buffer size because of correlation
+       with pilot positions */
+    iSearchWinSize = iHalfBuffer - veciTableFreqPilots[2];
+
+    /* Calculate actual indices of start and end of search window */
+    iStartDCSearch =
+        (int) Floor((rNormDesPos - rNormHalfWinSize) * iHalfBuffer);
+    iEndDCSearch = (int) Ceil((rNormDesPos + rNormHalfWinSize) * iHalfBuffer);
+
+    /* Check range. If out of range -> correct */
+    if (!((iStartDCSearch > 0) && (iStartDCSearch < iSearchWinSize)))
+        iStartDCSearch = 0;
+
+    if (!((iEndDCSearch > 0) && (iEndDCSearch < iSearchWinSize)))
+        iEndDCSearch = iSearchWinSize;
+
+    /* Set bound for ratio between filtered signal to signal. Use a lower bound
+       if the search window is smaller */
+    if (((_REAL) iEndDCSearch - iStartDCSearch) / iHalfBuffer < (_REAL) 0.042)
+        rPeakBoundFiltToSig = PEAK_BOUND_FILT2SIGNAL_0_042;
+    else
+        rPeakBoundFiltToSig = PEAK_BOUND_FILT2SIGNAL_1;
+}
+
+bool FreqOffsetModeABCD::calcOffset(const CRealVector& vecrPSD, int& offset)
 {
 
     /* Correlate known frequency-pilot structure with equalized
@@ -168,16 +215,16 @@ bool CFreqSyncAcq::AcquireModeABCD(const CRealVector& vecrPSD, _REAL& offset)
                found */
             /* Calculate frequency offset and set output parameter
                for offset */
-            offset = (_REAL) iMaxIndex / iFrAcFFTSize;
+            offset = iMaxIndex;
             return false;
         }
     }
     return true;
 }
 
-bool CFreqSyncAcq::AcquireModeE(const CRealVector& vecrPSD, _REAL& offset)
+bool FreqOffsetModeE::calcOffset(const CRealVector& vecrPSD, int& offset)
 {
-    offset = .01;
+    offset = 0;
     return false; // TODO MODE E
 }
 
@@ -256,6 +303,14 @@ void CFreqSyncAcq::ProcessDataInternal(CParameter& Parameters)
                 const int iStartFilt = 0; // <- no offset right now
 
                 /* Reset vectors for intermediate filtered result */
+                CRealVector					vecrFiltResLR;
+                CRealVector					vecrFiltResRL;
+                CRealVector					vecrFiltRes;
+                /* Init vectors for filtering in frequency direction */
+                vecrFiltResLR.Init(iHalfBuffer);
+                vecrFiltResRL.Init(iHalfBuffer);
+                vecrFiltRes.Init(iHalfBuffer);
+
                 vecrFiltResLR.Reset((CReal) 0.0);
                 vecrFiltResRL.Reset((CReal) 0.0);
 
@@ -299,15 +354,16 @@ void CFreqSyncAcq::ProcessDataInternal(CParameter& Parameters)
                         vecrPSD[i] = 0.0;
                 }
 
-                _REAL offset = 0.0;
+                int offset = 0;
                 if(Parameters.GetWaveMode()==RM_ROBUSTNESS_MODE_E)
-                    bAquisition = AcquireModeE(vecrPSD, offset);
+                    bAquisition = modeE.calcOffset(vecrPSD, offset);
                 else
-                    bAquisition = AcquireModeABCD(vecrPSD, offset);
+                    bAquisition = modeABCD.calcOffset(vecrPSD, offset);
 
                 if(bAquisition==FALSE)
                 {
-                    Parameters.rFreqOffsetAcqui = offset;
+                    Parameters.rFreqOffsetAcqui = (_REAL) offset / iFrAcFFTSize;
+;
                     /* Send out the data stored for FFT calculation ----- */
                     /* This does not work for bandpass filter. TODO: make
                        this possible for bandpass filter, too */
@@ -397,72 +453,26 @@ void CFreqSyncAcq::InitInternal(CParameter& Parameters)
        (for simulation) */
     iFFTSize = Parameters.CellMappingTable.iFFTSizeN;
 
-    /* We using parameters from robustness mode B as pattern for the desired
-       frequency pilot positions */
-    veciTableFreqPilots[0] =
-        iTableFreqPilRobModB[0][0] * NUM_BLOCKS_4_FREQ_ACQU;
-    veciTableFreqPilots[1] =
-        iTableFreqPilRobModB[1][0] * NUM_BLOCKS_4_FREQ_ACQU;
-    veciTableFreqPilots[2] =
-        iTableFreqPilRobModB[2][0] * NUM_BLOCKS_4_FREQ_ACQU;
-
     /* Size of FFT */
-    iFrAcFFTSize = ADJ_FOR_SRATE(RMB_FFT_SIZE_N, iSampleRate) * NUM_BLOCKS_4_FREQ_ACQU;
-
-
-    /* -------------------------------------------------------------------------
-       Set start- and endpoint of search window for DC carrier after the
-       correlation with the known pilot structure */
-    /* Normalize the desired position and window size which are in Hertz */
-    const _REAL rNormDesPos   = rCenterFreq < 0.0 ? 0.5 : rCenterFreq / iSampleRate * 2;
-    const _REAL rNormHalfWinSize = rWinSize < 0.0 ? 0.5 : rWinSize    / iSampleRate;
+    if(Parameters.GetWaveMode()==RM_ROBUSTNESS_MODE_E)
+        iFrAcFFTSize = ADJ_FOR_SRATE(RME_FFT_SIZE_N, iSampleRate) * NUM_BLOCKS_4_FREQ_ACQU;
+    else
+        iFrAcFFTSize = ADJ_FOR_SRATE(RMB_FFT_SIZE_N, iSampleRate) * NUM_BLOCKS_4_FREQ_ACQU;
 
     /* Length of the half of the spectrum of real input signal (the other half
        is the same because of the real input signal). We have to consider the
        Nyquist frequency ("iFrAcFFTSize" is always even!) */
     iHalfBuffer = iFrAcFFTSize / 2 + 1;
 
-    /* Search window is smaller than haft-buffer size because of correlation
-       with pilot positions */
-    iSearchWinSize = iHalfBuffer - veciTableFreqPilots[2];
 
-    /* Calculate actual indices of start and end of search window */
-    iStartDCSearch =
-        (int) Floor((rNormDesPos - rNormHalfWinSize) * iHalfBuffer);
-    iEndDCSearch = (int) Ceil((rNormDesPos + rNormHalfWinSize) * iHalfBuffer);
-
-    /* Check range. If out of range -> correct */
-    if (!((iStartDCSearch > 0) && (iStartDCSearch < iSearchWinSize)))
-        iStartDCSearch = 0;
-
-    if (!((iEndDCSearch > 0) && (iEndDCSearch < iSearchWinSize)))
-        iEndDCSearch = iSearchWinSize;
-
-    /* Set bound for ratio between filtered signal to signal. Use a lower bound
-       if the search window is smaller */
-    if (((_REAL) iEndDCSearch - iStartDCSearch) / iHalfBuffer < (_REAL) 0.042)
-        rPeakBoundFiltToSig = PEAK_BOUND_FILT2SIGNAL_0_042;
-    else
-        rPeakBoundFiltToSig = PEAK_BOUND_FILT2SIGNAL_1;
-
-
+    modeABCD.init(iHalfBuffer, rCenterFreq, rWinSize, iSampleRate)
+            ;
     /* Init vectors and FFT-plan -------------------------------------------- */
     /* Allocate memory for FFT-histories and init with zeros */
     iHistBufSize = iFrAcFFTSize * NUM_BLOCKS_USED_FOR_AV;
     vecrFFTHistory.Init(iHistBufSize, (_REAL) 0.0);
     vecrFFTInput.Init(iFrAcFFTSize);
     vecrSqMagFFTOut.Init(iHalfBuffer);
-
-    /* Allocate memory for PSD after pilot correlation */
-    vecrPSDPilCor.Init(iHalfBuffer);
-
-    /* Init vectors for filtering in frequency direction */
-    vecrFiltResLR.Init(iHalfBuffer);
-    vecrFiltResRL.Init(iHalfBuffer);
-    vecrFiltRes.Init(iHalfBuffer);
-
-    /* Index memory for detected peaks (assume worst case with the size) */
-    veciPeakIndex.Init(iHalfBuffer);
 
     /* Init plans for FFT (faster processing of Fft and Ifft commands) */
     FftPlan.Init(iFrAcFFTSize);

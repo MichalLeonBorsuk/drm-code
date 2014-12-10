@@ -286,6 +286,8 @@ void systemevalDlg::eventShow(QShowEvent*)
 
     // pass data available events on to plots
     connect(controller, SIGNAL(dataAvailable()), this, SLOT(OnDataAvailable()));
+
+    MainPlot->SetupChart(eCurCharType, controller->getReceiver()->GetParameters()->GetSigSampleRate());
 }
 
 void systemevalDlg::eventHide(QHideEvent*)
