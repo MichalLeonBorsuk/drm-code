@@ -357,7 +357,16 @@ CSettings::ParseArguments(int argc, char **argv)
 			continue;
 		}
 
-		/* Frequency acquisition search window size ------------------------- */
+        /* initial robustness mode ------------------------------ */
+        if (GetStringArgument(argc, argv, i, "-W", "--robmode", strArgument) == TRUE)
+        {
+            char c = strArgument[0];
+            if('A'<=c && c<='E')
+            Put("command", "robmode", c-'A');
+            continue;
+        }
+
+        /* Frequency acquisition search window size ------------------------- */
 		if (GetNumericArgument(argc, argv, i, "-S", "--fracwinsize", -1,
 							   MAX_FREQ_AQC_SE_WIN_SZ, rArgument) == TRUE)
 		{
@@ -643,6 +652,7 @@ CSettings::UsageArguments()
 		"  -f <s>, --fileio <s>         disable sound card, use file <s> instead\n"
 		"  -w <s>, --writewav <s>       write output to wave file\n"
 		"  -S <r>, --fracwinsize <r>    freq. acqu. search window size [Hz] (-1.0: sample rate / 2 (default))\n"
+        "  -W A|B|C|D|E                 initial robustness mode, most useful for mode E\n"
 		"  -E <r>, --fracwincent <r>    freq. acqu. search window center [Hz] (-1.0: sample rate / 4 (default))\n"
 		"  -F <b>, --filter <b>         apply bandpass filter (0: off; 1: on)\n"
 		"  -D <b>, --modmetric <b>      enable modified metrics (0: off; 1: on)\n"

@@ -69,11 +69,33 @@
 
 
 /* Classes ********************************************************************/
+class FreqOffsetModeABCD
+{
+public:
+    FreqOffsetModeABCD():veciTableFreqPilots(3){}
+    void init(int iHalfBuffer, double rCenterFreq,  double rWinSize, int iSampleRate);
+    bool calcOffset(const CRealVector& vecrPSD, int& offset);
+private:
+    int							iStartDCSearch;
+    int							iEndDCSearch;
+    _REAL						rPeakBoundFiltToSig;
+
+    CVector<int>				veciTableFreqPilots;
+    CRealVector					vecrPSDPilCor;
+    CVector<int>				veciPeakIndex;
+    int							iSearchWinSize;
+};
+
+class FreqOffsetModeE
+{
+public:
+    bool calcOffset(const CRealVector& vecrPSD, int& offset);
+};
+
 class CFreqSyncAcq : public CReceiverModul<_REAL, _COMPLEX>
 {
 public:
 	CFreqSyncAcq() : 
-		veciTableFreqPilots(3), /* 3 frequency pilots */
 		bAquisition(FALSE), bSyncInput(FALSE),
 		rCenterFreq(0), rWinSize(0),
 		bUseRecFilter(FALSE)
@@ -94,7 +116,6 @@ public:
 	void SetSyncInput(_BOOLEAN bNewS) {bSyncInput = bNewS;}
 
 protected:
-	CVector<int>				veciTableFreqPilots;
 	CShiftRegister<_REAL>		vecrFFTHistory;
 
 	CFftPlans					FftPlan;
@@ -117,33 +138,22 @@ protected:
 
 	_REAL						rCenterFreq;
 	_REAL						rWinSize;
-	int							iStartDCSearch;
-	int							iEndDCSearch;
-	_REAL						rPeakBoundFiltToSig;
-
-	CRealVector					vecrPSDPilCor;
-	int							iHalfBuffer;
-	int							iSearchWinSize;
-	CRealVector					vecrFiltResLR;
-	CRealVector					vecrFiltResRL;
-	CRealVector					vecrFiltRes;
-	CVector<int>				veciPeakIndex;
+    int							iHalfBuffer;
 
 	_COMPLEX					cCurExp;
 	_REAL						rInternIFNorm;
 
 	CDRMBandpassFilt			BPFilter;
 	_BOOLEAN					bUseRecFilter;
+    FreqOffsetModeABCD          modeABCD;
+    FreqOffsetModeE             modeE;
 
 	/* OPH: counter to count symbols within a frame in order to generate */
 	/* RSCI output even when unlocked */
-	int							iFreeSymbolCounter;
+    unsigned int				iFreeSymbolCounter;
 
 	virtual void InitInternal(CParameter& Parameters);
 	virtual void ProcessDataInternal(CParameter& Parameters);
-    bool AcquireModeABCD(const CRealVector& vecrPSD, _REAL& offset);
-    bool AcquireModeE(const CRealVector& vecrPSD, _REAL& offset);
-
 };
 
 

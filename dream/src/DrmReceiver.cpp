@@ -1725,6 +1725,9 @@ CDRMReceiver::LoadSettings()
     const _REAL rFreqAcSeWinSize = s.Get("command", "fracwinsize", -1);
     FreqSyncAcq.SetSearchWindow(rFreqAcSeWinCenter, rFreqAcSeWinSize);
 
+    // initial robustness mode
+    Parameters.SetWaveMode(ERobMode(s.Get("command", "robmode", RM_ROBUSTNESS_MODE_B)));
+
     /* Modified metrics flag */
     ChannelEstimation.SetIntCons(s.Get("Receiver", "modmetric", FALSE));
 

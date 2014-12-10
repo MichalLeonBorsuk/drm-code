@@ -93,9 +93,6 @@ CDRMPlot::~CDRMPlot()
 
 void CDRMPlot::SetupChart(const ECharType eNewType, int sampleRate)
 {
-    if(eNewType == CurCharType)
-        return;
-
     double sr = double(sampleRate) / 2000.0;
 
     plot->clearPlots();
