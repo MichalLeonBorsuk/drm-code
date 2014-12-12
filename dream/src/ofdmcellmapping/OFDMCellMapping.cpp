@@ -47,8 +47,8 @@ void COFDMCellMapping::ProcessDataInternal(CParameter& TransmParam)
         iNumFramesPerSuperframe = NUM_FRAMES_IN_SUPERFRAME_DRMPLUS;
 
 	/* Init temporary counter */
-	int iDummyCellCounter = 0;
-	int iMSCCounter = 0;
+    int iDummyCellCounter = 0;
+    unsigned int iMSCCounter = 0;
 	int iFACCounter = 0;
 	int iSDCCounter = 0;
 	for (int iCar = 0; iCar < iNumCarrier; iCar++)
@@ -175,7 +175,7 @@ void COFDMCellDemapping::ProcessDataInternal(CParameter& Parameters)
         iNumFramesPerSuperframe = NUM_FRAMES_IN_SUPERFRAME_DRMPLUS;
 
 	/* Demap data from the cells */
-	int iMSCCounter = 0;
+    unsigned int iMSCCounter = 0;
 	int iFACCounter = 0;
 	int iSDCCounter = 0;
 	for (int iCar = 0; iCar < iNumCarrier; iCar++)

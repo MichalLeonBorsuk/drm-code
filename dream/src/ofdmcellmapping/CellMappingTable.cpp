@@ -35,6 +35,7 @@
 
 #include "../GlobalDefinitions.h"
 #include "CellMappingTable.h"
+#include <QDebug>
 
 
 /* Implementation *************************************************************/
@@ -93,26 +94,27 @@ void CCellMappingTable::MakeTable(
 	}
 
     /* The robust mode defines all other parameters */
-	switch (eNewRobustnessMode)
+    iCarrierKmin = iTableCarrierKmin[iSpecOccArrayIndex][eNewRobustnessMode];
+    iCarrierKmax = iTableCarrierKmax[iSpecOccArrayIndex][eNewRobustnessMode];
+
+    iFFTSizeN = fft_size(eNewRobustnessMode, iSampleRate);
+    RatioTgTu = propagationParams[eNewRobustnessMode].TgTu;
+
+    iNumSymPerFrame = propagationParams[eNewRobustnessMode].Ns;
+    gcs = gainCellSubsets[eNewRobustnessMode];
+
+    double vif = VIRTUAL_INTERMED_FREQ_DRM30;
+
+    switch (eNewRobustnessMode)
 	{
 	case RM_ROBUSTNESS_MODE_A:
-        iCarrierKmin = iTableCarrierKmin[iSpecOccArrayIndex][RM_ROBUSTNESS_MODE_A];
-        iCarrierKmax = iTableCarrierKmax[iSpecOccArrayIndex][RM_ROBUSTNESS_MODE_A];
-		
-		iFFTSizeN = RMA_FFT_SIZE_N;
-		RatioTgTu.iEnum = RMA_ENUM_TG_TU;
-		RatioTgTu.iDenom = RMA_DENOM_TG_TU;
-
-		iNumSymPerFrame = RMA_NUM_SYM_PER_FRAME;
+        vif = VIRTUAL_INTERMED_FREQ_DRM30;
         iNumFramesPerSuperframe = NUM_FRAMES_IN_SUPERFRAME_DRM30;
         iNumSymbolsPerSuperframe = iNumSymPerFrame * NUM_FRAMES_IN_SUPERFRAME_DRM30;
 		piTableFAC = &iTableFACRobModA[0][0];
 		iNumTimePilots = RMA_NUM_TIME_PIL;
 		piTableTimePilots = &iTableTimePilRobModA[0][0];
 		piTableFreqPilots = &iTableFreqPilRobModA[0][0];
-        //iScatPilTimeInt = iTableGainCellSubset[SCAT_PIL_TIME_INT][eNewRobustnessMode];
-        //iScatPilFreqInt = iTableGainCellSubset[SCAT_PIL_FREQ_INT][eNewRobustnessMode];
-        gcs = gainCellSubsets[eNewRobustnessMode];
 
 		/* Scattered pilots phase definition */
 		ScatPilots.piConst = iTableScatPilConstRobModA;
@@ -125,23 +127,13 @@ void CCellMappingTable::MakeTable(
 		break;
 
 	case RM_ROBUSTNESS_MODE_B:
-        iCarrierKmin = iTableCarrierKmin[iSpecOccArrayIndex][RM_ROBUSTNESS_MODE_B];
-        iCarrierKmax = iTableCarrierKmax[iSpecOccArrayIndex][RM_ROBUSTNESS_MODE_B];
-
-		iFFTSizeN = RMB_FFT_SIZE_N;
-		RatioTgTu.iEnum = RMB_ENUM_TG_TU;
-		RatioTgTu.iDenom = RMB_DENOM_TG_TU;
-
-		iNumSymPerFrame = RMB_NUM_SYM_PER_FRAME;
+        vif = VIRTUAL_INTERMED_FREQ_DRM30;
         iNumFramesPerSuperframe = NUM_FRAMES_IN_SUPERFRAME_DRM30;
         iNumSymbolsPerSuperframe = iNumSymPerFrame * NUM_FRAMES_IN_SUPERFRAME_DRM30;
 		piTableFAC = &iTableFACRobModB[0][0];
 		iNumTimePilots = RMB_NUM_TIME_PIL;
 		piTableTimePilots = &iTableTimePilRobModB[0][0];
 		piTableFreqPilots = &iTableFreqPilRobModB[0][0];
-        //iScatPilTimeInt = iTableGainCellSubset[SCAT_PIL_TIME_INT][eNewRobustnessMode];
-        //iScatPilFreqInt = iTableGainCellSubset[SCAT_PIL_FREQ_INT][eNewRobustnessMode];
-        gcs = gainCellSubsets[eNewRobustnessMode];
 
 		/* Scattered pilots phase definition */
 		ScatPilots.piConst = iTableScatPilConstRobModB;
@@ -154,23 +146,13 @@ void CCellMappingTable::MakeTable(
 		break;
 
 	case RM_ROBUSTNESS_MODE_C:
-        iCarrierKmin = iTableCarrierKmin[iSpecOccArrayIndex][RM_ROBUSTNESS_MODE_C];
-        iCarrierKmax = iTableCarrierKmax[iSpecOccArrayIndex][RM_ROBUSTNESS_MODE_C];
-
-		iFFTSizeN = RMC_FFT_SIZE_N;
-		RatioTgTu.iEnum = RMC_ENUM_TG_TU;
-		RatioTgTu.iDenom = RMC_DENOM_TG_TU;
-
-		iNumSymPerFrame = RMC_NUM_SYM_PER_FRAME;
+        vif = VIRTUAL_INTERMED_FREQ_DRM30;
         iNumFramesPerSuperframe = NUM_FRAMES_IN_SUPERFRAME_DRM30;
         iNumSymbolsPerSuperframe = iNumSymPerFrame * NUM_FRAMES_IN_SUPERFRAME_DRM30;
 		piTableFAC = &iTableFACRobModC[0][0];
 		iNumTimePilots = RMC_NUM_TIME_PIL;
 		piTableTimePilots = &iTableTimePilRobModC[0][0];
 		piTableFreqPilots = &iTableFreqPilRobModC[0][0];
-        //iScatPilTimeInt = iTableGainCellSubset[SCAT_PIL_TIME_INT][eNewRobustnessMode];
-        //iScatPilFreqInt = iTableGainCellSubset[SCAT_PIL_FREQ_INT][eNewRobustnessMode];
-        gcs = gainCellSubsets[eNewRobustnessMode];
 
 		/* Scattered pilots phase definition */
 		ScatPilots.piConst = iTableScatPilConstRobModC;
@@ -183,23 +165,13 @@ void CCellMappingTable::MakeTable(
 		break;
 
 	case RM_ROBUSTNESS_MODE_D:
-        iCarrierKmin = iTableCarrierKmin[iSpecOccArrayIndex][RM_ROBUSTNESS_MODE_D];
-        iCarrierKmax = iTableCarrierKmax[iSpecOccArrayIndex][RM_ROBUSTNESS_MODE_D];
-
-		iFFTSizeN = RMD_FFT_SIZE_N;
-		RatioTgTu.iEnum = RMD_ENUM_TG_TU;
-		RatioTgTu.iDenom = RMD_DENOM_TG_TU;
-
-		iNumSymPerFrame = RMD_NUM_SYM_PER_FRAME;
+        vif = VIRTUAL_INTERMED_FREQ_DRM30;
         iNumFramesPerSuperframe = NUM_FRAMES_IN_SUPERFRAME_DRM30;
         iNumSymbolsPerSuperframe = iNumSymPerFrame * NUM_FRAMES_IN_SUPERFRAME_DRM30;
 		piTableFAC = &iTableFACRobModD[0][0];
 		iNumTimePilots = RMD_NUM_TIME_PIL;
 		piTableTimePilots = &iTableTimePilRobModD[0][0];
 		piTableFreqPilots = &iTableFreqPilRobModD[0][0];
-        //iScatPilTimeInt = iTableGainCellSubset[SCAT_PIL_TIME_INT][eNewRobustnessMode];
-        //iScatPilFreqInt = iTableGainCellSubset[SCAT_PIL_FREQ_INT][eNewRobustnessMode];
-        gcs = gainCellSubsets[eNewRobustnessMode];
 
 		/* Scattered pilots phase definition */
 		ScatPilots.piConst = iTableScatPilConstRobModD;
@@ -212,23 +184,13 @@ void CCellMappingTable::MakeTable(
 		break;
 
     case RM_ROBUSTNESS_MODE_E:
-        iCarrierKmin = iTableCarrierKmin[iSpecOccArrayIndex][RM_ROBUSTNESS_MODE_E];
-        iCarrierKmax = iTableCarrierKmax[iSpecOccArrayIndex][RM_ROBUSTNESS_MODE_E];
-
-        iFFTSizeN = RME_FFT_SIZE_N;
-        RatioTgTu.iEnum = RME_ENUM_TG_TU;
-        RatioTgTu.iDenom = RME_DENOM_TG_TU;
-
-        iNumSymPerFrame = RME_NUM_SYM_PER_FRAME;
+        vif = VIRTUAL_INTERMED_FREQ_DRMPLUS;
         iNumFramesPerSuperframe = NUM_FRAMES_IN_SUPERFRAME_DRMPLUS;
         iNumSymbolsPerSuperframe = iNumSymPerFrame * NUM_FRAMES_IN_SUPERFRAME_DRMPLUS;
         piTableFAC = &iTableFACRobModE[0][0];
         iNumTimePilots = RME_NUM_TIME_PIL;
         piTableTimePilots = &iTableTimePilRobModE[0][0];
         piTableFreqPilots = NULL;
-        //iScatPilTimeInt = iTableGainCellSubset[SCAT_PIL_TIME_INT][eNewRobustnessMode];
-        //iScatPilFreqInt = iTableGainCellSubset[SCAT_PIL_FREQ_INT][eNewRobustnessMode];
-        gcs = gainCellSubsets[eNewRobustnessMode];
 
         /* Scattered pilots phase definition */
         ScatPilots.piConst = iTableScatPilConstRobModE;
@@ -244,7 +206,8 @@ void CCellMappingTable::MakeTable(
 	}
 
 	/* Adjusting fft size to sample rate */
-	iFFTSizeN = ADJ_FOR_SRATE(iFFTSizeN, iSampleRate);
+    //iFFTSizeN = ADJ_FOR_SRATE(iFFTSizeN, iSampleRate);
+qDebug() << iFFTSizeN;
 
 	/* Get number of carriers with DC */
 	iNumCarrier = iCarrierKmax - iCarrierKmin + 1;
@@ -258,8 +221,7 @@ void CCellMappingTable::MakeTable(
 	iSymbolBlockSize = iFFTSizeN + iGuardSize;
 
 	/* Calculate the index of the DC carrier in the shifted spectrum */
-	iIndexDCFreq = (int) ((_REAL) VIRTUAL_INTERMED_FREQ *
-		iFFTSizeN / iSampleRate);
+    iIndexDCFreq = int(vif * iFFTSizeN / iSampleRate);
 
 	/* Index of minimum useful carrier (shifted) */
 	iShiftedKmin = iIndexDCFreq + iCarrierKmin;
@@ -267,7 +229,7 @@ void CCellMappingTable::MakeTable(
 	/* Index. of maximum useful carrier (shifted) */
 	iShiftedKmax = iIndexDCFreq + iCarrierKmax;
 
-	/* Calculate number of time-interploated frequency pilots. Special case
+    /* Calculate number of time-interpolated frequency pilots. Special case
 	   with robustness mode D: pilots in all carriers! BUT: DC carrier is
 	   counted as a pilot in that case!!! Be aware of that! */
     // TODO MODE E
@@ -286,9 +248,9 @@ void CCellMappingTable::MakeTable(
 		_COMPLEX((_REAL) 0.0, (_REAL) 0.0));
 
 	/* Allocate memory for vectors with number of certain cells */
-	veciNumMSCSym.Init(iNumSymbolsPerSuperframe);
-	veciNumFACSym.Init(iNumSymbolsPerSuperframe);
-	veciNumSDCSym.Init(iNumSymbolsPerSuperframe);
+    veciNumMSCSym.resize(iNumSymbolsPerSuperframe);
+    veciNumFACSym.resize(iNumSymbolsPerSuperframe);
+    veciNumSDCSym.resize(iNumSymbolsPerSuperframe);
 
 
 	/* Build table ************************************************************/
@@ -569,7 +531,7 @@ void CCellMappingTable::MakeTable(
 		veciNumFACSym[iSym] = 0;
 		veciNumSDCSym[iSym] = 0;
 
-		for (iCar = 0; iCar < iNumCarrier; iCar++)
+        for (unsigned int iCar = 0; iCar < iNumCarrier; iCar++)
 		{
 			/* MSC */
 			if (_IsMSC(matiMapTab[iSym][iCar]))

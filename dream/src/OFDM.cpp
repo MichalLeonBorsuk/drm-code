@@ -85,14 +85,14 @@ void COFDMModulation::InitInternal(CParameter& Parameters)
 
     /* Normalized offset correction factor for IF shift. Subtract the
        default IF frequency ("VIRTUAL_INTERMED_FREQ") */
-    const _REAL rNormCurFreqOffset = (_REAL) -2.0 * crPi *
-                                     (rDefCarOffset - VIRTUAL_INTERMED_FREQ) / Parameters.GetSigSampleRate();
+    double vif = Parameters.GetWaveMode()==RM_ROBUSTNESS_MODE_E?VIRTUAL_INTERMED_FREQ_DRMPLUS:VIRTUAL_INTERMED_FREQ_DRM30;
+    const _REAL rNormCurFreqOffset = -2.0 * crPi * (rDefCarOffset - vif) / Parameters.GetSigSampleRate();
 
     /* Rotation vector for exp() calculation */
     cExpStep = _COMPLEX(cos(rNormCurFreqOffset), sin(rNormCurFreqOffset));
 
     /* Start with phase null (can be arbitrarily chosen) */
-    cCurExp = (_REAL) 1.0;
+    cCurExp = 1.0;
 
     /* Init plans for FFT (faster processing of Fft and Ifft commands) */
     FftPlan.Init(iDFTSize);

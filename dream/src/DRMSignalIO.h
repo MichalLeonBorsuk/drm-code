@@ -81,7 +81,7 @@ public:
                     };
 
     CTransmitData(CSoundOutInterface* pNS) : pFileTransmitter(NULL), pSound(pNS),
-            eOutputFormat(OF_REAL_VAL), rDefCarOffset((_REAL) VIRTUAL_INTERMED_FREQ),
+            eOutputFormat(OF_REAL_VAL), rDefCarOffset((_REAL) VIRTUAL_INTERMED_FREQ_DRM30),
             strOutFileName("test/TransmittedData.txt"), bUseSoundcard(TRUE),
             bAmplified(FALSE), bHighQualityIQ(FALSE) {}
     virtual ~CTransmitData();
@@ -221,7 +221,8 @@ protected:
 
     /* OPH: counter to count symbols within a frame in order to generate */
     /* RSCI output */
-    int							iFreeSymbolCounter;
+    unsigned int				iFreeSymbolCounter;
+    double                      vif;
 
     virtual void InitInternal(CParameter& Parameters);
     virtual void ProcessDataInternal(CParameter& Parameters);

@@ -38,49 +38,37 @@
    i.e. the frequency pilots which have to be continuous. Our IF must be a
    multiple of 1500 Hz and must also be chosen so that the largest mode (20 kHz)
    must fit into the range of the FFT-size. Therefore 6000 Hz was chosen */
-#define VIRTUAL_INTERMED_FREQ			6000	// Hz
+#define VIRTUAL_INTERMED_FREQ_DRM30			6000	// Hz
+/* for DRM+ there are no frequency pilots so we don't need a multiple of 1500 Hz */
+#define VIRTUAL_INTERMED_FREQ_DRMPLUS		1000	// Hz
 
 /* Default sample rate MUST be set to a safe value of 48000,
    for testing purpose it must be a multiple of 750 */
-#define DEFAULT_SOUNDCRD_SAMPLE_RATE	48000	// Hz
-
+#define DEFAULT_AUDIO_SAMPLE_RATE	48000	// Hz
+#define DEFAULT_SIGNAL_SAMPLE_RATE 48000 // Hz
 /* DRM parameters */
 #define NUM_FRAMES_IN_SUPERFRAME_DRM30		3
 #define NUM_FRAMES_IN_SUPERFRAME_DRMPLUS	4
 
-#define RMA_FFT_SIZE_N					1152	// RMB: Robustness Mode A
-#define RMA_NUM_SYM_PER_FRAME			15
-#define RMA_ENUM_TG_TU					1
-#define RMA_DENOM_TG_TU					9
+#define NUM_ROBUSTNESS_MODES			4 // TODO MODE E
 
-#define RMB_FFT_SIZE_N					1024	// RMA: Robustness Mode B
-#define RMB_NUM_SYM_PER_FRAME			15
-#define RMB_ENUM_TG_TU					1
-#define RMB_DENOM_TG_TU					4
+struct CRatio {
+    int iEnum; int iDenom;
+    double val(){return double(iEnum)/double(iDenom);}
+    double recip(){return double(iDenom)/double(iEnum);}
+};
 
-#define RMC_FFT_SIZE_N					704		// RMC: Robustness Mode C
-#define RMC_NUM_SYM_PER_FRAME			20
-#define RMC_ENUM_TG_TU					4
-#define RMC_DENOM_TG_TU					11
+struct PropagationParams {CRatio Tu; CRatio TgTu; int Ns; };
 
-#define RMD_FFT_SIZE_N					448		// RMD: Robustness Mode D
-#define RMD_NUM_SYM_PER_FRAME			24
-#define RMD_ENUM_TG_TU					11
-#define RMD_DENOM_TG_TU					14
-
-#define RME_FFT_SIZE_N					448 // TODO MODE E
-#define RME_NUM_SYM_PER_FRAME           40 // TABLE 47
-#define RME_ENUM_TG_TU					1 // 4.4.2.2 Table 2
-#define RME_DENOM_TG_TU					9 // 4.4.2.2 Table 2
-
+extern PropagationParams propagationParams[NUM_ROBUSTNESS_MODES+1];
 
 #define MAX_NUM_STREAMS					4
 #define MAX_NUM_SERVICES				4
 
-#define NUM_ROBUSTNESS_MODES			4
-
 #define ADJ_FOR_SRATE(value, srate)		(value * srate / 48000) /* Reminder: 48000 is the right value, do not edit! (don't replace it by DEFAULT_SOUNDCRD_SAMPLE_RATE) */
 
+// Tu is in milliseconds so we need samplerate in kHz
+inline int fft_size(int rm, int samplerate) { return int(propagationParams[rm].Tu.val() * samplerate/1000); }
 
 /* Service ID has 24 bits, define a number which cannot be an ID and fits into
    the 32 bits of the length of the variable (e.g.: 1 << 25) */

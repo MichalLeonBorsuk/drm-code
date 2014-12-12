@@ -532,8 +532,7 @@ HEADERS += \
     src/util/Settings.h \
     src/util/Utilities.h \
     src/util/Vector.h \
-    src/Version.h \
-    src/GUI-QT/chartdialog.h
+    src/Version.h
 
 SOURCES += \
     src/AMDemodulation.cpp \
@@ -627,6 +626,7 @@ SOURCES += \
     src/tables/TableCarMap.cpp \
     src/tables/TableFAC.cpp \
     src/tables/TableStations.cpp \
+    src/tables/TableDRMGlobal.cpp \
     src/TextMessage.cpp \
     src/util/CRC.cpp \
     src/util/FileTyper.cpp \
@@ -634,8 +634,7 @@ SOURCES += \
     src/util/Reassemble.cpp \
     src/util/Settings.cpp \
     src/util/Utilities.cpp \
-    src/Version.cpp \
-    src/GUI-QT/chartdialog.cpp
+    src/Version.cpp
 
 !console {
     qt5.3 {
@@ -730,7 +729,8 @@ HEADERS += \
     src/GUI-QT/amwidget.h \
     src/GUI-QT/streamwidget.h \
     src/GUI-QT/ThemeCustomizer.h \
-    src/GUI-QT/openrscidialog.h
+    src/GUI-QT/openrscidialog.h \
+    src/GUI-QT/chartdialog.h
 
 SOURCES += \
     src/GUI-QT/AnalogDemDlg.cpp \
@@ -771,7 +771,8 @@ SOURCES += \
     src/GUI-QT/amwidget.cpp \
     src/GUI-QT/streamwidget.cpp \
     src/GUI-QT/ThemeCustomizer.cpp \
-    src/GUI-QT/openrscidialog.cpp
+    src/GUI-QT/openrscidialog.cpp \
+    src/GUI-QT/chartdialog.cpp
 }
 
 !isEmpty(QT):message(With Qt components: $$QT)

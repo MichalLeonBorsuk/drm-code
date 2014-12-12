@@ -274,8 +274,7 @@ void CFreqSyncAcq::ProcessDataInternal(CParameter& Parameters)
                 vecRet[k] = vecrFFTInput[k] * vecrHammingWin[k];
 
             /* Calculate power spectrum (X = real(F)^2 + imag(F)^2) */
-            vecrSqMagFFTOut =
-                SqMag(rfft(vecRet, FftPlan));
+            vecrSqMagFFTOut = SqMag(rfft(vecRet, FftPlan));
 
             /* Calculate moving average for better estimate of PSD */
             vvrPSDMovAv.Add(vecrSqMagFFTOut);
@@ -454,10 +453,10 @@ void CFreqSyncAcq::InitInternal(CParameter& Parameters)
     iFFTSize = Parameters.CellMappingTable.iFFTSizeN;
 
     /* Size of FFT */
+    ERobMode eRM = RM_ROBUSTNESS_MODE_B; // default for DRM30
     if(Parameters.GetWaveMode()==RM_ROBUSTNESS_MODE_E)
-        iFrAcFFTSize = ADJ_FOR_SRATE(RME_FFT_SIZE_N, iSampleRate) * NUM_BLOCKS_4_FREQ_ACQU;
-    else
-        iFrAcFFTSize = ADJ_FOR_SRATE(RMB_FFT_SIZE_N, iSampleRate) * NUM_BLOCKS_4_FREQ_ACQU;
+        eRM = RM_ROBUSTNESS_MODE_E;
+    iFrAcFFTSize = fft_size(eRM, iSampleRate) * NUM_BLOCKS_4_FREQ_ACQU;
 
     /* Length of the half of the spectrum of real input signal (the other half
        is the same because of the real input signal). We have to consider the
@@ -492,7 +491,8 @@ void CFreqSyncAcq::InitInternal(CParameter& Parameters)
 
 
     /* Init bandpass filter object */
-    BPFilter.Init(iSampleRate, Parameters.CellMappingTable.iSymbolBlockSize, VIRTUAL_INTERMED_FREQ,
+    int vif = Parameters.GetWaveMode()==RM_ROBUSTNESS_MODE_E?VIRTUAL_INTERMED_FREQ_DRMPLUS:VIRTUAL_INTERMED_FREQ_DRM30;
+    BPFilter.Init(iSampleRate, Parameters.CellMappingTable.iSymbolBlockSize, vif,
                   Parameters.GetSpectrumOccup(), CDRMBandpassFilt::FT_RECEIVER);
 
 

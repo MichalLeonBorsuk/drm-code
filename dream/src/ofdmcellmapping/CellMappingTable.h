@@ -34,7 +34,6 @@
 #include "../tables/TableFAC.h"
 #include "../util/Vector.h"
 
-
 /* Definitions ****************************************************************/
 /* Power definitions for pilots, boosted pilots and data cells (average) */
 #define AV_DATA_CELLS_POWER		((_REAL) 1.0)
@@ -79,8 +78,6 @@ public:
 
 	void MakeTable(ERobMode eNewRobustnessMode, ESpecOcc eNewSpectOccup, int iSampleRate);
 
-	struct CRatio {int iEnum; int iDenom;};
-
 	/* Mapping table and pilot cell matrix */
 	CMatrix<int>		matiMapTab; 
 	CMatrix<_COMPLEX>	matcPilotCells;
@@ -89,19 +86,17 @@ public:
     unsigned int		iNumSymPerFrame; /* Number of symbols per frame */
     unsigned int		iNumCarrier;
     GainCellSubset      gcs;
-    //int					iScatPilTimeInt; /* Time interpolation */
-    //int					iScatPilFreqInt; /* Frequency interpolation */
 
     unsigned int		iMaxNumMSCSym; /* Max number of MSC cells in a symbol */
 
 	/* Number of MSC cells in a symbol */
-	CVector<int>		veciNumMSCSym; 
+    vector<unsigned int>	veciNumMSCSym;
 
 	/* Number of FAC cells in a symbol */
-	CVector<int>		veciNumFACSym; 
+    vector<unsigned int>	veciNumFACSym;
 
 	/* Number of SDC cells in a symbol */
-	CVector<int>		veciNumSDCSym;
+    vector<unsigned int>	veciNumSDCSym;
 
 	int					iFFTSizeN; /* FFT size of the OFDM modulation */
 	int					iCarrierKmin; /* Carrier index of carrier with lowest frequency */

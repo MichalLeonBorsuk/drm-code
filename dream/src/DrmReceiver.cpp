@@ -586,7 +586,7 @@ CDRMReceiver::DemodulateDRM(_BOOLEAN& bEnoughData)
         bEnoughData = TRUE;
     }
 
-    /* Synchronization in the frequency domain (using pilots) --- */
+    /* Synchronization in the frequency domain (using time pilots) --- */
     if (SyncUsingPil.
             ProcessData(Parameters, OFDMDemodBuf, SyncUsingPilBuf))
     {
@@ -1069,7 +1069,10 @@ CDRMReceiver::SetInStartMode()
     /* Define with which parameters the receiver should try to decode the
        signal. If we are correct with our assumptions, the receiver does not
        need to reinitialize */
-    Parameters.InitCellMapTable(RM_ROBUSTNESS_MODE_B, SO_3);
+    if(Parameters.GetWaveMode()==RM_ROBUSTNESS_MODE_E)
+        Parameters.InitCellMapTable(RM_ROBUSTNESS_MODE_E, SO_6);
+    else
+        Parameters.InitCellMapTable(RM_ROBUSTNESS_MODE_B, SO_3);
 
     /* Set initial MLC parameters */
     Parameters.SetInterleaverDepth(SI_LONG);
@@ -1580,10 +1583,10 @@ CDRMReceiver::LoadSettings()
     /* Receiver ------------------------------------------------------------- */
 
     /* Sound card audio sample rate, some settings below depends on this one */
-    Parameters.SetNewAudSampleRate(s.Get("Receiver", "samplerateaud", int(DEFAULT_SOUNDCRD_SAMPLE_RATE)));
+    Parameters.SetNewAudSampleRate(s.Get("Receiver", "samplerateaud", int(DEFAULT_AUDIO_SAMPLE_RATE)));
 
     /* Sound card signal sample rate, some settings below depends on this one */
-    Parameters.SetNewSigSampleRate(s.Get("Receiver", "sampleratesig", int(DEFAULT_SOUNDCRD_SAMPLE_RATE)));
+    Parameters.SetNewSigSampleRate(s.Get("Receiver", "sampleratesig", int(DEFAULT_SIGNAL_SAMPLE_RATE)));
 
     /* Signal upscale ratio */
     Parameters.SetNewSigUpscaleRatio(s.Get("Receiver", "sigupratio", int(1)));
@@ -1756,7 +1759,7 @@ CDRMReceiver::LoadSettings()
 
     FrontEndParameters.rCalFactorAM = s.Get("FrontEnd", "calfactoram", 0.0);
 
-    FrontEndParameters.rIFCentreFreq = s.Get("FrontEnd", "ifcentrefrequency", (_REAL(DEFAULT_SOUNDCRD_SAMPLE_RATE) / 4));
+    FrontEndParameters.rIFCentreFreq = s.Get("FrontEnd", "ifcentrefrequency", (_REAL(DEFAULT_SIGNAL_SAMPLE_RATE) / 4));
 
     /* Latitude string (used to be just for log file) */
     double latitude, longitude;
