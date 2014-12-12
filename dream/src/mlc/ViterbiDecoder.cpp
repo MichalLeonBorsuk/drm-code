@@ -3,7 +3,7 @@
  * Copyright (c) 2001-2014
  *
  * Author(s):
- *	Volker Fischer, Alexander Kurpiers
+ *  Volker Fischer, Alexander Kurpiers
  *
  * Description:
  *
@@ -33,11 +33,11 @@
 _REAL CViterbiDecoder::Decode(CVector<CDistance>& vecNewDistance,
                               CVector<_DECISION>& vecOutputBits)
 {
-    int				i;
-    int				iDistCnt;
-    int				iCurDecState;
-    _VITMETRTYPE*	pCurTrelMetric;
-    _VITMETRTYPE*	pOldTrelMetric;
+    int             i;
+    int             iDistCnt;
+    int             iCurDecState;
+    _VITMETRTYPE*   pCurTrelMetric;
+    _VITMETRTYPE*   pOldTrelMetric;
 
 #ifdef USE_SIMD
     /* -------------------------------------------------------------------------
@@ -202,8 +202,8 @@ _REAL CViterbiDecoder::Decode(CVector<CDistance>& vecNewDistance,
         /* Use the butterfly unroll for reordering the metrics for SIMD
            trellis */
 #define BUTTERFLY(cur, next, prev0, prev1, met0, met1) \
-		{ \
-			/* At this point we convert from float to char! No overflow-check
+        { \
+            /* At this point we convert from float to char! No overflow-check
         is done here */ \
         chMet1[prev0] = (_VITMETRTYPE) METRICSET(i)[met0]; \
         chMet2[prev0] = (_VITMETRTYPE) METRICSET(i)[met1]; \
@@ -211,9 +211,9 @@ _REAL CViterbiDecoder::Decode(CVector<CDistance>& vecNewDistance,
 #else
         /* c++ version of trellis update */
 #define BUTTERFLY(cur, next, prev0, prev1, met0, met1) \
-		{ \
-			/* First state in this set ------------------------------------ */ \
-			/* Calculate metrics from the two previous states, use the old
+        { \
+            /* First state in this set ------------------------------------ */ \
+            /* Calculate metrics from the two previous states, use the old
         metric from the previous states plus the "transition-metric" */ \
         const _VITMETRTYPE rFiStAccMetricPrev0 = \
                 pOldTrelMetric[prev0] + METRICSET(i)[met0]; \
@@ -257,114 +257,114 @@ _REAL CViterbiDecoder::Decode(CVector<CDistance>& vecNewDistance,
             }
 #endif
 
-    /* Unroll butterflys to avoid loop overhead. For c++ version, the
-       actual calculation of the trellis update is done here, for MMX
-       version, only the reordering of the new metrics is done here */
-    BUTTERFLY( 0,  1,  0, 32,  0, 15)
-    BUTTERFLY( 2,  3,  1, 33,  6,  9)
-    BUTTERFLY( 4,  5,  2, 34, 11,  4)
-    BUTTERFLY( 6,  7,  3, 35, 13,  2)
-    BUTTERFLY( 8,  9,  4, 36, 11,  4)
-    BUTTERFLY(10, 11,  5, 37, 13,  2)
-    BUTTERFLY(12, 13,  6, 38,  0, 15)
-    BUTTERFLY(14, 15,  7, 39,  6,  9)
-    BUTTERFLY(16, 17,  8, 40,  4, 11)
-    BUTTERFLY(18, 19,  9, 41,  2, 13)
-    BUTTERFLY(20, 21, 10, 42, 15,  0)
-    BUTTERFLY(22, 23, 11, 43,  9,  6)
-    BUTTERFLY(24, 25, 12, 44, 15,  0)
-    BUTTERFLY(26, 27, 13, 45,  9,  6)
-    BUTTERFLY(28, 29, 14, 46,  4, 11)
-    BUTTERFLY(30, 31, 15, 47,  2, 13)
-    BUTTERFLY(32, 33, 16, 48,  9,  6)
-    BUTTERFLY(34, 35, 17, 49, 15,  0)
-    BUTTERFLY(36, 37, 18, 50,  2, 13)
-    BUTTERFLY(38, 39, 19, 51,  4, 11)
-    BUTTERFLY(40, 41, 20, 52,  2, 13)
-    BUTTERFLY(42, 43, 21, 53,  4, 11)
-    BUTTERFLY(44, 45, 22, 54,  9,  6)
-    BUTTERFLY(46, 47, 23, 55, 15,  0)
-    BUTTERFLY(48, 49, 24, 56, 13,  2)
-    BUTTERFLY(50, 51, 25, 57, 11,  4)
-    BUTTERFLY(52, 53, 26, 58,  6,  9)
-    BUTTERFLY(54, 55, 27, 59,  0, 15)
-    BUTTERFLY(56, 57, 28, 60,  6,  9)
-    BUTTERFLY(58, 59, 29, 61,  0, 15)
-    BUTTERFLY(60, 61, 30, 62, 13,  2)
-    BUTTERFLY(62, 63, 31, 63, 11,  4)
+        /* Unroll butterflys to avoid loop overhead. For c++ version, the
+           actual calculation of the trellis update is done here, for MMX
+           version, only the reordering of the new metrics is done here */
+        BUTTERFLY( 0,  1,  0, 32,  0, 15)
+        BUTTERFLY( 2,  3,  1, 33,  6,  9)
+        BUTTERFLY( 4,  5,  2, 34, 11,  4)
+        BUTTERFLY( 6,  7,  3, 35, 13,  2)
+        BUTTERFLY( 8,  9,  4, 36, 11,  4)
+        BUTTERFLY(10, 11,  5, 37, 13,  2)
+        BUTTERFLY(12, 13,  6, 38,  0, 15)
+        BUTTERFLY(14, 15,  7, 39,  6,  9)
+        BUTTERFLY(16, 17,  8, 40,  4, 11)
+        BUTTERFLY(18, 19,  9, 41,  2, 13)
+        BUTTERFLY(20, 21, 10, 42, 15,  0)
+        BUTTERFLY(22, 23, 11, 43,  9,  6)
+        BUTTERFLY(24, 25, 12, 44, 15,  0)
+        BUTTERFLY(26, 27, 13, 45,  9,  6)
+        BUTTERFLY(28, 29, 14, 46,  4, 11)
+        BUTTERFLY(30, 31, 15, 47,  2, 13)
+        BUTTERFLY(32, 33, 16, 48,  9,  6)
+        BUTTERFLY(34, 35, 17, 49, 15,  0)
+        BUTTERFLY(36, 37, 18, 50,  2, 13)
+        BUTTERFLY(38, 39, 19, 51,  4, 11)
+        BUTTERFLY(40, 41, 20, 52,  2, 13)
+        BUTTERFLY(42, 43, 21, 53,  4, 11)
+        BUTTERFLY(44, 45, 22, 54,  9,  6)
+        BUTTERFLY(46, 47, 23, 55, 15,  0)
+        BUTTERFLY(48, 49, 24, 56, 13,  2)
+        BUTTERFLY(50, 51, 25, 57, 11,  4)
+        BUTTERFLY(52, 53, 26, 58,  6,  9)
+        BUTTERFLY(54, 55, 27, 59,  0, 15)
+        BUTTERFLY(56, 57, 28, 60,  6,  9)
+        BUTTERFLY(58, 59, 29, 61,  0, 15)
+        BUTTERFLY(60, 61, 30, 62, 13,  2)
+        BUTTERFLY(62, 63, 31, 63, 11,  4)
 
 
 #undef BUTTERFLY
 
 #ifdef USE_SIMD
-    /* Do actual trellis update in separate file (assembler implementation) */
+        /* Do actual trellis update in separate file (assembler implementation) */
 #ifdef USE_MMX
-    TrellisUpdateMMX(
+        TrellisUpdateMMX(
 #endif
 #ifdef USE_SSE2
-        TrellisUpdateSSE2(
+            TrellisUpdateSSE2(
 #endif
-            &matdecDecisions[i][0], pCurTrelMetric, pOldTrelMetric,
-            chMet1, chMet2);
+                &matdecDecisions[i][0], pCurTrelMetric, pOldTrelMetric,
+                chMet1, chMet2);
 #endif
 
 #ifdef USE_MAX_LOG_MAP
-        /* Store accumulated metrics for backward Viterbi */
-        for (int j = 0; j < MC_NUM_STATES; j++)
-        matrAlpha[i][j] = pOldTrelMetric[j];
+            /* Store accumulated metrics for backward Viterbi */
+            for (int j = 0; j < MC_NUM_STATES; j++)
+            matrAlpha[i][j] = pOldTrelMetric[j];
 #endif
 
-        /* Swap trellis data pointers (old -> new, new -> old) */
-        _VITMETRTYPE* pTMPTrelMetric = pCurTrelMetric;
-        pCurTrelMetric = pOldTrelMetric;
-        pOldTrelMetric = pTMPTrelMetric;
+            /* Swap trellis data pointers (old -> new, new -> old) */
+            _VITMETRTYPE* pTMPTrelMetric = pCurTrelMetric;
+            pCurTrelMetric = pOldTrelMetric;
+            pOldTrelMetric = pTMPTrelMetric;
     }
 
 
 #ifdef USE_MAX_LOG_MAP
-    /* MAX-LOG MAP implementation ------------------------------------------- */
-    /* Reset all metrics in the trellis. We initialize all states exept of
-       the zero state with a high metric, because we KNOW that the state "0"
-       is the transmitted state */
-    pOldTrelMetric[0] = (_VITMETRTYPE) 0;
-for (i = 1; i < MC_NUM_STATES; i++)
-    pOldTrelMetric[i] = MC_METRIC_INIT_VALUE;
+/* MAX-LOG MAP implementation ------------------------------------------- */
+/* Reset all metrics in the trellis. We initialize all states exept of
+   the zero state with a high metric, because we KNOW that the state "0"
+   is the transmitted state */
+pOldTrelMetric[0] = (_VITMETRTYPE) 0;
+    for (i = 1; i < MC_NUM_STATES; i++)
+        pOldTrelMetric[i] = MC_METRIC_INIT_VALUE;
 
-/* Backward direction */
-for (i = iNumOutBitsWithMemory - 1; i >= 0; i--)
-{
-    /* Variables storing the likelihood of 0 and 1 bit */
-    _VITMETRTYPE rL0 = MC_METRIC_INIT_VALUE;
-    _VITMETRTYPE rL1 = MC_METRIC_INIT_VALUE;
+    /* Backward direction */
+    for (i = iNumOutBitsWithMemory - 1; i >= 0; i--)
+    {
+        /* Variables storing the likelihood of 0 and 1 bit */
+        _VITMETRTYPE rL0 = MC_METRIC_INIT_VALUE;
+        _VITMETRTYPE rL1 = MC_METRIC_INIT_VALUE;
 
 
-    /* Update trellis --------------------------------------------------- */
+        /* Update trellis --------------------------------------------------- */
 #define BUTTERFLY(cur, prev0, prev1, met0, met1) \
-		{ \
-			/* Calculate metrics from the two previous states, use the old
-    metric from the previous states plus the "transition-metric" */
-    \
-    const _VITMETRTYPE rFiStAccMetricPrev0 = \
-            pOldTrelMetric[prev0] + METRICSET(i)[met0];
-    \
-    const _VITMETRTYPE  rFiStAccMetricPrev1 = \
-            pOldTrelMetric[prev1] + METRICSET(i)[met1];
-    \
-    \
-    /* Take path with smallest metric */ \
-    if (rFiStAccMetricPrev0 < rFiStAccMetricPrev1) \
         { \
-          /* Save minimum metric for this state */ \
-          pCurTrelMetric[cur] = rFiStAccMetricPrev0;
-          \
-          \
-          /* Likelihood for 0 bit: max(alpha + beta) */ \
-          const _VITMETRTYPE rL0tmp = \
-                                      rFiStAccMetricPrev0 + matrAlpha[i][cur];
-          \
-          if (rL0tmp < rL0) \
-          rL0 = rL0tmp;
-          \
+            /* Calculate metrics from the two previous states, use the old
+    metric from the previous states plus the "transition-metric" */
+        \
+        const _VITMETRTYPE rFiStAccMetricPrev0 = \
+                pOldTrelMetric[prev0] + METRICSET(i)[met0];
+        \
+        const _VITMETRTYPE  rFiStAccMetricPrev1 = \
+                pOldTrelMetric[prev1] + METRICSET(i)[met1];
+        \
+        \
+        /* Take path with smallest metric */ \
+        if (rFiStAccMetricPrev0 < rFiStAccMetricPrev1) \
+        {   \
+            /* Save minimum metric for this state */ \
+            pCurTrelMetric[cur] = rFiStAccMetricPrev0;
+            \
+            \
+            /* Likelihood for 0 bit: max(alpha + beta) */ \
+            const _VITMETRTYPE rL0tmp = \
+            rFiStAccMetricPrev0 + matrAlpha[i][cur];
+            \
+            if (rL0tmp < rL0) \
+                rL0 = rL0tmp;
+            \
         } \
         else \
             {
@@ -378,88 +378,88 @@ for (i = iNumOutBitsWithMemory - 1; i >= 0; i--)
                                             rFiStAccMetricPrev1 + matrAlpha[i][cur];
                 \
                 if (rL1tmp < rL1) \
-                    rL1 = rL1tmp;
-                    \
-                } \
-            }
+                rL1 = rL1tmp;
+                \
+            } \
+        }
 
 /* Unroll butterflys with backwards direction parameters */
 BUTTERFLY( 0,  0,  1,  0, 15)
-BUTTERFLY( 1,  2,  3,  6,  9)
-BUTTERFLY( 2,  4,  5, 11,  4)
-BUTTERFLY( 3,  6,  7, 13,  2)
-BUTTERFLY( 4,  8,  9, 11,  4)
-BUTTERFLY( 5, 10, 11, 13,  2)
-BUTTERFLY( 6, 12, 13,  0, 15)
-BUTTERFLY( 7, 14, 15,  6,  9)
-BUTTERFLY( 8, 16, 17,  4, 11)
-BUTTERFLY( 9, 18, 19,  2, 13)
-BUTTERFLY(10, 20, 21, 15,  0)
-BUTTERFLY(11, 22, 23,  9,  6)
-BUTTERFLY(12, 24, 25, 15,  0)
-BUTTERFLY(13, 26, 27,  9,  6)
-BUTTERFLY(14, 28, 29,  4, 11)
-BUTTERFLY(15, 30, 31,  2, 13)
-BUTTERFLY(16, 32, 33,  9,  6)
-BUTTERFLY(17, 34, 35, 15,  0)
-BUTTERFLY(18, 36, 37,  2, 13)
-BUTTERFLY(19, 38, 39,  4, 11)
-BUTTERFLY(20, 40, 41,  2, 13)
-BUTTERFLY(21, 42, 43,  4, 11)
-BUTTERFLY(22, 44, 45,  9,  6)
-BUTTERFLY(23, 46, 47, 15,  0)
-BUTTERFLY(24, 48, 49, 13,  2)
-BUTTERFLY(25, 50, 51, 11,  4)
-BUTTERFLY(26, 52, 53,  6,  9)
-BUTTERFLY(27, 54, 55,  0, 15)
-BUTTERFLY(28, 56, 57,  6,  9)
-BUTTERFLY(29, 58, 59,  0, 15)
-BUTTERFLY(30, 60, 61, 13,  2)
-BUTTERFLY(31, 62, 63, 11,  4)
-BUTTERFLY(32,  0,  1, 15,  0)
-BUTTERFLY(33,  2,  3,  9,  6)
-BUTTERFLY(34,  4,  5,  4, 11)
-BUTTERFLY(35,  6,  7,  2, 13)
-BUTTERFLY(36,  8,  9,  4, 11)
-BUTTERFLY(37, 10, 11,  2, 13)
-BUTTERFLY(38, 12, 13, 15,  0)
-BUTTERFLY(39, 14, 15,  9,  6)
-BUTTERFLY(40, 16, 17, 11,  4)
-BUTTERFLY(41, 18, 19, 13,  2)
-BUTTERFLY(42, 20, 21,  0, 15)
-BUTTERFLY(43, 22, 23,  6,  9)
-BUTTERFLY(44, 24, 25,  0, 15)
-BUTTERFLY(45, 26, 27,  6,  9)
-BUTTERFLY(46, 28, 29, 11,  4)
-BUTTERFLY(47, 30, 31, 13,  2)
-BUTTERFLY(48, 32, 33,  6,  9)
-BUTTERFLY(49, 34, 35,  0, 15)
-BUTTERFLY(50, 36, 37, 13,  2)
-BUTTERFLY(51, 38, 39, 11,  4)
-BUTTERFLY(52, 40, 41, 13,  2)
-BUTTERFLY(53, 42, 43, 11,  4)
-BUTTERFLY(54, 44, 45,  6,  9)
-BUTTERFLY(55, 46, 47,  0, 15)
-BUTTERFLY(56, 48, 49,  2, 13)
-BUTTERFLY(57, 50, 51,  4, 11)
-BUTTERFLY(58, 52, 53,  9,  6)
-BUTTERFLY(59, 54, 55, 15,  0)
-BUTTERFLY(60, 56, 57,  9,  6)
-BUTTERFLY(61, 58, 59, 15,  0)
-BUTTERFLY(62, 60, 61,  2, 13)
-BUTTERFLY(63, 62, 63,  4, 11)
+    BUTTERFLY( 1,  2,  3,  6,  9)
+    BUTTERFLY( 2,  4,  5, 11,  4)
+    BUTTERFLY( 3,  6,  7, 13,  2)
+    BUTTERFLY( 4,  8,  9, 11,  4)
+    BUTTERFLY( 5, 10, 11, 13,  2)
+    BUTTERFLY( 6, 12, 13,  0, 15)
+    BUTTERFLY( 7, 14, 15,  6,  9)
+    BUTTERFLY( 8, 16, 17,  4, 11)
+    BUTTERFLY( 9, 18, 19,  2, 13)
+    BUTTERFLY(10, 20, 21, 15,  0)
+    BUTTERFLY(11, 22, 23,  9,  6)
+    BUTTERFLY(12, 24, 25, 15,  0)
+    BUTTERFLY(13, 26, 27,  9,  6)
+    BUTTERFLY(14, 28, 29,  4, 11)
+    BUTTERFLY(15, 30, 31,  2, 13)
+    BUTTERFLY(16, 32, 33,  9,  6)
+    BUTTERFLY(17, 34, 35, 15,  0)
+    BUTTERFLY(18, 36, 37,  2, 13)
+    BUTTERFLY(19, 38, 39,  4, 11)
+    BUTTERFLY(20, 40, 41,  2, 13)
+    BUTTERFLY(21, 42, 43,  4, 11)
+    BUTTERFLY(22, 44, 45,  9,  6)
+    BUTTERFLY(23, 46, 47, 15,  0)
+    BUTTERFLY(24, 48, 49, 13,  2)
+    BUTTERFLY(25, 50, 51, 11,  4)
+    BUTTERFLY(26, 52, 53,  6,  9)
+    BUTTERFLY(27, 54, 55,  0, 15)
+    BUTTERFLY(28, 56, 57,  6,  9)
+    BUTTERFLY(29, 58, 59,  0, 15)
+    BUTTERFLY(30, 60, 61, 13,  2)
+    BUTTERFLY(31, 62, 63, 11,  4)
+    BUTTERFLY(32,  0,  1, 15,  0)
+    BUTTERFLY(33,  2,  3,  9,  6)
+    BUTTERFLY(34,  4,  5,  4, 11)
+    BUTTERFLY(35,  6,  7,  2, 13)
+    BUTTERFLY(36,  8,  9,  4, 11)
+    BUTTERFLY(37, 10, 11,  2, 13)
+    BUTTERFLY(38, 12, 13, 15,  0)
+    BUTTERFLY(39, 14, 15,  9,  6)
+    BUTTERFLY(40, 16, 17, 11,  4)
+    BUTTERFLY(41, 18, 19, 13,  2)
+    BUTTERFLY(42, 20, 21,  0, 15)
+    BUTTERFLY(43, 22, 23,  6,  9)
+    BUTTERFLY(44, 24, 25,  0, 15)
+    BUTTERFLY(45, 26, 27,  6,  9)
+    BUTTERFLY(46, 28, 29, 11,  4)
+    BUTTERFLY(47, 30, 31, 13,  2)
+    BUTTERFLY(48, 32, 33,  6,  9)
+    BUTTERFLY(49, 34, 35,  0, 15)
+    BUTTERFLY(50, 36, 37, 13,  2)
+    BUTTERFLY(51, 38, 39, 11,  4)
+    BUTTERFLY(52, 40, 41, 13,  2)
+    BUTTERFLY(53, 42, 43, 11,  4)
+    BUTTERFLY(54, 44, 45,  6,  9)
+    BUTTERFLY(55, 46, 47,  0, 15)
+    BUTTERFLY(56, 48, 49,  2, 13)
+    BUTTERFLY(57, 50, 51,  4, 11)
+    BUTTERFLY(58, 52, 53,  9,  6)
+    BUTTERFLY(59, 54, 55, 15,  0)
+    BUTTERFLY(60, 56, 57,  9,  6)
+    BUTTERFLY(61, 58, 59, 15,  0)
+    BUTTERFLY(62, 60, 61,  2, 13)
+    BUTTERFLY(63, 62, 63,  4, 11)
 
 #undef BUTTERFLY
 
 
-/* Calculate final soft out value */
-if (i < iNumOutBits)
-    vecOutputBits[i] = rL0 - rL1;
+    /* Calculate final soft out value */
+    if (i < iNumOutBits)
+        vecOutputBits[i] = rL0 - rL1;
 
-/* Swap trellis data pointers (old -> new, new -> old) */
-_VITMETRTYPE* pTMPTrelMetric = pCurTrelMetric;
-pCurTrelMetric = pOldTrelMetric;
-pOldTrelMetric = pTMPTrelMetric;
+    /* Swap trellis data pointers (old -> new, new -> old) */
+    _VITMETRTYPE* pTMPTrelMetric = pCurTrelMetric;
+    pCurTrelMetric = pOldTrelMetric;
+    pOldTrelMetric = pTMPTrelMetric;
 }
 #endif
 
@@ -536,15 +536,15 @@ CViterbiDecoder::CViterbiDecoder()
        in the processing routine */
 
     /* We need to analyze 2^(MC_CONSTRAINT_LENGTH - 1) states in the trellis */
-    int	i;
-    int	iPrev0IndexForw[MC_NUM_STATES];
-    int	iPrev1IndexForw[MC_NUM_STATES];
-    int	iMetricPrev0Forw[MC_NUM_STATES];
-    int	iMetricPrev1Forw[MC_NUM_STATES];
-    int	iPrev0IndexBackw[MC_NUM_STATES];
-    int	iPrev1IndexBackw[MC_NUM_STATES];
-    int	iMetricPrev0Backw[MC_NUM_STATES];
-    int	iMetricPrev1Backw[MC_NUM_STATES];
+    int i;
+    int iPrev0IndexForw[MC_NUM_STATES];
+    int iPrev1IndexForw[MC_NUM_STATES];
+    int iMetricPrev0Forw[MC_NUM_STATES];
+    int iMetricPrev1Forw[MC_NUM_STATES];
+    int iPrev0IndexBackw[MC_NUM_STATES];
+    int iPrev1IndexBackw[MC_NUM_STATES];
+    int iMetricPrev0Backw[MC_NUM_STATES];
+    int iMetricPrev1Backw[MC_NUM_STATES];
 
     for (i = 0; i < MC_NUM_STATES; i++)
     {
@@ -552,12 +552,12 @@ CViterbiDecoder::CViterbiDecoder()
         /* We define in this trellis that we shift the bits from right to
            the left. We use the transition-bits which "fall" out of the
            shift-register (forward case) */
-        iPrev0IndexForw[i] = (i >> 1);			/* Old state, Leading "0"
-												   (automatically inserted by
-												   shifting */
-        iPrev1IndexForw[i] = (i >> 1)			 /* Old state */
+        iPrev0IndexForw[i] = (i >> 1);          /* Old state, Leading "0"
+                                                   (automatically inserted by
+                                                   shifting */
+        iPrev1IndexForw[i] = (i >> 1)            /* Old state */
                              | (1 << (MC_CONSTRAINT_LENGTH - 2)); /* New "1", must be on position
-													MC_CONSTRAINT_LENGTH - 1 */
+                                                    MC_CONSTRAINT_LENGTH - 1 */
 
         /* We define in this trellis that we shift the bits from left to
            the right. We use the transition-bits which get in the
@@ -568,12 +568,12 @@ CViterbiDecoder::CViterbiDecoder()
             1 | (1 << 1) | (1 << 2) | (1 << 3) | (1 << 4) | (1 << 5);
 
         iPrev0IndexBackw[i] = (i << 1) & iStRegMask; /* Old state, Beginning "0"
-												        (automatically inserted
-														by shifting. Mask result
-														to have length of state
-														register */
-        iPrev1IndexBackw[i] = ((i << 1) & iStRegMask) | 1;	/* New "1", must on
-															   first position */
+                                                        (automatically inserted
+                                                        by shifting. Mask result
+                                                        to have length of state
+                                                        register */
+        iPrev1IndexBackw[i] = ((i << 1) & iStRegMask) | 1;  /* New "1", must on
+                                                               first position */
 
 
         /* Assign metrics to the transitions from both paths ---------------- */

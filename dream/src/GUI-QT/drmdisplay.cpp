@@ -56,8 +56,8 @@ void DRMDisplay::showTextMessage(const QString& textMessage)
         switch (textMessage.at(i).unicode())
         {
         case 0x0A:
-            /* Code 0x0A may be inserted to indicate a preferred
-               line break */
+        /* Code 0x0A may be inserted to indicate a preferred
+           line break */
         case 0x1F:
             /* Code 0x1F (hex) may be inserted to indicate a
                preferred word break. This code may be used to

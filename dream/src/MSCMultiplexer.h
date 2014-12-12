@@ -3,10 +3,10 @@
  * Copyright (c) 2001-2014
  *
  * Author(s):
- *	Volker Fischer
+ *  Volker Fischer
  *
  * Description:
- *	See MSCMultiplexer.cpp
+ *  See MSCMultiplexer.cpp
  *
  ******************************************************************************
  *
@@ -45,13 +45,13 @@ public:
 protected:
     struct SStreamPos
     {
-        int	iOffsetLow;
-        int	iOffsetHigh;
-        int	iLenLow;
-        int	iLenHigh;
+        int iOffsetLow;
+        int iOffsetHigh;
+        int iLenLow;
+        int iLenHigh;
     };
 
-    SStreamPos			StreamPos[4];
+    SStreamPos          StreamPos[4];
 
     SStreamPos GetStreamPos(CParameter& Param, const int iStreamID);
     void ExtractData(CVectorEx<_BINARY>& vecIn, CVectorEx<_BINARY>& vecOut,

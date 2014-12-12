@@ -44,26 +44,26 @@
 class AacCodec : public CAudioCodec
 {
 public:
-	AacCodec();
-	virtual ~AacCodec();
-	/* Decoder */
-	virtual string DecGetVersion();
-	virtual bool CanDecode(CAudioParam::EAudCod eAudioCoding);
-	virtual bool DecOpen(CAudioParam& AudioParam, int *iAudioSampleRate, int *iLenDecOutPerChan);
-	virtual _SAMPLE* Decode(CVector<uint8_t>& vecbyPrepAudioFrame, int *iChannels, CAudioCodec::EDecError *eDecError);
-	virtual void DecClose();
-	virtual void DecUpdate(CAudioParam& AudioParam);
-	/* Encoder */
-	virtual string EncGetVersion();
-	virtual bool CanEncode(CAudioParam::EAudCod eAudioCoding);
-	virtual bool EncOpen(int iSampleRate, int iChannels, unsigned long *lNumSampEncIn, unsigned long *lMaxBytesEncOut);
-	virtual int Encode(CVector<_SAMPLE>& vecsEncInData, unsigned long lNumSampEncIn, CVector<uint8_t>& vecsEncOutData, unsigned long lMaxBytesEncOut);
-	virtual void EncClose();
-	virtual void EncSetBitrate(int iBitRate);
-	virtual void EncUpdate(CAudioParam& AudioParam);
+    AacCodec();
+    virtual ~AacCodec();
+    /* Decoder */
+    virtual string DecGetVersion();
+    virtual bool CanDecode(CAudioParam::EAudCod eAudioCoding);
+    virtual bool DecOpen(CAudioParam& AudioParam, int *iAudioSampleRate, int *iLenDecOutPerChan);
+    virtual _SAMPLE* Decode(CVector<uint8_t>& vecbyPrepAudioFrame, int *iChannels, CAudioCodec::EDecError *eDecError);
+    virtual void DecClose();
+    virtual void DecUpdate(CAudioParam& AudioParam);
+    /* Encoder */
+    virtual string EncGetVersion();
+    virtual bool CanEncode(CAudioParam::EAudCod eAudioCoding);
+    virtual bool EncOpen(int iSampleRate, int iChannels, unsigned long *lNumSampEncIn, unsigned long *lMaxBytesEncOut);
+    virtual int Encode(CVector<_SAMPLE>& vecsEncInData, unsigned long lNumSampEncIn, CVector<uint8_t>& vecsEncOutData, unsigned long lMaxBytesEncOut);
+    virtual void EncClose();
+    virtual void EncSetBitrate(int iBitRate);
+    virtual void EncUpdate(CAudioParam& AudioParam);
 protected:
-	NeAACDecHandle hFaadDecoder;
-	faacEncHandle hFaacEncoder;
+    NeAACDecHandle hFaadDecoder;
+    faacEncHandle hFaacEncoder;
 };
 
 #endif // _AAC_CODEC_H_

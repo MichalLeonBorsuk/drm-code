@@ -69,7 +69,7 @@ void AudioDetailWidget::setRxStatus(int sid, ETypeRxStatus s)
 {
     if(sid == short_id)
     {
-	(void)s; // TODO
+        (void)s; // TODO
     }
 }
 

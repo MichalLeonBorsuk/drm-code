@@ -3,7 +3,7 @@
  * Copyright (c) 2001-2014
  *
  * Author(s):
- *	Volker Fischer, Andrea Russo
+ *  Volker Fischer, Andrea Russo
  *
  * Description:
  *
@@ -63,45 +63,45 @@ typedef int rig_model_t;
 /* About dialog ------------------------------------------------------------- */
 class CAboutDlg : public QDialog, public Ui_CAboutDlgBase
 {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
-	CAboutDlg(QWidget* parent = 0);
-	virtual ~CAboutDlg() {}
+    CAboutDlg(QWidget* parent = 0);
+    virtual ~CAboutDlg() {}
 };
 
 /* Help Usage --------------------------------------------------------------- */
 class CHelpUsage : public CAboutDlg
 {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
-	CHelpUsage(const char* usage, const char* argv0, QWidget* parent = 0);
-	virtual ~CHelpUsage() {}
+    CHelpUsage(const char* usage, const char* argv0, QWidget* parent = 0);
+    virtual ~CHelpUsage() {}
 };
 
 /* System Tray -------------------------------------------------------------- */
 class CSysTray
 {
 public:
-	static CSysTray* Create(QWidget* parent, const char* callbackIcon, const char* callbackTimer, const char* icon);
-	static void Destroy(CSysTray** pSysTray);
-	static void SetToolTip(CSysTray* pSysTray, const QString& Title, const QString& Message);
-	static void Start(CSysTray* pSysTray);
-	static void Stop(CSysTray* pSysTray, const QString& Message);
-	static QAction* AddAction(CSysTray* pSysTray, const QString& text, const QObject* receiver, const char* member);
-	static QAction* AddSeparator(CSysTray* pSysTray);
+    static CSysTray* Create(QWidget* parent, const char* callbackIcon, const char* callbackTimer, const char* icon);
+    static void Destroy(CSysTray** pSysTray);
+    static void SetToolTip(CSysTray* pSysTray, const QString& Title, const QString& Message);
+    static void Start(CSysTray* pSysTray);
+    static void Stop(CSysTray* pSysTray, const QString& Message);
+    static QAction* AddAction(CSysTray* pSysTray, const QString& text, const QObject* receiver, const char* member);
+    static QAction* AddSeparator(CSysTray* pSysTray);
 
 protected:
-	virtual ~CSysTray();
-	CSysTray(QWidget* parent, const char* callbackIcon, const char* callbackTimer, const char* icon);
-	void CreateContextMenu();
-	QWidget* parent;
-	QString Title;
-	QString Message;
-	QSystemTrayIcon* pSystemTrayIcon;
-	QTimer* pTimer;
-	QMenu* pContextMenu;
+    virtual ~CSysTray();
+    CSysTray(QWidget* parent, const char* callbackIcon, const char* callbackTimer, const char* icon);
+    void CreateContextMenu();
+    QWidget* parent;
+    QString Title;
+    QString Message;
+    QSystemTrayIcon* pSystemTrayIcon;
+    QTimer* pTimer;
+    QMenu* pContextMenu;
 };
 
 /* GUI help functions ------------------------------------------------------- */
@@ -109,21 +109,21 @@ protected:
 class CRGBConversion
 {
 public:
-	static int RGB2int(const QColor newColor)
-	{
-		/* R, G and B are encoded as 8-bit numbers */
-		int iReturn = newColor.red();
-		iReturn <<= 8;
-		iReturn |= newColor.green();
-		iReturn <<= 8;
-		iReturn |= newColor.blue();
-		return iReturn;
-	}
+    static int RGB2int(const QColor newColor)
+    {
+        /* R, G and B are encoded as 8-bit numbers */
+        int iReturn = newColor.red();
+        iReturn <<= 8;
+        iReturn |= newColor.green();
+        iReturn <<= 8;
+        iReturn |= newColor.blue();
+        return iReturn;
+    }
 
-	static QColor int2RGB(const int iValue)
-	{
-		return QColor((iValue >> 16) & 255, (iValue >> 8) & 255, iValue & 255);
-	}
+    static QColor int2RGB(const int iValue)
+    {
+        return QColor((iValue >> 16) & 255, (iValue >> 8) & 255, iValue & 255);
+    }
 };
 
 class LevelMeter
@@ -135,9 +135,9 @@ public:
 };
 
 /* s-meter thermo parameters */
-#define S_METER_THERMO_MIN				double( -60.0) /* dB */
-#define S_METER_THERMO_MAX				double( 60.0) /* dB */
-#define S_METER_THERMO_ALARM			double(0.0) /* dB */
+#define S_METER_THERMO_MIN              double( -60.0) /* dB */
+#define S_METER_THERMO_MAX              double( 60.0) /* dB */
+#define S_METER_THERMO_ALARM            double(0.0) /* dB */
 
 class SMeter
 {

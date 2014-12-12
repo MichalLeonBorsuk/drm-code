@@ -3,7 +3,7 @@
  * Copyright (c) 2001-2014
  *
  * Author(s):
- *	Julian Cable, Andrea Russo
+ *  Julian Cable, Andrea Russo
  *
  * Description:
  *
@@ -37,41 +37,41 @@
 #include <map>
 
 namespace Ui {
-    class RigDlg;
+class RigDlg;
 }
 
 class SMeter;
 
 class RigDlg : public QDialog
 {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
     RigDlg(CRig&, QWidget* parent = 0);
     virtual ~RigDlg();
 
 protected:
-    void		showEvent(QShowEvent* pEvent);
-    void		hideEvent(QHideEvent* pEvent);
-    QString		getComboBoxComPort();
+    void        showEvent(QShowEvent* pEvent);
+    void        hideEvent(QHideEvent* pEvent);
+    QString     getComboBoxComPort();
 
     Ui::RigDlg* ui;
 
-    CRig&		rig;
-    rig_model_t		prev_rig_model;
-    string		prev_port;
+    CRig&       rig;
+    rig_model_t     prev_rig_model;
+    string      prev_port;
     map<rig_model_t,string> rigmap;
-    _BOOLEAN	bComboBoxPortMutex;
+    _BOOLEAN    bComboBoxPortMutex;
     SMeter*     sMeter;
 
 public slots:
-    void		on_rigTypes_itemSelectionChanged(); 
-    void		on_modified_stateChanged(int);
-    void		on_testRig_clicked();
-    void		on_buttonBox_accepted();
-    void		on_buttonBox_rejected();
-    void		on_comboBoxPort_editTextChanged(const QString &);
-    void		onSigstr(double);
+    void        on_rigTypes_itemSelectionChanged();
+    void        on_modified_stateChanged(int);
+    void        on_testRig_clicked();
+    void        on_buttonBox_accepted();
+    void        on_buttonBox_rejected();
+    void        on_comboBoxPort_editTextChanged(const QString &);
+    void        onSigstr(double);
 };
 
 #endif

@@ -3,7 +3,7 @@
  * Copyright (c) 2001-2014
  *
  * Author(s):
- *	Volker Fischer
+ *  Volker Fischer
  *
  * Description:
  *
@@ -61,11 +61,11 @@ void CRig::subscribe()
 #endif
     subscribers++;
     if(subscribers>0)
-	{
+    {
 #ifdef HAVE_LIBHAMLIB
         timer.start(1000);
 #endif
-	}
+    }
 }
 
 void CRig::unsubscribe()

@@ -17,7 +17,8 @@ QCPSMeter::QCPSMeter(QWidget* parent):QCustomPlot(parent)
     bars->setBrush(Qt::green);
     setMinimumWidth(200);
     QVector<double> v, k;
-    v << S_METER_THERMO_MAX; k << 0;
+    v << S_METER_THERMO_MAX;
+    k << 0;
     bars->setData(k, v);
 
     setBackground(QBrush(QColor(240,240,240)));
@@ -27,7 +28,8 @@ void QCPSMeter::setLevel(double d)
 {
     QVector<double> v, k;
     d += 50.0;
-    v << d; k << 0;
+    v << d;
+    k << 0;
     QCPAbstractPlottable* bars = plottable(0);
     qobject_cast<QCPBars*>(bars)->setData(k, v);
     replot();

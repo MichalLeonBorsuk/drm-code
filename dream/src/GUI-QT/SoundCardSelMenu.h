@@ -54,12 +54,12 @@ public:
         QWidget* parent = 0);
 
 protected:
-    CDRMTransceiver&	DRMTransceiver;
-    CParameter&			Parameters;
-    QMenu*				menuSigInput;
-    QMenu*				menuSigDevice;
-    QMenu*				menuSigSampleRate;
-    const bool			bReceiver;
+    CDRMTransceiver&    DRMTransceiver;
+    CParameter&         Parameters;
+    QMenu*              menuSigInput;
+    QMenu*              menuSigDevice;
+    QMenu*              menuSigSampleRate;
+    const bool          bReceiver;
     vector<deviceprop>  inputDevs;
     vector<deviceprop>  outputDevs;
     vector<QAction*>    inputSampleRate;
@@ -92,17 +92,17 @@ class CFileMenu : public QMenu
 
 public:
     CFileMenu(CDRMTransceiver& DRMTransceiver,
-        QMainWindow* parent, QMenu* menuInsertBefore);
+              QMainWindow* parent, QMenu* menuInsertBefore);
     void UpdateMenu();
 
 protected:
-    CDRMTransceiver&	DRMTransceiver;
-    QAction*			actionOpenFile;
-    QAction*			actionOpenRSCI;
-    QAction*			actionCloseFile;
-    const bool			bReceiver;
-	QString				strLastSoundPath;
-	QString				strLastRsciPath;
+    CDRMTransceiver&    DRMTransceiver;
+    QAction*            actionOpenFile;
+    QAction*            actionOpenRSCI;
+    QAction*            actionCloseFile;
+    const bool          bReceiver;
+    QString             strLastSoundPath;
+    QString             strLastRsciPath;
 
 public slots:
     void OnOpenFile();

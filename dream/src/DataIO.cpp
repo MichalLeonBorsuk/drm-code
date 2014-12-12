@@ -3,7 +3,7 @@
  * Copyright (c) 2001-2014
  *
  * Author(s):
- *	Volker Fischer
+ *  Volker Fischer
  *
  * Description:
  *
@@ -32,7 +32,7 @@
 
 /* Implementation *************************************************************/
 /******************************************************************************\
-* MSC data																	   *
+* MSC data                                                                     *
 \******************************************************************************/
 /* Transmitter -------------------------------------------------------------- */
 void CReadData::ProcessDataInternal(CParameter&)
@@ -179,9 +179,9 @@ void CWriteData::InitInternal(CParameter& Parameters)
     iAudSampleRate = Parameters.GetAudSampleRate();
 
     /* Set maximum audio frequency */
-	iMaxAudioFrequency = MAX_SPEC_AUDIO_FREQUENCY;
-	if (iMaxAudioFrequency > iAudSampleRate/2)
-		iMaxAudioFrequency = iAudSampleRate/2;
+    iMaxAudioFrequency = MAX_SPEC_AUDIO_FREQUENCY;
+    if (iMaxAudioFrequency > iAudSampleRate/2)
+        iMaxAudioFrequency = iAudSampleRate/2;
 
     /* Length of vector for audio spectrum. We use a power-of-two length to
        make the FFT work more efficient, need to be scaled from sample rate to
@@ -190,11 +190,11 @@ void CWriteData::InitInternal(CParameter& Parameters)
 
     /* Number of blocks for averaging the audio spectrum */
     iNumBlocksAvAudioSpec = Ceil(((_REAL) iAudSampleRate *
-        TIME_AV_AUDIO_SPECT_MS / 1000 / iNumSmpls4AudioSprectrum));
+                                  TIME_AV_AUDIO_SPECT_MS / 1000 / iNumSmpls4AudioSprectrum));
 
     /* Inits for audio spectrum plotting */
     vecsOutputData.Init((int) iNumBlocksAvAudioSpec * iNumSmpls4AudioSprectrum *
-                   2 /* stereo */, 0); /* Init with zeros */
+                        2 /* stereo */, 0); /* Init with zeros */
     FftPlan.Init(iNumSmpls4AudioSprectrum);
     veccFFTInput.Init(iNumSmpls4AudioSprectrum);
     veccFFTOutput.Init(iNumSmpls4AudioSprectrum);
@@ -224,12 +224,12 @@ void CWriteData::InitInternal(CParameter& Parameters)
 }
 
 CWriteData::CWriteData(CSoundOutInterface* pNS) :
-        pSound(pNS), /* Sound interface */
-        bMuteAudio(FALSE), bDoWriteWaveFile(FALSE),
-        bSoundBlocking(FALSE), bNewSoundBlocking(FALSE),
-        eOutChanSel(CS_BOTH_BOTH), rMixNormConst(MIX_OUT_CHAN_NORM_CONST),
-        iAudSampleRate(0), iNumSmpls4AudioSprectrum(0), iNumBlocksAvAudioSpec(0),
-        iMaxAudioFrequency(MAX_SPEC_AUDIO_FREQUENCY)
+    pSound(pNS), /* Sound interface */
+    bMuteAudio(FALSE), bDoWriteWaveFile(FALSE),
+    bSoundBlocking(FALSE), bNewSoundBlocking(FALSE),
+    eOutChanSel(CS_BOTH_BOTH), rMixNormConst(MIX_OUT_CHAN_NORM_CONST),
+    iAudSampleRate(0), iNumSmpls4AudioSprectrum(0), iNumBlocksAvAudioSpec(0),
+    iMaxAudioFrequency(MAX_SPEC_AUDIO_FREQUENCY)
 {
     /* Constructor */
 }
@@ -335,14 +335,14 @@ void CWriteData::GetAudioSpec(CVector<_REAL>& vecrData,
 /* Simulation --------------------------------------------------------------- */
 void CGenSimData::ProcessDataInternal(CParameter& TransmParam)
 {
-    int			i;
-    uint32_t	iTempShiftRegister1;
-    _BINARY		biPRBSbit;
-    uint32_t	iShiftRegister;
-    FILE*		pFileCurPos;
-    time_t		tiElTi;
-    long int	lReTi;
-    _REAL		rReDays;
+    int         i;
+    uint32_t    iTempShiftRegister1;
+    _BINARY     biPRBSbit;
+    uint32_t    iShiftRegister;
+    FILE*       pFileCurPos;
+    time_t      tiElTi;
+    long int    lReTi;
+    _REAL       rReDays;
 
     /* Get elapsed time since this run was started (seconds) */
     tiElTi = time(NULL) - tiStartTime;
@@ -397,8 +397,8 @@ void CGenSimData::ProcessDataInternal(CParameter& TransmParam)
 
         if (iCounter == iNumSimBlocks)
         {
-		TransmParam.eRunState = CParameter::STOP_REQUESTED;
-		iCounter = 0;
+            TransmParam.eRunState = CParameter::STOP_REQUESTED;
+            iCounter = 0;
         }
         break;
 
@@ -471,7 +471,7 @@ void CGenSimData::ProcessDataInternal(CParameter& TransmParam)
             /* A minimum simulation time must be elapsed */
             if (iCounter >= iMinNumBlocks)
             {
-		TransmParam.eRunState = CParameter::STOP_REQUESTED;
+                TransmParam.eRunState = CParameter::STOP_REQUESTED;
                 iCounter = 0;
             }
         }
@@ -588,11 +588,11 @@ void CGenSimData::SetNumErrors(int iNewNE, string strNewFileName)
 
 void CEvaSimData::ProcessDataInternal(CParameter& Parameters)
 {
-    uint32_t	iTempShiftRegister1;
-    _BINARY		biPRBSbit;
-    uint32_t	iShiftRegister;
-    int			iNumBitErrors;
-    int			i;
+    uint32_t    iTempShiftRegister1;
+    _BINARY     biPRBSbit;
+    uint32_t    iShiftRegister;
+    int         iNumBitErrors;
+    int         i;
 
     /* -------------------------------------------------------------------------
        Generate a pseudo-noise test-signal (PRBS) for comparison with
@@ -654,7 +654,7 @@ void CEvaSimData::InitInternal(CParameter& Parameters)
 
 
 /******************************************************************************\
-* FAC data																	   *
+* FAC data                                                                     *
 \******************************************************************************/
 /* Transmitter */
 void CGenerateFACData::ProcessDataInternal(CParameter& TransmParam)
@@ -720,7 +720,7 @@ void CUtilizeFACData::InitInternal(CParameter& Parameters)
 
 
 /******************************************************************************\
-* SDC data																	   *
+* SDC data                                                                     *
 \******************************************************************************/
 /* Transmitter */
 void CGenerateSDCData::ProcessDataInternal(CParameter& TransmParam)

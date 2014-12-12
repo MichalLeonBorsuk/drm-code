@@ -3,7 +3,7 @@
 * Copyright (c) 2001-2014
 *
 * Author(s):
-*	Alexander Kurpiers
+*   Alexander Kurpiers
 *
 *
 ******************************************************************************
@@ -38,63 +38,63 @@
 #endif
 
 /* Definitions ****************************************************************/
-#define	NUM_IN_CHANNELS			2		/* Stereo recording (but we only
+#define NUM_IN_CHANNELS         2       /* Stereo recording (but we only
 use one channel for recording) */
-#define	NUM_OUT_CHANNELS		2		/* Stereo Playback */
-#define	BITS_PER_SAMPLE			16		/* Use all bits of the D/A-converter */
-#define BYTES_PER_SAMPLE		2		/* Number of bytes per sample */
+#define NUM_OUT_CHANNELS        2       /* Stereo Playback */
+#define BITS_PER_SAMPLE         16      /* Use all bits of the D/A-converter */
+#define BYTES_PER_SAMPLE        2       /* Number of bytes per sample */
 
 #ifdef USE_OSS
 #include <map>
 
 class COSSDev
 {
-    public:
-COSSDev():name() {}
-void open(const string& devname, int mode);
-int fildes() {
-    return dev[name].fildes();
-}
-void close();
-protected:
-class devdata
-{
 public:
-    devdata():count(0),fd(0) {}
-    void open(const string&, int);
+    COSSDev():name() {}
+    void open(const string& devname, int mode);
+    int fildes() {
+        return dev[name].fildes();
+    }
     void close();
-    int fildes();
 protected:
-    int count;
-    int fd;
-};
-static map<string,devdata> dev;
-string name;
+    class devdata
+    {
+    public:
+        devdata():count(0),fd(0) {}
+        void open(const string&, int);
+        void close();
+        int fildes();
+    protected:
+        int count;
+        int fd;
+    };
+    static map<string,devdata> dev;
+    string name;
 };
 #endif
 
 class CSoundBuf : public CCyclicBuffer<_SAMPLE> {
 
-    public:
+public:
     CSoundBuf() : keep_running(TRUE)
 #ifdef QT_CORE_LIB
-            , data_accessed()
+        , data_accessed()
 #endif
-{}
-bool keep_running;
+    {}
+    bool keep_running;
 #ifdef QT_CORE_LIB
-void lock () {
-    data_accessed.lock();
-}
-void unlock () {
-    data_accessed.unlock();
-}
+    void lock () {
+        data_accessed.lock();
+    }
+    void unlock () {
+        data_accessed.unlock();
+    }
 
 protected:
-QMutex	data_accessed;
+    QMutex  data_accessed;
 #else
-void lock () { }
-void unlock () { }
+    void lock () { }
+    void unlock () { }
 #endif
 };
 
@@ -102,14 +102,14 @@ void unlock () { }
 typedef QThread CThread;
 #else
 class CThread {
-    public:
-void run() {}
-void start() {}
-void wait(int) {}
-void msleep(int) {}
-bool running() {
-    return true;
-}
+public:
+    void run() {}
+    void start() {}
+    void wait(int) {}
+    void msleep(int) {}
+    bool running() {
+        return true;
+    }
 };
 #endif
 

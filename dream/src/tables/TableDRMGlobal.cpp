@@ -3,10 +3,10 @@
  * Copyright (c) 2001-2014
  *
  * Author(s):
- *	Julian Cable
+ *  Julian Cable
  *
  * Description:
- *	DRM Propagation Parameters
+ *  DRM Propagation Parameters
  *
  ******************************************************************************
  *
@@ -37,9 +37,9 @@
  */
 
 PropagationParams propagationParams[NUM_ROBUSTNESS_MODES+1]= {
-{ {24, 1}, {1, 9}, 15},
-{ {64, 3}, {1, 4}, 15},
-{ {44, 3}, {4, 11}, 20},
-{ {28, 3}, {11, 14}, 24},
-{ {9, 4}, {1, 9}, 40}
+    { {24, 1}, {1, 9}, 15},
+    { {64, 3}, {1, 4}, 15},
+    { {44, 3}, {4, 11}, 20},
+    { {28, 3}, {11, 14}, 24},
+    { {9, 4}, {1, 9}, 40}
 };

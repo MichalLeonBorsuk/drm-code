@@ -3,10 +3,10 @@
  * Copyright (c) 2001-2014
  *
  * Author(s):
- *	Andrea Russo, Julian Cable
+ *  Andrea Russo, Julian Cable
  *
  * Description:
- *	Dream program version number
+ *  Dream program version number
  *
  ******************************************************************************
  *
@@ -43,5 +43,5 @@ const char dream_implementation[] = "CL";
 const int dream_version_major = 2;
 const int dream_version_minor = 2;
 const int dream_version_patch = 0;
-const char dream_version_build[] = "-svn973";
+const char dream_version_build[] = "-svn974";
 

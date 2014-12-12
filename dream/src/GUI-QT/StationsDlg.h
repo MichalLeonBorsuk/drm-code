@@ -3,7 +3,7 @@
  * Copyright (c) 2001-2014
  *
  * Author(s):
- *	Volker Fischer
+ *  Volker Fischer
  *
  * Description:
  *
@@ -42,12 +42,12 @@
 class RigDlg;
 
 namespace Ui {
-  class StationsDlgbase;
+class StationsDlgbase;
 }
 
 class StationsDlg : public CWindow
 {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
 #ifdef HAVE_LIBHAMLIB
@@ -55,86 +55,88 @@ public:
 #else
     StationsDlg(CSettings&, QMap<QWidget*,QString>&);
 #endif
-	virtual ~StationsDlg();
+    virtual ~StationsDlg();
 public slots:
     void SetFrequency(int);
     void OnSwitchMode(int);
-    ERecMode mode() { return eRecMode; }
+    ERecMode mode() {
+        return eRecMode;
+    }
 
 private:
 #ifdef HAVE_LIBHAMLIB
-    CRig&			Rig;
-    RigDlg			*pRigDlg;
+    CRig&           Rig;
+    RigDlg          *pRigDlg;
 #endif
     Ui::StationsDlgbase* ui;
 protected:
     struct Params {
         bool        bCurrentSortAscending;
-        int			iSortColumn;
-        QString		strColumnParam;
-        QString		targetFilter;
-        QString		languageFilter;
-        QString		countryFilter;
-        QString		url;
-        QString		filename;
+        int         iSortColumn;
+        QString     strColumnParam;
+        QString     targetFilter;
+        QString     languageFilter;
+        QString     countryFilter;
+        QString     url;
+        QString     filename;
     };
 
-	virtual void	eventClose(QCloseEvent* pEvent);
-	virtual void	eventHide(QHideEvent* pEvent);
-	virtual void	eventShow(QShowEvent* pEvent);
-	void			LoadSettings();
-	void			SaveSettings();
-    void			LoadSchedule();
-    void			LoadScheduleView();
-    void			UpdateTransmissionStatus();
-	void			AddWhatsThisHelp();
-	void			EnableSMeter();
-	void			DisableSMeter();
-    bool    		showAll();
+    virtual void    eventClose(QCloseEvent* pEvent);
+    virtual void    eventHide(QHideEvent* pEvent);
+    virtual void    eventShow(QShowEvent* pEvent);
+    void            LoadSettings();
+    void            SaveSettings();
+    void            LoadSchedule();
+    void            LoadScheduleView();
+    void            UpdateTransmissionStatus();
+    void            AddWhatsThisHelp();
+    void            EnableSMeter();
+    void            DisableSMeter();
+    bool            showAll();
     bool            GetSortAscending();
-    void			SetSortAscending(bool);
-    int				currentSortColumn();
+    void            SetSortAscending(bool);
+    int             currentSortColumn();
     Params          params[RM_NONE+1];
 
-	CSchedule		schedule;
+    CSchedule       schedule;
     ScheduleLoader  scheduleLoader;
-	QIcon			greenCube;
-	QIcon			redCube;
-	QIcon			orangeCube;
-	QIcon			pinkCube;
-	QSignalMapper*	previewMapper;
-	QActionGroup*	previewGroup;
-	QSignalMapper*	showMapper;
-	QActionGroup*	showGroup;
-	QTimer			Timer;
+    QIcon           greenCube;
+    QIcon           redCube;
+    QIcon           orangeCube;
+    QIcon           pinkCube;
+    QSignalMapper*  previewMapper;
+    QActionGroup*   previewGroup;
+    QSignalMapper*  showMapper;
+    QActionGroup*   showGroup;
+    QTimer          Timer;
 
-	QMutex			ListItemsMutex;
+    QMutex          ListItemsMutex;
 
-	QString			okMessage, badMessage;
+    QString         okMessage, badMessage;
     ERecMode        eRecMode;
     SMeter*         inputLevel;
 
 signals:
-	void subscribeRig();
-	void unsubscribeRig();
+    void subscribeRig();
+    void unsubscribeRig();
     void frequencyChanged(int);
 
 private slots:
     void setFine(bool on);
     void OnSigStr(double);
-	void OnTimer();
-	void OnUpdate();
+    void OnTimer();
+    void OnUpdate();
     void OnFileReady();
-	void OnShowStationsMenu(int iID);
-	void OnShowPreviewMenu(int iID);
-	void OnFreqCntNewValue(double dVal);
-	void OnHeaderClicked(int c);
-	void on_actionGetUpdate_triggered();
-	void on_ListViewStations_itemSelectionChanged();
-	void on_ComboBoxFilterTarget_activated(const QString&);
-	void on_ComboBoxFilterCountry_activated(const QString&);
-	void on_ComboBoxFilterLanguage_activated(const QString&);
-	void on_actionEnable_S_Meter_triggered();
-	void on_actionChooseRig_triggered();
+    void OnShowStationsMenu(int iID);
+    void OnShowPreviewMenu(int iID);
+    void OnFreqCntNewValue(double dVal);
+    void OnHeaderClicked(int c);
+    void on_actionGetUpdate_triggered();
+    void on_ListViewStations_itemSelectionChanged();
+    void on_ComboBoxFilterTarget_activated(const QString&);
+    void on_ComboBoxFilterCountry_activated(const QString&);
+    void on_ComboBoxFilterLanguage_activated(const QString&);
+    void on_actionEnable_S_Meter_triggered();
+    void on_actionChooseRig_triggered();
 };
 #endif

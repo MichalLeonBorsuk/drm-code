@@ -3,7 +3,7 @@
  * Copyright (c) 2001-2014
  *
  * Author(s):
- *	David Flamand
+ *  David Flamand
  *
  * Description:
  *  see CWindow.cpp
@@ -63,12 +63,12 @@
 class CEventFilter
 {
 public:
-	CEventFilter();
-	virtual ~CEventFilter();
-	bool isValid(const QEvent* event);
+    CEventFilter();
+    virtual ~CEventFilter();
+    bool isValid(const QEvent* event);
 
 protected:
-	QEvent::Type eLastEventType;
+    QEvent::Type eLastEventType;
 };
 
 
@@ -76,59 +76,59 @@ protected:
 
 class CWindow : public QMainWindow
 {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
-	CWindow(QWidget* parent, CSettings& Settings, const QString& windowName);
-	CWindow(QMap<QWidget*,QString>& parents, CSettings& Settings, const QString& windowName);
-	virtual ~CWindow();
-	void toggleVisibility();
-	void setSettingsTag(const QString& tag, bool hide);
-	QString getSetting(const QString& key, const QString& defvalue, const bool bCommon=false);
-	bool getSetting(const QString& key, const bool defvalue, const bool bCommon=false);
-	int getSetting(const QString& key, const int defvalue, const bool bCommon=false);
-	_REAL getSetting(const QString& key, const _REAL defvalue, const bool bCommon=false);
-	void putSetting(const QString& key, const QString& value, const bool bCommon=false);
-	void putSetting(const QString& key, const bool value, const bool bCommon=false);
-	void putSetting(const QString& key, const int value, const bool bCommon=false);
-	void putSetting(const QString& key, const _REAL value, const bool bCommon=false);
-	virtual void eventUpdate();
+    CWindow(QWidget* parent, CSettings& Settings, const QString& windowName);
+    CWindow(QMap<QWidget*,QString>& parents, CSettings& Settings, const QString& windowName);
+    virtual ~CWindow();
+    void toggleVisibility();
+    void setSettingsTag(const QString& tag, bool hide);
+    QString getSetting(const QString& key, const QString& defvalue, const bool bCommon=false);
+    bool getSetting(const QString& key, const bool defvalue, const bool bCommon=false);
+    int getSetting(const QString& key, const int defvalue, const bool bCommon=false);
+    _REAL getSetting(const QString& key, const _REAL defvalue, const bool bCommon=false);
+    void putSetting(const QString& key, const QString& value, const bool bCommon=false);
+    void putSetting(const QString& key, const bool value, const bool bCommon=false);
+    void putSetting(const QString& key, const int value, const bool bCommon=false);
+    void putSetting(const QString& key, const _REAL value, const bool bCommon=false);
+    virtual void eventUpdate();
 
 private:
-	void init();
-	virtual void closeEvent(QCloseEvent*);
-	virtual void showEvent(QShowEvent*);
-	virtual void hideEvent(QHideEvent*);
-	virtual void contextMenuEvent(QContextMenuEvent*);
+    void init();
+    virtual void closeEvent(QCloseEvent*);
+    virtual void showEvent(QShowEvent*);
+    virtual void hideEvent(QHideEvent*);
+    virtual void contextMenuEvent(QContextMenuEvent*);
 #if QT_VERSION >= 0x050000
-	virtual bool event(QEvent*);
+    virtual bool event(QEvent*);
 #endif
-	void loadWindowGeometry();
-	void saveWindowGeometry();
-	string getTagSection(const bool bCommon=false) const;
-	string getSection(const bool bCommon=false) const;
-	QMap <QWidget*, QString> parents;
-	QString settingsTag;
-	const QString windowName;
-	bool bHide;
-	CEventFilter ef;
+    void loadWindowGeometry();
+    void saveWindowGeometry();
+    string getTagSection(const bool bCommon=false) const;
+    string getSection(const bool bCommon=false) const;
+    QMap <QWidget*, QString> parents;
+    QString settingsTag;
+    const QString windowName;
+    bool bHide;
+    CEventFilter ef;
 
 protected:
-	virtual void eventClose(QCloseEvent*);
-	virtual void eventHide(QHideEvent*);
-	virtual void eventShow(QShowEvent*);
-	CSettings& Settings;
+    virtual void eventClose(QCloseEvent*);
+    virtual void eventHide(QHideEvent*);
+    virtual void eventShow(QShowEvent*);
+    CSettings& Settings;
 
 public slots:
-	virtual void setVisible(bool visible);
-	void OnShowWindow(QWidget* window, bool bVisible);
-	void OnCloseWindow(QWidget* window);
-	void OnDeleteWindow(QWidget* window);
+    virtual void setVisible(bool visible);
+    void OnShowWindow(QWidget* window, bool bVisible);
+    void OnCloseWindow(QWidget* window);
+    void OnDeleteWindow(QWidget* window);
 
 signals:
-	void showWindow(QWidget* window, bool bVisible);
-	void closeWindow(QWidget* window);
-	void deleteWindow(QWidget* window);
+    void showWindow(QWidget* window, bool bVisible);
+    void closeWindow(QWidget* window);
+    void deleteWindow(QWidget* window);
 };
 
 #endif

@@ -3,7 +3,7 @@
  * Copyright (c) 2001-2014
  *
  * Author(s):
- *	Alexander Kurpiers
+ *  Alexander Kurpiers
  *
  * Decription:
  * Linux sound interface
@@ -46,11 +46,11 @@ public:
     CSoundOut();
     virtual ~CSoundOut() {}
 
-    virtual void				Enumerate(vector<string>& choices) {
+    virtual void                Enumerate(vector<string>& choices) {
         choices = names;
     }
-    virtual void				SetDev(int iNewDevice);
-    virtual int					GetDev();
+    virtual void                SetDev(int iNewDevice);
+    virtual int                 GetDev();
 
     void Init(int iNewBufferSize, _BOOLEAN bNewBlocking = FALSE);
     _BOOLEAN Write(CVector<short>& psData);
@@ -62,9 +62,9 @@ protected:
     int write_HW( _SAMPLE *playbuf, int size );
     void close_HW( void );
 
-    int 	iBufferSize, iInBufferSize;
+    int     iBufferSize, iInBufferSize;
     short int *tmpplaybuf;
-    _BOOLEAN	bBlockingPlay;
+    _BOOLEAN    bBlockingPlay;
     vector<string> devices;
 
     class CPlayThread : public CThread
@@ -73,14 +73,14 @@ protected:
         virtual ~CPlayThread() {}
         virtual void run();
         CSoundBuf SoundBuf;
-        CSoundOut*	pSoundOut;
+        CSoundOut*  pSoundOut;
     protected:
-        _SAMPLE	tmpplaybuf[NUM_OUT_CHANNELS * FRAGSIZE];
+        _SAMPLE tmpplaybuf[NUM_OUT_CHANNELS * FRAGSIZE];
     } PlayThread;
 
     vector<string> names;
     _BOOLEAN bChangDev;
-    int	iCurrentDevice;
+    int iCurrentDevice;
 #ifdef USE_ALSA
     snd_pcm_t *handle;
 #endif

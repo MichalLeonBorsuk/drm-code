@@ -3,7 +3,7 @@
  * Copyright (c) 2001-2014, 2001-2014
  *
  * Author(s):
- *	 Julian Cable, David Flamand (rewrite)
+ *   Julian Cable, David Flamand (rewrite)
  *
  * Description: MOT Broadcast Website Viewer
  *
@@ -132,7 +132,7 @@ void BWSViewerWidget::UpdateWindowTitle(const uint32_t iServiceID, const bool bS
 
         /* Service ID (plot number in hexadecimal format) */
         QString strServiceID = "ID:" +
-                       QString().setNum(iServiceID, 16).toUpper();
+                               QString().setNum(iServiceID, 16).toUpper();
 
         /* Add the description on the title of the dialog */
         if (strLabel != "" || strServiceID != "")
@@ -152,7 +152,10 @@ void BWSViewerWidget::OnTimer()
     QString strLastLabel;
 
     /* Get current service parameters */
-    uint32_t iServiceID; bool bServiceValid; QString strLabel; ETypeRxStatus eStatus;
+    uint32_t iServiceID;
+    bool bServiceValid;
+    QString strLabel;
+    ETypeRxStatus eStatus;
     GetServiceParams(&iServiceID, &bServiceValid, &strLabel, &eStatus);
 
     /* Set current data service ID */
@@ -280,7 +283,9 @@ void BWSViewerWidget::showEvent(QShowEvent*)
 {
 
     /* Update window title */
-    uint32_t iServiceID; bool bServiceValid; QString strLabel;
+    uint32_t iServiceID;
+    bool bServiceValid;
+    QString strLabel;
     GetServiceParams(&iServiceID, &bServiceValid, &strLabel);
     UpdateWindowTitle(iServiceID, bServiceValid, strLabel);
 
@@ -358,7 +363,7 @@ bool BWSViewerWidget::Changed()
 }
 
 void BWSViewerWidget::SaveMOTObject(const QString& strObjName,
-                              const CMOTObject& obj)
+                                    const CMOTObject& obj)
 {
     const CVector<_BYTE>& vecbRawData = obj.Body.vecData;
 
@@ -438,41 +443,42 @@ void BWSViewerWidget::setSavePath(const QString&)
 void CWebsiteCache::GetObjectCountAndSize(unsigned int& count, unsigned int& size)
 {
     mutex.lock();
-        count = objects.size();
-        size = total_size;
+    count = objects.size();
+    size = total_size;
     mutex.unlock();
 }
 
 void CWebsiteCache::ClearAll()
 {
     mutex.lock();
-        strDirectoryIndex = QString(); /* NULL string, not empty string! */
-        objects.clear();
-        total_size = 0;
+    strDirectoryIndex = QString(); /* NULL string, not empty string! */
+    objects.clear();
+    total_size = 0;
     mutex.unlock();
 }
 
 void CWebsiteCache::AddObject(QString strObjName, QString strContentType, CVector<_BYTE>& vecbData)
 {
     mutex.lock();
-        /* increment id counter, 0 is reserved for error */
-        id_counter++; if (!id_counter) id_counter++;
+    /* increment id counter, 0 is reserved for error */
+    id_counter++;
+    if (!id_counter) id_counter++;
 
-        /* Get the object name */
-        strObjName = UrlEncodePath(strObjName);
+    /* Get the object name */
+    strObjName = UrlEncodePath(strObjName);
 
-        /* Erase previous object if any */
-        map<QString,CWebsiteObject>::iterator it;
-        it = objects.find(strObjName);
-        if (it != objects.end())
-        {
-            total_size -= it->second.data.size();
-            objects.erase(it);
-        }
+    /* Erase previous object if any */
+    map<QString,CWebsiteObject>::iterator it;
+    it = objects.find(strObjName);
+    if (it != objects.end())
+    {
+        total_size -= it->second.data.size();
+        objects.erase(it);
+    }
 
-        /* Insert the new object */
-        objects.insert(pair<QString,CWebsiteObject>(strObjName, CWebsiteObject(id_counter, strContentType, vecbData)));
-        total_size += vecbData.Size();
+    /* Insert the new object */
+    objects.insert(pair<QString,CWebsiteObject>(strObjName, CWebsiteObject(id_counter, strContentType, vecbData)));
+    total_size += vecbData.Size();
     mutex.unlock();
 
     /* Signal that a new object is added */
@@ -483,12 +489,12 @@ int CWebsiteCache::GetObjectContentType(const QString& strObjName, QString& strC
 {
     int id = 0;
     mutex.lock();
-        CWebsiteObject* obj = FindObject(strObjName);
-        if (obj)
-        {
-            id = obj->id;
-            strContentType = obj->strContentType;
-        }
+    CWebsiteObject* obj = FindObject(strObjName);
+    if (obj)
+    {
+        id = obj->id;
+        strContentType = obj->strContentType;
+    }
     mutex.unlock();
     return id;
 }
@@ -497,11 +503,11 @@ int CWebsiteCache::GetObjectSize(const QString& strObjName, const unsigned int i
 {
     int size = 0;
     mutex.lock();
-        CWebsiteObject* obj = FindObject(strObjName);
-        if (obj && obj->id == id)
-        {
-            size = obj->data.size();
-        }
+    CWebsiteObject* obj = FindObject(strObjName);
+    if (obj && obj->id == id)
+    {
+        size = obj->data.size();
+    }
     mutex.unlock();
     return size;
 }
@@ -512,18 +518,18 @@ int CWebsiteCache::CopyObjectData(const QString& strObjName, const unsigned int 
     if (maxsize >= 0 && offset >= 0)
     {
         mutex.lock();
-            CWebsiteObject* obj = FindObject(strObjName);
-            if (obj && obj->id == id)
+        CWebsiteObject* obj = FindObject(strObjName);
+        if (obj && obj->id == id)
+        {
+            size = obj->data.size();
+            if (offset < size)
             {
-                size = obj->data.size();
-                if (offset < size)
-                {
-                    size -= offset;
-                    if (size > maxsize)
-                        size = maxsize;
-                    memcpy(buffer, &obj->data.data()[offset], size);
-                }
+                size -= offset;
+                if (size > maxsize)
+                    size = maxsize;
+                memcpy(buffer, &obj->data.data()[offset], size);
             }
+        }
         mutex.unlock();
     }
     return size;
@@ -540,9 +546,9 @@ bool CWebsiteCache::SetDirectoryIndex(const QString strNewDirectoryIndex)
 {
     bool bChanged;
     mutex.lock();
-        bChanged = strDirectoryIndex != strNewDirectoryIndex;
-        if (bChanged)
-            strDirectoryIndex = strNewDirectoryIndex;
+    bChanged = strDirectoryIndex != strNewDirectoryIndex;
+    if (bChanged)
+        strDirectoryIndex = strNewDirectoryIndex;
     mutex.unlock();
     return bChanged;
 }
@@ -550,7 +556,7 @@ bool CWebsiteCache::SetDirectoryIndex(const QString strNewDirectoryIndex)
 QString CWebsiteCache::GetDirectoryIndex()
 {
     mutex.lock();
-        QString str = strDirectoryIndex;
+    QString str = strDirectoryIndex;
     mutex.unlock();
     return str;
 }
@@ -560,9 +566,9 @@ QString CWebsiteCache::GetDirectoryIndex()
 // CNetworkReplyCache implementation
 
 CNetworkReplyCache::CNetworkReplyCache(QNetworkAccessManager::Operation op,
-    const QNetworkRequest& req, CWebsiteCache& cache, CCounter& waitobjs)
+                                       const QNetworkRequest& req, CWebsiteCache& cache, CCounter& waitobjs)
     : cache(cache), waitobjs(waitobjs),
-    readOffset(0), emitted(false), id(0)
+      readOffset(0), emitted(false), id(0)
 {
     /* ETSI TS 101 498-1 Section 6.2.3 */
     QString strUrl(req.url().toString());

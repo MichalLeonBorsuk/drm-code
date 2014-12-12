@@ -3,7 +3,7 @@
  * Copyright (c) 2001-2014
  *
  * Author(s):
- *	Volker Fischer
+ *  Volker Fischer
  *
  * Description:
  *
@@ -38,19 +38,19 @@ CVector<int> CChannelCode::GenPuncPatTable(ECodScheme eNewCodingScheme,
         int iPunctPatPartA, int iPunctPatPartB,
         int iLevel)
 {
-    int				i;
-    int				iNumOutBits;
-    int				iNumOutBitsWithMemory;
-    int				iTailbitPattern;
-    int				iTailbitParamL0;
-    int				iTailbitParamL1;
-    int				iPartAPatLen;
-    int				iPartBPatLen;
-    int				iPunctCounter;
-    CVector<int>	veciPuncPatPartA;
-    CVector<int>	veciPuncPatPartB;
-    CVector<int>	veciTailBitPat;
-    CVector<int>	veciReturn;
+    int             i;
+    int             iNumOutBits;
+    int             iNumOutBitsWithMemory;
+    int             iTailbitPattern;
+    int             iTailbitParamL0;
+    int             iTailbitParamL1;
+    int             iPartAPatLen;
+    int             iPartBPatLen;
+    int             iPunctCounter;
+    CVector<int>    veciPuncPatPartA;
+    CVector<int>    veciPuncPatPartB;
+    CVector<int>    veciTailBitPat;
+    CVector<int>    veciReturn;
 
     /* Number of bits out is the sum of all protection levels */
     iNumOutBits = iNewNumOutBitsPartA + iNewNumOutBitsPartB;

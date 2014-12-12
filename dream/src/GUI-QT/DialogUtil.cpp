@@ -4,7 +4,7 @@
  * Copyright (c) 2001-2001-2014
  *
  * Author(s):
- *	Volker Fischer, Julian Cable
+ *  Volker Fischer, Julian Cable
  *
  * Description:
  *
@@ -104,21 +104,21 @@ QString VersionString(QWidget* parent)
         "<center><b>" + parent->tr("Dream, Version ");
     if (dream_version_patch == 0)
         strVersionText += QString("%1.%2%3")
-            .arg(dream_version_major)
-            .arg(dream_version_minor)
-            .arg(dream_version_build);
+                          .arg(dream_version_major)
+                          .arg(dream_version_minor)
+                          .arg(dream_version_build);
     else
         strVersionText += QString("%1.%2.%3%4")
-            .arg(dream_version_major)
-            .arg(dream_version_minor)
-            .arg(dream_version_patch)
-            .arg(dream_version_build);
+                          .arg(dream_version_major)
+                          .arg(dream_version_minor)
+                          .arg(dream_version_patch)
+                          .arg(dream_version_build);
     strVersionText +=
         "</b><br> " + parent->tr("Open-Source Software Implementation of "
                                  "a DRM-Receiver") +
         "<br>";
     strVersionText += parent->tr("Under the GNU General Public License (GPL)") +
-        "</center>";
+                      "</center>";
     return strVersionText;
 #ifdef _MSC_VER /* MSVC 2008 */
     parent; // warning C4100: 'parent' : unreferenced formal parameter
@@ -135,7 +135,7 @@ CAboutDlg::CAboutDlg(QWidget* parent):
     char  sfversion [128] ;
     sf_command (NULL, SFC_GET_LIB_VERSION, sfversion, sizeof (sfversion)) ;
 #endif
-    QString strCredits = 
+    QString strCredits =
         "<p>" /* General description of Dream software */
         "<big><b>Dream</b> " + tr("is a software implementation of a Digital "
                                   "Radio Mondiale (DRM) receiver. With Dream, DRM broadcasts can be received "
@@ -224,7 +224,7 @@ CAboutDlg::CAboutDlg(QWidget* parent):
         "<li><b>libjack</b> (The Jack Audio Connection Kit) <i>http://www.jackaudio.org</i></li>"
 #endif
 #ifdef USE_OPUS_LIBRARY
-		"<li><b>" + QString(OPUS_DESCRIPTION) + "</b> (" + QString(opusGetVersion()) + ") <i>" + QString(OPUS_WEBSITE_LINK) + "</i></li>"
+        "<li><b>" + QString(OPUS_DESCRIPTION) + "</b> (" + QString(opusGetVersion()) + ") <i>" + QString(OPUS_WEBSITE_LINK) + "</i></li>"
 #endif
         "</ul><br><br><hr/><br><br>"
         "<center><b>HISTORY</b></center><br>"
@@ -403,7 +403,7 @@ QAction* CSysTray::AddSeparator(CSysTray* pSysTray)
 void CSysTray::SetToolTip(CSysTray* pSysTray, const QString& Title, const QString& Message)
 {
     if (pSysTray != NULL &&
-        (pSysTray->Title != Title || pSysTray->Message != Message))
+            (pSysTray->Title != Title || pSysTray->Message != Message))
     {
         pSysTray->Title = Title;
         pSysTray->Message = Message;

@@ -3,7 +3,7 @@
  * Copyright (c) 2001-2014
  *
  * Author(s):
- *	
+ *
  *
  * Description:
  *
@@ -82,8 +82,8 @@ QString UrlEncodePath(QString url)
         path.replace(QRegExp("/\\./"), "/");
     /* The Actual percent encoding */
     path = QString(QUrl(path, QUrl::TolerantMode).toEncoded(
-        QUrl::RemoveScheme | QUrl::RemoveAuthority |
-        QUrl::RemoveQuery | QUrl::RemoveFragment));
+                       QUrl::RemoveScheme | QUrl::RemoveAuthority |
+                       QUrl::RemoveQuery | QUrl::RemoveFragment));
     return path;
 }
 
@@ -123,12 +123,12 @@ QString& Linkify(QString& text, QString linkColor)
             {
                 int chr = text[j].unicode();
                 if (!((chr=='@' && posBegin==posMAIL) ||
-                      chr=='.' || chr=='/' ||
-                      chr=='~' || chr=='-' ||
-                      chr=='_' || chr==':' ||
-                     (chr>='a' && chr<='z') ||
-                     (chr>='A' && chr<='Z') ||
-                     (chr>='0' && chr<='9')))
+                        chr=='.' || chr=='/' ||
+                        chr=='~' || chr=='-' ||
+                        chr=='_' || chr==':' ||
+                        (chr>='a' && chr<='z') ||
+                        (chr>='A' && chr<='Z') ||
+                        (chr>='0' && chr<='9')))
                 {
                     posEnd = j;
                     break;
@@ -166,15 +166,15 @@ void CreateDirectories(const QString& strFilename)
 {
     /*
         This function is for creating a complete directory structure to a given
-    	file name. If there is a pathname like this:
-    	/html/files/images/myimage.gif
-    	this function create all the folders into MOTCache:
-    	/html
-    	/html/files
-    	/html/files/images
-    	QFileInfo only creates a file if the pathname is valid. If not all folders
-    	are created, QFileInfo will not save the file. There was no QT function
-    	or a hint the QT mailing list found in which does the job of this function.
+        file name. If there is a pathname like this:
+        /html/files/images/myimage.gif
+        this function create all the folders into MOTCache:
+        /html
+        /html/files
+        /html/files/images
+        QFileInfo only creates a file if the pathname is valid. If not all folders
+        are created, QFileInfo will not save the file. There was no QT function
+        or a hint the QT mailing list found in which does the job of this function.
     */
     for (int i = 0;; i++)
     {
@@ -251,34 +251,34 @@ QString GetCodecString(const CService& service)
             /* Opus Audio sub codec */
             switch (service.AudioParam.eOPUSSubCod)
             {
-                case CAudioParam::OS_SILK:
-                    strReturn += "SILK ";
-                    break;
-                case CAudioParam::OS_HYBRID:
-                    strReturn += "HYBRID ";
-                    break;
-                case CAudioParam::OS_CELT:
-                    strReturn += "CELT ";
-                    break;
+            case CAudioParam::OS_SILK:
+                strReturn += "SILK ";
+                break;
+            case CAudioParam::OS_HYBRID:
+                strReturn += "HYBRID ";
+                break;
+            case CAudioParam::OS_CELT:
+                strReturn += "CELT ";
+                break;
             }
             /* Opus Audio bandwidth */
             switch (service.AudioParam.eOPUSBandwidth)
             {
-                case CAudioParam::OB_NB:
-                    strReturn += "NB";
-                    break;
-                case CAudioParam::OB_MB:
-                    strReturn += "MB";
-                    break;
-                case CAudioParam::OB_WB:
-                    strReturn += "WB";
-                    break;
-                case CAudioParam::OB_SWB:
-                    strReturn += "SWB";
-                    break;
-                case CAudioParam::OB_FB:
-                    strReturn += "FB";
-                    break;
+            case CAudioParam::OB_NB:
+                strReturn += "NB";
+                break;
+            case CAudioParam::OB_MB:
+                strReturn += "MB";
+                break;
+            case CAudioParam::OB_WB:
+                strReturn += "WB";
+                break;
+            case CAudioParam::OB_SWB:
+                strReturn += "SWB";
+                break;
+            case CAudioParam::OB_FB:
+                strReturn += "FB";
+                break;
             }
             break;
 
@@ -319,12 +319,12 @@ QString GetTypeString(const CService& service)
             switch (service.AudioParam.eOPUSChan)
             {
             case CAudioParam::OC_MONO:
-            strReturn = "MONO";
-            break;
+                strReturn = "MONO";
+                break;
 
             case CAudioParam::OC_STEREO:
-            strReturn = "STEREO";
-            break;
+                strReturn = "STEREO";
+                break;
             }
             break;
 
@@ -434,8 +434,8 @@ QString getAMScheduleUrl()
             year = d.year();
             season = 'a';
         }
-            }
-            break;
+    }
+    break;
     case 4:
     case 5:
     case 6:
@@ -457,8 +457,8 @@ QString getAMScheduleUrl()
             year = d.year();
             season = 'b';
         }
-             }
-             break;
+    }
+    break;
     case 11:
     case 12:
         year = d.year();

@@ -3,7 +3,7 @@
  * Copyright (c) 2001-2014
  *
  * Author(s):
- *	Julian Cable
+ *  Julian Cable
  *
  * Decription:
  * PortAudio sound interface
@@ -42,7 +42,7 @@ captureCallback(const void *inputBuffer, void *outputBuffer,
 {
     /* Cast data passed through stream to our structure. */
     CPaCommon *This = (CPaCommon *) userData;
-    (void) outputBuffer;		/* Prevent unused variable warning. */
+    (void) outputBuffer;        /* Prevent unused variable warning. */
     long bytes = framesPerBuffer*2*sizeof(short);
     long avail = PaUtil_GetRingBufferWriteAvailable(&This->ringBuffer);
     PaUtil_WriteRingBuffer(&This->ringBuffer, inputBuffer, (avail<bytes)?avail:bytes);
@@ -58,7 +58,7 @@ playbackCallback(const void *inputBuffer, void *outputBuffer,
                  PaStreamCallbackFlags statusFlags, void *userData)
 {
     CPaCommon *This = (CPaCommon *) userData;
-    (void) inputBuffer;			/* Prevent unused variable warning. */
+    (void) inputBuffer;         /* Prevent unused variable warning. */
     long bytes = framesPerBuffer*2*sizeof(short);
     long avail = PaUtil_GetRingBufferReadAvailable(&This->ringBuffer);
     PaUtil_ReadRingBuffer(&This->ringBuffer, outputBuffer, (avail<bytes)?avail:bytes);
@@ -70,9 +70,9 @@ playbackCallback(const void *inputBuffer, void *outputBuffer,
 int CPaCommon::pa_count = 0;
 
 CPaCommon::CPaCommon(bool cap):ringBuffer(),xruns(0),stream(NULL),
-        names(), devices(),
-        is_capture(cap), blocking(true), device_changed(true), xrun(false),
-        framesPerBuffer(0), ringBufferData(NULL)
+    names(), devices(),
+    is_capture(cap), blocking(true), device_changed(true), xrun(false),
+    framesPerBuffer(0), ringBufferData(NULL)
 {
     if (pa_count == 0)
     {
@@ -109,8 +109,8 @@ CPaCommon::Enumerate(vector < string > &choices, vector < string > &descriptions
 
     names.clear();
     descriptions.clear();
-	names.push_back(""); /* default device */
-	descriptions.push_back("");
+    names.push_back(""); /* default device */
+    descriptions.push_back("");
 
     int numDevices = Pa_GetDeviceCount();
     if (numDevices < 0)
@@ -261,11 +261,11 @@ CPaCommon::ReInit()
 
         if (err != paNoError) {
             //throw string("PortAudio error: ") + Pa_GetErrorText(err);
-		}
+        }
         err = Pa_StartStream(stream);
         if (err != paNoError) {
             //throw string("PortAudio error: ") + Pa_GetErrorText(err);
-		}
+        }
     }
     else
     {
@@ -274,12 +274,12 @@ CPaCommon::ReInit()
                             (void *) this);
         if (err != paNoError) {
             //throw string("PortAudio error: ") + Pa_GetErrorText(err);
-		}
+        }
     }
 
     unsigned long n = 2;
     while (n < minRingBufferSize)
-        n <<= 2;				/* smallest power of 2 >= requested */
+        n <<= 2;                /* smallest power of 2 >= requested */
 
     if (ringBufferData)
         delete[] ringBufferData;
@@ -351,7 +351,7 @@ CPaCommon::Write(CVector < short >&psData)
 
     //cout << "Write: got " << bytes << " can put " << PaUtil_GetRingBufferWriteAvailable(&ringBuffer) << endl;
     if (PaUtil_GetRingBufferWriteAvailable(&ringBuffer) < int(bytes))
-        return FALSE;			/* TODO use newer data in preference to draining old */
+        return FALSE;           /* TODO use newer data in preference to draining old */
 
     PaUtil_WriteRingBuffer(&ringBuffer, &psData[0], bytes);
     if (Pa_IsStreamStopped( stream ))
@@ -359,7 +359,7 @@ CPaCommon::Write(CVector < short >&psData)
         int err = Pa_StartStream(stream);
         if (err != paNoError) {
             //throw string("PortAudio error: ") + Pa_GetErrorText(err);
-		}
+        }
     }
     if (xruns==0)
         return FALSE;

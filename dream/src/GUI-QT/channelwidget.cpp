@@ -106,7 +106,7 @@ void ChannelWidget::on_chartSelector_currentItemChanged(QTreeWidgetItem *curr)
     if (curr && curr->parent())
     {
         /* Get chart type from selected item */
-         ECharType eCurCharType = ECharType(curr->data(0, Qt::UserRole).toInt());
+        ECharType eCurCharType = ECharType(curr->data(0, Qt::UserRole).toInt());
         /* Setup chart */
         pMainPlot->SetupChart(eCurCharType, sr);
     }

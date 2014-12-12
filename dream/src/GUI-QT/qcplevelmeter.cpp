@@ -16,8 +16,10 @@ QCPLevelMeter::QCPLevelMeter(QWidget* parent):QCustomPlot(parent)
     axisRect(0)->setAutoMargins(QCP::msLeft);
     axisRect(0)->setMargins(QMargins(0,7,3,5));
 
-    QVector<QString> labels; labels << "-50" << "0";
-    QVector<double> ticks; ticks << 0 << 50;
+    QVector<QString> labels;
+    labels << "-50" << "0";
+    QVector<double> ticks;
+    ticks << 0 << 50;
     yAxis->setRange(0, 50);
     yAxis->setAutoTicks(false);
     yAxis->setAutoSubTicks(false);
@@ -48,7 +50,8 @@ QCPLevelMeter::QCPLevelMeter(QWidget* parent):QCustomPlot(parent)
     bars->setWidth(0.5);
     bars->setBrush(Qt::green);//QColor(0, 255, 0, 100));
     QVector<double> k,v;
-    v << 20.0; k << 0;
+    v << 20.0;
+    k << 0;
     bars->setData(k, v);
 }
 
@@ -56,7 +59,8 @@ void QCPLevelMeter::setLevel(double d)
 {
     QVector<double> v, k;
     d += 50.0;
-    v << d; k << 0;
+    v << d;
+    k << 0;
     QCPAbstractPlottable* bars = plottable(0);
     qobject_cast<QCPBars*>(bars)->setData(k, v);
     replot();

@@ -3,13 +3,13 @@
  * Copyright (c) 2001-2014
  *
  * Original Author(s):
- *	Volker Fischer
+ *  Volker Fischer
  *
  * Qwt 5-6 conversion Author(s):
  *  David Flamand
  *
  * Description:
- *	Custom settings of the qwt-plot, Support Qwt version 5.0.0 to 6.1.0(+)
+ *  Custom settings of the qwt-plot, Support Qwt version 5.0.0 to 6.1.0(+)
  *
  ******************************************************************************
  *
@@ -83,7 +83,7 @@
 #endif
 
 /* Definitions ****************************************************************/
-#define GUI_CONTROL_UPDATE_WATERFALL			100	/* Milliseconds */
+#define GUI_CONTROL_UPDATE_WATERFALL            100 /* Milliseconds */
 
 /* Implementation *************************************************************/
 CDRMPlotQwt::CDRMPlotQwt(QWidget* parent) :
@@ -200,10 +200,10 @@ CDRMPlotQwt::CDRMPlotQwt(QWidget* parent) :
     /* Connections */
 #if QWT_VERSION < 0x060000
     connect(picker, SIGNAL(selected(const QwtDoublePoint &)),
-        this, SLOT(OnSelected(const QwtDoublePoint &)));
+            this, SLOT(OnSelected(const QwtDoublePoint &)));
 #else
     connect(picker, SIGNAL(selected(const QPointF &)),
-        this, SLOT(OnSelected(const QPointF &)));
+            this, SLOT(OnSelected(const QPointF &)));
 #endif
 }
 
@@ -337,8 +337,8 @@ void CDRMPlotQwt::clearPlots()
 }
 
 void CDRMPlotQwt::setupBasicPlot(const char* titleText,
-                    const char* xText, const char* yText, const char* legendText,
-                    double left, double right, double bottom, double top,
+                                 const char* xText, const char* yText, const char* legendText,
+                                 double left, double right, double bottom, double top,
                                  QColor pc, QColor bc)
 {
     grid.enableX(TRUE);
@@ -366,7 +366,9 @@ void CDRMPlotQwt::setupBasicPlot(const char* titleText,
     main1curve.setTitle(legendText);
     main1curve.attach(plot);
 
-    for(int i=0; i<4; i++) { policy[i] = Plot::fixed; }
+    for(int i=0; i<4; i++) {
+        policy[i] = Plot::fixed;
+    }
 }
 
 void CDRMPlotQwt::add2ndGraph(const char* axisText, const char* legendText, double bottom, double top, QColor pc)
@@ -388,7 +390,7 @@ void CDRMPlotQwt::add2ndGraph(const char* axisText, const char* legendText, doub
     main2curve.attach(plot);
 #if QWT_VERSION < 0x060100
     foreach(QWidget* item, legend->legendItems())
-        item->setFont(legend->font());
+    item->setFont(legend->font());
 #endif
 }
 
@@ -416,7 +418,8 @@ void CDRMPlotQwt::addxMarker(QColor color, double initialPos)
     yData = getBounds(QwtPlot::yLeft);
     double x[2], y[2];
     x[0] = x[1] = initialPos;
-    y[0] = yData[0]; y[1] = yData[1];
+    y[0] = yData[0];
+    y[1] = yData[1];
     curve->SETDATA(x, y, 2);
     nCurves++;
 }
@@ -441,7 +444,8 @@ void CDRMPlotQwt::addyMarker(QColor color, double initialPos)
     QVector<double> xData;
     xData = getBounds(QwtPlot::xBottom);
     double x[2], y[2];
-    x[0] = xData[0]; x[1] = xData[1];
+    x[0] = xData[0];
+    x[1] = xData[1];
     y[0] = y[1] = initialPos;
     yMarker.SETDATA(x, y, 2);
 }
@@ -700,7 +704,8 @@ void CDRMPlotQwt::setxMarker(int n, _REAL r)
     yData = getBounds(QwtPlot::yLeft);
     double x[2], y[2];
     x[0] = x[1] = r;
-    y[0] = yData[0]; y[1] = yData[1];
+    y[0] = yData[0];
+    y[1] = yData[1];
     curve->SETDATA(x, y, 2);
 }
 

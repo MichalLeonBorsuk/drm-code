@@ -74,19 +74,19 @@
 #define DEFAULT_MODE (MODE_SIGNAL /*| MODE_SERVICE*/)
 
 #define REPLACE_CHAR(str, from, to) \
-	for (size_t pos=0;;) { \
-		pos = str.find(from, pos); \
-		if (pos == string::npos) break; \
-		str.replace(pos, 1, to ""); \
-		pos += sizeof(to "")-1; \
-	}
+    for (size_t pos=0;;) { \
+        pos = str.find(from, pos); \
+        if (pos == string::npos) break; \
+        str.replace(pos, 1, to ""); \
+        pos += sizeof(to "")-1; \
+    }
 #define REPLACE_STR(str, from, to) \
-	for (size_t pos=0;;) { \
-		pos = str.find(from "", pos); \
-		if (pos == string::npos) break; \
-		str.replace(pos, sizeof(from "")-1, to ""); \
-		pos += sizeof(to "")-1; \
-	}
+    for (size_t pos=0;;) { \
+        pos = str.find(from "", pos); \
+        if (pos == string::npos) break; \
+        str.replace(pos, sizeof(from "")-1, to ""); \
+        pos += sizeof(to "")-1; \
+    }
 
 #define MINIMUM_IF_LEVEL -200.0
 
@@ -110,335 +110,388 @@ struct termios CConsoleIO::old_tio;
 void
 CConsoleIO::Enter(CDRMReceiver* pDRMReceiver)
 {
-	mode = DEFAULT_MODE;
+    mode = DEFAULT_MODE;
 
-	CConsoleIO::pDRMReceiver = pDRMReceiver;
+    CConsoleIO::pDRMReceiver = pDRMReceiver;
 
-	/* Signals to ignore */
-	struct sigaction sigact;
-	sigact.sa_handler = SIG_IGN;
-	sigemptyset(&sigact.sa_mask);
-	sigact.sa_flags = 0;
-	sigaction(SIGPIPE, &sigact, NULL);
-	sigaction(SIGINT,  &sigact, NULL);
-	sigaction(SIGHUP,  &sigact, NULL);
-	sigaction(SIGTERM, &sigact, NULL);
-	sigaction(SIGQUIT, &sigact, NULL);
-	sigaction(SIGUSR1, &sigact, NULL);
-	sigaction(SIGUSR2, &sigact, NULL);
+    /* Signals to ignore */
+    struct sigaction sigact;
+    sigact.sa_handler = SIG_IGN;
+    sigemptyset(&sigact.sa_mask);
+    sigact.sa_flags = 0;
+    sigaction(SIGPIPE, &sigact, NULL);
+    sigaction(SIGINT,  &sigact, NULL);
+    sigaction(SIGHUP,  &sigact, NULL);
+    sigaction(SIGTERM, &sigact, NULL);
+    sigaction(SIGQUIT, &sigact, NULL);
+    sigaction(SIGUSR1, &sigact, NULL);
+    sigaction(SIGUSR2, &sigact, NULL);
 
-	/* Signals to block */
-	sigemptyset(&sigset);
-	sigaddset(&sigset, SIGINT);
-	sigaddset(&sigset, SIGHUP);
-	sigaddset(&sigset, SIGTERM);
-	sigaddset(&sigset, SIGQUIT);
-	sigaddset(&sigset, SIGUSR1);
-	pthread_sigmask(SIG_BLOCK, &sigset, NULL);
+    /* Signals to block */
+    sigemptyset(&sigset);
+    sigaddset(&sigset, SIGINT);
+    sigaddset(&sigset, SIGHUP);
+    sigaddset(&sigset, SIGTERM);
+    sigaddset(&sigset, SIGQUIT);
+    sigaddset(&sigset, SIGUSR1);
+    pthread_sigmask(SIG_BLOCK, &sigset, NULL);
 
-	/* TTY opening */
-	tty = open(TTY_DEVICE, O_RDWR | O_NONBLOCK);
-	if (tty != -1)
-	{
-		if (!tcgetattr(tty, &old_tio))
-		{
-			struct termios tio = old_tio;
-			tio.c_lflag &= ~(ECHO|ICANON);
-			tty_setup = tcsetattr(tty, TCSANOW, &tio);
-		}
-		else
-			tty_setup = -1;
-		cwrite(HIDECUR CLEAR HOME);
-	}
+    /* TTY opening */
+    tty = open(TTY_DEVICE, O_RDWR | O_NONBLOCK);
+    if (tty != -1)
+    {
+        if (!tcgetattr(tty, &old_tio))
+        {
+            struct termios tio = old_tio;
+            tio.c_lflag &= ~(ECHO|ICANON);
+            tty_setup = tcsetattr(tty, TCSANOW, &tio);
+        }
+        else
+            tty_setup = -1;
+        cwrite(HIDECUR CLEAR HOME);
+    }
 }
 
 void
 CConsoleIO::Leave()
 {
-	if (tty != -1)
-	{
-		cwrite(CLEAR HOME SHOWCUR);
-		if (!tty_setup)
-			tcsetattr(tty, TCSANOW, &old_tio);
-		close(tty);
-		tty = -1;
-	}
+    if (tty != -1)
+    {
+        cwrite(CLEAR HOME SHOWCUR);
+        if (!tty_setup)
+            tcsetattr(tty, TCSANOW, &old_tio);
+        close(tty);
+        tty = -1;
+    }
 }
 
 void
 CConsoleIO::Update()
 {
-	/* Check for pending signals */
-	if (!sigpending(&sigset))
-	{
-		pthread_sigmask(SIG_UNBLOCK, &sigset, NULL);
-		pthread_sigmask(SIG_BLOCK,   &sigset, NULL);
-		if (sigismember(&sigset, SIGINT) ||
-			sigismember(&sigset, SIGHUP) ||
-			sigismember(&sigset, SIGTERM) ||
-			sigismember(&sigset, SIGQUIT)) {
-			pDRMReceiver->Stop();
-			return;
-		}
-		if (sigismember(&sigset, SIGUSR1))
-		{
-			pDRMReceiver->RequestNewAcquisition();
-		}
-	}
+    /* Check for pending signals */
+    if (!sigpending(&sigset))
+    {
+        pthread_sigmask(SIG_UNBLOCK, &sigset, NULL);
+        pthread_sigmask(SIG_BLOCK,   &sigset, NULL);
+        if (sigismember(&sigset, SIGINT) ||
+                sigismember(&sigset, SIGHUP) ||
+                sigismember(&sigset, SIGTERM) ||
+                sigismember(&sigset, SIGQUIT)) {
+            pDRMReceiver->Stop();
+            return;
+        }
+        if (sigismember(&sigset, SIGUSR1))
+        {
+            pDRMReceiver->RequestNewAcquisition();
+        }
+    }
 
-	/* No TTY return */
-	if (tty < 0)
-		return;
+    /* No TTY return */
+    if (tty < 0)
+        return;
 
-	CParameter& Parameters = *pDRMReceiver->GetParameters();
-	cinit();
+    CParameter& Parameters = *pDRMReceiver->GetParameters();
+    cinit();
 
-	/* Read key input */
-	for (;;)
-	{
-		unsigned char buffer[1];
-		int ret = read(tty, buffer, sizeof(buffer));
-		if (ret != sizeof(buffer))
-			break;
-		int key = buffer[0];
-		if (key == '\3' /* Control-C */ || key == 'q' || key == 'Q')
-		{
-			pDRMReceiver->Stop();
-			return;
-		}
-		if (key >= '1' && key <= '4')
-		{
-			Parameters.SetCurSelAudioService(key - '1');
-		}
-		if (key == ' ')
-		{
-			mode ^= MODE_NODISPLAY;
-			cwrite(CLEAR HOME);
-			time = 0;
-		}
-		if (key == 'f' || key == 'F')
-		{
-			mode &= ~MODE_NODISPLAY;
-			mode |= MODE_SIGNAL | MODE_SERVICE;
-			cwrite(CLEAR HOME);
-			time = 0;
-		}
-		if (key == 'i' || key == 'I')
-		{
-			if (mode & MODE_NODISPLAY)
-			{
-				mode &= ~MODE_NODISPLAY;
-				mode |= MODE_SIGNAL;
-			}
-			else
-				mode ^= MODE_SIGNAL;
-			cwrite(CLEAR);
-			time = 0;
-		}
-		if (key == 's' || key == 'S')
-		{
-			if (mode & MODE_NODISPLAY)
-			{
-				mode &= ~MODE_NODISPLAY;
-				mode |= MODE_SERVICE;
-			}
-			else
-				mode ^= MODE_SERVICE;
-			cwrite(CLEAR);
-			time = 0;
-		}
-		if (key == 'n' || key == 'N')
-		{
-			pDRMReceiver->RequestNewAcquisition();
-		}
-	}
+    /* Read key input */
+    for (;;)
+    {
+        unsigned char buffer[1];
+        int ret = read(tty, buffer, sizeof(buffer));
+        if (ret != sizeof(buffer))
+            break;
+        int key = buffer[0];
+        if (key == '\3' /* Control-C */ || key == 'q' || key == 'Q')
+        {
+            pDRMReceiver->Stop();
+            return;
+        }
+        if (key >= '1' && key <= '4')
+        {
+            Parameters.SetCurSelAudioService(key - '1');
+        }
+        if (key == ' ')
+        {
+            mode ^= MODE_NODISPLAY;
+            cwrite(CLEAR HOME);
+            time = 0;
+        }
+        if (key == 'f' || key == 'F')
+        {
+            mode &= ~MODE_NODISPLAY;
+            mode |= MODE_SIGNAL | MODE_SERVICE;
+            cwrite(CLEAR HOME);
+            time = 0;
+        }
+        if (key == 'i' || key == 'I')
+        {
+            if (mode & MODE_NODISPLAY)
+            {
+                mode &= ~MODE_NODISPLAY;
+                mode |= MODE_SIGNAL;
+            }
+            else
+                mode ^= MODE_SIGNAL;
+            cwrite(CLEAR);
+            time = 0;
+        }
+        if (key == 's' || key == 'S')
+        {
+            if (mode & MODE_NODISPLAY)
+            {
+                mode &= ~MODE_NODISPLAY;
+                mode |= MODE_SERVICE;
+            }
+            else
+                mode ^= MODE_SERVICE;
+            cwrite(CLEAR);
+            time = 0;
+        }
+        if (key == 'n' || key == 'N')
+        {
+            pDRMReceiver->RequestNewAcquisition();
+        }
+    }
 
-	if (mode & MODE_NODISPLAY)
-		return;
+    if (mode & MODE_NODISPLAY)
+        return;
 
-	struct timespec ts;
-	if (clock_gettime(CLOCK_MONOTONIC, &ts) == -1)
-		return;
-	unsigned long long curtime = (unsigned long long)ts.tv_sec*1000 + (unsigned long long)ts.tv_nsec/1000000;
-	if ((curtime - time) < GUI_CONTROL_UPDATE_TIME)
-		return;
-	time = curtime;
+    struct timespec ts;
+    if (clock_gettime(CLOCK_MONOTONIC, &ts) == -1)
+        return;
+    unsigned long long curtime = (unsigned long long)ts.tv_sec*1000 + (unsigned long long)ts.tv_nsec/1000000;
+    if ((curtime - time) < GUI_CONTROL_UPDATE_TIME)
+        return;
+    time = curtime;
 
-	char msc = ETypeRxStatus2char(Parameters.ReceiveStatus.SLAudio.GetStatus());
-	char sdc = ETypeRxStatus2char(Parameters.ReceiveStatus.SDC.GetStatus());
-	char fac = ETypeRxStatus2char(Parameters.ReceiveStatus.FAC.GetStatus());
-	char time = ETypeRxStatus2char(Parameters.ReceiveStatus.TSync.GetStatus());
-	char frame = ETypeRxStatus2char(Parameters.ReceiveStatus.FSync.GetStatus());
-	ETypeRxStatus soundCardStatusI = Parameters.ReceiveStatus.InterfaceI.GetStatus(); /* Input */
-	ETypeRxStatus soundCardStatusO = Parameters.ReceiveStatus.InterfaceO.GetStatus(); /* Output */
-	char inter = ETypeRxStatus2char(soundCardStatusO == NOT_PRESENT ||
-		(soundCardStatusI != NOT_PRESENT && soundCardStatusI != RX_OK) ? soundCardStatusI : soundCardStatusO);
-	cprintf(HOME "        IO:%c  Time:%c  Frame:%c  FAC:%c  SDC:%c  MSC:%c" NL, inter, time, frame, fac, sdc, msc);
+    char msc = ETypeRxStatus2char(Parameters.ReceiveStatus.SLAudio.GetStatus());
+    char sdc = ETypeRxStatus2char(Parameters.ReceiveStatus.SDC.GetStatus());
+    char fac = ETypeRxStatus2char(Parameters.ReceiveStatus.FAC.GetStatus());
+    char time = ETypeRxStatus2char(Parameters.ReceiveStatus.TSync.GetStatus());
+    char frame = ETypeRxStatus2char(Parameters.ReceiveStatus.FSync.GetStatus());
+    ETypeRxStatus soundCardStatusI = Parameters.ReceiveStatus.InterfaceI.GetStatus(); /* Input */
+    ETypeRxStatus soundCardStatusO = Parameters.ReceiveStatus.InterfaceO.GetStatus(); /* Output */
+    char inter = ETypeRxStatus2char(soundCardStatusO == NOT_PRESENT ||
+                                    (soundCardStatusI != NOT_PRESENT && soundCardStatusI != RX_OK) ? soundCardStatusI : soundCardStatusO);
+    cprintf(HOME "        IO:%c  Time:%c  Frame:%c  FAC:%c  SDC:%c  MSC:%c" NL, inter, time, frame, fac, sdc, msc);
 
-	_REAL rIFLevel = Parameters.GetIFSignalLevel();
-	if (rIFLevel > MINIMUM_IF_LEVEL)
-		cprintf("                   IF Level: %.1f dB" NL, rIFLevel);
-	else
-		cprintf("                   IF Level: " NA NL);
+    _REAL rIFLevel = Parameters.GetIFSignalLevel();
+    if (rIFLevel > MINIMUM_IF_LEVEL)
+        cprintf("                   IF Level: %.1f dB" NL, rIFLevel);
+    else
+        cprintf("                   IF Level: " NA NL);
 
-	if (mode & MODE_SIGNAL)
-	{
-		int signal = pDRMReceiver->GetAcquiState() == AS_WITH_SIGNAL;
-		if (signal)
-		{
-			_REAL rSNR = Parameters.GetSNR();
-			cprintf("                        SNR: %.1f dB" NL, rSNR);
+    if (mode & MODE_SIGNAL)
+    {
+        int signal = pDRMReceiver->GetAcquiState() == AS_WITH_SIGNAL;
+        if (signal)
+        {
+            _REAL rSNR = Parameters.GetSNR();
+            cprintf("                        SNR: %.1f dB" NL, rSNR);
 
-			_REAL rWMERMSC = Parameters.rWMERMSC;
-			_REAL rMER = Parameters.rMER;
-			cprintf("         MSC WMER / MSC MER: %.1f dB / %.1f dB" NL, rWMERMSC, rMER);
+            _REAL rWMERMSC = Parameters.rWMERMSC;
+            _REAL rMER = Parameters.rMER;
+            cprintf("         MSC WMER / MSC MER: %.1f dB / %.1f dB" NL, rWMERMSC, rMER);
 
-			_REAL rDCFreq = pDRMReceiver->GetReceiveData()->ConvertFrequency(Parameters.GetDCFrequency());
-			cprintf(" DC Frequency of DRM Signal: %.2f Hz" NL, rDCFreq);
+            _REAL rDCFreq = pDRMReceiver->GetReceiveData()->ConvertFrequency(Parameters.GetDCFrequency());
+            cprintf(" DC Frequency of DRM Signal: %.2f Hz" NL, rDCFreq);
 
-		    _REAL rCurSamROffs = Parameters.rResampleOffset;
-			int iCurSamROffsPPM = (int)(rCurSamROffs / Parameters.GetSigSampleRate() * 1e6);
-			cprintf("    Sample Frequency Offset: %.2f Hz (%i ppm)" NL, rCurSamROffs, iCurSamROffsPPM);
+            _REAL rCurSamROffs = Parameters.rResampleOffset;
+            int iCurSamROffsPPM = (int)(rCurSamROffs / Parameters.GetSigSampleRate() * 1e6);
+            cprintf("    Sample Frequency Offset: %.2f Hz (%i ppm)" NL, rCurSamROffs, iCurSamROffsPPM);
 
-			_REAL rSigma = Parameters.rSigmaEstimate;
-			_REAL rMinDelay = Parameters.rMinDelay;
-			if (rSigma >= 0.0)
-			cprintf("            Doppler / Delay: %.2f Hz / %.2f ms" NL, rSigma, rMinDelay);
-			else
-			cprintf("            Doppler / Delay: " NA NL);
+            _REAL rSigma = Parameters.rSigmaEstimate;
+            _REAL rMinDelay = Parameters.rMinDelay;
+            if (rSigma >= 0.0)
+                cprintf("            Doppler / Delay: %.2f Hz / %.2f ms" NL, rSigma, rMinDelay);
+            else
+                cprintf("            Doppler / Delay: " NA NL);
 
-			const char *strRob;
-			switch (Parameters.GetWaveMode()) {
-			case RM_ROBUSTNESS_MODE_A: strRob = "A"; break;
-			case RM_ROBUSTNESS_MODE_B: strRob = "B"; break;
-			case RM_ROBUSTNESS_MODE_C: strRob = "C"; break;
-			case RM_ROBUSTNESS_MODE_D: strRob = "D"; break;
-            case RM_ROBUSTNESS_MODE_E: strRob = "E"; break;
-            default:                   strRob = "?"; }
-			const char *strOcc;
-			switch (Parameters.GetSpectrumOccup()) {
-			case SO_0: strOcc = "4.5 kHz"; break;
-			case SO_1: strOcc = "5 kHz";   break;
-			case SO_2: strOcc = "9 kHz";   break;
-	 		case SO_3: strOcc = "10 kHz";  break;
-			case SO_4: strOcc = "18 kHz";  break;
-			case SO_5: strOcc = "20 kHz";  break;
-			default:   strOcc = "?";       }
-			cprintf("       DRM Mode / Bandwidth: %s / %s" NL, strRob, strOcc);
+            const char *strRob;
+            switch (Parameters.GetWaveMode()) {
+            case RM_ROBUSTNESS_MODE_A:
+                strRob = "A";
+                break;
+            case RM_ROBUSTNESS_MODE_B:
+                strRob = "B";
+                break;
+            case RM_ROBUSTNESS_MODE_C:
+                strRob = "C";
+                break;
+            case RM_ROBUSTNESS_MODE_D:
+                strRob = "D";
+                break;
+            case RM_ROBUSTNESS_MODE_E:
+                strRob = "E";
+                break;
+            default:
+                strRob = "?";
+            }
+            const char *strOcc;
+            switch (Parameters.GetSpectrumOccup()) {
+            case SO_0:
+                strOcc = "4.5 kHz";
+                break;
+            case SO_1:
+                strOcc = "5 kHz";
+                break;
+            case SO_2:
+                strOcc = "9 kHz";
+                break;
+            case SO_3:
+                strOcc = "10 kHz";
+                break;
+            case SO_4:
+                strOcc = "18 kHz";
+                break;
+            case SO_5:
+                strOcc = "20 kHz";
+                break;
+            default:
+                strOcc = "?";
+            }
+            cprintf("       DRM Mode / Bandwidth: %s / %s" NL, strRob, strOcc);
 
-			const char *strInter;
-		    switch (Parameters.eSymbolInterlMode) {
-		    case SI_LONG:  strInter = "2 s";    break;
-		    case SI_SHORT: strInter = "400 ms"; break;
-		    default:       strInter = "?";      }
-			cprintf("          Interleaver Depth: %s" NL, strInter);
+            const char *strInter;
+            switch (Parameters.eSymbolInterlMode) {
+            case SI_LONG:
+                strInter = "2 s";
+                break;
+            case SI_SHORT:
+                strInter = "400 ms";
+                break;
+            default:
+                strInter = "?";
+            }
+            cprintf("          Interleaver Depth: %s" NL, strInter);
 
-			const char *strSDC;
-			switch (Parameters.eSDCCodingScheme) {
-			case CS_1_SM: strSDC = "4-QAM";  break;
-			case CS_2_SM: strSDC = "16-QAM"; break;
-			default:      strSDC = "?";      }
-			const char *strMSC;
-			switch (Parameters.eMSCCodingScheme) {
-			case CS_2_SM:    strMSC = "SM 16-QAM";    break;
-			case CS_3_SM:    strMSC = "SM 64-QAM";    break;
-			case CS_3_HMSYM: strMSC = "HMsym 64-QAM"; break;
-			case CS_3_HMMIX: strMSC = "HMmix 64-QAM"; break;
-			default:         strMSC = "?";            }
-			cprintf("             SDC / MSC Mode: %s / %s" NL, strSDC, strMSC);
+            const char *strSDC;
+            switch (Parameters.eSDCCodingScheme) {
+            case CS_1_SM:
+                strSDC = "4-QAM";
+                break;
+            case CS_2_SM:
+                strSDC = "16-QAM";
+                break;
+            default:
+                strSDC = "?";
+            }
+            const char *strMSC;
+            switch (Parameters.eMSCCodingScheme) {
+            case CS_2_SM:
+                strMSC = "SM 16-QAM";
+                break;
+            case CS_3_SM:
+                strMSC = "SM 64-QAM";
+                break;
+            case CS_3_HMSYM:
+                strMSC = "HMsym 64-QAM";
+                break;
+            case CS_3_HMMIX:
+                strMSC = "HMmix 64-QAM";
+                break;
+            default:
+                strMSC = "?";
+            }
+            cprintf("             SDC / MSC Mode: %s / %s" NL, strSDC, strMSC);
 
-			int iPartB = Parameters.MSCPrLe.iPartB;
-			int iPartA = Parameters.MSCPrLe.iPartA;
-			cprintf("        Prot. Level (B / A): %i / %i" NL, iPartB, iPartA);
+            int iPartB = Parameters.MSCPrLe.iPartB;
+            int iPartA = Parameters.MSCPrLe.iPartA;
+            cprintf("        Prot. Level (B / A): %i / %i" NL, iPartB, iPartA);
 
-			int iNumAudio = Parameters.iNumAudioService;
-			int iNumData = Parameters.iNumDataService;
-			cprintf("         Number of Services: Audio: %i / Data: %i" NL, (int)iNumAudio, (int)iNumData);
+            int iNumAudio = Parameters.iNumAudioService;
+            int iNumData = Parameters.iNumDataService;
+            cprintf("         Number of Services: Audio: %i / Data: %i" NL, (int)iNumAudio, (int)iNumData);
 
-			int iYear = Parameters.iYear;
-			int iMonth = Parameters.iMonth;
-			int iDay = Parameters.iDay;
-			int iUTCHour = Parameters.iUTCHour;
-			int iUTCMin = Parameters.iUTCMin;
-			if (iYear==0 && iMonth==0 && iDay==0 && iUTCHour==0 && iUTCMin==0)
-			cprintf("       Received time - date: Service not available" CL);
-			else
-			cprintf("       Received time - date: %04i-%02i-%02i %02i:%02i:00" CL, iYear, iMonth, iDay, iUTCHour, iUTCMin);
+            int iYear = Parameters.iYear;
+            int iMonth = Parameters.iMonth;
+            int iDay = Parameters.iDay;
+            int iUTCHour = Parameters.iUTCHour;
+            int iUTCMin = Parameters.iUTCMin;
+            if (iYear==0 && iMonth==0 && iDay==0 && iUTCHour==0 && iUTCMin==0)
+                cprintf("       Received time - date: Service not available" CL);
+            else
+                cprintf("       Received time - date: %04i-%02i-%02i %02i:%02i:00" CL, iYear, iMonth, iDay, iUTCHour, iUTCMin);
 
-		}
-		else {
-			cprintf("                        SNR: " NA NL
-					"         MSC WMER / MSC MER: " NA NL
-					" DC Frequency of DRM Signal: " NA NL
-					"    Sample Frequency Offset: " NA NL
-					"            Doppler / Delay: " NA NL
-					"       DRM Mode / Bandwidth: " NA NL
-					"          Interleaver Depth: " NA NL
-					"             SDC / MSC Mode: " NA NL
-					"        Prot. Level (B / A): " NA NL
-					"         Number of Services: " NA NL
-					"       Received time - date: " NA CL);
-		}
-	}
-	if (mode & MODE_SERVICE)
-	{
-		if (mode & MODE_SIGNAL)
-			cprintf(NL);
-		cprintf(NL "Service:" NL);
-		const char* strTextMessage = NULL;
-		int iCurAudService = Parameters.GetCurSelAudioService();
-		for (int i = 0; i < MAX_NUM_SERVICES; i++)
-		{
-			CService service = Parameters.Service[i];
-			if (service.IsActive())
-			{
-				const char *strLabel = service.strLabel.c_str();
-				int ID = service.iServiceID;
-				bool audio = service.eAudDataFlag == CService::SF_AUDIO;
-				cprintf("%c%i | %X | %s ", i==iCurAudService ? '>' : ' ', i+1, ID, strLabel);
-				_REAL rBitRate = Parameters.GetBitRateKbps(i, !audio);
-				_REAL rPartABLenRat = Parameters.PartABLenRatio(i);
-		        if (rPartABLenRat != (_REAL) 0.0)
-					cprintf("| UEP (%.1f%%) |", rPartABLenRat * 100);
-		        else
-					cprintf("| EEP |");
-				if (rBitRate > 0.0)
-					cprintf(" %s %.2f kbps", audio ? "Audio" : "Data", rBitRate);
-				if (audio && service.DataParam.iStreamID != STREAM_ID_NOT_USED)
-				{
-					_REAL rBitRate = Parameters.GetBitRateKbps(i, TRUE);
-					cprintf(" + Data %.2f kbps", rBitRate);
-				}
-				cprintf(NL);
-				if (i == iCurAudService)
-					strTextMessage = service.AudioParam.strTextMessage.c_str();
-			}
-			else
-				cprintf(" %i" NL, i+1);
-		}
-		if (strTextMessage != NULL)
-		{
-			string msg(strTextMessage);
-			REPLACE_STR(msg, "\r\n", "\r");  /* Windows CR-LF */
-			REPLACE_CHAR(msg, '\n', "\r");   /* New Line */
-			REPLACE_CHAR(msg, '\f', "\r");   /* Form Feed */
-			REPLACE_CHAR(msg, '\v', "\r");   /* Vertical Tab */
-			REPLACE_CHAR(msg, '\t', "    "); /* Horizontal Tab */
-			REPLACE_CHAR(msg, '\r', NL);     /* Carriage Return */
-			cprintf(NL "%s", msg.c_str());
-		}
-	}
-	cprintf(CLREND HOME);
-	cflush();
+        }
+        else {
+            cprintf("                        SNR: " NA NL
+                    "         MSC WMER / MSC MER: " NA NL
+                    " DC Frequency of DRM Signal: " NA NL
+                    "    Sample Frequency Offset: " NA NL
+                    "            Doppler / Delay: " NA NL
+                    "       DRM Mode / Bandwidth: " NA NL
+                    "          Interleaver Depth: " NA NL
+                    "             SDC / MSC Mode: " NA NL
+                    "        Prot. Level (B / A): " NA NL
+                    "         Number of Services: " NA NL
+                    "       Received time - date: " NA CL);
+        }
+    }
+    if (mode & MODE_SERVICE)
+    {
+        if (mode & MODE_SIGNAL)
+            cprintf(NL);
+        cprintf(NL "Service:" NL);
+        const char* strTextMessage = NULL;
+        int iCurAudService = Parameters.GetCurSelAudioService();
+        for (int i = 0; i < MAX_NUM_SERVICES; i++)
+        {
+            CService service = Parameters.Service[i];
+            if (service.IsActive())
+            {
+                const char *strLabel = service.strLabel.c_str();
+                int ID = service.iServiceID;
+                bool audio = service.eAudDataFlag == CService::SF_AUDIO;
+                cprintf("%c%i | %X | %s ", i==iCurAudService ? '>' : ' ', i+1, ID, strLabel);
+                _REAL rBitRate = Parameters.GetBitRateKbps(i, !audio);
+                _REAL rPartABLenRat = Parameters.PartABLenRatio(i);
+                if (rPartABLenRat != (_REAL) 0.0)
+                    cprintf("| UEP (%.1f%%) |", rPartABLenRat * 100);
+                else
+                    cprintf("| EEP |");
+                if (rBitRate > 0.0)
+                    cprintf(" %s %.2f kbps", audio ? "Audio" : "Data", rBitRate);
+                if (audio && service.DataParam.iStreamID != STREAM_ID_NOT_USED)
+                {
+                    _REAL rBitRate = Parameters.GetBitRateKbps(i, TRUE);
+                    cprintf(" + Data %.2f kbps", rBitRate);
+                }
+                cprintf(NL);
+                if (i == iCurAudService)
+                    strTextMessage = service.AudioParam.strTextMessage.c_str();
+            }
+            else
+                cprintf(" %i" NL, i+1);
+        }
+        if (strTextMessage != NULL)
+        {
+            string msg(strTextMessage);
+            REPLACE_STR(msg, "\r\n", "\r");  /* Windows CR-LF */
+            REPLACE_CHAR(msg, '\n', "\r");   /* New Line */
+            REPLACE_CHAR(msg, '\f', "\r");   /* Form Feed */
+            REPLACE_CHAR(msg, '\v', "\r");   /* Vertical Tab */
+            REPLACE_CHAR(msg, '\t', "    "); /* Horizontal Tab */
+            REPLACE_CHAR(msg, '\r', NL);     /* Carriage Return */
+            cprintf(NL "%s", msg.c_str());
+        }
+    }
+    cprintf(CLREND HOME);
+    cflush();
 }
 
 char
 CConsoleIO::ETypeRxStatus2char(ETypeRxStatus eTypeRxStatus)
 {
-	switch (eTypeRxStatus) {
-	case CRC_ERROR:  return 'X';
-	case DATA_ERROR: return '*';
-	case RX_OK:      return 'O';
-	default:         return ' '; }
+    switch (eTypeRxStatus) {
+    case CRC_ERROR:
+        return 'X';
+    case DATA_ERROR:
+        return '*';
+    case RX_OK:
+        return 'O';
+    default:
+        return ' ';
+    }
 }
 

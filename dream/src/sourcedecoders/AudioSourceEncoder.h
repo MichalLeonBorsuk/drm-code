@@ -3,7 +3,7 @@
  * Copyright (c) 2001-2014
  *
  * Author(s):
- *	Volker Fischer, Ollie Haffenden
+ *  Volker Fischer, Ollie Haffenden
  *
  ******************************************************************************
  *
@@ -44,128 +44,156 @@
 class CAudioSourceEncoderImplementation
 {
 public:
-	CAudioSourceEncoderImplementation();
-	virtual ~CAudioSourceEncoderImplementation();
+    CAudioSourceEncoderImplementation();
+    virtual ~CAudioSourceEncoderImplementation();
 
-	void SetTextMessage(const string& strText);
-	void ClearTextMessage();
+    void SetTextMessage(const string& strText);
+    void ClearTextMessage();
 
-	void SetPicFileName(const string& strFileName, const string& strFormat)
-		{DataEncoder.GetSliShowEnc()->AddFileName(strFileName, strFormat);}
-	void ClearPicFileNames()
-		{DataEncoder.GetSliShowEnc()->ClearAllFileNames();}
-	void SetPathRemoval(_BOOLEAN bRemovePath)
-		{DataEncoder.GetSliShowEnc()->SetPathRemoval(bRemovePath);}
-	_BOOLEAN GetTransStat(string& strCPi, _REAL& rCPe)
-		{return DataEncoder.GetSliShowEnc()->GetTransStat(strCPi, rCPe);}
+    void SetPicFileName(const string& strFileName, const string& strFormat)
+    {
+        DataEncoder.GetSliShowEnc()->AddFileName(strFileName, strFormat);
+    }
+    void ClearPicFileNames()
+    {
+        DataEncoder.GetSliShowEnc()->ClearAllFileNames();
+    }
+    void SetPathRemoval(_BOOLEAN bRemovePath)
+    {
+        DataEncoder.GetSliShowEnc()->SetPathRemoval(bRemovePath);
+    }
+    _BOOLEAN GetTransStat(string& strCPi, _REAL& rCPe)
+    {
+        return DataEncoder.GetSliShowEnc()->GetTransStat(strCPi, rCPe);
+    }
 
     bool CanEncode(CAudioParam::EAudCod eAudCod) {
         switch (eAudCod)
         {
-        case CAudioParam::AC_NONE: return true;
-        case CAudioParam::AC_AAC:  return bCanEncodeAAC;
-        case CAudioParam::AC_CELP: return false;
-        case CAudioParam::AC_HVXC: return false;
-        case CAudioParam::AC_OPUS: return bCanEncodeOPUS;
-        case CAudioParam::AC_xHE_AAC: return false;
+        case CAudioParam::AC_NONE:
+            return true;
+        case CAudioParam::AC_AAC:
+            return bCanEncodeAAC;
+        case CAudioParam::AC_CELP:
+            return false;
+        case CAudioParam::AC_HVXC:
+            return false;
+        case CAudioParam::AC_OPUS:
+            return bCanEncodeOPUS;
+        case CAudioParam::AC_xHE_AAC:
+            return false;
         }
         return false;
     }
 
 protected:
-	void CloseEncoder();
+    void CloseEncoder();
 
-	CTextMessageEncoder		TextMessage;
-	_BOOLEAN				bUsingTextMessage;
-	CDataEncoder			DataEncoder;
-	int						iTotPacketSize;
-	_BOOLEAN				bIsDataService;
-	int						iTotNumBitsForUsage;
+    CTextMessageEncoder     TextMessage;
+    _BOOLEAN                bUsingTextMessage;
+    CDataEncoder            DataEncoder;
+    int                     iTotPacketSize;
+    _BOOLEAN                bIsDataService;
+    int                     iTotNumBitsForUsage;
 
-	CAudioCodec*			codec;
+    CAudioCodec*            codec;
 
-	unsigned long			lNumSampEncIn;
-	unsigned long			lMaxBytesEncOut;
-	unsigned long			lEncSamprate;
-	CVector<_BYTE>			aac_crc_bits;
-	CVector<_SAMPLE>		vecsEncInData;
-	CMatrix<_BYTE>			audio_frame;
-	CVector<int>			veciFrameLength;
-	int						iNumChannels;
-	int						iNumAudioFrames;
-	int						iNumBorders;
-	int						iAudioPayloadLen;
-	int						iNumHigherProtectedBytes;
+    unsigned long           lNumSampEncIn;
+    unsigned long           lMaxBytesEncOut;
+    unsigned long           lEncSamprate;
+    CVector<_BYTE>          aac_crc_bits;
+    CVector<_SAMPLE>        vecsEncInData;
+    CMatrix<_BYTE>          audio_frame;
+    CVector<int>            veciFrameLength;
+    int                     iNumChannels;
+    int                     iNumAudioFrames;
+    int                     iNumBorders;
+    int                     iAudioPayloadLen;
+    int                     iNumHigherProtectedBytes;
 
-	CAudioResample			ResampleObj[MAX_ENCODED_CHANNELS];
-	CVector<_REAL>			vecTempResBufIn[MAX_ENCODED_CHANNELS];
-	CVector<_REAL>			vecTempResBufOut[MAX_ENCODED_CHANNELS];
+    CAudioResample          ResampleObj[MAX_ENCODED_CHANNELS];
+    CVector<_REAL>          vecTempResBufIn[MAX_ENCODED_CHANNELS];
+    CVector<_REAL>          vecTempResBufOut[MAX_ENCODED_CHANNELS];
 
-	_BOOLEAN				bCanEncodeAAC;
-	_BOOLEAN				bCanEncodeOPUS;
+    _BOOLEAN                bCanEncodeAAC;
+    _BOOLEAN                bCanEncodeOPUS;
 
 public:
-	virtual void InitInternalTx(CParameter& Parameters, int &iInputBlockSize, int &iOutputBlockSize);
-	virtual void InitInternalRx(CParameter& Parameters, int &iInputBlockSize, int &iOutputBlockSize);
-	virtual void ProcessDataInternal(CParameter& Parameters, CVectorEx<_SAMPLE>* pvecInputData,
-					CVectorEx<_BINARY>* pvecOutputData, int &iInputBlockSize, int &iOutputBlockSize);
+    virtual void InitInternalTx(CParameter& Parameters, int &iInputBlockSize, int &iOutputBlockSize);
+    virtual void InitInternalRx(CParameter& Parameters, int &iInputBlockSize, int &iOutputBlockSize);
+    virtual void ProcessDataInternal(CParameter& Parameters, CVectorEx<_SAMPLE>* pvecInputData,
+                                     CVectorEx<_BINARY>* pvecOutputData, int &iInputBlockSize, int &iOutputBlockSize);
 };
 
 class CAudioSourceEncoderRx : public CReceiverModul<_SAMPLE, _BINARY>
 {
 public:
-	CAudioSourceEncoderRx() {}
-	virtual ~CAudioSourceEncoderRx() {}
+    CAudioSourceEncoderRx() {}
+    virtual ~CAudioSourceEncoderRx() {}
 
 protected:
-	CAudioSourceEncoderImplementation AudioSourceEncoderImpl;
+    CAudioSourceEncoderImplementation AudioSourceEncoderImpl;
 
-	virtual void InitInternal(CParameter& Parameters)
-	{
-		AudioSourceEncoderImpl.InitInternalRx(Parameters, iInputBlockSize, iOutputBlockSize);
-	}
+    virtual void InitInternal(CParameter& Parameters)
+    {
+        AudioSourceEncoderImpl.InitInternalRx(Parameters, iInputBlockSize, iOutputBlockSize);
+    }
 
-	virtual void ProcessDataInternal(CParameter& Parameters)
-	{
-		AudioSourceEncoderImpl.ProcessDataInternal(Parameters, pvecInputData, pvecOutputData, iInputBlockSize, iOutputBlockSize);
-	}
+    virtual void ProcessDataInternal(CParameter& Parameters)
+    {
+        AudioSourceEncoderImpl.ProcessDataInternal(Parameters, pvecInputData, pvecOutputData, iInputBlockSize, iOutputBlockSize);
+    }
 };
 
 class CAudioSourceEncoder : public CTransmitterModul<_SAMPLE, _BINARY>
 {
 public:
-	CAudioSourceEncoder() {}
-	virtual ~CAudioSourceEncoder() {}
+    CAudioSourceEncoder() {}
+    virtual ~CAudioSourceEncoder() {}
 
-	void SetTextMessage(const string& strText) {AudioSourceEncoderImpl.SetTextMessage(strText);}
-	void ClearTextMessage() {AudioSourceEncoderImpl.ClearTextMessage();}
+    void SetTextMessage(const string& strText) {
+        AudioSourceEncoderImpl.SetTextMessage(strText);
+    }
+    void ClearTextMessage() {
+        AudioSourceEncoderImpl.ClearTextMessage();
+    }
 
-	void SetPicFileName(const string& strFileName, const string& strFormat)
-			{AudioSourceEncoderImpl.SetPicFileName(strFileName, strFormat);}
+    void SetPicFileName(const string& strFileName, const string& strFormat)
+    {
+        AudioSourceEncoderImpl.SetPicFileName(strFileName, strFormat);
+    }
 
-	void ClearPicFileNames() {AudioSourceEncoderImpl.ClearPicFileNames();}
+    void ClearPicFileNames() {
+        AudioSourceEncoderImpl.ClearPicFileNames();
+    }
 
-	void SetPathRemoval(_BOOLEAN bRemovePath)
-			{AudioSourceEncoderImpl.SetPathRemoval(bRemovePath);}
+    void SetPathRemoval(_BOOLEAN bRemovePath)
+    {
+        AudioSourceEncoderImpl.SetPathRemoval(bRemovePath);
+    }
 
-	_BOOLEAN GetTransStat(string& strCPi, _REAL& rCPe)
-			{return AudioSourceEncoderImpl.GetTransStat(strCPi, rCPe);}
+    _BOOLEAN GetTransStat(string& strCPi, _REAL& rCPe)
+    {
+        return AudioSourceEncoderImpl.GetTransStat(strCPi, rCPe);
+    }
 
-	bool CanEncode(CAudioParam::EAudCod eAudCod)
-			{return AudioSourceEncoderImpl.CanEncode(eAudCod);}
+    bool CanEncode(CAudioParam::EAudCod eAudCod)
+    {
+        return AudioSourceEncoderImpl.CanEncode(eAudCod);
+    }
 
 protected:
-	CAudioSourceEncoderImplementation AudioSourceEncoderImpl;
+    CAudioSourceEncoderImplementation AudioSourceEncoderImpl;
 
-	virtual void InitInternal(CParameter& Parameters)
-	{
-		AudioSourceEncoderImpl.InitInternalTx(Parameters, iInputBlockSize, iOutputBlockSize);
-	}
+    virtual void InitInternal(CParameter& Parameters)
+    {
+        AudioSourceEncoderImpl.InitInternalTx(Parameters, iInputBlockSize, iOutputBlockSize);
+    }
 
-	virtual void ProcessDataInternal(CParameter& Parameters)
-	{
-		AudioSourceEncoderImpl.ProcessDataInternal(Parameters, pvecInputData, pvecOutputData, iInputBlockSize, iOutputBlockSize);
-	}
+    virtual void ProcessDataInternal(CParameter& Parameters)
+    {
+        AudioSourceEncoderImpl.ProcessDataInternal(Parameters, pvecInputData, pvecOutputData, iInputBlockSize, iOutputBlockSize);
+    }
 
 };
 

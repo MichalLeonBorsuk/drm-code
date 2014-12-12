@@ -14,8 +14,12 @@ class OpenRSCIDialog : public QDialog
 public:
     explicit OpenRSCIDialog(QWidget *parent = 0);
     ~OpenRSCIDialog();
-    QString getFile() { return file; }
-    void setPath(const QString& p) { path = p; }
+    QString getFile() {
+        return file;
+    }
+    void setPath(const QString& p) {
+        path = p;
+    }
 public slots:
     void accept();
 

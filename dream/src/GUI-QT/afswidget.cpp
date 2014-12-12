@@ -18,9 +18,9 @@ void sdItem(QTreeWidgetItem* w, const CServiceDefinition& sd, const CAltFreqSign
         QTreeWidgetItem* item = new QTreeWidgetItem(l);
         w->addChild(item);
     }
-            //sd. iRegionID;
-            //sd. iScheduleID;
-            //sd. iSystemID;
+    //sd. iRegionID;
+    //sd. iScheduleID;
+    //sd. iSystemID;
 }
 
 void AFSWidget::setAFS(const CAltFreqSign& a)

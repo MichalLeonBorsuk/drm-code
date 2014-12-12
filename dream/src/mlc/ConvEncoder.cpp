@@ -3,11 +3,11 @@
  * Copyright (c) 2001-2014
  *
  * Author(s):
- *	Volker Fischer
+ *  Volker Fischer
  *
  * Description:
  *
- *	Note: We always shift the bits towards the MSB
+ *  Note: We always shift the bits towards the MSB
  *
  ******************************************************************************
  *

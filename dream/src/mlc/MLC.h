@@ -3,10 +3,10 @@
  * Copyright (c) 2001-2014
  *
  * Author(s):
- *	Volker Fischer
+ *  Volker Fischer
  *
  * Description:
- *	See MLC.cpp
+ *  See MLC.cpp
  *
  ******************************************************************************
  *
@@ -52,12 +52,12 @@ public:
     void CalculateParam(CParameter& Parameter, int iNewChannelType);
 
 protected:
-    int	iLevels;
+    int iLevels;
     /* No input bits for each level. First index: Level, second index:
        Protection level.
        For three levels: [M_0,l  M_1,l  M2,l]
        For six levels: [M_0,lRe  M_0,lIm  M_1,lRe  M_1,lIm  M_2,lRe  ...  ] */
-    int	iM[MC_MAX_NUM_LEVELS][2];
+    int iM[MC_MAX_NUM_LEVELS][2];
     int iN[2];
     int iL[3];
     int iN_mux;
@@ -65,36 +65,36 @@ protected:
 
     const int* piInterlSequ;
 
-    int	iNumEncBits;
+    int iNumEncBits;
 
-    EChanType	eChannelType;
-    ECodScheme	eCodingScheme;
+    EChanType   eChannelType;
+    ECodScheme  eCodingScheme;
 };
 
 class CMLCEncoder : public CTransmitterModul<_BINARY, _COMPLEX>,
-            public CMLC
+    public CMLC
 {
 public:
     CMLCEncoder() {}
     virtual ~CMLCEncoder() {}
 
 protected:
-    CConvEncoder		ConvEncoder[MC_MAX_NUM_LEVELS];
+    CConvEncoder        ConvEncoder[MC_MAX_NUM_LEVELS];
     /* Two different types of interleaver table */
-    CBitInterleaver		BitInterleaver[2];
-    CQAMMapping			QAMMapping;
-    CEngergyDispersal	EnergyDisp;
+    CBitInterleaver     BitInterleaver[2];
+    CQAMMapping         QAMMapping;
+    CEngergyDispersal   EnergyDisp;
 
     /* Internal buffers */
-    CVector<_DECISION>	vecEncInBuffer[MC_MAX_NUM_LEVELS];
-    CVector<_DECISION>	vecEncOutBuffer[MC_MAX_NUM_LEVELS];
+    CVector<_DECISION>  vecEncInBuffer[MC_MAX_NUM_LEVELS];
+    CVector<_DECISION>  vecEncOutBuffer[MC_MAX_NUM_LEVELS];
 
     virtual void InitInternal(CParameter& TransmParam);
     virtual void ProcessDataInternal(CParameter& Parameter);
 };
 
 class CMLCDecoder : public CReceiverModul<CEquSig, _BINARY>,
-            public CMLC
+    public CMLC
 {
 public:
     CMLCDecoder() : iInitNumIterations(MC_NUM_ITERATIONS) {}
@@ -114,30 +114,30 @@ public:
     }
 
 protected:
-    CViterbiDecoder		ViterbiDecoder[MC_MAX_NUM_LEVELS];
-    CMLCMetric			MLCMetric;
+    CViterbiDecoder     ViterbiDecoder[MC_MAX_NUM_LEVELS];
+    CMLCMetric          MLCMetric;
     /* Two different types of deinterleaver table */
-    CBitDeinterleaver	BitDeinterleaver[2];
-    CBitInterleaver		BitInterleaver[2];
-    CConvEncoder		ConvEncoder[MC_MAX_NUM_LEVELS];
-    CEngergyDispersal	EnergyDisp;
+    CBitDeinterleaver   BitDeinterleaver[2];
+    CBitInterleaver     BitInterleaver[2];
+    CConvEncoder        ConvEncoder[MC_MAX_NUM_LEVELS];
+    CEngergyDispersal   EnergyDisp;
 
     /* Internal buffers */
-    CVector<CDistance>	vecMetric;
+    CVector<CDistance>  vecMetric;
 
-    CVector<_DECISION>	vecDecOutBits[MC_MAX_NUM_LEVELS];
-    CVector<_DECISION>	vecSubsetDef[MC_MAX_NUM_LEVELS];
-    int					iNumOutBits;
+    CVector<_DECISION>  vecDecOutBits[MC_MAX_NUM_LEVELS];
+    CVector<_DECISION>  vecSubsetDef[MC_MAX_NUM_LEVELS];
+    int                 iNumOutBits;
 
     /* Accumulated metric */
-    _REAL				rAccMetric;
+    _REAL               rAccMetric;
 
     /* Internal buffer for GetVectorSpace function */
-    CVector<_COMPLEX>	vecSigSpacBuf;
+    CVector<_COMPLEX>   vecSigSpacBuf;
 
-    int					iNumIterations;
-    int					iInitNumIterations;
-    int					iIndexLastBranch;
+    int                 iNumIterations;
+    int                 iInitNumIterations;
+    int                 iIndexLastBranch;
 
     virtual void InitInternal(CParameter& Parameters);
     virtual void ProcessDataInternal(CParameter& Parameters);
@@ -145,7 +145,7 @@ protected:
 
 
 /******************************************************************************\
-* Customized channel (de-)coders											   *
+* Customized channel (de-)coders                                               *
 \******************************************************************************/
 class CMSCMLCEncoder : public CMLCEncoder
 {

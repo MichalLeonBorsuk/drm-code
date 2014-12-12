@@ -3,7 +3,7 @@
  * Copyright (c) 2001-2014
  *
  * Author(s):
- *	Volker Fischer, Stephane Fillod, Tomi Manninen, Andrea Russo,Julian Cable
+ *  Volker Fischer, Stephane Fillod, Tomi Manninen, Andrea Russo,Julian Cable
  *
  *
  * Description: DRM and AM Schedules
@@ -36,79 +36,83 @@
 
 /* Definitions ****************************************************************/
 
-#define DRM_SCHEDULE_URL	"http://www.baseportal.com/cgi-bin/baseportal.pl?htx=/drmdx/scheduleini2"
+#define DRM_SCHEDULE_URL    "http://www.baseportal.com/cgi-bin/baseportal.pl?htx=/drmdx/scheduleini2"
 
 /* File handle type */
 #ifdef _WIN32
-# define FILE_HANDLE					HANDLE
+# define FILE_HANDLE                    HANDLE
 #else
-# define FILE_HANDLE					int
+# define FILE_HANDLE                    int
 #endif
 
 /* Name for DRM and AM schedule file. If you change something here, make sure
    that you also change the strings and help texts!  */
-#define DRMSCHEDULE_INI_FILE_NAME		"DRMSchedule.ini"
-#define AMSCHEDULE_INI_FILE_NAME		"AMSchedule.ini"
-#define AMSCHEDULE_CSV_FILE_NAME		"AMSchedule.csv"
+#define DRMSCHEDULE_INI_FILE_NAME       "DRMSchedule.ini"
+#define AMSCHEDULE_INI_FILE_NAME        "AMSchedule.ini"
+#define AMSCHEDULE_CSV_FILE_NAME        "AMSchedule.csv"
 
 /* Time definitions for preview */
-#define NUM_SECONDS_PREV_5MIN			300
-#define NUM_SECONDS_PREV_15MIN			900
-#define NUM_SECONDS_PREV_30MIN			1800
+#define NUM_SECONDS_PREV_5MIN           300
+#define NUM_SECONDS_PREV_15MIN          900
+#define NUM_SECONDS_PREV_30MIN          1800
 
-#define NUM_SECONDS_SOON_INACTIVE		600
+#define NUM_SECONDS_SOON_INACTIVE       600
 
 /* String definitions for schedule days */
-#define FLAG_STR_IRREGULAR_TRANSM		"0000000"
-#define CHR_ACTIVE_DAY_MARKER			'1'
+#define FLAG_STR_IRREGULAR_TRANSM       "0000000"
+#define CHR_ACTIVE_DAY_MARKER           '1'
 
 #include <iostream>
 
 namespace Station {
-	enum EState {IS_ACTIVE, IS_INACTIVE, IS_PREVIEW, IS_SOON_INACTIVE};
+enum EState {IS_ACTIVE, IS_INACTIVE, IS_PREVIEW, IS_SOON_INACTIVE};
 }
 
 class CStationsItem
 {
 public:
-	CStationsItem() : iStartHour(0), iStartMinute(0), iStopHour(0),
-		iStopMinute(0), iFreq(0), strName(""),
-		strTarget(""), strLanguage(""), strSite(""),
-		strCountry(""), strDaysFlags(""), strDaysShow(""),
-		rPower((_REAL) 0.0) { }
+    CStationsItem() : iStartHour(0), iStartMinute(0), iStopHour(0),
+        iStopMinute(0), iFreq(0), strName(""),
+        strTarget(""), strLanguage(""), strSite(""),
+        strCountry(""), strDaysFlags(""), strDaysShow(""),
+        rPower((_REAL) 0.0) { }
 
-	Station::EState stateAt(time_t, int) const;
-	_BOOLEAN activeAt(time_t) const;
-	int StartTime() const {return iStartHour * 100 + iStartMinute;}
-	int StopTime() const{return iStopHour * 100 + iStopMinute;}
-	void SetStartTime(const int iStartTime)
-	{
-		/* Recover hours and minutes */
-		iStartHour = iStartTime / 100;
-		iStartMinute = iStartTime - iStartHour * 100;
-	}
-	void SetStopTime(const int iStopTime)
-	{
-		/* Recover hours and minutes */
-		iStopHour = iStopTime / 100;
-		iStopMinute = iStopTime - iStopHour * 100;
-	}
+    Station::EState stateAt(time_t, int) const;
+    _BOOLEAN activeAt(time_t) const;
+    int StartTime() const {
+        return iStartHour * 100 + iStartMinute;
+    }
+    int StopTime() const {
+        return iStopHour * 100 + iStopMinute;
+    }
+    void SetStartTime(const int iStartTime)
+    {
+        /* Recover hours and minutes */
+        iStartHour = iStartTime / 100;
+        iStartMinute = iStartTime - iStartHour * 100;
+    }
+    void SetStopTime(const int iStopTime)
+    {
+        /* Recover hours and minutes */
+        iStopHour = iStopTime / 100;
+        iStopMinute = iStopTime - iStopHour * 100;
+    }
 
-	void SetDaysFlagString(const QString& strNewDaysFlags);
+    void SetDaysFlagString(const QString& strNewDaysFlags);
 
-	int		iStartHour;
-	int		iStartMinute;
-	int		iStopHour;
-	int		iStopMinute;
-	int		iFreq;
-	QString	strName;
-	QString	strTarget;
-	QString	strLanguage;
-	QString	strSite;
-	QString	strCountry;
-	QString	strDaysFlags;
-	QString	strDaysShow;
-	_REAL	rPower;
+    int     iStartHour;
+    int     iStartMinute;
+    int     iStopHour;
+    int     iStopMinute;
+    int     iFreq;
+    QString strName;
+    QString strTarget;
+    QString strLanguage;
+    QString strSite;
+    QString strCountry;
+    QString strDaysFlags;
+    QString strDaysShow;
+    _REAL   rPower;
 };
 
 class CSchedule
@@ -120,30 +124,48 @@ public:
     void ReadINIFile(FILE* pFile);
     void ReadCSVFile(FILE* pFile);
 
-    int GetNumberOfStations() {return StationsTable.size();}
-    CStationsItem& GetItem(const int iPos) {return StationsTable[iPos];}
+    int GetNumberOfStations() {
+        return StationsTable.size();
+    }
+    CStationsItem& GetItem(const int iPos) {
+        return StationsTable[iPos];
+    }
     Station::EState GetState(const int iPos);
     bool CheckFilter(const int iPos);
 
-    void setCountryFilter(const QString& s) { countryFilter = s; }
-    QString getCountryFilter() const { return countryFilter; }
-    void setLanguageFilter(const QString& s) { languageFilter = s; }
-    QString getLanguageFilter() const { return languageFilter; }
-    void setTargetFilter(const QString& s) { targetFilter = s; }
-    QString getTargetFilter() const { return targetFilter; }
+    void setCountryFilter(const QString& s) {
+        countryFilter = s;
+    }
+    QString getCountryFilter() const {
+        return countryFilter;
+    }
+    void setLanguageFilter(const QString& s) {
+        languageFilter = s;
+    }
+    QString getLanguageFilter() const {
+        return languageFilter;
+    }
+    void setTargetFilter(const QString& s) {
+        targetFilter = s;
+    }
+    QString getTargetFilter() const {
+        return targetFilter;
+    }
     void SetSecondsPreview(int iSec);
     int GetSecondsPreview() const;
     void LoadSchedule(const QString&);
-    void clear() { StationsTable.clear(); }
+    void clear() {
+        StationsTable.clear();
+    }
 
-    QStringList		ListTargets;
-    QStringList		ListCountries;
-    QStringList		ListLanguages;
+    QStringList     ListTargets;
+    QStringList     ListCountries;
+    QStringList     ListLanguages;
 
 protected:
     void UpdateStringListForFilter(const CStationsItem& StationsItem);
 
-    vector<CStationsItem>	StationsTable;
+    vector<CStationsItem>   StationsTable;
     QString                 countryFilter, targetFilter, languageFilter;
     int                     iSecondsPreview;
 };

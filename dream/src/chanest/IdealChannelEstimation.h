@@ -3,10 +3,10 @@
  * Copyright (c) 2001-2014
  *
  * Author(s):
- *	Volker Fischer
+ *  Volker Fischer
  *
  * Description:
- *	See Data.cpp
+ *  See Data.cpp
  *
  ******************************************************************************
  *
@@ -39,31 +39,31 @@
 
 /* Classes ********************************************************************/
 class CIdealChanEst :
-	public CSimulationModul<CEquSig, CEquSig, CChanSimDataDemod>, 
-	public CPilotModiClass
+    public CSimulationModul<CEquSig, CEquSig, CChanSimDataDemod>,
+    public CPilotModiClass
 {
 public:
-	CIdealChanEst() {}
-	virtual ~CIdealChanEst() {}
+    CIdealChanEst() {}
+    virtual ~CIdealChanEst() {}
 
-	void GetResults(CVector<_REAL>& vecrResults);
+    void GetResults(CVector<_REAL>& vecrResults);
 
 protected:
-	int	iNumCarrier;
-	int iNumSymPerFrame;
-	int iStartDCCar;
-	int iNumDCCarriers;
-	int iChanEstDelay;
-	int iDFTSize;
+    int iNumCarrier;
+    int iNumSymPerFrame;
+    int iStartDCCar;
+    int iNumDCCarriers;
+    int iChanEstDelay;
+    int iDFTSize;
 
-	CVector<_COMPLEX>	veccEstChan;
-	CVector<_COMPLEX>	veccRefChan;
-	CVector<_REAL>		vecrMSEAverage;
-	long int			lAvCnt;
-	int					iStartCnt;
+    CVector<_COMPLEX>   veccEstChan;
+    CVector<_COMPLEX>   veccRefChan;
+    CVector<_REAL>      vecrMSEAverage;
+    long int            lAvCnt;
+    int                 iStartCnt;
 
-	virtual void InitInternal(CParameter& Parameters);
-	virtual void ProcessDataInternal(CParameter& Parameters);
+    virtual void InitInternal(CParameter& Parameters);
+    virtual void ProcessDataInternal(CParameter& Parameters);
 };
 
 

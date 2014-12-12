@@ -3,18 +3,18 @@
  * Copyright (c) 2001-2014
  *
  * Author(s):
- *	Volker Fischer, Julian Cable, Oliver Haffenden
+ *  Volker Fischer, Julian Cable, Oliver Haffenden
  *
  * Description:
- *	Implements Digital Radio Mondiale (DRM) Multiplex Distribution Interface
- *	(MDI), Receiver Status and Control Interface (RSCI)
+ *  Implements Digital Radio Mondiale (DRM) Multiplex Distribution Interface
+ *  (MDI), Receiver Status and Control Interface (RSCI)
  *  and Distribution and Communications Protocol (DCP) as described in
- *	ETSI TS 102 820,  ETSI TS 102 349 and ETSI TS 102 821 respectively.
+ *  ETSI TS 102 820,  ETSI TS 102 349 and ETSI TS 102 821 respectively.
  *
  *  This module derives, from the CTagItemDecoder base class, tag item decoders specialised to decode each of the tag
  *  items defined in the control part of RSCI.
  *  Decoded commands are generally sent straight to the CDRMReceiver object which
- *	they hold a pointer to.
+ *  they hold a pointer to.
  *
  ******************************************************************************
  *
@@ -81,7 +81,7 @@ void CTagItemDecoderRsta::DecodeTag(CVector<_BINARY>& vecbiTag, const int iLen)
     else
         pParameter->ReceiveStatus.SDC.SetStatus(CRC_ERROR);
 
-	int iShortID = pParameter->GetCurSelAudioService();
+    int iShortID = pParameter->GetCurSelAudioService();
     if(audio==0)
         pParameter->AudioComponentStatus[iShortID].SetStatus(RX_OK);
     else
@@ -221,9 +221,9 @@ void CTagItemDecoderRgps::DecodeTag(CVector<_BINARY>& vecbiTag, const int iLen)
     if(uiLatitudeMinutes != 0xff)
     {
         gps_data.fix.latitude = double(iLatitudeDegrees)
-                   + (double(uiLatitudeMinutes) + double(uiLatitudeMinuteFractions)/65536.0)/60.0;
+                                + (double(uiLatitudeMinutes) + double(uiLatitudeMinuteFractions)/65536.0)/60.0;
         gps_data.fix.longitude = double(iLongitudeDegrees)
-                    + (double(uiLongitudeMinutes) + double(uiLongitudeMinuteFractions)/65536.0)/60.0;
+                                 + (double(uiLongitudeMinutes) + double(uiLongitudeMinuteFractions)/65536.0)/60.0;
         gps_data.set |= LATLON_SET;
     }
 

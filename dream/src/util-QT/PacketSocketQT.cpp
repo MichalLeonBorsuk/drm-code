@@ -3,7 +3,7 @@
  * Copyright(c) 2001-2014
  *
  * Author(s):
- *	Volker Fischer, Julian Cable, Oliver Haffenden
+ *  Volker Fischer, Julian Cable, Oliver Haffenden
  *
  * Description:
  *
@@ -52,8 +52,8 @@
 /* Some defines needed for compatibility when using Linux */
 #ifndef _WIN32
 typedef int SOCKET;
-# define SOCKET_ERROR				(-1)
-# define INVALID_SOCKET				(-1)
+# define SOCKET_ERROR               (-1)
+# define INVALID_SOCKET             (-1)
 #endif
 
 CPacketSocketQT::CPacketSocketQT():
@@ -86,11 +86,12 @@ void
 CPacketSocketQT::SendPacket(const vector < _BYTE > &vecbydata, uint32_t addr, uint16_t port)
 {
     /*int bytes_written;*/
-    (void)addr; (void)port;
+    (void)addr;
+    (void)port;
     if(udpSocket != NULL)
         /*bytes_written =*/ udpSocket->writeDatagram((char*)&vecbydata[0], vecbydata.size(), HostAddrOut, iHostPortOut);
     else if(tcpSocket != NULL)
-       /*bytes_written =*/ tcpSocket->write((char*)&vecbydata[0], vecbydata.size());
+        /*bytes_written =*/ tcpSocket->write((char*)&vecbydata[0], vecbydata.size());
 }
 
 QStringList
@@ -156,7 +157,7 @@ CPacketSocketQT::SetDestination(const string & strNewAddr)
 # else
         udpSocket->setSocketOption(QAbstractSocket::MulticastTtlOption, ttl);
         if(AddrInterface != QHostAddress(QHostAddress::Any))
-             udpSocket->setMulticastInterface(GetInterface(AddrInterface));
+            udpSocket->setMulticastInterface(GetInterface(AddrInterface));
 # endif
     }
     else
@@ -256,7 +257,7 @@ _BOOLEAN CPacketSocketQT::doSetSource(QHostAddress AddrGroup, QHostAddress AddrI
             /* Initialize the listening socket. */
             udpSocket->bind(AddrInterface, iPort);
         }
-        else if((gp & 0xe0000000) == 0xe0000000)	/* multicast! */
+        else if((gp & 0xe0000000) == 0xe0000000)    /* multicast! */
         {
             bool ok = udpSocket->bind(iPort, QUdpSocket::ShareAddress);
             if(ok == false)
@@ -267,7 +268,7 @@ _BOOLEAN CPacketSocketQT::doSetSource(QHostAddress AddrGroup, QHostAddress AddrI
             struct ip_mreq mreq;
             mreq.imr_multiaddr.s_addr = htonl(AddrGroup.toIPv4Address());
             mreq.imr_interface.s_addr = htonl(AddrInterface.toIPv4Address());
-            int n = setsockopt(udpSocket->socketDescriptor(), IPPROTO_IP, IP_ADD_MEMBERSHIP,(char *) &mreq,	sizeof(mreq));
+            int n = setsockopt(udpSocket->socketDescriptor(), IPPROTO_IP, IP_ADD_MEMBERSHIP,(char *) &mreq, sizeof(mreq));
             if(n == SOCKET_ERROR)
                 ok = false;
 #else

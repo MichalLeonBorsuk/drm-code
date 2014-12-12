@@ -3,10 +3,10 @@
  * Copyright (c) 2001-2014
  *
  * Author(s):
- *	Andrea Russo, Julian Cable
+ *  Andrea Russo, Julian Cable
  *
  * Description:
- *	Dream program version number
+ *  Dream program version number
  *
  ******************************************************************************
  *

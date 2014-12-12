@@ -3,10 +3,10 @@
  * Copyright (c) 2001-2014
  *
  * Author(s):
- *	Volker Fischer
+ *  Volker Fischer
  *
  * Description:
- *	Multi-level-channel (de)coder (MLC)
+ *  Multi-level-channel (de)coder (MLC)
  *
  ******************************************************************************
  *
@@ -35,7 +35,7 @@
 \******************************************************************************/
 void CMLCEncoder::ProcessDataInternal(CParameter&)
 {
-    int	i, j;
+    int i, j;
     int iElementCounter;
 
     /* Energy dispersal ----------------------------------------------------- */
@@ -141,7 +141,7 @@ void CMLCEncoder::ProcessDataInternal(CParameter&)
 void CMLCEncoder::InitInternal(CParameter& TransmParam)
 {
     int i;
-    int	iNumInBits;
+    int iNumInBits;
 
     TransmParam.Lock();
     CalculateParam(TransmParam, eChannelType);
@@ -199,9 +199,9 @@ void CMLCEncoder::InitInternal(CParameter& TransmParam)
 \******************************************************************************/
 void CMLCDecoder::ProcessDataInternal(CParameter&)
 {
-    int			i, j, k;
-    int			iElementCounter;
-    _BOOLEAN	bIteration;
+    int         i, j, k;
+    int         iElementCounter;
+    _BOOLEAN    bIteration;
 
     /* Save input signal for signal constellation. We cannot use the copy
        operator of vector because the input vector is not of the same size as
@@ -468,7 +468,7 @@ void CMLC::CalculateParam(CParameter& Parameter, int iNewChannelType)
 
     switch (iNewChannelType)
     {
-        /* FAC ********************************************************************/
+    /* FAC ********************************************************************/
     case CT_FAC:
         eCodingScheme = CS_1_SM;
         iN_mux = NUM_FAC_CELLS_DRM30;
@@ -510,7 +510,7 @@ void CMLC::CalculateParam(CParameter& Parameter, int iNewChannelType)
         break;
 
 
-        /* SDC ********************************************************************/
+    /* SDC ********************************************************************/
     case CT_SDC:
         eCodingScheme = Parameter.eSDCCodingScheme;
         iN_mux = Parameter.CellMappingTable.iNumSDCCellsPerSFrame;
@@ -613,7 +613,7 @@ void CMLC::CalculateParam(CParameter& Parameter, int iNewChannelType)
         break;
 
 
-        /* MSC ********************************************************************/
+    /* MSC ********************************************************************/
     case CT_MSC:
         eCodingScheme = Parameter.eMSCCodingScheme;
         iN_mux = Parameter.CellMappingTable.iNumUsefMSCCellsPerFrame;
@@ -655,14 +655,14 @@ void CMLC::CalculateParam(CParameter& Parameter, int iNewChannelType)
                                (
                                    /* R_0 */
                                    (_REAL) iPuncturingPatterns[iCodRateCombMSC16SM[
-                                                                   Parameter.MSCPrLe.iPartA][0]][0] /
+                                               Parameter.MSCPrLe.iPartA][0]][0] /
                                    iPuncturingPatterns[iCodRateCombMSC16SM[
-                                                           Parameter.MSCPrLe.iPartA][0]][1] +
+                                               Parameter.MSCPrLe.iPartA][0]][1] +
                                    /* R_1 */
                                    (_REAL) iPuncturingPatterns[iCodRateCombMSC16SM[
-                                                                   Parameter.MSCPrLe.iPartA][1]][0] /
+                                               Parameter.MSCPrLe.iPartA][1]][0] /
                                    iPuncturingPatterns[iCodRateCombMSC16SM[
-                                                           Parameter.MSCPrLe.iPartA][1]][1]))) *
+                                               Parameter.MSCPrLe.iPartA][1]][1]))) *
                     /* RY_Icm */
                     iCodRateCombMSC16SM[Parameter.MSCPrLe.iPartA][2];
 
@@ -680,9 +680,9 @@ void CMLC::CalculateParam(CParameter& Parameter, int iNewChannelType)
                 /* M_p,1 = 2 * N_1 * R_p */
                 iM[i][0] = (int) (2 * iN[0] *
                                   (_REAL) iPuncturingPatterns[iCodRateCombMSC16SM[
-                                                                  Parameter.MSCPrLe.iPartA][i]][0] /
+                                              Parameter.MSCPrLe.iPartA][i]][0] /
                                   iPuncturingPatterns[iCodRateCombMSC16SM[
-                                                          Parameter.MSCPrLe.iPartA][i]][1]);
+                                          Parameter.MSCPrLe.iPartA][i]][1]);
 
                 /* M_p,2 = RX_p * floor((2 * N_2 - 12) / RY_p) */
                 iM[i][1] =
@@ -734,19 +734,19 @@ void CMLC::CalculateParam(CParameter& Parameter, int iNewChannelType)
                                (
                                    /* R_0 */
                                    (_REAL) iPuncturingPatterns[iCodRateCombMSC64SM[
-                                                                   Parameter.MSCPrLe.iPartA][0]][0] /
+                                               Parameter.MSCPrLe.iPartA][0]][0] /
                                    iPuncturingPatterns[iCodRateCombMSC64SM[
-                                                           Parameter.MSCPrLe.iPartA][0]][1] +
+                                               Parameter.MSCPrLe.iPartA][0]][1] +
                                    /* R_1 */
                                    (_REAL) iPuncturingPatterns[iCodRateCombMSC64SM[
-                                                                   Parameter.MSCPrLe.iPartA][1]][0] /
+                                               Parameter.MSCPrLe.iPartA][1]][0] /
                                    iPuncturingPatterns[iCodRateCombMSC64SM[
-                                                           Parameter.MSCPrLe.iPartA][1]][1] +
+                                               Parameter.MSCPrLe.iPartA][1]][1] +
                                    /* R_2 */
                                    (_REAL) iPuncturingPatterns[iCodRateCombMSC64SM[
-                                                                   Parameter.MSCPrLe.iPartA][2]][0] /
+                                               Parameter.MSCPrLe.iPartA][2]][0] /
                                    iPuncturingPatterns[iCodRateCombMSC64SM[
-                                                           Parameter.MSCPrLe.iPartA][2]][1]))) *
+                                               Parameter.MSCPrLe.iPartA][2]][1]))) *
                     /* RY_Icm */
                     iCodRateCombMSC64SM[Parameter.MSCPrLe.iPartA][3];
 
@@ -764,9 +764,9 @@ void CMLC::CalculateParam(CParameter& Parameter, int iNewChannelType)
                 /* M_p,1 = 2 * N_1 * R_p */
                 iM[i][0] = (int) (2 * iN[0] *
                                   (_REAL) iPuncturingPatterns[iCodRateCombMSC64SM[
-                                                                  Parameter.MSCPrLe.iPartA][i]][0] /
+                                              Parameter.MSCPrLe.iPartA][i]][0] /
                                   iPuncturingPatterns[iCodRateCombMSC64SM[
-                                                          Parameter.MSCPrLe.iPartA][i]][1]);
+                                          Parameter.MSCPrLe.iPartA][i]][1]);
 
                 /* M_p,2 = RX_p * floor((2 * N_2 - 12) / RY_p) */
                 iM[i][1] =
@@ -823,14 +823,14 @@ void CMLC::CalculateParam(CParameter& Parameter, int iNewChannelType)
                                (
                                    /* R_1 */
                                    (_REAL) iPuncturingPatterns[iCodRateCombMSC64HMsym[
-                                                                   Parameter.MSCPrLe.iPartA][1]][0] /
+                                               Parameter.MSCPrLe.iPartA][1]][0] /
                                    iPuncturingPatterns[iCodRateCombMSC64HMsym[
-                                                           Parameter.MSCPrLe.iPartA][1]][1] +
+                                               Parameter.MSCPrLe.iPartA][1]][1] +
                                    /* R_2 */
                                    (_REAL) iPuncturingPatterns[iCodRateCombMSC64HMsym[
-                                                                   Parameter.MSCPrLe.iPartA][2]][0] /
+                                               Parameter.MSCPrLe.iPartA][2]][0] /
                                    iPuncturingPatterns[iCodRateCombMSC64HMsym[
-                                                           Parameter.MSCPrLe.iPartA][2]][1]))) *
+                                               Parameter.MSCPrLe.iPartA][2]][1]))) *
                     /* RY_Icm */
                     iCodRateCombMSC64HMsym[Parameter.MSCPrLe.iPartA][3];
 
@@ -860,9 +860,9 @@ void CMLC::CalculateParam(CParameter& Parameter, int iNewChannelType)
                 /* M_p,1 = 2 * N_1 * R_p */
                 iM[i][0] = (int) (2 * iN[0] *
                                   (_REAL) iPuncturingPatterns[iCodRateCombMSC64HMsym[
-                                                                  Parameter.MSCPrLe.iPartA][i]][0] /
+                                              Parameter.MSCPrLe.iPartA][i]][0] /
                                   iPuncturingPatterns[iCodRateCombMSC64HMsym[
-                                                          Parameter.MSCPrLe.iPartA][i]][1]);
+                                          Parameter.MSCPrLe.iPartA][i]][1]);
 
                 /* M_p,2 = RX_p * floor((2 * N_2 - 12) / RY_p) */
                 iM[i][1] =
@@ -919,29 +919,29 @@ void CMLC::CalculateParam(CParameter& Parameter, int iNewChannelType)
                                    (
                                        /* R_1 */
                                        (_REAL) iPuncturingPatterns[iCodRateCombMSC64HMmix[
-                                                                       Parameter.MSCPrLe.iPartA][1]][0] /
+                                                   Parameter.MSCPrLe.iPartA][1]][0] /
                                        iPuncturingPatterns[iCodRateCombMSC64HMmix[
-                                                               Parameter.MSCPrLe.iPartA][1]][1] +
+                                                   Parameter.MSCPrLe.iPartA][1]][1] +
                                        /* R_2 */
                                        (_REAL) iPuncturingPatterns[iCodRateCombMSC64HMmix[
-                                                                       Parameter.MSCPrLe.iPartA][2]][0] /
+                                                   Parameter.MSCPrLe.iPartA][2]][0] /
                                        iPuncturingPatterns[iCodRateCombMSC64HMmix[
-                                                               Parameter.MSCPrLe.iPartA][2]][1] +
+                                                   Parameter.MSCPrLe.iPartA][2]][1] +
                                        /* R_3 */
                                        (_REAL) iPuncturingPatterns[iCodRateCombMSC64HMmix[
-                                                                       Parameter.MSCPrLe.iPartA][3]][0] /
+                                                   Parameter.MSCPrLe.iPartA][3]][0] /
                                        iPuncturingPatterns[iCodRateCombMSC64HMmix[
-                                                               Parameter.MSCPrLe.iPartA][3]][1] +
+                                                   Parameter.MSCPrLe.iPartA][3]][1] +
                                        /* R_4 */
                                        (_REAL) iPuncturingPatterns[iCodRateCombMSC64HMmix[
-                                                                       Parameter.MSCPrLe.iPartA][4]][0] /
+                                                   Parameter.MSCPrLe.iPartA][4]][0] /
                                        iPuncturingPatterns[iCodRateCombMSC64HMmix[
-                                                               Parameter.MSCPrLe.iPartA][4]][1] +
+                                                   Parameter.MSCPrLe.iPartA][4]][1] +
                                        /* R_5 */
                                        (_REAL) iPuncturingPatterns[iCodRateCombMSC64HMmix[
-                                                                       Parameter.MSCPrLe.iPartA][5]][0] /
+                                                   Parameter.MSCPrLe.iPartA][5]][0] /
                                        iPuncturingPatterns[iCodRateCombMSC64HMmix[
-                                                               Parameter.MSCPrLe.iPartA][5]][1]))) *
+                                                   Parameter.MSCPrLe.iPartA][5]][1]))) *
                     /* RY_Icm */
                     iCodRateCombMSC64HMmix[Parameter.MSCPrLe.iPartA][6];
 
@@ -972,9 +972,9 @@ void CMLC::CalculateParam(CParameter& Parameter, int iNewChannelType)
                 /* M_p,1Re;Im = 2 * N_1 * R_pRe;Im */
                 iM[i][0] = (int) (iN[0] *
                                   (_REAL) iPuncturingPatterns[iCodRateCombMSC64HMmix[
-                                                                  Parameter.MSCPrLe.iPartA][i]][0] /
+                                              Parameter.MSCPrLe.iPartA][i]][0] /
                                   iPuncturingPatterns[iCodRateCombMSC64HMmix[
-                                                          Parameter.MSCPrLe.iPartA][i]][1]);
+                                          Parameter.MSCPrLe.iPartA][i]][1]);
 
                 /* M_p,2Re;Im =
                    RX_pRe;Im * floor((2 * N_2 - 12) / RY_pRe;Im) */

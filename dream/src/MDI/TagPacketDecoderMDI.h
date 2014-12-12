@@ -3,10 +3,10 @@
  * Copyright (c) 2001-2014
  *
  * Author(s):
- *	Volker Fischer, Oliver Haffenden
+ *  Volker Fischer, Oliver Haffenden
  *
  * Description:
- *	see MDITagPacketDecoder.cpp
+ *  see MDITagPacketDecoder.cpp
  *
  ******************************************************************************
  *
@@ -36,39 +36,39 @@
 class CTagPacketDecoderMDI : public CTagPacketDecoder
 {
 public:
-	// constructor: adds all of the decoders in the vocabulary to the list
-	CTagPacketDecoderMDI();
+    // constructor: adds all of the decoders in the vocabulary to the list
+    CTagPacketDecoderMDI();
 
-	// Set the pParameter pointer - RSCI tag item decoders will write to this directly
-	void SetParameterPtr(CParameter *pP);
+    // Set the pParameter pointer - RSCI tag item decoders will write to this directly
+    void SetParameterPtr(CParameter *pP);
 
-	// Overridden tag packet decoder function - clear the str tags before decoding
-	virtual void DecodeTagPackets(CVectorEx<_BINARY>& vecbiPkt, int iPayloadLen);
+    // Overridden tag packet decoder function - clear the str tags before decoding
+    virtual void DecodeTagPackets(CVectorEx<_BINARY>& vecbiPkt, int iPayloadLen);
 
-	// Decoders for each of the tag items in the vocabulary
+    // Decoders for each of the tag items in the vocabulary
 
-	//	MDI
-	CTagItemDecoderProTy		TagItemDecoderProTy;
-	CTagItemDecoderLoFrCnt		TagItemDecoderLoFrCnt;
-	CTagItemDecoderFAC			TagItemDecoderFAC;
-	CTagItemDecoderSDC			TagItemDecoderSDC;
-	CTagItemDecoderRobMod		TagItemDecoderRobMod;
-	vector<CTagItemDecoderStr>	TagItemDecoderStr;
-	CTagItemDecoderSDCChanInf	TagItemDecoderSDCChanInf;
-	CTagItemDecoderInfo			TagItemDecoderInfo;
-	CTagItemDecoderRxDemodMode	TagItemDecoderRxDemodMode;
-	CTagItemDecoderAMAudio		TagItemDecoderAMAudio;
+    //  MDI
+    CTagItemDecoderProTy        TagItemDecoderProTy;
+    CTagItemDecoderLoFrCnt      TagItemDecoderLoFrCnt;
+    CTagItemDecoderFAC          TagItemDecoderFAC;
+    CTagItemDecoderSDC          TagItemDecoderSDC;
+    CTagItemDecoderRobMod       TagItemDecoderRobMod;
+    vector<CTagItemDecoderStr>  TagItemDecoderStr;
+    CTagItemDecoderSDCChanInf   TagItemDecoderSDCChanInf;
+    CTagItemDecoderInfo         TagItemDecoderInfo;
+    CTagItemDecoderRxDemodMode  TagItemDecoderRxDemodMode;
+    CTagItemDecoderAMAudio      TagItemDecoderAMAudio;
 
-	// RSCI-specific
-	CTagItemDecoderRmer			TagItemDecoderRmer;
-	CTagItemDecoderRwmf			TagItemDecoderRwmf;
-	CTagItemDecoderRwmm			TagItemDecoderRwmm;
-	CTagItemDecoderRdbv			TagItemDecoderRdbv;
-	CTagItemDecoderRpsd			TagItemDecoderRpsd;
-	CTagItemDecoderRpir			TagItemDecoderRpir;
-	CTagItemDecoderRdop			TagItemDecoderRdop;
-	CTagItemDecoderRdel			TagItemDecoderRdel;
-	CTagItemDecoderRgps			TagItemDecoderRgps;
+    // RSCI-specific
+    CTagItemDecoderRmer         TagItemDecoderRmer;
+    CTagItemDecoderRwmf         TagItemDecoderRwmf;
+    CTagItemDecoderRwmm         TagItemDecoderRwmm;
+    CTagItemDecoderRdbv         TagItemDecoderRdbv;
+    CTagItemDecoderRpsd         TagItemDecoderRpsd;
+    CTagItemDecoderRpir         TagItemDecoderRpir;
+    CTagItemDecoderRdop         TagItemDecoderRdop;
+    CTagItemDecoderRdel         TagItemDecoderRdel;
+    CTagItemDecoderRgps         TagItemDecoderRgps;
 
 };
 

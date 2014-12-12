@@ -3,10 +3,10 @@
  * Copyright (c) 2001-2014
  *
  * Author(s):
- *	David Flamand
+ *  David Flamand
  *
  * Description:
- *	DRM receiver-transmitter base class
+ *  DRM receiver-transmitter base class
  *
  ******************************************************************************
  *
@@ -36,9 +36,9 @@
 class CDRMTransceiver
 {
 public:
-	CDRMTransceiver(CSettings* pSettings, CSoundInInterface* pSoundIn, CSoundOutInterface* pSoundOut, _BOOLEAN bTransmitter = FALSE)
-	: pSettings(pSettings), pSoundInInterface(pSoundIn), pSoundOutInterface(pSoundOut), bTransmitter(bTransmitter) {};
-	virtual ~CDRMTransceiver() {};
+    CDRMTransceiver(CSettings* pSettings, CSoundInInterface* pSoundIn, CSoundOutInterface* pSoundOut, _BOOLEAN bTransmitter = FALSE)
+        : pSettings(pSettings), pSoundInInterface(pSoundIn), pSoundOutInterface(pSoundOut), bTransmitter(bTransmitter) {};
+    virtual ~CDRMTransceiver() {};
 
     virtual void LoadSettings() = 0;
     virtual void SaveSettings() = 0;
@@ -53,27 +53,27 @@ public:
     {
         Parameters.eRunState = CParameter::STOP_REQUESTED;
     }
-    virtual CSettings*				GetSettings() {
+    virtual CSettings*              GetSettings() {
         return pSettings;
     }
-    virtual void					SetSettings(CSettings* pNewSettings) {
+    virtual void                    SetSettings(CSettings* pNewSettings) {
         pSettings = pNewSettings;
     }
-    virtual CParameter*				GetParameters() {
+    virtual CParameter*             GetParameters() {
         return &Parameters;
     }
-    virtual CSoundInInterface*		GetSoundInInterface() {
+    virtual CSoundInInterface*      GetSoundInInterface() {
         return pSoundInInterface;
     }
-    virtual CSoundOutInterface*		GetSoundOutInterface() {
+    virtual CSoundOutInterface*     GetSoundOutInterface() {
         return pSoundOutInterface;
     }
-	virtual _BOOLEAN				IsReceiver() const {
-		return !bTransmitter;
-	}
-	virtual _BOOLEAN				IsTransmitter() const {
-		return bTransmitter;
-	}
+    virtual _BOOLEAN                IsReceiver() const {
+        return !bTransmitter;
+    }
+    virtual _BOOLEAN                IsTransmitter() const {
+        return bTransmitter;
+    }
 
 protected:
     virtual void CloseSoundInterfaces()
@@ -81,13 +81,13 @@ protected:
         pSoundInInterface->Close();
         pSoundOutInterface->Close();
     }
-	CSettings*				pSettings;
-    CParameter				Parameters;
-    CSoundInInterface*		pSoundInInterface;
-    CSoundOutInterface*		pSoundOutInterface;
+    CSettings*              pSettings;
+    CParameter              Parameters;
+    CSoundInInterface*      pSoundInInterface;
+    CSoundOutInterface*     pSoundOutInterface;
 
 private:
-	const _BOOLEAN bTransmitter;
+    const _BOOLEAN bTransmitter;
 };
 
 #endif

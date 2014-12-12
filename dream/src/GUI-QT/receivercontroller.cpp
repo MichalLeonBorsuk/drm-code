@@ -67,7 +67,7 @@ void ReceiverController::on_new_data()
 
         /* detect if AFS mux information is available */
         bool bAFS = (Parameters.AltFreqSign.vecMultiplexes.size() > 0)
-                 || (Parameters.AltFreqSign.vecOtherServices.size() > 0);
+                    || (Parameters.AltFreqSign.vecOtherServices.size() > 0);
 
         map<uint32_t,CServiceInformation> si = Parameters.ServiceInformation;
 

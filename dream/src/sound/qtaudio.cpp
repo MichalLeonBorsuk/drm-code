@@ -158,27 +158,46 @@ void CSoundCommonQT::dumpAudioDeviceInfo(QAudioDeviceInfo di, const char* text)
     string codec;
     for (int i=0; i<di.supportedCodecs().size(); ++i)
         codec += string(di.supportedCodecs().at(i).toLocal8Bit().constData()) + " ";
-    string channel; QList<int> channellist = di.supportedChannelCounts();
+    string channel;
+    QList<int> channellist = di.supportedChannelCounts();
     for (QList<int>::iterator i= channellist.begin(); i != channellist.end(); ++i)
         channel += string(QString::number(*i).toLocal8Bit().constData()) + " ";
-    string samplesize; QList<int> sizelist = di.supportedSampleSizes();
+    string samplesize;
+    QList<int> sizelist = di.supportedSampleSizes();
     for (QList<int>::iterator i= sizelist.begin(); i != sizelist.end(); ++i)
         samplesize += string(QString::number(*i).toLocal8Bit().constData()) + " ";
-    string samplerate; QList<int> ratelist = di.supportedSampleRates();
+    string samplerate;
+    QList<int> ratelist = di.supportedSampleRates();
     for (QList<int>::iterator i= ratelist.begin(); i != ratelist.end(); ++i)
         samplerate += string(QString::number(*i).toLocal8Bit().constData()) + " ";
-    string byteorder; QList<QAudioFormat::Endian> orderlist = di.supportedByteOrders();
+    string byteorder;
+    QList<QAudioFormat::Endian> orderlist = di.supportedByteOrders();
     for (QList<QAudioFormat::Endian>::iterator i= orderlist.begin(); i != orderlist.end(); ++i)
         switch (*i) {
-        case QAudioFormat::BigEndian:    byteorder += "BigEndian ";    break;
-        case QAudioFormat::LittleEndian: byteorder += "LittleEndian "; break; }
-    string sampletype; QList<QAudioFormat::SampleType> typelist = di.supportedSampleTypes();
+        case QAudioFormat::BigEndian:
+            byteorder += "BigEndian ";
+            break;
+        case QAudioFormat::LittleEndian:
+            byteorder += "LittleEndian ";
+            break;
+        }
+    string sampletype;
+    QList<QAudioFormat::SampleType> typelist = di.supportedSampleTypes();
     for (QList<QAudioFormat::SampleType>::iterator i= typelist.begin(); i != typelist.end(); ++i)
         switch (*i) {
-        case QAudioFormat::Unknown:     sampletype += "Unknown ";     break;
-        case QAudioFormat::SignedInt:   sampletype += "SignedInt ";   break;
-        case QAudioFormat::UnSignedInt: sampletype += "UnSignedInt "; break;
-        case QAudioFormat::Float:       sampletype += "Float ";       break; }
+        case QAudioFormat::Unknown:
+            sampletype += "Unknown ";
+            break;
+        case QAudioFormat::SignedInt:
+            sampletype += "SignedInt ";
+            break;
+        case QAudioFormat::UnSignedInt:
+            sampletype += "UnSignedInt ";
+            break;
+        case QAudioFormat::Float:
+            sampletype += "Float ";
+            break;
+        }
     qDebug(
         "%s\n"
         "  CSoundCommonQT::dumpAudioDeviceInfo():\n"
@@ -206,14 +225,28 @@ void CSoundCommonQT::dumpAudioFormat(QAudioFormat format, const char* text)
 {
     string byteorder;
     switch (format.byteOrder()) {
-    case QAudioFormat::BigEndian:    byteorder += "BigEndian ";    break;
-    case QAudioFormat::LittleEndian: byteorder += "LittleEndian "; break; }
+    case QAudioFormat::BigEndian:
+        byteorder += "BigEndian ";
+        break;
+    case QAudioFormat::LittleEndian:
+        byteorder += "LittleEndian ";
+        break;
+    }
     string sampletype;
     switch (format.sampleType()) {
-    case QAudioFormat::Unknown:     sampletype += "Unknown ";     break;
-    case QAudioFormat::SignedInt:   sampletype += "SignedInt ";   break;
-    case QAudioFormat::UnSignedInt: sampletype += "UnSignedInt "; break;
-    case QAudioFormat::Float:       sampletype += "Float ";       break; }
+    case QAudioFormat::Unknown:
+        sampletype += "Unknown ";
+        break;
+    case QAudioFormat::SignedInt:
+        sampletype += "SignedInt ";
+        break;
+    case QAudioFormat::UnSignedInt:
+        sampletype += "UnSignedInt ";
+        break;
+    case QAudioFormat::Float:
+        sampletype += "Float ";
+        break;
+    }
     qDebug(
         "%s\n"
         "  CSoundCommonQT::dumpAudioFormat():\n"

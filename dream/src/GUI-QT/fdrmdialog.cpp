@@ -3,7 +3,7 @@
  * Copyright (c) 2001-2014
  *
  * Author(s):
- *	Volker Fischer, Andrea Russo, David Flamand, Julian Cable
+ *  Volker Fischer, Andrea Russo, David Flamand, Julian Cable
  *
  * Description:
  *
@@ -82,7 +82,7 @@ static const int DEFAULT_MESSAGE_STYLE=0; /* 0 = black on white , 1 = white on b
 FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& Settings, CRig& rig,
                        QWidget* parent)
 #else
-FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& Settings, 
+FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& Settings,
                        QWidget* parent)
 #endif
     :
@@ -127,9 +127,9 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& Settings,
     pAnalogDemDlg = new AnalogDemDlg(controller, Settings, pFileMenu, pSoundCardMenu);
 
     /* Parent list for Stations and Live Schedule window */
-	QMap <QWidget*,QString> parents;
-	parents[this] = "drm";
-	parents[pAnalogDemDlg] = "analog";
+    QMap <QWidget*,QString> parents;
+    parents[this] = "drm";
+    parents[pAnalogDemDlg] = "analog";
 
     /* Stations window */
 #ifdef HAVE_LIBHAMLIB
@@ -149,7 +149,7 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& Settings,
 
     /* Programme Guide Window */
     string sDataFilesDirectory = Settings.Get(
-                "Receiver", "datafilesdirectory", string(DEFAULT_DATA_FILES_DIRECTORY));
+                                     "Receiver", "datafilesdirectory", string(DEFAULT_DATA_FILES_DIRECTORY));
     pEPGDlg = new EPGDlg(Settings, this);
     pEPGDlg->setDecoder(new EPG(Parameters, sDataFilesDirectory));
 
@@ -182,8 +182,13 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& Settings,
     connect(messageStyleMapper, SIGNAL(mapped(int)), this, SLOT(OnMenuMessageStyle(int)));
     int iMessageStyle = getSetting("messagestyle", DEFAULT_MESSAGE_STYLE, true);
     switch(iMessageStyle) {
-    case 0: ui->actionBlackOnWhite->setChecked(true); break;
-    case 1: ui->actionWhiteOnBlack->setChecked(true); break; }
+    case 0:
+        ui->actionBlackOnWhite->setChecked(true);
+        break;
+    case 1:
+        ui->actionWhiteOnBlack->setChecked(true);
+        break;
+    }
     OnMenuMessageStyle(iMessageStyle);
 
     /* Plot style settings */
@@ -204,9 +209,16 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& Settings,
     connect(this, SIGNAL(plotStyleChanged(int)), this, SLOT(OnMenuPlotStyle(int)));
     int iPlotStyle = getSetting("plotstyle", DEFAULT_PLOT_STYLE, true);
     switch(iPlotStyle) {
-    case 0: ui->actionBlueWhite->setChecked(true);  break;
-    case 1: ui->actionGreenBlack->setChecked(true); break;
-    case 2: ui->actionBlackGrey->setChecked(true);  break; }
+    case 0:
+        ui->actionBlueWhite->setChecked(true);
+        break;
+    case 1:
+        ui->actionGreenBlack->setChecked(true);
+        break;
+    case 2:
+        ui->actionBlackGrey->setChecked(true);
+        break;
+    }
     emit plotStyleChanged(iPlotStyle);
 
     connect(ui->actionAbout_Dream, SIGNAL(triggered()), this, SLOT(OnHelpAbout()));
@@ -245,16 +257,16 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& Settings,
 
     /* System tray setup */
     pSysTray = CSysTray::Create(
-        this,
-        SLOT(OnSysTrayActivated(QSystemTrayIcon::ActivationReason)),
-        SLOT(OnSysTrayTimer()),
-        ":/icons/MainIcon.svg");
+                   this,
+                   SLOT(OnSysTrayActivated(QSystemTrayIcon::ActivationReason)),
+                   SLOT(OnSysTrayTimer()),
+                   ":/icons/MainIcon.svg");
     CSysTray::AddAction(pSysTray, tr("&New Acquisition"), controller, SLOT(triggerNewAcquisition()));
     CSysTray::AddSeparator(pSysTray);
     CSysTray::AddAction(pSysTray, tr("&Exit"), this, SLOT(close()));
 
-	/* clear signal strenght */
-	setBars(0);
+    /* clear signal strenght */
+    setBars(0);
 
     APPLY_CUSTOM_THEME_UI();
 }
@@ -464,9 +476,9 @@ void FDRMDialog::OnSysTrayActivated(QSystemTrayIcon::ActivationReason reason)
 {
     if (reason == QSystemTrayIcon::Trigger
 #if QT_VERSION < 0x050000
-        || reason == QSystemTrayIcon::DoubleClick
+            || reason == QSystemTrayIcon::DoubleClick
 #endif
-    )
+       )
     {
         const Qt::WindowStates ws = windowState();
         if (ws & Qt::WindowMinimized)
@@ -483,23 +495,23 @@ void FDRMDialog::OnSysTrayTimer()
     {
         CParameter& Parameters = *(DRMReceiver.GetParameters());
         Parameters.Lock();
-            const int iCurSelAudioServ = Parameters.GetCurSelAudioService();
-            CService audioService = Parameters.Service[iCurSelAudioServ];
-            const bool bServiceIsValid = audioService.IsActive()
-                                   && (audioService.AudioParam.iStreamID != STREAM_ID_NOT_USED)
-                                   && (audioService.eAudDataFlag == CService::SF_AUDIO);
-            if (bServiceIsValid)
-            {
-                /* Service label (UTF-8 encoded string -> convert) */
-                Title = QString::fromUtf8(audioService.strLabel.c_str());
-                // Text message of current selected audio service (UTF-8 decoding)
-                Message = QString::fromUtf8(audioService.AudioParam.strTextMessage.c_str());
-            }
+        const int iCurSelAudioServ = Parameters.GetCurSelAudioService();
+        CService audioService = Parameters.Service[iCurSelAudioServ];
+        const bool bServiceIsValid = audioService.IsActive()
+                                     && (audioService.AudioParam.iStreamID != STREAM_ID_NOT_USED)
+                                     && (audioService.eAudDataFlag == CService::SF_AUDIO);
+        if (bServiceIsValid)
+        {
+            /* Service label (UTF-8 encoded string -> convert) */
+            Title = QString::fromUtf8(audioService.strLabel.c_str());
+            // Text message of current selected audio service (UTF-8 decoding)
+            Message = QString::fromUtf8(audioService.AudioParam.strTextMessage.c_str());
+        }
         Parameters.Unlock();
     }
-	else {
+    else {
         Message = tr("Scanning...");
-	}
+    }
     CSysTray::SetToolTip(pSysTray, Title, Message);
 }
 
@@ -707,9 +719,9 @@ void FDRMDialog::OnServiceChanged(int short_id, const CService& service)
             ui->LabelBitrate->setText(strBitrate);
 
             /* Service selector auto selection */
-            if (pServiceSelector && 
-                service.AudioParam.iStreamID != STREAM_ID_NOT_USED &&
-                service.eAudDataFlag == CService::SF_AUDIO)
+            if (pServiceSelector &&
+                    service.AudioParam.iStreamID != STREAM_ID_NOT_USED &&
+                    service.eAudDataFlag == CService::SF_AUDIO)
             {
                 pServiceSelector->check(short_id);
             }
@@ -887,12 +899,12 @@ QString FDRMDialog::formatTextMessage(const QString& textMessage) const
         switch (textMessage.at(i).unicode())
         {
         case 0x0A:
-            /* Code 0x0A may be inserted to indicate a preferred
-               line break */
+        /* Code 0x0A may be inserted to indicate a preferred
+           line break */
         case 0x1F:
             /* Code 0x1F (hex) may be inserted to indicate a
                preferred word break. This code may be used to
-            	   display long words comprehensibly */
+                   display long words comprehensibly */
             formattedMessage += "<br>";
             break;
 
@@ -1190,7 +1202,7 @@ void FDRMDialog::SetDisplayColor(const QColor newColor)
 void FDRMDialog::AddWhatsThisHelp()
 {
     /*
-    	This text was taken from the only documentation of Dream software
+        This text was taken from the only documentation of Dream software
     */
     /* Text Message */
     QString strTextMessage =
@@ -1256,8 +1268,8 @@ void FDRMDialog::AddWhatsThisHelp()
     ui->FrameAudioDataParams->setWhatsThis(strStationLabelOther);
 
     const QString strBars = tr("from 1 to 5 bars indicates WMER in the range %1 to %2 dB")
-            .arg(floor(WMERSteps[0]))
-            .arg(floor(WMERSteps[4]));
+                            .arg(floor(WMERSteps[0]))
+                            .arg(floor(WMERSteps[4]));
     ui->onebar->setWhatsThis(strBars);
     ui->twobars->setWhatsThis(strBars);
     ui->threebars->setWhatsThis(strBars);

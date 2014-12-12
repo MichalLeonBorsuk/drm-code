@@ -3,7 +3,7 @@
 * Copyright (c) 2001-2014
 *
 * Author(s):
-*	Alexander Kurpiers
+*   Alexander Kurpiers
 *
 *
 ******************************************************************************
@@ -369,27 +369,26 @@ int CSoundOut::write_HW( _SAMPLE *playbuf, int size )
                     break;
                 }
                 continue;
-            } else
-                if (ret == -EPIPE) {    /* under-run */
-                    qDebug("underrun");
+            } else if (ret == -EPIPE) {   /* under-run */
+                qDebug("underrun");
+                ret = snd_pcm_prepare(handle);
+                if (ret < 0)
+                    qDebug("Can't recover from underrun, prepare failed: %s", snd_strerror(ret));
+                continue;
+            } else if (ret == -ESTRPIPE) {
+                qDebug("strpipe");
+                while ((ret = snd_pcm_resume(handle)) == -EAGAIN)
+                    sleep(1);       /* wait until the suspend flag is released */
+                if (ret < 0) {
                     ret = snd_pcm_prepare(handle);
                     if (ret < 0)
-                        qDebug("Can't recover from underrun, prepare failed: %s", snd_strerror(ret));
-                    continue;
-                } else if (ret == -ESTRPIPE) {
-                    qDebug("strpipe");
-                    while ((ret = snd_pcm_resume(handle)) == -EAGAIN)
-                        sleep(1);       /* wait until the suspend flag is released */
-                    if (ret < 0) {
-                        ret = snd_pcm_prepare(handle);
-                        if (ret < 0)
-                            qDebug("Can't recover from suspend, prepare failed: %s", snd_strerror(ret));
-                    }
-                    continue;
-                } else {
-                    qDebug("Write error: %s", snd_strerror(ret));
-                    throw CGenErr("Write error");
+                        qDebug("Can't recover from suspend, prepare failed: %s", snd_strerror(ret));
                 }
+                continue;
+            } else {
+                qDebug("Write error: %s", snd_strerror(ret));
+                throw CGenErr("Write error");
+            }
             break;  /* skip one period */
         }
         size -= ret;

@@ -3,7 +3,7 @@
  * Copyright (c) 2001-2014
  *
  * Author(s):
- *	Volker Fischer, Andrea Russo
+ *  Volker Fischer, Andrea Russo
  *
  * Description:
  *
@@ -76,34 +76,36 @@ public:
 #endif
     ~FDRMDialog();
 
-    ReceiverController* getController() { return controller; }
+    ReceiverController* getController() {
+        return controller;
+    }
 
 private:
     Ui::DRMMainWindow*  ui;
-    CDRMReceiver&		DRMReceiver;
+    CDRMReceiver&       DRMReceiver;
     ReceiverController* controller;
-    QTimer				TimerClose;
+    QTimer              TimerClose;
 
-    CLogging*			pLogging;
-    systemevalDlg*		pSysEvalDlg;
-    BWSViewer*			pBWSDlg;
-    JLViewer*			pJLDlg;
-    SlideShowViewer*	pSlideShowDlg;
-    StationsDlg*		pStationsDlg;
-    LiveScheduleDlg*	pLiveScheduleDlg;
-    EPGDlg*				pEPGDlg;
-    AnalogDemDlg*		pAnalogDemDlg;
+    CLogging*           pLogging;
+    systemevalDlg*      pSysEvalDlg;
+    BWSViewer*          pBWSDlg;
+    JLViewer*           pJLDlg;
+    SlideShowViewer*    pSlideShowDlg;
+    StationsDlg*        pStationsDlg;
+    LiveScheduleDlg*    pLiveScheduleDlg;
+    EPGDlg*             pEPGDlg;
+    AnalogDemDlg*       pAnalogDemDlg;
     GeneralSettingsDlg* pGeneralSettingsDlg;
-    MultSettingsDlg*	pMultSettingsDlg;
+    MultSettingsDlg*    pMultSettingsDlg;
     CSysTray*           pSysTray;
-    CFileMenu*			pFileMenu;
-    CSoundCardSelMenu*	pSoundCardMenu;
-    CAboutDlg*		    pAboutDlg;
+    CFileMenu*          pFileMenu;
+    CSoundCardSelMenu*  pSoundCardMenu;
+    CAboutDlg*          pAboutDlg;
     QString             SysTrayTitle;
     QString             SysTrayMessage;
-    QTimer				TimerSysTray;
-    CScheduler* 	    pScheduler;
-    QTimer*		        pScheduleTimer;
+    QTimer              TimerSysTray;
+    CScheduler*         pScheduler;
+    QTimer*             pScheduleTimer;
     int                 iCurrentFrequency;
     ServiceSelector*    pServiceSelector;
     DreamTabWidget*     pServiceTabs;
@@ -116,10 +118,10 @@ private:
     virtual void        eventHide(QHideEvent* pEvent);
     virtual void        eventShow(QShowEvent* pEvent);
     virtual void        eventUpdate();
-    void		AddWhatsThisHelp();
-    void		UpdateWindowTitle();
+    void        AddWhatsThisHelp();
+    void        UpdateWindowTitle();
 
-    void		SetDisplayColor(const QColor newColor);
+    void        SetDisplayColor(const QColor newColor);
 
     QString formatTextMessage(const QString&) const;
     void startLogging();

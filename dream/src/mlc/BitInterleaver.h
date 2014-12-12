@@ -3,7 +3,7 @@
  * Copyright (c) 2001-2014
  *
  * Author(s):
- *	Volker Fischer
+ *  Volker Fischer
  *
  * Description:
  *
@@ -45,12 +45,12 @@ public:
     void Interleave(CVector<_DECISION>& InputData);
 
 protected:
-    int					ix_in1;
-    int					ix_in2;
-    CVector<int>		veciIntTable1;
-    CVector<int>		veciIntTable2;
-    CVector<_DECISION>	vecInterlMemory1;
-    CVector<_DECISION>	vecInterlMemory2;
+    int                 ix_in1;
+    int                 ix_in2;
+    CVector<int>        veciIntTable1;
+    CVector<int>        veciIntTable2;
+    CVector<_DECISION>  vecInterlMemory1;
+    CVector<_DECISION>  vecInterlMemory2;
 };
 
 class CBitDeinterleaver: public CBlockInterleaver
@@ -63,12 +63,12 @@ public:
     void Deinterleave(CVector<CDistance>& vecInput);
 
 protected:
-    int					ix_in1;
-    int					ix_in2;
-    CVector<int>		veciIntTable1;
-    CVector<int>		veciIntTable2;
-    CVector<CDistance>	vecDeinterlMemory1;
-    CVector<CDistance>	vecDeinterlMemory2;
+    int                 ix_in1;
+    int                 ix_in2;
+    CVector<int>        veciIntTable1;
+    CVector<int>        veciIntTable2;
+    CVector<CDistance>  vecDeinterlMemory1;
+    CVector<CDistance>  vecDeinterlMemory2;
 };
 
 

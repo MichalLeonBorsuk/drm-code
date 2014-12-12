@@ -3,13 +3,13 @@
  * Copyright (c) 2001-2014
  *
  * Original Author(s):
- *	Volker Fischer
+ *  Volker Fischer
  *
  * Qwt 5-6 conversion Author(s):
  *  David Flamand
  *
  * Description:
- *	Custom settings of the qwt-plot, Support Qwt version 5.0.0 to 6.1.0(+)
+ *  Custom settings of the qwt-plot, Support Qwt version 5.0.0 to 6.1.0(+)
  *
  ******************************************************************************
  *
@@ -65,7 +65,9 @@ public:
 
     QwtPlot         *plot;
 
-    QWidget* widget() const { return plot; }
+    QWidget* widget() const {
+        return plot;
+    }
 
 protected:
     void applyColors(QColor MainGridColorPlot, QColor BckgrdColorPlot);
@@ -88,7 +90,9 @@ protected:
     void setyMarker(int n, _REAL r);
     void updateWaterfall(CVector<_REAL>& vecrData, CVector<_REAL>& vecrScale);
     void setQAMGrid(double div, int step, int substep);
-    void setWhatsThis(const QString& s) { plot->setWhatsThis(s); }
+    void setWhatsThis(const QString& s) {
+        plot->setWhatsThis(s);
+    }
     void setAutoScalePolicy(Plot::EAxis axis, Plot::EPolicy policy, double limit);
 
     void AddWhatsThisHelpChar(const ECharType NCharType);
@@ -96,19 +100,19 @@ protected:
 
     Plot::EPolicy   policy[4];
     double          limit[4];
-    ECharType		InitCharType;
-    ECodScheme		eLastSDCCodingScheme;
-    ECodScheme		eLastMSCCodingScheme;
-    _BOOLEAN		bLastAudioDecoder;
+    ECharType       InitCharType;
+    ECodScheme      eLastSDCCodingScheme;
+    ECodScheme      eLastMSCCodingScheme;
+    _BOOLEAN        bLastAudioDecoder;
 
-    QwtText			leftTitle, rightTitle, bottomTitle;
+    QwtText         leftTitle, rightTitle, bottomTitle;
 
-    QwtPlotCurve	main1curve, main2curve;
-    QwtPlotCurve	curve1, curve2, curve3, curve4, yMarker;
-    QwtPlotCurve	hcurvegrid, vcurvegrid;
-    QwtPlotGrid		grid;
-    QwtPlotPicker	*picker;
-    QwtLegend		*legend;
+    QwtPlotCurve    main1curve, main2curve;
+    QwtPlotCurve    curve1, curve2, curve3, curve4, yMarker;
+    QwtPlotCurve    hcurvegrid, vcurvegrid;
+    QwtPlotGrid     grid;
+    QwtPlotPicker   *picker;
+    QwtLegend       *legend;
     int             nCurves;
     QwtSymbol       markerSym[3];
 

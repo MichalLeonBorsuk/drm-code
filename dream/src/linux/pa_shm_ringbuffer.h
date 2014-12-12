@@ -55,141 +55,141 @@ extern "C"
 {
 #endif /* __cplusplus */
 
-    typedef struct PaUtilShmRingBuffer
-    {
-        long   bufferSize; /* Number of bytes in FIFO. Power of 2. Set by PaUtil_InitShmRingBuffer. */
-        long   writeIndex; /* Index of next writable byte. Set by PaUtil_AdvanceShmRingBufferWriteIndex. */
-        long   readIndex;  /* Index of next readable byte. Set by PaUtil_AdvanceShmRingBufferReadIndex. */
-        long   bigMask;    /* Used for wrapping indices with extra bit to distinguish full/empty. */
-        long   smallMask;  /* Used for fitting indices to buffer. */
-    } PaUtilShmRingBuffer;
+typedef struct PaUtilShmRingBuffer
+{
+    long   bufferSize; /* Number of bytes in FIFO. Power of 2. Set by PaUtil_InitShmRingBuffer. */
+    long   writeIndex; /* Index of next writable byte. Set by PaUtil_AdvanceShmRingBufferWriteIndex. */
+    long   readIndex;  /* Index of next readable byte. Set by PaUtil_AdvanceShmRingBufferReadIndex. */
+    long   bigMask;    /* Used for wrapping indices with extra bit to distinguish full/empty. */
+    long   smallMask;  /* Used for fitting indices to buffer. */
+} PaUtilShmRingBuffer;
 
-    /** Initialize Ring Buffer.
+/** Initialize Ring Buffer.
 
-     @param rbuf The ring buffer.
+ @param rbuf The ring buffer.
 
-     @param numBytes The number of bytes in the buffer and must be power of 2.
+ @param numBytes The number of bytes in the buffer and must be power of 2.
 
-     @param dataPtr A pointer to a previously allocated area where the data
-     will be maintained.  It must be numBytes long.
+ @param dataPtr A pointer to a previously allocated area where the data
+ will be maintained.  It must be numBytes long.
 
-     @return -1 if numBytes is not a power of 2, otherwise 0.
-    */
-    long PaUtil_InitializeShmRingBuffer( PaUtilShmRingBuffer *rbuf, long numBytes, void *dataPtr );
+ @return -1 if numBytes is not a power of 2, otherwise 0.
+*/
+long PaUtil_InitializeShmRingBuffer( PaUtilShmRingBuffer *rbuf, long numBytes, void *dataPtr );
 
-    /** Clear buffer. Should only be called when buffer is NOT being read.
+/** Clear buffer. Should only be called when buffer is NOT being read.
 
-     @param rbuf The ring buffer.
-    */
-    void PaUtil_FlushShmRingBuffer( PaUtilShmRingBuffer *rbuf );
+ @param rbuf The ring buffer.
+*/
+void PaUtil_FlushShmRingBuffer( PaUtilShmRingBuffer *rbuf );
 
-    /** Retrieve the number of bytes available in the ring buffer for writing.
+/** Retrieve the number of bytes available in the ring buffer for writing.
 
-     @param rbuf The ring buffer.
+ @param rbuf The ring buffer.
 
-     @return The number of bytes available for writing.
-    */
-    long PaUtil_GetShmRingBufferWriteAvailable( PaUtilShmRingBuffer *rbuf );
+ @return The number of bytes available for writing.
+*/
+long PaUtil_GetShmRingBufferWriteAvailable( PaUtilShmRingBuffer *rbuf );
 
-    /** Retrieve the number of bytes available in the ring buffer for reading.
+/** Retrieve the number of bytes available in the ring buffer for reading.
 
-     @param rbuf The ring buffer.
+ @param rbuf The ring buffer.
 
-     @return The number of bytes available for reading.
-    */
-    long PaUtil_GetShmRingBufferReadAvailable( PaUtilShmRingBuffer *rbuf );
+ @return The number of bytes available for reading.
+*/
+long PaUtil_GetShmRingBufferReadAvailable( PaUtilShmRingBuffer *rbuf );
 
-    /** Write data to the ring buffer.
+/** Write data to the ring buffer.
 
-     @param rbuf The ring buffer.
+ @param rbuf The ring buffer.
 
-     @param data The address of new data to write to the buffer.
+ @param data The address of new data to write to the buffer.
 
-     @param numBytes The number of bytes to be written.
+ @param numBytes The number of bytes to be written.
 
-     @return The number of bytes written.
-    */
-    long PaUtil_WriteShmRingBuffer( PaUtilShmRingBuffer *rbuf, const void *data, long numBytes );
+ @return The number of bytes written.
+*/
+long PaUtil_WriteShmRingBuffer( PaUtilShmRingBuffer *rbuf, const void *data, long numBytes );
 
-    /** Read data from the ring buffer.
+/** Read data from the ring buffer.
 
-     @param rbuf The ring buffer.
+ @param rbuf The ring buffer.
 
-     @param data The address where the data should be stored.
+ @param data The address where the data should be stored.
 
-     @param numBytes The number of bytes to be read.
+ @param numBytes The number of bytes to be read.
 
-     @return The number of bytes read.
-    */
-    long PaUtil_ReadShmRingBuffer( PaUtilShmRingBuffer *rbuf, void *data, long numBytes );
+ @return The number of bytes read.
+*/
+long PaUtil_ReadShmRingBuffer( PaUtilShmRingBuffer *rbuf, void *data, long numBytes );
 
-    /** Get address of region(s) to which we can write data.
+/** Get address of region(s) to which we can write data.
 
-     @param rbuf The ring buffer.
+ @param rbuf The ring buffer.
 
-     @param numBytes The number of bytes desired.
+ @param numBytes The number of bytes desired.
 
-     @param dataPtr1 The address where the first (or only) region pointer will be
-     stored.
+ @param dataPtr1 The address where the first (or only) region pointer will be
+ stored.
 
-     @param sizePtr1 The address where the first (or only) region length will be
-     stored.
+ @param sizePtr1 The address where the first (or only) region length will be
+ stored.
 
-     @param dataPtr2 The address where the second region pointer will be stored if
-     the first region is too small to satisfy numBytes.
+ @param dataPtr2 The address where the second region pointer will be stored if
+ the first region is too small to satisfy numBytes.
 
-     @param sizePtr2 The address where the second region length will be stored if
-     the first region is too small to satisfy numBytes.
+ @param sizePtr2 The address where the second region length will be stored if
+ the first region is too small to satisfy numBytes.
 
-     @return The room available to be written or numBytes, whichever is smaller.
-    */
-    long PaUtil_GetShmRingBufferWriteRegions( PaUtilShmRingBuffer *rbuf, long numBytes,
-            void **dataPtr1, long *sizePtr1,
-            void **dataPtr2, long *sizePtr2 );
+ @return The room available to be written or numBytes, whichever is smaller.
+*/
+long PaUtil_GetShmRingBufferWriteRegions( PaUtilShmRingBuffer *rbuf, long numBytes,
+        void **dataPtr1, long *sizePtr1,
+        void **dataPtr2, long *sizePtr2 );
 
-    /** Advance the write index to the next location to be written.
+/** Advance the write index to the next location to be written.
 
-     @param rbuf The ring buffer.
+ @param rbuf The ring buffer.
 
-     @param numBytes The number of bytes to advance.
+ @param numBytes The number of bytes to advance.
 
-     @return The new position.
-    */
-    long PaUtil_AdvanceShmRingBufferWriteIndex( PaUtilShmRingBuffer *rbuf, long numBytes );
+ @return The new position.
+*/
+long PaUtil_AdvanceShmRingBufferWriteIndex( PaUtilShmRingBuffer *rbuf, long numBytes );
 
-    /** Get address of region(s) from which we can write data.
+/** Get address of region(s) from which we can write data.
 
-     @param rbuf The ring buffer.
+ @param rbuf The ring buffer.
 
-     @param numBytes The number of bytes desired.
+ @param numBytes The number of bytes desired.
 
-     @param dataPtr1 The address where the first (or only) region pointer will be
-     stored.
+ @param dataPtr1 The address where the first (or only) region pointer will be
+ stored.
 
-     @param sizePtr1 The address where the first (or only) region length will be
-     stored.
+ @param sizePtr1 The address where the first (or only) region length will be
+ stored.
 
-     @param dataPtr2 The address where the second region pointer will be stored if
-     the first region is too small to satisfy numBytes.
+ @param dataPtr2 The address where the second region pointer will be stored if
+ the first region is too small to satisfy numBytes.
 
-     @param sizePtr2 The address where the second region length will be stored if
-     the first region is too small to satisfy numBytes.
+ @param sizePtr2 The address where the second region length will be stored if
+ the first region is too small to satisfy numBytes.
 
-     @return The number of bytes available for reading.
-    */
-    long PaUtil_GetShmRingBufferReadRegions( PaUtilShmRingBuffer *rbuf, long numBytes,
-            void **dataPtr1, long *sizePtr1,
-            void **dataPtr2, long *sizePtr2 );
+ @return The number of bytes available for reading.
+*/
+long PaUtil_GetShmRingBufferReadRegions( PaUtilShmRingBuffer *rbuf, long numBytes,
+        void **dataPtr1, long *sizePtr1,
+        void **dataPtr2, long *sizePtr2 );
 
-    /** Advance the read index to the next location to be read.
+/** Advance the read index to the next location to be read.
 
-     @param rbuf The ring buffer.
+ @param rbuf The ring buffer.
 
-     @param numBytes The number of bytes to advance.
+ @param numBytes The number of bytes to advance.
 
-     @return The new position.
-    */
-    long PaUtil_AdvanceShmRingBufferReadIndex( PaUtilShmRingBuffer *rbuf, long numBytes );
+ @return The new position.
+*/
+long PaUtil_AdvanceShmRingBufferReadIndex( PaUtilShmRingBuffer *rbuf, long numBytes );
 
 #ifdef __cplusplus
 }

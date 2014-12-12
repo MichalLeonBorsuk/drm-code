@@ -3,10 +3,10 @@
  * Copyright (c) 2001-2014
  *
  * Author(s):
- *	Volker Fischer
+ *  Volker Fischer
  *
  * Description:
- *	See FAC.cpp
+ *  See FAC.cpp
  *
  ******************************************************************************
  *
@@ -49,9 +49,9 @@ public:
 
 protected:
     CCRC CRCObject;
-    vector<int>	FACRepetition; /* See 6.3.6 */
-    size_t		FACNumRep;
-    size_t		FACRepetitionCounter;
+    vector<int> FACRepetition; /* See 6.3.6 */
+    size_t      FACNumRep;
+    size_t      FACRepetitionCounter;
 };
 
 class CFACReceive

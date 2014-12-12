@@ -33,19 +33,19 @@
 class CConsoleIO
 {
 public:
-	static void Enter(CDRMReceiver* pDRMReceiver);
-	static void Leave();
-	static void Update();
+    static void Enter(CDRMReceiver* pDRMReceiver);
+    static void Leave();
+    static void Update();
 protected:
-	static char ETypeRxStatus2char(ETypeRxStatus eTypeRxStatus);
-	static CDRMReceiver* pDRMReceiver;
-	static unsigned long long time;
-	static int mode;
-	static int tty;
-	static int tty_setup;
-	static char screen[];
-	static char* screen_ptr;
-	static int screen_size;
-	static sigset_t sigset;
-	static struct termios old_tio;
+    static char ETypeRxStatus2char(ETypeRxStatus eTypeRxStatus);
+    static CDRMReceiver* pDRMReceiver;
+    static unsigned long long time;
+    static int mode;
+    static int tty;
+    static int tty_setup;
+    static char screen[];
+    static char* screen_ptr;
+    static int screen_size;
+    static sigset_t sigset;
+    static struct termios old_tio;
 };

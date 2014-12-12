@@ -3,7 +3,7 @@
  * Copyright (c) 2001-2014
  *
  * Author(s):
- *	Julian Cable
+ *  Julian Cable
  *
  * Decription:
  * Sound in interface using POSIX shared memory
@@ -37,7 +37,7 @@
 # include "shmsoundin.h"
 
 CShmSoundIn::CShmSoundIn():ringBuffer(NULL),
-        shmid(-1),shm(NULL),shm_path(),name("shm input"),shmChannels(1),wantedChannels(2)
+    shmid(-1),shm(NULL),shm_path(),name("shm input"),shmChannels(1),wantedChannels(2)
 {
 }
 

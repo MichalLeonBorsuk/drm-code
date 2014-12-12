@@ -3,30 +3,30 @@
  * Copyright (c) 2003
  *
  * Author(s):
- *	Volker Fischer, Phil Karn, Morgan Lius
+ *  Volker Fischer, Phil Karn, Morgan Lius
  *
  * Description:
  *
-	SSE2 fixed-point implementation of trellis update
+    SSE2 fixed-point implementation of trellis update
 
-	This code is based on a Viterbi sample code from
-	Phil Karn, KA9Q (Dec 2001)
-	simd-viterbi-2.0.3.zip -> viterbi27.c, mmxbfly27.s, ssebfly27.s
-	homepage: http://www.ka9q.net
+    This code is based on a Viterbi sample code from
+    Phil Karn, KA9Q (Dec 2001)
+    simd-viterbi-2.0.3.zip -> viterbi27.c, mmxbfly27.s, ssebfly27.s
+    homepage: http://www.ka9q.net
 
-	Some comments to this MMX code:
-	- To compare two 8-bit sized unsigned char, we need to apply a
-	  special strategy:
-	  psubusb mm5, mm1 // mm5 - mm1
-	  pcmpeqb mm5, mm3 // mm3 = 0
-	  We subtract unsigned with saturation and afterwards compare for
-	  equal to zero. If value in mm1 is larger than the value in mm5, we
-	  always get 0 as the result
-	- Defining __asm Blocks as C Macros in windows: Put the __asm keyword in
-	  front of each assembly instruction
-	- If we want to use c-pointers to arrays (like "pOldTrelMetric"), we
-	  first have to copy it to a register (like edx), otherwise we get
-	  errors
+    Some comments to this MMX code:
+    - To compare two 8-bit sized unsigned char, we need to apply a
+      special strategy:
+      psubusb mm5, mm1 // mm5 - mm1
+      pcmpeqb mm5, mm3 // mm3 = 0
+      We subtract unsigned with saturation and afterwards compare for
+      equal to zero. If value in mm1 is larger than the value in mm5, we
+      always get 0 as the result
+    - Defining __asm Blocks as C Macros in windows: Put the __asm keyword in
+      front of each assembly instruction
+    - If we want to use c-pointers to arrays (like "pOldTrelMetric"), we
+      first have to copy it to a register (like edx), otherwise we get
+      errors
  *
  ******************************************************************************
  *
@@ -62,36 +62,36 @@ void CViterbiDecoder::TrellisUpdateSSE2(const _DECISIONTYPE* pCurDec,
     __asm
     {
         /* Each invocation of BFLY() will do 8 butterflies in parallel */
-#		define BFLY(GROUP) \
-		{ \
-			/* Compute branch metrics */ \
-			__asm mov edx, pOldTrelMetric /* Incoming path metric */ \
-			__asm movdqu xmm4, [edx + (16 * GROUP)] /* high bit = 0 */ \
-			__asm movdqu xmm5, [edx + ((16 * GROUP) + 32)] /* high bit = 1 */ \
-			__asm mov edx, pchMet1 \
-			__asm movdqu xmm0, [edx + (16 * GROUP)] \
-			__asm mov edx, pchMet2 \
-			__asm movdqu xmm3, [edx + (16 * GROUP)] \
-			\
-			__asm movdqu xmm1, xmm4 /* first set (mm1, mm2) */ \
-			__asm paddusb xmm1, xmm0 /* first set: decision for bit = 0 (mm1) */ \
-			__asm movdqu xmm2, xmm5 \
-			__asm paddusb xmm2, xmm3 /* first set: decision for bit = 1 (mm2) */ \
-			__asm movdqu xmm6, xmm4 /* second set (mm6, mm7) */ \
-			__asm paddusb xmm6, xmm3 /* second set: decision for bit = 0 (mm6) */ \
-			__asm movdqu xmm7, xmm5 \
-			__asm paddusb xmm7, xmm0 /* second set: decision for bit = 1 (mm7) */ \
-			\
-			/* live registers 1 2 6 7. Compare mm1 and mm2; mm6 and mm7 */ \
-			__asm movdqu xmm5, xmm2 \
-			__asm movdqu xmm4, xmm7 \
-			__asm psubusb xmm5, xmm1 /* mm5 = mm2 - mm1 */ \
-			__asm psubusb xmm4, xmm6 /* mm4 = mm7 - mm6 */ \
-			__asm pxor xmm3, xmm3 /* zero mm3 register, needed for comparison */ \
-			__asm pcmpeqb xmm5, xmm3 /* mm5 = first set of decisions */ \
-			__asm pcmpeqb xmm4, xmm3 /* mm4 = second set of decisions */ \
-			\
-			/* live registers 1 2 4 5 6 7. Select survivors. Avoid jumps
+#       define BFLY(GROUP) \
+        { \
+            /* Compute branch metrics */ \
+            __asm mov edx, pOldTrelMetric /* Incoming path metric */ \
+            __asm movdqu xmm4, [edx + (16 * GROUP)] /* high bit = 0 */ \
+            __asm movdqu xmm5, [edx + ((16 * GROUP) + 32)] /* high bit = 1 */ \
+            __asm mov edx, pchMet1 \
+            __asm movdqu xmm0, [edx + (16 * GROUP)] \
+            __asm mov edx, pchMet2 \
+            __asm movdqu xmm3, [edx + (16 * GROUP)] \
+            \
+            __asm movdqu xmm1, xmm4 /* first set (mm1, mm2) */ \
+            __asm paddusb xmm1, xmm0 /* first set: decision for bit = 0 (mm1) */ \
+            __asm movdqu xmm2, xmm5 \
+            __asm paddusb xmm2, xmm3 /* first set: decision for bit = 1 (mm2) */ \
+            __asm movdqu xmm6, xmm4 /* second set (mm6, mm7) */ \
+            __asm paddusb xmm6, xmm3 /* second set: decision for bit = 0 (mm6) */ \
+            __asm movdqu xmm7, xmm5 \
+            __asm paddusb xmm7, xmm0 /* second set: decision for bit = 1 (mm7) */ \
+            \
+            /* live registers 1 2 6 7. Compare mm1 and mm2; mm6 and mm7 */ \
+            __asm movdqu xmm5, xmm2 \
+            __asm movdqu xmm4, xmm7 \
+            __asm psubusb xmm5, xmm1 /* mm5 = mm2 - mm1 */ \
+            __asm psubusb xmm4, xmm6 /* mm4 = mm7 - mm6 */ \
+            __asm pxor xmm3, xmm3 /* zero mm3 register, needed for comparison */ \
+            __asm pcmpeqb xmm5, xmm3 /* mm5 = first set of decisions */ \
+            __asm pcmpeqb xmm4, xmm3 /* mm4 = second set of decisions */ \
+            \
+            /* live registers 1 2 4 5 6 7. Select survivors. Avoid jumps
         -> mask results with AND and ANDN. then OR */ \
         __asm movdqu xmm3, xmm5 \
         __asm movdqu xmm0, xmm4 \
@@ -119,136 +119,136 @@ void CViterbiDecoder::TrellisUpdateSSE2(const _DECISIONTYPE* pCurDec,
         __asm movdqu [edx + (32 * GROUP + 16)], xmm2 \
     }
 
-    BFLY(0)
-    BFLY(1)
+        BFLY(0)
+        BFLY(1)
 
 
-    /* -----------------------------------------------------------------
-       Normalize by finding smallest metric and subtracting it
-       from all metrics */
+        /* -----------------------------------------------------------------
+           Normalize by finding smallest metric and subtracting it
+           from all metrics */
 
 #if 1 // if 0, always normalize
-    /* See if we have to normalize */
-    mov eax, [edx] /* Extract first output metric */
-    and eax, 255
-    cmp eax, 150 /* Is it greater than 150? */
-    mov eax, 0
-    jle done /* No, no need to normalize */
+        /* See if we have to normalize */
+        mov eax, [edx] /* Extract first output metric */
+        and eax, 255
+        cmp eax, 150 /* Is it greater than 150? */
+        mov eax, 0
+        jle done /* No, no need to normalize */
 #endif
 
-    /* Search for minimum, byte-wise for whole register */
-    movdqu xmm0, [edx]
-    movdqu xmm1, [edx + 16]
-    pminub xmm0, xmm1
-    movdqu xmm1, [edx + 32]
-    pminub xmm0, xmm1
-    movdqu xmm1, [edx + 48]
-    pminub xmm0, xmm1
+        /* Search for minimum, byte-wise for whole register */
+        movdqu xmm0, [edx]
+        movdqu xmm1, [edx + 16]
+        pminub xmm0, xmm1
+        movdqu xmm1, [edx + 32]
+        pminub xmm0, xmm1
+        movdqu xmm1, [edx + 48]
+        pminub xmm0, xmm1
 
-    /* mm0 contains 8 smallest metrics
-       crunch down to single lowest metric */
-    movdqu xmm1, xmm0
-    psrldq xmm0, 8 /* The count to psrldq is in bytes not bits! */
-    pminub xmm0, xmm1
-    movdqu xmm1, xmm0
-    psrlq xmm0, 32 /* Compare lowest 4 bytes with highest 4 bytes */
-    pminub xmm0, xmm1 /* -> results are in lowest 4 bytes */
-    movdqu xmm1, xmm0
-    psrlq xmm0, 16 /* Compare lowest 2 bytes with mext 2 bytes */
-    pminub xmm0, xmm1 /* -> results are in lowest 2 bytes */
-    movdqu xmm1, xmm0
-    psrlq xmm0, 8 /* Compare lowest byte with second lowest byte */
-    pminub xmm0, xmm1 /* -> resulting minium metric is in lowest byte */
+        /* mm0 contains 8 smallest metrics
+           crunch down to single lowest metric */
+        movdqu xmm1, xmm0
+        psrldq xmm0, 8 /* The count to psrldq is in bytes not bits! */
+        pminub xmm0, xmm1
+        movdqu xmm1, xmm0
+        psrlq xmm0, 32 /* Compare lowest 4 bytes with highest 4 bytes */
+        pminub xmm0, xmm1 /* -> results are in lowest 4 bytes */
+        movdqu xmm1, xmm0
+        psrlq xmm0, 16 /* Compare lowest 2 bytes with mext 2 bytes */
+        pminub xmm0, xmm1 /* -> results are in lowest 2 bytes */
+        movdqu xmm1, xmm0
+        psrlq xmm0, 8 /* Compare lowest byte with second lowest byte */
+        pminub xmm0, xmm1 /* -> resulting minium metric is in lowest byte */
 
-    /* Expand value in lowest byte to all 16 bytes (watch this part better) */
-    punpcklbw xmm0,xmm0 /* lowest 2 bytes have same value */
-    pshuflw xmm0, xmm0, 0 /*  lowest 8 bytes have same value */
-    punpcklqdq xmm0,xmm0 /* all 16 bytes have same value */
-
-
-    /* mm0 now contains lowest metric in all 8 bytes
-       subtract it from every output metric. Trashes mm7 */
-#		define PSUBUSBM(MEM, REG) \
-		{ \
-			__asm movdqu xmm7, MEM \
-			__asm psubusb xmm7, REG \
-			__asm movdqu MEM, xmm7 \
-		}
-
-    PSUBUSBM([edx], mm0)
-    PSUBUSBM([edx + 16], mm0)
-    PSUBUSBM([edx + 32], mm0)
-    PSUBUSBM([edx + 48], mm0)
+        /* Expand value in lowest byte to all 16 bytes (watch this part better) */
+        punpcklbw xmm0,xmm0 /* lowest 2 bytes have same value */
+        pshuflw xmm0, xmm0, 0 /*  lowest 8 bytes have same value */
+        punpcklqdq xmm0,xmm0 /* all 16 bytes have same value */
 
 
-done:
-    /* Needed, when we have used mmx registers and want to use floating
-       point operations afterwards */
-    emms
+        /* mm0 now contains lowest metric in all 8 bytes
+           subtract it from every output metric. Trashes mm7 */
+#       define PSUBUSBM(MEM, REG) \
+        { \
+            __asm movdqu xmm7, MEM \
+            __asm psubusb xmm7, REG \
+            __asm movdqu MEM, xmm7 \
+        }
+
+        PSUBUSBM([edx], mm0)
+        PSUBUSBM([edx + 16], mm0)
+        PSUBUSBM([edx + 32], mm0)
+        PSUBUSBM([edx + 48], mm0)
+
+
+        done:
+        /* Needed, when we have used mmx registers and want to use floating
+           point operations afterwards */
+        emms
 
 #undef BFLY
 #undef MINIMUM
 #undef PSUBUSBM
-}
+    }
 #else
     /**************************************************************************\
     * Linux                                                                    *
     \**************************************************************************/
     /* Each invocation of BFLY() will do 16 butterflies in parallel */
-#	define BFLY(GROUP) \
-		/* Compute branch metrics */ \
-		"mov %1,%%edx; " /* Incoming path metric (input) */ \
-		"movdqu (16 * "GROUP")(%%edx),%%xmm4; " /* high bit = 0 */ \
-		"movdqu ((16 * "GROUP") + 32)(%%edx),%%xmm5; "	/* high bit = 1  */ \
-		"mov %2,%%eax; "  \
-		"mov %3,%%ebx ;"   \
-		"movdqu (16 * "GROUP")(%%eax),%%xmm0; "  \
-		"movdqu (16 * "GROUP")(%%ebx),%%xmm3; "  \
-		\
-		"movdqu %%xmm4,%%xmm1; " /* first set (mm1, mm2) */ \
-		"paddusb %%xmm0,%%xmm1; " /* first set: decision for bit = 0 (mm1) */ \
-		"movdqu %%xmm5,%%xmm2; " \
-		"paddusb %%xmm3,%%xmm2; " /* first set: decision for bit = 1 (mm2) */ \
-		"movdqu %%xmm4,%%xmm6;" /* second set (mm6, mm7) */ \
-		"paddusb %%xmm3,%%xmm6; " /* second set: decision for bit = 0 (mm6) */ \
-		"movdqu %%xmm5,%%xmm7; " \
-		"paddusb %%xmm0,%%xmm7; " /* second set: decision for bit = 1 (mm7) */ \
-		\
-		/* live registers 1 2 6 7. Compare mm1 and mm2; mm6 and mm7 */ \
-		"movdqu %%xmm2,%%xmm5; " \
-		"movdqu %%xmm7,%%xmm4; " \
-		"psubusb %%xmm1,%%xmm5; " /* mm5 = mm2 - mm1 */ \
-		"psubusb %%xmm6,%%xmm4; " /* mm4 = mm7 - mm6 */ \
-		"pxor %%xmm3,%%xmm3; " /* zero mm3 register, needed for comparison */ \
-		"pcmpeqb %%xmm3,%%xmm5; " /* mm5 = first set of decisions */ \
-		"pcmpeqb %%xmm3,%%xmm4; " /* mm4 = second set of decisions */ \
-		\
-		/* live registers 1 2 4 5 6 7. Select survivors. Avoid jumps */ \
-		/*   -> mask results with AND and ANDN. then OR */ \
-		"movdqu %%xmm5,%%xmm3; " \
-		"movdqu %%xmm4,%%xmm0; " \
-		"pand %%xmm5,%%xmm2; " \
-		"pand %%xmm4,%%xmm7; " \
-		"pandn %%xmm1,%%xmm3; " \
-		"pandn %%xmm6,%%xmm0; " \
-		"por %%xmm3,%%xmm2; " /* mm2: first set survivors (decisions in mm5) */ \
-		"por %%xmm0,%%xmm7; " /* mm7: second set survivors (decisions in mm4) */ \
-		\
-		/* live registers 2 4 5 7 */ \
-		/* interleave & store decisions in mm4, mm5 */ \
-		/* interleave & store new branch metrics in mm2, mm7 */ \
-		"movdqu %%xmm5,%%xmm3; " \
-		"movdqu %%xmm2,%%xmm0; " \
-		"punpcklbw %%xmm4,%%xmm3; " /* interleave first 8 decisions */ \
-		"punpckhbw %%xmm4,%%xmm5; " /* interleave second 8 decisions */ \
-		"punpcklbw %%xmm7,%%xmm0; " /* interleave first 8 new metrics */ \
-		"punpckhbw %%xmm7,%%xmm2; " /* interleave second 8 new metrics */ \
-		"mov %4,%%edx; " \
-		"movdqu %%xmm3,(32 * "GROUP")(%%edx); "  \
-		"movdqu %%xmm5,((32 * "GROUP") + 16)(%%edx); "   \
-		"mov %0,%%edx; " \
-		"movdqu %%xmm0,(32 * "GROUP")(%%edx); " /* new metrics */ \
-		"movdqu %%xmm2,((32 * "GROUP") + 16)(%%edx); " \
+#   define BFLY(GROUP) \
+        /* Compute branch metrics */ \
+        "mov %1,%%edx; " /* Incoming path metric (input) */ \
+        "movdqu (16 * "GROUP")(%%edx),%%xmm4; " /* high bit = 0 */ \
+        "movdqu ((16 * "GROUP") + 32)(%%edx),%%xmm5; "  /* high bit = 1  */ \
+        "mov %2,%%eax; "  \
+        "mov %3,%%ebx ;"   \
+        "movdqu (16 * "GROUP")(%%eax),%%xmm0; "  \
+        "movdqu (16 * "GROUP")(%%ebx),%%xmm3; "  \
+        \
+        "movdqu %%xmm4,%%xmm1; " /* first set (mm1, mm2) */ \
+        "paddusb %%xmm0,%%xmm1; " /* first set: decision for bit = 0 (mm1) */ \
+        "movdqu %%xmm5,%%xmm2; " \
+        "paddusb %%xmm3,%%xmm2; " /* first set: decision for bit = 1 (mm2) */ \
+        "movdqu %%xmm4,%%xmm6;" /* second set (mm6, mm7) */ \
+        "paddusb %%xmm3,%%xmm6; " /* second set: decision for bit = 0 (mm6) */ \
+        "movdqu %%xmm5,%%xmm7; " \
+        "paddusb %%xmm0,%%xmm7; " /* second set: decision for bit = 1 (mm7) */ \
+        \
+        /* live registers 1 2 6 7. Compare mm1 and mm2; mm6 and mm7 */ \
+        "movdqu %%xmm2,%%xmm5; " \
+        "movdqu %%xmm7,%%xmm4; " \
+        "psubusb %%xmm1,%%xmm5; " /* mm5 = mm2 - mm1 */ \
+        "psubusb %%xmm6,%%xmm4; " /* mm4 = mm7 - mm6 */ \
+        "pxor %%xmm3,%%xmm3; " /* zero mm3 register, needed for comparison */ \
+        "pcmpeqb %%xmm3,%%xmm5; " /* mm5 = first set of decisions */ \
+        "pcmpeqb %%xmm3,%%xmm4; " /* mm4 = second set of decisions */ \
+        \
+        /* live registers 1 2 4 5 6 7. Select survivors. Avoid jumps */ \
+        /*   -> mask results with AND and ANDN. then OR */ \
+        "movdqu %%xmm5,%%xmm3; " \
+        "movdqu %%xmm4,%%xmm0; " \
+        "pand %%xmm5,%%xmm2; " \
+        "pand %%xmm4,%%xmm7; " \
+        "pandn %%xmm1,%%xmm3; " \
+        "pandn %%xmm6,%%xmm0; " \
+        "por %%xmm3,%%xmm2; " /* mm2: first set survivors (decisions in mm5) */ \
+        "por %%xmm0,%%xmm7; " /* mm7: second set survivors (decisions in mm4) */ \
+        \
+        /* live registers 2 4 5 7 */ \
+        /* interleave & store decisions in mm4, mm5 */ \
+        /* interleave & store new branch metrics in mm2, mm7 */ \
+        "movdqu %%xmm5,%%xmm3; " \
+        "movdqu %%xmm2,%%xmm0; " \
+        "punpcklbw %%xmm4,%%xmm3; " /* interleave first 8 decisions */ \
+        "punpckhbw %%xmm4,%%xmm5; " /* interleave second 8 decisions */ \
+        "punpcklbw %%xmm7,%%xmm0; " /* interleave first 8 new metrics */ \
+        "punpckhbw %%xmm7,%%xmm2; " /* interleave second 8 new metrics */ \
+        "mov %4,%%edx; " \
+        "movdqu %%xmm3,(32 * "GROUP")(%%edx); "  \
+        "movdqu %%xmm5,((32 * "GROUP") + 16)(%%edx); "   \
+        "mov %0,%%edx; " \
+        "movdqu %%xmm0,(32 * "GROUP")(%%edx); " /* new metrics */ \
+        "movdqu %%xmm2,((32 * "GROUP") + 16)(%%edx); " \
  
 
     asm
@@ -296,17 +296,17 @@ done:
         "pminub %%xmm1,%%xmm0 ;" /* -> resulting minium metric is in lowest byte */
 
         /* Expand value in lowest byte to all 16 bytes (watch this part better) */
-        "punpcklbw %%xmm0,%%xmm0 ;"	/* lowest 2 bytes have same value */
+        "punpcklbw %%xmm0,%%xmm0 ;" /* lowest 2 bytes have same value */
         "pshuflw $0,%%xmm0,%%xmm0 ;" /* lowest 8 bytes have same value */
         "punpcklqdq %%xmm0,%%xmm0 ;" /* all 16 bytes have same value */
 
 
         /* xmm0 now contains lowest metric in all 16 bytes
            subtract it from every output metric. Trashes mm7 */
-#		define PSUBUSBM(REG, MEM) \
-			"movdqu "MEM",%%xmm7 ;" \
-			"psubusb "REG",%%xmm7 ;" \
-			"movdqu %%xmm7,"MEM" ;" \
+#       define PSUBUSBM(REG, MEM) \
+            "movdqu "MEM",%%xmm7 ;" \
+            "psubusb "REG",%%xmm7 ;" \
+            "movdqu %%xmm7,"MEM" ;" \
  
 
         PSUBUSBM("%%xmm0","(%%edx)")
@@ -315,12 +315,12 @@ done:
         PSUBUSBM("%%xmm0","48(%%edx)")
 
 
-        "done: emms ;"	/* Needed, when we have used mmx registers and want to use floating
-			 point operations afterwards */
+        "done: emms ;"  /* Needed, when we have used mmx registers and want to use floating
+             point operations afterwards */
 
-                :
-                :"m"(pCurTrelMetric),"m"(pOldTrelMetric),"m"(pchMet1),"m"(pchMet2),"m"(pCurDec)
-            );
+        :
+        :"m"(pCurTrelMetric),"m"(pOldTrelMetric),"m"(pchMet1),"m"(pchMet2),"m"(pCurDec)
+    );
 
 #undef BFLY
 #undef PSUBUSBM

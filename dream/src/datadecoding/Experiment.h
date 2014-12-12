@@ -4,7 +4,7 @@
  * Copyright (c) 2010
  *
  * Author(s):
- *	Julian Cable
+ *  Julian Cable
  *
  * Description:
  *
@@ -41,15 +41,15 @@
 class CExperiment
 {
 public:
-	CExperiment();
-	virtual ~CExperiment();
+    CExperiment();
+    virtual ~CExperiment();
 
-	void AddDataUnit(CVector<_BINARY>& vecbiNewData);
+    void AddDataUnit(CVector<_BINARY>& vecbiNewData);
 
 protected:
-	DAB_DATAGROUP_DECODER_t	dgdec;
-	static void dg_cb(const DAB_DATAGROUP_DECODER_msc_datagroup_header_t*,
-		const unsigned long len, const unsigned char* buf, void* data);
+    DAB_DATAGROUP_DECODER_t dgdec;
+    static void dg_cb(const DAB_DATAGROUP_DECODER_msc_datagroup_header_t*,
+                      const unsigned long len, const unsigned char* buf, void* data);
 };
 
 #endif

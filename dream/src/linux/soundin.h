@@ -3,7 +3,7 @@
  * Copyright (c) 2001-2014
  *
  * Author(s):
- *	Alexander Kurpiers
+ *  Alexander Kurpiers
  *
  * Decription:
  * Linux sound interface
@@ -34,7 +34,7 @@
 #include "soundcommon.h"
 
 /* Definitions ****************************************************************/
-#define RECORDING_CHANNEL		0		/* 0: Left, 1: Right */
+#define RECORDING_CHANNEL       0       /* 0: Left, 1: Right */
 
 #define SOUNDBUFLEN 102400
 
@@ -48,11 +48,11 @@ public:
     CSoundIn();
     virtual ~CSoundIn() {}
 
-    virtual void				Enumerate(vector<string>& choices) {
+    virtual void                Enumerate(vector<string>& choices) {
         choices = names;
     }
-    virtual void				SetDev(int iNewDevice);
-    virtual int					GetDev();
+    virtual void                SetDev(int iNewDevice);
+    virtual int                 GetDev();
 
     void Init(int iNewBufferSize, _BOOLEAN bNewBlocking = TRUE);
     _BOOLEAN Read(CVector<short>& psData);
@@ -63,9 +63,9 @@ protected:
     int read_HW( void * recbuf, int size);
     void close_HW( void );
 
-    int 	iBufferSize, iInBufferSize;
+    int     iBufferSize, iInBufferSize;
     short int *tmprecbuf;
-    _BOOLEAN	bBlockingRec;
+    _BOOLEAN    bBlockingRec;
     vector<string> devices;
 
     class CRecThread : public CThread
@@ -74,15 +74,15 @@ protected:
         virtual ~CRecThread() {}
         virtual void run();
         CSoundBuf SoundBuf;
-        CSoundIn*	pSoundIn;
+        CSoundIn*   pSoundIn;
     protected:
-        _SAMPLE	tmprecbuf[NUM_IN_CHANNELS * FRAGSIZE];
+        _SAMPLE tmprecbuf[NUM_IN_CHANNELS * FRAGSIZE];
     } RecThread;
 
 protected:
     vector<string> names;
     _BOOLEAN bChangDev;
-    int	iCurrentDevice;
+    int iCurrentDevice;
 #ifdef USE_ALSA
     snd_pcm_t *handle;
 #endif

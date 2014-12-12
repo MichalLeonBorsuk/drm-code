@@ -3,10 +3,10 @@
  * Copyright (c) 2001-2014
  *
  * Author(s):
- *	Volker Fischer
+ *  Volker Fischer
  *
  * Description:
- *	Tables for FAC
+ *  Tables for FAC
  *
  ******************************************************************************
  *
@@ -58,7 +58,7 @@ const int iTableNumOfServices[5][5] = {
 };
 
 /* Language code */
-#define LEN_TABLE_LANGUAGE_CODE			16
+#define LEN_TABLE_LANGUAGE_CODE         16
 
 const string strTableLanguageCode[LEN_TABLE_LANGUAGE_CODE] = {
     "No language specified",
@@ -80,8 +80,8 @@ const string strTableLanguageCode[LEN_TABLE_LANGUAGE_CODE] = {
 };
 
 /* Programme Type codes */
-#define LEN_TABLE_PROG_TYPE_CODE_TOT	32
-#define LEN_TABLE_PROG_TYPE_CODE		30
+#define LEN_TABLE_PROG_TYPE_CODE_TOT    32
+#define LEN_TABLE_PROG_TYPE_CODE        30
 
 const string strTableProgTypCod[LEN_TABLE_PROG_TYPE_CODE_TOT] = {
     "No programme type",

@@ -3,10 +3,10 @@
  * Copyright (c) 2001-2014
  *
  * Author(s):
- *	Volker Fischer
+ *  Volker Fischer
  *
  * Description:
- *	See DataDecoder.cpp
+ *  See DataDecoder.cpp
  *
  ******************************************************************************
  *
@@ -43,7 +43,7 @@ class CNews;
 
 /* Definitions ****************************************************************/
 /* Maximum number of packets per stream */
-#define MAX_NUM_PACK_PER_STREAM					4
+#define MAX_NUM_PACK_PER_STREAM                 4
 
 /* Define for application types */
 #define DAB_AT_DREAM_EXPERIMENTAL 1
@@ -51,51 +51,55 @@ class CNews;
 #define DAB_AT_BROADCASTWEBSITE 3
 #define DAB_AT_TPEG 4
 #define DAB_AT_DGPS 5
-#define DAB_AT_TMC 	6
-#define DAB_AT_EPG 	7
-#define DAB_AT_JAVA 	8
-#define DAB_AT_DMB 	9
-#define DAB_AT_IPDC 	0xa
-#define DAB_AT_VOICE 	0xb
-#define DAB_AT_MIDDLEWARE 	0xc
+#define DAB_AT_TMC  6
+#define DAB_AT_EPG  7
+#define DAB_AT_JAVA     8
+#define DAB_AT_DMB  9
+#define DAB_AT_IPDC     0xa
+#define DAB_AT_VOICE    0xb
+#define DAB_AT_MIDDLEWARE   0xc
 #define DAB_AT_JOURNALINE 0x44A
 
 class CDataDecoder:public CReceiverModul < _BINARY, _BINARY >
 {
-  public:
+public:
     CDataDecoder ();
     virtual ~CDataDecoder ();
 
     enum EAppType
-    { AT_NOT_SUP, AT_MOTSLIDESHOW, AT_JOURNALINE,
-	AT_BROADCASTWEBSITE, AT_TPEG, AT_DGPS, AT_TMC, AT_EPG,
-	    AT_JAVA, AT_EXPERIMENTAL, AT_DMB, AT_VOICE, AT_MIDDLEWARE, AT_IPDC
+    {   AT_NOT_SUP, AT_MOTSLIDESHOW, AT_JOURNALINE,
+        AT_BROADCASTWEBSITE, AT_TPEG, AT_DGPS, AT_TMC, AT_EPG,
+        AT_JAVA, AT_EXPERIMENTAL, AT_DMB, AT_VOICE, AT_MIDDLEWARE, AT_IPDC
     };
 
     _BOOLEAN GetMOTObject (CMOTObject & NewPic, const EAppType eAppTypeReq);
     _BOOLEAN GetMOTDirectory (CMOTDirectory & MOTDirectoryOut, const EAppType eAppTypeReq);
-	CMOTDABDec *getApplication(int iPacketID) { return (iPacketID>=0 && iPacketID<3)?&MOTObject[iPacketID]:NULL; }
+    CMOTDABDec *getApplication(int iPacketID) {
+        return (iPacketID>=0 && iPacketID<3)?&MOTObject[iPacketID]:NULL;
+    }
     void GetNews (const int iObjID, CNews & News);
     EAppType GetAppType ()
     {
-		return eAppType[iServPacketID];
+        return eAppType[iServPacketID];
     }
-    void setDataDirectory(const string& s) { strDataDirectory = s; }
+    void setDataDirectory(const string& s) {
+        strDataDirectory = s;
+    }
 
-  protected:
+protected:
     class CDataUnit
     {
-      public:
-	CVector < _BINARY > vecbiData;
-	_BOOLEAN bOK;
-	_BOOLEAN bReady;
+    public:
+        CVector < _BINARY > vecbiData;
+        _BOOLEAN bOK;
+        _BOOLEAN bReady;
 
-	void Reset ()
-	{
-	    vecbiData.Init (0);
-	    bOK = FALSE;
-	    bReady = FALSE;
-	}
+        void Reset ()
+        {
+            vecbiData.Init (0);
+            bOK = FALSE;
+            bReady = FALSE;
+        }
     };
 
     int iTotalPacketSize;
@@ -122,7 +126,7 @@ class CDataDecoder:public CReceiverModul < _BINARY, _BINARY >
     int iEPGService;
     int iEPGPacketID;
     void DecodeEPG(const CParameter& Parameters);
-	EAppType GetAppType(const CDataParam&);
+    EAppType GetAppType(const CDataParam&);
 
 };
 

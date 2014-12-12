@@ -3,7 +3,7 @@
  * Copyright (c) 2001-2014, 2001-2014
  *
  * Author(s):
- *	 Julian Cable, David Flamand (rewrite)
+ *   Julian Cable, David Flamand (rewrite)
  *
  * Description: MOT Broadcast Website Viewer
  *
@@ -57,7 +57,7 @@ BWSViewer::BWSViewer(CDRMReceiver& rec, CSettings& Settings, QWidget* parent):
 {
     setupUi(this);
     string sDataFilesDirectory = Settings.Get(
-                "Receiver", "datafilesdirectory", string(DEFAULT_DATA_FILES_DIRECTORY));
+                                     "Receiver", "datafilesdirectory", string(DEFAULT_DATA_FILES_DIRECTORY));
     strDataDir = QString::fromUtf8(sDataFilesDirectory.c_str());
 
     /* Setup webView */
@@ -66,7 +66,7 @@ BWSViewer::BWSViewer(CDRMReceiver& rec, CSettings& Settings, QWidget* parent):
     webView->pageAction(QWebPage::DownloadLinkToDisk)->setVisible(false);
     webView->pageAction(QWebPage::OpenImageInNewWindow)->setVisible(false);
     webView->pageAction(QWebPage::DownloadImageToDisk)->setVisible(false);
- 
+
     /* Update time for color LED */
     LEDStatus->SetUpdateTime(1000);
 
@@ -147,7 +147,7 @@ void BWSViewer::UpdateWindowTitle(const uint32_t iServiceID, const bool bService
 
         /* Service ID (plot number in hexadecimal format) */
         QString strServiceID = "ID:" +
-                       QString().setNum(iServiceID, 16).toUpper();
+                               QString().setNum(iServiceID, 16).toUpper();
 
         /* Add the description on the title of the dialog */
         if (strLabel != "" || strServiceID != "")
@@ -165,7 +165,10 @@ void BWSViewer::Update()
 void BWSViewer::OnTimer()
 {
     /* Get current service parameters */
-    uint32_t iServiceID; bool bServiceValid; QString strLabel; ETypeRxStatus eStatus;
+    uint32_t iServiceID;
+    bool bServiceValid;
+    QString strLabel;
+    ETypeRxStatus eStatus;
     GetServiceParams(&iServiceID, &bServiceValid, &strLabel, &eStatus);
 
     /* Set current data service ID */
@@ -329,7 +332,9 @@ void BWSViewer::eventShow(QShowEvent*)
     actionClear_Cache_on_New_Service->setChecked(bClearCacheOnNewService);
 
     /* Update window title */
-    uint32_t iServiceID; bool bServiceValid; QString strLabel;
+    uint32_t iServiceID;
+    bool bServiceValid;
+    QString strLabel;
     GetServiceParams(&iServiceID, &bServiceValid, &strLabel);
     UpdateWindowTitle(iServiceID, bServiceValid, strLabel);
 
@@ -383,7 +388,7 @@ bool BWSViewer::Changed()
                             MOTDir.DirectoryIndex[BASIC_PROFILE].c_str();
 #ifdef ENABLE_HACK
                     if (strNewDirectoryIndex == "not_here.html") /* Hack needed for vtc trial sample */
-	                    strNewDirectoryIndex = "index.html";
+                        strNewDirectoryIndex = "index.html";
 #endif
                     if (!strNewDirectoryIndex.isNull())
                         bDirectoryIndexChanged |= cache.SetDirectoryIndex(strNewDirectoryIndex);
@@ -399,7 +404,7 @@ bool BWSViewer::Changed()
             /* Hack needed for vtc trial sample */
             if (strObjName.endsWith(".stm", Qt::CaseInsensitive) && !strContentType.compare("application/octet-stream", Qt::CaseInsensitive))
                 strContentType = "text/html";
-#endif 
+#endif
             /* Add received MOT object to webView */
             cache.AddObject(strObjName, strContentType, obj.Body.vecData);
 
@@ -408,7 +413,7 @@ bool BWSViewer::Changed()
                 SaveMOTObject(strObjName, obj);
 
             /* Set changed flag */
-        	bChanged = true;
+            bChanged = true;
         }
     }
     return bChanged;
@@ -441,10 +446,10 @@ void BWSViewer::SaveMOTObject(const QString& strObjName,
         /* Close the file afterwards */
         file.close();
     }
-	else
-	{
-		QMessageBox::information(this, file.errorString(), strFileName);
-	}
+    else
+    {
+        QMessageBox::information(this, file.errorString(), strFileName);
+    }
 }
 
 QString BWSViewer::savePath()
@@ -457,10 +462,10 @@ void BWSViewer::GetServiceParams(uint32_t* iServiceID, bool* bServiceValid, QStr
 {
     CParameter& Parameters = *receiver.GetParameters();
     Parameters.Lock();
-        const int iCurSelDataServ = Parameters.GetCurSelDataService();
-        const CService service = Parameters.Service[iCurSelDataServ];
-        if (eStatus)
-            *eStatus = Parameters.DataComponentStatus[iCurSelDataServ].GetStatus();
+    const int iCurSelDataServ = Parameters.GetCurSelDataService();
+    const CService service = Parameters.Service[iCurSelDataServ];
+    if (eStatus)
+        *eStatus = Parameters.DataComponentStatus[iCurSelDataServ].GetStatus();
     Parameters.Unlock();
     if (iServiceID)
         *iServiceID = service.iServiceID;

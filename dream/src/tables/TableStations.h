@@ -3,7 +3,7 @@
  * Copyright (c) 2001-2014
  *
  * Author(s):
- *	Julian Cable
+ *  Julian Cable
  *
  *
  ******************************************************************************
@@ -33,18 +33,18 @@
 class CStationData
 {
 public:
-	CStationData();
+    CStationData();
 
-	std::string eibi_language(const std::string& code);
-	std::string itu_r_country(const std::string& code);
-	std::string eibi_target(const std::string& code);
-	std::string eibi_station(const std::string& country, const std::string& stn);
+    std::string eibi_language(const std::string& code);
+    std::string itu_r_country(const std::string& code);
+    std::string eibi_target(const std::string& code);
+    std::string eibi_station(const std::string& country, const std::string& stn);
 
 private:
-	std::map<std::string,std::string> l;
-	std::map<std::string,std::string> c;
-	std::map<std::string,std::string> t;
-	std::map<std::string, std::map<std::string,std::string> > s;
+    std::map<std::string,std::string> l;
+    std::map<std::string,std::string> c;
+    std::map<std::string,std::string> t;
+    std::map<std::string, std::map<std::string,std::string> > s;
 };
 
 #endif

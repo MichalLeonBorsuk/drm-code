@@ -3,7 +3,7 @@
  * Copyright (c) 2001-2014
  *
  * Author(s):
- *	Volker Fischer
+ *  Volker Fischer
  *
  * Description:
  * Transfer buffer between different modules
@@ -39,294 +39,312 @@
 template<class TData> class CBuffer
 {
 public:
-	CBuffer() : iBufferSize(0), bRequestFlag(FALSE) {}
-	virtual	~CBuffer() {}
+    CBuffer() : iBufferSize(0), bRequestFlag(FALSE) {}
+    virtual ~CBuffer() {}
 
-	void			SetRequestFlag(const _BOOLEAN bNewRequestFlag)
-						{bRequestFlag = bNewRequestFlag;}
-	_BOOLEAN		GetRequestFlag() const {return bRequestFlag;}
+    void            SetRequestFlag(const _BOOLEAN bNewRequestFlag)
+    {
+        bRequestFlag = bNewRequestFlag;
+    }
+    _BOOLEAN        GetRequestFlag() const {
+        return bRequestFlag;
+    }
 
-	/* Virtual function to be declared by the derived object */
-	virtual void				Init(const int iNewBufferSize);
-	virtual CVectorEx<TData>*	Get(const int iRequestedSize) = 0;
-	virtual CVectorEx<TData>*	QueryWriteBuffer() = 0;
-	virtual void				Put(const int iOfferedSize) = 0;
-	virtual void				Clear() = 0;
-	virtual int					GetFillLevel() const = 0;
+    /* Virtual function to be declared by the derived object */
+    virtual void                Init(const int iNewBufferSize);
+    virtual CVectorEx<TData>*   Get(const int iRequestedSize) = 0;
+    virtual CVectorEx<TData>*   QueryWriteBuffer() = 0;
+    virtual void                Put(const int iOfferedSize) = 0;
+    virtual void                Clear() = 0;
+    virtual int                 GetFillLevel() const = 0;
 
 protected:
-	CVectorEx<TData>	vecBuffer;
-	int					iBufferSize;
+    CVectorEx<TData>    vecBuffer;
+    int                 iBufferSize;
 
-	_BOOLEAN			bRequestFlag;
+    _BOOLEAN            bRequestFlag;
 };
 
 /* Single block buffer */
 template<class TData> class CSingleBuffer : public CBuffer<TData>
 {
 public:
-	CSingleBuffer() : iFillLevel(0) {}
-	CSingleBuffer(const int iNBufSize) {Init(iNBufSize);}
-	virtual	~CSingleBuffer() {}
+    CSingleBuffer() : iFillLevel(0) {}
+    CSingleBuffer(const int iNBufSize) {
+        Init(iNBufSize);
+    }
+    virtual ~CSingleBuffer() {}
 
-	virtual void				Init(const int iNewBufferSize);
-	virtual CVectorEx<TData>*	Get(const int iRequestedSize);
-	virtual CVectorEx<TData>*	QueryWriteBuffer() {return &(this->vecBuffer);}
-	virtual void				Put(const int iOfferedSize);
-	virtual void				Clear() {iFillLevel = 0;}
-	virtual int					GetFillLevel() const {return iFillLevel;}
+    virtual void                Init(const int iNewBufferSize);
+    virtual CVectorEx<TData>*   Get(const int iRequestedSize);
+    virtual CVectorEx<TData>*   QueryWriteBuffer() {
+        return &(this->vecBuffer);
+    }
+    virtual void                Put(const int iOfferedSize);
+    virtual void                Clear() {
+        iFillLevel = 0;
+    }
+    virtual int                 GetFillLevel() const {
+        return iFillLevel;
+    }
 
 protected:
-	int iFillLevel;
+    int iFillLevel;
 };
 
 /* Cyclic buffer */
 template<class TData> class CCyclicBuffer : public CBuffer<TData>
 {
 public:
-	enum EBufferState {BS_FULL, BS_EMPTY}; // BS: Buffer Status
+    enum EBufferState {BS_FULL, BS_EMPTY}; // BS: Buffer Status
 
-	CCyclicBuffer() {Clear();}
-	CCyclicBuffer(const int iNBufSize) {Init(iNBufSize);}
-	virtual	~CCyclicBuffer() {}
+    CCyclicBuffer() {
+        Clear();
+    }
+    CCyclicBuffer(const int iNBufSize) {
+        Init(iNBufSize);
+    }
+    virtual ~CCyclicBuffer() {}
 
-	virtual void				Init(const int iNewBufferSize);
-	virtual CVectorEx<TData>*	Get(const int iRequestedSize);
-	virtual CVectorEx<TData>*	QueryWriteBuffer() {return &vecInOutBuffer;}
-	virtual void				Put(const int iOfferedSize);
-	virtual void				Clear();
-	virtual int					GetFillLevel() const;
+    virtual void                Init(const int iNewBufferSize);
+    virtual CVectorEx<TData>*   Get(const int iRequestedSize);
+    virtual CVectorEx<TData>*   QueryWriteBuffer() {
+        return &vecInOutBuffer;
+    }
+    virtual void                Put(const int iOfferedSize);
+    virtual void                Clear();
+    virtual int                 GetFillLevel() const;
 
 protected:
-	CVectorEx<TData>	vecInOutBuffer;
+    CVectorEx<TData>    vecInOutBuffer;
 
-	int					iPut;
-	int					iGet;
-	EBufferState		iBufferState;
+    int                 iPut;
+    int                 iGet;
+    EBufferState        iBufferState;
 };
 
 
 /* Implementation *************************************************************/
 template<class TData> void CBuffer<TData>::Init(const int iNewBufferSize)
 {
-	/* Assign buffer size */
-	iBufferSize = iNewBufferSize;
+    /* Assign buffer size */
+    iBufferSize = iNewBufferSize;
 
-	/* Allocate memory for data field */
-	vecBuffer.Init(iBufferSize);
+    /* Allocate memory for data field */
+    vecBuffer.Init(iBufferSize);
 }
 
 
 /******************************************************************************\
-* Single block buffer														   *
+* Single block buffer                                                          *
 \******************************************************************************/
 template<class TData> void CSingleBuffer<TData>::Init(const int iNewBufferSize)
 {
-	/* Only initialize buffer when size has changed, otherwise preserve data */
-	if (iNewBufferSize != this->iBufferSize)
-	{
-		CBuffer<TData>::Init(iNewBufferSize);
+    /* Only initialize buffer when size has changed, otherwise preserve data */
+    if (iNewBufferSize != this->iBufferSize)
+    {
+        CBuffer<TData>::Init(iNewBufferSize);
 
-		/* Reset buffer parameters (empty buffer) */
-		iFillLevel = 0;
-	}
+        /* Reset buffer parameters (empty buffer) */
+        iFillLevel = 0;
+    }
 }
 
 template<class TData> CVectorEx<TData>* CSingleBuffer<TData>::Get(const int iRequestedSize)
 {
-	/* Get data */
+    /* Get data */
 #ifdef _DEBUG_DREAM
-	if (iRequestedSize > iFillLevel)
-	{
-		DebugError("SingleBuffer Get()", "FillLevel",
-			iFillLevel, "Requested size", iRequestedSize);
-	}
+    if (iRequestedSize > iFillLevel)
+    {
+        DebugError("SingleBuffer Get()", "FillLevel",
+                   iFillLevel, "Requested size", iRequestedSize);
+    }
 #endif
 
-	/* Block is read, buffer is now empty again */
-	iFillLevel -= iRequestedSize;
+    /* Block is read, buffer is now empty again */
+    iFillLevel -= iRequestedSize;
 
-	return &(this->vecBuffer);
+    return &(this->vecBuffer);
 }
 
 template<class TData> void CSingleBuffer<TData>::Put(const int iOfferedSize)
 {
-	/* New Block was added, set new fill level */
-	iFillLevel += iOfferedSize;
+    /* New Block was added, set new fill level */
+    iFillLevel += iOfferedSize;
 
 #ifdef _DEBUG_DREAM
-	if (iFillLevel > this->iBufferSize)
-	{
-		DebugError("SingleBuffer Put()", "FillLevel",
-			iFillLevel, "Buffer size", this->iBufferSize);
-	}
+    if (iFillLevel > this->iBufferSize)
+    {
+        DebugError("SingleBuffer Put()", "FillLevel",
+                   iFillLevel, "Buffer size", this->iBufferSize);
+    }
 #endif
 }
 
 
 /******************************************************************************\
-* Cyclic buffer																   *
+* Cyclic buffer                                                                *
 \******************************************************************************/
 template<class TData> void CCyclicBuffer<TData>::Init(const int iNewBufferSize)
 {
-	/* Only initialize buffer when size has changed, otherwise preserve data */
-	if (iNewBufferSize != this->iBufferSize)
-	{
-		CBuffer<TData>::Init(iNewBufferSize);
+    /* Only initialize buffer when size has changed, otherwise preserve data */
+    if (iNewBufferSize != this->iBufferSize)
+    {
+        CBuffer<TData>::Init(iNewBufferSize);
 
-		/* Make in- and output buffer the same size as the main buffer to
-		   make sure that the worst-case is no problem */
-		vecInOutBuffer.Init(iNewBufferSize);
+        /* Make in- and output buffer the same size as the main buffer to
+           make sure that the worst-case is no problem */
+        vecInOutBuffer.Init(iNewBufferSize);
 
-		/* Reset buffer parameters (empty buffer) */
-		iPut = 0;
-		iGet = 0;
-		iBufferState = BS_EMPTY;
-	}
+        /* Reset buffer parameters (empty buffer) */
+        iPut = 0;
+        iGet = 0;
+        iBufferState = BS_EMPTY;
+    }
 }
 
 template<class TData> void CCyclicBuffer<TData>::Clear()
 {
-	/* Clear buffer by resetting the pointer */
-	iPut = 0;
-	iGet = 0;
-	iBufferState = BS_EMPTY;
-	this->bRequestFlag = FALSE;
+    /* Clear buffer by resetting the pointer */
+    iPut = 0;
+    iGet = 0;
+    iBufferState = BS_EMPTY;
+    this->bRequestFlag = FALSE;
 }
 
 template<class TData> CVectorEx<TData>* CCyclicBuffer<TData>::Get(const int iRequestedSize)
 {
-	int	i;
-	int	iAvailSpace;
-	int iElementCount;
+    int i;
+    int iAvailSpace;
+    int iElementCount;
 
-	/* Test if enough data is available for reading */
-	iAvailSpace = iPut - iGet;
-	/* Test if wrap is needed */
-	if ((iAvailSpace < 0) || ((iAvailSpace == 0) && (iBufferState == BS_FULL)))
-		iAvailSpace += this->iBufferSize;
+    /* Test if enough data is available for reading */
+    iAvailSpace = iPut - iGet;
+    /* Test if wrap is needed */
+    if ((iAvailSpace < 0) || ((iAvailSpace == 0) && (iBufferState == BS_FULL)))
+        iAvailSpace += this->iBufferSize;
 
 #ifdef _DEBUG_DREAM
-	if (iAvailSpace < iRequestedSize)
-	{
-		DebugError("CyclicBuffer Get()", "Available space",
-			iAvailSpace, "Requested size", iAvailSpace);
-	}
+    if (iAvailSpace < iRequestedSize)
+    {
+        DebugError("CyclicBuffer Get()", "Available space",
+                   iAvailSpace, "Requested size", iAvailSpace);
+    }
 #endif
 
 
-	/* Get data ------------------------------------------------------------- */
-	iElementCount = 0;
+    /* Get data ------------------------------------------------------------- */
+    iElementCount = 0;
 
-	/* Test if data can be read in one block */
-	if (this->iBufferSize - iGet < iRequestedSize)
-	{
-		/* Data must be read in two portions */
-		for (i = iGet; i < this->iBufferSize; i++)
-		{
-			vecInOutBuffer[iElementCount] = this->vecBuffer[i];
-			iElementCount++;
-		}
-		for (i = 0; i < iRequestedSize - this->iBufferSize + iGet; i++)
-		{
-			vecInOutBuffer[iElementCount] = this->vecBuffer[i];
-			iElementCount++;
-		}
-	}
-	else
-	{
-		/* Data can be read in one block */
-		for (i = iGet; i < iGet + iRequestedSize; i++)
-		{
-			vecInOutBuffer[iElementCount] = this->vecBuffer[i];
-			iElementCount++;
-		}
-	}
+    /* Test if data can be read in one block */
+    if (this->iBufferSize - iGet < iRequestedSize)
+    {
+        /* Data must be read in two portions */
+        for (i = iGet; i < this->iBufferSize; i++)
+        {
+            vecInOutBuffer[iElementCount] = this->vecBuffer[i];
+            iElementCount++;
+        }
+        for (i = 0; i < iRequestedSize - this->iBufferSize + iGet; i++)
+        {
+            vecInOutBuffer[iElementCount] = this->vecBuffer[i];
+            iElementCount++;
+        }
+    }
+    else
+    {
+        /* Data can be read in one block */
+        for (i = iGet; i < iGet + iRequestedSize; i++)
+        {
+            vecInOutBuffer[iElementCount] = this->vecBuffer[i];
+            iElementCount++;
+        }
+    }
 
-	/* Adjust iGet pointer */
-	iGet += iRequestedSize;
-	if (iGet >= this->iBufferSize)
-		iGet -= this->iBufferSize;
+    /* Adjust iGet pointer */
+    iGet += iRequestedSize;
+    if (iGet >= this->iBufferSize)
+        iGet -= this->iBufferSize;
 
-	/* Test if buffer is empty. If yes, set empty-flag */
-	if ((iGet == iPut) && (iRequestedSize > 0))
-		iBufferState = BS_EMPTY;
+    /* Test if buffer is empty. If yes, set empty-flag */
+    if ((iGet == iPut) && (iRequestedSize > 0))
+        iBufferState = BS_EMPTY;
 
-	return &vecInOutBuffer;
+    return &vecInOutBuffer;
 }
 
 template<class TData> void CCyclicBuffer<TData>::Put(const int iOfferedSize)
 {
-	int	iAvailSpace;
-	int	i;
-	int iElementCount;
+    int iAvailSpace;
+    int i;
+    int iElementCount;
 
-	/* Test if enough data is available for writing */
-	iAvailSpace = iGet - iPut;
-	/* Test if wrap is needed */
-	if ((iAvailSpace < 0) || ((iAvailSpace == 0) && (iBufferState == BS_EMPTY)))
-		iAvailSpace += this->iBufferSize;
+    /* Test if enough data is available for writing */
+    iAvailSpace = iGet - iPut;
+    /* Test if wrap is needed */
+    if ((iAvailSpace < 0) || ((iAvailSpace == 0) && (iBufferState == BS_EMPTY)))
+        iAvailSpace += this->iBufferSize;
 
 #ifdef _DEBUG_DREAM
-	if (iAvailSpace < iOfferedSize)
-	{
-		DebugError("CyclicBuffer Put()", "Available space",
-			iAvailSpace, "Offered size", iOfferedSize);
-	}
+    if (iAvailSpace < iOfferedSize)
+    {
+        DebugError("CyclicBuffer Put()", "Available space",
+                   iAvailSpace, "Offered size", iOfferedSize);
+    }
 #endif
 
 
-	/* Put data ------------------------------------------------------------- */
-	iElementCount = 0;
+    /* Put data ------------------------------------------------------------- */
+    iElementCount = 0;
 
-	/* Test if data can be written in one block */
-	if (this->iBufferSize - iPut < iOfferedSize)
-	{
-		/* Data must be written in two steps */
-		for (i = iPut; i < this->iBufferSize; i++)
-		{
-			this->vecBuffer[i] = vecInOutBuffer[iElementCount];
-			iElementCount++;
-		}
-		for (i = 0; i < iOfferedSize - this->iBufferSize + iPut; i++)
-		{
-			this->vecBuffer[i] = vecInOutBuffer[iElementCount];
-			iElementCount++;
-		}
-	}
-	else
-	{
-		/* Data can be written in one block */
-		for (i = iPut; i < iPut + iOfferedSize; i++)
-		{
-			this->vecBuffer[i] = vecInOutBuffer[iElementCount];
-			iElementCount++;
-		}
-	}
+    /* Test if data can be written in one block */
+    if (this->iBufferSize - iPut < iOfferedSize)
+    {
+        /* Data must be written in two steps */
+        for (i = iPut; i < this->iBufferSize; i++)
+        {
+            this->vecBuffer[i] = vecInOutBuffer[iElementCount];
+            iElementCount++;
+        }
+        for (i = 0; i < iOfferedSize - this->iBufferSize + iPut; i++)
+        {
+            this->vecBuffer[i] = vecInOutBuffer[iElementCount];
+            iElementCount++;
+        }
+    }
+    else
+    {
+        /* Data can be written in one block */
+        for (i = iPut; i < iPut + iOfferedSize; i++)
+        {
+            this->vecBuffer[i] = vecInOutBuffer[iElementCount];
+            iElementCount++;
+        }
+    }
 
-	/* Adjust iPut pointer */
-	iPut += iOfferedSize;
-	if (iPut >= this->iBufferSize)
-		iPut -= this->iBufferSize;
+    /* Adjust iPut pointer */
+    iPut += iOfferedSize;
+    if (iPut >= this->iBufferSize)
+        iPut -= this->iBufferSize;
 
-	/* Test if buffer is full. If yes, set full-flag */
-	if ((iGet == iPut) && (iOfferedSize > 0))
-		iBufferState = BS_FULL;
+    /* Test if buffer is full. If yes, set full-flag */
+    if ((iGet == iPut) && (iOfferedSize > 0))
+        iBufferState = BS_FULL;
 }
 
 template<class TData> int CCyclicBuffer<TData>::GetFillLevel() const
 {
-	int iFillLevel;
+    int iFillLevel;
 
-	/* Calculate the available data in the buffer. Test if wrap is needed!
-	   Take into account the flag-information (full or empty buffer) */
-	iFillLevel = iPut - iGet;
-	if ((iFillLevel == 0) && (iBufferState == BS_FULL))
-		iFillLevel = this->iBufferSize;
-	if (iFillLevel < 0)
-		iFillLevel += this->iBufferSize;	/* Wrap around */
+    /* Calculate the available data in the buffer. Test if wrap is needed!
+       Take into account the flag-information (full or empty buffer) */
+    iFillLevel = iPut - iGet;
+    if ((iFillLevel == 0) && (iBufferState == BS_FULL))
+        iFillLevel = this->iBufferSize;
+    if (iFillLevel < 0)
+        iFillLevel += this->iBufferSize;    /* Wrap around */
 
-	return iFillLevel;
+    return iFillLevel;
 }
 
 

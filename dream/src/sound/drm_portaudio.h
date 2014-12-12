@@ -3,7 +3,7 @@
  * Copyright (c) 2001-2014
  *
  * Author(s):
- *	Julian Cable
+ *  Julian Cable
  *
  * Decription:
  * PortAudio sound interface
@@ -37,17 +37,17 @@ class CPaCommon: public CSelectionInterface
 {
 public:
     CPaCommon(bool);
-    virtual 		~CPaCommon();
+    virtual         ~CPaCommon();
 
-    virtual void	Enumerate(vector<string>& choices, vector<string>& descriptions);
-    virtual void	SetDev(string sNewDevice);
-    virtual string	GetDev();
+    virtual void    Enumerate(vector<string>& choices, vector<string>& descriptions);
+    virtual void    SetDev(string sNewDevice);
+    virtual string  GetDev();
 
-    _BOOLEAN		Init(int iSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking);
-    void			ReInit();
-    _BOOLEAN		Read(CVector<short>& psData);
-    _BOOLEAN		Write(CVector<short>& psData);
-    void			Close();
+    _BOOLEAN        Init(int iSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking);
+    void            ReInit();
+    _BOOLEAN        Read(CVector<short>& psData);
+    _BOOLEAN        Write(CVector<short>& psData);
+    void            Close();
 
     PaUtilRingBuffer ringBuffer;
     int xruns;
@@ -71,20 +71,20 @@ class CPaIn: public CSoundInInterface
 {
 public:
     CPaIn();
-    virtual 			~CPaIn();
-    virtual void		Enumerate(vector<string>& choices, vector<string>& descriptions) {
+    virtual             ~CPaIn();
+    virtual void        Enumerate(vector<string>& choices, vector<string>& descriptions) {
         hw.Enumerate(choices, descriptions);
     }
-    virtual void		SetDev(string sNewDevice) {
+    virtual void        SetDev(string sNewDevice) {
         hw.SetDev(sNewDevice);
     }
-    virtual string		GetDev() {
+    virtual string      GetDev() {
         return hw.GetDev();
     }
 
-    virtual _BOOLEAN	Init(int iSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking);
-    virtual void		Close();
-    virtual _BOOLEAN	Read(CVector<short>& psData);
+    virtual _BOOLEAN    Init(int iSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking);
+    virtual void        Close();
+    virtual _BOOLEAN    Read(CVector<short>& psData);
 
 protected:
 
@@ -95,20 +95,20 @@ class CPaOut: public CSoundOutInterface
 {
 public:
     CPaOut();
-    virtual 			~CPaOut();
-    virtual void		Enumerate(vector<string>& choices, vector<string>& descriptions) {
+    virtual             ~CPaOut();
+    virtual void        Enumerate(vector<string>& choices, vector<string>& descriptions) {
         hw.Enumerate(choices, descriptions);
     }
-    virtual void		SetDev(string sNewDevice) {
+    virtual void        SetDev(string sNewDevice) {
         hw.SetDev(sNewDevice);
     }
-    virtual string		GetDev() {
+    virtual string      GetDev() {
         return hw.GetDev();
     }
 
-    virtual _BOOLEAN	Init(int iSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking);
-    virtual void		Close();
-    virtual _BOOLEAN	Write(CVector<short>& psData);
+    virtual _BOOLEAN    Init(int iSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking);
+    virtual void        Close();
+    virtual _BOOLEAN    Write(CVector<short>& psData);
 
 protected:
 

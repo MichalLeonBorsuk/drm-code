@@ -58,11 +58,11 @@ private:
     Ui::StationsWidget* ui;
     CSchedule   schedule;
     ScheduleLoader scheduleLoader;
-    QIcon		greenCube,redCube,orangeCube,pinkCube;
+    QIcon       greenCube,redCube,orangeCube,pinkCube;
     QMutex      mutex;
     QTimer      Timer;
     Qt::SortOrder        sortOrder;
-    int			iSortColumn;
+    int         iSortColumn;
     QString     strColumnParam, drm_url;
 
     void        updateTransmissionStatus();

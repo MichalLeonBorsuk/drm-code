@@ -12,7 +12,9 @@ public:
     CDRMPlotQCP(QWidget* parent=0);
     ~CDRMPlotQCP();
 
-    QWidget* widget() const { return plot; }
+    QWidget* widget() const {
+        return plot;
+    }
 
 protected:
     void applyColors(QColor MainGridColorPlot, QColor BckgrdColorPlot);
@@ -35,7 +37,9 @@ protected:
     void setyMarker(int n, _REAL r);
     void updateWaterfall(CVector<_REAL>& vecrData, CVector<_REAL>& vecrScale);
     void setQAMGrid(double div, int step, int substep);
-    void setWhatsThis(const QString& s) { plot->setWhatsThis(s); }
+    void setWhatsThis(const QString& s) {
+        plot->setWhatsThis(s);
+    }
     void setAutoScalePolicy(Plot::EAxis axis, Plot::EPolicy policy, double limit);
 
 private:

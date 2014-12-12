@@ -3,10 +3,10 @@
  * Copyright (c) 2001-2014
  *
  * Author(s):
- *	Volker Fischer, Andrew Murphy, Andrea Russo, Oliver Haffenden
+ *  Volker Fischer, Andrew Murphy, Andrea Russo, Oliver Haffenden
  *
  * Description:
- *	See PlotManager.cpp
+ *  See PlotManager.cpp
  *
  *
  *
@@ -38,7 +38,7 @@
 /* Definitions ****************************************************************/
 
 /* Length of the history for synchronization parameters (used for the plot) */
-#define LEN_HIST_PLOT_SYNC_PARMS		2250
+#define LEN_HIST_PLOT_SYNC_PARMS        2250
 
 
 
@@ -63,7 +63,7 @@ public:
     void UpdateParamHistoriesRSIIn();
 
     void GetTransferFunction(CVector<_REAL>& vecrData,
-                             CVector<_REAL>& vecrGrpDly,	CVector<_REAL>& vecrScale);
+                             CVector<_REAL>& vecrGrpDly,    CVector<_REAL>& vecrScale);
 
     void GetAvPoDeSp(CVector<_REAL>& vecrData, CVector<_REAL>& vecrScale,
                      _REAL& rLowerBound, _REAL& rHigherBound,
@@ -89,19 +89,19 @@ public:
 
 
 private:
-    CDRMReceiver			*pReceiver;
+    CDRMReceiver            *pReceiver;
     /* Storing parameters for plot */
-    CShiftRegister<_REAL>	vecrFreqSyncValHist;
-    CShiftRegister<_REAL>	vecrSamOffsValHist;
-    CShiftRegister<_REAL>	vecrLenIRHist;
-    CShiftRegister<_REAL>	vecrDopplerHist;
-    CShiftRegister<_REAL>	vecrSNRHist;
-    CShiftRegister<int>		veciCDAudHist;
-    int						iSymbolCount;
-    _REAL					rSumDopplerHist;
-    _REAL					rSumSNRHist;
-    int						iCurrentCDAud;
-    CMutex					MutexHist;
+    CShiftRegister<_REAL>   vecrFreqSyncValHist;
+    CShiftRegister<_REAL>   vecrSamOffsValHist;
+    CShiftRegister<_REAL>   vecrLenIRHist;
+    CShiftRegister<_REAL>   vecrDopplerHist;
+    CShiftRegister<_REAL>   vecrSNRHist;
+    CShiftRegister<int>     veciCDAudHist;
+    int                     iSymbolCount;
+    _REAL                   rSumDopplerHist;
+    _REAL                   rSumSNRHist;
+    int                     iCurrentCDAud;
+    CMutex                  MutexHist;
 
 };
 

@@ -3,10 +3,10 @@
  * Copyright (c) 2001-2014
  *
  * Author(s):
- *	Julian Cable
+ *  Julian Cable
  *
  * Description:
- *	see Pft.cpp
+ *  see Pft.cpp
  *
  ******************************************************************************
  *
@@ -35,27 +35,27 @@
 class CPft
 {
 public:
-	CPft(int isrc=-1, int idst=-1);
+    CPft(int isrc=-1, int idst=-1);
 
-	bool DecodePFTPacket(const vector<_BYTE>& vecIn, vector<_BYTE>& vecOut);
-	static void MakePFTPackets(const vector < _BYTE > &vecbydata,
-					 vector < vector < _BYTE > >&packets, 
-					uint16_t sequence_counter, size_t fragment_size);
+    bool DecodePFTPacket(const vector<_BYTE>& vecIn, vector<_BYTE>& vecOut);
+    static void MakePFTPackets(const vector < _BYTE > &vecbydata,
+                               vector < vector < _BYTE > >&packets,
+                               uint16_t sequence_counter, size_t fragment_size);
 
 protected:
 
-	bool DecodeSimplePFTPacket(const vector<_BYTE>& vecIn, vector<_BYTE>& vecOut);
-	bool DecodePFTPacketWithFEC(const vector<_BYTE>& vecIn, vector<_BYTE>& vecOut);
+    bool DecodeSimplePFTPacket(const vector<_BYTE>& vecIn, vector<_BYTE>& vecOut);
+    bool DecodePFTPacketWithFEC(const vector<_BYTE>& vecIn, vector<_BYTE>& vecOut);
 
-	int iSource, iDest;
-	map<int,CReassemblerN> mapFragments;
-	int iHeaderLen;
-	int iPseq;
-	int iFindex;
-	int iFcount;
-	int iFEC;
-	int iAddr;
-	int iPlen;
+    int iSource, iDest;
+    map<int,CReassemblerN> mapFragments;
+    int iHeaderLen;
+    int iPseq;
+    int iFindex;
+    int iFcount;
+    int iFEC;
+    int iAddr;
+    int iPlen;
 };
 
 #endif

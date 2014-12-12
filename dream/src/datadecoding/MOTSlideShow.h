@@ -3,7 +3,7 @@
  * Copyright (c) 2001-2014
  *
  * Author(s):
- *	Volker Fischer
+ *  Volker Fischer
  *
  * Description:
  *
@@ -37,7 +37,7 @@
 /* Encoder ------------------------------------------------------------------ */
 class CMOTSlideShowEncoder
 {
-  public:
+public:
     CMOTSlideShowEncoder (): vecPicFileNames(0), bRemovePath(FALSE)
     {
     }
@@ -50,14 +50,18 @@ class CMOTSlideShowEncoder
     void GetDataUnit (CVector < _BINARY > &vecbiNewData);
 
     void AddFileName(const string & strFileName, const string & strFormat);
-    void ClearAllFileNames() {vecPicFileNames.Init(0);}
-    void SetPathRemoval(_BOOLEAN bNewRemovePath) {bRemovePath=bNewRemovePath;}
+    void ClearAllFileNames() {
+        vecPicFileNames.Init(0);
+    }
+    void SetPathRemoval(_BOOLEAN bNewRemovePath) {
+        bRemovePath=bNewRemovePath;
+    }
     _BOOLEAN GetTransStat(string & strCurPict, _REAL & rCurPerc) const;
 
-  protected:
+protected:
     struct SPicDescr
     {
-	string strName, strFormat;
+        string strName, strFormat;
     };
     void AddNextPicture ();
     string TransformFilename(const string strFileName);

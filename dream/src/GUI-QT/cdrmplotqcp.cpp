@@ -79,7 +79,9 @@ void CDRMPlotQCP::setupBasicPlot(const char* titleText, const char* xText, const
     plot->graph(0)->addToLegend();
 
     plot->legend->setVisible(false);
-    for(int i=0; i<4; i++) { policy[i] = Plot::fixed; }
+    for(int i=0; i<4; i++) {
+        policy[i] = Plot::fixed;
+    }
 }
 
 void CDRMPlotQCP::add2ndGraph(const char* axisText, const char* legendText, double bottom, double top, QColor pc)
@@ -354,8 +356,8 @@ void CDRMPlotQCP::setData(int n, CVector<_REAL>& vecrData, CVector<_REAL>& vecrS
             plot->yAxis2->setRange(0.0, dMaxYScale);
         }
     }
-        //plot->graph(n)->rescaleKeyAxis(true, true);
-        //plot->graph(n)->rescaleValueAxis(true);
+    //plot->graph(n)->rescaleKeyAxis(true, true);
+    //plot->graph(n)->rescaleValueAxis(true);
     if(axisLabel != "") {
         if(n==0)
             plot->yAxis->setLabel(axisLabel);
@@ -372,7 +374,7 @@ void CDRMPlotQCP::setxMarker(int n, _REAL r)
 
 void CDRMPlotQCP::setBwMarker(int n, _REAL c, _REAL w)
 {
-    QVector<double>	x, y;
+    QVector<double> x, y;
     x << c;
     y << plot->yAxis->range().lower; // full height
     bars[n]->setData(x, y);

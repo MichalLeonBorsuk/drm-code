@@ -14,7 +14,7 @@ CPos::CPos(gps_data_t* data, QGeoPositionInfoSource* src):gps(data)
     }
     if (source) {
         connect(source, SIGNAL(positionUpdated(QGeoPositionInfo)),
-                    this, SLOT(positionUpdated(QGeoPositionInfo)));
+                this, SLOT(positionUpdated(QGeoPositionInfo)));
         source->startUpdates();
         //qDebug() << "Position Updates Requested:";
     }

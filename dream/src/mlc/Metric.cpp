@@ -3,7 +3,7 @@
  * Copyright (c) 2001-2014
  *
  * Author(s):
- *	Volker Fischer
+ *  Volker Fischer
  *
  * Description:
  *
@@ -37,18 +37,18 @@
 
 /* Definitions ****************************************************************/
 /* Definitions for binary numbers (BI). On the left is most sigificant bit */
-#define BI_00	0 /* Two bits */
-#define BI_01	1
-#define BI_10	2
-#define BI_11	3
-#define BI_000	0 /* Three bits */
-#define BI_001	1
-#define BI_010	2
-#define BI_011	3
-#define BI_100	4
-#define BI_101	5
-#define BI_110	6
-#define BI_111	7
+#define BI_00   0 /* Two bits */
+#define BI_01   1
+#define BI_10   2
+#define BI_11   3
+#define BI_000  0 /* Three bits */
+#define BI_001  1
+#define BI_010  2
+#define BI_011  3
+#define BI_100  4
+#define BI_101  5
+#define BI_110  6
+#define BI_111  7
 
 
 /* Implementation *************************************************************/
@@ -69,7 +69,7 @@ void CMLCMetric::CalculateMetric(CVector<CEquSig>* pcInSymb,
     {
     case CS_1_SM:
         /**********************************************************************/
-        /* 4QAM	***************************************************************/
+        /* 4QAM ***************************************************************/
         /**********************************************************************/
         /* Metric according DRM-standard: (i_0  q_0) = (y_0,0  y_0,1) */
         for (i = 0, k = 0; i < iInputBlockSize; i++, k += 2)
@@ -305,7 +305,7 @@ void CMLCMetric::CalculateMetric(CVector<CEquSig>* pcInSymb,
 
                     vecMetric[k].rTow0 =
                         Minimum1((*pcInSymb)[i].cSig.real(),
-                                 rTableQAM64SM[iTabInd0][0],	(*pcInSymb)[i].rChan);
+                                 rTableQAM64SM[iTabInd0][0],    (*pcInSymb)[i].rChan);
 
                     vecMetric[k].rTow1 =
                         Minimum1((*pcInSymb)[i].cSig.real(),
@@ -343,7 +343,7 @@ void CMLCMetric::CalculateMetric(CVector<CEquSig>* pcInSymb,
                     /* Calculate distances, imaginary part */
                     vecMetric[k + 1].rTow0 =
                         Minimum1((*pcInSymb)[i].cSig.imag(),
-                                 rTableQAM64SM[iTabInd0][1],	(*pcInSymb)[i].rChan);
+                                 rTableQAM64SM[iTabInd0][1],    (*pcInSymb)[i].rChan);
 
                     vecMetric[k + 1].rTow1 =
                         Minimum1((*pcInSymb)[i].cSig.imag(),
@@ -424,7 +424,7 @@ void CMLCMetric::CalculateMetric(CVector<CEquSig>* pcInSymb,
                         (ExtractBit(vecSubsetDef3[k]) & 1);
 
                     vecMetric[k].rTow0 = Minimum1((*pcInSymb)[i].cSig.real(),
-                                                  rTableQAM64SM[iTabInd0][0],	(*pcInSymb)[i].rChan);
+                                                  rTableQAM64SM[iTabInd0][0],   (*pcInSymb)[i].rChan);
 
                     vecMetric[k].rTow1 = Minimum1((*pcInSymb)[i].cSig.real(),
                                                   rTableQAM64SM[iTabInd0 | (1 << 1)][0],

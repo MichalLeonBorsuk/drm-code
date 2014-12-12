@@ -20,7 +20,7 @@ public slots:
     void     updatePlot(const std::vector<_REAL>& vec, _REAL min, _REAL max);
 
 protected:
-    QPixmap	 Canvas;
+    QPixmap  Canvas;
     void     paintEvent(QPaintEvent *);
     void     resizeEvent(QResizeEvent *);
 };

@@ -70,9 +70,15 @@ class CSoundInQT : public CSoundCommonQT, public CSoundInInterface
 public:
     CSoundInQT();
     virtual ~CSoundInQT();
-    virtual void        Enumerate(vector<deviceprop>& dp, const int* dsr) { CSoundCommonQT::Enumerate(dp, dsr); }
-    virtual string      GetDev() { return CSoundCommonQT::GetDev(); }
-    virtual void        SetDev(string s) { CSoundCommonQT::SetDev(s); }
+    virtual void        Enumerate(vector<deviceprop>& dp, const int* dsr) {
+        CSoundCommonQT::Enumerate(dp, dsr);
+    }
+    virtual string      GetDev() {
+        return CSoundCommonQT::GetDev();
+    }
+    virtual void        SetDev(string s) {
+        CSoundCommonQT::SetDev(s);
+    }
     virtual _BOOLEAN    Init(int, int, _BOOLEAN);
     virtual _BOOLEAN    Read(CVector<short>&);
     virtual void        Close();
@@ -85,9 +91,15 @@ class CSoundOutQT : public CSoundCommonQT, public CSoundOutInterface
 public:
     CSoundOutQT();
     virtual ~CSoundOutQT();
-    virtual void        Enumerate(vector<deviceprop>& dp, const int* dsr) { CSoundCommonQT::Enumerate(dp, dsr); }
-    virtual string      GetDev() { return CSoundCommonQT::GetDev(); }
-    virtual void        SetDev(string s) { CSoundCommonQT::SetDev(s); }
+    virtual void        Enumerate(vector<deviceprop>& dp, const int* dsr) {
+        CSoundCommonQT::Enumerate(dp, dsr);
+    }
+    virtual string      GetDev() {
+        return CSoundCommonQT::GetDev();
+    }
+    virtual void        SetDev(string s) {
+        CSoundCommonQT::SetDev(s);
+    }
     virtual _BOOLEAN    Init(int, int, _BOOLEAN);
     virtual _BOOLEAN    Write(CVector<short>&);
     virtual void        Close();

@@ -3,7 +3,7 @@
  * Copyright (c) 2001-2014, 2001-2014, 2001-2014
  *
  * Author(s):
- *	Julian Cable, David Flamand
+ *  Julian Cable, David Flamand
  *
  * Decription:
  *  Read a file at the correct rate
@@ -59,7 +59,7 @@ CAudioFileIn::SetFileName(const string& strFileName)
     size_t p = strInFileName.rfind('.');
     if (p != string::npos)
         ext = strInFileName.substr(p+1);
-	eFmt = fmt_other;
+    eFmt = fmt_other;
     if (ext == "txt") eFmt = fmt_txt;
     if (ext == "TXT") eFmt = fmt_txt;
     if (ext.substr(0,2) == "iq") eFmt = fmt_raw_stereo;
@@ -109,10 +109,10 @@ CAudioFileIn::SetFileName(const string& strFileName)
         {
             iFileChannels = sfinfo.channels;
             iFileSampleRate = sfinfo.samplerate;
-		} else {
+        } else {
             string errs = string("")+sf_strerror(0)+" for "+strInFileName;
             throw CGenErr(errs);
-		}
+        }
         break;
     default:
         pFileReceiver = NULL;
@@ -171,7 +171,7 @@ CAudioFileIn::SetFileName(const string& strFileName)
 _BOOLEAN
 CAudioFileIn::Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking)
 {
-	//qDebug("CAudioFileIn::Init() iNewSampleRate=%i iNewBufferSize=%i bNewBlocking=%i", iNewSampleRate, iNewBufferSize, bNewBlocking);
+    //qDebug("CAudioFileIn::Init() iNewSampleRate=%i iNewBufferSize=%i bNewBlocking=%i", iNewSampleRate, iNewBufferSize, bNewBlocking);
 
     if (pacer)
     {
@@ -189,7 +189,7 @@ CAudioFileIn::Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking
 
     _BOOLEAN bChanged = FALSE;
 
-	if (iSampleRate != iNewSampleRate)
+    if (iSampleRate != iNewSampleRate)
     {
         iSampleRate = iNewSampleRate;
         bChanged = TRUE;
@@ -268,9 +268,9 @@ CAudioFileIn::Read(CVector<short>& psData)
 #ifdef HAVE_LIBSNDFILE
     while (iRemainingFrame > 0)
     {
-	    sf_count_t c = sf_readf_short((SNDFILE*)pFileReceiver, &buffer[iReadFrame * iFileChannels], iRemainingFrame);
-	    if (c != sf_count_t(iRemainingFrame))
-	    {
+        sf_count_t c = sf_readf_short((SNDFILE*)pFileReceiver, &buffer[iReadFrame * iFileChannels], iRemainingFrame);
+        if (c != sf_count_t(iRemainingFrame))
+        {
             /* rewind */
             if (sf_error((SNDFILE*)pFileReceiver) || sf_seek((SNDFILE*)pFileReceiver, 0, SEEK_SET) == -1)
             {
@@ -278,7 +278,7 @@ CAudioFileIn::Read(CVector<short>& psData)
                 bError = TRUE;
                 break;
             }
-	    }
+        }
         iRemainingFrame -= c;
         iReadFrame += c;
     }
@@ -364,8 +364,8 @@ CAudioFileIn::Close()
         pFileReceiver = NULL;
     }
 
-	if (buffer != NULL)
-		delete[] buffer;
+    if (buffer != NULL)
+        delete[] buffer;
     buffer = NULL;
 
     if (pacer != NULL)

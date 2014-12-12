@@ -3,13 +3,13 @@
  * Copyright (c) 2001-2014
  *
  * Author(s):
- *	Volker Fischer, Andrew Murphy
+ *  Volker Fischer, Andrew Murphy
  *
  * Description:
- *	See Data.cpp
+ *  See Data.cpp
  *
  * 11/21/2005 Andrew Murphy, BBC Research & Development, 2005
- *	- Addition GetSDCReceive(), Added CSplit class
+ *  - Addition GetSDCReceive(), Added CSplit class
  *
  ******************************************************************************
  *
@@ -44,19 +44,19 @@
 
 /* Definitions ****************************************************************/
 /* Maximum frequency for audio spectrum */
-#define MAX_SPEC_AUDIO_FREQUENCY	20000 /* Hz */
+#define MAX_SPEC_AUDIO_FREQUENCY    20000 /* Hz */
 
 /* In case of random-noise, define number of blocks */
-#define DEFAULT_NUM_SIM_BLOCKS		50
+#define DEFAULT_NUM_SIM_BLOCKS      50
 
 /* Time span used for averaging the audio spectrum. Shall be higher than the
    400 ms DRM audio block */
-#define TIME_AV_AUDIO_SPECT_MS		500 /* ms */
+#define TIME_AV_AUDIO_SPECT_MS      500 /* ms */
 
 /* Normalization constant for two mixed signals. If this constant is 2, no
    overrun of the "short" variable can happen but signal has quite much lower
    power -> compromise */
-#define MIX_OUT_CHAN_NORM_CONST		((_REAL) 1.0 / sqrt((_REAL) 2.0))
+#define MIX_OUT_CHAN_NORM_CONST     ((_REAL) 1.0 / sqrt((_REAL) 2.0))
 
 
 /* Classes ********************************************************************/
@@ -72,9 +72,9 @@ public:
     }
 
 protected:
-    CSoundInInterface*	pSound;
-    CVector<_SAMPLE>	vecsSoundBuffer;
-    CSignalLevelMeter	SignalLevelMeter;
+    CSoundInInterface*  pSound;
+    CVector<_SAMPLE>    vecsSoundBuffer;
+    CSignalLevelMeter   SignalLevelMeter;
 
     virtual void InitInternal(CParameter& TransmParam);
     virtual void ProcessDataInternal(CParameter& TransmParam);
@@ -119,22 +119,22 @@ public:
     }
 
 protected:
-    CSoundOutInterface*		pSound;
-    _BOOLEAN				bMuteAudio;
-    CWaveFile				WaveFileAudio;
-    _BOOLEAN				bDoWriteWaveFile;
-    _BOOLEAN				bSoundBlocking;
-    _BOOLEAN				bNewSoundBlocking;
-    CVector<_SAMPLE>		vecsTmpAudData;
-    EOutChanSel				eOutChanSel;
-    _REAL					rMixNormConst;
+    CSoundOutInterface*     pSound;
+    _BOOLEAN                bMuteAudio;
+    CWaveFile               WaveFileAudio;
+    _BOOLEAN                bDoWriteWaveFile;
+    _BOOLEAN                bSoundBlocking;
+    _BOOLEAN                bNewSoundBlocking;
+    CVector<_SAMPLE>        vecsTmpAudData;
+    EOutChanSel             eOutChanSel;
+    _REAL                   rMixNormConst;
 
-    CShiftRegister<_SAMPLE>	vecsOutputData;
-    CFftPlans				FftPlan;
-    CComplexVector			veccFFTInput;
-    CComplexVector			veccFFTOutput;
-    CRealVector				vecrAudioWindowFunction;
-    int						iAudSampleRate;
+    CShiftRegister<_SAMPLE> vecsOutputData;
+    CFftPlans               FftPlan;
+    CComplexVector          veccFFTInput;
+    CComplexVector          veccFFTOutput;
+    CRealVector             vecrAudioWindowFunction;
+    int                     iAudSampleRate;
     int                     iNumSmpls4AudioSprectrum;
     int                     iNumBlocksAvAudioSpec;
     int                     iMaxAudioFrequency;
@@ -147,7 +147,7 @@ class CGenSimData : public CTransmitterModul<_BINARY, _BINARY>
 {
 public:
     CGenSimData() : eCntType(CT_TIME), iNumSimBlocks(DEFAULT_NUM_SIM_BLOCKS),
-            iNumErrors(0), iCounter(0), strFileName("SimTime.dat"), tiStartTime(0) {}
+        iNumErrors(0), iCounter(0), strFileName("SimTime.dat"), tiStartTime(0) {}
     virtual ~CGenSimData() {}
 
     void SetSimTime(int iNewTi, string strNewFileName);
@@ -155,13 +155,13 @@ public:
 
 protected:
     enum ECntType {CT_TIME, CT_ERRORS};
-    ECntType	eCntType;
-    int			iNumSimBlocks;
-    int			iNumErrors;
-    int			iCounter;
-    int			iMinNumBlocks;
-    string		strFileName;
-    time_t		tiStartTime;
+    ECntType    eCntType;
+    int         iNumSimBlocks;
+    int         iNumErrors;
+    int         iCounter;
+    int         iMinNumBlocks;
+    string      strFileName;
+    time_t      tiStartTime;
 
     virtual void InitInternal(CParameter& TransmParam);
     virtual void ProcessDataInternal(CParameter& TransmParam);
@@ -174,9 +174,9 @@ public:
     virtual ~CEvaSimData() {}
 
 protected:
-    int		iIniCnt;
-    int		iNumAccBitErrRate;
-    _REAL	rAccBitErrRate;
+    int     iIniCnt;
+    int     iNumAccBitErrRate;
+    _REAL   rAccBitErrRate;
 
     virtual void InitInternal(CParameter& Parameters);
     virtual void ProcessDataInternal(CParameter& Parameters);
@@ -201,7 +201,7 @@ class CUtilizeFACData : public CReceiverModul<_BINARY, _BINARY>
 {
 public:
     CUtilizeFACData() :
-            bSyncInput(FALSE), bCRCOk(FALSE) {}
+        bSyncInput(FALSE), bCRCOk(FALSE) {}
     virtual ~CUtilizeFACData() {}
 
     /* To set the module up for synchronized DRM input data stream */
@@ -215,8 +215,8 @@ public:
 
 protected:
     CFACReceive FACReceive;
-    _BOOLEAN	bSyncInput;
-    _BOOLEAN	bCRCOk;
+    _BOOLEAN    bSyncInput;
+    _BOOLEAN    bCRCOk;
 
     virtual void InitInternal(CParameter& Parameters);
     virtual void ProcessDataInternal(CParameter& Parameters);
@@ -249,7 +249,7 @@ public:
 
 protected:
     CSDCReceive SDCReceive;
-    _BOOLEAN	bFirstBlock;
+    _BOOLEAN    bFirstBlock;
 
     virtual void InitInternal(CParameter& Parameters);
     virtual void ProcessDataInternal(CParameter& Parameters);
@@ -307,32 +307,34 @@ public:
 
     void NewFrequency(CParameter &Parameters);
 
-	_BOOLEAN IsRecording() {return bIsRecording;}
+    _BOOLEAN IsRecording() {
+        return bIsRecording;
+    }
 
 protected:
-    FILE *					pFile;
-    CVector<_SAMPLE>		vecsTmpAudData;
+    FILE *                  pFile;
+    CVector<_SAMPLE>        vecsTmpAudData;
 
     virtual void InitInternal(CParameter& Parameters);
     virtual void ProcessDataInternal(CParameter& Parameters);
-    void		 OpenFile(CParameter& Parameters);
+    void         OpenFile(CParameter& Parameters);
 
     /* For doing the IF to IQ conversion (stolen from AM demod) */
-    CRealVector					rvecInpTmp;
-    CComplexVector				cvecHilbert;
-    int							iHilFiltBlLen;
-    CFftPlans					FftPlansHilFilt;
+    CRealVector                 rvecInpTmp;
+    CComplexVector              cvecHilbert;
+    int                         iHilFiltBlLen;
+    CFftPlans                   FftPlansHilFilt;
 
-    CComplexVector				cvecBReal;
-    CComplexVector				cvecBImag;
-    CRealVector					rvecZReal;
-    CRealVector					rvecZImag;
+    CComplexVector              cvecBReal;
+    CComplexVector              cvecBImag;
+    CRealVector                 rvecZReal;
+    CRealVector                 rvecZImag;
 
-    CMixer						Mixer;
+    CMixer                      Mixer;
 
-    int							iFrequency; // For use in generating filename
-    _BOOLEAN					bIsRecording;
-    _BOOLEAN					bChangeReceived;
+    int                         iFrequency; // For use in generating filename
+    _BOOLEAN                    bIsRecording;
+    _BOOLEAN                    bChangeReceived;
 
 };
 

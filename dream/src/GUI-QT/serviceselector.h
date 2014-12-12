@@ -25,7 +25,7 @@ public slots:
     void onServiceChanged(int, const CService&);
 private:
     Ui::ServiceSelector* ui;
-    QButtonGroup*		 pButtonGroup;
+    QButtonGroup*        pButtonGroup;
     std::vector<QLabel*> serviceLabels;
 signals:
     void audioServiceSelected(int);

@@ -3,7 +3,7 @@
  * Copyright (c) 2001-2014
  *
  * Author(s):
- *	Volker Fischer
+ *  Volker Fischer
  *
  * Description:
  *
@@ -52,8 +52,8 @@ public:
     void Init(int iNewOutputBlockSize, ECodScheme eNewCodingScheme);
 
 protected:
-    int						iOutputBlockSize;
-    ECodScheme	eMapType;
+    int                     iOutputBlockSize;
+    ECodScheme  eMapType;
 };
 
 

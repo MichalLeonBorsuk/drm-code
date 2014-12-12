@@ -11,7 +11,9 @@ public:
     explicit QCPSMeter(QWidget *parent = 0);
 
     void setLevel(double level);
-    QWidget* widget() { return this; }
+    QWidget* widget() {
+        return this;
+    }
 };
 
 

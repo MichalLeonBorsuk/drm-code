@@ -3,10 +3,10 @@
  * Copyright (c) 2001-2014
  *
  * Author(s):
- *	Julian Cable
+ *  Julian Cable
  *
  * Description:
- *	ETSI DAB/DRM Electronic Programme Guide Viewer
+ *  ETSI DAB/DRM Electronic Programme Guide Viewer
  *
  *
  ******************************************************************************

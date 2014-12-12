@@ -135,12 +135,18 @@ public:
     bool CanDecode(CAudioParam::EAudCod eAudCod) {
         switch (eAudCod)
         {
-        case CAudioParam::AC_NONE: return true;
-        case CAudioParam::AC_AAC:  return bCanDecodeAAC;
-        case CAudioParam::AC_CELP: return bCanDecodeCELP;
-        case CAudioParam::AC_HVXC: return bCanDecodeHVXC;
-        case CAudioParam::AC_OPUS: return bCanDecodeOPUS;
-        case CAudioParam::AC_xHE_AAC: return false;
+        case CAudioParam::AC_NONE:
+            return true;
+        case CAudioParam::AC_AAC:
+            return bCanDecodeAAC;
+        case CAudioParam::AC_CELP:
+            return bCanDecodeCELP;
+        case CAudioParam::AC_HVXC:
+            return bCanDecodeHVXC;
+        case CAudioParam::AC_OPUS:
+            return bCanDecodeOPUS;
+        case CAudioParam::AC_xHE_AAC:
+            return false;
         }
         return false;
     }
@@ -196,7 +202,7 @@ protected:
     int iNumAudioFrames;
 
     CAudioParam::EAudCod eAudioCoding;
-	CAudioCodec* codec;
+    CAudioCodec* codec;
 
     int iNumBorders;
     int iNumHigherProtectedBytes;
@@ -233,7 +239,7 @@ protected:
     string AACFileName(CParameter&);
     string CELPFileName(CParameter&);
     string HVXCFileName(CParameter&);
-	void CloseDecoder();
+    void CloseDecoder();
 };
 
 #endif // _AUIDOSOURCEDECODER_H_INCLUDED_
