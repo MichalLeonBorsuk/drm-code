@@ -75,14 +75,14 @@ CAudioFileIn::SetFileName(const string& strFileName)
         if (ext.length() == 4 || ext.length() == 5) /* e.g.: iq48, IF192 */
             iFileSampleRate = 1000 * atoi(ext.substr(2).c_str());
         else
-            iFileSampleRate = DEFAULT_SOUNDCRD_SAMPLE_RATE;
+            iFileSampleRate = DEFAULT_SIGNAL_SAMPLE_RATE;
         break;
     default:
         iFileChannels = 1;
         if (ext.length() == 5 || ext.length() == 6) /* e.g.: TXT48, pcm192 */
             iFileSampleRate = 1000 * atoi(ext.substr(3).c_str());
         else
-            iFileSampleRate = DEFAULT_SOUNDCRD_SAMPLE_RATE;
+            iFileSampleRate = DEFAULT_SIGNAL_SAMPLE_RATE;
         break;
     }
 

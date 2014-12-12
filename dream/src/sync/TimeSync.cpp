@@ -37,7 +37,6 @@
 /* Implementation *************************************************************/
 void CTimeSync::ProcessDataInternal(CParameter& Parameters)
 {
-	int				i, j, k;
 	int				iMaxIndex;
 	int				iIntDiffToCenter;
 	int				iCurPos;
@@ -78,7 +77,7 @@ void CTimeSync::ProcessDataInternal(CParameter& Parameters)
 		cvecInpTmp.Init(iInputBlockSize);
 
 		/* Copy CVector data in CMatlibVector */
-		for (i = 0; i < iInputBlockSize; i++)
+        for (int i = 0; i < iInputBlockSize; i++)
 			cvecInpTmp[i] = (*pvecInputData)[i];
 
 		/* Complex Hilbert filter. We use the copy constructor for storing
@@ -96,7 +95,7 @@ void CTimeSync::ProcessDataInternal(CParameter& Parameters)
 		   TODO: Make vector types compatible (or maybe only use matlib vectors
 		   everywhere) */
 		cvecOutTmpInterm.Init(iDecInpuSize);
-		for (i = 0; i < iDecInpuSize; i++)
+        for (int i = 0; i < iDecInpuSize; i++)
 		{
 			cvecOutTmpInterm[i] = cvecOutTmp[i];
 //			float value[2] = {cvecOutTmp[i].real()/8192, cvecOutTmp[i].imag()/8192};
@@ -126,7 +125,7 @@ void CTimeSync::ProcessDataInternal(CParameter& Parameters)
 
 		/* Actual correlation over entire guard-interval */
 		CComplex cGuardCorrFreqTrack = 0.0;
-		for (i = 0; i < iLenGuardInt[iSelectedMode]; i++)
+        for (int i = 0; i < iLenGuardInt[iSelectedMode]; i++)
 		{
 			/* Use start point from ML timing estimation. The input stream is
 			   automatically adjusted to have this point at "iDecSymBS" */
@@ -162,7 +161,7 @@ void CTimeSync::ProcessDataInternal(CParameter& Parameters)
 			iNewStIndCount = 0;
 
 			/* We use the block in the middle of the buffer for observation */
-			for (i = iDecSymBS + iDecSymBS - iDecInpuSize;
+            for (int i = iDecSymBS + iDecSymBS - iDecInpuSize;
 				i < iDecSymBS + iDecSymBS; i++)
 			{
 				/* Only every "iStepSizeGuardCorr"'th value is calculated for
@@ -172,7 +171,7 @@ void CTimeSync::ProcessDataInternal(CParameter& Parameters)
 					/* Do the following guard interval correlation for all
 					   possible robustness modes (this is needed for robustness
 					   mode detection) */
-					for (j = 0; j < NUM_ROBUSTNESS_MODES; j++)
+                    for (int j = 0; j < NUM_ROBUSTNESS_MODES; j++)
 					{
 						/* Guard-interval correlation ----------------------- */
 						/* Speed optimized calculation of the guard-interval
@@ -191,7 +190,7 @@ void CTimeSync::ProcessDataInternal(CParameter& Parameters)
 							vecrIntermPowRes[j][iPosInIntermCResBuf[j]];
 
 						/* Calculate new block and add in memory */
-						for (k = iLengthOverlap[j]; k < iLenGuardInt[j]; k++)
+                        for (int k = iLengthOverlap[j]; k < iLenGuardInt[j]; k++)
 						{
 							/* Actual correlation */
 							iCurPos = iTimeSyncPos + k;
@@ -231,7 +230,7 @@ void CTimeSync::ProcessDataInternal(CParameter& Parameters)
 						}
 
 						/* Save correlation results in shift register */
-						for (k = 0; k < iRMCorrBufSize - 1; k++)
+                        for (int k = 0; k < iRMCorrBufSize - 1; k++)
 							vecrRMCorrBuffer[j][k] = vecrRMCorrBuffer[j][k + 1];
 
 						/* ML solution */
@@ -292,7 +291,7 @@ void CTimeSync::ProcessDataInternal(CParameter& Parameters)
 							/* Search for maximum */
 							iMaxIndex = 0;
 							rMaxValue = (CReal) -_MAXREAL; /* Init value */
-							for (k = 0; k < iMaxDetBufSize; k++)
+                            for (int k = 0; k < iMaxDetBufSize; k++)
 							{
 								if (pMaxDetBuffer[k] > rMaxValue)
 								{
@@ -343,7 +342,7 @@ void CTimeSync::ProcessDataInternal(CParameter& Parameters)
 					/* Correlation of guard-interval correlation with prepared
 					   cos-vector. Store highest peak */
 					rMaxValRMCorr = (CReal) 0.0;
-					for (j = 0; j < NUM_ROBUSTNESS_MODES; j++)
+                    for (int j = 0; j < NUM_ROBUSTNESS_MODES; j++)
 					{
 						/* Correlation with symbol rate frequency (Correlations
 						   must be normalized to be comparable!
@@ -362,7 +361,7 @@ void CTimeSync::ProcessDataInternal(CParameter& Parameters)
 
 					/* Get second highest peak */
 					rSecHighPeak = (CReal) 0.0;
-					for (j = 0; j < NUM_ROBUSTNESS_MODES; j++)
+                    for (int j = 0; j < NUM_ROBUSTNESS_MODES; j++)
 					{
 						if ((rResMode[j] > rSecHighPeak) &&
 							(iDetectedRModeInd != j))
@@ -399,7 +398,7 @@ void CTimeSync::ProcessDataInternal(CParameter& Parameters)
 	{
 		/* Use all measured FFT-window start points for determining the "real"
 		   one */	
-		for (i = 0; i < iNewStIndCount; i++)
+        for (int i = 0; i < iNewStIndCount; i++)
 		{
 			/* Check if new measurement is in range of predefined bound. This
 			   bound shall eliminate outliers for the calculation of the
@@ -538,7 +537,7 @@ fflush(pFile);
 		iStartIndex = i2SymBlSize;
 
 	/* Cut out the useful part of the OFDM symbol */
-	for (k = iStartIndex; k < iStartIndex + iDFTSize; k++)
+    for (int k = iStartIndex; k < iStartIndex + iDFTSize; k++)
 		(*pvecOutputData)[k - iStartIndex] = HistoryBuf[k];
 
 	/* If synchronized DRM input stream is used, overwrite the detected
@@ -551,7 +550,7 @@ fflush(pFile);
 		/* Cut out guard-interval at right position -> no channel estimation
 		   needed when having only one path. No delay introduced in this
 		   module  */
-		for (k = iGuardSize; k < iSymbolBlockSize; k++)
+        for (int k = iGuardSize; k < iSymbolBlockSize; k++)
 		{
 			(*pvecOutputData)[k - iGuardSize] = 
 				HistoryBuf[iTotalBufferSize - iInputBlockSize + k];
@@ -586,7 +585,6 @@ fflush(pFile);
 
 void CTimeSync::InitInternal(CParameter& Parameters)
 {
-	int	i, j;
 	int	iMaxSymbolBlockSize;
 	int	iObservedFreqBin;
 	CReal	rArgTemp;
@@ -596,12 +594,6 @@ void CTimeSync::InitInternal(CParameter& Parameters)
 
 	/* Get parameters from info class */
 	iSampleRate = Parameters.GetSigSampleRate();
-
-	/* Adjusting fft size to sample rate */
-	const int iRMAFFTSizeN = ADJ_FOR_SRATE(RMA_FFT_SIZE_N, iSampleRate);
-	const int iRMBFFTSizeN = ADJ_FOR_SRATE(RMB_FFT_SIZE_N, iSampleRate);
-	const int iRMCFFTSizeN = ADJ_FOR_SRATE(RMC_FFT_SIZE_N, iSampleRate);
-	const int iRMDFFTSizeN = ADJ_FOR_SRATE(RMD_FFT_SIZE_N, iSampleRate);
 
 	/* Adjusting GRDCRR_DEC_FACT to sample rate */
 	iGrdcrrDecFact = ADJ_FOR_SRATE(GRDCRR_DEC_FACT, iSampleRate);
@@ -664,7 +656,8 @@ void CTimeSync::InitInternal(CParameter& Parameters)
 	/* Init Hilbert filter. Since the frequency offset correction was
 	   done in the previous module, the offset for the filter is
 	   always "VIRTUAL_INTERMED_FREQ" */
-	SetFilterTaps((CReal) VIRTUAL_INTERMED_FREQ / iSampleRate);
+    double vif = Parameters.GetWaveMode()==RM_ROBUSTNESS_MODE_E?VIRTUAL_INTERMED_FREQ_DRMPLUS:VIRTUAL_INTERMED_FREQ_DRM30;
+    SetFilterTaps(vif / iSampleRate);
 
 	iGuardSize = Parameters.CellMappingTable.iGuardSize;
 	iDFTSize = Parameters.CellMappingTable.iFFTSizeN;
@@ -673,9 +666,19 @@ void CTimeSync::InitInternal(CParameter& Parameters)
 	/* Decimated symbol block size */
 	iDecSymBS = iSymbolBlockSize / iGrdcrrDecFact;
 
-	/* Calculate maximum symbol block size (This is Rob. Mode A) */
-	iMaxSymbolBlockSize = iRMAFFTSizeN + 
-		iRMAFFTSizeN * RMA_ENUM_TG_TU / RMA_DENOM_TG_TU;
+    /* Calculate maximum symbol block size */
+    if(Parameters.GetWaveMode()==RM_ROBUSTNESS_MODE_E)
+    {
+        const int iFFTSizeN = fft_size(RM_ROBUSTNESS_MODE_E, iSampleRate);
+        iMaxSymbolBlockSize = iFFTSizeN +
+            iFFTSizeN * propagationParams[RM_ROBUSTNESS_MODE_E].TgTu.val();
+    }
+    else
+    {   // for DRM30 This is Rob. Mode A
+        const int iRMAFFTSizeN = fft_size(RM_ROBUSTNESS_MODE_A, iSampleRate);
+        iMaxSymbolBlockSize = iRMAFFTSizeN +
+            iRMAFFTSizeN * propagationParams[RM_ROBUSTNESS_MODE_A].TgTu.val();
+    }
 
 	/* We need at least two blocks of data for determining the timing */
 	iTotalBufferSize = 2 * iSymbolBlockSize + iMaxSymbolBlockSize;
@@ -747,7 +750,7 @@ void CTimeSync::InitInternal(CParameter& Parameters)
 	   block) */
 	iRobModInitCnt = NUM_BLOCKS_FOR_RM_CORR + 1;
 
-	for (i = 0; i < NUM_ROBUSTNESS_MODES; i++)
+    for (int i = 0; i < NUM_ROBUSTNESS_MODES; i++)
 	{
 		cGuardCorr[i] = (CReal) 0.0;
 		cGuardCorrBlock[i] = (CReal) 0.0;
@@ -756,32 +759,11 @@ void CTimeSync::InitInternal(CParameter& Parameters)
 		iPosInIntermCResBuf[i] = 0;
 
 		/* Set length of the useful part of the symbol and guard size */
-		switch (i)
-		{
-		case 0:
-			iLenUsefPart[i] = iRMAFFTSizeN / iGrdcrrDecFact;
-			iLenGuardInt[i] = (int) ((CReal) iRMAFFTSizeN * 
-				RMA_ENUM_TG_TU / RMA_DENOM_TG_TU / iGrdcrrDecFact);
-			break;
-
-		case 1:
-			iLenUsefPart[i] = iRMBFFTSizeN / iGrdcrrDecFact;
-			iLenGuardInt[i] = (int) ((CReal) iRMBFFTSizeN * 
-				RMB_ENUM_TG_TU / RMB_DENOM_TG_TU / iGrdcrrDecFact);
-			break;
-
-		case 2:
-			iLenUsefPart[i] = iRMCFFTSizeN / iGrdcrrDecFact;
-			iLenGuardInt[i] = (int) ((CReal) iRMCFFTSizeN * 
-				RMC_ENUM_TG_TU / RMC_DENOM_TG_TU / iGrdcrrDecFact);
-			break;
-
-		case 3:
-			iLenUsefPart[i] = iRMDFFTSizeN / iGrdcrrDecFact;
-			iLenGuardInt[i] = (int) ((CReal) iRMDFFTSizeN * 
-				RMD_ENUM_TG_TU / RMD_DENOM_TG_TU / iGrdcrrDecFact);
-			break;
-		}
+        int iFFTSizeN = fft_size(i, iSampleRate);
+        iLenUsefPart[i] = iFFTSizeN / iGrdcrrDecFact;
+        iLenGuardInt[i] = (int) ((CReal) iFFTSizeN * propagationParams[i].TgTu.val() / iGrdcrrDecFact);
+        if(iLenGuardInt[i]==0)
+            iLenGuardInt[i]=1; // TODO MODE E
 
 		/* Number of correlation result blocks to be stored in a vector. This is
 		   the total length of the guard-interval divided by the step size.
@@ -807,7 +789,7 @@ void CTimeSync::InitInternal(CParameter& Parameters)
 		vecrCos[i].Init(iRMCorrBufSize);
 
 		/* Build table */
-		for (j = 0; j < iRMCorrBufSize; j++)
+        for (int j = 0; j < iRMCorrBufSize; j++)
 		{
 			/* Calculate frequency bins which has to be observed for each
 			   mode.

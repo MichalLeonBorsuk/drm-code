@@ -557,6 +557,8 @@ void CReceiveData::InitInternal(CParameter& Parameters)
     if (iOutputBlockAlignment)
         fprintf(stderr, "CReceiveData::InitInternal(): iOutputBlockAlignment = %i\n", iOutputBlockAlignment);
 
+    vif = Parameters.GetWaveMode()==RM_ROBUSTNESS_MODE_E?VIRTUAL_INTERMED_FREQ_DRMPLUS:VIRTUAL_INTERMED_FREQ_DRM30;
+
 	try {
 		const _BOOLEAN bChanged = pSound->Init(iSampleRate / iUpscaleRatio, iOutputBlockSize * 2 / iUpscaleRatio, TRUE);
 
@@ -609,8 +611,7 @@ void CReceiveData::InitInternal(CParameter& Parameters)
 
 		/* Set rotation vector to mix signal from zero frequency to virtual
 		   intermediate frequency */
-		const _REAL rNormCurFreqOffsetIQ =
-			(_REAL) 2.0 * crPi * ((_REAL) VIRTUAL_INTERMED_FREQ / iSampleRate);
+        const double rNormCurFreqOffsetIQ = 2.0 * crPi * vif / double(iSampleRate);
 
 		cExpStep = _COMPLEX(cos(rNormCurFreqOffsetIQ), sin(rNormCurFreqOffsetIQ));
 
@@ -723,7 +724,7 @@ _REAL CReceiveData::ConvertFrequency(_REAL rFrequency, _BOOLEAN bInvert) const
     else
         if (eInChanSelection == CReceiveData::CS_IQ_POS_ZERO ||
             eInChanSelection == CReceiveData::CS_IQ_NEG_ZERO)
-            rFrequency -= VIRTUAL_INTERMED_FREQ * iInvert;
+            rFrequency -= vif * iInvert;
 
     return rFrequency;
 }
@@ -751,7 +752,7 @@ void CReceiveData::GetInputSpec(CVector<_REAL>& vecrData,
 
     const int iOffsetScale =
         bNegativeFreq ? iLenSpecWithNyFreq / 2 :
-        (bOffsetFreq ? iLenSpecWithNyFreq * VIRTUAL_INTERMED_FREQ
+        (bOffsetFreq ? iLenSpecWithNyFreq * vif
             / (iSampleRate / 2) : 0);
 
     const _REAL rFactorScale =
@@ -827,7 +828,7 @@ void CReceiveData::CalculatePSD(CVector<_REAL>& vecrData,
 
     const int iOffsetScale =
         bNegativeFreq ? iLenSpecWithNyFreq / 2 :
-        (bOffsetFreq ? iLenSpecWithNyFreq * VIRTUAL_INTERMED_FREQ
+        (bOffsetFreq ? iLenSpecWithNyFreq * vif
             / (iSampleRate / 2) : 0);
 
     const _REAL rFactorScale =

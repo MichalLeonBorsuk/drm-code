@@ -241,7 +241,7 @@ CDRMTransmitter::~CDRMTransmitter()
 
 CDRMTransmitter::CDRMTransmitter(CSettings* pSettings) : CDRMTransceiver(pSettings, new CSoundIn, new CSoundOut, TRUE),
         ReadData(pSoundInInterface), TransmitData(pSoundOutInterface),
-        rDefCarOffset((_REAL) VIRTUAL_INTERMED_FREQ),
+        rDefCarOffset((_REAL) VIRTUAL_INTERMED_FREQ_DRM30),
         // UEP only works with Dream receiver, FIXME! -> disabled for now
         bUseUEP(FALSE)
 {
@@ -353,7 +353,7 @@ CDRMTransmitter::CDRMTransmitter(CSettings* pSettings) : CDRMTransceiver(pSettin
     Parameters.eSDCCodingScheme = CS_2_SM;
 
     /* Set desired intermedia frequency (IF) in Hertz */
-    SetCarOffset(_REAL(VIRTUAL_INTERMED_FREQ)); /* Default: "VIRTUAL_INTERMED_FREQ" */
+    SetCarOffset(_REAL(VIRTUAL_INTERMED_FREQ_DRM30)); /* Default: "VIRTUAL_INTERMED_FREQ" */
 
     if (bUseUEP == TRUE)
     {
@@ -379,10 +379,10 @@ void CDRMTransmitter::LoadSettings()
     string value, service;
 
     /* Sound card audio sample rate */
-    Parameters.SetNewAudSampleRate(s.Get(Transmitter, "samplerateaud", int(DEFAULT_SOUNDCRD_SAMPLE_RATE)));
+    Parameters.SetNewAudSampleRate(s.Get(Transmitter, "samplerateaud", int(DEFAULT_AUDIO_SAMPLE_RATE)));
 
     /* Sound card signal sample rate */
-    Parameters.SetNewSigSampleRate(s.Get(Transmitter, "sampleratesig", int(DEFAULT_SOUNDCRD_SAMPLE_RATE)));
+    Parameters.SetNewSigSampleRate(s.Get(Transmitter, "sampleratesig", int(DEFAULT_SIGNAL_SAMPLE_RATE)));
 
     /* Fetch new sample rate if any */
     Parameters.FetchNewSampleRate();
