@@ -3,10 +3,10 @@
  * Copyright (c) 2001-2014
  *
  * Author(s):
- *	Juian Cable
+ *  Juian Cable
  *
  * Description:
- *	Implementation of a CPacketSource that reads from a file
+ *  Implementation of a CPacketSource that reads from a file
  *
  ******************************************************************************
  *
@@ -39,15 +39,18 @@ class CPacer;
 class CPacketSourceFile : public CPacketSource
 {
 public:
-	CPacketSourceFile();
-	~CPacketSourceFile();
-	// Set the sink which will receive the packets
-	void SetPacketSink(CPacketSink *pSink);
-	// Stop sending packets to the sink
-	void ResetPacketSink(void);
-	_BOOLEAN SetOrigin(const string& str);
-	bool GetOrigin(string& str) { (void)str; return false; }
-	void poll();
+    CPacketSourceFile();
+    ~CPacketSourceFile();
+    // Set the sink which will receive the packets
+    void SetPacketSink(CPacketSink *pSink);
+    // Stop sending packets to the sink
+    void ResetPacketSink(void);
+    _BOOLEAN SetOrigin(const string& str);
+    bool GetOrigin(string& str) {
+        (void)str;
+        return false;
+    }
+    void poll();
 
 private:
 
@@ -58,11 +61,11 @@ private:
     void readPcap(vector<_BYTE>& vecbydata, int& interval);
     void readTagPacketHeader(string& tag, uint32_t& len);
 
-    CPacketSink		*pPacketSink;
-    uint64_t		last_packet_time;
-    CPacer*		pacer;
-    void*		pF;
-    int 		wanted_dest_port;
+    CPacketSink     *pPacketSink;
+    uint64_t        last_packet_time;
+    CPacer*     pacer;
+    void*       pF;
+    int         wanted_dest_port;
     enum {pcap,ff,af,pf}    eFileType;
 };
 

@@ -3,10 +3,10 @@
  * Copyright (c) 2001-2014
  *
  * Author(s):
- *	Julian Cable
+ *  Julian Cable
  *
  * Description:
- *	dummy sound classes
+ *  dummy sound classes
  *
  ******************************************************************************
  *
@@ -37,22 +37,22 @@ class CSoundInNull : public CSoundInInterface
 public:
     CSoundInNull() {}
     virtual ~CSoundInNull() {}
-    virtual _BOOLEAN	Init(int, int, _BOOLEAN) {
+    virtual _BOOLEAN    Init(int, int, _BOOLEAN) {
         return TRUE;
     }
-    virtual _BOOLEAN	Read(CVector<short>&) {
+    virtual _BOOLEAN    Read(CVector<short>&) {
         return FALSE;
     }
-    virtual void		Enumerate(vector<string>&choices, vector<string>&) {
+    virtual void        Enumerate(vector<string>&choices, vector<string>&) {
         choices.push_back("(File or Network)");
     }
-    virtual string		GetDev() {
+    virtual string      GetDev() {
         return sDev;
     }
-    virtual void		SetDev(string sNewDev) {
+    virtual void        SetDev(string sNewDev) {
         sDev = sNewDev;
     }
-    virtual void		Close() {}
+    virtual void        Close() {}
 private:
     string sDev;
 };
@@ -62,22 +62,22 @@ class CSoundOutNull : public CSoundOutInterface
 public:
     CSoundOutNull() {}
     virtual ~CSoundOutNull() {}
-    virtual _BOOLEAN	Init(int, int, _BOOLEAN) {
+    virtual _BOOLEAN    Init(int, int, _BOOLEAN) {
         return TRUE;
     }
-    virtual _BOOLEAN	Write(CVector<short>&) {
+    virtual _BOOLEAN    Write(CVector<short>&) {
         return FALSE;
     }
-    virtual void		Enumerate(vector<string>& choices, vector<string>&) {
+    virtual void        Enumerate(vector<string>& choices, vector<string>&) {
         choices.push_back("(None)");
     }
-    virtual string		GetDev() {
+    virtual string      GetDev() {
         return sDev;
     }
-    virtual void		SetDev(string sNewDev) {
+    virtual void        SetDev(string sNewDev) {
         sDev = sNewDev;
     }
-    virtual void		Close() {}
+    virtual void        Close() {}
 private:
     string sDev;
 };

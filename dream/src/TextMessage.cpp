@@ -3,7 +3,7 @@
  * Copyright (c) 2001-2001-2014
  *
  * Author(s):
- *	Volker Fischer
+ *  Volker Fischer
  *
  * Description:
  * Implementation of the text message application of section 6.5
@@ -60,7 +60,7 @@ void CTextMessageEncoder::Encode(CVector<_BINARY>& pData)
 
     /* Take care of byte count, segment count and message count ------------- */
     /* Check if current segment is completely done */
-    if (iByteCnt >=	CurTextMessage.GetSegSize(iSegCnt))
+    if (iByteCnt >= CurTextMessage.GetSegSize(iSegCnt))
     {
         iByteCnt = 0;
 
@@ -119,11 +119,11 @@ void CTextMessageEncoder::ClearAllText()
 
 void CTextMessage::SetText(const string& strMessage, const _BINARY biToggleBit)
 {
-    int		i, j;
-    int		iNumBodyBytes;
-    _BINARY	biFirstFlag;
-    _BINARY	biLastFlag;
-    CCRC	CRCObject;
+    int     i, j;
+    int     iNumBodyBytes;
+    _BINARY biFirstFlag;
+    _BINARY biLastFlag;
+    CCRC    CRCObject;
 
     /* Get length of text message.
        TODO: take care of multiple byte characters (UTF-8 coding)! */
@@ -259,8 +259,8 @@ void CTextMessage::SetText(const string& strMessage, const _BINARY biToggleBit)
 \******************************************************************************/
 void CTextMessageDecoder::Decode(CVector<_BINARY>& pData)
 {
-    int			i, j;
-    _BOOLEAN	bBeginningFound;
+    int         i, j;
+    _BOOLEAN    bBeginningFound;
 
     /* Reset binary vector function. Always four bytes of data */
     pData.ResetBitAccess();
@@ -485,8 +485,8 @@ void CTextMessageDecoder::SetText()
                             switch (cNewChar)
                             {
                             case 0x0A:
-                                /* Code 0x0A may be inserted to indicate a preferred
-                                   line break */
+                            /* Code 0x0A may be inserted to indicate a preferred
+                               line break */
                             case 0x1F:
                                 /* Code 0x1F (hex) may be inserted to indicate a
                                    preferred word break. This code may be used to

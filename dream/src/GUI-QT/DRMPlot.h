@@ -3,11 +3,11 @@
  * Copyright (c) 2001-2014
  *
  * Original Author(s):
- *	Volker Fischer
+ *  Volker Fischer
  * Refactored by Julian Cable
  *
  * Description:
- *	Base class for plots
+ *  Base class for plots
  *
  ******************************************************************************
  *
@@ -40,36 +40,36 @@
 #define WINDOW_CHART_HEIGHT 256
 
 /* Maximum and minimum values of x-axis of input spectrum plots */
-#define MIN_VAL_INP_SPEC_Y_AXIS_DB				((double) -120.0)
-#define MAX_VAL_INP_SPEC_Y_AXIS_DB				((double) 0.0)
+#define MIN_VAL_INP_SPEC_Y_AXIS_DB              ((double) -120.0)
+#define MAX_VAL_INP_SPEC_Y_AXIS_DB              ((double) 0.0)
 
 /* Maximum and minimum values of x-axis of input PSD (shifted) */
-#define MIN_VAL_SHIF_PSD_Y_AXIS_DB				((double) -85.0)
-#define MAX_VAL_SHIF_PSD_Y_AXIS_DB				((double) -35.0)
+#define MIN_VAL_SHIF_PSD_Y_AXIS_DB              ((double) -85.0)
+#define MAX_VAL_SHIF_PSD_Y_AXIS_DB              ((double) -35.0)
 
 /* Maximum and minimum values of x-axis of SNR spectrum */
-#define MIN_VAL_SNR_SPEC_Y_AXIS_DB				((double) 0.0)
-#define MAX_VAL_SNR_SPEC_Y_AXIS_DB				((double) 35.0)
+#define MIN_VAL_SNR_SPEC_Y_AXIS_DB              ((double) 0.0)
+#define MAX_VAL_SNR_SPEC_Y_AXIS_DB              ((double) 35.0)
 
 /* Window border for standalone chart */
 #define WINDOW_BORDER 1
 
 namespace Plot {
-    enum EAxis
-    {
-        bottom = 0,
-        left = 1,
-        top = 2,
-        right = 3
-    };
-    enum EPolicy {
-        fixed = 0,
-        min = 1,         // adjust the scale so that it is not larger than rMinScaleRange"
-        fit = 2,         // adjust the scale maximum so that it is not more than "rMaxDisToMax"
-        enlarge = 3,      // enlarge scale if needed
-        first = 4,
-        last = 5
-    };
+enum EAxis
+{
+    bottom = 0,
+    left = 1,
+    top = 2,
+    right = 3
+};
+enum EPolicy {
+    fixed = 0,
+    min = 1,         // adjust the scale so that it is not larger than rMinScaleRange"
+    fit = 2,         // adjust the scale maximum so that it is not more than "rMaxDisToMax"
+    enlarge = 3,      // enlarge scale if needed
+    first = 4,
+    last = 5
+};
 }
 
 enum ECharType
@@ -105,8 +105,8 @@ public:
     virtual void replot()=0;
     virtual void clearPlots()=0;
     virtual void setupBasicPlot(const char* titleText,
-                        const char* xText, const char* yText, const char* legendText,
-                        double left, double right, double bottom, double top, QColor pc, QColor bc)=0;
+                                const char* xText, const char* yText, const char* legendText,
+                                double left, double right, double bottom, double top, QColor pc, QColor bc)=0;
     virtual void add2ndGraph(const char* axisText, const char* legendText, double bottom, double top, QColor pc)=0;
     virtual void addxMarker(QColor color, double initialPos)=0;
     virtual void addBwMarker(QColor c)=0;
@@ -138,8 +138,12 @@ public:
     void setupTreeWidget(QTreeWidget* tw);
     void SetPlotStyle(const int iNewStyleID);
     void update(ReceiverController* rc);
-    ECharType getChartType() const { return CurCharType; }
-    virtual QWidget* widget() const { return plot->widget(); }
+    ECharType getChartType() const {
+        return CurCharType;
+    }
+    virtual QWidget* widget() const {
+        return plot->widget();
+    }
 
 signals:
     void plotClicked(double);
@@ -147,14 +151,14 @@ signals:
 protected:
     void addWhatsThisHelp();
 
-    ECharType		CurCharType;
+    ECharType       CurCharType;
     int             iSigSampleRate;
-    QColor			MainPenColorPlot;
-    QColor			MainGridColorPlot;
-    QColor			SpecLine1ColorPlot;
-    QColor			SpecLine2ColorPlot;
-    QColor			PassBandColorPlot;
-    QColor			BckgrdColorPlot;
+    QColor          MainPenColorPlot;
+    QColor          MainGridColorPlot;
+    QColor          SpecLine1ColorPlot;
+    QColor          SpecLine2ColorPlot;
+    QColor          PassBandColorPlot;
+    QColor          BckgrdColorPlot;
     PlotInterface*  plot;
 private slots:
     void on_plotClicked(double d);

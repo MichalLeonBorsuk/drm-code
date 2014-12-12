@@ -2,7 +2,7 @@
 
 QwtSMeter::QwtSMeter(QWidget *parent) :
     QwtThermo(parent)
-{    
+{
 # if QWT_VERSION < 0x060100
     setRange(S_METER_THERMO_MIN, S_METER_THERMO_MAX);
     setScale(S_METER_THERMO_MIN, S_METER_THERMO_MAX, 10.0);

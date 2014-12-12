@@ -3,10 +3,10 @@
  * Copyright (c) 2001-2014
  *
  * Author(s):
- *	Volker Fischer, Andrew Murphy
+ *  Volker Fischer, Andrew Murphy
  *
  * Description:
- *	DRM Parameters
+ *  DRM Parameters
  *
  ******************************************************************************
  *
@@ -47,7 +47,7 @@ CParameter::CParameter():
     eTransmitCurrentTime(CT_OFF),
     MSCPrLe(),bSDCCodeRateOneQuarter(false),
     Stream(MAX_NUM_STREAMS), Service(MAX_NUM_SERVICES),
-	AudioComponentStatus(MAX_NUM_SERVICES),DataComponentStatus(MAX_NUM_SERVICES),
+    AudioComponentStatus(MAX_NUM_SERVICES),DataComponentStatus(MAX_NUM_SERVICES),
     iNumBitsHierarchFrameTotal(0),
     iNumDecodedBitsMSC(0),
     iNumSDCBitsPerSFrame(0),
@@ -157,8 +157,8 @@ CParameter::CParameter(const CParameter& p):
     eTransmitCurrentTime(p.eTransmitCurrentTime),
     MSCPrLe(p.MSCPrLe),bSDCCodeRateOneQuarter(p.bSDCCodeRateOneQuarter),
     Stream(p.Stream), Service(p.Service),
-	AudioComponentStatus(p.AudioComponentStatus),DataComponentStatus(p.DataComponentStatus),
-	iNumBitsHierarchFrameTotal(p.iNumBitsHierarchFrameTotal),
+    AudioComponentStatus(p.AudioComponentStatus),DataComponentStatus(p.DataComponentStatus),
+    iNumBitsHierarchFrameTotal(p.iNumBitsHierarchFrameTotal),
     iNumDecodedBitsMSC(p.iNumDecodedBitsMSC),
     iNumSDCBitsPerSFrame(p.iNumSDCBitsPerSFrame),
     iNumFACBitsPerBlock(p.iNumFACBitsPerBlock),
@@ -191,7 +191,7 @@ CParameter::CParameter(const CParameter& p):
     iDRMChannelNum(p.iDRMChannelNum),
     iSpecChDoppler(p.iSpecChDoppler),
     rBitErrRate(p.rBitErrRate),
-    rSyncTestParam	(p.rSyncTestParam),
+    rSyncTestParam  (p.rSyncTestParam),
     rSINR(p.rSINR),
     iNumBitErrors(p.iNumBitErrors),
     iChanEstDelay(p.iChanEstDelay),
@@ -244,7 +244,7 @@ CParameter::CParameter(const CParameter& p):
     LastAudioService(p.LastAudioService),
     LastDataService(p.LastDataService)
 //, Mutex() // jfbc: I don't think this state should be copied
-   ,lenient_RSCI(p.lenient_RSCI)
+    ,lenient_RSCI(p.lenient_RSCI)
 {
     CellMappingTable.MakeTable(eRobustnessMode, eSpectOccup, iSigSampleRate);
     matcReceivedPilotValues = p.matcReceivedPilotValues; // TODO
@@ -268,8 +268,8 @@ CParameter& CParameter::operator=(const CParameter& p)
     bSDCCodeRateOneQuarter = p.bSDCCodeRateOneQuarter;
     Stream = p.Stream;
     Service = p.Service;
-	AudioComponentStatus = p.AudioComponentStatus;
-	DataComponentStatus = p.DataComponentStatus;
+    AudioComponentStatus = p.AudioComponentStatus;
+    DataComponentStatus = p.DataComponentStatus;
     iNumBitsHierarchFrameTotal = p.iNumBitsHierarchFrameTotal;
     iNumDecodedBitsMSC = p.iNumDecodedBitsMSC;
     iNumSDCBitsPerSFrame = p.iNumSDCBitsPerSFrame;
@@ -300,7 +300,7 @@ CParameter& CParameter::operator=(const CParameter& p)
     iDRMChannelNum = p.iDRMChannelNum;
     iSpecChDoppler = p.iSpecChDoppler;
     rBitErrRate = p.rBitErrRate;
-    rSyncTestParam	 = p.rSyncTestParam;
+    rSyncTestParam   = p.rSyncTestParam;
     rSINR = p.rSINR;
     iNumBitErrors = p.iNumBitErrors;
     iChanEstDelay = p.iChanEstDelay;
@@ -361,7 +361,7 @@ CParameter& CParameter::operator=(const CParameter& p)
 
 void CParameter::SetReceiver(CDRMReceiver* pDRMReceiver)
 {
-	pDRMRec = pDRMReceiver;
+    pDRMRec = pDRMReceiver;
     if (pDRMRec)
         eReceiverMode = pDRMRec->GetReceiverMode();
 }
@@ -413,8 +413,8 @@ void CParameter::ResetServicesStreams()
             Service[i].eAudDataFlag = CService::SF_AUDIO;
             Service[i].iServiceDescr = 0;
             Service[i].strLabel = "";
-			AudioComponentStatus[i].SetStatus(NOT_PRESENT);
-			DataComponentStatus[i].SetStatus(NOT_PRESENT);
+            AudioComponentStatus[i].SetStatus(NOT_PRESENT);
+            DataComponentStatus[i].SetStatus(NOT_PRESENT);
         }
 
         for (i = 0; i < MAX_NUM_STREAMS; i++)
@@ -912,7 +912,7 @@ void CParameter::SetServiceID(const int iShortID, const uint32_t iNewServiceID)
 
 
         /* If the receiver has lost the sync automatically restore
-        	last current service selected */
+            last current service selected */
 
         if ((iShortID > 0) && (iNewServiceID > 0))
         {
@@ -965,14 +965,14 @@ uint32_t CRawSimData::Get()
 _REAL CParameter::GetSysSNRdBPilPos() const
 {
     /*
-    	Get system SNR in dB for the pilot positions. Since the average power of
-    	the pilots is higher than the data cells, the SNR is also higher at these
-    	positions compared to the total SNR of the DRM signal.
+        Get system SNR in dB for the pilot positions. Since the average power of
+        the pilots is higher than the data cells, the SNR is also higher at these
+        positions compared to the total SNR of the DRM signal.
     */
     return (_REAL) 10.0 * log10(pow((_REAL) 10.0, rSysSimSNRdB / 10) /
                                 CellMappingTable.rAvPowPerSymbol *
-				CellMappingTable.rAvScatPilPow *
-				(_REAL) CellMappingTable.iNumCarrier);
+                                CellMappingTable.rAvScatPilPow *
+                                (_REAL) CellMappingTable.iNumCarrier);
 }
 
 void
@@ -1295,30 +1295,30 @@ string COtherService::ServiceID() const
     {
     case 0:
     case 1:
-    	ss << "ID:" << hex << setw(6) << iServiceID;
-    	break;
+        ss << "ID:" << hex << setw(6) << iServiceID;
+        break;
 
     case 3:
     case 6:
-    	ss << "ECC+PI:" << hex << setw(6) << iServiceID;
-    	break;
+        ss << "ECC+PI:" << hex << setw(6) << iServiceID;
+        break;
     case 4:
     case 7:
-    	ss << "PI:" << hex << setw(4) << iServiceID;
-    	break;
+        ss << "PI:" << hex << setw(4) << iServiceID;
+        break;
     case 9:
-    	ss << "ECC+aud:" << hex << setw(6) << iServiceID;
-    	break;
+        ss << "ECC+aud:" << hex << setw(6) << iServiceID;
+        break;
     case 10:
-    	ss << "AUDIO:" << hex << setw(4) << iServiceID;
-    	break;
+        ss << "AUDIO:" << hex << setw(4) << iServiceID;
+        break;
     case 11:
-    	ss << "DATA:" << hex << setw(8) << iServiceID;
-    	break;
-    	break;
+        ss << "DATA:" << hex << setw(8) << iServiceID;
+        break;
+        break;
 
     default:
-    	break;
+        break;
     }
     */
     return ss.str();

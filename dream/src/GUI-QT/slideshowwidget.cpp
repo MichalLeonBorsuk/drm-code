@@ -3,7 +3,7 @@
  * Copyright (c) 2001-2014
  *
  * Author(s):
- *	 Julian Cable, David Flamand
+ *   Julian Cable, David Flamand
  *
  * Description: SlideShow Viewer
  *
@@ -94,7 +94,7 @@ void SlideShowWidget::setStatus(int i, ETypeRxStatus eStatus)
         /* Remove all object from cache */
         while (motdec->NewObjectAvailable())
         {
-            CMOTObject	NewObj;
+            CMOTObject  NewObj;
             motdec->GetNextObject(NewObj);
         }
     }
@@ -103,7 +103,7 @@ void SlideShowWidget::setStatus(int i, ETypeRxStatus eStatus)
         /* Poll the data decoder module for one new picture */
         if(motdec->NewObjectAvailable())
         {
-            CMOTObject	NewObj;
+            CMOTObject  NewObj;
             motdec->GetNextObject(NewObj);
 
             /* Store received picture */
@@ -158,7 +158,7 @@ void SlideShowWidget::OnSave()
 
     QString strFilename = strCurrentSavePath + VerifyFilename(pics[iCurImagePos].name);
     strFilename = QFileDialog::getSaveFileName(this,
-        tr("Save File"), strFilename, tr("Images (*.png *.jpg)"));
+                  tr("Save File"), strFilename, tr("Images (*.png *.jpg)"));
 
     /* Check if user not hit the cancel button */
     if (!strFilename.isEmpty())
@@ -175,7 +175,7 @@ void SlideShowWidget::OnSaveAll()
     CreateDirectories(strCurrentSavePath);
 
     QString strDirectory = QFileDialog::getExistingDirectory(this,
-        tr("Open Directory"), strCurrentSavePath);
+                           tr("Open Directory"), strCurrentSavePath);
 
     /* Check if user not hit the cancel button */
     if (!strDirectory.isEmpty())

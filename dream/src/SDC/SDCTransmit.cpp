@@ -3,10 +3,10 @@
  * Copyright (c) 2001-2014
  *
  * Author(s):
- *	Volker Fischer
+ *  Volker Fischer
  *
  * Description:
- *	SDC
+ *  SDC
  *
  ******************************************************************************
  *
@@ -34,35 +34,35 @@ void CSDCTransmit::SDCParam(CVector<_BINARY>* pbiData, CParameter& Parameter)
 {
     CommitEnter(pbiData, Parameter);
 
-        /* Type 0 */
-        DataEntityType0(vecbiData, Parameter);
+    /* Type 0 */
+    DataEntityType0(vecbiData, Parameter);
+    CommitFlush();
+
+    // Only working for either one audio or data service!
+    if (Parameter.iNumAudioService == 1)
+    {
+        /* Type 9 */
+        DataEntityType9(vecbiData, 0, Parameter);
         CommitFlush();
-
-        // Only working for either one audio or data service!
-        if (Parameter.iNumAudioService == 1)
-        {
-            /* Type 9 */
-            DataEntityType9(vecbiData, 0, Parameter);
-            CommitFlush();
-        }
-        else
-        {
-            /* Type 5 */
-            DataEntityType5(vecbiData, 0, Parameter);
-            CommitFlush();
-        }
-
-        /* Type 1 */
-        DataEntityType1(vecbiData, 0, Parameter);
+    }
+    else
+    {
+        /* Type 5 */
+        DataEntityType5(vecbiData, 0, Parameter);
         CommitFlush();
+    }
 
-        /* Check if the current time can be transmitted */
-        if (CanTransmitCurrentTime(Parameter))
-        {
-            /* Type 8 */
-            DataEntityType8(vecbiData, 0, Parameter);
-            CommitFlush();
-        }
+    /* Type 1 */
+    DataEntityType1(vecbiData, 0, Parameter);
+    CommitFlush();
+
+    /* Check if the current time can be transmitted */
+    if (CanTransmitCurrentTime(Parameter))
+    {
+        /* Type 8 */
+        DataEntityType8(vecbiData, 0, Parameter);
+        CommitFlush();
+    }
 
     CommitLeave();
 }
@@ -160,7 +160,7 @@ _BOOLEAN CSDCTransmit::CanTransmitCurrentTime(CParameter& Parameter)
             {
             case CParameter::CT_UTC_OFFSET:
 #ifndef _WIN32
-				/* Extract time zone info */
+                /* Extract time zone info */
                 if (ltm != NULL)
                 {
                     const int iTimeZone = ltm->tm_gmtoff; /* offset in seconds */
@@ -174,7 +174,7 @@ _BOOLEAN CSDCTransmit::CanTransmitCurrentTime(CParameter& Parameter)
 #else
 // TODO
 #endif
-			case CParameter::CT_LOCAL:
+            case CParameter::CT_LOCAL:
             case CParameter::CT_UTC:
                 /* Extract time components */
                 if (Parameter.eTransmitCurrentTime == CParameter::CT_LOCAL)
@@ -208,7 +208,7 @@ _BOOLEAN CSDCTransmit::CanTransmitCurrentTime(CParameter& Parameter)
 
 
 /******************************************************************************\
-* Data entity Type 0 (Multiplex description data entity)					   *
+* Data entity Type 0 (Multiplex description data entity)                       *
 \******************************************************************************/
 void CSDCTransmit::DataEntityType0(CVector<_BINARY>& vecbiData,
                                    CParameter& Parameter)
@@ -269,12 +269,12 @@ void CSDCTransmit::DataEntityType0(CVector<_BINARY>& vecbiData,
 
 
 /******************************************************************************\
-* Data entity Type 1 (Label data entity)									   *
+* Data entity Type 1 (Label data entity)                                       *
 \******************************************************************************/
 void CSDCTransmit::DataEntityType1(CVector<_BINARY>& vecbiData, int ServiceID,
                                    CParameter& Parameter)
 {
-    int	iLenLabel;
+    int iLenLabel;
 
     /* Length of label. Label is a variable length field of up to 16 bytes
        defining the label using UTF-8 coding */
@@ -323,12 +323,12 @@ void CSDCTransmit::DataEntityType1(CVector<_BINARY>& vecbiData, int ServiceID,
 
 
 /******************************************************************************\
-* Data entity Type 5 (Application information data entity)					   *
+* Data entity Type 5 (Application information data entity)                     *
 \******************************************************************************/
 void CSDCTransmit::DataEntityType5(CVector<_BINARY>& vecbiData, int ServiceID,
                                    CParameter& Parameter)
 {
-    int	iNumBitsTotal = 0;
+    int iNumBitsTotal = 0;
 
     /* Set total number of bits */
     switch (Parameter.Service[ServiceID].DataParam.ePacketModInd)
@@ -431,10 +431,10 @@ void CSDCTransmit::DataEntityType5(CVector<_BINARY>& vecbiData, int ServiceID,
 
 
 /******************************************************************************\
-* Data entity Type 8 (Time and date information data entity)				   *
+* Data entity Type 8 (Time and date information data entity)                   *
 \******************************************************************************/
 void CSDCTransmit::DataEntityType8(CVector<_BINARY>& vecbiData, int ServiceID,
-                                      CParameter& Parameter)
+                                   CParameter& Parameter)
 {
     (void)ServiceID;
     const _BOOLEAN bTransmitOffset =
@@ -482,7 +482,7 @@ void CSDCTransmit::DataEntityType8(CVector<_BINARY>& vecbiData, int ServiceID,
 
 
 /******************************************************************************\
-* Data entity Type 9 (Audio information data entity)						   *
+* Data entity Type 9 (Audio information data entity)                           *
 \******************************************************************************/
 void CSDCTransmit::DataEntityType9(CVector<_BINARY>& vecbiData, int ServiceID,
                                    CParameter& Parameter)
@@ -651,7 +651,7 @@ void CSDCTransmit::DataEntityType9(CVector<_BINARY>& vecbiData, int ServiceID,
         case CAudioParam::AS_38_4KHZ: // TODO
         case CAudioParam::AS_9_6_KHZ: // TODO
         case CAudioParam::AS_RESERVED: // can't happen
-	    ;
+            ;
         }
     }
 

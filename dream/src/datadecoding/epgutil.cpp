@@ -3,10 +3,10 @@
  * Copyright (c) 2001-2014
  *
  * Author(s):
- *	Julian Cable
+ *  Julian Cable
  *
  * Description:
- *	ETSI DAB/DRM Electronic Programme Guide utilities
+ *  ETSI DAB/DRM Electronic Programme Guide utilities
  *
  *
  ******************************************************************************
@@ -49,19 +49,19 @@ mkdirs (const string & path)
     /* forward slashes only, since this is a MOT ContentName */
     size_t n = path.find_last_of ('/');
     if (n == string::npos)
-	return;
+        return;
     string left, sep = "";
     for (size_t p = 0; p < n;)
-      {
-	  size_t q = path.find ('/', p);
-	  if (q == string::npos)
-	      return;
-	  string dir = path.substr (p, q - p);
-	  left += sep + dir;
-      sep = PATH_SEPARATOR;
-	  mkdir (left.c_str (), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
-	  p = q + 1;
-      }
+    {
+        size_t q = path.find ('/', p);
+        if (q == string::npos)
+            return;
+        string dir = path.substr (p, q - p);
+        left += sep + dir;
+        sep = PATH_SEPARATOR;
+        mkdir (left.c_str (), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+        p = q + 1;
+    }
 }
 
 // this is the old dream one
@@ -74,21 +74,21 @@ epgFilename (const CDateAndTime & date, uint32_t sid, int type, bool advanced)
     s << setw (2) << int (date.month) << setw(2) << int (date.day);
     s << hex << setw (4) << ((unsigned long) sid);
     switch (type)
-      {
-      case 0:
-	  s << 'S';
-	  break;
-      case 1:
-	  s << 'P';
-	  break;
-      case 2:
-	  s << 'G';
-	  break;
-      }
+    {
+    case 0:
+        s << 'S';
+        break;
+    case 1:
+        s << 'P';
+        break;
+    case 2:
+        s << 'G';
+        break;
+    }
     if (advanced)
-	s << ".EHA";
+        s << ".EHA";
     else
-	s << ".EHB";
+        s << ".EHB";
     return s.str ();
 }
 
@@ -102,9 +102,9 @@ epgFilename_etsi (const CDateAndTime & date, uint32_t sid, int type, bool advanc
     s << setw (2) << int (date.month) << setw(2) << int (date.day);
     s << "d" << hex << setw (4) << ((unsigned long) sid);
     if (advanced)
-	s << ".EHA";
+        s << ".EHA";
     else
-	s << ".EHB";
+        s << ".EHB";
     return s.str ();
 }
 
@@ -118,8 +118,8 @@ epgFilename_dab (const CDateAndTime & date, uint32_t sid, int type, bool advance
     s << setw (2) << int (date.month) << setw(2) << int (date.day);
     s << "d" << hex << setw (6) << ((unsigned long) sid);
     if (advanced)
-	s << ".EHA";
+        s << ".EHA";
     else
-	s << ".EHB";
+        s << ".EHB";
     return s.str ();
 }

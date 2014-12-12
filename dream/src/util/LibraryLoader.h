@@ -3,10 +3,10 @@
  * Copyright (c) 2001-2014
  *
  * Author(s):
- *	David Flamand
+ *  David Flamand
  *
  * Description:
- *	Dynamic Link Library Loader
+ *  Dynamic Link Library Loader
  *
  ******************************************************************************
  *
@@ -43,56 +43,56 @@
 
 typedef struct LIBFUNC
 {
-	const char *pcFunctionName;
-	void **ppvFunctionAddress;
-	void *pvDummyFunctionAddress;
+    const char *pcFunctionName;
+    void **ppvFunctionAddress;
+    void *pvDummyFunctionAddress;
 } LIBFUNC;
 
 class CLibraryLoader
 {
 public:
-	static void* Load(const char** LibraryNames, const LIBFUNC* LibFuncs, bool (*LibCheckCallback)()=NULL)
-	{
-		void* hLib = NULL;
-		for (int l = 0; LibraryNames[l]; l++)
-		{
-			hLib = LOADLIB(LibraryNames[l]);
-			if (hLib != NULL)
-			{
-				int f;
-				for (f = 0; LibFuncs[f].pcFunctionName; f++)
-				{
-					void *pvFunc = GETPROC(hLib, LibFuncs[f].pcFunctionName);
-					if (!pvFunc)
-						break;
-					*LibFuncs[f].ppvFunctionAddress = pvFunc;
-				}
-				if (!LibFuncs[f].pcFunctionName)
-				{
-					if (LibCheckCallback==NULL || LibCheckCallback())
-						break;
-				}
-				FREELIB(hLib);
-				hLib = NULL;
-			}
-		}
-		if (hLib == NULL)
-		{
-			for (int f = 0; LibFuncs[f].pcFunctionName; f++)
-				*LibFuncs[f].ppvFunctionAddress = LibFuncs[f].pvDummyFunctionAddress;
-		}
-		return hLib;
-	}
-	static void Free(void** hLib, const LIBFUNC* LibFuncs)
-	{
-		for (int f = 0; LibFuncs[f].pcFunctionName; f++)
-			*LibFuncs[f].ppvFunctionAddress = LibFuncs[f].pvDummyFunctionAddress;
-		if (*hLib != NULL)
-		{
-			FREELIB(*hLib);
-			*hLib = NULL;
-		}
-	}
+    static void* Load(const char** LibraryNames, const LIBFUNC* LibFuncs, bool (*LibCheckCallback)()=NULL)
+    {
+        void* hLib = NULL;
+        for (int l = 0; LibraryNames[l]; l++)
+        {
+            hLib = LOADLIB(LibraryNames[l]);
+            if (hLib != NULL)
+            {
+                int f;
+                for (f = 0; LibFuncs[f].pcFunctionName; f++)
+                {
+                    void *pvFunc = GETPROC(hLib, LibFuncs[f].pcFunctionName);
+                    if (!pvFunc)
+                        break;
+                    *LibFuncs[f].ppvFunctionAddress = pvFunc;
+                }
+                if (!LibFuncs[f].pcFunctionName)
+                {
+                    if (LibCheckCallback==NULL || LibCheckCallback())
+                        break;
+                }
+                FREELIB(hLib);
+                hLib = NULL;
+            }
+        }
+        if (hLib == NULL)
+        {
+            for (int f = 0; LibFuncs[f].pcFunctionName; f++)
+                *LibFuncs[f].ppvFunctionAddress = LibFuncs[f].pvDummyFunctionAddress;
+        }
+        return hLib;
+    }
+    static void Free(void** hLib, const LIBFUNC* LibFuncs)
+    {
+        for (int f = 0; LibFuncs[f].pcFunctionName; f++)
+            *LibFuncs[f].ppvFunctionAddress = LibFuncs[f].pvDummyFunctionAddress;
+        if (*hLib != NULL)
+        {
+            FREELIB(*hLib);
+            *hLib = NULL;
+        }
+    }
 };
 
 #endif

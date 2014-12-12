@@ -3,10 +3,10 @@
  * Copyright (c) 2001-2014
  *
  * Author(s):
- *	Julian Cable
+ *  Julian Cable
  *
  * Description:
- *	ETSI DAB/DRM Electronic Programme Guide class
+ *  ETSI DAB/DRM Electronic Programme Guide class
  *
  *
  ******************************************************************************
@@ -1000,19 +1000,23 @@ EPG::genre_list[] = {
     {"5.9.3.3", "Edited"},
     {"6", "Recommendation"},
     {"6.0", "ALERT NOT REQUIRED"},
-    {"6.0.1",
-     "No content that requires alerting in any of the categories below"},
+    {   "6.0.1",
+        "No content that requires alerting in any of the categories below"
+    },
     {"6.1", "SEX"},
     {"6.1.1", "No sex descriptors"},
     {"6.1.2", "Obscured or implied sexual activity"},
     {"6.1.3", "Frank portrayal of sex and sexuality"},
     {"6.1.4", "Scenes of explicit sexual behaviour suitable for adults only"},
-    {"6.1.4.1",
-     "One scene of explicit sexual behaviour suitable for adults only"},
-    {"6.1.4.2",
-     "Occasional scenes of explicit sexual behaviour suitable for adults only"},
-    {"6.1.4.3",
-     "Frequent scenes of explicit sexual behaviour suitable for adults only"},
+    {   "6.1.4.1",
+        "One scene of explicit sexual behaviour suitable for adults only"
+    },
+    {   "6.1.4.2",
+        "Occasional scenes of explicit sexual behaviour suitable for adults only"
+    },
+    {   "6.1.4.3",
+        "Frequent scenes of explicit sexual behaviour suitable for adults only"
+    },
     {"6.1.5", "Sexual Violence"},
     {"6.1.5.1", "One scene of sexual violence"},
     {"6.1.5.2", "Occasional scenes of sexual violence"},
@@ -1023,14 +1027,18 @@ EPG::genre_list[] = {
     {"6.1.6.3", "Frequent verbal sexual references"},
     {"6.10", "STROBING"},
     {"6.10.1", "No strobing"},
-    {"6.10.2",
-     "Strobing that could impact on those suffering from Photosensitive epilepsy"},
-    {"6.10.2.1",
-     "One scene of strobing that could impact on those suffering from photosensitive epilepsy"},
-    {"6.10.2.2",
-     "Occasional strobing that could impact on those suffering from photosensitive epilepsy"},
-    {"6.10.2.3",
-     "Frequent strobing that could impact on those suffering from photosensitive epilepsy"},
+    {   "6.10.2",
+        "Strobing that could impact on those suffering from Photosensitive epilepsy"
+    },
+    {   "6.10.2.1",
+        "One scene of strobing that could impact on those suffering from photosensitive epilepsy"
+    },
+    {   "6.10.2.2",
+        "Occasional strobing that could impact on those suffering from photosensitive epilepsy"
+    },
+    {   "6.10.2.3",
+        "Frequent strobing that could impact on those suffering from photosensitive epilepsy"
+    },
     {"6.2", "NUDITY"},
     {"6.2.1", "No nudity descriptors"},
     {"6.2.2", "Partial nudity"},
@@ -1047,14 +1055,18 @@ EPG::genre_list[] = {
     {"6.3.2.1", "One Scene of deliberate infliction of pain to human beings"},
     {"6.3.2.2", "Occasional deliberate infliction of pain to human beings"},
     {"6.3.2.3", "Frequent deliberate infliction of pain to human beings"},
-    {"6.3.3",
-     "Infliction of strong psychological or physical pain to human beings"},
-    {"6.3.3.1",
-     "One scene of infliction of strong psychological or physical pain to human beings"},
-    {"6.3.3.2",
-     "Occasional scenes of infliction of strong psychological or physical pain to human beings"},
-    {"6.3.3.3",
-     "Frequent scenes of infliction of strong psychological or physical pain to human beings"},
+    {   "6.3.3",
+        "Infliction of strong psychological or physical pain to human beings"
+    },
+    {   "6.3.3.1",
+        "One scene of infliction of strong psychological or physical pain to human beings"
+    },
+    {   "6.3.3.2",
+        "Occasional scenes of infliction of strong psychological or physical pain to human beings"
+    },
+    {   "6.3.3.3",
+        "Frequent scenes of infliction of strong psychological or physical pain to human beings"
+    },
     {"6.3.4", "Deliberate killing of human beings"},
     {"6.3.4.1", "One scene of deliberate killing of human beings"},
     {"6.3.4.2", "Occasional deliberate killing of human beings"},
@@ -1070,28 +1082,38 @@ EPG::genre_list[] = {
     {"6.4.3.2", "Occasional deliberate killing of animals"},
     {"6.5", "VIOLENCE - FANTASY CHARACTERS"},
     {"6.5.1", "No violence descriptors"},
-    {"6.5.2",
-     "Deliberate infliction of pain to fantasy characters (including animation)"},
-    {"6.5.2.1",
-     "One scene of deliberate infliction of pain to fantasy characters (including animation)"},
-    {"6.5.2.2",
-     "Occasional deliberate infliction of pain to fantasy characters (including animation)"},
-    {"6.5.2.3",
-     "Frequent deliberate infliction of pain to fantasy characters (including animation)"},
-    {"6.5.3",
-     "Deliberate killing of fantasy characters (including animation)"},
-    {"6.5.3.1",
-     "One scene of deliberate killing of fantasy characters (including animation)"},
-    {"6.5.3.2",
-     "Occasional deliberate killing of fantasy characters (including animation)"},
-    {"6.5.3.3",
-     "Frequent deliberate killing of fantasy characters (including animation)"},
+    {   "6.5.2",
+        "Deliberate infliction of pain to fantasy characters (including animation)"
+    },
+    {   "6.5.2.1",
+        "One scene of deliberate infliction of pain to fantasy characters (including animation)"
+    },
+    {   "6.5.2.2",
+        "Occasional deliberate infliction of pain to fantasy characters (including animation)"
+    },
+    {   "6.5.2.3",
+        "Frequent deliberate infliction of pain to fantasy characters (including animation)"
+    },
+    {   "6.5.3",
+        "Deliberate killing of fantasy characters (including animation)"
+    },
+    {   "6.5.3.1",
+        "One scene of deliberate killing of fantasy characters (including animation)"
+    },
+    {   "6.5.3.2",
+        "Occasional deliberate killing of fantasy characters (including animation)"
+    },
+    {   "6.5.3.3",
+        "Frequent deliberate killing of fantasy characters (including animation)"
+    },
     {"6.6", "LANGUAGE"},
     {"6.6.1", "No language descriptors"},
-    {"6.6.10",
-     "Occasional use of offensive language (racist, homophobic, sexist)"},
-    {"6.6.11",
-     "Frequent use of offensive language (racist, homophobic, sexist)"},
+    {   "6.6.10",
+        "Occasional use of offensive language (racist, homophobic, sexist)"
+    },
+    {   "6.6.11",
+        "Frequent use of offensive language (racist, homophobic, sexist)"
+    },
     {"6.6.12", "One use of offensive language (racist, homophobic, sexist)"},
     {"6.6.2", "Occasional use of mild swear words and profanities"},
     {"6.6.3", "Frequent use of mild swear words and profanities"},
@@ -1103,17 +1125,20 @@ EPG::genre_list[] = {
     {"6.6.9", "One use of strong language"},
     {"6.7", "DISTURBING SCENES"},
     {"6.7.1", "No disturbing scenes descriptors"},
-    {"6.7.2",
-     "Factual material that may cause distress, including verbal descriptions of traumatic events and the telling of sensitive human interest stories."},
-    {"6.7.3",
-     "Mild scenes of blood and gore (including medical procedures, injuries from accidents, terrorists attack, murder, disaster, war)"},
+    {   "6.7.2",
+        "Factual material that may cause distress, including verbal descriptions of traumatic events and the telling of sensitive human interest stories."
+    },
+    {   "6.7.3",
+        "Mild scenes of blood and gore (including medical procedures, injuries from accidents, terrorists attack, murder, disaster, war)"
+    },
     {"6.7.3.1", "One mild scene of blood and gore"},
     {"6.7.3.2", "Occasional mild scenes of blood and gore"},
     {"6.7.3.3", "Frequent mild scenes of blood and gore"},
     {"6.7.4", "Severe scenes of blood and gore (as 6.7.3 above)"},
     {"6.7.4.1", "One severe scene of blood and gore"},
-    {"6.7.4.2",
-     "Occasional severe scenes of blood and gore (as 6.7.3 above)"},
+    {   "6.7.4.2",
+        "Occasional severe scenes of blood and gore (as 6.7.3 above)"
+    },
     {"6.7.4.3", "Frequent severe scenes of blood and gore (as 6.7.3 above)"},
     {"6.7.5", "Scenes with extreme horror effects"},
     {"6.7.5.1", "One scene with extreme horror effects"},
@@ -1121,8 +1146,9 @@ EPG::genre_list[] = {
     {"6.7.5.3", "Frequent scenes with extreme horror effects"},
     {"6.8", "DISCRIMINATION"},
     {"6.8.1", "No discrimination descriptors"},
-    {"6.8.2",
-     "Deliberate discrimination or the portrayal of deliberate discrimination"},
+    {   "6.8.2",
+        "Deliberate discrimination or the portrayal of deliberate discrimination"
+    },
     {"6.9", "ILLEGAL DRUGS"},
     {"6.9.1", "No illegal drugs descriptors"},
     {"6.9.2", "Portrayal of illegal drug use"},
@@ -1131,10 +1157,12 @@ EPG::genre_list[] = {
     {"6.9.2.3", "Frequent portrayal of illegal drug use"},
     {"6.9.3", "Portrayal of illegal drug use with instructive detail"},
     {"6.9.3.1", "One scene of illegal drug use with instructive detail"},
-    {"6.9.3.2",
-     "Occasional portrayal of illegal drug use with instructive detail"},
-    {"6.9.3.3",
-     "Frequent portrayal of illegal drug use with instructive detail"},
+    {   "6.9.3.2",
+        "Occasional portrayal of illegal drug use with instructive detail"
+    },
+    {   "6.9.3.3",
+        "Frequent portrayal of illegal drug use with instructive detail"
+    },
     {"7", "GroupRecommendation"},
     {"7.0", "Proprietary"},
     {"7.1", "Linear"},
@@ -1263,7 +1291,7 @@ EPG::parseDoc (const QDomDocument & doc)
 {
     QDomNodeList programmes = doc.elementsByTagName ("programme");
     if(programmes.count()==0)
-		return;
+        return;
     QDomNode l1 = programmes.item (0);
     while (!l1.isNull ())
     {

@@ -3,10 +3,10 @@
  * Copyright (c) 2001-2014
  *
  * Author(s):
- *	Volker Fischer
+ *  Volker Fischer
  *
  * Description:
- *	Tables for carrier mapping
+ *  Tables for carrier mapping
  *
  ******************************************************************************
  *
@@ -132,7 +132,7 @@ const int iTableFACRobModE[NUM_FAC_CELLS_DRMPLUS][2] = {
 };
 
 /* Frequency References (pilots) ES 201 980 V4.1.1 Table 52 ***********************************************************/
-#define NUM_FREQ_PILOTS			3
+#define NUM_FREQ_PILOTS         3
 const int iTableFreqPilRobModA[NUM_FREQ_PILOTS][2] = {
     {18, 205},
     {54, 836},
@@ -152,7 +152,7 @@ const int iTableFreqPilRobModC[NUM_FREQ_PILOTS][2] = {
 };
 
 const int iTableFreqPilRobModD[NUM_FREQ_PILOTS][2] = {
-    {7,	788},
+    {7, 788},
     {21, 1014},
     {28, 332}
 };
@@ -293,7 +293,7 @@ const int iTableGainCellSubset[4][5] = {
     {20, 6, 4, 3, 16}
 };
 #else
-const GainCellSubset gainCellSubsets[5]={
+const GainCellSubset gainCellSubsets[5]= {
     {2, 4, 5, 20},
     {1, 2, 3,  6},
     {1, 2, 2,  4},
@@ -314,8 +314,8 @@ const int iTableScatPilConstRobModD[3] = {1, 3, 1};
 const int iTableScatPilConstRobModE[3] = {4, 4, 2};
 
 // ES 201 980 V4.1.1 8.4.4.3.2
-#define SIZE_ROW_WZ_ROB_MOD_A	5
-#define SIZE_COL_WZ_ROB_MOD_A	3
+#define SIZE_ROW_WZ_ROB_MOD_A   5
+#define SIZE_COL_WZ_ROB_MOD_A   3
 const int iScatPilWRobModA[SIZE_ROW_WZ_ROB_MOD_A][SIZE_COL_WZ_ROB_MOD_A] = {
     {228, 341, 455},
     {455, 569, 683},

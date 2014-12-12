@@ -3,7 +3,7 @@
  * Copyright (c) 2001-2014
  *
  * Author(s):
- *	Volker Fischer
+ *  Volker Fischer
  *
  * Description:
  *
@@ -98,7 +98,7 @@ systemevalDlg::systemevalDlg(ReceiverController* rc, CSettings& Settings,
     /* Init context menu for tree widget */
     pTreeWidgetContextMenu = new QMenu(tr("Chart Selector context menu"), this);
     pTreeWidgetContextMenu->addAction(tr("&Open in separate window"),
-            this, SLOT(OnTreeWidgetContMenu(bool)));
+                                      this, SLOT(OnTreeWidgetContMenu(bool)));
 
     /* Connect controls ----------------------------------------------------- */
     connect(SliderNoOfIterations, SIGNAL(valueChanged(int)),
@@ -123,9 +123,9 @@ systemevalDlg::systemevalDlg(ReceiverController* rc, CSettings& Settings,
     /* Char selector list view */
     connect(chartSelector, SIGNAL(currentItemChanged(QTreeWidgetItem *, QTreeWidgetItem *)),
             this, SLOT(OnListSelChanged( QTreeWidgetItem *, QTreeWidgetItem *)));
-	chartSelector->setContextMenuPolicy(Qt::CustomContextMenu);
-	connect(chartSelector, SIGNAL(customContextMenuRequested ( const QPoint&  )),
-		this, SLOT(OnCustomContextMenuRequested(const QPoint&)));
+    chartSelector->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(chartSelector, SIGNAL(customContextMenuRequested ( const QPoint&  )),
+            this, SLOT(OnCustomContextMenuRequested(const QPoint&)));
 
     /* Buttons */
     connect(buttonOk, SIGNAL(clicked()), this, SLOT(close()));
@@ -277,7 +277,7 @@ void systemevalDlg::eventShow(QShowEvent*)
         /* Add window pointer in vector (needed for closing the windows) */
         vecpDRMPlots.push_back(pNewChartWin);
 
-		/* Show new window */
+        /* Show new window */
         pNewChartWin->show();
     }
 
@@ -354,8 +354,8 @@ void systemevalDlg::OnTreeWidgetContMenu(bool)
         ChartDialog* pNewChartWin = OpenChartWin(eNewCharType);
         vecpDRMPlots.push_back(pNewChartWin);
 
-		/* Show new window */
-		pNewChartWin->show();
+        /* Show new window */
+        pNewChartWin->show();
 
         eNewCharType = NONE_OLD;
     }
@@ -363,7 +363,7 @@ void systemevalDlg::OnTreeWidgetContMenu(bool)
 
 void systemevalDlg::OnCustomContextMenuRequested(const QPoint& p)
 {
-	QModelIndex index = chartSelector->indexAt(p);
+    QModelIndex index = chartSelector->indexAt(p);
     /* Make sure we have a non root item */
     if (index.parent() != QModelIndex())
     {
@@ -449,263 +449,263 @@ void systemevalDlg::OnTimer()
     OnDataAvailable(); // for Mode E until working
     Parameters.Lock();
 
-        SetStatus(LEDFAC, Parameters.ReceiveStatus.FAC.GetStatus());
-        SetStatus(LEDSDC, Parameters.ReceiveStatus.SDC.GetStatus());
-		// TODO Data Broadcasts
-		int iShortID = Parameters.GetCurSelAudioService();
-        SetStatus(LEDMSC, Parameters.AudioComponentStatus[iShortID].GetStatus());
-        SetStatus(LEDFrameSync, Parameters.ReceiveStatus.FSync.GetStatus());
-        SetStatus(LEDTimeSync, Parameters.ReceiveStatus.TSync.GetStatus());
-        ETypeRxStatus soundCardStatusI = Parameters.ReceiveStatus.InterfaceI.GetStatus(); /* Input */
-        ETypeRxStatus soundCardStatusO = Parameters.ReceiveStatus.InterfaceO.GetStatus(); /* Output */
-        SetStatus(LEDIOInterface, soundCardStatusO == NOT_PRESENT || (soundCardStatusI != NOT_PRESENT && soundCardStatusI != RX_OK) ? soundCardStatusI : soundCardStatusO);
+    SetStatus(LEDFAC, Parameters.ReceiveStatus.FAC.GetStatus());
+    SetStatus(LEDSDC, Parameters.ReceiveStatus.SDC.GetStatus());
+    // TODO Data Broadcasts
+    int iShortID = Parameters.GetCurSelAudioService();
+    SetStatus(LEDMSC, Parameters.AudioComponentStatus[iShortID].GetStatus());
+    SetStatus(LEDFrameSync, Parameters.ReceiveStatus.FSync.GetStatus());
+    SetStatus(LEDTimeSync, Parameters.ReceiveStatus.TSync.GetStatus());
+    ETypeRxStatus soundCardStatusI = Parameters.ReceiveStatus.InterfaceI.GetStatus(); /* Input */
+    ETypeRxStatus soundCardStatusO = Parameters.ReceiveStatus.InterfaceO.GetStatus(); /* Output */
+    SetStatus(LEDIOInterface, soundCardStatusO == NOT_PRESENT || (soundCardStatusI != NOT_PRESENT && soundCardStatusI != RX_OK) ? soundCardStatusI : soundCardStatusO);
 
-        /* Show SNR if receiver is in tracking mode */
-        if (Parameters.GetAcquiState() == AS_WITH_SIGNAL)
+    /* Show SNR if receiver is in tracking mode */
+    if (Parameters.GetAcquiState() == AS_WITH_SIGNAL)
+    {
+        /* Get a consistant snapshot */
+
+        /* We only get SNR from a local DREAM Front-End */
+        _REAL rSNR = Parameters.GetSNR();
+        if (rSNR >= 0.0)
         {
-            /* Get a consistant snapshot */
-
-            /* We only get SNR from a local DREAM Front-End */
-            _REAL rSNR = Parameters.GetSNR();
-            if (rSNR >= 0.0)
-            {
-                /* SNR */
-                ValueSNR->setText("<b>" +
-                                  QString().setNum(rSNR, 'f', 1) + " dB</b>");
-            }
-            else
-            {
-                ValueSNR->setText("<b>---</b>");
-            }
-            /* We get MER from a local DREAM Front-End or an RSCI input but not an MDI input */
-            _REAL rMER = Parameters.rMER;
-            if (rMER >= 0.0 )
-            {
-                ValueMERWMER->setText(QString().
-                                      setNum(Parameters.rWMERMSC, 'f', 1) + " dB / "
-                                      + QString().setNum(rMER, 'f', 1) + " dB");
-            }
-            else
-            {
-                ValueMERWMER->setText("---");
-            }
-
-            /* Doppler estimation (assuming Gaussian doppler spectrum) */
-            if (Parameters.rSigmaEstimate >= 0.0)
-            {
-                /* Plot delay and Doppler values */
-                ValueWiener->setText(
-                    QString().setNum(Parameters.rSigmaEstimate, 'f', 2) + " Hz / "
-                    + QString().setNum(Parameters.rMinDelay, 'f', 2) + " ms");
-            }
-            else
-            {
-                /* Plot only delay, Doppler not available */
-                ValueWiener->setText("--- / "
-                                     + QString().setNum(Parameters.rMinDelay, 'f', 2) + " ms");
-            }
-
-            /* Sample frequency offset estimation */
-            const _REAL rCurSamROffs = Parameters.rResampleOffset;
-
-            /* Display value in [Hz] and [ppm] (parts per million) */
-            ValueSampFreqOffset->setText(
-                QString().setNum(rCurSamROffs, 'f', 2) + " Hz (" +
-                QString().setNum((int) (rCurSamROffs / Parameters.GetSigSampleRate() * 1e6))
-                + " ppm)");
-
+            /* SNR */
+            ValueSNR->setText("<b>" +
+                              QString().setNum(rSNR, 'f', 1) + " dB</b>");
         }
         else
         {
             ValueSNR->setText("<b>---</b>");
-            ValueMERWMER->setText("---");
-            ValueWiener->setText("--- / ---");
-            ValueSampFreqOffset->setText("---");
         }
+        /* We get MER from a local DREAM Front-End or an RSCI input but not an MDI input */
+        _REAL rMER = Parameters.rMER;
+        if (rMER >= 0.0 )
+        {
+            ValueMERWMER->setText(QString().
+                                  setNum(Parameters.rWMERMSC, 'f', 1) + " dB / "
+                                  + QString().setNum(rMER, 'f', 1) + " dB");
+        }
+        else
+        {
+            ValueMERWMER->setText("---");
+        }
+
+        /* Doppler estimation (assuming Gaussian doppler spectrum) */
+        if (Parameters.rSigmaEstimate >= 0.0)
+        {
+            /* Plot delay and Doppler values */
+            ValueWiener->setText(
+                QString().setNum(Parameters.rSigmaEstimate, 'f', 2) + " Hz / "
+                + QString().setNum(Parameters.rMinDelay, 'f', 2) + " ms");
+        }
+        else
+        {
+            /* Plot only delay, Doppler not available */
+            ValueWiener->setText("--- / "
+                                 + QString().setNum(Parameters.rMinDelay, 'f', 2) + " ms");
+        }
+
+        /* Sample frequency offset estimation */
+        const _REAL rCurSamROffs = Parameters.rResampleOffset;
+
+        /* Display value in [Hz] and [ppm] (parts per million) */
+        ValueSampFreqOffset->setText(
+            QString().setNum(rCurSamROffs, 'f', 2) + " Hz (" +
+            QString().setNum((int) (rCurSamROffs / Parameters.GetSigSampleRate() * 1e6))
+            + " ppm)");
+
+    }
+    else
+    {
+        ValueSNR->setText("<b>---</b>");
+        ValueMERWMER->setText("---");
+        ValueWiener->setText("--- / ---");
+        ValueSampFreqOffset->setText("---");
+    }
 
 #ifdef _DEBUG_
-        TextFreqOffset->setText("DC: " +
-                                QString().setNum(DRMReceiver.GetReceiveData()->
-                                        ConvertFrequency(Parameters.GetDCFrequency()), 'f', 3) + " Hz ");
+    TextFreqOffset->setText("DC: " +
+                            QString().setNum(DRMReceiver.GetReceiveData()->
+                                    ConvertFrequency(Parameters.GetDCFrequency()), 'f', 3) + " Hz ");
 
-        /* Metric values */
-        ValueFreqOffset->setText(tr("Metrics [dB]: MSC: ") +
-                                 QString().setNum(
-                                     DRMReceiver.GetMSCMLC()->GetAccMetric(), 'f', 2) +	"\nSDC: " +
-                                 QString().setNum(
-                                     DRMReceiver.GetSDCMLC()->GetAccMetric(), 'f', 2) +	" / FAC: " +
-                                 QString().setNum(
-                                     DRMReceiver.GetFACMLC()->GetAccMetric(), 'f', 2));
+    /* Metric values */
+    ValueFreqOffset->setText(tr("Metrics [dB]: MSC: ") +
+                             QString().setNum(
+                                 DRMReceiver.GetMSCMLC()->GetAccMetric(), 'f', 2) + "\nSDC: " +
+                             QString().setNum(
+                                 DRMReceiver.GetSDCMLC()->GetAccMetric(), 'f', 2) + " / FAC: " +
+                             QString().setNum(
+                                 DRMReceiver.GetFACMLC()->GetAccMetric(), 'f', 2));
 #else
-        /* DC frequency */
-        ValueFreqOffset->setText(QString().setNum(controller->getReceiver()->GetReceiveData()->
-                                     ConvertFrequency(Parameters.GetDCFrequency()), 'f', 2) + " Hz");
+    /* DC frequency */
+    ValueFreqOffset->setText(QString().setNum(controller->getReceiver()->GetReceiveData()->
+                             ConvertFrequency(Parameters.GetDCFrequency()), 'f', 2) + " Hz");
 #endif
 
-        /* If MDI in is enabled, do not show any synchronization parameter */
-        if (controller->getReceiver()->GetRSIIn()->GetInEnabled() == TRUE)
-        {
-            ValueSNR->setText("<b>---</b>");
-            if (Parameters.vecrRdelThresholds.GetSize() > 0)
-                ValueWiener->setText(QString().setNum(Parameters.rRdop, 'f', 2) + " Hz / "
-                                     + QString().setNum(Parameters.vecrRdelIntervals[0], 'f', 2) + " ms ("
-                                     + QString().setNum(Parameters.vecrRdelThresholds[0]) + "%)");
-            else
-                ValueWiener->setText(QString().setNum(Parameters.rRdop, 'f', 2) + " Hz / ---");
-
-            ValueSampFreqOffset->setText("---");
-            ValueFreqOffset->setText("---");
-        }
-
-        /* FAC info static ------------------------------------------------------ */
-        QString strFACInfo;
-
-        /* Robustness mode #################### */
-        strFACInfo = GetRobModeStr(Parameters.GetWaveMode())
-                + " / " + GetSpecOccStr(Parameters.GetSpectrumOccup());
-
-        //FACDRMModeBWL->setText(tr("DRM Mode / Bandwidth:")); /* Label */
-        FACDRMModeBWV->setText(strFACInfo); /* Value */
-
-
-        /* Interleaver Depth #################### */
-        switch (Parameters.eSymbolInterlMode)
-        {
-        case SI_LONG:
-            strFACInfo = tr("2 s (Long Interleaving)");
-            break;
-
-        case SI_SHORT:
-            strFACInfo = tr("400 ms (Short Interleaving)");
-            break;
-
-        default:
-            strFACInfo = "?";
-        }
-
-        //FACInterleaverDepthL->setText(tr("Interleaver Depth:")); /* Label */
-        FACInterleaverDepthV->setText(strFACInfo); /* Value */
-
-
-        /* SDC, MSC mode #################### */
-        /* SDC */
-        switch (Parameters.eSDCCodingScheme)
-        {
-        case CS_1_SM:
-            strFACInfo = "4-QAM / ";
-            break;
-
-        case CS_2_SM:
-            strFACInfo = "16-QAM / ";
-            break;
-
-        default:
-            strFACInfo = "? / ";
-        }
-
-        /* MSC */
-        switch (Parameters.eMSCCodingScheme)
-        {
-        case CS_2_SM:
-            strFACInfo += "SM 16-QAM";
-            break;
-
-        case CS_3_SM:
-            strFACInfo += "SM 64-QAM";
-            break;
-
-        case CS_3_HMSYM:
-            strFACInfo += "HMsym 64-QAM";
-            break;
-
-        case CS_3_HMMIX:
-            strFACInfo += "HMmix 64-QAM";
-            break;
-
-        default:
-            strFACInfo += "?";
-        }
-
-        //FACSDCMSCModeL->setText(tr("SDC / MSC Mode:")); /* Label */
-        FACSDCMSCModeV->setText(strFACInfo); /* Value */
-
-
-        /* Code rates #################### */
-        strFACInfo = QString().setNum(Parameters.MSCPrLe.iPartB);
-        strFACInfo += " / ";
-        strFACInfo += QString().setNum(Parameters.MSCPrLe.iPartA);
-
-        //FACCodeRateL->setText(tr("Prot. Level (B / A):")); /* Label */
-        FACCodeRateV->setText(strFACInfo); /* Value */
-
-
-        /* Number of services #################### */
-        strFACInfo = tr("Audio: ");
-        strFACInfo += QString().setNum(Parameters.iNumAudioService);
-        strFACInfo += tr(" / Data: ");
-        strFACInfo += QString().setNum(Parameters.iNumDataService);
-
-        //FACNumServicesL->setText(tr("Number of Services:")); /* Label */
-        FACNumServicesV->setText(strFACInfo); /* Value */
-
-
-        /* Time, date #################### */
-        if ((Parameters.iUTCHour == 0) &&
-                (Parameters.iUTCMin == 0) &&
-                (Parameters.iDay == 0) &&
-                (Parameters.iMonth == 0) &&
-                (Parameters.iYear == 0))
-        {
-            /* No time service available */
-            strFACInfo = tr("Service not available");
-        }
+    /* If MDI in is enabled, do not show any synchronization parameter */
+    if (controller->getReceiver()->GetRSIIn()->GetInEnabled() == TRUE)
+    {
+        ValueSNR->setText("<b>---</b>");
+        if (Parameters.vecrRdelThresholds.GetSize() > 0)
+            ValueWiener->setText(QString().setNum(Parameters.rRdop, 'f', 2) + " Hz / "
+                                 + QString().setNum(Parameters.vecrRdelIntervals[0], 'f', 2) + " ms ("
+                                 + QString().setNum(Parameters.vecrRdelThresholds[0]) + "%)");
         else
-        {
+            ValueWiener->setText(QString().setNum(Parameters.rRdop, 'f', 2) + " Hz / ---");
+
+        ValueSampFreqOffset->setText("---");
+        ValueFreqOffset->setText("---");
+    }
+
+    /* FAC info static ------------------------------------------------------ */
+    QString strFACInfo;
+
+    /* Robustness mode #################### */
+    strFACInfo = GetRobModeStr(Parameters.GetWaveMode())
+                 + " / " + GetSpecOccStr(Parameters.GetSpectrumOccup());
+
+    //FACDRMModeBWL->setText(tr("DRM Mode / Bandwidth:")); /* Label */
+    FACDRMModeBWV->setText(strFACInfo); /* Value */
+
+
+    /* Interleaver Depth #################### */
+    switch (Parameters.eSymbolInterlMode)
+    {
+    case SI_LONG:
+        strFACInfo = tr("2 s (Long Interleaving)");
+        break;
+
+    case SI_SHORT:
+        strFACInfo = tr("400 ms (Short Interleaving)");
+        break;
+
+    default:
+        strFACInfo = "?";
+    }
+
+    //FACInterleaverDepthL->setText(tr("Interleaver Depth:")); /* Label */
+    FACInterleaverDepthV->setText(strFACInfo); /* Value */
+
+
+    /* SDC, MSC mode #################### */
+    /* SDC */
+    switch (Parameters.eSDCCodingScheme)
+    {
+    case CS_1_SM:
+        strFACInfo = "4-QAM / ";
+        break;
+
+    case CS_2_SM:
+        strFACInfo = "16-QAM / ";
+        break;
+
+    default:
+        strFACInfo = "? / ";
+    }
+
+    /* MSC */
+    switch (Parameters.eMSCCodingScheme)
+    {
+    case CS_2_SM:
+        strFACInfo += "SM 16-QAM";
+        break;
+
+    case CS_3_SM:
+        strFACInfo += "SM 64-QAM";
+        break;
+
+    case CS_3_HMSYM:
+        strFACInfo += "HMsym 64-QAM";
+        break;
+
+    case CS_3_HMMIX:
+        strFACInfo += "HMmix 64-QAM";
+        break;
+
+    default:
+        strFACInfo += "?";
+    }
+
+    //FACSDCMSCModeL->setText(tr("SDC / MSC Mode:")); /* Label */
+    FACSDCMSCModeV->setText(strFACInfo); /* Value */
+
+
+    /* Code rates #################### */
+    strFACInfo = QString().setNum(Parameters.MSCPrLe.iPartB);
+    strFACInfo += " / ";
+    strFACInfo += QString().setNum(Parameters.MSCPrLe.iPartA);
+
+    //FACCodeRateL->setText(tr("Prot. Level (B / A):")); /* Label */
+    FACCodeRateV->setText(strFACInfo); /* Value */
+
+
+    /* Number of services #################### */
+    strFACInfo = tr("Audio: ");
+    strFACInfo += QString().setNum(Parameters.iNumAudioService);
+    strFACInfo += tr(" / Data: ");
+    strFACInfo += QString().setNum(Parameters.iNumDataService);
+
+    //FACNumServicesL->setText(tr("Number of Services:")); /* Label */
+    FACNumServicesV->setText(strFACInfo); /* Value */
+
+
+    /* Time, date #################### */
+    if ((Parameters.iUTCHour == 0) &&
+            (Parameters.iUTCMin == 0) &&
+            (Parameters.iDay == 0) &&
+            (Parameters.iMonth == 0) &&
+            (Parameters.iYear == 0))
+    {
+        /* No time service available */
+        strFACInfo = tr("Service not available");
+    }
+    else
+    {
 #ifdef GUI_QT_DATE_TIME_TYPE
-            /* QT type of displaying date and time */
-            QDateTime DateTime;
-            DateTime.setDate(QDate(Parameters.iYear,
-                                   Parameters.iMonth,
-                                   Parameters.iDay));
-            DateTime.setTime(QTime(Parameters.iUTCHour,
-                                   Parameters.iUTCMin));
+        /* QT type of displaying date and time */
+        QDateTime DateTime;
+        DateTime.setDate(QDate(Parameters.iYear,
+                               Parameters.iMonth,
+                               Parameters.iDay));
+        DateTime.setTime(QTime(Parameters.iUTCHour,
+                               Parameters.iUTCMin));
 
-            strFACInfo = DateTime.toString();
+        strFACInfo = DateTime.toString();
 #else
-            /* Set time and date */
-            QString strMin;
-            const int iMin = Parameters.iUTCMin;
+        /* Set time and date */
+        QString strMin;
+        const int iMin = Parameters.iUTCMin;
 
-            /* Add leading zero to number smaller than 10 */
-            if (iMin < 10)
-                strMin = "0";
-            else
-                strMin = "";
+        /* Add leading zero to number smaller than 10 */
+        if (iMin < 10)
+            strMin = "0";
+        else
+            strMin = "";
 
-            strMin += QString().setNum(iMin);
+        strMin += QString().setNum(iMin);
 
-            strFACInfo =
-                /* Time */
-                QString().setNum(Parameters.iUTCHour) + ":" +
-                strMin + "  -  " +
-                /* Date */
-                QString().setNum(Parameters.iMonth) + "/" +
-                QString().setNum(Parameters.iDay) + "/" +
-                QString().setNum(Parameters.iYear);
+        strFACInfo =
+            /* Time */
+            QString().setNum(Parameters.iUTCHour) + ":" +
+            strMin + "  -  " +
+            /* Date */
+            QString().setNum(Parameters.iMonth) + "/" +
+            QString().setNum(Parameters.iDay) + "/" +
+            QString().setNum(Parameters.iYear);
 #endif
-            /* Add UTC offset if available */
-            if (Parameters.bValidUTCOffsetAndSense)
-                strFACInfo += QString(" %1%2%3%4")
-                    .arg(tr("UTC"))
-                    .arg(Parameters.iUTCSense ? "-" : "+")
-                    .arg(Parameters.iUTCOff / 2, 0, 10)
-                    .arg(Parameters.iUTCOff & 1 ? ".5" : "");
-        }
+        /* Add UTC offset if available */
+        if (Parameters.bValidUTCOffsetAndSense)
+            strFACInfo += QString(" %1%2%3%4")
+                          .arg(tr("UTC"))
+                          .arg(Parameters.iUTCSense ? "-" : "+")
+                          .arg(Parameters.iUTCOff / 2, 0, 10)
+                          .arg(Parameters.iUTCOff & 1 ? ".5" : "");
+    }
 
-        //FACTimeDateL->setText(tr("Received time - date:")); /* Label */
-        FACTimeDateV->setText(strFACInfo); /* Value */
+    //FACTimeDateL->setText(tr("Received time - date:")); /* Label */
+    FACTimeDateV->setText(strFACInfo); /* Value */
 
-        UpdateGPS(Parameters);
+    UpdateGPS(Parameters);
 
     Parameters.Unlock();
 }
@@ -753,15 +753,15 @@ void systemevalDlg::UpdateGPS(CParameter& Parameters)
         p_ts = gmtime(&tt);
         QChar fill('0');
         qStrTime = QString("UTC: %1/%2/%3 %4:%5:%6  ")
-                .arg(1900 + p_ts->tm_year)
-                .arg(1 + p_ts->tm_mon, 2, 10, fill)
-                .arg(p_ts->tm_mday, 2, 10, fill)
-                .arg(p_ts->tm_hour, 2, 10, fill)
-                .arg(p_ts->tm_min, 2, 10, fill)
-                .arg(p_ts->tm_sec,2, 10, fill);
+                   .arg(1900 + p_ts->tm_year)
+                   .arg(1 + p_ts->tm_mon, 2, 10, fill)
+                   .arg(p_ts->tm_mday, 2, 10, fill)
+                   .arg(p_ts->tm_hour, 2, 10, fill)
+                   .arg(p_ts->tm_min, 2, 10, fill)
+                   .arg(p_ts->tm_sec,2, 10, fill);
     }
     else
-	qStrTime = "UTC: ?";
+        qStrTime = "UTC: ?";
     QString qStrSat;
     if (gps.set&SATELLITE_SET)
         qStrSat = tr("  Satellites: ") + QString().setNum(gps.satellites_used);
@@ -857,8 +857,8 @@ void systemevalDlg::OnCheckBoxReverb()
 void systemevalDlg::OnCheckSaveAudioWAV()
 {
     /*
-    	This code is copied in AnalogDemDlg.cpp. If you do changes here, you should
-    	apply the changes in the other file, too
+        This code is copied in AnalogDemDlg.cpp. If you do changes here, you should
+        apply the changes in the other file, too
     */
     if (CheckBoxSaveAudioWave->isChecked() == TRUE)
     {
@@ -869,7 +869,7 @@ void systemevalDlg::OnCheckSaveAudioWAV()
         /* Check if user not hit the cancel button */
         if (!strFileName.isEmpty())
         {
-			string s = strFileName.toUtf8().constData();
+            string s = strFileName.toUtf8().constData();
             emit saveAudio(s);
         }
         else
@@ -887,15 +887,15 @@ void systemevalDlg::OnCheckWriteLog(int state)
 {
     if (state == Qt::Checked)
     {
-		emit startLogging();
+        emit startLogging();
     }
     else
     {
-		emit stopLogging();
+        emit stopLogging();
     }
 }
 
-QString	systemevalDlg::GetRobModeStr(ERobMode v)
+QString systemevalDlg::GetRobModeStr(ERobMode v)
 {
     switch (v)
     {
@@ -924,7 +924,7 @@ QString	systemevalDlg::GetRobModeStr(ERobMode v)
     }
 }
 
-QString	systemevalDlg::GetSpecOccStr(ESpecOcc v)
+QString systemevalDlg::GetSpecOccStr(ESpecOcc v)
 {
     switch (v)
     {
@@ -960,7 +960,7 @@ QString	systemevalDlg::GetSpecOccStr(ESpecOcc v)
 void systemevalDlg::AddWhatsThisHelp()
 {
     /*
-    	This text was taken from the only documentation of Dream software
+        This text was taken from the only documentation of Dream software
     */
     /* DC Frequency Offset */
     const QString strDCFreqOffs =
@@ -1001,7 +1001,7 @@ void systemevalDlg::AddWhatsThisHelp()
            "the two vertical dashed black lines in the Impulse Response (IR) "
            "plot.");
 
-	TextWiener->setWhatsThis(strDopplerDelay);
+    TextWiener->setWhatsThis(strDopplerDelay);
     ValueWiener->setWhatsThis(strDopplerDelay);
 
     /* I / O Interface LED */
@@ -1106,39 +1106,39 @@ void systemevalDlg::AddWhatsThisHelp()
 
     /* Flip Input Spectrum */
     CheckBoxFlipSpec->setWhatsThis(
-                     tr("<b>Flip Input Spectrum:</b> Checking this box "
-                        "will flip or invert the input spectrum. This is necessary if the "
-                        "mixer in the front-end uses the lower side band."));
+        tr("<b>Flip Input Spectrum:</b> Checking this box "
+           "will flip or invert the input spectrum. This is necessary if the "
+           "mixer in the front-end uses the lower side band."));
 
     /* Mute Audio */
     CheckBoxMuteAudio->setWhatsThis(
-                     tr("<b>Mute Audio:</b> The audio can be muted by "
-                        "checking this box. The reaction of checking or unchecking this box "
-                        "is delayed by approx. 1 second due to the audio buffers."));
+        tr("<b>Mute Audio:</b> The audio can be muted by "
+           "checking this box. The reaction of checking or unchecking this box "
+           "is delayed by approx. 1 second due to the audio buffers."));
 
     /* Reverberation Effect */
     CheckBoxReverb->setWhatsThis(
-                     tr("<b>Reverberation Effect:</b> If this check box is checked, a "
-                        "reverberation effect is applied each time an audio drop-out occurs. "
-                        "With this effect it is possible to mask short drop-outs."));
+        tr("<b>Reverberation Effect:</b> If this check box is checked, a "
+           "reverberation effect is applied each time an audio drop-out occurs. "
+           "With this effect it is possible to mask short drop-outs."));
 
     /* Log File */
     CheckBoxWriteLog->setWhatsThis(
-                     tr("<b>Log File:</b> Checking this box brings the "
-                        "Dream software to write a log file about the current reception. "
-                        "Every minute the average SNR, number of correct decoded FAC and "
-                        "number of correct decoded MSC blocks are logged including some "
-                        "additional information, e.g. the station label and bit-rate. The "
-                        "log mechanism works only for audio services using AAC source coding. "
+        tr("<b>Log File:</b> Checking this box brings the "
+           "Dream software to write a log file about the current reception. "
+           "Every minute the average SNR, number of correct decoded FAC and "
+           "number of correct decoded MSC blocks are logged including some "
+           "additional information, e.g. the station label and bit-rate. The "
+           "log mechanism works only for audio services using AAC source coding. "
 #ifdef _WIN32
-                        "During the logging no Dream windows "
-                        "should be moved or re-sized. This can lead to incorrect log files "
-                        "(problem with QT timer implementation under Windows). This problem "
-                        "does not exist in the Linux version of Dream."
+           "During the logging no Dream windows "
+           "should be moved or re-sized. This can lead to incorrect log files "
+           "(problem with QT timer implementation under Windows). This problem "
+           "does not exist in the Linux version of Dream."
 #endif
-                        "<br>The log file will be "
-                        "written in the directory were the Dream application was started and "
-                        "the name of this file is always DreamLog.txt"));
+           "<br>The log file will be "
+           "written in the directory were the Dream application was started and "
+           "the name of this file is always DreamLog.txt"));
 
     /* Wiener */
     const QString strWienerChanEst =
@@ -1172,31 +1172,31 @@ void systemevalDlg::AddWhatsThisHelp()
 
     /* DFT Zero Pad */
     RadioButtonFreqDFT->setWhatsThis(
-                     tr("<b>Channel Estimation Settings:</b> With these "
-                        "settings, the channel estimation method in time and frequency "
-                        "direction can be selected. The default values use the most powerful "
-                        "algorithms. For more detailed information about the estimation "
-                        "algorithms there are a lot of papers and books available.<br>"
-                        "<b>DFT Zero Pad:</b> Channel estimation method "
-                        "for the frequency direction using Discrete Fourier Transformation "
-                        "(DFT) to transform the channel estimation at the pilot positions to "
-                        "the time domain. There, a zero padding is applied to get a higher "
-                        "resolution in the frequency domain -> estimates at the data cells. "
-                        "This algorithm is very speed efficient but has problems at the edges "
-                        "of the OFDM spectrum due to the leakage effect."));
+        tr("<b>Channel Estimation Settings:</b> With these "
+           "settings, the channel estimation method in time and frequency "
+           "direction can be selected. The default values use the most powerful "
+           "algorithms. For more detailed information about the estimation "
+           "algorithms there are a lot of papers and books available.<br>"
+           "<b>DFT Zero Pad:</b> Channel estimation method "
+           "for the frequency direction using Discrete Fourier Transformation "
+           "(DFT) to transform the channel estimation at the pilot positions to "
+           "the time domain. There, a zero padding is applied to get a higher "
+           "resolution in the frequency domain -> estimates at the data cells. "
+           "This algorithm is very speed efficient but has problems at the edges "
+           "of the OFDM spectrum due to the leakage effect."));
 
     /* Guard Energy */
     RadioButtonTiSyncEnergy->setWhatsThis(
-                     tr("<b>Guard Energy:</b> Time synchronization "
-                        "tracking algorithm utilizes the estimation of the impulse response. "
-                        "This method tries to maximize the energy in the guard-interval to set "
-                        "the correct timing."));
+        tr("<b>Guard Energy:</b> Time synchronization "
+           "tracking algorithm utilizes the estimation of the impulse response. "
+           "This method tries to maximize the energy in the guard-interval to set "
+           "the correct timing."));
 
     /* First Peak */
     RadioButtonTiSyncFirstPeak->setWhatsThis(
-                     tr("<b>First Peak:</b> This algorithms searches for "
-                        "the first peak in the estimated impulse response and moves this peak "
-                        "to the beginning of the guard-interval (timing tracking algorithm)."));
+        tr("<b>First Peak:</b> This algorithms searches for "
+           "the first peak in the estimated impulse response and moves this peak "
+           "to the beginning of the guard-interval (timing tracking algorithm)."));
 
     /* SNR */
     const QString strSNREst =
@@ -1307,9 +1307,9 @@ void systemevalDlg::AddWhatsThisHelp()
 
     /* Save audio as wave */
     CheckBoxSaveAudioWave->setWhatsThis(
-                     tr("<b>Save Audio as WAV:</b> Save the audio signal "
-                        "as stereo, 16-bit, 48 kHz sample rate PCM wave file. Checking this "
-                        "box will let the user choose a file name for the recording."));
+        tr("<b>Save Audio as WAV:</b> Save the audio signal "
+           "as stereo, 16-bit, 48 kHz sample rate PCM wave file. Checking this "
+           "box will let the user choose a file name for the recording."));
 
     /* Interferer Rejection */
     const QString strInterfRej =

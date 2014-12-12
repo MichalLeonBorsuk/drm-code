@@ -3,20 +3,20 @@
  * Copyright (c) 2001-2001-2014
  *
  * Author(s):
- *	Volker Fischer, Andrew Murphy, Andrea Russo
+ *  Volker Fischer, Andrew Murphy, Andrea Russo
  *
  * Description:
- *	See Parameter.cpp
+ *  See Parameter.cpp
  *
  * 10/01/2001-2014 Andrew Murphy, BBC Research & Development, 2005
- *	- Additions to include additional RSCI related fields
+ *  - Additions to include additional RSCI related fields
  *
  * 11/21/2005 Andrew Murphy, BBC Research & Development, 2005
- *	- Additions to include AMSS demodulation (Added class
+ *  - Additions to include AMSS demodulation (Added class
  *    CAltFreqOtherServicesSign)
  *
  * 11/28/2005 Andrea Russo
- *	- Added classes for store alternative frequencies schedules and regions
+ *  - Added classes for store alternative frequencies schedules and regions
  *
  *******************************************************************************
  *
@@ -49,16 +49,16 @@
 #ifdef HAVE_LIBGPS
 # include <gps.h>
 #else
-    struct gps_fix_t {
-	double time;
-	double latitude;
-	double longitude;
-	double altitude;
-	double speed;
-	double track;
-    };
-    struct gps_data_t {
-	uint32_t set;
+struct gps_fix_t {
+    double time;
+    double latitude;
+    double longitude;
+    double altitude;
+    double speed;
+    double track;
+};
+struct gps_data_t {
+    uint32_t set;
 #define TIME_SET        0x00000002u
 #define LATLON_SET      0x00000008u
 #define ALTITUDE_SET    0x00000010u
@@ -66,13 +66,13 @@
 #define TRACK_SET       0x00000040u
 #define STATUS_SET      0x00000100u
 #define SATELLITE_SET   0x00010000u
-	gps_fix_t fix;
-	int    status; 
-#define STATUS_NO_FIX	0	/* no */
-#define STATUS_FIX	1	/* yes, without DGPS */
-#define STATUS_DGPS_FIX	2	/* yes, with DGPS */
-	int satellites_used;
-    };
+    gps_fix_t fix;
+    int    status;
+#define STATUS_NO_FIX   0   /* no */
+#define STATUS_FIX  1   /* yes, without DGPS */
+#define STATUS_DGPS_FIX 2   /* yes, with DGPS */
+    int satellites_used;
+};
 #endif
 
 class CDRMReceiver;
@@ -146,44 +146,44 @@ public:
     enum EOPUSApplication { OA_VOIP, OA_AUDIO };
 
     CAudioParam(): strTextMessage(), iStreamID(STREAM_ID_NOT_USED),
-            eAudioCoding(AC_NONE), eSBRFlag(SB_NOT_USED), eAudioSamplRate(AS_24KHZ),
-            bTextflag(FALSE), bEnhanceFlag(FALSE), eAudioMode(AM_MONO),
-            iCELPIndex(0), bCELPCRC(FALSE), eHVXCRate(HR_2_KBIT), bHVXCCRC(FALSE),
-            eOPUSBandwidth(OB_FB), eOPUSSubCod(OS_SILK), eOPUSChan(OC_STEREO),
-            eOPUSSignal(OG_MUSIC), eOPUSApplication(OA_AUDIO),
-            bOPUSForwardErrorCorrection(FALSE), bOPUSRequestReset(FALSE),
-            bParamChanged(FALSE),
-            rBitRate(0.0),bCanDecode(false)
+        eAudioCoding(AC_NONE), eSBRFlag(SB_NOT_USED), eAudioSamplRate(AS_24KHZ),
+        bTextflag(FALSE), bEnhanceFlag(FALSE), eAudioMode(AM_MONO),
+        iCELPIndex(0), bCELPCRC(FALSE), eHVXCRate(HR_2_KBIT), bHVXCCRC(FALSE),
+        eOPUSBandwidth(OB_FB), eOPUSSubCod(OS_SILK), eOPUSChan(OC_STEREO),
+        eOPUSSignal(OG_MUSIC), eOPUSApplication(OA_AUDIO),
+        bOPUSForwardErrorCorrection(FALSE), bOPUSRequestReset(FALSE),
+        bParamChanged(FALSE),
+        rBitRate(0.0),bCanDecode(false)
     {
     }
 
     /* Text-message */
-    string strTextMessage;	/* Max length is (8 * 16 Bytes) */
+    string strTextMessage;  /* Max length is (8 * 16 Bytes) */
 
-    int iStreamID;			/* Stream Id of the stream which carries the audio service */
+    int iStreamID;          /* Stream Id of the stream which carries the audio service */
 
-    EAudCod eAudioCoding;	/* This field indicated the source coding system */
-    ESBRFlag eSBRFlag;		/* SBR flag */
-    EAudSamRat eAudioSamplRate;	/* Audio sampling rate */
-    _BOOLEAN bTextflag;		/* Indicates whether a text message is present or not */
-    _BOOLEAN bEnhanceFlag;	/* Enhancement flag */
+    EAudCod eAudioCoding;   /* This field indicated the source coding system */
+    ESBRFlag eSBRFlag;      /* SBR flag */
+    EAudSamRat eAudioSamplRate; /* Audio sampling rate */
+    _BOOLEAN bTextflag;     /* Indicates whether a text message is present or not */
+    _BOOLEAN bEnhanceFlag;  /* Enhancement flag */
     bool bCA;               /* Conditional Access */
 
     /* For AAC: Mono, LC Stereo, Stereo --------------------------------- */
-    EAudMode eAudioMode;	/* Audio mode */
+    EAudMode eAudioMode;    /* Audio mode */
 
     /* For CELP --------------------------------------------------------- */
-    int iCELPIndex;			/* This field indicates the CELP bit rate index */
-    _BOOLEAN bCELPCRC;		/* This field indicates whether the CRC is used or not */
+    int iCELPIndex;         /* This field indicates the CELP bit rate index */
+    _BOOLEAN bCELPCRC;      /* This field indicates whether the CRC is used or not */
 
     /* For HVXC --------------------------------------------------------- */
-    EHVXCRate eHVXCRate;	/* This field indicates the rate of the HVXC */
-    _BOOLEAN bHVXCCRC;		/* This field indicates whether the CRC is used or not */
+    EHVXCRate eHVXCRate;    /* This field indicates the rate of the HVXC */
+    _BOOLEAN bHVXCCRC;      /* This field indicates whether the CRC is used or not */
 
     /* For OPUS --------------------------------------------------------- */
     EOPUSBandwidth eOPUSBandwidth; /* Audio bandwidth */
     EOPUSSubCod eOPUSSubCod; /* Audio sub codec */
-    EOPUSChan eOPUSChan;	/* Audio channels */
+    EOPUSChan eOPUSChan;    /* Audio channels */
     EOPUSSignal eOPUSSignal; /* Encoder signal type */
     EOPUSApplication eOPUSApplication; /* Encoder intended application */
     _BOOLEAN bOPUSForwardErrorCorrection; /* Encoder Forward Error Correction enabled */
@@ -253,32 +253,32 @@ public:
     /* AD: Application Domain */
     enum EApplDomain { AD_DRM_SPEC_APP, AD_DAB_SPEC_APP, AD_OTHER_SPEC_APP };
 
-    int iStreamID;			/* Stream Id of the stream which carries the data service */
+    int iStreamID;          /* Stream Id of the stream which carries the data service */
 
-    EPackMod ePacketModInd;	/* Packet mode indicator */
+    EPackMod ePacketModInd; /* Packet mode indicator */
 
     /* In case of packet mode ------------------------------------------- */
-    EDatUnit eDataUnitInd;	/* Data unit indicator */
-    int iPacketID;			/* Packet Id (2 bits) */
-    int iPacketLen;			/* Packet length */
+    EDatUnit eDataUnitInd;  /* Data unit indicator */
+    int iPacketID;          /* Packet Id (2 bits) */
+    int iPacketLen;         /* Packet length */
 
     // "DAB specified application" not yet implemented!!!
-    EApplDomain eAppDomain;	/* Application domain */
-    int iUserAppIdent;		/* User application identifier, only DAB */
+    EApplDomain eAppDomain; /* Application domain */
+    int iUserAppIdent;      /* User application identifier, only DAB */
     double rBitRate;
     bool bCanDecode;
     CDataDecoder* pDecoder;
 
     CDataParam():
-            iStreamID(STREAM_ID_NOT_USED),
-            ePacketModInd(PM_PACKET_MODE),
-            eDataUnitInd(DU_DATA_UNITS),
-            iPacketID(0),
-            iPacketLen(0),
-            eAppDomain(AD_DAB_SPEC_APP),
-            iUserAppIdent(0),
-            rBitRate(0.0),bCanDecode(false),
-            pDecoder(NULL)
+        iStreamID(STREAM_ID_NOT_USED),
+        ePacketModInd(PM_PACKET_MODE),
+        eDataUnitInd(DU_DATA_UNITS),
+        iPacketID(0),
+        iPacketLen(0),
+        eAppDomain(AD_DAB_SPEC_APP),
+        iUserAppIdent(0),
+        rBitRate(0.0),bCanDecode(false),
+        pDecoder(NULL)
     {
     }
 
@@ -318,10 +318,10 @@ public:
     enum ETyOServ { SF_AUDIO, SF_DATA };
 
     CService():
-            iServiceID(SERV_ID_NOT_USED), eCAIndication(CA_NOT_USED),
-            iLanguage(0), eAudDataFlag(SF_AUDIO), iServiceDescr(0),
-            strCountryCode(), strLanguageCode(), strLabel(),
-            AudioParam(), DataParam()
+        iServiceID(SERV_ID_NOT_USED), eCAIndication(CA_NOT_USED),
+        iLanguage(0), eAudDataFlag(SF_AUDIO), iServiceDescr(0),
+        strCountryCode(), strLanguageCode(), strLabel(),
+        AudioParam(), DataParam()
     {
     }
 
@@ -374,8 +374,8 @@ public:
         return true;
     }
 
-    int iLenPartA;			/* Data length for part A */
-    int iLenPartB;			/* Data length for part B */
+    int iLenPartA;          /* Data length for part A */
+    int iLenPartB;          /* Data length for part B */
 };
 
 class CMSCProtLev
@@ -392,9 +392,9 @@ public:
         return *this;
     }
 
-    int iPartA;				/* MSC protection level for part A */
-    int iPartB;				/* MSC protection level for part B */
-    int iHierarch;			/* MSC protection level for hierachical frame */
+    int iPartA;             /* MSC protection level for part A */
+    int iPartB;             /* MSC protection level for part B */
+    int iHierarch;          /* MSC protection level for hierachical frame */
 };
 
 /* Alternative Frequency Signalling ************************************** */
@@ -406,8 +406,8 @@ public:
     {
     }
     CAltFreqSched(const CAltFreqSched& nAFS):
-            iDayCode(nAFS.iDayCode), iStartTime(nAFS.iStartTime),
-            iDuration(nAFS.iDuration)
+        iDayCode(nAFS.iDayCode), iStartTime(nAFS.iStartTime),
+        iDuration(nAFS.iDuration)
     {
     }
 
@@ -444,15 +444,15 @@ class CAltFreqRegion
 {
 public:
     CAltFreqRegion():veciCIRAFZones(),
-            iLatitude(0), iLongitude(0),
-            iLatitudeEx(0), iLongitudeEx(0)
+        iLatitude(0), iLongitude(0),
+        iLatitudeEx(0), iLongitudeEx(0)
     {
     }
     CAltFreqRegion(const CAltFreqRegion& nAFR):
-            veciCIRAFZones(nAFR.veciCIRAFZones),
-            iLatitude(nAFR.iLatitude),
-            iLongitude(nAFR.iLongitude),
-            iLatitudeEx(nAFR.iLatitudeEx), iLongitudeEx(nAFR.iLongitudeEx)
+        veciCIRAFZones(nAFR.veciCIRAFZones),
+        iLatitude(nAFR.iLatitude),
+        iLongitude(nAFR.iLongitude),
+        iLatitudeEx(nAFR.iLatitudeEx), iLongitudeEx(nAFR.iLongitudeEx)
     {
     }
 
@@ -506,9 +506,9 @@ public:
     }
 
     CServiceDefinition(const CServiceDefinition& nAF):
-            veciFrequencies(nAF.veciFrequencies),
-            iRegionID(nAF.iRegionID), iScheduleID(nAF.iScheduleID),
-            iSystemID(nAF.iSystemID)
+        veciFrequencies(nAF.veciFrequencies),
+        iRegionID(nAF.iRegionID), iScheduleID(nAF.iScheduleID),
+        iSystemID(nAF.iSystemID)
     {
     }
 
@@ -567,8 +567,8 @@ public:
     }
 
     CMultiplexDefinition(const CMultiplexDefinition& nAF):CServiceDefinition(nAF),
-            veciServRestrict(nAF.veciServRestrict),
-            bIsSyncMultplx(nAF.bIsSyncMultplx)
+        veciServRestrict(nAF.veciServRestrict),
+        bIsSyncMultplx(nAF.bIsSyncMultplx)
     {
     }
 
@@ -608,13 +608,13 @@ class COtherService: public CServiceDefinition
 {
 public:
     COtherService(): CServiceDefinition(), bSameService(TRUE),
-            iShortID(0), iServiceID(SERV_ID_NOT_USED)
+        iShortID(0), iServiceID(SERV_ID_NOT_USED)
     {
     }
 
     COtherService(const COtherService& nAF):
-            CServiceDefinition(nAF), bSameService(nAF.bSameService),
-            iShortID(nAF.iShortID), iServiceID(nAF.iServiceID)
+        CServiceDefinition(nAF), bSameService(nAF.bSameService),
+        iShortID(nAF.iShortID), iServiceID(nAF.iServiceID)
     {
     }
 
@@ -659,17 +659,17 @@ class CAltFreqSign
 public:
 
     CAltFreqSign():vecRegions(16),vecSchedules(16),vecMultiplexes(),vecOtherServices(),
-            bRegionVersionFlag(FALSE),bScheduleVersionFlag(FALSE),
-            bMultiplexVersionFlag(FALSE),bOtherServicesVersionFlag(FALSE)
+        bRegionVersionFlag(FALSE),bScheduleVersionFlag(FALSE),
+        bMultiplexVersionFlag(FALSE),bOtherServicesVersionFlag(FALSE)
     {
     }
 
     CAltFreqSign(const CAltFreqSign& a):vecRegions(a.vecRegions),
-            vecSchedules(a.vecSchedules), vecMultiplexes(a.vecMultiplexes),
-            bRegionVersionFlag(a.bRegionVersionFlag),
-            bScheduleVersionFlag(a.bScheduleVersionFlag),
-            bMultiplexVersionFlag(a.bMultiplexVersionFlag),
-            bOtherServicesVersionFlag(a.bOtherServicesVersionFlag)
+        vecSchedules(a.vecSchedules), vecMultiplexes(a.vecMultiplexes),
+        bRegionVersionFlag(a.bRegionVersionFlag),
+        bScheduleVersionFlag(a.bScheduleVersionFlag),
+        bMultiplexVersionFlag(a.bMultiplexVersionFlag),
+        bOtherServicesVersionFlag(a.bOtherServicesVersionFlag)
     {
     }
 
@@ -803,12 +803,12 @@ class CReceiveStatus
 {
 public:
     CReceiveStatus():FSync(),TSync(),InterfaceI(),InterfaceO(),
-            FAC(),SDC(),SLAudio(),LLAudio()
+        FAC(),SDC(),SLAudio(),LLAudio()
     {
     }
     CReceiveStatus(const CReceiveStatus& s):FSync(s.FSync), TSync(s.TSync),
-            InterfaceI(s.InterfaceI), InterfaceO(s.InterfaceO), FAC(s.FAC), SDC(s.SDC),
-            SLAudio(s.SLAudio),LLAudio(s.LLAudio)
+        InterfaceI(s.InterfaceI), InterfaceO(s.InterfaceO), FAC(s.FAC), SDC(s.SDC),
+        SLAudio(s.SLAudio),LLAudio(s.LLAudio)
     {
     }
     CReceiveStatus& operator=(const CReceiveStatus& s)
@@ -874,16 +874,16 @@ public:
 
     // Constructor
     CFrontEndParameters():
-            eSMeterCorrectionType(S_METER_CORRECTION_TYPE_CAL_FACTOR_ONLY), rSMeterBandwidth(10000.0),
-            rDefaultMeasurementBandwidth(10000.0), bAutoMeasurementBandwidth(TRUE), rCalFactorAM(0.0),
-            rCalFactorDRM(0.0), rIFCentreFreq(12000.0)
+        eSMeterCorrectionType(S_METER_CORRECTION_TYPE_CAL_FACTOR_ONLY), rSMeterBandwidth(10000.0),
+        rDefaultMeasurementBandwidth(10000.0), bAutoMeasurementBandwidth(TRUE), rCalFactorAM(0.0),
+        rCalFactorDRM(0.0), rIFCentreFreq(12000.0)
     {}
     CFrontEndParameters(const CFrontEndParameters& p):
-            eSMeterCorrectionType(p.eSMeterCorrectionType), rSMeterBandwidth(p.rSMeterBandwidth),
-            rDefaultMeasurementBandwidth(p.rDefaultMeasurementBandwidth),
-            bAutoMeasurementBandwidth(p.bAutoMeasurementBandwidth),
-            rCalFactorAM(p.rCalFactorAM), rCalFactorDRM(p.rCalFactorDRM),
-            rIFCentreFreq(p.rIFCentreFreq)
+        eSMeterCorrectionType(p.eSMeterCorrectionType), rSMeterBandwidth(p.rSMeterBandwidth),
+        rDefaultMeasurementBandwidth(p.rDefaultMeasurementBandwidth),
+        bAutoMeasurementBandwidth(p.bAutoMeasurementBandwidth),
+        rCalFactorAM(p.rCalFactorAM), rCalFactorDRM(p.rCalFactorDRM),
+        rIFCentreFreq(p.rIFCentreFreq)
     {}
     CFrontEndParameters& operator=(const CFrontEndParameters& p)
     {
@@ -940,8 +940,8 @@ public:
 
     /* ST: Simulation Type */
     enum ESimType
-    { ST_NONE, ST_BITERROR, ST_MSECHANEST, ST_BER_IDEALCHAN,
-      ST_SYNC_PARAM, ST_SINR
+    {   ST_NONE, ST_BITERROR, ST_MSECHANEST, ST_BER_IDEALCHAN,
+        ST_SYNC_PARAM, ST_SINR
     };
 
     /* Misc. Functions ------------------------------------------------------ */
@@ -1094,8 +1094,8 @@ public:
     /* Symbol interleaver mode (long or short interleaving) */
     ESymIntMod eSymbolInterlMode;
 
-    ECodScheme eMSCCodingScheme;	/* MSC coding scheme */
-    ECodScheme eSDCCodingScheme;	/* SDC coding scheme */
+    ECodScheme eMSCCodingScheme;    /* MSC coding scheme */
+    ECodScheme eSDCCodingScheme;    /* SDC coding scheme */
 
     size_t iNumAudioService;
     size_t iNumDataService;
@@ -1137,10 +1137,10 @@ public:
     /* These values are used to set input and output block sizes of some modules */
     int iNumBitsHierarchFrameTotal;
     int iNumDecodedBitsMSC;
-    int iNumSDCBitsPerSFrame;	/* Number of SDC bits per super-frame */
-    int iNumFACBitsPerBlock;	/* Number of FAC bits per block 72 for DRM30 120 for DRM+ */
-    int iNumAudioDecoderBits;	/* Number of input bits for audio module */
-    int iNumDataDecoderBits;	/* Number of input bits for data decoder module */
+    int iNumSDCBitsPerSFrame;   /* Number of SDC bits per super-frame */
+    int iNumFACBitsPerBlock;    /* Number of FAC bits per block 72 for DRM30 120 for DRM+ */
+    int iNumAudioDecoderBits;   /* Number of input bits for audio module */
+    int iNumDataDecoderBits;    /* Number of input bits for data decoder module */
 
     /* Date */
     int iYear;
@@ -1196,8 +1196,8 @@ public:
     int iDRMChannelNum;
     int iSpecChDoppler;
     _REAL rBitErrRate;
-    _REAL rSyncTestParam;		/* For any other simulations, used
-								   with "ST_SYNC_PARAM" type */
+    _REAL rSyncTestParam;       /* For any other simulations, used
+                                   with "ST_SYNC_PARAM" type */
     _REAL rSINR;
     int iNumBitErrors;
     int iChanEstDelay;
@@ -1263,7 +1263,9 @@ public:
     /* General -------------------------------------------------------------- */
     _REAL GetNominalBandwidth();
     _REAL GetSysToNomBWCorrFact();
-    volatile enum { STOPPED, RUNNING, STOP_REQUESTED, RESTART } eRunState;
+    volatile enum {
+        STOPPED, RUNNING, STOP_REQUESTED, RESTART
+    } eRunState;
 
     CCellMappingTable CellMappingTable;
 
@@ -1273,7 +1275,8 @@ public:
     gps_data_t gps_data;
     bool use_gpsd;
     bool restart_gpsd;
-    string gps_host; string gps_port;
+    string gps_host;
+    string gps_port;
 
 protected:
 
@@ -1295,7 +1298,7 @@ protected:
     int iCurSelAudioService;
     int iCurSelDataService;
 
-    ERobMode eRobustnessMode;	/* E.g.: Mode A, B, C, D or E */
+    ERobMode eRobustnessMode;   /* E.g.: Mode A, B, C, D or E */
     ESpecOcc eSpectOccup;
 
     /* For resync to last service------------------------------------------- */

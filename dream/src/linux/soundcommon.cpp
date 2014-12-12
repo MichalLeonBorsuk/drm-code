@@ -3,7 +3,7 @@
 * Copyright (c) 2001-2014
 *
 * Author(s):
-*	Alexander Kurpiers
+*   Alexander Kurpiers
 *
 *
 ******************************************************************************
@@ -39,10 +39,10 @@
 
 CSoundIn::CSoundIn():devices(),names(),iCurrentDevice(-1)
 #ifdef USE_OSS
-        ,dev()
+    ,dev()
 #endif
 #ifdef USE_ALSA
-        ,handle(NULL)
+    ,handle(NULL)
 #endif
 {
     RecThread.pSoundIn = this;
@@ -69,7 +69,7 @@ CSoundIn::CRecThread::run()
 
             // common code
             if (size > 0) {
-                CVectorEx<_SAMPLE>*	ptarget;
+                CVectorEx<_SAMPLE>* ptarget;
 
                 /* Copy data from temporary buffer in output buffer */
                 SoundBuf.lock();
@@ -124,7 +124,7 @@ void CSoundIn::Init(int iNewBufferSize, _BOOLEAN bNewBlocking)
 
 _BOOLEAN CSoundIn::Read(CVector< _SAMPLE >& psData)
 {
-    CVectorEx<_SAMPLE>*	p;
+    CVectorEx<_SAMPLE>* p;
 
     /* Check if device must be opened or reinitialized */
     if (bChangDev == TRUE)
@@ -136,7 +136,7 @@ _BOOLEAN CSoundIn::Read(CVector< _SAMPLE >& psData)
         bChangDev = FALSE;
     }
 
-    RecThread.SoundBuf.lock();	// we need exclusive access
+    RecThread.SoundBuf.lock();  // we need exclusive access
 
     if (iCurrentDevice == -1)
         iCurrentDevice = names.size()-1;
@@ -196,10 +196,10 @@ int CSoundIn::GetDev()
 
 CSoundOut::CSoundOut():devices(),names(),iCurrentDevice(-1)
 #ifdef USE_OSS
-        ,dev()
+    ,dev()
 #endif
 #ifdef USE_ALSA
-        ,handle(NULL)
+    ,handle(NULL)
 #endif
 {
     PlayThread.pSoundOut = this;
@@ -221,7 +221,7 @@ void CSoundOut::CPlayThread::run()
 
             // enough data in the buffer
 
-            CVectorEx<_SAMPLE>*	p;
+            CVectorEx<_SAMPLE>* p;
 
             SoundBuf.lock();
             p = SoundBuf.Get( FRAGSIZE * NUM_OUT_CHANNELS );
@@ -242,7 +242,7 @@ void CSoundOut::CPlayThread::run()
                 fill = SoundBuf.GetFillLevel();
                 SoundBuf.unlock();
 
-            } while ((SoundBuf.keep_running) && ( fill < SOUNDBUFLEN/2 ));	// wait until buffer is at least half full
+            } while ((SoundBuf.keep_running) && ( fill < SOUNDBUFLEN/2 ));  // wait until buffer is at least half full
         }
     }
     qDebug("Play Thread stopped");
@@ -298,11 +298,11 @@ _BOOLEAN CSoundOut::Write(CVector< _SAMPLE >& psData)
         }
     }
 
-    PlayThread.SoundBuf.lock();	// we need exclusive access
+    PlayThread.SoundBuf.lock(); // we need exclusive access
 
     if ( ( SOUNDBUFLEN - PlayThread.SoundBuf.GetFillLevel() ) > iBufferSize) {
 
-        CVectorEx<_SAMPLE>*	ptarget;
+        CVectorEx<_SAMPLE>* ptarget;
 
         // data fits, so copy
         ptarget = PlayThread.SoundBuf.QueryWriteBuffer();

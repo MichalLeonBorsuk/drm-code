@@ -3,7 +3,7 @@
  * Copyright (c) 2005
  *
  * Author(s):
- *	Andrea Russo
+ *  Andrea Russo
  *
  * Description:
  *
@@ -349,7 +349,7 @@ LiveScheduleDlg::LiveScheduleDlg(CSettings& Settings,
 
     /* Clear list box for file names and set up columns */
     ListViewStations->clear();
-	ListViewStations->setSortingEnabled(true);
+    ListViewStations->setSortingEnabled(true);
 
     connect(actionSave,  SIGNAL(triggered()), this, SLOT(OnSave()));
 
@@ -437,7 +437,7 @@ LiveScheduleDlg::LoadSettings()
     // save path
 
     string sDataFilesDirectory = Settings.Get(
-                "Receiver", "datafilesdirectory", string(DEFAULT_DATA_FILES_DIRECTORY));
+                                     "Receiver", "datafilesdirectory", string(DEFAULT_DATA_FILES_DIRECTORY));
     strCurrentSavePath = QString::fromUtf8(sDataFilesDirectory.c_str());
 
     /* and make sure it exists */
@@ -515,18 +515,18 @@ LiveScheduleDlg::OnCheckFreeze()
     else
     {
         OnTimerList();
-        TimerList.start(GUI_TIMER_LIST_VIEW_UPDATE);	/* Stations list */
+        TimerList.start(GUI_TIMER_LIST_VIEW_UPDATE);    /* Stations list */
     }
 }
 
 int LiveScheduleDlg::currentSortColumn()
 {
-	return ListViewStations->sortColumn();
+    return ListViewStations->sortColumn();
 }
 
 bool LiveScheduleDlg::showAll()
 {
-	return actionShowAllStations->isChecked();
+    return actionShowAllStations->isChecked();
 }
 
 void
@@ -591,7 +591,7 @@ MyListLiveViewItem::key(int column, bool ascending) const
         if (!ascending)
             d = 100000.0;
 
-	const QString sFreq = QString().setNum(long((fFreq - d) * 10000.0)).rightJustified(20, '0');
+        const QString sFreq = QString().setNum(long((fFreq - d) * 10000.0)).rightJustified(20, '0');
         return text(column).toLower() + "|" + sFreq;
     }
 }
@@ -662,7 +662,7 @@ LiveScheduleDlg::LoadSchedule()
             strTitle += " [" + strStationName.trimmed() + "]";
     }
 
-	setWindowTitle(strTitle);
+    setWindowTitle(strTitle);
 }
 
 void
@@ -692,7 +692,7 @@ LiveScheduleDlg::eventShow(QShowEvent*)
         OnTimerList();
 
         /* Activate real-time timer when window is shown */
-        TimerList.start(GUI_TIMER_LIST_VIEW_UPDATE);	/* Stations list */
+        TimerList.start(GUI_TIMER_LIST_VIEW_UPDATE);    /* Stations list */
     }
 }
 
@@ -847,20 +847,20 @@ LiveScheduleDlg::OnSave()
     ListItemsMutex.lock();
 
     /* Force the sort for all items */
-	ListViewStations->sortItems(iCurrentSortColumn, bCurrentSortAscending?Qt::AscendingOrder:Qt::DescendingOrder);
+    ListViewStations->sortItems(iCurrentSortColumn, bCurrentSortAscending?Qt::AscendingOrder:Qt::DescendingOrder);
 
     /* Extract values from the list */
 
-	for(int i=0; i<ListViewStations->topLevelItemCount(); i++)
-	{
-		QTreeWidgetItem* myItem = ListViewStations->topLevelItem(i);
-        strSchedule += "<tr>" "<td align=\"right\">" + myItem->text(COL_FREQ) + "</td>"	/* freq */
-                       "<td>" + ColValue(myItem->text(1)) + "</td>"	/* system */
-                       "<td>" + ColValue(myItem->text(2)) + "</td>"	/* time */
-                       "<td>" + ColValue(myItem->text(3)) + "</td>"	/* target */
-                       "<td>" + ColValue(myItem->text(4)) + "</td>"	/* days */
+    for(int i=0; i<ListViewStations->topLevelItemCount(); i++)
+    {
+        QTreeWidgetItem* myItem = ListViewStations->topLevelItem(i);
+        strSchedule += "<tr>" "<td align=\"right\">" + myItem->text(COL_FREQ) + "</td>" /* freq */
+                       "<td>" + ColValue(myItem->text(1)) + "</td>" /* system */
+                       "<td>" + ColValue(myItem->text(2)) + "</td>" /* time */
+                       "<td>" + ColValue(myItem->text(3)) + "</td>" /* target */
+                       "<td>" + ColValue(myItem->text(4)) + "</td>" /* days */
                        "</tr>\n";
-	}
+    }
 
     ListItemsMutex.unlock();
 
@@ -902,7 +902,7 @@ LiveScheduleDlg::OnSave()
             if (FileObj.open(QIODevice::WriteOnly))
             {
                 QTextStream TextStream(&FileObj);
-                TextStream << strText;	/* Actual writing */
+                TextStream << strText;  /* Actual writing */
                 FileObj.close();
                 strCurrentSavePath = QFileInfo(strFilename).path() + PATH_SEPARATOR;
             }
@@ -914,33 +914,33 @@ void
 LiveScheduleDlg::AddWhatsThisHelp()
 {
     /* Stations List */
-	QString strView =
-                     tr("<b>Live Schedule List:</b> In the live schedule list "
-                        "it's possible to view AFS (Alternative Frequency Signalling) "
-                        "information transmitted with the current DRM or AMSS signal.</b>"
-                        "It is possible to limit the view to active stations by changing a "
-                        "setting in the 'view' menu.<br>"
-                        "The color of the cube on the left of the "
-                        "frequency shows the current status of the transmission.<br>"
-                        "A green box shows that the transmission takes place right now "
-                        "a red cube it is shown that the transmission is offline, "
-                        "a pink cube shown that the transmission soon will be offline.<br>"
-                        "If the stations preview is active an orange box shows the stations "
-                        "that will be active.<br>"
-                        "A little green cube on the left of the target column shows that the receiver"
-                        " coordinates (latitude and longitude) stored into Dream settings are within"
-                        " the target area of this transmission.<br>"
-                        "The list can be sorted by clicking on the headline of the column.");
+    QString strView =
+        tr("<b>Live Schedule List:</b> In the live schedule list "
+           "it's possible to view AFS (Alternative Frequency Signalling) "
+           "information transmitted with the current DRM or AMSS signal.</b>"
+           "It is possible to limit the view to active stations by changing a "
+           "setting in the 'view' menu.<br>"
+           "The color of the cube on the left of the "
+           "frequency shows the current status of the transmission.<br>"
+           "A green box shows that the transmission takes place right now "
+           "a red cube it is shown that the transmission is offline, "
+           "a pink cube shown that the transmission soon will be offline.<br>"
+           "If the stations preview is active an orange box shows the stations "
+           "that will be active.<br>"
+           "A little green cube on the left of the target column shows that the receiver"
+           " coordinates (latitude and longitude) stored into Dream settings are within"
+           " the target area of this transmission.<br>"
+           "The list can be sorted by clicking on the headline of the column.");
 
     /* UTC time label */
-	QString strTime =
-                     tr("<b>UTC Time:</b> Shows the current Coordinated "
-                        "Universal Time (UTC) which is also known as Greenwich Mean Time "
-                        "(GMT).");
+    QString strTime =
+        tr("<b>UTC Time:</b> Shows the current Coordinated "
+           "Universal Time (UTC) which is also known as Greenwich Mean Time "
+           "(GMT).");
 
     /* Check box freeze */
-	QString strFreeze = tr("<b>Freeze:</b> If this check box is selected the live schedule is frozen.");
-	ListViewStations->setWhatsThis(strView);
+    QString strFreeze = tr("<b>Freeze:</b> If this check box is selected the live schedule is frozen.");
+    ListViewStations->setWhatsThis(strView);
     TextLabelUTCTime->setWhatsThis(strTime);
     CheckBoxFreeze->setWhatsThis(strFreeze);
 }
@@ -990,12 +990,12 @@ CLiveScheduleItem::IsActive(const time_t ltime)
 bool
 CLiveScheduleItem::operator==(const CLiveScheduleItem& item)
 {
-	return
-	    strFreq == item.strFreq &&
-	    strTarget == item.strTarget &&
-	    iServiceID == item.iServiceID &&
-	    strSystem == item.strSystem &&
-	    bInsideTargetArea == item.bInsideTargetArea &&
-	    Schedule == item.Schedule;
+    return
+        strFreq == item.strFreq &&
+        strTarget == item.strTarget &&
+        iServiceID == item.iServiceID &&
+        strSystem == item.strSystem &&
+        bInsideTargetArea == item.bInsideTargetArea &&
+        Schedule == item.Schedule;
 }
 

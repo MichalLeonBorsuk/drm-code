@@ -3,7 +3,7 @@
  * Copyright (c) 2001-2014
  *
  * Author(s):
- *	Julian Cable
+ *  Julian Cable
  *
  * Decription:
  * ALSA sound interface
@@ -36,14 +36,14 @@ class CAlsaSoundIn: public CSoundInInterface
 {
 public:
     CAlsaSoundIn();
-    virtual 			~CAlsaSoundIn();
+    virtual             ~CAlsaSoundIn();
 
-    virtual void		Enumerate(vector<string>& choices);
-    virtual void		SetDev(int iNewDevice);
-    virtual int			GetDev();
-    virtual void		Init(int iNewBufferSize, _BOOLEAN bNewBlocking = TRUE);
-    virtual _BOOLEAN	Read(CVector<short>& psData);
-    virtual void		Close();
+    virtual void        Enumerate(vector<string>& choices);
+    virtual void        SetDev(int iNewDevice);
+    virtual int         GetDev();
+    virtual void        Init(int iNewBufferSize, _BOOLEAN bNewBlocking = TRUE);
+    virtual _BOOLEAN    Read(CVector<short>& psData);
+    virtual void        Close();
 protected:
     snd_pcm_t *handle;
     vector<string> names;
@@ -55,14 +55,14 @@ class CAlsaSoundOut: public CSoundOutInterface
 {
 public:
     CAlsaSoundOut();
-    virtual 			~CAlsaSoundOut();
+    virtual             ~CAlsaSoundOut();
 
-    virtual void		Enumerate(vector<string>& choices);
-    virtual void		SetDev(int iNewDevice);
-    virtual int			GetDev();
-    virtual void		Init(int iNewBufferSize, _BOOLEAN bNewBlocking = TRUE);
-    virtual _BOOLEAN	Write(CVector<short>& psData);
-    virtual void		Close();
+    virtual void        Enumerate(vector<string>& choices);
+    virtual void        SetDev(int iNewDevice);
+    virtual int         GetDev();
+    virtual void        Init(int iNewBufferSize, _BOOLEAN bNewBlocking = TRUE);
+    virtual _BOOLEAN    Write(CVector<short>& psData);
+    virtual void        Close();
 protected:
     snd_pcm_t *handle;
     vector<string> names;

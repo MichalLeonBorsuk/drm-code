@@ -3,7 +3,7 @@
  * Copyright (c) 2001-2014
  *
  * Author(s):
- *	Volker Fischer, Andrew Murphy, Julian Cable
+ *  Volker Fischer, Andrew Murphy, Julian Cable
  *
  * Description:
  *
@@ -47,7 +47,7 @@ AMWidget::AMWidget(ReceiverController* rc, QWidget *parent) :
     /* Set help text for the controls */
     AddWhatsThisHelp();
 
-    ui->sliderBandwidth->setTickPosition(QSlider::TicksBothSides);    
+    ui->sliderBandwidth->setTickPosition(QSlider::TicksBothSides);
 
     /* Init main plot */
     bool waterfall = false; // TODO getSetting("waterfall", false);
@@ -86,11 +86,11 @@ AMWidget::AMWidget(ReceiverController* rc, QWidget *parent) :
 
     /* Button groups */
     connect(ui->buttonGroupDemodulation, SIGNAL(buttonClicked(int)),
-        this, SLOT(OnRadioDemodulation(int)));
+            this, SLOT(OnRadioDemodulation(int)));
     connect(ui->buttonGroupAGC, SIGNAL(buttonClicked(int)),
-        this, SLOT(OnRadioAGC(int)));
+            this, SLOT(OnRadioAGC(int)));
     connect(ui->buttonGroupNoiseReduction, SIGNAL(buttonClicked(int)),
-        this, SLOT(OnRadioNoiRed(int)));
+            this, SLOT(OnRadioNoiRed(int)));
 
     connectController(controller);
 }
@@ -218,13 +218,13 @@ void AMWidget::on_buttonFreqOffset_clicked()
         controller->getReceiver()->GetReceiveData()->ConvertFrequency(
             controller->getReceiver()->GetAMDemod()->GetCurMixFreqOffs());
     const double new_freq = QInputDialog::getDouble(this, this->windowTitle(),
-        ui->labelFreqOffset->text(), prev_freq, -1e6, 1e6, 2, &ok);
+                            ui->labelFreqOffset->text(), prev_freq, -1e6, 1e6, 2, &ok);
     if (ok)
     {
         const _REAL conv_freq =
             controller->getReceiver()->GetReceiveData()->ConvertFrequency(new_freq, TRUE);
         const double dVal = conv_freq /
-            (controller->getReceiver()->GetParameters()->GetSigSampleRate() / 2);
+                            (controller->getReceiver()->GetParameters()->GetSigSampleRate() / 2);
         OnChartxAxisValSet(dVal);
     }
 }
@@ -239,79 +239,79 @@ void AMWidget::AddWhatsThisHelp()
     /* Noise Reduction */
     const QString strNoiseReduction =
         tr("<b>Noise Reduction:</b> The noise suppression is a frequency "
-        "domain optimal filter design based algorithm. The noise PSD is "
-        "estimated utilizing a minimum statistic. A problem of this type of "
-        "algorithm is that it produces the so called \"musical tones\". The "
-        "noise becomes coloured and sounds a bit strange. At the same time, "
-        "the useful signal (which might be speech or music) is also "
-        "distorted by the algorithm. By selecting the level of noise "
-        "reduction, a compromise between distortion of the useful signal "
-        "and actual noise reduction can be made.");
+           "domain optimal filter design based algorithm. The noise PSD is "
+           "estimated utilizing a minimum statistic. A problem of this type of "
+           "algorithm is that it produces the so called \"musical tones\". The "
+           "noise becomes coloured and sounds a bit strange. At the same time, "
+           "the useful signal (which might be speech or music) is also "
+           "distorted by the algorithm. By selecting the level of noise "
+           "reduction, a compromise between distortion of the useful signal "
+           "and actual noise reduction can be made.");
 
     /* Automatic Gain Control */
     const QString strAGC =
         tr("<b>AGC (Automatic Gain Control):</b> Input signals can have a "
-        "large variation in power due to channel impairments. To compensate "
-        "for that, an automatic gain control can be applied. The AGC has "
-        "four settings: Off, Slow, Medium and Fast.");
+           "large variation in power due to channel impairments. To compensate "
+           "for that, an automatic gain control can be applied. The AGC has "
+           "four settings: Off, Slow, Medium and Fast.");
 
     /* Filter Bandwidth */
     const QString strFilterBW =
         tr("<b>Filter Bandwidth:</b> A band-pass filter is applied before "
-        "the actual demodulation process. With this filter, adjacent signals "
-        "are attenuated. The bandwidth of this filter can be chosen in steps "
-        "of 1 Hz by using the slider bar. Clicking on the right or left side "
-        "of the slider leveler will increase/decrease the bandwidth by 1 kHz. "
-        "<br>The current filter bandwidth is indicated in the spectrum plot "
-        "by a selection bar.");
+           "the actual demodulation process. With this filter, adjacent signals "
+           "are attenuated. The bandwidth of this filter can be chosen in steps "
+           "of 1 Hz by using the slider bar. Clicking on the right or left side "
+           "of the slider leveler will increase/decrease the bandwidth by 1 kHz. "
+           "<br>The current filter bandwidth is indicated in the spectrum plot "
+           "by a selection bar.");
 
     /* Demodulation type */
     const QString strDemodType =
         tr("<b>Demodulation Type:</b> The following analog "
-        "demodulation types are available:<ul>"
-        "<li><b>AM:</b> This analog demodulation type is used in most of "
-        "the hardware radios. The envelope of the complex base-band signal "
-        "is used followed by a high-pass filter to remove the DC offset. "
-        "Additionally, a low pass filter with the same bandwidth as the "
-        "pass-band filter is applied to reduce the noise caused by "
-        "non-linear distortions.</li>"
-        "<li><b>LSB / USB:</b> These are single-side-band (SSB) demodulation "
-        "types. Only one side of the spectrum is evaluated, the upper side "
-        "band is used in USB and the lower side band with LSB. It is "
-        "important for SSB demodulation that the DC frequency of the analog "
-        "signal is known to get satisfactory results. The DC frequency is "
-        "automatically estimated by starting a new acquisition or by "
-        "clicking on the plot.</li>"
-        "<li><b>CW:</b> This demodulation type can be used to receive "
-        "CW signals. Only a narrow frequency band in a fixed distance "
-        "to the mixing frequency is used. By clicking on the spectrum "
-        "plot, the center position of the band pass filter can be set.</li>"
-        "<li><b>FM:</b> This is a narrow band frequency demodulation.</li>"
-        "</ul>");
+           "demodulation types are available:<ul>"
+           "<li><b>AM:</b> This analog demodulation type is used in most of "
+           "the hardware radios. The envelope of the complex base-band signal "
+           "is used followed by a high-pass filter to remove the DC offset. "
+           "Additionally, a low pass filter with the same bandwidth as the "
+           "pass-band filter is applied to reduce the noise caused by "
+           "non-linear distortions.</li>"
+           "<li><b>LSB / USB:</b> These are single-side-band (SSB) demodulation "
+           "types. Only one side of the spectrum is evaluated, the upper side "
+           "band is used in USB and the lower side band with LSB. It is "
+           "important for SSB demodulation that the DC frequency of the analog "
+           "signal is known to get satisfactory results. The DC frequency is "
+           "automatically estimated by starting a new acquisition or by "
+           "clicking on the plot.</li>"
+           "<li><b>CW:</b> This demodulation type can be used to receive "
+           "CW signals. Only a narrow frequency band in a fixed distance "
+           "to the mixing frequency is used. By clicking on the spectrum "
+           "plot, the center position of the band pass filter can be set.</li>"
+           "<li><b>FM:</b> This is a narrow band frequency demodulation.</li>"
+           "</ul>");
 
     /* Carrier Frequency */
     QString strTextFreqOffset =
         tr("<b>Carrier Frequency:</b> The (estimated) carrier frequency of the "
-        "analog signal is shown. (The estimation of this parameter can be done "
-        "by the Autom Frequency Acquisition which uses the estimated PSD of "
-        "the input signal and applies a maximum search.)");
+           "analog signal is shown. (The estimation of this parameter can be done "
+           "by the Autom Frequency Acquisition which uses the estimated PSD of "
+           "the input signal and applies a maximum search.)");
 
     /* Phase lock loop */
     const QString strPLL =
         tr("<b>PLL:</b> The Phase-Lock-Loop (PLL) tracks the carrier of the "
-        "modulated received signal. The resulting phase offset between the "
-        "reference oscillator and the received carrier is displayed in "
-        "a dial control. If the pointer is almost steady, the PLL is locked. "
-        "If the pointer of the dial control turns quickly, the PLL is "
-        "out of lock. To get the PLL locked, the frequency offset to "
-        "the true carrier frequency must not exceed a few Hz.");
+           "modulated received signal. The resulting phase offset between the "
+           "reference oscillator and the received carrier is displayed in "
+           "a dial control. If the pointer is almost steady, the PLL is locked. "
+           "If the pointer of the dial control turns quickly, the PLL is "
+           "out of lock. To get the PLL locked, the frequency offset to "
+           "the true carrier frequency must not exceed a few Hz.");
 
     /* Auto frequency acquisition */
     const QString strAutoFreqAcqu =
         tr("<b>Auto Frequency Acquisition:</b> Clicking on the "
-        "input spectrum plot changes the mixing frequency for demodulation. "
-        "If the Auto Frequency Acquisition is enabled, the largest peak "
-        "near the curser is selected.");
+           "input spectrum plot changes the mixing frequency for demodulation. "
+           "If the Auto Frequency Acquisition is enabled, the largest peak "
+           "near the curser is selected.");
 
     ui->radioButtonNoiRedOff->setWhatsThis(strNoiseReduction);
     ui->radioButtonNoiRedLow->setWhatsThis(strNoiseReduction);

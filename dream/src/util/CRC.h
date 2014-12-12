@@ -3,10 +3,10 @@
  * Copyright (c) 2001-2014
  *
  * Author(s):
- *	Volker Fischer
+ *  Volker Fischer
  *
  * Description:
- *	See CRC.cpp
+ *  See CRC.cpp
  *
  ******************************************************************************
  *
@@ -36,21 +36,21 @@
 class CCRC
 {
 public:
-	CCRC();
-	virtual ~CCRC() {}
+    CCRC();
+    virtual ~CCRC() {}
 
-	void Reset(const int iNewDegree);
-	void AddByte(const _BYTE byNewInput);
-	void AddBit(const _BINARY biNewInput);
-	_BOOLEAN CheckCRC(const uint32_t iCRC);
-	uint32_t GetCRC();
+    void Reset(const int iNewDegree);
+    void AddByte(const _BYTE byNewInput);
+    void AddBit(const _BINARY biNewInput);
+    _BOOLEAN CheckCRC(const uint32_t iCRC);
+    uint32_t GetCRC();
 
 protected:
-	int			iDegIndex;
-	uint32_t	iBitOutPosMask;
+    int         iDegIndex;
+    uint32_t    iBitOutPosMask;
 
-	uint32_t	iPolynMask[16];
-	uint32_t	iStateShiftReg;
+    uint32_t    iPolynMask[16];
+    uint32_t    iStateShiftReg;
 };
 
 

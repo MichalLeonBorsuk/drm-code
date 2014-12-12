@@ -3,10 +3,10 @@
  * Copyright (c) 2001-2014
  *
  * Author(s):
- *	Volker Fischer
+ *  Volker Fischer
  *
  * Description:
- *	Tables for QAM mapping (Mapping is already normalized)
+ *  Tables for QAM mapping (Mapping is already normalized)
  *
  ******************************************************************************
  *
@@ -85,9 +85,9 @@ const _REAL rTableQAM4[2][2] = {
 
 /* Global functions ***********************************************************/
 /*
-	----------------------------------------------------------------------------
-	Implementation of distance to nearest constellation point (symbol) for all
-	QAM types
+    ----------------------------------------------------------------------------
+    Implementation of distance to nearest constellation point (symbol) for all
+    QAM types
 */
 inline CComplex MinDist4QAM(const CComplex cI)
 {
@@ -132,8 +132,8 @@ inline CComplex MinDist64QAM(const CComplex cI)
 
 
 /*
-	----------------------------------------------------------------------------
-	Implementation of hard decision for all QAM types
+    ----------------------------------------------------------------------------
+    Implementation of hard decision for all QAM types
 */
 inline CComplex Dec4QAM(const CComplex cI)
 {

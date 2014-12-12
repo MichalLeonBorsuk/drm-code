@@ -3,10 +3,10 @@
  * Copyright (c) 2001-2014
  *
  * Author(s):
- *	Volker Fischer
+ *  Volker Fischer
  *
  * Description:
- *	DRM simulation script
+ *  DRM simulation script
  *
  ******************************************************************************
  *
@@ -39,15 +39,15 @@
 /* Implementation *************************************************************/
 void CDRMSimulation::SimScript()
 {
-    int									i;
-    int									iNumItMLC;
-    _REAL								rSNRCnt;
-    FILE*								pFileSimRes;
-    CVector<_REAL>						vecrMSE;
-    string								strSimFile;
-    string								strSpecialRemark;
-    CChannelEstimation::ETypeIntFreq	eChanEstFreqIntType;
-    CChannelEstimation::ETypeIntTime	eChanEstTimIntType;
+    int                                 i;
+    int                                 iNumItMLC;
+    _REAL                               rSNRCnt;
+    FILE*                               pFileSimRes;
+    CVector<_REAL>                      vecrMSE;
+    string                              strSimFile;
+    string                              strSpecialRemark;
+    CChannelEstimation::ETypeIntFreq    eChanEstFreqIntType;
+    CChannelEstimation::ETypeIntTime    eChanEstTimIntType;
 
 
     /**************************************************************************\
@@ -59,10 +59,10 @@ void CDRMSimulation::SimScript()
        certain type, just cut and past it at the end of the list
        There are  different types of simulations available:
        ST_BITERROR: BER simulation using actual channel estimation algorithms
-    		(either Wiener, linear or DFT method, can be set by
-    		eChanEstFreqIntType and eChanEstTimIntType)
+            (either Wiener, linear or DFT method, can be set by
+            eChanEstFreqIntType and eChanEstTimIntType)
        ST_SYNC_PARAM: testing synchronization units (requires modifications in
-    		the actual synchronization code to make it work)
+            the actual synchronization code to make it work)
        ST_MSECHANEST: MSE versus carrier for channel estimation algorithms
        ST_BER_IDEALCHAN: BER assuming ideal channel estimation
 
@@ -105,7 +105,7 @@ void CDRMSimulation::SimScript()
            is not the simulation time)
            iSimNumErrors: number of bit errors */
         iSimTime = 100;
-//		iSimNumErrors = 100000;
+//      iSimNumErrors = 100000;
 
 
         /* Number of iterations for MLC */
@@ -168,7 +168,8 @@ void CDRMSimulation::SimScript()
 #else
 # ifdef HAVE_UNISTD_H
         /* re-nice the process to highest possible value -> 19 */
-        int n = nice(19); (void)n;
+        int n = nice(19);
+        (void)n;
 
         /* Try to get hostname */
         char chHostName[255];
@@ -259,20 +260,20 @@ string CDRMSimulation::SimFileName(CParameter& SaveParam, string strAddInf,
                                    _BOOLEAN bWithSNR)
 {
     /*
-    	File naming convention:
-    	BER: Bit error rate simulation
-    	MSE: MSE for channel estimation
-    	BERIDEAL: Bit error rate simulation with ideal channel estimation
-    	SYNC: Simulation for a synchronization paramter (usually variance)
+        File naming convention:
+        BER: Bit error rate simulation
+        MSE: MSE for channel estimation
+        BERIDEAL: Bit error rate simulation with ideal channel estimation
+        SYNC: Simulation for a synchronization paramter (usually variance)
 
-    	B3: Robustness mode and spectrum occupancy
-    	CH5: Channel number
-    	It: Number of iterations in MLC decoder
-    	PL: Protection level of channel code
-    	"64SM": Modulation
-    	"T50": Length of simulation
+        B3: Robustness mode and spectrum occupancy
+        CH5: Channel number
+        It: Number of iterations in MLC decoder
+        PL: Protection level of channel code
+        "64SM": Modulation
+        "T50": Length of simulation
 
-    	example: BERIDEAL_CH8_B0_It1_PL1_64SM_T50_MyRemark
+        example: BERIDEAL_CH8_B0_It1_PL1_64SM_T50_MyRemark
     */
     char chNumTmpLong[256];
     string strFileName = "";

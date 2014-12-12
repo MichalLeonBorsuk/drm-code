@@ -3,10 +3,10 @@
  * Copyright (c) 2001-2014
  *
  * Author(s):
- *	Volker Fischer, Oliver Haffenden
+ *  Volker Fischer, Oliver Haffenden
  *
  * Description:
- *	Implementation of CPacketSocket interface that wraps up a Socket. See PacketSocket.cpp.
+ *  Implementation of CPacketSocket interface that wraps up a Socket. See PacketSocket.cpp.
  *
  ******************************************************************************
  *
@@ -32,7 +32,7 @@
 #ifdef _WIN32
 # include <winsock2.h>
 #else
-  typedef int SOCKET;
+typedef int SOCKET;
 # include <netinet/in.h>
 #endif
 
@@ -41,44 +41,44 @@
    rate of DRM is approx. 80 kbps. One MDI packet must be sent each DRM frame
    which is every 400 ms -> 0.4 * 80000 / 8 = 4000 bytes. Allocating more than
    double of this size should be ok for all possible cases */
-#define MAX_SIZE_BYTES_NETW_BUF		10000
+#define MAX_SIZE_BYTES_NETW_BUF     10000
 
 #include "PacketInOut.h"
 
 class CPacketSocketNative :
-	public CPacketSocket
+    public CPacketSocket
 {
 public:
-	CPacketSocketNative();
-	virtual ~CPacketSocketNative();
-	// Set the sink which will receive the packets
-	virtual void SetPacketSink(CPacketSink *pSink);
-	// Stop sending packets to the sink
-	virtual void ResetPacketSink(void);
+    CPacketSocketNative();
+    virtual ~CPacketSocketNative();
+    // Set the sink which will receive the packets
+    virtual void SetPacketSink(CPacketSink *pSink);
+    // Stop sending packets to the sink
+    virtual void ResetPacketSink(void);
 
-	// Send packet to the socket
-	void SendPacket(const vector<_BYTE>& vecbydata, uint32_t addr=0, uint16_t port=0);
+    // Send packet to the socket
+    void SendPacket(const vector<_BYTE>& vecbydata, uint32_t addr=0, uint16_t port=0);
 
-	virtual bool SetDestination(const string& str);
-	virtual bool SetOrigin(const string& str);
+    virtual bool SetDestination(const string& str);
+    virtual bool SetOrigin(const string& str);
 
-	virtual bool GetDestination(string& str);
-	virtual bool GetOrigin(string& str);
+    virtual bool GetDestination(string& str);
+    virtual bool GetOrigin(string& str);
 
-	void poll();
+    void poll();
 
 private:
-	void pollStream();
-	void pollDatagram();
+    void pollStream();
+    void pollDatagram();
 
-	vector<string> parseDest(const string & strNewAddr);
-	CPacketSink *pPacketSink;
+    vector<string> parseDest(const string & strNewAddr);
+    CPacketSink *pPacketSink;
 
-	sockaddr_in sourceAddr, destAddr;
-	sockaddr_in HostAddrOut;
-	vector<_BYTE>	writeBuf;
-	bool udp;
-	SOCKET s;
-	string origin, dest;
+    sockaddr_in sourceAddr, destAddr;
+    sockaddr_in HostAddrOut;
+    vector<_BYTE>   writeBuf;
+    bool udp;
+    SOCKET s;
+    string origin, dest;
 };
 #endif

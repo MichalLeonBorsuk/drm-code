@@ -3,10 +3,10 @@
  * Copyright (c) 2001-2014
  *
  * Author(s):
- *	Volker Fischer
+ *  Volker Fischer
  *
  * Description:
- *	Resample input DRM stream
+ *  Resample input DRM stream
  *
  ******************************************************************************
  *

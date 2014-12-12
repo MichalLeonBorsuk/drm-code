@@ -3,10 +3,10 @@
  * Copyright (c) 2001-2014
  *
  * Author(s):
- *	Volker Fischer
+ *  Volker Fischer
  *
  * Description:
- *	FAC
+ *  FAC
  *
  ******************************************************************************
  *
@@ -31,11 +31,11 @@
 
 /* Implementation *************************************************************/
 /******************************************************************************\
-* CFACTransmit																   *
+* CFACTransmit                                                                 *
 \******************************************************************************/
 void CFACTransmit::FACParam(CVector<_BINARY>* pbiFACData, CParameter& Parameter)
 {
-    int			iCurShortID;
+    int         iCurShortID;
 
     /* Reset enqueue function */
     (*pbiFACData).ResetBitAccess();
@@ -108,7 +108,7 @@ void CFACTransmit::FACParam(CVector<_BINARY>* pbiFACData, CParameter& Parameter)
         (*pbiFACData).Enqueue(1 /* 1 */, 1);
         break;
     case SI_MODE_E: // TODO
-	;
+        ;
     }
 
     /* MSC mode */
@@ -224,17 +224,17 @@ void CFACTransmit::FACParam(CVector<_BINARY>* pbiFACData, CParameter& Parameter)
 
 void CFACTransmit::Init(CParameter& Parameter)
 {
-    set<int>	actServ;
+    set<int>    actServ;
 
     /* Get active services */
     Parameter.GetActiveServices(actServ);
     const size_t iTotNumServices = actServ.size();
 
     /* Check how many audio and data services present */
-    vector<int>	veciAudioServ;
-    vector<int>	veciDataServ;
-    size_t		iNumAudio = 0;
-    size_t		iNumData = 0;
+    vector<int> veciAudioServ;
+    vector<int> veciDataServ;
+    size_t      iNumAudio = 0;
+    size_t      iNumData = 0;
 
     for (set<int>::iterator i = actServ.begin(); i!=actServ.end(); i++)
     {
@@ -378,15 +378,15 @@ void CFACTransmit::Init(CParameter& Parameter)
 
 
 /******************************************************************************\
-* CFACReceive																   *
+* CFACReceive                                                                  *
 \******************************************************************************/
 bool CFACReceive::FACParam(CVector<_BINARY>* pbiFACData,
-                               CParameter& Parameter)
+                           CParameter& Parameter)
 {
     /*
-    	First get new data from incoming data stream, then check if the new
-    	parameter differs from the old data stored in the receiver. If yes, init
-    	the modules to the new parameter
+        First get new data from incoming data stream, then check if the new
+        parameter differs from the old data stored in the receiver. If yes, init
+        the modules to the new parameter
     */
 
     /* CRC ------------------------------------------------------------------ */
@@ -591,8 +591,8 @@ void CFACReceive::ChannelParam(CVector<_BINARY>* pbiFACData, CParameter& Paramet
 /* Service parameters ----------------------------------------------- */
 void CFACReceive::ServiceParam(CVector<_BINARY>* pbiFACData, CParameter& Parameter)
 {
-    uint32_t	iTempServiceID;
-    int			iTempShortID;
+    uint32_t    iTempServiceID;
+    int         iTempShortID;
 
     Parameter.Lock();
 

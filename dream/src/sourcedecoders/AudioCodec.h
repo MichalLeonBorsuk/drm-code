@@ -39,31 +39,31 @@
 class CAudioCodec
 {
 public:
-	virtual ~CAudioCodec() {}
-	/* Decoder */
-	enum EDecError { DECODER_ERROR_OK, DECODER_ERROR_CRC, DECODER_ERROR_CORRUPTED, DECODER_ERROR_UNKNOWN };
-	virtual string DecGetVersion() = 0;
-	virtual bool CanDecode(CAudioParam::EAudCod eAudioCoding) = 0;
-	virtual bool DecOpen(CAudioParam& AudioParam, int *iAudioSampleRate, int *iLenDecOutPerChan) = 0;
-	virtual _SAMPLE* Decode(CVector<uint8_t>& vecbyPrepAudioFrame, int *iChannels, EDecError *eDecError) = 0;
-	virtual void DecClose() = 0;
-	virtual void DecUpdate(CAudioParam& AudioParam) = 0;
-	/* Encoder */
-	virtual string EncGetVersion() = 0;
-	virtual bool CanEncode(CAudioParam::EAudCod eAudioCoding) = 0;
-	virtual bool EncOpen(int iSampleRate, int iChannels, unsigned long *lNumSampEncIn, unsigned long *lMaxBytesEncOut) = 0;
-	virtual int Encode(CVector<_SAMPLE>& vecsEncInData, unsigned long lNumSampEncIn, CVector<uint8_t>& vecsEncOutData, unsigned long lMaxBytesEncOut) = 0;
-	virtual void EncClose() = 0;
-	virtual void EncSetBitrate(int iBitRate) = 0;
-	virtual void EncUpdate(CAudioParam& AudioParam) = 0;
-	/* Common */
-	static void InitCodecList();
-	static void UnrefCodecList();
-	static CAudioCodec* GetDecoder(CAudioParam::EAudCod eAudioCoding, bool bCanReturnNullPtr=false);
-	static CAudioCodec* GetEncoder(CAudioParam::EAudCod eAudioCoding, bool bCanReturnNullPtr=false);
+    virtual ~CAudioCodec() {}
+    /* Decoder */
+    enum EDecError { DECODER_ERROR_OK, DECODER_ERROR_CRC, DECODER_ERROR_CORRUPTED, DECODER_ERROR_UNKNOWN };
+    virtual string DecGetVersion() = 0;
+    virtual bool CanDecode(CAudioParam::EAudCod eAudioCoding) = 0;
+    virtual bool DecOpen(CAudioParam& AudioParam, int *iAudioSampleRate, int *iLenDecOutPerChan) = 0;
+    virtual _SAMPLE* Decode(CVector<uint8_t>& vecbyPrepAudioFrame, int *iChannels, EDecError *eDecError) = 0;
+    virtual void DecClose() = 0;
+    virtual void DecUpdate(CAudioParam& AudioParam) = 0;
+    /* Encoder */
+    virtual string EncGetVersion() = 0;
+    virtual bool CanEncode(CAudioParam::EAudCod eAudioCoding) = 0;
+    virtual bool EncOpen(int iSampleRate, int iChannels, unsigned long *lNumSampEncIn, unsigned long *lMaxBytesEncOut) = 0;
+    virtual int Encode(CVector<_SAMPLE>& vecsEncInData, unsigned long lNumSampEncIn, CVector<uint8_t>& vecsEncOutData, unsigned long lMaxBytesEncOut) = 0;
+    virtual void EncClose() = 0;
+    virtual void EncSetBitrate(int iBitRate) = 0;
+    virtual void EncUpdate(CAudioParam& AudioParam) = 0;
+    /* Common */
+    static void InitCodecList();
+    static void UnrefCodecList();
+    static CAudioCodec* GetDecoder(CAudioParam::EAudCod eAudioCoding, bool bCanReturnNullPtr=false);
+    static CAudioCodec* GetEncoder(CAudioParam::EAudCod eAudioCoding, bool bCanReturnNullPtr=false);
 private:
-	static vector<CAudioCodec*> CodecList;
-	static int RefCount;
+    static vector<CAudioCodec*> CodecList;
+    static int RefCount;
 };
 
 #endif // _AUDIOCODEC_H_

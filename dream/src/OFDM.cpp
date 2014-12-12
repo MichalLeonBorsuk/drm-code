@@ -3,11 +3,11 @@
  * Copyright (c) 2001-2014
  *
  * Author(s):
- *	Volker Fischer
+ *  Volker Fischer
  *
  * Description:
- *	OFDM modulation;
- *	OFDM demodulation, SNR estimation, PSD estimation
+ *  OFDM modulation;
+ *  OFDM demodulation, SNR estimation, PSD estimation
  *
  ******************************************************************************
  *
@@ -36,7 +36,7 @@
 \******************************************************************************/
 void COFDMModulation::ProcessDataInternal(CParameter&)
 {
-    int	i;
+    int i;
 
     /* Copy input vector in matlib vector and place bins at the correct
        position */

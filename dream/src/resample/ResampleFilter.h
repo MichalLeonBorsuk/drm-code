@@ -11,4 +11,4 @@
 /* Filter for ratios close to 1 */
 extern float fResTaps1To1[INTERP_DECIM_I_D][RES_FILT_NUM_TAPS_PER_PHASE];
 
-#endif	/* _RESAMPLEFILTER_H_ */
+#endif  /* _RESAMPLEFILTER_H_ */

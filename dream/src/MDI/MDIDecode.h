@@ -3,10 +3,10 @@
  * Copyright (c) 2001-2014
  *
  * Author(s):
- *	Volker Fischer, Oliver Haffenden
+ *  Volker Fischer, Oliver Haffenden
  *
  * Description:
- *	see MDIInBuffer.cpp
+ *  see MDIInBuffer.cpp
  *
  ******************************************************************************
  *
@@ -38,17 +38,17 @@
 class CDecodeRSIMDI : public CReceiverModul<_BINARY, _BINARY>
 {
 public:
-	CDecodeRSIMDI():TagPacketDecoderMDI() {}
-	virtual ~CDecodeRSIMDI() {}
+    CDecodeRSIMDI():TagPacketDecoderMDI() {}
+    virtual ~CDecodeRSIMDI() {}
 
 protected:
 
-	virtual void InitInternal(CParameter& Parameters);
-	virtual void ProcessDataInternal(CParameter& Parameters);
+    virtual void InitInternal(CParameter& Parameters);
+    virtual void ProcessDataInternal(CParameter& Parameters);
 
-	CTagPacketDecoderMDI TagPacketDecoderMDI;
-	int iFramesSinceSDC;
-	uint32_t last_dlfc;
+    CTagPacketDecoderMDI TagPacketDecoderMDI;
+    int iFramesSinceSDC;
+    uint32_t last_dlfc;
 };
 
 #endif

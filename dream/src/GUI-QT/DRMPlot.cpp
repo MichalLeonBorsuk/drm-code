@@ -3,12 +3,12 @@
  * Copyright (c) 2001-2014
  *
  * Original Author(s):
- *	Volker Fischer
+ *  Volker Fischer
  *
  * Refactored by Julian Cable
  *
  * Description:
- *	Base class for plots
+ *  Base class for plots
  *
  ******************************************************************************
  *
@@ -40,31 +40,31 @@
 
 /* Define the plot color profiles */
 /* BLUEWHITE */
-#define BLUEWHITE_MAIN_PEN_COLOR_PLOT			Qt::blue
-#define BLUEWHITE_MAIN_PEN_COLOR_CONSTELLATION	Qt::blue
-#define BLUEWHITE_BCKGRD_COLOR_PLOT				Qt::white
-#define BLUEWHITE_MAIN_GRID_COLOR_PLOT			Qt::gray
-#define BLUEWHITE_SPEC_LINE1_COLOR_PLOT			Qt::red
-#define BLUEWHITE_SPEC_LINE2_COLOR_PLOT			Qt::black
-#define BLUEWHITE_PASS_BAND_COLOR_PLOT			QColor(192, 192, 255, 125)
+#define BLUEWHITE_MAIN_PEN_COLOR_PLOT           Qt::blue
+#define BLUEWHITE_MAIN_PEN_COLOR_CONSTELLATION  Qt::blue
+#define BLUEWHITE_BCKGRD_COLOR_PLOT             Qt::white
+#define BLUEWHITE_MAIN_GRID_COLOR_PLOT          Qt::gray
+#define BLUEWHITE_SPEC_LINE1_COLOR_PLOT         Qt::red
+#define BLUEWHITE_SPEC_LINE2_COLOR_PLOT         Qt::black
+#define BLUEWHITE_PASS_BAND_COLOR_PLOT          QColor(192, 192, 255, 125)
 
 /* GREENBLACK */
-#define GREENBLACK_MAIN_PEN_COLOR_PLOT			Qt::green
-#define GREENBLACK_MAIN_PEN_COLOR_CONSTELLATION	Qt::red
-#define GREENBLACK_BCKGRD_COLOR_PLOT			Qt::black
-#define GREENBLACK_MAIN_GRID_COLOR_PLOT			QColor(128, 0, 0)
-#define GREENBLACK_SPEC_LINE1_COLOR_PLOT		Qt::yellow
-#define GREENBLACK_SPEC_LINE2_COLOR_PLOT		Qt::blue
-#define GREENBLACK_PASS_BAND_COLOR_PLOT			QColor(0, 96, 0, 125)
+#define GREENBLACK_MAIN_PEN_COLOR_PLOT          Qt::green
+#define GREENBLACK_MAIN_PEN_COLOR_CONSTELLATION Qt::red
+#define GREENBLACK_BCKGRD_COLOR_PLOT            Qt::black
+#define GREENBLACK_MAIN_GRID_COLOR_PLOT         QColor(128, 0, 0)
+#define GREENBLACK_SPEC_LINE1_COLOR_PLOT        Qt::yellow
+#define GREENBLACK_SPEC_LINE2_COLOR_PLOT        Qt::blue
+#define GREENBLACK_PASS_BAND_COLOR_PLOT         QColor(0, 96, 0, 125)
 
 /* BLACKGREY */
-#define BLACKGREY_MAIN_PEN_COLOR_PLOT			Qt::black
-#define BLACKGREY_MAIN_PEN_COLOR_CONSTELLATION	Qt::green
-#define BLACKGREY_BCKGRD_COLOR_PLOT				Qt::gray
-#define BLACKGREY_MAIN_GRID_COLOR_PLOT			Qt::white
-#define BLACKGREY_SPEC_LINE1_COLOR_PLOT			Qt::blue
-#define BLACKGREY_SPEC_LINE2_COLOR_PLOT			Qt::yellow
-#define BLACKGREY_PASS_BAND_COLOR_PLOT			QColor(128, 128, 128, 125)
+#define BLACKGREY_MAIN_PEN_COLOR_PLOT           Qt::black
+#define BLACKGREY_MAIN_PEN_COLOR_CONSTELLATION  Qt::green
+#define BLACKGREY_BCKGRD_COLOR_PLOT             Qt::gray
+#define BLACKGREY_MAIN_GRID_COLOR_PLOT          Qt::white
+#define BLACKGREY_SPEC_LINE1_COLOR_PLOT         Qt::blue
+#define BLACKGREY_SPEC_LINE2_COLOR_PLOT         Qt::yellow
+#define BLACKGREY_PASS_BAND_COLOR_PLOT          QColor(128, 128, 128, 125)
 
 CDRMPlot::CDRMPlot(QWidget* parent):QObject(parent),CurCharType(NONE_OLD)
 {
@@ -117,14 +117,14 @@ void CDRMPlot::SetupChart(const ECharType eNewType, int sampleRate)
     case TRANSFERFUNCTION:
         plot->setupBasicPlot("Channel Transfer Function / Group Delay","Carrier Index", "TF [dB]", "Transf. Fct.",
                              0.0, 200.0,
-                       MIN_VAL_SHIF_PSD_Y_AXIS_DB, MAX_VAL_SHIF_PSD_Y_AXIS_DB,
-                              MainPenColorPlot, BckgrdColorPlot);
+                             MIN_VAL_SHIF_PSD_Y_AXIS_DB, MAX_VAL_SHIF_PSD_Y_AXIS_DB,
+                             MainPenColorPlot, BckgrdColorPlot);
         plot->add2ndGraph("Group Delay [ms]", "Group Del.", -50.0, 50.0, SpecLine1ColorPlot);
         break;
 
     case POWER_SPEC_DENSITY:
         plot->setupBasicPlot("Shifted Power Spectral Density of Input Signal","Frequency [kHz]","PSD [dB]","Input Spectrum", 0.0, sr,
-                       MIN_VAL_SHIF_PSD_Y_AXIS_DB, MAX_VAL_SHIF_PSD_Y_AXIS_DB, MainPenColorPlot, BckgrdColorPlot);
+                             MIN_VAL_SHIF_PSD_Y_AXIS_DB, MAX_VAL_SHIF_PSD_Y_AXIS_DB, MainPenColorPlot, BckgrdColorPlot);
         plot->addxMarker(SpecLine1ColorPlot, 1.0);
         break;
 
@@ -136,7 +136,7 @@ void CDRMPlot::SetupChart(const ECharType eNewType, int sampleRate)
 
     case INPUTSPECTRUM_NO_AV:
         plot->setupBasicPlot("Input Spectrum","Frequency [kHz]","Input Spectrum [dB]","Input Spectrum", 0.0, sr,
-                       MIN_VAL_INP_SPEC_Y_AXIS_DB, 1.0,  MainPenColorPlot, BckgrdColorPlot);
+                             MIN_VAL_INP_SPEC_Y_AXIS_DB, 1.0,  MainPenColorPlot, BckgrdColorPlot);
         plot->addxMarker(SpecLine1ColorPlot, 1.0);
         break;
 
@@ -146,13 +146,13 @@ void CDRMPlot::SetupChart(const ECharType eNewType, int sampleRate)
 
     case INPUT_SIG_PSD:
         plot->setupBasicPlot("Input PSD","Frequency [kHz]", "Input PSD [dB]", "Input PSD", 0.0, sr,
-                       MIN_VAL_INP_SPEC_Y_AXIS_DB, MAX_VAL_INP_SPEC_Y_AXIS_DB,  MainPenColorPlot, BckgrdColorPlot);
+                             MIN_VAL_INP_SPEC_Y_AXIS_DB, MAX_VAL_INP_SPEC_Y_AXIS_DB,  MainPenColorPlot, BckgrdColorPlot);
         plot->addxMarker(SpecLine1ColorPlot, 1.0);
         break;
 
     case INPUT_SIG_PSD_ANALOG:
         plot->setupBasicPlot("Input PSD","Frequency [kHz]", "Input PSD [dB]", "Input PSD", 0.0, sr,
-                       MIN_VAL_INP_SPEC_Y_AXIS_DB, MAX_VAL_INP_SPEC_Y_AXIS_DB,  MainPenColorPlot, BckgrdColorPlot);
+                             MIN_VAL_INP_SPEC_Y_AXIS_DB, MAX_VAL_INP_SPEC_Y_AXIS_DB,  MainPenColorPlot, BckgrdColorPlot);
         plot->addxMarker(SpecLine1ColorPlot, 1.0);
         plot->addBwMarker(PassBandColorPlot);
         break;
@@ -164,7 +164,7 @@ void CDRMPlot::SetupChart(const ECharType eNewType, int sampleRate)
 
     case FREQ_SAM_OFFS_HIST:
         plot->setupBasicPlot("Rel. Frequency Offset / Sample Rate Offset History",
-                       "Time [ms]", "Freq. Offset [Hz]", "Freq", 0.0, 4.0, -2.0, 0.0, MainPenColorPlot, BckgrdColorPlot);
+                             "Time [ms]", "Freq. Offset [Hz]", "Freq", 0.0, 4.0, -2.0, 0.0, MainPenColorPlot, BckgrdColorPlot);
         plot->add2ndGraph("Sample Rate Offset [Hz]", "Samp.", 0.0, 1.0, SpecLine1ColorPlot);
         plot->setAutoScalePolicy(Plot::left, Plot::min, 1.0);
         plot->setAutoScalePolicy(Plot::right, Plot::min, 1.0);
@@ -173,13 +173,13 @@ void CDRMPlot::SetupChart(const ECharType eNewType, int sampleRate)
 
     case DOPPLER_DELAY_HIST:
         plot->setupBasicPlot("Delay / Doppler History",
-                       "Time [min]", "Delay [ms]", "Delay", -15.0, 0.0, 0.0, 10.0, MainPenColorPlot, BckgrdColorPlot);
+                             "Time [min]", "Delay [ms]", "Delay", -15.0, 0.0, 0.0, 10.0, MainPenColorPlot, BckgrdColorPlot);
         plot->add2ndGraph("Doppler [Hz]", "Doppler", 0.0, 4.0, SpecLine1ColorPlot);
         break;
 
     case SNR_AUDIO_HIST:
         plot->setupBasicPlot("SNR / Correctly Decoded Audio History",
-                       "Time [min]", "SNR [dB[", "SNR", -15.0, 0.0, 0.0, 1.0, MainPenColorPlot, BckgrdColorPlot);
+                             "Time [min]", "SNR [dB[", "SNR", -15.0, 0.0, 0.0, 1.0, MainPenColorPlot, BckgrdColorPlot);
         plot->add2ndGraph("Corr. Dec. Audio / DRM-Frame", "Audio", 0.0, 1.0, SpecLine1ColorPlot);
         /* Ratio between the maximum values for audio and SNR. The ratio should be
            chosen so that the audio curve is not in the same range as the SNR curve
@@ -242,7 +242,7 @@ void CDRMPlot::update(ReceiverController* rc)
     {
     case AVERAGED_IR:
         rc->getReceiver()->GetPlotManager()->GetAvPoDeSp(vecrData, vecrScale, rLowerBound, rHigherBound,
-            rStartGuard, rEndGuard, rPDSBegin, rPDSEnd);
+                rStartGuard, rEndGuard, rPDSBegin, rPDSEnd);
         plot->setData(0, vecrData, vecrScale);
         plot->setxMarker(0, rStartGuard);
         plot->setxMarker(1, rEndGuard);
@@ -307,7 +307,8 @@ void CDRMPlot::update(ReceiverController* rc)
     case AUDIO_SPECTRUM:
         if(rc->getReceiver()->GetParameters()->audiodecoder.empty())
         {
-            vecrData.Init(0); vecrScale.Init(0);
+            vecrData.Init(0);
+            vecrScale.Init(0);
             plot->setData(0, vecrData, vecrScale, "No codec");
         }
         else
@@ -321,7 +322,7 @@ void CDRMPlot::update(ReceiverController* rc)
         rc->getReceiver()->GetPlotManager()->GetFreqSamOffsHist(vecrData, vecrData2, vecrScale, rFreqAcquVal);
         // TODO AutoScale(vecrData, vecrData2, vecrScale);
         plot->setData(0, vecrData, vecrScale,
-            QString("Freq. Offset [Hz] rel. to %1 Hz").arg(rc->getReceiver()->GetReceiveData()->ConvertFrequency(rFreqAcquVal)));
+                      QString("Freq. Offset [Hz] rel. to %1 Hz").arg(rc->getReceiver()->GetReceiveData()->ConvertFrequency(rFreqAcquVal)));
         plot->setData(1, vecrData2, vecrScale);
         break;
 
@@ -483,26 +484,26 @@ void CDRMPlot::addWhatsThisHelp()
         /* Impulse Response */
         strCurPlotHelp =
             QObject::tr("<b>Impulse Response:</b> This plot shows "
-               "the estimated Impulse Response (IR) of the channel based on the "
-               "channel estimation. It is the averaged, Hamming Window weighted "
-               "Fourier back transformation of the transfer function. The length "
-               "of PDS estimation and time synchronization tracking is based on "
-               "this function. The two red dashed vertical lines show the "
-               "beginning and the end of the guard-interval. The two black dashed "
-               "vertical lines show the estimated beginning and end of the PDS of "
-               "the channel (derived from the averaged impulse response "
-               "estimation). If the \"First Peak\" timing tracking method is "
-               "chosen, a bound for peak estimation (horizontal dashed red line) "
-               "is shown. Only peaks above this bound are used for timing "
-               "estimation.");
+                        "the estimated Impulse Response (IR) of the channel based on the "
+                        "channel estimation. It is the averaged, Hamming Window weighted "
+                        "Fourier back transformation of the transfer function. The length "
+                        "of PDS estimation and time synchronization tracking is based on "
+                        "this function. The two red dashed vertical lines show the "
+                        "beginning and the end of the guard-interval. The two black dashed "
+                        "vertical lines show the estimated beginning and end of the PDS of "
+                        "the channel (derived from the averaged impulse response "
+                        "estimation). If the \"First Peak\" timing tracking method is "
+                        "chosen, a bound for peak estimation (horizontal dashed red line) "
+                        "is shown. Only peaks above this bound are used for timing "
+                        "estimation.");
         break;
 
     case TRANSFERFUNCTION:
         /* Transfer Function */
         strCurPlotHelp =
             QObject::tr("<b>Transfer Function / Group Delay:</b> "
-               "This plot shows the squared magnitude and the group delay of "
-               "the estimated channel at each sub-carrier.");
+                        "This plot shows the squared magnitude and the group delay of "
+                        "the estimated channel at each sub-carrier.");
         break;
 
     case FAC_CONSTELLATION:
@@ -512,50 +513,50 @@ void CDRMPlot::addWhatsThisHelp()
         /* Constellations */
         strCurPlotHelp =
             QObject::tr("<b>FAC, SDC, MSC:</b> The plots show the "
-               "constellations of the FAC, SDC and MSC logical channel of the DRM "
-               "stream. Depending on the current transmitter settings, the SDC "
-               "and MSC can have 4-QAM, 16-QAM or 64-QAM modulation.");
+                        "constellations of the FAC, SDC and MSC logical channel of the DRM "
+                        "stream. Depending on the current transmitter settings, the SDC "
+                        "and MSC can have 4-QAM, 16-QAM or 64-QAM modulation.");
         break;
 
     case POWER_SPEC_DENSITY:
         /* Shifted PSD */
         strCurPlotHelp =
             QObject::tr("<b>Shifted PSD:</b> This plot shows the "
-               "estimated Power Spectrum Density (PSD) of the input signal. The "
-               "DC frequency (red dashed vertical line) is fixed at 6 kHz. If "
-               "the frequency offset acquisition was successful, the rectangular "
-               "DRM spectrum should show up with a center frequency of 6 kHz. "
-               "This plot represents the frequency synchronized OFDM spectrum. "
-               "If the frequency synchronization was successful, the useful "
-               "signal really shows up only inside the actual DRM bandwidth "
-               "since the side loops have in this case only energy between the "
-               "samples in the frequency domain. On the sample positions outside "
-               "the actual DRM spectrum, the DRM signal has zero crossings "
-               "because of the orthogonality. Therefore this spectrum represents "
-               "NOT the actual spectrum but the \"idealized\" OFDM spectrum.");
-            break;
+                        "estimated Power Spectrum Density (PSD) of the input signal. The "
+                        "DC frequency (red dashed vertical line) is fixed at 6 kHz. If "
+                        "the frequency offset acquisition was successful, the rectangular "
+                        "DRM spectrum should show up with a center frequency of 6 kHz. "
+                        "This plot represents the frequency synchronized OFDM spectrum. "
+                        "If the frequency synchronization was successful, the useful "
+                        "signal really shows up only inside the actual DRM bandwidth "
+                        "since the side loops have in this case only energy between the "
+                        "samples in the frequency domain. On the sample positions outside "
+                        "the actual DRM spectrum, the DRM signal has zero crossings "
+                        "because of the orthogonality. Therefore this spectrum represents "
+                        "NOT the actual spectrum but the \"idealized\" OFDM spectrum.");
+        break;
 
     case SNR_SPECTRUM:
         /* SNR Spectrum (Weighted MER on MSC Cells) */
         strCurPlotHelp =
             QObject::tr("<b>SNR Spectrum (Weighted MER on MSC Cells):</b> "
-               "This plot shows the Weighted MER on MSC cells for each carrier "
-               "separately.");
-            break;
+                        "This plot shows the Weighted MER on MSC cells for each carrier "
+                        "separately.");
+        break;
 
     case INPUTSPECTRUM_NO_AV:
         /* Input Spectrum */
         strCurPlotHelp =
-        QObject::tr("<b>Input Spectrum:</b> This plot shows the "
-           "Fast Fourier Transformation (FFT) of the input signal. This plot "
-           "is active in both modes, analog and digital. There is no "
-           "averaging applied. The screen shot of the Evaluation Dialog shows "
-           "the significant shape of a DRM signal (almost rectangular). The "
-           "dashed vertical line shows the estimated DC frequency. This line "
-           "is very important for the analog AM demodulation. Each time a "
-           "new carrier frequency is acquired, the red line shows the "
-           "selected AM spectrum. If more than one AM spectrums are within "
-           "the sound card frequency range, the strongest signal is chosen.");
+            QObject::tr("<b>Input Spectrum:</b> This plot shows the "
+                        "Fast Fourier Transformation (FFT) of the input signal. This plot "
+                        "is active in both modes, analog and digital. There is no "
+                        "averaging applied. The screen shot of the Evaluation Dialog shows "
+                        "the significant shape of a DRM signal (almost rectangular). The "
+                        "dashed vertical line shows the estimated DC frequency. This line "
+                        "is very important for the analog AM demodulation. Each time a "
+                        "new carrier frequency is acquired, the red line shows the "
+                        "selected AM spectrum. If more than one AM spectrums are within "
+                        "the sound card frequency range, the strongest signal is chosen.");
         break;
 
     case INPUT_SIG_PSD:
@@ -563,60 +564,60 @@ void CDRMPlot::addWhatsThisHelp()
         /* Input PSD */
         strCurPlotHelp =
             QObject::tr("<b>Input PSD:</b> This plot shows the "
-               "estimated power spectral density (PSD) of the input signal. The "
-               "PSD is estimated by averaging some Hamming Window weighted "
-               "Fourier transformed blocks of the input signal samples. The "
-               "dashed vertical line shows the estimated DC frequency.");
+                        "estimated power spectral density (PSD) of the input signal. The "
+                        "PSD is estimated by averaging some Hamming Window weighted "
+                        "Fourier transformed blocks of the input signal samples. The "
+                        "dashed vertical line shows the estimated DC frequency.");
         break;
 
     case AUDIO_SPECTRUM:
         /* Audio Spectrum */
         strCurPlotHelp =
             QObject::tr("<b>Audio Spectrum:</b> This plot shows the "
-               "averaged audio spectrum of the currently played audio. With this "
-               "plot the actual audio bandwidth can easily determined. Since a "
-               "linear scale is used for the frequency axis, most of the energy "
-               "of the signal is usually concentrated on the far left side of the "
-               "spectrum.");
+                        "averaged audio spectrum of the currently played audio. With this "
+                        "plot the actual audio bandwidth can easily determined. Since a "
+                        "linear scale is used for the frequency axis, most of the energy "
+                        "of the signal is usually concentrated on the far left side of the "
+                        "spectrum.");
         break;
 
     case FREQ_SAM_OFFS_HIST:
         /* Frequency Offset / Sample Rate Offset History */
         strCurPlotHelp =
             QObject::tr("<b>Frequency Offset / Sample Rate Offset History:"
-               "</b> The history "
-               "of the values for frequency offset and sample rate offset "
-               "estimation is shown. If the frequency offset drift is very small, "
-               "this is an indication that the analog front end is of high "
-               "quality.");
+                        "</b> The history "
+                        "of the values for frequency offset and sample rate offset "
+                        "estimation is shown. If the frequency offset drift is very small, "
+                        "this is an indication that the analog front end is of high "
+                        "quality.");
         break;
 
     case DOPPLER_DELAY_HIST:
         /* Doppler / Delay History */
         strCurPlotHelp =
             QObject::tr("<b>Doppler / Delay History:</b> "
-               "The history of the values for the "
-               "Doppler and Impulse response length is shown. Large Doppler "
-               "values might be responsable for audio drop-outs.");
+                        "The history of the values for the "
+                        "Doppler and Impulse response length is shown. Large Doppler "
+                        "values might be responsable for audio drop-outs.");
         break;
 
     case SNR_AUDIO_HIST:
         /* SNR History */
         strCurPlotHelp =
             QObject::tr("<b>SNR History:</b> "
-               "The history of the values for the "
-               "SNR and correctly decoded audio blocks is shown. The maximum "
-               "achievable number of correctly decoded audio blocks per DRM "
-               "frame is 10 or 5 depending on the audio sample rate (24 kHz "
-               "or 12 kHz AAC core bandwidth).");
+                        "The history of the values for the "
+                        "SNR and correctly decoded audio blocks is shown. The maximum "
+                        "achievable number of correctly decoded audio blocks per DRM "
+                        "frame is 10 or 5 depending on the audio sample rate (24 kHz "
+                        "or 12 kHz AAC core bandwidth).");
         break;
 
     case INP_SPEC_WATERF:
         /* Waterfall Display of Input Spectrum */
         strCurPlotHelp =
             QObject::tr("<b>Waterfall Display of Input Spectrum:</b> "
-               "The input spectrum is displayed as a waterfall type. The "
-               "different colors represent different levels.");
+                        "The input spectrum is displayed as a waterfall type. The "
+                        "different colors represent different levels.");
         break;
 
     case NONE_OLD:

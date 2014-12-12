@@ -3,7 +3,7 @@
  * Copyright (c) 2001-2014
  *
  * Author(s):
- *	 Julian Cable, David Flamand
+ *   Julian Cable, David Flamand
  *
  * Description: MOT Slide Show Viewer
  *

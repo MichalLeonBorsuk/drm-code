@@ -37,16 +37,16 @@ StationsWidget::StationsWidget(ReceiverController* rc, QWidget *parent) :
 
     QStringList headers;
     headers
-        << QString() /* icon, enable sorting by online/offline */
-        << tr("Station Name")
-        << tr("Time [UTC]")
-        << tr("Frequency [kHz]")
-        << tr("Power [kW]")
-        << tr("Target")
-        << tr("Country")
-        << tr("Site")
-        << tr("Language")
-        << tr("Days");
+            << QString() /* icon, enable sorting by online/offline */
+            << tr("Station Name")
+            << tr("Time [UTC]")
+            << tr("Frequency [kHz]")
+            << tr("Power [kW]")
+            << tr("Target")
+            << tr("Country")
+            << tr("Site")
+            << tr("Language")
+            << tr("Days");
 
     ui->stations->setHeaderLabels(headers);
     ui->stations->headerItem()->setTextAlignment(2, Qt::AlignRight | Qt::AlignVCenter);
@@ -61,7 +61,8 @@ StationsWidget::StationsWidget(ReceiverController* rc, QWidget *parent) :
     QTreeWidgetItem* am = new QTreeWidgetItem(QStringList("AM"));
     ui->stations->addTopLevelItem(drm);
     ui->stations->addTopLevelItem(am);
-    QStringList x; x << "" << "-";
+    QStringList x;
+    x << "" << "-";
     QTreeWidgetItem* drm_manual = new QTreeWidgetItem(x);
     drm->addChild(drm_manual);
     QTreeWidgetItem* am_manual = new QTreeWidgetItem(x);
@@ -136,10 +137,10 @@ void StationsWidget::OnUpdate()
         else
         {
             QMessageBox::information(this, "Dream", tr("The schedule file "
-            " could not be found or contains no data.\n"
-            "No stations can be displayed.\n"
-            "Try to download this file by using the 'Update' menu."),
-            QMessageBox::Ok);
+                                     " could not be found or contains no data.\n"
+                                     "No stations can be displayed.\n"
+                                     "Try to download this file by using the 'Update' menu."),
+                                     QMessageBox::Ok);
         }
     }
     loadScheduleView();
@@ -325,22 +326,22 @@ void StationsWidget::AddWhatsThisHelp()
     /* Stations List */
     QString strList =
         tr("<b>Stations List:</b> In the stations list "
-        "view all DRM stations which are stored in the schedule.ini file "
-        "are shown. It is possible to show only active stations by changing a "
-        "setting in the 'view' menu. The color of the cube on the left of a "
-        "menu item shows the current status of the DRM transmission. A green "
-        "box shows that the transmission takes place right now, a "
-        //           "yellow cube shows that this is a test transmission and with a "
-        "red cube it is shown that the transmission is offline, "
-        "a pink cube shown that the transmission soon will be offline.<br>"
-        "If the stations preview is active an orange box shows the stations "
-        "that will be active.<br>"
-        "The list can be sorted by clicking on the headline of the "
-        "column.<br>By clicking on a menu item, a remote front-end can "
-        "be automatically switched to the current frequency and the "
-        "Dream software is reset to a new acquisition (to speed up the "
-        "synchronization process). Also, the log-file frequency edit "
-        "is automatically updated.");
+           "view all DRM stations which are stored in the schedule.ini file "
+           "are shown. It is possible to show only active stations by changing a "
+           "setting in the 'view' menu. The color of the cube on the left of a "
+           "menu item shows the current status of the DRM transmission. A green "
+           "box shows that the transmission takes place right now, a "
+           //           "yellow cube shows that this is a test transmission and with a "
+           "red cube it is shown that the transmission is offline, "
+           "a pink cube shown that the transmission soon will be offline.<br>"
+           "If the stations preview is active an orange box shows the stations "
+           "that will be active.<br>"
+           "The list can be sorted by clicking on the headline of the "
+           "column.<br>By clicking on a menu item, a remote front-end can "
+           "be automatically switched to the current frequency and the "
+           "Dream software is reset to a new acquisition (to speed up the "
+           "synchronization process). Also, the log-file frequency edit "
+           "is automatically updated.");
 
     ui->stations->setWhatsThis(strList);
 }

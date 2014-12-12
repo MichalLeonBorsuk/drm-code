@@ -3,10 +3,10 @@
  * Copyright (c) 2001-2014
  *
  * Author(s):
- *	Julian Cable
+ *  Julian Cable
  *
  * Description:
- *	ETSI DAB/DRM Electronic Programme Guide utilities
+ *  ETSI DAB/DRM Electronic Programme Guide utilities
  *
  *
  ******************************************************************************
@@ -35,13 +35,13 @@
 void mkdirs (const string & path);
 
 string epgFilename (const CDateAndTime & date,
-		    uint32_t sid, int type, bool advanced);
+                    uint32_t sid, int type, bool advanced);
 string epgFilename_etsi (const CDateAndTime & date,
-		    uint32_t sid, int type, bool advanced);
+                         uint32_t sid, int type, bool advanced);
 string epgFilename_dab (const CDateAndTime & date,
-		    uint32_t sid, int type, bool advanced);
+                        uint32_t sid, int type, bool advanced);
 
 string epgFilename2 (const CDateAndTime & date,
-		    uint32_t sid, int type, bool advanced);
+                     uint32_t sid, int type, bool advanced);
 
 #endif

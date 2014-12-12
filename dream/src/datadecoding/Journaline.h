@@ -3,7 +3,7 @@
  * Copyright (c) 2001-2014
  *
  * Author(s):
- *	Volker Fischer
+ *  Volker Fischer
  *
  * Description:
  *
@@ -37,50 +37,54 @@
 /* Definitions ****************************************************************/
 /* Definitions for links which objects are not yet received or items which
    do not have links (no menu) */
-#define JOURNALINE_IS_NO_LINK			-2
-#define JOURNALINE_LINK_NOT_ACTIVE		-1
+#define JOURNALINE_IS_NO_LINK           -2
+#define JOURNALINE_LINK_NOT_ACTIVE      -1
 
 
 /* Classes ********************************************************************/
 struct CNewsItem
 {
-	string	sText;
-	int		iLink;
+    string  sText;
+    int     iLink;
 };
 
 class CNews
 {
 public:
-	CNews() : sTitle(""), vecItem(0) {}
+    CNews() : sTitle(""), vecItem(0) {}
 
-	string				sTitle;
-	CVector<CNewsItem>	vecItem;
+    string              sTitle;
+    CVector<CNewsItem>  vecItem;
 };
 
 
 class CJournaline
 {
 public:
-	CJournaline();
-	virtual ~CJournaline();
+    CJournaline();
+    virtual ~CJournaline();
 
-	void GetNews(int iObjID, CNews& News);
-	void AddDataUnit(CVector<_BINARY>& vecbiNewData);
-	void Reset() {ResetOpenJournalineDecoder();}
-	void AddFile(const string filename);
+    void GetNews(int iObjID, CNews& News);
+    void AddDataUnit(CVector<_BINARY>& vecbiNewData);
+    void Reset() {
+        ResetOpenJournalineDecoder();
+    }
+    void AddFile(const string filename);
 
 protected:
-	DAB_DATAGROUP_DECODER_t	dgdec;
-	NEWS_SVC_DEC_decoder_t	newsdec;
+    DAB_DATAGROUP_DECODER_t dgdec;
+    NEWS_SVC_DEC_decoder_t  newsdec;
 
-	void ResetOpenJournalineDecoder();
+    void ResetOpenJournalineDecoder();
 
-	/* Callback functions for journaline decoder internal tasks */
-	static void obj_avail_cb(unsigned long, NEWS_SVC_DEC_obj_availability_t*,
-		void*) {}
-	static void dg_cb(const DAB_DATAGROUP_DECODER_msc_datagroup_header_t*,
-		const unsigned long len, const unsigned char* buf, void* data)
-		{NEWS_SVC_DEC_putData(((CJournaline*) data)->newsdec, len, buf);}
+    /* Callback functions for journaline decoder internal tasks */
+    static void obj_avail_cb(unsigned long, NEWS_SVC_DEC_obj_availability_t*,
+                             void*) {}
+    static void dg_cb(const DAB_DATAGROUP_DECODER_msc_datagroup_header_t*,
+                      const unsigned long len, const unsigned char* buf, void* data)
+    {
+        NEWS_SVC_DEC_putData(((CJournaline*) data)->newsdec, len, buf);
+    }
 };
 
 #endif // !defined(JOURNALINE_H__3B0UBVE987346456363LIHGEW982__INCLUDED_)

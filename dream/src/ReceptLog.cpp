@@ -3,10 +3,10 @@
  * Copyright (c) 2001-2014
  *
  * Author(s):
- *	Volker Fischer, Andrew Murphy, Julian Cable
+ *  Volker Fischer, Andrew Murphy, Julian Cable
  *
  * Description:
- *	see ReceptLog.h
+ *  see ReceptLog.h
  *
  ******************************************************************************
  *
@@ -397,7 +397,7 @@ CLongLog::writeParameters()
             iCurMSCSc = 3;
             break;
 
-        case CS_1_SM:			/* TODO */
+        case CS_1_SM:           /* TODO */
             break;
         }
     }
@@ -480,7 +480,7 @@ string CReceptLog::strdate(time_t t)
     struct tm * today;
     stringstream s;
 
-    today = gmtime(&t);		/* Always UTC */
+    today = gmtime(&t);     /* Always UTC */
 
     s << setfill('0')
       << setw(4) << today->tm_year + 1900 << "-"
@@ -493,7 +493,7 @@ string CReceptLog::strtime(time_t t)
     struct tm * today;
     stringstream s;
 
-    today = gmtime(&t);		/* Always UTC */
+    today = gmtime(&t);     /* Always UTC */
 
     s << setfill('0')
       << setw(2) << today->tm_hour << ":" << setw(2) << today-> tm_min << ":" << setw(2) << today->tm_sec;

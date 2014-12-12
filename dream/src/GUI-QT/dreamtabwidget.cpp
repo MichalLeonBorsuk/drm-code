@@ -142,9 +142,9 @@ QWidget* DreamTabWidget::makeDataApp(int short_id, const CService& service) cons
     if(pApp==NULL)
     {
         pApp = new QLabel(QString("short id %1 stream %2 packet id %3")
-                                       .arg(short_id)
-                                       .arg(service.DataParam.iStreamID)
-                                       .arg(service.DataParam.iPacketID));
+                          .arg(short_id)
+                          .arg(service.DataParam.iStreamID)
+                          .arg(service.DataParam.iPacketID));
     }
     return pApp;
 }
@@ -163,7 +163,7 @@ QWidget* DreamTabWidget::makePacketApp(int short_id, const CService& service) co
             connect(controller, SIGNAL(dataStatusChanged(int, ETypeRxStatus)), p, SLOT(setStatus(int, ETypeRxStatus)));
             pApp = p;
         }
-            break;
+        break;
 
         case DAB_AT_BROADCASTWEBSITE:
         {
@@ -175,7 +175,7 @@ QWidget* DreamTabWidget::makePacketApp(int short_id, const CService& service) co
             pApp = p;
 #endif
         }
-            break;
+        break;
 
         case DAB_AT_EPG:
             break;
@@ -245,6 +245,6 @@ void DreamTabWidget::on_engineeringMode(bool b)
     }
     QList<AudioDetailWidget*> list = findChildren<AudioDetailWidget*>();
     for (int i = 0; i < list.size(); ++i) {
-       list[i]->setEngineering(eng);
+        list[i]->setEngineering(eng);
     }
 }

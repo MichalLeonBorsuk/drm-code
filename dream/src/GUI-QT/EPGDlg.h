@@ -3,10 +3,10 @@
  * Copyright (c) 2001-2014
  *
  * Author(s):
- *	Julian Cable
+ *  Julian Cable
  *
  * Description:
- *	ETSI DAB/DRM Electronic Programme Guide Viewer
+ *  ETSI DAB/DRM Electronic Programme Guide Viewer
  *
  *
  ******************************************************************************
@@ -38,17 +38,17 @@
 
 
 /* Definitions ****************************************************************/
-#define COL_NAME	1
+#define COL_NAME    1
 
 /* Define the timer interval of updating */
-#define GUI_TIMER_EPG_UPDATE		1000 /* ms (1 second) */
+#define GUI_TIMER_EPG_UPDATE        1000 /* ms (1 second) */
 
 /* list view columns */
-#define COL_START		0
-#define COL_NAME		1
-#define	COL_GENRE		2
-#define	COL_DESCRIPTION	3
-#define COL_DURATION	4
+#define COL_START       0
+#define COL_NAME        1
+#define COL_GENRE       2
+#define COL_DESCRIPTION 3
+#define COL_DURATION    4
 
 
 /* Classes ********************************************************************/
@@ -80,9 +80,9 @@ protected:
 
     bool                  do_updates;
     EPG*                  pEpg;
-    QTimer		          Timer;
-    QIcon		          greenCube;
-    QTreeWidgetItem*	  next;
+    QTimer                Timer;
+    QIcon                 greenCube;
+    QTreeWidgetItem*      next;
 
 signals:
     void NowNext(QString);

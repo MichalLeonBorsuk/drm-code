@@ -3,10 +3,10 @@
  * Copyright (c) 2001-2014
  *
  * Author(s):
- *	Volker Fischer
+ *  Volker Fischer
  *
  * Description:
- *	Frequency synchronization acquisition (FFT-based)
+ *  Frequency synchronization acquisition (FFT-based)
  *
  * The input data is not modified by this module, it is just a measurement
  * of the frequency offset. The data is fed through this module.
@@ -116,7 +116,7 @@ bool FreqOffsetModeABCD::calcOffset(const CRealVector& vecrPSD, int& offset)
         /* Check all detected peaks in the "PSD-domain" if there are
            at least two peaks with approx the same power at the
            correct places (positions of the desired pilots) */
-        CRealVector	vecrPSDPilPoin(3);
+        CRealVector vecrPSDPilPoin(3);
         for (int i = 0; i < iNumDetPeaks; i++)
         {
             /* Fill the vector with the values at the desired
@@ -152,8 +152,8 @@ bool FreqOffsetModeABCD::calcOffset(const CRealVector& vecrPSD, int& offset)
            maximum with this value. We also detect, if a peak is
            left */
         bool    bNoPeaksLeft = true;
-        int		iMaxIndex=0;
-        CReal	rMaxValue = 0.0;
+        int     iMaxIndex=0;
+        CReal   rMaxValue = 0.0;
         for (int i = 0; i < iNumDetPeaks; i++)
         {
             if (vecbFlagVec[i] == 1)
@@ -302,9 +302,9 @@ void CFreqSyncAcq::ProcessDataInternal(CParameter& Parameters)
                 const int iStartFilt = 0; // <- no offset right now
 
                 /* Reset vectors for intermediate filtered result */
-                CRealVector					vecrFiltResLR;
-                CRealVector					vecrFiltResRL;
-                CRealVector					vecrFiltRes;
+                CRealVector                 vecrFiltResLR;
+                CRealVector                 vecrFiltResRL;
+                CRealVector                 vecrFiltRes;
                 /* Init vectors for filtering in frequency direction */
                 vecrFiltResLR.Init(iHalfBuffer);
                 vecrFiltResRL.Init(iHalfBuffer);
@@ -362,7 +362,7 @@ void CFreqSyncAcq::ProcessDataInternal(CParameter& Parameters)
                 if(acquired)
                 {
                     Parameters.rFreqOffsetAcqui = (_REAL) offset / iFrAcFFTSize;
-;
+                    ;
                     /* Send out the data stored for FFT calculation ----- */
                     /* This does not work for bandpass filter. TODO: make
                        this possible for bandpass filter, too */

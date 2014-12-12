@@ -3,10 +3,10 @@
  * Copyright (c) 2001-2014
  *
  * Author(s):
- *	Volker Fischer
+ *  Volker Fischer
  *
  * Description:
- *	Implementation of an analog AM demodulation
+ *  Implementation of an analog AM demodulation
  *
  *
  ******************************************************************************
@@ -158,7 +158,7 @@ void CAMDemodulation::ProcessDataInternal(CParameter& Parameters)
     /* Write mono signal in both channels (left and right) */
     for (i = 0; i < iResOutBlockSize; i++)
         (*pvecOutputData)[2 * i] = (*pvecOutputData)[2 * i + 1] =
-            Real2Sample(vecTempResBufOut[i]);
+                                       Real2Sample(vecTempResBufOut[i]);
 }
 
 void CAMDemodulation::InitInternal(CParameter& Parameters)
@@ -262,7 +262,7 @@ void CAMDemodulation::InitInternal(CParameter& Parameters)
 
     /* Init audio resampler */
     ResampleObj.Init(iSymbolBlockSize,
-        (_REAL) iAudSampleRate / iSigSampleRate);
+                     (_REAL) iAudSampleRate / iSigSampleRate);
     vecTempResBufIn.Init(iSymbolBlockSize, (_REAL) 0.0);
     vecTempResBufOut.Init(iResOutBlockSize, (_REAL) 0.0);
 
@@ -756,16 +756,16 @@ void CFreqOffsAcq::Start(const CReal rNewNormCenter)
 * Noise reduction                                                              *
 \******************************************************************************/
 /*
-	The original Dream noise reduction algorithm is based on optimal filters, whereas the
-	PDS of the noise is estimated with a minimum statistic.
-	We use an overlap and add method to avoid clicks caused by fast changing
-	optimal filters between successive blocks.
+    The original Dream noise reduction algorithm is based on optimal filters, whereas the
+    PDS of the noise is estimated with a minimum statistic.
+    We use an overlap and add method to avoid clicks caused by fast changing
+    optimal filters between successive blocks.
 
-	[Ref] A. Engel: "Transformationsbasierte Systeme zur einkanaligen
-		Stoerunterdrueckung bei Sprachsignalen", PhD Thesis, Christian-
-		Albrechts-Universitaet zu Kiel, 1998
+    [Ref] A. Engel: "Transformationsbasierte Systeme zur einkanaligen
+        Stoerunterdrueckung bei Sprachsignalen", PhD Thesis, Christian-
+        Albrechts-Universitaet zu Kiel, 1998
 
-	Robert Turnbull added the capability to use the one from the SPEEX codec
+    Robert Turnbull added the capability to use the one from the SPEEX codec
 */
 
 CNoiseReduction::~CNoiseReduction()
@@ -903,7 +903,7 @@ void CNoiseReduction::UpdateNoiseEst(CRealVector& vecrNoisePSD,
                                      const ENoiRedDegree eNoiRedDegree)
 {
     /*
-    	Implements a mimium statistic proposed by R. Martin
+        Implements a mimium statistic proposed by R. Martin
     */
     /* Set weighting factor for minimum statistic */
     CReal rWeiFact = MIN_STAT_WEIGHT_FACTOR_MED;

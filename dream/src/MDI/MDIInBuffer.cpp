@@ -3,10 +3,10 @@
  * Copyright (c) 2001-2014
  *
  * Author(s):
- *	Volker Fischer, Oliver Haffenden
+ *  Volker Fischer, Oliver Haffenden
  *
  * Description:
- *	simple blocking buffer
+ *  simple blocking buffer
  *
  ******************************************************************************
  *
@@ -36,10 +36,10 @@
 void
 CMDIInBuffer::Put(const vector<_BYTE>& data)
 {
-	guard.Lock();
-	buffer.push(data);
-	blocker.WakeOne();
-	guard.Unlock();
+    guard.Lock();
+    buffer.push(data);
+    blocker.WakeOne();
+    guard.Unlock();
 }
 
 /* get the buffer contents, but if it takes more than a second, return an empty buffer
@@ -49,28 +49,28 @@ CMDIInBuffer::Put(const vector<_BYTE>& data)
 void
 CMDIInBuffer::Get(vector<_BYTE>& data)
 {
-	guard.Lock();
-	if(buffer.empty())
-	{
-		if(blocker.Wait(&guard, 1000))
-		{
-			if(buffer.empty())
-				data.clear();
-			else
-			{
-				data = buffer.front();
-				buffer.pop();
-			}
-		}
-		else
-		{
-			data.clear();
-		}
-	}
-	else
-	{
-		data = buffer.front();
-		buffer.pop();
-	}
-	guard.Unlock();
+    guard.Lock();
+    if(buffer.empty())
+    {
+        if(blocker.Wait(&guard, 1000))
+        {
+            if(buffer.empty())
+                data.clear();
+            else
+            {
+                data = buffer.front();
+                buffer.pop();
+            }
+        }
+        else
+        {
+            data.clear();
+        }
+    }
+    else
+    {
+        data = buffer.front();
+        buffer.pop();
+    }
+    guard.Unlock();
 }

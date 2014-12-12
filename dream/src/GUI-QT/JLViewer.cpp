@@ -3,7 +3,7 @@
  * Copyright (c) 2001-2014
  *
  * Author(s):
- *	 Julian Cable
+ *   Julian Cable
  *
  * Description: Journaline Viewer
  *
@@ -39,7 +39,7 @@ JLViewer::JLViewer(CSettings& Settings, QWidget* parent):
     setupUi(this);
 
     string p = Settings.Get(
-                "Receiver", "datafilesdirectory", string(DEFAULT_DATA_FILES_DIRECTORY));
+                   "Receiver", "datafilesdirectory", string(DEFAULT_DATA_FILES_DIRECTORY));
 
     strCurrentSavePath = QString::fromUtf8((p+PATH_SEPARATOR+"Journaline").c_str());
 

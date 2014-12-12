@@ -49,4 +49,4 @@ extern const float fHilLPProt5_384[NUM_TAPS_HILB_FILT_5_384];
 /* Low pass prototype for Hilbert-filter 10 kHz bandwidth */
 extern const float fHilLPProt10_384[NUM_TAPS_HILB_FILT_10_384];
 
-#endif	/* _TIMESYNCFILTER_H_ */
+#endif  /* _TIMESYNCFILTER_H_ */

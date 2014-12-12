@@ -3,17 +3,17 @@
  * Copyright (c) 2001-2014
  *
  * Author(s):
- *	Volker Fischer, Andrew Murphy
+ *  Volker Fischer, Andrew Murphy
  *
  * Description:
- *	SDC data stream decoding (receiver)
+ *  SDC data stream decoding (receiver)
  *
  *
  * 11/21/2005 Andrew Murphy, BBC Research & Development, 2005
- *	- AMSS data entity groups (no AFS index), added eSDCType, data type 11
+ *  - AMSS data entity groups (no AFS index), added eSDCType, data type 11
  *
  * 11/28/2005 Andrea Russo
- *	- Added code for store alternative frequencies informations about Regions
+ *  - Added code for store alternative frequencies informations about Regions
  *      and Schedules.
  *
  ******************************************************************************
@@ -56,7 +56,7 @@ CSDCReceive::ERetStatus CSDCReceive::SDCParam(CVector<_BINARY>* pbiData,
         /* 20 bits from AFS index and CRC */
         iUsefulBitsSDC= 20 + iLengthDataFieldBytes * 8;
     }
-    else	// SDC_AMSS
+    else    // SDC_AMSS
     {
         iLengthDataFieldBytes =
             (int) ((_REAL) (Parameter.iNumSDCBitsPerSFrame - 16) / 8);
@@ -102,8 +102,8 @@ CSDCReceive::ERetStatus CSDCReceive::SDCParam(CVector<_BINARY>* pbiData,
     if (permissive || CRCObject.CheckCRC((*pbiData).Separate(16)) == TRUE)
     {
         /* CRC-check successful, extract data from SDC-stream --------------- */
-        int			iLengthOfBody;
-        _BOOLEAN	bError = FALSE;
+        int         iLengthOfBody;
+        _BOOLEAN    bError = FALSE;
 
         /* Reset separation function */
         (*pbiData).ResetBitAccess();
@@ -212,16 +212,16 @@ CSDCReceive::ERetStatus CSDCReceive::SDCParam(CVector<_BINARY>* pbiData,
 
 
 /******************************************************************************\
-* Data entity Type 0 (Multiplex description data entity)					   *
+* Data entity Type 0 (Multiplex description data entity)                       *
 \******************************************************************************/
 _BOOLEAN CSDCReceive::DataEntityType0(CVector<_BINARY>* pbiData,
                                       const int iLengthOfBody,
                                       CParameter& Parameter,
                                       const _BOOLEAN)
 {
-    CMSCProtLev				MSCPrLe;
-    int						iLenPartA;
-    int						iLenPartB;
+    CMSCProtLev             MSCPrLe;
+    int                     iLenPartA;
+    int                     iLenPartB;
 
     /* The receiver may determine the number of streams present in the multiplex
        by dividing the length field of the header by three (6.4.3.1) */
@@ -290,8 +290,8 @@ _BOOLEAN CSDCReceive::DataEntityType0(CVector<_BINARY>* pbiData,
 
 
 /******************************************************************************\
-* Data entity Type 1 (Label data entity)									   *
-* Uses the unique flavour of the version flag so it is not needed here		   *
+* Data entity Type 1 (Label data entity)                                       *
+* Uses the unique flavour of the version flag so it is not needed here         *
 \******************************************************************************/
 _BOOLEAN CSDCReceive::DataEntityType1(CVector<_BINARY>* pbiData,
                                       const int iLengthOfBody,
@@ -348,10 +348,10 @@ _BOOLEAN CSDCReceive::DataEntityType3(CVector<_BINARY>* pbiData,
                                       CParameter& Parameter,
                                       const _BOOLEAN bVersion)
 {
-    int			i;
-    _BOOLEAN	bEnhanceFlag = FALSE;
-    _BOOLEAN	bServRestrFlag = FALSE;
-    int			iServRestr = 0x0f;
+    int         i;
+    _BOOLEAN    bEnhanceFlag = FALSE;
+    _BOOLEAN    bServRestrFlag = FALSE;
+    int         iServRestr = 0x0f;
     CMultiplexDefinition AltFreq;
 
     /* Init number of frequency count */
@@ -623,7 +623,7 @@ _BOOLEAN CSDCReceive::DataEntityType4(CVector<_BINARY>* pbiData,
 }
 
 /******************************************************************************\
-* Data entity Type 5 (Application information data entity)					   *
+* Data entity Type 5 (Application information data entity)                     *
 \******************************************************************************/
 _BOOLEAN CSDCReceive::DataEntityType5(CVector<_BINARY>* pbiData,
                                       const int iLengthOfBody,
@@ -779,13 +779,13 @@ _BOOLEAN CSDCReceive::DataEntityType7(CVector<_BINARY>* pbiData,
             Region.veciCIRAFZones.push_back(iCIRAFZone);
 
         /*
-        	TODO: To check whether a certain longitude value is inside the specified
-        	longitude range, the following formula in pseudo program code shall be used
-        	(with my_longitude in the range -180 to +179):
-        	inside_area = ( (my_longitude >= longitude) AND
-        		(my_longitude <= (longitude + longitude_extent) ) OR
-        		( ((longitude + longitude_extent) >= +180) AND
-        		(my_longitude <= (longitude + longitude_extent - 360)) )
+            TODO: To check whether a certain longitude value is inside the specified
+            longitude range, the following formula in pseudo program code shall be used
+            (with my_longitude in the range -180 to +179):
+            inside_area = ( (my_longitude >= longitude) AND
+                (my_longitude <= (longitude + longitude_extent) ) OR
+                ( ((longitude + longitude_extent) >= +180) AND
+                (my_longitude <= (longitude + longitude_extent - 360)) )
         */
     }
 
@@ -829,7 +829,7 @@ _BOOLEAN CSDCReceive::DataEntityType7(CVector<_BINARY>* pbiData,
 
 
 /******************************************************************************\
-* Data entity Type 8 (Time and date information data entity)				   *
+* Data entity Type 8 (Time and date information data entity)                   *
 \******************************************************************************/
 _BOOLEAN CSDCReceive::DataEntityType8(CVector<_BINARY>* pbiData,
                                       const int iLengthOfBody,
@@ -842,60 +842,60 @@ _BOOLEAN CSDCReceive::DataEntityType8(CVector<_BINARY>* pbiData,
     if (iLengthOfBody > 4)
         return FALSE;
 
-	if (iLengthOfBody == 3)
+    if (iLengthOfBody == 3)
     {
-    /* Decode date */
-    CModJulDate ModJulDate((*pbiData).Separate(17));
+        /* Decode date */
+        CModJulDate ModJulDate((*pbiData).Separate(17));
 
-    Parameter.Lock();
-    Parameter.iDay = ModJulDate.GetDay();
-    Parameter.iMonth = ModJulDate.GetMonth();
-    Parameter.iYear = ModJulDate.GetYear();
+        Parameter.Lock();
+        Parameter.iDay = ModJulDate.GetDay();
+        Parameter.iMonth = ModJulDate.GetMonth();
+        Parameter.iYear = ModJulDate.GetYear();
 
-    /* UTC (hours and minutes) */
-    Parameter.iUTCHour = (*pbiData).Separate(5);
-    Parameter.iUTCMin = (*pbiData).Separate(6);
+        /* UTC (hours and minutes) */
+        Parameter.iUTCHour = (*pbiData).Separate(5);
+        Parameter.iUTCMin = (*pbiData).Separate(6);
 
-    Parameter.bValidUTCOffsetAndSense = FALSE;
+        Parameter.bValidUTCOffsetAndSense = FALSE;
     }
 
     if (iLengthOfBody == 4)
     {
-    /* Decode date */
-    CModJulDate ModJulDate((*pbiData).Separate(17));
+        /* Decode date */
+        CModJulDate ModJulDate((*pbiData).Separate(17));
 
-    Parameter.Lock();
-    Parameter.iDay = ModJulDate.GetDay();
-    Parameter.iMonth = ModJulDate.GetMonth();
-    Parameter.iYear = ModJulDate.GetYear();
+        Parameter.Lock();
+        Parameter.iDay = ModJulDate.GetDay();
+        Parameter.iMonth = ModJulDate.GetMonth();
+        Parameter.iYear = ModJulDate.GetYear();
 
-    /* UTC (hours and minutes) */
-    Parameter.iUTCHour = (*pbiData).Separate(5);
-    Parameter.iUTCMin = (*pbiData).Separate(6);
+        /* UTC (hours and minutes) */
+        Parameter.iUTCHour = (*pbiData).Separate(5);
+        Parameter.iUTCMin = (*pbiData).Separate(6);
 
-    /* rfu */
-    const int rfu = (*pbiData).Separate(2);
+        /* rfu */
+        const int rfu = (*pbiData).Separate(2);
 
-    /* UTC Sense */
-    Parameter.iUTCSense = (*pbiData).Separate(1); 
+        /* UTC Sense */
+        Parameter.iUTCSense = (*pbiData).Separate(1);
 
-    /* UTC Offset (local time offset) */
-    Parameter.iUTCOff = ((*pbiData).Separate(5));
+        /* UTC Offset (local time offset) */
+        Parameter.iUTCOff = ((*pbiData).Separate(5));
 
-    Parameter.bValidUTCOffsetAndSense = TRUE;
+        Parameter.bValidUTCOffsetAndSense = TRUE;
 
-    if (rfu)
-    {
-        /* rfu is set, reset all */
-        Parameter.iDay = 0;
-        Parameter.iMonth = 0;
-        Parameter.iYear = 0;
-        Parameter.iUTCSense = 0; 
-        Parameter.iUTCOff = 0;
-        Parameter.bValidUTCOffsetAndSense = FALSE;
+        if (rfu)
+        {
+            /* rfu is set, reset all */
+            Parameter.iDay = 0;
+            Parameter.iMonth = 0;
+            Parameter.iYear = 0;
+            Parameter.iUTCSense = 0;
+            Parameter.iUTCOff = 0;
+            Parameter.bValidUTCOffsetAndSense = FALSE;
+        }
     }
-    }
-	
+
     Parameter.Unlock();
 
     return FALSE;
@@ -903,7 +903,7 @@ _BOOLEAN CSDCReceive::DataEntityType8(CVector<_BINARY>* pbiData,
 
 
 /******************************************************************************\
-* Data entity Type 9 (Audio information data entity)						   *
+* Data entity Type 9 (Audio information data entity)                           *
 \******************************************************************************/
 _BOOLEAN CSDCReceive::DataEntityType9(CVector<_BINARY>* pbiData,
                                       const int iLengthOfBody,
@@ -1054,7 +1054,7 @@ _BOOLEAN CSDCReceive::DataEntityType9(CVector<_BINARY>* pbiData,
         break;
     case CAudioParam::AC_NONE: // can't happen
     case CAudioParam::AC_OPUS: // can't happen
-	;
+        ;
     }
 
     /* Audio sampling rate */
@@ -1160,9 +1160,9 @@ _BOOLEAN CSDCReceive::DataEntityType11(CVector<_BINARY>* pbiData,
                                        const _BOOLEAN bVersion)
 {
     size_t i;
-    _BOOLEAN		bRegionSchedFlag = FALSE;
-    int				iFrequencyEntryLength;
-    COtherService	OtherService;
+    _BOOLEAN        bRegionSchedFlag = FALSE;
+    int             iFrequencyEntryLength;
+    COtherService   OtherService;
 
     /* Init number of frequency count */
     int iNumFreqTmp = iLengthOfBody;

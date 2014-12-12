@@ -6,23 +6,26 @@ StreamWidget::StreamWidget(ReceiverController* rc, QWidget *parent) :
     QWidget(parent),
     ui(new Ui::StreamWidget),
     stream(),
-     msc(NULL),
-     cc(),
-     service()
+    msc(NULL),
+    cc(),
+    service()
 {
     ui->setupUi(this);
     QStringList headers;
     headers
-        << tr("Stream")
-        << tr("Type")
-        << tr("bit/s");
+            << tr("Stream")
+            << tr("Type")
+            << tr("bit/s");
     ui->treeWidget->setHeaderLabels(headers);
     QStringList l;
-    l.clear(); l << "FAC" << tr("Fast Access Channel") << "160";
+    l.clear();
+    l << "FAC" << tr("Fast Access Channel") << "160";
     ui->treeWidget->addTopLevelItem(new QTreeWidgetItem(l));
-    l.clear(); l << "SDC" << tr("Service Description Channel") << "?";
+    l.clear();
+    l << "SDC" << tr("Service Description Channel") << "?";
     ui->treeWidget->addTopLevelItem(new QTreeWidgetItem(l));
-    l.clear(); l << "MSC" << tr("Main Service Channel") << "?";
+    l.clear();
+    l << "MSC" << tr("Main Service Channel") << "?";
     ui->treeWidget->addTopLevelItem(msc = new QTreeWidgetItem(l));
     connect(rc, SIGNAL(serviceChanged(int,CService)), this, SLOT(setService(int, CService)));
     connect(rc, SIGNAL(channelConfigurationChanged(ChannelConfiguration)), this, SLOT(setChannel(ChannelConfiguration)));

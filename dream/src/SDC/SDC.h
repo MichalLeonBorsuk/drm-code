@@ -3,15 +3,15 @@
  * Copyright (c) 2001-2014
  *
  * Author(s):
- *	Volker Fischer, Andrew Murphy, David Flamand
+ *  Volker Fischer, Andrew Murphy, David Flamand
  *
  * Description:
- *	See SDC.cpp
+ *  See SDC.cpp
  *
  * 11/30/2001-2014 David Flamand, added transmit data entity type 8
  *
  * 11/21/2005 Andrew Murphy, BBC Research & Development, 2005
- *	- AMSS data entity groups (no AFS index), added eSDCType, data type 11
+ *  - AMSS data entity groups (no AFS index), added eSDCType, data type 11
  *
  ******************************************************************************
  *
@@ -42,7 +42,7 @@
 
 /* Definitions ****************************************************************/
 /* Number of bits of header of SDC block */
-#define NUM_BITS_HEADER_SDC			12
+#define NUM_BITS_HEADER_SDC         12
 
 
 /* Classes ********************************************************************/
@@ -121,8 +121,8 @@ protected:
     _BOOLEAN DataEntityType12(CVector<_BINARY>* pbiData, const int iLengthOfBody,
                               CParameter& Parameter);
 
-    CCRC		CRCObject;
-    ESDCType	eSDCType;
+    CCRC        CRCObject;
+    ESDCType    eSDCType;
 };
 
 

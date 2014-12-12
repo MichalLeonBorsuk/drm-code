@@ -3,10 +3,10 @@
  * Copyright (c) 2001-2014
  *
  * Author(s):
- *	Volker Fischer, Ollie Haffenden
+ *  Volker Fischer, Ollie Haffenden
  *
  * Description:
- *	Audio source encoder/decoder
+ *  Audio source encoder/decoder
  *
  ******************************************************************************
  *
@@ -253,7 +253,7 @@ CAudioSourceEncoderImplementation::InitInternalTx(CParameter & Parameters,
 {
     int iCurStreamID;
 
-    int iCurSelServ = 0;		// TEST
+    int iCurSelServ = 0;        // TEST
 
     Parameters.Lock();
 
@@ -313,7 +313,7 @@ CAudioSourceEncoderImplementation::InitInternalTx(CParameter & Parameters,
 
             /* Set encoder sample rate. This parameter decides other parameters */
             // TEST make threshold decision TODO: improvement
-            if (iTotAudFraSizeBits > 7000)	/* in bits! */
+            if (iTotAudFraSizeBits > 7000)  /* in bits! */
                 lEncSamprate = 24000;
             else
                 lEncSamprate = 12000;
@@ -321,15 +321,15 @@ CAudioSourceEncoderImplementation::InitInternalTx(CParameter & Parameters,
             switch (lEncSamprate)
             {
             case 12000:
-                iTimeEachAudBloMS = 80;	/* ms */
+                iTimeEachAudBloMS = 80; /* ms */
                 iNumAudioFrames = 5;
-                Parameters.Service[iCurSelServ].AudioParam.eAudioSamplRate = CAudioParam::AS_12KHZ;	/* Set parameter in global struct */
+                Parameters.Service[iCurSelServ].AudioParam.eAudioSamplRate = CAudioParam::AS_12KHZ; /* Set parameter in global struct */
                 break;
 
             case 24000:
-                iTimeEachAudBloMS = 40;	/* ms */
+                iTimeEachAudBloMS = 40; /* ms */
                 iNumAudioFrames = 10;
-                Parameters.Service[iCurSelServ].AudioParam.eAudioSamplRate = CAudioParam::AS_24KHZ;	/* Set parameter in global struct */
+                Parameters.Service[iCurSelServ].AudioParam.eAudioSamplRate = CAudioParam::AS_24KHZ; /* Set parameter in global struct */
                 break;
             }
 
@@ -364,7 +364,7 @@ CAudioSourceEncoderImplementation::InitInternalTx(CParameter & Parameters,
             lEncSamprate = 48000;
             iNumChannels = 2;
             iNumAudioFrames = 20;
-            Parameters.Service[iCurSelServ].AudioParam.eAudioSamplRate = CAudioParam::AS_48KHZ;	/* Set parameter in global struct */
+            Parameters.Service[iCurSelServ].AudioParam.eAudioSamplRate = CAudioParam::AS_48KHZ; /* Set parameter in global struct */
 
             /* Number of borders, opus decoder need to know the exact frame size,
                thus the number of borders equal the number of audio frames */
@@ -423,8 +423,8 @@ CAudioSourceEncoderImplementation::InitInternalTx(CParameter & Parameters,
 
             /* Init resample objects */
             ResampleObj[i].Init(iNumInSamplesMono,
-                (_REAL) lEncSamprate / (_REAL) Parameters.GetAudSampleRate() *
-                (_REAL) lNumSampEncIn / (_REAL) AUD_DEC_TRANSFROM_LENGTH);
+                                (_REAL) lEncSamprate / (_REAL) Parameters.GetAudSampleRate() *
+                                (_REAL) lNumSampEncIn / (_REAL) AUD_DEC_TRANSFROM_LENGTH);
         }
 
         /* Calculate number of bytes for higher protected blocks */
@@ -504,7 +504,7 @@ CAudioSourceEncoderImplementation::InitInternalRx(CParameter& Parameters,
 
         /* Set encoder sample rate. This parameter decides other parameters */
         // TEST make threshold decision TODO: improvement
-        if (iTotAudFraSizeBits > 7000)	/* in bits! */
+        if (iTotAudFraSizeBits > 7000)  /* in bits! */
             lEncSamprate = 24000;
         else
             lEncSamprate = 12000;
@@ -512,15 +512,15 @@ CAudioSourceEncoderImplementation::InitInternalRx(CParameter& Parameters,
         switch (lEncSamprate)
         {
         case 12000:
-            iTimeEachAudBloMS = 80;	/* ms */
+            iTimeEachAudBloMS = 80; /* ms */
             iNumAudioFrames = 5;
-            Parameters.Service[0].AudioParam.eAudioSamplRate = CAudioParam::AS_12KHZ;	/* Set parameter in global struct */
+            Parameters.Service[0].AudioParam.eAudioSamplRate = CAudioParam::AS_12KHZ;   /* Set parameter in global struct */
             break;
 
         case 24000:
-            iTimeEachAudBloMS = 40;	/* ms */
+            iTimeEachAudBloMS = 40; /* ms */
             iNumAudioFrames = 10;
-            Parameters.Service[0].AudioParam.eAudioSamplRate = CAudioParam::AS_24KHZ;	/* Set parameter in global struct */
+            Parameters.Service[0].AudioParam.eAudioSamplRate = CAudioParam::AS_24KHZ;   /* Set parameter in global struct */
             break;
         }
 
@@ -555,7 +555,7 @@ CAudioSourceEncoderImplementation::InitInternalRx(CParameter& Parameters,
         lEncSamprate = 48000;
         iNumChannels = 2;
         iNumAudioFrames = 20;
-        Parameters.Service[0].AudioParam.eAudioSamplRate = CAudioParam::AS_48KHZ;	/* Set parameter in global struct */
+        Parameters.Service[0].AudioParam.eAudioSamplRate = CAudioParam::AS_48KHZ;   /* Set parameter in global struct */
 
         /* Number of borders, opus decoder need to know the exact frame size,
            thus the number of borders equal the number of audio frames */
@@ -613,8 +613,8 @@ CAudioSourceEncoderImplementation::InitInternalRx(CParameter& Parameters,
 
         /* Init resample objects */
         ResampleObj[i].Init(iNumInSamplesMono,
-            (_REAL) lEncSamprate / (_REAL) Parameters.GetAudSampleRate() *
-            (_REAL) lNumSampEncIn / (_REAL) AUD_DEC_TRANSFROM_LENGTH);
+                            (_REAL) lEncSamprate / (_REAL) Parameters.GetAudSampleRate() *
+                            (_REAL) lNumSampEncIn / (_REAL) AUD_DEC_TRANSFROM_LENGTH);
     }
 
     /* Calculate number of bytes for higher protected blocks */

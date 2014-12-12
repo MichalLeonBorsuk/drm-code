@@ -3,7 +3,7 @@
  * Copyright (c) 2001-2014
  *
  * Author(s):
- *	Volker Fischer, Andrea Russo
+ *  Volker Fischer, Andrea Russo
  *
  * Description:
  *
@@ -39,39 +39,59 @@
 
 class CRig : public QObject
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
-	static void SetFrequencyCallback(void* sfCallbackParam, int iNewFreqkHz);
-	CRig(CSettings* pSettings, CParameter* pParameters);
-	~CRig();
-	void SetFrequency(int);
+    static void SetFrequencyCallback(void* sfCallbackParam, int iNewFreqkHz);
+    CRig(CSettings* pSettings, CParameter* pParameters);
+    ~CRig();
+    void SetFrequency(int);
 #ifdef HAVE_LIBHAMLIB
-	void GetRigList(map<rig_model_t,CHamlib::SDrRigCaps>& r) { Hamlib.GetRigList(r); }
-	rig_model_t GetHamlibModelID() { return Hamlib.GetHamlibModelID(); }
-	void SetHamlibModelID(rig_model_t r) { Hamlib.SetHamlibModelID(r); }
-	void SetEnableModRigSettings(_BOOLEAN b) { Hamlib.SetEnableModRigSettings(b); }
-	void GetPortList(map<string,string>& ports) { Hamlib.GetPortList(ports); }
-	string GetComPort() { return Hamlib.GetComPort(); }
-	void SetComPort(const string& s) { Hamlib.SetComPort(s); }
-	_BOOLEAN GetEnableModRigSettings() { return Hamlib.GetEnableModRigSettings(); }
-	CHamlib::ESMeterState GetSMeter(_REAL& r) { return Hamlib.GetSMeter(r); }
-	CHamlib* GetRig() { return &Hamlib; }
+    void GetRigList(map<rig_model_t,CHamlib::SDrRigCaps>& r) {
+        Hamlib.GetRigList(r);
+    }
+    rig_model_t GetHamlibModelID() {
+        return Hamlib.GetHamlibModelID();
+    }
+    void SetHamlibModelID(rig_model_t r) {
+        Hamlib.SetHamlibModelID(r);
+    }
+    void SetEnableModRigSettings(_BOOLEAN b) {
+        Hamlib.SetEnableModRigSettings(b);
+    }
+    void GetPortList(map<string,string>& ports) {
+        Hamlib.GetPortList(ports);
+    }
+    string GetComPort() {
+        return Hamlib.GetComPort();
+    }
+    void SetComPort(const string& s) {
+        Hamlib.SetComPort(s);
+    }
+    _BOOLEAN GetEnableModRigSettings() {
+        return Hamlib.GetEnableModRigSettings();
+    }
+    CHamlib::ESMeterState GetSMeter(_REAL& r) {
+        return Hamlib.GetSMeter(r);
+    }
+    CHamlib* GetRig() {
+        return &Hamlib;
+    }
 
 protected:
-	CHamlib Hamlib;
-	QTimer timer;
+    CHamlib Hamlib;
+    QTimer timer;
 #endif
 protected:
-	CSettings* pSettings;
-	CParameter* pParameters;
-	int subscribers;
+    CSettings* pSettings;
+    CParameter* pParameters;
+    int subscribers;
 
 signals:
     void sigstr(double);
 public slots:
-	void subscribe();
-	void unsubscribe();
-	void onTimer();
+    void subscribe();
+    void unsubscribe();
+    void onTimer();
 };
 
 #endif

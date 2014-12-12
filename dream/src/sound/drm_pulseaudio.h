@@ -3,7 +3,7 @@
  * Copyright (c) 2001-2014-2001-2014
  *
  * Author(s):
- *	David Flamand
+ *  David Flamand
  *
  * Decription:
  *  PulseAudio sound interface with clock drift adjustment (optional)
@@ -52,21 +52,21 @@
 class CSoundOutPulse;
 typedef struct pa_stream_notify_cb_userdata_t
 {
-	CSoundOutPulse*		SoundOutPulse;
-	_BOOLEAN			bOverflow;
+    CSoundOutPulse*     SoundOutPulse;
+    _BOOLEAN            bOverflow;
 } pa_stream_notify_cb_userdata_t;
 
 typedef struct pa_common
 {
-	_BOOLEAN		bClockDriftComp;
-	int				sample_rate_offset;
+    _BOOLEAN        bClockDriftComp;
+    int             sample_rate_offset;
 } pa_common;
 
 typedef struct pa_object
 {
-	pa_mainloop		*pa_m;
-	pa_context		*pa_c;
-	int				ref_count;
+    pa_mainloop     *pa_m;
+    pa_context      *pa_c;
+    int             ref_count;
 } pa_object;
 
 
@@ -75,111 +75,131 @@ typedef struct pa_object
 class CSoundPulse
 {
 public:
-	CSoundPulse(_BOOLEAN bPlayback);
-	virtual ~CSoundPulse() {}
-	void			Enumerate(vector<string>& names, vector<string>& descriptions);
-	void			SetDev(string sNewDevice);
-	string			GetDev();
+    CSoundPulse(_BOOLEAN bPlayback);
+    virtual ~CSoundPulse() {}
+    void            Enumerate(vector<string>& names, vector<string>& descriptions);
+    void            SetDev(string sNewDevice);
+    string          GetDev();
 protected:
-	_BOOLEAN		IsDefaultDevice();
-	_BOOLEAN		bPlayback;
-	_BOOLEAN		bChangDev;
-	string			sCurrentDevice;
+    _BOOLEAN        IsDefaultDevice();
+    _BOOLEAN        bPlayback;
+    _BOOLEAN        bChangDev;
+    string          sCurrentDevice;
 #ifdef ENABLE_STDIN_STDOUT
-	_BOOLEAN		IsStdinStdout();
-	_BOOLEAN		bStdinStdout;
-	_BOOLEAN		bMono;
+    _BOOLEAN        IsStdinStdout();
+    _BOOLEAN        bStdinStdout;
+    _BOOLEAN        bMono;
 #endif
 };
 
 class CSoundInPulse : public CSoundPulse, public CSoundInInterface
 {
 public:
-	CSoundInPulse();
-	virtual ~CSoundInPulse() {}
-	void			Enumerate(vector<string>& names, vector<string>& descriptions) {CSoundPulse::Enumerate(names, descriptions);};
-	string			GetDev() {return CSoundPulse::GetDev();};
-	void			SetDev(string sNewDevice) {CSoundPulse::SetDev(sNewDevice);};
+    CSoundInPulse();
+    virtual ~CSoundInPulse() {}
+    void            Enumerate(vector<string>& names, vector<string>& descriptions) {
+        CSoundPulse::Enumerate(names, descriptions);
+    };
+    string          GetDev() {
+        return CSoundPulse::GetDev();
+    };
+    void            SetDev(string sNewDevice) {
+        CSoundPulse::SetDev(sNewDevice);
+    };
 
-	_BOOLEAN		Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking);
-	_BOOLEAN		Read(CVector<_SAMPLE>& psData);
-	void			Close();
+    _BOOLEAN        Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking);
+    _BOOLEAN        Read(CVector<_SAMPLE>& psData);
+    void            Close();
 #ifdef CLOCK_DRIFT_ADJ_ENABLED
-	void			SetCommonParamPtr(pa_common *cp_ptr) { cp = cp_ptr; }
+    void            SetCommonParamPtr(pa_common *cp_ptr) {
+        cp = cp_ptr;
+    }
 #endif
 
 protected:
-	void			Init_HW();
-	int				Read_HW(void *recbuf, int size);
-	void			Close_HW();
-	void			SetBufferSize_HW();
+    void            Init_HW();
+    int             Read_HW(void *recbuf, int size);
+    void            Close_HW();
+    void            SetBufferSize_HW();
 
-	int				iSampleRate;
-	int				iBufferSize;
-	long			lTimeToWait;
-	_BOOLEAN		bBlockingRec;
+    int             iSampleRate;
+    int             iBufferSize;
+    long            lTimeToWait;
+    _BOOLEAN        bBlockingRec;
 
-	_BOOLEAN		bBufferingError;
+    _BOOLEAN        bBufferingError;
 
-	pa_stream		*pa_s;
-	size_t			remaining_nbytes;
-	const char		*remaining_data;
+    pa_stream       *pa_s;
+    size_t          remaining_nbytes;
+    const char      *remaining_data;
 
 #ifdef CLOCK_DRIFT_ADJ_ENABLED
-	int				record_sample_rate;
-	_BOOLEAN		bClockDriftComp;
-	pa_common		*cp;
+    int             record_sample_rate;
+    _BOOLEAN        bClockDriftComp;
+    pa_common       *cp;
 #endif
 };
 
 class CSoundOutPulse : public CSoundPulse, public CSoundOutInterface
 {
 public:
-	CSoundOutPulse();
-	virtual ~CSoundOutPulse() {}
-	void			Enumerate(vector<string>& names, vector<string>& descriptions) {CSoundPulse::Enumerate(names, descriptions);};
-	string			GetDev() {return CSoundPulse::GetDev();};
-	void			SetDev(string sNewDevice) {CSoundPulse::SetDev(sNewDevice);};
+    CSoundOutPulse();
+    virtual ~CSoundOutPulse() {}
+    void            Enumerate(vector<string>& names, vector<string>& descriptions) {
+        CSoundPulse::Enumerate(names, descriptions);
+    };
+    string          GetDev() {
+        return CSoundPulse::GetDev();
+    };
+    void            SetDev(string sNewDevice) {
+        CSoundPulse::SetDev(sNewDevice);
+    };
 
-	_BOOLEAN		Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking);
-	_BOOLEAN		Write(CVector<_SAMPLE>& psData);
-	void			Close();
+    _BOOLEAN        Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking);
+    _BOOLEAN        Write(CVector<_SAMPLE>& psData);
+    void            Close();
 #ifdef CLOCK_DRIFT_ADJ_ENABLED
-	pa_common *		GetCommonParamPtr() { return &cp; }
-	void			EnableClockDriftAdj(_BOOLEAN bEnable) { bNewClockDriftComp = bEnable; }
-	_BOOLEAN		IsClockDriftAdjEnabled() { return bNewClockDriftComp; }
+    pa_common *     GetCommonParamPtr() {
+        return &cp;
+    }
+    void            EnableClockDriftAdj(_BOOLEAN bEnable) {
+        bNewClockDriftComp = bEnable;
+    }
+    _BOOLEAN        IsClockDriftAdjEnabled() {
+        return bNewClockDriftComp;
+    }
 #endif
 
-	_BOOLEAN		bPrebuffer;
-	_BOOLEAN		bSeek;
-	_BOOLEAN		bBufferingError;
-	_BOOLEAN		bMuteError;
+    _BOOLEAN        bPrebuffer;
+    _BOOLEAN        bSeek;
+    _BOOLEAN        bBufferingError;
+    _BOOLEAN        bMuteError;
 
 protected:
-	void			Init_HW();
-	int				Write_HW(void *playbuf, int size);
-	void			Close_HW();
+    void            Init_HW();
+    int             Write_HW(void *playbuf, int size);
+    void            Close_HW();
 
-	int				iSampleRate;
-	int				iBufferSize;
-	long			lTimeToWait;
-	_BOOLEAN		bBlockingPlay;
+    int             iSampleRate;
+    int             iBufferSize;
+    long            lTimeToWait;
+    _BOOLEAN        bBlockingPlay;
 
-	pa_stream		*pa_s;
-	pa_stream_notify_cb_userdata_t pa_stream_notify_cb_userdata_underflow;
-	pa_stream_notify_cb_userdata_t pa_stream_notify_cb_userdata_overflow;
+    pa_stream       *pa_s;
+    pa_stream_notify_cb_userdata_t pa_stream_notify_cb_userdata_underflow;
+    pa_stream_notify_cb_userdata_t pa_stream_notify_cb_userdata_overflow;
 
 #ifdef CLOCK_DRIFT_ADJ_ENABLED
-	int				iMaxSampleRateOffset;
-	CReal			playback_usec_smoothed;
-	int				target_latency;
-	int				filter_stabilized;
-	int				wait_prebuffer;
-	CMatlibVector<CReal> B, A, X, Z;
-	_BOOLEAN		bNewClockDriftComp;
-	pa_common		cp;
-	int				playback_usec; // DEBUG
-	int				clock; // DEBUG
+    int             iMaxSampleRateOffset;
+    CReal           playback_usec_smoothed;
+    int             target_latency;
+    int             filter_stabilized;
+    int             wait_prebuffer;
+    CMatlibVector<CReal> B, A, X, Z;
+    _BOOLEAN        bNewClockDriftComp;
+    pa_common       cp;
+    int             playback_usec; // DEBUG
+    int             clock; // DEBUG
 #endif
 };
 

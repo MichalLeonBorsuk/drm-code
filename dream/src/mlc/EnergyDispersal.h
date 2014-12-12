@@ -3,7 +3,7 @@
  * Copyright (c) 2001-2014
  *
  * Author(s):
- *	Volker Fischer
+ *  Volker Fischer
  *
  * Description:
  *
@@ -44,11 +44,11 @@ public:
     void Init(int iNewNumInBits, int iNewLengthVSPP);
 
 protected:
-    int			iNumInBits;
-    int			iStartIndVSPP;
-    int			iEndIndVSPP;
-    uint32_t	iShiftRegisterSPP;
-    uint32_t	iShiftRegisterVSPP;
+    int         iNumInBits;
+    int         iStartIndVSPP;
+    int         iEndIndVSPP;
+    uint32_t    iShiftRegisterSPP;
+    uint32_t    iShiftRegisterVSPP;
 };
 
 

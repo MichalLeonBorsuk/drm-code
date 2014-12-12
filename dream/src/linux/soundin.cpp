@@ -3,7 +3,7 @@
 * Copyright (c) 2001-2014
 *
 * Author(s):
-*	Alexander Kurpiers
+*   Alexander Kurpiers
 *
 *
 ******************************************************************************
@@ -372,7 +372,7 @@ CSoundIn::CRecThread::run()
 
             // common code
             if (size > 0) {
-                CVectorEx<_SAMPLE>*	ptarget;
+                CVectorEx<_SAMPLE>* ptarget;
 
                 /* Copy data from temporary buffer in output buffer */
                 SoundBuf.lock();
@@ -427,7 +427,7 @@ void CSoundIn::Init(int iNewBufferSize, _BOOLEAN bNewBlocking)
 
 _BOOLEAN CSoundIn::Read(CVector< _SAMPLE >& psData)
 {
-    CVectorEx<_SAMPLE>*	p;
+    CVectorEx<_SAMPLE>* p;
 
     /* Check if device must be opened or reinitialized */
     if (bChangDev == TRUE)
@@ -439,7 +439,7 @@ _BOOLEAN CSoundIn::Read(CVector< _SAMPLE >& psData)
         bChangDev = FALSE;
     }
 
-    RecThread.SoundBuf.lock();	// we need exclusive access
+    RecThread.SoundBuf.lock();  // we need exclusive access
 
     if (iCurrentDevice == -1)
         iCurrentDevice = names.size()-1;

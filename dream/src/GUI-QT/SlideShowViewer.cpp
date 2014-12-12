@@ -3,7 +3,7 @@
  * Copyright (c) 2001-2014
  *
  * Author(s):
- *	 Julian Cable, David Flamand
+ *   Julian Cable, David Flamand
  *
  * Description: SlideShow Viewer
  *
@@ -41,7 +41,7 @@ SlideShowViewer::SlideShowViewer(CSettings& Settings, QWidget* parent):
     setupUi(this);
 
     string p = Settings.Get(
-                "Receiver", "datafilesdirectory", string(DEFAULT_DATA_FILES_DIRECTORY));
+                   "Receiver", "datafilesdirectory", string(DEFAULT_DATA_FILES_DIRECTORY));
 
     strCurrentSavePath = QString::fromUtf8((p+PATH_SEPARATOR+"MOT").c_str());
 
@@ -77,7 +77,7 @@ void SlideShowViewer::OnTimer()
     if (bClearMOTCache)
     {
         bClearMOTCache = false;
-        CMOTObject	NewObj;
+        CMOTObject  NewObj;
         while (decoder->GetMOTObject(NewObj, CDataDecoder::AT_MOTSLIDESHOW))
         {
         }
@@ -137,7 +137,7 @@ void SlideShowViewer::OnSave()
 
     QString strFilename = strCurrentSavePath + VerifyFilename(vecImageNames[iCurImagePos]);
     strFilename = QFileDialog::getSaveFileName(this,
-        tr("Save File"), strFilename, tr("Images (*.png *.jpg)"));
+                  tr("Save File"), strFilename, tr("Images (*.png *.jpg)"));
 
     /* Check if user not hit the cancel button */
     if (!strFilename.isEmpty())
@@ -154,7 +154,7 @@ void SlideShowViewer::OnSaveAll()
     CreateDirectories(strCurrentSavePath);
 
     QString strDirectory = QFileDialog::getExistingDirectory(this,
-        tr("Open Directory"), strCurrentSavePath);
+                           tr("Open Directory"), strCurrentSavePath);
 
     /* Check if user not hit the cancel button */
     if (!strDirectory.isEmpty())

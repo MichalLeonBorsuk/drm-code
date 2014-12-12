@@ -73,7 +73,7 @@ void DRMDetail::setSNR(double rSNR)
     {
         /* SNR */
         ui->ValueSNR->setText("<b>" +
-                          QString().setNum(rSNR, 'f', 1) + " dB</b>");
+                              QString().setNum(rSNR, 'f', 1) + " dB</b>");
     }
     else
     {
@@ -86,8 +86,8 @@ void DRMDetail::setMER(double rMER, double rWMERMSC)
     if (rMER >= 0.0 )
     {
         ui->ValueMERWMER->setText(QString().
-                              setNum(rWMERMSC, 'f', 1) + " dB / "
-                              + QString().setNum(rMER, 'f', 1) + " dB");
+                                  setNum(rWMERMSC, 'f', 1) + " dB / "
+                                  + QString().setNum(rMER, 'f', 1) + " dB");
     }
     else
     {
@@ -102,16 +102,16 @@ void DRMDetail::setDelay_Doppler(double rSigmaEstimate, double rMinDelay)
     {
         /* Plot delay and Doppler values */
         ui->ValueWiener->setText(
-                    QString("%1 Hz / %2 ms")
-                    .arg(rSigmaEstimate, 0, 'f', 2)
-                    .arg(rMinDelay, 0, 'f', 2)
+            QString("%1 Hz / %2 ms")
+            .arg(rSigmaEstimate, 0, 'f', 2)
+            .arg(rMinDelay, 0, 'f', 2)
         );
     }
     else
     {
         /* Plot only delay, Doppler not available */
         ui->ValueWiener->setText("--- / "
-                             + QString().setNum(rMinDelay, 'f', 2) + " ms");
+                                 + QString().setNum(rMinDelay, 'f', 2) + " ms");
     }
 }
 
@@ -119,10 +119,10 @@ void DRMDetail::setSampleFrequencyOffset(double rCurSamROffs, double rSampleRate
 {
     /* Display value in [Hz] and [ppm] (parts per million) */
     ui->ValueSampFreqOffset->setText(
-                QString("%1 Hz (%2 ppm)")
-                    .arg(rCurSamROffs, 0, 'f', 2)
-                    .arg((int) (rCurSamROffs / rSampleRate * 1e6))
-                );
+        QString("%1 Hz (%2 ppm)")
+        .arg(rCurSamROffs, 0, 'f', 2)
+        .arg((int) (rCurSamROffs / rSampleRate * 1e6))
+    );
 }
 
 void DRMDetail::setFrequencyOffset(double rOffset)
@@ -213,7 +213,7 @@ void DRMDetail::setCodeRate(int iPartB, int iPartA)
         ui->FACCodeRateV->setText(QString("%1 / %2").arg(iPartB).arg(iPartA));
 }
 
-QString	DRMDetail::GetRobModeStr(ERobMode e)
+QString DRMDetail::GetRobModeStr(ERobMode e)
 {
     switch (e)
     {
@@ -242,7 +242,7 @@ QString	DRMDetail::GetRobModeStr(ERobMode e)
     }
 }
 
-QString	DRMDetail::GetSpecOccStr(ESpecOcc e)
+QString DRMDetail::GetSpecOccStr(ESpecOcc e)
 {
     switch (e)
     {

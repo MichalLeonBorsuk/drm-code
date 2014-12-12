@@ -10,7 +10,9 @@ public:
     QCPLevelMeter(QWidget* parent=0);
 public slots:
     void setLevel(double d);
-    QWidget* widget() { return this; }
+    QWidget* widget() {
+        return this;
+    }
 };
 
 #endif // QCPLEVELMETER_H

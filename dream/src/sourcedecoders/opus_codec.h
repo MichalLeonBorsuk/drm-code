@@ -50,91 +50,91 @@
  */
 
 bool opus_init(
-	void
-	);
+    void
+);
 
 const char *opusGetVersion(
-	void
-	);
+    void
+);
 
 void opusSetupParam(
-	CAudioParam &AudioParam,
-	int toc
-	);
+    CAudioParam &AudioParam,
+    int toc
+);
 
 /*************
  *  encoder
  */
 
 typedef struct _opus_encoder {
-	OpusEncoder *oe;
-	int samplerate;
-	int channels;
-	int bitrate;
-	int samples_per_channel;
-	int frames_per_packet;
-	int bytes_per_frame;
-	CCRC *CRCObject;
+    OpusEncoder *oe;
+    int samplerate;
+    int channels;
+    int bitrate;
+    int samples_per_channel;
+    int frames_per_packet;
+    int bytes_per_frame;
+    CCRC *CRCObject;
 } opus_encoder;
 
 opus_encoder *opusEncOpen(
-	unsigned long sampleRate,
-	unsigned int numChannels,
-	unsigned int bytes_per_frame,
-	unsigned long *inputSamples,
-	unsigned long *maxOutputBytes
-	);
+    unsigned long sampleRate,
+    unsigned int numChannels,
+    unsigned int bytes_per_frame,
+    unsigned long *inputSamples,
+    unsigned long *maxOutputBytes
+);
 
 int opusEncEncode(opus_encoder *enc,
-	int32_t *inputBuffer,
-	unsigned int samplesInput,
-	unsigned char *outputBuffer,
-	unsigned int bufferSize
-	);
+                  int32_t *inputBuffer,
+                  unsigned int samplesInput,
+                  unsigned char *outputBuffer,
+                  unsigned int bufferSize
+                 );
 
 int opusEncClose(
-	opus_encoder *enc
-	);
+    opus_encoder *enc
+);
 
 void opusEncSetParam(opus_encoder *enc,
-	CAudioParam& AudioParam
-	);
+                     CAudioParam& AudioParam
+                    );
 
 /*************
  *  decoder
  */
 
 typedef struct _opus_decoder {
-	OpusDecoder *od;
-	int samplerate;
-	int channels;
-	int changed;
-	int last_good_toc;
-	CCRC *CRCObject;
-	opus_int16 out_pcm[OPUS_MAX_PCM_FRAME * 2]; // 2 = stereo
+    OpusDecoder *od;
+    int samplerate;
+    int channels;
+    int changed;
+    int last_good_toc;
+    CCRC *CRCObject;
+    opus_int16 out_pcm[OPUS_MAX_PCM_FRAME * 2]; // 2 = stereo
 } opus_decoder;
 
 opus_decoder *opusDecOpen(
-	void
-	);
+    void
+);
 
 void opusDecClose(
-	opus_decoder *dec
-	);
+    opus_decoder *dec
+);
 
 int opusDecInit(
-	opus_decoder *dec,
-	unsigned long samplerate,
-	unsigned char channels
-	);
+    opus_decoder *dec,
+    unsigned long samplerate,
+    unsigned char channels
+);
 
 void *opusDecDecode(
-	opus_decoder *dec,
-	unsigned char *error,
-	unsigned char *channels,
-	unsigned char *buffer,
-	unsigned long buffer_size
-	);
+    opus_decoder *dec,
+    unsigned char *error,
+    unsigned char *channels,
+    unsigned char *buffer,
+    unsigned long buffer_size
+);
 
 /*************
  *  class
@@ -143,26 +143,26 @@ void *opusDecDecode(
 class OpusCodec : public CAudioCodec
 {
 public:
-	OpusCodec();
-	virtual ~OpusCodec();
-	/* Decoder */
-	virtual string DecGetVersion();
-	virtual bool CanDecode(CAudioParam::EAudCod eAudioCoding);
-	virtual bool DecOpen(CAudioParam& AudioParam, int *iAudioSampleRate, int *iLenDecOutPerChan);
-	virtual _SAMPLE* Decode(CVector<uint8_t>& vecbyPrepAudioFrame, int *iChannels, CAudioCodec::EDecError *eDecError);
-	virtual void DecClose();
-	virtual void DecUpdate(CAudioParam& AudioParam);
-	/* Encoder */
-	virtual string EncGetVersion();
-	virtual bool CanEncode(CAudioParam::EAudCod eAudioCoding);
-	virtual bool EncOpen(int iSampleRate, int iChannels, unsigned long *lNumSampEncIn, unsigned long *lMaxBytesEncOut);
-	virtual int Encode(CVector<_SAMPLE>& vecsEncInData, unsigned long lNumSampEncIn, CVector<uint8_t>& vecsEncOutData, unsigned long lMaxBytesEncOut);
-	virtual void EncClose();
-	virtual void EncSetBitrate(int iBitRate);
-	virtual void EncUpdate(CAudioParam& AudioParam);
+    OpusCodec();
+    virtual ~OpusCodec();
+    /* Decoder */
+    virtual string DecGetVersion();
+    virtual bool CanDecode(CAudioParam::EAudCod eAudioCoding);
+    virtual bool DecOpen(CAudioParam& AudioParam, int *iAudioSampleRate, int *iLenDecOutPerChan);
+    virtual _SAMPLE* Decode(CVector<uint8_t>& vecbyPrepAudioFrame, int *iChannels, CAudioCodec::EDecError *eDecError);
+    virtual void DecClose();
+    virtual void DecUpdate(CAudioParam& AudioParam);
+    /* Encoder */
+    virtual string EncGetVersion();
+    virtual bool CanEncode(CAudioParam::EAudCod eAudioCoding);
+    virtual bool EncOpen(int iSampleRate, int iChannels, unsigned long *lNumSampEncIn, unsigned long *lMaxBytesEncOut);
+    virtual int Encode(CVector<_SAMPLE>& vecsEncInData, unsigned long lNumSampEncIn, CVector<uint8_t>& vecsEncOutData, unsigned long lMaxBytesEncOut);
+    virtual void EncClose();
+    virtual void EncSetBitrate(int iBitRate);
+    virtual void EncUpdate(CAudioParam& AudioParam);
 protected:
-	opus_decoder *hOpusDecoder;
-	opus_encoder *hOpusEncoder;
+    opus_decoder *hOpusDecoder;
+    opus_encoder *hOpusEncoder;
 };
 
 #endif // _OPUS_CODEC_H_

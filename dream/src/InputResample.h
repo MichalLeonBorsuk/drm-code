@@ -3,10 +3,10 @@
  * Copyright (c) 2001-2014
  *
  * Author(s):
- *	Volker Fischer
+ *  Volker Fischer
  *
  * Description:
- *	See InputResample.cpp
+ *  See InputResample.cpp
  *
  ******************************************************************************
  *
@@ -35,7 +35,7 @@
 
 
 /* Definitions ****************************************************************/
-#define MAX_RESAMPLE_OFFSET			200 /* Hz */
+#define MAX_RESAMPLE_OFFSET         200 /* Hz */
 
 
 /* Classes ********************************************************************/
@@ -51,8 +51,8 @@ public:
     }
 
 protected:
-    CResample	ResampleObj;
-    _BOOLEAN	bSyncInput;
+    CResample   ResampleObj;
+    _BOOLEAN    bSyncInput;
 
     virtual void InitInternal(CParameter& Parameters);
     virtual void ProcessDataInternal(CParameter& Parameters);

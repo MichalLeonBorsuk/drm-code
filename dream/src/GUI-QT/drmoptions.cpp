@@ -58,7 +58,7 @@ DRMOptions::setNumIterations(int iNumIt)
         /* Update slider and label */
         ui->SliderNoOfIterations->setValue(iNumIt);
         ui->TextNumOfIterations->setText(tr("MLC: Number of Iterations: ") +
-                                     QString().setNum(iNumIt));
+                                         QString().setNum(iNumIt));
     }
 }
 
@@ -66,7 +66,7 @@ void DRMOptions::on_SliderNoOfIterations_valueChanged(int value)
 {
     /* Show the new value in the label control */
     ui->TextNumOfIterations->setText(tr("MLC: Number of Iterations: ") +
-                                 QString().setNum(value));
+                                     QString().setNum(value));
 }
 
 void DRMOptions::setTimeInt(CChannelEstimation::ETypeIntTime state)
@@ -143,9 +143,9 @@ void DRMOptions::AddWhatsThisHelp()
 {
     /* Flip Input Spectrum */
     ui->CheckBoxFlipSpec->setWhatsThis(
-                     tr("<b>Flip Input Spectrum:</b> Checking this box "
-                        "will flip or invert the input spectrum. This is necessary if the "
-                        "mixer in the front-end uses the lower side band."));
+        tr("<b>Flip Input Spectrum:</b> Checking this box "
+           "will flip or invert the input spectrum. This is necessary if the "
+           "mixer in the front-end uses the lower side band."));
 
     /* Wiener */
     const QString strWienerChanEst =
@@ -179,31 +179,31 @@ void DRMOptions::AddWhatsThisHelp()
 
     /* DFT Zero Pad */
     ui->RadioButtonFreqDFT->setWhatsThis(
-                     tr("<b>Channel Estimation Settings:</b> With these "
-                        "settings, the channel estimation method in time and frequency "
-                        "direction can be selected. The default values use the most powerful "
-                        "algorithms. For more detailed information about the estimation "
-                        "algorithms there are a lot of papers and books available.<br>"
-                        "<b>DFT Zero Pad:</b> Channel estimation method "
-                        "for the frequency direction using Discrete Fourier Transformation "
-                        "(DFT) to transform the channel estimation at the pilot positions to "
-                        "the time domain. There, a zero padding is applied to get a higher "
-                        "resolution in the frequency domain -> estimates at the data cells. "
-                        "This algorithm is very speed efficient but has problems at the edges "
-                        "of the OFDM spectrum due to the leakage effect."));
+        tr("<b>Channel Estimation Settings:</b> With these "
+           "settings, the channel estimation method in time and frequency "
+           "direction can be selected. The default values use the most powerful "
+           "algorithms. For more detailed information about the estimation "
+           "algorithms there are a lot of papers and books available.<br>"
+           "<b>DFT Zero Pad:</b> Channel estimation method "
+           "for the frequency direction using Discrete Fourier Transformation "
+           "(DFT) to transform the channel estimation at the pilot positions to "
+           "the time domain. There, a zero padding is applied to get a higher "
+           "resolution in the frequency domain -> estimates at the data cells. "
+           "This algorithm is very speed efficient but has problems at the edges "
+           "of the OFDM spectrum due to the leakage effect."));
 
     /* Guard Energy */
     ui->RadioButtonTiSyncEnergy->setWhatsThis(
-                     tr("<b>Guard Energy:</b> Time synchronization "
-                        "tracking algorithm utilizes the estimation of the impulse response. "
-                        "This method tries to maximize the energy in the guard-interval to set "
-                        "the correct timing."));
+        tr("<b>Guard Energy:</b> Time synchronization "
+           "tracking algorithm utilizes the estimation of the impulse response. "
+           "This method tries to maximize the energy in the guard-interval to set "
+           "the correct timing."));
 
     /* First Peak */
     ui->RadioButtonTiSyncFirstPeak->setWhatsThis(
-                     tr("<b>First Peak:</b> This algorithms searches for "
-                        "the first peak in the estimated impulse response and moves this peak "
-                        "to the beginning of the guard-interval (timing tracking algorithm)."));
+        tr("<b>First Peak:</b> This algorithms searches for "
+           "the first peak in the estimated impulse response and moves this peak "
+           "to the beginning of the guard-interval (timing tracking algorithm)."));
 
     /* Interferer Rejection */
     const QString strInterfRej =

@@ -3,10 +3,10 @@
  * Copyright (c) 2001-2014
  *
  * Author(s):
- *	Volker Fischer
+ *  Volker Fischer
  *
  * Description:
- *	See DRMSignalIO.cpp
+ *  See DRMSignalIO.cpp
  *
  ******************************************************************************
  *
@@ -41,13 +41,13 @@
 /* Definitions ****************************************************************/
 /* Number of FFT blocks used for averaging. See next definition
    ("NUM_SMPLS_4_INPUT_SPECTRUM") for how to set the parameters */
-#define NUM_AV_BLOCKS_PSD			16
-#define LEN_PSD_AV_EACH_BLOCK		512
+#define NUM_AV_BLOCKS_PSD           16
+#define LEN_PSD_AV_EACH_BLOCK       512
 
 /* same but for the rpsd tag */
-#define NUM_AV_BLOCKS_PSD_RSI	150
-#define LEN_PSD_AV_EACH_BLOCK_RSI		256
-#define PSD_OVERLAP_RSI	128
+#define NUM_AV_BLOCKS_PSD_RSI   150
+#define LEN_PSD_AV_EACH_BLOCK_RSI       256
+#define PSD_OVERLAP_RSI 128
 
 /* power gain of the Hamming window */
 #define PSD_WINDOW_GAIN 0.39638
@@ -81,9 +81,9 @@ public:
                     };
 
     CTransmitData(CSoundOutInterface* pNS) : pFileTransmitter(NULL), pSound(pNS),
-            eOutputFormat(OF_REAL_VAL), rDefCarOffset((_REAL) VIRTUAL_INTERMED_FREQ_DRM30),
-            strOutFileName("test/TransmittedData.txt"), bUseSoundcard(TRUE),
-            bAmplified(FALSE), bHighQualityIQ(FALSE) {}
+        eOutputFormat(OF_REAL_VAL), rDefCarOffset((_REAL) VIRTUAL_INTERMED_FREQ_DRM30),
+        strOutFileName("test/TransmittedData.txt"), bUseSoundcard(TRUE),
+        bAmplified(FALSE), bHighQualityIQ(FALSE) {}
     virtual ~CTransmitData();
 
     void SetIQOutput(const EOutFormat eFormat) {
@@ -121,26 +121,26 @@ public:
     void FlushData();
 
 protected:
-    FILE*				pFileTransmitter;
-    CSoundOutInterface*	pSound;
-    CVector<short>		vecsDataOut;
-    int					iBlockCnt;
-    int					iNumBlocks;
-    EOutFormat			eOutputFormat;
+    FILE*               pFileTransmitter;
+    CSoundOutInterface* pSound;
+    CVector<short>      vecsDataOut;
+    int                 iBlockCnt;
+    int                 iNumBlocks;
+    EOutFormat          eOutputFormat;
 
-    CDRMBandpassFilt	BPFilter;
-    CReal				rDefCarOffset;
+    CDRMBandpassFilt    BPFilter;
+    CReal               rDefCarOffset;
 
-    CReal				rNormFactor;
+    CReal               rNormFactor;
 
-    int					iBigBlockSize;
+    int                 iBigBlockSize;
 
-    string				strOutFileName;
-    _BOOLEAN			bUseSoundcard;
+    string              strOutFileName;
+    _BOOLEAN            bUseSoundcard;
 
-    _BOOLEAN			bAmplified;
-    _BOOLEAN			bHighQualityIQ;
-    CVector<_REAL>		vecrReHist;
+    _BOOLEAN            bAmplified;
+    _BOOLEAN            bHighQualityIQ;
+    CVector<_REAL>      vecrReHist;
 
     void HilbertFilt(_COMPLEX& vecData);
 
@@ -193,35 +193,35 @@ public:
     }
 
 protected:
-    CSignalLevelMeter		SignalLevelMeter;
+    CSignalLevelMeter       SignalLevelMeter;
 
-    CSoundInInterface*		pSound;
-    CVector<_SAMPLE>		vecsSoundBuffer;
+    CSoundInInterface*      pSound;
+    CVector<_SAMPLE>        vecsSoundBuffer;
 
-    /* Access to vecrInpData buffer must be done 
+    /* Access to vecrInpData buffer must be done
        inside mutexInpData mutex */
-    CShiftRegister<_REAL>	vecrInpData;
+    CShiftRegister<_REAL>   vecrInpData;
     CMutex                  mutexInpData;
 
-    int					iSampleRate;
-    _BOOLEAN			bFippedSpectrum;
+    int                 iSampleRate;
+    _BOOLEAN            bFippedSpectrum;
 
-    int					iUpscaleRatio;
-    vector<float>		vecf_B, vecf_YL, vecf_YR, vecf_ZL, vecf_ZR;
+    int                 iUpscaleRatio;
+    vector<float>       vecf_B, vecf_YL, vecf_YR, vecf_ZL, vecf_ZR;
 
-    EInChanSel			eInChanSelection;
+    EInChanSel          eInChanSelection;
 
-    CVector<_REAL>		vecrReHist;
-    CVector<_REAL>		vecrImHist;
-    _COMPLEX			cCurExp;
-    _COMPLEX			cExpStep;
-    int					iPhase;
+    CVector<_REAL>      vecrReHist;
+    CVector<_REAL>      vecrImHist;
+    _COMPLEX            cCurExp;
+    _COMPLEX            cExpStep;
+    int                 iPhase;
 
     _REAL HilbertFilt(const _REAL rRe, const _REAL rIm);
 
     /* OPH: counter to count symbols within a frame in order to generate */
     /* RSCI output */
-    unsigned int				iFreeSymbolCounter;
+    unsigned int                iFreeSymbolCounter;
     double                      vif;
 
     virtual void InitInternal(CParameter& Parameters);

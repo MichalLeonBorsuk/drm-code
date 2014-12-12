@@ -3,10 +3,10 @@
 * Copyright (c) 2001-2014
 *
 * Author(s):
-*	Julian Cable
+*   Julian Cable
 *
 * Description:
-*	Jack sound classes
+*   Jack sound classes
 *
 ******************************************************************************
 *
@@ -35,8 +35,8 @@
 using namespace std;
 
 instance_data_t::instance_data_t():num_channels(2),
-        left(NULL), right(NULL), buff(NULL), underruns(0), overruns(0),
-        peer_left(),peer_right()
+    left(NULL), right(NULL), buff(NULL), underruns(0), overruns(0),
+    peer_left(),peer_right()
 {
     buff =
         jack_ringbuffer_create(
@@ -314,8 +314,8 @@ CSoundInJack::CSoundInJack():iBufferSize(0), bBlocking(TRUE), capture_data(), de
 }
 
 CSoundInJack::CSoundInJack(const CSoundInJack & e):
-        iBufferSize(e.iBufferSize), bBlocking(e.bBlocking), device_changed(TRUE),
-        capture_data(e.capture_data), dev(e.dev), ports(e.ports)
+    iBufferSize(e.iBufferSize), bBlocking(e.bBlocking), device_changed(TRUE),
+    capture_data(e.capture_data), dev(e.dev), ports(e.ports)
 {
 }
 
@@ -434,8 +434,8 @@ CSoundInJack::Read(CVector<short>& psData)
     short smax=-32767, smin=32767;
     for(int i=0; i<iBufferSize; i++)
     {
-    	if(smax<buffer[i]) smax = buffer[i];
-    	if(smin>buffer[i]) smin = buffer[i];
+        if(smax<buffer[i]) smax = buffer[i];
+        if(smin>buffer[i]) smin = buffer[i];
     }
     cout << iBufferSize << " " << setw(8) << smin << " " << setw(8) << smax << endl;
     */
@@ -457,7 +457,7 @@ CSoundInJack::Close()
 }
 
 CSoundOutJack::CSoundOutJack():iBufferSize(0), bBlocking(TRUE), device_changed(TRUE),
-        play_data(), dev(-1), ports()
+    play_data(), dev(-1), ports()
 {
     if (data.client==NULL)
         data.initialise();
@@ -507,7 +507,7 @@ CSoundOutJack::~CSoundOutJack()
 }
 
 CSoundOutJack::CSoundOutJack(const CSoundOutJack & e):
-        iBufferSize(e.iBufferSize), bBlocking(e.bBlocking),dev(e.dev)
+    iBufferSize(e.iBufferSize), bBlocking(e.bBlocking),dev(e.dev)
 {
 }
 

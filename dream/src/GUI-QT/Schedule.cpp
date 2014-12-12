@@ -3,7 +3,7 @@
  * Copyright (c) 2001-2014
  *
  * Author(s):
- *	Volker Fischer, Stephane Fillod, Tomi Manninen, Andrea Russo, Julian Cable
+ *  Volker Fischer, Stephane Fillod, Tomi Manninen, Andrea Russo, Julian Cable
  *
  *
  * Description: DRM and AM Schedules
@@ -46,8 +46,8 @@
 /* Implementation *************************************************************/
 
 CSchedule::CSchedule():
-ListTargets(), ListCountries(), ListLanguages(),
-  StationsTable(),iSecondsPreview(0)
+    ListTargets(), ListCountries(), ListLanguages(),
+    StationsTable(),iSecondsPreview(0)
 {
 }
 
@@ -63,348 +63,350 @@ int CSchedule::GetSecondsPreview() const
 
 void CSchedule::UpdateStringListForFilter(const CStationsItem& StationsItem)
 {
-	if (!ListTargets.contains(StationsItem.strTarget))
-		ListTargets.append(StationsItem.strTarget);
+    if (!ListTargets.contains(StationsItem.strTarget))
+        ListTargets.append(StationsItem.strTarget);
 
-	if (!ListCountries.contains(StationsItem.strCountry))
-		ListCountries.append(StationsItem.strCountry);
+    if (!ListCountries.contains(StationsItem.strCountry))
+        ListCountries.append(StationsItem.strCountry);
 
-	if (!ListLanguages.contains(StationsItem.strLanguage))
-		ListLanguages.append(StationsItem.strLanguage);
+    if (!ListLanguages.contains(StationsItem.strLanguage))
+        ListLanguages.append(StationsItem.strLanguage);
 }
 
 void CSchedule::LoadSchedule(const QString & schedFileName)
 {
-	string filename(schedFileName.toUtf8().constData());
-	QApplication::setOverrideCursor(Qt::BusyCursor);
-	ListTargets = QStringList("");
-	ListCountries = QStringList("");
-	ListLanguages = QStringList("");
-	StationsTable.clear();
-	FILE* pFile = fopen(filename.c_str(), "r");
-	if(pFile)
-	{
-		if(schedFileName.contains("ini"))
-			ReadINIFile(pFile);
-		else
-			ReadCSVFile(pFile);
-		fclose(pFile);
-	}
-	ListTargets.sort();
-	ListCountries.sort();
-	ListLanguages.sort();
-	QApplication::restoreOverrideCursor();
+    string filename(schedFileName.toUtf8().constData());
+    QApplication::setOverrideCursor(Qt::BusyCursor);
+    ListTargets = QStringList("");
+    ListCountries = QStringList("");
+    ListLanguages = QStringList("");
+    StationsTable.clear();
+    FILE* pFile = fopen(filename.c_str(), "r");
+    if(pFile)
+    {
+        if(schedFileName.contains("ini"))
+            ReadINIFile(pFile);
+        else
+            ReadCSVFile(pFile);
+        fclose(pFile);
+    }
+    ListTargets.sort();
+    ListCountries.sort();
+    ListLanguages.sort();
+    QApplication::restoreOverrideCursor();
 }
 
 void CSchedule::ReadINIFile(FILE* pFile)
 {
-	const int	iMaxLenName = 256;
-	char	cName[iMaxLenName], *r;
-	int		iFileStat, n;
-	_BOOLEAN	bReadOK = TRUE;
+    const int   iMaxLenName = 256;
+    char    cName[iMaxLenName], *r;
+    int     iFileStat, n;
+    _BOOLEAN    bReadOK = TRUE;
 
-	r = fgets(cName, iMaxLenName, pFile); /* [DRMSchedule] */
-	do
-	{
-		CStationsItem StationsItem;
+    r = fgets(cName, iMaxLenName, pFile); /* [DRMSchedule] */
+    do
+    {
+        CStationsItem StationsItem;
 
-		/* Start stop time */
-		int iStartTime, iStopTime;
-		iFileStat = fscanf(pFile, "StartStopTimeUTC=%04d-%04d\n",
-			&iStartTime, &iStopTime);
+        /* Start stop time */
+        int iStartTime, iStopTime;
+        iFileStat = fscanf(pFile, "StartStopTimeUTC=%04d-%04d\n",
+                           &iStartTime, &iStopTime);
 
-		if (iFileStat != 2)
-			bReadOK = FALSE;
-		else
-		{
-			StationsItem.SetStartTime(iStartTime);
-			StationsItem.SetStopTime(iStopTime);
-		}
+        if (iFileStat != 2)
+            bReadOK = FALSE;
+        else
+        {
+            StationsItem.SetStartTime(iStartTime);
+            StationsItem.SetStopTime(iStopTime);
+        }
 
-		/* Days */
-		/* Init days with the "irregular" marker in case no valid string could
-		be read */
-		QString strNewDaysFlags = FLAG_STR_IRREGULAR_TRANSM;
+        /* Days */
+        /* Init days with the "irregular" marker in case no valid string could
+        be read */
+        QString strNewDaysFlags = FLAG_STR_IRREGULAR_TRANSM;
 
-		iFileStat = fscanf(pFile, "Days[SMTWTFS]=%255[^\n|^\r]\n", cName);
-		if (iFileStat != 1)
-			n = fscanf(pFile, "\n");
-		else
-		{
-			/* Check for length of input string (must be 7) */
-			QString strTMP(cName);
-			if (strTMP.length() == 7)
-				strNewDaysFlags = strTMP;
-		}
+        iFileStat = fscanf(pFile, "Days[SMTWTFS]=%255[^\n|^\r]\n", cName);
+        if (iFileStat != 1)
+            n = fscanf(pFile, "\n");
+        else
+        {
+            /* Check for length of input string (must be 7) */
+            QString strTMP(cName);
+            if (strTMP.length() == 7)
+                strNewDaysFlags = strTMP;
+        }
 
-		/* Frequency */
-		iFileStat = fscanf(pFile, "Frequency=%d\n", &StationsItem.iFreq);
-		if (iFileStat != 1)
-			bReadOK = FALSE;
+        /* Frequency */
+        iFileStat = fscanf(pFile, "Frequency=%d\n", &StationsItem.iFreq);
+        if (iFileStat != 1)
+            bReadOK = FALSE;
 
-		/* Target */
-		iFileStat = fscanf(pFile, "Target=%255[^\n|^\r]\n", cName);
-		if (iFileStat != 1)
-			n = fscanf(pFile, "\n");
-		else
-			StationsItem.strTarget = cName;
+        /* Target */
+        iFileStat = fscanf(pFile, "Target=%255[^\n|^\r]\n", cName);
+        if (iFileStat != 1)
+            n = fscanf(pFile, "\n");
+        else
+            StationsItem.strTarget = cName;
 
-		/* Power */
-		iFileStat = fscanf(pFile, "Power=%255[^\n|^\r]\n", cName);
-		if (iFileStat != 1)
-			n = fscanf(pFile, "\n");
-		else
-			StationsItem.rPower = QString(cName).toFloat();
+        /* Power */
+        iFileStat = fscanf(pFile, "Power=%255[^\n|^\r]\n", cName);
+        if (iFileStat != 1)
+            n = fscanf(pFile, "\n");
+        else
+            StationsItem.rPower = QString(cName).toFloat();
 
-		/* Name of the station */
-		iFileStat = fscanf(pFile, "Programme=%255[^\n|^\r]\n", cName);
-		if (iFileStat != 1)
-			n = fscanf(pFile, "\n");
-		else
-			StationsItem.strName = cName;
+        /* Name of the station */
+        iFileStat = fscanf(pFile, "Programme=%255[^\n|^\r]\n", cName);
+        if (iFileStat != 1)
+            n = fscanf(pFile, "\n");
+        else
+            StationsItem.strName = cName;
 
-		/* Language */
-		iFileStat = fscanf(pFile, "Language=%255[^\n|^\r]\n", cName);
-		if (iFileStat != 1)
-			n = fscanf(pFile, "\n");
-		else
-			StationsItem.strLanguage = cName;
+        /* Language */
+        iFileStat = fscanf(pFile, "Language=%255[^\n|^\r]\n", cName);
+        if (iFileStat != 1)
+            n = fscanf(pFile, "\n");
+        else
+            StationsItem.strLanguage = cName;
 
-		/* Site */
-		iFileStat = fscanf(pFile, "Site=%255[^\n|^\r]\n", cName);
-		if (iFileStat != 1)
-			n = fscanf(pFile, "\n");
-		else
-			StationsItem.strSite = cName;
+        /* Site */
+        iFileStat = fscanf(pFile, "Site=%255[^\n|^\r]\n", cName);
+        if (iFileStat != 1)
+            n = fscanf(pFile, "\n");
+        else
+            StationsItem.strSite = cName;
 
-		/* Country */
-		iFileStat = fscanf(pFile, "Country=%255[^\n|^\r]\n", cName);
-		if (iFileStat != 1)
-			n = fscanf(pFile, "\n");
-		else
-			StationsItem.strCountry = cName;
+        /* Country */
+        iFileStat = fscanf(pFile, "Country=%255[^\n|^\r]\n", cName);
+        if (iFileStat != 1)
+            n = fscanf(pFile, "\n");
+        else
+            StationsItem.strCountry = cName;
 
-		iFileStat = fscanf(pFile, "\n");
+        iFileStat = fscanf(pFile, "\n");
 
-		/* Check for error before applying data */
-		if (bReadOK == TRUE)
-		{
-			/* Set "days flag string" and generate strings for displaying active
-			days */
-			StationsItem.SetDaysFlagString(strNewDaysFlags);
+        /* Check for error before applying data */
+        if (bReadOK == TRUE)
+        {
+            /* Set "days flag string" and generate strings for displaying active
+            days */
+            StationsItem.SetDaysFlagString(strNewDaysFlags);
 
-			/* Add new item in table */
-			StationsTable.push_back(StationsItem);
+            /* Add new item in table */
+            StationsTable.push_back(StationsItem);
 
-			UpdateStringListForFilter(StationsItem);
-		}
-	} while (!((iFileStat == EOF) || (bReadOK == FALSE)));
+            UpdateStringListForFilter(StationsItem);
+        }
+    } while (!((iFileStat == EOF) || (bReadOK == FALSE)));
 
-	(void)r; (void)n;
+    (void)r;
+    (void)n;
 }
 
 void CSchedule::ReadCSVFile(FILE* pFile)
 {
-	const int	iMaxLenRow = 1024;
-	char		cRow[iMaxLenRow];
-	CStationData data;
+    const int   iMaxLenRow = 1024;
+    char        cRow[iMaxLenRow];
+    CStationData data;
 
-	do {
-		CStationsItem StationsItem;
+    do {
+        CStationsItem StationsItem;
 
-		char* r = fgets(cRow, iMaxLenRow, pFile); (void)r;
-		QStringList fields;
-		stringstream ss(cRow);
-		do {
-			string s;
-			getline(ss, s, ';');
-			fields.push_back(s.c_str());
-		} while(!ss.eof());
+        char* r = fgets(cRow, iMaxLenRow, pFile);
+        (void)r;
+        QStringList fields;
+        stringstream ss(cRow);
+        do {
+            string s;
+            getline(ss, s, ';');
+            fields.push_back(s.c_str());
+        } while(!ss.eof());
 
-		StationsItem.iFreq = floor(fields[0].toFloat());
+        StationsItem.iFreq = floor(fields[0].toFloat());
 
-		if(fields[1] == "")
-		{
-			StationsItem.SetStartTime(0);
-			StationsItem.SetStopTime(2400);
-		}
-		else
-		{
-			QStringList times = fields[1].split("-");
-			if(times.count()==2)
-			{
-				StationsItem.SetStartTime(times[0].toInt());
-				StationsItem.SetStopTime(times[1].toInt());
-			}
-		}
+        if(fields[1] == "")
+        {
+            StationsItem.SetStartTime(0);
+            StationsItem.SetStopTime(2400);
+        }
+        else
+        {
+            QStringList times = fields[1].split("-");
+            if(times.count()==2)
+            {
+                StationsItem.SetStartTime(times[0].toInt());
+                StationsItem.SetStopTime(times[1].toInt());
+            }
+        }
 
-		if(fields[2].length()>0)
-		{
-			stringstream ss(fields[2].toUtf8().constData());
-			char c;
-			enum Days { Sunday=0, Monday=1, Tuesday=2, Wednesday=3,
-				Thursday=4, Friday=5, Saturday=6
-			};
-			Days first=Sunday, last=Sunday;
-			enum { no, in, done } range_state = no;
-			// Days[SMTWTFS]=1111111
-			QString strDays = "0000000";
-			while(!ss.eof())
-			{
-				ss >> c;
-				switch(c)
-				{
-				case '-':
-					range_state = in;
-					break;
-				case 'M':
-					ss >> c;
-					last = Monday;
-					break;
-				case 'T':
-					ss >> c;
-					last = (c=='u')?Tuesday:Thursday;
-					break;
-				case 'W':
-					ss >> c;
-					last = Wednesday;
-					break;
-				case 'F':
-					ss >> c;
-					last = Friday;
-					break;
-				case 'S':
-					ss >> c;
-					last = (c=='u')?Sunday:Saturday;
-					break;
-				}
-				switch(range_state)
-				{
-				case no:
-					strDays[last] = '1';
-					break;
-				case in:
-					first = last;
-					range_state = done;
-					break;
-				case done:
-					if(first<last)
-					{
-						for(int d=first; d<=last; d++)
-							strDays[d] = '1';
-					}
-					range_state = no;
-					break;
-				}
-			}
-			StationsItem.SetDaysFlagString(strDays);
-		}
-		else
-			StationsItem.SetDaysFlagString("1111111");
+        if(fields[2].length()>0)
+        {
+            stringstream ss(fields[2].toUtf8().constData());
+            char c;
+            enum Days { Sunday=0, Monday=1, Tuesday=2, Wednesday=3,
+                        Thursday=4, Friday=5, Saturday=6
+                      };
+            Days first=Sunday, last=Sunday;
+            enum { no, in, done } range_state = no;
+            // Days[SMTWTFS]=1111111
+            QString strDays = "0000000";
+            while(!ss.eof())
+            {
+                ss >> c;
+                switch(c)
+                {
+                case '-':
+                    range_state = in;
+                    break;
+                case 'M':
+                    ss >> c;
+                    last = Monday;
+                    break;
+                case 'T':
+                    ss >> c;
+                    last = (c=='u')?Tuesday:Thursday;
+                    break;
+                case 'W':
+                    ss >> c;
+                    last = Wednesday;
+                    break;
+                case 'F':
+                    ss >> c;
+                    last = Friday;
+                    break;
+                case 'S':
+                    ss >> c;
+                    last = (c=='u')?Sunday:Saturday;
+                    break;
+                }
+                switch(range_state)
+                {
+                case no:
+                    strDays[last] = '1';
+                    break;
+                case in:
+                    first = last;
+                    range_state = done;
+                    break;
+                case done:
+                    if(first<last)
+                    {
+                        for(int d=first; d<=last; d++)
+                            strDays[d] = '1';
+                    }
+                    range_state = no;
+                    break;
+                }
+            }
+            StationsItem.SetDaysFlagString(strDays);
+        }
+        else
+            StationsItem.SetDaysFlagString("1111111");
 
-		//StationsItem.rPower = 0.0;
-		//0   ;1        ;2    ;3  ;4               ;5;6;7;8;9;10
-		//1170;1600-1700;Mo-Fr;USA;Voice of America;E; ; ;0; ;
-		string homecountry;
-		int fieldcount = fields.size();
-		if(fieldcount>3)
-		{
-			homecountry = fields[3].toUtf8().constData();
-			string c = data.itu_r_country(homecountry);
-			if(c == "")
-				c = homecountry;
-			StationsItem.strCountry = QString::fromUtf8(c.c_str());
-		}
+        //StationsItem.rPower = 0.0;
+        //0   ;1        ;2    ;3  ;4               ;5;6;7;8;9;10
+        //1170;1600-1700;Mo-Fr;USA;Voice of America;E; ; ;0; ;
+        string homecountry;
+        int fieldcount = fields.size();
+        if(fieldcount>3)
+        {
+            homecountry = fields[3].toUtf8().constData();
+            string c = data.itu_r_country(homecountry);
+            if(c == "")
+                c = homecountry;
+            StationsItem.strCountry = QString::fromUtf8(c.c_str());
+        }
 
-		if(fieldcount>4)
-			StationsItem.strName = fields[4];
+        if(fieldcount>4)
+            StationsItem.strName = fields[4];
 
-		if(fieldcount>5)
-		{
-			string l = data.eibi_language(fields[5].toUtf8().constData());
-			StationsItem.strLanguage = QString::fromUtf8(l.c_str());
-		}
+        if(fieldcount>5)
+        {
+            string l = data.eibi_language(fields[5].toUtf8().constData());
+            StationsItem.strLanguage = QString::fromUtf8(l.c_str());
+        }
 
-		if(fieldcount>6)
-		{
-			string s = fields[6].toUtf8().constData();
-			string t = data.eibi_target(s);
-			if(t == "")
-			{
-				string c = data.itu_r_country(s);
-				if(c == "")
-					StationsItem.strTarget = QString::fromUtf8(s.c_str());
-				else
-					StationsItem.strTarget = QString::fromUtf8(c.c_str());
-			}
-			else
-			{
-				StationsItem.strTarget = QString::fromUtf8(t.c_str());
-			}
-		}
-		string country;
-		string stn;
-		if(fieldcount>7)
-		{
-			StationsItem.strSite = fields[7];
-			string s  = fields[7].toUtf8().constData();
-			if(s=="") // unknown or main Tx site of the home country
-			{
-				country = homecountry;
-			}
-			else
-			{
-				size_t i=0;
-				s += '-';
-				if(s[0]=='/') // transmitted from another country
-					i++;
-				string a,b;
-				while(s[i]!='-')
-					a += s[i++];
-				i++;
-				if(i<s.length())
-					while(s[i]!='-')
-						b += s[i++];
-				if(s[0]=='/')
-				{
-					country = a;
-					stn = b;
-				}
-				else
-				{
-					if(a.length()==3)
-					{
-						country = a;
-						stn = b;
-					}
-					else
-					{
-						country = homecountry;
-						stn = a;
-					}
-				}
-			}
-		}
-		else
-		{
-			country = homecountry;
-		}
-		QString site = QString::fromUtf8(data.eibi_station(country, stn).c_str());
-		if(site == "")
-		{
-			//cout << StationsItem.iFreq << " [" << StationsItem.strSite << "] [" << country << "] [" << stn << "]" << endl;
-		}
-		else
-		{
-			StationsItem.strSite = site;
-		}
+        if(fieldcount>6)
+        {
+            string s = fields[6].toUtf8().constData();
+            string t = data.eibi_target(s);
+            if(t == "")
+            {
+                string c = data.itu_r_country(s);
+                if(c == "")
+                    StationsItem.strTarget = QString::fromUtf8(s.c_str());
+                else
+                    StationsItem.strTarget = QString::fromUtf8(c.c_str());
+            }
+            else
+            {
+                StationsItem.strTarget = QString::fromUtf8(t.c_str());
+            }
+        }
+        string country;
+        string stn;
+        if(fieldcount>7)
+        {
+            StationsItem.strSite = fields[7];
+            string s  = fields[7].toUtf8().constData();
+            if(s=="") // unknown or main Tx site of the home country
+            {
+                country = homecountry;
+            }
+            else
+            {
+                size_t i=0;
+                s += '-';
+                if(s[0]=='/') // transmitted from another country
+                    i++;
+                string a,b;
+                while(s[i]!='-')
+                    a += s[i++];
+                i++;
+                if(i<s.length())
+                    while(s[i]!='-')
+                        b += s[i++];
+                if(s[0]=='/')
+                {
+                    country = a;
+                    stn = b;
+                }
+                else
+                {
+                    if(a.length()==3)
+                    {
+                        country = a;
+                        stn = b;
+                    }
+                    else
+                    {
+                        country = homecountry;
+                        stn = a;
+                    }
+                }
+            }
+        }
+        else
+        {
+            country = homecountry;
+        }
+        QString site = QString::fromUtf8(data.eibi_station(country, stn).c_str());
+        if(site == "")
+        {
+            //cout << StationsItem.iFreq << " [" << StationsItem.strSite << "] [" << country << "] [" << stn << "]" << endl;
+        }
+        else
+        {
+            StationsItem.strSite = site;
+        }
 
-		/* Add new item in table */
-		StationsTable.push_back(StationsItem);
+        /* Add new item in table */
+        StationsTable.push_back(StationsItem);
 
-		UpdateStringListForFilter(StationsItem);
+        UpdateStringListForFilter(StationsItem);
 
-	} while(!feof(pFile));
+    } while(!feof(pFile));
 }
 
 Station::EState CSchedule::GetState(const int iPos)
@@ -428,27 +430,27 @@ bool CSchedule::CheckFilter(const int iPos)
 
 Station::EState CStationsItem::stateAt(time_t ltime, int previewSeconds) const
 {
-	if (activeAt(ltime) == TRUE)
-	{
-		time_t dt = ltime+NUM_SECONDS_SOON_INACTIVE;
+    if (activeAt(ltime) == TRUE)
+    {
+        time_t dt = ltime+NUM_SECONDS_SOON_INACTIVE;
 
-		/* Check if the station soon will be inactive */
-		if (activeAt(dt) == TRUE)
-			return Station::IS_ACTIVE;
-		else
-			return Station::IS_SOON_INACTIVE;
-	}
-	else
-	{
-		for(time_t dt = ltime; dt < ltime + previewSeconds; dt += 60)
-		{
-			if (activeAt(dt) == TRUE)
-			{
-				return Station::IS_PREVIEW;
-			}
-		}
-		return Station::IS_INACTIVE;
-	}
+        /* Check if the station soon will be inactive */
+        if (activeAt(dt) == TRUE)
+            return Station::IS_ACTIVE;
+        else
+            return Station::IS_SOON_INACTIVE;
+    }
+    else
+    {
+        for(time_t dt = ltime; dt < ltime + previewSeconds; dt += 60)
+        {
+            if (activeAt(dt) == TRUE)
+            {
+                return Station::IS_PREVIEW;
+            }
+        }
+        return Station::IS_INACTIVE;
+    }
 }
 
 #ifdef _WIN32
@@ -457,105 +459,105 @@ extern time_t timegm(struct tm *tm); // defined in Scheduler.cpp
 
 _BOOLEAN CStationsItem::activeAt(time_t wantedTime) const
 {
-	struct tm ptm = *gmtime (&wantedTime);
-	ptm.tm_hour = 0;
-	ptm.tm_min = 0;
-	ptm.tm_sec = 0;
-	time_t wantedDay = timegm(&ptm); // start of daytime
+    struct tm ptm = *gmtime (&wantedTime);
+    ptm.tm_hour = 0;
+    ptm.tm_min = 0;
+    ptm.tm_sec = 0;
+    time_t wantedDay = timegm(&ptm); // start of daytime
 
-	/* Get start time */
-	time_t broadcastStart = wantedDay + 60*(60*iStartHour+iStartMinute);
+    /* Get start time */
+    time_t broadcastStart = wantedDay + 60*(60*iStartHour+iStartMinute);
 
-	/* Get stop time */
-	time_t broadcastStop = wantedDay + 60*(60*iStopHour+iStopMinute);
+    /* Get stop time */
+    time_t broadcastStop = wantedDay + 60*(60*iStopHour+iStopMinute);
 
-	/* Check, if stop time is on next day */
-	if(broadcastStop < broadcastStart)
-	{
-		broadcastStop += 86400l;
-	}
+    /* Check, if stop time is on next day */
+    if(broadcastStop < broadcastStart)
+    {
+        broadcastStop += 86400l;
+    }
 
-	/* Check day
-	tm_wday: day of week (0 - 6; Sunday = 0). "strDaysFlags" are coded with
-	pseudo binary representation. A one signals that day is active. The most
-	significant 1 is the sunday, then followed the monday and so on. */
-	if ((strDaysFlags[ptm.tm_wday] == CHR_ACTIVE_DAY_MARKER) ||
-		/* Check also for special case: days are 0000000. This is reserved for
-		DRM test transmissions or irregular transmissions. We define here
-		that these stations are transmitting every day */
-		(strDaysFlags == FLAG_STR_IRREGULAR_TRANSM))
-	{
-		if((broadcastStart <= wantedTime) && (wantedTime < broadcastStop))
-		{
-			return TRUE;
-		}
-		else
-		{
-			/* yesterday's broadcast might still be on */
-			int wday = ptm.tm_wday - 1;
-			if(wday < 0)
-				wday = 6;
-			if ((strDaysFlags[wday] == CHR_ACTIVE_DAY_MARKER) || (strDaysFlags == FLAG_STR_IRREGULAR_TRANSM))
-			{
-				broadcastStart -= 86400l;
-				broadcastStop -= 86400l;
-				if((broadcastStart <= wantedTime) && (wantedTime < broadcastStop))
-				{
-					return TRUE;
-				}
-			}
-		}
-	}
-	return FALSE;
+    /* Check day
+    tm_wday: day of week (0 - 6; Sunday = 0). "strDaysFlags" are coded with
+    pseudo binary representation. A one signals that day is active. The most
+    significant 1 is the sunday, then followed the monday and so on. */
+    if ((strDaysFlags[ptm.tm_wday] == CHR_ACTIVE_DAY_MARKER) ||
+            /* Check also for special case: days are 0000000. This is reserved for
+            DRM test transmissions or irregular transmissions. We define here
+            that these stations are transmitting every day */
+            (strDaysFlags == FLAG_STR_IRREGULAR_TRANSM))
+    {
+        if((broadcastStart <= wantedTime) && (wantedTime < broadcastStop))
+        {
+            return TRUE;
+        }
+        else
+        {
+            /* yesterday's broadcast might still be on */
+            int wday = ptm.tm_wday - 1;
+            if(wday < 0)
+                wday = 6;
+            if ((strDaysFlags[wday] == CHR_ACTIVE_DAY_MARKER) || (strDaysFlags == FLAG_STR_IRREGULAR_TRANSM))
+            {
+                broadcastStart -= 86400l;
+                broadcastStop -= 86400l;
+                if((broadcastStart <= wantedTime) && (wantedTime < broadcastStop))
+                {
+                    return TRUE;
+                }
+            }
+        }
+    }
+    return FALSE;
 }
 
 void CStationsItem::SetDaysFlagString(const QString& strNewDaysFlags)
 {
-	/* Set internal "days flag" string and "show days" string */
-	strDaysFlags = strNewDaysFlags;
-	strDaysShow = "";
+    /* Set internal "days flag" string and "show days" string */
+    strDaysFlags = strNewDaysFlags;
+    strDaysShow = "";
 
-	/* Init days string vector */
-	const QString strDayDef [] =
-	{
-		QObject::tr("Sun"),
-		QObject::tr("Mon"),
-		QObject::tr("Tue"),
-		QObject::tr("Wed"),
-		QObject::tr("Thu"),
-		QObject::tr("Fri"),
-		QObject::tr("Sat")
-	};
+    /* Init days string vector */
+    const QString strDayDef [] =
+    {
+        QObject::tr("Sun"),
+        QObject::tr("Mon"),
+        QObject::tr("Tue"),
+        QObject::tr("Wed"),
+        QObject::tr("Thu"),
+        QObject::tr("Fri"),
+        QObject::tr("Sat")
+    };
 
-	/* First test for day constellations which allow to apply special names */
-	if (strDaysFlags == FLAG_STR_IRREGULAR_TRANSM)
-		strDaysShow = QObject::tr("irregular");
-	else if (strDaysFlags == "1111111")
-		strDaysShow = QObject::tr("daily");
-	else if (strDaysFlags == "1111100")
-		strDaysShow = QObject::tr("from Sun to Thu");
-	else if (strDaysFlags == "1111110")
-		strDaysShow = QObject::tr("from Sun to Fri");
-	else if (strDaysFlags == "0111110")
-		strDaysShow = QObject::tr("from Mon to Fri");
-	else if (strDaysFlags == "0111111")
-		strDaysShow = QObject::tr("from Mon to Sat");
-	else
-	{
-		/* No special name could be applied, just list all active days */
-		for (int i = 0; i < 7; i++)
-		{
-			/* Check if day is active */
-			if (strDaysFlags[i] == CHR_ACTIVE_DAY_MARKER)
-			{
-				/* Set commas in between the days, to not set a comma at
-				the beginning */
-				if (strDaysShow != "")
-					strDaysShow += ",";
+    /* First test for day constellations which allow to apply special names */
+    if (strDaysFlags == FLAG_STR_IRREGULAR_TRANSM)
+        strDaysShow = QObject::tr("irregular");
+    else if (strDaysFlags == "1111111")
+        strDaysShow = QObject::tr("daily");
+    else if (strDaysFlags == "1111100")
+        strDaysShow = QObject::tr("from Sun to Thu");
+    else if (strDaysFlags == "1111110")
+        strDaysShow = QObject::tr("from Sun to Fri");
+    else if (strDaysFlags == "0111110")
+        strDaysShow = QObject::tr("from Mon to Fri");
+    else if (strDaysFlags == "0111111")
+        strDaysShow = QObject::tr("from Mon to Sat");
+    else
+    {
+        /* No special name could be applied, just list all active days */
+        for (int i = 0; i < 7; i++)
+        {
+            /* Check if day is active */
+            if (strDaysFlags[i] == CHR_ACTIVE_DAY_MARKER)
+            {
+                /* Set commas in between the days, to not set a comma at
+                the beginning */
+                if (strDaysShow != "")
+                    strDaysShow += ",";
 
-				/* Add current day */
-				strDaysShow += strDayDef[i];
-			}
-		}
-	}
+                /* Add current day */
+                strDaysShow += strDayDef[i];
+            }
+        }
+    }
 }

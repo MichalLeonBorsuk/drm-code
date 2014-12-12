@@ -3,7 +3,7 @@
  * Copyright (c) 2001-2014
  *
  * Author(s):
- *	Julian Cable, Oliver Haffenden
+ *  Julian Cable, Oliver Haffenden
  *
  * Description:
  *
@@ -44,8 +44,8 @@
 # include <arpa/inet.h>
 /* Some defines needed for compatibility when using Linux, Darwin, ... */
 typedef int SOCKET;
-# define SOCKET_ERROR				(-1)
-# define INVALID_SOCKET				(-1)
+# define SOCKET_ERROR               (-1)
+# define INVALID_SOCKET             (-1)
 #endif
 
 #include "../util/Pacer.h"
@@ -352,8 +352,8 @@ CPacketSourceFile::readPcap(vector<_BYTE>& vecbydata, int& interval)
             link_len=0;
         }
         //packet_time = header->ts; try this for BSD
-		packet_time.tv_sec = header->ts.tv_sec;
-		packet_time.tv_usec = header->ts.tv_usec;
+        packet_time.tv_sec = header->ts.tv_sec;
+        packet_time.tv_usec = header->ts.tv_usec;
 #endif
         if(pkt_data == NULL)
             return;

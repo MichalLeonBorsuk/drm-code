@@ -3,10 +3,10 @@
  * Copyright (c) 2001-2014
  *
  * Author(s):
- *	Volker Fischer
+ *  Volker Fischer
  *
  * Description:
- *	See DrmTransmitter.cpp
+ *  See DrmTransmitter.cpp
  *
  ******************************************************************************
  *
@@ -54,13 +54,13 @@ public:
     void Init();
     void Start();
 
-    CAudioSourceEncoder*	GetAudSrcEnc() {
+    CAudioSourceEncoder*    GetAudSrcEnc() {
         return &AudioSourceEncoder;
     }
-    CTransmitData*			GetTransData() {
+    CTransmitData*          GetTransData() {
         return &TransmitData;
     }
-    CReadData*				GetReadData() {
+    CReadData*              GetReadData() {
         return &ReadData;
     }
 
@@ -77,41 +77,43 @@ public:
 
 protected:
     void Run();
-    void InitSoftStop() { iSoftStopSymbolCount=0; };
+    void InitSoftStop() {
+        iSoftStopSymbolCount=0;
+    };
     _BOOLEAN CanSoftStopExit();
 
     /* Buffers */
-    CSingleBuffer<_SAMPLE>	DataBuf;
-    CSingleBuffer<_BINARY>	AudSrcBuf;
+    CSingleBuffer<_SAMPLE>  DataBuf;
+    CSingleBuffer<_BINARY>  AudSrcBuf;
 
-    CSingleBuffer<_COMPLEX>	MLCEncBuf;
-    CCyclicBuffer<_COMPLEX>	IntlBuf;
+    CSingleBuffer<_COMPLEX> MLCEncBuf;
+    CCyclicBuffer<_COMPLEX> IntlBuf;
 
-    CSingleBuffer<_BINARY>	GenFACDataBuf;
-    CCyclicBuffer<_COMPLEX>	FACMapBuf;
+    CSingleBuffer<_BINARY>  GenFACDataBuf;
+    CCyclicBuffer<_COMPLEX> FACMapBuf;
 
-    CSingleBuffer<_BINARY>	GenSDCDataBuf;
-    CCyclicBuffer<_COMPLEX>	SDCMapBuf;
+    CSingleBuffer<_BINARY>  GenSDCDataBuf;
+    CCyclicBuffer<_COMPLEX> SDCMapBuf;
 
-    CSingleBuffer<_COMPLEX>	CarMapBuf;
-    CSingleBuffer<_COMPLEX>	OFDMModBuf;
+    CSingleBuffer<_COMPLEX> CarMapBuf;
+    CSingleBuffer<_COMPLEX> OFDMModBuf;
 
     /* Modules */
-    CReadData				ReadData;
-    CAudioSourceEncoder		AudioSourceEncoder;
-    CMSCMLCEncoder			MSCMLCEncoder;
-    CSymbInterleaver		SymbInterleaver;
-    CGenerateFACData		GenerateFACData;
-    CFACMLCEncoder			FACMLCEncoder;
-    CGenerateSDCData		GenerateSDCData;
-    CSDCMLCEncoder			SDCMLCEncoder;
-    COFDMCellMapping		OFDMCellMapping;
-    COFDMModulation			OFDMModulation;
-    CTransmitData			TransmitData;
+    CReadData               ReadData;
+    CAudioSourceEncoder     AudioSourceEncoder;
+    CMSCMLCEncoder          MSCMLCEncoder;
+    CSymbInterleaver        SymbInterleaver;
+    CGenerateFACData        GenerateFACData;
+    CFACMLCEncoder          FACMLCEncoder;
+    CGenerateSDCData        GenerateSDCData;
+    CSDCMLCEncoder          SDCMLCEncoder;
+    COFDMCellMapping        OFDMCellMapping;
+    COFDMModulation         OFDMModulation;
+    CTransmitData           TransmitData;
 
-    _REAL					rDefCarOffset;
-    _BOOLEAN				bUseUEP;
-    int						iSoftStopSymbolCount;
+    _REAL                   rDefCarOffset;
+    _BOOLEAN                bUseUEP;
+    int                     iSoftStopSymbolCount;
 };
 
 

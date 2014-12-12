@@ -3,13 +3,13 @@
  * Copyright (c) 2001-2014
  *
  * Author(s):
- *	Volker Fischer, Andrew Murphy, Andrea Russo, Oliver Haffenden
+ *  Volker Fischer, Andrew Murphy, Andrea Russo, Oliver Haffenden
  *
  * Description:
- *	See DrmReceiver.cpp
+ *  See DrmReceiver.cpp
  *
  * 11/21/2005 Andrew Murphy, BBC Research & Development, 2005
- *	- Additions to include AMSS demodulation
+ *  - Additions to include AMSS demodulation
  *
  ******************************************************************************
  *
@@ -63,18 +63,18 @@
 /* Definitions ****************************************************************/
 /* Number of FAC frames until the acquisition is activated in case a signal
    was successfully decoded */
-#define	NUM_FAC_FRA_U_ACQ_WITH			10
+#define NUM_FAC_FRA_U_ACQ_WITH          10
 
 /* Number of OFDM symbols until the acquisition is activated in case no signal
    could be decoded after previous acquisition try */
-#define	NUM_OFDMSYM_U_ACQ_WITHOUT		150
+#define NUM_OFDMSYM_U_ACQ_WITHOUT       150
 
 /* Number of FAC blocks for delayed tracking mode switch (caused by time needed
    for initalizing the channel estimation */
-#define NUM_FAC_DEL_TRACK_SWITCH		2
+#define NUM_FAC_DEL_TRACK_SWITCH        2
 
 /* Length of the history for synchronization parameters (used for the plot) */
-#define LEN_HIST_PLOT_SYNC_PARMS		2250
+#define LEN_HIST_PLOT_SYNC_PARMS        2250
 
 
 typedef void (SFCallback)(void*, int);
@@ -146,25 +146,27 @@ public:
     CDRMReceiver(CSettings* pSettings=NULL);
     virtual ~CDRMReceiver();
 
-    void					LoadSettings(); // can write to settings to set defaults
-    void					SaveSettings();
-    void					Start();
-    void                    setController(CController *c) { controller = c; }
-    void					SetRsciInput(const string& rsciInput);
-    void					ClearRsciInput();
-    void					SetSoundFile(const string& soundFile);
-    void					ClearSoundFile();
-    void					SetInputFile(const string& inputFile);
-    void					ClearInputFile();
-    ESFStatus				GetInputStatus();
-    string					GetInputFileName();
-    void					RequestNewAcquisition() {
+    void                    LoadSettings(); // can write to settings to set defaults
+    void                    SaveSettings();
+    void                    Start();
+    void                    setController(CController *c) {
+        controller = c;
+    }
+    void                    SetRsciInput(const string& rsciInput);
+    void                    ClearRsciInput();
+    void                    SetSoundFile(const string& soundFile);
+    void                    ClearSoundFile();
+    void                    SetInputFile(const string& inputFile);
+    void                    ClearInputFile();
+    ESFStatus               GetInputStatus();
+    string                  GetInputFileName();
+    void                    RequestNewAcquisition() {
         bRestartFlag = TRUE;
     }
-    EAcqStat				GetAcquiState() {
+    EAcqStat                GetAcquiState() {
         return Parameters.GetAcquiState();
     }
-    ERecMode				GetReceiverMode() {
+    ERecMode                GetReceiverMode() {
         return eReceiverMode;
     }
     bool GetDownstreamRSCIOutEnabled()
@@ -172,24 +174,24 @@ public:
         return downstreamRSCI.GetOutEnabled();
     }
 
-    void					SetReceiverMode(ERecMode eNewMode);
-    void					SetInitResOff(_REAL rNRO)
+    void                    SetReceiverMode(ERecMode eNewMode);
+    void                    SetInitResOff(_REAL rNRO)
     {
         rInitResampleOffset = rNRO;
     }
-    void					SetAMDemodType(CAMDemodulation::EDemodType);
-    void					SetAMFilterBW(int iBw);
-    void					SetAMDemodAcq(_REAL rNewNorCen);
-    void	 				SetSFCallback(SFCallback* psfCallback, void* psfCallbackParam) {
+    void                    SetAMDemodType(CAMDemodulation::EDemodType);
+    void                    SetAMFilterBW(int iBw);
+    void                    SetAMDemodAcq(_REAL rNewNorCen);
+    void                    SetSFCallback(SFCallback* psfCallback, void* psfCallbackParam) {
         sfCallback = psfCallback;
         sfCallbackParam = psfCallbackParam;
     }
-    void	 				SetFrequency(int);
-    int		 				GetFrequency() {
+    void                    SetFrequency(int);
+    int                     GetFrequency() {
         return Parameters.GetFrequency();
     }
-    void					SetIQRecording(_BOOLEAN);
-    void					SetRSIRecording(_BOOLEAN, const char);
+    void                    SetIQRecording(_BOOLEAN);
+    void                    SetRSIRecording(_BOOLEAN, const char);
 
     /* Channel Estimation */
     void SetFreqInt(CChannelEstimation::ETypeIntFreq eNewTy)
@@ -243,214 +245,214 @@ public:
     }
 
     /* Get pointer to internal modules */
-    CUtilizeFACData*		GetFAC() {
+    CUtilizeFACData*        GetFAC() {
         return &UtilizeFACData;
     }
-    CUtilizeSDCData*		GetSDC() {
+    CUtilizeSDCData*        GetSDC() {
         return &UtilizeSDCData;
     }
-    CTimeSync*				GetTimeSync() {
+    CTimeSync*              GetTimeSync() {
         return &TimeSync;
     }
-    CFACMLCDecoder*			GetFACMLC() {
+    CFACMLCDecoder*         GetFACMLC() {
         return &FACMLCDecoder;
     }
-    CSDCMLCDecoder*			GetSDCMLC() {
+    CSDCMLCDecoder*         GetSDCMLC() {
         return &SDCMLCDecoder;
     }
-    CMSCMLCDecoder*			GetMSCMLC() {
+    CMSCMLCDecoder*         GetMSCMLC() {
         return &MSCMLCDecoder;
     }
-    CReceiveData*			GetReceiveData() {
+    CReceiveData*           GetReceiveData() {
         return &ReceiveData;
     }
-    COFDMDemodulation*		GetOFDMDemod() {
+    COFDMDemodulation*      GetOFDMDemod() {
         return &OFDMDemodulation;
     }
-    CSyncUsingPil*			GetSyncUsPil() {
+    CSyncUsingPil*          GetSyncUsPil() {
         return &SyncUsingPil;
     }
-    CWriteData*				GetWriteData() {
+    CWriteData*             GetWriteData() {
         return &WriteData;
     }
-    CDataDecoder*			GetDataDecoder() {
+    CDataDecoder*           GetDataDecoder() {
         return &DataDecoder;
     }
-    CAMDemodulation*		GetAMDemod() {
+    CAMDemodulation*        GetAMDemod() {
         return &AMDemodulation;
     }
-    CAMSSPhaseDemod*		GetAMSSPhaseDemod() {
+    CAMSSPhaseDemod*        GetAMSSPhaseDemod() {
         return &AMSSPhaseDemod;
     }
-    CAMSSDecode*			GetAMSSDecode() {
+    CAMSSDecode*            GetAMSSDecode() {
         return &AMSSDecode;
     }
-    CFreqSyncAcq*			GetFreqSyncAcq() {
+    CFreqSyncAcq*           GetFreqSyncAcq() {
         return &FreqSyncAcq;
     }
-    CAudioSourceDecoder*	GetAudSorceDec() {
+    CAudioSourceDecoder*    GetAudSorceDec() {
         return &AudioSourceDecoder;
     }
-    CUpstreamDI*			GetRSIIn() {
+    CUpstreamDI*            GetRSIIn() {
         return pUpstreamRSCI;
     }
-    CDownstreamDI*			GetRSIOut() {
+    CDownstreamDI*          GetRSIOut() {
         return &downstreamRSCI;
     }
-    CChannelEstimation*		GetChannelEstimation() {
+    CChannelEstimation*     GetChannelEstimation() {
         return &ChannelEstimation;
     }
 
-    CPlotManager*			GetPlotManager() {
+    CPlotManager*           GetPlotManager() {
         return &PlotManager;
     }
 
-    void					InitsForWaveMode();
-    void					InitsForSpectrumOccup();
-    void					InitsForNoDecBitsSDC();
-    void					InitsForAudParam();
-    void					InitsForDataParam();
-    void					InitsForInterlDepth();
-    void					InitsForMSCCodSche();
-    void					InitsForSDCCodSche();
-    void					InitsForMSC();
-    void					InitsForMSCDemux();
+    void                    InitsForWaveMode();
+    void                    InitsForSpectrumOccup();
+    void                    InitsForNoDecBitsSDC();
+    void                    InitsForAudParam();
+    void                    InitsForDataParam();
+    void                    InitsForInterlDepth();
+    void                    InitsForMSCCodSche();
+    void                    InitsForSDCCodSche();
+    void                    InitsForMSC();
+    void                    InitsForMSCDemux();
 
 protected:
 
-    void					SetInStartMode();
-    void					SetInTrackingMode();
-    void					SetInTrackingModeDelayed();
-    void					InitsForAllModules();
-    void					Run();
-    void					SetInput();
-    void					ResetInput();
-    void					DemodulateDRM(_BOOLEAN&);
-    void					DecodeDRM(_BOOLEAN&, _BOOLEAN&);
-    void					UtilizeDRM(_BOOLEAN&);
-    void					DemodulateAM(_BOOLEAN&);
-    void					DecodeAM(_BOOLEAN&);
-    void					UtilizeAM(_BOOLEAN&);
-    void					DemodulateFM(_BOOLEAN&);
-    void					DecodeFM(_BOOLEAN&);
-    void					UtilizeFM(_BOOLEAN&);
-    void					DetectAcquiFAC();
-    void					DetectAcquiSymbol();
-    void					InitReceiverMode();
-    void					saveSDCtoFile();
+    void                    SetInStartMode();
+    void                    SetInTrackingMode();
+    void                    SetInTrackingModeDelayed();
+    void                    InitsForAllModules();
+    void                    Run();
+    void                    SetInput();
+    void                    ResetInput();
+    void                    DemodulateDRM(_BOOLEAN&);
+    void                    DecodeDRM(_BOOLEAN&, _BOOLEAN&);
+    void                    UtilizeDRM(_BOOLEAN&);
+    void                    DemodulateAM(_BOOLEAN&);
+    void                    DecodeAM(_BOOLEAN&);
+    void                    UtilizeAM(_BOOLEAN&);
+    void                    DemodulateFM(_BOOLEAN&);
+    void                    DecodeFM(_BOOLEAN&);
+    void                    UtilizeFM(_BOOLEAN&);
+    void                    DetectAcquiFAC();
+    void                    DetectAcquiSymbol();
+    void                    InitReceiverMode();
+    void                    saveSDCtoFile();
     void                    CloseSoundInterfaces();
 
     CController*            controller;
     /* Modules */
-    CReceiveData			ReceiveData;
-    CWriteData				WriteData;
-    CInputResample			InputResample;
-    CFreqSyncAcq			FreqSyncAcq;
-    CTimeSync				TimeSync;
-    COFDMDemodulation		OFDMDemodulation;
-    CSyncUsingPil			SyncUsingPil;
-    CChannelEstimation		ChannelEstimation;
-    COFDMCellDemapping		OFDMCellDemapping;
-    CFACMLCDecoder			FACMLCDecoder;
-    CUtilizeFACData			UtilizeFACData;
-    CSDCMLCDecoder			SDCMLCDecoder;
-    CUtilizeSDCData			UtilizeSDCData;
-    CSymbDeinterleaver		SymbDeinterleaver;
-    CMSCMLCDecoder			MSCMLCDecoder;
-    CMSCDemultiplexer		MSCDemultiplexer;
-    CAudioSourceDecoder		AudioSourceDecoder;
-    CDataDecoder			DataDecoder;
-    CSplit					Split;
-    CSplit					SplitForIQRecord;
-    CWriteIQFile			WriteIQFile;
-    CSplitAudio				SplitAudio;
-    CAudioSourceEncoderRx	AudioSourceEncoder; // For encoding the audio for RSI
-    CSplitFAC				SplitFAC;
-    CSplitSDC				SplitSDC;
-    CSplitMSC				SplitMSC[MAX_NUM_STREAMS];
-    CConvertAudio			ConvertAudio;
-    CAMDemodulation			AMDemodulation;
-    CAMSSPhaseDemod			AMSSPhaseDemod;
-    CAMSSExtractBits		AMSSExtractBits;
-    CAMSSDecode				AMSSDecode;
+    CReceiveData            ReceiveData;
+    CWriteData              WriteData;
+    CInputResample          InputResample;
+    CFreqSyncAcq            FreqSyncAcq;
+    CTimeSync               TimeSync;
+    COFDMDemodulation       OFDMDemodulation;
+    CSyncUsingPil           SyncUsingPil;
+    CChannelEstimation      ChannelEstimation;
+    COFDMCellDemapping      OFDMCellDemapping;
+    CFACMLCDecoder          FACMLCDecoder;
+    CUtilizeFACData         UtilizeFACData;
+    CSDCMLCDecoder          SDCMLCDecoder;
+    CUtilizeSDCData         UtilizeSDCData;
+    CSymbDeinterleaver      SymbDeinterleaver;
+    CMSCMLCDecoder          MSCMLCDecoder;
+    CMSCDemultiplexer       MSCDemultiplexer;
+    CAudioSourceDecoder     AudioSourceDecoder;
+    CDataDecoder            DataDecoder;
+    CSplit                  Split;
+    CSplit                  SplitForIQRecord;
+    CWriteIQFile            WriteIQFile;
+    CSplitAudio             SplitAudio;
+    CAudioSourceEncoderRx   AudioSourceEncoder; // For encoding the audio for RSI
+    CSplitFAC               SplitFAC;
+    CSplitSDC               SplitSDC;
+    CSplitMSC               SplitMSC[MAX_NUM_STREAMS];
+    CConvertAudio           ConvertAudio;
+    CAMDemodulation         AMDemodulation;
+    CAMSSPhaseDemod         AMSSPhaseDemod;
+    CAMSSExtractBits        AMSSExtractBits;
+    CAMSSDecode             AMSSDecode;
 
-    CUpstreamDI*			pUpstreamRSCI;
-    CDecodeRSIMDI			DecodeRSIMDI;
-    CDownstreamDI			downstreamRSCI;
+    CUpstreamDI*            pUpstreamRSCI;
+    CDecodeRSIMDI           DecodeRSIMDI;
+    CDownstreamDI           downstreamRSCI;
 
     /* Buffers */
-    CSingleBuffer<_REAL>			AMDataBuf;
-    CSingleBuffer<_REAL>			AMSSDataBuf;
-    CSingleBuffer<_REAL>			AMSSPhaseBuf;
-    CCyclicBuffer<_REAL>			AMSSResPhaseBuf;
-    CCyclicBuffer<_BINARY>			AMSSBitsBuf;
+    CSingleBuffer<_REAL>            AMDataBuf;
+    CSingleBuffer<_REAL>            AMSSDataBuf;
+    CSingleBuffer<_REAL>            AMSSPhaseBuf;
+    CCyclicBuffer<_REAL>            AMSSResPhaseBuf;
+    CCyclicBuffer<_BINARY>          AMSSBitsBuf;
 
-    CCyclicBuffer<_REAL>			DemodDataBuf;
-    CSingleBuffer<_REAL>			IQRecordDataBuf;
+    CCyclicBuffer<_REAL>            DemodDataBuf;
+    CSingleBuffer<_REAL>            IQRecordDataBuf;
 
-    CCyclicBuffer<_REAL>			RecDataBuf;
-    CCyclicBuffer<_REAL>			InpResBuf;
-    CCyclicBuffer<_COMPLEX>			FreqSyncAcqBuf;
-    CSingleBuffer<_COMPLEX>			TimeSyncBuf;
-    CSingleBuffer<_COMPLEX>			OFDMDemodBuf;
-    CSingleBuffer<_COMPLEX>			SyncUsingPilBuf;
-    CSingleBuffer<CEquSig>			ChanEstBuf;
-    CCyclicBuffer<CEquSig>			MSCCarDemapBuf;
-    CCyclicBuffer<CEquSig>			FACCarDemapBuf;
-    CCyclicBuffer<CEquSig>			SDCCarDemapBuf;
-    CSingleBuffer<CEquSig>			DeintlBuf;
-    CSingleBuffer<_BINARY>			FACDecBuf;
-    CSingleBuffer<_BINARY>			FACUseBuf;
-    CSingleBuffer<_BINARY>			FACSendBuf;
-    CSingleBuffer<_BINARY>			SDCDecBuf;
-    CSingleBuffer<_BINARY>			SDCUseBuf;
-    CSingleBuffer<_BINARY>			SDCSendBuf;
-    CSingleBuffer<_BINARY>			MSCMLCDecBuf;
-    CSingleBuffer<_BINARY>			RSIPacketBuf;
-    vector<CSingleBuffer<_BINARY> >	MSCDecBuf;
-    vector<CSingleBuffer<_BINARY> >	MSCUseBuf;
-    vector<CSingleBuffer<_BINARY> >	MSCSendBuf;
-    CSingleBuffer<_BINARY>			EncAMAudioBuf;
-    CCyclicBuffer<_SAMPLE>			AudSoDecBuf;
-    CCyclicBuffer<_SAMPLE>			AMAudioBuf;
-    CCyclicBuffer<_SAMPLE>			AMSoEncBuf; // For encoding
+    CCyclicBuffer<_REAL>            RecDataBuf;
+    CCyclicBuffer<_REAL>            InpResBuf;
+    CCyclicBuffer<_COMPLEX>         FreqSyncAcqBuf;
+    CSingleBuffer<_COMPLEX>         TimeSyncBuf;
+    CSingleBuffer<_COMPLEX>         OFDMDemodBuf;
+    CSingleBuffer<_COMPLEX>         SyncUsingPilBuf;
+    CSingleBuffer<CEquSig>          ChanEstBuf;
+    CCyclicBuffer<CEquSig>          MSCCarDemapBuf;
+    CCyclicBuffer<CEquSig>          FACCarDemapBuf;
+    CCyclicBuffer<CEquSig>          SDCCarDemapBuf;
+    CSingleBuffer<CEquSig>          DeintlBuf;
+    CSingleBuffer<_BINARY>          FACDecBuf;
+    CSingleBuffer<_BINARY>          FACUseBuf;
+    CSingleBuffer<_BINARY>          FACSendBuf;
+    CSingleBuffer<_BINARY>          SDCDecBuf;
+    CSingleBuffer<_BINARY>          SDCUseBuf;
+    CSingleBuffer<_BINARY>          SDCSendBuf;
+    CSingleBuffer<_BINARY>          MSCMLCDecBuf;
+    CSingleBuffer<_BINARY>          RSIPacketBuf;
+    vector<CSingleBuffer<_BINARY> > MSCDecBuf;
+    vector<CSingleBuffer<_BINARY> > MSCUseBuf;
+    vector<CSingleBuffer<_BINARY> > MSCSendBuf;
+    CSingleBuffer<_BINARY>          EncAMAudioBuf;
+    CCyclicBuffer<_SAMPLE>          AudSoDecBuf;
+    CCyclicBuffer<_SAMPLE>          AMAudioBuf;
+    CCyclicBuffer<_SAMPLE>          AMSoEncBuf; // For encoding
 
-    int						iAcquRestartCnt;
-    int						iAcquDetecCnt;
-    int						iGoodSignCnt;
-    int						iDelayedTrackModeCnt;
-    ERecState				eReceiverState;
-    ERecMode				eReceiverMode;
-    ERecMode				eNewReceiverMode;
+    int                     iAcquRestartCnt;
+    int                     iAcquDetecCnt;
+    int                     iGoodSignCnt;
+    int                     iDelayedTrackModeCnt;
+    ERecState               eReceiverState;
+    ERecMode                eReceiverMode;
+    ERecMode                eNewReceiverMode;
 
-    int						iAudioStreamID;
-    int						iDataStreamID;
+    int                     iAudioStreamID;
+    int                     iDataStreamID;
 
 
-    _BOOLEAN				bRestartFlag;
+    _BOOLEAN                bRestartFlag;
 
-    _REAL					rInitResampleOffset;
+    _REAL                   rInitResampleOffset;
 
-    CVectorEx<_BINARY>		vecbiMostRecentSDC;
+    CVectorEx<_BINARY>      vecbiMostRecentSDC;
 
     /* number of frames without FAC data before generating free-running RSCI */
-    static const int		MAX_UNLOCKED_COUNT;
+    static const int        MAX_UNLOCKED_COUNT;
 
     /* Counter for unlocked frames, to keep generating RSCI even when unlocked */
-    int						iUnlockedCount;
-    int						iBwAM;
-    int						iBwLSB;
-    int						iBwUSB;
-    int						iBwCW;
-    int						iBwFM;
-    time_t					time_keeper;
-    SFCallback*				sfCallback;
-    void*					sfCallbackParam;
+    int                     iUnlockedCount;
+    int                     iBwAM;
+    int                     iBwLSB;
+    int                     iBwUSB;
+    int                     iBwCW;
+    int                     iBwFM;
+    time_t                  time_keeper;
+    SFCallback*             sfCallback;
+    void*                   sfCallbackParam;
 
-    CPlotManager			PlotManager;
-    string					rsiOrigin;
-    string					sSoundFile;
-    int						iPrevSigSampleRate; /* sample rate before sound file */
+    CPlotManager            PlotManager;
+    string                  rsiOrigin;
+    string                  sSoundFile;
+    int                     iPrevSigSampleRate; /* sample rate before sound file */
 };
 
 

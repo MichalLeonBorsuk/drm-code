@@ -10,8 +10,12 @@ class QwtLevelMeter : public QwtThermo, public LevelMeter
 public:
     explicit QwtLevelMeter(QWidget *parent = 0);
 
-    void setLevel(double level) { setValue(level); }
-    QWidget* widget() { return this; }
+    void setLevel(double level) {
+        setValue(level);
+    }
+    QWidget* widget() {
+        return this;
+    }
 };
 
 #endif // QWTLEVELMETER_H

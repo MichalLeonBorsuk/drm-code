@@ -2,7 +2,7 @@
  * Copyright (c) 2001-2014
  *
  * Author(s):
- *	Julian Cable
+ *  Julian Cable
  *
  * Description:
  *
@@ -35,7 +35,9 @@ public:
     enum type { pcap, file_framing, raw_af, raw_pft, pcm };
     FileTyper();
     static type resolve(const std::string& s);
-    static bool is_rxstat(type t) { return t != pcm; }
+    static bool is_rxstat(type t) {
+        return t != pcm;
+    }
 };
 
 #endif // FILETYPER_H

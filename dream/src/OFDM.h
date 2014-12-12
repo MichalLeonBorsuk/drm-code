@@ -3,10 +3,10 @@
  * Copyright (c) 2001-2014
  *
  * Author(s):
- *	Volker Fischer
+ *  Volker Fischer
  *
  * Description:
- *	See OFDM.cpp
+ *  See OFDM.cpp
  *
  ******************************************************************************
  *
@@ -36,7 +36,7 @@
 
 /* Definitions ****************************************************************/
 /* Time constant for IIR averaging of PSD estimation */
-#define TICONST_PSD_EST_OFDM			((CReal) 1.0) /* sec */
+#define TICONST_PSD_EST_OFDM            ((CReal) 1.0) /* sec */
 
 
 /* Classes ********************************************************************/
@@ -52,19 +52,19 @@ public:
     }
 
 protected:
-    CFftPlans				FftPlan;
+    CFftPlans               FftPlan;
 
-    CComplexVector			veccFFTInput;
-    CComplexVector			veccFFTOutput;
+    CComplexVector          veccFFTInput;
+    CComplexVector          veccFFTOutput;
 
-    int						iShiftedKmin;
-    int						iEndIndex;
-    int						iDFTSize;
-    int						iGuardSize;
+    int                     iShiftedKmin;
+    int                     iEndIndex;
+    int                     iDFTSize;
+    int                     iGuardSize;
 
-    _COMPLEX				cCurExp;
-    _COMPLEX				cExpStep;
-    _REAL					rDefCarOffset;
+    _COMPLEX                cCurExp;
+    _COMPLEX                cExpStep;
+    _REAL                   rDefCarOffset;
 
     virtual void InitInternal(CParameter& TransmParam);
     virtual void ProcessDataInternal(CParameter& TransmParam);
@@ -81,21 +81,21 @@ public:
     void GetPowDenSpec(CVector<_REAL>& vecrData, CVector<_REAL>& vecrScale);
 
 protected:
-    CFftPlans				FftPlan;
-    CComplexVector			veccFFTInput;
-    CComplexVector			veccFFTOutput;
+    CFftPlans               FftPlan;
+    CComplexVector          veccFFTInput;
+    CComplexVector          veccFFTOutput;
 
-    CVector<_REAL>			vecrPowSpec;
-    int						iSampleRate;
-    int						iLenPowSpec;
+    CVector<_REAL>          vecrPowSpec;
+    int                     iSampleRate;
+    int                     iLenPowSpec;
 
-    int						iShiftedKmin;
-    int						iShiftedKmax;
-    int						iDFTSize;
-    int						iGuardSize;
-    int						iNumCarrier;
+    int                     iShiftedKmin;
+    int                     iShiftedKmax;
+    int                     iDFTSize;
+    int                     iGuardSize;
+    int                     iNumCarrier;
 
-    CReal					rLamPSD;
+    CReal                   rLamPSD;
 
 
     virtual void InitInternal(CParameter& Parameters);
@@ -103,29 +103,29 @@ protected:
 };
 
 class COFDMDemodSimulation :
-            public CSimulationModul<CChanSimDataMod, _COMPLEX, CChanSimDataDemod>
+    public CSimulationModul<CChanSimDataMod, _COMPLEX, CChanSimDataDemod>
 {
 public:
     COFDMDemodSimulation() {}
     virtual ~COFDMDemodSimulation() {}
 
 protected:
-    CFftPlans				FftPlan;
-    CComplexVector			veccFFTInput;
-    CComplexVector			veccFFTOutput;
+    CFftPlans               FftPlan;
+    CComplexVector          veccFFTInput;
+    CComplexVector          veccFFTOutput;
 
-    int						iStartPointGuardRemov;
+    int                     iStartPointGuardRemov;
 
-    int						iShiftedKmin;
-    int						iShiftedKmax;
-    int						iDFTSize;
-    int						iGuardSize;
-    int						iNumCarrier;
-    int						iSymbolBlockSize;
-    int						iSymbolCounterTiSy;
-    int						iNumSymPerFrame;
+    int                     iShiftedKmin;
+    int                     iShiftedKmax;
+    int                     iDFTSize;
+    int                     iGuardSize;
+    int                     iNumCarrier;
+    int                     iSymbolBlockSize;
+    int                     iSymbolCounterTiSy;
+    int                     iNumSymPerFrame;
 
-    int						iNumTapsChan;
+    int                     iNumTapsChan;
 
     virtual void InitInternal(CParameter& Parameters);
     virtual void ProcessDataInternal(CParameter& Parameters);

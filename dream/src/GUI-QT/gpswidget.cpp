@@ -49,11 +49,11 @@ void GPSWidget::setGPSDatTime(double time)
     p_ts = gmtime(&tt);
     QChar fill('0');
     ui->time->setText( QString("UTC: %1/%2/%3 %4:%5:%6  ")
-            .arg(1900 + p_ts->tm_year)
-            .arg(1 + p_ts->tm_mon, 2, 10, fill)
-            .arg(p_ts->tm_mday, 2, 10, fill)
-            .arg(p_ts->tm_hour, 2, 10, fill)
-            .arg(p_ts->tm_min, 2, 10, fill)
-            .arg(p_ts->tm_sec,2, 10, fill)
-                       );
+                       .arg(1900 + p_ts->tm_year)
+                       .arg(1 + p_ts->tm_mon, 2, 10, fill)
+                       .arg(p_ts->tm_mday, 2, 10, fill)
+                       .arg(p_ts->tm_hour, 2, 10, fill)
+                       .arg(p_ts->tm_min, 2, 10, fill)
+                       .arg(p_ts->tm_sec,2, 10, fill)
+                     );
 }

@@ -3,10 +3,10 @@
  * Copyright (c) 2001-2014
  *
  * Author(s):
- *	Volker Fischer
+ *  Volker Fischer
  *
  * Description:
- *	Channel estimation and equalization
+ *  Channel estimation and equalization
  *
  ******************************************************************************
  *
@@ -33,10 +33,10 @@
 /* Implementation *************************************************************/
 void CChannelEstimation::ProcessDataInternal(CParameter& Parameters)
 {
-    int		i, j, k;
-    int		iModSymNum;
-    _REAL	rCurSNREst;
-    _REAL	rOffsPDSEst;
+    int     i, j, k;
+    int     iModSymNum;
+    _REAL   rCurSNREst;
+    _REAL   rOffsPDSEst;
 
     /* Check if symbol ID index has changed by the synchronization unit. If it
        has changed, reinit this module */
@@ -139,7 +139,7 @@ void CChannelEstimation::ProcessDataInternal(CParameter& Parameters)
     {
     case FLINEAR:
         /**********************************************************************\
-         * Linear interpolation												  *
+         * Linear interpolation                                               *
         \**********************************************************************/
         /* Set first pilot position */
         veccChanEst[0] = veccPilots[0];
@@ -163,7 +163,7 @@ void CChannelEstimation::ProcessDataInternal(CParameter& Parameters)
 
     case FDFTFILTER:
         /**********************************************************************\
-         * DFT based algorithm												  *
+         * DFT based algorithm                                                *
         \**********************************************************************/
         /* Special case with robustness mode D: pilots in all carriers!
            so no processing is required, the channel estimation is
@@ -208,7 +208,7 @@ void CChannelEstimation::ProcessDataInternal(CParameter& Parameters)
 
     case FWIENER:
         /**********************************************************************\
-         * Wiener filter													   *
+         * Wiener filter                                                       *
         \**********************************************************************/
         /* Wiener filter update --------------------------------------------- */
         /* Do not update filter in case of simulation */
@@ -313,7 +313,7 @@ void CChannelEstimation::ProcessDataInternal(CParameter& Parameters)
                 /* Average the SNR with a two sided recursion. Apply correction
                    factor, too */
                 IIR1TwoSided(rSNREstimate, rCurSNREst / rSNRTotToPilCorrFact,
-                             rLamSNREstFast,	rLamSNREstSlow);
+                             rLamSNREstFast,    rLamSNREstSlow);
             }
         }
         break;
@@ -598,7 +598,7 @@ void CChannelEstimation::CalculateRint(CParameter& Parameters)
 
     /* Interferer frequency */
     Parameters.rIntFreq = ((_REAL) iMaxIntCarrier + Parameters.CellMappingTable.iCarrierKmin) /
-                             Parameters.CellMappingTable.iFFTSizeN * iSampleRate;
+                          Parameters.CellMappingTable.iFFTSizeN * iSampleRate;
 }
 
 void CChannelEstimation::InitInternal(CParameter& Parameters)
@@ -890,15 +890,15 @@ CComplexVector CChannelEstimation::FreqOptimalFilter(int iFreqInt, int iDiff,
         int iLength)
 {
     /*
-    	We assume that the power delay spread is a rectangle function in the time
-    	domain (sinc-function in the frequency domain). Length and position of this
-    	window are adapted according to the current estimated PDS.
+        We assume that the power delay spread is a rectangle function in the time
+        domain (sinc-function in the frequency domain). Length and position of this
+        window are adapted according to the current estimated PDS.
     */
-    int				i;
-    CRealVector		vecrRpp(iLength);
-    CRealVector		vecrRhp(iLength);
-    CRealVector		vecrH(iLength);
-    CComplexVector	veccH(iLength);
+    int             i;
+    CRealVector     vecrRpp(iLength);
+    CRealVector     vecrRhp(iLength);
+    CRealVector     vecrH(iLength);
+    CComplexVector  veccH(iLength);
 
     /* Calculation of R_hp, this is the SHIFTED correlation function */
     for (i = 0; i < iLength; i++)
@@ -942,9 +942,9 @@ CComplexVector CChannelEstimation::FreqOptimalFilter(int iFreqInt, int iDiff,
 void CChannelEstimation::UpdateWienerFiltCoef(CReal rNewSNR, CReal rRatPDSLen,
         CReal rRatPDSOffs)
 {
-    int	j, i;
-    int	iDiff;
-    int	iCurPil;
+    int j, i;
+    int iDiff;
+    int iCurPil;
 
     /* Calculate all possible wiener filters */
     for (j = 0; j < iNumWienerFilt; j++)
@@ -1285,10 +1285,10 @@ void CChannelEstimation::GetAvPoDeSp(CVector<_REAL>& vecrData,
 void CChannelEstimation::UpdateRSIPilotStore(CParameter& Parameters, CVectorEx<_COMPLEX>* pvecInputData,
         CVector<int>& veciMapTab, CVector<_COMPLEX>& veccPilotCells, const unsigned int iSymbolCounter)
 {
-    int			i;
-    int			iPiHiIdx;
-    //int			iTimeDiffNew;
-    _COMPLEX	cNewPilot;
+    int         i;
+    int         iPiHiIdx;
+    //int           iTimeDiffNew;
+    _COMPLEX    cNewPilot;
 
     /* Clear time diff accumulator at start of the frame */
     if (iSymbolCounter == 0)
@@ -1331,7 +1331,7 @@ void CChannelEstimation::UpdateRSIPilotStore(CParameter& Parameters, CVectorEx<_
 
             /* We need to correct pilots due to timing corrections */
             /* Calculate timing difference: use the one you want to correct (the current one = 0) - the reference one */
-            cNewPilot =	pTimeInt->Rotate(cNewPilot, i, -iTimeDiffAccuRSI);
+            cNewPilot = pTimeInt->Rotate(cNewPilot, i, -iTimeDiffAccuRSI);
 
         }
         else /* it must be the DC carrier in mode D. Set to complex zero */
@@ -1348,11 +1348,11 @@ void CChannelEstimation::UpdateRSIPilotStore(CParameter& Parameters, CVectorEx<_
     {
         /* copy into CParam object */
         Parameters.matcReceivedPilotValues.Init(iNumSymPerFrame / gcs.t, iNumCarrier/gcs.f + 1,
-                _COMPLEX(_REAL(0.0),_REAL(0.0)));
+                                                _COMPLEX(_REAL(0.0),_REAL(0.0)));
         Parameters.matcReceivedPilotValues = matcRSIPilotStore;
         /* copy it a row at a time (vector provides an assignment operator)
         for (i=0; i<iNumSymPerFrame / gcs.t; i++)
-        	Parameters.matcReceivedPilotValues[i] = matcRSIPilotStore[i];
+            Parameters.matcReceivedPilotValues[i] = matcRSIPilotStore[i];
         */
 
 

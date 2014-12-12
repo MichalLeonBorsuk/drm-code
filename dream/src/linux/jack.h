@@ -3,10 +3,10 @@
  * Copyright (c) 2001-2014
  *
  * Author(s):
- *	Julian Cable
+ *  Julian Cable
  *
  * Description:
- *	Jack sound classes
+ *  Jack sound classes
  *
  ******************************************************************************
  *
@@ -33,7 +33,7 @@
 
 #ifdef _WIN32
 # include <windows.h>
-	typedef HANDLE pthread_t;
+typedef HANDLE pthread_t;
 #endif
 #include <jack/jack.h>
 #include <jack/ringbuffer.h>
@@ -73,12 +73,12 @@ public:
     CSoundInJack(const CSoundInJack& e);
     CSoundInJack& operator=(const CSoundInJack& e);
 
-    virtual void		Init(int iNewBufferSize, _BOOLEAN bNewBlocking = TRUE);
-    virtual _BOOLEAN	Read(CVector<short>& psData);
-    virtual void		Enumerate(vector<string>&);
-    virtual int			GetDev();
-    virtual void		SetDev(int iNewDev);
-    virtual void		Close();
+    virtual void        Init(int iNewBufferSize, _BOOLEAN bNewBlocking = TRUE);
+    virtual _BOOLEAN    Read(CVector<short>& psData);
+    virtual void        Enumerate(vector<string>&);
+    virtual int         GetDev();
+    virtual void        SetDev(int iNewDev);
+    virtual void        Close();
 protected:
     int iBufferSize;
     _BOOLEAN bBlocking;
@@ -96,12 +96,12 @@ public:
     CSoundOutJack(const CSoundOutJack& e);
     CSoundOutJack& operator=(const CSoundOutJack& e);
 
-    virtual void		Init(int iNewBufferSize, _BOOLEAN bNewBlocking = TRUE);
-    virtual _BOOLEAN	Write(CVector<short>& psData);
-    virtual void		Enumerate(vector<string>&);
-    virtual int			GetDev();
-    virtual void		SetDev(int iNewDev);
-    virtual void		Close();
+    virtual void        Init(int iNewBufferSize, _BOOLEAN bNewBlocking = TRUE);
+    virtual _BOOLEAN    Write(CVector<short>& psData);
+    virtual void        Enumerate(vector<string>&);
+    virtual int         GetDev();
+    virtual void        SetDev(int iNewDev);
+    virtual void        Close();
 protected:
     int iBufferSize;
     _BOOLEAN bBlocking;

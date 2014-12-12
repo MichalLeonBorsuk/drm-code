@@ -83,7 +83,7 @@ void AMSpectrumPlot::setWaterfallMode(bool b)
 
 void AMSpectrumPlot::updateBWMarker(double centerFreq, double bandwidth)
 {
-    QVector<double>	x, y;
+    QVector<double> x, y;
     x << centerFreq;
     y << yAxis->range().lower; // full height
     bw->setData(x, y);

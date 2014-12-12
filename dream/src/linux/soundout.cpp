@@ -3,7 +3,7 @@
 * Copyright (c) 2001-2014
 *
 * Author(s):
-*	Alexander Kurpiers
+*   Alexander Kurpiers
 *
 *
 ******************************************************************************
@@ -300,27 +300,26 @@ int CSoundOut::write_HW( _SAMPLE *playbuf, int size )
                     break;
                 }
                 continue;
-            } else
-                if (ret == -EPIPE) {    /* under-run */
-                    qDebug("underrun");
+            } else if (ret == -EPIPE) {   /* under-run */
+                qDebug("underrun");
+                ret = snd_pcm_prepare(handle);
+                if (ret < 0)
+                    qDebug("Can't recover from underrun, prepare failed: %s", snd_strerror(ret));
+                continue;
+            } else if (ret == -ESTRPIPE) {
+                qDebug("strpipe");
+                while ((ret = snd_pcm_resume(handle)) == -EAGAIN)
+                    sleep(1);       /* wait until the suspend flag is released */
+                if (ret < 0) {
                     ret = snd_pcm_prepare(handle);
                     if (ret < 0)
-                        qDebug("Can't recover from underrun, prepare failed: %s", snd_strerror(ret));
-                    continue;
-                } else if (ret == -ESTRPIPE) {
-                    qDebug("strpipe");
-                    while ((ret = snd_pcm_resume(handle)) == -EAGAIN)
-                        sleep(1);       /* wait until the suspend flag is released */
-                    if (ret < 0) {
-                        ret = snd_pcm_prepare(handle);
-                        if (ret < 0)
-                            qDebug("Can't recover from suspend, prepare failed: %s", snd_strerror(ret));
-                    }
-                    continue;
-                } else {
-                    qDebug("Write error: %s", snd_strerror(ret));
-                    throw CGenErr("Write error");
+                        qDebug("Can't recover from suspend, prepare failed: %s", snd_strerror(ret));
                 }
+                continue;
+            } else {
+                qDebug("Write error: %s", snd_strerror(ret));
+                throw CGenErr("Write error");
+            }
             break;  /* skip one period */
         }
         size -= ret;
@@ -353,7 +352,7 @@ void CSoundOut::CPlayThread::run()
 
             // enough data in the buffer
 
-            CVectorEx<_SAMPLE>*	p;
+            CVectorEx<_SAMPLE>* p;
 
             SoundBuf.lock();
             p = SoundBuf.Get( FRAGSIZE * NUM_OUT_CHANNELS );
@@ -374,7 +373,7 @@ void CSoundOut::CPlayThread::run()
                 fill = SoundBuf.GetFillLevel();
                 SoundBuf.unlock();
 
-            } while ((SoundBuf.keep_running) && ( fill < SOUNDBUFLEN/2 ));	// wait until buffer is at least half full
+            } while ((SoundBuf.keep_running) && ( fill < SOUNDBUFLEN/2 ));  // wait until buffer is at least half full
         }
     }
     qDebug("Play Thread stopped");
@@ -431,11 +430,11 @@ _BOOLEAN CSoundOut::Write(CVector< _SAMPLE >& psData)
         }
     }
 
-    PlayThread.SoundBuf.lock();	// we need exclusive access
+    PlayThread.SoundBuf.lock(); // we need exclusive access
 
     if ( ( SOUNDBUFLEN - PlayThread.SoundBuf.GetFillLevel() ) > iBufferSize) {
 
-        CVectorEx<_SAMPLE>*	ptarget;
+        CVectorEx<_SAMPLE>* ptarget;
 
         // data fits, so copy
         ptarget = PlayThread.SoundBuf.QueryWriteBuffer();

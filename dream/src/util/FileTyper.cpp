@@ -2,7 +2,7 @@
  * Copyright (c) 2001-2014
  *
  * Author(s):
- *	Julian Cable
+ *  Julian Cable
  *
  * Description:
  *
@@ -77,7 +77,8 @@ FileTyper::type FileTyper::resolve(const string& str)
     if (f)
     {
         char c[5];
-        size_t r = fread(&c, 1, 4, f); (void)r;
+        size_t r = fread(&c, 1, 4, f);
+        (void)r;
         fclose(f);
         c[4]='\0';
         if(strcmp(c, "fio_")==0) return file_framing;

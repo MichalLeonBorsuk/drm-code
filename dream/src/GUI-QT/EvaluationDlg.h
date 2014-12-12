@@ -3,7 +3,7 @@
  * Copyright (c) 2001-2014
  *
  * Author(s):
- *	Volker Fischer
+ *  Volker Fischer
  *
  * Description:
  *
@@ -48,63 +48,63 @@ class ReceiverController;
 
 class systemevalDlg : public CWindow, public Ui_SystemEvaluationWindow
 {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
     systemevalDlg(ReceiverController*, CSettings&, QWidget* parent = 0);
-	virtual ~systemevalDlg();
+    virtual ~systemevalDlg();
     void            connectController(ReceiverController*);
 
 protected:
     ReceiverController* controller;
     CParameter&     Parameters;
 
-	QTimer			Timer;
-	CDRMPlot*		MainPlot;
+    QTimer          Timer;
+    CDRMPlot*       MainPlot;
 
-	virtual void	eventShow(QShowEvent* pEvent);
-	virtual void	eventHide(QHideEvent* pEvent);
-	void			UpdateGPS(CParameter&);
-    void			setControls(CSettings& s);
-    void			AddWhatsThisHelp();
-    ChartDialog*	OpenChartWin(ECharType eNewType);
+    virtual void    eventShow(QShowEvent* pEvent);
+    virtual void    eventHide(QHideEvent* pEvent);
+    void            UpdateGPS(CParameter&);
+    void            setControls(CSettings& s);
+    void            AddWhatsThisHelp();
+    ChartDialog*    OpenChartWin(ECharType eNewType);
     QTreeWidgetItem* FindItemByECharType(ECharType eCharType);
-    string			ECharTypeToPlotName(ECharType eCharType);
+    string          ECharTypeToPlotName(ECharType eCharType);
     ECharType       PlotNameToECharType(const string& PlotName);
 
-    QString			GetRobModeStr(ERobMode);
-    QString			GetSpecOccStr(ESpecOcc v);
+    QString         GetRobModeStr(ERobMode);
+    QString         GetSpecOccStr(ESpecOcc v);
 
-	QMenu*			pTreeWidgetContextMenu;
+    QMenu*          pTreeWidgetContextMenu;
     ECharType       eCurCharType, eNewCharType;
-	int				iPlotStyle;
-    vector<ChartDialog*>	vecpDRMPlots;
+    int             iPlotStyle;
+    vector<ChartDialog*>    vecpDRMPlots;
 
 public slots:
-	void OnTimer();
-	void OnRadioTimeLinear();
-	void OnRadioTimeWiener();
-	void OnRadioFrequencyLinear();
-	void OnRadioFrequencyDft();
-	void OnRadioFrequencyWiener();
-	void OnRadioTiSyncFirstPeak();
-	void OnRadioTiSyncEnergy();
-	void OnSliderIterChange(int value);
-	void OnCheckFlipSpectrum();
-	void OnCheckBoxMuteAudio();
-	void OnCheckBoxReverb();
-	void OnCheckWriteLog(int);
-	void OnCheckSaveAudioWAV();
-	void OnCheckRecFilter();
-	void OnCheckModiMetric();
-	void OnListSelChanged(QTreeWidgetItem*, QTreeWidgetItem*);
-	void OnTreeWidgetContMenu(bool);
-	void OnCustomContextMenuRequested(const QPoint&);
+    void OnTimer();
+    void OnRadioTimeLinear();
+    void OnRadioTimeWiener();
+    void OnRadioFrequencyLinear();
+    void OnRadioFrequencyDft();
+    void OnRadioFrequencyWiener();
+    void OnRadioTiSyncFirstPeak();
+    void OnRadioTiSyncEnergy();
+    void OnSliderIterChange(int value);
+    void OnCheckFlipSpectrum();
+    void OnCheckBoxMuteAudio();
+    void OnCheckBoxReverb();
+    void OnCheckWriteLog(int);
+    void OnCheckSaveAudioWAV();
+    void OnCheckRecFilter();
+    void OnCheckModiMetric();
+    void OnListSelChanged(QTreeWidgetItem*, QTreeWidgetItem*);
+    void OnTreeWidgetContMenu(bool);
+    void OnCustomContextMenuRequested(const QPoint&);
     void OnDataAvailable();
-	void UpdatePlotStyle(int);
+    void UpdatePlotStyle(int);
 signals:
-	void startLogging();
-	void stopLogging();
+    void startLogging();
+    void stopLogging();
     void saveAudio(const string&);
     void setTimeInt(int);
     void setFreqInt(int);

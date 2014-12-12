@@ -3,10 +3,10 @@
  * Copyright (c) 2001-2014
  *
  * Author(s):
- *	Oliver Haffenden
+ *  Oliver Haffenden
  *
  * Description:
- *	see RSISubscriber.cpp
+ *  see RSISubscriber.cpp
  *
  ******************************************************************************
  *
@@ -43,85 +43,98 @@ class CTagPacketGenerator;
 class CRSISubscriber : public CPacketSocket
 {
 public:
-	CRSISubscriber(CPacketSink *pSink = NULL);
+    CRSISubscriber(CPacketSink *pSink = NULL);
 
-	/* provide a pointer to the receiver for incoming RCI commands */
-	/* leave it set to NULL if you want incoming commands to be ignored */
-	void SetReceiver(CDRMReceiver *pReceiver);
+    /* provide a pointer to the receiver for incoming RCI commands */
+    /* leave it set to NULL if you want incoming commands to be ignored */
+    void SetReceiver(CDRMReceiver *pReceiver);
 
-	virtual _BOOLEAN SetOrigin(const string&){return FALSE;} // only relevant for network subscribers
+    virtual _BOOLEAN SetOrigin(const string&) {
+        return FALSE;   // only relevant for network subscribers
+    }
 
-	/* Set the profile for this subscriber - could be different for different subscribers */
-	void SetProfile(const char c);
-	char GetProfile(void) const {return cProfile;}
+    /* Set the profile for this subscriber - could be different for different subscribers */
+    void SetProfile(const char c);
+    char GetProfile(void) const {
+        return cProfile;
+    }
 
-	void SetPFTFragmentSize(const int iFrag=-1);
+    void SetPFTFragmentSize(const int iFrag=-1);
 
-	/* Generate and send a packet */
-	void TransmitPacket(CTagPacketGenerator& Generator);
+    /* Generate and send a packet */
+    void TransmitPacket(CTagPacketGenerator& Generator);
 
-	void SetAFPktCRC(const _BOOLEAN bNAFPktCRC) {bUseAFCRC = bNAFPktCRC;}
+    void SetAFPktCRC(const _BOOLEAN bNAFPktCRC) {
+        bUseAFCRC = bNAFPktCRC;
+    }
 
 
-	/* from CPacketSink interface */
-	virtual void SendPacket(const vector<_BYTE>& vecbydata, uint32_t addr=0, uint16_t port=0);
+    /* from CPacketSink interface */
+    virtual void SendPacket(const vector<_BYTE>& vecbydata, uint32_t addr=0, uint16_t port=0);
 
-	/* from CPacketSource, but we really want it for RSCI control */
-	virtual void poll()=0;
+    /* from CPacketSource, but we really want it for RSCI control */
+    virtual void poll()=0;
 
 protected:
-	CPacketSink *pPacketSink;
-	char cProfile;
-	_BOOLEAN bNeedPft;
+    CPacketSink *pPacketSink;
+    char cProfile;
+    _BOOLEAN bNeedPft;
     size_t fragment_size;
-	CTagPacketDecoderRSCIControl TagPacketDecoderRSCIControl;
+    CTagPacketDecoderRSCIControl TagPacketDecoderRSCIControl;
 private:
-	CDRMReceiver *pDRMReceiver;
-	CAFPacketGenerator AFPacketGenerator;
+    CDRMReceiver *pDRMReceiver;
+    CAFPacketGenerator AFPacketGenerator;
 
-	_BOOLEAN bUseAFCRC;
-	uint16_t sequence_counter;
+    _BOOLEAN bUseAFCRC;
+    uint16_t sequence_counter;
 };
 
 
 class CRSISubscriberSocket : public CRSISubscriber
 {
 public:
-	CRSISubscriberSocket(CPacketSink *pSink = NULL);
-	virtual ~CRSISubscriberSocket();
+    CRSISubscriberSocket(CPacketSink *pSink = NULL);
+    virtual ~CRSISubscriberSocket();
 
-	_BOOLEAN SetOrigin(const string& str);
-	_BOOLEAN GetOrigin(string& addr);
-	_BOOLEAN SetDestination(const string& str);
-	_BOOLEAN GetDestination(string& addr);
-	void SetPacketSink(CPacketSink *pSink) { (void)pSink; }
-	void ResetPacketSink() {}
-	void poll();
+    _BOOLEAN SetOrigin(const string& str);
+    _BOOLEAN GetOrigin(string& addr);
+    _BOOLEAN SetDestination(const string& str);
+    _BOOLEAN GetDestination(string& addr);
+    void SetPacketSink(CPacketSink *pSink) {
+        (void)pSink;
+    }
+    void ResetPacketSink() {}
+    void poll();
 
 private:
-	CPacketSocket* pSocket;
-	string strDestination;
-	uint32_t uIf, uAddr;
-	uint16_t uPort;
+    CPacketSocket* pSocket;
+    string strDestination;
+    uint32_t uIf, uAddr;
+    uint16_t uPort;
 };
 
 
 class CRSISubscriberFile : public CRSISubscriber
 {
 public:
-	CRSISubscriberFile();
+    CRSISubscriberFile();
 
-	_BOOLEAN SetDestination(const string& strFName);
-	void StartRecording();
-	void StopRecording();
-	void poll() {} // Do Nothing
+    _BOOLEAN SetDestination(const string& strFName);
+    void StartRecording();
+    void StopRecording();
+    void poll() {} // Do Nothing
 
-	_BOOLEAN GetDestination(string& addr);
-	_BOOLEAN GetOrigin(string& addr) { (void)addr; return false; }
-	void SetPacketSink(CPacketSink *pSink) { (void)pSink; }
-	void ResetPacketSink() {}
+    _BOOLEAN GetDestination(string& addr);
+    _BOOLEAN GetOrigin(string& addr) {
+        (void)addr;
+        return false;
+    }
+    void SetPacketSink(CPacketSink *pSink) {
+        (void)pSink;
+    }
+    void ResetPacketSink() {}
 private:
-	CPacketSinkFile* pPacketSinkFile;
+    CPacketSinkFile* pPacketSinkFile;
 };
 
 #endif

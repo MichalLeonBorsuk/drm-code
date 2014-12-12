@@ -40,52 +40,52 @@ CAudioCodec::RefCount = 0;
 void
 CAudioCodec::InitCodecList()
 {
-	if (CodecList.size() == 0)
-	{
-		/* Null codec, MUST be the first */
-		CodecList.push_back(new NullCodec);
+    if (CodecList.size() == 0)
+    {
+        /* Null codec, MUST be the first */
+        CodecList.push_back(new NullCodec);
 
-		/* AAC */
-		CodecList.push_back(new AacCodec);
+        /* AAC */
+        CodecList.push_back(new AacCodec);
 
-		/* Opus */
-		CodecList.push_back(new OpusCodec);
-	}
-	RefCount ++;
+        /* Opus */
+        CodecList.push_back(new OpusCodec);
+    }
+    RefCount ++;
 }
 
 void
 CAudioCodec::UnrefCodecList()
 {
-	RefCount --;
-	if (!RefCount)
-	{
-		while (CodecList.size() != 0)
-		{
-			delete CodecList.back();
-			CodecList.pop_back();
-		}
-	}
+    RefCount --;
+    if (!RefCount)
+    {
+        while (CodecList.size() != 0)
+        {
+            delete CodecList.back();
+            CodecList.pop_back();
+        }
+    }
 }
 
 CAudioCodec*
 CAudioCodec::GetDecoder(CAudioParam::EAudCod eAudioCoding, bool bCanReturnNullPtr)
 {
-	const int size = CodecList.size();
-	for (int i = 1; i < size; i++)
-		if (CodecList[i]->CanDecode(eAudioCoding))
-			return CodecList[i];
-	/* Fallback to null codec */
+    const int size = CodecList.size();
+    for (int i = 1; i < size; i++)
+        if (CodecList[i]->CanDecode(eAudioCoding))
+            return CodecList[i];
+    /* Fallback to null codec */
     return bCanReturnNullPtr ? NULL : CodecList[0]; // ie the null codec
 }
 
 CAudioCodec*
 CAudioCodec::GetEncoder(CAudioParam::EAudCod eAudioCoding, bool bCanReturnNullPtr)
 {
-	const int size = CodecList.size();
-	for (int i = 1; i < size; i++)
-		if (CodecList[i]->CanEncode(eAudioCoding))
-			return CodecList[i];
-	/* Fallback to null codec */
+    const int size = CodecList.size();
+    for (int i = 1; i < size; i++)
+        if (CodecList[i]->CanEncode(eAudioCoding))
+            return CodecList[i];
+    /* Fallback to null codec */
     return bCanReturnNullPtr ? NULL : CodecList[0]; // ie the null codec
 }

@@ -3,7 +3,7 @@
  * Copyright (c) 2001-2014
  *
  * Author(s):
- *	Volker Fischer, Andrea Russo, David Flamand
+ *  Volker Fischer, Andrea Russo, David Flamand
  *
  * Description:
  *
@@ -53,8 +53,8 @@ void CreateDirectories(const QString& strFilename);
 
 void RestartTransceiver(CDRMTransceiver *DRMTransceiver);
 
-QString	GetCodecString(const CService&);
-QString	GetTypeString(const CService&);
+QString GetCodecString(const CService&);
+QString GetTypeString(const CService&);
 QString GetDataTypeString(const CService&);
 
 QString getAMScheduleUrl();

@@ -24,7 +24,7 @@ class CWebsiteObject
 public:
     CWebsiteObject(unsigned int id, const QString& strContentType, CVector<_BYTE>& vecbData)
         : id(id), strContentType(strContentType),
-        data(QByteArray((const char*)&vecbData[0], vecbData.Size())) {}
+          data(QByteArray((const char*)&vecbData[0], vecbData.Size())) {}
     virtual ~CWebsiteObject() {}
     unsigned int    id;
     QString         strContentType;
@@ -67,11 +67,15 @@ class CNetworkReplyCache : public QNetworkReply
 
 public:
     CNetworkReplyCache(QNetworkAccessManager::Operation op,
-        const QNetworkRequest& req, CWebsiteCache& cache, CCounter& waitobjs);
+                       const QNetworkRequest& req, CWebsiteCache& cache, CCounter& waitobjs);
     virtual ~CNetworkReplyCache();
-    void abort() { id = 0; }
+    void abort() {
+        id = 0;
+    }
     qint64 bytesAvailable() const;
-    bool isSequential() const { return true; }
+    bool isSequential() const {
+        return true;
+    }
 
 protected:
     qint64 readData(char * data, qint64 maxSize);
@@ -94,9 +98,9 @@ class CNetworkAccessManager : public QNetworkAccessManager
 
 public:
     CNetworkAccessManager(QObject* parent, CWebsiteCache& cache,
-        CCounter& waitobjs, const bool& bAllowExternalContent, const QString& strCacheHost)
+                          CCounter& waitobjs, const bool& bAllowExternalContent, const QString& strCacheHost)
         : QNetworkAccessManager(parent), cache(cache), waitobjs(waitobjs),
-        bAllowExternalContent(bAllowExternalContent), strCacheHost(strCacheHost) {}
+          bAllowExternalContent(bAllowExternalContent), strCacheHost(strCacheHost) {}
     virtual ~CNetworkAccessManager() {}
 
 protected:

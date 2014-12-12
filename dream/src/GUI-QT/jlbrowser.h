@@ -3,7 +3,7 @@
  * Copyright (c) 2001-2014
  *
  * Author(s):
- *	 Julian Cable
+ *   Julian Cable
  *
  * Description: Journaline Specialisation of TextBrowser
  *

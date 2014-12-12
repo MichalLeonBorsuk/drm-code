@@ -30,7 +30,9 @@ class ReceiverController : public QObject, public CController
 public:
     explicit ReceiverController(CDRMReceiver*, CSettings&, QObject *parent = 0);
     // TODO - remove this:
-    CDRMReceiver* getReceiver() { return receiver; }
+    CDRMReceiver* getReceiver() {
+        return receiver;
+    }
     int getMode() const;
 
 signals:

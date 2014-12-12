@@ -3,10 +3,10 @@
  * Copyright (c) 2001-2014
  *
  * Author(s):
- *	Julian Cable
+ *  Julian Cable
  *
  * Description:
- *	ETSI DAB/DRM Electronic Programme Guide XML Decompressor
+ *  ETSI DAB/DRM Electronic Programme Guide XML Decompressor
  *
  *
  ******************************************************************************
@@ -38,24 +38,38 @@ class tag_length_value
 {
 public:
 
-      tag_length_value(const _BYTE* p);
+    tag_length_value(const _BYTE* p);
 
-      bool is_cdata() const { return tag == 1; }
-      bool is_epg() const { return tag == 2; }
-      bool is_service_information() const { return tag == 3; }
-      bool is_string_token_table() const { return tag == 4; }
-      bool is_default_id() const { return tag == 5; }
-      bool is_child_element() const { return (5<tag) && (tag<0x80); }
-      bool is_attribute() const { return tag>=0x80; }
+    bool is_cdata() const {
+        return tag == 1;
+    }
+    bool is_epg() const {
+        return tag == 2;
+    }
+    bool is_service_information() const {
+        return tag == 3;
+    }
+    bool is_string_token_table() const {
+        return tag == 4;
+    }
+    bool is_default_id() const {
+        return tag == 5;
+    }
+    bool is_child_element() const {
+        return (5<tag) && (tag<0x80);
+    }
+    bool is_attribute() const {
+        return tag>=0x80;
+    }
 
-      uint8_t tag;
-      size_t length;
-      _BYTE* value;
+    uint8_t tag;
+    size_t length;
+    _BYTE* value;
 };
 
 class CEPGDecoder
 {
-  public:
+public:
     CEPGDecoder ():doc()
     {
     }

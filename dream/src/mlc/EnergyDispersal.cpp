@@ -3,7 +3,7 @@
  * Copyright (c) 2001-2014
  *
  * Author(s):
- *	Volker Fischer
+ *  Volker Fischer
  *
  * Description:
  *
@@ -36,9 +36,9 @@
 /* Implementation *************************************************************/
 void CEngergyDispersal::ProcessData(CVector<_BINARY>* pbiData)
 {
-    int			i;
-    uint32_t	iTempShiftRegister;
-    _BINARY		biPRBSbit;
+    int         i;
+    uint32_t    iTempShiftRegister;
+    _BINARY     biPRBSbit;
 
     /* Init shift register and set all registers to "1" with bit-wise
        not-operation */

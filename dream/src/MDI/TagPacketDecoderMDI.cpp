@@ -3,15 +3,15 @@
  * Copyright (c) 2001-2014
  *
  * Author(s):
- *	Volker Fischer, Julian Cable, Oliver Haffenden
+ *  Volker Fischer, Julian Cable, Oliver Haffenden
  *
  * Description:
- *	Implements Digital Radio Mondiale (DRM) Multiplex Distribution Interface
- *	(MDI), Receiver Status and Control Interface (RSCI)
+ *  Implements Digital Radio Mondiale (DRM) Multiplex Distribution Interface
+ *  (MDI), Receiver Status and Control Interface (RSCI)
  *  and Distribution and Communications Protocol (DCP) as described in
- *	ETSI TS 102 820,  ETSI TS 102 349 and ETSI TS 102 821 respectively.
+ *  ETSI TS 102 820,  ETSI TS 102 349 and ETSI TS 102 821 respectively.
  *
- *	This is a class derived from CTagPacketDecoder, specialised for the MDI application.
+ *  This is a class derived from CTagPacketDecoder, specialised for the MDI application.
  *
  *
  ******************************************************************************
@@ -36,89 +36,89 @@
 #include "TagPacketDecoderMDI.h"
 
 CTagPacketDecoderMDI::CTagPacketDecoderMDI()
-:	TagItemDecoderProTy()
-,	TagItemDecoderLoFrCnt()
-,	TagItemDecoderFAC()
-,	TagItemDecoderSDC()
-,	TagItemDecoderRobMod()
-,	TagItemDecoderStr()
-,	TagItemDecoderSDCChanInf(0)
-,	TagItemDecoderInfo()
-,	TagItemDecoderRxDemodMode()
-,	TagItemDecoderAMAudio()
+    :   TagItemDecoderProTy()
+    ,   TagItemDecoderLoFrCnt()
+    ,   TagItemDecoderFAC()
+    ,   TagItemDecoderSDC()
+    ,   TagItemDecoderRobMod()
+    ,   TagItemDecoderStr()
+    ,   TagItemDecoderSDCChanInf(0)
+    ,   TagItemDecoderInfo()
+    ,   TagItemDecoderRxDemodMode()
+    ,   TagItemDecoderAMAudio()
 
-,	TagItemDecoderRmer(0)
-,	TagItemDecoderRwmf(0)
-,	TagItemDecoderRwmm(0)
-,	TagItemDecoderRdbv(0)
-,	TagItemDecoderRpsd(0)
-,	TagItemDecoderRpir(0)
-,	TagItemDecoderRdop(0)
-,	TagItemDecoderRdel(0)
-,	TagItemDecoderRgps(0)
+    ,   TagItemDecoderRmer(0)
+    ,   TagItemDecoderRwmf(0)
+    ,   TagItemDecoderRwmm(0)
+    ,   TagItemDecoderRdbv(0)
+    ,   TagItemDecoderRpsd(0)
+    ,   TagItemDecoderRpir(0)
+    ,   TagItemDecoderRdop(0)
+    ,   TagItemDecoderRdel(0)
+    ,   TagItemDecoderRgps(0)
 
 {
 
-	// Add the tag item decoders to the base class list of decoders
-	// This defines the vocabulary of this particular decoder
-	AddTagItemDecoder(&TagItemDecoderProTy);
-	AddTagItemDecoder(&TagItemDecoderLoFrCnt);
-	AddTagItemDecoder(&TagItemDecoderFAC);
-	AddTagItemDecoder(&TagItemDecoderSDC);
-	AddTagItemDecoder(&TagItemDecoderRobMod);
-	TagItemDecoderStr.resize(MAX_NUM_STREAMS);
-	for(int i=0; i<MAX_NUM_STREAMS; i++)
-	{
-		TagItemDecoderStr[i].iStreamNumber = i;
+    // Add the tag item decoders to the base class list of decoders
+    // This defines the vocabulary of this particular decoder
+    AddTagItemDecoder(&TagItemDecoderProTy);
+    AddTagItemDecoder(&TagItemDecoderLoFrCnt);
+    AddTagItemDecoder(&TagItemDecoderFAC);
+    AddTagItemDecoder(&TagItemDecoderSDC);
+    AddTagItemDecoder(&TagItemDecoderRobMod);
+    TagItemDecoderStr.resize(MAX_NUM_STREAMS);
+    for(int i=0; i<MAX_NUM_STREAMS; i++)
+    {
+        TagItemDecoderStr[i].iStreamNumber = i;
         AddTagItemDecoder(&TagItemDecoderStr[i]);
-	}
-	AddTagItemDecoder(&TagItemDecoderSDCChanInf);
-	AddTagItemDecoder(&TagItemDecoderInfo);
-	AddTagItemDecoder(&TagItemDecoderRxDemodMode);
-	AddTagItemDecoder(&TagItemDecoderAMAudio);
+    }
+    AddTagItemDecoder(&TagItemDecoderSDCChanInf);
+    AddTagItemDecoder(&TagItemDecoderInfo);
+    AddTagItemDecoder(&TagItemDecoderRxDemodMode);
+    AddTagItemDecoder(&TagItemDecoderAMAudio);
 
-	// RSCI-specific
-	AddTagItemDecoder(&TagItemDecoderRmer);
-	AddTagItemDecoder(&TagItemDecoderRwmf);
-	AddTagItemDecoder(&TagItemDecoderRwmm);
-	AddTagItemDecoder(&TagItemDecoderRdbv);
-	AddTagItemDecoder(&TagItemDecoderRpsd);
-	AddTagItemDecoder(&TagItemDecoderRpir);
-	AddTagItemDecoder(&TagItemDecoderRdop);
-	AddTagItemDecoder(&TagItemDecoderRdel);
-	AddTagItemDecoder(&TagItemDecoderRgps);
+    // RSCI-specific
+    AddTagItemDecoder(&TagItemDecoderRmer);
+    AddTagItemDecoder(&TagItemDecoderRwmf);
+    AddTagItemDecoder(&TagItemDecoderRwmm);
+    AddTagItemDecoder(&TagItemDecoderRdbv);
+    AddTagItemDecoder(&TagItemDecoderRpsd);
+    AddTagItemDecoder(&TagItemDecoderRpir);
+    AddTagItemDecoder(&TagItemDecoderRdop);
+    AddTagItemDecoder(&TagItemDecoderRdel);
+    AddTagItemDecoder(&TagItemDecoderRgps);
 
 }
 
 void CTagPacketDecoderMDI::SetParameterPtr(CParameter *pP)
 {
-	// Pass this pointer to all of the tag item decoders that need it, i.e. the RSCI-specific ones
+    // Pass this pointer to all of the tag item decoders that need it, i.e. the RSCI-specific ones
     TagItemDecoderSDCChanInf.SetParameterPtr(pP);
     TagItemDecoderRmer.SetParameterPtr(pP);
-	TagItemDecoderRwmf.SetParameterPtr(pP);
-	TagItemDecoderRwmm.SetParameterPtr(pP);
-	TagItemDecoderRdbv.SetParameterPtr(pP);
-	TagItemDecoderRpsd.SetParameterPtr(pP);
-	TagItemDecoderRpir.SetParameterPtr(pP);
-	TagItemDecoderRdop.SetParameterPtr(pP);
-	TagItemDecoderRdel.SetParameterPtr(pP);
-	TagItemDecoderRgps.SetParameterPtr(pP);
+    TagItemDecoderRwmf.SetParameterPtr(pP);
+    TagItemDecoderRwmm.SetParameterPtr(pP);
+    TagItemDecoderRdbv.SetParameterPtr(pP);
+    TagItemDecoderRpsd.SetParameterPtr(pP);
+    TagItemDecoderRpir.SetParameterPtr(pP);
+    TagItemDecoderRdop.SetParameterPtr(pP);
+    TagItemDecoderRdel.SetParameterPtr(pP);
+    TagItemDecoderRgps.SetParameterPtr(pP);
 }
 
 void CTagPacketDecoderMDI::DecodeTagPackets(CVectorEx<_BINARY>& vecbiPkt, int iPayloadLen)
 {
-	// Initialise all the decoders: this will set them to "not ready"
-	InitTagItemDecoders();
-	// Set strx tags data to zero length in case they are not present
-	for(int i=0; i<MAX_NUM_STREAMS; i++)
-	{
-		TagItemDecoderStr[i].vecbidata.Init(0);
-	}
-	TagItemDecoderAMAudio.vecbidata.Init(0);
-	TagItemDecoderFAC.vecbidata.Init(0);
-	TagItemDecoderSDC.vecbidata.Init(0);
+    // Initialise all the decoders: this will set them to "not ready"
+    InitTagItemDecoders();
+    // Set strx tags data to zero length in case they are not present
+    for(int i=0; i<MAX_NUM_STREAMS; i++)
+    {
+        TagItemDecoderStr[i].vecbidata.Init(0);
+    }
+    TagItemDecoderAMAudio.vecbidata.Init(0);
+    TagItemDecoderFAC.vecbidata.Init(0);
+    TagItemDecoderSDC.vecbidata.Init(0);
 
-	TagItemDecoderRobMod.Init();
-	// Call base class function to do the actual decoding
-	CTagPacketDecoder::DecodeTagPackets(vecbiPkt, iPayloadLen);
+    TagItemDecoderRobMod.Init();
+    // Call base class function to do the actual decoding
+    CTagPacketDecoder::DecodeTagPackets(vecbiPkt, iPayloadLen);
 }

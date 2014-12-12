@@ -3,10 +3,10 @@
  * Copyright (c) 2001-2014
  *
  * Author(s):
- *	Volker Fischer, Andrew Murphy, Andrea Russo, Oliver Haffenden
+ *  Volker Fischer, Andrew Murphy, Andrea Russo, Oliver Haffenden
  *
  * Description:
- *	This class takes care of keeping the history plots as well as interfacing to the
+ *  This class takes care of keeping the history plots as well as interfacing to the
  *  relevant module in the case of the other plots, including getting data either from
  *  the RSCI input or the demodulator
  *
@@ -34,14 +34,14 @@
 #include <iostream>
 
 CPlotManager::CPlotManager() :
-        pReceiver(0),
-        vecrFreqSyncValHist(LEN_HIST_PLOT_SYNC_PARMS),
-        vecrSamOffsValHist(LEN_HIST_PLOT_SYNC_PARMS),
-        vecrLenIRHist(LEN_HIST_PLOT_SYNC_PARMS),
-        vecrDopplerHist(LEN_HIST_PLOT_SYNC_PARMS),
-        vecrSNRHist(LEN_HIST_PLOT_SYNC_PARMS),
-        veciCDAudHist(LEN_HIST_PLOT_SYNC_PARMS), iSymbolCount(0),
-        rSumDopplerHist((_REAL) 0.0), rSumSNRHist((_REAL) 0.0), iCurrentCDAud(0)
+    pReceiver(0),
+    vecrFreqSyncValHist(LEN_HIST_PLOT_SYNC_PARMS),
+    vecrSamOffsValHist(LEN_HIST_PLOT_SYNC_PARMS),
+    vecrLenIRHist(LEN_HIST_PLOT_SYNC_PARMS),
+    vecrDopplerHist(LEN_HIST_PLOT_SYNC_PARMS),
+    vecrSNRHist(LEN_HIST_PLOT_SYNC_PARMS),
+    veciCDAudHist(LEN_HIST_PLOT_SYNC_PARMS), iSymbolCount(0),
+    rSumDopplerHist((_REAL) 0.0), rSumSNRHist((_REAL) 0.0), iCurrentCDAud(0)
 {
 }
 
@@ -74,7 +74,7 @@ CPlotManager::UpdateParamHistories(ERecState eReceiverState)
         _REAL rSNR = Parameters.GetSNR();
         _REAL rSigmaEstimate = Parameters.rSigmaEstimate;
         _REAL iNumSymPerFrame = Parameters.CellMappingTable.iNumSymPerFrame;
-        _REAL rMeanDelay = (Parameters.rMinDelay +	Parameters.rMaxDelay) / 2.0;
+        _REAL rMeanDelay = (Parameters.rMinDelay +  Parameters.rMaxDelay) / 2.0;
         Parameters.Unlock();
 
         MutexHist.Lock();
@@ -301,7 +301,7 @@ CPlotManager::GetInputPSD(CVector<_REAL>& vecrData, CVector<_REAL>& vecrScale)
 }
 
 void CPlotManager::GetTransferFunction(CVector<_REAL>& vecrData,
-                                       CVector<_REAL>& vecrGrpDly,	CVector<_REAL>& vecrScale)
+                                       CVector<_REAL>& vecrGrpDly,  CVector<_REAL>& vecrScale)
 {
     pReceiver->GetChannelEstimation()->GetTransferFunction(vecrData, vecrGrpDly, vecrScale);
 }

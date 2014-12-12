@@ -3,7 +3,7 @@
  * Copyright (c) 2001-2014
  *
  * Author(s):
- *	Volker Fischer, Julian Cable, Oliver Haffenden
+ *  Volker Fischer, Julian Cable, Oliver Haffenden
  *
  * Description:
  *
@@ -53,15 +53,15 @@ void CPacketSocketNull::poll()
 
 _BOOLEAN CPacketSocketNull::SetOrigin(const string&)
 {
-	return FALSE;
+    return FALSE;
 }
 
 _BOOLEAN CPacketSocketNull::SetDestination(const string&)
 {
-	return FALSE;
+    return FALSE;
 }
 
 _BOOLEAN CPacketSocketNull::GetDestination(string&)
 {
-	return FALSE;
+    return FALSE;
 }
