@@ -146,16 +146,6 @@ systemevalDlg::systemevalDlg(ReceiverController* rc, CSettings& Settings,
     connect(CheckBoxReverb, SIGNAL(clicked()),
             this, SLOT(OnCheckBoxReverb()));
 
-    /* Timer */
-    connect(&Timer, SIGNAL(timeout()),
-            this, SLOT(OnTimer()));
-
-    /* Select chart type */
-    chartSelector->setCurrentItem(FindItemByECharType(eCurCharType), 0);
-
-    /* Force update */
-    OnTimer();
-
     APPLY_CUSTOM_THEME();
 }
 

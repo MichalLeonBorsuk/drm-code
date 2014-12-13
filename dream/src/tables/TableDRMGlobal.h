@@ -50,7 +50,7 @@
 #define NUM_FRAMES_IN_SUPERFRAME_DRM30      3
 #define NUM_FRAMES_IN_SUPERFRAME_DRMPLUS    4
 
-#define NUM_ROBUSTNESS_MODES            4 // TODO MODE E
+#define NUM_ROBUSTNESS_MODES                5
 
 struct CRatio {
     int iEnum;

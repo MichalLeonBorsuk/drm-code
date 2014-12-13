@@ -171,7 +171,7 @@ void CTimeSync::ProcessDataInternal(CParameter& Parameters)
                     /* Do the following guard interval correlation for all
                        possible robustness modes (this is needed for robustness
                        mode detection) */
-                    for (int j = 0; j < NUM_ROBUSTNESS_MODES; j++)
+                    for (int j = rm_low; j <= rm_high; j++)
                     {
                         /* Guard-interval correlation ----------------------- */
                         /* Speed optimized calculation of the guard-interval
@@ -184,23 +184,26 @@ void CTimeSync::ProcessDataInternal(CParameter& Parameters)
                            not be a multiple of "iStepSizeGuardCorr". Therefore
                            the "if"-condition */
                         /* First subtract correlation values shifted out */
-                        cGuardCorr[j] -=
-                            veccIntermCorrRes[j][iPosInIntermCResBuf[j]];
-                        rGuardPow[j] -=
-                            vecrIntermPowRes[j][iPosInIntermCResBuf[j]];
+                        int pos = iPosInIntermCResBuf[j];
+                        cGuardCorr[j] -= veccIntermCorrRes[j][pos];
+                        rGuardPow[j] -=  vecrIntermPowRes[j][pos];
 
                         /* Calculate new block and add in memory */
                         for (int k = iLengthOverlap[j]; k < iLenGuardInt[j]; k++)
                         {
                             /* Actual correlation */
                             iCurPos = iTimeSyncPos + k;
-                            cGuardCorrBlock[j] += HistoryBufCorr[iCurPos] *
-                                                  Conj(HistoryBufCorr[iCurPos + iLenUsefPart[j]]);
+                            int pos = iCurPos + iLenUsefPart[j];
+                            if(pos>=HistoryBufCorr.Size())
+                                pos = HistoryBufCorr.Size()-1; // TODO MODE E or was this always an off-by-1 errror?
+                            if(iCurPos>=HistoryBufCorr.Size())
+                                iCurPos = HistoryBufCorr.Size()-1; // TODO MODE E or was this always an off-by-1 errror?
+                            _COMPLEX hbc = HistoryBufCorr[iCurPos];
+                            _COMPLEX hbc2 = HistoryBufCorr[pos];
+                            cGuardCorrBlock[j] += hbc * Conj(hbc2);
 
                             /* Energy calculation for ML solution */
-                            rGuardPowBlock[j] +=
-                                SqMag(HistoryBufCorr[iCurPos]) +
-                                SqMag(HistoryBufCorr[iCurPos + iLenUsefPart[j]]);
+                            rGuardPowBlock[j] += SqMag(hbc) + SqMag(hbc2);
 
                             /* If one complete block is ready -> store it. We
                                need to add "1" to the k, because otherwise
@@ -208,11 +211,10 @@ void CTimeSync::ProcessDataInternal(CParameter& Parameters)
                                "if"-condition */
                             if (((k + 1) % iStepSizeGuardCorr) == 0)
                             {
-                                veccIntermCorrRes[j][iPosInIntermCResBuf[j]] =
-                                    cGuardCorrBlock[j];
+                                int pii = iPosInIntermCResBuf[j];
+                                veccIntermCorrRes[j][pii] = cGuardCorrBlock[j];
 
-                                vecrIntermPowRes[j][iPosInIntermCResBuf[j]] =
-                                    rGuardPowBlock[j];
+                                vecrIntermPowRes[j][pii] = rGuardPowBlock[j];
 
                                 /* Add the new block to the global result */
                                 cGuardCorr[j] += cGuardCorrBlock[j];
@@ -342,7 +344,7 @@ void CTimeSync::ProcessDataInternal(CParameter& Parameters)
                     /* Correlation of guard-interval correlation with prepared
                        cos-vector. Store highest peak */
                     rMaxValRMCorr = (CReal) 0.0;
-                    for (int j = 0; j < NUM_ROBUSTNESS_MODES; j++)
+                    for (int j = rm_low; j <= rm_high; j++)
                     {
                         /* Correlation with symbol rate frequency (Correlations
                            must be normalized to be comparable!
@@ -361,7 +363,7 @@ void CTimeSync::ProcessDataInternal(CParameter& Parameters)
 
                     /* Get second highest peak */
                     rSecHighPeak = (CReal) 0.0;
-                    for (int j = 0; j < NUM_ROBUSTNESS_MODES; j++)
+                    for (int j = rm_low; j <= rm_high; j++)
                     {
                         if ((rResMode[j] > rSecHighPeak) &&
                                 (iDetectedRModeInd != j))
@@ -592,6 +594,33 @@ void CTimeSync::InitInternal(CParameter& Parameters)
 
     Parameters.Lock();
 
+    double vif;
+    if(Parameters.GetWaveMode()==RM_ROBUSTNESS_MODE_E)
+    {
+        bRobModAcqu = FALSE;
+        vif = VIRTUAL_INTERMED_FREQ_DRMPLUS;
+        rm_low = RM_ROBUSTNESS_MODE_E;
+        rm_high = RM_ROBUSTNESS_MODE_E;
+        const int iFFTSizeN = fft_size(RM_ROBUSTNESS_MODE_E, iSampleRate);
+        iMaxSymbolBlockSize = iFFTSizeN +
+                              iFFTSizeN * propagationParams[RM_ROBUSTNESS_MODE_E].TgTu.val();
+        /* Set step size of the guard-interval correlation */
+        iStepSizeGuardCorr = STEP_SIZE_GUARD_CORR; // TODO MODE E (too large?)
+    }
+    else
+    {
+        bRobModAcqu = TRUE;
+        vif = VIRTUAL_INTERMED_FREQ_DRM30;
+        rm_low = RM_ROBUSTNESS_MODE_A;
+        rm_high = RM_ROBUSTNESS_MODE_D;
+        // for DRM30 max symbol size is with Robustness Mode A
+        const int iRMAFFTSizeN = fft_size(RM_ROBUSTNESS_MODE_A, iSampleRate);
+        iMaxSymbolBlockSize = iRMAFFTSizeN +
+                              iRMAFFTSizeN * propagationParams[RM_ROBUSTNESS_MODE_A].TgTu.val();
+        /* Set step size of the guard-interval correlation */
+        iStepSizeGuardCorr = STEP_SIZE_GUARD_CORR;
+    }
+
     /* Get parameters from info class */
     iSampleRate = Parameters.GetSigSampleRate();
 
@@ -656,7 +685,6 @@ void CTimeSync::InitInternal(CParameter& Parameters)
     /* Init Hilbert filter. Since the frequency offset correction was
        done in the previous module, the offset for the filter is
        always "VIRTUAL_INTERMED_FREQ" */
-    double vif = Parameters.GetWaveMode()==RM_ROBUSTNESS_MODE_E?VIRTUAL_INTERMED_FREQ_DRMPLUS:VIRTUAL_INTERMED_FREQ_DRM30;
     SetFilterTaps(vif / iSampleRate);
 
     iGuardSize = Parameters.CellMappingTable.iGuardSize;
@@ -666,35 +694,23 @@ void CTimeSync::InitInternal(CParameter& Parameters)
     /* Decimated symbol block size */
     iDecSymBS = iSymbolBlockSize / iGrdcrrDecFact;
 
-    /* Calculate maximum symbol block size */
-    if(Parameters.GetWaveMode()==RM_ROBUSTNESS_MODE_E)
-    {
-        const int iFFTSizeN = fft_size(RM_ROBUSTNESS_MODE_E, iSampleRate);
-        iMaxSymbolBlockSize = iFFTSizeN +
-                              iFFTSizeN * propagationParams[RM_ROBUSTNESS_MODE_E].TgTu.val();
-    }
-    else
-    {   // for DRM30 This is Rob. Mode A
-        const int iRMAFFTSizeN = fft_size(RM_ROBUSTNESS_MODE_A, iSampleRate);
-        iMaxSymbolBlockSize = iRMAFFTSizeN +
-                              iRMAFFTSizeN * propagationParams[RM_ROBUSTNESS_MODE_A].TgTu.val();
-    }
-
     /* We need at least two blocks of data for determining the timing */
     iTotalBufferSize = 2 * iSymbolBlockSize + iMaxSymbolBlockSize;
     iCorrBuffSize = iTotalBufferSize / iGrdcrrDecFact;
 
-    /* Set step size of the guard-interval correlation */
-    iStepSizeGuardCorr = STEP_SIZE_GUARD_CORR;
 
     /* Size for moving average buffer for guard-interval correlation */
     iMovAvBufSize =
         (int) ((CReal) iGuardSize / iGrdcrrDecFact / iStepSizeGuardCorr);
+    if(iMovAvBufSize==0)
+        iMovAvBufSize = 1; // TODO MODE E
 
     /* Size of buffer, storing the moving-average results for
        maximum detection */
     iMaxDetBufSize =
         (int) ((CReal) iDecSymBS / iStepSizeGuardCorr);
+    if(iMaxDetBufSize==0)
+        iMaxDetBufSize = 1; // TODO MODE E
 
     /* Center of maximum detection buffer */
     iCenterOfMaxDetBuf = (iMaxDetBufSize - 1) / 2;
@@ -743,14 +759,13 @@ void CTimeSync::InitInternal(CParameter& Parameters)
 
     /* Inits for guard-interval correlation and robustness mode detection --- */
     /* Size for robustness mode correlation buffer */
-    iRMCorrBufSize = (int) ((CReal) NUM_BLOCKS_FOR_RM_CORR * iDecSymBS
-                            / STEP_SIZE_GUARD_CORR);
+    iRMCorrBufSize = int((CReal) NUM_BLOCKS_FOR_RM_CORR * iDecSymBS / iStepSizeGuardCorr);
 
     /* Init init count for robustness mode detection (do not use the very first
        block) */
     iRobModInitCnt = NUM_BLOCKS_FOR_RM_CORR + 1;
 
-    for (int i = 0; i < NUM_ROBUSTNESS_MODES; i++)
+    for (int i = rm_low; i <= rm_high; i++)
     {
         cGuardCorr[i] = (CReal) 0.0;
         cGuardCorrBlock[i] = (CReal) 0.0;
@@ -771,10 +786,14 @@ void CTimeSync::InitInternal(CParameter& Parameters)
            we need to cut-off the fractional part */
         iLengthIntermCRes[i] = (int) ((CReal) iLenGuardInt[i] /
                                       iStepSizeGuardCorr);
+        if(iLengthIntermCRes[i]==0)
+            iLengthIntermCRes[i] = 1; // TODO MODE E
 
         /* This length is the start point for the "for"-loop */
         iLengthOverlap[i] = iLenGuardInt[i] -
                             iStepSizeGuardCorr;
+        if(iLengthOverlap[i]==0)
+            iLengthOverlap[i] = 1; // TODO MODE E
 
         /* Intermediate correlation results vector (init, zero out) */
         veccIntermCorrRes[i].Init(iLengthIntermCRes[i], (CReal) 0.0);
@@ -835,7 +854,6 @@ void CTimeSync::StartAcquisition()
 
     /* The regular acquisition flags */
     bTimingAcqu = TRUE;
-    bRobModAcqu = TRUE;
 
     /* Set the init flag so that the "rStartIndex" can be initialized with the
        center of the buffer and other important settings can be done */

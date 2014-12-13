@@ -473,6 +473,7 @@ void CTimeSyncTrack::Init(CParameter& Parameters, int iNewSymbDelay)
     case RM_ROBUSTNESS_MODE_A:
     case RM_ROBUSTNESS_MODE_B:
     case RM_ROBUSTNESS_MODE_C:
+    case RM_NO_MODE_DETECTED:
         rConst1 = pow((_REAL) 10.0, (_REAL) -TETA1_DIST_FROM_MAX_DB / 10);
         rConst2 = pow((_REAL) 10.0, (_REAL) TETA2_DIST_FROM_MIN_DB / 10);
         break;
@@ -480,8 +481,9 @@ void CTimeSyncTrack::Init(CParameter& Parameters, int iNewSymbDelay)
         rConst1 = pow((_REAL) 10.0, (_REAL) -TETA1_DIST_FROM_MAX_DB_RMD / 10);
         rConst2 = pow((_REAL) 10.0, (_REAL) TETA2_DIST_FROM_MIN_DB_RMD / 10);
         break;
-    case RM_ROBUSTNESS_MODE_E:
-        ;; // TODO MODE E
+    case RM_ROBUSTNESS_MODE_E: // TODO MODE E
+        rConst1 = pow((_REAL) 10.0, (_REAL) -TETA1_DIST_FROM_MAX_DB / 10);
+        rConst2 = pow((_REAL) 10.0, (_REAL) TETA2_DIST_FROM_MIN_DB / 10);
     }
 
     /* Define start point for rotation of detection vector for acausal taps.
@@ -537,7 +539,9 @@ void CTimeSyncTrack::Init(CParameter& Parameters, int iNewSymbDelay)
     iOldNonZeroDiff = 0;
 
     /* (O.Haffenden) Vector for power delay spread estimation for previous
-       symbol (used for RSCI rdop calculation) */
+       symbol (used for RSCI rdop calculation)
+       TODO MODE E
+     */
     veccOldImpulseResponse.Init(iNumIntpFreqPil, (CReal) 0.0);
     vecrRdelThresholds.Init(3);
     vecrRdelThresholds[0] = (CReal) 90.0;

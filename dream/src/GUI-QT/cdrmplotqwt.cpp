@@ -41,6 +41,7 @@
 #include <qwt_legend.h>
 #include <qwt_plot_picker.h>
 #include <qwt_picker_machine.h>
+#include <qwt_symbol.h>
 
 /* Define the FAC/SDC/MSC Symbol size */
 #if QWT_VERSION < 0x060000
@@ -85,12 +86,19 @@
 /* Definitions ****************************************************************/
 #define GUI_CONTROL_UPDATE_WATERFALL            100 /* Milliseconds */
 
+/* Waterfall spectrum stuff */
+WaterfallWidget* waterfallWidget;
+
 /* Implementation *************************************************************/
 CDRMPlotQwt::CDRMPlotQwt(QWidget* parent) :
     plot(new QwtPlot(parent)),
     InitCharType(NONE_OLD),
     eLastSDCCodingScheme((ECodScheme)-1), eLastMSCCodingScheme((ECodScheme)-1),
     bLastAudioDecoder(FALSE),
+    leftTitle(), rightTitle(), bottomTitle(),
+    main1curve(), main2curve(),
+    curve(), yMarker(), hcurvegrid(), vcurvegrid(),
+    grid(),picker(NULL),legend(NULL),nCurves(0),
     waterfallWidget(NULL)
 {
     /* Create new plot if none is supplied */
@@ -114,7 +122,7 @@ CDRMPlotQwt::CDRMPlotQwt(QWidget* parent) :
     plot->insertLegend(legend, QwtPlot::RightLegend);
 
     /* Curve defaults (other curves are set by PlotDefaults) */
-    curve4.setItemAttribute(QwtPlotItem::Legend, false);
+    curve[3].setItemAttribute(QwtPlotItem::Legend, false);
     yMarker.setItemAttribute(QwtPlotItem::Legend, false);
     vcurvegrid.setItemAttribute(QwtPlotItem::Legend, false);
     hcurvegrid.setItemAttribute(QwtPlotItem::Legend, false);
@@ -184,26 +192,12 @@ CDRMPlotQwt::CDRMPlotQwt(QWidget* parent) :
     picker->setStateMachine(machine);
 #endif
 
-    markerSym[0].setStyle(QwtSymbol::Ellipse);
-    markerSym[0].setSize(ALL_FAC_SYMBOL_SIZE);
-    markerSym[0].setPen(QPen(Qt::black));
-    markerSym[0].setBrush(QBrush(Qt::black));
-    markerSym[1].setStyle(QwtSymbol::XCross);
-    markerSym[1].setSize(ALL_SDC_SYMBOL_SIZE);
-    markerSym[1].setPen(QPen(Qt::red));
-    markerSym[1].setBrush(QBrush(Qt::red));
-    markerSym[2].setStyle(QwtSymbol::Rect);
-    markerSym[2].setSize(ALL_MSC_SYMBOL_SIZE);
-    markerSym[2].setPen(QPen(Qt::blue));
-    markerSym[2].setBrush(QBrush(Qt::blue));
-
     /* Connections */
 #if QWT_VERSION < 0x060000
     connect(picker, SIGNAL(selected(const QwtDoublePoint &)),
-            this, SLOT(OnSelected(const QwtDoublePoint &)));
+            this, SLOT(OnSelectedOld(const QwtDoublePoint &)));
 #else
-    connect(picker, SIGNAL(selected(const QPointF &)),
-            this, SLOT(OnSelected(const QPointF &)));
+    connect(picker, SIGNAL(selected(const QPointF&)), this, SLOT(OnSelected(const QPointF&)));
 #endif
 }
 
@@ -260,28 +254,37 @@ void CDRMPlotQwt::setQAMGrid(double div, int step, int substep)
     plot->setAxisScaleDiv(QwtPlot::yLeft, scaleDiv);
 }
 
-#if QWT_VERSION < 0x060000
-void CDRMPlotQwt::OnSelected(const QwtDoublePoint &pos)
-#else
-void CDRMPlotQwt::OnSelected(const QPointF &pos)
-#endif
+void CDRMPlotQwt::OnSelectedOld(const QwtDoublePoint &pos)
 {
-    /* Send normalized frequency to receiver */
-#if QWT_VERSION < 0x060100
+#if QWT_VERSION < 0x060000
 # if QWT_VERSION < 0x050200
     const double dMaxxBottom = plot->axisScaleDiv(QwtPlot::xBottom)->hBound();
 # else
     const double dMaxxBottom = plot->axisScaleDiv(QwtPlot::xBottom)->upperBound();
+# endif
+    /* Check if dMaxxBottom is valid */
+    if (dMaxxBottom > 0.0)
+    {
+        emit plotClicked(pos.x());
+    }
 #endif
-#else
+}
+
+void CDRMPlotQwt::OnSelected(const QPointF &pos)
+{
+#if QWT_VERSION >= 0x060000
+# if QWT_VERSION >= 0x060100
     const double dMaxxBottom = plot->axisScaleDiv(QwtPlot::xBottom).upperBound();
-#endif
+#else
+    const double dMaxxBottom = plot->axisScaleDiv(QwtPlot::xBottom)->upperBound();
+# endif
 
     /* Check if dMaxxBottom is valid */
     if (dMaxxBottom > 0.0)
     {
         emit plotClicked(pos.x());
     }
+#endif
 }
 
 void CDRMPlotQwt::replot()
@@ -292,46 +295,40 @@ void CDRMPlotQwt::replot()
 void CDRMPlotQwt::clearPlots()
 {
     /* Set default value of plot items */
-    curve1.detach();
-    curve2.detach();
-    curve3.detach();
-    curve4.detach();
+    for(int i=0; i<nCurves; i++)
+    {
+        curve[i].detach();
+    }
     yMarker.detach();
     hcurvegrid.detach();
     vcurvegrid.detach();
     main1curve.detach();
     main2curve.detach();
-    curve1.SETDATA(NULL, NULL, 0);
-    curve2.SETDATA(NULL, NULL, 0);
-    curve3.SETDATA(NULL, NULL, 0);
-    curve4.SETDATA(NULL, NULL, 0);
+#if 1
+    for(int i=0; i<nCurves; i++)
+    {
+        curve[i].SETDATA(NULL, NULL, 0);
+#if QWT_VERSION < 0x060000
+        curve[i].setSymbol(QwtSymbol());
+#else
+        curve[i].setSymbol(NULL);
+        curve[i].setLegendAttribute(QwtPlotCurve::LegendShowSymbol, false);
+        curve[i].setItemAttribute(QwtPlotItem::Legend, false);
+#endif
+    }
     yMarker.SETDATA(NULL, NULL, 0);
     hcurvegrid.SETDATA(NULL, NULL, 0);
     vcurvegrid.SETDATA(NULL, NULL, 0);
     main1curve.SETDATA(NULL, NULL, 0);
     main2curve.SETDATA(NULL, NULL, 0);
-#if QWT_VERSION < 0x060000
-    curve1.setSymbol(QwtSymbol());
-    curve2.setSymbol(QwtSymbol());
-    curve3.setSymbol(QwtSymbol());
-#else
-    curve1.setSymbol(NULL);
-    curve2.setSymbol(NULL);
-    curve3.setSymbol(NULL);
-    curve1.setLegendAttribute(QwtPlotCurve::LegendShowSymbol, false);
-    curve2.setLegendAttribute(QwtPlotCurve::LegendShowSymbol, false);
-    curve3.setLegendAttribute(QwtPlotCurve::LegendShowSymbol, false);
-#endif
     if (waterfallWidget != NULL)
     {
         delete waterfallWidget;
         waterfallWidget = NULL;
     }
-    curve1.setItemAttribute(QwtPlotItem::Legend, false);
-    curve2.setItemAttribute(QwtPlotItem::Legend, false);
-    curve3.setItemAttribute(QwtPlotItem::Legend, false);
     main1curve.setItemAttribute(QwtPlotItem::Legend, false);
     main2curve.setItemAttribute(QwtPlotItem::Legend, false);
+#endif
     // start curve count
     nCurves=0;
 }
@@ -396,31 +393,15 @@ void CDRMPlotQwt::add2ndGraph(const char* axisText, const char* legendText, doub
 
 void CDRMPlotQwt::addxMarker(QColor color, double initialPos)
 {
-    QwtPlotCurve* curve;
-    switch(nCurves)
-    {
-    case 0:
-        curve = &curve1;
-        break;
-    case 1:
-        curve = &curve2;
-        break;
-    case 2:
-        curve = &curve3;
-        break;
-    case 3:
-        curve = &curve4;
-        break;
-    }
-    curve->setPen(QPen(color, 1, Qt::DashLine));
-    curve->attach(plot);
+    curve[nCurves].setPen(QPen(color, 1, Qt::DashLine));
+    curve[nCurves].attach(plot);
     QVector<double> yData;
     yData = getBounds(QwtPlot::yLeft);
     double x[2], y[2];
     x[0] = x[1] = initialPos;
     y[0] = yData[0];
     y[1] = yData[1];
-    curve->SETDATA(x, y, 2);
+    curve[nCurves].SETDATA(x, y, 2);
     nCurves++;
 }
 
@@ -428,10 +409,10 @@ void CDRMPlotQwt::addBwMarker(QColor c)
 {
     QBrush brush(c);
     brush.setStyle(Qt::SolidPattern);
-    curve2.setBrush(brush);
-    curve2.setBaseline(MIN_VAL_INP_SPEC_Y_AXIS_DB);
-    curve2.setPen(QPen(Qt::NoPen));
-    curve2.attach(plot);
+    curve[1].setBrush(brush);
+    curve[1].setBaseline(MIN_VAL_INP_SPEC_Y_AXIS_DB);
+    curve[1].setPen(QPen(Qt::NoPen));
+    curve[1].attach(plot);
 
     /* Add tool tip to show the user the possibility of choosing the AM IF */
     plot->setToolTip(tr("Click on the plot to set the demodulation frequency"));
@@ -461,37 +442,42 @@ void CDRMPlotQwt::setupConstPlot(const char* text)
 
 void CDRMPlotQwt::addConstellation(const char *legendText, int c)
 {
-    QwtPlotCurve* curve;
-    switch(nCurves)
+    QwtSymbol* sym = new QwtSymbol();
+    switch(c)
     {
     case 0:
-        curve = &curve1;
+        sym->setStyle(QwtSymbol::Ellipse);
+        sym->setSize(ALL_FAC_SYMBOL_SIZE);
+        sym->setPen(QPen(Qt::black));
+        sym->setBrush(QBrush(Qt::black));
         break;
     case 1:
-        curve = &curve2;
+        sym->setStyle(QwtSymbol::XCross);
+        sym->setSize(ALL_SDC_SYMBOL_SIZE);
+        sym->setPen(QPen(Qt::red));
+        sym->setBrush(QBrush(Qt::red));
         break;
-    case 2:
-        curve = &curve3;
-        break;
-    case 3:
-        curve = &curve4;
-        break;
+    default:
+        sym->setStyle(QwtSymbol::Rect);
+        sym->setSize(ALL_MSC_SYMBOL_SIZE);
+        sym->setPen(QPen(Qt::blue));
+        sym->setBrush(QBrush(Qt::blue));
     }
-    curve->setPen(QPen(Qt::NoPen));
 #if QWT_VERSION < 0x060000
-    curve->setSymbol(markerSym[c]);
+    curve[nCurves].setSymbol(&sym);
 #else
-    curve->setSymbol(&markerSym[c]);
-    curve->setLegendAttribute(QwtPlotCurve::LegendShowSymbol, true);
+    curve[nCurves].setLegendAttribute(QwtPlotCurve::LegendShowSymbol, true);
+    curve[nCurves].setSymbol(sym);
 #endif
-    curve->setTitle(legendText);
-    curve->attach(plot);
+    curve[nCurves].setPen(QPen(Qt::NoPen));
+    curve[nCurves].setTitle(legendText);
+    curve[nCurves].attach(plot);
     nCurves++;
     if(nCurves>1)
     {
         // more than one constellation - put all in legend
-        curve1.setItemAttribute(QwtPlotItem::Legend, true);
-        curve->setItemAttribute(QwtPlotItem::Legend, true);
+        for(int i=0; i<nCurves; i++)
+            curve[i].setItemAttribute(QwtPlotItem::Legend, true);
     }
 }
 
@@ -666,47 +652,18 @@ void CDRMPlotQwt::setData(int n, CVector<_COMPLEX>& veccData)
         r[i] = veccData[i].real();
         im[i] = veccData[i].imag();
     }
-    switch(n) {
-    case 0:
-        curve1.SETDATA(&r[0], &im[0], size);
-        break;
-    case 1:
-        curve2.SETDATA(&r[0], &im[0], size);
-        break;
-    case 2:
-        curve3.SETDATA(&r[0], &im[0], size);
-        break;
-    default:
-        ;
-    }
+    curve[n].SETDATA(&r[0], &im[0], size);
 }
 
 void CDRMPlotQwt::setxMarker(int n, _REAL r)
 {
-    QwtPlotCurve* curve;
-    switch(n) {
-    case 0:
-        curve = & curve1;
-        break;
-    case 1:
-        curve = & curve2;
-        break;
-    case 2:
-        curve = & curve3;
-        break;
-    case 3:
-        curve = & curve4;
-        break;
-    default:
-        ;
-    }
     QVector<double> yData;
     yData = getBounds(QwtPlot::yLeft);
     double x[2], y[2];
     x[0] = x[1] = r;
     y[0] = yData[0];
     y[1] = yData[1];
-    curve->SETDATA(x, y, 2);
+    curve[n].SETDATA(x, y, 2);
 }
 
 void CDRMPlotQwt::setBwMarker(int n, _REAL c, _REAL b)
@@ -719,7 +676,7 @@ void CDRMPlotQwt::setBwMarker(int n, _REAL c, _REAL b)
     x[0] = c - b/2.0;
     x[1] = c + b/2.0;
     y[0] = y[1] = yData[1];
-    curve2.SETDATA(x, y, 2);
+    curve[1].SETDATA(x, y, 2);
 }
 
 

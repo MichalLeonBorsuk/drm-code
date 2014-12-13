@@ -38,13 +38,15 @@
 #include <qwt_plot.h>
 #include <qwt_plot_curve.h>
 #include <qwt_plot_grid.h>
-#include <qwt_symbol.h>
 #include <../util/Vector.h>
 
 /* Define the plot font size */
 #define PLOT_FONT_SIZE 8
 
 /* Classes ********************************************************************/
+#if QWT_VERSION >= 0x060000
+typedef QPointF QwtDoublePoint; // just for compilation
+#endif
 
 class WaterfallWidget;
 class CDRMReceiver;
@@ -108,23 +110,20 @@ protected:
     QwtText         leftTitle, rightTitle, bottomTitle;
 
     QwtPlotCurve    main1curve, main2curve;
-    QwtPlotCurve    curve1, curve2, curve3, curve4, yMarker;
+    QwtPlotCurve    curve[4];
+    QwtPlotCurve    yMarker;
     QwtPlotCurve    hcurvegrid, vcurvegrid;
     QwtPlotGrid     grid;
     QwtPlotPicker   *picker;
     QwtLegend       *legend;
     int             nCurves;
-    QwtSymbol       markerSym[3];
 
     /* Waterfall spectrum stuff */
     WaterfallWidget* waterfallWidget;
 
 private slots:
-#if QWT_VERSION < 0x060000
-    void OnSelected(const QwtDoublePoint &pos);
-#else
+    void OnSelectedOld(const QwtDoublePoint &pos);
     void OnSelected(const QPointF &pos);
-#endif
 
 signals:
     void plotClicked(double);

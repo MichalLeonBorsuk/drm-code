@@ -105,6 +105,7 @@ public:
     }
 
 protected:
+    ERobMode                    rm_low, rm_high;
     int                         iSampleRate;
     int                         iGrdcrrDecFact;
     int                         iNumTapsHilbFilt;
