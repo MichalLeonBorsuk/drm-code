@@ -8868,7 +8868,6 @@
      <addaction name="menuPlot_Style"/>
     </widget>
     <addaction name="actionDRM"/>
-    <addaction name="actionDRMPlus"/>
     <addaction name="actionAM"/>
     <addaction name="actionFM"/>
     <addaction name="actionReset"/>

@@ -309,53 +309,50 @@ qwt {
     HEADERS += src/GUI-QT/cdrmplotqwt.h src/GUI-QT/qwtlevelmeter.h src/GUI-QT/qwtsmeter.h
     SOURCES += src/GUI-QT/cdrmplotqwt.cpp src/GUI-QT/qwtlevelmeter.cpp src/GUI-QT/qwtsmeter.cpp
     QT += svg
-    macx {
-        LIBS += -framework qwt
-    }
-    else {
-        win32:CONFIG(debug, debug|release) {
-            # win debug
-            LIBS += -lqwtd
-        } else {
-            # unix | win release
-            LIBS += -lqwt
-        }
-    }
-    !crosscompile {
-        macx {
-          exists(/opt/local/Library/Frameworks/qwt.framework) {
-            INCLUDEPATH += /opt/local/Library/Frameworks/qwt.framework/Versions/6/Headers
-          }
-          exists(/Library/Frameworks/qwt.framework) {
-            INCLUDEPATH += /Library/Frameworks/qwt.framework/Versions/6/Headers
-          }
-        }
-        exists(/usr/include/qwt/qwt.h) {
-            INCLUDEPATH += /usr/include/qwt
-        }
-        exists(/usr/local/include/qwt/qwt.h) {
-            INCLUDEPATH += /usr/local/include/qwt
-        }
-        qt5 {
-            exists(/usr/local/qwt-6.1.1/include/qwt.h) {
-                INCLUDEPATH -= /usr/include/qwt
-		INCLUDEPATH += /usr/local/qwt-6.1.1/include
-		LIBS += -L/usr/local/qwt-6.1.1/lib
-            }
-        }
-        qt4 {
-            exists(/usr/include/qwt5/qwt.h) {
-                INCLUDEPATH += /usr/include/qwt5
-            }
-            exists(/usr/include/qwt-qt4/qwt.h) {
-                INCLUDEPATH += /usr/include/qwt-qt4
-                LIBS -= -lqwt
-                LIBS += -lqwt-qt4
-            }
-        }
-    }
-    exists($$OUT_PWD/include/qwt/qwt.h) {
+    exists("$$OUT_PWD/include/qwt/qwt.h") {
         INCLUDEPATH += $$OUT_PWD/include/qwt
+        LIBS += -L$$OUT_PWD/lib
+        LIBS += -lqwt
+    }
+    !exists($$OUT_PWD/include/qwt/qwt.h) {
+        macx {
+            LIBS += -framework qwt
+        }
+        else {
+            win32:CONFIG(debug, debug|release) {
+                # win debug
+                LIBS += -lqwtd
+            } else {
+                # unix | win release
+                LIBS += -lqwt
+            }
+        }
+        !crosscompile {
+            macx {
+              exists(/opt/local/Library/Frameworks/qwt.framework) {
+                INCLUDEPATH += /opt/local/Library/Frameworks/qwt.framework/Versions/6/Headers
+              }
+              exists(/Library/Frameworks/qwt.framework) {
+                INCLUDEPATH += /Library/Frameworks/qwt.framework/Versions/6/Headers
+              }
+            }
+            exists(/usr/include/qwt/qwt.h) {
+                INCLUDEPATH += /usr/include/qwt
+            }
+            exists(/usr/local/include/qwt/qwt.h) {
+                INCLUDEPATH += /usr/local/include/qwt
+            }
+            qt4 {
+                exists(/usr/include/qwt5/qwt.h) {
+                    INCLUDEPATH += /usr/include/qwt5
+                }
+                exists(/usr/include/qwt-qt4/qwt.h) {
+                    INCLUDEPATH += /usr/include/qwt-qt4
+                    LIBS -= -lqwt
+                    LIBS += -lqwt-qt4
+                }
+            }
+        }
     }
 }
 alsa {

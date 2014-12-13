@@ -145,7 +145,6 @@ private slots:
     void OnMenuPlotStyle(int);
     void OnSwitchToAM();
     void OnSwitchToDRM();
-    void OnToggledDRMPlus(bool b);
     void OnSwitchToFM();
     void OnWhatsThis();
     void OnHelpAbout();

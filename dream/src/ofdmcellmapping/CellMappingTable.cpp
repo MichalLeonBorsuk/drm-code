@@ -127,6 +127,7 @@ void CCellMappingTable::MakeTable(
         break;
 
     case RM_ROBUSTNESS_MODE_B:
+    case RM_NO_MODE_DETECTED: // use mode B as default
         vif = VIRTUAL_INTERMED_FREQ_DRM30;
         iNumFramesPerSuperframe = NUM_FRAMES_IN_SUPERFRAME_DRM30;
         iNumSymbolsPerSuperframe = iNumSymPerFrame * NUM_FRAMES_IN_SUPERFRAME_DRM30;
@@ -204,10 +205,6 @@ void CCellMappingTable::MakeTable(
     default:
         break;
     }
-
-    /* Adjusting fft size to sample rate */
-    //iFFTSizeN = ADJ_FOR_SRATE(iFFTSizeN, iSampleRate);
-    qDebug() << iFFTSizeN;
 
     /* Get number of carriers with DC */
     iNumCarrier = iCarrierKmax - iCarrierKmin + 1;

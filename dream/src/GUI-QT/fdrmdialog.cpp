@@ -165,7 +165,6 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& Settings,
 
     connect(ui->actionAM, SIGNAL(triggered()), this, SLOT(OnSwitchToAM()));
     connect(ui->actionDRM, SIGNAL(triggered()), this, SLOT(OnSwitchToDRM()));
-    connect(ui->actionDRMPlus, SIGNAL(toggled(bool)), this, SLOT(OnToggledDRMPlus(bool)));
     connect(ui->actionFM, SIGNAL(triggered()), this, SLOT(OnSwitchToFM()));
 
     connect(ui->actionDisplayColor, SIGNAL(triggered()), this, SLOT(OnMenuSetDisplayColor()));
@@ -530,12 +529,6 @@ void FDRMDialog::OnSwitchToAM()
 void FDRMDialog::OnSwitchToDRM()
 {
     controller->setMode(RM_DRM);
-}
-
-// this is just a signal mapper
-void FDRMDialog::OnToggledDRMPlus(bool b)
-{
-    controller->setRobustnesMode(b?RM_ROBUSTNESS_MODE_E:RM_ROBUSTNESS_MODE_A);
 }
 
 // this is just a signal mapper

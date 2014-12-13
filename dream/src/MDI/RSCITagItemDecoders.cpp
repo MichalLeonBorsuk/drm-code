@@ -327,13 +327,46 @@ void CTagItemDecoderCdmo::DecodeTag(CVector<_BINARY>& vecbiTag, const int iLen)
 
     if (pDRMReceiver == NULL)
         return;
-
+/*
+ * 6.4.2.1 Receiver demodulation type (rdmo)
+ */
     if(s == "drm_")
+    {
         pDRMReceiver->SetReceiverMode(RM_DRM);
+    }
+    if(s == "drm+")
+    {
+        pDRMReceiver->SetReceiverMode(RM_DRM);
+        pDRMReceiver->GetParameters()->SetWaveMode(RM_ROBUSTNESS_MODE_E);
+    }
     if(s == "am__")
+    {
         pDRMReceiver->SetReceiverMode(RM_AM);
-    if(s == "fm__")
+    }
+    if(s == "usb_")
+    {
+        pDRMReceiver->SetReceiverMode(RM_AM);
+    }
+    if(s == "lsb_")
+    {
+        pDRMReceiver->SetReceiverMode(RM_AM);
+    }
+    if(s == "sam_")
+    {
+        pDRMReceiver->SetReceiverMode(RM_AM);
+    }
+    if(s == "fm__") // backward compatibility with older Dream versions
+    {
         pDRMReceiver->SetReceiverMode(RM_FM);
+    }
+    if(s == "nbfm")
+    {
+        pDRMReceiver->SetReceiverMode(RM_FM);
+    }
+    if(s == "wbfm")
+    {
+        pDRMReceiver->SetReceiverMode(RM_FM);
+    }
 }
 
 void CTagItemDecoderCrec::DecodeTag(CVector<_BINARY>& vecbiTag, const int iLen)
