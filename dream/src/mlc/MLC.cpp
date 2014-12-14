@@ -35,7 +35,6 @@
 \******************************************************************************/
 void CMLCEncoder::ProcessDataInternal(CParameter&)
 {
-    int i, j;
     int iElementCounter;
 
     /* Energy dispersal ----------------------------------------------------- */
@@ -50,10 +49,10 @@ void CMLCEncoder::ProcessDataInternal(CParameter&)
     {
         /* Standard departitioning */
         /* Protection level A */
-        for (j = 0; j < iLevels; j++)
+        for (int j = 0; j < iLevels; j++)
         {
             /* Bits */
-            for (i = 0; i < iM[j][0]; i++)
+            for (int i = 0; i < iM[j][0]; i++)
             {
                 vecEncInBuffer[j][i] =
                     BitToSoft((*pvecInputData)[iElementCounter]);
@@ -63,10 +62,10 @@ void CMLCEncoder::ProcessDataInternal(CParameter&)
         }
 
         /* Protection level B */
-        for (j = 0; j < iLevels; j++)
+        for (int j = 0; j < iLevels; j++)
         {
             /* Bits */
-            for (i = 0; i < iM[j][1]; i++)
+            for (int i = 0; i < iM[j][1]; i++)
             {
                 vecEncInBuffer[j][iM[j][0] + i] =
                     BitToSoft((*pvecInputData)[iElementCounter]);
@@ -81,7 +80,7 @@ void CMLCEncoder::ProcessDataInternal(CParameter&)
            hierarchical bits at the beginning, then append the rest */
         /* Hierarchical frame (always "iM[0][1]"). "iM[0][0]" is always "0" in
            this case */
-        for (i = 0; i < iM[0][1]; i++)
+        for (int i = 0; i < iM[0][1]; i++)
         {
             vecEncInBuffer[0][i] =
                 BitToSoft((*pvecInputData)[iElementCounter]);
@@ -91,10 +90,10 @@ void CMLCEncoder::ProcessDataInternal(CParameter&)
 
 
         /* Protection level A (higher protected part) */
-        for (j = 1; j < iLevels; j++)
+        for (int j = 1; j < iLevels; j++)
         {
             /* Bits */
-            for (i = 0; i < iM[j][0]; i++)
+            for (int i = 0; i < iM[j][0]; i++)
             {
                 vecEncInBuffer[j][i] =
                     BitToSoft((*pvecInputData)[iElementCounter]);
@@ -104,10 +103,10 @@ void CMLCEncoder::ProcessDataInternal(CParameter&)
         }
 
         /* Protection level B  (lower protected part) */
-        for (j = 1; j < iLevels; j++)
+        for (int j = 1; j < iLevels; j++)
         {
             /* Bits */
-            for (i = 0; i < iM[j][1]; i++)
+            for (int i = 0; i < iM[j][1]; i++)
             {
                 vecEncInBuffer[j][iM[j][0] + i] =
                     BitToSoft((*pvecInputData)[iElementCounter]);
@@ -119,12 +118,12 @@ void CMLCEncoder::ProcessDataInternal(CParameter&)
 
 
     /* Convolutional encoder ------------------------------------------------ */
-    for (j = 0; j < iLevels; j++)
+    for (int j = 0; j < iLevels; j++)
         ConvEncoder[j].Encode(vecEncInBuffer[j], vecEncOutBuffer[j]);
 
 
     /* Bit interleaver ------------------------------------------------------ */
-    for (j = 0; j < iLevels; j++)
+    for (int j = 0; j < iLevels; j++)
         if (piInterlSequ[j] != -1)
             BitInterleaver[piInterlSequ[j]].Interleave(vecEncOutBuffer[j]);
 
@@ -140,7 +139,6 @@ void CMLCEncoder::ProcessDataInternal(CParameter&)
 
 void CMLCEncoder::InitInternal(CParameter& TransmParam)
 {
-    int i;
     int iNumInBits;
 
     TransmParam.Lock();
@@ -155,7 +153,7 @@ void CMLCEncoder::InitInternal(CParameter& TransmParam)
     EnergyDisp.Init(iNumInBits, iL[2]);
 
     /* Encoder */
-    for (i = 0; i < iLevels; i++)
+    for (int i = 0; i < iLevels; i++)
         ConvEncoder[i].Init(eCodingScheme, eChannelType, iN[0], iN[1],
                             iM[i][0], iM[i][1], iCodeRate[i][0], iCodeRate[i][1], i);
 
@@ -178,7 +176,7 @@ void CMLCEncoder::InitInternal(CParameter& TransmParam)
 
 
     /* Allocate memory for internal bit-buffers ----------------------------- */
-    for (i = 0; i < iLevels; i++)
+    for (int i = 0; i < iLevels; i++)
     {
         /* Buffers for each encoder on all different levels */
         /* Add bits from higher protected and lower protected part */
@@ -199,14 +197,13 @@ void CMLCEncoder::InitInternal(CParameter& TransmParam)
 \******************************************************************************/
 void CMLCDecoder::ProcessDataInternal(CParameter&)
 {
-    int         i, j, k;
     int         iElementCounter;
     _BOOLEAN    bIteration;
 
     /* Save input signal for signal constellation. We cannot use the copy
        operator of vector because the input vector is not of the same size as
        our intermediate buffer, therefore the "for"-loop */
-    for (i = 0; i < iInputBlockSize; i++)
+    for (int i = 0; i < iInputBlockSize; i++)
         vecSigSpacBuf[i] = (*pvecInputData)[i].cSig;
 
 
@@ -215,7 +212,7 @@ void CMLCDecoder::ProcessDataInternal(CParameter&)
 // TEST
     static FILE* pFile = fopen("test/constellation.dat", "w");
     if (eChannelType == CParameter::CT_MSC) {
-        for (i = 0; i < iInputBlockSize; i++)
+        for (int i = 0; i < iInputBlockSize; i++)
             fprintf(pFile, "%e %e\n", vecSigSpacBuf[i].real(), vecSigSpacBuf[i].imag());
         fflush(pFile);
     }
@@ -226,9 +223,9 @@ void CMLCDecoder::ProcessDataInternal(CParameter&)
 
 
     /* Iteration loop */
-    for (k = 0; k < iNumIterations + 1; k++)
+    for (int k = 0; k < iNumIterations + 1; k++)
     {
-        for (j = 0; j < iLevels; j++)
+        for (int j = 0; j < iLevels; j++)
         {
             /* Metric ------------------------------------------------------- */
             if (k > 0)
@@ -279,10 +276,10 @@ void CMLCDecoder::ProcessDataInternal(CParameter&)
     {
         /* Standard departitioning */
         /* Protection level A (higher protected part) */
-        for (j = 0; j < iLevels; j++)
+        for (int j = 0; j < iLevels; j++)
         {
             /* Bits */
-            for (i = 0; i < iM[j][0]; i++)
+            for (int i = 0; i < iM[j][0]; i++)
             {
                 (*pvecOutputData)[iElementCounter] =
                     ExtractBit(vecDecOutBits[j][i]);
@@ -292,10 +289,10 @@ void CMLCDecoder::ProcessDataInternal(CParameter&)
         }
 
         /* Protection level B (lower protected part) */
-        for (j = 0; j < iLevels; j++)
+        for (int j = 0; j < iLevels; j++)
         {
             /* Bits */
-            for (i = 0; i < iM[j][1]; i++)
+            for (int i = 0; i < iM[j][1]; i++)
             {
                 (*pvecOutputData)[iElementCounter] =
                     ExtractBit(vecDecOutBits[j][iM[j][0] + i]);
@@ -310,7 +307,7 @@ void CMLCDecoder::ProcessDataInternal(CParameter&)
            hierarchical bits at the beginning, then append the rest */
         /* Hierarchical frame (always "iM[0][1]"). "iM[0][0]" is always "0" in
            this case */
-        for (i = 0; i < iM[0][1]; i++)
+        for (int i = 0; i < iM[0][1]; i++)
         {
             (*pvecOutputData)[iElementCounter] =
                 ExtractBit(vecDecOutBits[0][i]);
@@ -319,10 +316,10 @@ void CMLCDecoder::ProcessDataInternal(CParameter&)
         }
 
         /* Protection level A (higher protected part) */
-        for (j = 1; j < iLevels; j++)
+        for (int j = 1; j < iLevels; j++)
         {
             /* Bits */
-            for (i = 0; i < iM[j][0]; i++)
+            for (int i = 0; i < iM[j][0]; i++)
             {
                 (*pvecOutputData)[iElementCounter] =
                     ExtractBit(vecDecOutBits[j][i]);
@@ -332,10 +329,10 @@ void CMLCDecoder::ProcessDataInternal(CParameter&)
         }
 
         /* Protection level B (lower protected part) */
-        for (j = 1; j < iLevels; j++)
+        for (int j = 1; j < iLevels; j++)
         {
             /* Bits */
-            for (i = 0; i < iM[j][1]; i++)
+            for (int i = 0; i < iM[j][1]; i++)
             {
                 (*pvecOutputData)[iElementCounter] =
                     ExtractBit(vecDecOutBits[j][iM[j][0] + i]);
@@ -353,9 +350,6 @@ void CMLCDecoder::ProcessDataInternal(CParameter&)
 
 void CMLCDecoder::InitInternal(CParameter& Parameters)
 {
-    int i;
-
-
     /* First, calculate all necessary parameters for decoding process */
     Parameters.Lock();
     CalculateParam(Parameters, eChannelType);
@@ -386,12 +380,12 @@ void CMLCDecoder::InitInternal(CParameter& Parameters)
     EnergyDisp.Init(iNumOutBits, iL[2]);
 
     /* Viterby decoder */
-    for (i = 0; i < iLevels; i++)
+    for (int i = 0; i < iLevels; i++)
         ViterbiDecoder[i].Init(eCodingScheme, eChannelType, iN[0], iN[1],
                                iM[i][0], iM[i][1], iCodeRate[i][0], iCodeRate[i][1], i);
 
     /* Encoder */
-    for (i = 0; i < iLevels; i++)
+    for (int i = 0; i < iLevels; i++)
         ConvEncoder[i].Init(eCodingScheme, eChannelType, iN[0], iN[1],
                             iM[i][0], iM[i][1], iCodeRate[i][0], iCodeRate[i][1], i);
 
@@ -421,11 +415,11 @@ void CMLCDecoder::InitInternal(CParameter& Parameters)
     vecMetric.Init(iNumEncBits);
 
     /* Decoder output buffers for all levels. Have different length */
-    for (i = 0; i < iLevels; i++)
+    for (int i = 0; i < iLevels; i++)
         vecDecOutBits[i].Init(iM[i][0] + iM[i][1]);
 
     /* Buffers for subset definition (always number of encoded bits long) */
-    for (i = 0; i < MC_MAX_NUM_LEVELS; i++)
+    for (int i = 0; i < MC_MAX_NUM_LEVELS; i++)
         vecSubsetDef[i].Init(iNumEncBits);
 
     /* Init buffer for signal space */
@@ -463,7 +457,6 @@ void CMLCDecoder::GetVectorSpace(CVector<_COMPLEX>& veccData)
 \******************************************************************************/
 void CMLC::CalculateParam(CParameter& Parameter, int iNewChannelType)
 {
-    int i;
     int iMSCDataLenPartA;
 
     switch (iNewChannelType)
@@ -471,9 +464,12 @@ void CMLC::CalculateParam(CParameter& Parameter, int iNewChannelType)
     /* FAC ********************************************************************/
     case CT_FAC:
         eCodingScheme = CS_1_SM;
-        iN_mux = NUM_FAC_CELLS_DRM30;
+        if(Parameter.GetWaveMode() == RM_ROBUSTNESS_MODE_E)
+            iN_mux = NUM_FAC_CELLS_DRMPLUS;
+        else
+            iN_mux = NUM_FAC_CELLS_DRM30;
 
-        iNumEncBits = NUM_FAC_CELLS_DRM30 * 2;
+        iNumEncBits = iN_mux * 2;
 
         iLevels = 1;
 
@@ -562,7 +558,7 @@ void CMLC::CalculateParam(CParameter& Parameter, int iNewChannelType)
             iLevels = 2;
 
             /* Code rates for prot.-Level A and B for each level */
-            for (i = 0; i < 2; i++)
+            for (int i = 0; i < 2; i++)
             {
                 /* Protection Level A */
                 iCodeRate[i][0] = 0;
@@ -582,7 +578,7 @@ void CMLC::CalculateParam(CParameter& Parameter, int iNewChannelType)
 
             /* iM: Number of bits each level -------------------------------- */
             /* M_p,2 = RX_p * floor((N_2 - 6) / RY_p) */
-            for (i = 0; i < 2; i++)
+            for (int i = 0; i < 2; i++)
             {
                 iM[i][0] = 0;
 
@@ -630,7 +626,7 @@ void CMLC::CalculateParam(CParameter& Parameter, int iNewChannelType)
             iLevels = 2;
 
             /* Code rates for prot.-Level A and B for each level */
-            for (i = 0; i < 2; i++)
+            for (int i = 0; i < 2; i++)
             {
                 /* Protection Level A */
                 iCodeRate[i][0] =
@@ -675,7 +671,7 @@ void CMLC::CalculateParam(CParameter& Parameter, int iNewChannelType)
 
 
             /* iM: Number of bits each level -------------------------------- */
-            for (i = 0; i < 2; i++)
+            for (int i = 0; i < 2; i++)
             {
                 /* M_p,1 = 2 * N_1 * R_p */
                 iM[i][0] = (int) (2 * iN[0] *
@@ -709,7 +705,7 @@ void CMLC::CalculateParam(CParameter& Parameter, int iNewChannelType)
             iLevels = 3;
 
             /* Code rates for prot.-Level A and B for each level */
-            for (i = 0; i < 3; i++)
+            for (int i = 0; i < 3; i++)
             {
                 /* Protection Level A */
                 iCodeRate[i][0] =
@@ -759,7 +755,7 @@ void CMLC::CalculateParam(CParameter& Parameter, int iNewChannelType)
 
 
             /* iM: Number of bits each level -------------------------------- */
-            for (i = 0; i < 3; i++)
+            for (int i = 0; i < 3; i++)
             {
                 /* M_p,1 = 2 * N_1 * R_p */
                 iM[i][0] = (int) (2 * iN[0] *
@@ -798,7 +794,7 @@ void CMLC::CalculateParam(CParameter& Parameter, int iNewChannelType)
             iCodeRate[0][1] =
                 iCodRateCombMSC64HMsym[Parameter.MSCPrLe.iHierarch][0];
 
-            for (i = 1; i < 3; i++)
+            for (int i = 1; i < 3; i++)
             {
                 /* Protection Level A */
                 iCodeRate[i][0] =
@@ -855,7 +851,7 @@ void CMLC::CalculateParam(CParameter& Parameter, int iNewChannelType)
                        iPuncturingPatterns[iCodRateCombMSC64HMsym[
                                                Parameter.MSCPrLe.iHierarch][0]][1]);
 
-            for (i = 1; i < 3; i++)
+            for (int i = 1; i < 3; i++)
             {
                 /* M_p,1 = 2 * N_1 * R_p */
                 iM[i][0] = (int) (2 * iN[0] *
@@ -894,7 +890,7 @@ void CMLC::CalculateParam(CParameter& Parameter, int iNewChannelType)
             iCodeRate[0][1] =
                 iCodRateCombMSC64HMmix[Parameter.MSCPrLe.iHierarch][0];
 
-            for (i = 1; i < 6; i++)
+            for (int i = 1; i < 6; i++)
             {
                 /* Protection Level A */
                 iCodeRate[i][0] =
@@ -967,7 +963,7 @@ void CMLC::CalculateParam(CParameter& Parameter, int iNewChannelType)
                        iPuncturingPatterns[iCodRateCombMSC64HMmix[
                                                Parameter.MSCPrLe.iHierarch][0]][1]);
 
-            for (i = 1; i < 6; i++)
+            for (int i = 1; i < 6; i++)
             {
                 /* M_p,1Re;Im = 2 * N_1 * R_pRe;Im */
                 iM[i][0] = (int) (iN[0] *

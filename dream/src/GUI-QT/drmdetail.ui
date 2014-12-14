@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>656</width>
+    <width>786</width>
     <height>158</height>
    </rect>
   </property>
@@ -166,7 +166,7 @@
            </sizepolicy>
           </property>
           <property name="text">
-           <string>FACDRMModeBWV</string>
+           <string>?</string>
           </property>
           <property name="wordWrap">
            <bool>false</bool>
@@ -185,7 +185,7 @@
            </sizepolicy>
           </property>
           <property name="text">
-           <string>FACInterleaverDepthV</string>
+           <string>?</string>
           </property>
           <property name="wordWrap">
            <bool>false</bool>
@@ -201,7 +201,7 @@
            </sizepolicy>
           </property>
           <property name="text">
-           <string>FACSDCMSCModeV</string>
+           <string>?</string>
           </property>
           <property name="wordWrap">
            <bool>false</bool>
@@ -211,14 +211,14 @@
         <item>
          <widget class="QLabel" name="FACCodeRateV">
           <property name="text">
-           <string>TextLabel</string>
+           <string>?</string>
           </property>
          </widget>
         </item>
         <item>
          <widget class="QLabel" name="FACNumServicesV">
           <property name="text">
-           <string>TextLabel</string>
+           <string>?</string>
           </property>
          </widget>
         </item>
@@ -412,7 +412,7 @@
            </size>
           </property>
           <property name="text">
-           <string>SNR</string>
+           <string>?</string>
           </property>
           <property name="wordWrap">
            <bool>false</bool>
@@ -434,7 +434,7 @@
            </size>
           </property>
           <property name="text">
-           <string>MER</string>
+           <string>?</string>
           </property>
           <property name="wordWrap">
            <bool>false</bool>
@@ -456,7 +456,7 @@
            </size>
           </property>
           <property name="text">
-           <string>FreqOffset</string>
+           <string>?</string>
           </property>
           <property name="wordWrap">
            <bool>false</bool>
@@ -472,7 +472,7 @@
            </sizepolicy>
           </property>
           <property name="text">
-           <string>SampFreqOffset</string>
+           <string>?</string>
           </property>
           <property name="wordWrap">
            <bool>false</bool>
@@ -494,7 +494,7 @@
            </size>
           </property>
           <property name="text">
-           <string>Wiener</string>
+           <string>?</string>
           </property>
           <property name="wordWrap">
            <bool>false</bool>

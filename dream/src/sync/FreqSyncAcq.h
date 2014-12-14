@@ -69,15 +69,33 @@
 
 
 /* Classes ********************************************************************/
-class FreqOffsetModeABCD
+class FreqOffsetMode
 {
 public:
-    FreqOffsetModeABCD():veciTableFreqPilots(3) {}
-    void init(int iHalfBuffer, int iSampleRate);
+    virtual ~FreqOffsetMode(){}
+    virtual void init(int iHalfBuffer, int iSampleRate)=0;
+    virtual bool calcOffset(const CRealVector& vecrPSD, int& offset)=0;
     void setSearchWindow(_REAL rNewCenterFreq, _REAL rNewWinSize) {
         rCenterFreq = rNewCenterFreq;
         rWinSize = rNewWinSize;
     }
+protected:
+    double rCenterFreq, rWinSize;
+};
+
+class FreqOffsetModeABCD: public FreqOffsetMode
+{
+public:
+    FreqOffsetModeABCD(const FreqOffsetMode& f):FreqOffsetMode(f),veciTableFreqPilots(3)
+    {
+        setSearchWindow(rCenterFreq, rWinSize);
+    }
+    FreqOffsetModeABCD():FreqOffsetMode(),veciTableFreqPilots(3)
+    {
+        setSearchWindow(0.0, 0.0);
+    }
+    virtual ~FreqOffsetModeABCD(){}
+    void init(int iHalfBuffer, int iSampleRate);
     bool calcOffset(const CRealVector& vecrPSD, int& offset);
 private:
     int                         iStartDCSearch;
@@ -88,12 +106,16 @@ private:
     CRealVector                 vecrPSDPilCor;
     CVector<int>                veciPeakIndex;
     int                         iSearchWinSize;
-    double                      rCenterFreq, rWinSize;
 };
 
-class FreqOffsetModeE
+class FreqOffsetModeE: public FreqOffsetMode
 {
 public:
+    FreqOffsetModeE(const FreqOffsetMode& f):FreqOffsetMode(f)
+    {
+        setSearchWindow(rCenterFreq, rWinSize);
+    }
+    void init(int iHalfBuffer, int iSampleRate);
     bool calcOffset(const CRealVector& vecrPSD, int& offset);
 };
 
@@ -101,7 +123,8 @@ class CFreqSyncAcq : public CReceiverModul<_REAL, _COMPLEX>
 {
 public:
     CFreqSyncAcq() :
-        acquired(false), bSyncInput(FALSE),bUseRecFilter(FALSE)
+        acquired(false), bSyncInput(FALSE),bUseRecFilter(FALSE),
+        foMode(new FreqOffsetModeABCD())
     {}
     virtual ~CFreqSyncAcq() {}
 
@@ -159,8 +182,7 @@ protected:
 
     CDRMBandpassFilt            BPFilter;
     _BOOLEAN                    bUseRecFilter;
-    FreqOffsetModeABCD          modeABCD;
-    FreqOffsetModeE             modeE;
+    FreqOffsetMode*             foMode;
 
     /* OPH: counter to count symbols within a frame in order to generate */
     /* RSCI output even when unlocked */

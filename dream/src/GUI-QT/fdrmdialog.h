@@ -124,8 +124,6 @@ private:
     void        SetDisplayColor(const QColor newColor);
 
     QString formatTextMessage(const QString&) const;
-    void startLogging();
-    void stopLogging();
     void SysTrayCreate();
     void SysTrayStart();
     void SysTrayStop(const QString&);
@@ -168,7 +166,7 @@ private slots:
     void OnServiceChanged(int, const CService&);
     void OnSignalLost();
     void OnFrequencyChanged(int);
-    void OnChannelReceptionChanged(Reception);
+    void OnChannelReceptionChanged(Reception&);
 
 signals:
     void plotStyleChanged(int);

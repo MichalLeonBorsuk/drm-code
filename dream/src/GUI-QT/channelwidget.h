@@ -3,11 +3,12 @@
 
 #include <QWidget>
 #include <QTreeWidgetItem>
-#include <../Parameter.h>
-#include "receivercontroller.h"
+#include <../enumerations.h>
 
 class CDRMPlot;
 class ReceiverController;
+class Reception;
+class ChannelConfiguration;
 
 namespace Ui {
 class ChannelWidget;
@@ -40,8 +41,8 @@ public slots:
     void setChannel(ERobMode, ESpecOcc, ESymIntMod, ECodScheme, ECodScheme);
     void setCodeRate(int,int);
     void setPlotStyle(int);
-    void on_channelConfigurationChanged(ChannelConfiguration);
-    void on_channelReceptionChanged(Reception);
+    void on_channelConfigurationChanged(ChannelConfiguration&);
+    void on_channelReceptionChanged(Reception&);
     void setNumIterations(int);
     void setTimeInt(int);
     void setFreqInt(int);

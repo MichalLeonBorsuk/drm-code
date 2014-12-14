@@ -29,7 +29,7 @@
 #if !defined(CELLMAPPINGTABLE_H__3B0BA660_CA63_4347A0D31912__INCLUDED_)
 #define CELLMAPPINGTABLE_H__3B0BA660_CA63_4347A0D31912__INCLUDED_
 
-#include "../GlobalDefinitions.h"
+#include "../enumerations.h"
 #include "../tables/TableCarMap.h"
 #include "../tables/TableFAC.h"
 #include "../util/Vector.h"

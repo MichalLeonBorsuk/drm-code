@@ -54,8 +54,8 @@ signals:
     void OutputStatusChanged(ETypeRxStatus);
     void InputSignalLevelChanged(double);
     void signalLost();
-    void channelReceptionChanged(Reception);
-    void channelConfigurationChanged(ChannelConfiguration);
+    void channelReceptionChanged(Reception&);
+    void channelConfigurationChanged(ChannelConfiguration&);
     void timeIntChanged(int);
     void freqIntChanged(int);
     void tiSyncTracTypeChanged(int);

@@ -55,6 +55,7 @@ protected:
     void PrepareTag(int iLenDataBits);
 
     void Enqueue(uint32_t iInformation, int iNumOfBits);
+    void Enqueue(const string &s);
 
 private:
     CVector<_BINARY> vecbiTagData; // Stores the generated data
@@ -266,7 +267,7 @@ protected:
 class CTagItemGeneratorRxDemodMode : public CTagItemGeneratorWithProfiles /* rdmo */
 {
 public:
-    void GenTag(ERecMode eMode); /* ERecMode defined in DRMReceiver.h but can't include it! */
+    void GenTag(ERecMode eMode, ERobMode eRM); /* ERecMode defined in DRMReceiver.h but can't include it! */
 protected:
     virtual string GetTagName();
     virtual string GetProfiles(); // Return a string containing the set of profiles for this tag

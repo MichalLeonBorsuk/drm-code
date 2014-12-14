@@ -33,7 +33,7 @@
 #if !defined(UTILITIES_H__3B0BA660_CA63_4344_B3452345D31912__INCLUDED_)
 #define UTILITIES_H__3B0BA660_CA63_4344_B3452345D31912__INCLUDED_
 
-#include "../GlobalDefinitions.h"
+#include "../enumerations.h"
 #include "Settings.h"
 #include "Vector.h"
 #include "../matlib/Matlib.h"

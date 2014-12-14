@@ -195,15 +195,6 @@ typedef unsigned int                    _MESSAGE_IDENT;
 #define GUI_CONTROL_UPDATE_TIME         500 /* Milliseconds */
 #define GUI_CONTROL_UPDATE_TIME_FAST    250 /* Milliseconds */
 
-
-/* Global enumerations ------------------------------------------------------ */
-enum ESpecOcc {SO_0, SO_1, SO_2, SO_3, SO_4, SO_5, SO_6}; /* SO: Spectrum Occupancy */
-enum ERobMode {RM_ROBUSTNESS_MODE_A=0, RM_ROBUSTNESS_MODE_B=1,
-               RM_ROBUSTNESS_MODE_C=2, RM_ROBUSTNESS_MODE_D=3, RM_ROBUSTNESS_MODE_E=4,
-               RM_NO_MODE_DETECTED=-1
-              }; /* RM: Robustness Mode */
-
-
 /* Constants ---------------------------------------------------------------- */
 const _REAL crPi = ((_REAL) 3.14159265358979323846);
 
@@ -212,9 +203,6 @@ const _REAL crPi = ((_REAL) 3.14159265358979323846);
 
 /* Define a number for the case: log10(0), which would lead to #inf */
 #define RET_VAL_LOG_0                   ((_REAL) -200.0)
-
-
-
 
 /* Classes ********************************************************************/
 /* For metric */

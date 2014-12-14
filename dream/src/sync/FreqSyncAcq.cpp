@@ -30,6 +30,7 @@
 \******************************************************************************/
 
 #include "FreqSyncAcq.h"
+#include <QDebug>
 
 /* Implementation *************************************************************/
 void FreqOffsetModeABCD::init(int iHalfBuffer, int iSampleRate)
@@ -222,9 +223,14 @@ bool FreqOffsetModeABCD::calcOffset(const CRealVector& vecrPSD, int& offset)
     return false;
 }
 
+void FreqOffsetModeE::init(int iHalfBuffer, int iSampleRate)
+{
+
+}
+
 bool FreqOffsetModeE::calcOffset(const CRealVector& vecrPSD, int& offset)
 {
-    offset = 0;
+    offset = int(1000.0/0.000385802);
     return true; // TODO MODE E
 }
 
@@ -354,15 +360,12 @@ void CFreqSyncAcq::ProcessDataInternal(CParameter& Parameters)
                 }
 
                 int offset = 0;
-                if(Parameters.GetWaveMode()==RM_ROBUSTNESS_MODE_E)
-                    acquired = modeE.calcOffset(vecrPSD, offset);
-                else
-                    acquired = modeABCD.calcOffset(vecrPSD, offset);
+                acquired = foMode->calcOffset(vecrPSD, offset);
 
                 if(acquired)
                 {
                     Parameters.rFreqOffsetAcqui = (_REAL) offset / iFrAcFFTSize;
-                    ;
+                    //qDebug() << "offset " << Parameters.rFreqOffsetAcqui << " Hz";
                     /* Send out the data stored for FFT calculation ----- */
                     /* This does not work for bandpass filter. TODO: make
                        this possible for bandpass filter, too */
@@ -452,10 +455,22 @@ void CFreqSyncAcq::InitInternal(CParameter& Parameters)
        (for simulation) */
     iFFTSize = Parameters.CellMappingTable.iFFTSizeN;
 
+    ERobMode eRM;
     /* Size of FFT */
-    ERobMode eRM = RM_ROBUSTNESS_MODE_B; // default for DRM30
     if(Parameters.GetWaveMode()==RM_ROBUSTNESS_MODE_E)
+    {
         eRM = RM_ROBUSTNESS_MODE_E;
+        FreqOffsetMode* temp = foMode;
+        foMode = new FreqOffsetModeE(*foMode); // preserve fields
+        delete temp;
+    }
+    else
+    {
+        eRM = RM_ROBUSTNESS_MODE_B; // default for DRM30
+        FreqOffsetMode* temp = foMode;
+        foMode = new FreqOffsetModeABCD(*foMode); // preserve fields
+        delete temp;
+    }
     iFrAcFFTSize = fft_size(eRM, iSampleRate) * NUM_BLOCKS_4_FREQ_ACQU;
 
     /* Length of the half of the spectrum of real input signal (the other half
@@ -464,7 +479,7 @@ void CFreqSyncAcq::InitInternal(CParameter& Parameters)
     iHalfBuffer = iFrAcFFTSize / 2 + 1;
 
 
-    modeABCD.init(iHalfBuffer, iSampleRate);
+    foMode->init(iHalfBuffer, iSampleRate);
 
     /* Init vectors and FFT-plan -------------------------------------------- */
     /* Allocate memory for FFT-histories and init with zeros */
@@ -515,7 +530,7 @@ void CFreqSyncAcq::InitInternal(CParameter& Parameters)
 
 void CFreqSyncAcq::SetSearchWindow(_REAL rNewCenterFreq, _REAL rNewWinSize)
 {
-    modeABCD.setSearchWindow(rNewCenterFreq, rNewWinSize);
+    foMode->setSearchWindow(rNewCenterFreq, rNewWinSize);
 
     /* Set flag to initialize the module to the new parameters */
     SetInitFlag();

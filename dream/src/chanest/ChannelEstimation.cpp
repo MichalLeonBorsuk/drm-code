@@ -33,7 +33,6 @@
 /* Implementation *************************************************************/
 void CChannelEstimation::ProcessDataInternal(CParameter& Parameters)
 {
-    int     i, j, k;
     int     iModSymNum;
     _REAL   rCurSNREst;
     _REAL   rOffsPDSEst;
@@ -50,14 +49,14 @@ void CChannelEstimation::ProcessDataInternal(CParameter& Parameters)
 
 // TODO: use CFIFO class for "matcHistory"!
     /* Move data in history-buffer (from iLenHistBuff - 1 towards 0) */
-    for (j = 0; j < iLenHistBuff - 1; j++)
+    for (int j = 0; j < iLenHistBuff - 1; j++)
     {
-        for (i = 0; i < iNumCarrier; i++)
+        for (int i = 0; i < iNumCarrier; i++)
             matcHistory[j][i] = matcHistory[j + 1][i];
     }
 
     /* Write new symbol in memory */
-    for (i = 0; i < iNumCarrier; i++)
+    for (int i = 0; i < iNumCarrier; i++)
         matcHistory[iLenHistBuff - 1][i] = (*pvecInputData)[i];
 
     const int iSymbolCounter = (*pvecInputData).GetExData().iSymbolID;
@@ -144,14 +143,14 @@ void CChannelEstimation::ProcessDataInternal(CParameter& Parameters)
         /* Set first pilot position */
         veccChanEst[0] = veccPilots[0];
 
-        for (j = 0, k = 1; j < iNumCarrier - gcs.f;
+        for (int j = 0, k = 1; j < iNumCarrier - gcs.f;
                 j += gcs.f, k++)
         {
             /* Set values at second time pilot position in cluster */
             veccChanEst[j + gcs.f] = veccPilots[k];
 
             /* Interpolation cluster */
-            for (i = 1; i < gcs.f; i++)
+            for (int i = 1; i < gcs.f; i++)
             {
                 /* E.g.: c(x) = (c_4 - c_0) / 4 * x + c_0 */
                 veccChanEst[j + i] =
@@ -224,7 +223,7 @@ void CChannelEstimation::ProcessDataInternal(CParameter& Parameters)
         /* FIR filter of the pilots with filter taps. We need to filter the
            pilot positions as well to improve the SNR estimation (which
            follows this procedure) */
-        for (j = 0; j < iNumCarrier; j++)
+        for (int j = 0; j < iNumCarrier; j++)
         {
 // TODO: Do only calculate channel estimation for data cells, not for pilot
 // cells (exeption: if we want to use SNR estimation based on pilots, we also
@@ -232,7 +231,7 @@ void CChannelEstimation::ProcessDataInternal(CParameter& Parameters)
             /* Convolution */
             veccChanEst[j] = _COMPLEX((_REAL) 0.0, (_REAL) 0.0);
 
-            for (i = 0; i < iLengthWiener; i++)
+            for (int i = 0; i < iLengthWiener; i++)
             {
                 veccChanEst[j] +=
                     matcFiltFreq[j][i] * veccPilots[veciPilOffTab[j] + i];
@@ -248,7 +247,7 @@ void CChannelEstimation::ProcessDataInternal(CParameter& Parameters)
 
     /* Write to output vector. Take oldest symbol of history for output. Also,
        ship the channel state at a certain cell */
-    for (i = 0; i < iNumCarrier; i++)
+    for (int i = 0; i < iNumCarrier; i++)
     {
         (*pvecOutputData)[i].cSig = matcHistory[0][i] / veccChanEst[i];
 
@@ -283,7 +282,7 @@ void CChannelEstimation::ProcessDataInternal(CParameter& Parameters)
     case SNR_PIL:
         /* Use estimated channel and compare it to the received pilots. This
            estimation works only if the channel estimation was successful */
-        for (i = 0; i < iNumCarrier; i++)
+        for (int i = 0; i < iNumCarrier; i++)
         {
             /* Identify pilot positions. Use MODIFIED "iSymbolID" (See lines
                above) */
@@ -323,7 +322,7 @@ void CChannelEstimation::ProcessDataInternal(CParameter& Parameters)
         /* SNR estimation with initialization */
         if (iSNREstInitCnt > 0)
         {
-            for (i = 0; i < iNumCarrier; i++)
+            for (int i = 0; i < iNumCarrier; i++)
             {
                 /* Only use the last frame of the initialization phase for
                    initial SNR estimation to debar initialization phase of
@@ -376,7 +375,7 @@ void CChannelEstimation::ProcessDataInternal(CParameter& Parameters)
             vecrNoiseEstFACSym[iModSymNum] = 0.0;
             vecrSignalEstFACSym[iModSymNum] = 0.0;
 
-            for (i = 0; i < iNumCarrier; i++)
+            for (int i = 0; i < iNumCarrier; i++)
             {
                 /* Only use FAC cells for this SNR estimation method */
                 if (_IsFAC(Parameters.CellMappingTable.matiMapTab[iModSymNum][i]))
@@ -412,7 +411,7 @@ void CChannelEstimation::ProcessDataInternal(CParameter& Parameters)
     }
 
     /* OPH: WMER, WMM and WMF estimation ------------------------------------ */
-    for (i = 0; i < iNumCarrier; i++)
+    for (int i = 0; i < iNumCarrier; i++)
     {
         /* Use MSC cells for this SNR estimation method */
         if (_IsMSC(Parameters.CellMappingTable.matiMapTab[iModSymNum][i]))
@@ -553,7 +552,7 @@ void CChannelEstimation::ProcessDataInternal(CParameter& Parameters)
     /* Interferer consideration --------------------------------------------- */
     if (bInterfConsid == TRUE)
     {
-        for (i = 0; i < iNumCarrier; i++)
+        for (int i = 0; i < iNumCarrier; i++)
         {
             /* Weight the channel estimates with the SNR estimate of the current
                carrier to consider the higher noise variance caused by
@@ -613,8 +612,7 @@ void CChannelEstimation::InitInternal(CParameter& Parameters)
     iSampleRate = Parameters.GetSigSampleRate();
 
     /* Length of guard-interval with respect to FFT-size! */
-    rGuardSizeFFT = (_REAL) iNumCarrier *
-                    Parameters.CellMappingTable.RatioTgTu.iEnum / Parameters.CellMappingTable.RatioTgTu.iDenom;
+    rGuardSizeFFT = _REAL(iNumCarrier) * Parameters.CellMappingTable.RatioTgTu.val();
 
     /* If robustness mode D is active, get DC position. This position cannot
        be "0" since in mode D no 5 kHz mode is defined (see DRM-standard).
@@ -894,14 +892,13 @@ CComplexVector CChannelEstimation::FreqOptimalFilter(int iFreqInt, int iDiff,
         domain (sinc-function in the frequency domain). Length and position of this
         window are adapted according to the current estimated PDS.
     */
-    int             i;
     CRealVector     vecrRpp(iLength);
     CRealVector     vecrRhp(iLength);
     CRealVector     vecrH(iLength);
     CComplexVector  veccH(iLength);
 
     /* Calculation of R_hp, this is the SHIFTED correlation function */
-    for (i = 0; i < iLength; i++)
+    for (int i = 0; i < iLength; i++)
     {
         const int iCurPos = i * iFreqInt - iDiff;
 
@@ -909,7 +906,7 @@ CComplexVector CChannelEstimation::FreqOptimalFilter(int iFreqInt, int iDiff,
     }
 
     /* Calculation of R_pp */
-    for (i = 0; i < iLength; i++)
+    for (int i = 0; i < iLength; i++)
     {
         const int iCurPos = i * iFreqInt;
 
@@ -926,7 +923,7 @@ CComplexVector CChannelEstimation::FreqOptimalFilter(int iFreqInt, int iDiff,
        function in the time domain to the correct position (determined by
        the "rRatPDSOffs") by multiplying in the frequency domain
        with exp(j w T) */
-    for (i = 0; i < iLength; i++)
+    for (int i = 0; i < iLength; i++)
     {
         const int iCurPos = i * iFreqInt - iDiff;
 
@@ -942,12 +939,11 @@ CComplexVector CChannelEstimation::FreqOptimalFilter(int iFreqInt, int iDiff,
 void CChannelEstimation::UpdateWienerFiltCoef(CReal rNewSNR, CReal rRatPDSLen,
         CReal rRatPDSOffs)
 {
-    int j, i;
     int iDiff;
     int iCurPil;
 
     /* Calculate all possible wiener filters */
-    for (j = 0; j < iNumWienerFilt; j++)
+    for (int j = 0; j < iNumWienerFilt; j++)
     {
         matcWienerFilter[j] = FreqOptimalFilter(gcs.f, j, rNewSNR,
                                                 rRatPDSLen, rRatPDSOffs, iLengthWiener);
@@ -957,9 +953,9 @@ void CChannelEstimation::UpdateWienerFiltCoef(CReal rNewSNR, CReal rRatPDSLen,
 #if 0
     /* Save filter coefficients */
     static FILE* pFile = fopen("test/wienerfreq.dat", "w");
-    for (j = 0; j < iNumWienerFilt; j++)
+    for (int j = 0; j < iNumWienerFilt; j++)
     {
-        for (i = 0; i < iLengthWiener; i++)
+        for (int i = 0; i < iLengthWiener; i++)
         {
             fprintf(pFile, "%e %e\n", Real(matcWienerFilter[j][i]),
                     Imag(matcWienerFilter[j][i]));
@@ -970,7 +966,7 @@ void CChannelEstimation::UpdateWienerFiltCoef(CReal rNewSNR, CReal rRatPDSLen,
 
 
     /* Set matrix with filter taps, one filter for each carrier */
-    for (j = 0; j < iNumCarrier; j++)
+    for (int j = 0; j < iNumCarrier; j++)
     {
         /* We define the current pilot position as the last pilot which the
            index "j" has passed */
@@ -1016,7 +1012,7 @@ void CChannelEstimation::UpdateWienerFiltCoef(CReal rNewSNR, CReal rRatPDSLen,
         iDiff = j - veciPilOffTab[j] * gcs.f;
 
         /* Copy correct filter in matrix */
-        for (i = 0; i < iLengthWiener; i++)
+        for (int i = 0; i < iLengthWiener; i++)
             matcFiltFreq[j][i] = matcWienerFilter[iDiff][i];
     }
 }
@@ -1208,8 +1204,6 @@ void CChannelEstimation::GetTransferFunction(CVector<_REAL>& vecrData,
 void CChannelEstimation::GetSNRProfile(CVector<_REAL>& vecrData,
                                        CVector<_REAL>& vecrScale)
 {
-    int i;
-
     /* Init output vectors */
     vecrData.Init(iNumCarrier, (_REAL) 0.0);
     vecrScale.Init(iNumCarrier, (_REAL) 0.0);
@@ -1224,7 +1218,7 @@ void CChannelEstimation::GetSNRProfile(CVector<_REAL>& vecrData,
         /* We want to suppress the carriers on which no SNR measurement can be
            performed (DC carrier, frequency pilots carriers) */
         int iNewNumCar = 0;
-        for (i = 0; i < iNumCarrier; i++)
+        for (int i = 0; i < iNumCarrier; i++)
         {
             if (vecrSigEstMSC[i] != (_REAL) 0.0)
                 iNewNumCar++;
@@ -1237,7 +1231,7 @@ void CChannelEstimation::GetSNRProfile(CVector<_REAL>& vecrData,
         /* Copy data in output vector and set scale
            (carrier index as x-scale) */
         int iCurOutIndx = 0;
-        for (i = 0; i < iNumCarrier; i++)
+        for (int i = 0; i < iNumCarrier; i++)
         {
             /* Suppress carriers where no SNR measurement is possible */
             if (vecrSigEstMSC[i] != (_REAL) 0.0)

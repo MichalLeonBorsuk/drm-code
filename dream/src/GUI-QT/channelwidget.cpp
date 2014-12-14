@@ -2,6 +2,7 @@
 #include "ui_channelwidget.h"
 #include <QTabBar>
 #include "DRMPlot.h"
+#include "receivercontroller.h"
 
 ChannelWidget::ChannelWidget(ReceiverController* c, QWidget *parent) :
     QWidget(parent),
@@ -84,14 +85,15 @@ void ChannelWidget::on_showOptions_toggled(bool enabled)
         ui->drmOptions->hide();
 }
 
-void ChannelWidget::on_channelConfigurationChanged(ChannelConfiguration c)
+void ChannelWidget::on_channelConfigurationChanged(ChannelConfiguration& c)
 {
     setChannel(ERobMode(c.robm), ESpecOcc(c.mode), ESymIntMod(c.interl),
                ECodScheme(c.sdcConst), ECodScheme(c.mscConst));
     setCodeRate(c.protLev.iPartA, c.protLev.iPartB);
+    ui->drmDetail->setNumServices(c.nAudio, c.nData);
 }
 
-void ChannelWidget::on_channelReceptionChanged(Reception r)
+void ChannelWidget::on_channelReceptionChanged(Reception &r)
 {
     setSNR(r.snr);
     setMER(r.mer, r.wmer);
