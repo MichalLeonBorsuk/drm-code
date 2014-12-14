@@ -566,6 +566,7 @@ CDRMReceiver::DemodulateDRM(_BOOLEAN& bEnoughData)
     if (TimeSync.ProcessData(Parameters, FreqSyncAcqBuf, TimeSyncBuf))
     {
         bEnoughData = TRUE;
+
         /* Use count of OFDM-symbols for detecting
          * aquisition state for acquisition detection
          * only if no signal was decoded before */
@@ -574,6 +575,7 @@ CDRMReceiver::DemodulateDRM(_BOOLEAN& bEnoughData)
             /* Increment symbol counter and check if bound is reached */
             iAcquDetecCnt++;
 
+            // TODO MODE E commenting out the next two lines allows the Frame Sync light to come on.
             if (iAcquDetecCnt > NUM_OFDMSYM_U_ACQ_WITHOUT)
                 SetInStartMode();
         }

@@ -45,8 +45,11 @@
 
 /* Classes ********************************************************************/
 class ReceiverController;
+class Reception;
+class ChannelConfiguration;
+class DRMDetail;
 
-class systemevalDlg : public CWindow, public Ui_SystemEvaluationWindow
+class systemevalDlg : public CWindow
 {
     Q_OBJECT
 
@@ -54,12 +57,17 @@ public:
     systemevalDlg(ReceiverController*, CSettings&, QWidget* parent = 0);
     virtual ~systemevalDlg();
     void            connectController(ReceiverController*);
+    void enableLogging(bool enable)
+    {
+        ui->CheckBoxWriteLog->setChecked(enable);
+    }
 
 protected:
+    Ui::SystemEvaluationWindow* ui;
     ReceiverController* controller;
     CParameter&     Parameters;
+    DRMDetail*      detail;
 
-    QTimer          Timer;
     CDRMPlot*       MainPlot;
 
     virtual void    eventShow(QShowEvent* pEvent);
@@ -81,7 +89,6 @@ protected:
     vector<ChartDialog*>    vecpDRMPlots;
 
 public slots:
-    void OnTimer();
     void OnRadioTimeLinear();
     void OnRadioTimeWiener();
     void OnRadioFrequencyLinear();
@@ -102,6 +109,8 @@ public slots:
     void OnCustomContextMenuRequested(const QPoint&);
     void OnDataAvailable();
     void UpdatePlotStyle(int);
+    void onReception(Reception& r);
+    void onChannel(ChannelConfiguration& c);
 signals:
     void startLogging();
     void stopLogging();

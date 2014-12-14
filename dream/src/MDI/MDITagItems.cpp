@@ -745,34 +745,25 @@ CTagItemGeneratorProfile::GetProfiles()
 }
 
 void
-CTagItemGeneratorRxDemodMode::GenTag(ERecMode eMode)    // rdmo
+CTagItemGeneratorRxDemodMode::GenTag(ERecMode eMode, ERobMode eRM)    // rdmo
 {
     PrepareTag(4 * SIZEOF__BYTE);
     switch (eMode)
     {
     case RM_DRM:
-        Enqueue((uint32_t) 'd', SIZEOF__BYTE);
-        Enqueue((uint32_t) 'r', SIZEOF__BYTE);
-        Enqueue((uint32_t) 'm', SIZEOF__BYTE);
-        Enqueue((uint32_t) '_', SIZEOF__BYTE);
+        if(eRM==RM_ROBUSTNESS_MODE_E)
+            Enqueue("drm+");
+        else
+            Enqueue("drm_");
         break;
     case RM_AM:
-        Enqueue((uint32_t) 'a', SIZEOF__BYTE);
-        Enqueue((uint32_t) 'm', SIZEOF__BYTE);
-        Enqueue((uint32_t) '_', SIZEOF__BYTE);
-        Enqueue((uint32_t) '_', SIZEOF__BYTE);
+        Enqueue("am__");
         break;
     case RM_FM:
-        Enqueue((uint32_t) 'f', SIZEOF__BYTE);
-        Enqueue((uint32_t) 'm', SIZEOF__BYTE);
-        Enqueue((uint32_t) '_', SIZEOF__BYTE);
-        Enqueue((uint32_t) '_', SIZEOF__BYTE);
+        Enqueue("wbfm");
         break;
-    default:
-        Enqueue((uint32_t) ' ', SIZEOF__BYTE);
-        Enqueue((uint32_t) ' ', SIZEOF__BYTE);
-        Enqueue((uint32_t) ' ', SIZEOF__BYTE);
-        Enqueue((uint32_t) ' ', SIZEOF__BYTE);
+    case RM_NONE:
+        Enqueue("    ");
         break;
     }
 
@@ -971,6 +962,14 @@ void
 CTagItemGenerator::Enqueue(uint32_t iInformation, int iNumOfBits)
 {
     vecbiTagData.Enqueue(iInformation, iNumOfBits);
+}
+
+// Put the bits to the bit vector (avoids derived classes needing to access the bit vector directly
+void
+CTagItemGenerator::Enqueue(const string& s)
+{
+    for(string::const_iterator p = s.begin(); p!= s.end(); p++)
+        Enqueue((uint32_t) *p, SIZEOF__BYTE);
 }
 
 /* TODO: there are still some RSCI tags left to implement */

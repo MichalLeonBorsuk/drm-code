@@ -1,5 +1,6 @@
 #include "engineeringtabwidget.h"
 #include "channelwidget.h"
+#include "receivercontroller.h"
 #include <QLabel>
 
 EngineeringTabWidget::EngineeringTabWidget(ReceiverController* controller, QWidget *parent) :

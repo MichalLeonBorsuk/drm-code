@@ -289,7 +289,7 @@ void FDRMDialog::connectController()
     connect(controller, SIGNAL(MSCChanged(ETypeRxStatus)), this, SLOT(OnMSCChanged(ETypeRxStatus)));
     connect(controller, SIGNAL(SDCChanged(ETypeRxStatus)), this, SLOT(OnSDCChanged(ETypeRxStatus)));
     connect(controller, SIGNAL(FACChanged(ETypeRxStatus)), this, SLOT(OnFACChanged(ETypeRxStatus)));
-    connect(controller, SIGNAL(channelReceptionChanged(Reception)), this, SLOT(OnChannelReceptionChanged(Reception)));
+    connect(controller, SIGNAL(channelReceptionChanged(Reception&)), this, SLOT(OnChannelReceptionChanged(Reception&)));
     connect(controller, SIGNAL(InputSignalLevelChanged(double)), this, SLOT(OnInputSignalLevelChanged(double)));
     connect(controller, SIGNAL(serviceChanged(int, const CService&)), this, SLOT(OnServiceChanged(int, const CService&)));
     connect(controller, SIGNAL(signalLost()), this, SLOT(OnSignalLost()));
@@ -552,7 +552,7 @@ void FDRMDialog::OnMSCChanged(ETypeRxStatus s)
     SetStatus(ui->CLED_MSC, s);
 }
 
-void FDRMDialog::OnChannelReceptionChanged(Reception r)
+void FDRMDialog::OnChannelReceptionChanged(Reception &r)
 {
     if(r.wmer>WMERSteps[4])
         setBars(5);
@@ -573,16 +573,6 @@ void FDRMDialog::OnInputSignalLevelChanged(double d)
     inputLevel->setLevel(d);
 }
 
-void FDRMDialog::startLogging()
-{
-    pSysEvalDlg->CheckBoxWriteLog->setChecked(true);
-}
-
-void FDRMDialog::stopLogging()
-{
-    pSysEvalDlg->CheckBoxWriteLog->setChecked(false);
-}
-
 void FDRMDialog::OnScheduleTimer()
 {
     CScheduler::SEvent e;
@@ -592,16 +582,16 @@ void FDRMDialog::OnScheduleTimer()
         controller->setFrequency(e.frequency);
         if(!pLogging->enabled())
         {
-            startLogging();
+            pSysEvalDlg->enableLogging(true);
         }
     }
     else
     {
-        stopLogging();
+        pSysEvalDlg->enableLogging(false);
     }
     if(pScheduler->empty())
     {
-        stopLogging();
+        pSysEvalDlg->enableLogging(false);
     }
     else
     {
@@ -851,7 +841,7 @@ void FDRMDialog::initialiseSchedule()
                 }
                 else // We are late starting
                 {
-                    startLogging();
+                    pSysEvalDlg->enableLogging(true);
                 }
             }
         }
@@ -862,7 +852,7 @@ void FDRMDialog::initialiseSchedule()
     else
     {
         if(pLogging->enabled())
-            startLogging();
+            pSysEvalDlg->enableLogging(true);
     }
 }
 

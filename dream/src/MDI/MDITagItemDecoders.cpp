@@ -277,15 +277,47 @@ void CTagItemDecoderRxDemodMode::DecodeTag(CVector<_BINARY>& vecbiTag, int iLen)
     string strMode = "";
     for (int i = 0; i < iLen / SIZEOF__BYTE; i++)
         strMode += (_BYTE) vecbiTag.Separate(SIZEOF__BYTE);
-    if (strMode == "drm_")
-        eMode = RM_DRM;
-    else if (strMode == "am__")
-        eMode = RM_AM;
-    else if (strMode == "fm__")
-        eMode = RM_FM;
-    else
-        eMode = RM_AM;
 
+    if (strMode == "drm_")
+    {
+        eMode = RM_DRM;
+    }
+    else if (strMode == "drm+")
+    {
+        eMode = RM_DRM;
+    }
+    else if (strMode == "am__")
+    {
+        eMode = RM_AM;
+    }
+    else if (strMode == "lsb_")
+    {
+        eMode = RM_AM;
+    }
+    else if (strMode == "usb_")
+    {
+        eMode = RM_AM;
+    }
+    else if (strMode == "sam_")
+    {
+        eMode = RM_AM;
+    }
+    else if (strMode == "fm__")
+    {
+        eMode = RM_FM;
+    }
+    else if (strMode == "nbfm")
+    {
+        eMode = RM_FM;
+    }
+    else if (strMode == "wbfm")
+    {
+        eMode = RM_FM;
+    }
+    else
+    {
+        eMode = RM_AM;
+    }
     SetReady(TRUE);
 }
 

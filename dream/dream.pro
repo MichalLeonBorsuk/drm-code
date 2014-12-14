@@ -529,7 +529,8 @@ HEADERS += \
     src/util/Settings.h \
     src/util/Utilities.h \
     src/util/Vector.h \
-    src/Version.h
+    src/Version.h \
+    src/enumerations.h
 
 SOURCES += \
     src/AMDemodulation.cpp \
