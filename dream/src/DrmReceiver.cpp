@@ -32,7 +32,6 @@
  *
 \******************************************************************************/
 
-#include <QDebug>
 #include "DrmReceiver.h"
 #include "util/Settings.h"
 #include "util/Utilities.h"
@@ -576,14 +575,8 @@ CDRMReceiver::DemodulateDRM(_BOOLEAN& bEnoughData)
             /* Increment symbol counter and check if bound is reached */
             iAcquDetecCnt++;
 
-            // TODO MODE E
-            int n;
-            if(Parameters.GetWaveMode()==RM_ROBUSTNESS_MODE_E)
-                n = NUM_OFDMSYM_U_ACQ_WITHOUT_DRMPLUS;
-            else
-                n = NUM_OFDMSYM_U_ACQ_WITHOUT_DRM30;
-
-            if (iAcquDetecCnt > n)
+            // TODO MODE E commenting out the next two lines allows the Frame Sync light to come on.
+            if (iAcquDetecCnt > NUM_OFDMSYM_U_ACQ_WITHOUT)
                 SetInStartMode();
         }
     }
@@ -621,15 +614,7 @@ CDRMReceiver::DemodulateDRM(_BOOLEAN& bEnoughData)
     {
         bEnoughData = TRUE;
     }
-    /*
-     * MLC in  2   244
-     * MLC in  1   332
-     * MLC in  0   2606
-     */
-qDebug() << "fill levels FAC " << FACCarDemapBuf.GetFillLevel() << " SDC " << SDCCarDemapBuf.GetFillLevel() << " MSC " << MSCCarDemapBuf.GetFillLevel();
-if(FACCarDemapBuf.GetFillLevel()==244) {
-qDebug() << "FAC frame";
-}
+
 }
 
 void

@@ -59,9 +59,7 @@
    correlation, therefore we can use a decimation of 8 [4]
    (i.e., 48 kHz / 8 [4] = 6 [12] kHz). Must be 8 [4] since all symbol and
    guard-interval lengths at 48000 for all robustness modes are dividable
-   by 8 [4]
-   TODO MODE E
- */
+   by 8 [4] */
 #ifdef USE_10_KHZ_HILBFILT
 # define GRDCRR_DEC_FACT                4
 # define NUM_TAPS_HILB_FILT_24          NUM_TAPS_HILB_FILT_10_24
