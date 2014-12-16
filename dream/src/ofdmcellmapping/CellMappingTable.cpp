@@ -57,7 +57,7 @@ void CCellMappingTable::MakeTable(
     int         iSpecOccArrayIndex=0;
     int         iNumFramesPerSuperframe;
     /* Tables */
-    const CellPos*  piTableFAC=NULL;
+    const int*      piTableFAC=NULL;
     const int*      piTableTimePilots=NULL;
     const int*      piTableFreqPilots=NULL;
 
@@ -89,7 +89,7 @@ void CCellMappingTable::MakeTable(
         iSpecOccArrayIndex = 5;
         break;
     case SO_6:
-        iSpecOccArrayIndex = 0; // because Table 49 is drawn that way
+        iSpecOccArrayIndex = 6;
         break;
     }
 
@@ -104,7 +104,6 @@ void CCellMappingTable::MakeTable(
     gcs = gainCellSubsets[eNewRobustnessMode];
 
     double vif = VIRTUAL_INTERMED_FREQ_DRM30;
-    int iNumFACCells;
 
     switch (eNewRobustnessMode)
     {
@@ -112,8 +111,7 @@ void CCellMappingTable::MakeTable(
         vif = VIRTUAL_INTERMED_FREQ_DRM30;
         iNumFramesPerSuperframe = NUM_FRAMES_IN_SUPERFRAME_DRM30;
         iNumSymbolsPerSuperframe = iNumSymPerFrame * NUM_FRAMES_IN_SUPERFRAME_DRM30;
-        piTableFAC = iTableFACRobModA;
-        iNumFACCells = NUM_FAC_CELLS_DRM30;
+        piTableFAC = &iTableFACRobModA[0][0];
         iNumTimePilots = RMA_NUM_TIME_PIL;
         piTableTimePilots = &iTableTimePilRobModA[0][0];
         piTableFreqPilots = &iTableFreqPilRobModA[0][0];
@@ -133,8 +131,7 @@ void CCellMappingTable::MakeTable(
         vif = VIRTUAL_INTERMED_FREQ_DRM30;
         iNumFramesPerSuperframe = NUM_FRAMES_IN_SUPERFRAME_DRM30;
         iNumSymbolsPerSuperframe = iNumSymPerFrame * NUM_FRAMES_IN_SUPERFRAME_DRM30;
-        piTableFAC = iTableFACRobModB;
-        iNumFACCells = NUM_FAC_CELLS_DRM30;
+        piTableFAC = &iTableFACRobModB[0][0];
         iNumTimePilots = RMB_NUM_TIME_PIL;
         piTableTimePilots = &iTableTimePilRobModB[0][0];
         piTableFreqPilots = &iTableFreqPilRobModB[0][0];
@@ -153,8 +150,7 @@ void CCellMappingTable::MakeTable(
         vif = VIRTUAL_INTERMED_FREQ_DRM30;
         iNumFramesPerSuperframe = NUM_FRAMES_IN_SUPERFRAME_DRM30;
         iNumSymbolsPerSuperframe = iNumSymPerFrame * NUM_FRAMES_IN_SUPERFRAME_DRM30;
-        piTableFAC = iTableFACRobModC;
-        iNumFACCells = NUM_FAC_CELLS_DRM30;
+        piTableFAC = &iTableFACRobModC[0][0];
         iNumTimePilots = RMC_NUM_TIME_PIL;
         piTableTimePilots = &iTableTimePilRobModC[0][0];
         piTableFreqPilots = &iTableFreqPilRobModC[0][0];
@@ -173,8 +169,7 @@ void CCellMappingTable::MakeTable(
         vif = VIRTUAL_INTERMED_FREQ_DRM30;
         iNumFramesPerSuperframe = NUM_FRAMES_IN_SUPERFRAME_DRM30;
         iNumSymbolsPerSuperframe = iNumSymPerFrame * NUM_FRAMES_IN_SUPERFRAME_DRM30;
-        piTableFAC = iTableFACRobModD;
-        iNumFACCells = NUM_FAC_CELLS_DRM30;
+        piTableFAC = &iTableFACRobModD[0][0];
         iNumTimePilots = RMD_NUM_TIME_PIL;
         piTableTimePilots = &iTableTimePilRobModD[0][0];
         piTableFreqPilots = &iTableFreqPilRobModD[0][0];
@@ -193,8 +188,7 @@ void CCellMappingTable::MakeTable(
         vif = VIRTUAL_INTERMED_FREQ_DRMPLUS;
         iNumFramesPerSuperframe = NUM_FRAMES_IN_SUPERFRAME_DRMPLUS;
         iNumSymbolsPerSuperframe = iNumSymPerFrame * NUM_FRAMES_IN_SUPERFRAME_DRMPLUS;
-        piTableFAC = iTableFACRobModE;
-        iNumFACCells = NUM_FAC_CELLS_DRMPLUS;
+        piTableFAC = &iTableFACRobModE[0][0];
         iNumTimePilots = RME_NUM_TIME_PIL;
         piTableTimePilots = &iTableTimePilRobModE[0][0];
         piTableFreqPilots = NULL;
@@ -268,7 +262,6 @@ void CCellMappingTable::MakeTable(
         iFrameSym = iSym % iNumSymPerFrame;
 
         /* Reset FAC counter at the beginning of each new frame */
-        // TODO MODE E this is getting reset before the 244 symbols (at 11 symbols)
         if (iFrameSym == 0)
             iFACCounter = 0;
 
@@ -327,21 +320,14 @@ void CCellMappingTable::MakeTable(
 
 
             /* FAC ---------------------------------------------------------- */
-            /*
-             * ES 201 980 V4.1.1 8.5.2.1 Cell positions
-             * The cells used for FAC are cells that are neither frequency references,
-             * nor time references, nor gain references, nor data
-             * cells in the symbols that do not contain the SDC.
-             * FAC cells convey highly protected QAM symbols that allow fast detection
-             * by the receiver of the type of signal it is currently receiving.
-             * For robustness modes A, B, C and D there are 65 FAC cells and
-             * for robustness mode E there are 244 FAC cells. Tables 62 to 66 give
-             * the position of the FAC cells for each robustness mode
-             */
-            if (iFACCounter < iNumFACCells)
+            /* FAC positions are defined in a table */
+            if (iFACCounter < (eNewRobustnessMode==RM_ROBUSTNESS_MODE_E)?NUM_FAC_CELLS_DRMPLUS:NUM_FAC_CELLS_DRM30)
             {
-                CellPos cp = piTableFAC[iFACCounter];
-                if(cp.symbol == iSym && cp.carrier == iCar)
+                /* piTableFAC[x * 2]: first column; piTableFAC[x * 2 + 1]:
+                   second column */
+                if (piTableFAC[iFACCounter * 2] * iNumCarrier +
+                        piTableFAC[iFACCounter * 2 + 1] == iFrameSym *
+                        iNumCarrier + iCar)
                 {
                     iFACCounter++;
                     matiMapTab[iSym][iCarArrInd] = CM_FAC;
@@ -353,7 +339,7 @@ void CCellMappingTable::MakeTable(
             /* Standard: 8.4.4.3:
                "In some cases gain references fall in locations which coincide
                with those already defined for either frequency or time
-s               references. In these cases, the phase definitions given in
+               references. In these cases, the phase definitions given in
                clauses 8.4.2 and 8.4.3 take precedence."
                Therefore, Scattered pilots must be definded FIRST here! */
 

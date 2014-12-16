@@ -230,7 +230,7 @@ void FreqOffsetModeE::init(int iHalfBuffer, int iSampleRate)
 
 bool FreqOffsetModeE::calcOffset(const CRealVector& vecrPSD, int& offset)
 {
-    offset = int(rCenterFreq/0.000385802);
+    offset = int(1000.0/0.000385802);
     return true; // TODO MODE E
 }
 
@@ -442,7 +442,6 @@ void CFreqSyncAcq::ProcessDataInternal(CParameter& Parameters)
 
     }
     Parameters.Unlock();
-qDebug() << "FreqSyncAc " << iOutputBlockSize;
 }
 
 void CFreqSyncAcq::InitInternal(CParameter& Parameters)

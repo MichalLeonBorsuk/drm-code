@@ -38,16 +38,15 @@
 #define NUM_FAC_CELLS_DRMPLUS       244
 
 /* FAC positions. The two numbers are {symbol no, carrier no} */
-struct CellPos { unsigned int symbol; int carrier; };
-extern const CellPos iTableFACRobModA[NUM_FAC_CELLS_DRM30];
+extern const int iTableFACRobModA[NUM_FAC_CELLS_DRM30][2];
 
-extern const CellPos iTableFACRobModB[NUM_FAC_CELLS_DRM30];
+extern const int iTableFACRobModB[NUM_FAC_CELLS_DRM30][2];
 
-extern const CellPos iTableFACRobModC[NUM_FAC_CELLS_DRM30];
+extern const int iTableFACRobModC[NUM_FAC_CELLS_DRM30][2];
 
-extern const CellPos iTableFACRobModD[NUM_FAC_CELLS_DRM30];
+extern const int iTableFACRobModD[NUM_FAC_CELLS_DRM30][2];
 
-extern const CellPos iTableFACRobModE[NUM_FAC_CELLS_DRMPLUS];
+extern const int iTableFACRobModE[NUM_FAC_CELLS_DRMPLUS][2];
 
 /* Frequency pilots ***********************************************************/
 #define NUM_FREQ_PILOTS         3
