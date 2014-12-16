@@ -27,7 +27,7 @@
 \******************************************************************************/
 
 #include "MLC.h"
-
+#include <QDebug>
 
 /* Implementation *************************************************************/
 /******************************************************************************\
@@ -346,6 +346,18 @@ void CMLCDecoder::ProcessDataInternal(CParameter&)
     /* Energy dispersal ----------------------------------------------------- */
     /* VSPP is treated as a separate part for energy dispersal (7.2.2) */
     EnergyDisp.ProcessData(pvecOutputData);
+
+    switch (eChannelType)
+    {
+    case CT_FAC:
+        qDebug() << "FACMLC " << iOutputBlockSize;
+        break;
+    case CT_SDC:
+        qDebug() << "SDCMLC " << iOutputBlockSize;
+        break;
+    case CT_MSC:
+        qDebug() << "MSCMLC " << iOutputBlockSize;
+    }
 }
 
 void CMLCDecoder::InitInternal(CParameter& Parameters)
@@ -428,6 +440,8 @@ void CMLCDecoder::InitInternal(CParameter& Parameters)
     /* Define block-size for input and output */
     iInputBlockSize = iN_mux;
     iOutputBlockSize = iNumOutBits;
+
+    qDebug() << "MLC in " << eChannelType << " " << iInputBlockSize;
 }
 
 void CMLCDecoder::GetVectorSpace(CVector<_COMPLEX>& veccData)

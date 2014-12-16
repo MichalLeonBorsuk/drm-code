@@ -28,7 +28,7 @@
 
 #include "ChannelEstimation.h"
 #include <limits>
-
+#include <QDebug>
 
 /* Implementation *************************************************************/
 void CChannelEstimation::ProcessDataInternal(CParameter& Parameters)
@@ -561,6 +561,7 @@ void CChannelEstimation::ProcessDataInternal(CParameter& Parameters)
                 CalAndBoundSNR(vecrSigEstMSC[i], vecrNoiseEstMSC[i]);
         }
     }
+    qDebug() << "ChannelEstimation " << iOutputBlockSize;
 }
 
 /* OPH: Calculate the values for the rint RSCI tag */

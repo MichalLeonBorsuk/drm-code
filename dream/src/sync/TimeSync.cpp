@@ -32,7 +32,7 @@
 \******************************************************************************/
 
 #include "TimeSync.h"
-
+#include <QDebug>
 
 /* Implementation *************************************************************/
 void CTimeSync::ProcessDataInternal(CParameter& Parameters)
@@ -194,10 +194,6 @@ void CTimeSync::ProcessDataInternal(CParameter& Parameters)
                             /* Actual correlation */
                             iCurPos = iTimeSyncPos + k;
                             int pos = iCurPos + iLenUsefPart[j];
-                            if(pos>=HistoryBufCorr.Size())
-                                pos = HistoryBufCorr.Size()-1; // TODO MODE E or was this always an off-by-1 errror?
-                            if(iCurPos>=HistoryBufCorr.Size())
-                                iCurPos = HistoryBufCorr.Size()-1; // TODO MODE E or was this always an off-by-1 errror?
                             _COMPLEX hbc = HistoryBufCorr[iCurPos];
                             _COMPLEX hbc2 = HistoryBufCorr[pos];
                             cGuardCorrBlock[j] += hbc * Conj(hbc2);
@@ -583,6 +579,7 @@ void CTimeSync::ProcessDataInternal(CParameter& Parameters)
        timing correction all old symbols must be corrected by a phase
        rotation as well */
     (*pvecOutputData).GetExData().iCurTimeCorr = iIntDiffToCenter;
+    qDebug() << "TimeSync " << iOutputBlockSize << " iIntDiffToCenter " << iIntDiffToCenter;
 }
 
 void CTimeSync::InitInternal(CParameter& Parameters)
@@ -776,24 +773,22 @@ void CTimeSync::InitInternal(CParameter& Parameters)
         /* Set length of the useful part of the symbol and guard size */
         int iFFTSizeN = fft_size(i, iSampleRate);
         iLenUsefPart[i] = iFFTSizeN / iGrdcrrDecFact;
-        iLenGuardInt[i] = (int) ((CReal) iFFTSizeN * propagationParams[i].TgTu.val() / iGrdcrrDecFact);
-        if(iLenGuardInt[i]==0)
-            iLenGuardInt[i]=1; // TODO MODE E
+        double TgTu = propagationParams[i].TgTu.val();
+        iLenGuardInt[i] = (int) ((CReal) iFFTSizeN * TgTu / iGrdcrrDecFact);
 
         /* Number of correlation result blocks to be stored in a vector. This is
            the total length of the guard-interval divided by the step size.
            Since the guard-size must not be a multiple of "iStepSizeGuardCorr",
-           we need to cut-off the fractional part */
-        iLengthIntermCRes[i] = (int) ((CReal) iLenGuardInt[i] /
-                                      iStepSizeGuardCorr);
-        if(iLengthIntermCRes[i]==0)
-            iLengthIntermCRes[i] = 1; // TODO MODE E
+           we need to cut-off the fractional part
+           For Mode E we get 0 so we need to reduce the step size
+        */
+        if(iStepSizeGuardCorr > iLenGuardInt[i]) {
+            iStepSizeGuardCorr = iLenGuardInt[i];
+        }
+        iLengthIntermCRes[i] = (int) ((CReal) iLenGuardInt[i] / iStepSizeGuardCorr);
 
         /* This length is the start point for the "for"-loop */
-        iLengthOverlap[i] = iLenGuardInt[i] -
-                            iStepSizeGuardCorr;
-        if(iLengthOverlap[i]==0)
-            iLengthOverlap[i] = 1; // TODO MODE E
+        iLengthOverlap[i] = iLenGuardInt[i] - iStepSizeGuardCorr;
 
         /* Intermediate correlation results vector (init, zero out) */
         veccIntermCorrRes[i].Init(iLengthIntermCRes[i], (CReal) 0.0);
