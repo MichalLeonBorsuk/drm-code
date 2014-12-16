@@ -27,7 +27,7 @@
 \******************************************************************************/
 
 #include "SyncUsingPil.h"
-
+#include <QDebug>
 
 /* Implementation *************************************************************/
 void CSyncUsingPil::ProcessDataInternal(CParameter& Parameters)
@@ -298,6 +298,7 @@ void CSyncUsingPil::ProcessDataInternal(CParameter& Parameters)
     }
 
     Parameters.Unlock();
+    qDebug() << "SyncUsingPil " << iOutputBlockSize;
 }
 
 void CSyncUsingPil::InitInternal(CParameter& Parameters)
