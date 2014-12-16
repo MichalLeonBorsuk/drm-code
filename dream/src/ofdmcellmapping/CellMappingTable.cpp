@@ -89,7 +89,7 @@ void CCellMappingTable::MakeTable(
         iSpecOccArrayIndex = 5;
         break;
     case SO_6:
-        iSpecOccArrayIndex = 6;
+        iSpecOccArrayIndex = 0; // because Table 49 is drawn that way
         break;
     }
 
