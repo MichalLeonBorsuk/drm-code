@@ -38,7 +38,7 @@ public slots:
 private:
     Ui::DRMDetail *ui;
     QString GetRobModeStr(ERobMode e);
-    QString GetSpecOccStr(ESpecOcc e);
+    QString GetSpecOccStr(ESpecOcc e, ERobMode m);
     void AddWhatsThisHelp();
 };
 

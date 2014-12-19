@@ -137,10 +137,8 @@ void DRMDetail::setChannel(ERobMode robm, ESpecOcc specocc, ESymIntMod eSymbolIn
 {
     QString strFACInfo;
     ERobMode er = robm;
-    if(specocc == SO_6)
-        er = RM_ROBUSTNESS_MODE_E;
 
-    ui->FACDRMModeBWV->setText(GetRobModeStr(er) + " / " + GetSpecOccStr(specocc));
+    ui->FACDRMModeBWV->setText(GetRobModeStr(er) + " / " + GetSpecOccStr(specocc, er));
 
     /* Interleaver Depth #################### */
     switch (eSymbolInterlMode)
@@ -242,12 +240,15 @@ QString DRMDetail::GetRobModeStr(ERobMode e)
     }
 }
 
-QString DRMDetail::GetSpecOccStr(ESpecOcc e)
+QString DRMDetail::GetSpecOccStr(ESpecOcc e, ERobMode m)
 {
     switch (e)
     {
     case SO_0:
-        return "4.5 kHz";
+        if(m==RM_ROBUSTNESS_MODE_E)
+            return "100 kHz";
+        else
+            return "4.5 kHz";
         break;
 
     case SO_1:
@@ -268,10 +269,6 @@ QString DRMDetail::GetSpecOccStr(ESpecOcc e)
 
     case SO_5:
         return "20 kHz";
-        break;
-
-    case SO_6:
-        return "100 kHz";
         break;
 
     default:

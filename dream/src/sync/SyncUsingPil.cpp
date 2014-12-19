@@ -302,9 +302,6 @@ void CSyncUsingPil::ProcessDataInternal(CParameter& Parameters)
 
 void CSyncUsingPil::InitInternal(CParameter& Parameters)
 {
-    int         i;
-    _COMPLEX    cPhaseCorTermDivi;
-
     Parameters.Lock();
 
     /* Init base class for modifying the pilots (rotation) */
@@ -344,7 +341,7 @@ void CSyncUsingPil::InitInternal(CParameter& Parameters)
        Frame-synchronization */
     iNumPilPairs = 0;
 
-    for (i = 0; i < iNumCarrier - 1; i++)
+    for (int i = 0; i < iNumCarrier - 1; i++)
     {
         /* Only successive pilots (in frequency direction) are used */
         if (_IsPilot(Parameters.CellMappingTable.matiMapTab[0][i]) &&
@@ -373,7 +370,7 @@ void CSyncUsingPil::InitInternal(CParameter& Parameters)
     /* Get position of frequency pilots */
     int iFreqPilCount = 0;
     int iAvPilPos = 0;
-    for (i = 0; i < iNumCarrier - 1; i++)
+    for (int i = 0; i < iNumCarrier - 1; i++)
     {
         if (_IsFreqPil(Parameters.CellMappingTable.matiMapTab[0][i]))
         {
@@ -391,7 +388,7 @@ void CSyncUsingPil::InitInternal(CParameter& Parameters)
         (CReal) iAvPilPos / NUM_FREQ_PILOTS / Parameters.CellMappingTable.iFFTSizeN;
 
     /* Init memory for "old" frequency pilots */
-    for (i = 0; i < NUM_FREQ_PILOTS; i++)
+    for (int i = 0; i < NUM_FREQ_PILOTS; i++)
         cOldFreqPil[i] = CComplex((CReal) 0.0, (CReal) 0.0);
 
     /* Nomalization constant for frequency offset estimation */
@@ -414,7 +411,7 @@ void CSyncUsingPil::InitInternal(CParameter& Parameters)
 #ifdef USE_SAMOFFS_TRACK_FRE_PIL
     /* Inits for sample rate offset estimation algorithm -------------------- */
     /* Init memory for actual phase differences */
-    for (i = 0; i < NUM_FREQ_PILOTS; i++)
+    for (int i = 0; i < NUM_FREQ_PILOTS; i++)
         cFreqPilotPhDiff[i] = CComplex((CReal) 0.0, (CReal) 0.0);
 
     /* Init time constant for IIR filter for sample rate offset estimation */

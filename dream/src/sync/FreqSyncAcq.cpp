@@ -33,7 +33,7 @@
 #include <QDebug>
 
 /* Implementation *************************************************************/
-void FreqOffsetModeABCD::init(int iHalfBuffer, int iSampleRate)
+void FreqOffsetModeABCD::init(int iHalfBuffer, int iSampleRate, double rCenterFreq, double rWinSize)
 {
     /* Allocate memory for PSD after pilot correlation */
     vecrPSDPilCor.Init(iHalfBuffer);
@@ -223,9 +223,9 @@ bool FreqOffsetModeABCD::calcOffset(const CRealVector& vecrPSD, int& offset)
     return false;
 }
 
-void FreqOffsetModeE::init(int iHalfBuffer, int iSampleRate)
+void FreqOffsetModeE::init(int iHalfBuffer, int iSampleRate, double rCenterFreq, double rWinSize)
 {
-
+    this->rCenterFreq = rCenterFreq; this->rWinSize = rWinSize;
 }
 
 bool FreqOffsetModeE::calcOffset(const CRealVector& vecrPSD, int& offset)
@@ -365,7 +365,7 @@ void CFreqSyncAcq::ProcessDataInternal(CParameter& Parameters)
                 if(acquired)
                 {
                     Parameters.rFreqOffsetAcqui = (_REAL) offset / iFrAcFFTSize;
-                    //qDebug() << "offset " << Parameters.rFreqOffsetAcqui << " Hz";
+                    qDebug() << "offset " << Parameters.rFreqOffsetAcqui << " Hz";
                     /* Send out the data stored for FFT calculation ----- */
                     /* This does not work for bandpass filter. TODO: make
                        this possible for bandpass filter, too */
@@ -386,7 +386,7 @@ void CFreqSyncAcq::ProcessDataInternal(CParameter& Parameters)
                         }
 
                         /* Init "exp-step" for regular frequency shift which
-                           is used in tracking mode to get contiuous mixing
+                           is used in tracking mode to get continuous mixing
                            signal */
                         cCurExp =
                             _COMPLEX(Cos(iHistBufSize * rNormCurFreqOffsFst),
@@ -418,6 +418,7 @@ void CFreqSyncAcq::ProcessDataInternal(CParameter& Parameters)
             (_REAL) 2.0 * crPi * (Parameters.rFreqOffsetAcqui +
                                   Parameters.rFreqOffsetTrack - rInternIFNorm);
 
+        qDebug() << rNormCurFreqOffset;
         /* New rotation vector for exp() calculation */
         const _COMPLEX cExpStep =
             _COMPLEX(Cos(rNormCurFreqOffset), Sin(rNormCurFreqOffset));
@@ -460,16 +461,12 @@ void CFreqSyncAcq::InitInternal(CParameter& Parameters)
     if(Parameters.GetWaveMode()==RM_ROBUSTNESS_MODE_E)
     {
         eRM = RM_ROBUSTNESS_MODE_E;
-        FreqOffsetMode* temp = foMode;
-        foMode = new FreqOffsetModeE(*foMode); // preserve fields
-        delete temp;
+        foMode = new FreqOffsetModeE();
     }
     else
     {
         eRM = RM_ROBUSTNESS_MODE_B; // default for DRM30
-        FreqOffsetMode* temp = foMode;
-        foMode = new FreqOffsetModeABCD(*foMode); // preserve fields
-        delete temp;
+        foMode = new FreqOffsetModeABCD();
     }
     iFrAcFFTSize = fft_size(eRM, iSampleRate) * NUM_BLOCKS_4_FREQ_ACQU;
 
@@ -479,7 +476,7 @@ void CFreqSyncAcq::InitInternal(CParameter& Parameters)
     iHalfBuffer = iFrAcFFTSize / 2 + 1;
 
 
-    foMode->init(iHalfBuffer, iSampleRate);
+    foMode->init(iHalfBuffer, iSampleRate, rCenterFreq, rWinSize);
 
     /* Init vectors and FFT-plan -------------------------------------------- */
     /* Allocate memory for FFT-histories and init with zeros */
@@ -506,9 +503,10 @@ void CFreqSyncAcq::InitInternal(CParameter& Parameters)
 
 
     /* Init bandpass filter object */
-    int vif = Parameters.GetWaveMode()==RM_ROBUSTNESS_MODE_E?VIRTUAL_INTERMED_FREQ_DRMPLUS:VIRTUAL_INTERMED_FREQ_DRM30;
+    bool drmplus = Parameters.GetWaveMode()==RM_ROBUSTNESS_MODE_E;
+    int vif = drmplus?VIRTUAL_INTERMED_FREQ_DRMPLUS:VIRTUAL_INTERMED_FREQ_DRM30;
     BPFilter.Init(iSampleRate, Parameters.CellMappingTable.iSymbolBlockSize, vif,
-                  Parameters.GetSpectrumOccup(), CDRMBandpassFilt::FT_RECEIVER);
+                  Parameters.GetSpectrumOccup(), CDRMBandpassFilt::FT_RECEIVER, drmplus);
 
 
     /* Define block-sizes for input (The output block size is set inside
@@ -526,14 +524,6 @@ void CFreqSyncAcq::InitInternal(CParameter& Parameters)
     iFreeSymbolCounter = 0;
 
     Parameters.Unlock();
-}
-
-void CFreqSyncAcq::SetSearchWindow(_REAL rNewCenterFreq, _REAL rNewWinSize)
-{
-    foMode->setSearchWindow(rNewCenterFreq, rNewWinSize);
-
-    /* Set flag to initialize the module to the new parameters */
-    SetInitFlag();
 }
 
 void CFreqSyncAcq::StartAcquisition()

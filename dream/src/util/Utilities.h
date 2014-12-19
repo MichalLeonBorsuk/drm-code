@@ -94,7 +94,7 @@ public:
     enum EFiltType {FT_TRANSMITTER, FT_RECEIVER};
 
     void Init(int iSampleRate, int iNewBlockSize, _REAL rOffsetHz,
-              ESpecOcc eSpecOcc, EFiltType eNFiTy);
+              ESpecOcc eSpecOcc, EFiltType eNFiTy, bool drmplus);
     void Process(CVector<_COMPLEX>& veccData);
 
 protected:

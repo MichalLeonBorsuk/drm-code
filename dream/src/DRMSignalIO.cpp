@@ -196,7 +196,8 @@ void CTransmitData::InitInternal(CParameter& Parameters)
 
 
     /* Init bandpass filter object */
-    BPFilter.Init(iSampleRate, iSymbolBlockSize, rDefCarOffset, eSpecOcc, CDRMBandpassFilt::FT_TRANSMITTER);
+    BPFilter.Init(iSampleRate, iSymbolBlockSize, rDefCarOffset, eSpecOcc,
+                  CDRMBandpassFilt::FT_TRANSMITTER, Parameters.GetWaveMode()==RM_ROBUSTNESS_MODE_E);
 
     /* All robustness modes and spectrum occupancies should have the same output
        power. Calculate the normaization factor based on the average power of

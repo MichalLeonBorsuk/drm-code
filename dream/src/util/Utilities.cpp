@@ -172,7 +172,7 @@ CDRMBandpassFilt::Process(CVector < _COMPLEX > &veccData)
 
 void
 CDRMBandpassFilt::Init(int iSampleRate, int iNewBlockSize, _REAL rOffsetHz,
-                       ESpecOcc eSpecOcc, EFiltType eNFiTy)
+                       ESpecOcc eSpecOcc, EFiltType eNFiTy, bool drmplus)
 {
     CReal rMargin = 0.0;
 
@@ -198,11 +198,16 @@ CDRMBandpassFilt::Init(int iSampleRate, int iNewBlockSize, _REAL rOffsetHz,
     switch (eSpecOcc)
     {
     case SO_0:
-        rBPFiltBW = ((CReal) 4500.0 + rMargin) / iSampleRate;
-
-        /* Completely on the right side of DC */
-        rNormCurFreqOffset =
-            (rOffsetHz + (CReal) 2190.0) / iSampleRate;
+        if(drmplus) {
+            rBPFiltBW = ((CReal) 100000.0 + rMargin) / iSampleRate;
+            /* Completely on the right side of DC */
+            rNormCurFreqOffset = (rOffsetHz + (CReal) 2190.0) / iSampleRate; // TODO MODE E
+        }
+        else {
+            rBPFiltBW = ((CReal) 4500.0 + rMargin) / iSampleRate;
+            /* Completely on the right side of DC */
+            rNormCurFreqOffset = (rOffsetHz + (CReal) 2190.0) / iSampleRate;
+        }
         break;
 
     case SO_1:
@@ -241,9 +246,6 @@ CDRMBandpassFilt::Init(int iSampleRate, int iNewBlockSize, _REAL rOffsetHz,
         /* Main part on the right side of DC */
         rNormCurFreqOffset =
             (rOffsetHz + (CReal) 5000.0) / iSampleRate;
-        break;
-    case SO_6: // TODO
-        ;
     }
 
     /* FFT plan is initialized with the long length */

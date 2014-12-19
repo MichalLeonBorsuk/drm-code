@@ -576,7 +576,7 @@ CDRMReceiver::DemodulateDRM(_BOOLEAN& bEnoughData)
             iAcquDetecCnt++;
 
             // TODO MODE E commenting out the next two lines allows the Frame Sync light to come on.
-            if (iAcquDetecCnt > NUM_OFDMSYM_U_ACQ_WITHOUT)
+            if (iAcquDetecCnt > NUM_OFDMSYM_U_ACQ_WITHOUT*10)
                 SetInStartMode();
         }
     }
@@ -1072,7 +1072,7 @@ CDRMReceiver::SetInStartMode()
        signal. If we are correct with our assumptions, the receiver does not
        need to reinitialize */
     if(Parameters.GetWaveMode()==RM_ROBUSTNESS_MODE_E)
-        Parameters.InitCellMapTable(RM_ROBUSTNESS_MODE_E, SO_6);
+        Parameters.InitCellMapTable(RM_ROBUSTNESS_MODE_E, SO_0);
     else
         Parameters.InitCellMapTable(RM_ROBUSTNESS_MODE_B, SO_3);
 

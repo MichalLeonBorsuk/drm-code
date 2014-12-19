@@ -185,11 +185,6 @@ TransmDialog::TransmDialog(CSettings& Settings, QWidget* parent)
 
     case SO_5:
         RadioButtonBandwidth20->setChecked(TRUE);
-        break;
-
-    case SO_6:
-        // TODO
-        break;
     }
 
     /* MSC interleaver mode */

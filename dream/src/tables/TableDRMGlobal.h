@@ -69,7 +69,7 @@ struct PropagationParams {
     int Ns;
 };
 
-extern PropagationParams propagationParams[NUM_ROBUSTNESS_MODES+1];
+extern PropagationParams propagationParams[NUM_ROBUSTNESS_MODES];
 
 #define MAX_NUM_STREAMS                 4
 #define MAX_NUM_SERVICES                4

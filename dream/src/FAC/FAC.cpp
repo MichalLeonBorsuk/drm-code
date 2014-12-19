@@ -90,11 +90,6 @@ void CFACTransmit::FACParam(CVector<_BINARY>* pbiFACData, CParameter& Parameter)
 
     case SO_5:
         (*pbiFACData).Enqueue(5 /* 0101 */, 4);
-        break;
-
-    case SO_6:
-        (*pbiFACData).Enqueue(0 /* 0000 */, 4);
-        break;
     }
 
     /* Interleaver depth flag */
@@ -444,7 +439,7 @@ bool CFACReceive::FACParam(CVector<_BINARY>* pbiFACData,
 
         ChannelParam(pbiFACData, Parameter);
         ServiceParam(pbiFACData, Parameter);
-        if(Parameter.GetSpectrumOccup()==SO_6)
+        if(Parameter.GetWaveMode()==RM_ROBUSTNESS_MODE_E)
             ServiceParam(pbiFACData, Parameter);
 
         /* CRC is ok, or lenient mode selected, return TRUE */
@@ -499,7 +494,7 @@ void CFACReceive::ChannelParam(CVector<_BINARY>* pbiFACData, CParameter& Paramet
     switch ((*pbiFACData).Separate(3))
     {
     case 0: /* 000 */
-        Parameter.SetSpectrumOccup(bModeE?SO_6:SO_0);
+        Parameter.SetSpectrumOccup(SO_0);
         break;
 
     case 1: /* 001 */
