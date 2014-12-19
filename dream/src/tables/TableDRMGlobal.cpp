@@ -36,7 +36,7 @@
  * FFT size.
  */
 
-PropagationParams propagationParams[NUM_ROBUSTNESS_MODES+1]= {
+PropagationParams propagationParams[NUM_ROBUSTNESS_MODES]= {
     { {24, 1}, {1, 9}, 15},
     { {64, 3}, {1, 4}, 15},
     { {44, 3}, {4, 11}, 20},

@@ -352,10 +352,6 @@ string CDRMSimulation::SimFileName(CParameter& SaveParam, string strAddInf,
         break;
     case SO_5:
         strFileName += "5_";
-        break;
-    case SO_6:
-        strFileName += "6_";
-        break;
     }
 
 

@@ -42,60 +42,20 @@
 void CCellMappingTable::MakeTable(
     ERobMode eNewRobustnessMode, ESpecOcc eNewSpectOccup, int iSampleRate)
 {
-    int         iNoMSCDummyCells; /* Number of MSC dummy cells */
     int         iNumTimePilots=0; /* Number of time pilots per frame */
     CScatPilots     ScatPilots;
-    unsigned int iSym;
-    int         iFrameSym;
-    int         iCar;
-    int         iTimePilotsCounter;
-    int         iFreqPilotsCounter;
-    int         iScatPilotsCounter;
-    int         iFACCounter;
-    int         iScatPilPhase;
-    int         iCarArrInd;
-    int         iSpecOccArrayIndex=0;
-    int         iNumFramesPerSuperframe;
     /* Tables */
     const int*      piTableFAC=NULL;
     const int*      piTableTimePilots=NULL;
     const int*      piTableFreqPilots=NULL;
 
+    int         iNumFramesPerSuperframe;
 
     /* Set Parameters and pointers to the tables ******************************/
-    switch (eNewSpectOccup)
-    {
-    case SO_0:
-        iSpecOccArrayIndex = 0;
-        break;
-
-    case SO_1:
-        iSpecOccArrayIndex = 1;
-        break;
-
-    case SO_2:
-        iSpecOccArrayIndex = 2;
-        break;
-
-    case SO_3:
-        iSpecOccArrayIndex = 3;
-        break;
-
-    case SO_4:
-        iSpecOccArrayIndex = 4;
-        break;
-
-    case SO_5:
-        iSpecOccArrayIndex = 5;
-        break;
-    case SO_6:
-        iSpecOccArrayIndex = 0; // because Table 49 is drawn that way
-        break;
-    }
 
     /* The robust mode defines all other parameters */
-    iCarrierKmin = iTableCarrierKmin[iSpecOccArrayIndex][eNewRobustnessMode];
-    iCarrierKmax = iTableCarrierKmax[iSpecOccArrayIndex][eNewRobustnessMode];
+    iCarrierKmin = iTableCarrierKmin[eNewSpectOccup][eNewRobustnessMode];
+    iCarrierKmax = iTableCarrierKmax[eNewSpectOccup][eNewRobustnessMode];
 
     iFFTSizeN = fft_size(eNewRobustnessMode, iSampleRate);
     RatioTgTu = propagationParams[eNewRobustnessMode].TgTu;
@@ -123,7 +83,7 @@ void CCellMappingTable::MakeTable(
         ScatPilots.piZ = &iScatPilZRobModA[0][0];
         ScatPilots.piQ = &iScatPilQRobModA[0][0];
 
-        ScatPilots.piGainTable = &iScatPilGainRobModA[iSpecOccArrayIndex][0];
+        ScatPilots.piGainTable = &iScatPilGainRobModA[eNewSpectOccup][0];
         break;
 
     case RM_ROBUSTNESS_MODE_B:
@@ -143,7 +103,7 @@ void CCellMappingTable::MakeTable(
         ScatPilots.piZ = &iScatPilZRobModB[0][0];
         ScatPilots.piQ = &iScatPilQRobModB[0][0];
 
-        ScatPilots.piGainTable = &iScatPilGainRobModB[iSpecOccArrayIndex][0];
+        ScatPilots.piGainTable = &iScatPilGainRobModB[eNewSpectOccup][0];
         break;
 
     case RM_ROBUSTNESS_MODE_C:
@@ -162,7 +122,7 @@ void CCellMappingTable::MakeTable(
         ScatPilots.piZ = &iScatPilZRobModC[0][0];
         ScatPilots.piQ = &iScatPilQRobModC[0][0];
 
-        ScatPilots.piGainTable = &iScatPilGainRobModC[iSpecOccArrayIndex][0];
+        ScatPilots.piGainTable = &iScatPilGainRobModC[eNewSpectOccup][0];
         break;
 
     case RM_ROBUSTNESS_MODE_D:
@@ -181,7 +141,7 @@ void CCellMappingTable::MakeTable(
         ScatPilots.piZ = &iScatPilZRobModD[0][0];
         ScatPilots.piQ = &iScatPilQRobModD[0][0];
 
-        ScatPilots.piGainTable = &iScatPilGainRobModD[iSpecOccArrayIndex][0];
+        ScatPilots.piGainTable = &iScatPilGainRobModD[eNewSpectOccup][0];
         break;
 
     case RM_ROBUSTNESS_MODE_E:
@@ -200,7 +160,7 @@ void CCellMappingTable::MakeTable(
         ScatPilots.piZ = &ModeEZ256[0][0];
         ScatPilots.piQ = &ModeEQ1024[0][0];
 
-        ScatPilots.piGainTable = &iScatPilGainRobModE[iSpecOccArrayIndex][0];
+        ScatPilots.piGainTable = &iScatPilGainRobModE[eNewSpectOccup][0];
         break;
     default:
         break;
@@ -253,31 +213,31 @@ void CCellMappingTable::MakeTable(
     /* Build table ************************************************************/
     /* Some of the definitions at the beginning are overwritten by successive
        definitions! E.g., first define all carriers as MSC cells */
-    iFreqPilotsCounter = 0;
-    iTimePilotsCounter = 0;
-    iFACCounter = 0;
-    for (iSym = 0; iSym < iNumSymbolsPerSuperframe; iSym++)
+    int iFreqPilotsCounter = 0;
+    int iTimePilotsCounter = 0;
+    int iFACCounter = 0;
+    for (int iSym = 0; iSym < int(iNumSymbolsPerSuperframe); iSym++)
     {
         /* Frame symbol: Counts symbols in one frame, not super frame! */
-        iFrameSym = iSym % iNumSymPerFrame;
+        int iFrameSym = iSym % iNumSymPerFrame;
 
         /* Reset FAC counter at the beginning of each new frame */
         if (iFrameSym == 0)
-            iFACCounter = 0;
+             iFACCounter = 0;
 
         /* Calculate the start value of "p" in equation for gain reference
            cells in ES 201 980 V4.1.1 Table 58 (8.4.4.1) */
         // TODO MODE E - do we need the c or m fields of this table here?
-        iScatPilotsCounter = (int) ((_REAL) (iCarrierKmin -
+        int iScatPilotsCounter = (int) ((_REAL) (iCarrierKmin -
                                              (int) ((_REAL) gcs.f / 2 + .5) -
                                              gcs.f * mod(iFrameSym, gcs.t)
                                             ) / (gcs.f * gcs.t));
 
-        for (iCar = iCarrierKmin; iCar < iCarrierKmax + 1; iCar++)
+        for (int iCar = iCarrierKmin; iCar < iCarrierKmax + 1; iCar++)
         {
             /* Set carrier array index (since we do not have negative indices
                in c++) */
-            iCarArrInd = iCar - iCarrierKmin;
+            int iCarArrInd = iCar - iCarrierKmin;
 
 
             /* MSC ---------------------------------------------------------- */
@@ -377,7 +337,7 @@ void CCellMappingTable::MakeTable(
                 /* Phase_1024[s,k] =
                    (4Z_256[n,m]pW_1024[n,m] + p^2(1 + s)Q_1024) mod 1024 */
                 int n_m = in * ScatPilots.iColSizeWZ + im;
-                iScatPilPhase = mod(4 * ScatPilots.piZ[n_m] + ip * ScatPilots.piW[n_m] +
+                int iScatPilPhase = mod(4 * ScatPilots.piZ[n_m] + ip * ScatPilots.piW[n_m] +
                                     ip * ip * (1 + iFrameSym) * ScatPilots.piQ[n_m], 1024);
 
                 /* Gain calculation and applying of complex value ----------- */
@@ -521,7 +481,7 @@ void CCellMappingTable::MakeTable(
     rAvPowPerSymbol = (_REAL) 0.0;
     rAvScatPilPow = (_REAL) 0.0;
 
-    for (iSym = 0; iSym < iNumSymbolsPerSuperframe; iSym++)
+    for (int iSym = 0; iSym < int(iNumSymbolsPerSuperframe); iSym++)
     {
         /* Init all counters */
         veciNumMSCSym[iSym] = 0;
@@ -604,7 +564,7 @@ void CCellMappingTable::MakeTable(
         (int) (iMSCCounter / iNumFramesPerSuperframe);
 
     /* Calculate dummy cells for MSC */
-    iNoMSCDummyCells = iMSCCounter - iNumUsefMSCCellsPerFrame *
+    int iNoMSCDummyCells = iMSCCounter - iNumUsefMSCCellsPerFrame *
                        iNumFramesPerSuperframe;
 
     /* Correct last MSC count (because of dummy cells) */
@@ -640,7 +600,7 @@ void CCellMappingTable::MakeTable(
         fprintf(pFile, "E");
         break;
     }
-    fprintf(pFile, " / Spectrum occupancy %d\n\n", iSpecOccArrayIndex);
+    fprintf(pFile, " / Spectrum occupancy %d\n\n", eNewSpectOccup);
 
     /* Actual table */
     for (int i = 0; i < iNumSymbolsPerSuperframe; i++)

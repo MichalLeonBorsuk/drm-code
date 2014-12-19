@@ -194,6 +194,8 @@ void CTimeSync::ProcessDataInternal(CParameter& Parameters)
                             /* Actual correlation */
                             iCurPos = iTimeSyncPos + k;
                             int pos = iCurPos + iLenUsefPart[j];
+                            if(pos>=HistoryBufCorr.Size())
+                                break;
                             _COMPLEX hbc = HistoryBufCorr[iCurPos];
                             _COMPLEX hbc2 = HistoryBufCorr[pos];
                             cGuardCorrBlock[j] += hbc * Conj(hbc2);

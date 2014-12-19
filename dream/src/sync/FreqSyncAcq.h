@@ -73,12 +73,8 @@ class FreqOffsetMode
 {
 public:
     virtual ~FreqOffsetMode(){}
-    virtual void init(int iHalfBuffer, int iSampleRate)=0;
+    virtual void init(int iHalfBuffer, int iSampleRate, double rCenterFreq, double rWinSize)=0;
     virtual bool calcOffset(const CRealVector& vecrPSD, int& offset)=0;
-    void setSearchWindow(_REAL rNewCenterFreq, _REAL rNewWinSize) {
-        rCenterFreq = rNewCenterFreq;
-        rWinSize = rNewWinSize;
-    }
 protected:
     double rCenterFreq, rWinSize;
 };
@@ -86,16 +82,11 @@ protected:
 class FreqOffsetModeABCD: public FreqOffsetMode
 {
 public:
-    FreqOffsetModeABCD(const FreqOffsetMode& f):FreqOffsetMode(f),veciTableFreqPilots(3)
-    {
-        setSearchWindow(rCenterFreq, rWinSize);
-    }
     FreqOffsetModeABCD():FreqOffsetMode(),veciTableFreqPilots(3)
     {
-        setSearchWindow(0.0, 0.0);
     }
     virtual ~FreqOffsetModeABCD(){}
-    void init(int iHalfBuffer, int iSampleRate);
+    void init(int iHalfBuffer, int iSampleRate, double rCenterFreq, double rWinSize);
     bool calcOffset(const CRealVector& vecrPSD, int& offset);
 private:
     int                         iStartDCSearch;
@@ -111,11 +102,10 @@ private:
 class FreqOffsetModeE: public FreqOffsetMode
 {
 public:
-    FreqOffsetModeE(const FreqOffsetMode& f):FreqOffsetMode(f)
+    FreqOffsetModeE():FreqOffsetMode()
     {
-        setSearchWindow(rCenterFreq, rWinSize);
     }
-    void init(int iHalfBuffer, int iSampleRate);
+    void init(int iHalfBuffer, int iSampleRate, double rCenterFreq, double rWinSize);
     bool calcOffset(const CRealVector& vecrPSD, int& offset);
 };
 
@@ -128,7 +118,10 @@ public:
     {}
     virtual ~CFreqSyncAcq() {}
 
-    void SetSearchWindow(_REAL rNewCenterFreq, _REAL rNewWinSize);
+    void SetSearchWindow(_REAL rNewCenterFreq, _REAL rNewWinSize)
+    {
+        rCenterFreq = rNewCenterFreq; rWinSize = rNewWinSize;
+    }
 
     void StartAcquisition();
     void StopAcquisition() {
@@ -154,6 +147,7 @@ public:
     }
 
 protected:
+    double rCenterFreq, rWinSize;
     CShiftRegister<_REAL>       vecrFFTHistory;
 
     CFftPlans                   FftPlan;
