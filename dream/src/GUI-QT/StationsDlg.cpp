@@ -533,8 +533,8 @@ void StationsDlg::on_actionEnable_S_Meter_triggered()
 
 void StationsDlg::EnableSMeter()
 {
-    ui->TextLabelSMeter->setEnabled(TRUE);
-    inputLevel->widget()->setEnabled(TRUE);
+    ui->TextLabelSMeter->setEnabled(true);
+    inputLevel->widget()->setEnabled(true);
     ui->TextLabelSMeter->show();
     inputLevel->widget()->show();
     emit subscribeRig();

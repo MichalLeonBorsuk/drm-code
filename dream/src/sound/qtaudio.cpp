@@ -53,7 +53,7 @@
 
 CSoundCommonQT::CSoundCommonQT(bool bInput) :
     bInput(bInput), bDevChanged(false),
-    iSampleRate(0), iBufferSize(0), bBlocking(FALSE),
+    iSampleRate(0), iBufferSize(0), bBlocking(false),
     iFrameSize(0), pIODevice(NULL)
 {
 }
@@ -322,10 +322,10 @@ CSoundInQT::~CSoundInQT()
     Close();
 }
 
-_BOOLEAN CSoundInQT::Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking)
+bool CSoundInQT::Init(int iNewSampleRate, int iNewBufferSize, bool bNewBlocking)
 {
 //    qDebug("CSoundInQT::Init() %i %i %i", iNewSampleRate, iNewBufferSize, bNewBlocking);
-    _BOOLEAN bChanged = FALSE;
+    bool bChanged = false;
     iBufferSize = iNewBufferSize;
     bBlocking = bNewBlocking;
 
@@ -333,7 +333,7 @@ _BOOLEAN CSoundInQT::Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewB
     {
         iSampleRate = iNewSampleRate;
         Close();
-        bChanged = TRUE;
+        bChanged = true;
     }
 
     if (bDevChanged || !pAudioInput)
@@ -360,9 +360,9 @@ _BOOLEAN CSoundInQT::Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewB
     return bChanged;
 }
 
-_BOOLEAN CSoundInQT::Read(CVector<short>& vecsSoundBuffer)
+bool CSoundInQT::Read(CVector<short>& vecsSoundBuffer)
 {
-    _BOOLEAN bError = TRUE;
+    bool bError = true;
     if (bDevChanged)
         Init(iSampleRate, iBufferSize, bBlocking);
     if (pIODevice)
@@ -410,10 +410,10 @@ CSoundOutQT::~CSoundOutQT()
     Close();
 }
 
-_BOOLEAN CSoundOutQT::Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking)
+bool CSoundOutQT::Init(int iNewSampleRate, int iNewBufferSize, bool bNewBlocking)
 {
 //    qDebug("CSoundOutQT::Init() %i %i %i", iNewSampleRate, iNewBufferSize, bNewBlocking);
-    _BOOLEAN bChanged = FALSE;
+    bool bChanged = false;
     iBufferSize = iNewBufferSize;
     bBlocking = bNewBlocking;
 
@@ -421,7 +421,7 @@ _BOOLEAN CSoundOutQT::Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNew
     {
         iSampleRate = iNewSampleRate;
         Close();
-        bChanged = TRUE;
+        bChanged = true;
     }
 
     if (bDevChanged || !pAudioOutput)
@@ -448,9 +448,9 @@ _BOOLEAN CSoundOutQT::Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNew
     return bChanged;
 }
 
-_BOOLEAN CSoundOutQT::Write(CVector<short>& vecsSoundBuffer)
+bool CSoundOutQT::Write(CVector<short>& vecsSoundBuffer)
 {
-    _BOOLEAN bError = TRUE;
+    bool bError = true;
     if (bDevChanged)
         Init(iSampleRate, iBufferSize, bBlocking);
     if (pIODevice)

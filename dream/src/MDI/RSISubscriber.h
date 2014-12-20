@@ -49,8 +49,8 @@ public:
     /* leave it set to NULL if you want incoming commands to be ignored */
     void SetReceiver(CDRMReceiver *pReceiver);
 
-    virtual _BOOLEAN SetOrigin(const string&) {
-        return FALSE;   // only relevant for network subscribers
+    virtual bool SetOrigin(const string&) {
+        return false;   // only relevant for network subscribers
     }
 
     /* Set the profile for this subscriber - could be different for different subscribers */
@@ -64,7 +64,7 @@ public:
     /* Generate and send a packet */
     void TransmitPacket(CTagPacketGenerator& Generator);
 
-    void SetAFPktCRC(const _BOOLEAN bNAFPktCRC) {
+    void SetAFPktCRC(const bool bNAFPktCRC) {
         bUseAFCRC = bNAFPktCRC;
     }
 
@@ -78,14 +78,14 @@ public:
 protected:
     CPacketSink *pPacketSink;
     char cProfile;
-    _BOOLEAN bNeedPft;
+    bool bNeedPft;
     size_t fragment_size;
     CTagPacketDecoderRSCIControl TagPacketDecoderRSCIControl;
 private:
     CDRMReceiver *pDRMReceiver;
     CAFPacketGenerator AFPacketGenerator;
 
-    _BOOLEAN bUseAFCRC;
+    bool bUseAFCRC;
     uint16_t sequence_counter;
 };
 
@@ -96,10 +96,10 @@ public:
     CRSISubscriberSocket(CPacketSink *pSink = NULL);
     virtual ~CRSISubscriberSocket();
 
-    _BOOLEAN SetOrigin(const string& str);
-    _BOOLEAN GetOrigin(string& addr);
-    _BOOLEAN SetDestination(const string& str);
-    _BOOLEAN GetDestination(string& addr);
+    bool SetOrigin(const string& str);
+    bool GetOrigin(string& addr);
+    bool SetDestination(const string& str);
+    bool GetDestination(string& addr);
     void SetPacketSink(CPacketSink *pSink) {
         (void)pSink;
     }
@@ -119,13 +119,13 @@ class CRSISubscriberFile : public CRSISubscriber
 public:
     CRSISubscriberFile();
 
-    _BOOLEAN SetDestination(const string& strFName);
+    bool SetDestination(const string& strFName);
     void StartRecording();
     void StopRecording();
     void poll() {} // Do Nothing
 
-    _BOOLEAN GetDestination(string& addr);
-    _BOOLEAN GetOrigin(string& addr) {
+    bool GetDestination(string& addr);
+    bool GetOrigin(string& addr) {
         (void)addr;
         return false;
     }

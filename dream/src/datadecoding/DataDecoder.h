@@ -72,8 +72,8 @@ public:
         AT_JAVA, AT_EXPERIMENTAL, AT_DMB, AT_VOICE, AT_MIDDLEWARE, AT_IPDC
     };
 
-    _BOOLEAN GetMOTObject (CMOTObject & NewPic, const EAppType eAppTypeReq);
-    _BOOLEAN GetMOTDirectory (CMOTDirectory & MOTDirectoryOut, const EAppType eAppTypeReq);
+    bool GetMOTObject (CMOTObject & NewPic, const EAppType eAppTypeReq);
+    bool GetMOTDirectory (CMOTDirectory & MOTDirectoryOut, const EAppType eAppTypeReq);
     CMOTDABDec *getApplication(int iPacketID) {
         return (iPacketID>=0 && iPacketID<3)?&MOTObject[iPacketID]:NULL;
     }
@@ -91,14 +91,14 @@ protected:
     {
     public:
         CVector < _BINARY > vecbiData;
-        _BOOLEAN bOK;
-        _BOOLEAN bReady;
+        bool bOK;
+        bool bReady;
 
         void Reset ()
         {
             vecbiData.Init (0);
-            bOK = FALSE;
-            bReady = FALSE;
+            bOK = false;
+            bReady = false;
         }
     };
 
@@ -108,7 +108,7 @@ protected:
     int iServPacketID;
     CVector < int >veciCRCOk;
 
-    _BOOLEAN DoNotProcessData;
+    bool DoNotProcessData;
 
     int iContInd[MAX_NUM_PACK_PER_STREAM];
     CDataUnit DataUnit[MAX_NUM_PACK_PER_STREAM];

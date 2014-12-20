@@ -39,7 +39,7 @@ void CChannelEstimation::ProcessDataInternal(CParameter& Parameters)
 
     /* Check if symbol ID index has changed by the synchronization unit. If it
        has changed, reinit this module */
-    if ((*pvecInputData).GetExData().bSymbolIDHasChanged == TRUE)
+    if ((*pvecInputData).GetExData().bSymbolIDHasChanged)
     {
 // FIXME: we loose one OFDM symbol by this call -> slower DRM signal acquisition
         SetInitFlag();
@@ -359,13 +359,13 @@ void CChannelEstimation::ProcessDataInternal(CParameter& Parameters)
         {
             /* Only right after initialization phase apply initial SNR
                value */
-            if (bSNRInitPhase == TRUE)
+            if (bSNRInitPhase)
             {
                 /* Normalize average */
                 rSignalEst /= iSNREstIniSigAvCnt;
                 rNoiseEst /= iSNREstIniNoiseAvCnt;
 
-                bSNRInitPhase = FALSE;
+                bSNRInitPhase = false;
             }
 
             /* replace SNR estimate of current symbol */
@@ -466,7 +466,7 @@ void CChannelEstimation::ProcessDataInternal(CParameter& Parameters)
     /* SNR and Doppler are updated every symbol.
      * TODO is this necessary ? */
 
-    if (bSNRInitPhase == FALSE)
+    if (bSNRInitPhase == false)
     {
         const _REAL rNomBWSNR = rSNREstimate * rSNRSysToNomBWCorrFact;
 
@@ -550,7 +550,7 @@ void CChannelEstimation::ProcessDataInternal(CParameter& Parameters)
     Parameters.Unlock();
 
     /* Interferer consideration --------------------------------------------- */
-    if (bInterfConsid == TRUE)
+    if (bInterfConsid)
     {
         for (int i = 0; i < iNumCarrier; i++)
         {
@@ -772,9 +772,9 @@ void CChannelEstimation::InitInternal(CParameter& Parameters)
     /* We only have an initialization phase for SNR estimation method based on
        the tentative decisions of FAC cells */
     if (TypeSNREst == SNR_FAC)
-        bSNRInitPhase = TRUE;
+        bSNRInitPhase = true;
     else
-        bSNRInitPhase = FALSE;
+        bSNRInitPhase = false;
 
     /* 5 DRM frames to start initial SNR estimation after initialization phase
        of other units */
@@ -1040,13 +1040,13 @@ _REAL CChannelEstimation::CalAndBoundSNR(const _REAL rSignalEst, const _REAL rNo
 #if 0
 _REAL CChannelEstimation::GetSNREstdB() const
 {
-    if (bSNRInitPhase == TRUE)
+    if (bSNRInitPhase)
         return -1.0;
 
     const _REAL rNomBWSNR = rSNREstimate * rSNRSysToNomBWCorrFact;
 
     /* Bound the SNR at 0 dB */
-    if ((rNomBWSNR > (_REAL) 1.0) && (bSNRInitPhase == FALSE))
+    if ((rNomBWSNR > (_REAL) 1.0) && (bSNRInitPhase == false))
         return (_REAL) 10.0 * log10(rNomBWSNR);
     else
         return (_REAL) 0.0;
@@ -1243,7 +1243,7 @@ void CChannelEstimation::GetSNRProfile(CVector<_REAL>& vecrData,
                     rSNRFACSigCorrFact * rSNRSysToNomBWCorrFact;
 
                 /* Bound the SNR at 0 dB */
-                if ((rNomBWSNR > (_REAL) 1.0) && (bSNRInitPhase == FALSE))
+                if ((rNomBWSNR > (_REAL) 1.0) && (bSNRInitPhase == false))
                     vecrData[iCurOutIndx] = (_REAL) 10.0 * Log10(rNomBWSNR);
                 else
                     vecrData[iCurOutIndx] = (_REAL) 0.0;

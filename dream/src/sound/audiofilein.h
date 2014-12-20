@@ -52,8 +52,8 @@ public:
         return iRequestedSampleRate;
     };
 
-    virtual _BOOLEAN    Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking);
-    virtual _BOOLEAN    Read(CVector<short>& psData);
+    virtual bool    Init(int iNewSampleRate, int iNewBufferSize, bool bNewBlocking);
+    virtual bool    Read(CVector<short>& psData);
     virtual void        Close();
 
 protected:

@@ -113,7 +113,7 @@ class CFreqSyncAcq : public CReceiverModul<_REAL, _COMPLEX>
 {
 public:
     CFreqSyncAcq() :
-        acquired(false), bSyncInput(FALSE),bUseRecFilter(FALSE),
+        acquired(false), bSyncInput(false),bUseRecFilter(false),
         foMode(new FreqOffsetModeABCD())
     {}
     virtual ~CFreqSyncAcq() {}
@@ -127,22 +127,22 @@ public:
     void StopAcquisition() {
         acquired = true;
     }
-    _BOOLEAN GetAcquisition() {
+    bool GetAcquisition() {
         return !acquired;
     }
 
-    void SetRecFilter(const _BOOLEAN bNewF) {
+    void SetRecFilter(const bool bNewF) {
         bUseRecFilter = bNewF;
     }
-    _BOOLEAN GetRecFilter() {
+    bool GetRecFilter() {
         return bUseRecFilter;
     }
-    _BOOLEAN GetUnlockedFrameBoundary() {
+    bool GetUnlockedFrameBoundary() {
         return iFreeSymbolCounter==0;
     }
 
     /* To set the module up for synchronized DRM input data stream */
-    void SetSyncInput(_BOOLEAN bNewS) {
+    void SetSyncInput(bool bNewS) {
         bSyncInput = bNewS;
     }
 
@@ -166,16 +166,15 @@ protected:
     int                         iAquisitionCounter;
     int                         iAverageCounter;
 
-    _BOOLEAN                    bSyncInput;
+    bool                    bSyncInput;
 
     int                         iHalfBuffer;
-    int                         iSampleRate;
 
     _COMPLEX                    cCurExp;
     _REAL                       rInternIFNorm;
 
     CDRMBandpassFilt            BPFilter;
-    _BOOLEAN                    bUseRecFilter;
+    bool                    bUseRecFilter;
     FreqOffsetMode*             foMode;
 
     /* OPH: counter to count symbols within a frame in order to generate */

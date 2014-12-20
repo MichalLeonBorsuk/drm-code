@@ -82,8 +82,8 @@ public:
 
     CTransmitData(CSoundOutInterface* pNS) : pFileTransmitter(NULL), pSound(pNS),
         eOutputFormat(OF_REAL_VAL), rDefCarOffset((_REAL) VIRTUAL_INTERMED_FREQ_DRM30),
-        strOutFileName("test/TransmittedData.txt"), bUseSoundcard(TRUE),
-        bAmplified(FALSE), bHighQualityIQ(FALSE) {}
+        strOutFileName("test/TransmittedData.txt"), bUseSoundcard(true),
+        bAmplified(false), bHighQualityIQ(false) {}
     virtual ~CTransmitData();
 
     void SetIQOutput(const EOutFormat eFormat) {
@@ -93,17 +93,17 @@ public:
         return eOutputFormat;
     }
 
-    void SetAmplifiedOutput(_BOOLEAN bEnable) {
+    void SetAmplifiedOutput(bool bEnable) {
         bAmplified = bEnable;
     }
-    _BOOLEAN GetAmplifiedOutput() {
+    bool GetAmplifiedOutput() {
         return bAmplified;
     }
 
-    void SetHighQualityIQ(_BOOLEAN bEnable) {
+    void SetHighQualityIQ(bool bEnable) {
         bHighQualityIQ = bEnable;
     }
-    _BOOLEAN GetHighQualityIQ() {
+    bool GetHighQualityIQ() {
         return bHighQualityIQ;
     }
 
@@ -115,7 +115,7 @@ public:
     void SetWriteToFile(const string strNFN)
     {
         strOutFileName = strNFN;
-        bUseSoundcard = FALSE;
+        bUseSoundcard = false;
     }
 
     void FlushData();
@@ -136,10 +136,10 @@ protected:
     int                 iBigBlockSize;
 
     string              strOutFileName;
-    _BOOLEAN            bUseSoundcard;
+    bool            bUseSoundcard;
 
-    _BOOLEAN            bAmplified;
-    _BOOLEAN            bHighQualityIQ;
+    bool            bAmplified;
+    bool            bHighQualityIQ;
     CVector<_REAL>      vecrReHist;
 
     void HilbertFilt(_COMPLEX& vecData);
@@ -157,11 +157,11 @@ public:
 
     CReceiveData() :
         pSound(NULL), vecrInpData(INPUT_DATA_VECTOR_SIZE, (_REAL) 0.0),
-        bFippedSpectrum(FALSE), eInChanSelection(CS_MIX_CHAN), iPhase(0)
+        bFippedSpectrum(false), eInChanSelection(CS_MIX_CHAN), iPhase(0)
     {}
     virtual ~CReceiveData();
 
-    _REAL ConvertFrequency(_REAL rFrequency, _BOOLEAN bInvert=FALSE) const;
+    _REAL ConvertFrequency(_REAL rFrequency, bool bInvert=false) const;
 
     void GetInputSpec(CVector<_REAL>& vecrData, CVector<_REAL>& vecrScale);
     void GetInputPSD(CVector<_REAL>& vecrData, CVector<_REAL>& vecrScale,
@@ -169,10 +169,10 @@ public:
                      const int iNumAvBlocksPSD = NUM_AV_BLOCKS_PSD,
                      const int iPSDOverlap = 0);
 
-    void SetFlippedSpectrum(const _BOOLEAN bNewF) {
+    void SetFlippedSpectrum(const bool bNewF) {
         bFippedSpectrum = bNewF;
     }
-    _BOOLEAN GetFlippedSpectrum() {
+    bool GetFlippedSpectrum() {
         return bFippedSpectrum;
     }
 
@@ -204,7 +204,7 @@ protected:
     CMutex                  mutexInpData;
 
     int                 iSampleRate;
-    _BOOLEAN            bFippedSpectrum;
+    bool            bFippedSpectrum;
 
     int                 iUpscaleRatio;
     vector<float>       vecf_B, vecf_YL, vecf_YR, vecf_ZL, vecf_ZR;

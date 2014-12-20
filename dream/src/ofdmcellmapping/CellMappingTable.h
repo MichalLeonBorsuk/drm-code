@@ -50,23 +50,24 @@
 #define CM_FRE_PI               32  /* Bit 5 */
 #define CM_SCAT_PI              64  /* Bit 6 */
 #define CM_BOOSTED_PI           128 /* Bit 7 */
+#define CM_NOT_USED             0   /* override for not used carriers */
 
 /* Definitions for checking the cells */
-#define _IsDC(a)                ((a) & CM_DC)
+#define _IsDC(a)                (((a) & CM_DC)!=0)
 
-#define _IsMSC(a)               ((a) & CM_MSC)
-#define _IsSDC(a)               ((a) & CM_SDC)
-#define _IsFAC(a)               ((a) & CM_FAC)
+#define _IsMSC(a)               (((a) & CM_MSC)!=0)
+#define _IsSDC(a)               (((a) & CM_SDC)!=0)
+#define _IsFAC(a)               (((a) & CM_FAC)!=0)
 
-#define _IsData(a)              (((a) & CM_MSC) || ((a) & CM_SDC) || ((a) & CM_FAC))
+#define _IsData(a)              (((a) & (CM_MSC|CM_SDC|CM_FAC))!=0)
 
 
-#define _IsTiPil(a)             ((a) & CM_TI_PI)
-#define _IsFreqPil(a)           ((a) & CM_FRE_PI)
-#define _IsScatPil(a)           ((a) & CM_SCAT_PI)
+#define _IsTiPil(a)             (((a) & CM_TI_PI)!=0)
+#define _IsFreqPil(a)           (((a) & CM_FRE_PI)!=0)
+#define _IsScatPil(a)           (((a) & CM_SCAT_PI)!=0)
 
-#define _IsPilot(a)             (((a) & CM_TI_PI) || ((a) & CM_FRE_PI) || ((a) & CM_SCAT_PI))
-#define _IsBoosPil(a)           ((a) & CM_BOOSTED_PI)
+#define _IsPilot(a)             (((a) & (CM_TI_PI|CM_FRE_PI|CM_SCAT_PI))!=0)
+#define _IsBoosPil(a)           (((a) & CM_BOOSTED_PI)!=0)
 
 
 /* Classes ********************************************************************/

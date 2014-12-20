@@ -55,7 +55,7 @@ CReassemblerN & CReassemblerN::operator= (const CReassemblerN & r)
 }
 
 void
-CReassemblerN::AddSegment (vector<_BYTE> &vecDataIn, int iSegNum, _BOOLEAN bLast)
+CReassemblerN::AddSegment (vector<_BYTE> &vecDataIn, int iSegNum, bool bLast)
 {
     if (bLast)
     {
@@ -87,7 +87,7 @@ CReassemblerN::AddSegment (vector<_BYTE> &vecDataIn, int iSegNum, _BOOLEAN bLast
     else
     {
         iSegmentSize = vecDataIn.size();
-        if (Tracker.HaveSegment (iSegNum) == FALSE)
+        if (Tracker.HaveSegment (iSegNum) == false)
         {
             copyin (vecDataIn, iSegNum);
         }

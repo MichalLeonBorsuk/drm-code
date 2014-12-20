@@ -53,8 +53,8 @@ public:
     CSoundIn();
     virtual ~CSoundIn();
 
-    virtual _BOOLEAN    Init(int iSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking);
-    virtual _BOOLEAN    Read(CVector<short>& psData);
+    virtual bool    Init(int iSampleRate, int iNewBufferSize, bool bNewBlocking);
+    virtual bool    Read(CVector<short>& psData);
     virtual void        Enumerate(vector<string>& names, vector<string>& descriptions);
     virtual string      GetDev();
     virtual void        SetDev(string sNewDev);
@@ -68,12 +68,12 @@ protected:
     vector<string>  vecstrDevices;
     string          sCurDev;
     WAVEFORMATEX    sWaveFormatEx;
-    _BOOLEAN        bChangDev;
+    bool        bChangDev;
     HANDLE          m_WaveEvent;
     int         iSampleRate;
     int         iBufferSize;
     int         iWhichBuffer;
-    _BOOLEAN        bBlocking;
+    bool        bBlocking;
 
     /* Wave in */
     WAVEINCAPS      m_WaveInDevCaps;
@@ -89,8 +89,8 @@ public:
     CSoundOut();
     virtual ~CSoundOut();
 
-    virtual _BOOLEAN    Init(int iSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking);
-    virtual _BOOLEAN    Write(CVector<short>& psData);
+    virtual bool    Init(int iSampleRate, int iNewBufferSize, bool bNewBlocking);
+    virtual bool    Write(CVector<short>& psData);
     virtual void        Enumerate(vector<string>& names, vector<string>& descriptions);
     virtual string      GetDev();
     virtual void        SetDev(string sNewDev);
@@ -105,12 +105,12 @@ protected:
     vector<string>  vecstrDevices;
     string          sCurDev;
     WAVEFORMATEX    sWaveFormatEx;
-    _BOOLEAN        bChangDev;
+    bool        bChangDev;
     HANDLE          m_WaveEvent;
     int         iSampleRate;
     int         iBufferSize;
     int         iWhichBuffer;
-    _BOOLEAN        bBlocking;
+    bool        bBlocking;
 
     /* Wave out */
     WAVEOUTCAPS     m_WaveOutDevCaps;

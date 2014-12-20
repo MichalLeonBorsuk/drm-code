@@ -39,14 +39,14 @@
 template<class TData> class CBuffer
 {
 public:
-    CBuffer() : iBufferSize(0), bRequestFlag(FALSE) {}
+    CBuffer() : iBufferSize(0), bRequestFlag(false) {}
     virtual ~CBuffer() {}
 
-    void            SetRequestFlag(const _BOOLEAN bNewRequestFlag)
+    void            SetRequestFlag(const bool bNewRequestFlag)
     {
         bRequestFlag = bNewRequestFlag;
     }
-    _BOOLEAN        GetRequestFlag() const {
+    bool        GetRequestFlag() const {
         return bRequestFlag;
     }
 
@@ -62,7 +62,7 @@ protected:
     CVectorEx<TData>    vecBuffer;
     int                 iBufferSize;
 
-    _BOOLEAN            bRequestFlag;
+    bool            bRequestFlag;
 };
 
 /* Single block buffer */
@@ -209,7 +209,7 @@ template<class TData> void CCyclicBuffer<TData>::Clear()
     iPut = 0;
     iGet = 0;
     iBufferState = BS_EMPTY;
-    this->bRequestFlag = FALSE;
+    this->bRequestFlag = false;
 }
 
 template<class TData> CVectorEx<TData>* CCyclicBuffer<TData>::Get(const int iRequestedSize)

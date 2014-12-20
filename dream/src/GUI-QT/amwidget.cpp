@@ -222,7 +222,7 @@ void AMWidget::on_buttonFreqOffset_clicked()
     if (ok)
     {
         const _REAL conv_freq =
-            controller->getReceiver()->GetReceiveData()->ConvertFrequency(new_freq, TRUE);
+            controller->getReceiver()->GetReceiveData()->ConvertFrequency(new_freq, true);
         const double dVal = conv_freq /
                             (controller->getReceiver()->GetParameters()->GetSigSampleRate() / 2);
         OnChartxAxisValSet(dVal);

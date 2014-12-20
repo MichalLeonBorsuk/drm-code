@@ -78,8 +78,8 @@
 class CTimeSyncTrack
 {
 public:
-    CTimeSyncTrack() : bTiSyncTracking(FALSE),
-        bSamRaOffsAcqu(TRUE), TypeTiSyncTrac(TSENERGY) {}
+    CTimeSyncTrack() : bTiSyncTracking(false),
+        bSamRaOffsAcqu(true), TypeTiSyncTrac(TSENERGY) {}
     virtual ~CTimeSyncTrack() {}
 
     enum ETypeTiSyncTrac {TSENERGY, TSFIRSTPEAK};
@@ -95,16 +95,16 @@ public:
                      _REAL& rPDSEnd, int iSampleRate);
 
     void StartTracking() {
-        bTiSyncTracking = TRUE;
+        bTiSyncTracking = true;
     }
     void StopTracking() {
-        bTiSyncTracking = FALSE;
+        bTiSyncTracking = false;
     }
 
     /* SetInitFlag() is needed for this function. Is done in channel estimation
        module */
     void StartSaRaOffAcq() {
-        bSamRaOffsAcqu = TRUE;
+        bSamRaOffsAcqu = true;
     }
 
     void SetTiSyncTracType(ETypeTiSyncTrac eNewTy);
@@ -141,8 +141,8 @@ protected:
     CReal                   rFracPartTiCor;
     int                     iTargetTimingPos;
 
-    _BOOLEAN                bTiSyncTracking;
-    _BOOLEAN                bSamRaOffsAcqu;
+    bool                bTiSyncTracking;
+    bool                bSamRaOffsAcqu;
 
     int                     iDFTSize;
 

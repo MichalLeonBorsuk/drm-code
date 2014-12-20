@@ -15,8 +15,8 @@ public:
     virtual string      GetDev();
     virtual int         GetSampleRate();
 
-    virtual _BOOLEAN    Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking);
-    virtual _BOOLEAN    Write(CVector<short>& psData);
+    virtual bool    Init(int iNewSampleRate, int iNewBufferSize, bool bNewBlocking);
+    virtual bool    Write(CVector<short>& psData);
     virtual void        Close();
 
 protected:

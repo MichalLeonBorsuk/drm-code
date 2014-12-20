@@ -81,7 +81,7 @@ CTagPacketDecoder::DecodeAFPacket(CVectorEx<_BINARY>& vecbiAFPkt)
 
     int iCRC = vecbiAFPkt.Separate(16);
 
-    const _BOOLEAN bCRCOk = CRCObject.CheckCRC(iCRC);
+    const bool bCRCOk = CRCObject.CheckCRC(iCRC);
     (void)bCRCOk;
 
     /* Actual packet decoding ----------------------------------------------- */
@@ -185,18 +185,18 @@ int CTagPacketDecoder::DecodeTag(CVector<_BINARY>& vecbiTag)
     /* Get tag data length (4 bytes = 32 bits) */
     const int iLenDataBits = vecbiTag.Separate(32);
     /* Check the tag name against each tag decoder in the vector of tag decoders */
-    _BOOLEAN bTagWasDec = FALSE;
+    bool bTagWasDec = false;
     for (i=0; i<vecpTagItemDecoders.Size(); i++)
     {
         if (strTagName.compare(vecpTagItemDecoders[i]->GetTagName()) == 0) // it's this tag
         {
             vecpTagItemDecoders[i]->DecodeTag(vecbiTag, iLenDataBits);
-            bTagWasDec = TRUE;
+            bTagWasDec = true;
         }
     }
 
     /* Take care of tags which are not supported */
-    if (bTagWasDec == FALSE)
+    if (bTagWasDec == false)
     {
         /* Take bits from tag vector */
         for (i = 0; i < iLenDataBits; i++)

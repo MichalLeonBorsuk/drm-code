@@ -36,7 +36,7 @@
 class CDRMTransceiver
 {
 public:
-    CDRMTransceiver(CSettings* pSettings, CSoundInInterface* pSoundIn, CSoundOutInterface* pSoundOut, _BOOLEAN bTransmitter = FALSE)
+    CDRMTransceiver(CSettings* pSettings, CSoundInInterface* pSoundIn, CSoundOutInterface* pSoundOut, bool bTransmitter = false)
         : pSettings(pSettings), pSoundInInterface(pSoundIn), pSoundOutInterface(pSoundOut), bTransmitter(bTransmitter) {};
     virtual ~CDRMTransceiver() {};
 
@@ -68,10 +68,10 @@ public:
     virtual CSoundOutInterface*     GetSoundOutInterface() {
         return pSoundOutInterface;
     }
-    virtual _BOOLEAN                IsReceiver() const {
+    virtual bool                IsReceiver() const {
         return !bTransmitter;
     }
-    virtual _BOOLEAN                IsTransmitter() const {
+    virtual bool                IsTransmitter() const {
         return bTransmitter;
     }
 
@@ -87,7 +87,7 @@ protected:
     CSoundOutInterface*     pSoundOutInterface;
 
 private:
-    const _BOOLEAN bTransmitter;
+    const bool bTransmitter;
 };
 
 #endif

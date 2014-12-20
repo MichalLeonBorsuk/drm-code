@@ -343,8 +343,8 @@ void COFDMDemodSimulation::ProcessDataInternal(CParameter&)
     (*pvecOutputData2).GetExData().iCurTimeCorr = 0;
 
     /* Symbol ID index is always ok */
-    (*pvecOutputData).GetExData().bSymbolIDHasChanged = FALSE;
-    (*pvecOutputData2).GetExData().bSymbolIDHasChanged = FALSE;
+    (*pvecOutputData).GetExData().bSymbolIDHasChanged = false;
+    (*pvecOutputData2).GetExData().bSymbolIDHasChanged = false;
 }
 
 void COFDMDemodSimulation::InitInternal(CParameter& Parameters)

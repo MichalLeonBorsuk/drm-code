@@ -49,8 +49,8 @@
     Stephane Fillod (developer of hamlib)
 */
 CHamlib::CHamlib():SpecDRMRigs(), CapsHamlibModels(),
-    pRig(NULL), bSMeterIsSupported(FALSE),
-    bModRigSettings(FALSE), iHamlibModelID(0),
+    pRig(NULL), bSMeterIsSupported(false),
+    bModRigSettings(false), iHamlibModelID(0),
     strHamlibConf(""), strSettings(""), iFreqOffset(0),
     modes(), levels(), functions(), parameters(), config()
 {
@@ -138,7 +138,7 @@ void
 CHamlib::RigSpecialParameters(rig_model_t id, const string & sSet, int iFrOff,
                               const string & sModSet)
 {
-    CapsHamlibModels[id].bIsSpecRig = TRUE;
+    CapsHamlibModels[id].bIsSpecRig = true;
     SpecDRMRigs[id] = CSpecDRMRig(sSet, iFrOff, sModSet);
 }
 
@@ -280,7 +280,7 @@ CHamlib::GetPortList(map < string, string > &ports)
     }
 #elif defined(__unix__)
 // TODO find better way to enumerate serial device
-    _BOOLEAN bOK = FALSE;
+    bool bOK = false;
 // hal-find-by-capability no longer available on recent linux distro, give an shell error message.
 // now check if the command exist before executing
 //  FILE *p = popen("hal-find-by-capability --capability serial", "r");
@@ -311,7 +311,7 @@ CHamlib::GetPortList(map < string, string > &ports)
                         if (buf[n - 1] == '\n')
                             buf[n - 1] = 0;
                         ports[buf] = buf;
-                        bOK = TRUE;
+                        bOK = true;
                     }
                     pclose(p2);
                 }
@@ -353,7 +353,7 @@ CHamlib::PrintHamlibModelList(const struct rig_caps *caps, void *data)
     CHamlib & Hamlib = *((CHamlib *) data);
 
     /* Store new model in class. Use only relevant information */
-    _BOOLEAN bIsSpec =
+    bool bIsSpec =
         Hamlib.SpecDRMRigs.find(caps->rig_model) != Hamlib.SpecDRMRigs.end();
 
     Hamlib.CapsHamlibModels[caps->rig_model] =
@@ -412,7 +412,7 @@ CHamlib::LoadSettings(CSettings & s)
         }
 
         /* Enable DRM modified receiver flag */
-        bModRigSettings = s.Get("Hamlib", "enmodrig", FALSE);
+        bModRigSettings = s.Get("Hamlib", "enmodrig", false);
 
         strSettings = s.Get("Hamlib", "settings");
         iFreqOffset = s.Get("Hamlib", "freqoffset", 0);
@@ -461,10 +461,10 @@ CHamlib::SaveSettings(CSettings & s)
     s.Put("Hamlib", "freqoffset", iFreqOffset);
 }
 
-_BOOLEAN
+bool
 CHamlib::SetFrequency(const int iFreqkHz)
 {
-    _BOOLEAN bSucceeded = FALSE;
+    bool bSucceeded = false;
 
     /* Check if rig was opend properly */
     if (pRig != NULL)
@@ -474,7 +474,7 @@ CHamlib::SetFrequency(const int iFreqkHz)
         if (rig_set_freq(pRig, RIG_VFO_CURR, (iFreqkHz + iFreqOffset) * 1000)
                 == RIG_OK)
         {
-            bSucceeded = TRUE;
+            bSucceeded = true;
         }
     }
 
@@ -487,7 +487,7 @@ CHamlib::ESMeterState CHamlib::GetSMeter(_REAL & rCurSigStr)
     eRetVal = SS_NOTVALID;
     rCurSigStr = (_REAL) 0.0;
 
-    if ((pRig != NULL) && (bSMeterIsSupported == TRUE))
+    if ((pRig != NULL) && (bSMeterIsSupported))
     {
         value_t
         tVal;
@@ -504,7 +504,7 @@ CHamlib::ESMeterState CHamlib::GetSMeter(_REAL & rCurSigStr)
         /* If a time-out happened, do not update s-meter anymore (disable it) */
         if (iHamlibRetVal == -RIG_ETIMEOUT)
         {
-            bSMeterIsSupported = FALSE;
+            bSMeterIsSupported = false;
             eRetVal = SS_TIMEOUT;
         }
     }
@@ -652,7 +652,7 @@ CHamlib::SetRigConfig()
 }
 
 void
-CHamlib::SetEnableModRigSettings(const _BOOLEAN bNSM)
+CHamlib::SetEnableModRigSettings(const bool bNSM)
 {
     if (bModRigSettings != bNSM)
     {
@@ -695,7 +695,7 @@ CHamlib::SetHamlibModelID(const rig_model_t model)
         if (s != SpecDRMRigs.end())
         {
             /* Get correct parameter string */
-            if (bModRigSettings == TRUE)
+            if (bModRigSettings)
                 strSettings = s->second.strDRMSetMod;
             else
             {
@@ -741,9 +741,9 @@ CHamlib::SetHamlibModelID(const rig_model_t model)
         {
             /* Check if s-meter can be used. Disable GUI control if not */
             if (rig_has_get_level(pRig, RIG_LEVEL_STRENGTH))
-                bSMeterIsSupported = TRUE;
+                bSMeterIsSupported = true;
             else
-                bSMeterIsSupported = FALSE;
+                bSMeterIsSupported = false;
         }
     }
 
@@ -753,6 +753,6 @@ CHamlib::SetHamlibModelID(const rig_model_t model)
         cerr << GenErr.strError << endl;
 
         /* Disable s-meter */
-        bSMeterIsSupported = FALSE;
+        bSMeterIsSupported = false;
     }
 }

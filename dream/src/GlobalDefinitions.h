@@ -64,20 +64,13 @@ using namespace std; /* Because of the library: "complex" */
 # define qDebug(...) do {} while (0)
 #endif
 
-#ifndef TRUE
-# define TRUE 1
-#endif
-#ifndef FALSE
-# define FALSE 0
-#endif
-
 /* Choose algorithms -------------------------------------------------------- */
 /* There are two algorithms available for frequency offset estimation for
    tracking mode: Using frequency pilots or the guard-interval correlation. In
    case of guard-interval correlation (which will be chosen if this macro is
    defined), the Hilbert filter in TimeSync must be used all the time -> more
    CPU usage. Also, the frequency tracking range is smaller */
-#undef USE_FRQOFFS_TRACK_GUARDCORR
+#define USE_FRQOFFS_TRACK_GUARDCORR 1
 
 /* The sample rate offset estimation can be done using the frequency pilots or
    the movement of the estimated impulse response. Defining this macro will
@@ -109,7 +102,6 @@ typedef double                          _REAL;
 typedef complex<_REAL>                  _COMPLEX;
 typedef short                           _SAMPLE;
 typedef unsigned char                   _BYTE;
-typedef bool                            _BOOLEAN;
 
 // bool seems not to work with linux TODO: Fix Me!
 typedef unsigned char/*bool*/           _BINARY;
@@ -252,7 +244,7 @@ public:
     void WakeOne() {
         WaitCond.wakeOne();
     }
-    _BOOLEAN Wait(CMutex* mutex, unsigned long time) {
+    bool Wait(CMutex* mutex, unsigned long time) {
         return WaitCond.wait(&mutex->Mutex, time);
     }
 protected:
@@ -273,8 +265,8 @@ class CWaitCondition
 {
 public:
     void WakeOne() {}
-    _BOOLEAN Wait(CMutex*, unsigned long) {
-        return TRUE;
+    bool Wait(CMutex*, unsigned long) {
+        return true;
     }
 };
 

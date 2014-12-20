@@ -105,7 +105,7 @@ protected:
     ECharType       InitCharType;
     ECodScheme      eLastSDCCodingScheme;
     ECodScheme      eLastMSCCodingScheme;
-    _BOOLEAN        bLastAudioDecoder;
+    bool        bLastAudioDecoder;
 
     QwtText         leftTitle, rightTitle, bottomTitle;
 

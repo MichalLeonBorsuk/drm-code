@@ -58,11 +58,11 @@ public:
     {
         DataEncoder.GetSliShowEnc()->ClearAllFileNames();
     }
-    void SetPathRemoval(_BOOLEAN bRemovePath)
+    void SetPathRemoval(bool bRemovePath)
     {
         DataEncoder.GetSliShowEnc()->SetPathRemoval(bRemovePath);
     }
-    _BOOLEAN GetTransStat(string& strCPi, _REAL& rCPe)
+    bool GetTransStat(string& strCPi, _REAL& rCPe)
     {
         return DataEncoder.GetSliShowEnc()->GetTransStat(strCPi, rCPe);
     }
@@ -90,10 +90,10 @@ protected:
     void CloseEncoder();
 
     CTextMessageEncoder     TextMessage;
-    _BOOLEAN                bUsingTextMessage;
+    bool                bUsingTextMessage;
     CDataEncoder            DataEncoder;
     int                     iTotPacketSize;
-    _BOOLEAN                bIsDataService;
+    bool                bIsDataService;
     int                     iTotNumBitsForUsage;
 
     CAudioCodec*            codec;
@@ -115,8 +115,8 @@ protected:
     CVector<_REAL>          vecTempResBufIn[MAX_ENCODED_CHANNELS];
     CVector<_REAL>          vecTempResBufOut[MAX_ENCODED_CHANNELS];
 
-    _BOOLEAN                bCanEncodeAAC;
-    _BOOLEAN                bCanEncodeOPUS;
+    bool                bCanEncodeAAC;
+    bool                bCanEncodeOPUS;
 
 public:
     virtual void InitInternalTx(CParameter& Parameters, int &iInputBlockSize, int &iOutputBlockSize);
@@ -167,12 +167,12 @@ public:
         AudioSourceEncoderImpl.ClearPicFileNames();
     }
 
-    void SetPathRemoval(_BOOLEAN bRemovePath)
+    void SetPathRemoval(bool bRemovePath)
     {
         AudioSourceEncoderImpl.SetPathRemoval(bRemovePath);
     }
 
-    _BOOLEAN GetTransStat(string& strCPi, _REAL& rCPe)
+    bool GetTransStat(string& strCPi, _REAL& rCPe)
     {
         return AudioSourceEncoderImpl.GetTransStat(strCPi, rCPe);
     }

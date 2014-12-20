@@ -234,13 +234,13 @@ static void pa_stream_notify_cb(pa_stream *, void *userdata)
         if (!SoundOutPulse.bPrebuffer)
         {
             DEBUG_MSG("*** playback %sFLOW\n", ud->bOverflow ? "OVER" : "UNDER");
-            SoundOutPulse.bBufferingError = TRUE;
+            SoundOutPulse.bBufferingError = true;
         }
     }
     if (ud->bOverflow)
-        SoundOutPulse.bSeek = TRUE;
+        SoundOutPulse.bSeek = true;
     else
-        SoundOutPulse.bPrebuffer = TRUE;
+        SoundOutPulse.bPrebuffer = true;
 }
 
 static void pa_stream_success_cb(pa_stream *, int /*success*/, void */*userdata*/)
@@ -373,10 +373,10 @@ int CSoundInPulse::Read_HW(void *recbuf, int size)
     if (pa_s)
     {
         /* Buffering error when latency >= 75% of RECORD_BUFFER_US */
-        _BOOLEAN bError = TRUE;
+        bool bError = true;
         uint64_t recording_usec;
         if (pa_stream_get_latency(&pa_obj, pa_s, iSampleRate, &recording_usec))
-            bError = recording_usec >= (uint64_t)(RECORD_BUFFER_US * 75 / 100) ? TRUE : FALSE;
+            bError = recording_usec >= (uint64_t)(RECORD_BUFFER_US * 75 / 100) ? true : false;
         bBufferingError |= bError;
 
 #ifdef CLOCK_DRIFT_ADJ_ENABLED
@@ -524,10 +524,10 @@ void CSoundOutPulse::Init_HW()
         DEBUG_MSG("CSoundOutPulse::Init_HW pa_stream_connect_playback failed\n");
 
     pa_stream_notify_cb_userdata_underflow.SoundOutPulse = this;
-    pa_stream_notify_cb_userdata_underflow.bOverflow = FALSE;
+    pa_stream_notify_cb_userdata_underflow.bOverflow = false;
     pa_stream_set_underflow_callback(pa_s, &pa_stream_notify_cb, (void*)&pa_stream_notify_cb_userdata_underflow);
     pa_stream_notify_cb_userdata_overflow.SoundOutPulse = this;
-    pa_stream_notify_cb_userdata_overflow.bOverflow = TRUE;
+    pa_stream_notify_cb_userdata_overflow.bOverflow = true;
     pa_stream_set_overflow_callback(pa_s, &pa_stream_notify_cb, (void*)&pa_stream_notify_cb_userdata_overflow);
 
 #ifdef CLOCK_DRIFT_ADJ_ENABLED
@@ -539,7 +539,7 @@ void CSoundOutPulse::Init_HW()
 #endif
 
     /* Clear mute error flag */
-    bMuteError = FALSE;
+    bMuteError = false;
 
     DEBUG_MSG("pulseaudio output device '%s', init done\n", sCurrentDevice.c_str());
 }
@@ -552,12 +552,12 @@ int CSoundOutPulse::Write_HW(void *playbuf, int size)
     if (pa_s)
     {
 #ifdef CLOCK_DRIFT_ADJ_ENABLED
-        _BOOLEAN bInitClockDriftComp = FALSE;
+        bool bInitClockDriftComp = false;
         if (cp.bClockDriftComp != bNewClockDriftComp) {
             cp.bClockDriftComp = bNewClockDriftComp;
             DEBUG_MSG("CSoundOutPulse::write_HW(): bClockDriftComp=%i\n", cp.bClockDriftComp);
             if (cp.bClockDriftComp)
-                bInitClockDriftComp = TRUE;
+                bInitClockDriftComp = true;
             else if (!bBlockingPlay)
                 pa_set_sample_rate(&pa_obj, pa_s, iSampleRate);
         }
@@ -568,10 +568,10 @@ int CSoundOutPulse::Write_HW(void *playbuf, int size)
             //      DEBUG_MSG("CSoundOutPulse::write_HW(): prebuffering ...\n");
             if (pa_o_sync(&pa_obj, pa_stream_prebuf(pa_s, pa_stream_success_cb, NULL)) != PA_OK)
                 DEBUG_MSG("CSoundOutPulse::write_HW(): prebuffering failed\n");
-            bPrebuffer = FALSE;
-            bSeek = FALSE;
+            bPrebuffer = false;
+            bSeek = false;
 #ifdef CLOCK_DRIFT_ADJ_ENABLED
-            bInitClockDriftComp = TRUE;
+            bInitClockDriftComp = true;
 #endif
         }
 
@@ -645,7 +645,7 @@ int CSoundOutPulse::Write_HW(void *playbuf, int size)
         }
 #endif
 
-        bSeek = FALSE;
+        bSeek = false;
 
         if (ret == PA_OK) {
             do {
@@ -668,7 +668,7 @@ void CSoundOutPulse::Close_HW()
     if (pa_s)
     {
         DEBUG_MSG("CSoundOutPulse::close_HW()\n");
-        bMuteError = TRUE;
+        bMuteError = true;
         if (bBlockingPlay && pa_obj.pa_m!=NULL && pa_obj.pa_c!=NULL && pa_s!=NULL)
         {
             if (pa_o_sync(&pa_obj, pa_stream_drain(pa_s, pa_stream_success_cb, NULL)) != PA_OK)
@@ -687,11 +687,11 @@ void CSoundOutPulse::Close_HW()
 
 /* Common ********************************************************************/
 
-CSoundPulse::CSoundPulse(_BOOLEAN bPlayback)
-    : bPlayback(bPlayback), bChangDev(TRUE)
+CSoundPulse::CSoundPulse(bool bPlayback)
+    : bPlayback(bPlayback), bChangDev(true)
 #ifdef ENABLE_STDIN_STDOUT
-    , bStdinStdout(FALSE)
-    , bMono(FALSE)
+    , bStdinStdout(false)
+    , bMono(false)
 #endif
 {
 }
@@ -732,7 +732,7 @@ void CSoundPulse::SetDev(string sNewDevice)
     if (sNewDevice != sCurrentDevice)
     {
         sCurrentDevice = sNewDevice;
-        bChangDev = TRUE;
+        bChangDev = true;
     }
 }
 
@@ -741,14 +741,14 @@ string CSoundPulse::GetDev()
     return sCurrentDevice;
 }
 
-_BOOLEAN CSoundPulse::IsDefaultDevice()
+bool CSoundPulse::IsDefaultDevice()
 {
     const char *str = sCurrentDevice.c_str();
     return *str == 0;
 }
 
 #ifdef ENABLE_STDIN_STDOUT
-_BOOLEAN CSoundPulse::IsStdinStdout()
+bool CSoundPulse::IsStdinStdout()
 {
     bMono =
         sCurrentDevice == STDIN_STDOUT_DEVICE_NAME_MONO;
@@ -763,27 +763,27 @@ _BOOLEAN CSoundPulse::IsStdinStdout()
 
 /* Wave in ********************************************************************/
 
-CSoundInPulse::CSoundInPulse(): CSoundPulse(FALSE),
+CSoundInPulse::CSoundInPulse(): CSoundPulse(false),
     iSampleRate(0), iBufferSize(0), lTimeToWait(0),
-    bBlockingRec(FALSE), bBufferingError(FALSE), pa_s(NULL),
+    bBlockingRec(false), bBufferingError(false), pa_s(NULL),
     remaining_nbytes(0), remaining_data(NULL)
 #ifdef CLOCK_DRIFT_ADJ_ENABLED
-    , record_sample_rate(0), bClockDriftComp(FALSE), cp(NULL)
+    , record_sample_rate(0), bClockDriftComp(false), cp(NULL)
 #endif
 {
 }
 
-_BOOLEAN CSoundInPulse::Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking)
+bool CSoundInPulse::Init(int iNewSampleRate, int iNewBufferSize, bool bNewBlocking)
 {
     DEBUG_MSG("initrec %i %i %i\n", iNewSampleRate, iNewBufferSize, bNewBlocking);
-    _BOOLEAN bChanged = FALSE;
+    bool bChanged = false;
 
 #ifdef ENABLE_STDIN_STDOUT
     /* Check if it's stdin */
     if (IsStdinStdout())
     {
         iBufferSize = iNewBufferSize * BYTES_PER_SAMPLE;
-        return FALSE;
+        return false;
     }
 #endif
 
@@ -791,7 +791,7 @@ _BOOLEAN CSoundInPulse::Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bN
     bBlockingRec = bNewBlocking;
 
     /* Check if device must be opened or reinitialized */
-    if (bChangDev == TRUE || iSampleRate != iNewSampleRate)
+    if (bChangDev || iSampleRate != iNewSampleRate)
     {
         /* Save samplerate buffer size */
         iSampleRate = iNewSampleRate;
@@ -807,10 +807,10 @@ _BOOLEAN CSoundInPulse::Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bN
         Init_HW();
 
         /* Reset flag */
-        bChangDev = FALSE;
+        bChangDev = false;
 
         /* Set changed flag */
-        bChanged = TRUE;
+        bChanged = true;
     }
     else {
         if (iBufferSize != iNewBufferSize)
@@ -824,12 +824,12 @@ _BOOLEAN CSoundInPulse::Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bN
     }
 
     /* Clear buffering error flag */
-    bBufferingError = FALSE;
+    bBufferingError = false;
 
     return bChanged;
 }
 
-_BOOLEAN CSoundInPulse::Read(CVector<_SAMPLE>& psData)
+bool CSoundInPulse::Read(CVector<_SAMPLE>& psData)
 {
 #ifdef ENABLE_STDIN_STDOUT
     /* Stdin support */
@@ -840,7 +840,7 @@ _BOOLEAN CSoundInPulse::Read(CVector<_SAMPLE>& psData)
         else
         {
             int sample = iBufferSize / BYTES_PER_SAMPLE;
-            _BOOLEAN ret = StdinRead((char*)&psData[0], iBufferSize/2);
+            bool ret = StdinRead((char*)&psData[0], iBufferSize/2);
             for (int i=sample-2, j=i/2; i>=0; i-=2, j--)
                 psData[i] = psData[i+1] = psData[j];
             return ret;
@@ -849,22 +849,22 @@ _BOOLEAN CSoundInPulse::Read(CVector<_SAMPLE>& psData)
 #endif
 
     /* Check if device must be opened or reinitialized */
-    if (bChangDev == TRUE)
+    if (bChangDev)
     {
         /* Reinit sound interface */
         Init(iSampleRate, iBufferSize, bBlockingRec);
 
         /* Reset flag */
-        bChangDev = FALSE;
+        bChangDev = false;
     }
 
     /* Read from 'hardware' */
-    _BOOLEAN bError = Read_HW(&psData[0], iBufferSize) != iBufferSize;
+    bool bError = Read_HW(&psData[0], iBufferSize) != iBufferSize;
     if (bError)
         DEBUG_MSG("CSoundInPulse::Read(): read_HW error\n");
 
     bError |= bBufferingError;
-    bBufferingError = FALSE;
+    bBufferingError = false;
 
     return bError;
 }
@@ -883,36 +883,36 @@ void CSoundInPulse::Close()
     Close_HW();
 
     /* Set flag to open devices the next time it is initialized */
-    bChangDev = TRUE;
+    bChangDev = true;
 }
 
 
 /* Wave out *******************************************************************/
 
-CSoundOutPulse::CSoundOutPulse(): CSoundPulse(TRUE),
-    bPrebuffer(FALSE), bSeek(FALSE),
-    bBufferingError(FALSE), bMuteError(FALSE),
+CSoundOutPulse::CSoundOutPulse(): CSoundPulse(true),
+    bPrebuffer(false), bSeek(false),
+    bBufferingError(false), bMuteError(false),
     iSampleRate(0), iBufferSize(0), lTimeToWait(0),
-    bBlockingPlay(FALSE), pa_s(NULL)
+    bBlockingPlay(false), pa_s(NULL)
 #ifdef CLOCK_DRIFT_ADJ_ENABLED
     , iMaxSampleRateOffset(0)
-//  , bNewClockDriftComp(TRUE), cp()
-    , bNewClockDriftComp(FALSE), cp()
+//  , bNewClockDriftComp(true), cp()
+    , bNewClockDriftComp(false), cp()
 #endif
 {
 }
 
-_BOOLEAN CSoundOutPulse::Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking)
+bool CSoundOutPulse::Init(int iNewSampleRate, int iNewBufferSize, bool bNewBlocking)
 {
     DEBUG_MSG("initplay %i %i %i\n", iNewSampleRate, iNewBufferSize, bNewBlocking);
-    _BOOLEAN bChanged = FALSE;
+    bool bChanged = false;
 
 #ifdef ENABLE_STDIN_STDOUT
     /* Check if it's stdin */
     if (IsStdinStdout())
     {
         iBufferSize = iNewBufferSize * BYTES_PER_SAMPLE;
-        return FALSE;
+        return false;
     }
 #endif
 
@@ -921,7 +921,7 @@ _BOOLEAN CSoundOutPulse::Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN b
     iBufferSize = iNewBufferSize;
 
     /* Check if device must be opened or reinitialized */
-    if (bChangDev == TRUE || iSampleRate != iNewSampleRate)
+    if (bChangDev || iSampleRate != iNewSampleRate)
     {
         /* Save samplerate */
         iSampleRate = iNewSampleRate;
@@ -936,23 +936,23 @@ _BOOLEAN CSoundOutPulse::Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN b
         Init_HW();
 
         /* Reset flag */
-        bChangDev = FALSE;
+        bChangDev = false;
 
         /* Set changed flag */
-        bChanged = TRUE;
+        bChanged = true;
     }
 
     /* Set prebuffer flag */
-    bPrebuffer = TRUE;
+    bPrebuffer = true;
     /* Clear seek flag */
-    bSeek = FALSE;
+    bSeek = false;
     /* Clear buffering error flag */
-    bBufferingError = FALSE;
+    bBufferingError = false;
 
     return bChanged;
 }
 
-_BOOLEAN CSoundOutPulse::Write(CVector<_SAMPLE>& psData)
+bool CSoundOutPulse::Write(CVector<_SAMPLE>& psData)
 {
 #ifdef ENABLE_STDIN_STDOUT
     /* Stdout support */
@@ -967,29 +967,29 @@ _BOOLEAN CSoundOutPulse::Write(CVector<_SAMPLE>& psData)
                 int value = ((int)psData[i] + (int)psData[i+1]) / 2;
                 psData[j] = (_SAMPLE)value;
             }
-            _BOOLEAN ret = StdoutWrite((char*)&psData[0], iBufferSize/2);
+            bool ret = StdoutWrite((char*)&psData[0], iBufferSize/2);
             return ret;
         }
     }
 #endif
 
     /* Check if device must be opened or reinitialized */
-    if (bChangDev == TRUE)
+    if (bChangDev)
     {
         /* Reinit sound interface */
         Init(iSampleRate, iBufferSize, bBlockingPlay);
 
         /* Reset flag */
-        bChangDev = FALSE;
+        bChangDev = false;
     }
 
     /* Write to 'hardware' */
-    _BOOLEAN bError = Write_HW(&psData[0], iBufferSize) != iBufferSize;
+    bool bError = Write_HW(&psData[0], iBufferSize) != iBufferSize;
     if (bError)
         DEBUG_MSG("CSoundOutPulse::Write(): write_HW error\n");
 
     bError |= bBufferingError;
-    bBufferingError = FALSE;
+    bBufferingError = false;
 
     return bError;
 }
@@ -1008,6 +1008,6 @@ void CSoundOutPulse::Close()
     Close_HW();
 
     /* Set flag to open devices the next time it is initialized */
-    bChangDev = TRUE;
+    bChangDev = true;
 }
 

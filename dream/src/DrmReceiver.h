@@ -161,7 +161,7 @@ public:
     ESFStatus               GetInputStatus();
     string                  GetInputFileName();
     void                    RequestNewAcquisition() {
-        bRestartFlag = TRUE;
+        bRestartFlag = true;
     }
     EAcqStat                GetAcquiState() {
         return Parameters.GetAcquiState();
@@ -190,8 +190,8 @@ public:
     int                     GetFrequency() {
         return Parameters.GetFrequency();
     }
-    void                    SetIQRecording(_BOOLEAN);
-    void                    SetRSIRecording(_BOOLEAN, const char);
+    void                    SetIQRecording(bool);
+    void                    SetRSIRecording(bool, const char);
 
     /* Channel Estimation */
     void SetFreqInt(CChannelEstimation::ETypeIntFreq eNewTy)
@@ -214,12 +214,12 @@ public:
         return ChannelEstimation.GetTimeInt();
     }
 
-    void SetIntCons(const _BOOLEAN bNewIntCons)
+    void SetIntCons(const bool bNewIntCons)
     {
         ChannelEstimation.SetIntCons(bNewIntCons);
     }
 
-    _BOOLEAN GetIntCons()
+    bool GetIntCons()
     {
         return ChannelEstimation.GetIntCons();
     }
@@ -327,15 +327,15 @@ protected:
     void                    Run();
     void                    SetInput();
     void                    ResetInput();
-    void                    DemodulateDRM(_BOOLEAN&);
-    void                    DecodeDRM(_BOOLEAN&, _BOOLEAN&);
-    void                    UtilizeDRM(_BOOLEAN&);
-    void                    DemodulateAM(_BOOLEAN&);
-    void                    DecodeAM(_BOOLEAN&);
-    void                    UtilizeAM(_BOOLEAN&);
-    void                    DemodulateFM(_BOOLEAN&);
-    void                    DecodeFM(_BOOLEAN&);
-    void                    UtilizeFM(_BOOLEAN&);
+    void                    DemodulateDRM(bool&);
+    void                    DecodeDRM(bool&, bool&);
+    void                    UtilizeDRM(bool&);
+    void                    DemodulateAM(bool&);
+    void                    DecodeAM(bool&);
+    void                    UtilizeAM(bool&);
+    void                    DemodulateFM(bool&);
+    void                    DecodeFM(bool&);
+    void                    UtilizeFM(bool&);
     void                    DetectAcquiFAC();
     void                    DetectAcquiSymbol();
     void                    InitReceiverMode();
@@ -429,7 +429,7 @@ protected:
     int                     iDataStreamID;
 
 
-    _BOOLEAN                bRestartFlag;
+    bool                bRestartFlag;
 
     _REAL                   rInitResampleOffset;
 

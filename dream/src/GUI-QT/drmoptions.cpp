@@ -75,12 +75,12 @@ void DRMOptions::setTimeInt(CChannelEstimation::ETypeIntTime state)
     {
     case CChannelEstimation::TLINEAR:
         if (!ui->RadioButtonTiLinear->isChecked())
-            ui->RadioButtonTiLinear->setChecked(TRUE);
+            ui->RadioButtonTiLinear->setChecked(true);
         break;
 
     case CChannelEstimation::TWIENER:
         if (!ui->RadioButtonTiWiener->isChecked())
-            ui->RadioButtonTiWiener->setChecked(TRUE);
+            ui->RadioButtonTiWiener->setChecked(true);
         break;
     }
 }
@@ -91,17 +91,17 @@ void DRMOptions::setFreqInt(CChannelEstimation::ETypeIntFreq state)
     {
     case CChannelEstimation::FLINEAR:
         if (!ui->RadioButtonFreqLinear->isChecked())
-            ui->RadioButtonFreqLinear->setChecked(TRUE);
+            ui->RadioButtonFreqLinear->setChecked(true);
         break;
 
     case CChannelEstimation::FDFTFILTER:
         if (!ui->RadioButtonFreqDFT->isChecked())
-            ui->RadioButtonFreqDFT->setChecked(TRUE);
+            ui->RadioButtonFreqDFT->setChecked(true);
         break;
 
     case CChannelEstimation::FWIENER:
         if (!ui->RadioButtonFreqWiener->isChecked())
-            ui->RadioButtonFreqWiener->setChecked(TRUE);
+            ui->RadioButtonFreqWiener->setChecked(true);
         break;
     }
 
@@ -113,12 +113,12 @@ void DRMOptions::setTiSyncTrac(CTimeSyncTrack::ETypeTiSyncTrac state)
     {
     case CTimeSyncTrack::TSFIRSTPEAK:
         if (!ui->RadioButtonTiSyncFirstPeak->isChecked())
-            ui->RadioButtonTiSyncFirstPeak->setChecked(TRUE);
+            ui->RadioButtonTiSyncFirstPeak->setChecked(true);
         break;
 
     case CTimeSyncTrack::TSENERGY:
         if (!ui->RadioButtonTiSyncEnergy->isChecked())
-            ui->RadioButtonTiSyncEnergy->setChecked(TRUE);
+            ui->RadioButtonTiSyncEnergy->setChecked(true);
         break;
     }
 

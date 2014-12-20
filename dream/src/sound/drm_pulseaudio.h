@@ -53,12 +53,12 @@ class CSoundOutPulse;
 typedef struct pa_stream_notify_cb_userdata_t
 {
     CSoundOutPulse*     SoundOutPulse;
-    _BOOLEAN            bOverflow;
+    bool            bOverflow;
 } pa_stream_notify_cb_userdata_t;
 
 typedef struct pa_common
 {
-    _BOOLEAN        bClockDriftComp;
+    bool        bClockDriftComp;
     int             sample_rate_offset;
 } pa_common;
 
@@ -75,20 +75,20 @@ typedef struct pa_object
 class CSoundPulse
 {
 public:
-    CSoundPulse(_BOOLEAN bPlayback);
+    CSoundPulse(bool bPlayback);
     virtual ~CSoundPulse() {}
     void            Enumerate(vector<string>& names, vector<string>& descriptions);
     void            SetDev(string sNewDevice);
     string          GetDev();
 protected:
-    _BOOLEAN        IsDefaultDevice();
-    _BOOLEAN        bPlayback;
-    _BOOLEAN        bChangDev;
+    bool        IsDefaultDevice();
+    bool        bPlayback;
+    bool        bChangDev;
     string          sCurrentDevice;
 #ifdef ENABLE_STDIN_STDOUT
-    _BOOLEAN        IsStdinStdout();
-    _BOOLEAN        bStdinStdout;
-    _BOOLEAN        bMono;
+    bool        IsStdinStdout();
+    bool        bStdinStdout;
+    bool        bMono;
 #endif
 };
 
@@ -107,8 +107,8 @@ public:
         CSoundPulse::SetDev(sNewDevice);
     };
 
-    _BOOLEAN        Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking);
-    _BOOLEAN        Read(CVector<_SAMPLE>& psData);
+    bool        Init(int iNewSampleRate, int iNewBufferSize, bool bNewBlocking);
+    bool        Read(CVector<_SAMPLE>& psData);
     void            Close();
 #ifdef CLOCK_DRIFT_ADJ_ENABLED
     void            SetCommonParamPtr(pa_common *cp_ptr) {
@@ -125,9 +125,9 @@ protected:
     int             iSampleRate;
     int             iBufferSize;
     long            lTimeToWait;
-    _BOOLEAN        bBlockingRec;
+    bool        bBlockingRec;
 
-    _BOOLEAN        bBufferingError;
+    bool        bBufferingError;
 
     pa_stream       *pa_s;
     size_t          remaining_nbytes;
@@ -135,7 +135,7 @@ protected:
 
 #ifdef CLOCK_DRIFT_ADJ_ENABLED
     int             record_sample_rate;
-    _BOOLEAN        bClockDriftComp;
+    bool        bClockDriftComp;
     pa_common       *cp;
 #endif
 };
@@ -155,25 +155,25 @@ public:
         CSoundPulse::SetDev(sNewDevice);
     };
 
-    _BOOLEAN        Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking);
-    _BOOLEAN        Write(CVector<_SAMPLE>& psData);
+    bool        Init(int iNewSampleRate, int iNewBufferSize, bool bNewBlocking);
+    bool        Write(CVector<_SAMPLE>& psData);
     void            Close();
 #ifdef CLOCK_DRIFT_ADJ_ENABLED
     pa_common *     GetCommonParamPtr() {
         return &cp;
     }
-    void            EnableClockDriftAdj(_BOOLEAN bEnable) {
+    void            EnableClockDriftAdj(bool bEnable) {
         bNewClockDriftComp = bEnable;
     }
-    _BOOLEAN        IsClockDriftAdjEnabled() {
+    bool        IsClockDriftAdjEnabled() {
         return bNewClockDriftComp;
     }
 #endif
 
-    _BOOLEAN        bPrebuffer;
-    _BOOLEAN        bSeek;
-    _BOOLEAN        bBufferingError;
-    _BOOLEAN        bMuteError;
+    bool        bPrebuffer;
+    bool        bSeek;
+    bool        bBufferingError;
+    bool        bMuteError;
 
 protected:
     void            Init_HW();
@@ -183,7 +183,7 @@ protected:
     int             iSampleRate;
     int             iBufferSize;
     long            lTimeToWait;
-    _BOOLEAN        bBlockingPlay;
+    bool        bBlockingPlay;
 
     pa_stream       *pa_s;
     pa_stream_notify_cb_userdata_t pa_stream_notify_cb_userdata_underflow;
@@ -196,7 +196,7 @@ protected:
     int             filter_stabilized;
     int             wait_prebuffer;
     CMatlibVector<CReal> B, A, X, Z;
-    _BOOLEAN        bNewClockDriftComp;
+    bool        bNewClockDriftComp;
     pa_common       cp;
     int             playback_usec; // DEBUG
     int             clock; // DEBUG

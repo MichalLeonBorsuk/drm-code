@@ -78,15 +78,15 @@ systemevalDlg::systemevalDlg(ReceiverController* rc, CSettings& Settings,
 
     /* If MDI in is enabled, disable some of the controls and use different
        initialization for the chart and chart selector */
-    if (controller->getReceiver()->GetRSIIn()->GetInEnabled() == TRUE)
+    if (controller->getReceiver()->GetRSIIn()->GetInEnabled())
     {
-        ui->SliderNoOfIterations->setEnabled(FALSE);
+        ui->SliderNoOfIterations->setEnabled(false);
 
-        ui->ButtonGroupChanEstFreqInt->setEnabled(FALSE);
-        ui->ButtonGroupChanEstTimeInt->setEnabled(FALSE);
-        ui->ButtonGroupTimeSyncTrack->setEnabled(FALSE);
-        ui->CheckBoxFlipSpec->setEnabled(FALSE);
-        ui->GroupBoxInterfRej->setEnabled(FALSE);
+        ui->ButtonGroupChanEstFreqInt->setEnabled(false);
+        ui->ButtonGroupChanEstTimeInt->setEnabled(false);
+        ui->ButtonGroupTimeSyncTrack->setEnabled(false);
+        ui->CheckBoxFlipSpec->setEnabled(false);
+        ui->GroupBoxInterfRej->setEnabled(false);
 
         /* Only audio spectrum makes sence for MDI in */
         eCurCharType = AUDIO_SPECTRUM;
@@ -211,12 +211,12 @@ void systemevalDlg::setControls(CSettings& s)
     {
     case CChannelEstimation::TLINEAR:
         if (!ui->RadioButtonTiLinear->isChecked())
-            ui->RadioButtonTiLinear->setChecked(TRUE);
+            ui->RadioButtonTiLinear->setChecked(true);
         break;
 
     case CChannelEstimation::TWIENER:
         if (!ui->RadioButtonTiWiener->isChecked())
-            ui->RadioButtonTiWiener->setChecked(TRUE);
+            ui->RadioButtonTiWiener->setChecked(true);
         break;
     }
 
@@ -224,17 +224,17 @@ void systemevalDlg::setControls(CSettings& s)
     {
     case CChannelEstimation::FLINEAR:
         if (!ui->RadioButtonFreqLinear->isChecked())
-            ui->RadioButtonFreqLinear->setChecked(TRUE);
+            ui->RadioButtonFreqLinear->setChecked(true);
         break;
 
     case CChannelEstimation::FDFTFILTER:
         if (!ui->RadioButtonFreqDFT->isChecked())
-            ui->RadioButtonFreqDFT->setChecked(TRUE);
+            ui->RadioButtonFreqDFT->setChecked(true);
         break;
 
     case CChannelEstimation::FWIENER:
         if (!ui->RadioButtonFreqWiener->isChecked())
-            ui->RadioButtonFreqWiener->setChecked(TRUE);
+            ui->RadioButtonFreqWiener->setChecked(true);
         break;
     }
 
@@ -242,21 +242,21 @@ void systemevalDlg::setControls(CSettings& s)
     {
     case CTimeSyncTrack::TSFIRSTPEAK:
         if (!ui->RadioButtonTiSyncFirstPeak->isChecked())
-            ui->RadioButtonTiSyncFirstPeak->setChecked(TRUE);
+            ui->RadioButtonTiSyncFirstPeak->setChecked(true);
         break;
 
     case CTimeSyncTrack::TSENERGY:
         if (!ui->RadioButtonTiSyncEnergy->isChecked())
-            ui->RadioButtonTiSyncEnergy->setChecked(TRUE);
+            ui->RadioButtonTiSyncEnergy->setChecked(true);
         break;
     }
 
     /* Update settings checkbuttons */
-    ui->CheckBoxReverb->setChecked(s.Get("Receiver", "reverb", FALSE));
-    ui->CheckBoxRecFilter->setChecked(s.Get("Receiver", "filter", FALSE));
-    ui->CheckBoxModiMetric->setChecked(s.Get("Receiver", "modemetric", FALSE));
-    ui->CheckBoxMuteAudio->setChecked(s.Get("Receiver", "muteaudio", FALSE));
-    ui->CheckBoxFlipSpec->setChecked(s.Get("Receiver", "flipspectrum", FALSE));
+    ui->CheckBoxReverb->setChecked(s.Get("Receiver", "reverb", false));
+    ui->CheckBoxRecFilter->setChecked(s.Get("Receiver", "filter", false));
+    ui->CheckBoxModiMetric->setChecked(s.Get("Receiver", "modemetric", false));
+    ui->CheckBoxMuteAudio->setChecked(s.Get("Receiver", "muteaudio", false));
+    ui->CheckBoxFlipSpec->setChecked(s.Get("Receiver", "flipspectrum", false));
 
     ui->CheckBoxSaveAudioWave->setChecked(s.Get("command", "writewav")!="");
 }
@@ -599,7 +599,7 @@ void systemevalDlg::OnCheckSaveAudioWAV()
         This code is copied in AnalogDemDlg.cpp. If you do changes here, you should
         apply the changes in the other file, too
     */
-    if (ui->CheckBoxSaveAudioWave->isChecked() == TRUE)
+    if (ui->CheckBoxSaveAudioWave->isChecked())
     {
         /* Show "save file" dialog */
         QString strFileName =
@@ -614,7 +614,7 @@ void systemevalDlg::OnCheckSaveAudioWAV()
         else
         {
             /* User hit the cancel button, uncheck the button */
-            ui->CheckBoxSaveAudioWave->setChecked(FALSE);
+            ui->CheckBoxSaveAudioWave->setChecked(false);
         }
     }
     else

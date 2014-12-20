@@ -54,17 +54,17 @@ public:
     virtual ~CUpstreamDI();
 
     /* CRSIMDIInInterface */
-    _BOOLEAN SetOrigin(const string& strAddr);
-    _BOOLEAN GetInEnabled() {
+    bool SetOrigin(const string& strAddr);
+    bool GetInEnabled() {
         return bMDIInEnabled;
     }
 
     /* CRCIOutInterface */
-    _BOOLEAN SetDestination(const string& strArgument);
-    _BOOLEAN GetOutEnabled() {
+    bool SetDestination(const string& strArgument);
+    bool GetOutEnabled() {
         return bMDIOutEnabled;
     }
-    void SetAFPktCRC(const _BOOLEAN bNAFPktCRC) {
+    void SetAFPktCRC(const bool bNAFPktCRC) {
         bUseAFCRC=bNAFPktCRC;
     }
     void SetFrequency(int iNewFreqkHz);
@@ -73,7 +73,7 @@ public:
     /* CPacketSink */
     virtual void SendPacket(const vector<_BYTE>& vecbydata, uint32_t addr=0, uint16_t port=0);
 
-    _BOOLEAN GetDestination(string& strArgument);
+    bool GetDestination(string& strArgument);
 
     /* CReceiverModul */
     void InitInternal(CParameter& Parameters);
@@ -88,12 +88,12 @@ protected:
     CRSISubscriberSocket        sink;
     CPft                        Pft;
 
-    _BOOLEAN                    bUseAFCRC;
+    bool                    bUseAFCRC;
 
     CSingleBuffer<_BINARY>      MDIInBuffer;
-    _BOOLEAN                    bMDIOutEnabled;
-    _BOOLEAN                    bMDIInEnabled;
-    _BOOLEAN                    bNeedPft;
+    bool                    bMDIOutEnabled;
+    bool                    bMDIInEnabled;
+    bool                    bNeedPft;
 
     /* Tag Item Generators */
 
@@ -124,18 +124,18 @@ public:
     void SendUnlockedFrame(CParameter& Parameter); /* called once per frame even if the Rx isn't synchronised */
     void SendAMFrame(CParameter& Parameter, CSingleBuffer<_BINARY>& CodedAudioData);
 
-    void SetAFPktCRC(const _BOOLEAN bNAFPktCRC);
+    void SetAFPktCRC(const bool bNAFPktCRC);
 
-    _BOOLEAN AddSubscriber(const string& dest, const char profile, const string& origin="");
+    bool AddSubscriber(const string& dest, const char profile, const string& origin="");
 
-    _BOOLEAN SetOrigin(const string& strAddr);
-    void SetRSIRecording(CParameter& Parameter, _BOOLEAN bOn, char cPro, const string& type="");
+    bool SetOrigin(const string& strAddr);
+    void SetRSIRecording(CParameter& Parameter, bool bOn, char cPro, const string& type="");
     void NewFrequency(CParameter& Parameter); /* needs to be called in case a new RSCI file needs to be started */
 
-    virtual _BOOLEAN GetOutEnabled() {
+    virtual bool GetOutEnabled() {
         return bMDIOutEnabled;
     }
-    virtual _BOOLEAN GetInEnabled() {
+    virtual bool GetInEnabled() {
         return bMDIInEnabled;
     }
     void GetNextPacket(CSingleBuffer<_BINARY>&  buf);
@@ -143,8 +143,8 @@ public:
 
     /* CPacketSink */
     virtual void SendPacket(const vector<_BYTE>& vecbydata, uint32_t addr=0, uint16_t port=0);
-    _BOOLEAN SetDestination(const string& strArgument);
-    _BOOLEAN GetDestination(string& strArgument);
+    bool SetDestination(const string& strArgument);
+    bool GetDestination(string& strArgument);
 
     string GetRSIfilename(CParameter& Parameter, const char cProfile);
 
@@ -155,11 +155,11 @@ protected:
     uint32_t                    iLogFraCnt;
     CDRMReceiver*               pDrmReceiver;
 
-    _BOOLEAN                    bMDIOutEnabled;
-    _BOOLEAN                    bMDIInEnabled;
-    _BOOLEAN                    bNeedPft;
+    bool                    bMDIOutEnabled;
+    bool                    bMDIInEnabled;
+    bool                    bNeedPft;
 
-    _BOOLEAN                    bIsRecording;
+    bool                    bIsRecording;
     int                         iFrequency;
     string                      strRecordType;
 

@@ -48,7 +48,7 @@ void AFSWidget::setAFS(const CAltFreqSign& a)
     vector<size_t> mfn;
     for(size_t i=0; i<a.vecMultiplexes.size(); i++)
     {
-        if(a.vecMultiplexes[i].bIsSyncMultplx==FALSE)
+        if(a.vecMultiplexes[i].bIsSyncMultplx==false)
         {
             mfn.push_back(i);
         }
@@ -74,7 +74,7 @@ void AFSWidget::setAFS(const CAltFreqSign& a)
         for(vector < COtherService >::const_iterator i=a.vecOtherServices.begin(); i!=a.vecOtherServices.end(); i++)
         {
             sdItem(item, *i, a);
-            //_BOOLEAN bSameService;
+            //bool bSameService;
             //int iShortID;
             //uint32_t iServiceID;
         }

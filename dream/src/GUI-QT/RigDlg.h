@@ -61,7 +61,7 @@ protected:
     rig_model_t     prev_rig_model;
     string      prev_port;
     map<rig_model_t,string> rigmap;
-    _BOOLEAN    bComboBoxPortMutex;
+    bool    bComboBoxPortMutex;
     SMeter*     sMeter;
 
 public slots:

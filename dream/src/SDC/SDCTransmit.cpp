@@ -147,7 +147,7 @@ void CSDCTransmit::CommitLeave()
 }
 
 
-_BOOLEAN CSDCTransmit::CanTransmitCurrentTime(CParameter& Parameter)
+bool CSDCTransmit::CanTransmitCurrentTime(CParameter& Parameter)
 {
     if (Parameter.eTransmitCurrentTime != CParameter::CT_OFF)
     {
@@ -194,7 +194,7 @@ _BOOLEAN CSDCTransmit::CanTransmitCurrentTime(CParameter& Parameter)
                         Parameter.iUTCHour = (int)gtm->tm_hour;
                         Parameter.iUTCMin = (int)gtm->tm_min;
                         Parameter.Unlock();
-                        return TRUE;
+                        return true;
                     }
                 }
                 break;
@@ -203,7 +203,7 @@ _BOOLEAN CSDCTransmit::CanTransmitCurrentTime(CParameter& Parameter)
             }
         }
     }
-    return FALSE;
+    return false;
 }
 
 
@@ -437,7 +437,7 @@ void CSDCTransmit::DataEntityType8(CVector<_BINARY>& vecbiData, int ServiceID,
                                    CParameter& Parameter)
 {
     (void)ServiceID;
-    const _BOOLEAN bTransmitOffset =
+    const bool bTransmitOffset =
         Parameter.bValidUTCOffsetAndSense &&
         Parameter.eTransmitCurrentTime == CParameter::CT_UTC_OFFSET;
     const int iNumBitsTotal = 28 + (bTransmitOffset ? 8 : 0);
@@ -583,11 +583,11 @@ void CSDCTransmit::DataEntityType9(CVector<_BINARY>& vecbiData, int ServiceID,
             /* CELP_CRC */
             switch (Parameter.Service[ServiceID].AudioParam.bCELPCRC)
             {
-            case FALSE:
+            case false:
                 vecbiData.Enqueue(0 /* 0 */, 1);
                 break;
 
-            case TRUE:
+            case true:
                 vecbiData.Enqueue(1 /* 1 */, 1);
                 break;
             }
@@ -609,11 +609,11 @@ void CSDCTransmit::DataEntityType9(CVector<_BINARY>& vecbiData, int ServiceID,
             /* HVXC CRC */
             switch (Parameter.Service[ServiceID].AudioParam.bHVXCCRC)
             {
-            case FALSE:
+            case false:
                 vecbiData.Enqueue(0 /* 0 */, 1);
                 break;
 
-            case TRUE:
+            case true:
                 vecbiData.Enqueue(1 /* 1 */, 1);
                 break;
             }
@@ -658,11 +658,11 @@ void CSDCTransmit::DataEntityType9(CVector<_BINARY>& vecbiData, int ServiceID,
     /* Text flag */
     switch (Parameter.Service[ServiceID].AudioParam.bTextflag)
     {
-    case FALSE:
+    case false:
         vecbiData.Enqueue(0 /* 0 */, 1);
         break;
 
-    case TRUE:
+    case true:
         vecbiData.Enqueue(1 /* 1 */, 1);
         break;
     }
@@ -670,11 +670,11 @@ void CSDCTransmit::DataEntityType9(CVector<_BINARY>& vecbiData, int ServiceID,
     /* Enhancement flag */
     switch (Parameter.Service[ServiceID].AudioParam.bEnhanceFlag)
     {
-    case FALSE:
+    case false:
         vecbiData.Enqueue(0 /* 0 */, 1);
         break;
 
-    case TRUE:
+    case true:
         vecbiData.Enqueue(1 /* 1 */, 1);
         break;
     }

@@ -405,7 +405,7 @@ public:
     int         iSymbolID;
 
     /* This flag indicates that the symbol ID has changed */
-    _BOOLEAN    bSymbolIDHasChanged;
+    bool    bSymbolIDHasChanged;
 
     /* The channel estimation needs information about timing corrections,
        because it is using information from the symbol memory */

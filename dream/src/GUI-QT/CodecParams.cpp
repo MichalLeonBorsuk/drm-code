@@ -43,7 +43,7 @@ CodecParams::CodecParams(CSettings& Settings, CParameter& Parameters,
                          int iShortID, QWidget* parent)
     :
     QDialog(parent), Settings(Settings), Parameters(Parameters),
-    iShortID(iShortID), bWasVisible(FALSE), bLastPositionValid(FALSE)
+    iShortID(iShortID), bWasVisible(false), bLastPositionValid(false)
 {
     setAttribute(Qt::WA_QuitOnClose, false);
     setupUi(this);
@@ -64,54 +64,54 @@ CodecParams::CodecParams(CSettings& Settings, CParameter& Parameters,
     switch (Parameters.Service[iShortID].AudioParam.eOPUSChan)
     {
     case CAudioParam::OC_MONO:
-        RadioButtonChannelsMono->setChecked(TRUE);
+        RadioButtonChannelsMono->setChecked(true);
         break;
     case CAudioParam::OC_STEREO:
-        RadioButtonChannelsStereo->setChecked(TRUE);
+        RadioButtonChannelsStereo->setChecked(true);
         break;
     }
     /* Bandwith */
     switch (Parameters.Service[iShortID].AudioParam.eOPUSBandwidth)
     {
     case CAudioParam::OB_NB:
-        RadioButtonBandwidthNB->setChecked(TRUE);
+        RadioButtonBandwidthNB->setChecked(true);
         break;
     case CAudioParam::OB_MB:
-        RadioButtonBandwidthMB->setChecked(TRUE);
+        RadioButtonBandwidthMB->setChecked(true);
         break;
     case CAudioParam::OB_WB:
-        RadioButtonBandwidthWB->setChecked(TRUE);
+        RadioButtonBandwidthWB->setChecked(true);
         break;
     case CAudioParam::OB_SWB:
-        RadioButtonBandwidthSWB->setChecked(TRUE);
+        RadioButtonBandwidthSWB->setChecked(true);
         break;
     case CAudioParam::OB_FB:
-        RadioButtonBandwidthFB->setChecked(TRUE);
+        RadioButtonBandwidthFB->setChecked(true);
         break;
     }
     /* FEC */
     if (Parameters.Service[iShortID].AudioParam.bOPUSForwardErrorCorrection)
-        RadioButtonFECOn->setChecked(TRUE);
+        RadioButtonFECOn->setChecked(true);
     else
-        RadioButtonFECOff->setChecked(TRUE);
+        RadioButtonFECOff->setChecked(true);
     /* Signal */
     switch (Parameters.Service[iShortID].AudioParam.eOPUSSignal)
     {
     case CAudioParam::OG_VOICE:
-        RadioButtonSignalVoice->setChecked(TRUE);
+        RadioButtonSignalVoice->setChecked(true);
         break;
     case CAudioParam::OG_MUSIC:
-        RadioButtonSignalMusic->setChecked(TRUE);
+        RadioButtonSignalMusic->setChecked(true);
         break;
     }
     /* Application */
     switch (Parameters.Service[iShortID].AudioParam.eOPUSApplication)
     {
     case CAudioParam::OA_VOIP:
-        RadioButtonAppVOIP->setChecked(TRUE);
+        RadioButtonAppVOIP->setChecked(true);
         break;
     case CAudioParam::OA_AUDIO:
-        RadioButtonAppAudio->setChecked(TRUE);
+        RadioButtonAppAudio->setChecked(true);
         break;
     }
     Parameters.Unlock();
@@ -170,7 +170,7 @@ void CodecParams::OnButtonGroupChannels(int iID)
     }
     Parameters.Lock();
     Parameters.Service[iShortID].AudioParam.eOPUSChan = eOPUSChan;
-    Parameters.Service[iShortID].AudioParam.bParamChanged = TRUE;
+    Parameters.Service[iShortID].AudioParam.bParamChanged = true;
     Parameters.Unlock();
 }
 
@@ -199,27 +199,27 @@ void CodecParams::OnButtonGroupBandwidth(int iID)
     }
     Parameters.Lock();
     Parameters.Service[iShortID].AudioParam.eOPUSBandwidth = eOPUSBandwidth;
-    Parameters.Service[iShortID].AudioParam.bParamChanged = TRUE;
+    Parameters.Service[iShortID].AudioParam.bParamChanged = true;
     Parameters.Unlock();
 }
 
 void CodecParams::OnButtonGroupFEC(int iID)
 {
     iID = -iID - 2; // TODO understand why
-    _BOOLEAN bOPUSForwardErrorCorrection;
+    bool bOPUSForwardErrorCorrection;
     switch (iID)
     {
     default:
     case 0:
-        bOPUSForwardErrorCorrection = FALSE;
+        bOPUSForwardErrorCorrection = false;
         break;
     case 1:
-        bOPUSForwardErrorCorrection = TRUE;
+        bOPUSForwardErrorCorrection = true;
         break;
     }
     Parameters.Lock();
     Parameters.Service[iShortID].AudioParam.bOPUSForwardErrorCorrection = bOPUSForwardErrorCorrection;
-    Parameters.Service[iShortID].AudioParam.bParamChanged = TRUE;
+    Parameters.Service[iShortID].AudioParam.bParamChanged = true;
     Parameters.Unlock();
 }
 
@@ -239,8 +239,8 @@ void CodecParams::OnButtonGroupSignal(int iID)
     }
     Parameters.Lock();
     Parameters.Service[iShortID].AudioParam.eOPUSSignal = eOPUSSignal;
-    Parameters.Service[iShortID].AudioParam.bOPUSRequestReset = TRUE;
-    Parameters.Service[iShortID].AudioParam.bParamChanged = TRUE;
+    Parameters.Service[iShortID].AudioParam.bOPUSRequestReset = true;
+    Parameters.Service[iShortID].AudioParam.bParamChanged = true;
     Parameters.Unlock();
 }
 
@@ -260,8 +260,8 @@ void CodecParams::OnButtonGroupApplication(int iID)
     }
     Parameters.Lock();
     Parameters.Service[iShortID].AudioParam.eOPUSApplication = eOPUSApplication;
-    Parameters.Service[iShortID].AudioParam.bOPUSRequestReset = TRUE;
-    Parameters.Service[iShortID].AudioParam.bParamChanged = TRUE;
+    Parameters.Service[iShortID].AudioParam.bOPUSRequestReset = true;
+    Parameters.Service[iShortID].AudioParam.bParamChanged = true;
     Parameters.Unlock();
 }
 
@@ -299,7 +299,7 @@ void CodecParams::GetDialogPosition(void)
     {
         iLastXPosition = WinGeom.x();
         iLastYPosition = WinGeom.y();
-        bLastPositionValid = TRUE;
+        bLastPositionValid = true;
     }
 }
 

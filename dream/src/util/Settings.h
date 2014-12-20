@@ -169,13 +169,13 @@ protected:
     int IsReceiver(const char *argv0);
     void ParseArguments(int argc, char** argv);
     void FileArg(const string&);
-    _BOOLEAN GetFlagArgument(int argc, char** argv, int& i, string strShortOpt,
+    bool GetFlagArgument(int argc, char** argv, int& i, string strShortOpt,
                              string strLongOpt);
-    _BOOLEAN GetNumericArgument(int argc, char** argv, int& i,
+    bool GetNumericArgument(int argc, char** argv, int& i,
                                 string strShortOpt, string strLongOpt,
                                 _REAL rRangeStart, _REAL rRangeStop,
                                 _REAL& rValue);
-    _BOOLEAN GetStringArgument(int argc, char** argv, int& i,
+    bool GetStringArgument(int argc, char** argv, int& i,
                                string strShortOpt, string strLongOpt,
                                string& strArg);
 };

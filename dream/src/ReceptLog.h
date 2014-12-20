@@ -44,20 +44,20 @@ public:
     void Update();
     bool restartNeeded();
 
-    void SetRxlEnabled(const _BOOLEAN b) {
+    void SetRxlEnabled(const bool b) {
         bRxlEnabled = b;
     }
-    _BOOLEAN GetRxlEnabled() {
+    bool GetRxlEnabled() {
         return bRxlEnabled;
     }
 
-    void SetPositionEnabled(const _BOOLEAN b) {
+    void SetPositionEnabled(const bool b) {
         bPositionEnabled = b;
     }
-    _BOOLEAN GetPositionEnabled() {
+    bool GetPositionEnabled() {
         return bPositionEnabled;
     }
-    _BOOLEAN GetLoggingActivated() {
+    bool GetLoggingActivated() {
         return bLogActivated;
     }
 
@@ -83,10 +83,10 @@ protected:
 
     CParameter & Parameters;
     ofstream File;
-    _BOOLEAN bLogActivated;
-    _BOOLEAN bLogEnabled;
-    _BOOLEAN bRxlEnabled;
-    _BOOLEAN bPositionEnabled;
+    bool bLogActivated;
+    bool bLogEnabled;
+    bool bRxlEnabled;
+    bool bPositionEnabled;
     int iSecDelLogStart;
     int iFrequency;
     double latitude,longitude;

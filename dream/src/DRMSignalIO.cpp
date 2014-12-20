@@ -117,7 +117,7 @@ void CTransmitData::FlushData()
 
     iBlockCnt = 0;
 
-    if (bUseSoundcard == TRUE)
+    if (bUseSoundcard)
     {
         /* Write data to sound card. Must be a blocking function */
         pSound->Write(vecsDataOut);
@@ -174,10 +174,10 @@ void CTransmitData::InitInternal(CParameter& Parameters)
         fclose(pFileTransmitter);
     }
 
-    if (bUseSoundcard == TRUE)
+    if (bUseSoundcard)
     {
         /* Init sound interface */
-        pSound->Init(iSampleRate, iBigBlockSize, TRUE);
+        pSound->Init(iSampleRate, iBigBlockSize, true);
     }
     else
     {
@@ -509,7 +509,7 @@ void CReceiveData::ProcessDataInternal(CParameter& Parameters)
     }
 
     /* Flip spectrum if necessary ------------------------------------------- */
-    if (bFippedSpectrum == TRUE)
+    if (bFippedSpectrum)
     {
         /* Since iOutputBlockSize is always even we can do some opt. here */
         for (i = 0; i < iOutputBlockSize; i+=2)
@@ -563,7 +563,7 @@ void CReceiveData::InitInternal(CParameter& Parameters)
     vif = Parameters.GetWaveMode()==RM_ROBUSTNESS_MODE_E?VIRTUAL_INTERMED_FREQ_DRMPLUS:VIRTUAL_INTERMED_FREQ_DRM30;
 
     try {
-        const _BOOLEAN bChanged = pSound->Init(iSampleRate / iUpscaleRatio, iOutputBlockSize * 2 / iUpscaleRatio, TRUE);
+        const bool bChanged = pSound->Init(iSampleRate / iUpscaleRatio, iOutputBlockSize * 2 / iUpscaleRatio, true);
 
         /* Clear input data buffer on change samplerate change */
         if (bChanged)
@@ -714,10 +714,10 @@ CReceiveData::~CReceiveData()
 }
 
 /*
-    Convert Real to I/Q frequency when bInvert is FALSE
-    Convert I/Q to Real frequency when bInvert is TRUE
+    Convert Real to I/Q frequency when bInvert is false
+    Convert I/Q to Real frequency when bInvert is true
 */
-_REAL CReceiveData::ConvertFrequency(_REAL rFrequency, _BOOLEAN bInvert) const
+_REAL CReceiveData::ConvertFrequency(_REAL rFrequency, bool bInvert) const
 {
     const int iInvert = bInvert ? -1 : 1;
 
@@ -744,11 +744,11 @@ void CReceiveData::GetInputSpec(CVector<_REAL>& vecrData,
     vecrScale.Init(iLenSpecWithNyFreq, (_REAL) 0.0);
 
     /* Init the constants for scale and normalization */
-    const _BOOLEAN bNegativeFreq =
+    const bool bNegativeFreq =
         eInChanSelection == CReceiveData::CS_IQ_POS_SPLIT ||
         eInChanSelection == CReceiveData::CS_IQ_NEG_SPLIT;
 
-    const _BOOLEAN bOffsetFreq =
+    const bool bOffsetFreq =
         eInChanSelection == CReceiveData::CS_IQ_POS_ZERO ||
         eInChanSelection == CReceiveData::CS_IQ_NEG_ZERO;
 
@@ -820,11 +820,11 @@ void CReceiveData::CalculatePSD(CVector<_REAL>& vecrData,
     vecrScale.Init(iLenSpecWithNyFreq, (_REAL) 0.0);
 
     /* Init the constants for scale and normalization */
-    const _BOOLEAN bNegativeFreq =
+    const bool bNegativeFreq =
         eInChanSelection == CReceiveData::CS_IQ_POS_SPLIT ||
         eInChanSelection == CReceiveData::CS_IQ_NEG_SPLIT;
 
-    const _BOOLEAN bOffsetFreq =
+    const bool bOffsetFreq =
         eInChanSelection == CReceiveData::CS_IQ_POS_ZERO ||
         eInChanSelection == CReceiveData::CS_IQ_NEG_ZERO;
 

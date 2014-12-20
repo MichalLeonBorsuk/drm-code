@@ -66,7 +66,7 @@ public:
 protected:
     void Run();
     void Init();
-    string SimFileName(CParameter& Param, string strAddInf, _BOOLEAN bWithSNR);
+    string SimFileName(CParameter& Param, string strAddInf, bool bWithSNR);
 
     int iSimTime;
     int iSimNumErrors;

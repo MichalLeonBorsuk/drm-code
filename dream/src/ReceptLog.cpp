@@ -33,8 +33,8 @@
 
 /* implementation --------------------------------------------- */
 
-CReceptLog::CReceptLog(CParameter & p):Parameters(p), File(), bLogActivated(FALSE),
-    bRxlEnabled(FALSE), bPositionEnabled(FALSE),
+CReceptLog::CReceptLog(CParameter & p):Parameters(p), File(), bLogActivated(false),
+    bRxlEnabled(false), bPositionEnabled(false),
     iSecDelLogStart(0)
 {
     iFrequency = Parameters.GetFrequency();
@@ -48,7 +48,7 @@ CReceptLog::Start(const string & filename)
     File.open(filename.c_str(), ios::app);
     if (File.is_open())
     {
-        bLogActivated = TRUE;
+        bLogActivated = true;
         writeHeader();
     }
     init();
@@ -61,7 +61,7 @@ CReceptLog::Stop()
         return;
     writeTrailer();
     File.close();
-    bLogActivated = FALSE;
+    bLogActivated = false;
 }
 
 void
@@ -156,7 +156,7 @@ CShortLog::writeHeader()
     {
         /* Service label (UTF-8 encoded string -> convert ? TODO locale) */
         label = Parameters.Service[iCurSelServ].strLabel;
-        bitrate = Parameters.GetBitRateKbps(iCurSelServ, FALSE);
+        bitrate = Parameters.GetBitRateKbps(iCurSelServ, false);
         RobMode = GetRobModeStr();
         SpecOcc = Parameters.GetSpectrumOccup();
     }

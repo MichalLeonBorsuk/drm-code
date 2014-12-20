@@ -43,10 +43,10 @@ public:
     virtual void    SetDev(string sNewDevice);
     virtual string  GetDev();
 
-    _BOOLEAN        Init(int iSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking);
+    bool        Init(int iSampleRate, int iNewBufferSize, bool bNewBlocking);
     void            ReInit();
-    _BOOLEAN        Read(CVector<short>& psData);
-    _BOOLEAN        Write(CVector<short>& psData);
+    bool        Read(CVector<short>& psData);
+    bool        Write(CVector<short>& psData);
     void            Close();
 
     PaUtilRingBuffer ringBuffer;
@@ -82,9 +82,9 @@ public:
         return hw.GetDev();
     }
 
-    virtual _BOOLEAN    Init(int iSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking);
+    virtual bool    Init(int iSampleRate, int iNewBufferSize, bool bNewBlocking);
     virtual void        Close();
-    virtual _BOOLEAN    Read(CVector<short>& psData);
+    virtual bool    Read(CVector<short>& psData);
 
 protected:
 
@@ -106,9 +106,9 @@ public:
         return hw.GetDev();
     }
 
-    virtual _BOOLEAN    Init(int iSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking);
+    virtual bool    Init(int iSampleRate, int iNewBufferSize, bool bNewBlocking);
     virtual void        Close();
-    virtual _BOOLEAN    Write(CVector<short>& psData);
+    virtual bool    Write(CVector<short>& psData);
 
 protected:
 

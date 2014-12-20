@@ -43,7 +43,7 @@ CAMDemodulation::CAMDemodulation() :
     rBPNormCentOffsTot(0.0),
     rvecZAM(), rvecADC(), rvecBDC(), rvecZFM(), rvecAFM(), rvecBFM(),
     iSymbolBlockSize(0),
-    bPLLIsEnabled(FALSE), bAutoFreqAcquIsEnabled(FALSE), eDemodType(DT_AM),
+    bPLLIsEnabled(false), bAutoFreqAcquIsEnabled(false), eDemodType(DT_AM),
     cOldVal(), eNoiRedType(NR_OFF), iNoiRedLevel(-12),
     PLL(), Mixer(), FreqOffsAcq(), AGC(), NoiseReduction(),
     iFreeSymbolCounter(0), iAudSampleRate(0), iSigSampleRate(0), iBandwidth(0),
@@ -85,7 +85,7 @@ void CAMDemodulation::ProcessDataInternal(CParameter& Parameters)
 
 
     /* Phase lock loop (PLL) ------------------------------------------------ */
-    if (bPLLIsEnabled == TRUE)
+    if (bPLLIsEnabled)
     {
         PLL.Process(rvecInpTmp);
 
@@ -374,7 +374,7 @@ void CAMDemodulation::SetAcqFreq(const CReal rNewNormCenter)
     /* Lock resources */
     Lock();
     {
-        if (bAutoFreqAcquIsEnabled == TRUE)
+        if (bAutoFreqAcquIsEnabled)
             FreqOffsAcq.Start(rNewNormCenter);
         else
             SetNormCurMixFreqOffs(rNewNormCenter / 2);
@@ -467,9 +467,9 @@ void CAMDemodulation::SetNoiRedLevel(const int iNewLevel)
     Unlock();
 }
 
-_BOOLEAN CAMDemodulation::GetPLLPhase(CReal& rPhaseOut)
+bool CAMDemodulation::GetPLLPhase(CReal& rPhaseOut)
 {
-    _BOOLEAN bReturn;
+    bool bReturn;
 
     /* Lock resources */
     Lock();
@@ -654,13 +654,13 @@ void CAGC::SetType(const EType eNewType)
 /******************************************************************************\
 * Frequency offset acquisition                                                 *
 \******************************************************************************/
-_BOOLEAN CFreqOffsAcq::Run(const CVector<_REAL>& vecrInpData)
+bool CFreqOffsAcq::Run(const CVector<_REAL>& vecrInpData)
 {
     /* Init return flag */
-    _BOOLEAN bNewAcqResAvailable = FALSE;
+    bool bNewAcqResAvailable = false;
 
     /* Only do new acquisition if requested */
-    if (bAcquisition == TRUE)
+    if (bAcquisition)
     {
         /* Add new symbol in history (shift register) */
         vecrFFTHistory.AddEnd(vecrInpData, iBlockSize);
@@ -691,8 +691,8 @@ _BOOLEAN CFreqOffsAcq::Run(const CVector<_REAL>& vecrInpData)
 
             /* Reset acquisition flag and Set return flag to show that new
                result is available*/
-            bAcquisition = FALSE;
-            bNewAcqResAvailable = TRUE;
+            bAcquisition = false;
+            bNewAcqResAvailable = true;
         }
     }
 
@@ -747,7 +747,7 @@ void CFreqOffsAcq::Start(const CReal rNewNormCenter)
     }
 
     /* Set flag for aquisition */
-    bAcquisition = TRUE;
+    bAcquisition = true;
     iAquisitionCounter = NUM_BLOCKS_CARR_ACQUISITION;
 }
 

@@ -52,7 +52,7 @@ CEventFilter::~CEventFilter()
 
 bool CEventFilter::isValid(const QEvent* event)
 {
-    bool bValid = FALSE;
+    bool bValid = false;
     QEvent::Type eEventType = event->type();
     switch (eEventType)
     {

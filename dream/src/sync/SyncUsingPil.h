@@ -56,8 +56,8 @@ public:
         cOldFreqPil(NUM_FREQ_PILOTS),
         iSymbCntFraSy(0),
         iNumSymPerFrame(0),
-        bSyncInput(FALSE), bAquisition(FALSE),
-        bTrackPil(FALSE)
+        bSyncInput(false), bAquisition(false),
+        bTrackPil(false)
 #ifdef USE_SAMOFFS_TRACK_FRE_PIL
         , cFreqPilotPhDiff(NUM_FREQ_PILOTS)
 #endif
@@ -65,20 +65,20 @@ public:
     virtual ~CSyncUsingPil() {}
 
     /* To set the module up for synchronized DRM input data stream */
-    void SetSyncInput(_BOOLEAN bNewS) {
+    void SetSyncInput(bool bNewS) {
         bSyncInput = bNewS;
     }
 
     void StartAcquisition();
     void StopAcquisition() {
-        bAquisition = FALSE;
+        bAquisition = false;
     }
 
     void StartTrackPil() {
-        bTrackPil = TRUE;
+        bTrackPil = true;
     }
     void StopTrackPil() {
-        bTrackPil = FALSE;
+        bTrackPil = false;
     }
 
 protected:
@@ -102,14 +102,14 @@ protected:
     unsigned int            iNumSymPerFrame;
     int                     iNumCarrier;
 
-    _BOOLEAN                bBadFrameSync;
-    _BOOLEAN                bInitFrameSync;
-    _BOOLEAN                bFrameSyncWasOK;
+    bool                bBadFrameSync;
+    bool                bInitFrameSync;
+    bool                bFrameSyncWasOK;
 
-    _BOOLEAN                bSyncInput;
+    bool                bSyncInput;
 
-    _BOOLEAN                bAquisition;
-    _BOOLEAN                bTrackPil;
+    bool                bAquisition;
+    bool                bTrackPil;
 
     unsigned int            iMiddleOfInterval;
 

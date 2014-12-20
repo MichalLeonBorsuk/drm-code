@@ -73,7 +73,7 @@ protected:
 class COFDMDemodulation : public CReceiverModul<_COMPLEX, _COMPLEX>
 {
 public:
-    /* bUseRecFilter shall be set the FALSE as default since in case of
+    /* bUseRecFilter shall be set the false as default since in case of
        BERIDEAL simulations, no filter shall be applied */
     COFDMDemodulation() : iLenPowSpec(0) {}
     virtual ~COFDMDemodulation() {}

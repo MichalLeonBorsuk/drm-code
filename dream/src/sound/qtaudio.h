@@ -60,7 +60,7 @@ protected:
     bool                bDevChanged;
     int                 iSampleRate;
     int                 iBufferSize;
-    _BOOLEAN            bBlocking;
+    bool            bBlocking;
     int                 iFrameSize;
     QIODevice*          pIODevice;
 };
@@ -79,8 +79,8 @@ public:
     virtual void        SetDev(string s) {
         CSoundCommonQT::SetDev(s);
     }
-    virtual _BOOLEAN    Init(int, int, _BOOLEAN);
-    virtual _BOOLEAN    Read(CVector<short>&);
+    virtual bool    Init(int, int, bool);
+    virtual bool    Read(CVector<short>&);
     virtual void        Close();
 private:
     QAudioInput*        pAudioInput;
@@ -100,8 +100,8 @@ public:
     virtual void        SetDev(string s) {
         CSoundCommonQT::SetDev(s);
     }
-    virtual _BOOLEAN    Init(int, int, _BOOLEAN);
-    virtual _BOOLEAN    Write(CVector<short>&);
+    virtual bool    Init(int, int, bool);
+    virtual bool    Write(CVector<short>&);
     virtual void        Close();
 private:
     QAudioOutput*       pAudioOutput;
