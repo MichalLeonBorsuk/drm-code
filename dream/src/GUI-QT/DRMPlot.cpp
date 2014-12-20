@@ -234,8 +234,8 @@ void CDRMPlot::update(ReceiverController* rc)
     CParameter& Parameters = *rc->getReceiver()->GetParameters();
 
     Parameters.Lock();
-    _REAL rDCFrequency = Parameters.GetDCFrequency();
     iSigSampleRate = Parameters.GetSigSampleRate();
+    _REAL rDCFrequency = Parameters.GetDCFrequency();
     Parameters.Unlock();
 
     switch (CurCharType)
@@ -269,7 +269,7 @@ void CDRMPlot::update(ReceiverController* rc)
 
     case INPUTSPECTRUM_NO_AV:
         rc->getReceiver()->GetReceiveData()->GetInputSpec(vecrData, vecrScale);
-        plot->setxMarker(0, rDCFrequency);
+        plot->setxMarker(0, rDCFrequency/1000.0);
         plot->setData(0, vecrData, vecrScale);
         break;
 
@@ -280,7 +280,7 @@ void CDRMPlot::update(ReceiverController* rc)
 
     case INPUT_SIG_PSD:
         rc->getReceiver()->GetPlotManager()->GetInputPSD(vecrData, vecrScale);
-        plot->setxMarker(0, rDCFrequency);
+        plot->setxMarker(0, rDCFrequency/1000.0);
         plot->setData(0, vecrData, vecrScale);
         break;
 

@@ -78,7 +78,7 @@ public:
         rPower((_REAL) 0.0) { }
 
     Station::EState stateAt(time_t, int) const;
-    _BOOLEAN activeAt(time_t) const;
+    bool activeAt(time_t) const;
     int StartTime() const {
         return iStartHour * 100 + iStartMinute;
     }

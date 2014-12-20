@@ -151,14 +151,14 @@ public:
         return false;
     }
     int GetNumCorDecAudio();
-    void SetReverbEffect(const _BOOLEAN bNER) {
+    void SetReverbEffect(const bool bNER) {
         bUseReverbEffect = bNER;
     }
-    _BOOLEAN GetReverbEffect() {
+    bool GetReverbEffect() {
         return bUseReverbEffect;
     }
 
-    _BOOLEAN bWriteToFile;
+    bool bWriteToFile;
 
 protected:
     enum EInitErr {ET_ALL, ET_AUDDECODER}; /* ET: Error type */
@@ -170,13 +170,13 @@ protected:
     };
 
     /* General */
-    _BOOLEAN DoNotProcessData;
-    _BOOLEAN DoNotProcessAudDecoder;
+    bool DoNotProcessData;
+    bool DoNotProcessAudDecoder;
     int iTotalFrameSize;
     int iNumCorDecAudio;
 
     /* Text message */
-    _BOOLEAN bTextMessageUsed;
+    bool bTextMessageUsed;
     CTextMessageDecoder TextMessage;
     CVector<_BINARY> vecbiTextMessBuf;
 
@@ -194,8 +194,8 @@ protected:
     CVector<_REAL> vecTempResBufOutOldRight;
 
     /* Drop-out masking (reverberation) */
-    _BOOLEAN bAudioWasOK;
-    _BOOLEAN bUseReverbEffect;
+    bool bAudioWasOK;
+    bool bUseReverbEffect;
     CAudioReverb AudioRev;
 
     int iLenDecOutPerChan;
@@ -220,7 +220,7 @@ protected:
     CVector<_BYTE> celp_crc_bits;
     int iNumHigherProtectedBits;
     int iNumLowerProtectedBits;
-    _BOOLEAN bCELPCRC;
+    bool bCELPCRC;
     CCRC CELPCRCObject;
 
     string audiodecoder;

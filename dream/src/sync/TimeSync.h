@@ -92,16 +92,16 @@ public:
     virtual ~CTimeSync() {}
 
     /* To set the module up for synchronized DRM input data stream */
-    void SetSyncInput(const _BOOLEAN bNewS) {
+    void SetSyncInput(const bool bNewS) {
         bSyncInput = bNewS;
     }
 
     void StartAcquisition();
     void StopTimingAcqu() {
-        bTimingAcqu = FALSE;
+        bTimingAcqu = false;
     }
     void StopRMDetAcqu() {
-        bRobModAcqu = FALSE;
+        bRobModAcqu = false;
     }
 
 protected:
@@ -137,12 +137,12 @@ protected:
 
     int                         iCenterOfBuf;
 
-    _BOOLEAN                    bSyncInput;
+    bool                    bSyncInput;
 
-    _BOOLEAN                    bInitTimingAcqu;
-    _BOOLEAN                    bTimingAcqu;
-    _BOOLEAN                    bRobModAcqu;
-    _BOOLEAN                    bAcqWasActive;
+    bool                    bInitTimingAcqu;
+    bool                    bTimingAcqu;
+    bool                    bRobModAcqu;
+    bool                    bAcqWasActive;
 
     int                         iTiSyncInitCnt;
     int                         iRobModInitCnt;

@@ -42,8 +42,8 @@
 /* Implementation *************************************************************/
 
 CAudioSourceDecoder::CAudioSourceDecoder()
-    :   bWriteToFile(FALSE), TextMessage(FALSE),
-        bUseReverbEffect(TRUE), codec(NULL), pFile(NULL)
+    :   bWriteToFile(false), TextMessage(false),
+        bUseReverbEffect(true), codec(NULL), pFile(NULL)
 {
     /* Initialize Audio Codec List */
     CAudioCodec::InitCodecList();
@@ -195,15 +195,15 @@ void
 CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
 {
     int i, j;
-    _BOOLEAN bCurBlockOK;
-    _BOOLEAN bCurBlockFaulty;
-    _BOOLEAN bGoodValues;
+    bool bCurBlockOK;
+    bool bCurBlockFaulty;
+    bool bGoodValues;
 
     int iDecChannels;
     CAudioCodec::EDecError eDecError;
     short *psDecOutSampleBuf;
 
-    bGoodValues = FALSE;
+    bGoodValues = false;
 
     Parameters.Lock();
     Parameters.vecbiAudioFrameStatus.Init(0);
@@ -211,14 +211,14 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
     Parameters.Unlock();
 
     /* Check if something went wrong in the initialization routine */
-    if (DoNotProcessData == TRUE)
+    if (DoNotProcessData)
     {
         return;
     }
 
     /* Text Message ********************************************************** */
     /* Total frame size depends on whether text message is used or not */
-    if (bTextMessageUsed == TRUE)
+    if (bTextMessageUsed)
     {
         /* Decode last for bytes of input block for text message */
         for (i = 0; i < SIZEOF__BYTE * NUM_BYTES_TEXT_MESS_IN_AUD_STR; i++)
@@ -229,7 +229,7 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
 
     /* Audio data header parsing ********************************************* */
     /* Check if audio shall not be decoded */
-    if (DoNotProcessAudDecoder == TRUE)
+    if (DoNotProcessAudDecoder)
     {
         return;
     }
@@ -244,7 +244,7 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
     if (eAudioCoding == CAudioParam::AC_AAC || eAudioCoding == CAudioParam::AC_OPUS)
     {
         /* AAC super-frame-header ------------------------------------------- */
-        bGoodValues = TRUE;
+        bGoodValues = true;
         size_t iPrevBorder = 0;
 
         for (i = 0; i < iNumBorders; i++)
@@ -263,7 +263,7 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
                 audio_frame[i].resize(size);
             }
             else
-                bGoodValues = FALSE;
+                bGoodValues = false;
             iPrevBorder = iFrameBorder;
         }
 
@@ -284,7 +284,7 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
                 audio_frame[iNumBorders].resize(size);
             }
             else
-                bGoodValues = FALSE;
+                bGoodValues = false;
         }
 
         /* Check if frame length entries represent possible values */
@@ -293,11 +293,11 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
                 {
                     if(int(audio_frame[i].size()) > iMaxLenOneAudFrame)
                     {
-                        bGoodValues = FALSE;
+                        bGoodValues = false;
                     }
                 }
         */
-        if (bGoodValues == TRUE)
+        if (bGoodValues)
         {
             /* Higher-protected part */
             for (i = 0; i < iNumAudioFrames; i++)
@@ -340,7 +340,7 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
                 celp_frame[i].Enqueue((*pvecInputData).Separate(1), 1);
 
             /* Extract CRC bits (8 bits) if used */
-            if (bCELPCRC == TRUE)
+            if (bCELPCRC)
                 celp_crc_bits[i] = _BINARY((*pvecInputData).Separate(8));
         }
 
@@ -367,14 +367,14 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
     /* Init output block size to zero, this variable is also used for
        determining the position for writing the output vector */
     iOutputBlockSize = 0;
-    _BOOLEAN bCodecUpdated = FALSE;
+    bool bCodecUpdated = false;
 
     for (j = 0; j < iNumAudioFrames; j++)
     {
-        bCurBlockFaulty = FALSE;
+        bCurBlockFaulty = false;
         if (eAudioCoding == CAudioParam::AC_AAC || eAudioCoding == CAudioParam::AC_OPUS)
         {
-            if (bGoodValues == TRUE)
+            if (bGoodValues)
             {
                 /* Prepare data vector with CRC at the beginning (the definition
                    with faad2 DRM interface) */
@@ -398,7 +398,7 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
                 /* Call decoder update */
                 if (!bCodecUpdated)
                 {
-                    bCodecUpdated = TRUE;
+                    bCodecUpdated = true;
                     Parameters.Lock();
                     int iCurSelAudioServ = Parameters.GetCurSelAudioService();
                     codec->DecUpdate(Parameters.Service[iCurSelAudioServ].AudioParam);
@@ -409,17 +409,17 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
                 Parameters.Lock();
                 Parameters.vecbiAudioFrameStatus.Add(eDecError == CAudioCodec::DECODER_ERROR_OK ? 0 : 1);
                 Parameters.Unlock();
-                if (!(eAudioCoding == CAudioParam::AC_OPUS && eDecError == CAudioCodec::DECODER_ERROR_CRC && bUseReverbEffect == FALSE) && eDecError != CAudioCodec::DECODER_ERROR_OK)
+                if (!(eAudioCoding == CAudioParam::AC_OPUS && eDecError == CAudioCodec::DECODER_ERROR_CRC && bUseReverbEffect == false) && eDecError != CAudioCodec::DECODER_ERROR_OK)
                 {
                     //cerr << "AAC decode error" << endl;
-                    bCurBlockOK = FALSE;    /* Set error flag */
+                    bCurBlockOK = false;    /* Set error flag */
                 }
                 else
                 {
-                    bCurBlockOK = TRUE;
+                    bCurBlockOK = true;
                     /* Opus can have FEC embeded, thus the audio frame is always OK */
                     if (eAudioCoding == CAudioParam::AC_OPUS && eDecError != CAudioCodec::DECODER_ERROR_OK)
-                        bCurBlockFaulty = TRUE;
+                        bCurBlockFaulty = true;
 
                     if(psDecOutSampleBuf) // might be dummy decoder
                     {
@@ -466,7 +466,7 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
             else
             {
                 /* DRM AAC header was wrong, set flag to "bad block" */
-                bCurBlockOK = FALSE;
+                bCurBlockOK = false;
                 /* OPH: update audio status vector for RSCI */
                 Parameters.Lock();
                 Parameters.vecbiAudioFrameStatus.Add(1);
@@ -475,7 +475,7 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
         }
         else if (eAudioCoding == CAudioParam::AC_CELP)
         {
-            if (bCELPCRC == TRUE)
+            if (bCELPCRC)
             {
                 /* Prepare CRC object and data stream */
                 CELPCRCObject.Reset(8);
@@ -487,11 +487,11 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
                 bCurBlockOK = CELPCRCObject.CheckCRC(celp_crc_bits[j]);
             }
             else
-                bCurBlockOK = TRUE;
+                bCurBlockOK = true;
 
             /* OPH: update audio status vector for RSCI */
             Parameters.Lock();
-            Parameters.vecbiAudioFrameStatus.Add(bCurBlockOK == TRUE ? 0 : 1);
+            Parameters.vecbiAudioFrameStatus.Add(bCurBlockOK ? 0 : 1);
             Parameters.Unlock();
 
             int iTotNumBits =
@@ -525,7 +525,7 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
         else if (eAudioCoding == CAudioParam::AC_HVXC)
         {
 
-            bCurBlockOK = TRUE; /* CRC always ignored */
+            bCurBlockOK = true; /* CRC always ignored */
 
             if (bWriteToFile && pFile!=NULL)
             {
@@ -554,16 +554,16 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
 
         }
         else
-            bCurBlockOK = FALSE;
+            bCurBlockOK = false;
 
 // This code is independent of particular audio source type and should work
 // fine with CELP and HVXC
 
         /* Postprocessing of audio blocks, status informations -------------- */
         ETypeRxStatus status = DATA_ERROR;
-        if (bCurBlockOK == FALSE)
+        if (bCurBlockOK == false)
         {
-            if (bAudioWasOK == TRUE)
+            if (bAudioWasOK)
             {
                 /* Post message to show that CRC was wrong (yellow light) */
                 status = DATA_ERROR;
@@ -579,7 +579,7 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
                     vecTempResBufOutOldLeft[i] *= rAtt;
                     vecTempResBufOutOldRight[i] *= rAtt;
 
-                    if (bUseReverbEffect == TRUE)
+                    if (bUseReverbEffect)
                     {
                         /* Fade in input signal for reverberation to avoid
                            clicks */
@@ -599,13 +599,13 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
                 }
 
                 /* Set flag to show that audio block was bad */
-                bAudioWasOK = FALSE;
+                bAudioWasOK = false;
             }
             else
             {
                 status = CRC_ERROR;
 
-                if (bUseReverbEffect == TRUE)
+                if (bUseReverbEffect)
                 {
                     /* Add Reverberation effect */
                     for (i = 0; i < iResOutBlockSize; i++)
@@ -637,9 +637,9 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
             }
 
 
-            if (bAudioWasOK == FALSE)
+            if (bAudioWasOK == false)
             {
-                if (bUseReverbEffect == TRUE)
+                if (bUseReverbEffect)
                 {
                     /* Add "last" reverbration only to old block */
                     for (i = 0; i < iResOutBlockSize; i++)
@@ -662,7 +662,7 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
                     vecTempResBufOutCurLeft[i] *= rAtt;
                     vecTempResBufOutCurRight[i] *= rAtt;
 
-                    if (bUseReverbEffect == TRUE)
+                    if (bUseReverbEffect)
                     {
                         /* Cross-fade reverberation effect */
                         const _REAL rRevSam = (1.0 - rAtt) * AudioRev.
@@ -675,7 +675,7 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
                 }
 
                 /* Reset flag */
-                bAudioWasOK = TRUE;
+                bAudioWasOK = true;
             }
         }
         Parameters.Lock();
@@ -725,8 +725,8 @@ CAudioSourceDecoder::InitInternal(CParameter & Parameters)
        size is set in the processing routine. We must set it here in case
        of an error in the initialization, this part in the processing
        routine is not being called */
-    DoNotProcessAudDecoder = FALSE;
-    DoNotProcessData = FALSE;
+    DoNotProcessAudDecoder = false;
+    DoNotProcessData = false;
     iOutputBlockSize = 0;
 
     /* Set audiodecoder to empty string - means "unknown" and "can't decode" to GUI */
@@ -740,7 +740,7 @@ CAudioSourceDecoder::InitInternal(CParameter & Parameters)
         iNumCorDecAudio = 0;
 
         /* Init "audio was ok" flag */
-        bAudioWasOK = TRUE;
+        bAudioWasOK = true;
 
         /* Get number of total input bits for this module */
         iInputBlockSize = Parameters.iNumAudioDecoderBits;
@@ -768,8 +768,8 @@ CAudioSourceDecoder::InitInternal(CParameter & Parameters)
         /* Init text message application ------------------------------------ */
         switch (AudioParam.bTextflag)
         {
-        case TRUE:
-            bTextMessageUsed = TRUE;
+        case true:
+            bTextMessageUsed = true;
 
             /* Get a pointer to the string */
             TextMessage.Init(&AudioParam.strTextMessage);
@@ -784,8 +784,8 @@ CAudioSourceDecoder::InitInternal(CParameter & Parameters)
                                   NUM_BYTES_TEXT_MESS_IN_AUD_STR);
             break;
 
-        case FALSE:
-            bTextMessageUsed = FALSE;
+        case false:
+            bTextMessageUsed = false;
 
             /* All bytes are used for AAC data, no text message present */
             iTotalFrameSize = iInputBlockSize;
@@ -954,7 +954,7 @@ CAudioSourceDecoder::InitInternal(CParameter & Parameters)
 #ifdef USE_CELP_DECODER
 
 // TODO put decoder initialization here
-            bWriteToFile = TRUE;
+            bWriteToFile = true;
             if(bWriteToFile)
             {
                 string fn = CELPFileName(Parameters);
@@ -1004,7 +1004,7 @@ CAudioSourceDecoder::InitInternal(CParameter & Parameters)
 #ifdef USE_HVXC_DECODER
 
 // TODO put decoder initialization here
-            bWriteToFile = TRUE;
+            bWriteToFile = true;
             if(bWriteToFile)
             {
                 string fn = HVXCFileName(Parameters);
@@ -1126,16 +1126,16 @@ CAudioSourceDecoder::InitInternal(CParameter & Parameters)
         {
         case ET_ALL:
             /* An init error occurred, do not process data in this module */
-            DoNotProcessData = TRUE;
+            DoNotProcessData = true;
             break;
 
         case ET_AUDDECODER:
             /* Audio part should not be decdoded, set flag */
-            DoNotProcessAudDecoder = TRUE;
+            DoNotProcessAudDecoder = true;
             break;
 
         default:
-            DoNotProcessData = TRUE;
+            DoNotProcessData = true;
         }
 
         /* In all cases set output size to zero */

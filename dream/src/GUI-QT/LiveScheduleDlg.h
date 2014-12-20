@@ -96,7 +96,7 @@ public:
                                const CAltFreqSign& AltFreqSign, const uint32_t iServiceID=SERV_ID_NOT_USED);
 
     void DecodeTargets(const vector<CAltFreqRegion> vecAltFreqRegions,
-                       string& strRegions , _BOOLEAN& bIntoTargetArea);
+                       string& strRegions , bool& bIntoTargetArea);
 
     void SetSecondsPreview(int iSec) {
         iSecondsPreview = iSec;
@@ -108,7 +108,7 @@ public:
     void SetReceiverCoordinates(double latitude, double longitude);
 
 protected:
-    _BOOLEAN IsActive(const int iPos, const time_t ltime);
+    bool IsActive(const int iPos, const time_t ltime);
 
     vector<CLiveScheduleItem>   StationsTable;
 
@@ -164,7 +164,7 @@ protected:
     void            SaveSettings();
     void            LoadSchedule();
     int             iCurrentSortColumn;
-    _BOOLEAN        bCurrentSortAscending;
+    bool        bCurrentSortAscending;
     void            SetStationsView();
     void            AddWhatsThisHelp();
     void            SetUTCTimeLabel();

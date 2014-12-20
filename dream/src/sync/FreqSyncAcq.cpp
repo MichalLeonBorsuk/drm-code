@@ -230,8 +230,40 @@ void FreqOffsetModeE::init(int iHalfBuffer, int iSampleRate, double rCenterFreq,
 
 bool FreqOffsetModeE::calcOffset(const CRealVector& vecrPSD, int& offset)
 {
-    offset = int(rCenterFreq/0.000385802);
-    return true; // TODO MODE E
+    //qDebug() << vecrPSD.GetSize();
+    double min=1.0*_MAXREAL, max= -1.0*_MAXREAL;
+    char c[vecrPSD.GetSize()+1];
+    int peak=0;
+    for(int i=0; i< vecrPSD.GetSize(); i++) {
+        double r = vecrPSD[i];
+        if(r<min) min = r;
+        if(r>max) max = r;
+        r *= 4.0;
+        if(r<10.0)
+            c[i] = int(r) + '0';
+        else
+        {
+            c[i] = 'A';
+            peak = i;
+        }
+        c[vecrPSD.GetSize()]=0;
+    }
+    // find edge after peak
+    int right_edge=0;
+    double low = 7.0*(max-min)/8.0+min;
+    for(int i=peak; i<vecrPSD.GetSize()-3; i++) {
+        if(vecrPSD[i]<low && vecrPSD[i+1]<low && vecrPSD[i+2]<low) {
+            right_edge = i;
+            break;
+        }
+    }
+    qDebug() << "peak = " << peak << "right = " << right_edge;
+    //qDebug() << c;
+    if(right_edge>0) {
+        offset = right_edge/2;
+        return true;
+    }
+//        offset = int(rCenterFreq/38.5802);
 }
 
 void CFreqSyncAcq::ProcessDataInternal(CParameter& Parameters)
@@ -365,11 +397,12 @@ void CFreqSyncAcq::ProcessDataInternal(CParameter& Parameters)
                 if(acquired)
                 {
                     Parameters.rFreqOffsetAcqui = (_REAL) offset / iFrAcFFTSize;
-                    qDebug() << "offset " << Parameters.rFreqOffsetAcqui << " Hz";
+                    int iSampleRate = Parameters.GetSigSampleRate();
+                    //qDebug() << "offset " << 100*Parameters.rFreqOffsetAcqui << "% " << iSampleRate*Parameters.rFreqOffsetAcqui << "kHz";
                     /* Send out the data stored for FFT calculation ----- */
                     /* This does not work for bandpass filter. TODO: make
                        this possible for bandpass filter, too */
-                    if (bUseRecFilter == FALSE)
+                    if (bUseRecFilter == false)
                     {
                         iOutputBlockSize = iHistBufSize;
 
@@ -401,7 +434,7 @@ void CFreqSyncAcq::ProcessDataInternal(CParameter& Parameters)
         /* If synchronized DRM input stream is used, overwrite the detected
            frequency offest estimate by the desired frequency, because we know
            this value */
-        if (bSyncInput == TRUE)
+        if (bSyncInput)
         {
             Parameters.rFreqOffsetAcqui =
                 (_REAL) Parameters.CellMappingTable.iIndexDCFreq / Parameters.CellMappingTable.iFFTSizeN;
@@ -418,7 +451,7 @@ void CFreqSyncAcq::ProcessDataInternal(CParameter& Parameters)
             (_REAL) 2.0 * crPi * (Parameters.rFreqOffsetAcqui +
                                   Parameters.rFreqOffsetTrack - rInternIFNorm);
 
-        qDebug() << rNormCurFreqOffset;
+        //qDebug() << rNormCurFreqOffset;
         /* New rotation vector for exp() calculation */
         const _COMPLEX cExpStep =
             _COMPLEX(Cos(rNormCurFreqOffset), Sin(rNormCurFreqOffset));
@@ -438,7 +471,7 @@ void CFreqSyncAcq::ProcessDataInternal(CParameter& Parameters)
 
 
         /* Bandpass filter -------------------------------------------------- */
-        if (bUseRecFilter == TRUE)
+        if (bUseRecFilter)
             BPFilter.Process(*pvecOutputData);
 
     }

@@ -156,7 +156,7 @@ public:
 
 protected:
     void setT60(const CReal rT60, int iSampleRate);
-    _BOOLEAN isPrime(const int number);
+    bool isPrime(const int number);
 
     CFIFO<int>  allpassDelays_[3];
     CFIFO<int>  combDelays_[4];

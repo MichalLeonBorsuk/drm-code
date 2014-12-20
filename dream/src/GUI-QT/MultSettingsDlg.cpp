@@ -78,7 +78,7 @@ void MultSettingsDlg::showEvent(QShowEvent*)
     SetDataDirectoryControls();
 }
 
-void MultSettingsDlg::ClearCache(string subdir, QString sFilter = "", _BOOLEAN bDeleteDirs)
+void MultSettingsDlg::ClearCache(string subdir, QString sFilter = "", bool bDeleteDirs)
 {
     /* Delete files into sPath directory with scan recursive */
     string p = Settings.Get("Receiver", "datafilesdirectory", string(DEFAULT_DATA_FILES_DIRECTORY));
@@ -87,7 +87,7 @@ void MultSettingsDlg::ClearCache(string subdir, QString sFilter = "", _BOOLEAN b
     ClearCache(dir, sFilter, bDeleteDirs);
 }
 
-void MultSettingsDlg::ClearCache(QDir dir, QString sFilter = "", _BOOLEAN bDeleteDirs)
+void MultSettingsDlg::ClearCache(QDir dir, QString sFilter = "", bool bDeleteDirs)
 {
     /* Check if the directory exists */
     if (dir.exists())
@@ -112,7 +112,7 @@ void MultSettingsDlg::ClearCache(QDir dir, QString sFilter = "", _BOOLEAN bDelet
                     ClearCache(QDir(fi->filePath()), sFilter, bDeleteDirs);
 
                     /* Eventually delete the directory */
-                    if (bDeleteDirs == TRUE)
+                    if (bDeleteDirs)
                         dir.rmdir(fi->fileName());
                 }
             }
@@ -141,7 +141,7 @@ void MultSettingsDlg::OnbuttonChooseDir()
 
 void MultSettingsDlg::OnbuttonClearCacheMOT()
 {
-    ClearCache("MOT", "", TRUE);
+    ClearCache("MOT", "", true);
 }
 
 void MultSettingsDlg::OnbuttonClearCacheEPG()

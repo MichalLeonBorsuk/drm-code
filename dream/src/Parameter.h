@@ -121,12 +121,12 @@ public:
 
     CAudioParam(): strTextMessage(), iStreamID(STREAM_ID_NOT_USED),
         eAudioCoding(AC_NONE), eSBRFlag(SB_NOT_USED), eAudioSamplRate(AS_24KHZ),
-        bTextflag(FALSE), bEnhanceFlag(FALSE), eAudioMode(AM_MONO),
-        iCELPIndex(0), bCELPCRC(FALSE), eHVXCRate(HR_2_KBIT), bHVXCCRC(FALSE),
+        bTextflag(false), bEnhanceFlag(false), eAudioMode(AM_MONO),
+        iCELPIndex(0), bCELPCRC(false), eHVXCRate(HR_2_KBIT), bHVXCCRC(false),
         eOPUSBandwidth(OB_FB), eOPUSSubCod(OS_SILK), eOPUSChan(OC_STEREO),
         eOPUSSignal(OG_MUSIC), eOPUSApplication(OA_AUDIO),
-        bOPUSForwardErrorCorrection(FALSE), bOPUSRequestReset(FALSE),
-        bParamChanged(FALSE),
+        bOPUSForwardErrorCorrection(false), bOPUSRequestReset(false),
+        bParamChanged(false),
         rBitRate(0.0),bCanDecode(false)
     {
     }
@@ -139,8 +139,8 @@ public:
     EAudCod eAudioCoding;   /* This field indicated the source coding system */
     ESBRFlag eSBRFlag;      /* SBR flag */
     EAudSamRat eAudioSamplRate; /* Audio sampling rate */
-    _BOOLEAN bTextflag;     /* Indicates whether a text message is present or not */
-    _BOOLEAN bEnhanceFlag;  /* Enhancement flag */
+    bool bTextflag;     /* Indicates whether a text message is present or not */
+    bool bEnhanceFlag;  /* Enhancement flag */
     bool bCA;               /* Conditional Access */
 
     /* For AAC: Mono, LC Stereo, Stereo --------------------------------- */
@@ -148,11 +148,11 @@ public:
 
     /* For CELP --------------------------------------------------------- */
     int iCELPIndex;         /* This field indicates the CELP bit rate index */
-    _BOOLEAN bCELPCRC;      /* This field indicates whether the CRC is used or not */
+    bool bCELPCRC;      /* This field indicates whether the CRC is used or not */
 
     /* For HVXC --------------------------------------------------------- */
     EHVXCRate eHVXCRate;    /* This field indicates the rate of the HVXC */
-    _BOOLEAN bHVXCCRC;      /* This field indicates whether the CRC is used or not */
+    bool bHVXCCRC;      /* This field indicates whether the CRC is used or not */
 
     /* For OPUS --------------------------------------------------------- */
     EOPUSBandwidth eOPUSBandwidth; /* Audio bandwidth */
@@ -160,49 +160,49 @@ public:
     EOPUSChan eOPUSChan;    /* Audio channels */
     EOPUSSignal eOPUSSignal; /* Encoder signal type */
     EOPUSApplication eOPUSApplication; /* Encoder intended application */
-    _BOOLEAN bOPUSForwardErrorCorrection; /* Encoder Forward Error Correction enabled */
-    _BOOLEAN bOPUSRequestReset; /* Request encoder reset */
+    bool bOPUSForwardErrorCorrection; /* Encoder Forward Error Correction enabled */
+    bool bOPUSRequestReset; /* Request encoder reset */
 
     /* CAudioParam has changed */
-    _BOOLEAN bParamChanged;
+    bool bParamChanged;
     double rBitRate;
     bool bCanDecode;
 
     /* This function is needed for detection changes in the class */
-    _BOOLEAN operator!=(const CAudioParam AudioParam)
+    bool operator!=(const CAudioParam AudioParam)
     {
         if (iStreamID != AudioParam.iStreamID)
-            return TRUE;
+            return true;
         if (eAudioCoding != AudioParam.eAudioCoding)
-            return TRUE;
+            return true;
         if (eSBRFlag != AudioParam.eSBRFlag)
-            return TRUE;
+            return true;
         if (eAudioSamplRate != AudioParam.eAudioSamplRate)
-            return TRUE;
+            return true;
         if (bTextflag != AudioParam.bTextflag)
-            return TRUE;
+            return true;
         if (bEnhanceFlag != AudioParam.bEnhanceFlag)
-            return TRUE;
+            return true;
 
         switch (AudioParam.eAudioCoding)
         {
         case AC_AAC:
             if (eAudioMode != AudioParam.eAudioMode)
-                return TRUE;
+                return true;
             break;
 
         case AC_CELP:
             if (bCELPCRC != AudioParam.bCELPCRC)
-                return TRUE;
+                return true;
             if (iCELPIndex != AudioParam.iCELPIndex)
-                return TRUE;
+                return true;
             break;
 
         case AC_HVXC:
             if (eHVXCRate != AudioParam.eHVXCRate)
-                return TRUE;
+                return true;
             if (bHVXCCRC != AudioParam.bHVXCCRC)
-                return TRUE;
+                return true;
             break;
 
         case AC_NONE:
@@ -210,7 +210,7 @@ public:
         case AC_xHE_AAC: // TODO
             break;
         }
-        return FALSE;
+        return false;
     }
 };
 
@@ -257,27 +257,27 @@ public:
     }
 
     /* This function is needed to detect changes in the data service */
-    _BOOLEAN operator!=(const CDataParam DataParam)
+    bool operator!=(const CDataParam DataParam)
     {
         if (iStreamID != DataParam.iStreamID)
-            return TRUE;
+            return true;
         if (ePacketModInd != DataParam.ePacketModInd)
-            return TRUE;
+            return true;
         if (DataParam.ePacketModInd == PM_PACKET_MODE)
         {
             if (eDataUnitInd != DataParam.eDataUnitInd)
-                return TRUE;
+                return true;
             if (iPacketID != DataParam.iPacketID)
-                return TRUE;
+                return true;
             if (iPacketLen != DataParam.iPacketLen)
-                return TRUE;
+                return true;
             if (eAppDomain != DataParam.eAppDomain)
-                return TRUE;
+                return true;
             if (DataParam.eAppDomain == AD_DAB_SPEC_APP)
                 if (iUserAppIdent != DataParam.iUserAppIdent)
-                    return TRUE;
+                    return true;
         }
-        return FALSE;
+        return false;
     }
 };
 
@@ -299,7 +299,7 @@ public:
     {
     }
 
-    _BOOLEAN IsActive() const
+    bool IsActive() const
     {
         return iServiceID != SERV_ID_NOT_USED;
     }
@@ -394,19 +394,19 @@ public:
         return *this;
     }
 
-    _BOOLEAN operator==(const CAltFreqSched& nAFS)
+    bool operator==(const CAltFreqSched& nAFS)
     {
         if (iDayCode != nAFS.iDayCode)
-            return FALSE;
+            return false;
         if (iStartTime != nAFS.iStartTime)
-            return FALSE;
+            return false;
         if (iDuration != nAFS.iDuration)
-            return FALSE;
+            return false;
 
-        return TRUE;
+        return true;
     }
 
-    _BOOLEAN IsActive(const time_t ltime);
+    bool IsActive(const time_t ltime);
 
     int iDayCode;
     int iStartTime;
@@ -442,27 +442,27 @@ public:
         return *this;
     }
 
-    _BOOLEAN operator==(const CAltFreqRegion& nAFR)
+    bool operator==(const CAltFreqRegion& nAFR)
     {
         if (iLatitude != nAFR.iLatitude)
-            return FALSE;
+            return false;
         if (iLongitude != nAFR.iLongitude)
-            return FALSE;
+            return false;
         if (iLatitudeEx != nAFR.iLatitudeEx)
-            return FALSE;
+            return false;
         if (iLongitudeEx != nAFR.iLongitudeEx)
-            return FALSE;
+            return false;
 
         /* Vector sizes */
         if (veciCIRAFZones.size() != nAFR.veciCIRAFZones.size())
-            return FALSE;
+            return false;
 
         /* Vector contents */
         for (size_t i = 0; i < veciCIRAFZones.size(); i++)
             if (veciCIRAFZones[i] != nAFR.veciCIRAFZones[i])
-                return FALSE;
+                return false;
 
-        return TRUE;
+        return true;
     }
 
     vector<int> veciCIRAFZones;
@@ -501,23 +501,23 @@ public:
 
         /* Vector sizes */
         if (veciFrequencies.size() != sd.veciFrequencies.size())
-            return FALSE;
+            return false;
 
         /* Vector contents */
         for (i = 0; i < veciFrequencies.size(); i++)
             if (veciFrequencies[i] != sd.veciFrequencies[i])
-                return FALSE;
+                return false;
 
         if (iRegionID != sd.iRegionID)
-            return FALSE;
+            return false;
 
         if (iScheduleID != sd.iScheduleID)
-            return FALSE;
+            return false;
 
         if (iSystemID != sd.iSystemID)
-            return FALSE;
+            return false;
 
-        return TRUE;
+        return true;
     }
     bool operator!=(const CServiceDefinition& sd) const {
         return !(*this==sd);
@@ -536,7 +536,7 @@ public:
 class CMultiplexDefinition: public CServiceDefinition
 {
 public:
-    CMultiplexDefinition():CServiceDefinition(), veciServRestrict(4), bIsSyncMultplx(FALSE)
+    CMultiplexDefinition():CServiceDefinition(), veciServRestrict(4), bIsSyncMultplx(false)
     {
     }
 
@@ -557,31 +557,31 @@ public:
     bool operator==(const CMultiplexDefinition& md) const
     {
         if (CServiceDefinition(*this) != md)
-            return FALSE;
+            return false;
 
         /* Vector sizes */
         if (veciServRestrict.size() != md.veciServRestrict.size())
-            return FALSE;
+            return false;
 
         /* Vector contents */
         for (size_t i = 0; i < veciServRestrict.size(); i++)
             if (veciServRestrict[i] != md.veciServRestrict[i])
-                return FALSE;
+                return false;
 
         if (bIsSyncMultplx != md.bIsSyncMultplx)
-            return FALSE;
+            return false;
 
-        return TRUE;
+        return true;
     }
 
     vector<int> veciServRestrict;
-    _BOOLEAN bIsSyncMultplx;
+    bool bIsSyncMultplx;
 };
 
 class COtherService: public CServiceDefinition
 {
 public:
-    COtherService(): CServiceDefinition(), bSameService(TRUE),
+    COtherService(): CServiceDefinition(), bSameService(true),
         iShortID(0), iServiceID(SERV_ID_NOT_USED)
     {
     }
@@ -606,23 +606,23 @@ public:
     bool operator==(const COtherService& nAF)
     {
         if (CServiceDefinition(*this) != nAF)
-            return FALSE;
+            return false;
 
         if (bSameService != nAF.bSameService)
-            return FALSE;
+            return false;
 
         if (iShortID != nAF.iShortID)
-            return FALSE;
+            return false;
 
         if (iServiceID != nAF.iServiceID)
-            return FALSE;
+            return false;
 
-        return TRUE;
+        return true;
     }
 
     string ServiceID() const;
 
-    _BOOLEAN bSameService;
+    bool bSameService;
     int iShortID;
     uint32_t iServiceID;
 };
@@ -633,8 +633,8 @@ class CAltFreqSign
 public:
 
     CAltFreqSign():vecRegions(16),vecSchedules(16),vecMultiplexes(),vecOtherServices(),
-        bRegionVersionFlag(FALSE),bScheduleVersionFlag(FALSE),
-        bMultiplexVersionFlag(FALSE),bOtherServicesVersionFlag(FALSE)
+        bRegionVersionFlag(false),bScheduleVersionFlag(false),
+        bMultiplexVersionFlag(false),bOtherServicesVersionFlag(false)
     {
     }
 
@@ -659,27 +659,27 @@ public:
         return *this;
     }
 
-    void ResetRegions(_BOOLEAN b)
+    void ResetRegions(bool b)
     {
         vecRegions.clear();
         vecRegions.resize(16);
         bRegionVersionFlag=b;
     }
 
-    void ResetSchedules(_BOOLEAN b)
+    void ResetSchedules(bool b)
     {
         vecSchedules.clear();
         vecSchedules.resize(16);
         bScheduleVersionFlag=b;
     }
 
-    void ResetMultiplexes(_BOOLEAN b)
+    void ResetMultiplexes(bool b)
     {
         vecMultiplexes.clear();
         bMultiplexVersionFlag=b;
     }
 
-    void ResetOtherServices(_BOOLEAN b)
+    void ResetOtherServices(bool b)
     {
         vecOtherServices.clear();
         bOtherServicesVersionFlag=b;
@@ -687,20 +687,20 @@ public:
 
     void Reset()
     {
-        ResetRegions(FALSE);
-        ResetSchedules(FALSE);
-        ResetMultiplexes(FALSE);
-        ResetOtherServices(FALSE);
+        ResetRegions(false);
+        ResetSchedules(false);
+        ResetMultiplexes(false);
+        ResetOtherServices(false);
     }
 
     vector < vector<CAltFreqRegion> > vecRegions; // outer vector indexed by regionID
     vector < vector<CAltFreqSched> > vecSchedules; // outer vector indexed by scheduleID
     vector < CMultiplexDefinition > vecMultiplexes;
     vector < COtherService > vecOtherServices;
-    _BOOLEAN bRegionVersionFlag;
-    _BOOLEAN bScheduleVersionFlag;
-    _BOOLEAN bMultiplexVersionFlag;
-    _BOOLEAN bOtherServicesVersionFlag;
+    bool bRegionVersionFlag;
+    bool bScheduleVersionFlag;
+    bool bMultiplexVersionFlag;
+    bool bOtherServicesVersionFlag;
 };
 
 /* Class to store information about the last service selected ------------- */
@@ -849,7 +849,7 @@ public:
     // Constructor
     CFrontEndParameters():
         eSMeterCorrectionType(S_METER_CORRECTION_TYPE_CAL_FACTOR_ONLY), rSMeterBandwidth(10000.0),
-        rDefaultMeasurementBandwidth(10000.0), bAutoMeasurementBandwidth(TRUE), rCalFactorAM(0.0),
+        rDefaultMeasurementBandwidth(10000.0), bAutoMeasurementBandwidth(true), rCalFactorAM(0.0),
         rCalFactorDRM(0.0), rIFCentreFreq(12000.0)
     {}
     CFrontEndParameters(const CFrontEndParameters& p):
@@ -875,7 +875,7 @@ public:
     _REAL rSMeterBandwidth; // The bandwidth the S-meter uses to do the measurement
 
     _REAL rDefaultMeasurementBandwidth; // Bandwidth to do measurement if not synchronised
-    _BOOLEAN bAutoMeasurementBandwidth; // TRUE: use the current FAC bandwidth if locked, FALSE: use default bandwidth always
+    bool bAutoMeasurementBandwidth; // true: use the current FAC bandwidth if locked, false: use default bandwidth always
     _REAL rCalFactorAM;
     _REAL rCalFactorDRM;
     _REAL rIFCentreFreq;
@@ -934,7 +934,7 @@ public:
     void SetNumAudioDecoderBits(const int iNewNumAudioDecoderBits);
     void SetNumDataDecoderBits(const int iNewNumDataDecoderBits);
 
-    _BOOLEAN SetWaveMode(const ERobMode eNewWaveMode);
+    bool SetWaveMode(const ERobMode eNewWaveMode);
     ERobMode GetWaveMode() const {
         return eRobustnessMode;
     }
@@ -1032,10 +1032,11 @@ public:
 
     _REAL GetDCFrequency() const
     {
-        return iSigSampleRate * (rFreqOffsetAcqui + rFreqOffsetTrack);
+        _REAL r = iSigSampleRate * (rFreqOffsetAcqui + rFreqOffsetTrack);
+        return r;
     }
 
-    _REAL GetBitRateKbps(const int iShortID, const _BOOLEAN bAudData) const;
+    _REAL GetBitRateKbps(const int iShortID, const bool bAudData) const;
     _REAL PartABLenRatio(const int iShortID) const;
 
     /* Parameters controlled by FAC ----------------------------------------- */
@@ -1089,7 +1090,7 @@ public:
     CDataParam GetDataParam(const int iShortID) const;
     void SetDataParam(const int iShortID, const CDataParam& NewDataParam);
 
-    void SetMSCProtLev(const CMSCProtLev NewMSCPrLe, const _BOOLEAN bWithHierarch);
+    void SetMSCProtLev(const CMSCProtLev NewMSCPrLe, const bool bWithHierarch);
     void SetStreamLen(const int iStreamID, const int iNewLenPartA, const int iNewLenPartB);
     void GetStreamLen(const int iStreamID, int& iLenPartA, int& iLenPartB) const;
     int GetStreamLen(const int iStreamID) const;
@@ -1126,7 +1127,7 @@ public:
     int iUTCMin;
     int iUTCOff;
     int iUTCSense;
-    _BOOLEAN bValidUTCOffsetAndSense;
+    bool bValidUTCOffsetAndSense;
 
     /* Identifies the current frame. This parameter is set by FAC */
     int iFrameIDTransm;
@@ -1151,7 +1152,7 @@ public:
     int iNumAudioFrames;
 
     CVector <_BINARY> vecbiAudioFrameStatus;
-    _BOOLEAN bMeasurePSD, bMeasurePSDAlways;
+    bool bMeasurePSD, bMeasurePSDAlways;
     _REAL rPIRStart;
     _REAL rPIREnd;
 
@@ -1215,14 +1216,14 @@ public:
     _REAL rMinDelay;
     _REAL rMaxDelay;
 
-    _BOOLEAN bMeasureDelay;
+    bool bMeasureDelay;
     CRealVector vecrRdel;
     CRealVector vecrRdelThresholds;
     CRealVector vecrRdelIntervals;
-    _BOOLEAN bMeasureDoppler;
+    bool bMeasureDoppler;
     _REAL rRdop;
     /* interference (constellation-based measurement rnic)*/
-    _BOOLEAN bMeasureInterference;
+    bool bMeasureInterference;
     _REAL rIntFreq, rINR, rICR;
 
     /* peak of PSD - for PSD-based interference measurement rnip */
@@ -1264,7 +1265,7 @@ protected:
     _REAL rSysSimSNRdB;
 
     int iFrequency;
-    _BOOLEAN bValidSignalStrength;
+    bool bValidSignalStrength;
     _REAL rSigStr;
     _REAL rIFSigStr;
 

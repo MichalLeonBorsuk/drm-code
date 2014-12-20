@@ -32,7 +32,7 @@
 /* Implementation *************************************************************/
 void CInputResample::ProcessDataInternal(CParameter& Parameters)
 {
-    if (bSyncInput == TRUE)
+    if (bSyncInput)
     {
         /* Only copy input data to output buffer, do not resample data */
         for (int i = 0; i < iInputBlockSize; i++)

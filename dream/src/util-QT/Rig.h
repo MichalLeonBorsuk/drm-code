@@ -55,7 +55,7 @@ public:
     void SetHamlibModelID(rig_model_t r) {
         Hamlib.SetHamlibModelID(r);
     }
-    void SetEnableModRigSettings(_BOOLEAN b) {
+    void SetEnableModRigSettings(bool b) {
         Hamlib.SetEnableModRigSettings(b);
     }
     void GetPortList(map<string,string>& ports) {
@@ -67,7 +67,7 @@ public:
     void SetComPort(const string& s) {
         Hamlib.SetComPort(s);
     }
-    _BOOLEAN GetEnableModRigSettings() {
+    bool GetEnableModRigSettings() {
         return Hamlib.GetEnableModRigSettings();
     }
     CHamlib::ESMeterState GetSMeter(_REAL& r) {

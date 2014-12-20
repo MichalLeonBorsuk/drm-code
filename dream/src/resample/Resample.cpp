@@ -331,7 +331,7 @@ void CAudioResample::Reset()
 #endif // HAVE_SPEEX
 
 void CSpectrumResample::Resample(CVector<_REAL>* prInput, CVector<_REAL>** pprOutput,
-                                 int iNewOutputBlockSize, _BOOLEAN bResample)
+                                 int iNewOutputBlockSize, bool bResample)
 {
     if (!bResample)
         iNewOutputBlockSize = 0;

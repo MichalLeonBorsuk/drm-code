@@ -45,7 +45,7 @@ public:
     void SetPacketSink(CPacketSink *pSink);
     // Stop sending packets to the sink
     void ResetPacketSink(void);
-    _BOOLEAN SetOrigin(const string& str);
+    bool SetOrigin(const string& str);
     bool GetOrigin(string& str) {
         (void)str;
         return false;

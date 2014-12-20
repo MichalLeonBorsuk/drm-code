@@ -51,23 +51,23 @@ public:
     virtual string GetTagName(void) = 0;
     virtual ~CTagItemDecoder() {}
 
-    CTagItemDecoder() : bIsReady(FALSE) {};
+    CTagItemDecoder() : bIsReady(false) {};
     // initialise any internal state variables. TODO: Make this pure to force implementer to think?
     virtual void Init(void) {
-        bIsReady = FALSE;
+        bIsReady = false;
     }
 
-    virtual _BOOLEAN IsReady(void) {
+    virtual bool IsReady(void) {
         return bIsReady;
     }
 
 protected:
-    void SetReady(_BOOLEAN bReady) {
+    void SetReady(bool bReady) {
         bIsReady = bReady;
     }
 
 private:
-    _BOOLEAN bIsReady;
+    bool bIsReady;
 
 };
 

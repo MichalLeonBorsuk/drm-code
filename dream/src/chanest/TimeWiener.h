@@ -86,7 +86,7 @@
 class CTimeWiener : public CChanEstTime
 {
 public:
-    CTimeWiener() : bTracking(FALSE) {}
+    CTimeWiener() : bTracking(false) {}
     virtual ~CTimeWiener() {}
 
     virtual int Init(CParameter& Parameters);
@@ -100,10 +100,10 @@ public:
     }
 
     void StartTracking() {
-        bTracking = TRUE;
+        bTracking = true;
     }
     void StopTracking() {
-        bTracking = FALSE;
+        bTracking = false;
     }
 
 protected:
@@ -123,10 +123,10 @@ protected:
     class CDDPilIdx
     {
     public:
-        CDDPilIdx() : iIdx(0), bIsPilot(FALSE) {}
-        CDDPilIdx(int iNI, _BOOLEAN bNP) : iIdx(iNI), bIsPilot(bNP) {}
+        CDDPilIdx() : iIdx(0), bIsPilot(false) {}
+        CDDPilIdx(int iNI, bool bNP) : iIdx(iNI), bIsPilot(bNP) {}
         int         iIdx;
-        _BOOLEAN    bIsPilot;
+        bool    bIsPilot;
     };
 
     CReal TimeOptimalFiltDD(CRealVector& vecrTaps, const int iTimeInt,
@@ -175,7 +175,7 @@ protected:
     _REAL               rAvSNR;
     int                 iAvSNRCnt;
 
-    _BOOLEAN            bTracking;
+    bool            bTracking;
 };
 
 

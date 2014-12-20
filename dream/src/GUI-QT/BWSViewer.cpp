@@ -367,11 +367,11 @@ bool BWSViewer::Changed()
         CMOTObject obj;
 
         /* Poll the data decoder module for new object */
-        while (decoder->GetMOTObject(obj, CDataDecoder::AT_BROADCASTWEBSITE) == TRUE)
+        while (decoder->GetMOTObject(obj, CDataDecoder::AT_BROADCASTWEBSITE))
         {
             /* Get the current directory */
             CMOTDirectory MOTDir;
-            if (decoder->GetMOTDirectory(MOTDir, CDataDecoder::AT_BROADCASTWEBSITE) == TRUE)
+            if (decoder->GetMOTDirectory(MOTDir, CDataDecoder::AT_BROADCASTWEBSITE))
             {
                 /* ETSI TS 101 498-1 Section 5.5.1 */
 

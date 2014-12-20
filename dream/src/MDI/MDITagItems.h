@@ -45,7 +45,7 @@ public:
     void Reset(); // Resets bit vector to zero length (i.e. no header)
     void GenEmptyTag(); // Generates valid tag item with zero payload length
     virtual ~CTagItemGenerator() {}
-    virtual _BOOLEAN IsInProfile(char cProfile);
+    virtual bool IsInProfile(char cProfile);
 
 protected:
     virtual string GetTagName() = 0; // Return the tag name
@@ -66,7 +66,7 @@ class CTagItemGeneratorWithProfiles : public CTagItemGenerator
 {
 public:
     CTagItemGeneratorWithProfiles();
-    virtual _BOOLEAN IsInProfile(char cProfile);
+    virtual bool IsInProfile(char cProfile);
 protected:
     virtual string GetTagName() =0;
 //private:
@@ -163,7 +163,7 @@ protected:
 class CTagItemGeneratorMERFormat : public CTagItemGeneratorWithProfiles
 {
 public:
-    void GenTag(_BOOLEAN bIsValid, _REAL rMER);
+    void GenTag(bool bIsValid, _REAL rMER);
 protected:
     virtual string GetTagName() {
         return "";
@@ -204,7 +204,7 @@ protected:
 class CTagItemGeneratorRDEL : public CTagItemGeneratorWithProfiles /* RDEL tag */
 {
 public:
-    void GenTag(_BOOLEAN bIsValid, const CRealVector &vecrThresholds, const CRealVector &vecrIntervals);
+    void GenTag(bool bIsValid, const CRealVector &vecrThresholds, const CRealVector &vecrIntervals);
 protected:
     virtual string GetTagName();
     virtual string GetProfiles(); // Return a string containing the set of profiles for this tag
@@ -222,7 +222,7 @@ protected:
 class CTagItemGeneratorRINT : public CTagItemGeneratorWithProfiles /* rnic tag */
 {
 public:
-    void GenTag(_BOOLEAN bIsValid, CReal rIntFreq, CReal rINR, CReal rICR);
+    void GenTag(bool bIsValid, CReal rIntFreq, CReal rINR, CReal rICR);
 protected:
     virtual string GetTagName();
     virtual string GetProfiles(); // Return a string containing the set of profiles for this tag
@@ -231,7 +231,7 @@ protected:
 class CTagItemGeneratorRNIP : public CTagItemGeneratorWithProfiles /* rnic tag */
 {
 public:
-    void GenTag(_BOOLEAN bIsValid, CReal rIntFreq, CReal rISR);
+    void GenTag(bool bIsValid, CReal rIntFreq, CReal rISR);
 protected:
     virtual string GetTagName();
     virtual string GetProfiles(); // Return a string containing the set of profiles for this tag
@@ -240,7 +240,7 @@ protected:
 class CTagItemGeneratorSignalStrength : public CTagItemGeneratorWithProfiles /* rdbv tag */
 {
 public:
-    void GenTag(_BOOLEAN bIsValid, _REAL rSigStrength);
+    void GenTag(bool bIsValid, _REAL rSigStrength);
 protected:
     virtual string GetTagName();
     virtual string GetProfiles(); // Return a string containing the set of profiles for this tag
@@ -276,7 +276,7 @@ protected:
 class CTagItemGeneratorRxFrequency : public CTagItemGeneratorWithProfiles /* rfre */
 {
 public:
-    void GenTag(_BOOLEAN bIsValid, int iFrequency);
+    void GenTag(bool bIsValid, int iFrequency);
 protected:
     virtual string GetTagName();
     virtual string GetProfiles(); // Return a string containing the set of profiles for this tag
@@ -285,7 +285,7 @@ protected:
 class CTagItemGeneratorRxActivated : public CTagItemGeneratorWithProfiles /* ract */
 {
 public:
-    void GenTag(_BOOLEAN bActivated);
+    void GenTag(bool bActivated);
 protected:
     virtual string GetTagName();
     virtual string GetProfiles(); // Return a string containing the set of profiles for this tag
@@ -294,7 +294,7 @@ protected:
 class CTagItemGeneratorRxBandwidth : public CTagItemGeneratorWithProfiles /* rbw_ */
 {
 public:
-    void GenTag(_BOOLEAN bIsValid, _REAL rBandwidth);
+    void GenTag(bool bIsValid, _REAL rBandwidth);
 protected:
     virtual string GetTagName();
     virtual string GetProfiles(); // Return a string containing the set of profiles for this tag
@@ -303,7 +303,7 @@ protected:
 class CTagItemGeneratorRxService : public CTagItemGeneratorWithProfiles /* rser */
 {
 public:
-    void GenTag(_BOOLEAN bIsValid, int iService);
+    void GenTag(bool bIsValid, int iService);
 protected:
     virtual string GetTagName();
     virtual string GetProfiles(); // Return a string containing the set of profiles for this tag
@@ -325,7 +325,7 @@ protected:
 class CTagItemGeneratorGPS : public CTagItemGeneratorWithProfiles /* rgps */
 {
 public:
-    void GenTag(_BOOLEAN bIsValid, gps_data_t& GPSData);
+    void GenTag(bool bIsValid, gps_data_t& GPSData);
 protected:
     virtual string GetTagName();
     virtual string GetProfiles(); // Return a string containing the set of profiles for this tag

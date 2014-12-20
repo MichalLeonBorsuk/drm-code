@@ -76,7 +76,7 @@ void CTagItemDecoderProTy::DecodeTag(CVector<_BINARY>& vecbiTag, const int iLen)
 
     protocols.push_back(p);
 
-    SetReady(TRUE);
+    SetReady(true);
 }
 
 string CTagItemDecoderLoFrCnt::GetTagName(void) {
@@ -90,7 +90,7 @@ void CTagItemDecoderLoFrCnt::DecodeTag(CVector<_BINARY>& vecbiTag, const int iLe
 
     dlfc = (uint32_t) vecbiTag.Separate(32);
 
-    SetReady(TRUE);
+    SetReady(true);
 }
 
 
@@ -120,7 +120,7 @@ void CTagItemDecoderFAC::DecodeTag(CVector<_BINARY>& vecbiTag, const int iLen)
         Enqueue(vecbiTag.Separate(SIZEOF__BYTE), SIZEOF__BYTE);
     }
 
-    SetReady(TRUE);
+    SetReady(true);
 }
 
 
@@ -147,7 +147,7 @@ void CTagItemDecoderSDC::DecodeTag(CVector<_BINARY>& vecbiTag, const int iLen)
     for (int i = 0; i < iSDCDataSize; i++)
         vecbidata.Enqueue(vecbiTag.Separate(1), 1);
 
-    SetReady(TRUE);
+    SetReady(true);
 }
 
 
@@ -163,7 +163,7 @@ void CTagItemDecoderRobMod::DecodeTag(CVector<_BINARY>& vecbiTag, const int iLen
 
     eRobMode = ERobMode(vecbiTag.Separate(8));
 
-    SetReady(TRUE);
+    SetReady(true);
 }
 
 
@@ -182,7 +182,7 @@ string CTagItemDecoderStr::GetTagName(void)
     default:
         return "str?";
     }
-    SetReady(TRUE);
+    SetReady(true);
 }
 
 void CTagItemDecoderStr::DecodeTag(CVector<_BINARY>& vecbiTag, const int iLen)
@@ -196,7 +196,7 @@ void CTagItemDecoderStr::DecodeTag(CVector<_BINARY>& vecbiTag, const int iLen)
         vecbidata.
         Enqueue(vecbiTag.Separate(SIZEOF__BYTE), SIZEOF__BYTE);
     }
-    SetReady(TRUE);
+    SetReady(true);
 }
 
 
@@ -227,7 +227,7 @@ void CTagItemDecoderSDCChanInf::DecodeTag(CVector<_BINARY>& vecbiTag, const int 
     /* Get stream parameters */
 
     /* Determine if hierarchical modulation is used */ // TODO
-    _BOOLEAN bHierarchical = FALSE;
+    bool bHierarchical = false;
 
     // don't store these if sdci tag packet signals zero length - dr111 bug
     // rely on the sdc_ tag packet to do something sensible.
@@ -236,7 +236,7 @@ void CTagItemDecoderSDCChanInf::DecodeTag(CVector<_BINARY>& vecbiTag, const int 
     {
         /* In case of hirachical modulation stream 0 describes the protection
            level and length of hierarchical data */
-        if ((i == 0) && (bHierarchical == TRUE))
+        if ((i == 0) && (bHierarchical))
         {
             /* Protection level for hierarchical */ // TODO
             vecbiTag.Separate(2);
@@ -265,7 +265,7 @@ void CTagItemDecoderSDCChanInf::DecodeTag(CVector<_BINARY>& vecbiTag, const int 
         }
     }
     pParameter->Unlock();
-    SetReady(TRUE);
+    SetReady(true);
 }
 
 string CTagItemDecoderRxDemodMode::GetTagName(void) {
@@ -318,7 +318,7 @@ void CTagItemDecoderRxDemodMode::DecodeTag(CVector<_BINARY>& vecbiTag, int iLen)
     {
         eMode = RM_AM;
     }
-    SetReady(TRUE);
+    SetReady(true);
 }
 
 string CTagItemDecoderAMAudio::GetTagName(void) {
@@ -391,7 +391,7 @@ void CTagItemDecoderAMAudio::DecodeTag(CVector<_BINARY>& vecbiTag, int iLen)
     for (int i = 0; i < (iLen-16) / SIZEOF__BYTE; i++)
         vecbidata.Enqueue(vecbiTag.Separate(SIZEOF__BYTE), SIZEOF__BYTE);
 
-    SetReady(TRUE);
+    SetReady(true);
 }
 
 string CTagItemDecoderInfo::GetTagName(void) {
@@ -405,5 +405,5 @@ void CTagItemDecoderInfo::DecodeTag(CVector<_BINARY>& vecbiTag, const int iLen)
     for (int i = 0; i < iLen / SIZEOF__BYTE; i++)
         strInfo += (_BYTE) vecbiTag.Separate(SIZEOF__BYTE);
 
-    SetReady(TRUE);
+    SetReady(true);
 }

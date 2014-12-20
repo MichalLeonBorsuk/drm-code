@@ -45,9 +45,9 @@ void CCellMappingTable::MakeTable(
     int         iNumTimePilots=0; /* Number of time pilots per frame */
     CScatPilots     ScatPilots;
     /* Tables */
-    const int*      piTableFAC=NULL;
-    const int*      piTableTimePilots=NULL;
-    const int*      piTableFreqPilots=NULL;
+    const int      (*piTableFAC)[2]=NULL;
+    const int      (*piTableTimePilots)[2]=NULL;
+    const int      (*piTableFreqPilots)[2]=NULL;
 
     int         iNumFramesPerSuperframe;
 
@@ -71,10 +71,10 @@ void CCellMappingTable::MakeTable(
         vif = VIRTUAL_INTERMED_FREQ_DRM30;
         iNumFramesPerSuperframe = NUM_FRAMES_IN_SUPERFRAME_DRM30;
         iNumSymbolsPerSuperframe = iNumSymPerFrame * NUM_FRAMES_IN_SUPERFRAME_DRM30;
-        piTableFAC = &iTableFACRobModA[0][0];
+        piTableFAC = iTableFACRobModA;
         iNumTimePilots = RMA_NUM_TIME_PIL;
-        piTableTimePilots = &iTableTimePilRobModA[0][0];
-        piTableFreqPilots = &iTableFreqPilRobModA[0][0];
+        piTableTimePilots = iTableTimePilRobModA;
+        piTableFreqPilots = iTableFreqPilRobModA;
 
         /* Scattered pilots phase definition */
         ScatPilots.piConst = iTableScatPilConstRobModA;
@@ -91,10 +91,10 @@ void CCellMappingTable::MakeTable(
         vif = VIRTUAL_INTERMED_FREQ_DRM30;
         iNumFramesPerSuperframe = NUM_FRAMES_IN_SUPERFRAME_DRM30;
         iNumSymbolsPerSuperframe = iNumSymPerFrame * NUM_FRAMES_IN_SUPERFRAME_DRM30;
-        piTableFAC = &iTableFACRobModB[0][0];
+        piTableFAC = iTableFACRobModB;
         iNumTimePilots = RMB_NUM_TIME_PIL;
-        piTableTimePilots = &iTableTimePilRobModB[0][0];
-        piTableFreqPilots = &iTableFreqPilRobModB[0][0];
+        piTableTimePilots = iTableTimePilRobModB;
+        piTableFreqPilots = iTableFreqPilRobModB;
 
         /* Scattered pilots phase definition */
         ScatPilots.piConst = iTableScatPilConstRobModB;
@@ -110,10 +110,10 @@ void CCellMappingTable::MakeTable(
         vif = VIRTUAL_INTERMED_FREQ_DRM30;
         iNumFramesPerSuperframe = NUM_FRAMES_IN_SUPERFRAME_DRM30;
         iNumSymbolsPerSuperframe = iNumSymPerFrame * NUM_FRAMES_IN_SUPERFRAME_DRM30;
-        piTableFAC = &iTableFACRobModC[0][0];
+        piTableFAC = iTableFACRobModC;
         iNumTimePilots = RMC_NUM_TIME_PIL;
-        piTableTimePilots = &iTableTimePilRobModC[0][0];
-        piTableFreqPilots = &iTableFreqPilRobModC[0][0];
+        piTableTimePilots = iTableTimePilRobModC;
+        piTableFreqPilots = iTableFreqPilRobModC;
 
         /* Scattered pilots phase definition */
         ScatPilots.piConst = iTableScatPilConstRobModC;
@@ -129,10 +129,10 @@ void CCellMappingTable::MakeTable(
         vif = VIRTUAL_INTERMED_FREQ_DRM30;
         iNumFramesPerSuperframe = NUM_FRAMES_IN_SUPERFRAME_DRM30;
         iNumSymbolsPerSuperframe = iNumSymPerFrame * NUM_FRAMES_IN_SUPERFRAME_DRM30;
-        piTableFAC = &iTableFACRobModD[0][0];
+        piTableFAC = iTableFACRobModD;
         iNumTimePilots = RMD_NUM_TIME_PIL;
-        piTableTimePilots = &iTableTimePilRobModD[0][0];
-        piTableFreqPilots = &iTableFreqPilRobModD[0][0];
+        piTableTimePilots = iTableTimePilRobModD;
+        piTableFreqPilots = iTableFreqPilRobModD;
 
         /* Scattered pilots phase definition */
         ScatPilots.piConst = iTableScatPilConstRobModD;
@@ -148,9 +148,9 @@ void CCellMappingTable::MakeTable(
         vif = VIRTUAL_INTERMED_FREQ_DRMPLUS;
         iNumFramesPerSuperframe = NUM_FRAMES_IN_SUPERFRAME_DRMPLUS;
         iNumSymbolsPerSuperframe = iNumSymPerFrame * NUM_FRAMES_IN_SUPERFRAME_DRMPLUS;
-        piTableFAC = &iTableFACRobModE[0][0];
+        piTableFAC = iTableFACRobModE;
         iNumTimePilots = RME_NUM_TIME_PIL;
-        piTableTimePilots = &iTableTimePilRobModE[0][0];
+        piTableTimePilots = iTableTimePilRobModE;
         piTableFreqPilots = NULL;
 
         /* Scattered pilots phase definition */
@@ -283,11 +283,7 @@ void CCellMappingTable::MakeTable(
             /* FAC positions are defined in a table */
             if (iFACCounter < (eNewRobustnessMode==RM_ROBUSTNESS_MODE_E)?NUM_FAC_CELLS_DRMPLUS:NUM_FAC_CELLS_DRM30)
             {
-                /* piTableFAC[x * 2]: first column; piTableFAC[x * 2 + 1]:
-                   second column */
-                if (piTableFAC[iFACCounter * 2] * iNumCarrier +
-                        piTableFAC[iFACCounter * 2 + 1] == iFrameSym *
-                        iNumCarrier + iCar)
+                if (piTableFAC[iFACCounter][0] * iNumCarrier + piTableFAC[iFACCounter][1] == iFrameSym * iNumCarrier + iCar)
                 {
                     iFACCounter++;
                     matiMapTab[iSym][iCarArrInd] = CM_FAC;
@@ -322,14 +318,13 @@ void CCellMappingTable::MakeTable(
 
                 /* Set complex value for this pilot */
                 /* Phase calculation ---------------------------------------- */
-                int in, im, ip, i;
 
                 /* Calculations as in drm-standard (8.4.4.3.1) */
                 /* "in" is ROW index and "im" is COLUMN index! */
-                in = mod(iFrameSym, ScatPilots.piConst[1] /* "y" */);
-                im = (int)
+                int in = mod(iFrameSym, ScatPilots.piConst[1] /* "y" */);
+                int im = (int)
                      ((_REAL) iFrameSym / ScatPilots.piConst[1] /* "y" */);
-                ip = (int) ((_REAL) (iCar - ScatPilots.piConst[2] /* "k_0" */ -
+                int ip = (int) ((_REAL) (iCar - ScatPilots.piConst[2] /* "k_0" */ -
                                      in * ScatPilots.piConst[0] /* "x" */) / (
                                 ScatPilots.piConst[0] /* "x" */ *
                                 ScatPilots.piConst[1] /* "y" */));
@@ -343,12 +338,12 @@ void CCellMappingTable::MakeTable(
                 /* Gain calculation and applying of complex value ----------- */
                 /* Test, if current carrier-index is one of the "boosted pilots"
                    position */
-                _BOOLEAN bIsBoostedPilot = FALSE;
-                for (i = 0; i < NUM_BOOSTED_SCAT_PILOTS; i++)
+                bool bIsBoostedPilot = false;
+                for (int i = 0; i < NUM_BOOSTED_SCAT_PILOTS; i++)
                 {
                     /* In case of match set flag */
                     if (ScatPilots.piGainTable[i] == iCar)
-                        bIsBoostedPilot = TRUE;
+                        bIsBoostedPilot = true;
                 }
 
                 /* Boosted pilot: Gain = 2, Regular pilot: Gain = sqrt(2) */
@@ -372,8 +367,7 @@ void CCellMappingTable::MakeTable(
             /* Time refs at the beginning of each frame, we use a table */
             if (iFrameSym == 0)
             {
-                /* Use only the first column in piTableTimePilots */
-                if (piTableTimePilots[iTimePilotsCounter * 2] == iCar)
+                if (piTableTimePilots[iTimePilotsCounter][0] == iCar)
                 {
                     /* Set flag in mapping table, consider case of both,
                        scattered pilot and time pilot at same position */
@@ -385,7 +379,7 @@ void CCellMappingTable::MakeTable(
                     /* Set complex value for this pilot */
                     matcPilotCells[iSym][iCarArrInd] =
                         Polar2Cart(sqrt(AV_PILOT_POWER),
-                                   piTableTimePilots[iTimePilotsCounter * 2 + 1]);
+                                   piTableTimePilots[iTimePilotsCounter][1]);
 
                     if (iTimePilotsCounter == iNumTimePilots - 1)
                         iTimePilotsCounter = 0;
@@ -400,9 +394,7 @@ void CCellMappingTable::MakeTable(
                 /* Frequency-reference pilots ----------------------------------- */
                 /* These pilots are in all symbols, the positions are stored in
                    a table */
-                /* piTableFreqPilots[x * 2]: first column;
-                   piTableFreqPilots[x * 2 + 1]: second column */
-                if (piTableFreqPilots[iFreqPilotsCounter * 2] == iCar)
+                if (piTableFreqPilots[iFreqPilotsCounter][0] == iCar)
                 {
                     /* Set flag in mapping table, consider case of multiple
                        definitions of pilot-mapping */
@@ -416,7 +408,7 @@ void CCellMappingTable::MakeTable(
 
                     /* Set complex value for this pilot */
                     /* Test for "special case" defined in drm-standard */
-                    _BOOLEAN bIsFreqPilSpeciCase = FALSE;
+                    bool bIsFreqPilSpeciCase = false;
                     if (eNewRobustnessMode == RM_ROBUSTNESS_MODE_D)
                     {
                         /* For robustness mode D, carriers 7 and 21 (Means: first
@@ -425,7 +417,7 @@ void CCellMappingTable::MakeTable(
                         {
                             /* Test for odd values of "s" (iSym) */
                             if ((iFrameSym % 2) == 1)
-                                bIsFreqPilSpeciCase = TRUE;
+                                bIsFreqPilSpeciCase = true;
                         }
                     }
 
@@ -434,14 +426,14 @@ void CCellMappingTable::MakeTable(
                     {
                         matcPilotCells[iSym][iCarArrInd] =
                             Polar2Cart(sqrt(AV_PILOT_POWER), mod(
-                                           piTableFreqPilots[iFreqPilotsCounter * 2 + 1] +
+                                           piTableFreqPilots[iFreqPilotsCounter][1] +
                                            512, 1024));
                     }
                     else
                     {
                         matcPilotCells[iSym][iCarArrInd] =
                             Polar2Cart(sqrt(AV_PILOT_POWER),
-                                       piTableFreqPilots[iFreqPilotsCounter * 2 + 1]);
+                                       piTableFreqPilots[iFreqPilotsCounter][1]);
                     }
 
                     /* Increase counter and wrap if needed */
@@ -452,18 +444,28 @@ void CCellMappingTable::MakeTable(
                 }
             }
 
-            /* DC-carrier (not used by DRM) --------------------------------- */
-            /* Mark DC-carrier. Must be marked after scattered pilots, because
+            /* ES 201 980 V4.1.1  Table 50
+             * Mark unused carriers. Must be marked after scattered pilots, because
                in one case (Robustness Mode D) some pilots must be overwritten!
                */
+            /* Except in Robustness Mode E the DC carrier is not used */
+            /* DC-carrier --------------------------------- */
             if (iCar == 0)
-                matiMapTab[iSym][iCarArrInd] = CM_DC;
-
-            /* In Robustness Mode A there are three "not used carriers" */
+            {
+                if (eNewRobustnessMode == RM_ROBUSTNESS_MODE_E)
+                {
+                    matiMapTab[iSym][iCarArrInd] |= CM_DC; // can be MSC cell
+                }
+                else
+                {
+                    matiMapTab[iSym][iCarArrInd] = CM_DC; // unused cell
+                }
+            }
+            /* In Robustness Mode A there are two additinal unused carriers */
             if (eNewRobustnessMode == RM_ROBUSTNESS_MODE_A)
             {
                 if ((iCar == -1) || (iCar == 1))
-                    matiMapTab[iSym][iCarArrInd] = CM_DC;
+                    matiMapTab[iSym][iCarArrInd] = CM_NOT_USED;
             }
         }
     }

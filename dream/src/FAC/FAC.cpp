@@ -428,7 +428,7 @@ bool CFACReceive::FACParam(CVector<_BINARY>* pbiFACData,
 
     _BYTE crc = (*pbiFACData).Separate(SIZEOF__BYTE);
     (void)(*pbiFACData).Separate(4);
-    bool crcok = CRCObject.CheckCRC(crc) == TRUE;
+    bool crcok = CRCObject.CheckCRC(crc);
 
     bool permissive = Parameter.lenient_RSCI;
     if (permissive || crcok)
@@ -442,13 +442,13 @@ bool CFACReceive::FACParam(CVector<_BINARY>* pbiFACData,
         if(Parameter.GetWaveMode()==RM_ROBUSTNESS_MODE_E)
             ServiceParam(pbiFACData, Parameter);
 
-        /* CRC is ok, or lenient mode selected, return TRUE */
-        return TRUE;
+        /* CRC is ok, or lenient mode selected, return true */
+        return true;
     }
     else
     {
-        /* Data is corrupted, do not use it. Return failure as FALSE */
-        return FALSE;
+        /* Data is corrupted, do not use it. Return failure as false */
+        return false;
     }
 }
 

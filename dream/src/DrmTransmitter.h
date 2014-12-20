@@ -80,7 +80,7 @@ protected:
     void InitSoftStop() {
         iSoftStopSymbolCount=0;
     };
-    _BOOLEAN CanSoftStopExit();
+    bool CanSoftStopExit();
 
     /* Buffers */
     CSingleBuffer<_SAMPLE>  DataBuf;
@@ -112,7 +112,7 @@ protected:
     CTransmitData           TransmitData;
 
     _REAL                   rDefCarOffset;
-    _BOOLEAN                bUseUEP;
+    bool                bUseUEP;
     int                     iSoftStopSymbolCount;
 };
 

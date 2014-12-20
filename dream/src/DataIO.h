@@ -91,19 +91,19 @@ public:
     virtual ~CWriteData() {}
 
     void StartWriteWaveFile(const string& strFileName);
-    _BOOLEAN GetIsWriteWaveFile() {
+    bool GetIsWriteWaveFile() {
         return bDoWriteWaveFile;
     }
     void StopWriteWaveFile();
 
-    void MuteAudio(_BOOLEAN bNewMA) {
+    void MuteAudio(bool bNewMA) {
         bMuteAudio = bNewMA;
     }
-    _BOOLEAN GetMuteAudio() {
+    bool GetMuteAudio() {
         return bMuteAudio;
     }
 
-    void SetSoundBlocking(const _BOOLEAN bNewBl)
+    void SetSoundBlocking(const bool bNewBl)
     {
         bNewSoundBlocking = bNewBl;
         SetInitFlag();
@@ -120,11 +120,11 @@ public:
 
 protected:
     CSoundOutInterface*     pSound;
-    _BOOLEAN                bMuteAudio;
+    bool                bMuteAudio;
     CWaveFile               WaveFileAudio;
-    _BOOLEAN                bDoWriteWaveFile;
-    _BOOLEAN                bSoundBlocking;
-    _BOOLEAN                bNewSoundBlocking;
+    bool                bDoWriteWaveFile;
+    bool                bSoundBlocking;
+    bool                bNewSoundBlocking;
     CVector<_SAMPLE>        vecsTmpAudData;
     EOutChanSel             eOutChanSel;
     _REAL                   rMixNormConst;
@@ -201,22 +201,22 @@ class CUtilizeFACData : public CReceiverModul<_BINARY, _BINARY>
 {
 public:
     CUtilizeFACData() :
-        bSyncInput(FALSE), bCRCOk(FALSE) {}
+        bSyncInput(false), bCRCOk(false) {}
     virtual ~CUtilizeFACData() {}
 
     /* To set the module up for synchronized DRM input data stream */
-    void SetSyncInput(_BOOLEAN bNewS) {
+    void SetSyncInput(bool bNewS) {
         bSyncInput = bNewS;
     }
 
-    _BOOLEAN GetCRCOk() const {
+    bool GetCRCOk() const {
         return bCRCOk;
     }
 
 protected:
     CFACReceive FACReceive;
-    _BOOLEAN    bSyncInput;
-    _BOOLEAN    bCRCOk;
+    bool    bSyncInput;
+    bool    bCRCOk;
 
     virtual void InitInternal(CParameter& Parameters);
     virtual void ProcessDataInternal(CParameter& Parameters);
@@ -249,7 +249,7 @@ public:
 
 protected:
     CSDCReceive SDCReceive;
-    _BOOLEAN    bFirstBlock;
+    bool    bFirstBlock;
 
     virtual void InitInternal(CParameter& Parameters);
     virtual void ProcessDataInternal(CParameter& Parameters);
@@ -307,7 +307,7 @@ public:
 
     void NewFrequency(CParameter &Parameters);
 
-    _BOOLEAN IsRecording() {
+    bool IsRecording() {
         return bIsRecording;
     }
 
@@ -333,8 +333,8 @@ protected:
     CMixer                      Mixer;
 
     int                         iFrequency; // For use in generating filename
-    _BOOLEAN                    bIsRecording;
-    _BOOLEAN                    bChangeReceived;
+    bool                    bIsRecording;
+    bool                    bChangeReceived;
 
 };
 

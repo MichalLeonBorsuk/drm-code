@@ -94,7 +94,7 @@ CDRMPlotQwt::CDRMPlotQwt(QWidget* parent) :
     plot(new QwtPlot(parent)),
     InitCharType(NONE_OLD),
     eLastSDCCodingScheme((ECodScheme)-1), eLastMSCCodingScheme((ECodScheme)-1),
-    bLastAudioDecoder(FALSE),
+    bLastAudioDecoder(false),
     leftTitle(), rightTitle(), bottomTitle(),
     main1curve(), main2curve(),
     curve(), yMarker(), hcurvegrid(), vcurvegrid(),
@@ -144,8 +144,8 @@ CDRMPlotQwt::CDRMPlotQwt(QWidget* parent) :
 #endif
 
     /* Grid */
-    grid.enableXMin(FALSE);
-    grid.enableYMin(FALSE);
+    grid.enableXMin(false);
+    grid.enableYMin(false);
     grid.attach(plot);
 
     /* Axis and title fonts */
@@ -338,8 +338,8 @@ void CDRMPlotQwt::setupBasicPlot(const char* titleText,
                                  double left, double right, double bottom, double top,
                                  QColor pc, QColor bc)
 {
-    grid.enableX(TRUE);
-    grid.enableY(TRUE);
+    grid.enableX(true);
+    grid.enableY(true);
     grid.SETMAJORPEN(QPen(pc, 0, Qt::DotLine));
     grid.SETMINORPEN(QPen(pc, 0, Qt::DotLine));
     main1curve.setItemAttribute(QwtPlotItem::Legend, false);
@@ -347,9 +347,9 @@ void CDRMPlotQwt::setupBasicPlot(const char* titleText,
     plot->setCanvasBackground(bc);
 
     plot->setTitle(titleText);
-    plot->enableAxis(QwtPlot::yRight, FALSE);
+    plot->enableAxis(QwtPlot::yRight, false);
     plot->setAxisTitle(QwtPlot::xBottom, xText);
-    plot->enableAxis(QwtPlot::yLeft, TRUE);
+    plot->enableAxis(QwtPlot::yLeft, true);
     plot->setAxisTitle(QwtPlot::yLeft, yText);
 
     /* initial scale */
@@ -434,9 +434,9 @@ void CDRMPlotQwt::addyMarker(QColor color, double initialPos)
 void CDRMPlotQwt::setupConstPlot(const char* text)
 {
     plot->setTitle(text);
-    plot->enableAxis(QwtPlot::yRight, FALSE);
+    plot->enableAxis(QwtPlot::yRight, false);
     plot->setAxisTitle(QwtPlot::xBottom, tr("Real"));
-    plot->enableAxis(QwtPlot::yLeft, TRUE);
+    plot->enableAxis(QwtPlot::yLeft, true);
     plot->setAxisTitle(QwtPlot::yLeft, tr("Imaginary"));
 }
 
@@ -485,11 +485,11 @@ void CDRMPlotQwt::setupWaterfall(double sr)
 {
     /* Init chart for waterfall input spectrum */
     plot->setTitle(tr("Waterfall Input Spectrum"));
-    plot->enableAxis(QwtPlot::yRight, FALSE);
+    plot->enableAxis(QwtPlot::yRight, false);
     plot->setAxisTitle(QwtPlot::xBottom, tr("Frequency [kHz]"));
-    plot->enableAxis(QwtPlot::yLeft, FALSE);
-    grid.enableX(FALSE);
-    grid.enableY(FALSE);
+    plot->enableAxis(QwtPlot::yLeft, false);
+    grid.enableX(false);
+    grid.enableY(false);
 
     /* Create a new waterfall widget if not exists */
     if (waterfallWidget == NULL) {

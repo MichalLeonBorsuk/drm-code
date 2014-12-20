@@ -95,7 +95,7 @@ void CPacketSourceFile::poll()
     }
 }
 
-_BOOLEAN
+bool
 CPacketSourceFile::SetOrigin(const string& origin)
 {
     string str = origin;

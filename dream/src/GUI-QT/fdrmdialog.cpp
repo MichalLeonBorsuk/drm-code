@@ -874,7 +874,7 @@ void FDRMDialog::OnTextMessageChanged(int short_id, const QString& text)
 QString FDRMDialog::formatTextMessage(const QString& textMessage) const
 {
     /* Activate text window */
-    ui->TextTextMessage->setEnabled(TRUE);
+    ui->TextTextMessage->setEnabled(true);
 
     QString formattedMessage = "";
     for (int i = 0; i < (int)textMessage.length(); i++)
@@ -946,7 +946,7 @@ void FDRMDialog::OnSignalLost()
     ui->LabelServiceID->setText("");
 
     /* Hide text message label */
-    ui->TextTextMessage->setEnabled(FALSE);
+    ui->TextTextMessage->setEnabled(false);
     ui->TextTextMessage->setText("");
 
     ui->LabelServiceLabel->setText(tr("Scanning..."));

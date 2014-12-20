@@ -402,27 +402,27 @@ void CAudioReverb::Init(CReal rT60, int iSampleRate)
     Clear();
 }
 
-_BOOLEAN CAudioReverb::isPrime(const int number)
+bool CAudioReverb::isPrime(const int number)
 {
     /*
         Returns true if argument value is prime. Taken from "class Effect" in
         "STK abstract effects parent class".
     */
     if (number == 2)
-        return TRUE;
+        return true;
 
     if (number & 1)
     {
         for (int i = 3; i < (int) Sqrt((CReal) number) + 1; i += 2)
         {
             if ((number % i) == 0)
-                return FALSE;
+                return false;
         }
 
-        return TRUE;            /* prime */
+        return true;            /* prime */
     }
     else
-        return FALSE;           /* even */
+        return false;           /* even */
 }
 
 void

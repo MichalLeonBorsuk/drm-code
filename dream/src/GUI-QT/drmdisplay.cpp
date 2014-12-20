@@ -48,7 +48,7 @@ void DRMDisplay::showReceptionStatus(ETypeRxStatus fac, ETypeRxStatus sdc, EType
 void DRMDisplay::showTextMessage(const QString& textMessage)
 {
     /* Activate text window */
-    ui->TextTextMessage->setEnabled(TRUE);
+    ui->TextTextMessage->setEnabled(true);
 
     QString formattedMessage = "";
     for (int i = 0; i < (int)textMessage.length(); i++)

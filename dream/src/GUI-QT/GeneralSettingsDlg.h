@@ -53,7 +53,7 @@ protected:
     void    showEvent(QShowEvent* pEvent);
     void    hideEvent(QHideEvent* pEvent);
 
-    _BOOLEAN    ValidInput(const QLineEdit* le);
+    bool    ValidInput(const QLineEdit* le);
     QString     ExtractDigits(const QString strS, const int iStart, const int iDigits);
 
     void            AddWhatsThisHelp();

@@ -109,19 +109,19 @@ protected:
     CSysTray*           pSysTray;
     QAction*            pActionStartStop;
 
-    _BOOLEAN            bIsStarted;
+    bool            bIsStarted;
     int                 iIDCurrentText;
     int                 iServiceDescr;
-    _BOOLEAN            bCloseRequested;
+    bool            bCloseRequested;
     int                 iButtonCodecState;
     LevelMeter*         inputLevel;
 
-    void                ShowButtonCodec(_BOOLEAN bShow, int iKey);
-    _BOOLEAN            GetMessageText(const int iID);
+    void                ShowButtonCodec(bool bShow, int iKey);
+    bool            GetMessageText(const int iID);
     void                UpdateMSCProtLevCombo();
-    void                EnableTextMessage(const _BOOLEAN bFlag);
-    void                EnableAudio(const _BOOLEAN bFlag);
-    void                EnableData(const _BOOLEAN bFlag);
+    void                EnableTextMessage(const bool bFlag);
+    void                EnableAudio(const bool bFlag);
+    void                EnableData(const bool bFlag);
     void                AddWhatsThisHelp();
 
 public slots:

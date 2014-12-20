@@ -63,7 +63,7 @@ public:
                          CVector<_DECISION>& vecSubsetDef4,
                          CVector<_DECISION>& vecSubsetDef5,
                          CVector<_DECISION>& vecSubsetDef6,
-                         int iLevel, _BOOLEAN bIteration);
+                         int iLevel, bool bIteration);
     void Init(int iNewInputBlockSize, ECodScheme eNewCodingScheme);
 
 protected:

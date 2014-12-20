@@ -21,9 +21,9 @@ void ReceiverController::setControls()
     emit freqIntChanged(settings.Get("Receiver", "freqint", 1));
     emit tiSyncTracTypeChanged(settings.Get("Receiver", "timesync", 1));
 
-    emit recFilterChanged(settings.Get("Receiver", "filter", FALSE));
-    emit intConsChanged(settings.Get("Receiver", "modemetric", FALSE));
-    emit flippedSpectrumChanged(settings.Get("Receiver", "flipspectrum", FALSE));
+    emit recFilterChanged(settings.Get("Receiver", "filter", false));
+    emit intConsChanged(settings.Get("Receiver", "modemetric", false));
+    emit flippedSpectrumChanged(settings.Get("Receiver", "flipspectrum", false));
 }
 
 void ReceiverController::on_new_data()

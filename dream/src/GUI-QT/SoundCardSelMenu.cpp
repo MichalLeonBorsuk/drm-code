@@ -315,7 +315,7 @@ void CSoundCardSelMenu::UpdateSampleRate(const bool bInput)
         for (size_t i = 0; i < actionSampleRate.size(); i++)
         {
             int samplerate = abs(actionSampleRate[i]->data().toInt());
-            actionSampleRate[i]->setEnabled(dev->samplerates[samplerate] == true);
+            actionSampleRate[i]->setEnabled(dev->samplerates[samplerate]);
         }
     }
 }

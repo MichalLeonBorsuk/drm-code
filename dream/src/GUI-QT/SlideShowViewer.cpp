@@ -86,7 +86,7 @@ void SlideShowViewer::OnTimer()
     CMOTObject NewObj;
 
     /* Poll the data decoder module for new object */
-    if (decoder->GetMOTObject(NewObj, CDataDecoder::AT_MOTSLIDESHOW) == TRUE)
+    if (decoder->GetMOTObject(NewObj, CDataDecoder::AT_MOTSLIDESHOW))
     {
         /* Store received picture */
         int iCurNumPict = vecImageNames.size();

@@ -54,8 +54,8 @@ public:
     virtual void                SetDev(int iNewDevice);
     virtual int                 GetDev();
 
-    void Init(int iNewBufferSize, _BOOLEAN bNewBlocking = TRUE);
-    _BOOLEAN Read(CVector<short>& psData);
+    void Init(int iNewBufferSize, bool bNewBlocking = true);
+    bool Read(CVector<short>& psData);
     void Close();
 
 protected:
@@ -65,7 +65,7 @@ protected:
 
     int     iBufferSize, iInBufferSize;
     short int *tmprecbuf;
-    _BOOLEAN    bBlockingRec;
+    bool    bBlockingRec;
     vector<string> devices;
 
     class CRecThread : public CThread
@@ -81,7 +81,7 @@ protected:
 
 protected:
     vector<string> names;
-    _BOOLEAN bChangDev;
+    bool bChangDev;
     int iCurrentDevice;
 #ifdef USE_ALSA
     snd_pcm_t *handle;

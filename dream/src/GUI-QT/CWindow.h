@@ -57,7 +57,7 @@
    hideEvent from spurious event like unmatched show/hide,
    which cause some problem for window save and restore.
    The class may be adapted for other type of filtering
-   as well. The member isValid() return FALSE when the
+   as well. The member isValid() return false when the
    event must be ignored. */
 
 class CEventFilter

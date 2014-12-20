@@ -154,11 +154,11 @@ CPaCommon::GetDev()
 }
 
 /* buffer_size is in samples - frames would be better */
-_BOOLEAN
-CPaCommon::Init(int iSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking)
+bool
+CPaCommon::Init(int iSampleRate, int iNewBufferSize, bool bNewBlocking)
 {
     if (device_changed == false && double(iSampleRate) == samplerate)
-        return FALSE;
+        return false;
 
     unsigned long channels=2;
 
@@ -194,7 +194,7 @@ CPaCommon::Init(int iSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking)
         //throw "portaudio open error";
     }
 
-    return TRUE;
+    return true;
 }
 
 void
@@ -312,14 +312,14 @@ CPaCommon::Close()
     }
 }
 
-_BOOLEAN
+bool
 CPaCommon::Read(CVector < short >&psData)
 {
     if (device_changed)
         ReInit();
 
     if (stream==NULL)
-        return TRUE;
+        return true;
 
     size_t bytes = psData.Size() * sizeof(short);
 
@@ -331,27 +331,27 @@ CPaCommon::Read(CVector < short >&psData)
 
     PaUtil_ReadRingBuffer(&ringBuffer, &psData[0], bytes);
     if (xruns==0)
-        return FALSE;
+        return false;
     else
         cout << "overrun" << endl;
     xruns = 0;
-    return TRUE;
+    return true;
 }
 
-_BOOLEAN
+bool
 CPaCommon::Write(CVector < short >&psData)
 {
     if (device_changed)
         ReInit();
 
     if (stream==NULL)
-        return TRUE;
+        return true;
 
     size_t bytes = psData.Size() * sizeof(short);
 
     //cout << "Write: got " << bytes << " can put " << PaUtil_GetRingBufferWriteAvailable(&ringBuffer) << endl;
     if (PaUtil_GetRingBufferWriteAvailable(&ringBuffer) < int(bytes))
-        return FALSE;           /* TODO use newer data in preference to draining old */
+        return false;           /* TODO use newer data in preference to draining old */
 
     PaUtil_WriteRingBuffer(&ringBuffer, &psData[0], bytes);
     if (Pa_IsStreamStopped( stream ))
@@ -362,11 +362,11 @@ CPaCommon::Write(CVector < short >&psData)
         }
     }
     if (xruns==0)
-        return FALSE;
+        return false;
     else
         cout << "underrun" << endl;
     xruns = 0;
-    return TRUE;
+    return true;
 }
 
 CPaIn::CPaIn():hw(true)
@@ -378,13 +378,13 @@ CPaIn::~CPaIn()
     Close();
 }
 
-_BOOLEAN
-CPaIn::Init(int iSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking)
+bool
+CPaIn::Init(int iSampleRate, int iNewBufferSize, bool bNewBlocking)
 {
     return hw.Init(iSampleRate, iNewBufferSize, bNewBlocking);
 }
 
-_BOOLEAN
+bool
 CPaIn::Read(CVector<short>& psData)
 {
     return hw.Read(psData);
@@ -406,13 +406,13 @@ CPaOut::~CPaOut()
     Close();
 }
 
-_BOOLEAN
-CPaOut::Init(int iSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking)
+bool
+CPaOut::Init(int iSampleRate, int iNewBufferSize, bool bNewBlocking)
 {
     return hw.Init(iSampleRate, iNewBufferSize, bNewBlocking);
 }
 
-_BOOLEAN
+bool
 CPaOut::Write(CVector<short>& psData)
 {
     return hw.Write(psData);

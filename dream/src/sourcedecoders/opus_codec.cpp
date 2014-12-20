@@ -338,7 +338,7 @@ void opusEncSetParam(opus_encoder *enc,
 
     if (AudioParam.bOPUSRequestReset)
     {
-        AudioParam.bOPUSRequestReset = FALSE;
+        AudioParam.bOPUSRequestReset = false;
 
         /* Signal */
         switch (AudioParam.eOPUSSignal)

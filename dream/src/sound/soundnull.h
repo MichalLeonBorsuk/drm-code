@@ -37,11 +37,11 @@ class CSoundInNull : public CSoundInInterface
 public:
     CSoundInNull() {}
     virtual ~CSoundInNull() {}
-    virtual _BOOLEAN    Init(int, int, _BOOLEAN) {
-        return TRUE;
+    virtual bool    Init(int, int, bool) {
+        return true;
     }
-    virtual _BOOLEAN    Read(CVector<short>&) {
-        return FALSE;
+    virtual bool    Read(CVector<short>&) {
+        return false;
     }
     virtual void        Enumerate(vector<string>&choices, vector<string>&) {
         choices.push_back("(File or Network)");
@@ -62,11 +62,11 @@ class CSoundOutNull : public CSoundOutInterface
 public:
     CSoundOutNull() {}
     virtual ~CSoundOutNull() {}
-    virtual _BOOLEAN    Init(int, int, _BOOLEAN) {
-        return TRUE;
+    virtual bool    Init(int, int, bool) {
+        return true;
     }
-    virtual _BOOLEAN    Write(CVector<short>&) {
-        return FALSE;
+    virtual bool    Write(CVector<short>&) {
+        return false;
     }
     virtual void        Enumerate(vector<string>& choices, vector<string>&) {
         choices.push_back("(None)");

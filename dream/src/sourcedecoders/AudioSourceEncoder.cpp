@@ -33,7 +33,7 @@
 /* Implementation *************************************************************/
 
 CAudioSourceEncoderImplementation::CAudioSourceEncoderImplementation()
-    : bUsingTextMessage(FALSE), codec(NULL)
+    : bUsingTextMessage(false), codec(NULL)
 {
     /* Initialize Audio Codec List */
     CAudioCodec::InitCodecList();
@@ -69,7 +69,7 @@ CAudioSourceEncoderImplementation::ProcessDataInternal(CParameter& Parameters,
     for (int i = 0; i < iOutputBlockSize; i++)
         (*pvecOutputData)[i] = 0;
 
-    if (bIsDataService == FALSE)
+    if (bIsDataService == false)
     {
         /* Check if audio param have changed */
         Parameters.Lock();
@@ -79,7 +79,7 @@ CAudioSourceEncoderImplementation::ProcessDataInternal(CParameter& Parameters,
 
         if (AudioParam.bParamChanged)
         {
-            AudioParam.bParamChanged = FALSE;
+            AudioParam.bParamChanged = false;
             codec->EncUpdate(AudioParam);
         }
         Parameters.Unlock();
@@ -199,7 +199,7 @@ CAudioSourceEncoderImplementation::ProcessDataInternal(CParameter& Parameters,
     }
 
     /* Data service and text message application ---------------------------- */
-    if (bIsDataService == TRUE)
+    if (bIsDataService)
     {
         // TODO: make a separate modul for data encoding
         /* Write data packets in stream */
@@ -223,7 +223,7 @@ CAudioSourceEncoderImplementation::ProcessDataInternal(CParameter& Parameters,
     else
     {
         /* Text message application. Last four bytes in stream are written */
-        if (bUsingTextMessage == TRUE)
+        if (bUsingTextMessage)
         {
             /* Always four bytes for text message "piece" */
             CVector < _BINARY >
@@ -275,7 +275,7 @@ CAudioSourceEncoderImplementation::InitInternalTx(CParameter & Parameters,
     if (Parameters.iNumDataService == 1)
     {
         /* Data service ----------------------------------------------------- */
-        bIsDataService = TRUE;
+        bIsDataService = true;
         iTotPacketSize = DataEncoder.Init(Parameters);
 
         /* Get stream ID for data service */
@@ -284,7 +284,7 @@ CAudioSourceEncoderImplementation::InitInternalTx(CParameter & Parameters,
     else
     {
         /* Audio service ---------------------------------------------------- */
-        bIsDataService = FALSE;
+        bIsDataService = false;
 
         /* Get stream ID and codec type for audio service */
         iCurStreamID = Parameters.Service[iCurSelServ].AudioParam.iStreamID;
@@ -296,7 +296,7 @@ CAudioSourceEncoderImplementation::InitInternalTx(CParameter & Parameters,
         /* Total frame size is input block size minus the bytes for the text
            message (if text message is used) */
         int iTotAudFraSizeBits = iTotNumBitsForUsage;
-        if (bUsingTextMessage == TRUE)
+        if (bUsingTextMessage)
             iTotAudFraSizeBits -=
                 SIZEOF__BYTE * NUM_BYTES_TEXT_MESS_IN_AUD_STR;
 
@@ -390,8 +390,8 @@ CAudioSourceEncoderImplementation::InitInternalTx(CParameter & Parameters,
             codec->EncSetBitrate(iBitRate);
 
             /* Set flags to reset and init codec params on first ProcessDataInternal call */
-            Parameters.Service[iCurSelServ].AudioParam.bOPUSRequestReset = TRUE;
-            Parameters.Service[iCurSelServ].AudioParam.bParamChanged = TRUE;
+            Parameters.Service[iCurSelServ].AudioParam.bOPUSRequestReset = true;
+            Parameters.Service[iCurSelServ].AudioParam.bParamChanged = true;
         }
         break;
 
@@ -482,12 +482,12 @@ CAudioSourceEncoderImplementation::InitInternalRx(CParameter& Parameters,
     //const int iTotNumBytesForUsage = iTotNumBitsForUsage / SIZEOF__BYTE;
 
     /* Audio service ---------------------------------------------------- */
-    bIsDataService = FALSE;
+    bIsDataService = false;
 
     /* Total frame size is input block size minus the bytes for the text
        message (if text message is used) */
     int iTotAudFraSizeBits = iTotNumBitsForUsage;
-    if (bUsingTextMessage == TRUE)
+    if (bUsingTextMessage)
         iTotAudFraSizeBits -= SIZEOF__BYTE * NUM_BYTES_TEXT_MESS_IN_AUD_STR;
 
     /* Get encoder instance */
@@ -581,8 +581,8 @@ CAudioSourceEncoderImplementation::InitInternalRx(CParameter& Parameters,
         codec->EncSetBitrate(iBitRate);
 
         /* Set flags to reset and init codec params on first ProcessDataInternal call */
-        Parameters.Service[0].AudioParam.bOPUSRequestReset = TRUE;
-        Parameters.Service[0].AudioParam.bParamChanged = TRUE;
+        Parameters.Service[0].AudioParam.bOPUSRequestReset = true;
+        Parameters.Service[0].AudioParam.bParamChanged = true;
     }
     break;
 
@@ -641,7 +641,7 @@ CAudioSourceEncoderImplementation::SetTextMessage(const string & strText)
     TextMessage.SetMessage(strText);
 
     /* Set text message flag */
-    bUsingTextMessage = TRUE;
+    bUsingTextMessage = true;
 }
 
 void
@@ -651,6 +651,6 @@ CAudioSourceEncoderImplementation::ClearTextMessage()
     TextMessage.ClearAllText();
 
     /* Clear text message flag */
-    bUsingTextMessage = FALSE;
+    bUsingTextMessage = false;
 }
 
