@@ -30,7 +30,7 @@
 #ifndef __DRMPLOT_H
 #define __DRMPLOT_H
 
-#include <../Parameter.h>
+#include "../util/Vector.h"
 #include <QColor>
 #include <QDialog>
 #include <QFrame>
