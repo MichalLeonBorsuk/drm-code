@@ -245,8 +245,8 @@ void CDRMPlotQCP::setData(int n, CVector<_REAL>& vecrData, CVector<_REAL>& vecrS
         if(policy[Plot::left]==Plot::min)
         {
             /* Get maximum and minimum values */
-            _REAL MaxFreq = -_MAXREAL;
-            _REAL MinFreq = _MAXREAL;
+            _REAL MaxFreq = -numeric_limits<_REAL>::max();
+            _REAL MinFreq = numeric_limits<_REAL>::max();
             for (int i = 0; i < vecrScale.Size(); i++)
             {
                 if (vecrData[i] > MaxFreq)
@@ -263,7 +263,7 @@ void CDRMPlotQCP::setData(int n, CVector<_REAL>& vecrData, CVector<_REAL>& vecrS
             const int iMaxDisToMax = limit[Plot::left]; /* dB */
 
             /* Get maximum value */
-            _REAL MaxSNR = -_MAXREAL;
+            _REAL MaxSNR = -numeric_limits<_REAL>::max();
 
             for (int i = 0; i < vecrScale.Size(); i++)
             {
@@ -289,7 +289,7 @@ void CDRMPlotQCP::setData(int n, CVector<_REAL>& vecrData, CVector<_REAL>& vecrS
         {
             const int iSize = vecrScale.Size();
             /* Get maximum value */
-            _REAL rMaxSNR = -_MAXREAL;
+            _REAL rMaxSNR = -numeric_limits<_REAL>::max();
             for (int i = 0; i < iSize; i++)
             {
                 if (vecrData[i] > rMaxSNR)
@@ -320,8 +320,8 @@ void CDRMPlotQCP::setData(int n, CVector<_REAL>& vecrData, CVector<_REAL>& vecrS
     {
         if(policy[Plot::right]==Plot::min)
         {
-            _REAL MaxSam = -_MAXREAL;
-            _REAL MinSam = _MAXREAL;
+            _REAL MaxSam = -numeric_limits<_REAL>::max();
+            _REAL MinSam = numeric_limits<_REAL>::max();
             for (int i = 0; i < vecrScale.Size(); i++)
             {
                 if (vecrData[i] > MaxSam)
@@ -337,7 +337,7 @@ void CDRMPlotQCP::setData(int n, CVector<_REAL>& vecrData, CVector<_REAL>& vecrS
             const int iMaxDisToMax = limit[Plot::right];
 
             /* Get maximum value */
-            _REAL Max = -_MAXREAL;
+            _REAL Max = -numeric_limits<_REAL>::max();
 
             for (int i = 0; i < vecrScale.Size(); i++)
             {

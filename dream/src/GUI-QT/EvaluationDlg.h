@@ -76,9 +76,9 @@ protected:
     void            setControls(CSettings& s);
     void            AddWhatsThisHelp();
     ChartDialog*    OpenChartWin(ECharType eNewType);
-    QTreeWidgetItem* FindItemByECharType(ECharType eCharType);
-    string          ECharTypeToPlotName(ECharType eCharType);
-    ECharType       PlotNameToECharType(const string& PlotName);
+    QString         ECharTypeToPlotName(ECharType eCharType);
+    ECharType       PlotNameToECharType(const QString &plotName);
+    void            selectChart(ECharType eCharType);
 
     QString         GetRobModeStr(ERobMode);
     QString         GetSpecOccStr(ESpecOcc v);

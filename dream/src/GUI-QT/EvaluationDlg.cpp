@@ -39,6 +39,7 @@
 #include <QFileDialog>
 #include <QHideEvent>
 #include <QShowEvent>
+#include <QTreeWidgetItemIterator>
 #include "ThemeCustomizer.h"
 #include "DialogUtil.h"
 #include "drmdetail.h"
@@ -70,11 +71,8 @@ systemevalDlg::systemevalDlg(ReceiverController* rc, CSettings& Settings,
 
     MainPlot->setupTreeWidget(ui->chartSelector);
 
-    /* Expand all items */
-    ui->chartSelector->expandAll();
-
     /* Load saved main plot type */
-    eCurCharType = PlotNameToECharType(string(getSetting("plottype", QString()).toLocal8Bit()));
+    eCurCharType = PlotNameToECharType(getSetting("plottype", QString()));
 
     /* If MDI in is enabled, disable some of the controls and use different
        initialization for the chart and chart selector */
@@ -273,7 +271,7 @@ void systemevalDlg::eventShow(QShowEvent*)
         s << "Chart Window " << i;
 
         /* get the chart type */
-        const ECharType eNewType = PlotNameToECharType(Settings.Get(s.str(), "plottype", string()));
+        const ECharType eNewType = PlotNameToECharType(QString(Settings.Get(s.str(), "plottype", string()).c_str()));
 
         /* get window geometry data */
         CWinGeom c;
@@ -297,7 +295,9 @@ void systemevalDlg::eventShow(QShowEvent*)
     // pass data available events on to plots
     connect(controller, SIGNAL(dataAvailable()), this, SLOT(OnDataAvailable()));
 
-    MainPlot->SetupChart(eCurCharType, controller->getReceiver()->GetParameters()->GetSigSampleRate());
+    selectChart(eCurCharType);
+
+    //MainPlot->SetupChart(eCurCharType, controller->getReceiver()->GetParameters()->GetSigSampleRate());
 }
 
 void systemevalDlg::eventHide(QHideEvent*)
@@ -325,7 +325,7 @@ void systemevalDlg::eventHide(QHideEvent*)
 
             s << "Chart Window " << iNumOpenCharts;
             Settings.Put(s.str(), c);
-            Settings.Put(s.str(), "plottype", ECharTypeToPlotName(vecpDRMPlots[i]->getChartType()));
+            Settings.Put(s.str(), "plottype", ECharTypeToPlotName(vecpDRMPlots[i]->getChartType()).toStdString());
 
             iNumOpenCharts++;
         }
@@ -338,7 +338,7 @@ void systemevalDlg::eventHide(QHideEvent*)
     vecpDRMPlots.clear();
 
     /* Store current plot type */
-    putSetting("plottype", QString::fromLocal8Bit(ECharTypeToPlotName(eCurCharType).c_str()));
+    putSetting("plottype", ECharTypeToPlotName(eCurCharType));
 }
 
 void systemevalDlg::UpdatePlotStyle(int iPlotStyle)
@@ -401,46 +401,38 @@ ChartDialog *systemevalDlg::OpenChartWin(ECharType eNewType)
     return pNewChartWin;
 }
 
-QTreeWidgetItem* systemevalDlg::FindItemByECharType(ECharType eCharType)
+ECharType systemevalDlg::PlotNameToECharType(const QString& plotName)
 {
-    for (int i = 0;; i++)
-    {
-        QTreeWidgetItem* item = ui->chartSelector->topLevelItem(i);
-        if (item == NULL)
-            return NULL;
-        for (int j = 0; j < item->childCount(); j++)
-        {
-            QTreeWidgetItem* subitem = item->child(j);
-            ECharType eCurCharType = ECharType(subitem->data(0, Qt::UserRole).toInt());
-            if (eCurCharType == eCharType)
-                return subitem;
-        }
+    QTreeWidgetItemIterator it(ui->chartSelector);
+    while (*it) {
+        if (plotName == (*it)->text(0))
+            return ECharType((*it)->data(0, Qt::UserRole).toInt());
+        ++it;
     }
+    return AUDIO_SPECTRUM; /* safe value */
 }
 
-ECharType systemevalDlg::PlotNameToECharType(const string& PlotName)
+QString systemevalDlg::ECharTypeToPlotName(ECharType eCharType)
 {
-    QString plotName(PlotName.c_str());
-    for (int i = 0;; i++)
-    {
-        QTreeWidgetItem* item = ui->chartSelector->topLevelItem(i);
-        if (item == NULL)
-            return AUDIO_SPECTRUM; /* safe value */
-        for (int j = 0; j < item->childCount(); j++)
-        {
-            QTreeWidgetItem* subitem = item->child(j);
-            if (plotName == subitem->text(0))
-                return ECharType(subitem->data(0, Qt::UserRole).toInt());
-        }
+    QTreeWidgetItemIterator it(ui->chartSelector);
+    while (*it) {
+        ECharType eCurCharType = ECharType((*it)->data(0, Qt::UserRole).toInt());
+        if (eCurCharType == eCharType)
+            return (*it)->text(0);
+        ++it;
     }
+    return QString();
 }
 
-string systemevalDlg::ECharTypeToPlotName(ECharType eCharType)
+void systemevalDlg::selectChart(ECharType eCharType)
 {
-    QTreeWidgetItem* item = FindItemByECharType(eCharType);
-    if (item != NULL)
-        return item->text(0).toStdString();
-    return string();
+    QTreeWidgetItemIterator it(ui->chartSelector);
+    while (*it) {
+        ECharType eCurCharType = ECharType((*it)->data(0, Qt::UserRole).toInt());
+        if (eCurCharType == eCharType)
+            (*it)->setSelected(true);
+        ++it;
+    }
 }
 
 void systemevalDlg::OnDataAvailable()

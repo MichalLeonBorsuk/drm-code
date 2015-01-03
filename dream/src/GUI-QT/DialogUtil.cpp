@@ -180,8 +180,7 @@ CAboutDlg::CAboutDlg(QWidget* parent):
         "<li><b>Qt</b> (" + QString(QT_VERSION_STR) + ") <i>http://qt-project.org</i></li>"
 #endif
 #ifdef QWT_VERSION
-        "<li><b>QWT</b> (" + QString(QWT_VERSION_STR) + ") <i>Dream is based in part on the work of the Qwt "
-        "project (http://qwt.sf.net).</i></li>"
+        "<li><b>QWT</b> (" + QString(QWT_VERSION_STR) + ") <i>http://qwt.sf.net</i></li>"
 #endif
 #ifdef WITH_QCUSTOMPLOT
         "<li><b>QCustomPlot</b> <i>http://www.qcustomplot.com</i></li>"

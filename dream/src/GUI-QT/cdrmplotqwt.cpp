@@ -521,8 +521,8 @@ void CDRMPlotQwt::setData(int n, CVector<_REAL>& vecrData, CVector<_REAL>& vecrS
         if(policy[Plot::left]==Plot::min)
         {
             /* Get maximum and minimum values */
-            _REAL MaxFreq = -_MAXREAL;
-            _REAL MinFreq = _MAXREAL;
+            _REAL MaxFreq = -numeric_limits<_REAL>::max();
+            _REAL MinFreq = numeric_limits<_REAL>::max();
             for (int i = 0; i < vecrScale.Size(); i++)
             {
                 if (vecrData[i] > MaxFreq)
@@ -539,7 +539,7 @@ void CDRMPlotQwt::setData(int n, CVector<_REAL>& vecrData, CVector<_REAL>& vecrS
             const int iMaxDisToMax = limit[Plot::left]; /* dB */
 
             /* Get maximum value */
-            _REAL Max = -_MAXREAL;
+            _REAL Max = -numeric_limits<_REAL>::max();
 
             for (int i = 0; i < vecrScale.Size(); i++)
             {
@@ -562,7 +562,7 @@ void CDRMPlotQwt::setData(int n, CVector<_REAL>& vecrData, CVector<_REAL>& vecrS
         {
             const int iSize = vecrScale.Size();
             /* Get maximum value */
-            _REAL rMax = -_MAXREAL;
+            _REAL rMax = -numeric_limits<_REAL>::max();
             for (int i = 0; i < iSize; i++)
             {
                 if (vecrData[i] > rMax)
@@ -593,8 +593,8 @@ void CDRMPlotQwt::setData(int n, CVector<_REAL>& vecrData, CVector<_REAL>& vecrS
     {
         if(policy[Plot::right]==Plot::min)
         {
-            _REAL Max = -_MAXREAL;
-            _REAL Min = _MAXREAL;
+            _REAL Max = -numeric_limits<_REAL>::max();
+            _REAL Min = numeric_limits<_REAL>::max();
             for (int i = 0; i < vecrScale.Size(); i++)
             {
                 if (vecrData[i] > Max)
@@ -610,7 +610,7 @@ void CDRMPlotQwt::setData(int n, CVector<_REAL>& vecrData, CVector<_REAL>& vecrS
             const int iMaxDisToMax = limit[Plot::right];
 
             /* Get maximum value */
-            _REAL Max = -_MAXREAL;
+            _REAL Max = -numeric_limits<_REAL>::max();
 
             for (int i = 0; i < vecrScale.Size(); i++)
             {

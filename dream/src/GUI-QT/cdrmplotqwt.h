@@ -38,7 +38,7 @@
 #include <qwt_plot.h>
 #include <qwt_plot_curve.h>
 #include <qwt_plot_grid.h>
-#include <../util/Vector.h>
+#include <../enumerations.h>
 
 /* Define the plot font size */
 #define PLOT_FONT_SIZE 8
