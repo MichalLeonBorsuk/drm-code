@@ -231,7 +231,7 @@ void FreqOffsetModeE::init(int iHalfBuffer, int iSampleRate, double rCenterFreq,
 bool FreqOffsetModeE::calcOffset(const CRealVector& vecrPSD, int& offset)
 {
     //qDebug() << vecrPSD.GetSize();
-    double min=1.0*_MAXREAL, max= -1.0*_MAXREAL;
+    double min=1.0*numeric_limits<_REAL>::max(), max= -1.0*numeric_limits<_REAL>::max();
     char c[vecrPSD.GetSize()+1];
     int peak=0;
     for(int i=0; i< vecrPSD.GetSize(); i++) {

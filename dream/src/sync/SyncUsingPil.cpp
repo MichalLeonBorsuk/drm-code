@@ -67,7 +67,7 @@ void CSyncUsingPil::ProcessDataInternal(CParameter& Parameters)
         {
             /* Search for maximum */
             unsigned int iMaxIndex = 0;
-            CReal rMaxValue = -_MAXREAL;
+            CReal rMaxValue = -numeric_limits<_REAL>::max();
             for (unsigned int i = 0; i < iNumSymPerFrame; i++)
             {
                 if (vecrCorrHistory[i] > rMaxValue)
@@ -324,7 +324,7 @@ void CSyncUsingPil::InitInternal(CParameter& Parameters)
 
     /* Allocate memory for histories. Init history with small values, because
        we search for maximum! */
-    vecrCorrHistory.Init(iNumSymPerFrame, -_MAXREAL);
+    vecrCorrHistory.Init(iNumSymPerFrame, -numeric_limits<_REAL>::max());
 
     /* Set middle of observation interval */
     iMiddleOfInterval = iNumSymPerFrame / 2;
@@ -433,7 +433,7 @@ void CSyncUsingPil::StartAcquisition()
     iSymbCntFraSy = 0;
 
     /* Reset correlation history */
-    vecrCorrHistory.Reset(-_MAXREAL);
+    vecrCorrHistory.Reset(-numeric_limits<_REAL>::max());
 
     bAquisition = true;
 
