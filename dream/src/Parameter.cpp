@@ -592,7 +592,7 @@ bool CParameter::SetWaveMode(const ERobMode eNewWaveMode)
         eSpectOccup = SO_0;
     }
 
-    /* Apply changes only if new paramter differs from old one */
+    /* Apply changes only if new parameter differs from old one */
     if (eRobustnessMode != eNewWaveMode)
     {
         /* Set new value */

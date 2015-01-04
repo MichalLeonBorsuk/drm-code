@@ -304,7 +304,7 @@ CComplex _integral(MATLIB_CALLBACK_QAUD f, const CReal a, const CReal b,
         a to b while keeping the asymptotic error estimate below
         errorBound using an adaptive implementation of Simpson's rule.
 
-        Notes: Instead of NaN we use _MAXREAL. Infinite bounds are not allowed! The
+        Notes: Instead of NaN we use numeric_limits<_REAL>::max(). Infinite bounds are not allowed! The
         lower bound must always be smaller than the higher bound!
     */
 
@@ -313,7 +313,7 @@ CComplex _integral(MATLIB_CALLBACK_QAUD f, const CReal a, const CReal b,
     int         m1, jend, mstart, j;
 
     if (integralError)
-        return _MAXREAL; /* NaN */
+        return numeric_limits<_REAL>::max(); /* NaN */
 
     /* Integrate over [a,b]. Initialize */
     const int max = 1024;
@@ -383,7 +383,7 @@ CComplex _integral(MATLIB_CALLBACK_QAUD f, const CReal a, const CReal b,
             else
             {
                 if (integralError)
-                    return _MAXREAL; /* NaN */
+                    return numeric_limits<_REAL>::max(); /* NaN */
 
                 /* Are we out of memory? */
                 if (m == j)
@@ -411,7 +411,7 @@ CComplex _integral(MATLIB_CALLBACK_QAUD f, const CReal a, const CReal b,
                     {
                         /* The error bound specified is too small! */
                         integralError = true;
-                        return _MAXREAL; /* NaN */
+                        return numeric_limits<_REAL>::max(); /* NaN */
                     }
 
                     m1 = m + step;
@@ -435,7 +435,7 @@ CComplex _integral(MATLIB_CALLBACK_QAUD f, const CReal a, const CReal b,
     while (m != mstart);
 
     if (integralError)
-        return _MAXREAL; /* NaN */
+        return numeric_limits<_REAL>::max(); /* NaN */
     else
         return value;
 }

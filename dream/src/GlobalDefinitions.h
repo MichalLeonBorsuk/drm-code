@@ -34,6 +34,7 @@ using namespace std; /* Because of the library: "complex" */
 #include <string>
 #include <cstdio>
 #include <cmath>
+#include <limits>
 #include "tables/TableDRMGlobal.h"
 
 
@@ -71,12 +72,6 @@ using namespace std; /* Because of the library: "complex" */
    defined), the Hilbert filter in TimeSync must be used all the time -> more
    CPU usage. Also, the frequency tracking range is smaller */
 #define USE_FRQOFFS_TRACK_GUARDCORR 1
-
-/* The sample rate offset estimation can be done using the frequency pilots or
-   the movement of the estimated impulse response. Defining this macro will
-   enable the frequency pilot based estimation. Simulations showed that this
-   method is more vulnerable to bad channel situations */
-#undef USE_SAMOFFS_TRACK_FRE_PIL
 
 /* Using max-log MAP decoder. A lot more memory and CPU is needed for this
    method. This is just for showing the potential of an improved decoding
@@ -148,11 +143,10 @@ typedef unsigned long long uint64_t;
 /* Define type-specific information */
 #define SIZEOF__BYTE                    8
 #define _MAXSHORT                       32767
-#define _MAXREAL                        ((_REAL) 3.4e38) /* Max for float */
 
 #ifdef USE_ERASURE_FOR_FASTER_ACQ
 /* Use max-value for showing that this is an erasure */
-# define ERASURE_TAG_VALUE              _MAXREAL
+# define ERASURE_TAG_VALUE              numeric_limits<_REAL>::max()
 #endif
 
 

@@ -33,12 +33,11 @@
 #include "../util/Modul.h"
 #include "../util/Vector.h"
 #include "../matlib/Matlib.h"
-#include "TimeSyncFilter.h"
 
 
 /* Definitions ****************************************************************/
 /* Use 5 or 10 kHz bandwidth for guard-interval correlation. 10 kHz bandwidth
-   should be chosen when time domain freuqency offset estimation is used */
+   should be chosen when time domain frequency offset estimation is used */
 #define USE_10_KHZ_HILBFILT
 
 #define LAMBDA_LOW_PASS_START           ((CReal) 0.99)
@@ -55,28 +54,6 @@
    samples to save computations */
 #define STEP_SIZE_GUARD_CORR            4
 
-/* "GRDCRR_DEC_FACT": Downsampling factor. We only use approx. 6 [12] kHz for
-   correlation, therefore we can use a decimation of 8 [4]
-   (i.e., 48 kHz / 8 [4] = 6 [12] kHz). Must be 8 [4] since all symbol and
-   guard-interval lengths at 48000 for all robustness modes are dividable
-   by 8 [4] */
-#ifdef USE_10_KHZ_HILBFILT
-# define GRDCRR_DEC_FACT                4
-# define NUM_TAPS_HILB_FILT_24          NUM_TAPS_HILB_FILT_10_24
-# define NUM_TAPS_HILB_FILT_48          NUM_TAPS_HILB_FILT_10_48
-# define NUM_TAPS_HILB_FILT_96          NUM_TAPS_HILB_FILT_10_96
-# define NUM_TAPS_HILB_FILT_192         NUM_TAPS_HILB_FILT_10_192
-# define NUM_TAPS_HILB_FILT_384         NUM_TAPS_HILB_FILT_10_384
-# define HILB_FILT_BNDWIDTH             HILB_FILT_BNDWIDTH_10
-#else
-# define GRDCRR_DEC_FACT                8
-# define NUM_TAPS_HILB_FILT_24          NUM_TAPS_HILB_FILT_5_24
-# define NUM_TAPS_HILB_FILT_48          NUM_TAPS_HILB_FILT_5_48
-# define NUM_TAPS_HILB_FILT_96          NUM_TAPS_HILB_FILT_5_96
-# define NUM_TAPS_HILB_FILT_192         NUM_TAPS_HILB_FILT_5_192
-# define NUM_TAPS_HILB_FILT_384         NUM_TAPS_HILB_FILT_5_384
-# define HILB_FILT_BNDWIDTH             HILB_FILT_BNDWIDTH_5
-#endif
 
 #ifdef USE_FRQOFFS_TRACK_GUARDCORR
 /* Time constant for IIR averaging of frequency offset estimation */
@@ -137,21 +114,20 @@ protected:
 
     int                         iCenterOfBuf;
 
-    bool                    bSyncInput;
+    bool                        bSyncInput;
 
-    bool                    bInitTimingAcqu;
-    bool                    bTimingAcqu;
-    bool                    bRobModAcqu;
-    bool                    bAcqWasActive;
+    bool                        bInitTimingAcqu;
+    bool                        bTimingAcqu;
+    bool                        bRobModAcqu;
+    bool                        bAcqWasActive;
 
     int                         iTiSyncInitCnt;
     int                         iRobModInitCnt;
 
-    int                         iSelectedMode;
+    ERobMode                    eSelectedMode;
 
     CComplexVector              cvecZ;
     CComplexVector              cvecB;
-    CVector<_COMPLEX>           cvecOutTmpInterm;
 
     CReal                       rLambdaCoAv;
 
@@ -180,12 +156,15 @@ protected:
     CReal                       rNormConstFOE;
 #endif
 
-    int         GetIndFromRMode(ERobMode eNewMode);
-    ERobMode    GetRModeFromInd(int iNewInd);
     void        SetFilterTaps(CReal rNewOffsetNorm);
 
     virtual void InitInternal(CParameter& Parameters);
     virtual void ProcessDataInternal(CParameter& Parameters);
+    int HilbertFilter();
+    _REAL calcFreqOffsetTrack();
+    void guardIntervalCorrelation(vector<int> &iNewStartIndexField, int iDecInpuSize);
+    ERobMode detectRobustnessMode();
+    ETypeRxStatus acquire(const vector<int> &iNewStartIndexField);
 };
 
 
