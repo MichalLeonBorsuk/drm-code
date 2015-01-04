@@ -43,7 +43,7 @@ h = I * firls(I * NumTapsP - 1, [0 fc fc 1], [1 1 0 0]) .* kaiser(I * NumTapsP, 
 % Export coefficiants to file ****************************************
 fid = fopen('ResampleFilter.h', 'w');
 
-fprintf(fid, '/* Automatically generated file with MATLAB */\n');
+fprintf(fid, '/* Automatically generated file with GNU Octave */\n');
 fprintf(fid, '/* File name: "ResampleFilter.m" */\n');
 fprintf(fid, '/* Filter taps in time-domain */\n\n');
 
@@ -56,10 +56,21 @@ fprintf(fid, '\n');
 fprintf(fid, '#define INTERP_DECIM_I_D             ');
 fprintf(fid, int2str(I));
 fprintf(fid, '\n\n\n');
+fprintf(fid, 'extern float fResTaps1To1[INTERP_DECIM_I_D][RES_FILT_NUM_TAPS_PER_PHASE];\n');
+
+fprintf(fid, '#endif	/* _RESAMPLEFILTER_H_ */\n');
+fclose(fid);
+
+fid = fopen('ResampleFilter.cpp', 'w');
+
+fprintf(fid, '/* Automatically generated file with GNU Octave */\n');
+fprintf(fid, '/* File name: "ResampleFilter.m" */\n');
+fprintf(fid, '/* Filter taps in time-domain */\n\n');
+fprintf(fid, '#include "ResampleFilter.h"\n\n');
 
 % Write filter taps
 fprintf(fid, '/* Filter for ratios close to 1 */\n');
-fprintf(fid, 'static float fResTaps1To1[INTERP_DECIM_I_D][RES_FILT_NUM_TAPS_PER_PHASE] = {\n');
+fprintf(fid, 'float fResTaps1To1[INTERP_DECIM_I_D][RES_FILT_NUM_TAPS_PER_PHASE] = {\n');
 for i = 1:I
 	hTemp = h(i:I:end) ;
 	fprintf(fid, '{\n');
@@ -72,6 +83,4 @@ for i = 1:I
     end    
 end
 fprintf(fid, '};\n\n\n');
-
-fprintf(fid, '#endif	/* _RESAMPLEFILTER_H_ */\n');
 fclose(fid);
