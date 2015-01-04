@@ -296,8 +296,6 @@ void systemevalDlg::eventShow(QShowEvent*)
     connect(controller, SIGNAL(dataAvailable()), this, SLOT(OnDataAvailable()));
 
     selectChart(eCurCharType);
-
-    //MainPlot->SetupChart(eCurCharType, controller->getReceiver()->GetParameters()->GetSigSampleRate());
 }
 
 void systemevalDlg::eventHide(QHideEvent*)
@@ -403,7 +401,7 @@ ChartDialog *systemevalDlg::OpenChartWin(ECharType eNewType)
 
 ECharType systemevalDlg::PlotNameToECharType(const QString& plotName)
 {
-    QTreeWidgetItemIterator it(ui->chartSelector);
+    QTreeWidgetItemIterator it(ui->chartSelector, QTreeWidgetItemIterator::NoChildren);
     while (*it) {
         if (plotName == (*it)->text(0))
             return ECharType((*it)->data(0, Qt::UserRole).toInt());
@@ -414,7 +412,7 @@ ECharType systemevalDlg::PlotNameToECharType(const QString& plotName)
 
 QString systemevalDlg::ECharTypeToPlotName(ECharType eCharType)
 {
-    QTreeWidgetItemIterator it(ui->chartSelector);
+    QTreeWidgetItemIterator it(ui->chartSelector, QTreeWidgetItemIterator::NoChildren);
     while (*it) {
         ECharType eCurCharType = ECharType((*it)->data(0, Qt::UserRole).toInt());
         if (eCurCharType == eCharType)
@@ -426,11 +424,12 @@ QString systemevalDlg::ECharTypeToPlotName(ECharType eCharType)
 
 void systemevalDlg::selectChart(ECharType eCharType)
 {
-    QTreeWidgetItemIterator it(ui->chartSelector);
+    QTreeWidgetItemIterator it(ui->chartSelector, QTreeWidgetItemIterator::NoChildren);
     while (*it) {
         ECharType eCurCharType = ECharType((*it)->data(0, Qt::UserRole).toInt());
-        if (eCurCharType == eCharType)
-            (*it)->setSelected(true);
+        if (eCurCharType == eCharType) {
+            ui->chartSelector->setCurrentItem(*it); // this version generates the signal we want
+        }
         ++it;
     }
 }
@@ -551,7 +550,7 @@ void systemevalDlg::OnSliderIterChange(int value)
 void systemevalDlg::OnListSelChanged(QTreeWidgetItem *curr, QTreeWidgetItem *)
 {
     /* Make sure we have a non root item */
-    if (curr && curr->parent())
+    if (curr && curr->parent() != NULL)
     {
         /* Get chart type from selected item */
         eCurCharType = ECharType(curr->data(0, Qt::UserRole).toInt());

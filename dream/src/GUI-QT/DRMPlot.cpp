@@ -400,9 +400,10 @@ void CDRMPlot::update(ReceiverController* rc)
 void CDRMPlot::setupTreeWidget(QTreeWidget* tw)
 {
     /* Set the Char Type of each selectable item */
-    QTreeWidgetItemIterator it(tw, QTreeWidgetItemIterator::NoChildren);
+    QTreeWidgetItemIterator it(tw);
     for (; *it; it++)
     {
+        (*it)->setData(0,  Qt::UserRole, NONE_OLD); // make sure non-root items don't match any chart type
         if ((*it)->text(0) == tr("SNR Spectrum"))
             (*it)->setData(0,  Qt::UserRole, SNR_SPECTRUM);
         if ((*it)->text(0) == tr("Audio Spectrum"))
