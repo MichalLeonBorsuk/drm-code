@@ -81,7 +81,7 @@ endfunction
 fid_h = fopen('IQInputFilter.h', 'w');
 fprintf(fid_h, '/* Automatically generated file with GNU Octave */\n');
 fprintf(fid_h, '\n');
-fprintf(fid_h, '/* File name: "IQInputFilter.octave" */\n');
+fprintf(fid_h, '/* File name: "IQInputFilter.m" */\n');
 fprintf(fid_h, '/* Filter taps in time-domain */\n');
 fprintf(fid_h, '\n');
 fprintf(fid_h, '#ifndef _IQINPUTFILTER_H_\n');
@@ -92,7 +92,7 @@ fprintf(fid_h, '\n');
 fid_cpp = fopen('IQInputFilter.cpp', 'w');
 fprintf(fid_cpp, '/* Automatically generated file with GNU Octave */\n');
 fprintf(fid_cpp, '\n');
-fprintf(fid_cpp, '/* File name: "IQInputFilter.octave" */\n');
+fprintf(fid_cpp, '/* File name: "IQInputFilter.m" */\n');
 fprintf(fid_cpp, '/* Filter taps in time-domain */\n');
 fprintf(fid_cpp, '\n');
 fprintf(fid_cpp, '#include "IQInputFilter.h"\n');
