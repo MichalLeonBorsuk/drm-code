@@ -31,7 +31,6 @@
 
 #include "cdrmplotqwt.h"
 #include "receivercontroller.h"
-#include "../DrmReceiver.h"
 #include "waterfallwidget.h"
 #include <QTreeWidget>
 #include <QResizeEvent>
