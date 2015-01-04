@@ -46,7 +46,7 @@ end
 fid = fopen('UpsampleFilter.h', 'w');
 fprintf(fid, '/* Automatically generated file with GNU Octave */\n');
 fprintf(fid, '\n');
-fprintf(fid, '/* File name: "UpsampleFilter.octave" */\n');
+fprintf(fid, '/* File name: "UpsampleFilter.m" */\n');
 fprintf(fid, '/* Filter taps in time-domain */\n');
 fprintf(fid, '\n');
 fprintf(fid, '#ifndef _UPSAMPLEFILTER_H_\n');

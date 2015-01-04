@@ -95,7 +95,7 @@ endfunction
 fid_cpp = fopen('TimeSyncFilter.cpp', 'w');
 fprintf(fid_cpp, '/* Automatically generated file with GNU Octave */\n');
 fprintf(fid_cpp, '\n');
-fprintf(fid_cpp, '/* File name: "TimeSyncFilter.octave" */\n');
+fprintf(fid_cpp, '/* File name: "TimeSyncFilter.m" */\n');
 fprintf(fid_cpp, '/* Filter taps in time-domain */\n');
 fprintf(fid_cpp, '\n');
 fprintf(fid_cpp, '#include "TimeSyncFilter.h"\n');
