@@ -50,10 +50,10 @@ void clock_getrealtime(struct timespec *tp)
   tp->tv_sec = static_cast<unsigned long>(sec);
   tp->tv_nsec = static_cast<unsigned long>(nsec);
 #else
-  struct timeval * tv;
+  struct timeval tv;
   gettimeofday(&tv, NULL);
   tp->tv_sec = tv.tv_sec;
-  tp->tv_nsec = 1000UL*tv_usec;
+  tp->tv_nsec = 1000UL*tv.tv_usec;
 #endif
 #endif
 } 
