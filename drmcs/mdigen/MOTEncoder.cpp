@@ -277,7 +277,7 @@ void MOTEncoder::compress(crcbytevector& out, const crcbytevector& in)
 void MOTEncoder::gzip_file(const string& dst, const string & src)
 {
   //cout << "gzip open: " << src << " -> " << dst << endl;
-  voidp out = gzopen(dst.c_str(), "wb");
+  gzFile out = gzopen(dst.c_str(), "wb");
   if (!out) {
     cerr << "gzip File open fail for file descriptor" << dst << endl;
     cerr.flush();
