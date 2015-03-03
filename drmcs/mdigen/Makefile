@@ -7,7 +7,7 @@ TAR = tar
 OBJ = svn_version.o mdigenerator.o TextEncode.o TextFileSCE.o PacketSCE.o TranslatingTextSCE.o TickerTextSCE.o Ticker.o wirelist.o fac.o StreamMux.o msc.o drmmux.o mdiout.o packetencoder.o CTAudioMemSCE.o PacketStreamMux.o TDMStreamMux.o FileSCE.o MonitoredFile.o JML.o DUFileSCE.o JMLSCE.o DataGroupEncoder.o PacketFileSCE.o
 
 LIVEOBJ  = CTAudioFileSCE.o TimedTextSCE.o TcpDataSCE.o sndfileinput.o oss.o alsa.o udpTextSCE.o MOTSCE.o MotObject.o MOTEncoder.o MotDirectory.o
-LIBS +=  -L. -lcommon -ldcp -lsdixml -lsdc -lrs -lstdc++ -lxml2 -lm -lrt -lz -lpcap -lfam
+LIBS +=  -L../common -L../dcp -L../sdixml -L../sdc -L../RSLib/  -lcommon -ldcp -lsdixml -lsdc -lrs -lstdc++ -lxml2 -lm -lrt -lz -lpcap -lfam
 LIVELIBS =  -lasound -lsndfile
 CXXINCS =  -I/usr/include/libxml2 -I.
 CXXINCS +=  -I../sdixml
