@@ -15,8 +15,8 @@ CXXINCS +=  -I../dcp
 CXXINCS +=  -I../common
 CXXINCS +=  -I../sdc
 CXXINCS +=  -I../RSLib
-CXXFLAGS = $(CXXINCS) -Wall
-CFLAGS = $(INCS) -Wall 
+CXXFLAGS = $(CXXINCS) -Wall -g
+CFLAGS = $(INCS) -Wall -g
 
 .PHONY: all all-before all-after clean clean-custom svn_version.cpp
 
@@ -27,11 +27,11 @@ clean: clean-custom
 
 mditestgenerator: $(OBJ) main.o
 	$(CPP) $(CXXFLAGS) BBCSceFactory.cpp $^ -o $@ $(LIBS)
-	strip $@
+#	strip $@
 
 mdigen: $(OBJ) $(LIVEOBJ) main.o
 	$(CPP) $(CXXFLAGS) -DNOT_JUST_A_TEST_GENERATOR BBCSceFactory.cpp $^ -o $@ $(LIBS) $(LIVELIBS)
-	strip $@
+#	strip $@
 
 HDR = sound.h alsa.h sndfileinput.h oss.h ServiceComponentEncoder.h mdigenerator.h platform.h udpTextSCE.h TextEncode.h TextFileSCE.h CTAudioFileSCE.h TranslatingTextSCE.h TimedTextSCE.h BBCSceFactory.h TickerTextSCE.h Ticker.h wirelist.h fac.h StreamMux.h PacketStreamMux.h TDMStreamMux.h msc.h drmmux.h mdiout.h TcpDataSCE.h packetencoder.h PacketSCE.h PacketFileSCE.h DataGroupEncoder.h motdefs.h MOTSCE.h MotObject.h MOTEncoder.h MotDirectory.h wirelist.c FileSCE.h CTAudioMemSCE.h MonitoredFile.h JML.h DUFileSCE.h JMLSCE.h
 
