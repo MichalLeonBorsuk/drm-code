@@ -1,0 +1,120 @@
+<drm_multiplex_configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns="http://www.drm.org/schema/drm" xsi:schemaLocation="http://www.drm.org/schema/drm http://217.35.80.115/drm/drm-mux.xsd">
+  <mux_general>
+    <transmission_offset>10.0</transmission_offset>
+    <mdi_destinations>
+      <!-- <mdi_destination>dcp.udp://233.11.2.0:9998?interface=192.168.128.1</mdi_destination> -->
+      <mdi_destination>dcp.udp://127.0.0.1:9998?interface=127.0.0.1</mdi_destination>
+      <!-- <mdi_destination>dcp.file://dump.pcap?file_framing=pcap</mdi_destination> -->
+      <mdi_destination>dcp.file://dump.mdi</mdi_destination>
+    </mdi_destinations>
+    <send_sdc_time>1</send_sdc_time>
+
+    <!--
+    <sync_base_layer_afs_refs>
+      <sync_basey_layer_afs_ref>hf1</sync_base_layer_afs_ref>
+    </sync_base_layer_afs_refs>
+    -->
+
+  </mux_general>
+  <channel>
+    <!-- Preset 17:         4-QAM/64-QAM,long, Mode B, CR 0.5, 17477 kbps, AAC+ SBR parametric stereo -->
+    <!--The tag 'robustness_mode' can take the following values:
+        0 = mode_a, 1 = mode_b, 2 = mode_c, 3 = mode_d
+    -->
+    <robustness_mode>1</robustness_mode>
+    <!--The tag 'spectrum_occupancy' can take the following values:
+        spectrum_occupancy        0  1  2  3  4  5
+        Channel bandwidth (kHz) 4,5  5  9 10 18 20
+    -->
+    <spectrum_occupancy>3</spectrum_occupancy>
+    <!--The tag 'interleaver_depth' can take the following values:
+        0 = long, 1 = short
+    -->
+    <interleaver_depth>0</interleaver_depth>
+    <!--The tag 'msc_mode' can take the following values:
+        0 = 64-QAM, no hier., 1 = 64-QAM, hier. on I, 2 = 64-QAM, hier. on I&Q, 3 = 16-QAM, no hier.
+    -->
+    <msc_mode>0</msc_mode>
+    <!--The tag 'sdc_mode' can take the following values:
+        0 = 16-QAM, 1 = 4-QAM
+    -->
+    <sdc_mode>0</sdc_mode>
+    <msc_protection_level>
+      <!--part_a, part_b and hierarchical protection levels
+          can take the following values
+          for the MSC with 16-QAM
+          Protection level Rall   R0  R1 RYlcm
+          0    0,5  1/3 2/3     3
+          1    0,62 1/2 3/4     4
+          for the MSC with 64-QAM
+          Protection level Rall  R0  R1  R2 RYlcm
+          0 0,5  1/4 1/2 3/4     4
+          1 0,6  1/3 2/3 4/5    15
+          2 0,71 1/2 3/4 7/8     8
+          3 0,78 2/3 4/5 8/9    45
+      -->
+      <part_a>0</part_a>
+      <part_b>0</part_b>
+      <hierarchical>0</hierarchical>
+    </msc_protection_level>
+  </channel>
+  <streams>
+
+    <stream xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns="http://www.drm.org/schema/drm" id="str1" type="data_packet_mode">
+      <components>
+        <component id="bws" xsi:type="data_packet" implementor="MOT">
+          <private>
+            <directory_mode>1</directory_mode>
+            <always_send_mime_type>0</always_send_mime_type>
+            <use_crc>1</use_crc>
+            <send_compressed_directory>0</send_compressed_directory>
+            <profiles>
+              <profile>
+                <id>1</id>
+                <index>index.html</index>
+              </profile>
+            </profiles>
+          </private>
+          <encoder_id>bws_enc</encoder_id>
+          <source_selector>/var/spool/drm/drmcs/bws</source_selector>
+          <application_domain>1</application_domain>
+          <application_data>0003</application_data>
+          <data_unit_indicator>1</data_unit_indicator>
+          <target_bitrate>5000</target_bitrate>
+        </component>
+
+        <!-- <component id="jml" xsi:type="data_packet" implementor="DUFile">
+          <private>
+            <directory_mode>1</directory_mode>
+            <use_crc>0</use_crc>
+          </private>
+          <encoder_id>jml_enc</encoder_id>
+          <source_selector>/var/spool/drm/journaline/news.jml</source_selector>
+          <application_domain>1</application_domain>
+          <application_data>044A00000000</application_data>
+          <data_unit_indicator>1</data_unit_indicator>
+          <target_bitrate>500</target_bitrate>
+          </component> -->
+        
+      </components>
+      <error_protection>eep</error_protection>
+      <bytes_per_frame>259</bytes_per_frame> 
+      <bytes_better_protected>0</bytes_better_protected>
+      <packet_length>255</packet_length> <!-- check how to calculate this, but dream does not support nothing beyond this value (255)  -->
+    </stream>
+  </streams>
+  <services>
+    
+    <service id="DRMCS">
+      <label>DRMCS MOT</label>
+      <service_identifier>A2B000</service_identifier> <!-- Please read the spec for service identifier allocation -->
+      <country>br</country>
+      <language>12</language>
+      <language_long>por</language_long>
+      <service_descriptor>2</service_descriptor>
+      <data_ref>bws</data_ref>
+    </service>
+    
+  </services>
+
+</drm_multiplex_configuration>
