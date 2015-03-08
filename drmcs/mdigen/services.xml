@@ -100,7 +100,7 @@
       <error_protection>eep</error_protection>
       <bytes_per_frame>259</bytes_per_frame> 
       <bytes_better_protected>0</bytes_better_protected>
-      <packet_length>255</packet_length> <!-- check how to calculate this, but dream does not support nothing beyond this value (255)  -->
+      <packet_length>255</packet_length> <!-- packet length range is 1 to 255 -->
     </stream>
   </streams>
   <services>
