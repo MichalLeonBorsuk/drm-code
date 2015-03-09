@@ -33,4 +33,5 @@ libfam-dev
 zlib1g-dev
 libxml2-dev
 libpcap-dev
+libsndfile1-dev
 fam

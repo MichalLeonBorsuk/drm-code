@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema
+ xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+ xmlns:afs="http://www.drm.org/schema/afs"
+ xmlns:drm="http://www.drm.org/schema/drm" 
+ targetNamespace="http://www.drm.org/schema/drm" 
+ elementFormDefault="qualified" 
+ >
+	<xs:include schemaLocation="drm-channel.xsd"/>
+	<xs:include schemaLocation="drm-service.xsd"/>
+	<xs:include schemaLocation="drm-stream.xsd"/>
+	<xs:include schemaLocation="drm-afs.xsd"/>
+	<xs:include schemaLocation="drm-common.xsd"/>
+	<xs:element name="drm_multiplex_configuration">
+		<xs:complexType>
+			<xs:all>
+				<xs:element ref="drm:private" minOccurs="0"/>
+				<xs:element ref="drm:mux_general"/>
+				<xs:element ref="drm:channel"/>
+				<xs:element ref="drm:streams"/>
+				<xs:element ref="drm:services"/>
+				<xs:element ref="drm:afs" minOccurs="0"/>
+			</xs:all>
+			<xs:attribute name="id" type="xs:ID"/>
+			<xs:attribute name="label" type="xs:string"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="transmission_offset">
+		<xs:annotation>
+			<xs:documentation>Minimum delay (fractions of seconds) between MDI packet generation and broadcast on air (MDI packet generation restriction are to be respected).
+UTCO is defined by the Multiplex Generator.</xs:documentation>
+		</xs:annotation>
+		<xs:simpleType>
+			<xs:restriction base="xs:float">
+				<xs:minInclusive value="0.0"/>
+			</xs:restriction>
+		</xs:simpleType>
+	</xs:element>
+	<xs:element name="send_sdc_time" type="xs:boolean"/>
+	<xs:element name="local_time_offset">
+	    <xs:annotation>
+	        <xs:documentation>This optional element defines the local time offset in the target area in the range -15.5 to 15.5 hours in 30 minute steps (see ETSI ES 201 980 clause 6.4.3.9).</xs:documentation>
+	    </xs:annotation>
+	    <xs:simpleType>
+	        <xs:restriction base="xs:float">
+	            <xs:maxInclusive value="15.5"/>
+	            <xs:minInclusive value="-15.5"/>
+	            <xs:pattern value="-?1?[0-9].[05]?"/>
+	        </xs:restriction>
+	    </xs:simpleType>
+	</xs:element>
+	<xs:element name="info" type="xs:string"/>
+	<xs:element name="carrier_control_mode" type="xs:unsignedByte">
+	    <xs:annotation>
+	        <xs:documentation>as defined in ASDI specification.</xs:documentation>
+	    </xs:annotation>
+	</xs:element>
+	<xs:element name="mux_general">
+		<xs:complexType>
+			<xs:all>
+				<xs:element ref="drm:info" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Optional field to carry any textual multiplex description.</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element ref="drm:transmission_offset" minOccurs="0"/>
+				<xs:element ref="drm:mdi_destinations" minOccurs="0"/>
+				<xs:element ref="drm:send_sdc_time" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Indicates whether the current time shall be signaled within the SDC (true) or not (false).</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element ref="drm:local_time_offset" minOccurs="0"/>
+				<xs:element ref="drm:sync_base_layer_afs_refs" minOccurs="0"/>
+				<xs:element ref="drm:async_base_layer_afs_refs" minOccurs="0"/>
+				<xs:element ref="drm:enhancement_layer_afs_refs" minOccurs="0"/>
+				<xs:element ref="drm:asdi_destinations"/>
+				<xs:element ref="drm:carrier_control_mode" maxOccurs="1" minOccurs="0"/>
+			</xs:all>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="mdi_destinations">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="drm:mdi_destination" maxOccurs="unbounded"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="mdi_destination">
+		<xs:annotation>
+			<xs:documentation>MDI URI-like destination strings as described in ETSI TS 102 821 (DCP - Distribution and Communication Protocol).
+Note that proper quoting of XML special characters is required!</xs:documentation>
+		</xs:annotation>
+		<xs:simpleType>
+			<xs:restriction base="xs:string">
+				<xs:whiteSpace value="collapse"/>
+			</xs:restriction>
+		</xs:simpleType>
+	</xs:element>
+	<xs:element name="asdi_destinations">
+	    <xs:complexType>
+	        <xs:sequence>
+	            <xs:element ref="drm:asdi_destination" maxOccurs="unbounded"/>
+	        </xs:sequence>
+	    </xs:complexType>
+	</xs:element>
+	<xs:element name="asdi_destination">
+	    <xs:annotation>
+	        <xs:documentation>
+	        </xs:documentation>
+	    </xs:annotation>
+	    <xs:simpleType>
+	        <xs:restriction base="xs:string">
+	            <xs:whiteSpace value="collapse"/>
+	        </xs:restriction>
+	    </xs:simpleType>
+	</xs:element>
+	<xs:element name="streams">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="drm:stream" maxOccurs="4"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="services">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="drm:service" maxOccurs="4"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="sync_base_layer_afs_refs">
+		<xs:annotation>
+			<xs:documentation>This field references an AFS list which contains other frequencies on which the base layer of this multiplex may be received synchronously with this transmission.</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="sync_base_layer_afs_ref" type="xs:IDREF" maxOccurs="unbounded"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="async_base_layer_afs_refs">
+		<xs:annotation>
+			<xs:documentation>This field references an AFS list which contains other frequencies on which the base layer of this multiplex may be received non-synchronously with this transmission.</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="async_base_layer_afs_ref" type="xs:IDREF" maxOccurs="unbounded"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="enhancement_layer_afs_refs">
+		<xs:annotation>
+			<xs:documentation>This field references an AFS list which contains other frequencies on which the enhancement layer of this multiplex may be received synchronously with this transmission.</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="enhancement_layer_afs_ref" type="xs:IDREF" maxOccurs="unbounded"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

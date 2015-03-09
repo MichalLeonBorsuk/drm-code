@@ -4,8 +4,8 @@
     <mdi_destinations>
       <!-- <mdi_destination>dcp.udp://233.11.2.0:9998?interface=192.168.128.1</mdi_destination> -->
       <mdi_destination>dcp.udp://127.0.0.1:9998?interface=127.0.0.1</mdi_destination>
-      <!-- <mdi_destination>dcp.file://dump.pcap?file_framing=pcap</mdi_destination> -->
-      <mdi_destination>dcp.file://dump.mdi</mdi_destination>
+      <mdi_destination>dcp.file://dump.pcap?file_framing=pcap</mdi_destination>
+      <!-- <mdi_destination>dcp.file://dump.mdi</mdi_destination> -->
     </mdi_destinations>
     <send_sdc_time>1</send_sdc_time>
 
@@ -98,7 +98,7 @@
         
       </components>
       <error_protection>eep</error_protection>
-      <bytes_per_frame>259</bytes_per_frame> 
+      <bytes_per_frame>258</bytes_per_frame> 
       <bytes_better_protected>0</bytes_better_protected>
       <packet_length>255</packet_length> <!-- packet length range is 1 to 255 -->
     </stream>
