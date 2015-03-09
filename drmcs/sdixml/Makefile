@@ -31,13 +31,14 @@ $(STATIC): $(OBJ)
 	ar r $(STATIC) $(OBJ)
 	ranlib $(STATIC)
 test: $(OBJ) main.cpp
-	$(CXX) $(LIBS) $(CXXFLAGS) main.cpp -o test -L. -lsdixml -lxml2 -lcommon
+	$(CXX) $(LIBS) $(CXXFLAGS) main.cpp -o test -L. -L../common -lsdixml -lxml2 -lcommon
 
 tar: $(HDR) $(SRC) version.cpp Makefile
 	$(TAR) zcf ../libsdixml-$(VERSION).tar.gz $^ debian
 
 version.cpp: $(HDR) $(SRC) Makefile
 	echo '#include "version.h"' > version.cpp
+# We should create version.cpp using svn revision.
 	echo -n 'const char *libsdixml::svn_version() { return "' >> version.cpp
 	echo -n 999 >> version.cpp
 	echo '"; }' >> version.cpp
