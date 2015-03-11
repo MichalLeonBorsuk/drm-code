@@ -44,6 +44,7 @@
 #include "engineeringtabwidget.h"
 #include "SlideShowViewer.h"
 #include "JLViewer.h"
+#include "GingaViewer.h"
 #ifdef QT_WEBKIT_LIB
 # include "BWSViewer.h"
 #endif
@@ -90,7 +91,7 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& Settings,
     ui(new Ui::DRMMainWindow),
     DRMReceiver(NDRMR),
     controller(new ReceiverController(&NDRMR, Settings, this)),
-    pLogging(NULL), pSysEvalDlg(NULL), pBWSDlg(NULL),
+    pLogging(NULL), pSysEvalDlg(NULL), pBWSDlg(NULL),pGingaDlg(NULL),
     pGeneralSettingsDlg(NULL), pMultSettingsDlg(NULL),
     pSysTray(NULL), pAboutDlg(NULL),
     pScheduler(NULL), pScheduleTimer(NULL), iCurrentFrequency(-1),
@@ -742,6 +743,16 @@ void FDRMDialog::OnServiceChanged(int short_id, const CService& service)
                 ;
             }
         }
+        if (service.DataParam.eAppDomain == CDataParam::AD_DRM_SPEC_APP)
+        {
+            switch (service.DataParam.iUserAppIdent)
+            {
+            case DRM_AT_GINGA:
+                if(ui->actionSingle_Window_Mode->isChecked()==false)
+                    ui->action_Multimedia_Dialog->setEnabled(true);
+                break;
+            }
+        }
     }
 }
 
@@ -804,6 +815,7 @@ void FDRMDialog::changeRecMode(int iRecMode, bool bWindowModeChanged)
 #ifdef QT_WEBKIT_LIB
     if (pBWSDlg)          pBWSDlg->setSettingsTag(settingsTag, true);
 #endif
+    if (pGingaDlg)        pGingaDlg->setSettingsTag(settingsTag, true);
     if (pEPGDlg)          pEPGDlg->setSettingsTag(settingsTag, true);
     if (pJLDlg)           pJLDlg->setSettingsTag(settingsTag, true);
     if (pSlideShowDlg)    pSlideShowDlg->setSettingsTag(settingsTag, true);
@@ -1014,39 +1026,56 @@ void FDRMDialog::on_action_Multimedia_Dialog_triggered()
     int shortID = Parameters.GetCurSelDataService();
     CService service = Parameters.Service[shortID];
 
+    int eAppDomain = Parameters.Service[shortID].DataParam.eAppDomain;
     int iAppIdent = Parameters.Service[shortID].DataParam.iUserAppIdent;
-
+    
     if(pMultimediaWindow)
     {
         disconnect(this, SIGNAL(dataStatusChanged(int, ETypeRxStatus)), pMultimediaWindow, SLOT(setStatus(int, ETypeRxStatus)));
         pMultimediaWindow = NULL;
     }
 
-    switch(iAppIdent)
+    if (eAppDomain == CDataParam::AD_DAB_SPEC_APP)
     {
-    case DAB_AT_EPG:
-        pEPGDlg->setServiceInformation(Parameters.ServiceInformation, iAudioServiceID);
-        break;
-    case DAB_AT_BROADCASTWEBSITE:
+        switch(iAppIdent)
+        {
+        case DAB_AT_EPG:
+            pEPGDlg->setServiceInformation(Parameters.ServiceInformation, iAudioServiceID);
+            break;
+        case DAB_AT_BROADCASTWEBSITE:
 #ifdef QT_WEBKIT_LIB
-        if(pBWSDlg==NULL)
-            pBWSDlg = new BWSViewer(DRMReceiver, Settings, this);
-        //pBWSDlg->setDecoder(DataDecoder);
-        //pBWSDlg->setServiceInformation(service);
-        pMultimediaWindow = pBWSDlg;
+            if(pBWSDlg==NULL)
+                pBWSDlg = new BWSViewer(DRMReceiver, Settings, this);
+            // pBWSDlg->setDecoder(DataDecoder);
+            // pBWSDlg->setServiceInformation(service);
+            pMultimediaWindow = pBWSDlg;
 #endif
+            break;
+        case DAB_AT_JOURNALINE:
+            pJLDlg->setServiceInformation(service, iAudioServiceID);
+            pJLDlg->setDecoder(DataDecoder);
+            pMultimediaWindow = pJLDlg;
+            break;
+        case DAB_AT_MOTSLIDESHOW:
+            pSlideShowDlg->setServiceInformation(shortID, service);
+            pMultimediaWindow = pSlideShowDlg;
         break;
-    case DAB_AT_JOURNALINE:
-        pJLDlg->setServiceInformation(service, iAudioServiceID);
-        pJLDlg->setDecoder(DataDecoder);
-        pMultimediaWindow = pJLDlg;
-        break;
-    case DAB_AT_MOTSLIDESHOW:
-        pSlideShowDlg->setServiceInformation(shortID, service);
-        pMultimediaWindow = pSlideShowDlg;
-        break;
+        }
     }
 
+    if (eAppDomain == CDataParam::AD_DRM_SPEC_APP)
+    {
+
+        switch(iAppIdent)
+        {
+        case DRM_AT_GINGA:
+            if(pGingaDlg==NULL)
+                pGingaDlg = new GingaViewer(DRMReceiver, Settings, this);
+            pMultimediaWindow = pGingaDlg;
+            break;
+        }
+    }
+    
     Parameters.Unlock();
 
     if(pMultimediaWindow != NULL)

@@ -54,6 +54,7 @@ class GeneralSettingsDlg;
 class CSysTray;
 class CFileMenu;
 class BWSViewer;
+class GingaViewer;
 class JLViewer;
 class SlideShowViewer;
 class CScheduler;
@@ -89,6 +90,7 @@ private:
     CLogging*           pLogging;
     systemevalDlg*      pSysEvalDlg;
     BWSViewer*          pBWSDlg;
+    GingaViewer*        pGingaDlg;
     JLViewer*           pJLDlg;
     SlideShowViewer*    pSlideShowDlg;
     StationsDlg*        pStationsDlg;

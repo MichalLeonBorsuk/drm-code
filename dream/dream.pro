@@ -1,5 +1,5 @@
 TEMPLATE = app
-CONFIG += warn_on
+CONFIG += warn_on debug
 TARGET = dream
 OBJECTS_DIR = obj
 DEFINES += EXECUTABLE_NAME=$$TARGET
@@ -698,6 +698,7 @@ HEADERS += \
     src/GUI-QT/EvaluationDlg.h \
     src/GUI-QT/fdrmdialog.h \
     src/GUI-QT/GeneralSettingsDlg.h \
+    src/GUI-QT/GingaViewer.h \
     src/GUI-QT/jlbrowser.h \
     src/GUI-QT/JLViewer.h \
     src/GUI-QT/LiveScheduleDlg.h \
@@ -740,6 +741,7 @@ SOURCES += \
     src/GUI-QT/EvaluationDlg.cpp \
     src/GUI-QT/fdrmdialog.cpp \
     src/GUI-QT/GeneralSettingsDlg.cpp \
+    src/GUI-QT/GingaViewer.cpp \
     src/GUI-QT/jlbrowser.cpp \
     src/GUI-QT/JLViewer.cpp \
     src/GUI-QT/LiveScheduleDlg.cpp \
