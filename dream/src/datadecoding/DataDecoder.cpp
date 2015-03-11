@@ -261,6 +261,10 @@ CDataDecoder::ProcessDataInternal(CParameter & Parameters)
                     Experiment.AddDataUnit(DataUnit[iPacketID].vecbiData);
                     break;
 
+                case AT_GINGA:
+                    MOTObject[iPacketID].AddDataUnit(DataUnit[iPacketID].vecbiData);
+                    break;
+
                 default:        /* do nothing */
                     ;
                 }
@@ -518,11 +522,27 @@ CDataDecoder::EAppType CDataDecoder::GetAppType(const CDataParam& DataParam)
 {
     EAppType eAppType = AT_NOT_SUP;
 
-    /* Only DAB application supported */
+    if (DataParam.eAppDomain == CDataParam::AD_DRM_SPEC_APP)
+    {
+        /* Get application identifier of current selected service */
+        const int iDRMUserAppIdent = DataParam.iUserAppIdent;
+
+        switch (iDRMUserAppIdent)
+        {
+        case DRM_AT_TMC:       /* DRM TMC */
+            eAppType = AT_TMC; 
+            break;
+            
+        case DRM_AT_GINGA:       /* Ginga-NCL application (ITU H.761) */
+            eAppType = AT_GINGA;
+            break;
+        }
+        
+    }
+    
     if (DataParam.eAppDomain == CDataParam::AD_DAB_SPEC_APP)
     {
-        /* Get application identifier of current selected service, only
-           used with DAB */
+        /* Get application identifier of current selected service */
         const int iDABUserAppIdent = DataParam.iUserAppIdent;
 
         switch (iDABUserAppIdent)

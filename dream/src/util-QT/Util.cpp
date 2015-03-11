@@ -400,6 +400,20 @@ QString GetDataTypeString(const CService& service)
                 break;
             }
         }
+        else if (service.DataParam.eAppDomain == CDataParam::AD_DRM_SPEC_APP)
+        {
+            switch (service.DataParam.iUserAppIdent)
+            {
+            case DRM_AT_TMC:
+                strReturn = QObject::tr("TMC");
+                break;
+
+            case DRM_AT_GINGA:
+                strReturn = QObject::tr("Ginga");
+                break;
+                
+            }
+        }
         else
             strReturn = QObject::tr("Unknown Service");
     }

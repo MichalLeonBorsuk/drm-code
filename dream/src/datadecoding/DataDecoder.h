@@ -45,7 +45,7 @@ class CNews;
 /* Maximum number of packets per stream */
 #define MAX_NUM_PACK_PER_STREAM                 4
 
-/* Define for application types */
+/* Define for DAB application types */
 #define DAB_AT_DREAM_EXPERIMENTAL 1
 #define DAB_AT_MOTSLIDESHOW 2
 #define DAB_AT_BROADCASTWEBSITE 3
@@ -60,6 +60,10 @@ class CNews;
 #define DAB_AT_MIDDLEWARE   0xc
 #define DAB_AT_JOURNALINE 0x44A
 
+/* Define for DRM application types */
+#define DRM_AT_TMC 0
+#define DRM_AT_GINGA 1
+
 class CDataDecoder:public CReceiverModul < _BINARY, _BINARY >
 {
 public:
@@ -69,7 +73,7 @@ public:
     enum EAppType
     {   AT_NOT_SUP, AT_MOTSLIDESHOW, AT_JOURNALINE,
         AT_BROADCASTWEBSITE, AT_TPEG, AT_DGPS, AT_TMC, AT_EPG,
-        AT_JAVA, AT_EXPERIMENTAL, AT_DMB, AT_VOICE, AT_MIDDLEWARE, AT_IPDC
+        AT_JAVA, AT_EXPERIMENTAL, AT_DMB, AT_VOICE, AT_MIDDLEWARE, AT_IPDC, AT_GINGA
     };
 
     bool GetMOTObject (CMOTObject & NewPic, const EAppType eAppTypeReq);

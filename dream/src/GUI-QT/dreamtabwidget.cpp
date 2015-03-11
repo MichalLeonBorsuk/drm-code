@@ -194,6 +194,19 @@ QWidget* DreamTabWidget::makePacketApp(int short_id, const CService& service) co
             ;
         }
     }
+    else if (service.DataParam.eAppDomain == CDataParam::AD_DRM_SPEC_APP)
+    {
+        switch (service.DataParam.iUserAppIdent)
+        {
+        case DRM_AT_GINGA:
+            /* TODO: make GingaViewerWidget */
+            break;
+
+        default:
+            ;
+        }
+    }
+
     return pApp;
 }
 
