@@ -30,7 +30,6 @@
 #ifndef _GINGAVIEWER_H
 #define _GINGAVIEWER_H
 
-#include "ui_GingaViewer.h"
 #include "DialogUtil.h"
 #include "CWindow.h"
 #include <QMutex>
@@ -39,7 +38,7 @@ class CMOTObject;
 class CDRMReceiver;
 class CDataDecoder;
 
-class GingaViewer : public CWindow, public Ui_GingaViewer
+class GingaViewer : public CWindow
 {
     Q_OBJECT
 
