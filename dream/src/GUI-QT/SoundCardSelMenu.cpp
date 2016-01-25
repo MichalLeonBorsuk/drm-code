@@ -372,7 +372,7 @@ void CFileMenu::OnOpenRSCI()
         if(r==QDialog::Accepted) {
             /* Check if user has hit chosen a file */
             QString filename = rdlg->getFile();
-            qDebug(filename.toLocal8Bit().constData());
+            qDebug("%s", filename.toLocal8Bit().constData());
             if(filename != "")
             {
                 strLastSoundPath = filename;
