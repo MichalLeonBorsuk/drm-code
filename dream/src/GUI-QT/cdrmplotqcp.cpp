@@ -1,5 +1,7 @@
 #include "cdrmplotqcp.h"
 #include <qcustomplot.h>
+#include "../matlib/MatlibStdToolbox.h"
+
 
 CDRMPlotQCP::CDRMPlotQCP(QWidget* parent):QObject(parent),plot(new QCustomPlot(parent)),wfplot(NULL),wfitem(NULL),
     title(NULL),hlines(),vlines()
