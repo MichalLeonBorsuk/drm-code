@@ -35,8 +35,8 @@ TDMStreamMux::TDMStreamMux(const TDMStreamMux& s):StreamMux(s)
 
 TDMStreamMux& TDMStreamMux::operator=(const TDMStreamMux& s)
 {
-  *this = s;
-  return *this;
+    *this = s;
+    return *this;
 }
 
 TDMStreamMux::~TDMStreamMux()
@@ -45,21 +45,22 @@ TDMStreamMux::~TDMStreamMux()
 
 void TDMStreamMux::ReConfigure(const Stream& config)
 {
-  cout << "TDMStreamMux::ReConfigure" << endl; cout.flush();
-  StreamMux::ReConfigure(config);
+    cout << "TDMStreamMux::ReConfigure" << endl;
+    cout.flush();
+    StreamMux::ReConfigure(config);
 }
 
 void TDMStreamMux::NextFrame(bytevector& out)
 {
-  size_t max = static_cast<size_t>(current.bytes_per_frame);
-  size_t avail = max;
-  out.clear();
-  for(size_t i=0; i<sce.size(); i++) {
-    sce[i]->NextFrame(out, avail);
-    avail = max - out.size();
-  }
-  if(avail>0){
-    cout << "not enough data to fill frame, adding " << avail << " nulls" << endl;
-    out.insert(out.end(), avail, 0);
-  }
+    size_t max = static_cast<size_t>(current.bytes_per_frame);
+    size_t avail = max;
+    out.clear();
+    for(size_t i=0; i<sce.size(); i++) {
+        sce[i]->NextFrame(out, avail);
+        avail = max - out.size();
+    }
+    if(avail>0) {
+        cout << "not enough data to fill frame, adding " << avail << " nulls" << endl;
+        out.insert(out.end(), avail, 0);
+    }
 }

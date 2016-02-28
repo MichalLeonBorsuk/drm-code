@@ -26,7 +26,7 @@
 #include "GaloisField.h"
 
 GaloisFieldElement::GaloisFieldElement(const GaloisField *Field)
-: mcpField(Field)
+    : mcpField(Field)
 {
 }
 
@@ -36,41 +36,41 @@ GaloisFieldElement::~GaloisFieldElement(void)
 
 const WorkingFiniteFieldElement * GaloisFieldElement::Add(const WorkingFiniteFieldElement * y)const
 {
-	const GaloisFieldElement *yCast = dynamic_cast<const GaloisFieldElement *>(y);
-	if (yCast)
-		return mcpField->Add(this, yCast);
-	else
-		return 0;
-	
+    const GaloisFieldElement *yCast = dynamic_cast<const GaloisFieldElement *>(y);
+    if (yCast)
+        return mcpField->Add(this, yCast);
+    else
+        return 0;
+
 }
 
 const WorkingFiniteFieldElement * GaloisFieldElement::Sub(const WorkingFiniteFieldElement * y)const
 {
-	const GaloisFieldElement *yCast = dynamic_cast<const GaloisFieldElement *>(y);
-	if (yCast)
-		return mcpField->Sub(this, yCast);
-	else
-		return 0;
-	
+    const GaloisFieldElement *yCast = dynamic_cast<const GaloisFieldElement *>(y);
+    if (yCast)
+        return mcpField->Sub(this, yCast);
+    else
+        return 0;
+
 }
 
 const WorkingFiniteFieldElement * GaloisFieldElement::Mul(const WorkingFiniteFieldElement * y)const
 {
-	const GaloisFieldElement *yCast = dynamic_cast<const GaloisFieldElement *>(y);
-	if (yCast)
-		return mcpField->Mul(this, yCast);
-	else
-		return 0;
-	
+    const GaloisFieldElement *yCast = dynamic_cast<const GaloisFieldElement *>(y);
+    if (yCast)
+        return mcpField->Mul(this, yCast);
+    else
+        return 0;
+
 }
 
 const WorkingFiniteFieldElement * GaloisFieldElement::Div(const WorkingFiniteFieldElement * y)const
 {
-	const GaloisFieldElement *yCast = dynamic_cast<const GaloisFieldElement *>(y);
-	if (yCast)
-		return mcpField->Div(this, yCast);
-	else
-		return 0;
-	
+    const GaloisFieldElement *yCast = dynamic_cast<const GaloisFieldElement *>(y);
+    if (yCast)
+        return mcpField->Div(this, yCast);
+    else
+        return 0;
+
 }
 

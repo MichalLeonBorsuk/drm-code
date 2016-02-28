@@ -43,8 +43,9 @@ static bool reconfiguration_requested = false;
 static void
 signal_handler(int sig, siginfo_t *si, void *unused)
 {
-  cout << "Got SIGHUP" << endl; cout.flush();
-  reconfiguration_requested = true;
+    cout << "Got SIGHUP" << endl;
+    cout.flush();
+    reconfiguration_requested = true;
 }
 #endif
 
@@ -52,12 +53,12 @@ extern const char* svn_version();
 
 void readCfg(Cfg& config, const string& cfg)
 {
-  xmlDocPtr config_doc = xmlParseFile(cfg.c_str());
-  if(config_doc == NULL) {
-    throw string("missing configuration file ")+cfg;
-  }
-  config.ReConfigure(config_doc->children);
-  xmlFreeDoc(config_doc);
+    xmlDocPtr config_doc = xmlParseFile(cfg.c_str());
+    if(config_doc == NULL) {
+        throw string("missing configuration file ")+cfg;
+    }
+    config.ReConfigure(config_doc->children);
+    xmlFreeDoc(config_doc);
 }
 
 /* TODO (jfbc#1#): Check the platforms time sync */
@@ -69,170 +70,176 @@ void readCfg(Cfg& config, const string& cfg)
 
 void ReConfigure(Mdigen& mdigen, const string& cfg, bool& ok, int& max_frames)
 {
-  Cfg config;
-  try {
-    readCfg(config, cfg);
-  }
-  catch(const char* e)
-  {
-    cerr << e << endl; cerr.flush();
-    ok = false;
-  }
-  catch(string e)
-  {
-    cerr << e << endl; cerr.flush();
-    ok = false;
-  }
-  try {
-      mdigen.utco = config.utco;
-	  if(config.initial_reconfiguration_index == -1)
-	    mdigen.initial_reconfiguration_index = 7; // needed if changes during run - can't rely on constructor
-	  else
-	    mdigen.initial_reconfiguration_index = config.initial_reconfiguration_index;
-      mdigen.ReConfigure(config.config_file);
-      max_frames = config.max_frames;
-  }
-  catch(string e){
-    cerr << e << endl; cerr.flush();
-    ok = false;
-  }
-  catch(char const* e) {
-    cerr << e << endl; cerr.flush();
-    ok = false;
-  }
-  reconfiguration_requested = false;
+    Cfg config;
+    try {
+        readCfg(config, cfg);
+    }
+    catch(const char* e)
+    {
+        cerr << e << endl;
+        cerr.flush();
+        ok = false;
+    }
+    catch(string e)
+    {
+        cerr << e << endl;
+        cerr.flush();
+        ok = false;
+    }
+    try {
+        mdigen.utco = config.utco;
+        if(config.initial_reconfiguration_index == -1)
+            mdigen.initial_reconfiguration_index = 7; // needed if changes during run - can't rely on constructor
+        else
+            mdigen.initial_reconfiguration_index = config.initial_reconfiguration_index;
+        mdigen.ReConfigure(config.config_file);
+        max_frames = config.max_frames;
+    }
+    catch(string e) {
+        cerr << e << endl;
+        cerr.flush();
+        ok = false;
+    }
+    catch(char const* e) {
+        cerr << e << endl;
+        cerr.flush();
+        ok = false;
+    }
+    reconfiguration_requested = false;
 }
 
 int main(int argc, char **argv)
 {
-  vector<string> cfg;
-  size_t cfg_num = 0;
-  if(argc==2) {
-    cfg.push_back(argv[1]);
-  } else if(argc==3) {
-    cfg.push_back(argv[1]);
-    cfg.push_back(argv[2]);
-  } else {
-    cfg.push_back(CONFIG_FILE);
-  }
-  time_t mtime;
-  struct stat s;
-  if (stat(cfg[cfg_num].c_str(), &s) == 0) {
-    mtime = s.st_mtime;
-  } else {
-    mtime = 0;
-  }
-  cout << "BBC MDI Generator Rev " << svn_version()
-       << ", using libsdixml Rev " << libsdixml::svn_version() << endl
-       << "Implementing SDI Schema version " << libsdixml::SDI_Schema_version()
-       << endl << "Reading config from " << cfg[cfg_num] << endl; cout.flush();
-  Mdigen mdigen;
-  /*
-  DcpIn dcpin;
-  dcpin.ReConfigure("dcp.udp://:9998");
-  tagpacketlist t;
-  dcpin.getFrame(t);
-  for(tagpacketlist::iterator i=t.begin(); i!=t.end(); i++)
-    cout << i->first << " " << i->second.size() << endl;
-  */
+    vector<string> cfg;
+    size_t cfg_num = 0;
+    if(argc==2) {
+        cfg.push_back(argv[1]);
+    } else if(argc==3) {
+        cfg.push_back(argv[1]);
+        cfg.push_back(argv[2]);
+    } else {
+        cfg.push_back(CONFIG_FILE);
+    }
+    time_t mtime;
+    struct stat s;
+    if (stat(cfg[cfg_num].c_str(), &s) == 0) {
+        mtime = s.st_mtime;
+    } else {
+        mtime = 0;
+    }
+    cout << "BBC MDI Generator Rev " << svn_version()
+         << ", using libsdixml Rev " << libsdixml::svn_version() << endl
+         << "Implementing SDI Schema version " << libsdixml::SDI_Schema_version()
+         << endl << "Reading config from " << cfg[cfg_num] << endl;
+    cout.flush();
+    Mdigen mdigen;
+    /*
+    DcpIn dcpin;
+    dcpin.ReConfigure("dcp.udp://:9998");
+    tagpacketlist t;
+    dcpin.getFrame(t);
+    for(tagpacketlist::iterator i=t.begin(); i!=t.end(); i++)
+      cout << i->first << " " << i->second.size() << endl;
+    */
 #ifdef WIN32
- int iResult;
- WSADATA wsaData;
- // Initialize Winsock
+    int iResult;
+    WSADATA wsaData;
+// Initialize Winsock
 
- iResult = WSAStartup(MAKEWORD(2,2), &wsaData);
- if (iResult != 0) {
-    printf("WSAStartup failed: %d\n", iResult);
-    exit(1);
- }
+    iResult = WSAStartup(MAKEWORD(2,2), &wsaData);
+    if (iResult != 0) {
+        printf("WSAStartup failed: %d\n", iResult);
+        exit(1);
+    }
 #else
-  struct sigaction sa;
-  sa.sa_flags = SA_SIGINFO;
-  sigemptyset(&sa.sa_mask);
-  sa.sa_sigaction = signal_handler;
-  if (sigaction(SIGHUP, &sa, NULL) == -1)
-  {
-  	cerr << "error assigning signal handler" << endl;
-	exit(1);
-  }
-  FAMConnection fc;
-  if(FAMOpen(&fc)==0)
-  {
-    FAMRequest fr;
-	if(cfg[0][0]!='/')
-	{
-			string path = getenv("PWD");
-			cerr << path << endl;
-			cfg[0] = path + "/" + cfg[0];
-	}
-    if(FAMMonitorFile(&fc, cfg[0].c_str(), &fr, NULL))
-      cerr << "can't monitor " << cfg[0] << endl;
-    else
-      cout << "FAM Monitoring " << cfg[0] << endl;
-  } else {
-      cerr << "can't connect to file alteration monitor " << endl;
-  }
+    struct sigaction sa;
+    sa.sa_flags = SA_SIGINFO;
+    sigemptyset(&sa.sa_mask);
+    sa.sa_sigaction = signal_handler;
+    if (sigaction(SIGHUP, &sa, NULL) == -1)
+    {
+        cerr << "error assigning signal handler" << endl;
+        exit(1);
+    }
+    FAMConnection fc;
+    if(FAMOpen(&fc)==0)
+    {
+        FAMRequest fr;
+        if(cfg[0][0]!='/')
+        {
+            string path = getenv("PWD");
+            cerr << path << endl;
+            cfg[0] = path + "/" + cfg[0];
+        }
+        if(FAMMonitorFile(&fc, cfg[0].c_str(), &fr, NULL))
+            cerr << "can't monitor " << cfg[0] << endl;
+        else
+            cout << "FAM Monitoring " << cfg[0] << endl;
+    } else {
+        cerr << "can't connect to file alteration monitor " << endl;
+    }
 
 #endif
-  bool ok = true;
-  int max_frames = -1;
-  int reconf_interval = 32;
-  int reconf = reconf_interval;
-  ReConfigure(mdigen, cfg[cfg_num], ok, max_frames);
-  while(ok) {
-    try {
-      mdigen.eachframe();
-	  //cout << "Frame: " << mdigen.transmitted_frames << endl;
+    bool ok = true;
+    int max_frames = -1;
+    int reconf_interval = 32;
+    int reconf = reconf_interval;
+    ReConfigure(mdigen, cfg[cfg_num], ok, max_frames);
+    while(ok) {
+        try {
+            mdigen.eachframe();
+            //cout << "Frame: " << mdigen.transmitted_frames << endl;
 #ifndef WIN32
-  while(FAMPending(&fc))
-  {
-    FAMEvent fe;
-    FAMNextEvent(&fc, &fe);
-	switch(fe.code)
-	{
-	case FAMDeleted:
-	  break;
-    case FAMChanged:
-          cout << "file alteration monitor detected config change" << endl;
-          reconfiguration_requested = true;
-	  break;
-    case FAMCreated:
-    case FAMExists:
-	  break;
-    case FAMEndExist:
-	  cout << "FAM initialised " << fe.filename << endl;
-	  break;
-    case FAMAcknowledge:
-	  cout << "FAM cancel acknowledged " << fe.filename << endl;
-	  break;
-    case FAMStartExecuting:
-    case FAMStopExecuting:
-    case FAMMoved:
-	  cout << "unexpected fam event " << fe.code << " '" << fe.filename << "'" << endl;
-	  break;
-    default:
-	  cout << "unknown fam event " << fe.code << " '" << fe.filename << "'" << endl;
-}
-}
+            while(FAMPending(&fc))
+            {
+                FAMEvent fe;
+                FAMNextEvent(&fc, &fe);
+                switch(fe.code)
+                {
+                case FAMDeleted:
+                    break;
+                case FAMChanged:
+                    cout << "file alteration monitor detected config change" << endl;
+                    reconfiguration_requested = true;
+                    break;
+                case FAMCreated:
+                case FAMExists:
+                    break;
+                case FAMEndExist:
+                    cout << "FAM initialised " << fe.filename << endl;
+                    break;
+                case FAMAcknowledge:
+                    cout << "FAM cancel acknowledged " << fe.filename << endl;
+                    break;
+                case FAMStartExecuting:
+                case FAMStopExecuting:
+                case FAMMoved:
+                    cout << "unexpected fam event " << fe.code << " '" << fe.filename << "'" << endl;
+                    break;
+                default:
+                    cout << "unknown fam event " << fe.code << " '" << fe.filename << "'" << endl;
+                }
+            }
 #endif
+        }
+        catch(char const* e) {
+            cerr << e << endl;
+            cerr.flush();
+        }
+        if(reconfiguration_requested) {
+            ReConfigure(mdigen, cfg[cfg_num], ok, max_frames);
+        }
+        if(cfg.size()>1)
+        {
+            reconf--;
+            if(reconf==0)
+            {
+                cfg_num = 1 - cfg_num;
+                ReConfigure(mdigen, cfg[cfg_num], ok, max_frames);
+                reconf = reconf_interval;
+            }
+        }
+        if(max_frames!=-1 && mdigen.transmitted_frames > max_frames)
+            break;
     }
-    catch(char const* e) {
-      cerr << e << endl; cerr.flush();
-    }
-    if(reconfiguration_requested) {
-      ReConfigure(mdigen, cfg[cfg_num], ok, max_frames);
-    }
-	if(cfg.size()>1)
-	{
-	  reconf--;
-	  if(reconf==0)
-	  {
-	    cfg_num = 1 - cfg_num;
-        ReConfigure(mdigen, cfg[cfg_num], ok, max_frames);
-		reconf = reconf_interval;
-	  }
-	}
-    if(max_frames!=-1 && mdigen.transmitted_frames > max_frames)
-      break;
-  }
 }

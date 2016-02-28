@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <drm>
-  <main_config>test.xml</main_config>
+  <main_config>mc.xml</main_config>
   <destination>dcp.udp://224.0.1.20:9999?interface=127.0.0.1</destination>
   <destination>dcp.file://dump.pcap?file_framing=pcap</destination>
   <utco>1</utco>

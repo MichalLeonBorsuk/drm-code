@@ -28,12 +28,12 @@
 using namespace std;
 
 DrmMux::DrmMux():frame_count(0),
-  fac(), sdc(), msc(),
-  robustness_mode(0),
-  fac_bytes(), sdc_bytes(), msc_bytes(),
-  wanted(),
-  reconfiguration_state(first_time),reconfiguration_index(0),
-  service_pattern(0)
+    fac(), sdc(), msc(),
+    robustness_mode(0),
+    fac_bytes(), sdc_bytes(), msc_bytes(),
+    wanted(),
+    reconfiguration_state(first_time),reconfiguration_index(0),
+    service_pattern(0)
 {
 }
 
@@ -90,101 +90,108 @@ reconfiguration mechanism for the version flag shall not be signalled.
 
 void DrmMux::ReConfigure(const DrmMuxConfig& config, unsigned int initial_reconfiguration_index)
 {
-  if(config.misconfiguration)
-    return;
-  wanted = config;
-  cout << "reconfigure requested for robm " << wanted.channel.robustness_mode << endl; cout.flush();
-  uint8_t num_audio=0, num_data=0;
-  for(size_t i=0; i<config.service.size(); i++) {
-    if(config.service[i].audio_ref.length()>0) {
-      num_audio++;
+    if(config.misconfiguration)
+        return;
+    wanted = config;
+    cout << "reconfigure requested for robm " << wanted.channel.robustness_mode << endl;
+    cout.flush();
+    uint8_t num_audio=0, num_data=0;
+    for(size_t i=0; i<config.service.size(); i++) {
+        if(config.service[i].audio_ref.length()>0) {
+            num_audio++;
+        }
+        else if(config.service[i].data_ref.length()>0) {
+            num_data++;
+        }
     }
-    else if(config.service[i].data_ref.length()>0) {
-      num_data++;
+    if( (num_audio==4) && (num_data==0) )
+        service_pattern = 0; // special case of 4 audio services
+    if( (num_audio==0) && (num_data==4) )
+        service_pattern = 0x0f; // special case of 4 data services
+    else {
+        service_pattern = (num_audio<<2)+num_data;
     }
-  }
-  if( (num_audio==4) && (num_data==0) )
-    service_pattern = 0; // special case of 4 audio services
-  if( (num_audio==0) && (num_data==4) )
-	service_pattern = 0x0f; // special case of 4 data services
-  else {
-	service_pattern = (num_audio<<2)+num_data;
-  }
-  if(reconfiguration_state == first_time) {
-    reconfiguration_state = running;
-    ReConfigureNow();
-  } else {
-    if(initial_reconfiguration_index>0)
-      reconfiguration_state = requested;
-	else
-      reconfiguration_state = signalled;
-    reconfiguration_index = initial_reconfiguration_index;
-  }
+    if(reconfiguration_state == first_time) {
+        reconfiguration_state = running;
+        ReConfigureNow();
+    } else {
+        if(initial_reconfiguration_index>0)
+            reconfiguration_state = requested;
+        else
+            reconfiguration_state = signalled;
+        reconfiguration_index = initial_reconfiguration_index;
+    }
 }
 
 void DrmMux::ReConfigureNow()
 {
-  try {
-    robustness_mode = wanted.channel.robustness_mode;
-    cout << "reconfigure implemented for robm " << wanted.channel.robustness_mode << endl; cout.flush();
-    // Fast Access Channel
-    cout << "FAC" << endl; cout.flush();
-    fac.ReConfigure(wanted, service_pattern);
-    // Service Description Channel
-    cout << "SDC" << endl; cout.flush();
-    sdc.ReConfigure(wanted);
-    // Main Service Channel
-    cout << "MSC" << endl; cout.flush();
-    msc.ReConfigure(wanted.stream);
-  } catch(const char* e) {
-    cerr << e << endl;
-	exit(1);
-  }
+    try {
+        robustness_mode = wanted.channel.robustness_mode;
+        cout << "reconfigure implemented for robm " << wanted.channel.robustness_mode << endl;
+        cout.flush();
+        // Fast Access Channel
+        cout << "FAC" << endl;
+        cout.flush();
+        fac.ReConfigure(wanted, service_pattern);
+        // Service Description Channel
+        cout << "SDC" << endl;
+        cout.flush();
+        sdc.ReConfigure(wanted);
+        // Main Service Channel
+        cout << "MSC" << endl;
+        cout.flush();
+        msc.ReConfigure(wanted.stream);
+    } catch(const char* e) {
+        cerr << e << endl;
+        exit(1);
+    }
 }
 
 void DrmMux::NextSuperFrame()
 {
-  switch(reconfiguration_state) {
-  case first_time:
-    throw "bad reconfiguration state in DRM Multiplexer";
-    break;
-  case requested: // reconfiguration requested and this is the first opportunity
-    cout << "Seamless reconfigure requested, sending new SDC for "
-		 << int(reconfiguration_index) << " superframes" << endl; cout.flush();
-    sdc.AnnounceReConfigure(wanted, service_pattern);
-    reconfiguration_state = signalled;
-    break;
-  case signalled:
-    if(reconfiguration_index==0) {
-      cout << "reconfiguration index is zero - reconfiguring" << endl; cout.flush();
-      ReConfigureNow();
-      reconfiguration_state = running;
-    } else {
-      reconfiguration_index--;
-	}
-    break;
-  case running:
-    ; // do nothing
-  }
+    switch(reconfiguration_state) {
+    case first_time:
+        throw "bad reconfiguration state in DRM Multiplexer";
+        break;
+    case requested: // reconfiguration requested and this is the first opportunity
+        cout << "Seamless reconfigure requested, sending new SDC for "
+             << int(reconfiguration_index) << " superframes" << endl;
+        cout.flush();
+        sdc.AnnounceReConfigure(wanted, service_pattern);
+        reconfiguration_state = signalled;
+        break;
+    case signalled:
+        if(reconfiguration_index==0) {
+            cout << "reconfiguration index is zero - reconfiguring" << endl;
+            cout.flush();
+            ReConfigureNow();
+            reconfiguration_state = running;
+        } else {
+            reconfiguration_index--;
+        }
+        break;
+    case running:
+        ; // do nothing
+    }
 }
 
 void DrmMux::NextFrame(DrmTime& timestamp)
 {
-  uint8_t fac_frame = frame_count % 3;
-  if(fac_frame==0) {
-    NextSuperFrame();
-    // Service Description Channel
-    sdc.NextFrame(sdc_bytes, timestamp);
-    // Fast Access Channel - must be after SDC in-case afs_index_valid has changed
-    fac.NextFrame(fac_bytes, fac_frame, sdc.afs_index_valid, reconfiguration_index);
-  } else {
-    // no Service Description Channel
-    sdc_bytes.clear();
-    // Fast Access Channel
-    fac.NextFrame(fac_bytes, fac_frame, sdc.afs_index_valid, reconfiguration_index);
-  }
-  // Main Service Channel
-  msc.NextFrame(msc_bytes);
-  frame_count++;
+    uint8_t fac_frame = frame_count % 3;
+    if(fac_frame==0) {
+        NextSuperFrame();
+        // Service Description Channel
+        sdc.NextFrame(sdc_bytes, timestamp);
+        // Fast Access Channel - must be after SDC in-case afs_index_valid has changed
+        fac.NextFrame(fac_bytes, fac_frame, sdc.afs_index_valid, reconfiguration_index);
+    } else {
+        // no Service Description Channel
+        sdc_bytes.clear();
+        // Fast Access Channel
+        fac.NextFrame(fac_bytes, fac_frame, sdc.afs_index_valid, reconfiguration_index);
+    }
+    // Main Service Channel
+    msc.NextFrame(msc_bytes);
+    frame_count++;
 }
 

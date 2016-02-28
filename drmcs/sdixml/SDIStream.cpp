@@ -26,42 +26,42 @@
 #include <iostream>
 using namespace std;
 
-const char* Stream::PROTECTION_LEVELS[]={"eep","eep_high","uep","hierarchical", NULL};
-const char* Stream::TYPES[]={"audio", "data_stream", "data_packet_mode", NULL};
+const char* Stream::PROTECTION_LEVELS[]= {"eep","eep_high","uep","hierarchical", NULL};
+const char* Stream::TYPES[]= {"audio", "data_stream", "data_packet_mode", NULL};
 
 Stream::Stream()
-  :  Persist(),
-     bytes_per_frame(-1),
-     bytes_better_protected(-1),
-     packet_size(-1),
-     error_protection(-1),
-     stream_type(unspecified),
-	 component()
+    :  Persist(),
+       bytes_per_frame(-1),
+       bytes_better_protected(-1),
+       packet_size(-1),
+       error_protection(-1),
+       stream_type(unspecified),
+       component()
 {
     tag="stream";
 }
 
 Stream::Stream(const Stream& s)
-:Persist(s),
- bytes_per_frame(s.bytes_per_frame),
- bytes_better_protected(s.bytes_better_protected),
- packet_size(s.packet_size),
- error_protection(s.error_protection),
- stream_type(s.stream_type),
- component(s.component)
+    :Persist(s),
+     bytes_per_frame(s.bytes_per_frame),
+     bytes_better_protected(s.bytes_better_protected),
+     packet_size(s.packet_size),
+     error_protection(s.error_protection),
+     stream_type(s.stream_type),
+     component(s.component)
 {
 }
 
 Stream& Stream::operator=(const Stream& s)
 {
-  *reinterpret_cast<Persist *>(this) = Persist(s);
-  bytes_per_frame = s.bytes_per_frame;
-  bytes_better_protected = s.bytes_better_protected;
-  packet_size = s.packet_size;
-  error_protection = s.error_protection;
-  stream_type = s.stream_type;
-  component = s.component;
-  return *this;
+    *reinterpret_cast<Persist *>(this) = Persist(s);
+    bytes_per_frame = s.bytes_per_frame;
+    bytes_better_protected = s.bytes_better_protected;
+    packet_size = s.packet_size;
+    error_protection = s.error_protection;
+    stream_type = s.stream_type;
+    component = s.component;
+    return *this;
 }
 
 Stream::~Stream()
@@ -70,117 +70,132 @@ Stream::~Stream()
 
 void Stream::clearConfig()
 {
-  Persist::clearConfig();
-  bytes_per_frame=-1;
-  bytes_better_protected=-1;
-  packet_size=-1;
-  error_protection=-1;
-  component.clear();
+    Persist::clearConfig();
+    bytes_per_frame=-1;
+    bytes_better_protected=-1;
+    packet_size=-1;
+    error_protection=-1;
+    component.clear();
 }
 
 void Stream::ReConfigure(xmlNodePtr config)
 {
     Persist::ReConfigure(config);
     xmlChar *type = xmlGetProp(config, BAD_CAST "type");
-    misconfiguration = false;
     if(component.size()==0) {
-      misconfiguration = true;
-      return;
+        cerr << "stream with no components" << endl;
+        misconfiguration = true;
+        return;
     }
     if(xmlStrEqual(type, BAD_CAST TYPES[0])) {
         stream_type=audio;
         switch (component.size()) {
         case 1:
-          if(component[0].type!=ServiceComponent::audio_sce) {
-            misconfiguration = true;
-          }
-          break;
+            if(component[0].type!=ServiceComponent::audio_sce) {
+                cerr << "audio stream with one component which is not audio" << endl;
+                misconfiguration = true;
+            }
+            break;
         case 2:
-          // see if we need to swap the order of components - audio must be first
-          if(component[0].type==ServiceComponent::text_sce) {
-            ServiceComponent txt = component[0];
-            component[0] = component[1];
-            component[1] = txt;
-          }
-          if(component[0].type!=ServiceComponent::audio_sce) {
-            misconfiguration = true;
-          }
-          if(component[1].type!=ServiceComponent::text_sce) {
-            misconfiguration = true;
-          }
-          break;
+            // see if we need to swap the order of components - audio must be first
+            if(component[0].type==ServiceComponent::text_sce) {
+                ServiceComponent txt = component[0];
+                component[0] = component[1];
+                component[1] = txt;
+            }
+            if(component[0].type!=ServiceComponent::audio_sce) {
+                cerr << "audio stream with two components and no audio" << endl;
+                misconfiguration = true;
+            }
+            if(component[1].type!=ServiceComponent::text_sce) {
+                cerr << "audio stream with two components and no text" << endl;
+                misconfiguration = true;
+            }
+            break;
         default:
-          misconfiguration = true;
+            cerr << "audio stream with more than two components" << endl;
+            misconfiguration = true;
         }
     }
     else if(xmlStrEqual(type, BAD_CAST TYPES[1])) {
         stream_type=data_stream;
         if(component.size()!=1 || component[0].type!=ServiceComponent::data_stream_sce) {
-          misconfiguration = true;
+            cerr << "data stream with no data components" << endl;
+            misconfiguration = true;
         }
     }
     else if(xmlStrEqual(type, BAD_CAST TYPES[2])) {
         stream_type=data_packet_mode;
         for(size_t i=0; i<component.size(); i++) {
-          misconfiguration |= component[i].type!=ServiceComponent::data_packet_mode_sce;
+            misconfiguration |= component[i].type!=ServiceComponent::data_packet_mode_sce;
         }
     }
-    else
+    else {
+        cerr << "unknown stream type " << type << endl;
         misconfiguration = true;
-    if(bytes_per_frame==-1)
+    }
+    if(bytes_per_frame==-1) {
+        cerr << "missing bytes_per_frame" << endl;
         misconfiguration = true;
-     if(bytes_better_protected==-1)
+    }
+    if(bytes_better_protected==-1) {
+        cerr << "missing bytes_better_protected" << endl;
         misconfiguration = true;
-     if(error_protection==-1)
+    }
+    if(error_protection==-1) {
+        cerr << "missing error_protection field" << endl;
         misconfiguration = true;
-     if(id.length()==0)
+    }
+    if(id.length()==0) {
+        cerr << "missing id" << endl;
         misconfiguration = true;
+    }
     xmlFree(type);
 }
 
 void Stream::PostReConfigure()
 {
-  switch(stream_type) {
-  case audio:
-    if(component.size()==1) { // audio only
+    switch(stream_type) {
+    case audio:
+        if(component.size()==1) { // audio only
+            component[0].bytes_per_frame = bytes_per_frame;
+            component[0].bytes_better_protected = bytes_better_protected;
+        } else { // audio + text
+            component[0].bytes_per_frame = bytes_per_frame-4;
+            component[0].bytes_better_protected = bytes_better_protected;
+            component[1].bytes_per_frame = 4;
+            component[1].bytes_better_protected = 0;
+        }
+        break;
+    case data_stream:
         component[0].bytes_per_frame = bytes_per_frame;
         component[0].bytes_better_protected = bytes_better_protected;
-    } else { // audio + text
-        component[0].bytes_per_frame = bytes_per_frame-4;
-        component[0].bytes_better_protected = bytes_better_protected;
-        component[1].bytes_per_frame = 4;
-        component[1].bytes_better_protected = 0;
+        component[0].packet_mode = 0;
+        break;
+    case data_packet_mode:
+        for(size_t i=0; i<component.size(); i++) {
+            component[i].bytes_per_frame = bytes_per_frame;
+            component[i].bytes_better_protected = bytes_better_protected;
+            component[i].packet_mode = 1;
+            component[i].packet_size = packet_size;
+            component[i].packet_id = static_cast<int>(i);
+        }
+        break;
+    case unspecified:
+        ;
     }
-    break;
-  case data_stream:
-    component[0].bytes_per_frame = bytes_per_frame;
-    component[0].bytes_better_protected = bytes_better_protected;
-    component[0].packet_mode = 0;
-    break;
-  case data_packet_mode:
-    for(size_t i=0; i<component.size(); i++) {
-      component[i].bytes_per_frame = bytes_per_frame;
-      component[i].bytes_better_protected = bytes_better_protected;
-      component[i].packet_mode = 1;
-      component[i].packet_size = packet_size;
-      component[i].packet_id = static_cast<int>(i);
-    }
-    break;
-  case unspecified:
-    ;
-  }
 }
 
 void Stream::GetParams(xmlNodePtr n)
 {
-    if(xmlStrEqual(n->name, BAD_CAST "components")){
-      for(xmlNodePtr c=n->children; c; c=c->next){
-        if(c->type==XML_ELEMENT_NODE) {
-          ServiceComponent s;
-	  s.ReConfigure(c);
-          component.push_back(s);
+    if(xmlStrEqual(n->name, BAD_CAST "components")) {
+        for(xmlNodePtr c=n->children; c; c=c->next) {
+            if(c->type==XML_ELEMENT_NODE) {
+                ServiceComponent s;
+                s.ReConfigure(c);
+                component.push_back(s);
+            }
         }
-      }
     }
     parseUnsigned(n, "bytes_per_frame", &bytes_per_frame);
     parseUnsigned(n, "bytes_better_protected", &bytes_better_protected);
@@ -190,23 +205,23 @@ void Stream::GetParams(xmlNodePtr n)
 
 void Stream::PutParams(xmlTextWriterPtr writer)
 {
-  xmlTextWriterWriteFormatAttribute(writer, BAD_CAST "type", "%s", TYPES[stream_type]);
-  Persist::PutParams(writer);
-  xmlTextWriterStartElement(writer, BAD_CAST "components");
-  for(size_t i=0; i<component.size(); i++) {
-    component[i].Configuration(writer);
-  }    
-  xmlTextWriterEndElement(writer);
-  PutEnum(writer, "error_protection", PROTECTION_LEVELS, error_protection);
-  xmlTextWriterStartComment(writer);
-  xmlTextWriterWriteString(writer, BAD_CAST 
-    "The value of the bytes_per_frame tag represents the total number of bytes");
-  xmlTextWriterWriteString(writer, BAD_CAST 
-     " in the MSC for this stream, including for audio streams, 4 bytes for");
-  xmlTextWriterWriteString(writer, BAD_CAST " text messages if these are active.");
-  xmlTextWriterEndComment(writer);
-  PutUnsigned(writer, "bytes_per_frame", bytes_per_frame);
-  PutUnsigned(writer, "bytes_better_protected", bytes_better_protected);
-  if(packet_size!=-1)
-    PutUnsigned(writer, "packet_length", packet_size);
+    xmlTextWriterWriteFormatAttribute(writer, BAD_CAST "type", "%s", TYPES[stream_type]);
+    Persist::PutParams(writer);
+    xmlTextWriterStartElement(writer, BAD_CAST "components");
+    for(size_t i=0; i<component.size(); i++) {
+        component[i].Configuration(writer);
+    }
+    xmlTextWriterEndElement(writer);
+    PutEnum(writer, "error_protection", PROTECTION_LEVELS, error_protection);
+    xmlTextWriterStartComment(writer);
+    xmlTextWriterWriteString(writer, BAD_CAST
+                             "The value of the bytes_per_frame tag represents the total number of bytes");
+    xmlTextWriterWriteString(writer, BAD_CAST
+                             " in the MSC for this stream, including for audio streams, 4 bytes for");
+    xmlTextWriterWriteString(writer, BAD_CAST " text messages if these are active.");
+    xmlTextWriterEndComment(writer);
+    PutUnsigned(writer, "bytes_per_frame", bytes_per_frame);
+    PutUnsigned(writer, "bytes_better_protected", bytes_better_protected);
+    if(packet_size!=-1)
+        PutUnsigned(writer, "packet_length", packet_size);
 }

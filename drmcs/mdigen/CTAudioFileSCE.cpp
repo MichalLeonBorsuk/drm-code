@@ -29,108 +29,108 @@
 
 CCTAudioFileSCE::~CCTAudioFileSCE()
 {
-  if(file.is_open())
-    file.close();
-  if(buffer)
-    delete[] buffer;
+    if(file.is_open())
+        file.close();
+    if(buffer)
+        delete[] buffer;
 }
 
 void CCTAudioFileSCE::ReConfigure(const ServiceComponent& config)
 {
-	unsigned short iVersionId, iUEP, iError;
-	int iTotalFrameLength, iCoderSamplingRate, iCoderField, iCoderId,
-                 iCoderMode, iAudioFrameLength, iHiProtFrameLength;
-	int bSBR;
-	string oldfile = current.source_selector;
+    unsigned short iVersionId, iUEP, iError;
+    int iTotalFrameLength, iCoderSamplingRate, iCoderField, iCoderId,
+        iCoderMode, iAudioFrameLength, iHiProtFrameLength;
+    int bSBR;
+    string oldfile = current.source_selector;
     ServiceComponentEncoder::ReConfigure(config);
-    if(oldfile != current.source_selector){
-      if(file.is_open())
-        file.close();
+    if(oldfile != current.source_selector) {
+        if(file.is_open())
+            file.close();
     }
     if(!file.is_open()) {
-      file.open(current.source_selector.c_str(), ios::in|ios::binary);
-      if(!file.is_open()) {
-        throw string("CTAudioFile: can't open file ")+current.source_selector;
-      }
+        file.open(current.source_selector.c_str(), ios::in|ios::binary);
+        if(!file.is_open()) {
+            throw string("CTAudioFile: can't open file ")+current.source_selector;
+        }
 
         //m_loop = true;
         // read the header from the file
-    	iTotalFrameLength = ReadInt();
-    	iVersionId = static_cast<unsigned short>(ReadInt());
-    	iCoderSamplingRate = ReadInt();
-    	iCoderField = ReadInt();
-    	iCoderId = ReadInt();
-    	iCoderMode = ReadInt();
-    	bSBR = ReadInt();
-    	iAudioFrameLength = ReadInt();
-    	iHiProtFrameLength = ReadInt();
-    	iUEP = static_cast<unsigned short>(ReadInt());
-    	iError = static_cast<unsigned short>(ReadInt());
+        iTotalFrameLength = ReadInt();
+        iVersionId = static_cast<unsigned short>(ReadInt());
+        iCoderSamplingRate = ReadInt();
+        iCoderField = ReadInt();
+        iCoderId = ReadInt();
+        iCoderMode = ReadInt();
+        bSBR = ReadInt();
+        iAudioFrameLength = ReadInt();
+        iHiProtFrameLength = ReadInt();
+        iUEP = static_cast<unsigned short>(ReadInt());
+        iError = static_cast<unsigned short>(ReadInt());
 
         // validate it against what the xml file asked for
         // we will allow the xml file to not specify the values
         if(current.audio_sampling_rate == -1)
-          current.audio_sampling_rate = iCoderSamplingRate;
-    	if(current.audio_coding == -1)
-    	  current.audio_coding = iCoderId%10;
-    	if(current.audio_mode == -1)
-    	  current.audio_mode = iCoderMode; // not just for AAC!
-    	if(current.SBR == -1)
-    	  current.SBR = bSBR;
-    	if(current.bytes_per_frame == -1)
-    	  current.bytes_per_frame = iAudioFrameLength;
+            current.audio_sampling_rate = iCoderSamplingRate;
+        if(current.audio_coding == -1)
+            current.audio_coding = iCoderId%10;
+        if(current.audio_mode == -1)
+            current.audio_mode = iCoderMode; // not just for AAC!
+        if(current.SBR == -1)
+            current.SBR = bSBR;
+        if(current.bytes_per_frame == -1)
+            current.bytes_per_frame = iAudioFrameLength;
         if(current.bytes_better_protected == -1)
-          current.bytes_better_protected = iHiProtFrameLength;
+            current.bytes_better_protected = iHiProtFrameLength;
         if(current.coder_field == -1)
-          current.coder_field = iCoderField;
+            current.coder_field = iCoderField;
 
         current.misconfiguration = false;
-    	if(iCoderSamplingRate != current.audio_sampling_rate)
-          current.misconfiguration = true;
-    	if(iCoderField != current.coder_field) current.misconfiguration = true;
-    	if(iCoderId%10 != current.audio_coding)
-          current.misconfiguration = true;
-    	if(iCoderMode != current.audio_mode)
-          current.misconfiguration = true;
-    	if(bSBR != current.SBR)
-          current.misconfiguration = true;
+        if(iCoderSamplingRate != current.audio_sampling_rate)
+            current.misconfiguration = true;
+        if(iCoderField != current.coder_field) current.misconfiguration = true;
+        if(iCoderId%10 != current.audio_coding)
+            current.misconfiguration = true;
+        if(iCoderMode != current.audio_mode)
+            current.misconfiguration = true;
+        if(bSBR != current.SBR)
+            current.misconfiguration = true;
         /* defer these checks
-    	if(iAudioFrameLength != m_bytes_per_frame)
+        if(iAudioFrameLength != m_bytes_per_frame)
           m_misconfiguration = true;
-    	if(iHiProtFrameLength != m_bytes_better_protected)
+        if(iHiProtFrameLength != m_bytes_better_protected)
           m_misconfiguration = true;
         */
         if(buffer)
-          delete[] buffer;
+            delete[] buffer;
         buffer = new char[current.bytes_per_frame];
     }
 }
 
 unsigned long CCTAudioFileSCE::ReadInt()
 {
-	unsigned long n;
-	file.read((char*)&n, 4);
-	return ntohl(n);
+    unsigned long n;
+    file.read((char*)&n, 4);
+    return ntohl(n);
 }
 
 void CCTAudioFileSCE::NextFrame(bytevector& buf, size_t max, double)
 {
-	if (!current.misconfiguration 
-         && max>=(unsigned)current.bytes_per_frame
-         && file.is_open())
-	{
-		file.read(buffer, current.bytes_per_frame);
-		buf.putbytes(buffer, current.bytes_per_frame);
+    if (!current.misconfiguration
+            && max>=(unsigned)current.bytes_per_frame
+            && file.is_open())
+    {
+        file.read(buffer, current.bytes_per_frame);
+        buf.putbytes(buffer, current.bytes_per_frame);
         current.loop=true;
-	    // skip over next header - will fail at eof but so what?
-	    file.seekg(DRM_FILE_HEADER_SIZE, ios::cur);
-		if(file.eof()) {
+        // skip over next header - will fail at eof but so what?
+        file.seekg(DRM_FILE_HEADER_SIZE, ios::cur);
+        if(file.eof()) {
             file.clear();
             if( current.loop) {
-			    file.seekg(DRM_FILE_HEADER_SIZE);
-			} else {
-			    buf.insert(buf.end(), current.bytes_per_frame, 0);
-			}
+                file.seekg(DRM_FILE_HEADER_SIZE);
+            } else {
+                buf.insert(buf.end(), current.bytes_per_frame, 0);
+            }
         }
-	}
+    }
 }

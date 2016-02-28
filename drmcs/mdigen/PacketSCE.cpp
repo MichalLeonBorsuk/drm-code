@@ -110,22 +110,22 @@ small objects.
 
 void PacketSCE::ReConfigure(const ServiceComponent& config)
 {
-  ServiceComponentEncoder::ReConfigure(config);
-  packet_encoder.ReConfigure(config);
-  payload_size = current.packet_size+3;
+    ServiceComponentEncoder::ReConfigure(config);
+    packet_encoder.ReConfigure(config);
+    payload_size = current.packet_size+3;
 }
 
 // the default SCE just sends 1 empty packet
 void PacketSCE::NextFrame(bytevector &out, size_t max, double)
 {
-  if(max<size_t(payload_size)) {
-    return;
-  }
-  bytevector payload;
-  crcbytevector packet;
-  // rely on the encoder to pad to the packet size!
-  packet_encoder.makePacket(packet, payload);
-  //cout << "packetSCE " << max << " " << out.size() << " " << packet.size() << " " << payload.size() << endl;
-  //cout.flush();
-  out.put(packet);
+    if(max<size_t(payload_size)) {
+        return;
+    }
+    bytevector payload;
+    crcbytevector packet;
+    // rely on the encoder to pad to the packet size!
+    packet_encoder.makePacket(packet, payload);
+    //cout << "packetSCE " << max << " " << out.size() << " " << packet.size() << " " << payload.size() << endl;
+    //cout.flush();
+    out.put(packet);
 }

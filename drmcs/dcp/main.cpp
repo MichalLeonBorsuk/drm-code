@@ -35,38 +35,39 @@ using namespace std;
 
 int main(int argc, char *argv[])
 {
-  DrmMuxConfig mux;
-  string sdi_file = argv[1];
-  cout << "BBC SDI xml library Rev " << libsdixml::svn_version() << endl
-       << "Implementing SDI Schema version " << libsdixml::SDI_Schema_version()
-       << endl << "Reading config from " << sdi_file << endl; cout.flush();
-  xmlDocPtr mdi_config_doc = xmlParseFile(sdi_file.c_str());
-  if(mdi_config_doc == NULL) {
-    throw string("missing configuration file ") + sdi_file;
-  }
-  int n = xmlXIncludeProcessTree(mdi_config_doc->children);
-  if(n<0) {
-    throw string("errors in XInclude processing");
-  }
-  cout << "XInclude processed " << n << " files" << endl;
-  xmlSaveCtxtPtr ctxt = xmlSaveToFilename("processed.xml", "UTF-8", 0);
-  xmlSaveTree(ctxt,	mdi_config_doc->children);
-  xmlSaveClose(ctxt);
-  mux.ReConfigure(mdi_config_doc->children);
-  xmlFreeDoc(mdi_config_doc);
-  cout << "starting output" << endl;
-  xmlTextWriterPtr writer;
-  writer=xmlNewTextWriterFilename("output.xml", 0);
-  xmlTextWriterSetIndent(writer, 1);
-  xmlTextWriterStartDocument(writer, NULL, "UTF-8", NULL);
-  mux.Configuration(writer);
-  xmlTextWriterEndDocument(writer);
-  xmlFreeTextWriter(writer);
-  if(mux.misconfiguration==true) {
-    cerr << "error in configuration file" << endl;
-  }
+    DrmMuxConfig mux;
+    string sdi_file = argv[1];
+    cout << "BBC SDI xml library Rev " << libsdixml::svn_version() << endl
+         << "Implementing SDI Schema version " << libsdixml::SDI_Schema_version()
+         << endl << "Reading config from " << sdi_file << endl;
+    cout.flush();
+    xmlDocPtr mdi_config_doc = xmlParseFile(sdi_file.c_str());
+    if(mdi_config_doc == NULL) {
+        throw string("missing configuration file ") + sdi_file;
+    }
+    int n = xmlXIncludeProcessTree(mdi_config_doc->children);
+    if(n<0) {
+        throw string("errors in XInclude processing");
+    }
+    cout << "XInclude processed " << n << " files" << endl;
+    xmlSaveCtxtPtr ctxt = xmlSaveToFilename("processed.xml", "UTF-8", 0);
+    xmlSaveTree(ctxt,	mdi_config_doc->children);
+    xmlSaveClose(ctxt);
+    mux.ReConfigure(mdi_config_doc->children);
+    xmlFreeDoc(mdi_config_doc);
+    cout << "starting output" << endl;
+    xmlTextWriterPtr writer;
+    writer=xmlNewTextWriterFilename("output.xml", 0);
+    xmlTextWriterSetIndent(writer, 1);
+    xmlTextWriterStartDocument(writer, NULL, "UTF-8", NULL);
+    mux.Configuration(writer);
+    xmlTextWriterEndDocument(writer);
+    xmlFreeTextWriter(writer);
+    if(mux.misconfiguration==true) {
+        cerr << "error in configuration file" << endl;
+    }
 #ifdef WIN32
-  system("PAUSE");
+    system("PAUSE");
 #endif
-  return EXIT_SUCCESS;
+    return EXIT_SUCCESS;
 }

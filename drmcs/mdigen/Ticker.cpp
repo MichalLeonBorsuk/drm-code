@@ -38,20 +38,20 @@
 void
 CTicker::request_channels (SOCKET s, int services, int *servicelist)
 {
-  if (services == 0)
+    if (services == 0)
     {
-      const char *argv[2];
-      argv[0] = "Listen";
-      argv[1] = "*";
-      encode_strings (s, 2, argv);
+        const char *argv[2];
+        argv[0] = "Listen";
+        argv[1] = "*";
+        encode_strings (s, 2, argv);
     }
-  else
+    else
     {
-      encode_string_ints (s, "Listen", services, servicelist);
+        encode_string_ints (s, "Listen", services, servicelist);
     }
-  send (s, "\n", 1, 0);
+    send (s, "\n", 1, 0);
 #ifndef WIN32
-  ioctl (s, I_FLUSH, FLUSHW);
+    ioctl (s, I_FLUSH, FLUSHW);
 #endif
 }
 
@@ -95,80 +95,80 @@ CTicker::closed ()
 void
 CTicker::check_for_input (SOCKET s)
 {
-  NDAT *ldat = decode_data (s);
-  NDAT **data;
-  int i;
-  if (ldat == NULL)
+    NDAT *ldat = decode_data (s);
+    NDAT **data;
+    int i;
+    if (ldat == NULL)
     {
-      closed ();
-      goto exit;
+        closed ();
+        goto exit;
     }
-  if (ldat->type != 'l')
-    goto exit;
-  data = ldat->values;
-  if (data == NULL || data[0] == NULL)
-    goto exit;
-  if (data[0]->type != 's')
-    goto exit;
-  if (data[0]->sval == NULL)
-    goto exit;
-  if (strcmp (data[0]->sval, "Added") == 0)
+    if (ldat->type != 'l')
+        goto exit;
+    data = ldat->values;
+    if (data == NULL || data[0] == NULL)
+        goto exit;
+    if (data[0]->type != 's')
+        goto exit;
+    if (data[0]->sval == NULL)
+        goto exit;
+    if (strcmp (data[0]->sval, "Added") == 0)
     {
-      NDAT **keys;
-      NDAT **vals;
-      if (data[1] == NULL)
-	goto exit;
-      keys = data[1]->keys;
-      vals = data[1]->values;
-      if (keys == NULL || vals == NULL)
-	goto exit;
-      for (i = 0; i < data[1]->ival; i++)
-	{
-	  added (vals[i]->sval, keys[i]->ival);
-	}
+        NDAT **keys;
+        NDAT **vals;
+        if (data[1] == NULL)
+            goto exit;
+        keys = data[1]->keys;
+        vals = data[1]->values;
+        if (keys == NULL || vals == NULL)
+            goto exit;
+        for (i = 0; i < data[1]->ival; i++)
+        {
+            added (vals[i]->sval, keys[i]->ival);
+        }
     }
-  else if (strcmp (data[0]->sval, "Removed") == 0)
+    else if (strcmp (data[0]->sval, "Removed") == 0)
     {
-      NDAT **items;
-      if (data[1] == NULL)
-	goto exit;
-      items = data[1]->values;
-      if (items == NULL)
-	goto exit;
-      for (i = 0; i < data[1]->ival; i++)
-	{
-	  deleted (items[i]->ival);
-	}
+        NDAT **items;
+        if (data[1] == NULL)
+            goto exit;
+        items = data[1]->values;
+        if (items == NULL)
+            goto exit;
+        for (i = 0; i < data[1]->ival; i++)
+        {
+            deleted (items[i]->ival);
+        }
     }
-  else if (strcmp (data[0]->sval, "Changed") == 0)
+    else if (strcmp (data[0]->sval, "Changed") == 0)
     {
-      NDAT **keys, **vals;
-      if (data[1] == NULL)
-	goto exit;
-      keys = data[1]->keys;
-      vals = data[1]->values;
-      if (keys == NULL || vals == NULL)
-	goto exit;
-      for (i = 0; i < data[1]->ival; i++)
-	{
-	  int j;
-	  NDAT **ckeys, **cvals;
-	  if (vals[i] == NULL)
-	    goto exit;
-	  ckeys = vals[i]->keys;
-	  cvals = vals[i]->values;
-	  if (ckeys == NULL || cvals == NULL)
-	    goto exit;
-	  for (j = 0; j < data[1]->ival; j++)
-	    {
-	      if (ckeys[j] && ckeys[j]->sval
-		  && (strcmp (ckeys[j]->sval, "Text") == 0))
-		{
-		  changed (keys[i]->ival, cvals[j]->sval);
-		}
-	    }
-	}
+        NDAT **keys, **vals;
+        if (data[1] == NULL)
+            goto exit;
+        keys = data[1]->keys;
+        vals = data[1]->values;
+        if (keys == NULL || vals == NULL)
+            goto exit;
+        for (i = 0; i < data[1]->ival; i++)
+        {
+            int j;
+            NDAT **ckeys, **cvals;
+            if (vals[i] == NULL)
+                goto exit;
+            ckeys = vals[i]->keys;
+            cvals = vals[i]->values;
+            if (ckeys == NULL || cvals == NULL)
+                goto exit;
+            for (j = 0; j < data[1]->ival; j++)
+            {
+                if (ckeys[j] && ckeys[j]->sval
+                        && (strcmp (ckeys[j]->sval, "Text") == 0))
+                {
+                    changed (keys[i]->ival, cvals[j]->sval);
+                }
+            }
+        }
     }
 exit:
-  free_data (ldat);
+    free_data (ldat);
 }

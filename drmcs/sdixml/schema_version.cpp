@@ -22,4 +22,6 @@
  *
 \******************************************************************************/
 #include "version.h"
-const char *libsdixml::SDI_Schema_version() { return "Final"; }
+const char *libsdixml::SDI_Schema_version() {
+    return "Final";
+}

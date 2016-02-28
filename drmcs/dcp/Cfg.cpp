@@ -25,47 +25,47 @@
 #include "Cfg.h"
 
 Cfg::Cfg():Persist(), config_file(), m_stdout(), m_stderr(),
-  utco(-1), max_frames(-1), initial_reconfiguration_index(-1)
+    utco(-1), max_frames(-1), initial_reconfiguration_index(-1)
 {
-  tag="drm";
+    tag="drm";
 }
 
 void Cfg::GetParams(xmlNodePtr n)
 {
-  xmlChar *s = xmlNodeGetContent(n);
-  string v;
-  if(s) {
-    v = (char*)s;
-    xmlFree(s);
-  }
-  parseUnsigned(n, "utco", &utco);
-  parseUnsigned(n, "max_frames", &max_frames);
-  parseUnsigned(n, "initial_reconfiguration_index", &initial_reconfiguration_index);
-  if(xmlStrEqual(n->name, BAD_CAST "main_config")) {
-    config_file = v;
-  }
-  if(xmlStrEqual(n->name, BAD_CAST "stdout")) {
-     m_stdout = v;
-     freopen(m_stdout.c_str(), "a", stdout);
-  }
-  if(xmlStrEqual(n->name, BAD_CAST "stderr")) {
-     m_stderr = v;
-     freopen(m_stderr.c_str(), "a", stderr);
-  }
+    xmlChar *s = xmlNodeGetContent(n);
+    string v;
+    if(s) {
+        v = (char*)s;
+        xmlFree(s);
+    }
+    parseUnsigned(n, "utco", &utco);
+    parseUnsigned(n, "max_frames", &max_frames);
+    parseUnsigned(n, "initial_reconfiguration_index", &initial_reconfiguration_index);
+    if(xmlStrEqual(n->name, BAD_CAST "main_config")) {
+        config_file = v;
+    }
+    if(xmlStrEqual(n->name, BAD_CAST "stdout")) {
+        m_stdout = v;
+        freopen(m_stdout.c_str(), "a", stdout);
+    }
+    if(xmlStrEqual(n->name, BAD_CAST "stderr")) {
+        m_stderr = v;
+        freopen(m_stderr.c_str(), "a", stderr);
+    }
 }
 
 void Cfg::PutParams(xmlTextWriterPtr writer)
 {
-  Persist::PutParams(writer);
-  PutString(writer, "main_config", config_file.c_str());
-  if(m_stdout.length()>0)
-    PutString(writer, "stdout", m_stdout);
-  if(m_stderr.length()>0)
-    PutString(writer, "stderr", m_stderr);
-  if(utco != -1)
-    PutUnsigned(writer, "utco", utco);
-  if(max_frames != -1)
-    PutUnsigned(writer, "max_frames", max_frames);
-  if(initial_reconfiguration_index != -1)
-    PutUnsigned(writer, "initial_reconfiguration_index", initial_reconfiguration_index);
+    Persist::PutParams(writer);
+    PutString(writer, "main_config", config_file.c_str());
+    if(m_stdout.length()>0)
+        PutString(writer, "stdout", m_stdout);
+    if(m_stderr.length()>0)
+        PutString(writer, "stderr", m_stderr);
+    if(utco != -1)
+        PutUnsigned(writer, "utco", utco);
+    if(max_frames != -1)
+        PutUnsigned(writer, "max_frames", max_frames);
+    if(initial_reconfiguration_index != -1)
+        PutUnsigned(writer, "initial_reconfiguration_index", initial_reconfiguration_index);
 }

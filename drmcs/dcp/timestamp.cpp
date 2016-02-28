@@ -31,18 +31,18 @@ using namespace std;
 void clock_getrealtime(struct timespec *tp)
 {
 #if _POSIX_C_SOURCE >= 199309L
-  clock_gettime(CLOCK_REALTIME, tp);
+    clock_gettime(CLOCK_REALTIME, tp);
 #else
-  struct timeval * tv;
-  gettimeofday(&tv, NULL);
-  tp->tv_sec = tv.tv_sec;
-  tp->tv_nsec = 1000UL*tv_usec;
+    struct timeval * tv;
+    gettimeofday(&tv, NULL);
+    tp->tv_sec = tv.tv_sec;
+    tp->tv_nsec = 1000UL*tv_usec;
 #endif
-} 
+}
 
 void DrmTime::initialise(int tist_leapseconds,  double tist_delay_s)
 {
-	// reference time is 2000-01-01 T 00:00 UTC which is currently 10957 seconds
+    // reference time is 2000-01-01 T 00:00 UTC which is currently 10957 seconds
     // after the unix epoch of 1970-01-01
     // The unix epoch drifts forwards with leap seconds, so DRM t0 will appear to drift backwards
     // wrt unix time
@@ -69,18 +69,18 @@ void DrmTime::initialise(int tist_leapseconds,  double tist_delay_s)
     // if time and date is to be sent, the SDC blocks must be arranged
     // so that block 0 is send just after the minute boundary at the
     // TRANSMITTER, which is related to the tist
-   	tist_ms = mux_drm_usec/1000ULL - drmtzero_ms + tist_delay_ms;
+    tist_ms = mux_drm_usec/1000ULL - drmtzero_ms + tist_delay_ms;
     // twosec_ms is the number of milliseconds since the last 2s boundary
     uint64_t twosec_ms = tist_ms % 2000ULL;
     // frame_ms is the number of milliseconds since the last 400 ms boundary
-    /* TODO (jfbc#1#): delay the start of coding so that extratime is zero. This 
-                       will minimise the actual delay between coding and 
+    /* TODO (jfbc#1#): delay the start of coding so that extratime is zero. This
+                       will minimise the actual delay between coding and
                        listening. */
     uint64_t frame_ms = twosec_ms % 400ULL;
     // we want to slip enough to make the next tist on a 2s+n*400ms boundary
     uint64_t extra_ms = 400ULL - frame_ms;
     tist_ms += extra_ms;
-   	// local time at mux must delay by extra_ms too
+    // local time at mux must delay by extra_ms too
     mux_drm_usec += 1000ULL*extra_ms;
 
     tist_minute = tist_ms / 60000ULL;
@@ -99,12 +99,12 @@ void DrmTime::initialise(int tist_leapseconds,  double tist_delay_s)
 */
 uint64_t DrmTime::tist_second()
 {
-  return 60*tist_minute + (4*tist_frame)/10;
+    return 60*tist_minute + (4*tist_frame)/10;
 }
 
 uint16_t DrmTime::tist_ms()
 {
-  return 100*(4*tist_frame-10*uint16_t((4*tist_frame)/10));
+    return 100*(4*tist_frame-10*uint16_t((4*tist_frame)/10));
 }
 
 uint64_t DrmTime::current_utc_usec()
@@ -124,40 +124,40 @@ uint64_t DrmTime::current_drm_usec()
 
 void DrmTime::date_and_time(uint32_t& mjd, uint8_t& hh, uint8_t& mm, time_t secs)
 {
-  struct tm *t;
-  t = gmtime(&secs);
-  uint32_t year,month,day,hour,min,second;
-  year = t->tm_year+1900;
-  month = t->tm_mon+1;
-  day = t->tm_mday;
-  hour = t->tm_hour;
-  min = t->tm_min;
-  second = t->tm_sec;
-  // http://www.answers.com/topic/julian-day
-  uint32_t a = (14-month)/12;
-  uint32_t y = year + 4800 - a;
-  uint32_t m = month + 12*a - 3;
-  uint32_t jdn = day + (153*m+2)/5 + 365*y + y/4 - y/100 +y/400 - 32045;
-  double jd = jdn + (hour-12.0)/24.0 + min/1440.0 + second/86400.0;
-  double dmjd = jd - 2400000.5;
-  //cout << "mjd " << mjd << endl;
-  mjd = uint32_t(dmjd);
-  hh = uint8_t(hour);
-  mm = uint8_t(min);
+    struct tm *t;
+    t = gmtime(&secs);
+    uint32_t year,month,day,hour,min,second;
+    year = t->tm_year+1900;
+    month = t->tm_mon+1;
+    day = t->tm_mday;
+    hour = t->tm_hour;
+    min = t->tm_min;
+    second = t->tm_sec;
+    // http://www.answers.com/topic/julian-day
+    uint32_t a = (14-month)/12;
+    uint32_t y = year + 4800 - a;
+    uint32_t m = month + 12*a - 3;
+    uint32_t jdn = day + (153*m+2)/5 + 365*y + y/4 - y/100 +y/400 - 32045;
+    double jd = jdn + (hour-12.0)/24.0 + min/1440.0 + second/86400.0;
+    double dmjd = jd - 2400000.5;
+    //cout << "mjd " << mjd << endl;
+    mjd = uint32_t(dmjd);
+    hh = uint8_t(hour);
+    mm = uint8_t(min);
 }
 
 void DrmTime::date_and_time(uint32_t& mjd, uint8_t& hh, uint8_t& mm)
 {
-  time_t secs = time_t(tist_second()) + drm_t0 - utco;
-  date_and_time(mjd, hh, mm, secs);
+    time_t secs = time_t(tist_second()) + drm_t0 - utco;
+    date_and_time(mjd, hh, mm, secs);
 }
 
 void DrmTime::wait(long usec)
 {
 #ifdef WIN32
-/* windows select doesn't work with no fds */
-  DWORD t_ms = static_cast<DWORD>(usec/1000UL);
-  Sleep(t_ms);
+    /* windows select doesn't work with no fds */
+    DWORD t_ms = static_cast<DWORD>(usec/1000UL);
+    Sleep(t_ms);
 #else
     struct timeval t;
     int maxfd=0;
@@ -166,20 +166,20 @@ void DrmTime::wait(long usec)
     select(maxfd, NULL, NULL, NULL, &t);
 #endif
 }
-   
+
 void DrmTime::increment()
 {
-  // add 400 milliseconds
-  tist_frame++;
-  if(tist_frame>149) {
-    tist_frame = 0;
-    tist_minute++;
-  }
-  mux_drm_usec += 400000ULL;
+    // add 400 milliseconds
+    tist_frame++;
+    if(tist_frame>149) {
+        tist_frame = 0;
+        tist_minute++;
+    }
+    mux_drm_usec += 400000ULL;
 }
 
 void DrmTime::check_for_leap_second()
-/* TODO (jfbc#1#): check if we have just had a leap second and adjust 
+/* TODO (jfbc#1#): check if we have just had a leap second and adjust
                    m_utco. */
 {
 }

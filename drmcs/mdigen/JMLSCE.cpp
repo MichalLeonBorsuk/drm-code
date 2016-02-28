@@ -59,55 +59,56 @@ static void createJML(JMLObjectCollection& carousel, const string& sometext)
 
 void JMLSCE::ReConfigure(const ServiceComponent& config)
 {
-  PacketSCE::ReConfigure(config);
-  // work out the DGE overhead
-  dge.Configure(true, false, false);
-  packet_encoder.ReConfigure(config);
-  JMLObjectCollection carousel;
-  createJML(carousel, "Avengers movie in works");
-  data_unit.resize(carousel.size());
-  for(size_t i=0; i<carousel.size(); i++)
-  {
-    carousel[i].encode(data_unit[i]);
-  }
+    PacketSCE::ReConfigure(config);
+    // work out the DGE overhead
+    dge.Configure(true, false, false);
+    packet_encoder.ReConfigure(config);
+    JMLObjectCollection carousel;
+    createJML(carousel, "Avengers movie in works");
+    data_unit.resize(carousel.size());
+    for(size_t i=0; i<carousel.size(); i++)
+    {
+        carousel[i].encode(data_unit[i]);
+    }
 }
 
 void JMLSCE::NextFrame(bytevector &out, size_t max, double stoptime)
 {
-  if(packet_queue.empty())
-    fill(stoptime);
-  if(packet_queue.empty())
-  {
-    //cout << "JMLSCE: queue empty" << endl;
-    return;
-  }
-  else
-  {
-    //cout << "JMLSCE: queue OK" << endl;
-  }
-  if(packet_queue.front().size()<=max) {
-    out.put(packet_queue.front());
-    packet_queue.pop();
-  } else {
-    cerr << "JMLSCE: packet queue size mismatch with packet mux" << endl; cerr.flush();
-  }
+    if(packet_queue.empty())
+        fill(stoptime);
+    if(packet_queue.empty())
+    {
+        //cout << "JMLSCE: queue empty" << endl;
+        return;
+    }
+    else
+    {
+        //cout << "JMLSCE: queue OK" << endl;
+    }
+    if(packet_queue.front().size()<=max) {
+        out.put(packet_queue.front());
+        packet_queue.pop();
+    } else {
+        cerr << "JMLSCE: packet queue size mismatch with packet mux" << endl;
+        cerr.flush();
+    }
 }
 
 void JMLSCE::fill(double stoptime)
 {
-  timespec t;
-  clock_getrealtime(&t);
-  double now_ms = 1000.0*double(t.tv_sec) + double (t.tv_nsec) / 1.0e6;
-  while(packet_queue.size() < max_queue_depth && now_ms < stoptime)
-  {
-    // put something in the packet queue
-    for(size_t i=0; i<data_unit.size(); i++)
-    {
-        crcbytevector out;
-        dge.putDataGroup(0, out, data_unit[i], i);
-        packet_encoder.makeDataUnit(packet_queue, out);
-    }
+    timespec t;
     clock_getrealtime(&t);
-    now_ms = 1000.0*double(t.tv_sec) + double (t.tv_nsec) / 1.0e6;
-  }
+    double now_ms = 1000.0*double(t.tv_sec) + double (t.tv_nsec) / 1.0e6;
+    while(packet_queue.size() < max_queue_depth && now_ms < stoptime)
+    {
+        // put something in the packet queue
+        for(size_t i=0; i<data_unit.size(); i++)
+        {
+            crcbytevector out;
+            dge.putDataGroup(0, out, data_unit[i], i);
+            packet_encoder.makeDataUnit(packet_queue, out);
+        }
+        clock_getrealtime(&t);
+        now_ms = 1000.0*double(t.tv_sec) + double (t.tv_nsec) / 1.0e6;
+    }
 }

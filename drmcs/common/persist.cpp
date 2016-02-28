@@ -22,23 +22,14 @@
  *
 \******************************************************************************/
 
-#ifndef WIN32
 #include <unistd.h>
-#endif
-
-
-#ifdef WIN32
-#include <winsock2.h>
-#else
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#endif
-
 #include <libxml/xmlwriter.h>
 #include <string.h>
 #include "persist.h"
-
 #include <iostream>
+
 using namespace std;
 
 const char *Persist::boolvals[]= {"false", "true", NULL};
@@ -71,7 +62,7 @@ Persist::~Persist()
 void Persist::clearConfig()
 {
     id.clear();
-    misconfiguration=true;
+    misconfiguration=false;
     private_config.clear();
 }
 
@@ -79,6 +70,7 @@ void Persist::walkConfig(xmlNodePtr n)
 {
     if(n==NULL) {
         misconfiguration = true;
+        cerr << "Persist - no configuration available" << endl;
         return;
     }
     for(xmlNodePtr c=n; c; c=c->next) {
@@ -114,7 +106,8 @@ void Persist::ReConfigure(xmlNodePtr config)
         id = (char*)s;
         xmlFree(s);
     }
-    walkConfig(config->children);
+    if(config->children)
+        walkConfig(config->children);
 }
 
 unsigned long Persist::xmlStringToUnsigned(const xmlChar *s)

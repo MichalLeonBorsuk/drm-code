@@ -26,7 +26,7 @@
 #include "GaloisField.h"
 
 GaloisFieldElementZero::GaloisFieldElementZero(const GaloisField *Field)
-: GaloisFieldElement(Field)
+    : GaloisFieldElement(Field)
 {
 }
 
@@ -36,20 +36,20 @@ GaloisFieldElementZero::~GaloisFieldElementZero(void)
 
 int GaloisFieldElementZero::Log(void) const
 {
-	// throw an exception
-	return 0;
+    // throw an exception
+    return 0;
 }
 int GaloisFieldElementZero::Value(void) const
 {
-	return 0;
+    return 0;
 }
 
 bool GaloisFieldElementZero::IsZero(void) const
 {
-	return true;
+    return true;
 }
 
 const WorkingFiniteFieldElement * GaloisFieldElementZero::ToPower(const int power) const
 {
-	return mcpField->GetElementPointer(0);
+    return mcpField->GetElementPointer(0);
 }

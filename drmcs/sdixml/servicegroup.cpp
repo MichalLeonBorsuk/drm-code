@@ -26,49 +26,49 @@
 #include <iostream>
 using namespace std;
 
-const char *ServiceGroup::types[]={"drm", "am", "amss", "fm-ena", "fm-asia", "dab", NULL};
+const char *ServiceGroup::types[]= {"drm", "am", "amss", "fm-ena", "fm-asia", "dab", NULL};
 
 ServiceGroup::ServiceGroup()
-:FrequencyGroup(),system_type(),
-  system_id(),
-  same_service(-1),
-  service_identifier()
+    :FrequencyGroup(),system_type(),
+     system_id(),
+     same_service(-1),
+     service_identifier()
 {
-  clearConfig();
-  tag="afs_service_group";
+    clearConfig();
+    tag="afs_service_group";
 }
 
 ServiceGroup::ServiceGroup(const ServiceGroup& a)
-:FrequencyGroup(a),system_type(a.system_type),
-  system_id(a.system_id),
-  same_service(a.same_service),
-  service_identifier(a.service_identifier)
+    :FrequencyGroup(a),system_type(a.system_type),
+     system_id(a.system_id),
+     same_service(a.same_service),
+     service_identifier(a.service_identifier)
 {
 }
 
 ServiceGroup& ServiceGroup::operator=(const ServiceGroup& a)
 {
-  *reinterpret_cast<FrequencyGroup *>(this) = FrequencyGroup(a);
-  system_type = a.system_type;
-  system_id = a.system_id;
-  same_service = a.same_service;
-  service_identifier =a.service_identifier;
-  return *this;
+    *reinterpret_cast<FrequencyGroup *>(this) = FrequencyGroup(a);
+    system_type = a.system_type;
+    system_id = a.system_id;
+    same_service = a.same_service;
+    service_identifier =a.service_identifier;
+    return *this;
 }
 
 void ServiceGroup::clearConfig()
 {
-  FrequencyGroup::clearConfig();
-  system_type = drm;
-  service_identifier.clear();
-  system_id=255;
-  same_service=-1;
-  service_identifier.clear();
+    FrequencyGroup::clearConfig();
+    system_type = drm;
+    service_identifier.clear();
+    system_id=255;
+    same_service=-1;
+    service_identifier.clear();
 }
 
 ServiceGroup::~ServiceGroup()
 {
-  clearConfig();
+    clearConfig();
 }
 /*
   <afs_service_group>
@@ -83,14 +83,14 @@ ServiceGroup::~ServiceGroup()
 */
 void ServiceGroup::GetParams(xmlNodePtr n)
 {
-  misconfiguration = false;
-  FrequencyGroup::GetParams(n);
-  int i=-1;
-  parseEnum(n, "system_id", &i, types);
-  if(i>-1)
-    system_type = e_system_type(i);
-  parseBool(n, "same_service", &same_service);
-  parseHexBinary(n, "afs_service_identifier", service_identifier);
+    misconfiguration = false;
+    FrequencyGroup::GetParams(n);
+    int i=-1;
+    parseEnum(n, "system_id", &i, types);
+    if(i>-1)
+        system_type = e_system_type(i);
+    parseBool(n, "same_service", &same_service);
+    parseHexBinary(n, "afs_service_identifier", service_identifier);
 }
 
 /*
@@ -123,61 +123,61 @@ Other Service Id: 32 bits (data service identifier).
 
 void ServiceGroup::ReConfigure(xmlNodePtr config)
 {
-  Persist::ReConfigure(config);
-  misconfiguration=false;
-  switch(system_type) {
-  case drm:
-    system_id = 0; // DRM
-    break;
-  case am:
-    system_id = 2; // AM
-    break;
-  case amss:
-    system_id = 1; // AMSS
-    break;
-  case fm_ena: // fm, Europe Grid
-  case fm_asia: // fm, /Asia Grid
-    switch(service_identifier.size()) {
-    case 0:
-        system_id = 5; // FM-RDS Europe & NA, No Id
+    Persist::ReConfigure(config);
+    misconfiguration=false;
+    switch(system_type) {
+    case drm:
+        system_id = 0; // DRM
         break;
-    case 2:
-        system_id = 4; // FM-RDS Europe & NA, PI
+    case am:
+        system_id = 2; // AM
         break;
-    case 3:
-        system_id = 3; // FM-RDS Europe & NA, ECC+PI
+    case amss:
+        system_id = 1; // AMSS
+        break;
+    case fm_ena: // fm, Europe Grid
+    case fm_asia: // fm, /Asia Grid
+        switch(service_identifier.size()) {
+        case 0:
+            system_id = 5; // FM-RDS Europe & NA, No Id
+            break;
+        case 2:
+            system_id = 4; // FM-RDS Europe & NA, PI
+            break;
+        case 3:
+            system_id = 3; // FM-RDS Europe & NA, ECC+PI
+            break;
+        default:
+            misconfiguration = true;
+        }
+        if(system_type==fm_asia)
+            system_id+=3;
+        break;
+    case dab: // dab
+        switch(service_identifier.size()) {
+        case 2:
+            system_id = 10; // DAB Audio
+            break;
+        case 3:
+            system_id = 9; // DAB Audio with ECC
+            break;
+        case 4:
+            system_id = 11; // DAB Data
+        default:
+            misconfiguration = true;
+        }
         break;
     default:
-        misconfiguration = true;
+        misconfiguration=true;
     }
-    if(system_type==fm_asia)
-      system_id+=3;
-    break;
-  case dab: // dab
-    switch(service_identifier.size()) {
-    case 2:
-      system_id = 10; // DAB Audio
-      break;
-    case 3:
-      system_id = 9; // DAB Audio with ECC
-      break;
-    case 4:
-      system_id = 11; // DAB Data
-    default:
-      misconfiguration = true;
-    }
-    break;
-  default:
-    misconfiguration=true;
-  }
 }
 
 void ServiceGroup::PutParams(xmlTextWriterPtr writer)
 {
-  PutEnum(writer, "system_id", types, system_type);
-  if(same_service!=-1)
-    PutBool(writer, "same_service", same_service);
-  if(service_identifier.size()>0)
-    PutHexBinary(writer, "afs_service_identifier", service_identifier);
-  FrequencyGroup::PutParams(writer);
+    PutEnum(writer, "system_id", types, system_type);
+    if(same_service!=-1)
+        PutBool(writer, "same_service", same_service);
+    if(service_identifier.size()>0)
+        PutHexBinary(writer, "afs_service_identifier", service_identifier);
+    FrequencyGroup::PutParams(writer);
 }

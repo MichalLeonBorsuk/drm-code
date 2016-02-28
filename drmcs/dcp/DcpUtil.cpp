@@ -29,62 +29,63 @@ using namespace std;
 
 bool parseDcpUri(map<string,string>& out, const string& uri)
 {
-  istringstream s(uri);
-  stringbuf b,a,scheme;
-  s.get(b, '.');
-  if(b.str()=="dcp")
+    istringstream s(uri);
+    stringbuf b,a,scheme;
+    s.get(b, '.');
+    if(b.str()=="dcp")
+        s.ignore();
+    else
+        return false;
+    s.get(scheme, ':');
     s.ignore();
-  else
-    return false;
-  s.get(scheme, ':');
-  s.ignore();
-  s.get(a, '?');
-  while(s.good()){
-    s.ignore();
-    stringbuf param, value;
-    string p,v;
-    s.get(param, '=');
-    s.ignore();
-    s.get(value, '&');
-    p=param.str();v=value.str();
-    out[param.str()]=value.str();
-  }
-  istringstream ss(scheme.str());
-  b.str("");
-  ss.get(b, '.');
-  out["type"]=b.str();
-  if(ss.good()){
-	ss.ignore();
-    b.str("");
-    ss.get(b);
-	if(b.str()=="pft"){
-      out["pft"] = "true";
-	}
-  }
-  istringstream t(a.str());
-  b.str("");
-  t.get(b, ':');
-  if(t.good()) {
-    out["target"] = b.str();
-	t.ignore();
-    a.str("");
-    t.get(a, ':');
-    b.str("");
-    if(t.good()) {
-      t.ignore();
-      t.get(b, ':');
+    s.get(a, '?');
+    while(s.good()) {
+        s.ignore();
+        stringbuf param, value;
+        string p,v;
+        s.get(param, '=');
+        s.ignore();
+        s.get(value, '&');
+        p=param.str();
+        v=value.str();
+        out[param.str()]=value.str();
     }
-  } else {
-    out["target"] = a.str();
-  }
-  if(a.str().size()>0){
-	if(b.str().size()>0) {
-      out["src_addr"]=a.str();
-      out["dst_addr"]=b.str();
-	} else {
-      out["dst_addr"]=a.str();
-	}
-  }
-  return true;
+    istringstream ss(scheme.str());
+    b.str("");
+    ss.get(b, '.');
+    out["type"]=b.str();
+    if(ss.good()) {
+        ss.ignore();
+        b.str("");
+        ss.get(b);
+        if(b.str()=="pft") {
+            out["pft"] = "true";
+        }
+    }
+    istringstream t(a.str());
+    b.str("");
+    t.get(b, ':');
+    if(t.good()) {
+        out["target"] = b.str();
+        t.ignore();
+        a.str("");
+        t.get(a, ':');
+        b.str("");
+        if(t.good()) {
+            t.ignore();
+            t.get(b, ':');
+        }
+    } else {
+        out["target"] = a.str();
+    }
+    if(a.str().size()>0) {
+        if(b.str().size()>0) {
+            out["src_addr"]=a.str();
+            out["dst_addr"]=b.str();
+        } else {
+            out["dst_addr"]=a.str();
+        }
+    }
+    return true;
 }
 

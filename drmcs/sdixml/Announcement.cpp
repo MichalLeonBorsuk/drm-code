@@ -26,55 +26,55 @@
 
 Announcement::Announcement():service_ref(),afs_ref(),announcement_types(0)
 {
-  clearConfig();
-  tag="announcement_flags_carried";
+    clearConfig();
+    tag="announcement_flags_carried";
 }
 
 void Announcement::clearConfig()
 {
-  service_ref="";
-  afs_ref="";
-  announcement_types=0;
+    service_ref="";
+    afs_ref="";
+    announcement_types=0;
 }
 
 Announcement::~Announcement()
 {
-  clearConfig();
+    clearConfig();
 }
 
 void Announcement::GetParams(xmlNodePtr n)
 {
-  if(xmlStrEqual(n->name, BAD_CAST "announcement_types")) {
-	for(xmlNodePtr d=n->children; d; d=d->next){
-	  if(d->type==XML_ELEMENT_NODE){
-        int i=-1;
-        parseUnsigned(d, "announcement_type", &i);
-        if(i>=0 && i<10)
-          announcement_types |= 1<<i;
-        if(i>9)
-          misconfiguration = true;
-      }
+    if(xmlStrEqual(n->name, BAD_CAST "announcement_types")) {
+        for(xmlNodePtr d=n->children; d; d=d->next) {
+            if(d->type==XML_ELEMENT_NODE) {
+                int i=-1;
+                parseUnsigned(d, "announcement_type", &i);
+                if(i>=0 && i<10)
+                    announcement_types |= 1<<i;
+                if(i>9)
+                    misconfiguration = true;
+            }
+        }
     }
-  }
-  parseIDREF(n, "service_ref", service_ref);
-  parseIDREF(n, "afs_ref", afs_ref);
+    parseIDREF(n, "service_ref", service_ref);
+    parseIDREF(n, "afs_ref", afs_ref);
 }
 
 void Announcement::ReConfigure(xmlNodePtr config)
 {
-  Persist::ReConfigure(config);
+    Persist::ReConfigure(config);
 }
 
 void Announcement::PutParams(xmlTextWriterPtr writer)
 {
-  Persist::PutParams(writer);
-  xmlTextWriterStartElement(writer, BAD_CAST "announcement_types");
-  for(int i=0; i<10; i++)
-    if(announcement_types & (1<<i))
-      PutUnsigned(writer, "announcement_type", i);
-  xmlTextWriterEndElement(writer);
-  if(service_ref.length()>0)
-    PutString(writer, "service_ref", service_ref);
-  if(afs_ref.length()>0)
-    PutString(writer, "afs_ref", afs_ref);
+    Persist::PutParams(writer);
+    xmlTextWriterStartElement(writer, BAD_CAST "announcement_types");
+    for(int i=0; i<10; i++)
+        if(announcement_types & (1<<i))
+            PutUnsigned(writer, "announcement_type", i);
+    xmlTextWriterEndElement(writer);
+    if(service_ref.length()>0)
+        PutString(writer, "service_ref", service_ref);
+    if(afs_ref.length()>0)
+        PutString(writer, "afs_ref", afs_ref);
 }

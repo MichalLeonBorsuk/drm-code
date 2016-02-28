@@ -27,97 +27,97 @@
 
 // Construct a Galois Field of size 2^NumberOfElementsLog2
 GaloisField::GaloisField(const unsigned int NumberOfElementsLog2, const unsigned int GeneratorPolynomial)
-: mNumberOfElements(1<<NumberOfElementsLog2)
-, mNumberOfElementsLog2(NumberOfElementsLog2)
-, mValueLookupTable(mNumberOfElements, 0)
-, mLogLookupTable(mNumberOfElements-1, 0)
+    : mNumberOfElements(1<<NumberOfElementsLog2)
+    , mNumberOfElementsLog2(NumberOfElementsLog2)
+    , mValueLookupTable(mNumberOfElements, 0)
+    , mLogLookupTable(mNumberOfElements-1, 0)
 {
-	// Deal with the zero element specially
-	GaloisFieldElement *pElement = new GaloisFieldElementZero(this);
-	mValueLookupTable[0] = pElement;
+    // Deal with the zero element specially
+    GaloisFieldElement *pElement = new GaloisFieldElementZero(this);
+    mValueLookupTable[0] = pElement;
 
 
-	// Now fill up the lookup-tables with the nonzero elements
-	GaloisFieldGenerator fieldGenerator(mNumberOfElementsLog2, GeneratorPolynomial);
-	for (unsigned int index = 0; index < mNumberOfElements - 1; index++)
-	{
-		unsigned int value = fieldGenerator.GetNextValue();
-		pElement = new GaloisFieldElementNonzero(index, value, this);
-		mValueLookupTable[value] = pElement;
-		mLogLookupTable[index] = pElement;
-	}
-	
+    // Now fill up the lookup-tables with the nonzero elements
+    GaloisFieldGenerator fieldGenerator(mNumberOfElementsLog2, GeneratorPolynomial);
+    for (unsigned int index = 0; index < mNumberOfElements - 1; index++)
+    {
+        unsigned int value = fieldGenerator.GetNextValue();
+        pElement = new GaloisFieldElementNonzero(index, value, this);
+        mValueLookupTable[value] = pElement;
+        mLogLookupTable[index] = pElement;
+    }
+
 
 }
 
 GaloisField::~GaloisField()
 {
-	// Delete all the members
-	for (vector<GaloisFieldElement *>::iterator p = mValueLookupTable.begin();
-		p != mValueLookupTable.end();
-		p++)
-	{
-		if (*p)
-			delete *p;
-	}
+    // Delete all the members
+    for (vector<GaloisFieldElement *>::iterator p = mValueLookupTable.begin();
+            p != mValueLookupTable.end();
+            p++)
+    {
+        if (*p)
+            delete *p;
+    }
 
 }
 
 FiniteFieldElement GaloisField::AlphaToPower(const int power) const
 {
-	FiniteFieldElement x(AlphaToPowerPointer(power));
-	return x;
+    FiniteFieldElement x(AlphaToPowerPointer(power));
+    return x;
 }
 
 FiniteFieldElement GaloisField::GetElement(unsigned int Value) const
 {
-	FiniteFieldElement x(GetElementPointer(Value));
-	return x;
+    FiniteFieldElement x(GetElementPointer(Value));
+    return x;
 }
 
 const GaloisFieldElement * GaloisField::Add(const GaloisFieldElement * x, const GaloisFieldElement * y) const
 {
-	return GetElementPointer(x->Value() ^ y->Value());
+    return GetElementPointer(x->Value() ^ y->Value());
 }
 
 const GaloisFieldElement * GaloisField::Sub(const GaloisFieldElement * x, const GaloisFieldElement * y) const
 {
-	return GetElementPointer(x->Value() ^ y->Value());
+    return GetElementPointer(x->Value() ^ y->Value());
 }
 
 const GaloisFieldElement * GaloisField::Mul(const GaloisFieldElement * x, const GaloisFieldElement * y) const
 {
-	if (!x->IsZero() && !y->IsZero())
-		return AlphaToPowerPointer(x->Log() + y->Log());
-	else
-		return GetElementPointer(0);
+    if (!x->IsZero() && !y->IsZero())
+        return AlphaToPowerPointer(x->Log() + y->Log());
+    else
+        return GetElementPointer(0);
 }
 
 const GaloisFieldElement * GaloisField::Div(const GaloisFieldElement * x, const GaloisFieldElement * y) const
 {
-	if (x->IsZero())
-		return GetElementPointer(0);
-	else
-		return AlphaToPowerPointer(x->Log() - y->Log());
+    if (x->IsZero())
+        return GetElementPointer(0);
+    else
+        return AlphaToPowerPointer(x->Log() - y->Log());
 }
 
 
 const GaloisFieldElement * GaloisField::AlphaToPowerPointer(const int power) const
 {
-	return mLogLookupTable[ModuloIndex(power)];
+    return mLogLookupTable[ModuloIndex(power)];
 }
 
 const GaloisFieldElement * GaloisField::GetElementPointer(const unsigned int Value) const
 {
-	return mValueLookupTable[Value];
+    return mValueLookupTable[Value];
 }
 
 unsigned int GaloisField::ModuloIndex(const int Index) const
 {
-	if (Index<0)
-		return (unsigned int) ((int) mNumberOfElements-1 + (Index % ((int)mNumberOfElements-1)));
-	else
-		return (unsigned int) (Index % (mNumberOfElements-1));
+    if (Index<0)
+        return (unsigned int) ((int) mNumberOfElements-1 + (Index % ((int)mNumberOfElements-1)));
+    else
+        return (unsigned int) (Index % (mNumberOfElements-1));
 }
 
 
