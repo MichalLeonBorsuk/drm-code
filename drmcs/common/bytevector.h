@@ -33,23 +33,27 @@
 class bytevector : public bytev
 {
 public:
-  uint8_t in_progress, bits;
+    uint8_t in_progress, bits;
 
-  bytevector():bytev(),in_progress(0),bits(0){}
-  virtual ~bytevector() {}
-  virtual void clear() { bytev::clear(); in_progress=0; bits=0; }
-  void put(uint64_t, unsigned=8);
-  void put(const bitvector&);
-  void put(const string&);
-  void put(const bytev&);
-  void putbytes(const char *, unsigned);
-  uint64_t get(unsigned=8);
-  int64_t getSigned(unsigned);
-  void get(bytev&, unsigned);
-  uint8_t peek() const;
-  bool dataAvailable() const;
+    bytevector():bytev(),in_progress(0),bits(0) {}
+    virtual ~bytevector() {}
+    virtual void clear() {
+        bytev::clear();
+        in_progress=0;
+        bits=0;
+    }
+    void put(uint64_t, unsigned=8);
+    void put(const bitvector&);
+    void put(const string&);
+    void put(const bytev&);
+    void putbytes(const char *, unsigned);
+    uint64_t get(unsigned=8);
+    int64_t getSigned(unsigned);
+    void get(bytev&, unsigned);
+    uint8_t peek() const;
+    bool dataAvailable() const;
 protected:
-  virtual void putb(uint8_t);
+    virtual void putb(uint8_t);
 };
 
 bytevector& operator<<(bytevector& b, const bytev& c);
@@ -58,8 +62,8 @@ bytevector& operator<< (bytevector& b, const string& c);
 
 template<size_t X> bytevector& operator<< (bytevector& b, const bitset<X>& c)
 {
-  b.put(c.to_ulong(), static_cast<unsigned>(c.size()));
-  return b;
+    b.put(c.to_ulong(), static_cast<unsigned>(c.size()));
+    return b;
 }
 
 

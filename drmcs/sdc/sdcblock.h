@@ -34,7 +34,7 @@ public:
 
   SdcBlock():transmit_buffer(),static_data(),requested(),change_allowed(true) {}
   SdcBlock(const bytevector& data):
-    transmit_buffer(),requested(),change_allowed(true)
+    transmit_buffer(),static_data(),requested(),change_allowed(true)
   { sendByDefault(data); }
   void sendByDefault(const bytevector& data)
   { 

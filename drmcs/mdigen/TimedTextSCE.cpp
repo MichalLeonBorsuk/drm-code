@@ -23,6 +23,7 @@
 \******************************************************************************/
 
 #include "TimedTextSCE.h"
+#include <unistd.h>
 
 using namespace std;
 

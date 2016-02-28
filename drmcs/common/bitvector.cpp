@@ -29,26 +29,26 @@ using namespace std;
 
 void bitvector::put(bitvector& bv)
 {
- for (uint16_t i = 0; i < bv.size(); i++)
-   push_back(bv[i]);
+    for (uint16_t i = 0; i < bv.size(); i++)
+        push_back(bv[i]);
 }
 
 void bitvector::put(uint64_t n, unsigned fmt)
 {
-  uint64_t t = n;
-  uint64_t mask = 0x01;
-  for (int i=fmt-1; i >=0; i--) {
-    if ((t >> i) & mask)
-      push_back(true);
-    else
-      push_back(false);
-  }
+    uint64_t t = n;
+    uint64_t mask = 0x01;
+    for (int i=fmt-1; i >=0; i--) {
+        if ((t >> i) & mask)
+            push_back(true);
+        else
+            push_back(false);
+    }
 }
 
 void bitvector::put(const bytev& s)
 {
-  for(unsigned i=0; i<s.size(); i++)
-    put(s[i], 8); 
+    for(unsigned i=0; i<s.size(); i++)
+        put(s[i], 8);
 }
 
 

@@ -31,11 +31,17 @@
 class crcbytevector : public bytevector
 {
 public:
-  CCrc16 crc;
-  virtual ~crcbytevector() {}
-  virtual void clear() { crc.reset(); bytevector::clear(); }
+    CCrc16 crc;
+    virtual ~crcbytevector() {}
+    virtual void clear() {
+        crc.reset();
+        bytevector::clear();
+    }
 protected:
-  virtual void putb(uint8_t b) { push_back(b);  crc.accumulate(b); }
+    virtual void putb(uint8_t b) {
+        push_back(b);
+        crc.accumulate(b);
+    }
 };
 
 #endif

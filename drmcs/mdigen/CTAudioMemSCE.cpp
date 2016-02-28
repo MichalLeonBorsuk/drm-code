@@ -22,10 +22,9 @@
  *
 \******************************************************************************/
 
+#include <arpa/inet.h>
 #include <string.h>
-#include <stdio.h>
 #include "CTAudioMemSCE.h"
-#include <platform.h>
 
 void CCTAudioMemSCE::ReConfigure(const ServiceComponent& config)
 {

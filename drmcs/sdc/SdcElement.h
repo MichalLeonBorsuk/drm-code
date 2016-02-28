@@ -31,6 +31,7 @@ class SdcElement
 {
 public:
 
+  SdcElement();
   bytevector out;
   unsigned type;
   size_t size() { return out.size(); }

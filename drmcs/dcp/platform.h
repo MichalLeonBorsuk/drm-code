@@ -48,7 +48,7 @@ typedef unsigned __int32 uint32_t;
 typedef unsigned __int16 uint16_t;
 typedef unsigned __int8 uint8_t;
 #else
-#include <stdint.h>
+#include <inttypes.h>
 #endif
 
 #ifdef WIN32
@@ -58,8 +58,8 @@ typedef unsigned long in_addr_t;
 # define MSG_TRUNC 0
 # define sleep(n) Sleep(1000*n);
 #else
-#include <netinet/in.h>
-#include <arpa/inet.h>
+//#include <netinet/in.h>
+//#include <arpa/inet.h>
 typedef int SOCKET;
 #define SOCKET_ERROR (-1)
 #define INVALID_SOCKET (-1)

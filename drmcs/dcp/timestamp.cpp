@@ -25,35 +25,18 @@
 #include <stdio.h>
 #include "timestamp.h"
 #include <time.h>
-#ifdef WIN32
-#include <windows.h>
-#endif
-
 #include <iostream>
 using namespace std;
 
 void clock_getrealtime(struct timespec *tp)
 {
-#if _POSIX_TIMERS>0
+#if _POSIX_C_SOURCE >= 199309L
   clock_gettime(CLOCK_REALTIME, tp);
-#else
-#ifdef WIN32
-  /* The FILETIME structure is a 64-bit value representing 
-   * the number of 100-nanosecond intervals since January 1, 1601. 
-   */
-  FILETIME ft;
-  GetSystemTimeAsFileTime(&ft);
-  uint64_t t = *(uint64_t*)&ft - 116444736000000000ULL;
-  uint64_t sec = t/10000000ULL;
-  uint64_t nsec = 100ULL*(t - 10000000ULL*sec);
-  tp->tv_sec = static_cast<unsigned long>(sec);
-  tp->tv_nsec = static_cast<unsigned long>(nsec);
 #else
   struct timeval * tv;
   gettimeofday(&tv, NULL);
   tp->tv_sec = tv.tv_sec;
   tp->tv_nsec = 1000UL*tv_usec;
-#endif
 #endif
 } 
 

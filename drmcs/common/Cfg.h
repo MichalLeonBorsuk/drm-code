@@ -25,8 +25,8 @@
 #ifndef _CFG_H
 #define _CFG_H
 
-#include <persist.h>
-#include <libxml/xmlwriter.h>
+#include "persist.h"
+#include <libxml2/libxml/xmlwriter.h>
 #include <vector>
 #include <string>
 
@@ -36,13 +36,13 @@ class Cfg : public Persist
 {
 public:
 
-  string config_file, m_stdout, m_stderr;
-  int utco, max_frames, initial_reconfiguration_index;
+    string config_file, m_stdout, m_stderr;
+    int utco, max_frames, initial_reconfiguration_index;
 
-  Cfg();
-  virtual ~Cfg() {}
-  void GetParams(xmlNodePtr n);
-  void PutParams(xmlTextWriterPtr writer);
+    Cfg();
+    virtual ~Cfg() {}
+    void GetParams(xmlNodePtr n);
+    void PutParams(xmlTextWriterPtr writer);
 
 };
 #endif

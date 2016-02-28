@@ -32,10 +32,10 @@ typedef unsigned __int32 uint32_t;
 typedef unsigned __int16 uint16_t;
 typedef unsigned __int8 uint8_t;
 #else
-#include <stdint.h>
+#include <cstdint>
 #endif
 
-#include <bytev.h>
+#include "bytev.h"
 
 #include <vector>
 using namespace std;
@@ -43,13 +43,13 @@ using namespace std;
 class bitvector : public vector<bool>
 {
 public:
-  bitvector():vector<bool>() {}
-  bitvector(bool* pb1, bool* pb2) : vector<bool>(pb1, pb2) {}
+    bitvector():vector<bool>() {}
+    bitvector(bool* pb1, bool* pb2) : vector<bool>(pb1, pb2) {}
 //  const bool* data() const { return &(*this)[0];}
 
-  void put(uint64_t n, unsigned fmt);
-  void put(const bytev& s);
-  void put(bitvector& bv);
+    void put(uint64_t n, unsigned fmt);
+    void put(const bytev& s);
+    void put(bitvector& bv);
 };
 
 #endif

@@ -23,8 +23,8 @@
 \******************************************************************************/
 
 
+#include <arpa/inet.h>
 #include "FileSCE.h"
-#include <platform.h>
 #include <iostream>
 
 FileSCE::~FileSCE()

@@ -26,9 +26,7 @@
 #define _MONITORED_FILE_H
 
 #include <string>
-#ifndef WIN32
 #include <fam.h>
-#endif
 
   /*
    * works just like an old fashioned file, but can be polled for change and

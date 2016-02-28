@@ -22,21 +22,12 @@
  *
 \******************************************************************************/
 
-#include <string.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
-#include <fcntl.h>
-#include <ctype.h>
-#ifndef WIN32
-#include <stropts.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/tcp.h>
-#include <netdb.h>
-#include <errno.h>
-#endif
-#include <iostream>
+#include <cstring>
+//#include <cstdio>
+#include <ctime>
+//#include <fcntl.h>
+#include <cctype>
+//#include <iostream>
 #include <sstream>
 
 #include "TickerTextSCE.h"
