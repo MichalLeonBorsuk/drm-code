@@ -30,98 +30,98 @@ using namespace std;
 
 static size_t write_callback( void  *ptr,  size_t size, size_t nmemb, void *stream)
 {
-  char* buffer = (char*)stream;
-  size_t n = size*nmemb;
-  if(n>0)
-    memcpy(buffer, ptr, n);
-  for(size_t i=n-1; i>=0 && (buffer[i]=='\n' || buffer[i]=='\r'); i--)
-    buffer[i] = 0;
-  //cout << "w " << buffer << endl;
-  return n;
+    char* buffer = (char*)stream;
+    size_t n = size*nmemb;
+    if(n>0)
+        memcpy(buffer, ptr, n);
+    for(size_t i=n-1; i>=0 && (buffer[i]=='\n' || buffer[i]=='\r'); i--)
+        buffer[i] = 0;
+    //cout << "w " << buffer << endl;
+    return n;
 }
 
 static void* curl_callback(void* arg)
 {
-  webTextSCE* This = (webTextSCE*)arg;
-  while(This->running) {
-    if(This->handle==NULL) {
-      This->handle = curl_easy_init( );
-      curl_easy_setopt(This->handle, CURLOPT_URL, This->current.source_selector.c_str());
-      curl_easy_setopt(This->handle, CURLOPT_WRITEFUNCTION, write_callback);
-      curl_easy_setopt(This->handle, CURLOPT_WRITEDATA, This->buffer);
+    webTextSCE* This = (webTextSCE*)arg;
+    while(This->running) {
+        if(This->handle==NULL) {
+            This->handle = curl_easy_init( );
+            curl_easy_setopt(This->handle, CURLOPT_URL, This->current.source_selector.c_str());
+            curl_easy_setopt(This->handle, CURLOPT_WRITEFUNCTION, write_callback);
+            curl_easy_setopt(This->handle, CURLOPT_WRITEDATA, This->buffer);
+        }
+        memset(This->buffer, 0, sizeof(This->buffer));
+        CURLcode err = curl_easy_perform(This->handle);
+        if(err==0)
+            This->changed = true;
+        else
+            cerr << "curl error " << err << endl;
+        timespec delay;
+        delay.tv_sec = 10;
+        delay.tv_nsec = 0;
+        nanosleep(&delay, NULL);
     }
-    memset(This->buffer, 0, sizeof(This->buffer));
-    CURLcode err = curl_easy_perform(This->handle);
-    if(err==0)
-      This->changed = true;
-    else
-      cerr << "curl error " << err << endl;
-	timespec delay;
-	delay.tv_sec = 10;
-	delay.tv_nsec = 0;
-    nanosleep(&delay, NULL);
-  }
-  curl_easy_cleanup(This->handle);
-  return NULL;
+    curl_easy_cleanup(This->handle);
+    return NULL;
 }
 
 webTextSCE::webTextSCE():CTranslatingTextSCE(),
-latin1_message(),utf8_message(),in_message(false)
+    latin1_message(),utf8_message(),in_message(false)
 {
-  handle = NULL;
-  running = true;
-  int err = pthread_create(&thread, NULL, curl_callback, this);
-  if(err<0)
-    cerr << "can't create thread " << err << endl;
+    handle = NULL;
+    running = true;
+    int err = pthread_create(&thread, NULL, curl_callback, this);
+    if(err<0)
+        cerr << "can't create thread " << err << endl;
 }
 
 webTextSCE::~webTextSCE()
 {
-  running = false;
-  pthread_join(thread, NULL);
+    running = false;
+    pthread_join(thread, NULL);
 }
 
 webTextSCE::webTextSCE(const webTextSCE& p)
-:CTranslatingTextSCE(p),
-latin1_message(),utf8_message(),
-in_message(p.in_message)
+    :CTranslatingTextSCE(p),
+     latin1_message(),utf8_message(),
+     in_message(p.in_message)
 {
-  handle = NULL;
-  running = true;
-  int err = pthread_create(&thread, NULL, curl_callback, this);
-  if(err<0)
-    cerr << "can't create thread " << err << endl;
+    handle = NULL;
+    running = true;
+    int err = pthread_create(&thread, NULL, curl_callback, this);
+    if(err<0)
+        cerr << "can't create thread " << err << endl;
 }
 
 webTextSCE& webTextSCE::operator=(const webTextSCE& e)
 {
-  *reinterpret_cast<CTranslatingTextSCE*>(this) = e;
-  latin1_message = e.latin1_message;
-  utf8_message = e.utf8_message;
-  in_message = e.in_message;
-  handle = NULL;
-  running = true;
-  int err = pthread_create(&thread, NULL, curl_callback, this);
-  if(err<0)
-    cerr << "can't create thread " << err << endl;
-  return *this;
+    *reinterpret_cast<CTranslatingTextSCE*>(this) = e;
+    latin1_message = e.latin1_message;
+    utf8_message = e.utf8_message;
+    in_message = e.in_message;
+    handle = NULL;
+    running = true;
+    int err = pthread_create(&thread, NULL, curl_callback, this);
+    if(err<0)
+        cerr << "can't create thread " << err << endl;
+    return *this;
 }
 
 void webTextSCE::ReConfigure(const ServiceComponent& config)
 {
-  CTranslatingTextSCE::ReConfigure(config);
-  changed = false;
-  if(handle)
-    curl_easy_cleanup(handle);
-  handle = NULL;
+    CTranslatingTextSCE::ReConfigure(config);
+    changed = false;
+    if(handle)
+        curl_easy_cleanup(handle);
+    handle = NULL;
 }
 
 string webTextSCE::next_message()
 {
-  if(changed) {
-    utf8_message = buffer;
-    changed = false;
-  }
-  //cout << utf8_message << endl;
-  return utf8_message;
+    if(changed) {
+        utf8_message = buffer;
+        changed = false;
+    }
+    //cout << utf8_message << endl;
+    return utf8_message;
 }

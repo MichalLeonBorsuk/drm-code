@@ -27,74 +27,74 @@
 using namespace std;
 
 FrequencyGroup::FrequencyGroup():Persist(),
-   region_ref(""), schedule_ref(""),
-   region_id(-1), schedule_id(-1),frequency(0)
+    region_ref(""), schedule_ref(""),
+    region_id(-1), schedule_id(-1),frequency(0)
 
 {
-  clearConfig();
-  tag="afs_mux_frequency_group";
+    clearConfig();
+    tag="afs_mux_frequency_group";
 }
 
 FrequencyGroup::FrequencyGroup(const FrequencyGroup& a)
-:Persist(a),
-   region_ref(a.region_ref), schedule_ref(a.schedule_ref),
-   region_id(a.region_id), schedule_id(a.schedule_id),frequency(a.frequency)
+    :Persist(a),
+     region_ref(a.region_ref), schedule_ref(a.schedule_ref),
+     region_id(a.region_id), schedule_id(a.schedule_id),frequency(a.frequency)
 {
 }
 
 FrequencyGroup& FrequencyGroup::operator=(const FrequencyGroup& a)
 {
-  *reinterpret_cast<Persist *>(this) = Persist(a);
-   region_ref = a.region_ref;
-   schedule_ref = a.schedule_ref;
-   region_id = a.region_id;
-   schedule_id = a.schedule_id;
-   frequency = a.frequency;
-  return *this;
+    *reinterpret_cast<Persist *>(this) = Persist(a);
+    region_ref = a.region_ref;
+    schedule_ref = a.schedule_ref;
+    region_id = a.region_id;
+    schedule_id = a.schedule_id;
+    frequency = a.frequency;
+    return *this;
 }
 
 void FrequencyGroup::clearConfig()
 {
-  Persist::clearConfig();
-   region_ref.clear();
-   schedule_ref.clear();
-   region_id = -1;
-   schedule_id = -1;
-   frequency.clear();
+    Persist::clearConfig();
+    region_ref.clear();
+    schedule_ref.clear();
+    region_id = -1;
+    schedule_id = -1;
+    frequency.clear();
 }
 
 FrequencyGroup::~FrequencyGroup()
 {
-  clearConfig();
+    clearConfig();
 }
 
 void FrequencyGroup::GetParams(xmlNodePtr n)
 {
-  misconfiguration = false;
-  parseIDREF(n, "region_ref", region_ref);
-  parseIDREF(n, "schedule_ref", schedule_ref);
-  if(xmlStrEqual(n->name, BAD_CAST "frequencies")) {
-    for(xmlNodePtr e=n->children; e; e=e->next){
-      if(e->type==XML_ELEMENT_NODE){
-        int i=-1;
-        parseUnsigned(e, "frequency", &i);
-        if(i>0) {
-          frequency.push_back(i);
+    misconfiguration = false;
+    parseIDREF(n, "region_ref", region_ref);
+    parseIDREF(n, "schedule_ref", schedule_ref);
+    if(xmlStrEqual(n->name, BAD_CAST "frequencies")) {
+        for(xmlNodePtr e=n->children; e; e=e->next) {
+            if(e->type==XML_ELEMENT_NODE) {
+                int i=-1;
+                parseUnsigned(e, "frequency", &i);
+                if(i>0) {
+                    frequency.push_back(i);
+                }
+            }
         }
-      }
     }
-  }
 }
 
 void FrequencyGroup::PutParams(xmlTextWriterPtr writer)
 {
-      if(region_ref.length()>0)
+    if(region_ref.length()>0)
         PutString(writer, "region_ref", region_ref);
-      if(schedule_ref.length()>0)
+    if(schedule_ref.length()>0)
         PutString(writer, "schedule_ref", schedule_ref);
-      xmlTextWriterStartElement(writer, BAD_CAST "frequencies");
-      for(size_t j=0; j<frequency.size(); j++) {
+    xmlTextWriterStartElement(writer, BAD_CAST "frequencies");
+    for(size_t j=0; j<frequency.size(); j++) {
         PutUnsigned(writer, "frequency", frequency[j]);
-      }
-      xmlTextWriterEndElement(writer);
+    }
+    xmlTextWriterEndElement(writer);
 }

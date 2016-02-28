@@ -26,7 +26,7 @@
 
 Schedule::Schedule():Persist(),interval()
 {
-  clearConfig();
+    clearConfig();
     tag="schedule";
 }
 
@@ -43,59 +43,59 @@ Schedule& Schedule::operator=(const Schedule& s)
 
 void Schedule::clearConfig()
 {
-  interval.clear();
+    interval.clear();
 }
 
 Schedule::~Schedule()
 {
-  clearConfig();
+    clearConfig();
 }
 
 void Schedule::GetParams(xmlNodePtr c)
 {
-      if(xmlStrEqual(c->name, BAD_CAST "interval")) {
+    if(xmlStrEqual(c->name, BAD_CAST "interval")) {
         Interval v;
-        for(xmlNodePtr d=c->children; d; d=d->next){
-          if(d->type==XML_ELEMENT_NODE){
-            if(xmlStrEqual(d->name, BAD_CAST "days")) {
-              xmlChar *dc = xmlNodeGetContent(d);
-              v.days = (char*)dc;
-              xmlFree(dc);
+        for(xmlNodePtr d=c->children; d; d=d->next) {
+            if(d->type==XML_ELEMENT_NODE) {
+                if(xmlStrEqual(d->name, BAD_CAST "days")) {
+                    xmlChar *dc = xmlNodeGetContent(d);
+                    v.days = (char*)dc;
+                    xmlFree(dc);
+                }
+                if(xmlStrEqual(d->name, BAD_CAST "start_time")) {
+                    xmlChar *start = xmlNodeGetContent(d);
+                    sscanf((char*)start, "%u:%u", &v.start_hour, &v.start_minute);
+                    xmlFree(start);
+                }
+                parseUnsigned(d, "duration", &v.duration);
             }
-            if(xmlStrEqual(d->name, BAD_CAST "start_time")) {
-              xmlChar *start = xmlNodeGetContent(d);
-              sscanf((char*)start, "%u:%u", &v.start_hour, &v.start_minute);
-	       xmlFree(start);
-            }
-            parseUnsigned(d, "duration", &v.duration);
-          }
         }
         interval.push_back(v);
-      }
+    }
 }
 
 void Schedule::ReConfigure(xmlNodePtr config)
 {
-  misconfiguration=false;
-  Persist::ReConfigure(config);
-  if(interval.size()>15)
-    misconfiguration=true;
+    misconfiguration=false;
+    Persist::ReConfigure(config);
+    if(interval.size()>15)
+        misconfiguration=true;
 }
 
 void Schedule::PutParams(xmlTextWriterPtr writer)
 {
-  Persist::PutParams(writer);
-  for(size_t i=0; i<interval.size(); i++) {
-    xmlTextWriterStartElement(writer, BAD_CAST "interval");
-	PutString(writer, "days", interval[i].days);
-    xmlTextWriterStartElement(writer, BAD_CAST "start_time");
-	xmlTextWriterWriteFormatString(writer, "%02u:%02u",
-              interval[i].start_hour, interval[i].start_minute);
-    xmlTextWriterEndElement(writer);
-    xmlTextWriterStartComment(writer);
-    xmlTextWriterWriteString(writer, BAD_CAST " duration is in minutes ");
-    xmlTextWriterEndComment(writer);
-    PutUnsigned(writer, "duration", interval[i].duration);    
-    xmlTextWriterEndElement(writer);
-  }
+    Persist::PutParams(writer);
+    for(size_t i=0; i<interval.size(); i++) {
+        xmlTextWriterStartElement(writer, BAD_CAST "interval");
+        PutString(writer, "days", interval[i].days);
+        xmlTextWriterStartElement(writer, BAD_CAST "start_time");
+        xmlTextWriterWriteFormatString(writer, "%02u:%02u",
+                                       interval[i].start_hour, interval[i].start_minute);
+        xmlTextWriterEndElement(writer);
+        xmlTextWriterStartComment(writer);
+        xmlTextWriterWriteString(writer, BAD_CAST " duration is in minutes ");
+        xmlTextWriterEndComment(writer);
+        PutUnsigned(writer, "duration", interval[i].duration);
+        xmlTextWriterEndElement(writer);
+    }
 }

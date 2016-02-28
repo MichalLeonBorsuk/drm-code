@@ -26,12 +26,12 @@
 
 AFSServicelist::AFSServicelist():Persist(),short_id(4),sg()
 {
-  tag = "afs_service_list";
-  misconfiguration = false;
+    tag = "afs_service_list";
+    misconfiguration = false;
 }
 
 AFSServicelist::AFSServicelist(const AFSServicelist& l)
-:Persist(l),short_id(l.short_id),sg(l.sg)
+    :Persist(l),short_id(l.short_id),sg(l.sg)
 {
 }
 
@@ -41,35 +41,35 @@ AFSServicelist::~AFSServicelist()
 
 AFSServicelist& AFSServicelist::operator=(const AFSServicelist& l)
 {
-  sg = l.sg;
-  short_id = l.short_id;
-  return *this;
+    sg = l.sg;
+    short_id = l.short_id;
+    return *this;
 }
 
 void AFSServicelist::clearConfig()
 {
-  sg.clear();
-  misconfiguration = false;
+    sg.clear();
+    misconfiguration = false;
 }
 
 void AFSServicelist::GetParams(xmlNodePtr n)
 {
-  misconfiguration = false;
-  if(xmlStrEqual(n->name,BAD_CAST "afs_service_group")) {
-    ServiceGroup s;
-    s.ReConfigure(n);
-    sg.push_back(s);
-    misconfiguration |= s.misconfiguration;
-  }
+    misconfiguration = false;
+    if(xmlStrEqual(n->name,BAD_CAST "afs_service_group")) {
+        ServiceGroup s;
+        s.ReConfigure(n);
+        sg.push_back(s);
+        misconfiguration |= s.misconfiguration;
+    }
 }
 
 void AFSServicelist::PutParams(xmlTextWriterPtr writer)
 {
-  Persist::PutParams(writer);
-  if(sg.size()>0) {
-    for(size_t i=0; i<sg.size(); i++) {
-      sg[i].Configuration(writer);
+    Persist::PutParams(writer);
+    if(sg.size()>0) {
+        for(size_t i=0; i<sg.size(); i++) {
+            sg[i].Configuration(writer);
+        }
     }
-  }
 }
 

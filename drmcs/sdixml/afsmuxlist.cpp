@@ -25,27 +25,27 @@
 #include "afsmuxlist.h"
 
 AFSMuxlist::AFSMuxlist():Persist(),fg(),carried_short_id(),
-sync(false),base_layer(true),restricted_services(false)
+    sync(false),base_layer(true),restricted_services(false)
 {
-  tag = "afs_multiplex_list";
-  misconfiguration = false;
+    tag = "afs_multiplex_list";
+    misconfiguration = false;
 }
 
 AFSMuxlist::AFSMuxlist(const AFSMuxlist& l):Persist(l),
-fg(l.fg),carried_short_id(l.carried_short_id),
-sync(l.sync),base_layer(l.base_layer),restricted_services(l.restricted_services)
+    fg(l.fg),carried_short_id(l.carried_short_id),
+    sync(l.sync),base_layer(l.base_layer),restricted_services(l.restricted_services)
 {
 }
 
 AFSMuxlist& AFSMuxlist::operator=(const AFSMuxlist& l)
 {
-  *reinterpret_cast<Persist *>(this) = Persist(l);
-  fg = l.fg;
-  carried_short_id = l.carried_short_id;
-  sync = l.sync;
-  base_layer = l.base_layer;
-  restricted_services = l.restricted_services;
-  return *this;
+    *reinterpret_cast<Persist *>(this) = Persist(l);
+    fg = l.fg;
+    carried_short_id = l.carried_short_id;
+    sync = l.sync;
+    base_layer = l.base_layer;
+    restricted_services = l.restricted_services;
+    return *this;
 }
 
 AFSMuxlist::~AFSMuxlist()
@@ -54,31 +54,31 @@ AFSMuxlist::~AFSMuxlist()
 
 void AFSMuxlist::clearConfig()
 {
-  fg.clear();
-  carried_short_id.clear();
-  base_layer=true;
-  sync=false;
-  restricted_services=false;
-  misconfiguration = false;
+    fg.clear();
+    carried_short_id.clear();
+    base_layer=true;
+    sync=false;
+    restricted_services=false;
+    misconfiguration = false;
 }
 
 void AFSMuxlist::GetParams(xmlNodePtr n)
 {
-  misconfiguration = false;
-  if(xmlStrEqual(n->name,BAD_CAST "afs_mux_frequency_group")) {
-    FrequencyGroup f;
-    f.ReConfigure(n);
-    fg.push_back(f);
-    misconfiguration |= f.misconfiguration;
-  }
+    misconfiguration = false;
+    if(xmlStrEqual(n->name,BAD_CAST "afs_mux_frequency_group")) {
+        FrequencyGroup f;
+        f.ReConfigure(n);
+        fg.push_back(f);
+        misconfiguration |= f.misconfiguration;
+    }
 }
 
 void AFSMuxlist::PutParams(xmlTextWriterPtr writer)
 {
-  Persist::PutParams(writer);
-  if(fg.size()>0) {
-    for(size_t i=0; i<fg.size(); i++) {
-      fg[i].Configuration(writer);
+    Persist::PutParams(writer);
+    if(fg.size()>0) {
+        for(size_t i=0; i<fg.size(); i++) {
+            fg[i].Configuration(writer);
+        }
     }
-  }
 }

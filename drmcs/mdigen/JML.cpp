@@ -50,7 +50,7 @@ void compress(bytevector& out, const bytevector& in, uint8_t type)
     if(deflateInit2(&strm, 9, Z_DEFLATED, -15, 8, Z_DEFAULT_STRATEGY)!=Z_OK)
         throw(string("zlib init error"));
     if(deflate(&strm, Z_FINISH)!=Z_STREAM_END)
-    throw(string("zlib process error"));
+        throw(string("zlib process error"));
     if(deflateEnd(&strm)!=Z_OK)
         throw(string("zlib finish error"));
     out.putbytes((char*)o, strm.total_out);
@@ -123,22 +123,22 @@ static void decodeDS(std::ostream& out, const unsigned char* buf, size_t n)
     case Padding:
         break;
     case AbsoluteTimeout:
-        {
-            time_t n = (buf[0] << 16)+(buf[1] << 8)+buf[2];
-            n = epoch + 15*60*n;
-            tm tm = *gmtime(&n);
-            char s[32];
-            putenv(const_cast<char*>("TZ=UTC"));
-            strftime(s, sizeof(s), "%Y-%m-%dT%T", &tm);
-            out << "<span AbsoluteTimeout='" << s << "'/>";
-        }
-        break;
+    {
+        time_t n = (buf[0] << 16)+(buf[1] << 8)+buf[2];
+        n = epoch + 15*60*n;
+        tm tm = *gmtime(&n);
+        char s[32];
+        putenv(const_cast<char*>("TZ=UTC"));
+        strftime(s, sizeof(s), "%Y-%m-%dT%T", &tm);
+        out << "<span AbsoluteTimeout='" << s << "'/>";
+    }
+    break;
     case RelativeTimeout:
-        {
-            int n = 15*60*((buf[0] << 16)+(buf[1] << 8)+buf[2]);
-            out << "<span RelativeTimeout='" << n << "'/>";
-        }
-        break;
+    {
+        int n = 15*60*((buf[0] << 16)+(buf[1] << 8)+buf[2]);
+        out << "<span RelativeTimeout='" << n << "'/>";
+    }
+    break;
     case GeneralLinkTarger:
         break;
     case Keyword:
@@ -195,25 +195,25 @@ void Text::asHTML(std::ostream& out)
             out << "<span class='EndOfIntroductorySection'/>";
             break;
         case DataSectionStart:
+        {
+            char buf[4096];
+            size_t p=0;
+            in.get(c);
+            size_t n = int(*reinterpret_cast<unsigned char*>(&c))+1;
+            while(n>0)
             {
-                char buf[4096];
-                size_t p=0;
-                in.get(c);
-                size_t n = int(*reinterpret_cast<unsigned char*>(&c))+1;
-                while(n>0)
+                in.read(&buf[p], n);
+                p+=n;
+                if(n==256 && in.peek()==DataSectionContinuation)
                 {
-                    in.read(&buf[p], n);
-                    p+=n;
-                    if(n==256 && in.peek()==DataSectionContinuation)
-                    {
-                        in.ignore(1);
-                        in.get(c);
-                        n = int(*reinterpret_cast<unsigned char*>(&c))+1;
-                    }
+                    in.ignore(1);
+                    in.get(c);
+                    n = int(*reinterpret_cast<unsigned char*>(&c))+1;
                 }
-                decodeDS(out, reinterpret_cast<unsigned char*>(buf), p);
             }
-            break;
+            decodeDS(out, reinterpret_cast<unsigned char*>(buf), p);
+        }
+        break;
         case DataSectionContinuation:
             in.ignore(1); // should not happen
             break;

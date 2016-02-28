@@ -109,76 +109,76 @@ small objects.
 
 void PacketEncoder::ReConfigure(const ServiceComponent& config)
 {
-  // note - packet encoder continuity index (ci) not reset if packet id not changed
-  if(packet_id != config.packet_id)
-    ci = 0;
-  packet_id=config.packet_id;
-  packet_size=config.packet_size;
+    // note - packet encoder continuity index (ci) not reset if packet id not changed
+    if(packet_id != config.packet_id)
+        ci = 0;
+    packet_id=config.packet_id;
+    packet_size=config.packet_size;
 }
 
 void PacketEncoder::makePacket(crcbytevector& packet, bytevector& in)
 {
-  bytevector::iterator p  = in.begin(), q  = in.end();
-  makePacket(packet, p, q, true, true);
+    bytevector::iterator p  = in.begin(), q  = in.end();
+    makePacket(packet, p, q, true, true);
 }
 
 void PacketEncoder::makePacket(crcbytevector& packet,
-              bytevector::iterator& from, bytevector::iterator& to,
-              bool first, bool last)
+                               bytevector::iterator& from, bytevector::iterator& to,
+                               bool first, bool last)
 {
-  int bytes = int(to-from);
-  uint16_t padding=packet_size;
-  if(bytes>=0 && bytes<=packet_size)
-    padding -= bytes;
-  else {
-    return; // should throw?
-  }
-  packet.crc.reset();
-  packet.put(first?1:0, 1); // first indicator
-  packet.put(last?1:0, 1); // last indicator
-  packet.put(packet_id, 2); // packet id
-  if(padding==0) {
-    packet.put(0, 1); // padding indicator
-    packet.put(ci++, 3);
-    while(from!=to) {
-      uint64_t c = *from;
-      from++;
-      packet.put(c, 8);
+    int bytes = int(to-from);
+    uint16_t padding=packet_size;
+    if(bytes>=0 && bytes<=packet_size)
+        padding -= bytes;
+    else {
+        return; // should throw?
     }
-  } else {
-    packet.put(1, 1); // padding indicator
-    packet.put(ci++, 3);
-    packet.put(packet_size-padding, 8);
-    while(from!=to) {
-      uint64_t c = *from++;
-      packet.put(c, 8);
+    packet.crc.reset();
+    packet.put(first?1:0, 1); // first indicator
+    packet.put(last?1:0, 1); // last indicator
+    packet.put(packet_id, 2); // packet id
+    if(padding==0) {
+        packet.put(0, 1); // padding indicator
+        packet.put(ci++, 3);
+        while(from!=to) {
+            uint64_t c = *from;
+            from++;
+            packet.put(c, 8);
+        }
+    } else {
+        packet.put(1, 1); // padding indicator
+        packet.put(ci++, 3);
+        packet.put(packet_size-padding, 8);
+        while(from!=to) {
+            uint64_t c = *from++;
+            packet.put(c, 8);
+        }
+        for(int i=1; i<padding; i++) {
+            packet.put(0, 8);
+        }
     }
-    for(int i=1; i<padding; i++){
-      packet.put(0, 8);
-    }
-  }
-  packet.put(packet.crc.result(), 16);
+    packet.put(packet.crc.result(), 16);
 }
 
 void PacketEncoder::makeDataUnit(packetqueue& out, bytevector& in)
 {
-  bool first, last;
-  first=true;
-  last=false;
-  bytevector::iterator p = in.begin();
-  while(p<in.end())  
-  {
-    crcbytevector packet;
-    bytevector::iterator q;
-    if((in.end()-p)<=packet_size) {
-      last=true;
-      q=in.end();
-	} else {
-	  q = p+packet_size;
-	}
-    makePacket(packet, p, q, first, last);
-    out.push(packet);
-    first=false;
-    p=q;
-  }
+    bool first, last;
+    first=true;
+    last=false;
+    bytevector::iterator p = in.begin();
+    while(p<in.end())
+    {
+        crcbytevector packet;
+        bytevector::iterator q;
+        if((in.end()-p)<=packet_size) {
+            last=true;
+            q=in.end();
+        } else {
+            q = p+packet_size;
+        }
+        makePacket(packet, p, q, first, last);
+        out.push(packet);
+        first=false;
+        p=q;
+    }
 }

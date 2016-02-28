@@ -41,66 +41,66 @@ CTimedTextSCE::~CTimedTextSCE()
 
 CTimedTextSCE& CTimedTextSCE::operator=(const CTimedTextSCE& e)
 {
-  CTranslatingTextSCE(*this) = e;
-  message = e.message; 
-  next = message.begin();
-  return *this;
+    CTranslatingTextSCE(*this) = e;
+    message = e.message;
+    next = message.begin();
+    return *this;
 }
 
 
 string CTimedTextSCE::next_message()
 {
-  time_t now = time(NULL);
-  if(next == message.end())
-    next = message.begin();
-  if(next == message.end())
-    return ""; // empty!!!
-  time_t next_sec = last + next->offset.tv_sec;
-  if(next_sec > now)
-    sleep(next_sec - now);
-  string text = next->text;
-  next++;
-  last = now;
-  cout << text << endl;
-  return text;
+    time_t now = time(NULL);
+    if(next == message.end())
+        next = message.begin();
+    if(next == message.end())
+        return ""; // empty!!!
+    time_t next_sec = last + next->offset.tv_sec;
+    if(next_sec > now)
+        sleep(next_sec - now);
+    string text = next->text;
+    next++;
+    last = now;
+    cout << text << endl;
+    return text;
 }
 
 void CTimedTextSCE::ReConfigure(const ServiceComponent& config)
 {
-  cerr << "CTimedTextSCE::ReConfigure" << endl;
-  CTranslatingTextSCE::ReConfigure(config);
-  xmlDocPtr text_doc = xmlParseFile(current.source_selector.c_str());
-  if(text_doc == NULL) {
-    throw string("bad timed text file") + current.source_selector;
-  }
-  xmlNodePtr n;
-  for (n = text_doc->children; n->type != XML_ELEMENT_NODE; n = n->next);
-  for (n = n->children; n; n = n->next)
-  {
-    if (n->type == XML_ELEMENT_NODE)
-    {
-      if (xmlStrEqual (n->name, BAD_CAST "TextSample"))
-      {
-	    timed_text m;
-        xmlChar *s = xmlGetProp(n, BAD_CAST "sampleTime");
-        if(s) {
-		  char *st = (char*)s;
-		  m.offset.tv_sec = (atoi(st)*60+atoi(&st[3]))*60+atoi(&st[6]);
-		  m.offset.tv_nsec = atoi(&st[9])*1000000UL;
-          xmlFree(s);
-        }
-        s = xmlGetProp(n, BAD_CAST "text");
-        if(s) {
-          m.text = (char*)s;
-          xmlFree(s);
-        }
-		if(m.text[0]== '\'' && m.text[m.text.length()-1] == '\'')
-		  m.text = m.text.substr(1, m.text.length()-2);
-		message.push_back(m);
-      }
+    cerr << "CTimedTextSCE::ReConfigure" << endl;
+    CTranslatingTextSCE::ReConfigure(config);
+    xmlDocPtr text_doc = xmlParseFile(current.source_selector.c_str());
+    if(text_doc == NULL) {
+        throw string("bad timed text file") + current.source_selector;
     }
-  }
-  xmlFreeDoc(text_doc);
-  next = message.begin();
-  last = time(NULL);
+    xmlNodePtr n;
+    for (n = text_doc->children; n->type != XML_ELEMENT_NODE; n = n->next);
+    for (n = n->children; n; n = n->next)
+    {
+        if (n->type == XML_ELEMENT_NODE)
+        {
+            if (xmlStrEqual (n->name, BAD_CAST "TextSample"))
+            {
+                timed_text m;
+                xmlChar *s = xmlGetProp(n, BAD_CAST "sampleTime");
+                if(s) {
+                    char *st = (char*)s;
+                    m.offset.tv_sec = (atoi(st)*60+atoi(&st[3]))*60+atoi(&st[6]);
+                    m.offset.tv_nsec = atoi(&st[9])*1000000UL;
+                    xmlFree(s);
+                }
+                s = xmlGetProp(n, BAD_CAST "text");
+                if(s) {
+                    m.text = (char*)s;
+                    xmlFree(s);
+                }
+                if(m.text[0]== '\'' && m.text[m.text.length()-1] == '\'')
+                    m.text = m.text.substr(1, m.text.length()-2);
+                message.push_back(m);
+            }
+        }
+    }
+    xmlFreeDoc(text_doc);
+    next = message.begin();
+    last = time(NULL);
 }

@@ -29,55 +29,55 @@
 
 FileSCE::~FileSCE()
 {
-  if(file.is_open())
-    file.close();
-  if(buffer)
-    delete[] buffer;
+    if(file.is_open())
+        file.close();
+    if(buffer)
+        delete[] buffer;
 }
 
 void FileSCE::ReConfigure(const ServiceComponent& config)
 {
-	string oldfile = current.source_selector;
+    string oldfile = current.source_selector;
     ServiceComponentEncoder::ReConfigure(config);
-    if(oldfile != current.source_selector){
-      if(file.is_open())
-        file.close();
+    if(oldfile != current.source_selector) {
+        if(file.is_open())
+            file.close();
     }
     if(!file.is_open()) {
-      file.open(current.source_selector.c_str(), ios::in|ios::binary);
-      if(!file.is_open()) {
-        throw string("FileSCE: can't open file ")+current.source_selector;
-      }
+        file.open(current.source_selector.c_str(), ios::in|ios::binary);
+        if(!file.is_open()) {
+            throw string("FileSCE: can't open file ")+current.source_selector;
+        }
 
-      if(buffer)
-        delete[] buffer;
-      buffer = new char[current.bytes_per_frame];
+        if(buffer)
+            delete[] buffer;
+        buffer = new char[current.bytes_per_frame];
     }
 }
 
 unsigned long FileSCE::ReadInt()
 {
-	unsigned long n;
-	file.read((char*)&n, 4);
-	return ntohl(n);
+    unsigned long n;
+    file.read((char*)&n, 4);
+    return ntohl(n);
 }
 
 void FileSCE::NextFrame(bytevector& buf, size_t max, double)
 {
-	if (!current.misconfiguration 
-         && max>=(unsigned)current.bytes_per_frame
-         && file.is_open())
-	{
-		file.read(buffer, current.bytes_per_frame);
-		buf.putbytes(buffer, current.bytes_per_frame);
+    if (!current.misconfiguration
+            && max>=(unsigned)current.bytes_per_frame
+            && file.is_open())
+    {
+        file.read(buffer, current.bytes_per_frame);
+        buf.putbytes(buffer, current.bytes_per_frame);
         current.loop=true;
-		if(file.eof()) {
+        if(file.eof()) {
             file.clear();
             if( current.loop) {
-			    file.seekg(0);
-			} else {
-			    buf.insert(buf.end(), current.bytes_per_frame, 0);
-			}
+                file.seekg(0);
+            } else {
+                buf.insert(buf.end(), current.bytes_per_frame, 0);
+            }
         }
-	}
+    }
 }

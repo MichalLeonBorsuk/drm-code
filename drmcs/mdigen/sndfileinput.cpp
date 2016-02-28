@@ -32,7 +32,7 @@ using namespace std;
 
 CSndFile::CSndFile():handle(NULL),sfinfo(),num_channels(0)
 {
-cout << "sndfile default constructor" << endl;
+    cout << "sndfile default constructor" << endl;
 }
 
 CSndFile::CSndFile(const CSndFile& e):handle(e.handle),sfinfo(e.sfinfo),num_channels(e.num_channels)
@@ -41,94 +41,96 @@ CSndFile::CSndFile(const CSndFile& e):handle(e.handle),sfinfo(e.sfinfo),num_chan
 
 CSndFile& CSndFile::operator=(const CSndFile& e)
 {
-  handle = e.handle;
-  sfinfo = e.sfinfo;
-  num_channels = e.num_channels;
-  return *this;
+    handle = e.handle;
+    sfinfo = e.sfinfo;
+    num_channels = e.num_channels;
+    return *this;
 }
 
 CSndFile::~CSndFile()
 {
-  close();
+    close();
 }
 
 bool CSndFile::is_open()
 {
-  return (handle)?true:false;
+    return (handle)?true:false;
 }
 
 void CSndFile::open(const string& device, int channels)
 {
-  memset(&sfinfo, 0, sizeof(SF_INFO));
-  num_channels = channels;
-  stringstream s(device);
-  string sys, dev;
-  s >> sys >> dev;
-  cout << "sndfile: " << dev << channels << endl; cout.flush();
-  handle = sf_open(dev.c_str(), SFM_READ, &sfinfo);
-  if (handle == NULL)
-    throw string("audio open error ") + sf_strerror(0);
-  if(sfinfo.channels != num_channels)
-  {
-    //num_channels = -1;
-    //throw string("audio open error wrong num channels file");
-  }
-  if(sfinfo.samplerate != 48000)
-  {
-    num_channels = -1;
-    throw string("audio open error wrong sample rate in file");
-  }
-  cout << "sndfile audio open " <<  dev << endl; cout.flush();
+    memset(&sfinfo, 0, sizeof(SF_INFO));
+    num_channels = channels;
+    stringstream s(device);
+    string sys, dev;
+    s >> sys >> dev;
+    cout << "sndfile: " << dev << channels << endl;
+    cout.flush();
+    handle = sf_open(dev.c_str(), SFM_READ, &sfinfo);
+    if (handle == NULL)
+        throw string("audio open error ") + sf_strerror(0);
+    if(sfinfo.channels != num_channels)
+    {
+        //num_channels = -1;
+        //throw string("audio open error wrong num channels file");
+    }
+    if(sfinfo.samplerate != 48000)
+    {
+        num_channels = -1;
+        throw string("audio open error wrong sample rate in file");
+    }
+    cout << "sndfile audio open " <<  dev << endl;
+    cout.flush();
 }
 
 void CSndFile::close()
 {
-  if(handle) {
-    ::sf_close(handle);
-    handle = NULL;
-  }
+    if(handle) {
+        ::sf_close(handle);
+        handle = NULL;
+    }
 }
 
 void CSndFile::read(vector<float>& buffer)
 {
-  if(num_channels == -1)
-    return;
-  sf_count_t wanted = buffer.size()/num_channels;
-  sf_count_t to_read = wanted;
-  if(sfinfo.channels == 2 && num_channels == 1) {
-    to_read = 2 * wanted;
-    float buf[to_read];
-    sf_count_t c = sf_readf_float(handle, &buf[0], wanted);
+    if(num_channels == -1)
+        return;
+    sf_count_t wanted = buffer.size()/num_channels;
+    sf_count_t to_read = wanted;
+    if(sfinfo.channels == 2 && num_channels == 1) {
+        to_read = 2 * wanted;
+        float buf[to_read];
+        sf_count_t c = sf_readf_float(handle, &buf[0], wanted);
+        if(c != wanted)
+        {
+            sf_seek(handle, 0, SEEK_SET);
+            (void)sf_readf_float(handle, &buf[0], wanted);
+        }
+        for(size_t i=0; i<wanted; i++)
+        {
+            buffer[i] = (buf[2*i]+buf[2*i+1])/2.0;
+        }
+        return;
+    }
+    if(sfinfo.channels == 1 && num_channels == 2) {
+        to_read = wanted / 2;
+        sf_count_t c = sf_readf_float(handle, &buffer[to_read], wanted);
+        if(c != wanted)
+        {
+            sf_seek(handle, 0, SEEK_SET);
+            (void)sf_readf_float(handle, &buffer[to_read], wanted);
+        }
+        for(size_t i=0; i<to_read; i++)
+        {
+            buffer[i] = buffer[2*i]/2.0;
+            buffer[i+1] = buffer[2*i]/2.0;
+        }
+        return;
+    }
+    sf_count_t c = sf_readf_float(handle, &buffer[0], wanted);
     if(c != wanted)
     {
-      sf_seek(handle, 0, SEEK_SET);
-      (void)sf_readf_float(handle, &buf[0], wanted);
+        sf_seek(handle, 0, SEEK_SET);
+        (void)sf_readf_float(handle, &buffer[0], wanted);
     }
-    for(size_t i=0; i<wanted; i++)
-    {
-      buffer[i] = (buf[2*i]+buf[2*i+1])/2.0;
-    }
-    return;
-  }
-  if(sfinfo.channels == 1 && num_channels == 2) {
-    to_read = wanted / 2;
-    sf_count_t c = sf_readf_float(handle, &buffer[to_read], wanted);
-    if(c != wanted)
-    {
-      sf_seek(handle, 0, SEEK_SET);
-      (void)sf_readf_float(handle, &buffer[to_read], wanted);
-    }
-    for(size_t i=0; i<to_read; i++)
-    {
-      buffer[i] = buffer[2*i]/2.0;
-      buffer[i+1] = buffer[2*i]/2.0;
-    }
-    return;
-  }
-  sf_count_t c = sf_readf_float(handle, &buffer[0], wanted);
-  if(c != wanted)
-  {
-    sf_seek(handle, 0, SEEK_SET);
-    (void)sf_readf_float(handle, &buffer[0], wanted);
-  }
 }

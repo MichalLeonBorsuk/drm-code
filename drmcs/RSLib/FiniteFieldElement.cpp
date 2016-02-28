@@ -25,7 +25,7 @@
 #include "FiniteFieldElement.h"
 
 FiniteFieldElement::FiniteFieldElement(const WorkingFiniteFieldElement *pElement)
-: mpElement(pElement)
+    : mpElement(pElement)
 {
 }
 
@@ -35,32 +35,32 @@ FiniteFieldElement::~FiniteFieldElement(void)
 
 FiniteFieldElement FiniteFieldElement::operator+(const FiniteFieldElement y) const
 {
-	FiniteFieldElement x(mpElement->Add(y.mpElement));
-	return x;
+    FiniteFieldElement x(mpElement->Add(y.mpElement));
+    return x;
 }
 
 FiniteFieldElement FiniteFieldElement::operator-(const FiniteFieldElement y) const
 {
-	FiniteFieldElement x(mpElement->Sub(y.mpElement));
-	return x;
+    FiniteFieldElement x(mpElement->Sub(y.mpElement));
+    return x;
 }
 
 FiniteFieldElement FiniteFieldElement::operator*(const FiniteFieldElement y) const
 {
-	FiniteFieldElement x(mpElement->Mul(y.mpElement));
-	return x;
+    FiniteFieldElement x(mpElement->Mul(y.mpElement));
+    return x;
 }
 
 FiniteFieldElement FiniteFieldElement::operator/(const FiniteFieldElement y) const
 {
-	FiniteFieldElement x(mpElement->Div(y.mpElement));
-	return x;
+    FiniteFieldElement x(mpElement->Div(y.mpElement));
+    return x;
 }
 
 FiniteFieldElement FiniteFieldElement::ToPower(const int power) const
 {
-	FiniteFieldElement x(mpElement->ToPower(power));
-	return x;
+    FiniteFieldElement x(mpElement->ToPower(power));
+    return x;
 }
 
 // These operators have replaced by a type conversion operator to int
@@ -76,12 +76,12 @@ FiniteFieldElement FiniteFieldElement::ToPower(const int power) const
 
 ostream &operator<<(ostream &stream, const FiniteFieldElement& element)
 {
-	// Output the integer form
-	stream << element.mpElement->Value();
-	return stream;
+    // Output the integer form
+    stream << element.mpElement->Value();
+    return stream;
 }
 
 FiniteFieldElement::operator int() const
 {
-	return mpElement->Value();
+    return mpElement->Value();
 }

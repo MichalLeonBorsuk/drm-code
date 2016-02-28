@@ -1,8 +1,8 @@
 /******************************************************************************\
  * British Broadcasting Corporation
- * Copyright (c) 2006
+ * Copyright (c) 2016
  *
- * Author(s):  Julian Cable, Ollie Haffenden, Andrew Murphy
+ * Author(s):  Julian Cable
  *
  ******************************************************************************
  *
@@ -22,35 +22,20 @@
  *
 \******************************************************************************/
 
-#include "GaloisFieldElementNonzero.h"
-#include "GaloisField.h"
+#ifndef _FDKAUDIOSCE_H
+#define _FDKAUDIOSCE_H
 
-GaloisFieldElementNonzero::GaloisFieldElementNonzero(const int Log, const int Value, const GaloisField *Field)
-    : GaloisFieldElement(Field)
-    , mValue(Value)
-    , mLog(Log)
-{
-}
+#include <ServiceComponentEncoder.h>
+#include <aacenc_lib.h>
 
-GaloisFieldElementNonzero::~GaloisFieldElementNonzero()
+class FDKAudioSCE : public ServiceComponentEncoder
 {
-}
-
-int GaloisFieldElementNonzero::Log(void) const
-{
-    return mLog;
-}
-int GaloisFieldElementNonzero::Value(void) const
-{
-    return mValue;
-}
-
-bool GaloisFieldElementNonzero::IsZero(void) const
-{
-    return false;
-}
-
-const WorkingFiniteFieldElement * GaloisFieldElementNonzero::ToPower(const int power) const
-{
-    return mcpField->AlphaToPowerPointer(Log() * power);
-}
+public:
+    FDKAudioSCE():hAacEncoder(NULL){}
+    virtual ~FDKAudioSCE(){}
+	virtual void ReConfigure(const ServiceComponent&);
+ 	virtual void NextFrame(bytevector& buf, size_t max, double stoptime=0);
+protected:
+    HANDLE_AACENCODER hAacEncoder;
+};
+#endif

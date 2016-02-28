@@ -28,44 +28,44 @@ using namespace std;
 
 void TextFileSCE::ReConfigure(const ServiceComponent& config)
 {
-  CTranslatingTextSCE::ReConfigure(config);
-  if(file.is_open())
-    file.close();
-  file.open(current.source_selector.c_str());
-  if(!file.is_open()) {
-    cerr << "can't open " << current.source_selector << " as a text message file" << endl;
-  }
+    CTranslatingTextSCE::ReConfigure(config);
+    if(file.is_open())
+        file.close();
+    file.open(current.source_selector.c_str());
+    if(!file.is_open()) {
+        cerr << "can't open " << current.source_selector << " as a text message file" << endl;
+    }
 }
 
 string TextFileSCE::next_message()
 {
-  string message;
+    string message;
 
-  while(file.is_open()) {
+    while(file.is_open()) {
 
-    getline(file, message);
+        getline(file, message);
 
-    if(message.length()==0) {
-    // loop file
-      if(file.eof()) {
-        file.clear();
-        file.close();
-        file.open(current.source_selector.c_str());
-        if(!file.is_open())
-          return ""; // someone stole out file! - no text to get
-      }
-    } else {
-      break;
+        if(message.length()==0) {
+            // loop file
+            if(file.eof()) {
+                file.clear();
+                file.close();
+                file.open(current.source_selector.c_str());
+                if(!file.is_open())
+                    return ""; // someone stole out file! - no text to get
+            }
+        } else {
+            break;
+        }
     }
-  }
-  for(size_t i=0; i<message.length(); i++) {
-    if(message[i]=='^')
-        message[i]=0x0b;
-    if(message[i]=='\n') {
-      message.erase(i);
-      break;
+    for(size_t i=0; i<message.length(); i++) {
+        if(message[i]=='^')
+            message[i]=0x0b;
+        if(message[i]=='\n') {
+            message.erase(i);
+            break;
+        }
     }
-  }
-  return message;
+    return message;
 }
 

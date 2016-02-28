@@ -30,59 +30,60 @@ using namespace std;
 
 MSC::MSC()
 {
-  for(size_t i=0; i<stream.size(); i++)
-    stream[i] = NULL;
+    for(size_t i=0; i<stream.size(); i++)
+        stream[i] = NULL;
 }
 
 MSC::MSC(const MSC& m)
 {
-  for(size_t i=0; i<m.stream.size(); i++) {
-    stream.push_back(m.stream[i]);
-  }
+    for(size_t i=0; i<m.stream.size(); i++) {
+        stream.push_back(m.stream[i]);
+    }
 }
 MSC& MSC::operator=(const MSC&)
 {
-  return *this;
+    return *this;
 }
 
 MSC::~MSC()
 {
-  for(size_t i=0; i<stream.size(); i++)
-    delete stream[i];
+    for(size_t i=0; i<stream.size(); i++)
+        delete stream[i];
 }
 
 void MSC::ReConfigure(const vector<Stream>& config)
 {
-  cout << "MSC::ReConfigure: " << stream.size() << endl; cout.flush();
-  // delete any streams no longer in use
-  for(size_t i=config.size(); i<stream.size(); i++)
-    delete stream[i];
-  if(stream.size()>config.size())
-    stream.resize(config.size());
-  // make new streams
-  for(size_t i=stream.size(); i<config.size(); i++) {
-    if(config[i].stream_type == Stream::data_packet_mode)
-	  stream.push_back(new PacketStreamMux());
-	else
-	  stream.push_back(new TDMStreamMux());
-  }
-  // reconfigure streams
-  for(size_t i=0; i<stream.size(); i++) {
-    if((stream[i]->Class() == Stream::data_packet_mode) && (config[i].stream_type != Stream::data_packet_mode)) {
-	  delete stream[i];
-	  stream[i] = new TDMStreamMux();
-	}
-    if((stream[i]->Class() != Stream::data_packet_mode) && (config[i].stream_type == Stream::data_packet_mode)) {
-	  delete stream[i];
-	  stream[i] = new PacketStreamMux();
-	}
-    stream[i]->ReConfigure(config[i]);
-  }
+    cout << "MSC::ReConfigure: " << stream.size() << endl;
+    cout.flush();
+    // delete any streams no longer in use
+    for(size_t i=config.size(); i<stream.size(); i++)
+        delete stream[i];
+    if(stream.size()>config.size())
+        stream.resize(config.size());
+    // make new streams
+    for(size_t i=stream.size(); i<config.size(); i++) {
+        if(config[i].stream_type == Stream::data_packet_mode)
+            stream.push_back(new PacketStreamMux());
+        else
+            stream.push_back(new TDMStreamMux());
+    }
+    // reconfigure streams
+    for(size_t i=0; i<stream.size(); i++) {
+        if((stream[i]->Class() == Stream::data_packet_mode) && (config[i].stream_type != Stream::data_packet_mode)) {
+            delete stream[i];
+            stream[i] = new TDMStreamMux();
+        }
+        if((stream[i]->Class() != Stream::data_packet_mode) && (config[i].stream_type == Stream::data_packet_mode)) {
+            delete stream[i];
+            stream[i] = new PacketStreamMux();
+        }
+        stream[i]->ReConfigure(config[i]);
+    }
 }
 
 void MSC::NextFrame(vector<bytevector>& out)
 {
-  out.resize(stream.size());
-  for(size_t i=0; i<stream.size(); i++)
-    stream[i]->NextFrame(out[i]);
+    out.resize(stream.size());
+    for(size_t i=0; i<stream.size(); i++)
+        stream[i]->NextFrame(out[i]);
 }

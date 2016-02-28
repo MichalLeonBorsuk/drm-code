@@ -29,7 +29,7 @@ using namespace std;
 #include <fcntl.h>
 
 udpTextSCE::udpTextSCE():CTranslatingTextSCE(),
-message(),socket()
+    message(),socket()
 {
 }
 
@@ -38,57 +38,57 @@ udpTextSCE::~udpTextSCE()
 }
 
 udpTextSCE::udpTextSCE(const udpTextSCE& p)
-:CTranslatingTextSCE(p), message(p.message), socket(p.socket)
+    :CTranslatingTextSCE(p), message(p.message), socket(p.socket)
 {
 }
 
 udpTextSCE& udpTextSCE::operator=(const udpTextSCE& e)
 {
-  *reinterpret_cast<CTranslatingTextSCE*>(this) = e;
-  message = e.message;
-  socket = e.socket;
-  return *this;
+    *reinterpret_cast<CTranslatingTextSCE*>(this) = e;
+    message = e.message;
+    socket = e.socket;
+    return *this;
 }
 
 void udpTextSCE::ReConfigure(const ServiceComponent& config)
 {
-  CTranslatingTextSCE::ReConfigure(config);
-  if(socket.handle!=INVALID_SOCKET)
-    socket.close();
-  map<string,string> params;
-  size_t p = config.source_selector.find(':');
-  if(p != string::npos)
-  {
-  	string host = config.source_selector.substr(0, p);
-  	string port = config.source_selector.substr(p+1);
-	cout << "udp: " << host << " " << port << endl;
-  	params["join"] = "true";
-  	params["addr"] = host;
-  	params["port"] = port;
-  }
-  else
-  {
-  	params["port"] = config.source_selector;
-  }
-  socket.ReConfigure(params);
-  socket.open();
-  int buffsize = 500;
-  (void)setsockopt(socket.handle,SOL_SOCKET,SO_RCVBUF,(char*)&buffsize,sizeof(buffsize));
+    CTranslatingTextSCE::ReConfigure(config);
+    if(socket.handle!=INVALID_SOCKET)
+        socket.close();
+    map<string,string> params;
+    size_t p = config.source_selector.find(':');
+    if(p != string::npos)
+    {
+        string host = config.source_selector.substr(0, p);
+        string port = config.source_selector.substr(p+1);
+        cout << "udp: " << host << " " << port << endl;
+        params["join"] = "true";
+        params["addr"] = host;
+        params["port"] = port;
+    }
+    else
+    {
+        params["port"] = config.source_selector;
+    }
+    socket.ReConfigure(params);
+    socket.open();
+    int buffsize = 500;
+    (void)setsockopt(socket.handle,SOL_SOCKET,SO_RCVBUF,(char*)&buffsize,sizeof(buffsize));
 }
 
 string udpTextSCE::next_message()
 {
-  if(socket.poll()==dgram_socket::data_avail)
-  {
-    bytev buffer;
-    buffer.resize(2048);
-    socket.fetch(buffer);
-    message = "";
-    for(size_t i=0; i<buffer.size(); i++)
+    if(socket.poll()==dgram_socket::data_avail)
     {
-      message += buffer[i];
+        bytev buffer;
+        buffer.resize(2048);
+        socket.fetch(buffer);
+        message = "";
+        for(size_t i=0; i<buffer.size(); i++)
+        {
+            message += buffer[i];
+        }
     }
-  }
-  cout << message << endl;
-  return message;
+    cout << message << endl;
+    return message;
 }

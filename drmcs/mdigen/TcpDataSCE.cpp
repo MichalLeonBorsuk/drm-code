@@ -38,35 +38,35 @@ CTcpDataSCE::CTcpDataSCE()
 
 void CTcpDataSCE::clearConfig()
 {
-  sock.close();
+    sock.close();
 }
 
 void CTcpDataSCE::ReConfigure(const ServiceComponent& config)
 {
-  ServiceComponentEncoder::ReConfigure(config);
-  map<string, string> mapconfig;
-  int parms;
-  char host[255], port[255];
-  const char *p=current.source_selector.c_str();
-  while(*p==' ') p++;
-  parms = sscanf(p, "%[^:]:%s", host, port);
-  if(parms==2) {
-    mapconfig["host"]=host;
-    mapconfig["port"]=port;
-    sock.ReConfigure(mapconfig);
-  } else {
-    throw "TCPDATASCE error";
-  }
+    ServiceComponentEncoder::ReConfigure(config);
+    map<string, string> mapconfig;
+    int parms;
+    char host[255], port[255];
+    const char *p=current.source_selector.c_str();
+    while(*p==' ') p++;
+    parms = sscanf(p, "%[^:]:%s", host, port);
+    if(parms==2) {
+        mapconfig["host"]=host;
+        mapconfig["port"]=port;
+        sock.ReConfigure(mapconfig);
+    } else {
+        throw "TCPDATASCE error";
+    }
 }
 
 void CTcpDataSCE::NextFrame(bytevector& buf, size_t max, double)
 {
-  if(sock.handle==INVALID_SOCKET)
-    sock.open();
-  if(sock.poll()){
-    bytev b;
-    sock.fetch(b);
-    if(b.size()<=max)
-      buf.put(b);
-  }
+    if(sock.handle==INVALID_SOCKET)
+        sock.open();
+    if(sock.poll()) {
+        bytev b;
+        sock.fetch(b);
+        if(b.size()<=max)
+            buf.put(b);
+    }
 }

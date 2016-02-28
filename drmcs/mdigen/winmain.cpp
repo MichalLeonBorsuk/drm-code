@@ -63,29 +63,29 @@ int WINAPI WinMain (HINSTANCE hThisInstance,
 
     /* The class is registered, let's create the program*/
     hwnd = CreateWindowEx (
-           0,                   /* Extended possibilites for variation */
-           szClassName,         /* Classname */
-           "BBC DRM MDI Generator",       /* Title Text */
-           WS_OVERLAPPEDWINDOW, /* default window */
-           CW_USEDEFAULT,       /* Windows decides the position */
-           CW_USEDEFAULT,       /* where the window ends up on the screen */
-           230,                 /* The programs width */
-           100,                 /* and height in pixels */
-           HWND_DESKTOP,        /* The window is a child-window to desktop */
-           NULL,                /* No menu */
-           hThisInstance,       /* Program Instance handler */
-           NULL                 /* No Window Creation data */
+               0,                   /* Extended possibilites for variation */
+               szClassName,         /* Classname */
+               "BBC DRM MDI Generator",       /* Title Text */
+               WS_OVERLAPPEDWINDOW, /* default window */
+               CW_USEDEFAULT,       /* Windows decides the position */
+               CW_USEDEFAULT,       /* where the window ends up on the screen */
+               230,                 /* The programs width */
+               100,                 /* and height in pixels */
+               HWND_DESKTOP,        /* The window is a child-window to desktop */
+               NULL,                /* No menu */
+               hThisInstance,       /* Program Instance handler */
+               NULL                 /* No Window Creation data */
            );
 
     /* Make the window visible on the screen */
     ShowWindow (hwnd, nFunsterStil);
-    
+
     HDC hdc = GetDC(hwnd);
     RECT rect;
-    SetBkMode(hdc, TRANSPARENT); 
+    SetBkMode(hdc, TRANSPARENT);
 
     CMdigen mdigen;
-    
+
     mdigen.init("config.xml");
 
     //GetClientRect(hwnd, &rect);
@@ -93,7 +93,7 @@ int WINAPI WinMain (HINSTANCE hThisInstance,
     rect.top = 0;
     rect.right = 200;
     rect.bottom = 100;
-    
+
     TextOut(hdc, 10, 10, "Frames", 6);
 
     /* Run the message loop. It will run until GetMessage() returns 0 */
@@ -106,10 +106,10 @@ int WINAPI WinMain (HINSTANCE hThisInstance,
         mdigen.nextframe();
         char x[20];
         sprintf(x, "%06d", mdigen.frame_count);
-        FillRect(hdc, &rect, (HBRUSH)COLOR_WINDOW); 
-        //FrameRect(hdc, &rect, (HBRUSH)COLOR_WINDOWTEXT); 
+        FillRect(hdc, &rect, (HBRUSH)COLOR_WINDOW);
+        //FrameRect(hdc, &rect, (HBRUSH)COLOR_WINDOWTEXT);
         TextOut(hdc, 70, 10, x, 6);
- 
+
     }
 
     /* The program return-value is 0 - The value that PostQuitMessage() gave */
@@ -123,11 +123,11 @@ LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM
 {
     switch (message)                  /* handle the messages */
     {
-        case WM_DESTROY:
-            PostQuitMessage (0);       /* send a WM_QUIT to the message queue */
-            break;
-        default:                      /* for messages that we don't deal with */
-            return DefWindowProc (hwnd, message, wParam, lParam);
+    case WM_DESTROY:
+        PostQuitMessage (0);       /* send a WM_QUIT to the message queue */
+        break;
+    default:                      /* for messages that we don't deal with */
+        return DefWindowProc (hwnd, message, wParam, lParam);
     }
 
     return 0;

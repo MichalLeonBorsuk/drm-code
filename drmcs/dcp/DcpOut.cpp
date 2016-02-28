@@ -42,21 +42,21 @@ DcpOut::DcpOut():pft(NULL),sock(NULL),m_use_crc(false), m_use_tist(false),m_file
 
 void DcpOut::clearConfig()
 {
-  m_target = "";
-  m_src_addr = 0;
-  m_dst_addr = 0;
-  m_file_framing=false;
-  m_use_tist=true;
-  m_use_crc=true;
-  m_tcp_server = false;
-  if(pft) {
-    delete pft;
-    pft=NULL;
-  }
-  if(sock) {
-    delete sock;
-    sock=NULL;
-  }
+    m_target = "";
+    m_src_addr = 0;
+    m_dst_addr = 0;
+    m_file_framing=false;
+    m_use_tist=true;
+    m_use_crc=true;
+    m_tcp_server = false;
+    if(pft) {
+        delete pft;
+        pft=NULL;
+    }
+    if(sock) {
+        delete sock;
+        sock=NULL;
+    }
 }
 
 DcpOut::~DcpOut()
@@ -66,256 +66,256 @@ DcpOut::~DcpOut()
 
 void DcpOut::ReConfigure(const string& uri)
 {
-  map<string,string> config;
-  config.clear();
-  parseDcpUri(config, uri);
-  ReConfigure(config);
+    map<string,string> config;
+    config.clear();
+    parseDcpUri(config, uri);
+    ReConfigure(config);
 }
 
 
 void DcpOut::ReConfigure(map<string,string>& config)
 {
-  clearConfig();
-  for(map<string,string>::iterator i=config.begin(); i!=config.end(); i++){
-    setParam(i->first.c_str(), i->second.c_str());
-  }
-  if(config.count("crc")>0){
-    const string & s = config["crc"];
-    if(s=="0" || s == "false" || s=="f")
-      m_use_crc = false;
-  }
-  if(config.count("pft")>0){
-    if(config.count("fec")>0){
-      const string & s = config["fec"];
-      if(s=="0")
-        pft = new SimplePftOut();
-      else
-        pft = new FecPftOut();
-    } else {
-      pft = new SimplePftOut();
+    clearConfig();
+    for(map<string,string>::iterator i=config.begin(); i!=config.end(); i++) {
+        setParam(i->first.c_str(), i->second.c_str());
     }
-    pft->ReConfigure(config);
-  }
-  config["addr"] = string(&config["target"][2]);
-  config["port"]=config["dst_addr"];
-  if(m_type=="udp") {
-    sock = new dgram_socket();
-  } else if(m_type=="tcp") {
-    if(config.count("end")>0){
-      string& end = config["end"];
-      if(end == "server") {
-        ssock = new server_socket();
-        m_tcp_server = true;
-      } else {
-        sock = new client_socket();
-      }
-    } else {
-      sock = new client_socket();
+    if(config.count("crc")>0) {
+        const string & s = config["crc"];
+        if(s=="0" || s == "false" || s=="f")
+            m_use_crc = false;
     }
-  } else if(m_type=="file") {
-    config["path"]=config["addr"];
-    sock = new file_socket();
-  } else if(m_type=="ser") {
-    // not done yet
-  }
-  if(sock) {
-    sock->ReConfigure(config);
-    misconfiguration = false;
-  } else if(m_tcp_server) {
-    ssock->ReConfigure(config);
-    misconfiguration = false;
-  }
+    if(config.count("pft")>0) {
+        if(config.count("fec")>0) {
+            const string & s = config["fec"];
+            if(s=="0")
+                pft = new SimplePftOut();
+            else
+                pft = new FecPftOut();
+        } else {
+            pft = new SimplePftOut();
+        }
+        pft->ReConfigure(config);
+    }
+    config["addr"] = string(&config["target"][2]);
+    config["port"]=config["dst_addr"];
+    if(m_type=="udp") {
+        sock = new dgram_socket();
+    } else if(m_type=="tcp") {
+        if(config.count("end")>0) {
+            string& end = config["end"];
+            if(end == "server") {
+                ssock = new server_socket();
+                m_tcp_server = true;
+            } else {
+                sock = new client_socket();
+            }
+        } else {
+            sock = new client_socket();
+        }
+    } else if(m_type=="file") {
+        config["path"]=config["addr"];
+        sock = new file_socket();
+    } else if(m_type=="ser") {
+        // not done yet
+    }
+    if(sock) {
+        sock->ReConfigure(config);
+        misconfiguration = false;
+    } else if(m_tcp_server) {
+        ssock->ReConfigure(config);
+        misconfiguration = false;
+    }
 }
 
 bool DcpOut::setParam(const char *param, const char *value)
 {
-  if(strcmp(param, "type")==0) {
-    m_type = value;
-  }
-  if(strcmp(param, "target")==0) {
-    m_target = value;
-  }
-  if(strcmp(param, "src_addr")==0) {
-    m_src_addr = atoi(value);
-  }
-  if(strcmp(param, "dst_addr")==0) {
-    m_dst_addr = atoi(value);
-  }
-  if(strcmp(param, "file_framing")==0) {
-      m_file_framing = false;
-      const string s = value;
-      if(s=="1" || s == "true" || s=="t")
-        m_file_framing = true;
-  }
-  if (strcmp(param, "proto")==0) {
-    m_proto = value;
-  }
-  return true;
+    if(strcmp(param, "type")==0) {
+        m_type = value;
+    }
+    if(strcmp(param, "target")==0) {
+        m_target = value;
+    }
+    if(strcmp(param, "src_addr")==0) {
+        m_src_addr = atoi(value);
+    }
+    if(strcmp(param, "dst_addr")==0) {
+        m_dst_addr = atoi(value);
+    }
+    if(strcmp(param, "file_framing")==0) {
+        m_file_framing = false;
+        const string s = value;
+        if(s=="1" || s == "true" || s=="t")
+            m_file_framing = true;
+    }
+    if (strcmp(param, "proto")==0) {
+        m_proto = value;
+    }
+    return true;
 }
 
 void DcpOut::PutParams(xmlTextWriterPtr writer)
 {
-  Persist::PutParams(writer);
-  // scheme
-  xmlTextWriterWriteString(writer, BAD_CAST "dcp.");
-  xmlTextWriterWriteString(writer, BAD_CAST m_type.c_str());
-  if(pft)
-    xmlTextWriterWriteString(writer, BAD_CAST ".pft");
-  // :
-  xmlTextWriterWriteString(writer,BAD_CAST  ":");
-  // target
-  xmlTextWriterWriteString(writer,BAD_CAST  m_target.c_str());
-  // optional src/dst addr
-  if(m_dst_addr != 0) {
+    Persist::PutParams(writer);
+    // scheme
+    xmlTextWriterWriteString(writer, BAD_CAST "dcp.");
+    xmlTextWriterWriteString(writer, BAD_CAST m_type.c_str());
+    if(pft)
+        xmlTextWriterWriteString(writer, BAD_CAST ".pft");
+    // :
     xmlTextWriterWriteString(writer,BAD_CAST  ":");
-    if(m_src_addr != 0) {
-      xmlTextWriterWriteFormatString(writer, "%u:", m_src_addr);
+    // target
+    xmlTextWriterWriteString(writer,BAD_CAST  m_target.c_str());
+    // optional src/dst addr
+    if(m_dst_addr != 0) {
+        xmlTextWriterWriteString(writer,BAD_CAST  ":");
+        if(m_src_addr != 0) {
+            xmlTextWriterWriteFormatString(writer, "%u:", m_src_addr);
+        }
+        xmlTextWriterWriteFormatString(writer, "%u", m_dst_addr);
     }
-    xmlTextWriterWriteFormatString(writer, "%u", m_dst_addr);
-  }
-  // optional query
-  if(pft) {
-    char sep[2]="?";
-    map<string,string> config;
-    pft->config(config);
-    for(map<string,string>::iterator i=config.begin(); i!=config.end(); i++){
-      const char *param=i->first.c_str(), *value=i->second.c_str();
-      xmlTextWriterWriteFormatString(writer, "%s%s=%s", sep, param, value);
-      sep[0]='&';
+    // optional query
+    if(pft) {
+        char sep[2]="?";
+        map<string,string> config;
+        pft->config(config);
+        for(map<string,string>::iterator i=config.begin(); i!=config.end(); i++) {
+            const char *param=i->first.c_str(), *value=i->second.c_str();
+            xmlTextWriterWriteFormatString(writer, "%s%s=%s", sep, param, value);
+            sep[0]='&';
+        }
     }
-  }
 }
 
 bool DcpOut::sendFrame(const tagpacketlist& frame, const vector<string>& tag_tx_order, uint16_t af_seq)
 {
-  size_t packet_len, num_packets;
-  if(sock) {
-    if(sock && sock->handle==INVALID_SOCKET) {
-      sock->open();
-      if(sock->handle==INVALID_SOCKET)
-        return true;
-    }
-  } else {
-    if(m_tcp_server) {
-      if(ssock) {
-        if(ssock->handle==INVALID_SOCKET) {
-          ssock->open();
+    size_t packet_len, num_packets;
+    if(sock) {
+        if(sock && sock->handle==INVALID_SOCKET) {
+            sock->open();
+            if(sock->handle==INVALID_SOCKET)
+                return true;
         }
-        if(ssock->poll()) {
-          stream_socket *s = new stream_socket;
-          bool ok = ssock->fetch(*s);
-          if(ok)
-            sock = s;
-          else
-            return false; // should be true ?
-        } else {
-         return false;
-        }
-      } else {
-        return false;
-      }
     } else {
-      return false;
+        if(m_tcp_server) {
+            if(ssock) {
+                if(ssock->handle==INVALID_SOCKET) {
+                    ssock->open();
+                }
+                if(ssock->poll()) {
+                    stream_socket *s = new stream_socket;
+                    bool ok = ssock->fetch(*s);
+                    if(ok)
+                        sock = s;
+                    else
+                        return false; // should be true ?
+                } else {
+                    return false;
+                }
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
     }
-  }
 
-  crcbytevector c;
-  if(pft){
-    crcbytevector d;
-    makeAFpacket(d, frame, tag_tx_order, af_seq);
-    pft->makePFT(d, c, packet_len);
-    num_packets = c.size() / packet_len;
-    if(num_packets*packet_len<c.size())
-      num_packets++;
-  } else {
-    makeAFpacket(c, frame, tag_tx_order, af_seq);
-    packet_len=c.size();
-    num_packets=1;
-  }
-  size_t bytes = c.size();
-  for(unsigned i=0; i<num_packets; i++){
-    size_t p,len;
-    p=i*packet_len;
-    if((p+packet_len)<=bytes)
-      len = packet_len;
-    else
-      len = c.size()-p;
-    if(m_file_framing){
-      bytevector b;
-      makeFFheader(b, len, true);
-      sock->send(b);
+    crcbytevector c;
+    if(pft) {
+        crcbytevector d;
+        makeAFpacket(d, frame, tag_tx_order, af_seq);
+        pft->makePFT(d, c, packet_len);
+        num_packets = c.size() / packet_len;
+        if(num_packets*packet_len<c.size())
+            num_packets++;
+    } else {
+        makeAFpacket(c, frame, tag_tx_order, af_seq);
+        packet_len=c.size();
+        num_packets=1;
     }
-    sock->send(c, p, len);
-  }
-  return false;
+    size_t bytes = c.size();
+    for(unsigned i=0; i<num_packets; i++) {
+        size_t p,len;
+        p=i*packet_len;
+        if((p+packet_len)<=bytes)
+            len = packet_len;
+        else
+            len = c.size()-p;
+        if(m_file_framing) {
+            bytevector b;
+            makeFFheader(b, len, true);
+            sock->send(b);
+        }
+        sock->send(c, p, len);
+    }
+    return false;
 }
 
 bool DcpOut::sendFrameRaw(const bytevector& data)
 {
-  size_t packet_len, num_packets;
-  if(sock) {
-    if(sock && sock->handle==INVALID_SOCKET) {
-      sock->open();
-      if(sock->handle==INVALID_SOCKET)
-        return true;
-    }
-  } else {
-    if(m_tcp_server) {
-      if(ssock) {
-        if(ssock->handle==INVALID_SOCKET) {
-          ssock->open();
+    size_t packet_len, num_packets;
+    if(sock) {
+        if(sock && sock->handle==INVALID_SOCKET) {
+            sock->open();
+            if(sock->handle==INVALID_SOCKET)
+                return true;
         }
-        if(ssock->poll()) {
-          stream_socket *s = new stream_socket;
-          bool ok = ssock->fetch(*s);
-          if(ok)
-            sock = s;
-          else
-            return false; // should be true ?
-        } else {
-         return false;
-        }
-      } else {
-        return false;
-      }
     } else {
-      return false;
+        if(m_tcp_server) {
+            if(ssock) {
+                if(ssock->handle==INVALID_SOCKET) {
+                    ssock->open();
+                }
+                if(ssock->poll()) {
+                    stream_socket *s = new stream_socket;
+                    bool ok = ssock->fetch(*s);
+                    if(ok)
+                        sock = s;
+                    else
+                        return false; // should be true ?
+                } else {
+                    return false;
+                }
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
     }
-  }
-  sock->send(data, 0, data.size());
+    sock->send(data, 0, data.size());
 
-  return false;
+    return false;
 }
 
 
 void DcpOut::makeAFpacket(crcbytevector& out,
-    const tagpacketlist& frame, const vector<string>& tag_tx_order, uint16_t af_seq)
+                          const tagpacketlist& frame, const vector<string>& tag_tx_order, uint16_t af_seq)
 {
-  bytevector b;
-  for(vector<string>::const_iterator tag=tag_tx_order.begin(); tag!=tag_tx_order.end(); tag++){
-    tagpacketlist::const_iterator f = frame.find(*tag);
-    if(f!=frame.end()){
-      const bytevector& payload=f->second;
-      size_t n=payload.size();
-      unsigned bits=payload.bits;
-      b.put(*tag);
-      b.put(8*n+bits, 32);
-      b.put(payload);
-      if(payload.bits!=0) {
-        b.put(payload.in_progress, 8);
-      }
+    bytevector b;
+    for(vector<string>::const_iterator tag=tag_tx_order.begin(); tag!=tag_tx_order.end(); tag++) {
+        tagpacketlist::const_iterator f = frame.find(*tag);
+        if(f!=frame.end()) {
+            const bytevector& payload=f->second;
+            size_t n=payload.size();
+            unsigned bits=payload.bits;
+            b.put(*tag);
+            b.put(8*n+bits, 32);
+            b.put(payload);
+            if(payload.bits!=0) {
+                b.put(payload.in_progress, 8);
+            }
+        }
     }
-  }
-  size_t bs = b.size();
-  out.put("AF");
-  out.put(bs, 32);
-  out.put(af_seq, 16);
-  out.put(1, m_use_crc?1:0); // crc flag
-  out.put(1, 3); // MAJor version
-  out.put(0, 4); // MINor version
-  out.put("T"); // protocol type tag packets
-  out.put(b);
-  out.put(out.crc.result(), 16);
+    size_t bs = b.size();
+    out.put("AF");
+    out.put(bs, 32);
+    out.put(af_seq, 16);
+    out.put(1, m_use_crc?1:0); // crc flag
+    out.put(1, 3); // MAJor version
+    out.put(0, 4); // MINor version
+    out.put("T"); // protocol type tag packets
+    out.put(b);
+    out.put(out.crc.result(), 16);
 }
 /* File: ETSI TS 102 821 V0.0.2f (2003-10)
 
@@ -354,18 +354,23 @@ TI_NSEC:  the number of whole SI nanoseconds,  in the range 0-999 999 999.
 
 void DcpOut::makeFFheader(bytevector& out, size_t packet_size, bool sendTime)
 {
-  timespec tp;
-  clock_getrealtime(&tp);
-  uint64_t bytesize_ff = 4+4+packet_size; // afpf
-  if(sendTime)
-    bytesize_ff += 4+4+4+4;
-  // Tag Item fio_
-  out.put("fio_"); out.put(8*bytesize_ff, 32);
-  // nested tag packets
-  // Tag Item time
-  if(sendTime) {
-    out.put("time"); out.put(64, 32); out.put(tp.tv_sec, 32); out.put(tp.tv_nsec, 32);
-  }
-  // Tag Item afpf
-  out.put("afpf"); out.put(8*packet_size, 32);
+    timespec tp;
+    clock_getrealtime(&tp);
+    uint64_t bytesize_ff = 4+4+packet_size; // afpf
+    if(sendTime)
+        bytesize_ff += 4+4+4+4;
+    // Tag Item fio_
+    out.put("fio_");
+    out.put(8*bytesize_ff, 32);
+    // nested tag packets
+    // Tag Item time
+    if(sendTime) {
+        out.put("time");
+        out.put(64, 32);
+        out.put(tp.tv_sec, 32);
+        out.put(tp.tv_nsec, 32);
+    }
+    // Tag Item afpf
+    out.put("afpf");
+    out.put(8*packet_size, 32);
 }

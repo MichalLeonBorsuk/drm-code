@@ -31,45 +31,46 @@
 // TODO - make the DataGroup part optional by private config
 void DUFileSCE::ReConfigure(const ServiceComponent& config)
 {
-  bool ss_changed=false;
-  if(current.source_selector != config.source_selector)
-  {
-    f.ignore();
-    ss_changed = true;
-  }
-  PacketSCE::ReConfigure(config);
-  next_data_unit=data_unit.end();
-  packet_encoder.ReConfigure(config);
-  dge.Configure(true, false, false);
-  file_pos=0;
-  if(ss_changed)
-    f.monitor(config.source_selector);
+    bool ss_changed=false;
+    if(current.source_selector != config.source_selector)
+    {
+        f.ignore();
+        ss_changed = true;
+    }
+    PacketSCE::ReConfigure(config);
+    next_data_unit=data_unit.end();
+    packet_encoder.ReConfigure(config);
+    dge.Configure(true, false, false);
+    file_pos=0;
+    if(ss_changed)
+        f.monitor(config.source_selector);
 }
 
 void DUFileSCE::NextFrame(bytevector &out, size_t max, double stoptime)
 {
-  if(max<(unsigned int)payload_size)
-  {
-    return;
-  }
-  if(packet_queue.empty())
-  {
-      if(f.changed() || data_unit.size()==0)
-        read_file(stoptime);
-      fill(stoptime);
-  }
-  if(packet_queue.empty())
-  {
-      return;
-  }
-  if(packet_queue.front().size()<=max)
-  {
-    out.put(packet_queue.front());
-    packet_queue.pop();
-  } else
-  {
-    cerr << "JMLSCE: packet queue size mismatch with packet mux" << endl; cerr.flush();
-  }
+    if(max<(unsigned int)payload_size)
+    {
+        return;
+    }
+    if(packet_queue.empty())
+    {
+        if(f.changed() || data_unit.size()==0)
+            read_file(stoptime);
+        fill(stoptime);
+    }
+    if(packet_queue.empty())
+    {
+        return;
+    }
+    if(packet_queue.front().size()<=max)
+    {
+        out.put(packet_queue.front());
+        packet_queue.pop();
+    } else
+    {
+        cerr << "JMLSCE: packet queue size mismatch with packet mux" << endl;
+        cerr.flush();
+    }
 }
 
 void DUFileSCE::fill(double stoptime)
@@ -118,13 +119,13 @@ void DUFileSCE::read_file(double stoptime)
         cout << "open " << current.source_selector << endl;
         int mode = O_RDWR; // need RW for locking
 #ifdef WIN32
-	mode |= O_BINARY;
+        mode |= O_BINARY;
 #endif
         bool ok = f.open(mode);
         if(!ok)
         {
-          cerr << "can't open " << current.source_selector << endl;
-          return;
+            cerr << "can't open " << current.source_selector << endl;
+            return;
         }
         data_unit.clear();
     }

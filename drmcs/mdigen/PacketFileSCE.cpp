@@ -28,40 +28,40 @@
 
 void PacketFileSCE::ReConfigure(const ServiceComponent& config)
 {
-  PacketSCE::ReConfigure(config);
+    PacketSCE::ReConfigure(config);
 }
 
 void PacketFileSCE::NextFrame(bytevector &out, size_t max, double stoptime)
 {
-  if(max<(unsigned int)payload_size)
-    return;
-  if(!current.misconfiguration && open==false) {
-    file.open(current.source_selector.c_str(), ios::in|ios::binary);
-    if(file.is_open()) {
-      open=true;
-    } else {
-      cerr << "can't open " << current.source_selector << endl;
-      cerr.flush();
-      return;
+    if(max<(unsigned int)payload_size)
+        return;
+    if(!current.misconfiguration && open==false) {
+        file.open(current.source_selector.c_str(), ios::in|ios::binary);
+        if(file.is_open()) {
+            open=true;
+        } else {
+            cerr << "can't open " << current.source_selector << endl;
+            cerr.flush();
+            return;
+        }
     }
-  }
-  if (open)
-  {
-    bytevector packet;
-    for(size_t i=0; i<max; i+=payload_size) {
-      //bool done = file.eof();
-      packet.resize(payload_size);
-      file.read((char*)packet.data(), payload_size);
-      size_t l=file.gcount();
-      if(l<payload_size) {
-        file.clear();
-        file.seekg(0, ios::beg);
-        if(l==0)
-          file.read((char*)packet.data(), payload_size);
-        else
-          packet.resize(l);
-      }
-      out.put(packet);
+    if (open)
+    {
+        bytevector packet;
+        for(size_t i=0; i<max; i+=payload_size) {
+            //bool done = file.eof();
+            packet.resize(payload_size);
+            file.read((char*)packet.data(), payload_size);
+            size_t l=file.gcount();
+            if(l<payload_size) {
+                file.clear();
+                file.seekg(0, ios::beg);
+                if(l==0)
+                    file.read((char*)packet.data(), payload_size);
+                else
+                    packet.resize(l);
+            }
+            out.put(packet);
+        }
     }
-  }
 }

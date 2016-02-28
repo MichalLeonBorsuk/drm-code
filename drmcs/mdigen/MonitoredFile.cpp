@@ -31,108 +31,110 @@ using namespace std;
 
 bool MonitoredFile::monitor(const string& path)
 {
-  this->path = path;
+    this->path = path;
 #ifndef WIN32
-  if(FAMOpen(&fc)==0)
-  {
-    FAMRequest fr;
-    if(FAMMonitorFile(&fc, path.c_str(), &fr, NULL)==0)
+    if(FAMOpen(&fc)==0)
     {
-      cout << "FAM Monitoring " << path << endl;
-      return true;
+        FAMRequest fr;
+        if(FAMMonitorFile(&fc, path.c_str(), &fr, NULL)==0)
+        {
+            cout << "FAM Monitoring " << path << endl;
+            return true;
+        }
+        else
+        {
+            cerr << "can't monitor " << path << endl;
+        }
     }
     else
     {
-      cerr << "can't monitor " << path << endl;
+        cerr << "can't connect to file alteration monitor " << endl;
     }
-  }
-  else
-  {
-      cerr << "can't connect to file alteration monitor " << endl;
-  }
 #endif
-  return false;
+    return false;
 }
 
 bool MonitoredFile::open(int mode)
 {
-  fd = ::open(path.c_str(), mode);
-  if(fd>0)
-  {
+    fd = ::open(path.c_str(), mode);
+    if(fd>0)
+    {
 #ifndef WIN32
-      int r = lockf(fd, F_TLOCK, 0);
-      if(r<0)
-      {
-          ::close(fd);
-          fd=-1;
-          return false;
-      }
+        int r = lockf(fd, F_TLOCK, 0);
+        if(r<0)
+        {
+            ::close(fd);
+            fd=-1;
+            return false;
+        }
 #endif
-      return true;
-  }
-  return false;
+        return true;
+    }
+    return false;
 }
 
 void MonitoredFile::ignore()
 {
 #ifndef WIN32
-  if(FAMCONNECTION_GETFD(&fc)>0)
-  {
-    (void)FAMClose(&fc);
-  }
+    if(FAMCONNECTION_GETFD(&fc)>0)
+    {
+        (void)FAMClose(&fc);
+    }
 #endif
 }
 
 void MonitoredFile::close()
 {
-  if(fd>0)
-  {
+    if(fd>0)
+    {
 #ifndef WIN32
-      lockf(fd, F_ULOCK, 0);
+        lockf(fd, F_ULOCK, 0);
 #endif
-      ::close(fd);
-  }
+        ::close(fd);
+    }
 }
 
 bool MonitoredFile::changed()
 {
 #ifdef WIN32
-static bool first=true;
-if(first) { first=false;
-  return true;}
-#else
-  while(FAMPending(&fc))
-  {
-    FAMEvent fe;
-    FAMNextEvent(&fc, &fe);
-	switch(fe.code)
-	{
-	case FAMDeleted:
-	  break;
-    case FAMChanged:
-          return true;
-	  break;
-    case FAMCreated:
-    case FAMExists:
-          return true;
-      break;
-    case FAMEndExist:
-	  cout << "FAM initialised " << fe.filename << endl;
-	  break;
-    case FAMAcknowledge:
-	  cout << "FAM cancel acknowledged " << fe.filename << endl;
-	  break;
-    case FAMStartExecuting:
-    case FAMStopExecuting:
-    case FAMMoved:
-	  cout << "unexpected fam event " << fe.code << " '" << fe.filename << "'" << endl;
-	  break;
-    default:
-	  cout << "unknown fam event " << fe.code << " '" << fe.filename << "'" << endl;
+    static bool first=true;
+    if(first) {
+        first=false;
+        return true;
     }
-  }
+#else
+    while(FAMPending(&fc))
+    {
+        FAMEvent fe;
+        FAMNextEvent(&fc, &fe);
+        switch(fe.code)
+        {
+        case FAMDeleted:
+            break;
+        case FAMChanged:
+            return true;
+            break;
+        case FAMCreated:
+        case FAMExists:
+            return true;
+            break;
+        case FAMEndExist:
+            cout << "FAM initialised " << fe.filename << endl;
+            break;
+        case FAMAcknowledge:
+            cout << "FAM cancel acknowledged " << fe.filename << endl;
+            break;
+        case FAMStartExecuting:
+        case FAMStopExecuting:
+        case FAMMoved:
+            cout << "unexpected fam event " << fe.code << " '" << fe.filename << "'" << endl;
+            break;
+        default:
+            cout << "unknown fam event " << fe.code << " '" << fe.filename << "'" << endl;
+        }
+    }
 #endif
-  return false;
+    return false;
 }
 
 size_t MonitoredFile::read(void* buf, size_t bytes)

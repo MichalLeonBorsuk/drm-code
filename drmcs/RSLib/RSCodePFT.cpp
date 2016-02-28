@@ -27,64 +27,64 @@
 #include "GaloisField.h"
 #include "FiniteFieldPolynomial.h"
 
-CRSCodePFT::CRSCodePFT(const unsigned int n, const unsigned int k, 
-				const unsigned int indexFirstRoot, 
-				const unsigned int indexStepRoot,
-				const unsigned int fieldSizeLog2,
-				const unsigned int fieldGeneratorPolynomial)
-				: mpField(new GaloisField(fieldSizeLog2, fieldGeneratorPolynomial))
-				, mpRSAlgebra(new RSAlgebra(n, k, mpField, indexFirstRoot, indexStepRoot))
-				, mNumCodeBits(n)
-				, mNumDataBits(k)
+CRSCodePFT::CRSCodePFT(const unsigned int n, const unsigned int k,
+                       const unsigned int indexFirstRoot,
+                       const unsigned int indexStepRoot,
+                       const unsigned int fieldSizeLog2,
+                       const unsigned int fieldGeneratorPolynomial)
+    : mpField(new GaloisField(fieldSizeLog2, fieldGeneratorPolynomial))
+    , mpRSAlgebra(new RSAlgebra(n, k, mpField, indexFirstRoot, indexStepRoot))
+    , mNumCodeBits(n)
+    , mNumDataBits(k)
 {
 
 }
 
 CRSCodePFT::~CRSCodePFT(void)
 {
-	delete mpRSAlgebra;
-	delete mpField;
+    delete mpRSAlgebra;
+    delete mpField;
 }
 
 void CRSCodePFT::Encode(unsigned char *pData, unsigned char *pParity)
 {
-	// Map to a polynomial
-	FiniteFieldPolynomial p(mpField);
+    // Map to a polynomial
+    FiniteFieldPolynomial p(mpField);
 
-	// DRM order: first data byte maps to highest order coefficient
-	for (unsigned int i = 0; i<mNumDataBits; i++)
-		p.SetCoefficient(mNumDataBits-1- i, mpField->GetElement(pData[i]));
+    // DRM order: first data byte maps to highest order coefficient
+    for (unsigned int i = 0; i<mNumDataBits; i++)
+        p.SetCoefficient(mNumDataBits-1- i, mpField->GetElement(pData[i]));
 
-	// Encode (On return, p is a polynomial of order n-1)
-	mpRSAlgebra->Encode(p);
+    // Encode (On return, p is a polynomial of order n-1)
+    mpRSAlgebra->Encode(p);
 
-	// Put the parity bits into the output
-	for (unsigned int i = 0; i<mNumCodeBits - mNumDataBits; i++)
-		pParity[i] = p.GetCoefficient(mNumCodeBits - mNumDataBits - 1 - i);
+    // Put the parity bits into the output
+    for (unsigned int i = 0; i<mNumCodeBits - mNumDataBits; i++)
+        pParity[i] = p.GetCoefficient(mNumCodeBits - mNumDataBits - 1 - i);
 }
 
-int CRSCodePFT::Decode(unsigned char *pData, 
-					   unsigned int *pErasurePositions, 
-					   unsigned int numErasures)
+int CRSCodePFT::Decode(unsigned char *pData,
+                       unsigned int *pErasurePositions,
+                       unsigned int numErasures)
 {
-	// Map to a polynomial
-	FiniteFieldPolynomial p(mpField);
+    // Map to a polynomial
+    FiniteFieldPolynomial p(mpField);
 
-	// DRM order: first data byte maps to highest order coefficient
-	for (unsigned int i = 0; i<mNumCodeBits; i++)
-		p.SetCoefficient(mNumCodeBits-1- i, mpField->GetElement(pData[i]));
+    // DRM order: first data byte maps to highest order coefficient
+    for (unsigned int i = 0; i<mNumCodeBits; i++)
+        p.SetCoefficient(mNumCodeBits-1- i, mpField->GetElement(pData[i]));
 
-	// Make an STL list of the erasure positions
-	list<unsigned int> erasures;
-	for (unsigned int i = 0; i < numErasures; i++)
-		erasures.push_back(mNumCodeBits - 1 - pErasurePositions[i]);
+    // Make an STL list of the erasure positions
+    list<unsigned int> erasures;
+    for (unsigned int i = 0; i < numErasures; i++)
+        erasures.push_back(mNumCodeBits - 1 - pErasurePositions[i]);
 
-	// Do the error correction
-	int corrections = mpRSAlgebra->Decode(p, erasures);
+    // Do the error correction
+    int corrections = mpRSAlgebra->Decode(p, erasures);
 
-	// Copy back to data array
-	for (unsigned int i = 0; i<mNumCodeBits; i++)
-		pData[i] = p.GetCoefficient(mNumCodeBits-1-i);
+    // Copy back to data array
+    for (unsigned int i = 0; i<mNumCodeBits; i++)
+        pData[i] = p.GetCoefficient(mNumCodeBits-1-i);
 
-	return corrections;
+    return corrections;
 }

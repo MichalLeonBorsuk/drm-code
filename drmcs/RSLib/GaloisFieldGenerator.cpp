@@ -25,10 +25,10 @@
 #include "GaloisFieldGenerator.h"
 
 GaloisFieldGenerator::GaloisFieldGenerator(const unsigned int NumberOfElementsLog2, const unsigned int GeneratorPolynomial)
-: mcNumberOfElementsLog2(NumberOfElementsLog2)
-, mcNumberOfElements(1<<NumberOfElementsLog2)
-, mcGeneratorPolynomial(GeneratorPolynomial)
-, mCurrentValue(1)
+    : mcNumberOfElementsLog2(NumberOfElementsLog2)
+    , mcNumberOfElements(1<<NumberOfElementsLog2)
+    , mcGeneratorPolynomial(GeneratorPolynomial)
+    , mCurrentValue(1)
 {
 }
 
@@ -38,9 +38,9 @@ GaloisFieldGenerator::~GaloisFieldGenerator(void)
 
 unsigned int GaloisFieldGenerator::GetNextValue(void)
 {
-	unsigned int returnValue = mCurrentValue;
-	mCurrentValue <<= 1;
-	if ((mCurrentValue & mcNumberOfElements) != 0)
-		mCurrentValue ^= mcGeneratorPolynomial;
-	return returnValue;
+    unsigned int returnValue = mCurrentValue;
+    mCurrentValue <<= 1;
+    if ((mCurrentValue & mcNumberOfElements) != 0)
+        mCurrentValue ^= mcGeneratorPolynomial;
+    return returnValue;
 }
