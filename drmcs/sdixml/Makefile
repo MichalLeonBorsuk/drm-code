@@ -12,10 +12,10 @@ HDR = afs.h afsmuxlist.h afsservicelist.h Announcement.h BitRates.h DrmMuxConfig
 OBJ  = afs.o afsmuxlist.o afsservicelist.o frequencygroup.o servicegroup.o afs.o BitRates.o Announcement.o DrmMuxConfig.o Service.o Region.o RFChannel.o Schedule.o ServiceComponent.o SDIStream.o version.o schema_version.o AMSSConfig.o
 
 INCS =  
-CXXINCS =  -I/usr/include/libxml2 -I../common
+CXXINCS = -I../common -I/usr/include/libxml2
 STATIC  = libsdixml.a
 BIN = test
-CXXFLAGS = $(CXXINCS)  -Wall -g3 -Wshadow -Weffc++ -Wsign-promo -Wcomment 
+CXXFLAGS = $(CXXINCS)  -Wall -g3 -Wshadow -Weffc++ -Wsign-promo -Wcomment -std=c++11
 CFLAGS = $(INCS)   -Wall -g3
 RM = rm -f
 

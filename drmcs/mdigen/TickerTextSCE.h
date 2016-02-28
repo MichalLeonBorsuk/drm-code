@@ -25,7 +25,6 @@
 #ifndef _TICKERTEXTSCE_H
 #define _TICKERTEXTSCE_H
 
-#include <platform.h>
 #include <TranslatingTextSCE.h>
 #include "Ticker.h"
 #include "sockets.h"

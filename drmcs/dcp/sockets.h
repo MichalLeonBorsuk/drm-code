@@ -26,11 +26,14 @@
 #define _SOCKETS_H
 
 #include <map>
-#include "bytevector.h"
-#include "platform.h"
-#ifndef WIN32
-#include <pcap.h>
-#endif
+#include <bytevector.h>
+# include <pcap.h>
+typedef int SOCKET;
+# define SOCKET_ERROR (-1)
+# define INVALID_SOCKET (-1)
+#include <netinet/in.h>
+#include <arpa/inet.h>
+
 
 class basic_socket
 {

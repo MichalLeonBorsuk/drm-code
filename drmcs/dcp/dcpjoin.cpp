@@ -32,6 +32,7 @@
 #include <cctype>
 #include <iostream>
 #include <sstream>
+#include "sockets.h"
 #include "timestamp.h"
 
 using namespace std;

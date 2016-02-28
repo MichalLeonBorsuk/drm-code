@@ -25,7 +25,6 @@
 #ifndef _CTAUDIOFILESCE_H
 #define _CTAUDIOFILESCE_H
 
-#include <stdio.h>
 #include <ServiceComponentEncoder.h>
 
 class CCTAudioFileSCE : public CAudioSCE

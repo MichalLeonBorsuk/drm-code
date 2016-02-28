@@ -25,7 +25,6 @@
 #ifndef _CRC16_H
 #define _CRC16_H
 
-#include "platform.h"
 /* TODO (jfbc#1#): Use this class in the PFT layer */
 
 class CCrc16

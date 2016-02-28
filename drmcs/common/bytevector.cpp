@@ -27,167 +27,167 @@
 
 using namespace std;
 
-void bytevector::put(const bitvector& b) 
+void bytevector::put(const bitvector& b)
 {
-  uint8_t byte;
-  for (size_t i=0; i < b.size(); i+=8) {
-    byte = 0;
-    for (int q=0; q < 8; q++) {
-      byte |= b[i+q] << (7-q);
+    uint8_t byte;
+    for (size_t i=0; i < b.size(); i+=8) {
+        byte = 0;
+        for (int q=0; q < 8; q++) {
+            byte |= b[i+q] << (7-q);
+        }
+        push_back(byte);
     }
-    push_back(byte);
-  }
 }
 
 void bytevector::putb(uint8_t b)
 {
-  push_back(b);
+    push_back(b);
 }
 
 void bytevector::put(uint64_t n, unsigned fmt)
 {
-  if(8U-bits >= fmt) { // it all fits in the in_progress byte
-    uint8_t mask = (1<<fmt)-1;
-    uint8_t b = static_cast<uint8_t>(n & mask);
-    bits += fmt;
-    in_progress |= b << (8-bits);
-    if(bits==8) { // a whole byte
-      putb(in_progress);
-      in_progress = 0;
-      bits = 0;
+    if(8U-bits >= fmt) { // it all fits in the in_progress byte
+        uint8_t mask = (1<<fmt)-1;
+        uint8_t b = static_cast<uint8_t>(n & mask);
+        bits += fmt;
+        in_progress |= b << (8-bits);
+        if(bits==8) { // a whole byte
+            putb(in_progress);
+            in_progress = 0;
+            bits = 0;
+        }
+    } else { // spans more than one byte
+        if(bits>0) { // grab enough bits to fill the in_progress byte
+            int leading_bits = 8 - bits;
+            uint8_t mask = (1<<leading_bits)-1;
+            uint8_t b = static_cast<uint8_t>((n >> (fmt-leading_bits)) & mask);
+            bits += leading_bits; // should be 8!
+            in_progress |= b;
+            fmt -= leading_bits;
+            putb(in_progress);
+            in_progress = 0;
+            if(bits != 8) {
+                fprintf(stderr, "bytevector bits should be 8 is %d\n", bits);
+            }
+            bits = 0;
+        }
+        // handle complete bytes
+        int mid = fmt/8;
+        for(int i=0; i<mid; i++) {
+            uint8_t b = static_cast<uint8_t>((n >> (fmt-8)) & 0xff);
+            putb(b);
+            fmt -= 8;
+        }
+        // handle the last bits: fmt will now be < 8 and bits will be 0
+        if(fmt>0) {
+            bits = fmt;
+            in_progress = static_cast<uint8_t>((n & ((1<<fmt)-1)) << (8-bits));
+        }
     }
-  } else { // spans more than one byte
-    if(bits>0) { // grab enough bits to fill the in_progress byte
-      int leading_bits = 8 - bits;
-      uint8_t mask = (1<<leading_bits)-1;
-      uint8_t b = static_cast<uint8_t>((n >> (fmt-leading_bits)) & mask);
-      bits += leading_bits; // should be 8!
-      in_progress |= b;      
-      fmt -= leading_bits;
-      putb(in_progress);
-      in_progress = 0;
-      if(bits != 8) {
-        fprintf(stderr, "bytevector bits should be 8 is %d\n", bits);
-      }
-      bits = 0;
-    }
-    // handle complete bytes
-    int mid = fmt/8;
-    for(int i=0; i<mid; i++) {
-      uint8_t b = static_cast<uint8_t>((n >> (fmt-8)) & 0xff);
-      putb(b);
-      fmt -= 8;
-    }
-    // handle the last bits: fmt will now be < 8 and bits will be 0
-    if(fmt>0) {
-      bits = fmt;
-      in_progress = static_cast<uint8_t>((n & (1<<fmt)-1) << (8-bits));
-    }
-  }
 }
 
 void bytevector::put(const string& s)
 {
-  if(bits==0) {
-    for(unsigned i=0; i<s.length(); i++)
-      putb(s[i]);
-  } else {
-    for(unsigned i=0; i<s.length(); i++)
-      put(s[i], 8);
-  }
+    if(bits==0) {
+        for(unsigned i=0; i<s.length(); i++)
+            putb(s[i]);
+    } else {
+        for(unsigned i=0; i<s.length(); i++)
+            put(s[i], 8);
+    }
 }
 
 void bytevector::put(const bytev& s)
 {
-  if(bits==0) {
-    for(unsigned i=0; i<s.size(); i++)
-      putb(s[i]); 
-  } else {
-    for(unsigned i=0; i<s.size(); i++)
-      put(s[i], 8);
-  }
+    if(bits==0) {
+        for(unsigned i=0; i<s.size(); i++)
+            putb(s[i]);
+    } else {
+        for(unsigned i=0; i<s.size(); i++)
+            put(s[i], 8);
+    }
 }
 
 void bytevector::putbytes(const char* s, unsigned bytes)
 {
-  if(bits==0) {
-    for(unsigned i=0; i<bytes; i++)
-      putb(s[i]);
-  } else {
-    for(unsigned i=0; i<bytes; i++)
-      put(s[i], 8);
-  }
+    if(bits==0) {
+        for(unsigned i=0; i<bytes; i++)
+            putb(s[i]);
+    } else {
+        for(unsigned i=0; i<bytes; i++)
+            put(s[i], 8);
+    }
 }
 
 uint64_t bytevector::get(unsigned wanted)
 {
-  uint64_t result = 0;
-  if(8*size()+bits<wanted) {
-    return 0;
-  } else {
-    // stuff in progress
-    uint8_t b = (wanted>=bits)?bits:wanted;
-    result = in_progress >> (8-b);
-    in_progress <<= b;
-    wanted -= b;
-    bits -= b;
-    // whole octets
-    bytev::iterator i = begin();
-    while(wanted>=8){
-      result = (result << 8) | *i++;
-      wanted -= 8;
+    uint64_t result = 0;
+    if(8*size()+bits<wanted) {
+        return 0;
+    } else {
+        // stuff in progress
+        uint8_t b = (wanted>=bits)?bits:wanted;
+        result = in_progress >> (8-b);
+        in_progress <<= b;
+        wanted -= b;
+        bits -= b;
+        // whole octets
+        bytev::iterator i = begin();
+        while(wanted>=8) {
+            result = (result << 8) | *i++;
+            wanted -= 8;
+        }
+        // partial last octet
+        if(wanted>0) {
+            in_progress = *i++;
+            bits = 8;
+            result = (result << wanted) | in_progress >> (8-wanted);
+            in_progress <<= wanted;
+            bits -= wanted;
+        }
+        erase(begin(), i);
     }
-    // partial last octet
-    if(wanted>0) {
-      in_progress = *i++;
-      bits = 8;
-      result = (result << wanted) | in_progress >> (8-wanted);
-      in_progress <<= wanted;
-      bits -= wanted;
-    }
-    erase(begin(), i);
-  }
-  return result;
+    return result;
 }
 
 int64_t bytevector::getSigned(unsigned wanted)
 {
-  uint64_t n = get(wanted);
-  if(n & (1ULL<<(wanted-1))){
-    uint64_t x = 1<<wanted;
-    uint64_t xx = x-1;
-    uint64_t xxx = ~xx;
-    return int64_t(xxx|n);
-  }else
-    return n;
+    uint64_t n = get(wanted);
+    if(n & (1ULL<<(wanted-1))) {
+        uint64_t x = 1<<wanted;
+        uint64_t xx = x-1;
+        uint64_t xxx = ~xx;
+        return int64_t(xxx|n);
+    } else
+        return n;
 }
 
 void bytevector::get(bytev& v, unsigned len)
 {
-  if(bits==0) {
-    if(len>=size()) {
-      bytev::iterator s = begin();
-      v.insert(v.end(), s, s+len);
-      erase(s, s+len);
+    if(bits==0) {
+        if(len>=size()) {
+            bytev::iterator s = begin();
+            v.insert(v.end(), s, s+len);
+            erase(s, s+len);
+        }
+    } else {
+        v.resize(len);
+        for(unsigned i=0; i<len; i++)
+            v[i]=static_cast<uint8_t>(get(8));
     }
-  } else {
-    v.resize(len);
-    for(unsigned i=0; i<len; i++)
-      v[i]=static_cast<uint8_t>(get(8));
-  }
 }
 
 
 bytevector& operator<<(bytevector& b, const bytev& c)
 {
-  b.put(c);
-  return b;
+    b.put(c);
+    return b;
 }
 
 bytevector& operator<< (bytevector& b, const string& c)
 {
-  b.put(c);
-  return b;
+    b.put(c);
+    return b;
 }
 
 uint8_t bytevector::peek() const

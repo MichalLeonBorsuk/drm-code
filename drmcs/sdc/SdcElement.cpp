@@ -25,16 +25,20 @@
 #include "SdcElement.h"
 #include <iostream>
 
+SdcElement::SdcElement():out(),type(0)
+{
+}
+
 void SdcElement::Type0(
     const bytevector& sdci,
     bool next)
 {
-  type=0;
-  out.clear();
-  // length of body
-  out.put(sdci.size()-1, 7);
-  out.put(next?1:0, 1); // version flag = reconfiguration
-  out.put(sdci);
+    type=0;
+    out.clear();
+    // length of body
+    out.put(sdci.size()-1, 7);
+    out.put(next?1:0, 1); // version flag = reconfiguration
+    out.put(sdci);
 }
 
 /*
@@ -58,15 +62,15 @@ void SdcElement::Type1(
     const string& label,
     size_t short_id)
 {
-  size_t len = label.length();
-  type=1;
-  out.clear();
-  out.put(len, 7);
-  out.put(0, 1); // version flag = 0 for unique
-  out.put(type, 4);
-  out.put(short_id, 2);
-  out.put(0, 2); // rfu
-  out.put(label);
+    size_t len = label.length();
+    type=1;
+    out.clear();
+    out.put(len, 7);
+    out.put(0, 1); // version flag = 0 for unique
+    out.put(type, 4);
+    out.put(short_id, 2);
+    out.put(0, 2); // rfu
+    out.put(label);
 }
 
 
@@ -101,20 +105,20 @@ both the Audio CA flag and the Data CA flag are set to 1.
 
 void SdcElement::Type2(
     const Service& s, bool next,
-	size_t short_id)
+    size_t short_id)
 {
     type=2;
     out.clear();
-	out.put(1+s.ca_data.size(), 7);
+    out.put(1+s.ca_data.size(), 7);
     out.put(next?1:0, 1);
     out.put(type, 4);
-	out.put(short_id, 2);
-	bool is_audio_ca = s.audio_ref.length()>0 
-      && s.conditional_access;
-	out.put(is_audio_ca, 1);
-	bool is_data_ca = s.data_ref.length()>0
-      && s.conditional_access;
-	out.put(is_data_ca, 1);
+    out.put(short_id, 2);
+    bool is_audio_ca = s.audio_ref.length()>0
+                       && s.conditional_access;
+    out.put(is_audio_ca, 1);
+    bool is_data_ca = s.data_ref.length()>0
+                      && s.conditional_access;
+    out.put(is_data_ca, 1);
     out.put(s.ca_system_identifier, 8);
     out.put(s.ca_data);
 }
@@ -131,20 +135,20 @@ void SdcElement::Type2(
   zero to 16 frequencies per entity; zero to 64 entities in total
 */
 
-void SdcElement::Type3(const AFSMuxlist& l, int i, int version)
+void SdcElement::Type3(const AFSMuxlist& l, int n, int version)
 {
-	size_t len=0;
+    size_t len=0;
     uint16_t sr_flag=0, rs_flag=0;
-    const FrequencyGroup& group = l.fg[i];
+    const FrequencyGroup& group = l.fg[n];
     if(group.frequency.size()>16)
-		throw "too many frequencies in a type 3 SDC element (16 allowed)";
+        throw "too many frequencies in a type 3 SDC element (16 allowed)";
     if(l.restricted_services) {
-      sr_flag=1;
-      len++;
+        sr_flag=1;
+        len++;
     }
     if(group.region_id!=0 || group.schedule_id!=0) {
-      len++;
-      rs_flag=1;
+        len++;
+        rs_flag=1;
     }
     len+=2*group.frequency.size();
     type=3;
@@ -156,21 +160,21 @@ void SdcElement::Type3(const AFSMuxlist& l, int i, int version)
     out.put(l.base_layer?0:1, 1);
     out.put(sr_flag, 1);
     out.put(rs_flag, 1);
-    if(sr_flag){
-	  // bit map of short ids carried in this other service
-	  uint8_t service_restriction = 0;
-      for(size_t i=0; i<l.carried_short_id.size(); i++) {
-        service_restriction |= 1 << l.carried_short_id[i];
-      }
-      out.put(service_restriction, 4); 
-      out.put(0, 4); // rfa
+    if(sr_flag) {
+        // bit map of short ids carried in this other service
+        uint8_t service_restriction = 0;
+        for(size_t i=0; i<l.carried_short_id.size(); i++) {
+            service_restriction |= 1 << l.carried_short_id[i];
+        }
+        out.put(service_restriction, 4);
+        out.put(0, 4); // rfa
     }
     if(rs_flag) {
-      out.put(group.region_id, 4);
-      out.put(group.schedule_id, 4);
+        out.put(group.region_id, 4);
+        out.put(group.schedule_id, 4);
     }
-    for(unsigned i=0; i<group.frequency.size(); i++){
-      out.put(group.frequency[i], 16);
+    for(unsigned i=0; i<group.frequency.size(); i++) {
+        out.put(group.frequency[i], 16);
     }
 }
 
@@ -189,11 +193,11 @@ void SdcElement::Type4(size_t id, const Schedule::Interval& v, int version)
     out.put(version, 1);
     out.put(type, 4);
     out.put(id, 4);
-	uint8_t days = 0;
-	for(size_t i=0; i<v.days.length(); i++) {
-	    uint8_t d = v.days[i] - '0'; // Mon=1, Tue=2, ... Sun=7
+    uint8_t days = 0;
+    for(size_t i=0; i<v.days.length(); i++) {
+        uint8_t d = v.days[i] - '0'; // Mon=1, Tue=2, ... Sun=7
         days |= 1<<(7-d);
-	}
+    }
     out.put(days, 7);
     out.put(60*v.start_hour+v.start_minute, 11);
     out.put(v.duration, 14);
@@ -208,41 +212,41 @@ void SdcElement::Type4(size_t id, const Schedule::Interval& v, int version)
 */
 void SdcElement::Type5(
     const ServiceComponent& c,
-	size_t short_id,
-	size_t stream,
-	bool next)
+    size_t short_id,
+    size_t stream,
+    bool next)
 {
-  type=5;
-  out.clear();
-  size_t len = 1+(c.packet_mode?1:0)+c.application_data.size();
-  out.put(len, 7);
-  out.put(next?1:0, 1); // version flag = reconfiguration
-  out.put(type, 4);
-  out.put(short_id, 2);
-  out.put(stream, 2);
-  out.put(c.packet_mode?1:0, 1);
-  if(c.packet_mode) {
-/*
-- data unit indicator 1 bit.
-- packet Id 2 bits.
-- enhancement flag 1 bit.
-- application domain 3 bits.
-- packet length 8 bits.
-*/
-    out.put(c.data_unit_indicator, 1);
-    out.put(c.packet_id, 2);
-    out.put(c.enhancement, 1);
-    out.put(c.application_domain, 3);
-    out.put(c.packet_size, 8);
-  } else {
-  /*- rfa 3 bits.
-  - enhancement flag 1 bit.
-  - application domain 3 bits.*/
-    out.put(0, 3);
-    out.put(c.enhancement, 1);
-    out.put(c.application_domain, 3);
-  }
-  out.put(c.application_data);
+    type=5;
+    out.clear();
+    size_t len = 1+(c.packet_mode?1:0)+c.application_data.size();
+    out.put(len, 7);
+    out.put(next?1:0, 1); // version flag = reconfiguration
+    out.put(type, 4);
+    out.put(short_id, 2);
+    out.put(stream, 2);
+    out.put(c.packet_mode?1:0, 1);
+    if(c.packet_mode) {
+        /*
+        - data unit indicator 1 bit.
+        - packet Id 2 bits.
+        - enhancement flag 1 bit.
+        - application domain 3 bits.
+        - packet length 8 bits.
+        */
+        out.put(c.data_unit_indicator, 1);
+        out.put(c.packet_id, 2);
+        out.put(c.enhancement, 1);
+        out.put(c.application_domain, 3);
+        out.put(c.packet_size, 8);
+    } else {
+        /*- rfa 3 bits.
+        - enhancement flag 1 bit.
+        - application domain 3 bits.*/
+        out.put(0, 3);
+        out.put(c.enhancement, 1);
+        out.put(c.application_domain, 3);
+    }
+    out.put(c.application_data);
 }
 
 /*
@@ -256,7 +260,7 @@ void SdcElement::Type5(
 
 void SdcElement::Type6(
     const Announcement& a,
-	uint8_t short_id_flags, int version)
+    uint8_t short_id_flags, int version)
 {
     type=6;
     out.clear();
@@ -278,10 +282,10 @@ void SdcElement::Type6(
 - Longitude Extent 8 bits.
 - n CIRAF Zones n -- 8 bits.
 */
-void SdcElement::Type7(size_t id, 
-  const Region::Area& a, 
-  const vector<int>& zone,
-  int version)
+void SdcElement::Type7(size_t id,
+                       const Region::Area& a,
+                       const vector<int>& zone,
+                       int version)
 {
     type=7;
     out.clear();
@@ -294,7 +298,7 @@ void SdcElement::Type7(size_t id,
     out.put(a.latitude_extent, 7);
     out.put(a.longitude_extent, 8);
     for(size_t i=0; i<zone.size(); i++)
-      out.put(zone[i], 8);
+        out.put(zone[i], 8);
 }
 
 /*
@@ -330,40 +334,40 @@ void SdcElement::Type8(
 - rfa 1 bit.
 */
 void SdcElement::Type9(
-  const ServiceComponent& c,
-  size_t short_id,
-  size_t stream,
-  bool has_text, bool next
+    const ServiceComponent& c,
+    size_t short_id,
+    size_t stream,
+    bool has_text, bool next
 )
 {
-  type=9;
-  out.clear();
-  out.put(2, 7);
-  out.put(next?1:0, 1); // version flag = reconfiguration
-  out.put(type, 4);
-  out.put(short_id, 2);
-  out.put(stream, 2);
-  out.put(c.audio_coding, 2);
-  out.put(c.SBR?1:0, 1);
-  out.put(c.audio_mode, 2);
-  switch(c.audio_sampling_rate) {
-  case 8000:
-    out.put(0, 3);
-    break;
-  case 12000:
-    out.put(1, 3);
-    break;
-  case 16000:
-    out.put(2, 3);
-    break;
-  case 24000:
-    out.put(3, 3);
-    break;
-  }
-  out.put(has_text?1:0, 1);
-  out.put(c.enhancement, 1);
-  out.put(c.coder_field, 5);
-  out.put(0, 1); // rfu
+    type=9;
+    out.clear();
+    out.put(2, 7);
+    out.put(next?1:0, 1); // version flag = reconfiguration
+    out.put(type, 4);
+    out.put(short_id, 2);
+    out.put(stream, 2);
+    out.put(c.audio_coding, 2);
+    out.put(c.SBR?1:0, 1);
+    out.put(c.audio_mode, 2);
+    switch(c.audio_sampling_rate) {
+    case 8000:
+        out.put(0, 3);
+        break;
+    case 12000:
+        out.put(1, 3);
+        break;
+    case 16000:
+        out.put(2, 3);
+        break;
+    case 24000:
+        out.put(3, 3);
+        break;
+    }
+    out.put(has_text?1:0, 1);
+    out.put(c.enhancement, 1);
+    out.put(c.coder_field, 5);
+    out.put(0, 1); // rfu
 }
 
 /*
@@ -383,21 +387,21 @@ void SdcElement::Type10(
     bool enhanced,
     size_t service_pattern)
 {
-  type=10;
-  out.clear();
-  out.put(2, 7);
-  out.put(1, 1); // version flag = reconfiguration, always 1 for type 10s!
-  out.put(type, 4);
-  // Channel parameters
-  out.put(enhanced?1:0, 1); // base/enhancement flag
-  out.put(channel.robustness_mode, 2);
-  out.put(channel.spectral_occupancy, 4);
-  out.put(channel.interleaver_depth, 1);
-  out.put(channel.msc_mode, 2);
-  out.put(channel.sdc_mode, 1);
-  out.put(service_pattern, 4);
-  out.put(0, 3); // rfa
-  out.put(0, 2); // rfu
+    type=10;
+    out.clear();
+    out.put(2, 7);
+    out.put(1, 1); // version flag = reconfiguration, always 1 for type 10s!
+    out.put(type, 4);
+    // Channel parameters
+    out.put(enhanced?1:0, 1); // base/enhancement flag
+    out.put(channel.robustness_mode, 2);
+    out.put(channel.spectral_occupancy, 4);
+    out.put(channel.interleaver_depth, 1);
+    out.put(channel.msc_mode, 2);
+    out.put(channel.sdc_mode, 1);
+    out.put(service_pattern, 4);
+    out.put(0, 3); // rfa
+    out.put(0, 2); // rfu
 }
 
 /*
@@ -414,96 +418,96 @@ void SdcElement::Type10(
 static const size_t idbytes[] = {3, 3, 0, 3, 2, 0, 3, 2, 0, 3, 2, 4};
 
 void SdcElement::Type11(
-   const ServiceGroup& group,
-   bool is_announcement,
-   size_t short_id, int version
+    const ServiceGroup& group,
+    bool is_announcement,
+    size_t short_id, int version
 )
 {
-  type=11;
-  size_t len=1;
-  uint16_t rs_flag=0;
-  if(group.frequency.size()>16)
-    throw "too many frequencies in a type 11 SDC element (16 allowed)";
-  if(group.region_id>0 || group.schedule_id>0) {
-    len++;
-    rs_flag=1;
-  }
-  if(group.system_id<12)
-    len += idbytes[group.system_id];
-  else
-    throw "invalid system id";
-  if(group.service_identifier.size()!=idbytes[group.system_id])
-    throw "Wrong size service id for system id in a type 11 SDC element";
-  if(group.system_id<3){
-    len+=2*group.frequency.size();
-  } else {
-    len+=group.frequency.size();
-  }
-  out.clear();
-  out.put(len, 7);
-  out.put(version, 1); // list mechanism
-  out.put(type, 4);
-  out.put(is_announcement?1:0, 1);
-  out.put(short_id, 2);
-  out.put(rs_flag, 1);
-  out.put(group.same_service==1?1:0, 1);
-  out.put(0, 2); // rfa
-  out.put(group.system_id, 5);
-  if(rs_flag) {
-    out.put(group.region_id, 4);
-    out.put(group.schedule_id, 4);
-  }
-  out.put(group.service_identifier);
-  switch(group.system_id){
-  case 0: // drm
-  case 1: // am with ID
-  case 2: // am
-       for(size_t i=0; i<group.frequency.size(); i++){
-         out.put(0, 1);
-         out.put(group.frequency[i], 15);
-       }
-       break;
-  case 3:
-  case 4:
-  case 5:
-       for(size_t i=0; i<group.frequency.size(); i++){
-         uint16_t f = (group.frequency[i]-87500)/100;
-         out.put(f, 8);
-       }
-       break;
-  case 6:
-  case 7:
-  case 8:
-       for(size_t i=0; i<group.frequency.size(); i++){
-         uint16_t f = (group.frequency[i]-76000)/100;
-         out.put(f, 8);
-       }
-       break;
-  default:
-       for(size_t i=0; i<group.frequency.size(); i++){
-         out.put(group.frequency[i], 8);
-       }
-       break;
-  }
+    type=11;
+    size_t len=1;
+    uint16_t rs_flag=0;
+    if(group.frequency.size()>16)
+        throw "too many frequencies in a type 11 SDC element (16 allowed)";
+    if(group.region_id>0 || group.schedule_id>0) {
+        len++;
+        rs_flag=1;
+    }
+    if(group.system_id<12)
+        len += idbytes[group.system_id];
+    else
+        throw "invalid system id";
+    if(group.service_identifier.size()!=idbytes[group.system_id])
+        throw "Wrong size service id for system id in a type 11 SDC element";
+    if(group.system_id<3) {
+        len+=2*group.frequency.size();
+    } else {
+        len+=group.frequency.size();
+    }
+    out.clear();
+    out.put(len, 7);
+    out.put(version, 1); // list mechanism
+    out.put(type, 4);
+    out.put(is_announcement?1:0, 1);
+    out.put(short_id, 2);
+    out.put(rs_flag, 1);
+    out.put(group.same_service==1?1:0, 1);
+    out.put(0, 2); // rfa
+    out.put(group.system_id, 5);
+    if(rs_flag) {
+        out.put(group.region_id, 4);
+        out.put(group.schedule_id, 4);
+    }
+    out.put(group.service_identifier);
+    switch(group.system_id) {
+    case 0: // drm
+    case 1: // am with ID
+    case 2: // am
+        for(size_t i=0; i<group.frequency.size(); i++) {
+            out.put(0, 1);
+            out.put(group.frequency[i], 15);
+        }
+        break;
+    case 3:
+    case 4:
+    case 5:
+        for(size_t i=0; i<group.frequency.size(); i++) {
+            uint16_t f = (group.frequency[i]-87500)/100;
+            out.put(f, 8);
+        }
+        break;
+    case 6:
+    case 7:
+    case 8:
+        for(size_t i=0; i<group.frequency.size(); i++) {
+            uint16_t f = (group.frequency[i]-76000)/100;
+            out.put(f, 8);
+        }
+        break;
+    default:
+        for(size_t i=0; i<group.frequency.size(); i++) {
+            out.put(group.frequency[i], 8);
+        }
+        break;
+    }
 }
 
 void SdcElement::Type12(
     const Service& s,
-	size_t short_id)
+    size_t short_id)
 {
-  type=12;
-  out.clear();
-  out.put(5, 7);
-  out.put(0, 1); // unique
-  out.put(type, 4);
-  out.put(short_id, 2);
-  out.put(0, 2);
-  if(s.language_long.length()==3)
-    out.put(s.language_long);
-  else
-    out.put("---");
-  if(s.country.length()==2)
-    out.put(s.country);
-  else
-    out.put("--");
+    type=12;
+    out.clear();
+    out.put(5, 7);
+    out.put(0, 1); // unique
+    out.put(type, 4);
+    out.put(short_id, 2);
+    out.put(0, 2);
+    if(s.language_long.length()==3)
+        out.put(s.language_long);
+    else
+        out.put("---");
+    if(s.country.length()==2)
+        out.put(s.country);
+    else
+        out.put("--");
 }

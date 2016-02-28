@@ -25,8 +25,8 @@
 #ifndef _TIMESTAMP_H
 #define _TIMESTAMP_H
 
+#include <libxml/encoding.h>
 #include <time.h>
-#include "platform.h"
 
 void clock_getrealtime(struct timespec *tp);
 

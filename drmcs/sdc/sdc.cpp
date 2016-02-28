@@ -33,7 +33,7 @@ const unsigned short SDC::sdc_length[4][2][6]
 		{{  0,   0,   0,  68,   0, 147}, {  0,   0,   0,  32,   0,  72}},
 		{{  0,   0,   0,  33,   0,  78}, {  0,   0,   0,  15,   0,  38}}};
 
-SDC::SDC():
+SDC::SDC():sdci(),
 afs_index_valid(false),
 current(),afs_index(0),length(0),
 block(15),elements_in_every_block(),
@@ -439,9 +439,9 @@ void SDC::ConfigureAFS(vector<SdcElement>& afs_element, const AFS& afs)
 	try {
     	e.Type11(sg[i], false, 3, afs_version);
     	afs_element.push_back(e);
-	} catch(const char *e)
+	} catch(const char *ex)
 	{
-		throw (string("error in scanning guide data: ")+e).c_str();
+		throw (string("error in scanning guide data: ")+ex).c_str();
 	}
   }
 }

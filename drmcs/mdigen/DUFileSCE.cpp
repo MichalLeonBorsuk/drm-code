@@ -23,10 +23,10 @@
 \******************************************************************************/
 
 #include "DUFileSCE.h"
-#include <platform.h>
+#include <arpa/inet.h>
+#include <fcntl.h>
 #include <iostream>
 #include "timestamp.h"
-#include <fcntl.h>
 
 // TODO - make the DataGroup part optional by private config
 void DUFileSCE::ReConfigure(const ServiceComponent& config)

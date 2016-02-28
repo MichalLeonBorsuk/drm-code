@@ -25,6 +25,7 @@
 #ifndef AFX_TEXTENCODE_H
 #define AFX_TEXTENCODE_H
 
+#include <libxml/encoding.h>
 #include <Crc16.h>
 #include <bytevector.h>
 

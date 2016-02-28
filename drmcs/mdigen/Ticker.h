@@ -25,7 +25,7 @@
 #ifndef _TICKER_H
 #define _TICKER_H
 
-#include "platform.h"
+#include "sockets.h"
 
 class CTicker
 {

@@ -22,7 +22,7 @@
  *
 \******************************************************************************/
 
-#include <platform.h>
+#include <libxml/encoding.h>
 #include "drmmux.h"
 #include "mdiout.h"
 #include "DcpOut.h"

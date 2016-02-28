@@ -42,8 +42,11 @@ using namespace std;
 class bytev : public vector<uint8_t>
 {
 public:
-  bytev():vector<uint8_t>() {}
-  const uint8_t* data() const { return &(*this)[0];}
+    bytev():vector<uint8_t>() {}
+    // virtual ~bytev() {} vector has a non-virtual destructor so this does not help
+    const uint8_t* data() const {
+        return &(*this)[0];
+    }
 };
 
 #endif

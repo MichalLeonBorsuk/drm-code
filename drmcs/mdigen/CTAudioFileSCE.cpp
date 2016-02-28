@@ -24,7 +24,7 @@
 
 
 #include "CTAudioFileSCE.h"
-#include <platform.h>
+#include <arpa/inet.h>
 #include <iostream>
 
 CCTAudioFileSCE::~CCTAudioFileSCE()

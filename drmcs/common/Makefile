@@ -11,9 +11,9 @@ OBJ  = bitvector.o bytevector.o Cfg.o Crc16.o persist.o timestamp.o
 
 LIBS =   
 INCS =  
-CXXINCS =  -I/usr/include/libxml2 -I.
+CXXINCS = -I/usr/include/libxml2
 STATIC  = libcommon.a
-CXXFLAGS = $(CXXINCS)  -Wall -g3 -Wshadow -Weffc++ -Wsign-promo -Wcomment 
+CXXFLAGS = $(CXXINCS)  -Wall -g3 -Wshadow -Weffc++ -Wsign-promo -Wcomment -std=c++11 
 CFLAGS = $(INCS)   -Wall -g3
 RM = rm -f
 
