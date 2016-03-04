@@ -29,8 +29,18 @@ FiniteFieldElement::FiniteFieldElement(const WorkingFiniteFieldElement *pElement
 {
 }
 
+FiniteFieldElement::FiniteFieldElement(const FiniteFieldElement& element):mpElement(element.mpElement)
+{
+}
+
 FiniteFieldElement::~FiniteFieldElement(void)
 {
+}
+
+FiniteFieldElement& FiniteFieldElement::operator=(const FiniteFieldElement& e)
+{
+    mpElement = e.mpElement;
+    return *this;
 }
 
 FiniteFieldElement FiniteFieldElement::operator+(const FiniteFieldElement y) const

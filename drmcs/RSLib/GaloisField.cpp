@@ -50,6 +50,14 @@ GaloisField::GaloisField(const unsigned int NumberOfElementsLog2, const unsigned
 
 }
 
+GaloisField::GaloisField(const GaloisField& f)
+    : mNumberOfElements(f.mNumberOfElements)
+    , mNumberOfElementsLog2(f.mNumberOfElementsLog2)
+    , mValueLookupTable(f.mValueLookupTable)
+    , mLogLookupTable(f.mLogLookupTable)
+{
+}
+
 GaloisField::~GaloisField()
 {
     // Delete all the members
@@ -61,6 +69,17 @@ GaloisField::~GaloisField()
             delete *p;
     }
 
+}
+
+GaloisField& GaloisField::operator=(const GaloisField& f)
+{
+    if(mNumberOfElements != f.mNumberOfElements)
+	throw "can't change size of Galois Field";
+    if(mNumberOfElementsLog2 != f.mNumberOfElementsLog2)
+	throw "can't change size of Galois Field";
+    mValueLookupTable = f.mValueLookupTable;
+    mLogLookupTable = f.mLogLookupTable;
+    return *this;
 }
 
 FiniteFieldElement GaloisField::AlphaToPower(const int power) const

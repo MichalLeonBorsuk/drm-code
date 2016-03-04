@@ -35,6 +35,8 @@ public:
 				const GaloisField *const pField, 
 				const unsigned int indexFirstRoot = 1, 
 				const unsigned int indexStepRoot = 1);
+	RSAlgebra(const RSAlgebra&);
+	RSAlgebra& operator=(const RSAlgebra&);
 	virtual ~RSAlgebra(void);
 	void Encode(FiniteFieldPolynomial &data);
 	int Decode(FiniteFieldPolynomial &data, list<unsigned int> &erasures);

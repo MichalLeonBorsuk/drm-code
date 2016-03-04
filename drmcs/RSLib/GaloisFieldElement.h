@@ -34,6 +34,8 @@ class GaloisFieldElement :
 {
 public:
 	GaloisFieldElement(const GaloisField *Field);
+	GaloisFieldElement(const GaloisFieldElement&);
+	GaloisFieldElement& operator=(const GaloisFieldElement&);
 	virtual ~GaloisFieldElement(void);
 	virtual const WorkingFiniteFieldElement * Add(const WorkingFiniteFieldElement * y) const;
 	virtual const WorkingFiniteFieldElement * Sub(const WorkingFiniteFieldElement * y) const;

@@ -28,17 +28,33 @@ RSAlgebra::RSAlgebra(	const unsigned int n, const unsigned int k,
                         const GaloisField *const pField,
                         const unsigned int indexFirstRoot,
                         const unsigned int indexStepRoot)
-    : mNumCodeBits(n)
+    : mpField(pField)
+    , mNumCodeBits(n)
     , mNumDataBits(k)
     , mIndexFirstRoot(indexFirstRoot)
     , mIndexStepRoot(indexStepRoot)
-    , mpField(pField)
     , mGenerator(pField, pField->GetElement(1), 0)
 {
 
     // Make the Generator polynomial
     for (unsigned int index = indexFirstRoot, i=0; i<n-k; i++, index += indexStepRoot)
         mGenerator.AddRoot(pField->AlphaToPower(index));
+}
+
+RSAlgebra::RSAlgebra(const RSAlgebra& a)
+    : mpField(a.mpField)
+    , mNumCodeBits(a.mNumCodeBits)
+    , mNumDataBits(a.mNumDataBits)
+    , mIndexFirstRoot(a.mIndexFirstRoot)
+    , mIndexStepRoot(a.mIndexStepRoot)
+    , mGenerator(a.mGenerator)
+{
+}
+
+RSAlgebra& RSAlgebra::operator=(const RSAlgebra&)
+{
+    throw "can't assign RSAlgebra objects";
+    return *this;
 }
 
 RSAlgebra::~RSAlgebra(void)
@@ -153,8 +169,8 @@ int RSAlgebra::Decode(FiniteFieldPolynomial &data, list<unsigned int> &erasures)
     for (int errorPos=0; (unsigned int)errorPos<mNumCodeBits; errorPos++)
     {
         FiniteFieldElement XjInv = mpField->AlphaToPower(-errorPos);
-        FiniteFieldElement l = lambda(XjInv);
-        if (l==0)
+        FiniteFieldElement ll = lambda(XjInv);
+        if (ll==0)
         {
             errorCount++;
             // root found at position errorPos

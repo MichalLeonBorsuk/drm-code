@@ -37,9 +37,15 @@ FiniteFieldPolynomial::FiniteFieldPolynomial(const FiniteField * const field)
 {
 }
 
+FiniteFieldPolynomial::FiniteFieldPolynomial(const FiniteFieldPolynomial& p)
+    : mCoeffs(p.mCoeffs)
+    , mpField(p.mpField)
+{
+}
+
 FiniteFieldPolynomial::FiniteFieldPolynomial(const FiniteField * const field, const FiniteFieldElement value, const unsigned int order)
-    : mpField(field)
-    , mCoeffs(order+1, field->GetElement(0))
+    : mCoeffs(order+1, field->GetElement(0))
+    , mpField(field)
 {
     mCoeffs[order] = value;
 }
@@ -69,13 +75,13 @@ void FiniteFieldPolynomial::operator+=(const FiniteFieldPolynomial& rhpoly)
     for(unsigned int i=0; i<=Order(); i++)
         SetCoefficient(i, GetCoefficient(i) + rhpoly.GetCoefficient(i));
 }
-
 // assignment operator
-void FiniteFieldPolynomial::operator=(const FiniteFieldPolynomial& rhpoly)
+FiniteFieldPolynomial& FiniteFieldPolynomial::operator=(const FiniteFieldPolynomial& rhpoly)
 {
     Pad(rhpoly.Order());
     for(unsigned int i=0; i<=Order(); i++)
         SetCoefficient(i, rhpoly.GetCoefficient(i));
+    return *this;
 }
 
 

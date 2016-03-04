@@ -34,7 +34,9 @@ class FiniteFieldElement
 public:
 	friend ostream &operator<<(ostream &stream, const FiniteFieldElement& element);
 	FiniteFieldElement(const WorkingFiniteFieldElement *pElement);
+	FiniteFieldElement(const FiniteFieldElement& element);
 	virtual ~FiniteFieldElement(void);
+        FiniteFieldElement& operator=(const FiniteFieldElement&);
 	FiniteFieldElement operator+(const FiniteFieldElement y) const;
 	FiniteFieldElement operator-(const FiniteFieldElement y) const;
 	FiniteFieldElement operator*(const FiniteFieldElement y) const;

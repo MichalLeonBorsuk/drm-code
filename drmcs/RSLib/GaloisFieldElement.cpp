@@ -30,6 +30,17 @@ GaloisFieldElement::GaloisFieldElement(const GaloisField *Field)
 {
 }
 
+GaloisFieldElement::GaloisFieldElement(const GaloisFieldElement& e)
+    : mcpField(e.mcpField)
+{
+}
+
+GaloisFieldElement& GaloisFieldElement::operator=(const GaloisFieldElement& e)
+{
+    throw "Can't assign GalloisFieldElement because pointer is const";
+    return *this;
+}
+
 GaloisFieldElement::~GaloisFieldElement(void)
 {
 }
