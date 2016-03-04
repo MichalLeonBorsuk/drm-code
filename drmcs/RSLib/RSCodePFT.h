@@ -35,6 +35,8 @@ public:
 				const unsigned int indexStepRoot = 1,
 				const unsigned int fieldSizeLog2 = 8,
 				const unsigned int fieldGeneratorPolynomial = 0x11D);
+	CRSCodePFT(const CRSCodePFT&);
+	CRSCodePFT& operator=(const CRSCodePFT&);
 	virtual ~CRSCodePFT(void);
 	void Encode(unsigned char *pData, unsigned char *pParity);
 	int Decode(unsigned char *pData, unsigned int *pErasurePositions = 0, unsigned int numErasures = 0);

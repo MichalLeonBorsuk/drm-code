@@ -35,6 +35,7 @@ public:
 	FiniteFieldPolynomial(const FiniteField * const field);
 	// Constructor for making a simple polynomial with order coeffs equal to value
 	FiniteFieldPolynomial(const FiniteField *const field, const FiniteFieldElement value, const unsigned int order = 1);
+	FiniteFieldPolynomial(const FiniteFieldPolynomial&);
 	virtual ~FiniteFieldPolynomial(void);
 	void SetCoefficient(const unsigned int index, const FiniteFieldElement coefficient);
 	void AddRoot(FiniteFieldElement root);
@@ -47,7 +48,7 @@ public:
 	void operator*=(const FiniteFieldElement &multiplier);
 	void operator/=(const FiniteFieldElement &divisor);
 	
-	void operator=(const FiniteFieldPolynomial& rhpoly);
+	FiniteFieldPolynomial& operator=(const FiniteFieldPolynomial& rhpoly);
 
 	void Trim(void);
 

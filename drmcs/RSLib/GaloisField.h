@@ -40,7 +40,9 @@ class GaloisField :
 {
 public:
 	GaloisField(const unsigned int NumberOfElementsLog2, const unsigned int GeneratorPolynomial = 0);
+	GaloisField(const GaloisField&);
 	virtual ~GaloisField(void);
+	GaloisField& operator=(const GaloisField&);
 	virtual FiniteFieldElement GetElement(unsigned int Value) const;
 	FiniteFieldElement AlphaToPower(const int power) const;
 
@@ -54,8 +56,8 @@ public:
 
 private:
 	const unsigned int mNumberOfElements;
+	const unsigned int mNumberOfElementsLog2;
 	vector<GaloisFieldElement *> mValueLookupTable;
 	vector<GaloisFieldElement *> mLogLookupTable;
-	const unsigned int mNumberOfElementsLog2;
 };
 #endif

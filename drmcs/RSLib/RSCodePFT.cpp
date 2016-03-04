@@ -40,6 +40,20 @@ CRSCodePFT::CRSCodePFT(const unsigned int n, const unsigned int k,
 
 }
 
+CRSCodePFT:: CRSCodePFT(const CRSCodePFT& e)
+    : mpField(e.mpField)
+    , mpRSAlgebra(e.mpRSAlgebra)
+    , mNumCodeBits(e.mNumCodeBits)
+    , mNumDataBits(e.mNumDataBits)
+{
+}
+
+CRSCodePFT& CRSCodePFT::operator=(const CRSCodePFT&)
+{
+    throw "can't assign CRSCodePFT objects";
+    return *this;
+}
+
 CRSCodePFT::~CRSCodePFT(void)
 {
     delete mpRSAlgebra;

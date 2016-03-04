@@ -27,8 +27,8 @@
 GaloisFieldGenerator::GaloisFieldGenerator(const unsigned int NumberOfElementsLog2, const unsigned int GeneratorPolynomial)
     : mcNumberOfElementsLog2(NumberOfElementsLog2)
     , mcNumberOfElements(1<<NumberOfElementsLog2)
-    , mcGeneratorPolynomial(GeneratorPolynomial)
     , mCurrentValue(1)
+    , mcGeneratorPolynomial(GeneratorPolynomial)
 {
 }
 
