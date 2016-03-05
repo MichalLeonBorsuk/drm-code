@@ -23,7 +23,7 @@
 \******************************************************************************/
 
 #include "PacketSCE.h"
-
+using namespace std;
 
 /*
 
@@ -116,16 +116,12 @@ void PacketSCE::ReConfigure(const ServiceComponent& config)
 }
 
 // the default SCE just sends 1 empty packet
-void PacketSCE::NextFrame(bytevector &out, size_t max, double)
+void PacketSCE::NextFrame(vector<uint8_t> &out, size_t max, double)
 {
     if(max<size_t(payload_size)) {
         return;
     }
-    bytevector payload;
-    crcbytevector packet;
+    vector<uint8_t> payload;
     // rely on the encoder to pad to the packet size!
-    packet_encoder.makePacket(packet, payload);
-    //cout << "packetSCE " << max << " " << out.size() << " " << packet.size() << " " << payload.size() << endl;
-    //cout.flush();
-    out.put(packet);
+    packet_encoder.makePacket(out, payload);
 }

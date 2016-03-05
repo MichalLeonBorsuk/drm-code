@@ -37,7 +37,7 @@ public:
   StreamMux& operator=(const StreamMux&);
   virtual ~StreamMux();
   virtual void ReConfigure(const Stream&);
-  virtual void NextFrame(bytevector&);
+  virtual void NextFrame(std::vector<uint8_t>&);
   Stream::StreamType Class() { return Stream::unspecified; }
 
 protected:

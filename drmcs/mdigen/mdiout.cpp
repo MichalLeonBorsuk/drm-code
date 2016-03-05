@@ -52,11 +52,16 @@ void MdiOut::ReConfigure(const DrmMuxConfig& config)
     if(config.misconfiguration)
         return;
     frame.clear();
-    frame["*ptr"] << "DMDI" << bitset<32>(0);
+    bytevector bits;
+    bits << "DMDI" << bitset<32>(0);
+    frame["*ptr"] = bits.data();
     //frame["*ptr"] << "RSCI" << bitset<32>(0);
     //frame["rpro"] << bitset<8>('A');
-    if(config.info.length()>0)
-        frame["info"].put(config.info);
+    if(config.info.length()>0) {
+        bits.clear();
+        bits.put(config.info);
+        frame["info"] = bits.data();
+    }
 }
 
 void MdiOut::buildFrame(const DrmMux& mux, DrmTime& timestamp)
@@ -92,7 +97,7 @@ void MdiOut::buildFrame(const DrmMux& mux, DrmTime& timestamp)
     tist.put(timestamp.tist_second(), 40);
     tist.put(timestamp.tist_ms(), 10);
 
-    frame["robm"]=robm;
-    frame["dlfc"]=dlfc;
-    frame["tist"]=tist;
+    frame["robm"]=robm.data();
+    frame["dlfc"]=dlfc.data();
+    frame["tist"]=tist.data();
 }

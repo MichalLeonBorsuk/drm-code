@@ -25,11 +25,10 @@
 #ifndef _SOUND_H
 #define _SOUND_H
 
-#include "platform.h"
 #include <string>
 #include <vector>
 
-class Sound
+template<class T> class Sound
 {
 public:
 
@@ -37,7 +36,7 @@ public:
 
   virtual void open(const std::string& device, int channels){}
   virtual void close(){};
-  virtual void read(std::vector<float>& buffer){}
+  virtual void read(std::vector<T>& buffer){}
   virtual bool is_open() {return false;}
 
 };

@@ -28,7 +28,7 @@
 #include "sound.h"
 #include "sndfile.h"
 
-class CSndFile: public Sound
+class CSndFile: public Sound<float>
 {
 public:
 

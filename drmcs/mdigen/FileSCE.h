@@ -41,12 +41,12 @@ public:
   }
   ~FileSCE();
   virtual void ReConfigure(const ServiceComponent&);
-  virtual void NextFrame(bytevector& buffer, size_t max, double stoptime=0);
+  virtual void NextFrame(std::vector<uint8_t>& buffer, size_t max, double stoptime=0);
  	
 protected:
   static const unsigned int DRM_FILE_HEADER_SIZE=44;
   unsigned long ReadInt(); 
-  ifstream file;
+  std::ifstream file;
   char *buffer;
 };
 #endif

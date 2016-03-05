@@ -26,6 +26,8 @@
 #define _SERVICE_COMPONENT_H
 
 #include "persist.h"
+#include <string>
+#include <vector>
 
 class ServiceComponent : public Persist
 {
@@ -39,11 +41,11 @@ public:
     virtual void GetParams(xmlNodePtr n);
     virtual void PutParams(xmlTextWriterPtr writer);
 
-    string label;
-    string source_selector;
-    string encoder_id;
-    string implementor;
-    string typestring;
+    std::string label;
+    std::string source_selector;
+    std::string encoder_id;
+    std::string implementor;
+    std::string typestring;
     enum  {audio_sce, text_sce, data_stream_sce, data_packet_mode_sce, unspecified_sce} type;
     int bytes_per_frame;
     int bytes_better_protected; // live encoding needs this!
@@ -71,7 +73,7 @@ public: // audio SCEs
     void AudioGetParams(xmlNodePtr n);
     void AudioPutParams(xmlTextWriterPtr writer);
     void AudioclearConfig();
-    bool AudioValidate(string& message);
+    bool AudioValidate(std::string& message);
     
     enum eAudio {AUDIO_CODING_AAC, AUDIO_CODING_CELP, AUDIO_CODING_HVXC, UNDEFINED=-1};
     int audio_coding;
@@ -96,11 +98,11 @@ public: // data SCEs
     void DataGetParams(xmlNodePtr n);
     void DataPutParams(xmlTextWriterPtr writer);
     void DataclearConfig();
-    bool DataValidate(string& message);
+    bool DataValidate(std::string& message);
 
     int application_domain;
     int data_unit_indicator;
-    bytev application_data;
+    std::vector<uint8_t> application_data;
     int packet_mode;
     int	packet_size;
     int	packet_id; // to be filled in by the mux

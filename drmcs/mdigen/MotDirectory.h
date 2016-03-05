@@ -46,9 +46,9 @@ public:
       objects.clear();
     }
 
-  void add_file(const string& name, size_t size);
-  void change_file(const string& name, size_t size);
-  void delete_file(const string& name);
+  void add_file(const std::string& name, size_t size);
+  void change_file(const std::string& name, size_t size);
+  void delete_file(const std::string& name);
 
   // set field methods
   void setDataCarouselPeriod(uint32_t period);
@@ -58,7 +58,7 @@ public:
   void setPriority(uint8_t priority) ;
   void setRetransmissionDistance(uint32_t d) ;
   void setProfileSubset(const bytevector& profiles) ;
-  void setDirectoryIndex(uint8_t profile, const string& index);
+  void setDirectoryIndex(uint8_t profile, const std::string& index);
   void setUniqueBodyVersion(uint32_t v) ;
   void setDefaultExpirationRelative(time_t t);
   void setDefaultExpirationAbsolute(timespec t);
@@ -73,17 +73,17 @@ public:
   void putExpirationRelative(bytevector& out, time_t t) ;
   void putExpirationAbsolute(bytevector& out, timespec t);
 
-  string next_object();
+  std::string next_object();
 
   /* this storage mechanism ensures that 
      the directory is sorted by content name */
-  map<string, MotObject> objects;
+  std::map<std::string, MotObject> objects;
   uint16_t next_transport_id;
   uint16_t transport_id;
   bool dirty;
 
 protected:
-  bool check_add_file(const string& name, uint32_t size);
+  bool check_add_file(const std::string& name, uint32_t size);
 
   bytevector extension;
   uint16_t SegmentSize;

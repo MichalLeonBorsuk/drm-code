@@ -14,7 +14,7 @@ INCS =
 CXXINCS =  -I/usr/include/libxml2 -I../common -I../sdixml -I.
 STATIC  = libsdc.a
 BIN = 
-CXXFLAGS = $(CXXINCS)  -Wall -g3 -Wshadow -Weffc++ -Wsign-promo -Wcomment 
+CXXFLAGS = $(CXXINCS) -Werror -Wall -g3 -Wshadow -Weffc++ -Wsign-promo -Wcomment -std=c++11
 CFLAGS = $(INCS)   -Wall -g3
 RM = rm -f
 

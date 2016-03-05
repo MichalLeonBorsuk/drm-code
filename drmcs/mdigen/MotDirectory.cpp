@@ -22,12 +22,15 @@
  *
 \******************************************************************************/
 
-#include <string.h>
-#include <stdlib.h>
+#include "MotDirectory.h"
+#include <cstring>
+#include <cstdlib>
 #include <iostream>
 #include <fstream>
-#include "MotDirectory.h"
 #include <zlib.h>
+#include <timestamp.h>
+
+using namespace std;
 
 MotDirectory::MotDirectory(): next_transport_id(0), dirty(true),
     SegmentSize(0), DataCarouselPeriod(0), always_send_mime_type(false)
@@ -99,9 +102,10 @@ void MotDirectory::putExpirationRelative(bytevector& out, time_t t)
 
 void MotDirectory::putExpirationAbsolute(bytevector& out, timespec t)
 {
-    uint16_t hours, mins, seconds, ms;
-    bool secs;
-    uint32_t mjd;
+    uint8_t hours=0, mins=0;
+    bool secs=false; // TODO
+    uint32_t mjd=0;
+    DrmTime::date_and_time(mjd, hours, mins, t.tv_sec);
     MotObject::putExtensionParameterHeader(out, 0x09, 4+(secs?2:0));
     out.put(1, 1); // time valid
     out.put(mjd, 17);
@@ -110,8 +114,9 @@ void MotDirectory::putExpirationAbsolute(bytevector& out, timespec t)
     out.put(hours, 5);
     out.put(mins, 6);
     if(secs) {
+        uint16_t seconds=0; // TODO
         out.put(seconds, 6);
-        out.put(ms, 10);
+        out.put(t.tv_nsec/1000000L, 10);
     }
 }
 
@@ -164,7 +169,7 @@ void MotDirectory::put_compressed_to(crcbytevector& out)
     strm.zalloc = Z_NULL;
     strm.zfree = Z_NULL;
     strm.opaque = Z_NULL;
-    strm.next_in = (Bytef*)in.data();
+    strm.next_in = (Bytef*)&in.data()[0];
     strm.next_out = o;
     strm.avail_in = in.size();
     strm.avail_out = 2*in.size();

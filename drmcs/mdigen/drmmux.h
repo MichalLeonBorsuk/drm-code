@@ -40,9 +40,9 @@ public:
   SDC sdc;
   MSC msc;
   uint8_t robustness_mode;
-  bytevector fac_bytes;
-  crcbytevector sdc_bytes;
-  vector<bytevector> msc_bytes;
+  std::vector<uint8_t> fac_bytes;
+  std::vector<uint8_t> sdc_bytes;
+  std::vector<std::vector<uint8_t> > msc_bytes;
   DrmMuxConfig wanted;
   enum { first_time, requested, signalled, running} reconfiguration_state;
   uint8_t reconfiguration_index;

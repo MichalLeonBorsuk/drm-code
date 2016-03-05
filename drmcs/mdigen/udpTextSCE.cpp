@@ -24,9 +24,10 @@
 
 #include "udpTextSCE.h"
 #include <iostream>
-using namespace std;
 #include <unistd.h>
 #include <fcntl.h>
+
+using namespace std;
 
 udpTextSCE::udpTextSCE():CTranslatingTextSCE(),
     message(),socket()
@@ -80,7 +81,7 @@ string udpTextSCE::next_message()
 {
     if(socket.poll()==dgram_socket::data_avail)
     {
-        bytev buffer;
+        vector<uint8_t> buffer;
         buffer.resize(2048);
         socket.fetch(buffer);
         message = "";

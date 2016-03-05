@@ -25,13 +25,9 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
-#ifdef WIN32
-# include <io.h>
-#else
-# include <unistd.h>
-# include <dirent.h>
-# include <syslog.h>
-#endif
+#include <unistd.h>
+#include <dirent.h>
+#include <syslog.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <time.h>
@@ -45,23 +41,19 @@
 #include <platform.h>
 #include "MOTEncoder.h"
 
+using namespace std;
+
 MOTEncoder::MOTEncoder(): packet_queue(), in_dir(),
     block_size(0), packet_encoder(), directory(),  dge(), current_object(),
     flags(), in_file(-1),max_queue_depth(100), segment(0), dir_interval(120.0e3),
-    monitored_directories()
-#ifndef WIN32
-    ,fc()
-#endif
+    monitored_directories(),fc()
 {
 }
 
 MOTEncoder::MOTEncoder(const MOTEncoder& o): packet_queue(), in_dir(o.in_dir),
     block_size(o.block_size), packet_encoder(), directory(),  dge(), current_object(),
     flags(o.flags), in_file(-1), max_queue_depth(100), segment(0), dir_interval(30.0e3),
-    monitored_directories()
-#ifndef WIN32
-    ,fc()
-#endif
+    monitored_directories(),fc()
 {
 }
 
@@ -81,9 +73,7 @@ MOTEncoder::~MOTEncoder()
         lockf(in_file, F_ULOCK, 0);
         close(in_file);
     }
-#ifndef WIN32
     FAMClose(&fc);
-#endif
 }
 
 /* MOTEncoder state:
@@ -107,12 +97,10 @@ void MOTEncoder::ReConfigure(
     map<uint8_t,string>& profile_index
 )
 {
-#ifndef WIN32
     if(FAMCONNECTION_GETFD(&fc)>0)
     {
         (void)FAMClose(&fc);
     }
-#endif
     monitored_directories.clear();
     encoder_id = encoder_id_param;
     in_dir = in;
@@ -146,7 +134,6 @@ void MOTEncoder::ReConfigure(
     }
     current_object = directory.objects.end();
     last_sent_dir = 0.0;
-#ifndef WIN32
     if(FAMOpen(&fc)==0) {
         FAMRequest fr;
         if(FAMMonitorDirectory(&fc, in_dir.c_str(), &fr, NULL)==0)
@@ -156,10 +143,9 @@ void MOTEncoder::ReConfigure(
     } else {
         cerr << "can't connect to file alteration monitor " << endl;
     }
-#endif
 }
 
-void MOTEncoder::next_packet(bytevector &out, size_t max, double stoptime)
+void MOTEncoder::next_packet(vector<uint8_t>& out, size_t max, double stoptime)
 {
     if(scan_input_directory() && flags.directory_mode)
         code_MOTdirectory();
@@ -173,7 +159,8 @@ void MOTEncoder::next_packet(bytevector &out, size_t max, double stoptime)
         //cout << "MOTEncoder: queue OK" << endl;
     }
     if(packet_queue.front().size()<=max) {
-        out.put(packet_queue.front());
+        const vector<uint8_t>& p = packet_queue.front();
+        out.insert(out.end(), p.begin(), p.end());
         packet_queue.pop();
     } else {
         cerr << "MOTEncoder: packet queue size mismatch with packet mux" << endl;
@@ -202,9 +189,6 @@ void MOTEncoder::fill(double stoptime)
             MotObject& m = current_object->second;
             string inp = in_dir + "/" + m.file_name;
             int mode = O_RDWR; // need RW for locking
-#ifdef WIN32
-            mode |= O_BINARY;
-#endif
             in_file = open(inp.c_str(), mode);
             lockf(in_file, F_TLOCK, 0);
             if(flags.directory_mode==false) {
@@ -234,10 +218,9 @@ void MOTEncoder::move_directory_iterator()
 void MOTEncoder::get_one_data_unit(uint16_t transport_id)
 {
     crcbytevector dg;
-    bytevector data;
+    vector<uint8_t> data(dg_payload_size);
     bool last;
-    data.resize(dg_payload_size);
-    size_t r = read(in_file, (char*)data.data(), dg_payload_size);
+    size_t r = read(in_file, (char*)&data[0], dg_payload_size);
     if(r<data.size())
         data.resize(r);
     if(r==0 || r < dg_payload_size) {
@@ -249,7 +232,7 @@ void MOTEncoder::get_one_data_unit(uint16_t transport_id)
         last = false;
     }
     dge.putDataGroupSegment(dg, transport_id, data, 4U, segment & 0x0f, segment, last);
-    packet_encoder.makeDataUnit(packet_queue, dg);
+    packet_encoder.makeDataUnit(packet_queue, dg.data());
     segment++;
     //cout << "put segment, queue length is " << packet_queue.size() << endl;
 }
@@ -261,7 +244,7 @@ void MOTEncoder::compress(crcbytevector& out, const crcbytevector& in)
     strm.zalloc = Z_NULL;
     strm.zfree = Z_NULL;
     strm.opaque = Z_NULL;
-    strm.next_in = (Bytef*)in.data();
+    strm.next_in = (Bytef*)&in.data()[0];
     strm.next_out = o;
     strm.avail_in = in.size();
     strm.avail_out = 2*in.size();
@@ -309,7 +292,7 @@ void MOTEncoder::code_MOTdirectory()
     if(flags.send_uncompressed_dir) {
         crcbytevector dg;
         dge.putDataGroupSegment(dg, directory.transport_id, dir, 6U, 0, 0, true);
-        packet_encoder.makeDataUnit(packet_queue, dg);
+        packet_encoder.makeDataUnit(packet_queue, dg.data());
         //cout << "sending " << dg.size() << " byte directory on packet id " << packet_encoder.packet_id << " tid " << directory.transport_id << endl;
     }
 
@@ -324,7 +307,7 @@ void MOTEncoder::code_MOTdirectory()
         cdir.put(dir.size(), 30); // uncompressed data size
         cdir.put(dircompressed);
         dge.putDataGroupSegment(dg, directory.transport_id, cdir, 7U, 0, 0, true);
-        packet_encoder.makeDataUnit(packet_queue, dg);
+        packet_encoder.makeDataUnit(packet_queue, dg.data());
         //cout << "sending " << dg.size() << " byte compressed directory on packet id " << packet_encoder.packet_id << endl;
     }
 }
@@ -335,15 +318,12 @@ void MOTEncoder::codefileheader(const MotObject & m)
     bytevector data;
     m.putHeader(data);
     dge.putDataGroupSegment(dg, m.transport_id, data, 3U, m.object_version, 0, true);
-    packet_encoder.makeDataUnit(packet_queue, dg);
+    packet_encoder.makeDataUnit(packet_queue, dg.data());
 }
 
 bool MOTEncoder::scan_input_directory()
 {
     bool changed = false;
-#ifdef WIN32
-    // TODO
-#else
     while(FAMPending(&fc))
     {
         FAMEvent fe;
@@ -378,8 +358,8 @@ bool MOTEncoder::scan_input_directory()
                     current_object = directory.objects.end();
                     //cout << "deleted file " << fe.filename << " in " << dir << endl;
                 } else {
-                    FAMRequest fr;
-                    fr.reqnum = d->first;
+                    //FAMRequest fr;
+                    //fr.reqnum = d->first;
                     //cout << "removing directory monitor " << (FAMCancelMonitor(&fc, &fr)?"failed":"OK") << endl;
                     monitored_directories.erase(d);
                 }
@@ -431,6 +411,5 @@ bool MOTEncoder::scan_input_directory()
             cout << "unknown fam event " << fe.code << " '" << fe.filename << "'" << endl;
         }
     }
-#endif
     return changed;
 }

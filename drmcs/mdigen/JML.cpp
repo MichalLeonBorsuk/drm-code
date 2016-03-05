@@ -43,7 +43,7 @@ void compress(bytevector& out, const bytevector& in, uint8_t type)
     strm.zalloc = Z_NULL;
     strm.zfree = Z_NULL;
     strm.opaque = Z_NULL;
-    strm.next_in = (Bytef*)in.data();
+    strm.next_in = (Bytef*)&in.data()[0];
     strm.next_out = o;
     strm.avail_in = in.size();
     strm.avail_out = 2*in.size();
@@ -67,9 +67,9 @@ void uncompress(bytevector& out, const bytevector& in, uint8_t type)
     z_stream strm;
     strm.zalloc = 0;
     strm.zfree = 0;
-    strm.next_in = (Bytef*)in.data();
+    strm.next_in = (Bytef*)&in.data()[0];
     strm.avail_in = in.size();
-    strm.next_out = (Bytef*)out.data();
+    strm.next_out = (Bytef*)&out.data()[0];
     strm.avail_out = out.size();
 
     int err = inflateInit2(&strm, -15);
@@ -91,8 +91,7 @@ void uncompress(bytevector& out, const bytevector& in, uint8_t type)
 
 void Text::encode(bytevector& out) const
 {
-    for(size_t i=0; i<encoded_string.length(); i++)
-        out.put(encoded_string[i]);
+    out.put(encoded_string);
 }
 
 void Text::decode(bytevector& m)
@@ -240,7 +239,7 @@ void TitleBlock::asHTML(std::ostream& out)
 
 void TitleBlock::encode(bytevector& out) const
 {
-    out.put(JML::Title);
+    out.putb(JML::Title);
     text.encode(out);
 }
 
@@ -273,11 +272,11 @@ void ListBlock::asHTML(std::ostream& out)
 
 void ListBlock::encode(bytevector& out) const
 {
-    out.put(JML::ListItem);
+    out.putb(JML::ListItem);
     col[0].encode(out);
     for(size_t i=1; i<col.size(); i++)
     {
-        out.put(ListColumn);
+        out.putb(ListColumn);
         col[i].encode(out);
     }
 }
@@ -314,7 +313,7 @@ void Link::asHTML(std::ostream& out)
 
 void Link::encode(bytevector& out) const
 {
-    out.put(JML::LinkItem);
+    out.putb(JML::LinkItem);
     out.put(ref, 16);
     label.encode(out);
 }
@@ -385,7 +384,7 @@ void JMLObject::encode(bytevector& out) const
             link[i].encode(raw);
         break;
     case PlainText:
-        raw.put(JML::BodyText);
+        raw.putb(JML::BodyText);
         body.encode(raw);
         break;
     case TitleOnly:
@@ -405,7 +404,7 @@ void JMLObject::encode(bytevector& out) const
     if(c)
     {
         //cout << "putting compressed " << compressed.size() << " < " << raw.size() << endl;
-        out.put(0x08); // magic number
+        out.putb(0x08); // magic number
         out.put(compressed);
     }
     else

@@ -51,7 +51,7 @@ protected:
   void getNext() { transmit_buffer = requested.front(); requested.pop(); }
 
   bytevector transmit_buffer, static_data;
-  queue<bytevector> requested;
+  std::queue<bytevector> requested;
   bool change_allowed;
 };
 

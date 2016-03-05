@@ -146,7 +146,7 @@ then an unused packet id shall be used. Empty packets using a packet id of
 the same packet id <p>
 */
 
-void PacketStreamMux::NextFrame(bytevector& out)
+void PacketStreamMux::NextFrame(vector<uint8_t>& out)
 {
     size_t max = static_cast<size_t>(current.bytes_per_frame);
     size_t avail = max;

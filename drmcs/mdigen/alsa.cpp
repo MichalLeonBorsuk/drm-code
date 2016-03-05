@@ -28,26 +28,26 @@
 #include <sstream>
 using namespace std;
 
-ALSA::ALSA():handle(NULL)
+template<typename T> ALSA<T>::ALSA():handle(NULL)
 {
 }
 
-ALSA::ALSA(const ALSA& e):handle(e.handle)
+template<typename T> ALSA<T>::ALSA(const ALSA<T>& e):handle(e.handle)
 {
 }
 
-ALSA& ALSA::operator=(const ALSA& e)
+template<typename T> ALSA<T>& ALSA<T>::operator=(const ALSA<T>& e)
 {
     handle = e.handle;
     return *this;
 }
 
-ALSA::~ALSA()
+template<typename T> ALSA<T>::~ALSA()
 {
     close();
 }
 
-void ALSA::open(const string& device, int channels)
+template<typename T> void ALSA<T>::open(const string& device, int channels)
 {
     num_channels = channels;
     stringstream s(device);
@@ -136,7 +136,7 @@ void ALSA::open(const string& device, int channels)
     snd_pcm_format_mask_free(mask);
 }
 
-void ALSA::close()
+template<typename T> void ALSA<T>::close()
 {
     if((snd_pcm_t*)handle) {
         snd_pcm_close((snd_pcm_t*)handle);
@@ -165,7 +165,7 @@ template<typename T> void read1(snd_pcm_t *handle, T* left, T* right, size_t n,
     } while (r > 0 && want>0);
 }
 
-template<typename T> void read_mono(snd_pcm_t *handle, vector<float>& buffer, T* left, T* right,
+template<typename T1, typename T2> void read_mono(snd_pcm_t *handle, vector<T1>& buffer, T2* left, T2* right,
                                     size_t card_channels, size_t left_chan, size_t right_chan, double scale_factor)
 {
     size_t n = buffer.size();
@@ -177,7 +177,7 @@ template<typename T> void read_mono(snd_pcm_t *handle, vector<float>& buffer, T*
     }
 }
 
-template<typename T> void read_stereo(snd_pcm_t *handle, vector<float>& buffer, T* left, T* right,
+template<typename T1, typename T2> void read_stereo(snd_pcm_t *handle, vector<T1>& buffer, T2* left, T2* right,
                                       size_t card_channels, size_t left_chan, size_t right_chan, double scale_factor)
 {
     size_t n = buffer.size()/2;
@@ -190,7 +190,7 @@ template<typename T> void read_stereo(snd_pcm_t *handle, vector<float>& buffer, 
     }
 }
 
-void ALSA::read(vector<float>& buffer)
+template<typename T> void ALSA<T>::read(vector<T>& buffer)
 {
     size_t n = buffer.size();
     if(format == SND_PCM_FORMAT_S32) {
@@ -210,7 +210,7 @@ void ALSA::read(vector<float>& buffer)
     }
 }
 
-bool ALSA::is_open()
+template<typename T> bool ALSA<T>::is_open()
 {
     return handle != NULL;
 }

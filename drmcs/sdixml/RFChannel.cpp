@@ -26,6 +26,8 @@
 #include "BitRates.h"
 #include <iostream>
 
+using namespace std;
+
 const char* RFChannel::INTERLEAVINGS[]= {"long","short", NULL};
 const char* RFChannel::ROBMODES[]= {"mode_a","mode_b","mode_c","mode_d", NULL};
 const char* RFChannel::VSPPS[]= {"1/2","4/7","3/5","2/3", NULL};

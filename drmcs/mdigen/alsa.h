@@ -28,7 +28,7 @@
 #include "sound.h"
 #include <alsa/asoundlib.h>
 
-class ALSA: public Sound
+template<class T> class ALSA: public Sound<T>
 {
 public:
 
@@ -40,7 +40,7 @@ public:
 
   virtual void open(const std::string& device, int channels);
   virtual void close();
-  virtual void read(std::vector<float>& buffer);
+  virtual void read(std::vector<T>& buffer);
   virtual bool is_open();
 
 protected:

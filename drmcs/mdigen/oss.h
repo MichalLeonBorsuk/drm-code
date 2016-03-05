@@ -27,7 +27,7 @@
 
 #include "sound.h"
 
-class OSS: public Sound
+class OSS: public Sound<float>
 {
 public:
 

@@ -106,7 +106,7 @@ void CSndFile::read(vector<float>& buffer)
             sf_seek(handle, 0, SEEK_SET);
             (void)sf_readf_float(handle, &buf[0], wanted);
         }
-        for(size_t i=0; i<wanted; i++)
+        for(int i=0; i<wanted; i++)
         {
             buffer[i] = (buf[2*i]+buf[2*i+1])/2.0;
         }
@@ -120,7 +120,7 @@ void CSndFile::read(vector<float>& buffer)
             sf_seek(handle, 0, SEEK_SET);
             (void)sf_readf_float(handle, &buffer[to_read], wanted);
         }
-        for(size_t i=0; i<to_read; i++)
+        for(int i=0; i<to_read; i++)
         {
             buffer[i] = buffer[2*i]/2.0;
             buffer[i+1] = buffer[2*i]/2.0;

@@ -29,7 +29,6 @@
 #include "CTAudioMemSCE.h"
 #include "TranslatingTextSCE.h"
 #include "TextFileSCE.h"
-#ifdef NOT_JUST_A_TEST_GENERATOR
 # include "CTAudioFileSCE.h"
 # include "TimedTextSCE.h"
 # include "TickerTextSCE.h"
@@ -37,7 +36,7 @@
 # include "udpTextSCE.h"
 # include "MOTSCE.h"
 # include "JMLSCE.h"
-#endif
+# include "FDKAudioSCE.h"
 
 /* TODO (jfbc#2#): find a way for these to be less hard coded - ability to
                    register new encoder types - DLLs ? */
@@ -60,13 +59,14 @@ ServiceComponentEncoder* BBCSceFactory::create(const ServiceComponent& config)
     }
     if(config.implementor == "PacketFile") {
         return new PacketFileSCE();
+    } else if(config.implementor == "fdk") {
+        return new FDKAudioSCE();
     } else if(config.implementor == "CTAudioMem") {
         return new CCTAudioMemSCE();
     } else if(config.implementor == "FixedText") {
         return new CTranslatingTextSCE();
     } else if(config.implementor == "TextFile") {
         return new TextFileSCE();
-#ifdef NOT_JUST_A_TEST_GENERATOR
     } else if(config.implementor == "CTAudioFile") {
         return new CCTAudioFileSCE();
     } else if(config.implementor == "udpText") {
@@ -79,7 +79,6 @@ ServiceComponentEncoder* BBCSceFactory::create(const ServiceComponent& config)
         return new MOTSCE();
     } else if(config.implementor == "TickerText") {
         return new CTickerTextSCE();
-#endif
     } else
         throw string("unknown implementor tag ")+config.implementor;
 }

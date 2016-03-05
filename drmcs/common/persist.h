@@ -33,8 +33,8 @@
 #include <libxml/xpath.h>
 #include <libxml/xpathInternals.h>
 #include <libxml/xmlwriter.h>
-#include "bytev.h"
 #include <string>
+#include <vector>
 /* TODO (jfbc#2#): incorporate XML Namespaces */
 /* TODO (jfbc#2#): Develop Schemas and use validating parsers */
 /* TODO (jfbc#2#): Use XPointers for ids instead of literals, incorporate 
@@ -59,7 +59,7 @@ public:
   virtual bool setParam(const char *param, const char *value) { return false; }
   virtual const char *putParams(const char *sep, xmlTextWriterPtr writer) { return sep;}
   void parseHexBinary(xmlNodePtr c, const char *tag, uint8_t **data, unsigned *len);
-  void parseHexBinary(xmlNodePtr c, const char *tag, bytev& data);
+  void parseHexBinary(xmlNodePtr c, const char *tag, std::vector<uint8_t>& data);
   void parseEnum(const xmlChar *val, int *var, const char * const vals[]);
   void parseEnum(xmlNodePtr c, const char *tag, int *var, const char * const vals[]);
   void parseBase64Binary(xmlNodePtr c , const char *tag, uint8_t *data, unsigned *len);
@@ -69,7 +69,7 @@ public:
   void parseSigned(xmlNodePtr c, const char *tag, int *var);
   void parseUnsignedLong(xmlNodePtr c, const char *tag, int long *var);
   void parseBool(xmlNodePtr c, const char *tag, int *var);
-  void parseIDREF(xmlNodePtr c, const char *tag, string& s);
+  void parseIDREF(xmlNodePtr c, const char *tag, std::string& s);
   virtual void ReConfigure(xmlNodePtr config);
   virtual xmlNodePtr find(xmlNodePtr config, const char* id=NULL);
   virtual void walkConfig(xmlNodePtr n);
@@ -77,10 +77,10 @@ public:
   virtual void GetParams(xmlNodePtr n) {}
   virtual xmlNodeSetPtr findNodes(xmlNodePtr config, const xmlChar *path);
   void PutHexBinary(xmlTextWriterPtr writer, const char *tag, const uint8_t *data, unsigned len);
-  void PutHexBinary(xmlTextWriterPtr writer, const char *tag, const bytev& data);
+  void PutHexBinary(xmlTextWriterPtr writer, const char *tag, const std::vector<uint8_t>& data);
   void PutBase64Binary(xmlTextWriterPtr writer, const char *tag, const uint8_t *data, unsigned len);
   void PutBool(xmlTextWriterPtr writer, const char *tag, int var);
-  void PutString(xmlTextWriterPtr writer, const char *tag, const string &s);
+  void PutString(xmlTextWriterPtr writer, const char *tag, const std::string &s);
   void PutString(xmlTextWriterPtr writer, const char *tag, const xmlChar *s);
   void PutDouble(xmlTextWriterPtr writer, const char *tag, double n);
   void PutUnsigned(xmlTextWriterPtr writer, const char *tag, int n);
@@ -93,14 +93,14 @@ public:
   virtual void PutParams(xmlTextWriterPtr writer);
   virtual void PutPrivateParams(xmlTextWriterPtr writer);
 
-  string tag;
-  string id;
+  std::string tag;
+  std::string id;
   bool misconfiguration;
 //#define NODE
 #ifdef NODE
   xmlNodePtr private_config;
 #else
-  string private_config;
+  std::string private_config;
 #endif
 
 protected:

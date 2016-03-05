@@ -34,25 +34,27 @@
 class DcpOut : public Persist
 {
 public:
+    DcpOut(const DcpOut&);
+    DcpOut& operator=(const DcpOut&);
     DcpOut();
     virtual ~DcpOut();
-    virtual void ReConfigure(const string& uri);
-    virtual void ReConfigure(map<string,string>& config);
+    virtual void ReConfigure(const std::string& uri);
+    virtual void ReConfigure(std::map<std::string,std::string>& config);
     virtual bool setParam(const char *param, const char *value);
     virtual void GetParams(xmlNodePtr n) {}
     virtual void PutParams(xmlTextWriterPtr writer);
     virtual void clearConfig();
-    virtual bool sendFrame(const tagpacketlist&, const vector<string>&, uint16_t);
-    virtual bool sendFrameRaw(const bytevector& data); // for AMSS
-    void makeAFpacket(crcbytevector&, const tagpacketlist&, const vector<string>&, uint16_t);
-    void makeFFheader(bytevector& out, size_t packet_size, bool sendTime);
-    void makePcapFileHeader(bytevector& out);
-    void makePcapPacketHeader(bytevector& out, size_t packet_size);
+    virtual bool sendFrame(const tagpacketlist&, const std::vector<std::string>&, uint16_t);
+    virtual bool sendFrameRaw(const std::vector<uint8_t>& data); // for AMSS
+    void makeAFpacket(std::vector<uint8_t>&, const tagpacketlist&, const std::vector<std::string>&, uint16_t);
+    void makeFFheader(std::vector<uint8_t>& out, size_t packet_size, bool sendTime);
+    void makePcapFileHeader(std::vector<uint8_t>& out);
+    void makePcapPacketHeader(std::vector<uint8_t>& out, size_t packet_size);
 
     PftOut *pft;
     basic_socket *sock;
     server_socket *ssock;
-    string m_type, m_target, m_proto;
+    std::string m_type, m_target, m_proto;
     bool m_use_crc, m_use_tist, m_file_framing, m_tcp_server;
     unsigned int m_src_addr, m_dst_addr;
 };

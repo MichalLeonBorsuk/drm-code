@@ -27,16 +27,19 @@
 #include "DcpUtil.h"
 #include "PftIn.h"
 #include "sockets.h"
+#include <vector>
 
 
 class DcpIn : public Persist
 {
 public:
     DcpIn();
+    DcpIn(const DcpIn&);
+    DcpIn& operator=(const DcpIn&);
     virtual ~DcpIn();
-    virtual void ReConfigure(const string& uri);
-    virtual void ReConfigure(map<string,string>& config);
-    bool parseUri(map<string,string>& out, const string& uri);
+    virtual void ReConfigure(const std::string& uri);
+    virtual void ReConfigure(std::map<std::string,std::string>& config);
+    bool parseUri(std::map<std::string,std::string>& out, const std::string& uri);
     virtual bool setParam(const char *param, const char *value);
     virtual void GetParams(xmlNodePtr n) {}
     virtual void PutParams(xmlTextWriterPtr writer);
@@ -47,11 +50,11 @@ protected:
     PftIn pft;
     basic_socket *sock;
     server_socket *ssock;
-    string m_type, m_target;
+    std::string m_type, m_target;
     bool m_use_pft, m_use_crc, m_use_tist, m_file_framing, m_tcp_server;
     unsigned int m_src_addr, m_dst_addr;
 
-	bool decodeAF(tagpacketlist& frame, crcbytevector& input);
+	bool decodeAF(tagpacketlist& frame, std::vector<uint8_t>& input);
 
 
 };

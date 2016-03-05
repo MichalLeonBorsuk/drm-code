@@ -37,7 +37,7 @@ public:
   PacketStreamMux& operator=(const PacketStreamMux&);
   virtual ~PacketStreamMux();
   void ReConfigure(const Stream&);
-  void NextFrame(bytevector&);
+  void NextFrame(std::vector<uint8_t>&);
   Stream::StreamType Class() { return Stream::data_packet_mode; }
 
 protected:

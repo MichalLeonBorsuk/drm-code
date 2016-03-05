@@ -23,6 +23,9 @@
 \******************************************************************************/
 
 #include "fac.h"
+#include <bytevector.h>
+
+using namespace std;
 
 static unsigned long CRC(const char *data, size_t bytesize,
                          unsigned short num_crc_bits, unsigned long crc_gen, bool invert)
@@ -139,7 +142,7 @@ crc is 8 bits
 72
 */
 
-void FAC::NextFrame(bytevector& out, uint8_t frame_number, bool afs_index_valid,
+void FAC::NextFrame(vector<uint8_t>& fac, uint8_t frame_number, bool afs_index_valid,
                     uint8_t reconfiguration_index)
 {
     // FAC repetition
@@ -162,8 +165,8 @@ void FAC::NextFrame(bytevector& out, uint8_t frame_number, bool afs_index_valid,
     }
     bool is_audio, ca_active;
     uint8_t identity;
-    out.clear();
-    size_t l;
+    bytevector out;
+    //size_t l;
     // Channel parameters
     out.put(0, 1); // base/enhancement flag
     /* Identity: this 2-bit field identifies the current frame and also validates the SDC AFS index (see clause 6.4) as follows:
@@ -172,7 +175,7 @@ void FAC::NextFrame(bytevector& out, uint8_t frame_number, bool afs_index_valid,
        10: third FAC of the transmission super frame.
        11: first FAC of the transmission super frame and AFS index is invalid.
     */
-    l=out.size();
+    //l=out.size();
     if(frame_number==0)
         if(afs_index_valid)
             identity = 0;
@@ -208,4 +211,5 @@ void FAC::NextFrame(bytevector& out, uint8_t frame_number, bool afs_index_valid,
     out.put(c, 8);
     //printf("fac frame=%u afs valid=%u, id=%u crc is %02lx\n", frame_number, afs_index_valid?1:0, identity, c);
     //fflush(stdout);
+    fac = out.data();
 }

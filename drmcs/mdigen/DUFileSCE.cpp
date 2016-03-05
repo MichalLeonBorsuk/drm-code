@@ -26,7 +26,10 @@
 #include <arpa/inet.h>
 #include <fcntl.h>
 #include <iostream>
+#include <algorithm>
 #include "timestamp.h"
+
+using namespace std;
 
 // TODO - make the DataGroup part optional by private config
 void DUFileSCE::ReConfigure(const ServiceComponent& config)
@@ -46,7 +49,7 @@ void DUFileSCE::ReConfigure(const ServiceComponent& config)
         f.monitor(config.source_selector);
 }
 
-void DUFileSCE::NextFrame(bytevector &out, size_t max, double stoptime)
+void DUFileSCE::NextFrame(vector<uint8_t> &out, size_t max, double stoptime)
 {
     if(max<(unsigned int)payload_size)
     {
@@ -64,7 +67,8 @@ void DUFileSCE::NextFrame(bytevector &out, size_t max, double stoptime)
     }
     if(packet_queue.front().size()<=max)
     {
-        out.put(packet_queue.front());
+        const vector<uint8_t>& bytes = packet_queue.front();
+        out.insert(out.end(), bytes.begin(), bytes.end());
         packet_queue.pop();
     } else
     {
@@ -84,7 +88,7 @@ void DUFileSCE::fill(double stoptime)
     crcbytevector out;
     //cout << "fill: " << next_data_unit->size() << endl;
     dge.putDataGroup(0, out, *next_data_unit, 0); // TODO make configurable
-    packet_encoder.makeDataUnit(packet_queue, out);
+    packet_encoder.makeDataUnit(packet_queue, out.data());
     next_data_unit++;
     /*
     timespec t;
@@ -143,7 +147,7 @@ void DUFileSCE::read_file(double stoptime)
             du_len = ntohs(du_len);
             bytevector du;
             du.resize(du_len);
-            n += f.read(const_cast<uint8_t*>(du.data()), du_len);
+            n += f.read(const_cast<uint8_t*>(&du.data()[0]), du_len);
             if(n==size_t(du_len+2))
             {
                 data_unit.push_back(du);

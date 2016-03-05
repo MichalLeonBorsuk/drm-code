@@ -36,7 +36,7 @@ public:
   MSC& operator=(const MSC&);
   virtual ~MSC();
   virtual void ReConfigure(const vector<Stream>&);
-  virtual void NextFrame(vector<bytevector>&);
+  virtual void NextFrame(std::vector<std::vector<uint8_t> >&);
 protected:
   vector<StreamMux*> stream;
 };

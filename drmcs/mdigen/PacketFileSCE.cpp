@@ -26,12 +26,14 @@
 #include <platform.h>
 #include <iostream>
 
+using namespace std;
+
 void PacketFileSCE::ReConfigure(const ServiceComponent& config)
 {
     PacketSCE::ReConfigure(config);
 }
 
-void PacketFileSCE::NextFrame(bytevector &out, size_t max, double stoptime)
+void PacketFileSCE::NextFrame(vector<uint8_t> &out, size_t max, double stoptime)
 {
     if(max<(unsigned int)payload_size)
         return;
@@ -47,21 +49,21 @@ void PacketFileSCE::NextFrame(bytevector &out, size_t max, double stoptime)
     }
     if (open)
     {
-        bytevector packet;
+        vector<uint8_t> packet;
         for(size_t i=0; i<max; i+=payload_size) {
             //bool done = file.eof();
             packet.resize(payload_size);
-            file.read((char*)packet.data(), payload_size);
+            file.read((char*)&packet[0], payload_size);
             size_t l=file.gcount();
             if(l<payload_size) {
                 file.clear();
                 file.seekg(0, ios::beg);
                 if(l==0)
-                    file.read((char*)packet.data(), payload_size);
+                    file.read((char*)&packet[0], payload_size);
                 else
                     packet.resize(l);
             }
-            out.put(packet);
+            out.insert(out.end(), packet.begin(), packet.end());
         }
     }
 }

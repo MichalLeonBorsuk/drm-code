@@ -127,6 +127,7 @@ int main(int argc, char **argv)
     } else {
         mtime = 0;
     }
+    (void)mtime;
     cout << "BBC MDI Generator Rev " << svn_version()
          << ", using libsdixml Rev " << libsdixml::svn_version() << endl
          << "Implementing SDI Schema version " << libsdixml::SDI_Schema_version()
@@ -141,17 +142,6 @@ int main(int argc, char **argv)
     for(tagpacketlist::iterator i=t.begin(); i!=t.end(); i++)
       cout << i->first << " " << i->second.size() << endl;
     */
-#ifdef WIN32
-    int iResult;
-    WSADATA wsaData;
-// Initialize Winsock
-
-    iResult = WSAStartup(MAKEWORD(2,2), &wsaData);
-    if (iResult != 0) {
-        printf("WSAStartup failed: %d\n", iResult);
-        exit(1);
-    }
-#else
     struct sigaction sa;
     sa.sa_flags = SA_SIGINFO;
     sigemptyset(&sa.sa_mask);
@@ -179,7 +169,6 @@ int main(int argc, char **argv)
         cerr << "can't connect to file alteration monitor " << endl;
     }
 
-#endif
     bool ok = true;
     int max_frames = -1;
     int reconf_interval = 32;
@@ -189,7 +178,6 @@ int main(int argc, char **argv)
         try {
             mdigen.eachframe();
             //cout << "Frame: " << mdigen.transmitted_frames << endl;
-#ifndef WIN32
             while(FAMPending(&fc))
             {
                 FAMEvent fe;
@@ -220,7 +208,6 @@ int main(int argc, char **argv)
                     cout << "unknown fam event " << fe.code << " '" << fe.filename << "'" << endl;
                 }
             }
-#endif
         }
         catch(char const* e) {
             cerr << e << endl;

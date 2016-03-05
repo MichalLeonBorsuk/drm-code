@@ -42,12 +42,12 @@ public:
     return *this;
   }
   virtual ~PacketSCE() {}
-  void NextFrame(bytevector& buf, size_t max, double stoptime=0);
+  void NextFrame(std::vector<uint8_t>& buf, size_t max, double stoptime=0);
   void ReConfigure(const ServiceComponent&);
 
   PacketEncoder packet_encoder;
   size_t payload_size;
-  string encoder_id;
+  std::string encoder_id;
 };
 
 #endif

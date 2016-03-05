@@ -145,7 +145,7 @@ void Service::GetParams(xmlNodePtr n)
             cerr << "service identifier more than 3 characters" << endl;
         }
         if(len<3) {
-            bytev::iterator theIterator = service_identifier.begin();
+            vector<uint8_t>::iterator theIterator = service_identifier.begin();
             service_identifier.insert( theIterator, 3-len, 0);
         }
     }

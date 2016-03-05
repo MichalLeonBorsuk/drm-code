@@ -108,17 +108,18 @@ void SDC::ReConfigure(const DrmMuxConfig& config,
     current_block = 0;
 }
 
-void SDC::NextFrame(crcbytevector &out, DrmTime& timestamp)
+void SDC::NextFrame(vector<uint8_t> &out, DrmTime& timestamp)
 {
-    out.clear();
+    crcbytevector s;
     check_build_date_and_time(timestamp);
-    afs_index_valid = block[current_block].NextFrame(out, afs_index);
+    afs_index_valid = block[current_block].NextFrame(s, afs_index);
     if(reconfiguration_version)
         afs_index_valid = false;
-    block[current_block].build_sdc(out, afs_index, length);
+    block[current_block].build_sdc(s, afs_index, length);
     current_block++;
     if(current_block>afs_index)
         current_block=0;
+    out = s.data();
 }
 
 // Allocate elements to blocks. If we are really stuck for space
@@ -193,10 +194,10 @@ void SDC::check_build_date_and_time(DrmTime& timestamp)
 
 void SDC::build_sdci(const DrmMuxConfig& mux)
 {
-    sdci.clear();
-    sdci.put(0, 4); // this only works because a type 0 has zero in the type field!
-    sdci.put(mux.channel.protection_a, 2);
-    sdci.put(mux.channel.protection_b, 2);
+    bytevector payload;
+    payload.put(0, 4); // this only works because a type 0 has zero in the type field!
+    payload.put(mux.channel.protection_a, 2);
+    payload.put(mux.channel.protection_b, 2);
 
     // stream description for stream 0
     if (mux.channel.msc_mode==1 || mux.channel.msc_mode==2) {
@@ -205,21 +206,22 @@ void SDC::build_sdci(const DrmMuxConfig& mux)
         {
             // When using hierarchical coding, the first service must not use unequal error protection
         }
-        sdci.put(mux.channel.VSPP, 2);
-        sdci.put(0, 10); // rfu
-        sdci.put(mux.stream[0].bytes_per_frame, 12);
+        payload.put(mux.channel.VSPP, 2);
+        payload.put(0, 10); // rfu
+        payload.put(mux.stream[0].bytes_per_frame, 12);
 
     } else {
-        sdci.put(mux.stream[0].bytes_better_protected, 12);
-        sdci.put(mux.stream[0].bytes_per_frame - mux.stream[0].bytes_better_protected, 12);
+        payload.put(mux.stream[0].bytes_better_protected, 12);
+        payload.put(mux.stream[0].bytes_per_frame - mux.stream[0].bytes_better_protected, 12);
     }
     // in case of hierarchical, datalenA and datalenB are interpreted differently
     // stream description for streams 1, 2 and 3 (if in use)
     for (size_t n=1; n<mux.stream.size(); n++)
     {
-        sdci.put(mux.stream[n].bytes_better_protected, 12);
-        sdci.put(mux.stream[n].bytes_per_frame - mux.stream[n].bytes_better_protected, 12);
+        payload.put(mux.stream[n].bytes_better_protected, 12);
+        payload.put(mux.stream[n].bytes_per_frame - mux.stream[n].bytes_better_protected, 12);
     }
+    sdci = payload.data();
 }
 
 void SDC::ConfigureServiceUnique(vector<SdcElement>& element,

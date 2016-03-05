@@ -26,7 +26,7 @@
 #define _MOTOBJECT_H
 
 #include "DataGroupEncoder.h"
-#include "map"
+#include <bytevector.h>
 
 // MOT From EN 301 234 V2.1.1 (2005-07) 
 
@@ -41,9 +41,9 @@ public:
   virtual ~MotObject();
 
   // set field methods
-  void setHeaders(const string& f);
-  void setMimeType(const string& mt);
-  void setContentName(const string& content_name);
+  void setHeaders(const std::string& f);
+  void setMimeType(const std::string& mt);
+  void setContentName(const std::string& content_name);
   void setCompressionType(uint8_t compression_type);
   void setProfileSubset(const bytevector& profiles);
   void setScopeStart(time_t pscope_start, int8_t local_time_offset=0);
@@ -63,17 +63,17 @@ public:
    * if the string is too long, it gets truncated.
    */
   static void putStringParameter(bytevector& out, uint8_t param, 
-                          const string& s, int prefix=-1);
+                          const std::string& s, int prefix=-1);
   static void putDateTime(bytevector& out, uint32_t mjd, uint8_t hours, 
               uint8_t minutes, uint8_t seconds, int8_t lto);
 
   uint32_t file_size;
   uint8_t object_version;
-  string mime_type;
+  std::string mime_type;
   uint8_t content_type;
   uint16_t content_subtype;
   uint16_t transport_id;
-  string content_name, file_name;
+  std::string content_name, file_name;
   uint8_t compression_type;
   bytevector profiles, scope_start, scope_end;
   int scope_id;
@@ -84,9 +84,9 @@ protected:
 
   void find_type_by_mime(
     uint8_t& type, uint16_t& subtype,
-    const string& major, const string& minor) const;
+    const std::string& major, const std::string& minor) const;
   void find_mime_by_ext(
-    string& major, string& minor, const string& content_name) const;
+    std::string& major, std::string& minor, const std::string& content_name) const;
 
 };
 

@@ -27,10 +27,8 @@
 #include <iostream>
 #include "MOTEncoder.h"
 #include <sys/stat.h>
-#ifdef WIN32
-# include <io.h>
-# include <direct.h>
-#endif
+
+using namespace std;
 
 MOTSCE::MOTSCE():PacketSCE(),flags(),profile_index(), mot_encoder()
 {
@@ -106,9 +104,10 @@ void MOTSCE::ReConfigure(const ServiceComponent& config)
         compressible,
         profile_index
     );
+    (void)uat;
 }
 
-void MOTSCE::NextFrame(bytevector &out, size_t max, double stoptime)
+void MOTSCE::NextFrame(vector<uint8_t>& out, size_t max, double stoptime)
 {
     if(max>=payload_size) {
         mot_encoder.next_packet(out, max, stoptime);

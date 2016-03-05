@@ -25,7 +25,7 @@
 #ifndef _FAC_H
 #define _FAC_H
 
-#include "bytevector.h"
+#include <vector>
 #include <RFChannel.h>
 #include <Service.h>
 #include <DrmMuxConfig.h>
@@ -46,7 +46,7 @@ public:
   virtual ~FAC();
 
   void ReConfigure(const DrmMuxConfig&, uint8_t);
-  void NextFrame(bytevector&, uint8_t, bool, uint8_t);
+  void NextFrame(std::vector<uint8_t>&, uint8_t, bool, uint8_t);
     
 };
 

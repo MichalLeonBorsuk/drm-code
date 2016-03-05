@@ -28,16 +28,50 @@
 #include "timestamp.h"
 #include "DcpOut.h"
 #include "Crc16.h"
+#include <bytevector.h>
+#include <crcbytevector.h>
 #include <iostream>
 #include <sstream>
 
+using namespace std;
 
-
-DcpOut::DcpOut():pft(NULL),sock(NULL),m_use_crc(false), m_use_tist(false),m_file_framing(false)
+DcpOut::DcpOut():pft(NULL),sock(NULL),ssock(NULL),
+    m_type(), m_target(), m_proto(),
+    m_use_crc(false), m_use_tist(false),m_file_framing(false),
+    m_tcp_server(false),
+    m_src_addr(0), m_dst_addr(0)
 {
     tag="destination";
     clearConfig();
     m_type = "xxx";
+}
+
+DcpOut::DcpOut(const DcpOut& d)
+    :Persist(d),pft(d.pft),sock(d.sock),
+     ssock(d.ssock),m_type(d.m_type), m_target(d.m_target), m_proto(d.m_proto),
+     m_use_crc(d.m_use_crc), m_use_tist(d.m_use_tist),m_file_framing(d.m_file_framing),
+     m_tcp_server(d.m_tcp_server),
+     m_src_addr(d.m_src_addr),
+     m_dst_addr(d.m_dst_addr)
+{
+}
+
+DcpOut& DcpOut::operator=(const DcpOut& d)
+{
+    tag = d.tag;
+    pft = d.pft;
+    sock = d.sock;
+    ssock = d.ssock;
+    m_type = d.m_type;
+    m_target = d.m_target;
+    m_proto = d.m_proto;
+    m_use_crc = d.m_use_crc;
+    m_use_tist = d.m_use_tist;
+    m_file_framing = d.m_file_framing;
+    m_tcp_server = d.m_tcp_server;
+    m_src_addr = d.m_src_addr;
+    m_dst_addr = d.m_dst_addr;
+    return *this;
 }
 
 void DcpOut::clearConfig()
@@ -219,9 +253,9 @@ bool DcpOut::sendFrame(const tagpacketlist& frame, const vector<string>& tag_tx_
         }
     }
 
-    crcbytevector c;
+    vector<uint8_t> c;
     if(pft) {
-        crcbytevector d;
+        vector<uint8_t> d;
         makeAFpacket(d, frame, tag_tx_order, af_seq);
         pft->makePFT(d, c, packet_len);
         num_packets = c.size() / packet_len;
@@ -241,7 +275,7 @@ bool DcpOut::sendFrame(const tagpacketlist& frame, const vector<string>& tag_tx_
         else
             len = c.size()-p;
         if(m_file_framing) {
-            bytevector b;
+            vector<uint8_t> b;
             makeFFheader(b, len, true);
             sock->send(b);
         }
@@ -250,9 +284,8 @@ bool DcpOut::sendFrame(const tagpacketlist& frame, const vector<string>& tag_tx_
     return false;
 }
 
-bool DcpOut::sendFrameRaw(const bytevector& data)
+bool DcpOut::sendFrameRaw(const vector<uint8_t>& data)
 {
-    size_t packet_len, num_packets;
     if(sock) {
         if(sock && sock->handle==INVALID_SOCKET) {
             sock->open();
@@ -288,17 +321,17 @@ bool DcpOut::sendFrameRaw(const bytevector& data)
 }
 
 
-void DcpOut::makeAFpacket(crcbytevector& out,
+void DcpOut::makeAFpacket(vector<uint8_t>& out,
                           const tagpacketlist& frame, const vector<string>& tag_tx_order, uint16_t af_seq)
 {
     bytevector b;
-    for(vector<string>::const_iterator tag=tag_tx_order.begin(); tag!=tag_tx_order.end(); tag++) {
-        tagpacketlist::const_iterator f = frame.find(*tag);
+    for(vector<string>::const_iterator tagp=tag_tx_order.begin(); tagp!=tag_tx_order.end(); tagp++) {
+        tagpacketlist::const_iterator f = frame.find(*tagp);
         if(f!=frame.end()) {
-            const bytevector& payload=f->second;
+            const bytevector payload=f->second;
             size_t n=payload.size();
             unsigned bits=payload.bits;
-            b.put(*tag);
+            b.put(*tagp);
             b.put(8*n+bits, 32);
             b.put(payload);
             if(payload.bits!=0) {
@@ -307,15 +340,17 @@ void DcpOut::makeAFpacket(crcbytevector& out,
         }
     }
     size_t bs = b.size();
-    out.put("AF");
-    out.put(bs, 32);
-    out.put(af_seq, 16);
-    out.put(1, m_use_crc?1:0); // crc flag
-    out.put(1, 3); // MAJor version
-    out.put(0, 4); // MINor version
-    out.put("T"); // protocol type tag packets
-    out.put(b);
-    out.put(out.crc.result(), 16);
+    crcbytevector tp;
+    tp.put("AF");
+    tp.put(bs, 32);
+    tp.put(af_seq, 16);
+    tp.put(1, m_use_crc?1:0); // crc flag
+    tp.put(1, 3); // MAJor version
+    tp.put(0, 4); // MINor version
+    tp.put("T"); // protocol type tag packets
+    tp.put(b);
+    tp.put(tp.crc.result(), 16);
+    out = tp.data();
 }
 /* File: ETSI TS 102 821 V0.0.2f (2003-10)
 
@@ -352,25 +387,27 @@ TI_NSEC:  the number of whole SI nanoseconds,  in the range 0-999 999 999.
   Values outside of this range are not defined
 */
 
-void DcpOut::makeFFheader(bytevector& out, size_t packet_size, bool sendTime)
+void DcpOut::makeFFheader(vector<uint8_t>& out, size_t packet_size, bool sendTime)
 {
     timespec tp;
     clock_getrealtime(&tp);
     uint64_t bytesize_ff = 4+4+packet_size; // afpf
     if(sendTime)
         bytesize_ff += 4+4+4+4;
+    bytevector b;
     // Tag Item fio_
-    out.put("fio_");
-    out.put(8*bytesize_ff, 32);
+    b.put("fio_");
+    b.put(8*bytesize_ff, 32);
     // nested tag packets
     // Tag Item time
     if(sendTime) {
-        out.put("time");
-        out.put(64, 32);
-        out.put(tp.tv_sec, 32);
-        out.put(tp.tv_nsec, 32);
+        b.put("time");
+        b.put(64, 32);
+        b.put(tp.tv_sec, 32);
+        b.put(tp.tv_nsec, 32);
     }
     // Tag Item afpf
-    out.put("afpf");
-    out.put(8*packet_size, 32);
+    b.put("afpf");
+    b.put(8*packet_size, 32);
+    out = b.data();
 }

@@ -23,6 +23,7 @@
 \******************************************************************************/
 
 #include "PftOut.h"
+#include <crcbytevector.h>
 #include <string.h>
 #include <iostream>
 #include <sstream>
@@ -53,8 +54,10 @@ using namespace std;
 
 
 PftOut::PftOut()
+  :m_mtu(0), m_use_address(false),
+  m_source_address(0), m_dest_address(0),
+  m_sequence_counter(rand())
 {
-    clearConfig();
 }
 
 void PftOut::clearConfig()
@@ -142,16 +145,17 @@ int PftOut::headerLength(bool use_addr, bool use_fec)
 }
 
 int PftOut::makePFT(
-    const bytev& in, crcbytevector& out,
+    const vector<uint8_t>& in, vector<uint8_t>& pfp,
     size_t header_bytesize, size_t payload_bytesize, uint16_t num_packets,
     bool fec, uint16_t rsK, uint16_t rsZ)
 {
-    const uint8_t *p = in.data();
+    crcbytevector out;
     uint16_t data_size = static_cast<uint16_t>(in.size());
     size_t space_needed = data_size+num_packets*header_bytesize;
     out.reserve(space_needed);
     out.clear();
     size_t bytes_remaining = data_size;
+    const uint8_t *p = in.data();
     for (uint16_t n=0; n<num_packets; n++)
     {
         if(bytes_remaining < payload_bytesize)
@@ -162,13 +166,14 @@ int PftOut::makePFT(
         p += payload_bytesize;
         bytes_remaining -= payload_bytesize;
     }
+    pfp = out.data();
     // increment SEQ counter
     m_sequence_counter++;
     return ERR_NO_ERROR;
 }
 
-int SimplePftOut::makePFT(const bytev& in,
-                          crcbytevector& out, size_t &packet_bytesize)
+int SimplePftOut::makePFT(const vector<uint8_t>& in,
+                          vector<uint8_t>& out, size_t &packet_bytesize)
 {
     uint16_t num_packets, data_size=in.size();
     size_t header_bytesize, payload_bytesize;
@@ -202,8 +207,8 @@ void FecPftOut::config(map<string,string>& config)
     config["fec"]=m_expected_packet_losses;
 }
 
-int FecPftOut::makePFT(const bytev& in,
-                       crcbytevector& out, size_t &packet_bytesize)
+int FecPftOut::makePFT(const vector<uint8_t>& in,
+                       vector<uint8_t>& out, size_t &packet_bytesize)
 {
     uint16_t data_size=in.size();
     // c = ceil(l/kmax), l=AF packet len, kmax = 207
@@ -263,7 +268,7 @@ int FecPftOut::makePFT(const bytev& in,
     code.Encode(&data_to_send[outp-k], &data_to_send[outp]);
     //memset(&data_to_send[outp], 255, PFT_RS_P);
 
-    bytev fec_bytes;
+    vector<uint8_t> fec_bytes;
     fec_bytes.resize(out_size, 0xfe);
     for(int i=0; i<number_of_fragments; i++) {
         for(int j=0; j<fragment_size; j++) {
