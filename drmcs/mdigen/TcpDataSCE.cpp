@@ -22,15 +22,14 @@
  *
 \******************************************************************************/
 
-#include <string.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
+#include <cstring>
+#include <cstdlib>
+#include <ctime>
 #include <fcntl.h>
-#include <ctype.h>
-
-
+#include <cctype>
 #include "TcpDataSCE.h"
+
+using namespace std;
 
 CTcpDataSCE::CTcpDataSCE()
 {
@@ -59,14 +58,14 @@ void CTcpDataSCE::ReConfigure(const ServiceComponent& config)
     }
 }
 
-void CTcpDataSCE::NextFrame(bytevector& buf, size_t max, double)
+void CTcpDataSCE::NextFrame(vector<uint8_t>& buf, size_t max, double)
 {
     if(sock.handle==INVALID_SOCKET)
         sock.open();
     if(sock.poll()) {
-        bytev b;
+        vector<uint8_t> b;
         sock.fetch(b);
         if(b.size()<=max)
-            buf.put(b);
+            buf.insert(buf.end(), b.begin(), b.end());
     }
 }

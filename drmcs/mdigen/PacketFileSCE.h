@@ -32,12 +32,12 @@ class PacketFileSCE : public PacketSCE
 {
 public:
     PacketFileSCE():PacketSCE(),open(false){}
-	virtual void NextFrame(bytevector& buf, size_t max, double stoptime=0);
+	virtual void NextFrame(std::vector<uint8_t>& buf, size_t max, double stoptime=0);
     virtual void ReConfigure(const ServiceComponent&);
 
 protected:
     
-    fstream file;
+    std::fstream file;
     bool open;
 };
 #endif

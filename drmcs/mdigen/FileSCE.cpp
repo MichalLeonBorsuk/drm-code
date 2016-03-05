@@ -26,6 +26,9 @@
 #include <arpa/inet.h>
 #include "FileSCE.h"
 #include <iostream>
+#include <bytevector.h>
+
+using namespace std;
 
 FileSCE::~FileSCE()
 {
@@ -62,8 +65,9 @@ unsigned long FileSCE::ReadInt()
     return ntohl(n);
 }
 
-void FileSCE::NextFrame(bytevector& buf, size_t max, double)
+void FileSCE::NextFrame(vector<uint8_t>& out, size_t max, double)
 {
+    bytevector buf;
     if (!current.misconfiguration
             && max>=(unsigned)current.bytes_per_frame
             && file.is_open())
@@ -76,8 +80,10 @@ void FileSCE::NextFrame(bytevector& buf, size_t max, double)
             if( current.loop) {
                 file.seekg(0);
             } else {
-                buf.insert(buf.end(), current.bytes_per_frame, 0);
+		vector<uint8_t> zeroes(current.bytes_per_frame, 0);
+                buf.put(zeroes);
             }
         }
     }
+    out = buf.data();
 }

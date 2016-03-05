@@ -25,42 +25,52 @@
 #ifndef _BYTEVECTOR_H
 #define _BYTEVECTOR_H
 
+#include <vector>
 #include <string>
 #include <bitset>
-#include "bitvector.h"
-#include "bytev.h"
+#include <cstdint>
 
-class bytevector : public bytev
+class bytevector 
 {
 public:
     uint8_t in_progress, bits;
 
-    bytevector():bytev(),in_progress(0),bits(0) {}
+    bytevector():in_progress(0),bits(0),_data() {}
+    bytevector(const std::vector<uint8_t>& v):in_progress(0),bits(0),_data(v) {}
     virtual ~bytevector() {}
-    virtual void clear() {
-        bytev::clear();
+    virtual 
+    void clear() {
+        _data.clear();
         in_progress=0;
         bits=0;
     }
-    void put(uint64_t, unsigned=8);
-    void put(const bitvector&);
-    void put(const string&);
-    void put(const bytev&);
+    const std::vector<uint8_t>& data() const { return _data; }
+    void put(uint64_t, unsigned);
+    void put(const std::string&);
+    void put(const bytevector& bv) { put(bv._data); }
+    void put(const std::vector<uint8_t>&);
     void putbytes(const char *, unsigned);
+    void putb(uint8_t);
     uint64_t get(unsigned=8);
     int64_t getSigned(unsigned);
-    void get(bytev&, unsigned);
+    void get(std::vector<uint8_t>&, unsigned);
     uint8_t peek() const;
     bool dataAvailable() const;
+    void reserve(size_t n) { _data.reserve(n); }
+    void resize(size_t n) { _data.resize(n); }
+    size_t size() const { return _data.size(); }
+    bool empty() const { return _data.empty(); }
+    void push_back(const uint8_t& val) { _data.push_back(val); }
+    uint8_t& operator[](int i) { return _data[i]; }
 protected:
-    virtual void putb(uint8_t);
+    std::vector<uint8_t> _data;
 };
 
-bytevector& operator<<(bytevector& b, const bytev& c);
+bytevector& operator<<(bytevector& b, const std::vector<uint8_t>& c);
 
-bytevector& operator<< (bytevector& b, const string& c);
+bytevector& operator<< (bytevector& b, const std::string& c);
 
-template<size_t X> bytevector& operator<< (bytevector& b, const bitset<X>& c)
+template<size_t X> bytevector& operator<< (bytevector& b, const std::bitset<X>& c)
 {
     b.put(c.to_ulong(), static_cast<unsigned>(c.size()));
     return b;

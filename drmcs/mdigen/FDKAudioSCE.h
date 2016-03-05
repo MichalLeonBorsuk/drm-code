@@ -26,16 +26,19 @@
 #define _FDKAUDIOSCE_H
 
 #include <ServiceComponentEncoder.h>
+#include <alsa/asoundlib.h>
 #include <aacenc_lib.h>
 
 class FDKAudioSCE : public ServiceComponentEncoder
 {
 public:
-    FDKAudioSCE():hAacEncoder(NULL){}
-    virtual ~FDKAudioSCE(){}
-	virtual void ReConfigure(const ServiceComponent&);
- 	virtual void NextFrame(bytevector& buf, size_t max, double stoptime=0);
+    FDKAudioSCE():ServiceComponentEncoder(),hAacEncoder(NULL),hAlsa(NULL),channels(0) {}
+    virtual ~FDKAudioSCE() {}
+    virtual void ReConfigure(const ServiceComponent&);
+    virtual void NextFrame(std::vector<uint8_t>& buf, size_t max, double stoptime=0);
 protected:
     HANDLE_AACENCODER hAacEncoder;
+    snd_pcm_t* hAlsa;
+    int channels;
 };
 #endif

@@ -39,7 +39,7 @@ public:
     data_unit(),next_data_unit()
     {
     }
-	virtual void NextFrame(bytevector& buf, size_t max, double stoptime=0);
+	virtual void NextFrame(std::vector<uint8_t>& buf, size_t max, double stoptime=0);
     virtual void ReConfigure(const ServiceComponent&);
 
 protected:
@@ -50,8 +50,8 @@ protected:
     size_t max_queue_depth;
     PacketEncoder packet_encoder;
     DataGroupEncoder dge;
-    vector<bytevector> data_unit;
-    vector<bytevector>::iterator next_data_unit;
+    std::vector<bytevector> data_unit;
+    std::vector<bytevector>::iterator next_data_unit;
     void read_file(double stoptime);
     void fill(double stoptime);
 

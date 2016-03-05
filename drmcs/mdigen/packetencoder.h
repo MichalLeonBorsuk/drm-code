@@ -26,10 +26,10 @@
 #define _PACKETENCODER_H
 
 #include <queue>
-#include <crcbytevector.h>
+#include <vector>
 #include <ServiceComponentEncoder.h>
 
-typedef queue<bytevector> packetqueue;
+typedef std::queue<std::vector<uint8_t> > packetqueue;
 
 class PacketEncoder
 {
@@ -48,10 +48,9 @@ public:
     return *this;
   }
   void ReConfigure(const ServiceComponent& config);
-  void makeDataUnit(packetqueue& out, bytevector& in);
-  void makePacket(crcbytevector& packet, bytevector& in);
-  void makePacket(crcbytevector& packet, 
-             bytevector::iterator& from, bytevector::iterator& to, bool, bool);
+  void makeDataUnit(packetqueue& out, const std::vector<uint8_t>& in);
+  void makePacket(std::vector<uint8_t>& packet, const std::vector<uint8_t>& in);
+  void makePacket(std::vector<uint8_t>& packet, const std::vector<uint8_t>::const_iterator& from, const std::vector<uint8_t>::const_iterator& to, bool, bool);
 };
 
 #endif

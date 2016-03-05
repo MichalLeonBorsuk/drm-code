@@ -26,8 +26,7 @@
 #define _SERVICEGROUP_H
 
 #include "frequencygroup.h"
-
-using namespace std;
+#include <vector>
 
 class ServiceGroup : public FrequencyGroup
 {
@@ -59,6 +58,6 @@ public:
   static const char* types[];
   int system_id;
   int same_service;
-  bytev service_identifier;
+  std::vector<uint8_t> service_identifier;
 };
 #endif

@@ -83,6 +83,6 @@ void StreamMux::ReConfigure(const Stream& config)
     }
 }
 
-void StreamMux::NextFrame(bytevector& out)
+void StreamMux::NextFrame(vector<uint8_t>& out)
 {
 }

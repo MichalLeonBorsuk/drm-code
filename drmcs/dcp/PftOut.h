@@ -30,7 +30,8 @@
 #include <RSCodePFT.h>
 #include <string>
 #include <map>
-#include "crcbytevector.h"
+#include <vector>
+#include <crcbytevector.h>
 
 class PftOut : public Persist
 {
@@ -43,17 +44,17 @@ public:
   PftOut();
   virtual ~PftOut();
   virtual void GetParams(xmlNodePtr n){};
-  virtual void ReConfigure(map<string,string>& config);
-  virtual void config(map<string,string>& config);
+  virtual void ReConfigure(std::map<std::string,std::string>& config);
+  virtual void config(std::map<std::string,std::string>& config);
   void makePFTheader(
     crcbytevector &out, size_t in_size,
     uint32_t Findex, uint32_t Fcount, 
     bool fec=false, uint16_t rsK=0, uint16_t rsZ=0);
   int headerLength(bool use_addr, bool use_fec);
-  int makePFT(const bytev& in, crcbytevector& out, 
+  int makePFT(const std::vector<uint8_t>& in, std::vector<uint8_t>& out, 
     size_t header_bytesize, size_t payload_bytesize, uint16_t num_packets,
     bool fec, uint16_t rsK, uint16_t rsZ);
-  virtual int makePFT(const bytev& afpacket, crcbytevector& out, 
+  virtual int makePFT(const std::vector<uint8_t>& afpacket, std::vector<uint8_t>& out, 
                       size_t &packet_bytesize) { return 0; }
 
 protected:
@@ -64,17 +65,17 @@ protected:
 class SimplePftOut : public PftOut
 {
 public:
-  virtual int makePFT(const bytev& afpacket, crcbytevector& out, 
-                      size_t &packet_bytesize);
+  virtual int makePFT(const std::vector<uint8_t>& afpacket, std::vector<uint8_t>& out, size_t &packet_bytesize);
 };
 
 class FecPftOut : public PftOut
 {
 public:
+  FecPftOut():m_expected_packet_losses(0),code() {}
   int m_expected_packet_losses;
   CRSCodePFT code;
-  virtual int makePFT(const bytev& afpacket, crcbytevector& out, size_t &packet_bytesize);
-  virtual void ReConfigure(map<string,string>& config);
-  virtual void config(map<string,string>& config);
+  virtual int makePFT(const std::vector<uint8_t>& afpacket, std::vector<uint8_t>& out, size_t &packet_bytesize);
+  virtual void ReConfigure(std::map<std::string,std::string>& config);
+  virtual void config(std::map<std::string,std::string>& config);
 };
 #endif

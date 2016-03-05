@@ -32,6 +32,7 @@ class crcbytevector : public bytevector
 {
 public:
     CCrc16 crc;
+    crcbytevector():bytevector(),crc() {}
     virtual ~crcbytevector() {}
     virtual void clear() {
         crc.reset();

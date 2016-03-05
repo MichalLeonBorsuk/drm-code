@@ -30,7 +30,7 @@
 #include <RSCodePFT.h>
 #include <string>
 #include <map>
-#include "crcbytevector.h"
+#include <vector>
 #include "Reassemble.h"
 
 class PftIn : public Persist
@@ -42,19 +42,19 @@ public:
   PftIn();
   virtual ~PftIn();
   virtual void GetParams(xmlNodePtr n){};
-  virtual void ReConfigure(map<string,string>& config);
-  virtual void config(map<string,string>& config);
-  bool decodePFT(bytev& out, const bytev& data);
+  virtual void ReConfigure(std::map<std::string,std::string>& config);
+  virtual void config(std::map<std::string,std::string>& config);
+  bool decodePFT(std::vector<uint8_t>& out, const std::vector<uint8_t>& data);
 
 protected:
-  map<int,CReassembler> mapFragments;
+  std::map<int,CReassembler> mapFragments;
   CRSCodePFT code;
 
   void clearConfig();
-  bool decodeSimplePFT(bytev& out, const bytev& data, uint16_t Pseq, uint16_t Plen, uint32_t Findex, uint32_t Fcount);
-  bool decodePFTWithFEC(bytev& out, const bytev& data, uint16_t Pseq, uint16_t Plen, uint32_t Findex, uint32_t Fcount, uint16_t rsK, uint16_t rsZ);
-  void deinterleave(const bytev& input, bytev& output, uint16_t plen, uint32_t fcount);
-  bool rsCorrectData(const bytev& input, bytev& output, uint32_t c_max, uint16_t rsk, uint16_t rsz);
+  bool decodeSimplePFT(std::vector<uint8_t>& out, const std::vector<uint8_t>& data, uint16_t Pseq, uint16_t Plen, uint32_t Findex, uint32_t Fcount);
+  bool decodePFTWithFEC(std::vector<uint8_t>& out, const std::vector<uint8_t>& data, uint16_t Pseq, uint16_t Plen, uint32_t Findex, uint32_t Fcount, uint16_t rsK, uint16_t rsZ);
+  void deinterleave(const std::vector<uint8_t>& input, std::vector<uint8_t>& output, uint16_t plen, uint32_t fcount);
+  bool rsCorrectData(const std::vector<uint8_t>& input, std::vector<uint8_t>& output, uint32_t c_max, uint16_t rsk, uint16_t rsz);
 };
 
 #endif

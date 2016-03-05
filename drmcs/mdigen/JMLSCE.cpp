@@ -26,6 +26,7 @@
 #include "JML.h"
 #include "timestamp.h"
 
+using namespace std;
 using namespace JML;
 
 static void createJML(JMLObjectCollection& carousel, const string& sometext)
@@ -72,7 +73,7 @@ void JMLSCE::ReConfigure(const ServiceComponent& config)
     }
 }
 
-void JMLSCE::NextFrame(bytevector &out, size_t max, double stoptime)
+void JMLSCE::NextFrame(vector<uint8_t> &out, size_t max, double stoptime)
 {
     if(packet_queue.empty())
         fill(stoptime);
@@ -86,7 +87,8 @@ void JMLSCE::NextFrame(bytevector &out, size_t max, double stoptime)
         //cout << "JMLSCE: queue OK" << endl;
     }
     if(packet_queue.front().size()<=max) {
-        out.put(packet_queue.front());
+        const vector<uint8_t>& p = packet_queue.front();
+        out.insert(out.end(), p.begin(), p.end());
         packet_queue.pop();
     } else {
         cerr << "JMLSCE: packet queue size mismatch with packet mux" << endl;
@@ -106,7 +108,7 @@ void JMLSCE::fill(double stoptime)
         {
             crcbytevector out;
             dge.putDataGroup(0, out, data_unit[i], i);
-            packet_encoder.makeDataUnit(packet_queue, out);
+            packet_encoder.makeDataUnit(packet_queue, out.data());
         }
         clock_getrealtime(&t);
         now_ms = 1000.0*double(t.tv_sec) + double (t.tv_nsec) / 1.0e6;

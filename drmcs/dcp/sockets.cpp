@@ -24,6 +24,7 @@
 
 #include "sockets.h"
 
+#include <bytevector.h>
 #include <sys/types.h>
 #include <time.h>
 #include <fcntl.h>
@@ -33,7 +34,6 @@
 #include <iostream>
 #include <sstream>
 #include "timestamp.h"
-#ifndef WIN32
 #include <unistd.h>
 #include <stropts.h>
 #include <sys/types.h>
@@ -41,17 +41,8 @@
 #include <netinet/tcp.h>
 #include <netdb.h>
 #include <errno.h>
-#endif
 
-/*
-#ifdef WIN32
-extern "C" {
-int install_bpf_program(pcap_t *, struct bpf_program *){ return 0;}
-void pcap_freecode(struct bpf_program *) {}
-char* PacketGetVersion() { return "3.0"; }
-};
-#endif
-*/
+using namespace std;
 
 basic_socket::basic_socket():mtu(0),port(0),handle(INVALID_SOCKET)
 {
@@ -76,13 +67,7 @@ basic_socket& basic_socket::operator=(const basic_socket& s)
 
 const string basic_socket::error_message(const string& where)
 {
-#ifdef WIN32
-    stringstream s;
-    s << where << " " << WSAGetLastError();
-    return s.str();
-#else
     return where + strerror(errno);
-#endif
 }
 
 void basic_socket::ReConfigure(map<string,string>& config)
@@ -151,20 +136,16 @@ basic_socket::poll_result_t basic_socket::poll()
 
 void basic_socket::close()
 {
-#ifdef WIN32
-    closesocket(handle);
-#else
     ::close(handle);
-#endif
     handle=INVALID_SOCKET;
 }
 
-void stream_socket::send(const bytev&, size_t start, size_t count)
+void stream_socket::send(const vector<uint8_t>&, size_t start, size_t count)
 {
 
 }
 
-void stream_socket::fetch(bytev&)
+void stream_socket::fetch(vector<uint8_t>&)
 {
 }
 
@@ -183,10 +164,7 @@ bool server_socket::open()
         cerr.flush();
         return false;
     }
-#ifdef WIN32
-#else
     fcntl(s, F_SETFL, O_NONBLOCK);
-#endif
     listen(s, 5); // length of queue for pending
     handle = s;
     return true;
@@ -203,11 +181,7 @@ basic_socket::poll_result_t server_socket::poll()
 bool server_socket::fetch(stream_socket& sock)
 {
     struct  sockaddr_in clnt;
-#ifdef WIN32
-    int clen=sizeof(clnt);
-#else
     socklen_t clen=sizeof(clnt);
-#endif
     SOCKET s;
     int n,optval = 1;
     struct protoent *pe;
@@ -290,10 +264,7 @@ bool client_socket::open()
         cerr << "getproto error" << endl;
         return false;
     }
-#ifdef WIN32
-#else
     setsockopt (s, SOL_SOCKET, O_NONBLOCK, (char*)&optval, sizeof (optval));
-#endif
     if (::connect(s,(struct sockaddr*)&server, sizeof(struct sockaddr_in))!=0) {
         ::close(s);
         cerr << "can't connect to host " << host << endl;
@@ -305,11 +276,12 @@ bool client_socket::open()
     return true;
 }
 
-dgram_socket::dgram_socket():basic_socket(),ttl(127),join(false)
+dgram_socket::dgram_socket():basic_socket(),sock_addr(),addr(),iface(),ttl(127),join(false)
 {
 }
 
-dgram_socket::dgram_socket(const dgram_socket& s):basic_socket(s),ttl(s.ttl),join(s.join)
+dgram_socket::dgram_socket(const dgram_socket& s): basic_socket(s),sock_addr(s.sock_addr),addr(s.addr),iface(s.iface),
+ttl(s.ttl),join(s.join)
 {
 }
 
@@ -422,14 +394,14 @@ bool dgram_socket::open()
     return false;
 }
 
-void dgram_socket::send(const bytev& packet, size_t start, size_t count)
+void dgram_socket::send(const vector<uint8_t>& packet, size_t start, size_t count)
 {
     int n = sendto(handle, (char*)packet.data()+start, static_cast<int>((count==0)?packet.size():count), 0,
                    (sockaddr*) &sock_addr, sizeof(sockaddr_in));
-    //cerr << "dgram_socket::send wanted " << count << " sent " << n << endl;
+    cerr << "dgram_socket::send wanted " << count << " sent " << n << endl;
 }
 
-void dgram_socket::fetch(bytev& packet)
+void dgram_socket::fetch(vector<uint8_t>& packet)
 {
     socklen_t l = sizeof(sockaddr_in);
     if(&packet[0] != packet.data())
@@ -495,10 +467,8 @@ bool file_socket::open()
 {
     if(pcap)
     {
-#ifndef WIN32
         pcap_t *p = pcap_open_dead(DLT_RAW, 65536);
         fp = pcap_dump_open(p, path.c_str());
-#endif
         if(fp) {
             handle=1;
             return true;
@@ -521,9 +491,7 @@ void file_socket::close()
 {
     if(pcap)
     {
-#ifndef WIN32
         pcap_dump_close(fp);
-#endif
     }
     else
     {
@@ -532,7 +500,7 @@ void file_socket::close()
     handle=INVALID_SOCKET;
 }
 
-void file_socket::send(const bytev& packet, size_t start, size_t count)
+void file_socket::send(const vector<uint8_t>& packet, size_t start, size_t count)
 {
     char *p = (char*)packet.data()+start;
     size_t n = (count==0)?packet.size():count;
@@ -556,7 +524,6 @@ void file_socket::send(const bytev& packet, size_t start, size_t count)
         out.put(8+n, 16);
         out.put(01, 16);
         out.put(packet);
-#ifndef WIN32
         pcap_pkthdr hdr;
         timespec tp;
         clock_getrealtime(&tp);
@@ -564,19 +531,14 @@ void file_socket::send(const bytev& packet, size_t start, size_t count)
         hdr.ts.tv_usec = tp.tv_nsec/1000UL;
         hdr.caplen = c;
         hdr.len = c;
-        pcap_dump((u_char*)fp, &hdr, (u_char*)out.data()+start);
+        pcap_dump((u_char*)fp, &hdr, (u_char*)&out.data()[0]+start);
         pcap_dump_flush(fp);
-#endif
     } else {
         ::write(handle, p, n);
-#ifdef WIN32
-        ::_commit(handle);
-#else
         ::fsync(handle);
-#endif
     }
 }
 
-void file_socket::fetch(bytev&)
+void file_socket::fetch(vector<uint8_t>&)
 {
 }

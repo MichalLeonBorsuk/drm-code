@@ -26,7 +26,7 @@
 #define _SERVICECOMPONENTENCODER_H
 
 #include <ServiceComponent.h>
-#include <bytevector.h>
+#include <vector>
 #include <iostream>
 
 class ServiceComponentEncoder
@@ -38,10 +38,10 @@ public:
   ServiceComponentEncoder& operator=(const ServiceComponentEncoder& e)
   { current=e.current; return *this; }
   virtual ~ServiceComponentEncoder() {}
-  virtual void ReConfigure(const ServiceComponent& config) { 	 cerr << "ServiceComponent::ReConfigure" << endl;
+  virtual void ReConfigure(const ServiceComponent& config) { std::cerr << "ServiceComponent::ReConfigure" << std::endl;
  current = config; }
-  virtual void NextFrame(bytevector& buf, size_t max, double stoptime=0) {}
-  virtual string next_message() { return "";} // avoids cast for text messages in SDI
+  virtual void NextFrame(std::vector<uint8_t>& buf, size_t max, double stoptime=0) {}
+  virtual std::string next_message() { return "";} // avoids cast for text messages in SDIA
 
   ServiceComponent current;
 };

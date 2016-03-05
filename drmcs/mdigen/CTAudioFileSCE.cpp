@@ -26,6 +26,9 @@
 #include "CTAudioFileSCE.h"
 #include <arpa/inet.h>
 #include <iostream>
+#include <algorithm>
+
+using namespace std;
 
 CCTAudioFileSCE::~CCTAudioFileSCE()
 {
@@ -66,6 +69,7 @@ void CCTAudioFileSCE::ReConfigure(const ServiceComponent& config)
         iHiProtFrameLength = ReadInt();
         iUEP = static_cast<unsigned short>(ReadInt());
         iError = static_cast<unsigned short>(ReadInt());
+    (void)iVersionId; (void)iUEP; (void)iError; (void)iTotalFrameLength;
 
         // validate it against what the xml file asked for
         // we will allow the xml file to not specify the values
@@ -113,14 +117,14 @@ unsigned long CCTAudioFileSCE::ReadInt()
     return ntohl(n);
 }
 
-void CCTAudioFileSCE::NextFrame(bytevector& buf, size_t max, double)
+void CCTAudioFileSCE::NextFrame(vector<uint8_t>& buf, size_t max, double)
 {
     if (!current.misconfiguration
             && max>=(unsigned)current.bytes_per_frame
             && file.is_open())
     {
         file.read(buffer, current.bytes_per_frame);
-        buf.putbytes(buffer, current.bytes_per_frame);
+        copy(buffer, buffer+current.bytes_per_frame, buf.end());
         current.loop=true;
         // skip over next header - will fail at eof but so what?
         file.seekg(DRM_FILE_HEADER_SIZE, ios::cur);

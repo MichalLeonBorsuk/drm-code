@@ -4,10 +4,10 @@ VERSION = 1.0.0
 CXX  = g++
 CC   = gcc
 TAR  = tar
-SRC  = bitvector.cpp bytevector.cpp Cfg.cpp Crc16.cpp persist.cpp timestamp.cpp
-HDR = bitvector.h bytevector.h bytev.h Cfg.h Crc16.h crcbytevector.h persist.h timestamp.h
+SRC  = bytevector.cpp Cfg.cpp Crc16.cpp persist.cpp timestamp.cpp
+HDR = bytevector.h bytev.h Cfg.h Crc16.h crcbytevector.h persist.h timestamp.h
 
-OBJ  = bitvector.o bytevector.o Cfg.o Crc16.o persist.o timestamp.o
+OBJ  = bytevector.o Cfg.o Crc16.o persist.o timestamp.o
 
 LIBS =   
 INCS =  

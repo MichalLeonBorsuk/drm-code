@@ -25,25 +25,16 @@
 #ifndef _TCPDATASCE_H
 #define _TCPDATASCE_H
 
-#include <libxml/encoding.h>
-#include <libxml/tree.h>
-#include <libxml/parser.h>
-#include <libxml/xpath.h>
-#include <libxml/xpathInternals.h>
 #include <ServiceComponentEncoder.h>
-#include <queue>
-#include <string>
-#include <platform.h>
+#include <vector>
 #include "sockets.h"
-
-using namespace std;
 
 class CTcpDataSCE : public ServiceComponentEncoder
 {
 public:
     CTcpDataSCE();
     void clearConfig();
-	virtual void NextFrame(bytevector& buf, size_t max, double stoptime=0);
+    virtual void NextFrame(std::vector<uint8_t>& buf, size_t max, double stoptime=0);
     virtual void ReConfigure(const ServiceComponent&);
 
     client_socket sock;

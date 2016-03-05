@@ -60,7 +60,7 @@ public:
      map<uint8_t,string>& profile_index
   );
 
-  void next_packet(bytevector &out, size_t max, double stoptime=0);
+  void next_packet(vector<uint8_t>& out, size_t max, double stoptime=0);
 
 protected:
 

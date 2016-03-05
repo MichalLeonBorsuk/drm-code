@@ -50,7 +50,7 @@ void TDMStreamMux::ReConfigure(const Stream& config)
     StreamMux::ReConfigure(config);
 }
 
-void TDMStreamMux::NextFrame(bytevector& out)
+void TDMStreamMux::NextFrame(vector<uint8_t>& out)
 {
     size_t max = static_cast<size_t>(current.bytes_per_frame);
     size_t avail = max;

@@ -230,7 +230,7 @@ void Persist::parseHexBinary(xmlNodePtr c, const char *xmltag, uint8_t **data, u
     }
 }
 
-void Persist::parseHexBinary(xmlNodePtr c, const char *xmltag, bytev& data)
+void Persist::parseHexBinary(xmlNodePtr c, const char *xmltag, vector<uint8_t>& data)
 {
     if(xmlStrEqual(c->name,(const xmlChar*)xmltag)) {
         xmlChar *val = xmlNodeGetContent(c);
@@ -320,7 +320,7 @@ void Persist::PutHexBinary(xmlTextWriterPtr writer, const char *xmltag, const ui
     xmlTextWriterEndElement(writer);
 }
 
-void Persist::PutHexBinary(xmlTextWriterPtr writer, const char *xmltag, const bytev& data)
+void Persist::PutHexBinary(xmlTextWriterPtr writer, const char *xmltag, const vector<uint8_t>& data)
 {
     xmlTextWriterStartElement(writer, BAD_CAST xmltag);
     for(size_t i=0; i<data.size(); i++) {

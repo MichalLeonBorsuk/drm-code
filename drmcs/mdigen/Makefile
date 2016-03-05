@@ -15,7 +15,7 @@ CXXINCS +=  -I../dcp
 CXXINCS +=  -I../common
 CXXINCS +=  -I../sdc
 CXXINCS +=  -I../RSLib
-CXXFLAGS = $(CXXINCS) -Wall -g -std=c++11
+CXXFLAGS = $(CXXINCS) -Werror -Wall -g -std=c++11
 CFLAGS = $(INCS) -Wall -g
 
 .PHONY: all all-before all-after clean clean-custom svn_version.cpp

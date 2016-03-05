@@ -23,6 +23,9 @@
 \******************************************************************************/
 
 #include "packetencoder.h"
+#include <crcbytevector.h>
+
+using namespace std;
 
 /*
 
@@ -116,16 +119,18 @@ void PacketEncoder::ReConfigure(const ServiceComponent& config)
     packet_size=config.packet_size;
 }
 
-void PacketEncoder::makePacket(crcbytevector& packet, bytevector& in)
+void PacketEncoder::makePacket(vector<uint8_t>& packet, const vector<uint8_t>& in)
 {
-    bytevector::iterator p  = in.begin(), q  = in.end();
+    vector<uint8_t>::const_iterator p  = in.begin(), q  = in.end();
     makePacket(packet, p, q, true, true);
 }
 
-void PacketEncoder::makePacket(crcbytevector& packet,
-                               bytevector::iterator& from, bytevector::iterator& to,
+void PacketEncoder::makePacket(vector<uint8_t>& out,
+                               const vector<uint8_t>::const_iterator& from, const vector<uint8_t>::const_iterator& to,
                                bool first, bool last)
 {
+    crcbytevector packet;
+    vector<uint8_t>::const_iterator p = from;
     int bytes = int(to-from);
     uint16_t padding=packet_size;
     if(bytes>=0 && bytes<=packet_size)
@@ -140,17 +145,16 @@ void PacketEncoder::makePacket(crcbytevector& packet,
     if(padding==0) {
         packet.put(0, 1); // padding indicator
         packet.put(ci++, 3);
-        while(from!=to) {
-            uint64_t c = *from;
-            from++;
+        while(p!=to) {
+            uint64_t c = *p++;
             packet.put(c, 8);
         }
     } else {
         packet.put(1, 1); // padding indicator
         packet.put(ci++, 3);
         packet.put(packet_size-padding, 8);
-        while(from!=to) {
-            uint64_t c = *from++;
+        while(p!=to) {
+            uint64_t c = *p++;
             packet.put(c, 8);
         }
         for(int i=1; i<padding; i++) {
@@ -158,18 +162,19 @@ void PacketEncoder::makePacket(crcbytevector& packet,
         }
     }
     packet.put(packet.crc.result(), 16);
+    out = packet.data();
 }
 
-void PacketEncoder::makeDataUnit(packetqueue& out, bytevector& in)
+void PacketEncoder::makeDataUnit(packetqueue& out, const vector<uint8_t>& in)
 {
     bool first, last;
     first=true;
     last=false;
-    bytevector::iterator p = in.begin();
+    vector<uint8_t>::const_iterator p = in.begin();
     while(p<in.end())
     {
-        crcbytevector packet;
-        bytevector::iterator q;
+        vector<uint8_t> packet;
+        vector<uint8_t>::const_iterator q;
         if((in.end()-p)<=packet_size) {
             last=true;
             q=in.end();

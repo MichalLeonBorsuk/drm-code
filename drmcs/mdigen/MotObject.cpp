@@ -29,6 +29,8 @@
 #include "timestamp.h"
 #include <iostream>
 
+using namespace std;
+
 MotObject::MotObject():
     file_size(0), object_version(0),
     mime_type(""), content_type(0), content_subtype(0),

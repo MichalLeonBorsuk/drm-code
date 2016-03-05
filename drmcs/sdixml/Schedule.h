@@ -26,6 +26,7 @@
 #define _SCHEDULE_H
 
 #include "persist.h"
+#include <string>
 
 class Schedule : public Persist
 {
@@ -42,7 +43,7 @@ public:
 
   struct Interval {
   		Interval():days(),start_hour(-1),start_minute(-1),duration(-1){}
-         string days;
+         std::string days;
          int start_hour, start_minute;
          int duration;
   };

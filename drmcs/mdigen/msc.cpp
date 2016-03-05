@@ -81,7 +81,7 @@ void MSC::ReConfigure(const vector<Stream>& config)
     }
 }
 
-void MSC::NextFrame(vector<bytevector>& out)
+void MSC::NextFrame(vector<vector<uint8_t> >& out)
 {
     out.resize(stream.size());
     for(size_t i=0; i<stream.size(); i++)

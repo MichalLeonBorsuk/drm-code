@@ -40,7 +40,6 @@
 #define REASSEMBLE_H
 
 #include "platform.h"
-#include "bytevector.h"
 #include <vector>
 
 class CSegmentTracker
@@ -149,19 +148,19 @@ public:
 		return bReady;
 	}
 
-	void AddSegment (const bytev &vecDataIn, int iSegNum, bool bLast);
+	void AddSegment (const std::vector<uint8_t> &vecDataIn, int iSegNum, bool bLast);
 
-	bytev vecData;
+	std::vector<uint8_t> vecData;
 
 	size_t segment_count() { return Tracker.segment_count(); }
 
 protected:
 
-	virtual void copyin (const bytev& vecDataIn, size_t iSegNum);
-	virtual void cachelast (const bytev& vecDataIn, size_t iSegSize);
+	virtual void copyin (const std::vector<uint8_t>& vecDataIn, size_t iSegNum);
+	virtual void cachelast (const std::vector<uint8_t>& vecDataIn, size_t iSegSize);
 	virtual void copylast ();
 
-	bytev vecLastSegment;
+	std::vector<uint8_t> vecLastSegment;
 	int iLastSegmentNum;
 	int iLastSegmentSize;
 	size_t iSegmentSize;

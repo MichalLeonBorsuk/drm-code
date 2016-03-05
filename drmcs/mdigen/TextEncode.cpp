@@ -22,10 +22,12 @@
  *
 \******************************************************************************/
 
-#include <stdio.h>
-#include <string.h>
+#include <iostream>
+#include <cstring>
 
 #include "TextEncode.h"
+
+using namespace std;
 
 /*
 The text message (when present) shall occupy the last four bytes of the lower
@@ -80,8 +82,7 @@ void CTextEncode::put(uint8_t byte)
     if(m_len<sizeof(m_buffer))
         m_buffer[m_len++] = byte;
     else {
-        fprintf(stderr, "text message encode error: message too long %u >= %u\n", m_len, sizeof(m_buffer));
-        fflush(stderr);
+        cerr << "text message encode error: message too long " << m_len << " <= " << sizeof(m_buffer) << endl;
     }
 }
 

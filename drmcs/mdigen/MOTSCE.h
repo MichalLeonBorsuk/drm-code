@@ -25,7 +25,6 @@
 #ifndef _MOTDIRSCE_H
 #define _MOTDIRSCE_H
 
-#include <fstream>
 #include "PacketSCE.h"
 #include "MOTEncoder.h"
 
@@ -37,14 +36,14 @@ public:
   MOTSCE& operator=(const MOTSCE&);
   virtual ~MOTSCE();
 
-  virtual void NextFrame(bytevector& buf, size_t max, double stoptime=0);
+  virtual void NextFrame(std::vector<uint8_t>& buf, size_t max, double stoptime=0);
   virtual void ReConfigure(const ServiceComponent&);
   void NextFile();
 
 protected:
 
   MOTEncoder::Flags flags;
-  map<uint8_t,string> profile_index;
+  std::map<uint8_t,std::string> profile_index;
   MOTEncoder mot_encoder;
 
   void GetParams(xmlNodePtr n);

@@ -25,11 +25,12 @@
 #ifndef _DCPUTIL_H
 #define _DCPUTIL_H
 
-#include "bytevector.h"
+#include <vector>
 #include <map>
 #include <string>
+#include <cstdint>
 
-typedef std::map<std::string,bytevector> tagpacketlist;
+typedef std::map<std::string,std::vector<uint8_t> > tagpacketlist;
 
 bool parseDcpUri(std::map<std::string,std::string>& out, const std::string& uri);
 

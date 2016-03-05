@@ -55,18 +55,18 @@ public:
     static const char* LANGUAGES[];  
     static const char* PROGRAMMETYPES[];  
 
-    string service_label;
+    std::string service_label;
     int service_descriptor;
-    bytev service_identifier;
-    string country;
+    std::vector<uint8_t> service_identifier;
+    std::string country;
     int language;
-    string language_long;
-    string audio_ref, data_ref;
-    vector<string> afs_ref;
+    std::string language_long;
+    std::string audio_ref, data_ref;
+    std::vector<string> afs_ref;
     bool conditional_access;
     int ca_system_identifier;
-    bytev ca_data;
-    vector<Announcement> announcement;
+    std::vector<uint8_t> ca_data;
+    std::vector<Announcement> announcement;
 
 protected:
 };

@@ -41,9 +41,9 @@ public:
             bool new_reconfiguration_version=false,
             uint8_t new_services_pattern = 0
             );
-  void NextFrame(crcbytevector&, DrmTime&);
+  void NextFrame(std::vector<uint8_t>&, DrmTime&);
 
-  bytevector sdci;
+  std::vector<uint8_t> sdci;
   bool afs_index_valid;
 
 protected:
@@ -61,7 +61,6 @@ protected:
   uint16_t num_elements_in_every_block;
 
   void check_build_date_and_time(DrmTime& timestamp);
-  void build_sdc(crcbytevector &out, const bytevector& block_to_send);
   void build_sdci(const DrmMuxConfig& mux);
   void SdcDataLength(unsigned short &length);
   void buildBlocks(vector<SdcElement>& element, size_t max_blocks);

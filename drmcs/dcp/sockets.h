@@ -26,7 +26,7 @@
 #define _SOCKETS_H
 
 #include <map>
-#include <bytevector.h>
+#include <vector>
 # include <pcap.h>
 typedef int SOCKET;
 # define SOCKET_ERROR (-1)
@@ -48,29 +48,29 @@ public:
   basic_socket(const basic_socket&);
   virtual ~basic_socket();
   basic_socket& operator=(const basic_socket& e);
-  virtual void ReConfigure(map<string,string>& config);
-  virtual void config(map<string,string>& config);
+  virtual void ReConfigure(std::map<std::string,std::string>& config);
+  virtual void config(std::map<std::string,std::string>& config);
   virtual bool open(){return false;}
   virtual poll_result_t poll();
   virtual void close();
-  virtual void send(const bytev&, size_t start=0, size_t count=0){}
-  virtual void fetch(bytev&){}
+  virtual void send(const std::vector<uint8_t>&, size_t start=0, size_t count=0){}
+  void fetch(std::vector<uint8_t>&);
 protected:
-  const string error_message(const string&);
+  const std::string error_message(const std::string&);
 };
 
 class stream_socket : public basic_socket
 {
 public:
-  virtual void send(const bytev&, size_t start, size_t count);
-  virtual void fetch(bytev&);
+  virtual void send(const std::vector<uint8_t>&, size_t start, size_t count);
+  void fetch(std::vector<uint8_t>&);
 };
 
 class server_socket : public basic_socket
 {
 public:
 
-
+  server_socket(){}
   bool open();
   poll_result_t poll();
   bool fetch(stream_socket&);
@@ -79,10 +79,10 @@ public:
 class client_socket : public stream_socket
 {
 public:
-  string host;
-
-  void ReConfigure(map<string,string>& config);
-  void config(map<string,string>& config);
+  std::string host;
+  client_socket():host(""){}
+  void ReConfigure(std::map<std::string,std::string>& config);
+  void config(std::map<std::string,std::string>& config);
   bool open();
 };
 
@@ -90,7 +90,7 @@ class dgram_socket : public basic_socket
 {
 public:
   sockaddr_in sock_addr;
-  string addr, iface;
+  std::string addr, iface;
   int ttl;
   bool join;
 
@@ -99,34 +99,30 @@ public:
   virtual ~dgram_socket();
   dgram_socket& operator=(const dgram_socket& e);
 
-  void ReConfigure(map<string,string>& config);
-  void config(map<string,string>& config);
+  void ReConfigure(std::map<std::string,std::string>& config);
+  void config(std::map<std::string,std::string>& config);
   bool open();
-  void send(const bytev&, size_t start=0, size_t count=0);
-  void fetch(bytev&);
+  void send(const std::vector<uint8_t>&, size_t start=0, size_t count=0);
+  void fetch(std::vector<uint8_t>&);
 };
 
 class file_socket : public basic_socket
 {
 public:
-  string path;
+  std::string path;
 
   file_socket();
   file_socket(const file_socket& p);
   virtual ~file_socket();
   file_socket& operator=(const file_socket& e);
-  void ReConfigure(map<string,string>& config);
-  void config(map<string,string>& config);
+  void ReConfigure(std::map<std::string,std::string>& config);
+  void config(std::map<std::string,std::string>& config);
   bool open();
   void close();
-  void send(const bytev&, size_t start=0, size_t count=0);
-  void fetch(bytev&);
+  void send(const std::vector<uint8_t>&, size_t start=0, size_t count=0);
+  void fetch(std::vector<uint8_t>&);
 protected:
-#ifndef WIN32
   pcap_dumper_t *fp;
-#else
-  FILE *fp;
-#endif
   bool pcap;
 };
 

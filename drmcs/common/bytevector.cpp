@@ -23,25 +23,12 @@
 \******************************************************************************/
 
 #include "bytevector.h"
-#include <cstdio>
 
 using namespace std;
 
-void bytevector::put(const bitvector& b)
-{
-    uint8_t byte;
-    for (size_t i=0; i < b.size(); i+=8) {
-        byte = 0;
-        for (int q=0; q < 8; q++) {
-            byte |= b[i+q] << (7-q);
-        }
-        push_back(byte);
-    }
-}
-
 void bytevector::putb(uint8_t b)
 {
-    push_back(b);
+    _data.push_back(b);
 }
 
 void bytevector::put(uint64_t n, unsigned fmt)
@@ -97,7 +84,7 @@ void bytevector::put(const string& s)
     }
 }
 
-void bytevector::put(const bytev& s)
+void bytevector::put(const vector<uint8_t>& s)
 {
     if(bits==0) {
         for(unsigned i=0; i<s.size(); i++)
@@ -122,7 +109,7 @@ void bytevector::putbytes(const char* s, unsigned bytes)
 uint64_t bytevector::get(unsigned wanted)
 {
     uint64_t result = 0;
-    if(8*size()+bits<wanted) {
+    if(8*_data.size()+bits<wanted) {
         return 0;
     } else {
         // stuff in progress
@@ -132,7 +119,7 @@ uint64_t bytevector::get(unsigned wanted)
         wanted -= b;
         bits -= b;
         // whole octets
-        bytev::iterator i = begin();
+        vector<uint8_t>::iterator i = _data.begin();
         while(wanted>=8) {
             result = (result << 8) | *i++;
             wanted -= 8;
@@ -145,7 +132,7 @@ uint64_t bytevector::get(unsigned wanted)
             in_progress <<= wanted;
             bits -= wanted;
         }
-        erase(begin(), i);
+        _data.erase(_data.begin(), i);
     }
     return result;
 }
@@ -162,13 +149,13 @@ int64_t bytevector::getSigned(unsigned wanted)
         return n;
 }
 
-void bytevector::get(bytev& v, unsigned len)
+void bytevector::get(vector<uint8_t>& v, unsigned len)
 {
     if(bits==0) {
-        if(len>=size()) {
-            bytev::iterator s = begin();
+        if(len>=_data.size()) {
+            vector<uint8_t>::iterator s = _data.begin();
             v.insert(v.end(), s, s+len);
-            erase(s, s+len);
+            _data.erase(s, s+len);
         }
     } else {
         v.resize(len);
@@ -178,7 +165,7 @@ void bytevector::get(bytev& v, unsigned len)
 }
 
 
-bytevector& operator<<(bytevector& b, const bytev& c)
+bytevector& operator<<(bytevector& b, const vector<uint8_t>& c)
 {
     b.put(c);
     return b;
@@ -192,13 +179,13 @@ bytevector& operator<< (bytevector& b, const string& c)
 
 uint8_t bytevector::peek() const
 {
-    return data()[0];
+    return _data[0];
 }
 
 bool bytevector::dataAvailable() const
 {
     if(bits==0)
-        return size()>0;
+        return _data.size()>0;
     else
         return true;
 }

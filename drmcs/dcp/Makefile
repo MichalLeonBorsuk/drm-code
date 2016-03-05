@@ -10,7 +10,7 @@ INCS =
 CXXINCS =  -I../common -I../sdixml -I/usr/include/libxml2 -I../RSLib
 STATIC  = libdcp.a
 BIN = test dcpjoin
-CXXFLAGS = $(CXXINCS)  -Wall -g3 -Wshadow -Weffc++ -Wsign-promo -Wcomment -std=c++11 
+CXXFLAGS = $(CXXINCS) -Werror -Wall -g3 -Wshadow -Weffc++ -Wsign-promo -Wcomment -std=c++11 
 CFLAGS = $(INCS)   -Wall -g3
 RM = rm -f
 

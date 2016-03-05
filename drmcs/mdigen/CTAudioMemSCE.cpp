@@ -23,8 +23,11 @@
 \******************************************************************************/
 
 #include <arpa/inet.h>
-#include <string.h>
+#include <cstring>
+#include <bytevector.h>
 #include "CTAudioMemSCE.h"
+
+using namespace std;
 
 void CCTAudioMemSCE::ReConfigure(const ServiceComponent& config)
 {
@@ -53,6 +56,8 @@ void CCTAudioMemSCE::ReConfigure(const ServiceComponent& config)
     iUEP = static_cast<unsigned short>(ReadInt());
     iError = static_cast<unsigned short>(ReadInt());
 
+
+   (void)iVersionId; (void)iTotalFrameLength; (void)iUEP; (void)iError;
     // validate it against what the xml file asked for
     // we will allow the xml file to not specify the values
     if(current.audio_sampling_rate == -1)
@@ -73,17 +78,35 @@ void CCTAudioMemSCE::ReConfigure(const ServiceComponent& config)
 
     current.misconfiguration = false;
     if(iCoderSamplingRate != current.audio_sampling_rate)
+    {
+        cerr << "bad sample rate" << endl;
         current.misconfiguration = true;
+    }
     if(iCoderField != current.coder_field)
+    {
+        cerr << "bad coder field" << endl;
         current.misconfiguration = true;
+    }
     if(iCoderId%10 != current.audio_coding)
+    {
+        cerr << "bad codec" << endl;
         current.misconfiguration = true;
+    }
     if(iCoderMode != current.audio_mode)
+    {
+        cerr << "bad channel config" << endl;
         current.misconfiguration = true;
+    }
     if(bSBR != current.SBR)
+    {
+        cerr << "bad SBR" << endl;
         current.misconfiguration = true;
+    }
     if(current.bytes_per_frame != iAudioFrameLength)
+    {
+        cerr << "bad bytes per frame" << endl;
         current.misconfiguration = true;
+    }
 }
 
 unsigned long CCTAudioMemSCE::ReadInt()
@@ -94,8 +117,9 @@ unsigned long CCTAudioMemSCE::ReadInt()
     return ntohl(n);
 }
 
-void CCTAudioMemSCE::NextFrame(bytevector& buf, size_t max, double)
+void CCTAudioMemSCE::NextFrame(vector<uint8_t>& out, size_t max, double)
 {
+    bytevector buf;
     if (!current.misconfiguration && max>=(unsigned)current.bytes_per_frame)
     {
         buf.putbytes((char*)&audio[p], current.bytes_per_frame);
@@ -106,6 +130,10 @@ void CCTAudioMemSCE::NextFrame(bytevector& buf, size_t max, double)
             p=DRM_FILE_HEADER_SIZE;
         }
     }
+    else {
+        cerr << "CTAudioMem error" << endl;
+    }
+    out = buf.data();
 }
 
 uint8_t CCTAudioMemSCE::audio[] = {

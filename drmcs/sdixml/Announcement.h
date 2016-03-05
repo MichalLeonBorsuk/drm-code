@@ -26,6 +26,7 @@
 #define _ANNOUNCEMENTS_H
 
 #include "persist.h"
+#include <string>
 
 class Announcement : public Persist
 {
@@ -49,7 +50,7 @@ public:
   virtual void GetParams(xmlNodePtr n);
   virtual void PutParams(xmlTextWriterPtr writer);
 
-  string service_ref,afs_ref;
+  std::string service_ref,afs_ref;
   unsigned announcement_types;
 
 };

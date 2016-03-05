@@ -21,25 +21,13 @@
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
 \******************************************************************************/
-/******************************************************************************\
- * British Broadcasting Corporation
- * Copyright (c) 2006
- *
- * Author(s):
- *	Julian Cable
- *
- * Description:
- *	General Purpose Packet Reassembler for data packet mode, MOT and PFT
- *
- * All rights reserved
- * Note that a GPL version of this code can be found @ drm.sourceforge.net
- * The BBC asserts its right as the copyright holder to use this code in closed source applications.
-\******************************************************************************/
 
 #include "Reassemble.h"
 #include <iostream>
 
-CReassembler::CReassembler (const CReassembler & r):iLastSegmentNum (r.iLastSegmentNum),
+using namespace std;
+
+CReassembler::CReassembler (const CReassembler & r):vecData(),vecLastSegment(),iLastSegmentNum (r.iLastSegmentNum),
     iLastSegmentSize (r.iLastSegmentSize),
     iSegmentSize (r.iSegmentSize), Tracker (r.Tracker), bReady (r.bReady)
 {
@@ -65,7 +53,7 @@ CReassembler & CReassembler::operator= (const CReassembler & r)
 }
 
 void
-CReassembler::AddSegment (const bytev& vecDataIn, int iSegNum, bool bLast)
+CReassembler::AddSegment (const vector<uint8_t>& vecDataIn, int iSegNum, bool bLast)
 {
     if (bLast)
     {
@@ -119,7 +107,7 @@ CReassembler::AddSegment (const bytev& vecDataIn, int iSegNum, bool bLast)
 }
 
 void
-CReassembler::copyin (const bytev& vecDataIn, size_t iSegNum)
+CReassembler::copyin (const vector<uint8_t>& vecDataIn, size_t iSegNum)
 {
     size_t offset = iSegNum * iSegmentSize;
     size_t iNewSize = offset + vecDataIn.size();
@@ -130,7 +118,7 @@ CReassembler::copyin (const bytev& vecDataIn, size_t iSegNum)
 }
 
 void
-CReassembler::cachelast (const bytev& vecDataIn, size_t iSegSize)
+CReassembler::cachelast (const vector<uint8_t>& vecDataIn, size_t iSegSize)
 {
     vecLastSegment.resize (iSegSize);
     for (size_t i = 0; i < iSegSize; i++)

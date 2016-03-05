@@ -52,8 +52,8 @@ using namespace std;
 
 
 PftIn::PftIn()
+:m_use_address(false),m_source_address(0),m_dest_address(0),mapFragments(),code()
 {
-    clearConfig();
 }
 
 void PftIn::clearConfig()
@@ -97,7 +97,7 @@ void PftIn::config(map<string,string>& config)
     }
 }
 
-bool PftIn::decodePFT(bytev& out, const bytev& data)
+bool PftIn::decodePFT(vector<uint8_t>& out, const vector<uint8_t>& data)
 {
     size_t p=0;
     char s0 = data[p++];
@@ -106,9 +106,9 @@ bool PftIn::decodePFT(bytev& out, const bytev& data)
         return false;
     uint16_t Pseq = (data[p]<<8)+data[p+1];
     p+=2;
-    uint32_t Findex = ((data[p]<<8)+data[p+1])<<8+data[p+2];
+    uint32_t Findex = (((data[p]<<8)+data[p+1])<<8)+data[p+2];
     p+=3;
-    uint32_t Fcount = ((data[p]<<8)+data[p+1])<<8+data[p+2];
+    uint32_t Fcount = (((data[p]<<8)+data[p+1])<<8)+data[p+2];
     p+=3;
     uint16_t Plen = (data[p]<<8)+data[p+1];
     p+=2;
@@ -124,25 +124,26 @@ bool PftIn::decodePFT(bytev& out, const bytev& data)
     // optional address header field
     uint16_t source_address=0, dest_address=0;
     if (addr) {
-        source_address = data[p]<<8+data[p+1];
+        source_address = (data[p]<<8)+data[p+1];
         p+=2;
-        dest_address = data[p]<<8+data[p+1];
+        dest_address = (data[p]<<8)+data[p+1];
         p+=2;
     }
     if(m_use_address && m_source_address != source_address)
         return false;
     if(m_use_address && m_dest_address != dest_address)
         return false;
-    uint16_t crc = data[p]<<8+data[p+1];
+    uint16_t crc = (data[p]<<8)+data[p+1];
     p+=2;
     // TODO check CRC
+    (void)crc;
     if (fec)
         return decodePFTWithFEC(out, data, Pseq, Plen, Findex, Fcount, rsK, rsZ);
     else
         return decodeSimplePFT(out, data, Pseq, Plen, Findex, Fcount);
 }
 
-bool PftIn::decodeSimplePFT(bytev& out, const bytev& data, uint16_t Pseq, uint16_t Plen, uint32_t Findex, uint32_t Fcount)
+bool PftIn::decodeSimplePFT(vector<uint8_t>& out, const vector<uint8_t>& data, uint16_t Pseq, uint16_t Plen, uint32_t Findex, uint32_t Fcount)
 {
     if(Fcount==1)
     {
@@ -160,16 +161,16 @@ bool PftIn::decodeSimplePFT(bytev& out, const bytev& data, uint16_t Pseq, uint16
     return false;
 }
 
-bool PftIn::decodePFTWithFEC(bytev& out, const bytev& data, uint16_t Pseq, uint16_t Plen, uint32_t Findex, uint32_t Fcount, uint16_t rsK, uint16_t rsZ)
+bool PftIn::decodePFTWithFEC(vector<uint8_t>& out, const vector<uint8_t>& data, uint16_t Pseq, uint16_t Plen, uint32_t Findex, uint32_t Fcount, uint16_t rsK, uint16_t rsZ)
 {
-    uint16_t decoded_size = Fcount*Plen;
+    //uint16_t decoded_size = Fcount*Plen;
     uint32_t c_max = Fcount*Plen/(rsK+PFT_RS_P);  /* rounded down */
     uint32_t rx_min = c_max*rsK/Plen;
     if(rx_min*Plen<c_max*rsK)
         rx_min++;
     mapFragments[Pseq].AddSegment(data, Findex, Fcount == (Findex+1));
     if(mapFragments[Pseq].segment_count()>=rx_min) {
-        bytev deinterleaved;
+        vector<uint8_t> deinterleaved;
         deinterleaved.resize(Fcount*Plen);
         deinterleave(mapFragments[Pseq].vecData, deinterleaved, Plen, Fcount);
         return rsCorrectData(deinterleaved, out, c_max, rsK, rsZ);
@@ -177,7 +178,7 @@ bool PftIn::decodePFTWithFEC(bytev& out, const bytev& data, uint16_t Pseq, uint1
     return false;
 }
 
-void PftIn::deinterleave(const bytev& input, bytev& output, uint16_t Plen, uint32_t Fcount)
+void PftIn::deinterleave(const vector<uint8_t>& input, vector<uint8_t>& output, uint16_t Plen, uint32_t Fcount)
 {
     for(size_t fidx=0; fidx<Fcount; fidx++)
     {
@@ -188,7 +189,7 @@ void PftIn::deinterleave(const bytev& input, bytev& output, uint16_t Plen, uint3
     }
 }
 
-bool PftIn::rsCorrectData(const bytev& input, bytev& output, uint32_t c_max, uint16_t rsK, uint16_t rsZ)
+bool PftIn::rsCorrectData(const vector<uint8_t>& input, vector<uint8_t>& output, uint32_t c_max, uint16_t rsK, uint16_t rsZ)
 {
     uint32_t index_coded = 0, index_out = 0;
     for (uint32_t i=0; i<c_max; i++)

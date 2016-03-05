@@ -28,11 +28,31 @@
 #include <cstring>
 #include <iostream>
 
-DcpIn::DcpIn():pft(),sock(NULL),m_use_pft(false),m_use_crc(false), m_use_tist(false),m_file_framing(false)
+using namespace std;
+
+DcpIn::DcpIn():pft(),sock(NULL),
+ssock(),m_type(),m_target(),
+m_use_pft(false),m_use_crc(false),
+m_use_tist(false),m_file_framing(false),
+m_tcp_server(),m_src_addr(0),m_dst_addr(0)
 {
     tag="destination";
     clearConfig();
     m_type = "xxx";
+}
+
+DcpIn::DcpIn(const DcpIn& d)
+:Persist(d),pft(d.pft),sock(d.sock),
+ssock(d.ssock),m_type(d.m_type),m_target(d.m_target),
+m_use_pft(d.m_use_pft),m_use_crc(d.m_use_crc),
+m_use_tist(d.m_use_tist),m_file_framing(d.m_file_framing),
+m_tcp_server(d.m_tcp_server),m_src_addr(d.m_src_addr),m_dst_addr(d.m_dst_addr)
+{
+}
+
+DcpIn& DcpIn::operator=(const DcpIn&)
+{
+    return *this;
 }
 
 void DcpIn::clearConfig()
@@ -194,7 +214,7 @@ bool DcpIn::getFrame(tagpacketlist& frame)
             throw "can't open socket";
         }
     }
-    crcbytevector b;
+    vector<uint8_t> b;
     b.resize(2048);
     try {
         sock->fetch(b);
@@ -203,7 +223,7 @@ bool DcpIn::getFrame(tagpacketlist& frame)
     if(b.size()==0)
         return false;
     if(b[0]=='P') {
-        crcbytevector out;
+        vector<uint8_t> out;
         if(pft.decodePFT(out, b))
             return decodeAF(frame, out);
         return false;
@@ -211,7 +231,7 @@ bool DcpIn::getFrame(tagpacketlist& frame)
     return decodeAF(frame, b);
 }
 
-bool DcpIn::decodeAF(tagpacketlist& frame, crcbytevector& data)
+bool DcpIn::decodeAF(tagpacketlist& frame, vector<uint8_t>& data)
 {
     size_t p=0;
     char s0 = data[p++];
@@ -220,24 +240,23 @@ bool DcpIn::decodeAF(tagpacketlist& frame, crcbytevector& data)
         return false;
     uint32_t bits = ntohl(*(uint32_t*)&data[p]);
     p+=4;
-    uint16_t af_seq = ntohs(*(uint16_t*)&data[p]);
+    uint16_t af_seq = ntohs(*(uint16_t*)&data[p]); (void)af_seq;
     p+=2;
-    uint8_t flags = data[p++];
+    uint8_t flags = data[p++]; (void)flags;
     char pt = data[p++];
     if(pt!='T')
         return false;
-    uint32_t bytes = bits/8;
     while(p<data.size()-2) {
-        string tag;
+        //string tag;
         tag += data[p++];
         tag += data[p++];
         tag += data[p++];
         tag += data[p++];
-        uint32_t bits = ntohl(*(uint32_t*)&data[p]);
+        bits = ntohl(*(uint32_t*)&data[p]);
         p+=4;
-        bytevector b;
+        vector<uint8_t> b;
         b.resize(bits/8);
-        for(bytev::iterator i=b.begin(); i!=b.end(); i++)
+        for(vector<uint8_t>::iterator i=b.begin(); i!=b.end(); i++)
             *i = data[p++];
         frame[tag] = b;
         cout << tag << " " << b.size() << endl;
