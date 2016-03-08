@@ -4,7 +4,7 @@
   <mux_general>
     <mdi_destinations>
       <!-- <mdi_destination>dcp.udp://233.11.2.0:9998?interface=192.168.128.1</mdi_destination> -->
-      <mdi_destination>dcp.udp://127.0.0.1:9998?interface=127.0.0.1</mdi_destination>
+      <mdi_destination>dcp.udp://127.0.0.1:9998?crc=true&amp;interface=127.0.0.1</mdi_destination>
       <mdi_destination>dcp.file://dump.pcap?file_framing=pcap</mdi_destination>
       <!-- <mdi_destination>dcp.file://dump.mdi</mdi_destination> -->
     </mdi_destinations>

@@ -24,30 +24,30 @@
 
 #ifndef _CRC16_H
 #define _CRC16_H
-
-#include "stdint.h"
-/* TODO (jfbc#1#): Use this class in the PFT layer */
+#include <iostream>
 
 class CCrc16
 {
 public:
     CCrc16();
-    uint16_t	ReverseBits( uint16_t x );
-    uint8_t		ReverseBits( uint8_t b );
-    uint16_t	CreateTableEntry( int index );
-    void		CreateTable();
-    uint16_t	ComputeCrcUsingTable(  uint8_t* data, int length );
+    void operator()(uint8_t byte) { accumulate(byte); }
     void        reset();
     void        accumulate(uint8_t byte);
     uint16_t    result();
+private:
+    uint16_t    ReverseBits( uint16_t x );
+    uint8_t     ReverseBits( uint8_t b );
+    uint16_t    CreateTableEntry( int index );
+    void        CreateTable();
+    uint16_t    ComputeCrcUsingTable(  uint8_t* data, int length );
 
-    uint16_t	m_Crc;
-    uint16_t	m_ResetValue;
-    uint16_t	m_Polynomial;
-    bool		m_Reflect;
-    bool		m_ReflectCrc;
-    uint16_t	m_CrcXorOutput;
-    static uint16_t	m_Table[256];
+    uint16_t    m_Crc;
+    uint16_t    m_ResetValue;
+    uint16_t    m_Polynomial;
+    bool        m_Reflect;
+    bool        m_ReflectCrc;
+    uint16_t    m_CrcXorOutput;
+    static uint16_t    m_Table[256];
     static bool no_table;
 };
 #endif

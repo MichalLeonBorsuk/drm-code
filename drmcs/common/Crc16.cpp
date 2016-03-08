@@ -46,7 +46,7 @@
 bool CCrc16::no_table=true;
 uint16_t CCrc16::m_Table[256];
 
-CCrc16::CCrc16():m_Crc(0xffff),m_ResetValue(0xffff),m_Polynomial(0),
+CCrc16::CCrc16():m_Crc(0xffff),m_ResetValue(0xffff),m_Polynomial(0x1021),
     m_Reflect(false),m_ReflectCrc(false),m_CrcXorOutput(0xffff)
 {
     if(no_table) { // static initialisation
