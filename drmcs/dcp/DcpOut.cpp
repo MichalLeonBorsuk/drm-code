@@ -29,15 +29,15 @@
 #include "DcpOut.h"
 #include "Crc16.h"
 #include <bytevector.h>
-#include <crcbytevector.h>
 #include <iostream>
 #include <sstream>
+#include <algorithm>
 
 using namespace std;
 
 DcpOut::DcpOut():pft(NULL),sock(NULL),ssock(NULL),
-    m_type(), m_target(), m_proto(),
-    m_use_crc(false), m_use_tist(false),m_file_framing(false),
+    m_type("xxx"), m_target(), m_proto(),
+    m_use_crc(true), m_use_tist(true),m_file_framing(false),
     m_tcp_server(false),
     m_src_addr(0), m_dst_addr(0)
 {
@@ -340,7 +340,7 @@ void DcpOut::makeAFpacket(vector<uint8_t>& out,
         }
     }
     size_t bs = b.size();
-    crcbytevector tp;
+    bytevector tp;
     tp.put("AF");
     tp.put(bs, 32);
     tp.put(af_seq, 16);
@@ -349,7 +349,11 @@ void DcpOut::makeAFpacket(vector<uint8_t>& out,
     tp.put(0, 4); // MINor version
     tp.put("T"); // protocol type tag packets
     tp.put(b);
-    tp.put(tp.crc.result(), 16);
+    CCrc16 crc;
+    for_each(tp.data().begin(), tp.data().end(), crc);
+    uint16_t r = crc.result();
+cout << "crc " << r << endl;
+    tp.put(r, 16);
     out = tp.data();
 }
 /* File: ETSI TS 102 821 V0.0.2f (2003-10)

@@ -50,7 +50,7 @@ public:
     void put(const bytevector& bv) { put(bv._data); }
     void put(const std::vector<uint8_t>&);
     void putbytes(const char *, unsigned);
-    void putb(uint8_t);
+    virtual void putb(uint8_t); // overwritten in crcbytevector
     uint64_t get(unsigned=8);
     int64_t getSigned(unsigned);
     void get(std::vector<uint8_t>&, unsigned);

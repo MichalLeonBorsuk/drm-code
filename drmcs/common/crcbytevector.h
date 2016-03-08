@@ -38,7 +38,6 @@ public:
         crc.reset();
         bytevector::clear();
     }
-protected:
     virtual void putb(uint8_t b) {
         push_back(b);
         crc.accumulate(b);
