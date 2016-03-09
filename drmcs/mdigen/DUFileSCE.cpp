@@ -85,7 +85,7 @@ void DUFileSCE::fill(double stoptime)
     {
         next_data_unit = data_unit.begin();
     }
-    crcbytevector out;
+    bytevector out;
     //cout << "fill: " << next_data_unit->size() << endl;
     dge.putDataGroup(0, out, *next_data_unit, 0); // TODO make configurable
     packet_encoder.makeDataUnit(packet_queue, out.data());
@@ -100,7 +100,7 @@ void DUFileSCE::fill(double stoptime)
         {
             next_data_unit = data_unit.begin();
         }
-        crcbytevector out;
+        bytevector out;
         dge.putDataGroup(0, out, *next_data_unit, 0); // TODO make configurable
         packet_encoder.makeDataUnit(packet_queue, out);
         next_data_unit++;

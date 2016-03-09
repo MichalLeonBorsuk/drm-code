@@ -26,7 +26,7 @@
 #define _MOTDIRECTORY_H
 
 #include "MotObject.h"
-#include "crcbytevector.h"
+#include "bytevector.h"
 #include <map>
 
 // MOT From EN 301 234 V1.2.1 (1999-02)
@@ -67,8 +67,8 @@ public:
   // query methods
 
   // methods to build PDUs
-  void put_to(crcbytevector& out);
-  void put_compressed_to(crcbytevector& out);
+  void put_to(bytevector& out);
+  void put_compressed_to(bytevector& out);
   void putPermitOutdatedVersions(bytevector& out, uint8_t n) const;
   void putExpirationRelative(bytevector& out, time_t t) ;
   void putExpirationAbsolute(bytevector& out, timespec t);

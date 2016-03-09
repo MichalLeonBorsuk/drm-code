@@ -110,7 +110,7 @@ void SDC::ReConfigure(const DrmMuxConfig& config,
 
 void SDC::NextFrame(vector<uint8_t> &out, DrmTime& timestamp)
 {
-    crcbytevector s;
+    bytevector s;
     check_build_date_and_time(timestamp);
     afs_index_valid = block[current_block].NextFrame(s, afs_index);
     if(reconfiguration_version)

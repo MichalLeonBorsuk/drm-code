@@ -22,16 +22,14 @@
  *
 \******************************************************************************/
 
-#include <stdio.h>
-#include <string.h>
-#include <stddef.h>
+#include <cstdio>
+#include <cstring>
+#include <cstddef>
 #include "timestamp.h"
 #include "DcpOut.h"
 #include "Crc16.h"
 #include <bytevector.h>
-#include <iostream>
 #include <sstream>
-#include <algorithm>
 
 using namespace std;
 
@@ -350,9 +348,11 @@ void DcpOut::makeAFpacket(vector<uint8_t>& out,
     tp.put("T"); // protocol type tag packets
     tp.put(b);
     CCrc16 crc;
-    for_each(tp.data().begin(), tp.data().end(), crc);
+    //for_each(tp.data().begin(), tp.data().end(), crc);
+    for(size_t i=0; i<tp.data().size(); i++) {
+      crc.accumulate(tp.data()[i]);
+    }
     uint16_t r = crc.result();
-cout << "crc " << r << endl;
     tp.put(r, 16);
     out = tp.data();
 }

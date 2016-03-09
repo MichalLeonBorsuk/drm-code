@@ -31,7 +31,7 @@
 #include <string>
 #include <map>
 #include <vector>
-#include <crcbytevector.h>
+#include <bytevector.h>
 
 class PftOut : public Persist
 {
@@ -47,7 +47,7 @@ public:
   virtual void ReConfigure(std::map<std::string,std::string>& config);
   virtual void config(std::map<std::string,std::string>& config);
   void makePFTheader(
-    crcbytevector &out, size_t in_size,
+    bytevector &out, size_t in_size,
     uint32_t Findex, uint32_t Fcount, 
     bool fec=false, uint16_t rsK=0, uint16_t rsZ=0);
   int headerLength(bool use_addr, bool use_fec);

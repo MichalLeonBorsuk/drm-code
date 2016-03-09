@@ -23,7 +23,8 @@
 \******************************************************************************/
 
 #include "PftOut.h"
-#include <crcbytevector.h>
+#include <bytevector.h>
+#include <Crc16.h>
 #include <string.h>
 #include <iostream>
 #include <sstream>
@@ -111,12 +112,12 @@ void PftOut::config(map<string,string>& config)
 }
 
 void PftOut::makePFTheader(
-    crcbytevector &out, size_t in_size,
+    bytevector &out, size_t in_size,
     uint32_t Findex, uint32_t Fcount,
     bool fec, uint16_t rsK, uint16_t rsZ
 )
 {
-    out.crc.reset();
+    CCrc16 crc;
     // write PFT Packet Header
     out.put("PF");
     out.put(m_sequence_counter, 16);
@@ -136,7 +137,8 @@ void PftOut::makePFTheader(
         out.put(m_dest_address, 16);
     }
     // CRC
-    out.put(out.crc.result(), 16);
+    for(size_t i=0; i<out.data().size(); i++) crc(out.data()[i]);
+    out.put(crc.result(), 16);
 }
 
 int PftOut::headerLength(bool use_addr, bool use_fec)
@@ -149,7 +151,7 @@ int PftOut::makePFT(
     size_t header_bytesize, size_t payload_bytesize, uint16_t num_packets,
     bool fec, uint16_t rsK, uint16_t rsZ)
 {
-    crcbytevector out;
+    bytevector out;
     uint16_t data_size = static_cast<uint16_t>(in.size());
     size_t space_needed = data_size+num_packets*header_bytesize;
     out.reserve(space_needed);

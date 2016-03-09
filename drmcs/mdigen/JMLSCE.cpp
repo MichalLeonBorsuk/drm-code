@@ -106,7 +106,7 @@ void JMLSCE::fill(double stoptime)
         // put something in the packet queue
         for(size_t i=0; i<data_unit.size(); i++)
         {
-            crcbytevector out;
+            bytevector out;
             dge.putDataGroup(0, out, data_unit[i], i);
             packet_encoder.makeDataUnit(packet_queue, out.data());
         }

@@ -23,7 +23,8 @@
 \******************************************************************************/
 
 #include "packetencoder.h"
-#include <crcbytevector.h>
+#include <bytevector.h>
+#include <Crc16.h>
 
 using namespace std;
 
@@ -129,7 +130,7 @@ void PacketEncoder::makePacket(vector<uint8_t>& out,
                                const vector<uint8_t>::const_iterator& from, const vector<uint8_t>::const_iterator& to,
                                bool first, bool last)
 {
-    crcbytevector packet;
+    bytevector packet;
     vector<uint8_t>::const_iterator p = from;
     int bytes = int(to-from);
     uint16_t padding=packet_size;
@@ -138,7 +139,6 @@ void PacketEncoder::makePacket(vector<uint8_t>& out,
     else {
         return; // should throw?
     }
-    packet.crc.reset();
     packet.put(first?1:0, 1); // first indicator
     packet.put(last?1:0, 1); // last indicator
     packet.put(packet_id, 2); // packet id
@@ -161,7 +161,9 @@ void PacketEncoder::makePacket(vector<uint8_t>& out,
             packet.put(0, 8);
         }
     }
-    packet.put(packet.crc.result(), 16);
+    CCrc16 crc;
+    for(size_t i=0; i<packet.data().size(); i++) crc(packet.data()[i]);
+    packet.put(crc.result(), 16);
     out = packet.data();
 }
 
