@@ -24,6 +24,7 @@
 
 #include "DataGroupEncoder.h"
 #include <iostream>
+#include <Crc16.h>
 
 void DataGroupEncoder::Configure(bool crc, bool seg, bool tid, const bytevector& ua)
 {
@@ -41,7 +42,7 @@ void DataGroupEncoder::Configure(bool crc, bool seg, bool tid)
     user_address.clear();
 }
 
-void DataGroupEncoder::putDataGroupSegment(crcbytevector& out, uint16_t transport_id,
+void DataGroupEncoder::putDataGroupSegment(bytevector& out, uint16_t transport_id,
         const bytevector& in, uint8_t type, uint8_t cont, uint16_t segment, bool last) const
 {
     bytevector seg;
@@ -50,27 +51,28 @@ void DataGroupEncoder::putDataGroupSegment(crcbytevector& out, uint16_t transpor
     putDataGroup(out, transport_id, seg, type, cont, segment, last);
 }
 
-void DataGroupEncoder::putDataGroup(uint8_t type, crcbytevector& out, const bytevector& in, uint8_t cont)
+void DataGroupEncoder::putDataGroup(uint8_t type, bytevector& out, const bytevector& in, uint8_t cont)
 {
     putDataGroup(out, 0, in, type, cont, 0, true);
 }
 
-void DataGroupEncoder::putDataGroup(crcbytevector& out, uint16_t transport_id, const bytevector& in,
+void DataGroupEncoder::putDataGroup(bytevector& out, uint16_t transport_id, const bytevector& in,
                                     uint8_t type, uint8_t cont, uint16_t segment_num, bool last) const
 {
-    if(use_crc)
-        out.crc.reset();
     putDataGroupHeader(out, type, cont, 0x0F);
     if(use_tid || (user_address.size()>0) || segment)
         putSessionHeader(out, transport_id, segment_num, last);
     // data
     out.put(in);
     // crc
-    if(use_crc)
-        out.put(out.crc.result(), 16);
+    if(use_crc) {
+        CCrc16 crc;
+        for(size_t i=0; i<out.data().size(); i++) crc(out.data()[i]);
+        out.put(crc.result(), 16);
+    }
 }
 
-void DataGroupEncoder::putDataGroupHeader(crcbytevector& out,
+void DataGroupEncoder::putDataGroupHeader(bytevector& out,
         uint8_t type, uint8_t cont, uint8_t rep, bool x, uint16_t ef) const
 {
     // Data Group Header
@@ -86,7 +88,7 @@ void DataGroupEncoder::putDataGroupHeader(crcbytevector& out,
         out.put(ef, 16);
 }
 
-void DataGroupEncoder::putSessionHeader(crcbytevector& out, uint16_t transport_id,
+void DataGroupEncoder::putSessionHeader(bytevector& out, uint16_t transport_id,
                                         uint16_t segment_num, bool last) const
 {
     bool use_uaf = use_tid || user_address.size()>0;

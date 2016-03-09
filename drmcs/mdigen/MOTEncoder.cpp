@@ -120,7 +120,7 @@ void MOTEncoder::ReConfigure(
     // work out the DGE overhead
     dge.Configure(flags.crc, true, true);
     {
-        crcbytevector dg;
+        bytevector dg;
         bytevector data;
         dge.putDataGroupSegment(dg, 0, data, 4U, 0, 0, true);
         dg_payload_size = block_size - dg.size();
@@ -217,7 +217,7 @@ void MOTEncoder::move_directory_iterator()
 
 void MOTEncoder::get_one_data_unit(uint16_t transport_id)
 {
-    crcbytevector dg;
+    bytevector dg;
     vector<uint8_t> data(dg_payload_size);
     bool last;
     size_t r = read(in_file, (char*)&data[0], dg_payload_size);
@@ -237,7 +237,7 @@ void MOTEncoder::get_one_data_unit(uint16_t transport_id)
     //cout << "put segment, queue length is " << packet_queue.size() << endl;
 }
 
-void MOTEncoder::compress(crcbytevector& out, const crcbytevector& in)
+void MOTEncoder::compress(bytevector& out, const bytevector& in)
 {
     Bytef* o = new Bytef[2*in.size()];
     z_stream strm;
@@ -287,17 +287,17 @@ void MOTEncoder::gzip_file(const string& dst, const string & src)
 
 void MOTEncoder::code_MOTdirectory()
 {
-    crcbytevector dir;
+    bytevector dir;
     directory.put_to(dir);
     if(flags.send_uncompressed_dir) {
-        crcbytevector dg;
+        bytevector dg;
         dge.putDataGroupSegment(dg, directory.transport_id, dir, 6U, 0, 0, true);
         packet_encoder.makeDataUnit(packet_queue, dg.data());
         //cout << "sending " << dg.size() << " byte directory on packet id " << packet_encoder.packet_id << " tid " << directory.transport_id << endl;
     }
 
     if(flags.send_compressed_dir) {
-        crcbytevector cdir, dircompressed, dg;
+        bytevector cdir, dircompressed, dg;
         compress(dircompressed, dir);
         cdir.put(1, 1); // CF compression flag
         cdir.put(0, 1); // rfu
@@ -314,7 +314,7 @@ void MOTEncoder::code_MOTdirectory()
 
 void MOTEncoder::codefileheader(const MotObject & m)
 {
-    crcbytevector dg;
+    bytevector dg;
     bytevector data;
     m.putHeader(data);
     dge.putDataGroupSegment(dg, m.transport_id, data, 3U, m.object_version, 0, true);

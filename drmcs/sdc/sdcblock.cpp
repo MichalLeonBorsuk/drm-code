@@ -23,10 +23,11 @@
 \******************************************************************************/
 
 #include "sdcblock.h"
+#include <Crc16.h>
 #include <iostream>
 using namespace std;
 
-bool SdcBlock::NextFrame(crcbytevector &out, uint8_t afs_index)
+bool SdcBlock::NextFrame(bytevector &out, uint8_t afs_index)
 {
     if(sent()) {
         if(more_queued()) { // this has been sent and a different one is required
@@ -52,9 +53,9 @@ bool SdcBlock::NextFrame(crcbytevector &out, uint8_t afs_index)
     return !change_allowed;
 }
 
-void SdcBlock::build_sdc(crcbytevector &out, uint8_t afs_index, uint16_t sdc_length)
+void SdcBlock::build_sdc(bytevector &out, uint8_t afs_index, uint16_t sdc_length)
 {
-    out.crc.reset();
+    CCrc16 crc;
     out.put(0, 4); // rfu for MDI byte alignment
     out.put(afs_index, 4);
     out.put(transmit_buffer);
@@ -62,5 +63,6 @@ void SdcBlock::build_sdc(crcbytevector &out, uint8_t afs_index, uint16_t sdc_len
     for(size_t i=out.size(); i<sdc_length+1U; i++) {
         out.put(0, 8);
     }
-    out.put(out.crc.result(), 16);
+    for(size_t i=0; i<out.data().size(); i++) crc(out.data()[i]);
+    out.put(crc.result(), 16);
 }

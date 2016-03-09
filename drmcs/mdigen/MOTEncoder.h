@@ -70,7 +70,7 @@ protected:
   void code_MOTdirectory();
   void move_directory_iterator();
 
-  void compress(crcbytevector& out, const crcbytevector& in);
+  void compress(bytevector& out, const bytevector& in);
   void gzip_file(const string& dst, const string& src);
   bool scan_input_directory();
 

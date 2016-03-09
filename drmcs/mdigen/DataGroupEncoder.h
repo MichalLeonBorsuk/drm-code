@@ -25,7 +25,7 @@
 #ifndef _DATAGROUPENCODER_H
 #define _DATAGROUPENCODER_H
 
-#include <crcbytevector.h>
+#include <bytevector.h>
 
 // Data Groups from ETSI EN 300 401 V1.3.3 (2001-05)
 
@@ -37,18 +37,18 @@ public:
   void Configure(bool crc, bool seg, bool tid, const bytevector& ua);
   void Configure(bool crc, bool seg, bool tid);
 
-  void putDataGroupSegment(crcbytevector& out, uint16_t transport_id, const bytevector& in,
+  void putDataGroupSegment(bytevector& out, uint16_t transport_id, const bytevector& in,
                  uint8_t type, uint8_t cont, uint16_t segment, bool last) const;
 
-  void putDataGroup(crcbytevector& out, uint16_t transport_id, const bytevector& in,
+  void putDataGroup(bytevector& out, uint16_t transport_id, const bytevector& in,
                  uint8_t type, uint8_t cont, uint16_t segment_num, bool last) const;
 
-  void putDataGroup(uint8_t type, crcbytevector& out, const bytevector& in, uint8_t cont);
+  void putDataGroup(uint8_t type, bytevector& out, const bytevector& in, uint8_t cont);
 
-  void putDataGroupHeader(crcbytevector& out, uint8_t type, uint8_t cont,
+  void putDataGroupHeader(bytevector& out, uint8_t type, uint8_t cont,
                  uint8_t rep, bool x=false, uint16_t ef=0) const;
 
-  void putSessionHeader(crcbytevector& out, uint16_t transport_id,
+  void putSessionHeader(bytevector& out, uint16_t transport_id,
                  uint16_t segment_num, bool last) const;
 
   void putSegmentationHeader(bytevector& out, uint16_t rep, size_t size) const;

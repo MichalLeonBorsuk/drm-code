@@ -25,7 +25,7 @@
 #ifndef _SDCBLOCK_H
 #define _SDCBLOCK_H
 
-#include <crcbytevector.h>
+#include <bytevector.h>
 #include <queue>
 
 class SdcBlock
@@ -41,8 +41,8 @@ public:
     static_data.clear(); static_data.put(data);
   }
   void sendOnce(const bytevector& data) { requested.push(data); }
-  bool NextFrame(crcbytevector &out, uint8_t afs_index);
-  void build_sdc(crcbytevector &out, uint8_t afs_index, uint16_t sdc_length);
+  bool NextFrame(bytevector &out, uint8_t afs_index);
+  void build_sdc(bytevector &out, uint8_t afs_index, uint16_t sdc_length);
 
 protected:
 

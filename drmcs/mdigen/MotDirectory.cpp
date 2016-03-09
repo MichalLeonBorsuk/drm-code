@@ -160,9 +160,9 @@ void MotDirectory::setUniqueBodyVersion(uint32_t v)
     extension.put(v, 32);
 }
 
-void MotDirectory::put_compressed_to(crcbytevector& out)
+void MotDirectory::put_compressed_to(bytevector& out)
 {
-    crcbytevector in;
+    bytevector in;
     put_to(in);
     Bytef* o = new Bytef[2*in.size()];
     z_stream strm;
@@ -189,7 +189,7 @@ void MotDirectory::put_compressed_to(crcbytevector& out)
     delete[] o;
 }
 
-void MotDirectory::put_to(crcbytevector& out)
+void MotDirectory::put_to(bytevector& out)
 {
     bytevector ob;
     if(dirty)
