@@ -221,7 +221,7 @@ void CDecodeRSIMDI::InitInternal(CParameter& Parameters)
 
     iOutputBlockSize = Parameters.iNumFACBitsPerBlock;
     //iOutputBlockSize2 = Parameters.iNumSDCBitsPerSFrame;
-    iMaxOutputBlockSize2 = 1024;
+    iMaxOutputBlockSize2 = 207*SIZEOF__BYTE; // ES 201 980 v 4.1.1 Table 21
     size_t numstreams = Parameters.Stream.size();
     //vecpvecOutputData.resize(numstreams);
     for(size_t i=0; i<numstreams; i++)
