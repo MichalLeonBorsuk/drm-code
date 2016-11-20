@@ -7,7 +7,7 @@ CDRMPlotQCP::CDRMPlotQCP(QWidget* parent):QObject(parent),plot(new QCustomPlot(p
     title(NULL),hlines(),vlines()
 {
     this->plot = plot;
-    title = new QCPPlotTitle(plot);
+    title = new QCPTextElement(plot);
     QFont f = title->font();
     f.setPointSize(10);
     title->setFont(f);
@@ -23,8 +23,8 @@ CDRMPlotQCP::CDRMPlotQCP(QWidget* parent):QObject(parent),plot(new QCustomPlot(p
     //plot->plotLayout()->setColumnStretchFactor(1, 1); // legend only 20% (4:1 = 80:20)
     plot->plotLayout()->insertRow(0); // inserts an empty row above the default axis rect
     plot->plotLayout()->addElement(0, 0, title);
-    connect(plot, SIGNAL(plottableClick(QCPAbstractPlottable*,QMouseEvent*)),
-            this, SLOT(on_plotClick(QCPAbstractPlottable*,QMouseEvent*)));
+    connect(plot, SIGNAL(plottableClick(QCPAbstractPlottable*,int,QMouseEvent*)),
+            this, SLOT(on_plotClick(QCPAbstractPlottable*,int,QMouseEvent*)));
 }
 
 CDRMPlotQCP::~CDRMPlotQCP()
@@ -107,7 +107,7 @@ void CDRMPlotQCP::addxMarker(QColor color, double initialPos)
 {
     QCPItemLine* l = new QCPItemLine(plot);
     l->setPen(QPen(color, 1, Qt::DashLine));
-    plot->addItem(l);
+    //plot->addItem(l);
     l->start->setCoords(initialPos, plot->yAxis->range().lower);
     l->end->setCoords(initialPos, plot->yAxis->range().upper);
     vlines << l;
@@ -118,7 +118,7 @@ void CDRMPlotQCP::addBwMarker(QColor c)
     QCPBars* bw = new QCPBars(plot->xAxis, plot->yAxis);
     bw->setBrush(QBrush(c));
     bw->setPen(QPen(Qt::NoPen));
-    plot->addPlottable(bw);
+    //plot->addPlottable(bw);
     if(plot->addLayer("bw")) {
         bw->setLayer("bw");
     }
@@ -129,7 +129,7 @@ void CDRMPlotQCP::addyMarker(QColor color, double initialPos)
 {
     QCPItemLine* l = new QCPItemLine(plot);
     l->setPen(QPen(color, 1, Qt::DashLine));
-    plot->addItem(l);
+    //plot->addItem(l);
     l->start->setCoords(initialPos, plot->xAxis->range().lower);
     l->end->setCoords(initialPos, plot->xAxis->range().upper);
     hlines << l;
@@ -141,7 +141,7 @@ void CDRMPlotQCP::setupWaterfall(double sr)
     wfitem = new QCPItemPixmap(plot);
     wfplot = new WaterFallPlot();
     wfplot->resize(plot->axisRect()->size());
-    plot->addItem(wfitem);
+    //plot->addItem(wfitem);
     plot->legend->setVisible(false);
     plot->xAxis->setLabel(QObject::tr("Frequency [kHz]"));
     plot->xAxis->setRange(0.0, sr);
@@ -171,21 +171,21 @@ void CDRMPlotQCP::setQAMGrid(double div, int step, int substep)
         pos = Round(pos * 100.0) / 100.0;
         subticks << pos;
     }
-    plot->xAxis->setTickVector(ticks);
+    plot->xAxis->ticker()->setTickCount(step);
     plot->xAxis->setRange(ticks[0], ticks[ticks.size()-1]);
     plot->yAxis->setRange(ticks[0], ticks[ticks.size()-1]);
-    plot->yAxis->setTickVector(ticks);
+    plot->yAxis->ticker()->setTickCount(step);
 }
 
 void CDRMPlotQCP::setupConstPlot(const char* text)
 {
     plot->yAxis2->setVisible(false);
 
-    plot->xAxis->setAutoTicks(false);
+    //plot->xAxis->ticker()->setAutoTicks(false);
     plot->xAxis->setVisible(true);;
     plot->xAxis->setLabel(QObject::tr("Real"));
 
-    plot->yAxis->setAutoTicks(false);
+    //plot->yAxis->ticker()->setAutoTicks(false);
     plot->yAxis->setVisible(true);
     plot->yAxis->setLabel(QObject::tr("Imaginary"));
     plot->legend->setVisible(false);
@@ -395,7 +395,7 @@ void CDRMPlotQCP::setAutoScalePolicy(Plot::EAxis axis, Plot::EPolicy policy, dou
     this->limit[axis] = limit;
 }
 
-void CDRMPlotQCP::on_plotClick(QCPAbstractPlottable *, QMouseEvent *event)
+void CDRMPlotQCP::on_plotClick(QCPAbstractPlottable *, int, QMouseEvent *event)
 {
     double d = plot->xAxis->pixelToCoord(event->x());
     emit plotClicked(d);

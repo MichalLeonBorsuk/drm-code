@@ -8,17 +8,21 @@
 ServiceSelector::ServiceSelector(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::ServiceSelector),
-    pButtonGroup(NULL),serviceLabels(4)
+    pAudioButtonGroup(NULL),pDataButtonGroup(NULL),serviceLabels(4),buttons(4)
 {
     ui->setupUi(this);
-    pButtonGroup = new QButtonGroup(this);
-    pButtonGroup->setExclusive(true);
-    pButtonGroup->addButton(ui->PushButtonService1, 0);
-    pButtonGroup->addButton(ui->PushButtonService2, 1);
-    pButtonGroup->addButton(ui->PushButtonService3, 2);
-    pButtonGroup->addButton(ui->PushButtonService4, 3);
-    connect(pButtonGroup, SIGNAL(buttonClicked(int)), this, SIGNAL(audioServiceSelected(int)));
-    connect(pButtonGroup, SIGNAL(buttonClicked(int)), this, SIGNAL(dataServiceSelected(int)));
+    pAudioButtonGroup = new QButtonGroup(this);
+    pDataButtonGroup = new QButtonGroup(this);
+    pAudioButtonGroup->setExclusive(true);
+    pDataButtonGroup->setExclusive(true); // shouldn't be but that's how Dream currently written
+
+    connect(pAudioButtonGroup, SIGNAL(buttonClicked(int)), this, SIGNAL(audioServiceSelected(int)));
+    connect(pDataButtonGroup, SIGNAL(buttonClicked(int)), this, SIGNAL(dataServiceSelected(int)));
+
+    buttons[0] = ui->PushButtonService1;
+    buttons[1] = ui->PushButtonService2;
+    buttons[2] = ui->PushButtonService3;
+    buttons[3] = ui->PushButtonService4;
 
     serviceLabels[0] = ui->TextMiniService1;
     serviceLabels[1] = ui->TextMiniService2;
@@ -61,6 +65,10 @@ ServiceSelector::~ServiceSelector()
 
 void ServiceSelector::onServiceChanged(int short_id, const CService& service)
 {
+
+    pAudioButtonGroup->removeButton(buttons[short_id]);
+    pDataButtonGroup->removeButton(buttons[short_id]);
+
     QString text;
 
     /* Check, if service is used */
@@ -85,7 +93,9 @@ void ServiceSelector::onServiceChanged(int short_id, const CService& service)
 
         /* Audio service */
         if ((service.eAudDataFlag == CService::SF_AUDIO))
-        {
+        {            
+            pAudioButtonGroup->addButton(buttons[short_id], short_id);
+
             /* Report missing codec */
             if (!service.AudioParam.bCanDecode)
                 text += tr(" [no codec available]");
@@ -93,6 +103,10 @@ void ServiceSelector::onServiceChanged(int short_id, const CService& service)
             /* Show, if a multimedia stream is connected to this service */
             if (service.DataParam.iStreamID != STREAM_ID_NOT_USED)
             {
+                // auxiliary data service on an audio service
+                // don't pop up the window
+                //pDataButtonGroup->addButton(buttons[short_id], short_id);
+
                 if (service.DataParam.iUserAppIdent == DAB_AT_EPG)
                     text += tr(" + EPG"); /* EPG service */
                 else
@@ -107,6 +121,8 @@ void ServiceSelector::onServiceChanged(int short_id, const CService& service)
         /* Data service */
         else
         {
+            pDataButtonGroup->addButton(buttons[short_id], short_id);
+
             if (service.DataParam.ePacketModInd == CDataParam::PM_PACKET_MODE)
             {
                 if (service.DataParam.eAppDomain == CDataParam::AD_DAB_SPEC_APP)
@@ -123,23 +139,20 @@ void ServiceSelector::onServiceChanged(int short_id, const CService& service)
         }
     }
     serviceLabels[short_id]->setText(text);
-    pButtonGroup->button(short_id)->setEnabled(text != "");
+    buttons[short_id]->setEnabled(text != "");
 }
 
 void ServiceSelector::check(int i)
 {
-    pButtonGroup->button(i)->setChecked(true);
+    //pButtonGroup->button(i)->setChecked(true);
 }
 
 void ServiceSelector::disableAll()
 {
-    pButtonGroup->setExclusive(false);
     for(size_t i=0; i<serviceLabels.size(); i++)
     {
-        QPushButton* button = (QPushButton*)pButtonGroup->button(i);
-        if (button && button->isEnabled()) button->setEnabled(false);
-        if (button && button->isChecked()) button->setChecked(false);
+        buttons[i]->setEnabled(false);
+        buttons[i]->setChecked(false);
         serviceLabels[i]->setText("");
     }
-    pButtonGroup->setExclusive(true);
 }

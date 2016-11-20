@@ -21,11 +21,12 @@ QCPLevelMeter::QCPLevelMeter(QWidget* parent):QCustomPlot(parent)
     QVector<double> ticks;
     ticks << 0 << 50;
     yAxis->setRange(0, 50);
-    yAxis->setAutoTicks(false);
-    yAxis->setAutoSubTicks(false);
-    yAxis->setAutoTickLabels(false);
-    yAxis->setTickVector(ticks);
-    yAxis->setTickVectorLabels(labels);
+    //yAxis->setAutoTicks(false);
+    //yAxis->setAutoSubTicks(false);
+    //yAxis->setAutoTickLabels(false);
+    //yAxis->setTickVector(ticks);
+    yAxis->ticker()->setTickCount(2);
+    //yAxis->setTickVectorLabels(labels);
     yAxis->setBasePen(pen);
     yAxis->setTickLengthIn(0);
     yAxis->setTickLengthOut(6);
@@ -33,7 +34,7 @@ QCPLevelMeter::QCPLevelMeter(QWidget* parent):QCustomPlot(parent)
     yAxis->setTickLabelPadding(1);
     yAxis->setTickLabelColor(Qt::red);
     yAxis->setTickLabelFont(font);
-    yAxis->setSubTickCount(4);
+    //yAxis->ticker()->setSubTickCount(4);
     yAxis->setSubTickLengthIn(0);
     yAxis->setSubTickLengthOut(3);
     yAxis->setSubTickPen(pen);
@@ -44,7 +45,7 @@ QCPLevelMeter::QCPLevelMeter(QWidget* parent):QCustomPlot(parent)
     xAxis->setVisible(false);
 
     QCPBars *bars = new QCPBars(xAxis, yAxis);
-    addPlottable(bars);
+    //addPlottable(bars);
     bars->setName("dB");
     bars->setPen(pen);
     bars->setWidth(0.5);

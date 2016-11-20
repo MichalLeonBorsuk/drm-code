@@ -36,37 +36,40 @@
 
 EPGDlg::EPGDlg(CSettings& Settings, QWidget* parent):
     CWindow(parent, Settings, "EPG"),
-    do_updates(false),
+    ui(new Ui::CEPGDlgbase()),
     pEpg(NULL),
     greenCube(":/icons/greenCube.png"),
-    next(NULL)
+    next(NULL),
+    drmTime()
 {
-    setupUi(this);
+    ui->setupUi(this);
 
     /* auto resize of the programme name column */
-    dateEdit->setDate(QDate::currentDate());
-    connect(channel, SIGNAL(activated(const QString&)), this , SLOT(on_channel_activated(const QString&)));
-    connect(dateEdit, SIGNAL(dateChanged(const QDate&)), this , SLOT(on_dateEdit_dateChanged(const QDate&)));
+    ui->dateEdit->setDate(drmTime.date());
+    connect(ui->channel, SIGNAL(activated(const QString&)), this , SLOT(on_channel_activated(const QString&)));
+    connect(ui->dateEdit, SIGNAL(dateChanged(const QDate&)), this , SLOT(on_dateEdit_dateChanged(const QDate&)));
     connect(&Timer, SIGNAL(timeout()), this, SLOT(OnTimer()));
 
-    TextEPGDisabled->hide();
+    ui->TextEPGDisabled->hide();
 
     APPLY_CUSTOM_THEME();
 }
 
 EPGDlg::~EPGDlg()
 {
+    delete ui;
 }
 
-void EPGDlg::setServiceInformation(const map<uint32_t,CServiceInformation>& si, uint32_t current_sid)
+void EPGDlg::setServiceInformation(const CServiceInformation& si, uint32_t current_sid)
 {
     // update the channels combobox from the epg
-    channel->clear();
-    for (map < uint32_t, CServiceInformation >::const_iterator i = si.begin(); i != si.end(); i++) {
-        QString channel_label = QString().fromUtf8(i->second.label.begin()->c_str());
-        channel->addItem(channel_label, i->second.id);
+    ui->channel->clear();
+    for (map<uint32_t,set<string> >::const_iterator i = si.begin(); i != si.end(); i++) {
+        QString channel_label = QString().fromUtf8(i->second.begin()->c_str());
+        ui->channel->addItem(channel_label, i->first);
     }
-    channel->setCurrentIndex(channel->findData(current_sid));
+    if(current_sid!=0)
+        ui->channel->setCurrentIndex(ui->channel->findData(current_sid));
 }
 
 void EPGDlg::setDecoder(EPG* p)
@@ -79,9 +82,9 @@ void EPGDlg::setActive(QTreeWidgetItem* item)
     if(isActive(item))
     {
         item->setIcon(COL_START, greenCube);
-        Data->scrollToItem(item);
+        ui->Data->scrollToItem(item);
         emit NowNext(item->text(COL_NAME));
-        next = Data->itemBelow(item);
+        next = ui->Data->itemBelow(item);
     }
     else
     {
@@ -92,6 +95,7 @@ void EPGDlg::setActive(QTreeWidgetItem* item)
 void EPGDlg::OnTimer()
 {
     /* Get current UTC time */
+    // TODO use drmTime
     time_t ltime;
     time(&ltime);
     tm gmtCur = *gmtime(&ltime);
@@ -100,27 +104,23 @@ void EPGDlg::OnTimer()
         /* today in UTC */
         QDate todayUTC = QDate(gmtCur.tm_year + 1900, gmtCur.tm_mon + 1, gmtCur.tm_mday);
 
-        if ((basic->toPlainText() == tr("no basic profile data"))
-                || (advanced->toPlainText() == tr("no advanced profile data")))
+        if ((ui->basic->toPlainText() == tr("no basic profile data"))
+                || (ui->advanced->toPlainText() == tr("no advanced profile data")))
         {
             /* not all information is loaded */
             select();
         }
         /* Check the items now on line. */
-        if (dateEdit->date() == todayUTC) /* if today */
+        if (ui->dateEdit->date() == todayUTC) /* if today */
         {
-            for(int i=0; i<Data->topLevelItemCount(); i++)
-                setActive(Data->topLevelItem(i));
+            for(int i=0; i<ui->Data->topLevelItemCount(); i++)
+                setActive(ui->Data->topLevelItem(i));
         }
     }
 }
 
-void EPGDlg::eventShow()
+void EPGDlg::eventShow(QShowEvent *)
 {
-    // use the current date
-    dateEdit->setDate(QDate::currentDate());
-    // update the current selection
-    do_updates = true;
     if(pEpg)
         pEpg->progs.clear();
     select();
@@ -129,7 +129,7 @@ void EPGDlg::eventShow()
     Timer.start(GUI_TIMER_EPG_UPDATE);
 }
 
-void EPGDlg::eventHide()
+void EPGDlg::eventHide(QHideEvent *)
 {
     /* Deactivate real-time timer */
     Timer.stop();
@@ -138,6 +138,15 @@ void EPGDlg::eventHide()
 void EPGDlg::on_dateEdit_dateChanged(const QDate&)
 {
     select();
+}
+
+void EPGDlg::on_DRMTimeChanged(QDateTime dt)
+{
+    drmTime = dt;
+    if(ui->realTime->isChecked())
+    {
+        ui->dateEdit->setDate(dt.date());
+    }
 }
 
 void EPGDlg::on_channel_activated(const QString&)
@@ -149,23 +158,25 @@ void EPGDlg::on_channel_activated(const QString&)
 
 void EPGDlg::select()
 {
-    QTreeWidgetItem* CurrActiveItem = NULL;
-    QDate date = dateEdit->date();
-
-    if (!do_updates)
+    if(!this->isVisible())
         return;
-    Data->clear();
-    basic->setText(tr("no basic profile data"));
-    advanced->setText(tr("no advanced profile data"));
-    uint32_t chan = channel->itemData(channel->currentIndex()).toUInt();
-    // get schedule for date +/- 1 - will allow user timezones sometime
-    QDomDocument *doc;
-    QDate o = date.addDays(-1);
-    doc = getFile (o, chan, false);
+
+    ui->Data->clear();
+    ui->basic->setText(tr("no basic profile data"));
+    ui->advanced->setText(tr("no advanced profile data"));
+
     if(pEpg == NULL)
     {
-        return;
+        return; // should not happen
     }
+
+    QDate date = ui->dateEdit->date();
+    uint32_t chan = ui->channel->itemData(ui->channel->currentIndex()).toUInt();
+
+    // get schedule for date +/- 1 - will allow user timezones sometime
+    QDate o = date.addDays(-1);
+    QDomDocument *doc;
+    doc = getFile (o, chan, false);
     if(doc)
         pEpg->parseDoc(*doc);
     doc = getFile (o, chan, true);
@@ -179,6 +190,7 @@ void EPGDlg::select()
     if(doc)
         pEpg->parseDoc(*doc);
 
+    // load basic tab
     QString xml;
     doc = getFile (date, chan, false);
     if(doc)
@@ -186,24 +198,27 @@ void EPGDlg::select()
         pEpg->parseDoc(*doc);
         xml = doc->toString();
         if (xml.length() > 0)
-            basic->setText(xml);
+            ui->basic->setText(xml);
     }
 
+    // load advanced tab
     doc = getFile (date, chan, true);
     if(doc)
     {
         pEpg->parseDoc(*doc);
         xml = doc->toString();
         if (xml.length() > 0)
-            advanced->setText(xml);
+            ui->advanced->setText(xml);
     }
 
+    // load EPG tab
     if (pEpg->progs.count()==0) {
-        (void) new QTreeWidgetItem(Data, QStringList() << tr("no data"));
+        (void) new QTreeWidgetItem(ui->Data, QStringList() << tr("no data"));
         return;
     }
-    Data->sortItems(COL_START, Qt::AscendingOrder);
+    ui->Data->sortItems(COL_START, Qt::AscendingOrder);
 
+    QTreeWidgetItem* CurrActiveItem = NULL;
     for (QMap < time_t, EPG::CProg >::Iterator i = pEpg->progs.begin();
             i != pEpg->progs.end(); i++)
     {
@@ -272,7 +287,7 @@ void EPGDlg::select()
         }
         QStringList l;
         l << s_start << name << genre << description << s_duration;
-        QTreeWidgetItem* CurrItem = new QTreeWidgetItem(Data, l);
+        QTreeWidgetItem* CurrItem = new QTreeWidgetItem(ui->Data, l);
         QDateTime dt;
         dt.setTime_t(start);
         CurrItem->setData(COL_START, Qt::UserRole, dt);

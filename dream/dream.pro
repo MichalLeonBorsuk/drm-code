@@ -1,3 +1,4 @@
+QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.8
 TEMPLATE = app
 CONFIG += warn_on debug
 TARGET = dream
@@ -12,6 +13,9 @@ contains(QT_VERSION, ^4\\..*) {
 contains(QT_VERSION, ^5\\..*) {
     CONFIG += qt qt5
     VERSION_MESSAGE = Qt $$QT_VERSION
+}
+contains(QT_VERSION, ^5\\.7\\..*) {
+    CONFIG += qt5.7
 }
 contains(QT_VERSION, ^5\\.3\\..*) {
     CONFIG += qt5.3
@@ -35,14 +39,15 @@ qtconsole {
 }
 !console:!qtconsole {
     CONFIG += gui
-    !qcustomplot:CONFIG += qwt
+    #!qcustomplot:CONFIG += qwt
+    !qwt:CONFIG+=qcustomplot
     UI_MESSAGE = GUI mode
 }
 gui {
     RESOURCES = src/GUI-QT/res/icons.qrc
     QT += network xml
     qt4:QT += webkit
-    qt5:QT += widgets webkitwidgets
+    qt5!qt5.7:QT += widgets webkitwidgets
     INCLUDEPATH += src/GUI-QT
     VPATH += src/GUI-QT
     win32:RC_FILE = windows/dream.rc
@@ -60,7 +65,9 @@ unix:!cross_compile {
 }
 macx {
     INCLUDEPATH += /opt/local/include
+    INCLUDEPATH += /usr/local/include
     LIBS += -L/opt/local/lib
+    LIBS += -L/usr/local/lib
     LIBS += -framework CoreFoundation -framework CoreServices
     LIBS += -framework CoreAudio -framework AudioToolbox -framework AudioUnit
     CONFIG += pcap
@@ -323,8 +330,8 @@ qwt {
                 # win debug
                 LIBS += -lqwtd
             } else {
-                # unix | win release
-                LIBS += -lqwt
+                # unix | win release - if this doesnt work try LIBS += -lqwt
+		LIBS += -lqwt-qt5
             }
         }
         !crosscompile {
@@ -377,7 +384,11 @@ portaudio {
     SOURCES += src/sound/drm_portaudio.cpp \
                src/sound/pa_ringbuffer.c
     LIBS += -lportaudio
-    unix:PKGCONFIG += portaudio-2.0
+    unix {
+	!macx {
+	  PKGCONFIG += portaudio-2.0
+	}
+    }
     message("with portaudio")
 }
 pulseaudio {

@@ -298,6 +298,8 @@ void FDRMDialog::connectController()
     connect(controller, SIGNAL(frequencyChanged(int)), this, SLOT(OnFrequencyChanged(int)));
     connect(this, SIGNAL(frequencyChanged(int)), controller, SLOT(setFrequency(int)));
 
+    connect(controller, SIGNAL(newDataService(int)), this, SLOT(on_NewDataService(int)));
+
     // stations
     connect(pStationsDlg, SIGNAL(frequencyChanged(int)), controller, SLOT(setFrequency(int)));
     connect(controller, SIGNAL(mode(int)), pStationsDlg, SLOT(OnSwitchMode(int)));
@@ -316,6 +318,9 @@ void FDRMDialog::connectController()
     // AM
     connect(pAnalogDemDlg, SIGNAL(SwitchMode(int)), controller, SLOT(setMode(int)));
     connect(pAnalogDemDlg, SIGNAL(NewAMAcquisition()), controller, SLOT(triggerNewAcquisition()));
+
+    // EPG
+    connect(controller, SIGNAL(DRMTimeChanged(QDateTime)), pEPGDlg, SLOT(on_DRMTimeChanged(QDateTime)));
 }
 
 void FDRMDialog::setBars(int bars)
@@ -434,13 +439,6 @@ void FDRMDialog::on_actionGeneralSettings_triggered()
     pGeneralSettingsDlg->onGPSd(gpsd, false);
     Parameters.Unlock();
     pGeneralSettingsDlg->show();
-}
-
-void FDRMDialog::on_actionMultimediaSettings_triggered()
-{
-    if (pMultSettingsDlg == NULL)
-        pMultSettingsDlg = new MultSettingsDlg(*DRMReceiver.GetParameters(), Settings, this);
-    pMultSettingsDlg->show();
 }
 
 void FDRMDialog::onUserEnteredPosition(double lat, double lng)
@@ -730,7 +728,7 @@ void FDRMDialog::OnServiceChanged(int short_id, const CService& service)
             switch (service.DataParam.iUserAppIdent)
             {
             case DAB_AT_EPG:
-                ui->action_Multimedia_Dialog->setEnabled(false); // has its own menu
+                ui->action_Multimedia_Dialog->setEnabled(true);
                 break;
             case DAB_AT_BROADCASTWEBSITE:
             case DAB_AT_JOURNALINE:
@@ -754,6 +752,8 @@ void FDRMDialog::OnServiceChanged(int short_id, const CService& service)
             }
         }
     }
+    // epg dialog should connect to the signal
+    pEPGDlg->setServiceInformation(DRMReceiver.GetParameters()->ServiceInformation, 0);
 }
 
 void FDRMDialog::OnModeChanged(int value)
@@ -1000,17 +1000,18 @@ void FDRMDialog::eventHide(QHideEvent*)
 
 void FDRMDialog::OnSelectDataService(int shortId)
 {
-    if(pMultimediaWindow)
-    {
-        disconnect(controller, SIGNAL(dataStatusChanged(int, ETypeRxStatus)), pMultimediaWindow, SLOT(setStatus(int, ETypeRxStatus)));
-        pMultimediaWindow = NULL;
-    }
-    if(ui->action_Multimedia_Dialog->isEnabled()) // must be multi-window
-        on_action_Multimedia_Dialog_triggered();
     controller->selectDataService(shortId);
 }
 
-void FDRMDialog::on_action_Multimedia_Dialog_triggered()
+
+void FDRMDialog::on_actionMultimediaSettings_triggered()
+{
+    if (pMultSettingsDlg == NULL)
+        pMultSettingsDlg = new MultSettingsDlg(*DRMReceiver.GetParameters(), Settings, this);
+    pMultSettingsDlg->show();
+}
+
+void FDRMDialog::on_NewDataService(int shortId)
 {
     // TODO - run this on startup if the window was already open
     CParameter& Parameters = *DRMReceiver.GetParameters();
@@ -1023,12 +1024,11 @@ void FDRMDialog::on_action_Multimedia_Dialog_triggered()
     const uint32_t iAudioServiceID = Parameters.Service[iCurSelAudioServ].iServiceID;
 
     /* Get current data service */
-    int shortID = Parameters.GetCurSelDataService();
-    CService service = Parameters.Service[shortID];
+    const CService& service = Parameters.Service[shortId];
 
-    int eAppDomain = Parameters.Service[shortID].DataParam.eAppDomain;
-    int iAppIdent = Parameters.Service[shortID].DataParam.iUserAppIdent;
-    
+    int eAppDomain = Parameters.Service[shortId].DataParam.eAppDomain;
+    int iAppIdent = Parameters.Service[shortId].DataParam.iUserAppIdent;
+
     if(pMultimediaWindow)
     {
         disconnect(this, SIGNAL(dataStatusChanged(int, ETypeRxStatus)), pMultimediaWindow, SLOT(setStatus(int, ETypeRxStatus)));
@@ -1041,6 +1041,10 @@ void FDRMDialog::on_action_Multimedia_Dialog_triggered()
         {
         case DAB_AT_EPG:
             pEPGDlg->setServiceInformation(Parameters.ServiceInformation, iAudioServiceID);
+            if(service.eAudDataFlag == CService::SF_DATA)
+            {
+                pMultimediaWindow = pEPGDlg; // if its embedded in the audio service don't open
+            }
             break;
         case DAB_AT_BROADCASTWEBSITE:
 #ifdef QT_WEBKIT_LIB
@@ -1057,7 +1061,7 @@ void FDRMDialog::on_action_Multimedia_Dialog_triggered()
             pMultimediaWindow = pJLDlg;
             break;
         case DAB_AT_MOTSLIDESHOW:
-            pSlideShowDlg->setServiceInformation(shortID, service);
+            pSlideShowDlg->setServiceInformation(shortId, service);
             pMultimediaWindow = pSlideShowDlg;
         break;
         }
@@ -1075,7 +1079,7 @@ void FDRMDialog::on_action_Multimedia_Dialog_triggered()
             break;
         }
     }
-    
+
     Parameters.Unlock();
 
     if(pMultimediaWindow != NULL)
@@ -1085,7 +1089,7 @@ void FDRMDialog::on_action_Multimedia_Dialog_triggered()
     }
     else
     {
-        if(iAppIdent!=0) // might not be set yet.
+        if(iAppIdent==0) // might not be set yet.
             QMessageBox::information(this, "Dream", tr("unsupported data application"));
     }
 }

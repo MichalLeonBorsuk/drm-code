@@ -30,9 +30,13 @@
 
 /* The mutex need to be application wide,
    only the execution routines are thread-safe */
-static CMutex* mutex = NULL;
-#define MUTEX_LOCK() mutex->Lock()
-#define MUTEX_UNLOCK() mutex->Unlock()
+namespace internal {
+    static CMutex* mutex = NULL;
+}
+
+#define MUTEX_LOCK() internal::mutex->Lock()
+#define MUTEX_UNLOCK() internal::mutex->Unlock()
+
 
 # define PLANNER_FLAGS (FFTW_ESTIMATE | FFTW_DESTROY_INPUT)
 /* Warning: for testing purpose only */
@@ -669,8 +673,8 @@ CFftPlans::CFftPlans(const int iFftSize) :
     bInitialized(false), bFixedSizeInit(false), fftw_n(0)
 {
     /* Static initialization of CMutex not working on Mac OS X */
-    if (!mutex)
-        mutex = new CMutex();
+    if (!internal::mutex)
+        internal::mutex = new CMutex();
 
     /* If iFftSize is non zero then proceed to initialization */
     if (iFftSize)

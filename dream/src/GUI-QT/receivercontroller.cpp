@@ -7,7 +7,8 @@ ReceiverController::ReceiverController(CDRMReceiver* p, CSettings& s, QObject *p
     receiver(p),
     iCurrentFrequency(-1),
     currentMode(RM_NONE),
-    settings(s)
+    settings(s),
+    drmTime()
 {
     setObjectName("controller");
     connect(this, SIGNAL(dataAvailable()), this, SLOT(on_new_data()), Qt::QueuedConnection);
@@ -69,7 +70,7 @@ void ReceiverController::on_new_data()
         bool bAFS = (Parameters.AltFreqSign.vecMultiplexes.size() > 0)
                     || (Parameters.AltFreqSign.vecOtherServices.size() > 0);
 
-        map<uint32_t,CServiceInformation> si = Parameters.ServiceInformation;
+        CServiceInformation si = Parameters.ServiceInformation;
 
         Reception reception;
 
@@ -156,13 +157,15 @@ void ReceiverController::on_new_data()
     }
 
 
-    /* Time, date ####################
-    if ((Parameters.iUTCHour == 0) &&
-            (Parameters.iUTCMin == 0) &&
-            (Parameters.iDay == 0) &&
-            (Parameters.iMonth == 0) &&
-            (Parameters.iYear == 0))
-            */
+    /* Time, date ####################*/
+    QDate d(Parameters.iYear, Parameters.iMonth, Parameters.iDay);
+    QTime t(Parameters.iUTCHour, Parameters.iUTCMin);
+    QDateTime dt(d, t, Qt::UTC);
+    if(dt != drmTime)
+    {
+        drmTime = dt;
+        emit DRMTimeChanged(dt);
+    }
 }
 
 
@@ -235,7 +238,9 @@ void ReceiverController::selectDataService(int shortId)
     Parameters.Lock();
     Parameters.SetCurSelDataService(shortId);
     Parameters.Unlock();
+    emit newDataService(shortId);
 }
+
 void ReceiverController::setSaveAudio(const string& s)
 {
     if(s!="")

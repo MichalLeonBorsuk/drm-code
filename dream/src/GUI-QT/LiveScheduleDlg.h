@@ -153,7 +153,7 @@ public slots:
     void setLocation(double, double);
     void setAFS(const CAltFreqSign& altFreqSign);
     void setService(int, const CService&);
-    void setServiceInformation(const map <uint32_t,CServiceInformation>);
+    void setServiceInformation(CServiceInformation);
     void setFrequency(int);
 
 protected:
@@ -193,7 +193,7 @@ protected:
     int             iWidthColStationID;
     bool            bDisableFrequencyChange;
     QString         strStationName;
-    map <uint32_t,CServiceInformation> serviceInformation;
+    CServiceInformation serviceInformation;
 
 signals:
     void frequencyChanged(int);

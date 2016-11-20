@@ -32,12 +32,25 @@
 
 #include "GlobalDefinitions.h"
 #include <set>
+#include <map>
 
 class CServiceInformation
 {
 public:
-    uint32_t        id;    /* this is the primary key but we keep it inside too for completeness */
-    set<string>     label; /* gathered from the SDC. Normally the label is static and is the station name, but
-                              it is officially dynamic so we collect all that we see. */
+    CServiceInformation():data(),savepath(""){}
+    virtual ~CServiceInformation() {}
+    void setPath(string s) { savepath = s; }
+    void loadChannels();
+    void saveChannels();
+    void addChannel (const string& label, uint32_t sid);
+    map<uint32_t,set<string> >::const_iterator find(uint32_t sid) const { return data.find(sid); }
+    map<uint32_t,set<string> >::const_iterator begin() const { return data.begin(); }
+    map<uint32_t,set<string> >::const_iterator end() const { return data.end(); }
+protected:
+    map<uint32_t, set<string> > data;
+    string savepath;
+//    uint32_t        id;    /* this is the primary key but we keep it inside too for completeness */
+//    set<string>     label; /* gathered from the SDC. Normally the label is static and is the station name, but
+//                              it is officially dynamic so we collect all that we see. */
 };
 #endif

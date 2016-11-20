@@ -328,8 +328,7 @@ bool CSDCReceive::DataEntityType1(CVector<_BINARY>* pbiData,
         uint32_t sid = Parameter.Service[iTempShortID].iServiceID;
         if (sid != SERV_ID_NOT_USED)
         {
-            (void)Parameter.ServiceInformation[sid].label.insert(strLabel);
-            Parameter.ServiceInformation[sid].id = sid;
+            Parameter.ServiceInformation.addChannel(strLabel, sid);
         }
         Parameter.Unlock();
 

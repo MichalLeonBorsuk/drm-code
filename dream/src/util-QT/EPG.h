@@ -42,13 +42,10 @@ public:
     EPG (CParameter&, const string&);
     virtual ~ EPG ()
     {
-        saveChannels (servicesFilename);
     }
     /* assignment operator to help MSVC8 */
     EPG& operator=(const EPG&);
 
-    void loadChannels (const QString & fileName);
-    void saveChannels (const QString & fileName);
     void addChannel (const string& label, uint32_t sid);
     void parseDoc (const QDomDocument &);
 
