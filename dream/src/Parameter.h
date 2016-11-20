@@ -1107,7 +1107,7 @@ public:
     vector<CRxStatus> DataComponentStatus;
 
     /* information about services gathered from SDC, EPG and web schedules */
-    map<uint32_t,CServiceInformation> ServiceInformation;
+    CServiceInformation ServiceInformation;
 
     /* These values are used to set input and output block sizes of some modules */
     int iNumBitsHierarchFrameTotal;

@@ -410,7 +410,7 @@ void LiveScheduleDlg::setAFS(const CAltFreqSign& altFreqSign)
     DRMSchedule.LoadAFSInformation(altFreqSign);
 }
 
-void LiveScheduleDlg::setServiceInformation(const map <uint32_t,CServiceInformation> si)
+void LiveScheduleDlg::setServiceInformation(const CServiceInformation si)
 {
     serviceInformation = si;
 }
@@ -724,10 +724,10 @@ LiveScheduleDlg::SetStationsView()
                 {
                     bHaveOtherServiceIDs = true;
 
-                    map <uint32_t,CServiceInformation>::const_iterator
+                    map <uint32_t,set<string> >::const_iterator
                     si = serviceInformation.find(item.iServiceID);
                     if(si != serviceInformation.end())
-                        name = QString::fromUtf8(si->second.label.begin()->c_str());
+                        name = QString::fromUtf8(si->second.cbegin()->c_str());
                     else
                     {
                         ulong sid = item.iServiceID;

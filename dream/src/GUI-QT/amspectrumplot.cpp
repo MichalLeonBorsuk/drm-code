@@ -23,10 +23,10 @@ AMSpectrumPlot::AMSpectrumPlot(QWidget *parent) :
     addGraph();
     graph(0)->setPen(QPen(Qt::blue, 2, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
     /* Insert line for bandwidth marker */
-    addPlottable(bw);
+    //addPlottable(bw);
     /* Insert line for DC carrier */
-    addItem(dc);
-    addItem(wfitem);
+    //addItem(dc);
+    //addItem(wfitem);
 
     if(addLayer("spectrum")) {
         graph(0)->setLayer("spectrum");
@@ -45,7 +45,7 @@ AMSpectrumPlot::AMSpectrumPlot(QWidget *parent) :
 
     /* Add title */
     plotLayout()->insertRow(0); // inserts an empty row above the default axis rect
-    plotLayout()->addElement(0, 0, new QCPPlotTitle(this, tr("Input PSD")));
+    plotLayout()->addElement(0, 0, new QCPTextElement(this, tr("Input PSD")));
 }
 
 void AMSpectrumPlot::updateSpectrum(CVector<_REAL>& vecrData, CVector<_REAL>& vecrScale)

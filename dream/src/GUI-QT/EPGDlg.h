@@ -56,19 +56,19 @@
 class EPG;
 class QDomDocument;
 
-class EPGDlg : public CWindow, public Ui_CEPGDlgbase
+class EPGDlg : public CWindow
 {
     Q_OBJECT
 
 public:
     EPGDlg(CSettings&, QWidget* parent = 0);
     virtual ~EPGDlg();
-    void setServiceInformation(const map<uint32_t,CServiceInformation>&, uint32_t);
+    void setServiceInformation(const CServiceInformation&, uint32_t);
     void setDecoder(EPG*);
 
 protected:
-    virtual void eventShow();
-    virtual void eventHide();
+    virtual void eventShow(QShowEvent*);
+    virtual void eventHide(QHideEvent*);
     void setActive(QTreeWidgetItem*);
     bool isActive(QTreeWidgetItem*);
 
@@ -78,11 +78,12 @@ protected:
     QDomDocument* getFile (const QDate& date, uint32_t sid, bool bAdvanced);
     void select();
 
-    bool                  do_updates;
+    Ui::CEPGDlgbase       *ui;
     EPG*                  pEpg;
     QTimer                Timer;
     QIcon                 greenCube;
     QTreeWidgetItem*      next;
+    QDateTime             drmTime;
 
 signals:
     void NowNext(QString);
@@ -90,6 +91,7 @@ signals:
 private slots:
     void on_channel_activated(const QString&);
     void on_dateEdit_dateChanged(const QDate&);
+    void on_DRMTimeChanged(QDateTime);
     void OnTimer();
 };
 

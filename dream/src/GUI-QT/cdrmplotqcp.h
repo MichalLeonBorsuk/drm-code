@@ -49,13 +49,13 @@ private:
     QCustomPlot* plot;
     WaterFallPlot* wfplot;
     QCPItemPixmap* wfitem;
-    QCPPlotTitle* title;
+    QCPTextElement* title;
     QVector<QCPItemLine*> hlines, vlines;
     QVector<QCPBars*> bars;
 
 private slots:
 
-    void on_plotClick(QCPAbstractPlottable*,QMouseEvent*);
+    void on_plotClick(QCPAbstractPlottable*,int,QMouseEvent*);
 signals:
     void plotClicked(double);
 };

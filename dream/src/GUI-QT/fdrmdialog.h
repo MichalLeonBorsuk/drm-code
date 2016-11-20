@@ -154,9 +154,10 @@ private slots:
     void initialiseSchedule();
     void on_actionGeneralSettings_triggered();
     void on_actionMultimediaSettings_triggered();
+    void on_NewDataService(int);
     void onUserEnteredPosition(double, double);
     void onUseGPSd(const QString&);
-    void on_action_Multimedia_Dialog_triggered();
+    //void on_action_Multimedia_Dialog_triggered();
     void on_actionSingle_Window_Mode_triggered(bool);
     void on_actionEngineering_Mode_triggered(bool);
     void OnTextMessageChanged(int, const QString&);

@@ -1263,11 +1263,10 @@ EPG::EPG(CParameter& NParameters, const string& savePath):
             break;
         genres[genre_list[i].genre] = genre_list[i].desc;
     }
-    dir = QString::fromUtf8((savePath+"/EPG").c_str());
+    string sp = savePath+"/EPG";
+    dir = QString::fromUtf8((sp.c_str()));
     CreateDirectories(dir);
-    servicesFilename = dir + "services.xml";
-    loadChannels (servicesFilename);
-    saveChannels (servicesFilename);
+    NParameters.ServiceInformation.setPath(sp);
 }
 
 EPG& EPG::operator=(const EPG& e)
@@ -1282,8 +1281,7 @@ EPG& EPG::operator=(const EPG& e)
 void
 EPG::addChannel (const string& label, uint32_t sid)
 {
-    Parameters.ServiceInformation[sid].label.insert(label);
-    Parameters.ServiceInformation[sid].id = sid;
+    Parameters.ServiceInformation.addChannel(label, sid);
 }
 
 void
@@ -1404,96 +1402,6 @@ void EPG::CProg::augment(const CProg& p)
         secondaryGenre.push_back(p.secondaryGenre[i]);
     for (i=0; i<p.otherGenre.size(); i++)
         otherGenre.push_back(p.otherGenre[i]);
-}
-
-/*
-<service>
-<serviceID id="e1.ce15.c221.0" />
-<shortName>Radio 1</shortName>
-<mediumName>BBC Radio 1</mediumName>
-</service>
-*/
-
-void
-EPG::saveChannels (const QString & fileName)
-{
-    QFile f (fileName);
-    if (!f.open (QIODevice::WriteOnly))
-    {
-        return;
-    }
-    QDomDocument doc ("serviceInformation");
-    QDomElement root = doc.createElement ("serviceInformation");
-    doc.appendChild (root);
-    QDomElement ensemble = doc.createElement ("ensemble");
-    root.appendChild (ensemble);
-    for (map < uint32_t, CServiceInformation >::const_iterator i = Parameters.ServiceInformation.begin();
-            i != Parameters.ServiceInformation.end(); i++)
-    {
-        const CServiceInformation& si = i->second;
-        QDomElement service = doc.createElement ("service");
-        QDomElement serviceID = doc.createElement ("serviceID");
-        serviceID.setAttribute ("id", QString::number (ulong (si.id), 16));
-        service.appendChild (serviceID);
-        for (set<string>::const_iterator j = si.label.begin(); j != si.label.end(); j++)
-        {
-            QDomElement shortName = doc.createElement ("shortName");
-            QDomText text = doc.createTextNode (QString().fromUtf8(j->c_str()));
-            shortName.appendChild (text);
-            service.appendChild (shortName);
-        }
-        ensemble.appendChild (service);
-    }
-    QTextStream stream (&f);
-    stream << doc.toString ();
-    f.close ();
-
-}
-
-void
-EPG::loadChannels (const QString & fileName)
-{
-    QDomDocument domTree;
-    QFile f (fileName);
-    if (!f.open (QIODevice::ReadOnly))
-    {
-        addChannel ("BBC & DW", 0xE1C248);
-        return;
-    }
-    if (!domTree.setContent (&f))
-    {
-        f.close ();
-        return;
-    }
-    f.close ();
-    QDomNodeList ensembles = domTree.elementsByTagName ("ensemble");
-    QDomNode n = ensembles.item (0).firstChild ();
-    while (!n.isNull ())
-    {
-        if (n.nodeName () == "service")
-        {
-            QDomNode e = n.firstChild ();
-            string name;
-            QString sid;
-            while (!e.isNull ())
-            {
-                if (e.isElement ())
-                {
-                    QDomElement s = e.toElement ();
-                    if (s.tagName () == "shortName")
-                        name = s.text().toUtf8().constData();
-                    if (s.tagName () == "serviceID")
-                        sid = s.attribute ("id", "0");
-                }
-                e = e.nextSibling ();
-            }
-            if (name != "")
-            {
-                addChannel (name, sid.toUInt (NULL, 16));
-            }
-        }
-        n = n.nextSibling ();
-    }
 }
 
 time_t EPG::parseTime(const QString & time)

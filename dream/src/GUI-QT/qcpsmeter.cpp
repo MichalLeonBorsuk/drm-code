@@ -3,14 +3,15 @@
 QCPSMeter::QCPSMeter(QWidget* parent):QCustomPlot(parent)
 {
     xAxis2->setRange(S_METER_THERMO_MIN, S_METER_THERMO_MAX);
-    xAxis2->setTickStep(10.0);
+    //xAxis2->setTickStep(10.0);
+    xAxis2->ticker()->setTickCount(5);
     xAxis->setVisible(false);
     xAxis2->setVisible(true);
     yAxis->setVisible(false);
     yAxis2->setVisible(false);
 
     QCPBars *bars = new QCPBars(yAxis, xAxis2);
-    addPlottable(bars);
+    //addPlottable(bars);
     bars->setName("dB");
     bars->setWidth(6);
     bars->setPen(Qt::NoPen);

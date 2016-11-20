@@ -1,6 +1,7 @@
 #ifndef RECEIVERCONTROLLER_H
 #define RECEIVERCONTROLLER_H
 
+#include <QDateTime>
 #include <QObject>
 #include <../DrmReceiver.h>
 #include <../util/Settings.h>
@@ -37,13 +38,14 @@ public:
 
 signals:
     void serviceChanged(int, const CService&);
+    void newDataService(int);
     void dataStatusChanged(int, ETypeRxStatus);
     void frequencyChanged(int);
     void mode(int);
     void position(double,double);
     void AFS(const CAltFreqSign&);
     void setAFS(bool);
-    void serviceInformation(const map <uint32_t,CServiceInformation>);
+    void serviceInformation(CServiceInformation);
     void textMessageChanged(int, QString);
     void MSCChanged(ETypeRxStatus);
     void SDCChanged(ETypeRxStatus);
@@ -64,6 +66,7 @@ signals:
     void recFilterChanged(bool);
     void intConsChanged(bool);
     void amFilterBandwidthChanged(int);
+    void DRMTimeChanged(QDateTime);
     void dataAvailable();
 
 public slots:
@@ -99,6 +102,7 @@ private:
     int           currentAMfilterBW;
     ERecMode      currentMode;
     CSettings&    settings;
+    QDateTime     drmTime;
 
 private slots:
     void on_new_data();

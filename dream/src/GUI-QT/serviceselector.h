@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include <QButtonGroup>
+#include <QPushButton>
 #include <QLabel>
 #include <vector>
 
@@ -25,8 +26,10 @@ public slots:
     void onServiceChanged(int, const CService&);
 private:
     Ui::ServiceSelector* ui;
-    QButtonGroup*        pButtonGroup;
+    QButtonGroup*        pAudioButtonGroup;
+    QButtonGroup*        pDataButtonGroup;
     std::vector<QLabel*> serviceLabels;
+    std::vector<QPushButton*> buttons;
 signals:
     void audioServiceSelected(int);
     void dataServiceSelected(int);

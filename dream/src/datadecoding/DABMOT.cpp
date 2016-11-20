@@ -645,7 +645,7 @@ CMOTDABDec::DeliverIfReady(TTransportID TransportID)
                 /* Can't unzip so change the filename */
                 o.strName = string(o.strName.c_str()) + ".gz";
         }
-        //cerr << o << endl;;
+        cerr << o << endl;;
         ostringstream ss;
         ss << o << endl;
 #ifdef QT_CORE_LIB
@@ -764,7 +764,7 @@ CMOTDABDec::AddDataUnit(CVector < _BINARY > &vecbiNewData)
 
         vecbiNewData.Separate(iLenEndUserAddress);
     }
-    //cerr << "MOT: new data unit, tid " << TransportID << " CRC " << bCRCOk << " DG" << iDataGroupType << endl;
+    cerr << "MOT: new data unit, tid " << TransportID << " CRC " << bCRCOk << " DG" << iDataGroupType << " seg " << iSegmentNum << endl;
 
     /* MSC data group data field -------------------------------------------- */
     /* If CRC is not used enter if-block, if CRC flag is used, it must be ok to
@@ -799,7 +799,7 @@ CMOTDABDec::AddDataUnit(CVector < _BINARY > &vecbiNewData)
                 {
                     /* mode change, throw away any directory */
                     MOTDirectory.Reset();
-                    //cerr << "Reset " << MOTDirectory << endl;
+                    cerr << "Reset " << MOTDirectory << endl;
                 }
                 MOTmode = headerMode;
 
@@ -861,14 +861,14 @@ CMOTDABDec::AddDataUnit(CVector < _BINARY > &vecbiNewData)
                     MOTHeaders.clear();
                     MOTDirectory.TransportID = -1;  /* forced reset */
                     MOTmode = directoryMode;
-                    //cerr << "Reset " << MOTDirectory << endl;
+                    cerr << "Reset " << MOTDirectory << endl;
                 }
 
                 /* The carousel is changing */
                 if (MOTDirectory.TransportID != TransportID)
                 {
                     /* we never got all the previous directory */
-                    //cerr << " we never got all the previous directory " << TransportID << ", " << MOTDirectory.  TransportID << endl;
+                    cerr << " we never got all the previous directory " << TransportID << ", " << MOTDirectory.  TransportID << endl;
                     MOTDirectory.Reset();
                     MOTDirectory.TransportID = TransportID;
                     MOTDirectoryEntity.Reset();
@@ -889,7 +889,7 @@ CMOTDABDec::AddDataUnit(CVector < _BINARY > &vecbiNewData)
                     /* have we got the full directory ? */
                     if (MOTDirectoryEntity.Ready())
                     {
-                        //cerr << "Ready " << MOTDirectory << endl;
+                        cerr << "Ready " << MOTDirectory << endl;
                         ProcessDirectory(MOTDirectoryEntity);
                         MOTDirectory.TransportID = TransportID;
                     }           /* END IF HAVE ALL OF THE NEW DIRECTORY */
@@ -1016,7 +1016,7 @@ CMOTDABDec::ProcessDirectory(CBitReassembler & MOTDir)
     }
     MOTCarousel.erase(MOTCarousel.begin(), MOTCarousel.end());
 
-    //cerr << "decode directory " << MOTDirectory.  iNumberOfObjects << " === " << MOTDirectory.vecObjects.size() << " {";
+    cerr << "decode directory " << MOTDirectory.  iNumberOfObjects << " === " << MOTDirectory.vecObjects.size() << " {";
 
     MOTDirectory.vecObjects.clear();
 
@@ -1031,10 +1031,10 @@ CMOTDABDec::ProcessDirectory(CBitReassembler & MOTDir)
             MOTCarousel[tid].Body = b->second;
         /* mark objects which are in the new directory */
         MOTDirectory.vecObjects.push_back(tid);
-        //cerr << tid << " ";
+        cerr << tid << " ";
         DeliverIfReady(tid);
     }
-    //cerr << "}" << endl;
+    cerr << "}" << endl;
 
 }
 
