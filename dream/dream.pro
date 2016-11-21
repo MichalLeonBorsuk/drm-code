@@ -243,7 +243,15 @@ win32|crosscompile {
         CONFIG += opus
     }
 }
+!crosscompile {
+  exists(/usr/include/neaacdec.h) {
+    CONFIG += faad2
+  }
+}
 exists($$OUT_PWD/include/neaacdec.h) {
+    CONFIG += faad2
+}
+faad2 {
      DEFINES += HAVE_LIBFAAD \
      USE_FAAD2_LIBRARY
      LIBS += -lfaad_drm
