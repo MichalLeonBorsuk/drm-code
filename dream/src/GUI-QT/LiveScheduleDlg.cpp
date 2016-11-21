@@ -727,7 +727,7 @@ LiveScheduleDlg::SetStationsView()
                     map <uint32_t,set<string> >::const_iterator
                     si = serviceInformation.find(item.iServiceID);
                     if(si != serviceInformation.end())
-                        name = QString::fromUtf8(si->second.cbegin()->c_str());
+                        name = QString::fromUtf8(si->second.begin()->c_str());
                     else
                     {
                         ulong sid = item.iServiceID;
