@@ -311,8 +311,8 @@ void FDRMDialog::connectController()
     connect(controller, SIGNAL(position(double,double)), pLiveScheduleDlg, SLOT(setLocation(double, double)));
     connect(controller, SIGNAL(position(double,double)), pLiveScheduleDlg, SLOT(setLocation(double, double)));
     connect(controller, SIGNAL(AFS(const CAltFreqSign&)), pLiveScheduleDlg, SLOT(setAFS(const CAltFreqSign&)));
-    connect(controller, SIGNAL(serviceInformation(const map <uint32_t,CServiceInformation>)),
-            pLiveScheduleDlg, SLOT(setServiceInformation(const map <uint32_t,CServiceInformation>)));
+    connect(controller, SIGNAL(serviceInformation(const CServiceInformation&)),
+            pLiveScheduleDlg, SLOT(setServiceInformation(const CServiceInformation&)));
     connect(pLiveScheduleDlg, SIGNAL(frequencyChanged(int)), controller, SIGNAL(frequencyChanged(int)));
 
     // AM
