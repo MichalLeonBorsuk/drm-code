@@ -410,7 +410,7 @@ void LiveScheduleDlg::setAFS(const CAltFreqSign& altFreqSign)
     DRMSchedule.LoadAFSInformation(altFreqSign);
 }
 
-void LiveScheduleDlg::setServiceInformation(const CServiceInformation si)
+void LiveScheduleDlg::setServiceInformation(const CServiceInformation& si)
 {
     serviceInformation = si;
 }

@@ -153,7 +153,7 @@ public slots:
     void setLocation(double, double);
     void setAFS(const CAltFreqSign& altFreqSign);
     void setService(int, const CService&);
-    void setServiceInformation(CServiceInformation);
+    void setServiceInformation(const CServiceInformation&);
     void setFrequency(int);
 
 protected:
