@@ -39,8 +39,12 @@ qtconsole {
 }
 !console:!qtconsole {
     CONFIG += gui
-    #!qcustomplot:CONFIG += qwt
-    !qwt:CONFIG+=qcustomplot
+    macx {
+      !qwt:CONFIG+=qcustomplot
+    }
+    else {
+      !qcustomplot:CONFIG += qwt
+    }
     UI_MESSAGE = GUI mode
 }
 gui {
