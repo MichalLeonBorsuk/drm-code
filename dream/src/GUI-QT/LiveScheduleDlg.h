@@ -26,7 +26,7 @@
 \******************************************************************************/
 
 #ifndef __LiveScheduleDlg_H
-#define LiveScheduleDlg_H
+#define __LiveScheduleDlg_H
 
 #include "ui_LiveScheduleWindow.h"
 #include "CWindow.h"
