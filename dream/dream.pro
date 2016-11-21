@@ -334,8 +334,9 @@ qwt {
                 # win debug
                 LIBS += -lqwtd
             } else {
-                # unix | win release - if this doesnt work try LIBS += -lqwt
-		LIBS += -lqwt-qt5
+                # unix | win release 
+		qt4:LIBS += -lqwt
+		qt5:LIBS += -lqwt-qt5
             }
         }
         !crosscompile {
