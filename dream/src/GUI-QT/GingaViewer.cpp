@@ -1,6 +1,6 @@
 /******************************************************************************\
  * PUC-Rio / Telemidia Lab.
- * Copyright (c) 2015
+ * Copyright (c) 2015-2018
  *
  * 
  * Author(s):
@@ -117,7 +117,7 @@ void GingaViewer::OnTimer()
 
             QProcess *process = new QProcess(this);
 
-            args << "--vmode" << "640x480" << "--ncl" << path + index;
+            args << path + index;
 
             if ( !process->startDetached("ginga", args) )
             {
