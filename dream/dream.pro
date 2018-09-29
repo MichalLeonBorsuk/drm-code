@@ -1,4 +1,4 @@
-QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.8
+#QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.8
 TEMPLATE = app
 CONFIG += warn_on debug
 TARGET = dream
@@ -6,20 +6,6 @@ OBJECTS_DIR = obj
 DEFINES += EXECUTABLE_NAME=$$TARGET
 LIBS += -L$$OUT_PWD/lib
 INCLUDEPATH += $$OUT_PWD/include
-contains(QT_VERSION, ^4\\..*) {
-    CONFIG += qt qt4
-    VERSION_MESSAGE = Qt $$QT_VERSION
-}
-contains(QT_VERSION, ^5\\..*) {
-    CONFIG += qt qt5
-    VERSION_MESSAGE = Qt $$QT_VERSION
-}
-contains(QT_VERSION, ^5\\.7\\..*) {
-    CONFIG += qt5.7
-}
-contains(QT_VERSION, ^5\\.3\\..*) {
-    CONFIG += qt5.3
-}
 CONFIG(debug, debug|release) {
     DEBUG_MESSAGE = debug
 }
@@ -28,36 +14,43 @@ else {
 }
 console {
     QT -= core gui
-    CONFIG -= qt qt4 qt5
+    CONFIG -= qt
     UI_MESSAGE = console mode
     VERSION_MESSAGE = No Qt
 }
 qtconsole {
     QT -= gui
     QT += xml
+    CONFIG += qt
     UI_MESSAGE = console mode
+}
+qt {
+  HEADERS += \
+    src/GUI-QT/Logging.h \
+    src/util-QT/epgdec.h \
+    src/util-QT/EPG.h \
+    src/util-QT/Util.h
+  SOURCES += \
+    src/GUI-QT/Logging.cpp \
+    src/util-QT/EPG.cpp \
+    src/util-QT/epgdec.cpp \
+    src/util-QT/Util.cpp
 }
 !console:!qtconsole {
     CONFIG += gui
-    macx {
-      !qwt:CONFIG+=qcustomplot
-    }
-    else {
-      !qcustomplot:CONFIG += qwt
-    }
-    UI_MESSAGE = GUI mode
 }
 gui {
     RESOURCES = src/GUI-QT/res/icons.qrc
-    QT += network xml
-    qt4:QT += webkit
-    qt5!qt5.7:QT += widgets webkitwidgets
+    QT += network xml widgets webenginewidgets
+    CONFIG += qt
     INCLUDEPATH += src/GUI-QT
     VPATH += src/GUI-QT
     win32:RC_FILE = windows/dream.rc
     macx:RC_FILE = src/GUI-QT/res/macicons.icns
     UI_DIR = ui
     MOC_DIR = moc
+    UI_MESSAGE = GUI mode
+    !qcustomplot:CONFIG += qwt
 }
 message($$VERSION_MESSAGE $$DEBUG_MESSAGE $$UI_MESSAGE)
 qt:multimedia {
@@ -68,29 +61,21 @@ unix:!cross_compile {
     message(building on $$UNAME)
 }
 macx {
-    INCLUDEPATH += /opt/local/include
     INCLUDEPATH += /usr/local/include
-    LIBS += -L/opt/local/lib
     LIBS += -L/usr/local/lib
+    QMAKE_LFLAGS += -F/usr/local/lib
     LIBS += -framework CoreFoundation -framework CoreServices
     LIBS += -framework CoreAudio -framework AudioToolbox -framework AudioUnit
     CONFIG += pcap
     !sound:CONFIG += portaudio sound
-    !qt5:!contains(QT_VERSION, ^4\\.8.*) {
-      exists(/opt/local/include/sndfile.h) {
+    exists(/usr/local/include/sndfile.h) {
         CONFIG += sndfile
-      }
-      exists(/opt/local/include/speex/speex_preprocess.h) {
+    }
+    exists(/usr/local/include/speex/speex_preprocess.h) {
         CONFIG += speexdsp
-      }
-      exists(/opt/local/include/hamlib/rig.h) {
+    }
+    exists(/usr/local/include/hamlib/rig.h) {
         CONFIG += hamlib
-      }
-      contains(QT_VERSION, ^4\\.7.*) {
-        QT += phonon opengl svg
-        DEFINES -= QWT_NO_SVG
-        QMAKE_LFLAGS += -bind_at_load
-      }
     }
 }
 linux-* {
@@ -148,14 +133,12 @@ unix:!cross_compile {
            }
         }
     }
-    qt5|contains(QT_VERSION, ^4\\.8.*) {
       packagesExist(sndfile) {
         CONFIG += sndfile
       }
       packagesExist(hamlib) {
         CONFIG += hamlib
       }
-#      packagesExist(gpsd) { ### proper package name ??? ###
       packagesExist(libgps) {
         CONFIG += gps
       }
@@ -168,29 +151,6 @@ unix:!cross_compile {
       packagesExist(speexdsp) {
         CONFIG += speexdsp
       }
-    }
-    else {
-      exists(/usr/include/sndfile.h) | \
-      exists(/usr/local/include/sndfile.h) {
-        CONFIG += sndfile
-      }
-      exists(/usr/include/hamlib/rig.h) | \
-      exists(/usr/local/include/hamlib/rig.h) {
-          CONFIG += hamlib
-      }
-      exists(/usr/include/gps.h) | \
-      exists(/usr/local/include/gps.h) {
-        CONFIG += gps
-      }
-      exists(/usr/include/opus/opus.h) | \
-      exists(/usr/local/include/opus/opus.h) {
-       CONFIG += opus
-      }
-      exists(/usr/include/speex/speex_preprocess.h) | \
-      exists(/usr/local/include/speex/speex_preprocess.h) {
-       CONFIG += speexdsp
-      }
-    }
     exists(/usr/include/pcap.h) | \
     exists(/usr/local/include/pcap.h) {
        CONFIG += pcap
@@ -333,44 +293,28 @@ qwt {
         LIBS += -L$$OUT_PWD/lib
         LIBS += -lqwt
     }
-    !exists($$OUT_PWD/include/qwt/qwt.h) {
+    else {
         macx {
             LIBS += -framework qwt
+            INCLUDEPATH += /usr/local/lib/qwt.framework/Headers
         }
-        else {
-            win32:CONFIG(debug, debug|release) {
-                # win debug
-                LIBS += -lqwtd
-            } else {
-                # unix | win release 
-		qt4:LIBS += -lqwt
-		qt5:LIBS += -lqwt-qt5
-            }
+        win32:CONFIG(debug, debug|release) {
+            # win debug
+            LIBS += -lqwtd
+        }
+        win32:CONFIG(release) {
+            LIBS += -lqwt
+        }
+        unix!macx {
+            # unix | win release
+            LIBS += -lqwt
         }
         !crosscompile {
-            macx {
-              exists(/opt/local/Library/Frameworks/qwt.framework) {
-                INCLUDEPATH += /opt/local/Library/Frameworks/qwt.framework/Versions/6/Headers
-              }
-              exists(/Library/Frameworks/qwt.framework) {
-                INCLUDEPATH += /Library/Frameworks/qwt.framework/Versions/6/Headers
-              }
-            }
             exists(/usr/include/qwt/qwt.h) {
                 INCLUDEPATH += /usr/include/qwt
             }
             exists(/usr/local/include/qwt/qwt.h) {
                 INCLUDEPATH += /usr/local/include/qwt
-            }
-            qt4 {
-                exists(/usr/include/qwt5/qwt.h) {
-                    INCLUDEPATH += /usr/include/qwt5
-                }
-                exists(/usr/include/qwt-qt4/qwt.h) {
-                    INCLUDEPATH += /usr/include/qwt-qt4
-                    LIBS -= -lqwt
-                    LIBS += -lqwt-qt4
-                }
             }
         }
     }
@@ -658,23 +602,6 @@ SOURCES += \
     src/util/Utilities.cpp \
     src/Version.cpp
 
-!console {
-    qt5.3 {
-        QT += positioning
-        HEADERS += src/util-QT/cpos.h
-        SOURCES += src/util-QT/cpos.cpp
-    }
-HEADERS += \
-    src/GUI-QT/Logging.h \
-    src/util-QT/epgdec.h \
-    src/util-QT/EPG.h \
-    src/util-QT/Util.h
-SOURCES += \
-    src/GUI-QT/Logging.cpp \
-    src/util-QT/EPG.cpp \
-    src/util-QT/epgdec.cpp \
-    src/util-QT/Util.cpp
-}
 gui {
     contains(QT, webkitwidgets)|contains(QT,webkit) {
         FORMS += BWSViewer.ui bwsviewerwidget.ui
@@ -682,6 +609,10 @@ gui {
         SOURCES += src/GUI-QT/BWSViewer.cpp src/GUI-QT/bwsviewerwidget.cpp
         DEFINES += HAVE_QTWEBKIT
     }
+!console {
+    HEADERS += src/util-QT/cpos.h
+    SOURCES += src/util-QT/cpos.cpp
+}
 FORMS += \
     AboutDlgbase.ui \
     AMMainWindow.ui \
