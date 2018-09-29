@@ -307,7 +307,7 @@ qwt {
         }
         unix!macx {
             # unix | win release
-            LIBS += -lqwt
+            LIBS += -lqwt-qt5
         }
         !crosscompile {
             exists(/usr/include/qwt/qwt.h) {
