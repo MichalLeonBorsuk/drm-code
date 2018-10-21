@@ -766,9 +766,8 @@ CAudioSourceDecoder::InitInternal(CParameter & Parameters)
         }
 
         /* Init text message application ------------------------------------ */
-        switch (AudioParam.bTextflag)
+        if(AudioParam.bTextflag)
         {
-        case true:
             bTextMessageUsed = true;
 
             /* Get a pointer to the string */
@@ -782,14 +781,12 @@ CAudioSourceDecoder::InitInternal(CParameter & Parameters)
             /* Init vector for text message bytes */
             vecbiTextMessBuf.Init(SIZEOF__BYTE *
                                   NUM_BYTES_TEXT_MESS_IN_AUD_STR);
-            break;
-
-        case false:
+        }
+        else {
             bTextMessageUsed = false;
 
             /* All bytes are used for AAC data, no text message present */
             iTotalFrameSize = iInputBlockSize;
-            break;
         }
 
         /* Get decoder instance */

@@ -26,8 +26,8 @@
  *
 \******************************************************************************/
 
-#if !defined(VECTOR_H__3B0BA660_CA6LIUBEFIB2B_23E7A0D31912__INCLUDED_)
-#define VECTOR_H__3B0BA660_CA6LIUBEFIB2B_23E7A0D31912__INCLUDED_
+#ifndef _vector_h
+#define _vector_h
 
 #include "../GlobalDefinitions.h"
 #include <vector>
@@ -36,28 +36,24 @@
 /******************************************************************************\
 * CVector base class                                                           *
 \******************************************************************************/
-template<class TData> class CVector : public vector<TData>
+template<class TData> class CVector
 {
 public:
-    CVector() : iBitArrayCounter(0), iVectorSize(0) {
-        pData = this->begin();
+    CVector() : iBitArrayCounter(0), data(0) {
     }
-    CVector(const int iNeSi) {
+    CVector(const int iNeSi): iBitArrayCounter(0), data(iNeSi) {
         Init(iNeSi);
     }
-    CVector(const int iNeSi, const TData tInVa) {
+    CVector(const int iNeSi, const TData tInVa): iBitArrayCounter(0), data(iNeSi, tInVa) {
         Init(iNeSi, tInVa);
     }
     virtual ~CVector() {}
 
-    /* Copy constructor: The order of the initialization list must not be
-       changed. First, the base class must be initialized, then the pData
-       pointer must be set to the new data source. The bit access is, by
-       default, reset */
+    /* Copy constructor:
+     * The bit access is, by default, reset */
     CVector(const CVector<TData>& vecI) :
-        vector<TData>(static_cast<const vector<TData>&>(vecI)),
-        iBitArrayCounter(0), iVectorSize(vecI.Size()) {
-        pData = this->begin();
+        iBitArrayCounter(0), data(vecI.data)
+    {
     }
 
     virtual void Init(const int iNewSize);
@@ -68,57 +64,53 @@ public:
 
     void Enlarge(const int iAddedSize);
     void Add(const TData& tI) {
-        Enlarge(1);
-        pData[iVectorSize - 1] = tI;
+        data.push_back(tI);
     }
 
     inline int Size() const {
-        return iVectorSize;
+        return data.size();
     }
 
     /* This operator allows for a l-value assignment of this object:
        CVector[x] = y is possible */
     inline TData& operator[](const int iPos) {
 #ifdef _DEBUG_
-        if ((iPos < 0) || (iPos > iVectorSize - 1))
+        if ((iPos < 0) || (iPos > int(data.size()) - 1))
         {
             DebugError("Writing vector out of bounds", "Vector size",
-                       iVectorSize, "New parameter", iPos);
+                       int(data.size()), "New parameter", iPos);
         }
 #endif
-        return pData[iPos];
+        return data[iPos];
     }
 
     inline TData operator[](const int iPos) const {
 #ifdef _DEBUG_
-        if ((iPos < 0) || (iPos > iVectorSize - 1))
+        if ((iPos < 0) || (iPos > int(data.size()) - 1))
         {
             DebugError("Reading vector out of bounds", "Vector size",
-                       iVectorSize, "New parameter", iPos);
+                       int(data.size()), "New parameter", iPos);
         }
 #endif
-        return pData[iPos];
+        return data[iPos];
     }
 
     inline CVector<TData>& operator=(const CVector<TData>& vecI) {
 #ifdef _DEBUG_
         /* Vectors which shall be copied MUST have same size! (If this is
-           satisfied, the parameter "iVectorSize" must not be adjusted as
+           satisfied, the parameter "int(data.size())" must not be adjusted as
            a side effect) */
-        if (vecI.Size() != iVectorSize)
+        if (vecI.Size() != int(data.size()))
         {
             DebugError("Vector operator=() different size", "Vector size",
-                       iVectorSize, "New parameter", vecI.Size());
+                       int(data.size()), "New parameter", vecI.Size());
         }
 #endif
-        vector<TData>::operator=(vecI);
-
-        /* Reset my data pointer in case, the operator=() of the base class
-           did change the actual memory */
-        pData = this->begin();
-
+        data = vecI.data;
         return *this;
     }
+
+    const vector<TData>& Data() const { return data; }
 
 
     /* Bit operation functions */
@@ -128,23 +120,23 @@ public:
         iBitArrayCounter = 0;
     }
 
+    friend bool operator==(const CVector<TData>& lhs, const CVector<TData>& rhs) {
+        lhs.data == rhs.data;
+    }
+
 protected:
-    typename vector<TData>::iterator    pData;
     int                                 iBitArrayCounter;
-    int                                 iVectorSize;
+    vector<TData>                       data;
 };
 
 
 /* Implementation *************************************************************/
 template<class TData> void CVector<TData>::Init(const int iNewSize)
 {
-    iVectorSize = iNewSize;
-
     /* Clear old buffer and reserve memory for new buffer, get iterator
        for pointer operations */
-    this->clear();
-    this->resize(iNewSize);
-    pData = this->begin();
+    data.clear();
+    data.resize(iNewSize);
 }
 
 template<class TData> void CVector<TData>::Init(const int iNewSize,
@@ -159,19 +151,14 @@ template<class TData> void CVector<TData>::Init(const int iNewSize,
 
 template<class TData> void CVector<TData>::Enlarge(const int iAddedSize)
 {
-    iVectorSize += iAddedSize;
-    this->resize(iVectorSize);
-
-    /* We have to reset the pointer since it could be that the vector size was
-       zero before enlarging the vector */
-    pData = this->begin();
+    data.resize(data.size()+iAddedSize);
 }
 
 template<class TData> void CVector<TData>::Reset(const TData tResetVal)
 {
     /* Set all values to reset value */
-    for (int i = 0; i < iVectorSize; i++)
-        pData[i] = tResetVal;
+    for (int i = 0; i < int(data.size()); i++)
+        data[i] = tResetVal;
 }
 
 template<class TData> void CVector<TData>::Enqueue(uint32_t iInformation,
@@ -201,7 +188,7 @@ template<class TData> uint32_t CVector<TData>::Separate(const int iNumOfBits)
 
     /* Check, if current position plus new bit-size is smaller than the maximum
        length of the bit vector. Error code: return a "0" */
-    if (iBitArrayCounter + iNumOfBits > iVectorSize)
+    if (iBitArrayCounter + iNumOfBits > int(data.size()))
         return 0;
 
     /* Separate out bits from bit-array */
@@ -211,7 +198,7 @@ template<class TData> uint32_t CVector<TData>::Separate(const int iNumOfBits)
         /* MSB comes first, therefore shift left */
         iInformation <<= 1;
 
-        iInformation |= pData[iBitArrayCounter + i] & 1;
+        iInformation |= data[iBitArrayCounter + i] & 1;
     }
 
     iBitArrayCounter += iNumOfBits;
@@ -245,22 +232,14 @@ public:
 /* Implementation *************************************************************/
 template<class TData> void CShiftRegister<TData>::AddBegin(const TData tNewD)
 {
-    /* Shift old values */
-    for (int i = this->iVectorSize - 1; i > 0; i--)
-        this->pData[i] = this->pData[i - 1];
-
-    /* Add new value */
-    this->pData[0] = tNewD;
+    move_backward(this->data.begin(), this->data.end()-1, this->data.begin()+1);
+    this->data[0] = tNewD;
 }
 
 template<class TData> void CShiftRegister<TData>::AddEnd(const TData tNewD)
 {
-    /* Shift old values */
-    for (int i = 0; i < this->iVectorSize - 1; i++)
-        this->pData[i] = this->pData[i + 1];
-
-    /* Add new value */
-    this->pData[this->iVectorSize - 1] = tNewD;
+    move(this->data.begin()+1, this->data.end(), this->data.begin());
+    *this->data.end() = tNewD;
 }
 
 template<class TData> void CShiftRegister<TData>::AddEnd(const CVector<TData>& vectNewD,
@@ -268,16 +247,16 @@ template<class TData> void CShiftRegister<TData>::AddEnd(const CVector<TData>& v
 {
     int i, iBlockEnd, iMovLen;
 
-    iBlockEnd = this->iVectorSize - iLen;
+    iBlockEnd = int(this->data.size()) - iLen;
     iMovLen = iLen;
 
     /* Shift old values */
     for (i = 0; i < iBlockEnd; i++)
-        this->pData[i] = this->pData[iMovLen++];
+        this->data[i] = this->data[iMovLen++];
 
     /* Add new block of data */
     for (i = 0; i < iLen; i++)
-        this->pData[iBlockEnd++] = vectNewD[i];
+        this->data[iBlockEnd++] = vectNewD[i];
 }
 
 
@@ -294,7 +273,7 @@ public:
 
     void Add(const TData tNewD);
     inline TData Get() {
-        return this->pData[iCurIdx];
+        return this->data[iCurIdx];
     }
 
     virtual void Init(const int iNewSize);
@@ -319,11 +298,11 @@ template<class TData> void CFIFO<TData>::Init(const int iNewSize,
 
 template<class TData> void CFIFO<TData>::Add(const TData tNewD)
 {
-    this->pData[iCurIdx] = tNewD;
+    this->data[iCurIdx] = tNewD;
 
     /* Increment index */
     iCurIdx++;
-    if (iCurIdx >= this->iVectorSize)
+    if (iCurIdx >= int(this->data.size()))
         iCurIdx = 0;
 }
 
@@ -360,7 +339,7 @@ template<class TData> void CMovingAv<TData>::InitVec(const int iNewSize,
 
     /* Init each vector in vector */
     for (int i = 0; i < iNewSize; i++)
-        this->pData[i].Init(iNewVecSize, 0);
+        this->data[i].Init(iNewVecSize, 0);
 
     /* Init current average result */
     tCurAvResult.Init(iNewVecSize, 0);
@@ -381,15 +360,15 @@ template<class TData> void CMovingAv<TData>::Add(const TData tNewD)
         history buffer
     */
     /* Subtract oldest value */
-    tCurAvResult -= this->pData[iCurIdx];
+    tCurAvResult -= this->data[iCurIdx];
 
     /* Add new value and write in memory */
     tCurAvResult += tNewD;
-    this->pData[iCurIdx] = tNewD;
+    this->data[iCurIdx] = tNewD;
 
     /* Increase position pointer and test if wrap */
     iCurIdx++;
-    if (iCurIdx >= this->iVectorSize)
+    if (iCurIdx >= int(this->data.size()))
         iCurIdx = 0;
 }
 
@@ -546,5 +525,4 @@ template<class TData> CMatrix<TData>::~CMatrix()
         delete[] ppData;
 }
 
-
-#endif // !defined(VECTOR_H__3B0BA660_CA6LIUBEFIB2B_23E7A0D31912__INCLUDED_)
+#endif // _vector_h

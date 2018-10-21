@@ -26,8 +26,8 @@
  *
 \******************************************************************************/
 
-#ifndef __EVALUATIONDLG_H
-#define __EVALUATIONDLG_H
+#ifndef __eVALUATIONDLG_H
+#define __eVALUATIONDLG_H
 
 #include "ui_systemevalDlgbase.h"
 #include "CWindow.h"
@@ -45,8 +45,8 @@
 
 /* Classes ********************************************************************/
 class ReceiverController;
-class Reception;
-class ChannelConfiguration;
+struct Reception;
+struct ChannelConfiguration;
 class DRMDetail;
 
 class systemevalDlg : public CWindow
@@ -54,7 +54,7 @@ class systemevalDlg : public CWindow
     Q_OBJECT
 
 public:
-    systemevalDlg(ReceiverController*, CSettings&, QWidget* parent = 0);
+    systemevalDlg(ReceiverController*, CSettings&, QWidget* parent = nullptr);
     virtual ~systemevalDlg();
     void            connectController(ReceiverController*);
     void enableLogging(bool enable)

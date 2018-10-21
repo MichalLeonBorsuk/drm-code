@@ -9,22 +9,6 @@
 class QPaintEvent;
 class QResizeEvent;
 
-#if 0
-class SimpleWaterfallWidget : public QWidget
-{
-    Q_OBJECT
-public:
-    explicit SimpleWaterfallWidget(QWidget *parent = 0);
-
-public slots:
-    void     updatePlot(const std::vector<_REAL>& vec, _REAL min, _REAL max);
-
-protected:
-    QPixmap  Canvas;
-    void     paintEvent(QPaintEvent *);
-    void     resizeEvent(QResizeEvent *);
-};
-#endif
 class WaterFallPlot
 {
 public:
@@ -40,7 +24,7 @@ class WaterfallWidget : public QWidget
 {
     Q_OBJECT
 public:
-    explicit WaterfallWidget(QWidget *parent = 0);
+    explicit WaterfallWidget(QWidget *parent = NULL);
 
 public slots:
     void     updatePlot(const std::vector<_REAL>& vec, _REAL min, _REAL max);

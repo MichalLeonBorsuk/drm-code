@@ -162,7 +162,7 @@ CDataDecoder::ProcessDataInternal(CParameter & Parameters)
                     DataUnit[iPacketID].bReady = false;
 
                     /* Set values to read complete packet size */
-                    iNewPacketDataSize = iNewPacketDataSize;
+                    // iNewPacketDataSize = iNewPacketDataSize;
                     iNumSkipBytes = 2;  /* Only CRC has to be skipped */
                 }
                 else
@@ -331,8 +331,8 @@ CDataDecoder::DecodeEPG(const CParameter & Parameters)
         FILE *f = fopen(path.c_str(), "wb");
         if (f)
         {
-            fwrite(&NewObj.Body.vecData.front(), 1,
-                   NewObj.Body.vecData.size(), f);
+            fwrite(&NewObj.Body.vecData.Data().front(), 1,
+                   NewObj.Body.vecData.Size(), f);
             fclose(f);
         }
     }

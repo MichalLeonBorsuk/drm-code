@@ -232,7 +232,7 @@ CReal Besseli(const CReal rNu, const CReal rZ)
 CMatlibVector<CReal> Randn(const int iLen)
 {
     /* Add some constant distributed random processes together */
-    _VECOP(CReal, iLen,
+    _vECOP(CReal, iLen,
            (CReal) ((((CReal)
                       rand() + rand() + rand() + rand() + rand() + rand() + rand())
                      / RAND_MAX - 0.5) * /* sqrt(3) * 2 / sqrt(7) */ 1.3093));

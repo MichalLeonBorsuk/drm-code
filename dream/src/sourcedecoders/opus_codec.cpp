@@ -573,14 +573,14 @@ OpusCodec::DecOpen(CAudioParam& AudioParam, int *iAudioSampleRate, int *iLenDecO
 _SAMPLE*
 OpusCodec::Decode(CVector<uint8_t>& vecbyPrepAudioFrame, int *iChannels, CAudioCodec::EDecError *eDecError)
 {
-    _SAMPLE *sample = NULL;
-    if (hOpusDecoder != NULL)
+    _SAMPLE *sample = nullptr;
+    if (hOpusDecoder != nullptr)
     {
-        sample = (_SAMPLE *)opusDecDecode(hOpusDecoder,
+        sample = static_cast<_SAMPLE *>(opusDecDecode(hOpusDecoder,
                                           eDecError,
                                           iChannels,
                                           &vecbyPrepAudioFrame[0],
-                                          vecbyPrepAudioFrame.size());
+                                          static_cast<unsigned long>(vecbyPrepAudioFrame.Size())));
     }
     return sample;
 }

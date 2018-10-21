@@ -40,16 +40,16 @@
 #define WINDOW_CHART_HEIGHT 256
 
 /* Maximum and minimum values of x-axis of input spectrum plots */
-#define MIN_VAL_INP_SPEC_Y_AXIS_DB              ((double) -120.0)
-#define MAX_VAL_INP_SPEC_Y_AXIS_DB              ((double) 0.0)
+#define MIN_VAL_INP_SPEC_Y_AXIS_DB              double(-120.0)
+#define MAX_VAL_INP_SPEC_Y_AXIS_DB              double(0.0)
 
 /* Maximum and minimum values of x-axis of input PSD (shifted) */
-#define MIN_VAL_SHIF_PSD_Y_AXIS_DB              ((double) -85.0)
-#define MAX_VAL_SHIF_PSD_Y_AXIS_DB              ((double) -35.0)
+#define MIN_VAL_SHIF_PSD_Y_AXIS_DB              double(-85.0)
+#define MAX_VAL_SHIF_PSD_Y_AXIS_DB              double(-35.0)
 
 /* Maximum and minimum values of x-axis of SNR spectrum */
-#define MIN_VAL_SNR_SPEC_Y_AXIS_DB              ((double) 0.0)
-#define MAX_VAL_SNR_SPEC_Y_AXIS_DB              ((double) 35.0)
+#define MIN_VAL_SNR_SPEC_Y_AXIS_DB              double(0.0)
+#define MAX_VAL_SNR_SPEC_Y_AXIS_DB              double(35.0)
 
 /* Window border for standalone chart */
 #define WINDOW_BORDER 1

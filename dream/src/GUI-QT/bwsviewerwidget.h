@@ -116,7 +116,7 @@ class BWSViewerWidget : public QWidget
     Q_OBJECT
 
 public:
-    explicit BWSViewerWidget(QWidget* parent = 0);
+    explicit BWSViewerWidget(QWidget* parent = nullptr);
     ~BWSViewerWidget();
 public slots:
     void setDecoder(CDataDecoder*);
@@ -154,7 +154,7 @@ private:
     void UpdateWindowTitle(const uint32_t iServiceID, const bool bServiceValid, QString strLabel);
     QString ObjectStr(unsigned int count);
     void SetupSavePath(QString& strSavePath);
-    void GetServiceParams(uint32_t* iServiceID, bool* bServiceValid, QString* strLabel, ETypeRxStatus* eStatus=0);
+    void GetServiceParams(uint32_t* iServiceID, bool* bServiceValid, QString* strLabel, ETypeRxStatus* eStatus=nullptr);
     void showEvent(QShowEvent *);
     void hideEvent(QHideEvent *);
 

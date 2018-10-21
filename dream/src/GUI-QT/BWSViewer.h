@@ -44,7 +44,7 @@ class BWSViewer : public CWindow, public Ui_BWSViewer
     Q_OBJECT
 
 public:
-    BWSViewer(CDRMReceiver&, CSettings&, QWidget* parent = 0);
+    BWSViewer(CDRMReceiver&, CSettings&, QWidget* parent = nullptr);
     virtual ~BWSViewer();
 
 protected:
