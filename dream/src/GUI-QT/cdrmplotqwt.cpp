@@ -43,56 +43,24 @@
 #include <qwt_symbol.h>
 
 /* Define the FAC/SDC/MSC Symbol size */
-#if QWT_VERSION < 0x060000
-# define FAC_SYMBOL_SIZE 5
-# define SDC_SYMBOL_SIZE 5
-# define MSC_SYMBOL_SIZE 2
-# define ALL_FAC_SYMBOL_SIZE 5
-# define ALL_SDC_SYMBOL_SIZE 4
-# define ALL_MSC_SYMBOL_SIZE 2
-#else
 # define FAC_SYMBOL_SIZE 4
 # define SDC_SYMBOL_SIZE 4
 # define MSC_SYMBOL_SIZE 2
 # define ALL_FAC_SYMBOL_SIZE 4
 # define ALL_SDC_SYMBOL_SIZE 4
 # define ALL_MSC_SYMBOL_SIZE 2
-#endif
 
 /* Window margin for chart */
 #define WINDOW_MARGIN 10
 
-/* Sometime between Qwt version some name may change, we fix this */
-#if QWT_VERSION < 0x060000
-# define SETDATA setData
-#else
-# define SETDATA setSamples
-#endif
-#if QWT_VERSION < 0x060100
-# define SETMAJORPEN setMajPen
-# define SETMINORPEN setMinPen
-#else
-# define SETMAJORPEN setMajorPen
-# define SETMINORPEN setMinorPen
-#endif
-
-/* Set workaround flag for Qwt version 5.0.0 and 5.0.1 */
-/* QwtPlotCurve::Xfy seems broken on these versions */
-#if QWT_VERSION < 0x050002
-# define QWT_WORKAROUND_XFY
-#endif
-
 /* Definitions ****************************************************************/
 #define GUI_CONTROL_UPDATE_WATERFALL            100 /* Milliseconds */
-
-/* Waterfall spectrum stuff */
-WaterfallWidget* waterfallWidget;
 
 /* Implementation *************************************************************/
 CDRMPlotQwt::CDRMPlotQwt(QWidget* parent) :
     plot(new QwtPlot(parent)),
     InitCharType(NONE_OLD),
-    eLastSDCCodingScheme((ECodScheme)-1), eLastMSCCodingScheme((ECodScheme)-1),
+    eLastSDCCodingScheme(ECodScheme(-1)), eLastMSCCodingScheme(ECodScheme(-1)),
     bLastAudioDecoder(false),
     leftTitle(), rightTitle(), bottomTitle(),
     main1curve(), main2curve(),
@@ -125,22 +93,10 @@ CDRMPlotQwt::CDRMPlotQwt(QWidget* parent) :
     yMarker.setItemAttribute(QwtPlotItem::Legend, false);
     vcurvegrid.setItemAttribute(QwtPlotItem::Legend, false);
     hcurvegrid.setItemAttribute(QwtPlotItem::Legend, false);
-#ifndef QWT_WORKAROUND_XFY
     vcurvegrid.setStyle(QwtPlotCurve::Sticks);
     hcurvegrid.setStyle(QwtPlotCurve::Sticks);
-#else
-    vcurvegrid.setStyle(QwtPlotCurve::Steps);
-    hcurvegrid.setStyle(QwtPlotCurve::Steps);
-#endif
-#if QWT_VERSION < 0x060000
-# ifndef QWT_WORKAROUND_XFY
-    vcurvegrid.setCurveType(QwtPlotCurve::Yfx);
-    hcurvegrid.setCurveType(QwtPlotCurve::Xfy);
-# endif
-#else
     vcurvegrid.setOrientation(Qt::Vertical);
     hcurvegrid.setOrientation(Qt::Horizontal);
-#endif
 
     /* Grid */
     grid.enableXMin(false);
@@ -174,30 +130,17 @@ CDRMPlotQwt::CDRMPlotQwt(QWidget* parent) :
         WINDOW_MARGIN, WINDOW_MARGIN);
 
     /* Canvas */
-#if QWT_VERSION < 0x060100
-    plot->setCanvasLineWidth(0);
-#else
     ((QFrame*)plot->canvas())->setLineWidth(0);
-#endif
     plot->canvas()->setBackgroundRole(QPalette::Window);
 
     /* Picker */
     picker = new QwtPlotPicker(plot->canvas());
-#if QWT_VERSION < 0x060000
-    picker->setSelectionFlags(QwtPicker::PointSelection | QwtPicker::ClickSelection);
-#else
     picker->initMousePattern(1);
     QwtPickerClickPointMachine *machine = new QwtPickerClickPointMachine();
     picker->setStateMachine(machine);
-#endif
 
     /* Connections */
-#if QWT_VERSION < 0x060000
-    connect(picker, SIGNAL(selected(const QwtDoublePoint &)),
-            this, SLOT(OnSelectedOld(const QwtDoublePoint &)));
-#else
     connect(picker, SIGNAL(selected(const QPointF&)), this, SLOT(OnSelected(const QPointF&)));
-#endif
 }
 
 CDRMPlotQwt::~CDRMPlotQwt()
@@ -207,8 +150,8 @@ CDRMPlotQwt::~CDRMPlotQwt()
 void CDRMPlotQwt::applyColors(QColor MainGridColorPlot, QColor BckgrdColorPlot)
 {
     /* Apply colors */
-    grid.SETMAJORPEN(QPen(MainGridColorPlot, 0, Qt::DotLine));
-    grid.SETMINORPEN(QPen(MainGridColorPlot, 0, Qt::DotLine));
+    grid.setMajorPen(QPen(MainGridColorPlot, 0, Qt::DotLine));
+    grid.setMinorPen(QPen(MainGridColorPlot, 0, Qt::DotLine));
     vcurvegrid.setPen(QPen(MainGridColorPlot, 1, Qt::DotLine));
     hcurvegrid.setPen(QPen(MainGridColorPlot, 1, Qt::DotLine));
     plot->setCanvasBackground(QColor(BckgrdColorPlot));
@@ -221,11 +164,7 @@ void CDRMPlotQwt::setQAMGrid(double div, int step, int substep)
 {
     int i;
     _REAL pos;
-#if QWT_VERSION < 0x060000
-    QwtValueList ticks[3];
-#else
     QList <double> ticks[3];
-#endif
 
     for (i=0; i<=step*2; i++)
     {
@@ -253,37 +192,15 @@ void CDRMPlotQwt::setQAMGrid(double div, int step, int substep)
     plot->setAxisScaleDiv(QwtPlot::yLeft, scaleDiv);
 }
 
-void CDRMPlotQwt::OnSelectedOld(const QwtDoublePoint &pos)
-{
-#if QWT_VERSION < 0x060000
-# if QWT_VERSION < 0x050200
-    const double dMaxxBottom = plot->axisScaleDiv(QwtPlot::xBottom)->hBound();
-# else
-    const double dMaxxBottom = plot->axisScaleDiv(QwtPlot::xBottom)->upperBound();
-# endif
-    /* Check if dMaxxBottom is valid */
-    if (dMaxxBottom > 0.0)
-    {
-        emit plotClicked(pos.x());
-    }
-#endif
-}
-
 void CDRMPlotQwt::OnSelected(const QPointF &pos)
 {
-#if QWT_VERSION >= 0x060000
-# if QWT_VERSION >= 0x060100
     const double dMaxxBottom = plot->axisScaleDiv(QwtPlot::xBottom).upperBound();
-#else
-    const double dMaxxBottom = plot->axisScaleDiv(QwtPlot::xBottom)->upperBound();
-# endif
 
     /* Check if dMaxxBottom is valid */
     if (dMaxxBottom > 0.0)
     {
         emit plotClicked(pos.x());
     }
-#endif
 }
 
 void CDRMPlotQwt::replot()
@@ -303,23 +220,18 @@ void CDRMPlotQwt::clearPlots()
     vcurvegrid.detach();
     main1curve.detach();
     main2curve.detach();
-#if 1
     for(int i=0; i<nCurves; i++)
     {
-        curve[i].SETDATA(NULL, NULL, 0);
-#if QWT_VERSION < 0x060000
-        curve[i].setSymbol(QwtSymbol());
-#else
+        curve[i].setSamples(NULL, NULL, 0);
         curve[i].setSymbol(NULL);
         curve[i].setLegendAttribute(QwtPlotCurve::LegendShowSymbol, false);
         curve[i].setItemAttribute(QwtPlotItem::Legend, false);
-#endif
     }
-    yMarker.SETDATA(NULL, NULL, 0);
-    hcurvegrid.SETDATA(NULL, NULL, 0);
-    vcurvegrid.SETDATA(NULL, NULL, 0);
-    main1curve.SETDATA(NULL, NULL, 0);
-    main2curve.SETDATA(NULL, NULL, 0);
+    yMarker.setSamples(NULL, NULL, 0);
+    hcurvegrid.setSamples(NULL, NULL, 0);
+    vcurvegrid.setSamples(NULL, NULL, 0);
+    main1curve.setSamples(NULL, NULL, 0);
+    main2curve.setSamples(NULL, NULL, 0);
     if (waterfallWidget != NULL)
     {
         delete waterfallWidget;
@@ -327,7 +239,6 @@ void CDRMPlotQwt::clearPlots()
     }
     main1curve.setItemAttribute(QwtPlotItem::Legend, false);
     main2curve.setItemAttribute(QwtPlotItem::Legend, false);
-#endif
     // start curve count
     nCurves=0;
 }
@@ -339,8 +250,8 @@ void CDRMPlotQwt::setupBasicPlot(const char* titleText,
 {
     grid.enableX(true);
     grid.enableY(true);
-    grid.SETMAJORPEN(QPen(pc, 0, Qt::DotLine));
-    grid.SETMINORPEN(QPen(pc, 0, Qt::DotLine));
+    grid.setMajorPen(QPen(pc, 0, Qt::DotLine));
+    grid.setMinorPen(QPen(pc, 0, Qt::DotLine));
     main1curve.setItemAttribute(QwtPlotItem::Legend, false);
     main2curve.setItemAttribute(QwtPlotItem::Legend, false);
     plot->setCanvasBackground(bc);
@@ -384,10 +295,6 @@ void CDRMPlotQwt::add2ndGraph(const char* axisText, const char* legendText, doub
     main2curve.setTitle(legendText);
     main2curve.setYAxis(QwtPlot::yRight);
     main2curve.attach(plot);
-#if QWT_VERSION < 0x060100
-    foreach(QWidget* item, legend->legendItems())
-    item->setFont(legend->font());
-#endif
 }
 
 void CDRMPlotQwt::addxMarker(QColor color, double initialPos)
@@ -400,7 +307,7 @@ void CDRMPlotQwt::addxMarker(QColor color, double initialPos)
     x[0] = x[1] = initialPos;
     y[0] = yData[0];
     y[1] = yData[1];
-    curve[nCurves].SETDATA(x, y, 2);
+    curve[nCurves].setSamples(x, y, 2);
     nCurves++;
 }
 
@@ -427,7 +334,7 @@ void CDRMPlotQwt::addyMarker(QColor color, double initialPos)
     x[0] = xData[0];
     x[1] = xData[1];
     y[0] = y[1] = initialPos;
-    yMarker.SETDATA(x, y, 2);
+    yMarker.setSamples(x, y, 2);
 }
 
 void CDRMPlotQwt::setupConstPlot(const char* text)
@@ -462,12 +369,8 @@ void CDRMPlotQwt::addConstellation(const char *legendText, int c)
         sym->setPen(QPen(Qt::blue));
         sym->setBrush(QBrush(Qt::blue));
     }
-#if QWT_VERSION < 0x060000
-    curve[nCurves].setSymbol(&sym);
-#else
     curve[nCurves].setLegendAttribute(QwtPlotCurve::LegendShowSymbol, true);
     curve[nCurves].setSymbol(sym);
-#endif
     curve[nCurves].setPen(QPen(Qt::NoPen));
     curve[nCurves].setTitle(legendText);
     curve[nCurves].attach(plot);
@@ -630,9 +533,9 @@ void CDRMPlotQwt::setData(int n, CVector<_REAL>& vecrData, CVector<_REAL>& vecrS
     }
     const int size = vecrData.Size();
     if(n==0)
-        main1curve.SETDATA(size ? &vecrScale[0] : NULL, size ? &vecrData[0] : NULL, size);
+        main1curve.setSamples(size ? &vecrScale[0] : NULL, size ? &vecrData[0] : NULL, size);
     else
-        main2curve.SETDATA(size ? &vecrScale[0] : NULL, size ? &vecrData[0] : NULL, size);
+        main2curve.setSamples(size ? &vecrScale[0] : NULL, size ? &vecrData[0] : NULL, size);
     // set dynamic axis label
     if(axisLabel != "") {
         if(n==0)
@@ -651,7 +554,7 @@ void CDRMPlotQwt::setData(int n, CVector<_COMPLEX>& veccData)
         r[i] = veccData[i].real();
         im[i] = veccData[i].imag();
     }
-    curve[n].SETDATA(&r[0], &im[0], size);
+    curve[n].setSamples(&r[0], &im[0], size);
 }
 
 void CDRMPlotQwt::setxMarker(int n, _REAL r)
@@ -662,7 +565,7 @@ void CDRMPlotQwt::setxMarker(int n, _REAL r)
     x[0] = x[1] = r;
     y[0] = yData[0];
     y[1] = yData[1];
-    curve[n].SETDATA(x, y, 2);
+    curve[n].setSamples(x, y, 2);
 }
 
 void CDRMPlotQwt::setBwMarker(int n, _REAL c, _REAL b)
@@ -675,7 +578,7 @@ void CDRMPlotQwt::setBwMarker(int n, _REAL c, _REAL b)
     x[0] = c - b/2.0;
     x[1] = c + b/2.0;
     y[0] = y[1] = yData[1];
-    curve[1].SETDATA(x, y, 2);
+    curve[1].setSamples(x, y, 2);
 }
 
 
@@ -685,15 +588,15 @@ void CDRMPlotQwt::setyMarker(int n, _REAL r)
     QVector<double> xData, yData;
     xData = getBounds(QwtPlot::xBottom);
     yData << r << r;
-    yMarker.SETDATA(xData, yData);
+    yMarker.setSamples(xData, yData);
 }
 
 void CDRMPlotQwt::updateWaterfall(CVector<_REAL>& vecrData, CVector<_REAL>& vecrScale)
 {
     /* No waterfallWidget so return */
-    if (waterfallWidget == NULL)
+    if (waterfallWidget == nullptr)
         return;
-    waterfallWidget->updatePlot(vecrData, MIN_VAL_INP_SPEC_Y_AXIS_DB, MAX_VAL_INP_SPEC_Y_AXIS_DB);
+    waterfallWidget->updatePlot(vecrData.Data(), MIN_VAL_INP_SPEC_Y_AXIS_DB, MAX_VAL_INP_SPEC_Y_AXIS_DB);
     (void)vecrScale;
 }
 
@@ -705,17 +608,8 @@ void CDRMPlotQwt::setAutoScalePolicy(Plot::EAxis axis, Plot::EPolicy policy, dou
 
 QVector<double> CDRMPlotQwt::getBounds(QwtPlot::Axis axis)
 {
-#if QWT_VERSION < 0x060100
-    QwtScaleDiv* psd = plot->axisScaleDiv(axis);
-    QwtScaleDiv& sd = *psd;
-#else
     QwtScaleDiv sd = plot->axisScaleDiv(axis);
-#endif
     QVector<double> data;
-#if QWT_VERSION < 0x050200
-    data << sd.lBound() << sd.hBound();
-#else
     data << sd.lowerBound() << sd.upperBound();
-#endif
     return data;
 }

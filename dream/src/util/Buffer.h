@@ -27,10 +27,9 @@
  *
 \******************************************************************************/
 
-#if !defined(PUFFER_H__3B0BA660_CA63_4344_BB2B_23E7A0D31912__INCLUDED_)
-#define PUFFER_H__3B0BA660_CA63_4344_BB2B_23E7A0D31912__INCLUDED_
+#ifndef _buffer_h
+#define _buffer_h
 
-#include "../GlobalDefinitions.h"
 #include "Vector.h"
 
 

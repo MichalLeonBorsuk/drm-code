@@ -37,7 +37,7 @@
 
 
 CRSISubscriber::CRSISubscriber(CPacketSink *pSink) : pPacketSink(pSink),
-    cProfile(0), bNeedPft(false), fragment_size(0), pDRMReceiver(0),
+    cProfile(0), bNeedPft(false), fragment_size(0), pDRMReceiver(nullptr),
     bUseAFCRC(true), sequence_counter(0)
 {
     TagPacketDecoderRSCIControl.SetSubscriber(this);
@@ -58,7 +58,7 @@ void CRSISubscriber::SetPFTFragmentSize(const int iFrag)
 {
     if(iFrag>0)
     {
-        fragment_size = iFrag;
+        fragment_size = static_cast<unsigned>(iFrag);
         bNeedPft = true;
     }
     else
@@ -67,10 +67,10 @@ void CRSISubscriber::SetPFTFragmentSize(const int iFrag)
 
 void CRSISubscriber::TransmitPacket(CTagPacketGenerator& Generator)
 {
-    if (pPacketSink != 0)
+    if (pPacketSink != nullptr)
     {
         Generator.SetProfile(cProfile);
-        vector<_BYTE> packet = AFPacketGenerator.GenAFPacket(bUseAFCRC, Generator);
+        vector<_BYTE> packet = AFPacketGenerator.GenAFPacket(bUseAFCRC, Generator).Data();
         if(bNeedPft)
         {
             vector< vector<_BYTE> > packets;
@@ -89,7 +89,7 @@ void CRSISubscriber::TransmitPacket(CTagPacketGenerator& Generator)
 void CRSISubscriber::SendPacket(const vector<_BYTE>& vecbydata, uint32_t, uint16_t)
 {
     CVectorEx<_BINARY> vecbidata;
-    vecbidata.Init(vecbydata.size()*SIZEOF__BYTE);
+    vecbidata.Init(static_cast<int>(vecbydata.size()*SIZEOF__BYTE));
     vecbidata.ResetBitAccess();
     for(size_t i=0; i<vecbydata.size(); i++)
         vecbidata.Enqueue(vecbydata[i], SIZEOF__BYTE);
@@ -100,8 +100,8 @@ void CRSISubscriber::SendPacket(const vector<_BYTE>& vecbydata, uint32_t, uint16
 
 
 /* TODO wrap a sendto in a class and store it in pPacketSink */
-CRSISubscriberSocket::CRSISubscriberSocket(CPacketSink *pSink):CRSISubscriber(pSink),pSocket(NULL)
-    ,uIf(0),uAddr(0),uPort(0)
+CRSISubscriberSocket::CRSISubscriberSocket(CPacketSink *pSink):CRSISubscriber(pSink),pSocket(nullptr)
+    //,uAddr(0),uIf(0),uPort(0)
 {
     pSocket = new CPacketSocketNative;
     pPacketSink = pSocket;
@@ -114,7 +114,7 @@ CRSISubscriberSocket::~CRSISubscriberSocket()
 
 bool CRSISubscriberSocket::SetDestination(const string& dest)
 {
-    if(pSocket==NULL)
+    if(pSocket==nullptr)
     {
         return false;
     }
@@ -140,7 +140,7 @@ bool CRSISubscriberSocket::GetDestination(string& str)
 
 bool CRSISubscriberSocket::SetOrigin(const string& str)
 {
-    if(pSocket==NULL)
+    if(pSocket==nullptr)
     {
         return false;
     }
@@ -157,7 +157,7 @@ bool CRSISubscriberSocket::SetOrigin(const string& str)
 
 bool CRSISubscriberSocket::GetOrigin(string& str)
 {
-    if(pSocket==NULL)
+    if(pSocket==nullptr)
     {
         return false;
     }
@@ -168,14 +168,14 @@ bool CRSISubscriberSocket::GetOrigin(string& str)
 /* poll for incoming packets */
 void CRSISubscriberSocket::poll()
 {
-    if(pSocket!=NULL)
+    if(pSocket!=nullptr)
         pSocket->poll();
 }
 
-CRSISubscriberFile::CRSISubscriberFile(): CRSISubscriber(NULL), pPacketSinkFile(NULL)
+CRSISubscriberFile::CRSISubscriberFile(): CRSISubscriber(nullptr), pPacketSinkFile(nullptr)
 {
     /* override the subscriber back to NULL to prevent Cpro doing anything */
-    TagPacketDecoderRSCIControl.SetSubscriber(NULL);
+    TagPacketDecoderRSCIControl.SetSubscriber(nullptr);
 }
 
 bool CRSISubscriberFile::SetDestination(const string& strFName)
@@ -184,8 +184,8 @@ bool CRSISubscriberFile::SetDestination(const string& strFName)
     if(pPacketSink)
     {
         delete pPacketSink;
-        pPacketSink = NULL;
-        pPacketSinkFile = NULL;
+        pPacketSink = nullptr;
+        pPacketSinkFile = nullptr;
     }
     string ext;
     size_t p = strFName.rfind('.');

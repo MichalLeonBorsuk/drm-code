@@ -64,14 +64,14 @@ public:
     void AddSegment (int iSegNum)
     {
         if ((iSegNum + 1) > int (vecbHaveSegment.size ()))
-            vecbHaveSegment.resize (iSegNum + 1, false);
-        vecbHaveSegment[iSegNum] = true;
+            vecbHaveSegment.resize (unsigned(iSegNum) + 1, false);
+        vecbHaveSegment[unsigned(iSegNum)] = true;
     }
 
     bool HaveSegment (int iSegNum)
     {
         if (iSegNum < int (vecbHaveSegment.size ()))
-            return vecbHaveSegment[iSegNum];
+            return vecbHaveSegment[unsigned(iSegNum)];
         return false;
     }
 
@@ -180,8 +180,8 @@ public:
 
 protected:
 
-    virtual void copyin (CVector < _BYTE > &vecDataIn, size_t iSegNum);
-    virtual void cachelast (CVector < _BYTE > &vecDataIn, size_t iSegSize);
+    virtual void copyBitsin (CVector < _BYTE > &vecDataIn, size_t iSegNum);
+    virtual void cachelastBits (CVector < _BYTE > &vecDataIn, size_t iSegSize);
     virtual void copylast ();
 
     bool bPack;
@@ -191,10 +191,7 @@ class CByteReassemblerN:public CBitReassemblerN
 {
 public:
 
-    CByteReassemblerN():CBitReassemblerN()
-    {
-        bPack = true;
-    }
+    CByteReassemblerN();
 
 };
 

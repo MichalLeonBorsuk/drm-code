@@ -122,7 +122,6 @@ protected:
     WaterfallWidget* waterfallWidget;
 
 private slots:
-    void OnSelectedOld(const QwtDoublePoint &pos);
     void OnSelected(const QPointF &pos);
 
 signals:

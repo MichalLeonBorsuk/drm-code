@@ -61,9 +61,8 @@ void FreqOffsetModeABCD::init(int iHalfBuffer, int iSampleRate, double rCenterFr
     iSearchWinSize = iHalfBuffer - veciTableFreqPilots[2];
 
     /* Calculate actual indices of start and end of search window */
-    iStartDCSearch =
-        (int) Floor((rNormDesPos - rNormHalfWinSize) * iHalfBuffer);
-    iEndDCSearch = (int) Ceil((rNormDesPos + rNormHalfWinSize) * iHalfBuffer);
+    iStartDCSearch = static_cast<int>(Floor((rNormDesPos - rNormHalfWinSize) * iHalfBuffer));
+    iEndDCSearch = static_cast<int>(Ceil((rNormDesPos + rNormHalfWinSize) * iHalfBuffer));
 
     /* Check range. If out of range -> correct */
     if (!((iStartDCSearch > 0) && (iStartDCSearch < iSearchWinSize)))
@@ -74,7 +73,7 @@ void FreqOffsetModeABCD::init(int iHalfBuffer, int iSampleRate, double rCenterFr
 
     /* Set bound for ratio between filtered signal to signal. Use a lower bound
        if the search window is smaller */
-    if (((_REAL) iEndDCSearch - iStartDCSearch) / iHalfBuffer < (_REAL) 0.042)
+    if (static_cast<_REAL>(iEndDCSearch - iStartDCSearch) / iHalfBuffer < static_cast<_REAL>(0.042))
         rPeakBoundFiltToSig = PEAK_BOUND_FILT2SIGNAL_0_042;
     else
         rPeakBoundFiltToSig = PEAK_BOUND_FILT2SIGNAL_1;
@@ -232,21 +231,22 @@ bool FreqOffsetModeE::calcOffset(const CRealVector& vecrPSD, int& offset)
 {
     //qDebug() << vecrPSD.GetSize();
     double min=1.0*numeric_limits<_REAL>::max(), max= -1.0*numeric_limits<_REAL>::max();
-    char c[vecrPSD.GetSize()+1];
+    vector<char> c(static_cast<size_t>(vecrPSD.GetSize()+1));
     int peak=0;
-    for(int i=0; i< vecrPSD.GetSize(); i++) {
+    for(int i=0; i < vecrPSD.GetSize(); i++) {
         double r = vecrPSD[i];
         if(r<min) min = r;
         if(r>max) max = r;
         r *= 4.0;
-        if(r<10.0)
-            c[i] = int(r) + '0';
+        if(r<10.0) {
+            c[unsigned(i)] = '0' + static_cast<char>(int(r));
+        }
         else
         {
-            c[i] = 'A';
+            c[unsigned(i)] = 'A';
             peak = i;
         }
-        c[vecrPSD.GetSize()]=0;
+        c[unsigned(vecrPSD.GetSize())] = char(0);
     }
     // find edge after peak
     int right_edge=0;
@@ -283,7 +283,7 @@ void CFreqSyncAcq::ProcessDataInternal(CParameter& Parameters)
 
         /* Do not transfer any data to the next block if no frequency
            acquisition was successfully done */
-        iOutputBlockSize = 0;
+        this->iOutputBlockSize = 0;
 
         /* Add new symbol in history (shift register) */
         vecrFFTHistory.AddEnd((*pvecInputData), iInputBlockSize);
@@ -348,8 +348,8 @@ void CFreqSyncAcq::ProcessDataInternal(CParameter& Parameters)
                 vecrFiltResRL.Init(iHalfBuffer);
                 vecrFiltRes.Init(iHalfBuffer);
 
-                vecrFiltResLR.Reset((CReal) 0.0);
-                vecrFiltResRL.Reset((CReal) 0.0);
+                vecrFiltResLR.Reset(static_cast<CReal>(0.0));
+                vecrFiltResRL.Reset(static_cast<CReal>(0.0));
 
                 /* From the left edge to the right edge */
                 vecrFiltResLR[iStartFilt] = vecrPSD[iStartFilt];
@@ -396,7 +396,7 @@ void CFreqSyncAcq::ProcessDataInternal(CParameter& Parameters)
 
                 if(acquired)
                 {
-                    Parameters.rFreqOffsetAcqui = (_REAL) offset / iFrAcFFTSize;
+                    Parameters.rFreqOffsetAcqui = static_cast<_REAL>( offset / iFrAcFFTSize );
                     int iSampleRate = Parameters.GetSigSampleRate();
                     //qDebug() << "offset " << 100*Parameters.rFreqOffsetAcqui << "% " << iSampleRate*Parameters.rFreqOffsetAcqui << "kHz";
                     /* Send out the data stored for FFT calculation ----- */
@@ -407,8 +407,8 @@ void CFreqSyncAcq::ProcessDataInternal(CParameter& Parameters)
                         iOutputBlockSize = iHistBufSize;
 
                         /* Frequency offset correction */
-                        const _REAL rNormCurFreqOffsFst = (_REAL) 2.0 * crPi *
-                                                          (Parameters.rFreqOffsetAcqui - rInternIFNorm);
+                        const _REAL rNormCurFreqOffsFst = static_cast<_REAL>( 2.0 * crPi *
+                                                          (Parameters.rFreqOffsetAcqui - rInternIFNorm));
 
                         for (int i = 0; i < iHistBufSize; i++)
                         {
@@ -437,7 +437,7 @@ void CFreqSyncAcq::ProcessDataInternal(CParameter& Parameters)
         if (bSyncInput)
         {
             Parameters.rFreqOffsetAcqui =
-                (_REAL) Parameters.CellMappingTable.iIndexDCFreq / Parameters.CellMappingTable.iFFTSizeN;
+                static_cast<_REAL>( Parameters.CellMappingTable.iIndexDCFreq / Parameters.CellMappingTable.iFFTSizeN);
         }
 
         /* Use the same block size as input block size */
@@ -448,8 +448,8 @@ void CFreqSyncAcq::ProcessDataInternal(CParameter& Parameters)
         /* Total frequency offset from acquisition and tracking (we calculate
            the normalized frequency offset) */
         const _REAL rNormCurFreqOffset =
-            (_REAL) 2.0 * crPi * (Parameters.rFreqOffsetAcqui +
-                                  Parameters.rFreqOffsetTrack - rInternIFNorm);
+            static_cast<_REAL>( 2.0 * crPi * (Parameters.rFreqOffsetAcqui +
+                                  Parameters.rFreqOffsetTrack - rInternIFNorm) );
 
         //qDebug() << rNormCurFreqOffset;
         /* New rotation vector for exp() calculation */
@@ -514,7 +514,7 @@ void CFreqSyncAcq::InitInternal(CParameter& Parameters)
     /* Init vectors and FFT-plan -------------------------------------------- */
     /* Allocate memory for FFT-histories and init with zeros */
     iHistBufSize = iFrAcFFTSize * NUM_BLOCKS_USED_FOR_AV;
-    vecrFFTHistory.Init(iHistBufSize, (_REAL) 0.0);
+    vecrFFTHistory.Init(iHistBufSize, static_cast<_REAL>(0.0));
     vecrFFTInput.Init(iFrAcFFTSize);
     vecrSqMagFFTOut.Init(iHalfBuffer);
 
@@ -531,8 +531,8 @@ void CFreqSyncAcq::InitInternal(CParameter& Parameters)
 
     /* Frequency correction */
     /* Start with phase null (arbitrary) */
-    cCurExp = (_REAL) 1.0;
-    rInternIFNorm = (_REAL) Parameters.CellMappingTable.iIndexDCFreq / iFFTSize;
+    cCurExp = static_cast<_REAL>( 1.0);
+    rInternIFNorm = static_cast<_REAL>(Parameters.CellMappingTable.iIndexDCFreq / iFFTSize);
 
 
     /* Init bandpass filter object */
@@ -569,5 +569,5 @@ void CFreqSyncAcq::StartAcquisition()
     iAverageCounter = NUM_FFT_RES_AV_BLOCKS;
 
     /* Reset FFT-history */
-    vecrFFTHistory.Reset((_REAL) 0.0);
+    vecrFFTHistory.Reset(static_cast<_REAL>(0.0));
 }

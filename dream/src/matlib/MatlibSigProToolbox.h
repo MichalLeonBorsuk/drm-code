@@ -25,8 +25,8 @@
  *
 \******************************************************************************/
 
-#ifndef _MATLIB_SIGNAL_PROC_TOOLBOX_H_
-#define _MATLIB_SIGNAL_PROC_TOOLBOX_H_
+#ifndef _mATLIB_SIGNAL_PROC_TOOLBOX_H_
+#define _mATLIB_SIGNAL_PROC_TOOLBOX_H_
 
 #include "Matlib.h"
 #include "MatlibStdToolbox.h"
@@ -39,7 +39,7 @@ CMatlibVector<CReal>    Randn(const int iLen);
 inline
 CMatlibVector<CReal>    Rand(const int iLen)
 {
-    _VECOP(CReal, iLen, (CReal) rand() / RAND_MAX);
+    _vECOP(CReal, iLen, (CReal) rand() / RAND_MAX);
 }
 
 
@@ -78,7 +78,7 @@ inline CReal            Sinc(const CReal& rI)
 inline
 CMatlibVector<CReal>    Sinc(const CMatlibVector<CReal>& fvI)
 {
-    _VECOP(CReal, fvI.GetSize(), Sinc(fvI[i]));
+    _vECOP(CReal, fvI.GetSize(), Sinc(fvI[i]));
 }
 
 
@@ -111,12 +111,12 @@ inline CReal            SqMag(const CReal& rI)
 inline
 CMatlibVector<CReal>    SqMag(const CMatlibVector<CComplex>& veccI)
 {
-    _VECOP(CReal, veccI.GetSize(), SqMag(veccI[i]));
+    _vECOP(CReal, veccI.GetSize(), SqMag(veccI[i]));
 }
 inline
 CMatlibVector<CReal>    SqMag(const CMatlibVector<CReal>& vecrI)
 {
-    _VECOP(CReal, vecrI.GetSize(), SqMag(vecrI[i]));
+    _vECOP(CReal, vecrI.GetSize(), SqMag(vecrI[i]));
 }
 
 /* One pole recursion (first order IIR)

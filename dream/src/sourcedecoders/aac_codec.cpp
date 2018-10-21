@@ -214,14 +214,14 @@ AacCodec::DecOpen(CAudioParam& AudioParam, int *iAudioSampleRate, int *iLenDecOu
 _SAMPLE*
 AacCodec::Decode(CVector<uint8_t>& vecbyPrepAudioFrame, int *iChannels, CAudioCodec::EDecError *eDecError)
 {
-    _SAMPLE* psDecOutSampleBuf = NULL;
+    _SAMPLE* psDecOutSampleBuf = nullptr;
     NeAACDecFrameInfo DecFrameInfo;
     DecFrameInfo.channels = 1;
     DecFrameInfo.error = 1;
-    if (hFaadDecoder != NULL)
+    if (hFaadDecoder != nullptr)
     {
-        psDecOutSampleBuf = (_SAMPLE*) NeAACDecDecode(hFaadDecoder,
-                            &DecFrameInfo, &vecbyPrepAudioFrame[0], vecbyPrepAudioFrame.size());
+        psDecOutSampleBuf = static_cast<_SAMPLE*>(NeAACDecDecode(hFaadDecoder,
+                            &DecFrameInfo, &vecbyPrepAudioFrame[0], static_cast<unsigned long>(vecbyPrepAudioFrame.Size())));
     }
     *iChannels = DecFrameInfo.channels;
     *eDecError = DecFrameInfo.error ? CAudioCodec::DECODER_ERROR_UNKNOWN : CAudioCodec::DECODER_ERROR_OK;

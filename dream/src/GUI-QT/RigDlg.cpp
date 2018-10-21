@@ -40,14 +40,15 @@ RigDlg::RigDlg(CRig& nrig, QWidget* parent) :
     QDialog(parent),
     rig(nrig), rigmap(), bComboBoxPortMutex(false)
 {
+    map<rig_model_t,CHamlib::SDrRigCaps> r;
+    rig.GetRigList(r);
+
     setAttribute(Qt::WA_QuitOnClose, false);
     ui->setupUi(this);
 
     sMeter = SMeter::createSMeter();
     ui->sMeterLayout->addWidget(sMeter->widget());
 
-    map<rig_model_t,CHamlib::SDrRigCaps> r;
-    rig.GetRigList(r);
     ui->modified->setEnabled(false);
     //rigTypes->setColumnCount(2);
     ui->rigTypes->setSortingEnabled(false);

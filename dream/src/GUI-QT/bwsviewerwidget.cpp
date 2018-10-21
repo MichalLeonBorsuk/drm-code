@@ -34,7 +34,8 @@
 #include <QDir>
 #include <QFile>
 #include <QMessageBox>
-#include <QWebHistory>
+#include <QWebEngineHistory>
+#include <QAction>
 
 #undef ENABLE_HACK
 #define ENABLE_HACK /* Do we really need these hack unless for vtc trial sample? */
@@ -54,11 +55,11 @@ BWSViewerWidget::BWSViewerWidget(QWidget* parent):
     ui->setupUi(this);
 
     /* Setup webView */
-    ui->webView->page()->setNetworkAccessManager(&nam);
-    ui->webView->pageAction(QWebPage::OpenLinkInNewWindow)->setVisible(false);
-    ui->webView->pageAction(QWebPage::DownloadLinkToDisk)->setVisible(false);
-    ui->webView->pageAction(QWebPage::OpenImageInNewWindow)->setVisible(false);
-    ui->webView->pageAction(QWebPage::DownloadImageToDisk)->setVisible(false);
+    //ui->webView->page()->setNetworkAccessManager(&nam);
+    ui->webView->pageAction(QWebEnginePage::OpenLinkInNewWindow)->setVisible(false);
+    ui->webView->pageAction(QWebEnginePage::DownloadLinkToDisk)->setVisible(false);
+   // ui->webView->pageAction(QWebEnginePage::OpenImageInNewWindow)->setVisible(false);
+    ui->webView->pageAction(QWebEnginePage::DownloadImageToDisk)->setVisible(false);
 
     /* Update time for color LED */
     ui->LEDStatus->SetUpdateTime(1000);
@@ -386,8 +387,10 @@ void BWSViewerWidget::SaveMOTObject(const QString& strObjName,
         size = vecbRawData.Size();
 
         /* Write data */
-        for (i = 0, written = 0; size > 0 && written >= 0; i+=written, size-=written)
-            written = file.write((const char*)&vecbRawData.at(i), size);
+        for (i = 0, written = 0; size > 0 && written >= 0; i+=written, size-=written) {
+            const _BYTE& bv = vecbRawData.Data().at(unsigned(i));
+            written = int(file.write(reinterpret_cast<const char*>(&bv), size));
+        }
 
         /* Close the file afterwards */
         file.close();

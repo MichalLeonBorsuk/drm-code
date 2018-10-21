@@ -138,13 +138,13 @@ CVector<_BYTE> CAFPacketGenerator::PackBytes(CVector<_BINARY> &vecbiPacket)
     /* Convert to bytes and return */
     CVector<_BYTE> vecbyPacket;
     vecbiPacket.ResetBitAccess();
-    size_t bits = vecbiPacket.Size();
-    size_t bytes = bits / SIZEOF__BYTE;
-    vecbyPacket.reserve(bytes);
-    for(size_t i=0; i<bytes; i++)
+    int bits = vecbiPacket.Size();
+    int bytes = bits / SIZEOF__BYTE;
+    vecbyPacket.Init(bytes);
+    for(int i=0; i<bytes; i++)
     {
-        _BYTE byte = (_BYTE)vecbiPacket.Separate(SIZEOF__BYTE);
-        vecbyPacket.push_back(byte);
+        _BYTE byte = _BYTE(vecbiPacket.Separate(SIZEOF__BYTE));
+        vecbyPacket.Add(byte);
     }
     return vecbyPacket;
 }

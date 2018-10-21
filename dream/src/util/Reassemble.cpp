@@ -80,7 +80,7 @@ CReassemblerN::AddSegment (vector<_BYTE> &vecDataIn, int iSegNum, bool bLast)
             }
             else
             {   /* case 3 */
-                copyin (vecDataIn, iSegNum);
+                copyin (vecDataIn, size_t(iSegNum));
             }
         }                       /* otherwise do nothing as we already have the last segment */
     }
@@ -130,7 +130,7 @@ CReassemblerN::cachelast (vector < _BYTE > &vecDataIn, size_t iSegSize)
 void
 CReassemblerN::copylast ()
 {
-    size_t offset = iLastSegmentNum * iSegmentSize;
+    size_t offset = size_t(iLastSegmentNum) * iSegmentSize;
     vecData.resize (vecData.size()+vecLastSegment.size ());
     for (size_t i = 0; i < size_t (vecLastSegment.size ()); i++)
         vecData[offset + i] = vecLastSegment[i];
@@ -138,7 +138,7 @@ CReassemblerN::copylast ()
 }
 
 void
-CBitReassemblerN::copyin (CVector < _BYTE > &vecDataIn, size_t iSegNum)
+CBitReassemblerN::copyBitsin (CVector < _BYTE > &vecDataIn, size_t iSegNum)
 {
     size_t iSize = size_t(iSegmentSize) * (bPack?1:8);
     size_t offset = iSegNum * iSize;
@@ -150,7 +150,7 @@ CBitReassemblerN::copyin (CVector < _BYTE > &vecDataIn, size_t iSegNum)
 }
 
 void
-CBitReassemblerN::cachelast (CVector < _BYTE > &vecDataIn, size_t iSegSize)
+CBitReassemblerN::cachelastBits (CVector < _BYTE > &vecDataIn, size_t iSegSize)
 {
     size_t iSize = size_t(iSegSize) * (bPack?1:8);
     vecLastSegment.resize (iSize);
@@ -167,4 +167,9 @@ CBitReassemblerN::copylast ()
     for (size_t i = 0; i < size_t (vecLastSegment.size ()); i++)
         vecData[offset + i] = vecLastSegment[i];
     vecLastSegment.resize (0);
+}
+
+CByteReassemblerN::CByteReassemblerN():CBitReassemblerN()
+{
+    bPack = true;
 }

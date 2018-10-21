@@ -27,16 +27,15 @@
  *
 \******************************************************************************/
 
-#if !defined(AFX_MODUL_H__41E39CD3_2AEC_400E_907B_148C0EC17A43__INCLUDED_)
-#define AFX_MODUL_H__41E39CD3_2AEC_400E_907B_148C0EC17A43__INCLUDED_
+#if !defined(_module_h)
+#define _module_h
 
 #include "Buffer.h"
-#include "Vector.h"
 #include "../Parameter.h"
 #include <iostream>
 
-
 /* Classes ********************************************************************/
+
 /* CModul ------------------------------------------------------------------- */
 template<class TInput, class TOutput>
 class CModul

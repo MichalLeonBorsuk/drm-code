@@ -94,7 +94,7 @@ void SlideShowViewer::OnTimer()
 
         /* Load picture in QT format */
         QPixmap pic;
-        if (pic.loadFromData(&imagedata[0], imagedata.size()))
+        if (pic.loadFromData(&imagedata[0], unsigned(imagedata.Size())))
         {
             /* Set new picture in source factory */
             vecImages.push_back(pic);

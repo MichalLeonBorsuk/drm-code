@@ -581,15 +581,12 @@ void CSDCTransmit::DataEntityType9(CVector<_BINARY>& vecbiData, int ServiceID,
             vecbiData.Enqueue((uint32_t) 0, 1);
 
             /* CELP_CRC */
-            switch (Parameter.Service[ServiceID].AudioParam.bCELPCRC)
+            if (Parameter.Service[ServiceID].AudioParam.bCELPCRC)
             {
-            case false:
-                vecbiData.Enqueue(0 /* 0 */, 1);
-                break;
-
-            case true:
                 vecbiData.Enqueue(1 /* 1 */, 1);
-                break;
+            }
+            else {
+                vecbiData.Enqueue(0 /* 0 */, 1);
             }
             break;
 
@@ -607,15 +604,12 @@ void CSDCTransmit::DataEntityType9(CVector<_BINARY>& vecbiData, int ServiceID,
             }
 
             /* HVXC CRC */
-            switch (Parameter.Service[ServiceID].AudioParam.bHVXCCRC)
+            if (Parameter.Service[ServiceID].AudioParam.bHVXCCRC)
             {
-            case false:
-                vecbiData.Enqueue(0 /* 0 */, 1);
-                break;
-
-            case true:
                 vecbiData.Enqueue(1 /* 1 */, 1);
-                break;
+            }
+            else {
+                vecbiData.Enqueue(0 /* 0 */, 1);
             }
             break;
 
@@ -656,27 +650,21 @@ void CSDCTransmit::DataEntityType9(CVector<_BINARY>& vecbiData, int ServiceID,
     }
 
     /* Text flag */
-    switch (Parameter.Service[ServiceID].AudioParam.bTextflag)
+    if(Parameter.Service[ServiceID].AudioParam.bTextflag)
     {
-    case false:
-        vecbiData.Enqueue(0 /* 0 */, 1);
-        break;
-
-    case true:
         vecbiData.Enqueue(1 /* 1 */, 1);
-        break;
+    }
+    else {
+        vecbiData.Enqueue(0 /* 0 */, 1);
     }
 
     /* Enhancement flag */
-    switch (Parameter.Service[ServiceID].AudioParam.bEnhanceFlag)
+    if(Parameter.Service[ServiceID].AudioParam.bEnhanceFlag)
     {
-    case false:
-        vecbiData.Enqueue(0 /* 0 */, 1);
-        break;
-
-    case true:
         vecbiData.Enqueue(1 /* 1 */, 1);
-        break;
+    }
+    else {
+        vecbiData.Enqueue(0 /* 0 */, 1);
     }
 
     /* Coder field */
@@ -690,9 +678,9 @@ void CSDCTransmit::DataEntityType9(CVector<_BINARY>& vecbiData, int ServiceID,
     else
     {
         /* rfa 5 bit */
-        vecbiData.Enqueue((uint32_t) 0, 5);
+        vecbiData.Enqueue(static_cast<uint32_t>(0), 5);
     }
 
     /* rfa 1 bit */
-    vecbiData.Enqueue((uint32_t) 0, 1);
+    vecbiData.Enqueue(static_cast<uint32_t>(0), 1);
 }

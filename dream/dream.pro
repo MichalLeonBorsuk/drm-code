@@ -61,21 +61,25 @@ unix:!cross_compile {
     message(building on $$UNAME)
 }
 macx {
+    QT_CONFIG -= no-pkg-config
+    PKG_CONFIG = /usr/local/bin/pkg-config
     INCLUDEPATH += /usr/local/include
     LIBS += -L/usr/local/lib
     QMAKE_LFLAGS += -F/usr/local/lib
     LIBS += -framework CoreFoundation -framework CoreServices
     LIBS += -framework CoreAudio -framework AudioToolbox -framework AudioUnit
     CONFIG += pcap
-    !sound:CONFIG += portaudio sound
-    exists(/usr/local/include/sndfile.h) {
+    packagesExist(libpulse) {
+        CONFIG += pulseaudio sound
+    }
+    packagesExist(sndfile) {
         CONFIG += sndfile
     }
-    exists(/usr/local/include/speex/speex_preprocess.h) {
-        CONFIG += speexdsp
-    }
-    exists(/usr/local/include/hamlib/rig.h) {
+    packagesExist(hamlib) {
         CONFIG += hamlib
+    }
+    packagesExist(speex) {
+        CONFIG += libspeexdsp
     }
 }
 linux-* {
@@ -85,7 +89,7 @@ android {
     ANDROID_PACKAGE_SOURCE_DIR=$$PWD/android
     SOURCES += src/android/platform_util.cpp
     HEADERS += src/android/platform_util.h
-    QT -= webkitwidgets
+    QT -= webenginewidgets
     QT += svg
     #CONFIG += openSL sound
     CONFIG += qtaudio sound
@@ -342,9 +346,7 @@ portaudio {
                src/sound/pa_ringbuffer.c
     LIBS += -lportaudio
     unix {
-	!macx {
-	  PKGCONFIG += portaudio-2.0
-	}
+        PKGCONFIG += portaudio-2.0
     }
     message("with portaudio")
 }
@@ -352,8 +354,16 @@ pulseaudio {
     DEFINES += USE_PULSEAUDIO
     HEADERS += src/sound/drm_pulseaudio.h
     SOURCES += src/sound/drm_pulseaudio.cpp
-    LIBS += -lpulse
-    unix:PKGCONFIG += libpulse
+    unix {
+        PKGCONFIG += libpulse
+        macx {
+            INCLUDEPATH += /usr/local/Cellar/pulseaudio/12.2/include
+            LIBS += -L/usr/local/Cellar/pulseaudio/12.2/lib -lpulse
+        }
+    }
+    else {
+        LIBS += -lpulse
+    }
     message("with pulseaudio")
 }
 openSL {
@@ -600,10 +610,11 @@ SOURCES += \
     src/util/Reassemble.cpp \
     src/util/Settings.cpp \
     src/util/Utilities.cpp \
-    src/Version.cpp
+    src/Version.cpp \
+    src/util/vector.cpp
 
 gui {
-    contains(QT, webkitwidgets)|contains(QT,webkit) {
+    contains(QT, webenginewidgets)|contains(QT,webkit) {
         FORMS += BWSViewer.ui bwsviewerwidget.ui
         HEADERS += src/GUI-QT/BWSViewer.h src/GUI-QT/bwsviewerwidget.h
         SOURCES += src/GUI-QT/BWSViewer.cpp src/GUI-QT/bwsviewerwidget.cpp
@@ -730,7 +741,7 @@ SOURCES += \
     src/GUI-QT/chartdialog.cpp
 }
 
-!isEmpty(QT):message(With Qt components: $$QT)
+!isEmpty(QT):message(with Qt components: $$QT)
 !sound:error("no usable audio interface found - install pulseaudio or portaudio dev package")
 
 OTHER_FILES += \

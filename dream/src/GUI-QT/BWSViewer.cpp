@@ -33,7 +33,7 @@
 #include <QDir>
 #include <QFile>
 #include <QMessageBox>
-#include <QWebHistory>
+#include <QWebEngineHistory>
 #include "ThemeCustomizer.h"
 
 
@@ -49,7 +49,7 @@
 BWSViewer::BWSViewer(CDRMReceiver& rec, CSettings& Settings, QWidget* parent):
     CWindow(parent, Settings, "BWS"),
     nam(this, cache, waitobjs, bAllowExternalContent, strCacheHost),
-    receiver(rec), decoder(NULL), bHomeSet(false), bPageLoading(false),
+    receiver(rec), decoder(nullptr), bHomeSet(false), bPageLoading(false),
     bSaveFileToDisk(false), bRestrictedProfile(false), bAllowExternalContent(true),
     bClearCacheOnNewService(true), bDirectoryIndexChanged(false),
     iLastAwaitingOjects(0), strCacheHost(CACHE_HOST),
@@ -61,11 +61,11 @@ BWSViewer::BWSViewer(CDRMReceiver& rec, CSettings& Settings, QWidget* parent):
     strDataDir = QString::fromUtf8(sDataFilesDirectory.c_str());
 
     /* Setup webView */
-    webView->page()->setNetworkAccessManager(&nam);
-    webView->pageAction(QWebPage::OpenLinkInNewWindow)->setVisible(false);
-    webView->pageAction(QWebPage::DownloadLinkToDisk)->setVisible(false);
-    webView->pageAction(QWebPage::OpenImageInNewWindow)->setVisible(false);
-    webView->pageAction(QWebPage::DownloadImageToDisk)->setVisible(false);
+    //webView->page()->setNetworkAccessManager(&nam);
+    webView->pageAction(QWebEnginePage::OpenLinkInNewWindow)->setVisible(false);
+    webView->pageAction(QWebEnginePage::DownloadLinkToDisk)->setVisible(false);
+    //webView->pageAction(QWebEnginePage::OpenImageInNewWindow)->setVisible(false);
+    webView->pageAction(QWebEnginePage::DownloadImageToDisk)->setVisible(false);
 
     /* Update time for color LED */
     LEDStatus->SetUpdateTime(1000);
@@ -436,12 +436,14 @@ void BWSViewer::SaveMOTObject(const QString& strObjName,
     QFile file(strFileName);
     if (file.open(QIODevice::WriteOnly))// | QIODevice::Truncate))
     {
-        int i, written, size;
-        size = vecbRawData.Size();
+        long long written = 0;
+        int size = vecbRawData.Size();
 
         /* Write data */
-        for (i = 0, written = 0; size > 0 && written >= 0; i+=written, size-=written)
-            written = file.write((const char*)&vecbRawData.at(i), size);
+        for (int i = 0; size > 0 && written >= 0; i+=written, size-=written) {
+            const _BYTE& bv = vecbRawData.Data().at(unsigned(i));
+            written = file.write(reinterpret_cast<const char*>(&bv), size);
+        }
 
         /* Close the file afterwards */
         file.close();

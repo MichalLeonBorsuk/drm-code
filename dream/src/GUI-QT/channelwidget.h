@@ -7,8 +7,8 @@
 
 class CDRMPlot;
 class ReceiverController;
-class Reception;
-class ChannelConfiguration;
+struct Reception;
+struct ChannelConfiguration;
 
 namespace Ui {
 class ChannelWidget;
@@ -19,7 +19,7 @@ class ChannelWidget : public QWidget
     Q_OBJECT
 
 public:
-    explicit ChannelWidget(ReceiverController*, QWidget *parent = 0);
+    explicit ChannelWidget(ReceiverController*, QWidget *parent = nullptr);
     ~ChannelWidget();
     void connectController(ReceiverController*);
 

@@ -211,8 +211,10 @@ void GingaViewer::SaveMOTObject(const QString& strObjName,
         receivedObjects++;
         
         /* Write data */
-        for (i = 0, written = 0; size > 0 && written >= 0; i+=written, size-=written)
-            written = file.write((const char*)&vecbRawData.at(i), size);
+        for (i = 0, written = 0; size > 0 && written >= 0; i+=written, size-=written) {
+            const _BYTE& bv = vecbRawData.Data().at(unsigned(i));
+            written = file.write(reinterpret_cast<const char*>(&bv), size);
+        }
 
         /* Close the file afterwards */
         file.close();
