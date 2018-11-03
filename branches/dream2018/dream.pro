@@ -38,7 +38,7 @@ gui {
     RESOURCES = src/GUI-QT/res/icons.qrc
     QT += network xml
     qt4:QT += webkit
-    qt5:QT += widgets webkitwidgets
+    qt5:QT += widgets
     INCLUDEPATH += src/GUI-QT
     VPATH += src/GUI-QT
     win32:RC_FILE = windows/dream.rc
@@ -57,27 +57,25 @@ unix:!cross_compile {
     message(building on $$UNAME)
 }
 macx {
-    INCLUDEPATH += /opt/local/include
-    LIBS += -L/opt/local/lib
+    QT_CONFIG -= no-pkg-config
+    PKG_CONFIG = /usr/local/bin/pkg-config
+    INCLUDEPATH += /usr/local/include
+    LIBS += -L/usr/local/lib
+    QMAKE_LFLAGS += -F/usr/local/lib
     LIBS += -framework CoreFoundation -framework CoreServices
     LIBS += -framework CoreAudio -framework AudioToolbox -framework AudioUnit
-    CONFIG += pcap
-    !multimedia:CONFIG += portaudio sound
-    !qt5:!contains(QT_VERSION, ^4\\.8.*) {
-      exists(/opt/local/include/sndfile.h) {
+    CONFIG += pcap qwt
+    packagesExist(libpulse) {
+        CONFIG += pulseaudio sound
+    }
+    packagesExist(sndfile) {
         CONFIG += sndfile
-      }
-      exists(/opt/local/include/speex/speex_preprocess.h) {
-        CONFIG += speexdsp
-      }
-      exists(/opt/local/include/hamlib/rig.h) {
+    }
+    packagesExist(hamlib) {
         CONFIG += hamlib
-      }
-      contains(QT_VERSION, ^4\\.7.*) {
-	QT += phonon opengl svg
-        DEFINES -= QWT_NO_SVG
-        QMAKE_LFLAGS += -bind_at_load
-      }
+    }
+    packagesExist(speex) {
+        CONFIG += libspeexdsp
     }
 }
 linux-* {
@@ -288,47 +286,38 @@ hamlib {
      message("with hamlib")
 }
 qwt {
-    DEFINES += QWT_NO_SVG
-    macx {
-        LIBS += -framework qwt
-   }
-   else {
+    message("with Qwt")
+    #DEFINES += QWT_NO_SVG
+    QT += svg
+    exists("$$OUT_PWD/include/qwt/qwt.h") {
+        INCLUDEPATH += $$OUT_PWD/include/qwt
+        LIBS += -L$$OUT_PWD/lib
+        LIBS += -lqwt
+    }
+    else {
+        macx {
+            LIBS += -framework qwt
+            INCLUDEPATH += /usr/local/lib/qwt.framework/Headers
+        }
         win32:CONFIG(debug, debug|release) {
             # win debug
             LIBS += -lqwtd
-        } else {
-            # unix | win release
+        }
+        win32:CONFIG(release) {
             LIBS += -lqwt
         }
-   }
-   !crosscompile {
-        macx {
-          exists(/opt/local/Library/Frameworks/qwt.framework) {
-            INCLUDEPATH += /opt/local/Library/Frameworks/qwt.framework/Versions/6/Headers
-          }
-          exists(/Library/Frameworks/qwt.framework) {
-            INCLUDEPATH += /Library/Frameworks/qwt.framework/Versions/6/Headers
-          }
-	}
-        exists(/usr/include/qwt/qwt.h) {
-            INCLUDEPATH += /usr/include/qwt
+        unix!macx {
+            # unix | win release
+            LIBS += -lqwt-qt5
         }
-        exists(/usr/local/include/qwt/qwt.h) {
-            INCLUDEPATH += /usr/local/include/qwt
-        }
-	qt4 {
-            exists(/usr/include/qwt5/qwt.h) {
-                INCLUDEPATH += /usr/include/qwt5
+        !crosscompile {
+            exists(/usr/include/qwt/qwt.h) {
+                INCLUDEPATH += /usr/include/qwt
             }
-            exists(/usr/include/qwt-qt4/qwt.h) {
-                INCLUDEPATH += /usr/include/qwt-qt4
-                LIBS -= -lqwt
-                LIBS += -lqwt-qt4
+            exists(/usr/local/include/qwt/qwt.h) {
+                INCLUDEPATH += /usr/local/include/qwt
             }
         }
-    }
-    exists($$OUT_PWD/include/qwt/qwt.h) {
-        INCLUDEPATH += $$OUT_PWD/include/qwt
     }
 }
 alsa {
@@ -360,8 +349,18 @@ pulseaudio {
     DEFINES += USE_PULSEAUDIO
     HEADERS += src/sound/drm_pulseaudio.h
     SOURCES += src/sound/drm_pulseaudio.cpp
-    LIBS += -lpulse
-    unix:PKGCONFIG += libpulse
+    unix {
+        macx {
+            INCLUDEPATH += /usr/local/Cellar/pulseaudio/12.2/include
+            LIBS += -L/usr/local/Cellar/pulseaudio/12.2/lib -lpulse
+        }
+        else {
+            PKGCONFIG += libpulse
+        }
+    }
+    else {
+        LIBS += -lpulse
+    }
     message("with pulseaudio")
 }
 openSL {

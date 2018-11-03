@@ -26,7 +26,7 @@
 \******************************************************************************/
 
 #ifndef __LiveScheduleDlg_H
-#define LiveScheduleDlg_H
+#define __LiveScheduleDlg_H
 
 #include "ui_LiveScheduleWindow.h"
 #include "CWindow.h"
@@ -108,7 +108,7 @@ public:
 	void SetSecondsPreview(int iSec) {iSecondsPreview = iSec;}
 	int GetSecondsPreview() {return iSecondsPreview;}
 
-	void SetReceiverCoordinates(double latitude, double longitude);
+    virtual void SetReceiverCoordinates(double latitude, double longitude);
 
 protected:
 	_BOOLEAN IsActive(const int iPos, const time_t ltime);
