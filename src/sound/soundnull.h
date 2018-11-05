@@ -26,8 +26,8 @@
  *
 \******************************************************************************/
 
-#ifndef _SOUNDNULL_H
-#define _SOUNDNULL_H
+#ifndef SOUNDNULL_H
+#define SOUNDNULL_H
 
 #include "soundinterface.h"
 
@@ -36,7 +36,7 @@ class CSoundInNull : public CSoundInInterface
 {
 public:
     CSoundInNull() {}
-    virtual ~CSoundInNull() {}
+    virtual ~CSoundInNull();
     virtual _BOOLEAN	Init(int, int, _BOOLEAN) {
         return TRUE;
     }
@@ -61,16 +61,18 @@ class CSoundOutNull : public CSoundOutInterface
 {
 public:
     CSoundOutNull() {}
-    virtual ~CSoundOutNull() {}
+    virtual ~CSoundOutNull();
     virtual _BOOLEAN	Init(int, int, _BOOLEAN) {
         return TRUE;
     }
     virtual _BOOLEAN	Write(CVector<short>&) {
         return FALSE;
     }
-    virtual void		Enumerate(vector<string>& choices, vector<string>&) {
+
+    virtual void		Enumerate(vector<string>& choices, vector<string>&){
         choices.push_back("(None)");
     }
+
     virtual string		GetDev() {
         return sDev;
     }

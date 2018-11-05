@@ -65,9 +65,9 @@ macx {
     LIBS += -framework CoreFoundation -framework CoreServices
     LIBS += -framework CoreAudio -framework AudioToolbox -framework AudioUnit
     CONFIG += pcap qwt
-    packagesExist(libpulse) {
-        CONFIG += pulseaudio sound
-    }
+    #packagesExist(libpulse) {
+    #    CONFIG += pulseaudio sound
+    #}
     packagesExist(sndfile) {
         CONFIG += sndfile
     }
@@ -224,12 +224,18 @@ win32 {
     }
 }
 exists($$OUT_PWD/include/neaacdec.h) {
+    config += faad2
+}
+exists($$OUT_PWD/include/faac.h) {
+    config += faac-drm
+}
+faad2 {
      DEFINES += HAVE_LIBFAAD \
      USE_FAAD2_LIBRARY
      LIBS += -lfaad_drm
      message("with FAAD2")
 }
-exists($$OUT_PWD/include/faac.h) {
+faac-drm {
      DEFINES += HAVE_LIBFAAC \
      USE_FAAC_LIBRARY
      LIBS += -lfaac_drm
@@ -592,7 +598,9 @@ SOURCES += \
     src/util/Reassemble.cpp \
     src/util/Settings.cpp \
     src/util/Utilities.cpp \
-    src/Version.cpp
+    src/Version.cpp \
+    src/sound/soundnull.cpp \
+    src/sound/soundinterface.cpp
 !console {
 HEADERS += \
     src/GUI-QT/Logging.h \

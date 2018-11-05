@@ -26,8 +26,8 @@
  *
 \******************************************************************************/
 
-#ifndef _SOUNDINTERFACE_H
-#define _SOUNDINTERFACE_H
+#ifndef SOUNDINTERFACE_H
+#define SOUNDINTERFACE_H
 
 #include "selectioninterface.h"
 #include "../util/Vector.h"
@@ -35,7 +35,7 @@
 class CSoundInInterface : public CSelectionInterface
 {
 public:
-    virtual 		~CSoundInInterface() {}
+    virtual 		~CSoundInInterface();
 
     /* sound card interface - used by ReadData */
     virtual _BOOLEAN Init(int iSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking)=0;
@@ -47,7 +47,7 @@ public:
 class CSoundOutInterface : public CSelectionInterface
 {
 public:
-    virtual 		~CSoundOutInterface() {}
+    virtual 		~CSoundOutInterface();
 
     /* sound card interface - used by WriteData */
     virtual _BOOLEAN Init(int iSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking)=0;

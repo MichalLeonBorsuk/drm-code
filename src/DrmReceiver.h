@@ -454,6 +454,7 @@ protected:
 #ifdef QT_MULTIMEDIA_LIB
     QAudioInput *pAudioInput;
     QAudioOutput *pAudioOutput;
+    QString indev; QString outdev;
 #endif
 };
 

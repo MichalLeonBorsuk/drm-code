@@ -168,3 +168,8 @@ CBitReassemblerN::copylast ()
 		vecData[offset + i] = vecLastSegment[i];
     vecLastSegment.resize (0);
 }
+
+CByteReassemblerN::~CByteReassemblerN()
+{
+}
+

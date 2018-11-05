@@ -137,8 +137,8 @@ public:
 
 protected:
 
-	virtual void copyin (vector<_BYTE> &vecDataIn, size_t iSegNum);
-	virtual void cachelast (vector<_BYTE> &vecDataIn, size_t iSegSize);
+    virtual void copyin (vector<_BYTE> &vecDataIn, size_t iSegNum);
+    virtual void cachelast (vector<_BYTE> &vecDataIn, size_t iSegSize);
 	virtual void copylast ();
 
 	vector<_BYTE> vecLastSegment;
@@ -180,8 +180,8 @@ public:
 
 protected:
 
-	virtual void copyin (CVector < _BYTE > &vecDataIn, size_t iSegNum);
-	virtual void cachelast (CVector < _BYTE > &vecDataIn, size_t iSegSize);
+    virtual void copyin (CVector < _BYTE > &vecDataIn, size_t iSegNum);
+    virtual void cachelast (CVector < _BYTE > &vecDataIn, size_t iSegSize);
 	virtual void copylast ();
 
 	bool bPack;
@@ -194,7 +194,8 @@ public:
 	CByteReassemblerN():CBitReassemblerN()
 	{
 		bPack = true;
-	}
+    }
+    virtual ~CByteReassemblerN();
 
 };
 

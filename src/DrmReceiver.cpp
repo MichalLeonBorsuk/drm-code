@@ -81,6 +81,7 @@ CDRMReceiver::CDRMReceiver(CSettings* pSettings) : CDRMTransceiver(pSettings, ne
     PlotManager(), iPrevSigSampleRate(0)
 #ifdef QT_MULTIMEDIA_LIB
   ,pAudioInput(NULL),pAudioOutput(NULL)
+  ,indev(), outdev()
 #endif
 
 {
@@ -90,6 +91,7 @@ CDRMReceiver::CDRMReceiver(CSettings* pSettings) : CDRMTransceiver(pSettings, ne
 #ifdef HAVE_LIBGPS
     Parameters.gps_data.gps_fd = -1;
 #endif
+
 }
 
 CDRMReceiver::~CDRMReceiver()
@@ -1706,10 +1708,29 @@ CDRMReceiver::LoadSettings()
     SetAMDemodType(eDemodType);
 
     /* Sound In device */
+#ifdef QT_MULTIMEDIA_LIB
+    indev = QString::fromStdString(s.Get("Receiver", "snddevin", string()));
+    foreach(const QAudioDeviceInfo& di, QAudioDeviceInfo::availableDevices(QAudio::AudioInput))
+    {
+        QString name = di.deviceName();
+        if(name==indev)
+            SetInputDevice(di);
+    }
+#else
     pSoundInInterface->SetDev(s.Get("Receiver", "snddevin", string()));
-
+#endif
     /* Sound Out device */
+#ifdef QT_MULTIMEDIA_LIB
+    outdev = QString::fromStdString(s.Get("Receiver", "snddevout", string()));
+    foreach(const QAudioDeviceInfo& di, QAudioDeviceInfo::availableDevices(QAudio::AudioOutput))
+    {
+        QString name = di.deviceName();
+        if(name==outdev)
+            SetOutputDevice(di);
+    }
+#else
     pSoundOutInterface->SetDev(s.Get("Receiver", "snddevout", string()));
+#endif
 
     str = s.Get("command", "rciout");
     if (str != "")
@@ -1892,11 +1913,18 @@ CDRMReceiver::SaveSettings()
     s.Put("Receiver", "modmetric", ChannelEstimation.GetIntCons());
 
     /* Sound In device */
+#ifdef QT_MULTIMEDIA_LIB
+    s.Put("Receiver", "snddevin", indev.toStdString());
+#else
     s.Put("Receiver", "snddevin", pSoundInInterface->GetDev());
+#endif
 
     /* Sound Out device */
+#ifdef QT_MULTIMEDIA_LIB
+    s.Put("Receiver", "snddevout", outdev.toStdString());
+#else
     s.Put("Receiver", "snddevout", pSoundOutInterface->GetDev());
-
+#endif
     /* Number of iterations for MLC setting */
     s.Put("Receiver", "mlciter", MSCMLCDecoder.GetInitNumIterations());
 
