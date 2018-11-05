@@ -78,8 +78,8 @@ public:
 		return bTransmitter;
 	}
 #ifdef QT_MULTIMEDIA_LIB
-    virtual void SetInputDevice(const QAudioDeviceInfo&) = 0;
-    virtual void SetOutputDevice(const QAudioDeviceInfo&) = 0;
+    virtual void SetInputDevice(const QString&) = 0;
+    virtual void SetOutputDevice(const QString&) = 0;
 #endif
 
 protected:

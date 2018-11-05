@@ -154,8 +154,8 @@ public:
     ESFStatus				GetInputStatus();
     string					GetInputFileName();
 #ifdef QT_MULTIMEDIA_LIB
-    void					SetInputDevice(const QAudioDeviceInfo&);
-    void					SetOutputDevice(const QAudioDeviceInfo&);
+    void					SetInputDevice(const QString&);
+    void					SetOutputDevice(const QString&);
 #endif
     void					RequestNewAcquisition() {
         bRestartFlag = TRUE;

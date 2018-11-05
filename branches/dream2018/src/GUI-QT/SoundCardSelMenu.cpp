@@ -140,16 +140,10 @@ void CSoundCardSelMenu::OnSoundInDevice(QAction* action)
     Parameters.Lock();
     QString inputName;
 #ifdef QT_MULTIMEDIA_LIB
-    QString device = action->data().toString();
-    foreach(const QAudioDeviceInfo& di, QAudioDeviceInfo::availableDevices(QAudio::AudioInput))
-    {
-        QString name = di.deviceName();
-        if(name==device)
-            DRMTransceiver.SetInputDevice(di);
-    }
+    DRMTransceiver.SetInputDevice(action->data().toString());
 #else
-        CSelectionInterface* pSoundInIF = DRMTransceiver.GetSoundInInterface();
-        pSoundInIF->SetDev(action->data().toString().toLocal8Bit().constData());
+    CSelectionInterface* pSoundInIF = DRMTransceiver.GetSoundInInterface();
+    pSoundInIF->SetDev(action->data().toString().toLocal8Bit().constData());
 #endif
     Parameters.Unlock();
 }
@@ -158,16 +152,10 @@ void CSoundCardSelMenu::OnSoundOutDevice(QAction* action)
 {
     Parameters.Lock();
 #ifdef QT_MULTIMEDIA_LIB
-    QString device = action->data().toString();
-    foreach(const QAudioDeviceInfo& di, QAudioDeviceInfo::availableDevices(QAudio::AudioOutput))
-    {
-        QString name = di.deviceName();
-        if(name==device)
-            DRMTransceiver.SetOutputDevice(di);
-    }
+    DRMTransceiver.SetOutputDevice(action->data().toString());
 #else
-        CSelectionInterface* pSoundOutIF = DRMTransceiver.GetSoundOutInterface();
-        pSoundOutIF->SetDev(action->data().toString().toLocal8Bit().constData());
+    CSelectionInterface* pSoundOutIF = DRMTransceiver.GetSoundOutInterface();
+    pSoundOutIF->SetDev(action->data().toString().toLocal8Bit().constData());
 #endif
     Parameters.Unlock();
 }
