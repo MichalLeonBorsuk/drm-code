@@ -48,7 +48,7 @@ static const LIBFUNC FaadLibFuncs[] = {
 # if defined(_WIN32)
 static const char* FaadLibNames[] = { "faad2_drm.dll", "libfaad2_drm.dll", "faad_drm.dll", "libfaad2.dll", NULL };
 # elif defined(__APPLE__)
-static const char* FaadLibNames[] = { "libfaad2_drm.dylib", NULL };
+static const char* FaadLibNames[] = { "libfaad_drm.dylib", NULL };
 # else
 static const char* FaadLibNames[] = { "libfaad2_drm.so", "libfaad_drm.so", "libfaad.so.2", NULL };
 # endif
