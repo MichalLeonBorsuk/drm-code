@@ -402,7 +402,7 @@ CDRMReceiver::Run()
 
 #ifdef QT_MULTIMEDIA_LIB
 void
-CDRMReceiver::SetInputDevice(const QAudioDeviceInfo& di)
+CDRMReceiver::SetInputDevice(const QString& device)
 {
     QAudioFormat format;
     format.setSampleRate(Parameters.GetSoundCardSigSampleRate());
@@ -411,13 +411,25 @@ CDRMReceiver::SetInputDevice(const QAudioDeviceInfo& di)
     format.setChannelCount(2); // TODO
     format.setByteOrder(QAudioFormat::LittleEndian);
     format.setCodec("audio/pcm");
-    QAudioFormat nearestFormat = di.nearestFormat(format);
-    pAudioInput = new QAudioInput(di, nearestFormat);
-    ReceiveData.SetSoundInterface(pAudioInput);
+    indev = device;
+    foreach(const QAudioDeviceInfo& di, QAudioDeviceInfo::availableDevices(QAudio::AudioInput))
+    {
+        QString name = di.deviceName();
+        if(indev == "") { // might be called from initialisation and Dream.ini has no value
+            indev = name;
+        }
+        if(name==indev) {
+            QAudioFormat nearestFormat = di.nearestFormat(format);
+            // TODO QIODevice needs to be declared in working thread
+            pAudioInput = new QAudioInput(di, nearestFormat);
+            ReceiveData.SetSoundInterface(pAudioInput);
+            break;
+        }
+    }
 }
 
 void
-CDRMReceiver::SetOutputDevice(const QAudioDeviceInfo& di)
+CDRMReceiver::SetOutputDevice(const QString& device)
 {
     QAudioFormat format;
     format.setSampleRate(Parameters.GetAudSampleRate());
@@ -426,18 +438,29 @@ CDRMReceiver::SetOutputDevice(const QAudioDeviceInfo& di)
     format.setChannelCount(2); // TODO
     format.setByteOrder(QAudioFormat::LittleEndian);
     format.setCodec("audio/pcm");
-    QAudioFormat nearestFormat = di.nearestFormat(format);
-    pAudioOutput = new QAudioOutput(di, nearestFormat);
-    pAudioOutput->setBufferSize(1000000);
-    QIODevice* pIODevice = pAudioOutput->start();
-    int n = pAudioOutput->bufferSize();
-    if(pAudioOutput->error()==QAudio::NoError)
+    outdev = device;
+    foreach(const QAudioDeviceInfo& di, QAudioDeviceInfo::availableDevices(QAudio::AudioOutput))
     {
-        WriteData.SetSoundInterface(pIODevice);
-    }
-    else
-    {
-        qDebug("Can't open audio output");
+        QString name = di.deviceName();
+        if(outdev == "") { // might be called from initialisation and Dream.ini has no value
+            outdev = name;
+        }
+        if(name==outdev) {
+            QAudioFormat nearestFormat = di.nearestFormat(format);
+            pAudioOutput = new QAudioOutput(di, nearestFormat);
+            pAudioOutput->setBufferSize(1000000);
+            // TODO QIODevice needs to be declared in working thread
+            QIODevice* pIODevice = pAudioOutput->start();
+            int n = pAudioOutput->bufferSize();
+            if(pAudioOutput->error()==QAudio::NoError)
+            {
+                WriteData.SetSoundInterface(pIODevice);
+            }
+            else
+            {
+                qDebug("Can't open audio output");
+            }
+        }
     }
 }
 #endif
@@ -1710,24 +1733,14 @@ CDRMReceiver::LoadSettings()
     /* Sound In device */
 #ifdef QT_MULTIMEDIA_LIB
     indev = QString::fromStdString(s.Get("Receiver", "snddevin", string()));
-    foreach(const QAudioDeviceInfo& di, QAudioDeviceInfo::availableDevices(QAudio::AudioInput))
-    {
-        QString name = di.deviceName();
-        if(name==indev)
-            SetInputDevice(di);
-    }
+    SetInputDevice(indev);
 #else
     pSoundInInterface->SetDev(s.Get("Receiver", "snddevin", string()));
 #endif
     /* Sound Out device */
 #ifdef QT_MULTIMEDIA_LIB
     outdev = QString::fromStdString(s.Get("Receiver", "snddevout", string()));
-    foreach(const QAudioDeviceInfo& di, QAudioDeviceInfo::availableDevices(QAudio::AudioOutput))
-    {
-        QString name = di.deviceName();
-        if(name==outdev)
-            SetOutputDevice(di);
-    }
+    SetOutputDevice(outdev);
 #else
     pSoundOutInterface->SetDev(s.Get("Receiver", "snddevout", string()));
 #endif
