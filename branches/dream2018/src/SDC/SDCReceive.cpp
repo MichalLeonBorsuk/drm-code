@@ -35,6 +35,7 @@
 
 #include "SDC.h"
 
+CSDCReceive::~CSDCReceive(){}
 
 /* Implementation *************************************************************/
 CSDCReceive::ERetStatus CSDCReceive::SDCParam(CVector<_BINARY>* pbiData,
