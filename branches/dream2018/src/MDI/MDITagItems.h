@@ -39,7 +39,7 @@ class CTagItemGenerator
 {
 public:
 	void PutTagItemData(CVector<_BINARY> &vecbiDestination); // Call this to write the binary data (header + payload) to the vector
-	int GetTotalLength() { return vecbiTagData.Size();}; // returns the length in bits
+    int GetTotalLength() { return vecbiTagData.Size();} // returns the length in bits
 	void Reset(); // Resets bit vector to zero length (i.e. no header)
 	void GenEmptyTag(); // Generates valid tag item with zero payload length
 	virtual ~CTagItemGenerator() {}

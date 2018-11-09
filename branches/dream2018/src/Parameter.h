@@ -106,7 +106,7 @@ class CAudioParam
 public:
 
     /* AC: Audio Coding */
-    enum EAudCod { AC_NONE, AC_AAC, AC_CELP, AC_HVXC, AC_OPUS };
+    enum EAudCod { AC_NONE, AC_AAC, AC_OPUS, AC_RESERVED, AC_xHE_AAC, AC_CELP, AC_HVXC };
 
     /* SB: SBR */
     enum ESBRFlag { SB_NOT_USED, SB_USED };
@@ -118,7 +118,7 @@ public:
     enum EHVXCRate { HR_2_KBIT, HR_4_KBIT };
 
     /* AS: Audio Sampling rate */
-    enum EAudSamRat { AS_8_KHZ, AS_12KHZ, AS_16KHZ, AS_24KHZ, AS_48KHZ };
+    enum EAudSamRat { AS_9_6KHZ, AS_12KHZ, AS_16KHZ, AS_19_2KHZ, AS_24KHZ, AS_32KHZ, AS_38_4KHZ, AS_48KHZ };
 
     /* OB: Opus Audio Bandwidth, coded in audio data stream */
     enum EOPUSBandwidth { OB_NB, OB_MB, OB_WB, OB_SWB, OB_FB };
@@ -250,22 +250,16 @@ public:
                 return TRUE;
             break;
 
+        case AC_xHE_AAC:
+            if (eAudioMode != AudioParam.eAudioMode)
+                return TRUE;
+            break;
+
         case AC_CELP:
-            if (bCELPCRC != AudioParam.bCELPCRC)
-                return TRUE;
-            if (iCELPIndex != AudioParam.iCELPIndex)
-                return TRUE;
-            break;
-
         case AC_HVXC:
-            if (eHVXCRate != AudioParam.eHVXCRate)
-                return TRUE;
-            if (bHVXCCRC != AudioParam.bHVXCCRC)
-                return TRUE;
-            break;
-
         case AC_NONE:
         case AC_OPUS:
+        case AC_RESERVED:
             break;
         }
         return FALSE;
@@ -821,7 +815,7 @@ public:
     {
         iService = 0;
         iServiceID = SERV_ID_NOT_USED;
-    };
+    }
 
     void Save(const int iCurSel, const int iCurServiceID)
     {
@@ -830,7 +824,7 @@ public:
             iService = iCurSel;
             iServiceID = iCurServiceID;
         }
-    };
+    }
 
     /* store only fac parameters */
     int iService;

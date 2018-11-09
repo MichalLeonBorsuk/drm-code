@@ -602,29 +602,36 @@ void CSDCTransmit::DataEntityType9(CVector<_BINARY>& vecbiData, const CAudioPara
             break;
         }
 
-        /* Audio sampling rate */
+        // Audio sampling rate AS_9_6_KHZ, AS_12KHZ, AS_16KHZ, AS_19_2KHZ, AS_24KHZ, AS_32KHZ, AS_38_4KHZ, AS_48KHZ
+        unsigned int iVal=0;
         switch (AudioParam.eAudioSamplRate)
         {
-        case CAudioParam::AS_8_KHZ:
-            vecbiData.Enqueue(0 /* 000 */, 3);
+        case CAudioParam::AS_9_6KHZ:
+            iVal = 0;
             break;
-
         case CAudioParam::AS_12KHZ:
-            vecbiData.Enqueue(1 /* 001 */, 3);
+            iVal = 1;
             break;
-
         case CAudioParam::AS_16KHZ:
-            vecbiData.Enqueue(2 /* 010 */, 3);
+            iVal = 2;
             break;
-
+        case CAudioParam::AS_19_2KHZ:
+            iVal = 2;
+            break;
         case CAudioParam::AS_24KHZ:
-            vecbiData.Enqueue(3 /* 011 */, 3);
+            iVal = (AudioParam.eAudioCoding==CAudioParam::AC_xHE_AAC)?4:3;
             break;
-
+        case CAudioParam::AS_32KHZ:
+            iVal = 2;
+            break;
+        case CAudioParam::AS_38_4KHZ:
+            iVal = 2;
+            break;
         case CAudioParam::AS_48KHZ:
-            vecbiData.Enqueue(5 /* 101 */, 3);
+            iVal = (AudioParam.eAudioCoding==CAudioParam::AC_xHE_AAC)?7:5;
             break;
         }
+        vecbiData.Enqueue(iVal, 3);
     }
 
     /* Text flag */

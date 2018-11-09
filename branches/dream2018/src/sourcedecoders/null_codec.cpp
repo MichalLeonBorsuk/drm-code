@@ -55,8 +55,8 @@ bool NullCodec::DecOpen(CAudioParam& AudioParam, int *iAudioSampleRate, int *iLe
 	int iSampleRate = 24000;
 	switch (AudioParam.eAudioSamplRate)
 	{
-	case CAudioParam::AS_8_KHZ:
-		iSampleRate = 8000;
+    case CAudioParam::AS_9_6KHZ:
+        iSampleRate = 9600;
 		break;
 	case CAudioParam::AS_12KHZ:
 		iSampleRate = 12000;
@@ -64,10 +64,19 @@ bool NullCodec::DecOpen(CAudioParam& AudioParam, int *iAudioSampleRate, int *iLe
 	case CAudioParam::AS_16KHZ:
 		iSampleRate = 16000;
 		break;
-	case CAudioParam::AS_24KHZ:
+    case CAudioParam::AS_19_2KHZ:
+        iSampleRate = 19200;
+        break;
+    case CAudioParam::AS_24KHZ:
 		iSampleRate = 24000;
 		break;
-	case CAudioParam::AS_48KHZ:
+    case CAudioParam::AS_32KHZ:
+        iSampleRate = 32000;
+        break;
+    case CAudioParam::AS_38_4KHZ:
+        iSampleRate = 38400;
+        break;
+    case CAudioParam::AS_48KHZ:
 		iSampleRate = 48000;
 		break;
 	}

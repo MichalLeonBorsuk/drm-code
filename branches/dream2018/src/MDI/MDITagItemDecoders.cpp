@@ -317,14 +317,32 @@ void CTagItemDecoderAMAudio::DecodeTag(CVector<_BINARY>& vecbiTag, int iLen)
 	}
 	/* Audio sampling rate */
 	iVal = vecbiTag.Separate(3);
-	switch (iVal)
-	{
-		case 0: AudioParams.eAudioSamplRate = CAudioParam::AS_8_KHZ; break;
-		case 1: AudioParams.eAudioSamplRate = CAudioParam::AS_12KHZ; break;
-		case 2: AudioParams.eAudioSamplRate = CAudioParam::AS_16KHZ; break;
-		case 3: AudioParams.eAudioSamplRate = CAudioParam::AS_24KHZ; break;
-		default: AudioParams.eAudioSamplRate = CAudioParam::AS_24KHZ;
-	}
+    if(AudioParams.eAudioCoding == CAudioParam::AC_xHE_AAC) {
+        switch (iVal)
+        {
+            case 0: AudioParams.eAudioSamplRate = CAudioParam::AS_9_6KHZ; break;
+            case 1: AudioParams.eAudioSamplRate = CAudioParam::AS_12KHZ; break;
+            case 2: AudioParams.eAudioSamplRate = CAudioParam::AS_16KHZ; break;
+            case 3: AudioParams.eAudioSamplRate = CAudioParam::AS_19_2KHZ; break;
+            case 4: AudioParams.eAudioSamplRate = CAudioParam::AS_24KHZ; break;
+            case 5: AudioParams.eAudioSamplRate = CAudioParam::AS_32KHZ; break;
+            case 6: AudioParams.eAudioSamplRate = CAudioParam::AS_38_4KHZ; break;
+            case 7: AudioParams.eAudioSamplRate = CAudioParam::AS_48KHZ; break;
+        }
+    }
+    else {
+        switch (iVal)
+        {
+            case 1: AudioParams.eAudioSamplRate = CAudioParam::AS_12KHZ; break;
+            case 3: AudioParams.eAudioSamplRate = CAudioParam::AS_24KHZ; break;
+            case 5: AudioParams.eAudioSamplRate = CAudioParam::AS_48KHZ; break;
+            case 7: // Old OPUS EXPERIMENTAL
+                AudioParams.eAudioCoding = CAudioParam::AC_OPUS;
+                AudioParams.eAudioMode = CAudioParam::AM_STEREO;
+                AudioParams.eAudioSamplRate = CAudioParam::AS_48KHZ;
+                break;
+        }
+    }
 	// coder field and some rfus (TODO: code the coder field correctly for all cases)
 	vecbiTag.Separate(8);
 	/* Copy stream data */

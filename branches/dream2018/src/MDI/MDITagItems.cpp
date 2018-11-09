@@ -1370,11 +1370,11 @@ CTagItemGeneratorAMAudio::GenTag(CParameter & Parameter, CSingleBuffer < _BINARY
 	case CAudioParam::AC_AAC:	// 00
 		iVal = 0;
 		break;
-	case CAudioParam::AC_CELP:	// 01
+    case CAudioParam::AC_OPUS:	// 01
 		iVal = 1;
 		break;
-	case CAudioParam::AC_HVXC:	// 10
-		iVal = 2;
+    case CAudioParam::AC_xHE_AAC:	// 11
+        iVal = 3;
 		break;
 	default:
 		iVal = 0;				// reserved
@@ -1402,24 +1402,35 @@ CTagItemGeneratorAMAudio::GenTag(CParameter & Parameter, CSingleBuffer < _BINARY
 	}
 	Enqueue(iVal, 2);
 
-	// Audio sampling rate
-	switch (Parameter.Service[0].AudioParam.eAudioSamplRate)
-	{
-	case CAudioParam::AS_8_KHZ:
-		iVal = 0;
-		break;
-	case CAudioParam::AS_12KHZ:
-		iVal = 1;
-		break;
-	case CAudioParam::AS_16KHZ:
-		iVal = 2;
-		break;
-	case CAudioParam::AS_24KHZ:
-		iVal = 3;
-		break;
-	default:
-		iVal = 3;
-	}
+    // Audio sampling rate AS_9_6_KHZ, AS_12KHZ, AS_16KHZ, AS_19_2KHZ, AS_24KHZ, AS_32KHZ, AS_38_4KHZ, AS_48KHZ
+    switch (Parameter.Service[0].AudioParam.eAudioSamplRate)
+    {
+    case CAudioParam::AS_9_6KHZ:
+        iVal = 0;
+        break;
+    case CAudioParam::AS_12KHZ:
+        iVal = 1;
+        break;
+    case CAudioParam::AS_16KHZ:
+        iVal = 2;
+        break;
+    case CAudioParam::AS_19_2KHZ:
+        iVal = 2;
+        break;
+    case CAudioParam::AS_24KHZ:
+        iVal = (Parameter.Service[0].AudioParam.eAudioCoding==CAudioParam::AC_xHE_AAC)?4:3;
+        break;
+    case CAudioParam::AS_32KHZ:
+        iVal = 2;
+        break;
+    case CAudioParam::AS_38_4KHZ:
+        iVal = 2;
+        break;
+    case CAudioParam::AS_48KHZ:
+        iVal = (Parameter.Service[0].AudioParam.eAudioCoding==CAudioParam::AC_xHE_AAC)?7:5;
+        break;
+    }
+
 
 	Enqueue(iVal, 3);
 

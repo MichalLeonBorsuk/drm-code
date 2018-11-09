@@ -1147,27 +1147,16 @@ QString FDRMDialog::GetCodecString(const CService& service)
         /* Audio coding */
         switch (service.AudioParam.eAudioCoding)
         {
-        case CAudioParam::AC_NONE:
-            break;
-
         case CAudioParam::AC_AAC:
-            /* Only 12 and 24 kHz sample rates are supported for AAC encoding */
+            /* Only 12 and 24 kHz sample rates are supported for AAC encoding in DRM30 */
             if (eSamRate == CAudioParam::AS_12KHZ)
                 strReturn = "aac";
             else
                 strReturn = "AAC";
             break;
 
-        case CAudioParam::AC_CELP:
-            /* Only 8 and 16 kHz sample rates are supported for CELP encoding */
-            if (eSamRate == CAudioParam::AS_8_KHZ)
-                strReturn = "celp";
-            else
-                strReturn = "CELP";
-            break;
-
-        case CAudioParam::AC_HVXC:
-            strReturn = "HVXC";
+        case CAudioParam::AC_xHE_AAC:
+            strReturn = "xHE-AAC";
             break;
 
 		case CAudioParam::AC_OPUS:
@@ -1204,6 +1193,7 @@ QString FDRMDialog::GetCodecString(const CService& service)
 					strReturn += "FB";
 					break;
 			}
+        default:;
         }
 
         /* SBR */

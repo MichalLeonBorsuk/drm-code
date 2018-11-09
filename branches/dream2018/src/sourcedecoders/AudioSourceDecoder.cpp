@@ -50,8 +50,7 @@ CAudioSourceDecoder::CAudioSourceDecoder()
 
     /* Needed by fdrmdialog.cpp to report missing codec */
     bCanDecodeAAC  = CAudioCodec::GetDecoder(CAudioParam::AC_AAC,  true) != NULL;
-    bCanDecodeCELP = CAudioCodec::GetDecoder(CAudioParam::AC_CELP, true) != NULL;
-    bCanDecodeHVXC = CAudioCodec::GetDecoder(CAudioParam::AC_HVXC, true) != NULL;
+    bCanDecodexHE_AAC = CAudioCodec::GetDecoder(CAudioParam::AC_xHE_AAC, true) != NULL;
     bCanDecodeOPUS = CAudioCodec::GetDecoder(CAudioParam::AC_OPUS, true) != NULL;
 }
 
@@ -98,90 +97,6 @@ CAudioSourceDecoder::AACFileName(CParameter & Parameters)
     if (Parameters.
             Service[Parameters.GetCurSelAudioService()].AudioParam.
             eSBRFlag == CAudioParam::SB_USED)
-    {
-        ss << "_sbr";
-    }
-//    Parameters.Unlock(); // TODO CAudioSourceDecoder::InitInternal() already have the lock
-    ss << ".dat";
-
-    return ss.str();
-}
-
-string
-CAudioSourceDecoder::CELPFileName(CParameter & Parameters)
-{
-    stringstream ss;
-    ss << "test/celp_";
-//    Parameters.Lock(); // TODO CAudioSourceDecoder::InitInternal() already have the lock
-    if (Parameters.Service[Parameters.GetCurSelAudioService()].
-            AudioParam.eAudioSamplRate == CAudioParam::AS_8_KHZ)
-    {
-        ss << "8kHz_" << 
-            iTableCELP8kHzUEPParams
-                 [Parameters.
-                  Service[Parameters.GetCurSelAudioService()].
-                  AudioParam.iCELPIndex][0];
-    }
-    else
-    {
-        ss << "16kHz_" <<
-            iTableCELP16kHzUEPParams
-                 [Parameters.
-                  Service[Parameters.GetCurSelAudioService()].
-                  AudioParam.iCELPIndex][0];
-    }
-    ss << "bps";
-
-    if (Parameters.Service[Parameters.GetCurSelAudioService()].
-            AudioParam.eSBRFlag == CAudioParam::SB_USED)
-    {
-        ss << "_sbr";
-    }
-//    Parameters.Unlock(); // TODO CAudioSourceDecoder::InitInternal() already have the lock
-    ss << ".dat";
-
-    return ss.str();
-}
-
-string
-CAudioSourceDecoder::HVXCFileName(CParameter & Parameters)
-{
-    stringstream ss;
-    ss << "test/hvxc_";
-//    Parameters.Lock(); // TODO CAudioSourceDecoder::InitInternal() already have the lock
-    if (Parameters.Service[Parameters.GetCurSelAudioService()].
-            AudioParam.eAudioSamplRate == CAudioParam::AS_8_KHZ)
-    {
-        ss << "8kHz";
-    }
-    else
-    {
-        ss << "unknown";
-    }
-
-    if (Parameters.Service[Parameters.GetCurSelAudioService()].
-            AudioParam.eHVXCRate == CAudioParam::HR_2_KBIT)
-    {
-        ss << "_2kbps";
-    }
-    else if (Parameters.Service[Parameters.GetCurSelAudioService()].
-             AudioParam.eHVXCRate == CAudioParam::HR_4_KBIT)
-    {
-        ss << "_4kbps";
-    }
-    else
-    {
-        ss << "_unknown";
-    }
-
-    if (Parameters.Service[Parameters.GetCurSelAudioService()].
-            AudioParam.bHVXCCRC)
-    {
-        ss << "_crc";
-    }
-
-    if (Parameters.Service[Parameters.GetCurSelAudioService()].
-            AudioParam.eSBRFlag == CAudioParam::SB_USED)
     {
         ss << "_sbr";
     }
@@ -329,37 +244,9 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
     }
     else if (eAudioCoding == CAudioParam::AC_CELP)
     {
-        /* celp_super_frame(celp_table_ind) --------------------------------- */
-        /* Higher-protected part */
-        for (i = 0; i < iNumAudioFrames; i++)
-        {
-            celp_frame[i].ResetBitAccess();
-
-            /* Extract higher protected part bits */
-            for (j = 0; j < iNumHigherProtectedBits; j++)
-                celp_frame[i].Enqueue((*pvecInputData).Separate(1), 1);
-
-            /* Extract CRC bits (8 bits) if used */
-            if (bCELPCRC == TRUE)
-                celp_crc_bits[i] = _BINARY((*pvecInputData).Separate(8));
-        }
-
-        /* Lower-protected part */
-        for (i = 0; i < iNumAudioFrames; i++)
-        {
-            for (j = 0; j < iNumLowerProtectedBits; j++)
-                celp_frame[i].Enqueue((*pvecInputData).Separate(1), 1);
-        }
     }
     else if (eAudioCoding == CAudioParam::AC_HVXC)
     {
-        for (i = 0; i < iNumAudioFrames; i++)
-        {
-            hvxc_frame[i].ResetBitAccess();
-
-            for (j = 0; j < iNumHvxcBits; j++)
-                hvxc_frame[i].Enqueue((*pvecInputData).Separate(1), 1);
-        }
     }
 
 
@@ -472,86 +359,6 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
                 Parameters.vecbiAudioFrameStatus.Add(1);
                 Parameters.Unlock();
             }
-        }
-        else if (eAudioCoding == CAudioParam::AC_CELP)
-        {
-            if (bCELPCRC == TRUE)
-            {
-                /* Prepare CRC object and data stream */
-                CELPCRCObject.Reset(8);
-                celp_frame[j].ResetBitAccess();
-
-                for (i = 0; i < iNumHigherProtectedBits; i++)
-                    CELPCRCObject.AddBit((_BINARY) celp_frame[j].Separate(1));
-
-                bCurBlockOK = CELPCRCObject.CheckCRC(celp_crc_bits[j]);
-            }
-            else
-                bCurBlockOK = TRUE;
-
-            /* OPH: update audio status vector for RSCI */
-            Parameters.Lock();
-            Parameters.vecbiAudioFrameStatus.Add(bCurBlockOK == TRUE ? 0 : 1);
-            Parameters.Unlock();
-
-            int iTotNumBits =
-                iNumHigherProtectedBits + iNumLowerProtectedBits;
-            if (bWriteToFile && pFile!=NULL)
-            {
-                int iNewFrL = (iTotNumBits + 7) / 8; //(int) Ceil((CReal) iTotNumBits / 8);
-                fwrite((void *) &iNewFrL, size_t(4), size_t(1), pFile);	// frame length
-                celp_frame[j].ResetBitAccess();
-                for (i = 0; i < iNewFrL; i++)
-                {
-                    int iNumBits = Min(iTotNumBits - i * 8, 8);
-                    _BYTE bCurVal = (_BYTE) celp_frame[j].Separate(iNumBits);
-                    fwrite((void *) &bCurVal, size_t(1), size_t(1), pFile);	// data
-                }
-                fflush(pFile);
-            }
-
-#ifdef USE_CELP_DECODER
-
-            /* Write zeros in current output buffer since we do not have a decoder */
-            for (i = 0; i < iResOutBlockSize; i++)
-            {
-                vecTempResBufOutCurLeft[i] = (_REAL) 0.0;
-                vecTempResBufOutCurRight[i] = (_REAL) 0.0;
-            }
-
-#endif
-
-        }
-        else if (eAudioCoding == CAudioParam::AC_HVXC)
-        {
-
-            bCurBlockOK = TRUE; /* CRC always ignored */
-
-            if (bWriteToFile && pFile!=NULL)
-            {
-                int iNewFrL = (iNumHvxcBits + 7) / 8; //(int) Ceil((CReal) iNumHvxcBits / 8);
-                fwrite((void *) &iNewFrL, size_t(4), size_t(1), pFile);	// frame length
-                hvxc_frame[j].ResetBitAccess();
-                for (i = 0; i < iNewFrL; i++)
-                {
-                    int iNumBits = Min(iNumHvxcBits - i * 8, 8);
-                    _BYTE bCurVal = (_BYTE) hvxc_frame[j].Separate(iNumBits);
-                    fwrite((void *) &bCurVal, size_t(1), size_t(1), pFile);	// data
-                }
-                fflush(pFile);
-            }
-
-#ifdef USE_HVXC_DECODER
-
-            /* Write zeros in current output buffer since we do not have a decoder */
-            for (i = 0; i < iResOutBlockSize; i++)
-            {
-                vecTempResBufOutCurLeft[i] = (_REAL) 0.0;
-                vecTempResBufOutCurRight[i] = (_REAL) 0.0;
-            }
-
-#endif
-
         }
         else
             bCurBlockOK = FALSE;
@@ -866,162 +673,9 @@ CAudioSourceDecoder::InitInternal(CParameter & Parameters)
                 pFile = fopen(fn.c_str(), "wb");
             }
         }
-        else if (eAudioCoding == CAudioParam::AC_CELP)
+        else if (eAudioCoding == CAudioParam::AC_xHE_AAC)
         {
-            /* Init for CELP decoding --------------------------------------- */
-            int iCurCelpIdx, iCelpFrameLength;
-
-            /* Set number of frames in a super-frame */
-            switch (AudioParam.eAudioSamplRate)	/* Only 8000 and 16000 is allowed */
-            {
-            case CAudioParam::AS_8_KHZ:
-                /* Check range */
-                iCurCelpIdx = AudioParam.iCELPIndex;
-
-                if ((iCurCelpIdx > 0) &&
-                        (iCurCelpIdx < LEN_CELP_8KHZ_UEP_PARAMS_TAB))
-                {
-                    /* CELP frame length */
-                    iCelpFrameLength =
-                        iTableCELP8kHzUEPParams[iCurCelpIdx][1];
-
-                    /* Number of bits for lower and higher protected parts */
-                    iNumHigherProtectedBits =
-                        iTableCELP8kHzUEPParams[iCurCelpIdx][2];
-                    iNumLowerProtectedBits =
-                        iTableCELP8kHzUEPParams[iCurCelpIdx][3];
-                }
-                else
-                    throw CInitErr(ET_AUDDECODER);
-
-                /* Set audio sample rate */
-                iAudioSampleRate = 8000;
-                break;
-
-            case CAudioParam::AS_16KHZ:
-                /* Check range */
-                iCurCelpIdx = AudioParam.iCELPIndex;
-
-                if ((iCurCelpIdx > 0) &&
-                        (iCurCelpIdx < LEN_CELP_16KHZ_UEP_PARAMS_TAB))
-                {
-                    /* CELP frame length */
-                    iCelpFrameLength =
-                        iTableCELP16kHzUEPParams[iCurCelpIdx][1];
-
-                    /* Number of bits for lower and higher protected parts */
-                    iNumHigherProtectedBits =
-                        iTableCELP16kHzUEPParams[iCurCelpIdx][2];
-                    iNumLowerProtectedBits =
-                        iTableCELP16kHzUEPParams[iCurCelpIdx][3];
-                }
-                else
-                    throw CInitErr(ET_AUDDECODER);
-
-                /* Set audio sample rate */
-                iAudioSampleRate = 16000;
-                break;
-
-            default:
-                /* Some error occurred, throw error */
-                throw CInitErr(ET_AUDDECODER);
-                break;
-            }
-
-            /* Check lengths of iNumHigherProtectedBits and
-               iNumLowerProtectedBits for overrun */
-            const int iTotalNumCELPBits =
-                iNumHigherProtectedBits + iNumLowerProtectedBits;
-
-            if (iTotalNumCELPBits * SIZEOF__BYTE > iTotalFrameSize)
-                throw CInitErr(ET_AUDDECODER);
-
-            /* Calculate number of audio frames (one audio super frame is
-               always 400 ms long) */
-            iNumAudioFrames = 400 /* ms */  / iCelpFrameLength /* ms */ ;
-
-            /* Set CELP CRC flag */
-            bCELPCRC = AudioParam.bCELPCRC;
-
-            /* Init vectors storing the CELP raw data and CRCs */
-            celp_frame.Init(iNumAudioFrames, iTotalNumCELPBits);
-            celp_crc_bits.Init(iNumAudioFrames);
-
-// TEST
-            iLenDecOutPerChan = 0;
-
-
-#ifdef USE_CELP_DECODER
-
-// TODO put decoder initialization here
-            bWriteToFile = TRUE;
-            if(bWriteToFile)
-            {
-                string fn = CELPFileName(Parameters);
-                if(pFile)
-                    fclose(pFile);
-                pFile = fopen(fn.c_str(), "wb");
-            }
-
-#else
-            /* No CELP decoder available */
-            throw CInitErr(ET_AUDDECODER);
-#endif
-        }
-        else if (eAudioCoding == CAudioParam::AC_HVXC)
-        {
-            /* Init for HVXC decoding --------------------------------------- */
-
-			iAudioSampleRate = 8000;
-            iNumAudioFrames = 400 / 20;
-
-            iLenDecOutPerChan = 0;
-
-            iNumHvxcBits = 0;
-            if (AudioParam.eHVXCRate == CAudioParam::HR_2_KBIT)
-            {
-                iNumHvxcBits = 40;
-                if (AudioParam.bHVXCCRC)
-                {
-                    iNumHvxcBits += 8;
-                }
-            }
-            else if (AudioParam.eHVXCRate == CAudioParam::HR_4_KBIT)
-            {
-                iNumHvxcBits = 80;
-                if (AudioParam.bHVXCCRC)
-                {
-                    iNumHvxcBits += 13;
-                }
-            }
-
-            if ( ! iNumHvxcBits ) {
-                throw CInitErr(ET_AUDDECODER);
-            }
-
-            hvxc_frame.Init(iNumAudioFrames, iNumHvxcBits);
-
-#ifdef USE_HVXC_DECODER
-
-// TODO put decoder initialization here
-            bWriteToFile = TRUE;
-            if(bWriteToFile)
-            {
-                string fn = HVXCFileName(Parameters);
-                if(pFile)
-                    fclose(pFile);
-#ifdef _WIN32
-                _mkdir("test");
-#else
-                mkdir("test", 0777);
-#endif
-                pFile = fopen(fn.c_str(), "wb");
-            }
-
-#else
-            /* No HVXC decoder available */
-            throw CInitErr(ET_AUDDECODER);
-#endif
+            // TODO
         }
         else if (eAudioCoding == CAudioParam::AC_OPUS)
         {

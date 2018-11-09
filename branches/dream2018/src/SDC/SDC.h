@@ -117,6 +117,8 @@ protected:
                              CParameter& Parameter);
     _BOOLEAN DataEntityType9(CVector<_BINARY>* pbiData, const int iLengthOfBody,
                              CParameter& Parameter, const _BOOLEAN bVersion);
+    _BOOLEAN DataEntityType9Old(CVector<_BINARY>* pbiData, const int iLengthOfBody,
+                             CParameter& Parameter, const _BOOLEAN bVersion);
 // ...
     _BOOLEAN DataEntityType11(CVector<_BINARY>* pbiData, const int iLengthOfBody,
                               CParameter& Parameter, const _BOOLEAN bVersion);
