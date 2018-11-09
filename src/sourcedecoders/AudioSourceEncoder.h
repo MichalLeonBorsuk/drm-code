@@ -67,6 +67,8 @@ public:
         case CAudioParam::AC_CELP: return false;
         case CAudioParam::AC_HVXC: return false;
         case CAudioParam::AC_OPUS: return bCanEncodeOPUS;
+        case CAudioParam::AC_xHE_AAC: return false;
+        case CAudioParam::AC_RESERVED: return false;
         }
         return false;
     }

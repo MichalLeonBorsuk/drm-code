@@ -906,7 +906,221 @@ _BOOLEAN CSDCReceive::DataEntityType8(CVector<_BINARY>* pbiData,
 /******************************************************************************\
 * Data entity Type 9 (Audio information data entity)						   *
 \******************************************************************************/
+/*
+6.4.3.10 Audio information data entity - type 9
+Each audio service needs a detailed description of the parameters needed for audio decoding. This data entity uses the reconfiguration mechanism for the version flag.
+• Short Id                2 bits
+• Stream Id               2 bits
+• audio coding            2 bits
+• SBR flag                1 bit
+• audio mode              2 bits
+• audio sampling rate     3 bits
+• text flag               1 bit
+• enhancement flag        1 bit
+• coder field             5 bits
+• rfa                     1 bit
+• codec specific config   8n bits
+
+ */
 _BOOLEAN CSDCReceive::DataEntityType9(CVector<_BINARY>* pbiData,
+                                      const int iLengthOfBody,
+                                      CParameter& Parameter,
+                                      const _BOOLEAN)
+{
+    /* Check length -> must be 2 bytes */
+    if (iLengthOfBody != 2)
+        return TRUE;
+
+    /* Init error flag with "no error" */
+    _BOOLEAN bError = FALSE;
+
+    /* Init bAudioSamplingRateValue7 flag to FALSE */
+    _BOOLEAN bAudioSamplingRateValue7 = FALSE;
+
+    /* Short ID (the short ID is the index of the service-array) */
+    const int iTempShortID = int((*pbiData).Separate(2));
+
+    /* Load audio parameters class with current parameters */
+    Parameter.Lock();
+    CAudioParam AudParam = Parameter.GetAudioParam(iTempShortID);
+    Parameter.Unlock();
+
+    /* Stream Id */
+    AudParam.iStreamID = int((*pbiData).Separate(2));
+
+    /* Audio coding */
+    switch ((*pbiData).Separate(2))
+    {
+    case 0: /* 00 */
+        AudParam.eAudioCoding = CAudioParam::AC_AAC;
+        break;
+
+    case 1: /* 01 */
+        AudParam.eAudioCoding = CAudioParam::AC_OPUS; // non-standard
+        break;
+
+    case 2: /* 10 */
+        AudParam.eAudioCoding = CAudioParam::AC_RESERVED;
+        break;
+
+    case 3: /* 11 */
+        AudParam.eAudioCoding = CAudioParam::AC_xHE_AAC;
+        break;
+    }
+
+    /* SBR flag */
+    switch ((*pbiData).Separate(1))
+    {
+    case 0: /* 0 */
+        AudParam.eSBRFlag = CAudioParam::SB_NOT_USED;
+        break;
+
+    case 1: /* 1 */
+        AudParam.eSBRFlag = CAudioParam::SB_USED;
+        break;
+    }
+
+    /* Audio mode */
+    switch ((*pbiData).Separate(2))
+    {
+    case 0: /* 00 */
+        AudParam.eAudioMode = CAudioParam::AM_MONO;
+        break;
+
+    case 1: /* 01 */
+        AudParam.eAudioMode = CAudioParam::AM_P_STEREO; // Not used in xHE-AAC
+        break;
+
+    case 2: /* 10 */
+        AudParam.eAudioMode = CAudioParam::AM_STEREO;
+        break;
+
+    default: /* reserved */
+        AudParam.eAudioMode = CAudioParam::AM_STEREO;
+        bError = TRUE;
+        break;
+    }
+
+    /* Audio sampling rate */
+    if(AudParam.eAudioCoding == CAudioParam::AC_xHE_AAC) {
+        switch ((*pbiData).Separate(3))
+        {
+        case 0: /* 000 */
+            AudParam.eAudioSamplRate = CAudioParam::AS_9_6KHZ;
+            break;
+
+        case 1: /* 001 */
+            AudParam.eAudioSamplRate = CAudioParam::AS_12KHZ;
+            break;
+
+        case 2: /* 010 */
+            AudParam.eAudioSamplRate = CAudioParam::AS_16KHZ;
+            break;
+
+        case 3: /* 011 */
+            AudParam.eAudioSamplRate = CAudioParam::AS_19_2KHZ;
+            break;
+
+        case 4: /* 100 */
+            AudParam.eAudioSamplRate = CAudioParam::AS_24KHZ;
+            break;
+
+        case 5: /* 101 */
+            AudParam.eAudioSamplRate = CAudioParam::AS_32KHZ;
+            break;
+
+        case 6: /* 110 */
+            AudParam.eAudioSamplRate = CAudioParam::AS_38_4KHZ;
+            break;
+
+        case 7: /* 111 */
+            AudParam.eAudioSamplRate = CAudioParam::AS_48KHZ;
+        default: /* reserved */
+            bError = TRUE;
+            break;
+        }
+    }
+    else {
+        switch ((*pbiData).Separate(3))
+        {
+        case 1: /* 001 */
+            AudParam.eAudioSamplRate = CAudioParam::AS_12KHZ;
+            break;
+        case 3: /* 011 */
+            AudParam.eAudioSamplRate = CAudioParam::AS_24KHZ;
+            break;
+        case 5: /* 101 */
+            AudParam.eAudioSamplRate = CAudioParam::AS_48KHZ;
+            break;
+        case 7: /* 111 */
+            bAudioSamplingRateValue7 = TRUE;
+        default: /* reserved */
+            bError = TRUE;
+            break;
+        }
+    }
+
+    /* XXX EXPERIMENTAL THIS IS NOT PART OF DRM STANDARD XXX */
+    if ((bAudioSamplingRateValue7 && AudParam.eAudioCoding == CAudioParam::AC_AAC) || (AudParam.eAudioCoding == CAudioParam::AC_OPUS) ) {
+        bError = AudParam.eSBRFlag != CAudioParam::SB_NOT_USED || AudParam.eAudioMode != CAudioParam::AM_MONO;
+        AudParam.eAudioCoding = CAudioParam::AC_OPUS;
+        AudParam.eAudioMode = CAudioParam::AM_STEREO;
+        AudParam.eAudioSamplRate = CAudioParam::AS_48KHZ;
+        AudParam.eSBRFlag = CAudioParam::SB_NOT_USED;
+    }
+
+    /* Text flag */
+    switch ((*pbiData).Separate(1))
+    {
+    case 0: /* 0 */
+        AudParam.bTextflag = FALSE;
+        break;
+
+    case 1: /* 1 */
+        AudParam.bTextflag = TRUE;
+        break;
+    }
+
+    /* Enhancement flag */
+    switch ((*pbiData).Separate(1))
+    {
+    case 0: /* 0 */
+        AudParam.bEnhanceFlag = FALSE;
+        break;
+
+    case 1: /* 1 */
+        AudParam.bEnhanceFlag = TRUE;
+        break;
+    }
+
+    /* Coder field */
+    if (AudParam.eAudioCoding == CAudioParam::AC_CELP)
+    {
+        /* CELP index */
+        AudParam.iCELPIndex = (*pbiData).Separate(5);
+    }
+    else
+    {
+        /* rfa 5 bit */
+        (*pbiData).Separate(5);
+    }
+
+    /* rfa 1 bit */
+    (*pbiData).Separate(1);
+
+    /* Set new parameters in global struct */
+    if (bError == FALSE)
+    {
+        Parameter.Lock();
+        Parameter.SetAudioParam(iTempShortID, AudParam);
+        Parameter.Unlock();
+        return FALSE;
+    }
+    else
+        return TRUE;
+}
+
+_BOOLEAN CSDCReceive::DataEntityType9Old(CVector<_BINARY>* pbiData,
                                       const int iLengthOfBody,
                                       CParameter& Parameter,
                                       const _BOOLEAN)
@@ -1042,7 +1256,7 @@ _BOOLEAN CSDCReceive::DataEntityType9(CVector<_BINARY>* pbiData,
     switch ((*pbiData).Separate(3))
     {
     case 0: /* 000 */
-        AudParam.eAudioSamplRate = CAudioParam::AS_8_KHZ;
+        AudParam.eAudioSamplRate = CAudioParam::AS_9_6KHZ;
         break;
 
     case 1: /* 001 */
@@ -1054,27 +1268,30 @@ _BOOLEAN CSDCReceive::DataEntityType9(CVector<_BINARY>* pbiData,
         break;
 
     case 3: /* 011 */
-        AudParam.eAudioSamplRate = CAudioParam::AS_24KHZ;
+        AudParam.eAudioSamplRate = (AudParam.eAudioCoding==CAudioParam::AC_xHE_AAC)?CAudioParam::AS_19_2KHZ:CAudioParam::AS_24KHZ;
+        break;
+
+    case 4: /* 010 */
+        AudParam.eAudioSamplRate = CAudioParam::AS_16KHZ;
         break;
 
     case 5: /* 101 */
-        AudParam.eAudioSamplRate = CAudioParam::AS_48KHZ;
+        AudParam.eAudioSamplRate = (AudParam.eAudioCoding==CAudioParam::AC_xHE_AAC)?CAudioParam::AS_32KHZ:CAudioParam::AS_48KHZ;
+        break;
+
+    case 6: /* 010 */
+        AudParam.eAudioSamplRate = CAudioParam::AS_16KHZ;
         break;
 
     case 7: /* 111 */
-        bAudioSamplingRateValue7 = TRUE;
+        AudParam.eAudioSamplRate = CAudioParam::AS_48KHZ;
+        /* XXX EXPERIMENTAL THIS IS NOT PART OF DRM STANDARD XXX */
+        if(AudParam.eAudioCoding==CAudioParam::AC_AAC) { // 48 kHz AAC is for DRM+ this needs changing if we are in Mode E
+            AudParam.eAudioCoding = CAudioParam::AC_OPUS;
+        }
     default: /* reserved */
         bError = TRUE;
         break;
-    }
-
-    /* XXX EXPERIMENTAL THIS IS NOT PART OF DRM STANDARD XXX */
-    if (bAudioSamplingRateValue7 && AudParam.eAudioCoding == CAudioParam::AC_AAC) {
-        bError = AudParam.eSBRFlag != CAudioParam::SB_NOT_USED || AudParam.eAudioMode != CAudioParam::AM_MONO;
-        AudParam.eAudioCoding = CAudioParam::AC_OPUS;
-        AudParam.eAudioMode = CAudioParam::AM_STEREO;
-        AudParam.eAudioSamplRate = CAudioParam::AS_48KHZ;
-        AudParam.eSBRFlag = CAudioParam::SB_NOT_USED;
     }
 
     /* Text flag */
