@@ -78,6 +78,9 @@
 #else
 # include "../sourcedecoders/neaacdec_dll.h"
 #endif
+#ifdef HAVE_LIBFDK_AAC
+# include "../sourcedecoders/fdk_aac_codec.h"
+#endif
 /* fftw 3.3.2 doesn't export the symbol fftw_version
  * for windows in libfftw3-3.def
  * You can add it regenerate the lib file and it's supposed to work,
@@ -124,6 +127,9 @@ CAboutDlg::CAboutDlg(QWidget* parent):
     char  sfversion [128] ;
     sf_command (NULL, SFC_GET_LIB_VERSION, sfversion, sizeof (sfversion)) ;
 #endif
+#ifdef HAVE_LIBFDK_AAC
+    FdkAacCodec fdk;
+#endif
     QString strCredits = 
         "<p>" /* General description of Dream software */
         "<big><b>Dream</b> " + tr("is a software implementation of a Digital "
@@ -164,6 +170,10 @@ CAboutDlg::CAboutDlg(QWidget* parent):
 #endif
 #ifdef USE_FAAC_LIBRARY
         "<li><b>FAAC</b> <i>http://faac.sourceforge.net</i></li>"
+#endif
+#ifdef HAVE_LIBFDK_AAC
+        "<li><b>fdk-aac decoder</b> (" + QString::fromStdString(fdk.DecGetVersion()) + ") <i>https://www.iis.fraunhofer.de/en/ff/amm/impl.html</i></li>"
+        "<li><b>fdk-aac encoder</b> (" + QString::fromStdString(fdk.EncGetVersion()) + ") <i>https://www.iis.fraunhofer.de/en/ff/amm/impl.html</i></li>"
 #endif
 #ifdef QT_CORE_LIB
         "<li><b>Qt</b> (" + QString(QT_VERSION_STR) + ") <i>http://qt-project.org</i></li>"
