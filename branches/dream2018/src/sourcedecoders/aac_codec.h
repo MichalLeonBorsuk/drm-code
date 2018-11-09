@@ -26,8 +26,8 @@
  *
 \******************************************************************************/
 
-#ifndef _AAC_CODEC_H_
-#define _AAC_CODEC_H_
+#ifndef AAC_CODEC_H_
+#define AAC_CODEC_H_
 
 #include "AudioCodec.h"
 #ifdef USE_FAAD2_LIBRARY
@@ -66,4 +66,4 @@ protected:
 	faacEncHandle hFaacEncoder;
 };
 
-#endif // _AAC_CODEC_H_
+#endif // AAC_CODEC_H_

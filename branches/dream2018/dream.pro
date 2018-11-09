@@ -229,6 +229,11 @@ exists($$OUT_PWD/include/neaacdec.h) {
 exists($$OUT_PWD/include/faac.h) {
     config += faac-drm
 }
+fdk-aac {
+     DEFINES += HAVE_LIBFDK_AAC
+     LIBS += -lfdk-aac
+     message("with fdk-aac")
+}
 faad2 {
      DEFINES += HAVE_LIBFAAD \
      USE_FAAD2_LIBRARY
@@ -498,7 +503,8 @@ HEADERS += \
     src/util/Settings.h \
     src/util/Utilities.h \
     src/util/Vector.h \
-    src/Version.h
+    src/Version.h \
+    src/sourcedecoders/fdk_aac_codec.h
 SOURCES += \
     src/AMDemodulation.cpp \
     src/AMSSDemodulation.cpp \
@@ -600,7 +606,8 @@ SOURCES += \
     src/util/Utilities.cpp \
     src/Version.cpp \
     src/sound/soundnull.cpp \
-    src/sound/soundinterface.cpp
+    src/sound/soundinterface.cpp \
+    src/sourcedecoders/fdk_aac_codec.cpp
 !console {
 HEADERS += \
     src/GUI-QT/Logging.h \

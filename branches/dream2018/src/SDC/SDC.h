@@ -31,8 +31,8 @@
  *
 \******************************************************************************/
 
-#if !defined(SDC_H__3B0BA660_CA63SDBOJKEWROBNER89NE877A0D312__INCLUDED_)
-#define SDC_H__3B0BA660_CA63SDBOJKEWROBNER89NE877A0D312__INCLUDED_
+#ifndef SDC_H
+#define SDC_H
 
 #include "../GlobalDefinitions.h"
 #include "../Parameter.h"
@@ -50,9 +50,11 @@ class CSDCTransmit
 {
 public:
     CSDCTransmit() {}
-    virtual ~CSDCTransmit() {}
+    virtual ~CSDCTransmit();
 
     void SDCParam(CVector<_BINARY>* pbiData, CParameter& Parameter);
+
+    static void DataEntityType9(CVector<_BINARY>& vecbiData, const CAudioParam& audioParam);
 
 protected:
     void CommitEnter(CVector<_BINARY>* pbiData, CParameter& Parameter);
@@ -89,7 +91,7 @@ public:
     enum ERetStatus {SR_OK, SR_BAD_CRC, SR_BAD_DATA};
     enum ESDCType {SDC_DRM, SDC_AMSS};
     CSDCReceive() : eSDCType(SDC_DRM) {}
-    virtual ~CSDCReceive() {}
+    virtual ~CSDCReceive();
 
     ERetStatus SDCParam(CVector<_BINARY>* pbiData, CParameter& Parameter);
     void SetSDCType(ESDCType sdcType) {
@@ -126,4 +128,4 @@ protected:
 };
 
 
-#endif // !defined(SDC_H__3B0BA660_CA63SDBOJKEWROBNER89NE877A0D312__INCLUDED_)
+#endif // SDC_H

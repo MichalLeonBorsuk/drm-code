@@ -39,7 +39,7 @@
 class CAudioCodec
 {
 public:
-	virtual ~CAudioCodec() {}
+    virtual ~CAudioCodec();
 	/* Decoder */
 	enum EDecError { DECODER_ERROR_OK, DECODER_ERROR_CRC, DECODER_ERROR_CORRUPTED, DECODER_ERROR_UNKNOWN };
 	virtual string DecGetVersion() = 0;

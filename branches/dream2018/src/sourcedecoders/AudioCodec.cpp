@@ -31,6 +31,10 @@
 #include "aac_codec.h"
 #include "opus_codec.h"
 
+CAudioCodec::~CAudioCodec() {
+
+}
+
 vector<CAudioCodec*>
 CAudioCodec::CodecList;
 
