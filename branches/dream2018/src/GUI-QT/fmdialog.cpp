@@ -486,16 +486,8 @@ QString FMDialog::GetCodecString(const int iServiceID)
 				strReturn = "AAC";
 			break;
 
-		case CAudioParam::AC_CELP:
-			/* Only 8 and 16 kHz sample rates are supported for CELP encoding */
-			if (eSamRate == CAudioParam::AS_8_KHZ)
-				strReturn = "celp";
-			else
-				strReturn = "CELP";
-			break;
-
-		case CAudioParam::AC_HVXC:
-			strReturn = "HVXC";
+        case CAudioParam::AC_xHE_AAC:
+                strReturn = "xHE-AAC";
 			break;
 
 		case CAudioParam::AC_OPUS:
