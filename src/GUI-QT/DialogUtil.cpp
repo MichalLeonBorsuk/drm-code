@@ -125,7 +125,7 @@ CAboutDlg::CAboutDlg(QWidget* parent):
     setupUi(this);
 #ifdef HAVE_LIBSNDFILE
     char  sfversion [128] ;
-    sf_command (NULL, SFC_GET_LIB_VERSION, sfversion, sizeof (sfversion)) ;
+    sf_command (nullptr, SFC_GET_LIB_VERSION, sfversion, sizeof (sfversion)) ;
 #endif
 #ifdef HAVE_LIBFDK_AAC
     FdkAacCodec fdk;
@@ -172,8 +172,8 @@ CAboutDlg::CAboutDlg(QWidget* parent):
         "<li><b>FAAC</b> <i>http://faac.sourceforge.net</i></li>"
 #endif
 #ifdef HAVE_LIBFDK_AAC
-        "<li><b>fdk-aac decoder</b> (" + QString::fromStdString(fdk.DecGetVersion()) + ") <i>https://www.iis.fraunhofer.de/en/ff/amm/impl.html</i></li>"
-        "<li><b>fdk-aac encoder</b> (" + QString::fromStdString(fdk.EncGetVersion()) + ") <i>https://www.iis.fraunhofer.de/en/ff/amm/impl.html</i></li>"
+        "<li><b>fdk-aac decoder</b> (" + fdk.DecGetVersion().c_str() + ") <i>https://www.iis.fraunhofer.de/en/ff/amm/impl.html</i></li>"
+        "<li><b>fdk-aac encoder</b> (" + fdk.EncGetVersion().c_str() + ") <i>https://www.iis.fraunhofer.de/en/ff/amm/impl.html</i></li>"
 #endif
 #ifdef QT_CORE_LIB
         "<li><b>Qt</b> (" + QString(QT_VERSION_STR) + ") <i>http://qt-project.org</i></li>"
