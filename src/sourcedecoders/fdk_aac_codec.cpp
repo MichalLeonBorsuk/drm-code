@@ -75,7 +75,7 @@ FdkAacCodec::DecOpen(CAudioParam& AudioParam, int *iAudioSampleRate, int *iLenDe
 
     _BINARY *pData = &vecbiData.data()[0];
 
-    hDecoder = aacDecoder_Open (TRANSPORT_TYPE::TT_DRM, 0);
+    hDecoder = aacDecoder_Open (TRANSPORT_TYPE::TT_DRM, 1);
 
     if(hDecoder == nullptr)
         return false;
@@ -98,15 +98,16 @@ FdkAacCodec::Decode(CVector<uint8_t>& vecbyPrepAudioFrame, int *iChannels, CAudi
     uint8_t* pData = vecbyPrepAudioFrame.data();
     UINT bufferSize = unsigned(vecbyPrepAudioFrame.Size());
     UINT bytesValid = unsigned(vecbyPrepAudioFrame.Size());
-    cerr << "aac decode before bufferSize " << bufferSize << ", bytesValid " << bytesValid << endl;
-
+    //cerr << "aac decode before bufferSize " << bufferSize << ", bytesValid " << bytesValid << endl;
     int output_size = 8*2*2048;
     //uint8_t *output_buf = new uint8_t[output_size]; if we need to do endian swap
     int16_t *decode_buf = new int16_t[output_size/2];
 
+    *eDecError = CAudioCodec::DECODER_ERROR_UNKNOWN;
+
     AAC_DECODER_ERROR err = aacDecoder_Fill(hDecoder, &pData, &bufferSize, &bytesValid);
     if(err == AAC_DEC_OK) {
-        cerr << "aac decode after fill bufferSize " << bufferSize << ", bytesValid " << bytesValid << endl;
+        //cerr << "aac decode after fill bufferSize " << bufferSize << ", bytesValid " << bytesValid << endl;
         if (bytesValid != 0) {
             cerr << "Unable to feed all " << bufferSize << " input bytes, bytes left " << bytesValid << endl;
             return nullptr; // wait for all frames of the superframe?
@@ -115,6 +116,7 @@ FdkAacCodec::Decode(CVector<uint8_t>& vecbyPrepAudioFrame, int *iChannels, CAudi
             int frame_size = 0;
             err = aacDecoder_DecodeFrame(hDecoder, decode_buf, output_size / sizeof(INT_PCM), 0);
             if (err == AAC_DEC_NOT_ENOUGH_BITS)
+                fprintf(stderr, "not enough bits\n");
                 break; // this is the good end as well as a possible error
             if (err != AAC_DEC_OK) {
                 cerr << "Decode failed: " << err << endl;
@@ -128,6 +130,7 @@ FdkAacCodec::Decode(CVector<uint8_t>& vecbyPrepAudioFrame, int *iChannels, CAudi
             }
             */
         }
+        *eDecError = CAudioCodec::DECODER_ERROR_OK;
         return decode_buf;
     }
     else {
