@@ -142,6 +142,8 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
         TextMessage.Decode(vecbiTextMessBuf);
     }
 
+    cerr << "superframe done" << endl;
+
     /* Audio data header parsing ********************************************* */
     /* Check if audio shall not be decoded */
     if (DoNotProcessAudDecoder == TRUE)

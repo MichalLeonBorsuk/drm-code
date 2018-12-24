@@ -30,6 +30,9 @@
 #include "null_codec.h"
 #include "aac_codec.h"
 #include "opus_codec.h"
+#ifdef HAVE_LIBFDK_AAC
+# include "fdk_aac_codec.h"
+#endif
 
 CAudioCodec::~CAudioCodec() {
 
@@ -50,7 +53,11 @@ CAudioCodec::InitCodecList()
 		CodecList.push_back(new NullCodec);
 
 		/* AAC */
-		CodecList.push_back(new AacCodec);
+#ifdef HAVE_LIBFDK_AAC
+        CodecList.push_back(new FdkAacCodec);
+#else
+        CodecList.push_back(new AacCodec);
+#endif
 
 		/* Opus */
 		CodecList.push_back(new OpusCodec);
@@ -75,12 +82,12 @@ CAudioCodec::UnrefCodecList()
 CAudioCodec*
 CAudioCodec::GetDecoder(CAudioParam::EAudCod eAudioCoding, bool bCanReturnNullPtr)
 {
-	const int size = CodecList.size();
+    const int size = int(CodecList.size());
 	for (int i = 1; i < size; i++)
-		if (CodecList[i]->CanDecode(eAudioCoding))
-			return CodecList[i];
+        if (CodecList[unsigned(i)]->CanDecode(eAudioCoding))
+            return CodecList[unsigned(i)];
 	/* Fallback to null codec */
-    return bCanReturnNullPtr ? NULL : CodecList[0]; // ie the null codec
+    return bCanReturnNullPtr ? nullptr : CodecList[0]; // ie the null codec
 }
 
 CAudioCodec*
