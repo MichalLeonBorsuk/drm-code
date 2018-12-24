@@ -142,8 +142,6 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
         TextMessage.Decode(vecbiTextMessBuf);
     }
 
-    cerr << "superframe done" << endl;
-
     /* Audio data header parsing ********************************************* */
     /* Check if audio shall not be decoded */
     if (DoNotProcessAudDecoder == TRUE)
@@ -265,8 +263,7 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
         {
             if (bGoodValues == TRUE)
             {
-                /* Prepare data vector with CRC at the beginning (the definition
-                   with faad2 DRM interface) */
+                /* Prepare data vector with CRC at the beginning (the definition with faad2 DRM interface) */
                 CVector<uint8_t> vecbyPrepAudioFrame(audio_frame[j].size()+1);
                 vecbyPrepAudioFrame[0] = aac_crc_bits[j];
 
@@ -365,8 +362,7 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
         else
             bCurBlockOK = FALSE;
 
-// This code is independent of particular audio source type and should work
-// fine with CELP and HVXC
+        // This code is independent of particular audio source type and should work with all codecs
 
         /* Postprocessing of audio blocks, status informations -------------- */
 		ETypeRxStatus status = DATA_ERROR;
