@@ -69,28 +69,50 @@ FdkAacCodec::DecOpen(CAudioParam& AudioParam, int *iAudioSampleRate, int *iLenDe
 {
     unsigned int Type9Size = 2;
     CVector<_BINARY> vecbiData;
-    vecbiData.Init(int(Type9Size));
+    vecbiData.Init(16);
     vecbiData.ResetBitAccess();
     CSDCTransmit::DataEntityType9(vecbiData, AudioParam);
+    vecbiData.ResetBitAccess();
 
-    _BINARY *pData = &vecbiData.data()[0];
+    //uint32_t t9[1];
+    //t9[0] = vecbiData.Separate(16);
+    //UCHAR *t9b = reinterpret_cast<UCHAR*>(t9);
+    //UCHAR c = t9b[0]; t9b[0] = t9b[1]; t9b[1] = c;
 
-    hDecoder = aacDecoder_Open (TRANSPORT_TYPE::TT_DRM, 1);
+    UCHAR t9b[2];
+    t9b[0] = UCHAR(vecbiData.Separate(8));
+    t9b[1] = UCHAR(vecbiData.Separate(8));
+
+    cerr << "type9 " << hex << int(t9b[0]) << int(t9b[1]) << dec << endl;
+
+    UCHAR *t9 = &t9b[0];
+
+    hDecoder = aacDecoder_Open (TRANSPORT_TYPE::TT_DRM, 2);
 
     if(hDecoder == nullptr)
         return false;
-    AAC_DECODER_ERROR err = aacDecoder_ConfigRaw (hDecoder, &pData, &Type9Size);
+    AAC_DECODER_ERROR err = aacDecoder_ConfigRaw (hDecoder, &t9, &Type9Size);
     if(err == AAC_DEC_OK) {
         CStreamInfo *pinfo = aacDecoder_GetStreamInfo(hDecoder);
         if (pinfo==nullptr || pinfo->sampleRate <= 0) {
             cerr << "No stream info" << endl;
-            return false;
+            *iAudioSampleRate = 24000;
+            *iLenDecOutPerChan=1920;
+            return true;// TODO
         }
         info = *pinfo;
+        cerr << "channels " << info.aacNumChannels
+             << " sample rate " << info.aacSampleRate
+             << " samples per frame " << info.aacSamplesPerFrame
+             << endl;
+        *iAudioSampleRate = 24000;
+        *iLenDecOutPerChan=1920;
         return true;
     }
-    return false;
-}
+    *iAudioSampleRate = 24000;
+    *iLenDecOutPerChan=1920;
+    return true; // TODO
+ }
 
 _SAMPLE*
 FdkAacCodec::Decode(CVector<uint8_t>& vecbyPrepAudioFrame, int *iChannels, CAudioCodec::EDecError *eDecError)
@@ -102,6 +124,8 @@ FdkAacCodec::Decode(CVector<uint8_t>& vecbyPrepAudioFrame, int *iChannels, CAudi
     int output_size = 8*2*2048;
     //uint8_t *output_buf = new uint8_t[output_size]; if we need to do endian swap
     int16_t *decode_buf = new int16_t[output_size/2];
+
+    memset(decode_buf, 0, output_size);
 
     *eDecError = CAudioCodec::DECODER_ERROR_UNKNOWN;
 
@@ -130,7 +154,17 @@ FdkAacCodec::Decode(CVector<uint8_t>& vecbyPrepAudioFrame, int *iChannels, CAudi
             }
             */
         }
+        CStreamInfo *pinfo = aacDecoder_GetStreamInfo(hDecoder);
+        if (pinfo==nullptr || pinfo->sampleRate <= 0) {
+            cerr << "No stream info" << endl;
+        }
+        info = *pinfo;
+        cerr << "channels " << info.aacNumChannels
+             << " sample rate " << info.aacSampleRate
+             << " samples per frame " << info.aacSamplesPerFrame
+             << endl;
         *eDecError = CAudioCodec::DECODER_ERROR_OK;
+        //for(int i=1919; i<1922; i++) cerr << decode_buf[unsigned(i)] << " "; cerr << endl;
         return decode_buf;
     }
     else {
