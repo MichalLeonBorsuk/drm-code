@@ -161,7 +161,7 @@ CDataDecoder::ProcessDataInternal(CParameter & Parameters)
 					DataUnit[iPacketID].bReady = FALSE;
 
 					/* Set values to read complete packet size */
-					iNewPacketDataSize = iNewPacketDataSize;
+                    iNewPacketDataSize = iMaxPacketDataSize; // TODO check the semantics here iNewPacketDataSize;
 					iNumSkipBytes = 2;	/* Only CRC has to be skipped */
 				}
 				else
