@@ -42,7 +42,7 @@ public:
 	virtual string DecGetVersion();
 	virtual bool CanDecode(CAudioParam::EAudCod eAudioCoding);
 	virtual bool DecOpen(CAudioParam& AudioParam, int *iAudioSampleRate, int *iLenDecOutPerChan);
-	virtual _SAMPLE* Decode(CVector<uint8_t>& vecbyPrepAudioFrame, int *iChannels, CAudioCodec::EDecError *eDecError);
+    virtual _SAMPLE* Decode(vector<uint8_t>& audio_frame, uint8_t aac_crc_bits, int *iChannels, CAudioCodec::EDecError *eDecError);
 	virtual void DecClose();
 	virtual void DecUpdate(CAudioParam& AudioParam);
 	/* Encoder */
@@ -53,6 +53,7 @@ public:
 	virtual void EncClose();
 	virtual void EncSetBitrate(int iBitRate);
 	virtual void EncUpdate(CAudioParam& AudioParam);
+    virtual void resetFile(string) {}
 protected:
     HANDLE_AACDECODER hDecoder;
     HANDLE_AACENCODER hEncoder;
