@@ -117,6 +117,13 @@ FdkAacCodec::DecOpen(CAudioParam& AudioParam, int *iAudioSampleRate, int *iLenDe
 _SAMPLE*
 FdkAacCodec::Decode(vector<uint8_t>& audio_frame, uint8_t aac_crc_bits, int *iChannels, CAudioCodec::EDecError *eDecError)
 {
+    /* Prepare data vector with CRC at the beginning (the definition with faad2 DRM interface) */
+    CVector<uint8_t> vecbyPrepAudioFrame(int(audio_frame.size()+1));
+    vecbyPrepAudioFrame[0] = aac_crc_bits;
+
+    for (size_t i = 0; i < audio_frame.size(); i++)
+        vecbyPrepAudioFrame[int(i + 1)] = audio_frame[i];
+
     uint8_t* pData = vecbyPrepAudioFrame.data();
     UINT bufferSize = unsigned(vecbyPrepAudioFrame.Size());
     UINT bytesValid = unsigned(vecbyPrepAudioFrame.Size());
