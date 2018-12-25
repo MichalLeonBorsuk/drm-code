@@ -571,9 +571,15 @@ OpusCodec::DecOpen(CAudioParam& AudioParam, int *iAudioSampleRate, int *iLenDecO
 }
 
 _SAMPLE*
-OpusCodec::Decode(CVector<uint8_t>& vecbyPrepAudioFrame, int *iChannels, CAudioCodec::EDecError *eDecError)
+OpusCodec::Decode(vector<uint8_t>& audio_frame, uint8_t aac_crc_bits, int *iChannels, CAudioCodec::EDecError *eDecError)
 {
-	_SAMPLE *sample = NULL;
+    /* Prepare data vector with CRC at the beginning (the definition with faad2 DRM interface) */
+    CVector<uint8_t> vecbyPrepAudioFrame(int(audio_frame.size()+1));
+    vecbyPrepAudioFrame[0] = aac_crc_bits;
+
+    for (size_t i = 0; i < audio_frame.size(); i++)
+        vecbyPrepAudioFrame[int(i + 1)] = audio_frame[i];
+    _SAMPLE *sample = NULL;
 	if (hOpusDecoder != NULL)
 	{
 		sample = (_SAMPLE *)opusDecDecode(hOpusDecoder,
