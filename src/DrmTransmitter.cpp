@@ -67,8 +67,10 @@ void CDRMTransmitter::Run()
     	DRM-parameters are fed to the function
     */
 
+#ifdef QT_MULTIMEDIA_LIB
     doSetInputDevice();
     doSetOutputDevice();
+#endif
 
     for (;;)
     {
