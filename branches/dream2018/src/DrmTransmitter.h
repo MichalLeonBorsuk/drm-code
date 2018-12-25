@@ -26,8 +26,8 @@
  *
 \******************************************************************************/
 
-#if !defined(DRMTRANSM_H__3B0BA660_CA63_4344_BB2B_23E7A0D31912__INCLUDED_)
-#define DRMTRANSM_H__3B0BA660_CA63_4344_BB2B_23E7A0D31912__INCLUDED_
+#ifndef __DRMTRANSM_H
+#define __DRMTRANSM_H
 
 #include <iostream>
 #include "util/Buffer.h"
@@ -54,6 +54,7 @@ public:
     void Init();
     void Start();
 
+
     CAudioSourceEncoder*	GetAudSrcEnc() {
         return &AudioSourceEncoder;
     }
@@ -75,15 +76,21 @@ public:
         return rDefCarOffset;
     }
 #ifdef QT_MULTIMEDIA_LIB
-    void SetInputDevice(const QString&) {}
-    void SetOutputDevice(const QString&) {}
+    void SetInputDevice(const QString&);
+    void SetOutputDevice(const QString&);
+    void doSetInputDevice();
+    void doSetOutputDevice();
 #endif
 
 protected:
     void Run();
-    void InitSoftStop() { iSoftStopSymbolCount=0; };
+    void InitSoftStop() { iSoftStopSymbolCount=0; }
     _BOOLEAN CanSoftStopExit();
 
+#ifdef QT_MULTIMEDIA_LIB
+    QString indev;
+    QString outdev;
+#endif
     /* Buffers */
     CSingleBuffer<_SAMPLE>	DataBuf;
     CSingleBuffer<_BINARY>	AudSrcBuf;
