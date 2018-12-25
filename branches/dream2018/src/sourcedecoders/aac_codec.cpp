@@ -100,7 +100,7 @@ static bool FaacCheckCallback()
 /* Implementation *************************************************************/
 
 AacCodec::AacCodec() :
-	hFaadDecoder(NULL), hFaacEncoder(NULL)
+    hFaadDecoder(nullptr), hFaacEncoder(nullptr),pFile(nullptr)
 {
 #ifndef USE_FAAD2_LIBRARY
 	if (hFaadLib == NULL)
@@ -208,17 +208,33 @@ AacCodec::DecOpen(CAudioParam& AudioParam, int *iAudioSampleRate, int *iLenDecOu
         *iAudioSampleRate = iAACSampleRate;
         *iLenDecOutPerChan = AUD_DEC_TRANSFROM_LENGTH;
     }
-	return hFaadDecoder != NULL;
+    return hFaadDecoder != nullptr;
 }
 
 _SAMPLE*
-AacCodec::Decode(CVector<uint8_t>& vecbyPrepAudioFrame, int *iChannels, CAudioCodec::EDecError *eDecError)
+AacCodec::Decode(vector<uint8_t>& audio_frame, uint8_t aac_crc_bits, int *iChannels, CAudioCodec::EDecError *eDecError)
 {
-	_SAMPLE* psDecOutSampleBuf = NULL;
+    _SAMPLE* psDecOutSampleBuf = nullptr;
 	NeAACDecFrameInfo DecFrameInfo;
 	DecFrameInfo.channels = 1;
 	DecFrameInfo.error = 1;
-	if (hFaadDecoder != NULL)
+
+    /* Prepare data vector with CRC at the beginning (the definition with faad2 DRM interface) */
+    CVector<uint8_t> vecbyPrepAudioFrame(int(audio_frame.size()+1));
+    vecbyPrepAudioFrame[0] = aac_crc_bits;
+
+    for (size_t i = 0; i < audio_frame.size(); i++)
+        vecbyPrepAudioFrame[int(i + 1)] = audio_frame[i];
+
+    if (pFile!=nullptr)
+    {
+        size_t iNewFrL = size_t(vecbyPrepAudioFrame.Size()) + 1;
+        fwrite(&iNewFrL, size_t(4), size_t(1), pFile);	// frame length
+        fwrite(&vecbyPrepAudioFrame[0], 1, iNewFrL, pFile);	// data
+        fflush(pFile);
+    }
+
+    if (hFaadDecoder != nullptr)
 	{
 		psDecOutSampleBuf = (_SAMPLE*) NeAACDecDecode(hFaadDecoder,
 			&DecFrameInfo, &vecbyPrepAudioFrame[0], vecbyPrepAudioFrame.size());
@@ -231,6 +247,10 @@ AacCodec::Decode(CVector<uint8_t>& vecbyPrepAudioFrame, int *iChannels, CAudioCo
 void
 AacCodec::DecClose()
 {
+    if(pFile != nullptr) {
+        fclose(pFile);
+        pFile = nullptr;
+    }
 	if (hFaadDecoder != NULL)
 	{
 		NeAACDecClose(hFaadDecoder);
@@ -321,4 +341,17 @@ void
 AacCodec::EncUpdate(CAudioParam&)
 {
 }
+
+void
+AacCodec::resetFile(string name)
+{
+    if(pFile != nullptr) {
+        fclose(pFile);
+        pFile = nullptr;
+    }
+    if(name != "") {
+        pFile = fopen(name.c_str(), "wb");
+    }
+}
+
 

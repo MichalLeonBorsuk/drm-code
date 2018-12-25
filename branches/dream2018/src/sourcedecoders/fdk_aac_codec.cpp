@@ -115,7 +115,7 @@ FdkAacCodec::DecOpen(CAudioParam& AudioParam, int *iAudioSampleRate, int *iLenDe
  }
 
 _SAMPLE*
-FdkAacCodec::Decode(CVector<uint8_t>& vecbyPrepAudioFrame, int *iChannels, CAudioCodec::EDecError *eDecError)
+FdkAacCodec::Decode(vector<uint8_t>& audio_frame, uint8_t aac_crc_bits, int *iChannels, CAudioCodec::EDecError *eDecError)
 {
     uint8_t* pData = vecbyPrepAudioFrame.data();
     UINT bufferSize = unsigned(vecbyPrepAudioFrame.Size());

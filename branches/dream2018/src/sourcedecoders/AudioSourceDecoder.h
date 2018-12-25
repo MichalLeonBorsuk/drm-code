@@ -122,8 +122,6 @@ protected:
     bool bCanDecodeOPUS;
     bool bCanDecodexHE_AAC;
 
-    FILE *pFile;
-
     virtual void InitInternal(CParameter& Parameters);
     virtual void ProcessDataInternal(CParameter& Parameters);
     string AACFileName(CParameter&);

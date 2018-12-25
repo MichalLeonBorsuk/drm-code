@@ -45,10 +45,11 @@ public:
 	virtual string DecGetVersion() = 0;
 	virtual bool CanDecode(CAudioParam::EAudCod eAudioCoding) = 0;
 	virtual bool DecOpen(CAudioParam& AudioParam, int *iAudioSampleRate, int *iLenDecOutPerChan) = 0;
-	virtual _SAMPLE* Decode(CVector<uint8_t>& vecbyPrepAudioFrame, int *iChannels, EDecError *eDecError) = 0;
+    virtual _SAMPLE* Decode(vector<uint8_t>& audio_frame, uint8_t aac_crc_bits, int *iChannels, EDecError *eDecError) = 0;
 	virtual void DecClose() = 0;
 	virtual void DecUpdate(CAudioParam& AudioParam) = 0;
-	/* Encoder */
+    virtual void resetFile(string name) = 0;
+    /* Encoder */
 	virtual string EncGetVersion() = 0;
 	virtual bool CanEncode(CAudioParam::EAudCod eAudioCoding) = 0;
 	virtual bool EncOpen(int iSampleRate, int iChannels, unsigned long *lNumSampEncIn, unsigned long *lMaxBytesEncOut) = 0;
@@ -61,6 +62,7 @@ public:
 	static void UnrefCodecList();
 	static CAudioCodec* GetDecoder(CAudioParam::EAudCod eAudioCoding, bool bCanReturnNullPtr=false);
 	static CAudioCodec* GetEncoder(CAudioParam::EAudCod eAudioCoding, bool bCanReturnNullPtr=false);
+    static void extractSamples(size_t iNumAudioFrames, size_t iNumHigherProtectedBytes, CVectorEx<_BINARY>& vecInputData, vector< vector<uint8_t> >& audio_frame, vector<uint8_t>& aac_crc_bits);
 private:
 	static vector<CAudioCodec*> CodecList;
 	static int RefCount;

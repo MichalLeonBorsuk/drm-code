@@ -100,3 +100,34 @@ CAudioCodec::GetEncoder(CAudioParam::EAudCod eAudioCoding, bool bCanReturnNullPt
 	/* Fallback to null codec */
     return bCanReturnNullPtr ? NULL : CodecList[0]; // ie the null codec
 }
+
+void
+CAudioCodec::extractSamples(size_t iNumAudioFrames, size_t iNumHigherProtectedBytes, CVectorEx<_BINARY>& vecInputData, vector< vector<uint8_t> >& audio_frame, vector<uint8_t>& aac_crc_bits)
+{
+    /* Higher-protected part */
+    for (size_t i = 0; i < iNumAudioFrames; i++)
+    {
+        /* Extract higher protected part bytes (8 bits per byte) */
+        for (size_t j = 0; j < iNumHigherProtectedBytes; j++)
+            audio_frame[i][j] = _BINARY(vecInputData.Separate(8));
+
+        /* Extract CRC bits (8 bits) */
+        aac_crc_bits[i] = _BINARY(vecInputData.Separate(8));
+    }
+
+    /* Lower-protected part */
+    for (size_t i = 0; i < iNumAudioFrames; i++)
+    {
+        /* First calculate frame length, derived from higher protected
+           part frame length and total size */
+        const size_t iNumLowerProtectedBytes =
+            audio_frame[i].size() - iNumHigherProtectedBytes;
+
+        /* Extract lower protected part bytes (8 bits per byte) */
+        for (size_t j = 0; j < iNumLowerProtectedBytes; j++)
+        {
+            audio_frame[i][iNumHigherProtectedBytes + j] =
+                _BINARY(vecInputData.Separate(8));
+        }
+    }
+}

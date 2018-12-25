@@ -85,9 +85,8 @@ bool NullCodec::DecOpen(CAudioParam& AudioParam, int *iAudioSampleRate, int *iLe
 	return false;
 }
 
-_SAMPLE* NullCodec::Decode(CVector<uint8_t>& vecbyPrepAudioFrame, int *iChannels, EDecError *eDecError)
+_SAMPLE* NullCodec::Decode(vector<uint8_t>& audio_frame, uint8_t aac_crc_bits, int *iChannels, EDecError *eDecError)
 {
-	(void)vecbyPrepAudioFrame;
 	*iChannels = 1;
 	*eDecError = DECODER_ERROR_UNKNOWN;
 	return NULL;
