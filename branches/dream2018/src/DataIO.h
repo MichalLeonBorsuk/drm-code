@@ -73,8 +73,14 @@ public:
     _REAL GetLevelMeter() {
         return SignalLevelMeter.Level();
     }
+#ifdef QT_MULTIMEDIA_LIB
+    void SetSoundInterface(QIODevice*);
+#endif
 
 protected:
+#ifdef QT_MULTIMEDIA_LIB
+    QIODevice*              pIODevice;
+#endif
     CSoundInInterface*	pSound;
     CVector<_SAMPLE>	vecsSoundBuffer;
     CSignalLevelMeter	SignalLevelMeter;

@@ -41,6 +41,25 @@ const static int SineTable[] = { 0, 1, 0, -1, 0 };
 /******************************************************************************\
 * Transmitter                                                                  *
 \******************************************************************************/
+CTransmitData::CTransmitData(CSoundOutInterface* pNS) : pFileTransmitter(nullptr),
+#ifdef QT_MULTIMEDIA_LIB
+        pIODevice(nullptr),
+#endif
+        pSound(pNS),
+        eOutputFormat(OF_REAL_VAL), rDefCarOffset((_REAL) VIRTUAL_INTERMED_FREQ),
+        strOutFileName("test/TransmittedData.txt"), bUseSoundcard(TRUE),
+        bAmplified(FALSE), bHighQualityIQ(FALSE)
+{
+
+}
+
+void CTransmitData::SetSoundInterface(QIODevice* p)
+{
+#ifdef QT_MULTIMEDIA_LIB
+    pIODevice = p;
+#endif
+}
+
 void CTransmitData::ProcessDataInternal(CParameter&)
 {
     int i;
@@ -123,7 +142,19 @@ void CTransmitData::FlushData()
     if (bUseSoundcard == TRUE)
     {
         /* Write data to sound card. Must be a blocking function */
+
+#ifdef QT_MULTIMEDIA_LIB
+        bool bBad = true;
+        if(pIODevice)
+        {
+            qint64 n = 2*vecsDataOut.Size();
+            int m = pIODevice->write((char*)&vecsDataOut[0], n);
+            if(m==n)
+                bBad = false;
+        }
+#else
         pSound->Write(vecsDataOut);
+#endif
     }
     else
     {
