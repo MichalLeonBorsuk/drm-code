@@ -33,6 +33,8 @@
 #ifdef QT_MULTIMEDIA_LIB
 #include <QAudioInput>
 #include <QIODevice>
+#else
+  class QIODevice;
 #endif
 #include "Parameter.h"
 #include "matlib/Matlib.h"
@@ -84,10 +86,8 @@ public:
                      OF_IQ_NEG /* I / Q */, OF_EP /* envelope / phase */
                     };
 
-    CTransmitData(CSoundOutInterface* pNS) : pFileTransmitter(NULL), pSound(pNS),
-            eOutputFormat(OF_REAL_VAL), rDefCarOffset((_REAL) VIRTUAL_INTERMED_FREQ),
-            strOutFileName("test/TransmittedData.txt"), bUseSoundcard(TRUE),
-            bAmplified(FALSE), bHighQualityIQ(FALSE) {}
+    CTransmitData(CSoundOutInterface* pNS);
+
     virtual ~CTransmitData();
 
     void SetIQOutput(const EOutFormat eFormat) {
@@ -116,6 +116,8 @@ public:
         rDefCarOffset = rNewCarOffset;
     }
 
+    void SetSoundInterface(QIODevice*);
+
     void SetWriteToFile(const string strNFN)
     {
         strOutFileName = strNFN;
@@ -126,6 +128,9 @@ public:
 
 protected:
     FILE*				pFileTransmitter;
+#ifdef QT_MULTIMEDIA_LIB
+    QIODevice*              pIODevice;
+#endif
     CSoundOutInterface*	pSound;
     CVector<short>		vecsDataOut;
     int					iBlockCnt;

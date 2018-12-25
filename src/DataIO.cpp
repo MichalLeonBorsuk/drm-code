@@ -38,8 +38,24 @@
 void CReadData::ProcessDataInternal(CParameter&)
 {
     /* Get data from sound interface */
-    pSound->Read(vecsSoundBuffer);
-
+    if (pSound == nullptr)
+    {
+#ifdef QT_MULTIMEDIA_LIB
+        if(pIODevice)
+        {
+            qint64 n = 2*vecsSoundBuffer.Size();
+            pIODevice->read((char*)&vecsSoundBuffer[0], n);
+        }
+        else
+            return;
+#else
+        return;
+#endif
+    }
+    else
+    {
+        pSound->Read(vecsSoundBuffer);
+    }
     /* Write data to output buffer */
     for (int i = 0; i < iOutputBlockSize; i++)
         (*pvecOutputData)[i] = vecsSoundBuffer[i];
@@ -65,6 +81,15 @@ void CReadData::InitInternal(CParameter& Parameters)
     /* Init level meter */
     SignalLevelMeter.Init(0);
 }
+
+#ifdef QT_MULTIMEDIA_LIB
+void
+CReadData::SetSoundInterface(QIODevice* p)
+{
+    pIODevice = p;
+}
+#endif
+
 
 /* Receiver ----------------------------------------------------------------- */
 #ifdef QT_MULTIMEDIA_LIB

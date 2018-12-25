@@ -29,6 +29,10 @@
 #include "DrmTransmitter.h"
 #include "sound/sound.h"
 #include <sstream>
+#ifdef QT_MULTIMEDIA_LIB
+# include <QAudioInput>
+# include <QAudioOutput>
+#endif
 
 /* Implementation *************************************************************/
 void CDRMTransmitter::Start()
@@ -62,6 +66,10 @@ void CDRMTransmitter::Run()
     	convention is always "input-buffer, output-buffer". Additional, the
     	DRM-parameters are fed to the function
     */
+
+    doSetInputDevice();
+    doSetOutputDevice();
+
     for (;;)
     {
         /* MSC ****************************************************************/
@@ -106,8 +114,6 @@ void CDRMTransmitter::Run()
     }
 }
 
-#if 1
-/* Flavour 1: Stop at the frame boundary (worst case delay one frame) */
 _BOOLEAN CDRMTransmitter::CanSoftStopExit()
 {
     /* Set new symbol flag */
@@ -121,6 +127,8 @@ _BOOLEAN CDRMTransmitter::CanSoftStopExit()
         /* Set stop requested flag */
         const _BOOLEAN bStopRequested = Parameters.eRunState != CParameter::RUNNING;
 
+#if true
+        /* Flavour 1: Stop at the frame boundary (worst case delay one frame) */
         /* The soft stop is always started at the beginning of a new frame */
         if ((bStopRequested && iSoftStopSymbolCount == 0) || iSoftStopSymbolCount < 0)
         {
@@ -131,28 +139,8 @@ _BOOLEAN CDRMTransmitter::CanSoftStopExit()
             if (--iSoftStopSymbolCount < -iSymbolPerFrame)
                 return TRUE; /* End of frame reached, signal that loop exit must be done */
         }
-        else
-        {
-            /* Update the symbol counter to keep track of frame beginning */
-            if (++iSoftStopSymbolCount >= iSymbolPerFrame)
-                iSoftStopSymbolCount = 0;
-        }
-    }
-    return FALSE; /* Signal to continue the normal operation */
-}
-#endif
-#if 0
-/* Flavour 2: Stop at the symbol boundary (worst case delay two frame) */
-_BOOLEAN CDRMTransmitter::CanSoftStopExit()
-{
-    /* Set new symbol flag */
-    const _BOOLEAN bNewSymbol = OFDMModBuf.GetFillLevel() != 0;
-
-    if (bNewSymbol)
-    {
-        /* Set stop requested flag */
-        const _BOOLEAN bStopRequested = Parameters.eRunState != CParameter::RUNNING;
-
+#else
+        /* Flavour 2: Stop at the symbol boundary (worst case delay two frame) */
         /* Check if stop is requested */
         if (bStopRequested || iSoftStopSymbolCount < 0)
         {
@@ -169,12 +157,9 @@ _BOOLEAN CDRMTransmitter::CanSoftStopExit()
                 TransmitData.FlushData();
                 return TRUE; /* Signal that a loop exit must be done */
             }
-        }
+#endif
         else
         {
-            /* Number of symbol by frame */
-            const int iSymbolPerFrame = Parameters.CellMappingTable.iNumSymPerFrame;
-
             /* Update the symbol counter to keep track of frame beginning */
             if (++iSoftStopSymbolCount >= iSymbolPerFrame)
                 iSoftStopSymbolCount = 0;
@@ -182,14 +167,83 @@ _BOOLEAN CDRMTransmitter::CanSoftStopExit()
     }
     return FALSE; /* Signal to continue the normal operation */
 }
-#endif
-#if 0
-/* Flavour 3: The original behaviour: stop at the symbol boundary,
-   without zeroing any symbol. Cause spreading of the spectrum on the
-   entire bandwidth for the last symbol. */
-_BOOLEAN CDRMTransmitter::CanSoftStopExit()
+
+#ifdef QT_MULTIMEDIA_LIB
+void CDRMTransmitter::doSetInputDevice()
 {
-    return Parameters.eRunState != CParameter::RUNNING;
+    QAudioFormat format;
+    format.setSampleRate(Parameters.GetSoundCardSigSampleRate());
+    format.setSampleSize(16);
+    format.setSampleType(QAudioFormat::SignedInt);
+    format.setChannelCount(2); // TODO
+    format.setByteOrder(QAudioFormat::LittleEndian);
+    format.setCodec("audio/pcm");
+    foreach(const QAudioDeviceInfo& di, QAudioDeviceInfo::availableDevices(QAudio::AudioInput))
+    {
+        QString name = di.deviceName();
+        if(indev == "") { // might not be initialised
+            indev = name;
+        }
+        if(name==indev) {
+            QAudioFormat nearestFormat = di.nearestFormat(format);
+            QAudioInput* pAudioInput = new QAudioInput(di, nearestFormat);
+            QIODevice* pIODevice = pAudioInput->start();
+            if(pAudioInput->error()==QAudio::NoError)
+            {
+                ReadData.SetSoundInterface(pIODevice);
+            }
+            else
+            {
+                qDebug("Can't open audio output");
+            }
+            break;
+        }
+    }
+}
+
+void CDRMTransmitter::doSetOutputDevice()
+{
+    QAudioFormat format;
+    format.setSampleRate(Parameters.GetAudSampleRate());
+    format.setSampleSize(16);
+    format.setSampleType(QAudioFormat::SignedInt);
+    format.setChannelCount(2); // TODO
+    format.setByteOrder(QAudioFormat::LittleEndian);
+    format.setCodec("audio/pcm");
+    foreach(const QAudioDeviceInfo& di, QAudioDeviceInfo::availableDevices(QAudio::AudioOutput))
+    {
+        QString name = di.deviceName();
+        if(outdev == "") { // might be called from initialisation and Dream.ini has no value
+            outdev = name;
+        }
+        if(name==outdev) {
+            QAudioFormat nearestFormat = di.nearestFormat(format);
+            QAudioOutput* pAudioOutput = new QAudioOutput(di, nearestFormat);
+            pAudioOutput->setBufferSize(1000000);
+            QIODevice* pIODevice = pAudioOutput->start();
+            int n = pAudioOutput->bufferSize();
+            if(pAudioOutput->error()==QAudio::NoError)
+            {
+                TransmitData.SetSoundInterface(pIODevice);
+            }
+            else
+            {
+                qDebug("Can't open audio output");
+            }
+        }
+    }
+}
+
+void
+CDRMTransmitter::SetInputDevice(const QString& device)
+{
+    indev = device;
+}
+
+void
+CDRMTransmitter::SetOutputDevice(const QString& device)
+{
+    outdev = device;
 }
 #endif
 
