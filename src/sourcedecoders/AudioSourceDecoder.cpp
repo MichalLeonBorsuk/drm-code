@@ -332,11 +332,11 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
                     }
                     else
                     {
-                        /* Stereo non-interleaved */
+                        /* Stereo docs claim non-interleaved but we are getting interleaved! */
                         cerr << "stereo " << iResOutBlockSize << endl;
                         for(int i = 0; i<iResOutBlockSize; i++) {
-                            vecTempResBufOutCurLeft[i] = _REAL(psDecOutSampleBuf[i]) / 2.0;
-                            vecTempResBufOutCurRight[i] = _REAL(psDecOutSampleBuf[iResOutBlockSize+i]) / 2.0;
+                            vecTempResBufOutCurLeft[i] = _REAL(psDecOutSampleBuf[2*i]);
+                            vecTempResBufOutCurRight[i] = _REAL(psDecOutSampleBuf[2*i+1]);
                         }
                     }
                 }
