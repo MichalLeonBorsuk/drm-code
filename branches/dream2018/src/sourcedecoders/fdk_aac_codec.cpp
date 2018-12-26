@@ -195,7 +195,7 @@ FdkAacCodec::Decode(vector<uint8_t>& audio_frame, uint8_t aac_crc_bits, int& iCh
         logConfig(info);
 
         if(info.aacNumChannels > 0) {
-            output_size = info.frameSize;
+            output_size = info.frameSize * info.numChannels;
             iChannels = info.numChannels;
         }
     }
@@ -213,16 +213,7 @@ FdkAacCodec::Decode(vector<uint8_t>& audio_frame, uint8_t aac_crc_bits, int& iCh
         }
         memset(decode_buf, 0, sizeof(int16_t)*size_t(output_size));
 
-        while(true) {
-            err = aacDecoder_DecodeFrame(hDecoder, decode_buf, output_size, 0);
-            if (err == AAC_DEC_NOT_ENOUGH_BITS)
-                cerr << "not enough bits" << endl;
-                break; // this is the good end as well as a possible error
-            if (err != AAC_DEC_OK) {
-                cerr << "Decode failed: " << err << endl;
-                return nullptr;
-            }
-        }
+        err = aacDecoder_DecodeFrame(hDecoder, decode_buf, output_size, 0);
         eDecError = CAudioCodec::DECODER_ERROR_OK;
         return decode_buf;
     }
