@@ -32,14 +32,14 @@
 #include <QRadioButton>
 #include <QButtonGroup>
 #include <QLayout>
-#include "CodecParams.h"
+#include "OpusCodecParams.h"
 #include "DialogUtil.h"
 #include "../util-QT/Util.h"
 #include "../DrmTransmitter.h"
 #include "../sourcedecoders/opus_codec.h"
 
 
-CodecParams::CodecParams(CSettings& Settings, CParameter& Parameters,
+OpusCodecParams::OpusCodecParams(CSettings& Settings, CParameter& Parameters,
 	int iShortID, QWidget* parent)
 	:
 	QDialog(parent), Settings(Settings), Parameters(Parameters),
@@ -129,7 +129,7 @@ CodecParams::CodecParams(CSettings& Settings, CParameter& Parameters,
 		this, SLOT(OnButtonGroupApplication(int)));
 }
 
-CodecParams::~CodecParams()
+OpusCodecParams::~OpusCodecParams()
 {
 	/* Save window position */
 	CWinGeom s;
@@ -148,13 +148,13 @@ CodecParams::~CodecParams()
 	Settings.Put("Codec Dialog", s);
 }
 
-void CodecParams::reject()
+void OpusCodecParams::reject()
 { 
 	GetDialogPosition();
 	QDialog::reject();
 }
 
-void CodecParams::OnButtonGroupChannels(int iID)
+void OpusCodecParams::OnButtonGroupChannels(int iID)
 {
 	iID = -iID - 2; // TODO understand why
 	CAudioParam::EOPUSChan eOPUSChan;
@@ -174,7 +174,7 @@ void CodecParams::OnButtonGroupChannels(int iID)
 	Parameters.Unlock();
 }
 
-void CodecParams::OnButtonGroupBandwidth(int iID)
+void OpusCodecParams::OnButtonGroupBandwidth(int iID)
 {
 	iID = -iID - 2; // TODO understand why
 	CAudioParam::EOPUSBandwidth eOPUSBandwidth;
@@ -203,7 +203,7 @@ void CodecParams::OnButtonGroupBandwidth(int iID)
 	Parameters.Unlock();
 }
 
-void CodecParams::OnButtonGroupFEC(int iID)
+void OpusCodecParams::OnButtonGroupFEC(int iID)
 {
 	iID = -iID - 2; // TODO understand why
 	_BOOLEAN bOPUSForwardErrorCorrection;
@@ -223,7 +223,7 @@ void CodecParams::OnButtonGroupFEC(int iID)
 	Parameters.Unlock();
 }
 
-void CodecParams::OnButtonGroupSignal(int iID)
+void OpusCodecParams::OnButtonGroupSignal(int iID)
 {
 	iID = -iID - 2; // TODO understand why
 	CAudioParam::EOPUSSignal eOPUSSignal;
@@ -244,7 +244,7 @@ void CodecParams::OnButtonGroupSignal(int iID)
 	Parameters.Unlock();
 }
 
-void CodecParams::OnButtonGroupApplication(int iID)
+void OpusCodecParams::OnButtonGroupApplication(int iID)
 {
 	iID = -iID - 2; // TODO understand why
 	CAudioParam::EOPUSApplication eOPUSApplication;
@@ -265,7 +265,7 @@ void CodecParams::OnButtonGroupApplication(int iID)
 	Parameters.Unlock();
 }
 
-void CodecParams::Toggle(void)
+void OpusCodecParams::Toggle(void)
 {
 	bWasVisible = isVisible();
 	if (bWasVisible)
@@ -277,7 +277,7 @@ void CodecParams::Toggle(void)
 		show();
 }
 
-void CodecParams::Show(bool bShow)
+void OpusCodecParams::Show(bool bShow)
 {
 	if (bShow)
 	{
@@ -292,7 +292,7 @@ void CodecParams::Show(bool bShow)
 	}
 }
 
-void CodecParams::GetDialogPosition(void)
+void OpusCodecParams::GetDialogPosition(void)
 {
 	QRect WinGeom = geometry();
 	if (WinGeom.isValid() && !WinGeom.isEmpty() && !WinGeom.isNull())

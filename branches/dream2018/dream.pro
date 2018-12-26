@@ -505,7 +505,9 @@ HEADERS += \
     src/util/Settings.h \
     src/util/Utilities.h \
     src/util/Vector.h \
-    src/Version.h
+    src/Version.h \
+    src/GUI-QT/OpusCodecParams.h \
+    src/GUI-QT/AACCodecParams.h
 SOURCES += \
     src/AMDemodulation.cpp \
     src/AMSSDemodulation.cpp \
@@ -607,7 +609,9 @@ SOURCES += \
     src/util/Utilities.cpp \
     src/Version.cpp \
     src/sound/soundnull.cpp \
-    src/sound/soundinterface.cpp
+    src/sound/soundinterface.cpp \
+    src/GUI-QT/OpusCodecParams.cpp \
+    src/GUI-QT/AACCodecParams.cpp
 !console {
 HEADERS += \
     src/GUI-QT/Logging.h \
@@ -630,7 +634,8 @@ FORMS += \
     AboutDlgbase.ui \
     AMMainWindow.ui \
     AMSSDlgbase.ui \
-    CodecParams.ui \
+    AACCodecParams.ui \
+    OpusCodecParams.ui \
     DRMMainWindow.ui \
     EPGDlgbase.ui \
     FMMainWindow.ui \
@@ -644,7 +649,6 @@ FORMS += \
     TransmDlgbase.ui
 HEADERS += \
     src/GUI-QT/AnalogDemDlg.h \
-    src/GUI-QT/CodecParams.h \
     src/GUI-QT/CWindow.h \
     src/GUI-QT/DialogUtil.h \
     src/GUI-QT/DRMPlot.h \
@@ -665,7 +669,6 @@ HEADERS += \
     src/GUI-QT/TransmDlg.h
 SOURCES += \
     src/GUI-QT/AnalogDemDlg.cpp \
-    src/GUI-QT/CodecParams.cpp \
     src/GUI-QT/CWindow.cpp \
     src/GUI-QT/DialogUtil.cpp \
     src/GUI-QT/DRMPlot.cpp \
@@ -775,3 +778,6 @@ OTHER_FILES += \
     android/res/values-pl/strings.xml \
     android/AndroidManifest.xml \
     windows/dream.iss
+
+FORMS += \
+    src/GUI-QT/AACCodecParams.ui

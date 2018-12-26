@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>CodecParams</class>
- <widget class="QDialog" name="CodecParams">
+ <class>OpusCodecParams</class>
+ <widget class="QDialog" name="OpusCodecParams">
   <property name="geometry">
    <rect>
     <x>0</x>

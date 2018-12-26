@@ -27,18 +27,18 @@
 \******************************************************************************/
 
 #include <QDialog>
-#include "ui_CodecParams.h"
+#include "ui_OpusCodecParams.h"
 #include "../Parameter.h"
 #include "../util/Settings.h"
 
-class CodecParams : public QDialog, public Ui_CodecParams
+class OpusCodecParams : public QDialog, public Ui_OpusCodecParams
 {
 	Q_OBJECT
 
 public:
-	CodecParams(CSettings&, CParameter&, int iShortID,
+    OpusCodecParams(CSettings&, CParameter&, int iShortID,
 		QWidget* parent = 0);
-	virtual ~CodecParams();
+    virtual ~OpusCodecParams();
 	void Toggle(void);
 	void Show(bool bShow);
 
