@@ -446,27 +446,27 @@ int opusDecInit(
 }
 
 void *opusDecDecode(
-	opus_decoder *dec,
-	CAudioCodec::EDecError *eDecError,
-	int *iChannels,
-	unsigned char *buffer,
-	unsigned long buffer_size
+    opus_decoder *dec,
+    CAudioCodec::EDecError& eDecError,
+    int& iChannels,
+    unsigned char *buffer,
+    unsigned long buffer_size
 	)
 {
 	int frames_per_packet, pcm_len, frame_bytes, sub_frame_bytes, i, pos, pcm_pos;
 	int crc_ok=0, corrupted=0;
-	int frame_extra_bytes = CRC_BYTES;
+    int frame_extra_bytes = CRC_BYTES;
 	frames_per_packet = 1;
-	frame_bytes = buffer_size - frame_extra_bytes;
+    frame_bytes = buffer_size - frame_extra_bytes;
 	if (frame_bytes>=1 && frame_bytes<=OPUS_MAX_DATA_FRAME)
 	{
 #if CRC_BYTES != 0
 		dec->CRCObject->Reset(8*CRC_BYTES);
-		for (i=CRC_BYTES; i<frame_bytes; i++)
+        for (i=CRC_BYTES; i<frame_bytes; i++)
 			dec->CRCObject->AddByte(buffer[i]);
 		int crc = dec->CRCObject->GetCRC();
 # if CRC_BYTES == 1
-		crc_ok = crc == buffer[0];
+        crc_ok = crc == buffer[0];
 # elif CRC_BYTES == 2
 		crc_ok = crc == ((buffer[0]<<8)|buffer[1]);
 # else
@@ -494,21 +494,21 @@ void *opusDecDecode(
 	{
 		memset(dec->out_pcm, 0, OPUS_PCM_FRAME_SIZE * sizeof(opus_int16) * dec->channels);
 		EPRINTF("opusDecDecode: DECODER_ERROR_CORRUPTED\n");
-		*eDecError =  CAudioCodec::DECODER_ERROR_CORRUPTED;
+        eDecError =  CAudioCodec::DECODER_ERROR_CORRUPTED;
 	}
 	else if (!crc_ok)
 	{
 		EPRINTF("opusDecDecode: DECODER_ERROR_CRC\n");
-		*eDecError =  CAudioCodec::DECODER_ERROR_CRC;
+        eDecError =  CAudioCodec::DECODER_ERROR_CRC;
 	}
 	else
 	{
-		*eDecError = CAudioCodec::DECODER_ERROR_OK;
+        eDecError = CAudioCodec::DECODER_ERROR_OK;
 		if (frame_bytes >= 1)
 			dec->last_good_toc = buffer[frame_extra_bytes];
 	}
 
-	*iChannels = dec->channels;
+    iChannels = dec->channels;
 	dec->changed = 1;
 	return dec->out_pcm;
 }
@@ -557,7 +557,7 @@ OpusCodec::CanDecode(CAudioParam::EAudCod eAudioCoding)
 }
 
 bool
-OpusCodec::DecOpen(CAudioParam& AudioParam, int *iAudioSampleRate, int *iLenDecOutPerChan)
+OpusCodec::DecOpen(CAudioParam& AudioParam, int& iAudioSampleRate, int& iLenDecOutPerChan)
 {
 	(void)AudioParam;
 	const int iSampleRate = 48000;
@@ -565,13 +565,13 @@ OpusCodec::DecOpen(CAudioParam& AudioParam, int *iAudioSampleRate, int *iLenDecO
 		hOpusDecoder = opusDecOpen();
 	if (hOpusDecoder != nullptr)
 		opusDecInit(hOpusDecoder, iSampleRate, 2);
-	*iAudioSampleRate = iSampleRate;
-	*iLenDecOutPerChan = AUD_DEC_TRANSFROM_LENGTH;
+    iAudioSampleRate = iSampleRate;
+    iLenDecOutPerChan = AUD_DEC_TRANSFROM_LENGTH;
 	return hOpusDecoder != nullptr;
 }
 
 _SAMPLE*
-OpusCodec::Decode(vector<uint8_t>& audio_frame, uint8_t aac_crc_bits, int *iChannels, CAudioCodec::EDecError *eDecError)
+OpusCodec::Decode(vector<uint8_t>& audio_frame, uint8_t aac_crc_bits, int& iChannels, CAudioCodec::EDecError& eDecError)
 {
     /* Prepare data vector with CRC at the beginning (the definition with faad2 DRM interface) */
     CVector<uint8_t> vecbyPrepAudioFrame(int(audio_frame.size()+1));
@@ -581,14 +581,20 @@ OpusCodec::Decode(vector<uint8_t>& audio_frame, uint8_t aac_crc_bits, int *iChan
         vecbyPrepAudioFrame[int(i + 1)] = audio_frame[i];
     _SAMPLE *sample = nullptr;
 	if (hOpusDecoder != nullptr)
-	{
-		sample = (_SAMPLE *)opusDecDecode(hOpusDecoder,
+    {
+        sample = (_SAMPLE *)opusDecDecode(hOpusDecoder,
 			eDecError,
-			iChannels,
-			&vecbyPrepAudioFrame[0],
-			vecbyPrepAudioFrame.size());
+            iChannels,
+            &vecbyPrepAudioFrame[0],
+            vecbyPrepAudioFrame.size()
+                );
 	}
 	return sample;
+}
+
+CAudioCodec::EDecError OpusCodec::FullyDecode(vector<uint8_t>& audio_frame, uint8_t aac_crc_bits, vector<_SAMPLE>& left, vector<_SAMPLE>& right)
+{
+    return EDecError::DECODER_ERROR_UNKNOWN;
 }
 
 void

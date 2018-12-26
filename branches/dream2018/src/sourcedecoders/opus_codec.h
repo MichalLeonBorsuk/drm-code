@@ -148,9 +148,10 @@ public:
 	/* Decoder */
 	virtual string DecGetVersion();
 	virtual bool CanDecode(CAudioParam::EAudCod eAudioCoding);
-	virtual bool DecOpen(CAudioParam& AudioParam, int *iAudioSampleRate, int *iLenDecOutPerChan);
-    virtual _SAMPLE* Decode(vector<uint8_t>& audio_frame, uint8_t aac_crc_bits, int *iChannels, CAudioCodec::EDecError *eDecError);
-	virtual void DecClose();
+    virtual bool DecOpen(CAudioParam& AudioParam, int& iAudioSampleRate, int& iLenDecOutPerChan);
+    virtual _SAMPLE* Decode(vector<uint8_t>& audio_frame, uint8_t aac_crc_bits, int& iChannels, CAudioCodec::EDecError& eDecError);
+    virtual CAudioCodec::EDecError FullyDecode(vector<uint8_t>& audio_frame, uint8_t aac_crc_bits, vector<_SAMPLE>& left, vector<_SAMPLE>& right);
+    virtual void DecClose();
 	virtual void DecUpdate(CAudioParam& AudioParam);
 	/* Encoder */
 	virtual string EncGetVersion();
