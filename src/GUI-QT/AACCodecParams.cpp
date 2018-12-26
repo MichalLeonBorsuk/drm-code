@@ -36,7 +36,7 @@
 #include "DialogUtil.h"
 #include "../util-QT/Util.h"
 #include "../DrmTransmitter.h"
-#include "../sourcedecoders/opus_codec.h"
+#include "../sourcedecoders/fdk_aac_codec.h"
 
 
 AACCodecParams::AACCodecParams(CSettings& Settings, CParameter& Parameters,
@@ -54,79 +54,54 @@ AACCodecParams::AACCodecParams(CSettings& Settings, CParameter& Parameters,
 	if (s.iXPos && s.iYPos)
 		move(s.iXPos, s.iYPos);
 
-	QString strWebSite(OPUS_WEBSITE_LINK);
-	LabelInfoDescription->setText(tr(OPUS_DESCRIPTION));
-	LabelInfoVersion->setText(opusGetVersion());
+    QString strWebSite("https://www.iis.fraunhofer.de/en/ff/amm/prod/audiocodec/audiocodecs/heaac.html");
+    LabelInfoDescription->setText(tr("HE-AAC"));
+    LabelInfoVersion->setText("2.0.0");
 	LabelInfoWebSite->setText(Linkify(strWebSite));
 
 	Parameters.Lock();
 	/* Channels */
-	switch (Parameters.Service[iShortID].AudioParam.eOPUSChan)
+    switch (Parameters.Service[iShortID].AudioParam.eAudioMode)
 	{
-	case CAudioParam::OC_MONO:
+    case CAudioParam::AM_MONO:
 		RadioButtonChannelsMono->setChecked(TRUE);
 		break;
-	case CAudioParam::OC_STEREO:
+    case CAudioParam::AM_STEREO:
 		RadioButtonChannelsStereo->setChecked(TRUE);
 		break;
-	}
-	/* Bandwith */
-	switch (Parameters.Service[iShortID].AudioParam.eOPUSBandwidth)
+    case CAudioParam::AM_P_STEREO:
+        RadioButtonChannelsParametricStereo->setChecked(TRUE);
+        break;
+    case CAudioParam::AM_SURROUND:
+        RadioButtonChannelsSurround->setChecked(TRUE);
+        break;
+    }
+    /* Sample Rate */
+    switch (Parameters.Service[iShortID].AudioParam.eAudioSamplRate)
 	{
-	case CAudioParam::OB_NB:
-		RadioButtonBandwidthNB->setChecked(TRUE);
+    case CAudioParam::AS_12KHZ:
+        RadioButton12kHz->setChecked(TRUE);
 		break;
-	case CAudioParam::OB_MB:
-		RadioButtonBandwidthMB->setChecked(TRUE);
-		break;
-	case CAudioParam::OB_WB:
-		RadioButtonBandwidthWB->setChecked(TRUE);
-		break;
-	case CAudioParam::OB_SWB:
-		RadioButtonBandwidthSWB->setChecked(TRUE);
-		break;
-	case CAudioParam::OB_FB:
-		RadioButtonBandwidthFB->setChecked(TRUE);
+    case CAudioParam::AS_24KHZ:
+        RadioButton24kHz->setChecked(TRUE);
 		break;
 	}
-	/* FEC */
-	if (Parameters.Service[iShortID].AudioParam.bOPUSForwardErrorCorrection)
-		RadioButtonFECOn->setChecked(TRUE);
-	else
-		RadioButtonFECOff->setChecked(TRUE);
-	/* Signal */
-	switch (Parameters.Service[iShortID].AudioParam.eOPUSSignal)
-	{
-	case CAudioParam::OG_VOICE:
-		RadioButtonSignalVoice->setChecked(TRUE);
-		break;
-	case CAudioParam::OG_MUSIC:
-		RadioButtonSignalMusic->setChecked(TRUE);
-		break;
-	}
-	/* Application */
-	switch (Parameters.Service[iShortID].AudioParam.eOPUSApplication)
-	{
-	case CAudioParam::OA_VOIP:
-		RadioButtonAppVOIP->setChecked(TRUE);
-		break;
-	case CAudioParam::OA_AUDIO:
-		RadioButtonAppAudio->setChecked(TRUE);
-		break;
-	}
+    /* options */
+    CheckBoxSBR->setCheckState(Parameters.Service[iShortID].AudioParam.eSBRFlag?Qt::Checked:Qt::Unchecked);
 	Parameters.Unlock();
 
 	/* Connections */
-	connect(ButtonGroupChannels, SIGNAL(buttonClicked(int)),
-		this, SLOT(OnButtonGroupChannels(int)));
-	connect(ButtonGroupBandwidth, SIGNAL(buttonClicked(int)),
-		this, SLOT(OnButtonGroupBandwidth(int)));
-	connect(ButtonGroupFEC, SIGNAL(buttonClicked(int)),
-		this, SLOT(OnButtonGroupFEC(int)));
-	connect(ButtonGroupSignal, SIGNAL(buttonClicked(int)),
-		this, SLOT(OnButtonGroupSignal(int)));
-	connect(ButtonGroupApplication, SIGNAL(buttonClicked(int)),
-		this, SLOT(OnButtonGroupApplication(int)));
+    connect(ButtonGroupChannels, SIGNAL(buttonClicked(int)), this, SLOT(OnButtonGroupChannels(int)));
+    connect(ButtonGroupSampleRate, SIGNAL(buttonClicked(int)),		this, SLOT(OnButtonGroupSampleRate(int)));
+    connect(CheckBoxSBR, SIGNAL(toggled(bool)),		this, SLOT(OnCheckBoxSBR(bool)));
+
+    ButtonGroupChannels->addButton(RadioButtonChannelsMono, CAudioParam::AM_MONO);
+    ButtonGroupChannels->addButton(RadioButtonChannelsStereo, CAudioParam::AM_STEREO);
+    ButtonGroupChannels->addButton(RadioButtonChannelsParametricStereo, CAudioParam::AM_P_STEREO);
+    ButtonGroupChannels->addButton(RadioButtonChannelsSurround, CAudioParam::AM_SURROUND);
+
+    ButtonGroupSampleRate->addButton(RadioButton12kHz, CAudioParam::AS_12KHZ);
+    ButtonGroupSampleRate->addButton(RadioButton24kHz, CAudioParam::AS_24KHZ);
 }
 
 AACCodecParams::~AACCodecParams()
@@ -156,111 +131,24 @@ void AACCodecParams::reject()
 
 void AACCodecParams::OnButtonGroupChannels(int iID)
 {
-	iID = -iID - 2; // TODO understand why
-	CAudioParam::EOPUSChan eOPUSChan;
-	switch (iID)
-	{
-	case 0:
-		eOPUSChan = CAudioParam::OC_MONO;
-		break;
-	default:
-	case 1:
-		eOPUSChan = CAudioParam::OC_STEREO;
-		break;
-	}
-	Parameters.Lock();
-	Parameters.Service[iShortID].AudioParam.eOPUSChan = eOPUSChan;
+    Parameters.Lock();
+    Parameters.Service[iShortID].AudioParam.eAudioMode = static_cast<CAudioParam::EAudMode>(iID);
 	Parameters.Service[iShortID].AudioParam.bParamChanged = TRUE;
 	Parameters.Unlock();
 }
 
-void AACCodecParams::OnButtonGroupBandwidth(int iID)
+void AACCodecParams::OnButtonGroupSampleRate(int iID)
 {
-	iID = -iID - 2; // TODO understand why
-	CAudioParam::EOPUSBandwidth eOPUSBandwidth;
-	switch (iID)
-	{
-	case 0:
-		eOPUSBandwidth = CAudioParam::OB_NB;
-		break;
-	case 1:
-		eOPUSBandwidth = CAudioParam::OB_MB;
-		break;
-	case 2:
-		eOPUSBandwidth = CAudioParam::OB_WB;
-		break;
-	case 3:
-		eOPUSBandwidth = CAudioParam::OB_SWB;
-		break;
-	default:
-	case 4:
-		eOPUSBandwidth = CAudioParam::OB_FB;
-		break;
-	}
 	Parameters.Lock();
-	Parameters.Service[iShortID].AudioParam.eOPUSBandwidth = eOPUSBandwidth;
+    Parameters.Service[iShortID].AudioParam.eAudioSamplRate =  static_cast<CAudioParam::EAudSamRat>(iID);
 	Parameters.Service[iShortID].AudioParam.bParamChanged = TRUE;
 	Parameters.Unlock();
 }
 
-void AACCodecParams::OnButtonGroupFEC(int iID)
+void AACCodecParams::OnCheckBoxSBR(bool checked)
 {
-	iID = -iID - 2; // TODO understand why
-	_BOOLEAN bOPUSForwardErrorCorrection;
-	switch (iID)
-	{
-	default:
-	case 0:
-		bOPUSForwardErrorCorrection = FALSE;
-		break;
-	case 1:
-		bOPUSForwardErrorCorrection = TRUE;
-		break;
-	}
 	Parameters.Lock();
-	Parameters.Service[iShortID].AudioParam.bOPUSForwardErrorCorrection = bOPUSForwardErrorCorrection;
-	Parameters.Service[iShortID].AudioParam.bParamChanged = TRUE;
-	Parameters.Unlock();
-}
-
-void AACCodecParams::OnButtonGroupSignal(int iID)
-{
-	iID = -iID - 2; // TODO understand why
-	CAudioParam::EOPUSSignal eOPUSSignal;
-	switch (iID)
-	{
-	case 0:
-		eOPUSSignal = CAudioParam::OG_VOICE;
-		break;
-	default:
-	case 1:
-		eOPUSSignal = CAudioParam::OG_MUSIC;
-		break;
-	}
-	Parameters.Lock();
-	Parameters.Service[iShortID].AudioParam.eOPUSSignal = eOPUSSignal;
-	Parameters.Service[iShortID].AudioParam.bOPUSRequestReset = TRUE;
-	Parameters.Service[iShortID].AudioParam.bParamChanged = TRUE;
-	Parameters.Unlock();
-}
-
-void AACCodecParams::OnButtonGroupApplication(int iID)
-{
-	iID = -iID - 2; // TODO understand why
-	CAudioParam::EOPUSApplication eOPUSApplication;
-	switch (iID)
-	{
-	case 0:
-		eOPUSApplication = CAudioParam::OA_VOIP;
-		break;
-	default:
-	case 1:
-		eOPUSApplication = CAudioParam::OA_AUDIO;
-		break;
-	}
-	Parameters.Lock();
-	Parameters.Service[iShortID].AudioParam.eOPUSApplication = eOPUSApplication;
-	Parameters.Service[iShortID].AudioParam.bOPUSRequestReset = TRUE;
+    Parameters.Service[iShortID].AudioParam.eSBRFlag = checked?CAudioParam::SB_USED:CAudioParam::SB_NOT_USED;
 	Parameters.Service[iShortID].AudioParam.bParamChanged = TRUE;
 	Parameters.Unlock();
 }
