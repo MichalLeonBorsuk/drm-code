@@ -43,10 +43,10 @@ class CTagPacketGenerator;
 class CRSISubscriber : public CPacketSocket
 {
 public:
-	CRSISubscriber(CPacketSink *pSink = NULL);
+	CRSISubscriber(CPacketSink *pSink = nullptr);
 
 	/* provide a pointer to the receiver for incoming RCI commands */
-	/* leave it set to NULL if you want incoming commands to be ignored */
+	/* leave it set to nullptr if you want incoming commands to be ignored */
 	void SetReceiver(CDRMReceiver *pReceiver);
 
 	virtual _BOOLEAN SetOrigin(const string&){return FALSE;} // only relevant for network subscribers
@@ -87,7 +87,7 @@ private:
 class CRSISubscriberSocket : public CRSISubscriber
 {
 public:
-	CRSISubscriberSocket(CPacketSink *pSink = NULL);
+	CRSISubscriberSocket(CPacketSink *pSink = nullptr);
 	virtual ~CRSISubscriberSocket();
 
 	_BOOLEAN SetOrigin(const string& str);

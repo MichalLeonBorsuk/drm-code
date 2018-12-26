@@ -98,14 +98,14 @@ void SlideShowViewer::OnTimer()
     }
 
     CDataDecoder* DataDecoder = receiver.GetDataDecoder();
-    if (DataDecoder == NULL)
+    if (DataDecoder == nullptr)
     {
         qDebug("can't get data decoder from receiver");
         return;
     }
 
     CMOTDABDec* motdec = DataDecoder->getApplication(iPacketID);
-    if (motdec == NULL)
+    if (motdec == nullptr)
     {
         qDebug("can't get MOT decoder for short id %d, packetId %d", shortID, iPacketID);
         return;

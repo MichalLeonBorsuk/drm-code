@@ -44,7 +44,7 @@ EPGDlg::EPGDlg(CDRMReceiver& NDRMR, CSettings& Settings, QWidget* parent):
     DRMReceiver(NDRMR),
     sids(),
     greenCube(":/icons/greenCube.png"),
-    next(NULL)
+    next(nullptr)
 {
     setupUi(this);
 
@@ -157,7 +157,7 @@ void EPGDlg::on_channel_activated(const QString&)
 
 void EPGDlg::select()
 {
-    QTreeWidgetItem* CurrActiveItem = NULL;
+    QTreeWidgetItem* CurrActiveItem = nullptr;
     QDate date = dateEdit->date();
 
     if (!do_updates)
@@ -312,7 +312,7 @@ EPGDlg::getFile(const QString& path)
     QFile file (path);
     if (!file.open (QIODevice::ReadOnly))
     {
-        return NULL;
+        return nullptr;
     }
     vector<_BYTE> vecData;
     vecData.resize (file.size ());
@@ -332,7 +332,7 @@ EPGDlg::getFile (const QDate& date, uint32_t sid, bool bAdvanced)
 {
     QString path = getFileName(date, sid, bAdvanced);
     QDomDocument* doc = getFile(path);
-    if(doc != NULL)
+    if(doc != nullptr)
         return doc;
     return getFile(getFileName_etsi(date, sid, bAdvanced));
 }

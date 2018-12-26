@@ -1460,7 +1460,7 @@ EPG::loadChannels (const QString & fileName)
             }
             if (name != "")
             {
-                addChannel (name, sid.toUInt (NULL, 16));
+                addChannel (name, sid.toUInt (nullptr, 16));
             }
         }
         n = n.nextSibling ();

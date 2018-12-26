@@ -33,7 +33,7 @@
 /* Implementation *************************************************************/
 
 CAudioSourceEncoderImplementation::CAudioSourceEncoderImplementation()
-    : bUsingTextMessage(FALSE), codec(NULL)
+    : bUsingTextMessage(FALSE), codec(nullptr)
 {
     /* Initialize Audio Codec List */
     CAudioCodec::InitCodecList();
@@ -43,8 +43,8 @@ CAudioSourceEncoderImplementation::CAudioSourceEncoderImplementation()
     codec = CAudioCodec::GetEncoder(AC_NULL);
 
     /* Needed by TransmDlg.cpp to report available codec */
-    bCanEncodeAAC  = CAudioCodec::GetEncoder(CAudioParam::AC_AAC,  true) != NULL;
-    bCanEncodeOPUS = CAudioCodec::GetEncoder(CAudioParam::AC_OPUS, true) != NULL;
+    bCanEncodeAAC  = CAudioCodec::GetEncoder(CAudioParam::AC_AAC,  true) != nullptr;
+    bCanEncodeOPUS = CAudioCodec::GetEncoder(CAudioParam::AC_OPUS, true) != nullptr;
 }
 
 CAudioSourceEncoderImplementation::~CAudioSourceEncoderImplementation()
@@ -630,7 +630,7 @@ CAudioSourceEncoderImplementation::InitInternalRx(CParameter& Parameters,
 void
 CAudioSourceEncoderImplementation::CloseEncoder()
 {
-    if (codec != NULL)
+    if (codec != nullptr)
         codec->EncClose();
 }
 

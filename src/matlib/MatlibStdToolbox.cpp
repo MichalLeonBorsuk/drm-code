@@ -30,7 +30,7 @@
 
 /* The mutex need to be application wide,
    only the execution routines are thread-safe */
-static CMutex* _mutex = NULL;
+static CMutex* _mutex = nullptr;
 #define MUTEX_LOCK() _mutex->Lock()
 #define MUTEX_UNLOCK() _mutex->Unlock()
 
@@ -664,8 +664,8 @@ CMatlibVector<CReal> FftFilt(const CMatlibVector<CComplex>& rvH,
 
 /* FftPlans implementation -------------------------------------------------- */
 CFftPlans::CFftPlans(const int iFftSize) :
-	RFFTPlForw(NULL), RFFTPlBackw(NULL), pFftwRealIn(NULL), pFftwRealOut(NULL),
-	FFTPlForw(NULL), FFTPlBackw(NULL), pFftwComplexIn(NULL), pFftwComplexOut(NULL),
+	RFFTPlForw(nullptr), RFFTPlBackw(nullptr), pFftwRealIn(nullptr), pFftwRealOut(nullptr),
+	FFTPlForw(nullptr), FFTPlBackw(nullptr), pFftwComplexIn(nullptr), pFftwComplexOut(nullptr),
 	bInitialized(FALSE), bFixedSizeInit(FALSE), fftw_n(0)
 {
 	/* Static initialization of CMutex not working on Mac OS X */
@@ -781,15 +781,15 @@ void CFftPlans::Clean()
 		delete[] pFftwComplexIn;
 		delete[] pFftwComplexOut;
 
-		pFftwRealIn = NULL;
-		pFftwRealOut = NULL;
-		pFftwComplexIn = NULL;
-		pFftwComplexOut = NULL;
+		pFftwRealIn = nullptr;
+		pFftwRealOut = nullptr;
+		pFftwComplexIn = nullptr;
+		pFftwComplexOut = nullptr;
 
-		RFFTPlForw = NULL;
-		RFFTPlBackw = NULL;
-		FFTPlForw = NULL;
-		FFTPlBackw = NULL;
+		RFFTPlForw = nullptr;
+		RFFTPlBackw = nullptr;
+		FFTPlForw = nullptr;
+		FFTPlBackw = nullptr;
 
 		fftw_n = 0;
 

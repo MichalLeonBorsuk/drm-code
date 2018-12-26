@@ -172,7 +172,7 @@ protected:
     void UpdateStatus();
     void UpdateWindowTitle(const uint32_t iServiceID, const bool bServiceValid, QString strLabel);
     QString ObjectStr(unsigned int count);
-    void GetServiceParams(uint32_t* iServiceID=NULL, bool* bServiceValid=NULL, QString* strLabel=NULL, ETypeRxStatus* eStatus=NULL);
+    void GetServiceParams(uint32_t* iServiceID=nullptr, bool* bServiceValid=nullptr, QString* strLabel=nullptr, ETypeRxStatus* eStatus=nullptr);
     virtual void eventShow(QShowEvent*);
     virtual void eventHide(QHideEvent*);
 

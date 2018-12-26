@@ -58,9 +58,9 @@ const size_t iMaxPacketSize = 4096;
 const size_t iAFHeaderLen = 10;
 const size_t iAFCRCLen = 2;
 
-CPacketSourceFile::CPacketSourceFile():pPacketSink(NULL),
-    last_packet_time(0),pacer(NULL),
-    pF(NULL), wanted_dest_port(-1), eFileType(pcap)
+CPacketSourceFile::CPacketSourceFile():pPacketSink(nullptr),
+    last_packet_time(0),pacer(nullptr),
+    pF(nullptr), wanted_dest_port(-1), eFileType(pcap)
 {
     pacer = new CPacer(400000000ULL);
 }
@@ -90,7 +90,7 @@ void CPacketSourceFile::poll()
         }
 
         /* Decode the incoming packet */
-        if (pPacketSink != NULL)
+        if (pPacketSink != nullptr)
             pPacketSink->SendPacket(vecbydata);
     }
 }
@@ -116,7 +116,7 @@ CPacketSourceFile::SetOrigin(const string& origin)
     else
     {
         pF = fopen(str.c_str(), "rb");
-        if ( pF != NULL)
+        if ( pF != nullptr)
         {
             char c;
             size_t n = fread(&c, sizeof(c), 1, (FILE *) pF);
@@ -127,7 +127,7 @@ CPacketSourceFile::SetOrigin(const string& origin)
             if(c=='f') eFileType = ff;
         }
     }
-    return pF != NULL;
+    return pF != nullptr;
 }
 
 CPacketSourceFile::~CPacketSourceFile()
@@ -154,7 +154,7 @@ CPacketSourceFile::SetPacketSink(CPacketSink * pSink)
 void
 CPacketSourceFile::ResetPacketSink()
 {
-    pPacketSink = NULL;
+    pPacketSink = nullptr;
 }
 
 void
@@ -317,7 +317,7 @@ void
 CPacketSourceFile::readPcap(vector<_BYTE>& vecbydata, int& interval)
 {
     int link_len = 0;
-    const _BYTE* pkt_data = NULL;
+    const _BYTE* pkt_data = nullptr;
     timeval packet_time = { 0, 0 };
     while(true)
     {
@@ -329,7 +329,7 @@ CPacketSourceFile::readPcap(vector<_BYTE>& vecbydata, int& interval)
         if((res = pcap_next_ex( (pcap_t*)pF, &header, &data)) != 1)
         {
             pcap_close((pcap_t*)pF);
-            pF = NULL;
+            pF = nullptr;
             return;
         }
         int lt = pcap_datalink((pcap_t*)pF);
@@ -355,7 +355,7 @@ CPacketSourceFile::readPcap(vector<_BYTE>& vecbydata, int& interval)
 		packet_time.tv_sec = header->ts.tv_sec;
 		packet_time.tv_usec = header->ts.tv_usec;
 #endif
-        if(pkt_data == NULL)
+        if(pkt_data == nullptr)
             return;
 
         /* 4n bytes IP header, 8 bytes UDP header */

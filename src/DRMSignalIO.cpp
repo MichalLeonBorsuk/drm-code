@@ -203,7 +203,7 @@ void CTransmitData::InitInternal(CParameter& Parameters)
 
     vecsDataOut.Init(iBigBlockSize);
 
-    if (pFileTransmitter != NULL)
+    if (pFileTransmitter != nullptr)
     {
         fclose(pFileTransmitter);
     }
@@ -224,7 +224,7 @@ void CTransmitData::InitInternal(CParameter& Parameters)
 #endif
 
         /* Check for error */
-        if (pFileTransmitter == NULL)
+        if (pFileTransmitter == nullptr)
             throw CGenErr("The file " + strOutFileName + " cannot be created.");
     }
 
@@ -248,7 +248,7 @@ void CTransmitData::InitInternal(CParameter& Parameters)
 CTransmitData::~CTransmitData()
 {
     /* Close file */
-    if (pFileTransmitter != NULL)
+    if (pFileTransmitter != nullptr)
         fclose(pFileTransmitter);
 }
 
@@ -319,7 +319,7 @@ void CReceiveData::ProcessDataInternal(CParameter& Parameters)
     /* Get data from sound interface. The read function must be a
        blocking function! */
     bool bBad = true;
-    if (pSound == NULL)
+    if (pSound == nullptr)
     {
 #ifdef QT_MULTIMEDIA_LIB
         if(pIODevice)
@@ -602,7 +602,7 @@ void CReceiveData::InitInternal(CParameter& Parameters)
     	   has to taken care about the buffering data of a whole MSC block.
     	   Use stereo input (* 2) */
 
-    if (pSound == NULL)
+    if (pSound == nullptr)
         return;
 
     Parameters.Lock();
@@ -686,11 +686,11 @@ void CReceiveData::InitInternal(CParameter& Parameters)
 	}
     catch (CGenErr GenErr)
     {
-		pSound = NULL;
+		pSound = nullptr;
     }
     catch (string strError)
     {
-		pSound = NULL;
+		pSound = nullptr;
     }
 }
 

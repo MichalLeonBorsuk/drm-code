@@ -76,11 +76,11 @@ CDRMReceiver::CDRMReceiver(CSettings* pSettings) : CDRMTransceiver(pSettings, ne
     iBwAM(10000), iBwLSB(5000), iBwUSB(5000), iBwCW(150), iBwFM(6000),
     time_keeper(0),
 #ifdef HAVE_LIBHAMLIB
-    pRig(NULL),
+    pRig(nullptr),
 #endif
     PlotManager(), iPrevSigSampleRate(0)
 #ifdef QT_MULTIMEDIA_LIB
-  ,pAudioInput(NULL),pAudioOutput(NULL)
+  ,pAudioInput(nullptr),pAudioOutput(nullptr)
   ,indev(), outdev()
 #endif
 
@@ -188,10 +188,10 @@ CDRMReceiver::Run()
         if(gps_data->gps_fd != -1) (void)gps_close(gps_data);
 # if GPSD_API_MAJOR_VERSION < 5
         result = gps_open_r(Parameters.gps_host.c_str(), s.str().c_str(), gps_data);
-        if(!result) (void)gps_stream(gps_data, WATCH_ENABLE|POLL_NONBLOCK, NULL);
+        if(!result) (void)gps_stream(gps_data, WATCH_ENABLE|POLL_NONBLOCK, nullptr);
 # else
         result = gps_open(Parameters.gps_host.c_str(), s.str().c_str(), gps_data);
-        if(!result) (void)gps_stream(gps_data, WATCH_ENABLE, NULL);
+        if(!result) (void)gps_stream(gps_data, WATCH_ENABLE, nullptr);
 # endif
         if(result) gps_data->gps_fd = -1;
         Parameters.restart_gpsd = false;
@@ -226,14 +226,14 @@ CDRMReceiver::Run()
         pUpstreamRSCI->ReadData(Parameters, RSIPacketBuf);
         if (RSIPacketBuf.GetFillLevel() > 0)
         {
-            time_keeper = time(NULL);
+            time_keeper = time(nullptr);
             DecodeRSIMDI.ProcessData(Parameters, RSIPacketBuf, FACDecBuf, SDCDecBuf, MSCDecBuf);
             PlotManager.UpdateParamHistoriesRSIIn();
             bFrameToSend = TRUE;
         }
         else
         {
-            time_t now = time(NULL);
+            time_t now = time(nullptr);
             if ((now - time_keeper) > 2)
             {
                 Parameters.ReceiveStatus.InterfaceI.SetStatus(NOT_PRESENT);
@@ -473,7 +473,7 @@ CDRMReceiver::SetInput()
         /* Fetch new sample rate if any */
         Parameters.FetchNewSampleRate();
         /* Close previous sound interface */
-        if (pSoundInInterface != NULL)
+        if (pSoundInInterface != nullptr)
         {
             sSndDevIn = pSoundInInterface->GetDev();
             pSoundInInterface->Close();
@@ -911,10 +911,10 @@ CDRMReceiver::InitReceiverMode()
     case RM_AM:
     case RM_FM:
 #if 0
-        if (pAMParam == NULL)
+        if (pAMParam == nullptr)
         {
             /* its the first time we have been in AM mode */
-            if (pDRMParam == NULL)
+            if (pDRMParam == nullptr)
             {
                 /* DRM Mode was never invoked so we get to claim the default parameter instance */
                 pAMParam = pParameters;
@@ -961,7 +961,7 @@ CDRMReceiver::InitReceiverMode()
         pAMParam->eReceiverMode = eNewReceiverMode;
         pParameters = pAMParam;
 
-        if (pParameters == NULL)
+        if (pParameters == nullptr)
             throw CGenErr("Something went terribly wrong in the Receiver");
 #endif
         Parameters.eReceiverMode = eNewReceiverMode;
@@ -979,10 +979,10 @@ CDRMReceiver::InitReceiverMode()
         break;
     case RM_DRM:
 #if 0
-        if (pDRMParam == NULL)
+        if (pDRMParam == nullptr)
         {
             /* its the first time we have been in DRM mode */
-            if (pAMParam == NULL)
+            if (pAMParam == nullptr)
             {
                 /* AM Mode was never invoked so we get to claim the default parameter instance */
                 pDRMParam = pParameters;
@@ -1028,7 +1028,7 @@ CDRMReceiver::InitReceiverMode()
 //        pDRMParam->eReceiverMode = RM_DRM;
 //        pParameters = pDRMParam;
 
-//        if (pParameters == NULL)
+//        if (pParameters == nullptr)
 //            throw CGenErr("Something went terribly wrong in the Receiver");
         Parameters.eReceiverMode = eNewReceiverMode;
 
@@ -1603,9 +1603,9 @@ CDRMReceiver::SetRSIRecording(_BOOLEAN bOn, const char cProfile)
 void
 CDRMReceiver::saveSDCtoFile()
 {
-    static FILE *pFile = NULL;
+    static FILE *pFile = nullptr;
 
-    if (pFile == NULL)
+    if (pFile == nullptr)
         pFile = fopen("test/altfreq.dat", "w");
 
     Parameters.Lock();
@@ -1633,7 +1633,7 @@ CDRMReceiver::saveSDCtoFile()
 void
 CDRMReceiver::LoadSettings()
 {
-    if (pSettings == NULL) return;
+    if (pSettings == nullptr) return;
     CSettings& s = *pSettings;
 
     /* Serial Number */
@@ -1873,7 +1873,7 @@ CDRMReceiver::LoadSettings()
 void
 CDRMReceiver::SaveSettings()
 {
-    if (pSettings == NULL) return;
+    if (pSettings == nullptr) return;
     CSettings& s = *pSettings;
 
     s.Put("Receiver", "mode", int(eReceiverMode));

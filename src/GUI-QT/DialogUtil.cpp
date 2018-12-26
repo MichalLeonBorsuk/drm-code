@@ -320,12 +320,12 @@ CHelpUsage::CHelpUsage(const char* usage, const char* argv0, QWidget* parent)
 /* System Tray -------------------------------------------------------------- */
 
 CSysTray::CSysTray(QWidget* parent, const char* callbackIcon, const char* callbackTimer, const char* icon)
-    : pTimer(NULL), pContextMenu(NULL)
+    : pTimer(nullptr), pContextMenu(nullptr)
 {
     pSystemTrayIcon = new QSystemTrayIcon(QIcon(icon), parent);
-    if (callbackIcon != NULL)
+    if (callbackIcon != nullptr)
         parent->connect(pSystemTrayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)), parent, callbackIcon);
-    if (callbackTimer != NULL)
+    if (callbackTimer != nullptr)
 	{
 		pTimer = new QTimer();
         parent->connect(pTimer, SIGNAL(timeout()), parent, callbackTimer);
@@ -335,17 +335,17 @@ CSysTray::CSysTray(QWidget* parent, const char* callbackIcon, const char* callba
 
 CSysTray::~CSysTray()
 {
-	if (pTimer != NULL)
+	if (pTimer != nullptr)
 		delete pTimer;
-    if (pSystemTrayIcon != NULL)
+    if (pSystemTrayIcon != nullptr)
         delete pSystemTrayIcon;
-    if (pContextMenu != NULL)
+    if (pContextMenu != nullptr)
         delete pContextMenu;
 }
 
 void CSysTray::CreateContextMenu()
 {
-    if (pContextMenu == NULL)
+    if (pContextMenu == nullptr)
     {
         pContextMenu = new QMenu();
         pSystemTrayIcon->setContextMenu(pContextMenu);
@@ -354,7 +354,7 @@ void CSysTray::CreateContextMenu()
 
 CSysTray* CSysTray::Create(QWidget* parent, const char* callbackIcon, const char* callbackTimer, const char* icon)
 {
-    CSysTray* pSysTray = NULL;
+    CSysTray* pSysTray = nullptr;
     if (QSystemTrayIcon::isSystemTrayAvailable())
         pSysTray = new CSysTray(parent, callbackIcon, callbackTimer, icon);
     return pSysTray;
@@ -362,45 +362,45 @@ CSysTray* CSysTray::Create(QWidget* parent, const char* callbackIcon, const char
 
 void CSysTray::Destroy(CSysTray** pSysTray)
 {
-    if (*pSysTray != NULL)
+    if (*pSysTray != nullptr)
     {
         delete *pSysTray;
-        *pSysTray = NULL;
+        *pSysTray = nullptr;
     }
 }
 
 void CSysTray::Start(CSysTray* pSysTray)
 {
-    if (pSysTray == NULL) return;
-    if (pSysTray->pTimer != NULL)
+    if (pSysTray == nullptr) return;
+    if (pSysTray->pTimer != nullptr)
         pSysTray->pTimer->start(GUI_CONTROL_UPDATE_TIME);
 }
 
 void CSysTray::Stop(CSysTray* pSysTray, const QString& Message)
 {
-    if (pSysTray == NULL) return;
-	if (pSysTray->pTimer != NULL)
+    if (pSysTray == nullptr) return;
+	if (pSysTray->pTimer != nullptr)
         pSysTray->pTimer->stop();
     SetToolTip(pSysTray, QString(), Message);
 }
 
 QAction* CSysTray::AddAction(CSysTray* pSysTray, const QString& text, const QObject* receiver, const char* member)
 {
-    if (pSysTray == NULL) return NULL;
+    if (pSysTray == nullptr) return nullptr;
     pSysTray->CreateContextMenu();
     return pSysTray->pContextMenu->addAction(text, receiver, member);
 }
 
 QAction* CSysTray::AddSeparator(CSysTray* pSysTray)
 {
-    if (pSysTray == NULL) return NULL;
+    if (pSysTray == nullptr) return nullptr;
     pSysTray->CreateContextMenu();
     return pSysTray->pContextMenu->addSeparator();
 }
 
 void CSysTray::SetToolTip(CSysTray* pSysTray, const QString& Title, const QString& Message)
 {
-    if (pSysTray != NULL &&
+    if (pSysTray != nullptr &&
         (pSysTray->Title != Title || pSysTray->Message != Message))
     {
         pSysTray->Title = Title;

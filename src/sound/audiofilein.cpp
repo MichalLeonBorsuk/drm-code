@@ -40,9 +40,9 @@
 
 
 CAudioFileIn::CAudioFileIn(): CSoundInInterface(), eFmt(fmt_other),
-    pFileReceiver(NULL), iSampleRate(0), iRequestedSampleRate(0), iBufferSize(0),
-    iFileSampleRate(0), iFileChannels(0), pacer(NULL),
-    ResampleObjL(NULL), ResampleObjR(NULL), buffer(NULL)
+    pFileReceiver(nullptr), iSampleRate(0), iRequestedSampleRate(0), iBufferSize(0),
+    iFileSampleRate(0), iFileChannels(0), pacer(nullptr),
+    ResampleObjL(nullptr), ResampleObjR(nullptr), buffer(nullptr)
 {
 }
 
@@ -100,12 +100,12 @@ CAudioFileIn::SetFileName(const string& strFileName)
         sfinfo.channels = iFileChannels;
         sfinfo.format = SF_FORMAT_RAW|SF_FORMAT_PCM_16|SF_ENDIAN_LITTLE;
         pFileReceiver = (FILE*)sf_open(strInFileName.c_str(), SFM_READ, &sfinfo);
-        if (pFileReceiver == NULL)
+        if (pFileReceiver == nullptr)
             throw CGenErr(string("")+sf_strerror(0)+" raised on "+strInFileName);
         break;
     case fmt_other:
         pFileReceiver = (FILE*)sf_open(strInFileName.c_str(), SFM_READ, &sfinfo);
-        if (pFileReceiver != NULL)
+        if (pFileReceiver != nullptr)
         {
             iFileChannels = sfinfo.channels;
             iFileSampleRate = sfinfo.samplerate;
@@ -115,7 +115,7 @@ CAudioFileIn::SetFileName(const string& strFileName)
 		}
         break;
     default:
-        pFileReceiver = NULL;
+        pFileReceiver = nullptr;
         break;
     }
 #else
@@ -127,7 +127,7 @@ CAudioFileIn::SetFileName(const string& strFileName)
 
     /* Check for errors */
 #ifdef HAVE_LIBSNDFILE
-    if (pFileReceiver != NULL)
+    if (pFileReceiver != nullptr)
     {
         sf_count_t count;
         switch (eFmt)
@@ -143,7 +143,7 @@ CAudioFileIn::SetFileName(const string& strFileName)
             if (sf_error((SNDFILE*)pFileReceiver) || count != 1 || iFileChannels < 1 || iFileChannels > 2)
             {
                 sf_close((SNDFILE*)pFileReceiver);
-                pFileReceiver = NULL;
+                pFileReceiver = nullptr;
             }
             else
             {
@@ -158,7 +158,7 @@ CAudioFileIn::SetFileName(const string& strFileName)
 #endif
 
 // The error is reported when reading (red light in system eval on interface IO led)
-//    if (pFileReceiver == NULL)
+//    if (pFileReceiver == nullptr)
 //        throw CGenErr("The file " + strInFileName + " could not be openned");
 
     iRequestedSampleRate = iFileSampleRate;
@@ -176,7 +176,7 @@ CAudioFileIn::Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking
     if (pacer)
     {
         delete pacer;
-        pacer = NULL;
+        pacer = nullptr;
     }
     if (bNewBlocking)
     {
@@ -184,7 +184,7 @@ CAudioFileIn::Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking
         pacer = new CPacer(uint64_t(1e9*interval));
     }
 
-    if (pFileReceiver == NULL)
+    if (pFileReceiver == nullptr)
         return TRUE;
 
     _BOOLEAN bChanged = FALSE;
@@ -204,12 +204,12 @@ CAudioFileIn::Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking
         if (iNewSampleRate != iFileSampleRate)
         {
             iOutBlockSize = iNewBufferSize / 2; /* Mono */
-            if (ResampleObjL == NULL)
+            if (ResampleObjL == nullptr)
                 ResampleObjL = new CAudioResample();
             ResampleObjL->Init(iOutBlockSize, iFileSampleRate, iNewSampleRate);
             if (iFileChannels == 2)
             {
-                if (ResampleObjR == NULL)
+                if (ResampleObjR == nullptr)
                     ResampleObjR = new CAudioResample();
                 ResampleObjR->Init(iOutBlockSize, iFileSampleRate, iNewSampleRate);
             }
@@ -219,9 +219,9 @@ CAudioFileIn::Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking
             buffer = new short[iMaxInputSize * 2];
             if (bChanged)
             {
-                if (ResampleObjL != NULL)
+                if (ResampleObjL != nullptr)
                     ResampleObjL->Reset();
-                if (ResampleObjR != NULL)
+                if (ResampleObjR != nullptr)
                     ResampleObjR->Reset();
             }
         }
@@ -240,7 +240,7 @@ CAudioFileIn::Read(CVector<short>& psData)
     if (pacer)
         pacer->wait();
 
-    if (pFileReceiver == NULL || psData.Size() < iBufferSize)
+    if (pFileReceiver == nullptr || psData.Size() < iBufferSize)
         return TRUE;
 
     const int iFrames = ResampleObjL ? ResampleObjL->GetFreeInputSize() : iBufferSize/2;
@@ -351,7 +351,7 @@ void
 CAudioFileIn::Close()
 {
     /* Close file (if opened) */
-    if (pFileReceiver != NULL)
+    if (pFileReceiver != nullptr)
     {
 #ifdef HAVE_LIBSNDFILE
         if (eFmt == fmt_txt)
@@ -361,24 +361,24 @@ CAudioFileIn::Close()
 #else
         fclose(pFileReceiver);
 #endif
-        pFileReceiver = NULL;
+        pFileReceiver = nullptr;
     }
 
-	if (buffer != NULL)
+	if (buffer != nullptr)
 		delete[] buffer;
-    buffer = NULL;
+    buffer = nullptr;
 
-    if (pacer != NULL)
+    if (pacer != nullptr)
         delete pacer;
-    pacer = NULL;
+    pacer = nullptr;
 
-    if (ResampleObjL != NULL)
+    if (ResampleObjL != nullptr)
         delete ResampleObjL;
-    ResampleObjL = NULL;
+    ResampleObjL = nullptr;
 
-    if (ResampleObjR != NULL)
+    if (ResampleObjR != nullptr)
         delete ResampleObjR;
-    ResampleObjR = NULL;
+    ResampleObjR = nullptr;
 
     vecTempResBufIn.Init(0, (_REAL) 0.0);
     vecTempResBufOut.Init(0, (_REAL) 0.0);

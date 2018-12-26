@@ -156,7 +156,7 @@ _BOOLEAN CSDCTransmit::CanTransmitCurrentTime(CParameter& Parameter)
     if (Parameter.eTransmitCurrentTime != CParameter::CT_OFF)
     {
         /* Get current UTC time */
-        time_t t = time(NULL);
+        time_t t = time(nullptr);
         if (t != ((time_t)-1))
         {
             struct tm *gtm, *ltm = localtime(&t);
@@ -165,7 +165,7 @@ _BOOLEAN CSDCTransmit::CanTransmitCurrentTime(CParameter& Parameter)
             case CParameter::CT_UTC_OFFSET:
 #ifndef _WIN32
 				/* Extract time zone info */
-                if (ltm != NULL)
+                if (ltm != nullptr)
                 {
                     const int iTimeZone = ltm->tm_gmtoff; /* offset in seconds */
                     /* Set local time offset in half hour */
@@ -185,7 +185,7 @@ _BOOLEAN CSDCTransmit::CanTransmitCurrentTime(CParameter& Parameter)
                     gtm = ltm;
                 else
                     gtm = gmtime(&t);
-                if (gtm != NULL)
+                if (gtm != nullptr)
                 {
                     /* Time info is only transmitted at minute edge see 6.4.3.9 */
                     if (iLastMinuteTransmitted != gtm->tm_min)

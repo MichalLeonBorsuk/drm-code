@@ -1078,7 +1078,7 @@ CDateAndTime::extract_relative(CVector < _BINARY > &vecbiData)
 {
 	int granularity = (int) vecbiData.Separate(2);
 	int interval = (int) vecbiData.Separate(6);
-	time_t t = time(NULL);
+	time_t t = time(nullptr);
 	switch (granularity)
 	{
 	case 0:

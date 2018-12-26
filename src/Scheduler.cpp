@@ -98,7 +98,7 @@ bool CScheduler::LoadSchedule(const string& filename)
 
 void CScheduler::fill()
 {
-	time_t dt = time(NULL); // daytime
+	time_t dt = time(nullptr); // daytime
 	struct tm dts;
 	dts = *gmtime(&dt);
 	dts.tm_hour = 0;
@@ -156,7 +156,7 @@ string CScheduler::format(const struct tm& g)
 
 void CScheduler::before()
 {
-	time_t t = time(NULL);
+	time_t t = time(nullptr);
 	t += 10;
 	iniFile.PutIniSetting("Settings", "StartTime1", format(t));
 	t += 30;

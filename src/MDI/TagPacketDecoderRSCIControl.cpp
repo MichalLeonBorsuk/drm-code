@@ -40,7 +40,7 @@
 
 // constructor: adds all of the decoders in the vocabulary to the list
 CTagPacketDecoderRSCIControl::CTagPacketDecoderRSCIControl(void) 
-: pDRMReceiver(NULL)
+: pDRMReceiver(nullptr)
 , TagItemDecoderCact()
 , TagItemDecoderCfre()
 , TagItemDecoderCdmo()

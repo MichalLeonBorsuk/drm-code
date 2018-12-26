@@ -295,7 +295,7 @@ void CTagItemDecoderCact::DecodeTag(CVector<_BINARY>& vecbiTag, const int iLen)
 
     const int iNewState = vecbiTag.Separate(8) - '0';
 
-    if (pDRMReceiver == NULL)
+    if (pDRMReceiver == nullptr)
         return;
 
     // TODO pDRMReceiver->SetState(iNewState);
@@ -308,7 +308,7 @@ void CTagItemDecoderCfre::DecodeTag(CVector<_BINARY>& vecbiTag, const int iLen)
     if (iLen != 32)
         return;
 
-    if (pDRMReceiver == NULL)
+    if (pDRMReceiver == nullptr)
         return;
 
     const int iNewFrequency = vecbiTag.Separate(32);
@@ -325,7 +325,7 @@ void CTagItemDecoderCdmo::DecodeTag(CVector<_BINARY>& vecbiTag, const int iLen)
     for (int i = 0; i < iLen / SIZEOF__BYTE; i++)
         s += (_BYTE) vecbiTag.Separate(SIZEOF__BYTE);
 
-    if (pDRMReceiver == NULL)
+    if (pDRMReceiver == nullptr)
         return;
 
     if(s == "drm_")
@@ -347,7 +347,7 @@ void CTagItemDecoderCrec::DecodeTag(CVector<_BINARY>& vecbiTag, const int iLen)
     char c3 = (char) vecbiTag.Separate(SIZEOF__BYTE);
     char c4 = (char) vecbiTag.Separate(SIZEOF__BYTE);
 
-    if (pDRMReceiver == NULL)
+    if (pDRMReceiver == nullptr)
         return;
 
     if(s == "st")
@@ -362,7 +362,7 @@ void CTagItemDecoderCpro::DecodeTag(CVector<_BINARY>& vecbiTag, const int iLen)
         return;
 
     char c = char(vecbiTag.Separate(SIZEOF__BYTE));
-    if (pRSISubscriber != NULL)
+    if (pRSISubscriber != nullptr)
         pRSISubscriber->SetProfile(c);
 }
 /* TODO: other control tag items */

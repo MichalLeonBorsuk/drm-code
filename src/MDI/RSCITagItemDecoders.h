@@ -109,7 +109,7 @@ public:
 class CTagItemDecoderRCI : public CTagItemDecoder
 {
 public:
-	CTagItemDecoderRCI(const string& s) : pDRMReceiver(NULL),tag(s) {}
+	CTagItemDecoderRCI(const string& s) : pDRMReceiver(nullptr),tag(s) {}
 	void SetReceiver(CDRMReceiver *pReceiver) {pDRMReceiver = pReceiver;}
 	virtual string GetTagName() { return tag; }
 protected:
@@ -148,7 +148,7 @@ public:
 class CTagItemDecoderCpro : public CTagItemDecoderRCI
 {
 public:
-	CTagItemDecoderCpro() : CTagItemDecoderRCI("crec"), pRSISubscriber(NULL) {}
+	CTagItemDecoderCpro() : CTagItemDecoderRCI("crec"), pRSISubscriber(nullptr) {}
 	virtual void DecodeTag(CVector<_BINARY>& vecbiTag, const int iLenDataBits);
 	void SetSubscriber(CRSISubscriber *pSubscriber) {pRSISubscriber = pSubscriber;}
 private:

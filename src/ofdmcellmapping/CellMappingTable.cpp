@@ -55,9 +55,9 @@ void CCellMappingTable::MakeTable(
 	int			iCarArrInd;
 	int			iSpecOccArrayIndex=0;
 	/* Tables */
-	const int*		piTableFAC=NULL;
-	const int*		piTableTimePilots=NULL;
-	const int*		piTableFreqPilots=NULL;
+	const int*		piTableFAC=nullptr;
+	const int*		piTableTimePilots=nullptr;
+	const int*		piTableFreqPilots=nullptr;
 
 
 	/* Set Parameters and pointers to the tables ******************************/

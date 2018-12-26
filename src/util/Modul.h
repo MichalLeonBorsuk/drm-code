@@ -247,8 +247,8 @@ CModul<TInput, TOutput>::CModul()
 	iMaxOutputBlockSize = 0;
 	iInputBlockSize = 0;
 	iOutputBlockSize = 0;
-	pvecInputData = NULL;
-	pvecOutputData = NULL;
+	pvecInputData = nullptr;
+	pvecOutputData = nullptr;
 }
 
 template<class TInput, class TOutput>
@@ -331,8 +331,8 @@ CTransmitterModul<TInput, TOutput>::CTransmitterModul()
 	/* Initialize all member variables with zeros */
 	iInputBlockSize2 = 0;
 	iInputBlockSize3 = 0;
-	pvecInputData2 = NULL;
-	pvecInputData3 = NULL;
+	pvecInputData2 = nullptr;
+	pvecInputData3 = nullptr;
 }
 
 template<class TInput, class TOutput>
@@ -510,8 +510,8 @@ CReceiverModul<TInput, TOutput>::CReceiverModul()
 	iMaxOutputBlockSize3 = 0;
 	iOutputBlockSize2 = 0;
 	iOutputBlockSize3 = 0;
-	pvecOutputData2 = NULL;
-	pvecOutputData3 = NULL;
+	pvecOutputData2 = nullptr;
+	pvecOutputData3 = nullptr;
 	bResetBuf = FALSE;
 	bResetBuf2 = FALSE;
 	bResetBuf3 = FALSE;
@@ -1132,8 +1132,8 @@ CSimulationModul<TInput, TOutput, TInOut2>::CSimulationModul()
 	iMaxOutputBlockSize2 = 0;
 	iOutputBlockSize2 = 0;
 	iInputBlockSize2 = 0;
-	pvecOutputData2 = NULL;
-	pvecInputData2 = NULL;
+	pvecOutputData2 = nullptr;
+	pvecInputData2 = nullptr;
 }
 
 template<class TInput, class TOutput, class TInOut2>

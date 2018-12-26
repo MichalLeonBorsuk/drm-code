@@ -438,7 +438,7 @@ void CSchedule::ReadCSVFile(FILE* pFile)
 
 Station::EState CSchedule::GetState(const int iPos)
 {
-	return StationsTable[iPos].stateAt(time(NULL), GetSecondsPreview());
+	return StationsTable[iPos].stateAt(time(nullptr), GetSecondsPreview());
 }
 
 bool CSchedule::CheckFilter(const int iPos)

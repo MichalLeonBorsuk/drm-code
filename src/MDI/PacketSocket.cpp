@@ -64,7 +64,7 @@ inline int inet_aton(const char*s, void * a) {
 #endif
 
 CPacketSocketNative::CPacketSocketNative():
-        pPacketSink(NULL), HostAddrOut(),
+        pPacketSink(nullptr), HostAddrOut(),
         writeBuf(),udp(true),
         s(INVALID_SOCKET), origin(""), dest("")
 {
@@ -88,7 +88,7 @@ CPacketSocketNative::SetPacketSink(CPacketSink * pSink)
 void
 CPacketSocketNative::ResetPacketSink()
 {
-    pPacketSink = NULL;
+    pPacketSink = nullptr;
 }
 
 // Send packet to the socket
@@ -371,7 +371,7 @@ CPacketSocketNative::pollStream()
     if (iNumBytesRead > 0)
     {
         /* Decode the incoming packet */
-        if (pPacketSink != NULL)
+        if (pPacketSink != nullptr)
         {
             vecbydata.resize(iNumBytesRead);
             // TODO - is there any reason or possibility to optionally filter on source address?

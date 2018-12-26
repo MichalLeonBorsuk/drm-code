@@ -139,7 +139,7 @@ public:
 
     enum ESFStatus { SF_SNDCARDIN, SF_SNDFILEIN, SF_RSCIMDIIN };
 
-    CDRMReceiver(CSettings* pSettings=NULL);
+    CDRMReceiver(CSettings* pSettings=nullptr);
     virtual ~CDRMReceiver();
 
     void					LoadSettings(); // can write to settings to set defaults

@@ -110,9 +110,9 @@ CConsoleIO::Enter(CDRMReceiver* pDRMReceiver)
 	sigact.sa_handler = SIG_IGN;
 	sigemptyset(&sigact.sa_mask);
 	sigact.sa_flags = 0;
-	sigaction(SIGPIPE, &sigact, NULL);
-	sigaction(SIGUSR1, &sigact, NULL);
-	sigaction(SIGUSR2, &sigact, NULL);
+	sigaction(SIGPIPE, &sigact, nullptr);
+	sigaction(SIGUSR1, &sigact, nullptr);
+	sigaction(SIGUSR2, &sigact, nullptr);
 
 	/* Signals to block */
 	sigemptyset(&sigset);
@@ -120,7 +120,7 @@ CConsoleIO::Enter(CDRMReceiver* pDRMReceiver)
 	sigaddset(&sigset, SIGHUP);
 	sigaddset(&sigset, SIGTERM);
 	sigaddset(&sigset, SIGQUIT);
-	pthread_sigmask(SIG_SETMASK, &sigset, NULL);
+	pthread_sigmask(SIG_SETMASK, &sigset, nullptr);
 
 	/* TTY opening */
 	tty = open(TTY_DEVICE, O_RDWR | O_NONBLOCK);
@@ -346,7 +346,7 @@ CConsoleIO::Update()
 		if (mode & MODE_BOTH)
 			cprintf(NL);
 		cprintf(NL "Service:" NL);
-		const char* strTextMessage = NULL;
+		const char* strTextMessage = nullptr;
 		int iCurAudService = Parameters.GetCurSelAudioService();
 		for (int i = 0; i < MAX_NUM_SERVICES; i++)
 		{
@@ -377,7 +377,7 @@ CConsoleIO::Update()
 			else
 				cprintf(" %i" NL, i+1);
 		}
-		if (strTextMessage != NULL)
+		if (strTextMessage != nullptr)
 		{
 			string msg(strTextMessage);
 			REPLACE_STR(msg, "\r\n", "\r");  /* Windows CR-LF */

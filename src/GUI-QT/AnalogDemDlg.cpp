@@ -61,7 +61,7 @@ AnalogDemDlg::AnalogDemDlg(CDRMReceiver& NDRMR, CSettings& Settings,
 	CFileMenu* pFileMenu, CSoundCardSelMenu* pSoundCardMenu, QWidget* parent) :
 	CWindow(parent, Settings, "AM"),
 	DRMReceiver(NDRMR),
-	AMSSDlg(NDRMR, Settings, this), MainPlot(NULL),
+	AMSSDlg(NDRMR, Settings, this), MainPlot(nullptr),
 	pFileMenu(pFileMenu), pSoundCardMenu(pSoundCardMenu)
 {
 	setupUi(this);
@@ -84,7 +84,7 @@ AnalogDemDlg::AnalogDemDlg(CDRMReceiver& NDRMR, CSettings& Settings,
 	connect(actionAbout_Dream, SIGNAL(triggered()), this, SLOT(OnHelpAbout()));
 	connect(actionWhats_This, SIGNAL(triggered()), this, SLOT(OnWhatsThis()));
 	SliderBandwidth->setTickPosition(QSlider::TicksBothSides);
-	MainPlot = new CDRMPlot(NULL, plot);
+	MainPlot = new CDRMPlot(nullptr, plot);
 
 	/* Init main plot */
 	bool waterfall = getSetting("waterfall", false);

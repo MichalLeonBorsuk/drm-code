@@ -269,7 +269,7 @@ void CWriteData::InitInternal(CParameter& Parameters)
 
 CWriteData::CWriteData(CSoundOutInterface* pNS) :
 #ifdef QT_MULTIMEDIA_LIB
-        pIODevice(NULL),
+        pIODevice(nullptr),
 #endif
         pSound(pNS), /* Sound interface */
         bMuteAudio(FALSE), bDoWriteWaveFile(FALSE),
@@ -392,7 +392,7 @@ void CGenSimData::ProcessDataInternal(CParameter& TransmParam)
     _REAL		rReDays;
 
     /* Get elapsed time since this run was started (seconds) */
-    tiElTi = time(NULL) - tiStartTime;
+    tiElTi = time(nullptr) - tiStartTime;
 
     /* Stop simulation if stop condition is true */
     iCounter++;
@@ -407,7 +407,7 @@ void CGenSimData::ProcessDataInternal(CParameter& TransmParam)
 
             /* Store current counter position in file */
             pFileCurPos = fopen(strFileName.c_str(), "w");
-            if (pFileCurPos != NULL)
+            if (pFileCurPos != nullptr)
             {
                 fprintf(pFileCurPos,
                         "%d / %d (%ld min elapsed, estimated time remaining: %ld min)",
@@ -464,7 +464,7 @@ void CGenSimData::ProcessDataInternal(CParameter& TransmParam)
 
                 /* Store current counter position in file */
                 pFileCurPos = fopen(strFileName.c_str(), "w");
-                if (pFileCurPos != NULL)
+                if (pFileCurPos != nullptr)
                 {
                     fprintf(pFileCurPos,
                             "%d / %d (%ld min elapsed, estimated time remaining: %ld min [%.1f days])",
@@ -485,7 +485,7 @@ void CGenSimData::ProcessDataInternal(CParameter& TransmParam)
 
                 /* Store current counter position in file */
                 pFileCurPos = fopen(strFileName.c_str(), "w");
-                if (pFileCurPos != NULL)
+                if (pFileCurPos != nullptr)
                 {
                     fprintf(pFileCurPos,
                             "%d / %d (%ld min elapsed, estimated minimum"
@@ -528,7 +528,7 @@ void CGenSimData::ProcessDataInternal(CParameter& TransmParam)
     /* Generate a pseudo-noise test-signal (PRBS) */
     /* Init shift register with an arbitrary number (Must be known at the
        receiver AND transmitter!) */
-    iShiftRegister = (uint32_t) (time(NULL) + rand());
+    iShiftRegister = (uint32_t) (time(nullptr) + rand());
     TransmParam.RawSimDa.Add(iShiftRegister);
 
     for (i = 0; i < iOutputBlockSize; i++)
@@ -599,7 +599,7 @@ void CGenSimData::InitInternal(CParameter& TransmParam)
     TransmParam.RawSimDa.Reset();
 
     /* Init start time */
-    tiStartTime = time(NULL);
+    tiStartTime = time(nullptr);
 }
 
 void CGenSimData::SetSimTime(int iNewTi, string strNewFileName)
@@ -946,7 +946,7 @@ void CWriteIQFile::ProcessDataInternal(CParameter& Parameters)
     if (bChangeReceived) // file is open but we want to start a new one
     {
         bChangeReceived = FALSE;
-        if (pFile != NULL)
+        if (pFile != nullptr)
         {
             fclose(pFile);
         }
@@ -956,10 +956,10 @@ void CWriteIQFile::ProcessDataInternal(CParameter& Parameters)
     // is recording switched on?
     if (!bIsRecording)
     {
-        if (pFile != NULL)
+        if (pFile != nullptr)
         {
             fclose(pFile); // close file if currently open
-            pFile = NULL;
+            pFile = nullptr;
         }
         return;
     }
@@ -972,10 +972,10 @@ void CWriteIQFile::ProcessDataInternal(CParameter& Parameters)
     {
         iFrequency = iNewFrequency;
         // If file is currently open, close it
-        if (pFile != NULL)
+        if (pFile != nullptr)
         {
             fclose(pFile);
-            pFile = NULL;
+            pFile = nullptr;
         }
     }
     // Now open the file with correct name if it isn't currently open
