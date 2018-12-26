@@ -407,7 +407,7 @@ void CDRMChannel::InitInternal(CParameter& Parameters)
 
 
     /* Set seed of random noise generator */
-    srand((unsigned) time(NULL));
+    srand((unsigned) time(nullptr));
 
     /* Define block-sizes for input and output */
     iInputBlockSize = Parameters.CellMappingTable.iSymbolBlockSize;

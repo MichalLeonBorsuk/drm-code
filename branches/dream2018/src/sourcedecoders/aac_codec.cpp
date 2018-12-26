@@ -39,18 +39,18 @@ static NeAACDecInitDRM_t *NeAACDecInitDRM;
 static NeAACDecClose_t *NeAACDecClose;
 static NeAACDecDecode_t *NeAACDecDecode;
 static const LIBFUNC FaadLibFuncs[] = {
-	{ "NeAACDecOpen",    (void**)&NeAACDecOpen,    (void*)NULL },
-	{ "NeAACDecInitDRM", (void**)&NeAACDecInitDRM, (void*)NULL },
-	{ "NeAACDecClose",   (void**)&NeAACDecClose,   (void*)NULL },
-	{ "NeAACDecDecode",  (void**)&NeAACDecDecode,  (void*)NULL },
-	{ NULL, NULL, NULL }
+	{ "NeAACDecOpen",    (void**)&NeAACDecOpen,    (void*)nullptr },
+	{ "NeAACDecInitDRM", (void**)&NeAACDecInitDRM, (void*)nullptr },
+	{ "NeAACDecClose",   (void**)&NeAACDecClose,   (void*)nullptr },
+	{ "NeAACDecDecode",  (void**)&NeAACDecDecode,  (void*)nullptr },
+	{ nullptr, nullptr, nullptr }
 };
 # if defined(_WIN32)
-static const char* FaadLibNames[] = { "faad2_drm.dll", "libfaad2_drm.dll", "faad_drm.dll", "libfaad2.dll", NULL };
+static const char* FaadLibNames[] = { "faad2_drm.dll", "libfaad2_drm.dll", "faad_drm.dll", "libfaad2.dll", nullptr };
 # elif defined(__APPLE__)
-static const char* FaadLibNames[] = { "libfaad_drm.dylib", NULL };
+static const char* FaadLibNames[] = { "libfaad_drm.dylib", nullptr };
 # else
-static const char* FaadLibNames[] = { "libfaad2_drm.so", "libfaad_drm.so", "libfaad.so.2", NULL };
+static const char* FaadLibNames[] = { "libfaad2_drm.so", "libfaad_drm.so", "libfaad.so.2", nullptr };
 # endif
 #endif
 
@@ -64,20 +64,20 @@ static faacEncOpen_t* faacEncOpen;
 static faacEncEncode_t* faacEncEncode;
 static faacEncClose_t* faacEncClose;
 static const LIBFUNC FaacLibFuncs[] = {
-	{ "faacEncGetVersion",              (void**)&faacEncGetVersion,              (void*)NULL },
-	{ "faacEncGetCurrentConfiguration", (void**)&faacEncGetCurrentConfiguration, (void*)NULL },
-	{ "faacEncSetConfiguration",        (void**)&faacEncSetConfiguration,        (void*)NULL },
-	{ "faacEncOpen",                    (void**)&faacEncOpen,                    (void*)NULL },
-	{ "faacEncEncode",                  (void**)&faacEncEncode,                  (void*)NULL },
-	{ "faacEncClose",                   (void**)&faacEncClose,                   (void*)NULL },
-	{ NULL, NULL, NULL }
+	{ "faacEncGetVersion",              (void**)&faacEncGetVersion,              (void*)nullptr },
+	{ "faacEncGetCurrentConfiguration", (void**)&faacEncGetCurrentConfiguration, (void*)nullptr },
+	{ "faacEncSetConfiguration",        (void**)&faacEncSetConfiguration,        (void*)nullptr },
+	{ "faacEncOpen",                    (void**)&faacEncOpen,                    (void*)nullptr },
+	{ "faacEncEncode",                  (void**)&faacEncEncode,                  (void*)nullptr },
+	{ "faacEncClose",                   (void**)&faacEncClose,                   (void*)nullptr },
+	{ nullptr, nullptr, nullptr }
 };
 # if defined(_WIN32)
-static const char* FaacLibNames[] = { "faac_drm.dll", "libfaac_drm.dll", "libfaac.dll", "faac.dll", NULL };
+static const char* FaacLibNames[] = { "faac_drm.dll", "libfaac_drm.dll", "libfaac.dll", "faac.dll", nullptr };
 # elif defined(__APPLE__)
-static const char* FaacLibNames[] = { "libfaac_drm.dylib", NULL };
+static const char* FaacLibNames[] = { "libfaac_drm.dylib", nullptr };
 # else
-static const char* FaacLibNames[] = { "libfaac_drm.so", "libfaac.so.0", NULL };
+static const char* FaacLibNames[] = { "libfaac_drm.so", "libfaac.so.0", nullptr };
 # endif
 static bool FaacCheckCallback()
 {
@@ -85,7 +85,7 @@ static bool FaacCheckCallback()
     unsigned long lNumSampEncIn = 0;
     unsigned long lMaxBytesEncOut = 0;
     faacEncHandle hEncoder = faacEncOpen(24000, 1, &lNumSampEncIn, &lMaxBytesEncOut);
-    if (hEncoder != NULL)
+    if (hEncoder != nullptr)
     {
         /* lMaxBytesEncOut is odd when DRM is supported */
         bLibOk = lMaxBytesEncOut & 1;
@@ -103,7 +103,7 @@ AacCodec::AacCodec() :
     hFaadDecoder(nullptr), hFaacEncoder(nullptr),pFile(nullptr)
 {
 #ifndef USE_FAAD2_LIBRARY
-	if (hFaadLib == NULL)
+	if (hFaadLib == nullptr)
 	{
 		hFaadLib = CLibraryLoader::Load(FaadLibNames, FaadLibFuncs);
 		if (!hFaadLib)
@@ -113,7 +113,7 @@ AacCodec::AacCodec() :
 	}
 #endif
 #ifndef USE_FAAC_LIBRARY
-    if (hFaacLib == NULL)
+    if (hFaacLib == nullptr)
     {
         hFaacLib = CLibraryLoader::Load(FaacLibNames, FaacLibFuncs, FaacCheckCallback);
         if (!hFaacLib)
@@ -152,9 +152,9 @@ bool
 AacCodec::DecOpen(CAudioParam& AudioParam, int *iAudioSampleRate, int *iLenDecOutPerChan)
 {
 	int iAACSampleRate = 12000;
-	if (hFaadDecoder == NULL)
+	if (hFaadDecoder == nullptr)
 		hFaadDecoder = NeAACDecOpen();
-	if (hFaadDecoder != NULL)
+	if (hFaadDecoder != nullptr)
 	{
 		int iDRMchanMode = DRMCH_MONO;
 		/* Only 12 kHz and 24 kHz is allowed */
@@ -251,10 +251,10 @@ AacCodec::DecClose()
         fclose(pFile);
         pFile = nullptr;
     }
-	if (hFaadDecoder != NULL)
+	if (hFaadDecoder != nullptr)
 	{
 		NeAACDecClose(hFaadDecoder);
-		hFaadDecoder = NULL;
+		hFaadDecoder = nullptr;
 	}
 }
 
@@ -291,14 +291,14 @@ AacCodec::EncOpen(int iSampleRate, int iChannels, unsigned long *lNumSampEncIn, 
 {
 	hFaacEncoder = faacEncOpen(iSampleRate, iChannels,
 		lNumSampEncIn, lMaxBytesEncOut);
-	return hFaacEncoder != NULL;
+	return hFaacEncoder != nullptr;
 }
 
 int
 AacCodec::Encode(CVector<_SAMPLE>& vecsEncInData, unsigned long lNumSampEncIn, CVector<uint8_t>& vecsEncOutData, unsigned long lMaxBytesEncOut)
 {
 	int bytesEncoded = 0;
-	if (hFaacEncoder != NULL)
+	if (hFaacEncoder != nullptr)
 	{
 		bytesEncoded = faacEncEncode(hFaacEncoder,
 			(int32_t *) &vecsEncInData[0],
@@ -311,17 +311,17 @@ AacCodec::Encode(CVector<_SAMPLE>& vecsEncInData, unsigned long lNumSampEncIn, C
 void
 AacCodec::EncClose()
 {
-	if (hFaacEncoder != NULL)
+	if (hFaacEncoder != nullptr)
 	{
 		faacEncClose(hFaacEncoder);
-		hFaacEncoder = NULL;
+		hFaacEncoder = nullptr;
 	}
 }
 
 void
 AacCodec::EncSetBitrate(int iBitRate)
 {
-	if (hFaacEncoder != NULL)
+	if (hFaacEncoder != nullptr)
 	{
 		/* Set encoder configuration */
 		faacEncConfigurationPtr CurEncFormat;

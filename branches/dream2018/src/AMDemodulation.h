@@ -98,7 +98,7 @@ class CNoiseReduction
 public:
     CNoiseReduction() : eNoiRedDegree(NR_MEDIUM)
 #ifdef HAVE_SPEEX
-    , preprocess_state(NULL), speex_data(NULL)
+    , preprocess_state(nullptr), speex_data(nullptr)
     , supression_level(0), sample_rate(0)
 #endif
     {}

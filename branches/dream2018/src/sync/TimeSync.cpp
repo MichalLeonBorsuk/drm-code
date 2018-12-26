@@ -895,7 +895,7 @@ void CTimeSync::SetFilterTaps(CReal rNewOffsetNorm)
 }
 
 CTimeSync::CTimeSync() : iSampleRate(0), iGrdcrrDecFact(0),
-	iNumTapsHilbFilt(0), fHilLPProt(NULL),
+	iNumTapsHilbFilt(0), fHilLPProt(nullptr),
 	iTimeSyncPos(0), bSyncInput(FALSE), bTimingAcqu(FALSE),
 	bRobModAcqu(FALSE), bAcqWasActive(FALSE), rLambdaCoAv((CReal) 1.0),
 	iLengthIntermCRes(NUM_ROBUSTNESS_MODES),

@@ -48,7 +48,7 @@
 BWSViewer::BWSViewer(CDRMReceiver& rec, CSettings& Settings, QWidget* parent):
     CWindow(parent, Settings, "BWS"),
     nam(this, cache, waitobjs, bAllowExternalContent, strCacheHost),
-    receiver(rec), decoder(NULL), bHomeSet(false), bPageLoading(false),
+    receiver(rec), decoder(nullptr), bHomeSet(false), bPageLoading(false),
     bSaveFileToDisk(false), bRestrictedProfile(false), bAllowExternalContent(true),
     bClearCacheOnNewService(true), bDirectoryIndexChanged(false),
     iLastAwaitingOjects(0), strCacheHost(CACHE_HOST),
@@ -196,10 +196,10 @@ void BWSViewer::OnTimer()
         break;
     }
 
-    if (decoder == NULL)
+    if (decoder == nullptr)
     {
         decoder = receiver.GetDataDecoder();
-        if (decoder == NULL)
+        if (decoder == nullptr)
             qDebug("can't get data decoder from receiver");
     }
 
@@ -351,7 +351,7 @@ void BWSViewer::eventHide(QHideEvent*)
 bool BWSViewer::Changed()
 {
     bool bChanged = false;
-    if (decoder != NULL)
+    if (decoder != nullptr)
     {
         CMOTObject obj;
 
@@ -484,7 +484,7 @@ void CWebsiteCache::GetObjectCountAndSize(unsigned int& count, unsigned int& siz
 void CWebsiteCache::ClearAll()
 {
     mutex.lock();
-        strDirectoryIndex = QString(); /* NULL string, not empty string! */
+        strDirectoryIndex = QString(); /* nullptr string, not empty string! */
         objects.clear();
         total_size = 0;
     mutex.unlock();
@@ -571,7 +571,7 @@ CWebsiteObject* CWebsiteCache::FindObject(const QString& strObjName)
 {
     map<QString,CWebsiteObject>::iterator it;
     it = objects.find(strObjName);
-    return it != objects.end() ? &it->second : NULL;
+    return it != objects.end() ? &it->second : nullptr;
 }
 
 bool CWebsiteCache::SetDirectoryIndex(const QString strNewDirectoryIndex)

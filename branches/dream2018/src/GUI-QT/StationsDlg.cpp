@@ -217,7 +217,7 @@ void StationsDlg::on_actionGetUpdate_triggered()
 		QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes )
 	{
 		/* Try to download the current schedule. Copy the file to the
-		current working directory (which is "QDir().absFilePath(NULL)") */
+		current working directory (which is "QDir().absFilePath(nullptr)") */
 		manager->get(QNetworkRequest(qurl));
 	}
 }

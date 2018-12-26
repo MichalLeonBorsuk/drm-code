@@ -204,7 +204,7 @@ void CDRMSimulation::SimScript()
         pFileSimRes = fopen(strSimFile.c_str(), "w");
 
         /* If opening of file was not successful, exit simulation */
-        if (pFileSimRes == NULL)
+        if (pFileSimRes == nullptr)
             exit(1);
 
         /* Show name as console output */

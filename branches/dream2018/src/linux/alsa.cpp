@@ -58,7 +58,7 @@ void CSoundIn::Init_HW() {
     /* record device */
     string recdevice = devices[iCurrentDevice];
 
-    if (handle != NULL)
+    if (handle != nullptr)
         return;
 
     err = snd_pcm_open( &handle, recdevice.c_str(), SND_PCM_STREAM_CAPTURE, 0 );
@@ -227,10 +227,10 @@ int CSoundIn::read_HW( void * recbuf, int size) {
 
 void CSoundIn::close_HW( void ) {
 
-    if (handle != NULL)
+    if (handle != nullptr)
         snd_pcm_close( handle );
 
-    handle = NULL;
+    handle = nullptr;
 }
 
 void CSoundOut::Init_HW()
@@ -256,7 +256,7 @@ void CSoundOut::Init_HW()
 
     string playdevice = devices[iCurrentDevice];
 
-    if (handle != NULL)
+    if (handle != nullptr)
         return;
 
     err = snd_pcm_open( &handle, playdevice.c_str(), SND_PCM_STREAM_PLAYBACK, 0 );
@@ -401,10 +401,10 @@ int CSoundOut::write_HW( _SAMPLE *playbuf, int size )
 void CSoundOut::close_HW( void )
 {
 
-    if (handle != NULL)
+    if (handle != nullptr)
         snd_pcm_close( handle );
 
-    handle = NULL;
+    handle = nullptr;
 }
 
 void
@@ -423,7 +423,7 @@ getdevices(vector < string > &names, vector < string > &devices,
             sndstat.getline(s, sizeof(s));
             if (strlen(s) == 0)
                 break;
-            if (strstr(s, playback ? "playback" : "capture") != NULL)
+            if (strstr(s, playback ? "playback" : "capture") != nullptr)
                 tmp.push_back(s);
         }
         sndstat.close();

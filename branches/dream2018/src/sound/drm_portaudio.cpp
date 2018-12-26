@@ -69,10 +69,10 @@ playbackCallback(const void *inputBuffer, void *outputBuffer,
 
 int CPaCommon::pa_count = 0;
 
-CPaCommon::CPaCommon(bool cap):ringBuffer(),xruns(0),stream(NULL),
+CPaCommon::CPaCommon(bool cap):ringBuffer(),xruns(0),stream(nullptr),
         names(), devices(),
         is_capture(cap), blocking(true), device_changed(true), xrun(false),
-        framesPerBuffer(0), ringBufferData(NULL)
+        framesPerBuffer(0), ringBufferData(nullptr)
 {
     if (pa_count == 0)
     {
@@ -206,7 +206,7 @@ CPaCommon::ReInit()
 
     memset(&pParameters, 0, sizeof(pParameters));
     pParameters.channelCount = 2;
-    pParameters.hostApiSpecificStreamInfo = NULL;
+    pParameters.hostApiSpecificStreamInfo = nullptr;
     pParameters.sampleFormat = paInt16;
 
     int idev = -1;
@@ -250,12 +250,12 @@ CPaCommon::ReInit()
     }
 
     /* See the specific host's API docs for info on using this field */
-    pParameters.hostApiSpecificStreamInfo = NULL;
+    pParameters.hostApiSpecificStreamInfo = nullptr;
 
     /* flags that can be used to define dither, clip settings and more */
     if (is_capture)
     {
-        err = Pa_OpenStream(&stream, &pParameters, NULL, samplerate,
+        err = Pa_OpenStream(&stream, &pParameters, nullptr, samplerate,
                             framesPerBuffer, paNoFlag, captureCallback,
                             (void *) this);
 
@@ -269,7 +269,7 @@ CPaCommon::ReInit()
     }
     else
     {
-        err = Pa_OpenStream(&stream, NULL, &pParameters, samplerate,
+        err = Pa_OpenStream(&stream, nullptr, &pParameters, samplerate,
                             framesPerBuffer, paNoFlag, playbackCallback,
                             (void *) this);
         if (err != paNoError) {
@@ -307,7 +307,7 @@ CPaCommon::Close()
             cout << "PortAudio error: " << Pa_GetErrorText(err) << endl;
         }
 
-        stream = NULL;
+        stream = nullptr;
         device_changed = true;
     }
 }
@@ -318,7 +318,7 @@ CPaCommon::Read(CVector < short >&psData)
     if (device_changed)
         ReInit();
 
-    if (stream==NULL)
+    if (stream==nullptr)
         return TRUE;
 
     size_t bytes = psData.Size() * sizeof(short);
@@ -344,7 +344,7 @@ CPaCommon::Write(CVector < short >&psData)
     if (device_changed)
         ReInit();
 
-    if (stream==NULL)
+    if (stream==nullptr)
         return TRUE;
 
     size_t bytes = psData.Size() * sizeof(short);

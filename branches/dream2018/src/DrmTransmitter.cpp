@@ -427,7 +427,7 @@ CDRMTransmitter::CDRMTransmitter(CSettings* pSettings) : CDRMTransceiver(pSettin
 
 void CDRMTransmitter::LoadSettings()
 {
-    if (pSettings == NULL) return;
+    if (pSettings == nullptr) return;
     CSettings& s = *pSettings;
 
     const char *Transmitter = "Transmitter";
@@ -573,7 +573,7 @@ void CDRMTransmitter::LoadSettings()
 
 void CDRMTransmitter::SaveSettings()
 {
-    if (pSettings == NULL) return;
+    if (pSettings == nullptr) return;
     CSettings& s = *pSettings;
 
     const char *Transmitter = "Transmitter";

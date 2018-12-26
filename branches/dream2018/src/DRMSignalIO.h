@@ -166,9 +166,9 @@ public:
 
     CReceiveData() :
 #ifdef QT_MULTIMEDIA_LIB
-        pIODevice(NULL),
+        pIODevice(nullptr),
 #endif
-        pSound(NULL),
+        pSound(nullptr),
         vecrInpData(INPUT_DATA_VECTOR_SIZE, (_REAL) 0.0),
             bFippedSpectrum(FALSE), eInChanSelection(CS_MIX_CHAN), iPhase(0)
     {}

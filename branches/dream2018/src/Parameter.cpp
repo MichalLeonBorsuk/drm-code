@@ -45,7 +45,7 @@
 
 /* Implementation *************************************************************/
 CParameter::CParameter():
-    pDRMRec(NULL),
+    pDRMRec(nullptr),
     eSymbolInterlMode(),
     eMSCCodingScheme(),
     eSDCCodingScheme(),
@@ -949,7 +949,7 @@ string CParameter::GetDataDirectory(const char* pcChildDirectory) const
     size_t p = sDirectory.find_last_of(PATH_SEPARATORS);
     if (sDirectory != "" && (p == string::npos || p != (sDirectory.size()-1)))
         sDirectory += PATH_SEPARATOR;
-    if (pcChildDirectory != NULL)
+    if (pcChildDirectory != nullptr)
     {
         sDirectory += pcChildDirectory;
         size_t p = sDirectory.find_last_of(PATH_SEPARATORS);

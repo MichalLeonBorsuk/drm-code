@@ -74,7 +74,7 @@ class CDataDecoder:public CReceiverModul < _BINARY, _BINARY >
 
     _BOOLEAN GetMOTObject (CMOTObject & NewPic, const EAppType eAppTypeReq);
     _BOOLEAN GetMOTDirectory (CMOTDirectory & MOTDirectoryOut, const EAppType eAppTypeReq);
-	CMOTDABDec *getApplication(int iPacketID) { return (iPacketID>=0 && iPacketID<3)?&MOTObject[iPacketID]:NULL; }
+	CMOTDABDec *getApplication(int iPacketID) { return (iPacketID>=0 && iPacketID<3)?&MOTObject[iPacketID]:nullptr; }
     void GetNews (const int iObjID, CNews & News);
     EAppType GetAppType ()
     {

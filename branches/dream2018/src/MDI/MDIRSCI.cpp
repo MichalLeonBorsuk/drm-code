@@ -50,7 +50,7 @@
 #include "MDIRSCI.h"
 
 /* Implementation *************************************************************/
-CDownstreamDI::CDownstreamDI() : iLogFraCnt(0), pDrmReceiver(NULL),
+CDownstreamDI::CDownstreamDI() : iLogFraCnt(0), pDrmReceiver(nullptr),
 	bMDIOutEnabled(FALSE), bMDIInEnabled(FALSE),bIsRecording(FALSE),
 	iFrequency(0), strRecordType(),
 	vecTagItemGeneratorStr(MAX_NUM_STREAMS), vecTagItemGeneratorRBP(MAX_NUM_STREAMS),
@@ -378,7 +378,7 @@ void CDownstreamDI::GetNextPacket(CSingleBuffer<_BINARY>&)
 _BOOLEAN
 CDownstreamDI::AddSubscriber(const string& dest, const char profile, const string& origin)
 {
-	CRSISubscriber* subs = NULL;
+	CRSISubscriber* subs = nullptr;
 	/* heuristic to test for file or socket - TODO - better syntax */
 	size_t p = dest.find_first_not_of("TPtp0123456789.:");
 	if (p != string::npos)
@@ -387,10 +387,10 @@ CDownstreamDI::AddSubscriber(const string& dest, const char profile, const strin
 	}
 	else
 	{
-		subs = new CRSISubscriberSocket(NULL);
+		subs = new CRSISubscriberSocket(nullptr);
 	}
 
-	if(subs == NULL)
+	if(subs == nullptr)
 	{
 		cerr << "can't make RSI Subscriber" << endl;
 		return FALSE;
@@ -535,7 +535,7 @@ void CDownstreamDI::poll()
 /******************************************************************************\
 * DI receive status, send control                                             *
 \******************************************************************************/
-CUpstreamDI::CUpstreamDI() : source(NULL), sink(), bUseAFCRC(TRUE), bMDIOutEnabled(FALSE), bMDIInEnabled(FALSE)
+CUpstreamDI::CUpstreamDI() : source(nullptr), sink(), bUseAFCRC(TRUE), bMDIOutEnabled(FALSE), bMDIInEnabled(FALSE)
 {
 	/* Init constant tag */
 	TagItemGeneratorProTyRSCI.GenTag();

@@ -89,7 +89,7 @@ _SAMPLE* NullCodec::Decode(vector<uint8_t>& audio_frame, uint8_t aac_crc_bits, i
 {
 	*iChannels = 1;
 	*eDecError = DECODER_ERROR_UNKNOWN;
-	return NULL;
+	return nullptr;
 }
 
 void NullCodec::DecClose()

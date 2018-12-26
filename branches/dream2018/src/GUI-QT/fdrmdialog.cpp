@@ -61,11 +61,11 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& Settings,
     :
     CWindow(parent, Settings, "DRM"),
     DRMReceiver(NDRMR),
-    serviceLabels(4), pLogging(NULL),
-    pSysTray(NULL), pCurrentWindow(this),
+    serviceLabels(4), pLogging(nullptr),
+    pSysTray(nullptr), pCurrentWindow(this),
     iMultimediaServiceBit(0),
     iLastMultimediaServiceSelected(-1),
-    pScheduler(NULL), pScheduleTimer(NULL)
+    pScheduler(nullptr), pScheduleTimer(nullptr)
 {
     setupUi(this);
 
@@ -451,7 +451,7 @@ void FDRMDialog::OnScheduleTimer()
     else
     {
         e = pScheduler->pop();
-        time_t now = time(NULL);
+        time_t now = time(nullptr);
         pScheduleTimer->start(1000*(e.time-now));
     }
 }
@@ -475,7 +475,7 @@ void FDRMDialog::OnTimer()
     }
 
     // do this here so GUI has initialised before we might pop up a message box
-    if(pScheduler!=NULL)
+    if(pScheduler!=nullptr)
         return;
 
     string schedfile = Settings.Get("command", "schedule", string());
@@ -490,7 +490,7 @@ void FDRMDialog::OnTimer()
             CScheduler::SEvent e;
             if(!pScheduler->empty()) {
                 e = pScheduler->front();
-                time_t now = time(NULL);
+                time_t now = time(nullptr);
                 time_t next = e.time - now;
                 if(next > 0)
                 {
@@ -999,7 +999,7 @@ void FDRMDialog::OnSelectAudioService(int shortId)
 void FDRMDialog::OnSelectDataService(int shortId)
 {
     CParameter& Parameters = *DRMReceiver.GetParameters();
-    QWidget* pDlg = NULL;
+    QWidget* pDlg = nullptr;
 
     Parameters.Lock();
 
@@ -1023,14 +1023,14 @@ void FDRMDialog::OnSelectDataService(int shortId)
         break;
     }
 
-    if(pDlg != NULL)
+    if(pDlg != nullptr)
         Parameters.SetCurSelDataService(shortId);
 
     CService::ETyOServ eAudDataFlag = Parameters.Service[shortId].eAudDataFlag;
 
     Parameters.Unlock();
 
-    if(pDlg != NULL)
+    if(pDlg != nullptr)
     {
         if (pDlg != pEPGDlg)
             iLastMultimediaServiceSelected = shortId;

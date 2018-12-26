@@ -1178,7 +1178,7 @@ protected:
     string sDataFilesDirectory;
 public:
 
-    string GetDataDirectory(const char* pcChildDirectory = NULL) const;
+    string GetDataDirectory(const char* pcChildDirectory = nullptr) const;
     void SetDataDirectory(string sNewDataFilesDirectory);
 
     /* Parameters controlled by SDC ----------------------------------------- */

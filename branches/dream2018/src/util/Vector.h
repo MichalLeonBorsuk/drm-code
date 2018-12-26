@@ -412,11 +412,11 @@ protected:
 template<class TData> class CMatrix
 {
 public:
-	CMatrix() : ppData(NULL), iRow(0), iCol(0) {}
+	CMatrix() : ppData(nullptr), iRow(0), iCol(0) {}
 	CMatrix(const int iNewR, const int iNewC) {Init(iNewR, iNewC);}
 	CMatrix(const int iNewR, const int iNewC, const TData tInVa) 
 		{Init(iNewR, iNewC, tInVa);}
-	CMatrix(const CMatrix& m): ppData(NULL) {
+	CMatrix(const CMatrix& m): ppData(nullptr) {
 		Init(m.iRow,m.iCol); 
 		for (int i=0; i<m.NumRows(); i++)
 			ppData[i] = m[i];
@@ -475,7 +475,7 @@ template<class TData> void CMatrix<TData>::Init(const int iNewRow,
 	if (iRow > 0)
 	{
 		/* Delete resources from previous init */
-		if (ppData != NULL)
+		if (ppData != nullptr)
 			delete[] ppData;
 
 		/* Allocate new memory for history buffer */
@@ -507,7 +507,7 @@ template<class TData> void CMatrix<TData>::Reset(const TData tResetVal)
 template<class TData> CMatrix<TData>::~CMatrix()
 {
 	/* Delete buffer */
-	if (ppData != NULL)
+	if (ppData != nullptr)
 		delete[] ppData;
 }
 

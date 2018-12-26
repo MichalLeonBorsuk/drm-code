@@ -182,7 +182,7 @@ long PaUtil_GetRingBufferWriteRegions( PaUtilRingBuffer *rbuf, long numBytes,
     {
         *dataPtr1 = &rbuf->buffer[index];
         *sizePtr1 = numBytes;
-        *dataPtr2 = NULL;
+        *dataPtr2 = nullptr;
         *sizePtr2 = 0;
     }
     return numBytes;
@@ -226,7 +226,7 @@ long PaUtil_GetRingBufferReadRegions( PaUtilRingBuffer *rbuf, long numBytes,
     {
         *dataPtr1 = &rbuf->buffer[index];
         *sizePtr1 = numBytes;
-        *dataPtr2 = NULL;
+        *dataPtr2 = nullptr;
         *sizePtr2 = 0;
     }
     return numBytes;

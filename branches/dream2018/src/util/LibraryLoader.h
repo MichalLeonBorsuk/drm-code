@@ -51,13 +51,13 @@ typedef struct LIBFUNC
 class CLibraryLoader
 {
 public:
-	static void* Load(const char** LibraryNames, const LIBFUNC* LibFuncs, bool (*LibCheckCallback)()=NULL)
+	static void* Load(const char** LibraryNames, const LIBFUNC* LibFuncs, bool (*LibCheckCallback)()=nullptr)
 	{
-		void* hLib = NULL;
+		void* hLib = nullptr;
 		for (int l = 0; LibraryNames[l]; l++)
 		{
 			hLib = LOADLIB(LibraryNames[l]);
-			if (hLib != NULL)
+			if (hLib != nullptr)
 			{
 				int f;
 				for (f = 0; LibFuncs[f].pcFunctionName; f++)
@@ -69,14 +69,14 @@ public:
 				}
 				if (!LibFuncs[f].pcFunctionName)
 				{
-					if (LibCheckCallback==NULL || LibCheckCallback())
+					if (LibCheckCallback==nullptr || LibCheckCallback())
 						break;
 				}
 				FREELIB(hLib);
-				hLib = NULL;
+				hLib = nullptr;
 			}
 		}
-		if (hLib == NULL)
+		if (hLib == nullptr)
 		{
 			for (int f = 0; LibFuncs[f].pcFunctionName; f++)
 				*LibFuncs[f].ppvFunctionAddress = LibFuncs[f].pvDummyFunctionAddress;
@@ -87,10 +87,10 @@ public:
 	{
 		for (int f = 0; LibFuncs[f].pcFunctionName; f++)
 			*LibFuncs[f].ppvFunctionAddress = LibFuncs[f].pvDummyFunctionAddress;
-		if (*hLib != NULL)
+		if (*hLib != nullptr)
 		{
 			FREELIB(*hLib);
-			*hLib = NULL;
+			*hLib = nullptr;
 		}
 	}
 };
