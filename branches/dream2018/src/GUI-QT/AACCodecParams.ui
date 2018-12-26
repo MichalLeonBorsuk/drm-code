@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>447</width>
-    <height>345</height>
+    <width>550</width>
+    <height>436</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -23,7 +23,7 @@
    <iconset resource="res/icons.qrc">
     <normaloff>:/icons/MainIconTx.svg</normaloff>:/icons/MainIconTx.svg</iconset>
   </property>
-  <layout class="QGridLayout">
+  <layout class="QGridLayout" name="gridLayout">
    <item row="0" column="0" colspan="2">
     <widget class="QGroupBox" name="GroupBoxInfo">
      <property name="sizePolicy">
@@ -164,296 +164,129 @@
      </layout>
     </widget>
    </item>
-   <item row="1" column="1">
-    <layout class="QVBoxLayout">
-     <item>
-      <widget class="QGroupBox" name="GroupBoxApplication">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="title">
-        <string>Application</string>
-       </property>
-       <layout class="QHBoxLayout">
-        <item>
-         <widget class="QRadioButton" name="RadioButtonAppVOIP">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>VoIP</string>
-          </property>
-          <attribute name="buttonGroup">
-           <string notr="true">ButtonGroupApplication</string>
-          </attribute>
-         </widget>
-        </item>
-        <item>
-         <widget class="QRadioButton" name="RadioButtonAppAudio">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>Audio</string>
-          </property>
-          <attribute name="buttonGroup">
-           <string notr="true">ButtonGroupApplication</string>
-          </attribute>
-         </widget>
-        </item>
-       </layout>
-      </widget>
-     </item>
-     <item>
-      <widget class="QGroupBox" name="GroupBoxSignal">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="title">
-        <string>Signal</string>
-       </property>
-       <layout class="QHBoxLayout">
-        <item>
-         <widget class="QRadioButton" name="RadioButtonSignalVoice">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>Voice</string>
-          </property>
-          <attribute name="buttonGroup">
-           <string notr="true">ButtonGroupSignal</string>
-          </attribute>
-         </widget>
-        </item>
-        <item>
-         <widget class="QRadioButton" name="RadioButtonSignalMusic">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>Music</string>
-          </property>
-          <attribute name="buttonGroup">
-           <string notr="true">ButtonGroupSignal</string>
-          </attribute>
-         </widget>
-        </item>
-       </layout>
-      </widget>
-     </item>
-     <item>
-      <widget class="QGroupBox" name="GroupBoxFEC">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="title">
-        <string>Forward Error Correction</string>
-       </property>
-       <layout class="QHBoxLayout">
-        <item>
-         <widget class="QRadioButton" name="RadioButtonFECOff">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>Off</string>
-          </property>
-          <attribute name="buttonGroup">
-           <string notr="true">ButtonGroupFEC</string>
-          </attribute>
-         </widget>
-        </item>
-        <item>
-         <widget class="QRadioButton" name="RadioButtonFECOn">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>On</string>
-          </property>
-          <attribute name="buttonGroup">
-           <string notr="true">ButtonGroupFEC</string>
-          </attribute>
-         </widget>
-        </item>
-       </layout>
-      </widget>
-     </item>
-    </layout>
+   <item row="1" column="0" colspan="2">
+    <widget class="QGroupBox" name="GroupBoxChannels">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="title">
+      <string>Channels</string>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <item>
+       <widget class="QRadioButton" name="RadioButtonChannelsMono">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>Mono</string>
+        </property>
+        <attribute name="buttonGroup">
+         <string notr="true">ButtonGroupChannels</string>
+        </attribute>
+       </widget>
+      </item>
+      <item>
+       <widget class="QRadioButton" name="RadioButtonChannelsParametricStereo">
+        <property name="text">
+         <string>Parametric Stereo</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QRadioButton" name="RadioButtonChannelsStereo">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>Stereo</string>
+        </property>
+        <attribute name="buttonGroup">
+         <string notr="true">ButtonGroupChannels</string>
+        </attribute>
+       </widget>
+      </item>
+      <item>
+       <widget class="QRadioButton" name="RadioButtonChannelsSurround">
+        <property name="text">
+         <string>Surround</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
    </item>
-   <item row="1" column="0">
-    <layout class="QVBoxLayout">
-     <item>
-      <widget class="QGroupBox" name="GroupBoxChannels">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="title">
-        <string>Channels</string>
-       </property>
-       <layout class="QHBoxLayout">
-        <item>
-         <widget class="QRadioButton" name="RadioButtonChannelsMono">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>Mono</string>
-          </property>
-          <attribute name="buttonGroup">
-           <string notr="true">ButtonGroupChannels</string>
-          </attribute>
-         </widget>
-        </item>
-        <item>
-         <widget class="QRadioButton" name="RadioButtonChannelsStereo">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>Stereo</string>
-          </property>
-          <attribute name="buttonGroup">
-           <string notr="true">ButtonGroupChannels</string>
-          </attribute>
-         </widget>
-        </item>
-       </layout>
-      </widget>
-     </item>
-     <item>
-      <widget class="QGroupBox" name="GroupBoxBandwidth">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="title">
-        <string>Bandwidth</string>
-       </property>
-       <layout class="QVBoxLayout">
-        <item>
-         <widget class="QRadioButton" name="RadioButtonBandwidthNB">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>Narrow Band (4 kHz)</string>
-          </property>
-          <attribute name="buttonGroup">
-           <string notr="true">ButtonGroupBandwidth</string>
-          </attribute>
-         </widget>
-        </item>
-        <item>
-         <widget class="QRadioButton" name="RadioButtonBandwidthMB">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>Medium Band (6 kHz)</string>
-          </property>
-          <attribute name="buttonGroup">
-           <string notr="true">ButtonGroupBandwidth</string>
-          </attribute>
-         </widget>
-        </item>
-        <item>
-         <widget class="QRadioButton" name="RadioButtonBandwidthWB">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>Wide Band (8 kHz)</string>
-          </property>
-          <attribute name="buttonGroup">
-           <string notr="true">ButtonGroupBandwidth</string>
-          </attribute>
-         </widget>
-        </item>
-        <item>
-         <widget class="QRadioButton" name="RadioButtonBandwidthSWB">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>Super Wide Band (12 kHz)</string>
-          </property>
-          <attribute name="buttonGroup">
-           <string notr="true">ButtonGroupBandwidth</string>
-          </attribute>
-         </widget>
-        </item>
-        <item>
-         <widget class="QRadioButton" name="RadioButtonBandwidthFB">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>Full Band (20 kHz)</string>
-          </property>
-          <attribute name="buttonGroup">
-           <string notr="true">ButtonGroupBandwidth</string>
-          </attribute>
-         </widget>
-        </item>
-       </layout>
-      </widget>
-     </item>
-    </layout>
+   <item row="2" column="0">
+    <widget class="QGroupBox" name="GroupBoxSampleRate">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="title">
+      <string>Sample Rate</string>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_2">
+      <item>
+       <widget class="QRadioButton" name="RadioButton12kHz">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>12 kHz</string>
+        </property>
+        <attribute name="buttonGroup">
+         <string notr="true">ButtonGroupSampleRate</string>
+        </attribute>
+       </widget>
+      </item>
+      <item>
+       <widget class="QRadioButton" name="RadioButton24kHz">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>24 kHz</string>
+        </property>
+        <attribute name="buttonGroup">
+         <string notr="true">ButtonGroupSampleRate</string>
+        </attribute>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="2" column="1">
+    <widget class="QGroupBox" name="GroupBoxOptions">
+     <property name="title">
+      <string>Options</string>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <item>
+       <widget class="QCheckBox" name="CheckBoxSBR">
+        <property name="text">
+         <string>SBR</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
    </item>
   </layout>
  </widget>
@@ -461,27 +294,15 @@
  <tabstops>
   <tabstop>RadioButtonChannelsMono</tabstop>
   <tabstop>RadioButtonChannelsStereo</tabstop>
-  <tabstop>RadioButtonBandwidthNB</tabstop>
-  <tabstop>RadioButtonBandwidthMB</tabstop>
-  <tabstop>RadioButtonBandwidthWB</tabstop>
-  <tabstop>RadioButtonBandwidthSWB</tabstop>
-  <tabstop>RadioButtonBandwidthFB</tabstop>
-  <tabstop>RadioButtonAppVOIP</tabstop>
-  <tabstop>RadioButtonAppAudio</tabstop>
-  <tabstop>RadioButtonSignalVoice</tabstop>
-  <tabstop>RadioButtonSignalMusic</tabstop>
-  <tabstop>RadioButtonFECOff</tabstop>
-  <tabstop>RadioButtonFECOn</tabstop>
+  <tabstop>RadioButton24kHz</tabstop>
+  <tabstop>RadioButton12kHz</tabstop>
  </tabstops>
  <resources>
   <include location="res/icons.qrc"/>
  </resources>
  <connections/>
  <buttongroups>
-  <buttongroup name="ButtonGroupSignal"/>
-  <buttongroup name="ButtonGroupBandwidth"/>
-  <buttongroup name="ButtonGroupApplication"/>
   <buttongroup name="ButtonGroupChannels"/>
-  <buttongroup name="ButtonGroupFEC"/>
+  <buttongroup name="ButtonGroupSampleRate"/>
  </buttongroups>
 </ui>

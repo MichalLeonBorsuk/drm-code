@@ -112,7 +112,7 @@ public:
     enum ESBRFlag { SB_NOT_USED, SB_USED };
 
     /* AM: Audio Mode */
-    enum EAudMode { AM_MONO, AM_P_STEREO, AM_STEREO };
+    enum EAudMode { AM_MONO, AM_P_STEREO, AM_STEREO, AM_SURROUND };
 
     /* HR: HVXC Rate */
     enum EHVXCRate { HR_2_KBIT, HR_4_KBIT };
