@@ -36,6 +36,11 @@
 #include <QHeaderView>
 #include <QWhatsThis>
 
+CTransmitterThread::~CTransmitterThread()
+{
+    // just to give it a vtable
+}
+
 
 TransmDialog::TransmDialog(CSettings& Settings,	QWidget* parent)
 	:
@@ -43,7 +48,7 @@ TransmDialog::TransmDialog(CSettings& Settings,	QWidget* parent)
 	TransThread(Settings),
 	DRMTransmitter(TransThread.DRMTransmitter),
 	vecstrTextMessage(1) /* 1 for new text */,
-	pCodecDlg(nullptr), pSysTray(nullptr),
+    pAACCodecDlg(nullptr),pOpusCodecDlg(nullptr), pSysTray(nullptr),
 	pActionStartStop(nullptr), bIsStarted(FALSE),
 	iIDCurrentText(0), iServiceDescr(0),
 	bCloseRequested(FALSE), iButtonCodecState(0)
@@ -275,7 +280,7 @@ TransmDialog::TransmDialog(CSettings& Settings,	QWidget* parent)
 	LineEditServiceLabel->setText(label);
 
 	/* Service ID */
-	LineEditServiceID->setText(QString().setNum((int) Service.iServiceID, 16));
+    LineEditServiceID->setText(QString().setNum(int(Service.iServiceID), 16));
 
 
 	int i;
@@ -312,7 +317,7 @@ TransmDialog::TransmDialog(CSettings& Settings,	QWidget* parent)
 	{
 	case CAudioParam::AC_AAC:
 		RadioButtonAAC->setChecked(TRUE);
-		ShowButtonCodec(FALSE, 1);
+        ShowButtonCodec(TRUE, 1);
 		break;
 
 	case CAudioParam::AC_OPUS:
@@ -390,87 +395,87 @@ TransmDialog::TransmDialog(CSettings& Settings,	QWidget* parent)
 	menu_Settings->addMenu(new CSoundCardSelMenu(DRMTransmitter, pFileMenu, this));
 
 	connect(actionAbout_Dream, SIGNAL(triggered()), &AboutDlg, SLOT(show()));
-	connect(actionWhats_This, SIGNAL(triggered()), this, SLOT(OnWhatsThis()));
+    connect(actionWhats_This, SIGNAL(triggered()), reinterpret_cast<QObject*>(this), SLOT(OnWhatsThis()));
 
 	/* Connections ---------------------------------------------------------- */
 	/* Push buttons */
 	connect(ButtonStartStop, SIGNAL(clicked()),
-		this, SLOT(OnButtonStartStop()));
+        reinterpret_cast<QObject*>(this), SLOT(OnButtonStartStop()));
 	connect(ButtonCodec, SIGNAL(clicked()),
-		this, SLOT(OnButtonCodec()));
+        reinterpret_cast<QObject*>(this), SLOT(OnButtonCodec()));
 	connect(PushButtonAddText, SIGNAL(clicked()),
-		this, SLOT(OnPushButtonAddText()));
+        reinterpret_cast<QObject*>(this), SLOT(OnPushButtonAddText()));
 	connect(PushButtonClearAllText, SIGNAL(clicked()),
-		this, SLOT(OnButtonClearAllText()));
+        reinterpret_cast<QObject*>(this), SLOT(OnButtonClearAllText()));
 	connect(PushButtonAddFile, SIGNAL(clicked()),
-		this, SLOT(OnPushButtonAddFileName()));
+        reinterpret_cast<QObject*>(this), SLOT(OnPushButtonAddFileName()));
 	connect(PushButtonClearAllFileNames, SIGNAL(clicked()),
-		this, SLOT(OnButtonClearAllFileNames()));
+        reinterpret_cast<QObject*>(this), SLOT(OnButtonClearAllFileNames()));
 
 	/* Check boxes */
 	connect(CheckBoxHighQualityIQ, SIGNAL(toggled(bool)),
-		this, SLOT(OnToggleCheckBoxHighQualityIQ(bool)));
+        reinterpret_cast<QObject*>(this), SLOT(OnToggleCheckBoxHighQualityIQ(bool)));
 	connect(CheckBoxAmplifiedOutput, SIGNAL(toggled(bool)),
-		this, SLOT(OnToggleCheckBoxAmplifiedOutput(bool)));
+        reinterpret_cast<QObject*>(this), SLOT(OnToggleCheckBoxAmplifiedOutput(bool)));
 	connect(CheckBoxEnableTextMessage, SIGNAL(toggled(bool)),
-		this, SLOT(OnToggleCheckBoxEnableTextMessage(bool)));
+        reinterpret_cast<QObject*>(this), SLOT(OnToggleCheckBoxEnableTextMessage(bool)));
 	connect(CheckBoxEnableAudio, SIGNAL(toggled(bool)),
-		this, SLOT(OnToggleCheckBoxEnableAudio(bool)));
+        reinterpret_cast<QObject*>(this), SLOT(OnToggleCheckBoxEnableAudio(bool)));
 	connect(CheckBoxEnableData, SIGNAL(toggled(bool)),
-		this, SLOT(OnToggleCheckBoxEnableData(bool)));
+        reinterpret_cast<QObject*>(this), SLOT(OnToggleCheckBoxEnableData(bool)));
 	connect(CheckBoxRemovePath, SIGNAL(toggled(bool)),
-		this, SLOT(OnToggleCheckBoxRemovePath(bool)));
+        reinterpret_cast<QObject*>(this), SLOT(OnToggleCheckBoxRemovePath(bool)));
 
 	/* Combo boxes */
 	connect(ComboBoxMSCInterleaver, SIGNAL(activated(int)),
-		this, SLOT(OnComboBoxMSCInterleaverActivated(int)));
+        reinterpret_cast<QObject*>(this), SLOT(OnComboBoxMSCInterleaverActivated(int)));
 	connect(ComboBoxMSCConstellation, SIGNAL(activated(int)),
-		this, SLOT(OnComboBoxMSCConstellationActivated(int)));
+        reinterpret_cast<QObject*>(this), SLOT(OnComboBoxMSCConstellationActivated(int)));
 	connect(ComboBoxSDCConstellation, SIGNAL(activated(int)),
-		this, SLOT(OnComboBoxSDCConstellationActivated(int)));
+        reinterpret_cast<QObject*>(this), SLOT(OnComboBoxSDCConstellationActivated(int)));
 	connect(ComboBoxLanguage, SIGNAL(activated(int)),
-		this, SLOT(OnComboBoxLanguageActivated(int)));
+        reinterpret_cast<QObject*>(this), SLOT(OnComboBoxLanguageActivated(int)));
 	connect(ComboBoxProgramType, SIGNAL(activated(int)),
-		this, SLOT(OnComboBoxProgramTypeActivated(int)));
+        reinterpret_cast<QObject*>(this), SLOT(OnComboBoxProgramTypeActivated(int)));
 	connect(ComboBoxTextMessage, SIGNAL(activated(int)),
-		this, SLOT(OnComboBoxTextMessageActivated(int)));
+        reinterpret_cast<QObject*>(this), SLOT(OnComboBoxTextMessageActivated(int)));
 	connect(ComboBoxMSCProtLev, SIGNAL(activated(int)),
-		this, SLOT(OnComboBoxMSCProtLevActivated(int)));
+        reinterpret_cast<QObject*>(this), SLOT(OnComboBoxMSCProtLevActivated(int)));
 
 	/* Button groups */
 	connect(ButtonGroupRobustnessMode, SIGNAL(buttonClicked(int)),
-		this, SLOT(OnRadioRobustnessMode(int)));
+        reinterpret_cast<QObject*>(this), SLOT(OnRadioRobustnessMode(int)));
 	connect(ButtonGroupBandwidth, SIGNAL(buttonClicked(int)),
-		this, SLOT(OnRadioBandwidth(int)));
+        reinterpret_cast<QObject*>(this), SLOT(OnRadioBandwidth(int)));
 	connect(ButtonGroupOutput, SIGNAL(buttonClicked(int)),
-		this, SLOT(OnRadioOutput(int)));
+        reinterpret_cast<QObject*>(this), SLOT(OnRadioOutput(int)));
 	connect(ButtonGroupCodec, SIGNAL(buttonClicked(int)),
-		this, SLOT(OnRadioCodec(int)));
+        reinterpret_cast<QObject*>(this), SLOT(OnRadioCodec(int)));
 	connect(ButtonGroupCurrentTime, SIGNAL(buttonClicked(int)),
-		this, SLOT(OnRadioCurrentTime(int)));
+        reinterpret_cast<QObject*>(this), SLOT(OnRadioCurrentTime(int)));
 
 	/* Line edits */
 	connect(LineEditServiceLabel, SIGNAL(textChanged(const QString&)),
-		this, SLOT(OnTextChangedServiceLabel(const QString&)));
+        reinterpret_cast<QObject*>(this), SLOT(OnTextChangedServiceLabel(const QString&)));
 	connect(LineEditServiceID, SIGNAL(textChanged(const QString&)),
-		this, SLOT(OnTextChangedServiceID(const QString&)));
+        reinterpret_cast<QObject*>(this), SLOT(OnTextChangedServiceID(const QString&)));
 	connect(LineEditSndCrdIF, SIGNAL(textChanged(const QString&)),
-		this, SLOT(OnTextChangedSndCrdIF(const QString&)));
+        reinterpret_cast<QObject*>(this), SLOT(OnTextChangedSndCrdIF(const QString&)));
 
 	/* Timers */
 	connect(&Timer, SIGNAL(timeout()),
-		this, SLOT(OnTimer()));
+        reinterpret_cast<QObject*>(this), SLOT(OnTimer()));
 	connect(&TimerStop, SIGNAL(timeout()),
-		this, SLOT(OnTimerStop()));
+        reinterpret_cast<QObject*>(this), SLOT(OnTimerStop()));
 
     /* System tray setup */
-    pSysTray = CSysTray::Create(this,
+    pSysTray = CSysTray::Create(reinterpret_cast<QWidget*>(this),
         SLOT(OnSysTrayActivated(QSystemTrayIcon::ActivationReason)),
         nullptr, ":/icons/MainIconTx.svg");
 	pActionStartStop = CSysTray::AddAction(pSysTray,
-		ButtonStartStop->text(), this, SLOT(OnButtonStartStop()));
+        ButtonStartStop->text(), reinterpret_cast<QObject*>(this), SLOT(OnButtonStartStop()));
 	CSysTray::AddSeparator(pSysTray);
-	CSysTray::AddAction(pSysTray, tr("&Exit"), this, SLOT(close()));
+    CSysTray::AddAction(pSysTray, tr("&Exit"), reinterpret_cast<QObject*>(this), SLOT(close()));
 	CSysTray::SetToolTip(pSysTray, QString(), tr("Stopped"));
 
 	/* Set timer for real-time controls */
@@ -480,8 +485,10 @@ TransmDialog::TransmDialog(CSettings& Settings,	QWidget* parent)
 TransmDialog::~TransmDialog()
 {
 	/* Destroy codec dialog if exist */
-	if (pCodecDlg)
-		delete pCodecDlg;
+    if (pAACCodecDlg)
+        delete pAACCodecDlg;
+    if (pOpusCodecDlg)
+        delete pOpusCodecDlg;
 }
 
 void TransmDialog::eventClose(QCloseEvent* ce)
@@ -933,15 +940,28 @@ void TransmDialog::OnButtonClearAllFileNames()
 void TransmDialog::OnButtonCodec()
 {
 	/* Create Codec Dialog if nullptr */
-	if (!pCodecDlg)
-	{
-		const int iShortID = 0; // TODO
-		CParameter& Parameters = *TransThread.DRMTransmitter.GetParameters();
-		pCodecDlg = new CodecParams(Settings, Parameters, iShortID, this);
-	}
-	/* Toggle the visibility */
-	if (pCodecDlg)
-		pCodecDlg->Toggle();
+    if(RadioButtonAAC->isChecked()) {
+        if (!pAACCodecDlg)
+        {
+            const int iShortID = 0; // TODO
+            CParameter& Parameters = *TransThread.DRMTransmitter.GetParameters();
+            pAACCodecDlg = new AACCodecParams(Settings, Parameters, iShortID, this);
+        }
+        /* Toggle the visibility */
+        if (pAACCodecDlg)
+            pAACCodecDlg->Toggle();
+    }
+    else {
+        if (!pOpusCodecDlg)
+        {
+            const int iShortID = 0; // TODO
+            CParameter& Parameters = *TransThread.DRMTransmitter.GetParameters();
+            pOpusCodecDlg = new OpusCodecParams(Settings, Parameters, iShortID, this);
+        }
+        /* Toggle the visibility */
+        if (pOpusCodecDlg)
+            pOpusCodecDlg->Toggle();
+    }
 }
 
 void TransmDialog::OnComboBoxTextMessageActivated(int iID)
@@ -1380,8 +1400,8 @@ void TransmDialog::ShowButtonCodec(_BOOLEAN bShow, int iKey)
 			ButtonCodec->show();
 		else
 			ButtonCodec->hide();
-		if (pCodecDlg)
-			pCodecDlg->Show(bShow);
+        if (pAACCodecDlg)
+            pAACCodecDlg->Show(bShow);
 	}
 }
 

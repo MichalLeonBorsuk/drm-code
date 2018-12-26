@@ -30,7 +30,8 @@
 #define _TRANSMDLG_H_
 
 #include "ui_TransmDlgbase.h"
-#include "CodecParams.h"
+#include "AACCodecParams.h"
+#include "OpusCodecParams.h"
 #include "DialogUtil.h"
 #include "CWindow.h"
 #include "../DrmTransmitter.h"
@@ -61,6 +62,8 @@ class CTransmitterThread : public QThread
 public:
 	CTransmitterThread(CSettings& Settings) : DRMTransmitter(&Settings) {}
 
+    virtual ~CTransmitterThread();
+
 	void Stop()
 	{
 		/* Stop working thread */
@@ -90,7 +93,7 @@ class TransmDialog : public CWindow, public Ui_TransmDlgBase
 	Q_OBJECT
 
 public:
-	TransmDialog(CSettings&, QWidget* parent=0);
+    TransmDialog(CSettings&, QWidget* parent=nullptr);
 	virtual ~TransmDialog();
 
 protected:
@@ -106,7 +109,8 @@ protected:
 	QTimer				TimerStop;
 	CVector<string>		vecstrTextMessage;
 	QMenu*				pSettingsMenu;
-	CodecParams*		pCodecDlg;
+    AACCodecParams*		pAACCodecDlg;
+    OpusCodecParams*	pOpusCodecDlg;
     CSysTray*           pSysTray;
 	QAction*			pActionStartStop;
 
