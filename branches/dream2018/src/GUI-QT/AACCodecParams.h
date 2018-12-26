@@ -36,8 +36,7 @@ class AACCodecParams : public QDialog, public Ui_AACCodecParams
 	Q_OBJECT
 
 public:
-	AACCodecParams(CSettings&, CParameter&, int iShortID,
-		QWidget* parent = 0);
+    AACCodecParams(CSettings&, CParameter&, int iShortID, QWidget* parent = nullptr);
 	virtual ~AACCodecParams();
 	void Toggle(void);
 	void Show(bool bShow);
@@ -55,8 +54,6 @@ protected:
 
 public slots:
 	void OnButtonGroupChannels(int iID);
-	void OnButtonGroupBandwidth(int iID);
-	void OnButtonGroupFEC(int iID);
-	void OnButtonGroupSignal(int iID);
-	void OnButtonGroupApplication(int iID);
+    void OnButtonGroupSampleRate(int iID);
+    void OnCheckBoxSBR(bool checked);
 };
