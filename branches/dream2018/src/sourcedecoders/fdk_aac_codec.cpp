@@ -192,7 +192,7 @@ FdkAacCodec::Decode(vector<uint8_t>& audio_frame, uint8_t aac_crc_bits, int& iCh
     else {
         info = *pinfo;
 
-        logConfig(info);
+        //logConfig(info);
 
         if(info.aacNumChannels > 0) {
             output_size = info.frameSize * info.numChannels;
