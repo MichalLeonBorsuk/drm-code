@@ -522,18 +522,15 @@ void CSDCTransmit::DataEntityType9(CVector<_BINARY>& vecbiData, const CAudioPara
     }
     else
     {
-        cerr << "AAC/";
         /* SBR flag */
         switch (AudioParam.eSBRFlag)
         {
         case CAudioParam::SB_NOT_USED:
-            cerr << "NoSBR/";
             vecbiData.Enqueue(0 /* 0 */, 1);
             break;
 
         case CAudioParam::SB_USED:
             vecbiData.Enqueue(1 /* 1 */, 1);
-            cerr << "SBR/";
             break;
         }
 
@@ -546,17 +543,14 @@ void CSDCTransmit::DataEntityType9(CVector<_BINARY>& vecbiData, const CAudioPara
             {
             case CAudioParam::AM_MONO:
                 vecbiData.Enqueue(0 /* 00 */, 2);
-                cerr << "Mono/";
                 break;
 
             case CAudioParam::AM_P_STEREO:
                 vecbiData.Enqueue(1 /* 01 */, 2);
-                cerr << "P-Stereo/";
                 break;
 
             case CAudioParam::AM_STEREO:
                 vecbiData.Enqueue(2 /* 10 */, 2);
-                cerr << "Stereo/";
                 break;
             }
             break;
@@ -615,35 +609,27 @@ void CSDCTransmit::DataEntityType9(CVector<_BINARY>& vecbiData, const CAudioPara
         {
         case CAudioParam::AS_9_6KHZ:
             iVal = 0;
-            cerr << "9k6";
             break;
         case CAudioParam::AS_12KHZ:
             iVal = 1;
-            cerr << "12k";
             break;
         case CAudioParam::AS_16KHZ:
             iVal = 2;
-            cerr << "16k";
             break;
         case CAudioParam::AS_19_2KHZ:
             iVal = 3;
-            cerr << "19k2";
             break;
         case CAudioParam::AS_24KHZ:
             iVal = (AudioParam.eAudioCoding==CAudioParam::AC_xHE_AAC)?4:3;
-            cerr << "24k";
             break;
         case CAudioParam::AS_32KHZ:
             iVal = 5;
-            cerr << "32k";
             break;
         case CAudioParam::AS_38_4KHZ:
             iVal = 6;
-            cerr << "38k4";
             break;
         case CAudioParam::AS_48KHZ:
             iVal = (AudioParam.eAudioCoding==CAudioParam::AC_xHE_AAC)?7:5;
-            cerr << "48k";
             break;
         }
         vecbiData.Enqueue(iVal, 3);
@@ -689,8 +675,6 @@ void CSDCTransmit::DataEntityType9(CVector<_BINARY>& vecbiData, const CAudioPara
 
     /* rfa 1 bit */
     vecbiData.Enqueue((uint32_t) 0, 1);
-
-    cerr << endl;
 }
 
 void CSDCTransmit::DataEntityType9(CVector<_BINARY>& vecbiData, int ServiceID,
