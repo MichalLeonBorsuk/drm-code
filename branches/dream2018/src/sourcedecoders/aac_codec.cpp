@@ -149,7 +149,7 @@ AacCodec::CanDecode(CAudioParam::EAudCod eAudioCoding)
 }
 
 bool
-AacCodec::DecOpen(CAudioParam& AudioParam, int *iAudioSampleRate, int *iLenDecOutPerChan)
+AacCodec::DecOpen(CAudioParam& AudioParam, int& iAudioSampleRate, int& iLenDecOutPerChan)
 {
 	int iAACSampleRate = 12000;
 	if (hFaadDecoder == nullptr)
@@ -200,19 +200,19 @@ AacCodec::DecOpen(CAudioParam& AudioParam, int *iAudioSampleRate, int *iLenDecOu
        Length of output is doubled if SBR is used */
     if (AudioParam.eSBRFlag == CAudioParam::SB_USED)
     {
-        *iAudioSampleRate = iAACSampleRate * 2;
-        *iLenDecOutPerChan = AUD_DEC_TRANSFROM_LENGTH * 2;
+        iAudioSampleRate = iAACSampleRate * 2;
+        iLenDecOutPerChan = AUD_DEC_TRANSFROM_LENGTH * 2;
     }
     else
     {
-        *iAudioSampleRate = iAACSampleRate;
-        *iLenDecOutPerChan = AUD_DEC_TRANSFROM_LENGTH;
+        iAudioSampleRate = iAACSampleRate;
+        iLenDecOutPerChan = AUD_DEC_TRANSFROM_LENGTH;
     }
     return hFaadDecoder != nullptr;
 }
 
 _SAMPLE*
-AacCodec::Decode(vector<uint8_t>& audio_frame, uint8_t aac_crc_bits, int *iChannels, CAudioCodec::EDecError *eDecError)
+AacCodec::Decode(vector<uint8_t>& audio_frame, uint8_t aac_crc_bits, int& iChannels, CAudioCodec::EDecError& eDecError)
 {
     _SAMPLE* psDecOutSampleBuf = nullptr;
 	NeAACDecFrameInfo DecFrameInfo;
@@ -239,9 +239,14 @@ AacCodec::Decode(vector<uint8_t>& audio_frame, uint8_t aac_crc_bits, int *iChann
 		psDecOutSampleBuf = (_SAMPLE*) NeAACDecDecode(hFaadDecoder,
 			&DecFrameInfo, &vecbyPrepAudioFrame[0], vecbyPrepAudioFrame.size());
 	}
-	*iChannels = DecFrameInfo.channels;
-	*eDecError = DecFrameInfo.error ? CAudioCodec::DECODER_ERROR_UNKNOWN : CAudioCodec::DECODER_ERROR_OK;
+    iChannels = DecFrameInfo.channels;
+    eDecError = DecFrameInfo.error ? CAudioCodec::DECODER_ERROR_UNKNOWN : CAudioCodec::DECODER_ERROR_OK;
 	return psDecOutSampleBuf;
+}
+
+CAudioCodec::EDecError AacCodec::FullyDecode(vector<uint8_t>& audio_frame, uint8_t aac_crc_bits, vector<_SAMPLE>& left, vector<_SAMPLE>& right)
+{
+    return EDecError::DECODER_ERROR_UNKNOWN;
 }
 
 void

@@ -44,9 +44,10 @@ public:
 	enum EDecError { DECODER_ERROR_OK, DECODER_ERROR_CRC, DECODER_ERROR_CORRUPTED, DECODER_ERROR_UNKNOWN };
 	virtual string DecGetVersion() = 0;
 	virtual bool CanDecode(CAudioParam::EAudCod eAudioCoding) = 0;
-	virtual bool DecOpen(CAudioParam& AudioParam, int *iAudioSampleRate, int *iLenDecOutPerChan) = 0;
-    virtual _SAMPLE* Decode(vector<uint8_t>& audio_frame, uint8_t aac_crc_bits, int *iChannels, EDecError *eDecError) = 0;
-	virtual void DecClose() = 0;
+    virtual bool DecOpen(CAudioParam& AudioParam, int& iAudioSampleRate, int& iLenDecOutPerChan) = 0;
+    virtual _SAMPLE* Decode(vector<uint8_t>& audio_frame, uint8_t aac_crc_bits, int& iChannels, EDecError& eDecError) = 0;
+    virtual CAudioCodec::EDecError FullyDecode(vector<uint8_t>& audio_frame, uint8_t aac_crc_bits, vector<_SAMPLE>& left, vector<_SAMPLE>& right) = 0;
+    virtual void DecClose() = 0;
 	virtual void DecUpdate(CAudioParam& AudioParam) = 0;
     virtual void resetFile(string name) = 0;
     /* Encoder */

@@ -50,7 +50,7 @@ bool NullCodec::CanDecode(CAudioParam::EAudCod eAudioCoding)
 	return false;
 }
 
-bool NullCodec::DecOpen(CAudioParam& AudioParam, int *iAudioSampleRate, int *iLenDecOutPerChan)
+bool NullCodec::DecOpen(CAudioParam& AudioParam, int& iAudioSampleRate, int& iLenDecOutPerChan)
 {
 	int iSampleRate = 24000;
 	switch (AudioParam.eAudioSamplRate)
@@ -80,16 +80,21 @@ bool NullCodec::DecOpen(CAudioParam& AudioParam, int *iAudioSampleRate, int *iLe
 		iSampleRate = 48000;
 		break;
 	}
-	*iAudioSampleRate = iSampleRate;
-    *iLenDecOutPerChan = AUD_DEC_TRANSFROM_LENGTH;
+    iAudioSampleRate = iSampleRate;
+    iLenDecOutPerChan = AUD_DEC_TRANSFROM_LENGTH;
 	return false;
 }
 
-_SAMPLE* NullCodec::Decode(vector<uint8_t>& audio_frame, uint8_t aac_crc_bits, int *iChannels, EDecError *eDecError)
+_SAMPLE* NullCodec::Decode(vector<uint8_t>& audio_frame, uint8_t aac_crc_bits, int& iChannels, EDecError& eDecError)
 {
-	*iChannels = 1;
-	*eDecError = DECODER_ERROR_UNKNOWN;
+    iChannels = 1;
+    eDecError = DECODER_ERROR_UNKNOWN;
 	return nullptr;
+}
+
+CAudioCodec::EDecError NullCodec::FullyDecode(vector<uint8_t>& audio_frame, uint8_t aac_crc_bits, vector<_SAMPLE>& left, vector<_SAMPLE>& right)
+{
+    return DECODER_ERROR_UNKNOWN;
 }
 
 void NullCodec::DecClose()
