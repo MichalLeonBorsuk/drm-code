@@ -2,7 +2,7 @@
 #include "../util/Pacer.h"
 
 #include <sys/time.h>
-#include <signal.h>
+#include <csignal>
 #include <unistd.h>
 #include <cstdio>
 #include <iostream>

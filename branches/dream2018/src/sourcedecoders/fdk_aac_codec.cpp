@@ -64,6 +64,8 @@ FdkAacCodec::CanDecode(CAudioParam::EAudCod eAudioCoding)
 	return eAudioCoding == CAudioParam::AC_AAC;
 }
 
+static int n=0;
+
 bool
 FdkAacCodec::DecOpen(CAudioParam& AudioParam, int *iAudioSampleRate, int *iLenDecOutPerChan)
 {
@@ -119,6 +121,7 @@ FdkAacCodec::Decode(vector<uint8_t>& audio_frame, uint8_t aac_crc_bits, int *iCh
 {
     /* Prepare data vector with CRC at the beginning (the definition with faad2 DRM interface) */
 
+    //if(n++>2000) { exit(0);}
 
     CVector<uint8_t> vecbyPrepAudioFrame(int(audio_frame.size()+1));
     vecbyPrepAudioFrame[0] = aac_crc_bits;
