@@ -1107,8 +1107,8 @@ CDRMReceiver::CloseSoundInterfaces()
     pSoundInInterface->Close();
     pSoundOutInterface->Close();
 #ifdef QT_MULTIMEDIA_LIB
-    if(pAudioInput) pAudioInput->stop();
-    if(pAudioOutput) pAudioOutput->stop();
+    //if(pAudioInput) pAudioInput->stop();
+    //if(pAudioOutput) pAudioOutput->stop();
 #endif
 }
 
