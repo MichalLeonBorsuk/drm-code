@@ -126,7 +126,7 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
         return;
     }
 
-    cerr << "got one logical frame of length " << pvecInputData->Size() << " bits" << endl;
+    //cerr << "got one logical frame of length " << pvecInputData->Size() << " bits" << endl;
 
     /* Text Message ********************************************************** */
     /* Total frame size depends on whether text message is used or not */
@@ -324,7 +324,7 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
                     if (iDecChannels == 1)
                     {
                         /* Mono */
-                        cerr << "mono " << iResOutBlockSize << endl;
+                        //cerr << "mono " << iResOutBlockSize << endl;
                         for(int i = 0; i<iResOutBlockSize; i++) {
                             vecTempResBufOutCurLeft[i] = _REAL(psDecOutSampleBuf[i]) / 2.0;
                             vecTempResBufOutCurRight[i] = _REAL(psDecOutSampleBuf[i]) / 2.0;
@@ -333,7 +333,7 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
                     else
                     {
                         /* Stereo docs claim non-interleaved but we are getting interleaved! */
-                        cerr << "stereo " << iResOutBlockSize << endl;
+                        //cerr << "stereo " << iResOutBlockSize << endl;
                         for(int i = 0; i<iResOutBlockSize; i++) {
                             vecTempResBufOutCurLeft[i] = _REAL(psDecOutSampleBuf[2*i]);
                             vecTempResBufOutCurRight[i] = _REAL(psDecOutSampleBuf[2*i+1]);
