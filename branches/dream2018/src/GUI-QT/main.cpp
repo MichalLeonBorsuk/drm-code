@@ -90,7 +90,7 @@ CRx::run()
 
 #ifdef USE_OPENSL
 # include <SLES/OpenSLES.h>
-SLObjectItf engineObject = NULL;
+SLObjectItf engineObject = nullptr;
 #endif
 
 #ifdef QT_GUI_LIB
@@ -101,7 +101,7 @@ int
 main(int argc, char **argv)
 {
 #ifdef USE_OPENSL
-    (void)slCreateEngine(&engineObject, 0, NULL, 0, NULL, NULL);
+    (void)slCreateEngine(&engineObject, 0, nullptr, 0, nullptr, nullptr);
     (void)(*engineObject)->Realize(engineObject, SL_BOOLEAN_FALSE);
 #endif
 #if defined(__unix__) && !defined(__APPLE__)
@@ -110,7 +110,7 @@ main(int argc, char **argv)
 	sigemptyset(&sigset);
 	sigaddset(&sigset, SIGPIPE);
 	sigaddset(&sigset, SIGCHLD);
-	pthread_sigmask(SIG_BLOCK, &sigset, NULL);
+	pthread_sigmask(SIG_BLOCK, &sigset, nullptr);
 #endif
 
 	/* create app before running Settings.Load to consume platform/QT parameters */
@@ -233,7 +233,7 @@ ErrorMessage(string strErrorString)
 	strError += "\n\nThe application will exit now.";
 
 #ifdef _WIN32
-	MessageBoxA(NULL, strError.c_str(), "Dream",
+	MessageBoxA(nullptr, strError.c_str(), "Dream",
 			   MB_SYSTEMMODAL | MB_OK | MB_ICONEXCLAMATION);
 #else
 	perror(strError.c_str());
@@ -258,7 +258,7 @@ int
 main(int argc, char **argv)
 {
 #ifdef USE_OPENSL
-    (void)slCreateEngine(&engineObject, 0, NULL, 0, NULL, NULL);
+    (void)slCreateEngine(&engineObject, 0, nullptr, 0, nullptr, nullptr);
     (void)(*engineObject)->Realize(engineObject, SL_BOOLEAN_FALSE);
 #endif
     try

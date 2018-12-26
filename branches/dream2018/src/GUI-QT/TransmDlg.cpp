@@ -43,8 +43,8 @@ TransmDialog::TransmDialog(CSettings& Settings,	QWidget* parent)
 	TransThread(Settings),
 	DRMTransmitter(TransThread.DRMTransmitter),
 	vecstrTextMessage(1) /* 1 for new text */,
-	pCodecDlg(NULL), pSysTray(NULL),
-	pActionStartStop(NULL), bIsStarted(FALSE),
+	pCodecDlg(nullptr), pSysTray(nullptr),
+	pActionStartStop(nullptr), bIsStarted(FALSE),
 	iIDCurrentText(0), iServiceDescr(0),
 	bCloseRequested(FALSE), iButtonCodecState(0)
 {
@@ -466,7 +466,7 @@ TransmDialog::TransmDialog(CSettings& Settings,	QWidget* parent)
     /* System tray setup */
     pSysTray = CSysTray::Create(this,
         SLOT(OnSysTrayActivated(QSystemTrayIcon::ActivationReason)),
-        NULL, ":/icons/MainIconTx.svg");
+        nullptr, ":/icons/MainIconTx.svg");
 	pActionStartStop = CSysTray::AddAction(pSysTray,
 		ButtonStartStop->text(), this, SLOT(OnButtonStartStop()));
 	CSysTray::AddSeparator(pSysTray);
@@ -893,7 +893,7 @@ void TransmDialog::OnToggleCheckBoxRemovePath(bool bState)
 void TransmDialog::OnPushButtonAddFileName()
 {
 	/* Show "open file" dialog. Let the user select more than one file */
-	QStringList list = QFileDialog::getOpenFileNames(this, tr("Add Files"), NULL, tr("Image Files (*.png *.jpg *.jpeg *.jfif)"));
+	QStringList list = QFileDialog::getOpenFileNames(this, tr("Add Files"), nullptr, tr("Image Files (*.png *.jpg *.jpeg *.jfif)"));
 
 	/* Check if user not hit the cancel button */
 	if (!list.isEmpty())
@@ -932,7 +932,7 @@ void TransmDialog::OnButtonClearAllFileNames()
 
 void TransmDialog::OnButtonCodec()
 {
-	/* Create Codec Dialog if NULL */
+	/* Create Codec Dialog if nullptr */
 	if (!pCodecDlg)
 	{
 		const int iShortID = 0; // TODO

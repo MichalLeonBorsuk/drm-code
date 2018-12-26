@@ -37,15 +37,15 @@
 
 /* Implementation *************************************************************/
 CDRMPlot::CDRMPlot(QWidget* parent, QwtPlot* SuppliedPlot) :
-	SuppliedPlot(SuppliedPlot), DialogPlot(NULL), bActive(FALSE),
+	SuppliedPlot(SuppliedPlot), DialogPlot(nullptr), bActive(FALSE),
 	CurCharType(NONE_OLD), InitCharType(NONE_OLD),
 	eLastSDCCodingScheme((ECodScheme)-1), eLastMSCCodingScheme((ECodScheme)-1),
-	bLastAudioDecoder(FALSE), pDRMRec(NULL),
-	WaterfallWidget(NULL), iAudSampleRate(0), iSigSampleRate(0),
+	bLastAudioDecoder(FALSE), pDRMRec(nullptr),
+	WaterfallWidget(nullptr), iAudSampleRate(0), iSigSampleRate(0),
 	iLastXoredSampleRate(0), iLastChanMode(-1)
 {
 	/* Create new plot if none is supplied */
-	if (SuppliedPlot == NULL)
+	if (SuppliedPlot == nullptr)
 	{
 		DialogPlot = new QwtPlotDialog(parent);
 		plot = DialogPlot->GetPlot();
@@ -151,7 +151,7 @@ CDRMPlot::CDRMPlot(QWidget* parent, QwtPlot* SuppliedPlot) :
 	connect(picker, SIGNAL(selected(const QPointF &)),
 		this, SLOT(OnSelected(const QPointF &)));
 #endif
-	if (DialogPlot != NULL)
+	if (DialogPlot != nullptr)
 	{
 		connect(DialogPlot, SIGNAL(activate()), this, SLOT(activate()));
 		connect(DialogPlot, SIGNAL(deactivate()), this, SLOT(deactivate()));
@@ -162,7 +162,7 @@ CDRMPlot::~CDRMPlot()
 {
 	deactivate();
 	/* Delete DialogPlot if exist */
-	if (DialogPlot != NULL)
+	if (DialogPlot != nullptr)
 		delete DialogPlot;
 }
 
@@ -543,16 +543,16 @@ void CDRMPlot::SetPlotStyle(const int iNewStyleID)
 void CDRMPlot::SetData(CVector<_REAL>& vecrData, CVector<_REAL>& vecrScale)
 {
 	const int size = vecrData.Size();
-	main1curve.SETDATA(size ? &vecrScale[0] : NULL, size ? &vecrData[0] : NULL, size);
+	main1curve.SETDATA(size ? &vecrScale[0] : nullptr, size ? &vecrData[0] : nullptr, size);
 }
 
 void CDRMPlot::SetData(CVector<_REAL>& vecrData1, CVector<_REAL>& vecrData2,
                        CVector<_REAL>& vecrScale)
 {
 	const int size1 = vecrData1.Size();
-	main1curve.SETDATA(size1 ? &vecrScale[0] : NULL, size1 ? &vecrData1[0] : NULL, size1);
+	main1curve.SETDATA(size1 ? &vecrScale[0] : nullptr, size1 ? &vecrData1[0] : nullptr, size1);
 	const int size2 = vecrData2.Size();
-	main2curve.SETDATA(size2 ? &vecrScale[0] : NULL, size2 ? &vecrData2[0] : NULL, size2);
+	main2curve.SETDATA(size2 ? &vecrScale[0] : nullptr, size2 ? &vecrData2[0] : nullptr, size2);
 }
 
 void CDRMPlot::SetData(QwtPlotCurve& curve, CVector<_COMPLEX>& veccData)
@@ -569,7 +569,7 @@ void CDRMPlot::SetData(QwtPlotCurve& curve, CVector<_COMPLEX>& veccData)
 		curve.SETDATA(&r[0], &im[0], size);
 	}
 	else
-		curve.SETDATA(NULL, NULL, 0);
+		curve.SETDATA(nullptr, nullptr, 0);
 }
 
 void CDRMPlot::SetData(CVector<_COMPLEX>& veccData)
@@ -600,23 +600,23 @@ void CDRMPlot::PlotDefaults()
 	vcurvegrid.detach();
 	main1curve.detach();
 	main2curve.detach();
-	curve1.SETDATA(NULL, NULL, 0);
-	curve2.SETDATA(NULL, NULL, 0);
-	curve3.SETDATA(NULL, NULL, 0);
-	curve4.SETDATA(NULL, NULL, 0);
-	curve5.SETDATA(NULL, NULL, 0);
-	hcurvegrid.SETDATA(NULL, NULL, 0);
-	vcurvegrid.SETDATA(NULL, NULL, 0);
-	main1curve.SETDATA(NULL, NULL, 0);
-	main2curve.SETDATA(NULL, NULL, 0);
+	curve1.SETDATA(nullptr, nullptr, 0);
+	curve2.SETDATA(nullptr, nullptr, 0);
+	curve3.SETDATA(nullptr, nullptr, 0);
+	curve4.SETDATA(nullptr, nullptr, 0);
+	curve5.SETDATA(nullptr, nullptr, 0);
+	hcurvegrid.SETDATA(nullptr, nullptr, 0);
+	vcurvegrid.SETDATA(nullptr, nullptr, 0);
+	main1curve.SETDATA(nullptr, nullptr, 0);
+	main2curve.SETDATA(nullptr, nullptr, 0);
 #if QWT_VERSION < 0x060000
 	curve1.setSymbol(QwtSymbol());
     curve2.setSymbol(QwtSymbol());
 	curve3.setSymbol(QwtSymbol());
 #else
-	curve1.setSymbol(NULL);
-	curve2.setSymbol(NULL);
-	curve3.setSymbol(NULL);
+	curve1.setSymbol(nullptr);
+	curve2.setSymbol(nullptr);
+	curve3.setSymbol(nullptr);
 	curve1.setLegendAttribute(QwtPlotCurve::LegendShowSymbol, false);
 	curve2.setLegendAttribute(QwtPlotCurve::LegendShowSymbol, false);
 	curve3.setLegendAttribute(QwtPlotCurve::LegendShowSymbol, false);
@@ -631,10 +631,10 @@ void CDRMPlot::PlotDefaults()
 	main1curve.setItemAttribute(QwtPlotItem::Legend, false);
 	main2curve.setItemAttribute(QwtPlotItem::Legend, false);
 	plot->setCanvasBackground(QColor(BckgrdColorPlot));
-	if (WaterfallWidget != NULL)
+	if (WaterfallWidget != nullptr)
 	{
 		delete WaterfallWidget;
-		WaterfallWidget = NULL;
+		WaterfallWidget = nullptr;
 	}
 }
 
@@ -798,7 +798,7 @@ void CDRMPlot::SetupAudioSpec(_BOOLEAN bAudioDecoder)
 	else
 	{
 		plot->setTitle(tr("No audio decoding possible"));
-		main1curve.SETDATA(NULL, NULL, 0);
+		main1curve.SETDATA(nullptr, nullptr, 0);
 	}
 	plot->enableAxis(QwtPlot::yRight, FALSE);
 	plot->setAxisTitle(QwtPlot::xBottom, tr("Frequency [kHz]"));
@@ -1184,7 +1184,7 @@ void CDRMPlot::SetBWMarker(const _REAL rBWCenter, const _REAL rBWWidth)
 		curve2.SETDATA(dX, dY, 2);
 	}
 	else
-		curve2.SETDATA(NULL, NULL, 0);
+		curve2.SETDATA(nullptr, nullptr, 0);
 }
 
 void CDRMPlot::SetupInpSpecWaterf()
@@ -1198,7 +1198,7 @@ void CDRMPlot::SetupInpSpecWaterf()
 	grid.enableY(FALSE);
 
 	/* Create a new waterfall widget if not exists */
-	if (WaterfallWidget == NULL)
+	if (WaterfallWidget == nullptr)
 		WaterfallWidget = new CWidget(plot, Canvas);
 
 	/* Set plot background color */
@@ -1216,7 +1216,7 @@ void CDRMPlot::SetupInpSpecWaterf()
 void CDRMPlot::SetInpSpecWaterf(CVector<_REAL>& vecrData, CVector<_REAL>&)
 {
 	/* No WaterfallWidget so return */
-	if (WaterfallWidget == NULL)
+	if (WaterfallWidget == nullptr)
 		return;
 
 	/* Check if the canvas size has changed */

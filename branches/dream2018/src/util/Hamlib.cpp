@@ -49,7 +49,7 @@
 	Stephane Fillod (developer of hamlib)
 */
 CHamlib::CHamlib():SpecDRMRigs(), CapsHamlibModels(),
-pRig(NULL), bSMeterIsSupported(FALSE),
+pRig(nullptr), bSMeterIsSupported(FALSE),
 bModRigSettings(FALSE), iHamlibModelID(0),
 strHamlibConf(""), strSettings(""), iFreqOffset(0),
 modes(), levels(), functions(), parameters(), config()
@@ -126,7 +126,7 @@ modes(), levels(), functions(), parameters(), config()
 
 CHamlib::~CHamlib()
 {
-	if (pRig != NULL)
+	if (pRig != nullptr)
 	{
 		/* close everything */
 		rig_close(pRig);
@@ -158,7 +158,7 @@ CHamlib::GetPortList(map < string, string > &ports)
 #ifdef _WIN32
 # ifdef HAVE_SETUPAPI
 	GUID guid = GUID_DEVINTERFACE_COMPORT;
-	HDEVINFO hDevInfoSet = SetupDiGetClassDevs(&guid, NULL, NULL,
+	HDEVINFO hDevInfoSet = SetupDiGetClassDevs(&guid, nullptr, nullptr,
 											   DIGCF_PRESENT |
 											   DIGCF_DEVICEINTERFACE);
 	if (hDevInfoSet != INVALID_HANDLE_VALUE)
@@ -176,7 +176,7 @@ CHamlib::GetPortList(map < string, string > &ports)
 				DWORD dwSize = sizeof(szPortName);
 				DWORD dwType = 0;
 				if ((RegQueryValueExA
-					 (hDeviceKey, "PortName", NULL, &dwType,
+					 (hDeviceKey, "PortName", nullptr, &dwType,
 					  reinterpret_cast < LPBYTE > (szPortName),
 					  &dwSize) == ERROR_SUCCESS) && (dwType == REG_SZ))
 				{
@@ -214,9 +214,9 @@ CHamlib::GetPortList(map < string, string > &ports)
 
     // Serial devices are instances of class IOSerialBSDClient
     classesToMatch = IOServiceMatching(kIOSerialBSDServiceValue);
-    if (classesToMatch == NULL)
+    if (classesToMatch == nullptr)
     {
-        fprintf(stderr, "IOServiceMatching returned a NULL dictionary.\n");
+        fprintf(stderr, "IOServiceMatching returned a nullptr dictionary.\n");
     }
     else
 	{
@@ -281,7 +281,7 @@ CHamlib::GetPortList(map < string, string > &ports)
 #elif defined(__unix__)
 	_BOOLEAN bOK = FALSE;
 	FILE *p = popen("hal-find-by-capability --capability serial", "r");
-	if (p != NULL)
+	if (p != nullptr)
 	{
 		while (!feof(p))
 		{
@@ -294,7 +294,7 @@ CHamlib::GetPortList(map < string, string > &ports)
 					string("hal-get-property --key serial.device --udi ") +
 					buf;
 				FILE *p2 = popen(s.c_str(), "r");
-				if (p2 != NULL)
+				if (p2 != nullptr)
 				{
 					buf[0] = 0;
 					r = fgets(buf, sizeof(buf), p2);
@@ -461,7 +461,7 @@ CHamlib::SetFrequency(const int iFreqkHz)
 	_BOOLEAN bSucceeded = FALSE;
 
 	/* Check if rig was opend properly */
-	if (pRig != NULL)
+	if (pRig != nullptr)
 	{
 		/* Set frequency (consider frequency offset and conversion
 		   from kHz to Hz by " * 1000 ") */
@@ -481,7 +481,7 @@ CHamlib::ESMeterState CHamlib::GetSMeter(_REAL & rCurSigStr)
 		eRetVal = SS_NOTVALID;
 	rCurSigStr = (_REAL) 0.0;
 
-	if ((pRig != NULL) && (bSMeterIsSupported == TRUE))
+	if ((pRig != nullptr) && (bSMeterIsSupported == TRUE))
 	{
 		value_t
 			tVal;
@@ -522,7 +522,7 @@ CHamlib::ConfigureRig(const string & strSet)
 		{
 			/* Malformatted config string */
 			rig_cleanup(pRig);
-			pRig = NULL;
+			pRig = nullptr;
 
 			throw CGenErr(string("Malformatted config string: ") + strSet);
 		}
@@ -639,7 +639,7 @@ CHamlib::SetRigConfig()
 		if (ret != RIG_OK)
 		{
 			rig_cleanup(pRig);
-			pRig = NULL;
+			pRig = nullptr;
 			throw CGenErr("Rig set conf failed.");
 		}
 	}
@@ -672,12 +672,12 @@ CHamlib::SetHamlibModelID(const rig_model_t model)
 	try
 	{
 		/* If rig was already open, close it first */
-		if (pRig != NULL)
+		if (pRig != nullptr)
 		{
 			/* Close everything */
 			rig_close(pRig);
 			rig_cleanup(pRig);
-			pRig = NULL;
+			pRig = nullptr;
 		}
 
 		if (iHamlibModelID == 0)
@@ -706,7 +706,7 @@ CHamlib::SetHamlibModelID(const rig_model_t model)
 
 		/* Init rig */
 		pRig = rig_init(iHamlibModelID);
-		if (pRig == NULL)
+		if (pRig == nullptr)
 			throw CGenErr("Initialization of hamlib failed.");
 
 		SetRigConfig();
@@ -717,7 +717,7 @@ CHamlib::SetHamlibModelID(const rig_model_t model)
 		{
 			/* Fail! */
 			rig_cleanup(pRig);
-			pRig = NULL;
+			pRig = nullptr;
 
 			throw CGenErr("Rig open failed.");
 		}
@@ -731,7 +731,7 @@ CHamlib::SetHamlibModelID(const rig_model_t model)
 		SetRigParams();
 
 		/* Check if s-meter capabilities are available */
-		if (pRig != NULL)
+		if (pRig != nullptr)
 		{
 			/* Check if s-meter can be used. Disable GUI control if not */
 			if (rig_has_get_level(pRig, RIG_LEVEL_STRENGTH))

@@ -124,7 +124,7 @@ void CResample::Init(const int iNewInputBlockSize)
 #ifdef HAVE_SPEEX
 CAudioResample::CAudioResample() :
 	rRation(1.0), iInputBlockSize(0), iOutputBlockSize(0),
-	resampler(NULL), iInputBuffered(0), iMaxInputSize(0)
+	resampler(nullptr), iInputBuffered(0), iMaxInputSize(0)
 {
 }
 CAudioResample::~CAudioResample()
@@ -133,10 +133,10 @@ CAudioResample::~CAudioResample()
 }
 void CAudioResample::Free()
 {
-	if (resampler != NULL)
+	if (resampler != nullptr)
 	{
 		speex_resampler_destroy(resampler);
-		resampler = NULL;
+		resampler = nullptr;
 	}
 	vecfInput.Init(0);
 	vecfOutput.Init(0);
@@ -162,7 +162,7 @@ void CAudioResample::Resample(CVector<_REAL>& rInput, CVector<_REAL>& rOutput)
 		int output_frames_gen = 0;
 		int input_frames = iInputBuffered + iInputSize;
 
-		if (resampler != NULL)
+		if (resampler != nullptr)
 		{
 			spx_uint32_t in_len = input_frames;
 			spx_uint32_t out_len = iOutputBlockSize;
@@ -201,7 +201,7 @@ int CAudioResample::GetFreeInputSize() const
 void CAudioResample::Reset()
 {
 	iInputBuffered = 0;
-	if (resampler != NULL)
+	if (resampler != nullptr)
 	{
 		int err = speex_resampler_reset_mem(resampler);
 		if (err != RESAMPLER_ERR_SUCCESS)
@@ -244,7 +244,7 @@ void CAudioResample::Init(const int iNewOutputBlockSize, const int iInputSampler
 		}
 		vecfOutput.Init(iOutputBlockSize);
 		int err = RESAMPLER_ERR_SUCCESS;
-		if (resampler == NULL)
+		if (resampler == nullptr)
 		{
 			resampler = speex_resampler_init(1, spx_uint32_t(iInputSamplerate), spx_uint32_t(iOutputSamplerate), RESAMPLING_QUALITY, &err);
 			iInputBuffered = 0;

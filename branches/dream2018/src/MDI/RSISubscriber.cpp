@@ -100,7 +100,7 @@ void CRSISubscriber::SendPacket(const vector<_BYTE>& vecbydata, uint32_t, uint16
 
 
 /* TODO wrap a sendto in a class and store it in pPacketSink */
-CRSISubscriberSocket::CRSISubscriberSocket(CPacketSink *pSink):CRSISubscriber(pSink),pSocket(NULL)
+CRSISubscriberSocket::CRSISubscriberSocket(CPacketSink *pSink):CRSISubscriber(pSink),pSocket(nullptr)
 ,uIf(0),uAddr(0),uPort(0)
 {
 	pSocket = new CPacketSocketNative;
@@ -114,7 +114,7 @@ CRSISubscriberSocket::~CRSISubscriberSocket()
 
 _BOOLEAN CRSISubscriberSocket::SetDestination(const string& dest)
 {
-	if(pSocket==NULL)
+	if(pSocket==nullptr)
 	{
 		return FALSE;
 	}
@@ -140,7 +140,7 @@ _BOOLEAN CRSISubscriberSocket::GetDestination(string& str)
 
 _BOOLEAN CRSISubscriberSocket::SetOrigin(const string& str)
 {
-	if(pSocket==NULL)
+	if(pSocket==nullptr)
 	{
 		return FALSE;
 	}
@@ -157,7 +157,7 @@ _BOOLEAN CRSISubscriberSocket::SetOrigin(const string& str)
 
 bool CRSISubscriberSocket::GetOrigin(string& str)
 {
-	if(pSocket==NULL)
+	if(pSocket==nullptr)
 	{
 		return FALSE;
 	}
@@ -168,14 +168,14 @@ bool CRSISubscriberSocket::GetOrigin(string& str)
 /* poll for incoming packets */
 void CRSISubscriberSocket::poll()
 {
-	if(pSocket!=NULL)
+	if(pSocket!=nullptr)
 		pSocket->poll();
 }
 
-CRSISubscriberFile::CRSISubscriberFile(): CRSISubscriber(NULL), pPacketSinkFile(NULL)
+CRSISubscriberFile::CRSISubscriberFile(): CRSISubscriber(nullptr), pPacketSinkFile(nullptr)
 {
-	/* override the subscriber back to NULL to prevent Cpro doing anything */
-	TagPacketDecoderRSCIControl.SetSubscriber(NULL);
+	/* override the subscriber back to nullptr to prevent Cpro doing anything */
+	TagPacketDecoderRSCIControl.SetSubscriber(nullptr);
 }
 
 _BOOLEAN CRSISubscriberFile::SetDestination(const string& strFName)
@@ -184,8 +184,8 @@ _BOOLEAN CRSISubscriberFile::SetDestination(const string& strFName)
 	if(pPacketSink)
 	{
 		delete pPacketSink;
-		pPacketSink = NULL;
-		pPacketSinkFile = NULL;
+		pPacketSink = nullptr;
+		pPacketSinkFile = nullptr;
 	}
 	string ext;
 	size_t p = strFName.rfind('.');

@@ -76,7 +76,7 @@ bool CEventFilter::isValid(const QEvent* event)
 CWindow::CWindow(QWidget* parent, CSettings& Settings, const QString& windowName) :
 	QMainWindow(), parents(), windowName(windowName), Settings(Settings)
 {
-	if (parent != NULL)
+	if (parent != nullptr)
 		parents[parent] = "";
 	init();
 }

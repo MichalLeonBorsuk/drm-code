@@ -813,7 +813,7 @@ void CNoiseReduction::Process(CRealVector& vecrIn)
         {
             speex_data[i] = (spx_int16_t)vectorData[i];
         }
-        speex_preprocess(preprocess_state, speex_data, NULL);
+        speex_preprocess(preprocess_state, speex_data, nullptr);
         for (i=0; i<vectorSz; i++)
         {
             vectorData[i] = (CReal)speex_data[i];

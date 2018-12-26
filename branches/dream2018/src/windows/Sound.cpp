@@ -50,7 +50,7 @@ static UINT FindDevice(const vector<string>& vecstrDevices, const string& names)
 * Wave in                                                                      *
 \******************************************************************************/
 
-CSoundIn::CSoundIn():CSoundInInterface(),m_WaveIn(NULL)
+CSoundIn::CSoundIn():CSoundInInterface(),m_WaveIn(nullptr)
 {
     int i;
 
@@ -64,7 +64,7 @@ CSoundIn::CSoundIn():CSoundInInterface(),m_WaveIn(NULL)
     for (i = 0; i < NUM_SOUND_BUFFERS_IN; i++)
     {
         memset(&m_WaveInHeader[i], 0, sizeof(WAVEHDR));
-        psSoundcardBuffer[i] = NULL;
+        psSoundcardBuffer[i] = nullptr;
     }
 
 	/* Default device WAVE_MAPPER */
@@ -77,7 +77,7 @@ CSoundIn::CSoundIn():CSoundInInterface(),m_WaveIn(NULL)
 
     /* We use an event controlled wave-in structure */
     /* Create events */
-    m_WaveEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+    m_WaveEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
 
     /* Set flag to open devices */
     bChangDev = TRUE;
@@ -91,12 +91,12 @@ CSoundIn::~CSoundIn()
     /* Delete allocated memory */
     for (int i = 0; i < NUM_SOUND_BUFFERS_IN; i++)
     {
-        if (psSoundcardBuffer[i] != NULL)
+        if (psSoundcardBuffer[i] != nullptr)
             delete[] psSoundcardBuffer[i];
     }
 
     /* Close the handle for the events */
-    if (m_WaveEvent != NULL)
+    if (m_WaveEvent != nullptr)
         CloseHandle(m_WaveEvent);
 }
 
@@ -215,7 +215,7 @@ _BOOLEAN CSoundIn::Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBlo
                simply no effect */
             waveInUnprepareHeader(m_WaveIn, &m_WaveInHeader[i], sizeof(WAVEHDR));
 
-            if (psSoundcardBuffer[i] != NULL)
+            if (psSoundcardBuffer[i] != nullptr)
                 delete[] psSoundcardBuffer[i];
 
             psSoundcardBuffer[i] = new short[iBufferSize];
@@ -255,7 +255,7 @@ void CSoundIn::OpenDevice()
     sWaveFormatEx.cbSize = 0;
 
 	/* Open wave-input and set call-back mechanism to event handle */
-    if (m_WaveIn != NULL)
+    if (m_WaveIn != nullptr)
     {
         waveInReset(m_WaveIn);
         waveInClose(m_WaveIn);
@@ -298,7 +298,7 @@ void CSoundIn::Close()
     MMRESULT	result;
 
     /* Reset audio driver */
-    if (m_WaveIn != NULL)
+    if (m_WaveIn != nullptr)
     {
         result = waveInReset(m_WaveIn);
         if (result != MMSYSERR_NOERROR)
@@ -306,11 +306,11 @@ void CSoundIn::Close()
     }
 
     /* Set event to ensure that thread leaves the waiting function */
-    if (m_WaveEvent != NULL)
+    if (m_WaveEvent != nullptr)
         SetEvent(m_WaveEvent);
 
     /* Unprepare wave-headers */
-    if (m_WaveIn != NULL)
+    if (m_WaveIn != nullptr)
     {
         for (i = 0; i < NUM_SOUND_BUFFERS_IN; i++)
         {
@@ -327,7 +327,7 @@ void CSoundIn::Close()
         if (result != MMSYSERR_NOERROR)
             throw CGenErr("Sound Interface, waveInClose() failed.");
 
-        m_WaveIn = NULL;
+        m_WaveIn = nullptr;
 	}
 
     /* Set flag to open devices the next time it is initialized */
@@ -336,7 +336,7 @@ void CSoundIn::Close()
 /******************************************************************************\
 * Wave out                                                                     *
 \******************************************************************************/
-CSoundOut::CSoundOut():CSoundOutInterface(),m_WaveOut(NULL)
+CSoundOut::CSoundOut():CSoundOutInterface(),m_WaveOut(nullptr)
 {
     int i;
 
@@ -350,7 +350,7 @@ CSoundOut::CSoundOut():CSoundOutInterface(),m_WaveOut(NULL)
     for (i = 0; i < NUM_SOUND_BUFFERS_OUT; i++)
     {
         memset(&m_WaveOutHeader[i], 0, sizeof(WAVEHDR));
-        psPlaybackBuffer[i] = NULL;
+        psPlaybackBuffer[i] = nullptr;
     }
 
 	/* Default device WAVE_MAPPER */
@@ -363,7 +363,7 @@ CSoundOut::CSoundOut():CSoundOutInterface(),m_WaveOut(NULL)
 
     /* We use an event controlled wave-out structure */
     /* Create events */
-    m_WaveEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+    m_WaveEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
 
     /* Set flag to open devices */
     bChangDev = TRUE;
@@ -380,12 +380,12 @@ CSoundOut::~CSoundOut()
     /* Delete allocated memory */
     for (int i = 0; i < NUM_SOUND_BUFFERS_OUT; i++)
     {
-        if (psPlaybackBuffer[i] != NULL)
+        if (psPlaybackBuffer[i] != nullptr)
             delete[] psPlaybackBuffer[i];
     }
 
     /* Close the handle for the events */
-    if (m_WaveEvent != NULL)
+    if (m_WaveEvent != nullptr)
         CloseHandle(m_WaveEvent);
 }
 
@@ -534,7 +534,7 @@ _BOOLEAN CSoundOut::Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBl
             waveOutUnprepareHeader(m_WaveOut, &m_WaveOutHeader[j], sizeof(WAVEHDR));
 
             /* Create memory for playback buffer */
-            if (psPlaybackBuffer[j] != NULL)
+            if (psPlaybackBuffer[j] != nullptr)
                 delete[] psPlaybackBuffer[j];
 
             psPlaybackBuffer[j] = new short[iBufferSize];
@@ -569,7 +569,7 @@ void CSoundOut::OpenDevice()
                                     sWaveFormatEx.nSamplesPerSec;
     sWaveFormatEx.cbSize = 0;
 
-    if (m_WaveOut != NULL)
+    if (m_WaveOut != nullptr)
     {
         waveOutReset(m_WaveOut);
         waveOutClose(m_WaveOut);
@@ -612,7 +612,7 @@ void CSoundOut::Close()
     MMRESULT	result;
 
     /* Reset audio driver */
-    if (m_WaveOut != NULL)
+    if (m_WaveOut != nullptr)
     {
         result = waveOutReset(m_WaveOut);
         if (result != MMSYSERR_NOERROR)
@@ -620,11 +620,11 @@ void CSoundOut::Close()
     }
 
     /* Set event to ensure that thread leaves the waiting function */
-    if (m_WaveEvent != NULL)
+    if (m_WaveEvent != nullptr)
         SetEvent(m_WaveEvent);
 
     /* Unprepare wave-headers */
-    if (m_WaveOut != NULL)
+    if (m_WaveOut != nullptr)
     {
         for (i = 0; i < NUM_SOUND_BUFFERS_OUT; i++)
         {
@@ -641,7 +641,7 @@ void CSoundOut::Close()
         if (result != MMSYSERR_NOERROR)
             throw CGenErr("Sound Interface, waveOutClose() failed.");
 
-        m_WaveOut = NULL;
+        m_WaveOut = nullptr;
 	}
 
     /* Set flag to open devices the next time it is initialized */

@@ -47,7 +47,7 @@ protected:
     void                    SetImage(int);
     void                    UpdateButtons();
     void                    ClearMOTCache(CMOTDABDec *motdec);
-    void                    GetServiceParams(uint32_t* iServiceID, bool* bServiceValid, QString* strLabel, ETypeRxStatus* eStatus=NULL, int* shortID=NULL, int* iPacketID=NULL);
+    void                    GetServiceParams(uint32_t* iServiceID, bool* bServiceValid, QString* strLabel, ETypeRxStatus* eStatus=nullptr, int* shortID=nullptr, int* iPacketID=nullptr);
     void                    UpdateWindowTitle(const uint32_t iServiceID, const bool bServiceValid, QString strLabel);
     QTimer                  Timer;
     QString                 strCurrentSavePath;

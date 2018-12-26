@@ -55,7 +55,7 @@ systemevalDlg::systemevalDlg(CDRMReceiver& NDRMR, CSettings& Settings,
     /* Init main plot */
     iPlotStyle = getSetting("plotstyle", 0, true);
     putSetting("plotstyle", iPlotStyle, true);
-    MainPlot = new CDRMPlot(NULL, plot);
+    MainPlot = new CDRMPlot(nullptr, plot);
     MainPlot->SetRecObj(&DRMReceiver);
     MainPlot->SetPlotStyle(iPlotStyle);
 
@@ -404,7 +404,7 @@ void systemevalDlg::OnCustomContextMenuRequested(const QPoint& p)
 CDRMPlot* systemevalDlg::OpenChartWin(CDRMPlot::ECharType eNewType)
 {
     /* Create new chart window */
-    CDRMPlot* pNewChartWin = new CDRMPlot(this, NULL);
+    CDRMPlot* pNewChartWin = new CDRMPlot(this, nullptr);
     pNewChartWin->setCaption(tr("Chart Window"));
 
     /* Set correct icon (use the same as this dialog) */
@@ -426,8 +426,8 @@ QTreeWidgetItem* systemevalDlg::FindItemByECharType(CDRMPlot::ECharType eCharTyp
     for (int i = 0;; i++)
     {
         QTreeWidgetItem* item = chartSelector->topLevelItem(i);
-        if (item == NULL)
-            return NULL;
+        if (item == nullptr)
+            return nullptr;
         for (int j = 0; j < item->childCount(); j++)
         {
             QTreeWidgetItem* subitem = item->child(j);
@@ -444,7 +444,7 @@ CDRMPlot::ECharType systemevalDlg::PlotNameToECharType(const string& PlotName)
     for (int i = 0;; i++)
     {
         QTreeWidgetItem* item = chartSelector->topLevelItem(i);
-        if (item == NULL)
+        if (item == nullptr)
             return CDRMPlot::AUDIO_SPECTRUM; /* safe value */
         for (int j = 0; j < item->childCount(); j++)
         {
@@ -458,7 +458,7 @@ CDRMPlot::ECharType systemevalDlg::PlotNameToECharType(const string& PlotName)
 string systemevalDlg::ECharTypeToPlotName(CDRMPlot::ECharType eCharType)
 {
     QTreeWidgetItem* item = FindItemByECharType(eCharType);
-    if (item != NULL)
+    if (item != nullptr)
         return item->text(0).toStdString();
     return string();
 }

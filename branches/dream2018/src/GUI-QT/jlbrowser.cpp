@@ -32,7 +32,7 @@
 #include <iostream>
 
 JLBrowser::JLBrowser(QWidget * parent)
-    : QTextBrowser(parent),decoder(NULL),strFhGIISText(),strJournalineHeadText(),
+    : QTextBrowser(parent),decoder(nullptr),strFhGIISText(),strJournalineHeadText(),
       total(0),ready(0)
 {
 
@@ -56,7 +56,7 @@ JLBrowser::JLBrowser(QWidget * parent)
 
 bool JLBrowser::changed()
 {
-    if(decoder==NULL)
+    if(decoder==nullptr)
     {
         return false;
     }

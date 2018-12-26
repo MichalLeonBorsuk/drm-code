@@ -536,7 +536,7 @@ decode_bitrate (const _BYTE* p)
 static string
 decode_attribute_name(const dectab& tab)
 {
-	if (tab.name == NULL)
+	if (tab.name == nullptr)
 	  {
 	      return "unknown";
 	  }

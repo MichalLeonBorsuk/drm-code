@@ -187,7 +187,7 @@ void CreateDirectories(const QString& strFilename)
 
 void RestartTransceiver(CDRMTransceiver *DRMTransceiver)
 {
-    if (DRMTransceiver != NULL)
+    if (DRMTransceiver != nullptr)
     {
         QMutex sleep;
         CParameter& Parameters = *DRMTransceiver->GetParameters();

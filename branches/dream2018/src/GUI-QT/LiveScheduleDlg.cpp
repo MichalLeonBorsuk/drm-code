@@ -565,7 +565,7 @@ LiveScheduleDlg::LoadSchedule()
        otherwise this may cause an segmentation fault) */
     for (size_t i = 0; i < vecpListItems.size(); i++)
     {
-        if (vecpListItems[i] != NULL)
+        if (vecpListItems[i] != nullptr)
             delete vecpListItems[i];
     }
     vecpListItems.clear();
@@ -578,7 +578,7 @@ LiveScheduleDlg::LoadSchedule()
     /* Init vector for storing the pointer to the list view items */
     const int iNumStations = DRMSchedule.GetStationNumber();
 
-    vecpListItems.resize(iNumStations, NULL);
+    vecpListItems.resize(iNumStations, nullptr);
 
     actionSave->setEnabled(iNumStations > 0);
     /* Unlock BEFORE calling the stations view update because in this function
@@ -671,7 +671,7 @@ LiveScheduleDlg::SetStationsView()
                 (DRMSchedule.CheckState(i) == CDRMLiveSchedule::IS_INACTIVE)))
         {
             /* Only insert item if it is not already in the list */
-            if (vecpListItems[i] == NULL)
+            if (vecpListItems[i] == nullptr)
             {
                 /* Generate new list item with all necessary column entries */
                 const CLiveScheduleItem& item = DRMSchedule.GetItem(i);
@@ -735,7 +735,7 @@ LiveScheduleDlg::SetStationsView()
         else
         {
             /* Delete this item since it is not used anymore */
-            if (vecpListItems[i] != NULL)
+            if (vecpListItems[i] != nullptr)
             {
                 /* If one deletes a menu item in QT list view, it is
                    automaticall removed from the list and the list gets
@@ -743,7 +743,7 @@ LiveScheduleDlg::SetStationsView()
                 delete vecpListItems[i];
 
                 /* Reset pointer so we can distinguish if it is used or not */
-                vecpListItems[i] = NULL;
+                vecpListItems[i] = nullptr;
 
                 /* Set flag for sorting the list */
                 bListHastChanged = TRUE;
