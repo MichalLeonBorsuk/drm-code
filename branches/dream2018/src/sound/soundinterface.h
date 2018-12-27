@@ -35,7 +35,7 @@
 class CSoundInInterface : public CSelectionInterface
 {
 public:
-    virtual 		~CSoundInInterface();
+    virtual 		~CSoundInInterface()=0;
 
     /* sound card interface - used by ReadData */
     virtual _BOOLEAN Init(int iSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking)=0;
@@ -47,7 +47,7 @@ public:
 class CSoundOutInterface : public CSelectionInterface
 {
 public:
-    virtual 		~CSoundOutInterface();
+    virtual 		~CSoundOutInterface()=0;
 
     /* sound card interface - used by WriteData */
     virtual _BOOLEAN Init(int iSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking)=0;

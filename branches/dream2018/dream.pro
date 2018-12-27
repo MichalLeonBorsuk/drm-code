@@ -609,9 +609,11 @@ SOURCES += \
     src/util/Utilities.cpp \
     src/Version.cpp \
     src/sound/soundnull.cpp \
-    src/sound/soundinterface.cpp \
     src/GUI-QT/OpusCodecParams.cpp \
-    src/GUI-QT/AACCodecParams.cpp
+    src/GUI-QT/AACCodecParams.cpp \
+    src/DrmTransceiver.cpp \
+    src/sound/soundinterface.cpp \
+    src/sound/selectioninterface.cpp
 !console {
 HEADERS += \
     src/GUI-QT/Logging.h \

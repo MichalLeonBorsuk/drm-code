@@ -46,6 +46,23 @@ using namespace std;
 #include "FileTyper.h"
 
 /* Implementation *************************************************************/
+
+CIniFile::CIniFile()
+{
+}
+
+CIniFile::~CIniFile()
+{
+}
+
+CSettings::CSettings():CIniFile()
+{
+}
+
+CSettings::~CSettings()
+{
+}
+
 void
 CSettings::Load(int argc, char **argv)
 {
