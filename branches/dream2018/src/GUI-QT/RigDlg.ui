@@ -81,8 +81,7 @@
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout_3">
       <item>
-       <widget class="QwtThermo" name="sMeter">
-       </widget>
+       <widget class="QwtThermo" name="sMeter" native="true"/>
       </item>
      </layout>
     </widget>

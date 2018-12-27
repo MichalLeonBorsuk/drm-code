@@ -149,7 +149,7 @@ AacCodec::CanDecode(CAudioParam::EAudCod eAudioCoding)
 }
 
 bool
-AacCodec::DecOpen(CAudioParam& AudioParam, int& iAudioSampleRate, int& iLenDecOutPerChan)
+AacCodec::DecOpen(const CAudioParam& AudioParam, int& iAudioSampleRate, int& iLenDecOutPerChan)
 {
 	int iAACSampleRate = 12000;
 	if (hFaadDecoder == nullptr)
@@ -212,7 +212,7 @@ AacCodec::DecOpen(CAudioParam& AudioParam, int& iAudioSampleRate, int& iLenDecOu
 }
 
 _SAMPLE*
-AacCodec::Decode(vector<uint8_t>& audio_frame, uint8_t aac_crc_bits, int& iChannels, CAudioCodec::EDecError& eDecError)
+AacCodec::Decode(const vector<uint8_t>& audio_frame, uint8_t aac_crc_bits, int& iChannels, CAudioCodec::EDecError& eDecError)
 {
     _SAMPLE* psDecOutSampleBuf = nullptr;
 	NeAACDecFrameInfo DecFrameInfo;
@@ -242,11 +242,6 @@ AacCodec::Decode(vector<uint8_t>& audio_frame, uint8_t aac_crc_bits, int& iChann
     iChannels = DecFrameInfo.channels;
     eDecError = DecFrameInfo.error ? CAudioCodec::DECODER_ERROR_UNKNOWN : CAudioCodec::DECODER_ERROR_OK;
 	return psDecOutSampleBuf;
-}
-
-CAudioCodec::EDecError AacCodec::FullyDecode(vector<uint8_t>& audio_frame, uint8_t aac_crc_bits, vector<_SAMPLE>& left, vector<_SAMPLE>& right)
-{
-    return EDecError::DECODER_ERROR_UNKNOWN;
 }
 
 void
@@ -292,15 +287,18 @@ AacCodec::CanEncode(CAudioParam::EAudCod eAudioCoding)
 }
 
 bool
-AacCodec::EncOpen(int iSampleRate, int iChannels, unsigned long *lNumSampEncIn, unsigned long *lMaxBytesEncOut)
+AacCodec::EncOpen(const CAudioParam& AudioParam, unsigned long& lNumSampEncIn, unsigned long& lMaxBytesEncOut)
 {
-	hFaacEncoder = faacEncOpen(iSampleRate, iChannels,
-		lNumSampEncIn, lMaxBytesEncOut);
+    unsigned long iSampleRate = 24000;
+    if(AudioParam.eAudioSamplRate==CAudioParam::AS_12KHZ) iSampleRate = 12000;
+    unsigned int iChannels=1;
+    if(AudioParam.eAudioMode!=CAudioParam::AM_MONO) iChannels = 2;
+    hFaacEncoder = faacEncOpen(iSampleRate, iChannels, &lNumSampEncIn, &lMaxBytesEncOut);
 	return hFaacEncoder != nullptr;
 }
 
 int
-AacCodec::Encode(CVector<_SAMPLE>& vecsEncInData, unsigned long lNumSampEncIn, CVector<uint8_t>& vecsEncOutData, unsigned long lMaxBytesEncOut)
+AacCodec::Encode(const vector<_SAMPLE>& vecsEncInData, unsigned long lNumSampEncIn, CVector<uint8_t>& vecsEncOutData, unsigned long lMaxBytesEncOut)
 {
 	int bytesEncoded = 0;
 	if (hFaacEncoder != nullptr)

@@ -557,7 +557,7 @@ OpusCodec::CanDecode(CAudioParam::EAudCod eAudioCoding)
 }
 
 bool
-OpusCodec::DecOpen(CAudioParam& AudioParam, int& iAudioSampleRate, int& iLenDecOutPerChan)
+OpusCodec::DecOpen(const CAudioParam& AudioParam, int& iAudioSampleRate, int& iLenDecOutPerChan)
 {
 	(void)AudioParam;
 	const int iSampleRate = 48000;
@@ -571,7 +571,7 @@ OpusCodec::DecOpen(CAudioParam& AudioParam, int& iAudioSampleRate, int& iLenDecO
 }
 
 _SAMPLE*
-OpusCodec::Decode(vector<uint8_t>& audio_frame, uint8_t aac_crc_bits, int& iChannels, CAudioCodec::EDecError& eDecError)
+OpusCodec::Decode(const vector<uint8_t>& audio_frame, uint8_t aac_crc_bits, int& iChannels, CAudioCodec::EDecError& eDecError)
 {
     /* Prepare data vector with CRC at the beginning (the definition with faad2 DRM interface) */
     CVector<uint8_t> vecbyPrepAudioFrame(int(audio_frame.size()+1));
@@ -590,11 +590,6 @@ OpusCodec::Decode(vector<uint8_t>& audio_frame, uint8_t aac_crc_bits, int& iChan
                 );
 	}
 	return sample;
-}
-
-CAudioCodec::EDecError OpusCodec::FullyDecode(vector<uint8_t>& audio_frame, uint8_t aac_crc_bits, vector<_SAMPLE>& left, vector<_SAMPLE>& right)
-{
-    return EDecError::DECODER_ERROR_UNKNOWN;
 }
 
 void
@@ -632,15 +627,17 @@ OpusCodec::CanEncode(CAudioParam::EAudCod eAudioCoding)
 }
 
 bool
-OpusCodec::EncOpen(int iSampleRate, int iChannels, unsigned long *lNumSampEncIn, unsigned long *lMaxBytesEncOut)
+OpusCodec::EncOpen(const CAudioParam& AudioParam, unsigned long& lNumSampEncIn, unsigned long& lMaxBytesEncOut)
 {
+    unsigned long iSampleRate = 48000;
+    unsigned iChannels = 1;
 	hOpusEncoder = opusEncOpen(iSampleRate, iChannels,
-		0, lNumSampEncIn, lMaxBytesEncOut);
+        0, &lNumSampEncIn, &lMaxBytesEncOut);
 	return hOpusEncoder != nullptr;
 }
 
 int
-OpusCodec::Encode(CVector<_SAMPLE>& vecsEncInData, unsigned long lNumSampEncIn, CVector<uint8_t>& vecsEncOutData, unsigned long lMaxBytesEncOut)
+OpusCodec::Encode(const vector<_SAMPLE>& vecsEncInData, unsigned long lNumSampEncIn, CVector<uint8_t>& vecsEncOutData, unsigned long lMaxBytesEncOut)
 {
 	int bytesEncoded = 0;
 	if (hOpusEncoder != nullptr)
