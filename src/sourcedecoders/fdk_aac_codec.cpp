@@ -259,7 +259,38 @@ FdkAacCodec::EncGetVersion()
 bool
 FdkAacCodec::CanEncode(CAudioParam::EAudCod eAudioCoding)
 {
-	return eAudioCoding == CAudioParam::AC_AAC;
+    if(eAudioCoding != CAudioParam::AC_AAC)
+        return false;
+    if(hEncoder == nullptr) {
+        AACENC_ERROR r = aacEncOpen(&hEncoder, 0x01|0x02|0x04|0x08, 0); // allocate all modules except the metadata module, let library allocate channels in case we get to use MPS
+        if(r!=AACENC_OK) {
+            hEncoder = nullptr;
+            return false;
+        }
+        UINT aot = aacEncoder_GetParam(hEncoder, AACENC_AOT);
+        if(aot==AOT_DRM_AAC)
+                return true;
+        if(aot==AOT_DRM_SBR)
+                return true;
+        if(aot==AOT_DRM_MPEG_PS)
+                return true;
+        if(aot==AOT_DRM_SURROUND)
+                return true;
+        r = aacEncoder_SetParam(hEncoder, AACENC_AOT, AOT_DRM_AAC);
+        aacEncoder_SetParam(hEncoder, AACENC_AOT, aot);
+        return r==AACENC_OK;
+    }
+    else {
+        UINT aot = aacEncoder_GetParam(hEncoder, AACENC_AOT);
+        if(aot==AOT_DRM_AAC)
+                return true;
+        if(aot==AOT_DRM_SBR)
+                return true;
+        if(aot==AOT_DRM_MPEG_PS)
+                return true;
+        if(aot==AOT_DRM_SURROUND)
+                return true;
+    }
 }
 
 bool
@@ -298,7 +329,12 @@ FdkAacCodec::EncOpen(const CAudioParam& AudioParam, unsigned long& lNumSampEncIn
         r = aacEncoder_SetParam(hEncoder, AACENC_AOT, AOT_DRM_SURROUND);
     }
     if(r!=AACENC_OK) {
-        cerr << "error setting DRM mode" << hex << r << dec << endl;
+        if(r==AACENC_INVALID_CONFIG) {
+            cerr << "invalid config setting DRM mode" << endl;
+        }
+        else {
+            cerr << "error setting DRM mode" << hex << r << dec << endl;
+        }
     }
     r = aacEncoder_SetParam(hEncoder, AACENC_SAMPLERATE, unsigned(0));
     if(r!=AACENC_OK) {
