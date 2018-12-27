@@ -26,8 +26,8 @@
  *
 \******************************************************************************/
 
-#ifndef _DRM_TRANSCEIVER_H_
-#define _DRM_TRANSCEIVER_H_
+#ifndef DRM_TRANSCEIVER_H
+#define DRM_TRANSCEIVER_H
 
 #include "Parameter.h"
 #include "util/Settings.h"
@@ -39,9 +39,8 @@
 class CDRMTransceiver
 {
 public:
-	CDRMTransceiver(CSettings* pSettings, CSoundInInterface* pSoundIn, CSoundOutInterface* pSoundOut, _BOOLEAN bTransmitter = FALSE)
-	: pSettings(pSettings), pSoundInInterface(pSoundIn), pSoundOutInterface(pSoundOut), bTransmitter(bTransmitter) {};
-	virtual ~CDRMTransceiver() {};
+    CDRMTransceiver(CSettings* pSettings, CSoundInInterface* pSoundIn, CSoundOutInterface* pSoundOut, bool bTransmitter=false);
+    virtual ~CDRMTransceiver();
 
     virtual void LoadSettings() = 0;
     virtual void SaveSettings() = 0;

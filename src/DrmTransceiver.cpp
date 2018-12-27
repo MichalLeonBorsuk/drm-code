@@ -1,12 +1,12 @@
 /******************************************************************************\
- * British Broadcasting Corporation
- * Copyright (c) 2007
+ * Technische Universitaet Darmstadt, Institut fuer Nachrichtentechnik
+ * Copyright (c) 2001
  *
  * Author(s):
- *	Julian Cable
+ *	Volker Fischer
  *
- * Decription:
- * sound interfaces
+ * Description:
+ *	DRM-transmitter
  *
  ******************************************************************************
  *
@@ -26,19 +26,13 @@
  *
 \******************************************************************************/
 
-#ifndef SELECTIONINTERFACE_H
-#define SELECTIONINTERFACE_H
+#include "DrmTransceiver.h"
 
-#include <vector>
-#include <string>
-
-class CSelectionInterface
+CDRMTransceiver::CDRMTransceiver(CSettings* pSettings, CSoundInInterface* pSoundIn, CSoundOutInterface* pSoundOut, _BOOLEAN bTransmitter)
+: pSettings(pSettings), pSoundInInterface(pSoundIn), pSoundOutInterface(pSoundOut), bTransmitter(bTransmitter)
 {
-public:
-    virtual 			~CSelectionInterface()=0;
-    virtual void		Enumerate(std::vector<std::string>& names, std::vector<std::string>& descriptions)=0;
-    virtual std::string		GetDev()=0;
-    virtual void		SetDev(std::string sNewDev)=0;
-};
+}
 
-#endif
+CDRMTransceiver::~CDRMTransceiver()
+{
+}

@@ -43,7 +43,7 @@
 
 /* Implementation *************************************************************/
 int CResample::Resample(CVector<_REAL>* prInput, CVector<_REAL>* prOutput,
-						_REAL rRation)
+                        _REAL rRatio)
 {
 	/* Move old data from the end to the history part of the buffer and
 	   add new data (shift register) */
@@ -51,7 +51,7 @@ int CResample::Resample(CVector<_REAL>* prInput, CVector<_REAL>* prOutput,
 
 	/* Sample-interval of new sample frequency in relation to interpolated
 	   sample-interval */
-	rTStep = (_REAL) INTERP_DECIM_I_D / rRation;
+    rTStep = (_REAL) INTERP_DECIM_I_D / rRatio;
 
 	/* Init output counter */
 	int im = 0;
@@ -123,7 +123,7 @@ void CResample::Init(const int iNewInputBlockSize)
 
 #ifdef HAVE_SPEEX
 CAudioResample::CAudioResample() :
-	rRation(1.0), iInputBlockSize(0), iOutputBlockSize(0),
+    rRatio(1.0), iInputBlockSize(0), iOutputBlockSize(0),
 	resampler(nullptr), iInputBuffered(0), iMaxInputSize(0)
 {
 }
@@ -140,11 +140,11 @@ void CAudioResample::Free()
 	}
 	vecfInput.Init(0);
 	vecfOutput.Init(0);
-	rRation = 1.0;
+    rRatio = 1.0;
 }
 void CAudioResample::Resample(CVector<_REAL>& rInput, CVector<_REAL>& rOutput)
 {
-	if (rRation == 1.0)
+    if (rRatio == 1.0)
 	{
 		memcpy(&rOutput[0], &rInput[0], sizeof(_REAL) * iOutputBlockSize);
 	}
@@ -208,17 +208,19 @@ void CAudioResample::Reset()
 			qDebug("CAudioResample::Init(): libspeexdsp error: %s", speex_resampler_strerror(err));
 	}
 }
-void CAudioResample::Init(const int iNewInputBlockSize, const _REAL rNewRation)
+void CAudioResample::Init(const int iNewInputBlockSize, const _REAL rNewRatio)
 {
 	Free();
 	if (!iNewInputBlockSize)
 		return;
+    if(int(rNewRatio)==0)
+        return;
 	iInputBlockSize = iNewInputBlockSize;
-	iOutputBlockSize = int(iNewInputBlockSize * rNewRation);
-	rRation = _REAL(iOutputBlockSize) / iInputBlockSize;
+    iOutputBlockSize = int(iNewInputBlockSize * rNewRatio);
+    rRatio = _REAL(iOutputBlockSize) / iInputBlockSize;
 	iInputBuffered = 0;
 	iMaxInputSize = 0;
-	if (rRation != 1.0)
+    if (int(rRatio) != 1)
 	{
 		int err;
 		resampler = speex_resampler_init(1, spx_uint32_t(iInputBlockSize), spx_uint32_t(iOutputBlockSize), RESAMPLING_QUALITY, &err);
@@ -230,10 +232,10 @@ void CAudioResample::Init(const int iNewInputBlockSize, const _REAL rNewRation)
 }
 void CAudioResample::Init(const int iNewOutputBlockSize, const int iInputSamplerate, const int iOutputSamplerate)
 {
-	rRation = _REAL(iOutputSamplerate) / iInputSamplerate;
-	iInputBlockSize = int(iNewOutputBlockSize / rRation);
+    rRatio = _REAL(iOutputSamplerate) / iInputSamplerate;
+    iInputBlockSize = int(iNewOutputBlockSize / rRatio);
 	iOutputBlockSize = iNewOutputBlockSize;
-	if (rRation != 1.0)
+    if (rRatio != 1.0)
 	{
 		const int iNewMaxInputSize = iInputBlockSize * 2;
 		const int iInputSize = vecfInput.Size();
@@ -269,7 +271,7 @@ void CAudioResample::Resample(CVector<_REAL>& rInput, CVector<_REAL>& rOutput)
 {
 	int j;
 
-	if (rRation == (_REAL) 1.0)
+    if (rRatio == (_REAL) 1.0)
 	{
 		/* If ratio is 1, no resampling is needed, just copy vector */
 		for (j = 0; j < iOutputBlockSize; j++)
@@ -286,10 +288,10 @@ void CAudioResample::Resample(CVector<_REAL>& rInput, CVector<_REAL>& rOutput)
 		{
 			/* Phase for the linear interpolation-taps */
 			const int ip =
-				(int) (j * INTERP_DECIM_I_D / rRation) % INTERP_DECIM_I_D;
+                (int) (j * INTERP_DECIM_I_D / rRatio) % INTERP_DECIM_I_D;
 
 			/* Sample position in input vector */
-			const int in = (int) (j / rRation) + RES_FILT_NUM_TAPS_PER_PHASE;
+            const int in = (int) (j / rRatio) + RES_FILT_NUM_TAPS_PER_PHASE;
 
 			/* Convolution */
 			_REAL ry = (_REAL) 0.0;
@@ -300,17 +302,17 @@ void CAudioResample::Resample(CVector<_REAL>& rInput, CVector<_REAL>& rOutput)
 		}
 	}
 }
-void CAudioResample::Init(int iNewInputBlockSize, _REAL rNewRation)
+void CAudioResample::Init(int iNewInputBlockSize, _REAL rNewRatio)
 {
-	rRation = rNewRation;
+    rRatio = rNewRatio;
 	iInputBlockSize = iNewInputBlockSize;
-	iOutputBlockSize = (int) (iInputBlockSize * rRation);
+    iOutputBlockSize = (int) (iInputBlockSize * rRatio);
 	Reset();
 }
 void CAudioResample::Init(const int iNewOutputBlockSize, const int iInputSamplerate, const int iOutputSamplerate)
 {
-	rRation = _REAL(iOutputSamplerate) / iInputSamplerate;
-	iInputBlockSize = (int) (iNewOutputBlockSize / rRation);
+    rRatio = _REAL(iOutputSamplerate) / iInputSamplerate;
+    iInputBlockSize = (int) (iNewOutputBlockSize / rRatio);
 	iOutputBlockSize = iNewOutputBlockSize;
 	Reset();
 }
@@ -345,9 +347,9 @@ void CSpectrumResample::Resample(CVector<_REAL>* prInput, CVector<_REAL>** pprOu
 	}
 
 	int iInputBlockSize = prInput->Size();
-	_REAL rRation = _REAL(iInputBlockSize) / _REAL(iOutputBlockSize);
+    _REAL rRatio = _REAL(iInputBlockSize) / _REAL(iOutputBlockSize);
 
-	if (!bResample || rRation <= (_REAL) 1.0)
+    if (!bResample || rRatio <= (_REAL) 1.0)
 	{
 		/* If ratio is 1 or less, no resampling is needed */
 		*pprOutput = prInput;
@@ -357,7 +359,7 @@ void CSpectrumResample::Resample(CVector<_REAL>* prInput, CVector<_REAL>** pprOu
 		int j, i;
 		CVector<_REAL>* prOutput;
 		prOutput = &vecrIntBuff;
-		_REAL rBorder = rRation;
+        _REAL rBorder = rRatio;
 		_REAL rMax = -1.0e10;
 		_REAL rValue;
 
@@ -373,7 +375,7 @@ void CSpectrumResample::Resample(CVector<_REAL>* prInput, CVector<_REAL>** pprOu
 			{
 				(*prOutput)[i++] = rMax - 6.0;
 				rMax = -1.0e10;
-				rBorder = rRation * i;
+                rBorder = rRatio * i;
 			}
 		}
 		if (i < iOutputBlockSize)

@@ -106,7 +106,7 @@ static void logConfig(const CStreamInfo& info) {
 }
 
 bool
-FdkAacCodec::DecOpen(CAudioParam& AudioParam, int& iAudioSampleRate, int& iLenDecOutPerChan)
+FdkAacCodec::DecOpen(const CAudioParam& AudioParam, int& iAudioSampleRate, int& iLenDecOutPerChan)
 {
     unsigned int Type9Size = 2;
     CVector<_BINARY> vecbiData;
@@ -153,7 +153,7 @@ FdkAacCodec::DecOpen(CAudioParam& AudioParam, int& iAudioSampleRate, int& iLenDe
  }
 
 _SAMPLE*
-FdkAacCodec::Decode(vector<uint8_t>& audio_frame, uint8_t aac_crc_bits, int& iChannels, CAudioCodec::EDecError& eDecError)
+FdkAacCodec::Decode(const vector<uint8_t>& audio_frame, uint8_t aac_crc_bits, int& iChannels, CAudioCodec::EDecError& eDecError)
 {
     /* Prepare data vector with CRC at the beginning (the definition with faad2 DRM interface) */
 
@@ -223,11 +223,6 @@ FdkAacCodec::Decode(vector<uint8_t>& audio_frame, uint8_t aac_crc_bits, int& iCh
     }
 }
 
-CAudioCodec::EDecError FdkAacCodec::FullyDecode(vector<uint8_t>& audio_frame, uint8_t aac_crc_bits, vector<_SAMPLE>& left, vector<_SAMPLE>& right)
-{
-    return EDecError::DECODER_ERROR_UNKNOWN;
-}
-
 void
 FdkAacCodec::DecClose()
 {
@@ -268,19 +263,19 @@ FdkAacCodec::CanEncode(CAudioParam::EAudCod eAudioCoding)
 }
 
 bool
-FdkAacCodec::EncOpen(int iSampleRate, int iChannels, unsigned long *lNumSampEncIn, unsigned long *lMaxBytesEncOut)
+FdkAacCodec::EncOpen(const CAudioParam& AudioParam, unsigned long& lNumSampEncIn, unsigned long& lMaxBytesEncOut)
 {
-    unsigned int bits_per_frame = static_cast<unsigned int>(*lMaxBytesEncOut * SIZEOF__BYTE);
-    unsigned int bitrate = 1000*bits_per_frame/400;
+    //unsigned int bits_per_frame = static_cast<unsigned int>(*lMaxBytesEncOut * SIZEOF__BYTE);
+    //unsigned int bitrate = 1000*bits_per_frame/400;
     aacEncOpen(&hEncoder, 0, 2);
     aacEncoder_SetParam(hEncoder, AACENC_AOT, AUDIO_OBJECT_TYPE::AOT_DRM_AAC);
-    aacEncoder_SetParam(hEncoder, AACENC_BITRATE, bitrate);
-    aacEncoder_SetParam(hEncoder, AACENC_SAMPLERATE, unsigned(iSampleRate));
+    //aacEncoder_SetParam(hEncoder, AACENC_BITRATE, bitrate);
+    //aacEncoder_SetParam(hEncoder, AACENC_SAMPLERATE, unsigned(iSampleRate));
     return hEncoder != nullptr;
 }
 
 int
-FdkAacCodec::Encode(CVector<_SAMPLE>& vecsEncInData, unsigned long lNumSampEncIn, CVector<uint8_t>& vecsEncOutData, unsigned long lMaxBytesEncOut)
+FdkAacCodec::Encode(const vector<_SAMPLE>& vecsEncInData, unsigned long lNumSampEncIn, CVector<uint8_t>& vecsEncOutData, unsigned long lMaxBytesEncOut)
 {
 	int bytesEncoded = 0;
     if (hEncoder != nullptr)

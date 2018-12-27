@@ -26,8 +26,8 @@
  *
 \******************************************************************************/
 
-#if !defined(SETTINGS_H__3B0BA660_DGEG56GE64B2B_23DSG9876D31912__INCLUDED_)
-#define SETTINGS_H__3B0BA660_DGEG56GE64B2B_23DSG9876D31912__INCLUDED_
+#ifndef SETTINGS_H
+#define SETTINGS_H
 
 #include "../GlobalDefinitions.h"
 #include <map>
@@ -131,8 +131,8 @@
 class CIniFile
 {
 public:
-	CIniFile() {}
-	virtual ~CIniFile() {}
+    CIniFile();
+    virtual ~CIniFile();
 	void SaveIni(ostream&) const;
 	void SaveIni(const char*) const;
 	bool LoadIni(const char*);
@@ -149,8 +149,9 @@ protected:
 class CSettings: public CIniFile
 {
 public:
-	CSettings() {}
-	void Load(int argc, char** argv);
+    CSettings();
+    ~CSettings();
+    void Load(int argc, char** argv);
 	void Save();
 	void Clear();
 	string Get(const string& section, const string& key, const string& def="") const;

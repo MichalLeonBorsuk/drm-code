@@ -44,8 +44,7 @@ public:
 	virtual ~CResample() {}
 
 	void Init(const int iNewInputBlockSize);
-	int Resample(CVector<_REAL>* prInput, CVector<_REAL>* prOutput,
-				 _REAL rRation);
+    int Resample(CVector<_REAL>* prInput, CVector<_REAL>* prOutput, _REAL rRatio);
 
 protected:
 	_REAL					rTStep;
@@ -64,7 +63,7 @@ public:
 	CAudioResample();
 	virtual ~CAudioResample();
 
-	void Init(int iNewInputBlockSize, _REAL rNewRation);
+    void Init(int iNewInputBlockSize, _REAL rNewRatio);
 	void Init(int iNewOutputBlockSize, int iInputSamplerate, int iOutputSamplerate);
 	void Resample(CVector<_REAL>& rInput, CVector<_REAL>& rOutput);
 	int GetFreeInputSize() const;
@@ -72,7 +71,7 @@ public:
 	void Reset();
 
 protected:
-	_REAL					rRation;
+    _REAL					rRatio;
 	int						iInputBlockSize;
 	int						iOutputBlockSize;
 #ifdef HAVE_SPEEX
