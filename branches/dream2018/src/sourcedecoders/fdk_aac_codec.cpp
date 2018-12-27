@@ -267,10 +267,59 @@ FdkAacCodec::EncOpen(const CAudioParam& AudioParam, unsigned long& lNumSampEncIn
 {
     //unsigned int bits_per_frame = static_cast<unsigned int>(*lMaxBytesEncOut * SIZEOF__BYTE);
     //unsigned int bitrate = 1000*bits_per_frame/400;
-    aacEncOpen(&hEncoder, 0, 2);
-    aacEncoder_SetParam(hEncoder, AACENC_AOT, AUDIO_OBJECT_TYPE::AOT_DRM_AAC);
-    //aacEncoder_SetParam(hEncoder, AACENC_BITRATE, bitrate);
-    //aacEncoder_SetParam(hEncoder, AACENC_SAMPLERATE, unsigned(iSampleRate));
+    AACENC_ERROR r = aacEncOpen(&hEncoder, 0x01|0x02|0x04|0x08, 0); // allocate all modules except the metadata module, let library allocate channels in case we get to use MPS
+    if(r!=AACENC_OK) {
+        cerr << "error opening encoder " << r << endl;
+    }
+    /*
+     *  AOT_DRM_AAC      = 143,  Virtual AOT for DRM (ER-AAC-SCAL without SBR)
+     *  AOT_DRM_SBR      = 144,  Virtual AOT for DRM (ER-AAC-SCAL with SBR)
+     *  AOT_DRM_MPEG_PS  = 145,  Virtual AOT for DRM (ER-AAC-SCAL with SBR and MPEG-PS)
+     *  AOT_DRM_SURROUND = 146,  Virtual AOT for DRM Surround (ER-AAC-SCAL (+SBR) +MPS)
+     *  AOT_DRM_USAC     = 147   Virtual AOT for DRM with USAC
+     * NB decoder uses only AOT_DRM_AAC and puts SBR, PS in sub fields - what should we do with the encoder?
+     */
+    switch (AudioParam.eAudioMode) {
+    case CAudioParam::AM_MONO:
+        if(AudioParam.eSBRFlag) {
+            r = aacEncoder_SetParam(hEncoder, AACENC_AOT, AOT_DRM_SBR);
+        }
+        else {
+            r = aacEncoder_SetParam(hEncoder, AACENC_AOT, AOT_DRM_AAC);
+        }
+        break;
+    case CAudioParam::AM_P_STEREO:
+        r = aacEncoder_SetParam(hEncoder, AACENC_AOT, AOT_DRM_MPEG_PS);
+        break;
+    case CAudioParam::AM_STEREO:
+        r = aacEncoder_SetParam(hEncoder, AACENC_AOT, AOT_DRM_SBR);
+        break;
+    case CAudioParam::AM_SURROUND:
+        r = aacEncoder_SetParam(hEncoder, AACENC_AOT, AOT_DRM_SURROUND);
+    }
+    if(r!=AACENC_OK) {
+        cerr << "error setting DRM mode" << hex << r << dec << endl;
+    }
+    r = aacEncoder_SetParam(hEncoder, AACENC_SAMPLERATE, unsigned(0));
+    if(r!=AACENC_OK) {
+        cerr << "error setting sample rate " << hex << r << dec << endl;
+    }
+    switch (AudioParam.eAudioMode) {
+    case CAudioParam::AM_MONO:
+        r = aacEncoder_SetParam(hEncoder, AACENC_CHANNELMODE, MODE_1);
+        break;
+    case CAudioParam::AM_P_STEREO:
+        r = aacEncoder_SetParam(hEncoder, AACENC_CHANNELMODE, MODE_2);
+        break;
+    case CAudioParam::AM_STEREO:
+        r = aacEncoder_SetParam(hEncoder, AACENC_CHANNELMODE, MODE_2);
+        break;
+    case CAudioParam::AM_SURROUND:
+        r = aacEncoder_SetParam(hEncoder, AACENC_CHANNELMODE, MODE_6_1); // TODO provide more options ES 201 980 6.4.3.10
+    }
+    if(r!=AACENC_OK) {
+        cerr << "error setting channel mode " << hex << r << dec << endl;
+    }
     return hEncoder != nullptr;
 }
 
@@ -299,7 +348,8 @@ FdkAacCodec::EncSetBitrate(int iBitRate)
 {
     if (hEncoder != nullptr)
 	{
-	}
+        aacEncoder_SetParam(hEncoder, AACENC_BITRATE, iBitRate);
+    }
 }
 
 void
