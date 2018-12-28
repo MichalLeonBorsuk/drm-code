@@ -275,7 +275,7 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
                            allocated inside the decoder! */
                         if (iDecChannels == 1)
                         {
-                            cerr << "resample " << iLenDecOutPerChan << " mono samples" << endl;
+                            //cerr << "resample " << iLenDecOutPerChan << " mono samples" << endl;
                             /* Change type of data (short -> real) */
                             for (size_t i = 0; i < size_t(iLenDecOutPerChan); i++)
                                 vecTempResBufInLeft[i] = psDecOutSampleBuf[i];
@@ -284,7 +284,7 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
                             ResampleObjL.Resample(vecTempResBufInLeft,
                                                   vecTempResBufOutCurLeft);
 
-                            cerr << "copy " << iResOutBlockSize << " samples from left to right" << endl;
+                            //cerr << "copy " << iResOutBlockSize << " samples from left to right" << endl;
                             /* Mono (write the same audio material in both
                                channels) */
                             for (size_t i = 0; i < size_t(iResOutBlockSize); i++)
@@ -296,7 +296,7 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
                         else
                         {
                             /* Stereo */
-                            cerr << "resample " << iLenDecOutPerChan << " stereo samples" << endl;
+                            //cerr << "resample " << iLenDecOutPerChan << " stereo samples" << endl;
                             for (size_t i = 0; i < size_t(iLenDecOutPerChan); i++)
                             {
                                 vecTempResBufInLeft[i] = psDecOutSampleBuf[i * 2];
@@ -309,7 +309,7 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
                                                   vecTempResBufOutCurLeft);
                             ResampleObjR.Resample(vecTempResBufInRight,
                                                   vecTempResBufOutCurRight);
-                            cerr << "copied " << iResOutBlockSize << " samples" << endl;
+                            //cerr << "copied " << iResOutBlockSize << " samples" << endl;
                         }
                     }
                 }
@@ -394,7 +394,7 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
                            allocated inside the decoder! */
                         if (iDecChannels == 1)
                         {
-                            cerr << "resample " << iLenDecOutPerChan << " mono samples" << endl;
+                            //cerr << "resample " << iLenDecOutPerChan << " mono samples" << endl;
                             /* Change type of data (short -> real) */
                             for (size_t i = 0; i < size_t(iLenDecOutPerChan); i++)
                                 vecTempResBufInLeft[i] = psDecOutSampleBuf[i];
@@ -415,7 +415,7 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
                         else
                         {
                             /* Stereo */
-                            cerr << "resample " << iLenDecOutPerChan << " stereo samples" << endl;
+                            //cerr << "resample " << iLenDecOutPerChan << " stereo samples" << endl;
                             for (size_t i = 0; i < size_t(iLenDecOutPerChan); i++)
                             {
                                 vecTempResBufInLeft[i] = psDecOutSampleBuf[i * 2];
@@ -428,7 +428,7 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
                                                   vecTempResBufOutCurLeft);
                             ResampleObjR.Resample(vecTempResBufInRight,
                                                   vecTempResBufOutCurRight);
-                            cerr << "copied " << iResOutBlockSize << " samples" << endl;
+                            //cerr << "copied " << iResOutBlockSize << " samples" << endl;
                         }
                     }
                 }
