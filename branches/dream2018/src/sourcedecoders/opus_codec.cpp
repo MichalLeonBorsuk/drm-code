@@ -637,7 +637,7 @@ OpusCodec::EncOpen(const CAudioParam& AudioParam, unsigned long& lNumSampEncIn, 
 }
 
 int
-OpusCodec::Encode(const vector<_SAMPLE>& vecsEncInData, unsigned long lNumSampEncIn, CVector<uint8_t>& vecsEncOutData, unsigned long lMaxBytesEncOut)
+OpusCodec::Encode(CVector<_SAMPLE>& vecsEncInData, unsigned long lNumSampEncIn, CVector<uint8_t>& vecsEncOutData, unsigned long lMaxBytesEncOut)
 {
 	int bytesEncoded = 0;
 	if (hOpusEncoder != nullptr)

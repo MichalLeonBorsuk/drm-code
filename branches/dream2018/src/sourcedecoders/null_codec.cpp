@@ -121,7 +121,7 @@ bool NullCodec::EncOpen(const CAudioParam&, unsigned long& lNumSampEncIn, unsign
 	return false;
 }
 
-int NullCodec::Encode(const vector<_SAMPLE>& vecsEncInData, unsigned long lNumSampEncIn, CVector<uint8_t>& vecsEncOutData, unsigned long lMaxBytesEncOut)
+int NullCodec::Encode(CVector<_SAMPLE>& vecsEncInData, unsigned long lNumSampEncIn, CVector<uint8_t>& vecsEncOutData, unsigned long lMaxBytesEncOut)
 {
 	(void)vecsEncInData;
 	(void)lNumSampEncIn;
