@@ -43,5 +43,5 @@ const char dream_implementation[] = "CL";
 const int dream_version_major = 2;
 const int dream_version_minor = 1;
 const int dream_version_patch = 1;
-const char dream_version_build[] = "-svn808";
+const char dream_version_build[] = "-svn1066";
 
