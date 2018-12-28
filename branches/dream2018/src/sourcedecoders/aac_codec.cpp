@@ -294,7 +294,9 @@ AacCodec::EncOpen(const CAudioParam& AudioParam, unsigned long& lNumSampEncIn, u
     unsigned int iChannels=1;
     if(AudioParam.eAudioMode!=CAudioParam::AM_MONO) iChannels = 2;
     hFaacEncoder = faacEncOpen(iSampleRate, iChannels, &lNumSampEncIn, &lMaxBytesEncOut);
-	return hFaacEncoder != nullptr;
+    //cerr << "lNumSampEncIn " << lNumSampEncIn << endl;
+    //cerr << "lMaxBytesEncOut " << lMaxBytesEncOut << endl;
+    return hFaacEncoder != nullptr;
 }
 
 int
@@ -305,9 +307,9 @@ AacCodec::Encode(const vector<_SAMPLE>& vecsEncInData, unsigned long lNumSampEnc
 	{
 		bytesEncoded = faacEncEncode(hFaacEncoder,
 			(int32_t *) &vecsEncInData[0],
-			lNumSampEncIn, &vecsEncOutData[0],
+            lNumSampEncIn, &vecsEncOutData[0],
 			lMaxBytesEncOut);
-	}
+    }
 	return bytesEncoded;
 }
 

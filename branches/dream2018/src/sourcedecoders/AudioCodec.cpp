@@ -55,9 +55,8 @@ CAudioCodec::InitCodecList()
 		/* AAC */
 #ifdef HAVE_LIBFDK_AAC
         CodecList.push_back(new FdkAacCodec);
-#else
-        CodecList.push_back(new AacCodec);
 #endif
+        CodecList.push_back(new AacCodec);
 
 		/* Opus */
 		CodecList.push_back(new OpusCodec);
