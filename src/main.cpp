@@ -35,16 +35,16 @@
 # include <csignal>
 #endif
 
-#include "../GlobalDefinitions.h"
-#include "../DrmReceiver.h"
-#include "../DrmTransmitter.h"
-#include "../DrmSimulation.h"
-#include "../util/Settings.h"
+#include "GlobalDefinitions.h"
+#include "DrmReceiver.h"
+#include "DrmTransmitter.h"
+#include "DrmSimulation.h"
+#include "util/Settings.h"
 #include <iostream>
 
 #ifdef QT_CORE_LIB
 # ifdef HAVE_LIBHAMLIB
-#   include "../util-QT/Rig.h"
+#   include "util-QT/Rig.h"
 # endif
 # include <QCoreApplication>
 # include <QTranslator>
