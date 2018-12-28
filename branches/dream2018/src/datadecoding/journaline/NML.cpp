@@ -108,7 +108,7 @@ const char *NML::ObjectTypeString[]=
 
 
 
-NMLFactory *NMLFactory::_instance = 0;
+NMLFactory *NMLFactory::_instance = nullptr;
 
 NMLFactory::NMLFactory()
 {
@@ -187,7 +187,7 @@ NML *NMLFactory::CreateError(NML::NewsObjectId_t oid,
 /// @return  dump of NML object as string
 std::string DumpRaw(const NML::RawNewsObject_t & rno)
 {
-  return HexDump(rno.nml, static_cast<int>(rno.nml_len), 8);
+  return HexDump(rno.nml, static_cast<unsigned>(rno.nml_len), 8);
 }
 
 
@@ -235,18 +235,16 @@ std::string NML::Dump(void) const
           GetObjectType(),
           isStatic(),
           GetRevisionIndex(),
-          (int)_news.extended_header.size(),
+          int(_news.extended_header.size()),
           nr_of_items);
   std::string s = buf;
   if (_news.extended_header.size())
   {
     s += "\nextended header: ";
-    s += HexDump(_news.extended_header.c_str(),
-                 _news.extended_header.size());
+    s += HexDump(_news.extended_header.c_str(), static_cast<unsigned int>(_news.extended_header.size()));
   }
   s += "\ntitle=\n";
-  s += HexDump(_news.title.c_str(),
-               _news.title.size());
+  s += HexDump(_news.title.c_str(), static_cast<unsigned int>(_news.title.size()));
   s += "\nitems:\n";
   s += items;
   return s;
@@ -259,10 +257,10 @@ std::string NML::Dump(void) const
 //returns 0 on error
 unsigned char* NMLFactory::getNextSection( const unsigned char*& p, unsigned short& plen, unsigned short& reslen )
 {
-	register int i = 0;
-	register int j = 0;
-	register int dslen;
-	unsigned char* res = (unsigned char*)malloc( plen + 1 );
+    unsigned short i = 0;
+    unsigned short j = 0;
+    int dslen;
+    unsigned char* res = static_cast<unsigned char*>(malloc( plen + 1 ));
 
 	// we will loop through the entire data until a break case is met
 	while( i < plen )
@@ -280,7 +278,7 @@ unsigned char* NMLFactory::getNextSection( const unsigned char*& p, unsigned sho
 				// abort!
 				reslen = 0;
 				free( res );
-				return 0;
+                return nullptr;
 			}
 			// we can safely skip the datasection now
 			i += 2 + dslen;
@@ -306,7 +304,7 @@ unsigned char* NMLFactory::getNextSection( const unsigned char*& p, unsigned sho
 	res[j] = '\0';
 
 	// finally return the result
-	reslen = j;
+    reslen = j;
 	return res;
 }
 
@@ -478,7 +476,7 @@ NML* NMLFactory::CreateNML( const NML::RawNewsObject_t& rno, const NMLEscapeCode
 			n->SetErrorDump( n->_news.object_id, uncompressed, error );
 			return n;
 		}
-		tmp_string.assign( (const char *)(pure_text), pure_txt_len);
+        tmp_string.assign(reinterpret_cast<char*>(pure_text), pure_txt_len);
 		free( pure_text );
 		NML::Item_t item;
 		EscapeCodeHandler->Convert( item.text, tmp_string );
@@ -690,7 +688,7 @@ std::string HexDump(const unsigned char *p,
   {
     char buf[4];
     sprintf(buf, "%02x ", p[i]);
-    ascii += (isprint(p[i]))?p[i]:'.';
+    ascii += isprint(p[i])?char(p[i]):'.';
     dump += buf;
     if (i%bytes_per_line==bytes_per_line-1)
     {
@@ -744,8 +742,8 @@ int Inflate(unsigned char *dest,
     return 0;
   }
 
-  stream.zalloc = 0;
-  stream.zfree = 0;
+  stream.zalloc = nullptr;
+  stream.zfree = nullptr;
 
   err = inflateInit2(&stream, -15);
   if (err != Z_OK)
@@ -814,7 +812,7 @@ bool RemoveNMLEscapeSequences::Convert(std::string & dest,
     case 0x1A: // data section begin -> read over next bytes
     case 0x1B: // data section continuation -> read over next bytes
       ++i;
-      i += src[i] + 1;
+      i += unsigned(src[i]) + 1;
       break;
     case 0x1C: // extended code begin -> ignore next byte
     case 0x1D: // extended code end -> ignore next byte
