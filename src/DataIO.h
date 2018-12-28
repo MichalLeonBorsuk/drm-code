@@ -67,23 +67,25 @@
 class CReadData : public CTransmitterModul<_SAMPLE, _SAMPLE>
 {
 public:
-    CReadData(CSoundInInterface* pNS) : pSound(pNS) {}
+    CReadData() : pSound(nullptr) {}
     virtual ~CReadData() {}
 
     _REAL GetLevelMeter() {
         return SignalLevelMeter.Level();
     }
-#ifdef QT_MULTIMEDIA_LIB
-    void SetSoundInterface(QIODevice*);
-#endif
+    void SetSoundInterface(string);
+    string GetSoundInterface() { return soundDevice; }
+    void Stop();
 
 protected:
 #ifdef QT_MULTIMEDIA_LIB
-    QIODevice*              pIODevice;
+    QIODevice*          pIODevice;
 #endif
-    CSoundInInterface*	pSound;
+    CSoundInInterface*  pSound;
+    string              soundDevice;
     CVector<_SAMPLE>	vecsSoundBuffer;
     CSignalLevelMeter	SignalLevelMeter;
+    int					iSampleRate;
 
     virtual void InitInternal(CParameter& TransmParam);
     virtual void ProcessDataInternal(CParameter& TransmParam);
@@ -96,7 +98,7 @@ public:
                       CS_LEFT_MIX, CS_RIGHT_MIX
                      };
 
-    CWriteData(CSoundOutInterface* pNS);
+    CWriteData();
     virtual ~CWriteData() {}
 
     void StartWriteWaveFile(const string& strFileName);
@@ -126,15 +128,16 @@ public:
     EOutChanSel GetOutChanSel() {
         return eOutChanSel;
     }
-#ifdef QT_MULTIMEDIA_LIB
-    void SetSoundInterface(QIODevice*);
-#endif
+    void SetSoundInterface(string);
+    string GetSoundInterface() { return soundDevice; }
+    void Stop();
 
 protected:
 #ifdef QT_MULTIMEDIA_LIB
     QIODevice*              pIODevice;
 #endif
     CSoundOutInterface*		pSound;
+    string                  soundDevice;
     _BOOLEAN				bMuteAudio;
     CWaveFile				WaveFileAudio;
     _BOOLEAN				bDoWriteWaveFile;
