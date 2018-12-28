@@ -30,8 +30,12 @@
 #include "UpsampleFilter.h"
 #include <iostream>
 #ifdef QT_MULTIMEDIA_LIB
-#include <QBuffer>
+# include <QBuffer>
+# include <QAudioOutput>
+# include <QAudioInput>
 #endif
+#include "sound/sound.h"
+#include "sound/audiofilein.h"
 
 
 const static int SineTable[] = { 0, 1, 0, -1, 0 };
@@ -41,11 +45,11 @@ const static int SineTable[] = { 0, 1, 0, -1, 0 };
 /******************************************************************************\
 * Transmitter                                                                  *
 \******************************************************************************/
-CTransmitData::CTransmitData(CSoundOutInterface* pNS) : pFileTransmitter(nullptr),
+CTransmitData::CTransmitData() : pFileTransmitter(nullptr),
 #ifdef QT_MULTIMEDIA_LIB
         pIODevice(nullptr),
 #endif
-        pSound(pNS),
+        pSound(nullptr),
         eOutputFormat(OF_REAL_VAL), rDefCarOffset((_REAL) VIRTUAL_INTERMED_FREQ),
         strOutFileName("test/TransmittedData.txt"), bUseSoundcard(TRUE),
         bAmplified(FALSE), bHighQualityIQ(FALSE)
@@ -53,10 +57,46 @@ CTransmitData::CTransmitData(CSoundOutInterface* pNS) : pFileTransmitter(nullptr
 
 }
 
-void CTransmitData::SetSoundInterface(QIODevice* p)
+void CTransmitData::Stop()
 {
 #ifdef QT_MULTIMEDIA_LIB
-    pIODevice = p;
+    if(pIODevice!=nullptr) pIODevice->close();
+#endif
+    if(pSound!=nullptr) pSound->Close();
+}
+
+void CTransmitData::SetSoundInterface(string device)
+{
+    soundDevice = device;
+#ifdef QT_MULTIMEDIA_LIB
+    QAudioFormat format;
+    if(iSampleRate==0) iSampleRate = 48000; // TODO get initialisation order right
+    format.setSampleRate(iSampleRate);
+    format.setSampleSize(16);
+    format.setSampleType(QAudioFormat::SignedInt);
+    format.setChannelCount(2); // TODO
+    format.setByteOrder(QAudioFormat::LittleEndian);
+    format.setCodec("audio/pcm");
+    foreach(const QAudioDeviceInfo& di, QAudioDeviceInfo::availableDevices(QAudio::AudioOutput))
+    {
+        if(device == di.deviceName().toStdString()) {
+            QAudioFormat nearestFormat = di.nearestFormat(format);
+            QAudioOutput* pAudioOutput = new QAudioOutput(di, nearestFormat);
+            pAudioOutput->setBufferSize(1000000);
+            pIODevice = pAudioOutput->start();
+            if(pAudioOutput->error()!=QAudio::NoError)
+            {
+                qDebug("Can't open audio output");
+            }
+        }
+    }
+#else
+    if(pSound != nullptr) {
+        delete pSound;
+        pSound = nullptr;
+    }
+    pSound = new CSoundOut();
+    pSound->SetSoundInterface(device);
 #endif
 }
 
@@ -186,7 +226,7 @@ void CTransmitData::InitInternal(CParameter& Parameters)
     	CReal	rNormCurFreqOffset;
     */
     /* Get signal sample rate */
-    const int iSampleRate = Parameters.GetSigSampleRate();
+    iSampleRate = Parameters.GetSigSampleRate();
     /* Define symbol block-size */
     const int iSymbolBlockSize = Parameters.CellMappingTable.iSymbolBlockSize;
 
@@ -211,7 +251,7 @@ void CTransmitData::InitInternal(CParameter& Parameters)
     if (bUseSoundcard == TRUE)
     {
         /* Init sound interface */
-        pSound->Init(iSampleRate, iBigBlockSize, TRUE);
+        if(pSound!=nullptr) pSound->Init(iSampleRate, iBigBlockSize, TRUE);
     }
     else
     {
@@ -278,23 +318,77 @@ void CTransmitData::HilbertFilt(_COMPLEX& vecData)
 //inline _REAL sample2real(_SAMPLE s) { return _REAL(s)/32768.0; }
 inline _REAL sample2real(_SAMPLE s) { return _REAL(s); }
 
-#ifdef QT_MULTIMEDIA_LIB
-void
-CReceiveData::SetSoundInterface(QAudioInput *p)
+void CReceiveData::Stop()
 {
-    pAudioInput = p;
-    pIODevice = pAudioInput->start();
-    if(pAudioInput->error()==QAudio::NoError)
-    {
-        pIODevice->open(QIODevice::ReadOnly);
-        qDebug("audio input open");
+#ifdef QT_MULTIMEDIA_LIB
+    if(pIODevice!=nullptr) pIODevice->close();
+#endif
+    if(pSound!=nullptr) pSound->Close();
+}
+
+void
+CReceiveData::SetSoundInterface(string device)
+{
+    soundDevice = device;
+    if(pSound != nullptr) {
+        pSound->Close();
+        delete pSound;
+        pSound = nullptr;
     }
-    else
-    {
-        qDebug("Can't open audio input");
+    if(device.find(".") != string::npos) {
+        CAudioFileIn* pAudioFileIn = new CAudioFileIn();
+        pAudioFileIn->SetFileName(device);
+        int sr = pAudioFileIn->GetSampleRate();
+        if(iSampleRate!=sr) {
+            // TODO
+            cerr << "file sample rate is " << sr << endl;
+            iSampleRate = sr;
+        }
+        pSound = pAudioFileIn;
+#ifdef QT_MULTIMEDIA_LIB
+        if(pIODevice!=nullptr) {
+            pIODevice->close();
+            pIODevice = nullptr;
+        }
+#endif
+    }
+    else {
+#ifdef QT_MULTIMEDIA_LIB
+        QAudioFormat format;
+        if(iSampleRate==0) iSampleRate = 48000; // TODO get order of initialisation correct
+        format.setSampleRate(iSampleRate);
+        format.setSampleSize(16);
+        format.setSampleType(QAudioFormat::SignedInt);
+        format.setChannelCount(2); // TODO
+        format.setByteOrder(QAudioFormat::LittleEndian);
+        format.setCodec("audio/pcm");
+        foreach(const QAudioDeviceInfo& di, QAudioDeviceInfo::availableDevices(QAudio::AudioInput))
+        {
+            foreach(const QAudioDeviceInfo& di, QAudioDeviceInfo::availableDevices(QAudio::AudioInput))
+            {
+                if(device == di.deviceName().toStdString()) {
+                    QAudioFormat nearestFormat = di.nearestFormat(format);
+                    QAudioInput* pAudioInput = new QAudioInput(di, nearestFormat);
+                    pIODevice = pAudioInput->start();
+                    if(pAudioInput->error()==QAudio::NoError)
+                    {
+                        pIODevice->open(QIODevice::ReadOnly);
+                        qDebug("audio input open");
+                    }
+                    else
+                    {
+                        qDebug("Can't open audio input");
+                    }
+                }
+                break;
+            }
+        }
+#else
+        pSound = new CSoundIn();
+        pSound->SetSoundInterface(device);
+#endif
     }
 }
-#endif
 
 void CReceiveData::ProcessDataInternal(CParameter& Parameters)
 {

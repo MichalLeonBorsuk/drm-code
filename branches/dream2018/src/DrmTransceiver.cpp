@@ -28,8 +28,8 @@
 
 #include "DrmTransceiver.h"
 
-CDRMTransceiver::CDRMTransceiver(CSettings* pSettings, CSoundInInterface* pSoundIn, CSoundOutInterface* pSoundOut, _BOOLEAN bTransmitter)
-: pSettings(pSettings), pSoundInInterface(pSoundIn), pSoundOutInterface(pSoundOut), bTransmitter(bTransmitter)
+CDRMTransceiver::CDRMTransceiver(CSettings* pSettings, _BOOLEAN bTransmitter)
+: pSettings(pSettings), bTransmitter(bTransmitter)
 {
 }
 
