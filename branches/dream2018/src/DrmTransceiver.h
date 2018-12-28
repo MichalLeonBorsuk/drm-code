@@ -46,6 +46,8 @@ public:
     virtual void SetOutputDevice(const QString&) = 0;
     virtual QString GetInputDevice() = 0;
     virtual QString GetOutputDevice() = 0;
+    virtual void EnumerateInputs(std::vector<std::string>& names, std::vector<std::string>& descriptions)=0;
+    virtual void EnumerateOutputs(std::vector<std::string>& names, std::vector<std::string>& descriptions)=0;
 
     virtual void Restart()
     {
