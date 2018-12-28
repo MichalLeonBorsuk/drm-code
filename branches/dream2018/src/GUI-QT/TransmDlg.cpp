@@ -463,10 +463,8 @@ TransmDialog::TransmDialog(CSettings& Settings,	QWidget* parent)
         reinterpret_cast<QObject*>(this), SLOT(OnTextChangedSndCrdIF(const QString&)));
 
 	/* Timers */
-	connect(&Timer, SIGNAL(timeout()),
-        reinterpret_cast<QObject*>(this), SLOT(OnTimer()));
-	connect(&TimerStop, SIGNAL(timeout()),
-        reinterpret_cast<QObject*>(this), SLOT(OnTimerStop()));
+    connect(&Timer, SIGNAL(timeout()), reinterpret_cast<QObject*>(this), SLOT(OnTimer()));
+    connect(&TimerStop, SIGNAL(timeout()), reinterpret_cast<QObject*>(this), SLOT(OnTimerStop()));
 
     /* System tray setup */
     pSysTray = CSysTray::Create(reinterpret_cast<QWidget*>(this),
@@ -480,6 +478,7 @@ TransmDialog::TransmDialog(CSettings& Settings,	QWidget* parent)
 
 	/* Set timer for real-time controls */
 	Timer.start(GUI_CONTROL_UPDATE_TIME);
+    TimerStop.setSingleShot(true);
 }
 
 TransmDialog::~TransmDialog()
@@ -582,26 +581,32 @@ void TransmDialog::OnTimer()
 
 void TransmDialog::OnTimerStop()
 {
-	if (!TransThread.isRunning())
+    if (TransThread.isRunning())
 	{
-		TimerStop.stop();
+        cerr << "transmitter thread is running on timer stop - retrying" << endl;
+        /* Request a transmitter stop */
+        TransThread.Stop();
 
-		bIsStarted = FALSE;
+        /* Start the timer for polling the thread state */
+        TimerStop.start(50);
+        return;
+    }
 
-		if (bCloseRequested)
-		{
-			close();
-		}
-		else
-		{
-			ButtonStartStop->setText(tr("&Start"));
-			if (pActionStartStop)
-				pActionStartStop->setText(ButtonStartStop->text());
-			CSysTray::SetToolTip(pSysTray, QString(), tr("Stopped"));
+    bIsStarted = FALSE;
 
-			EnableAllControlsForSet();
-		}
-	}
+    if (bCloseRequested)
+    {
+        close();
+        return;
+    }
+
+    ButtonStartStop->setText(tr("&Start"));
+    if (pActionStartStop) {
+        pActionStartStop->setText(ButtonStartStop->text());
+    }
+    CSysTray::SetToolTip(pSysTray, QString(), tr("Stopped"));
+
+    EnableAllControlsForSet();
 }
 
 void TransmDialog::OnButtonStartStop()
