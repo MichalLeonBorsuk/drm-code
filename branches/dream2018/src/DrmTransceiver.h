@@ -44,6 +44,8 @@ public:
     virtual void Start() = 0;
     virtual void SetInputDevice(const QString&) = 0;
     virtual void SetOutputDevice(const QString&) = 0;
+    virtual QString GetInputDevice() = 0;
+    virtual QString GetOutputDevice() = 0;
 
     virtual void Restart()
     {

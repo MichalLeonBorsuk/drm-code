@@ -63,6 +63,7 @@
 #include <QAudioInput>
 #include <QAudioOutput>
 #endif
+#include <QString>
 
 /* Definitions ****************************************************************/
 /* Number of FAC frames until the acquisition is activated in case a signal
@@ -152,8 +153,11 @@ public:
     void					ClearInputFile();
     ESFStatus				GetInputStatus();
     string					GetInputFileName();
+    QString					GetInputDevice() { return indev; }
+    QString					GetOutputDevice() { return outdev; }
     void					SetInputDevice(const QString&);
     void					SetOutputDevice(const QString&);
+
     void					RequestNewAcquisition() {
         bRestartFlag = TRUE;
     }
@@ -450,8 +454,8 @@ protected:
 #ifdef QT_MULTIMEDIA_LIB
     QAudioInput *pAudioInput;
     QAudioOutput *pAudioOutput;
-    QString indev; QString outdev;
 #endif
+    QString indev; QString outdev;
 };
 
 

@@ -224,13 +224,17 @@ QMenu* CSoundCardSelMenu::InitDevice(QMenu* self, QMenu* parent, const QString& 
         group->addAction(m);
     }
 #else
-    CSelectionInterface* intf = bInput ? (CSelectionInterface*)DRMTransceiver.GetSoundInInterface() : (CSelectionInterface*)DRMTransceiver.GetSoundOutInterface();
     vector<string> names;
     vector<string> descriptions;
-    intf->Enumerate(names, descriptions);
+    // TODO intf->Enumerate(names, descriptions);
     int iNumSoundDev = names.size();
     int iNumDescriptions = descriptions.size(); /* descriptions are optional */
-    string sDefaultDev = intf->GetDev();
+    QString sDefaultDev;
+    if(bInput) {
+	sDefaultDev = DRMTransceiver.GetInputDevice();
+    } else {
+	sDefaultDev = DRMTransceiver.GetOutputDevice();
+    }
     for (int i = 0; i < iNumSoundDev; i++)
     {
         QString name(QString::fromLocal8Bit(names[i].c_str()));
@@ -238,14 +242,11 @@ QMenu* CSoundCardSelMenu::InitDevice(QMenu* self, QMenu* parent, const QString& 
         QAction* m = menu->addAction(name.isEmpty() ? tr("[default]") : name + (desc.isEmpty() ? desc : " [" + desc + "]"));
         m->setData(name);
         m->setCheckable(true);
-//        if (name.isEmpty())
-//            menu->setDefaultAction(m);
-        if (names[i] == sDefaultDev)
+        if (names[i] == sDefaultDev.toStdString())
             m->setChecked(true);
         if (group == nullptr)
             group = new QActionGroup(m);
         group->addAction(m);
-//printf("CSoundCardSelMenu::InitDevice() %s\n", name.toUtf8().constData());
     }
 #endif
     return menu;
