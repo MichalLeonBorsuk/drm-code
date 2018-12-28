@@ -47,12 +47,12 @@ const static int SineTable[] = { 0, 1, 0, -1, 0 };
 \******************************************************************************/
 CTransmitData::CTransmitData() : pFileTransmitter(nullptr),
 #ifdef QT_MULTIMEDIA_LIB
-        pIODevice(nullptr),
+    pIODevice(nullptr),
 #endif
-        pSound(nullptr),
-        eOutputFormat(OF_REAL_VAL), rDefCarOffset((_REAL) VIRTUAL_INTERMED_FREQ),
-        strOutFileName("test/TransmittedData.txt"), bUseSoundcard(TRUE),
-        bAmplified(FALSE), bHighQualityIQ(FALSE)
+    pSound(nullptr),
+    eOutputFormat(OF_REAL_VAL), rDefCarOffset((_REAL) VIRTUAL_INTERMED_FREQ),
+    strOutFileName("test/TransmittedData.txt"), bUseSoundcard(TRUE),
+    bAmplified(FALSE), bHighQualityIQ(FALSE)
 {
 
 }
@@ -96,7 +96,7 @@ void CTransmitData::SetSoundInterface(string device)
         pSound = nullptr;
     }
     pSound = new CSoundOut();
-    pSound->SetSoundInterface(device);
+    pSound->SetDev(device);
 #endif
 }
 
@@ -124,7 +124,7 @@ void CTransmitData::ProcessDataInternal(CParameter&)
             Real2Sample(cInputData.imag() * rNormFactor);
 
         /* Envelope, phase */
-        const _SAMPLE sCurOutEnv = 
+        const _SAMPLE sCurOutEnv =
             Real2Sample(Abs(cInputData) * (_REAL) 256.0);
         const _SAMPLE sCurOutPhase = /* 2^15 / pi / 2 -> approx. 5000 */
             Real2Sample(Angle(cInputData) * (_REAL) 5000.0);
@@ -316,7 +316,9 @@ void CTransmitData::HilbertFilt(_COMPLEX& vecData)
 \******************************************************************************/
 
 //inline _REAL sample2real(_SAMPLE s) { return _REAL(s)/32768.0; }
-inline _REAL sample2real(_SAMPLE s) { return _REAL(s); }
+inline _REAL sample2real(_SAMPLE s) {
+    return _REAL(s);
+}
 
 void CReceiveData::Stop()
 {
@@ -385,7 +387,7 @@ CReceiveData::SetSoundInterface(string device)
         }
 #else
         pSound = new CSoundIn();
-        pSound->SetSoundInterface(device);
+        pSound->SetDev(device);
 #endif
     }
 }
@@ -474,7 +476,7 @@ void CReceiveData::ProcessDataInternal(CParameter& Parameters)
             }
             break;
 
-            /* I / Q input */
+        /* I / Q input */
         case CS_IQ_POS:
             for (i = 0; i < iOutputBlockSize; i++)
             {
@@ -550,9 +552,9 @@ void CReceiveData::ProcessDataInternal(CParameter& Parameters)
     }
 
     /* Upscale ratio equal to one */
-	else {
-    /* Write data to output buffer. Do not set the switch command inside
-       the for-loop for efficiency reasons */
+    else {
+        /* Write data to output buffer. Do not set the switch command inside
+           the for-loop for efficiency reasons */
         switch (eInChanSelection)
         {
         case CS_LEFT_CHAN:
@@ -585,7 +587,7 @@ void CReceiveData::ProcessDataInternal(CParameter& Parameters)
             }
             break;
 
-            /* I / Q input */
+        /* I / Q input */
         case CS_IQ_POS:
             for (i = 0; i < iOutputBlockSize; i++)
             {
@@ -662,7 +664,7 @@ void CReceiveData::ProcessDataInternal(CParameter& Parameters)
             }
             break;
         }
-	}
+    }
 
     /* Flip spectrum if necessary ------------------------------------------- */
     if (bFippedSpectrum == TRUE)
@@ -713,78 +715,79 @@ void CReceiveData::InitInternal(CParameter& Parameters)
     Parameters.Unlock();
 
     const int iOutputBlockAlignment = iOutputBlockSize & 3;
-    if (iOutputBlockAlignment)
+    if (iOutputBlockAlignment) {
         fprintf(stderr, "CReceiveData::InitInternal(): iOutputBlockAlignment = %i\n", iOutputBlockAlignment);
+    }
 
-	try {
-		const _BOOLEAN bChanged = pSound->Init(iSampleRate / iUpscaleRatio, iOutputBlockSize * 2 / iUpscaleRatio, TRUE);
+    try {
+        const _BOOLEAN bChanged = pSound->Init(iSampleRate / iUpscaleRatio, iOutputBlockSize * 2 / iUpscaleRatio, TRUE);
 
-		/* Clear input data buffer on change samplerate change */
-		if (bChanged)
-			ClearInputData();
+        /* Clear input data buffer on change samplerate change */
+        if (bChanged)
+            ClearInputData();
 
-		/* Init 2X upscaler if enabled */
-		if (iUpscaleRatio > 1)
-		{
-			const int taps = (NUM_TAPS_UPSAMPLE_FILT + 3) & ~3;
-			vecf_B.resize(taps, 0.0f);
-			for (int i = 0; i < NUM_TAPS_UPSAMPLE_FILT; i++)
-				vecf_B[i] = dUpsampleFilt[i] * iUpscaleRatio;
-			if (bChanged)
-			{
-				vecf_ZL.resize(0);
-				vecf_ZR.resize(0);
-			}
-			vecf_ZL.resize((iOutputBlockSize + taps) / 2, 0.0f);
-			vecf_ZR.resize((iOutputBlockSize + taps) / 2, 0.0f);
-			vecf_YL.resize(iOutputBlockSize);
-			vecf_YR.resize(iOutputBlockSize);
-		}
-		else
-		{
-			vecf_B.resize(0);
-			vecf_YL.resize(0);
-			vecf_YR.resize(0);
-			vecf_ZL.resize(0);
-			vecf_ZR.resize(0);
-		}
+        /* Init 2X upscaler if enabled */
+        if (iUpscaleRatio > 1)
+        {
+            const int taps = (NUM_TAPS_UPSAMPLE_FILT + 3) & ~3;
+            vecf_B.resize(taps, 0.0f);
+            for (int i = 0; i < NUM_TAPS_UPSAMPLE_FILT; i++)
+                vecf_B[i] = dUpsampleFilt[i] * iUpscaleRatio;
+            if (bChanged)
+            {
+                vecf_ZL.resize(0);
+                vecf_ZR.resize(0);
+            }
+            vecf_ZL.resize((iOutputBlockSize + taps) / 2, 0.0f);
+            vecf_ZR.resize((iOutputBlockSize + taps) / 2, 0.0f);
+            vecf_YL.resize(iOutputBlockSize);
+            vecf_YR.resize(iOutputBlockSize);
+        }
+        else
+        {
+            vecf_B.resize(0);
+            vecf_YL.resize(0);
+            vecf_YR.resize(0);
+            vecf_ZL.resize(0);
+            vecf_ZR.resize(0);
+        }
 
-		/* Init buffer size for taking stereo input */
-		vecsSoundBuffer.Init(iOutputBlockSize * 2 / iUpscaleRatio);
+        /* Init buffer size for taking stereo input */
+        vecsSoundBuffer.Init(iOutputBlockSize * 2 / iUpscaleRatio);
 
-		/* Init signal meter */
-		SignalLevelMeter.Init(0);
+        /* Init signal meter */
+        SignalLevelMeter.Init(0);
 
-		/* Inits for I / Q input, only if it is not already
-		   to keep the history intact */
-		if (vecrReHist.Size() != NUM_TAPS_IQ_INPUT_FILT || bChanged)
-		{
-			vecrReHist.Init(NUM_TAPS_IQ_INPUT_FILT, (_REAL) 0.0);
-			vecrImHist.Init(NUM_TAPS_IQ_INPUT_FILT, (_REAL) 0.0);
-		}
+        /* Inits for I / Q input, only if it is not already
+           to keep the history intact */
+        if (vecrReHist.Size() != NUM_TAPS_IQ_INPUT_FILT || bChanged)
+        {
+            vecrReHist.Init(NUM_TAPS_IQ_INPUT_FILT, (_REAL) 0.0);
+            vecrImHist.Init(NUM_TAPS_IQ_INPUT_FILT, (_REAL) 0.0);
+        }
 
-		/* Start with phase null (can be arbitrarily chosen) */
-		cCurExp = (_REAL) 1.0;
+        /* Start with phase null (can be arbitrarily chosen) */
+        cCurExp = (_REAL) 1.0;
 
-		/* Set rotation vector to mix signal from zero frequency to virtual
-		   intermediate frequency */
-		const _REAL rNormCurFreqOffsetIQ =
-			(_REAL) 2.0 * crPi * ((_REAL) VIRTUAL_INTERMED_FREQ / iSampleRate);
+        /* Set rotation vector to mix signal from zero frequency to virtual
+           intermediate frequency */
+        const _REAL rNormCurFreqOffsetIQ =
+            (_REAL) 2.0 * crPi * ((_REAL) VIRTUAL_INTERMED_FREQ / iSampleRate);
 
-		cExpStep = _COMPLEX(cos(rNormCurFreqOffsetIQ), sin(rNormCurFreqOffsetIQ));
+        cExpStep = _COMPLEX(cos(rNormCurFreqOffsetIQ), sin(rNormCurFreqOffsetIQ));
 
 
-		/* OPH: init free-running symbol counter */
-		iFreeSymbolCounter = 0;
+        /* OPH: init free-running symbol counter */
+        iFreeSymbolCounter = 0;
 
-	}
+    }
     catch (CGenErr GenErr)
     {
-		pSound = nullptr;
+        pSound = nullptr;
     }
     catch (string strError)
     {
-		pSound = nullptr;
+        pSound = nullptr;
     }
 }
 
@@ -816,52 +819,52 @@ _REAL CReceiveData::HilbertFilt(const _REAL rRe, const _REAL rIm)
 
 void CReceiveData::InterpFIR_2X(const int channels, _SAMPLE* X, vector<float>& Z, vector<float>& Y, vector<float>& B)
 {
-	/*
-	    2X interpolating filter. When combined with CS_IQ_POS_SPLIT or CS_IQ_NEG_SPLIT
-	    input data mode, convert I/Q input to full bandwidth, code by David Flamand
-	*/
-	int i, j;
-	const int B_len = B.size();
-	const int Z_len = Z.size();
-	const int Y_len = Y.size();
-	const int Y_len_2 = Y_len / 2;
-	float *B_beg_ptr = &B[0];
-	float *Z_beg_ptr = &Z[0];
-	float *Y_ptr = &Y[0];
-	float *B_end_ptr, *B_ptr, *Z_ptr;
-	float y0, y1, y2, y3;
+    /*
+        2X interpolating filter. When combined with CS_IQ_POS_SPLIT or CS_IQ_NEG_SPLIT
+        input data mode, convert I/Q input to full bandwidth, code by David Flamand
+    */
+    int i, j;
+    const int B_len = B.size();
+    const int Z_len = Z.size();
+    const int Y_len = Y.size();
+    const int Y_len_2 = Y_len / 2;
+    float *B_beg_ptr = &B[0];
+    float *Z_beg_ptr = &Z[0];
+    float *Y_ptr = &Y[0];
+    float *B_end_ptr, *B_ptr, *Z_ptr;
+    float y0, y1, y2, y3;
 
-	/* Check for size and alignment requirement */
-	if ((B_len & 3) || (Z_len != (B_len/2 + Y_len_2)) || (Y_len & 1))
-		return;
+    /* Check for size and alignment requirement */
+    if ((B_len & 3) || (Z_len != (B_len/2 + Y_len_2)) || (Y_len & 1))
+        return;
 
-	/* Copy the old history at the end */
-	for (i = B_len/2-1; i >= 0; i--)
-		Z_beg_ptr[Y_len_2 + i] = Z_beg_ptr[i];
+    /* Copy the old history at the end */
+    for (i = B_len/2-1; i >= 0; i--)
+        Z_beg_ptr[Y_len_2 + i] = Z_beg_ptr[i];
 
-	/* Copy the new sample at the beginning of the history */
-	for (i = 0, j = 0; i < Y_len_2; i++, j+=channels)
-		Z_beg_ptr[Y_len_2 - i - 1] = X[j];
+    /* Copy the new sample at the beginning of the history */
+    for (i = 0, j = 0; i < Y_len_2; i++, j+=channels)
+        Z_beg_ptr[Y_len_2 - i - 1] = X[j];
 
-	/* The actual lowpass filtering using FIR */
-	for (i = Y_len_2-1; i >= 0; i--)
-	{
-		B_end_ptr  = B_beg_ptr + B_len;
-		B_ptr      = B_beg_ptr;
-		Z_ptr      = Z_beg_ptr + i;
-		y0 = y1 = y2 = y3 = 0.0f;
-		while (B_ptr != B_end_ptr)
-		{
-			y0 = y0 + B_ptr[0] * Z_ptr[0];
-			y1 = y1 + B_ptr[1] * Z_ptr[0];
-			y2 = y2 + B_ptr[2] * Z_ptr[1];
-			y3 = y3 + B_ptr[3] * Z_ptr[1];
-			B_ptr += 4;
-			Z_ptr += 2;
-		}
-		*Y_ptr++ = y0 + y2;
-		*Y_ptr++ = y1 + y3;
-	}
+    /* The actual lowpass filtering using FIR */
+    for (i = Y_len_2-1; i >= 0; i--)
+    {
+        B_end_ptr  = B_beg_ptr + B_len;
+        B_ptr      = B_beg_ptr;
+        Z_ptr      = Z_beg_ptr + i;
+        y0 = y1 = y2 = y3 = 0.0f;
+        while (B_ptr != B_end_ptr)
+        {
+            y0 = y0 + B_ptr[0] * Z_ptr[0];
+            y1 = y1 + B_ptr[1] * Z_ptr[0];
+            y2 = y2 + B_ptr[2] * Z_ptr[1];
+            y3 = y3 + B_ptr[3] * Z_ptr[1];
+            B_ptr += 4;
+            Z_ptr += 2;
+        }
+        *Y_ptr++ = y0 + y2;
+        *Y_ptr++ = y1 + y3;
+    }
 }
 
 CReceiveData::~CReceiveData()
@@ -877,12 +880,11 @@ _REAL CReceiveData::ConvertFrequency(_REAL rFrequency, _BOOLEAN bInvert) const
     const int iInvert = bInvert ? -1 : 1;
 
     if (eInChanSelection == CReceiveData::CS_IQ_POS_SPLIT ||
-        eInChanSelection == CReceiveData::CS_IQ_NEG_SPLIT)
+            eInChanSelection == CReceiveData::CS_IQ_NEG_SPLIT)
         rFrequency -= iSampleRate / 4 * iInvert;
-    else
-        if (eInChanSelection == CReceiveData::CS_IQ_POS_ZERO ||
-            eInChanSelection == CReceiveData::CS_IQ_NEG_ZERO)
-            rFrequency -= VIRTUAL_INTERMED_FREQ * iInvert;
+    else if (eInChanSelection == CReceiveData::CS_IQ_POS_ZERO ||
+             eInChanSelection == CReceiveData::CS_IQ_NEG_ZERO)
+        rFrequency -= VIRTUAL_INTERMED_FREQ * iInvert;
 
     return rFrequency;
 }
@@ -900,18 +902,18 @@ void CReceiveData::GetInputSpec(CVector<_REAL>& vecrData,
     vecrScale.Init(iLenSpecWithNyFreq, (_REAL) 0.0);
 
     /* Init the constants for scale and normalization */
-    const _BOOLEAN bNegativeFreq = 
+    const _BOOLEAN bNegativeFreq =
         eInChanSelection == CReceiveData::CS_IQ_POS_SPLIT ||
-		eInChanSelection == CReceiveData::CS_IQ_NEG_SPLIT;
+        eInChanSelection == CReceiveData::CS_IQ_NEG_SPLIT;
 
-    const _BOOLEAN bOffsetFreq = 
+    const _BOOLEAN bOffsetFreq =
         eInChanSelection == CReceiveData::CS_IQ_POS_ZERO ||
-		eInChanSelection == CReceiveData::CS_IQ_NEG_ZERO;
+        eInChanSelection == CReceiveData::CS_IQ_NEG_ZERO;
 
     const int iOffsetScale =
         bNegativeFreq ? iLenSpecWithNyFreq / 2 :
         (bOffsetFreq ? iLenSpecWithNyFreq * VIRTUAL_INTERMED_FREQ
-            / (iSampleRate / 2) : 0);
+         / (iSampleRate / 2) : 0);
 
     const _REAL rFactorScale =
         (_REAL) iSampleRate / iLenSpecWithNyFreq / 2000;
@@ -922,8 +924,8 @@ void CReceiveData::GetInputSpec(CVector<_REAL>& vecrData,
 
     const _REAL rNormData = rDataCalibrationFactor /
                             ((_REAL) _MAXSHORT * _MAXSHORT *
-                            NUM_SMPLS_4_INPUT_SPECTRUM *
-                            NUM_SMPLS_4_INPUT_SPECTRUM);
+                             NUM_SMPLS_4_INPUT_SPECTRUM *
+                             NUM_SMPLS_4_INPUT_SPECTRUM);
 
     /* Copy data from shift register in Matlib vector */
     CRealVector vecrFFTInput(NUM_SMPLS_4_INPUT_SPECTRUM);
@@ -976,18 +978,18 @@ void CReceiveData::CalculatePSD(CVector<_REAL>& vecrData,
     vecrScale.Init(iLenSpecWithNyFreq, (_REAL) 0.0);
 
     /* Init the constants for scale and normalization */
-    const _BOOLEAN bNegativeFreq = 
+    const _BOOLEAN bNegativeFreq =
         eInChanSelection == CReceiveData::CS_IQ_POS_SPLIT ||
-		eInChanSelection == CReceiveData::CS_IQ_NEG_SPLIT;
+        eInChanSelection == CReceiveData::CS_IQ_NEG_SPLIT;
 
-    const _BOOLEAN bOffsetFreq = 
+    const _BOOLEAN bOffsetFreq =
         eInChanSelection == CReceiveData::CS_IQ_POS_ZERO ||
-		eInChanSelection == CReceiveData::CS_IQ_NEG_ZERO;
+        eInChanSelection == CReceiveData::CS_IQ_NEG_ZERO;
 
     const int iOffsetScale =
         bNegativeFreq ? iLenSpecWithNyFreq / 2 :
         (bOffsetFreq ? iLenSpecWithNyFreq * VIRTUAL_INTERMED_FREQ
-            / (iSampleRate / 2) : 0);
+         / (iSampleRate / 2) : 0);
 
     const _REAL rFactorScale =
         (_REAL) iSampleRate / iLenSpecWithNyFreq / 2000;
@@ -1005,7 +1007,8 @@ void CReceiveData::CalculatePSD(CVector<_REAL>& vecrData,
 
     /* Calculate FFT of each small block and average results (estimation
        of PSD of input signal) */
-    CFftPlans FftPlans; int i;
+    CFftPlans FftPlans;
+    int i;
     mutexInpData.Lock();
     for (i = 0; i < iNumAvBlocksPSD; i++)
     {
