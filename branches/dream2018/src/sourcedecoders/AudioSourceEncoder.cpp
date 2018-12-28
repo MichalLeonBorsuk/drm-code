@@ -101,11 +101,6 @@ CAudioSourceEncoderImplementation::ProcessDataInternal(CParameter& Parameters,
         /* Split data in individual audio blocks */
         for (int j = 0; j < iNumAudioFrames; j++)
         {
-            vector<_SAMPLE> vecIn(vecsEncInData.Size());
-            for (size_t i = 0; i < vecIn.size(); i++) {
-                vecIn[i] = vecsEncInData[i];
-            }
-
             int bytesEncoded;
             CVector < unsigned char >vecsTmpData(lMaxBytesEncOut);
 
@@ -118,7 +113,7 @@ CAudioSourceEncoderImplementation::ProcessDataInternal(CParameter& Parameters,
             }
 
             /* Actual encoding */
-            bytesEncoded = codec->Encode(vecIn, lNumSampEncIn * iNumChannels, vecsTmpData, lMaxBytesEncOut);
+            bytesEncoded = codec->Encode(vecsEncInData, lNumSampEncIn * iNumChannels, vecsTmpData, lMaxBytesEncOut);
             if (bytesEncoded > 0)
             {
                 /* Extract CRC */

@@ -39,11 +39,11 @@ static NeAACDecInitDRM_t *NeAACDecInitDRM;
 static NeAACDecClose_t *NeAACDecClose;
 static NeAACDecDecode_t *NeAACDecDecode;
 static const LIBFUNC FaadLibFuncs[] = {
-	{ "NeAACDecOpen",    (void**)&NeAACDecOpen,    (void*)nullptr },
-	{ "NeAACDecInitDRM", (void**)&NeAACDecInitDRM, (void*)nullptr },
-	{ "NeAACDecClose",   (void**)&NeAACDecClose,   (void*)nullptr },
-	{ "NeAACDecDecode",  (void**)&NeAACDecDecode,  (void*)nullptr },
-	{ nullptr, nullptr, nullptr }
+    { "NeAACDecOpen",    (void**)&NeAACDecOpen,    (void*)nullptr },
+    { "NeAACDecInitDRM", (void**)&NeAACDecInitDRM, (void*)nullptr },
+    { "NeAACDecClose",   (void**)&NeAACDecClose,   (void*)nullptr },
+    { "NeAACDecDecode",  (void**)&NeAACDecDecode,  (void*)nullptr },
+    { nullptr, nullptr, nullptr }
 };
 # if defined(_WIN32)
 static const char* FaadLibNames[] = { "faad2_drm.dll", "libfaad2_drm.dll", "faad_drm.dll", "libfaad2.dll", nullptr };
@@ -64,13 +64,13 @@ static faacEncOpen_t* faacEncOpen;
 static faacEncEncode_t* faacEncEncode;
 static faacEncClose_t* faacEncClose;
 static const LIBFUNC FaacLibFuncs[] = {
-	{ "faacEncGetVersion",              (void**)&faacEncGetVersion,              (void*)nullptr },
-	{ "faacEncGetCurrentConfiguration", (void**)&faacEncGetCurrentConfiguration, (void*)nullptr },
-	{ "faacEncSetConfiguration",        (void**)&faacEncSetConfiguration,        (void*)nullptr },
-	{ "faacEncOpen",                    (void**)&faacEncOpen,                    (void*)nullptr },
-	{ "faacEncEncode",                  (void**)&faacEncEncode,                  (void*)nullptr },
-	{ "faacEncClose",                   (void**)&faacEncClose,                   (void*)nullptr },
-	{ nullptr, nullptr, nullptr }
+    { "faacEncGetVersion",              (void**)&faacEncGetVersion,              (void*)nullptr },
+    { "faacEncGetCurrentConfiguration", (void**)&faacEncGetCurrentConfiguration, (void*)nullptr },
+    { "faacEncSetConfiguration",        (void**)&faacEncSetConfiguration,        (void*)nullptr },
+    { "faacEncOpen",                    (void**)&faacEncOpen,                    (void*)nullptr },
+    { "faacEncEncode",                  (void**)&faacEncEncode,                  (void*)nullptr },
+    { "faacEncClose",                   (void**)&faacEncClose,                   (void*)nullptr },
+    { nullptr, nullptr, nullptr }
 };
 # if defined(_WIN32)
 static const char* FaacLibNames[] = { "faac_drm.dll", "libfaac_drm.dll", "libfaac.dll", "faac.dll", nullptr };
@@ -103,14 +103,14 @@ AacCodec::AacCodec() :
     hFaadDecoder(nullptr), hFaacEncoder(nullptr),pFile(nullptr)
 {
 #ifndef USE_FAAD2_LIBRARY
-	if (hFaadLib == nullptr)
-	{
-		hFaadLib = CLibraryLoader::Load(FaadLibNames, FaadLibFuncs);
-		if (!hFaadLib)
-		    cerr << "No usable FAAD2 aac decoder library found" << endl;
-		else
-		    cerr << "Got FAAD2 library" << endl;
-	}
+    if (hFaadLib == nullptr)
+    {
+        hFaadLib = CLibraryLoader::Load(FaadLibNames, FaadLibFuncs);
+        if (!hFaadLib)
+            cerr << "No usable FAAD2 aac decoder library found" << endl;
+        else
+            cerr << "Got FAAD2 library" << endl;
+    }
 #endif
 #ifndef USE_FAAC_LIBRARY
     if (hFaacLib == nullptr)
@@ -125,8 +125,8 @@ AacCodec::AacCodec() :
 }
 AacCodec::~AacCodec()
 {
-	DecClose();
-	EncClose();
+    DecClose();
+    EncClose();
 }
 
 /******************************************************************************/
@@ -135,67 +135,67 @@ AacCodec::~AacCodec()
 string
 AacCodec::DecGetVersion()
 {
-	return string("Nero AAC version: ") + FAAD2_VERSION;
+    return string("Nero AAC version: ") + FAAD2_VERSION;
 }
 
 bool
 AacCodec::CanDecode(CAudioParam::EAudCod eAudioCoding)
 {
 #ifndef USE_FAAD2_LIBRARY
-	return hFaadLib && eAudioCoding == CAudioParam::AC_AAC;
+    return hFaadLib && eAudioCoding == CAudioParam::AC_AAC;
 #else
-	return eAudioCoding == CAudioParam::AC_AAC;
+    return eAudioCoding == CAudioParam::AC_AAC;
 #endif
 }
 
 bool
 AacCodec::DecOpen(const CAudioParam& AudioParam, int& iAudioSampleRate, int& iLenDecOutPerChan)
 {
-	int iAACSampleRate = 12000;
-	if (hFaadDecoder == nullptr)
-		hFaadDecoder = NeAACDecOpen();
-	if (hFaadDecoder != nullptr)
-	{
-		int iDRMchanMode = DRMCH_MONO;
-		/* Only 12 kHz and 24 kHz is allowed */
-		switch (AudioParam.eAudioSamplRate)
-		{
-		case CAudioParam::AS_12KHZ:
-			iAACSampleRate = 12000;
-			break;
+    int iAACSampleRate = 12000;
+    if (hFaadDecoder == nullptr)
+        hFaadDecoder = NeAACDecOpen();
+    if (hFaadDecoder != nullptr)
+    {
+        int iDRMchanMode = DRMCH_MONO;
+        /* Only 12 kHz and 24 kHz is allowed */
+        switch (AudioParam.eAudioSamplRate)
+        {
+        case CAudioParam::AS_12KHZ:
+            iAACSampleRate = 12000;
+            break;
 
-		case CAudioParam::AS_24KHZ:
-			iAACSampleRate = 24000;
-			break;
+        case CAudioParam::AS_24KHZ:
+            iAACSampleRate = 24000;
+            break;
 
-		default:
-			break;
-		}
-		/* Number of channels for AAC: Mono, PStereo, Stereo */
-		switch (AudioParam.eAudioMode)
-		{
-		case CAudioParam::AM_MONO:
-			if (AudioParam.eSBRFlag == CAudioParam::SB_USED)
-				iDRMchanMode = DRMCH_SBR_MONO;
-			else
-				iDRMchanMode = DRMCH_MONO;
-			break;
+        default:
+            break;
+        }
+        /* Number of channels for AAC: Mono, PStereo, Stereo */
+        switch (AudioParam.eAudioMode)
+        {
+        case CAudioParam::AM_MONO:
+            if (AudioParam.eSBRFlag == CAudioParam::SB_USED)
+                iDRMchanMode = DRMCH_SBR_MONO;
+            else
+                iDRMchanMode = DRMCH_MONO;
+            break;
 
-		case CAudioParam::AM_P_STEREO:
-			/* Low-complexity only defined in SBR mode */
-			iDRMchanMode = DRMCH_SBR_PS_STEREO;
-			break;
+        case CAudioParam::AM_P_STEREO:
+            /* Low-complexity only defined in SBR mode */
+            iDRMchanMode = DRMCH_SBR_PS_STEREO;
+            break;
 
-		case CAudioParam::AM_STEREO:
-			if (AudioParam.eSBRFlag == CAudioParam::SB_USED)
-				iDRMchanMode = DRMCH_SBR_STEREO;
-			else
-				iDRMchanMode = DRMCH_STEREO;
-			break;
-		}
-		NeAACDecInitDRM(&hFaadDecoder, iAACSampleRate,
-			(unsigned char)iDRMchanMode);
-	}
+        case CAudioParam::AM_STEREO:
+            if (AudioParam.eSBRFlag == CAudioParam::SB_USED)
+                iDRMchanMode = DRMCH_SBR_STEREO;
+            else
+                iDRMchanMode = DRMCH_STEREO;
+            break;
+        }
+        NeAACDecInitDRM(&hFaadDecoder, iAACSampleRate,
+                        (unsigned char)iDRMchanMode);
+    }
     /* In case of SBR, AAC sample rate is half the total sample rate.
        Length of output is doubled if SBR is used */
     if (AudioParam.eSBRFlag == CAudioParam::SB_USED)
@@ -215,9 +215,9 @@ _SAMPLE*
 AacCodec::Decode(const vector<uint8_t>& audio_frame, uint8_t aac_crc_bits, int& iChannels, CAudioCodec::EDecError& eDecError)
 {
     _SAMPLE* psDecOutSampleBuf = nullptr;
-	NeAACDecFrameInfo DecFrameInfo;
-	DecFrameInfo.channels = 1;
-	DecFrameInfo.error = 1;
+    NeAACDecFrameInfo DecFrameInfo;
+    DecFrameInfo.channels = 1;
+    DecFrameInfo.error = 1;
 
     /* Prepare data vector with CRC at the beginning (the definition with faad2 DRM interface) */
     CVector<uint8_t> vecbyPrepAudioFrame(int(audio_frame.size()+1));
@@ -235,13 +235,13 @@ AacCodec::Decode(const vector<uint8_t>& audio_frame, uint8_t aac_crc_bits, int& 
     }
 
     if (hFaadDecoder != nullptr)
-	{
-		psDecOutSampleBuf = (_SAMPLE*) NeAACDecDecode(hFaadDecoder,
-			&DecFrameInfo, &vecbyPrepAudioFrame[0], vecbyPrepAudioFrame.size());
-	}
+    {
+        psDecOutSampleBuf = (_SAMPLE*) NeAACDecDecode(hFaadDecoder,
+                            &DecFrameInfo, &vecbyPrepAudioFrame[0], vecbyPrepAudioFrame.size());
+    }
     iChannels = DecFrameInfo.channels;
     eDecError = DecFrameInfo.error ? CAudioCodec::DECODER_ERROR_UNKNOWN : CAudioCodec::DECODER_ERROR_OK;
-	return psDecOutSampleBuf;
+    return psDecOutSampleBuf;
 }
 
 void
@@ -251,11 +251,11 @@ AacCodec::DecClose()
         fclose(pFile);
         pFile = nullptr;
     }
-	if (hFaadDecoder != nullptr)
-	{
-		NeAACDecClose(hFaadDecoder);
-		hFaadDecoder = nullptr;
-	}
+    if (hFaadDecoder != nullptr)
+    {
+        NeAACDecClose(hFaadDecoder);
+        hFaadDecoder = nullptr;
+    }
 }
 
 void
@@ -269,77 +269,70 @@ AacCodec::DecUpdate(CAudioParam&)
 string
 AacCodec::EncGetVersion()
 {
-	char nul = 0;
-	char *faac_id_string = &nul;
-	char *faac_copyright_string = &nul;
-	faacEncGetVersion(&faac_id_string, &faac_copyright_string);
-	return string("FAAC version: ") + faac_id_string;
+    char nul = 0;
+    char *faac_id_string = &nul;
+    char *faac_copyright_string = &nul;
+    faacEncGetVersion(&faac_id_string, &faac_copyright_string);
+    return string("FAAC version: ") + faac_id_string;
 }
 
 bool
 AacCodec::CanEncode(CAudioParam::EAudCod eAudioCoding)
 {
 #ifndef USE_FAAC_LIBRARY
-	return hFaacLib && eAudioCoding == CAudioParam::AC_AAC;
+    return hFaacLib && eAudioCoding == CAudioParam::AC_AAC;
 #else
-	return eAudioCoding == CAudioParam::AC_AAC;
+    return eAudioCoding == CAudioParam::AC_AAC;
 #endif
 }
 
 bool
 AacCodec::EncOpen(const CAudioParam& AudioParam, unsigned long& lNumSampEncIn, unsigned long& lMaxBytesEncOut)
 {
-    unsigned long iSampleRate = 24000;
-    if(AudioParam.eAudioSamplRate==CAudioParam::AS_12KHZ) iSampleRate = 12000;
-    unsigned int iChannels=1;
-    if(AudioParam.eAudioMode!=CAudioParam::AM_MONO) iChannels = 2;
+    unsigned long iSampleRate = (AudioParam.eAudioSamplRate==CAudioParam::AS_12KHZ)?12000:24000;
+    unsigned int iChannels=(AudioParam.eAudioMode!=CAudioParam::AM_MONO)?1:2;
     hFaacEncoder = faacEncOpen(iSampleRate, iChannels, &lNumSampEncIn, &lMaxBytesEncOut);
-    //cerr << "lNumSampEncIn " << lNumSampEncIn << endl;
-    //cerr << "lMaxBytesEncOut " << lMaxBytesEncOut << endl;
     return hFaacEncoder != nullptr;
 }
 
 int
-AacCodec::Encode(const vector<_SAMPLE>& vecsEncInData, unsigned long lNumSampEncIn, CVector<uint8_t>& vecsEncOutData, unsigned long lMaxBytesEncOut)
+AacCodec::Encode(CVector<_SAMPLE>& vecsEncInData, unsigned long lNumSampEncIn, CVector<uint8_t>& vecsEncOutData, unsigned long lMaxBytesEncOut)
 {
-	int bytesEncoded = 0;
-	if (hFaacEncoder != nullptr)
-	{
-		bytesEncoded = faacEncEncode(hFaacEncoder,
-			(int32_t *) &vecsEncInData[0],
-            lNumSampEncIn, &vecsEncOutData[0],
-			lMaxBytesEncOut);
+    int bytesEncoded = 0;
+    if (hFaacEncoder != nullptr)
+    {
+        bytesEncoded = faacEncEncode(hFaacEncoder, (int32_t *) &vecsEncInData[0], lNumSampEncIn, &vecsEncOutData[0], lMaxBytesEncOut);
     }
-	return bytesEncoded;
+    return bytesEncoded;
 }
 
 void
 AacCodec::EncClose()
 {
-	if (hFaacEncoder != nullptr)
-	{
-		faacEncClose(hFaacEncoder);
-		hFaacEncoder = nullptr;
-	}
+    if (hFaacEncoder != nullptr)
+    {
+        faacEncClose(hFaacEncoder);
+        hFaacEncoder = nullptr;
+    }
 }
 
 void
 AacCodec::EncSetBitrate(int iBitRate)
 {
-	if (hFaacEncoder != nullptr)
-	{
-		/* Set encoder configuration */
-		faacEncConfigurationPtr CurEncFormat;
-		CurEncFormat = faacEncGetCurrentConfiguration(hFaacEncoder);
-		CurEncFormat->inputFormat = FAAC_INPUT_16BIT;
-		CurEncFormat->useTns = 1;
-		CurEncFormat->aacObjectType = LOW;
-		CurEncFormat->mpegVersion = MPEG4;
-		CurEncFormat->outputFormat = 0;	/* (0 = Raw; 1 = ADTS -> Raw) */
-		CurEncFormat->bitRate = iBitRate;
-		CurEncFormat->bandWidth = 0;	/* Let the encoder choose the bandwidth */
-		faacEncSetConfiguration(hFaacEncoder, CurEncFormat);
-	}
+    if (hFaacEncoder != nullptr)
+    {
+        /* Set encoder configuration */
+        faacEncConfigurationPtr CurEncFormat;
+        CurEncFormat = faacEncGetCurrentConfiguration(hFaacEncoder);
+        CurEncFormat->inputFormat = FAAC_INPUT_16BIT;
+        CurEncFormat->useTns = 1;
+        CurEncFormat->aacObjectType = LOW;
+        CurEncFormat->mpegVersion = MPEG4;
+        CurEncFormat->outputFormat = 0;	/* (0 = Raw; 1 = ADTS -> Raw) */
+        CurEncFormat->bitRate = iBitRate;
+        CurEncFormat->bandWidth = 0;	/* Let the encoder choose the bandwidth */
+        faacEncSetConfiguration(hFaacEncoder, CurEncFormat);
+    }
 }
 
 void
