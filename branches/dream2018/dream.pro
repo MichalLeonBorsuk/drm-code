@@ -535,7 +535,6 @@ SOURCES += \
     src/DrmSimulation.cpp \
     src/DrmTransmitter.cpp \
     src/FAC/FAC.cpp \
-    src/GUI-QT/main.cpp \
     src/InputResample.cpp \
     src/interleaver/BlockInterleaver.cpp \
     src/interleaver/SymbolInterleaver.cpp \
@@ -688,7 +687,10 @@ SOURCES += \
     src/GUI-QT/StationsDlg.cpp \
     src/GUI-QT/OpusCodecParams.cpp \
     src/GUI-QT/AACCodecParams.cpp \
-    src/GUI-QT/TransmDlg.cpp
+    src/GUI-QT/TransmDlg.cpp \
+    src/GUI-QT/main.cpp
+} else {
+    SOURCES += src/main.cpp
 }
 !sound {
     error("no usable audio interface found - install pulseaudio or portaudio dev package")
