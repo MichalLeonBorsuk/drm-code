@@ -133,7 +133,7 @@ FdkAacCodec::DecOpen(const CAudioParam& AudioParam, int& iAudioSampleRate, int& 
         //decode_buf = nullptr;
     //}
 
-    cerr << "type9 " << hex << int(t9[1]) << " " << int(t9[0]) << dec << endl;
+    //cerr << "type9 " << hex << int(t9[1]) << " " << int(t9[0]) << dec << endl;
     AAC_DECODER_ERROR err = aacDecoder_ConfigRaw (hDecoder, &t9, &Type9Size);
     if(err == AAC_DEC_OK) {
         CStreamInfo *pinfo = aacDecoder_GetStreamInfo(hDecoder);
