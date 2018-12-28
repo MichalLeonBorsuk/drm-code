@@ -42,20 +42,11 @@
 #include "../util/Settings.h"
 #include <iostream>
 
-#ifdef QT_CORE_LIB
-# ifdef QT_GUI_LIB
-#  include "fdrmdialog.h"
-#  include "TransmDlg.h"
-#  include "DialogUtil.h"
-#  ifdef HAVE_LIBHAMLIB
-#   include "../util-QT/Rig.h"
-#  endif
-#  include <QApplication>
-#  include <QMessageBox>
-# endif
-# include <QCoreApplication>
-# include <QTranslator>
-# include <QThread>
+#ifdef HAVE_LIBHAMLIB
+# include "../util-QT/Rig.h"
+#endif
+#include <QTranslator>
+#include <QThread>
 
 class CRx: public QThread
 {
@@ -86,17 +77,21 @@ CRx::run()
     }
     qDebug("Working thread complete");
 }
-#endif
 
 #ifdef USE_OPENSL
 # include <SLES/OpenSLES.h>
 SLObjectItf engineObject = nullptr;
 #endif
 
-#ifdef QT_GUI_LIB
 /******************************************************************************\
 * Using GUI with QT                                                            *
 \******************************************************************************/
+# include "fdrmdialog.h"
+# include "TransmDlg.h"
+# include "DialogUtil.h"
+# include <QApplication>
+# include <QMessageBox>
+
 int
 main(int argc, char **argv)
 {
@@ -249,79 +244,6 @@ ErrorMessage(string strErrorString)
 */
 	exit(1);
 }
-#else /* QT_GUI_LIB */
-/******************************************************************************\
-* No GUI                                                                       *
-\******************************************************************************/
-
-int
-main(int argc, char **argv)
-{
-#ifdef USE_OPENSL
-    (void)slCreateEngine(&engineObject, 0, nullptr, 0, nullptr, nullptr);
-    (void)(*engineObject)->Realize(engineObject, SL_BOOLEAN_FALSE);
-#endif
-    try
-	{
-		CSettings Settings;
-		Settings.Load(argc, argv);
-
-		string mode = Settings.Get("command", "mode", string());
-		if (mode == "receive")
-		{
-			CDRMSimulation DRMSimulation;
-			CDRMReceiver DRMReceiver(&Settings);
-
-			DRMSimulation.SimScript();
-			DRMReceiver.LoadSettings();
-
-#ifdef _WIN32
-	WSADATA wsaData;
-	(void)WSAStartup(MAKEWORD(2,2), &wsaData);
-#endif
-#ifdef QT_CORE_LIB
-			QCoreApplication app(argc, argv);
-			/* Start working thread */
-			CRx rx(DRMReceiver);
-			rx.start();
-			return app.exec();
-#else
-			DRMReceiver.Start();
-#endif
-		}
-		else if (mode == "transmit")
-		{
-			CDRMTransmitter DRMTransmitter(&Settings);
-			DRMTransmitter.LoadSettings();
-			DRMTransmitter.Start();
-		}
-		else
-		{
-			string usage(Settings.UsageArguments());
-			for (;;)
-			{
-				size_t pos = usage.find("$EXECNAME");
-				if (pos == string::npos) break;
-				usage.replace(pos, sizeof("$EXECNAME")-1, argv[0]);
-			}
-			cerr << usage << endl << endl;
-			exit(0);
-		}
-	}
-	catch(CGenErr GenErr)
-	{
-		ErrorMessage(GenErr.strError);
-	}
-
-	return 0;
-}
-
-void
-ErrorMessage(string strErrorString)
-{
-	perror(strErrorString.c_str());
-}
-#endif /* QT_GUI_LIB */
 
 void
 DebugError(const char *pchErDescr, const char *pchPar1Descr,
