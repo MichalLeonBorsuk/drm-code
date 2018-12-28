@@ -64,14 +64,14 @@ public:
 	void AddSegment (int iSegNum)
 	{
 		if ((iSegNum + 1) > int (vecbHaveSegment.size ()))
-			vecbHaveSegment.resize (iSegNum + 1, FALSE);
-		vecbHaveSegment[iSegNum] = TRUE;
+            vecbHaveSegment.resize (unsigned(iSegNum) + 1, FALSE);
+        vecbHaveSegment[unsigned(iSegNum)] = TRUE;
 	}
 
 	_BOOLEAN HaveSegment (int iSegNum)
 	{
 		if (iSegNum < int (vecbHaveSegment.size ()))
-			return vecbHaveSegment[iSegNum];
+            return vecbHaveSegment[unsigned(iSegNum)];
 		return FALSE;
 	}
 
@@ -137,66 +137,16 @@ public:
 
 protected:
 
-    virtual void copyin (vector<_BYTE> &vecDataIn, size_t iSegNum);
-    virtual void cachelast (vector<_BYTE> &vecDataIn, size_t iSegSize);
-	virtual void copylast ();
+    virtual void copyin(vector<_BYTE> &vecDataIn, size_t iSegNum);
+    virtual void cachelast(vector<_BYTE> &vecDataIn, size_t iSegSize);
+    virtual void copylast();
 
 	vector<_BYTE> vecLastSegment;
-	int iLastSegmentNum;
-	int iLastSegmentSize;
+    int iLastSegmentNum;
+    int iLastSegmentSize;
 	size_t iSegmentSize;
 	CSegmentTrackerN Tracker;
 	bool bReady;
-};
-
-/* CBitReassemblerN uses the Dream CVector class to take a vector of bytes, each holding one bit.
- * It reassembles the segments into another vector, either of bits or of bytes by packing.
- * Packing reduces the amount of storage needed and prepares the output vector to be used in
- * applications expecting vectors of bytes, such as zlib.
- *
- * The major difference to the base class is that the input vector may have a header in front
- * of the data. This will be ignored as long as the bitaccess pointer in the CVector is correctly
- * positioned.
- */
-
-class CBitReassemblerN:public CReassemblerN
-{
-public:
-
-	CBitReassemblerN():CReassemblerN(),bPack(false)
-	{
-	}
-
-	CBitReassemblerN(const CBitReassemblerN& r):CReassemblerN(r),bPack(r.bPack)
-	{
-	}
-
-	inline CBitReassemblerN & operator= (const CBitReassemblerN & r)
-	{
-		CReassemblerN(*this) = r;
-		bPack = r.bPack;
-		return *this;
-	}
-
-protected:
-
-    virtual void copyin (CVector < _BYTE > &vecDataIn, size_t iSegNum);
-    virtual void cachelast (CVector < _BYTE > &vecDataIn, size_t iSegSize);
-	virtual void copylast ();
-
-	bool bPack;
-};
-
-class CByteReassemblerN:public CBitReassemblerN
-{
-public:
-
-	CByteReassemblerN():CBitReassemblerN()
-	{
-		bPack = true;
-    }
-    virtual ~CByteReassemblerN();
-
 };
 
 #endif
