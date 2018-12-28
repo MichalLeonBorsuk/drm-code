@@ -32,19 +32,18 @@
 #include "Parameter.h"
 #include "util/Settings.h"
 #include "sound/soundinterface.h"
-#ifdef QT_MULTIMEDIA_LIB
-# include <QAudioDeviceInfo>
-#endif
 
 class CDRMTransceiver
 {
 public:
-    CDRMTransceiver(CSettings* pSettings, CSoundInInterface* pSoundIn, CSoundOutInterface* pSoundOut, bool bTransmitter=false);
+    CDRMTransceiver(CSettings* pSettings, bool bTransmitter=false);
     virtual ~CDRMTransceiver();
 
     virtual void LoadSettings() = 0;
     virtual void SaveSettings() = 0;
     virtual void Start() = 0;
+    virtual void SetInputDevice(const QString&) = 0;
+    virtual void SetOutputDevice(const QString&) = 0;
 
     virtual void Restart()
     {
@@ -64,33 +63,16 @@ public:
     virtual CParameter*				GetParameters() {
         return &Parameters;
     }
-    virtual CSoundInInterface*		GetSoundInInterface() {
-        return pSoundInInterface;
-    }
-    virtual CSoundOutInterface*		GetSoundOutInterface() {
-        return pSoundOutInterface;
-    }
 	virtual _BOOLEAN				IsReceiver() const {
 		return !bTransmitter;
 	}
 	virtual _BOOLEAN				IsTransmitter() const {
 		return bTransmitter;
 	}
-#ifdef QT_MULTIMEDIA_LIB
-    virtual void SetInputDevice(const QString&) = 0;
-    virtual void SetOutputDevice(const QString&) = 0;
-#endif
 
 protected:
-    virtual void CloseSoundInterfaces()
-    {
-        pSoundInInterface->Close();
-        pSoundOutInterface->Close();
-    }
 	CSettings*				pSettings;
     CParameter				Parameters;
-    CSoundInInterface*		pSoundInInterface;
-    CSoundOutInterface*		pSoundOutInterface;
 
 private:
 	const _BOOLEAN bTransmitter;

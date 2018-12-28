@@ -27,11 +27,9 @@
 \******************************************************************************/
 
 #include "DrmTransmitter.h"
-#include "sound/sound.h"
 #include <sstream>
 #ifdef QT_MULTIMEDIA_LIB
-# include <QAudioInput>
-# include <QAudioOutput>
+# include <QAudioDeviceInfo>
 #endif
 
 /* Implementation *************************************************************/
@@ -43,6 +41,10 @@ void CDRMTransmitter::Start()
     {
         /* Initialization of the modules */
         Init();
+#ifdef QT_MULTIMEDIA_LIB
+    doSetInputDevice();
+    doSetOutputDevice();
+#endif
 
         /* Set run flag */
         Parameters.eRunState = CParameter::RUNNING;
@@ -53,7 +55,8 @@ void CDRMTransmitter::Start()
     while (Parameters.eRunState == CParameter::RESTART);
 
     /* Closing the sound interfaces */
-    CloseSoundInterfaces();
+    ReadData.Stop();
+    TransmitData.Stop();
 
     /* Set flag to stopped */
     Parameters.eRunState = CParameter::STOPPED;
@@ -66,12 +69,6 @@ void CDRMTransmitter::Run()
     	convention is always "input-buffer, output-buffer". Additional, the
     	DRM-parameters are fed to the function
     */
-
-#ifdef QT_MULTIMEDIA_LIB
-    doSetInputDevice();
-    doSetOutputDevice();
-#endif
-
     for (;;)
     {
         /* MSC ****************************************************************/
@@ -170,84 +167,49 @@ _BOOLEAN CDRMTransmitter::CanSoftStopExit()
     return FALSE; /* Signal to continue the normal operation */
 }
 
-#ifdef QT_MULTIMEDIA_LIB
 void CDRMTransmitter::doSetInputDevice()
 {
-    QAudioFormat format;
-    format.setSampleRate(Parameters.GetSoundCardSigSampleRate());
-    format.setSampleSize(16);
-    format.setSampleType(QAudioFormat::SignedInt);
-    format.setChannelCount(2); // TODO
-    format.setByteOrder(QAudioFormat::LittleEndian);
-    format.setCodec("audio/pcm");
-    foreach(const QAudioDeviceInfo& di, QAudioDeviceInfo::availableDevices(QAudio::AudioInput))
-    {
-        QString name = di.deviceName();
-        if(indev == "") { // might not be initialised
-            indev = name;
-        }
-        if(name==indev) {
-            QAudioFormat nearestFormat = di.nearestFormat(format);
-            QAudioInput* pAudioInput = new QAudioInput(di, nearestFormat);
-            QIODevice* pIODevice = pAudioInput->start();
-            if(pAudioInput->error()==QAudio::NoError)
-            {
-                ReadData.SetSoundInterface(pIODevice);
-            }
-            else
-            {
-                qDebug("Can't open audio output");
-            }
+#ifdef QT_MULTIMEDIA_LIB
+    if(indev == "") { // might not be initialised
+        foreach(const QAudioDeviceInfo& di, QAudioDeviceInfo::availableDevices(QAudio::AudioInput))
+        {
+            indev = di.deviceName();
             break;
         }
     }
+#endif
+    ReadData.SetSoundInterface(indev.toStdString());
 }
 
 void CDRMTransmitter::doSetOutputDevice()
 {
-    QAudioFormat format;
-    format.setSampleRate(Parameters.GetAudSampleRate());
-    format.setSampleSize(16);
-    format.setSampleType(QAudioFormat::SignedInt);
-    format.setChannelCount(2); // TODO
-    format.setByteOrder(QAudioFormat::LittleEndian);
-    format.setCodec("audio/pcm");
-    foreach(const QAudioDeviceInfo& di, QAudioDeviceInfo::availableDevices(QAudio::AudioOutput))
-    {
-        QString name = di.deviceName();
-        if(outdev == "") { // might be called from initialisation and Dream.ini has no value
-            outdev = name;
-        }
-        if(name==outdev) {
-            QAudioFormat nearestFormat = di.nearestFormat(format);
-            QAudioOutput* pAudioOutput = new QAudioOutput(di, nearestFormat);
-            pAudioOutput->setBufferSize(1000000);
-            QIODevice* pIODevice = pAudioOutput->start();
-            int n = pAudioOutput->bufferSize();
-            if(pAudioOutput->error()==QAudio::NoError)
-            {
-                TransmitData.SetSoundInterface(pIODevice);
-            }
-            else
-            {
-                qDebug("Can't open audio output");
-            }
+#ifdef QT_MULTIMEDIA_LIB
+    if(outdev == "") { // might be called from initialisation and Dream.ini has no value
+        foreach(const QAudioDeviceInfo& di, QAudioDeviceInfo::availableDevices(QAudio::AudioOutput))
+        {
+            outdev = di.deviceName();
+            break;
         }
     }
+#endif
+    TransmitData.SetSoundInterface(outdev.toStdString());
 }
 
 void
 CDRMTransmitter::SetInputDevice(const QString& device)
 {
     indev = device;
+    //CSelectionInterface* pSoundOutIF = DRMTransceiver.GetSoundOutInterface();
+    //pSoundOutIF->SetDev(action->data().toString().toLocal8Bit().constData());
 }
 
 void
 CDRMTransmitter::SetOutputDevice(const QString& device)
 {
     outdev = device;
+    //CSelectionInterface* pSoundOutIF = DRMTransceiver.GetSoundOutInterface();
+    //pSoundOutIF->SetDev(action->data().toString().toLocal8Bit().constData());
 }
-#endif
 
 void CDRMTransmitter::Init()
 {
@@ -291,12 +253,10 @@ void CDRMTransmitter::Init()
 
 CDRMTransmitter::~CDRMTransmitter()
 {
-    delete pSoundInInterface;
-    delete pSoundOutInterface;
 }
 
-CDRMTransmitter::CDRMTransmitter(CSettings* pSettings) : CDRMTransceiver(pSettings, new CSoundIn, new CSoundOut, TRUE),
-        ReadData(pSoundInInterface), TransmitData(pSoundOutInterface),
+CDRMTransmitter::CDRMTransmitter(CSettings* pSettings) : CDRMTransceiver(pSettings, TRUE),
+        ReadData(), TransmitData(),
         rDefCarOffset((_REAL) VIRTUAL_INTERMED_FREQ),
         // UEP only works with Dream receiver, FIXME! -> disabled for now
         bUseUEP(FALSE)
@@ -444,10 +404,10 @@ void CDRMTransmitter::LoadSettings()
     Parameters.FetchNewSampleRate();
 
     /* Sound card input device id */
-    pSoundInInterface->SetDev(s.Get(Transmitter, "snddevin", string()));
+    ReadData.SetSoundInterface(s.Get(Transmitter, "snddevin", string()));
 
     /* Sound card output device id */
-    pSoundOutInterface->SetDev(s.Get(Transmitter, "snddevout", string()));
+    TransmitData.SetSoundInterface(s.Get(Transmitter, "snddevout", string()));
 #if 0 // TODO
     /* Sound clock drift adjustment */
     _BOOLEAN bEnabled = s.Get(Transmitter, "sndclkadj", int(0));
@@ -590,10 +550,10 @@ void CDRMTransmitter::SaveSettings()
     s.Put(Transmitter, "sampleratesig", Parameters.GetSigSampleRate());
 
     /* Sound card input device id */
-    s.Put(Transmitter, "snddevin", pSoundInInterface->GetDev());
+    s.Put(Transmitter, "snddevin", ReadData.GetSoundInterface());
 
     /* Sound card output device id */
-    s.Put(Transmitter, "snddevout", pSoundOutInterface->GetDev());
+    s.Put(Transmitter, "snddevout", TransmitData.GetSoundInterface());
 #if 0 // TODO
     /* Sound clock drift adjustment */
     s.Put(Transmitter, "sndclkadj", int(((CSoundOutPulse*)pSoundOutInterface)->IsClockDriftAdjEnabled()));

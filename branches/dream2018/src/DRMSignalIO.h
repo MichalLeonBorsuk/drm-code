@@ -86,7 +86,7 @@ public:
                      OF_IQ_NEG /* I / Q */, OF_EP /* envelope / phase */
                     };
 
-    CTransmitData(CSoundOutInterface* pNS);
+    CTransmitData();
 
     virtual ~CTransmitData();
 
@@ -116,7 +116,9 @@ public:
         rDefCarOffset = rNewCarOffset;
     }
 
-    void SetSoundInterface(QIODevice*);
+    void SetSoundInterface(string);
+    string GetSoundInterface() { return soundDevice; }
+    void Stop();
 
     void SetWriteToFile(const string strNFN)
     {
@@ -132,6 +134,7 @@ protected:
     QIODevice*              pIODevice;
 #endif
     CSoundOutInterface*	pSound;
+    string              soundDevice;
     CVector<short>		vecsDataOut;
     int					iBlockCnt;
     int					iNumBlocks;
@@ -146,6 +149,7 @@ protected:
 
     string				strOutFileName;
     _BOOLEAN			bUseSoundcard;
+    int					iSampleRate;
 
     _BOOLEAN			bAmplified;
     _BOOLEAN			bHighQualityIQ;
@@ -195,12 +199,10 @@ public:
         mutexInpData.Unlock();
     }
 
-    void SetSoundInterface(CSoundInInterface* pS) {
-        pSound = pS;
-    }
-#ifdef QT_MULTIMEDIA_LIB
-    void SetSoundInterface(QAudioInput *);
-#endif
+    void SetSoundInterface(string);
+    string GetSoundInterface() { return soundDevice; }
+    void Stop();
+
     void SetInChanSel(const EInChanSel eNS) {
         eInChanSelection = eNS;
     }
@@ -217,6 +219,7 @@ protected:
 #endif
     CSoundInInterface*		pSound;
     CVector<_SAMPLE>		vecsSoundBuffer;
+    string                  soundDevice;
 
     /* Access to vecrInpData buffer must be done 
        inside mutexInpData mutex */

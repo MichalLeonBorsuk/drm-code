@@ -41,8 +41,7 @@
 #include "sound/soundnull.h"
 #include "sound/audiofilein.h"
 #ifdef QT_MULTIMEDIA_LIB
-#include <QAudioFormat>
-#include <QIODevice>
+# include <QAudioDeviceInfo>
 #endif
 #ifdef HAVE_LIBHAMLIB
 # ifdef QT_CORE_LIB // TODO should not have dependency to qt here
@@ -59,8 +58,8 @@ const int
 CDRMReceiver::MAX_UNLOCKED_COUNT = 2;
 
 /* Implementation *************************************************************/
-CDRMReceiver::CDRMReceiver(CSettings* pSettings) : CDRMTransceiver(pSettings, new CSoundInNull, new CSoundOut),
-    ReceiveData(), WriteData(pSoundOutInterface),
+CDRMReceiver::CDRMReceiver(CSettings* pSettings) : CDRMTransceiver(pSettings),
+    ReceiveData(), WriteData(),
     FreqSyncAcq(),
     ChannelEstimation(),
     UtilizeFACData(), UtilizeSDCData(), MSCDemultiplexer(),
@@ -96,8 +95,6 @@ CDRMReceiver::CDRMReceiver(CSettings* pSettings) : CDRMTransceiver(pSettings, ne
 
 CDRMReceiver::~CDRMReceiver()
 {
-    delete pSoundInInterface;
-    delete pSoundOutInterface;
     delete pUpstreamRSCI;
 }
 
@@ -400,85 +397,26 @@ CDRMReceiver::Run()
     }
 }
 
-#ifdef QT_MULTIMEDIA_LIB
 void
 CDRMReceiver::SetInputDevice(const QString& device)
 {
-    QAudioFormat format;
-    format.setSampleRate(Parameters.GetSoundCardSigSampleRate());
-    format.setSampleSize(16);
-    format.setSampleType(QAudioFormat::SignedInt);
-    format.setChannelCount(2); // TODO
-    format.setByteOrder(QAudioFormat::LittleEndian);
-    format.setCodec("audio/pcm");
-    indev = device;
-    foreach(const QAudioDeviceInfo& di, QAudioDeviceInfo::availableDevices(QAudio::AudioInput))
-    {
-        QString name = di.deviceName();
-        if(indev == "") { // might be called from initialisation and Dream.ini has no value
-            indev = name;
-        }
-        if(name==indev) {
-            QAudioFormat nearestFormat = di.nearestFormat(format);
-            // TODO QIODevice needs to be declared in working thread
-            pAudioInput = new QAudioInput(di, nearestFormat);
-            ReceiveData.SetSoundInterface(pAudioInput);
-            break;
-        }
-    }
+    ReceiveData.SetSoundInterface(device.toStdString());
 }
 
 void
 CDRMReceiver::SetOutputDevice(const QString& device)
 {
-    QAudioFormat format;
-    format.setSampleRate(Parameters.GetAudSampleRate());
-    format.setSampleSize(16);
-    format.setSampleType(QAudioFormat::SignedInt);
-    format.setChannelCount(2); // TODO
-    format.setByteOrder(QAudioFormat::LittleEndian);
-    format.setCodec("audio/pcm");
-    outdev = device;
-    foreach(const QAudioDeviceInfo& di, QAudioDeviceInfo::availableDevices(QAudio::AudioOutput))
-    {
-        QString name = di.deviceName();
-        if(outdev == "") { // might be called from initialisation and Dream.ini has no value
-            outdev = name;
-        }
-        if(name==outdev) {
-            QAudioFormat nearestFormat = di.nearestFormat(format);
-            pAudioOutput = new QAudioOutput(di, nearestFormat);
-            pAudioOutput->setBufferSize(1000000);
-            // TODO QIODevice needs to be declared in working thread
-            QIODevice* pIODevice = pAudioOutput->start();
-            int n = pAudioOutput->bufferSize();
-            if(pAudioOutput->error()==QAudio::NoError)
-            {
-                WriteData.SetSoundInterface(pIODevice);
-            }
-            else
-            {
-                qDebug("Can't open audio output");
-            }
-        }
-    }
+    WriteData.SetSoundInterface(device.toStdString());
 }
-#endif
 
 void
 CDRMReceiver::SetInput()
 {
-    string sSndDevIn;
     Parameters.Lock();
         /* Fetch new sample rate if any */
         Parameters.FetchNewSampleRate();
         /* Close previous sound interface */
-        if (pSoundInInterface != nullptr)
-        {
-            sSndDevIn = pSoundInInterface->GetDev();
-            pSoundInInterface->Close();
-            delete pSoundInInterface;
-        }
+        ReceiveData.Stop();
         /* Get a fresh CUpstreamDI interface */
         if (pUpstreamRSCI->GetInEnabled())
         {
@@ -489,7 +427,6 @@ CDRMReceiver::SetInput()
         if (rsiOrigin != "")
         {
             ReceiveData.ClearInputData();
-            pSoundInInterface = new CSoundInNull();
             pUpstreamRSCI->SetOrigin(rsiOrigin);
         }
         else
@@ -504,20 +441,16 @@ CDRMReceiver::SetInput()
                 /* Save sample rate */
                 if (iPrevSigSampleRate == 0)
                     iPrevSigSampleRate = Parameters.GetSoundCardSigSampleRate();
+                //const int iSampleRate = AudioFileIn->GetSampleRate(); TODO
+                //Parameters.SetSoundCardSigSampleRate(iSampleRate);
                 /* Open sound file interface */
-                CAudioFileIn* AudioFileIn = new CAudioFileIn();
-                AudioFileIn->SetFileName(sSoundFile);
-                const int iSampleRate = AudioFileIn->GetSampleRate();
-                Parameters.SetSoundCardSigSampleRate(iSampleRate);
-                pSoundInInterface = AudioFileIn;
+                ReceiveData.SetSoundInterface(sSoundFile);
             }
             else
             {
-                /* Open sound card interface */
-                pSoundInInterface = new CSoundIn();
+                ReceiveData.SetSoundInterface(indev.toStdString());
             }
         }
-        pSoundInInterface->SetDev(sSndDevIn);
     Parameters.Unlock();
 }
 
@@ -552,6 +485,7 @@ CDRMReceiver::SetSoundFile(const string& soundFile)
 {
     Parameters.Lock();
         sSoundFile = soundFile;
+        indev = soundFile.c_str();
     Parameters.Unlock();
 }
 
@@ -560,6 +494,7 @@ CDRMReceiver::ClearSoundFile()
 {
     Parameters.Lock();
         sSoundFile = "";
+        indev="";
     Parameters.Unlock();
 }
 
@@ -1104,12 +1039,8 @@ CDRMReceiver::Start()
 void
 CDRMReceiver::CloseSoundInterfaces()
 {
-    pSoundInInterface->Close();
-    pSoundOutInterface->Close();
-#ifdef QT_MULTIMEDIA_LIB
-    //if(pAudioInput) pAudioInput->stop();
-    //if(pAudioOutput) pAudioOutput->stop();
-#endif
+    ReceiveData.Stop();
+    WriteData.Stop();
 }
 
 void
@@ -1309,7 +1240,7 @@ CDRMReceiver::InitsForAllModules()
     }
     ConvertAudio.SetInitFlag();
 
-    ReceiveData.SetSoundInterface(pSoundInInterface);
+    ReceiveData.SetSoundInterface(indev.toStdString());
     ReceiveData.SetInitFlag();
     InputResample.SetInitFlag();
     FreqSyncAcq.SetInitFlag();
@@ -1394,7 +1325,7 @@ CDRMReceiver::InitsForWaveMode()
     iAcquDetecCnt = 0;
 
     /* Set init flags */
-    ReceiveData.SetSoundInterface(pSoundInInterface);
+    ReceiveData.SetSoundInterface(indev.toStdString());
     ReceiveData.SetInitFlag();
     InputResample.SetInitFlag();
     FreqSyncAcq.SetInitFlag();
@@ -1731,19 +1662,11 @@ CDRMReceiver::LoadSettings()
     SetAMDemodType(eDemodType);
 
     /* Sound In device */
-#ifdef QT_MULTIMEDIA_LIB
     indev = QString::fromStdString(s.Get("Receiver", "snddevin", string()));
     SetInputDevice(indev);
-#else
-    pSoundInInterface->SetDev(s.Get("Receiver", "snddevin", string()));
-#endif
     /* Sound Out device */
-#ifdef QT_MULTIMEDIA_LIB
     outdev = QString::fromStdString(s.Get("Receiver", "snddevout", string()));
     SetOutputDevice(outdev);
-#else
-    pSoundOutInterface->SetDev(s.Get("Receiver", "snddevout", string()));
-#endif
 
     str = s.Get("command", "rciout");
     if (str != "")
@@ -1926,18 +1849,10 @@ CDRMReceiver::SaveSettings()
     s.Put("Receiver", "modmetric", ChannelEstimation.GetIntCons());
 
     /* Sound In device */
-#ifdef QT_MULTIMEDIA_LIB
     s.Put("Receiver", "snddevin", indev.toStdString());
-#else
-    s.Put("Receiver", "snddevin", pSoundInInterface->GetDev());
-#endif
 
     /* Sound Out device */
-#ifdef QT_MULTIMEDIA_LIB
     s.Put("Receiver", "snddevout", outdev.toStdString());
-#else
-    s.Put("Receiver", "snddevout", pSoundOutInterface->GetDev());
-#endif
     /* Number of iterations for MLC setting */
     s.Put("Receiver", "mlciter", MSCMLCDecoder.GetInitNumIterations());
 

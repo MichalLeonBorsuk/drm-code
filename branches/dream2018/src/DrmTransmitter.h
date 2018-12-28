@@ -75,22 +75,18 @@ public:
     _REAL GetCarOffset() {
         return rDefCarOffset;
     }
-#ifdef QT_MULTIMEDIA_LIB
     void SetInputDevice(const QString&);
     void SetOutputDevice(const QString&);
     void doSetInputDevice();
     void doSetOutputDevice();
-#endif
 
 protected:
     void Run();
     void InitSoftStop() { iSoftStopSymbolCount=0; }
     _BOOLEAN CanSoftStopExit();
 
-#ifdef QT_MULTIMEDIA_LIB
     QString indev;
     QString outdev;
-#endif
     /* Buffers */
     CSingleBuffer<_SAMPLE>	DataBuf;
     CSingleBuffer<_BINARY>	AudSrcBuf;

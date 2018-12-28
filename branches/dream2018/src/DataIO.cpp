@@ -29,6 +29,11 @@
 #include "DataIO.h"
 #include <iomanip>
 #include <time.h>
+#ifdef QT_MULTIMEDIA_LIB
+# include <QAudioOutput>
+# include <QAudioInput>
+#endif
+#include "sound/sound.h"
 
 /* Implementation *************************************************************/
 /******************************************************************************\
@@ -67,7 +72,7 @@ void CReadData::ProcessDataInternal(CParameter&)
 void CReadData::InitInternal(CParameter& Parameters)
 {
     /* Get audio sample rate */
-    const int iSampleRate = Parameters.GetAudSampleRate();
+    iSampleRate = Parameters.GetAudSampleRate();
 
     /* Define block-size for output, an audio frame always corresponds
        to 400 ms. We use always stereo blocks */
@@ -75,31 +80,95 @@ void CReadData::InitInternal(CParameter& Parameters)
                               (_REAL) 0.4 /* 400 ms */ * 2 /* stereo */);
 
     /* Init sound interface and intermediate buffer */
-    pSound->Init(iSampleRate, iOutputBlockSize, FALSE);
+    if(pSound) pSound->Init(iSampleRate, iOutputBlockSize, FALSE);
     vecsSoundBuffer.Init(iOutputBlockSize);
 
     /* Init level meter */
     SignalLevelMeter.Init(0);
 }
 
-#ifdef QT_MULTIMEDIA_LIB
-void
-CReadData::SetSoundInterface(QIODevice* p)
+void CReadData::Stop()
 {
-    pIODevice = p;
-}
+#ifdef QT_MULTIMEDIA_LIB
+    if(pIODevice!=nullptr) pIODevice->close();
 #endif
+    if(pSound!=nullptr) pSound->Close();
+}
+
+void
+CReadData::SetSoundInterface(string device)
+{
+#ifdef QT_MULTIMEDIA_LIB
+    QAudioFormat format;
+    if(iSampleRate==0) iSampleRate = 48000; // TODO get order of initialisation correct
+    format.setSampleRate(iSampleRate);
+    format.setSampleSize(16);
+    format.setSampleType(QAudioFormat::SignedInt);
+    format.setChannelCount(2); // TODO
+    format.setByteOrder(QAudioFormat::LittleEndian);
+    format.setCodec("audio/pcm");
+    foreach(const QAudioDeviceInfo& di, QAudioDeviceInfo::availableDevices(QAudio::AudioInput))
+    {
+        foreach(const QAudioDeviceInfo& di, QAudioDeviceInfo::availableDevices(QAudio::AudioInput))
+        {
+            if(device == di.deviceName().toStdString()) {
+                QAudioFormat nearestFormat = di.nearestFormat(format);
+                QAudioInput* pAudioInput = new QAudioInput(di, nearestFormat);
+                pIODevice = pAudioInput->start();
+                if(pAudioInput->error()==QAudio::NoError)
+                {
+                    pIODevice->open(QIODevice::ReadOnly);
+                    qDebug("audio input open");
+                }
+                else
+                {
+                    qDebug("Can't open audio input");
+                }
+            }
+            break;
+        }
+    }
+#endif
+}
 
 
 /* Receiver ----------------------------------------------------------------- */
-#ifdef QT_MULTIMEDIA_LIB
-void
-CWriteData::SetSoundInterface(QIODevice* p)
+void CWriteData::Stop()
 {
-    pIODevice = p;
-}
+#ifdef QT_MULTIMEDIA_LIB
+    if(pIODevice!=nullptr) pIODevice->close();
 #endif
+    if(pSound!=nullptr) pSound->Close();
+}
 
+void
+CWriteData::SetSoundInterface(string device)
+{
+#ifdef QT_MULTIMEDIA_LIB
+    QAudioFormat format;
+    if(iAudSampleRate==0) iAudSampleRate = 48000; // TODO get order of initialisation correct
+    format.setSampleRate(iAudSampleRate);
+    format.setSampleSize(16);
+    format.setSampleType(QAudioFormat::SignedInt);
+    format.setChannelCount(2); // TODO
+    format.setByteOrder(QAudioFormat::LittleEndian);
+    format.setCodec("audio/pcm");
+    foreach(const QAudioDeviceInfo& di, QAudioDeviceInfo::availableDevices(QAudio::AudioOutput))
+    {
+        if(device == di.deviceName().toStdString()) {
+            QAudioFormat nearestFormat = di.nearestFormat(format);
+            QAudioOutput* pAudioOutput = new QAudioOutput(di, nearestFormat);
+            pAudioOutput->setBufferSize(1000000);
+            // TODO QIODevice needs to be declared in working thread
+            pIODevice = pAudioOutput->start();
+            if(pAudioOutput->error()!=QAudio::NoError)
+            {
+                qDebug("Can't open audio output");
+            }
+        }
+    }
+#endif
+}
 
 void CWriteData::ProcessDataInternal(CParameter& Parameters)
 {
@@ -254,7 +323,7 @@ void CWriteData::InitInternal(CParameter& Parameters)
         bSoundBlocking = bNewSoundBlocking;
 
     /* Init sound interface with blocking or non-blocking behaviour */
-    pSound->Init(iAudSampleRate, iAudFrameSize * 2 /* stereo */, bSoundBlocking);
+    if(pSound!=nullptr) pSound->Init(iAudSampleRate, iAudFrameSize * 2 /* stereo */, bSoundBlocking);
 
     /* Init intermediate buffer needed for different channel selections */
     vecsTmpAudData.Init(iAudFrameSize * 2 /* stereo */);
@@ -267,11 +336,11 @@ void CWriteData::InitInternal(CParameter& Parameters)
     iInputBlockSize = iAudFrameSize * 2 /* stereo */;
 }
 
-CWriteData::CWriteData(CSoundOutInterface* pNS) :
+CWriteData::CWriteData() :
 #ifdef QT_MULTIMEDIA_LIB
         pIODevice(nullptr),
 #endif
-        pSound(pNS), /* Sound interface */
+        pSound(nullptr), /* Sound interface */
         bMuteAudio(FALSE), bDoWriteWaveFile(FALSE),
         bSoundBlocking(FALSE), bNewSoundBlocking(FALSE),
         eOutChanSel(CS_BOTH_BOTH), rMixNormConst(MIX_OUT_CHAN_NORM_CONST),
@@ -950,7 +1019,7 @@ void CWriteIQFile::ProcessDataInternal(CParameter& Parameters)
         {
             fclose(pFile);
         }
-        pFile = 0;
+        pFile = nullptr;
     }
 
     // is recording switched on?
