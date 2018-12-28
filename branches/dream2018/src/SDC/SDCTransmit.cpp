@@ -518,7 +518,6 @@ void CSDCTransmit::DataEntityType9(CVector<_BINARY>& vecbiData, const CAudioPara
         vecbiData.Enqueue(0 /* 000 */, 3); /* set to zero, rfa for OPUS */
         /* Audio sampling rate */
         vecbiData.Enqueue(7 /* 111 */, 3); /* set to seven, reserved value for AAC */
-        cerr << "Opus/";
     }
     else
     {
