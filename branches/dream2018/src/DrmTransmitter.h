@@ -41,6 +41,7 @@
 #include "sourcedecoders/AudioSourceEncoder.h"
 #include "sound/soundinterface.h"
 #include "DrmTransceiver.h"
+#include <QString>
 
 /* Classes ********************************************************************/
 class CDRMTransmitter : public CDRMTransceiver
@@ -75,6 +76,8 @@ public:
     _REAL GetCarOffset() {
         return rDefCarOffset;
     }
+    QString					GetInputDevice() { return indev; }
+    QString					GetOutputDevice() { return outdev; }
     void SetInputDevice(const QString&);
     void SetOutputDevice(const QString&);
     void doSetInputDevice();

@@ -40,5 +40,4 @@ public:
     virtual std::string		GetDev()=0;
     virtual void		SetDev(std::string sNewDev)=0;
 };
-
 #endif
