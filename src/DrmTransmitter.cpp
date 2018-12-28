@@ -167,31 +167,23 @@ _BOOLEAN CDRMTransmitter::CanSoftStopExit()
     return FALSE; /* Signal to continue the normal operation */
 }
 
+void CDRMTransmitter::EnumerateInputs(std::vector<std::string>& names, std::vector<std::string>& descriptions)
+{
+    ReadData.Enumerate(names, descriptions);
+}
+
+void CDRMTransmitter::EnumerateOutputs(std::vector<std::string>& names, std::vector<std::string>& descriptions)
+{
+    TransmitData.Enumerate(names, descriptions);
+}
+
 void CDRMTransmitter::doSetInputDevice()
 {
-#ifdef QT_MULTIMEDIA_LIB
-    if(indev == "") { // might not be initialised
-        foreach(const QAudioDeviceInfo& di, QAudioDeviceInfo::availableDevices(QAudio::AudioInput))
-        {
-            indev = di.deviceName();
-            break;
-        }
-    }
-#endif
     ReadData.SetSoundInterface(indev.toStdString());
 }
 
 void CDRMTransmitter::doSetOutputDevice()
 {
-#ifdef QT_MULTIMEDIA_LIB
-    if(outdev == "") { // might be called from initialisation and Dream.ini has no value
-        foreach(const QAudioDeviceInfo& di, QAudioDeviceInfo::availableDevices(QAudio::AudioOutput))
-        {
-            outdev = di.deviceName();
-            break;
-        }
-    }
-#endif
     TransmitData.SetSoundInterface(outdev.toStdString());
 }
 
