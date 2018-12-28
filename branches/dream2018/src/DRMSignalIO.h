@@ -118,6 +118,7 @@ public:
 
     void SetSoundInterface(string);
     string GetSoundInterface() { return soundDevice; }
+    void Enumerate(std::vector<std::string>& names, std::vector<std::string>& descriptions);
     void Stop();
 
     void SetWriteToFile(const string strNFN)
@@ -201,6 +202,7 @@ public:
 
     void SetSoundInterface(string);
     string GetSoundInterface() { return soundDevice; }
+    void Enumerate(std::vector<std::string>& names, std::vector<std::string>& descriptions);
     void Stop();
 
     void SetInChanSel(const EInChanSel eNS) {
