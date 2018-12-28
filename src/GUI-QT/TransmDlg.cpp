@@ -317,7 +317,7 @@ TransmDialog::TransmDialog(CSettings& Settings,	QWidget* parent)
 	{
 	case CAudioParam::AC_AAC:
 		RadioButtonAAC->setChecked(TRUE);
-        ShowButtonCodec(TRUE, 1);
+        ShowButtonCodec(FALSE, 1);
 		break;
 
 	case CAudioParam::AC_OPUS:
@@ -326,7 +326,7 @@ TransmDialog::TransmDialog(CSettings& Settings,	QWidget* parent)
 		break;
 
 	default:
-        ShowButtonCodec(TRUE, 1);
+        ShowButtonCodec(FALSE, 1);
 		break;
 	}
 	CAudioSourceEncoder& AudioSourceEncoder = *DRMTransmitter.GetAudSrcEnc();
@@ -1340,7 +1340,7 @@ void TransmDialog::OnRadioCodec(int iID)
 	{
 	case 0:
 		eNewAudioCoding = CAudioParam::AC_AAC;
-        ShowButtonCodec(TRUE, 1);
+        ShowButtonCodec(FALSE, 1);
 		break;
 
 	case 1:
