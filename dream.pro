@@ -64,7 +64,7 @@ macx {
     QMAKE_LFLAGS += -F/usr/local/lib
     LIBS += -framework CoreFoundation -framework CoreServices
     LIBS += -framework CoreAudio -framework AudioToolbox -framework AudioUnit
-    CONFIG += pcap qwt
+    CONFIG += pcap
     #packagesExist(libpulse) {
     #    CONFIG += pulseaudio sound
     #}
@@ -505,9 +505,7 @@ HEADERS += \
     src/util/Settings.h \
     src/util/Utilities.h \
     src/util/Vector.h \
-    src/Version.h \
-    src/GUI-QT/OpusCodecParams.h \
-    src/GUI-QT/AACCodecParams.h
+    src/Version.h
 SOURCES += \
     src/AMDemodulation.cpp \
     src/AMSSDemodulation.cpp \
@@ -609,8 +607,6 @@ SOURCES += \
     src/util/Utilities.cpp \
     src/Version.cpp \
     src/sound/soundnull.cpp \
-    src/GUI-QT/OpusCodecParams.cpp \
-    src/GUI-QT/AACCodecParams.cpp \
     src/DrmTransceiver.cpp \
     src/sound/soundinterface.cpp \
     src/sound/selectioninterface.cpp
@@ -668,6 +664,8 @@ HEADERS += \
     src/GUI-QT/SlideShowViewer.h \
     src/GUI-QT/SoundCardSelMenu.h \
     src/GUI-QT/StationsDlg.h \
+    src/GUI-QT/OpusCodecParams.h \
+    src/GUI-QT/AACCodecParams.h \
     src/GUI-QT/TransmDlg.h
 SOURCES += \
     src/GUI-QT/AnalogDemDlg.cpp \
@@ -688,6 +686,8 @@ SOURCES += \
     src/GUI-QT/SlideShowViewer.cpp \
     src/GUI-QT/SoundCardSelMenu.cpp \
     src/GUI-QT/StationsDlg.cpp \
+    src/GUI-QT/OpusCodecParams.cpp \
+    src/GUI-QT/AACCodecParams.cpp \
     src/GUI-QT/TransmDlg.cpp
 }
 !sound {
@@ -781,5 +781,4 @@ OTHER_FILES += \
     android/AndroidManifest.xml \
     windows/dream.iss
 
-FORMS += \
-    src/GUI-QT/AACCodecParams.ui
+message('Qt modules $$QT')
