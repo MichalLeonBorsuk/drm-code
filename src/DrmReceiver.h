@@ -148,7 +148,6 @@ public:
     void					SetRsciInput(const string& rsciInput);
     void					ClearRsciInput();
     void					SetSoundFile(const string& soundFile);
-    void					ClearSoundFile();
     void					SetInputFile(const string& inputFile);
     void					ClearInputFile();
     ESFStatus				GetInputStatus();
@@ -447,7 +446,6 @@ protected:
 
     CPlotManager			PlotManager;
     string					rsiOrigin;
-    string					sSoundFile;
     int						iPrevSigSampleRate; /* sample rate before sound file */
 #ifdef QT_MULTIMEDIA_LIB
     QAudioInput *pAudioInput;

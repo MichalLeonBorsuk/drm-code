@@ -435,21 +435,11 @@ CDRMReceiver::SetInput()
             InputResample.SetSyncInput(FALSE);
             SyncUsingPil.SetSyncInput(FALSE);
             TimeSync.SetSyncInput(FALSE);
-            /* Check for Sound file */
-            if (sSoundFile != "")
-            {
-                /* Save sample rate */
-                if (iPrevSigSampleRate == 0)
-                    iPrevSigSampleRate = Parameters.GetSoundCardSigSampleRate();
-                //const int iSampleRate = AudioFileIn->GetSampleRate(); TODO
-                //Parameters.SetSoundCardSigSampleRate(iSampleRate);
-                /* Open sound file interface */
-                ReceiveData.SetSoundInterface(sSoundFile);
+            /* Save sample rate */
+            if (iPrevSigSampleRate == 0) {
+                iPrevSigSampleRate = Parameters.GetSoundCardSigSampleRate();
             }
-            else
-            {
-                ReceiveData.SetSoundInterface(indev.toStdString());
-            }
+            ReceiveData.SetSoundInterface(indev.toStdString());
         }
     Parameters.Unlock();
 }
@@ -483,19 +473,7 @@ CDRMReceiver::ClearRsciInput()
 void
 CDRMReceiver::SetSoundFile(const string& soundFile)
 {
-    Parameters.Lock();
-        sSoundFile = soundFile;
-        indev = soundFile.c_str();
-    Parameters.Unlock();
-}
-
-void
-CDRMReceiver::ClearSoundFile()
-{
-    Parameters.Lock();
-        sSoundFile = "";
-        indev="";
-    Parameters.Unlock();
+    indev = soundFile.c_str();
 }
 
 void
@@ -505,7 +483,6 @@ CDRMReceiver::SetInputFile(const string& inputFile)
     if(FileTyper::is_rxstat(t))
     {
         SetRsciInput(inputFile);
-        ClearSoundFile();
     }
     else
     {
@@ -517,7 +494,6 @@ CDRMReceiver::SetInputFile(const string& inputFile)
 void
 CDRMReceiver::ClearInputFile()
 {
-    ClearSoundFile();
     ClearRsciInput();
 }
 
@@ -528,7 +504,7 @@ CDRMReceiver::GetInputStatus()
     Parameters.Lock();
         if (rsiOrigin != "")
             eStatus = SF_RSCIMDIIN;
-        else if (sSoundFile != "")
+        else if (indev.contains("."))
             eStatus = SF_SNDFILEIN;
     Parameters.Unlock();
     return eStatus;
@@ -539,7 +515,7 @@ CDRMReceiver::GetInputFileName()
 {
     string fileName;
     Parameters.Lock();
-        fileName = rsiOrigin != "" ? rsiOrigin : sSoundFile;
+        fileName = rsiOrigin != "" ? rsiOrigin : indev.toStdString();
     Parameters.Unlock();
     return fileName;
 }
@@ -1609,8 +1585,14 @@ CDRMReceiver::LoadSettings()
 
     /* Input from file if any */
     str = s.Get("command", string("fileio"));
-    if (str != "")
+    if (str == "") {
+        /* Sound In device */
+        indev = QString::fromStdString(s.Get("Receiver", "snddevin", string()));
+        SetInputDevice(indev);
+    }
+    else {
         SetInputFile(str);
+    }
 
     /* Channel Estimation: Frequency Interpolation */
     SetFreqInt((CChannelEstimation::ETypeIntFreq)s.Get("Receiver", "freqint", int(CChannelEstimation::FWIENER)));
@@ -1661,9 +1643,6 @@ CDRMReceiver::LoadSettings()
     /* Load user's saved filter bandwidth and demodulation type */
     SetAMDemodType(eDemodType);
 
-    /* Sound In device */
-    indev = QString::fromStdString(s.Get("Receiver", "snddevin", string()));
-    SetInputDevice(indev);
     /* Sound Out device */
     outdev = QString::fromStdString(s.Get("Receiver", "snddevout", string()));
     SetOutputDevice(outdev);
