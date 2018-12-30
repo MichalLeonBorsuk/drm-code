@@ -28,7 +28,15 @@
 
 #include "Sound.h"
 #include <iostream>
+#define _SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING
+#include <string>
+#include <codecvt>
 
+std::string ws2s(const std::wstring& wstr)
+{
+	std::string str = std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t>().to_bytes(wstr);
+	return str;
+}
 
 static UINT FindDevice(const vector<string>& vecstrDevices, const string& names)
 {
@@ -49,7 +57,6 @@ static UINT FindDevice(const vector<string>& vecstrDevices, const string& names)
 /******************************************************************************\
 * Wave in                                                                      *
 \******************************************************************************/
-
 CSoundIn::CSoundIn():CSoundInInterface(),m_WaveIn(nullptr)
 {
     int i;
@@ -69,16 +76,10 @@ CSoundIn::CSoundIn():CSoundInInterface(),m_WaveIn(nullptr)
 
 	/* Default device WAVE_MAPPER */
 	vecstrDevices.push_back("");
-
-    unsigned long long bs = 300;
-    int usedDefaultChar;
-    char multiByteStr[300];
 	/* Get info about the devices and store the names */
     for (i = 0; i < iNumDevs; i++) {
         if (!waveInGetDevCaps(i, &m_WaveInDevCaps, sizeof(WAVEINCAPS))) {
-            int n = WideCharToMultiByte(CP_ACP, WC_DEFAULTCHAR, m_WaveInDevCaps.szPname, -1,
-              multiByteStr, bs, NULL, &usedDefaultChar);
-            vecstrDevices.push_back(multiByteStr);
+            vecstrDevices.push_back(ws2s(m_WaveInDevCaps.szPname));
         }
     }
 
@@ -291,7 +292,7 @@ void CSoundIn::SetDev(string sNewDev)
 void CSoundIn::Enumerate(vector<string>& names, vector<string>& descriptions)
 {
     names = vecstrDevices;
-	descriptions.clear();
+	descriptions.resize(names.size());
 }
 
 string	CSoundIn::GetDev()
@@ -364,15 +365,10 @@ CSoundOut::CSoundOut():CSoundOutInterface(),m_WaveOut(nullptr)
 	vecstrDevices.push_back("");
 
 	/* Get info about the devices and store the names */
-    unsigned long long bs = 300;
-    int usedDefaultChar;
-    char multiByteStr[300];
     for (i = 0; i < iNumDevs; i++) {
         if (!waveOutGetDevCaps(i, &m_WaveOutDevCaps, sizeof(WAVEOUTCAPS))) {
-            int n = WideCharToMultiByte(CP_ACP, WC_DEFAULTCHAR, m_WaveOutDevCaps.szPname, -1,
-              multiByteStr, bs, NULL, &usedDefaultChar);
-            vecstrDevices.push_back(multiByteStr);
-        }
+			vecstrDevices.push_back(ws2s(m_WaveOutDevCaps.szPname));
+		}
     }
 
     /* We use an event controlled wave-out structure */
@@ -601,7 +597,7 @@ void CSoundOut::OpenDevice()
 void CSoundOut::Enumerate(vector<string>& names, vector<string>& descriptions)
 {
     names = vecstrDevices;
-	descriptions.clear();
+	descriptions.resize(names.size());
 }
 
 string CSoundOut::GetDev()
