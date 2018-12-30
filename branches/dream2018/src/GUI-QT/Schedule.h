@@ -32,7 +32,7 @@
 #include <QNetworkAccessManager>
 #include <QUrl>
 #include <QTreeWidgetItem>
-#include "util/Vector.h"
+#include "../util/Vector.h"
 
 /* Definitions ****************************************************************/
 
