@@ -211,9 +211,7 @@ win32 {
     SOURCES += src/windows/Pacer.cpp src/windows/platform_util.cpp
     HEADERS += src/windows/platform_util.h
     msvc* {
-        TEMPLATE = vcapp
         DEFINES += NOMINMAX
-        QMAKE_CXXFLAGS += /wd"4996" /wd"4521"
         QMAKE_LFLAGS_RELEASE += /NODEFAULTLIB:libcmt.lib
         QMAKE_LFLAGS_DEBUG += /NODEFAULTLIB:libcmtd.lib
         LIB += zdll.lib
