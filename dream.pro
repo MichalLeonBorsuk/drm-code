@@ -3,8 +3,8 @@ CONFIG += warn_on
 TARGET = dream
 OBJECTS_DIR = obj
 DEFINES += EXECUTABLE_NAME=$$TARGET
-LIBS += -L$$OUT_PWD/lib
-INCLUDEPATH += $$OUT_PWD/include
+LIBS += -L$$PWD/lib
+INCLUDEPATH += $$PWD/include
 contains(QT_VERSION, ^4\\..*) {
     CONFIG += qt qt4
     VERSION_MESSAGE = Qt 4
@@ -180,7 +180,7 @@ unix:!cross_compile {
     }
 }
 win32 {
-    LIBS += -lfftw3-3
+    LIBS += -llibfftw3-3
     !multimedia {
         exists($$OUT_PWD/include/portaudio.h) {
           CONFIG += portaudio sound
@@ -189,43 +189,35 @@ win32 {
           CONFIG += mmsystem sound
         }
     }
-    exists($$OUT_PWD/include/speex/speex_preprocess.h) {
+    exists($$PWD/include/speex/speex_preprocess.h) {
       CONFIG += speexdsp
     }
-    exists($$OUT_PWD/include/hamlib/rig.h) {
+    exists($$PWD/include/hamlib/rig.h) {
       CONFIG += hamlib
     }
-    exists($$OUT_PWD/include/pcap.h) {
+    exists($$PWD/include/pcap.h) {
       CONFIG += pcap
     }
-    exists($$OUT_PWD/include/sndfile.h) {
+    exists($$PWD/include/sndfile.h) {
         CONFIG += sndfile
     }
-    exists($$OUT_PWD/include/opus/opus.h) {
+    exists($$PWD/include/opus/opus.h) {
         CONFIG += opus
     }
-    LIBS += -lsetupapi -lwsock32 -lws2_32 -lzdll -ladvapi32 -luser32
-    DEFINES += HAVE_SETUPAPI \
-    HAVE_LIBZ _CRT_SECURE_NO_WARNINGS
-    DEFINES -= UNICODE
+    LIBS += -lsetupapi -lwsock32 -lws2_32 -lzlib -ladvapi32 -luser32
+    DEFINES += HAVE_SETUPAPI HAVE_LIBZ _CRT_SECURE_NO_WARNINGS
     SOURCES += src/windows/Pacer.cpp src/windows/platform_util.cpp
     HEADERS += src/windows/platform_util.h
     msvc* {
         DEFINES += NOMINMAX
         QMAKE_LFLAGS_RELEASE += /NODEFAULTLIB:libcmt.lib
         QMAKE_LFLAGS_DEBUG += /NODEFAULTLIB:libcmtd.lib
-        LIB += zdll.lib
+        QMAKE_LFLAGS_DEBUG += /NODEFAULTLIB:libcmt.lib
     }
     g++ {
-         DEFINES += HAVE_STDINT_H
+         DEFINES += HAVE_STDINT_H HAVE_LIBZ
          LIBS += -lz
     }
-}
-exists($$OUT_PWD/include/neaacdec.h) {
-    config += faad2
-}
-exists($$OUT_PWD/include/faac.h) {
-    config += faac-drm
 }
 fdk-aac {
      DEFINES += HAVE_LIBFDK_AAC
@@ -234,36 +226,29 @@ fdk-aac {
      SOURCES += src/sourcedecoders/fdk_aac_codec.cpp
      message("with fdk-aac")
 }
-faad2 {
-     DEFINES += HAVE_LIBFAAD \
-     USE_FAAD2_LIBRARY
-     LIBS += -lfaad_drm
-     message("with FAAD2")
-}
-faac-drm {
-     DEFINES += HAVE_LIBFAAC \
-     USE_FAAC_LIBRARY
-     LIBS += -lfaac_drm
-     message("with FAAC")
-}
 opus {
-     DEFINES += HAVE_LIBOPUS \
-     USE_OPUS_LIBRARY
-     unix:LIBS += -lopus
-     win32:LIBS += libopus.lib
+    DEFINES += HAVE_LIBOPUS USE_OPUS_LIBRARY
+    unix:LIBS += -lopus
+    win32 {
+        CONFIG(debug, debug|release) {
+            LIBS += -lopusd
+        }
+        CONFIG(release, debug|release) {
+            LIBS += -lopus
+        }
+    }
      message("with opus")
 }
 sndfile {
      DEFINES += HAVE_LIBSNDFILE
      unix:LIBS += -lsndfile
-     win32-msvc*:LIBS += libsndfile-1.lib
-     win32-g++:LIBS += -lsndfile-1
+     win32:LIBS += -llibsndfile-1
      message("with libsndfile")
 }
 speexdsp {
      DEFINES += HAVE_SPEEX
      unix:LIBS += -lspeexdsp
-     win32:LIBS += libspeexdsp.lib
+     win32:LIBS += -llibspeexdsp
      message("with libspeexdsp")
 }
 gps {
@@ -274,15 +259,14 @@ gps {
 pcap {
      DEFINES += HAVE_LIBPCAP
      unix:LIBS += -lpcap
-     win32-msvc*:LIBS += wpcap.lib packet.lib
-     win32-g++:LIBS += -lwpcap -lpacket
+     win32:LIBS += -lwpcap -lpacket
      message("with pcap")
 }
 hamlib {
      DEFINES += HAVE_LIBHAMLIB
      macx:LIBS += -framework IOKit
      unix:LIBS += -lhamlib
-     win32:LIBS += libhamlib-2.lib
+     win32:LIBS += -llibhamlib-2
      HEADERS += src/util/Hamlib.h
      SOURCES += src/util/Hamlib.cpp
      qt {
@@ -298,36 +282,30 @@ hamlib {
 }
 qwt {
     message("with Qwt")
-    #DEFINES += QWT_NO_SVG
     QT += svg
-    exists("$$OUT_PWD/include/qwt/qwt.h") {
-        INCLUDEPATH += $$OUT_PWD/include/qwt
-        LIBS += -L$$OUT_PWD/lib
-        LIBS += -lqwt
+    macx {
+        LIBS += -framework qwt
+        INCLUDEPATH += /usr/local/lib/qwt.framework/Headers
     }
-    else {
-        macx {
-            LIBS += -framework qwt
-            INCLUDEPATH += /usr/local/lib/qwt.framework/Headers
-        }
-        win32:CONFIG(debug, debug|release) {
-            # win debug
+    win32 {
+        INCLUDEPATH += $$PWD/include/qwt
+        CONFIG(debug, debug|release) {
             LIBS += -lqwtd
         }
-        win32:CONFIG(release) {
+        CONFIG(release, debug|release) {
             LIBS += -lqwt
         }
-        unix!macx {
-            # unix | win release
-            LIBS += -lqwt-qt5
+    }
+    unix!macx {
+        # unix | win release
+        LIBS += -lqwt-qt5
+    }
+    !crosscompile {
+        exists(/usr/include/qwt/qwt.h) {
+            INCLUDEPATH += /usr/include/qwt
         }
-        !crosscompile {
-            exists(/usr/include/qwt/qwt.h) {
-                INCLUDEPATH += /usr/include/qwt
-            }
-            exists(/usr/local/include/qwt/qwt.h) {
-                INCLUDEPATH += /usr/local/include/qwt
-            }
+        exists(/usr/local/include/qwt/qwt.h) {
+            INCLUDEPATH += /usr/local/include/qwt
         }
     }
 }
