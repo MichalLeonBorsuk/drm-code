@@ -70,10 +70,17 @@ CSoundIn::CSoundIn():CSoundInInterface(),m_WaveIn(nullptr)
 	/* Default device WAVE_MAPPER */
 	vecstrDevices.push_back("");
 
+    unsigned long long bs = 300;
+    int usedDefaultChar;
+    char multiByteStr[300];
 	/* Get info about the devices and store the names */
-    for (i = 0; i < iNumDevs; i++)
-        if (!waveInGetDevCaps(i, &m_WaveInDevCaps, sizeof(WAVEINCAPS)))
-            vecstrDevices.push_back(m_WaveInDevCaps.szPname);
+    for (i = 0; i < iNumDevs; i++) {
+        if (!waveInGetDevCaps(i, &m_WaveInDevCaps, sizeof(WAVEINCAPS))) {
+            int n = WideCharToMultiByte(CP_ACP, WC_DEFAULTCHAR, m_WaveInDevCaps.szPname, -1,
+              multiByteStr, bs, NULL, &usedDefaultChar);
+            vecstrDevices.push_back(multiByteStr);
+        }
+    }
 
     /* We use an event controlled wave-in structure */
     /* Create events */
@@ -357,9 +364,16 @@ CSoundOut::CSoundOut():CSoundOutInterface(),m_WaveOut(nullptr)
 	vecstrDevices.push_back("");
 
 	/* Get info about the devices and store the names */
-    for (i = 0; i < iNumDevs; i++)
-        if (!waveOutGetDevCaps(i, &m_WaveOutDevCaps, sizeof(WAVEOUTCAPS)))
-            vecstrDevices.push_back(m_WaveOutDevCaps.szPname);
+    unsigned long long bs = 300;
+    int usedDefaultChar;
+    char multiByteStr[300];
+    for (i = 0; i < iNumDevs; i++) {
+        if (!waveOutGetDevCaps(i, &m_WaveOutDevCaps, sizeof(WAVEOUTCAPS))) {
+            int n = WideCharToMultiByte(CP_ACP, WC_DEFAULTCHAR, m_WaveOutDevCaps.szPname, -1,
+              multiByteStr, bs, NULL, &usedDefaultChar);
+            vecstrDevices.push_back(multiByteStr);
+        }
+    }
 
     /* We use an event controlled wave-out structure */
     /* Create events */
