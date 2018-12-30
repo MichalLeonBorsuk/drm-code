@@ -123,24 +123,21 @@ CReadData::SetSoundInterface(string device)
     format.setCodec("audio/pcm");
     foreach(const QAudioDeviceInfo& di, QAudioDeviceInfo::availableDevices(QAudio::AudioInput))
     {
-        foreach(const QAudioDeviceInfo& di, QAudioDeviceInfo::availableDevices(QAudio::AudioInput))
-        {
-            if(device == di.deviceName().toStdString()) {
-                QAudioFormat nearestFormat = di.nearestFormat(format);
-                QAudioInput* pAudioInput = new QAudioInput(di, nearestFormat);
-                pIODevice = pAudioInput->start();
-                if(pAudioInput->error()==QAudio::NoError)
-                {
-                    pIODevice->open(QIODevice::ReadOnly);
-                    qDebug("audio input open");
-                }
-                else
-                {
-                    qDebug("Can't open audio input");
-                }
+        if(device == di.deviceName().toStdString()) {
+            QAudioFormat nearestFormat = di.nearestFormat(format);
+            QAudioInput* pAudioInput = new QAudioInput(di, nearestFormat);
+            pIODevice = pAudioInput->start();
+            if(pAudioInput->error()==QAudio::NoError)
+            {
+                pIODevice->open(QIODevice::ReadOnly);
+                qDebug("audio input open");
             }
-            break;
+            else
+            {
+                qDebug("Can't open audio input");
+            }
         }
+        break;
     }
 #endif
 }
