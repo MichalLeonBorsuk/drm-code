@@ -598,10 +598,11 @@ SOURCES += \
     src/util-QT/Util.cpp
 }
 gui {
-    contains(QT, webkitwidgets)|contains(QT,webkit) {
+    contains(QT, webkitwidgets)|contains(QT,webkit)|contains(QT,webengine) {
         FORMS += BWSViewer.ui
         HEADERS += src/GUI-QT/BWSViewer.h
         SOURCES += src/GUI-QT/BWSViewer.cpp
+        message('with BWS')
     }
 FORMS += \
     AboutDlgbase.ui \
