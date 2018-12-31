@@ -33,7 +33,7 @@
 #include <QDir>
 #include <QFile>
 #include <QMessageBox>
-#include <QWebHistory>
+#include <QWebEngineHistory>
 
 
 #define CACHE_HOST          "127.0.0.1" /* Not an actual server, MUST be set to "127.0.0.1" */
@@ -57,11 +57,10 @@ BWSViewer::BWSViewer(CDRMReceiver& rec, CSettings& Settings, QWidget* parent):
     setupUi(this);
 
     /* Setup webView */
-    webView->page()->setNetworkAccessManager(&nam);
-    webView->pageAction(QWebPage::OpenLinkInNewWindow)->setVisible(false);
-    webView->pageAction(QWebPage::DownloadLinkToDisk)->setVisible(false);
-    webView->pageAction(QWebPage::OpenImageInNewWindow)->setVisible(false);
-    webView->pageAction(QWebPage::DownloadImageToDisk)->setVisible(false);
+    webView->pageAction(QWebEnginePage::OpenLinkInNewWindow)->setVisible(false);
+    webView->pageAction(QWebEnginePage::DownloadLinkToDisk)->setVisible(false);
+    webView->pageAction(QWebEnginePage::OpenLinkInNewWindow)->setVisible(false);
+    webView->pageAction(QWebEnginePage::DownloadImageToDisk)->setVisible(false);
  
     /* Update time for color LED */
     LEDStatus->SetUpdateTime(1000);
