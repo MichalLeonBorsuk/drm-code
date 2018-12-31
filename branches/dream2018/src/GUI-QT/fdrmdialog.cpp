@@ -36,7 +36,7 @@
 #include <QCloseEvent>
 #include "SlideShowViewer.h"
 #include "JLViewer.h"
-#ifdef QT_WEBKIT_LIB
+#ifdef QT_WEBENGINE_LIB
 # include "BWSViewer.h"
 #endif
 #ifdef HAVE_LIBHAMLIB
@@ -105,7 +105,7 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& Settings,
     pLiveScheduleDlg = new LiveScheduleDlg(DRMReceiver, Settings, parents);
 
     /* MOT broadcast website viewer window */
-#ifdef QT_WEBKIT_LIB
+#ifdef QT_WEBENGINE_LIB
     pBWSDlg = new BWSViewer(DRMReceiver, Settings, this);
 #endif
 
@@ -1011,7 +1011,7 @@ void FDRMDialog::OnSelectDataService(int shortId)
         pDlg = pEPGDlg;
         break;
     case DAB_AT_BROADCASTWEBSITE:
-#ifdef QT_WEBKIT_LIB
+#ifdef QT_WEBENGINE_LIB
         pDlg = pBWSDlg;
 #endif
         break;
