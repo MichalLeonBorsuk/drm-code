@@ -75,7 +75,7 @@
          <number>0</number>
         </property>
         <item>
-         <widget class="QWebView" name="webView">
+         <widget class="QWebEngineView" name="webView">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Ignored" vsizetype="Ignored">
             <horstretch>0</horstretch>
@@ -409,9 +409,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>QWebView</class>
+   <class>QWebEngineView</class>
    <extends>QWidget</extends>
-   <header>QtWebKit/QWebView</header>
+   <header>QWebEngineView</header>
   </customwidget>
   <customwidget>
    <class>CMultColorLED</class>
