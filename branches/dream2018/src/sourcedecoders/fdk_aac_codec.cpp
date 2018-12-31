@@ -30,6 +30,7 @@
 #include <fdk-aac/aacenc_lib.h>
 #include <fdk-aac/FDK_audio.h>
 #include "src/SDC/SDC.h"
+#include <cstring>
 
 FdkAacCodec::FdkAacCodec() :
     hDecoder(nullptr), hEncoder(nullptr),info(),decode_buf()
