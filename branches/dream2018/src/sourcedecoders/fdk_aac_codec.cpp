@@ -330,8 +330,8 @@ FdkAacCodec::EncOpen(const CAudioParam& AudioParam, unsigned long& lNumSampEncIn
     case CAudioParam::AM_STEREO:
         r = aacEncoder_SetParam(hEncoder, AACENC_AOT, AOT_DRM_SBR);
         break;
-    case CAudioParam::AM_SURROUND:
-        r = aacEncoder_SetParam(hEncoder, AACENC_AOT, AOT_DRM_SURROUND);
+    //case CAudioParam::AM_SURROUND:
+        //r = aacEncoder_SetParam(hEncoder, AACENC_AOT, AOT_DRM_SURROUND);
     }
     if(r!=AACENC_OK) {
         if(r==AACENC_INVALID_CONFIG) {
@@ -363,8 +363,8 @@ FdkAacCodec::EncOpen(const CAudioParam& AudioParam, unsigned long& lNumSampEncIn
     case CAudioParam::AM_STEREO:
         r = aacEncoder_SetParam(hEncoder, AACENC_CHANNELMODE, MODE_2);
        break;
-    case CAudioParam::AM_SURROUND:
-        r = aacEncoder_SetParam(hEncoder, AACENC_CHANNELMODE, MODE_6_1); // TODO provide more options ES 201 980 6.4.3.10
+    //case CAudioParam::AM_SURROUND:
+        //r = aacEncoder_SetParam(hEncoder, AACENC_CHANNELMODE, MODE_6_1); // TODO provide more options ES 201 980 6.4.3.10
     }
     if(r!=AACENC_OK) {
         cerr << "error setting channel mode " << hex << r << dec << endl;
