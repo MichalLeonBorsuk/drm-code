@@ -225,6 +225,29 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
     }
     else if (eAudioCoding == CAudioParam::AC_xHE_AAC)
     {
+        /*
+         * The xHE-AAC audio super frame Header section has the following structure:
+            • Frame border count
+            • Bit reservoir level
+            • Fixed header CRC
+            The following definitions apply:
+            4 bits. 4 bits. 8 bits
+         * */
+        int iFrameBorderCount = pvecInputData->Separate(4);
+        int iBitReservoirLevel = pvecInputData->Separate(4);
+        int iheaderCRC = pvecInputData->Separate(8);
+        // TODO check CRC
+        // get the directory
+        // set the pointer to the end of the super-frame and then back b*16 bits
+        vector<int> ivecborders(iFrameBorderCount);
+        pvecInputData->Separate(iNumHigherProtectedBytes-16-iFrameBorderCount*16);
+        for(int i=iFrameBorderCount; i>=0; i--) {
+            int iFrameBorderIndex = pvecInputData->Separate(12);
+            int iFrameBorderCountRepeat = pvecInputData->Separate(4);
+            ivecborders[i] = iFrameBorderIndex;
+        }
+        // now separate the frames using the borders
+        // TODO
     }
     else if (eAudioCoding == CAudioParam::AC_CELP)
     {
@@ -727,7 +750,7 @@ CAudioSourceDecoder::InitInternal(CParameter & Parameters)
         }
         else if (eAudioCoding == CAudioParam::AC_xHE_AAC)
         {
-            // TODO
+            // all variable per superframe
         }
         else if (eAudioCoding == CAudioParam::AC_OPUS)
         {

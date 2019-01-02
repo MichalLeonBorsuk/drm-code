@@ -77,6 +77,9 @@ macx {
     packagesExist(speex) {
         CONFIG += libspeexdsp
     }
+    packagesExist(fdk-aac) {
+        CONFIG += fdk-aac
+    }
 }
 linux-* {
     LIBS += -ldl -lrt
@@ -151,6 +154,9 @@ unix:!cross_compile {
       packagesExist(speexdsp) {
         CONFIG += speexdsp
       }
+      packagesExist(fdk-aac) {
+        CONFIG += fdk-aac
+      }
     }
     else {
       exists(/usr/include/sndfile.h) | \
@@ -203,6 +209,9 @@ win32 {
     }
     exists($$PWD/include/opus/opus.h) {
         CONFIG += opus
+    }
+    exists($$PWD/include/fdk-aac/aacdecoder_lib.h) {
+        CONFIG += fdk-aac
     }
     LIBS += -lsetupapi -lwsock32 -lws2_32 -lzlib -ladvapi32 -luser32
     DEFINES += HAVE_SETUPAPI HAVE_LIBZ _CRT_SECURE_NO_WARNINGS
