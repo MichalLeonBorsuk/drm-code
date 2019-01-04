@@ -34,6 +34,11 @@
 # include "fdk_aac_codec.h"
 #endif
 
+CAudioCodec::CAudioCodec():pFile(nullptr)
+{
+
+}
+
 CAudioCodec::~CAudioCodec() {
 
 }
@@ -128,5 +133,35 @@ CAudioCodec::extractSamples(size_t iNumAudioFrames, size_t iNumHigherProtectedBy
             audio_frame[i][iNumHigherProtectedBytes + j] =
                 _BINARY(vecInputData.Separate(8));
         }
+    }
+}
+
+void
+CAudioCodec::openFile(const CParameter& Parameters)
+{
+    if(pFile != nullptr) {
+        fclose(pFile);
+        pFile = nullptr;
+    }
+    pFile = fopen(fileName(Parameters).c_str(), "wb");
+}
+
+void
+CAudioCodec::writeFile(const vector<uint8_t>& audio_frame)
+{
+    if (pFile!=nullptr)
+    {
+        size_t iNewFrL = size_t(audio_frame.size()) + 1;
+        fwrite(&iNewFrL, size_t(4), size_t(1), pFile);	// frame length
+        fwrite(&audio_frame[0], 1, iNewFrL, pFile);	// data
+        fflush(pFile);
+    }
+}
+
+void
+CAudioCodec::closeFile() {
+    if(pFile != nullptr) {
+        fclose(pFile);
+        pFile = nullptr;
     }
 }

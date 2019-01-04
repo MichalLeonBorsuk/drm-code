@@ -61,12 +61,10 @@ public:
     virtual void EncClose();
 	virtual void EncSetBitrate(int iBitRate);
 	virtual void EncUpdate(CAudioParam& AudioParam);
-    virtual void resetFile(string);
 protected:
 	NeAACDecHandle hFaadDecoder;
 	faacEncHandle hFaacEncoder;
-private:
-    FILE *pFile;
+    string fileName(const CParameter& Parameters) const;
 };
 
 #endif // AAC_CODEC_H_

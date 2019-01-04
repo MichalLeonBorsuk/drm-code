@@ -39,6 +39,7 @@
 class CAudioCodec
 {
 public:
+    CAudioCodec();
     virtual ~CAudioCodec();
 	/* Decoder */
 	enum EDecError { DECODER_ERROR_OK, DECODER_ERROR_CRC, DECODER_ERROR_CORRUPTED, DECODER_ERROR_UNKNOWN };
@@ -48,7 +49,6 @@ public:
     virtual _SAMPLE* Decode(const vector<uint8_t>& audio_frame, uint8_t aac_crc_bits, int& iChannels, EDecError& eDecError) = 0;
     virtual void DecClose() = 0;
 	virtual void DecUpdate(CAudioParam& AudioParam) = 0;
-    virtual void resetFile(string name) = 0;
     /* Encoder */
 	virtual string EncGetVersion() = 0;
 	virtual bool CanEncode(CAudioParam::EAudCod eAudioCoding) = 0;
@@ -63,9 +63,14 @@ public:
 	static CAudioCodec* GetDecoder(CAudioParam::EAudCod eAudioCoding, bool bCanReturnNullPtr=false);
 	static CAudioCodec* GetEncoder(CAudioParam::EAudCod eAudioCoding, bool bCanReturnNullPtr=false);
     static void extractSamples(size_t iNumAudioFrames, size_t iNumHigherProtectedBytes, CVectorEx<_BINARY>& vecInputData, vector< vector<uint8_t> >& audio_frame, vector<uint8_t>& aac_crc_bits);
+    virtual void openFile(const CParameter& Parameters);
+    virtual void closeFile();
+    virtual void writeFile(const vector<uint8_t>& audio_frame);
+    virtual string fileName(const CParameter& Parameters) const = 0;
 private:
 	static vector<CAudioCodec*> CodecList;
 	static int RefCount;
+    FILE *pFile;
 };
 
 #endif // _AUDIOCODEC_H_

@@ -100,7 +100,7 @@ static bool FaacCheckCallback()
 /* Implementation *************************************************************/
 
 AacCodec::AacCodec() :
-    hFaadDecoder(nullptr), hFaacEncoder(nullptr),pFile(nullptr)
+    hFaadDecoder(nullptr), hFaacEncoder(nullptr)
 {
 #ifndef USE_FAAD2_LIBRARY
     if (hFaadLib == nullptr)
@@ -226,13 +226,7 @@ AacCodec::Decode(const vector<uint8_t>& audio_frame, uint8_t aac_crc_bits, int& 
     for (size_t i = 0; i < audio_frame.size(); i++)
         vecbyPrepAudioFrame[int(i + 1)] = audio_frame[i];
 
-    if (pFile!=nullptr)
-    {
-        size_t iNewFrL = size_t(vecbyPrepAudioFrame.Size()) + 1;
-        fwrite(&iNewFrL, size_t(4), size_t(1), pFile);	// frame length
-        fwrite(&vecbyPrepAudioFrame[0], 1, iNewFrL, pFile);	// data
-        fflush(pFile);
-    }
+    writeFile(audio_frame);
 
     if (hFaadDecoder != nullptr)
     {
@@ -247,10 +241,7 @@ AacCodec::Decode(const vector<uint8_t>& audio_frame, uint8_t aac_crc_bits, int& 
 void
 AacCodec::DecClose()
 {
-    if(pFile != nullptr) {
-        fclose(pFile);
-        pFile = nullptr;
-    }
+    closeFile();
     if (hFaadDecoder != nullptr)
     {
         NeAACDecClose(hFaadDecoder);
@@ -340,16 +331,49 @@ AacCodec::EncUpdate(CAudioParam&)
 {
 }
 
-void
-AacCodec::resetFile(string name)
+
+string
+AacCodec::fileName(const CParameter& Parameters) const
 {
-    if(pFile != nullptr) {
-        fclose(pFile);
-        pFile = nullptr;
+    // Store AAC-data in file
+    stringstream ss;
+    ss << "test/aac_";
+
+//    Parameters.Lock(); // TODO CAudioSourceDecoder::InitInternal() already have the lock
+    if (Parameters.
+            Service[Parameters.GetCurSelAudioService()].AudioParam.
+            eAudioSamplRate == CAudioParam::AS_12KHZ)
+    {
+        ss << "12kHz_";
     }
-    if(name != "") {
-        pFile = fopen(name.c_str(), "wb");
+    else
+        ss << "24kHz_";
+
+    switch (Parameters.
+            Service[Parameters.GetCurSelAudioService()].
+            AudioParam.eAudioMode)
+    {
+    case CAudioParam::AM_MONO:
+        ss << "mono";
+        break;
+
+    case CAudioParam::AM_P_STEREO:
+        ss << "pstereo";
+        break;
+
+    case CAudioParam::AM_STEREO:
+        ss << "stereo";
+        break;
     }
+
+    if (Parameters.
+            Service[Parameters.GetCurSelAudioService()].AudioParam.
+            eSBRFlag == CAudioParam::SB_USED)
+    {
+        ss << "_sbr";
+    }
+//    Parameters.Unlock(); // TODO CAudioSourceDecoder::InitInternal() already have the lock
+    ss << ".dat";
+
+    return ss.str();
 }
-
-
