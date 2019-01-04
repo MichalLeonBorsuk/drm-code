@@ -139,7 +139,7 @@ public:
             eAudioCoding(AC_NONE), eSBRFlag(SB_NOT_USED), eAudioSamplRate(AS_24KHZ),
             bTextflag(FALSE), bEnhanceFlag(FALSE), eAudioMode(AM_MONO),
             iCELPIndex(0), bCELPCRC(FALSE), eHVXCRate(HR_2_KBIT), bHVXCCRC(FALSE),
-            xHE_AAC_Static_Config(),
+            t9Bytes(),
             eOPUSBandwidth(OB_FB), eOPUSSubCod(OS_SILK), eOPUSChan(OC_STEREO),
             eOPUSSignal(OG_MUSIC), eOPUSApplication(OA_AUDIO),
             bOPUSForwardErrorCorrection(FALSE), bOPUSRequestReset(FALSE),
@@ -159,7 +159,7 @@ public:
             bCELPCRC(ap.bCELPCRC),
             eHVXCRate(ap.eHVXCRate),
             bHVXCCRC(ap.bHVXCCRC),
-            xHE_AAC_Static_Config(ap.xHE_AAC_Static_Config),
+            t9Bytes(ap.t9Bytes),
             eOPUSBandwidth(ap.eOPUSBandwidth),
             eOPUSSubCod(ap.eOPUSSubCod),
             eOPUSChan(ap.eOPUSChan),
@@ -184,7 +184,7 @@ public:
         bCELPCRC = ap.bCELPCRC;
         eHVXCRate = ap.eHVXCRate;
         bHVXCCRC = ap.bHVXCCRC;
-        xHE_AAC_Static_Config = ap.xHE_AAC_Static_Config;
+        t9Bytes = ap.t9Bytes;
         eOPUSBandwidth = ap.eOPUSBandwidth;
         eOPUSSubCod = ap.eOPUSSubCod;
         eOPUSChan = ap.eOPUSChan;
@@ -219,7 +219,7 @@ public:
     _BOOLEAN bHVXCCRC;		/* This field indicates whether the CRC is used or not */
 
     /* for xHE-AAC ------------------------------------------------------ */
-    vector<_BYTE> xHE_AAC_Static_Config;
+    vector<_BYTE> t9Bytes;
 
     /* For OPUS --------------------------------------------------------- */
     EOPUSBandwidth eOPUSBandwidth; /* Audio bandwidth */
@@ -268,7 +268,7 @@ public:
         case AC_RESERVED:
             break;
         }
-        if(xHE_AAC_Static_Config != AudioParam.xHE_AAC_Static_Config) {
+        if(t9Bytes != AudioParam.t9Bytes) {
             return TRUE;
         }
         return FALSE;
