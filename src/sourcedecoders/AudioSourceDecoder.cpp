@@ -84,6 +84,7 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
 
     //cerr << "got one logical frame of length " << pvecInputData->Size() << " bits" << endl;
 
+    TextMessage.Decode(vecbiTextMessBuf);
     /* Text Message ********************************************************** */
     /* Total frame size depends on whether text message is used or not */
     if (bTextMessageUsed == TRUE)
@@ -194,15 +195,19 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
         int iheaderCRC = pvecInputData->Separate(8);
         // TODO check CRC
         // get the directory
-        // set the pointer to the end of the super-frame and then back b*16 bits
+        int directory_offset = iTotalFrameSize - 16 * iFrameBorderCount;
+        cerr << "directory offset " << directory_offset << " bits " << (directory_offset/SIZEOF__BYTE) << " bytes" << endl;
+        CVector<_BINARY> vecbiDirectory(16 * iFrameBorderCount);
+        for (int i = 0; i < 16 * iFrameBorderCount; i++) {
+            vecbiDirectory[i] = (*pvecInputData)[directory_offset + i];
+        }
+
+        vecbiDirectory.ResetBitAccess();
         vector<int> ivecborders(iFrameBorderCount);
-        int directory_offset = iNumHigherProtectedBytes-iFrameBorderCount*16;
-        cerr << "superframe has " << iNumHigherProtectedBytes << " bytes and " << iFrameBorderCount << " borders. Directory starts at " << directory_offset << endl;
-        pvecInputData->Separate((directory_offset-2)*8);//__SIZEOF_BYTE);
         for(int i=iFrameBorderCount; i>=0; i--) {
-            int iFrameBorderIndex = pvecInputData->Separate(12);
-            int iFrameBorderCountRepeat =  pvecInputData->Separate(4);
-            cerr << "border " << i << " of " << iFrameBorderCountRepeat << " starts at " << iFrameBorderCountRepeat << endl;
+            int iFrameBorderIndex = vecbiDirectory.Separate(12);
+            int iFrameBorderCountRepeat =  vecbiDirectory.Separate(4);
+            cerr << "border " << i << " of " << iFrameBorderCountRepeat << " starts at " << hex << iFrameBorderIndex << dec << endl;
             ivecborders[i] = iFrameBorderIndex;
         }
         // now separate the frames using the borders
@@ -213,6 +218,22 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
     }
     else if (eAudioCoding == CAudioParam::AC_HVXC)
     {
+    }
+
+    if(bWriteToFile)
+    {
+        static int n=0;
+        stringstream fn;
+        fn << "audio" << n++ << ".bin";
+        FILE *f = fopen(fn.str().c_str(), "ab");
+        int bytes = iTotalFrameSize/SIZEOF__BYTE;
+        uint8_t b[bytes];
+        pvecInputData->ResetBitAccess();
+        for(int i=0; i<bytes; i++) {
+            b[i] = pvecInputData->Separate(8);
+        }
+        fwrite(b, 1, bytes, f);
+        fclose(f);
     }
 
 
