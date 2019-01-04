@@ -201,17 +201,29 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
         for (int i = 0; i < 16 * iFrameBorderCount; i++) {
             vecbiDirectory[i] = (*pvecInputData)[directory_offset + i];
         }
-
         vecbiDirectory.ResetBitAccess();
-        vector<int> ivecborders(iFrameBorderCount);
-        for(int i=iFrameBorderCount; i>=0; i--) {
-            int iFrameBorderIndex = vecbiDirectory.Separate(12);
+        vector<size_t> ivecborders;
+        ivecborders.resize(unsigned(iFrameBorderCount));
+        for(int i=iFrameBorderCount-1; i>=0; i--) {
+            size_t iFrameBorderIndex = vecbiDirectory.Separate(12);
             int iFrameBorderCountRepeat =  vecbiDirectory.Separate(4);
             cerr << "border " << i << " of " << iFrameBorderCountRepeat << " starts at " << hex << iFrameBorderIndex << dec << endl;
             ivecborders[i] = iFrameBorderIndex;
         }
+        ivecborders.push_back(directory_offset/SIZEOF__BYTE);  // last frame ends at start of directory
         // now separate the frames using the borders
-        // TODO
+        iNumAudioFrames = iFrameBorderCount + 1;
+        size_t start = 2; // offset at the beginning
+        audio_frame.resize(iNumAudioFrames);
+        for (size_t i = 0; i < audio_frame.size(); i++)
+        {
+            cerr << hex << "extracting frame " << i << " from offset " << start << " to offset " << ivecborders[i] << dec << endl;
+            audio_frame[i].resize(ivecborders[i]-start);
+            for (size_t j = 0; j < audio_frame[i].size(); j++) {
+                audio_frame[i][j] = _BINARY((*pvecInputData).Separate(8));
+            }
+            start = ivecborders[i];
+        }
     }
     else if (eAudioCoding == CAudioParam::AC_CELP)
     {
