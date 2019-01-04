@@ -117,18 +117,28 @@ static void logConfig(const CStreamInfo& info) {
 bool
 FdkAacCodec::DecOpen(const CAudioParam& AudioParam, int& iAudioSampleRate, int& iLenDecOutPerChan)
 {
-    unsigned int Type9Size = 2;
-    CVector<_BINARY> vecbiData;
-    vecbiData.Init(16);
-    vecbiData.ResetBitAccess();
-    CSDCTransmit::DataEntityType9(vecbiData, AudioParam);
-    vecbiData.ResetBitAccess();
 
-    UCHAR t9b[2];
-    t9b[0] = UCHAR(vecbiData.Separate(8));
-    t9b[1] = UCHAR(vecbiData.Separate(8));
+    unsigned int Type9Size;
+    UCHAR *t9;
+    if(AudioParam.eAudioCoding==CAudioParam::AC_xHE_AAC) {
+        Type9Size = AudioParam.t9Bytes.size();
+        t9 = const_cast<UCHAR*>(&AudioParam.t9Bytes[0]);
+    }
+    else {
+        Type9Size = 2;
+        CVector<_BINARY> vecbiData;
+        vecbiData.Init(16);
+        vecbiData.ResetBitAccess();
+        CSDCTransmit::DataEntityType9(vecbiData, AudioParam);
+        vecbiData.ResetBitAccess();
 
-    UCHAR *t9 = &t9b[0];
+        UCHAR t9b[2];
+        t9b[0] = UCHAR(vecbiData.Separate(8));
+        t9b[1] = UCHAR(vecbiData.Separate(8));
+
+        UCHAR *t9 = &t9b[0];
+
+    }
 
     hDecoder = aacDecoder_Open (TRANSPORT_TYPE::TT_DRM, 3);
 
