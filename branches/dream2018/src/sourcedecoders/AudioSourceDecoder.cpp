@@ -42,7 +42,7 @@
 /* Implementation *************************************************************/
 
 CAudioSourceDecoder::CAudioSourceDecoder()
-    :	bWriteToFile(FALSE), TextMessage(FALSE),
+    :	bWriteToFile(TRUE), TextMessage(FALSE),
         bUseReverbEffect(TRUE), codec(nullptr)
 {
     /* Initialize Audio Codec List */
@@ -60,51 +60,7 @@ CAudioSourceDecoder::~CAudioSourceDecoder()
     CAudioCodec::UnrefCodecList();
 }
 
-string
-CAudioSourceDecoder::AACFileName(CParameter & Parameters)
-{
-    // Store AAC-data in file
-    stringstream ss;
-    ss << "test/aac_";
 
-//    Parameters.Lock(); // TODO CAudioSourceDecoder::InitInternal() already have the lock
-    if (Parameters.
-            Service[Parameters.GetCurSelAudioService()].AudioParam.
-            eAudioSamplRate == CAudioParam::AS_12KHZ)
-    {
-        ss << "12kHz_";
-    }
-    else
-        ss << "24kHz_";
-
-    switch (Parameters.
-            Service[Parameters.GetCurSelAudioService()].
-            AudioParam.eAudioMode)
-    {
-    case CAudioParam::AM_MONO:
-        ss << "mono";
-        break;
-
-    case CAudioParam::AM_P_STEREO:
-        ss << "pstereo";
-        break;
-
-    case CAudioParam::AM_STEREO:
-        ss << "stereo";
-        break;
-    }
-
-    if (Parameters.
-            Service[Parameters.GetCurSelAudioService()].AudioParam.
-            eSBRFlag == CAudioParam::SB_USED)
-    {
-        ss << "_sbr";
-    }
-//    Parameters.Unlock(); // TODO CAudioSourceDecoder::InitInternal() already have the lock
-    ss << ".dat";
-
-    return ss.str();
-}
 
 void
 CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
@@ -240,10 +196,13 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
         // get the directory
         // set the pointer to the end of the super-frame and then back b*16 bits
         vector<int> ivecborders(iFrameBorderCount);
-        pvecInputData->Separate(iNumHigherProtectedBytes-16-iFrameBorderCount*16);
+        int directory_offset = iNumHigherProtectedBytes-iFrameBorderCount*16;
+        cerr << "superframe has " << iNumHigherProtectedBytes << " bytes and " << iFrameBorderCount << " borders. Directory starts at " << directory_offset << endl;
+        pvecInputData->Separate((directory_offset-2)*8);//__SIZEOF_BYTE);
         for(int i=iFrameBorderCount; i>=0; i--) {
             int iFrameBorderIndex = pvecInputData->Separate(12);
-            int iFrameBorderCountRepeat = pvecInputData->Separate(4);
+            int iFrameBorderCountRepeat =  pvecInputData->Separate(4);
+            cerr << "border " << i << " of " << iFrameBorderCountRepeat << " starts at " << iFrameBorderCountRepeat << endl;
             ivecborders[i] = iFrameBorderIndex;
         }
         // now separate the frames using the borders
@@ -710,6 +669,14 @@ CAudioSourceDecoder::InitInternal(CParameter & Parameters)
         if (codec->CanDecode(eAudioCoding))
             audiodecoder = codec->DecGetVersion();
 
+        if(bWriteToFile)
+        {
+            codec->openFile(Parameters);
+        }
+        else {
+            codec->closeFile();
+        }
+
         int iNumHeaderBytes = 0;
         /* Length of higher protected part of audio stream */
         const int iLenAudHigh = Parameters.Stream[iCurAudioStreamID].iLenPartA;
@@ -740,16 +707,27 @@ CAudioSourceDecoder::InitInternal(CParameter & Parameters)
             /* Number of borders */
             iNumBorders = iNumAudioFrames - 1;
 
-            if(bWriteToFile)
-            {
-                codec->resetFile(AACFileName(Parameters));
-            }
-            else {
-                codec->resetFile("");
-            }
+            iAudioPayloadLen = iTotalFrameSize / SIZEOF__BYTE -
+                               iNumHeaderBytes - iNumAudioFrames;
+
+            /* Check iAudioPayloadLen value, only positive values make sense */
+            if (iAudioPayloadLen < 0)
+                throw CInitErr(ET_AUDDECODER);
+
+            /* Calculate number of bytes for higher protected blocks */
+            iNumHigherProtectedBytes = (iLenAudHigh - iNumHeaderBytes -
+                                        iNumAudioFrames /* CRC bytes */ ) /
+                                        iNumAudioFrames;
+
+            if (iNumHigherProtectedBytes < 0)
+                iNumHigherProtectedBytes = 0;
         }
         else if (eAudioCoding == CAudioParam::AC_xHE_AAC)
         {
+            iNumHeaderBytes = 2;
+            iNumAudioFrames = 0;
+            iAudioPayloadLen = iTotalFrameSize / SIZEOF__BYTE - iNumHeaderBytes - iNumAudioFrames;
+            iNumHigherProtectedBytes = iAudioPayloadLen;
             // all variable per superframe
         }
         else if (eAudioCoding == CAudioParam::AC_OPUS)
@@ -761,27 +739,26 @@ CAudioSourceDecoder::InitInternal(CParameter & Parameters)
 
             /* Number of borders */
             iNumBorders = iNumAudioFrames;
+            iAudioPayloadLen = iTotalFrameSize / SIZEOF__BYTE -
+                               iNumHeaderBytes - iNumAudioFrames;
+
+            /* Check iAudioPayloadLen value, only positive values make sense */
+            if (iAudioPayloadLen < 0)
+                throw CInitErr(ET_AUDDECODER);
+
+            /* Calculate number of bytes for higher protected blocks */
+            iNumHigherProtectedBytes = (iLenAudHigh - iNumHeaderBytes -
+                                        iNumAudioFrames /* CRC bytes */ ) /
+                                        iNumAudioFrames;
+
+            if (iNumHigherProtectedBytes < 0)
+                iNumHigherProtectedBytes = 0;
         }
         else
         {
             /* Audio codec not supported */
             throw CInitErr(ET_AUDDECODER);
         }
-
-        iAudioPayloadLen = iTotalFrameSize / SIZEOF__BYTE -
-                           iNumHeaderBytes - iNumAudioFrames;
-
-        /* Check iAudioPayloadLen value, only positive values make sense */
-        if (iAudioPayloadLen < 0)
-            throw CInitErr(ET_AUDDECODER);
-
-        /* Calculate number of bytes for higher protected blocks */
-        iNumHigherProtectedBytes = (iLenAudHigh - iNumHeaderBytes -
-                                    iNumAudioFrames /* CRC bytes */ ) /
-                                    iNumAudioFrames;
-
-        if (iNumHigherProtectedBytes < 0)
-            iNumHigherProtectedBytes = 0;
 
         /* The maximum length for one audio frame is "iAudioPayloadLen". The
            regular size will be much shorter since all audio frames share
