@@ -124,7 +124,6 @@ protected:
 
     virtual void InitInternal(CParameter& Parameters);
     virtual void ProcessDataInternal(CParameter& Parameters);
-    string AACFileName(CParameter&);
 	void CloseDecoder();
 };
 
