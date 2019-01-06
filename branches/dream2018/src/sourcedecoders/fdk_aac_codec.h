@@ -54,7 +54,7 @@ public:
 	virtual void EncSetBitrate(int iBitRate);
 	virtual void EncUpdate(CAudioParam& AudioParam);
     virtual void resetFile(string) {}
-    virtual string fileName(const CParameter& Parameters) const {return "fdk.bin";}
+    virtual string fileName(const CParameter& Parameters) const;
 protected:
     HANDLE_AACDECODER hDecoder;
     HANDLE_AACENCODER hEncoder;
