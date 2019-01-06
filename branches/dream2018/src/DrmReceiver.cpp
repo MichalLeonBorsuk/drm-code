@@ -1598,7 +1598,15 @@ CDRMReceiver::LoadSettings()
     str = s.Get("command", string("fileio"));
     if (str == "") {
         /* Sound In device */
-        indev = QString::fromStdString(s.Get("Receiver", "snddevin", string()));
+        str = s.Get("Receiver", "snddevin", string());
+        if(str == "") {
+            vector<string> vn,vd;
+            EnumerateInputs(vn, vd);
+            if(vn.size()>0) {
+                str = vn[0];
+            }
+        }
+        indev = QString::fromStdString(str);
         SetInputDevice(indev);
     }
     else {
@@ -1655,7 +1663,15 @@ CDRMReceiver::LoadSettings()
     SetAMDemodType(eDemodType);
 
     /* Sound Out device */
-    outdev = QString::fromStdString(s.Get("Receiver", "snddevout", string()));
+    str = s.Get("Receiver", "snddevout", string());
+    if(str == "") {
+        vector<string> vn,vd;
+        EnumerateOutputs(vn, vd);
+        if(vn.size()>0) {
+            str = vn[0];
+        }
+    }
+    outdev = QString::fromStdString(str);
     SetOutputDevice(outdev);
 
     str = s.Get("command", "rciout");
