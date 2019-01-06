@@ -680,7 +680,10 @@ void CSDCTransmit::DataEntityType9(CVector<_BINARY>& vecbiData, int ServiceID,
                                    CParameter& Parameter)
 {
     /* Set total number of bits */
-    const int iNumBitsTotal = 20;
+    int iNumBitsTotal = 20;
+    if(Parameter.Service[ServiceID].AudioParam.eAudioCoding==CAudioParam::AC_xHE_AAC) {
+        iNumBitsTotal += (Parameter.Service[ServiceID].AudioParam.t9Bytes.size()-2)*SIZEOF__BYTE;
+    }
 
     /* Init return vector (storing this data block) */
     vecbiData.Init(iNumBitsTotal + NUM_BITS_HEADER_SDC);
