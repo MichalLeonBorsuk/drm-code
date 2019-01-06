@@ -66,19 +66,17 @@ FdkAacCodec::DecGetVersion()
     return version.str();
 }
 
-//CAPF_AAC_960 | CAPF_AAC_USAC
-
 bool
 FdkAacCodec::CanDecode(CAudioParam::EAudCod eAudioCoding)
 {
     LIB_INFO info;
     aacinfo(info);
     if(eAudioCoding == CAudioParam::AC_AAC) {
-        if((info.flags & CAPF_AAC_960) != 0)
+        if((info.flags & CAPF_AAC_DRM_BSFORMAT & CAPF_SBR_DRM_BS & CAPF_SBR_PS_DRM) != 0)
             return true;
     }
     if(eAudioCoding == CAudioParam::AC_xHE_AAC) {
-        if((info.flags & CAPF_AAC_960 & CAPF_AAC_USAC) != 0)
+        if((info.flags & CAPF_AAC_USAC) != 0)
             return true;
     }
     return false;
