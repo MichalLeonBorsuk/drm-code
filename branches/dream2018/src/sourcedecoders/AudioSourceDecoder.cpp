@@ -682,7 +682,7 @@ CAudioSourceDecoder::InitInternal(CParameter & Parameters)
 
         /* Get number of total input bits for this module */
         iInputBlockSize = Parameters.iNumAudioDecoderBits;
-
+cerr << "iInputBlockSize " << iInputBlockSize << endl;
         /* Get current selected audio service */
         iCurSelServ = Parameters.GetCurSelAudioService();
 
@@ -711,14 +711,11 @@ CAudioSourceDecoder::InitInternal(CParameter & Parameters)
             /* Get a pointer to the string */
             TextMessage.Init(&AudioParam.strTextMessage);
 
-            /* Total frame size is input block size minus the bytes for the text
-               message */
-            iTotalFrameSize = iInputBlockSize -
-                    SIZEOF__BYTE * NUM_BYTES_TEXT_MESS_IN_AUD_STR;
+            /* Total frame size is input block size minus the bytes for the text message */
+            iTotalFrameSize = iInputBlockSize - SIZEOF__BYTE * NUM_BYTES_TEXT_MESS_IN_AUD_STR;
 
             /* Init vector for text message bytes */
-            vecbiTextMessBuf.Init(SIZEOF__BYTE *
-                                  NUM_BYTES_TEXT_MESS_IN_AUD_STR);
+            vecbiTextMessBuf.Init(SIZEOF__BYTE * NUM_BYTES_TEXT_MESS_IN_AUD_STR);
         }
         else {
             bTextMessageUsed = FALSE;

@@ -927,17 +927,6 @@ _BOOLEAN CSDCReceive::DataEntityType9(CVector<_BINARY>* pbiData,
                                       CParameter& Parameter,
                                       const _BOOLEAN)
 {
-    cerr << "type 9 rx " << hex;
-    CVector<_BINARY> t9(iLengthOfBody*SIZEOF__BYTE);
-    for(size_t i=0; i<t9.Size(); i++) {
-        t9[i] = (*pbiData)[i];
-    }
-    t9.ResetBitAccess();
-    for(size_t i=0; i<iLengthOfBody; i++) {
-        cerr << int(t9.Separate(8));
-    }
-    cerr << dec << endl;
-
 
     /* Check length -> must be at least 2 bytes */
     if (iLengthOfBody < 2)
