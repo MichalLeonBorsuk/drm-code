@@ -28,25 +28,34 @@
  *
 \******************************************************************************/
 
+#include <QTranslator>
+#include <QThread>
+#include <QApplication>
+#include <QMessageBox>
+
 #ifdef _WIN32
 # include <windows.h>
-#endif
-#if defined(__unix__) && !defined(__APPLE__)
+#else
 # include <csignal>
 #endif
+#include <iostream>
 
 #include "../GlobalDefinitions.h"
 #include "../DrmReceiver.h"
 #include "../DrmTransmitter.h"
 #include "../DrmSimulation.h"
 #include "../util/Settings.h"
-#include <iostream>
+# include "fdrmdialog.h"
+# include "TransmDlg.h"
+# include "DialogUtil.h"
 
 #ifdef HAVE_LIBHAMLIB
 # include "../util-QT/Rig.h"
 #endif
-#include <QTranslator>
-#include <QThread>
+#ifdef USE_OPENSL
+# include <SLES/OpenSLES.h>
+  SLObjectItf engineObject = nullptr;
+#endif
 
 class CRx: public QThread
 {
@@ -78,23 +87,11 @@ CRx::run()
     qDebug("Working thread complete");
 }
 
-#ifdef USE_OPENSL
-# include <SLES/OpenSLES.h>
-SLObjectItf engineObject = nullptr;
-#endif
-
-/******************************************************************************\
-* Using GUI with QT                                                            *
-\******************************************************************************/
-# include "fdrmdialog.h"
-# include "TransmDlg.h"
-# include "DialogUtil.h"
-# include <QApplication>
-# include <QMessageBox>
-
 int
 main(int argc, char **argv)
 {
+    QApplication app(argc, argv);
+
 #ifdef USE_OPENSL
     (void)slCreateEngine(&engineObject, 0, nullptr, 0, nullptr, nullptr);
     (void)(*engineObject)->Realize(engineObject, SL_BOOLEAN_FALSE);
@@ -108,8 +105,6 @@ main(int argc, char **argv)
 	pthread_sigmask(SIG_BLOCK, &sigset, nullptr);
 #endif
 
-	/* create app before running Settings.Load to consume platform/QT parameters */
-	QApplication app(argc, argv);
 
 #if defined(__APPLE__)
 	/* find plugins on MacOs when deployed in a bundle */
