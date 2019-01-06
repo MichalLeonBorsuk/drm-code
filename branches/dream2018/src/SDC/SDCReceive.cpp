@@ -145,7 +145,9 @@ CSDCReceive::ERetStatus CSDCReceive::SDCParam(CVector<_BINARY>* pbiData,
             const int iNumBitsEntity = iLengthOfBody * 8 + 4;
 
             /* Call the routine for the signalled type */
-            switch ((*pbiData).Separate(4))
+            int t = (*pbiData).Separate(4);
+            cerr << "type " << t;
+            switch (t)
             {
             case 0: /* Type 0 */
                 bError = DataEntityType0(pbiData, iLengthOfBody, Parameter, bVersionFlag);
@@ -192,7 +194,7 @@ CSDCReceive::ERetStatus CSDCReceive::SDCParam(CVector<_BINARY>* pbiData,
                    from the queue */
                 (*pbiData).Separate(iNumBitsEntity);
             }
-
+            cerr << endl;
             /* Count number of bits consumed (7 for length, 1 for version flag,
                4 for type = 12 plus actual entitiy body data) */
             iBitsConsumed += 12 + iNumBitsEntity;
@@ -322,6 +324,7 @@ _BOOLEAN CSDCReceive::DataEntityType1(CVector<_BINARY>* pbiData,
         }
 
         /* store label string in the current service structure */
+        cerr << " id " << iTempShortID << " '" << strLabel << "'";
         Parameter.Lock();
         Parameter.Service[iTempShortID].strLabel = strLabel;
         /* and keep it in the persistent service information store.
@@ -690,6 +693,11 @@ _BOOLEAN CSDCReceive::DataEntityType5(CVector<_BINARY>* pbiData,
         /* Packet length */
         DataParam.iPacketLen = (*pbiData).Separate(8);
         break;
+    }
+
+    cerr << " service " << iTempShortID <<  " stream " << DataParam.iStreamID;
+    if(DataParam.ePacketModInd) {
+        cerr << " packet id " << DataParam.iPacketID << " len " << DataParam.iPacketLen;
     }
 
     /* Application data */
