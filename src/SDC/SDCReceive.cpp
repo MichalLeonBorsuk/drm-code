@@ -927,8 +927,9 @@ _BOOLEAN CSDCReceive::DataEntityType9(CVector<_BINARY>* pbiData,
                                       CParameter& Parameter,
                                       const _BOOLEAN)
 {
-    /* Check length -> must be 2 bytes */
-    if (iLengthOfBody != 2)
+
+    /* Check length -> must be at least 2 bytes */
+    if (iLengthOfBody < 2)
         return TRUE;
 
     /* Init error flag with "no error" */
@@ -1099,6 +1100,27 @@ _BOOLEAN CSDCReceive::DataEntityType9(CVector<_BINARY>* pbiData,
         /* CELP index */
         AudParam.iCELPIndex = (*pbiData).Separate(5);
     }
+    if ((AudParam.eAudioCoding == CAudioParam::AC_AAC) || (AudParam.eAudioCoding == CAudioParam::AC_xHE_AAC))
+    {
+        int mpeg_surround_config = (*pbiData).Separate(3);
+        switch(mpeg_surround_config) {
+        case 0: // no MPEG Surround information available.
+        case 1: // reserved.
+            break;
+        case 2: // MPEG Surround with 5.1 output channels.
+            break;
+        case 3: // MPEG Surround with 7.1 output channels.
+            break;
+        case 4: // reserved.
+        case 5: // reserved.
+        case 6: // reserved.
+            break;
+        case 7: // other mode (the mode can be derived from the MPEG Surround data stream)
+            break;
+        }
+        /* rfa 2 bits */
+        (*pbiData).Separate(2);
+    }
     else
     {
         /* rfa 5 bit */
@@ -1107,6 +1129,15 @@ _BOOLEAN CSDCReceive::DataEntityType9(CVector<_BINARY>* pbiData,
 
     /* rfa 1 bit */
     (*pbiData).Separate(1);
+
+    if (AudParam.eAudioCoding == CAudioParam::AC_xHE_AAC)
+    {
+        (*pbiData).ResetBitAccess();
+        AudParam.t9Bytes.resize(iLengthOfBody);
+        for(int i=0; i < iLengthOfBody; i++) {
+            AudParam.t9Bytes[i] = ((*pbiData).Separate(8));
+        }
+    }
 
     /* Set new parameters in global struct */
     if (bError == FALSE)
