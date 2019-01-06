@@ -64,11 +64,7 @@ FdkAacCodec::DecGetVersion()
 bool
 FdkAacCodec::CanDecode(CAudioParam::EAudCod eAudioCoding)
 {
-    if(eAudioCoding == CAudioParam::AC_AAC) return true;
-#ifdef AC_USAC
-    if(eAudioCoding == CAudioParam::AC_xHE_AAC) return true;
-#endif
-    return false;
+	return eAudioCoding == CAudioParam::AC_AAC;
 }
 
 static void logConfig(const CStreamInfo& info) {
@@ -82,14 +78,12 @@ static void logConfig(const CStreamInfo& info) {
     case AUDIO_OBJECT_TYPE::AOT_DRM_MPEG_PS:
         cerr << " AAC+SBR+PS";
         break;
-#ifdef AC_USAC
-    case AUDIO_OBJECT_TYPE::AOT_DRM_SURROUND:
-        cerr << " AAC+Surround";
-        break;
-    case AUDIO_OBJECT_TYPE::AOT_DRM_USAC:
-        cerr << " xHE-AAC";
-        break;
-#endif
+    //case AUDIO_OBJECT_TYPE::AOT_DRM_SURROUND:
+    //    cerr << " AAC+Surround";
+    //    break;
+    //case AUDIO_OBJECT_TYPE::AOT_DRM_USAC:
+    //    cerr << " xHE-AAC";
+    //    break;
     default:
         cerr << "unknown object type";
     }
@@ -117,28 +111,18 @@ static void logConfig(const CStreamInfo& info) {
 bool
 FdkAacCodec::DecOpen(const CAudioParam& AudioParam, int& iAudioSampleRate, int& iLenDecOutPerChan)
 {
+    unsigned int Type9Size = 2;
+    CVector<_BINARY> vecbiData;
+    vecbiData.Init(16);
+    vecbiData.ResetBitAccess();
+    CSDCTransmit::DataEntityType9(vecbiData, AudioParam);
+    vecbiData.ResetBitAccess();
 
-    unsigned int Type9Size;
-    UCHAR *t9;
-    if(AudioParam.eAudioCoding==CAudioParam::AC_xHE_AAC) {
-        Type9Size = AudioParam.t9Bytes.size();
-        t9 = const_cast<UCHAR*>(&AudioParam.t9Bytes[0]);
-    }
-    else {
-        Type9Size = 2;
-        CVector<_BINARY> vecbiData;
-        vecbiData.Init(16);
-        vecbiData.ResetBitAccess();
-        CSDCTransmit::DataEntityType9(vecbiData, AudioParam);
-        vecbiData.ResetBitAccess();
+    UCHAR t9b[2];
+    t9b[0] = UCHAR(vecbiData.Separate(8));
+    t9b[1] = UCHAR(vecbiData.Separate(8));
 
-        UCHAR t9b[2];
-        t9b[0] = UCHAR(vecbiData.Separate(8));
-        t9b[1] = UCHAR(vecbiData.Separate(8));
-
-        UCHAR *t9 = &t9b[0];
-
-    }
+    UCHAR *t9 = &t9b[0];
 
     hDecoder = aacDecoder_Open (TRANSPORT_TYPE::TT_DRM, 3);
 
@@ -182,8 +166,6 @@ FdkAacCodec::Decode(const vector<uint8_t>& audio_frame, uint8_t aac_crc_bits, in
 
     for (size_t i = 0; i < audio_frame.size(); i++)
         vecbyPrepAudioFrame[int(i + 1)] = audio_frame[i];
-
-    writeFile(audio_frame);
 
     uint8_t* pData = vecbyPrepAudioFrame.data();
     UINT bufferSize = unsigned(vecbyPrepAudioFrame.Size());
@@ -457,47 +439,3 @@ FdkAacCodec::EncUpdate(CAudioParam&)
 {
 }
 
-string
-FdkAacCodec::fileName(const CParameter& Parameters) const
-{
-    // Store AAC-data in file
-    stringstream ss;
-    ss << "test/aac_";
-
-//    Parameters.Lock(); // TODO CAudioSourceDecoder::InitInternal() already have the lock
-    if (Parameters.
-            Service[Parameters.GetCurSelAudioService()].AudioParam.
-            eAudioSamplRate == CAudioParam::AS_12KHZ)
-    {
-        ss << "12kHz_";
-    }
-    else
-        ss << "24kHz_";
-
-    switch (Parameters.
-            Service[Parameters.GetCurSelAudioService()].
-            AudioParam.eAudioMode)
-    {
-    case CAudioParam::AM_MONO:
-        ss << "mono";
-        break;
-
-    case CAudioParam::AM_P_STEREO:
-        ss << "pstereo";
-        break;
-
-    case CAudioParam::AM_STEREO:
-        ss << "stereo";
-        break;
-    }
-
-    if (Parameters.
-            Service[Parameters.GetCurSelAudioService()].AudioParam.
-            eSBRFlag == CAudioParam::SB_USED)
-    {
-        ss << "_sbr";
-    }
-    ss << ".dat";
-
-    return ss.str();
-}

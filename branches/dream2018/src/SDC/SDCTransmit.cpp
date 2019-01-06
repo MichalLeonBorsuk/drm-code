@@ -490,11 +490,6 @@ void CSDCTransmit::DataEntityType8(CVector<_BINARY>& vecbiData, int ServiceID,
 \******************************************************************************/
 void CSDCTransmit::DataEntityType9(CVector<_BINARY>& vecbiData, const CAudioParam& AudioParam)
 {
-    /* Init return vector (storing this data block) */
-    int bytes = AudioParam.t9Bytes.size();
-    //vecbiData.Init(bytes*SIZEOF__BYTE);
-    //vecbiData.ResetBitAccess();
-
     /* Audio coding */
     switch (AudioParam.eAudioCoding)
     {
@@ -679,29 +674,13 @@ void CSDCTransmit::DataEntityType9(CVector<_BINARY>& vecbiData, const CAudioPara
 
     /* rfa 1 bit */
     vecbiData.Enqueue((uint32_t) 0, 1);
-
-    // TEST overwrite this from array
-    //vecbiData.ResetBitAccess();
-    for(size_t i = 2; i < AudioParam.t9Bytes.size(); i++) {
-        vecbiData.Enqueue(AudioParam.t9Bytes[i], 8);
-    }
-    cerr << "type 9 tx " << hex;
-    CVector<_BINARY> t9(vecbiData.Size());
-    for(size_t i=0; i<vecbiData.Size(); i++) {
-        t9[i] = vecbiData[i];
-    }
-    t9.ResetBitAccess();
-    for(size_t i=0; i<t9.Size()/SIZEOF__BYTE; i++) {
-        cerr << int(t9.Separate(8));
-    }
-    cerr << dec << endl;
 }
 
 void CSDCTransmit::DataEntityType9(CVector<_BINARY>& vecbiData, int ServiceID,
                                    CParameter& Parameter)
 {
     /* Set total number of bits */
-    const int iNumBitsTotal = 20 + (Parameter.Service[ServiceID].AudioParam.eAudioCoding==CAudioParam::AC_xHE_AAC)?((Parameter.Service[ServiceID].AudioParam.t9Bytes.size()-2)*SIZEOF__BYTE):0;
+    const int iNumBitsTotal = 20;
 
     /* Init return vector (storing this data block) */
     vecbiData.Init(iNumBitsTotal + NUM_BITS_HEADER_SDC);
@@ -709,7 +688,6 @@ void CSDCTransmit::DataEntityType9(CVector<_BINARY>& vecbiData, int ServiceID,
 
     /* Length of the body, excluding the initial 4 bits ("- 4"),
        measured in bytes ("/ 8") */
-
     vecbiData.Enqueue((uint32_t) (iNumBitsTotal - 4) / 8, 7);
 
     /* Version flag (not used in this implementation) */
