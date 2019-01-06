@@ -699,7 +699,6 @@ _BOOLEAN CReceiverModul<TInput, TOutput>::
 	if (this->iInputBlockSize == 0)
 	{
 		InputBuffer.Clear();
-cerr << "iInputBlockSize is zero" << endl;
 		return FALSE;
 	}
 
