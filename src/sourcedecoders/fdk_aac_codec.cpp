@@ -44,30 +44,43 @@ FdkAacCodec::~FdkAacCodec()
 	EncClose();
 }
 
+static void aacinfo(LIB_INFO& inf) {
+    LIB_INFO info[12];
+    memset(info, 0, sizeof(info));
+    aacDecoder_GetLibInfo(info);
+    stringstream version;
+    for(int i=0; info[i].module_id!=FDK_NONE && i<12; i++) {
+        if(info[i].module_id == FDK_AACDEC) {
+            inf = info[i];
+        }
+    }
+}
+
 string
 FdkAacCodec::DecGetVersion()
 {
-    /*
-    LIB_INFO info;
-    aacDecoder_GetLibInfo(&info);
     stringstream version;
-    version << int((info.version >> 24) & 0xff)
-            << '.'
-            << int((info.version >> 16) & 0xff)
-            << '.'
-            << int((info.version >> 8) & 0xff);
+    LIB_INFO info;
+    aacinfo(info);
+    version << info.title << " version " << info.versionStr << " " << info.build_date << endl;
     return version.str();
-    */
-    return "1.0";
 }
+
+//CAPF_AAC_960 | CAPF_AAC_USAC
 
 bool
 FdkAacCodec::CanDecode(CAudioParam::EAudCod eAudioCoding)
 {
-    if(eAudioCoding == CAudioParam::AC_AAC) return true;
-#ifdef AC_USAC
-    if(eAudioCoding == CAudioParam::AC_xHE_AAC) return true;
-#endif
+    LIB_INFO info;
+    aacinfo(info);
+    if(eAudioCoding == CAudioParam::AC_AAC) {
+        if((info.flags & CAPF_AAC_960) != 0)
+            return true;
+    }
+    if(eAudioCoding == CAudioParam::AC_xHE_AAC) {
+        if((info.flags & CAPF_AAC_960 & CAPF_AAC_USAC) != 0)
+            return true;
+    }
     return false;
 }
 
@@ -82,14 +95,12 @@ static void logConfig(const CStreamInfo& info) {
     case AUDIO_OBJECT_TYPE::AOT_DRM_MPEG_PS:
         cerr << " AAC+SBR+PS";
         break;
-#ifdef AC_USAC
     case AUDIO_OBJECT_TYPE::AOT_DRM_SURROUND:
         cerr << " AAC+Surround";
         break;
     case AUDIO_OBJECT_TYPE::AOT_DRM_USAC:
         cerr << " xHE-AAC";
         break;
-#endif
     default:
         cerr << "unknown object type";
     }
