@@ -197,7 +197,7 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
         // TODO check CRC
         // get the directory
         int directory_offset = iTotalFrameSize - 16 * iFrameBorderCount;
-        cerr << "directory offset " << directory_offset << " bits " << (directory_offset/SIZEOF__BYTE) << " bytes" << endl;
+        //cerr << "directory offset " << directory_offset << " bits " << (directory_offset/SIZEOF__BYTE) << " bytes" << endl;
         CVector<_BINARY> vecbiDirectory(16 * iFrameBorderCount);
         for (int i = 0; i < 16 * iFrameBorderCount; i++) {
             vecbiDirectory[i] = (*pvecInputData)[directory_offset + i];
@@ -208,7 +208,7 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
         for(int i=iFrameBorderCount-1; i>=0; i--) {
             size_t iFrameBorderIndex = vecbiDirectory.Separate(12);
             int iFrameBorderCountRepeat =  vecbiDirectory.Separate(4);
-            cerr << "border " << i << " of " << iFrameBorderCountRepeat << " starts at " << hex << iFrameBorderIndex << dec << endl;
+            //cerr << "border " << i << " of " << iFrameBorderCountRepeat << " starts at " << hex << iFrameBorderIndex << dec << endl;
             ivecborders[i] = iFrameBorderIndex;
         }
         ivecborders.push_back(directory_offset/SIZEOF__BYTE);  // last frame ends at start of directory
@@ -220,7 +220,7 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
         aac_crc_bits[0] = iBitReservoirLevel; // this passes this value into the decoder but its a hack!!!!
         for (size_t i = 0; i < audio_frame.size(); i++)
         {
-            cerr << hex << "extracting frame " << i << " from offset " << start << " to offset " << ivecborders[i] << dec << endl;
+            //cerr << hex << "extracting frame " << i << " from offset " << start << " to offset " << ivecborders[i] << dec << endl;
             audio_frame[i].resize(ivecborders[i]-start);
             for (size_t j = 0; j < audio_frame[i].size(); j++) {
                 audio_frame[i][j] = _BINARY((*pvecInputData).Separate(8));
@@ -679,45 +679,9 @@ CAudioSourceDecoder::InitInternal(CParameter & Parameters)
 
         /* Init "audio was ok" flag */
         bAudioWasOK = TRUE;
-#if 0
-        // in case of no type 0 SDC element
-         // guess EEP, audio takes everything not data, data is one packet per frame
-         if(Parameters.iNumAudioDecoderBits == 0) {
-             cerr << "MSC " << Parameters.iNumDecodedBitsMSC << endl;
-
-             int data_bytes = 0;
-             int audStream = 5;
-             for(int i=0; i<4; i++) {
-                 if(Parameters.Service[i].IsActive()) {
-                     if(Parameters.Service[i].eAudDataFlag == CService::SF_AUDIO) {
-                         cerr << " service " << i << " is audio using stream "
-                             << Parameters.Service[i].AudioParam.iStreamID << endl;
-                         audStream = i;
-                     }
-                     else {
-                         cerr << " service " << i << " is data using stream "
-                              << Parameters.Service[i].DataParam.iStreamID << endl;
-                         data_bytes += Parameters.Service[i].DataParam.iPacketLen;
-                         Parameters.SetStreamLen(i, 0, Parameters.Service[i].DataParam.iPacketLen*SIZEOF__BYTE);
-                     }
-                 }
-             }
-             CMSCProtLev	MSCPrLe;
-             MSCPrLe.iPartA = 0;
-             MSCPrLe.iPartB = Parameters.iNumDecodedBitsMSC;
-             Parameters.SetMSCProtLev(MSCPrLe, false);
-             if(audStream!=5) {
-                 int n = Parameters.iNumDecodedBitsMSC - data_bytes*SIZEOF__BYTE;
-                 Parameters.SetStreamLen(audStream, 0, n);
-                 Parameters.SetNumAudioDecoderBits(n);
-                 iInputBlockSize = n;
-             }
-         }
-#endif
 
          /* Get number of total input bits for this module */
          iInputBlockSize = Parameters.iNumAudioDecoderBits;
-        cerr << "iInputBlockSize " << iInputBlockSize << endl;
 
         /* Get current selected audio service */
         iCurSelServ = Parameters.GetCurSelAudioService();

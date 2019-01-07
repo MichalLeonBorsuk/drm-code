@@ -652,12 +652,9 @@ void CParameter::SetStreamLen(const int iStreamID, const int iNewLenPartA,
     if ((Stream[iStreamID].iLenPartA != iNewLenPartA) ||
             (Stream[iStreamID].iLenPartB != iNewLenPartB))
     {
-        cerr << "stream " <<  iStreamID << " len " << iNewLenPartA << "/" << iNewLenPartB << endl;
-
         /* Use new parameters */
         Stream[iStreamID].iLenPartA = iNewLenPartA;
         Stream[iStreamID].iLenPartB = iNewLenPartB;
-        cerr << "stream " <<  iStreamID << " len " << iNewLenPartA << "/" << iNewLenPartB << endl;
 
         /* Set init flags */
         if (pDRMRec) pDRMRec->InitsForMSC();
@@ -674,7 +671,6 @@ int CParameter::GetStreamLen(const int iStreamID) const
 
 void CParameter::SetNumDecodedBitsMSC(const int iNewNumDecodedBitsMSC)
 {
-    cerr << "MSC bits " << iNewNumDecodedBitsMSC << " MSC bytes " << (iNewNumDecodedBitsMSC/SIZEOF__BYTE) << endl;
     /* Apply changes only if parameters have changed */
     if (iNewNumDecodedBitsMSC != iNumDecodedBitsMSC)
     {
