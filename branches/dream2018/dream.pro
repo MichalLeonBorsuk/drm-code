@@ -452,6 +452,7 @@ HEADERS += \
     src/resample/Resample.h \
     src/Scheduler.h \
     src/SDC/SDC.h \
+    src/SDC/audioparam.h \
     src/ServiceInformation.h \
     src/sound/audiofilein.h \
     src/sound/selectioninterface.h \
@@ -565,6 +566,7 @@ SOURCES += \
     src/Scheduler.cpp \
     src/SDC/SDCReceive.cpp \
     src/SDC/SDCTransmit.cpp \
+    src/SDC/audioparam.cpp \
     src/ServiceInformation.cpp \
     src/SimulationParameters.cpp \
     src/sound/audiofilein.cpp \

@@ -488,193 +488,6 @@ void CSDCTransmit::DataEntityType8(CVector<_BINARY>& vecbiData, int ServiceID,
 /******************************************************************************\
 * Data entity Type 9 (Audio information data entity)						   *
 \******************************************************************************/
-void CSDCTransmit::DataEntityType9(CVector<_BINARY>& vecbiData, const CAudioParam& AudioParam)
-{
-    /* Audio coding */
-    switch (AudioParam.eAudioCoding)
-    {
-    case CAudioParam::AC_AAC:
-    case CAudioParam::AC_OPUS:
-        vecbiData.Enqueue(0 /* 00 */, 2);
-        break;
-
-    case CAudioParam::AC_CELP:
-        vecbiData.Enqueue(1 /* 01 */, 2);
-        break;
-
-    case CAudioParam::AC_HVXC:
-        vecbiData.Enqueue(2 /* 10 */, 2);
-        break;
-
-    default:
-        vecbiData.Enqueue(2 /* 11 */, 2);
-        break;
-    }
-
-    if (AudioParam.eAudioCoding == CAudioParam::AC_OPUS)
-    {
-        /* XXX EXPERIMENTAL THIS IS NOT PART OF DRM STANDARD XXX */
-        /* SBR flag, Audio mode */
-        vecbiData.Enqueue(0 /* 000 */, 3); /* set to zero, rfa for OPUS */
-        /* Audio sampling rate */
-        vecbiData.Enqueue(7 /* 111 */, 3); /* set to seven, reserved value for AAC */
-    }
-    else
-    {
-        /* SBR flag */
-        switch (AudioParam.eSBRFlag)
-        {
-        case CAudioParam::SB_NOT_USED:
-            vecbiData.Enqueue(0 /* 0 */, 1);
-            break;
-
-        case CAudioParam::SB_USED:
-            vecbiData.Enqueue(1 /* 1 */, 1);
-            break;
-        }
-
-        /* Audio mode */
-        switch (AudioParam.eAudioCoding)
-        {
-        case CAudioParam::AC_AAC:
-            /* Channel type */
-            switch (AudioParam.eAudioMode)
-            {
-            case CAudioParam::AM_MONO:
-                vecbiData.Enqueue(0 /* 00 */, 2);
-                break;
-
-            case CAudioParam::AM_P_STEREO:
-                vecbiData.Enqueue(1 /* 01 */, 2);
-                break;
-
-            case CAudioParam::AM_STEREO:
-                vecbiData.Enqueue(2 /* 10 */, 2);
-                break;
-            }
-            break;
-
-        case CAudioParam::AC_CELP:
-            /* rfa */
-            vecbiData.Enqueue((uint32_t) 0, 1);
-
-            /* CELP_CRC */
-            switch (AudioParam.bCELPCRC)
-            {
-            case FALSE:
-                vecbiData.Enqueue(0 /* 0 */, 1);
-                break;
-
-            case TRUE:
-                vecbiData.Enqueue(1 /* 1 */, 1);
-                break;
-            }
-            break;
-
-        case CAudioParam::AC_HVXC:
-            /* HVXC_rate */
-            switch (AudioParam.eHVXCRate)
-            {
-            case CAudioParam::HR_2_KBIT:
-                vecbiData.Enqueue(0 /* 0 */, 1);
-                break;
-
-            case CAudioParam::HR_4_KBIT:
-                vecbiData.Enqueue(1 /* 1 */, 1);
-                break;
-            }
-
-            /* HVXC CRC */
-            switch (AudioParam.bHVXCCRC)
-            {
-            case FALSE:
-                vecbiData.Enqueue(0 /* 0 */, 1);
-                break;
-
-            case TRUE:
-                vecbiData.Enqueue(1 /* 1 */, 1);
-                break;
-            }
-            break;
-
-        default:
-            vecbiData.Enqueue(0 /* 00 */, 2);
-            break;
-        }
-
-        // Audio sampling rate AS_9_6_KHZ, AS_12KHZ, AS_16KHZ, AS_19_2KHZ, AS_24KHZ, AS_32KHZ, AS_38_4KHZ, AS_48KHZ
-        unsigned int iVal=0;
-        switch (AudioParam.eAudioSamplRate)
-        {
-        case CAudioParam::AS_9_6KHZ:
-            iVal = 0;
-            break;
-        case CAudioParam::AS_12KHZ:
-            iVal = 1;
-            break;
-        case CAudioParam::AS_16KHZ:
-            iVal = 2;
-            break;
-        case CAudioParam::AS_19_2KHZ:
-            iVal = 3;
-            break;
-        case CAudioParam::AS_24KHZ:
-            iVal = (AudioParam.eAudioCoding==CAudioParam::AC_xHE_AAC)?4:3;
-            break;
-        case CAudioParam::AS_32KHZ:
-            iVal = 5;
-            break;
-        case CAudioParam::AS_38_4KHZ:
-            iVal = 6;
-            break;
-        case CAudioParam::AS_48KHZ:
-            iVal = (AudioParam.eAudioCoding==CAudioParam::AC_xHE_AAC)?7:5;
-            break;
-        }
-        vecbiData.Enqueue(iVal, 3);
-    }
-
-    /* Text flag */
-    switch (AudioParam.bTextflag)
-    {
-    case FALSE:
-        vecbiData.Enqueue(0 /* 0 */, 1);
-        break;
-
-    case TRUE:
-        vecbiData.Enqueue(1 /* 1 */, 1);
-        break;
-    }
-
-    /* Enhancement flag */
-    switch (AudioParam.bEnhanceFlag)
-    {
-    case FALSE:
-        vecbiData.Enqueue(0 /* 0 */, 1);
-        break;
-
-    case TRUE:
-        vecbiData.Enqueue(1 /* 1 */, 1);
-        break;
-    }
-
-    /* Coder field */
-    if (AudioParam.
-            eAudioCoding == CAudioParam::AC_CELP)
-    {
-        /* CELP index */
-        vecbiData.Enqueue(
-            (uint32_t) AudioParam.iCELPIndex, 5);
-    }
-    else
-    {
-        /* rfa 5 bit */
-        vecbiData.Enqueue((uint32_t) 0, 5);
-    }
-
-    /* rfa 1 bit */
-    vecbiData.Enqueue((uint32_t) 0, 1);
-}
 
 void CSDCTransmit::DataEntityType9(CVector<_BINARY>& vecbiData, int ServiceID,
                                    CParameter& Parameter)
@@ -682,7 +495,7 @@ void CSDCTransmit::DataEntityType9(CVector<_BINARY>& vecbiData, int ServiceID,
     /* Set total number of bits */
     int iNumBitsTotal = 20;
     if(Parameter.Service[ServiceID].AudioParam.eAudioCoding==CAudioParam::AC_xHE_AAC) {
-        iNumBitsTotal += (Parameter.Service[ServiceID].AudioParam.t9Bytes.size()-2)*SIZEOF__BYTE;
+        iNumBitsTotal += (Parameter.Service[ServiceID].AudioParam.xHE_AAC_config.size())*SIZEOF__BYTE;
     }
 
     /* Init return vector (storing this data block) */
@@ -704,8 +517,8 @@ void CSDCTransmit::DataEntityType9(CVector<_BINARY>& vecbiData, int ServiceID,
     vecbiData.Enqueue((uint32_t) ServiceID, 2);
 
     /* Stream Id */
-    vecbiData.Enqueue((uint32_t) Parameter.Service[ServiceID].AudioParam.
-                      iStreamID, 2);
+    vecbiData.Enqueue((uint32_t) Parameter.Service[ServiceID].AudioParam.iStreamID, 2);
 
-    DataEntityType9(vecbiData, Parameter.Service[ServiceID].AudioParam);
+    /* rest of entity */
+    Parameter.Service[ServiceID].AudioParam.EnqueueType9(vecbiData);
 }
