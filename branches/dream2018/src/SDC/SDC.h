@@ -54,8 +54,6 @@ public:
 
     void SDCParam(CVector<_BINARY>* pbiData, CParameter& Parameter);
 
-    static void DataEntityType9(CVector<_BINARY>& vecbiData, const CAudioParam& audioParam);
-
 protected:
     void CommitEnter(CVector<_BINARY>* pbiData, CParameter& Parameter);
     void CommitFlush();
