@@ -108,6 +108,7 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
 
     vector< vector<uint8_t> > audio_frame(iNumAudioFrames);
     vector<uint8_t> aac_crc_bits(iNumAudioFrames);
+    uint8_t iBitReservoirLevel=0;
 
     /* Check which audio coding type is used */
     if (eAudioCoding == CAudioParam::AC_AAC || eAudioCoding == CAudioParam::AC_OPUS)
@@ -192,7 +193,7 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
             4 bits. 4 bits. 8 bits
          * */
         int iFrameBorderCount = pvecInputData->Separate(4);
-        int iBitReservoirLevel = pvecInputData->Separate(4);
+        iBitReservoirLevel = pvecInputData->Separate(4);
         int iheaderCRC = pvecInputData->Separate(8);
         // TODO check CRC
         // get the directory
@@ -217,7 +218,6 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
         size_t start = 2; // offset at the beginning
         audio_frame.resize(iNumAudioFrames);
         aac_crc_bits.resize(1); // TODO make this more sensible
-        aac_crc_bits[0] = iBitReservoirLevel; // this passes this value into the decoder but its a hack!!!!
         for (size_t i = 0; i < audio_frame.size(); i++)
         {
             //cerr << hex << "extracting frame " << i << " from offset " << start << " to offset " << ivecborders[i] << dec << endl;
@@ -364,7 +364,7 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
                 CAudioCodec::EDecError eDecError;
                 /* The actual decoding */
                 int iDecChannels;
-                short *psDecOutSampleBuf = codec->Decode(audio_frame[j], aac_crc_bits[j], iDecChannels, eDecError);
+                short *psDecOutSampleBuf = codec->Decode(audio_frame[j], iBitReservoirLevel, iDecChannels, eDecError);
 
                 bCurBlockOK = true;
 

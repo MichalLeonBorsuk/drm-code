@@ -72,8 +72,13 @@ FdkAacCodec::CanDecode(CAudioParam::EAudCod eAudioCoding)
     LIB_INFO info;
     aacinfo(info);
     if(eAudioCoding == CAudioParam::AC_AAC) {
-        if((info.flags & CAPF_AAC_DRM_BSFORMAT & CAPF_SBR_DRM_BS & CAPF_SBR_PS_DRM) != 0)
-            return true;
+        if((info.flags & CAPF_AAC_DRM_BSFORMAT) == 0)
+            return false;
+        if((info.flags & CAPF_SBR_DRM_BS) ==0 )
+            return false;
+        if((info.flags & CAPF_SBR_PS_DRM) == 0)
+            return false;
+        return true;
     }
     if(eAudioCoding == CAudioParam::AC_xHE_AAC) {
         if((info.flags & CAPF_AAC_USAC) != 0)
@@ -126,37 +131,18 @@ static void logConfig(const CStreamInfo& info) {
 bool
 FdkAacCodec::DecOpen(const CAudioParam& AudioParam, int& iAudioSampleRate, int& iLenDecOutPerChan)
 {
-    unsigned int Type9Size;
+    unsigned int type9Size;
     UCHAR *t9;
-    if(AudioParam.eAudioCoding==CAudioParam::AC_xHE_AAC) {
-        Type9Size = AudioParam.t9Bytes.size();
-        t9 = const_cast<UCHAR*>(&AudioParam.t9Bytes[0]);
-    }
-    else {
-        Type9Size = 2;
-        CVector<_BINARY> vecbiData;
-        vecbiData.Init(16);
-        vecbiData.ResetBitAccess();
-        CSDCTransmit::DataEntityType9(vecbiData, AudioParam);
-        vecbiData.ResetBitAccess();
-
-        UCHAR t9b[2];
-        t9b[0] = UCHAR(vecbiData.Separate(8));
-        t9b[1] = UCHAR(vecbiData.Separate(8));
-        t9 = &t9b[0];
-    }
     hDecoder = aacDecoder_Open (TRANSPORT_TYPE::TT_DRM, 3);
 
     if(hDecoder == nullptr)
         return false;
 
-    //if(decode_buf != nullptr) {
-        //delete [] decode_buf;
-        //decode_buf = nullptr;
-    //}
+    vector<uint8_t> type9 = AudioParam.getType9Bytes();
+    type9Size = type9.size();
+    t9 = &type9[0];
 
-    //cerr << "type9 " << hex << int(t9[1]) << " " << int(t9[0]) << dec << endl;
-    AAC_DECODER_ERROR err = aacDecoder_ConfigRaw (hDecoder, &t9, &Type9Size);
+    AAC_DECODER_ERROR err = aacDecoder_ConfigRaw (hDecoder, &t9, &type9Size);
     if(err == AAC_DEC_OK) {
         CStreamInfo *pinfo = aacDecoder_GetStreamInfo(hDecoder);
         if (pinfo==nullptr) {
@@ -179,6 +165,7 @@ FdkAacCodec::DecOpen(const CAudioParam& AudioParam, int& iAudioSampleRate, int& 
 _SAMPLE*
 FdkAacCodec::Decode(const vector<uint8_t>& audio_frame, uint8_t aac_crc_bits, int& iChannels, CAudioCodec::EDecError& eDecError)
 {
+
     /* Prepare data vector with CRC at the beginning (the definition with faad2 DRM interface) */
 
 
