@@ -146,7 +146,6 @@ CSDCReceive::ERetStatus CSDCReceive::SDCParam(CVector<_BINARY>* pbiData,
 
             /* Call the routine for the signalled type */
             int t = (*pbiData).Separate(4);
-            cerr << "type " << t;
             switch (t)
             {
             case 0: /* Type 0 */
@@ -194,7 +193,6 @@ CSDCReceive::ERetStatus CSDCReceive::SDCParam(CVector<_BINARY>* pbiData,
                    from the queue */
                 (*pbiData).Separate(iNumBitsEntity);
             }
-            cerr << endl;
             /* Count number of bits consumed (7 for length, 1 for version flag,
                4 for type = 12 plus actual entitiy body data) */
             iBitsConsumed += 12 + iNumBitsEntity;
@@ -324,7 +322,6 @@ _BOOLEAN CSDCReceive::DataEntityType1(CVector<_BINARY>* pbiData,
         }
 
         /* store label string in the current service structure */
-        cerr << " id " << iTempShortID << " '" << strLabel << "'";
         Parameter.Lock();
         Parameter.Service[iTempShortID].strLabel = strLabel;
         /* and keep it in the persistent service information store.
@@ -695,11 +692,6 @@ _BOOLEAN CSDCReceive::DataEntityType5(CVector<_BINARY>* pbiData,
         break;
     }
 
-    cerr << " service " << iTempShortID <<  " stream " << DataParam.iStreamID;
-    if(DataParam.ePacketModInd) {
-        cerr << " packet id " << DataParam.iPacketID << " len " << DataParam.iPacketLen;
-    }
-
     /* Application data */
     if (DataParam.ePacketModInd == CDataParam::PM_SYNCHRON_STR_MODE)
     {
@@ -954,11 +946,14 @@ _BOOLEAN CSDCReceive::DataEntityType9(CVector<_BINARY>* pbiData,
     CAudioParam AudParam = Parameter.GetAudioParam(iTempShortID);
     Parameter.Unlock();
 
+    unsigned b01, b2, b34,b567,b8,b9, babc, bde, bf;
     /* Stream Id */
     AudParam.iStreamID = int((*pbiData).Separate(2));
 
     /* Audio coding */
-    switch ((*pbiData).Separate(2))
+    b01 = (*pbiData).Separate(2);
+
+    switch (b01)
     {
     case 0: /* 00 */
         AudParam.eAudioCoding = CAudioParam::AC_AAC;
@@ -978,7 +973,8 @@ _BOOLEAN CSDCReceive::DataEntityType9(CVector<_BINARY>* pbiData,
     }
 
     /* SBR flag */
-    switch ((*pbiData).Separate(1))
+    b2 = (*pbiData).Separate(1);
+    switch (b2)
     {
     case 0: /* 0 */
         AudParam.eSBRFlag = CAudioParam::SB_NOT_USED;
@@ -990,7 +986,8 @@ _BOOLEAN CSDCReceive::DataEntityType9(CVector<_BINARY>* pbiData,
     }
 
     /* Audio mode */
-    switch ((*pbiData).Separate(2))
+    b34 = (*pbiData).Separate(2);
+    switch (b34)
     {
     case 0: /* 00 */
         AudParam.eAudioMode = CAudioParam::AM_MONO;
@@ -1011,8 +1008,9 @@ _BOOLEAN CSDCReceive::DataEntityType9(CVector<_BINARY>* pbiData,
     }
 
     /* Audio sampling rate */
+    b567 = (*pbiData).Separate(3);
     if(AudParam.eAudioCoding == CAudioParam::AC_xHE_AAC) {
-        switch ((*pbiData).Separate(3))
+        switch (b567)
         {
         case 0: /* 000 */
             AudParam.eAudioSamplRate = CAudioParam::AS_9_6KHZ;
@@ -1050,7 +1048,7 @@ _BOOLEAN CSDCReceive::DataEntityType9(CVector<_BINARY>* pbiData,
         }
     }
     else {
-        switch ((*pbiData).Separate(3))
+        switch (b567)
         {
         case 1: /* 001 */
             AudParam.eAudioSamplRate = CAudioParam::AS_12KHZ;
@@ -1079,7 +1077,8 @@ _BOOLEAN CSDCReceive::DataEntityType9(CVector<_BINARY>* pbiData,
     }
 
     /* Text flag */
-    switch ((*pbiData).Separate(1))
+    b8 = (*pbiData).Separate(1);
+    switch (b8)
     {
     case 0: /* 0 */
         AudParam.bTextflag = FALSE;
@@ -1091,7 +1090,8 @@ _BOOLEAN CSDCReceive::DataEntityType9(CVector<_BINARY>* pbiData,
     }
 
     /* Enhancement flag */
-    switch ((*pbiData).Separate(1))
+    b9 = (*pbiData).Separate(1);
+    switch (b9)
     {
     case 0: /* 0 */
         AudParam.bEnhanceFlag = FALSE;
@@ -1103,14 +1103,10 @@ _BOOLEAN CSDCReceive::DataEntityType9(CVector<_BINARY>* pbiData,
     }
 
     /* Coder field */
-    if (AudParam.eAudioCoding == CAudioParam::AC_CELP)
-    {
-        /* CELP index */
-        AudParam.iCELPIndex = (*pbiData).Separate(5);
-    }
     if ((AudParam.eAudioCoding == CAudioParam::AC_AAC) || (AudParam.eAudioCoding == CAudioParam::AC_xHE_AAC))
     {
-        int mpeg_surround_config = (*pbiData).Separate(3);
+        babc = (*pbiData).Separate(3);
+        int mpeg_surround_config = babc;
         switch(mpeg_surround_config) {
         case 0: // no MPEG Surround information available.
         case 1: // reserved.
@@ -1127,23 +1123,42 @@ _BOOLEAN CSDCReceive::DataEntityType9(CVector<_BINARY>* pbiData,
             break;
         }
         /* rfa 2 bits */
-        (*pbiData).Separate(2);
+        bde = (*pbiData).Separate(2);
     }
     else
     {
         /* rfa 5 bit */
-        (*pbiData).Separate(5);
+        AudParam.iCELPIndex = (*pbiData).Separate(5);
     }
 
     /* rfa 1 bit */
-    (*pbiData).Separate(1);
+    bf = (*pbiData).Separate(1);
 
     if (AudParam.eAudioCoding == CAudioParam::AC_xHE_AAC)
     {
-        (*pbiData).ResetBitAccess();
+        // TODO work out if FDK needs the first byte here or not
+        CVector<_BINARY> b;
+        b.Init(2);
+        b.ResetBitAccess();
+        //b.Enqueue(9, 4);
+        //b.Enqueue(iTempShortID, 2);
+        //b.Enqueue(AudParam.iStreamID, 2);
+        b.Enqueue(b01, 2);
+        b.Enqueue(b2, 1);
+        b.Enqueue(b34, 2);
+        b.Enqueue(b567, 3);
+        b.Enqueue(b8, 1);
+        b.Enqueue(b8, 1);
+        b.Enqueue(b9, 1);
+        b.Enqueue(babc, 3);
+        b.Enqueue(bde, 2);
+        b.Enqueue(bf, 1);
+        b.ResetBitAccess();
         AudParam.t9Bytes.resize(iLengthOfBody);
-        for(int i=0; i < iLengthOfBody; i++) {
-            AudParam.t9Bytes[i] = ((*pbiData).Separate(8));
+        AudParam.t9Bytes[0] = b.Separate(8);
+        AudParam.t9Bytes[1] = b.Separate(8);
+        for(int i=2; i < iLengthOfBody; i++) {
+            AudParam.t9Bytes[i] = (*pbiData).Separate(8);
         }
     }
 
