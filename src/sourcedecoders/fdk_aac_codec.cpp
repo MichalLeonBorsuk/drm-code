@@ -205,6 +205,7 @@ FdkAacCodec::Decode(const vector<uint8_t>& audio_frame, uint8_t aac_crc_bits, in
     else {
         info = *pinfo;
 
+        //cerr << "Decode";
         //logConfig(info);
 
         if(info.aacNumChannels > 0) {
