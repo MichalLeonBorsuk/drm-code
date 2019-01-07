@@ -218,6 +218,10 @@ vector<uint8_t> CAudioParam::getType9Bytes() const
     bits.Init((2+xHE_AAC_config.size())*SIZEOF__BYTE);
     bits.ResetBitAccess();
     EnqueueType9(bits);
+    for(int i=0; i<bits.Size(); i++) {
+        cerr << int(bits[i]);
+    }
+    cerr << endl;
     bits.ResetBitAccess();
     vector<uint8_t> bytes;
     for(int i=0; i<bits.Size()/SIZEOF__BYTE; i++) {
@@ -245,7 +249,7 @@ void CAudioParam::EnqueueType9(CVector<_BINARY>& vecbiData) const
         break;
 
     default:
-        vecbiData.Enqueue(2 /* 11 */, 2);
+        vecbiData.Enqueue(3 /* 11 */, 2);
         break;
     }
 
@@ -414,4 +418,8 @@ void CAudioParam::EnqueueType9(CVector<_BINARY>& vecbiData) const
 
     /* rfa 1 bit */
     vecbiData.Enqueue((uint32_t) 0, 1);
+
+    for(int i=0; i<xHE_AAC_config.size(); i++) {
+        vecbiData.Enqueue(xHE_AAC_config[i], 8);
+    }
 }
