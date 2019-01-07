@@ -1,4 +1,5 @@
 #include "audioparam.h"
+#include <iostream>
 
 CAudioParam::~CAudioParam()
 {
@@ -29,7 +30,6 @@ bool CAudioParam::setFromType9Bits(CVector<_BINARY>& biData, unsigned numBytes)
         eAudioCoding = CAudioParam::AC_xHE_AAC;
         break;
     }
-
     /* SBR flag */
     switch (biData.Separate(1))
     {
@@ -159,7 +159,6 @@ bool CAudioParam::setFromType9Bits(CVector<_BINARY>& biData, unsigned numBytes)
         bEnhanceFlag = TRUE;
         break;
     }
-
     /* Coder field */
     if ((eAudioCoding == CAudioParam::AC_AAC) || (eAudioCoding == CAudioParam::AC_xHE_AAC))
     {
@@ -215,11 +214,12 @@ void CAudioParam::setFromType9Bytes(const std::vector<uint8_t>& data)
 
 vector<uint8_t> CAudioParam::getType9Bytes() const
 {
-    vector<uint8_t> bytes;
     CVector<_BINARY> bits;
     bits.Init((2+xHE_AAC_config.size())*SIZEOF__BYTE);
     bits.ResetBitAccess();
     EnqueueType9(bits);
+    bits.ResetBitAccess();
+    vector<uint8_t> bytes;
     for(int i=0; i<bits.Size()/SIZEOF__BYTE; i++) {
         bytes.push_back(bits.Separate(SIZEOF__BYTE));
     }
@@ -357,7 +357,9 @@ void CAudioParam::EnqueueType9(CVector<_BINARY>& vecbiData) const
             iVal = 3;
             break;
         case CAudioParam::AS_24KHZ:
-            iVal = (eAudioCoding==CAudioParam::AC_xHE_AAC)?4:3;
+            if(eAudioCoding==CAudioParam::AC_xHE_AAC) iVal = 4;
+            if(eAudioCoding==CAudioParam::AC_AAC) iVal = 3;
+            if(eAudioCoding==CAudioParam::AC_OPUS) iVal = 3;
             break;
         case CAudioParam::AS_32KHZ:
             iVal = 5;
