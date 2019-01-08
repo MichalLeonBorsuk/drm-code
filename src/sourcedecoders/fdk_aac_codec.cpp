@@ -313,8 +313,6 @@ FdkAacCodec::DecodeAAC(const vector<uint8_t>& audio_frame, uint8_t aac_crc_bits,
         }
         cerr << "err " << err << endl;
         return nullptr;
-        eDecError = CAudioCodec::DECODER_ERROR_OK;
-        return decode_buf;
     }
     else {
         cerr << "Fill failed: " << err << endl;
