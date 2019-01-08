@@ -101,6 +101,7 @@ static void logConfig(const CStreamInfo& info) {
     case AUDIO_OBJECT_TYPE::AOT_DRM_SURROUND:
         cerr << " AAC+Surround";
         break;
+    case AUDIO_OBJECT_TYPE::AOT_USAC:
     case AUDIO_OBJECT_TYPE::AOT_DRM_USAC:
         cerr << " xHE-AAC";
         break;
@@ -113,8 +114,8 @@ static void logConfig(const CStreamInfo& info) {
     if((info.flags & AC_PS_PRESENT) == AC_PS_PRESENT) {
         cerr << "+PS";
     }
-    cerr << " AAC channels " << info.aacNumChannels
-         << " AAC sample rate " << info.aacSampleRate
+    cerr << " channels coded " << info.aacNumChannels
+         << " coded sample rate " << info.aacSampleRate
          << " channels " << info.numChannels
          << " channel config " << info.channelConfig
          << " sample rate " << info.sampleRate
