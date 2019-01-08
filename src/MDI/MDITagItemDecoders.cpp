@@ -291,20 +291,10 @@ void CTagItemDecoderAMAudio::DecodeTag(CVector<_BINARY>& vecbiTag, int iLen)
 {
 
 	/* Audio coding */
-	int iVal = vecbiTag.Separate(2);
-	switch (iVal)
-	{
-		case 0: AudioParams.eAudioCoding = CAudioParam::AC_AAC;
-			break;
-		case 1: AudioParams.eAudioCoding = CAudioParam::AC_CELP; /* 01 */
-			break;
-		case 2: AudioParams.eAudioCoding = CAudioParam::AC_HVXC; /* 10 */
-			break;
-		default: AudioParams.eAudioCoding = CAudioParam::AC_AAC;/* reserved */
-	}
+    AudioParams.eAudioCoding = CAudioParam::EAudCod(vecbiTag.Separate(2));
 
 	/* SBR flag */
-	iVal = vecbiTag.Separate(1);
+    uint32_t iVal = vecbiTag.Separate(1);
 	AudioParams.eSBRFlag = (iVal == 1 ? CAudioParam::SB_USED : CAudioParam::SB_NOT_USED);
 	/* Audio mode */
 	iVal = vecbiTag.Separate(2);

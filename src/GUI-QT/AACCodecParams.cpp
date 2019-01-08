@@ -72,9 +72,6 @@ AACCodecParams::AACCodecParams(CSettings& Settings, CParameter& Parameters,
     case CAudioParam::AM_P_STEREO:
         RadioButtonChannelsParametricStereo->setChecked(TRUE);
         break;
-    case CAudioParam::AM_SURROUND:
-        RadioButtonChannelsSurround->setChecked(TRUE);
-        break;
     }
     /* Sample Rate */
     switch (Parameters.Service[iShortID].AudioParam.eAudioSamplRate)
@@ -98,7 +95,7 @@ AACCodecParams::AACCodecParams(CSettings& Settings, CParameter& Parameters,
     ButtonGroupChannels->addButton(RadioButtonChannelsMono, CAudioParam::AM_MONO);
     ButtonGroupChannels->addButton(RadioButtonChannelsStereo, CAudioParam::AM_STEREO);
     ButtonGroupChannels->addButton(RadioButtonChannelsParametricStereo, CAudioParam::AM_P_STEREO);
-    ButtonGroupChannels->addButton(RadioButtonChannelsSurround, CAudioParam::AM_SURROUND);
+    //ButtonGroupChannels->addButton(RadioButtonChannelsSurround, CAudioParam::AM_SURROUND);
 
     ButtonGroupSampleRate->addButton(RadioButton12kHz, CAudioParam::AS_12KHZ);
     ButtonGroupSampleRate->addButton(RadioButton24kHz, CAudioParam::AS_24KHZ);
@@ -132,7 +129,7 @@ void AACCodecParams::reject()
 void AACCodecParams::OnButtonGroupChannels(int iID)
 {
     Parameters.Lock();
-    Parameters.Service[iShortID].AudioParam.eAudioMode = static_cast<CAudioParam::EAudMode>(iID);
+    Parameters.Service[iShortID].AudioParam.eAudioMode = static_cast<CAudioParam::EAudioMode>(iID);
 	Parameters.Service[iShortID].AudioParam.bParamChanged = TRUE;
 	Parameters.Unlock();
 }

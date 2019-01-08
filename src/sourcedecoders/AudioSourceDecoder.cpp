@@ -228,12 +228,6 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
             start = ivecborders[i];
         }
     }
-    else if (eAudioCoding == CAudioParam::AC_CELP)
-    {
-    }
-    else if (eAudioCoding == CAudioParam::AC_HVXC)
-    {
-    }
 
     /* Audio decoding ******************************************************** */
     /* Init output block size to zero, this variable is also used for
