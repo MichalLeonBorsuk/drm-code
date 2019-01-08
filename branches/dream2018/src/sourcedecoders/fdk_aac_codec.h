@@ -61,7 +61,7 @@ protected:
     HANDLE_AACDECODER hDecoder;
     HANDLE_AACENCODER hEncoder;
     bool bUsac;
-    int16_t decode_buf[3840];
+    int16_t decode_buf[13840];
 };
 
 #endif // FDK_AAC_CODEC_H_
