@@ -154,10 +154,6 @@ vector<uint8_t> CAudioParam::getType9Bytes() const
     bits.Init(int((2+xHE_AAC_config.size())*SIZEOF__BYTE));
     bits.ResetBitAccess();
     EnqueueType9(bits);
-    for(int i=0; i<bits.Size(); i++) {
-        cerr << int(bits[i]);
-    }
-    cerr << endl;
     bits.ResetBitAccess();
     vector<uint8_t> bytes;
     for(int i=0; i<bits.Size()/SIZEOF__BYTE; i++) {
