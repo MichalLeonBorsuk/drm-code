@@ -395,25 +395,27 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
                 int iDecChannels;
                 short *psDecOutSampleBuf = codec->Decode(audio_frame[j], iBitReservoirLevel, iDecChannels, eDecError);
 
-                bCurBlockOK = true;
+                if((psDecOutSampleBuf!=nullptr) && (eDecError==CAudioCodec::DECODER_ERROR_OK)) {
+                    bCurBlockOK = true;
 
-                if (iDecChannels == 1)
-                {
-                    /* Mono */
-                    //cerr << "mono " << iResOutBlockSize << endl;
-                    for(int i = 0; i<iResOutBlockSize; i++) {
-                        vecTempResBufOutCurLeft[i] = _REAL(psDecOutSampleBuf[i]) / 2.0;
-                        vecTempResBufOutCurRight[i] = _REAL(psDecOutSampleBuf[i]) / 2.0;
+                    if (iDecChannels == 1)
+                    {
+                        /* Mono */
+                        //cerr << "mono " << iResOutBlockSize << endl;
+                        for(int i = 0; i<iResOutBlockSize; i++) {
+                            vecTempResBufOutCurLeft[i] = _REAL(psDecOutSampleBuf[i]) / 2.0;
+                            vecTempResBufOutCurRight[i] = _REAL(psDecOutSampleBuf[i]) / 2.0;
+                        }
                     }
-                }
-                else
-                {
-                    /* Stereo docs claim non-interleaved but we are getting interleaved! */
-                    for(int i = 0; i<iResOutBlockSize; i++) {
-                        vecTempResBufOutCurLeft[i] = _REAL(psDecOutSampleBuf[2*i]);
-                        vecTempResBufOutCurRight[i] = _REAL(psDecOutSampleBuf[2*i+1]);
-                    }
+                    else
+                    {
+                        /* Stereo docs claim non-interleaved but we are getting interleaved! */
+                        for(int i = 0; i<iResOutBlockSize; i++) {
+                            vecTempResBufOutCurLeft[i] = _REAL(psDecOutSampleBuf[2*i]);
+                            vecTempResBufOutCurRight[i] = _REAL(psDecOutSampleBuf[2*i+1]);
+                        }
 
+                    }
                 }
 
                 /* OPH: add frame status to vector for RSCI */
