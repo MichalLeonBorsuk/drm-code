@@ -180,7 +180,66 @@ FdkAacCodec::Decode(const vector<uint8_t>& audio_frame, uint8_t aac_crc_bits, in
 _SAMPLE*
 FdkAacCodec::DecodeUSAC(const vector<uint8_t>& audio_frame, uint8_t reservoir, int& iChannels, CAudioCodec::EDecError& eDecError)
 {
-    return nullptr;
+    writeFile(audio_frame);
+
+    uint8_t* pData = const_cast<uint8_t*>(&audio_frame[0]);
+    UINT bufferSize = audio_frame.size();
+    UINT bytesValid = audio_frame.size();
+
+    eDecError = CAudioCodec::DECODER_ERROR_UNKNOWN;
+
+    AAC_DECODER_ERROR err = aacDecoder_Fill(hDecoder, &pData, &bufferSize, &bytesValid);
+    if(err != AAC_DEC_OK) {
+        cerr << "fill failed " << int(err) << endl;
+        return nullptr;
+    }
+
+    int output_size = 0;
+    CStreamInfo *pinfo = aacDecoder_GetStreamInfo(hDecoder);
+    if (pinfo==nullptr) {
+        cerr << "No stream info" << endl;
+    }
+    else {
+
+        cerr << "Decode";
+        logConfig(*pinfo);
+
+        if(pinfo->aacNumChannels > 0) {
+            output_size = pinfo->frameSize * pinfo->numChannels;
+            iChannels = pinfo->numChannels;
+        }
+    }
+    if(err == AAC_DEC_OK) {
+        cerr << "aac decode after fill bufferSize " << bufferSize << ", bytesValid " << bytesValid << endl;
+        if (bytesValid != 0) {
+            cerr << "Unable to feed all " << bufferSize << " input bytes, bytes left " << bytesValid << endl;
+            return nullptr; // wait for all frames of the superframe?
+        }
+        if(sizeof (decode_buf) < sizeof(int16_t)*size_t(output_size)) {
+            cerr << "can't fit output into decoder buffer" << endl;
+        }
+        memset(decode_buf, 0, sizeof(int16_t)*size_t(output_size));
+
+        err = aacDecoder_DecodeFrame(hDecoder, decode_buf, output_size, 0);
+        if(err == AAC_DEC_OK) {
+            eDecError = CAudioCodec::DECODER_ERROR_OK;
+            cerr << "xHE-AAC frame decoded OK" << endl;
+            return decode_buf;
+        }
+        eDecError = CAudioCodec::DECODER_ERROR_UNKNOWN;
+        if(err == AAC_DEC_OUT_OF_MEMORY) {
+            cerr << "Heap returned NULL pointer. Output buffer is invalid." << endl;
+        }
+        if(err == AAC_DEC_UNKNOWN) {
+            cerr << "Error condition is of unknown reason, or from a another module. Output buffer is invalid." << endl;
+        }
+        cerr << "err " << err << endl;
+        return nullptr;
+    }
+    else {
+        cerr << "Fill failed: " << err << endl;
+        return nullptr;
+    }
 }
 
 _SAMPLE*
@@ -201,13 +260,6 @@ FdkAacCodec::DecodeAAC(const vector<uint8_t>& audio_frame, uint8_t aac_crc_bits,
     uint8_t* pData = vecbyPrepAudioFrame.data();
     UINT bufferSize = unsigned(vecbyPrepAudioFrame.Size());
     UINT bytesValid = unsigned(vecbyPrepAudioFrame.Size());
-
-
-    //UINT bufferSize = audio_frame.size();
-    //uint8_t data[bufferSize];
-    ///memccpy(&data[0], &audio_frame[0], bufferSize, 1);
-    //UINT bytesValid = bufferSize;
-
 
     eDecError = CAudioCodec::DECODER_ERROR_UNKNOWN;
 
@@ -248,6 +300,19 @@ FdkAacCodec::DecodeAAC(const vector<uint8_t>& audio_frame, uint8_t aac_crc_bits,
         memset(decode_buf, 0, sizeof(int16_t)*size_t(output_size));
 
         err = aacDecoder_DecodeFrame(hDecoder, decode_buf, output_size, 0);
+        if(err == AAC_DEC_OK) {
+            eDecError = CAudioCodec::DECODER_ERROR_OK;
+            return decode_buf;
+        }
+        eDecError = CAudioCodec::DECODER_ERROR_UNKNOWN;
+        if(err == AAC_DEC_OUT_OF_MEMORY) {
+            cerr << "Heap returned NULL pointer. Output buffer is invalid." << endl;
+        }
+        if(err == AAC_DEC_UNKNOWN) {
+            cerr << "Error condition is of unknown reason, or from a another module. Output buffer is invalid." << endl;
+        }
+        cerr << "err " << err << endl;
+        return nullptr;
         eDecError = CAudioCodec::DECODER_ERROR_OK;
         return decode_buf;
     }
