@@ -56,9 +56,11 @@ public:
     virtual void resetFile(string) {}
     virtual string fileName(const CParameter& Parameters) const;
 protected:
+    virtual _SAMPLE* DecodeAAC(const vector<uint8_t>& audio_frame, uint8_t aac_crc_bits, int& iChannels, EDecError& eDecError);
+    virtual _SAMPLE* DecodeUSAC(const vector<uint8_t>& audio_frame, uint8_t reservoir, int& iChannels, EDecError& eDecError);
     HANDLE_AACDECODER hDecoder;
     HANDLE_AACENCODER hEncoder;
-    CStreamInfo info;
+    bool bUsac;
     int16_t decode_buf[3840];
 };
 

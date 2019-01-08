@@ -33,7 +33,7 @@
 #include <cstring>
 
 FdkAacCodec::FdkAacCodec() :
-    hDecoder(nullptr), hEncoder(nullptr),info(),decode_buf()
+    hDecoder(nullptr), hEncoder(nullptr),bUsac(false),decode_buf()
 {
 }
 
@@ -69,19 +69,19 @@ FdkAacCodec::DecGetVersion()
 bool
 FdkAacCodec::CanDecode(CAudioParam::EAudCod eAudioCoding)
 {
-    LIB_INFO info;
-    aacinfo(info);
+    LIB_INFO linfo;
+    aacinfo(linfo);
     if(eAudioCoding == CAudioParam::AC_AAC) {
-        if((info.flags & CAPF_AAC_DRM_BSFORMAT) == 0)
+        if((linfo.flags & CAPF_AAC_DRM_BSFORMAT) == 0)
             return false;
-        if((info.flags & CAPF_SBR_DRM_BS) ==0 )
+        if((linfo.flags & CAPF_SBR_DRM_BS) ==0 )
             return false;
-        if((info.flags & CAPF_SBR_PS_DRM) == 0)
+        if((linfo.flags & CAPF_SBR_PS_DRM) == 0)
             return false;
         return true;
     }
     if(eAudioCoding == CAudioParam::AC_xHE_AAC) {
-        if((info.flags & CAPF_AAC_USAC) != 0)
+        if((linfo.flags & CAPF_AAC_USAC) != 0)
             return true;
     }
     return false;
@@ -156,6 +156,9 @@ FdkAacCodec::DecOpen(const CAudioParam& AudioParam, int& iAudioSampleRate, int& 
         logConfig(*pinfo);
         iAudioSampleRate = 48000;
         iLenDecOutPerChan=1920;
+        bUsac = false;
+        if(pinfo->aot == AUDIO_OBJECT_TYPE::AOT_USAC) bUsac = true;
+        if(pinfo->aot == AUDIO_OBJECT_TYPE::AOT_DRM_USAC) bUsac = true;
         return true;
     }
     iAudioSampleRate = 48000;
@@ -165,6 +168,23 @@ FdkAacCodec::DecOpen(const CAudioParam& AudioParam, int& iAudioSampleRate, int& 
 
 _SAMPLE*
 FdkAacCodec::Decode(const vector<uint8_t>& audio_frame, uint8_t aac_crc_bits, int& iChannels, CAudioCodec::EDecError& eDecError)
+{
+    if(bUsac) {
+        return DecodeUSAC(audio_frame, aac_crc_bits, iChannels, eDecError);
+    }
+    else {
+        return DecodeAAC(audio_frame, aac_crc_bits, iChannels, eDecError);
+    }
+}
+
+_SAMPLE*
+FdkAacCodec::DecodeUSAC(const vector<uint8_t>& audio_frame, uint8_t reservoir, int& iChannels, CAudioCodec::EDecError& eDecError)
+{
+    return nullptr;
+}
+
+_SAMPLE*
+FdkAacCodec::DecodeAAC(const vector<uint8_t>& audio_frame, uint8_t aac_crc_bits, int& iChannels, CAudioCodec::EDecError& eDecError)
 {
 
     /* Prepare data vector with CRC at the beginning (the definition with faad2 DRM interface) */
@@ -204,14 +224,13 @@ FdkAacCodec::Decode(const vector<uint8_t>& audio_frame, uint8_t aac_crc_bits, in
         //return nullptr; this breaks everything!
     }
     else {
-        info = *pinfo;
 
         //cerr << "Decode";
         //logConfig(info);
 
-        if(info.aacNumChannels > 0) {
-            output_size = info.frameSize * info.numChannels;
-            iChannels = info.numChannels;
+        if(pinfo->aacNumChannels > 0) {
+            output_size = pinfo->frameSize * pinfo->numChannels;
+            iChannels = pinfo->numChannels;
         }
     }
     if(err == AAC_DEC_OK) {
