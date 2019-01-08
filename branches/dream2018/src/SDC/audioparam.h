@@ -8,19 +8,19 @@ class CAudioParam
 public:
 
     /* AC: Audio Coding */
-    enum EAudCod { AC_NONE, AC_AAC, AC_OPUS, AC_RESERVED, AC_xHE_AAC, AC_CELP, AC_HVXC };
+    enum EAudCod { AC_AAC=0, AC_OPUS=1, AC_RESERVED=2, AC_xHE_AAC=3,  AC_NONE=4 };
 
     /* SB: SBR */
-    enum ESBRFlag { SB_NOT_USED, SB_USED };
+    enum ESBRFlag { SB_NOT_USED=0, SB_USED=1 };
 
     /* AM: Audio Mode */
-    enum EAudMode { AM_MONO, AM_P_STEREO, AM_STEREO, AM_SURROUND };
+    enum EAudioMode { AM_MONO=0, AM_P_STEREO=1, AM_STEREO=2, AM_RESERVED=3 };
 
-    /* HR: HVXC Rate */
-    enum EHVXCRate { HR_2_KBIT, HR_4_KBIT };
-
-    /* AS: Audio Sampling rate */
+    /* AS: Audio Sampling rate - complex map so don't try to assign by casting */
     enum EAudSamRat { AS_9_6KHZ, AS_12KHZ, AS_16KHZ, AS_19_2KHZ, AS_24KHZ, AS_32KHZ, AS_38_4KHZ, AS_48KHZ };
+
+    /* MPEG Surround */
+    enum ESurround { MS_NONE=0, MS_5_1=2, MS_7_1=3, MS_OTHER=7, MS_RESERVED_1=1, MS_RESERVED_4=4, MS_RESERVED_5=5, MS_RESERVED_6=6, };
 
     /* OB: Opus Audio Bandwidth, coded in audio data stream */
     enum EOPUSBandwidth { OB_NB, OB_MB, OB_WB, OB_SWB, OB_FB };
@@ -39,8 +39,7 @@ public:
 
     CAudioParam(): strTextMessage(), iStreamID(STREAM_ID_NOT_USED),
             eAudioCoding(AC_NONE), eSBRFlag(SB_NOT_USED), eAudioSamplRate(AS_24KHZ),
-            bTextflag(FALSE), bEnhanceFlag(FALSE), eAudioMode(AM_MONO),
-            iCELPIndex(0), bCELPCRC(FALSE), eHVXCRate(HR_2_KBIT), bHVXCCRC(FALSE),
+            bTextflag(FALSE), bEnhanceFlag(FALSE), eSurround(MS_NONE), eAudioMode(AM_MONO),
             xHE_AAC_config(),
             eOPUSBandwidth(OB_FB), eOPUSSubCod(OS_SILK), eOPUSChan(OC_STEREO),
             eOPUSSignal(OG_MUSIC), eOPUSApplication(OA_AUDIO),
@@ -59,11 +58,8 @@ public:
             eAudioSamplRate(ap.eAudioSamplRate),
             bTextflag(ap.bTextflag),
             bEnhanceFlag(ap.bEnhanceFlag),
+            eSurround(ap.eSurround),
             eAudioMode(ap.eAudioMode),
-            iCELPIndex(ap.iCELPIndex),
-            bCELPCRC(ap.bCELPCRC),
-            eHVXCRate(ap.eHVXCRate),
-            bHVXCCRC(ap.bHVXCCRC),
             xHE_AAC_config(ap.xHE_AAC_config),
             eOPUSBandwidth(ap.eOPUSBandwidth),
             eOPUSSubCod(ap.eOPUSSubCod),
@@ -84,11 +80,8 @@ public:
         eAudioSamplRate = ap.eAudioSamplRate;
         bTextflag =	ap.bTextflag;
         bEnhanceFlag = ap.bEnhanceFlag;
+        eSurround = ap.eSurround;
         eAudioMode = ap.eAudioMode;
-        iCELPIndex = ap.iCELPIndex;
-        bCELPCRC = ap.bCELPCRC;
-        eHVXCRate = ap.eHVXCRate;
-        bHVXCCRC = ap.bHVXCCRC;
         xHE_AAC_config = ap.xHE_AAC_config;
         eOPUSBandwidth = ap.eOPUSBandwidth;
         eOPUSSubCod = ap.eOPUSSubCod;
@@ -116,17 +109,10 @@ public:
     EAudSamRat eAudioSamplRate;	/* Audio sampling rate */
     _BOOLEAN bTextflag;		/* Indicates whether a text message is present or not */
     _BOOLEAN bEnhanceFlag;	/* Enhancement flag */
+    ESurround eSurround;    /* MPEG Surround */
 
-    /* For AAC: Mono, LC Stereo, Stereo --------------------------------- */
-    EAudMode eAudioMode;	/* Audio mode */
-
-    /* For CELP --------------------------------------------------------- */
-    int iCELPIndex;			/* This field indicates the CELP bit rate index */
-    _BOOLEAN bCELPCRC;		/* This field indicates whether the CRC is used or not */
-
-    /* For HVXC --------------------------------------------------------- */
-    EHVXCRate eHVXCRate;	/* This field indicates the rate of the HVXC */
-    _BOOLEAN bHVXCCRC;		/* This field indicates whether the CRC is used or not */
+    /* For AAC: Mono, P-Stereo, Stereo --------------------------------- */
+    EAudioMode eAudioMode;	/* Audio mode */
 
     /* for xHE-AAC ------------------------------------------------------ */
     vector<_BYTE> xHE_AAC_config;
@@ -141,48 +127,30 @@ public:
     _BOOLEAN bOPUSRequestReset; /* Request encoder reset */
 
     /* CAudioParam has changed */
-    _BOOLEAN bParamChanged;
+    bool bParamChanged;
 
     /* This function is needed for detection changes in the class */
-    _BOOLEAN operator!=(const CAudioParam AudioParam)
+    bool operator!=(const CAudioParam AudioParam)
     {
         if (iStreamID != AudioParam.iStreamID)
-            return TRUE;
+            return true;
         if (eAudioCoding != AudioParam.eAudioCoding)
-            return TRUE;
+            return true;
         if (eSBRFlag != AudioParam.eSBRFlag)
-            return TRUE;
+            return true;
         if (eAudioSamplRate != AudioParam.eAudioSamplRate)
-            return TRUE;
+            return true;
         if (bTextflag != AudioParam.bTextflag)
-            return TRUE;
+            return true;
         if (bEnhanceFlag != AudioParam.bEnhanceFlag)
-            return TRUE;
-
-        switch (AudioParam.eAudioCoding)
-        {
-        case AC_AAC:
-            if (eAudioMode != AudioParam.eAudioMode)
-                return TRUE;
-            break;
-
-        case AC_xHE_AAC:
-            if (eAudioMode != AudioParam.eAudioMode)
-                return TRUE;
-            break;
-
-        case AC_CELP:
-        case AC_HVXC:
-        case AC_NONE:
-        case AC_OPUS:
-        case AC_RESERVED:
-            break;
-        }
-        if(xHE_AAC_config != AudioParam.xHE_AAC_config) {
-            return TRUE;
-        }
-        return FALSE;
+            return true;
+        if (eAudioMode != AudioParam.eAudioMode)
+            return true;
+        if(xHE_AAC_config != AudioParam.xHE_AAC_config)
+            return true;
+        return false;
     }
+
 };
 
 #endif // AUDIOPARAM_H

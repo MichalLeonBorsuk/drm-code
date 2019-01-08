@@ -401,10 +401,8 @@ void CParameter::ResetServicesStreams()
             Service[i].AudioParam.bTextflag = FALSE;
             Service[i].AudioParam.bEnhanceFlag = FALSE;
             Service[i].AudioParam.eAudioMode = CAudioParam::AM_MONO;
-            Service[i].AudioParam.iCELPIndex = 0;
-            Service[i].AudioParam.bCELPCRC = FALSE;
-            Service[i].AudioParam.eHVXCRate = CAudioParam::HR_2_KBIT;
-            Service[i].AudioParam.bHVXCCRC = FALSE;
+            Service[i].AudioParam.eSurround = CAudioParam::MS_NONE;
+            Service[i].AudioParam.xHE_AAC_config.clear();
 
             Service[i].DataParam.iStreamID = STREAM_ID_NOT_USED;
             Service[i].DataParam.ePacketModInd = CDataParam::PM_PACKET_MODE;
@@ -444,10 +442,8 @@ void CParameter::ResetServicesStreams()
         Service[0].AudioParam.bTextflag = FALSE;
         Service[0].AudioParam.bEnhanceFlag = FALSE;
         Service[0].AudioParam.eAudioMode = CAudioParam::AM_MONO; // ? FM could be stereo
-        Service[0].AudioParam.iCELPIndex = 0;
-        Service[0].AudioParam.bCELPCRC = FALSE;
-        Service[0].AudioParam.eHVXCRate = CAudioParam::HR_2_KBIT;
-        Service[0].AudioParam.bHVXCCRC = FALSE;
+        Service[0].AudioParam.eSurround = CAudioParam::MS_NONE;
+        Service[0].AudioParam.xHE_AAC_config.clear();
 
         Service[0].iServiceID = SERV_ID_NOT_USED;
         Service[0].eCAIndication = CService::CA_NOT_USED;
