@@ -106,32 +106,137 @@ CAudioCodec::GetEncoder(CAudioParam::EAudCod eAudioCoding, bool bCanReturnNullPt
 }
 
 void
-CAudioCodec::extractSamples(size_t iNumAudioFrames, size_t iNumHigherProtectedBytes, CVectorEx<_BINARY>& vecInputData, vector< vector<uint8_t> >& audio_frame, vector<uint8_t>& aac_crc_bits)
+CAudioCodec::Init(const CAudioParam& AudioParam, int iInputBlockSize, int iLenAudHigh)
 {
-    /* Higher-protected part */
-    for (size_t i = 0; i < iNumAudioFrames; i++)
-    {
-        /* Extract higher protected part bytes (8 bits per byte) */
-        for (size_t j = 0; j < iNumHigherProtectedBytes; j++)
-            audio_frame[i][j] = _BINARY(vecInputData.Separate(8));
+    int iNumHeaderBytes = 0;
 
-        /* Extract CRC bits (8 bits) */
-        aac_crc_bits[i] = _BINARY(vecInputData.Separate(8));
+    if (AudioParam.bTextflag)
+    {
+        /* Total frame size is input block size minus the bytes for the text message */
+        iTotalFrameSize = iInputBlockSize - SIZEOF__BYTE * NUM_BYTES_TEXT_MESS_IN_AUD_STR;
+    }
+    else {
+        /* All bytes are used for audio data, no text message present */
+        iTotalFrameSize = iInputBlockSize;
+    }
+    /* Set number of AAC frames in a AAC super-frame */
+    switch (AudioParam.eAudioSamplRate)	/* Only 12 kHz and 24 kHz is allowed */
+    {
+    case CAudioParam::AS_12KHZ:
+        iNumAudioFrames = 5;
+        iNumHeaderBytes = 6;
+        break;
+
+    case CAudioParam::AS_24KHZ:
+        iNumAudioFrames = 10;
+        iNumHeaderBytes = 14;
+        break;
+
+    default:
+        /* Some error occurred, throw error */
+        throw CInitErr(ET_AUDDECODER);
+        break;
     }
 
-    /* Lower-protected part */
-    for (size_t i = 0; i < iNumAudioFrames; i++)
-    {
-        /* First calculate frame length, derived from higher protected
-           part frame length and total size */
-        const size_t iNumLowerProtectedBytes =
-            audio_frame[i].size() - iNumHigherProtectedBytes;
+    /* Number of borders */
+    iNumBorders = iNumAudioFrames - 1;
 
-        /* Extract lower protected part bytes (8 bits per byte) */
-        for (size_t j = 0; j < iNumLowerProtectedBytes; j++)
+    iAudioPayloadLen = iTotalFrameSize / SIZEOF__BYTE - iNumHeaderBytes - iNumAudioFrames;
+
+    /* Check iAudioPayloadLen value, only positive values make sense */
+    if (iAudioPayloadLen < 0)
+        throw CInitErr(ET_AUDDECODER);
+
+    /* Calculate number of bytes for higher protected blocks */
+    iNumHigherProtectedBytes = (iLenAudHigh - iNumHeaderBytes - iNumAudioFrames /* CRC bytes */ ) / iNumAudioFrames;
+
+    if (iNumHigherProtectedBytes < 0)
+        iNumHigherProtectedBytes = 0;
+    /* The maximum length for one audio frame is "iAudioPayloadLen". The
+       regular size will be much shorter since all audio frames share
+       the total size, but we do not know at this time how the data is
+       split in the transmitter source coder */
+    iMaxLenOneAudFrame = iAudioPayloadLen;
+}
+
+void CAudioCodec::Partition(CVectorEx<_BINARY>& vecInputData, vector< vector<uint8_t> >& audio_frame, vector<uint8_t>& aac_crc_bits)
+{
+    /* AAC super-frame-header ------------------------------------------- */
+    int bGoodValues = TRUE;
+    size_t iPrevBorder = 0;
+
+    audio_frame.resize(iNumBorders+1);
+    aac_crc_bits.resize(audio_frame.size());
+
+    for (int i = 0; i < iNumBorders; i++)
+    {
+        /* Frame border in bytes (12 bits) */
+        size_t iFrameBorder = vecInputData.Separate(12);
+
+        /* The length is difference between borders */
+        if(iFrameBorder>=iPrevBorder)
         {
-            audio_frame[i][iNumHigherProtectedBytes + j] =
-                _BINARY(vecInputData.Separate(8));
+            int size = iFrameBorder - iPrevBorder;
+            if (size < iNumHigherProtectedBytes)
+                size = iNumHigherProtectedBytes;
+            else if (size > iMaxLenOneAudFrame)
+                size = iMaxLenOneAudFrame;
+            audio_frame[i].resize(size);
+        }
+        else
+            bGoodValues = FALSE;
+        iPrevBorder = iFrameBorder;
+    }
+
+    /* Byte-alignment (4 bits) in case of odd number of borders */
+    if (iNumBorders & 1)
+        vecInputData.Separate(4);
+
+    /* Frame length of last frame */
+    if (iNumBorders != iNumAudioFrames)
+    {
+        if(iAudioPayloadLen>=int(iPrevBorder))
+        {
+            int size = iAudioPayloadLen - iPrevBorder;
+            if (size < iNumHigherProtectedBytes)
+                size = iNumHigherProtectedBytes;
+            else if (size > iMaxLenOneAudFrame)
+                size = iMaxLenOneAudFrame;
+            audio_frame[iNumBorders].resize(size);
+        }
+        else
+            bGoodValues = FALSE;
+    }
+
+    /* Check if frame length entries represent possible values */
+
+    if (bGoodValues == TRUE)
+    {
+        /* Higher-protected part */
+        for (size_t i = 0; i < iNumAudioFrames; i++)
+        {
+            /* Extract higher protected part bytes (8 bits per byte) */
+            for (size_t j = 0; j < iNumHigherProtectedBytes; j++)
+                audio_frame[i][j] = _BINARY(vecInputData.Separate(8));
+
+            /* Extract CRC bits (8 bits) */
+            aac_crc_bits[i] = _BINARY(vecInputData.Separate(8));
+        }
+
+        /* Lower-protected part */
+        for (size_t i = 0; i < iNumAudioFrames; i++)
+        {
+            /* First calculate frame length, derived from higher protected
+               part frame length and total size */
+            const size_t iNumLowerProtectedBytes =
+                audio_frame[i].size() - iNumHigherProtectedBytes;
+
+            /* Extract lower protected part bytes (8 bits per byte) */
+            for (size_t j = 0; j < iNumLowerProtectedBytes; j++)
+            {
+                audio_frame[i][iNumHigherProtectedBytes + j] =
+                    _BINARY(vecInputData.Separate(8));
+            }
         }
     }
 }

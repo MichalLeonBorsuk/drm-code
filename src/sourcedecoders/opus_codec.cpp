@@ -539,6 +539,32 @@ OpusCodec::~OpusCodec()
 
 /******************************************************************************/
 /* Decoder Implementation *****************************************************/
+void
+OpusCodec::Init(const CAudioParam& AudioParam, int iInputBlockSize, int iLenAudHigh)
+{
+    CAudioCodec::Init(AudioParam, iInputBlockSize, iLenAudHigh);
+
+    /* Init for OPUS decoding ---------------------------------------- */
+
+    int iNumHeaderBytes = 0; // TODO check this
+
+    /* Number of audio frame */
+    iNumAudioFrames = 20;
+
+    /* Number of borders */
+    iNumBorders = iNumAudioFrames;
+    iAudioPayloadLen = iTotalFrameSize / SIZEOF__BYTE - iNumHeaderBytes - iNumAudioFrames;
+
+    /* Check iAudioPayloadLen value, only positive values make sense */
+    if (iAudioPayloadLen < 0)
+        throw CInitErr(ET_AUDDECODER);
+
+    /* Calculate number of bytes for higher protected blocks */
+    iNumHigherProtectedBytes = (iLenAudHigh - 0 - iNumAudioFrames /* CRC bytes */ ) / iNumAudioFrames;
+
+    if (iNumHigherProtectedBytes < 0)
+        iNumHigherProtectedBytes = 0;
+}
 
 string
 OpusCodec::DecGetVersion()
