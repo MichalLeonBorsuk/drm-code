@@ -53,7 +53,7 @@ public:
     virtual _SAMPLE* Decode(const vector<uint8_t>& audio_frame, uint8_t aac_crc_bits, int& iChannels, CAudioCodec::EDecError& eDecError);
     virtual void DecClose();
 	virtual void DecUpdate(CAudioParam& AudioParam);
-	/* Encoder */
+    /* Encoder */
 	virtual string EncGetVersion();
 	virtual bool CanEncode(CAudioParam::EAudCod eAudioCoding);
     virtual bool EncOpen(const CAudioParam& AudioParam, unsigned long& lNumSampEncIn, unsigned long& lMaxBytesEncOut);
