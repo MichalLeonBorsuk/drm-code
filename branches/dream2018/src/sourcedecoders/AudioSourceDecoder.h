@@ -67,18 +67,10 @@ public:
     _BOOLEAN bWriteToFile;
 
 protected:
-    enum EInitErr {ET_ALL, ET_AUDDECODER}; /* ET: Error type */
-    class CInitErr
-    {
-    public:
-        CInitErr(EInitErr eNewErrType) : eErrType(eNewErrType) {}
-        EInitErr eErrType;
-    };
 
     /* General */
     _BOOLEAN DoNotProcessData;
     _BOOLEAN DoNotProcessAudDecoder;
-    int iTotalFrameSize;
     int iNumCorDecAudio;
 
     /* Text message */
@@ -105,18 +97,10 @@ protected:
     CAudioReverb AudioRev;
 
     int iLenDecOutPerChan;
-    int iNumAudioFrames;
 
     CAudioParam::EAudCod eAudioCoding;
 	CAudioCodec* codec;
-
-    int iNumBorders;
-    int iNumHigherProtectedBytes;
-    int iMaxLenOneAudFrame;
-
     int iBadBlockCount;
-    int iAudioPayloadLen;
-
     string audiodecoder;
     bool bCanDecodeAAC;
     bool bCanDecodeOPUS;
