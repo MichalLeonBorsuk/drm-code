@@ -65,11 +65,9 @@ CAudioSourceDecoder::~CAudioSourceDecoder()
 void
 CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
 {
-    _BOOLEAN bCurBlockOK;
-    _BOOLEAN bGoodValues;
+    bool bCurBlockOK;
+    bool bGoodValues = false;
 
-    //int iDecChannels;
-    bGoodValues = FALSE;
 
     Parameters.Lock();
     Parameters.vecbiAudioFrameStatus.Init(0);
@@ -84,10 +82,8 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
 
     //cerr << "got one logical frame of length " << pvecInputData->Size() << " bits" << endl;
 
-    TextMessage.Decode(vecbiTextMessBuf);
     /* Text Message ********************************************************** */
-    /* Total frame size depends on whether text message is used or not */
-    if (bTextMessageUsed == TRUE)
+    if (bTextMessageUsed)
     {
         /* Decode last four bytes of input block for text message */
         for (int i = 0; i < SIZEOF__BYTE * NUM_BYTES_TEXT_MESS_IN_AUD_STR; i++)

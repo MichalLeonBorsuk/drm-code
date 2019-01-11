@@ -60,6 +60,8 @@ public:
 	virtual void DecUpdate(CAudioParam& AudioParam) = 0;
     virtual void Init(const CAudioParam& AudioParam, int iInputBlockSize, int iLenAudHigh);
     virtual void Partition(CVectorEx<_BINARY>& vecInputData, vector< vector<uint8_t> >& audio_frame, vector<uint8_t>& aac_crc_bits);
+    virtual void PartitionAAC(CVectorEx<_BINARY>& vecInputData, vector< vector<uint8_t> >& audio_frame, vector<uint8_t>& aac_crc_bits);
+    virtual void PartitionUSAC(CVectorEx<_BINARY>& vecInputData, vector< vector<uint8_t> >& audio_frame, vector<uint8_t>& aac_crc_bits);
     /* Encoder */
 	virtual string EncGetVersion() = 0;
 	virtual bool CanEncode(CAudioParam::EAudCod eAudioCoding) = 0;
@@ -82,6 +84,7 @@ private:
 	static int RefCount;
     FILE *pFile;
 protected:
+    CAudioParam::EAudCod eAudioCoding;
     int iNumAudioFrames;
     int iNumBorders;
     int iAudioPayloadLen;

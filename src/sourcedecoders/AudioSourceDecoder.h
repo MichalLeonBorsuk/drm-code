@@ -74,7 +74,7 @@ protected:
     int iNumCorDecAudio;
 
     /* Text message */
-    _BOOLEAN bTextMessageUsed;
+    bool bTextMessageUsed;
     CTextMessageDecoder TextMessage;
     CVector<_BINARY> vecbiTextMessBuf;
 
