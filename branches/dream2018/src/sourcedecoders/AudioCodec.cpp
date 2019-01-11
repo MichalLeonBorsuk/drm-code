@@ -162,23 +162,25 @@ CAudioCodec::Init(const CAudioParam& AudioParam, int iInputBlockSize, int iLenAu
     iMaxLenOneAudFrame = iAudioPayloadLen;
 }
 
-void CAudioCodec::Partition(CVectorEx<_BINARY>& vecInputData, vector< vector<uint8_t> >& audio_frame, vector<uint8_t>& aac_crc_bits)
+bool
+CAudioCodec::Partition(CVectorEx<_BINARY>& vecInputData, vector< vector<uint8_t> >& audio_frame, vector<uint8_t>& aac_crc_bits)
 {
     if(eAudioCoding == CAudioParam::AC_AAC) {
-        PartitionAAC(vecInputData, audio_frame, aac_crc_bits);
+        return PartitionAAC(vecInputData, audio_frame, aac_crc_bits);
     }
     else if(eAudioCoding == CAudioParam::AC_xHE_AAC) {
-        PartitionUSAC(vecInputData, audio_frame, aac_crc_bits);
+        return PartitionUSAC(vecInputData, audio_frame, aac_crc_bits);
     }
     else if(eAudioCoding == CAudioParam::AC_OPUS) {
-        PartitionAAC(vecInputData, audio_frame, aac_crc_bits);
+        return PartitionAAC(vecInputData, audio_frame, aac_crc_bits);
     }
     else {
-        // do nothing?
+        return false;
     }
 }
 
-void CAudioCodec::PartitionAAC(CVectorEx<_BINARY>& vecInputData, vector< vector<uint8_t> >& audio_frame, vector<uint8_t>& aac_crc_bits)
+bool
+CAudioCodec::PartitionAAC(CVectorEx<_BINARY>& vecInputData, vector< vector<uint8_t> >& audio_frame, vector<uint8_t>& aac_crc_bits)
 {
     /* AAC super-frame-header ------------------------------------------- */
     bool bGoodValues = true;
@@ -247,9 +249,10 @@ void CAudioCodec::PartitionAAC(CVectorEx<_BINARY>& vecInputData, vector< vector<
             }
         }
     }
+    return bGoodValues;
 }
 
-void
+bool
 CAudioCodec::PartitionUSAC(CVectorEx<_BINARY>& vecInputData, vector<vector<uint8_t> >& audio_frame, vector<uint8_t>& aac_crc_bits)
 {
     /*
@@ -327,6 +330,7 @@ always needs to buffer the last 2 bytes within the Payload section for a possibl
         }
         start = ivecborders[i];
     }
+    return bGoodValues;
 }
 
 void

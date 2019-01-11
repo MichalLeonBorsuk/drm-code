@@ -106,7 +106,7 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
     vector<uint8_t> aac_crc_bits;
     uint8_t iBitReservoirLevel=0;
 
-    codec->Partition(*pvecInputData, audio_frame, aac_crc_bits);
+    bGoodValues = codec->Partition(*pvecInputData, audio_frame, aac_crc_bits);
 
     /* Audio decoding ******************************************************** */
     /* Init output block size to zero, this variable is also used for
