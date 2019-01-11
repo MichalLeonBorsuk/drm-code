@@ -46,7 +46,6 @@ public:
     virtual void DecClose();
 	virtual void DecUpdate(CAudioParam& AudioParam);
     virtual void Init(const CAudioParam& AudioParam, int iInputBlockSize, int iLenAudHigh);
-    virtual void Partition(CVectorEx<_BINARY>& vecInputData, vector< vector<uint8_t> >& audio_frame, vector<uint8_t>& aac_crc_bits);
     /* Encoder */
 	virtual string EncGetVersion();
 	virtual bool CanEncode(CAudioParam::EAudCod eAudioCoding);
