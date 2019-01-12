@@ -42,7 +42,7 @@
 /* Implementation *************************************************************/
 
 CAudioSourceDecoder::CAudioSourceDecoder()
-    :	bWriteToFile(FALSE), TextMessage(FALSE),
+    :	bWriteToFile(TRUE), TextMessage(FALSE),
       bUseReverbEffect(TRUE), codec(nullptr)
 {
     /* Initialize Audio Codec List */
@@ -199,7 +199,7 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
                         if (iDecChannels == 1)
                         {
                             /* Mono */
-                            //cerr << "mono " << iResOutBlockSize << endl;
+                            // << "mono " << iResOutBlockSize << endl;
                             for(int i = 0; i<iResOutBlockSize; i++) {
                                 vecTempResBufOutCurLeft[i] = _REAL(psDecOutSampleBuf[i]) / 2.0;
                                 vecTempResBufOutCurRight[i] = _REAL(psDecOutSampleBuf[i]) / 2.0;

@@ -232,7 +232,18 @@ CAudioCodec::PartitionAAC(CVectorEx<_BINARY>& vecInputData, vector< vector<uint8
     /* Check if frame length entries represent possible values */
 
     if (bGoodValues)
-    {
+    {        
+        /* Higher-protected part */
+        for (size_t i = 0; i < iNumAudioFrames; i++)
+        {
+            /* Extract higher protected part bytes (8 bits per byte) */
+            for (size_t j = 0; j < iNumHigherProtectedBytes; j++)
+                audio_frame[i][j] = _BINARY(vecInputData.Separate(8));
+
+            /* Extract CRC bits (8 bits) */
+            aac_crc_bits[i] = _BINARY(vecInputData.Separate(8));
+        }
+
         /* Lower-protected part */
         for (size_t i = 0; i < iNumAudioFrames; i++)
         {
@@ -249,6 +260,7 @@ CAudioCodec::PartitionAAC(CVectorEx<_BINARY>& vecInputData, vector< vector<uint8
             }
         }
     }
+
     return bGoodValues;
 }
 
@@ -302,7 +314,7 @@ always needs to buffer the last 2 bytes within the Payload section for a possibl
     // TODO handle reservoir - should it only be passed to the first frame in a superframe?
     // get the directory
     int directory_offset = iTotalFrameSize - 16 * iFrameBorderCount;
-    //cerr << "directory offset " << directory_offset << " bits " << (directory_offset/SIZEOF__BYTE) << " bytes" << endl;
+    cerr << "directory offset " << directory_offset << " bits " << (directory_offset/SIZEOF__BYTE) << " bytes" << endl;
     CVector<_BINARY> vecbiDirectory(16 * iFrameBorderCount);
     for (int i = 0; i < 16 * iFrameBorderCount; i++) {
         vecbiDirectory[i] = vecInputData[directory_offset + i];
@@ -313,7 +325,7 @@ always needs to buffer the last 2 bytes within the Payload section for a possibl
     for(int i=iFrameBorderCount-1; i>=0; i--) {
         size_t iFrameBorderIndex = vecbiDirectory.Separate(12);
         int iFrameBorderCountRepeat =  vecbiDirectory.Separate(4);
-        //cerr << "border " << i << " of " << iFrameBorderCountRepeat << " starts at " << hex << iFrameBorderIndex << dec << endl;
+        cerr << "border " << i << " of " << iFrameBorderCountRepeat << " starts at " << hex << iFrameBorderIndex << dec << endl;
         ivecborders[i] = iFrameBorderIndex;
     }
     ivecborders.push_back(directory_offset/SIZEOF__BYTE);  // last frame ends at start of directory
@@ -323,7 +335,7 @@ always needs to buffer the last 2 bytes within the Payload section for a possibl
     audio_frame.resize(iNumAudioFrames);
     for (size_t i = 0; i < audio_frame.size(); i++)
     {
-        //cerr << hex << "extracting frame " << i << " from offset " << start << " to offset " << ivecborders[i] << dec << endl;
+        cerr << hex << "extracting frame " << i << " from offset " << start << " to offset " << ivecborders[i] << dec << endl;
         audio_frame[i].resize(ivecborders[i]-start);
         for (size_t j = 0; j < audio_frame[i].size(); j++) {
             audio_frame[i][j] = _BINARY(vecInputData.Separate(8));
@@ -340,7 +352,8 @@ CAudioCodec::openFile(const CParameter& Parameters)
         fclose(pFile);
         pFile = nullptr;
     }
-    pFile = fopen(fileName(Parameters).c_str(), "wb");
+    string fn = fileName(Parameters);
+    pFile = fopen(fn.c_str(), "wb");
 }
 
 void
