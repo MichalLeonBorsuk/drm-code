@@ -200,6 +200,7 @@ typedef unsigned int					_MESSAGE_IDENT;
 enum ESpecOcc {SO_0, SO_1, SO_2, SO_3, SO_4, SO_5}; /* SO: Spectrum Occupancy */
 enum ERobMode {RM_ROBUSTNESS_MODE_A, RM_ROBUSTNESS_MODE_B,
                RM_ROBUSTNESS_MODE_C, RM_ROBUSTNESS_MODE_D,
+               RM_ROBUSTNESS_MODE_E,
                RM_NO_MODE_DETECTED
               }; /* RM: Robustness Mode */
 
