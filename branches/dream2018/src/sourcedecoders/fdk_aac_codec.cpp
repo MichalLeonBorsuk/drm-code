@@ -159,6 +159,7 @@ FdkAacCodec::DecOpen(const CAudioParam& AudioParam, int& iAudioSampleRate, int& 
     type9Size = type9.size();
     t9 = &type9[0];
 
+    cerr << "type9 " << hex; for(size_t i=0; i<type9Size; i++) cerr << int(type9[i]) << " "; cerr << dec << endl;
     AAC_DECODER_ERROR err = aacDecoder_ConfigRaw (hDecoder, &t9, &type9Size);
     if(err == AAC_DEC_OK) {
         CStreamInfo *pinfo = aacDecoder_GetStreamInfo(hDecoder);
@@ -264,7 +265,6 @@ FdkAacCodec::DecodeAAC(const vector<uint8_t>& audio_frame, uint8_t aac_crc_bits,
 
     /* Prepare data vector with CRC at the beginning (the definition with faad2 DRM interface) */
 
-
     CVector<uint8_t> vecbyPrepAudioFrame(int(audio_frame.size()+1));
     vecbyPrepAudioFrame[0] = aac_crc_bits;
 
@@ -278,6 +278,7 @@ FdkAacCodec::DecodeAAC(const vector<uint8_t>& audio_frame, uint8_t aac_crc_bits,
     UINT bytesValid = unsigned(vecbyPrepAudioFrame.Size());
 
     eDecError = CAudioCodec::DECODER_ERROR_UNKNOWN;
+    eDecError = CAudioCodec::DECODER_ERROR_OK; // TODO
 
     AAC_DECODER_ERROR err = aacDecoder_Fill(hDecoder, &pData, &bufferSize, &bytesValid);
     if(err != AAC_DEC_OK) {
@@ -554,7 +555,7 @@ FdkAacCodec::fileName(const CParameter& Parameters) const
 {
     // Store AAC-data in file
     stringstream ss;
-    ss << "test/aac_";
+    ss << "aac_";
 
 //    Parameters.Lock(); // TODO CAudioSourceDecoder::InitInternal() already have the lock
     if (Parameters.
