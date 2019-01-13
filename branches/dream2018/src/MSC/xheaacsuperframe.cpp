@@ -5,6 +5,13 @@ XHEAACSuperFrame::XHEAACSuperFrame():AudioSuperFrame ()
 
 }
 
+void
+XHEAACSuperFrame::init(const CAudioParam& audioParam, unsigned frameSize)
+{
+    numChannels = audioParam.AM_MONO?1:2;
+    this->frameSize = frameSize;
+}
+
 
         /*
      * 5.3.1.3 Transport of xHE-AAC audio frames within the payload section
@@ -51,10 +58,11 @@ bool XHEAACSuperFrame::parse(CVectorEx<_BINARY>& asf)
     unsigned iheaderCRC = asf.Separate(8);
     // TODO check CRC
     // TODO handle frames split across audio superframes
-    // TODO handle reservoir - should it only be passed to the first frame in a superframe?
+    // TODO handle reservoir
+    unsigned bitResLevel = (bitReservoirLevel+1) * 384 * numChannels;
     // get the directory
     unsigned directory_offset = 8*(frameSize - 2*frameBorderCount);
-    cerr << "frame size " << frameSize << " directory offset " << directory_offset << " bits " << (directory_offset/SIZEOF__BYTE) << " bytes" << endl;
+    cerr << "bit reservoir level " << bitReservoirLevel << " bitResLevel " << bitResLevel << " frame size " << frameSize << " directory offset " << directory_offset << " bits " << (directory_offset/SIZEOF__BYTE) << " bytes" << endl;
     CVector<_BINARY> vecbiDirectory(int(16 * frameBorderCount));
     for (unsigned i = 0; i < 16 * frameBorderCount; i++) {
         vecbiDirectory[int(i)] = asf[int(directory_offset + i)];
