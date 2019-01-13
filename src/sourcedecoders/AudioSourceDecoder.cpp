@@ -367,6 +367,8 @@ CAudioSourceDecoder::InitInternal(CParameter & Parameters)
             throw CInitErr(ET_ALL);
         }
 
+        int iTotalFrameSize = Parameters.Stream[iCurAudioStreamID].iLenPartA+Parameters.Stream[iCurAudioStreamID].iLenPartB;
+
         /* Init text message application ------------------------------------ */
         if (AudioParam.bTextflag)
         {
@@ -377,6 +379,8 @@ CAudioSourceDecoder::InitInternal(CParameter & Parameters)
 
             /* Init vector for text message bytes */
             vecbiTextMessBuf.Init(SIZEOF__BYTE * NUM_BYTES_TEXT_MESS_IN_AUD_STR);
+
+            iTotalFrameSize -= NUM_BYTES_TEXT_MESS_IN_AUD_STR;
         }
         else {
             bTextMessageUsed = FALSE;
@@ -384,9 +388,8 @@ CAudioSourceDecoder::InitInternal(CParameter & Parameters)
         if(eAudioCoding==CAudioParam::AC_xHE_AAC) {
             XHEAACSuperFrame* p = new XHEAACSuperFrame();
             // part B should be enough as xHE-AAC MUST be EEP but its easier to just add them
-            p->init(Parameters.Stream[iCurAudioStreamID].iLenPartA+Parameters.Stream[iCurAudioStreamID].iLenPartB);
+            p->init(iTotalFrameSize);
             pAudioSuperFrame = p;
-            cerr << "init xHE-AAC" << endl;
         }
         else {
             AACSuperFrame *p = new AACSuperFrame();
@@ -408,16 +411,12 @@ CAudioSourceDecoder::InitInternal(CParameter & Parameters)
         }
 
         codec->Init(AudioParam, iInputBlockSize);
-        cerr << "init xHE-AAC 4" << endl;
 
         /* Init decoder */
         codec->DecOpen(AudioParam, iAudioSampleRate, iLenDecOutPerChan);
-        cerr << "init xHE-AAC 5" << endl;
 
         /* set string for GUI */
         Parameters.audiodecoder = audiodecoder;
-
-        cerr << "init xHE-AAC done" << endl;
 
         /* Set number of Audio frames for log file */
         // TODO Parameters.iNumAudioFrames = iNumAudioFrames;
