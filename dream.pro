@@ -491,7 +491,12 @@ HEADERS += \
     src/util/Settings.h \
     src/util/Utilities.h \
     src/util/Vector.h \
-    src/Version.h
+    src/Version.h \
+    src/MSC/logicalframe.h \
+    src/MSC/audiosuperframe.h \
+    src/MSC/aacsuperframe.h \
+    src/MSC/xheaacsuperframe.h \
+    src/MSC/frameborderdescription.h
 SOURCES += \
     src/AMDemodulation.cpp \
     src/AMSSDemodulation.cpp \
@@ -595,7 +600,12 @@ SOURCES += \
     src/sound/soundnull.cpp \
     src/DrmTransceiver.cpp \
     src/sound/soundinterface.cpp \
-    src/sound/selectioninterface.cpp
+    src/sound/selectioninterface.cpp \
+    src/MSC/logicalframe.cpp \
+    src/MSC/audiosuperframe.cpp \
+    src/MSC/aacsuperframe.cpp \
+    src/MSC/xheaacsuperframe.cpp \
+    src/MSC/frameborderdescription.cpp
 !console {
 HEADERS += \
     src/GUI-QT/Logging.h \

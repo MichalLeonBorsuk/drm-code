@@ -58,10 +58,7 @@ public:
     virtual EDecError Decode(const vector<uint8_t>& audio_frame, uint8_t aac_crc_bits, CVector<_REAL>& left,  CVector<_REAL>& right) = 0;
     virtual void DecClose() = 0;
 	virtual void DecUpdate(CAudioParam& AudioParam) = 0;
-    virtual void Init(const CAudioParam& AudioParam, int iInputBlockSize, int iLenAudHigh);
-    virtual bool Partition(CVectorEx<_BINARY>& vecInputData, vector< vector<uint8_t> >& audio_frame, vector<uint8_t>& aac_crc_bits);
-    virtual bool PartitionAAC(CVectorEx<_BINARY>& vecInputData, vector< vector<uint8_t> >& audio_frame, vector<uint8_t>& aac_crc_bits);
-    virtual bool PartitionUSAC(CVectorEx<_BINARY>& vecInputData, vector< vector<uint8_t> >& audio_frame, vector<uint8_t>& aac_crc_bits);
+    virtual void Init(const CAudioParam& AudioParam, int iInputBlockSize);
     /* Encoder */
 	virtual string EncGetVersion() = 0;
 	virtual bool CanEncode(CAudioParam::EAudCod eAudioCoding) = 0;
