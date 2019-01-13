@@ -133,15 +133,6 @@ void
 FdkAacCodec::Init(const CAudioParam& AudioParam, int iInputBlockSize)
 {
     CAudioCodec::Init(AudioParam, iInputBlockSize);
-   if (AudioParam.eAudioCoding == CAudioParam::AC_xHE_AAC)
-    {
-        int iNumHeaderBytes = 2;
-        iNumAudioFrames = 0;
-        iAudioPayloadLen = iTotalFrameSize / SIZEOF__BYTE - iNumHeaderBytes - iNumAudioFrames;
-        iNumHigherProtectedBytes = iAudioPayloadLen;
-        // all variable per superframe
-
-    }
 }
 
 

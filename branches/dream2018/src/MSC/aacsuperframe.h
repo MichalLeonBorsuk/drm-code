@@ -14,7 +14,6 @@ public:
 private:
     unsigned lengthPartA, lengthPartB;
     unsigned headerBytes;
-    vector<vector<uint8_t>> audioFrame;
     vector<uint8_t> aacCRC;
     bool header(CVectorEx<_BINARY>&);
 };

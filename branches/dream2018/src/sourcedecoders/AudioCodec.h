@@ -81,13 +81,7 @@ private:
 	static int RefCount;
     FILE *pFile;
 protected:
-    CAudioParam::EAudCod eAudioCoding;
-    int iNumAudioFrames;
-    int iNumBorders;
-    int iAudioPayloadLen;
     int iTotalFrameSize;
-    int iNumHigherProtectedBytes;
-    int iMaxLenOneAudFrame;
 };
 
 #endif // _AUDIOCODEC_H_

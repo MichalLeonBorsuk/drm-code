@@ -5,13 +5,7 @@ XHEAACSuperFrame::XHEAACSuperFrame():AudioSuperFrame ()
 
 }
 
-bool XHEAACSuperFrame::parse(CVectorEx<_BINARY>& asf)
-{
-#if 0
 
-    bool
-    CAudioCodec::PartitionUSAC(CVectorEx<_BINARY>& vecInputData, vector<vector<uint8_t> >& audio_frame, vector<uint8_t>& aac_crc_bits)
-    {
         /*
      * 5.3.1.3 Transport of xHE-AAC audio frames within the payload section
     The USAC access unit encoder generates a continuous sequence of audio frames at a constant bit rate over the long term.
@@ -41,53 +35,52 @@ bool XHEAACSuperFrame::parse(CVectorEx<_BINARY>& asf)
     indicating the start of the audio frame at the last byte of the Payload section of the previous audio super frame. A decoder therefore
     always needs to buffer the last 2 bytes within the Payload section for a possible later processing along with the next audio super frame.
      */
-
-        int bGoodValues = TRUE;
-        /*
-     * The xHE-AAC audio super frame Header section has the following structure:
-        • Frame border count
-        • Bit reservoir level
-        • Fixed header CRC
-        The following definitions apply:
-        4 bits. 4 bits. 8 bits
-     * */
-        int iFrameBorderCount = vecInputData.Separate(4);
-        int iBitReservoirLevel = vecInputData.Separate(4);
-        int iheaderCRC = vecInputData.Separate(8);
-        // TODO check CRC
-        // TODO handle frames split across audio superframes
-        // TODO handle reservoir - should it only be passed to the first frame in a superframe?
-        // get the directory
-        int directory_offset = iTotalFrameSize - 16 * iFrameBorderCount;
-        cerr << "directory offset " << directory_offset << " bits " << (directory_offset/SIZEOF__BYTE) << " bytes" << endl;
-        CVector<_BINARY> vecbiDirectory(16 * iFrameBorderCount);
-        for (int i = 0; i < 16 * iFrameBorderCount; i++) {
-            vecbiDirectory[i] = vecInputData[directory_offset + i];
-        }
-        vecbiDirectory.ResetBitAccess();
-        vector<size_t> ivecborders;
-        ivecborders.resize(unsigned(iFrameBorderCount));
-        for(int i=iFrameBorderCount-1; i>=0; i--) {
-            size_t iFrameBorderIndex = vecbiDirectory.Separate(12);
-            int iFrameBorderCountRepeat =  vecbiDirectory.Separate(4);
-            cerr << "border " << i << " of " << iFrameBorderCountRepeat << " starts at " << hex << iFrameBorderIndex << dec << endl;
-            ivecborders[i] = iFrameBorderIndex;
-        }
-        ivecborders.push_back(directory_offset/SIZEOF__BYTE);  // last frame ends at start of directory
-        // now separate the frames using the borders
-        iNumAudioFrames = iFrameBorderCount + 1;
-        size_t start = 2; // offset at the beginning
-        audio_frame.resize(iNumAudioFrames);
-        for (size_t i = 0; i < audio_frame.size(); i++)
-        {
-            cerr << hex << "extracting frame " << i << " from offset " << start << " to offset " << ivecborders[i] << dec << endl;
-            audio_frame[i].resize(ivecborders[i]-start);
-            for (size_t j = 0; j < audio_frame[i].size(); j++) {
-                audio_frame[i][j] = _BINARY(vecInputData.Separate(8));
-            }
-            start = ivecborders[i];
-        }
-        return bGoodValues;
+    /*
+    * The xHE-AAC audio super frame Header section has the following structure:
+    • Frame border count
+    • Bit reservoir level
+    • Fixed header CRC
+    The following definitions apply:
+    4 bits. 4 bits. 8 bits
+    * */
+bool XHEAACSuperFrame::parse(CVectorEx<_BINARY>& asf)
+{
+    bool ok = true;
+    unsigned frameBorderCount = asf.Separate(4);
+    unsigned bitReservoirLevel = asf.Separate(4);
+    unsigned iheaderCRC = asf.Separate(8);
+    // TODO check CRC
+    // TODO handle frames split across audio superframes
+    // TODO handle reservoir - should it only be passed to the first frame in a superframe?
+    // get the directory
+    unsigned directory_offset = frameSize - 16 * frameBorderCount;
+    cerr << "directory offset " << directory_offset << " bits " << (directory_offset/SIZEOF__BYTE) << " bytes" << endl;
+    CVector<_BINARY> vecbiDirectory(int(16 * frameBorderCount));
+    for (unsigned i = 0; i < 16 * frameBorderCount; i++) {
+        vecbiDirectory[int(i)] = asf[int(directory_offset + i)];
     }
-#endif
+    vecbiDirectory.ResetBitAccess();
+    vector<size_t> vecborders;
+    vecborders.resize(unsigned(frameBorderCount));
+    for(int i=int(frameBorderCount-1); i>=0; i--) {
+        int frameBorderIndex = int(vecbiDirectory.Separate(12));
+        int frameBorderCountRepeat =  int(vecbiDirectory.Separate(4));
+        cerr << "border " << i << " of " << frameBorderCountRepeat << " starts at " << hex << frameBorderIndex << dec << endl;
+        vecborders[unsigned(i)] = size_t(frameBorderIndex);
+    }
+    vecborders.push_back(directory_offset/SIZEOF__BYTE);  // last frame ends at start of directory
+    // now separate the frames using the borders
+    audioFrame.resize(frameBorderCount + 1);
+    size_t start = 2; // offset at the beginning
+    for (size_t i = 0; i < audioFrame.size(); i++)
+    {
+        cerr << hex << "extracting frame " << i << " from offset " << start << " to offset " << vecborders[i] << dec << endl;
+        audioFrame[i].resize(vecborders[i]-start);
+        for (size_t j = 0; j < audioFrame[i].size(); j++) {
+            audioFrame[i][j] = _BINARY(asf.Separate(8));
+        }
+        start = vecborders[i];
+    }
+    return ok;
 }
+
