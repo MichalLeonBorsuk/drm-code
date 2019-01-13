@@ -53,8 +53,8 @@ bool XHEAACSuperFrame::parse(CVectorEx<_BINARY>& asf)
     // TODO handle frames split across audio superframes
     // TODO handle reservoir - should it only be passed to the first frame in a superframe?
     // get the directory
-    unsigned directory_offset = frameSize - 16 * frameBorderCount;
-    cerr << "directory offset " << directory_offset << " bits " << (directory_offset/SIZEOF__BYTE) << " bytes" << endl;
+    unsigned directory_offset = 8*(frameSize - 2*frameBorderCount);
+    cerr << "frame size " << frameSize << " directory offset " << directory_offset << " bits " << (directory_offset/SIZEOF__BYTE) << " bytes" << endl;
     CVector<_BINARY> vecbiDirectory(int(16 * frameBorderCount));
     for (unsigned i = 0; i < 16 * frameBorderCount; i++) {
         vecbiDirectory[int(i)] = asf[int(directory_offset + i)];
@@ -64,9 +64,26 @@ bool XHEAACSuperFrame::parse(CVectorEx<_BINARY>& asf)
     vecborders.resize(unsigned(frameBorderCount));
     for(int i=int(frameBorderCount-1); i>=0; i--) {
         int frameBorderIndex = int(vecbiDirectory.Separate(12));
-        int frameBorderCountRepeat =  int(vecbiDirectory.Separate(4));
-        cerr << "border " << i << " of " << frameBorderCountRepeat << " starts at " << hex << frameBorderIndex << dec << endl;
+        int frameBorderCountRepeat = int(vecbiDirectory.Separate(4));
+        if(frameBorderCountRepeat != frameBorderCount) {
+            ok = false;
+        }
+        cerr << "border " << i << " of " << frameBorderCountRepeat << "/" << frameBorderCount << " starts at " << hex << frameBorderIndex << dec << endl;
         vecborders[unsigned(i)] = size_t(frameBorderIndex);
+    }
+    switch(vecborders[0]) {
+    case 0xffe: // delayed from previous superframe
+        cerr << "frame starts in previous superframe" << endl;
+        break;
+    case 0xfff: // the start of the audio frame at the last byte of the Payload section of the previous audio super frame
+        cerr << "frame has one bytr in previous superframe" << endl;
+        break;
+    default: // boundary in this superframe
+        cerr << "frame starts in this superframe" << endl;
+        break;
+    }
+    if(!ok) {
+        return false;
     }
     vecborders.push_back(directory_offset/SIZEOF__BYTE);  // last frame ends at start of directory
     // now separate the frames using the borders
