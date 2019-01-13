@@ -38,6 +38,8 @@
 # include <sys/types.h>
 #endif
 
+#include "../MSC/aacsuperframe.h"
+#include "../MSC/xheaacsuperframe.h"
 
 /* Implementation *************************************************************/
 
@@ -102,18 +104,14 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
     /* Reset bit extraction access */
     (*pvecInputData).ResetBitAccess();
 
-    vector< vector<uint8_t> > audio_frame;
-    vector<uint8_t> aac_crc_bits;
-    uint8_t iBitReservoirLevel=0;
-
-    bGoodValues = codec->Partition(*pvecInputData, audio_frame, aac_crc_bits);
+    bGoodValues = pAudioSuperFrame->parse(*pvecInputData);
 
     /* Audio decoding ******************************************************** */
     /* Init output block size to zero, this variable is also used for
        determining the position for writing the output vector */
     iOutputBlockSize = 0;
 
-    for (size_t j = 0; j < audio_frame.size(); j++)
+    for (size_t j = 0; j < pAudioSuperFrame->getNumFrames(); j++)
     {
         _BOOLEAN bCodecUpdated = FALSE;
         bool bCurBlockFaulty = false; // just for Opus or any other codec with FEC
@@ -121,15 +119,18 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
         if (bGoodValues == TRUE)
         {
             CAudioCodec::EDecError eDecError;
+            vector<uint8_t> audio_frame;
+            uint8_t aac_crc_bits;
+            pAudioSuperFrame->getFrame(audio_frame, aac_crc_bits, j);
             if(bResample) {
-                eDecError = codec->Decode(audio_frame[j], aac_crc_bits[j], vecTempResBufInLeft, vecTempResBufInRight);
+                eDecError = codec->Decode(audio_frame, aac_crc_bits, vecTempResBufInLeft, vecTempResBufInRight);
                 /* Resample data */
                 // TODO - optimise resampling mono
                 ResampleObjL.Resample(vecTempResBufInLeft, vecTempResBufOutCurLeft);
                 ResampleObjR.Resample(vecTempResBufInRight, vecTempResBufOutCurRight);
             }
             else {
-                eDecError = codec->Decode(audio_frame[j], aac_crc_bits[j], vecTempResBufOutCurLeft, vecTempResBufOutCurRight);
+                eDecError = codec->Decode(audio_frame, aac_crc_bits, vecTempResBufOutCurLeft, vecTempResBufOutCurRight);
             }
 
             bCurBlockOK = (eDecError == CAudioCodec::DECODER_ERROR_OK);
@@ -378,7 +379,15 @@ CAudioSourceDecoder::InitInternal(CParameter & Parameters)
         else {
             bTextMessageUsed = FALSE;
         }
-
+        if(eAudioCoding==CAudioParam::AC_xHE_AAC) {
+            XHEAACSuperFrame* p = new XHEAACSuperFrame();
+            pAudioSuperFrame = p;
+        }
+        else {
+            AACSuperFrame *p = new AACSuperFrame();
+            p->init(AudioParam,  Parameters.GetWaveMode(), Parameters.Stream[iCurAudioStreamID].iLenPartA, Parameters.Stream[iCurAudioStreamID].iLenPartB);
+            pAudioSuperFrame = p;
+        }
         /* Get decoder instance */
         codec = CAudioCodec::GetDecoder(eAudioCoding);
 
@@ -393,7 +402,7 @@ CAudioSourceDecoder::InitInternal(CParameter & Parameters)
             codec->closeFile();
         }
 
-        codec->Init(AudioParam, iInputBlockSize, Parameters.Stream[iCurAudioStreamID].iLenPartA);
+        codec->Init(AudioParam, iInputBlockSize);
 
         /* Init decoder */
         codec->DecOpen(AudioParam, iAudioSampleRate, iLenDecOutPerChan);

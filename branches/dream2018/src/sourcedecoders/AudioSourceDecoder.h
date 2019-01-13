@@ -35,6 +35,7 @@
 #include "../datadecoding/DataDecoder.h"
 #include "../util/Utilities.h"
 #include "AudioCodec.h"
+#include "../MSC/audiosuperframe.h"
 
 /* Classes ********************************************************************/
 
@@ -98,6 +99,7 @@ protected:
     CAudioReverb AudioRev;
 
     int iLenDecOutPerChan;
+    AudioSuperFrame* pAudioSuperFrame;
 
     CAudioParam::EAudCod eAudioCoding;
     CAudioCodec* codec;
@@ -109,7 +111,7 @@ protected:
 
     virtual void InitInternal(CParameter& Parameters);
     virtual void ProcessDataInternal(CParameter& Parameters);
-	void CloseDecoder();
+    void CloseDecoder();
 };
 
 #endif // AUDIOSOURCEDECODER_H

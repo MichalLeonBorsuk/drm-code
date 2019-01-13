@@ -130,9 +130,9 @@ static void logConfig(const CStreamInfo& info) {
 }
 
 void
-FdkAacCodec::Init(const CAudioParam& AudioParam, int iInputBlockSize, int iLenAudHigh)
+FdkAacCodec::Init(const CAudioParam& AudioParam, int iInputBlockSize)
 {
-    CAudioCodec::Init(AudioParam, iInputBlockSize, iLenAudHigh);
+    CAudioCodec::Init(AudioParam, iInputBlockSize);
    if (AudioParam.eAudioCoding == CAudioParam::AC_xHE_AAC)
     {
         int iNumHeaderBytes = 2;
