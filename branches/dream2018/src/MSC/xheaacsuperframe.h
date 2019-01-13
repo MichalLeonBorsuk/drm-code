@@ -16,6 +16,7 @@ private:
     unsigned numChannels;
     unsigned frameSize;
     uint8_t previous[2];
+    std::vector<uint8_t> partialFrame;
 };
 
 #endif // XHEAACSUPERFRAME_H

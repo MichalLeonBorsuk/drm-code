@@ -1,8 +1,7 @@
 #include "xheaacsuperframe.h"
 
-XHEAACSuperFrame::XHEAACSuperFrame():AudioSuperFrame ()
+XHEAACSuperFrame::XHEAACSuperFrame():AudioSuperFrame (),numChannels(0),frameSize(0),previous(),partialFrame()
 {
-
 }
 
 void
@@ -93,18 +92,30 @@ bool XHEAACSuperFrame::parse(CVectorEx<_BINARY>& asf)
     if(!ok) {
         return false;
     }
-    vecborders.push_back(directory_offset/SIZEOF__BYTE);  // last frame ends at start of directory
     // now separate the frames using the borders
-    audioFrame.resize(frameBorderCount + 1);
-    size_t start = 2; // offset at the beginning
-    for (size_t i = 0; i < audioFrame.size(); i++)
+    audioFrame.resize(frameBorderCount);
+    unsigned start = vecborders[0];
+    audioFrame[0].resize(partialFrame.size()+start-2);
+    for (size_t j = 0; j < partialFrame.size(); j++)
+    {
+        audioFrame[0][j] = partialFrame[j];
+    }
+    for (size_t j = partialFrame.size(); j < audioFrame[0].size(); j++)
+    {
+        audioFrame[0][j] = uint8_t(asf.Separate(8));
+    }
+    for (size_t i = 1; i < audioFrame.size(); i++)
     {
         cerr << hex << "extracting frame " << i << " from offset " << start << " to offset " << vecborders[i] << dec << endl;
-        audioFrame[i].resize(vecborders[i]-start);
+        audioFrame[i].resize(vecborders[i]);
         for (size_t j = 0; j < audioFrame[i].size(); j++) {
-            audioFrame[i][j] = _BINARY(asf.Separate(8));
+            audioFrame[i][j] = uint8_t(asf.Separate(8));
         }
         start = vecborders[i];
+    }
+    partialFrame.resize(directory_offset/SIZEOF__BYTE-start);
+    for (size_t j = 0; j < partialFrame.size(); j++) {
+        partialFrame[j] = uint8_t(asf.Separate(8));
     }
     return ok;
 }
