@@ -211,9 +211,11 @@ AacCodec::DecOpen(const CAudioParam& AudioParam, int& iAudioSampleRate, int& iLe
     return hFaadDecoder != nullptr;
 }
 
-_SAMPLE*
-AacCodec::Decode(const vector<uint8_t>& audio_frame, uint8_t aac_crc_bits, int& iChannels, CAudioCodec::EDecError& eDecError)
+CAudioCodec::EDecError
+AacCodec::Decode(const vector<uint8_t>& audio_frame, uint8_t aac_crc_bits, CVector<_REAL>& left, CVector<_REAL>& right)
 {
+    EDecError eDecError;
+    bool bCurBlockOK = true;
     _SAMPLE* psDecOutSampleBuf = nullptr;
     NeAACDecFrameInfo DecFrameInfo;
     DecFrameInfo.channels = 1;
@@ -230,12 +232,42 @@ AacCodec::Decode(const vector<uint8_t>& audio_frame, uint8_t aac_crc_bits, int& 
 
     if (hFaadDecoder != nullptr)
     {
-        psDecOutSampleBuf = (_SAMPLE*) NeAACDecDecode(hFaadDecoder,
-                            &DecFrameInfo, &vecbyPrepAudioFrame[0], vecbyPrepAudioFrame.size());
+        psDecOutSampleBuf = (_SAMPLE*) NeAACDecDecode(hFaadDecoder, &DecFrameInfo, &vecbyPrepAudioFrame[0], vecbyPrepAudioFrame.size());
     }
-    iChannels = DecFrameInfo.channels;
-    eDecError = DecFrameInfo.error ? CAudioCodec::DECODER_ERROR_UNKNOWN : CAudioCodec::DECODER_ERROR_OK;
-    return psDecOutSampleBuf;
+    if(DecFrameInfo.error) {
+        return CAudioCodec::DECODER_ERROR_UNKNOWN;
+    }
+
+    //========= TODO
+    int iLenDecOutPerChan;
+    //========= END TODO
+
+    if(psDecOutSampleBuf) // might be dummy decoder
+    {
+        /* Conversion from _SAMPLE vector to _REAL vector for
+           resampling. ATTENTION: We use a vector which was
+           allocated inside the decoder! */
+        if (DecFrameInfo.channels == 1)
+        {
+            //cerr << "resample " << iLenDecOutPerChan << " mono samples" << endl;
+            /* Change type of data (short -> real) */
+            for (size_t i = 0; i < size_t(iLenDecOutPerChan); i++) {
+                left[int(i)] = psDecOutSampleBuf[i];
+                right[int(i)] = psDecOutSampleBuf[i];
+            }
+
+        }
+        else
+        {
+            /* Stereo */
+            //cerr << "resample " << iLenDecOutPerChan << " stereo samples" << endl;
+            for (size_t i = 0; i < size_t(iLenDecOutPerChan); i++)
+            {
+                left[i] = psDecOutSampleBuf[i * 2];
+                right[i] = psDecOutSampleBuf[i * 2 + 1];
+            }
+        }
+    }
 }
 
 void

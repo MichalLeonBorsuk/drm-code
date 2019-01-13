@@ -40,11 +40,9 @@ public:
 	virtual string DecGetVersion();
 	virtual bool CanDecode(CAudioParam::EAudCod eAudioCoding);
     virtual bool DecOpen(const CAudioParam& AudioParam, int& iAudioSampleRate, int& iLenDecOutPerChan);
-    virtual _SAMPLE* Decode(const vector<uint8_t>& audio_frame, uint8_t aac_crc_bits, int& iChannels, CAudioCodec::EDecError& eDecError);
+    virtual EDecError Decode(const vector<uint8_t>& audio_frame, uint8_t aac_crc_bits, CVector<_REAL>& left,  CVector<_REAL>& right);
     virtual void DecClose();
 	virtual void DecUpdate(CAudioParam& AudioParam);
-    virtual void Init(const CAudioCodec& AudioParam, int iInputBlockSize, int iLenAudHigh) {}
-    virtual void Partition(CVectorEx<_BINARY>& vecInputData, vector< vector<uint8_t> >& audio_frame, int iNumAudioFrames, int iTotalFrameSize) {}
     /* Encoder */
 	virtual string EncGetVersion();
 	virtual bool CanEncode(CAudioParam::EAudCod eAudioCoding);
