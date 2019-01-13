@@ -118,262 +118,67 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
         _BOOLEAN bCodecUpdated = FALSE;
         bool bCurBlockFaulty = false; // just for Opus or any other codec with FEC
 
-        if (eAudioCoding == CAudioParam::AC_AAC)
+        if (bGoodValues == TRUE)
         {
-            if (bGoodValues == TRUE)
+            CAudioCodec::EDecError eDecError;
+            if (eAudioCoding == CAudioParam::AC_AAC)
             {
-                CAudioCodec::EDecError eDecError;
                 string version = codec->DecGetVersion();
                 if(version.find("Nero")==0) {
                     //cerr << "FAAD2" << endl;
                     /* The actual decoding */
-                    int iDecChannels;
-                    short *psDecOutSampleBuf = codec->Decode(audio_frame[j], aac_crc_bits[j], iDecChannels, eDecError);
-
-                    /* Call decoder update */
-                    if (!bCodecUpdated)
-                    {
-                        bCodecUpdated = TRUE;
-                        Parameters.Lock();
-                        int iCurSelAudioServ = Parameters.GetCurSelAudioService();
-                        codec->DecUpdate(Parameters.Service[iCurSelAudioServ].AudioParam);
-                        Parameters.Unlock();
-                    }
-
-                    bCurBlockOK = true;
-
-                    if(psDecOutSampleBuf) // might be dummy decoder
-                    {
-                        /* Conversion from _SAMPLE vector to _REAL vector for
-                           resampling. ATTENTION: We use a vector which was
-                           allocated inside the decoder! */
-                        if (iDecChannels == 1)
-                        {
-                            //cerr << "resample " << iLenDecOutPerChan << " mono samples" << endl;
-                            /* Change type of data (short -> real) */
-                            for (size_t i = 0; i < size_t(iLenDecOutPerChan); i++)
-                                vecTempResBufInLeft[i] = psDecOutSampleBuf[i];
-
-                            /* Resample data */
-                            ResampleObjL.Resample(vecTempResBufInLeft,
-                                                  vecTempResBufOutCurLeft);
-
-                            //cerr << "copy " << iResOutBlockSize << " samples from left to right" << endl;
-                            /* Mono (write the same audio material in both
-                               channels) */
-                            for (size_t i = 0; i < size_t(iResOutBlockSize); i++)
-                            {
-                                vecTempResBufOutCurRight[i] =
-                                        vecTempResBufOutCurLeft[i];
-                            }
-                        }
-                        else
-                        {
-                            /* Stereo */
-                            //cerr << "resample " << iLenDecOutPerChan << " stereo samples" << endl;
-                            for (size_t i = 0; i < size_t(iLenDecOutPerChan); i++)
-                            {
-                                vecTempResBufInLeft[i] = psDecOutSampleBuf[i * 2];
-                                vecTempResBufInRight[i] =
-                                        psDecOutSampleBuf[i * 2 + 1];
-                            }
-
-                            /* Resample data */
-                            ResampleObjL.Resample(vecTempResBufInLeft,
-                                                  vecTempResBufOutCurLeft);
-                            ResampleObjR.Resample(vecTempResBufInRight,
-                                                  vecTempResBufOutCurRight);
-                            //cerr << "copied " << iResOutBlockSize << " samples" << endl;
-                        }
-                    }
+                    eDecError = codec->Decode(audio_frame[j], aac_crc_bits[j], vecTempResBufInLeft, vecTempResBufInRight);
+                    /* Resample data */
+                    // TODO - optimise resampling mono
+                    ResampleObjL.Resample(vecTempResBufInLeft, vecTempResBufOutCurLeft);
+                    ResampleObjR.Resample(vecTempResBufInRight, vecTempResBufOutCurRight);
+                    //cerr << "copied " << iResOutBlockSize << " samples" << endl;
                 }
                 else {
                     //cerr << "fdk" << endl;
                     /* The actual decoding */
-                    int iDecChannels;
-                    short *psDecOutSampleBuf = codec->Decode(audio_frame[j], aac_crc_bits[j], iDecChannels, eDecError);
-
-                    if((psDecOutSampleBuf!=nullptr) && (eDecError==CAudioCodec::DECODER_ERROR_OK)) {
-                        bCurBlockOK = true;
-
-                        if (iDecChannels == 1)
-                        {
-                            /* Mono */
-                            // << "mono " << iResOutBlockSize << endl;
-                            for(int i = 0; i<iResOutBlockSize; i++) {
-                                vecTempResBufOutCurLeft[i] = _REAL(psDecOutSampleBuf[i]) / 2.0;
-                                vecTempResBufOutCurRight[i] = _REAL(psDecOutSampleBuf[i]) / 2.0;
-                            }
-                        }
-                        else
-                        {
-                            /* Stereo docs claim non-interleaved but we are getting interleaved! */
-                            //cerr << "stereo " << iResOutBlockSize << endl;
-                            for(int i = 0; i<iResOutBlockSize; i++) {
-                                vecTempResBufOutCurLeft[i] = _REAL(psDecOutSampleBuf[2*i]);
-                                vecTempResBufOutCurRight[i] = _REAL(psDecOutSampleBuf[2*i+1]);
-                            }
-                        }
-                    }
-
+                    eDecError = codec->Decode(audio_frame[j], aac_crc_bits[j], vecTempResBufOutCurLeft, vecTempResBufOutCurRight);
                 }
-
-                /* OPH: add frame status to vector for RSCI */
-                Parameters.Lock();
-                Parameters.vecbiAudioFrameStatus.Add(eDecError == CAudioCodec::DECODER_ERROR_OK ? 0 : 1);
-                Parameters.Unlock();
             }
-            else
-            {
-                /* DRM AAC header was wrong, set flag to "bad block" */
-                bCurBlockOK = FALSE;
-                /* OPH: update audio status vector for RSCI */
-                Parameters.Lock();
-                Parameters.vecbiAudioFrameStatus.Add(1);
-                Parameters.Unlock();
-            }
-        }
-        else if(eAudioCoding == CAudioParam::AC_xHE_AAC)
-        {
-            if (bGoodValues == TRUE)
-            {
-                CAudioCodec::EDecError eDecError;
-                /* The actual decoding */
-                int iDecChannels;
-                short *psDecOutSampleBuf = codec->Decode(audio_frame[j], iBitReservoirLevel, iDecChannels, eDecError);
-
-                if((psDecOutSampleBuf!=nullptr) && (eDecError==CAudioCodec::DECODER_ERROR_OK)) {
-                    bCurBlockOK = true;
-
-                    if (iDecChannels == 1)
-                    {
-                        /* Mono */
-                        //cerr << "mono " << iResOutBlockSize << endl;
-                        for(int i = 0; i<iResOutBlockSize; i++) {
-                            vecTempResBufOutCurLeft[i] = _REAL(psDecOutSampleBuf[i]) / 2.0;
-                            vecTempResBufOutCurRight[i] = _REAL(psDecOutSampleBuf[i]) / 2.0;
-                        }
-                    }
-                    else
-                    {
-                        /* Stereo docs claim non-interleaved but we are getting interleaved! */
-                        for(int i = 0; i<iResOutBlockSize; i++) {
-                            vecTempResBufOutCurLeft[i] = _REAL(psDecOutSampleBuf[2*i]);
-                            vecTempResBufOutCurRight[i] = _REAL(psDecOutSampleBuf[2*i+1]);
-                        }
-
-                    }
-                }
-
-                /* OPH: add frame status to vector for RSCI */
-                Parameters.Lock();
-                Parameters.vecbiAudioFrameStatus.Add(eDecError == CAudioCodec::DECODER_ERROR_OK ? 0 : 1);
-                Parameters.Unlock();
-            }
-            else
-            {
-                /* DRM AAC header was wrong, set flag to "bad block" */
-                bCurBlockOK = FALSE;
-                /* OPH: update audio status vector for RSCI */
-                Parameters.Lock();
-                Parameters.vecbiAudioFrameStatus.Add(1);
-                Parameters.Unlock();
-            }
-        }
-        else if(eAudioCoding == CAudioParam::AC_OPUS)
-        {
-            if (bGoodValues == TRUE)
+            else if(eAudioCoding == CAudioParam::AC_xHE_AAC)
             {
                 /* The actual decoding */
-                int iDecChannels;
-                CAudioCodec::EDecError eDecError;
-                short *psDecOutSampleBuf = codec->Decode(audio_frame[j], aac_crc_bits[j], iDecChannels, eDecError);
-
-                /* Call decoder update */
-                if (!bCodecUpdated)
-                {
-                    bCodecUpdated = TRUE;
-                    Parameters.Lock();
-                    int iCurSelAudioServ = Parameters.GetCurSelAudioService();
-                    codec->DecUpdate(Parameters.Service[iCurSelAudioServ].AudioParam);
-                    Parameters.Unlock();
-                }
-
-                if (!(eDecError == CAudioCodec::DECODER_ERROR_CRC && bUseReverbEffect == FALSE) && eDecError != CAudioCodec::DECODER_ERROR_OK)
-                {
-                    //cerr << "AAC decode error" << endl;
-                    bCurBlockOK = false;	/* Set error flag */
-                }
-                else
-                {
-                    bCurBlockOK = true;
-                    /* Opus can have FEC embeded, thus the audio frame is always OK */
-                    if (eDecError != CAudioCodec::DECODER_ERROR_OK)
-                        bCurBlockFaulty = true;
-
-                    if(psDecOutSampleBuf) // might be dummy decoder
-                    {
-                        /* Conversion from _SAMPLE vector to _REAL vector for
-                           resampling. ATTENTION: We use a vector which was
-                           allocated inside the decoder! */
-                        if (iDecChannels == 1)
-                        {
-                            //cerr << "resample " << iLenDecOutPerChan << " mono samples" << endl;
-                            /* Change type of data (short -> real) */
-                            for (size_t i = 0; i < size_t(iLenDecOutPerChan); i++)
-                                vecTempResBufInLeft[i] = psDecOutSampleBuf[i];
-
-                            /* Resample data */
-                            ResampleObjL.Resample(vecTempResBufInLeft,
-                                                  vecTempResBufOutCurLeft);
-
-                            //cerr << "copy " << iResOutBlockSize << " samples from left to right" << endl;
-                            /* Mono (write the same audio material in both
-                               channels) */
-                            for (size_t i = 0; i < size_t(iResOutBlockSize); i++)
-                            {
-                                vecTempResBufOutCurRight[i] =
-                                        vecTempResBufOutCurLeft[i];
-                            }
-                        }
-                        else
-                        {
-                            /* Stereo */
-                            //cerr << "resample " << iLenDecOutPerChan << " stereo samples" << endl;
-                            for (size_t i = 0; i < size_t(iLenDecOutPerChan); i++)
-                            {
-                                vecTempResBufInLeft[i] = psDecOutSampleBuf[i * 2];
-                                vecTempResBufInRight[i] =
-                                        psDecOutSampleBuf[i * 2 + 1];
-                            }
-
-                            /* Resample data */
-                            ResampleObjL.Resample(vecTempResBufInLeft,
-                                                  vecTempResBufOutCurLeft);
-                            ResampleObjR.Resample(vecTempResBufInRight,
-                                                  vecTempResBufOutCurRight);
-                            //cerr << "copied " << iResOutBlockSize << " samples" << endl;
-                        }
-                    }
-                }
-
-                /* OPH: add frame status to vector for RSCI */
-                Parameters.Lock();
-                Parameters.vecbiAudioFrameStatus.Add(eDecError == CAudioCodec::DECODER_ERROR_OK ? 0 : 1);
-                Parameters.Unlock();
+                eDecError = codec->Decode(audio_frame[j], aac_crc_bits[j], vecTempResBufOutCurLeft, vecTempResBufOutCurRight);
             }
-            else
+            else if(eAudioCoding == CAudioParam::AC_OPUS)
             {
-                /* DRM AAC header was wrong, set flag to "bad block" */
-                bCurBlockOK = FALSE;
-                /* OPH: update audio status vector for RSCI */
+                eDecError = codec->Decode(audio_frame[j], aac_crc_bits[j], vecTempResBufInLeft, vecTempResBufInRight);
+                /* Resample data */
+                // TODO - optimise resampling mono
+                ResampleObjL.Resample(vecTempResBufInLeft, vecTempResBufOutCurLeft);
+                ResampleObjR.Resample(vecTempResBufInRight, vecTempResBufOutCurRight);
+            }
+
+            bCurBlockOK = (eDecError == CAudioCodec::DECODER_ERROR_OK);
+
+            /* Call decoder update */
+            if (!bCodecUpdated)
+            {
+                bCodecUpdated = TRUE;
                 Parameters.Lock();
-                Parameters.vecbiAudioFrameStatus.Add(1);
+                int iCurSelAudioServ = Parameters.GetCurSelAudioService();
+                codec->DecUpdate(Parameters.Service[iCurSelAudioServ].AudioParam);
                 Parameters.Unlock();
             }
+            /* OPH: add frame status to vector for RSCI */
+            Parameters.Lock();
+            Parameters.vecbiAudioFrameStatus.Add(eDecError == CAudioCodec::DECODER_ERROR_OK ? 0 : 1);
+            Parameters.Unlock();
         }
         else
+        {
+            /* DRM AAC header was wrong, set flag to "bad block" */
             bCurBlockOK = FALSE;
+            /* OPH: update audio status vector for RSCI */
+            Parameters.Lock();
+            Parameters.vecbiAudioFrameStatus.Add(1);
+            Parameters.Unlock();
+        }
 
         // This code is independent of particular audio source type and should work with all codecs
 

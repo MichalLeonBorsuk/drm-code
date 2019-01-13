@@ -55,7 +55,7 @@ public:
 	virtual string DecGetVersion() = 0;
 	virtual bool CanDecode(CAudioParam::EAudCod eAudioCoding) = 0;
     virtual bool DecOpen(const CAudioParam& AudioParam, int& iAudioSampleRate, int& iLenDecOutPerChan) = 0;
-    virtual _SAMPLE* Decode(const vector<uint8_t>& audio_frame, uint8_t aac_crc_bits, int& iChannels, EDecError& eDecError) = 0;
+    virtual EDecError Decode(const vector<uint8_t>& audio_frame, uint8_t aac_crc_bits, CVector<_REAL>& left,  CVector<_REAL>& right) = 0;
     virtual void DecClose() = 0;
 	virtual void DecUpdate(CAudioParam& AudioParam) = 0;
     virtual void Init(const CAudioParam& AudioParam, int iInputBlockSize, int iLenAudHigh);
