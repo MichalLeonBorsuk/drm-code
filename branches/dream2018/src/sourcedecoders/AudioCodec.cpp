@@ -108,15 +108,6 @@ CAudioCodec::GetEncoder(CAudioParam::EAudCod eAudioCoding, bool bCanReturnNullPt
 void
 CAudioCodec::Init(const CAudioParam& AudioParam, int iInputBlockSize)
 {
-    if (AudioParam.bTextflag)
-    {
-        /* Total frame size is input block size minus the bytes for the text message */
-        iTotalFrameSize = iInputBlockSize - SIZEOF__BYTE * NUM_BYTES_TEXT_MESS_IN_AUD_STR;
-    }
-    else {
-        /* All bytes are used for audio data, no text message present */
-        iTotalFrameSize = iInputBlockSize;
-    }
 }
 
 void
