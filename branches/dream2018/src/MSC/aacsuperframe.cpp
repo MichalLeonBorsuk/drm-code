@@ -1,6 +1,6 @@
 #include "aacsuperframe.h"
 
-AACSuperFrame::AACSuperFrame():AudioSuperFrame (),lengthPartA(0),lengthPartB(0),headerBytes(0),audioFrame(),aacCRC()
+AACSuperFrame::AACSuperFrame():AudioSuperFrame (),lengthPartA(0),lengthPartB(0),headerBytes(0),aacCRC()
 {
 }
 

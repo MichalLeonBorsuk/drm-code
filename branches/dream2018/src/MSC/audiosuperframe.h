@@ -11,6 +11,8 @@ public:
     virtual bool parse(CVectorEx<_BINARY>& asf)=0;
     virtual unsigned getNumFrames()=0;
     virtual void getFrame(std::vector<uint8_t>& , uint8_t& crc, unsigned i)=0;
+protected:
+    vector<vector<uint8_t>> audioFrame;
 };
 
 #endif // AUDIOSUPERFRAME_H

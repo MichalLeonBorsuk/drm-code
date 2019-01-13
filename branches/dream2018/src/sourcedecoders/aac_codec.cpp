@@ -238,9 +238,7 @@ AacCodec::Decode(const vector<uint8_t>& audio_frame, uint8_t aac_crc_bits, CVect
         return CAudioCodec::DECODER_ERROR_UNKNOWN;
     }
 
-    //========= TODO
-    int iLenDecOutPerChan;
-    //========= END TODO
+    int iLenDecOutPerChan = AUD_DEC_TRANSFROM_LENGTH;
 
     if(psDecOutSampleBuf) // might be dummy decoder
     {
