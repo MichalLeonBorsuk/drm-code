@@ -540,9 +540,9 @@ OpusCodec::~OpusCodec()
 /******************************************************************************/
 /* Decoder Implementation *****************************************************/
 void
-OpusCodec::Init(const CAudioParam& AudioParam, int iInputBlockSize, int iLenAudHigh)
+OpusCodec::Init(const CAudioParam& AudioParam, int iInputBlockSize)
 {
-    CAudioCodec::Init(AudioParam, iInputBlockSize, iLenAudHigh);
+    CAudioCodec::Init(AudioParam, iInputBlockSize);
 
     /* Init for OPUS decoding ---------------------------------------- */
 
@@ -558,12 +558,6 @@ OpusCodec::Init(const CAudioParam& AudioParam, int iInputBlockSize, int iLenAudH
     /* Check iAudioPayloadLen value, only positive values make sense */
     if (iAudioPayloadLen < 0)
         throw CInitErr(ET_AUDDECODER);
-
-    /* Calculate number of bytes for higher protected blocks */
-    iNumHigherProtectedBytes = (iLenAudHigh - 0 - iNumAudioFrames /* CRC bytes */ ) / iNumAudioFrames;
-
-    if (iNumHigherProtectedBytes < 0)
-        iNumHigherProtectedBytes = 0;
 }
 
 string
