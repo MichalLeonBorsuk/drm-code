@@ -546,18 +546,18 @@ OpusCodec::Init(const CAudioParam& AudioParam, int iInputBlockSize)
 
     /* Init for OPUS decoding ---------------------------------------- */
 
-    int iNumHeaderBytes = 0; // TODO check this
+    //int iNumHeaderBytes = 0; // TODO check this
 
     /* Number of audio frame */
-    iNumAudioFrames = 20;
+    //iNumAudioFrames = 20;
 
     /* Number of borders */
-    iNumBorders = iNumAudioFrames;
-    iAudioPayloadLen = iTotalFrameSize / SIZEOF__BYTE - iNumHeaderBytes - iNumAudioFrames;
+   // iNumBorders = iNumAudioFrames;
+   // iAudioPayloadLen = iTotalFrameSize / SIZEOF__BYTE - iNumHeaderBytes - iNumAudioFrames;
 
     /* Check iAudioPayloadLen value, only positive values make sense */
-    if (iAudioPayloadLen < 0)
-        throw CInitErr(ET_AUDDECODER);
+   // if (iAudioPayloadLen < 0)
+   //     throw CInitErr(ET_AUDDECODER);
 }
 
 string

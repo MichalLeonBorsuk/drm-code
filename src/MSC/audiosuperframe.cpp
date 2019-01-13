@@ -43,7 +43,7 @@
  * }
  */
 
-AudioSuperFrame::AudioSuperFrame()
+AudioSuperFrame::AudioSuperFrame():audioFrame()
 {
 
 }

@@ -8,18 +8,13 @@ class XHEAACSuperFrame: public AudioSuperFrame
 {
 public:
     XHEAACSuperFrame();
+    void init(unsigned frameSize) { this->frameSize = frameSize; }
     virtual bool parse(CVectorEx<_BINARY>& asf);
-    virtual unsigned getNumFrames() { return frameBorderCount+1; }
+    virtual unsigned getNumFrames() { return audioFrame.size(); }
     virtual void getFrame(std::vector<uint8_t>& frame, uint8_t& crc, unsigned i) { }
 private:
-    // Header section
-    unsigned frameBorderCount;
-    unsigned bitReservoirLevel;
-    unsigned fixedHeaderCRC;
-    // Payload section
+    unsigned frameSize;
     uint8_t previous[2];
-    // Directory section
-    std::vector<FrameBorderDescription> frameBorderDescription;
 };
 
 #endif // XHEAACSUPERFRAME_H

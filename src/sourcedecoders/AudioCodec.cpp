@@ -108,10 +108,6 @@ CAudioCodec::GetEncoder(CAudioParam::EAudCod eAudioCoding, bool bCanReturnNullPt
 void
 CAudioCodec::Init(const CAudioParam& AudioParam, int iInputBlockSize)
 {
-    int iNumHeaderBytes = 0;
-
-    eAudioCoding = AudioParam.eAudioCoding; // save this so we can call the most appropriate partition routines, etc.
-
     if (AudioParam.bTextflag)
     {
         /* Total frame size is input block size minus the bytes for the text message */
@@ -121,34 +117,6 @@ CAudioCodec::Init(const CAudioParam& AudioParam, int iInputBlockSize)
         /* All bytes are used for audio data, no text message present */
         iTotalFrameSize = iInputBlockSize;
     }
-
-    /* Set number of AAC frames in a AAC super-frame */
-    switch (AudioParam.eAudioSamplRate)	/* Only 12 kHz and 24 kHz is allowed */
-    {
-    case CAudioParam::AS_12KHZ:
-        iNumAudioFrames = 5;
-        iNumHeaderBytes = 6;
-        break;
-
-    case CAudioParam::AS_24KHZ:
-        iNumAudioFrames = 10;
-        iNumHeaderBytes = 14;
-        break;
-
-    default:
-        /* Some error occurred, throw error */
-        throw CInitErr(ET_AUDDECODER);
-        break;
-    }
-
-    /* Number of borders */
-    iNumBorders = iNumAudioFrames - 1;
-
-    iAudioPayloadLen = iTotalFrameSize / SIZEOF__BYTE - iNumHeaderBytes - iNumAudioFrames;
-
-    /* Check iAudioPayloadLen value, only positive values make sense */
-    if (iAudioPayloadLen < 0)
-        throw CInitErr(ET_AUDDECODER);
 }
 
 void
