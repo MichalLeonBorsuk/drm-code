@@ -44,7 +44,7 @@
 /* Implementation *************************************************************/
 
 CAudioSourceDecoder::CAudioSourceDecoder()
-    :	bWriteToFile(TRUE), TextMessage(FALSE),
+    :	bWriteToFile(FALSE), TextMessage(FALSE),
       bUseReverbEffect(TRUE), codec(nullptr)
 {
     /* Initialize Audio Codec List */

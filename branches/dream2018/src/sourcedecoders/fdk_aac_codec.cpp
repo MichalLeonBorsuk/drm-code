@@ -129,13 +129,6 @@ static void logConfig(const CStreamInfo& info) {
     cerr << endl;
 }
 
-void
-FdkAacCodec::Init(const CAudioParam& AudioParam, int iInputBlockSize)
-{
-    CAudioCodec::Init(AudioParam, iInputBlockSize);
-}
-
-
 bool
 FdkAacCodec::DecOpen(const CAudioParam& AudioParam, int& iAudioSampleRate, int& iLenDecOutPerChan)
 {
