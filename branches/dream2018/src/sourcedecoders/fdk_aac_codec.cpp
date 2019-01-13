@@ -225,7 +225,7 @@ CAudioCodec::EDecError FdkAacCodec::Decode(const vector<uint8_t>& audio_frame, u
         //return CAudioCodec::DECODER_ERROR_UNKNOWN;
     }
     else {
-        cerr << pinfo->aacNumChannels << " aac channels " << endl;
+        //cerr << pinfo->aacNumChannels << " aac channels " << endl;
     }
 
     if(err != AAC_DEC_OK) {

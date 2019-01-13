@@ -121,37 +121,15 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
         if (bGoodValues == TRUE)
         {
             CAudioCodec::EDecError eDecError;
-            if (eAudioCoding == CAudioParam::AC_AAC)
-            {
-                string version = codec->DecGetVersion();
-                if(version.find("Nero")==0) {
-                    //cerr << "FAAD2" << endl;
-                    /* The actual decoding */
-                    eDecError = codec->Decode(audio_frame[j], aac_crc_bits[j], vecTempResBufInLeft, vecTempResBufInRight);
-                    /* Resample data */
-                    // TODO - optimise resampling mono
-                    ResampleObjL.Resample(vecTempResBufInLeft, vecTempResBufOutCurLeft);
-                    ResampleObjR.Resample(vecTempResBufInRight, vecTempResBufOutCurRight);
-                    //cerr << "copied " << iResOutBlockSize << " samples" << endl;
-                }
-                else {
-                    //cerr << "fdk" << endl;
-                    /* The actual decoding */
-                    eDecError = codec->Decode(audio_frame[j], aac_crc_bits[j], vecTempResBufOutCurLeft, vecTempResBufOutCurRight);
-                }
-            }
-            else if(eAudioCoding == CAudioParam::AC_xHE_AAC)
-            {
-                /* The actual decoding */
-                eDecError = codec->Decode(audio_frame[j], aac_crc_bits[j], vecTempResBufOutCurLeft, vecTempResBufOutCurRight);
-            }
-            else if(eAudioCoding == CAudioParam::AC_OPUS)
-            {
+            if(bResample) {
                 eDecError = codec->Decode(audio_frame[j], aac_crc_bits[j], vecTempResBufInLeft, vecTempResBufInRight);
                 /* Resample data */
                 // TODO - optimise resampling mono
                 ResampleObjL.Resample(vecTempResBufInLeft, vecTempResBufOutCurLeft);
                 ResampleObjR.Resample(vecTempResBufInRight, vecTempResBufOutCurRight);
+            }
+            else {
+                eDecError = codec->Decode(audio_frame[j], aac_crc_bits[j], vecTempResBufOutCurLeft, vecTempResBufOutCurRight);
             }
 
             bCurBlockOK = (eDecError == CAudioCodec::DECODER_ERROR_OK);
@@ -426,36 +404,43 @@ CAudioSourceDecoder::InitInternal(CParameter & Parameters)
         /* Set number of Audio frames for log file */
         // TODO Parameters.iNumAudioFrames = iNumAudioFrames;
 
-        /* Since we do not correct for sample rate offsets here (yet), we do not
+        int iOutputSampleRate = Parameters.GetAudSampleRate();
+        Parameters.Unlock();
+
+        /* Since we do not do Mode E or correct for sample rate offsets here (yet), we do not
            have to consider larger buffers. An audio frame always corresponds
            to 400 ms */
-        iMaxLenResamplerOutput = (int) ((_REAL) Parameters.GetAudSampleRate() *
-                                        (_REAL) 0.4 /* 400ms */  *
-                                        2 /* for stereo */ );
+        iMaxLenResamplerOutput = int(_REAL(iOutputSampleRate) * 0.4 /* 400ms */  * 2 /* for stereo */ );
 
-        iResOutBlockSize = (int) ((_REAL) iLenDecOutPerChan *
-                                  Parameters.GetAudSampleRate() / iAudioSampleRate);
+        if(iAudioSampleRate == iOutputSampleRate) {
+            bResample = false;
+            iResOutBlockSize = iLenDecOutPerChan;
+        }
+        else {
+            bResample = true;
+            _REAL rRatio = _REAL(iOutputSampleRate) / _REAL(iOutputSampleRate);
+            iResOutBlockSize = int(_REAL(iLenDecOutPerChan) * rRatio);
+            /* Init resample objects */
+            ResampleObjL.Init(iLenDecOutPerChan, rRatio);
+            ResampleObjR.Init(iLenDecOutPerChan, rRatio);
+        }
+
         //cerr << "output block size per channel " << iResOutBlockSize << " = samples " << iLenDecOutPerChan << " * " << Parameters.GetAudSampleRate() << " / " << iAudioSampleRate << endl;
 
         /* Additional buffers needed for resampling since we need conversation
            between _REAL and _SAMPLE. We have to init the buffers with
            zeros since it can happen, that we have bad CRC right at the
            start of audio blocks */
-        vecTempResBufInLeft.Init(iLenDecOutPerChan, (_REAL) 0.0);
-        vecTempResBufInRight.Init(iLenDecOutPerChan, (_REAL) 0.0);
-        vecTempResBufOutCurLeft.Init(iResOutBlockSize, (_REAL) 0.0);
-        vecTempResBufOutCurRight.Init(iResOutBlockSize, (_REAL) 0.0);
-        vecTempResBufOutOldLeft.Init(iResOutBlockSize, (_REAL) 0.0);
-        vecTempResBufOutOldRight.Init(iResOutBlockSize, (_REAL) 0.0);
+        vecTempResBufInLeft.Init(iLenDecOutPerChan, 0.0);
+        vecTempResBufInRight.Init(iLenDecOutPerChan, 0.0);
+        vecTempResBufOutCurLeft.Init(iResOutBlockSize, 0.0);
+        vecTempResBufOutCurRight.Init(iResOutBlockSize, 0.0);
+        vecTempResBufOutOldLeft.Init(iResOutBlockSize, 0.0);
+        vecTempResBufOutOldRight.Init(iResOutBlockSize, 0.0);
 
-        /* Init resample objects */
-        ResampleObjL.Init(iLenDecOutPerChan,
-                          (_REAL) Parameters.GetAudSampleRate() / iAudioSampleRate);
-        ResampleObjR.Init(iLenDecOutPerChan,
-                          (_REAL) Parameters.GetAudSampleRate() / iAudioSampleRate);
 
         /* Clear reverberation object */
-        AudioRev.Init(1.0 /* seconds delay */, Parameters.GetAudSampleRate());
+        AudioRev.Init(1.0 /* seconds delay */, iOutputSampleRate);
         AudioRev.Clear();
 
         /* With this parameter we define the maximum lenght of the output
@@ -464,8 +449,6 @@ CAudioSourceDecoder::InitInternal(CParameter & Parameters)
            now we do not correct and we could stay with a single buffer
            Maybe TODO: sample rate correction to avoid audio dropouts */
         iMaxOutputBlockSize = iMaxLenResamplerOutput;
-
-        Parameters.Unlock();
     }
 
     catch(CInitErr CurErr)

@@ -79,6 +79,7 @@ protected:
     CVector<_BINARY> vecbiTextMessBuf;
 
     /* Resampling */
+    bool bResample;
     int iResOutBlockSize;
 
     CAudioResample ResampleObjL;
