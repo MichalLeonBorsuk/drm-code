@@ -80,8 +80,6 @@ private:
 	static vector<CAudioCodec*> CodecList;
 	static int RefCount;
     FILE *pFile;
-protected:
-    int iTotalFrameSize;
 };
 
 #endif // _AUDIOCODEC_H_
