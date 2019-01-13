@@ -99,7 +99,7 @@ protected:
     int iLenDecOutPerChan;
 
     CAudioParam::EAudCod eAudioCoding;
-	CAudioCodec* codec;
+    CAudioCodec* codec;
     int iBadBlockCount;
     string audiodecoder;
     bool bCanDecodeAAC;

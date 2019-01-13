@@ -596,26 +596,73 @@ OpusCodec::DecOpen(const CAudioParam& AudioParam, int& iAudioSampleRate, int& iL
 	return hOpusDecoder != nullptr;
 }
 
-_SAMPLE*
-OpusCodec::Decode(const vector<uint8_t>& audio_frame, uint8_t aac_crc_bits, int& iChannels, CAudioCodec::EDecError& eDecError)
+
+CAudioCodec::EDecError
+OpusCodec::Decode(const vector<uint8_t>& audio_frame, uint8_t aac_crc_bits, CVector<_REAL>& left, CVector<_REAL>& right)
 {
+    EDecError eDecError;
+    int iDecChannels;
+    bool bCurBlockOK = true;
     /* Prepare data vector with CRC at the beginning (the definition with faad2 DRM interface) */
     CVector<uint8_t> vecbyPrepAudioFrame(int(audio_frame.size()+1));
     vecbyPrepAudioFrame[0] = aac_crc_bits;
 
     for (size_t i = 0; i < audio_frame.size(); i++)
         vecbyPrepAudioFrame[int(i + 1)] = audio_frame[i];
-    _SAMPLE *sample = nullptr;
+    _SAMPLE *psDecOutSampleBuf = nullptr;
 	if (hOpusDecoder != nullptr)
     {
-        sample = (_SAMPLE *)opusDecDecode(hOpusDecoder,
+        psDecOutSampleBuf = (_SAMPLE *)opusDecDecode(hOpusDecoder,
 			eDecError,
-            iChannels,
+            iDecChannels,
             &vecbyPrepAudioFrame[0],
             vecbyPrepAudioFrame.size()
                 );
 	}
-	return sample;
+
+    //========= TODO
+    int bUseReverbEffect;
+    int bCurBlockFaulty;
+    int iLenDecOutPerChan;
+    //========= END TODO
+
+    if (!(eDecError == CAudioCodec::DECODER_ERROR_CRC && bUseReverbEffect == FALSE) && eDecError != CAudioCodec::DECODER_ERROR_OK)
+    {
+        //cerr << "Opus decode error" << endl;
+        bCurBlockOK = false;	/* Set error flag */
+    }
+    else
+    {
+        bCurBlockOK = true;
+        /* Opus can have FEC embeded, thus the audio frame is always OK */
+        if (eDecError != CAudioCodec::DECODER_ERROR_OK)
+            bCurBlockFaulty = true;
+
+        if(psDecOutSampleBuf) // might be dummy decoder
+        {
+            /* Conversion from _SAMPLE vector to _REAL vector for
+               resampling. ATTENTION: We use a vector which was
+               allocated inside the decoder! */
+            if (iDecChannels == 1)
+            {
+                /* Change type of data (short -> real) */
+                for (size_t i = 0; i < size_t(iLenDecOutPerChan); i++) {
+                    left[int(i)] = psDecOutSampleBuf[i];
+                    right[int(i)] = psDecOutSampleBuf[i];
+                }
+            }
+            else
+            {
+                /* Stereo */
+                for (size_t i = 0; i < size_t(iLenDecOutPerChan); i++)
+                {
+                    left[int(i)] = psDecOutSampleBuf[i * 2];
+                    right[int(i)] = psDecOutSampleBuf[i * 2 + 1];
+                }
+            }
+        }
+    }
+    return eDecError;
 }
 
 void
