@@ -388,7 +388,7 @@ CAudioSourceDecoder::InitInternal(CParameter & Parameters)
         if(eAudioCoding==CAudioParam::AC_xHE_AAC) {
             XHEAACSuperFrame* p = new XHEAACSuperFrame();
             // part B should be enough as xHE-AAC MUST be EEP but its easier to just add them
-            p->init(iTotalFrameSize);
+            p->init(AudioParam, iTotalFrameSize);
             pAudioSuperFrame = p;
         }
         else {
