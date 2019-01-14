@@ -1,14 +1,16 @@
 #include "xheaacsuperframe.h"
 
-XHEAACSuperFrame::XHEAACSuperFrame():AudioSuperFrame (),numChannels(0),frameSize(0),previous(),partialFrame()
-{
+XHEAACSuperFrame::XHEAACSuperFrame():AudioSuperFrame (),numChannels(0),superFrameSize(0),payload(),borders(),frameSize()
+{    
 }
 
 void
 XHEAACSuperFrame::init(const CAudioParam& audioParam, unsigned frameSize)
 {
     numChannels = audioParam.AM_MONO?1:2;
-    this->frameSize = frameSize;
+    superFrameSize = frameSize;
+    payload.resize(0);
+    borders.resize(0);
 }
 
 
@@ -32,7 +34,7 @@ XHEAACSuperFrame::init(const CAudioParam& audioParam, unsigned frameSize)
     section of subsequent audio super frame(s). The frame borders within the Payload section of an audio super frame can be derived from
     the Header and Directory section of the audio super frame (there may be none!).
 
-    An audio super frame shall not contain a Frame border description element without at least one byte of the corresponding audio frame data.
+    An audio super frame shall not contaixn a Frame border description element without at least one byte of the corresponding audio frame data.
     If the available space in an audio super frame is not sufficient to hold at least 1 byte of the next audio frame in the Payload section
     plus the 2 bytes of the related extra Frame border description element in the Directory section, then the remaining space in the Payload
     section shall be filled with audio frame content, while the related Frame border description element is carried as the first Frame border
@@ -56,67 +58,88 @@ bool XHEAACSuperFrame::parse(CVectorEx<_BINARY>& asf)
     unsigned bitReservoirLevel = asf.Separate(4);
     unsigned iheaderCRC = asf.Separate(8);
     // TODO check CRC
-    // TODO handle frames split across audio superframes
     // TODO handle reservoir
     unsigned bitResLevel = (bitReservoirLevel+1) * 384 * numChannels;
-    // get the directory
-    unsigned directory_offset = 8*(frameSize - 2*frameBorderCount);
-    cerr << "bit reservoir level " << bitReservoirLevel << " bitResLevel " << bitResLevel << " frame size " << frameSize << " directory offset " << directory_offset << " bits " << (directory_offset/SIZEOF__BYTE) << " bytes" << endl;
-    CVector<_BINARY> vecbiDirectory(int(16 * frameBorderCount));
-    for (unsigned i = 0; i < 16 * frameBorderCount; i++) {
-        vecbiDirectory[int(i)] = asf[int(directory_offset + i)];
-    }
-    vecbiDirectory.ResetBitAccess();
-    vector<size_t> vecborders;
-    vecborders.resize(unsigned(frameBorderCount));
-    for(int i=int(frameBorderCount-1); i>=0; i--) {
-        int frameBorderIndex = int(vecbiDirectory.Separate(12));
-        int frameBorderCountRepeat = int(vecbiDirectory.Separate(4));
-        if(frameBorderCountRepeat != frameBorderCount) {
-            ok = false;
+    unsigned directory_offset = superFrameSize - 2*frameBorderCount;
+    size_t start = payload.size();
+    cerr << "payload start " << start << " bit reservoir level " << bitReservoirLevel << " bitResLevel " << bitResLevel << " superframe size " << superFrameSize << " directory offset " << 8*directory_offset << " bits " << directory_offset << " bytes" << endl;
+    // get the payload
+    for(size_t i=2; i<directory_offset; i++) payload.push_back(asf.Separate(8));
+    borders.resize(frameBorderCount);
+    frameSize.resize(frameBorderCount);
+    if(frameBorderCount>0) {
+        // get the directory
+        for(int i=int(frameBorderCount-1); i>=0; i--) {
+            unsigned frameBorderIndex = asf.Separate(12);
+            unsigned frameBorderCountRepeat = asf.Separate(4);
+            if(frameBorderCountRepeat != frameBorderCount) {
+                ok = false;
+            }
+            cerr << "border " << i << " of " << frameBorderCountRepeat << "/" << frameBorderCount << " starts at " << hex << frameBorderIndex << dec << endl;
+            borders[unsigned(i)] = frameBorderIndex;
         }
-        cerr << "border " << i << " of " << frameBorderCountRepeat << "/" << frameBorderCount << " starts at " << hex << frameBorderIndex << dec << endl;
-        vecborders[unsigned(i)] = size_t(frameBorderIndex);
+        if(!ok) {
+            return false;
+        }
+        // set the borders relative to the start including the payload bytes from previous superframes
+        switch(borders[0]) {
+        case 0xffe: // delayed from previous superframe
+            cerr << "first frame has two bytes in previous superframe" << endl;
+            if(start<2) return false;
+            borders[0] = start-2;
+            frameSize[0] = borders[0];
+            break;
+        case 0xfff: // the start of the audio frame at the last byte of the Payload section of the previous audio super frame
+            cerr << "first frame has one byte in previous superframe" << endl;
+            if(start<1) return false;
+            borders[0] = start-1;
+            frameSize[0] = borders[0];
+            break;
+        default: // boundary in this superframe
+            borders[0] += start;
+            if(borders[0]<2) return false;
+            borders[0] -= 2; // header not in payload
+            frameSize[0] = borders[0];
+            cerr << "border 0 is " << borders[0] << " from start of payload" << endl;
+            break;
+        }
+        for(unsigned i=1; i<borders.size(); i++) {
+            borders[i] += start;
+            borders[i] -= 2; // header not in payload
+            unsigned bytes = borders[i]-borders[i-1];
+            frameSize[i] = bytes;
+            cerr << "border " << i << " is " << borders[i] << " from start of payload" << endl;
+        }
+        for(unsigned i=0; i<frameSize.size(); i++) {
+            cerr << "frame " << i << " has " << frameSize[i] << " bytes" << endl;
+        }
     }
-    switch(vecborders[0]) {
-    case 0xffe: // delayed from previous superframe
-        cerr << "frame starts in previous superframe" << endl;
-        break;
-    case 0xfff: // the start of the audio frame at the last byte of the Payload section of the previous audio super frame
-        cerr << "frame has one bytr in previous superframe" << endl;
-        break;
-    default: // boundary in this superframe
-        cerr << "frame starts in this superframe" << endl;
-        break;
-    }
-    if(!ok) {
-        return false;
-    }
-    // now separate the frames using the borders
+    size_t bytesInFrames = 0; for(size_t i=0; i<frameSize.size(); i++) bytesInFrames+=frameSize[i];
+    size_t next = payload.size()-bytesInFrames;
+    cerr << "payload is " << payload.size() << " bytes of which " << bytesInFrames << " are for this superframe and " << next << " are for the next superframe" << endl;
+    // now copy into the audioFrames for simplicty
+    size_t i=0;
     audioFrame.resize(frameBorderCount);
-    unsigned start = vecborders[0];
-    audioFrame[0].resize(partialFrame.size()+start-2);
-    for (size_t j = 0; j < partialFrame.size(); j++)
-    {
-        audioFrame[0][j] = partialFrame[j];
-    }
-    for (size_t j = partialFrame.size(); j < audioFrame[0].size(); j++)
-    {
-        audioFrame[0][j] = uint8_t(asf.Separate(8));
-    }
-    for (size_t i = 1; i < audioFrame.size(); i++)
-    {
-        cerr << hex << "extracting frame " << i << " from offset " << start << " to offset " << vecborders[i] << dec << endl;
-        audioFrame[i].resize(vecborders[i]);
-        for (size_t j = 0; j < audioFrame[i].size(); j++) {
-            audioFrame[i][j] = uint8_t(asf.Separate(8));
+    audioFrame[i].resize(0);
+    while(true) {
+        audioFrame[i].push_back(payload.front());
+        payload.pop_front();
+        if(audioFrame[i].size()==frameSize[i]) {
+            i++;
+            if(i>=audioFrame.size()) break;
+            audioFrame[i].resize(0);
         }
-        start = vecborders[i];
     }
-    partialFrame.resize(directory_offset/SIZEOF__BYTE-start);
-    for (size_t j = 0; j < partialFrame.size(); j++) {
-        partialFrame[j] = uint8_t(asf.Separate(8));
-    }
+    cerr << "remaining payload is " << payload.size() << " bytes" << endl;
+    size_t allocated = 2 + 2*frameBorderCount; // bytes of the superframe for the header and directory
+    allocated += bytesInFrames - start; // do count bytes in frames but not the ones from previous superframes
+    allocated += next; // do count bytes for next superframe
+    cerr << "allocated " << allocated << " bytes out of " << superFrameSize << " in the superframe" << endl;
     return ok;
 }
 
+void
+XHEAACSuperFrame::getFrame(std::vector<uint8_t>& frame, uint8_t& crc, unsigned i)
+{
+    frame = audioFrame[i];
+}
