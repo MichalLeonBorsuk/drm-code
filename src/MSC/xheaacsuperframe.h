@@ -3,6 +3,7 @@
 
 #include "audiosuperframe.h"
 #include "frameborderdescription.h"
+#include <deque>
 
 class XHEAACSuperFrame: public AudioSuperFrame
 {
@@ -10,13 +11,14 @@ public:
     XHEAACSuperFrame();
     void init(const CAudioParam& audioParam, unsigned frameSize);
     virtual bool parse(CVectorEx<_BINARY>& asf);
-    virtual unsigned getNumFrames() { return audioFrame.size(); }
-    virtual void getFrame(std::vector<uint8_t>& frame, uint8_t& crc, unsigned i) { }
+    virtual unsigned getNumFrames() { return borders.size(); }
+    virtual void getFrame(std::vector<uint8_t>& frame, uint8_t& crc, unsigned i);
 private:
     unsigned numChannels;
-    unsigned frameSize;
-    uint8_t previous[2];
-    std::vector<uint8_t> partialFrame;
+    unsigned superFrameSize;
+    deque<uint8_t> payload;
+    vector<unsigned> frameSize;
+    vector<unsigned> borders;
 };
 
 #endif // XHEAACSUPERFRAME_H
