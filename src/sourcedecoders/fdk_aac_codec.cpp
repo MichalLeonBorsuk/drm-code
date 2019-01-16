@@ -155,8 +155,8 @@ FdkAacCodec::DecOpen(const CAudioParam& AudioParam, int& iAudioSampleRate, int& 
         }
         cerr << "DecOpen";
         logConfig(*pinfo);
-        iAudioSampleRate = 48000;
-        iLenDecOutPerChan=1920;
+        iAudioSampleRate = pinfo->extSamplingRate;
+        iLenDecOutPerChan=pinfo->aacSamplesPerFrame;
         bUsac = false;
         if(pinfo->aot == AUDIO_OBJECT_TYPE::AOT_USAC) bUsac = true;
         if(pinfo->aot == AUDIO_OBJECT_TYPE::AOT_DRM_USAC) bUsac = true;
@@ -201,8 +201,8 @@ CAudioCodec::EDecError FdkAacCodec::Decode(const vector<uint8_t>& audio_frame, u
         //return nullptr; this breaks everything!
     }
 
-    //cerr << "Decode";
-    //logConfig(info);
+    cerr << "Decode";
+    logConfig(*pinfo);
 
     if(pinfo->aacNumChannels == 0) {
         cerr << "zero output channels: " << err << endl;
@@ -216,7 +216,7 @@ CAudioCodec::EDecError FdkAacCodec::Decode(const vector<uint8_t>& audio_frame, u
         cerr << "Fill failed: " << err << endl;
         return CAudioCodec::DECODER_ERROR_UNKNOWN;
     }
-    //cerr << "aac decode after fill bufferSize " << bufferSize << ", bytesValid " << bytesValid << endl;
+    cerr << "aac decode after fill bufferSize " << bufferSize << ", bytesValid " << bytesValid << endl;
     if (bytesValid != 0) {
         cerr << "Unable to feed all " << bufferSize << " input bytes, bytes left " << bytesValid << endl;
         return CAudioCodec::DECODER_ERROR_UNKNOWN;
