@@ -414,6 +414,7 @@ CAudioSourceDecoder::InitInternal(CParameter & Parameters)
 
         /* Init decoder */
         codec->DecOpen(AudioParam, iAudioSampleRate, iLenDecOutPerChan);
+        cerr << "DecOpen sample rate " << iAudioSampleRate << " samples per channel " << iLenDecOutPerChan << endl;
 
         /* set string for GUI */
         Parameters.audiodecoder = audiodecoder;
@@ -425,8 +426,7 @@ CAudioSourceDecoder::InitInternal(CParameter & Parameters)
         Parameters.Unlock();
 
         /* Since we do not do Mode E or correct for sample rate offsets here (yet), we do not
-           have to consider larger buffers. An audio frame always corresponds
-           to 400 ms */
+           have to consider larger buffers. An audio frame always corresponds to 400 ms */
         iMaxLenResamplerOutput = int(_REAL(iOutputSampleRate) * 0.4 /* 400ms */  * 2 /* for stereo */ );
 
         if(iAudioSampleRate == iOutputSampleRate) {
@@ -435,7 +435,7 @@ CAudioSourceDecoder::InitInternal(CParameter & Parameters)
         }
         else {
             bResample = true;
-            _REAL rRatio = _REAL(iOutputSampleRate) / _REAL(iOutputSampleRate);
+            _REAL rRatio = _REAL(iOutputSampleRate) / _REAL(iAudioSampleRate);
             iResOutBlockSize = int(_REAL(iLenDecOutPerChan) * rRatio);
             /* Init resample objects */
             ResampleObjL.Init(iLenDecOutPerChan, rRatio);
