@@ -31,7 +31,7 @@
 
 #include "soundinterface.h"
 #include "../util/Pacer.h"
-#include "../resample/Resample.h"
+#include "../resample/caudioresample.h"
 
 /* Classes ********************************************************************/
 class CAudioFileIn : public CSoundInInterface
