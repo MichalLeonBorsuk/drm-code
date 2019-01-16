@@ -496,7 +496,10 @@ HEADERS += \
     src/MSC/audiosuperframe.h \
     src/MSC/aacsuperframe.h \
     src/MSC/xheaacsuperframe.h \
-    src/MSC/frameborderdescription.h
+    src/MSC/frameborderdescription.h \
+    src/resample/speexresampler.h \
+    src/resample/cspectrumresample.h \
+    src/resample/caudioresample.h
 SOURCES += \
     src/AMDemodulation.cpp \
     src/AMSSDemodulation.cpp \
@@ -605,7 +608,10 @@ SOURCES += \
     src/MSC/audiosuperframe.cpp \
     src/MSC/aacsuperframe.cpp \
     src/MSC/xheaacsuperframe.cpp \
-    src/MSC/frameborderdescription.cpp
+    src/MSC/frameborderdescription.cpp \
+    src/resample/speexresampler.cpp \
+    src/resample/cspectrumresample.cpp \
+    src/resample/caudioresample.cpp
 !console {
 HEADERS += \
     src/GUI-QT/Logging.h \

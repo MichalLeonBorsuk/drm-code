@@ -37,6 +37,12 @@
 #include "AudioCodec.h"
 #include "../MSC/audiosuperframe.h"
 
+#ifdef HAVE_SPEEX
+# include "../resample/speexresampler.h"
+#else
+# include "../resample/caudioresample.h"
+#endif
+
 /* Classes ********************************************************************/
 
 class CAudioSourceDecoder : public CReceiverModul<_BINARY, _SAMPLE>
@@ -83,8 +89,13 @@ protected:
     bool bResample;
     int iResOutBlockSize;
 
+#ifdef HAVE_SPEEX
+    SpeexResampler ResampleObjL;
+    SpeexResampler ResampleObjR;
+#else
     CAudioResample ResampleObjL;
     CAudioResample ResampleObjR;
+#endif
 
     CVector<_REAL> vecTempResBufInLeft;
     CVector<_REAL> vecTempResBufInRight;

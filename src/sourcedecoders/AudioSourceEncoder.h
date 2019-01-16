@@ -31,7 +31,11 @@
 #include "../util/Modul.h"
 #include "../util/CRC.h"
 #include "../TextMessage.h"
-#include "../resample/Resample.h"
+#ifdef HAVE_SPEEX
+# include "../resample/speexresampler.h"
+#else
+# include "../resample/caudioresample.h"
+#endif
 #include "../datadecoding/DataEncoder.h"
 #include "../util/Utilities.h"
 #include "AudioCodec.h"
@@ -96,7 +100,11 @@ protected:
 	int						iAudioPayloadLen;
 	int						iNumHigherProtectedBytes;
 
-	CAudioResample			ResampleObj[MAX_ENCODED_CHANNELS];
+#ifdef HAVE_SPEEX
+    SpeexResampler			ResampleObj[MAX_ENCODED_CHANNELS];
+#else
+    CAudioResample			ResampleObj[MAX_ENCODED_CHANNELS];
+#endif
 	CVector<_REAL>			vecTempResBufIn[MAX_ENCODED_CHANNELS];
 	CVector<_REAL>			vecTempResBufOut[MAX_ENCODED_CHANNELS];
 

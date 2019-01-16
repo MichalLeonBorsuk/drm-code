@@ -31,9 +31,6 @@
 
 #include "../GlobalDefinitions.h"
 #include "../util/Vector.h"
-#ifdef HAVE_SPEEX
-# include <speex/speex_resampler.h>
-#endif
 
 
 /* Classes ********************************************************************/
@@ -41,7 +38,7 @@ class CResample
 {
 public:
 	CResample() {}
-	virtual ~CResample() {}
+    virtual ~CResample();
 
 	void Init(const int iNewInputBlockSize);
     int Resample(CVector<_REAL>* prInput, CVector<_REAL>* prOutput, _REAL rRatio);
@@ -55,49 +52,6 @@ protected:
 	int						iHistorySize;
 
 	int						iInputBlockSize;
-};
-
-class CAudioResample
-{
-public:
-	CAudioResample();
-	virtual ~CAudioResample();
-
-    void Init(int iNewInputBlockSize, _REAL rNewRatio);
-	void Init(int iNewOutputBlockSize, int iInputSamplerate, int iOutputSamplerate);
-	void Resample(CVector<_REAL>& rInput, CVector<_REAL>& rOutput);
-	int GetFreeInputSize() const;
-	int GetMaxInputSize() const;
-	void Reset();
-
-protected:
-    _REAL					rRatio;
-	int						iInputBlockSize;
-	int						iOutputBlockSize;
-#ifdef HAVE_SPEEX
-	SpeexResamplerState*	resampler; 
-	CVector<float>			vecfInput;
-	CVector<float>			vecfOutput;
-	int						iInputBuffered;
-	int						iMaxInputSize;
-	void Free();
-#else
-	CShiftRegister<_REAL>	vecrIntBuff;
-	int						iHistorySize;
-#endif
-};
-
-class CSpectrumResample
-{
-public:
-	CSpectrumResample() : iOutputBlockSize(0) {}
-	virtual ~CSpectrumResample() {}
-
-	void Resample(CVector<_REAL>* prInput, CVector<_REAL>** pprOutput, int iNewOutputBlockSize, _BOOLEAN bResample);
-
-protected:
-	CVector<_REAL>			vecrIntBuff;
-	int						iOutputBlockSize;
 };
 
 #endif // !defined(RESAMPLE_H__3B0FEUFE7876F_FE8FE_CA63_4344_1912__INCLUDED_)
