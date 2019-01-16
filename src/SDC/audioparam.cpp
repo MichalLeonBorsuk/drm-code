@@ -26,6 +26,7 @@ bool CAudioParam::setFromType9Bits(CVector<_BINARY>& biData, unsigned numBytes)
     bool bAudioSamplingRateValue7 = false;
 
     unsigned asr = biData.Separate(3);
+
     if(eAudioCoding == CAudioParam::AC_xHE_AAC) {
         switch (asr)
         {
@@ -94,37 +95,19 @@ bool CAudioParam::setFromType9Bits(CVector<_BINARY>& biData, unsigned numBytes)
     }
 
     /* Text flag */
-    switch (biData.Separate(1))
-    {
-    case 0: /* 0 */
-        bTextflag = FALSE;
-        break;
+    bTextflag = biData.Separate(1)==1;
 
-    case 1: /* 1 */
-        bTextflag = TRUE;
-        break;
-    }
-
-    /* Enhancement flag */
-    switch (biData.Separate(1))
-    {
-    case 0: /* 0 */
-        bEnhanceFlag = FALSE;
-        break;
-
-    case 1: /* 1 */
-        bEnhanceFlag = TRUE;
-        break;
-    }
+    /* enhancement flag */
+    bEnhanceFlag = biData.Separate(1)==1;
 
     /* Coder field */
     eSurround = ESurround(biData.Separate(3)); // no need to worry if not AAC/xHE-AAC
 
     /* rfa 2 bits */
-    biData.Separate(2);
+    unsigned rfa2 = biData.Separate(2);
 
     /* rfa 1 bit */
-    biData.Separate(1);
+    unsigned rfa1 = biData.Separate(1);
 
     if (eAudioCoding == CAudioParam::AC_xHE_AAC)
     {
@@ -133,7 +116,6 @@ bool CAudioParam::setFromType9Bits(CVector<_BINARY>& biData, unsigned numBytes)
             xHE_AAC_config[i] = biData.Separate(8);
         }
     }
-
     return bError;
 }
 
@@ -164,62 +146,24 @@ vector<uint8_t> CAudioParam::getType9Bytes() const
 
 void CAudioParam::EnqueueType9(CVector<_BINARY>& vecbiData) const
 {
-    ESBRFlag sbr = eSBRFlag;
-
     /* Audio coding */
     switch (eAudioCoding)
     {
     case CAudioParam::AC_AAC:
-        vecbiData.Enqueue(0 /* 00 */, 2);
-        break;
     case CAudioParam::AC_xHE_AAC:
-        vecbiData.Enqueue(3 /* 11 */, 2);
-        break;
     case CAudioParam::AC_OPUS:
-        vecbiData.Enqueue(1 /* 01 */, 2); // non-standard
-        sbr = CAudioParam::SB_NOT_USED;
+    case CAudioParam::AC_RESERVED:
+        vecbiData.Enqueue(eAudioCoding, 2);
         break;
     case CAudioParam::AC_NONE:
-    case CAudioParam::AC_RESERVED:
-        vecbiData.Enqueue(2 /* 10 */, 2);
+        vecbiData.Enqueue(CAudioParam::AC_RESERVED, 2);
     }
 
     /* SBR flag */
-    switch (sbr)
-    {
-    case CAudioParam::SB_NOT_USED:
-        vecbiData.Enqueue(0 /* 0 */, 1);
-        break;
-
-    case CAudioParam::SB_USED:
-        vecbiData.Enqueue(1 /* 1 */, 1);
-        break;
-    }
+    vecbiData.Enqueue(eSBRFlag, 1);
 
     /* Audio mode */
-    switch (eAudioCoding)
-    {
-        case CAudioParam::AC_AAC:
-            /* Channel type */
-            switch (eAudioMode)
-            {
-            case CAudioParam::AM_MONO:
-                vecbiData.Enqueue(0 /* 00 */, 2);
-                break;
-
-            case CAudioParam::AM_P_STEREO:
-                vecbiData.Enqueue(1 /* 01 */, 2);
-                break;
-
-            case CAudioParam::AM_STEREO:
-                vecbiData.Enqueue(2 /* 10 */, 2);
-                break;
-            }
-            break;
-
-            vecbiData.Enqueue(0 /* 00 */, 2);
-            break;
-    }
+    vecbiData.Enqueue(eAudioMode, 2);
 
     // Audio sampling rate AS_9_6_KHZ, AS_12KHZ, AS_16KHZ, AS_19_2KHZ, AS_24KHZ, AS_32KHZ, AS_38_4KHZ, AS_48KHZ
     unsigned int iVal=0;
