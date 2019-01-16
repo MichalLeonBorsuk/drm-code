@@ -65,7 +65,7 @@
 #endif
 
 /* Other includes */
-#include "../resample/Resample.h"
+#include "../resample/cspectrumresample.h"
 #include "../util/Vector.h"
 #include "../Parameter.h"
 #include "../DrmReceiver.h"
