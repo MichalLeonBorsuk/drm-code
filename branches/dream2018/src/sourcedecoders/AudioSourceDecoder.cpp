@@ -82,7 +82,7 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
         return;
     }
 
-    cerr << "got one logical frame of length " << pvecInputData->Size() << " bits" << endl;
+    //cerr << "got one logical frame of length " << pvecInputData->Size() << " bits" << endl;
 
     /* Text Message ********************************************************** */
     if (bTextMessageUsed)
