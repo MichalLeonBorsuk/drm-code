@@ -124,10 +124,12 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
             pAudioSuperFrame->getFrame(audio_frame, aac_crc_bits, j);
             if(bResample) {
                 eDecError = codec->Decode(audio_frame, aac_crc_bits, vecTempResBufInLeft, vecTempResBufInRight);
-                /* Resample data */
-                // TODO - optimise resampling mono
-                ResampleObjL.Resample(vecTempResBufInLeft, vecTempResBufOutCurLeft);
-                ResampleObjR.Resample(vecTempResBufInRight, vecTempResBufOutCurRight);
+                if(eDecError==CAudioCodec::DECODER_ERROR_OK) {
+                    /* Resample data */
+                    // TODO - optimise resampling mono
+                    ResampleObjL.Resample(vecTempResBufInLeft, vecTempResBufOutCurLeft);
+                    ResampleObjR.Resample(vecTempResBufInRight, vecTempResBufOutCurRight);
+                }
             }
             else {
                 eDecError = codec->Decode(audio_frame, aac_crc_bits, vecTempResBufOutCurLeft, vecTempResBufOutCurRight);
