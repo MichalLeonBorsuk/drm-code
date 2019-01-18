@@ -12,20 +12,18 @@ public:
     void Init(int iNewInputBlockSize, _REAL rNewRatio);
     void Init(int iNewOutputBlockSize, int iInputSamplerate, int iOutputSamplerate);
     void Resample(CVector<_REAL>& rInput, CVector<_REAL>& rOutput);
-    int GetFreeInputSize() const;
-    int GetMaxInputSize() const;
     void Reset();
-protected:
-    _REAL					rRatio;
-    int						iInputBlockSize;
-    int						iOutputBlockSize;
-    CShiftRegister<_REAL>	vecrIntBuff;
-    int						iHistorySize;
+private:
+    size_t					iInputBlockSize;
+    size_t					iOutputBlockSize;
     SpeexResamplerState*	resampler;
-    CVector<float>			vecfInput;
-    CVector<float>			vecfOutput;
-    int						iInputBuffered;
-    int						iMaxInputSize;
+    vector<float>			vecfInput;
+    vector<float>			vecfOutput;
+    size_t					iInputBuffered;
+    size_t                  iMaxInputSize;
+
+    size_t GetFreeInputSize() const;
+    size_t GetMaxInputSize() const;
     void Free();
 };
 
