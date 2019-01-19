@@ -577,7 +577,7 @@ OpusCodec::CanDecode(CAudioParam::EAudCod eAudioCoding)
 }
 
 bool
-OpusCodec::DecOpen(const CAudioParam& AudioParam, int& iAudioSampleRate, int& iLenDecOutPerChan)
+OpusCodec::DecOpen(const CAudioParam& AudioParam, int& iAudioSampleRate)
 {
 	(void)AudioParam;
 	const int iSampleRate = 48000;
@@ -586,7 +586,6 @@ OpusCodec::DecOpen(const CAudioParam& AudioParam, int& iAudioSampleRate, int& iL
 	if (hOpusDecoder != nullptr)
 		opusDecInit(hOpusDecoder, iSampleRate, 2);
     iAudioSampleRate = iSampleRate;
-    iLenDecOutPerChan = AUD_DEC_TRANSFROM_LENGTH;
 	return hOpusDecoder != nullptr;
 }
 

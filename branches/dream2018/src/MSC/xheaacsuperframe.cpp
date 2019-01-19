@@ -13,7 +13,10 @@ XHEAACSuperFrame::init(const CAudioParam& audioParam, unsigned frameSize)
     borders.resize(0);
 }
 
-
+unsigned XHEAACSuperFrame::getSuperFrameDurationMilliseconds()
+{
+    return 0; // TODO is this variable or fixed?
+}
         /*
      * 5.3.1.3 Transport of xHE-AAC audio frames within the payload section
     The USAC access unit encoder generates a continuous sequence of audio frames at a constant bit rate over the long term.
