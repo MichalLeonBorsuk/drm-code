@@ -130,7 +130,7 @@ static void logConfig(const CStreamInfo& info) {
 }
 
 bool
-FdkAacCodec::DecOpen(const CAudioParam& AudioParam, int& iAudioSampleRate, int& iLenDecOutPerChan)
+FdkAacCodec::DecOpen(const CAudioParam& AudioParam, int& iAudioSampleRate)
 {
     unsigned int type9Size;
     UCHAR *t9;
@@ -150,13 +150,11 @@ FdkAacCodec::DecOpen(const CAudioParam& AudioParam, int& iAudioSampleRate, int& 
         if (pinfo==nullptr) {
             cerr << "DecOpen No stream info" << endl;
             iAudioSampleRate = 48000;
-            iLenDecOutPerChan=1920;
             return true;// TODO
         }
         cerr << "DecOpen";
         logConfig(*pinfo);
         iAudioSampleRate = pinfo->extSamplingRate;
-        iLenDecOutPerChan = 2 * pinfo->aacSamplesPerFrame;
 
         if(pinfo->aot == AUDIO_OBJECT_TYPE::AOT_USAC) bUsac = true;
         else if(pinfo->aot == AUDIO_OBJECT_TYPE::AOT_DRM_USAC) bUsac = true;
@@ -165,7 +163,6 @@ FdkAacCodec::DecOpen(const CAudioParam& AudioParam, int& iAudioSampleRate, int& 
         return true;
     }
     iAudioSampleRate = 48000;
-    iLenDecOutPerChan=1920;
     return true; // TODO
  }
 

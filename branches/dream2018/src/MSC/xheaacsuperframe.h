@@ -12,6 +12,7 @@ public:
     void init(const CAudioParam& audioParam, unsigned frameSize);
     virtual bool parse(CVectorEx<_BINARY>& asf);
     virtual unsigned getNumFrames() { return borders.size(); }
+    virtual unsigned getSuperFrameDurationMilliseconds();
     virtual void getFrame(std::vector<uint8_t>& frame, uint8_t& crc, unsigned i);
 private:
     unsigned numChannels;

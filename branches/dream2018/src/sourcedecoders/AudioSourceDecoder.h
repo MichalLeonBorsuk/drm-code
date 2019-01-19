@@ -109,7 +109,6 @@ protected:
     _BOOLEAN bUseReverbEffect;
     CAudioReverb AudioRev;
 
-    int iLenDecOutPerChan;
     AudioSuperFrame* pAudioSuperFrame;
 
     CAudioParam::EAudCod eAudioCoding;

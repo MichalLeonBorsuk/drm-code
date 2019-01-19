@@ -1,6 +1,7 @@
 #include "aacsuperframe.h"
 
-AACSuperFrame::AACSuperFrame():AudioSuperFrame (),lengthPartA(0),lengthPartB(0),headerBytes(0),aacCRC()
+AACSuperFrame::AACSuperFrame():AudioSuperFrame (),
+    lengthPartA(0),lengthPartB(0),superFrameDurationMilliseconds(0),headerBytes(0),aacCRC()
 {
 }
 
@@ -22,6 +23,7 @@ void AACSuperFrame::init(const CAudioParam &audioParam, ERobMode eRobMode, unsig
         default:
             break;
         }
+        superFrameDurationMilliseconds = 400;
         break;
     case ERobMode::RM_ROBUSTNESS_MODE_E:
         switch(audioParam.eAudioSamplRate) {
@@ -34,6 +36,7 @@ void AACSuperFrame::init(const CAudioParam &audioParam, ERobMode eRobMode, unsig
         default:
             break;
         }
+        superFrameDurationMilliseconds = 200;
         break;
     case ERobMode::RM_NO_MODE_DETECTED:
         break;

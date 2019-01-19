@@ -149,7 +149,7 @@ AacCodec::CanDecode(CAudioParam::EAudCod eAudioCoding)
 }
 
 bool
-AacCodec::DecOpen(const CAudioParam& AudioParam, int& iAudioSampleRate, int& iLenDecOutPerChan)
+AacCodec::DecOpen(const CAudioParam& AudioParam, int& iAudioSampleRate)
 {
     int iAACSampleRate = 12000;
     if (hFaadDecoder == nullptr)
@@ -201,12 +201,10 @@ AacCodec::DecOpen(const CAudioParam& AudioParam, int& iAudioSampleRate, int& iLe
     if (AudioParam.eSBRFlag == CAudioParam::SB_USED)
     {
         iAudioSampleRate = iAACSampleRate * 2;
-        iLenDecOutPerChan = AUD_DEC_TRANSFROM_LENGTH * 2;
     }
     else
     {
         iAudioSampleRate = iAACSampleRate;
-        iLenDecOutPerChan = AUD_DEC_TRANSFROM_LENGTH;
     }
     return hFaadDecoder != nullptr;
 }

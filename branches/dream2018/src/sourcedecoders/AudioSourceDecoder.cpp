@@ -415,8 +415,18 @@ CAudioSourceDecoder::InitInternal(CParameter & Parameters)
         codec->Init(AudioParam, iInputBlockSize);
 
         /* Init decoder */
-        codec->DecOpen(AudioParam, iAudioSampleRate, iLenDecOutPerChan);
-        cerr << "DecOpen sample rate " << iAudioSampleRate << " samples per channel " << iLenDecOutPerChan << endl;
+        codec->DecOpen(AudioParam, iAudioSampleRate);
+        cerr << "DecOpen sample rate " << iAudioSampleRate << endl;
+
+        int iLenDecOutPerChan = 0; // no need to use the one from the codec
+        int numFrames = pAudioSuperFrame->getNumFrames();
+        if(numFrames==0) {
+            // xHE-AAC - can't tell yet!
+        }
+        else {
+            int samplesPerChannelPerSuperFrame = pAudioSuperFrame->getSuperFrameDurationMilliseconds() * iAudioSampleRate / 1000;
+            iLenDecOutPerChan = samplesPerChannelPerSuperFrame / numFrames;
+        }
 
         /* set string for GUI */
         Parameters.audiodecoder = audiodecoder;
