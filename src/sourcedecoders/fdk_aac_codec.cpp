@@ -156,10 +156,12 @@ FdkAacCodec::DecOpen(const CAudioParam& AudioParam, int& iAudioSampleRate, int& 
         cerr << "DecOpen";
         logConfig(*pinfo);
         iAudioSampleRate = pinfo->extSamplingRate;
-        iLenDecOutPerChan=pinfo->aacSamplesPerFrame;
-        bUsac = false;
+        iLenDecOutPerChan = 2 * pinfo->aacSamplesPerFrame;
+
         if(pinfo->aot == AUDIO_OBJECT_TYPE::AOT_USAC) bUsac = true;
-        if(pinfo->aot == AUDIO_OBJECT_TYPE::AOT_DRM_USAC) bUsac = true;
+        else if(pinfo->aot == AUDIO_OBJECT_TYPE::AOT_DRM_USAC) bUsac = true;
+        else bUsac = false;
+
         return true;
     }
     iAudioSampleRate = 48000;
