@@ -50,7 +50,7 @@ bool NullCodec::CanDecode(CAudioParam::EAudCod eAudioCoding)
 	return false;
 }
 
-bool NullCodec::DecOpen(const CAudioParam& AudioParam, int& iAudioSampleRate, int& iLenDecOutPerChan)
+bool NullCodec::DecOpen(const CAudioParam& AudioParam, int& iAudioSampleRate)
 {
 	int iSampleRate = 24000;
 	switch (AudioParam.eAudioSamplRate)
@@ -81,7 +81,6 @@ bool NullCodec::DecOpen(const CAudioParam& AudioParam, int& iAudioSampleRate, in
 		break;
 	}
     iAudioSampleRate = iSampleRate;
-    iLenDecOutPerChan = AUD_DEC_TRANSFROM_LENGTH;
 	return false;
 }
 

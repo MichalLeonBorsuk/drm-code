@@ -10,9 +10,10 @@ public:
     void init(const CAudioParam& audioParam,  ERobMode eRobMode, unsigned lengthPartA, unsigned lengthPartB);
     virtual bool parse(CVectorEx<_BINARY>& asf);
     virtual unsigned getNumFrames() { return unsigned(audioFrame.size()); }
+    virtual unsigned getSuperFrameDurationMilliseconds() { return superFrameDurationMilliseconds; }
     virtual void getFrame(vector<uint8_t>& frame, uint8_t& crc, unsigned i) { frame = audioFrame[i]; crc = aacCRC[i]; }
 private:
-    unsigned lengthPartA, lengthPartB;
+    unsigned lengthPartA, lengthPartB, superFrameDurationMilliseconds;
     unsigned headerBytes;
     vector<uint8_t> aacCRC;
     bool header(CVectorEx<_BINARY>&);
