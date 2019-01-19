@@ -110,6 +110,7 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
     /* Init output block size to zero, this variable is also used for
        determining the position for writing the output vector */
     iOutputBlockSize = 0;
+    int iResOutBlockSize = 0;
 
     for (size_t j = 0; j < pAudioSuperFrame->getNumFrames(); j++)
     {
@@ -122,11 +123,10 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
             vector<uint8_t> audio_frame;
             uint8_t aac_crc_bits;
             pAudioSuperFrame->getFrame(audio_frame, aac_crc_bits, j);
-            if(bResample) {
+            if(inputSampleRate != outputSampleRate) {
                 eDecError = codec->Decode(audio_frame, aac_crc_bits, vecTempResBufInLeft, vecTempResBufInRight);
                 if(eDecError==CAudioCodec::DECODER_ERROR_OK) {
                     /* Resample data */
-                    // TODO - optimise resampling mono
                     ResampleObjL.Resample(vecTempResBufInLeft, vecTempResBufOutCurLeft);
                     ResampleObjR.Resample(vecTempResBufInRight, vecTempResBufOutCurRight);
                 }
@@ -134,6 +134,8 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
             else {
                 eDecError = codec->Decode(audio_frame, aac_crc_bits, vecTempResBufOutCurLeft, vecTempResBufOutCurRight);
             }
+
+            iResOutBlockSize = vecTempResBufOutCurLeft.Size();
 
             bCurBlockOK = (eDecError == CAudioCodec::DECODER_ERROR_OK);
 
@@ -164,122 +166,13 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
         // This code is independent of particular audio source type and should work with all codecs
 
         /* Postprocessing of audio blocks, status informations -------------- */
-        ETypeRxStatus status = DATA_ERROR;
-        if (bCurBlockOK == FALSE)
+        ETypeRxStatus status = reverb.apply(bCurBlockOK, bCurBlockFaulty, vecTempResBufOutCurLeft, vecTempResBufOutCurRight);
+
+        if (bCurBlockOK && !bCurBlockFaulty)
         {
-            if (bAudioWasOK == TRUE)
-            {
-                /* Post message to show that CRC was wrong (yellow light) */
-                status = DATA_ERROR;
-
-                /* Fade-out old block to avoid "clicks" in audio. We use linear
-                   fading which gives a log-fading impression */
-                for (int i = 0; i < iResOutBlockSize; i++)
-                {
-                    /* Linear attenuation with time of OLD buffer */
-                    const _REAL rAtt = 1.0 - _REAL(i / iResOutBlockSize);
-
-                    vecTempResBufOutOldLeft[i] *= rAtt;
-                    vecTempResBufOutOldRight[i] *= rAtt;
-
-                    if (bUseReverbEffect == TRUE)
-                    {
-                        /* Fade in input signal for reverberation to avoid
-                           clicks */
-                        const _REAL rAttRev = _REAL( i / iResOutBlockSize);
-
-                        /* Cross-fade reverberation effect */
-                        const _REAL rRevSam = (1.0 - rAtt) * AudioRev.
-                                ProcessSample(vecTempResBufOutOldLeft[i] *
-                                              rAttRev,
-                                              vecTempResBufOutOldRight[i] *
-                                              rAttRev);
-
-                        /* Mono reverbration signal */
-                        vecTempResBufOutOldLeft[i] += rRevSam;
-                        vecTempResBufOutOldRight[i] += rRevSam;
-                    }
-                }
-
-                /* Set flag to show that audio block was bad */
-                bAudioWasOK = FALSE;
-            }
-            else
-            {
-                status = CRC_ERROR;
-
-                if (bUseReverbEffect == TRUE)
-                {
-                    /* Add Reverberation effect */
-                    for (int i = 0; i < iResOutBlockSize; i++)
-                    {
-                        /* Mono reverberation signal */
-                        vecTempResBufOutOldLeft[i] =
-                                vecTempResBufOutOldRight[i] = AudioRev.
-                                ProcessSample(0, 0);
-                    }
-                }
-            }
-
-            /* Write zeros in current output buffer */
-            for (int i = 0; i < iResOutBlockSize; i++)
-            {
-                vecTempResBufOutCurLeft[i] = 0.0;
-                vecTempResBufOutCurRight[i] = 0.0;
-            }
+            iNumCorDecAudio++;
         }
-        else
-        {
-            /* Increment correctly decoded audio blocks counter */
-            if (bCurBlockFaulty) {
-                status = DATA_ERROR;
-            }
-            else {
-                iNumCorDecAudio++;
-                status = RX_OK;
-            }
 
-            if (bAudioWasOK == FALSE)
-            {
-                if (bUseReverbEffect == TRUE)
-                {
-                    /* Add "last" reverbration only to old block */
-                    for (int i = 0; i < iResOutBlockSize; i++)
-                    {
-                        /* Mono reverberation signal */
-                        vecTempResBufOutOldLeft[i] =
-                                vecTempResBufOutOldRight[i] = AudioRev.
-                                ProcessSample(vecTempResBufOutOldLeft[i],
-                                              vecTempResBufOutOldRight[i]);
-                    }
-                }
-
-                /* Fade-in new block to avoid "clicks" in audio. We use linear
-                   fading which gives a log-fading impression */
-                for (int i = 0; i < iResOutBlockSize; i++)
-                {
-                    /* Linear attenuation with time */
-                    const _REAL rAtt = (_REAL) i / iResOutBlockSize;
-
-                    vecTempResBufOutCurLeft[i] *= rAtt;
-                    vecTempResBufOutCurRight[i] *= rAtt;
-
-                    if (bUseReverbEffect == TRUE)
-                    {
-                        /* Cross-fade reverberation effect */
-                        const _REAL rRevSam = (1.0 - rAtt) * AudioRev.
-                                ProcessSample(0, 0);
-
-                        /* Mono reverberation signal */
-                        vecTempResBufOutCurLeft[i] += rRevSam;
-                        vecTempResBufOutCurRight[i] += rRevSam;
-                    }
-                }
-
-                /* Reset flag */
-                bAudioWasOK = TRUE;
-            }
-        }
         Parameters.Lock();
         Parameters.ReceiveStatus.SLAudio.SetStatus(status);
         Parameters.ReceiveStatus.LLAudio.SetStatus(status);
@@ -289,19 +182,13 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
         /* Conversion from _REAL to _SAMPLE with special function */
         for (int i = 0; i < iResOutBlockSize; i++)
         {
-            (*pvecOutputData)[iOutputBlockSize + i * 2] = Real2Sample(vecTempResBufOutOldLeft[i]);	/* Left channel */
-            (*pvecOutputData)[iOutputBlockSize + i * 2 + 1] = Real2Sample(vecTempResBufOutOldRight[i]);	/* Right channel */
+            (*pvecOutputData)[iOutputBlockSize + i * 2] = Real2Sample(vecTempResBufOutCurLeft[i]);	/* Left channel */
+            (*pvecOutputData)[iOutputBlockSize + i * 2 + 1] = Real2Sample(vecTempResBufOutCurRight[i]);	/* Right channel */
         }
 
         /* Add new block to output block size ("* 2" for stereo output block) */
         iOutputBlockSize += iResOutBlockSize * 2;
 
-        /* Store current audio block */
-        for (int i = 0; i < iResOutBlockSize; i++)
-        {
-            vecTempResBufOutOldLeft[i] = vecTempResBufOutCurLeft[i];
-            vecTempResBufOutOldRight[i] = vecTempResBufOutCurRight[i];
-        }
     }
 }
 
@@ -321,7 +208,6 @@ CAudioSourceDecoder::InitInternal(CParameter & Parameters)
     int iCurAudioStreamID;
     int iMaxLenResamplerOutput;
     int iCurSelServ;
-    int iAudioSampleRate;
 
     /* Init error flags and output block size parameter. The output block
        size is set in the processing routine. We must set it here in case
@@ -415,8 +301,8 @@ CAudioSourceDecoder::InitInternal(CParameter & Parameters)
         codec->Init(AudioParam, iInputBlockSize);
 
         /* Init decoder */
-        codec->DecOpen(AudioParam, iAudioSampleRate);
-        cerr << "DecOpen sample rate " << iAudioSampleRate << endl;
+        codec->DecOpen(AudioParam, inputSampleRate);
+        cerr << "DecOpen sample rate " << inputSampleRate << endl;
 
         int iLenDecOutPerChan = 0; // no need to use the one from the codec
         int numFrames = pAudioSuperFrame->getNumFrames();
@@ -424,7 +310,7 @@ CAudioSourceDecoder::InitInternal(CParameter & Parameters)
             // xHE-AAC - can't tell yet!
         }
         else {
-            int samplesPerChannelPerSuperFrame = pAudioSuperFrame->getSuperFrameDurationMilliseconds() * iAudioSampleRate / 1000;
+            int samplesPerChannelPerSuperFrame = pAudioSuperFrame->getSuperFrameDurationMilliseconds() * inputSampleRate / 1000;
             iLenDecOutPerChan = samplesPerChannelPerSuperFrame / numFrames;
         }
 
@@ -434,25 +320,21 @@ CAudioSourceDecoder::InitInternal(CParameter & Parameters)
         /* Set number of Audio frames for log file */
         // TODO Parameters.iNumAudioFrames = iNumAudioFrames;
 
-        int iOutputSampleRate = Parameters.GetAudSampleRate();
+        outputSampleRate = Parameters.GetAudSampleRate();
         Parameters.Unlock();
 
         /* Since we do not do Mode E or correct for sample rate offsets here (yet), we do not
            have to consider larger buffers. An audio frame always corresponds to 400 ms */
-        iMaxLenResamplerOutput = int(_REAL(iOutputSampleRate) * 0.4 /* 400ms */  * 2 /* for stereo */ );
+        iMaxLenResamplerOutput = int(_REAL(outputSampleRate) * 0.4 /* 400ms */  * 2 /* for stereo */ );
 
-        if(iAudioSampleRate == iOutputSampleRate) {
-            bResample = false;
-            iResOutBlockSize = iLenDecOutPerChan;
-        }
-        else {
-            bResample = true;
-            _REAL rRatio = _REAL(iOutputSampleRate) / _REAL(iAudioSampleRate);
-            iResOutBlockSize = int(_REAL(iLenDecOutPerChan) * rRatio);
+        if(inputSampleRate != outputSampleRate) {
+            _REAL rRatio = _REAL(outputSampleRate) / _REAL(inputSampleRate);
             /* Init resample objects */
             ResampleObjL.Init(iLenDecOutPerChan, rRatio);
             ResampleObjR.Init(iLenDecOutPerChan, rRatio);
         }
+
+        int iResOutBlockSize = outputSampleRate * iLenDecOutPerChan / inputSampleRate;
 
         //cerr << "output block size per channel " << iResOutBlockSize << " = samples " << iLenDecOutPerChan << " * " << Parameters.GetAudSampleRate() << " / " << iAudioSampleRate << endl;
 
@@ -464,15 +346,10 @@ CAudioSourceDecoder::InitInternal(CParameter & Parameters)
         vecTempResBufInRight.Init(iLenDecOutPerChan, 0.0);
         vecTempResBufOutCurLeft.Init(iResOutBlockSize, 0.0);
         vecTempResBufOutCurRight.Init(iResOutBlockSize, 0.0);
-        vecTempResBufOutOldLeft.Init(iResOutBlockSize, 0.0);
-        vecTempResBufOutOldRight.Init(iResOutBlockSize, 0.0);
 
+        reverb.Init(outputSampleRate, bUseReverbEffect);
 
-        /* Clear reverberation object */
-        AudioRev.Init(1.0 /* seconds delay */, iOutputSampleRate);
-        AudioRev.Clear();
-
-        /* With this parameter we define the maximum lenght of the output
+        /* With this parameter we define the maximum length of the output
            buffer. The cyclic buffer is only needed if we do a sample rate
            correction due to a difference compared to the transmitter. But for
            now we do not correct and we could stay with a single buffer

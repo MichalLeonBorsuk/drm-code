@@ -36,6 +36,7 @@
 #include "../util/Utilities.h"
 #include "AudioCodec.h"
 #include "../MSC/audiosuperframe.h"
+#include "reverb.h"
 
 #ifdef HAVE_SPEEX
 # include "../resample/speexresampler.h"
@@ -86,8 +87,7 @@ protected:
     CVector<_BINARY> vecbiTextMessBuf;
 
     /* Resampling */
-    bool bResample;
-    int iResOutBlockSize;
+    int inputSampleRate, outputSampleRate;
 
 #ifdef HAVE_SPEEX
     SpeexResampler ResampleObjL;
@@ -101,13 +101,10 @@ protected:
     CVector<_REAL> vecTempResBufInRight;
     CVector<_REAL> vecTempResBufOutCurLeft;
     CVector<_REAL> vecTempResBufOutCurRight;
-    CVector<_REAL> vecTempResBufOutOldLeft;
-    CVector<_REAL> vecTempResBufOutOldRight;
 
     /* Drop-out masking (reverberation) */
     _BOOLEAN bAudioWasOK;
     _BOOLEAN bUseReverbEffect;
-    CAudioReverb AudioRev;
 
     AudioSuperFrame* pAudioSuperFrame;
 
@@ -122,6 +119,7 @@ protected:
     virtual void InitInternal(CParameter& Parameters);
     virtual void ProcessDataInternal(CParameter& Parameters);
     void CloseDecoder();
+    Reverb reverb;
 };
 
 #endif // AUDIOSOURCEDECODER_H
