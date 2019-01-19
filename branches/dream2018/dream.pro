@@ -499,7 +499,8 @@ HEADERS += \
     src/MSC/frameborderdescription.h \
     src/resample/speexresampler.h \
     src/resample/cspectrumresample.h \
-    src/resample/caudioresample.h
+    src/resample/caudioresample.h \
+    src/sourcedecoders/reverb.h
 SOURCES += \
     src/AMDemodulation.cpp \
     src/AMSSDemodulation.cpp \
@@ -611,7 +612,8 @@ SOURCES += \
     src/MSC/frameborderdescription.cpp \
     src/resample/speexresampler.cpp \
     src/resample/cspectrumresample.cpp \
-    src/resample/caudioresample.cpp
+    src/resample/caudioresample.cpp \
+    src/sourcedecoders/reverb.cpp
 !console {
 HEADERS += \
     src/GUI-QT/Logging.h \

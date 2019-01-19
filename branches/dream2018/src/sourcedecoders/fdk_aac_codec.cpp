@@ -245,6 +245,9 @@ CAudioCodec::EDecError FdkAacCodec::Decode(const vector<uint8_t>& audio_frame, u
         return CAudioCodec::DECODER_ERROR_UNKNOWN;
     }
 
+    left.Init(pinfo->frameSize, 0.0);
+    right.Init(pinfo->frameSize, 0.0);
+
     if (pinfo->numChannels == 1)
     {
         /* Mono */
