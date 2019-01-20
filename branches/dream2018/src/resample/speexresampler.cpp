@@ -3,9 +3,7 @@
 #include <iostream>
 #define RESAMPLING_QUALITY 6 /* 0-10 : 0=fast/bad 10=slow/good */
 
-SpeexResampler::SpeexResampler() :
-    iInputBlockSize(0), iOutputBlockSize(0),
-    resampler(nullptr), iInputBuffered(0), iMaxInputSize(0)
+SpeexResampler::SpeexResampler():resampler(nullptr), vecfInput(), vecfOutput(), iInputBuffered(0)
 {
 }
 
@@ -27,17 +25,23 @@ void SpeexResampler::Free()
 
 /* this function is only called when the input and output sample rates are different */
 void SpeexResampler::Resample(CVector<_REAL>& rInput, CVector<_REAL>& rOutput)
-{
-    if (rOutput.Size() != int(iOutputBlockSize))
+{    
+    size_t iOutputBlockSize = vecfOutput.size();
+    if (rOutput.Size() != int(iOutputBlockSize)) {
         cerr << "SpeexResampler::Resample(): rOutput.Size(" << rOutput.Size() << ") != iOutputBlockSize(" << iOutputBlockSize << ")" << endl;
+        iOutputBlockSize = size_t(rOutput.Size());
+        vecfOutput.resize(iOutputBlockSize);
+    }
 
-    size_t iInputSize = GetFreeInputSize();
-    for (size_t i = 0; i < iInputSize; i++)
+    if(GetFreeInputSize()<rInput.size()) {
+        vecfInput.resize(rInput.size()+iInputBuffered);
+    }
+    for (size_t i = 0; i < GetFreeInputSize(); i++)
         vecfInput[i+iInputBuffered] = float(rInput[int(i)]);
 
     spx_uint32_t input_frames_used = spx_uint32_t(rInput.size());
     spx_uint32_t output_frames_gen = spx_uint32_t(rOutput.size());
-    size_t input_frames = iInputBuffered + iInputSize;
+    size_t input_frames = iInputBuffered + GetFreeInputSize();
 
     if (resampler != nullptr)
     {
@@ -62,19 +66,16 @@ void SpeexResampler::Resample(CVector<_REAL>& rInput, CVector<_REAL>& rOutput)
         rOutput[int(i)] = _REAL(vecfOutput[i]);
 
     iInputBuffered = input_frames - input_frames_used;
+    if(vecfInput.size()<iInputBuffered) {
+        vecfInput.resize(iInputBuffered);
+    }
     for (size_t i = 0; i < iInputBuffered; i++)
         vecfInput[i] = vecfInput[i+input_frames_used];
 }
 
-
-size_t SpeexResampler::GetMaxInputSize() const
-{
-    return iMaxInputSize != 0 ? iMaxInputSize : iInputBlockSize;
-}
-
 size_t SpeexResampler::GetFreeInputSize() const
 {
-    return GetMaxInputSize() - iInputBuffered;
+    return vecfInput.size() - iInputBuffered;
 }
 
 void SpeexResampler::Reset()
@@ -97,10 +98,9 @@ void SpeexResampler::Init(const int iNewInputBlockSize, const _REAL rNewRatio)
         cerr << "resampler initialised with too great a compression ratio" << endl;
         return;
     }
-    iInputBlockSize = size_t(iNewInputBlockSize);
-    iOutputBlockSize = size_t(iNewInputBlockSize * rNewRatio);
+    size_t iInputBlockSize = size_t(iNewInputBlockSize);
+    size_t iOutputBlockSize = size_t(iNewInputBlockSize * rNewRatio);
     iInputBuffered = 0;
-    iMaxInputSize = 0;
     int err;
     resampler = speex_resampler_init(1, spx_uint32_t(iInputBlockSize), spx_uint32_t(iOutputBlockSize), RESAMPLING_QUALITY, &err);
     if (resampler == nullptr)
@@ -111,10 +111,8 @@ void SpeexResampler::Init(const int iNewInputBlockSize, const _REAL rNewRatio)
 
 void SpeexResampler::Init(int iNewOutputBlockSize, int iInputSamplerate, int iOutputSamplerate)
 {
-    iInputBlockSize = size_t((iOutputSamplerate * iNewOutputBlockSize) / iInputSamplerate);
-    iOutputBlockSize = size_t(iNewOutputBlockSize);
-    const size_t iNewMaxInputSize = unsigned(iInputBlockSize) * 2;
-    iMaxInputSize = iNewMaxInputSize;
+    size_t iInputBlockSize = size_t((iOutputSamplerate * iNewOutputBlockSize) / iInputSamplerate);
+    size_t iOutputBlockSize = size_t(iNewOutputBlockSize);
     int err = RESAMPLER_ERR_SUCCESS;
     if (resampler == nullptr)
     {

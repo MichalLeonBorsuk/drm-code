@@ -127,6 +127,12 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
                 eDecError = codec->Decode(audio_frame, aac_crc_bits, vecTempResBufInLeft, vecTempResBufInRight);
                 if(eDecError==CAudioCodec::DECODER_ERROR_OK) {
                     /* Resample data */
+                    iResOutBlockSize = outputSampleRate * vecTempResBufInLeft.Size() / inputSampleRate;
+                    if(iResOutBlockSize != vecTempResBufOutCurLeft.Size()) { // NOOP for AAC, needed for xHE-AAC
+                        vecTempResBufOutCurLeft.Init(iResOutBlockSize, 0.0);
+                        vecTempResBufOutCurRight.Init(iResOutBlockSize, 0.0);
+                    }
+
                     ResampleObjL.Resample(vecTempResBufInLeft, vecTempResBufOutCurLeft);
                     ResampleObjR.Resample(vecTempResBufInRight, vecTempResBufOutCurRight);
                 }

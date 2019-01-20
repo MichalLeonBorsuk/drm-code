@@ -130,26 +130,6 @@ protected:
 	int iYear, iDay, iMonth, iModJulDate;
 };
 
-
-/* Audio Reverbration ------------------------------------------------------- */
-class CAudioReverb
-{
-public:
-	CAudioReverb() {}
-	void Init(CReal rT60, int iSampleRate);
-	void Clear();
-	CReal ProcessSample(const CReal rLInput, const CReal rRInput);
-
-protected:
-	void setT60(const CReal rT60, int iSampleRate);
-	_BOOLEAN isPrime(const int number);
-
-	CFIFO<int>	allpassDelays_[3];
-	CFIFO<int>	combDelays_[4];
-	CReal		allpassCoefficient_;
-	CReal		combCoefficient_[4];
-};
-
 inline int Complement2toInt(const unsigned int iSize, CVector<_BINARY>* pbiData)
 {
 	int iVal = 0;
