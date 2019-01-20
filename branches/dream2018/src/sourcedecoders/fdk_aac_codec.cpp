@@ -251,11 +251,11 @@ CAudioCodec::EDecError FdkAacCodec::Decode(const vector<uint8_t>& audio_frame, u
         //return nullptr; this breaks everything!
     }
 
-    cerr << "Decode";
+    //cerr << "Decode";
     //logAOT(*pinfo);
-    logFlags(*pinfo);
+    //logFlags(*pinfo);
     //logNumbers(*pinfo);
-    cerr << endl;
+    //cerr << endl;
 
     if(pinfo->aacNumChannels == 0) {
         cerr << "zero output channels: " << err << endl;
@@ -290,7 +290,9 @@ CAudioCodec::EDecError FdkAacCodec::Decode(const vector<uint8_t>& audio_frame, u
     err = aacDecoder_DecodeFrame(hDecoder, decode_buf, output_size, 0);
 
     if(err == AAC_DEC_OK) {
-        cerr << "good frame" << endl;
+        double d = 0.0;
+        for(size_t i=0; i<output_size; i++) d += double(decode_buf[i]);
+        cerr << "energy in good frame " << (d/output_size) << endl;
     }
     else if(err == AAC_DEC_PARSE_ERROR) {
         cerr << "error parsing bitstream." << endl;
