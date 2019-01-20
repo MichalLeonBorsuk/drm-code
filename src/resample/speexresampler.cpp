@@ -27,15 +27,12 @@ void SpeexResampler::Free()
 void SpeexResampler::Resample(CVector<_REAL>& rInput, CVector<_REAL>& rOutput)
 {    
     size_t iOutputBlockSize = vecfOutput.size();
-    if (rOutput.Size() != int(iOutputBlockSize)) {
-        cerr << "SpeexResampler::Resample(): rOutput.Size(" << rOutput.Size() << ") != iOutputBlockSize(" << iOutputBlockSize << ")" << endl;
+    if ((rOutput.Size() != int(iOutputBlockSize)) || (GetFreeInputSize()<rInput.size())) {
+        cerr << "SpeexResampler::Resample(): initialisation needed" << endl;
         iOutputBlockSize = size_t(rOutput.Size());
-        vecfOutput.resize(iOutputBlockSize);
+        Init(rInput.size(), _REAL(rOutput.Size())/_REAL(rInput.size()));
     }
 
-    if(GetFreeInputSize()<rInput.size()) {
-        vecfInput.resize(rInput.size()+iInputBuffered);
-    }
     for (size_t i = 0; i < GetFreeInputSize(); i++)
         vecfInput[i+iInputBuffered] = float(rInput[int(i)]);
 

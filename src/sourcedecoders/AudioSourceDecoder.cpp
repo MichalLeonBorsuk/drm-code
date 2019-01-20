@@ -131,6 +131,9 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
                     if(iResOutBlockSize != vecTempResBufOutCurLeft.Size()) { // NOOP for AAC, needed for xHE-AAC
                         vecTempResBufOutCurLeft.Init(iResOutBlockSize, 0.0);
                         vecTempResBufOutCurRight.Init(iResOutBlockSize, 0.0);
+                        _REAL rRatio = _REAL(outputSampleRate) / _REAL(inputSampleRate);
+                        ResampleObjL.Init(vecTempResBufInLeft.Size(), rRatio);
+                        ResampleObjR.Init(vecTempResBufInLeft.Size(), rRatio);
                     }
 
                     ResampleObjL.Resample(vecTempResBufInLeft, vecTempResBufOutCurLeft);
