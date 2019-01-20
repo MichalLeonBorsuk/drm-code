@@ -1,4 +1,5 @@
 #include "xheaacsuperframe.h"
+#include "../util/CRC.h"
 
 XHEAACSuperFrame::XHEAACSuperFrame():AudioSuperFrame (),numChannels(0),superFrameSize(0),payload(),borders(),frameSize()
 {    
@@ -59,8 +60,15 @@ bool XHEAACSuperFrame::parse(CVectorEx<_BINARY>& asf)
     bool ok = true;
     unsigned frameBorderCount = asf.Separate(4);
     unsigned bitReservoirLevel = asf.Separate(4);
-    unsigned iheaderCRC = asf.Separate(8);
-    // TODO check CRC
+    CCRC CRCObject;
+    CRCObject.Reset(8);
+    CRCObject.AddByte((frameBorderCount << 4) | bitReservoirLevel);
+    if(CRCObject.CheckCRC(asf.Separate(8))) {
+        cerr << "superframe crc ok" << endl;
+    }
+    else {
+        cerr << "superframe crc bad but will hope the frameBorderCount is OK" << endl;
+    }
     // TODO handle reservoir
     unsigned bitResLevel = (bitReservoirLevel+1) * 384 * numChannels;
     unsigned directory_offset = superFrameSize - 2*frameBorderCount;
