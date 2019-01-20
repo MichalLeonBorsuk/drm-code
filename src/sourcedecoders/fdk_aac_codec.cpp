@@ -289,13 +289,27 @@ CAudioCodec::EDecError FdkAacCodec::Decode(const vector<uint8_t>& audio_frame, u
     memset(decode_buf, 0, sizeof(int16_t)*output_size);
     err = aacDecoder_DecodeFrame(hDecoder, decode_buf, output_size, 0);
 
-    if(err != AAC_DEC_OK) {
-        if(err == AAC_DEC_OUT_OF_MEMORY) {
-            cerr << "Heap returned NULL pointer. Output buffer is invalid." << endl;
-        }
-        if(err == AAC_DEC_UNKNOWN) {
-            cerr << "Error condition is of unknown reason, or from a another module. Output buffer is invalid." << endl;
-        }
+    if(err == AAC_DEC_OK) {
+        cerr << "good frame" << endl;
+    }
+    else if(err == AAC_DEC_PARSE_ERROR) {
+        cerr << "error parsing bitstream." << endl;
+        return CAudioCodec::DECODER_ERROR_UNKNOWN;
+    }
+    else if(err == AAC_DEC_OUTPUT_BUFFER_TOO_SMALL) {
+        cerr << "The provided output buffer is too small." << endl;
+        return CAudioCodec::DECODER_ERROR_UNKNOWN;
+    }
+    else if(err == AAC_DEC_OUT_OF_MEMORY) {
+        cerr << "Heap returned NULL pointer. Output buffer is invalid." << endl;
+        return CAudioCodec::DECODER_ERROR_UNKNOWN;
+    }
+    else if(err == AAC_DEC_UNKNOWN) {
+        cerr << "Error condition is of unknown reason, or from a another module. Output buffer is invalid." << endl;
+        return CAudioCodec::DECODER_ERROR_UNKNOWN;
+    }
+    else {
+        cerr << "other error " << hex << int(err) << dec << endl;
         return CAudioCodec::DECODER_ERROR_UNKNOWN;
     }
 

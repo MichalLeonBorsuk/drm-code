@@ -111,7 +111,7 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
        determining the position for writing the output vector */
     iOutputBlockSize = 0;
     int iResOutBlockSize = 0;
-
+    cerr << endl << "audio superframe with " << pAudioSuperFrame->getNumFrames() << " frames" << endl;
     for (size_t j = 0; j < pAudioSuperFrame->getNumFrames(); j++)
     {
         _BOOLEAN bCodecUpdated = FALSE;
@@ -179,6 +179,7 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
 
         if (bCurBlockOK && !bCurBlockFaulty)
         {
+            /* Increment correctly decoded audio blocks counter */
             iNumCorDecAudio++;
         }
 
