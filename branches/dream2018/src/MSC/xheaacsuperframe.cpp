@@ -64,15 +64,16 @@ bool XHEAACSuperFrame::parse(CVectorEx<_BINARY>& asf)
     CRCObject.Reset(8);
     CRCObject.AddByte((frameBorderCount << 4) | bitReservoirLevel);
     if(CRCObject.CheckCRC(asf.Separate(8))) {
-        cerr << "superframe crc ok" << endl;
+        //cerr << endl << "superframe crc ok" << endl;
     }
     else {
-        cerr << "superframe crc bad but will hope the frameBorderCount is OK" << endl;
+        //cerr << endl << "superframe crc bad but will hope the frameBorderCount is OK" << endl;
     }
     // TODO handle reservoir
     unsigned bitResLevel = (bitReservoirLevel+1) * 384 * numChannels;
     unsigned directory_offset = superFrameSize - 2*frameBorderCount;
     size_t start = payload.size();
+    //cerr << start << " bytes left from previous superframe" << endl;
     //cerr << "payload start " << start << " bit reservoir level " << bitReservoirLevel << " bitResLevel " << bitResLevel << " superframe size " << superFrameSize << " directory offset " << 8*directory_offset << " bits " << directory_offset << " bytes" << endl;
     // get the payload
     for(size_t i=2; i<directory_offset; i++) payload.push_back(asf.Separate(8));
@@ -111,7 +112,7 @@ bool XHEAACSuperFrame::parse(CVectorEx<_BINARY>& asf)
             if(borders[0]<2) return false;
             borders[0] -= 2; // header not in payload
             frameSize[0] = borders[0];
-            //cerr << "border 0 is " << borders[0] << " from start of payload" << endl;
+            //cerr << "border 0 is " << borders[0] << " bytes from start of payload" << endl;
             break;
         }
         for(unsigned i=1; i<borders.size(); i++) {
@@ -119,7 +120,7 @@ bool XHEAACSuperFrame::parse(CVectorEx<_BINARY>& asf)
             borders[i] -= 2; // header not in payload
             unsigned bytes = borders[i]-borders[i-1];
             frameSize[i] = bytes;
-            //cerr << "border " << i << " is " << borders[i] << " from start of payload" << endl;
+            //cerr << "border " << i << " is " << borders[i] << " bytes from start of payload" << endl;
         }
     }
     size_t bytesInFrames = 0; for(size_t i=0; i<frameSize.size(); i++) bytesInFrames+=frameSize[i];

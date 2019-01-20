@@ -31,6 +31,7 @@
 #include <sstream>
 #include <string>
 #include <algorithm>
+#include <cmath>
 #ifdef _WIN32
 # include <direct.h>
 #else
@@ -111,7 +112,7 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
        determining the position for writing the output vector */
     iOutputBlockSize = 0;
     int iResOutBlockSize = 0;
-    cerr << endl << "audio superframe with " << pAudioSuperFrame->getNumFrames() << " frames" << endl;
+    cerr << "audio superframe with " << pAudioSuperFrame->getNumFrames() << " frames" << endl;
     for (size_t j = 0; j < pAudioSuperFrame->getNumFrames(); j++)
     {
         _BOOLEAN bCodecUpdated = FALSE;
@@ -164,7 +165,7 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
         }
         else
         {
-            /* DRM AAC header was wrong, set flag to "bad block" */
+            /* DRM super-frame header was wrong, set flag to "bad block" */
             bCurBlockOK = FALSE;
             /* OPH: update audio status vector for RSCI */
             Parameters.Lock();
@@ -183,6 +184,15 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
             iNumCorDecAudio++;
         }
 
+        {
+            double l = 0.0, r = 0.0;
+            for(int i=0; i<vecTempResBufOutCurLeft.Size(); i++) {
+                l += vecTempResBufOutCurLeft[i];
+                r += vecTempResBufOutCurRight[i];
+            }
+            cerr << "energy after resampling and reverb left " << (l/vecTempResBufOutCurLeft.Size()) << " right " << (l/vecTempResBufOutCurRight.Size()) << endl;
+        }
+
         Parameters.Lock();
         Parameters.ReceiveStatus.SLAudio.SetStatus(status);
         Parameters.ReceiveStatus.LLAudio.SetStatus(status);
@@ -198,6 +208,19 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
 
         /* Add new block to output block size ("* 2" for stereo output block) */
         iOutputBlockSize += iResOutBlockSize * 2;
+
+        if(iOutputBlockSize==0) {
+            cerr << "iOutputBlockSize is zero" << endl;
+        }
+        else {
+            double d=0.0;
+            for (int i = 0; i < iOutputBlockSize; i++)
+            {
+                double n = (*pvecOutputData)[i];
+                d += n*n;
+            }
+            cerr << "energy after converting " << iOutputBlockSize << " samples back to int " << sqrt(d/iOutputBlockSize) << endl;
+        }
 
     }
 }
