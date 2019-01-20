@@ -63,11 +63,14 @@ void SpeexResampler::Resample(CVector<_REAL>& rInput, CVector<_REAL>& rOutput)
         rOutput[int(i)] = _REAL(vecfOutput[i]);
 
     iInputBuffered = input_frames - input_frames_used;
-    if(vecfInput.size()<iInputBuffered) {
-        vecfInput.resize(iInputBuffered);
+    if(iInputBuffered>0) {
+        cerr << "resampling buffered " << iInputBuffered << " frames" << endl;
+        if(vecfInput.size()<iInputBuffered) {
+            vecfInput.resize(iInputBuffered);
+        }
+        for (size_t i = 0; i < iInputBuffered; i++)
+            vecfInput[i] = vecfInput[i+input_frames_used];
     }
-    for (size_t i = 0; i < iInputBuffered; i++)
-        vecfInput[i] = vecfInput[i+input_frames_used];
 }
 
 size_t SpeexResampler::GetFreeInputSize() const

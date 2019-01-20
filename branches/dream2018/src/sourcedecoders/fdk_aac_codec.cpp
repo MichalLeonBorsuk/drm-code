@@ -87,7 +87,7 @@ FdkAacCodec::CanDecode(CAudioParam::EAudCod eAudioCoding)
     return false;
 }
 
-static void logConfig(const CStreamInfo& info) {
+static void logAOT(const CStreamInfo& info) {
     switch (info.aot) {
     case AUDIO_OBJECT_TYPE::AOT_DRM_AAC:
         cerr << " AAC";
@@ -111,9 +111,58 @@ static void logConfig(const CStreamInfo& info) {
     if(info.extAot == AUDIO_OBJECT_TYPE::AOT_SBR) {
         cerr << "+SBR";
     }
+}
+    /*
+     * AC_ER_VCB11 1 means use  virtual codebooks
+     * AC_ER_RVLC  1 means use huffman codeword reordering
+     * AC_ER_HCR   1 means use virtual codebooks
+     * AC_SCALABLE AAC Scalable
+     * AC_ELD AAC-ELD
+     * AC_LD AAC-LD
+     * AC_ER ER syntax
+     * AC_BSAC BSAC
+     * AC_USAC USAC
+     * AC_RSV603DA RSVD60 3D audio
+     * AC_HDAAC HD-AAC
+     * AC_RSVD50 Rsvd50
+     * AC_SBR_PRESENT SBR present flag (from ASC)
+     * AC_SBRCRC  SBR CRC present flag. Only relevant for AAC-ELD for now.
+     * AC_PS_PRESENT PS present flag (from ASC or implicit)
+     * AC_MPS_PRESENT   MPS present flag (from ASC or implicit)
+     * AC_DRM DRM bit stream syntax
+     * AC_INDEP Independency flag
+     * AC_MPEGD_RES MPEG-D residual individual channel data.
+     * AC_SAOC_PRESENT SAOC Present Flag
+     * AC_DAB DAB bit stream syntax
+     * AC_ELD_DOWNSCALE ELD Downscaled playout
+     * AC_LD_MPS Low Delay MPS.
+     * AC_DRC_PRESENT  Dynamic Range Control (DRC) data found.
+     * AC_USAC_SCFGI3  USAC flag: If stereoConfigIndex is 3 the flag is set.
+     */
+
+static void logFlags(const CStreamInfo& info) {
+
+    if((info.flags & AC_USAC) == AC_USAC) {
+        cerr << "+USAC";
+    }
+    if((info.flags & AC_SBR_PRESENT) == AC_SBR_PRESENT) {
+        cerr << "+SBR";
+    }
+    if((info.flags & AC_SBRCRC) == AC_SBRCRC) {
+        cerr << "+SBR-CRC";
+    }
     if((info.flags & AC_PS_PRESENT) == AC_PS_PRESENT) {
         cerr << "+PS";
     }
+    if((info.flags & AC_MPS_PRESENT) == AC_MPS_PRESENT) {
+        cerr << "+MPS";
+    }
+    if((info.flags & AC_INDEP) == AC_INDEP) {
+        cerr << " (independent)";
+    }
+}
+
+static void logNumbers(const CStreamInfo& info) {
     cerr << " channels coded " << info.aacNumChannels
          << " coded sample rate " << info.aacSampleRate
          << " channels " << info.numChannels
@@ -126,7 +175,6 @@ static void logConfig(const CStreamInfo& info) {
     cerr << " channel 0 type " << int(info.pChannelType[0]) << " index " << int(info.pChannelIndices[0]);
     if(info.numChannels==2)
         cerr << " channel 1 type " << int(info.pChannelType[1]) << " index " << int(info.pChannelIndices[1]);
-    cerr << endl;
 }
 
 bool
@@ -153,7 +201,10 @@ FdkAacCodec::DecOpen(const CAudioParam& AudioParam, int& iAudioSampleRate)
             return true;// TODO
         }
         cerr << "DecOpen";
-        logConfig(*pinfo);
+        logAOT(*pinfo);
+        logFlags(*pinfo);
+        //logNumbers(*pinfo);
+        cerr << endl;
         iAudioSampleRate = pinfo->extSamplingRate;
 
         if(pinfo->aot == AUDIO_OBJECT_TYPE::AOT_USAC) bUsac = true;
@@ -201,7 +252,10 @@ CAudioCodec::EDecError FdkAacCodec::Decode(const vector<uint8_t>& audio_frame, u
     }
 
     cerr << "Decode";
-    logConfig(*pinfo);
+    //logAOT(*pinfo);
+    logFlags(*pinfo);
+    //logNumbers(*pinfo);
+    cerr << endl;
 
     if(pinfo->aacNumChannels == 0) {
         cerr << "zero output channels: " << err << endl;
@@ -215,7 +269,7 @@ CAudioCodec::EDecError FdkAacCodec::Decode(const vector<uint8_t>& audio_frame, u
         cerr << "Fill failed: " << err << endl;
         return CAudioCodec::DECODER_ERROR_UNKNOWN;
     }
-    cerr << "aac decode after fill bufferSize " << bufferSize << ", bytesValid " << bytesValid << endl;
+    //cerr << "aac decode after fill bufferSize " << bufferSize << ", bytesValid " << bytesValid << endl;
     if (bytesValid != 0) {
         cerr << "Unable to feed all " << bufferSize << " input bytes, bytes left " << bytesValid << endl;
         return CAudioCodec::DECODER_ERROR_UNKNOWN;
