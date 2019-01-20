@@ -36,8 +36,9 @@
 #include "DialogUtil.h"
 #include "../util-QT/Util.h"
 #include "../DrmTransmitter.h"
-#include "../sourcedecoders/fdk_aac_codec.h"
-
+#ifdef HAVE_LIBFDK_AAC
+# include "../sourcedecoders/fdk_aac_codec.h"
+#endif
 
 AACCodecParams::AACCodecParams(CSettings& Settings, CParameter& Parameters,
 	int iShortID, QWidget* parent)
