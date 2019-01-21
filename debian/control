@@ -10,7 +10,7 @@ Homepage: https://sourceforge.net/p/drm
 
 Package: dream
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}
+Depends: ${shlibs:Depends}, ${misc:Depends}, libfaad2
 Description: A software radio for AM and Digital Radio Mondiale (DRM)
  Dream is a software implementation of a Digital Radio Mondiale (DRM) receiver.
  With Dream, DRM broadcasts can be received with an SDR dongle or 
