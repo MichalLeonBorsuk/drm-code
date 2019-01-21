@@ -142,10 +142,13 @@ unix:!cross_compile {
       packagesExist(hamlib) {
         CONFIG += hamlib
       }
-      packagesExist(gpsd) {
+      packagesExist(libgps) {
         CONFIG += gps
       }
       packagesExist(pcap) {
+        CONFIG += pcap
+      }
+      exists(/usr/include/pcap) {
         CONFIG += pcap
       }
       packagesExist(opus) {
