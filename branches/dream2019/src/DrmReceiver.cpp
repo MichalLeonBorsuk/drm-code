@@ -46,6 +46,7 @@
 #ifdef HAVE_LIBHAMLIB
 # ifdef QT_CORE_LIB // TODO should not have dependency to qt here
 #  include "util-QT/Rig.h"
+#  include <QMetaType>
 # endif
 #endif
 #ifdef USE_CONSOLEIO
@@ -63,11 +64,13 @@ CDRMReceiver::CDRMReceiver(CSettings* pSettings) : CDRMTransceiver(pSettings),
     FreqSyncAcq(),
     ChannelEstimation(),
     UtilizeFACData(), UtilizeSDCData(), MSCDemultiplexer(),
-    AudioSourceDecoder(),
+    AudioSourceDecoder(),audioSuperframeDecoder(),audioFrameReceiver(),audioFrameDecoder(),audioOutput(),
     pUpstreamRSCI(new CUpstreamDI()), DecodeRSIMDI(), downstreamRSCI(),
     RSIPacketBuf(),
-    MSCDecBuf(MAX_NUM_STREAMS), MSCUseBuf(MAX_NUM_STREAMS),
-    MSCSendBuf(MAX_NUM_STREAMS), iAcquRestartCnt(0),
+    MSCDecBuf(MAX_NUM_STREAMS), MSCUseBuf(MAX_NUM_STREAMS),MSCSendBuf(MAX_NUM_STREAMS),
+    MSCUseBufOld(MAX_NUM_STREAMS),MSCUseBufNew(MAX_NUM_STREAMS),
+    iAcquRestartCnt(0),
+    rxSignaller(),
     iAcquDetecCnt(0), iGoodSignCnt(0), eReceiverMode(RM_DRM),
     eNewReceiverMode(RM_DRM), iAudioStreamID(STREAM_ID_NOT_USED),
     iDataStreamID(STREAM_ID_NOT_USED), bRestartFlag(TRUE),
@@ -90,7 +93,11 @@ CDRMReceiver::CDRMReceiver(CSettings* pSettings) : CDRMTransceiver(pSettings),
 #ifdef HAVE_LIBGPS
     Parameters.gps_data.gps_fd = -1;
 #endif
-
+    int id = qRegisterMetaType<AudioFrame>();
+    id = qRegisterMetaType<CAudioParam>();
+    audioFrameReceiver.connect(&audioFrameReceiver, &AudioFrameReceiver::frameReceived, &audioFrameDecoder, &AudioFrameDecoder::decodeFrame);
+    rxSignaller.connect(&rxSignaller, &RxSignaller::audioConfigSignalled,  &audioFrameDecoder, &AudioFrameDecoder::on_rxSignaller_audioConfigSignalled);
+    rxSignaller.connect(&audioFrameDecoder, &AudioFrameDecoder::audioDecoded, &audioOutput, &AudioOutput::audioDecoded);
 }
 
 CDRMReceiver::~CDRMReceiver()
@@ -297,6 +304,7 @@ CDRMReceiver::Run()
         for (i = 0; i < MSCDecBuf.size(); i++)
         {
             SplitMSC[i].ProcessData(Parameters, MSCDecBuf[i], MSCUseBuf[i], MSCSendBuf[i]);
+            SplitMSC2[i].ProcessData(Parameters, MSCUseBuf[i], MSCUseBufOld[i], MSCUseBufNew[i]);
         }
         break;
     case RM_AM:
@@ -658,22 +666,28 @@ CDRMReceiver::UtilizeDRM(_BOOLEAN& bEnoughData)
     /* Data decoding */
     if (iDataStreamID != STREAM_ID_NOT_USED)
     {
-        if (DataDecoder.WriteData(Parameters, MSCUseBuf[iDataStreamID]))
+        if (DataDecoder.WriteData(Parameters, MSCUseBufOld[iDataStreamID]))
             bEnoughData = TRUE;
     }
     /* Source decoding (audio) */
     if (iAudioStreamID != STREAM_ID_NOT_USED)
     {
         //cerr << "audio processing" << endl;
-        if (AudioSourceDecoder.ProcessData(Parameters,
-                                           MSCUseBuf[iAudioStreamID],
-                                           AudSoDecBuf))
+        if (AudioSourceDecoder.ProcessData(Parameters, MSCUseBufOld[iAudioStreamID], AudSoDecBuf))
         {
             bEnoughData = TRUE;
 
-            /* Store the number of correctly decoded audio blocks for
-             *                            the history */
+            /* Store the number of correctly decoded audio blocks for the history */
             PlotManager.SetCurrentCDAud(AudioSourceDecoder.GetNumCorDecAudio());
+        }
+
+        if (audioSuperframeDecoder.WriteData(Parameters, MSCUseBufNew[iAudioStreamID]))
+        {
+            bEnoughData = TRUE;
+            for(unsigned i=0; i<audioSuperframeDecoder.getNumFrames(); i++) {
+                AudioFrame& af = audioSuperframeDecoder.getFrame(i);
+                audioFrameReceiver.decodeFrame(af);
+            }
         }
     }
     if( (iDataStreamID == STREAM_ID_NOT_USED)
@@ -681,9 +695,7 @@ CDRMReceiver::UtilizeDRM(_BOOLEAN& bEnoughData)
          (iAudioStreamID == STREAM_ID_NOT_USED)
     ) // try and decode stream 0 as audio anyway
     {
-        if (AudioSourceDecoder.ProcessData(Parameters,
-                                           MSCUseBuf[0],
-                                           AudSoDecBuf))
+        if (AudioSourceDecoder.ProcessData(Parameters,MSCUseBuf[0],AudSoDecBuf))
         {
             bEnoughData = TRUE;
 
@@ -1223,6 +1235,10 @@ CDRMReceiver::InitsForAllModules()
         SplitMSC[i].SetInitFlag();
         MSCDecBuf[i].Clear();
         MSCUseBuf[i].Clear();
+        SplitMSC2[i].SetStream(i);
+        SplitMSC2[i].SetInitFlag();
+        MSCUseBufNew[i].Clear();
+        MSCUseBufOld[i].Clear();
         MSCSendBuf[i].Clear();
     }
     ConvertAudio.SetInitFlag();
@@ -1245,6 +1261,7 @@ CDRMReceiver::InitsForAllModules()
     DecodeRSIMDI.SetInitFlag();
     MSCDemultiplexer.SetInitFlag();
     AudioSourceDecoder.SetInitFlag();
+    audioSuperframeDecoder.SetInitFlag();
     DataDecoder.SetInitFlag();
     WriteData.SetInitFlag();
 
@@ -1410,6 +1427,8 @@ CDRMReceiver::InitsForMSCDemux()
     {
         SplitMSC[i].SetStream(i);
         SplitMSC[i].SetInitFlag();
+        SplitMSC2[i].SetStream(i);
+        SplitMSC2[i].SetInitFlag();
     }
     InitsForAudParam();
     InitsForDataParam();
@@ -1427,6 +1446,8 @@ CDRMReceiver::InitsForAudParam()
     {
         MSCDecBuf[i].Clear();
         MSCUseBuf[i].Clear();
+        MSCUseBufNew[i].Clear();
+        MSCUseBufOld[i].Clear();
         MSCSendBuf[i].Clear();
     }
 
@@ -1434,9 +1455,12 @@ CDRMReceiver::InitsForAudParam()
     DecodeRSIMDI.SetInitFlag();
     MSCDemultiplexer.SetInitFlag();
     int a = Parameters.GetCurSelAudioService();
-    iAudioStreamID = Parameters.GetAudioParam(a).iStreamID;
+    CAudioParam ap = Parameters.GetAudioParam(a);
+    iAudioStreamID = ap.iStreamID;
     Parameters.SetNumAudioDecoderBits(Parameters.GetStreamLen(iAudioStreamID) * SIZEOF__BYTE);
     AudioSourceDecoder.SetInitFlag();
+    audioSuperframeDecoder.SetInitFlag();
+    rxSignaller.signalAudioConfig(ap);
 }
 
 void

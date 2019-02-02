@@ -2,6 +2,7 @@
 #define AUDIOPARAM_H
 
 #include "../util/Vector.h"
+#include <QMetaType>
 
 class CAudioParam
 {
@@ -151,6 +152,9 @@ public:
         return false;
     }
 
+    int getSampleRateHz() const;
 };
+
+Q_DECLARE_METATYPE(CAudioParam)
 
 #endif // AUDIOPARAM_H

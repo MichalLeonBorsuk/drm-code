@@ -223,3 +223,26 @@ void CAudioParam::EnqueueType9(CVector<_BINARY>& vecbiData) const
         vecbiData.Enqueue(xHE_AAC_config[i], 8);
     }
 }
+
+int CAudioParam::getSampleRateHz() const
+{
+    switch (eAudioSamplRate) {
+    case CAudioParam::AS_9_6KHZ:
+        return 9600;
+    case CAudioParam::AS_16KHZ:
+        return 16000;
+    case CAudioParam::AS_19_2KHZ:
+        return 19200;
+    case CAudioParam::AS_12KHZ:
+        return 12000;
+    case CAudioParam::AS_24KHZ:
+        return 24000;
+    case CAudioParam::AS_32KHZ:
+        return 32000;
+    case CAudioParam::AS_38_4KHZ:
+        return 38400;
+    case CAudioParam::AS_48KHZ:
+        return 48000;
+    }
+
+}

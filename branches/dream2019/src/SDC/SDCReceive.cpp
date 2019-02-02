@@ -164,7 +164,7 @@ CSDCReceive::ERetStatus CSDCReceive::SDCParam(CVector<_BINARY>* pbiData,
                 bError = DataEntityType4(pbiData, iLengthOfBody, Parameter, bVersionFlag);
                 break;
 
-            case 5: /* Type 5 */
+            case 5: /*  */
                 bError = DataEntityType5(pbiData, iLengthOfBody, Parameter, bVersionFlag);
                 break;
 

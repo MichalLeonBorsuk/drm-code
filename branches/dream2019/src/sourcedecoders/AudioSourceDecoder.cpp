@@ -112,7 +112,7 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
        determining the position for writing the output vector */
     iOutputBlockSize = 0;
     int iResOutBlockSize = 0;
-    cerr << "audio superframe with " << pAudioSuperFrame->getNumFrames() << " frames" << endl;
+    //cerr << "audio superframe with " << pAudioSuperFrame->getNumFrames() << " frames" << endl;
     for (size_t j = 0; j < pAudioSuperFrame->getNumFrames(); j++)
     {
         _BOOLEAN bCodecUpdated = FALSE;
@@ -190,7 +190,7 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
                 l += vecTempResBufOutCurLeft[i];
                 r += vecTempResBufOutCurRight[i];
             }
-            cerr << "energy after resampling and reverb left " << (l/vecTempResBufOutCurLeft.Size()) << " right " << (l/vecTempResBufOutCurRight.Size()) << endl;
+            //cerr << "energy after resampling and reverb left " << (l/vecTempResBufOutCurLeft.Size()) << " right " << (l/vecTempResBufOutCurRight.Size()) << endl;
         }
 
         Parameters.Lock();
@@ -219,7 +219,7 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
                 double n = (*pvecOutputData)[i];
                 d += n*n;
             }
-            cerr << "energy after converting " << iOutputBlockSize << " samples back to int " << sqrt(d/iOutputBlockSize) << endl;
+            //cerr << "energy after converting " << iOutputBlockSize << " samples back to int " << sqrt(d/iOutputBlockSize) << endl;
         }
 
     }
@@ -250,7 +250,7 @@ CAudioSourceDecoder::InitInternal(CParameter & Parameters)
     DoNotProcessData = FALSE;
     iOutputBlockSize = 0;
 
-    cerr << "init" << endl;
+    //cerr << "init" << endl;
 
     /* Set audiodecoder to empty string - means "unknown" and "can't decode" to GUI */
     audiodecoder = "";
