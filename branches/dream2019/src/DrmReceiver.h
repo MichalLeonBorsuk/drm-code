@@ -47,6 +47,9 @@
 #include "datadecoding/DataDecoder.h"
 #include "sourcedecoders/AudioSourceEncoder.h"
 #include "sourcedecoders/AudioSourceDecoder.h"
+#include "sourcedecoders/audioframereceiver.h"
+#include "sourcedecoders/audioframedecoder.h"
+#include "sound/audiooutput.h"
 #include "mlc/MLC.h"
 #include "interleaver/SymbolInterleaver.h"
 #include "ofdmcellmapping/OFDMCellMapping.h"
@@ -63,7 +66,9 @@
 #include <QAudioInput>
 #include <QAudioOutput>
 #endif
+#include "../MSC/audiosuperframedecoder.h"
 #include <QString>
+#include "../util-QT/rxsignaller.h"
 
 /* Definitions ****************************************************************/
 /* Number of FAC frames until the acquisition is activated in case a signal
@@ -361,6 +366,10 @@ protected:
     CMSCMLCDecoder			MSCMLCDecoder;
     CMSCDemultiplexer		MSCDemultiplexer;
     CAudioSourceDecoder		AudioSourceDecoder;
+    AudioSuperframeDecoder  audioSuperframeDecoder;
+    AudioFrameReceiver      audioFrameReceiver;
+    AudioFrameDecoder       audioFrameDecoder;
+    AudioOutput             audioOutput;
     CDataDecoder			DataDecoder;
     CSplit					Split;
     CSplit					SplitForIQRecord;
@@ -370,6 +379,7 @@ protected:
     CSplitFAC				SplitFAC;
     CSplitSDC				SplitSDC;
     CSplitMSC				SplitMSC[MAX_NUM_STREAMS];
+    CSplitMSC				SplitMSC2[MAX_NUM_STREAMS];
     CConvertAudio			ConvertAudio;
     CAMDemodulation			AMDemodulation;
     CAMSSPhaseDemod			AMSSPhaseDemod;
@@ -412,10 +422,13 @@ protected:
     vector<CSingleBuffer<_BINARY> >	MSCDecBuf;
     vector<CSingleBuffer<_BINARY> >	MSCUseBuf;
     vector<CSingleBuffer<_BINARY> >	MSCSendBuf;
+    vector<CSingleBuffer<_BINARY> >	MSCUseBufOld;
+    vector<CSingleBuffer<_BINARY> >	MSCUseBufNew;
     CSingleBuffer<_BINARY>			EncAMAudioBuf;
     CCyclicBuffer<_SAMPLE>			AudSoDecBuf;
     CCyclicBuffer<_SAMPLE>			AMAudioBuf;
     CCyclicBuffer<_SAMPLE>			AMSoEncBuf; // For encoding
+    RxSignaller                     rxSignaller;
 
     int						iAcquRestartCnt;
     int						iAcquDetecCnt;
