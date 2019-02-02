@@ -182,11 +182,11 @@ CWriteData::SetSoundInterface(string device)
     {
         if(device == di.deviceName().toStdString()) {
             QAudioFormat nearestFormat = di.nearestFormat(format);
-            QAudioOutput* pAudioOutput = new QAudioOutput(di, nearestFormat);
-            pAudioOutput->setBufferSize(1000000);
+            //QAudioOutput* pAudioOutput = new QAudioOutput(di, nearestFormat);
+            //pAudioOutput->setBufferSize(1000000);
             // TODO QIODevice needs to be declared in working thread
-            pIODevice = pAudioOutput->start();
-            if(pAudioOutput->error()!=QAudio::NoError)
+            //TODOpIODevice = pAudioOutput->start();
+            //if(pAudioOutput->error()!=QAudio::NoError)
             {
                 qDebug("Can't open audio output");
             }
@@ -272,7 +272,7 @@ void CWriteData::ProcessDataInternal(CParameter& Parameters)
 
 #ifdef QT_MULTIMEDIA_LIB
     bool bBad = true;
-    if(pIODevice)
+    if(pIODevice && pIODevice->isWritable())
     {
         qint64 n = 2*vecsTmpAudData.Size();
         int m = pIODevice->write((char*)&vecsTmpAudData[0], n);
