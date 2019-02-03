@@ -44,39 +44,10 @@ use one channel for recording) */
 #define BITS_PER_SAMPLE         16      /* Use all bits of the D/A-converter */
 #define BYTES_PER_SAMPLE        2       /* Number of bytes per sample */
 
-#ifdef USE_OSS
-#include <map>
-
-class COSSDev
-{
-public:
-    COSSDev():name() {}
-    void open(const string& devname, int mode);
-    int fildes() {
-        return dev[name].fildes();
-    }
-    void close();
-protected:
-    class devdata
-    {
-    public:
-        devdata():count(0),fd(0) {}
-        void open(const string&, int);
-        void close();
-        int fildes();
-    protected:
-        int count;
-        int fd;
-    };
-    static map<string,devdata> dev;
-    string name;
-};
-#endif
-
 class CSoundBuf : public CCyclicBuffer<_SAMPLE> {
 
 public:
-    CSoundBuf() : keep_running(TRUE)
+    CSoundBuf() : keep_running(true)
 #ifdef QT_CORE_LIB
         , data_accessed()
 #endif
@@ -112,7 +83,5 @@ public:
     }
 };
 #endif
-
-void getdevices(vector<string>& names, vector<string>& devices, bool playback);
 
 #endif

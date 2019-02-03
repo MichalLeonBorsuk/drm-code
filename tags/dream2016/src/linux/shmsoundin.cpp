@@ -73,7 +73,7 @@ CShmSoundIn::Init(int iNewBufferSize, _BOOLEAN bNewBlocking)
 }
 
 void
-CShmSoundIn::Enumerate(vector < string > &choices)
+CShmSoundIn::Enumerate(vector < string > &choices, vector<string>&)
 {
     choices.clear();
     if (shmid==-1)

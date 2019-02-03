@@ -29,7 +29,7 @@
 #ifndef _SOUNDOUT_H
 #define _SOUNDOUT_H
 
-#include "../soundinterface.h"
+#include "../sound/soundinterface.h"
 #include "../util/Buffer.h"
 #include "soundcommon.h"
 
@@ -46,13 +46,11 @@ public:
     CSoundOut();
     virtual ~CSoundOut() {}
 
-    virtual void                Enumerate(vector<string>& choices) {
-        choices = names;
-    }
-    virtual void                SetDev(int iNewDevice);
-    virtual int                 GetDev();
+    virtual void Enumerate(vector<string>&, vector<string>&);
+    virtual void SetDev(string sNewDevice);
+    virtual string GetDev();
 
-    void Init(int iNewBufferSize, bool bNewBlocking = false);
+    bool Init(int iSampleRate, int iNewBufferSize, bool bNewBlocking = false);
     bool Write(CVector<short>& psData);
 
     void Close();
@@ -65,7 +63,6 @@ protected:
     int     iBufferSize, iInBufferSize;
     short int *tmpplaybuf;
     bool    bBlockingPlay;
-    vector<string> devices;
 
     class CPlayThread : public CThread
     {
@@ -78,16 +75,10 @@ protected:
         _SAMPLE tmpplaybuf[NUM_OUT_CHANNELS * FRAGSIZE];
     } PlayThread;
 
-    vector<string> names;
     bool bChangDev;
-    int iCurrentDevice;
-#ifdef USE_ALSA
+    string sCurrentDevice;
+    int iSampleRate;
     snd_pcm_t *handle;
-#endif
-#ifdef USE_OSS
-    COSSDev dev;
-#endif
-
 };
 
 #endif
