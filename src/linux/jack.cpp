@@ -349,7 +349,7 @@ CSoundInJack::~CSoundInJack()
 }
 
 void
-CSoundInJack::Enumerate(vector<string>& choices)
+CSoundInJack::Enumerate(vector<string>& choices, vector<string>&)
 {
     ports.load(data.client, JackPortIsOutput);
     choices = ports.devices;
@@ -522,7 +522,7 @@ CSoundOutJack & CSoundOutJack::operator=(const CSoundOutJack & e)
 }
 
 void
-CSoundOutJack::Enumerate(vector<string>& choices)
+CSoundOutJack::Enumerate(vector<string>& choices, vector<string>&)
 {
     ports.load(data.client, JackPortIsInput);
     choices = ports.devices;

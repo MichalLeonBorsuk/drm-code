@@ -75,9 +75,9 @@ public:
 
     virtual void        Init(int iNewBufferSize, _BOOLEAN bNewBlocking = TRUE);
     virtual _BOOLEAN    Read(CVector<short>& psData);
-    virtual void        Enumerate(vector<string>&);
-    virtual int         GetDev();
-    virtual void        SetDev(int iNewDev);
+    virtual void        Enumerate(vector<string>&, vector<string>&);
+    virtual string      GetDev();
+    virtual void        SetDev(string iNewDev);
     virtual void        Close();
 protected:
     int iBufferSize;
@@ -98,9 +98,9 @@ public:
 
     virtual void        Init(int iNewBufferSize, _BOOLEAN bNewBlocking = TRUE);
     virtual _BOOLEAN    Write(CVector<short>& psData);
-    virtual void        Enumerate(vector<string>&);
-    virtual int         GetDev();
-    virtual void        SetDev(int iNewDev);
+    virtual void        Enumerate(vector<string>&, vector<string>&);
+    virtual string      GetDev();
+    virtual void        SetDev(string iNewDev);
     virtual void        Close();
 protected:
     int iBufferSize;
