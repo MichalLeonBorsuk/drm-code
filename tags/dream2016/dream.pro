@@ -377,11 +377,9 @@ qwt {
 }
 alsa {
     DEFINES += USE_ALSA
-    HEADERS += src/linux/soundsrc.h \
-               src/linux/soundin.h \
-               src/linux/soundout.h
-    SOURCES += src/linux/alsa.cpp \
-               src/linux/soundsrc.cpp
+    HEADERS += src/linux/soundin.h src/linux/soundout.h src/linux/soundcommon.h
+    SOURCES += src/linux/soundin.cpp src/linux/soundout.cpp src/linux/soundcommon.cpp
+    LIBS += -lasound
     message("with alsa")
 }
 mmsystem {

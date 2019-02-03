@@ -29,7 +29,7 @@
 #ifndef _SOUNDIN_H
 #define _SOUNDIN_H
 
-#include "../soundinterface.h"
+#include "../sound/soundinterface.h"
 #include "../util/Buffer.h"
 #include "soundcommon.h"
 
@@ -48,13 +48,11 @@ public:
     CSoundIn();
     virtual ~CSoundIn() {}
 
-    virtual void                Enumerate(vector<string>& choices) {
-        choices = names;
-    }
-    virtual void                SetDev(int iNewDevice);
-    virtual int                 GetDev();
+    virtual void Enumerate(vector<string>&, vector<string>&);
+    virtual void SetDev(string sNewDevice);
+    virtual string GetDev();
 
-    void Init(int iNewBufferSize, bool bNewBlocking = true);
+    bool Init(int iSampleRate, int iNewBufferSize, bool bNewBlocking = true);
     bool Read(CVector<short>& psData);
     void Close();
 
@@ -66,7 +64,6 @@ protected:
     int     iBufferSize, iInBufferSize;
     short int *tmprecbuf;
     bool    bBlockingRec;
-    vector<string> devices;
 
     class CRecThread : public CThread
     {
@@ -80,15 +77,10 @@ protected:
     } RecThread;
 
 protected:
-    vector<string> names;
     bool bChangDev;
-    int iCurrentDevice;
-#ifdef USE_ALSA
+    string sCurrentDevice;
+    int iSampleRate;
     snd_pcm_t *handle;
-#endif
-#ifdef USE_OSS
-    COSSDev dev;
-#endif
 };
 
 #endif
