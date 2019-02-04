@@ -39,46 +39,14 @@
 #define ALSA_PCM_NEW_HW_PARAMS_API
 #define ALSA_PCM_NEW_SW_PARAMS_API
 
-CSoundIn::CSoundIn(): handle(NULL), bChangDev(true), sCurrentDevice("")
+CSoundIn::CSoundIn(): bChangDev(true), sCurrentDevice(""),handle(nullptr)
 {
     RecThread.pSoundIn = this;
 }
 
 void CSoundIn::Enumerate(vector<string>& choices, vector<string>& descriptions)
 {
-    choices.resize(0);
-    descriptions.resize(0);
-
-    char **hints;
-    int err = snd_device_name_hint(-1, "pcm", (void***)&hints);
-    if (err != 0)
-       return;//Error! Just return
-
-    char** n = hints;
-    while (*n != nullptr) {
-
-        char *ioid = snd_device_name_get_hint(*n, "IOID");
-        if (ioid == nullptr || 0 == strcmp("Input", ioid)) {
-            char *name = snd_device_name_get_hint(*n, "NAME");
-            if (name != nullptr && 0 != strcmp("null", name)) {
-                char *desc = snd_device_name_get_hint(*n, "DESC");
-                if (desc != nullptr && 0 != strcmp("null", desc)) {
-                    descriptions.push_back(desc);
-                    free(desc);
-                }
-                else {
-                    descriptions.push_back("");
-                }
-                choices.push_back(name);
-                free(name);
-            }
-        }
-        free(ioid);
-        n++;
-    }
-
-    //Free hint buffer too
-    snd_device_name_free_hint((void**)hints);
+    enumerate(choices, descriptions, SND_PCM_STREAM_CAPTURE);
 }
 
 void

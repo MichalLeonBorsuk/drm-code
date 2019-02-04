@@ -35,7 +35,6 @@
 
 /* Definitions ****************************************************************/
 #define SOUNDBUFLEN 102400
-
 #define FRAGSIZE 8192
 //#define FRAGSIZE 1024
 
@@ -58,7 +57,7 @@ public:
 protected:
     void Init_HW();
     int write_HW( _SAMPLE *playbuf, int size );
-    void close_HW( void );
+    void close_HW();
 
     int     iBufferSize, iInBufferSize;
     short int *tmpplaybuf;

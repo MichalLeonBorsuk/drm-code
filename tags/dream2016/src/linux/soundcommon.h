@@ -84,4 +84,10 @@ public:
 };
 #endif
 
+void enumerate(vector<string>& choices, vector<string>& descriptions, snd_pcm_stream_t direction);
+string checkName(vector<string> names, string sCurrentDevice);
+snd_pcm_t* Init_hw(snd_pcm_uframes_t period_size, int iSampleRate, string name, snd_pcm_stream_t direction);
+void close_hw(snd_pcm_t* handle);
+int write_hw(snd_pcm_t* handle, _SAMPLE *playbuf, snd_pcm_uframes_t size );
+
 #endif
