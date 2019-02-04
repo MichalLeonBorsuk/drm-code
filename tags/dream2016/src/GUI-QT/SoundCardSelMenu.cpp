@@ -203,14 +203,14 @@ void CSoundCardSelMenu::OnSoundSignalUpscale(bool bChecked)
     emit sampleRateChanged();
 }
 
-QMenu* CSoundCardSelMenu::InitDevice(QMenu* self, QMenu* parent, const QString& text, const int* deriredsamplerate, const bool bInput)
+QMenu* CSoundCardSelMenu::InitDevice(QMenu* self, QMenu* parent, const QString& text, const int* desiredsamplerate, const bool bInput)
 {
     QMenu* menu = self != NULL ? self : parent->addMenu(text);
     menu->clear();
     QActionGroup* group = NULL;
     CSelectionInterface* intf = bInput ? (CSelectionInterface*)DRMTransceiver.GetSoundInInterface() : (CSelectionInterface*)DRMTransceiver.GetSoundOutInterface();
     vector<deviceprop>& devs(bInput ? inputDevs : outputDevs);
-    intf->Enumerate(devs, deriredsamplerate);
+    intf->Enumerate(devs, desiredsamplerate);
     int iNumSoundDev = devs.size();
     string sDefaultDev = intf->GetDev();
     deviceprop** curDev = bInput ? &curInputDev : &curOutputDev;
