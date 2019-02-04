@@ -51,7 +51,7 @@ CDRMReceiver::MAX_UNLOCKED_COUNT = 2;
 
 /* Implementation *************************************************************/
 CDRMReceiver::CDRMReceiver(CSettings* pSettings) :
-    CDRMTransceiver(pSettings, new CSoundInNull, new CSoundOut),
+    CDRMTransceiver(pSettings, new CSoundIn, new CSoundOut),
     controller(NULL),
     ReceiveData(), WriteData(pSoundOutInterface),
     FreqSyncAcq(),

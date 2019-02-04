@@ -26,17 +26,12 @@
  *
 \******************************************************************************/
 
-#ifndef _SOUND_H
-#define _SOUND_H
+#ifndef SOUND_H
+#define SOUND_H
 
 #if defined(WIN32) && !defined(USE_PORTAUDIO) && !defined(USE_JACK) && !defined(USE_QTAUDIO)
 /* mmsystem sound interface */
 # include "../windows/Sound.h"
-#else
-
-# ifdef USE_OSS
-#  include "../linux/soundin.h"
-#  include "../linux/soundout.h"
 # endif
 
 # ifdef USE_ALSA
@@ -75,12 +70,10 @@ typedef CSoundInQT CSoundIn;
 typedef CSoundOutQT CSoundOut;
 # endif
 
-# if !defined(USE_OSS) && !defined(USE_ALSA) && !defined(USE_JACK) && !defined(USE_PULSEAUDIO) && !defined(USE_PORTAUDIO) && !defined(USE_OPENSL) && !defined(USE_QTAUDIO)
+# if !defined(USE_ALSA) && !defined(USE_JACK) && !defined(USE_PULSEAUDIO) && !defined(USE_PORTAUDIO) && !defined(USE_OPENSL) && !defined(USE_QTAUDIO)
 #  include "soundnull.h"
 typedef CSoundInNull CSoundIn;
 typedef CSoundOutNull CSoundOut;
 # endif
-
-#endif
 
 #endif
