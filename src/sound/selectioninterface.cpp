@@ -19,7 +19,3 @@ void CSelectionInterface::Enumerate(vector<deviceprop>& devs, const int* desired
         devs.push_back(dp);
     }
 }
-
-void CSelectionInterface::Enumerate(vector<string>&, vector<string>&)
-{
-}
