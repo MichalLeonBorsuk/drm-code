@@ -64,7 +64,7 @@ public:
             dp.desc = i<descriptions.size() ? descriptions.at(i) : "";
             devs.push_back(dp);
         }
-    };
+    }
     virtual string      GetDev()=0;
     virtual void        SetDev(string sNewDev)=0;
 protected:
