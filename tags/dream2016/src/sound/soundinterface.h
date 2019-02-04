@@ -35,20 +35,21 @@
 class CSoundInInterface : public CSelectionInterface
 {
 public:
-    virtual         ~CSoundInInterface() {}
+    virtual         ~CSoundInInterface();
 
+    virtual void        Enumerate(vector<string>& names, vector<string>& descriptions)=0;
     /* sound card interface - used by ReadData */
     virtual bool Init(int iSampleRate, int iNewBufferSize, bool bNewBlocking)=0;
     virtual bool Read(CVector<short>& psData)=0;
     virtual void     Close()=0;
-
 };
 
 class CSoundOutInterface : public CSelectionInterface
 {
 public:
-    virtual         ~CSoundOutInterface() {}
+    virtual         ~CSoundOutInterface();
 
+    virtual void        Enumerate(vector<string>& names, vector<string>& descriptions)=0;
     /* sound card interface - used by WriteData */
     virtual bool Init(int iSampleRate, int iNewBufferSize, bool bNewBlocking)=0;
     virtual bool Write(CVector<short>& psData)=0;

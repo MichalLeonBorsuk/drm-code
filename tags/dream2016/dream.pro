@@ -655,7 +655,8 @@ SOURCES += \
     src/util/Settings.cpp \
     src/util/Utilities.cpp \
     src/Version.cpp \
-    src/sound/selectioninterface.cpp
+    src/sound/selectioninterface.cpp \
+    src/sound/soundinterface.cpp
 
 !console {
     qt5.3 {

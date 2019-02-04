@@ -50,11 +50,10 @@ public:
     virtual ~CSelectionInterface();
     /* new/updated interface should reimplement that one */
     virtual void        Enumerate(vector<deviceprop>& devs, const int* desiredsamplerates);
+    /* for backward compatibility */
+    virtual void        Enumerate(vector<string>& names, vector<string>& descriptions)=0;
     virtual string      GetDev()=0;
     virtual void        SetDev(string sNewDev)=0;
-protected:
-    /* for backward compatibility */
-    virtual void        Enumerate(vector<string>& names, vector<string>& descriptions);
 };
 
 #endif

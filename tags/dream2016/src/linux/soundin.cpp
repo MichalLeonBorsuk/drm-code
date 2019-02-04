@@ -314,12 +314,6 @@ void CSoundIn::Init_HW() {
         qDebug("Unable to set avail min : %s", snd_strerror(err));
         throw CGenErr("alsa CSoundIn::Init_HW ");
     }
-    /* Align all transfers to 1 sample */
-    err = snd_pcm_sw_params_set_xfer_align(handle, swparams, 1);
-    if (err < 0) {
-        qDebug("Unable to set transfer align : %s", snd_strerror(err));
-        throw CGenErr("alsa CSoundIn::Init_HW ");
-    }
     /* Write the parameters to the record/playback device */
     err = snd_pcm_sw_params(handle, swparams);
     if (err < 0) {
