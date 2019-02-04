@@ -654,7 +654,8 @@ SOURCES += \
     src/util/Reassemble.cpp \
     src/util/Settings.cpp \
     src/util/Utilities.cpp \
-    src/Version.cpp
+    src/Version.cpp \
+    src/sound/selectioninterface.cpp
 
 !console {
     qt5.3 {
