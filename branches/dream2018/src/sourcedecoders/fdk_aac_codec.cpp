@@ -80,10 +80,12 @@ FdkAacCodec::CanDecode(CAudioParam::EAudCod eAudioCoding)
             return false;
         return true;
     }
+#ifdef HAVE_USAC
     if(eAudioCoding == CAudioParam::AC_xHE_AAC) {
         if((linfo.flags & CAPF_AAC_USAC) != 0)
             return true;
     }
+#endif
     return false;
 }
 
@@ -101,10 +103,12 @@ static void logAOT(const CStreamInfo& info) {
     case AUDIO_OBJECT_TYPE::AOT_DRM_SURROUND:
         cerr << " AAC+Surround";
         break;
+#ifdef HAVE_USAC
     case AUDIO_OBJECT_TYPE::AOT_USAC:
     case AUDIO_OBJECT_TYPE::AOT_DRM_USAC:
         cerr << " xHE-AAC";
         break;
+#endif
     default:
         cerr << "unknown object type";
     }
@@ -208,7 +212,9 @@ FdkAacCodec::DecOpen(const CAudioParam& AudioParam, int& iAudioSampleRate)
         iAudioSampleRate = pinfo->extSamplingRate;
 
         if(pinfo->aot == AUDIO_OBJECT_TYPE::AOT_USAC) bUsac = true;
+#ifdef HAVE_USAC
         else if(pinfo->aot == AUDIO_OBJECT_TYPE::AOT_DRM_USAC) bUsac = true;
+#endif
         else bUsac = false;
 
         return true;
@@ -298,10 +304,12 @@ CAudioCodec::EDecError FdkAacCodec::Decode(const vector<uint8_t>& audio_frame, u
         cerr << "error parsing bitstream." << endl;
         return CAudioCodec::DECODER_ERROR_UNKNOWN;
     }
+#ifdef HAVE_USAC
     else if(err == AAC_DEC_OUTPUT_BUFFER_TOO_SMALL) {
         cerr << "The provided output buffer is too small." << endl;
         return CAudioCodec::DECODER_ERROR_UNKNOWN;
     }
+#endif
     else if(err == AAC_DEC_OUT_OF_MEMORY) {
         cerr << "Heap returned NULL pointer. Output buffer is invalid." << endl;
         return CAudioCodec::DECODER_ERROR_UNKNOWN;
