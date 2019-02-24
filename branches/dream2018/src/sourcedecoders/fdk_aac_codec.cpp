@@ -298,7 +298,7 @@ CAudioCodec::EDecError FdkAacCodec::Decode(const vector<uint8_t>& audio_frame, u
     if(err == AAC_DEC_OK) {
         double d = 0.0;
         for(size_t i=0; i<output_size; i++) d += double(decode_buf[i]);
-        cerr << "energy in good frame " << (d/output_size) << endl;
+        //cerr << "energy in good frame " << (d/output_size) << endl;
     }
     else if(err == AAC_DEC_PARSE_ERROR) {
         cerr << "error parsing bitstream." << endl;
