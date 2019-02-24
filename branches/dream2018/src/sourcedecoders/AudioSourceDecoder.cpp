@@ -112,7 +112,7 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
        determining the position for writing the output vector */
     iOutputBlockSize = 0;
     int iResOutBlockSize = 0;
-    cerr << "audio superframe with " << pAudioSuperFrame->getNumFrames() << " frames" << endl;
+    //cerr << "audio superframe with " << pAudioSuperFrame->getNumFrames() << " frames" << endl;
     for (size_t j = 0; j < pAudioSuperFrame->getNumFrames(); j++)
     {
         _BOOLEAN bCodecUpdated = FALSE;
@@ -190,7 +190,7 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
                 l += vecTempResBufOutCurLeft[i];
                 r += vecTempResBufOutCurRight[i];
             }
-            cerr << "energy after resampling and reverb left " << (l/vecTempResBufOutCurLeft.Size()) << " right " << (l/vecTempResBufOutCurRight.Size()) << endl;
+            //cerr << "energy after resampling and reverb left " << (l/vecTempResBufOutCurLeft.Size()) << " right " << (l/vecTempResBufOutCurRight.Size()) << endl;
         }
 
         Parameters.Lock();
@@ -210,7 +210,7 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
         iOutputBlockSize += iResOutBlockSize * 2;
 
         if(iOutputBlockSize==0) {
-            cerr << "iOutputBlockSize is zero" << endl;
+            //cerr << "iOutputBlockSize is zero" << endl;
         }
         else {
             double d=0.0;
@@ -219,7 +219,7 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
                 double n = (*pvecOutputData)[i];
                 d += n*n;
             }
-            cerr << "energy after converting " << iOutputBlockSize << " samples back to int " << sqrt(d/iOutputBlockSize) << endl;
+            //cerr << "energy after converting " << iOutputBlockSize << " samples back to int " << sqrt(d/iOutputBlockSize) << endl;
         }
 
     }
@@ -392,23 +392,24 @@ CAudioSourceDecoder::InitInternal(CParameter & Parameters)
 
     catch(CInitErr CurErr)
     {
-        cerr << "init xHE-AAC exception - do not process" << endl;
-
         Parameters.Unlock();
 
         switch (CurErr.eErrType)
         {
         case ET_ALL:
             /* An init error occurred, do not process data in this module */
+	    cerr << "stream not used" << endl;
             DoNotProcessData = TRUE;
             break;
 
         case ET_AUDDECODER:
-            /* Audio part should not be decdoded, set flag */
+            /* Audio part should not be decoded, set flag */
+	    cerr << "audio error" << endl;
             DoNotProcessAudDecoder = TRUE;
             break;
 
         default:
+	    cerr << "audio ok but something else wrong" << endl;
             DoNotProcessData = TRUE;
         }
 
