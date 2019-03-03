@@ -59,7 +59,6 @@
 #include "sound/soundinterface.h"
 #include "PlotManager.h"
 #include "DrmTransceiver.h"
-#include <QString>
 
 /* Definitions ****************************************************************/
 /* Number of FAC frames until the acquisition is activated in case a signal
@@ -146,16 +145,14 @@ public:
     void					SetRsciInput(const string& rsciInput);
     void					ClearRsciInput();
     void					SetSoundFile(const string& soundFile);
-    void					SetInputFile(const string& inputFile);
-    void					ClearInputFile();
     ESFStatus				GetInputStatus();
     string					GetInputFileName();
-    QString					GetInputDevice() { return QString::fromStdString(ReceiveData.GetSoundInterface()); }
-    QString					GetOutputDevice() { return QString::fromStdString(WriteData.GetSoundInterface()); }
+    string					GetInputDevice() { return ReceiveData.GetSoundInterface(); }
+    string					GetOutputDevice() { return WriteData.GetSoundInterface(); }
     void                    EnumerateInputs(std::vector<std::string>& names, std::vector<std::string>& descriptions);
     void                    EnumerateOutputs(std::vector<std::string>& names, std::vector<std::string>& descriptions);
-    void					SetInputDevice(const QString&);
-    void					SetOutputDevice(const QString&);
+    void					SetInputDevice(const string&);
+    void					SetOutputDevice(const string&);
 
     void					RequestNewAcquisition() {
         bRestartFlag = TRUE;

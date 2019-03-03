@@ -393,15 +393,15 @@ CDRMReceiver::Run()
 }
 
 void
-CDRMReceiver::SetInputDevice(const QString& device)
+CDRMReceiver::SetInputDevice(const string& device)
 {
-    ReceiveData.SetSoundInterface(device.toStdString());
+    ReceiveData.SetSoundInterface(device);
 }
 
 void
-CDRMReceiver::SetOutputDevice(const QString& device)
+CDRMReceiver::SetOutputDevice(const string& device)
 {
-    WriteData.SetSoundInterface(device.toStdString());
+    WriteData.SetSoundInterface(device);
 }
 
 void CDRMReceiver::EnumerateInputs(std::vector<std::string>& names, std::vector<std::string>& descriptions)
@@ -478,27 +478,6 @@ void
 CDRMReceiver::SetSoundFile(const string& soundFile)
 {
     ReceiveData.SetSoundInterface(soundFile);
-}
-
-void
-CDRMReceiver::SetInputFile(const string& inputFile)
-{
-    FileTyper::type t = FileTyper::resolve(inputFile);
-    if(FileTyper::is_rxstat(t))
-    {
-        SetRsciInput(inputFile);
-    }
-    else
-    {
-        SetSoundFile(inputFile);
-        ClearRsciInput();
-    }
-}
-
-void
-CDRMReceiver::ClearInputFile()
-{
-    ClearRsciInput();
 }
 
 CDRMReceiver::ESFStatus
@@ -1597,11 +1576,8 @@ CDRMReceiver::LoadSettings()
                 str = vn[0];
             }
         }
-        SetInputDevice(QString::fromStdString(str));
     }
-    else {
-        SetInputFile(str);
-    }
+    SetInputDevice(str);
 
     /* Channel Estimation: Frequency Interpolation */
     SetFreqInt((CChannelEstimation::ETypeIntFreq)s.Get("Receiver", "freqint", int(CChannelEstimation::FWIENER)));
@@ -1661,7 +1637,7 @@ CDRMReceiver::LoadSettings()
             str = vn[0];
         }
     }
-    SetOutputDevice(QString::fromStdString(str));
+    SetOutputDevice(str);
 
     str = s.Get("command", "rciout");
     if (str != "")
