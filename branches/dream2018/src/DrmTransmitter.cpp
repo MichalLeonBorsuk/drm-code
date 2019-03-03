@@ -179,28 +179,26 @@ void CDRMTransmitter::EnumerateOutputs(std::vector<std::string>& names, std::vec
 
 void CDRMTransmitter::doSetInputDevice()
 {
-    ReadData.SetSoundInterface(indev.toStdString());
+    ReadData.SetSoundInterface(indev);
 }
 
 void CDRMTransmitter::doSetOutputDevice()
 {
-    TransmitData.SetSoundInterface(outdev.toStdString());
+    TransmitData.SetSoundInterface(outdev);
 }
 
 void
-CDRMTransmitter::SetInputDevice(const QString& device)
+CDRMTransmitter::SetInputDevice(const string& device)
 {
     indev = device;
-    //CSelectionInterface* pSoundOutIF = DRMTransceiver.GetSoundOutInterface();
-    //pSoundOutIF->SetDev(action->data().toString().toLocal8Bit().constData());
+    ReadData.SetSoundInterface(indev);
 }
 
 void
-CDRMTransmitter::SetOutputDevice(const QString& device)
+CDRMTransmitter::SetOutputDevice(const string& device)
 {
     outdev = device;
-    //CSelectionInterface* pSoundOutIF = DRMTransceiver.GetSoundOutInterface();
-    //pSoundOutIF->SetDev(action->data().toString().toLocal8Bit().constData());
+    TransmitData.SetSoundInterface(outdev);
 }
 
 void CDRMTransmitter::Init()

@@ -42,10 +42,10 @@ public:
     virtual void LoadSettings() = 0;
     virtual void SaveSettings() = 0;
     virtual void Start() = 0;
-    virtual void SetInputDevice(const QString&) = 0;
-    virtual void SetOutputDevice(const QString&) = 0;
-    virtual QString GetInputDevice() = 0;
-    virtual QString GetOutputDevice() = 0;
+    virtual void SetInputDevice(const string&) = 0;
+    virtual void SetOutputDevice(const string&) = 0;
+    virtual string GetInputDevice() = 0;
+    virtual string GetOutputDevice() = 0;
     virtual void EnumerateInputs(std::vector<std::string>& names, std::vector<std::string>& descriptions)=0;
     virtual void EnumerateOutputs(std::vector<std::string>& names, std::vector<std::string>& descriptions)=0;
 

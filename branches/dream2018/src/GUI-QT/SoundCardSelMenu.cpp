@@ -34,6 +34,7 @@
 #include "DialogUtil.h"
 #include <QFileDialog>
 #include "../util-QT/Util.h"
+#include "../util/FileTyper.h"
 
 #ifdef QT_MULTIMEDIA_LIB
 # include <QAudioDeviceInfo>
@@ -138,15 +139,14 @@ CSoundCardSelMenu::CSoundCardSelMenu(CDRMTransceiver& DRMTransceiver,
 void CSoundCardSelMenu::OnSoundInDevice(QAction* action)
 {
     Parameters.Lock();
-    QString inputName;
-    DRMTransceiver.SetInputDevice(action->data().toString());
+    DRMTransceiver.SetInputDevice(action->data().toString().toStdString());
     Parameters.Unlock();
 }
 
 void CSoundCardSelMenu::OnSoundOutDevice(QAction* action)
 {
     Parameters.Lock();
-    DRMTransceiver.SetOutputDevice(action->data().toString());
+    DRMTransceiver.SetOutputDevice(action->data().toString().toStdString());
     Parameters.Unlock();
 }
 
@@ -202,19 +202,18 @@ QMenu* CSoundCardSelMenu::InitDevice(QMenu* self, QMenu* parent, const QString& 
     QActionGroup* group = nullptr;
     vector<string> names;
     vector<string> descriptions;
-    int iNumDescriptions = descriptions.size(); /* descriptions are optional */
     QString sDefaultDev;
     if(bInput) {
         DRMTransceiver.EnumerateInputs(names, descriptions);
-        sDefaultDev = DRMTransceiver.GetInputDevice();
+        sDefaultDev = QString::fromStdString(DRMTransceiver.GetInputDevice());
     } else {
         DRMTransceiver.EnumerateOutputs(names, descriptions);
-        sDefaultDev = DRMTransceiver.GetOutputDevice();
+        sDefaultDev = QString::fromStdString(DRMTransceiver.GetOutputDevice());
     }
     for (int i = 0; i < names.size(); i++)
     {
-        QString name(QString::fromLocal8Bit(names[i].c_str()));
-        QString desc(QString::fromLocal8Bit(descriptions[i].c_str()));
+        QString name(QString::fromStdString(names[i]));
+        QString desc(QString::fromStdString(descriptions[i]));
         if(name.size()==0) name = tr("[default]");
         QString t = name;
         if(desc.size()>0) t += " [" + desc + "]";
@@ -326,11 +325,20 @@ void CFileMenu::OnOpenFile()
     if (bReceiver)
     {
 	    QString filename = QFileDialog::getOpenFileName(this, tr("Open File"), strLastSoundPath, tr(FILE_FILTER));
-	    /* Check if user not hit the cancel button */
+        /* Check if user hit the cancel button */
 	    if (!filename.isEmpty())
 	    {
 			strLastSoundPath = filename;
-		    ((CDRMReceiver&)DRMTransceiver).SetInputFile(string(filename.toLocal8Bit().constData()));
+            FileTyper::type t = FileTyper::resolve(filename.toStdString());
+            if(FileTyper::is_rxstat(t))
+            {
+                ((CDRMReceiver&)DRMTransceiver).SetRsciInput(filename.toStdString());
+            }
+            else
+            {
+                ((CDRMReceiver&)DRMTransceiver).SetInputDevice(filename.toStdString());
+                ((CDRMReceiver&)DRMTransceiver).ClearRsciInput();
+            }
 		    RestartTransceiver(&DRMTransceiver);
             UpdateMenu();
 	    }
@@ -341,7 +349,7 @@ void CFileMenu::OnCloseFile()
 {
     if (bReceiver)
     {
-	    ((CDRMReceiver&)DRMTransceiver).ClearInputFile();
+        ((CDRMReceiver&)DRMTransceiver).SetInputDevice("");
 	    RestartTransceiver(&DRMTransceiver);
         UpdateMenu();
     }
