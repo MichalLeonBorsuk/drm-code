@@ -42,7 +42,9 @@
 
 #include <alsa/asoundlib.h>
 
-CSoundOut::CSoundOut() : bChangDev(true), sCurrentDevice(""), handle(nullptr)
+CSoundOut::CSoundOut():
+    iBufferSize(0), iInBufferSize(0), tmpplaybuf(nullptr), bBlockingPlay(false),
+    bChangDev(true), sCurrentDevice(""), iSampleRate(48000),handle(nullptr)
 {
     PlayThread.pSoundOut = this;
 }
@@ -131,7 +133,7 @@ bool CSoundOut::Write(CVector< _SAMPLE >& psData)
     if (bChangDev == true)
     {
         /* Reinit sound interface */
-        Init(iBufferSize, bBlockingPlay);
+        Init(iSampleRate, iBufferSize, bBlockingPlay);
 
         /* Reset flag */
         bChangDev = false;

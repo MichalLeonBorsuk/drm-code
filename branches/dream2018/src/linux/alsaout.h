@@ -59,10 +59,6 @@ protected:
     int write_HW( _SAMPLE *playbuf, int size );
     void close_HW();
 
-    int     iBufferSize, iInBufferSize;
-    short int *tmpplaybuf;
-    bool    bBlockingPlay;
-
     class CPlayThread : public CThread
     {
     public:
@@ -74,6 +70,9 @@ protected:
         _SAMPLE tmpplaybuf[NUM_OUT_CHANNELS * FRAGSIZE];
     } PlayThread;
 
+    int     iBufferSize, iInBufferSize;
+    short int *tmpplaybuf;
+    bool    bBlockingPlay;
     bool bChangDev;
     string sCurrentDevice;
     int iSampleRate;
