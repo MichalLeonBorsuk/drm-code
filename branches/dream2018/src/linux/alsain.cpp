@@ -39,7 +39,9 @@
 #define ALSA_PCM_NEW_HW_PARAMS_API
 #define ALSA_PCM_NEW_SW_PARAMS_API
 
-CSoundIn::CSoundIn(): bChangDev(true), sCurrentDevice(""),handle(nullptr)
+CSoundIn::CSoundIn():
+    iBufferSize(0), iInBufferSize(0), tmprecbuf(nullptr), bBlockingRec(false),
+    bChangDev(true), sCurrentDevice(""),iSampleRate(48000),handle(nullptr)
 {
     RecThread.pSoundIn = this;
 }
@@ -130,7 +132,7 @@ bool CSoundIn::Read(CVector< _SAMPLE >& psData)
     if (bChangDev == true)
     {
         /* Reinit sound interface */
-        Init(iBufferSize, bBlockingRec);
+        Init(iSampleRate, iBufferSize, bBlockingRec);
 
         /* Reset flag */
         bChangDev = false;
@@ -232,35 +234,34 @@ void CSoundIn::Init_HW() {
     err = snd_pcm_hw_params_any(handle, hwparams);
     if (err < 0) {
         qDebug("Broken configuration : no configurations available: %s", snd_strerror(err));
-        throw CGenErr("alsa CSoundIn::Init_HW ");
+        throw CGenErr(string("alsa CSoundIn::Init_HW ")+snd_strerror(err));
     }
     /* Set the interleaved read/write format */
     err = snd_pcm_hw_params_set_access(handle, hwparams, SND_PCM_ACCESS_RW_INTERLEAVED);
 
     if (err < 0) {
         qDebug("Access type not available : %s", snd_strerror(err));
-        throw CGenErr("alsa CSoundIn::Init_HW ");
+        throw CGenErr(string("alsa CSoundIn::Init_HW ")+snd_strerror(err));
 
     }
     /* Set the sample format */
     err = snd_pcm_hw_params_set_format(handle, hwparams, SND_PCM_FORMAT_S16_LE);
     if (err < 0) {
         qDebug("Sample format not available : %s", snd_strerror(err));
-        throw CGenErr("alsa CSoundIn::Init_HW ");
+        throw CGenErr(string("alsa CSoundIn::Init_HW ")+snd_strerror(err));
     }
     /* Set the count of channels */
     err = snd_pcm_hw_params_set_channels(handle, hwparams, NUM_IN_CHANNELS);
     if (err < 0) {
         qDebug("Channels count (%i) not available s: %s", NUM_IN_CHANNELS, snd_strerror(err));
-        throw CGenErr("alsa CSoundIn::Init_HW ");
+        throw CGenErr(string("alsa CSoundIn::Init_HW ")+snd_strerror(err));
     }
     /* Set the stream rate */
     dir=0;
     err = snd_pcm_hw_params_set_rate(handle, hwparams, iSampleRate, dir);
     if (err < 0) {
         qDebug("Rate %iHz not available : %s", iSampleRate, snd_strerror(err));
-        throw CGenErr("alsa CSoundIn::Init_HW ");
-
+        throw CGenErr(string("alsa CSoundIn::Init_HW ")+snd_strerror(err));
     }
     dir=0;
     unsigned int buffer_time = 500000;              /* ring buffer length in us */
@@ -268,12 +269,12 @@ void CSoundIn::Init_HW() {
     err = snd_pcm_hw_params_set_buffer_time_near(handle, hwparams, &buffer_time, &dir);
     if (err < 0) {
         qDebug("Unable to set buffer time %i for playback: %s\n", buffer_time, snd_strerror(err));
-        throw CGenErr("alsa CSoundIn::Init_HW ");
+        throw CGenErr(string("alsa CSoundIn::Init_HW ")+snd_strerror(err));
     }
     err = snd_pcm_hw_params_get_buffer_size(hwparams, &buffer_size);
     if (err < 0) {
         qDebug("Unable to get buffer size for playback: %s\n", snd_strerror(err));
-        throw CGenErr("alsa CSoundIn::Init_HW ");
+        throw CGenErr(string("alsa CSoundIn::Init_HW ")+snd_strerror(err));
     }
     // qDebug("buffer size %d", buffer_size);
     /* set the period time */
@@ -281,12 +282,12 @@ void CSoundIn::Init_HW() {
     err = snd_pcm_hw_params_set_period_time_near(handle, hwparams, &period_time, &dir);
     if (err < 0) {
         qDebug("Unable to set period time %i for playback: %s\n", period_time, snd_strerror(err));
-        throw CGenErr("alsa CSoundIn::Init_HW ");
+        throw CGenErr(string("alsa CSoundIn::Init_HW ")+snd_strerror(err));
     }
     err = snd_pcm_hw_params_get_period_size_min(hwparams, &period_size, &dir);
     if (err < 0) {
         qDebug("Unable to get period size for playback: %s\n", snd_strerror(err));
-        throw CGenErr("alsa CSoundIn::Init_HW ");
+        throw CGenErr(string("alsa CSoundIn::Init_HW ")+snd_strerror(err));
     }
     // qDebug("period size %d", period_size);
 
@@ -294,31 +295,31 @@ void CSoundIn::Init_HW() {
     err = snd_pcm_hw_params(handle, hwparams);
     if (err < 0) {
         qDebug("Unable to set hw params : %s", snd_strerror(err));
-        throw CGenErr("alsa CSoundIn::Init_HW ");
+        throw CGenErr(string("alsa CSoundIn::Init_HW ")+snd_strerror(err));
     }
     /* Get the current swparams */
     err = snd_pcm_sw_params_current(handle, swparams);
     if (err < 0) {
         qDebug("Unable to determine current swparams : %s", snd_strerror(err));
-        throw CGenErr("alsa CSoundIn::Init_HW ");
+        throw CGenErr(string("alsa CSoundIn::Init_HW ")+snd_strerror(err));
     }
     /* Start the transfer when the buffer immediately */
     err = snd_pcm_sw_params_set_start_threshold(handle, swparams, 0);
     if (err < 0) {
         qDebug("Unable to set start threshold mode : %s", snd_strerror(err));
-        throw CGenErr("alsa CSoundIn::Init_HW ");
+        throw CGenErr(string("alsa CSoundIn::Init_HW ")+snd_strerror(err));
     }
     /* Allow the transfer when at least period_size samples can be processed */
     err = snd_pcm_sw_params_set_avail_min(handle, swparams, period_size);
     if (err < 0) {
         qDebug("Unable to set avail min : %s", snd_strerror(err));
-        throw CGenErr("alsa CSoundIn::Init_HW ");
+        throw CGenErr(string("alsa CSoundIn::Init_HW ")+snd_strerror(err));
     }
     /* Write the parameters to the record/playback device */
     err = snd_pcm_sw_params(handle, swparams);
     if (err < 0) {
         qDebug("Unable to set sw params : %s", snd_strerror(err));
-        throw CGenErr("alsa CSoundIn::Init_HW ");
+        throw CGenErr(string("alsa CSoundIn::Init_HW ")+snd_strerror(err));
     }
     snd_pcm_start(handle);
     qDebug("alsa init done");
