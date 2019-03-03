@@ -23,9 +23,8 @@
 * 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 *
 \******************************************************************************/
-#include "soundcommon.h"
+#include "alsacommon.h"
 #include <alsa/asoundlib.h>
-#include <iostream>
 
 string checkName(vector<string> names, string sCurrentDevice)
 {
