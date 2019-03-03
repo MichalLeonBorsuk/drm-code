@@ -123,7 +123,7 @@ CSoundCardSelMenu::CSoundCardSelMenu(CDRMTransceiver& DRMTransceiver,
             connect(actionUpscale, SIGNAL(toggled(bool)), this, SLOT(OnSoundSignalUpscale(bool)));
         Parameters.Unlock();
         if (pFileMenu != nullptr)
-            connect(pFileMenu, SIGNAL(soundFileChanged(CDRMReceiver::ESFStatus)), this, SLOT(OnSoundFileChanged(CDRMReceiver::ESFStatus)));
+            connect(pFileMenu, SIGNAL(soundFileChanged(QString)), this, SLOT(OnSoundFileChanged(QString)));
     }
     else
     {   /* Transmitter */
@@ -266,10 +266,24 @@ QMenu* CSoundCardSelMenu::InitSampleRate(QMenu* parent, const QString& text, con
     return menu;
 }
 
-void CSoundCardSelMenu::OnSoundFileChanged(CDRMReceiver::ESFStatus eStatus)
+void CSoundCardSelMenu::OnSoundFileChanged(QString filename)
 {
-    const bool bSoundFile = eStatus == CDRMReceiver::SF_SNDFILEIN;
-    const bool bRsciMdiIn = eStatus == CDRMReceiver::SF_RSCIMDIIN;
+    bool bRsciMdiIn = false;
+    bool bSoundFile = false;
+
+    FileTyper::type t = FileTyper::resolve(filename.toStdString());
+    switch(t) {
+    case FileTyper::unrecognised:
+        break;
+    case FileTyper::pcap:
+    case FileTyper::file_framing:
+    case FileTyper::raw_af:
+    case FileTyper::raw_pft:
+        bRsciMdiIn = true;
+        break;
+    case FileTyper::pcm:
+        bSoundFile = true;
+    }
 
     if (menuSigInput != nullptr && bRsciMdiIn == menuSigInput->isEnabled())
         menuSigInput->setEnabled(!bRsciMdiIn);
@@ -280,7 +294,7 @@ void CSoundCardSelMenu::OnSoundFileChanged(CDRMReceiver::ESFStatus eStatus)
     if (menuSigSampleRate != nullptr && bSoundFile == menuSigSampleRate->isEnabled())
         menuSigSampleRate->setEnabled(!bSoundFile);
 
-    if (eStatus == CDRMReceiver::SF_SNDCARDIN)
+    if (bSoundFile)
     {
         if (bReceiver)
         {
@@ -359,15 +373,25 @@ void CFileMenu::UpdateMenu()
 {
     if (bReceiver)
     {
-        CDRMReceiver::ESFStatus eStatus = ((CDRMReceiver&)DRMTransceiver).GetInputStatus();
-        const bool bSoundFile = eStatus == CDRMReceiver::SF_SNDFILEIN;
-        const bool bRsciMdiIn = eStatus == CDRMReceiver::SF_RSCIMDIIN;
+        string filename = ((CDRMReceiver&)DRMTransceiver).GetInputFileName();
 
-        const bool bInputFile = bSoundFile | bRsciMdiIn;
+        bool bInputFile = false;
+        FileTyper::type t = FileTyper::resolve(filename);
+        switch(t) {
+        case FileTyper::unrecognised:
+            bInputFile = false;
+            break;
+        case FileTyper::pcap:
+        case FileTyper::file_framing:
+        case FileTyper::raw_af:
+        case FileTyper::raw_pft:
+        case FileTyper::pcm:
+            bInputFile = true;
+        }
         if (bInputFile != actionCloseFile->isEnabled())
             actionCloseFile->setEnabled(bInputFile);
 
-        emit soundFileChanged(eStatus);
+        emit soundFileChanged(QString::fromStdString(filename));
     }
 }
 

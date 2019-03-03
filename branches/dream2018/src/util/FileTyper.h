@@ -32,10 +32,10 @@
 class FileTyper
 {
 public:
-    enum type { pcap, file_framing, raw_af, raw_pft, pcm };
+    enum type { unrecognised, pcap, file_framing, raw_af, raw_pft, pcm };
     FileTyper();
     static type resolve(const std::string& s);
-    static bool is_rxstat(type t) { return t != pcm; }
+    static bool is_rxstat(type t) { return (t != pcm) && (t != unrecognised); }
 };
 
 #endif // FILETYPER_H

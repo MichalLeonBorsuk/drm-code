@@ -28,7 +28,7 @@
 
 #include "fdrmdialog.h"
 #include <iostream>
-#include <QDir>
+#include <QFileInfo>
 #include <QWhatsThis>
 #include <QHideEvent>
 #include <QEvent>
@@ -81,7 +81,7 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& Settings,
     pFileMenu = new CFileMenu(DRMReceiver, this, menu_View);
     pSoundCardMenu = new CSoundCardSelMenu(DRMReceiver, pFileMenu, this);
     menu_Settings->addMenu(pSoundCardMenu);
-    connect(pFileMenu, SIGNAL(soundFileChanged(CDRMReceiver::ESFStatus)), this, SLOT(OnSoundFileChanged(CDRMReceiver::ESFStatus)));
+    connect(pFileMenu, SIGNAL(soundFileChanged(QString)), this, SLOT(OnSoundFileChanged(QString)));
 
     /* Analog demodulation window */
     pAnalogDemDlg = new AnalogDemDlg(DRMReceiver, Settings, pFileMenu, pSoundCardMenu);
@@ -907,18 +907,17 @@ void FDRMDialog::ClearDisplay()
 
 void FDRMDialog::UpdateWindowTitle()
 {
-    QString windowName, fileName(QString::fromLocal8Bit(DRMReceiver.GetInputFileName().c_str()));
-    const bool bInputFile = fileName != "";
-    fileName = bInputFile ? QDir(fileName).dirName() : "";
-    windowName = "Dream";
-    windowName = bInputFile ? fileName + " - " + windowName : windowName;
-    setWindowTitle(windowName);
-    windowName = tr("Analog Demodulation");
-    windowName = bInputFile ? fileName + " - " + windowName : windowName;
-    pAnalogDemDlg->setWindowTitle(windowName);
-    windowName = tr("FM Receiver");
-    windowName = bInputFile ? fileName + " - " + windowName : windowName;
-    pFMDlg->setWindowTitle(windowName);
+    QString windowName, fileName(QString::fromStdString(DRMReceiver.GetInputDevice()));
+    if(QFileInfo::exists(fileName)) {
+        setWindowTitle(QString("Dream") + " - " + fileName);
+        pAnalogDemDlg->setWindowTitle(tr("Analog Demodulation") + " - " + fileName);
+        pFMDlg->setWindowTitle(tr("FM Receiver") + " - " + fileName);
+    }
+    else {
+        setWindowTitle("Dream");
+        pAnalogDemDlg->setWindowTitle(tr("Analog Demodulation"));
+        pFMDlg->setWindowTitle(tr("FM Receiver"));
+    }
 }
 
 /* change mode is only called when the mode REALLY has changed

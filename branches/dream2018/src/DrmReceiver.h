@@ -133,8 +133,6 @@ class CDRMReceiver : public CDRMTransceiver
 {
 public:
 
-    enum ESFStatus { SF_SNDCARDIN, SF_SNDFILEIN, SF_RSCIMDIIN };
-
     CDRMReceiver(CSettings* pSettings=nullptr);
     virtual ~CDRMReceiver();
 
@@ -145,7 +143,6 @@ public:
     void					SetRsciInput(const string& rsciInput);
     void					ClearRsciInput();
     void					SetSoundFile(const string& soundFile);
-    ESFStatus				GetInputStatus();
     string					GetInputFileName();
     string					GetInputDevice() { return ReceiveData.GetSoundInterface(); }
     string					GetOutputDevice() { return WriteData.GetSoundInterface(); }
