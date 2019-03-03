@@ -1819,8 +1819,11 @@ CDRMReceiver::SaveSettings()
     /* Modified metrics flag */
     s.Put("Receiver", "modmetric", ChannelEstimation.GetIntCons());
 
-    /* Sound In device */
-    s.Put("Receiver", "snddevin", ReceiveData.GetSoundInterface());
+    /* Sound In device - don't save files, only devices */
+    string indev = ReceiveData.GetSoundInterface();
+    if(indev.find(".") == string::npos) {
+        s.Put("Receiver", "snddevin", indev);
+    }
 
     /* Sound Out device */
     s.Put("Receiver", "snddevout", WriteData.GetSoundInterface());
