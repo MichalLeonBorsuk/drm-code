@@ -24,7 +24,7 @@
 *
 \******************************************************************************/
 
-#include "soundin.h"
+#include "alsain.h"
 
 #include <unistd.h>
 #include <fcntl.h>

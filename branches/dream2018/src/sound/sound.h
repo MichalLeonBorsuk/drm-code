@@ -34,14 +34,9 @@
 # include "../windows/Sound.h"
 #else
 
-# ifdef USE_OSS
-#  include "../linux/soundin.h"
-#  include "../linux/soundout.h"
-# endif
-
 # ifdef USE_ALSA
-#  include "../linux/soundin.h"
-#  include "../linux/soundout.h"
+#  include "../linux/alsain.h"
+#  include "../linux/alsaout.h"
 # endif
 
 # ifdef USE_JACK
