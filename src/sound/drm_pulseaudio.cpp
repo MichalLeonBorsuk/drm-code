@@ -763,7 +763,7 @@ _BOOLEAN CSoundPulse::IsStdinStdout()
 /* Wave in ********************************************************************/
 
 CSoundInPulse::CSoundInPulse(): CSoundPulse(FALSE),
-	iSampleRate(0), iBufferSize(0), lTimeToWait(0),
+    iSampleRate(48000), iBufferSize(0), lTimeToWait(0),
 	bBlockingRec(FALSE), bBufferingError(FALSE), pa_s(nullptr),
 	remaining_nbytes(0), remaining_data(nullptr)
 #ifdef CLOCK_DRIFT_ADJ_ENABLED
@@ -885,7 +885,7 @@ void CSoundInPulse::Close()
 CSoundOutPulse::CSoundOutPulse(): CSoundPulse(TRUE),
 	bPrebuffer(FALSE), bSeek(FALSE),
 	bBufferingError(FALSE), bMuteError(FALSE),
-	iSampleRate(0), iBufferSize(0), lTimeToWait(0),
+    iSampleRate(48000), iBufferSize(0), lTimeToWait(0),
 	bBlockingPlay(FALSE), pa_s(nullptr)
 #ifdef CLOCK_DRIFT_ADJ_ENABLED
 	, iMaxSampleRateOffset(0)
