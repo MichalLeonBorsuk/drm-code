@@ -394,7 +394,7 @@ int CSoundInPulse::Read_HW(void *recbuf, int size)
 		}
 #endif
 
-		while (size) {
+        while ((size>0) && (pa_s != nullptr)) {
 			if (!remaining_nbytes) {
 				nbytes = 0;
 				data   = nullptr;
@@ -495,7 +495,7 @@ void CSoundOutPulse::Init_HW()
 		STREAM_NAME("output", bBlockingPlay),	// A name for this stream
 		&ss,									// Our sample format.
 		nullptr									// Use default channel map
-		);
+        );
 	if (!pa_s)
 	{
 		DEBUG_MSG("CSoundOutPulse::Init_HW pa_stream_new failed\n");
