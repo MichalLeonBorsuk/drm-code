@@ -36,7 +36,6 @@
 #include "../DrmTransceiver.h"
 #include "../sound/selectioninterface.h"
 
-
 typedef struct CHANSEL {
     const char* Name;
     const int iChanSel;
@@ -72,7 +71,7 @@ public slots:
     void OnSoundOutDevice(QAction*);
     void OnSoundSampleRate(QAction*);
     void OnSoundSignalUpscale(bool);
-    void OnSoundFileChanged(CDRMReceiver::ESFStatus);
+    void OnSoundFileChanged(QString);
 
 signals:
     void sampleRateChanged();
@@ -100,7 +99,7 @@ public slots:
     void OnCloseFile();
 
 signals:
-    void soundFileChanged(CDRMReceiver::ESFStatus eStatus);
+    void soundFileChanged(QString);
 };
 
 #endif

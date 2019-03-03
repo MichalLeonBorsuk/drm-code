@@ -79,7 +79,7 @@ AnalogDemDlg::AnalogDemDlg(CDRMReceiver& NDRMR, CSettings& Settings,
 	connect(actionAM, SIGNAL(triggered()), this, SIGNAL(NewAMAcquisition()));
 	connect(actionFM, SIGNAL(triggered()), this, SLOT(OnSwitchToFM()));
 	connect(actionDRM, SIGNAL(triggered()), this, SLOT(OnSwitchToDRM()));
-	connect(pFileMenu, SIGNAL(soundFileChanged(CDRMReceiver::ESFStatus)), this, SLOT(OnSoundFileChanged(CDRMReceiver::ESFStatus)));
+    connect(pFileMenu, SIGNAL(soundFileChanged(QString)), this, SLOT(OnSoundFileChanged(QString)));
 	connect(pSoundCardMenu, SIGNAL(sampleRateChanged()), this, SLOT(OnSampleRateChanged()));
 	connect(actionAbout_Dream, SIGNAL(triggered()), this, SLOT(OnHelpAbout()));
 	connect(actionWhats_This, SIGNAL(triggered()), this, SLOT(OnWhatsThis()));
@@ -385,7 +385,7 @@ void AnalogDemDlg::OnSampleRateChanged()
 	UpdateSliderBandwidth();
 }
 
-void AnalogDemDlg::OnSoundFileChanged(CDRMReceiver::ESFStatus)
+void AnalogDemDlg::OnSoundFileChanged(QString)
 {
 	UpdateSliderBandwidth();
 }

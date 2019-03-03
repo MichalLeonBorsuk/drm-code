@@ -36,6 +36,7 @@
 #endif
 #include "sound/sound.h"
 #include "sound/audiofilein.h"
+#include "util/FileTyper.h"
 
 
 const static int SineTable[] = { 0, 1, 0, -1, 0 };
@@ -365,7 +366,7 @@ CReceiveData::SetSoundInterface(string device)
         delete pSound;
         pSound = nullptr;
     }
-    if(device.find(".") != string::npos) {
+    if(FileTyper::resolve(device) != FileTyper::unrecognised) {
         CAudioFileIn* pAudioFileIn = new CAudioFileIn();
         pAudioFileIn->SetFileName(device);
         int sr = pAudioFileIn->GetSampleRate();

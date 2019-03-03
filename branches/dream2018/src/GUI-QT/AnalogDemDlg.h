@@ -105,7 +105,7 @@ protected:
 public slots:
 	void UpdatePlotStyle(int);
 	void OnSampleRateChanged();
-	void OnSoundFileChanged(CDRMReceiver::ESFStatus);
+    void OnSoundFileChanged(QString);
 	void OnTimer();
 	void OnTimerPLLPhaseDial();
 	void OnTimerClose();

@@ -480,20 +480,6 @@ CDRMReceiver::SetSoundFile(const string& soundFile)
     ReceiveData.SetSoundInterface(soundFile);
 }
 
-CDRMReceiver::ESFStatus
-CDRMReceiver::GetInputStatus()
-{
-    string indev = ReceiveData.GetSoundInterface();
-    CDRMReceiver::ESFStatus eStatus = SF_SNDCARDIN;
-    Parameters.Lock();
-        if (rsiOrigin != "")
-            eStatus = SF_RSCIMDIIN;
-        else if (indev.find(".")!=string::npos)
-            eStatus = SF_SNDFILEIN;
-    Parameters.Unlock();
-    return eStatus;
-}
-
 string
 CDRMReceiver::GetInputFileName()
 {

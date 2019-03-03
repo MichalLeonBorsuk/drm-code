@@ -85,5 +85,7 @@ FileTyper::type FileTyper::resolve(const string& str)
         if(strcmp(c, "AF")==0) return raw_af;
         if(strcmp(c, "PF")==0) return raw_pft;
     }
-    return pcm;
+    if(s.find(".wav")!=string::npos) return pcm;
+    if(s.find(".WAV")!=string::npos) return pcm;
+    return unrecognised;
 }
