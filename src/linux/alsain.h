@@ -61,10 +61,6 @@ protected:
     int read_HW( void * recbuf, int size);
     void close_HW( void );
 
-    int     iBufferSize, iInBufferSize;
-    short int *tmprecbuf;
-    bool    bBlockingRec;
-
     class CRecThread : public CThread
     {
     public:
@@ -77,6 +73,9 @@ protected:
     } RecThread;
 
 protected:
+    int     iBufferSize, iInBufferSize;
+    short int *tmprecbuf;
+    bool    bBlockingRec;
     bool bChangDev;
     string sCurrentDevice;
     int iSampleRate;
