@@ -59,10 +59,6 @@
 #include "sound/soundinterface.h"
 #include "PlotManager.h"
 #include "DrmTransceiver.h"
-#ifdef QT_MULTIMEDIA_LIB
-#include <QAudioInput>
-#include <QAudioOutput>
-#endif
 #include <QString>
 
 /* Definitions ****************************************************************/
@@ -146,6 +142,7 @@ public:
     void					LoadSettings(); // can write to settings to set defaults
     void					SaveSettings();
     void					Start();
+
     void					SetRsciInput(const string& rsciInput);
     void					ClearRsciInput();
     void					SetSoundFile(const string& soundFile);
@@ -153,8 +150,8 @@ public:
     void					ClearInputFile();
     ESFStatus				GetInputStatus();
     string					GetInputFileName();
-    QString					GetInputDevice() { return indev; }
-    QString					GetOutputDevice() { return outdev; }
+    QString					GetInputDevice() { return QString::fromStdString(ReceiveData.GetSoundInterface()); }
+    QString					GetOutputDevice() { return QString::fromStdString(WriteData.GetSoundInterface()); }
     void                    EnumerateInputs(std::vector<std::string>& names, std::vector<std::string>& descriptions);
     void                    EnumerateOutputs(std::vector<std::string>& names, std::vector<std::string>& descriptions);
     void					SetInputDevice(const QString&);
@@ -453,11 +450,6 @@ protected:
     CPlotManager			PlotManager;
     string					rsiOrigin;
     int						iPrevSigSampleRate; /* sample rate before sound file */
-#ifdef QT_MULTIMEDIA_LIB
-    QAudioInput *pAudioInput;
-    QAudioOutput *pAudioOutput;
-#endif
-    QString indev; QString outdev;
 };
 
 
