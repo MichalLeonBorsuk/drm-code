@@ -323,8 +323,8 @@ qwt {
 }
 alsa {
     DEFINES += USE_ALSA
-    HEADERS += src/linux/soundin.h src/linux/soundout.h src/linux/soundcommon.h
-    SOURCES += src/linux/soundin.cpp src/linux/soundout.cpp src/linux/soundcommon.cpp
+    HEADERS += src/linux/alsain.h src/linux/alsaout.h src/linux/alsacommon.h
+    SOURCES += src/linux/alsain.cpp src/linux/alsaout.cpp src/linux/alsacommon.cpp
     LIBS += -lasound
     message("with alsa")
 }

@@ -30,8 +30,8 @@
 #define _SOUND_H
 
 #ifdef USE_ALSA
-# include "soundin.h"
-# include "soundout.h"
+# include "alsain.h"
+# include "alsaout.h"
 #endif
 
 #ifdef USE_JACK

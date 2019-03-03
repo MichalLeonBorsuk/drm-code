@@ -25,17 +25,15 @@
 \******************************************************************************/
 
 
-#ifndef _SOUND_COMMON_H
-#define _SOUND_COMMON_H
+#ifndef _ALSA_COMMON_H
+#define _ALSA_COMMON_H
 
 #ifdef QT_CORE_LIB
 # include <qmutex.h>
 # include <qthread.h>
 #endif
 #include "../util/Buffer.h"
-#ifdef USE_ALSA
 #include <alsa/asoundlib.h>
-#endif
 
 /* Definitions ****************************************************************/
 #define NUM_IN_CHANNELS         2       /* Stereo recording (but we only

@@ -26,57 +26,54 @@
  *
 \******************************************************************************/
 
-#ifndef _SOUNDIN_H
-#define _SOUNDIN_H
+#ifndef _SOUNDOUT_H
+#define _SOUNDOUT_H
 
 #include "../sound/soundinterface.h"
 #include "../util/Buffer.h"
-#include "soundcommon.h"
+#include "alsacommon.h"
 
 /* Definitions ****************************************************************/
-#define RECORDING_CHANNEL       0       /* 0: Left, 1: Right */
-
 #define SOUNDBUFLEN 102400
-
 #define FRAGSIZE 8192
 //#define FRAGSIZE 1024
 
 /* Classes ********************************************************************/
-class CSoundIn : public CSoundInInterface
+class CSoundOut : public CSoundOutInterface
 {
 public:
-    CSoundIn();
-    virtual ~CSoundIn() {}
+    CSoundOut();
+    virtual ~CSoundOut() {}
 
     virtual void Enumerate(vector<string>&, vector<string>&);
     virtual void SetDev(string sNewDevice);
     virtual string GetDev();
 
-    bool Init(int iSampleRate, int iNewBufferSize, bool bNewBlocking = true);
-    bool Read(CVector<short>& psData);
+    bool Init(int iSampleRate, int iNewBufferSize, bool bNewBlocking = false);
+    bool Write(CVector<short>& psData);
+
     void Close();
 
 protected:
     void Init_HW();
-    int read_HW( void * recbuf, int size);
-    void close_HW( void );
+    int write_HW( _SAMPLE *playbuf, int size );
+    void close_HW();
 
     int     iBufferSize, iInBufferSize;
-    short int *tmprecbuf;
-    bool    bBlockingRec;
+    short int *tmpplaybuf;
+    bool    bBlockingPlay;
 
-    class CRecThread : public CThread
+    class CPlayThread : public CThread
     {
     public:
-        virtual ~CRecThread() {}
+        virtual ~CPlayThread() {}
         virtual void run();
         CSoundBuf SoundBuf;
-        CSoundIn*   pSoundIn;
+        CSoundOut*  pSoundOut;
     protected:
-        _SAMPLE tmprecbuf[NUM_IN_CHANNELS * FRAGSIZE];
-    } RecThread;
+        _SAMPLE tmpplaybuf[NUM_OUT_CHANNELS * FRAGSIZE];
+    } PlayThread;
 
-protected:
     bool bChangDev;
     string sCurrentDevice;
     int iSampleRate;
