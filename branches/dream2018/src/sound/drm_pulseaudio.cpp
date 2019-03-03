@@ -27,10 +27,11 @@
 \******************************************************************************/
 
 #include <unistd.h>
-#include <time.h>
-#include <string.h>
-#include <stdlib.h>
+#include <ctime>
+#include <cstring>
+#include <cstdlib>
 #include <vector>
+#include <iostream>
 #include "drm_pulseaudio.h"
 
 #ifndef PA_STREAM_ADJUST_LATENCY
@@ -694,6 +695,11 @@ CSoundPulse::CSoundPulse(_BOOLEAN bPlayback)
 {
 }
 
+CSoundPulse::~CSoundPulse()
+{
+    cerr << "~CSoundPulse" << endl;
+}
+
 void CSoundPulse::Enumerate(vector<string>& names, vector<string>& descriptions)
 {
 	pa_object pa_obj = { /*.pa_m=*/nullptr, /*.pa_c=*/nullptr, /*.ref_count=*/0 };
@@ -764,6 +770,11 @@ CSoundInPulse::CSoundInPulse(): CSoundPulse(FALSE),
 	, record_sample_rate(0), bClockDriftComp(FALSE), cp(nullptr)
 #endif
 {
+}
+
+CSoundInPulse::~CSoundInPulse()
+{
+    cerr << "~CSoundInPulse" << endl;
 }
 
 _BOOLEAN CSoundInPulse::Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking)
@@ -882,6 +893,11 @@ CSoundOutPulse::CSoundOutPulse(): CSoundPulse(TRUE),
 	, bNewClockDriftComp(FALSE), cp()
 #endif
 {
+}
+
+CSoundOutPulse::~CSoundOutPulse()
+{
+    cerr << "~CSoundOutPulse" << endl;
 }
 
 _BOOLEAN CSoundOutPulse::Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking)
