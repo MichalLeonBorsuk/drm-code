@@ -78,11 +78,6 @@ CDRMReceiver::CDRMReceiver(CSettings* pSettings) : CDRMTransceiver(pSettings),
     pRig(nullptr),
 #endif
     PlotManager(), iPrevSigSampleRate(0)
-#ifdef QT_MULTIMEDIA_LIB
-  ,pAudioInput(nullptr),pAudioOutput(nullptr)
-  ,indev(), outdev()
-#endif
-
 {
     Parameters.SetReceiver(this);
     downstreamRSCI.SetReceiver(this);
@@ -449,7 +444,6 @@ CDRMReceiver::SetInput()
             if (iPrevSigSampleRate == 0) {
                 iPrevSigSampleRate = Parameters.GetSoundCardSigSampleRate();
             }
-            ReceiveData.SetSoundInterface(indev.toStdString());
         }
     Parameters.Unlock();
 }
@@ -483,7 +477,7 @@ CDRMReceiver::ClearRsciInput()
 void
 CDRMReceiver::SetSoundFile(const string& soundFile)
 {
-    indev = soundFile.c_str();
+    ReceiveData.SetSoundInterface(soundFile);
 }
 
 void
@@ -510,11 +504,12 @@ CDRMReceiver::ClearInputFile()
 CDRMReceiver::ESFStatus
 CDRMReceiver::GetInputStatus()
 {
+    string indev = ReceiveData.GetSoundInterface();
     CDRMReceiver::ESFStatus eStatus = SF_SNDCARDIN;
     Parameters.Lock();
         if (rsiOrigin != "")
             eStatus = SF_RSCIMDIIN;
-        else if (indev.contains("."))
+        else if (indev.find(".")!=string::npos)
             eStatus = SF_SNDFILEIN;
     Parameters.Unlock();
     return eStatus;
@@ -525,7 +520,7 @@ CDRMReceiver::GetInputFileName()
 {
     string fileName;
     Parameters.Lock();
-        fileName = rsiOrigin != "" ? rsiOrigin : indev.toStdString();
+        fileName = rsiOrigin != "" ? rsiOrigin : ReceiveData.GetSoundInterface();
     Parameters.Unlock();
     return fileName;
 }
@@ -1227,7 +1222,6 @@ CDRMReceiver::InitsForAllModules()
     }
     ConvertAudio.SetInitFlag();
 
-    ReceiveData.SetSoundInterface(indev.toStdString());
     ReceiveData.SetInitFlag();
     InputResample.SetInitFlag();
     FreqSyncAcq.SetInitFlag();
@@ -1312,7 +1306,6 @@ CDRMReceiver::InitsForWaveMode()
     iAcquDetecCnt = 0;
 
     /* Set init flags */
-    ReceiveData.SetSoundInterface(indev.toStdString());
     ReceiveData.SetInitFlag();
     InputResample.SetInitFlag();
     FreqSyncAcq.SetInitFlag();
@@ -1604,8 +1597,7 @@ CDRMReceiver::LoadSettings()
                 str = vn[0];
             }
         }
-        indev = QString::fromStdString(str);
-        SetInputDevice(indev);
+        SetInputDevice(QString::fromStdString(str));
     }
     else {
         SetInputFile(str);
@@ -1669,8 +1661,7 @@ CDRMReceiver::LoadSettings()
             str = vn[0];
         }
     }
-    outdev = QString::fromStdString(str);
-    SetOutputDevice(outdev);
+    SetOutputDevice(QString::fromStdString(str));
 
     str = s.Get("command", "rciout");
     if (str != "")
@@ -1853,10 +1844,10 @@ CDRMReceiver::SaveSettings()
     s.Put("Receiver", "modmetric", ChannelEstimation.GetIntCons());
 
     /* Sound In device */
-    s.Put("Receiver", "snddevin", indev.toStdString());
+    s.Put("Receiver", "snddevin", ReceiveData.GetSoundInterface());
 
     /* Sound Out device */
-    s.Put("Receiver", "snddevout", outdev.toStdString());
+    s.Put("Receiver", "snddevout", WriteData.GetSoundInterface());
     /* Number of iterations for MLC setting */
     s.Put("Receiver", "mlciter", MSCMLCDecoder.GetInitNumIterations());
 
