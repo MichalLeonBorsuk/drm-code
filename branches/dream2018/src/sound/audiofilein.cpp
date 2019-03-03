@@ -240,7 +240,10 @@ CAudioFileIn::Read(CVector<short>& psData)
     if (pacer)
         pacer->wait();
 
-    if (pFileReceiver == nullptr || psData.Size() < iBufferSize)
+    if (pFileReceiver == nullptr)
+        return TRUE;
+
+    if(psData.Size() < iBufferSize)
         return TRUE;
 
     const int iFrames = ResampleObjL ? ResampleObjL->GetFreeInputSize() : iBufferSize/2;
