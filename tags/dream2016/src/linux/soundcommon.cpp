@@ -25,6 +25,7 @@
 \******************************************************************************/
 #include "soundcommon.h"
 #include <alsa/asoundlib.h>
+#include <iostream>
 
 string checkName(vector<string> names, string sCurrentDevice)
 {
@@ -198,7 +199,6 @@ void close_hw(snd_pcm_t* handle)
 
 void enumerate(vector<string>& choices, vector<string>& descriptions, snd_pcm_stream_t direction)
 {
-    snd_pcm_t *pcm;
     choices.resize(0);
     descriptions.resize(0);
 
@@ -211,54 +211,20 @@ void enumerate(vector<string>& choices, vector<string>& descriptions, snd_pcm_st
     while (*n != nullptr) {
 
         char *ioid = snd_device_name_get_hint(*n, "IOID");
+        char *name = snd_device_name_get_hint(*n, "NAME");
+        char *desc = snd_device_name_get_hint(*n, "DESC");
+
         const char *d = (direction==SND_PCM_STREAM_PLAYBACK)?"Output":"Input";
-        if (ioid == nullptr || 0 == strcmp(d, ioid)) {
-
-            char *name = snd_device_name_get_hint(*n, "NAME");
-            if (name == nullptr || 0 == strcmp("null", name)) {
-                free(ioid);
-                n++;
-                continue;
-            }
-
-            err = snd_pcm_open( &pcm, name, direction, 0);
-            if ( err != 0)
-            {
-                free(ioid);
-                n++;
-                continue;
-            }
-
-            snd_pcm_hw_params_t *hwparams;
-            snd_pcm_hw_params_alloca(&hwparams);
-
-            /* Choose all parameters */
-            err = snd_pcm_hw_params_any(pcm, hwparams);
-            err = snd_pcm_hw_params_test_format(pcm, hwparams, SND_PCM_FORMAT_S16);
-            //snd_pcm_hw_params_free(hwparams);
-            snd_pcm_close( pcm );
-            //snd_pcm_hw_free(handle);
-            if(err!=0) {
-                free(ioid);
-                n++;
-                continue;
-            }
-
-            char *desc = snd_device_name_get_hint(*n, "DESC");
-            if (desc != nullptr && 0 != strcmp("null", desc)) {
-                descriptions.push_back(desc);
-                free(desc);
-            }
-            else {
-                descriptions.push_back("");
-            }
+	if(ioid==NULL) {
+            descriptions.push_back(desc);
             choices.push_back(name);
-            free(name);
-        }
-        free(ioid);
+	}
+	else if (0 == strcmp(d, ioid)) {
+            descriptions.push_back(desc);
+            choices.push_back(name);
+	}
         n++;
     }
 
-    //Free hint buffer too
     snd_device_name_free_hint((void**)hints);
 }
