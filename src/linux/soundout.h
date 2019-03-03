@@ -1,9 +1,9 @@
 /******************************************************************************\
  * Technische Universitaet Darmstadt, Institut fuer Nachrichtentechnik
- * Copyright (c) 2001
+ * Copyright (c) 2001-2014
  *
  * Author(s):
- *	Alexander Kurpiers
+ *  Alexander Kurpiers
  *
  * Decription:
  * Linux sound interface
@@ -29,13 +29,12 @@
 #ifndef _SOUNDOUT_H
 #define _SOUNDOUT_H
 
-#include "../soundinterface.h"
+#include "../sound/soundinterface.h"
 #include "../util/Buffer.h"
 #include "soundcommon.h"
 
 /* Definitions ****************************************************************/
 #define SOUNDBUFLEN 102400
-
 #define FRAGSIZE 8192
 //#define FRAGSIZE 1024
 
@@ -46,26 +45,23 @@ public:
     CSoundOut();
     virtual ~CSoundOut() {}
 
-    virtual void				Enumerate(vector<string>& choices) {
-        choices = names;
-    }
-    virtual void				SetDev(int iNewDevice);
-    virtual int					GetDev();
+    virtual void Enumerate(vector<string>&, vector<string>&);
+    virtual void SetDev(string sNewDevice);
+    virtual string GetDev();
 
-    void Init(int iNewBufferSize, _BOOLEAN bNewBlocking = FALSE);
-    _BOOLEAN Write(CVector<short>& psData);
+    bool Init(int iSampleRate, int iNewBufferSize, bool bNewBlocking = false);
+    bool Write(CVector<short>& psData);
 
     void Close();
 
 protected:
     void Init_HW();
     int write_HW( _SAMPLE *playbuf, int size );
-    void close_HW( void );
+    void close_HW();
 
-    int 	iBufferSize, iInBufferSize;
+    int     iBufferSize, iInBufferSize;
     short int *tmpplaybuf;
-    _BOOLEAN	bBlockingPlay;
-    vector<string> devices;
+    bool    bBlockingPlay;
 
     class CPlayThread : public CThread
     {
@@ -73,21 +69,15 @@ protected:
         virtual ~CPlayThread() {}
         virtual void run();
         CSoundBuf SoundBuf;
-        CSoundOut*	pSoundOut;
+        CSoundOut*  pSoundOut;
     protected:
-        _SAMPLE	tmpplaybuf[NUM_OUT_CHANNELS * FRAGSIZE];
+        _SAMPLE tmpplaybuf[NUM_OUT_CHANNELS * FRAGSIZE];
     } PlayThread;
 
-    vector<string> names;
-    _BOOLEAN bChangDev;
-    int	iCurrentDevice;
-#ifdef USE_ALSA
+    bool bChangDev;
+    string sCurrentDevice;
+    int iSampleRate;
     snd_pcm_t *handle;
-#endif
-#ifdef USE_OSS
-    COSSDev dev;
-#endif
-
 };
 
 #endif

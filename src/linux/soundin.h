@@ -1,9 +1,9 @@
 /******************************************************************************\
  * Technische Universitaet Darmstadt, Institut fuer Nachrichtentechnik
- * Copyright (c) 2001
+ * Copyright (c) 2001-2014
  *
  * Author(s):
- *	Alexander Kurpiers
+ *  Alexander Kurpiers
  *
  * Decription:
  * Linux sound interface
@@ -29,12 +29,12 @@
 #ifndef _SOUNDIN_H
 #define _SOUNDIN_H
 
-#include "../soundinterface.h"
+#include "../sound/soundinterface.h"
 #include "../util/Buffer.h"
 #include "soundcommon.h"
 
 /* Definitions ****************************************************************/
-#define RECORDING_CHANNEL		0		/* 0: Left, 1: Right */
+#define RECORDING_CHANNEL       0       /* 0: Left, 1: Right */
 
 #define SOUNDBUFLEN 102400
 
@@ -48,14 +48,12 @@ public:
     CSoundIn();
     virtual ~CSoundIn() {}
 
-    virtual void				Enumerate(vector<string>& choices) {
-        choices = names;
-    }
-    virtual void				SetDev(int iNewDevice);
-    virtual int					GetDev();
+    virtual void Enumerate(vector<string>&, vector<string>&);
+    virtual void SetDev(string sNewDevice);
+    virtual string GetDev();
 
-    void Init(int iNewBufferSize, _BOOLEAN bNewBlocking = TRUE);
-    _BOOLEAN Read(CVector<short>& psData);
+    bool Init(int iSampleRate, int iNewBufferSize, bool bNewBlocking = true);
+    bool Read(CVector<short>& psData);
     void Close();
 
 protected:
@@ -63,10 +61,9 @@ protected:
     int read_HW( void * recbuf, int size);
     void close_HW( void );
 
-    int 	iBufferSize, iInBufferSize;
+    int     iBufferSize, iInBufferSize;
     short int *tmprecbuf;
-    _BOOLEAN	bBlockingRec;
-    vector<string> devices;
+    bool    bBlockingRec;
 
     class CRecThread : public CThread
     {
@@ -74,21 +71,16 @@ protected:
         virtual ~CRecThread() {}
         virtual void run();
         CSoundBuf SoundBuf;
-        CSoundIn*	pSoundIn;
+        CSoundIn*   pSoundIn;
     protected:
-        _SAMPLE	tmprecbuf[NUM_IN_CHANNELS * FRAGSIZE];
+        _SAMPLE tmprecbuf[NUM_IN_CHANNELS * FRAGSIZE];
     } RecThread;
 
 protected:
-    vector<string> names;
-    _BOOLEAN bChangDev;
-    int	iCurrentDevice;
-#ifdef USE_ALSA
+    bool bChangDev;
+    string sCurrentDevice;
+    int iSampleRate;
     snd_pcm_t *handle;
-#endif
-#ifdef USE_OSS
-    COSSDev dev;
-#endif
 };
 
 #endif

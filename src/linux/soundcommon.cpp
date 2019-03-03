@@ -1,9 +1,9 @@
 /******************************************************************************\
 * Technische Universitaet Darmstadt, Institut fuer Nachrichtentechnik
-* Copyright (c) 2001
+* Copyright (c) 2001-2014
 *
 * Author(s):
-*	Alexander Kurpiers
+*   Alexander Kurpiers
 *
 *
 ******************************************************************************
@@ -23,330 +23,208 @@
 * 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 *
 \******************************************************************************/
-
-#include "soundin.h"
-#include "soundout.h"
-
-#include <unistd.h>
-#include <fcntl.h>
-#include <sys/types.h>
-#include <sys/ioctl.h>
+#include "soundcommon.h"
+#include <alsa/asoundlib.h>
 #include <iostream>
-#include <fstream>
-#include <sstream>
 
-/* ************************************************************************* */
-
-CSoundIn::CSoundIn():devices(),names(),iCurrentDevice(-1)
-#ifdef USE_OSS
-        ,dev()
-#endif
-#ifdef USE_ALSA
-        ,handle(NULL)
-#endif
+string checkName(vector<string> names, string sCurrentDevice)
 {
-    RecThread.pSoundIn = this;
-    getdevices(names, devices, false);
-    /* Set flag to open devices */
-    bChangDev = TRUE;
+    if(names.size()==0) {
+        return sCurrentDevice;
+    }
+
+    /* might be invalid due to command line parameter or USB device unplugged */
+    string sDefault = "";
+    for(size_t i=0; i<names.size(); i++) {
+        if(names[i] == sCurrentDevice) return sCurrentDevice;
+        if(names[i].find("default") != string::npos) sDefault = names[i];
+    }
+    if(sDefault == "") return names[0];
+    return sDefault;
 }
 
-void
-CSoundIn::CRecThread::run()
+snd_pcm_t* Init_hw(snd_pcm_uframes_t period_size, int iSampleRate, string name, snd_pcm_stream_t direction)
 {
-    while (SoundBuf.keep_running) {
 
-        int fill;
+    int err, dir;
+    snd_pcm_hw_params_t *hwparams;
+    snd_pcm_sw_params_t *swparams;
+    snd_pcm_uframes_t buffer_size;
+    snd_pcm_t* handle;
 
-        SoundBuf.lock();
-        fill = SoundBuf.GetFillLevel();
-        SoundBuf.unlock();
+    err = snd_pcm_open( &handle, name.c_str(), direction, 0);
+    if ( err != 0)
+    {
+        qDebug("open error: %s", snd_strerror(err));
+        throw CGenErr("alsa CSoundOut::Init_HW playback, can't open "+name);
+    }
 
-        if (  (SOUNDBUFLEN - fill) > (FRAGSIZE * NUM_IN_CHANNELS) ) {
-            // enough space in the buffer
+    snd_pcm_hw_params_alloca(&hwparams);
+    snd_pcm_sw_params_alloca(&swparams);
 
-            int size = pSoundIn->read_HW( tmprecbuf, FRAGSIZE);
+    /* Choose all parameters */
+    err = snd_pcm_hw_params_any(handle, hwparams);
+    if (err < 0) {
+        qDebug("Broken configuration : no configurations available: %s", snd_strerror(err));
+        throw CGenErr("alsa CSoundOut::Init_HW ");
+    }
+    /* Set the interleaved read/write format */
+    err = snd_pcm_hw_params_set_access(handle, hwparams, SND_PCM_ACCESS_RW_INTERLEAVED);
 
-            // common code
-            if (size > 0) {
-                CVectorEx<_SAMPLE>*	ptarget;
+    if (err < 0) {
+        qDebug("Access type not available : %s", snd_strerror(err));
+        throw CGenErr("alsa CSoundOut::Init_HW ");
 
-                /* Copy data from temporary buffer in output buffer */
-                SoundBuf.lock();
+    }
+    /* Set the sample format */
+    err = snd_pcm_hw_params_set_format(handle, hwparams, SND_PCM_FORMAT_S16_LE);
+    if (err < 0) {
+        qDebug("Sample format not available : %s", snd_strerror(err));
+        throw CGenErr(string("alsa CSoundOut::Init_HW ")+snd_strerror(err));
+    }
+    /* Set the count of channels */
+    err = snd_pcm_hw_params_set_channels(handle, hwparams, NUM_OUT_CHANNELS);
+    if (err < 0) {
+        qDebug("Channels count (%i) not available s: %s", NUM_OUT_CHANNELS, snd_strerror(err));
+        throw CGenErr("alsa CSoundOut::Init_HW ");
+    }
+    /* Set the stream rate */
+    dir=0;
+    err = snd_pcm_hw_params_set_rate(handle, hwparams, iSampleRate, dir);
+    if (err < 0) {
+        qDebug("Rate %iHz not available : %s", iSampleRate, snd_strerror(err));
+        throw CGenErr("alsa CSoundOut::Init_HW ");
+    }
+    dir=0;
+    unsigned int buffer_time = 500000;              /* ring buffer length in us */
+    /* set the buffer time */
+    err = snd_pcm_hw_params_set_buffer_time_near(handle, hwparams, &buffer_time, &dir);
+    if (err < 0) {
+        qDebug("Unable to set buffer time %i for playback: %s\n", buffer_time, snd_strerror(err));
+        throw CGenErr("alsa CSoundOut::Init_HW ");
+    }
+    err = snd_pcm_hw_params_get_buffer_size(hwparams, &buffer_size);
+    if (err < 0) {
+        qDebug("Unable to get buffer size for playback: %s\n", snd_strerror(err));
+        throw CGenErr("alsa CSoundOut::Init_HW ");
+    }
+    // qDebug("buffer size %d", buffer_size);
+    /* set the period time */
+    unsigned int period_time = 100000;              /* period time in us */
+    err = snd_pcm_hw_params_set_period_time_near(handle, hwparams, &period_time, &dir);
+    if (err < 0) {
+        qDebug("Unable to set period time %i for playback: %s\n", period_time, snd_strerror(err));
+        throw CGenErr("alsa CSoundOut::Init_HW ");
+    }
+    err = snd_pcm_hw_params_get_period_size_min(hwparams, &period_size, &dir);
+    if (err < 0) {
+        qDebug("Unable to get period size for playback: %s\n", snd_strerror(err));
+        throw CGenErr("alsa CSoundOut::Init_HW ");
+    }
+    // qDebug("period size %d", period_size);
 
-                ptarget = SoundBuf.QueryWriteBuffer();
+    /* Write the parameters to device */
+    err = snd_pcm_hw_params(handle, hwparams);
+    if (err < 0) {
+        qDebug("Unable to set hw params : %s", snd_strerror(err));
+        throw CGenErr("alsa CSoundOut::Init_HW ");
+    }
+    /* Get the current swparams */
+    err = snd_pcm_sw_params_current(handle, swparams);
+    if (err < 0) {
+        qDebug("Unable to determine current swparams : %s", snd_strerror(err));
+        throw CGenErr("alsa CSoundOut::Init_HW ");
+    }
+    /* Write the parameters to the playback device */
+    err = snd_pcm_sw_params(handle, swparams);
+    if (err < 0) {
+        qDebug("Unable to set sw params : %s", snd_strerror(err));
+        throw CGenErr("alsa CSoundOut::Init_HW ");
+    }
+    snd_pcm_start(handle);
+    qDebug("alsa init done");
+    return handle;
+}
 
-                for (int i = 0; i < size * NUM_IN_CHANNELS; i++)
-                    (*ptarget)[i] = tmprecbuf[i];
+int write_hw(snd_pcm_t* handle, _SAMPLE *playbuf, snd_pcm_uframes_t size )
+{
 
-                SoundBuf.Put( size * NUM_IN_CHANNELS );
-                SoundBuf.unlock();
+    int start = 0;
+    int ret;
+
+    while (size) {
+
+        ret = snd_pcm_writei(handle, &playbuf[int(start)], size );
+        if (ret < 0) {
+            if (ret ==  -EAGAIN) {
+                if ((ret = snd_pcm_wait (handle, 100)) < 0) {
+                    qDebug ("poll failed (%s)", snd_strerror (ret));
+                    break;
+                }
+                continue;
+            } else if (ret == -EPIPE) {   /* under-run */
+                qDebug("underrun");
+                ret = snd_pcm_prepare(handle);
+                if (ret < 0)
+                    qDebug("Can't recover from underrun, prepare failed: %s", snd_strerror(ret));
+                continue;
+            } else if (ret == -ESTRPIPE) {
+                qDebug("strpipe");
+                while ((ret = snd_pcm_resume(handle)) == -EAGAIN)
+                    sleep(1);       /* wait until the suspend flag is released */
+                if (ret < 0) {
+                    ret = snd_pcm_prepare(handle);
+                    if (ret < 0)
+                        qDebug("Can't recover from suspend, prepare failed: %s", snd_strerror(ret));
+                }
+                continue;
+            } else {
+                qDebug("Write error: %s", snd_strerror(ret));
+                throw CGenErr("Write error");
             }
-        } else {
-            msleep( 1 );
+            break;  /* skip one period */
         }
+        size -= ret;
+        start += ret;
     }
-    qDebug("Rec Thread stopped");
+    return 0;
 }
 
-
-/* Wave in ********************************************************************/
-
-void CSoundIn::Init(int iNewBufferSize, _BOOLEAN bNewBlocking)
+void close_hw(snd_pcm_t* handle)
 {
-    qDebug("initrec %d", iNewBufferSize);
 
-    /* Save < */
-    RecThread.SoundBuf.lock();
-    iInBufferSize = iNewBufferSize;
-    bBlockingRec = bNewBlocking;
-    RecThread.SoundBuf.unlock();
-
-    /* Check if device must be opened or reinitialized */
-    if (bChangDev == TRUE)
-    {
-
-        Init_HW( );
-
-        /* Reset flag */
-        bChangDev = FALSE;
-    }
-
-    if ( RecThread.running() == FALSE ) {
-        RecThread.SoundBuf.lock();
-        RecThread.SoundBuf.Init( SOUNDBUFLEN );
-        RecThread.SoundBuf.unlock();
-        RecThread.start();
-    }
-
+    if (handle != nullptr)
+        snd_pcm_close( handle );
 }
 
-
-_BOOLEAN CSoundIn::Read(CVector< _SAMPLE >& psData)
+void enumerate(vector<string>& choices, vector<string>& descriptions, snd_pcm_stream_t direction)
 {
-    CVectorEx<_SAMPLE>*	p;
+    choices.resize(0);
+    descriptions.resize(0);
 
-    /* Check if device must be opened or reinitialized */
-    if (bChangDev == TRUE)
-    {
-        /* Reinit sound interface */
-        Init(iBufferSize, bBlockingRec);
+    char **hints;
+    int err = snd_device_name_hint(-1, "pcm", (void***)&hints);
+    if (err != 0)
+       return;//Error! Just return
 
-        /* Reset flag */
-        bChangDev = FALSE;
+    char** n = hints;
+    while (*n != nullptr) {
+
+        char *ioid = snd_device_name_get_hint(*n, "IOID");
+        char *name = snd_device_name_get_hint(*n, "NAME");
+        char *desc = snd_device_name_get_hint(*n, "DESC");
+
+        const char *d = (direction==SND_PCM_STREAM_PLAYBACK)?"Output":"Input";
+	if(ioid==NULL) {
+            descriptions.push_back(desc);
+            choices.push_back(name);
+	}
+	else if (0 == strcmp(d, ioid)) {
+            descriptions.push_back(desc);
+            choices.push_back(name);
+	}
+        n++;
     }
 
-    RecThread.SoundBuf.lock();	// we need exclusive access
-
-    if (iCurrentDevice == -1)
-        iCurrentDevice = names.size()-1;
-
-    while ( RecThread.SoundBuf.GetFillLevel() < iInBufferSize ) {
-
-
-        // not enough data, sleep a little
-        RecThread.SoundBuf.unlock();
-        usleep(1000); //1ms
-        RecThread.SoundBuf.lock();
-    }
-
-    // copy data
-
-    p = RecThread.SoundBuf.Get( iInBufferSize );
-    for (int i=0; i<iInBufferSize; i++)
-        psData[i] = (*p)[i];
-
-    RecThread.SoundBuf.unlock();
-
-    return FALSE;
+    snd_device_name_free_hint((void**)hints);
 }
-
-void CSoundIn::Close()
-{
-    qDebug("stoprec");
-
-    // stop the recording threads
-
-    if (RecThread.running() ) {
-        RecThread.SoundBuf.keep_running = FALSE;
-        // wait 1sec max. for the threads to terminate
-        RecThread.wait(1000);
-    }
-
-    close_HW();
-
-    /* Set flag to open devices the next time it is initialized */
-    bChangDev = TRUE;
-}
-
-void CSoundIn::SetDev(int iNewDevice)
-{
-    /* Change only in case new device id is not already active */
-    if (iNewDevice != iCurrentDevice)
-    {
-        iCurrentDevice = iNewDevice;
-        bChangDev = TRUE;
-    }
-}
-
-int CSoundIn::GetDev()
-{
-    return iCurrentDevice;
-}
-
-CSoundOut::CSoundOut():devices(),names(),iCurrentDevice(-1)
-#ifdef USE_OSS
-        ,dev()
-#endif
-#ifdef USE_ALSA
-        ,handle(NULL)
-#endif
-{
-    PlayThread.pSoundOut = this;
-    getdevices(names, devices, true);
-    /* Set flag to open devices */
-    bChangDev = TRUE;
-}
-
-void CSoundOut::CPlayThread::run()
-{
-    while ( SoundBuf.keep_running ) {
-        int fill;
-
-        SoundBuf.lock();
-        fill = SoundBuf.GetFillLevel();
-        SoundBuf.unlock();
-
-        if ( fill > (FRAGSIZE * NUM_OUT_CHANNELS) ) {
-
-            // enough data in the buffer
-
-            CVectorEx<_SAMPLE>*	p;
-
-            SoundBuf.lock();
-            p = SoundBuf.Get( FRAGSIZE * NUM_OUT_CHANNELS );
-
-            for (int i=0; i < FRAGSIZE * NUM_OUT_CHANNELS; i++)
-                tmpplaybuf[i] = (*p)[i];
-
-            SoundBuf.unlock();
-
-            pSoundOut->write_HW( tmpplaybuf, FRAGSIZE );
-
-        } else {
-
-            do {
-                msleep( 1 );
-
-                SoundBuf.lock();
-                fill = SoundBuf.GetFillLevel();
-                SoundBuf.unlock();
-
-            } while ((SoundBuf.keep_running) && ( fill < SOUNDBUFLEN/2 ));	// wait until buffer is at least half full
-        }
-    }
-    qDebug("Play Thread stopped");
-}
-
-void CSoundOut::Init(int iNewBufferSize, _BOOLEAN bNewBlocking)
-{
-    qDebug("initplay %d", iNewBufferSize);
-
-    /* Save buffer size */
-    PlayThread.SoundBuf.lock();
-    iBufferSize = iNewBufferSize;
-    bBlockingPlay = bNewBlocking;
-    PlayThread.SoundBuf.unlock();
-
-    /* Check if device must be opened or reinitialized */
-    if (bChangDev == TRUE)
-    {
-
-        Init_HW( );
-
-        /* Reset flag */
-        bChangDev = FALSE;
-    }
-
-    if ( PlayThread.running() == FALSE ) {
-        PlayThread.SoundBuf.lock();
-        PlayThread.SoundBuf.Init( SOUNDBUFLEN );
-        PlayThread.SoundBuf.unlock();
-        PlayThread.start();
-    }
-}
-
-_BOOLEAN CSoundOut::Write(CVector< _SAMPLE >& psData)
-{
-    /* Check if device must be opened or reinitialized */
-    if (bChangDev == TRUE)
-    {
-        /* Reinit sound interface */
-        Init(iBufferSize, bBlockingPlay);
-
-        /* Reset flag */
-        bChangDev = FALSE;
-    }
-
-    if ( bBlockingPlay ) {
-        // blocking write
-        while ( PlayThread.SoundBuf.keep_running ) {
-            PlayThread.SoundBuf.lock();
-            int fill = SOUNDBUFLEN - PlayThread.SoundBuf.GetFillLevel();
-            PlayThread.SoundBuf.unlock();
-            if ( fill > iBufferSize) break;
-        }
-    }
-
-    PlayThread.SoundBuf.lock();	// we need exclusive access
-
-    if ( ( SOUNDBUFLEN - PlayThread.SoundBuf.GetFillLevel() ) > iBufferSize) {
-
-        CVectorEx<_SAMPLE>*	ptarget;
-
-        // data fits, so copy
-        ptarget = PlayThread.SoundBuf.QueryWriteBuffer();
-        for (int i=0; i < iBufferSize; i++)
-        {
-            (*ptarget)[i] = psData[i];
-        }
-
-        PlayThread.SoundBuf.Put( iBufferSize );
-    }
-
-    PlayThread.SoundBuf.unlock();
-
-    return FALSE;
-}
-
-void CSoundOut::Close()
-{
-    qDebug("stopplay");
-
-    // stop the playback thread
-    if (PlayThread.running() ) {
-        PlayThread.SoundBuf.keep_running = FALSE;
-        PlayThread.wait(1000);
-    }
-
-    close_HW();
-
-    /* Set flag to open devices the next time it is initialized */
-    bChangDev = TRUE;
-}
-
-void CSoundOut::SetDev(int iNewDevice)
-{
-    /* Change only in case new device id is not already active */
-    if (iNewDevice != iCurrentDevice)
-    {
-        iCurrentDevice = iNewDevice;
-        bChangDev = TRUE;
-    }
-}
-
-int CSoundOut::GetDev()
-{
-    return iCurrentDevice;
-}
-

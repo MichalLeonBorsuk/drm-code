@@ -1,9 +1,9 @@
 /******************************************************************************\
  * Technische Universitaet Darmstadt, Institut fuer Nachrichtentechnik
- * Copyright (c) 2001
+ * Copyright (c) 2001-2014
  *
  * Author(s):
- *	Alexander Kurpiers
+ *  Alexander Kurpiers
  *
  * Decription:
  * Linux sound interface
@@ -29,11 +29,6 @@
 #ifndef _SOUND_H
 #define _SOUND_H
 
-#ifdef USE_OSS
-# include "soundin.h"
-# include "soundout.h"
-#endif
-
 #ifdef USE_ALSA
 # include "soundin.h"
 # include "soundout.h"
@@ -51,7 +46,7 @@ typedef CPaIn CSoundIn;
 typedef CPaOut CSoundOut;
 #endif
 
-#if !defined(USE_OSS) && !defined(USE_ALSA) && !defined(USE_JACK) && !defined(USE_PORTAUDIO)
+#if !defined(USE_ALSA) && !defined(USE_JACK) && !defined(USE_PORTAUDIO)
 # include "../soundnull.h"
 typedef CSoundInNull CSoundIn;
 typedef CSoundOutNull CSoundOut;
