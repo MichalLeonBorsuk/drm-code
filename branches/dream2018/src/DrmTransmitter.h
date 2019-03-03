@@ -41,7 +41,6 @@
 #include "sourcedecoders/AudioSourceEncoder.h"
 #include "sound/soundinterface.h"
 #include "DrmTransceiver.h"
-#include <QString>
 
 /* Classes ********************************************************************/
 class CDRMTransmitter : public CDRMTransceiver
@@ -76,12 +75,12 @@ public:
     _REAL GetCarOffset() {
         return rDefCarOffset;
     }
-    QString	GetInputDevice() { return indev; }
-    QString	GetOutputDevice() { return outdev; }
+    string	GetInputDevice() { return indev; }
+    string	GetOutputDevice() { return outdev; }
     void EnumerateInputs(std::vector<std::string>& names, std::vector<std::string>& descriptions);
     void EnumerateOutputs(std::vector<std::string>& names, std::vector<std::string>& descriptions);
-    void SetInputDevice(const QString&);
-    void SetOutputDevice(const QString&);
+    void SetInputDevice(const string&);
+    void SetOutputDevice(const string&);
     void doSetInputDevice();
     void doSetOutputDevice();
 
@@ -90,8 +89,8 @@ protected:
     void InitSoftStop() { iSoftStopSymbolCount=0; }
     _BOOLEAN CanSoftStopExit();
 
-    QString indev;
-    QString outdev;
+    string indev;
+    string outdev;
     /* Buffers */
     CSingleBuffer<_SAMPLE>	DataBuf;
     CSingleBuffer<_BINARY>	AudSrcBuf;
