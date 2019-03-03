@@ -112,6 +112,7 @@ void CReadData::Enumerate(std::vector<std::string>& names, std::vector<std::stri
 void
 CReadData::SetSoundInterface(string device)
 {
+    soundDevice = device;
 #ifdef QT_MULTIMEDIA_LIB
     QAudioFormat format;
     if(iSampleRate==0) iSampleRate = 48000; // TODO get order of initialisation correct
@@ -139,6 +140,13 @@ CReadData::SetSoundInterface(string device)
         }
         break;
     }
+#else
+    if(pSound != nullptr) {
+        delete pSound;
+        pSound = nullptr;
+    }
+    pSound = new CSoundIn();
+    pSound->SetDev(device);
 #endif
 }
 
