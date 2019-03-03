@@ -1,9 +1,9 @@
 /******************************************************************************\
 * Technische Universitaet Darmstadt, Institut fuer Nachrichtentechnik
-* Copyright (c) 2001
+* Copyright (c) 2001-2014
 *
 * Author(s):
-*	Alexander Kurpiers
+*   Alexander Kurpiers
 *
 *
 ******************************************************************************
@@ -38,63 +38,34 @@
 #endif
 
 /* Definitions ****************************************************************/
-#define	NUM_IN_CHANNELS			2		/* Stereo recording (but we only
+#define NUM_IN_CHANNELS         2       /* Stereo recording (but we only
 use one channel for recording) */
-#define	NUM_OUT_CHANNELS		2		/* Stereo Playback */
-#define	BITS_PER_SAMPLE			16		/* Use all bits of the D/A-converter */
-#define BYTES_PER_SAMPLE		2		/* Number of bytes per sample */
-
-#ifdef USE_OSS
-#include <map>
-
-class COSSDev
-{
-    public:
-COSSDev():name() {}
-void open(const string& devname, int mode);
-int fildes() {
-    return dev[name].fildes();
-}
-void close();
-protected:
-class devdata
-{
-public:
-    devdata():count(0),fd(0) {}
-    void open(const string&, int);
-    void close();
-    int fildes();
-protected:
-    int count;
-    int fd;
-};
-static map<string,devdata> dev;
-string name;
-};
-#endif
+#define NUM_OUT_CHANNELS        2       /* Stereo Playback */
+#define BITS_PER_SAMPLE         16      /* Use all bits of the D/A-converter */
+#define BYTES_PER_SAMPLE        2       /* Number of bytes per sample */
 
 class CSoundBuf : public CCyclicBuffer<_SAMPLE> {
 
-    public:
-    CSoundBuf() : keep_running(TRUE)
+public:
+    CSoundBuf() : keep_running(true)
 #ifdef QT_CORE_LIB
-            , data_accessed()
+        , data_accessed()
 #endif
-{}
-bool keep_running;
+    {}
+    bool keep_running;
 #ifdef QT_CORE_LIB
-void lock () {
-    data_accessed.lock();
-}
-void unlock () {
-    data_accessed.unlock();
-}
+    void lock () {
+        data_accessed.lock();
+    }
+    void unlock () {
+        data_accessed.unlock();
+    }
 
 protected:
-QMutex	data_accessed;
+    QMutex  data_accessed;
 #else
-void lock () { }
-void unlock () { }
+    void lock () { }
+    void unlock () { }
 #endif
 };
 
@@ -102,17 +73,21 @@ void unlock () { }
 typedef QThread CThread;
 #else
 class CThread {
-    public:
-void run() {}
-void start() {}
-void wait(int) {}
-void msleep(int) {}
-bool running() {
-    return true;
-}
+public:
+    void run() {}
+    void start() {}
+    void wait(int) {}
+    void msleep(int) {}
+    bool running() {
+        return true;
+    }
 };
 #endif
 
-void getdevices(vector<string>& names, vector<string>& devices, bool playback);
+void enumerate(vector<string>& choices, vector<string>& descriptions, snd_pcm_stream_t direction);
+string checkName(vector<string> names, string sCurrentDevice);
+snd_pcm_t* Init_hw(snd_pcm_uframes_t period_size, int iSampleRate, string name, snd_pcm_stream_t direction);
+void close_hw(snd_pcm_t* handle);
+int write_hw(snd_pcm_t* handle, _SAMPLE *playbuf, snd_pcm_uframes_t size );
 
 #endif
