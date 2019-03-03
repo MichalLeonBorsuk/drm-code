@@ -76,7 +76,7 @@ class CSoundPulse
 {
 public:
 	CSoundPulse(_BOOLEAN bPlayback);
-	virtual ~CSoundPulse() {}
+    virtual ~CSoundPulse();
 	void			Enumerate(vector<string>& names, vector<string>& descriptions);
 	void			SetDev(string sNewDevice);
 	string			GetDev();
@@ -95,7 +95,7 @@ class CSoundInPulse : public CSoundPulse, public CSoundInInterface
 {
 public:
 	CSoundInPulse();
-	virtual ~CSoundInPulse() {}
+    virtual ~CSoundInPulse();
 	void			Enumerate(vector<string>& names, vector<string>& descriptions) {CSoundPulse::Enumerate(names, descriptions);};
 	string			GetDev() {return CSoundPulse::GetDev();};
 	void			SetDev(string sNewDevice) {CSoundPulse::SetDev(sNewDevice);};
@@ -135,7 +135,7 @@ class CSoundOutPulse : public CSoundPulse, public CSoundOutInterface
 {
 public:
 	CSoundOutPulse();
-	virtual ~CSoundOutPulse() {}
+    virtual ~CSoundOutPulse();
 	void			Enumerate(vector<string>& names, vector<string>& descriptions) {CSoundPulse::Enumerate(names, descriptions);};
 	string			GetDev() {return CSoundPulse::GetDev();};
 	void			SetDev(string sNewDevice) {CSoundPulse::SetDev(sNewDevice);};
