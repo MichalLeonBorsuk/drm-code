@@ -271,7 +271,9 @@ CAudioFileIn::Read(CVector<short>& psData)
 #ifdef HAVE_LIBSNDFILE
     while (iRemainingFrame > 0)
     {
-	    sf_count_t c = sf_readf_short((SNDFILE*)pFileReceiver, &buffer[iReadFrame * iFileChannels], iRemainingFrame);
+        if (pFileReceiver == nullptr) // file was closed in a different thread. TODO make this not possible
+            return TRUE;
+        sf_count_t c = sf_readf_short((SNDFILE*)pFileReceiver, &buffer[iReadFrame * iFileChannels], iRemainingFrame);
 	    if (c != sf_count_t(iRemainingFrame))
 	    {
             /* rewind */
@@ -288,6 +290,8 @@ CAudioFileIn::Read(CVector<short>& psData)
 #else
     while (iRemainingFrame > 0)
     {
+        if (pFileReceiver == nullptr) // file was closed in a different thread. TODO make this not possible
+            return TRUE;
         size_t c = fread(&buffer[iReadFrame * iFileChannels], sizeof(short), size_t(iRemainingFrame), pFileReceiver);
         if (c != size_t(iRemainingFrame))
         {
