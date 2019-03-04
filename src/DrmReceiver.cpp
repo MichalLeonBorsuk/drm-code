@@ -950,7 +950,7 @@ CDRMReceiver::Start()
     do
     {
         /* Setup new sound file or RSCI input if any */
-        SetInput();
+        //SetInput();
 
         /* Set new acquisition flag */
         RequestNewAcquisition();
