@@ -907,11 +907,12 @@ void FDRMDialog::ClearDisplay()
 
 void FDRMDialog::UpdateWindowTitle()
 {
-    QString windowName, fileName(QString::fromStdString(DRMReceiver.GetInputDevice()));
-    if(QFileInfo::exists(fileName)) {
-        setWindowTitle(QString("Dream") + " - " + fileName);
-        pAnalogDemDlg->setWindowTitle(tr("Analog Demodulation") + " - " + fileName);
-        pFMDlg->setWindowTitle(tr("FM Receiver") + " - " + fileName);
+    QFileInfo fi(QString::fromStdString(DRMReceiver.GetInputDevice()));
+    if(fi.exists()) {
+
+        setWindowTitle(QString("Dream") + " - " + fi.baseName());
+        pAnalogDemDlg->setWindowTitle(tr("Analog Demodulation") + " - " + fi.baseName());
+        pFMDlg->setWindowTitle(tr("FM Receiver") + " - " + fi.baseName());
     }
     else {
         setWindowTitle("Dream");
