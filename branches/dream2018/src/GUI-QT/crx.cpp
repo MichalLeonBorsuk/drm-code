@@ -46,14 +46,14 @@ void CRx::SetOutputDevice(const string& s)
     trx.SetOutputDevice(s);
 }
 
-string CRx::GetInputDevice()
+void CRx::GetInputDevice(string& s)
 {
-    return trx.GetInputDevice();
+    trx.GetInputDevice(s);
 }
 
-string CRx::GetOutputDevice()
+void CRx::GetOutputDevice(string& s)
 {
-    return trx.GetOutputDevice();
+    trx.GetOutputDevice(s);
 }
 
 void CRx::EnumerateInputs(std::vector<std::string>& names, std::vector<std::string>& descriptions)

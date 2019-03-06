@@ -141,8 +141,8 @@ public:
 
     void					SetRsciInput(const string& rsciInput);
     void					ClearRsciInput();
-    virtual string			GetInputDevice() override { return ReceiveData.GetSoundInterface(); }
-    string					GetOutputDevice() { return WriteData.GetSoundInterface(); }
+    void                    GetInputDevice(string&);
+    void					GetOutputDevice(string&);
     void                    EnumerateInputs(std::vector<std::string>& names, std::vector<std::string>& descriptions);
     void                    EnumerateOutputs(std::vector<std::string>& names, std::vector<std::string>& descriptions);
     void					SetInputDevice(const string&);

@@ -17,14 +17,16 @@ private:
     CDRMTransceiver& trx;
 
 signals:
+    void InputDeviceChanged(const string&);
+    void OutputDeviceChanged(const string&);
 
 public slots:
     virtual void LoadSettings() override;
     virtual void SaveSettings() override;
     virtual void SetInputDevice(const string&) override;
     virtual void SetOutputDevice(const string&) override;
-    virtual string GetInputDevice() override;
-    virtual string GetOutputDevice() override;
+    virtual void GetInputDevice(string&) override;
+    virtual void GetOutputDevice(string&) override;
     virtual void EnumerateInputs(std::vector<std::string>& names, std::vector<std::string>& descriptions) override;
     virtual void EnumerateOutputs(std::vector<std::string>& names, std::vector<std::string>& descriptions) override;
     virtual void Start() override;
