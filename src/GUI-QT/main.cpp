@@ -151,12 +151,17 @@ main(int argc, char **argv)
 		}
 		else if(mode == "transmit")
 		{
-			TransmDialog* pMainDlg = new TransmDialog(Settings);
+            CDRMTransmitter DRMTransmitter(&Settings);
+            DRMTransmitter.LoadSettings();
+            CRx tx(DRMTransmitter);
+            TransmDialog* pMainDlg = new TransmDialog(tx);
 
 			/* Show dialog */
 			pMainDlg->show();
+            tx.start();
 			app.exec();
-		}
+            DRMTransmitter.SaveSettings();
+        }
 		else
 		{
 			CHelpUsage HelpUsage(Settings.UsageArguments(), argv[0]);

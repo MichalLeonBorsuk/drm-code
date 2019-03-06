@@ -35,6 +35,7 @@
 #include "../DrmReceiver.h"
 #include "../DrmTransceiver.h"
 #include "../sound/selectioninterface.h"
+#include "crx.h"
 
 typedef struct CHANSEL {
     const char* Name;
@@ -48,7 +49,7 @@ class CSoundCardSelMenu : public QMenu
 
 public:
     CSoundCardSelMenu(
-        CDRMTransceiver& DRMTransceiver,
+        CRx& DRMTransceiver,
         CFileMenu* pFileMenu,
         QWidget* parent = 0);
 
@@ -75,6 +76,8 @@ public slots:
 
 signals:
     void sampleRateChanged();
+    void soundInDeviceChanged(string);
+    void soundOutDeviceChanged(string);
 };
 
 class CFileMenu : public QMenu
@@ -82,7 +85,7 @@ class CFileMenu : public QMenu
     Q_OBJECT
 
 public:
-    CFileMenu(CDRMTransceiver& DRMTransceiver,
+    CFileMenu(CRx& DRMTransceiver,
         QMainWindow* parent, QMenu* menuInsertBefore);
     void UpdateMenu();
 

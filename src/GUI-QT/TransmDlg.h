@@ -53,47 +53,17 @@
 #include <QMainWindow>
 #include <QMenu>
 #include <qwt_thermo.h>
+#include "crx.h"
 
 
 /* Classes ********************************************************************/
-/* Thread class for the transmitter */
-class CTransmitterThread : public QThread 
-{
-public:
-	CTransmitterThread(CSettings& Settings) : DRMTransmitter(&Settings) {}
-
-    virtual ~CTransmitterThread();
-
-	void Stop()
-	{
-		/* Stop working thread */
-		DRMTransmitter.Stop();
-	}
-
-	virtual void run()
-	{
-		try
-		{
-			/* Call receiver main routine */
-			DRMTransmitter.Start();
-		}
-
-		catch (CGenErr GenErr)
-		{
-			ErrorMessage(GenErr.strError);
-		}
-	}
-
-	CDRMTransmitter	DRMTransmitter;
-};
-
 
 class TransmDialog : public CWindow, public Ui_TransmDlgBase
 {
 	Q_OBJECT
 
 public:
-    TransmDialog(CSettings&, QWidget* parent=nullptr);
+    TransmDialog(CRx&, QWidget* parent=nullptr);
 	virtual ~TransmDialog();
 
 protected:
@@ -102,7 +72,7 @@ protected:
 	void EnableAllControlsForSet();
 	void TabWidgetEnableTabs(QTabWidget* tabWidget, bool enable);
 
-	CTransmitterThread	TransThread; /* Working thread object */
+    CRx                	TransThread; /* Working thread object */
 	CDRMTransmitter&	DRMTransmitter;
 	CAboutDlg			AboutDlg;
 	QTimer				Timer;
