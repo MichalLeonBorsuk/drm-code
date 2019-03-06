@@ -138,14 +138,9 @@ public:
     void					LoadSettings(); // can write to settings to set defaults
     void					SaveSettings();
     void					Start();
-    void					Start1();
-    void					Start2();
-    void					Start3();
 
     void					SetRsciInput(const string& rsciInput);
     void					ClearRsciInput();
-    void					SetSoundFile(const string& soundFile);
-    string					GetInputFileName();
     virtual string			GetInputDevice() override { return ReceiveData.GetSoundInterface(); }
     string					GetOutputDevice() { return WriteData.GetSoundInterface(); }
     void                    EnumerateInputs(std::vector<std::string>& names, std::vector<std::string>& descriptions);

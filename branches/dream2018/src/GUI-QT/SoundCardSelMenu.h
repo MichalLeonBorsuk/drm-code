@@ -90,7 +90,6 @@ protected:
     CDRMTransceiver&	DRMTransceiver;
     QAction*			actionOpenFile;
     QAction*			actionCloseFile;
-    const bool			bReceiver;
 	QString				strLastSoundPath;
 	QString				strLastRsciPath;
 
