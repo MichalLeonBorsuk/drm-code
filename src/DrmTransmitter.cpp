@@ -201,6 +201,22 @@ CDRMTransmitter::SetOutputDevice(const string& device)
     TransmitData.SetSoundInterface(outdev);
 }
 
+void CDRMTransmitter::Restart()
+{
+    if (Parameters.eRunState == CParameter::RUNNING)
+        Parameters.eRunState = CParameter::RESTART;
+}
+
+void CDRMTransmitter::Stop()
+{
+    Parameters.eRunState = CParameter::STOP_REQUESTED;
+}
+
+CSettings* CDRMTransmitter::GetSettings()
+{
+    return pSettings;
+}
+
 void CDRMTransmitter::Init()
 {
     /* Fetch new sample rate if any */
@@ -245,11 +261,11 @@ CDRMTransmitter::~CDRMTransmitter()
 {
 }
 
-CDRMTransmitter::CDRMTransmitter(CSettings* pSettings) : CDRMTransceiver(pSettings, TRUE),
+CDRMTransmitter::CDRMTransmitter(CSettings* nPsettings) : CDRMTransceiver(),
         ReadData(), TransmitData(),
         rDefCarOffset((_REAL) VIRTUAL_INTERMED_FREQ),
         // UEP only works with Dream receiver, FIXME! -> disabled for now
-        bUseUEP(FALSE)
+        bUseUEP(FALSE), Parameters(*(new CParameter())), pSettings(nPsettings)
 {
     /* Init streams */
     Parameters.ResetServicesStreams();
