@@ -57,35 +57,7 @@
   SLObjectItf engineObject = nullptr;
 #endif
 
-class CRx: public QThread
-{
-public:
-	CRx(CDRMReceiver& nRx):rx(nRx)
-	{}
-	void run();
-private:
-	CDRMReceiver& rx;
-};
-
-void
-CRx::run()
-{
-    qDebug("Working thread started");
-    try
-    {
-        /* Call receiver main routine */
-        rx.Start();
-    }
-    catch (CGenErr GenErr)
-    {
-        ErrorMessage(GenErr.strError);
-    }
-    catch (string strError)
-    {
-        ErrorMessage(strError);
-    }
-    qDebug("Working thread complete");
-}
+#include "crx.h"
 
 int
 main(int argc, char **argv)
@@ -155,15 +127,15 @@ main(int argc, char **argv)
 			{
 				rig.subscribe();
 			}
-			FDRMDialog *pMainDlg = new FDRMDialog(DRMReceiver, Settings, rig);
+            CRx rx(DRMReceiver);
+            FDRMDialog *pMainDlg = new FDRMDialog(rx, Settings, rig);
 #else
 			FDRMDialog *pMainDlg = new FDRMDialog(DRMReceiver, Settings);
 #endif
 			(void)pMainDlg;
 
 			/* Start working thread */
-			CRx rx(DRMReceiver);
-			rx.start();
+            rx.start();
 
 			/* Set main window */
 			app.exec();
@@ -257,3 +229,5 @@ DebugError(const char *pchErDescr, const char *pchPar1Descr,
 	fprintf(stderr, "\nDebug error! For more information see test/DebugError.dat\n");
 	exit(1);
 }
+
+#include "main.moc"

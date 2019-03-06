@@ -28,11 +28,6 @@
 
 #include "DrmTransceiver.h"
 
-CDRMTransceiver::CDRMTransceiver(CSettings* pSettings, _BOOLEAN bTransmitter)
-: pSettings(pSettings), bTransmitter(bTransmitter)
-{
-}
-
 CDRMTransceiver::~CDRMTransceiver()
 {
 }

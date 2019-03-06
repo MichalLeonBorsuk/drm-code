@@ -41,6 +41,7 @@
 #include "sourcedecoders/AudioSourceEncoder.h"
 #include "sound/soundinterface.h"
 #include "DrmTransceiver.h"
+#include "Parameter.h"
 
 /* Classes ********************************************************************/
 class CDRMTransmitter : public CDRMTransceiver
@@ -83,6 +84,13 @@ public:
     void SetOutputDevice(const string&);
     void doSetInputDevice();
     void doSetOutputDevice();
+    virtual _BOOLEAN				IsReceiver() const { return false; }
+    virtual _BOOLEAN				IsTransmitter() const { return true; }
+    virtual void Restart();
+    virtual void Stop();
+    virtual CSettings*				GetSettings() ;
+    virtual void					SetSettings(CSettings* pNewSettings) { pSettings = pNewSettings; }
+    virtual CParameter*				GetParameters() {return &Parameters; }
 
 protected:
     void Run();
@@ -123,6 +131,8 @@ protected:
     _REAL					rDefCarOffset;
     _BOOLEAN				bUseUEP;
     int						iSoftStopSymbolCount;
+    CParameter&             Parameters;
+    CSettings*              pSettings;
 };
 
 
