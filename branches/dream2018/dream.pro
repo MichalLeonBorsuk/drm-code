@@ -502,7 +502,8 @@ HEADERS += \
     src/resample/cspectrumresample.h \
     src/resample/caudioresample.h \
     src/sourcedecoders/reverb.h \
-    src/sourcedecoders/caudioreverb.h
+    src/sourcedecoders/caudioreverb.h \
+    src/GUI-QT/crx.h
 SOURCES += \
     src/AMDemodulation.cpp \
     src/AMSSDemodulation.cpp \
@@ -616,7 +617,8 @@ SOURCES += \
     src/resample/cspectrumresample.cpp \
     src/resample/caudioresample.cpp \
     src/sourcedecoders/reverb.cpp \
-    src/sourcedecoders/caudioreverb.cpp
+    src/sourcedecoders/caudioreverb.cpp \
+    src/GUI-QT/crx.cpp
 !console {
 HEADERS += \
     src/GUI-QT/Logging.h \

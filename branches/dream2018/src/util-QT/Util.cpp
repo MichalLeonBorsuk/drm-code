@@ -33,6 +33,7 @@
 #include <QDir>
 #include <QFileInfo>
 #include <QCoreApplication>
+#include "../Parameter.h"
 
 /* Ensure that the given filename is secure */
 QString VerifyFilename(QString filename)

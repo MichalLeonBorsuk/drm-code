@@ -78,7 +78,6 @@
 
 
 /* Classes ********************************************************************/
-class CSettings;
 class CRig;
 
 class CSplitFAC : public CSplitModul<_BINARY>
@@ -139,19 +138,48 @@ public:
     void					LoadSettings(); // can write to settings to set defaults
     void					SaveSettings();
     void					Start();
+    void					Start1();
+    void					Start2();
+    void					Start3();
 
     void					SetRsciInput(const string& rsciInput);
     void					ClearRsciInput();
     void					SetSoundFile(const string& soundFile);
     string					GetInputFileName();
-    string					GetInputDevice() { return ReceiveData.GetSoundInterface(); }
+    virtual string			GetInputDevice() override { return ReceiveData.GetSoundInterface(); }
     string					GetOutputDevice() { return WriteData.GetSoundInterface(); }
     void                    EnumerateInputs(std::vector<std::string>& names, std::vector<std::string>& descriptions);
     void                    EnumerateOutputs(std::vector<std::string>& names, std::vector<std::string>& descriptions);
     void					SetInputDevice(const string&);
     void					SetOutputDevice(const string&);
 
-    void					RequestNewAcquisition() {
+    void Restart()
+    {
+        if (Parameters.eRunState == CParameter::RUNNING)
+            Parameters.eRunState = CParameter::RESTART;
+    }
+
+    void Stop()
+    {
+        Parameters.eRunState = CParameter::STOP_REQUESTED;
+    }
+
+    CSettings*GetSettings() {
+        return pSettings;
+    }
+
+    void SetSettings(CSettings* pNewSettings) {
+        pSettings = pNewSettings;
+    }
+
+    CParameter*	GetParameters() {
+        return &Parameters;
+    }
+
+    virtual _BOOLEAN IsReceiver() const override { return true; }
+    virtual _BOOLEAN IsTransmitter() const override  { return false; }
+
+    void RequestNewAcquisition() {
         bRestartFlag = TRUE;
     }
     EAcqStat				GetAcquiState() {
@@ -444,6 +472,8 @@ protected:
     CPlotManager			PlotManager;
     string					rsiOrigin;
     int						iPrevSigSampleRate; /* sample rate before sound file */
+    CParameter&             Parameters;
+    CSettings*              pSettings;
 };
 
 

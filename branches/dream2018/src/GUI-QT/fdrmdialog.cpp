@@ -52,15 +52,16 @@ static _REAL WMERSteps[] = {6.0, 12.0, 18.0, 24.0, 30.0};
 
 /* Implementation *************************************************************/
 #ifdef HAVE_LIBHAMLIB
-FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& Settings, CRig& rig,
+FDRMDialog::FDRMDialog(CRx& nTrx, CSettings& Settings, CRig& rig,
                        QWidget* parent)
 #else
-FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& Settings, 
+FDRMDialog::FDRMDialog(CRx& nTrx, CSettings& Settings,
                        QWidget* parent)
 #endif
     :
     CWindow(parent, Settings, "DRM"),
-    DRMReceiver(NDRMR),
+    trx(nTrx),
+    DRMReceiver(*reinterpret_cast<CDRMReceiver*>(nTrx.GetTRX())),
     serviceLabels(4), pLogging(nullptr),
     pSysTray(nullptr), pCurrentWindow(this),
     iMultimediaServiceBit(0),

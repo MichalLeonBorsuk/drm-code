@@ -58,7 +58,7 @@ const int
 CDRMReceiver::MAX_UNLOCKED_COUNT = 2;
 
 /* Implementation *************************************************************/
-CDRMReceiver::CDRMReceiver(CSettings* pSettings) : CDRMTransceiver(pSettings),
+CDRMReceiver::CDRMReceiver(CSettings* nPsettings) : CDRMTransceiver(),
     ReceiveData(), WriteData(),
     FreqSyncAcq(),
     ChannelEstimation(),
@@ -77,7 +77,7 @@ CDRMReceiver::CDRMReceiver(CSettings* pSettings) : CDRMTransceiver(pSettings),
 #ifdef HAVE_LIBHAMLIB
     pRig(nullptr),
 #endif
-    PlotManager(), iPrevSigSampleRate(0)
+    PlotManager(), iPrevSigSampleRate(0),Parameters(*(new CParameter())), pSettings(nPsettings)
 {
     Parameters.SetReceiver(this);
     downstreamRSCI.SetReceiver(this);
@@ -936,7 +936,16 @@ CDRMReceiver::InitReceiverMode()
 void
 CDRMReceiver::Start()
 {
-    // set the frequency from the command line or ini file
+    Start1();
+    Start2();
+    Start3();
+}
+
+void
+CDRMReceiver::Start1()
+{
+
+// set the frequency from the command line or ini file
     int iFreqkHz = Parameters.GetFrequency();
     if (iFreqkHz != -1)
         SetFrequency(iFreqkHz);
@@ -947,6 +956,11 @@ CDRMReceiver::Start()
 
     /* Set restart flag */
     Parameters.eRunState = CParameter::RESTART;
+}
+
+void
+CDRMReceiver::Start2()
+{
     do
     {
         /* Setup new sound file or RSCI input if any */
@@ -973,6 +987,11 @@ CDRMReceiver::Start()
         ResetInput();
     }
     while (Parameters.eRunState == CParameter::RESTART);
+}
+
+void
+CDRMReceiver::Start3()
+{
 
     CloseSoundInterfaces();
 

@@ -29,14 +29,16 @@
 #ifndef DRM_TRANSCEIVER_H
 #define DRM_TRANSCEIVER_H
 
-#include "Parameter.h"
-#include "util/Settings.h"
 #include "sound/soundinterface.h"
+#include <vector>
+
+class CSettings;
+class CParameter;
 
 class CDRMTransceiver
 {
 public:
-    CDRMTransceiver(CSettings* pSettings, bool bTransmitter=false);
+    CDRMTransceiver() {}
     virtual ~CDRMTransceiver();
 
     virtual void LoadSettings() = 0;
@@ -48,38 +50,14 @@ public:
     virtual string GetOutputDevice() = 0;
     virtual void EnumerateInputs(std::vector<std::string>& names, std::vector<std::string>& descriptions)=0;
     virtual void EnumerateOutputs(std::vector<std::string>& names, std::vector<std::string>& descriptions)=0;
+    virtual void Restart() = 0;
+    virtual void Stop() = 0;
+    virtual CSettings*				GetSettings() = 0;
+    virtual void					SetSettings(CSettings* pNewSettings) = 0;
+    virtual CParameter*				GetParameters() = 0;
+    virtual _BOOLEAN				IsReceiver() const = 0;
+    virtual _BOOLEAN				IsTransmitter() const = 0;
 
-    virtual void Restart()
-    {
-        if (Parameters.eRunState == CParameter::RUNNING)
-            Parameters.eRunState = CParameter::RESTART;
-    }
-    virtual void Stop()
-    {
-        Parameters.eRunState = CParameter::STOP_REQUESTED;
-    }
-    virtual CSettings*				GetSettings() {
-        return pSettings;
-    }
-    virtual void					SetSettings(CSettings* pNewSettings) {
-        pSettings = pNewSettings;
-    }
-    virtual CParameter*				GetParameters() {
-        return &Parameters;
-    }
-	virtual _BOOLEAN				IsReceiver() const {
-		return !bTransmitter;
-	}
-	virtual _BOOLEAN				IsTransmitter() const {
-		return bTransmitter;
-	}
-
-protected:
-	CSettings*				pSettings;
-    CParameter				Parameters;
-
-private:
-	const _BOOLEAN bTransmitter;
 };
 
 #endif

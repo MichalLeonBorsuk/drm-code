@@ -60,6 +60,7 @@
 #include "GeneralSettingsDlg.h"
 #include "MultColorLED.h"
 #include "Logging.h"
+#include "crx.h"
 #include "../DrmReceiver.h"
 #include "../util/Vector.h"
 #include "../datadecoding/DataDecoder.h"
@@ -76,13 +77,14 @@ class FDRMDialog : public CWindow, public Ui_DRMMainWindow
 
 public:
 #ifdef HAVE_LIBHAMLIB
-    FDRMDialog(CDRMReceiver&, CSettings&, CRig&, QWidget* parent = 0);
+    FDRMDialog(CRx&, CSettings&, CRig&, QWidget* parent = 0);
 #else
-    FDRMDialog(CDRMReceiver&, CSettings&, QWidget* parent = 0);
+    FDRMDialog(CRx&, CSettings&, QWidget* parent = 0);
 #endif
     virtual ~FDRMDialog();
 
 protected:
+    CDRMTransceiver&    trx;
     CDRMReceiver&		DRMReceiver;
     QTimer				Timer;
     QTimer				TimerClose;
