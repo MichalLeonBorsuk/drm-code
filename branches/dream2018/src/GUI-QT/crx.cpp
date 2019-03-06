@@ -12,7 +12,7 @@ CRx::run()
     qDebug("Working thread started");
     try
     {
-        /* Call receiver main routine */
+        /* Call main routine */
         trx.Start();
     }
     catch (CGenErr GenErr)
@@ -34,11 +34,6 @@ void CRx::LoadSettings()
 void CRx::SaveSettings()
 {
     trx.SaveSettings();
-}
-
-void CRx::Start()
-{
-    trx.Start();
 }
 
 void CRx::SetInputDevice(const string& s)
@@ -69,6 +64,11 @@ void CRx::EnumerateInputs(std::vector<std::string>& names, std::vector<std::stri
 void CRx::EnumerateOutputs(std::vector<std::string>& names, std::vector<std::string>& descriptions)
 {
     trx.EnumerateOutputs(names, descriptions);
+}
+
+void CRx::Start()
+{
+    trx.Start();
 }
 
 void CRx::Restart()

@@ -61,7 +61,6 @@ FDRMDialog::FDRMDialog(CRx& nTrx, CSettings& Settings,
     :
     CWindow(parent, Settings, "DRM"),
     trx(nTrx),
-    DRMReceiver(*reinterpret_cast<CDRMReceiver*>(nTrx.GetTRX())),
     serviceLabels(4), pLogging(nullptr),
     pSysTray(nullptr), pCurrentWindow(this),
     iMultimediaServiceBit(0),
@@ -73,22 +72,22 @@ FDRMDialog::FDRMDialog(CRx& nTrx, CSettings& Settings,
     /* Set help text for the controls */
     AddWhatsThisHelp();
 
-    CParameter& Parameters = *DRMReceiver.GetParameters();
+    CParameter& Parameters = *trx.GetParameters();
 
     pLogging = new CLogging(Parameters);
     pLogging->LoadSettings(Settings);
 
     /* Creation of file and sound card menu */
-    pFileMenu = new CFileMenu(DRMReceiver, this, menu_View);
-    pSoundCardMenu = new CSoundCardSelMenu(DRMReceiver, pFileMenu, this);
+    pFileMenu = new CFileMenu(trx, this, menu_View);
+    pSoundCardMenu = new CSoundCardSelMenu(trx, pFileMenu, this);
     menu_Settings->addMenu(pSoundCardMenu);
     connect(pFileMenu, SIGNAL(soundFileChanged(QString)), this, SLOT(OnSoundFileChanged(QString)));
 
     /* Analog demodulation window */
-    pAnalogDemDlg = new AnalogDemDlg(DRMReceiver, Settings, pFileMenu, pSoundCardMenu);
+    pAnalogDemDlg = new AnalogDemDlg(*reinterpret_cast<CDRMReceiver*>(nTrx.GetTRX()), Settings, pFileMenu, pSoundCardMenu);
 
     /* FM window */
-    pFMDlg = new FMDialog(DRMReceiver, Settings, pFileMenu, pSoundCardMenu);
+    pFMDlg = new FMDialog(*reinterpret_cast<CDRMReceiver*>(nTrx.GetTRX()), Settings, pFileMenu, pSoundCardMenu);
 
     /* Parent list for Stations and Live Schedule window */
 	QMap <QWidget*,QString> parents;
@@ -97,30 +96,30 @@ FDRMDialog::FDRMDialog(CRx& nTrx, CSettings& Settings,
 
     /* Stations window */
 #ifdef HAVE_LIBHAMLIB
-    pStationsDlg = new StationsDlg(DRMReceiver, Settings, rig, parents);
+    pStationsDlg = new StationsDlg(*reinterpret_cast<CDRMReceiver*>(nTrx.GetTRX()), Settings, rig, parents);
 #else
-    pStationsDlg = new StationsDlg(DRMReceiver, Settings, parents);
+    pStationsDlg = new StationsDlg(*reinterpret_cast<CDRMReceiver*>(nTrx.GetTRX()), Settings, parents);
 #endif
 
     /* Live Schedule window */
-    pLiveScheduleDlg = new LiveScheduleDlg(DRMReceiver, Settings, parents);
+    pLiveScheduleDlg = new LiveScheduleDlg(*reinterpret_cast<CDRMReceiver*>(nTrx.GetTRX()), Settings, parents);
 
     /* MOT broadcast website viewer window */
 #ifdef QT_WEBENGINE_LIB
-    pBWSDlg = new BWSViewer(DRMReceiver, Settings, this);
+    pBWSDlg = new BWSViewer(*reinterpret_cast<CDRMReceiver*>(nTrx.GetTRX()), Settings, this);
 #endif
 
     /* Journaline viewer window */
-    pJLDlg = new JLViewer(DRMReceiver, Settings, this);
+    pJLDlg = new JLViewer(*reinterpret_cast<CDRMReceiver*>(nTrx.GetTRX()), Settings, this);
 
     /* MOT slide show window */
-    pSlideShowDlg = new SlideShowViewer(DRMReceiver, Settings, this);
+    pSlideShowDlg = new SlideShowViewer(*reinterpret_cast<CDRMReceiver*>(nTrx.GetTRX()), Settings, this);
 
     /* Programme Guide Window */
-    pEPGDlg = new EPGDlg(DRMReceiver, Settings, this);
+    pEPGDlg = new EPGDlg(*reinterpret_cast<CDRMReceiver*>(nTrx.GetTRX()), Settings, this);
 
     /* Evaluation window */
-    pSysEvalDlg = new systemevalDlg(DRMReceiver, Settings, this);
+    pSysEvalDlg = new systemevalDlg(*reinterpret_cast<CDRMReceiver*>(nTrx.GetTRX()), Settings, this);
 
     /* general settings window */
     pGeneralSettingsDlg = new GeneralSettingsDlg(Parameters, Settings, this);
@@ -303,9 +302,9 @@ void FDRMDialog::OnSysTrayActivated(QSystemTrayIcon::ActivationReason reason)
 void FDRMDialog::OnSysTrayTimer()
 {
     QString Title, Message;
-    if (DRMReceiver.GetAcquiState() == AS_WITH_SIGNAL)
+    if (reinterpret_cast<CDRMReceiver*>(trx.GetTRX())->GetAcquiState() == AS_WITH_SIGNAL)
     {
-        CParameter& Parameters = *(DRMReceiver.GetParameters());
+        CParameter& Parameters = *(trx.GetParameters());
         Parameters.Lock();
             const int iCurSelAudioServ = Parameters.GetCurSelAudioService();
             CService audioService = Parameters.Service[iCurSelAudioServ];
@@ -380,7 +379,7 @@ void FDRMDialog::SetStatus(CMultColorLED* LED, ETypeRxStatus state)
 void FDRMDialog::UpdateDRM_GUI()
 {
     _BOOLEAN bMultimediaServiceAvailable;
-    CParameter& Parameters = *DRMReceiver.GetParameters();
+    CParameter& Parameters = *trx.GetParameters();
 
     if (isVisible() == false)
         ChangeGUIModeToDRM();
@@ -403,7 +402,7 @@ void FDRMDialog::UpdateDRM_GUI()
     iMultimediaServiceBit = 0;
 
     /* Check if receiver does receive a signal */
-    if(DRMReceiver.GetAcquiState() == AS_WITH_SIGNAL)
+    if(reinterpret_cast<CDRMReceiver*>(trx.GetTRX())->GetAcquiState() == AS_WITH_SIGNAL)
         UpdateDisplay();
     else
     {
@@ -435,7 +434,7 @@ void FDRMDialog::OnScheduleTimer()
     e = pScheduler->front();
     if (e.frequency != -1)
     {
-        DRMReceiver.SetFrequency(e.frequency);
+        reinterpret_cast<CDRMReceiver*>(trx.GetTRX())->SetFrequency(e.frequency);
         if(!pLogging->enabled())
         {
             startLogging();
@@ -459,7 +458,7 @@ void FDRMDialog::OnScheduleTimer()
 
 void FDRMDialog::OnTimer()
 {
-    ERecMode eNewReceiverMode = DRMReceiver.GetReceiverMode();
+    ERecMode eNewReceiverMode = reinterpret_cast<CDRMReceiver*>(trx.GetTRX())->GetReceiverMode();
     switch(eNewReceiverMode)
     {
     case RM_DRM:
@@ -516,7 +515,7 @@ void FDRMDialog::OnTimer()
 
 void FDRMDialog::OnTimerClose()
 {
-    if (DRMReceiver.GetParameters()->eRunState == CParameter::STOPPED)
+    if (trx.GetParameters()->eRunState == CParameter::STOPPED)
         close();
 }
 
@@ -680,7 +679,7 @@ QString FDRMDialog::serviceSelector(CParameter& Parameters, int i)
         if ((service.eAudDataFlag == CService::SF_AUDIO))
         {
             /* Report missing codec */
-            if (!DRMReceiver.GetAudSorceDec()->CanDecode(service.AudioParam.eAudioCoding))
+            if (!reinterpret_cast<CDRMReceiver*>(trx.GetTRX())->GetAudSorceDec()->CanDecode(service.AudioParam.eAudioCoding))
                 text += tr(" [no codec available]");
 
             /* Show, if a multimedia stream is connected to this service */
@@ -748,7 +747,7 @@ QString FDRMDialog::serviceSelector(CParameter& Parameters, int i)
 
 void FDRMDialog::UpdateDisplay()
 {
-    CParameter& Parameters = *(DRMReceiver.GetParameters());
+    CParameter& Parameters = *(trx.GetParameters());
 
     Parameters.Lock();
 
@@ -908,7 +907,7 @@ void FDRMDialog::ClearDisplay()
 
 void FDRMDialog::UpdateWindowTitle()
 {
-    QFileInfo fi(QString::fromStdString(DRMReceiver.GetInputDevice()));
+    QFileInfo fi(QString::fromStdString(trx.GetInputDevice()));
     if(fi.exists()) {
 
         setWindowTitle(QString("Dream") + " - " + fi.baseName());
@@ -977,18 +976,18 @@ void FDRMDialog::eventHide(QHideEvent*)
 
 void FDRMDialog::OnNewAcquisition()
 {
-    DRMReceiver.RequestNewAcquisition();
+    reinterpret_cast<CDRMReceiver*>(trx.GetTRX())->RequestNewAcquisition();
 }
 
 void FDRMDialog::OnSwitchMode(int newMode)
 {
-    DRMReceiver.SetReceiverMode(ERecMode(newMode));
+    reinterpret_cast<CDRMReceiver*>(trx.GetTRX())->SetReceiverMode(ERecMode(newMode));
     Timer.start(GUI_CONTROL_UPDATE_TIME);
 }
 
 void FDRMDialog::OnSelectAudioService(int shortId)
 {
-    CParameter& Parameters = *DRMReceiver.GetParameters();
+    CParameter& Parameters = *trx.GetParameters();
 
     Parameters.Lock();
 
@@ -999,7 +998,7 @@ void FDRMDialog::OnSelectAudioService(int shortId)
 
 void FDRMDialog::OnSelectDataService(int shortId)
 {
-    CParameter& Parameters = *DRMReceiver.GetParameters();
+    CParameter& Parameters = *trx.GetParameters();
     QWidget* pDlg = nullptr;
 
     Parameters.Lock();
@@ -1106,7 +1105,7 @@ void FDRMDialog::eventClose(QCloseEvent* ce)
     if (!TimerClose.isActive())
     {
         /* Request that the working thread stops */
-        DRMReceiver.Stop();
+        trx.Stop();
 
         /* Stop real-time timer */
         Timer.stop();
@@ -1123,7 +1122,7 @@ void FDRMDialog::eventClose(QCloseEvent* ce)
      * so if the window never close it mean there is a bug
      * somewhere, a fix is needed
      */
-    if (DRMReceiver.GetParameters()->eRunState == CParameter::STOPPED)
+    if (trx.GetParameters()->eRunState == CParameter::STOPPED)
     {
         TimerClose.stop();
         AboutDlg.close();

@@ -181,7 +181,7 @@ void CSoundCardSelMenu::OnSoundSampleRate(QAction* action)
         if (iSampleRate < 0) Parameters.SetNewSigSampleRate(-iSampleRate);
         else                 Parameters.SetNewAudSampleRate(iSampleRate);
     Parameters.Unlock();
-    RestartTransceiver(&DRMTransceiver);
+    DRMTransceiver.Restart();
     emit sampleRateChanged();
 }
 
@@ -191,7 +191,7 @@ void CSoundCardSelMenu::OnSoundSignalUpscale(bool bChecked)
         Parameters.SetNewSigSampleRate(Parameters.GetSoundCardSigSampleRate());
         Parameters.SetNewSigUpscaleRatio(bChecked ? 2 : 1);
     Parameters.Unlock();
-    RestartTransceiver(&DRMTransceiver);
+    DRMTransceiver.Restart();
     emit sampleRateChanged();
 }
 
@@ -308,12 +308,12 @@ void CSoundCardSelMenu::OnSoundFileChanged(QString filename)
 /* CFileMenu ******************************************************************/
 // TODO DRMTransmitter
 
-CFileMenu::CFileMenu(CDRMTransceiver& DRMTransceiver, QMainWindow* parent,
+CFileMenu::CFileMenu(CDRMTransceiver& trx, QMainWindow* parent,
     QMenu* menuInsertBefore)
-    : QMenu(parent), DRMTransceiver(DRMTransceiver), bReceiver(DRMTransceiver.IsReceiver())
+    : QMenu(parent), DRMTransceiver(trx)
 {
     setTitle(tr("&File"));
-    if (bReceiver)
+    if (DRMTransceiver.IsReceiver())
     {
         QString openFile(tr("&Open File..."));
         QString closeFile(tr("&Close File"));
@@ -336,7 +336,7 @@ void CFileMenu::OnOpenFile()
 	SND_FILE2 \
 	RSCI_FILE2 \
 	"All Files (*)"
-    if (bReceiver)
+    if (DRMTransceiver.IsReceiver())
     {
 	    QString filename = QFileDialog::getOpenFileName(this, tr("Open File"), strLastSoundPath, tr(FILE_FILTER));
         /* Check if user hit the cancel button */
@@ -353,7 +353,7 @@ void CFileMenu::OnOpenFile()
                 ((CDRMReceiver&)DRMTransceiver).SetInputDevice(filename.toStdString());
                 ((CDRMReceiver&)DRMTransceiver).ClearRsciInput();
             }
-		    RestartTransceiver(&DRMTransceiver);
+            DRMTransceiver.Restart();
             UpdateMenu();
 	    }
     }
@@ -361,19 +361,19 @@ void CFileMenu::OnOpenFile()
 
 void CFileMenu::OnCloseFile()
 {
-    if (bReceiver)
+    if (DRMTransceiver.IsReceiver())
     {
-        ((CDRMReceiver&)DRMTransceiver).SetInputDevice("");
-	    RestartTransceiver(&DRMTransceiver);
+        DRMTransceiver.SetInputDevice("");
+        DRMTransceiver.Restart();
         UpdateMenu();
     }
 }
 
 void CFileMenu::UpdateMenu()
 {
-    if (bReceiver)
+    if (DRMTransceiver.IsReceiver())
     {
-        string filename = ((CDRMReceiver&)DRMTransceiver).GetInputFileName();
+        string filename = DRMTransceiver.GetInputDevice();
 
         bool bInputFile = false;
         FileTyper::type t = FileTyper::resolve(filename);

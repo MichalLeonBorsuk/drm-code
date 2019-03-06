@@ -45,6 +45,4 @@ QString& Linkify(QString& text);
 
 void CreateDirectories(const QString& strFilename);
 
-void RestartTransceiver(CDRMTransceiver *DRMTransceiver);
-
 #endif // __UTIL_QT_UTIL_H

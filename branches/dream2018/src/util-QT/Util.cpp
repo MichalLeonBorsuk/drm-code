@@ -185,20 +185,3 @@ void CreateDirectories(const QString& strFilename)
             QDir().mkdir(strDirName);
     }
 }
-
-void RestartTransceiver(CDRMTransceiver *DRMTransceiver)
-{
-    if (DRMTransceiver != nullptr)
-    {
-        QMutex sleep;
-        CParameter& Parameters = *DRMTransceiver->GetParameters();
-        DRMTransceiver->Restart();
-        while (Parameters.eRunState == CParameter::RESTART)
-        {
-            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-            sleep.lock(); /* TODO find a better way to sleep on Qt */
-            sleep.tryLock(10); /* 10 ms */
-            sleep.unlock();
-        }
-    }
-}
