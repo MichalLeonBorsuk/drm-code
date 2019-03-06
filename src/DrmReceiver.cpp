@@ -393,9 +393,39 @@ CDRMReceiver::Run()
 }
 
 void
-CDRMReceiver::SetInputDevice(const string& device)
+CDRMReceiver::SetInputDevice(const string& s)
 {
-    ReceiveData.SetSoundInterface(device);
+    string device = s;
+    if(device == "") {
+        vector<string> names;
+        vector<string> descriptions;
+        ReceiveData.Enumerate(names, descriptions);
+        if(names.size()>0)
+            device = names[0];
+    }
+    ReceiveData.Stop();
+    ReceiveData.ClearInputData();
+    /* Get a fresh CUpstreamDI interface */
+    if (pUpstreamRSCI->GetInEnabled())
+    {
+        delete pUpstreamRSCI;
+        pUpstreamRSCI = new CUpstreamDI();
+    }
+    switch(FileTyper::resolve(device)) {
+    case FileTyper::unrecognised:
+    case FileTyper::pcm:
+        /* SetSyncInput to FALSE, can be modified by pUpstreamRSCI */
+        InputResample.SetSyncInput(FALSE);
+        SyncUsingPil.SetSyncInput(FALSE);
+        TimeSync.SetSyncInput(FALSE);
+        ReceiveData.SetSoundInterface(device); // audio input
+        break;
+    case FileTyper::pcap:
+    case FileTyper::file_framing:
+    case FileTyper::raw_af:
+    case FileTyper::raw_pft:
+        pUpstreamRSCI->SetOrigin(device);
+    }
 }
 
 void
@@ -404,12 +434,12 @@ CDRMReceiver::SetOutputDevice(const string& device)
     WriteData.SetSoundInterface(device);
 }
 
-void CDRMReceiver::EnumerateInputs(std::vector<std::string>& names, std::vector<std::string>& descriptions)
+void CDRMReceiver::EnumerateInputs(vector<string>& names, vector<string>& descriptions)
 {
     ReceiveData.Enumerate(names, descriptions);
 }
 
-void CDRMReceiver::EnumerateOutputs(std::vector<std::string>& names, std::vector<std::string>& descriptions)
+void CDRMReceiver::EnumerateOutputs(vector<string>& names, vector<string>& descriptions)
 {
     WriteData.Enumerate(names, descriptions);
 }
@@ -422,50 +452,6 @@ void CDRMReceiver::GetInputDevice(string& s)
 void CDRMReceiver::GetOutputDevice(string& s)
 {
     s = WriteData.GetSoundInterface();
-}
-
-void
-CDRMReceiver::SetInput()
-{
-    Parameters.Lock();
-        /* Fetch new sample rate if any */
-        Parameters.FetchNewSampleRate();
-        /* Close previous sound interface */
-        ReceiveData.Stop();
-        /* Get a fresh CUpstreamDI interface */
-        if (pUpstreamRSCI->GetInEnabled())
-        {
-            delete pUpstreamRSCI;
-            pUpstreamRSCI = new CUpstreamDI();
-        }
-        /* Check for RSCI file */
-        if (rsiOrigin != "")
-        {
-            ReceiveData.ClearInputData();
-            pUpstreamRSCI->SetOrigin(rsiOrigin);
-        }
-        else
-        {
-            /* SetSyncInput to FALSE, can be modified by pUpstreamRSCI */
-            InputResample.SetSyncInput(FALSE);
-            SyncUsingPil.SetSyncInput(FALSE);
-            TimeSync.SetSyncInput(FALSE);
-            /* Save sample rate */
-            if (iPrevSigSampleRate == 0) {
-                iPrevSigSampleRate = Parameters.GetSoundCardSigSampleRate();
-            }
-        }
-    Parameters.Unlock();
-}
-
-void
-CDRMReceiver::ResetInput()
-{
-    if (iPrevSigSampleRate != 0)
-    {
-        Parameters.SetSoundCardSigSampleRate(iPrevSigSampleRate);
-        iPrevSigSampleRate = 0;
-    }
 }
 
 void
@@ -943,9 +929,6 @@ CDRMReceiver::Start()
     Parameters.eRunState = CParameter::RESTART;
     do
     {
-        /* Setup new sound file or RSCI input if any */
-        //SetInput();
-
         /* Set new acquisition flag */
         RequestNewAcquisition();
 
@@ -962,9 +945,6 @@ CDRMReceiver::Start()
 #endif
         }
         while (Parameters.eRunState == CParameter::RUNNING);
-
-        /* Restore some parameter previously set by SetInput() */
-        ResetInput();
     }
     while (Parameters.eRunState == CParameter::RESTART);
 
