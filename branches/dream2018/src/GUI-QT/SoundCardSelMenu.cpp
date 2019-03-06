@@ -97,7 +97,7 @@ static const int SignalSampleRateTable[] =
 
 /* CSoundCardSelMenu **********************************************************/
 
-CSoundCardSelMenu::CSoundCardSelMenu(CDRMTransceiver& DRMTransceiver,
+CSoundCardSelMenu::CSoundCardSelMenu(CRx& DRMTransceiver,
     CFileMenu* pFileMenu, QWidget* parent) : QMenu(parent),
     DRMTransceiver(DRMTransceiver), Parameters(*DRMTransceiver.GetParameters()),
     menuSigInput(nullptr), menuSigDevice(nullptr), menuSigSampleRate(nullptr),
@@ -121,6 +121,8 @@ CSoundCardSelMenu::CSoundCardSelMenu(CDRMTransceiver& DRMTransceiver,
             actionUpscale->setCheckable(true);
             actionUpscale->setChecked(Parameters.GetSigUpscaleRatio() == 2);
             connect(actionUpscale, SIGNAL(toggled(bool)), this, SLOT(OnSoundSignalUpscale(bool)));
+            connect(this, SIGNAL(soundInDeviceChange(string&)), &DRMTransceiver, SLOT(SetInputDevice(string&)));
+            connect(this, SIGNAL(soundOutDeviceChange(string&)), &DRMTransceiver, SLOT(SetOutputDevice(string&)));
         Parameters.Unlock();
         if (pFileMenu != nullptr)
             connect(pFileMenu, SIGNAL(soundFileChanged(QString)), this, SLOT(OnSoundFileChanged(QString)));
@@ -138,16 +140,12 @@ CSoundCardSelMenu::CSoundCardSelMenu(CDRMTransceiver& DRMTransceiver,
 
 void CSoundCardSelMenu::OnSoundInDevice(QAction* action)
 {
-    Parameters.Lock();
-    DRMTransceiver.SetInputDevice(action->data().toString().toStdString());
-    Parameters.Unlock();
+    emit soundInDeviceChanged(action->data().toString().toStdString());
 }
 
 void CSoundCardSelMenu::OnSoundOutDevice(QAction* action)
 {
-    Parameters.Lock();
-    DRMTransceiver.SetOutputDevice(action->data().toString().toStdString());
-    Parameters.Unlock();
+    emit soundOutDeviceChanged(action->data().toString().toStdString());
 }
 
 void CSoundCardSelMenu::OnSoundInChannel(QAction* action)
@@ -312,7 +310,7 @@ void CSoundCardSelMenu::OnSoundFileChanged(QString filename)
 /* CFileMenu ******************************************************************/
 // TODO DRMTransmitter
 
-CFileMenu::CFileMenu(CDRMTransceiver& trx, QMainWindow* parent,
+CFileMenu::CFileMenu(CRx& trx, QMainWindow* parent,
     QMenu* menuInsertBefore)
     : QMenu(parent), DRMTransceiver(trx)
 {

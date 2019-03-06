@@ -35,18 +35,13 @@
 #include <QProgressBar>
 #include <QHeaderView>
 #include <QWhatsThis>
+#include "../DrmTransmitter.h"
 
-CTransmitterThread::~CTransmitterThread()
-{
-    // just to give it a vtable
-}
-
-
-TransmDialog::TransmDialog(CSettings& Settings,	QWidget* parent)
+TransmDialog::TransmDialog(CRx& tx,	QWidget* parent)
 	:
-    CWindow(parent, Settings, "Transmit"),
-	TransThread(Settings),
-	DRMTransmitter(TransThread.DRMTransmitter),
+    CWindow(parent, *tx.GetSettings(), "Transmit"),
+    TransThread(*tx.GetTRX()),
+    DRMTransmitter(*reinterpret_cast<CDRMTransmitter*>(TransThread.GetTRX())),
 	vecstrTextMessage(1) /* 1 for new text */,
     pAACCodecDlg(nullptr),pOpusCodecDlg(nullptr), pSysTray(nullptr),
 	pActionStartStop(nullptr), bIsStarted(FALSE),
@@ -98,7 +93,7 @@ TransmDialog::TransmDialog(CSettings& Settings,	QWidget* parent)
 	TextLabelCurPict->setText("");
 
 	/* Output mode (real valued, I / Q or E / P) */
-	switch (TransThread.DRMTransmitter.GetTransData()->GetIQOutput())
+    switch (reinterpret_cast<CDRMTransmitter*>(TransThread.GetTRX())->GetTransData()->GetIQOutput())
 	{
 	case CTransmitData::OF_REAL_VAL:
 		RadioButtonOutReal->setChecked(TRUE);
@@ -118,12 +113,12 @@ TransmDialog::TransmDialog(CSettings& Settings,	QWidget* parent)
 	}
 
 	/* Output High Quality I/Q */
-	CheckBoxHighQualityIQ->setEnabled(TransThread.DRMTransmitter.GetTransData()->GetIQOutput() != CTransmitData::OF_REAL_VAL);
-	CheckBoxHighQualityIQ->setChecked(TransThread.DRMTransmitter.GetTransData()->GetHighQualityIQ());
+    CheckBoxHighQualityIQ->setEnabled(reinterpret_cast<CDRMTransmitter*>(TransThread.GetTRX())->GetTransData()->GetIQOutput() != CTransmitData::OF_REAL_VAL);
+    CheckBoxHighQualityIQ->setChecked(reinterpret_cast<CDRMTransmitter*>(TransThread.GetTRX())->GetTransData()->GetHighQualityIQ());
 
 	/* Output Amplified */
-	CheckBoxAmplifiedOutput->setEnabled(TransThread.DRMTransmitter.GetTransData()->GetIQOutput() != CTransmitData::OF_EP);
-	CheckBoxAmplifiedOutput->setChecked(TransThread.DRMTransmitter.GetTransData()->GetAmplifiedOutput());
+    CheckBoxAmplifiedOutput->setEnabled(reinterpret_cast<CDRMTransmitter*>(TransThread.GetTRX())->GetTransData()->GetIQOutput() != CTransmitData::OF_EP);
+    CheckBoxAmplifiedOutput->setChecked(reinterpret_cast<CDRMTransmitter*>(TransThread.GetTRX())->GetTransData()->GetAmplifiedOutput());
 
 	/* Don't lock the Parameter object since the working thread is stopped */
 	CParameter& Parameters = *DRMTransmitter.GetParameters();
@@ -300,7 +295,7 @@ TransmDialog::TransmDialog(CSettings& Settings,	QWidget* parent)
 
 	/* Sound card IF */
 	LineEditSndCrdIF->setText(QString().number(
-		TransThread.DRMTransmitter.GetCarOffset(), 'f', 2));
+        reinterpret_cast<CDRMTransmitter*>(TransThread.GetTRX())->GetCarOffset(), 'f', 2));
 
 	/* Clear list box for file names */
 	OnButtonClearAllFileNames();
@@ -390,9 +385,9 @@ TransmDialog::TransmDialog(CSettings& Settings,	QWidget* parent)
 
 
 	/* Set Menu ***************************************************************/
-	CFileMenu* pFileMenu = new CFileMenu(DRMTransmitter, this, menu_Settings);
+    CFileMenu* pFileMenu = new CFileMenu(TransThread, this, menu_Settings);
 
-	menu_Settings->addMenu(new CSoundCardSelMenu(DRMTransmitter, pFileMenu, this));
+    menu_Settings->addMenu(new CSoundCardSelMenu(TransThread, pFileMenu, this));
 
 	connect(actionAbout_Dream, SIGNAL(triggered()), &AboutDlg, SLOT(show()));
     connect(actionWhats_This, SIGNAL(triggered()), reinterpret_cast<QObject*>(this), SLOT(OnWhatsThis()));
@@ -547,7 +542,7 @@ void TransmDialog::OnTimer()
 	if (bIsStarted == TRUE)
 	{
 		ProgrInputLevel->
-			setValue(TransThread.DRMTransmitter.GetReadData()->GetLevelMeter());
+            setValue(reinterpret_cast<CDRMTransmitter*>(TransThread.GetTRX())->GetReadData()->GetLevelMeter());
 
 		string strCPictureName;
 		_REAL rCPercent;
@@ -555,7 +550,7 @@ void TransmDialog::OnTimer()
 		/* Activate progress bar for slide show pictures only if current state
 		   can be queried and if data service is active
 		   (check box is checked) */
-		if ((TransThread.DRMTransmitter.GetAudSrcEnc()->
+        if ((reinterpret_cast<CDRMTransmitter*>(TransThread.GetTRX())->GetAudSrcEnc()->
 			GetTransStat(strCPictureName, rCPercent) ==	TRUE) &&
 			(CheckBoxEnableData->isChecked()))
 		{
@@ -632,14 +627,13 @@ void TransmDialog::OnButtonStartStop()
 
 			/* Start transmitter */
 			/* Set text message */
-			TransThread.DRMTransmitter.GetAudSrcEnc()->ClearTextMessage();
+            reinterpret_cast<CDRMTransmitter*>(TransThread.GetTRX())->GetAudSrcEnc()->ClearTextMessage();
 
 			for (i = 1; i < vecstrTextMessage.Size(); i++)
-				TransThread.DRMTransmitter.GetAudSrcEnc()->
-					SetTextMessage(vecstrTextMessage[i]);
+                reinterpret_cast<CDRMTransmitter*>(TransThread.GetTRX())->GetAudSrcEnc()->SetTextMessage(vecstrTextMessage[i]);
 
 			/* Set file names for data application */
-			TransThread.DRMTransmitter.GetAudSrcEnc()->ClearPicFileNames();
+            reinterpret_cast<CDRMTransmitter*>(TransThread.GetTRX())->GetAudSrcEnc()->ClearPicFileNames();
 
 			/* Iteration through table widget items */
 			int count = TreeWidgetFileNames->topLevelItemCount();
@@ -657,7 +651,7 @@ void TransmDialog::OnButtonStartStop()
 					QFileInfo FileInfo(strFileName);
 					const QString strFormat = FileInfo.suffix();
 
-					TransThread.DRMTransmitter.GetAudSrcEnc()->
+                    reinterpret_cast<CDRMTransmitter*>(TransThread.GetTRX())->GetAudSrcEnc()->
 						SetPicFileName(strFileName.toUtf8().constData(), strFormat.toUtf8().constData());
 				}
 			}
@@ -678,12 +672,12 @@ void TransmDialog::OnButtonStartStop()
 
 void TransmDialog::OnToggleCheckBoxHighQualityIQ(bool bState)
 {
-	TransThread.DRMTransmitter.GetTransData()->SetHighQualityIQ(bState);
+    reinterpret_cast<CDRMTransmitter*>(TransThread.GetTRX())->GetTransData()->SetHighQualityIQ(bState);
 }
 
 void TransmDialog::OnToggleCheckBoxAmplifiedOutput(bool bState)
 {
-	TransThread.DRMTransmitter.GetTransData()->SetAmplifiedOutput(bState);
+    reinterpret_cast<CDRMTransmitter*>(TransThread.GetTRX())->GetTransData()->SetAmplifiedOutput(bState);
 }
 
 void TransmDialog::OnToggleCheckBoxEnableTextMessage(bool bState)
@@ -693,7 +687,7 @@ void TransmDialog::OnToggleCheckBoxEnableTextMessage(bool bState)
 
 void TransmDialog::EnableTextMessage(const _BOOLEAN bFlag)
 {
-	CParameter& Parameters = *TransThread.DRMTransmitter.GetParameters();
+    CParameter& Parameters = *TransThread.GetParameters();
 
 	Parameters.Lock();
 
@@ -752,7 +746,7 @@ void TransmDialog::EnableAudio(const _BOOLEAN bFlag)
 		GroupBoxTextMessage->setEnabled(TRUE);
 		ComboBoxProgramType->setEnabled(TRUE);
 
-		CParameter& Parameters = *TransThread.DRMTransmitter.GetParameters();
+        CParameter& Parameters = *TransThread.GetParameters();
 
 		Parameters.Lock();
 
@@ -808,7 +802,7 @@ void TransmDialog::EnableData(const _BOOLEAN bFlag)
 
 	if (bFlag == TRUE)
 	{
-		CParameter& Parameters = *TransThread.DRMTransmitter.GetParameters();
+        CParameter& Parameters = *TransThread.GetParameters();
 
 		Parameters.Lock();
 
@@ -899,7 +893,7 @@ void TransmDialog::OnButtonClearAllText()
 
 void TransmDialog::OnToggleCheckBoxRemovePath(bool bState)
 {
-	TransThread.DRMTransmitter.GetAudSrcEnc()->SetPathRemoval(bState);
+    reinterpret_cast<CDRMTransmitter*>(TransThread.GetTRX())->GetAudSrcEnc()->SetPathRemoval(bState);
 }
 
 void TransmDialog::OnPushButtonAddFileName()
@@ -949,7 +943,7 @@ void TransmDialog::OnButtonCodec()
         if (!pAACCodecDlg)
         {
             const int iShortID = 0; // TODO
-            CParameter& Parameters = *TransThread.DRMTransmitter.GetParameters();
+            CParameter& Parameters = *TransThread.GetParameters();
             pAACCodecDlg = new AACCodecParams(Settings, Parameters, iShortID, this);
         }
         /* Toggle the visibility */
@@ -960,7 +954,7 @@ void TransmDialog::OnButtonCodec()
         if (!pOpusCodecDlg)
         {
             const int iShortID = 0; // TODO
-            CParameter& Parameters = *TransThread.DRMTransmitter.GetParameters();
+            CParameter& Parameters = *TransThread.GetParameters();
             pOpusCodecDlg = new OpusCodecParams(Settings, Parameters, iShortID, this);
         }
         /* Toggle the visibility */
@@ -988,12 +982,12 @@ void TransmDialog::OnComboBoxTextMessageActivated(int iID)
 void TransmDialog::OnTextChangedSndCrdIF(const QString& strIF)
 {
 	/* Convert string to floating point value "toFloat()" */
-	TransThread.DRMTransmitter.SetCarOffset(strIF.toFloat());
+    reinterpret_cast<CDRMTransmitter*>(TransThread.GetTRX())->SetCarOffset(strIF.toFloat());
 }
 
 void TransmDialog::OnTextChangedServiceID(const QString& strID)
 {
-	CParameter& Parameters = *TransThread.DRMTransmitter.GetParameters();
+    CParameter& Parameters = *TransThread.GetParameters();
 
 	if(strID.length()<6)
         return;
@@ -1013,7 +1007,7 @@ void TransmDialog::OnTextChangedServiceID(const QString& strID)
 
 void TransmDialog::OnTextChangedServiceLabel(const QString& strLabel)
 {
-	CParameter& Parameters = *TransThread.DRMTransmitter.GetParameters();
+    CParameter& Parameters = *TransThread.GetParameters();
 
 	Parameters.Lock();
 	/* Set additional text for log file. */
@@ -1023,7 +1017,7 @@ void TransmDialog::OnTextChangedServiceLabel(const QString& strLabel)
 
 void TransmDialog::OnComboBoxMSCInterleaverActivated(int iID)
 {
-	CParameter& Parameters = *TransThread.DRMTransmitter.GetParameters();
+    CParameter& Parameters = *TransThread.GetParameters();
 
 	Parameters.Lock();
 	switch (iID)
@@ -1041,7 +1035,7 @@ void TransmDialog::OnComboBoxMSCInterleaverActivated(int iID)
 
 void TransmDialog::OnComboBoxMSCConstellationActivated(int iID)
 {
-	CParameter& Parameters = *TransThread.DRMTransmitter.GetParameters();
+    CParameter& Parameters = *TransThread.GetParameters();
 
 	Parameters.Lock();
 	switch (iID)
@@ -1071,7 +1065,7 @@ void TransmDialog::OnComboBoxMSCConstellationActivated(int iID)
 
 void TransmDialog::OnComboBoxMSCProtLevActivated(int iID)
 {
-	CParameter& Parameters = *TransThread.DRMTransmitter.GetParameters();
+    CParameter& Parameters = *TransThread.GetParameters();
 	Parameters.Lock();
 	Parameters.MSCPrLe.iPartB = iID;
 	Parameters.Unlock();
@@ -1079,7 +1073,7 @@ void TransmDialog::OnComboBoxMSCProtLevActivated(int iID)
 
 void TransmDialog::UpdateMSCProtLevCombo()
 {
-	CParameter& Parameters = *TransThread.DRMTransmitter.GetParameters();
+    CParameter& Parameters = *TransThread.GetParameters();
 	Parameters.Lock();
 	if (Parameters.eMSCCodingScheme == CS_2_SM)
 	{
@@ -1106,7 +1100,7 @@ void TransmDialog::UpdateMSCProtLevCombo()
 
 void TransmDialog::OnComboBoxSDCConstellationActivated(int iID)
 {
-	CParameter& Parameters = *TransThread.DRMTransmitter.GetParameters();
+    CParameter& Parameters = *TransThread.GetParameters();
 	Parameters.Lock();
 	switch (iID)
 	{
@@ -1123,7 +1117,7 @@ void TransmDialog::OnComboBoxSDCConstellationActivated(int iID)
 
 void TransmDialog::OnComboBoxLanguageActivated(int iID)
 {
-	CParameter& Parameters = *TransThread.DRMTransmitter.GetParameters();
+    CParameter& Parameters = *TransThread.GetParameters();
 	Parameters.Lock();
 	Parameters.Service[0].iLanguage = iID;
 	Parameters.Unlock();
@@ -1131,7 +1125,7 @@ void TransmDialog::OnComboBoxLanguageActivated(int iID)
 
 void TransmDialog::OnComboBoxProgramTypeActivated(int iID)
 {
-	CParameter& Parameters = *TransThread.DRMTransmitter.GetParameters();
+    CParameter& Parameters = *TransThread.GetParameters();
 	Parameters.Lock();
 	Parameters.Service[0].iServiceDescr = iID;
 	Parameters.Unlock();
@@ -1141,7 +1135,7 @@ void TransmDialog::OnComboBoxProgramTypeActivated(int iID)
 void TransmDialog::OnRadioRobustnessMode(int iID)
 {
 	iID = -iID - 2; // TODO understand why
-	CParameter& Parameters = *TransThread.DRMTransmitter.GetParameters();
+    CParameter& Parameters = *TransThread.GetParameters();
 
 	/* Set current bandwidth */
 	Parameters.Lock();
@@ -1255,7 +1249,7 @@ void TransmDialog::OnRadioBandwidth(int iID)
 		break;
 	}
 
-	CParameter& Parameters = *TransThread.DRMTransmitter.GetParameters();
+    CParameter& Parameters = *TransThread.GetParameters();
 
 	/* Set new spectrum occupancy */
 	Parameters.Lock();
@@ -1270,32 +1264,28 @@ void TransmDialog::OnRadioOutput(int iID)
 	{
 	case 0:
 		/* Button "Real Valued" */
-		TransThread.DRMTransmitter.GetTransData()->
-			SetIQOutput(CTransmitData::OF_REAL_VAL);
+        reinterpret_cast<CDRMTransmitter*>(TransThread.GetTRX())->GetTransData()->SetIQOutput(CTransmitData::OF_REAL_VAL);
 		CheckBoxAmplifiedOutput->setEnabled(true);
 		CheckBoxHighQualityIQ->setEnabled(false);
 		break;
 
 	case 1:
 		/* Button "I / Q (pos)" */
-		TransThread.DRMTransmitter.GetTransData()->
-			SetIQOutput(CTransmitData::OF_IQ_POS);
+        reinterpret_cast<CDRMTransmitter*>(TransThread.GetTRX())->GetTransData()->SetIQOutput(CTransmitData::OF_IQ_POS);
 		CheckBoxAmplifiedOutput->setEnabled(true);
 		CheckBoxHighQualityIQ->setEnabled(true);
 		break;
 
 	case 2:
 		/* Button "I / Q (neg)" */
-		TransThread.DRMTransmitter.GetTransData()->
-			SetIQOutput(CTransmitData::OF_IQ_NEG);
+        reinterpret_cast<CDRMTransmitter*>(TransThread.GetTRX())->GetTransData()->SetIQOutput(CTransmitData::OF_IQ_NEG);
 		CheckBoxAmplifiedOutput->setEnabled(true);
 		CheckBoxHighQualityIQ->setEnabled(true);
 		break;
 
 	case 3:
 		/* Button "E / P" */
-		TransThread.DRMTransmitter.GetTransData()->
-			SetIQOutput(CTransmitData::OF_EP);
+        reinterpret_cast<CDRMTransmitter*>(TransThread.GetTRX())->GetTransData()->SetIQOutput(CTransmitData::OF_EP);
 		CheckBoxAmplifiedOutput->setEnabled(false);
 		CheckBoxHighQualityIQ->setEnabled(true);
 		break;
@@ -1326,7 +1316,7 @@ void TransmDialog::OnRadioCurrentTime(int iID)
 		break;
 	}
 
-	CParameter& Parameters = *TransThread.DRMTransmitter.GetParameters();
+    CParameter& Parameters = *TransThread.GetParameters();
 
 	Parameters.Lock();
 
@@ -1354,7 +1344,7 @@ void TransmDialog::OnRadioCodec(int iID)
 		break;
 	}
 
-	CParameter& Parameters = *TransThread.DRMTransmitter.GetParameters();
+    CParameter& Parameters = *TransThread.GetParameters();
 
 	Parameters.Lock();
 
