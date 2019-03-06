@@ -475,22 +475,6 @@ CDRMReceiver::ClearRsciInput()
 }
 
 void
-CDRMReceiver::SetSoundFile(const string& soundFile)
-{
-    ReceiveData.SetSoundInterface(soundFile);
-}
-
-string
-CDRMReceiver::GetInputFileName()
-{
-    string fileName;
-    Parameters.Lock();
-        fileName = rsiOrigin != "" ? rsiOrigin : ReceiveData.GetSoundInterface();
-    Parameters.Unlock();
-    return fileName;
-}
-
-void
 CDRMReceiver::DemodulateDRM(_BOOLEAN& bEnoughData)
 {
     /* Resample input DRM-stream -------------------------------- */
@@ -936,15 +920,6 @@ CDRMReceiver::InitReceiverMode()
 void
 CDRMReceiver::Start()
 {
-    Start1();
-    Start2();
-    Start3();
-}
-
-void
-CDRMReceiver::Start1()
-{
-
 // set the frequency from the command line or ini file
     int iFreqkHz = Parameters.GetFrequency();
     if (iFreqkHz != -1)
@@ -956,11 +931,6 @@ CDRMReceiver::Start1()
 
     /* Set restart flag */
     Parameters.eRunState = CParameter::RESTART;
-}
-
-void
-CDRMReceiver::Start2()
-{
     do
     {
         /* Setup new sound file or RSCI input if any */
@@ -987,11 +957,6 @@ CDRMReceiver::Start2()
         ResetInput();
     }
     while (Parameters.eRunState == CParameter::RESTART);
-}
-
-void
-CDRMReceiver::Start3()
-{
 
     CloseSoundInterfaces();
 

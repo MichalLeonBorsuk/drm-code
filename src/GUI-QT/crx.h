@@ -21,13 +21,13 @@ signals:
 public slots:
     virtual void LoadSettings() override;
     virtual void SaveSettings() override;
-    virtual void Start() override;
     virtual void SetInputDevice(const string&) override;
     virtual void SetOutputDevice(const string&) override;
     virtual string GetInputDevice() override;
     virtual string GetOutputDevice() override;
     virtual void EnumerateInputs(std::vector<std::string>& names, std::vector<std::string>& descriptions) override;
     virtual void EnumerateOutputs(std::vector<std::string>& names, std::vector<std::string>& descriptions) override;
+    virtual void Start() override;
     virtual void Restart() override;
     virtual void Stop() override;
     virtual CSettings*				GetSettings() override;

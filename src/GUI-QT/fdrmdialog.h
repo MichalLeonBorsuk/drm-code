@@ -84,8 +84,7 @@ public:
     virtual ~FDRMDialog();
 
 protected:
-    CDRMTransceiver&    trx;
-    CDRMReceiver&		DRMReceiver;
+    CRx&    trx;
     QTimer				Timer;
     QTimer				TimerClose;
     vector<QLabel*>		serviceLabels;
