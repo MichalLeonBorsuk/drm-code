@@ -414,6 +414,16 @@ void CDRMReceiver::EnumerateOutputs(std::vector<std::string>& names, std::vector
     WriteData.Enumerate(names, descriptions);
 }
 
+void CDRMReceiver::GetInputDevice(string& s)
+{
+    s = ReceiveData.GetSoundInterface();
+}
+
+void CDRMReceiver::GetOutputDevice(string& s)
+{
+    s = WriteData.GetSoundInterface();
+}
+
 void
 CDRMReceiver::SetInput()
 {

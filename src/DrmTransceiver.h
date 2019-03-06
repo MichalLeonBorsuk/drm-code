@@ -46,8 +46,8 @@ public:
     virtual void Start() = 0;
     virtual void SetInputDevice(const string&) = 0;
     virtual void SetOutputDevice(const string&) = 0;
-    virtual string GetInputDevice() = 0;
-    virtual string GetOutputDevice() = 0;
+    virtual void GetInputDevice(string&) = 0;
+    virtual void GetOutputDevice(string&) = 0;
     virtual void EnumerateInputs(std::vector<std::string>& names, std::vector<std::string>& descriptions)=0;
     virtual void EnumerateOutputs(std::vector<std::string>& names, std::vector<std::string>& descriptions)=0;
     virtual void Restart() = 0;

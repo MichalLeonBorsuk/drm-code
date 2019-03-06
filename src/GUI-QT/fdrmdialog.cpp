@@ -907,7 +907,9 @@ void FDRMDialog::ClearDisplay()
 
 void FDRMDialog::UpdateWindowTitle()
 {
-    QFileInfo fi(QString::fromStdString(trx.GetInputDevice()));
+    string filename;
+    trx.GetInputDevice(filename);
+    QFileInfo fi(QString::fromStdString(filename));
     if(fi.exists()) {
 
         setWindowTitle(QString("Dream") + " - " + fi.baseName());

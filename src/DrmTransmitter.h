@@ -76,8 +76,8 @@ public:
     _REAL GetCarOffset() {
         return rDefCarOffset;
     }
-    string	GetInputDevice() { return indev; }
-    string	GetOutputDevice() { return outdev; }
+    void GetInputDevice(string& s) { s = indev; }
+    void GetOutputDevice(string& s) { s = outdev; }
     void EnumerateInputs(std::vector<std::string>& names, std::vector<std::string>& descriptions);
     void EnumerateOutputs(std::vector<std::string>& names, std::vector<std::string>& descriptions);
     void SetInputDevice(const string&);
