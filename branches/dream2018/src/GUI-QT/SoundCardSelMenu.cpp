@@ -205,10 +205,14 @@ QMenu* CSoundCardSelMenu::InitDevice(QMenu* self, QMenu* parent, const QString& 
     QString sDefaultDev;
     if(bInput) {
         DRMTransceiver.EnumerateInputs(names, descriptions);
-        sDefaultDev = QString::fromStdString(DRMTransceiver.GetInputDevice());
+        string s;
+        DRMTransceiver.GetInputDevice(s);
+        sDefaultDev = QString::fromStdString(s);
     } else {
         DRMTransceiver.EnumerateOutputs(names, descriptions);
-        sDefaultDev = QString::fromStdString(DRMTransceiver.GetOutputDevice());
+        string s;
+        DRMTransceiver.GetOutputDevice(s);
+        sDefaultDev = QString::fromStdString(s);
     }
     for (int i = 0; i < names.size(); i++)
     {
@@ -373,7 +377,8 @@ void CFileMenu::UpdateMenu()
 {
     if (DRMTransceiver.IsReceiver())
     {
-        string filename = DRMTransceiver.GetInputDevice();
+        string filename;
+        DRMTransceiver.GetInputDevice(filename);
 
         bool bInputFile = false;
         FileTyper::type t = FileTyper::resolve(filename);
