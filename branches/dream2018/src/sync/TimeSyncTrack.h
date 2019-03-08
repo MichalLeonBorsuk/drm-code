@@ -32,7 +32,7 @@
 #include "../GlobalDefinitions.h"
 #include "../Parameter.h"
 #include "../util/Vector.h"
-#include "../matlib/Matlib.h"
+#include "../matlib/MatlibSigProToolbox.h"
 
 
 /* Definitions ****************************************************************/

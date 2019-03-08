@@ -858,10 +858,4 @@ CMatlibMatrix<T> CMatlibMatrix<T>::operator()(const int iRowFrom, const int iRow
 	return matRet;
 }
 
-
-/* Include toolboxes after all type definitions */
-#include "MatlibStdToolbox.h"
-#include "MatlibSigProToolbox.h"
-
-
 #endif /* _MATLIB_H_ */

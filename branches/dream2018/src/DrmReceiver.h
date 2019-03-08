@@ -29,8 +29,8 @@
  *
 \******************************************************************************/
 
-#if !defined(DRMRECEIVER_H__3B0BA660_CA63_4344_BB2B_23E7A0D31912__INCLUDED_)
-#define DRMRECEIVER_H__3B0BA660_CA63_4344_BB2B_23E7A0D31912__INCLUDED_
+#ifndef DRMRECEIVER_H
+#define DRMRECEIVER_H
 
 #include "GlobalDefinitions.h"
 #include <iostream>
@@ -79,6 +79,7 @@
 
 /* Classes ********************************************************************/
 class CRig;
+class CSettings;
 
 class CSplitFAC : public CSplitModul<_BINARY>
 {
@@ -135,39 +136,37 @@ public:
     CDRMReceiver(CSettings* pSettings=nullptr);
     virtual ~CDRMReceiver();
 
-    void					LoadSettings(); // can write to settings to set defaults
-    void					SaveSettings();
-    void					Start();
+    virtual void			LoadSettings() override; // can write to settings to set defaults
+    virtual void			SaveSettings() override;
+    virtual void			Start() override;
 
-    void					SetRsciInput(const string& rsciInput);
-    void					ClearRsciInput();
-    void                    GetInputDevice(string&);
-    void					GetOutputDevice(string&);
-    void                    EnumerateInputs(std::vector<std::string>& names, std::vector<std::string>& descriptions);
-    void                    EnumerateOutputs(std::vector<std::string>& names, std::vector<std::string>& descriptions);
-    void					SetInputDevice(const string&);
-    void					SetOutputDevice(const string&);
+    virtual void            GetInputDevice(string&) override;
+    virtual void			GetOutputDevice(string&) override;
+    virtual void            EnumerateInputs(std::vector<std::string>& names, std::vector<std::string>& descriptions) override;
+    virtual void            EnumerateOutputs(std::vector<std::string>& names, std::vector<std::string>& descriptions) override;
+    virtual void            SetInputDevice(QString) override;
+    virtual void			SetOutputDevice(QString) override;
 
-    void Restart()
+    virtual void Restart() override
     {
         if (Parameters.eRunState == CParameter::RUNNING)
             Parameters.eRunState = CParameter::RESTART;
     }
 
-    void Stop()
+    virtual void Stop() override
     {
         Parameters.eRunState = CParameter::STOP_REQUESTED;
     }
 
-    CSettings*GetSettings() {
+    virtual CSettings*GetSettings()  override{
         return pSettings;
     }
 
-    void SetSettings(CSettings* pNewSettings) {
+    virtual void SetSettings(CSettings* pNewSettings) override {
         pSettings = pNewSettings;
     }
 
-    CParameter*	GetParameters() {
+    virtual CParameter*	GetParameters() override {
         return &Parameters;
     }
 

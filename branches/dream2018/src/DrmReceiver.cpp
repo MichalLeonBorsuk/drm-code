@@ -56,6 +56,7 @@
 #endif
 const int
 CDRMReceiver::MAX_UNLOCKED_COUNT = 2;
+#include <QString>
 
 /* Implementation *************************************************************/
 CDRMReceiver::CDRMReceiver(CSettings* nPsettings) : CDRMTransceiver(),
@@ -393,9 +394,9 @@ CDRMReceiver::Run()
 }
 
 void
-CDRMReceiver::SetInputDevice(const string& s)
+CDRMReceiver::SetInputDevice(QString s)
 {
-    string device = s;
+    string device = s.toStdString();
     if(device == "") {
         vector<string> names;
         vector<string> descriptions;
@@ -426,12 +427,13 @@ CDRMReceiver::SetInputDevice(const string& s)
     case FileTyper::raw_pft:
         pUpstreamRSCI->SetOrigin(device);
     }
+    Restart(); // sounds right!!
 }
 
 void
-CDRMReceiver::SetOutputDevice(const string& device)
+CDRMReceiver::SetOutputDevice(QString device)
 {
-    WriteData.SetSoundInterface(device);
+    WriteData.SetSoundInterface(device.toStdString());
 }
 
 void CDRMReceiver::EnumerateInputs(vector<string>& names, vector<string>& descriptions)
@@ -452,22 +454,6 @@ void CDRMReceiver::GetInputDevice(string& s)
 void CDRMReceiver::GetOutputDevice(string& s)
 {
     s = WriteData.GetSoundInterface();
-}
-
-void
-CDRMReceiver::SetRsciInput(const string& rsciInput)
-{
-    Parameters.Lock();
-        rsiOrigin = rsciInput;
-    Parameters.Unlock();
-}
-
-void
-CDRMReceiver::ClearRsciInput()
-{
-    Parameters.Lock();
-        rsiOrigin = "";
-    Parameters.Unlock();
 }
 
 void
@@ -1521,23 +1507,24 @@ CDRMReceiver::LoadSettings()
 
     /* Upstream RSCI if any */
     string str = s.Get("command", "rsiin");
-    if (str != "")
-        SetRsciInput(str);
-
-    /* Input from file if any */
-    str = s.Get("command", string("fileio"));
     if (str == "") {
-        /* Sound In device */
-        str = s.Get("Receiver", "snddevin", string());
-        if(str == "") {
-            vector<string> vn,vd;
-            EnumerateInputs(vn, vd);
-            if(vn.size()>0) {
-                str = vn[0];
+
+        /* Input from file if any */
+        str = s.Get("command", string("fileio"));
+        if (str == "") {
+            /* Sound In device */
+            str = s.Get("Receiver", "snddevin", string());
+            if(str == "") {
+                vector<string> vn,vd;
+                EnumerateInputs(vn, vd);
+                if(vn.size()>0) {
+                    str = vn[0];
+                }
             }
         }
     }
-    SetInputDevice(str);
+    QString qs(QString::fromStdString(str));
+    SetInputDevice(qs);
 
     /* Channel Estimation: Frequency Interpolation */
     SetFreqInt((CChannelEstimation::ETypeIntFreq)s.Get("Receiver", "freqint", int(CChannelEstimation::FWIENER)));
@@ -1597,7 +1584,8 @@ CDRMReceiver::LoadSettings()
             str = vn[0];
         }
     }
-    SetOutputDevice(str);
+    qs = QString::fromStdString(str);
+    SetOutputDevice(qs);
 
     str = s.Get("command", "rciout");
     if (str != "")

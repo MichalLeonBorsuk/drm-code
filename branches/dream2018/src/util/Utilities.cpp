@@ -41,6 +41,7 @@
 #include <IOKit/IOKitLib.h>
 #include <IOKit/serial/IOSerialKeys.h>
 #endif
+#include <../matlib/MatlibSigProToolbox.h>
 
 /* Implementation *************************************************************/
 /******************************************************************************\

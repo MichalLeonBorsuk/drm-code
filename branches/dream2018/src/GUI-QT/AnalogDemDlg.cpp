@@ -205,7 +205,8 @@ void AnalogDemDlg::eventUpdate()
 {
 	/* Put (re)initialization code here for the settings that might have
 	   be changed by another top level window. Called on mode switch */
-	pFileMenu->UpdateMenu();
+    //pFileMenu->UpdateMenu();
+    cerr << "AMDialog eventUpdate" << endl;
 	UpdateSliderBandwidth();
 }
 

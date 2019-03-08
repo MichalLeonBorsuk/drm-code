@@ -27,7 +27,7 @@
 \******************************************************************************/
 
 #include "SyncUsingPil.h"
-
+#include <../matlib/MatlibSigProToolbox.h>
 
 /* Implementation *************************************************************/
 void CSyncUsingPil::ProcessDataInternal(CParameter& Parameters)

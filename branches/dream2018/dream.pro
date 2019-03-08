@@ -503,7 +503,9 @@ HEADERS += \
     src/resample/caudioresample.h \
     src/sourcedecoders/reverb.h \
     src/sourcedecoders/caudioreverb.h \
-    src/GUI-QT/crx.h
+    src/GUI-QT/ctrx.h \
+    src/GUI-QT/crx.h \
+    src/GUI-QT/ctx.h
 SOURCES += \
     src/AMDemodulation.cpp \
     src/AMSSDemodulation.cpp \
@@ -618,7 +620,9 @@ SOURCES += \
     src/resample/caudioresample.cpp \
     src/sourcedecoders/reverb.cpp \
     src/sourcedecoders/caudioreverb.cpp \
-    src/GUI-QT/crx.cpp
+    src/GUI-QT/ctrx.cpp \
+    src/GUI-QT/crx.cpp \
+    src/GUI-QT/ctx.cpp
 !console {
 HEADERS += \
     src/GUI-QT/Logging.h \

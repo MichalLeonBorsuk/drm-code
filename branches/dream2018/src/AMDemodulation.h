@@ -32,7 +32,7 @@
 #include "Parameter.h"
 #include "util/Modul.h"
 #include "util/Vector.h"
-#include "matlib/Matlib.h"
+#include "matlib/MatlibSigProToolbox.h"
 #include "resample/caudioresample.h"
 #ifdef HAVE_SPEEX
 # include <speex/speex_preprocess.h>

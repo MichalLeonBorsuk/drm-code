@@ -37,6 +37,7 @@
 #include "sound/sound.h"
 #include "sound/audiofilein.h"
 #include "util/FileTyper.h"
+#include <../matlib/MatlibSigProToolbox.h>
 
 
 const static int SineTable[] = { 0, 1, 0, -1, 0 };
