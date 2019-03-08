@@ -502,10 +502,7 @@ HEADERS += \
     src/resample/cspectrumresample.h \
     src/resample/caudioresample.h \
     src/sourcedecoders/reverb.h \
-    src/sourcedecoders/caudioreverb.h \
-    src/GUI-QT/ctrx.h \
-    src/GUI-QT/crx.h \
-    src/GUI-QT/ctx.h
+    src/sourcedecoders/caudioreverb.h
 SOURCES += \
     src/AMDemodulation.cpp \
     src/AMSSDemodulation.cpp \
@@ -619,10 +616,7 @@ SOURCES += \
     src/resample/cspectrumresample.cpp \
     src/resample/caudioresample.cpp \
     src/sourcedecoders/reverb.cpp \
-    src/sourcedecoders/caudioreverb.cpp \
-    src/GUI-QT/ctrx.cpp \
-    src/GUI-QT/crx.cpp \
-    src/GUI-QT/ctx.cpp
+    src/sourcedecoders/caudioreverb.cpp
 !console {
 HEADERS += \
     src/GUI-QT/Logging.h \
@@ -680,7 +674,10 @@ HEADERS += \
     src/GUI-QT/StationsDlg.h \
     src/GUI-QT/OpusCodecParams.h \
     src/GUI-QT/AACCodecParams.h \
-    src/GUI-QT/TransmDlg.h
+    src/GUI-QT/TransmDlg.h \
+    src/GUI-QT/ctrx.h \
+    src/GUI-QT/crx.h \
+    src/GUI-QT/ctx.h
 SOURCES += \
     src/GUI-QT/AnalogDemDlg.cpp \
     src/GUI-QT/CWindow.cpp \
@@ -703,6 +700,9 @@ SOURCES += \
     src/GUI-QT/OpusCodecParams.cpp \
     src/GUI-QT/AACCodecParams.cpp \
     src/GUI-QT/TransmDlg.cpp \
+    src/GUI-QT/ctrx.cpp \
+    src/GUI-QT/crx.cpp \
+    src/GUI-QT/ctx.cpp \
     src/GUI-QT/main.cpp
 } else {
     SOURCES += src/main.cpp
