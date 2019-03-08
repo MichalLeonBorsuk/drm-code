@@ -27,7 +27,7 @@
 \******************************************************************************/
 
 #include "TimeWiener.h"
-
+#include <../matlib/MatlibSigProToolbox.h>
 
 /* Implementation *************************************************************/
 _REAL CTimeWiener::Estimate(CVectorEx<_COMPLEX>* pvecInputData,

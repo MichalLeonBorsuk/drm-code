@@ -76,15 +76,15 @@ class FDRMDialog : public CWindow, public Ui_DRMMainWindow
     Q_OBJECT
 
 public:
+    FDRMDialog(CTRx*, CSettings&,
 #ifdef HAVE_LIBHAMLIB
-    FDRMDialog(CRx&, CSettings&, CRig&, QWidget* parent = 0);
-#else
-    FDRMDialog(CRx&, CSettings&, QWidget* parent = 0);
+               CRig&,
 #endif
+               QWidget* parent = 0);
     virtual ~FDRMDialog();
 
 protected:
-    CRx&    trx;
+    CRx&                rx;
     QTimer				Timer;
     QTimer				TimerClose;
     vector<QLabel*>		serviceLabels;
@@ -163,7 +163,7 @@ public slots:
     void OnSwitchToFM();
     void OnSwitchToAM();
     void OnHelpAbout() {AboutDlg.show();}
-    void OnSoundFileChanged(QString) {UpdateWindowTitle(); ClearDisplay();};
+    void OnSoundFileChanged(QString);
     void OnWhatsThis();
     void OnSysTrayActivated(QSystemTrayIcon::ActivationReason);
 signals:

@@ -44,6 +44,7 @@
 using namespace std;
 
 #include "../util/LogPrint.h"
+#include <../matlib/MatlibStdToolbox.h>
 
 CTagItemGeneratorWithProfiles::CTagItemGeneratorWithProfiles()
 {
