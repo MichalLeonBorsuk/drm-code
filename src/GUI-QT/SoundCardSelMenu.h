@@ -25,8 +25,8 @@
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
 \******************************************************************************/
-#ifndef __SOUNDCARDMENU_H
-#define __SOUNDCARDMENU_H
+#ifndef SOUNDCARDMENU_H
+#define SOUNDCARDMENU_H
 
 #include <QMenu>
 #include <QMenuBar>
@@ -35,7 +35,7 @@
 #include "../DrmReceiver.h"
 #include "../DrmTransceiver.h"
 #include "../sound/selectioninterface.h"
-#include "crx.h"
+#include "ctrx.h"
 
 typedef struct CHANSEL {
     const char* Name;
@@ -49,12 +49,12 @@ class CSoundCardSelMenu : public QMenu
 
 public:
     CSoundCardSelMenu(
-        CRx& DRMTransceiver,
+        CTRx& ntrx,
         CFileMenu* pFileMenu,
         QWidget* parent = 0);
 
 protected:
-    CDRMTransceiver&	DRMTransceiver;
+    CTRx&               trx;
     CParameter&			Parameters;
     QMenu*				menuSigInput;
     QMenu*				menuSigDevice;
@@ -76,8 +76,8 @@ public slots:
 
 signals:
     void sampleRateChanged();
-    void soundInDeviceChanged(string);
-    void soundOutDeviceChanged(string);
+    void soundInDeviceChanged(QString);
+    void soundOutDeviceChanged(QString);
 };
 
 class CFileMenu : public QMenu
@@ -85,16 +85,12 @@ class CFileMenu : public QMenu
     Q_OBJECT
 
 public:
-    CFileMenu(CRx& DRMTransceiver,
-        QMainWindow* parent, QMenu* menuInsertBefore);
-    void UpdateMenu();
+    CFileMenu(CTRx& ntrx, QMainWindow* parent, QMenu* menuInsertBefore);
 
 protected:
-    CDRMTransceiver&	DRMTransceiver;
+    CTRx&               trx;
     QAction*			actionOpenFile;
     QAction*			actionCloseFile;
-	QString				strLastSoundPath;
-	QString				strLastRsciPath;
 
 public slots:
     void OnOpenFile();

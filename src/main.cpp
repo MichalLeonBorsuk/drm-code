@@ -50,10 +50,10 @@
 # include <QTranslator>
 # include <QThread>
 
-class CRx: public QThread
+class CTRx: public QThread
 {
 public:
-	CRx(CDRMReceiver& nRx):rx(nRx)
+	CTRx(CDRMReceiver& nRx):rx(nRx)
 	{}
 	void run();
 private:
@@ -61,7 +61,7 @@ private:
 };
 
 void
-CRx::run()
+CTRx::run()
 {
     qDebug("Working thread started");
     try
@@ -114,7 +114,7 @@ main(int argc, char **argv)
 #ifdef QT_CORE_LIB
 			QCoreApplication app(argc, argv);
 			/* Start working thread */
-			CRx rx(DRMReceiver);
+			CTRx rx(DRMReceiver);
 			rx.start();
 			return app.exec();
 #else

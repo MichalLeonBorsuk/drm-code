@@ -26,6 +26,7 @@
 \******************************************************************************/
 
 #include "caudioreverb.h"
+#include <../matlib/MatlibStdToolbox.h>
 
 CAudioReverb::CAudioReverb()
 {

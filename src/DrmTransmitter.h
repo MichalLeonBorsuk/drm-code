@@ -80,8 +80,8 @@ public:
     void GetOutputDevice(string& s) { s = outdev; }
     void EnumerateInputs(std::vector<std::string>& names, std::vector<std::string>& descriptions);
     void EnumerateOutputs(std::vector<std::string>& names, std::vector<std::string>& descriptions);
-    void SetInputDevice(const string&);
-    void SetOutputDevice(const string&);
+    void SetInputDevice(QString);
+    void SetOutputDevice(QString);
     void doSetInputDevice();
     void doSetOutputDevice();
     virtual _BOOLEAN				IsReceiver() const { return false; }

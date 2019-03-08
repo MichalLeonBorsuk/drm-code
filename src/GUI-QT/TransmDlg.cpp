@@ -37,7 +37,7 @@
 #include <QWhatsThis>
 #include "../DrmTransmitter.h"
 
-TransmDialog::TransmDialog(CRx& tx,	QWidget* parent)
+TransmDialog::TransmDialog(CTRx& tx,	QWidget* parent)
 	:
     CWindow(parent, *tx.GetSettings(), "Transmit"),
     TransThread(*tx.GetTRX()),

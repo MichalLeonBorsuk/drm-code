@@ -57,7 +57,7 @@
   SLObjectItf engineObject = nullptr;
 #endif
 
-#include "crx.h"
+#include "ctrx.h"
 
 int
 main(int argc, char **argv)
@@ -119,6 +119,7 @@ main(int argc, char **argv)
 			rig.LoadSettings(Settings); // must be before DRMReceiver for G313
 #endif
 			DRMReceiver.LoadSettings();
+            CTRx rx(DRMReceiver);
 
 #ifdef HAVE_LIBHAMLIB
 			DRMReceiver.SetRig(&rig);
@@ -127,8 +128,7 @@ main(int argc, char **argv)
 			{
 				rig.subscribe();
 			}
-            CRx rx(DRMReceiver);
-            FDRMDialog *pMainDlg = new FDRMDialog(rx, Settings, rig);
+            FDRMDialog *pMainDlg = new FDRMDialog(&rx, Settings, rig);
 #else
 			FDRMDialog *pMainDlg = new FDRMDialog(DRMReceiver, Settings);
 #endif
@@ -153,7 +153,7 @@ main(int argc, char **argv)
 		{
             CDRMTransmitter DRMTransmitter(&Settings);
             DRMTransmitter.LoadSettings();
-            CRx tx(DRMTransmitter);
+            CTRx tx(DRMTransmitter);
             TransmDialog* pMainDlg = new TransmDialog(tx);
 
 			/* Show dialog */

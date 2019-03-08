@@ -31,7 +31,7 @@
 
 #include "Parameter.h"
 #include "util/Modul.h"
-#include "matlib/Matlib.h"
+#include "matlib/MatlibSigProToolbox.h"
 
 
 /* Definitions ****************************************************************/
