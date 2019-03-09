@@ -32,15 +32,15 @@
 #include "../datadecoding/DataDecoder.h"
 #include <QFileDialog>
 
-SlideShowViewer::SlideShowViewer(CDRMReceiver& rec, CSettings& Settings, QWidget* parent):
+SlideShowViewer::SlideShowViewer(CRx& nrx, CSettings& Settings, QWidget* parent):
     CWindow(parent, Settings, "SlideShow"),
-    receiver(rec), vecImages(), vecImageNames(), iCurImagePos(-1),
+    rx(nrx), vecImages(), vecImageNames(), iCurImagePos(-1),
     bClearMOTCache(false), iLastServiceID(0), bLastServiceValid(false)
 {
     setupUi(this);
 
     /* Get MOT save path */
-    CParameter& Parameters = *receiver.GetParameters();
+    CParameter& Parameters = *rx.GetParameters();
     Parameters.Lock();
     strCurrentSavePath = QString::fromUtf8(Parameters.GetDataDirectory("MOT").c_str());
     Parameters.Unlock();
@@ -97,10 +97,10 @@ void SlideShowViewer::OnTimer()
         break;
     }
 
-    CDataDecoder* DataDecoder = receiver.GetDataDecoder();
+    CDataDecoder* DataDecoder = rx.GetDataDecoder();
     if (DataDecoder == nullptr)
     {
-        qDebug("can't get data decoder from receiver");
+        qDebug("can't get data decoder from rx");
         return;
     }
 
@@ -318,7 +318,7 @@ void SlideShowViewer::ClearMOTCache(CMOTDABDec *motdec)
 
 void SlideShowViewer::GetServiceParams(uint32_t* iServiceID, bool* bServiceValid, QString* strLabel, ETypeRxStatus* eStatus, int* shortID, int* iPacketID)
 {
-    CParameter& Parameters = *receiver.GetParameters();
+    CParameter& Parameters = *rx.GetParameters();
     Parameters.Lock();
 
         /* Get current audio service */

@@ -45,7 +45,7 @@
 #include "DialogUtil.h"
 #include "CWindow.h"
 #include "MultColorLED.h"
-#include "../DrmReceiver.h"
+#include "crx.h"
 #include "../util/Vector.h"
 
 /* Classes ********************************************************************/
@@ -55,11 +55,11 @@ class FMDialog : public CWindow, public Ui_FMMainWindow
 	Q_OBJECT
 
 public:
-	FMDialog(CDRMReceiver&, CSettings&, CFileMenu*, CSoundCardSelMenu*,
+    FMDialog(CRx&, CSettings&, CFileMenu*, CSoundCardSelMenu*,
 	QWidget* parent = 0);
 
 protected:
-	CDRMReceiver&		DRMReceiver;
+    CRx&                rx;
 
 	QMenuBar*			pMenu;
 	QMenu*				pReceiverModeMenu;

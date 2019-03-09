@@ -59,16 +59,16 @@
 
 static const CHANSEL InputChannelTable[] =
 {
-    { "Left Channel",  CReceiveData::CS_LEFT_CHAN    },
-    { "Right Channel", CReceiveData::CS_RIGHT_CHAN   },
-    { "L + R",         CReceiveData::CS_MIX_CHAN     },
-    { "L - R",         CReceiveData::CS_SUB_CHAN     },
-    { "I/Q Pos",       CReceiveData::CS_IQ_POS       },
-    { "I/Q Neg",       CReceiveData::CS_IQ_NEG       },
-    { "I/Q Pos Zero",  CReceiveData::CS_IQ_POS_ZERO  },
-    { "I/Q Neg Zero",  CReceiveData::CS_IQ_NEG_ZERO  },
-    { "I/Q Pos Split", CReceiveData::CS_IQ_POS_SPLIT },
-    { "I/Q Neg Split", CReceiveData::CS_IQ_NEG_SPLIT },
+    { "Left Channel",  CS_LEFT_CHAN    },
+    { "Right Channel", CS_RIGHT_CHAN   },
+    { "L + R",         CS_MIX_CHAN     },
+    { "L - R",         CS_SUB_CHAN     },
+    { "I/Q Pos",       CS_IQ_POS       },
+    { "I/Q Neg",       CS_IQ_NEG       },
+    { "I/Q Pos Zero",  CS_IQ_POS_ZERO  },
+    { "I/Q Neg Zero",  CS_IQ_NEG_ZERO  },
+    { "I/Q Pos Split", CS_IQ_POS_SPLIT },
+    { "I/Q Neg Split", CS_IQ_NEG_SPLIT },
     { nullptr, 0 } /* end of list */
 };
 
@@ -141,7 +141,6 @@ CSoundCardSelMenu::CSoundCardSelMenu(CTRx& ntrx,
 
 void CSoundCardSelMenu::OnSoundInDevice(QAction* action)
 {
-    qDebug("CSoundCardSelMenu::OnSoundInDevice %d", QThread::currentThreadId());
     InitDevice(menuSigDevice, menuSigInput, tr("Device"), true);
     QString qs = action->data().toString();
     emit soundInDeviceChanged(qs);
@@ -159,7 +158,7 @@ void CSoundCardSelMenu::OnSoundInChannel(QAction* action)
     {
         Parameters.Lock();
             CReceiveData& ReceiveData = *((CDRMReceiver&)trx).GetReceiveData();
-            CReceiveData::EInChanSel eInChanSel = CReceiveData::EInChanSel(action->data().toInt());
+            EInChanSel eInChanSel = EInChanSel(action->data().toInt());
             ReceiveData.SetInChanSel(eInChanSel);
         Parameters.Unlock();
     }

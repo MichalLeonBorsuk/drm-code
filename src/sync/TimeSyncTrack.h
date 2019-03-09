@@ -82,8 +82,6 @@ public:
 		bSamRaOffsAcqu(TRUE), TypeTiSyncTrac(TSENERGY) {}
 	virtual ~CTimeSyncTrack() {}
 
-	enum ETypeTiSyncTrac {TSENERGY, TSFIRSTPEAK};
-
 	void Init(CParameter& Parameter, int iNewSymbDelay);
 
 	void Process(CParameter& Parameter, CComplexVector& veccChanEst,

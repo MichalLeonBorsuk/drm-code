@@ -31,6 +31,7 @@
 
 #include "DRMPlot.h"
 #include "../DRMSignalIO.h"
+#include "../PlotManager.h"
 #include <cmath>
 #include <algorithm>
 
@@ -172,9 +173,9 @@ void CDRMPlot::UpdateAnalogBWMarker()
 	{
 		_REAL rCenterFreq, rBandwidth;
 		/* Get data and parameters from modules */
-		pDRMRec->GetAMDemod()->GetBWParameters(rCenterFreq, rBandwidth);
+        pDRMRec->GetAMBWParameters(rCenterFreq, rBandwidth);
 		/* Prepare graph and set data */
-		SetDCCarrier(pDRMRec->GetAMDemod()->GetCurMixFreqOffs());
+        SetDCCarrier(pDRMRec->GetAMMixerFrequencyOffset());
 		SetBWMarker(rCenterFreq, rBandwidth);
 		plot->replot();
 	}
@@ -205,7 +206,7 @@ void CDRMPlot::OnTimerChart()
 	_BOOLEAN bAudioDecoder = !Parameters.audiodecoder.empty();
 	iAudSampleRate = Parameters.GetAudSampleRate();
 	iSigSampleRate = Parameters.GetSigSampleRate();
-	int iChanMode = (int)pDRMRec->GetReceiveData()->GetInChanSel();
+    int iChanMode = (int)pDRMRec->GetInChanSel();
 	Parameters.Unlock();
 
 	/* Needed to detect sample rate change */
@@ -258,7 +259,7 @@ void CDRMPlot::OnTimerChart()
 
 	case POWER_SPEC_DENSITY:
 		/* Get data from module */
-		pDRMRec->GetOFDMDemod()->GetPowDenSpec(vecrData, vecrScale);
+        pDRMRec->GetPowDenSpec(vecrData, vecrScale);
 
 		if (change) SetupPSD();
 		/* Set data */
@@ -277,7 +278,7 @@ void CDRMPlot::OnTimerChart()
 
 	case INPUTSPECTRUM_NO_AV:
 		/* Get data from module */
-		pDRMRec->GetReceiveData()->GetInputSpec(vecrData, vecrScale);
+        pDRMRec->GetInputSpec(vecrData, vecrScale);
 
 		if (change) SetupInpSpec();
 		/* Prepare graph and set data */
@@ -287,7 +288,7 @@ void CDRMPlot::OnTimerChart()
 
 	case INP_SPEC_WATERF:
 		/* Get data from module */
-		pDRMRec->GetReceiveData()->GetInputSpec(vecrData, vecrScale);
+        pDRMRec->GetInputSpec(vecrData, vecrScale);
 
 		if (change) SetupInpSpecWaterf();
 		/* Set data */
@@ -306,19 +307,19 @@ void CDRMPlot::OnTimerChart()
 
 	case INPUT_SIG_PSD_ANALOG:
 		/* Get data and parameters from modules */
-		pDRMRec->GetReceiveData()->GetInputPSD(vecrData, vecrScale);
-		pDRMRec->GetAMDemod()->GetBWParameters(rCenterFreq, rBandwidth);
+        pDRMRec->GetInputPSD(vecrData, vecrScale);
+        pDRMRec->GetAMBWParameters(rCenterFreq, rBandwidth);
 
 		if (change) SetupInpPSD(TRUE);
 		/* Prepare graph and set data */
-		SetDCCarrier(pDRMRec->GetAMDemod()->GetCurMixFreqOffs());
+        SetDCCarrier(pDRMRec->GetAMMixerFrequencyOffset());
 		SetBWMarker(rCenterFreq, rBandwidth);
 		SetData(vecrData, vecrScale);
 		break;
 
 	case AUDIO_SPECTRUM:
 		/* Get data from module */
-		pDRMRec->GetWriteData()->GetAudioSpec(vecrData, vecrScale);
+        pDRMRec->GetAudioSpec(vecrData, vecrScale);
 
 		if (change || bLastAudioDecoder != bAudioDecoder)
 		{
@@ -337,8 +338,7 @@ void CDRMPlot::OnTimerChart()
 		if (change) SetupFreqSamOffsHist();
 		/* Prepare graph and set data */
 		plot->setAxisTitle(QwtPlot::yLeft, tr("Freq. Offset [Hz] rel. to ")
-			+ QString().setNum(pDRMRec->GetReceiveData()->
-				ConvertFrequency(rFreqAcquVal))
+            + QString().setNum(pDRMRec->ConvertFrequency(rFreqAcquVal))
 			+ " Hz");
 		AutoScale(vecrData, vecrData2, vecrScale);
 		SetData(vecrData, vecrData2, vecrScale);
@@ -366,7 +366,7 @@ void CDRMPlot::OnTimerChart()
 
 	case FAC_CONSTELLATION:
 		/* Get data vector */
-		pDRMRec->GetFACMLC()->GetVectorSpace(veccData1);
+        pDRMRec->GetFACMLCVectorSpace(veccData1);
 
 		if (change) SetupFACConst();
 		/* Set data */
@@ -375,7 +375,7 @@ void CDRMPlot::OnTimerChart()
 
 	case SDC_CONSTELLATION:
 		/* Get data vector */
-		pDRMRec->GetSDCMLC()->GetVectorSpace(veccData1);
+        pDRMRec->GetSDCMLCVectorSpace(veccData1);
 
 		if (change || eLastSDCCodingScheme != eSDCCodingScheme)
 		{
@@ -388,7 +388,7 @@ void CDRMPlot::OnTimerChart()
 
 	case MSC_CONSTELLATION:
 		/* Get data vector */
-		pDRMRec->GetMSCMLC()->GetVectorSpace(veccData1);
+        pDRMRec->GetMSCMLCVectorSpace(veccData1);
 
 		if (change || eLastMSCCodingScheme != eMSCCodingScheme)
 		{
@@ -401,9 +401,9 @@ void CDRMPlot::OnTimerChart()
 
 	case ALL_CONSTELLATION:
 		/* Get data vectors */
-		pDRMRec->GetMSCMLC()->GetVectorSpace(veccData1);
-		pDRMRec->GetSDCMLC()->GetVectorSpace(veccData2);
-		pDRMRec->GetFACMLC()->GetVectorSpace(veccData3);
+        pDRMRec->GetMSCMLCVectorSpace(veccData1);
+        pDRMRec->GetSDCMLCVectorSpace(veccData2);
+        pDRMRec->GetFACMLCVectorSpace(veccData3);
 
 		if (change) SetupAllConst();
 		/* Set data */
@@ -1086,10 +1086,8 @@ void CDRMPlot::SetupInpSpec()
 	plot->setAxisTitle(QwtPlot::yLeft, tr("Input Spectrum [dB]"));
 
 	/* Fixed scale */
-	const double dXScaleMin = pDRMRec->GetReceiveData()->
-		ConvertFrequency((_REAL) 0.0) / 1000;
-	const double dXScaleMax = pDRMRec->GetReceiveData()->
-		ConvertFrequency((_REAL) iSigSampleRate / 2) / 1000;
+    const double dXScaleMin = pDRMRec->ConvertFrequency((_REAL) 0.0) / 1000;
+    const double dXScaleMax = pDRMRec->ConvertFrequency((_REAL) iSigSampleRate / 2) / 1000;
 	plot->setAxisScale(QwtPlot::xBottom, dXScaleMin, dXScaleMax);
 
 	plot->setAxisScale(QwtPlot::yLeft, MIN_VAL_INP_SPEC_Y_AXIS_DB,
@@ -1113,7 +1111,7 @@ void CDRMPlot::SetDCCarrier(const _REAL rDCFreq)
 	/* Insert line for DC carrier */
 	double dX[2], dY[2];
 	dX[0] = dX[1] =
-		pDRMRec->GetReceiveData()->ConvertFrequency(rDCFreq) / 1000;
+        pDRMRec->ConvertFrequency(rDCFreq) / 1000;
 
 	/* Take the min-max values from scale to get vertical line */
 	dY[0] = MIN_VAL_INP_SPEC_Y_AXIS_DB;
@@ -1132,14 +1130,11 @@ void CDRMPlot::SetupInpPSD(_BOOLEAN bAnalog)
 	plot->setAxisTitle(QwtPlot::yLeft, tr("Input PSD [dB]"));
 
 	/* Fixed scale */
-	const double dXScaleMin = pDRMRec->GetReceiveData()->
-		ConvertFrequency((_REAL) 0.0) / 1000;
-	const double dXScaleMax = pDRMRec->GetReceiveData()->
-		ConvertFrequency((_REAL) iSigSampleRate / 2) / 1000;
+    const double dXScaleMin = pDRMRec->ConvertFrequency((_REAL) 0.0) / 1000;
+    const double dXScaleMax = pDRMRec->ConvertFrequency((_REAL) iSigSampleRate / 2) / 1000;
 	plot->setAxisScale(QwtPlot::xBottom, dXScaleMin, dXScaleMax);
 
-	plot->setAxisScale(QwtPlot::yLeft, MIN_VAL_INP_SPEC_Y_AXIS_DB,
-		MAX_VAL_INP_SPEC_Y_AXIS_DB);
+    plot->setAxisScale(QwtPlot::yLeft, MIN_VAL_INP_SPEC_Y_AXIS_DB, MAX_VAL_INP_SPEC_Y_AXIS_DB);
 
 	/* Insert line for bandwidth marker */
 	if (bAnalog)
@@ -1172,9 +1167,9 @@ void CDRMPlot::SetBWMarker(const _REAL rBWCenter, const _REAL rBWWidth)
 	/* Insert marker for filter bandwidth if required */
 	if (rBWWidth != (_REAL) 0.0)
 	{
-		dX[0] = pDRMRec->GetReceiveData()->ConvertFrequency(
+        dX[0] = pDRMRec->ConvertFrequency(
 			(rBWCenter - rBWWidth / 2) * (double)iSigSampleRate) / 1000.0;
-		dX[1] = pDRMRec->GetReceiveData()->ConvertFrequency(
+        dX[1] = pDRMRec->ConvertFrequency(
 			(rBWCenter + rBWWidth / 2) * (double)iSigSampleRate) / 1000.0;
 
 		/* Take the min-max values from scale to get vertical line */
@@ -1206,10 +1201,8 @@ void CDRMPlot::SetupInpSpecWaterf()
 	plot->setCanvasBackground(palette.color(QPalette::Window));
 
 	/* Fixed scale */
-	const double dXScaleMin = pDRMRec->GetReceiveData()->
-		ConvertFrequency((_REAL) 0.0) / 1000;
-	const double dXScaleMax = pDRMRec->GetReceiveData()->
-		ConvertFrequency((_REAL) iSigSampleRate / 2) / 1000;
+    const double dXScaleMin = pDRMRec->ConvertFrequency((_REAL) 0.0) / 1000;
+    const double dXScaleMax = pDRMRec->ConvertFrequency((_REAL) iSigSampleRate / 2) / 1000;
 	plot->setAxisScale(QwtPlot::xBottom, dXScaleMin, dXScaleMax);
 }
 
@@ -1552,8 +1545,8 @@ void CDRMPlot::OnSelected(const QPointF &pos)
 
 		/* Emit signal containing normalized selected frequency */
 		emit xAxisValSet(
-			pDRMRec->GetReceiveData()->ConvertFrequency(dFreq * 1000, TRUE) /
-			pDRMRec->GetReceiveData()->ConvertFrequency(dMaxxBottom * 1000, TRUE));
+            pDRMRec->ConvertFrequency(dFreq * 1000, TRUE) /
+            pDRMRec->ConvertFrequency(dMaxxBottom * 1000, TRUE));
 	}
 }
 

@@ -216,10 +216,6 @@ public:
         delete[] cCurrentBlockBits;
     }
 
-    /* AMSS status */
-    enum EAMSSBlockLockStat { NO_SYNC, RE_SYNC, DEF_SYNC, DEF_SYNC_BUT_DATA_CHANGED, POSSIBLE_LOSS_OF_SYNC };
-
-
     EAMSSBlockLockStat GetLockStatus() const {
         return eAMSSBlockLockStatus;
     }

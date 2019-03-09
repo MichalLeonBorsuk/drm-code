@@ -43,13 +43,13 @@
 
 /* Implementation *************************************************************/
 #ifdef HAVE_LIBHAMLIB
-StationsDlg::StationsDlg(CDRMReceiver& DRMReceiver, CSettings& Settings, CRig& Rig, QMap<QWidget*,QString>& parents):
+StationsDlg::StationsDlg(CRx& nrx, CSettings& Settings, CRig& Rig, QMap<QWidget*,QString>& parents):
 CWindow(parents, Settings, "Stations"),
-DRMReceiver(DRMReceiver), Rig(Rig),
+rx(nrx), Rig(Rig),
 #else
-StationsDlg::StationsDlg(CDRMReceiver& DRMReceiver, CSettings& Settings, QMap<QWidget*,QString>& parents):
+StationsDlg::StationsDlg(CRx& rx, CSettings& Settings, QMap<QWidget*,QString>& parents):
 CWindow(parents, Settings, "Stations"),
-DRMReceiver(DRMReceiver),
+rx(rx),
 #endif
 greenCube(":/icons/greenCube.png"), redCube(":/icons/redCube.png"),
 orangeCube(":/icons/orangeCube.png"), pinkCube(":/icons/pinkCube.png"),
@@ -271,7 +271,7 @@ void StationsDlg::eventHide(QHideEvent*)
 
 void StationsDlg::eventShow(QShowEvent*)
 {
-	QwtCounterFrequency->setValue(DRMReceiver.GetFrequency());
+    QwtCounterFrequency->setValue(rx.GetFrequency());
 	bool ensmeter = false;
 	ensmeter = actionEnable_S_Meter->isChecked();
 	if(ensmeter)
@@ -279,7 +279,7 @@ void StationsDlg::eventShow(QShowEvent*)
 	else
 		DisableSMeter();
     CSchedule::ESchedMode eSchedM = schedule.GetSchedMode();
-    ERecMode eRecM = DRMReceiver.GetReceiverMode();
+    ERecMode eRecM = rx.GetReceiverMode();
     bool bIsDRM = eRecM == RM_DRM;
     if (
         (eSchedM == CSchedule::SM_DRM && !bIsDRM)
@@ -337,7 +337,7 @@ void StationsDlg::OnTimer()
 		TextLabelUTCTime->setText(strUTCTime);
 
 	/* frequency could be changed by evaluation dialog or RSCI */
-	int iFrequency = DRMReceiver.GetFrequency();
+    int iFrequency = rx.GetFrequency();
 	int iCurFrequency = QwtCounterFrequency->value();
 
 	if (iFrequency != iCurFrequency)
@@ -388,7 +388,7 @@ void StationsDlg::LoadSettings()
 	}
 
 	/* get sorting and filtering behaviour */
-	ERecMode eRecSM = DRMReceiver.GetReceiverMode();
+    ERecMode eRecSM = rx.GetReceiverMode();
 	switch (eRecSM)
 	{
 	case RM_DRM:
@@ -574,11 +574,11 @@ void StationsDlg::UpdateTransmissionStatus()
 
 void StationsDlg::OnFreqCntNewValue(double dVal)
 {
-	int iFrequency = DRMReceiver.GetFrequency();
+    int iFrequency = rx.GetFrequency();
 	int newFreq = int(dVal);
 
 	if(newFreq != iFrequency) // avoid double tuning via RSCI
-		DRMReceiver.SetFrequency(int(dVal));
+        rx.SetFrequency(int(dVal));
 }
 
 void StationsDlg::OnHeaderClicked(int c)
@@ -680,7 +680,7 @@ void StationsDlg::SetFrequencyFromGUI(int iFreq)
 	QwtCounterFrequency->setValue(iFreq);
 
 	/* If the mode has changed re-initialise the receiver */
-	ERecMode eCurrentMode = DRMReceiver.GetReceiverMode();
+    ERecMode eCurrentMode = rx.GetReceiverMode();
 
 	/* if "bReInitOnFrequencyChange" is not true, initiate a reinit when
 	schedule mode is different from receiver mode */
@@ -691,16 +691,16 @@ void StationsDlg::SetFrequencyFromGUI(int iFreq)
 
 	case CSchedule::SM_DRM:
 		if (eCurrentMode != RM_DRM)
-			DRMReceiver.SetReceiverMode(RM_DRM);
+            rx.SetReceiverMode(RM_DRM);
 		if (bReInitOnFrequencyChange)
-			DRMReceiver.RequestNewAcquisition();
+            rx.Restart();
 		break;
 
 	case CSchedule::SM_ANALOG:
 		if (eCurrentMode != RM_AM)
-			DRMReceiver.SetReceiverMode(RM_AM);
+            rx.SetReceiverMode(RM_AM);
 		if (bReInitOnFrequencyChange)
-			DRMReceiver.RequestNewAcquisition();
+            rx.Restart();
 		break;
 	}
 }

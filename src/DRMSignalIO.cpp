@@ -909,11 +909,11 @@ _REAL CReceiveData::ConvertFrequency(_REAL rFrequency, _BOOLEAN bInvert) const
 {
     const int iInvert = bInvert ? -1 : 1;
 
-    if (eInChanSelection == CReceiveData::CS_IQ_POS_SPLIT ||
-            eInChanSelection == CReceiveData::CS_IQ_NEG_SPLIT)
+    if (eInChanSelection == CS_IQ_POS_SPLIT ||
+            eInChanSelection == CS_IQ_NEG_SPLIT)
         rFrequency -= iSampleRate / 4 * iInvert;
-    else if (eInChanSelection == CReceiveData::CS_IQ_POS_ZERO ||
-             eInChanSelection == CReceiveData::CS_IQ_NEG_ZERO)
+    else if (eInChanSelection == CS_IQ_POS_ZERO ||
+             eInChanSelection == CS_IQ_NEG_ZERO)
         rFrequency -= VIRTUAL_INTERMED_FREQ * iInvert;
 
     return rFrequency;
@@ -933,12 +933,12 @@ void CReceiveData::GetInputSpec(CVector<_REAL>& vecrData,
 
     /* Init the constants for scale and normalization */
     const _BOOLEAN bNegativeFreq =
-        eInChanSelection == CReceiveData::CS_IQ_POS_SPLIT ||
-        eInChanSelection == CReceiveData::CS_IQ_NEG_SPLIT;
+        eInChanSelection == CS_IQ_POS_SPLIT ||
+        eInChanSelection == CS_IQ_NEG_SPLIT;
 
     const _BOOLEAN bOffsetFreq =
-        eInChanSelection == CReceiveData::CS_IQ_POS_ZERO ||
-        eInChanSelection == CReceiveData::CS_IQ_NEG_ZERO;
+        eInChanSelection == CS_IQ_POS_ZERO ||
+        eInChanSelection == CS_IQ_NEG_ZERO;
 
     const int iOffsetScale =
         bNegativeFreq ? iLenSpecWithNyFreq / 2 :
@@ -1009,12 +1009,12 @@ void CReceiveData::CalculatePSD(CVector<_REAL>& vecrData,
 
     /* Init the constants for scale and normalization */
     const _BOOLEAN bNegativeFreq =
-        eInChanSelection == CReceiveData::CS_IQ_POS_SPLIT ||
-        eInChanSelection == CReceiveData::CS_IQ_NEG_SPLIT;
+        eInChanSelection == CS_IQ_POS_SPLIT ||
+        eInChanSelection == CS_IQ_NEG_SPLIT;
 
     const _BOOLEAN bOffsetFreq =
-        eInChanSelection == CReceiveData::CS_IQ_POS_ZERO ||
-        eInChanSelection == CReceiveData::CS_IQ_NEG_ZERO;
+        eInChanSelection == CS_IQ_POS_ZERO ||
+        eInChanSelection == CS_IQ_NEG_ZERO;
 
     const int iOffsetScale =
         bNegativeFreq ? iLenSpecWithNyFreq / 2 :

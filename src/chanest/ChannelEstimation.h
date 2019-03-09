@@ -89,10 +89,6 @@ public:
 
     virtual ~CChannelEstimation() {}
 
-    enum ETypeIntFreq {FLINEAR, FDFTFILTER, FWIENER};
-    enum ETypeIntTime {TLINEAR, TWIENER};
-    enum ETypeSNREst {SNR_FAC, SNR_PIL};
-
     void GetTransferFunction(CVector<_REAL>& vecrData,
                              CVector<_REAL>& vecrGrpDly,	CVector<_REAL>& vecrScale);
     void GetAvPoDeSp(CVector<_REAL>& vecrData, CVector<_REAL>& vecrScale,
@@ -115,14 +111,14 @@ public:
     void SetFreqInt(ETypeIntFreq eNewTy) {
         TypeIntFreq = eNewTy;
     }
-    ETypeIntFreq GetFreqInt() {
+    ETypeIntFreq GetFrequencyInterpolationAlgorithm() {
         return TypeIntFreq;
     }
     void SetTimeInt(ETypeIntTime eNewTy) {
         TypeIntTime = eNewTy;
         SetInitFlag();
     }
-    ETypeIntTime GetTimeInt() const {
+    ETypeIntTime GetTimeInterpolationAlgorithm() const {
         return TypeIntTime;
     }
 

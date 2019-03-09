@@ -42,10 +42,10 @@
 #include "SoundCardSelMenu.h"
 
 /* Implementation *************************************************************/
-FMDialog::FMDialog(CDRMReceiver& NDRMR, CSettings& Settings,
+FMDialog::FMDialog(CRx& nrx, CSettings& Settings,
 	CFileMenu* pFileMenu, CSoundCardSelMenu* pSoundCardMenu, QWidget* parent) :
 	CWindow(parent, Settings, "FM"),
-	DRMReceiver(NDRMR),
+    rx(nrx),
 	pFileMenu(pFileMenu), pSoundCardMenu(pSoundCardMenu), eReceiverMode(RM_NONE)
 {
 	setupUi(this);
@@ -131,11 +131,11 @@ void FMDialog::OnSwitchToAM()
 void FMDialog::OnTune()
 {
 	bool ok;
-	double freq = double(DRMReceiver.GetFrequency())/1000.0;
+    double freq = double(rx.GetFrequency())/1000.0;
 	double f = QInputDialog::getDouble(this, tr("Dream FM"), tr("Frequency (MHz):"), freq, 86.0, 110.0, 2, &ok);
 	if (ok)
 	{
-		DRMReceiver.SetFrequency(int(1000.0*f));
+        rx.SetFrequency(int(1000.0*f));
 	}
 }
 
@@ -163,7 +163,7 @@ void FMDialog::SetStatus(CMultColorLED* LED, ETypeRxStatus state)
 
 void FMDialog::OnTimer()
 {
-	ERecMode eNewReceiverMode = DRMReceiver.GetReceiverMode();
+    ERecMode eNewReceiverMode = rx.GetReceiverMode();
 	switch(eNewReceiverMode)
 	{
 	case RM_DRM:
@@ -174,7 +174,7 @@ void FMDialog::OnTimer()
 		break;
 	case RM_FM:
 		{
-			CParameter& Parameters = *DRMReceiver.GetParameters();
+            CParameter& Parameters = *rx.GetParameters();
 			Parameters.Lock();
 
 			/* Input level meter */
@@ -186,7 +186,7 @@ void FMDialog::OnTimer()
 			int iShortID = Parameters.GetCurSelAudioService();
 			SetStatus(CLED_MSC, Parameters.AudioComponentStatus[iShortID].GetStatus());
 
-			int freq = DRMReceiver.GetFrequency();
+            int freq = rx.GetFrequency();
 			QString fs = QString("%1 MHz").arg(double(freq)/1000.0, 5, 'f', 2);
 
 			LabelServiceLabel->setText(fs);
@@ -194,7 +194,7 @@ void FMDialog::OnTimer()
 			Parameters.Unlock();
 
 			/* Check if receiver does receive a signal */
-			if(DRMReceiver.GetAcquiState() == AS_WITH_SIGNAL)
+            if(rx.GetAcquisitionState() == AS_WITH_SIGNAL)
 				UpdateDisplay();
 			else
 				ClearDisplay();
@@ -207,13 +207,13 @@ void FMDialog::OnTimer()
 
 void FMDialog::OnTimerClose()
 {
-	if(DRMReceiver.GetParameters()->eRunState == CParameter::STOPPED)
+    if(rx.GetParameters()->eRunState == CParameter::STOPPED)
 		close();
 }
 
 void FMDialog::UpdateDisplay()
 {
-	CParameter& Parameters = *(DRMReceiver.GetParameters());
+    CParameter& Parameters = *(rx.GetParameters());
 
 	Parameters.Lock();
 
@@ -417,7 +417,7 @@ void FMDialog::eventHide(QHideEvent*)
 
 void FMDialog::SetService(int iNewServiceID)
 {
-	CParameter& Parameters = *DRMReceiver.GetParameters();
+    CParameter& Parameters = *rx.GetParameters();
 	Parameters.Lock();
 	Parameters.SetCurSelAudioService(iNewServiceID);
 	Parameters.Unlock();
@@ -450,7 +450,7 @@ void FMDialog::eventClose(QCloseEvent* ce)
     }
 
 	/* Stay open until working thread is done */
-	if (DRMReceiver.GetParameters()->eRunState == CParameter::STOPPED)
+    if (rx.GetParameters()->eRunState == CParameter::STOPPED)
 	{
 		TimerClose.stop();
 		ce->accept();
@@ -463,7 +463,7 @@ QString FMDialog::GetCodecString(const int iServiceID)
 {
 	QString strReturn;
 
-	CParameter& Parameters = *DRMReceiver.GetParameters();
+    CParameter& Parameters = *rx.GetParameters();
 
 	/* First check if it is audio or data service */
 	if (Parameters.Service[iServiceID].eAudDataFlag == CService::SF_AUDIO)
@@ -553,7 +553,7 @@ QString FMDialog::GetTypeString(const int iServiceID)
 {
 	QString strReturn;
 
-	CParameter& Parameters = *DRMReceiver.GetParameters();
+    CParameter& Parameters = *rx.GetParameters();
 
 	/* First check if it is audio or data service */
 	if (Parameters.Service[iServiceID].

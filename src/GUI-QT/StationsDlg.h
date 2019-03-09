@@ -35,7 +35,7 @@
 
 #include "DialogUtil.h"
 #include "CWindow.h"
-#include "../DrmReceiver.h"
+#include "crx.h"
 #include "Schedule.h"
 
 /* Definitions ****************************************************************/
@@ -46,9 +46,9 @@ class StationsDlg : public CWindow, public Ui_StationsDlgbase
 
 public:
 #ifdef HAVE_LIBHAMLIB
-	StationsDlg(CDRMReceiver&, CSettings&, CRig&, QMap<QWidget*,QString>&);
+    StationsDlg(CRx&, CSettings&, CRig&, QMap<QWidget*,QString>&);
 #else
-	StationsDlg(CDRMReceiver&, CSettings&, QMap<QWidget*,QString>&);
+    StationsDlg(CRx&, CSettings&, QMap<QWidget*,QString>&);
 #endif
 	virtual ~StationsDlg();
 
@@ -79,7 +79,7 @@ protected:
 	QString			strColumnParamdrm;
 	QString			strColumnParamanalog;
 
-	CDRMReceiver&	DRMReceiver;
+    CRx&            rx;
 #ifdef HAVE_LIBHAMLIB
 	CRig&			Rig;
 #endif
