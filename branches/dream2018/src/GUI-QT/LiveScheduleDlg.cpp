@@ -327,10 +327,10 @@ CDRMLiveSchedule::LoadAFSInformations(const CAltFreqSign& AltFreqSign)
     }
 }
 
-LiveScheduleDlg::LiveScheduleDlg(CDRMReceiver& DRMReceiver, CSettings& Settings,
+LiveScheduleDlg::LiveScheduleDlg(CRx& nrx, CSettings& Settings,
                                  QMap<QWidget*,QString>& parents):
     CWindow(parents, Settings, "Live Schedule"),
-    DRMReceiver(DRMReceiver),
+    rx(nrx),
     smallGreenCube(":/icons/smallGreenCube.png"),
     greenCube(":/icons/greenCube.png"), redCube(":/icons/redCube.png"),
     orangeCube(":/icons/orangeCube.png"), pinkCube(":/icons/pinkCube.png"),
@@ -402,7 +402,7 @@ LiveScheduleDlg::LoadSettings()
     ListViewStations->sortItems(iCurrentSortColumn, bCurrentSortAscending?Qt::AscendingOrder:Qt::DescendingOrder);
 
     /* Retrieve the setting saved into the .ini file */
-    strCurrentSavePath = QString::fromUtf8(DRMReceiver.GetParameters()->GetDataDirectory("AFS").c_str());
+    strCurrentSavePath = QString::fromUtf8(rx.GetParameters()->GetDataDirectory("AFS").c_str());
 
     /* and make sure it exists */
 	CreateDirectories(strCurrentSavePath);
@@ -507,7 +507,7 @@ LiveScheduleDlg::OnShowPreviewMenu(int iID)
 void
 LiveScheduleDlg::OnTimerList()
 {
-    CParameter& Parameters = *DRMReceiver.GetParameters();
+    CParameter& Parameters = *rx.GetParameters();
 
     Parameters.Lock();
     /* Get current receiver latitude and longitude if defined */
@@ -570,7 +570,7 @@ LiveScheduleDlg::LoadSchedule()
     }
     vecpListItems.clear();
 
-    CParameter& Parameters = *DRMReceiver.GetParameters();
+    CParameter& Parameters = *rx.GetParameters();
     Parameters.Lock();
     DRMSchedule.LoadAFSInformations(Parameters.AltFreqSign);
     Parameters.Unlock();
@@ -650,7 +650,7 @@ LiveScheduleDlg::SetStationsView()
 {
     /* Set lock because of list view items. These items could be changed
        by another thread */
-    CParameter& Parameters = *DRMReceiver.GetParameters();
+    CParameter& Parameters = *rx.GetParameters();
     Parameters.Lock();
     int sNo = Parameters.GetCurSelAudioService();
     string thisServiceLabel = Parameters.Service[sNo].strLabel;
@@ -795,7 +795,7 @@ LiveScheduleDlg::OnSave()
     QString strSchedule = "";
     QString strValue = "";
 
-    CParameter& Parameters = *DRMReceiver.GetParameters();
+    CParameter& Parameters = *rx.GetParameters();
 
     Parameters.Lock();
 

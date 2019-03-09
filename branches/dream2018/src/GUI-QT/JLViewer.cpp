@@ -31,9 +31,9 @@
 #include "../datadecoding/DataDecoder.h"
 #include <QFontDialog>
 
-JLViewer::JLViewer(CDRMReceiver& rec, CSettings& Settings, QWidget* parent):
+JLViewer::JLViewer(CRx& nrx, CSettings& Settings, QWidget* parent):
     CWindow(parent, Settings, "Journaline"),
-    receiver(rec), decoderSet(false)
+    rx(nrx), decoderSet(false)
 {
     setupUi(this);
 
@@ -79,7 +79,7 @@ void JLViewer::eventShow(QShowEvent*)
         textBrowser->setFont(fontTextBrowser);
     }
 
-    CParameter& Parameters = *receiver.GetParameters();
+    CParameter& Parameters = *rx.GetParameters();
     Parameters.Lock();
     const int iCurSelAudioServ = Parameters.GetCurSelAudioService();
     const uint32_t iAudioServiceID = Parameters.Service[iCurSelAudioServ].iServiceID;
@@ -89,7 +89,7 @@ void JLViewer::eventShow(QShowEvent*)
     CService service = Parameters.Service[shortID];
     Parameters.Unlock();
 
-    CDataDecoder* dec = receiver.GetDataDecoder();
+    CDataDecoder* dec = rx.GetDataDecoder();
     if(dec)
     {
         textBrowser->setDecoder(dec);
@@ -147,7 +147,7 @@ void JLViewer::eventHide(QHideEvent*)
 
 void JLViewer::OnTimer()
 {
-    CParameter& Parameters = *receiver.GetParameters();
+    CParameter& Parameters = *rx.GetParameters();
     Parameters.Lock();
 
     /* Get current data service */
@@ -158,7 +158,7 @@ void JLViewer::OnTimer()
 
     if(!decoderSet)
     {
-        CDataDecoder* dec = receiver.GetDataDecoder();
+        CDataDecoder* dec = rx.GetDataDecoder();
         if(dec)
         {
             textBrowser->setDecoder(dec);

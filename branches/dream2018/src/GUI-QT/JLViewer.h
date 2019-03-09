@@ -31,7 +31,7 @@
 
 #include "ui_JLViewer.h"
 #include "CWindow.h"
-#include "../DrmReceiver.h"
+#include "crx.h"
 #include <QTextDocument>
 #include <string>
 
@@ -40,7 +40,7 @@ class JLViewer : public CWindow, public Ui_JLViewer
     Q_OBJECT
 
 public:
-    JLViewer(CDRMReceiver&, CSettings&, QWidget* parent = 0);
+    JLViewer(CRx&, CSettings&, QWidget* parent = 0);
     virtual ~JLViewer();
 
 protected:
@@ -48,8 +48,8 @@ protected:
     virtual void eventHide(QHideEvent*);
     QTimer Timer;
     QTextDocument           document;
-//    QString                 strCurrentSavePath;
-    CDRMReceiver&           receiver;
+//    QString               strCurrentSavePath;
+    CRx&                    rx;
     bool                    decoderSet;
 
 public slots:

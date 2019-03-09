@@ -32,7 +32,7 @@
 
 #include "ui_EPGDlgbase.h"
 #include "CWindow.h"
-#include "../DrmReceiver.h"
+#include "crx.h"
 #include "../util-QT/EPG.h"
 #include <QWidget>
 #include <QDateTime>
@@ -69,7 +69,7 @@ class EPGDlg : public CWindow, public Ui_CEPGDlgbase
     Q_OBJECT
 
 public:
-    EPGDlg(CDRMReceiver&, CSettings&, QWidget* parent = 0);
+    EPGDlg(CRx&, CSettings&, QWidget* parent = 0);
     virtual ~EPGDlg();
 
     void select();
@@ -85,10 +85,10 @@ protected:
     virtual QDomDocument* getFile (const QString&);
     virtual QDomDocument* getFile (const QDate& date, uint32_t sid, bool bAdvanced);
 
-    bool do_updates;
-    EPG epg;
-    CDRMReceiver&	DRMReceiver;
-    QTimer		Timer;
+    bool    do_updates;
+    EPG     epg;
+    CRx&    rx;
+    QTimer	Timer;
     map<QString,uint32_t> sids;
     QIcon		greenCube;
     QTreeWidgetItem*	next;

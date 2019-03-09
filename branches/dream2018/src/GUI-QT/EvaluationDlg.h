@@ -36,7 +36,7 @@
 #include "MultColorLED.h"
 #include "../GlobalDefinitions.h"
 #include "../util/Vector.h"
-#include "../DrmReceiver.h"
+#include "crx.h"
 
 /* Definitions ****************************************************************/
 /* Define this macro if you prefer the QT-type of displaying date and time */
@@ -50,13 +50,13 @@ class systemevalDlg : public CWindow, public Ui_SystemEvaluationWindow
 	Q_OBJECT
 
 public:
-	systemevalDlg(CDRMReceiver&, CSettings&, QWidget* parent = 0);
+    systemevalDlg(CRx&, CSettings&, QWidget* parent = 0);
 	virtual ~systemevalDlg();
 
 	void SetStatus(CMultColorLED*, ETypeRxStatus);
 
 protected:
-	CDRMReceiver&	DRMReceiver;
+    CRx&            rx;
 
 	QTimer			Timer;
 	CDRMPlot*		MainPlot;

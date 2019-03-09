@@ -413,7 +413,7 @@ void CAMDemodulation::SetFilterBW(const int iNewBW)
     Unlock();
 }
 
-void CAMDemodulation::SetAGCType(const CAGC::EType eNewType)
+void CAMDemodulation::SetAGCType(const EAmAgcType eNewType)
 {
     /* Lock resources */
     Lock();
@@ -620,7 +620,7 @@ void CAGC::Init(int iNewSampleRate, int iNewBlockSize)
     rAvAmplEst = DES_AV_AMPL_AM_SIGNAL / AM_AMPL_CORR_FACTOR;
 }
 
-void CAGC::SetType(const EType eNewType)
+void CAGC::SetType(const EAmAgcType eNewType)
 {
     /* Set internal parameter */
     eType = eNewType;

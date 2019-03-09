@@ -53,17 +53,17 @@
 #include <QMainWindow>
 #include <QMenu>
 #include <qwt_thermo.h>
-#include "ctrx.h"
 
 
 /* Classes ********************************************************************/
+class CTx;
 
 class TransmDialog : public CWindow, public Ui_TransmDlgBase
 {
 	Q_OBJECT
 
 public:
-    TransmDialog(CTRx&, QWidget* parent=nullptr);
+    TransmDialog(CTx&, QWidget* parent=nullptr);
 	virtual ~TransmDialog();
 
 protected:
@@ -72,8 +72,7 @@ protected:
 	void EnableAllControlsForSet();
 	void TabWidgetEnableTabs(QTabWidget* tabWidget, bool enable);
 
-    CTRx                	TransThread; /* Working thread object */
-	CDRMTransmitter&	DRMTransmitter;
+    CTx&                tx; /* Working thread object */
 	CAboutDlg			AboutDlg;
 	QTimer				Timer;
 	QTimer				TimerStop;
