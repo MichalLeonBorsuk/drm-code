@@ -41,7 +41,7 @@
 
 
 class CMOTObject;
-class CDRMReceiver;
+class CRx;
 class CDataDecoder;
 
 
@@ -139,13 +139,13 @@ class BWSViewer : public CWindow, public Ui_BWSViewer
     Q_OBJECT
 
 public:
-    BWSViewer(CDRMReceiver&, CSettings&, QWidget* parent = 0);
+    BWSViewer(CRx&, CSettings&, QWidget* parent = 0);
     virtual ~BWSViewer();
 
 protected:
     CNetworkAccessManager nam;
     QTimer          Timer;
-    CDRMReceiver&   receiver;
+    CRx&            rx;
     CDataDecoder*   decoder;
     CWebsiteCache   cache;
     bool            bHomeSet;

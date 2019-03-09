@@ -86,10 +86,10 @@ FDRMDialog::FDRMDialog(CRx& nRx, CSettings& Settings,
     connect(pSoundCardMenu, SIGNAL(soundInDeviceChanged(QString)), this, SLOT(OnSoundFileChanged(QString)));
 
     /* Analog demodulation window */
-    pAnalogDemDlg = new AnalogDemDlg(*reinterpret_cast<CDRMReceiver*>(rx.GetTRX()), Settings, pFileMenu, pSoundCardMenu);
+    pAnalogDemDlg = new AnalogDemDlg(rx, Settings, pFileMenu, pSoundCardMenu);
 
     /* FM window */
-    pFMDlg = new FMDialog(*reinterpret_cast<CDRMReceiver*>(rx.GetTRX()), Settings, pFileMenu, pSoundCardMenu);
+    pFMDlg = new FMDialog(rx, Settings, pFileMenu, pSoundCardMenu);
 
     /* Parent list for Stations and Live Schedule window */
 	QMap <QWidget*,QString> parents;
@@ -98,30 +98,30 @@ FDRMDialog::FDRMDialog(CRx& nRx, CSettings& Settings,
 
     /* Stations window */
 #ifdef HAVE_LIBHAMLIB
-    pStationsDlg = new StationsDlg(*reinterpret_cast<CDRMReceiver*>(rx.GetTRX()), Settings, rig, parents);
+    pStationsDlg = new StationsDlg(rx, Settings, rig, parents);
 #else
-    pStationsDlg = new StationsDlg(*reinterpret_cast<CDRMReceiver*>(rx.GetTRX()), Settings, parents);
+    pStationsDlg = new StationsDlg(rx, Settings, parents);
 #endif
 
     /* Live Schedule window */
-    pLiveScheduleDlg = new LiveScheduleDlg(*reinterpret_cast<CDRMReceiver*>(rx.GetTRX()), Settings, parents);
+    pLiveScheduleDlg = new LiveScheduleDlg(rx, Settings, parents);
 
     /* MOT broadcast website viewer window */
 #ifdef QT_WEBENGINE_LIB
-    pBWSDlg = new BWSViewer(*reinterpret_cast<CDRMReceiver*>(rx.GetTRX()), Settings, this);
+    pBWSDlg = new BWSViewer(rx, Settings, this);
 #endif
 
     /* Journaline viewer window */
-    pJLDlg = new JLViewer(*reinterpret_cast<CDRMReceiver*>(rx.GetTRX()), Settings, this);
+    pJLDlg = new JLViewer(rx, Settings, this);
 
     /* MOT slide show window */
-    pSlideShowDlg = new SlideShowViewer(*reinterpret_cast<CDRMReceiver*>(rx.GetTRX()), Settings, this);
+    pSlideShowDlg = new SlideShowViewer(rx, Settings, this);
 
     /* Programme Guide Window */
-    pEPGDlg = new EPGDlg(*reinterpret_cast<CDRMReceiver*>(rx.GetTRX()), Settings, this);
+    pEPGDlg = new EPGDlg(rx, Settings, this);
 
     /* Evaluation window */
-    pSysEvalDlg = new systemevalDlg(*reinterpret_cast<CDRMReceiver*>(rx.GetTRX()), Settings, this);
+    pSysEvalDlg = new systemevalDlg(rx, Settings, this);
 
     /* general settings window */
     pGeneralSettingsDlg = new GeneralSettingsDlg(Parameters, Settings, this);
@@ -305,7 +305,7 @@ void FDRMDialog::OnSysTrayActivated(QSystemTrayIcon::ActivationReason reason)
 void FDRMDialog::OnSysTrayTimer()
 {
     QString Title, Message;
-    if (reinterpret_cast<CDRMReceiver*>(rx.GetTRX())->GetAcquiState() == AS_WITH_SIGNAL)
+    if (rx.GetAcquisitionState() == AS_WITH_SIGNAL)
     {
         CParameter& Parameters = *rx.GetParameters();
         Parameters.Lock();
@@ -405,7 +405,7 @@ void FDRMDialog::UpdateDRM_GUI()
     iMultimediaServiceBit = 0;
 
     /* Check if receiver does receive a signal */
-    if(reinterpret_cast<CDRMReceiver*>(rx.GetTRX())->GetAcquiState() == AS_WITH_SIGNAL)
+    if(rx.GetAcquisitionState() == AS_WITH_SIGNAL)
         UpdateDisplay();
     else
     {
@@ -437,7 +437,7 @@ void FDRMDialog::OnScheduleTimer()
     e = pScheduler->front();
     if (e.frequency != -1)
     {
-        reinterpret_cast<CDRMReceiver*>(rx.GetTRX())->SetFrequency(e.frequency);
+        rx.SetFrequency(e.frequency);
         if(!pLogging->enabled())
         {
             startLogging();
@@ -461,7 +461,7 @@ void FDRMDialog::OnScheduleTimer()
 
 void FDRMDialog::OnTimer()
 {
-    ERecMode eNewReceiverMode = reinterpret_cast<CDRMReceiver*>(rx.GetTRX())->GetReceiverMode();
+    ERecMode eNewReceiverMode = rx.GetReceiverMode();
     switch(eNewReceiverMode)
     {
     case RM_DRM:
@@ -679,10 +679,10 @@ QString FDRMDialog::serviceSelector(CParameter& Parameters, int i)
         }
 
         /* Audio service */
-        if ((service.eAudDataFlag == CService::SF_AUDIO))
+        if (service.eAudDataFlag == CService::SF_AUDIO)
         {
             /* Report missing codec */
-            if (!reinterpret_cast<CDRMReceiver*>(rx.GetTRX())->GetAudSorceDec()->CanDecode(service.AudioParam.eAudioCoding))
+            if (!rx.CanDecode(service.AudioParam.eAudioCoding))
                 text += tr(" [no codec available]");
 
             /* Show, if a multimedia stream is connected to this service */
@@ -988,12 +988,12 @@ void FDRMDialog::eventHide(QHideEvent*)
 
 void FDRMDialog::OnNewAcquisition()
 {
-    reinterpret_cast<CDRMReceiver*>(rx.GetTRX())->RequestNewAcquisition();
+    rx.Restart();
 }
 
 void FDRMDialog::OnSwitchMode(int newMode)
 {
-    reinterpret_cast<CDRMReceiver*>(rx.GetTRX())->SetReceiverMode(ERecMode(newMode));
+    rx.SetReceiverMode(ERecMode(newMode));
     Timer.start(GUI_CONTROL_UPDATE_TIME);
 }
 

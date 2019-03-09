@@ -68,7 +68,7 @@
 #include "../resample/cspectrumresample.h"
 #include "../util/Vector.h"
 #include "../Parameter.h"
-#include "../DrmReceiver.h"
+#include "crx.h"
 
 
 /* Definitions ****************************************************************/
@@ -282,7 +282,7 @@ public:
 	QwtPlot         *plot;
 
 	/* This function has to be called before chart can be used! */
-	void SetRecObj(CDRMReceiver* pNDRMRec) {pDRMRec = pNDRMRec;}
+    void SetRecObj(CRx* pNDRMRec) {pDRMRec = pNDRMRec;}
 
 	void SetupChart(const ECharType eNewType);
 	ECharType GetChartType() const { return CurCharType; }
@@ -379,7 +379,7 @@ protected:
 	QwtLegend		*legend;
 
 	QTimer			TimerChart;
-	CDRMReceiver	*pDRMRec;
+    CRx             *pDRMRec;
 
 	/* Waterfall spectrum stuff */
 	QPixmap			Canvas;

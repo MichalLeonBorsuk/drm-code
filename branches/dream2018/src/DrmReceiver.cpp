@@ -71,7 +71,7 @@ CDRMReceiver::CDRMReceiver(CSettings* nPsettings) : CDRMTransceiver(),
     MSCSendBuf(MAX_NUM_STREAMS), iAcquRestartCnt(0),
     iAcquDetecCnt(0), iGoodSignCnt(0), eReceiverMode(RM_DRM),
     eNewReceiverMode(RM_DRM), iAudioStreamID(STREAM_ID_NOT_USED),
-    iDataStreamID(STREAM_ID_NOT_USED), bRestartFlag(TRUE),
+    iDataStreamID(STREAM_ID_NOT_USED),
     rInitResampleOffset((_REAL) 0.0),
     iBwAM(10000), iBwLSB(5000), iBwUSB(5000), iBwCW(150), iBwFM(6000),
     time_keeper(0),
@@ -102,28 +102,28 @@ CDRMReceiver::SetReceiverMode(ERecMode eNewMode)
 }
 
 void
-CDRMReceiver::SetAMDemodType(CAMDemodulation::EDemodType eNew)
+CDRMReceiver::SetAMDemodType(EDemodType eNew)
 {
     AMDemodulation.SetDemodType(eNew);
     switch (eNew)
     {
-    case CAMDemodulation::DT_AM:
+    case DT_AM:
         AMDemodulation.SetFilterBW(iBwAM);
         break;
 
-    case CAMDemodulation::DT_LSB:
+    case DT_LSB:
         AMDemodulation.SetFilterBW(iBwLSB);
         break;
 
-    case CAMDemodulation::DT_USB:
+    case DT_USB:
         AMDemodulation.SetFilterBW(iBwUSB);
         break;
 
-    case CAMDemodulation::DT_CW:
+    case DT_CW:
         AMDemodulation.SetFilterBW(iBwCW);
         break;
 
-    case CAMDemodulation::DT_FM:
+    case DT_FM:
         AMDemodulation.SetFilterBW(iBwFM);
         break;
     }
@@ -135,23 +135,23 @@ CDRMReceiver::SetAMFilterBW(int value)
     /* Store filter bandwidth for this demodulation type */
     switch (AMDemodulation.GetDemodType())
     {
-    case CAMDemodulation::DT_AM:
+    case DT_AM:
         iBwAM = value;
         break;
 
-    case CAMDemodulation::DT_LSB:
+    case DT_LSB:
         iBwLSB = value;
         break;
 
-    case CAMDemodulation::DT_USB:
+    case DT_USB:
         iBwUSB = value;
         break;
 
-    case CAMDemodulation::DT_CW:
+    case DT_CW:
         iBwCW = value;
         break;
 
-    case CAMDemodulation::DT_FM:
+    case DT_FM:
         iBwFM = value;
         break;
     }
@@ -206,9 +206,8 @@ CDRMReceiver::Run()
 	(void)result;
 #endif
 
-    if (bRestartFlag) /* new acquisition requested by GUI */
+    if (Parameters.eRunState == CParameter::RESTART) /* new acquisition requested */
     {
-        bRestartFlag = FALSE;
         SetInStartMode();
     }
 
@@ -306,9 +305,7 @@ CDRMReceiver::Run()
     }
 
     /* Decoding */
-    while (bEnoughData &&
-        (Parameters.eRunState==CParameter::RUNNING ||
-         Parameters.eRunState==CParameter::RESTART))
+    while (bEnoughData && (Parameters.eRunState==CParameter::RUNNING || Parameters.eRunState==CParameter::RESTART))
     {
         /* Init flag */
         bEnoughData = FALSE;
@@ -427,7 +424,7 @@ CDRMReceiver::SetInputDevice(QString s)
     case FileTyper::raw_pft:
         pUpstreamRSCI->SetOrigin(device);
     }
-    Restart(); // sounds right!!
+    Restart();
 }
 
 void
@@ -911,12 +908,10 @@ CDRMReceiver::Start()
     CConsoleIO::Enter(this);
 #endif
 
-    /* Set restart flag */
-    Parameters.eRunState = CParameter::RESTART;
     do
     {
         /* Set new acquisition flag */
-        RequestNewAcquisition();
+        Restart();
 
         /* Initialisation pass */
         Run();
@@ -1527,19 +1522,19 @@ CDRMReceiver::LoadSettings()
     SetInputDevice(qs);
 
     /* Channel Estimation: Frequency Interpolation */
-    SetFreqInt((CChannelEstimation::ETypeIntFreq)s.Get("Receiver", "freqint", int(CChannelEstimation::FWIENER)));
+    SetFreqInt((ETypeIntFreq)s.Get("Receiver", "freqint", int(FWIENER)));
 
     /* Channel Estimation: Time Interpolation */
-    SetTimeInt((CChannelEstimation::ETypeIntTime)s.Get("Receiver", "timeint", int(CChannelEstimation::TWIENER)));
+    SetTimeInt((ETypeIntTime)s.Get("Receiver", "timeint", int(TWIENER)));
 
     /* Time Sync Tracking */
-    SetTiSyncTracType((CTimeSyncTrack::ETypeTiSyncTrac)s.Get("Receiver", "timesync", int(CTimeSyncTrack::TSENERGY)));
+    SetTiSyncTracType((ETypeTiSyncTrac)s.Get("Receiver", "timesync", int(TSENERGY)));
 
     /* Flip spectrum flag */
     ReceiveData.SetFlippedSpectrum(s.Get("Receiver", "flipspectrum", FALSE));
 
     /* Input channel selection */
-    ReceiveData.SetInChanSel((CReceiveData::EInChanSel)s.Get("Receiver", "inchansel", int(CReceiveData::CS_MIX_CHAN)));
+    ReceiveData.SetInChanSel((EInChanSel)s.Get("Receiver", "inchansel", int(CS_MIX_CHAN)));
 
     /* Output channel selection */
     WriteData.SetOutChanSel((CWriteData::EOutChanSel)s.Get("Receiver", "outchansel", int(CWriteData::CS_BOTH_BOTH)));
@@ -1547,10 +1542,10 @@ CDRMReceiver::LoadSettings()
     /* AM Parameters */
 
     /* AGC */
-    AMDemodulation.SetAGCType((CAGC::EType)s.Get("AM Demodulation", "agc", 0));
+    AMDemodulation.SetAGCType((EAmAgcType)s.Get("AM Demodulation", "agc", 0));
 
     /* noise reduction */
-    AMDemodulation.SetNoiRedType((CAMDemodulation::ENoiRedType)s.Get("AM Demodulation", "noisered", 0));
+    AMDemodulation.SetNoiRedType((ENoiRedType)s.Get("AM Demodulation", "noisered", 0));
 
 #ifdef HAVE_SPEEX
     /* noise reduction level */
@@ -1564,8 +1559,7 @@ CDRMReceiver::LoadSettings()
     AMDemodulation.EnableAutoFreqAcq(s.Get("AM Demodulation", "autofreqacq", 0));
 
     /* demodulation type and bandwidth */
-    CAMDemodulation::EDemodType eDemodType
-    = (CAMDemodulation::EDemodType)s.Get("AM Demodulation", "demodulation", CAMDemodulation::DT_AM);
+    EDemodType eDemodType = (EDemodType)s.Get("AM Demodulation", "demodulation", DT_AM);
     iBwAM = s.Get("AM Demodulation", "filterbwam", 10000);
     iBwUSB = s.Get("AM Demodulation", "filterbwusb", 5000);
     iBwLSB = s.Get("AM Demodulation", "filterbwlsb", 5000);
@@ -1738,10 +1732,10 @@ CDRMReceiver::SaveSettings()
     s.Put("Receiver", "measurepsdalways", Parameters.bMeasurePSDAlways);
 
     /* Channel Estimation: Frequency Interpolation */
-    s.Put("Receiver", "freqint", GetFreqInt());
+    s.Put("Receiver", "freqint", GetFrequencyInterpolationAlgorithm());
 
     /* Channel Estimation: Time Interpolation */
-    s.Put("Receiver", "timeint", GetTimeInt());
+    s.Put("Receiver", "timeint", GetTimeInterpolationAlgorithm());
 
     /* Time Sync Tracking */
     s.Put("Receiver", "timesync", GetTiSyncTracType());

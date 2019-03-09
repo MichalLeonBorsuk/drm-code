@@ -183,21 +183,20 @@ protected:
 class CAGC
 {
 public:
-    enum EType {AT_NO_AGC, AT_SLOW, AT_MEDIUM, AT_FAST};
 
     CAGC() : eType(AT_MEDIUM) {}
     void Init(int iSampleRate, int iNewBlockSize);
     void Process(CRealVector& vecrIn /* in/out */);
 
-    void SetType(const EType eNewType);
-    EType GetType() {
+    void SetType(const EAmAgcType eNewType);
+    EAmAgcType GetType() {
         return eType;
     }
 
 protected:
     int		iSampleRate;
     int		iBlockSize;
-    EType	eType;
+    EAmAgcType	eType;
     CReal	rAttack, rDecay;
     CReal	rAvAmplEst;
 };
@@ -259,9 +258,6 @@ public:
     CAMDemodulation();
     virtual ~CAMDemodulation() {}
 
-    enum EDemodType {DT_AM, DT_LSB, DT_USB, DT_CW, DT_FM};
-    enum ENoiRedType {NR_OFF, NR_LOW, NR_MEDIUM, NR_HIGH, NR_SPEEX};
-
     void SetAcqFreq(const CReal rNewNormCenter);
 
     void EnableAutoFreqAcq(const _BOOLEAN bNewEn)
@@ -289,8 +285,8 @@ public:
         return (int) (rBPNormBW * iSigSampleRate);
     }
 
-    void SetAGCType(const CAGC::EType eNewType);
-    CAGC::EType GetAGCType() {
+    void SetAGCType(const EAmAgcType eNewType);
+    EAmAgcType GetAGCType() {
         return AGC.GetType();
     }
 

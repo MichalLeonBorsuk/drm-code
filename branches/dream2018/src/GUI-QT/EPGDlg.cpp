@@ -37,11 +37,11 @@
 #include <QPixmap>
 #include <QMetaObject>
 
-EPGDlg::EPGDlg(CDRMReceiver& NDRMR, CSettings& Settings, QWidget* parent):
+EPGDlg::EPGDlg(CRx& nrx, CSettings& Settings, QWidget* parent):
     CWindow(parent, Settings, "EPG"),
     do_updates(false),
-    epg(*NDRMR.GetParameters()),
-    DRMReceiver(NDRMR),
+    epg(*nrx.GetParameters()),
+    rx(nrx),
     sids(),
     greenCube(":/icons/greenCube.png"),
     next(nullptr)
@@ -104,7 +104,7 @@ void EPGDlg::OnTimer()
 
 void EPGDlg::eventShow(QShowEvent *)
 {
-    CParameter& Parameters = *DRMReceiver.GetParameters();
+    CParameter& Parameters = *rx.GetParameters();
     Parameters.Lock();
     int sNo = Parameters.GetCurSelAudioService();
     uint32_t sid = Parameters.Service[sNo].iServiceID;

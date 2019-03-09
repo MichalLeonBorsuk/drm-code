@@ -74,30 +74,44 @@
 
 class CDRMReceiver;
 
+enum EInChanSel {CS_LEFT_CHAN, CS_RIGHT_CHAN, CS_MIX_CHAN, CS_SUB_CHAN, CS_IQ_POS,
+                 CS_IQ_NEG, CS_IQ_POS_ZERO, CS_IQ_NEG_ZERO, CS_IQ_POS_SPLIT, CS_IQ_NEG_SPLIT
+                };
+
+/* Maximum frequency for audio spectrum */
+#define MAX_SPEC_AUDIO_FREQUENCY	20000 /* Hz */
+
+
 /* CS: Coding Scheme */
 enum ECodScheme { CS_1_SM, CS_2_SM, CS_3_SM, CS_3_HMSYM, CS_3_HMMIX };
 
 /* CT: Channel Type */
 enum EChanType { CT_MSC, CT_SDC, CT_FAC };
 
-enum ETypeIntFreq
-{ FLINEAR, FDFTFILTER, FWIENER };
-enum ETypeIntTime
-{ TLINEAR, TWIENER };
-enum ETypeSNREst
-{ SNR_FAC, SNR_PIL };
-enum ETypeRxStatus
-{ NOT_PRESENT, CRC_ERROR, DATA_ERROR, RX_OK };
+enum ETypeTiSyncTrac {TSENERGY, TSFIRSTPEAK};
+
+enum ETypeIntFreq { FLINEAR, FDFTFILTER, FWIENER };
+enum ETypeIntTime { TLINEAR, TWIENER };
+enum ETypeSNREst { SNR_FAC, SNR_PIL };
+enum ETypeRxStatus { NOT_PRESENT, CRC_ERROR, DATA_ERROR, RX_OK };
 /* RM: Receiver mode (analog or digital demodulation) */
 
-enum ERecMode
-{ RM_DRM, RM_AM, RM_FM, RM_NONE };
+enum ERecMode { RM_DRM, RM_AM, RM_FM, RM_NONE };
 
 /* Acquisition state of receiver */
 enum EAcqStat {AS_NO_SIGNAL, AS_WITH_SIGNAL};
 
 /* Receiver state */
 enum ERecState {RS_TRACKING, RS_ACQUISITION};
+
+enum EAmAgcType {AT_NO_AGC, AT_SLOW, AT_MEDIUM, AT_FAST};
+
+/* AM enumerations */
+enum EDemodType {DT_AM, DT_LSB, DT_USB, DT_CW, DT_FM};
+enum ENoiRedType {NR_OFF, NR_LOW, NR_MEDIUM, NR_HIGH, NR_SPEEX};
+
+/* AMSS status */
+enum EAMSSBlockLockStat { NO_SYNC, RE_SYNC, DEF_SYNC, DEF_SYNC_BUT_DATA_CHANGED, POSSIBLE_LOSS_OF_SYNC };
 
 /* Classes ********************************************************************/
 

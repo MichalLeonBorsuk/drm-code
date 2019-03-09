@@ -46,8 +46,8 @@ void CDRMSimulation::SimScript()
     CVector<_REAL>						vecrMSE;
     string								strSimFile;
     string								strSpecialRemark;
-    CChannelEstimation::ETypeIntFreq	eChanEstFreqIntType;
-    CChannelEstimation::ETypeIntTime	eChanEstTimIntType;
+    ETypeIntFreq                        eChanEstFreqIntType;
+    ETypeIntTime                    	eChanEstTimIntType;
 
 
     /**************************************************************************\
@@ -117,8 +117,8 @@ void CDRMSimulation::SimScript()
 
 
         /* Choose the type of channel estimation algorithms used for simlation */
-        eChanEstFreqIntType = CChannelEstimation::FWIENER;//FDFTFILTER;//FLINEAR;
-        eChanEstTimIntType = CChannelEstimation::TWIENER;//TLINEAR;
+        eChanEstFreqIntType = FWIENER;//FDFTFILTER;//FLINEAR;
+        eChanEstTimIntType = TWIENER;//TLINEAR;
 
 
         /* Define which synchronization algorithms we want to use */
@@ -357,29 +357,29 @@ string CDRMSimulation::SimFileName(CParameter& SaveParam, string strAddInf,
     if (SaveParam.eSimType == CParameter::ST_BITERROR)
     {
         /* Time direction */
-        switch (ChannelEstimation.GetTimeInt())
+        switch (ChannelEstimation.GetTimeInterpolationAlgorithm())
         {
-        case CChannelEstimation::TLINEAR:
+        case TLINEAR:
             strFileName += "Tl";
             break;
 
-        case CChannelEstimation::TWIENER:
+        case TWIENER:
             strFileName += "Tw";
             break;
         }
 
         /* Frequency direction */
-        switch (ChannelEstimation.GetFreqInt())
+        switch (ChannelEstimation.GetFrequencyInterpolationAlgorithm())
         {
-        case CChannelEstimation::FLINEAR:
+        case FLINEAR:
             strFileName += "Fl_";
             break;
 
-        case CChannelEstimation::FDFTFILTER:
+        case FDFTFILTER:
             strFileName += "Fd_";
             break;
 
-        case CChannelEstimation::FWIENER:
+        case FWIENER:
             strFileName += "Fw_";
             break;
         }

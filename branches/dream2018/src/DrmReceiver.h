@@ -173,9 +173,6 @@ public:
     virtual _BOOLEAN IsReceiver() const override { return true; }
     virtual _BOOLEAN IsTransmitter() const override  { return false; }
 
-    void RequestNewAcquisition() {
-        bRestartFlag = TRUE;
-    }
     EAcqStat				GetAcquiState() {
         return Parameters.GetAcquiState();
     }
@@ -192,7 +189,7 @@ public:
     {
         rInitResampleOffset = rNRO;
     }
-    void					SetAMDemodType(CAMDemodulation::EDemodType);
+    void					SetAMDemodType(EDemodType);
     void					SetAMFilterBW(int iBw);
     void					SetAMDemodAcq(_REAL rNewNorCen);
 #ifdef HAVE_LIBHAMLIB
@@ -208,24 +205,24 @@ public:
     void					SetRSIRecording(_BOOLEAN, const char);
 
     /* Channel Estimation */
-    void SetFreqInt(CChannelEstimation::ETypeIntFreq eNewTy)
+    void SetFreqInt(ETypeIntFreq eNewTy)
     {
         ChannelEstimation.SetFreqInt(eNewTy);
     }
 
-    CChannelEstimation::ETypeIntFreq GetFreqInt()
+    ETypeIntFreq GetFrequencyInterpolationAlgorithm()
     {
-        return ChannelEstimation.GetFreqInt();
+        return ChannelEstimation.GetFrequencyInterpolationAlgorithm();
     }
 
-    void SetTimeInt(CChannelEstimation::ETypeIntTime eNewTy)
+    void SetTimeInt(ETypeIntTime eNewTy)
     {
         ChannelEstimation.SetTimeInt(eNewTy);
     }
 
-    CChannelEstimation::ETypeIntTime GetTimeInt() const
+    ETypeIntTime GetTimeInterpolationAlgorithm() const
     {
-        return ChannelEstimation.GetTimeInt();
+        return ChannelEstimation.GetTimeInterpolationAlgorithm();
     }
 
     void SetIntCons(const _BOOLEAN bNewIntCons)
@@ -238,22 +235,22 @@ public:
         return ChannelEstimation.GetIntCons();
     }
 
-    void SetSNREst(CChannelEstimation::ETypeSNREst eNewTy)
+    void SetSNREst(ETypeSNREst eNewTy)
     {
         ChannelEstimation.SetSNREst(eNewTy);
     }
 
-    CChannelEstimation::ETypeSNREst GetSNREst()
+    ETypeSNREst GetSNREst()
     {
         return ChannelEstimation.GetSNREst();
     }
 
-    void SetTiSyncTracType(CTimeSyncTrack::ETypeTiSyncTrac eNewTy)
+    void SetTiSyncTracType(ETypeTiSyncTrac eNewTy)
     {
         ChannelEstimation.GetTimeSyncTrack()->SetTiSyncTracType(eNewTy);
     }
 
-    CTimeSyncTrack::ETypeTiSyncTrac GetTiSyncTracType()
+    ETypeTiSyncTrac GetTiSyncTracType()
     {
         return ChannelEstimation.GetTimeSyncTrack()->GetTiSyncTracType();
     }
@@ -438,9 +435,6 @@ protected:
 
     int						iAudioStreamID;
     int						iDataStreamID;
-
-
-    _BOOLEAN				bRestartFlag;
 
     _REAL					rInitResampleOffset;
 

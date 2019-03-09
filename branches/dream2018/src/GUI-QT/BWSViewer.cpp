@@ -27,7 +27,7 @@
 \******************************************************************************/
 
 #include "BWSViewer.h"
-#include "../DrmReceiver.h"
+#include "crx.h"
 #include "../util-QT/Util.h"
 #include "../datadecoding/DataDecoder.h"
 #include <QDir>
@@ -45,10 +45,10 @@
 #define ENABLE_HACK /* Do we really need these hack unless for vtc trial sample? */
 
 
-BWSViewer::BWSViewer(CDRMReceiver& rec, CSettings& Settings, QWidget* parent):
+BWSViewer::BWSViewer(CRx& nrx, CSettings& Settings, QWidget* parent):
     CWindow(parent, Settings, "BWS"),
     nam(this, cache, waitobjs, bAllowExternalContent, strCacheHost),
-    receiver(rec), decoder(nullptr), bHomeSet(false), bPageLoading(false),
+    rx(nrx), decoder(nullptr), bHomeSet(false), bPageLoading(false),
     bSaveFileToDisk(false), bRestrictedProfile(false), bAllowExternalContent(true),
     bClearCacheOnNewService(true), bDirectoryIndexChanged(false),
     iLastAwaitingOjects(0), strCacheHost(CACHE_HOST),
@@ -197,7 +197,7 @@ void BWSViewer::OnTimer()
 
     if (decoder == nullptr)
     {
-        decoder = receiver.GetDataDecoder();
+        decoder = rx.GetDataDecoder();
         if (decoder == nullptr)
             qDebug("can't get data decoder from receiver");
     }
@@ -447,12 +447,12 @@ void BWSViewer::SetupSavePath(QString& strSavePath)
 {
     /* Append service ID to MOT save path */
     strSavePath = strSavePath.setNum(iCurrentDataServiceID, 16).toUpper().rightJustified(8, '0');
-    strSavePath = QString::fromUtf8((*receiver.GetParameters()).GetDataDirectory("MOT").c_str()) + strSavePath + "/";
+    strSavePath = QString::fromUtf8((*rx.GetParameters()).GetDataDirectory("MOT").c_str()) + strSavePath + "/";
 }
 
 void BWSViewer::GetServiceParams(uint32_t* iServiceID, bool* bServiceValid, QString* strLabel, ETypeRxStatus* eStatus)
 {
-    CParameter& Parameters = *receiver.GetParameters();
+    CParameter& Parameters = *rx.GetParameters();
     Parameters.Lock();
         const int iCurSelDataServ = Parameters.GetCurSelDataService();
         const CService service = Parameters.Service[iCurSelDataServ];

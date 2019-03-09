@@ -39,10 +39,10 @@
 #include <QShowEvent>
 
 /* Implementation *************************************************************/
-systemevalDlg::systemevalDlg(CDRMReceiver& NDRMR, CSettings& Settings,
+systemevalDlg::systemevalDlg(CRx& nrx, CSettings& Settings,
                              QWidget* parent) :
     CWindow(parent, Settings, "System Evaluation"),
-    DRMReceiver(NDRMR),
+    rx(nrx),
     eNewCharType(CDRMPlot::NONE_OLD)
 {
     setupUi(this);
@@ -56,15 +56,13 @@ systemevalDlg::systemevalDlg(CDRMReceiver& NDRMR, CSettings& Settings,
     iPlotStyle = getSetting("plotstyle", 0, true);
     putSetting("plotstyle", iPlotStyle, true);
     MainPlot = new CDRMPlot(nullptr, plot);
-    MainPlot->SetRecObj(&DRMReceiver);
+    MainPlot->SetRecObj(&rx);
     MainPlot->SetPlotStyle(iPlotStyle);
 
     /* Init slider control */
     SliderNoOfIterations->setRange(0, 4);
-    SliderNoOfIterations->
-    setValue(DRMReceiver.GetMSCMLC()->GetInitNumIterations());
-    TextNumOfIterations->setText(tr("MLC: Number of Iterations: ") +
-                                 QString().setNum(DRMReceiver.GetMSCMLC()->GetInitNumIterations()));
+    SliderNoOfIterations->setValue(rx.GetMSCMLInitNumIterations());
+    TextNumOfIterations->setText(tr("MLC: Number of Iterations: ") + QString().setNum(SliderNoOfIterations->value()));
 
     /* Update times for colour LEDs */
     LEDFAC->SetUpdateTime(1500);
@@ -119,9 +117,9 @@ systemevalDlg::systemevalDlg(CDRMReceiver& NDRMR, CSettings& Settings,
     /* Load saved main plot type */
     eCurCharType = PlotNameToECharType(string(getSetting("plottype", QString()).toLocal8Bit()));
 
-    /* If MDI in is enabled, disable some of the controls and use different
+    /* If RSCI in is enabled, disable some of the controls and use different
        initialization for the chart and chart selector */
-    if (DRMReceiver.GetRSIIn()->GetInEnabled() == TRUE)
+    if (rx.inputIsRSCI())
     {
         SliderNoOfIterations->setEnabled(FALSE);
 
@@ -199,15 +197,15 @@ systemevalDlg::systemevalDlg(CDRMReceiver& NDRMR, CSettings& Settings,
 
 systemevalDlg::~systemevalDlg()
 {
-    if(DRMReceiver.GetWriteData()->GetIsWriteWaveFile())
-        DRMReceiver.GetWriteData()->StopWriteWaveFile();
+    if(rx.isWriteWaveFile())
+        rx.StopWriteWaveFile();
     delete MainPlot;
 }
 
 void systemevalDlg::UpdateControls()
 {
     /* Slider for MLC number of iterations */
-    const int iNumIt = DRMReceiver.GetMSCMLC()->GetInitNumIterations();
+    const int iNumIt = rx.GetMSCMLInitNumIterations();
     if (SliderNoOfIterations->value() != iNumIt)
     {
         /* Update slider and label */
@@ -217,60 +215,58 @@ void systemevalDlg::UpdateControls()
     }
 
     /* Update for channel estimation and time sync switches */
-    switch (DRMReceiver.GetTimeInt())
+    switch (rx.GetTimeInterpolationAlgorithm())
     {
-    case CChannelEstimation::TLINEAR:
+    case TLINEAR:
         if (!RadioButtonTiLinear->isChecked())
             RadioButtonTiLinear->setChecked(TRUE);
         break;
 
-    case CChannelEstimation::TWIENER:
+    case TWIENER:
         if (!RadioButtonTiWiener->isChecked())
             RadioButtonTiWiener->setChecked(TRUE);
         break;
     }
 
-    switch (DRMReceiver.GetFreqInt())
+    switch (rx.GetFrequencyInterpolationAlgorithm())
     {
-    case CChannelEstimation::FLINEAR:
+    case FLINEAR:
         if (!RadioButtonFreqLinear->isChecked())
             RadioButtonFreqLinear->setChecked(TRUE);
         break;
 
-    case CChannelEstimation::FDFTFILTER:
+    case FDFTFILTER:
         if (!RadioButtonFreqDFT->isChecked())
             RadioButtonFreqDFT->setChecked(TRUE);
         break;
 
-    case CChannelEstimation::FWIENER:
+    case FWIENER:
         if (!RadioButtonFreqWiener->isChecked())
             RadioButtonFreqWiener->setChecked(TRUE);
         break;
     }
 
-    switch (DRMReceiver.GetTiSyncTracType())
+    switch (rx.GetTimeSyncTrackingType())
     {
-    case CTimeSyncTrack::TSFIRSTPEAK:
+    case TSFIRSTPEAK:
         if (!RadioButtonTiSyncFirstPeak->isChecked())
             RadioButtonTiSyncFirstPeak->setChecked(TRUE);
         break;
 
-    case CTimeSyncTrack::TSENERGY:
+    case TSENERGY:
         if (!RadioButtonTiSyncEnergy->isChecked())
             RadioButtonTiSyncEnergy->setChecked(TRUE);
         break;
     }
 
     /* Update settings checkbuttons */
-    CheckBoxReverb->setChecked(DRMReceiver.GetAudSorceDec()->GetReverbEffect());
-    CheckBoxRecFilter->setChecked(DRMReceiver.GetFreqSyncAcq()->GetRecFilter());
-    CheckBoxModiMetric->setChecked(DRMReceiver.GetIntCons());
-    CheckBoxMuteAudio->setChecked(DRMReceiver.GetWriteData()->GetMuteAudio());
-    CheckBoxFlipSpec->
-    setChecked(DRMReceiver.GetReceiveData()->GetFlippedSpectrum());
+    CheckBoxReverb->setChecked(rx.GetReverbEffect());
+    CheckBoxRecFilter->setChecked(rx.isFrequencySyncAcquisitionFilterEnabled());
+    CheckBoxModiMetric->setChecked(rx.isIntefererConsiderationEnabled());
+    CheckBoxMuteAudio->setChecked(rx.isAudioMuted());
+    CheckBoxFlipSpec->setChecked(rx.isSpectrumFlipped());
 
-    CheckBoxSaveAudioWave->
-    setChecked(DRMReceiver.GetWriteData()->GetIsWriteWaveFile());
+    CheckBoxSaveAudioWave->setChecked(rx.isWriteWaveFile());
 }
 
 void systemevalDlg::eventShow(QShowEvent*)
@@ -412,7 +408,7 @@ CDRMPlot* systemevalDlg::OpenChartWin(CDRMPlot::ECharType eNewType)
     pNewChartWin->setIcon(icon);
 
     /* Set receiver object and correct chart type */
-    pNewChartWin->SetRecObj(&DRMReceiver);
+    pNewChartWin->SetRecObj(&rx);
     pNewChartWin->SetupChart(eNewType);
 
     /* Set plot style*/
@@ -487,7 +483,7 @@ void systemevalDlg::SetStatus(CMultColorLED* LED, ETypeRxStatus state)
 
 void systemevalDlg::OnTimer()
 {
-    CParameter& Parameters = *(DRMReceiver.GetParameters());
+    CParameter& Parameters = *(rx.GetParameters());
 
     Parameters.Lock();
 
@@ -503,7 +499,7 @@ void systemevalDlg::OnTimer()
         SetStatus(LEDIOInterface, soundCardStatusO == NOT_PRESENT || (soundCardStatusI != NOT_PRESENT && soundCardStatusI != RX_OK) ? soundCardStatusI : soundCardStatusO);
 
         /* Show SNR if receiver is in tracking mode */
-        if (DRMReceiver.GetAcquiState() == AS_WITH_SIGNAL)
+        if (rx.GetAcquisitionState() == AS_WITH_SIGNAL)
         {
             /* Get a consistant snapshot */
 
@@ -567,28 +563,24 @@ void systemevalDlg::OnTimer()
 
 #ifdef _DEBUG_
         TextFreqOffset->setText("DC: " +
-                                QString().setNum(DRMReceiver.GetReceiveData()->
+                                QString().setNum(rx.GetReceiveData()->
                                         ConvertFrequency(Parameters.GetDCFrequency()), 'f', 3) + " Hz ");
 
         /* Metric values */
         ValueFreqOffset->setText(tr("Metrics [dB]: MSC: ") +
                                  QString().setNum(
-                                     DRMReceiver.GetMSCMLC()->GetAccMetric(), 'f', 2) +	"\nSDC: " +
+                                     rx.GetMSCMLC()->GetAccMetric(), 'f', 2) +	"\nSDC: " +
                                  QString().setNum(
-                                     DRMReceiver.GetSDCMLC()->GetAccMetric(), 'f', 2) +	" / FAC: " +
+                                     rx.GetSDCMLC()->GetAccMetric(), 'f', 2) +	" / FAC: " +
                                  QString().setNum(
-                                     DRMReceiver.GetFACMLC()->GetAccMetric(), 'f', 2));
+                                     rx.GetFACMLC()->GetAccMetric(), 'f', 2));
 #else
         /* DC frequency */
-        ValueFreqOffset->setText(QString().setNum(DRMReceiver.GetReceiveData()->
-                                     ConvertFrequency(Parameters.GetDCFrequency()), 'f', 2) + " Hz");
+        ValueFreqOffset->setText(QString().setNum(rx.ConvertFrequency(Parameters.GetDCFrequency()), 'f', 2) + " Hz");
 #endif
 
-        /* _WIN32 fix because in Visual c++ the GUI files are always compiled even
-           if QT_GUI_LIB is set or not (problem with MDI in DRMReceiver) */
-#ifdef QT_GUI_LIB
         /* If MDI in is enabled, do not show any synchronization parameter */
-        if (DRMReceiver.GetRSIIn()->GetInEnabled() == TRUE)
+        if (rx.inputIsRSCI())
         {
             ValueSNR->setText("<b>---</b>");
             if (Parameters.vecrRdelThresholds.GetSize() > 0)
@@ -601,8 +593,6 @@ void systemevalDlg::OnTimer()
             ValueSampFreqOffset->setText("---");
             ValueFreqOffset->setText("---");
         }
-#endif
-
 
         /* FAC info static ------------------------------------------------------ */
         QString strFACInfo;
@@ -825,60 +815,57 @@ void systemevalDlg::UpdateGPS(CParameter& Parameters)
 
 void systemevalDlg::OnRadioTimeLinear()
 {
-    if (DRMReceiver.GetTimeInt() != CChannelEstimation::TLINEAR)
-        DRMReceiver.SetTimeInt(CChannelEstimation::TLINEAR);
+    if (rx.GetTimeInterpolationAlgorithm() != TLINEAR)
+        rx.SetTimeInterpolationAlgorithm(TLINEAR);
 }
 
 void systemevalDlg::OnRadioTimeWiener()
 {
-    if (DRMReceiver.GetTimeInt() != CChannelEstimation::TWIENER)
-        DRMReceiver.SetTimeInt(CChannelEstimation::TWIENER);
+    if (rx.GetTimeInterpolationAlgorithm() != TWIENER)
+        rx.SetTimeInterpolationAlgorithm(TWIENER);
 }
 
 void systemevalDlg::OnRadioFrequencyLinear()
 {
-    if (DRMReceiver.GetFreqInt() != CChannelEstimation::FLINEAR)
-        DRMReceiver.SetFreqInt(CChannelEstimation::FLINEAR);
+    if (rx.GetFrequencyInterpolationAlgorithm() != FLINEAR)
+        rx.SetFrequencyInterpolationAlgorithm(FLINEAR);
 }
 
 void systemevalDlg::OnRadioFrequencyDft()
 {
-    if (DRMReceiver.GetFreqInt() != CChannelEstimation::FDFTFILTER)
-        DRMReceiver.SetFreqInt(CChannelEstimation::FDFTFILTER);
+    if (rx.GetFrequencyInterpolationAlgorithm() != FDFTFILTER)
+        rx.SetFrequencyInterpolationAlgorithm(FDFTFILTER);
 }
 
 void systemevalDlg::OnRadioFrequencyWiener()
 {
-    if (DRMReceiver.GetFreqInt() != CChannelEstimation::FWIENER)
-        DRMReceiver.SetFreqInt(CChannelEstimation::FWIENER);
+    if (rx.GetFrequencyInterpolationAlgorithm() != FWIENER)
+        rx.SetFrequencyInterpolationAlgorithm(FWIENER);
 }
 
 void systemevalDlg::OnRadioTiSyncFirstPeak()
 {
-    if (DRMReceiver.GetTiSyncTracType() !=
-            CTimeSyncTrack::TSFIRSTPEAK)
+    if (rx.GetTimeSyncTrackingType() != TSFIRSTPEAK)
     {
-        DRMReceiver.SetTiSyncTracType(CTimeSyncTrack::TSFIRSTPEAK);
+        rx.SetTimeSyncTrackingType(TSFIRSTPEAK);
     }
 }
 
 void systemevalDlg::OnRadioTiSyncEnergy()
 {
-    if (DRMReceiver.GetTiSyncTracType() !=
-            CTimeSyncTrack::TSENERGY)
+    if (rx.GetTimeSyncTrackingType() != TSENERGY)
     {
-        DRMReceiver.SetTiSyncTracType(CTimeSyncTrack::TSENERGY);
+        rx.SetTimeSyncTrackingType(TSENERGY);
     }
 }
 
 void systemevalDlg::OnSliderIterChange(int value)
 {
     /* Set new value in working thread module */
-    DRMReceiver.GetMSCMLC()->SetNumIterations(value);
+    rx.SetNumMSCMLCIterations(value);
 
     /* Show the new value in the label control */
-    TextNumOfIterations->setText(tr("MLC: Number of Iterations: ") +
-                                 QString().setNum(value));
+    TextNumOfIterations->setText(tr("MLC: Number of Iterations: ") + QString().setNum(value));
 }
 
 void systemevalDlg::OnListSelChanged(QTreeWidgetItem *curr, QTreeWidgetItem *)
@@ -896,36 +883,34 @@ void systemevalDlg::OnListSelChanged(QTreeWidgetItem *curr, QTreeWidgetItem *)
 void systemevalDlg::OnCheckFlipSpectrum()
 {
     /* Set parameter in working thread module */
-    DRMReceiver.GetReceiveData()->
-    SetFlippedSpectrum(CheckBoxFlipSpec->isChecked());
+    rx.SetFlipSpectrum(CheckBoxFlipSpec->isChecked());
 }
 
 void systemevalDlg::OnCheckRecFilter()
 {
     /* Set parameter in working thread module */
-    DRMReceiver.GetFreqSyncAcq()->
-    SetRecFilter(CheckBoxRecFilter->isChecked());
+    rx.SetFrequencySyncAcquisitionFilter(CheckBoxRecFilter->isChecked());
 
     /* If filter status is changed, a new aquisition is necessary */
-    DRMReceiver.RequestNewAcquisition();
+    rx.Restart();
 }
 
 void systemevalDlg::OnCheckModiMetric()
 {
     /* Set parameter in working thread module */
-    DRMReceiver.SetIntCons(CheckBoxModiMetric->isChecked());
+    rx.SetConsiderInterferer(CheckBoxModiMetric->isChecked());
 }
 
 void systemevalDlg::OnCheckBoxMuteAudio()
 {
     /* Set parameter in working thread module */
-    DRMReceiver.GetWriteData()->MuteAudio(CheckBoxMuteAudio->isChecked());
+    rx.MuteAudio(CheckBoxMuteAudio->isChecked());
 }
 
 void systemevalDlg::OnCheckBoxReverb()
 {
     /* Set parameter in working thread module */
-    DRMReceiver.GetAudSorceDec()->SetReverbEffect(CheckBoxReverb->isChecked());
+    rx.SetReverberationEffect(CheckBoxReverb->isChecked());
 }
 
 void systemevalDlg::OnCheckSaveAudioWAV()
@@ -944,7 +929,7 @@ void systemevalDlg::OnCheckSaveAudioWAV()
         if (!strFileName.isEmpty())
         {
 			string s = strFileName.toUtf8().constData();
-            DRMReceiver.GetWriteData()->StartWriteWaveFile(s);
+            rx.StartWriteWaveFile(s);
         }
         else
         {
@@ -953,7 +938,7 @@ void systemevalDlg::OnCheckSaveAudioWAV()
         }
     }
     else
-        DRMReceiver.GetWriteData()->StopWriteWaveFile();
+        rx.StopWriteWaveFile();
 }
 
 
@@ -971,7 +956,7 @@ void systemevalDlg::OnCheckWriteLog(int state)
 
 QString	systemevalDlg::GetRobModeStr()
 {
-    CParameter& Parameters = *DRMReceiver.GetParameters();
+    CParameter& Parameters = *rx.GetParameters();
     switch (Parameters.GetWaveMode())
     {
     case RM_ROBUSTNESS_MODE_A:
@@ -997,7 +982,7 @@ QString	systemevalDlg::GetRobModeStr()
 
 QString	systemevalDlg::GetSpecOccStr()
 {
-    switch (DRMReceiver.GetParameters()->GetSpectrumOccup())
+    switch (rx.GetParameters()->GetSpectrumOccup())
     {
     case SO_0:
         return "4.5 kHz";
