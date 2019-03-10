@@ -15,6 +15,7 @@ class CRx : public CTRx
 public:
     explicit CRx(CDRMReceiver& nRx, CTRx *parent = nullptr);
     virtual ~CRx() override;
+    void run() override;
 
     virtual void    GetInputPSD(CVector<_REAL>& vecrData, CVector<_REAL>& vecrScale);
     virtual void    GetPowDenSpec(CVector<_REAL>& vecrData, CVector<_REAL>& vecrScale);
@@ -74,9 +75,9 @@ public slots:
     virtual void GetOutputDevice(string&) override;
     virtual void EnumerateInputs(std::vector<std::string>& names, std::vector<std::string>& descriptions) override;
     virtual void EnumerateOutputs(std::vector<std::string>& names, std::vector<std::string>& descriptions) override;
-    virtual void Start() override;
-    virtual void Restart() override;
-    virtual void Stop() override;
+    virtual void Start();
+    virtual void Stop();
+    virtual void Restart();
     virtual CSettings*				GetSettings() override;
     virtual void					SetSettings(CSettings* pNewSettings) override;
     virtual CParameter*				GetParameters() override;
@@ -103,9 +104,14 @@ public slots:
     virtual void SetAMDemodAcq(_REAL);
     virtual void EnableAMPLL(bool);
     virtual void EnableAutoFrequenctAcquisition(bool);
+    virtual void onSoundInChannelChanged(EInChanSel);
+    virtual void onSoundOutChannelChanged(EOutChanSel);
+    virtual void onSoundSampleRateChanged(int);
+    virtual void SetSoundSignalUpscale(int);
 
 private:
     CDRMReceiver& rx;
+    ERunState eRunState;
 };
 
 #endif // CRX_H

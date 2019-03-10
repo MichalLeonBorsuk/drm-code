@@ -516,9 +516,8 @@ void FDRMDialog::OnTimer()
     }
 }
 
-void FDRMDialog::OnTimerClose()
+void FDRMDialog::OnTimerClose() // TODO
 {
-    if (rx.GetParameters()->eRunState == CParameter::STOPPED)
         close();
 }
 
@@ -1134,7 +1133,8 @@ void FDRMDialog::eventClose(QCloseEvent* ce)
      * so if the window never close it mean there is a bug
      * somewhere, a fix is needed
      */
-    if (rx.GetParameters()->eRunState == CParameter::STOPPED)
+    // TODO if (rx.GetParameters()->eRunState == CParameter::STOPPED)
+    if(true)
     {
         TimerClose.stop();
         AboutDlg.close();

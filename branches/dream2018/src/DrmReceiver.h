@@ -138,7 +138,6 @@ public:
 
     virtual void			LoadSettings() override; // can write to settings to set defaults
     virtual void			SaveSettings() override;
-    virtual void			Start() override;
 
     virtual void            GetInputDevice(string&) override;
     virtual void			GetOutputDevice(string&) override;
@@ -146,17 +145,6 @@ public:
     virtual void            EnumerateOutputs(std::vector<std::string>& names, std::vector<std::string>& descriptions) override;
     virtual void            SetInputDevice(QString) override;
     virtual void			SetOutputDevice(QString) override;
-
-    virtual void Restart() override
-    {
-        if (Parameters.eRunState == CParameter::RUNNING)
-            Parameters.eRunState = CParameter::RESTART;
-    }
-
-    virtual void Stop() override
-    {
-        Parameters.eRunState = CParameter::STOP_REQUESTED;
-    }
 
     virtual CSettings*GetSettings()  override{
         return pSettings;
@@ -328,14 +316,17 @@ public:
     void					InitsForSDCCodSche();
     void					InitsForMSC();
     void					InitsForMSCDemux();
+    void                    process();
+    void                    updatePosition();
+    void					InitReceiverMode();
+    void					SetInStartMode();
+    void                    CloseSoundInterfaces();
 
 protected:
 
-    void					SetInStartMode();
     void					SetInTrackingMode();
     void					SetInTrackingModeDelayed();
     void					InitsForAllModules();
-    void					Run();
     void					DemodulateDRM(_BOOLEAN&);
     void					DecodeDRM(_BOOLEAN&, _BOOLEAN&);
     void					UtilizeDRM(_BOOLEAN&);
@@ -347,9 +338,7 @@ protected:
     void					UtilizeFM(_BOOLEAN&);
     void					DetectAcquiFAC();
     void					DetectAcquiSymbol();
-    void					InitReceiverMode();
     void					saveSDCtoFile();
-    void                    CloseSoundInterfaces();
 
     /* Modules */
     CReceiveData			ReceiveData;

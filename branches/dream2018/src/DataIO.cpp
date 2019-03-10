@@ -554,7 +554,7 @@ void CGenSimData::ProcessDataInternal(CParameter& TransmParam)
 
         if (iCounter == iNumSimBlocks)
         {
-		TransmParam.eRunState = CParameter::STOP_REQUESTED;
+        //TransmParam.eRunState = CParameter::STOP_REQUESTED; TODO
 		iCounter = 0;
         }
         break;
@@ -628,7 +628,7 @@ void CGenSimData::ProcessDataInternal(CParameter& TransmParam)
             /* A minimum simulation time must be elapsed */
             if (iCounter >= iMinNumBlocks)
             {
-		TransmParam.eRunState = CParameter::STOP_REQUESTED;
+                // TODO TransmParam.eRunState = CParameter::STOP_REQUESTED;
                 iCounter = 0;
             }
         }

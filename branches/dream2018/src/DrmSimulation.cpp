@@ -116,9 +116,9 @@ void CDRMSimulation::Run()
     Init();
 
     /* Set run flag */
-    Parameters.eRunState = CParameter::RUNNING;
+    // TODO Parameters.eRunState = CParameter::RUNNING;
 
-    while (Parameters.eRunState == CParameter::RUNNING)
+    while (true) // TODO Parameters.eRunState == CParameter::RUNNING)
     {
         /**********************************************************************\
         * Transmitter														   *

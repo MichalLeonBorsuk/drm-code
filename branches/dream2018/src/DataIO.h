@@ -93,10 +93,6 @@ protected:
 class CWriteData : public CReceiverModul<_SAMPLE, _SAMPLE>
 {
 public:
-    enum EOutChanSel {CS_BOTH_BOTH, CS_LEFT_LEFT, CS_RIGHT_RIGHT,
-                      CS_LEFT_MIX, CS_RIGHT_MIX
-                     };
-
     CWriteData();
     virtual ~CWriteData() {}
 

@@ -53,8 +53,6 @@ public:
     void LoadSettings();
     void SaveSettings();
     void Init();
-    void Start();
-
 
     CAudioSourceEncoder*	GetAudSrcEnc() {
         return &AudioSourceEncoder;
@@ -86,16 +84,15 @@ public:
     void doSetOutputDevice();
     virtual _BOOLEAN				IsReceiver() const { return false; }
     virtual _BOOLEAN				IsTransmitter() const { return true; }
-    virtual void Restart();
-    virtual void Stop();
     virtual CSettings*				GetSettings() ;
     virtual void					SetSettings(CSettings* pNewSettings) { pSettings = pNewSettings; }
     virtual CParameter*				GetParameters() {return &Parameters; }
+    void Run();
+    void Close() {ReadData.Stop(); TransmitData.Stop(); }
 
 protected:
-    void Run();
-    void InitSoftStop() { iSoftStopSymbolCount=0; }
     _BOOLEAN CanSoftStopExit();
+    void InitSoftStop() { iSoftStopSymbolCount=0; }
 
     string indev;
     string outdev;

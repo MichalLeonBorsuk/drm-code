@@ -74,11 +74,11 @@ static const CHANSEL InputChannelTable[] =
 
 static const CHANSEL OutputChannelTable[] =
 {
-    { "Both Channels",              CWriteData::CS_BOTH_BOTH   },
-    { "Left -> Left, Right Muted",  CWriteData::CS_LEFT_LEFT   },
-    { "Right -> Right, Left Muted", CWriteData::CS_RIGHT_RIGHT },
-    { "L + R -> Left, Right Muted", CWriteData::CS_LEFT_MIX    },
-    { "L + R -> Right, Left Muted", CWriteData::CS_RIGHT_MIX   },
+    { "Both Channels",              CS_BOTH_BOTH   },
+    { "Left -> Left, Right Muted",  CS_LEFT_LEFT   },
+    { "Right -> Right, Left Muted", CS_RIGHT_RIGHT },
+    { "L + R -> Left, Right Muted", CS_LEFT_MIX    },
+    { "L + R -> Right, Left Muted", CS_RIGHT_MIX   },
     { nullptr, 0 } /* end of list */
 };
 
@@ -107,23 +107,33 @@ CSoundCardSelMenu::CSoundCardSelMenu(CTRx& ntrx,
     if (bReceiver)
     {   /* Receiver */
         Parameters.Lock();
-            menuSigInput = addMenu(tr("Signal Input"));
-            QMenu* menuAudOutput = addMenu(tr("Audio Output"));
-            menuSigDevice = InitDevice(nullptr, menuSigInput, tr("Device"), true);
-            connect(menuSigDevice, SIGNAL(triggered(QAction*)), this, SLOT(OnSoundInDevice(QAction*)));
-            connect(InitDevice(nullptr, menuAudOutput, tr("Device"), false), SIGNAL(triggered(QAction*)), this, SLOT(OnSoundOutDevice(QAction*)));
-            connect(InitChannel(menuSigInput, tr("Channel"), (int)((CDRMReceiver&)trx).GetReceiveData()->GetInChanSel(), InputChannelTable), SIGNAL(triggered(QAction*)), this, SLOT(OnSoundInChannel(QAction*)));
-            connect(InitChannel(menuAudOutput, tr("Channel"), (int)((CDRMReceiver&)trx).GetWriteData()->GetOutChanSel(), OutputChannelTable), SIGNAL(triggered(QAction*)), this, SLOT(OnSoundOutChannel(QAction*)));
-            menuSigSampleRate = InitSampleRate(menuSigInput, tr("Sample Rate"), Parameters.GetSoundCardSigSampleRate(), SignalSampleRateTable);
-            connect(menuSigSampleRate, SIGNAL(triggered(QAction*)), this, SLOT(OnSoundSampleRate(QAction*)));
-            connect(InitSampleRate(menuAudOutput, tr("Sample Rate"), Parameters.GetAudSampleRate(), AudioSampleRateTable), SIGNAL(triggered(QAction*)), this, SLOT(OnSoundSampleRate(QAction*)));
-            QAction *actionUpscale = menuSigInput->addAction(tr("2:1 upscale"));
-            actionUpscale->setCheckable(true);
-            actionUpscale->setChecked(Parameters.GetSigUpscaleRatio() == 2);
-            connect(actionUpscale, SIGNAL(toggled(bool)), this, SLOT(OnSoundSignalUpscale(bool)));
-            connect(this, SIGNAL(soundInDeviceChanged(QString)), &trx, SLOT(SetInputDevice(QString)), Qt::QueuedConnection);
-            connect(this, SIGNAL(soundOutDeviceChanged(QString)), &trx, SLOT(SetOutputDevice(QString)), Qt::QueuedConnection);
+        menuSigInput = addMenu(tr("Signal Input"));
+        QMenu* menuAudOutput = addMenu(tr("Audio Output"));
+        QMenu* menuInputChannel = InitChannel(menuSigInput, tr("Channel"), (int)((CDRMReceiver&)trx).GetReceiveData()->GetInChanSel(), InputChannelTable);
+        QMenu* menuOutputChannel = InitChannel(menuAudOutput, tr("Channel"), (int)((CDRMReceiver&)trx).GetWriteData()->GetOutChanSel(), OutputChannelTable);
+        menuSigDevice = InitDevice(nullptr, menuSigInput, tr("Device"), true);
+        menuSigSampleRate = InitSampleRate(menuSigInput, tr("Sample Rate"), Parameters.GetSoundCardSigSampleRate(), SignalSampleRateTable);
+        int upscaleRatio = Parameters.GetSigUpscaleRatio();
         Parameters.Unlock();
+
+        connect(menuSigDevice, SIGNAL(triggered(QAction*)), this, SLOT(OnSoundInDevice(QAction*)));
+        connect(InitDevice(nullptr, menuAudOutput, tr("Device"), false), SIGNAL(triggered(QAction*)), this, SLOT(OnSoundOutDevice(QAction*)));
+        connect(menuInputChannel, SIGNAL(triggered(QAction*)), this, SLOT(OnSoundInChannel(QAction*)));
+        connect(menuOutputChannel, SIGNAL(triggered(QAction*)), this, SLOT(OnSoundOutChannel(QAction*)));
+        connect(menuSigSampleRate, SIGNAL(triggered(QAction*)), this, SLOT(OnSoundSampleRate(QAction*)));
+        connect(InitSampleRate(menuAudOutput, tr("Sample Rate"), Parameters.GetAudSampleRate(), AudioSampleRateTable), SIGNAL(triggered(QAction*)), this, SLOT(OnSoundSampleRate(QAction*)));
+        QAction *actionUpscale = menuSigInput->addAction(tr("2:1 upscale"));
+        actionUpscale->setCheckable(true);
+        actionUpscale->setChecked(upscaleRatio == 2);
+        connect(actionUpscale, SIGNAL(toggled(bool)), this, SLOT(OnSoundSignalUpscale(bool)));
+        connect(this, SIGNAL(soundInDeviceChanged(QString)), &trx, SLOT(SetInputDevice(QString)));
+        connect(this, SIGNAL(soundOutDeviceChanged(QString)), &trx, SLOT(SetOutputDevice(QString)));
+        connect(this, SIGNAL(soundSampleRateChanged(int)), &trx, SLOT(onSoundSampleRateChanged(int)));
+        connect(this, SIGNAL(soundInDeviceChanged(QString)), &trx, SLOT(SetInputDevice(QString)));
+        connect(this, SIGNAL(soundOutDeviceChanged(QString)), &trx, SLOT(SetOutputDevice(QString)));
+        connect(this, SIGNAL(soundInChannelChanged(EInChanSel)), &trx, SLOT(onSoundInChannelChanged(EInChanSel)));
+        connect(this, SIGNAL(soundOutChannelChanged(EOutChanSel)), &trx, SLOT(onSoundOutChannelChanged(EOutChanSel)));
+        connect(this, SIGNAL(soundSignalUpscaleChanged(int)), &trx, SLOT(SetSoundSignalUpscale(int)));
         if (pFileMenu != nullptr) {
             connect(pFileMenu, SIGNAL(soundFileChanged(QString)), this, SLOT(OnSoundFileChanged(QString)));
         }
@@ -141,60 +151,32 @@ CSoundCardSelMenu::CSoundCardSelMenu(CTRx& ntrx,
 
 void CSoundCardSelMenu::OnSoundInDevice(QAction* action)
 {
-    InitDevice(menuSigDevice, menuSigInput, tr("Device"), true);
-    QString qs = action->data().toString();
-    emit soundInDeviceChanged(qs);
+    emit soundInDeviceChanged(action->data().toString());
 }
 
 void CSoundCardSelMenu::OnSoundOutDevice(QAction* action)
 {
-    QString qs = action->data().toString();
-    emit soundOutDeviceChanged(qs);
+    emit soundOutDeviceChanged(action->data().toString());
 }
 
 void CSoundCardSelMenu::OnSoundInChannel(QAction* action)
 {
-    if (bReceiver)
-    {
-        Parameters.Lock();
-            CReceiveData& ReceiveData = *((CDRMReceiver&)trx).GetReceiveData();
-            EInChanSel eInChanSel = EInChanSel(action->data().toInt());
-            ReceiveData.SetInChanSel(eInChanSel);
-        Parameters.Unlock();
-    }
+    emit soundInChannelChanged(EInChanSel(action->data().toInt()));
 }
 
 void CSoundCardSelMenu::OnSoundOutChannel(QAction* action)
 {
-    if (bReceiver)
-    {
-        Parameters.Lock();
-            CWriteData& WriteData = *((CDRMReceiver&)trx).GetWriteData();
-            CWriteData::EOutChanSel eOutChanSel = CWriteData::EOutChanSel(action->data().toInt());
-            WriteData.SetOutChanSel(eOutChanSel);
-        Parameters.Unlock();
-    }
+    emit soundOutChannelChanged(EOutChanSel(action->data().toInt()));
 }
 
 void CSoundCardSelMenu::OnSoundSampleRate(QAction* action)
 {
-    const int iSampleRate = action->data().toInt();
-    Parameters.Lock();
-        if (iSampleRate < 0) Parameters.SetNewSigSampleRate(-iSampleRate);
-        else                 Parameters.SetNewAudSampleRate(iSampleRate);
-    Parameters.Unlock();
-    trx.Restart();
-    emit sampleRateChanged();
+    emit soundSampleRateChanged(EOutChanSel(action->data().toInt()));
 }
 
 void CSoundCardSelMenu::OnSoundSignalUpscale(bool bChecked)
 {
-    Parameters.Lock();  
-        Parameters.SetNewSigSampleRate(Parameters.GetSoundCardSigSampleRate());
-        Parameters.SetNewSigUpscaleRatio(bChecked ? 2 : 1);
-    Parameters.Unlock();
-    trx.Restart();
-    emit sampleRateChanged();
+    emit soundSignalUpscaleChanged(bChecked ? 2 : 1);
 }
 
 QMenu* CSoundCardSelMenu::InitDevice(QMenu* self, QMenu* parent, const QString& text, bool bInput)
@@ -337,7 +319,6 @@ void CFileMenu::OnOpenFile()
     /* Check if user hit the cancel button */
     if (!filename.isEmpty())
     {
-        qDebug("CFileMenu::OnCloseFile %d", QThread::currentThreadId());
         emit soundFileChanged(filename);
         actionCloseFile->setEnabled(true);
     }
@@ -345,7 +326,6 @@ void CFileMenu::OnOpenFile()
 
 void CFileMenu::OnCloseFile()
 {
-    qDebug("CFileMenu::OnCloseFile %d", QThread::currentThreadId());
     emit soundFileChanged("");
     actionCloseFile->setEnabled(false);
 }
