@@ -2,12 +2,68 @@
 
 #include <../DrmReceiver.h>
 
-CRx::CRx(CDRMReceiver& nRx, CTRx *trx): CTRx(trx), rx(nRx)
+CRx::CRx(CDRMReceiver& nRx, CTRx *trx): CTRx(trx), rx(nRx), eRunState(STOPPED)
 {
 }
 
 CRx::~CRx()
 {
+}
+
+void
+CRx::run()
+{
+    qDebug("Working thread started");
+    try
+    {
+        // set the frequency from the command line or ini file
+        int iFreqkHz = rx.GetParameters()->GetFrequency();
+        if (iFreqkHz != -1)
+            rx.SetFrequency(iFreqkHz);
+
+    #ifdef USE_CONSOLEIO
+        CConsoleIO::Enter(this);
+    #endif
+
+        do
+        {
+            rx.InitReceiverMode();
+            rx.SetInStartMode();
+
+            /* Set run flag so that the thread can work */
+            eRunState = RUNNING;
+            do
+            {
+                rx.updatePosition();
+                rx.process();
+
+#ifdef USE_CONSOLEIO
+                CConsoleIO::Update();
+#endif
+            }
+            while (eRunState == RUNNING);
+
+            /* Restore some parameter previously set by SetInput() */
+        }
+        while (eRunState == RESTART);
+
+        rx.CloseSoundInterfaces();
+
+#ifdef USE_CONSOLEIO
+        CConsoleIO::Leave();
+#endif
+
+        eRunState = STOPPED;
+    }
+    catch (CGenErr GenErr)
+    {
+        ErrorMessage(GenErr.strError);
+    }
+    catch (string strError)
+    {
+        ErrorMessage(strError);
+    }
+    qDebug("Working thread complete");
 }
 
 void CRx::LoadSettings()
@@ -22,8 +78,8 @@ void CRx::SaveSettings()
 
 void CRx::SetInputDevice(QString s)
 {
-    qDebug("CRx::SetInputDevice %s", QThread::currentThreadId());
     rx.SetInputDevice(s);
+    eRunState = RESTART;
 }
 
 void CRx::SetOutputDevice(QString s)
@@ -53,17 +109,18 @@ void CRx::EnumerateOutputs(std::vector<std::string>& names, std::vector<std::str
 
 void CRx::Start()
 {
-    rx.Start();
+    if (eRunState == RUNNING)
+        eRunState = RESTART;
 }
 
 void CRx::Restart()
 {
-    rx.Restart();
+    Start();
 }
 
 void CRx::Stop()
 {
-    rx.Stop();
+    eRunState = STOP_REQUESTED;
 }
 
 CSettings* CRx::GetSettings()
@@ -335,6 +392,7 @@ void CRx::SetFlipSpectrum(bool b)
 void CRx::SetFrequencySyncAcquisitionFilter(bool b)
 {
     rx.GetFreqSyncAcq()->SetRecFilter(b);
+    eRunState = RESTART;
 }
 
 void CRx::SetConsiderInterferer(bool b)
@@ -399,4 +457,26 @@ void CRx::EnableAMPLL(bool b)
 void CRx::EnableAutoFrequenctAcquisition(bool b)
 {
     rx.GetAMDemod()->EnableAutoFreqAcq(b);
+}
+
+void CRx::onSoundInChannelChanged(EInChanSel e)
+{
+    rx.GetReceiveData()->SetInChanSel(e);
+}
+
+void CRx::onSoundOutChannelChanged(EOutChanSel e)
+{
+    rx.GetWriteData()->SetOutChanSel(e);
+}
+
+void  CRx::onSoundSampleRateChanged(int n)
+{
+    rx.GetParameters()->SetNewAudSampleRate(n);
+    Restart();
+}
+
+void CRx::SetSoundSignalUpscale(int n)
+{
+    rx.GetParameters()->SetNewSigUpscaleRatio(n);
+    Restart();
 }

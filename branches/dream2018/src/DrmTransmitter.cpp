@@ -33,35 +33,6 @@
 #endif
 
 /* Implementation *************************************************************/
-void CDRMTransmitter::Start()
-{
-    /* Set restart flag */
-    Parameters.eRunState = CParameter::RESTART;
-    do
-    {
-        /* Initialization of the modules */
-        Init();
-#ifdef QT_MULTIMEDIA_LIB
-    doSetInputDevice();
-    doSetOutputDevice();
-#endif
-
-        /* Set run flag */
-        Parameters.eRunState = CParameter::RUNNING;
-
-        /* Start the transmitter run routine */
-        Run();
-    }
-    while (Parameters.eRunState == CParameter::RESTART);
-
-    /* Closing the sound interfaces */
-    ReadData.Stop();
-    TransmitData.Stop();
-
-    /* Set flag to stopped */
-    Parameters.eRunState = CParameter::STOPPED;
-}
-
 void CDRMTransmitter::Run()
 {
     /*
@@ -124,7 +95,7 @@ _BOOLEAN CDRMTransmitter::CanSoftStopExit()
         const int iSymbolPerFrame = Parameters.CellMappingTable.iNumSymPerFrame;
 
         /* Set stop requested flag */
-        const _BOOLEAN bStopRequested = Parameters.eRunState != CParameter::RUNNING;
+        const _BOOLEAN bStopRequested = false;//Parameters.eRunState != CParameter::RUNNING;
 
 #if true
         /* Flavour 1: Stop at the frame boundary (worst case delay one frame) */
@@ -201,17 +172,6 @@ CDRMTransmitter::SetOutputDevice(QString device)
     TransmitData.SetSoundInterface(outdev);
 }
 
-void CDRMTransmitter::Restart()
-{
-    if (Parameters.eRunState == CParameter::RUNNING)
-        Parameters.eRunState = CParameter::RESTART;
-}
-
-void CDRMTransmitter::Stop()
-{
-    Parameters.eRunState = CParameter::STOP_REQUESTED;
-}
-
 CSettings* CDRMTransmitter::GetSettings()
 {
     return pSettings;
@@ -219,7 +179,8 @@ CSettings* CDRMTransmitter::GetSettings()
 
 void CDRMTransmitter::Init()
 {
-    /* Fetch new sample rate if any */
+
+   /* Fetch new sample rate if any */
     Parameters.FetchNewSampleRate();
 
     /* Init cell mapping table */
@@ -255,6 +216,11 @@ void CDRMTransmitter::Init()
 
     /* Initialize the soft stop */
     InitSoftStop();
+
+#ifdef QT_MULTIMEDIA_LIB
+    doSetInputDevice();
+    doSetOutputDevice();
+#endif
 }
 
 CDRMTransmitter::~CDRMTransmitter()
