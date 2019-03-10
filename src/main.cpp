@@ -79,7 +79,7 @@ CTRx::run()
     }
     qDebug("Working thread complete");
 }
-#endif
+#endif // QT_CORE_LIB
 
 #ifdef USE_OPENSL
 # include <SLES/OpenSLES.h>
@@ -115,18 +115,46 @@ main(int argc, char **argv)
 			QCoreApplication app(argc, argv);
 			/* Start working thread */
 			CTRx rx(DRMReceiver);
-			rx.start();
-			return app.exec();
-#else
-			DRMReceiver.Start();
+            rx.start();
+            return app.exec();
+#wlse
+            // TODO
 #endif
-		}
+
 		else if (mode == "transmit")
 		{
 			CDRMTransmitter DRMTransmitter(&Settings);
 			DRMTransmitter.LoadSettings();
-			DRMTransmitter.Start();
-		}
+            CParameter& Parameters = *DRMTransmitter.GetParameters();
+            try
+            {
+                /* Set restart flag */
+                Parameters.eRunState = CParameter::RESTART;
+                do
+                {
+                    /* Initialization of the modules */
+                    DRMTransmitter.Init();
+
+                    /* Set run flag */
+                    Parameters.eRunState = CParameter::RUNNING;
+
+                    /* Start the transmitter run routine */
+                    DRMTransmitter.Run();
+                }
+                while (Parameters.eRunState == CParameter::RESTART);
+
+                /* Closing the sound interfaces */
+                DRMTransmitter.Close();
+            }
+            catch (CGenErr GenErr)
+            {
+                ErrorMessage(GenErr.strError);
+            }
+            catch (string strError)
+            {
+                ErrorMessage(strError);
+            }
+        }
 		else
 		{
 			string usage(Settings.UsageArguments());

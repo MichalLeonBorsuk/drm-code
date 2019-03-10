@@ -80,7 +80,7 @@ AnalogDemDlg::AnalogDemDlg(CRx& nrx, CSettings& Settings,
 	connect(actionFM, SIGNAL(triggered()), this, SLOT(OnSwitchToFM()));
 	connect(actionDRM, SIGNAL(triggered()), this, SLOT(OnSwitchToDRM()));
     connect(pFileMenu, SIGNAL(soundFileChanged(QString)), this, SLOT(OnSoundFileChanged(QString)));
-	connect(pSoundCardMenu, SIGNAL(sampleRateChanged()), this, SLOT(OnSampleRateChanged()));
+    connect(pSoundCardMenu, SIGNAL(soundSampleRateChanged(int)), this, SLOT(OnSampleRateChanged(int)));
 	connect(actionAbout_Dream, SIGNAL(triggered()), this, SLOT(OnHelpAbout()));
 	connect(actionWhats_This, SIGNAL(triggered()), this, SLOT(OnWhatsThis()));
 	SliderBandwidth->setTickPosition(QSlider::TicksBothSides);
@@ -255,7 +255,7 @@ void AnalogDemDlg::eventClose(QCloseEvent* ce)
 	}
 
 	/* Stay open until working thread is done */
-    if (rx.GetParameters()->eRunState == CParameter::STOPPED)
+    if (true) // TODO rx.GetParameters()->eRunState == CParameter::STOPPED)
 	{
         TimerClose.stop();
 		ce->accept();
@@ -378,7 +378,7 @@ void AnalogDemDlg::UpdatePlotStyle(int iPlotstyle)
 		MainPlot->SetPlotStyle(iPlotstyle);
 }
 
-void AnalogDemDlg::OnSampleRateChanged()
+void AnalogDemDlg::OnSampleRateChanged(int)
 {
 	UpdateSliderBandwidth();
 }
@@ -431,9 +431,8 @@ void AnalogDemDlg::OnTimerPLLPhaseDial()
 	}
 }
 
-void AnalogDemDlg::OnTimerClose()
+void AnalogDemDlg::OnTimerClose() // TODO
 {
-    if(rx.GetParameters()->eRunState == CParameter::STOPPED)
 		close();
 }
 

@@ -890,9 +890,6 @@ void systemevalDlg::OnCheckRecFilter()
 {
     /* Set parameter in working thread module */
     rx.SetFrequencySyncAcquisitionFilter(CheckBoxRecFilter->isChecked());
-
-    /* If filter status is changed, a new aquisition is necessary */
-    rx.Restart();
 }
 
 void systemevalDlg::OnCheckModiMetric()

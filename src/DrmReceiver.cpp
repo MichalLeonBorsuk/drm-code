@@ -48,9 +48,6 @@
 #  include "util-QT/Rig.h"
 # endif
 #endif
-#ifdef USE_CONSOLEIO
-# include "linux/ConsoleIO.h"
-#endif
 #if 0
 #include <fcd.h>
 #endif
@@ -159,238 +156,6 @@ CDRMReceiver::SetAMFilterBW(int value)
 }
 
 void
-CDRMReceiver::Run()
-{
-    _BOOLEAN bEnoughData = TRUE;
-    _BOOLEAN bFrameToSend = FALSE;
-    size_t i;
-    /* Check for parameter changes from RSCI or GUI thread --------------- */
-    /* The parameter changes are done through flags, the actual initialization
-     * is done in this (the working) thread to avoid problems with shared data */
-    if (eNewReceiverMode != RM_NONE)
-        InitReceiverMode();
-
-#ifdef HAVE_LIBGPS
-//TODO locking
-    gps_data_t* gps_data = &Parameters.gps_data;
-    int result=0;
-    if(Parameters.restart_gpsd)
-    {
-        stringstream s;
-        s <<  Parameters.gps_port;
-        if(gps_data->gps_fd != -1) (void)gps_close(gps_data);
-# if GPSD_API_MAJOR_VERSION < 5
-        result = gps_open_r(Parameters.gps_host.c_str(), s.str().c_str(), gps_data);
-        if(!result) (void)gps_stream(gps_data, WATCH_ENABLE|POLL_NONBLOCK, nullptr);
-# else
-        result = gps_open(Parameters.gps_host.c_str(), s.str().c_str(), gps_data);
-        if(!result) (void)gps_stream(gps_data, WATCH_ENABLE, nullptr);
-# endif
-        if(result) gps_data->gps_fd = -1;
-        Parameters.restart_gpsd = false;
-    }
-    if(gps_data->gps_fd != -1)
-    {
-        if(Parameters.use_gpsd)
-# if GPSD_API_MAJOR_VERSION < 5
-            result = gps_poll(gps_data);
-# else
-            result = gps_read(gps_data);
-# endif
-        else
-        {
-            (void)gps_close(gps_data);
-            gps_data->gps_fd = -1;
-        }
-    }
-	(void)result;
-#endif
-
-    if (Parameters.eRunState == CParameter::RESTART) /* new acquisition requested */
-    {
-        SetInStartMode();
-    }
-
-    /* Input - from upstream RSCI or input and demodulation from sound card / file */
-    if (pUpstreamRSCI->GetInEnabled() == TRUE)
-    {
-        RSIPacketBuf.Clear();
-        pUpstreamRSCI->ReadData(Parameters, RSIPacketBuf);
-        if (RSIPacketBuf.GetFillLevel() > 0)
-        {
-            time_keeper = time(nullptr);
-            DecodeRSIMDI.ProcessData(Parameters, RSIPacketBuf, FACDecBuf, SDCDecBuf, MSCDecBuf);
-            PlotManager.UpdateParamHistoriesRSIIn();
-            bFrameToSend = TRUE;
-        }
-        else
-        {
-            time_t now = time(nullptr);
-            if ((now - time_keeper) > 2)
-            {
-                Parameters.ReceiveStatus.InterfaceI.SetStatus(NOT_PRESENT);
-                Parameters.ReceiveStatus.InterfaceO.SetStatus(NOT_PRESENT);
-                Parameters.ReceiveStatus.TSync.SetStatus(NOT_PRESENT);
-                Parameters.ReceiveStatus.FSync.SetStatus(NOT_PRESENT);
-                Parameters.ReceiveStatus.FAC.SetStatus(NOT_PRESENT);
-                Parameters.ReceiveStatus.SDC.SetStatus(NOT_PRESENT);
-                Parameters.ReceiveStatus.SLAudio.SetStatus(NOT_PRESENT);
-            }
-        }
-    }
-    else
-    {
-
-        if (WriteIQFile.IsRecording())
-        {
-            /* Receive data in RecDataBuf */
-            ReceiveData.ReadData(Parameters, RecDataBuf);
-
-            /* Split samples, one output to the demodulation, another for IQ recording */
-            if (SplitForIQRecord.ProcessData(Parameters, RecDataBuf, DemodDataBuf, IQRecordDataBuf))
-            {
-                bEnoughData = TRUE;
-            }
-        }
-        else
-        {
-            /* No I/Q recording then receive data directly in DemodDataBuf */
-            ReceiveData.ReadData(Parameters, DemodDataBuf);
-        }
-
-        switch (eReceiverMode)
-        {
-        case RM_DRM:
-            DemodulateDRM(bEnoughData);
-            DecodeDRM(bEnoughData, bFrameToSend);
-            break;
-        case RM_AM:
-            DemodulateAM(bEnoughData);
-            DecodeAM(bEnoughData);
-            break;
-        case RM_FM:
-            DemodulateFM(bEnoughData);
-            DecodeFM(bEnoughData);
-            break;
-        case RM_NONE:
-            break;
-        }
-    }
-
-    /* Split the data for downstream RSCI and local processing. TODO make this conditional */
-    switch (eReceiverMode)
-    {
-    case RM_DRM:
-        SplitFAC.ProcessData(Parameters, FACDecBuf, FACUseBuf, FACSendBuf);
-
-        /* if we have an SDC block, make a copy and keep it until the next frame is to be sent */
-        if (SDCDecBuf.GetFillLevel() == Parameters.iNumSDCBitsPerSFrame)
-        {
-            SplitSDC.ProcessData(Parameters, SDCDecBuf, SDCUseBuf, SDCSendBuf);
-        }
-
-        for (i = 0; i < MSCDecBuf.size(); i++)
-        {
-            SplitMSC[i].ProcessData(Parameters, MSCDecBuf[i], MSCUseBuf[i], MSCSendBuf[i]);
-        }
-        break;
-    case RM_AM:
-        SplitAudio.ProcessData(Parameters, AMAudioBuf, AudSoDecBuf, AMSoEncBuf);
-        break;
-    case RM_FM:
-        SplitAudio.ProcessData(Parameters, AMAudioBuf, AudSoDecBuf, AMSoEncBuf);
-        break;
-    case RM_NONE:
-        break;
-    }
-
-    /* Decoding */
-    while (bEnoughData && (Parameters.eRunState==CParameter::RUNNING || Parameters.eRunState==CParameter::RESTART))
-    {
-        /* Init flag */
-        bEnoughData = FALSE;
-
-        // Write output I/Q file
-        if (WriteIQFile.IsRecording())
-        {
-            if (WriteIQFile.WriteData(Parameters, IQRecordDataBuf))
-            {
-                bEnoughData = TRUE;
-            }
-        }
-
-        switch (eReceiverMode)
-        {
-        case RM_DRM:
-            UtilizeDRM(bEnoughData);
-            break;
-        case RM_AM:
-            UtilizeAM(bEnoughData);
-            break;
-        case RM_FM:
-            UtilizeFM(bEnoughData);
-            break;
-        case RM_NONE:
-            break;
-        }
-    }
-
-    /* Output to downstream RSCI */
-    if (downstreamRSCI.GetOutEnabled())
-    {
-        switch (eReceiverMode)
-        {
-        case RM_DRM:
-            if (Parameters.eAcquiState == AS_NO_SIGNAL)
-            {
-                /* we will get one of these between each FAC block, and occasionally we */
-                /* might get two, so don't start generating free-wheeling RSCI until we've. */
-                /* had three in a row */
-                if (FreqSyncAcq.GetUnlockedFrameBoundary())
-                {
-                    if (iUnlockedCount < MAX_UNLOCKED_COUNT)
-                        iUnlockedCount++;
-                    else
-                        downstreamRSCI.SendUnlockedFrame(Parameters);
-                }
-            }
-            else if (bFrameToSend)
-            {
-                downstreamRSCI.SendLockedFrame(Parameters, FACSendBuf, SDCSendBuf, MSCSendBuf);
-                iUnlockedCount = 0;
-                bFrameToSend = FALSE;
-            }
-            break;
-        case RM_AM:
-        case RM_FM:
-            /* Encode audio for RSI output */
-            if (AudioSourceEncoder.ProcessData(Parameters, AMSoEncBuf, MSCSendBuf[0]))
-                bFrameToSend = TRUE;
-
-            if (bFrameToSend)
-                downstreamRSCI.SendAMFrame(Parameters, MSCSendBuf[0]);
-            break;
-        case RM_NONE:
-            break;
-        }
-    }
-    /* Check for RSCI commands */
-    if (downstreamRSCI.GetInEnabled())
-    {
-        downstreamRSCI.poll();
-    }
-
-    /* Play and/or save the audio */
-    if (iAudioStreamID != STREAM_ID_NOT_USED || (eReceiverMode == RM_AM) || (eReceiverMode == RM_FM))
-    {
-        if (WriteData.WriteData(Parameters, AudSoDecBuf))
-        {
-            bEnoughData = TRUE;
-        }
-    }
-}
-
-void
 CDRMReceiver::SetInputDevice(QString s)
 {
     string device = s.toStdString();
@@ -424,7 +189,6 @@ CDRMReceiver::SetInputDevice(QString s)
     case FileTyper::raw_pft:
         pUpstreamRSCI->SetOrigin(device);
     }
-    Restart();
 }
 
 void
@@ -897,48 +661,6 @@ CDRMReceiver::InitReceiverMode()
 }
 
 void
-CDRMReceiver::Start()
-{
-// set the frequency from the command line or ini file
-    int iFreqkHz = Parameters.GetFrequency();
-    if (iFreqkHz != -1)
-        SetFrequency(iFreqkHz);
-
-#ifdef USE_CONSOLEIO
-    CConsoleIO::Enter(this);
-#endif
-
-    do
-    {
-        /* Set new acquisition flag */
-        Restart();
-
-        /* Initialisation pass */
-        Run();
-
-        /* Set run flag so that the thread can work */
-        Parameters.eRunState = CParameter::RUNNING;
-        do
-        {
-            Run();
-#ifdef USE_CONSOLEIO
-            CConsoleIO::Update();
-#endif
-        }
-        while (Parameters.eRunState == CParameter::RUNNING);
-    }
-    while (Parameters.eRunState == CParameter::RESTART);
-
-    CloseSoundInterfaces();
-
-#ifdef USE_CONSOLEIO
-    CConsoleIO::Leave();
-#endif
-
-    Parameters.eRunState = CParameter::STOPPED;
-}
-
-void
 CDRMReceiver::CloseSoundInterfaces()
 {
     ReceiveData.Stop();
@@ -1106,6 +828,230 @@ CDRMReceiver::SetInTrackingModeDelayed()
        the channel estimation has initialized its estimation */
     TimeSync.StopTimingAcqu();
     ChannelEstimation.GetTimeSyncTrack()->StartTracking();
+}
+
+void
+CDRMReceiver::process()
+{
+    bool bFrameToSend = false;
+    bool bEnoughData = true;
+
+    /* Input - from upstream RSCI or input and demodulation from sound card / file */
+    if (pUpstreamRSCI->GetInEnabled() == TRUE)
+    {
+        RSIPacketBuf.Clear();
+        pUpstreamRSCI->ReadData(Parameters, RSIPacketBuf);
+        if (RSIPacketBuf.GetFillLevel() > 0)
+        {
+            time_keeper = time(nullptr);
+            DecodeRSIMDI.ProcessData(Parameters, RSIPacketBuf, FACDecBuf, SDCDecBuf, MSCDecBuf);
+            PlotManager.UpdateParamHistoriesRSIIn();
+            bFrameToSend = TRUE;
+        }
+        else
+        {
+            time_t now = time(nullptr);
+            if ((now - time_keeper) > 2)
+            {
+                Parameters.ReceiveStatus.InterfaceI.SetStatus(NOT_PRESENT);
+                Parameters.ReceiveStatus.InterfaceO.SetStatus(NOT_PRESENT);
+                Parameters.ReceiveStatus.TSync.SetStatus(NOT_PRESENT);
+                Parameters.ReceiveStatus.FSync.SetStatus(NOT_PRESENT);
+                Parameters.ReceiveStatus.FAC.SetStatus(NOT_PRESENT);
+                Parameters.ReceiveStatus.SDC.SetStatus(NOT_PRESENT);
+                Parameters.ReceiveStatus.SLAudio.SetStatus(NOT_PRESENT);
+            }
+        }
+    }
+    else
+    {
+
+        if (WriteIQFile.IsRecording())
+        {
+            /* Receive data in RecDataBuf */
+            ReceiveData.ReadData(Parameters, RecDataBuf);
+
+            /* Split samples, one output to the demodulation, another for IQ recording */
+            if (SplitForIQRecord.ProcessData(Parameters, RecDataBuf, DemodDataBuf, IQRecordDataBuf))
+            {
+                bEnoughData = TRUE;
+            }
+        }
+        else
+        {
+            /* No I/Q recording then receive data directly in DemodDataBuf */
+            ReceiveData.ReadData(Parameters, DemodDataBuf);
+        }
+
+        switch (eReceiverMode)
+        {
+        case RM_DRM:
+            DemodulateDRM(bEnoughData);
+            DecodeDRM(bEnoughData, bFrameToSend);
+            break;
+        case RM_AM:
+            DemodulateAM(bEnoughData);
+            DecodeAM(bEnoughData);
+            break;
+        case RM_FM:
+            DemodulateFM(bEnoughData);
+            DecodeFM(bEnoughData);
+            break;
+        case RM_NONE:
+            break;
+        }
+    }
+
+    /* Split the data for downstream RSCI and local processing. TODO make this conditional */
+    switch (eReceiverMode)
+    {
+    case RM_DRM:
+        SplitFAC.ProcessData(Parameters, FACDecBuf, FACUseBuf, FACSendBuf);
+
+        /* if we have an SDC block, make a copy and keep it until the next frame is to be sent */
+        if (SDCDecBuf.GetFillLevel() == Parameters.iNumSDCBitsPerSFrame)
+        {
+            SplitSDC.ProcessData(Parameters, SDCDecBuf, SDCUseBuf, SDCSendBuf);
+        }
+
+        for (int i = 0; i < MSCDecBuf.size(); i++)
+        {
+            SplitMSC[i].ProcessData(Parameters, MSCDecBuf[i], MSCUseBuf[i], MSCSendBuf[i]);
+        }
+        break;
+    case RM_AM:
+        SplitAudio.ProcessData(Parameters, AMAudioBuf, AudSoDecBuf, AMSoEncBuf);
+        break;
+    case RM_FM:
+        SplitAudio.ProcessData(Parameters, AMAudioBuf, AudSoDecBuf, AMSoEncBuf);
+        break;
+    case RM_NONE:
+        break;
+    }
+
+    /* Decoding */
+    while (bEnoughData) // TODO break if stop requested
+    {
+        /* Init flag */
+        bEnoughData = FALSE;
+
+        // Write output I/Q file
+        if (WriteIQFile.IsRecording())
+        {
+            if (WriteIQFile.WriteData(Parameters, IQRecordDataBuf))
+            {
+                bEnoughData = TRUE;
+            }
+        }
+
+        switch (eReceiverMode)
+        {
+        case RM_DRM:
+            UtilizeDRM(bEnoughData);
+            break;
+        case RM_AM:
+            UtilizeAM(bEnoughData);
+            break;
+        case RM_FM:
+            UtilizeFM(bEnoughData);
+            break;
+        case RM_NONE:
+            break;
+        }
+    }
+
+    /* Output to downstream RSCI */
+    if (downstreamRSCI.GetOutEnabled())
+    {
+        switch (eReceiverMode)
+        {
+        case RM_DRM:
+            if (Parameters.eAcquiState == AS_NO_SIGNAL)
+            {
+                /* we will get one of these between each FAC block, and occasionally we */
+                /* might get two, so don't start generating free-wheeling RSCI until we've. */
+                /* had three in a row */
+                if (FreqSyncAcq.GetUnlockedFrameBoundary())
+                {
+                    if (iUnlockedCount < MAX_UNLOCKED_COUNT)
+                        iUnlockedCount++;
+                    else
+                        downstreamRSCI.SendUnlockedFrame(Parameters);
+                }
+            }
+            else if (bFrameToSend)
+            {
+                downstreamRSCI.SendLockedFrame(Parameters, FACSendBuf, SDCSendBuf, MSCSendBuf);
+                iUnlockedCount = 0;
+                bFrameToSend = FALSE;
+            }
+            break;
+        case RM_AM:
+        case RM_FM:
+            /* Encode audio for RSI output */
+            if (AudioSourceEncoder.ProcessData(Parameters, AMSoEncBuf, MSCSendBuf[0]))
+                bFrameToSend = TRUE;
+
+            if (bFrameToSend)
+                downstreamRSCI.SendAMFrame(Parameters, MSCSendBuf[0]);
+            break;
+        case RM_NONE:
+            break;
+        }
+    }
+    /* Check for RSCI commands */
+    if (downstreamRSCI.GetInEnabled())
+    {
+        downstreamRSCI.poll();
+    }
+
+    /* Play and/or save the audio */
+    if (iAudioStreamID != STREAM_ID_NOT_USED || (eReceiverMode == RM_AM) || (eReceiverMode == RM_FM))
+    {
+        if (WriteData.WriteData(Parameters, AudSoDecBuf))
+        {
+            bEnoughData = TRUE;
+        }
+    }
+}
+
+void CDRMReceiver::updatePosition()
+{
+#ifdef HAVE_LIBGPS
+//TODO locking
+    gps_data_t* gps_data = &Parameters.gps_data;
+    int result=0;
+    if(Parameters.restart_gpsd)
+    {
+        stringstream s;
+        s <<  Parameters.gps_port;
+        if(gps_data->gps_fd != -1) (void)gps_close(gps_data);
+# if GPSD_API_MAJOR_VERSION < 5
+        result = gps_open_r(Parameters.gps_host.c_str(), s.str().c_str(), gps_data);
+        if(!result) (void)gps_stream(gps_data, WATCH_ENABLE|POLL_NONBLOCK, nullptr);
+# else
+        result = gps_open(Parameters.gps_host.c_str(), s.str().c_str(), gps_data);
+        if(!result) (void)gps_stream(gps_data, WATCH_ENABLE, nullptr);
+# endif
+        if(result) gps_data->gps_fd = -1;
+        Parameters.restart_gpsd = false;
+    }
+    if(gps_data->gps_fd != -1)
+    {
+        if(Parameters.use_gpsd)
+# if GPSD_API_MAJOR_VERSION < 5
+            result = gps_poll(gps_data);
+# else
+            result = gps_read(gps_data);
+# endif
+        else
+        {
+            (void)gps_close(gps_data);
+            gps_data->gps_fd = -1;
+        }
+    }
+    (void)result;
+#endif
 }
 
 void
@@ -1537,7 +1483,7 @@ CDRMReceiver::LoadSettings()
     ReceiveData.SetInChanSel((EInChanSel)s.Get("Receiver", "inchansel", int(CS_MIX_CHAN)));
 
     /* Output channel selection */
-    WriteData.SetOutChanSel((CWriteData::EOutChanSel)s.Get("Receiver", "outchansel", int(CWriteData::CS_BOTH_BOTH)));
+    WriteData.SetOutChanSel((EOutChanSel)s.Get("Receiver", "outchansel", int(CS_BOTH_BOTH)));
 
     /* AM Parameters */
 

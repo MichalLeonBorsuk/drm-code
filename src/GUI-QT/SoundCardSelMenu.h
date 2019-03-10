@@ -75,9 +75,12 @@ public slots:
     void OnSoundFileChanged(QString);
 
 signals:
-    void sampleRateChanged();
+    void soundSampleRateChanged(int);
     void soundInDeviceChanged(QString);
     void soundOutDeviceChanged(QString);
+    void soundInChannelChanged(EInChanSel);
+    void soundOutChannelChanged(EOutChanSel);
+    void soundSignalUpscaleChanged(int);
 };
 
 class CFileMenu : public QMenu

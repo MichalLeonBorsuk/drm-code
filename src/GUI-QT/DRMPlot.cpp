@@ -181,12 +181,9 @@ void CDRMPlot::UpdateAnalogBWMarker()
 	}
 }
 
-void CDRMPlot::OnTimerChart()
+void CDRMPlot::OnTimerChart() // TODO make sure timer stopped when receiver not running
 {
 	CParameter& Parameters = *pDRMRec->GetParameters();
-	/* Update only performed when running */
-	if (Parameters.eRunState != CParameter::RUNNING)
-		return;
 
 	/* CHART ******************************************************************/
 	CVector<_REAL>	vecrData;

@@ -44,15 +44,12 @@ public:
 
     virtual void LoadSettings() = 0;
     virtual void SaveSettings() = 0;
-    virtual void Start() = 0;
     virtual void SetInputDevice(QString) = 0;
     virtual void SetOutputDevice(QString) = 0;
     virtual void GetInputDevice(string&) = 0;
     virtual void GetOutputDevice(string&) = 0;
     virtual void EnumerateInputs(std::vector<std::string>& names, std::vector<std::string>& descriptions)=0;
     virtual void EnumerateOutputs(std::vector<std::string>& names, std::vector<std::string>& descriptions)=0;
-    virtual void Restart() = 0;
-    virtual void Stop() = 0;
     virtual CSettings*				GetSettings() = 0;
     virtual void					SetSettings(CSettings* pNewSettings) = 0;
     virtual CParameter*				GetParameters() = 0;

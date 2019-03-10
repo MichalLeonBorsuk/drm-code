@@ -207,7 +207,6 @@ void FMDialog::OnTimer()
 
 void FMDialog::OnTimerClose()
 {
-    if(rx.GetParameters()->eRunState == CParameter::STOPPED)
 		close();
 }
 
@@ -449,14 +448,7 @@ void FMDialog::eventClose(QCloseEvent* ce)
 		TimerClose.start(50);
     }
 
-	/* Stay open until working thread is done */
-    if (rx.GetParameters()->eRunState == CParameter::STOPPED)
-	{
-		TimerClose.stop();
-		ce->accept();
-	}
-	else
-		ce->ignore();
+    /* TODO Stay open until working thread is done */
 }
 
 QString FMDialog::GetCodecString(const int iServiceID)
