@@ -118,7 +118,46 @@ main(int argc, char **argv)
             rx.start();
             return app.exec();
 #wlse
-            // TODO
+            try
+            {
+                // set the frequency from the command line or ini file
+                int iFreqkHz = DRMReceiver.GetParameters()->GetFrequency();
+                if (iFreqkHz != -1)
+                    DRMReceiver.SetFrequency(iFreqkHz);
+
+#ifdef USE_CONSOLEIO
+                CConsoleIO::Enter(this);
+#endif
+                ERunState eRunState = RESTART;
+                do
+                {
+                    DRMReceiver.InitReceiverMode();
+                    DRMReceiver.SetInStartMode();
+                    eRunState = RUNNING;
+                    do
+                    {
+                        DRMReceiver.updatePosition();
+                        DRMReceiver.process();
+#ifdef USE_CONSOLEIO
+                        CConsoleIO::Update();
+#endif
+                    }
+                    while (eRunState == RUNNING);
+                }
+                while (eRunState == RESTART);
+                DRMReceiver.CloseSoundInterfaces();
+#ifdef USE_CONSOLEIO
+                CConsoleIO::Leave();
+#endif
+            }
+            catch (CGenErr GenErr)
+            {
+                ErrorMessage(GenErr.strError);
+            }
+            catch (string strError)
+            {
+                ErrorMessage(strError);
+            }
 #endif
 
 		else if (mode == "transmit")
