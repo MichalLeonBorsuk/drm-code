@@ -86,7 +86,6 @@ public:
 protected:
     CRx&                rx;
     QTimer				Timer;
-    QTimer				TimerClose;
     vector<QLabel*>		serviceLabels;
 
     CLogging*			pLogging;
@@ -128,7 +127,7 @@ protected:
     void		UpdateDRM_GUI();
     void		UpdateDisplay();
     void		ClearDisplay();
-    void		UpdateWindowTitle();
+    void		UpdateWindowTitle(QString);
 
     void		SetDisplayColor(const QColor newColor);
 
@@ -153,7 +152,6 @@ public slots:
     void OnTimer();
     void OnScheduleTimer();
     void OnSysTrayTimer();
-    void OnTimerClose();
     void OnSelectAudioService(int);
     void OnSelectDataService(int);
     void OnViewMultimediaDlg();
@@ -166,6 +164,7 @@ public slots:
     void OnSoundFileChanged(QString);
     void OnWhatsThis();
     void OnSysTrayActivated(QSystemTrayIcon::ActivationReason);
+    void OnWorkingThreadFinished();
 signals:
     void plotStyleChanged(int);
 };

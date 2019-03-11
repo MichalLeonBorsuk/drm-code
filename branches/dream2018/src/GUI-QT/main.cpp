@@ -119,7 +119,6 @@ main(int argc, char **argv)
 			CRig rig(DRMReceiver.GetParameters());
 			rig.LoadSettings(Settings); // must be before DRMReceiver for G313
 #endif
-			DRMReceiver.LoadSettings();
             CRx rx(DRMReceiver);
 
 #ifdef HAVE_LIBHAMLIB
@@ -134,6 +133,7 @@ main(int argc, char **argv)
 			FDRMDialog *pMainDlg = new FDRMDialog(DRMReceiver, Settings);
 #endif
 			(void)pMainDlg;
+            rx.LoadSettings();  // load settings after GUI initialised so LoadSettings signals get captured
 
 			/* Start working thread */
             rx.start();
@@ -148,20 +148,20 @@ main(int argc, char **argv)
 			}
 			rig.SaveSettings(Settings);
 #endif
-			DRMReceiver.SaveSettings();
+            rx.SaveSettings();
 		}
 		else if(mode == "transmit")
 		{
             CDRMTransmitter DRMTransmitter(&Settings);
-            DRMTransmitter.LoadSettings();
             CTx tx(DRMTransmitter);
             TransmDialog* pMainDlg = new TransmDialog(tx);
 
-			/* Show dialog */
+            tx.LoadSettings(); // load settings after GUI initialised so LoadSettings signals get captured
+            /* Show dialog */
 			pMainDlg->show();
             tx.start();
 			app.exec();
-            DRMTransmitter.SaveSettings();
+            tx.SaveSettings();
         }
 		else
 		{

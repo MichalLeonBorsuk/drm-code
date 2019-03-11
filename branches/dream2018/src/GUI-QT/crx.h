@@ -65,22 +65,20 @@ public:
     virtual bool GetReverbEffect();
     virtual EAcqStat GetAcquisitionState();
     virtual int GetFrequency() override;
+    virtual void EnumerateInputs(std::vector<std::string>& names, std::vector<std::string>& descriptions) override;
+    virtual void EnumerateOutputs(std::vector<std::string>& names, std::vector<std::string>& descriptions) override;
+    virtual CSettings*				GetSettings() override;
+    virtual CParameter*				GetParameters() override;
 
 public slots:
     virtual void LoadSettings() override;
     virtual void SaveSettings() override;
     virtual void SetInputDevice(QString) override;
     virtual void SetOutputDevice(QString) override;
-    virtual void GetInputDevice(string&) override;
-    virtual void GetOutputDevice(string&) override;
-    virtual void EnumerateInputs(std::vector<std::string>& names, std::vector<std::string>& descriptions) override;
-    virtual void EnumerateOutputs(std::vector<std::string>& names, std::vector<std::string>& descriptions) override;
     virtual void Start();
     virtual void Stop();
     virtual void Restart();
-    virtual CSettings*				GetSettings() override;
     virtual void					SetSettings(CSettings* pNewSettings) override;
-    virtual CParameter*				GetParameters() override;
     virtual _BOOLEAN				IsReceiver() const override { return true;}
     virtual _BOOLEAN				IsTransmitter() const override { return false;}
     virtual void StartWriteWaveFile(string);
@@ -112,6 +110,47 @@ public slots:
 private:
     CDRMReceiver& rx;
     ERunState eRunState;
+    void emitSignals();
+
+signals:
+    void inputSampleRateChanged(int);
+    void outputSampleRateChanged(int);
+    void soundFileChanged(QString);
+    void InputDeviceChanged(QString);
+    void OutputDeviceChanged(QString);
+    void AMBWParametersChanged(double rCenterFreq, double rBW);
+    void AMNoiseReductionLevelChanged(int);
+    void AMNoiseReductionTypeChanged(ENoiRedType);
+    void AMDemodulationTypeChanged(EDemodType);
+    void AMAGCTypeChanged(EAmAgcType);
+    void AMFilterBWChanged(int);
+    void AMMixerFrequencyOffsetChanged(double);
+    void AMPLLPhaseChanged(_REAL);
+    void ReceiverModeChanged(ERecMode);
+    void InChanSelChanged(EInChanSel);
+    void MSCMLInitNumIterationsChanged(int);
+    void isInputRSCIChanged(bool);
+    void isWriteWaveFileChanged(bool);
+    void isAudioMutedChanged(bool);
+    void isIntefererConsiderationEnabledChanged(bool);
+    void isFrequencySyncAcquisitionFilterEnabledChanged(bool);
+    void isSpectrumFlippedChanged(bool);
+    void isAMAutoFrequencyAcquisitionEnabledChanged(bool);
+    void isAMPLLEnabledChanged(bool);
+    void AMSSPLLPhaseChanged(_REAL);
+    void AMSSPercentageDataEntityGroupCompleteChanged(int);
+    void AMSSDataEntityGroupStatusChanged(QString);
+    void AMSSCurrentBlockChanged(int);
+    void AMSSCurrentBlockBitsChanged(QString);
+    void AMSSBlock1StatusChanged(bool);
+    void AMSSLockStatusChanged(EAMSSBlockLockStat);
+    void canDecodeChanged(bool);
+    void TimeInterpolationAlgorithmChanged(ETypeIntTime);
+    void FrequencyInterpolationAlgorithmChanged(ETypeIntFreq);
+    void TimeSyncTrackingTypeChanged(ETypeTiSyncTrac);
+    void ReverbEffectChanged(bool);
+    void AcquisitionStateChanged(EAcqStat);
+    void FrequencyChanged(int);
 };
 
 #endif // CRX_H
