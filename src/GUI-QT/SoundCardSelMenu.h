@@ -57,15 +57,17 @@ protected:
     CTRx&               trx;
     CParameter&			Parameters;
     QMenu*				menuSigInput;
-    QMenu*				menuSigDevice;
+    QMenu*				menuInputDev;
     QMenu*				menuSigSampleRate;
+    QMenu*				menuOutputDev;
     const bool			bReceiver;
 
-    QMenu* InitDevice(QMenu* self, QMenu* parent, const QString& text, bool bInput);
     QMenu* InitChannel(QMenu* parent, const QString& text, const int iChanSel, const CHANSEL* ChanSel);
-    QMenu* InitSampleRate(QMenu* parent, const QString& text, const int iCurrentSampleRate, const int* SampleRate);
+    QMenu* InitSampleRate(QMenu* parent, const QString& text, const int* SampleRate);
+    void UpdateDeviceMenu(QMenu* menu, const vector<string>& names, const vector<string>& descriptions, const string& selected);
 
 public slots:
+    // slots connected to signals from user
     void OnSoundInChannel(QAction*);
     void OnSoundOutChannel(QAction*);
     void OnSoundInDevice(QAction*);
@@ -73,6 +75,11 @@ public slots:
     void OnSoundSampleRate(QAction*);
     void OnSoundSignalUpscale(bool);
     void OnSoundFileChanged(QString);
+    // slots connected to signals from receiver
+    void OnSoundInDeviceChanged(QString);
+    void OnSoundOutDeviceChanged(QString);
+    void OnSoundInSampleRateChanged(int);
+    void OnSoundOutSampleRateChanged(int);
 
 signals:
     void soundSampleRateChanged(int);

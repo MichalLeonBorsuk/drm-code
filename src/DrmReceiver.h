@@ -139,8 +139,8 @@ public:
     virtual void			LoadSettings() override; // can write to settings to set defaults
     virtual void			SaveSettings() override;
 
-    virtual void            GetInputDevice(string&) override;
-    virtual void			GetOutputDevice(string&) override;
+    virtual void            GetInputDevice(string&);
+    virtual void			GetOutputDevice(string&);
     virtual void            EnumerateInputs(std::vector<std::string>& names, std::vector<std::string>& descriptions) override;
     virtual void            EnumerateOutputs(std::vector<std::string>& names, std::vector<std::string>& descriptions) override;
     virtual void            SetInputDevice(QString) override;

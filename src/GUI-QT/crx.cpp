@@ -21,9 +21,9 @@ CRx::run()
         if (iFreqkHz != -1)
             rx.SetFrequency(iFreqkHz);
 
-    #ifdef USE_CONSOLEIO
+#ifdef USE_CONSOLEIO
         CConsoleIO::Enter(this);
-    #endif
+#endif
 
         do
         {
@@ -34,6 +34,7 @@ CRx::run()
             eRunState = RUNNING;
             do
             {
+                emitSignals();
                 rx.updatePosition();
                 rx.process();
 
@@ -69,6 +70,14 @@ CRx::run()
 void CRx::LoadSettings()
 {
     rx.LoadSettings();
+    string s;
+    rx.GetInputDevice(s);
+    emit InputDeviceChanged(QString::fromStdString(s));
+    emit soundFileChanged(QString::fromStdString(s)); // TODO only send if it is a file!!!
+    rx.GetOutputDevice(s);
+    emit OutputDeviceChanged(QString::fromStdString(s));
+    emit inputSampleRateChanged(rx.GetParameters()->GetSigSampleRate());
+    emit outputSampleRateChanged(rx.GetParameters()->GetAudSampleRate());
 }
 
 void CRx::SaveSettings()
@@ -80,21 +89,14 @@ void CRx::SetInputDevice(QString s)
 {
     rx.SetInputDevice(s);
     eRunState = RESTART;
+    emit InputDeviceChanged(s);
+    emit soundFileChanged(s); // TODO only send if it is a file!!!
 }
 
 void CRx::SetOutputDevice(QString s)
 {
     rx.SetOutputDevice(s);
-}
-
-void CRx::GetInputDevice(string& s)
-{
-    rx.GetInputDevice(s);
-}
-
-void CRx::GetOutputDevice(string& s)
-{
-    rx.GetOutputDevice(s);
+    emit OutputDeviceChanged(s);
 }
 
 void CRx::EnumerateInputs(std::vector<std::string>& names, std::vector<std::string>& descriptions)
@@ -473,10 +475,16 @@ void  CRx::onSoundSampleRateChanged(int n)
 {
     rx.GetParameters()->SetNewAudSampleRate(n);
     Restart();
+    emit outputSampleRateChanged(n);
 }
 
 void CRx::SetSoundSignalUpscale(int n)
 {
     rx.GetParameters()->SetNewSigUpscaleRatio(n);
     Restart();
+}
+
+void CRx::emitSignals()
+{
+
 }

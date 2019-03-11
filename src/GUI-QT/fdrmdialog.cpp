@@ -81,9 +81,8 @@ FDRMDialog::FDRMDialog(CRx& nRx, CSettings& Settings,
     pFileMenu = new CFileMenu(rx, this, menu_View);
     pSoundCardMenu = new CSoundCardSelMenu(rx, pFileMenu, this);
     menu_Settings->addMenu(pSoundCardMenu);
-    //connect(pFileMenu, SIGNAL(soundFileChanged(QString)), this, SLOT(OnSoundFileChanged(QString)));
-    //connect(pSoundCardMenu, SIGNAL(soundInDeviceChanged(string)), &rx, SLOT(onSoundInDeviceChanged(string)));
-    connect(pSoundCardMenu, SIGNAL(soundInDeviceChanged(QString)), this, SLOT(OnSoundFileChanged(QString)));
+    connect(&rx, SIGNAL(soundFileChanged(QString)), this, SLOT(OnSoundFileChanged(QString)));
+    connect(&rx, SIGNAL(finished()), this, SLOT(OnWorkingThreadFinished()));
 
     /* Analog demodulation window */
     pAnalogDemDlg = new AnalogDemDlg(rx, Settings, pFileMenu, pSoundCardMenu);
@@ -241,7 +240,6 @@ FDRMDialog::FDRMDialog(CRx& nRx, CSettings& Settings,
     connect(pFMDlg, SIGNAL(ViewLiveScheduleDlg()), pLiveScheduleDlg, SLOT(show()));
 
     connect(&Timer, SIGNAL(timeout()), this, SLOT(OnTimer()));
-    connect(&TimerClose, SIGNAL(timeout()), this, SLOT(OnTimerClose()));
 
     serviceLabels[0] = TextMiniService1;
     serviceLabels[1] = TextMiniService2;
@@ -249,7 +247,7 @@ FDRMDialog::FDRMDialog(CRx& nRx, CSettings& Settings,
     serviceLabels[3] = TextMiniService4;
 
     ClearDisplay();
-    UpdateWindowTitle(); // load filename from settings if set
+    UpdateWindowTitle(""); // load filename from settings if set
 
     /* System tray setup */
     pSysTray = CSysTray::Create(
@@ -514,11 +512,6 @@ void FDRMDialog::OnTimer()
         if(pLogging->enabled())
             startLogging();
     }
-}
-
-void FDRMDialog::OnTimerClose() // TODO
-{
-        close();
 }
 
 void FDRMDialog::showTextMessage(const QString& textMessage)
@@ -907,17 +900,15 @@ void FDRMDialog::ClearDisplay()
     LabelServiceLabel->setText(tr("Scanning..."));
 }
 
-void FDRMDialog::OnSoundFileChanged(QString)
+void FDRMDialog::OnSoundFileChanged(QString s)
 {
-    UpdateWindowTitle();
+    UpdateWindowTitle(s);
     ClearDisplay();
 }
 
-void FDRMDialog::UpdateWindowTitle()
+void FDRMDialog::UpdateWindowTitle(QString filename)
 {
-    string filename;
-    rx.GetInputDevice(filename);
-    QFileInfo fi(QString::fromStdString(filename));
+    QFileInfo fi(filename);
     if(fi.exists()) {
 
         setWindowTitle(QString("Dream") + " - " + fi.baseName());
@@ -1113,8 +1104,7 @@ void FDRMDialog::eventClose(QCloseEvent* ce)
      * close so that the user knows the program has completed
      * when the window closes
      */
-    if (!TimerClose.isActive())
-    {
+
         /* Request that the working thread stops */
         rx.Stop();
 
@@ -1123,27 +1113,22 @@ void FDRMDialog::eventClose(QCloseEvent* ce)
 
         pLogging->SaveSettings(Settings);
 
-        /* Set the timer for polling the working thread state */
-        TimerClose.start(50);
-
         CSysTray::Destroy(&pSysTray);
-    }
 
-    /* Wait indefinitely until the working thread is stopped,
-     * so if the window never close it mean there is a bug
-     * somewhere, a fix is needed
-     */
-    // TODO if (rx.GetParameters()->eRunState == CParameter::STOPPED)
-    if(true)
-    {
-        TimerClose.stop();
         AboutDlg.close();
         pAnalogDemDlg->close();
         pFMDlg->close();
-        ce->accept();
-    }
-    else
-        ce->ignore();
+
+        // now wait for the working thread finished signal
+        if(rx.isFinished())
+            ce->accept();
+        else
+            ce->ignore();
+}
+
+void FDRMDialog::OnWorkingThreadFinished()
+{
+    close();
 }
 
 QString FDRMDialog::GetCodecString(const CService& service)
