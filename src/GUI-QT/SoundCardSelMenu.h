@@ -58,7 +58,8 @@ protected:
     CParameter&			Parameters;
     QMenu*				menuSigInput;
     QMenu*				menuInputDev;
-    QMenu*				menuSigSampleRate;
+    QMenu*				menuInputSampleRate;
+    QMenu*				menuOutputSampleRate;
     QMenu*				menuOutputDev;
     const bool			bReceiver;
 
