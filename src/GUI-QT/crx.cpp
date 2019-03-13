@@ -77,6 +77,7 @@ void CRx::LoadSettings()
     emit OutputDeviceChanged(s);
     emit inputSampleRateChanged(rx.GetParameters()->GetSigSampleRate());
     emit outputSampleRateChanged(rx.GetParameters()->GetAudSampleRate());
+    emit soundUpscaleRatioChanged(rx.GetParameters()->GetSigUpscaleRatio());
 }
 
 void CRx::SaveSettings()
@@ -482,6 +483,7 @@ void CRx::SetSoundSignalUpscale(int n)
 {
     rx.GetParameters()->SetNewSigUpscaleRatio(n);
     Restart();
+    emit soundUpscaleRatioChanged(n);
 }
 
 void CRx::emitSignals()
