@@ -70,12 +70,11 @@ CRx::run()
 void CRx::LoadSettings()
 {
     rx.LoadSettings();
-    string s;
-    rx.GetInputDevice(s);
-    emit InputDeviceChanged(QString::fromStdString(s));
-    emit soundFileChanged(QString::fromStdString(s)); // TODO only send if it is a file!!!
-    rx.GetOutputDevice(s);
-    emit OutputDeviceChanged(QString::fromStdString(s));
+    QString s = QString::fromStdString(rx.GetInputDevice());
+    emit InputDeviceChanged(s);
+    emit soundFileChanged(s); // TODO only send if it is a file!!!
+    s = QString::fromStdString(rx.GetOutputDevice());
+    emit OutputDeviceChanged(s);
     emit inputSampleRateChanged(rx.GetParameters()->GetSigSampleRate());
     emit outputSampleRateChanged(rx.GetParameters()->GetAudSampleRate());
 }
@@ -89,14 +88,15 @@ void CRx::SetInputDevice(QString s)
 {
     rx.SetInputDevice(s);
     eRunState = RESTART;
-    emit InputDeviceChanged(s);
-    emit soundFileChanged(s); // TODO only send if it is a file!!!
+    QString id = QString::fromStdString(rx.GetInputDevice());
+    emit InputDeviceChanged(id);
+    emit soundFileChanged(id); // TODO only send if it is a file!!!
 }
 
 void CRx::SetOutputDevice(QString s)
 {
     rx.SetOutputDevice(s);
-    emit OutputDeviceChanged(s);
+    emit OutputDeviceChanged(QString::fromStdString(rx.GetOutputDevice()));
 }
 
 void CRx::EnumerateInputs(std::vector<std::string>& names, std::vector<std::string>& descriptions)
