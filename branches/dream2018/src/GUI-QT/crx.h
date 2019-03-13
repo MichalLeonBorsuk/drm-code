@@ -115,6 +115,7 @@ private:
 signals:
     void inputSampleRateChanged(int);
     void outputSampleRateChanged(int);
+    void soundUpscaleRatioChanged(int);
     void soundFileChanged(QString);
     void InputDeviceChanged(QString);
     void OutputDeviceChanged(QString);
