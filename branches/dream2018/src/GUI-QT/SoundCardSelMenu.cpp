@@ -99,7 +99,7 @@ static const int SignalSampleRateTable[] =
 
 CSoundCardSelMenu::CSoundCardSelMenu(CTRx& ntrx,
     CFileMenu* pFileMenu, QWidget* parent) : QMenu(parent),
-    trx(ntrx), Parameters(*trx.GetParameters()),
+    trx(ntrx),
     menuSigInput(nullptr), menuInputDev(nullptr),
     menuInputSampleRate(nullptr),menuOutputSampleRate(nullptr),
     menuOutputDev(nullptr),
@@ -110,7 +110,6 @@ CSoundCardSelMenu::CSoundCardSelMenu(CTRx& ntrx,
 
     if (bReceiver)
     {   /* Receiver */
-        Parameters.Lock();
         menuSigInput = addMenu(tr("Signal Input"));
         menuInputDev = menuSigInput->addMenu(tr("Device"));
         connect(menuInputDev, SIGNAL(triggered(QAction*)), this, SLOT(OnSoundInDevice(QAction*)));
@@ -122,17 +121,13 @@ CSoundCardSelMenu::CSoundCardSelMenu(CTRx& ntrx,
         QMenu* menuInputChannel = InitChannel(menuSigInput, tr("Channel"), (int)((CDRMReceiver&)trx).GetReceiveData()->GetInChanSel(), InputChannelTable);
         QMenu* menuOutputChannel = InitChannel(menuAudOutput, tr("Channel"), (int)((CDRMReceiver&)trx).GetWriteData()->GetOutChanSel(), OutputChannelTable);
         menuInputSampleRate = InitSampleRate(menuSigInput, tr("Sample Rate"), SignalSampleRateTable);
-        int upscaleRatio = Parameters.GetSigUpscaleRatio();
-        Parameters.Unlock();
 
         connect(menuInputChannel, SIGNAL(triggered(QAction*)), this, SLOT(OnSoundInChannel(QAction*)));
         connect(menuOutputChannel, SIGNAL(triggered(QAction*)), this, SLOT(OnSoundOutChannel(QAction*)));
         connect(menuInputSampleRate, SIGNAL(triggered(QAction*)), this, SLOT(OnSoundSampleRate(QAction*)));
         menuOutputSampleRate = InitSampleRate(menuAudOutput, tr("Sample Rate"), AudioSampleRateTable);
         connect(menuOutputSampleRate, SIGNAL(triggered(QAction*)), this, SLOT(OnSoundSampleRate(QAction*)));
-        QAction *actionUpscale = menuSigInput->addAction(tr("2:1 upscale"));
-        actionUpscale->setCheckable(true);
-        actionUpscale->setChecked(upscaleRatio == 2);
+        actionUpscale = menuSigInput->addAction(tr("2:1 upscale"));
         connect(actionUpscale, SIGNAL(toggled(bool)), this, SLOT(OnSoundSignalUpscale(bool)));
         connect(this, SIGNAL(soundInDeviceChanged(QString)), &trx, SLOT(SetInputDevice(QString)));
         connect(this, SIGNAL(soundOutDeviceChanged(QString)), &trx, SLOT(SetOutputDevice(QString)));
@@ -148,6 +143,8 @@ CSoundCardSelMenu::CSoundCardSelMenu(CTRx& ntrx,
 
         connect(&trx, SIGNAL(inputSampleRateChanged(int)), this, SLOT(OnSoundInSampleRateChanged(int)));
         connect(&trx, SIGNAL(outputSampleRateChanged(int)), this, SLOT(OnSoundOutSampleRateChanged(int)));
+
+        connect(&trx, SIGNAL(soundUpscaleRatioChanged(int)), this, SLOT(OnSoundUpscaleRatioChanged(int)));
 
         if (pFileMenu != nullptr) {
             connect(pFileMenu, SIGNAL(soundFileChanged(QString)), this, SLOT(OnSoundFileChanged(QString)));
@@ -297,6 +294,11 @@ void CSoundCardSelMenu::OnSoundOutSampleRateChanged(int sr)
     else {
 
     }
+}
+
+void CSoundCardSelMenu::OnSoundUpscaleRatioChanged(int upscaleRatio)
+{
+    actionUpscale->setChecked(upscaleRatio == 2);
 }
 
 void CSoundCardSelMenu::OnSoundFileChanged(QString filename)
