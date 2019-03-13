@@ -207,16 +207,6 @@ void CDRMReceiver::EnumerateOutputs(vector<string>& names, vector<string>& descr
     WriteData.Enumerate(names, descriptions);
 }
 
-void CDRMReceiver::GetInputDevice(string& s)
-{
-    s = ReceiveData.GetSoundInterface();
-}
-
-void CDRMReceiver::GetOutputDevice(string& s)
-{
-    s = WriteData.GetSoundInterface();
-}
-
 void
 CDRMReceiver::DemodulateDRM(_BOOLEAN& bEnoughData)
 {

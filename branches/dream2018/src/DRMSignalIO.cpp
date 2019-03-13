@@ -404,8 +404,12 @@ CReceiveData::SetSoundInterface(string device)
                     pIODevice = pAudioInput->start();
                     if(pAudioInput->error()==QAudio::NoError)
                     {
-                        pIODevice->open(QIODevice::ReadOnly);
-                        qDebug("audio input open");
+                        if(pIODevice->open(QIODevice::ReadOnly)) {
+                            qDebug("audio input open");
+                        }
+                        else {
+                            qDebug("audio input open failed");
+                        }
                     }
                     else
                     {
