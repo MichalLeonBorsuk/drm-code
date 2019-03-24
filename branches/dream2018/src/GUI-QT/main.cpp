@@ -236,4 +236,4 @@ DebugError(const char *pchErDescr, const char *pchPar1Descr,
 	exit(1);
 }
 
-#include "main.moc"
+//#include "main.moc"
