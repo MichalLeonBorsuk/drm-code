@@ -200,8 +200,8 @@ CWriteData::SetSoundInterface(string device)
             pAudioOutput->setBufferSize(1000000);
             // TODO QIODevice needs to be declared in working thread
             pIODevice = pAudioOutput->start();
-	fprintf(stderr, "buffer size %d\n", pAudioOutput->bufferSize());
-	fprintf(stderr, "period size %d\n", pAudioOutput->periodSize());
+            fprintf(stderr, "buffer size %d\n", pAudioOutput->bufferSize());
+            fprintf(stderr, "period size %d\n", pAudioOutput->periodSize());
             if(pAudioOutput->error()!=QAudio::NoError)
             {
                 qDebug("Can't open audio output");
@@ -262,7 +262,7 @@ void CWriteData::ProcessDataInternal(CParameter& Parameters)
             const _REAL rRightChan = (*pvecInputData)[2 * i + 1];
 
             vecsTmpAudData[2 * i] =
-                Real2Sample((rLeftChan + rRightChan) * rMixNormConst);
+                    Real2Sample((rLeftChan + rRightChan) * rMixNormConst);
 
             vecsTmpAudData[2 * i + 1] = 0; /* mute */
         }
@@ -279,7 +279,7 @@ void CWriteData::ProcessDataInternal(CParameter& Parameters)
 
             vecsTmpAudData[2 * i] = 0; /* mute */
             vecsTmpAudData[2 * i + 1] =
-                Real2Sample((rLeftChan + rRightChan) * rMixNormConst);
+                    Real2Sample((rLeftChan + rRightChan) * rMixNormConst);
         }
         break;
     }
@@ -314,7 +314,7 @@ void CWriteData::ProcessDataInternal(CParameter& Parameters)
         }
         if(n==0) {
             bBad = false;
-	}
+        }
     }
 #else
     const _BOOLEAN bBad = pSound->Write(vecsTmpAudData);
@@ -354,9 +354,9 @@ void CWriteData::InitInternal(CParameter& Parameters)
     iAudSampleRate = Parameters.GetAudSampleRate();
 
     /* Set maximum audio frequency */
-	iMaxAudioFrequency = MAX_SPEC_AUDIO_FREQUENCY;
-	if (iMaxAudioFrequency > iAudSampleRate/2)
-		iMaxAudioFrequency = iAudSampleRate/2;
+    iMaxAudioFrequency = MAX_SPEC_AUDIO_FREQUENCY;
+    if (iMaxAudioFrequency > iAudSampleRate/2)
+        iMaxAudioFrequency = iAudSampleRate/2;
 
     /* Length of vector for audio spectrum. We use a power-of-two length to
        make the FFT work more efficient, need to be scaled from sample rate to
@@ -365,11 +365,11 @@ void CWriteData::InitInternal(CParameter& Parameters)
 
     /* Number of blocks for averaging the audio spectrum */
     iNumBlocksAvAudioSpec = Ceil(((_REAL) iAudSampleRate *
-        TIME_AV_AUDIO_SPECT_MS / 1000 / iNumSmpls4AudioSprectrum));
+                                  TIME_AV_AUDIO_SPECT_MS / 1000 / iNumSmpls4AudioSprectrum));
 
     /* Inits for audio spectrum plotting */
     vecsOutputData.Init((int) iNumBlocksAvAudioSpec * iNumSmpls4AudioSprectrum *
-                   2 /* stereo */, 0); /* Init with zeros */
+                        2 /* stereo */, 0); /* Init with zeros */
     FftPlan.Init(iNumSmpls4AudioSprectrum);
     veccFFTInput.Init(iNumSmpls4AudioSprectrum);
     veccFFTOutput.Init(iNumSmpls4AudioSprectrum);
@@ -399,15 +399,15 @@ void CWriteData::InitInternal(CParameter& Parameters)
 }
 
 CWriteData::CWriteData() :
-#ifdef QT_MULTIMEDIA_LIB
-        pIODevice(nullptr),
-#endif
-        pSound(nullptr), /* Sound interface */
-        bMuteAudio(FALSE), bDoWriteWaveFile(FALSE),
-        bSoundBlocking(FALSE), bNewSoundBlocking(FALSE),
-        eOutChanSel(CS_BOTH_BOTH), rMixNormConst(MIX_OUT_CHAN_NORM_CONST),
-        iAudSampleRate(0), iNumSmpls4AudioSprectrum(0), iNumBlocksAvAudioSpec(0),
-        iMaxAudioFrequency(MAX_SPEC_AUDIO_FREQUENCY)
+    #ifdef QT_MULTIMEDIA_LIB
+    pIODevice(nullptr),
+    #endif
+    pSound(nullptr), /* Sound interface */
+    bMuteAudio(FALSE), bDoWriteWaveFile(FALSE),
+    bSoundBlocking(FALSE), bNewSoundBlocking(FALSE),
+    eOutChanSel(CS_BOTH_BOTH), rMixNormConst(MIX_OUT_CHAN_NORM_CONST),
+    iAudSampleRate(0), iNumSmpls4AudioSprectrum(0), iNumBlocksAvAudioSpec(0),
+    iMaxAudioFrequency(MAX_SPEC_AUDIO_FREQUENCY)
 {
     /* Constructor */
 }
@@ -486,8 +486,8 @@ void CWriteData::GetAudioSpec(CVector<_REAL>& vecrData,
 
     /* Calculate norm constant and scale factor */
     const _REAL rNormData = (_REAL) iNumSmpls4AudioSprectrum *
-                            iNumSmpls4AudioSprectrum * _MAXSHORT * _MAXSHORT *
-                            iNumBlocksAvAudioSpec;
+            iNumSmpls4AudioSprectrum * _MAXSHORT * _MAXSHORT *
+            iNumBlocksAvAudioSpec;
 
     /* Define scale factor for audio data */
     const _REAL rFactorScale = _REAL(iMaxAudioFrequency) / iLenPowSpec / 1000;
@@ -531,118 +531,118 @@ void CGenSimData::ProcessDataInternal(CParameter& TransmParam)
     {
     case CT_TIME:
         try
+    {
+        /* Estimate remaining time */
+        lReTi = (long int) (((_REAL) iNumSimBlocks - iCounter) /
+                            iCounter * tiElTi);
+
+        /* Store current counter position in file */
+        pFileCurPos = fopen(strFileName.c_str(), "w");
+        if (pFileCurPos != nullptr)
+        {
+            fprintf(pFileCurPos,
+                    "%d / %d (%ld min elapsed, estimated time remaining: %ld min)",
+                    iCounter, iNumSimBlocks,
+                    (long int)tiElTi / 60, lReTi / 60);
+
+            /* Write current paramter value */
+            _REAL rCurParamVal;
+            switch (TransmParam.eSimType)
+            {
+            case CParameter::ST_SYNC_PARAM:
+                rCurParamVal = TransmParam.rSyncTestParam;
+                break;
+
+            case CParameter::ST_SINR:
+                rCurParamVal = TransmParam.rSINR;
+                break;
+
+            default:
+                rCurParamVal = TransmParam.rBitErrRate;
+                break;
+            }
+            fprintf(pFileCurPos, "\n%e %e",
+                    TransmParam.GetNominalSNRdB(), rCurParamVal);
+
+            fclose(pFileCurPos);
+        }
+    }
+
+        catch (...)
+    {
+        /* Catch all file errors to avoid stopping the simulation */
+    }
+
+        if (iCounter == iNumSimBlocks)
+        {
+            //TransmParam.eRunState = CParameter::STOP_REQUESTED; TODO
+            iCounter = 0;
+        }
+        break;
+
+    case CT_ERRORS:
+        try
+    {
+        if (iCounter >= iMinNumBlocks)
         {
             /* Estimate remaining time */
-            lReTi = (long int) (((_REAL) iNumSimBlocks - iCounter) /
-                                iCounter * tiElTi);
+            lReTi = (long int)
+                    (((_REAL) iNumErrors - TransmParam.iNumBitErrors) /
+                     TransmParam.iNumBitErrors * tiElTi);
+
+            /* Estimated remaining days ( x / (60 * 60 * 24) ) */
+            rReDays = (_REAL) lReTi / 86400;
 
             /* Store current counter position in file */
             pFileCurPos = fopen(strFileName.c_str(), "w");
             if (pFileCurPos != nullptr)
             {
                 fprintf(pFileCurPos,
-                        "%d / %d (%ld min elapsed, estimated time remaining: %ld min)",
-                        iCounter, iNumSimBlocks,
-                        (long int)tiElTi / 60, lReTi / 60);
+                        "%d / %d (%ld min elapsed, estimated time remaining: %ld min [%.1f days])",
+                        TransmParam.iNumBitErrors, iNumErrors, (long int)tiElTi / 60,
+                        lReTi / 60, rReDays);
 
-                /* Write current paramter value */
-                _REAL rCurParamVal;
-                switch (TransmParam.eSimType)
-                {
-                case CParameter::ST_SYNC_PARAM:
-                    rCurParamVal = TransmParam.rSyncTestParam;
-                    break;
-
-                case CParameter::ST_SINR:
-                    rCurParamVal = TransmParam.rSINR;
-                    break;
-
-                default:
-                    rCurParamVal = TransmParam.rBitErrRate;
-                    break;
-                }
-                fprintf(pFileCurPos, "\n%e %e",
-                        TransmParam.GetNominalSNRdB(), rCurParamVal);
-
+                /* Add current value of BER */
+                fprintf(pFileCurPos, "\n%e %e", TransmParam.
+                        GetNominalSNRdB(), TransmParam.rBitErrRate);
                 fclose(pFileCurPos);
             }
         }
-
-        catch (...)
+        else
         {
-            /* Catch all file errors to avoid stopping the simulation */
-        }
+            /* Estimate remaining time */
+            lReTi = (long int)
+                    (((_REAL) iMinNumBlocks - iCounter) / iCounter * tiElTi);
 
-        if (iCounter == iNumSimBlocks)
-        {
-        //TransmParam.eRunState = CParameter::STOP_REQUESTED; TODO
-		iCounter = 0;
-        }
-        break;
-
-    case CT_ERRORS:
-        try
-        {
-            if (iCounter >= iMinNumBlocks)
+            /* Store current counter position in file */
+            pFileCurPos = fopen(strFileName.c_str(), "w");
+            if (pFileCurPos != nullptr)
             {
-                /* Estimate remaining time */
+                fprintf(pFileCurPos,
+                        "%d / %d (%ld min elapsed, estimated minimum"
+                        " time remaining: %ld min)\n",
+                        iCounter, iMinNumBlocks, (long int)tiElTi / 60, lReTi / 60);
+
                 lReTi = (long int)
                         (((_REAL) iNumErrors - TransmParam.iNumBitErrors) /
                          TransmParam.iNumBitErrors * tiElTi);
+                fprintf(pFileCurPos,
+                        "%d / %d (%ld min elapsed, estimated time remaining: %ld min)",
+                        TransmParam.iNumBitErrors, iNumErrors, (long int)tiElTi / 60,
+                        lReTi / 60);
 
-                /* Estimated remaining days ( x / (60 * 60 * 24) ) */
-                rReDays = (_REAL) lReTi / 86400;
-
-                /* Store current counter position in file */
-                pFileCurPos = fopen(strFileName.c_str(), "w");
-                if (pFileCurPos != nullptr)
-                {
-                    fprintf(pFileCurPos,
-                            "%d / %d (%ld min elapsed, estimated time remaining: %ld min [%.1f days])",
-                            TransmParam.iNumBitErrors, iNumErrors, (long int)tiElTi / 60,
-                            lReTi / 60, rReDays);
-
-                    /* Add current value of BER */
-                    fprintf(pFileCurPos, "\n%e %e", TransmParam.
-                            GetNominalSNRdB(), TransmParam.rBitErrRate);
-                    fclose(pFileCurPos);
-                }
-            }
-            else
-            {
-                /* Estimate remaining time */
-                lReTi = (long int)
-                        (((_REAL) iMinNumBlocks - iCounter) / iCounter * tiElTi);
-
-                /* Store current counter position in file */
-                pFileCurPos = fopen(strFileName.c_str(), "w");
-                if (pFileCurPos != nullptr)
-                {
-                    fprintf(pFileCurPos,
-                            "%d / %d (%ld min elapsed, estimated minimum"
-                            " time remaining: %ld min)\n",
-                            iCounter, iMinNumBlocks, (long int)tiElTi / 60, lReTi / 60);
-
-                    lReTi = (long int)
-                            (((_REAL) iNumErrors - TransmParam.iNumBitErrors) /
-                             TransmParam.iNumBitErrors * tiElTi);
-                    fprintf(pFileCurPos,
-                            "%d / %d (%ld min elapsed, estimated time remaining: %ld min)",
-                            TransmParam.iNumBitErrors, iNumErrors, (long int)tiElTi / 60,
-                            lReTi / 60);
-
-                    /* Add current value of BER */
-                    fprintf(pFileCurPos, "\n%e %e", TransmParam.
-                            GetNominalSNRdB(), TransmParam.rBitErrRate);
-                    fclose(pFileCurPos);
-                }
+                /* Add current value of BER */
+                fprintf(pFileCurPos, "\n%e %e", TransmParam.
+                        GetNominalSNRdB(), TransmParam.rBitErrRate);
+                fclose(pFileCurPos);
             }
         }
+    }
 
         catch (...)
-        {
-            /* Catch all file errors to avoid stopping the simulation */
-        }
+    {
+        /* Catch all file errors to avoid stopping the simulation */
+    }
 
         if (TransmParam.iNumBitErrors >= iNumErrors)
         {
@@ -746,7 +746,7 @@ void CGenSimData::SetSimTime(int iNewTi, string strNewFileName)
 
     /* Set file name */
     strFileName = string(SIM_OUT_FILES_PATH) +
-                  strNewFileName + "__SIMTIME" + string(".dat");
+            strNewFileName + "__SIMTIME" + string(".dat");
 }
 
 void CGenSimData::SetNumErrors(int iNewNE, string strNewFileName)
@@ -761,7 +761,7 @@ void CGenSimData::SetNumErrors(int iNewNE, string strNewFileName)
 
     /* Set file name */
     strFileName = string(SIM_OUT_FILES_PATH) +
-                  strNewFileName + "__SIMTIME" + string(".dat");
+            strNewFileName + "__SIMTIME" + string(".dat");
 }
 
 void CEvaSimData::ProcessDataInternal(CParameter& Parameters)
@@ -878,8 +878,8 @@ void CUtilizeFACData::ProcessDataInternal(CParameter& Parameters)
 void CUtilizeFACData::InitInternal(CParameter& Parameters)
 {
 
-// This should be in FAC class in an Init() routine which has to be defined, this
-// would be cleaner code! TODO
+    // This should be in FAC class in an Init() routine which has to be defined, this
+    // would be cleaner code! TODO
     /* Init frame ID so that a "0" comes after increasing the init value once */
     Parameters.iFrameIDReceiv = NUM_FRAMES_IN_SUPERFRAME - 1;
 
@@ -909,7 +909,7 @@ void CGenerateSDCData::InitInternal(CParameter& TransmParam)
 /* Receiver */
 void CUtilizeSDCData::ProcessDataInternal(CParameter& Parameters)
 {
-//    _BOOLEAN bSDCOK = FALSE;
+    //    _BOOLEAN bSDCOK = FALSE;
 
     /* Decode SDC block and return CRC status */
     CSDCReceive::ERetStatus eStatus = SDCReceive.SDCParam(pvecInputData, Parameters);
@@ -919,7 +919,7 @@ void CUtilizeSDCData::ProcessDataInternal(CParameter& Parameters)
     {
     case CSDCReceive::SR_OK:
         Parameters.ReceiveStatus.SDC.SetStatus(RX_OK);
-//        bSDCOK = TRUE;
+        //        bSDCOK = TRUE;
         break;
 
     case CSDCReceive::SR_BAD_CRC:
@@ -1058,10 +1058,10 @@ void CWriteIQFile::InitInternal(CParameter& Parameters)
     for (int i = 0; i < iHilFiltBlLen; i++)
     {
         rvecBReal[i] = vecrFilter[i] *
-                       Cos((CReal) 2.0 * crPi * rBPNormCentOffset * i - rStartPhase);
+                Cos((CReal) 2.0 * crPi * rBPNormCentOffset * i - rStartPhase);
 
         rvecBImag[i] = vecrFilter[i] *
-                       Sin((CReal) 2.0 * crPi * rBPNormCentOffset * i - rStartPhase);
+                Sin((CReal) 2.0 * crPi * rBPNormCentOffset * i - rStartPhase);
     }
 
     /* Transformation in frequency domain for fft filter */
@@ -1122,8 +1122,8 @@ void CWriteIQFile::ProcessDataInternal(CParameter& Parameters)
 
     /* Cut out a spectrum part of desired bandwidth */
     cvecHilbert = CComplexVector(
-                      FftFilt(cvecBReal, rvecInpTmp, rvecZReal, FftPlansHilFilt),
-                      FftFilt(cvecBImag, rvecInpTmp, rvecZImag, FftPlansHilFilt));
+                FftFilt(cvecBReal, rvecInpTmp, rvecZReal, FftPlansHilFilt),
+                FftFilt(cvecBImag, rvecInpTmp, rvecZImag, FftPlansHilFilt));
 
     /* Mix it down to zero frequency */
     Mixer.SetMixFreq(CReal(0.25));
