@@ -295,9 +295,22 @@ void CWriteData::ProcessDataInternal(CParameter& Parameters)
     bool bBad = true;
     if(pIODevice)
     {
-        qint64 n = 2*vecsTmpAudData.Size();
-        int m = pIODevice->write((char*)&vecsTmpAudData[0], n);
-        if(m==n)
+        qint64 l = 2*vecsTmpAudData.Size();
+        char* buf = reinterpret_cast<char*>(&vecsTmpAudData[0]);
+        int n = int(l);
+        int m = 0;
+        int b = n / 10;
+        while(n>b) {
+            int w = pIODevice->write(buf, b);
+            buf += w;
+            b = w; // only write as much next time as it accepted this time
+            n -= b;
+            pIODevice->waitForBytesWritten(-1);
+        }
+        if(n>0) {
+            m += pIODevice->write(buf, n);
+        }
+        if(n==0)
             bBad = false;
     }
 #else
