@@ -200,6 +200,8 @@ CWriteData::SetSoundInterface(string device)
             pAudioOutput->setBufferSize(1000000);
             // TODO QIODevice needs to be declared in working thread
             pIODevice = pAudioOutput->start();
+	fprintf(stderr, "buffer size %d\n", pAudioOutput->bufferSize());
+	fprintf(stderr, "period size %d\n", pAudioOutput->periodSize());
             if(pAudioOutput->error()!=QAudio::NoError)
             {
                 qDebug("Can't open audio output");
@@ -310,8 +312,9 @@ void CWriteData::ProcessDataInternal(CParameter& Parameters)
         if(n>0) {
             m += pIODevice->write(buf, n);
         }
-        if(n==0)
+        if(n==0) {
             bBad = false;
+	}
     }
 #else
     const _BOOLEAN bBad = pSound->Write(vecsTmpAudData);
