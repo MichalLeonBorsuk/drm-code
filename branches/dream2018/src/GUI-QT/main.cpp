@@ -130,7 +130,7 @@ main(int argc, char **argv)
 			}
             FDRMDialog *pMainDlg = new FDRMDialog(&rx, Settings, rig);
 #else
-			FDRMDialog *pMainDlg = new FDRMDialog(DRMReceiver, Settings);
+			FDRMDialog *pMainDlg = new FDRMDialog(&rx, Settings);
 #endif
 			(void)pMainDlg;
             rx.LoadSettings();  // load settings after GUI initialised so LoadSettings signals get captured

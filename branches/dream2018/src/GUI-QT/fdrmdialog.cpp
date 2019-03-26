@@ -52,11 +52,9 @@ static _REAL WMERSteps[] = {6.0, 12.0, 18.0, 24.0, 30.0};
 
 /* Implementation *************************************************************/
 #ifdef HAVE_LIBHAMLIB
-FDRMDialog::FDRMDialog(CTRx* pRx, CSettings& Settings, CRig& rig,
-                       QWidget* parent)
+FDRMDialog::FDRMDialog(CTRx* pRx, CSettings& Settings, CRig& rig, QWidget* parent)
 #else
-FDRMDialog::FDRMDialog(CRx& nRx, CSettings& Settings,
-                       QWidget* parent)
+FDRMDialog::FDRMDialog(CTRx* pRx, CSettings& Settings, QWidget* parent)
 #endif
     :
     CWindow(parent, Settings, "DRM"),
