@@ -34,7 +34,13 @@
 
 std::string ws2s(const std::wstring& wstr)
 {
+#if 0
 	std::string str = std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t>().to_bytes(wstr);
+#else
+	std::string str;
+	for(char x : wstr)
+		str += x;
+#endif
 	return str;
 }
 
