@@ -175,7 +175,6 @@ CDRMReceiver::SetInputDevice(QString s)
         pUpstreamRSCI = new CUpstreamDI();
     }
     switch(FileTyper::resolve(device)) {
-    case FileTyper::unrecognised:
     case FileTyper::pcm:
         /* SetSyncInput to FALSE, can be modified by pUpstreamRSCI */
         InputResample.SetSyncInput(FALSE);
@@ -183,6 +182,7 @@ CDRMReceiver::SetInputDevice(QString s)
         TimeSync.SetSyncInput(FALSE);
         ReceiveData.SetSoundInterface(device); // audio input
         break;
+    case FileTyper::unrecognised: // includes rsi network
     case FileTyper::pcap:
     case FileTyper::file_framing:
     case FileTyper::raw_af:

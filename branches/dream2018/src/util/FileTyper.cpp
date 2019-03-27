@@ -81,11 +81,10 @@ FileTyper::type FileTyper::resolve(const string& str)
         fclose(f);
         c[4]='\0';
         if(strcmp(c, "fio_")==0) return file_framing;
+        if(strcmp(c, "RIFF")==0) return pcm;
         c[2]='\0';
         if(strcmp(c, "AF")==0) return raw_af;
         if(strcmp(c, "PF")==0) return raw_pft;
     }
-    if(s.find(".wav")!=string::npos) return pcm;
-    if(s.find(".WAV")!=string::npos) return pcm;
     return unrecognised;
 }
