@@ -42,6 +42,7 @@ gui {
     INCLUDEPATH += src/GUI-QT
     VPATH += src/GUI-QT
     win32:RC_FILE = windows/dream.rc
+    win32:RC_INCLUDEPATH = $$PWD/src/GUI-QT/res
     macx:RC_FILE = src/GUI-QT/res/macicons.icns
     CONFIG += qwt
     UI_DIR = ui
@@ -189,7 +190,6 @@ unix:!cross_compile {
     }
 }
 win32 {
-    LIBS += -llibfftw3-3
     !multimedia {
         exists($$OUT_PWD/include/portaudio.h) {
           CONFIG += portaudio sound
@@ -216,7 +216,7 @@ win32 {
     exists($$PWD/include/fdk-aac/aacdecoder_lib.h) {
         CONFIG += fdk-aac
     }
-    LIBS += -lsetupapi -lwsock32 -lws2_32 -lzlib -ladvapi32 -luser32
+    LIBS += -lsetupapi -lwsock32 -lws2_32 -ladvapi32 -luser32
     DEFINES += HAVE_SETUPAPI HAVE_LIBZ _CRT_SECURE_NO_WARNINGS
     SOURCES += src/windows/Pacer.cpp src/windows/platform_util.cpp
     HEADERS += src/windows/platform_util.h
@@ -228,7 +228,10 @@ win32 {
     }
     g++ {
          DEFINES += HAVE_STDINT_H HAVE_LIBZ
-         LIBS += -lz
+         LIBS += -lz -llibfftw3
+    }
+    else {
+         LIBS += -lzlib -llibfftw3-3
     }
 }
 fdk-aac {
