@@ -225,13 +225,11 @@ win32 {
         QMAKE_LFLAGS_RELEASE += /NODEFAULTLIB:libcmt.lib
         QMAKE_LFLAGS_DEBUG += /NODEFAULTLIB:libcmtd.lib
         QMAKE_LFLAGS_DEBUG += /NODEFAULTLIB:libcmt.lib
-    }
-    g++ {
-         DEFINES += HAVE_STDINT_H HAVE_LIBZ
-         LIBS += -lz -llibfftw3
+        LIBS += -lzlib -llibfftw3-3
     }
     else {
-         LIBS += -lzlib -llibfftw3-3
+         DEFINES += HAVE_STDINT_H HAVE_LIBZ
+         LIBS += -lz -llibfftw3
     }
 }
 fdk-aac {
@@ -281,7 +279,14 @@ hamlib {
      DEFINES += HAVE_LIBHAMLIB
      macx:LIBS += -framework IOKit
      unix:LIBS += -lhamlib
-     win32:LIBS += -llibhamlib-2
+     win32 {
+       msvc* {
+         LIBS += -llibhamlib-2
+       }
+       else {
+         LIBS += -lhamlib
+       }
+     }
      HEADERS += src/util/Hamlib.h
      SOURCES += src/util/Hamlib.cpp
      qt {
