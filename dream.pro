@@ -196,6 +196,10 @@ win32:mxe {
   message('MXE')
   CONFIG += sndfile hamlib pcap opus speexdsp fdk-aac sound
   QT += multimedia
+  LIBS += -lsetupapi -lwsock32 -lws2_32 -ladvapi32 -luser32 -lz -lfftw3
+  DEFINES += HAVE_SETUPAPI HAVE_LIBZ _CRT_SECURE_NO_WARNINGS HAVE_STDINT_H HAVE_LIBZ
+  SOURCES += src/windows/Pacer.cpp src/windows/platform_util.cpp
+  HEADERS += src/windows/platform_util.h
 }
 win32:!mxe {
     !multimedia {t
@@ -263,14 +267,15 @@ opus {
 sndfile {
      DEFINES += HAVE_LIBSNDFILE
      unix:LIBS += -lsndfile
-     win32:mxe:LIBS += -lsndfile
+     win32:mxe:LIBS += -lsndfile -lvorbisenc -lvorbis -lFLAC -logg -lm
      win32:!mxe:LIBS += -llibsndfile-1
      message("with libsndfile")
 }
 speexdsp {
      DEFINES += HAVE_SPEEX
      unix:LIBS += -lspeexdsp
-     win32:LIBS += -llibspeexdsp
+     win32:mxe:LIBS += -lspeexdsp
+     win32:!mxe:LIBS += -llibspeexdsp
      message("with libspeexdsp")
 }
 gps {
@@ -293,7 +298,7 @@ hamlib {
          LIBS += -llibhamlib-2
        }
        else {
-         LIBS += -lhamlib
+         LIBS += -lhamlib -lusb-1.0
        }
      }
      HEADERS += src/util/Hamlib.h
