@@ -189,8 +189,16 @@ unix:!cross_compile {
       }
     }
 }
-win32 {
-    !multimedia {
+contains(QMAKE_CC, i686-w64-mingw32.static-gcc) {
+  CONFIG += mxe
+}
+win32:mxe {
+  message('MXE')
+  CONFIG += sndfile hamlib pcap opus speexdsp fdk-aac sound
+  QT += multimedia
+}
+win32:!mxe {
+    !multimedia {t
         exists($$OUT_PWD/include/portaudio.h) {
           CONFIG += portaudio sound
         }
@@ -255,7 +263,8 @@ opus {
 sndfile {
      DEFINES += HAVE_LIBSNDFILE
      unix:LIBS += -lsndfile
-     win32:LIBS += -llibsndfile-1
+     win32:mxe:LIBS += -lsndfile
+     win32:!mxe:LIBS += -llibsndfile-1
      message("with libsndfile")
 }
 speexdsp {
