@@ -164,17 +164,6 @@ CAboutDlg::CAboutDlg(QWidget* parent):
 #else
         "<li><b>FFTW</b> <i>http://www.fftw.org</i></li>"
 #endif
-#if USE_FAAD2_LIBRARY
-        "<li><b>FAAD2</b> (" + QString(FAAD2_VERSION) + ") <i>AAC/HE-AAC/HE-AACv2/DRM decoder "
-        "(c) Ahead Software, www.nero.com (http://faac.sf.net)</i></li>"
-#endif
-#ifdef USE_FAAC_LIBRARY
-        "<li><b>FAAC</b> <i>http://faac.sourceforge.net</i></li>"
-#endif
-#ifdef HAVE_LIBFDK_AAC
-        "<li><b>fdk-aac decoder</b> (" + fdk.DecGetVersion().c_str() + ") <i>https://www.iis.fraunhofer.de/en/ff/amm/impl.html</i></li>"
-        "<li><b>fdk-aac encoder</b> (" + fdk.EncGetVersion().c_str() + ") <i>https://www.iis.fraunhofer.de/en/ff/amm/impl.html</i></li>"
-#endif
 #ifdef QT_CORE_LIB
         "<li><b>Qt</b> (" + QString(QT_VERSION_STR) + ") <i>http://qt-project.org</i></li>"
 #endif
@@ -218,6 +207,16 @@ CAboutDlg::CAboutDlg(QWidget* parent):
 #endif
 #ifdef USE_JACK
         "<li><b>libjack</b> (The Jack Audio Connection Kit) <i>http://www.jackaudio.org</i></li>"
+#endif
+#ifdef HAVE_LIBFDK_AAC
+        "<li><b>fdk-aac decoder</b> (" + fdk.DecGetVersion().c_str() + ") <i>https://www.iis.fraunhofer.de/en/ff/amm/impl.html</i></li>"
+#endif
+#if USE_FAAD2_LIBRARY
+        "<li><b>FAAD2</b> (" + QString(FAAD2_VERSION) + ") <i>AAC/HE-AAC/HE-AACv2/DRM decoder "
+        "(c) Ahead Software, www.nero.com (http://faac.sf.net)</i></li>"
+#endif
+#ifdef USE_FAAC_LIBRARY
+        "<li><b>FAAC</b> <i>http://faac.sourceforge.net</i></li>"
 #endif
 #ifdef USE_OPUS_LIBRARY
 		"<li><b>" + QString(OPUS_DESCRIPTION) + "</b> (" + QString(opusGetVersion()) + ") <i>" + QString(OPUS_WEBSITE_LINK) + "</i></li>"
