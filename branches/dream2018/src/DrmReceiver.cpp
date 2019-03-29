@@ -1016,23 +1016,18 @@ void CDRMReceiver::updatePosition()
         stringstream s;
         s <<  Parameters.gps_port;
         if(gps_data->gps_fd != -1) (void)gps_close(gps_data);
-# if GPSD_API_MAJOR_VERSION < 5
-        result = gps_open_r(Parameters.gps_host.c_str(), s.str().c_str(), gps_data);
-        if(!result) (void)gps_stream(gps_data, WATCH_ENABLE|POLL_NONBLOCK, nullptr);
-# else
         result = gps_open(Parameters.gps_host.c_str(), s.str().c_str(), gps_data);
         if(!result) (void)gps_stream(gps_data, WATCH_ENABLE, nullptr);
-# endif
         if(result) gps_data->gps_fd = -1;
         Parameters.restart_gpsd = false;
     }
     if(gps_data->gps_fd != -1)
     {
         if(Parameters.use_gpsd)
-# if GPSD_API_MAJOR_VERSION < 5
-            result = gps_poll(gps_data);
-# else
+# if GPSD_API_MAJOR_VERSION < 7
             result = gps_read(gps_data);
+# else
+            result = gps_read(gps_data, NULL, 0);
 # endif
         else
         {
