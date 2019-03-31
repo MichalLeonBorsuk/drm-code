@@ -36,7 +36,7 @@ qtconsole {
 }
 gui {
     RESOURCES = src/GUI-QT/res/icons.qrc
-    QT += network xml multimedia widgets
+    QT += network xml widgets
     INCLUDEPATH += src/GUI-QT
     VPATH += src/GUI-QT
     win32 {
@@ -55,15 +55,13 @@ gui {
     }
 }
 message($$VERSION_MESSAGE $$DEBUG_MESSAGE $$UI_MESSAGE)
-qt:multimedia {
-    QT += multimedia
-    CONFIG += sound
-}
 unix:!cross_compile {
     UNAME = $$system(uname -s)
     message(building on $$UNAME)
 }
 macx {
+    QT += multimedia
+    CONFIG += sound
     QT_CONFIG -= no-pkg-config
     PKG_CONFIG = /usr/local/bin/pkg-config
     INCLUDEPATH += /usr/local/include
@@ -84,8 +82,11 @@ macx {
     }
 }
 linux-* {
-    CONFIG += fdk-aac
-    LIBS += -ldl -lrt
+  CONFIG += fdk-aac
+  LIBS += -ldl -lrt
+  qt:multimedia {
+	CONFIG += sound
+  }
 }
 android {
     CONFIG += openSL sound fdk-aac
@@ -188,6 +189,16 @@ win32 {
   DEFINES += HAVE_SETUPAPI HAVE_LIBZ _CRT_SECURE_NO_WARNINGS HAVE_LIBZ HAVE_LIBPCAP
   SOURCES += src/windows/Pacer.cpp src/windows/platform_util.cpp
   HEADERS += src/windows/platform_util.h
+  qt:multimedia {
+	CONFIG += sound
+  }
+  else {
+    HEADERS += src/windows/Sound.h
+    SOURCES += src/windows/Sound.cpp
+    LIBS += -lwinmm
+    message("with mmsystem")
+	CONFIG += sound
+  }
   msvc* {
         DEFINES += NOMINMAX
         QMAKE_LFLAGS_RELEASE += /NODEFAULTLIB:libcmt.lib
@@ -205,14 +216,6 @@ win32 {
     QT += multimedia
   }
   else {
-    !multimedia {t
-        exists($$PWD/include/portaudio.h) {
-          CONFIG += portaudio sound
-        }
-        else {
-          CONFIG += mmsystem sound
-        }
-    }
     exists($$PWD/include/speex/speex_preprocess.h) {
       CONFIG += speexdsp
     }
@@ -324,12 +327,6 @@ alsa {
     SOURCES += src/linux/alsain.cpp src/linux/alsaout.cpp src/linux/alsacommon.cpp
     LIBS += -lasound
     message("with alsa")
-}
-mmsystem {
-    HEADERS += src/windows/Sound.h
-    SOURCES += src/windows/Sound.cpp
-    LIBS += -lwinmm
-    message("with mmsystem")
 }
 portaudio {
     DEFINES += USE_PORTAUDIO
