@@ -1,5 +1,6 @@
 TEMPLATE = app
 CONFIG += warn_on
+CONFIG+=fdk-aac
 TARGET = dream
 OBJECTS_DIR = obj
 DEFINES += EXECUTABLE_NAME=$$TARGET
@@ -36,9 +37,7 @@ qtconsole {
 }
 gui {
     RESOURCES = src/GUI-QT/res/icons.qrc
-    QT += network xml
-    qt4:QT += webkit
-    qt5:QT += widgets
+    QT += network xml multimedia widgets webenginewidgets
     INCLUDEPATH += src/GUI-QT
     VPATH += src/GUI-QT
     win32:RC_FILE = windows/dream.rc
@@ -203,12 +202,15 @@ win32:mxe {
 }
 win32:!mxe {
     !multimedia {t
-        exists($$OUT_PWD/include/portaudio.h) {
+        exists($$PWD/include/portaudio.h) {
           CONFIG += portaudio sound
         }
         else {
           CONFIG += mmsystem sound
         }
+    }
+    exists($$PWD/include/fdk-aac/aacdecoder_lib.h) {
+      CONFIG += fdk-aac
     }
     exists($$PWD/include/speex/speex_preprocess.h) {
       CONFIG += speexdsp
@@ -242,6 +244,7 @@ win32:!mxe {
     else {
          DEFINES += HAVE_STDINT_H HAVE_LIBZ
          LIBS += -lz -llibfftw3
+         LIBS -= -lzlib
     }
 }
 fdk-aac {
