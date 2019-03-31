@@ -215,7 +215,7 @@ void CSoundCardSelMenu::UpdateDeviceMenu(QMenu* menu, const vector<string>& name
 {
     menu->clear();
     QActionGroup* group = nullptr;
-    for (int i = 0; i < names.size(); i++)
+    for (int i = 0; i < int(names.size()); i++)
     {
         QString name(QString::fromStdString(names[i]));
         QString desc(QString::fromStdString(descriptions[i]));

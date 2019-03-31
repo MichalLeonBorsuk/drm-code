@@ -535,7 +535,7 @@ void CDownstreamDI::poll()
 /******************************************************************************\
 * DI receive status, send control                                             *
 \******************************************************************************/
-CUpstreamDI::CUpstreamDI() : source(nullptr), sink(), bUseAFCRC(TRUE), bMDIOutEnabled(FALSE), bMDIInEnabled(FALSE)
+CUpstreamDI::CUpstreamDI() : source(nullptr), sink(), bUseAFCRC(true), bMDIOutEnabled(true)
 {
 	/* Init constant tag */
 	TagItemGeneratorProTyRSCI.GenTag();
@@ -551,12 +551,10 @@ CUpstreamDI::~CUpstreamDI()
 
 _BOOLEAN CUpstreamDI::SetOrigin(const string& str)
 {
-	/* only allow one listening address */
-	if(bMDIInEnabled == TRUE)
-		return FALSE;
-
-	if(source)
-		return FALSE;
+	if (source != nullptr) {
+		delete source;
+		source = nullptr;
+	}
 
 	strOrigin = str;
 
@@ -574,7 +572,6 @@ _BOOLEAN CUpstreamDI::SetOrigin(const string& str)
 	if (bOK)
 	{
 		source->SetPacketSink(this);
-		bMDIInEnabled = TRUE;
 		return TRUE;
 	}
 	return FALSE;

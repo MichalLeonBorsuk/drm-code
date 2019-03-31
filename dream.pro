@@ -248,9 +248,7 @@ sndfile {
 }
 speexdsp {
      DEFINES += HAVE_SPEEX
-     unix:LIBS += -lspeexdsp
-     win32:mxe:LIBS += -lspeexdsp
-     win32:!mxe:LIBS += -llibspeexdsp
+     LIBS += -lspeexdsp
      message("with libspeexdsp")
 }
 gps {
@@ -627,74 +625,74 @@ gui {
         SOURCES += src/GUI-QT/BWSViewer.cpp
         message('with BWS')
     }
-FORMS += \
-    AboutDlgbase.ui \
-    AMMainWindow.ui \
-    AMSSDlgbase.ui \
-    AACCodecParams.ui \
-    OpusCodecParams.ui \
-    DRMMainWindow.ui \
-    EPGDlgbase.ui \
-    FMMainWindow.ui \
-    GeneralSettingsDlgbase.ui \
-    JLViewer.ui \
-    LiveScheduleWindow.ui \
-    MultSettingsDlgbase.ui \
-    SlideShowViewer.ui \
-    StationsDlgbase.ui \
-    systemevalDlgbase.ui \
-    TransmDlgbase.ui
-HEADERS += \
-    src/GUI-QT/AnalogDemDlg.h \
-    src/GUI-QT/CWindow.h \
-    src/GUI-QT/DialogUtil.h \
-    src/GUI-QT/DRMPlot.h \
-    src/GUI-QT/EPGDlg.h \
-    src/GUI-QT/EvaluationDlg.h \
-    src/GUI-QT/fdrmdialog.h \
-    src/GUI-QT/fmdialog.h \
-    src/GUI-QT/GeneralSettingsDlg.h \
-    src/GUI-QT/jlbrowser.h \
-    src/GUI-QT/JLViewer.h \
-    src/GUI-QT/LiveScheduleDlg.h \
-    src/GUI-QT/MultColorLED.h \
-    src/GUI-QT/MultSettingsDlg.h \
-    src/GUI-QT/Schedule.h \
-    src/GUI-QT/SlideShowViewer.h \
-    src/GUI-QT/SoundCardSelMenu.h \
-    src/GUI-QT/StationsDlg.h \
-    src/GUI-QT/OpusCodecParams.h \
-    src/GUI-QT/AACCodecParams.h \
-    src/GUI-QT/TransmDlg.h \
-    src/GUI-QT/ctrx.h \
-    src/GUI-QT/crx.h \
-    src/GUI-QT/ctx.h
-SOURCES += \
-    src/GUI-QT/AnalogDemDlg.cpp \
-    src/GUI-QT/CWindow.cpp \
-    src/GUI-QT/DialogUtil.cpp \
-    src/GUI-QT/DRMPlot.cpp \
-    src/GUI-QT/EPGDlg.cpp \
-    src/GUI-QT/EvaluationDlg.cpp \
-    src/GUI-QT/fdrmdialog.cpp \
-    src/GUI-QT/fmdialog.cpp \
-    src/GUI-QT/GeneralSettingsDlg.cpp \
-    src/GUI-QT/jlbrowser.cpp \
-    src/GUI-QT/JLViewer.cpp \
-    src/GUI-QT/LiveScheduleDlg.cpp \
-    src/GUI-QT/MultColorLED.cpp \
-    src/GUI-QT/MultSettingsDlg.cpp \
-    src/GUI-QT/Schedule.cpp \
-    src/GUI-QT/SlideShowViewer.cpp \
-    src/GUI-QT/SoundCardSelMenu.cpp \
-    src/GUI-QT/StationsDlg.cpp \
-    src/GUI-QT/OpusCodecParams.cpp \
-    src/GUI-QT/AACCodecParams.cpp \
-    src/GUI-QT/TransmDlg.cpp \
-    src/GUI-QT/ctrx.cpp \
-    src/GUI-QT/crx.cpp \
-    src/GUI-QT/ctx.cpp \
-    src/GUI-QT/main.cpp
+    FORMS += \
+        AboutDlgbase.ui \
+        AMMainWindow.ui \
+        AMSSDlgbase.ui \
+        AACCodecParams.ui \
+        OpusCodecParams.ui \
+        DRMMainWindow.ui \
+        EPGDlgbase.ui \
+        FMMainWindow.ui \
+        GeneralSettingsDlgbase.ui \
+        JLViewer.ui \
+        LiveScheduleWindow.ui \
+        MultSettingsDlgbase.ui \
+        SlideShowViewer.ui \
+        StationsDlgbase.ui \
+        systemevalDlgbase.ui \
+        TransmDlgbase.ui
+    HEADERS += \
+        src/GUI-QT/AnalogDemDlg.h \
+        src/GUI-QT/CWindow.h \
+        src/GUI-QT/DialogUtil.h \
+        src/GUI-QT/DRMPlot.h \
+        src/GUI-QT/EPGDlg.h \
+        src/GUI-QT/EvaluationDlg.h \
+        src/GUI-QT/fdrmdialog.h \
+        src/GUI-QT/fmdialog.h \
+        src/GUI-QT/GeneralSettingsDlg.h \
+        src/GUI-QT/jlbrowser.h \
+        src/GUI-QT/JLViewer.h \
+        src/GUI-QT/LiveScheduleDlg.h \
+        src/GUI-QT/MultColorLED.h \
+        src/GUI-QT/MultSettingsDlg.h \
+        src/GUI-QT/Schedule.h \
+        src/GUI-QT/SlideShowViewer.h \
+        src/GUI-QT/SoundCardSelMenu.h \
+        src/GUI-QT/StationsDlg.h \
+        src/GUI-QT/OpusCodecParams.h \
+        src/GUI-QT/AACCodecParams.h \
+        src/GUI-QT/TransmDlg.h \
+        src/GUI-QT/ctrx.h \
+        src/GUI-QT/crx.h \
+        src/GUI-QT/ctx.h
+    SOURCES += \
+        src/GUI-QT/AnalogDemDlg.cpp \
+        src/GUI-QT/CWindow.cpp \
+        src/GUI-QT/DialogUtil.cpp \
+        src/GUI-QT/DRMPlot.cpp \
+        src/GUI-QT/EPGDlg.cpp \
+        src/GUI-QT/EvaluationDlg.cpp \
+        src/GUI-QT/fdrmdialog.cpp \
+        src/GUI-QT/fmdialog.cpp \
+        src/GUI-QT/GeneralSettingsDlg.cpp \
+        src/GUI-QT/jlbrowser.cpp \
+        src/GUI-QT/JLViewer.cpp \
+        src/GUI-QT/LiveScheduleDlg.cpp \
+        src/GUI-QT/MultColorLED.cpp \
+        src/GUI-QT/MultSettingsDlg.cpp \
+        src/GUI-QT/Schedule.cpp \
+        src/GUI-QT/SlideShowViewer.cpp \
+        src/GUI-QT/SoundCardSelMenu.cpp \
+        src/GUI-QT/StationsDlg.cpp \
+        src/GUI-QT/OpusCodecParams.cpp \
+        src/GUI-QT/AACCodecParams.cpp \
+        src/GUI-QT/TransmDlg.cpp \
+        src/GUI-QT/ctrx.cpp \
+        src/GUI-QT/crx.cpp \
+        src/GUI-QT/ctx.cpp \
+        src/GUI-QT/main.cpp
 } else {
     SOURCES += src/main.cpp
 }
