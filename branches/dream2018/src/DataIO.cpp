@@ -32,6 +32,7 @@
 #ifdef QT_MULTIMEDIA_LIB
 # include <QAudioOutput>
 # include <QAudioInput>
+# include <QSet>
 #endif
 #include "sound/sound.h"
 
@@ -98,11 +99,16 @@ void CReadData::Stop()
 void CReadData::Enumerate(std::vector<std::string>& names, std::vector<std::string>& descriptions)
 {
 #ifdef QT_MULTIMEDIA_LIB
-    foreach(const QAudioDeviceInfo& di, QAudioDeviceInfo::availableDevices(QAudio::AudioInput))
-    {
-        names.push_back(di.deviceName().toStdString());
-        descriptions.push_back("");
-    }
+	QSet<QString> s;
+	foreach(const QAudioDeviceInfo& di, QAudioDeviceInfo::availableDevices(QAudio::AudioInput))
+	{
+		s.insert(di.deviceName());
+	}
+	names.clear(); descriptions.clear();
+	foreach(const QString n, s) {
+		names.push_back(n.toStdString());
+		descriptions.push_back("");
+	}
 #else
     if(pSound==nullptr) pSound = new CSoundIn;
     pSound->Enumerate(names, descriptions);
@@ -168,11 +174,16 @@ void CWriteData::Stop()
 void CWriteData::Enumerate(std::vector<std::string>& names, std::vector<std::string>& descriptions)
 {
 #ifdef QT_MULTIMEDIA_LIB
-    foreach(const QAudioDeviceInfo& di, QAudioDeviceInfo::availableDevices(QAudio::AudioOutput))
-    {
-        names.push_back(di.deviceName().toStdString());
-        descriptions.push_back("");
-    }
+	QSet<QString> s;
+	foreach(const QAudioDeviceInfo& di, QAudioDeviceInfo::availableDevices(QAudio::AudioInput))
+	{
+		s.insert(di.deviceName());
+	}
+	names.clear(); descriptions.clear();
+	foreach(const QString n, s) {
+		names.push_back(n.toStdString());
+		descriptions.push_back("");
+	}
 #else
     if(pSound==nullptr) pSound = new CSoundOut;
     pSound->Enumerate(names, descriptions);
