@@ -61,9 +61,10 @@ macx {
     INCLUDEPATH += /usr/local/include
     LIBS += -L/usr/local/lib
     QMAKE_LFLAGS += -F/usr/local/lib
-    LIBS += -framework CoreFoundation -framework CoreServices
+    LIBS += -framework CoreFoundation -framework CoreServices -lpcap
     LIBS += -framework CoreAudio -framework AudioToolbox -framework AudioUnit
-    CONFIG += pcap fdk-aac
+    CONFIG += fdk-aac
+    DEFINES += HAVE_LIBPCAP
     packagesExist(sndfile) {
         CONFIG += sndfile
     }
@@ -113,6 +114,8 @@ unix {
     DEFINES += HAVE_LIBZ
 }
 unix:!cross_compile {
+    DEFINES += HAVE_LIBPCAP
+    LIBS += -lpcap
     !sound {
          # check for pulseaudio before portaudio
          exists(/usr/include/pulse/pulseaudio.h) | \
@@ -138,12 +141,6 @@ unix:!cross_compile {
       packagesExist(libgps) {
         CONFIG += gps
       }
-      packagesExist(pcap) {
-        CONFIG += pcap
-      }
-      exists(/usr/include/pcap) {
-        CONFIG += pcap
-      }
       packagesExist(opus) {
         CONFIG += opus
       }
@@ -164,10 +161,6 @@ unix:!cross_compile {
       exists(/usr/local/include/gps.h) {
         CONFIG += gps
       }
-      exists(/usr/include/pcap.h) | \
-      exists(/usr/local/include/pcap.h) {
-        CONFIG += pcap
-      }
       exists(/usr/include/opus/opus.h) | \
       exists(/usr/local/include/opus/opus.h) {
        CONFIG += opus
@@ -184,7 +177,7 @@ contains(QMAKE_CC, i686-w64-mingw32.static-gcc) {
 win32 {
   CONFIG += fdk-aac
   LIBS += -lsetupapi -lwsock32 -lws2_32 -ladvapi32 -luser32 -lwpcap -lpacket
-  DEFINES += HAVE_SETUPAPI HAVE_LIBZ _CRT_SECURE_NO_WARNINGS HAVE_LIBZ
+  DEFINES += HAVE_SETUPAPI HAVE_LIBZ _CRT_SECURE_NO_WARNINGS HAVE_LIBZ HAVE_LIBPCAP
   SOURCES += src/windows/Pacer.cpp src/windows/platform_util.cpp
   HEADERS += src/windows/platform_util.h
   msvc* {
@@ -200,7 +193,7 @@ win32 {
   }
   mxe {
     message('MXE')
-    CONFIG += sndfile hamlib pcap opus speexdsp sound
+    CONFIG += sndfile hamlib opus speexdsp sound
     QT += multimedia
   }
   else {
@@ -264,11 +257,6 @@ gps {
      DEFINES += HAVE_LIBGPS
      unix:LIBS += -lgps
      message("with gps")
-}
-pcap {
-     DEFINES += HAVE_LIBPCAP
-     unix:LIBS += -lpcap
-     message("with pcap")
 }
 hamlib {
      DEFINES += HAVE_LIBHAMLIB
