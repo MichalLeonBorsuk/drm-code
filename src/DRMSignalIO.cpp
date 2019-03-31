@@ -33,6 +33,7 @@
 # include <QBuffer>
 # include <QAudioOutput>
 # include <QAudioInput>
+# include <QSet>
 #endif
 #include "sound/sound.h"
 #include "sound/audiofilein.h"
@@ -70,11 +71,16 @@ void CTransmitData::Stop()
 void CTransmitData::Enumerate(std::vector<std::string>& names, std::vector<std::string>& descriptions)
 {
 #ifdef QT_MULTIMEDIA_LIB
-    foreach(const QAudioDeviceInfo& di, QAudioDeviceInfo::availableDevices(QAudio::AudioOutput))
-    {
-        names.push_back(di.deviceName().toStdString());
-        descriptions.push_back("");
-    }
+	QSet<QString> s;
+	foreach(const QAudioDeviceInfo& di, QAudioDeviceInfo::availableDevices(QAudio::AudioOutput))
+	{
+		s.insert(di.deviceName());
+	}
+	names.clear(); descriptions.clear();
+	foreach(const QString n, s) {
+		names.push_back(n.toStdString());
+		descriptions.push_back("");
+	}
 #else
     if(pSound==nullptr) pSound = new CSoundOut;
     pSound->Enumerate(names, descriptions);
@@ -347,9 +353,14 @@ void CReceiveData::Stop()
 void CReceiveData::Enumerate(std::vector<std::string>& names, std::vector<std::string>& descriptions)
 {
 #ifdef QT_MULTIMEDIA_LIB
-    foreach(const QAudioDeviceInfo& di, QAudioDeviceInfo::availableDevices(QAudio::AudioInput))
-    {
-        names.push_back(di.deviceName().toStdString());
+	QSet<QString> s;
+	foreach(const QAudioDeviceInfo& di, QAudioDeviceInfo::availableDevices(QAudio::AudioInput))
+	{
+		s.insert(di.deviceName());
+	}
+	names.clear(); descriptions.clear();
+	foreach(const QString n, s) {
+        names.push_back(n.toStdString());
         descriptions.push_back("");
     }
 #else
@@ -396,28 +407,25 @@ CReceiveData::SetSoundInterface(string device)
         format.setCodec("audio/pcm");
         foreach(const QAudioDeviceInfo& di, QAudioDeviceInfo::availableDevices(QAudio::AudioInput))
         {
-            foreach(const QAudioDeviceInfo& di, QAudioDeviceInfo::availableDevices(QAudio::AudioInput))
-            {
-                if(device == di.deviceName().toStdString()) {
-                    QAudioFormat nearestFormat = di.nearestFormat(format);
-                    QAudioInput* pAudioInput = new QAudioInput(di, nearestFormat);
-                    pIODevice = pAudioInput->start();
-                    if(pAudioInput->error()==QAudio::NoError)
-                    {
-                        if(pIODevice->open(QIODevice::ReadOnly)) {
-                            qDebug("audio input open");
-                        }
-                        else {
-                            qDebug("audio input open failed");
-                        }
+            if(device == di.deviceName().toStdString()) {
+                QAudioFormat nearestFormat = di.nearestFormat(format);
+                QAudioInput* pAudioInput = new QAudioInput(di, nearestFormat);
+                pIODevice = pAudioInput->start();
+                if(pAudioInput->error()==QAudio::NoError)
+                {
+                    if(pIODevice->open(QIODevice::ReadOnly)) {
+                        qDebug("audio input open");
                     }
-                    else
-                    {
-                        qDebug("Can't open audio input");
+                    else {
+                        qDebug("audio input open failed");
                     }
                 }
-                break;
-            }
+                else
+                {
+                    qDebug("Can't open audio input");
+                }
+				break;
+			}
         }
 #else
         pSound = new CSoundIn();
