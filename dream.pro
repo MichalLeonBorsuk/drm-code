@@ -1,6 +1,5 @@
 TEMPLATE = app
 CONFIG += warn_on
-CONFIG+=fdk-aac
 TARGET = dream
 OBJECTS_DIR = obj
 DEFINES += EXECUTABLE_NAME=$$TARGET
@@ -64,10 +63,7 @@ macx {
     QMAKE_LFLAGS += -F/usr/local/lib
     LIBS += -framework CoreFoundation -framework CoreServices
     LIBS += -framework CoreAudio -framework AudioToolbox -framework AudioUnit
-    CONFIG += pcap
-    #packagesExist(libpulse) {
-    #    CONFIG += pulseaudio sound
-    #}
+    CONFIG += pcap fdk-aac
     packagesExist(sndfile) {
         CONFIG += sndfile
     }
@@ -77,15 +73,13 @@ macx {
     packagesExist(speex) {
         CONFIG += libspeexdsp
     }
-    packagesExist(fdk-aac) {
-        CONFIG += fdk-aac
-    }
 }
 linux-* {
+    CONFIG += fdk-aac
     LIBS += -ldl -lrt
 }
 android {
-    CONFIG += openSL sound
+    CONFIG += openSL sound fdk-aac
     SOURCES += src/android/platform_util.cpp src/android/soundin.cpp src/android/soundout.cpp
     HEADERS += src/android/platform_util.h src/android/soundin.h src/android/soundout.h
     QT -= webkitwidgets
@@ -102,8 +96,7 @@ unix {
     tui:console {
       CONFIG += consoleio
     }
-    LIBS += -lfftw3
-    LIBS += -lz
+    LIBS += -lfftw3 -lz
     SOURCES += src/linux/Pacer.cpp
     DEFINES += HAVE_DLFCN_H \
            HAVE_MEMORY_H \
@@ -157,9 +150,6 @@ unix:!cross_compile {
       packagesExist(speexdsp) {
         CONFIG += speexdsp
       }
-      packagesExist(fdk-aac) {
-        CONFIG += fdk-aac
-      }
     }
     else {
       exists(/usr/include/sndfile.h) | \
@@ -191,16 +181,29 @@ unix:!cross_compile {
 contains(QMAKE_CC, i686-w64-mingw32.static-gcc) {
   CONFIG += mxe
 }
-win32:mxe {
-  message('MXE')
-  CONFIG += sndfile hamlib pcap opus speexdsp fdk-aac sound
-  QT += multimedia
-  LIBS += -lsetupapi -lwsock32 -lws2_32 -ladvapi32 -luser32 -lz -lfftw3
-  DEFINES += HAVE_SETUPAPI HAVE_LIBZ _CRT_SECURE_NO_WARNINGS HAVE_STDINT_H HAVE_LIBZ
+win32 {
+  CONFIG += fdk-aac
+  LIBS += -lsetupapi -lwsock32 -lws2_32 -ladvapi32 -luser32 -lwpcap -lpacket
+  DEFINES += HAVE_SETUPAPI HAVE_LIBZ _CRT_SECURE_NO_WARNINGS HAVE_LIBZ
   SOURCES += src/windows/Pacer.cpp src/windows/platform_util.cpp
   HEADERS += src/windows/platform_util.h
-}
-win32:!mxe {
+  msvc* {
+        DEFINES += NOMINMAX
+        QMAKE_LFLAGS_RELEASE += /NODEFAULTLIB:libcmt.lib
+        QMAKE_LFLAGS_DEBUG += /NODEFAULTLIB:libcmtd.lib
+        QMAKE_LFLAGS_DEBUG += /NODEFAULTLIB:libcmt.lib
+        LIBS += -lzlib -llibfftw3-3
+  }
+  else {
+         DEFINES += HAVE_STDINT_H
+         LIBS += -lz -lfftw3
+  }
+  mxe {
+    message('MXE')
+    CONFIG += sndfile hamlib pcap opus speexdsp sound
+    QT += multimedia
+  }
+  else {
     !multimedia {t
         exists($$PWD/include/portaudio.h) {
           CONFIG += portaudio sound
@@ -209,17 +212,11 @@ win32:!mxe {
           CONFIG += mmsystem sound
         }
     }
-    exists($$PWD/include/fdk-aac/aacdecoder_lib.h) {
-      CONFIG += fdk-aac
-    }
     exists($$PWD/include/speex/speex_preprocess.h) {
       CONFIG += speexdsp
     }
     exists($$PWD/include/hamlib/rig.h) {
       CONFIG += hamlib
-    }
-    exists($$PWD/include/pcap.h) {
-      CONFIG += pcap
     }
     exists($$PWD/include/sndfile.h) {
         CONFIG += sndfile
@@ -227,25 +224,7 @@ win32:!mxe {
     exists($$PWD/include/opus/opus.h) {
         CONFIG += opus
     }
-    exists($$PWD/include/fdk-aac/aacdecoder_lib.h) {
-        CONFIG += fdk-aac
-    }
-    LIBS += -lsetupapi -lwsock32 -lws2_32 -ladvapi32 -luser32
-    DEFINES += HAVE_SETUPAPI HAVE_LIBZ _CRT_SECURE_NO_WARNINGS
-    SOURCES += src/windows/Pacer.cpp src/windows/platform_util.cpp
-    HEADERS += src/windows/platform_util.h
-    msvc* {
-        DEFINES += NOMINMAX
-        QMAKE_LFLAGS_RELEASE += /NODEFAULTLIB:libcmt.lib
-        QMAKE_LFLAGS_DEBUG += /NODEFAULTLIB:libcmtd.lib
-        QMAKE_LFLAGS_DEBUG += /NODEFAULTLIB:libcmt.lib
-        LIBS += -lzlib -llibfftw3-3
-    }
-    else {
-         DEFINES += HAVE_STDINT_H HAVE_LIBZ
-         LIBS += -lz -llibfftw3
-         LIBS -= -lzlib
-    }
+  }
 }
 fdk-aac {
      DEFINES += HAVE_LIBFDK_AAC
@@ -289,7 +268,6 @@ gps {
 pcap {
      DEFINES += HAVE_LIBPCAP
      unix:LIBS += -lpcap
-     win32:LIBS += -lwpcap -lpacket
      message("with pcap")
 }
 hamlib {
