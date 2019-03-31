@@ -54,12 +54,12 @@ public:
 	virtual ~CUpstreamDI();
 
 	/* CRSIMDIInInterface */
-	_BOOLEAN SetOrigin(const string& strAddr);
-	_BOOLEAN GetInEnabled() {return bMDIInEnabled;}
+	bool SetOrigin(const string& strAddr);
+	bool GetInEnabled() {return source != nullptr;}
 
 	/* CRCIOutInterface */
-	_BOOLEAN SetDestination(const string& strArgument);
-	_BOOLEAN GetOutEnabled() {return bMDIOutEnabled;}
+	bool SetDestination(const string& strArgument);
+	bool GetOutEnabled() {return bMDIOutEnabled;}
 	void SetAFPktCRC(const _BOOLEAN bNAFPktCRC) {bUseAFCRC=bNAFPktCRC;}
 	void SetFrequency(int iNewFreqkHz);
 	void SetReceiverMode(ERecMode eNewMode);
@@ -82,12 +82,11 @@ protected:
 	CRSISubscriberSocket		sink;
 	CPft						Pft;
 
-	_BOOLEAN					bUseAFCRC;
+	bool						bUseAFCRC;
 
 	CSingleBuffer<_BINARY>		MDIInBuffer;
-	_BOOLEAN					bMDIOutEnabled;
-	_BOOLEAN					bMDIInEnabled;
-	_BOOLEAN					bNeedPft;
+	bool						bMDIOutEnabled;
+	bool						bNeedPft;
 
 	/* Tag Item Generators */
 
