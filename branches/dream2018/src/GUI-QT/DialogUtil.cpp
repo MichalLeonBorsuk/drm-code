@@ -175,7 +175,7 @@ CAboutDlg::CAboutDlg(QWidget* parent):
 #ifdef HAVE_SPEEX
         "<li><b>LIBSPEEX</b> <i>http://www.speex.org</i></li>"
 #endif
-		<p>The audio and signal device drivers in use are as follows:</p>
+		"<p>The audio and signal device drivers in use are as follows:</p>"
 #ifdef USE_ALSA
         "<li><b>ALSA</b> (" + QString(SND_LIB_VERSION_STR) + ") <i>http://www.alsa-project.org</i></li>"
 #endif
