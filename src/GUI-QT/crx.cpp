@@ -239,7 +239,7 @@ void CRx::GetAMBWParameters(double& rCenterFreq, double& rBW)
 
 double CRx::GetAMMixerFrequencyOffset() const
 {
-    rx.GetAMDemod()->GetCurMixFreqOffs();
+    return rx.GetAMDemod()->GetCurMixFreqOffs();
 }
 
 int     CRx::GetAMNoiseReductionLevel()
@@ -420,6 +420,7 @@ void CRx::SetReceiverMode(ERecMode e)
 
 void CRx::SetAMDemodulationType(EDemodType e)
 {
+    rx.GetAMDemod()->SetDemodType(e);
 }
 
 void CRx::SetAMFilterBW(int n)
