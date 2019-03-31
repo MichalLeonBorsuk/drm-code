@@ -30,6 +30,7 @@
 #include <iostream>
 #define _SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING
 #include <cstring>
+#include <iostream>
 #include <codecvt>
 
 std::string ws2s(const std::wstring& wstr)
@@ -86,6 +87,7 @@ CSoundIn::CSoundIn():CSoundInInterface(),m_WaveIn(nullptr)
 	/* Get info about the devices and store the names */
     for (i = 0; i < iNumDevs; i++) {
         if (!waveInGetDevCaps(i, &m_WaveInDevCaps, sizeof(WAVEINCAPS))) {
+            cerr << "mmsystem " <<  ws2s(m_WaveInDevCaps.szPname) << endl;
             vecstrDevices.push_back(ws2s(m_WaveInDevCaps.szPname));
         }
     }
@@ -375,6 +377,7 @@ CSoundOut::CSoundOut():CSoundOutInterface(),m_WaveOut(nullptr)
 	/* Get info about the devices and store the names */
     for (i = 0; i < iNumDevs; i++) {
         if (!waveOutGetDevCaps(i, &m_WaveOutDevCaps, sizeof(WAVEOUTCAPS))) {
+            cerr << "mmsystem " <<  ws2s(m_WaveOutDevCaps.szPname) << endl;
 			vecstrDevices.push_back(ws2s(m_WaveOutDevCaps.szPname));
 		}
     }
