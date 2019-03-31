@@ -72,12 +72,19 @@ FdkAacCodec::CanDecode(CAudioParam::EAudCod eAudioCoding)
     LIB_INFO linfo;
     aacinfo(linfo);
     if(eAudioCoding == CAudioParam::AC_AAC) {
-        if((linfo.flags & CAPF_AAC_DRM_BSFORMAT) == 0)
+        if((linfo.flags & CAPF_AAC_DRM_BSFORMAT) == 0) {
+            cerr << "aac but codec has no drm" << endl;
             return false;
-        if((linfo.flags & CAPF_SBR_DRM_BS) ==0 )
+        }
+        if((linfo.flags & CAPF_SBR_DRM_BS) ==0 ) {
+            cerr << "aac but  codec has no sbr" << endl;
             return false;
-        if((linfo.flags & CAPF_SBR_PS_DRM) == 0)
+        }
+        if((linfo.flags & CAPF_SBR_PS_DRM) == 0) {
+            cerr << "aac but  codec has no parametric stereo" << endl;
             return false;
+        }
+        cerr << "can decode" << endl;
         return true;
     }
 #ifdef HAVE_USAC
