@@ -175,7 +175,7 @@ void CWriteData::Enumerate(std::vector<std::string>& names, std::vector<std::str
 {
 #ifdef QT_MULTIMEDIA_LIB
 	QSet<QString> s;
-	foreach(const QAudioDeviceInfo& di, QAudioDeviceInfo::availableDevices(QAudio::AudioInput))
+	foreach(const QAudioDeviceInfo& di, QAudioDeviceInfo::availableDevices(QAudio::AudioOutput))
 	{
 		s.insert(di.deviceName());
 	}
