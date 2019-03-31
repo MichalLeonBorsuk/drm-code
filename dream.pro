@@ -36,15 +36,23 @@ qtconsole {
 }
 gui {
     RESOURCES = src/GUI-QT/res/icons.qrc
-    QT += network xml multimedia widgets webenginewidgets
+    QT += network xml multimedia widgets
     INCLUDEPATH += src/GUI-QT
     VPATH += src/GUI-QT
-    win32:RC_FILE = windows/dream.rc
-    win32:RC_INCLUDEPATH = $$PWD/src/GUI-QT/res
+    win32 {
+        RC_FILE = windows/dream.rc
+        RC_INCLUDEPATH = $$PWD/src/GUI-QT/res
+    }
     macx:RC_FILE = src/GUI-QT/res/macicons.icns
     CONFIG += qwt
     UI_DIR = ui
     MOC_DIR = moc
+    contains(QT,webenginewidgets) {
+        FORMS += BWSViewer.ui
+        HEADERS += src/GUI-QT/BWSViewer.h
+        SOURCES += src/GUI-QT/BWSViewer.cpp
+        message('with BWS')
+    }
 }
 message($$VERSION_MESSAGE $$DEBUG_MESSAGE $$UI_MESSAGE)
 qt:multimedia {
@@ -619,12 +627,6 @@ SOURCES += \
     src/util-QT/Util.cpp
 }
 gui {
-    contains(QT,webenginewidgets) {
-        FORMS += BWSViewer.ui
-        HEADERS += src/GUI-QT/BWSViewer.h
-        SOURCES += src/GUI-QT/BWSViewer.cpp
-        message('with BWS')
-    }
     FORMS += \
         AboutDlgbase.ui \
         AMMainWindow.ui \
