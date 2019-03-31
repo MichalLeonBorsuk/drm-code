@@ -45,19 +45,6 @@
 # include "../util-QT/Rig.h"
 #endif
 
-/* to extract the library version */
-#ifdef USE_ALSA
-# include <alsa/version.h>
-#endif
-#ifdef USE_OSS
-# include <sys/soundcard.h>
-#endif
-#ifdef USE_PORTAUDIO
-# include <portaudio.h>
-#endif
-#ifdef USE_PULSEAUDIO
-# include <pulse/version.h>
-#endif
 #ifdef HAVE_LIBSNDFILE
 # include <sndfile.h>
 #endif
@@ -177,11 +164,6 @@ CAboutDlg::CAboutDlg(QWidget* parent):
         "<li><b>FhG IIS Journaline Decoder</b> <i>Features NewsService "
         "Journaline(R) decoder technology by Fraunhofer IIS, Erlangen, "
         "Germany. For more information visit http://www.iis.fraunhofer.de/en/bf/db/pro.html</i></li>"
-#ifdef HAVE_LIBFREEIMAGE
-        "<li><b>FreeImage</b> (" + QString(FreeImage_GetVersion()) + ") <i>This software uses the FreeImage open source "
-        "image library. See http://freeimage.sourceforge.net for details. "
-        "FreeImage is used under the GNU GPL.</i></li>"
-#endif
 #ifdef HAVE_LIBPCAP
         "<li><b>LIBPCAP</b> (" + QString(pcap_lib_version()) + ") <i>http://www.tcpdump.org/ "
         "This product includes software developed by the Computer Systems "
@@ -193,9 +175,7 @@ CAboutDlg::CAboutDlg(QWidget* parent):
 #ifdef HAVE_SPEEX
         "<li><b>LIBSPEEX</b> <i>http://www.speex.org</i></li>"
 #endif
-#ifdef USE_OSS
-        "<li><b>OSS</b> (" + QString("Open Sound System version %1").arg(SOUND_VERSION, 0, 16) + ")</li>"
-#endif
+		<p>The audio and signal device drivers in use are as follows:</p>
 #ifdef USE_ALSA
         "<li><b>ALSA</b> (" + QString(SND_LIB_VERSION_STR) + ") <i>http://www.alsa-project.org</i></li>"
 #endif
@@ -208,6 +188,14 @@ CAboutDlg::CAboutDlg(QWidget* parent):
 #ifdef USE_JACK
         "<li><b>libjack</b> (The Jack Audio Connection Kit) <i>http://www.jackaudio.org</i></li>"
 #endif
+#ifdef QT_MULTIMEDIA
+		"<li><b>Qt Multimedia</b>(" + QString(QT_VERSION_STR) + ") <i>http://qt-project.org</i></li>"
+#else
+# ifdef WIN32
+		"<li><b>Windows Waveform Audio</b>(WinMM) <i>https://docs.microsoft.com</i></li>"
+# endif
+#endif
+
 #ifdef HAVE_LIBFDK_AAC
         "<li><b>fdk-aac decoder</b> (" + fdk.DecGetVersion().c_str() + ") <i>https://www.iis.fraunhofer.de/en/ff/amm/impl.html</i></li>"
 #endif
