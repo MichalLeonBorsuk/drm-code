@@ -29,7 +29,7 @@
 #include "Sound.h"
 #include <iostream>
 #define _SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING
-#include <string>
+#include <cstring>
 #include <codecvt>
 
 std::string ws2s(const std::wstring& wstr)
@@ -80,6 +80,7 @@ CSoundIn::CSoundIn():CSoundInInterface(),m_WaveIn(nullptr)
         psSoundcardBuffer[i] = nullptr;
     }
 
+    vecstrDevices.clear();
 	/* Default device WAVE_MAPPER */
 	vecstrDevices.push_back("");
 	/* Get info about the devices and store the names */
@@ -367,7 +368,8 @@ CSoundOut::CSoundOut():CSoundOutInterface(),m_WaveOut(nullptr)
         psPlaybackBuffer[i] = nullptr;
     }
 
-	/* Default device WAVE_MAPPER */
+    vecstrDevices.clear();
+    /* Default device WAVE_MAPPER */
 	vecstrDevices.push_back("");
 
 	/* Get info about the devices and store the names */
