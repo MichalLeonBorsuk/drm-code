@@ -51,9 +51,6 @@
 #ifdef HAVE_LIBPCAP
 # include <pcap.h>
 #endif
-#ifdef HAVE_LIBFREEIMAGE
-# include <FreeImage.h>
-#endif
 #ifdef QT_GUI_LIB
 # include <qwt_global.h>
 #endif
@@ -67,6 +64,16 @@
 #endif
 #ifdef HAVE_LIBFDK_AAC
 # include "../sourcedecoders/fdk_aac_codec.h"
+#endif
+#ifdef USE_ALSA
+# include <alsa/version.h>
+#endif
+#ifdef USE_PORTAUDIO
+#endif
+#ifdef USE_PULSEAUDIO
+# include <pulse/pulseaudio.h>
+#endif
+#ifdef USE_JACK
 #endif
 /* fftw 3.3.2 doesn't export the symbol fftw_version
  * for windows in libfftw3-3.def
