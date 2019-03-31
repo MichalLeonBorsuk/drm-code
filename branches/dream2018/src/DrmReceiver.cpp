@@ -158,23 +158,37 @@ CDRMReceiver::SetAMFilterBW(int value)
 void
 CDRMReceiver::SetInputDevice(QString s)
 {
-    string device = s.toStdString();
-    if(device == "") {
-        vector<string> names;
-        vector<string> descriptions;
-        ReceiveData.Enumerate(names, descriptions);
-        if(names.size()>0)
-            device = names[0];
-    }
-    ReceiveData.Stop();
-    ReceiveData.ClearInputData();
-    /* Get a fresh CUpstreamDI interface */
-    if (pUpstreamRSCI->GetInEnabled())
-    {
-        delete pUpstreamRSCI;
-        pUpstreamRSCI = new CUpstreamDI();
-    }
-    switch(FileTyper::resolve(device)) {
+	ReceiveData.Stop();
+	ReceiveData.ClearInputData();
+	/* Get a fresh CUpstreamDI interface */
+	if (pUpstreamRSCI->GetInEnabled())
+	{
+		delete pUpstreamRSCI;
+		pUpstreamRSCI = new CUpstreamDI();
+	}
+	string device = s.toStdString();
+	FileTyper::type t = FileTyper::resolve(device);
+	if (t == FileTyper::unrecognised) {
+		vector<string> names;
+		vector<string> descriptions;
+		ReceiveData.Enumerate(names, descriptions);
+		if (names.size() > 0) {
+			if (device == "") {
+				device = names[0];
+				t = FileTyper::pcm;
+			}
+			else {
+				for (int i = 0; i<int(names.size()); i++) {
+					if (device == names[i]) {
+						device = names[i];
+						t = FileTyper::pcm;
+						break;
+					}
+				}
+			}
+		}
+	}
+    switch(t) {
     case FileTyper::pcm:
         /* SetSyncInput to FALSE, can be modified by pUpstreamRSCI */
         InputResample.SetSyncInput(FALSE);
@@ -453,7 +467,7 @@ CDRMReceiver::DetectAcquiFAC()
 {
     /* If upstreamRSCI in is enabled, do not check for acquisition state because we want
        to stay in tracking mode all the time */
-    if (pUpstreamRSCI->GetInEnabled() == TRUE)
+    if (pUpstreamRSCI->GetInEnabled())
         return;
 
     /* Acquisition switch */
@@ -644,7 +658,7 @@ CDRMReceiver::InitReceiverMode()
     /* Init all modules */
     SetInStartMode();
 
-    if (pUpstreamRSCI->GetOutEnabled() == TRUE)
+    if (pUpstreamRSCI->GetOutEnabled())
     {
         pUpstreamRSCI->SetReceiverMode(eReceiverMode);
     }
@@ -764,7 +778,7 @@ CDRMReceiver::SetInStartMode()
 
     /* In case upstreamRSCI is enabled, go directly to tracking mode, do not activate the
        synchronization units */
-    if (pUpstreamRSCI->GetInEnabled() == TRUE)
+    if (pUpstreamRSCI->GetInEnabled())
     {
         /* We want to have as low CPU usage as possible, therefore set the
            synchronization units in a state where they do only a minimum
@@ -827,7 +841,7 @@ CDRMReceiver::process()
     bool bEnoughData = true;
 
     /* Input - from upstream RSCI or input and demodulation from sound card / file */
-    if (pUpstreamRSCI->GetInEnabled() == TRUE)
+    if (pUpstreamRSCI->GetInEnabled())
     {
         RSIPacketBuf.Clear();
         pUpstreamRSCI->ReadData(Parameters, RSIPacketBuf);
@@ -904,7 +918,7 @@ CDRMReceiver::process()
             SplitSDC.ProcessData(Parameters, SDCDecBuf, SDCUseBuf, SDCSendBuf);
         }
 
-        for (int i = 0; i < MSCDecBuf.size(); i++)
+        for (int i = 0; i < int(MSCDecBuf.size()); i++)
         {
             SplitMSC[i].ProcessData(Parameters, MSCDecBuf[i], MSCUseBuf[i], MSCSendBuf[i]);
         }
@@ -1306,7 +1320,7 @@ void CDRMReceiver::SetFrequency(int iNewFreqkHz)
         Parameters.ResetServicesStreams();
     Parameters.Unlock();
 
-    if (pUpstreamRSCI->GetOutEnabled() == TRUE)
+    if (pUpstreamRSCI->GetOutEnabled())
     {
         pUpstreamRSCI->SetFrequency(iNewFreqkHz);
     }
