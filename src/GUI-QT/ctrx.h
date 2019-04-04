@@ -5,8 +5,6 @@
 #include "../DrmTransceiver.h"
 #include <vector>
 
-enum ERunState { STOPPED, RUNNING, STOP_REQUESTED, RESTART };
-
 class CTRx : public QThread, public CDRMTransceiver
 {
     Q_OBJECT
