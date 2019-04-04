@@ -105,7 +105,7 @@ public slots:
     virtual void onSoundInChannelChanged(EInChanSel);
     virtual void onSoundOutChannelChanged(EOutChanSel);
     virtual void onSoundSampleRateChanged(int);
-    virtual void SetSoundSignalUpscale(int);
+    virtual void SetSoundSignalUpscale(int) override;
 
 private:
     CDRMReceiver& rx;
