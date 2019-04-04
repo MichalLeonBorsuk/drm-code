@@ -26,8 +26,8 @@
  *
 \******************************************************************************/
 
-#ifndef _GLOBALDEFINITIONS_H
-#define _GLOBALDEFINITIONS_H
+#ifndef GLOBALDEFINITIONS_H
+#define GLOBALDEFINITIONS_H
 
 #include <complex>
 using namespace std; /* Because of the library: "complex" */
@@ -145,10 +145,18 @@ typedef unsigned __int64 uint64_t;
 #else
 typedef signed char int8_t;
 typedef unsigned char uint8_t;
-typedef signed int int16_t;
+#ifndef _INT16_T
+    typedef signed int int16_t;
+#endif
+#ifndef _UINT16_T
 typedef unsigned int uint16_t;
+#endif
+#ifndef _INT32_T
 typedef signed long int32_t;
+#endif
+#ifndef _UINT32_T
 typedef unsigned long uint32_t;
+#endif
 typedef signed long long int64_t;
 typedef unsigned long long uint64_t;
 #endif

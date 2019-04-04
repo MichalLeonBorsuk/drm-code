@@ -35,6 +35,7 @@
 class CSettings;
 class CParameter;
 class QString;
+enum ERunState { STOPPED, RUNNING, STOP_REQUESTED, RESTART };
 
 class CDRMTransceiver
 {

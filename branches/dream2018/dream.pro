@@ -296,7 +296,7 @@ qwt {
     message("with Qwt")
     QT += svg
     macx {
-        INCLUDEPATH += /usr/local/lib/qwt.framework/Headers
+        INCLUDEPATH += /Library/Frameworks/qwt.framework/Headers
         LIBS += -framework qwt
     }
     win32 {
