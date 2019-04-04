@@ -30,7 +30,7 @@
 #include "ReceptLog.h"
 #include <iomanip>
 #include <iostream>
-#include <../matlib/MatlibStdToolbox.h>
+#include "matlib/MatlibStdToolbox.h"
 
 /* implementation --------------------------------------------- */
 

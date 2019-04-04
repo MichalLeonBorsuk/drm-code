@@ -32,7 +32,7 @@
 \******************************************************************************/
 
 #include "SymbolInterleaver.h"
-#include <../matlib/MatlibStdToolbox.h>
+#include "../matlib/MatlibStdToolbox.h"
 
 
 /* Implementation *************************************************************/

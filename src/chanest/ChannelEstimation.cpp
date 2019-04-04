@@ -28,7 +28,7 @@
 
 #include "ChannelEstimation.h"
 #include <limits>
-#include <../matlib/MatlibSigProToolbox.h>
+#include "../matlib/MatlibSigProToolbox.h"
 
 
 /* Implementation *************************************************************/

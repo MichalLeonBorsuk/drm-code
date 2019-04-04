@@ -30,7 +30,7 @@
 \******************************************************************************/
 
 #include "FreqSyncAcq.h"
-#include <../matlib/MatlibSigProToolbox.h>
+#include "../matlib/MatlibSigProToolbox.h"
 
 /* Implementation *************************************************************/
 void CFreqSyncAcq::ProcessDataInternal(CParameter& Parameters)
