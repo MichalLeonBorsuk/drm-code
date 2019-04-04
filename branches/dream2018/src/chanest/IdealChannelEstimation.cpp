@@ -27,7 +27,7 @@
 \******************************************************************************/
 
 #include "IdealChannelEstimation.h"
-#include <../matlib/MatlibSigProToolbox.h>
+#include "../matlib/MatlibSigProToolbox.h"
 
 /* Implementation *************************************************************/
 void CIdealChanEst::ProcessDataInternal(CParameter& Parameters)

@@ -32,7 +32,7 @@
 \******************************************************************************/
 
 #include "TimeSync.h"
-#include <../matlib/MatlibSigProToolbox.h>
+#include "../matlib/MatlibSigProToolbox.h"
 
 
 /* Implementation *************************************************************/
