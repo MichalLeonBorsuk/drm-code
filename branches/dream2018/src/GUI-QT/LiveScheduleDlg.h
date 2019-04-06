@@ -30,7 +30,7 @@
 
 #include "ui_LiveScheduleWindow.h"
 #include "CWindow.h"
-#include "crx.h"
+#include "../main-Qt/crx.h"
 #include <QSignalMapper>
 #include <QDialog>
 #include <QTreeWidget>

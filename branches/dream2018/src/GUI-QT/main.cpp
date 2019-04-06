@@ -57,8 +57,8 @@
   SLObjectItf engineObject = nullptr;
 #endif
 
-#include "crx.h"
-#include "ctx.h"
+#include "../main-Qt/crx.h"
+#include "../main-Qt/ctx.h"
 
 int
 main(int argc, char **argv)

@@ -444,6 +444,7 @@ FdkAacCodec::EncOpen(const CAudioParam& AudioParam, unsigned long& lNumSampEncIn
      * NB decoder uses only AOT_DRM_AAC and puts SBR, PS in sub fields - what should we do with the encoder?
      */
     switch (AudioParam.eAudioMode) {
+    case CAudioParam::AM_RESERVED:break;
     case CAudioParam::AM_MONO:
         if(AudioParam.eSBRFlag) {
             r = aacEncoder_SetParam(hEncoder, AACENC_AOT, AOT_DRM_SBR);
@@ -476,6 +477,14 @@ FdkAacCodec::EncOpen(const CAudioParam& AudioParam, unsigned long& lNumSampEncIn
         break;
     case CAudioParam::AS_24KHZ:
         r = aacEncoder_SetParam(hEncoder, AACENC_SAMPLERATE, 24000);
+        break;
+    case CAudioParam::AS_16KHZ:
+    case CAudioParam::AS_32KHZ:
+    case CAudioParam::AS_9_6KHZ:
+    case CAudioParam::AS_19_2KHZ:
+    case CAudioParam::AS_38_4KHZ:
+    case CAudioParam::AS_48KHZ:
+        ;
     }
     if(r!=AACENC_OK) {
         cerr << "error setting sample rate " << hex << r << dec << endl;
@@ -491,6 +500,7 @@ FdkAacCodec::EncOpen(const CAudioParam& AudioParam, unsigned long& lNumSampEncIn
     case CAudioParam::AM_STEREO:
         r = aacEncoder_SetParam(hEncoder, AACENC_CHANNELMODE, MODE_2);
        break;
+    case CAudioParam::AM_RESERVED:;
     //case CAudioParam::AM_SURROUND:
         //r = aacEncoder_SetParam(hEncoder, AACENC_CHANNELMODE, MODE_6_1); // TODO provide more options ES 201 980 6.4.3.10
     }
@@ -599,6 +609,7 @@ FdkAacCodec::fileName(const CParameter& Parameters) const
     case CAudioParam::AM_STEREO:
         ss << "stereo";
         break;
+    case CAudioParam::AM_RESERVED:;
     }
 
     if (Parameters.

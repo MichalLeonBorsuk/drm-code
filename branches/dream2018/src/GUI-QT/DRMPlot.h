@@ -68,7 +68,7 @@
 #include "../resample/cspectrumresample.h"
 #include "../util/Vector.h"
 #include "../Parameter.h"
-#include "crx.h"
+#include "../main-Qt/crx.h"
 
 
 /* Definitions ****************************************************************/
