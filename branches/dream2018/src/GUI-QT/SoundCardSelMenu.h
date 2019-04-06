@@ -35,7 +35,7 @@
 #include "../DrmReceiver.h"
 #include "../DrmTransceiver.h"
 #include "../sound/selectioninterface.h"
-#include "ctrx.h"
+#include "../main-Qt/ctrx.h"
 
 typedef struct CHANSEL {
     const char* Name;

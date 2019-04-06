@@ -60,7 +60,7 @@
 #include "GeneralSettingsDlg.h"
 #include "MultColorLED.h"
 #include "Logging.h"
-#include "crx.h"
+#include "../main-Qt/crx.h"
 #include "../DrmReceiver.h"
 #include "../util/Vector.h"
 #include "../datadecoding/DataDecoder.h"

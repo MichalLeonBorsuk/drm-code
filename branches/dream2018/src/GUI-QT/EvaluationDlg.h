@@ -36,7 +36,7 @@
 #include "MultColorLED.h"
 #include "../GlobalDefinitions.h"
 #include "../util/Vector.h"
-#include "crx.h"
+#include "../main-Qt/crx.h"
 
 /* Definitions ****************************************************************/
 /* Define this macro if you prefer the QT-type of displaying date and time */

@@ -45,7 +45,7 @@
 #include "DialogUtil.h"
 #include "CWindow.h"
 #include "MultColorLED.h"
-#include "crx.h"
+#include "../main-Qt/crx.h"
 #include "../util/Vector.h"
 
 /* Classes ********************************************************************/
