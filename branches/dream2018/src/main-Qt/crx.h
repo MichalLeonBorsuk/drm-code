@@ -152,6 +152,9 @@ signals:
     void ReverbEffectChanged(bool);
     void AcquisitionStateChanged(EAcqStat);
     void FrequencyChanged(int);
+    void drmModeStarted();
+    void amModeStarted();
+    void fmModeStarted();
 };
 
 #endif // CRX_H
