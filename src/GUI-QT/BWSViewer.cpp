@@ -27,7 +27,7 @@
 \******************************************************************************/
 
 #include "BWSViewer.h"
-#include "crx.h"
+#include "../main-Qt/crx.h"
 #include "../util-QT/Util.h"
 #include "../datadecoding/DataDecoder.h"
 #include <QDir>
