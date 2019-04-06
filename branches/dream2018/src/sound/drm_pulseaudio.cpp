@@ -479,7 +479,7 @@ void CSoundOutPulse::Init_HW()
 
 	ss.format = PA_SAMPLE_S16NE;
 	ss.channels = NUM_CHANNELS;
-	ss.rate = iSampleRate;
+    ss.rate = uint32_t(iSampleRate);
 
 	/* playback device */
 	if (!IsDefaultDevice())
