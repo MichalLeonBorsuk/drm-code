@@ -30,6 +30,13 @@ CRx::run()
             rx.InitReceiverMode();
             rx.SetInStartMode();
 
+            switch(rx.GetReceiverMode()) {
+            case RM_DRM: emit drmModeStarted(); break;
+            case RM_AM: emit amModeStarted(); break;
+            case RM_FM: emit fmModeStarted(); break;
+            case RM_NONE:;
+            }
+
             /* Set run flag so that the thread can work */
             eRunState = RUNNING;
             do
@@ -416,6 +423,7 @@ void CRx::SetReverberationEffect(bool b)
 void CRx::SetReceiverMode(ERecMode e)
 {
     rx.SetReceiverMode(e);
+    eRunState = RESTART;
 }
 
 void CRx::SetAMDemodulationType(EDemodType e)
