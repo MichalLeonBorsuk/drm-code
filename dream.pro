@@ -616,12 +616,19 @@ HEADERS += \
     src/GUI-QT/Logging.h \
     src/util-QT/epgdec.h \
     src/util-QT/EPG.h \
-    src/util-QT/Util.h
+    src/util-QT/Util.h \
+    src/main-Qt/ctrx.h \
+    src/main-Qt/crx.h \
+    src/main-Qt/ctx.h
+
 SOURCES += \
     src/GUI-QT/Logging.cpp \
     src/util-QT/EPG.cpp \
     src/util-QT/epgdec.cpp \
-    src/util-QT/Util.cpp
+    src/util-QT/Util.cpp \
+    src/main-Qt/ctrx.cpp \
+    src/main-Qt/crx.cpp \
+    src/main-Qt/ctx.cpp
 }
 gui {
     FORMS += \
@@ -662,10 +669,7 @@ gui {
         src/GUI-QT/StationsDlg.h \
         src/GUI-QT/OpusCodecParams.h \
         src/GUI-QT/AACCodecParams.h \
-        src/GUI-QT/TransmDlg.h \
-        src/GUI-QT/ctrx.h \
-        src/GUI-QT/crx.h \
-        src/GUI-QT/ctx.h
+        src/GUI-QT/TransmDlg.h
     SOURCES += \
         src/GUI-QT/AnalogDemDlg.cpp \
         src/GUI-QT/CWindow.cpp \
@@ -688,9 +692,6 @@ gui {
         src/GUI-QT/OpusCodecParams.cpp \
         src/GUI-QT/AACCodecParams.cpp \
         src/GUI-QT/TransmDlg.cpp \
-        src/GUI-QT/ctrx.cpp \
-        src/GUI-QT/crx.cpp \
-        src/GUI-QT/ctx.cpp \
         src/GUI-QT/main.cpp
 } else {
     SOURCES += src/main.cpp
