@@ -31,7 +31,7 @@
 
 #include "ui_SlideShowViewer.h"
 #include "CWindow.h"
-#include "crx.h"
+#include "../main-Qt/crx.h"
 #include "../datadecoding/DABMOT.h"
 
 class SlideShowViewer : public CWindow, public Ui_SlideShowViewer

@@ -35,7 +35,7 @@
 
 #include "DialogUtil.h"
 #include "CWindow.h"
-#include "crx.h"
+#include "../main-Qt/crx.h"
 #include "Schedule.h"
 
 /* Definitions ****************************************************************/

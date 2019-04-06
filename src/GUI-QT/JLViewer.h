@@ -31,7 +31,7 @@
 
 #include "ui_JLViewer.h"
 #include "CWindow.h"
-#include "crx.h"
+#include "../main-Qt/crx.h"
 #include <QTextDocument>
 #include <string>
 

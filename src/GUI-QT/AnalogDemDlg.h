@@ -36,7 +36,7 @@
 #include "SoundCardSelMenu.h"
 #include "DRMPlot.h"
 #include "../GlobalDefinitions.h"
-#include "crx.h"
+#include "../main-Qt/crx.h"
 #include "../tables/TableAMSS.h"
 #include <QTimer>
 #include <QDialog>

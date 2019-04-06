@@ -32,7 +32,7 @@
 
 #include "ui_EPGDlgbase.h"
 #include "CWindow.h"
-#include "crx.h"
+#include "../main-Qt/crx.h"
 #include "../util-QT/EPG.h"
 #include <QWidget>
 #include <QDateTime>
