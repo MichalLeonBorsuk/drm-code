@@ -131,10 +131,6 @@ protected:
 
     void		SetDisplayColor(const QColor newColor);
 
-    void		ChangeGUIModeToDRM();
-    void		ChangeGUIModeToAM();
-    void		ChangeGUIModeToFM();
-
     QString	GetCodecString(const CService&);
     QString	GetTypeString(const CService&);
     QString serviceSelector(CParameter&, int);
@@ -165,6 +161,9 @@ public slots:
     void OnWhatsThis();
     void OnSysTrayActivated(QSystemTrayIcon::ActivationReason);
     void OnWorkingThreadFinished();
+    void ChangeGUIModeToDRM();
+    void ChangeGUIModeToAM();
+    void ChangeGUIModeToFM();
 signals:
     void plotStyleChanged(int);
 };

@@ -239,6 +239,10 @@ FDRMDialog::FDRMDialog(CTRx* pRx, CSettings& Settings, QWidget* parent)
 
     connect(&Timer, SIGNAL(timeout()), this, SLOT(OnTimer()));
 
+    connect(&rx, SIGNAL(drmModeStarted()), this, SLOT(ChangeGUIModeToDRM()));
+    connect(&rx, SIGNAL(amModeStarted()), this, SLOT(ChangeGUIModeToAM()));
+    connect(&rx, SIGNAL(fmModeStarted()), this, SLOT(ChangeGUIModeToFM()));
+
     serviceLabels[0] = TextMiniService1;
     serviceLabels[1] = TextMiniService2;
     serviceLabels[2] = TextMiniService3;
