@@ -43,7 +43,7 @@ captureCallback(const void *inputBuffer, void *outputBuffer,
     /* Cast data passed through stream to our structure. */
     CPaCommon *This = (CPaCommon *) userData;
     (void) outputBuffer;		/* Prevent unused variable warning. */
-    long bytes = framesPerBuffer*2*sizeof(short);
+    long bytes = long(framesPerBuffer*2*sizeof(short));
     long avail = PaUtil_GetRingBufferWriteAvailable(&This->ringBuffer);
     PaUtil_WriteRingBuffer(&This->ringBuffer, inputBuffer, (avail<bytes)?avail:bytes);
     if (statusFlags&paInputOverflow)
@@ -212,7 +212,7 @@ CPaCommon::ReInit()
     int idev = -1;
     for (int i = 0; i < int(names.size()); i++)
     {
-        if (names[i] == dev)
+        if (names[unsigned(i)] == dev)
         {
             idev = i;
             break;
@@ -228,8 +228,8 @@ CPaCommon::ReInit()
     }
     else
     {
-        cout << "opening " << names[idev] << endl;
-        pParameters.device = devices[idev];
+        cout << "opening " << names[unsigned(idev)] << endl;
+        pParameters.device = devices[unsigned(idev)];
     }
 
     if (pParameters.device == paNoDevice)
@@ -257,7 +257,7 @@ CPaCommon::ReInit()
     {
         err = Pa_OpenStream(&stream, &pParameters, nullptr, samplerate,
                             framesPerBuffer, paNoFlag, captureCallback,
-                            (void *) this);
+                            this);
 
         if (err != paNoError) {
             //throw string("PortAudio error: ") + Pa_GetErrorText(err);
