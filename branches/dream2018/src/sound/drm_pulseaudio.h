@@ -115,7 +115,7 @@ protected:
 
 	int				iSampleRate;
 	int				iBufferSize;
-	long			lTimeToWait;
+    unsigned        timeToWait;
 	_BOOLEAN		bBlockingRec;
 
 	_BOOLEAN		bBufferingError;
@@ -161,7 +161,7 @@ protected:
 
 	int				iSampleRate;
 	int				iBufferSize;
-	long			lTimeToWait;
+    unsigned		timeToWait;
 	_BOOLEAN		bBlockingPlay;
 
 	pa_stream		*pa_s;
