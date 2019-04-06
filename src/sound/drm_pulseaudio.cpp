@@ -41,15 +41,15 @@
 # define PA_STREAM_DONT_MOVE 0
 #endif
 
-#define RECORD_BUFFER_US    2000000 // us
-#define PLAYBACK_BUFFER_US  2000000 // us
-#define PLAYBACK_LATENCY_US 1000000 // us (50% of PLAYBACK_BUFFER_US)
-#define WAIT_PREBUFFER ((int)(PLAYBACK_LATENCY_US + 399999) / 400000) // 400000us = .4s (frame duration)
+#define RECORD_BUFFER_US    2000000.0 // us
+#define PLAYBACK_BUFFER_US  2000000.0 // us
+#define PLAYBACK_LATENCY_US 1000000.0 // us (50% of PLAYBACK_BUFFER_US)
+#define WAIT_PREBUFFER int((PLAYBACK_LATENCY_US + 399999.0) / 400000.0)) // 400000us = .4s (frame duration)
 #define NUM_CHANNELS 2 // Stereo
-#define BYTES_PER_SAMPLE ((int)sizeof(_SAMPLE))
-#define PA_RECORD_MAXLENGTH ((int)((double)(NUM_CHANNELS * BYTES_PER_SAMPLE * iSampleRate) * ((double)RECORD_BUFFER_US)    / (double)1000000))
-#define PA_PLAYBACK_TLENGTH ((int)((double)(NUM_CHANNELS * BYTES_PER_SAMPLE * iSampleRate) * ((double)PLAYBACK_BUFFER_US)  / (double)1000000))
-#define PA_PLAYBACK_PREBUF  ((int)((double)(NUM_CHANNELS * BYTES_PER_SAMPLE * iSampleRate) * ((double)PLAYBACK_LATENCY_US) / (double)1000000))
+#define BYTES_PER_SAMPLE int(sizeof(_SAMPLE))
+#define PA_RECORD_MAXLENGTH uint32_t((double(NUM_CHANNELS * BYTES_PER_SAMPLE * iSampleRate) * RECORD_BUFFER_US / 1000000.0))
+#define PA_PLAYBACK_TLENGTH uint32_t((double(NUM_CHANNELS * BYTES_PER_SAMPLE * iSampleRate) * PLAYBACK_BUFFER_US  / 1000000.0))
+#define PA_PLAYBACK_PREBUF  uint32_t((double(NUM_CHANNELS * BYTES_PER_SAMPLE * iSampleRate) * PLAYBACK_LATENCY_US / 1000000.0))
 #define STREAM_FLAGS (PA_STREAM_ADJUST_LATENCY | PA_STREAM_DONT_MOVE)
 #define STREAM_NAME(io, blocking) (blocking ? "Signal " io : "Audio " io)
 #define APP_NAME(io, blocking) ((!io != !blocking) ? "Dream Transmitter" : "Dream Receiver")
@@ -69,19 +69,20 @@
 
 #ifdef ENABLE_STDIN_STDOUT
 # define STDIN_STDOUT_DEVICE_NAME "-"
-static int StdoutWrite(const char *buf, ssize_t count)
+static int StdoutWrite(const char *buf, size_t count)
 {
-	ssize_t chunk;
+    ssize_t chunk;
 	while (count > 0) {
 		chunk = write(STDOUT_FILENO, buf, count);
 		if (chunk <= 0)
 			return 1;
 		buf += chunk;
-		count -= chunk;
+        count -= size_t(chunk);
 	};
 	return 0;
 }
-static int StdinRead(char *buf, ssize_t count)
+
+static int StdinRead(char *buf, size_t count)
 {
 	ssize_t chunk;
 	while (count > 0) {
@@ -90,8 +91,8 @@ static int StdinRead(char *buf, ssize_t count)
 			memset(buf, 0, count);
 			return 1;
 		}
-		buf += chunk;
-		count -= chunk;
+        buf += chunk;
+        count -= size_t(chunk);
 	};
 	return 0;
 }
@@ -124,6 +125,7 @@ static int pa_c_sync(pa_object *pa_obj, int error)
 	DEBUG_MSG("pa_c_sync failed, error %i\n", error);
 	return error;
 }
+
 static int pa_o_sync(pa_object *pa_obj, pa_operation *pa_o)
 {
 	int retval, error;
@@ -226,7 +228,7 @@ static void pa_s_free(pa_stream **pa_s)
 
 static void pa_stream_notify_cb(pa_stream *, void *userdata)
 {
-	pa_stream_notify_cb_userdata_t* ud = (pa_stream_notify_cb_userdata_t*)userdata;
+    pa_stream_notify_cb_userdata_t* ud = reinterpret_cast<pa_stream_notify_cb_userdata_t*>(userdata);
 	CSoundOutPulse& SoundOutPulse = *ud->SoundOutPulse;
 	if (!SoundOutPulse.bMuteError)
 	{
@@ -254,8 +256,8 @@ static int pa_stream_get_latency(pa_object *pa_obj, pa_stream *pa_s, int sample_
 		const pa_timing_info *ti;
 		ti = pa_stream_get_timing_info(pa_s);
 		if (ti && !ti->write_index_corrupt && !ti->read_index_corrupt) {
-			uint64_t samples = llabs(ti->write_index - ti->read_index) / (NUM_CHANNELS*BYTES_PER_SAMPLE);
-			*usec = samples * (uint32_t)1000000 / (uint32_t)sample_rate;
+            uint64_t samples = uint64_t(llabs(ti->write_index - ti->read_index) / (NUM_CHANNELS*BYTES_PER_SAMPLE));
+            *usec = samples * uint32_t(1000000) / uint32_t(sample_rate);
 			return 1;
 		}
 	}
@@ -283,16 +285,16 @@ static void pa_source_info_cb(pa_context *, const pa_source_info *i, int eol, vo
 {
 	if (!eol)
 	{
-		((USERDATA*)userdata)->names->push_back(string(i->name));
-		((USERDATA*)userdata)->descriptions->push_back(string(i->description));
+        reinterpret_cast<USERDATA*>(userdata)->names->push_back(string(i->name));
+        reinterpret_cast<USERDATA*>(userdata)->descriptions->push_back(string(i->description));
 	}
 }
 static void pa_sink_info_cb(pa_context *, const pa_sink_info *i, int eol, void *userdata)
 {
 	if (!eol)
 	{
-		((USERDATA*)userdata)->names->push_back(string(i->name));
-		((USERDATA*)userdata)->descriptions->push_back(string(i->description));
+        reinterpret_cast<USERDATA*>(userdata)->names->push_back(string(i->name));
+        reinterpret_cast<USERDATA*>(userdata)->descriptions->push_back(string(i->description));
 	}
 }
 
@@ -313,7 +315,7 @@ void CSoundInPulse::Init_HW()
 
 	ss.format = PA_SAMPLE_S16NE;
 	ss.channels = NUM_CHANNELS;
-	ss.rate = iSampleRate;
+    ss.rate = uint32_t(iSampleRate);
 
 	/* record device */
 	if (!IsDefaultDevice())
@@ -336,11 +338,11 @@ void CSoundInPulse::Init_HW()
 		return;
 	}
 
-	pa_attr.maxlength = PA_RECORD_MAXLENGTH;			// Maximum length of the buffer.
-	pa_attr.tlength   = -1;								// Playback only: target length of the buffer.
-	pa_attr.prebuf    = -1; 							// Playback only: pre-buffering.
-	pa_attr.minreq    = -1;								// Playback only: minimum request.
-	pa_attr.fragsize  = iBufferSize*BYTES_PER_SAMPLE;	// Recording only: fragment size.
+    pa_attr.maxlength = PA_RECORD_MAXLENGTH;			// Maximum length of the buffer.
+    pa_attr.tlength   = uint32_t(-1);					// Playback only: target length of the buffer.
+    pa_attr.prebuf    = uint32_t(-1); 					// Playback only: pre-buffering.
+    pa_attr.minreq    = uint32_t(-1);					// Playback only: minimum request.
+    pa_attr.fragsize  = uint32_t(iBufferSize*BYTES_PER_SAMPLE);	// Recording only: fragment size.
 
 	ret = pa_stream_connect_record(pa_s,	// The stream to connect to a source 
 		recdevice,							// Name of the source to connect to, or nullptr for default
@@ -348,7 +350,7 @@ void CSoundInPulse::Init_HW()
 #ifdef CLOCK_DRIFT_ADJ_ENABLED
 		(pa_stream_flags_t)(STREAM_FLAGS | (!bBlockingRec ? PA_STREAM_VARIABLE_RATE : 0)) // Additional flags, or 0 for default
 #else
-		(pa_stream_flags_t)STREAM_FLAGS		// Additional flags, or 0 for default
+        pa_stream_flags_t(STREAM_FLAGS)		// Additional flags, or 0 for default
 #endif
 		);
 	if (pa_s_sync(&pa_obj, pa_s, ret) != PA_OK)
@@ -365,6 +367,7 @@ int CSoundInPulse::Read_HW(void *recbuf, int size)
 	int ret, retval, filled, chunk;
 	const void *data;
 	size_t nbytes;
+    char* recbufp = reinterpret_cast<char*>(recbuf);
 
 	filled = 0;
 	size *= BYTES_PER_SAMPLE;
@@ -375,7 +378,7 @@ int CSoundInPulse::Read_HW(void *recbuf, int size)
 		_BOOLEAN bError = TRUE;
 		uint64_t recording_usec;
 		if (pa_stream_get_latency(&pa_obj, pa_s, iSampleRate, &recording_usec))
-			bError = recording_usec >= (uint64_t)(RECORD_BUFFER_US * 75 / 100) ? TRUE : FALSE;
+            bError = (recording_usec >= uint64_t(RECORD_BUFFER_US * 75 / 100)) ? TRUE : FALSE;
 		bBufferingError |= bError;
 
 #ifdef CLOCK_DRIFT_ADJ_ENABLED
@@ -410,33 +413,35 @@ int CSoundInPulse::Read_HW(void *recbuf, int size)
 				data   = remaining_data;
 			}
 			if (data) {
-				if (nbytes > (size_t)size) {
+                if (nbytes > size_t(size)) {
 					chunk = size;
-					remaining_nbytes = nbytes - chunk;
-					remaining_data   = (char*)data   + chunk;
+                    remaining_nbytes = nbytes - size_t(chunk);
+                    remaining_data   = reinterpret_cast<const char*>(data) + chunk;
 //					DEBUG_MSG("pa_stream_peek frag %6i %6i\n", (int)nbytes, chunk);
-					memcpy(recbuf, data, chunk);
+                    memcpy(recbufp, data, size_t(chunk));
 				}
 				else {
-					chunk = (int)nbytes;
+                    chunk = int(nbytes);
 					remaining_nbytes = 0;
 					remaining_data   = nullptr;
 //					DEBUG_MSG("pa_stream_peek full %6i %6i\n", (int)nbytes, chunk);
-					memcpy(recbuf, data, chunk);
+                    memcpy(recbufp, data, size_t(chunk));
 					pa_stream_drop(pa_s); // <- after memcpy
 				}
 				filled += chunk;
-				size -= chunk;
-				recbuf = ((char*)recbuf)+chunk;
+                size -= chunk;
+                recbufp += chunk;
 			}
 		}
 	}
 
 	if (size > 0) {
-		memset(recbuf, 0, size);
+        memset(recbufp, 0, size_t(size));
 		if (bBlockingRec)
-			usleep(lTimeToWait);
+            usleep(timeToWait);
 	}
+
+    recbuf = recbufp;
 
 //	DEBUG_MSG("CSoundInPulse::read_HW filled %6i\n", filled);
 	return filled / BYTES_PER_SAMPLE;
@@ -459,10 +464,10 @@ void CSoundInPulse::SetBufferSize_HW()
 #ifdef PA_STREAM_FIX_RATE /* used to check for at least version 0.9.8 */
 	pa_buffer_attr pa_attr;
 	pa_attr.maxlength = PA_RECORD_MAXLENGTH;			// Maximum length of the buffer.
-	pa_attr.tlength   = -1;								// Playback only: target length of the buffer.
-	pa_attr.prebuf    = -1; 							// Playback only: pre-buffering.
-	pa_attr.minreq    = -1;								// Playback only: minimum request.
-	pa_attr.fragsize  = iBufferSize*BYTES_PER_SAMPLE;	// Recording only: fragment size.
+    pa_attr.tlength   = uint32_t(-1);								// Playback only: target length of the buffer.
+    pa_attr.prebuf    = uint32_t(-1); 							// Playback only: pre-buffering.
+    pa_attr.minreq    = uint32_t(-1);								// Playback only: minimum request.
+    pa_attr.fragsize  = uint32_t(iBufferSize*BYTES_PER_SAMPLE);	// Recording only: fragment size.
 	if (pa_o_sync(&pa_obj, pa_stream_set_buffer_attr(pa_s, &pa_attr, pa_stream_success_cb, nullptr)) != PA_OK)
 		DEBUG_MSG("CSoundInPulse::SetBufferSize_HW() error\n");
 #endif
@@ -505,16 +510,16 @@ void CSoundOutPulse::Init_HW()
 	pa_attr.maxlength = PA_PLAYBACK_TLENGTH;	// Maximum length of the buffer.
 	pa_attr.tlength   = PA_PLAYBACK_TLENGTH;	// Playback only: target length of the buffer.
 	pa_attr.prebuf    = PA_PLAYBACK_PREBUF;		// Playback only: pre-buffering.
-	pa_attr.minreq    = -1;						// Playback only: minimum request.
-	pa_attr.fragsize  = -1;						// Recording only: fragment size.
+    pa_attr.minreq    = uint32_t(-1);						// Playback only: minimum request.
+    pa_attr.fragsize  = uint32_t(-1);						// Recording only: fragment size.
 
 	ret = pa_stream_connect_playback(pa_s,	// The stream to connect to a sink
 		playdevice,							// Name of the source to connect to, or nullptr for default
 		&pa_attr,							// Buffer attributes, or nullptr for default
 #ifdef CLOCK_DRIFT_ADJ_ENABLED
-		(pa_stream_flags_t)(STREAM_FLAGS | (!bBlockingPlay ? PA_STREAM_VARIABLE_RATE : 0)), // Additional flags, or 0 for default
+        pa_stream_flags_t(STREAM_FLAGS | (!bBlockingPlay ? PA_STREAM_VARIABLE_RATE : 0))), // Additional flags, or 0 for default
 #else
-		(pa_stream_flags_t)STREAM_FLAGS,	// Additional flags, or 0 for default
+        pa_stream_flags_t(STREAM_FLAGS),	// Additional flags, or 0 for default
 #endif
 		nullptr,								// Initial volume, or nullptr for default
 		nullptr								// Synchronize this stream with the specified one, or nullptr for a standalone stream
@@ -524,10 +529,10 @@ void CSoundOutPulse::Init_HW()
 
 	pa_stream_notify_cb_userdata_underflow.SoundOutPulse = this;
 	pa_stream_notify_cb_userdata_underflow.bOverflow = FALSE;
-	pa_stream_set_underflow_callback(pa_s, &pa_stream_notify_cb, (void*)&pa_stream_notify_cb_userdata_underflow);
+    pa_stream_set_underflow_callback(pa_s, &pa_stream_notify_cb, &pa_stream_notify_cb_userdata_underflow);
 	pa_stream_notify_cb_userdata_overflow.SoundOutPulse = this;
 	pa_stream_notify_cb_userdata_overflow.bOverflow = TRUE;
-	pa_stream_set_overflow_callback(pa_s, &pa_stream_notify_cb, (void*)&pa_stream_notify_cb_userdata_overflow);
+    pa_stream_set_overflow_callback(pa_s, &pa_stream_notify_cb, &pa_stream_notify_cb_userdata_overflow);
 
 #ifdef CLOCK_DRIFT_ADJ_ENABLED
 	X.Init(1);
@@ -620,7 +625,7 @@ int CSoundOutPulse::Write_HW(void *playbuf, int size)
 
 		ret = pa_stream_write(pa_s,		// The stream to use
 			playbuf,					// The data to write
-			size * BYTES_PER_SAMPLE,	// The length of the data to write in bytes
+            size_t(size * BYTES_PER_SAMPLE),	// The length of the data to write in bytes
 			nullptr,						// A cleanup routine for the data or nullptr to request an internal copy
 			bSeek ? -(PA_PLAYBACK_PREBUF/2) : 0,	// Offset for seeking, must be 0 for upload streams
 			PA_SEEK_RELATIVE			// Seek mode, must be PA_SEEK_RELATIVE for upload streams
@@ -657,7 +662,7 @@ int CSoundOutPulse::Write_HW(void *playbuf, int size)
 
 	if (size > 0) {
 		if (bBlockingPlay)
-			usleep(lTimeToWait);
+            usleep(timeToWait);
 	}
 
 	return -1;
@@ -763,7 +768,7 @@ _BOOLEAN CSoundPulse::IsStdinStdout()
 /* Wave in ********************************************************************/
 
 CSoundInPulse::CSoundInPulse(): CSoundPulse(FALSE),
-    iSampleRate(48000), iBufferSize(0), lTimeToWait(0),
+    iSampleRate(48000), iBufferSize(0), timeToWait(0),
 	bBlockingRec(FALSE), bBufferingError(FALSE), pa_s(nullptr),
 	remaining_nbytes(0), remaining_data(nullptr)
 #ifdef CLOCK_DRIFT_ADJ_ENABLED
@@ -802,7 +807,7 @@ _BOOLEAN CSoundInPulse::Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bN
 		iBufferSize = iNewBufferSize;
 
 		/* Time to wait in case of read error (ns) */
-		lTimeToWait = (iNewBufferSize / NUM_CHANNELS) * 1000l / (iNewSampleRate / 1000l) + 1000;
+        timeToWait = unsigned((iNewBufferSize / NUM_CHANNELS) * 1000l / (iNewSampleRate / 1000l) + 1000);
 
 		/* Close the previous input */
 		Close_HW();
@@ -838,7 +843,7 @@ _BOOLEAN CSoundInPulse::Read(CVector<_SAMPLE>& psData)
 #ifdef ENABLE_STDIN_STDOUT
 	/* Stdin support */
 	if (bStdinStdout)
-		return StdinRead((char*)&psData[0], iBufferSize);
+        return StdinRead(reinterpret_cast<char*>(&psData[0]), size_t(iBufferSize));
 #endif
 
 	/* Check if device must be opened or reinitialized */
@@ -885,7 +890,7 @@ void CSoundInPulse::Close()
 CSoundOutPulse::CSoundOutPulse(): CSoundPulse(TRUE),
 	bPrebuffer(FALSE), bSeek(FALSE),
 	bBufferingError(FALSE), bMuteError(FALSE),
-    iSampleRate(48000), iBufferSize(0), lTimeToWait(0),
+    iSampleRate(48000), iBufferSize(0), timeToWait(0),
 	bBlockingPlay(FALSE), pa_s(nullptr)
 #ifdef CLOCK_DRIFT_ADJ_ENABLED
 	, iMaxSampleRateOffset(0)
@@ -925,7 +930,7 @@ _BOOLEAN CSoundOutPulse::Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN b
 		iSampleRate = iNewSampleRate;
 
 		/* Time to wait in case of write error (ns) */
-		lTimeToWait = (iNewBufferSize / NUM_CHANNELS) * 1000l / (iNewSampleRate / 1000l) + 1000;
+        timeToWait = unsigned((iNewBufferSize / NUM_CHANNELS) * 1000l / (iNewSampleRate / 1000l) + 1000);
 
 		/* Close the previous input */
 		Close_HW();
@@ -955,7 +960,7 @@ _BOOLEAN CSoundOutPulse::Write(CVector<_SAMPLE>& psData)
 #ifdef ENABLE_STDIN_STDOUT
 	/* Stdout support */
 	if (bStdinStdout)
-		return StdoutWrite((char*)&psData[0], iBufferSize);
+        return StdoutWrite(reinterpret_cast<char*>(&psData[0]), size_t(iBufferSize));
 #endif
 
 	/* Check if device must be opened or reinitialized */
