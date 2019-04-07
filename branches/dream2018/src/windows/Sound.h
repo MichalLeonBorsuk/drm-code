@@ -59,6 +59,7 @@ virtual void		Enumerate(vector<string>& names, vector<string>& descriptions);
 virtual string		GetDev();
 virtual void		SetDev(string sNewDev);
 virtual void		Close();
+virtual string		GetVersion() { return "windows Multimedia"; }
 
 protected:
 void		OpenDevice();
@@ -95,6 +96,7 @@ virtual void		Enumerate(vector<string>& names, vector<string>& descriptions);
 virtual string		GetDev();
 virtual void		SetDev(string sNewDev);
 virtual void		Close();
+virtual string		GetVersion() { return "windows Multimedia"; }
 
 protected:
 void		OpenDevice();

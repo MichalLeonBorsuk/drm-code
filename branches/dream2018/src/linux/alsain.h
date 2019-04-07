@@ -55,6 +55,7 @@ public:
     bool Init(int iSampleRate, int iNewBufferSize, bool bNewBlocking = true);
     bool Read(CVector<short>& psData);
     void Close();
+	virtual string		GetVersion() { return "alsa audio input"; }
 
 protected:
     void Init_HW();

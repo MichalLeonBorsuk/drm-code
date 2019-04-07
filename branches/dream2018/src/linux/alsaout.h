@@ -53,6 +53,7 @@ public:
     bool Write(CVector<short>& psData);
 
     void Close();
+	virtual string		GetVersion() { return "alsa audio output"; }
 
 protected:
     void Init_HW();

@@ -79,6 +79,7 @@ public:
     virtual int			GetDev();
     virtual void		SetDev(int iNewDev);
     virtual void		Close();
+	virtual string		GetVersion() { return "JACK audio input"; }
 protected:
     int iBufferSize;
     _BOOLEAN bBlocking;
@@ -102,6 +103,7 @@ public:
     virtual int			GetDev();
     virtual void		SetDev(int iNewDev);
     virtual void		Close();
+	virtual string		GetVersion() { return "JACK audio output"; }
 protected:
     int iBufferSize;
     _BOOLEAN bBlocking;

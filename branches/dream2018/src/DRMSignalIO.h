@@ -120,6 +120,11 @@ public:
     string GetSoundInterface() { return soundDevice; }
     void Enumerate(std::vector<std::string>& names, std::vector<std::string>& descriptions);
     void Stop();
+#ifdef QT_MULTIMEDIA_LIB
+	string GetSoundInterfaceVersion() { return "QtMultimedia"; }
+#else
+	string GetSoundInterfaceVersion() { return pSound->GetVersion(); }
+#endif
 
     void SetWriteToFile(const string strNFN)
     {
@@ -200,7 +205,11 @@ public:
     string GetSoundInterface() { return soundDevice; }
     void Enumerate(std::vector<std::string>& names, std::vector<std::string>& descriptions);
     void Stop();
-
+#ifdef QT_MULTIMEDIA_LIB
+	string GetSoundInterfaceVersion() { return "QtMultimedia"; }
+#else
+	string GetSoundInterfaceVersion() { return pSound->GetVersion(); }
+#endif
     void SetInChanSel(const EInChanSel eNS) {
         eInChanSelection = eNS;
     }

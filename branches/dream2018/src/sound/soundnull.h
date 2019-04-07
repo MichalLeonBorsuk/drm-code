@@ -53,6 +53,7 @@ public:
         sDev = sNewDev;
     }
     virtual void		Close() {}
+	virtual string		GetVersion() { return "no audio interface"; }
 private:
     string sDev;
 };
@@ -80,6 +81,7 @@ public:
         sDev = sNewDev;
     }
     virtual void		Close() {}
+	virtual string		GetVersion() { return "no audio interface"; }
 private:
     string sDev;
 };
