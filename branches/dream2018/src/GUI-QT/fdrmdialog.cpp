@@ -759,12 +759,12 @@ void FDRMDialog::UpdateDisplay()
                            && (audioService.AudioParam.iStreamID != STREAM_ID_NOT_USED)
                            && (audioService.eAudDataFlag == CService::SF_AUDIO);
 
-    int i, iFirstAudioService=-1, iFirstDataService=-1;
-    for(i=0; i < MAX_NUM_SERVICES; i++)
+    int iFirstAudioService=-1, iFirstDataService=-1;
+    for(unsigned i=0; i < MAX_NUM_SERVICES; i++)
     {
-        QString label = serviceSelector(Parameters, i);
+        QString label = serviceSelector(Parameters, int(i));
         serviceLabels[i]->setText(label);
-        pButtonGroup->button(i)->setEnabled(label != "");
+        pButtonGroup->button(int(i))->setEnabled(label != "");
         if (!bServiceIsValid && (iFirstAudioService == -1 || iFirstDataService == -1))
         {
             Parameters.Lock();
@@ -844,11 +844,10 @@ void FDRMDialog::UpdateDisplay()
             QString strBitrate = QString().setNum(rBitRate, 'f', 2) + tr(" kbps");
 
             /* Equal or unequal error protection */
-            if (rPartABLenRat != (_REAL) 0.0)
+            if (int(rPartABLenRat) != 0)
             {
                 /* Print out the percentage of part A length to total length */
-                strBitrate += " UEP (" +
-                              QString().setNum(rPartABLenRat * 100, 'f', 1) + " %)";
+                strBitrate += " UEP (" + QString().setNum(rPartABLenRat * 100, 'f', 1) + " %)";
             }
             else
             {
@@ -1192,6 +1191,7 @@ QString FDRMDialog::GetCodecString(const CService& service)
 					strReturn += "FB";
 					break;
 			}
+            break;
         default:;
         }
 
@@ -1252,6 +1252,7 @@ QString FDRMDialog::GetTypeString(const CService& service)
             case CAudioParam::AM_STEREO:
                 strReturn = "Stereo";
                 break;
+            case CAudioParam::AM_RESERVED:;
             }
         }
     }

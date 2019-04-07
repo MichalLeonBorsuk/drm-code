@@ -81,9 +81,7 @@ public:
 	void			SetDev(string sNewDevice);
 	string			GetDev();
 protected:
-	_BOOLEAN		IsDefaultDevice();
 	_BOOLEAN		bPlayback;
-	_BOOLEAN		bChangDev;
 	string			sCurrentDevice;
 #ifdef ENABLE_STDIN_STDOUT
 	_BOOLEAN		IsStdinStdout();

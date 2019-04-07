@@ -43,7 +43,6 @@
 #include "../GlobalDefinitions.h"
 #include "../DrmReceiver.h"
 #include "../DrmTransmitter.h"
-#include "../DrmSimulation.h"
 #include "../util/Settings.h"
 # include "fdrmdialog.h"
 # include "TransmDlg.h"
@@ -89,16 +88,9 @@ main(int argc, char **argv)
 #endif
 
 	/* Load and install multi-language support (if available) */
-	QTranslator translator(0);
+    QTranslator translator(nullptr);
 	if (translator.load("dreamtr"))
 		app.installTranslator(&translator);
-
-	CDRMSimulation DRMSimulation;
-
-	/* Call simulation script. If simulation is activated, application is
-	   automatically exit in that routine. If in the script no simulation is
-	   activated, this function will immediately return */
-	DRMSimulation.SimScript();
 
 	CSettings Settings;
 	/* Parse arguments and load settings from init-file */
@@ -173,15 +165,15 @@ main(int argc, char **argv)
 
 	catch(CGenErr GenErr)
 	{
-		ErrorMessage(GenErr.strError);
+        qDebug("%s", GenErr.strError.c_str());
 	}
 	catch(string strError)
 	{
-		ErrorMessage(strError);
+        qDebug("%s", strError.c_str());
 	}
 	catch(char *Error)
 	{
-		ErrorMessage(Error);
+        qDebug("%s", Error);
 	}
 
 	/* Save settings to init-file */
@@ -189,51 +181,3 @@ main(int argc, char **argv)
 
 	return 0;
 }
-
-/* Implementation of global functions *****************************************/
-
-void
-ErrorMessage(string strErrorString)
-{
-	/* Workaround for the QT problem */
-	string strError = "The following error occured:\n";
-	strError += strErrorString.c_str();
-	strError += "\n\nThe application will exit now.";
-
-#ifdef _WIN32
-	MessageBoxA(nullptr, strError.c_str(), "Dream",
-			   MB_SYSTEMMODAL | MB_OK | MB_ICONEXCLAMATION);
-#else
-	perror(strError.c_str());
-#endif
-
-/*
-// Does not work correctly. If it is called by a different thread, the
-// application hangs! FIXME
-	QMessageBox::critical(0, "Dream",
-		QString("The following error occured:<br><b>") +
-		QString(strErrorString.c_str()) +
-		"</b><br><br>The application will exit now.");
-*/
-	exit(1);
-}
-
-void
-DebugError(const char *pchErDescr, const char *pchPar1Descr,
-		   const double dPar1, const char *pchPar2Descr, const double dPar2)
-{
-	FILE *pFile = fopen("test/DebugError.dat", "a");
-	fprintf(pFile, "%s", pchErDescr);
-	fprintf(pFile, " ### ");
-	fprintf(pFile, "%s", pchPar1Descr);
-	fprintf(pFile, ": ");
-	fprintf(pFile, "%e ### ", dPar1);
-	fprintf(pFile, "%s", pchPar2Descr);
-	fprintf(pFile, ": ");
-	fprintf(pFile, "%e\n", dPar2);
-	fclose(pFile);
-	fprintf(stderr, "\nDebug error! For more information see test/DebugError.dat\n");
-	exit(1);
-}
-
-//#include "main.moc"

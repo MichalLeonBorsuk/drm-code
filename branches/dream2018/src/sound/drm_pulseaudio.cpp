@@ -228,20 +228,28 @@ static void pa_s_free(pa_stream **pa_s)
 
 static void pa_stream_notify_cb(pa_stream *, void *userdata)
 {
+    if(userdata == nullptr) {
+        DEBUG_MSG("*** playback callback null\n");
+        return;
+    }
     pa_stream_notify_cb_userdata_t* ud = reinterpret_cast<pa_stream_notify_cb_userdata_t*>(userdata);
-	CSoundOutPulse& SoundOutPulse = *ud->SoundOutPulse;
-	if (!SoundOutPulse.bMuteError)
+    CSoundOutPulse* SoundOutPulse = ud->SoundOutPulse;
+    if(SoundOutPulse == nullptr) {
+        DEBUG_MSG("*** playback callback null\n");
+        return;
+    }
+    if (!SoundOutPulse->bMuteError)
 	{
-		if (!SoundOutPulse.bPrebuffer)
+        if (!SoundOutPulse->bPrebuffer)
 		{
-			DEBUG_MSG("*** playback %sFLOW\n", ud->bOverflow ? "OVER" : "UNDER");
-			SoundOutPulse.bBufferingError = TRUE;
+            DEBUG_MSG("*** playback %sFLOW\n", ud->bOverflow ? "OVER" : "UNDER");
+            SoundOutPulse->bBufferingError = TRUE;
 		}
 	}
-	if (ud->bOverflow)
-		SoundOutPulse.bSeek = TRUE;
+    if (ud->bOverflow)
+        SoundOutPulse->bSeek = TRUE;
 	else
-		SoundOutPulse.bPrebuffer = TRUE;
+        SoundOutPulse->bPrebuffer = TRUE;
 }
 
 static void pa_stream_success_cb(pa_stream *, int /*success*/, void */*userdata*/)
@@ -318,8 +326,7 @@ void CSoundInPulse::Init_HW()
     ss.rate = uint32_t(iSampleRate);
 
 	/* record device */
-	if (!IsDefaultDevice())
-		recdevice = sCurrentDevice.c_str();
+    recdevice = sCurrentDevice.c_str();
 
 	if (pa_init(&pa_obj, APP_NAME(1, bBlockingRec)) != PA_OK)
 	{
@@ -487,8 +494,7 @@ void CSoundOutPulse::Init_HW()
     ss.rate = uint32_t(iSampleRate);
 
 	/* playback device */
-	if (!IsDefaultDevice())
-		playdevice = sCurrentDevice.c_str();
+    playdevice = sCurrentDevice.c_str();
 
 	if (pa_init(&pa_obj, APP_NAME(0, bBlockingPlay)) != PA_OK)
 	{
@@ -515,13 +521,13 @@ void CSoundOutPulse::Init_HW()
 
 	ret = pa_stream_connect_playback(pa_s,	// The stream to connect to a sink
 		playdevice,							// Name of the source to connect to, or nullptr for default
-		&pa_attr,							// Buffer attributes, or nullptr for default
+        &pa_attr,							// Buffer attributes, or nullptr for default
 #ifdef CLOCK_DRIFT_ADJ_ENABLED
         pa_stream_flags_t(STREAM_FLAGS | (!bBlockingPlay ? PA_STREAM_VARIABLE_RATE : 0))), // Additional flags, or 0 for default
 #else
         pa_stream_flags_t(STREAM_FLAGS),	// Additional flags, or 0 for default
 #endif
-		nullptr,								// Initial volume, or nullptr for default
+        nullptr,								// Initial volume, or nullptr for default
 		nullptr								// Synchronize this stream with the specified one, or nullptr for a standalone stream
 		);
 	if (pa_s_sync(&pa_obj, pa_s, ret) != PA_OK)
@@ -545,7 +551,7 @@ void CSoundOutPulse::Init_HW()
 	/* Clear mute error flag */
 	bMuteError = FALSE;
 
-	DEBUG_MSG("pulseaudio output device '%s', init done\n", sCurrentDevice.c_str());
+    DEBUG_MSG("pulseaudio output device '%s', init done\n", playdevice);
 }
 
 int CSoundOutPulse::Write_HW(void *playbuf, int size)
@@ -683,6 +689,7 @@ void CSoundOutPulse::Close_HW()
 		}
 		pa_s_free(&pa_s);
 		pa_free(&pa_obj);
+        pa_s = nullptr;
 	}
 }
 
@@ -693,7 +700,7 @@ void CSoundOutPulse::Close_HW()
 /* Common ********************************************************************/
 
 CSoundPulse::CSoundPulse(_BOOLEAN bPlayback)
-	: bPlayback(bPlayback), bChangDev(TRUE)
+    : bPlayback(bPlayback)
 #ifdef ENABLE_STDIN_STDOUT
 	, bStdinStdout(FALSE)
 #endif
@@ -713,9 +720,6 @@ void CSoundPulse::Enumerate(vector<string>& names, vector<string>& descriptions)
 
 	names.clear();
 	descriptions.clear();
-	names.push_back(""); /* default device */
-	descriptions.push_back("");
-
 	if (pa_init(&pa_obj, "") != PA_OK)
 	{
 		DEBUG_MSG("CSoundPulse::Enumerate(): pa_init failed\n");
@@ -741,19 +745,12 @@ void CSoundPulse::SetDev(string sNewDevice)
 	if (sNewDevice != sCurrentDevice)
 	{
 		sCurrentDevice = sNewDevice;
-		bChangDev = TRUE;
 	}
 }
 
 string CSoundPulse::GetDev()
 {
 	return sCurrentDevice;
-}
-
-_BOOLEAN CSoundPulse::IsDefaultDevice()
-{
-	const char *str = sCurrentDevice.c_str();
-	return *str == 0;
 }
 
 #ifdef ENABLE_STDIN_STDOUT
@@ -800,7 +797,7 @@ _BOOLEAN CSoundInPulse::Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bN
 	bBlockingRec = bNewBlocking;
 
 	/* Check if device must be opened or reinitialized */
-	if (bChangDev == TRUE || iSampleRate != iNewSampleRate)
+    if (iSampleRate != iNewSampleRate)
 	{
 		/* Save samplerate buffer size */
 		iSampleRate = iNewSampleRate;
@@ -814,10 +811,6 @@ _BOOLEAN CSoundInPulse::Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bN
 
 		/* Open the new input */
 		Init_HW();
-
-		/* Reset flag */
-		bChangDev = FALSE;
-
 		/* Set changed flag */
 		bChanged = TRUE;
 	}
@@ -846,16 +839,6 @@ _BOOLEAN CSoundInPulse::Read(CVector<_SAMPLE>& psData)
         return StdinRead(reinterpret_cast<char*>(&psData[0]), size_t(iBufferSize));
 #endif
 
-	/* Check if device must be opened or reinitialized */
-	if (bChangDev == TRUE)
-	{
-		/* Reinit sound interface */
-		Init(iSampleRate, iBufferSize, bBlockingRec);
-
-		/* Reset flag */
-		bChangDev = FALSE;
-	}
-
 	/* Read from 'hardware' */
 	_BOOLEAN bError = Read_HW(&psData[0], iBufferSize) != iBufferSize;
 	if (bError)
@@ -879,9 +862,6 @@ void CSoundInPulse::Close()
 
 	/* Close the input */
 	Close_HW();
-
-	/* Set flag to open devices the next time it is initialized */
-	bChangDev = TRUE;
 }
 
 
@@ -923,27 +903,20 @@ _BOOLEAN CSoundOutPulse::Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN b
 	bBlockingPlay = bNewBlocking;
 	iBufferSize = iNewBufferSize;
 
-	/* Check if device must be opened or reinitialized */
-	if (bChangDev == TRUE || iSampleRate != iNewSampleRate)
-	{
-		/* Save samplerate */
-		iSampleRate = iNewSampleRate;
+    /* Save samplerate */
+    iSampleRate = iNewSampleRate;
 
-		/* Time to wait in case of write error (ns) */
-        timeToWait = unsigned((iNewBufferSize / NUM_CHANNELS) * 1000l / (iNewSampleRate / 1000l) + 1000);
+    /* Time to wait in case of write error (ns) */
+    timeToWait = unsigned((iNewBufferSize / NUM_CHANNELS) * 1000l / (iNewSampleRate / 1000l) + 1000);
 
-		/* Close the previous input */
-		Close_HW();
+    /* Close the previous input */
+    Close_HW();
 
-		/* Open the new input */
-		Init_HW();
+    /* Open the new input */
+    Init_HW();
 
-		/* Reset flag */
-		bChangDev = FALSE;
-
-		/* Set changed flag */
-		bChanged = TRUE;
-	}
+    /* Set changed flag */
+    bChanged = TRUE;
 
 	/* Set prebuffer flag */
 	bPrebuffer = TRUE;
@@ -962,17 +935,6 @@ _BOOLEAN CSoundOutPulse::Write(CVector<_SAMPLE>& psData)
 	if (bStdinStdout)
         return StdoutWrite(reinterpret_cast<char*>(&psData[0]), size_t(iBufferSize));
 #endif
-
-	/* Check if device must be opened or reinitialized */
-	if (bChangDev == TRUE)
-	{
-		/* Reinit sound interface */
-		Init(iSampleRate, iBufferSize, bBlockingPlay);
-
-		/* Reset flag */
-		bChangDev = FALSE;
-	}
-
 	/* Write to 'hardware' */
 	_BOOLEAN bError = Write_HW(&psData[0], iBufferSize) != iBufferSize;
 	if (bError)
@@ -996,8 +958,5 @@ void CSoundOutPulse::Close()
 
 	/* Close the output */
 	Close_HW();
-
-	/* Set flag to open devices the next time it is initialized */
-	bChangDev = TRUE;
 }
 

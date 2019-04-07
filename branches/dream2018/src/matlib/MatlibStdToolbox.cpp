@@ -669,8 +669,7 @@ CFftPlans::CFftPlans(const int iFftSize) :
 	bInitialized(FALSE), bFixedSizeInit(FALSE), fftw_n(0)
 {
 	/* Static initialization of CMutex not working on Mac OS X */
-    if (!_mutex)
-        _mutex = new CMutex();
+    if (!_mutex) _mutex = new CMutex();
 
 	/* If iFftSize is non zero then proceed to initialization */
 	if (iFftSize)
