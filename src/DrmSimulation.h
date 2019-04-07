@@ -48,9 +48,49 @@
 #include "sync/SyncUsingPil.h"
 #include "drmchannel/ChannelSimulation.h"
 
+#define SIM_OUT_FILES_PATH "./test/"
 
 
 /* Classes ********************************************************************/
+class CGenSimData : public CTransmitterModul<_BINARY, _BINARY>
+{
+public:
+    CGenSimData() : eCntType(CT_TIME), iNumSimBlocks(DEFAULT_NUM_SIM_BLOCKS),
+            iNumErrors(0), iCounter(0), strFileName("SimTime.dat"), tiStartTime(0) {}
+    virtual ~CGenSimData() {}
+
+    void SetSimTime(int iNewTi, string strNewFileName);
+    void SetNumErrors(int iNewNE, string strNewFileName);
+
+protected:
+    enum ECntType {CT_TIME, CT_ERRORS};
+    ECntType	eCntType;
+    int			iNumSimBlocks;
+    int			iNumErrors;
+    int			iCounter;
+    int			iMinNumBlocks;
+    string		strFileName;
+    time_t		tiStartTime;
+
+    virtual void InitInternal(CParameter& TransmParam);
+    virtual void ProcessDataInternal(CParameter& TransmParam);
+};
+
+class CEvaSimData : public CReceiverModul<_BINARY, _BINARY>
+{
+public:
+    CEvaSimData() {}
+    virtual ~CEvaSimData() {}
+
+protected:
+    int		iIniCnt;
+    int		iNumAccBitErrRate;
+    _REAL	rAccBitErrRate;
+
+    virtual void InitInternal(CParameter& Parameters);
+    virtual void ProcessDataInternal(CParameter& Parameters);
+};
+
 class CDRMSimulation
 {
 public:
