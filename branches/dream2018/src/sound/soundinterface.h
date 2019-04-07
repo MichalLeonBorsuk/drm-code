@@ -41,6 +41,7 @@ public:
     virtual _BOOLEAN Init(int iSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking)=0;
     virtual _BOOLEAN Read(CVector<short>& psData)=0;
     virtual void     Close()=0;
+	virtual std::string	GetVersion() = 0;
 
 };
 
@@ -53,6 +54,7 @@ public:
     virtual _BOOLEAN Init(int iSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking)=0;
     virtual _BOOLEAN Write(CVector<short>& psData)=0;
     virtual void     Close()=0;
+	virtual std::string	GetVersion() = 0;
 };
 
 #endif

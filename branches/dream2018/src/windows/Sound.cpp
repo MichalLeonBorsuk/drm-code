@@ -82,8 +82,6 @@ CSoundIn::CSoundIn():CSoundInInterface(),m_WaveIn(nullptr)
     }
 
     vecstrDevices.clear();
-	/* Default device WAVE_MAPPER */
-	vecstrDevices.push_back("");
 	/* Get info about the devices and store the names */
     for (i = 0; i < iNumDevs; i++) {
         if (!waveInGetDevCaps(i, &m_WaveInDevCaps, sizeof(WAVEINCAPS))) {
@@ -371,9 +369,6 @@ CSoundOut::CSoundOut():CSoundOutInterface(),m_WaveOut(nullptr)
     }
 
     vecstrDevices.clear();
-    /* Default device WAVE_MAPPER */
-	vecstrDevices.push_back("");
-
 	/* Get info about the devices and store the names */
     for (i = 0; i < iNumDevs; i++) {
         if (!waveOutGetDevCaps(i, &m_WaveOutDevCaps, sizeof(WAVEOUTCAPS))) {
