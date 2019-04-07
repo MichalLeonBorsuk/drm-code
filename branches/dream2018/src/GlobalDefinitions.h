@@ -223,7 +223,7 @@ const _REAL crPi = M_PI;
 #define S9_DBUV 34.0 /* S9 in dBuV for converting HamLib S-meter readings to RSCI format */
 
 /* Define a number for the case: log10(0), which would lead to #inf */
-#define RET_VAL_LOG_0					((_REAL) -200.0)
+#define RET_VAL_LOG_0					(-200.0)
 
 
 
