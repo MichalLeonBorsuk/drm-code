@@ -36,7 +36,9 @@ using namespace std; /* Because of the library: "complex" */
 #include <limits>
 #include <cmath>
 #include "tables/TableDRMGlobal.h"
-
+#ifndef M_PI
+# define M_PI (3.14159265358979323846)
+#endif
 
 /* Definitions ****************************************************************/
 /* When you define the following flag, a directory called

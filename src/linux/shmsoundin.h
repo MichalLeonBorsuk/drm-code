@@ -43,6 +43,7 @@ public:
 
     virtual void		Init(int iNewBufferSize, _BOOLEAN bNewBlocking = TRUE);
     virtual void		Close();
+	virtual string		GetVersion() { return "linux shared memory audio input"; }
     virtual _BOOLEAN	Read(CVector<short>& psData);
 
     void				SetShmPath(const string& p) {

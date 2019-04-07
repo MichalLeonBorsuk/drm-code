@@ -49,6 +49,7 @@ public:
     virtual _BOOLEAN	Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking);
     virtual _BOOLEAN 	Read(CVector<short>& psData);
     virtual void 		Close();
+	virtual std::string GetVersion() { return "Dream Audio File Reader"; }
 
 protected:
     string				strInFileName;
