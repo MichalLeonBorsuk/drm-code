@@ -178,7 +178,7 @@ CDRMReceiver::SetInputDevice(QString s)
 				t = FileTyper::pcm;
 			}
 			else {
-				for (int i = 0; i<int(names.size()); i++) {
+                for (unsigned i = 0; i<names.size(); i++) {
 					if (device == names[i]) {
 						device = names[i];
 						t = FileTyper::pcm;
