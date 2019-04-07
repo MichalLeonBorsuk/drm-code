@@ -103,6 +103,7 @@ void CRx::SetInputDevice(QString s)
 
 void CRx::SetOutputDevice(QString s)
 {
+    cerr << "CRx::SetOutputDevice " << s.toStdString() << endl;
     rx.SetOutputDevice(s);
     emit OutputDeviceChanged(QString::fromStdString(rx.GetOutputDevice()));
 }
@@ -474,11 +475,13 @@ void CRx::EnableAutoFrequenctAcquisition(bool b)
 void CRx::onSoundInChannelChanged(EInChanSel e)
 {
     rx.GetReceiveData()->SetInChanSel(e);
+    emit InputChannelChanged(int(e));
 }
 
 void CRx::onSoundOutChannelChanged(EOutChanSel e)
 {
     rx.GetWriteData()->SetOutChanSel(e);
+    emit OutputChannelChanged(int(e));
 }
 
 void  CRx::onSoundSampleRateChanged(int n)
