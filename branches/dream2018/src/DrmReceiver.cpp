@@ -209,6 +209,7 @@ void
 CDRMReceiver::SetOutputDevice(QString device)
 {
     WriteData.SetSoundInterface(device.toStdString());
+    WriteData.Init(Parameters);
 }
 
 void CDRMReceiver::EnumerateInputs(vector<string>& names, vector<string>& descriptions)

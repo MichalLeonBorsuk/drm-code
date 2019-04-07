@@ -24,6 +24,9 @@ CRx::run()
 #ifdef USE_CONSOLEIO
         CConsoleIO::Enter(this);
 #endif
+        // emit any initial state needed by UI and not otherwise set
+        emit InputChannelChanged(int(rx.GetReceiveData()->GetInChanSel()));
+        emit OutputChannelChanged(int(rx.GetWriteData()->GetOutChanSel()));
 
         do
         {
@@ -41,7 +44,6 @@ CRx::run()
             eRunState = RUNNING;
             do
             {
-                emitSignals();
                 rx.updatePosition();
                 rx.process();
 
@@ -496,9 +498,4 @@ void CRx::SetSoundSignalUpscale(int n)
     rx.GetParameters()->SetNewSigUpscaleRatio(n);
     Restart();
     emit soundUpscaleRatioChanged(n);
-}
-
-void CRx::emitSignals()
-{
-
 }
