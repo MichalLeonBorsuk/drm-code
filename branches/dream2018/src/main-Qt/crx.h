@@ -110,7 +110,6 @@ public slots:
 private:
     CDRMReceiver& rx;
     ERunState eRunState;
-    void emitSignals();
 
 signals:
     void inputSampleRateChanged(int);
