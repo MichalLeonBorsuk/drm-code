@@ -35,6 +35,7 @@
 #include <QFileDialog>
 #include "../util-QT/Util.h"
 #include "../util/FileTyper.h"
+#include "../main-Qt/crx.h"
 
 #ifdef QT_MULTIMEDIA_LIB
 # include <QAudioDeviceInfo>
@@ -116,10 +117,9 @@ CSoundCardSelMenu::CSoundCardSelMenu(CTRx& ntrx,
 
         QMenu* menuAudOutput = addMenu(tr("Audio Output"));
         menuOutputDev = menuAudOutput->addMenu(tr("Device"));
-        connect(menuOutputDev, SIGNAL(triggered(QAction*)), this, SLOT(OnSoundOutDevice(QAction*)));
 
-        QMenu* menuInputChannel = InitChannel(menuSigInput, tr("Channel"), (int)((CDRMReceiver&)trx).GetReceiveData()->GetInChanSel(), InputChannelTable);
-        QMenu* menuOutputChannel = InitChannel(menuAudOutput, tr("Channel"), (int)((CDRMReceiver&)trx).GetWriteData()->GetOutChanSel(), OutputChannelTable);
+        menuInputChannel = InitChannel(menuSigInput, tr("Channel"), InputChannelTable);
+        menuOutputChannel = InitChannel(menuAudOutput, tr("Channel"), OutputChannelTable);
         menuInputSampleRate = InitSampleRate(menuSigInput, tr("Sample Rate"), SignalSampleRateTable);
 
         connect(menuInputChannel, SIGNAL(triggered(QAction*)), this, SLOT(OnSoundInChannel(QAction*)));
@@ -130,16 +130,16 @@ CSoundCardSelMenu::CSoundCardSelMenu(CTRx& ntrx,
         actionUpscale = menuSigInput->addAction(tr("2:1 upscale"));
         connect(actionUpscale, SIGNAL(toggled(bool)), this, SLOT(OnSoundSignalUpscale(bool)));
         connect(this, SIGNAL(soundInDeviceChanged(QString)), &trx, SLOT(SetInputDevice(QString)));
-        connect(this, SIGNAL(soundOutDeviceChanged(QString)), &trx, SLOT(SetOutputDevice(QString)));
         connect(this, SIGNAL(soundSampleRateChanged(int)), &trx, SLOT(onSoundSampleRateChanged(int)));
         connect(this, SIGNAL(soundInDeviceChanged(QString)), &trx, SLOT(SetInputDevice(QString)));
-        connect(this, SIGNAL(soundOutDeviceChanged(QString)), &trx, SLOT(SetOutputDevice(QString)));
         connect(this, SIGNAL(soundInChannelChanged(EInChanSel)), &trx, SLOT(onSoundInChannelChanged(EInChanSel)));
         connect(this, SIGNAL(soundOutChannelChanged(EOutChanSel)), &trx, SLOT(onSoundOutChannelChanged(EOutChanSel)));
         connect(this, SIGNAL(soundSignalUpscaleChanged(int)), &trx, SLOT(SetSoundSignalUpscale(int)));
 
+        connect(reinterpret_cast<CRx*>(&trx), SIGNAL(InputChannelChanged(int)), this, SLOT(OnSoundInChannelChanged(int)));
+        connect(reinterpret_cast<CRx*>(&trx), SIGNAL(OutputChannelChanged(int)), this, SLOT(OnSoundOutChannelChanged(int)));
+
         connect(&trx, SIGNAL(InputDeviceChanged(QString)), this, SLOT(OnSoundInDeviceChanged(QString)));
-        connect(&trx, SIGNAL(OutputDeviceChanged(QString)), this, SLOT(OnSoundOutDeviceChanged(QString)));
 
         connect(&trx, SIGNAL(inputSampleRateChanged(int)), this, SLOT(OnSoundInSampleRateChanged(int)));
         connect(&trx, SIGNAL(outputSampleRateChanged(int)), this, SLOT(OnSoundOutSampleRateChanged(int)));
@@ -158,11 +158,14 @@ CSoundCardSelMenu::CSoundCardSelMenu(CTRx& ntrx,
 
         QMenu* menuSignal = addMenu(tr("Signal Output"));
         menuOutputDev = menuSignal->addMenu(tr("Device"));
-        connect(menuOutputDev, SIGNAL(triggered(QAction*)), this, SLOT(OnSoundOutDevice(QAction*)));
 
         connect(InitSampleRate(menuAudio, tr("Sample Rate"), AudioSampleRateTable), SIGNAL(triggered(QAction*)), this, SLOT(OnSoundSampleRate(QAction*)));
         connect(InitSampleRate(menuSignal, tr("Sample Rate"), SignalSampleRateTable), SIGNAL(triggered(QAction*)), this, SLOT(OnSoundSampleRate(QAction*)));
     }
+
+    connect(menuOutputDev, SIGNAL(triggered(QAction*)), this, SLOT(OnSoundOutDevice(QAction*)));
+    connect(this, SIGNAL(soundOutDeviceChanged(QString)), &trx, SLOT(SetOutputDevice(QString)));
+    connect(&trx, SIGNAL(OutputDeviceChanged(QString)), this, SLOT(OnSoundOutDeviceChanged(QString)));
 }
 
 void CSoundCardSelMenu::OnSoundInDevice(QAction* action)
@@ -172,7 +175,9 @@ void CSoundCardSelMenu::OnSoundInDevice(QAction* action)
 
 void CSoundCardSelMenu::OnSoundOutDevice(QAction* action)
 {
-    emit soundOutDeviceChanged(action->data().toString());
+    QString dev = action->data().toString();
+    cerr << "OnSoundOutDevice " << dev.toStdString() << endl;
+    emit soundOutDeviceChanged(dev);
 }
 
 void CSoundCardSelMenu::OnSoundInChannel(QAction* action)
@@ -205,9 +210,11 @@ void CSoundCardSelMenu::OnSoundInDeviceChanged(QString s)
 
 void CSoundCardSelMenu::OnSoundOutDeviceChanged(QString s)
 {
+    cerr << "CSoundCardSelMenu::OnSoundOutDeviceChanged " << s.toStdString() << endl;
     vector<string> names;
     vector<string> descriptions;
     trx.EnumerateOutputs(names, descriptions);
+    qDebug("output device changed in trx %s", s.toStdString().c_str());
     UpdateDeviceMenu(menuOutputDev, names, descriptions, s.toStdString());
 }
 
@@ -233,7 +240,7 @@ void CSoundCardSelMenu::UpdateDeviceMenu(QMenu* menu, const vector<string>& name
     }
 }
 
-QMenu* CSoundCardSelMenu::InitChannel(QMenu* parent, const QString& text, const int iCurrentChanSel, const CHANSEL* ChanSel)
+QMenu* CSoundCardSelMenu::InitChannel(QMenu* parent, const QString& text, const CHANSEL* ChanSel)
 {
     QMenu* menu = parent->addMenu(text);
     QActionGroup* group = new QActionGroup(parent);
@@ -243,11 +250,29 @@ QMenu* CSoundCardSelMenu::InitChannel(QMenu* parent, const QString& text, const 
         int iChanSel = ChanSel[i].iChanSel;
         m->setData(iChanSel);
         m->setCheckable(true);
-        if (iChanSel == iCurrentChanSel)
-            m->setChecked(true);
         group->addAction(m);
     }
     return menu;
+}
+
+void CSoundCardSelMenu::OnSoundInChannelChanged(int chan)
+{
+    QList<QAction*> actions = menuInputChannel->actions();
+    for(int i=0; i<actions.size(); i++) {
+        int n = actions[i]->data().toInt();
+        if(abs(n) == chan)
+            actions[i]->setChecked(true);
+    }
+}
+
+void CSoundCardSelMenu::OnSoundOutChannelChanged(int chan)
+{
+    QList<QAction*> actions = menuOutputChannel->actions();
+    for(int i=0; i<actions.size(); i++) {
+        int n = actions[i]->data().toInt();
+        if(abs(n) == chan)
+            actions[i]->setChecked(true);
+    }
 }
 
 QMenu* CSoundCardSelMenu::InitSampleRate(QMenu* parent, const QString& text, const int* SampleRate)
@@ -303,7 +328,7 @@ void CSoundCardSelMenu::OnSoundUpscaleRatioChanged(int upscaleRatio)
 
 void CSoundCardSelMenu::OnSoundFileChanged(QString filename)
 {
-    qDebug("CSoundCardSelMenu::OnSoundFileChanged %d", QThread::currentThreadId());
+    qDebug("CSoundCardSelMenu::OnSoundFileChanged %p", QThread::currentThreadId());
     if(filename == "") {
         menuSigInput->setEnabled(true);
         menuInputDev->setEnabled(true);

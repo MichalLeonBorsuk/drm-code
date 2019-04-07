@@ -128,7 +128,8 @@ signals:
     void AMMixerFrequencyOffsetChanged(double);
     void AMPLLPhaseChanged(_REAL);
     void ReceiverModeChanged(ERecMode);
-    void InChanSelChanged(EInChanSel);
+    void InputChannelChanged(int);
+    void OutputChannelChanged(int);
     void MSCMLInitNumIterationsChanged(int);
     void isInputRSCIChanged(bool);
     void isWriteWaveFileChanged(bool);

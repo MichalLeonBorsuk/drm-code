@@ -60,10 +60,13 @@ protected:
     QMenu*				menuInputSampleRate;
     QMenu*				menuOutputSampleRate;
     QMenu*				menuOutputDev;
+    QMenu*              menuInputChannel;
+    QMenu*              menuOutputChannel;
+
     const bool			bReceiver;
     QAction*            actionUpscale;
 
-    QMenu* InitChannel(QMenu* parent, const QString& text, const int iChanSel, const CHANSEL* ChanSel);
+    QMenu* InitChannel(QMenu* parent, const QString& text, const CHANSEL* ChanSel);
     QMenu* InitSampleRate(QMenu* parent, const QString& text, const int* SampleRate);
     void UpdateDeviceMenu(QMenu* menu, const vector<string>& names, const vector<string>& descriptions, const string& selected);
 
@@ -82,6 +85,8 @@ public slots:
     void OnSoundInSampleRateChanged(int);
     void OnSoundOutSampleRateChanged(int);
     void OnSoundUpscaleRatioChanged(int);
+    void OnSoundInChannelChanged(int chan);
+    void OnSoundOutChannelChanged(int chan);
 
 signals:
     void soundSampleRateChanged(int);
