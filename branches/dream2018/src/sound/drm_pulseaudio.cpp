@@ -777,6 +777,7 @@ CSoundInPulse::CSoundInPulse(): CSoundPulse(FALSE),
 CSoundInPulse::~CSoundInPulse()
 {
     cerr << "~CSoundInPulse" << endl;
+    Close();
 }
 
 _BOOLEAN CSoundInPulse::Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking)
@@ -883,6 +884,7 @@ CSoundOutPulse::CSoundOutPulse(): CSoundPulse(TRUE),
 CSoundOutPulse::~CSoundOutPulse()
 {
     cerr << "~CSoundOutPulse" << endl;
+    Close();
 }
 
 _BOOLEAN CSoundOutPulse::Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking)
