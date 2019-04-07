@@ -457,29 +457,26 @@ void CReceiveData::ProcessDataInternal(CParameter& Parameters)
     /* Get data from sound interface. The read function must be a
        blocking function! */
     bool bBad = true;
-    if (pSound == nullptr)
-    {
 #ifdef QT_MULTIMEDIA_LIB
-        if(pIODevice)
-        {
-            qint64 n = 2*vecsSoundBuffer.Size();
-            int m = pIODevice->read((char*)&vecsSoundBuffer[0], n);
-            if(m==n)
-                bBad = false;
-        }
-        else
-            return;
-#else
-        return;
-#endif
+    if(pIODevice)
+    {
+        qint64 n = 2*vecsSoundBuffer.Size();
+        qint64 m = pIODevice->read(reinterpret_cast<char*>(&vecsSoundBuffer[0]), n);
+        if(m==n)
+            bBad = false;
     }
-    else
+#else
+    if (pSound != nullptr)
     {
         bBad = pSound->Read(vecsSoundBuffer);
     }
+#endif
     Parameters.Lock();
     Parameters.ReceiveStatus.InterfaceI.SetStatus(bBad ? CRC_ERROR : RX_OK); /* Red light */
     Parameters.Unlock();
+
+    if(bBad)
+        return;
 
     /* Upscale if ratio greater than one */
     if (iUpscaleRatio > 1)
@@ -740,9 +737,11 @@ void CReceiveData::InitInternal(CParameter& Parameters)
     	   has to taken care about the buffering data of a whole MSC block.
     	   Use stereo input (* 2) */
 
+#ifdef QT_MULTIMEDIA_LIB
+#else
     if (pSound == nullptr)
         return;
-
+#endif
     Parameters.Lock();
     /* We define iOutputBlockSize as half the iSymbolBlockSize because
        if a positive frequency offset is present in drm signal,
@@ -762,7 +761,11 @@ void CReceiveData::InitInternal(CParameter& Parameters)
     }
 
     try {
-        const _BOOLEAN bChanged = pSound->Init(iSampleRate / iUpscaleRatio, iOutputBlockSize * 2 / iUpscaleRatio, TRUE);
+        const _BOOLEAN bChanged = TRUE;
+#ifdef QT_MULTIMEDIA_LIB
+#else
+        bChanged = pSound->Init(iSampleRate / iUpscaleRatio, iOutputBlockSize * 2 / iUpscaleRatio, TRUE);
+#endif
 
         /* Clear input data buffer on change samplerate change */
         if (bChanged)
@@ -773,17 +776,17 @@ void CReceiveData::InitInternal(CParameter& Parameters)
         {
             const int taps = (NUM_TAPS_UPSAMPLE_FILT + 3) & ~3;
             vecf_B.resize(taps, 0.0f);
-            for (int i = 0; i < NUM_TAPS_UPSAMPLE_FILT; i++)
-                vecf_B[i] = dUpsampleFilt[i] * iUpscaleRatio;
+            for (unsigned i = 0; i < NUM_TAPS_UPSAMPLE_FILT; i++)
+                vecf_B[i] = float(dUpsampleFilt[i] * iUpscaleRatio);
             if (bChanged)
             {
                 vecf_ZL.resize(0);
                 vecf_ZR.resize(0);
             }
-            vecf_ZL.resize((iOutputBlockSize + taps) / 2, 0.0f);
-            vecf_ZR.resize((iOutputBlockSize + taps) / 2, 0.0f);
-            vecf_YL.resize(iOutputBlockSize);
-            vecf_YR.resize(iOutputBlockSize);
+            vecf_ZL.resize(unsigned(iOutputBlockSize + taps) / 2, 0.0f);
+            vecf_ZR.resize(unsigned(iOutputBlockSize + taps) / 2, 0.0f);
+            vecf_YL.resize(unsigned(iOutputBlockSize));
+            vecf_YR.resize(unsigned(iOutputBlockSize));
         }
         else
         {
@@ -804,17 +807,16 @@ void CReceiveData::InitInternal(CParameter& Parameters)
            to keep the history intact */
         if (vecrReHist.Size() != NUM_TAPS_IQ_INPUT_FILT || bChanged)
         {
-            vecrReHist.Init(NUM_TAPS_IQ_INPUT_FILT, (_REAL) 0.0);
-            vecrImHist.Init(NUM_TAPS_IQ_INPUT_FILT, (_REAL) 0.0);
+            vecrReHist.Init(NUM_TAPS_IQ_INPUT_FILT, 0.0);
+            vecrImHist.Init(NUM_TAPS_IQ_INPUT_FILT, 0.0);
         }
 
         /* Start with phase null (can be arbitrarily chosen) */
-        cCurExp = (_REAL) 1.0;
+        cCurExp = 1.0;
 
         /* Set rotation vector to mix signal from zero frequency to virtual
            intermediate frequency */
-        const _REAL rNormCurFreqOffsetIQ =
-            (_REAL) 2.0 * crPi * ((_REAL) VIRTUAL_INTERMED_FREQ / iSampleRate);
+        const _REAL rNormCurFreqOffsetIQ = 2.0 * crPi * _REAL(VIRTUAL_INTERMED_FREQ / iSampleRate);
 
         cExpStep = _COMPLEX(cos(rNormCurFreqOffsetIQ), sin(rNormCurFreqOffsetIQ));
 
@@ -839,10 +841,8 @@ _REAL CReceiveData::HilbertFilt(const _REAL rRe, const _REAL rIm)
     	Hilbert filter for I / Q input data. This code is based on code written
     	by Cesco (HB9TLK)
     */
-    int i;
-
     /* Move old data */
-    for (i = 0; i < NUM_TAPS_IQ_INPUT_FILT - 1; i++)
+    for (int i = 0; i < NUM_TAPS_IQ_INPUT_FILT - 1; i++)
     {
         vecrReHist[i] = vecrReHist[i + 1];
         vecrImHist[i] = vecrImHist[i + 1];
@@ -852,9 +852,9 @@ _REAL CReceiveData::HilbertFilt(const _REAL rRe, const _REAL rIm)
     vecrImHist[NUM_TAPS_IQ_INPUT_FILT - 1] = rIm;
 
     /* Filter */
-    _REAL rSum = (_REAL) 0.0;
-    for (i = 1; i < NUM_TAPS_IQ_INPUT_FILT; i += 2)
-        rSum += fHilFiltIQ[i] * vecrImHist[i];
+    _REAL rSum = 0.0;
+    for (unsigned i = 1; i < NUM_TAPS_IQ_INPUT_FILT; i += 2)
+        rSum += _REAL(fHilFiltIQ[i]) * vecrImHist[int(i)];
 
     return (rSum + vecrReHist[IQ_INP_HIL_FILT_DELAY]) / 2;
 }
@@ -988,11 +988,11 @@ void CReceiveData::GetInputSpec(CVector<_REAL>& vecrData,
         const _REAL rNormSqMag = vecrSqMagSpect[i] * rNormData;
 
         if (rNormSqMag > 0)
-            vecrData[i] = (_REAL) 10.0 * log10(rNormSqMag);
+            vecrData[i] = 10.0 * log10(rNormSqMag);
         else
             vecrData[i] = RET_VAL_LOG_0;
 
-        vecrScale[i] = (_REAL) (i - iOffsetScale) * rFactorScale;
+        vecrScale[i] = _REAL( (i - iOffsetScale) * rFactorScale);
     }
 
 }
@@ -1016,8 +1016,8 @@ void CReceiveData::CalculatePSD(CVector<_REAL>& vecrData,
     const int iLenSpecWithNyFreq = iLenPSDAvEachBlock / 2 + 1;
 
     /* Init input and output vectors */
-    vecrData.Init(iLenSpecWithNyFreq, (_REAL) 0.0);
-    vecrScale.Init(iLenSpecWithNyFreq, (_REAL) 0.0);
+    vecrData.Init(iLenSpecWithNyFreq, 0.0);
+    vecrScale.Init(iLenSpecWithNyFreq, 0.0);
 
     /* Init the constants for scale and normalization */
     const _BOOLEAN bNegativeFreq =
@@ -1033,15 +1033,14 @@ void CReceiveData::CalculatePSD(CVector<_REAL>& vecrData,
         (bOffsetFreq ? iLenSpecWithNyFreq * VIRTUAL_INTERMED_FREQ
          / (iSampleRate / 2) : 0);
 
-    const _REAL rFactorScale =
-        (_REAL) iSampleRate / iLenSpecWithNyFreq / 2000;
+    const _REAL rFactorScale = _REAL( iSampleRate / iLenSpecWithNyFreq / 2000);
 
-    const _REAL rNormData = (_REAL) _MAXSHORT * _MAXSHORT *
+    const _REAL rNormData = _REAL( _MAXSHORT * _MAXSHORT *
                             iLenPSDAvEachBlock * iLenPSDAvEachBlock *
-                            iNumAvBlocksPSD * _REAL(PSD_WINDOW_GAIN);
+                            iNumAvBlocksPSD * _REAL(PSD_WINDOW_GAIN));
 
     /* Init intermediate vectors */
-    CRealVector vecrAvSqMagSpect(iLenSpecWithNyFreq, (CReal) 0.0);
+    CRealVector vecrAvSqMagSpect(iLenSpecWithNyFreq, 0.0);
     CRealVector vecrFFTInput(iLenPSDAvEachBlock);
 
     /* Init Hamming window */
@@ -1072,11 +1071,11 @@ void CReceiveData::CalculatePSD(CVector<_REAL>& vecrData,
         const _REAL rNormSqMag = vecrAvSqMagSpect[i] / rNormData;
 
         if (rNormSqMag > 0)
-            vecrData[i] = (_REAL) 10.0 * log10(rNormSqMag);
+            vecrData[i] = 10.0 * log10(rNormSqMag);
         else
             vecrData[i] = RET_VAL_LOG_0;
 
-        vecrScale[i] = (_REAL) (i - iOffsetScale) * rFactorScale;
+        vecrScale[i] = _REAL( (i - iOffsetScale) * rFactorScale);
     }
 }
 
@@ -1119,7 +1118,7 @@ void CReceiveData::PutPSD(CParameter &Parameters)
     int iStartIndex = iStartBin - (LEN_PSD_AV_EACH_BLOCK_RSI/4) + (iVecSize-1)/2;
 
     /* Fill with zeros to start with */
-    Parameters.vecrPSD.Init(iVecSize, (_REAL) 0.0);
+    Parameters.vecrPSD.Init(iVecSize, 0.0);
 
     for (i=iStartIndex, j=iStartBin; j<=iEndBin; i++,j++)
         Parameters.vecrPSD[i] = vecrData[j];
