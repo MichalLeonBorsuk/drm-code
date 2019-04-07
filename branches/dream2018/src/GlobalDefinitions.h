@@ -33,6 +33,7 @@
 using namespace std; /* Because of the library: "complex" */
 #include <string>
 #include <cstdio>
+#include <limits>
 #include <cmath>
 #include "tables/TableDRMGlobal.h"
 
@@ -163,7 +164,7 @@ typedef unsigned long long uint64_t;
 
 /* Define type-specific information */
 #define SIZEOF__BYTE					8
-#define _MAXSHORT						32767
+#define _MAXSHORT						std::numeric_limits<int16_t>::max()
 #define _MAXREAL						((_REAL) 3.4e38) /* Max for float */
 
 #ifdef USE_ERASURE_FOR_FASTER_ACQ
@@ -214,7 +215,7 @@ enum ERobMode {RM_ROBUSTNESS_MODE_A, RM_ROBUSTNESS_MODE_B,
 
 
 /* Constants ---------------------------------------------------------------- */
-const _REAL crPi = ((_REAL) 3.14159265358979323846);
+const _REAL crPi = M_PI;
 
 
 #define S9_DBUV 34.0 /* S9 in dBuV for converting HamLib S-meter readings to RSCI format */
@@ -321,22 +322,6 @@ public:
 };
 typedef CChanSimData<_REAL>		CChanSimDataMod; /* OFDM modulated signals */
 typedef CChanSimData<_COMPLEX>	CChanSimDataDemod; /* Demodulated signals */
-
-/* Path for simulation output and status files */
-#define SIM_OUT_FILES_PATH				"test/"
-
-
-/* Prototypes for global functions ********************************************/
-/* Posting a window message */
-//void PostWinMessage(const _MESSAGE_IDENT MessID, const int iMessageParam = 0);
-
-/* Debug error handling */
-void DebugError(const char* pchErDescr, const char* pchPar1Descr,
-                const double dPar1, const char* pchPar2Descr,
-                const double dPar2);
-
-void ErrorMessage(string strErrorString);
-
 
 /* Global functions ***********************************************************/
 /* Converting _REAL to _SAMPLE */

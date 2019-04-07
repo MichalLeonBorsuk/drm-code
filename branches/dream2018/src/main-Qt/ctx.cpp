@@ -16,7 +16,6 @@ void
 CTx::run()
 {
     qDebug("Working thread started");
-    CParameter& Parameters = *tx.GetParameters();
     try
     {
         /* Set restart flag */
@@ -38,11 +37,11 @@ CTx::run()
     }
     catch (CGenErr GenErr)
     {
-        ErrorMessage(GenErr.strError);
+        qDebug("%s", GenErr.strError.c_str());
     }
     catch (string strError)
     {
-        ErrorMessage(strError);
+        qDebug("%s", strError.c_str());
     }
     qDebug("Working thread complete");
 }

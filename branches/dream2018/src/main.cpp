@@ -117,7 +117,7 @@ main(int argc, char **argv)
 			CTRx rx(DRMReceiver);
             rx.start();
             return app.exec();
-#wlse
+#else
             try
             {
                 // set the frequency from the command line or ini file

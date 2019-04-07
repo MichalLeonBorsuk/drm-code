@@ -64,28 +64,16 @@ void CTagItemDecoderRsta::DecodeTag(CVector<_BINARY>& vecbiTag, const int iLen)
 {
     if (iLen != 32)
         return;
-    uint8_t sync = (uint8_t)vecbiTag.Separate(8);
-    uint8_t fac = (uint8_t)vecbiTag.Separate(8);
-    uint8_t sdc = (uint8_t)vecbiTag.Separate(8);
-    uint8_t audio = (uint8_t)vecbiTag.Separate(8);
-    if(sync==0)
-        pParameter->ReceiveStatus.TSync.SetStatus(RX_OK);
-    else
-        pParameter->ReceiveStatus.TSync.SetStatus(CRC_ERROR);
-    if(fac==0)
-        pParameter->ReceiveStatus.FAC.SetStatus(RX_OK);
-    else
-        pParameter->ReceiveStatus.FAC.SetStatus(CRC_ERROR);
-    if(sdc==0)
-        pParameter->ReceiveStatus.SDC.SetStatus(RX_OK);
-    else
-        pParameter->ReceiveStatus.SDC.SetStatus(CRC_ERROR);
+    uint8_t sync = uint8_t(vecbiTag.Separate(8));
+    uint8_t fac = uint8_t(vecbiTag.Separate(8));
+    uint8_t sdc = uint8_t(vecbiTag.Separate(8));
+    uint8_t audio = uint8_t(vecbiTag.Separate(8));
+    pParameter->ReceiveStatus.TSync.SetStatus((sync==0)?RX_OK:CRC_ERROR);
+    pParameter->ReceiveStatus.FAC.SetStatus((fac==0)?RX_OK:CRC_ERROR);
+    pParameter->ReceiveStatus.SDC.SetStatus((sdc==0)?RX_OK:CRC_ERROR);
 
-	int iShortID = pParameter->GetCurSelAudioService();
-    if(audio==0)
-        pParameter->AudioComponentStatus[iShortID].SetStatus(RX_OK);
-    else
-        pParameter->AudioComponentStatus[iShortID].SetStatus(CRC_ERROR);
+    unsigned iShortID = unsigned(pParameter->GetCurSelAudioService());
+    pParameter->AudioComponentStatus[iShortID].SetStatus((audio==0)?RX_OK:CRC_ERROR);
 }
 
 void CTagItemDecoderRwmf::DecodeTag(CVector<_BINARY>& vecbiTag, const int iLen)
