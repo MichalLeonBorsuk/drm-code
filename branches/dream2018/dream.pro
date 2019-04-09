@@ -192,7 +192,7 @@ win32 {
   qt:multimedia {
 	CONFIG += sound
   }
-  else {
+  !qt:multimedia {
     HEADERS += src/windows/Sound.h
     SOURCES += src/windows/Sound.cpp
     LIBS += -lwinmm
