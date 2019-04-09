@@ -761,10 +761,10 @@ void CReceiveData::InitInternal(CParameter& Parameters)
     }
 
     try {
-        const _BOOLEAN bChanged = TRUE;
 #ifdef QT_MULTIMEDIA_LIB
+		const _BOOLEAN bChanged = TRUE;
 #else
-        bChanged = pSound->Init(iSampleRate / iUpscaleRatio, iOutputBlockSize * 2 / iUpscaleRatio, TRUE);
+		const _BOOLEAN bChanged = pSound->Init(iSampleRate / iUpscaleRatio, iOutputBlockSize * 2 / iUpscaleRatio, TRUE);
 #endif
 
         /* Clear input data buffer on change samplerate change */
