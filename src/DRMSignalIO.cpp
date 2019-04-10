@@ -465,6 +465,9 @@ void CReceiveData::ProcessDataInternal(CParameter& Parameters)
         if(m==n)
             bBad = false;
     }
+	else if (pSound != nullptr) { // for audio files
+		bBad = pSound->Read(vecsSoundBuffer);
+	}
 #else
     if (pSound != nullptr)
     {
