@@ -31,7 +31,6 @@
 #ifdef QT_MULTIMEDIA_LIB
 # include <QAudioDeviceInfo>
 #endif
-#include <QString>
 
 /* Implementation *************************************************************/
 void CDRMTransmitter::Run()
