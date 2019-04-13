@@ -112,7 +112,7 @@ bool CAudioParam::setFromType9Bits(CVector<_BINARY>& biData, unsigned numBytes)
     if (eAudioCoding == CAudioParam::AC_xHE_AAC)
     {
         xHE_AAC_config.resize(numBytes-2);
-        for(int i=0; i < xHE_AAC_config.size(); i++) {
+        for(size_t i=0; i < xHE_AAC_config.size(); i++) {
             xHE_AAC_config[i] = biData.Separate(8);
         }
     }
@@ -219,7 +219,7 @@ void CAudioParam::EnqueueType9(CVector<_BINARY>& vecbiData) const
     /* rfa 1 bit */
     vecbiData.Enqueue((uint32_t) 0, 1);
 
-    for(int i=0; i<xHE_AAC_config.size(); i++) {
+    for(size_t i=0; i < xHE_AAC_config.size(); i++) {
         vecbiData.Enqueue(xHE_AAC_config[i], 8);
     }
 }
