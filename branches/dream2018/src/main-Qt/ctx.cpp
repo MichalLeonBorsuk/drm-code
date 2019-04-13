@@ -1,6 +1,6 @@
 #include "ctx.h"
 
-#include <../DrmTransmitter.h>
+#include "../DrmTransmitter.h"
 
 CTx::CTx(CDRMTransmitter& nTx, CTRx *parent): CTRx(parent), tx(nTx), eRunState(STOPPED)
 {
