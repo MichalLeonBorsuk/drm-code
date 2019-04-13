@@ -24,6 +24,7 @@ console {
     CONFIG -= qt qt4 qt5
     UI_MESSAGE = console mode
     VERSION_MESSAGE = No Qt
+    SOURCES += src/main.cpp
 }
 qtconsole {
     QT -= gui
@@ -611,24 +612,26 @@ SOURCES += \
     src/resample/caudioresample.cpp \
     src/sourcedecoders/reverb.cpp \
     src/sourcedecoders/caudioreverb.cpp
-!console {
-HEADERS += \
-    src/GUI-QT/Logging.h \
-    src/util-QT/epgdec.h \
-    src/util-QT/EPG.h \
-    src/util-QT/Util.h \
-    src/main-Qt/ctrx.h \
-    src/main-Qt/crx.h \
-    src/main-Qt/ctx.h
 
-SOURCES += \
-    src/GUI-QT/Logging.cpp \
-    src/util-QT/EPG.cpp \
-    src/util-QT/epgdec.cpp \
-    src/util-QT/Util.cpp \
-    src/main-Qt/ctrx.cpp \
-    src/main-Qt/crx.cpp \
-    src/main-Qt/ctx.cpp
+!console {
+    HEADERS += \
+        src/GUI-QT/Logging.h \
+        src/util-QT/epgdec.h \
+        src/util-QT/EPG.h \
+        src/util-QT/Util.h \
+        src/main-Qt/ctrx.h \
+        src/main-Qt/crx.h \
+        src/main-Qt/ctx.h
+
+    SOURCES += \
+        src/GUI-QT/Logging.cpp \
+        src/util-QT/EPG.cpp \
+        src/util-QT/epgdec.cpp \
+        src/main-Qt/main.cpp \
+        src/util-QT/Util.cpp \
+        src/main-Qt/ctrx.cpp \
+        src/main-Qt/crx.cpp \
+        src/main-Qt/ctx.cpp
 }
 gui {
     FORMS += \
@@ -693,8 +696,6 @@ gui {
         src/GUI-QT/AACCodecParams.cpp \
         src/GUI-QT/TransmDlg.cpp \
         src/GUI-QT/main.cpp
-} else {
-    SOURCES += src/main.cpp
 }
 !sound {
     error("no usable audio interface found - install pulseaudio or portaudio dev package")
