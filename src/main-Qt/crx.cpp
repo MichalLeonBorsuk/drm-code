@@ -1,6 +1,6 @@
 #include "crx.h"
 
-#include <../DrmReceiver.h>
+#include "../DrmReceiver.h"
 
 CRx::CRx(CDRMReceiver& nRx, CTRx *trx): CTRx(trx), rx(nRx), eRunState(STOPPED)
 {

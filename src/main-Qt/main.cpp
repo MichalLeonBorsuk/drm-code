@@ -35,12 +35,22 @@
 # include <csignal>
 #endif
 
-#include "GlobalDefinitions.h"
-#include "DrmReceiver.h"
-#include "DrmTransmitter.h"
-#include "DrmSimulation.h"
-#include "util/Settings.h"
+#include "../GlobalDefinitions.h"
+#include "../DrmReceiver.h"
+#include "../DrmTransmitter.h"
+#include "../DrmSimulation.h"
+#include "../util/Settings.h"
 #include <iostream>
+
+#ifdef HAVE_LIBHAMLIB
+# include "../util-QT/Rig.h"
+#endif
+# include <QCoreApplication>
+# include <QTranslator>
+# include <QThread>
+
+#include "../main-Qt/crx.h"
+#include "../main-Qt/ctx.h"
 
 int
 main(int argc, char **argv)
@@ -63,48 +73,12 @@ main(int argc, char **argv)
 	WSADATA wsaData;
 	(void)WSAStartup(MAKEWORD(2,2), &wsaData);
 #endif
-            try
-            {
-                // set the frequency from the command line or ini file
-                int iFreqkHz = DRMReceiver.GetParameters()->GetFrequency();
-                if (iFreqkHz != -1)
-                    DRMReceiver.SetFrequency(iFreqkHz);
-
-#ifdef USE_CONSOLEIO
-                CConsoleIO::Enter(this);
-#endif
-                ERunState eRunState = RESTART;
-                do
-                {
-                    DRMReceiver.InitReceiverMode();
-                    DRMReceiver.SetInStartMode();
-                    eRunState = RUNNING;
-                    do
-                    {
-                        DRMReceiver.updatePosition();
-                        DRMReceiver.process();
-#ifdef USE_CONSOLEIO
-                        CConsoleIO::Update();
-#endif
-                    }
-                    while (eRunState == RUNNING);
-                }
-                while (eRunState == RESTART);
-                DRMReceiver.CloseSoundInterfaces();
-#ifdef USE_CONSOLEIO
-                CConsoleIO::Leave();
-#endif
-            }
-            catch (CGenErr GenErr)
-            {
-                perror(GenErr.strError.c_str());
-            }
-            catch (string strError)
-            {
-                perror(strError.c_str());
-            }
+			QCoreApplication app(argc, argv);
+			/* Start working thread */
+            CRx rx(DRMReceiver);
+            rx.start();
+            return app.exec();
         }
-
 		else if (mode == "transmit")
 		{
 			CDRMTransmitter DRMTransmitter(&Settings);
@@ -124,18 +98,18 @@ main(int argc, char **argv)
                     /* Start the transmitter run routine */
                     DRMTransmitter.Run();
                 }
-                while(eRunState == RESTART);
+                while (eRunState == RESTART);
 
                 /* Closing the sound interfaces */
                 DRMTransmitter.Close();
             }
             catch (CGenErr GenErr)
             {
-                perror(GenErr.strError.c_str());
+                cerr << GenErr.strError << endl;
             }
             catch (string strError)
             {
-                perror(strError.c_str());
+                cerr << strError << endl;
             }
         }
 		else
@@ -153,26 +127,8 @@ main(int argc, char **argv)
 	}
 	catch(CGenErr GenErr)
 	{
-        perror(GenErr.strError.c_str());
-    }
+        cerr << GenErr.strError << endl;
+	}
 
 	return 0;
-}
-
-void
-DebugError(const char *pchErDescr, const char *pchPar1Descr,
-		   const double dPar1, const char *pchPar2Descr, const double dPar2)
-{
-	FILE *pFile = fopen("test/DebugError.dat", "a");
-	fprintf(pFile, "%s", pchErDescr);
-	fprintf(pFile, " ### ");
-	fprintf(pFile, "%s", pchPar1Descr);
-	fprintf(pFile, ": ");
-	fprintf(pFile, "%e ### ", dPar1);
-	fprintf(pFile, "%s", pchPar2Descr);
-	fprintf(pFile, ": ");
-	fprintf(pFile, "%e\n", dPar2);
-	fclose(pFile);
-	fprintf(stderr, "\nDebug error! For more information see test/DebugError.dat\n");
-	exit(1);
 }
