@@ -208,7 +208,7 @@ CAboutDlg::CAboutDlg(QWidget* parent):
 #ifdef USE_JACK
         "<li><b>libjack</b> (The Jack Audio Connection Kit) <i>http://www.jackaudio.org</i></li>"
 #endif
-#ifdef QT_MULTIMEDIA
+#ifdef QT_MULTIMEDIA_LIB
 		"<li><b>Qt Multimedia</b>(" + QString(QT_VERSION_STR) + ") <i>http://qt-project.org</i></li>"
 #else
 # ifdef WIN32
