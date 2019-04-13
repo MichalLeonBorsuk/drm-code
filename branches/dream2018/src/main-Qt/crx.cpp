@@ -94,7 +94,7 @@ void CRx::SaveSettings()
     rx.SaveSettings();
 }
 
-void CRx::SetInputDevice(QString s)
+void CRx::SetInputDevice(string s)
 {
     rx.SetInputDevice(s);
     eRunState = RESTART;
@@ -103,9 +103,9 @@ void CRx::SetInputDevice(QString s)
     emit soundFileChanged(id); // TODO only send if it is a file!!!
 }
 
-void CRx::SetOutputDevice(QString s)
+void CRx::SetOutputDevice(string s)
 {
-    cerr << "CRx::SetOutputDevice " << s.toStdString() << endl;
+    cerr << "CRx::SetOutputDevice " << s << endl;
     rx.SetOutputDevice(s);
     emit OutputDeviceChanged(QString::fromStdString(rx.GetOutputDevice()));
 }
