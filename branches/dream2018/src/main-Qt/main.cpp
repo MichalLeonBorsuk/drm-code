@@ -45,9 +45,9 @@
 #ifdef HAVE_LIBHAMLIB
 # include "../util-QT/Rig.h"
 #endif
-# include <QCoreApplication>
-# include <QTranslator>
-# include <QThread>
+#include <QCoreApplication>
+#include <QTranslator>
+#include <QThread>
 
 #include "../main-Qt/crx.h"
 #include "../main-Qt/ctx.h"
@@ -55,34 +55,38 @@
 int
 main(int argc, char **argv)
 {
-    try
-	{
-		CSettings Settings;
-		Settings.Load(argc, argv);
-
-		string mode = Settings.Get("command", "mode", string());
-		if (mode == "receive")
-		{
-			CDRMSimulation DRMSimulation;
-			CDRMReceiver DRMReceiver(&Settings);
-
-			DRMSimulation.SimScript();
-			DRMReceiver.LoadSettings();
-
 #ifdef _WIN32
-	WSADATA wsaData;
-	(void)WSAStartup(MAKEWORD(2,2), &wsaData);
+    WSADATA wsaData;
+    (void)WSAStartup(MAKEWORD(2,2), &wsaData);
 #endif
-			QCoreApplication app(argc, argv);
-			/* Start working thread */
+    try
+    {
+        QCoreApplication app(argc, argv);
+
+        CSettings Settings;
+        Settings.Load(argc, argv);
+
+        string mode = Settings.Get("command", "mode", string());
+        if (mode == "receive")
+        {
+            CDRMSimulation DRMSimulation;
+            CDRMReceiver DRMReceiver(&Settings);
+
+            DRMSimulation.SimScript();
+            DRMReceiver.LoadSettings();
+
             CRx rx(DRMReceiver);
+
+            QObject::connect(&rx, SIGNAL(finished()), &app, SLOT(quit()), Qt::QueuedConnection);
+
             rx.start();
             return app.exec();
+
         }
-		else if (mode == "transmit")
-		{
-			CDRMTransmitter DRMTransmitter(&Settings);
-			DRMTransmitter.LoadSettings();
+        else if (mode == "transmit")
+        {
+            CDRMTransmitter DRMTransmitter(&Settings);
+            DRMTransmitter.LoadSettings();
             try
             {
                 /* Set restart flag */
@@ -112,23 +116,24 @@ main(int argc, char **argv)
                 cerr << strError << endl;
             }
         }
-		else
-		{
-			string usage(Settings.UsageArguments());
-			for (;;)
-			{
-				size_t pos = usage.find("$EXECNAME");
-				if (pos == string::npos) break;
-				usage.replace(pos, sizeof("$EXECNAME")-1, argv[0]);
-			}
-			cerr << usage << endl << endl;
-			exit(0);
-		}
-	}
-	catch(CGenErr GenErr)
-	{
-        cerr << GenErr.strError << endl;
-	}
+        else
+        {
+            string usage(Settings.UsageArguments());
+            for (;;)
+            {
+                size_t pos = usage.find("$EXECNAME");
+                if (pos == string::npos) break;
+                usage.replace(pos, sizeof("$EXECNAME")-1, argv[0]);
+            }
+            cerr << usage << endl << endl;
+            exit(0);
+        }
 
-	return 0;
+    }
+    catch(CGenErr GenErr)
+    {
+        cerr << GenErr.strError << endl;
+    }
+
+    return 0;
 }

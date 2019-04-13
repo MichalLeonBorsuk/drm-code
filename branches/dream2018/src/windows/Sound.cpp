@@ -358,8 +358,10 @@ CSoundOut::CSoundOut():CSoundOutInterface(),m_WaveOut(nullptr)
     /* Get the number of digital audio devices in this computer, check range */
     int iNumDevs = waveOutGetNumDevs();
 
-    if (iNumDevs == 0)
+    if (iNumDevs == 0) {
+        cerr << "waveOutGetNumDevs was zero" << endl;
         return;
+    }
 
     /* Init buffer pointer to zero */
     for (i = 0; i < NUM_SOUND_BUFFERS_OUT; i++)

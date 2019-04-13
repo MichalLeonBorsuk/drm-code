@@ -20,7 +20,7 @@ else {
     DEBUG_MESSAGE = release
 }
 console {
-    QT -= core gui
+    QT -= core gui multimedia
     CONFIG -= qt qt4 qt5
     UI_MESSAGE = console mode
     VERSION_MESSAGE = No Qt
@@ -30,10 +30,18 @@ qtconsole {
     QT -= gui
     QT += xml
     UI_MESSAGE = console mode
+    SOURCES += src/main-Qt/main.cpp
 }
 !console:!qtconsole {
     CONFIG += gui
     UI_MESSAGE = GUI mode
+}
+consoleio {
+    DEFINES += USE_CONSOLEIO
+    HEADERS += src/linux/ConsoleIO.h
+    SOURCES += src/linux/ConsoleIO.cpp
+    LIBS += -lpthread
+    message("with terminal user interface")
 }
 gui {
     RESOURCES = src/GUI-QT/res/icons.qrc
@@ -90,12 +98,11 @@ linux-* {
   }
 }
 android {
-    CONFIG += openSL sound fdk-aac
+    CONFIG += sound fdk-aac
     SOURCES += src/android/platform_util.cpp src/android/soundin.cpp src/android/soundout.cpp
     HEADERS += src/android/platform_util.h src/android/soundin.h src/android/soundout.h
     QT -= webkitwidgets
-    QT += svg
-    LIBS += -lOpenSLES
+    QT += svg multimedia
 }
 unix {
     target.path = /usr/bin
@@ -104,9 +111,6 @@ unix {
     INSTALLS += documentation
     INSTALLS += target
     CONFIG += link_pkgconfig
-    tui:console {
-      CONFIG += consoleio
-    }
     LIBS += -lfftw3 -lz
     SOURCES += src/linux/Pacer.cpp
     DEFINES += HAVE_DLFCN_H \
@@ -186,7 +190,7 @@ contains(QMAKE_CC, i686-w64-mingw32.static-gcc) {
 }
 win32 {
   CONFIG += fdk-aac
-  LIBS += -lsetupapi -lwsock32 -lws2_32 -ladvapi32 -luser32 -lwpcap -lpacket
+  LIBS += -lwpcap -lpacket -lmincore
   DEFINES += HAVE_SETUPAPI HAVE_LIBZ _CRT_SECURE_NO_WARNINGS HAVE_LIBZ HAVE_LIBPCAP
   SOURCES += src/windows/Pacer.cpp src/windows/platform_util.cpp
   HEADERS += src/windows/platform_util.h
@@ -213,8 +217,14 @@ win32 {
   }
   mxe {
     message('MXE')
-    CONFIG += sndfile hamlib opus speexdsp sound
-    QT += multimedia
+    !minimal:CONFIG += sndfile hamlib opus
+    minimal {
+        HEADERS += src/windows/Sound.h
+        SOURCES += src/windows/Sound.cpp
+        LIBS += -lwinmm
+    }
+    CONFIG += speexdsp sound
+    !console:QT += multimedia
   }
   else {
     exists($$PWD/include/speex/speex_preprocess.h) {
@@ -356,17 +366,6 @@ pulseaudio {
         LIBS += -lpulse
     }
     message("with pulseaudio")
-}
-openSL {
-    DEFINES += USE_OPENSL
-    message("with openSL")
-}
-consoleio {
-    DEFINES += USE_CONSOLEIO
-    HEADERS += src/linux/ConsoleIO.h
-    SOURCES += src/linux/ConsoleIO.cpp
-    LIBS += -lpthread
-    message("with terminal user interface")
 }
 HEADERS += \
     src/AMDemodulation.h \
@@ -627,7 +626,6 @@ SOURCES += \
         src/GUI-QT/Logging.cpp \
         src/util-QT/EPG.cpp \
         src/util-QT/epgdec.cpp \
-        src/main-Qt/main.cpp \
         src/util-QT/Util.cpp \
         src/main-Qt/ctrx.cpp \
         src/main-Qt/crx.cpp \
@@ -697,6 +695,7 @@ gui {
         src/GUI-QT/TransmDlg.cpp \
         src/GUI-QT/main.cpp
 }
+
 !sound {
     error("no usable audio interface found - install pulseaudio or portaudio dev package")
 }
