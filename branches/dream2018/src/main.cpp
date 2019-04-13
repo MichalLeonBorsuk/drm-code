@@ -34,7 +34,9 @@
 #if defined(__unix__) && !defined(__APPLE__)
 # include <csignal>
 #endif
-
+#ifdef USE_CONSOLEIO
+# include "linux/ConsoleIO.h"
+#endif
 #include "GlobalDefinitions.h"
 #include "DrmReceiver.h"
 #include "DrmTransmitter.h"
@@ -71,7 +73,7 @@ main(int argc, char **argv)
                     DRMReceiver.SetFrequency(iFreqkHz);
 
 #ifdef USE_CONSOLEIO
-                CConsoleIO::Enter(this);
+                CConsoleIO::Enter(&DRMReceiver);
 #endif
                 ERunState eRunState = RESTART;
                 do
@@ -84,7 +86,7 @@ main(int argc, char **argv)
                         DRMReceiver.updatePosition();
                         DRMReceiver.process();
 #ifdef USE_CONSOLEIO
-                        CConsoleIO::Update();
+                        eRunState = CConsoleIO::Update();
 #endif
                     }
                     while (eRunState == RUNNING);

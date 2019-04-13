@@ -1,4 +1,7 @@
 #include "crx.h"
+#ifdef USE_CONSOLEIO
+# include "../linux/ConsoleIO.h"
+#endif
 
 #include "../DrmReceiver.h"
 
@@ -22,7 +25,7 @@ CRx::run()
             rx.SetFrequency(iFreqkHz);
 
 #ifdef USE_CONSOLEIO
-        CConsoleIO::Enter(this);
+        CConsoleIO::Enter(&rx);
 #endif
         // emit any initial state needed by UI and not otherwise set
         emit InputChannelChanged(int(rx.GetReceiveData()->GetInChanSel()));
@@ -48,7 +51,7 @@ CRx::run()
                 rx.process();
 
 #ifdef USE_CONSOLEIO
-                CConsoleIO::Update();
+                eRunState = CConsoleIO::Update();
 #endif
             }
             while (eRunState == RUNNING);
@@ -134,6 +137,8 @@ void CRx::Restart()
 void CRx::Stop()
 {
     eRunState = STOP_REQUESTED;
+cerr << "finished" << endl;
+    emit finished();
 }
 
 CSettings* CRx::GetSettings()

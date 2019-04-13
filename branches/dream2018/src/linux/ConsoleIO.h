@@ -35,7 +35,7 @@ class CConsoleIO
 public:
 	static void Enter(CDRMReceiver* pDRMReceiver);
 	static void Leave();
-	static void Update();
+	static ERunState Update();
 protected:
 	static char ETypeRxStatus2char(ETypeRxStatus eTypeRxStatus);
 	static CDRMReceiver* pDRMReceiver;
