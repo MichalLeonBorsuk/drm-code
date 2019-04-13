@@ -151,7 +151,7 @@ CConsoleIO::Leave()
 	}
 }
 
-void
+ERunState
 CConsoleIO::Update()
 {
 	/* Check for pending signals */
@@ -160,14 +160,13 @@ CConsoleIO::Update()
 			sigismember(&sigset, SIGHUP) ||
 			sigismember(&sigset, SIGTERM) ||
 			sigismember(&sigset, SIGQUIT)) {
-			pDRMReceiver->Stop();
-			return;
+			return STOP_REQUESTED;
 		}
 	}
 
 	/* No TTY return */
 	if (tty < 0)
-		return;
+		return RUNNING;
 
 	CParameter& Parameters = *pDRMReceiver->GetParameters();
 	cinit();
@@ -182,8 +181,7 @@ CConsoleIO::Update()
 		int key = buffer[0];
 		if (key == '\3' /* Control-C */ || key == 'q' || key == 'Q')
 		{
-			pDRMReceiver->Stop();
-			return;
+			return STOP_REQUESTED;
 		}
 		if (key == ' ')
 		{
@@ -216,14 +214,14 @@ CConsoleIO::Update()
 	}
 
 	if (mode & MODE_NO_DISPLAY)
-		return;
+		return RUNNING;
 
 	struct timespec ts;
 	if (clock_gettime(CLOCK_MONOTONIC, &ts) == -1)
-		return;
+		return RUNNING;
 	unsigned long long curtime = (unsigned long long)ts.tv_sec*1000 + (unsigned long long)ts.tv_nsec/1000000;
 	if ((curtime - time) < GUI_CONTROL_UPDATE_TIME)
-		return;
+		return RUNNING;
 	time = curtime;
 
     char msc = ETypeRxStatus2char(Parameters.ReceiveStatus.SLAudio.GetStatus());
@@ -391,6 +389,7 @@ CConsoleIO::Update()
 	}
 	cprintf(CLREND HOME);
 	cflush();
+	return RUNNING;
 }
 
 char
