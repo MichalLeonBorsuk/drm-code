@@ -150,8 +150,8 @@ public:
     }
     virtual void            EnumerateInputs(std::vector<std::string>& names, std::vector<std::string>& descriptions) override;
     virtual void            EnumerateOutputs(std::vector<std::string>& names, std::vector<std::string>& descriptions) override;
-    virtual void            SetInputDevice(QString) override;
-    virtual void			SetOutputDevice(QString) override;
+    virtual void            SetInputDevice(std::string) override;
+    virtual void			SetOutputDevice(std::string) override;
 
     virtual CSettings*GetSettings()  override{
         return pSettings;

@@ -53,7 +53,6 @@
 #endif
 const int
 CDRMReceiver::MAX_UNLOCKED_COUNT = 2;
-#include <QString>
 
 /* Implementation *************************************************************/
 CDRMReceiver::CDRMReceiver(CSettings* nPsettings) : CDRMTransceiver(),
@@ -156,7 +155,7 @@ CDRMReceiver::SetAMFilterBW(int value)
 }
 
 void
-CDRMReceiver::SetInputDevice(QString s)
+CDRMReceiver::SetInputDevice(string s)
 {
 	ReceiveData.Stop();
 	ReceiveData.ClearInputData();
@@ -166,7 +165,7 @@ CDRMReceiver::SetInputDevice(QString s)
 		delete pUpstreamRSCI;
 		pUpstreamRSCI = new CUpstreamDI();
 	}
-	string device = s.toStdString();
+    string device = s;
 	FileTyper::type t = FileTyper::resolve(device);
 	if (t == FileTyper::unrecognised) {
 		vector<string> names;
@@ -206,9 +205,9 @@ CDRMReceiver::SetInputDevice(QString s)
 }
 
 void
-CDRMReceiver::SetOutputDevice(QString device)
+CDRMReceiver::SetOutputDevice(string device)
 {
-    WriteData.SetSoundInterface(device.toStdString());
+    WriteData.SetSoundInterface(device);
     WriteData.Init(Parameters);
 }
 
@@ -1464,8 +1463,7 @@ CDRMReceiver::LoadSettings()
             }
         }
     }
-    QString qs(QString::fromStdString(str));
-    SetInputDevice(qs);
+    SetInputDevice(str);
 
     /* Channel Estimation: Frequency Interpolation */
     SetFreqInt((ETypeIntFreq)s.Get("Receiver", "freqint", int(FWIENER)));
@@ -1524,8 +1522,7 @@ CDRMReceiver::LoadSettings()
             str = vn[0];
         }
     }
-    qs = QString::fromStdString(str);
-    SetOutputDevice(qs);
+    SetOutputDevice(str);
 
     str = s.Get("command", "rciout");
     if (str != "")

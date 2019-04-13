@@ -34,7 +34,6 @@
 
 class CSettings;
 class CParameter;
-class QString;
 enum ERunState { STOPPED, RUNNING, STOP_REQUESTED, RESTART };
 
 class CDRMTransceiver
@@ -45,8 +44,8 @@ public:
 
     virtual void LoadSettings() = 0;
     virtual void SaveSettings() = 0;
-    virtual void SetInputDevice(QString) = 0;
-    virtual void SetOutputDevice(QString) = 0;
+    virtual void SetInputDevice(std::string) = 0;
+    virtual void SetOutputDevice(std::string) = 0;
     virtual void EnumerateInputs(std::vector<std::string>& names, std::vector<std::string>& descriptions)=0;
     virtual void EnumerateOutputs(std::vector<std::string>& names, std::vector<std::string>& descriptions)=0;
     virtual CSettings*				GetSettings() = 0;

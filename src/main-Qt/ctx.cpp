@@ -56,12 +56,12 @@ void CTx::SaveSettings()
     tx.SaveSettings();
 }
 
-void CTx::SetInputDevice(QString s)
+void CTx::SetInputDevice(string s)
 {
     tx.SetInputDevice(s);
 }
 
-void CTx::SetOutputDevice(QString s)
+void CTx::SetOutputDevice(string s)
 {
     tx.SetOutputDevice(s);
 }

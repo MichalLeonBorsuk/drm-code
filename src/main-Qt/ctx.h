@@ -34,8 +34,8 @@ public:
 public slots:
     virtual void LoadSettings() override;
     virtual void SaveSettings() override;
-    virtual void SetInputDevice(QString) override;
-    virtual void SetOutputDevice(QString) override;
+    virtual void SetInputDevice(string) override;
+    virtual void SetOutputDevice(string) override;
     virtual void Restart();
     virtual void Stop();
     virtual void SetSettings(CSettings* pNewSettings) override;
