@@ -160,16 +160,16 @@ void CDRMTransmitter::doSetOutputDevice()
 }
 
 void
-CDRMTransmitter::SetInputDevice(QString device)
+CDRMTransmitter::SetInputDevice(string device)
 {
-    indev = device.toStdString();
+    indev = device;
     ReadData.SetSoundInterface(indev);
 }
 
 void
-CDRMTransmitter::SetOutputDevice(QString device)
+CDRMTransmitter::SetOutputDevice(string device)
 {
-    outdev = device.toStdString();
+    outdev = device;
     TransmitData.SetSoundInterface(outdev);
 }
 
