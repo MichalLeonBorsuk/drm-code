@@ -1,43 +1,32 @@
-contains(QT_VERSION, ^4\\..*) {
-	CONFIG += qt4
-	VERSION_MESSAGE = Qt 4
-	CONFIG(debug, debug|release) {
-		DEBUG_MESSAGE = debug
-	}
-	else {
-		DEBUG_MESSAGE = release 
-	}
-}
-count(QT_VERSION, 0) {
-	CONFIG += qt3 thread
-	VERSION_MESSAGE = Qt 3
-	debug {
-		DEBUG_MESSAGE = debug
-	}
-	else {
-		DEBUG_MESSAGE = release 
-	}
-}
+QT += core gui network xml widgets
+TEMPLATE = app
+TARGET = dream
+INCLUDEPATH += libs
+INCLUDEPATH += libs/qwt
+LIBS += -Llibs
+OBJECTS_DIR = obj
+DEFINES += EXECUTABLE_NAME=$$TARGET
+macx:QMAKE_LFLAGS += -F$$PWD/libs
 console {
-    QT -= gui
-    CONFIG -= qt
-    qt3:CONFIG -= qt3
-    qt4:CONFIG -= qt4
+	QT -= core gui network xml widgets
     DEFINES += USE_NO_QT
     DEFINES -= USE_QT_GUI
     UI_MESSAGE = console mode
     VERSION_MESSAGE=No Qt
 }
-else {
-    qtconsole {
-        QT -= gui
-        DEFINES -= USE_QT_GUI
-        UI_MESSAGE = console mode
-    }
-    else {
-        DEFINES += USE_QT_GUI
-        RESOURCES = src/GUI-QT/res/icons.qrc
-        UI_MESSAGE = GUI mode
+qtconsole {
+	QT -= gui widgets
+	DEFINES -= USE_QT_GUI
+	UI_MESSAGE = console mode
+	INCLUDEPATH += moc
+}
+gui {
+	VPATH += src/GUI-QT
+	INCLUDEPATH += src/GUI-QT
+	INCLUDEPATH += moc
+	DEFINES += USE_QT_GUI
+	RESOURCES = src/GUI-QT/res/icons.qrc
+	UI_MESSAGE = GUI mode
 	FORMS += TransmDlgbase.ui
 	FORMS += AMSSDlgbase.ui \
 	systemevalDlgbase.ui \
@@ -46,91 +35,57 @@ else {
 	FORMS += GeneralSettingsDlgbase.ui \
 	MultSettingsDlgbase.ui \
 	AboutDlgbase.ui
-    }
-}
-message($$VERSION_MESSAGE $$DEBUG_MESSAGE $$UI_MESSAGE)
-TEMPLATE = app
-TARGET = dream
-VPATH += src/GUI-QT
-INCLUDEPATH += src/GUI-QT
-INCLUDEPATH += libs
-INCLUDEPATH += moc
-INCLUDEPATH += libs/qwt
-LIBS += -Llibs
-OBJECTS_DIR = obj
-DEFINES += EXECUTABLE_NAME=$$TARGET
-macx:QMAKE_LFLAGS += -F$$PWD/libs
-        QT += network xml widgets
-        HEADERS += src/GUI-QT/DRMPlot.h src/GUI-QT/EvaluationDlg.h
-        HEADERS += src/GUI-QT/SlideShowViewer.h
-        HEADERS += src/GUI-QT/SoundCardSelMenu.h
-        SOURCES += src/GUI-QT/DRMPlot.cpp src/GUI-QT/EvaluationDlg.cpp
-        SOURCES += src/GUI-QT/SlideShowViewer.cpp
-        SOURCES += src/GUI-QT/SoundCardSelMenu.cpp
-        FORMS += DRMMainWindow.ui FMMainWindow.ui AMMainWindow.ui LiveScheduleWindow.ui
-        FORMS += SlideShowViewer.ui
-        unix {
-            macx {
-                exists(libs/qwt.framework) {
-                    message("with qwt6")
-                    INCLUDEPATH += libs/qwt
-                    LIBS += -framework qwt
-                }
-                else {
-                    error("no usable qwt version 6 found")
-                }
-            }
-            else {
-                exists(/usr/include/qwt/qwt.h) {
-                    message("with qwt")
-                    INCLUDEPATH += /usr/include/qwt
-                    LIBS += -lqwt
-                }
-                exists(/usr/include/qwt5/qwt.h) {
-                    message("with qwt")
-                    INCLUDEPATH += /usr/include/qwt5
-                    LIBS += -lqwt
-                }
-                exists(/usr/include/qwt-qt4/qwt.h) {
-                    message("with qwt")
-                    INCLUDEPATH += /usr/include/qwt-qt4
-                    LIBS += -lqwt-qt4
-                }
-		target.path = /usr/bin
-		documentation.path = /usr/share/man/man1
-		documentation.files = linux/dream.1
-		INSTALLS += documentation
-            }
-        }
-        win32 {
-             INCLUDEPATH += libs/qwt
-             CONFIG( debug, debug|release ) {
-                 # debug
-                 LIBS += -lqwtd
-             } else {
-                 # release
-                 LIBS += -lqwt
-             }
-        }
-qt3 {
-		VPATH += src/GUI-QT/qt2
-        HEADERS += src/GUI-QT/qt2/DRMPlot.h src/GUI-QT/systemevalDlg.h src/GUI-QT/MultimediaDlg.h
-        SOURCES += src/GUI-QT/qt2/DRMPlot.cpp src/GUI-QT/systemevalDlg.cpp src/GUI-QT/MultimediaDlg.cpp
-        FORMS += fdrmdialogbase.ui fmdialogbase.ui AnalogDemDlgbase.ui LiveScheduleDlgbase.ui
-        FORMS += MultimediaDlgbase.ui
-        LIBS += -lqwt
-        unix {
-            exists(/usr/local/include/qwt) {
-                INCLUDEPATH += /usr/local/include/qwt
-                LIBS += -L/usr/local/lib
-            }
-            exists(/usr/include/qwt) {
-                INCLUDEPATH += /usr/include/qwt
-            }
-        }
-        win32 {
-            INCLUDEPATH += libs/qwt
-        }
+	HEADERS += src/GUI-QT/DRMPlot.h src/GUI-QT/EvaluationDlg.h
+	HEADERS += src/GUI-QT/SlideShowViewer.h
+	HEADERS += src/GUI-QT/SoundCardSelMenu.h
+	SOURCES += src/GUI-QT/DRMPlot.cpp src/GUI-QT/EvaluationDlg.cpp
+	SOURCES += src/GUI-QT/SlideShowViewer.cpp
+	SOURCES += src/GUI-QT/SoundCardSelMenu.cpp
+	FORMS += DRMMainWindow.ui FMMainWindow.ui AMMainWindow.ui LiveScheduleWindow.ui
+	FORMS += SlideShowViewer.ui
+	unix {
+		macx {
+			exists(libs/qwt.framework) {
+				message("with qwt6")
+				INCLUDEPATH += libs/qwt
+				LIBS += -framework qwt
+			}
+			else {
+				error("no usable qwt version 6 found")
+			}
+		}
+		else {
+			exists(/usr/include/qwt/qwt.h) {
+				message("with qwt")
+				INCLUDEPATH += /usr/include/qwt
+				LIBS += -lqwt
+			}
+			exists(/usr/include/qwt5/qwt.h) {
+				message("with qwt")
+				INCLUDEPATH += /usr/include/qwt5
+				LIBS += -lqwt
+			}
+			exists(/usr/include/qwt-qt4/qwt.h) {
+				message("with qwt")
+				INCLUDEPATH += /usr/include/qwt-qt4
+				LIBS += -lqwt-qt4
+			}
+	target.path = /usr/bin
+	documentation.path = /usr/share/man/man1
+	documentation.files = linux/dream.1
+	INSTALLS += documentation
+		}
+	}
+	win32 {
+		 INCLUDEPATH += libs/qwt
+		 CONFIG( debug, debug|release ) {
+			 # debug
+			 LIBS += -lqwtd
+		 } else {
+			 # release
+			 LIBS += -lqwt
+		 }
+	}
 }
 macx {
     INCLUDEPATH += /Developer/dream/include /opt/local/include
@@ -334,9 +289,11 @@ hamlib {
     macx:LIBS += -framework IOKit
     unix:LIBS += -lhamlib
     win32:LIBS += libhamlib-2.lib
-	HEADERS += src/GUI-QT/RigDlg.h
-	SOURCES += src/GUI-QT/RigDlg.cpp
-	FORMS += RigDlg.ui
+	gui {
+		HEADERS += src/GUI-QT/RigDlg.h
+		SOURCES += src/GUI-QT/RigDlg.cpp
+		FORMS += RigDlg.ui
+	}
 }
 alsa {
     DEFINES += USE_ALSA
@@ -612,3 +569,4 @@ SOURCES += \
     src/GUI-QT/StationsDlg.cpp \
     src/GUI-QT/TransmDlg.cpp
 }
+message($$VERSION_MESSAGE $$DEBUG_MESSAGE $$UI_MESSAGE)
