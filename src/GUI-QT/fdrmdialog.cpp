@@ -41,9 +41,9 @@
 # include <QEvent>
 # include <QShowEvent>
 # include <QCloseEvent>
-# include "BWSViewer.h"
+//# include "BWSViewer.h"
 # include "SlideShowViewer.h"
-# include "JLViewer.h"
+//# include "JLViewer.h"
 # define CHECK_PTR(x) Q_CHECK_PTR(x)
 # define toUpper(s) s.toUpper()
 #endif
@@ -60,7 +60,7 @@ inline QString str2qstr(const string& s) {
 
 /* Implementation *************************************************************/
 FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& NSettings, CRig& rig,
-                       QWidget* parent, const char* name, bool modal, Qt::WFlags f)
+                       QWidget* parent, const char* name, bool modal, Qt::WindowFlags f)
     :
     FDRMDialogBase(parent, name, modal, f),
     DRMReceiver(NDRMR),Settings(NSettings),
@@ -209,10 +209,10 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& NSettings, CRig& rig,
     pFMDlg = new FMDialog(DRMReceiver, Settings, rig);
 
     /* MOT broadcast website viewer window */
-    pBWSDlg = new BWSViewer(DRMReceiver, Settings, NULL);
+    //pBWSDlg = new BWSViewer(DRMReceiver, Settings, NULL);
 
     /* Journaline viewer window */
-    pJLDlg = new JLViewer(DRMReceiver, Settings, NULL);
+    //pJLDlg = new JLViewer(DRMReceiver, Settings, NULL);
 
     /* MOT slide show window */
     pSlideShowDlg = new SlideShowViewer(DRMReceiver, Settings, NULL);
@@ -309,25 +309,17 @@ FDRMDialog::FDRMDialog(CDRMReceiver& NDRMR, CSettings& NSettings, CRig& rig,
     connect(pAnalogDemDlg, SIGNAL(About()), this, SLOT(OnHelpAbout()));
 
     /* Init progress bar for input signal level */
-    ProgrInputLevel->setRange(-50.0, 0.0);
+    ProgrInputLevel->setScale(-50.0, 0.0);
     ProgrInputLevel->setAlarmLevel(-12.5);
     QColor alarmColor(QColor(255, 0, 0));
     QColor fillColor(QColor(0, 190, 0));
-#if QWT_VERSION < 0x050000
-    ProgrInputLevel->setOrientation(QwtThermo::Vertical, QwtThermo::Left);
-#else
-    ProgrInputLevel->setOrientation(Qt::Vertical, QwtThermo::LeftScale);
-#endif
-#if QWT_VERSION < 0x060000
-    ProgrInputLevel->setAlarmColor(alarmColor);
-    ProgrInputLevel->setFillColor(fillColor);
-#else
+    ProgrInputLevel->setOrientation(Qt::Vertical);
+	ProgrInputLevel->setScalePosition(QwtThermo::LeadingScale);
     QPalette newPalette = FrameMainDisplay->palette();
     newPalette.setColor(QPalette::Base, newPalette.color(QPalette::Window));
     newPalette.setColor(QPalette::ButtonText, fillColor);
     newPalette.setColor(QPalette::Highlight, alarmColor);
     ProgrInputLevel->setPalette(newPalette);
-#endif
 
     connect(pStationsDlg, SIGNAL(subscribeRig()), &rig, SLOT(subscribe()));
     connect(pStationsDlg, SIGNAL(unsubscribeRig()), &rig, SLOT(unsubscribe()));
@@ -1015,13 +1007,13 @@ void FDRMDialog::showEvent(QShowEvent* e)
         pMultiMediaDlg->show();
 #else
     if (Settings.Get("DRM Dialog", "BWS Dialog visible", false))
-        pBWSDlg->show();
+       ;// pBWSDlg->show();
 
     if (Settings.Get("DRM Dialog", "SS Dialog visible", false))
         pSlideShowDlg->show();
 
     if (Settings.Get("DRM Dialog", "JL Dialog visible", false))
-        pJLDlg->show();
+       ;// pJLDlg->show();
 #endif
 
     if (Settings.Get("DRM Dialog", "EPG Dialog visible", false))
@@ -1046,12 +1038,12 @@ void FDRMDialog::hideEvent(QHideEvent* e)
     pMultiMediaDlg->hide();
     pMultiMediaDlg->SaveSettings(Settings);
 #else
-    Settings.Put("DRM Dialog", "BWS Dialog visible", pBWSDlg->isVisible());
-    Settings.Put("DRM Dialog", "JL Dialog visible", pJLDlg->isVisible());
+    //Settings.Put("DRM Dialog", "BWS Dialog visible", pBWSDlg->isVisible());
+    //Settings.Put("DRM Dialog", "JL Dialog visible", pJLDlg->isVisible());
     Settings.Put("DRM Dialog", "SS Dialog visible", pSlideShowDlg->isVisible());
     pSlideShowDlg->hide();
-    pBWSDlg->hide();
-    pJLDlg->hide();
+    //pBWSDlg->hide();
+    //pJLDlg->hide();
 #endif
     Settings.Put("DRM Dialog", "EPG Dialog visible", pEPGDlg->isVisible());
 
@@ -1123,10 +1115,10 @@ void FDRMDialog::OnSelectDataService(int shortId)
         pDlg = pEPGDlg;
         break;
     case DAB_AT_BROADCASTWEBSITE:
-        pDlg = pBWSDlg;
+        //pDlg = pBWSDlg;
         break;
     case DAB_AT_JOURNALINE:
-        pDlg = pJLDlg;
+        //pDlg = pJLDlg;
         break;
     case DAB_AT_MOTSLIDESHOW:
         pDlg = pSlideShowDlg;

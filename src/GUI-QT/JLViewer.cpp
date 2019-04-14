@@ -33,7 +33,7 @@
 #include <QFontDialog>
 
 JLViewer::JLViewer(CDRMReceiver& rec, CSettings& s, QWidget* parent,
-                   const char*, Qt::WFlags):
+                   const char*, Qt::WindowFlags):
     QDialog(parent), Ui_JLViewer(),
     receiver(rec), settings(s), decoderSet(false)
 {

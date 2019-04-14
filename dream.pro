@@ -51,25 +51,24 @@ else {
 message($$VERSION_MESSAGE $$DEBUG_MESSAGE $$UI_MESSAGE)
 TEMPLATE = app
 TARGET = dream
+VPATH += src/GUI-QT
 INCLUDEPATH += src/GUI-QT
 INCLUDEPATH += libs
+INCLUDEPATH += moc
+INCLUDEPATH += libs/qwt
 LIBS += -Llibs
 OBJECTS_DIR = obj
 DEFINES += EXECUTABLE_NAME=$$TARGET
 macx:QMAKE_LFLAGS += -F$$PWD/libs
-qt4 {
-	VPATH += src/GUI-QT
-        QT += network xml webkit
+        QT += network xml widgets
         HEADERS += src/GUI-QT/DRMPlot.h src/GUI-QT/EvaluationDlg.h
-        HEADERS += src/GUI-QT/SlideShowViewer.h src/GUI-QT/JLViewer.h
-        HEADERS += src/GUI-QT/BWSViewer.h src/GUI-QT/jlbrowser.h
+        HEADERS += src/GUI-QT/SlideShowViewer.h
         HEADERS += src/GUI-QT/SoundCardSelMenu.h
         SOURCES += src/GUI-QT/DRMPlot.cpp src/GUI-QT/EvaluationDlg.cpp
-        SOURCES += src/GUI-QT/SlideShowViewer.cpp src/GUI-QT/JLViewer.cpp
-        SOURCES += src/GUI-QT/BWSViewer.cpp src/GUI-QT/jlbrowser.cpp
+        SOURCES += src/GUI-QT/SlideShowViewer.cpp
         SOURCES += src/GUI-QT/SoundCardSelMenu.cpp
         FORMS += DRMMainWindow.ui FMMainWindow.ui AMMainWindow.ui LiveScheduleWindow.ui
-        FORMS += JLViewer.ui BWSViewer.ui SlideShowViewer.ui
+        FORMS += SlideShowViewer.ui
         unix {
             macx {
                 exists(libs/qwt.framework) {
@@ -113,9 +112,8 @@ qt4 {
                  LIBS += -lqwt
              }
         }
-}
 qt3 {
-	VPATH += src/GUI-QT/qt2
+		VPATH += src/GUI-QT/qt2
         HEADERS += src/GUI-QT/qt2/DRMPlot.h src/GUI-QT/systemevalDlg.h src/GUI-QT/MultimediaDlg.h
         SOURCES += src/GUI-QT/qt2/DRMPlot.cpp src/GUI-QT/systemevalDlg.cpp src/GUI-QT/MultimediaDlg.cpp
         FORMS += fdrmdialogbase.ui fmdialogbase.ui AnalogDemDlgbase.ui LiveScheduleDlgbase.ui
@@ -297,6 +295,9 @@ win32 {
     UI_DIR = moc
     MOC_DIR = moc
     LIBS += -lsetupapi \
+	-ladvapi32 \
+	-lzlib \
+	-luser32 \
     -lwinmm \
     -lwsock32
     DEFINES += HAVE_SETUPAPI \
@@ -333,11 +334,9 @@ hamlib {
     macx:LIBS += -framework IOKit
     unix:LIBS += -lhamlib
     win32:LIBS += libhamlib-2.lib
-    qt4 {
-        HEADERS += src/GUI-QT/RigDlg.h
-        SOURCES += src/GUI-QT/RigDlg.cpp
-        FORMS += RigDlg.ui
-    }
+	HEADERS += src/GUI-QT/RigDlg.h
+	SOURCES += src/GUI-QT/RigDlg.cpp
+	FORMS += RigDlg.ui
 }
 alsa {
     DEFINES += USE_ALSA

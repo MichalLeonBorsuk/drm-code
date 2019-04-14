@@ -37,7 +37,7 @@
 
 RigDlg::RigDlg(
     CRig& nrig,
-    QWidget* parent, Qt::WFlags f) :
+    QWidget* parent, Qt::WindowFlags f) :
     QDialog(parent, f), Ui_RigDlg(),
     rig(nrig),rigmap()
 {

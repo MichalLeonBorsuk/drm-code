@@ -45,7 +45,7 @@
 
 /* Implementation *************************************************************/
 MultimediaDlg::MultimediaDlg(CDRMReceiver& DRMReceiver, CSettings& Settings,
-                             QWidget* parent, const char* name, bool modal, Qt::WFlags f):
+                             QWidget* parent, const char* name, bool modal, Qt::WindowFlags f):
     MultimediaDlgBase(parent, name, modal, f), Settings(Settings),
     Parameters(*DRMReceiver.GetParameters()), DataDecoder(*DRMReceiver.GetDataDecoder()),
     JournalineDecoder(), bGetFromFile(false)

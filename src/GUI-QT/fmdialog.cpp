@@ -38,7 +38,6 @@
 # include <QWhatsThis>
 # include <QShowEvent>
 # include <QHideEvent>
-# include <QCustomEvent>
 # include <QCloseEvent>
 # include <QEvent>
 # include "SoundCardSelMenu.h"
@@ -47,7 +46,7 @@
 
 /* Implementation *************************************************************/
 FMDialog::FMDialog(CDRMReceiver& NDRMR, CSettings& NSettings, CRig& rig,
-	QWidget* parent, const char* name, bool modal, Qt::WFlags f):
+	QWidget* parent, const char* name, bool modal, Qt::WindowFlags f):
 	FMDialogBase(parent, name, modal, f),
 	DRMReceiver(NDRMR), Settings(NSettings),
 	eReceiverMode(RM_NONE)
@@ -130,25 +129,17 @@ FMDialog::FMDialog(CDRMReceiver& NDRMR, CSettings& NSettings, CRig& rig,
 	LabelServiceID->setText("");
 
 	/* Init progress bar for input signal level */
-	ProgrInputLevel->setRange(-50.0, 0.0);
+	ProgrInputLevel->setScale(-50.0, 0.0);
 	ProgrInputLevel->setAlarmLevel(-12.5);
 	QColor alarmColor(QColor(255, 0, 0));
 	QColor fillColor(QColor(0, 190, 0));
-#if QWT_VERSION < 0x050000
-	ProgrInputLevel->setOrientation(QwtThermo::Vertical, QwtThermo::Left);
-#else
-	ProgrInputLevel->setOrientation(Qt::Vertical, QwtThermo::LeftScale);
-#endif
-#if QWT_VERSION < 0x060000
-	ProgrInputLevel->setAlarmColor(alarmColor);
-	ProgrInputLevel->setFillColor(fillColor);
-#else
+	ProgrInputLevel->setOrientation(Qt::Vertical);
+    ProgrInputLevel->setScalePosition(QwtThermo::LeadingScale);
 	QPalette newPalette = FrameMainDisplay->palette();
 	newPalette.setColor(QPalette::Base, newPalette.color(QPalette::Window));
 	newPalette.setColor(QPalette::ButtonText, fillColor);
 	newPalette.setColor(QPalette::Highlight, alarmColor);
 	ProgrInputLevel->setPalette(newPalette);
-#endif
 
 	/* Update times for color LEDs */
 	CLED_FAC->SetUpdateTime(1500);

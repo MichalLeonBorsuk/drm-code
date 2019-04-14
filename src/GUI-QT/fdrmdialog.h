@@ -83,7 +83,7 @@ class CScheduler;
 class FDRMDialogBase : public QMainWindow, public Ui_DRMMainWindow
 {
 public:
-    FDRMDialogBase(QWidget* parent, const char*, bool, Qt::WFlags f):
+    FDRMDialogBase(QWidget* parent, const char*, bool, Qt::WindowFlags f):
         QMainWindow(parent,f) {
         setupUi(this);
     }
@@ -96,7 +96,7 @@ class FDRMDialog : public FDRMDialogBase
 
 public:
     FDRMDialog(CDRMReceiver&, CSettings&, CRig&, QWidget* parent = 0, const char* name = 0,
-               bool modal = FALSE,	Qt::WFlags f = 0);
+               bool modal = FALSE,	Qt::WindowFlags f = 0);
     void switchEvent();
 
     virtual ~FDRMDialog();

@@ -43,7 +43,7 @@ class JLViewer : public QDialog, Ui_JLViewer
 
 public:
     JLViewer(CDRMReceiver&, CSettings&, QWidget* parent = 0,
-             const char* name = 0, Qt::WFlags f = 0);
+             const char* name = 0, Qt::WindowFlags f = 0);
     virtual ~JLViewer();
 
 protected:
