@@ -6387,7 +6387,7 @@
   <customwidget>
    <class>CMultColorLED</class>
    <extends>QWidget</extends>
-   <header location="global">MultColorLED.h</header>
+   <header>MultColorLED.h</header>
   </customwidget>
  </customwidgets>
  <resources>
