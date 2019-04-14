@@ -37,8 +37,12 @@
    In case of robustness mode D we have 24 symbols */
 #define NUM_SOUND_BUFFERS_IN	24		/* Number of sound card buffers */
 
-#ifdef QT_GUI_LIB
-# define NUM_SOUND_BUFFERS_OUT	6		/* Number of sound card buffers */
+#ifdef USE_QT_GUI
+# if QT_VERSION >= 0x030000
+#  define NUM_SOUND_BUFFERS_OUT	6		/* Number of sound card buffers */
+# else
+#  define NUM_SOUND_BUFFERS_OUT	12		/* Number of sound card buffers */
+# endif
 #else
 # define NUM_SOUND_BUFFERS_OUT	3		/* Number of sound card buffers */
 #endif
@@ -59,7 +63,7 @@ virtual void		Enumerate(vector<string>& names, vector<string>& descriptions);
 virtual string		GetDev();
 virtual void		SetDev(string sNewDev);
 virtual void		Close();
-virtual string		GetVersion() { return "windows Multimedia"; }
+virtual string		GetVersion() { return ""; };
 
 protected:
 void		OpenDevice();
@@ -96,7 +100,7 @@ virtual void		Enumerate(vector<string>& names, vector<string>& descriptions);
 virtual string		GetDev();
 virtual void		SetDev(string sNewDev);
 virtual void		Close();
-virtual string		GetVersion() { return "windows Multimedia"; }
+virtual string		GetVersion() { return ""; };
 
 protected:
 void		OpenDevice();

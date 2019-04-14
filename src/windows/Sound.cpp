@@ -28,22 +28,9 @@
 
 #include "Sound.h"
 #include <iostream>
-#define _SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING
-#include <cstring>
-#include <iostream>
 #include <codecvt>
 
-std::string ws2s(const std::wstring& wstr)
-{
-#if 0
-	std::string str = std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t>().to_bytes(wstr);
-#else
-	std::string str;
-	for(char x : wstr)
-		str += x;
-#endif
-	return str;
-}
+static std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> conv;
 
 static UINT FindDevice(const vector<string>& vecstrDevices, const string& names)
 {
@@ -64,7 +51,8 @@ static UINT FindDevice(const vector<string>& vecstrDevices, const string& names)
 /******************************************************************************\
 * Wave in                                                                      *
 \******************************************************************************/
-CSoundIn::CSoundIn():CSoundInInterface(),m_WaveIn(nullptr)
+
+CSoundIn::CSoundIn():CSoundInInterface(),m_WaveIn(NULL)
 {
     int i;
 
@@ -78,21 +66,21 @@ CSoundIn::CSoundIn():CSoundInInterface(),m_WaveIn(nullptr)
     for (i = 0; i < NUM_SOUND_BUFFERS_IN; i++)
     {
         memset(&m_WaveInHeader[i], 0, sizeof(WAVEHDR));
-        psSoundcardBuffer[i] = nullptr;
+        psSoundcardBuffer[i] = NULL;
     }
 
-    vecstrDevices.clear();
+	/* Default device WAVE_MAPPER */
+	vecstrDevices.push_back("");
+
 	/* Get info about the devices and store the names */
-    for (i = 0; i < iNumDevs; i++) {
-        if (!waveInGetDevCaps(i, &m_WaveInDevCaps, sizeof(WAVEINCAPS))) {
-            cerr << "mmsystem " <<  ws2s(m_WaveInDevCaps.szPname) << endl;
-            vecstrDevices.push_back(ws2s(m_WaveInDevCaps.szPname));
-        }
-    }
+    for (i = 0; i < iNumDevs; i++)
+		if (!waveInGetDevCaps(i, &m_WaveInDevCaps, sizeof(WAVEINCAPS))) {
+			vecstrDevices.push_back(conv.to_bytes(m_WaveInDevCaps.szPname));
+		}
 
     /* We use an event controlled wave-in structure */
     /* Create events */
-    m_WaveEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
+    m_WaveEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 
     /* Set flag to open devices */
     bChangDev = TRUE;
@@ -106,12 +94,12 @@ CSoundIn::~CSoundIn()
     /* Delete allocated memory */
     for (int i = 0; i < NUM_SOUND_BUFFERS_IN; i++)
     {
-        if (psSoundcardBuffer[i] != nullptr)
+        if (psSoundcardBuffer[i] != NULL)
             delete[] psSoundcardBuffer[i];
     }
 
     /* Close the handle for the events */
-    if (m_WaveEvent != nullptr)
+    if (m_WaveEvent != NULL)
         CloseHandle(m_WaveEvent);
 }
 
@@ -230,7 +218,7 @@ _BOOLEAN CSoundIn::Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBlo
                simply no effect */
             waveInUnprepareHeader(m_WaveIn, &m_WaveInHeader[i], sizeof(WAVEHDR));
 
-            if (psSoundcardBuffer[i] != nullptr)
+            if (psSoundcardBuffer[i] != NULL)
                 delete[] psSoundcardBuffer[i];
 
             psSoundcardBuffer[i] = new short[iBufferSize];
@@ -270,7 +258,7 @@ void CSoundIn::OpenDevice()
     sWaveFormatEx.cbSize = 0;
 
 	/* Open wave-input and set call-back mechanism to event handle */
-    if (m_WaveIn != nullptr)
+    if (m_WaveIn != NULL)
     {
         waveInReset(m_WaveIn);
         waveInClose(m_WaveIn);
@@ -279,8 +267,13 @@ void CSoundIn::OpenDevice()
     /* Get device ID */
 	UINT mmdev = FindDevice(vecstrDevices, sCurDev);
 
+#if defined(_MSC_VER) && (_MSC_VER < 1400)
+    MMRESULT result = waveInOpen(&m_WaveIn, mmdev, &sWaveFormatEx,
+                                 (DWORD) m_WaveEvent, 0, CALLBACK_EVENT);
+#else
     MMRESULT result = waveInOpen(&m_WaveIn, mmdev, &sWaveFormatEx,
                                  (DWORD_PTR) m_WaveEvent, 0, CALLBACK_EVENT);
+#endif
     if (result != MMSYSERR_NOERROR)
         throw CGenErr("Sound Interface Start, waveInOpen() failed. This error "
                       "usually occurs if another application blocks the sound in.");
@@ -299,7 +292,7 @@ void CSoundIn::SetDev(string sNewDev)
 void CSoundIn::Enumerate(vector<string>& names, vector<string>& descriptions)
 {
     names = vecstrDevices;
-	descriptions.resize(names.size());
+	descriptions.resize(names.size(), "");
 }
 
 string	CSoundIn::GetDev()
@@ -313,7 +306,7 @@ void CSoundIn::Close()
     MMRESULT	result;
 
     /* Reset audio driver */
-    if (m_WaveIn != nullptr)
+    if (m_WaveIn != NULL)
     {
         result = waveInReset(m_WaveIn);
         if (result != MMSYSERR_NOERROR)
@@ -321,11 +314,11 @@ void CSoundIn::Close()
     }
 
     /* Set event to ensure that thread leaves the waiting function */
-    if (m_WaveEvent != nullptr)
+    if (m_WaveEvent != NULL)
         SetEvent(m_WaveEvent);
 
     /* Unprepare wave-headers */
-    if (m_WaveIn != nullptr)
+    if (m_WaveIn != NULL)
     {
         for (i = 0; i < NUM_SOUND_BUFFERS_IN; i++)
         {
@@ -342,7 +335,7 @@ void CSoundIn::Close()
         if (result != MMSYSERR_NOERROR)
             throw CGenErr("Sound Interface, waveInClose() failed.");
 
-        m_WaveIn = nullptr;
+        m_WaveIn = NULL;
 	}
 
     /* Set flag to open devices the next time it is initialized */
@@ -351,37 +344,35 @@ void CSoundIn::Close()
 /******************************************************************************\
 * Wave out                                                                     *
 \******************************************************************************/
-CSoundOut::CSoundOut():CSoundOutInterface(),m_WaveOut(nullptr)
+CSoundOut::CSoundOut():CSoundOutInterface(),m_WaveOut(NULL)
 {
     int i;
 
     /* Get the number of digital audio devices in this computer, check range */
     int iNumDevs = waveOutGetNumDevs();
 
-    if (iNumDevs == 0) {
-        cerr << "waveOutGetNumDevs was zero" << endl;
+    if (iNumDevs == 0)
         return;
-    }
 
     /* Init buffer pointer to zero */
     for (i = 0; i < NUM_SOUND_BUFFERS_OUT; i++)
     {
         memset(&m_WaveOutHeader[i], 0, sizeof(WAVEHDR));
-        psPlaybackBuffer[i] = nullptr;
+        psPlaybackBuffer[i] = NULL;
     }
 
-    vecstrDevices.clear();
+	/* Default device WAVE_MAPPER */
+	vecstrDevices.push_back("");
+
 	/* Get info about the devices and store the names */
-    for (i = 0; i < iNumDevs; i++) {
-        if (!waveOutGetDevCaps(i, &m_WaveOutDevCaps, sizeof(WAVEOUTCAPS))) {
-            cerr << "mmsystem " <<  ws2s(m_WaveOutDevCaps.szPname) << endl;
-			vecstrDevices.push_back(ws2s(m_WaveOutDevCaps.szPname));
+    for (i = 0; i < iNumDevs; i++)
+		if (!waveOutGetDevCaps(i, &m_WaveOutDevCaps, sizeof(WAVEOUTCAPS))) {
+			vecstrDevices.push_back(conv.to_bytes(m_WaveOutDevCaps.szPname));
 		}
-    }
 
     /* We use an event controlled wave-out structure */
     /* Create events */
-    m_WaveEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
+    m_WaveEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 
     /* Set flag to open devices */
     bChangDev = TRUE;
@@ -398,12 +389,12 @@ CSoundOut::~CSoundOut()
     /* Delete allocated memory */
     for (int i = 0; i < NUM_SOUND_BUFFERS_OUT; i++)
     {
-        if (psPlaybackBuffer[i] != nullptr)
+        if (psPlaybackBuffer[i] != NULL)
             delete[] psPlaybackBuffer[i];
     }
 
     /* Close the handle for the events */
-    if (m_WaveEvent != nullptr)
+    if (m_WaveEvent != NULL)
         CloseHandle(m_WaveEvent);
 }
 
@@ -552,7 +543,7 @@ _BOOLEAN CSoundOut::Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBl
             waveOutUnprepareHeader(m_WaveOut, &m_WaveOutHeader[j], sizeof(WAVEHDR));
 
             /* Create memory for playback buffer */
-            if (psPlaybackBuffer[j] != nullptr)
+            if (psPlaybackBuffer[j] != NULL)
                 delete[] psPlaybackBuffer[j];
 
             psPlaybackBuffer[j] = new short[iBufferSize];
@@ -587,7 +578,7 @@ void CSoundOut::OpenDevice()
                                     sWaveFormatEx.nSamplesPerSec;
     sWaveFormatEx.cbSize = 0;
 
-    if (m_WaveOut != nullptr)
+    if (m_WaveOut != NULL)
     {
         waveOutReset(m_WaveOut);
         waveOutClose(m_WaveOut);
@@ -596,8 +587,13 @@ void CSoundOut::OpenDevice()
     /* Get device ID */
 	UINT mmdev = FindDevice(vecstrDevices, sCurDev);
 
+#if defined(_MSC_VER) && (_MSC_VER < 1400)
+    MMRESULT result = waveOutOpen(&m_WaveOut, mmdev, &sWaveFormatEx,
+                                  (DWORD) m_WaveEvent, 0, CALLBACK_EVENT);
+#else
     MMRESULT result = waveOutOpen(&m_WaveOut, mmdev, &sWaveFormatEx,
                                   (DWORD_PTR) m_WaveEvent, 0, CALLBACK_EVENT);
+#endif
     if (result != MMSYSERR_NOERROR)
         throw CGenErr("Sound Interface Start, waveOutOpen() failed.");
 }
@@ -605,7 +601,7 @@ void CSoundOut::OpenDevice()
 void CSoundOut::Enumerate(vector<string>& names, vector<string>& descriptions)
 {
     names = vecstrDevices;
-	descriptions.resize(names.size());
+	descriptions.resize(names.size(), "");
 }
 
 string CSoundOut::GetDev()
@@ -630,7 +626,7 @@ void CSoundOut::Close()
     MMRESULT	result;
 
     /* Reset audio driver */
-    if (m_WaveOut != nullptr)
+    if (m_WaveOut != NULL)
     {
         result = waveOutReset(m_WaveOut);
         if (result != MMSYSERR_NOERROR)
@@ -638,11 +634,11 @@ void CSoundOut::Close()
     }
 
     /* Set event to ensure that thread leaves the waiting function */
-    if (m_WaveEvent != nullptr)
+    if (m_WaveEvent != NULL)
         SetEvent(m_WaveEvent);
 
     /* Unprepare wave-headers */
-    if (m_WaveOut != nullptr)
+    if (m_WaveOut != NULL)
     {
         for (i = 0; i < NUM_SOUND_BUFFERS_OUT; i++)
         {
@@ -659,7 +655,7 @@ void CSoundOut::Close()
         if (result != MMSYSERR_NOERROR)
             throw CGenErr("Sound Interface, waveOutClose() failed.");
 
-        m_WaveOut = nullptr;
+        m_WaveOut = NULL;
 	}
 
     /* Set flag to open devices the next time it is initialized */
