@@ -61,7 +61,7 @@ class CDRMPlot;
 class CAMSSDlgBase : public QDialog, public Ui_CAMSSDlgBase
 {
 public:
-    CAMSSDlgBase(QWidget* parent, const char*, bool, Qt::WFlags f = 0):
+    CAMSSDlgBase(QWidget* parent, const char*, bool, Qt::WindowFlags f = 0):
         QDialog(parent,f) {
         setupUi(this);
     }
@@ -72,7 +72,7 @@ class AnalogDemDlgBase : public QMainWindow, public Ui_AMMainWindow
 {
 public:
     AnalogDemDlgBase(QWidget* parent = 0,
-                     const char* name = 0, bool modal=false, Qt::WFlags f = 0):
+                     const char* name = 0, bool modal=false, Qt::WindowFlags f = 0):
         QMainWindow(parent,f), MainPlot(NULL)
     {
         (void)name;
@@ -93,7 +93,7 @@ class CAMSSDlg : public CAMSSDlgBase
 
 public:
 	CAMSSDlg(CDRMReceiver&, CSettings&, QWidget* parent = 0, const char* name = 0,
-		bool modal = FALSE, Qt::WFlags f = 0);
+		bool modal = FALSE, Qt::WindowFlags f = 0);
 
 protected:
 	CDRMReceiver&	DRMReceiver;
@@ -119,7 +119,7 @@ class AnalogDemDlg : public AnalogDemDlgBase
 
 public:
 	AnalogDemDlg(CDRMReceiver&, CSettings&, QWidget* parent = 0,
-		const char* name = 0, bool modal = FALSE, Qt::WFlags f = 0);
+		const char* name = 0, bool modal = FALSE, Qt::WindowFlags f = 0);
 
 protected:
 	CDRMReceiver&	DRMReceiver;

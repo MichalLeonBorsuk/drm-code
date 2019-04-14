@@ -71,7 +71,7 @@ typedef int rig_model_t;
 class CAboutDlgBase : public QDialog, public Ui_CAboutDlgBase
 {
 public:
-	CAboutDlgBase(QWidget* parent, const char*, bool, Qt::WFlags f):
+	CAboutDlgBase(QWidget* parent, const char*, bool, Qt::WindowFlags f):
 		QDialog(parent,f){setupUi(this);}
 	virtual ~CAboutDlgBase() {}
 };
@@ -83,7 +83,7 @@ class CAboutDlg : public CAboutDlgBase
 
 public:
 	CAboutDlg(QWidget* parent = 0, const char* name = 0, bool modal = FALSE,
-		Qt::WFlags f = 0);
+		Qt::WindowFlags f = 0);
 };
 
 /* Help Usage --------------------------------------------------------------- */
@@ -93,7 +93,7 @@ class CHelpUsage : public CAboutDlgBase
 
 public:
 	CHelpUsage(const char* usage, const char* argv0, QWidget* parent = 0,
-		const char* name = 0, bool modal = FALSE, Qt::WFlags f = 0);
+		const char* name = 0, bool modal = FALSE, Qt::WindowFlags f = 0);
 };
 
 #if QT_VERSION < 0x040000

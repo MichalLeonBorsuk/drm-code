@@ -109,7 +109,7 @@ class TransmDlgBase : public QMainWindow, public Ui_TransmDlgBase
 {
 public:
 	TransmDlgBase(QWidget* parent = 0, const char* name = 0,
-		bool modal = FALSE, Qt::WFlags f = 0):
+		bool modal = FALSE, Qt::WindowFlags f = 0):
 		QMainWindow(parent){(void)name;(void)modal;(void)f;setupUi(this);}
 	virtual ~TransmDlgBase() {}
 };
@@ -120,7 +120,7 @@ class TransmDialog : public TransmDlgBase
 
 public:
 	TransmDialog(CSettings&,
-		QWidget* parent=0, const char* name=0, bool modal=FALSE, Qt::WFlags f=0);
+		QWidget* parent=0, const char* name=0, bool modal=FALSE, Qt::WindowFlags f=0);
 	virtual ~TransmDialog();
 
 protected:

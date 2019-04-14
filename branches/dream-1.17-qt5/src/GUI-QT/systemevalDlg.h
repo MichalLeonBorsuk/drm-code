@@ -67,7 +67,7 @@ class systemevalDlg : public systemevalDlgBase
 
 public:
 	systemevalDlg(CDRMReceiver&, CSettings&, QWidget* parent = 0,
-		const char* name = 0, bool modal = FALSE, Qt::WFlags f = 0);
+		const char* name = 0, bool modal = FALSE, Qt::WindowFlags f = 0);
 
 	virtual ~systemevalDlg();
 

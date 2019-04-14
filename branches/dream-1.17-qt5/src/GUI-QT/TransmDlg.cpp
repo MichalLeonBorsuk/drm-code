@@ -85,7 +85,7 @@
 
 
 TransmDialog::TransmDialog(CSettings& Settings,
-	QWidget* parent, const char* name, bool modal, Qt::WFlags f)
+	QWidget* parent, const char* name, bool modal, Qt::WindowFlags f)
 	:
 	TransmDlgBase(parent, name, modal, f),
 	TransThread(Settings),
@@ -130,23 +130,15 @@ TransmDialog::TransmDialog(CSettings& Settings,
 	UpdateMSCProtLevCombo();
 
 	/* Init progress bar for input signal level */
-	ProgrInputLevel->setRange(-50.0, 0.0);
-#if QT_VERSION < 0x040000
-	ProgrInputLevel->setOrientation(QwtThermo::Horizontal, QwtThermo::Bottom);
-#else
-	ProgrInputLevel->setOrientation(Qt::Horizontal, QwtThermo::BottomScale);
-#endif
+	ProgrInputLevel->setScale(-50.0, 0.0);
+    ProgrInputLevel->setOrientation(Qt::Horizontal);
+    ProgrInputLevel->setScalePosition(QwtThermo::LeadingScale);
 	ProgrInputLevel->setAlarmLevel(-5.0);
-#if QWT_VERSION < 0x060000
-	ProgrInputLevel->setAlarmColor(QColor(255, 0, 0));
-	ProgrInputLevel->setFillColor(QColor(0, 190, 0));
-#else
 	QPalette newPalette = palette();
 	newPalette.setColor(QPalette::Base, newPalette.color(QPalette::Window));
 	newPalette.setColor(QPalette::ButtonText, QColor(0, 190, 0));
 	newPalette.setColor(QPalette::Highlight,  QColor(255, 0, 0));
 	ProgrInputLevel->setPalette(newPalette);
-#endif
 
 	/* Init progress bar for current transmitted picture */
 	ProgressBarSetRange(ProgressBarCurPict, 100);

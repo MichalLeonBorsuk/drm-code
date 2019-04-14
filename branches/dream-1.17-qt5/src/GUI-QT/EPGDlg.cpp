@@ -42,7 +42,7 @@
 #endif
 
 EPGDlg::EPGDlg(CDRMReceiver& NDRMR, CSettings& NSettings, QWidget* parent,
-               const char* name, bool modal, Qt::WFlags f):
+               const char* name, bool modal, Qt::WindowFlags f):
     CEPGDlgbase(parent, name, modal, f),
     do_updates(false),
     epg(*NDRMR.GetParameters()),

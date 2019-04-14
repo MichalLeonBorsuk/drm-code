@@ -112,24 +112,20 @@ CDRMPlot::CDRMPlot(QWidget* parent, QwtPlot* SuppliedPlot) :
 
 	/* Global frame */
 	plot->setFrameStyle(QFrame::Plain|QFrame::NoFrame);
-	plot->setLineWidth(0);
+	((QFrame*)plot->canvas())->setLineWidth(0);
 	plot->setContentsMargins(
 		WINDOW_MARGIN, WINDOW_MARGIN,
 		WINDOW_MARGIN, WINDOW_MARGIN);
 
 	/* Canvas */
-	plot->setCanvasLineWidth(0);
+	((QFrame*)plot->canvas())->setLineWidth(0);
 	plot->canvas()->setBackgroundRole(QPalette::Window);
 
 	/* Picker */
 	picker = new QwtPlotPicker(plot->canvas());
-#if QWT_VERSION < 0x060000
-	picker->setSelectionFlags(QwtPicker::PointSelection | QwtPicker::ClickSelection);
-#else
 	picker->initMousePattern(1);
 	QwtPickerClickPointMachine *machine = new QwtPickerClickPointMachine();
 	picker->setStateMachine(machine);
-#endif
 
 	/* Set default style */
 	SetPlotStyle(0);
@@ -502,8 +498,8 @@ void CDRMPlot::SetPlotStyle(const int iNewStyleID)
 	}
 
 	/* Apply colors */
-	grid.setMajPen(QPen(MainGridColorPlot, 0, Qt::DotLine));
-	grid.setMinPen(QPen(MainGridColorPlot, 0, Qt::DotLine));
+	grid.setMajorPen(QPen(MainGridColorPlot, 0, Qt::DotLine));
+	grid.setMinorPen(QPen(MainGridColorPlot, 0, Qt::DotLine));
 	vcurvegrid.setPen(QPen(MainGridColorPlot, 1, Qt::DotLine));
 	hcurvegrid.setPen(QPen(MainGridColorPlot, 1, Qt::DotLine));
 	plot->setCanvasBackground(QColor(BckgrdColorPlot));
@@ -595,8 +591,8 @@ void CDRMPlot::PlotDefaults()
 #endif
 	grid.enableX(TRUE);
 	grid.enableY(TRUE);
-	grid.setMajPen(QPen(MainGridColorPlot, 0, Qt::DotLine));
-	grid.setMinPen(QPen(MainGridColorPlot, 0, Qt::DotLine));
+	grid.setMajorPen(QPen(MainGridColorPlot, 0, Qt::DotLine));
+	grid.setMinorPen(QPen(MainGridColorPlot, 0, Qt::DotLine));
 	curve1.setItemAttribute(QwtPlotItem::Legend, false);
 	curve2.setItemAttribute(QwtPlotItem::Legend, false);
 	curve3.setItemAttribute(QwtPlotItem::Legend, false);
@@ -1492,7 +1488,7 @@ void CDRMPlot::OnSelected(const QPointF &pos)
 #endif
 {
 	/* Send normalized frequency to receiver */
-	const double dMaxxBottom = plot->axisScaleDiv(QwtPlot::xBottom)->UPPERBOUND();
+	const double dMaxxBottom = plot->axisScaleDiv(QwtPlot::xBottom).upperBound();
 
 	/* Check if dMaxxBottom is valid */
 	if (dMaxxBottom > 0.0)

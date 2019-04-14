@@ -115,7 +115,7 @@ QString VersionString(QWidget* parent)
 
 /* Implementation *************************************************************/
 /* About dialog ------------------------------------------------------------- */
-CAboutDlg::CAboutDlg(QWidget* parent, const char* name, bool modal, Qt::WFlags f):
+CAboutDlg::CAboutDlg(QWidget* parent, const char* name, bool modal, Qt::WindowFlags f):
     CAboutDlgBase(parent, name, modal, f)
 {
 #ifdef HAVE_LIBSNDFILE
@@ -284,7 +284,7 @@ CAboutDlg::CAboutDlg(QWidget* parent, const char* name, bool modal, Qt::WFlags f
 
 /* Help Usage --------------------------------------------------------------- */
 CHelpUsage::CHelpUsage(const char* usage, const char* argv0,
-    QWidget* parent, const char* name, bool modal, Qt::WFlags f)
+    QWidget* parent, const char* name, bool modal, Qt::WindowFlags f)
     : CAboutDlgBase(parent, name, modal, f)
 {
 #if QT_VERSION < 0x040000
@@ -729,11 +729,9 @@ QString UrlEncodePath(QString url)
     while (path.indexOf("/./") != -1)
         path.replace(QRegExp("/\\./"), "/");
     /* The Actual percent encoding */
-# if QT_VERSION < 0x040400
-    path = QString(QUrl(path, QUrl::TolerantMode).toEncoded(QUrl::RemoveScheme | QUrl::RemoveAuthority));
-# else
-    path = QString(QUrl(path, QUrl::TolerantMode).encodedPath());
-# endif
+    path = QString(QUrl(path, QUrl::TolerantMode).toEncoded(
+        QUrl::RemoveScheme | QUrl::RemoveAuthority |
+        QUrl::RemoveQuery | QUrl::RemoveFragment));
     return path;
 }
 
@@ -746,28 +744,15 @@ bool IsUrlDirectory(QString url)
 
 void InitSMeter(QWidget* parent, QwtThermo* sMeter)
 {
-    sMeter->setRange(S_METER_THERMO_MIN, S_METER_THERMO_MAX);
-#if QT_VERSION < 0x040000
-    sMeter->setOrientation(QwtThermo::Horizontal, QwtThermo::Top);
-//#else
-//    sMeter->setOrientation(Qt::Horizontal, QwtThermo::TopScale); // Set via ui file
-#endif
     sMeter->setAlarmLevel(S_METER_THERMO_ALARM);
-    sMeter->setAlarmLevel(-12.5);
-    sMeter->setScale(S_METER_THERMO_MIN, S_METER_THERMO_MAX, 10.0);
+    sMeter->setScale(S_METER_THERMO_MIN, S_METER_THERMO_MAX);
     sMeter->setAlarmEnabled(TRUE);
     sMeter->setValue(S_METER_THERMO_MIN);
-#if QWT_VERSION < 0x060000
-    (void)parent;
-    sMeter->setAlarmColor(QColor(255, 0, 0));
-    sMeter->setFillColor(QColor(0, 190, 0));
-#else
     QPalette newPalette = parent->palette();
     newPalette.setColor(QPalette::Base, newPalette.color(QPalette::Window));
     newPalette.setColor(QPalette::ButtonText, QColor(0, 190, 0));
     newPalette.setColor(QPalette::Highlight,  QColor(255, 0, 0));
     sMeter->setPalette(newPalette);
-#endif
 }
 
 /* Convert all www. or http:// or email to real

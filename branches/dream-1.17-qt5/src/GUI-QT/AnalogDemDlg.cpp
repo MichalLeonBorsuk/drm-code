@@ -59,10 +59,11 @@
 # include <QCloseEvent>
 # include <qwt_plot_layout.h>
 #endif
+#include <qwt_round_scale_draw.h>
 
 /* Implementation *************************************************************/
 AnalogDemDlg::AnalogDemDlg(CDRMReceiver& NDRMR, CSettings& NSettings,
-	QWidget* parent, const char* name, bool modal, Qt::WFlags f):
+	QWidget* parent, const char* name, bool modal, Qt::WindowFlags f):
 	AnalogDemDlgBase(parent, name, modal, f),
 	DRMReceiver(NDRMR), Settings(NSettings), AMSSDlg(NDRMR, Settings, parent, name, modal, f)
 {
@@ -166,15 +167,13 @@ AnalogDemDlg::AnalogDemDlg(CDRMReceiver& NDRMR, CSettings& NSettings,
 	PhaseDial->setMode(QwtDial::RotateNeedle);
 	PhaseDial->setWrapping(true);
 	PhaseDial->setReadOnly(true);
-	PhaseDial->setScale(0, 360, 45); /* Degrees */
+	PhaseDial->setScale(0, 360); /* Degrees */
+	PhaseDial->setScaleStepSize(45);
 	PhaseDial->setOrigin(270);
 	PhaseDial->setNeedle(new QwtDialSimpleNeedle(QwtDialSimpleNeedle::Arrow));
-	PhaseDial->setFrameShadow(QwtDial::Plain);
-#if QWT_VERSION < 0x060000
-	PhaseDial->setScaleOptions(QwtDial::ScaleTicks);
-#else
-	PhaseDial->setScaleComponents(QwtAbstractScaleDraw::Ticks);
-#endif
+	PhaseDial->setFrameShadow(QwtDial::Sunken);
+	PhaseDial->setScaleMaxMinor(0);
+	PhaseDial->scaleDraw()->enableComponent(QwtAbstractScaleDraw::Labels, false);
 
 
 	/* Update controls */
@@ -884,7 +883,7 @@ void AnalogDemDlg::AddWhatsThisHelp()
 	Added phase offset display for AMSS demodulation loop.
 */
 CAMSSDlg::CAMSSDlg(CDRMReceiver& NDRMR, CSettings& NSettings,
-	QWidget* parent, const char* name, bool modal, Qt::WFlags f) :
+	QWidget* parent, const char* name, bool modal, Qt::WindowFlags f) :
 	CAMSSDlgBase(parent, name, modal, f),
 	DRMReceiver(NDRMR),
 	Settings(NSettings)
@@ -902,15 +901,13 @@ CAMSSDlg::CAMSSDlg(CDRMReceiver& NDRMR, CSettings& NSettings,
 	PhaseDialAMSS->setMode(QwtDial::RotateNeedle);
 	PhaseDialAMSS->setWrapping(true);
 	PhaseDialAMSS->setReadOnly(true);
-	PhaseDialAMSS->setScale(0, 360, 45); /* Degrees */
+	PhaseDialAMSS->setScale(0, 360); /* Degrees */
+	PhaseDialAMSS->setScaleStepSize(45);
 	PhaseDialAMSS->setOrigin(270);
 	PhaseDialAMSS->setNeedle(new QwtDialSimpleNeedle(QwtDialSimpleNeedle::Arrow));
 	PhaseDialAMSS->setFrameShadow(QwtDial::Plain);
-#if QWT_VERSION < 0x060000
-	PhaseDialAMSS->setScaleOptions(QwtDial::ScaleTicks);
-#else
-	PhaseDialAMSS->setScaleComponents(QwtAbstractScaleDraw::Ticks);
-#endif
+	PhaseDialAMSS->setScaleMaxMinor(0);
+	PhaseDialAMSS->scaleDraw()->enableComponent(QwtAbstractScaleDraw::Labels, false);
 
 	TextAMSSServiceLabel->setText("");
 	TextAMSSCountryCode->setText("");
