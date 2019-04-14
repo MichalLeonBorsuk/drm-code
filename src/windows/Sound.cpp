@@ -28,7 +28,9 @@
 
 #include "Sound.h"
 #include <iostream>
+#include <codecvt>
 
+static std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> conv;
 
 static UINT FindDevice(const vector<string>& vecstrDevices, const string& names)
 {
@@ -72,8 +74,9 @@ CSoundIn::CSoundIn():CSoundInInterface(),m_WaveIn(NULL)
 
 	/* Get info about the devices and store the names */
     for (i = 0; i < iNumDevs; i++)
-        if (!waveInGetDevCaps(i, &m_WaveInDevCaps, sizeof(WAVEINCAPS)))
-            vecstrDevices.push_back(m_WaveInDevCaps.szPname);
+		if (!waveInGetDevCaps(i, &m_WaveInDevCaps, sizeof(WAVEINCAPS))) {
+			vecstrDevices.push_back(conv.to_bytes(m_WaveInDevCaps.szPname));
+		}
 
     /* We use an event controlled wave-in structure */
     /* Create events */
@@ -289,7 +292,7 @@ void CSoundIn::SetDev(string sNewDev)
 void CSoundIn::Enumerate(vector<string>& names, vector<string>& descriptions)
 {
     names = vecstrDevices;
-	descriptions.clear();
+	descriptions.resize(names.size(), "");
 }
 
 string	CSoundIn::GetDev()
@@ -363,8 +366,9 @@ CSoundOut::CSoundOut():CSoundOutInterface(),m_WaveOut(NULL)
 
 	/* Get info about the devices and store the names */
     for (i = 0; i < iNumDevs; i++)
-        if (!waveOutGetDevCaps(i, &m_WaveOutDevCaps, sizeof(WAVEOUTCAPS)))
-            vecstrDevices.push_back(m_WaveOutDevCaps.szPname);
+		if (!waveOutGetDevCaps(i, &m_WaveOutDevCaps, sizeof(WAVEOUTCAPS))) {
+			vecstrDevices.push_back(conv.to_bytes(m_WaveOutDevCaps.szPname));
+		}
 
     /* We use an event controlled wave-out structure */
     /* Create events */
@@ -597,7 +601,7 @@ void CSoundOut::OpenDevice()
 void CSoundOut::Enumerate(vector<string>& names, vector<string>& descriptions)
 {
     names = vecstrDevices;
-	descriptions.clear();
+	descriptions.resize(names.size(), "");
 }
 
 string CSoundOut::GetDev()
