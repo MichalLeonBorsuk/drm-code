@@ -39,7 +39,7 @@
 /* Implementation *************************************************************/
 
 MultSettingsDlg::MultSettingsDlg(CParameter& NP, CSettings& NSettings, QWidget* parent,
-	const char* name, bool modal, Qt::WFlags f) :
+	const char* name, bool modal, Qt::WindowFlags f) :
 	CMultSettingsDlgBase(parent, name, modal, f),
 	Parameters(NP), Settings(NSettings)
 {

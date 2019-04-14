@@ -166,7 +166,7 @@ public:
 class CLiveScheduleDlgBase : public QDialog, public Ui_LiveScheduleWindow
 {
 public:
-	CLiveScheduleDlgBase(QWidget* parent, const char*, bool, Qt::WFlags):
+	CLiveScheduleDlgBase(QWidget* parent, const char*, bool, Qt::WindowFlags):
 		QDialog(parent) {setWindowFlags(Qt::Window);}
 	virtual ~CLiveScheduleDlgBase() {}
 };
@@ -178,7 +178,7 @@ class LiveScheduleDlg : public CLiveScheduleDlgBase
 public:
 	LiveScheduleDlg(CDRMReceiver&, CSettings&,
 		QWidget* parent = 0,
-		const char* name = 0, bool modal = FALSE, Qt::WFlags f = 0);
+		const char* name = 0, bool modal = FALSE, Qt::WindowFlags f = 0);
 	virtual ~LiveScheduleDlg();
 
 	void LoadSchedule();

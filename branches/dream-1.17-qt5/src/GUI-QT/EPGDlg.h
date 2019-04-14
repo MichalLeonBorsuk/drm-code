@@ -85,7 +85,7 @@ class EPGListViewItem : public QListViewItem
 class CEPGDlgbase : public QDialog, public Ui_CEPGDlgbase
 {
 public:
-    CEPGDlgbase(QWidget* parent, const char*, bool, Qt::WFlags f = 0):
+    CEPGDlgbase(QWidget* parent, const char*, bool, Qt::WindowFlags f = 0):
         QDialog(parent,f) {setWindowFlags(Qt::Window); setupUi(this);}
     virtual ~CEPGDlgbase() {}
 };
@@ -97,7 +97,7 @@ class EPGDlg : public CEPGDlgbase
 public:
 
     EPGDlg(CDRMReceiver&, CSettings&, QWidget* parent = 0, const char* name = 0,
-           bool modal = FALSE, Qt::WFlags f = 0);
+           bool modal = FALSE, Qt::WindowFlags f = 0);
     virtual ~EPGDlg();
     /* dummy assignment operator to help MSVC8 */
     EPGDlg& operator=(const EPGDlg&)

@@ -108,7 +108,7 @@ class MultimediaDlgBase : public QMainWindow, public Ui_MultimediaDlgBase
 {
 public:
 	MultimediaDlgBase(QWidget* parent = 0, const char* name = 0,
-		bool modal = FALSE, Qt::WFlags f = 0):
+		bool modal = FALSE, Qt::WindowFlags f = 0):
 		QMainWindow(parent,name,f){(void)name;(void)modal;setupUi(this);}
 	virtual ~MultimediaDlgBase() {}
 };
@@ -119,7 +119,7 @@ class MultimediaDlg : public MultimediaDlgBase
 
 public:
 	MultimediaDlg(CDRMReceiver&, CSettings&, QWidget* parent = 0,
-		const char* name = 0, bool modal = FALSE, Qt::WFlags f = 0);
+		const char* name = 0, bool modal = FALSE, Qt::WindowFlags f = 0);
 	virtual ~MultimediaDlg();
 
 	void SaveSettings(CSettings&);

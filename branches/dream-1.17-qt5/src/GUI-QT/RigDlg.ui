@@ -73,7 +73,7 @@
       <item>
        <widget class="QwtThermo" name="sMeter">
         <property name="scalePosition">
-         <enum>QwtThermo::TopScale</enum>
+         <enum>QwtThermo::TrailingScale</enum>
         </property>
        </widget>
       </item>

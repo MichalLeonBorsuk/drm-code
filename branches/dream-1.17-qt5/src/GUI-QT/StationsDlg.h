@@ -245,7 +245,7 @@ class CStationsDlgBase : public QDialog, public Ui_StationsDlgbase
 {
 public:
 	CStationsDlgBase(QWidget* parent = 0, const char* name = 0,
-		bool modal = FALSE, Qt::WFlags f = 0):
+		bool modal = FALSE, Qt::WindowFlags f = 0):
 		QDialog(parent) {(void)name;(void)modal;(void)f; setWindowFlags(Qt::Window);}
 	virtual ~CStationsDlgBase() {}
 };
@@ -256,7 +256,7 @@ class StationsDlg : public CStationsDlgBase
 
 public:
 	StationsDlg(CDRMReceiver&, CSettings&, CRig&, QWidget* parent = 0,
-		const char* name = 0, bool modal = FALSE, Qt::WFlags f = 0);
+		const char* name = 0, bool modal = FALSE, Qt::WindowFlags f = 0);
 	virtual ~StationsDlg();
 
 	void SaveSettings(CSettings&);

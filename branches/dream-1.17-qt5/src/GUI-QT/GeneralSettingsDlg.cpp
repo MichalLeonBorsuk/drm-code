@@ -47,7 +47,7 @@
 /* Implementation *************************************************************/
 
 GeneralSettingsDlg::GeneralSettingsDlg(CParameter& NParam, CSettings& NSettings,
-                                       QWidget* parent, const char* name, bool modal, Qt::WFlags f) :
+                                       QWidget* parent, const char* name, bool modal, Qt::WindowFlags f) :
     CGeneralSettingsDlgBase(parent, name, modal, f),
     Parameters(NParam),Settings(NSettings)
 {

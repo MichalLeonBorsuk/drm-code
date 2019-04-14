@@ -47,7 +47,7 @@ class CGeneralSettingsDlgBase : public QDialog, public Ui_CGeneralSettingsDlgBas
 {
 public:
 	CGeneralSettingsDlgBase(QWidget* parent = 0, const char* name = 0,
-		bool modal = FALSE, Qt::WFlags f = 0):
+		bool modal = FALSE, Qt::WindowFlags f = 0):
 		QDialog(parent,f){(void)name;(void)modal;setupUi(this);}
 	virtual ~CGeneralSettingsDlgBase() {}
 };
@@ -59,7 +59,7 @@ class GeneralSettingsDlg : public CGeneralSettingsDlgBase
 public:
 
 	GeneralSettingsDlg(CParameter& NParam, CSettings& NSettings, QWidget* parent = 0,
-		const char* name = 0, bool modal = FALSE, Qt::WFlags f = 0);
+		const char* name = 0, bool modal = FALSE, Qt::WindowFlags f = 0);
 	virtual ~GeneralSettingsDlg();
 
 protected:

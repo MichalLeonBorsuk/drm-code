@@ -337,7 +337,7 @@ CDRMLiveSchedule::LoadAFSInformations(const CAltFreqSign& AltFreqSign)
 
 LiveScheduleDlg::LiveScheduleDlg(CDRMReceiver& DRMReceiver, CSettings& Settings,
                                  QWidget * parent, const char *name,
-                                 bool modal, Qt::WFlags f):
+                                 bool modal, Qt::WindowFlags f):
     CLiveScheduleDlgBase(parent, name, modal, f),
     DRMReceiver(DRMReceiver), Settings(Settings),
 #if QT_VERSION >= 0x040000

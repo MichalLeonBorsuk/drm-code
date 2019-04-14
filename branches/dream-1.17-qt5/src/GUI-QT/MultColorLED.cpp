@@ -34,7 +34,7 @@
 
 
 /* Implementation *************************************************************/
-CMultColorLED::CMultColorLED(QWidget * parent, const char * name, Qt::WFlags f) : 
+CMultColorLED::CMultColorLED(QWidget * parent, const char * name, Qt::WindowFlags f) : 
 	QLabel(parent), eColorFlag(RL_GREY),
 	TimerRedLight(), TimerGreenLight(), TimerYellowLight(),
 	bFlagRedLi(false), bFlagGreenLi(false), bFlagYellowLi(false),
@@ -141,7 +141,7 @@ void CMultColorLED::UpdateColor()
 	/* If no color is active, set control to grey light */
 	if (eColorFlag != RL_GREY)
 	{
-		setPixmap(NULL/*grey*/);
+		//setPixmap(NULL/*grey*/);
 		eColorFlag = RL_GREY;
 	}
 }

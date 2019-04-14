@@ -38,7 +38,7 @@
 
 /* Implementation *************************************************************/
 systemevalDlg::systemevalDlg(CDRMReceiver& NDRMR, CSettings& NSettings,
-                             QWidget* parent, const char* name, bool modal, Qt::WFlags f) :
+                             QWidget* parent, const char* name, bool modal, Qt::WindowFlags f) :
     systemevalDlgBase(parent, name, modal, f),
     DRMReceiver(NDRMR),
     Settings(NSettings),
