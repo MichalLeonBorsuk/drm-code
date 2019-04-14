@@ -45,7 +45,6 @@ CReceptLog::CReceptLog(CParameter & p):Parameters(p), File(), bLogActivated(FALS
 void
 CReceptLog::Start(const string & filename)
 {
-qDebug("open log");
     File.open(filename.c_str(), ios::app);
     if (File.is_open())
     {
@@ -62,7 +61,6 @@ CReceptLog::Stop()
         return;
     writeTrailer();
     File.close();
-qDebug("close log");
     bLogActivated = FALSE;
 }
 
