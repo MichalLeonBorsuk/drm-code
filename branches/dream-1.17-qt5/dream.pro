@@ -1,46 +1,40 @@
-QT += core gui network xml widgets
 TEMPLATE = app
 TARGET = dream
 INCLUDEPATH += libs
-INCLUDEPATH += libs/qwt
 LIBS += -Llibs
 OBJECTS_DIR = obj
 DEFINES += EXECUTABLE_NAME=$$TARGET
 macx:QMAKE_LFLAGS += -F$$PWD/libs
 console {
-	QT -= core gui network xml widgets
+	QT -= core gui
     DEFINES += USE_NO_QT
     DEFINES -= USE_QT_GUI
     UI_MESSAGE = console mode
     VERSION_MESSAGE=No Qt
 }
 qtconsole {
-	QT -= gui widgets
+	QT -= gui
 	DEFINES -= USE_QT_GUI
 	UI_MESSAGE = console mode
 	INCLUDEPATH += moc
 }
-gui {
+contains(QT, gui) {
+	QT += network xml widgets
 	VPATH += src/GUI-QT
+	INCLUDEPATH += libs/qwt
 	INCLUDEPATH += src/GUI-QT
 	INCLUDEPATH += moc
 	DEFINES += USE_QT_GUI
 	RESOURCES = src/GUI-QT/res/icons.qrc
 	UI_MESSAGE = GUI mode
-	FORMS += TransmDlgbase.ui
-	FORMS += AMSSDlgbase.ui \
-	systemevalDlgbase.ui \
-	StationsDlgbase.ui \
-	EPGDlgbase.ui
-	FORMS += GeneralSettingsDlgbase.ui \
-	MultSettingsDlgbase.ui \
-	AboutDlgbase.ui
 	HEADERS += src/GUI-QT/DRMPlot.h src/GUI-QT/EvaluationDlg.h
 	HEADERS += src/GUI-QT/SlideShowViewer.h
 	HEADERS += src/GUI-QT/SoundCardSelMenu.h
 	SOURCES += src/GUI-QT/DRMPlot.cpp src/GUI-QT/EvaluationDlg.cpp
 	SOURCES += src/GUI-QT/SlideShowViewer.cpp
 	SOURCES += src/GUI-QT/SoundCardSelMenu.cpp
+	FORMS += TransmDlgbase.ui AMSSDlgbase.ui systemevalDlgbase.ui StationsDlgbase.ui EPGDlgbase.ui
+	FORMS += GeneralSettingsDlgbase.ui MultSettingsDlgbase.ui AboutDlgbase.ui
 	FORMS += DRMMainWindow.ui FMMainWindow.ui AMMainWindow.ui LiveScheduleWindow.ui
 	FORMS += SlideShowViewer.ui
 	unix {
@@ -257,7 +251,6 @@ win32 {
     -lwsock32
     DEFINES += HAVE_SETUPAPI \
     HAVE_LIBZ
-    DEFINES -= UNICODE
     SOURCES += src/windows/Pacer.cpp
 }
 faad {
@@ -289,7 +282,7 @@ hamlib {
     macx:LIBS += -framework IOKit
     unix:LIBS += -lhamlib
     win32:LIBS += libhamlib-2.lib
-	gui {
+	contains(QT, gui) {
 		HEADERS += src/GUI-QT/RigDlg.h
 		SOURCES += src/GUI-QT/RigDlg.cpp
 		FORMS += RigDlg.ui
