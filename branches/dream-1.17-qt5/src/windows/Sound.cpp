@@ -69,9 +69,6 @@ CSoundIn::CSoundIn():CSoundInInterface(),m_WaveIn(NULL)
         psSoundcardBuffer[i] = NULL;
     }
 
-	/* Default device WAVE_MAPPER */
-	vecstrDevices.push_back("");
-
 	/* Get info about the devices and store the names */
     for (i = 0; i < iNumDevs; i++)
 		if (!waveInGetDevCaps(i, &m_WaveInDevCaps, sizeof(WAVEINCAPS))) {
@@ -360,9 +357,6 @@ CSoundOut::CSoundOut():CSoundOutInterface(),m_WaveOut(NULL)
         memset(&m_WaveOutHeader[i], 0, sizeof(WAVEHDR));
         psPlaybackBuffer[i] = NULL;
     }
-
-	/* Default device WAVE_MAPPER */
-	vecstrDevices.push_back("");
 
 	/* Get info about the devices and store the names */
     for (i = 0; i < iNumDevs; i++)
