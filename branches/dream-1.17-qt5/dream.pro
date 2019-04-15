@@ -14,6 +14,7 @@ console {
 }
 qtconsole {
 	QT -= gui
+	QT += network xml
 	DEFINES -= USE_QT_GUI
 	UI_MESSAGE = console mode
 	INCLUDEPATH += moc
@@ -52,7 +53,12 @@ contains(QT, gui) {
 			exists(/usr/include/qwt/qwt.h) {
 				message("with qwt")
 				INCLUDEPATH += /usr/include/qwt
-				LIBS += -lqwt
+				exists(/usr/lib/libqwt.so) {
+					LIBS += -lqwt
+				}
+				exists(/usr/lib/libqwt-qt5.so) {
+					LIBS += -lqwt-qt5
+				}
 			}
 			exists(/usr/include/qwt5/qwt.h) {
 				message("with qwt")
