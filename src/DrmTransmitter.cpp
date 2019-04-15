@@ -240,7 +240,7 @@ CDRMTransmitter::~CDRMTransmitter()
 }
 
 CDRMTransmitter::CDRMTransmitter(CSettings* pSettings) : CDRMTransceiver(pSettings, new CSoundIn, new CSoundOut, TRUE),
-        ReadData(pSoundInInterface), TransmitData(pSoundOutInterface),
+        ReadData(pSoundInInterface), TransmitData(),
         rDefCarOffset((_REAL) VIRTUAL_INTERMED_FREQ),
         // UEP only works with Dream receiver, FIXME! -> disabled for now
         bUseUEP(FALSE)
