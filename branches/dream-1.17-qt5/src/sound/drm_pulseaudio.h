@@ -77,14 +77,14 @@ class CSoundPulse
 public:
 	CSoundPulse(_BOOLEAN bPlayback);
 	virtual ~CSoundPulse() {}
-	void			Enumerate(vector<string>& names, vector<string>& descriptions);
-	void			SetDev(string sNewDevice);
-	string			GetDev();
+	void			Enumerate(std::vector<std::string>& names, std::vector<std::string>& descriptions);
+	void			SetDev(std::string sNewDevice);
+	std::string			GetDev();
 protected:
 	_BOOLEAN		IsDefaultDevice();
 	_BOOLEAN		bPlayback;
 	_BOOLEAN		bChangDev;
-	string			sCurrentDevice;
+	std::string			sCurrentDevice;
 #ifdef ENABLE_STDIN_STDOUT
 	_BOOLEAN		IsStdinStdout();
 	_BOOLEAN		bStdinStdout;
@@ -96,9 +96,9 @@ class CSoundInPulse : public CSoundPulse, public CSoundInInterface
 public:
 	CSoundInPulse();
 	virtual ~CSoundInPulse() {}
-	void			Enumerate(vector<string>& names, vector<string>& descriptions) {CSoundPulse::Enumerate(names, descriptions);};
-	string			GetDev() {return CSoundPulse::GetDev();};
-	void			SetDev(string sNewDevice) {CSoundPulse::SetDev(sNewDevice);};
+	void			Enumerate(std::vector<std::string>& names, std::vector<std::string>& descriptions) {CSoundPulse::Enumerate(names, descriptions);};
+	std::string			GetDev() {return CSoundPulse::GetDev();};
+	void			SetDev(std::string sNewDevice) {CSoundPulse::SetDev(sNewDevice);};
 
 	_BOOLEAN		Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking);
 	_BOOLEAN		Read(CVector<_SAMPLE>& psData);
@@ -135,9 +135,9 @@ class CSoundOutPulse : public CSoundPulse, public CSoundOutInterface
 public:
 	CSoundOutPulse();
 	virtual ~CSoundOutPulse() {}
-	void			Enumerate(vector<string>& names, vector<string>& descriptions) {CSoundPulse::Enumerate(names, descriptions);};
-	string			GetDev() {return CSoundPulse::GetDev();};
-	void			SetDev(string sNewDevice) {CSoundPulse::SetDev(sNewDevice);};
+	void			Enumerate(std::vector<std::string>& names, std::vector<std::string>& descriptions) {CSoundPulse::Enumerate(names, descriptions);};
+	std::string			GetDev() {return CSoundPulse::GetDev();};
+	void			SetDev(std::string sNewDevice) {CSoundPulse::SetDev(sNewDevice);};
 
 	_BOOLEAN		Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking);
 	_BOOLEAN		Write(CVector<_SAMPLE>& psData);
