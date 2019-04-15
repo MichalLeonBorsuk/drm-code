@@ -32,5 +32,5 @@ const char dream_manufacturer[] = "drea";
 const char dream_implementation[] = "Qt";
 const int dream_version_major = 1;
 const int dream_version_minor = 18;
-const char dream_version_build[] = "SNAPSHOT";
+const char dream_version_build[] = "";
 
