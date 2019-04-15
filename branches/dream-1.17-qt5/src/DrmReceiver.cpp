@@ -1543,7 +1543,7 @@ CDRMReceiver::LoadSettings()
     ReceiveData.SetFlippedSpectrum(s.Get("Receiver", "flipspectrum", FALSE));
 
     /* Input channel selection */
-    ReceiveData.SetInChanSel((CReceiveData::EInChanSel)s.Get("Receiver", "inchansel", int(CReceiveData::CS_MIX_CHAN)));
+    ReceiveData.SetInChanSel((EInChanSel)s.Get("Receiver", "inchansel", int(CS_MIX_CHAN)));
 
     /* Output channel selection */
     WriteData.SetOutChanSel((CWriteData::EOutChanSel)s.Get("Receiver", "outchansel", int(CWriteData::CS_BOTH_BOTH)));
