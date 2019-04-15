@@ -47,7 +47,7 @@ public:
 	virtual void DecodeTag(CVector<_BINARY>& vecbiTag, const int iLenDataBits) = 0;
 
 	// This function must return the name of the tag item that this decoder decodes.
-	virtual string GetTagName(void) = 0;
+	virtual std::string GetTagName(void) = 0;
 	virtual ~CTagItemDecoder() {}
 
 	CTagItemDecoder() : bIsReady(FALSE) {};

@@ -46,6 +46,7 @@
 # include <FreeImage.h>
 #endif
 #endif
+using namespace std;
 
 /* Implementation *************************************************************/
 ostream & operator<<(ostream & out, CDateAndTime & d)

@@ -36,7 +36,7 @@
 #if QT_VERSION < 0x040000
 # include <qsocketdevice.h>
 # include <qsocketnotifier.h> 
-# include <qstringlist.h>
+# include <qstd::stringlist.h>
 #else
 # include <QUdpSocket>
 # include <QTcpSocket>
@@ -76,12 +76,12 @@ public:
 	virtual void ResetPacketSink(void);
 
 	// Send packet to the socket
-	void SendPacket(const vector<_BYTE>& vecbydata, uint32_t addr=0, uint16_t port=0);
+	void SendPacket(const std::vector<_BYTE>& vecbydata, uint32_t addr=0, uint16_t port=0);
 
-	virtual _BOOLEAN SetDestination(const string& str);
-	virtual _BOOLEAN SetOrigin(const string& str);
+	virtual _BOOLEAN SetDestination(const std::string& str);
+	virtual _BOOLEAN SetOrigin(const std::string& str);
 
-	virtual _BOOLEAN GetDestination(string& str);
+	virtual _BOOLEAN GetDestination(std::string& str);
 
 	void poll();
 
@@ -89,7 +89,7 @@ private:
 	void pollStream();
 	void pollDatagram();
 
-	QStringList parseDest(const string & strNewAddr);
+	QStringList parseDest(const std::string & strNewAddr);
 	_BOOLEAN doSetSource(QHostAddress, QHostAddress, int, QHostAddress);
 #if QT_VERSION >= 0x040200
 	QNetworkInterface GetInterface(QHostAddress AddrInterface);
@@ -99,7 +99,7 @@ private:
 	uint32_t	sourceAddr;
 	QHostAddress	HostAddrOut;
 	int		iHostPortOut;
-	vector<_BYTE>	writeBuf;
+	std::vector<_BYTE>	writeBuf;
 	bool udp;
 
 #if QT_VERSION < 0x040000

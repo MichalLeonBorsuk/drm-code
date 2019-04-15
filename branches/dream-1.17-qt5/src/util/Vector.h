@@ -36,7 +36,7 @@
 /******************************************************************************\
 * CVector base class                                                           *
 \******************************************************************************/
-template<class TData> class CVector : public vector<TData>
+template<class TData> class CVector : public std::vector<TData>
 {
 public:
 	CVector() : iBitArrayCounter(0), iVectorSize(0) {pData = this->begin();}
@@ -49,7 +49,7 @@ public:
 	   pointer must be set to the new data source. The bit access is, by
 	   default, reset */
 	CVector(const CVector<TData>& vecI) :
-		vector<TData>(static_cast<const vector<TData>&>(vecI)),
+		std::vector<TData>(static_cast<const std::vector<TData>&>(vecI)),
 		iBitArrayCounter(0), iVectorSize(vecI.Size()) {pData = this->begin();}
 
 	virtual void Init(const int iNewSize);
@@ -96,7 +96,7 @@ public:
 				iVectorSize, "New parameter", vecI.Size());
 		}
 #endif
-		vector<TData>::operator=(vecI);
+		std::vector<TData>::operator=(vecI);
 
 		/* Reset my data pointer in case, the operator=() of the base class
 		   did change the actual memory */
@@ -112,7 +112,7 @@ public:
 	void		ResetBitAccess() {iBitArrayCounter = 0;}
 
 protected:
-	typename vector<TData>::iterator	pData;
+	typename std::vector<TData>::iterator	pData;
 	int									iBitArrayCounter;
 	int									iVectorSize;
 };

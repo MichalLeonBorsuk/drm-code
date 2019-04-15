@@ -32,6 +32,7 @@
 #include <iostream>
 #include <cstdlib>
 #include <cerrno>
+using namespace std;
 
 #ifdef _WIN32
 /* Always include winsock2.h before windows.h */

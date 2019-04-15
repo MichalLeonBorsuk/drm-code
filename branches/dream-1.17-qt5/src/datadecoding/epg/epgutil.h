@@ -32,16 +32,16 @@
 
 #include "../DABMOT.h"
 
-void mkdirs (const string & path);
+void mkdirs (const std::string & path);
 
-string epgFilename (const CDateAndTime & date,
+std::string epgFilename (const CDateAndTime & date,
 		    uint32_t sid, int type, bool advanced);
-string epgFilename_etsi (const CDateAndTime & date,
+std::string epgFilename_etsi (const CDateAndTime & date,
 		    uint32_t sid, int type, bool advanced);
-string epgFilename_dab (const CDateAndTime & date,
+std::string epgFilename_dab (const CDateAndTime & date,
 		    uint32_t sid, int type, bool advanced);
 
-string epgFilename2 (const CDateAndTime & date,
+std::string epgFilename2 (const CDateAndTime & date,
 		    uint32_t sid, int type, bool advanced);
 
 #endif

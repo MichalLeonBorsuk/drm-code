@@ -76,7 +76,7 @@ public:
 	}
 
 protected:
-	vector < _BOOLEAN > vecbHaveSegment;
+	std::vector < _BOOLEAN > vecbHaveSegment;
 };
 
 /* The base class reassembles chunks of byte vectors into one big vector.
@@ -131,17 +131,17 @@ public:
 		return bReady;
 	}
 
-	void AddSegment (vector<_BYTE> &vecDataIn, int iSegNum, _BOOLEAN bLast);
+	void AddSegment (std::vector<_BYTE> &vecDataIn, int iSegNum, _BOOLEAN bLast);
 
-	vector<_BYTE> vecData;
+	std::vector<_BYTE> vecData;
 
 protected:
 
-	virtual void copyin (vector<_BYTE> &vecDataIn, size_t iSegNum);
-	virtual void cachelast (vector<_BYTE> &vecDataIn, size_t iSegSize);
+	virtual void copyin (std::vector<_BYTE> &vecDataIn, size_t iSegNum);
+	virtual void cachelast (std::vector<_BYTE> &vecDataIn, size_t iSegSize);
 	virtual void copylast ();
 
-	vector<_BYTE> vecLastSegment;
+	std::vector<_BYTE> vecLastSegment;
 	int iLastSegmentNum;
 	int iLastSegmentSize;
 	size_t iSegmentSize;

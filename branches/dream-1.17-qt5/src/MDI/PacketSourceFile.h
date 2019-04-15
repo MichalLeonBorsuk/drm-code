@@ -45,17 +45,17 @@ public:
 	void SetPacketSink(CPacketSink *pSink);
 	// Stop sending packets to the sink
 	void ResetPacketSink(void);
-	_BOOLEAN SetOrigin(const string& str);
+	_BOOLEAN SetOrigin(const std::string& str);
 	void poll();
 
 private:
 
-    void readRawAF(vector<_BYTE>& vecbydata, int& interval);
-    void readRawPFT(vector<_BYTE>& vecbydata, int& interval);
-    void readFF(vector<_BYTE>& vecbydata, int& interval);
+    void readRawAF(std::vector<_BYTE>& vecbydata, int& interval);
+    void readRawPFT(std::vector<_BYTE>& vecbydata, int& interval);
+    void readFF(std::vector<_BYTE>& vecbydata, int& interval);
 
-    void readPcap(vector<_BYTE>& vecbydata, int& interval);
-    void readTagPacketHeader(string& tag, uint32_t& len);
+    void readPcap(std::vector<_BYTE>& vecbydata, int& interval);
+    void readTagPacketHeader(std::string& tag, uint32_t& len);
 
     CPacketSink		*pPacketSink;
     uint64_t		last_packet_time;

@@ -29,7 +29,7 @@
 #include "drm_portaudio.h"
 #include <iostream>
 #include <cstring>
-
+using namespace std;
 /* This routine will be called by the PortAudio engine when audio is needed.
  * It may called at interrupt level on some machines so don't do anything
  * that could mess up the system like calling malloc() or free().

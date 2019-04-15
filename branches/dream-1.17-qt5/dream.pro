@@ -42,7 +42,7 @@ contains(QT, gui) {
 		macx {
 			exists(libs/qwt.framework) {
 				message("with qwt6")
-				INCLUDEPATH += libs/qwt
+				INCLUDEPATH += libs/qwt.framework/Headers
 				LIBS += -framework qwt
 			}
 			else {
@@ -88,8 +88,8 @@ contains(QT, gui) {
 	}
 }
 macx {
-    INCLUDEPATH += /Developer/dream/include /opt/local/include
-    LIBS += -L/Developer/dream/lib -L/opt/local/lib
+    INCLUDEPATH += /Developer/dream/include /opt/local/include /usr/local/include
+    LIBS += -L/Developer/dream/lib -L/opt/local/lib -L/usr/local/lib
     LIBS += -framework CoreFoundation -framework CoreServices
     LIBS += -framework CoreAudio -framework AudioToolbox -framework AudioUnit
     UI_DIR = moc
@@ -134,7 +134,7 @@ unix {
         CONFIG += pcap
                   message("with pcap")
               }
-    exists(/usr/include/sndfile.h) {
+    exists(/usr/include/sndfile.h) | exists(/usr/local/include/sndfile.h){
         CONFIG += sndfile
                   message("with libsndfile")
               }
@@ -142,7 +142,7 @@ unix {
         CONFIG += sndfile
                   message("with libsndfile")
               }
-    exists(/usr/include/fftw3.h) {
+    exists(/usr/include/fftw3.h) | exists(/usr/local/include/fftw3.h) {
         DEFINES += HAVE_FFTW3_H
                    LIBS += -lfftw3
                            message("with fftw3")
