@@ -1,5 +1,6 @@
 
 #include "../util/Pacer.h"
+using namespace std;
 
 /* The FILETIME structure is a 64-bit value representing
  * the number of 100-nanosecond intervals since January 1, 1601.
