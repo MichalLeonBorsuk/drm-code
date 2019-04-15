@@ -37,7 +37,7 @@ class CServiceInformation
 {
 public:
     uint32_t		id;    /* this is the primary key but we keep it inside too for completeness */
-    set<string>		label; /* gathered from the SDC. Normally the label is static and is the station name, but
+    std::set<std::string>	label; /* gathered from the SDC. Normally the label is static and is the station name, but
 							  it is officially dynamic so we collect all that we see. */
 };
 #endif

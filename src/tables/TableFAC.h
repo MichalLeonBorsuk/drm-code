@@ -29,7 +29,6 @@
 #if !defined(TABLE_FAC_H__3B0_CA63_4344_BGDEB2B_23E7912__INCLUDED_)
 #define TABLE_FAC_H__3B0_CA63_4344_BGDEB2B_23E7912__INCLUDED_
 
-#include <string>
 #include "../GlobalDefinitions.h"
 
 /* Definitions ****************************************************************/
@@ -48,13 +47,13 @@ extern const int iTableNumOfServices[5][5];
 /* Language code */
 #define LEN_TABLE_LANGUAGE_CODE			16
 
-extern const string strTableLanguageCode[LEN_TABLE_LANGUAGE_CODE];
+extern const std::string strTableLanguageCode[LEN_TABLE_LANGUAGE_CODE];
 
 /* Programme Type codes */
 #define LEN_TABLE_PROG_TYPE_CODE_TOT	32
 #define LEN_TABLE_PROG_TYPE_CODE		30
 
-extern const string strTableProgTypCod[LEN_TABLE_PROG_TYPE_CODE_TOT];
+extern const std::string strTableProgTypCod[LEN_TABLE_PROG_TYPE_CODE_TOT];
 
 /* Country code table according to ISO 3166 */
 
@@ -72,7 +71,7 @@ extern const struct elCountry TableCountryCode[LEN_TABLE_COUNTRY_CODE];
 
 /* Get country name from ISO 3166 A2 */
 
-string GetISOCountryName(const string strA2);
+std::string GetISOCountryName(const std::string strA2);
 
 /* Language code table according to ISO/IEC 639-2 */
 
@@ -90,11 +89,11 @@ extern const struct elLanguage TableISOLanguageCode[LEN_TABLE_ISO_LANGUAGE_CODE]
 
 /* Get language name from ISO 3166 */
 
-string GetISOLanguageName(const string strA3);
+std::string GetISOLanguageName(const std::string strA3);
 
 /* CIRAF zones */
 #define LEN_TABLE_CIRAF_ZONES			86
 
-extern const string strTableCIRAFzones[LEN_TABLE_CIRAF_ZONES];
+extern const std::string strTableCIRAFzones[LEN_TABLE_CIRAF_ZONES];
 
 #endif // !defined(TABLE_FAC_H__3B0_CA63_4344_BGDEB2B_23E7912__INCLUDED_)

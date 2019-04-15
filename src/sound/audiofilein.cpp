@@ -37,6 +37,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <string.h>
+using namespace std;
 
 
 CAudioFileIn::CAudioFileIn(): CSoundInInterface(), eFmt(fmt_other),

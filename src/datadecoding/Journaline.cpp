@@ -33,6 +33,7 @@
 #endif
 
 #include "journaline/newssvcdec_impl.h" // for log variables
+using namespace std;
 
 CJournaline::CJournaline() : dgdec(NULL), newsdec(NULL)
 {

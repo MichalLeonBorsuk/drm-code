@@ -28,6 +28,7 @@
 
 #include "Reassemble.h"
 #include <iostream>
+using namespace std;
 
 CReassemblerN::CReassemblerN (const CReassemblerN & r):iLastSegmentNum (r.iLastSegmentNum),
 		iLastSegmentSize (r.iLastSegmentSize),

@@ -121,7 +121,7 @@ class CDateAndTime
         seconds = 0;
     }
 
-	void dump(ostream& out);
+	void dump(std::ostream& out);
 
     int utc_flag, lto_flag, half_hours;
     uint16_t year;
@@ -179,7 +179,7 @@ class CSegmentTracker
     }
 
   protected:
-    vector < _BOOLEAN > vecbHaveSegment;
+    std::vector < _BOOLEAN > vecbHaveSegment;
 };
 
 class CReassembler
@@ -305,7 +305,7 @@ class CMOTObjectBase
 			  int &iHeaderFieldLen, int &iDataFieldLen,
 			  CVector < _BINARY > &vecbiHeader) const;
 
-    string extractString (CVector < _BINARY > &vecbiData, int iLen) const;
+    std::string extractString (CVector < _BINARY > &vecbiData, int iLen) const;
 
     TTransportID TransportID;
     CDateAndTime ExpireTime;
@@ -357,12 +357,12 @@ class CMOTDirectory:public CMOTObjectBase
 
     virtual void AddHeader (CVector < _BINARY > &vecbiHeader);
 
-	void dump(ostream&);
+	void dump(std::ostream&);
 
     int iCarouselPeriod, iNumberOfObjects, iSegmentSize;
     _BOOLEAN bCompressionFlag, bSortedHeaderInformation;
-    map < _BYTE, string > DirectoryIndex;
-    vector < TTransportID > vecObjects;
+    std::map < _BYTE, std::string > DirectoryIndex;
+    std::vector < TTransportID > vecObjects;
 };
 
 /* we define this to reduce the need for copy constructors and operator=
@@ -474,7 +474,7 @@ class CMOTObject:public CMOTObjectBase
         iScopeId = 0;
     }
 
-	void dump(ostream&);
+	void dump(std::ostream&);
 
     void AddHeader (CVector < _BINARY > &header);
 
@@ -483,19 +483,19 @@ class CMOTObject:public CMOTObjectBase
 
     _BOOLEAN bComplete, bHasHeader;
     CByteReassembler Body;
-    string strName;
+    std::string strName;
     int iBodySize;
     int iCharacterSetForName;
     int iCharacterSetForDescription;
-    string strFormat;
-    string strMimeType;
+    std::string strFormat;
+    std::string strMimeType;
     int iCompressionType;
-    string strContentDescription;
+    std::string strContentDescription;
     int iVersion, iUniqueBodyVersion;
     int iContentType, iContentSubType;
     int iPriority;
     int iRetransmissionDistance;
-    vector < _BYTE > vecbProfileSubset;
+    std::vector < _BYTE > vecbProfileSubset;
 
     /* the following for EPG Objects */
     CDateAndTime ScopeStart, ScopeEnd;
@@ -596,14 +596,14 @@ class CMOTDABDec
     enum
     { unknown, headerMode, directoryMode } MOTmode;
     /* strictly, there should be only one of these! */
-    map < TTransportID, CBitReassembler > MOTHeaders;
+    std::map < TTransportID, CBitReassembler > MOTHeaders;
     CBitReassembler MOTDirectoryEntity;
     CBitReassembler MOTDirComprEntity;
 
     /* These fields are the cached complete carousel */
     CMOTDirectory MOTDirectory;
-    map < TTransportID, CMOTObject > MOTCarousel;
-    queue < TTransportID > qiNewObjects;
+    std::map < TTransportID, CMOTObject > MOTCarousel;
+    std::queue < TTransportID > qiNewObjects;
 #ifdef USE_QT_GUI
     QMutex guard;
     QWaitCondition blocker;

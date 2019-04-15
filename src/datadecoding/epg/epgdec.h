@@ -32,7 +32,6 @@
 #include "../../GlobalDefinitions.h"
 #include <qdom.h>
 #include <vector>
-using namespace std;
 
 class tag_length_value
 {
@@ -59,7 +58,7 @@ class CEPGDecoder
     CEPGDecoder ():doc()
     {
     }
-    void decode (const vector<_BYTE>&);
+    void decode (const std::vector<_BYTE>&);
 
     QDomDocument doc;
 

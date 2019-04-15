@@ -39,11 +39,11 @@ public:
 	CMDIInBuffer() : buffer() ,guard(),blocker()
 	{}
 
-	void Put(const vector<_BYTE>& data);
-	void Get(vector<_BYTE>& data);
+	void Put(const std::vector<_BYTE>& data);
+	void Get(std::vector<_BYTE>& data);
 
 protected:
-	queue< vector<_BYTE> > buffer;
+	std::queue<std::vector<_BYTE> > buffer;
 	CMutex guard;
 	CWaitCondition blocker;
 };
