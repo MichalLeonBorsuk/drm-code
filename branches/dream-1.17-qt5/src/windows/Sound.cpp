@@ -72,7 +72,9 @@ CSoundIn::CSoundIn():CSoundInInterface(),m_WaveIn(NULL)
 	/* Get info about the devices and store the names */
     for (i = 0; i < iNumDevs; i++)
 		if (!waveInGetDevCaps(i, &m_WaveInDevCaps, sizeof(WAVEINCAPS))) {
-			vecstrDevices.push_back(conv.to_bytes(m_WaveInDevCaps.szPname));
+			string s = conv.to_bytes(m_WaveInDevCaps.szPname);
+			cerr << "found input device " << s << endl;
+			vecstrDevices.push_back(s);
 		}
 
     /* We use an event controlled wave-in structure */
@@ -262,7 +264,8 @@ void CSoundIn::OpenDevice()
     }
 
     /* Get device ID */
-	UINT mmdev = FindDevice(vecstrDevices, sCurDev);
+	UINT mmdev = FindDevice(vecstrDevices, sCurDev) + 1; // +1 because wav mapper is device 0 and not stored or found
+    cerr << "select input device " << mmdev << endl;
 
 #if defined(_MSC_VER) && (_MSC_VER < 1400)
     MMRESULT result = waveInOpen(&m_WaveIn, mmdev, &sWaveFormatEx,
@@ -278,6 +281,7 @@ void CSoundIn::OpenDevice()
 
 void CSoundIn::SetDev(string sNewDev)
 {
+	cerr << "input device " << sNewDev << " selected" << endl;
     /* Change only in case new device id is not already active */
     if (sNewDev != sCurDev)
     {
@@ -361,7 +365,9 @@ CSoundOut::CSoundOut():CSoundOutInterface(),m_WaveOut(NULL)
 	/* Get info about the devices and store the names */
     for (i = 0; i < iNumDevs; i++)
 		if (!waveOutGetDevCaps(i, &m_WaveOutDevCaps, sizeof(WAVEOUTCAPS))) {
-			vecstrDevices.push_back(conv.to_bytes(m_WaveOutDevCaps.szPname));
+			string s = conv.to_bytes(m_WaveOutDevCaps.szPname);
+			cerr << "found output device " << s << endl;
+			vecstrDevices.push_back(s);
 		}
 
     /* We use an event controlled wave-out structure */
@@ -579,8 +585,8 @@ void CSoundOut::OpenDevice()
     }
 
     /* Get device ID */
-	UINT mmdev = FindDevice(vecstrDevices, sCurDev);
-
+	UINT mmdev = FindDevice(vecstrDevices, sCurDev) + 1; // +1 because wav mapper is device 0 and not stored or found
+    cerr << "select output device " << mmdev << endl;
 #if defined(_MSC_VER) && (_MSC_VER < 1400)
     MMRESULT result = waveOutOpen(&m_WaveOut, mmdev, &sWaveFormatEx,
                                   (DWORD) m_WaveEvent, 0, CALLBACK_EVENT);
@@ -606,6 +612,7 @@ string CSoundOut::GetDev()
 void CSoundOut::SetDev(string sNewDev)
 {
     /* Change only in case new device id is not already active */
+	cerr << "output device " << sNewDev << " selected" << endl;
     if (sNewDev != sCurDev)
     {
         sCurDev = sNewDev;
