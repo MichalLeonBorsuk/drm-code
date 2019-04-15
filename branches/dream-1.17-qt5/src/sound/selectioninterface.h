@@ -37,9 +37,9 @@ class CSelectionInterface
 {
 public:
     virtual 			~CSelectionInterface() {}
-    virtual void		Enumerate(vector<string>& names, vector<string>& descriptions)=0;
-    virtual string		GetDev()=0;
-    virtual void		SetDev(string sNewDev)=0;
+    virtual void		Enumerate(std::vector<std::string>& names, std::vector<std::string>& descriptions)=0;
+    virtual std::string		GetDev()=0;
+    virtual void		SetDev(std::string sNewDev)=0;
 };
 
 #endif

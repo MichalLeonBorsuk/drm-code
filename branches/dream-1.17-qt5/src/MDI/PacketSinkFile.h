@@ -41,22 +41,22 @@ public:
 	CPacketSinkFile();
 	virtual ~CPacketSinkFile() {}
 
-	virtual void SendPacket(const vector<_BYTE>& vecbydata, uint32_t addr=0, uint16_t port=0);
+	virtual void SendPacket(const std::vector<_BYTE>& vecbydata, uint32_t addr=0, uint16_t port=0);
 
-	virtual _BOOLEAN SetDestination(const string& strFName);
-	virtual _BOOLEAN GetDestination(string& strFName) { strFName = strFileName; return TRUE; }
+	virtual _BOOLEAN SetDestination(const std::string& strFName);
+	virtual _BOOLEAN GetDestination(std::string& strFName) { strFName = strFileName; return TRUE; }
 	void StartRecording();
 	void StopRecording();
 
 protected:
 	virtual void open()=0;
 	virtual void close()=0;
-	virtual void write(const vector<_BYTE>& vecbydata)=0;
+	virtual void write(const std::vector<_BYTE>& vecbydata)=0;
 
 	FILE *pFile;
 	_BOOLEAN bIsRecording;
 	_BOOLEAN bChangeReceived;
-	string strFileName;
+	std::string strFileName;
 };
 
 class CPacketSinkRawFile : public CPacketSinkFile
@@ -67,7 +67,7 @@ public:
 protected:
 	virtual void open();
 	virtual void close();
-	virtual void write(const vector<_BYTE>& vecbydata);
+	virtual void write(const std::vector<_BYTE>& vecbydata);
 };
 
 class CPacketSinkFileFraming : public CPacketSinkFile
@@ -78,7 +78,7 @@ public:
 protected:
 	virtual void open();
 	virtual void close();
-	virtual void write(const vector<_BYTE>& vecbydata);
+	virtual void write(const std::vector<_BYTE>& vecbydata);
 };
 
 class CPacketSinkPcapFile : public CPacketSinkFile
@@ -89,7 +89,7 @@ public:
 protected:
 	virtual void open();
 	virtual void close();
-	virtual void write(const vector<_BYTE>& vecbydata);
+	virtual void write(const std::vector<_BYTE>& vecbydata);
 };
 
 #endif

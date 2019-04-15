@@ -31,8 +31,6 @@
 
 #include "../GlobalDefinitions.h"
 #include <map>
-#include <string>
-
 
 /* Definitions ****************************************************************/
 #define DREAM_INIT_FILE_NAME		"Dream.ini"
@@ -116,8 +114,8 @@
 		bool operator()(const std::string& x, const std::string& y) const;
 	};
 	/* These typedefs just make the code a bit more readable */
-	typedef std::map<string, string, StlIniCompareStringNoCase > INISection;
-	typedef std::map<string, INISection , StlIniCompareStringNoCase > INIFile;
+	typedef std::map<std::string, std::string, StlIniCompareStringNoCase > INISection;
+	typedef std::map<std::string, INISection , StlIniCompareStringNoCase > INIFile;
 
 	class CWinGeom
 	{
@@ -133,14 +131,14 @@ class CIniFile
 public:
 	CIniFile() {}
 	virtual ~CIniFile() {}
-	void SaveIni(ostream&) const;
+	void SaveIni(std::ostream&) const;
 	void SaveIni(const char*) const;
 	bool LoadIni(const char*);
 
-	string GetIniSetting(const string& strSection, const string& strKey,
-				const string& strDefaultVal = "") const;
-	void PutIniSetting(const string& strSection, const string& strKey="",
-				const string& strVal = "");
+	std::string GetIniSetting(const std::string& strSection, const std::string& strKey,
+				const std::string& strDefaultVal = "") const;
+	void PutIniSetting(const std::string& strSection, const std::string& strKey="",
+				const std::string& strVal = "");
 protected:
 	INIFile ini;
 	CMutex Mutex;
@@ -153,31 +151,31 @@ public:
 	void Load(int argc, char** argv);
 	void Save();
 	void Clear();
-	string Get(const string& section, const string& key, const string& def="") const;
-	void Put(const string& section, const string& key, const string& value);
-	bool Get(const string& section, const string& key, const bool def) const;
-	void Put(const string& section, const string& key, const bool value);
-	int Get(const string& section, const string& key, const int def) const;
-	void Put(const string& section, const string& key, const int value);
-	_REAL Get(const string& section, const string& key, const _REAL def) const;
-	void Put(const string& section, const string& key, const _REAL value);
-	void Get(const string& section, CWinGeom&) const;
-	void Put(const string& section, const CWinGeom&);
+	std::string Get(const std::string& section, const std::string& key, const std::string& def="") const;
+	void Put(const std::string& section, const std::string& key, const std::string& value);
+	bool Get(const std::string& section, const std::string& key, const bool def) const;
+	void Put(const std::string& section, const std::string& key, const bool value);
+	int Get(const std::string& section, const std::string& key, const int def) const;
+	void Put(const std::string& section, const std::string& key, const int value);
+	_REAL Get(const std::string& section, const std::string& key, const _REAL def) const;
+	void Put(const std::string& section, const std::string& key, const _REAL value);
+	void Get(const std::string& section, CWinGeom&) const;
+	void Put(const std::string& section, const CWinGeom&);
 	const char* UsageArguments();
 
 protected:
 	int IsReceiver(const char *argv0);
 	void ParseArguments(int argc, char** argv);
-	void FileArg(const string&);
-	_BOOLEAN GetFlagArgument(int argc, char** argv, int& i, string strShortOpt,
-							 string strLongOpt);
+	void FileArg(const std::string&);
+	_BOOLEAN GetFlagArgument(int argc, char** argv, int& i, std::string strShortOpt,
+							 std::string strLongOpt);
 	_BOOLEAN GetNumericArgument(int argc, char** argv, int& i,
-								string strShortOpt, string strLongOpt,
+								std::string strShortOpt, std::string strLongOpt,
 								_REAL rRangeStart, _REAL rRangeStop,
 								_REAL& rValue);
 	_BOOLEAN GetStringArgument(int argc, char** argv, int& i,
-							   string strShortOpt, string strLongOpt,
-							   string& strArg);
+							   std::string strShortOpt, std::string strLongOpt,
+							   std::string& strArg);
 };
 
 #endif // !defined(SETTINGS_H__3B0BA660_DGEG56GE64B2B_23DSG9876D31912__INCLUDED_)

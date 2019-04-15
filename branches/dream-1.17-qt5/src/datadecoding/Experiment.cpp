@@ -27,6 +27,7 @@
 
 #include "Experiment.h"
 #include <iostream>
+using namespace std;
 
 CExperiment::CExperiment() : dgdec(NULL)
 {

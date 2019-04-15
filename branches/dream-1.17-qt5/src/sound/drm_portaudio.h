@@ -39,9 +39,9 @@ public:
     CPaCommon(bool);
     virtual 		~CPaCommon();
 
-    virtual void	Enumerate(vector<string>& choices, vector<string>& descriptions);
-    virtual void	SetDev(string sNewDevice);
-    virtual string	GetDev();
+    virtual void	Enumerate(std::vector<std::string>& choices, std::vector<std::string>& descriptions);
+    virtual void	SetDev(std::string sNewDevice);
+    virtual std::string	GetDev();
 
     _BOOLEAN		Init(int iSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking);
     void			ReInit();
@@ -55,9 +55,9 @@ public:
 protected:
 
     PaStream *stream;
-    vector<string> names;
-    vector<PaDeviceIndex> devices;
-    string dev;
+    std::vector<std::string> names;
+    std::vector<PaDeviceIndex> devices;
+    std::string dev;
     bool is_capture,blocking,device_changed,xrun;
     int framesPerBuffer;
     int iBufferSize;
@@ -72,13 +72,13 @@ class CPaIn: public CSoundInInterface
 public:
     CPaIn();
     virtual 			~CPaIn();
-    virtual void		Enumerate(vector<string>& choices, vector<string>& descriptions) {
+    virtual void		Enumerate(std::vector<std::string>& choices, std::vector<std::string>& descriptions) {
         hw.Enumerate(choices, descriptions);
     }
-    virtual void		SetDev(string sNewDevice) {
+    virtual void		SetDev(std::string sNewDevice) {
         hw.SetDev(sNewDevice);
     }
-    virtual string		GetDev() {
+    virtual std::string		GetDev() {
         return hw.GetDev();
     }
 
@@ -96,13 +96,13 @@ class CPaOut: public CSoundOutInterface
 public:
     CPaOut();
     virtual 			~CPaOut();
-    virtual void		Enumerate(vector<string>& choices, vector<string>& descriptions) {
+    virtual void		Enumerate(std::vector<std::string>& choices, std::vector<std::string>& descriptions) {
         hw.Enumerate(choices, descriptions);
     }
-    virtual void		SetDev(string sNewDevice) {
+    virtual void		SetDev(std::string sNewDevice) {
         hw.SetDev(sNewDevice);
     }
-    virtual string		GetDev() {
+    virtual std::string		GetDev() {
         return hw.GetDev();
     }
 

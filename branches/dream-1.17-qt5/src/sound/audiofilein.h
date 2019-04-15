@@ -40,10 +40,10 @@ public:
     CAudioFileIn();
     virtual ~CAudioFileIn();
 
-    virtual void		Enumerate(vector<string>&, vector<string>&) {}
-    virtual void		SetDev(string sNewDevice) {sCurrentDevice = sNewDevice;}
-    virtual string		GetDev() {return sCurrentDevice;}
-    virtual void		SetFileName(const string& strFileName);
+    virtual void		Enumerate(std::vector<std::string>&, std::vector<std::string>&) {}
+    virtual void		SetDev(std::string sNewDevice) {sCurrentDevice = sNewDevice;}
+    virtual std::string		GetDev() {return sCurrentDevice;}
+    virtual void		SetFileName(const std::string& strFileName);
     virtual int			GetSampleRate() {return iRequestedSampleRate;};
 
     virtual _BOOLEAN	Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking);
@@ -51,7 +51,7 @@ public:
     virtual void 		Close();
 
 protected:
-    string				strInFileName;
+    std::string				strInFileName;
     CVector<_REAL>		vecTempResBufIn;
     CVector<_REAL>		vecTempResBufOut;
     enum { fmt_txt, fmt_raw_mono, fmt_raw_stereo, fmt_other } eFmt;
@@ -67,7 +67,7 @@ protected:
     short*				buffer;
     int					iInBlockSize;
     int					iOutBlockSize;
-    string				sCurrentDevice;
+    std::string				sCurrentDevice;
 };
 
 #endif

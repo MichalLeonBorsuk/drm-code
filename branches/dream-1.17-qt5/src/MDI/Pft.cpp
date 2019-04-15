@@ -33,6 +33,7 @@
 #include "Pft.h"
 #include "../util/CRC.h"
 #include <iostream>
+using namespace std;
 
 CPft::CPft(int isrc, int idst):
 iSource(isrc),
