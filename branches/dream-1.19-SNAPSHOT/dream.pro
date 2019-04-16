@@ -88,13 +88,14 @@ contains(QT, gui) {
 	}
 }
 macx {
-    INCLUDEPATH += /Developer/dream/include /opt/local/include /usr/local/include
-    LIBS += -L/Developer/dream/lib -L/opt/local/lib -L/usr/local/lib
+    INCLUDEPATH += /usr/local/include
+    LIBS += -L/usr/local/lib
     LIBS += -framework CoreFoundation -framework CoreServices
     LIBS += -framework CoreAudio -framework AudioToolbox -framework AudioUnit
     UI_DIR = moc
     MOC_DIR = moc
     RC_FILE = src/GUI-QT/res/macicons.icns
+    CONFIG += fdk-aac
 }
 exists(libs/faac.h) {
     CONFIG += faac
@@ -258,6 +259,13 @@ win32 {
     DEFINES += HAVE_SETUPAPI \
     HAVE_LIBZ
     SOURCES += src/windows/Pacer.cpp
+}
+fdk-aac {
+     DEFINES += HAVE_LIBFDK_AAC
+     LIBS += -lfdk-aac
+     HEADERS += src/sourcedecoders/fdk_aac_codec.h
+     SOURCES += src/sourcedecoders/fdk_aac_codec.cpp
+     message("with fdk-aac")
 }
 faad {
     DEFINES += HAVE_LIBFAAD \
