@@ -1,12 +1,12 @@
 /******************************************************************************\
  *
- * Copyright (c) 2013
+ * Copyright (c) 2019
  *
  * Author(s):
- *  David Flamand
+ *  Julian Cable
  *
  * Description:
- *  See aac_codec.cpp
+ *  adapt fdk decoder to Dream
  *
  ******************************************************************************
  *
@@ -29,36 +29,23 @@
 #ifndef FDK_AAC_CODEC_H_
 #define FDK_AAC_CODEC_H_
 
-#include "AudioCodec.h"
+#include "../Parameter.h"
 #include <fdk-aac/aacdecoder_lib.h>
 #include <fdk-aac/aacenc_lib.h>
 
-class FdkAacCodec : public CAudioCodec
+enum EDecError { DECODER_ERROR_OK, DECODER_ERROR_CRC, DECODER_ERROR_CORRUPTED, DECODER_ERROR_UNKNOWN };
+
+class FdkAacCodec
 {
 public:
     FdkAacCodec();
     virtual ~FdkAacCodec();
-	/* Decoder */
-	virtual string DecGetVersion();
-	virtual bool CanDecode(CAudioParam::EAudCod eAudioCoding);
+    virtual std::string DecGetVersion();
     virtual bool DecOpen(const CAudioParam& AudioParam, int& iAudioSampleRate);
     virtual EDecError Decode(const vector<uint8_t>& audio_frame, uint8_t aac_crc_bits, CVector<_REAL>& left,  CVector<_REAL>& right);
     virtual void DecClose();
-	virtual void DecUpdate(CAudioParam& AudioParam);
-    /* Encoder */
-	virtual string EncGetVersion();
-	virtual bool CanEncode(CAudioParam::EAudCod eAudioCoding);
-    virtual bool EncOpen(const CAudioParam& AudioParam, unsigned long& lNumSampEncIn, unsigned long& lMaxBytesEncOut);
-    virtual int Encode(CVector<_SAMPLE>& vecsEncInData, unsigned long lNumSampEncIn, CVector<uint8_t>& vecsEncOutData, unsigned long lMaxBytesEncOut);
-    virtual void EncClose();
-	virtual void EncSetBitrate(int iBitRate);
-	virtual void EncUpdate(CAudioParam& AudioParam);
-    virtual void resetFile(string) {}
-    virtual string fileName(const CParameter& Parameters) const;
 protected:
     HANDLE_AACDECODER hDecoder;
-    HANDLE_AACENCODER hEncoder;
-    bool bUsac;
     int16_t decode_buf[13840];
 };
 

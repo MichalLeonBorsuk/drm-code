@@ -35,11 +35,7 @@
 #include "../datadecoding/DataDecoder.h"
 #include "../util/Utilities.h"
 
-#ifdef USE_FAAD2_LIBRARY
-# include <neaacdec.h>
-#else
-# include "neaacdec_dll.h"
-#endif
+class FdkAacCodec;
 
 /* Definitions ****************************************************************/
 
@@ -199,7 +195,7 @@ protected:
 
     CAudioParam::EAudCod eAudioCoding;
 
-    NeAACDecHandle HandleAACDecoder;
+    FdkAacCodec *codec;
 
     int iNumBorders;
     int iNumHigherProtectedBytes;
