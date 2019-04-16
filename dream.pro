@@ -114,11 +114,11 @@ unix {
                   message("with pulseaudio")
               }
     else {
-    #packagesExist(portaudio-2.0) {
-        CONFIG += portaudio
-     PKGCONFIG += portaudio-2.0
-                  message("with portaudio")
-              }
+        packagesExist(portaudio-2.0) {
+           CONFIG += portaudio
+           PKGCONFIG += portaudio-2.0
+       }
+    }
     exists(/usr/include/hamlib/rig.h) {
         CONFIG += hamlib
                   message("with hamlib")
