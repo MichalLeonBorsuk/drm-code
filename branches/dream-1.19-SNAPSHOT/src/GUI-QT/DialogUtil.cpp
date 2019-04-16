@@ -47,6 +47,9 @@
 # define CHECK_PTR(x) Q_CHECK_PTR(x)
 #endif
 #include "../Version.h"
+#ifdef HAVE_LIBFDK_AAC
+# include "../sourcedecoders/fdk_aac_codec.h"
+#endif
 #ifdef USE_ALSA
 # include <alsa/version.h>
 #endif
@@ -122,6 +125,9 @@ CAboutDlg::CAboutDlg(QWidget* parent, const char* name, bool modal, Qt::WindowFl
     char  sfversion [128] ;
     sf_command (NULL, SFC_GET_LIB_VERSION, sfversion, sizeof (sfversion)) ;
 #endif
+#ifdef HAVE_LIBFDK_AAC
+    FdkAacCodec fdk;
+#endif
     QString strCredits = 
         "<p>" /* General description of Dream software */
         "<big><b>Dream</b> " + tr("is a software implementation of a Digital "
@@ -155,6 +161,9 @@ CAboutDlg::CAboutDlg(QWidget* parent, const char* name, bool modal, Qt::WindowFl
         "<li><b>FFTW</b> (" + QString(fftw_version) + ") <i>http://www.fftw.org</i></li>"
 #else
         "<li><b>FFTW</b> <i>http://www.fftw.org</i></li>"
+#endif
+#ifdef HAVE_LIBFDK_AAC
+	"<li><b>fdk-aac decoder</b> (" + fdk.DecGetVersion().c_str() + ") <i>https://www.iis.fraunhofer.de/en/ff/amm/impl.html</i></li>"
 #endif
 #if USE_FAAD2_LIBRARY
         "<li><b>FAAD2</b> (" + QString(FAAD2_VERSION) + ") <i>AAC/HE-AAC/HE-AACv2/DRM decoder "
