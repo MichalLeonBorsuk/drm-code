@@ -86,86 +86,6 @@ CAudioSourceDecoder::AACFileName(CParameter & Parameters)
     return ss.str();
 }
 
-string
-CAudioSourceDecoder::CELPFileName(CParameter & Parameters)
-{
-    stringstream ss;
-    ss << "test/celp_";
-    if (Parameters.Service[Parameters.GetCurSelAudioService()].
-            AudioParam.eAudioSamplRate == CAudioParam::AS_8_KHZ)
-    {
-        ss << "8kHz_" << 
-            iTableCELP8kHzUEPParams
-                 [Parameters.
-                  Service[Parameters.GetCurSelAudioService()].
-                  AudioParam.iCELPIndex][0];
-    }
-    else
-    {
-        ss << "16kHz_" <<
-            iTableCELP16kHzUEPParams
-                 [Parameters.
-                  Service[Parameters.GetCurSelAudioService()].
-                  AudioParam.iCELPIndex][0];
-    }
-    ss << "bps";
-
-    if (Parameters.Service[Parameters.GetCurSelAudioService()].
-            AudioParam.eSBRFlag == CAudioParam::SB_USED)
-    {
-        ss << "_sbr";
-    }
-    ss << ".dat";
-
-    return ss.str();
-}
-
-string
-CAudioSourceDecoder::HVXCFileName(CParameter & Parameters)
-{
-    stringstream ss;
-    ss << "test/hvxc_";
-    if (Parameters.Service[Parameters.GetCurSelAudioService()].
-            AudioParam.eAudioSamplRate == CAudioParam::AS_8_KHZ)
-    {
-        ss << "8kHz";
-    }
-    else
-    {
-        ss << "unknown";
-    }
-
-    if (Parameters.Service[Parameters.GetCurSelAudioService()].
-            AudioParam.eHVXCRate == CAudioParam::HR_2_KBIT)
-    {
-        ss << "_2kbps";
-    }
-    else if (Parameters.Service[Parameters.GetCurSelAudioService()].
-             AudioParam.eHVXCRate == CAudioParam::HR_4_KBIT)
-    {
-        ss << "_4kbps";
-    }
-    else
-    {
-        ss << "_unknown";
-    }
-
-    if (Parameters.Service[Parameters.GetCurSelAudioService()].
-            AudioParam.bHVXCCRC)
-    {
-        ss << "_crc";
-    }
-
-    if (Parameters.Service[Parameters.GetCurSelAudioService()].
-            AudioParam.eSBRFlag == CAudioParam::SB_USED)
-    {
-        ss << "_sbr";
-    }
-    ss << ".dat";
-
-    return ss.str();
-}
-
 void
 CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
 {
@@ -279,41 +199,6 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
             }
         }
     }
-    else if (eAudioCoding == CAudioParam::AC_CELP)
-    {
-        /* celp_super_frame(celp_table_ind) --------------------------------- */
-        /* Higher-protected part */
-        for (i = 0; i < iNumAudioFrames; i++)
-        {
-            celp_frame[i].ResetBitAccess();
-
-            /* Extract higher protected part bits */
-            for (j = 0; j < iNumHigherProtectedBits; j++)
-                celp_frame[i].Enqueue((*pvecInputData).Separate(1), 1);
-
-            /* Extract CRC bits (8 bits) if used */
-            if (bCELPCRC == TRUE)
-                celp_crc_bits[i] = _BINARY((*pvecInputData).Separate(8));
-        }
-
-        /* Lower-protected part */
-        for (i = 0; i < iNumAudioFrames; i++)
-        {
-            for (j = 0; j < iNumLowerProtectedBits; j++)
-                celp_frame[i].Enqueue((*pvecInputData).Separate(1), 1);
-        }
-    }
-    else if (eAudioCoding == CAudioParam::AC_HVXC)
-    {
-        for (i = 0; i < iNumAudioFrames; i++)
-        {
-            hvxc_frame[i].ResetBitAccess();
-
-            for (j = 0; j < iNumHvxcBits; j++)
-                hvxc_frame[i].Enqueue((*pvecInputData).Separate(1), 1);
-        }
-    }
-
 
     /* Audio decoding ******************************************************** */
     /* Init output block size to zero, this variable is also used for
@@ -336,7 +221,7 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
                 }
 
                 /* Call decoder routine */
-                EDecError eDecError = codec->Decode(audio_frame[i], aac_crc_bits[i], vecTempResBufOutCurLeft, vecTempResBufOutCurRight);
+                EDecError eDecError = codec->Decode(audio_frame[j], aac_crc_bits[j], vecTempResBufOutCurLeft, vecTempResBufOutCurRight);
 
                 /* OPH: add frame status to vector for RSCI */
                 Parameters.Lock();

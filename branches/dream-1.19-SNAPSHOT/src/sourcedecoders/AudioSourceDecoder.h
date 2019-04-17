@@ -229,8 +229,6 @@ protected:
     virtual void InitInternal(CParameter& Parameters);
     virtual void ProcessDataInternal(CParameter& Parameters);
     string AACFileName(CParameter&);
-    string CELPFileName(CParameter&);
-    string HVXCFileName(CParameter&);
 };
 
 #endif // !defined(AUIDOSOURCEDECODER_H__3B0BA660_CABB2B_23E7A0D31912__INCLUDED_)
