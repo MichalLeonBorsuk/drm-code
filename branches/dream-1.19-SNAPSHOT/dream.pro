@@ -109,6 +109,9 @@ unix {
     target.path = /usr/bin
     INSTALLS += target
     CONFIG += link_pkgconfig
+    packagesExist(fdk-aac) {
+        CONFIG += fdk-aac
+    }
     exists(/usr/include/pulse/pulseaudio.h) {
         CONFIG += pulseaudio
                   message("with pulseaudio")
