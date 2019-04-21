@@ -223,11 +223,12 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
                 /* Call decoder routine */
                 EDecError eDecError = codec->Decode(audio_frame[j], aac_crc_bits[j], vecTempResBufOutCurLeft, vecTempResBufOutCurRight);
 
-                /* OPH: add frame status to vector for RSCI */
+                /* OPH: add frame status to vector for RSCI RAFS tag item ETSI TS 102 349 6.4.3.7 */
                 Parameters.Lock();
-                Parameters.vecbiAudioFrameStatus.Add(eDecError == 0 ? 0 : 1);
+                Parameters.vecbiAudioFrameStatus.Add(eDecError == DECODER_ERROR_OK ? 0 : 1);
                 Parameters.Unlock();
 
+                bCurBlockOK = (eDecError == DECODER_ERROR_OK);
             }
             else
             {
