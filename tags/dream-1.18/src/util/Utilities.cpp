@@ -35,7 +35,7 @@
 #  endif
 #  include <windows.h>
 #  include <setupapi.h>
-#  if defined(_MSC_VER) && (_MSC_VER < 1400) || defined(__MINGW32__)
+#  if defined(_MSC_VER) && (_MSC_VER < 1400)
     DEFINE_GUID(GUID_DEVINTERFACE_COMPORT, 0x86e0d1e0L, 0x8089,
     0x11d0, 0x9c, 0xe4, 0x08, 0x00, 0x3e, 0x30, 0x1f, 0x73);
 #  endif

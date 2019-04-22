@@ -1,6 +1,12 @@
 TEMPLATE = app
 TARGET = dream
 INCLUDEPATH += libs
+contains(QMAKE_CC, i686-w64-mingw32.static-gcc) {
+  CONFIG += mxe
+  message(mxe)
+  INCLUDEPATH+=/opt/mxe/usr/i686-w64-mingw32.static/include
+  LIBS+=-L/opt/mxe/usr/i686-w64-mingw32.static/lib
+}
 LIBS += -Llibs
 OBJECTS_DIR = obj
 DEFINES += EXECUTABLE_NAME=$$TARGET
@@ -20,7 +26,7 @@ qtconsole {
 	INCLUDEPATH += moc
 }
 contains(QT, gui) {
-	QT += network xml widgets
+	QT += network xml widgets svg
 	VPATH += src/GUI-QT
 	INCLUDEPATH += libs/qwt
 	INCLUDEPATH += src/GUI-QT
@@ -216,24 +222,31 @@ win32 {
         SOURCES += src/windows/Sound.cpp
         message("with mmsystem")
     }
-    exists(libs/fftw3.h) {
+    mxe {
         DEFINES += HAVE_FFTW3_H
-        LIBS += -lfftw3-3
+        LIBS += -lfftw3
         message("with fftw3")
     }
     else {
-        exists(libs/fftw.h) {
-            DEFINES += HAVE_FFTW_H
-            LIBS += -lfftw
-			exists(libs/rfftw.lib) {
-				DEFINES += HAVE_RFFTW_H
-				LIBS += -lrfftw
-			}
-        message("with fftw2")
-        }
-        else {
-            error("no usable fftw version 2 or 3 found")
-        }
+	    exists(libs/fftw3.h) {
+		DEFINES += HAVE_FFTW3_H
+		LIBS += -lfftw3-3
+		message("with fftw3")
+	    }
+	    else {
+		exists(libs/fftw.h) {
+		    DEFINES += HAVE_FFTW_H
+		    LIBS += -lfftw
+				exists(libs/rfftw.lib) {
+					DEFINES += HAVE_RFFTW_H
+					LIBS += -lrfftw
+				}
+		message("with fftw2")
+		}
+		else {
+		    error("no usable fftw version 2 or 3 found")
+		}
+	    }
     }
     exists(libs/hamlib/rig.h) {
         CONFIG += hamlib
@@ -251,10 +264,15 @@ win32 {
     MOC_DIR = moc
     LIBS += -lsetupapi \
 	-ladvapi32 \
-	-lzlib \
 	-luser32 \
     -lwinmm \
     -lwsock32
+    mxe {
+        #LIBS+=-lz
+    }
+    else {
+        LIBS+=-lzlib 
+    }
     DEFINES += HAVE_SETUPAPI \
     HAVE_LIBZ
     SOURCES += src/windows/Pacer.cpp
