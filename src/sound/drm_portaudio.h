@@ -39,9 +39,9 @@ public:
     CPaCommon(bool);
     virtual 		~CPaCommon();
 
-    virtual void	Enumerate(vector<string>& choices, vector<string>& descriptions);
-    virtual void	SetDev(string sNewDevice);
-    virtual string	GetDev();
+    virtual void	Enumerate(std::vector<std::string>& names, std::vector<std::string>& descriptions);
+    virtual void	SetDev(std::string sNewDevice);
+    virtual std::string	GetDev();
 
     _BOOLEAN		Init(int iSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking);
     void			ReInit();
@@ -72,13 +72,16 @@ class CPaIn: public CSoundInInterface
 public:
     CPaIn();
     virtual 			~CPaIn();
-    virtual void		Enumerate(vector<string>& choices, vector<string>& descriptions) {
-        hw.Enumerate(choices, descriptions);
+    virtual void	Enumerate(std::vector<std::string>& names, std::vector<std::string>& descriptions)
+    {
+        hw.Enumerate(names, descriptions);
     }
-    virtual void		SetDev(string sNewDevice) {
+    virtual void	SetDev(std::string sNewDevice)
+    {
         hw.SetDev(sNewDevice);
     }
-    virtual string		GetDev() {
+    virtual std::string	GetDev()
+    {
         return hw.GetDev();
     }
 
@@ -96,16 +99,18 @@ class CPaOut: public CSoundOutInterface
 public:
     CPaOut();
     virtual 			~CPaOut();
-    virtual void		Enumerate(vector<string>& choices, vector<string>& descriptions) {
-        hw.Enumerate(choices, descriptions);
+    virtual void	Enumerate(std::vector<std::string>& names, std::vector<std::string>& descriptions)
+    {
+        hw.Enumerate(names, descriptions);
     }
-    virtual void		SetDev(string sNewDevice) {
+    virtual void	SetDev(std::string sNewDevice)
+    {
         hw.SetDev(sNewDevice);
     }
-    virtual string		GetDev() {
+    virtual std::string	GetDev()
+    {
         return hw.GetDev();
     }
-
     virtual _BOOLEAN	Init(int iSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking);
     virtual void		Close();
     virtual _BOOLEAN	Write(CVector<short>& psData);
