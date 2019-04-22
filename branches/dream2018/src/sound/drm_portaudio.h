@@ -84,6 +84,10 @@ public:
     {
         return hw.GetDev();
     }
+    virtual std::string	GetVersion()
+    {
+        return Pa_GetVersionInfo()->versionText;
+    }
 
     virtual _BOOLEAN	Init(int iSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking);
     virtual void		Close();
@@ -110,6 +114,10 @@ public:
     virtual std::string	GetDev()
     {
         return hw.GetDev();
+    }
+    virtual std::string	GetVersion()
+    {
+        return Pa_GetVersionInfo()->versionText;
     }
     virtual _BOOLEAN	Init(int iSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking);
     virtual void		Close();
