@@ -139,39 +139,10 @@ unix {
     exists(/usr/include/pcap.h) {
         CONFIG += pcap
                   message("with pcap")
-              }
-    exists(/usr/include/sndfile.h) | exists(/usr/local/include/sndfile.h){
-        CONFIG += sndfile
-                  message("with libsndfile")
-              }
-    exists(/opt/local/include/sndfile.h) {
-        CONFIG += sndfile
-                  message("with libsndfile")
-              }
-    exists(/usr/include/fftw3.h) | exists(/usr/local/include/fftw3.h) {
-        DEFINES += HAVE_FFTW3_H
-                   LIBS += -lfftw3
-                           message("with fftw3")
-                       }
-    else {
-      exists(/usr/include/fftw.h) {
-	message("with fftw2")
-        LIBS += -lfftw
-        exists(/usr/include/rfftw.h):LIBS += -lrfftw
-        exists(/opt/local/include/dfftw.h) {
-            DEFINES += HAVE_DFFTW_H
-            LIBS += -ldfftw
-        }
-        exists(/opt/local/include/drfftw.h) {
-           DEFINES += HAVE_DRFFTW_H
-           LIBS += -ldrfftw
-        }
-        DEFINES += HAVE_FFTW_H HAVE_RFFTW_H
-      }
-      else {
-        error("no usable fftw library found - install fftw dev package")
-      }
     }
+    DEFINES += HAVE_FFTW3_H
+    DEFINES += HAVE_LIBSNDFILE
+    PKGCONFIG += fftw3 sndfile
     LIBS += -lz -ldl
     SOURCES += src/linux/Pacer.cpp
     DEFINES += HAVE_DLFCN_H \
@@ -199,20 +170,28 @@ msvc2008 {
     QMAKE_CXXFLAGS += /wd"4996" /wd"4521"
     QMAKE_LFLAGS_RELEASE += /NODEFAULTLIB:libcmt.lib
     QMAKE_LFLAGS_DEBUG += /NODEFAULTLIB:libcmtd.lib
-    LIB += zlib.lib
 }
 msvc2010 {
     TEMPLATE = vc
     QMAKE_CXXFLAGS += /wd"4996" /wd"4521"
     QMAKE_LFLAGS_RELEASE += /NODEFAULTLIB:libcmt.lib
     QMAKE_LFLAGS_DEBUG += /NODEFAULTLIB:libcmtd.lib
-    LIB += zlib.lib
-}
-win32-g++ {
-    DEFINES += HAVE_STDINT_H
-    LIBS += -lz
 }
 win32 {
+    DEFINES += HAVE_SETUPAPI HAVE_LIBZ HAVE_FFTW3_H HAVE_LIBSNDFILE
+    win32-g++ {
+        CONFIG += link_pkgconfig
+        DEFINES += HAVE_STDINT_H
+        LIBS += -lz
+        PKGCONFIG += fftw3 sndfile
+        message(win32-g++)
+    }
+    else {
+        LIB += zlib.lib
+	LIBS += -lfftw3-3
+        LIBS += -lsndfile-1
+        message(win32-msvc)
+    }
     exists(libs/portaudio.h) {
         CONFIG += portaudio
         message("with portaudio")
@@ -221,32 +200,6 @@ win32 {
         HEADERS += src/windows/Sound.h
         SOURCES += src/windows/Sound.cpp
         message("with mmsystem")
-    }
-    mxe {
-        DEFINES += HAVE_FFTW3_H
-        LIBS += -lfftw3
-        message("with fftw3")
-    }
-    else {
-	    exists(libs/fftw3.h) {
-		DEFINES += HAVE_FFTW3_H
-		LIBS += -lfftw3-3
-		message("with fftw3")
-	    }
-	    else {
-		exists(libs/fftw.h) {
-		    DEFINES += HAVE_FFTW_H
-		    LIBS += -lfftw
-				exists(libs/rfftw.lib) {
-					DEFINES += HAVE_RFFTW_H
-					LIBS += -lrfftw
-				}
-		message("with fftw2")
-		}
-		else {
-		    error("no usable fftw version 2 or 3 found")
-		}
-	    }
     }
     exists(libs/hamlib/rig.h) {
         CONFIG += hamlib
@@ -262,19 +215,7 @@ win32 {
     }
     UI_DIR = moc
     MOC_DIR = moc
-    LIBS += -lsetupapi \
-	-ladvapi32 \
-	-luser32 \
-    -lwinmm \
-    -lwsock32
-    mxe {
-        #LIBS+=-lz
-    }
-    else {
-        LIBS+=-lzlib 
-    }
-    DEFINES += HAVE_SETUPAPI \
-    HAVE_LIBZ
+    LIBS += -lsetupapi -ladvapi32 -luser32 -lwinmm -lwsock32
     SOURCES += src/windows/Pacer.cpp
 }
 faad {
@@ -286,11 +227,6 @@ faac {
     DEFINES += HAVE_LIBFAAC \
     USE_FAAC_LIBRARY
     LIBS += -lfaac_drm
-}
-sndfile {
-    DEFINES += HAVE_LIBSNDFILE
-    unix:LIBS += -lsndfile
-    win32:LIBS += libsndfile-1.lib
 }
 gps {
     DEFINES += HAVE_LIBGPS
