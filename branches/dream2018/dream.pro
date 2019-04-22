@@ -6,11 +6,9 @@ DEFINES += EXECUTABLE_NAME=$$TARGET
 LIBS += -L$$PWD/lib
 INCLUDEPATH += $$PWD/include
 contains(QT_VERSION, ^4\\..*) {
-    CONFIG += qt qt4
     VERSION_MESSAGE = Qt 4
 }
 contains(QT_VERSION, ^5\\..*) {
-    CONFIG += qt qt5
     VERSION_MESSAGE = Qt 5
 }
 CONFIG(debug, debug|release) {
@@ -20,21 +18,16 @@ else {
     DEBUG_MESSAGE = release
 }
 console {
-    QT -= core gui multimedia
-    CONFIG -= qt qt4 qt5
+    QT -= core gui
     UI_MESSAGE = console mode
     VERSION_MESSAGE = No Qt
     SOURCES += src/main.cpp
 }
 qtconsole {
     QT -= gui
-    QT += xml
+    QT += xml network
     UI_MESSAGE = console mode
     SOURCES += src/main-Qt/main.cpp
-}
-!console:!qtconsole {
-    CONFIG += gui
-    UI_MESSAGE = GUI mode
 }
 consoleio {
     DEFINES += USE_CONSOLEIO
@@ -43,7 +36,8 @@ consoleio {
     LIBS += -lpthread
     message("with terminal user interface")
 }
-gui {
+contains(QT,gui) {
+    UI_MESSAGE = GUI mode
     RESOURCES = src/GUI-QT/res/icons.qrc
     QT += network xml widgets
     INCLUDEPATH += src/GUI-QT
@@ -93,7 +87,7 @@ macx {
 linux-* {
   CONFIG += fdk-aac
   LIBS += -ldl -lrt
-  qt:multimedia {
+  contains(QT,multimedia) {
 	CONFIG += sound
   }
 }
@@ -194,10 +188,11 @@ win32 {
   DEFINES += HAVE_SETUPAPI HAVE_LIBZ _CRT_SECURE_NO_WARNINGS HAVE_LIBZ HAVE_LIBPCAP
   SOURCES += src/windows/Pacer.cpp src/windows/platform_util.cpp
   HEADERS += src/windows/platform_util.h
-  qt:multimedia {
+  LIBS += -lsetupapi
+  contains(QT,multimedia) {
 	CONFIG += sound
   }
-  !qt:multimedia {
+  else {
     HEADERS += src/windows/Sound.h
     SOURCES += src/windows/Sound.cpp
     LIBS += -lwinmm
