@@ -135,8 +135,8 @@ public:
 	CSoundOutPulse();
     virtual ~CSoundOutPulse();
 	void			Enumerate(vector<string>& names, vector<string>& descriptions) {CSoundPulse::Enumerate(names, descriptions);};
-	string			GetDev() {return CSoundPulse::GetDev();};
-	void			SetDev(string sNewDevice) {CSoundPulse::SetDev(sNewDevice);};
+    string			GetDev() {return CSoundPulse::GetDev();}
+    void			SetDev(string sNewDevice) {CSoundPulse::SetDev(sNewDevice);}
 
 	_BOOLEAN		Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking);
 	_BOOLEAN		Write(CVector<_SAMPLE>& psData);
