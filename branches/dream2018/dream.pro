@@ -287,11 +287,11 @@ hamlib {
      }
      HEADERS += src/util/Hamlib.h
      SOURCES += src/util/Hamlib.cpp
-     qt {
+     contains(QT,core) {
        HEADERS += src/util-QT/Rig.h
        SOURCES += src/util-QT/Rig.cpp
      }
-     gui {
+     contains(QT,gui) {
          HEADERS += src/GUI-QT/RigDlg.h
          SOURCES += src/GUI-QT/RigDlg.cpp
          FORMS += RigDlg.ui
