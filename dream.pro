@@ -63,7 +63,7 @@ unix:!cross_compile {
     message(building on $$UNAME)
 }
 macx {
-    QT += multimedia
+    !console:QT += multimedia
     CONFIG += sound
     QT_CONFIG -= no-pkg-config
     PKG_CONFIG = /usr/local/bin/pkg-config
