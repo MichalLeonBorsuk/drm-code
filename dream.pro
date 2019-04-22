@@ -187,8 +187,8 @@ win32 {
         message(win32-g++)
     }
     else {
-        LIB += zlib.lib
-	LIBS += -lfftw3-3
+        LIBS += -lzlib
+		LIBS += -lfftw3-3
         LIBS += -lsndfile-1
         message(win32-msvc)
     }
