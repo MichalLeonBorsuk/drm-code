@@ -147,7 +147,6 @@ macx {
     }
 }
 linux-* {
-  CONFIG += fdk-aac
   LIBS += -ldl -lrt
   contains(QT,multimedia) {
 	CONFIG += sound
