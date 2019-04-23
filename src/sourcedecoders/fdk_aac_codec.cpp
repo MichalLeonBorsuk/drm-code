@@ -84,7 +84,6 @@ FdkAacCodec::CanDecode(CAudioParam::EAudCod eAudioCoding)
             cerr << "aac but  codec has no parametric stereo" << endl;
             return false;
         }
-        cerr << "can decode" << endl;
         return true;
     }
 #ifdef HAVE_USAC
