@@ -250,8 +250,6 @@ CAudioSourceDecoder::InitInternal(CParameter & Parameters)
     DoNotProcessData = FALSE;
     iOutputBlockSize = 0;
 
-    cerr << "init" << endl;
-
     /* Set audiodecoder to empty string - means "unknown" and "can't decode" to GUI */
     audiodecoder = "";
 
@@ -397,18 +395,15 @@ CAudioSourceDecoder::InitInternal(CParameter & Parameters)
         {
         case ET_ALL:
             /* An init error occurred, do not process data in this module */
-	    cerr << "stream not used" << endl;
             DoNotProcessData = TRUE;
             break;
 
         case ET_AUDDECODER:
             /* Audio part should not be decoded, set flag */
-	    cerr << "audio error" << endl;
             DoNotProcessAudDecoder = TRUE;
             break;
 
         default:
-	    cerr << "audio ok but something else wrong" << endl;
             DoNotProcessData = TRUE;
         }
 

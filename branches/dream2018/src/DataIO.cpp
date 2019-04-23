@@ -193,7 +193,6 @@ void CWriteData::Enumerate(std::vector<std::string>& names, std::vector<std::str
 void
 CWriteData::SetSoundInterface(string device)
 {
-    cerr << "CWriteData::SetSoundInterface " << device << endl;
     soundDevice = device;
 #ifdef QT_MULTIMEDIA_LIB
     QAudioFormat format;
