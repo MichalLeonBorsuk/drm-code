@@ -371,17 +371,15 @@ void CWriteData::InitInternal(CParameter& Parameters)
         iMaxAudioFrequency = iAudSampleRate/2;
 
     /* Length of vector for audio spectrum. We use a power-of-two length to
-       make the FFT work more efficient, need to be scaled from sample rate to
+       make the FFT work more efficiently, need to be scaled from sample rate to
        keep the same frequency resolution */
     iNumSmpls4AudioSprectrum = ADJ_FOR_SRATE(1024, iAudSampleRate);
 
     /* Number of blocks for averaging the audio spectrum */
-    iNumBlocksAvAudioSpec = Ceil(((_REAL) iAudSampleRate *
-                                  TIME_AV_AUDIO_SPECT_MS / 1000 / iNumSmpls4AudioSprectrum));
+    iNumBlocksAvAudioSpec = int(ceil(_REAL(iAudSampleRate * TIME_AV_AUDIO_SPECT_MS) / 1000.0 / _REAL(iNumSmpls4AudioSprectrum)));
 
     /* Inits for audio spectrum plotting */
-    vecsOutputData.Init((int) iNumBlocksAvAudioSpec * iNumSmpls4AudioSprectrum *
-                        2 /* stereo */, 0); /* Init with zeros */
+    vecsOutputData.Init((int) iNumBlocksAvAudioSpec * iNumSmpls4AudioSprectrum * 2 /* stereo */, 0); /* Init with zeros */
     FftPlan.Init(iNumSmpls4AudioSprectrum);
     veccFFTInput.Init(iNumSmpls4AudioSprectrum);
     veccFFTOutput.Init(iNumSmpls4AudioSprectrum);

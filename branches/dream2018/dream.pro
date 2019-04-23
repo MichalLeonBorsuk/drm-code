@@ -199,16 +199,16 @@ win32 {
     message("with mmsystem")
 	CONFIG += sound
   }
-  msvc* {
-        DEFINES += NOMINMAX
-        QMAKE_LFLAGS_RELEASE += /NODEFAULTLIB:libcmt.lib
-        QMAKE_LFLAGS_DEBUG += /NODEFAULTLIB:libcmtd.lib
-        QMAKE_LFLAGS_DEBUG += /NODEFAULTLIB:libcmt.lib
-        LIBS += -lzlib -llibfftw3-3
+  win32-g++ {
+	DEFINES += HAVE_STDINT_H
+	LIBS += -lz -lfftw3
   }
   else {
-         DEFINES += HAVE_STDINT_H
-         LIBS += -lz -lfftw3
+	DEFINES += NOMINMAX
+	QMAKE_LFLAGS_RELEASE += /NODEFAULTLIB:libcmt.lib
+	QMAKE_LFLAGS_DEBUG += /NODEFAULTLIB:libcmtd.lib
+	QMAKE_LFLAGS_DEBUG += /NODEFAULTLIB:libcmt.lib
+	LIBS += -lzlib -llibfftw3-3
   }
   mxe {
     message('MXE')

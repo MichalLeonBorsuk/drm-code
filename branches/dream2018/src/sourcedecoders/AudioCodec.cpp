@@ -106,7 +106,7 @@ CAudioCodec::GetEncoder(CAudioParam::EAudCod eAudioCoding, bool bCanReturnNullPt
 }
 
 void
-CAudioCodec::Init(const CAudioParam& AudioParam, int iInputBlockSize)
+CAudioCodec::Init(const CAudioParam&, int)
 {
 }
 
