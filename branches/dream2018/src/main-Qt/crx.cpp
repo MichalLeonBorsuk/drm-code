@@ -76,7 +76,7 @@ CRx::run()
     {
         qDebug("%s", strError.c_str());
     }
-    qDebug("Working thread complete");
+    qDebug("Receiver working thread complete");
 }
 
 void CRx::LoadSettings()
@@ -147,8 +147,6 @@ void CRx::Restart()
 void CRx::Stop()
 {
     eRunState = STOP_REQUESTED;
-cerr << "finished" << endl;
-    emit finished();
 }
 
 CSettings* CRx::GetSettings()

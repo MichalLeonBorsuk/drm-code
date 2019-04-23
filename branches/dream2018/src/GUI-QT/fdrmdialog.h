@@ -85,6 +85,7 @@ public:
 
 protected:
     CRx&                rx;
+    bool                done;
     QTimer				Timer;
     vector<QLabel*>		serviceLabels;
 
