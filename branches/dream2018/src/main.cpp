@@ -3,12 +3,10 @@
  * Copyright (c) 2004
  *
  * Author(s):
- *	Volker Fischer, Stephane Fillod
+ *	Volker Fischer, Stephane Fillod, Julian Cable
  *
- * Description:
+ * Description: main programme for console mode
  *
- * 11/10/2004 Stephane Fillod
- *	- QT translation
  *
  ******************************************************************************
  *
@@ -30,11 +28,11 @@
 
 #ifdef _WIN32
 # include <windows.h>
-# include "windows/ConsoleIO.h"
-#else
-# ifndef __APPLE__
+#endif
+#if defined(__unix__) && !defined(__APPLE__)
 # include <csignal>
-# endif
+#endif
+#ifdef USE_CONSOLEIO
 # include "linux/ConsoleIO.h"
 #endif
 #include "GlobalDefinitions.h"
@@ -71,7 +69,10 @@ main(int argc, char **argv)
                 int iFreqkHz = DRMReceiver.GetParameters()->GetFrequency();
                 if (iFreqkHz != -1)
                     DRMReceiver.SetFrequency(iFreqkHz);
+
+#ifdef USE_CONSOLEIO
                 CConsoleIO::Enter(&DRMReceiver);
+#endif
                 ERunState eRunState = RESTART;
                 do
                 {
@@ -82,13 +83,17 @@ main(int argc, char **argv)
                     {
                         DRMReceiver.updatePosition();
                         DRMReceiver.process();
+#ifdef USE_CONSOLEIO
                         eRunState = CConsoleIO::Update();
+#endif
                     }
                     while (eRunState == RUNNING);
                 }
                 while (eRunState == RESTART);
                 DRMReceiver.CloseSoundInterfaces();
+#ifdef USE_CONSOLEIO
                 CConsoleIO::Leave();
+#endif
             }
             catch (CGenErr GenErr)
             {
