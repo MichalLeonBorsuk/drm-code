@@ -48,20 +48,20 @@ public:
 	virtual void DecodeTag(CVector<_BINARY>& vecbiTag, const int iLenDataBits) = 0;
 
 	// This function must return the name of the tag item that this decoder decodes.
-	virtual string GetTagName(void) = 0;
+	virtual std::string GetTagName(void) = 0;
 	virtual ~CTagItemDecoder() {}
 
-	CTagItemDecoder() : bIsReady(FALSE) {};
+	CTagItemDecoder() : bIsReady(false) {};
 	// initialise any internal state variables. TODO: Make this pure to force implementer to think?
-	virtual void Init(void) {bIsReady = FALSE;}
+	virtual void Init(void) {bIsReady = false;}
 
-	virtual _BOOLEAN IsReady(void) {return bIsReady;}
+	virtual bool IsReady(void) {return bIsReady;}
 
 protected:
-	void SetReady(_BOOLEAN bReady) {bIsReady = bReady;}
+	void SetReady(bool bReady) {bIsReady = bReady;}
 
 private:
-	_BOOLEAN bIsReady;
+	bool bIsReady;
 
 };
 
@@ -69,14 +69,14 @@ private:
 class CTagItemDecoderRSI : public CTagItemDecoder
 {
 public:
-    CTagItemDecoderRSI(CParameter* pP, const string& s) : pParameter(pP), tag(s) {}
+    CTagItemDecoderRSI(CParameter* pP, const std::string& s) : pParameter(pP), tag(s) {}
     void SetParameterPtr(CParameter *pP) {pParameter = pP;}
-    virtual string GetTagName() { return tag; }
+    virtual std::string GetTagName() { return tag; }
 protected:
 
     _REAL decodeDb(CVector<_BINARY>& vecbiTag);
     CParameter *pParameter;
-    string tag;
+    std::string tag;
 };
 
 #endif

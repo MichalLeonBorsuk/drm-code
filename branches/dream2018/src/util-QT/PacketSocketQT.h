@@ -60,12 +60,12 @@ public:
 	virtual void ResetPacketSink(void);
 
 	// Send packet to the socket
-	void SendPacket(const vector<_BYTE>& vecbydata, uint32_t addr=0, uint16_t port=0);
+	void SendPacket(const std::vector<_BYTE>& vecbydata, uint32_t addr=0, uint16_t port=0);
 
-	virtual _BOOLEAN SetDestination(const string& str);
-	virtual _BOOLEAN SetOrigin(const string& str);
+	virtual bool SetDestination(const std::string& str);
+	virtual bool SetOrigin(const std::string& str);
 
-	virtual _BOOLEAN GetDestination(string& str);
+	virtual bool GetDestination(std::string& str);
 
 	void poll();
 
@@ -73,15 +73,15 @@ private:
 	void pollStream();
 	void pollDatagram();
 
-	QStringList parseDest(const string & strNewAddr);
-	_BOOLEAN doSetSource(QHostAddress, QHostAddress, int, QHostAddress);
+	QStringList parseDest(const std::string & strNewAddr);
+	bool doSetSource(QHostAddress, QHostAddress, int, QHostAddress);
 	QNetworkInterface GetInterface(QHostAddress AddrInterface);
 	CPacketSink *pPacketSink;
 
 	uint32_t	sourceAddr;
 	QHostAddress	HostAddrOut;
 	int		iHostPortOut;
-	vector<_BYTE>	writeBuf;
+	std::vector<_BYTE>	writeBuf;
 	bool udp;
 
 	QUdpSocket* udpSocket;

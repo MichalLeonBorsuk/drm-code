@@ -44,7 +44,7 @@
 /* Classes ********************************************************************/
 struct CNewsItem
 {
-	string	sText;
+	std::string	sText;
 	int		iLink;
 };
 
@@ -53,7 +53,7 @@ class CNews
 public:
 	CNews() : sTitle(""), vecItem(0) {}
 
-	string				sTitle;
+	std::string				sTitle;
 	CVector<CNewsItem>	vecItem;
 };
 
@@ -67,7 +67,7 @@ public:
 	void GetNews(int iObjID, CNews& News);
 	void AddDataUnit(CVector<_BINARY>& vecbiNewData);
 	void Reset() {ResetOpenJournalineDecoder();}
-	void AddFile(const string filename);
+	void AddFile(const std::string filename);
 
 protected:
 	DAB_DATAGROUP_DECODER_t	dgdec;

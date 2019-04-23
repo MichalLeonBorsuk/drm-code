@@ -139,17 +139,17 @@ public:
     virtual void			LoadSettings() override; // can write to settings to set defaults
     virtual void			SaveSettings() override;
 
-    string GetInputDevice()
+    std::string GetInputDevice()
     {
         return ReceiveData.GetSoundInterface();
     }
 
-    string GetOutputDevice()
+    std::string GetOutputDevice()
     {
         return WriteData.GetSoundInterface();
     }
-    virtual void            EnumerateInputs(std::vector<std::string>& names, std::vector<std::string>& descriptions) override;
-    virtual void            EnumerateOutputs(std::vector<std::string>& names, std::vector<std::string>& descriptions) override;
+    virtual void            EnumerateInputs(std::vector<string>& names, std::vector<string>& descriptions) override;
+    virtual void            EnumerateOutputs(std::vector<string>& names, std::vector<string>& descriptions) override;
     virtual void            SetInputDevice(std::string) override;
     virtual void			SetOutputDevice(std::string) override;
 
@@ -165,8 +165,8 @@ public:
         return &Parameters;
     }
 
-    virtual _BOOLEAN IsReceiver() const override { return true; }
-    virtual _BOOLEAN IsTransmitter() const override  { return false; }
+    virtual bool IsReceiver() const override { return true; }
+    virtual bool IsTransmitter() const override  { return false; }
 
     EAcqStat				GetAcquiState() {
         return Parameters.GetAcquiState();
@@ -196,8 +196,8 @@ public:
     int		 				GetFrequency() {
         return Parameters.GetFrequency();
     }
-    void					SetIQRecording(_BOOLEAN);
-    void					SetRSIRecording(_BOOLEAN, const char);
+    void					SetIQRecording(bool);
+    void					SetRSIRecording(bool, const char);
 
     /* Channel Estimation */
     void SetFreqInt(ETypeIntFreq eNewTy)
@@ -220,12 +220,12 @@ public:
         return ChannelEstimation.GetTimeInterpolationAlgorithm();
     }
 
-    void SetIntCons(const _BOOLEAN bNewIntCons)
+    void SetIntCons(const bool bNewIntCons)
     {
         ChannelEstimation.SetIntCons(bNewIntCons);
     }
 
-    _BOOLEAN GetIntCons()
+    bool GetIntCons()
     {
         return ChannelEstimation.GetIntCons();
     }
@@ -334,15 +334,15 @@ protected:
     void					SetInTrackingMode();
     void					SetInTrackingModeDelayed();
     void					InitsForAllModules();
-    void					DemodulateDRM(_BOOLEAN&);
-    void					DecodeDRM(_BOOLEAN&, _BOOLEAN&);
-    void					UtilizeDRM(_BOOLEAN&);
-    void					DemodulateAM(_BOOLEAN&);
-    void					DecodeAM(_BOOLEAN&);
-    void					UtilizeAM(_BOOLEAN&);
-    void					DemodulateFM(_BOOLEAN&);
-    void					DecodeFM(_BOOLEAN&);
-    void					UtilizeFM(_BOOLEAN&);
+    void					DemodulateDRM(bool&);
+    void					DecodeDRM(bool&, bool&);
+    void					UtilizeDRM(bool&);
+    void					DemodulateAM(bool&);
+    void					DecodeAM(bool&);
+    void					UtilizeAM(bool&);
+    void					DemodulateFM(bool&);
+    void					DecodeFM(bool&);
+    void					UtilizeFM(bool&);
     void					DetectAcquiFAC();
     void					DetectAcquiSymbol();
     void					saveSDCtoFile();
@@ -413,9 +413,9 @@ protected:
     CSingleBuffer<_BINARY>			SDCSendBuf;
     CSingleBuffer<_BINARY>			MSCMLCDecBuf;
     CSingleBuffer<_BINARY>			RSIPacketBuf;
-    vector<CSingleBuffer<_BINARY> >	MSCDecBuf;
-    vector<CSingleBuffer<_BINARY> >	MSCUseBuf;
-    vector<CSingleBuffer<_BINARY> >	MSCSendBuf;
+    std::vector<CSingleBuffer<_BINARY> >	MSCDecBuf;
+    std::vector<CSingleBuffer<_BINARY> >	MSCUseBuf;
+    std::vector<CSingleBuffer<_BINARY> >	MSCSendBuf;
     CSingleBuffer<_BINARY>			EncAMAudioBuf;
     CCyclicBuffer<_SAMPLE>			AudSoDecBuf;
     CCyclicBuffer<_SAMPLE>			AMAudioBuf;
@@ -452,7 +452,7 @@ protected:
 #endif
 
     CPlotManager			PlotManager;
-    string					rsiOrigin;
+    std::string					rsiOrigin;
     int						iPrevSigSampleRate; /* sample rate before sound file */
     CParameter&             Parameters;
     CSettings*              pSettings;

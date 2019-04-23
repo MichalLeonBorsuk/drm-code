@@ -177,16 +177,16 @@ void CAMSSPhaseDemod::SetBPFilter(const CReal rNewBPNormBW,
     cvecBImag = rfft(rvecBImag, FftPlansHilFilt);
 }
 
-_BOOLEAN CAMSSPhaseDemod::GetPLLPhase(CReal& rPhaseOut)
+bool CAMSSPhaseDemod::GetPLLPhase(CReal& rPhaseOut)
 {
-    _BOOLEAN bReturn;
+    bool bReturn;
 
     /* Lock resources */
     Lock();
     {
         /* Phase is only valid if PLL is enabled. Return status */
         rPhaseOut = AMSSPLL.GetCurPhase();
-        bReturn = TRUE;
+        bReturn = true;
     }
     Unlock();
 
@@ -244,9 +244,9 @@ void CAMSSExtractBits::ProcessDataInternal(CParameter& Parameters)
         if (iBitSyncSampleCount == iBitSyncSliceOffset)
         {
             if (rvecInpTmp[i] < 0)
-                (*pvecOutputData)[iBitCount] = TRUE;
+                (*pvecOutputData)[iBitCount] = true;
             else
-                (*pvecOutputData)[iBitCount] = FALSE;
+                (*pvecOutputData)[iBitCount] = false;
 
             iBitCount++;
         }
@@ -354,7 +354,7 @@ void CAMSSDecode::InitInternal(CParameter& Parameters)
 
     blDataEntityGroupSegmentsReceived.Init(MAX_DATA_ENTITY_GROUP_SEGMENTS, 0);
 
-    bVersionFlag = FALSE;
+    bVersionFlag = false;
 
     Parameters.Lock();
     ResetStatus(Parameters);
@@ -401,7 +401,7 @@ void CAMSSDecode::ProcessDataInternal(CParameter& Parameters)
 
 void CAMSSDecode::DecodeBlock1(CVector<_BINARY>& bBits, CParameter& Parameters)
 {
-    _BOOLEAN	bLocalVersionFlag;
+    bool	bLocalVersionFlag;
     int			i;
 
     uint32_t	iServiceID;
@@ -412,9 +412,9 @@ void CAMSSDecode::DecodeBlock1(CVector<_BINARY>& bBits, CParameter& Parameters)
 
     /* Version flag */
     if (bBits.Separate(1) == 0)
-        bLocalVersionFlag = FALSE;
+        bLocalVersionFlag = false;
     else
-        bLocalVersionFlag = TRUE;
+        bLocalVersionFlag = true;
 
     iAMSSCarrierMode = bBits.Separate(3);
     iTotalDataEntityGroupSegments = bBits.Separate(4) + 1;
@@ -460,9 +460,9 @@ void CAMSSDecode::DecodeBlock1(CVector<_BINARY>& bBits, CParameter& Parameters)
     }
 
     if (blFirstEverBlock1)
-        blFirstEverBlock1 = FALSE;
+        blFirstEverBlock1 = false;
 
-    blBlock1DataValid = TRUE;
+    blBlock1DataValid = true;
 }
 
 void CAMSSDecode::DecodeBlock2(CVector<_BINARY>& bBits)
@@ -511,8 +511,8 @@ int CAMSSDecode::DecodeBlock(CVector<_BINARY>& bBits, CParameter& Parameters)
     ApplyOffsetWord(bBitsBlock1, bOffsetBlock1);
     ApplyOffsetWord(bBitsBlock2, bOffsetBlock2);
 
-    _BOOLEAN bBlock1Test = CheckCRC(bBitsBlock1);
-    _BOOLEAN bBlock2Test = CheckCRC(bBitsBlock2);
+    bool bBlock1Test = CheckCRC(bBitsBlock1);
+    bool bBlock2Test = CheckCRC(bBitsBlock2);
 
     if (bBlock1Test)
         iCurrentBlock =  1;
@@ -529,7 +529,7 @@ int CAMSSDecode::DecodeBlock(CVector<_BINARY>& bBits, CParameter& Parameters)
     switch (eAMSSBlockLockStatus)
     {
     case NO_SYNC:
-        blBlock1DataValid = FALSE;
+        blBlock1DataValid = false;
 
         if (bBlock1Test)
         {
@@ -672,10 +672,10 @@ int CAMSSDecode::DecodeBlock(CVector<_BINARY>& bBits, CParameter& Parameters)
                     DecodeBlock1(bBits, Parameters);
 
                     //last block 2 was from this new data entity group so decode that.
-                    if (blStoredBlock2Valid == TRUE)
+                    if (blStoredBlock2Valid)
                     {
                         DecodeBlock2(bBlock2Store);
-                        blStoredBlock2Valid = FALSE;
+                        blStoredBlock2Valid = false;
                     }
                 }
                 else
@@ -698,7 +698,7 @@ int CAMSSDecode::DecodeBlock(CVector<_BINARY>& bBits, CParameter& Parameters)
                 DecodeBlock2(bBits);
 
                 //also store the block 2 - may belong to next data entity group
-                blStoredBlock2Valid = TRUE;
+                blStoredBlock2Valid = true;
                 bBlock2Store = bBits;
 
                 iBitsSinceLastBlock2Pass = 0;
@@ -801,7 +801,7 @@ int CAMSSDecode::DecodeBlock(CVector<_BINARY>& bBits, CParameter& Parameters)
         return 0;
 }
 
-_BOOLEAN CAMSSDecode::CheckCRC(CVector<_BINARY>& bBits)
+bool CAMSSDecode::CheckCRC(CVector<_BINARY>& bBits)
 {
     int i=0;
     int j=0;
@@ -820,9 +820,9 @@ _BOOLEAN CAMSSDecode::CheckCRC(CVector<_BINARY>& bBits)
     }
 
     if (iCRCTrueBits == 0)
-        return TRUE;
+        return true;
     else
-        return FALSE;
+        return false;
 }
 
 
@@ -890,8 +890,8 @@ void CAMSSDecode::ResetStatus(CParameter& Parameters)
 {
     int i;
 
-    blStoredBlock2Valid = FALSE;
-    blFirstEverBlock1 = TRUE;
+    blStoredBlock2Valid = false;
+    blFirstEverBlock1 = true;
 
     iTotalDataEntityGroupSegments = 0;
 
@@ -900,7 +900,7 @@ void CAMSSDecode::ResetStatus(CParameter& Parameters)
     iBlock1FailCount = 0;
     iBlock2FailCount = 0;
 
-    blBlock1DataValid = FALSE;
+    blBlock1DataValid = false;
 
     iCurrentBlock = 0;
 
@@ -916,7 +916,7 @@ void CAMSSDecode::ResetStatus(CParameter& Parameters)
 
     iPercentageDataEntityGroupComplete = 0;
 
-    bDataEntityGroup.Reset(FALSE);
+    bDataEntityGroup.Reset(false);
     blDataEntityGroupSegmentsReceived.Reset(0);
 
     Parameters.ResetServicesStreams();

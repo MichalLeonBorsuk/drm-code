@@ -222,7 +222,7 @@ void JLViewer::OnSetFont()
     /* Open the font dialog */
     QFont newFont = QFontDialog::getFont(&bok, textBrowser->currentFont(), this);
 
-    if (bok == true)
+    if (bok)
     {
         /* Store the current text and then reset it */
         QString strOldText = textBrowser->toHtml();

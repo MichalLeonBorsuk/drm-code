@@ -51,7 +51,7 @@
 
 /* Implementation *************************************************************/
 CDownstreamDI::CDownstreamDI() : iLogFraCnt(0), pDrmReceiver(nullptr),
-	bMDIOutEnabled(FALSE), bMDIInEnabled(FALSE),bIsRecording(FALSE),
+	bMDIOutEnabled(false), bMDIInEnabled(false),bIsRecording(false),
 	iFrequency(0), strRecordType(),
 	vecTagItemGeneratorStr(MAX_NUM_STREAMS), vecTagItemGeneratorRBP(MAX_NUM_STREAMS),
 	RSISubscribers(),pRSISubscriberFile(new CRSISubscriberFile)
@@ -112,26 +112,26 @@ void CDownstreamDI::SendLockedFrame(CParameter& Parameter,
 
 	/* RSCI tags ------------------------------------------------------------ */
 	TagItemGeneratorRAFS.GenTag(Parameter);
-	TagItemGeneratorRWMF.GenTag(TRUE, Parameter.rWMERFAC); /* WMER for FAC */
-	TagItemGeneratorRWMM.GenTag(TRUE, Parameter.rWMERMSC); /* WMER for MSC */
-	TagItemGeneratorRMER.GenTag(TRUE, Parameter.rMER); /* MER for MSC */
-	TagItemGeneratorRDEL.GenTag(TRUE, Parameter.vecrRdelThresholds, Parameter.vecrRdelIntervals);
-	TagItemGeneratorRDOP.GenTag(TRUE, Parameter.rRdop);
-	TagItemGeneratorRINT.GenTag(TRUE,Parameter.rIntFreq, Parameter.rINR, Parameter.rICR);
-	TagItemGeneratorRNIP.GenTag(TRUE,Parameter.rMaxPSDFreq, Parameter.rMaxPSDwrtSig);
-	TagItemGeneratorRxService.GenTag(TRUE, Parameter.GetCurSelAudioService());
+	TagItemGeneratorRWMF.GenTag(true, Parameter.rWMERFAC); /* WMER for FAC */
+	TagItemGeneratorRWMM.GenTag(true, Parameter.rWMERMSC); /* WMER for MSC */
+	TagItemGeneratorRMER.GenTag(true, Parameter.rMER); /* MER for MSC */
+	TagItemGeneratorRDEL.GenTag(true, Parameter.vecrRdelThresholds, Parameter.vecrRdelIntervals);
+	TagItemGeneratorRDOP.GenTag(true, Parameter.rRdop);
+	TagItemGeneratorRINT.GenTag(true,Parameter.rIntFreq, Parameter.rINR, Parameter.rICR);
+	TagItemGeneratorRNIP.GenTag(true,Parameter.rMaxPSDFreq, Parameter.rMaxPSDwrtSig);
+	TagItemGeneratorRxService.GenTag(true, Parameter.GetCurSelAudioService());
 	TagItemGeneratorReceiverStatus.GenTag(Parameter);
-	TagItemGeneratorRxFrequency.GenTag(TRUE, Parameter.GetFrequency()); /* rfre */
-	TagItemGeneratorRxActivated.GenTag(TRUE); /* ract */
+	TagItemGeneratorRxFrequency.GenTag(true, Parameter.GetFrequency()); /* rfre */
+	TagItemGeneratorRxActivated.GenTag(true); /* ract */
 	TagItemGeneratorPowerSpectralDensity.GenTag(Parameter);
 	TagItemGeneratorPowerImpulseResponse.GenTag(Parameter);
 	TagItemGeneratorPilots.GenTag(Parameter);
 
 	/* Generate some other tags */
 	_REAL rSigStr = Parameter.SigStrstat.getCurrent();
-	TagItemGeneratorSignalStrength.GenTag(TRUE, rSigStr + S9_DBUV);
+	TagItemGeneratorSignalStrength.GenTag(true, rSigStr + S9_DBUV);
 
-	TagItemGeneratorGPS.GenTag(TRUE, Parameter.gps_data);	// rgps
+	TagItemGeneratorGPS.GenTag(true, Parameter.gps_data);	// rgps
 
 	GenDIPacket();
 }
@@ -167,16 +167,16 @@ void CDownstreamDI::SendUnlockedFrame(CParameter& Parameter)
 
 	TagItemGeneratorPilots.GenEmptyTag();
 
-	TagItemGeneratorRNIP.GenTag(TRUE,Parameter.rMaxPSDFreq, Parameter.rMaxPSDwrtSig);
+	TagItemGeneratorRNIP.GenTag(true,Parameter.rMaxPSDFreq, Parameter.rMaxPSDwrtSig);
 
 	/* Generate some other tags */
 	TagItemGeneratorRINF.GenTag(Parameter.sReceiverID);	/* rinf */
-	TagItemGeneratorRxFrequency.GenTag(TRUE, Parameter.GetFrequency()); /* rfre */
-	TagItemGeneratorRxActivated.GenTag(TRUE); /* ract */
+	TagItemGeneratorRxFrequency.GenTag(true, Parameter.GetFrequency()); /* rfre */
+	TagItemGeneratorRxActivated.GenTag(true); /* ract */
 	_REAL rSigStr = Parameter.SigStrstat.getCurrent();
-	TagItemGeneratorSignalStrength.GenTag(TRUE, rSigStr + S9_DBUV);
+	TagItemGeneratorSignalStrength.GenTag(true, rSigStr + S9_DBUV);
 
-	TagItemGeneratorGPS.GenTag(TRUE, Parameter.gps_data);	/* rgps */
+	TagItemGeneratorGPS.GenTag(true, Parameter.gps_data);	/* rgps */
 
 	GenDIPacket();
 }
@@ -212,19 +212,19 @@ void CDownstreamDI::SendAMFrame(CParameter& Parameter, CSingleBuffer<_BINARY>& C
 
 	TagItemGeneratorPilots.GenEmptyTag();
 
-	TagItemGeneratorRNIP.GenTag(TRUE, Parameter.rMaxPSDFreq, Parameter.rMaxPSDwrtSig);
+	TagItemGeneratorRNIP.GenTag(true, Parameter.rMaxPSDFreq, Parameter.rMaxPSDwrtSig);
 
 	// Generate a rama tag with the encoded audio data
 	TagItemGeneratorAMAudio.GenTag(Parameter, CodedAudioData);
 
 	/* Generate some other tags */
 	TagItemGeneratorRINF.GenTag(Parameter.sReceiverID);	/* rinf */
-	TagItemGeneratorRxFrequency.GenTag(TRUE, Parameter.GetFrequency()); /* rfre */
-	TagItemGeneratorRxActivated.GenTag(TRUE); /* ract */
+	TagItemGeneratorRxFrequency.GenTag(true, Parameter.GetFrequency()); /* rfre */
+	TagItemGeneratorRxActivated.GenTag(true); /* ract */
 	_REAL rSigStr = Parameter.SigStrstat.getCurrent();
-	TagItemGeneratorSignalStrength.GenTag(TRUE, rSigStr + S9_DBUV);
+	TagItemGeneratorSignalStrength.GenTag(true, rSigStr + S9_DBUV);
 
-	TagItemGeneratorGPS.GenTag(TRUE, Parameter.gps_data);	/* rgps */
+	TagItemGeneratorGPS.GenTag(true, Parameter.gps_data);	/* rgps */
 
 	GenDIPacket();
 }
@@ -375,7 +375,7 @@ void CDownstreamDI::GetNextPacket(CSingleBuffer<_BINARY>&)
 	// TODO
 }
 
-_BOOLEAN
+bool
 CDownstreamDI::AddSubscriber(const string& dest, const char profile, const string& origin)
 {
 	CRSISubscriber* subs = nullptr;
@@ -393,17 +393,17 @@ CDownstreamDI::AddSubscriber(const string& dest, const char profile, const strin
 	if(subs == nullptr)
 	{
 		cerr << "can't make RSI Subscriber" << endl;
-		return FALSE;
+		return false;
 	}
 
 	// Delegate
-	_BOOLEAN bOK = TRUE;
+	bool bOK = true;
 	if (dest != "")
 	{
 		bOK &= subs->SetDestination(dest);
 		if (bOK)
 		{
-			bMDIOutEnabled = TRUE;
+			bMDIOutEnabled = true;
 			subs->SetProfile(profile);
 		}
 	}
@@ -412,40 +412,40 @@ CDownstreamDI::AddSubscriber(const string& dest, const char profile, const strin
 		bOK &= subs->SetOrigin(origin);
 		if (bOK)
 		{
-			bMDIInEnabled = TRUE;
+			bMDIInEnabled = true;
 		}
 	}
 	if (bOK)
 	{
 		subs->SetReceiver(pDrmReceiver);
 		RSISubscribers.push_back(subs);
-		return TRUE;
+		return true;
 	}
 	else
 	{
-		bMDIInEnabled = FALSE;
-		bMDIOutEnabled = FALSE;
+		bMDIInEnabled = false;
+		bMDIOutEnabled = false;
 		delete subs;
 	}
-	return FALSE;
+	return false;
 }
 
-_BOOLEAN CDownstreamDI::SetOrigin(const string&)
+bool CDownstreamDI::SetOrigin(const string&)
 {
-	return FALSE;
+	return false;
 }
 
-_BOOLEAN CDownstreamDI::SetDestination(const string&)
+bool CDownstreamDI::SetDestination(const string&)
 {
-	return FALSE;
+	return false;
 }
 
-_BOOLEAN CDownstreamDI::GetDestination(string&)
+bool CDownstreamDI::GetDestination(string&)
 {
-	return FALSE; // makes no sense
+	return false; // makes no sense
 }
 
-void CDownstreamDI::SetAFPktCRC(const _BOOLEAN bNAFPktCRC)
+void CDownstreamDI::SetAFPktCRC(const bool bNAFPktCRC)
 {
 	for(vector<CRSISubscriber*>::iterator i = RSISubscribers.begin();
 			i!=RSISubscribers.end(); i++)
@@ -472,7 +472,7 @@ string CDownstreamDI::GetRSIfilename(CParameter& Parameter, const char cProfile)
 	return filename.str();
 }
 
-void CDownstreamDI::SetRSIRecording(CParameter& Parameter, const _BOOLEAN bOn, char cPro, const string& type)
+void CDownstreamDI::SetRSIRecording(CParameter& Parameter, const bool bOn, char cPro, const string& type)
 {
 	strRecordType = type;
 	if (bOn)
@@ -484,13 +484,13 @@ void CDownstreamDI::SetRSIRecording(CParameter& Parameter, const _BOOLEAN bOn, c
 
 		pRSISubscriberFile->SetDestination(fn);
 		pRSISubscriberFile->StartRecording();
-		bMDIOutEnabled = TRUE;
-		bIsRecording = TRUE;
+		bMDIOutEnabled = true;
+		bIsRecording = true;
 	}
 	else
 	{
 		pRSISubscriberFile->StopRecording();
-		bIsRecording = FALSE;
+		bIsRecording = false;
 	}
 }
 
@@ -549,7 +549,7 @@ CUpstreamDI::~CUpstreamDI()
 	}
 }
 
-_BOOLEAN CUpstreamDI::SetOrigin(const string& str)
+bool CUpstreamDI::SetOrigin(const string& str)
 {
 	if (source != nullptr) {
 		delete source;
@@ -560,7 +560,7 @@ _BOOLEAN CUpstreamDI::SetOrigin(const string& str)
 
 	// try a file
 	source = new CPacketSourceFile;
-	_BOOLEAN bOK = source->SetOrigin(str);
+	bool bOK = source->SetOrigin(str);
 
 	if(!bOK)
 	{
@@ -572,12 +572,12 @@ _BOOLEAN CUpstreamDI::SetOrigin(const string& str)
 	if (bOK)
 	{
 		source->SetPacketSink(this);
-		return TRUE;
+		return true;
 	}
-	return FALSE;
+	return false;
 }
 
-_BOOLEAN CUpstreamDI::SetDestination(const string& str)
+bool CUpstreamDI::SetDestination(const string& str)
 {
 
 	bMDIOutEnabled = sink.SetDestination(str);
@@ -585,14 +585,14 @@ _BOOLEAN CUpstreamDI::SetDestination(const string& str)
 	return bMDIOutEnabled;
 }
 
-_BOOLEAN CUpstreamDI::GetDestination(string& str)
+bool CUpstreamDI::GetDestination(string& str)
 {
 	return sink.GetDestination(str);
 }
 
 void CUpstreamDI::SetFrequency(int iNewFreqkHz)
 {
-	if(bMDIOutEnabled==FALSE)
+	if(bMDIOutEnabled==false)
 		return;
 	TagPacketGenerator.Reset();
 	TagItemGeneratorCfre.GenTag(iNewFreqkHz);
@@ -603,7 +603,7 @@ void CUpstreamDI::SetFrequency(int iNewFreqkHz)
 
 void CUpstreamDI::SetReceiverMode(ERecMode eNewMode)
 {
-	if(bMDIOutEnabled==FALSE)
+	if(bMDIOutEnabled==false)
 		return;
 	TagPacketGenerator.Reset();
 	TagItemGeneratorCdmo.GenTag(eNewMode);

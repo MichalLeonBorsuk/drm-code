@@ -56,7 +56,7 @@
    hideEvent from spurious event like unmatched show/hide,
    which cause some problem for window save and restore.
    The class may be adapted for other type of filtering
-   as well. The member isValid() return FALSE when the
+   as well. The member isValid() return false when the
    event must be ignored. */
 
 class CEventFilter
@@ -103,7 +103,7 @@ private:
 #endif
 	void loadWindowGeometry();
 	void saveWindowGeometry();
-	string getSection(const bool bCommon=false) const;
+	std::string getSection(const bool bCommon=false) const;
 	QMap <QWidget*, QString> parents;
 	const QString windowName;
 	CEventFilter ef;

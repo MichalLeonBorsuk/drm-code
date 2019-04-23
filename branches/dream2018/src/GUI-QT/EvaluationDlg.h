@@ -68,8 +68,8 @@ protected:
 	void			AddWhatsThisHelp();
 	CDRMPlot*		OpenChartWin(CDRMPlot::ECharType eNewType);
 	QTreeWidgetItem* FindItemByECharType(CDRMPlot::ECharType eCharType);
-	string			ECharTypeToPlotName(CDRMPlot::ECharType eCharType);
-	CDRMPlot::ECharType PlotNameToECharType(const string& PlotName);
+	std::string			ECharTypeToPlotName(CDRMPlot::ECharType eCharType);
+	CDRMPlot::ECharType PlotNameToECharType(const std::string& PlotName);
 
 	QString			GetRobModeStr();
 	QString			GetSpecOccStr();
@@ -77,7 +77,7 @@ protected:
 	QMenu*			pTreeWidgetContextMenu;
 	CDRMPlot::ECharType eCurCharType, eNewCharType;
 	int				iPlotStyle;
-	vector<CDRMPlot*>	vecpDRMPlots;
+	std::vector<CDRMPlot*>	vecpDRMPlots;
 
 public slots:
 	void OnTimer();

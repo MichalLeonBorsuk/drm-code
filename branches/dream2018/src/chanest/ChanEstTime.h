@@ -36,7 +36,7 @@
 
 
 /* Classes ********************************************************************/
-/* Pilot modification class (e.g., rotation of complex vector) */
+/* Pilot modification class (e.g., rotation of complex std::vector) */
 class CPilotModiClass
 {
 public:

@@ -66,7 +66,7 @@ main(int argc, char **argv)
 
 #ifdef USE_OPENSL
     (void)slCreateEngine(&engineObject, 0, nullptr, 0, nullptr, nullptr);
-    (void)(*engineObject)->Realize(engineObject, SL_BOOLEAN_FALSE);
+    (void)(*engineObject)->Realize(engineObject, SLbool_false);
 #endif
 #if defined(__unix__) && !defined(__APPLE__)
 	/* Prevent signal interaction with popen */

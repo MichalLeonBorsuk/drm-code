@@ -49,7 +49,7 @@ public:
 
 protected:
     CCRC CRCObject;
-    vector<int>	FACRepetition; /* See 6.3.6 */
+    std::vector<int>	FACRepetition; /* See 6.3.6 */
     size_t		FACNumRep;
     size_t		FACRepetitionCounter;
 };
@@ -61,7 +61,7 @@ public:
     virtual ~CFACReceive() {}
 
     /* "pbiFACData" contains 72 bits */
-    _BOOLEAN FACParam(CVector<_BINARY>* pbiFACData, CParameter& Parameter);
+    bool FACParam(CVector<_BINARY>* pbiFACData, CParameter& Parameter);
 
 protected:
     CCRC CRCObject;

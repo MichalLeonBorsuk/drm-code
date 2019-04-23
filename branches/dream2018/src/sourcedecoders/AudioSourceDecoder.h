@@ -65,20 +65,20 @@ public:
         return false;
     }
     int GetNumCorDecAudio();
-    void SetReverbEffect(const _BOOLEAN bNER) {
+    void SetReverbEffect(const bool bNER) {
         bUseReverbEffect = bNER;
     }
-    _BOOLEAN GetReverbEffect() {
+    bool GetReverbEffect() {
         return bUseReverbEffect;
     }
 
-    _BOOLEAN bWriteToFile;
+    bool bWriteToFile;
 
 protected:
 
     /* General */
-    _BOOLEAN DoNotProcessData;
-    _BOOLEAN DoNotProcessAudDecoder;
+    bool DoNotProcessData;
+    bool DoNotProcessAudDecoder;
     int iNumCorDecAudio;
 
     /* Text message */
@@ -103,15 +103,15 @@ protected:
     CVector<_REAL> vecTempResBufOutCurRight;
 
     /* Drop-out masking (reverberation) */
-    _BOOLEAN bAudioWasOK;
-    _BOOLEAN bUseReverbEffect;
+    bool bAudioWasOK;
+    bool bUseReverbEffect;
 
     AudioSuperFrame* pAudioSuperFrame;
 
     CAudioParam::EAudCod eAudioCoding;
     CAudioCodec* codec;
     int iBadBlockCount;
-    string audiodecoder;
+    std::string audiodecoder;
     bool bCanDecodeAAC;
     bool bCanDecodeOPUS;
     bool bCanDecodexHE_AAC;

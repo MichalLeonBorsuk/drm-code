@@ -151,7 +151,7 @@ void CSDCTransmit::CommitLeave()
 }
 
 
-_BOOLEAN CSDCTransmit::CanTransmitCurrentTime(CParameter& Parameter)
+bool CSDCTransmit::CanTransmitCurrentTime(CParameter& Parameter)
 {
     if (Parameter.eTransmitCurrentTime != CParameter::CT_OFF)
     {
@@ -198,7 +198,7 @@ _BOOLEAN CSDCTransmit::CanTransmitCurrentTime(CParameter& Parameter)
                         Parameter.iUTCHour = (int)gtm->tm_hour;
                         Parameter.iUTCMin = (int)gtm->tm_min;
                         Parameter.Unlock();
-                        return TRUE;
+                        return true;
                     }
                 }
                 break;
@@ -207,7 +207,7 @@ _BOOLEAN CSDCTransmit::CanTransmitCurrentTime(CParameter& Parameter)
             }
         }
     }
-    return FALSE;
+    return false;
 }
 
 
@@ -441,7 +441,7 @@ void CSDCTransmit::DataEntityType8(CVector<_BINARY>& vecbiData, int ServiceID,
                                       CParameter& Parameter)
 {
     (void)ServiceID;
-    const _BOOLEAN bTransmitOffset =
+    const bool bTransmitOffset =
         Parameter.bValidUTCOffsetAndSense &&
         Parameter.eTransmitCurrentTime == CParameter::CT_UTC_OFFSET;
     const int iNumBitsTotal = 28 + (bTransmitOffset ? 8 : 0);

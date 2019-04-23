@@ -13,8 +13,8 @@ public:
     virtual int GetFrequency()=0;
 
 signals:
-    void InputDeviceChanged(const string&);
-    void OutputDeviceChanged(const string&);
+    void InputDeviceChanged(const std::string&);
+    void OutputDeviceChanged(const std::string&);
     void soundUpscaleRatioChanged(int);
 
 public slots:

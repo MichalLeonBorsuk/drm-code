@@ -49,28 +49,30 @@ typedef int SOCKET;
 # include <pcap.h>
 #endif
 
+using namespace std;
+
 CPacketSinkFile::CPacketSinkFile()
-: pFile(0), bIsRecording(0), bChangeReceived(FALSE)
+: pFile(0), bIsRecording(0), bChangeReceived(false)
 {
 }
 
-_BOOLEAN CPacketSinkFile::SetDestination(const string& strFName)
+bool CPacketSinkFile::SetDestination(const string& strFName)
 {
 	strFileName = strFName;
-	bChangeReceived = TRUE;
-	return TRUE;
+	bChangeReceived = true;
+	return true;
 }
 
 void CPacketSinkFile::StartRecording()
 {
-	bIsRecording = TRUE;
-	bChangeReceived = TRUE;
+	bIsRecording = true;
+	bChangeReceived = true;
 }
 
 void CPacketSinkFile::StopRecording()
 {
-	bIsRecording = FALSE;
-	bChangeReceived = TRUE;
+	bIsRecording = false;
+	bChangeReceived = true;
 }
 
 void CPacketSinkFile::SendPacket(const vector<_BYTE>& vecbydata, uint32_t, uint16_t)
@@ -82,7 +84,7 @@ void CPacketSinkFile::SendPacket(const vector<_BYTE>& vecbydata, uint32_t, uint1
 			close();
 		}
         pFile = 0;
-		bChangeReceived = FALSE;
+		bChangeReceived = false;
 	}
 
     if (!bIsRecording) // not recording
@@ -101,7 +103,7 @@ void CPacketSinkFile::SendPacket(const vector<_BYTE>& vecbydata, uint32_t, uint1
             if (!pFile)
           {
                     // Failed to open
-                    bIsRecording = FALSE;
+                    bIsRecording = false;
                     return;
             }
     }

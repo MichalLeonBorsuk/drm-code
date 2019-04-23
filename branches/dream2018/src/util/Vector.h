@@ -36,7 +36,7 @@
 /******************************************************************************\
 * CVector base class                                                           *
 \******************************************************************************/
-template<class TData> class CVector : public vector<TData>
+template<class TData> class CVector : public std::vector<TData>
 {
 public:
 	CVector() : iBitArrayCounter(0), iVectorSize(0) {pData = this->begin();}
@@ -49,7 +49,7 @@ public:
 	   pointer must be set to the new data source. The bit access is, by
 	   default, reset */
 	CVector(const CVector<TData>& vecI) :
-		vector<TData>(static_cast<const vector<TData>&>(vecI)),
+		std::vector<TData>(static_cast<const std::vector<TData>&>(vecI)),
 		iBitArrayCounter(0), iVectorSize(vecI.Size()) {pData = this->begin();}
 
 	virtual void Init(const int iNewSize);
@@ -69,7 +69,7 @@ public:
 #ifdef _DEBUG_
 		if ((iPos < 0) || (iPos > iVectorSize - 1))
 		{
-			DebugError("Writing vector out of bounds", "Vector size",
+			DebugError("Writing std::vector out of bounds", "Vector size",
 				iVectorSize, "New parameter", iPos);
 		}
 #endif		
@@ -79,7 +79,7 @@ public:
 #ifdef _DEBUG_
 		if ((iPos < 0) || (iPos > iVectorSize - 1))
 		{
-			DebugError("Reading vector out of bounds", "Vector size",
+			DebugError("Reading std::vector out of bounds", "Vector size",
 				iVectorSize, "New parameter", iPos);
 		}
 #endif
@@ -96,7 +96,7 @@ public:
 				iVectorSize, "New parameter", vecI.Size());
 		}
 #endif
-		vector<TData>::operator=(vecI);
+		std::vector<TData>::operator=(vecI);
 
 		/* Reset my data pointer in case, the operator=() of the base class
 		   did change the actual memory */
@@ -112,7 +112,7 @@ public:
 	void		ResetBitAccess() {iBitArrayCounter = 0;}
 
 protected:
-	typename vector<TData>::iterator	pData;
+	typename std::vector<TData>::iterator	pData;
 	int									iBitArrayCounter;
 	int									iVectorSize;
 };
@@ -145,8 +145,8 @@ template<class TData> void CVector<TData>::Enlarge(const int iAddedSize)
 	iVectorSize += iAddedSize;
 	this->resize(iVectorSize);
 
-	/* We have to reset the pointer since it could be that the vector size was
-	   zero before enlarging the vector */
+	/* We have to reset the pointer since it could be that the std::vector size was
+	   zero before enlarging the std::vector */
 	pData = this->begin();
 }
 
@@ -183,7 +183,7 @@ template<class TData> uint32_t CVector<TData>::Separate(const int iNumOfBits)
 	uint32_t iInformation;
 
 	/* Check, if current position plus new bit-size is smaller than the maximum
-	   length of the bit vector. Error code: return a "0" */
+	   length of the bit std::vector. Error code: return a "0" */
 	if (iBitArrayCounter + iNumOfBits > iVectorSize)
 		return 0;
 
@@ -220,7 +220,7 @@ public:
 	/* Add one value at the end, shift the others to the left */
 	void AddEnd(const TData tNewD);
 
-	/* Add a vector at the end, shift others to the left */
+	/* Add a std::vector at the end, shift others to the left */
 	void AddEnd(const CVector<TData>& vectNewD, const int iLen);
 };
 
@@ -337,7 +337,7 @@ template<class TData> void CMovingAv<TData>::InitVec(const int iNewSize,
 	iCurIdx = 0;
 	CVector<TData>::Init(iNewSize);
 
-	/* Init each vector in vector */
+	/* Init each std::vector in std::vector */
 	for (int i = 0; i < iNewSize; i++)
 		this->pData[i].Init(iNewVecSize, 0);
 
@@ -374,7 +374,7 @@ template<class TData> void CMovingAv<TData>::Add(const TData tNewD)
 
 
 /******************************************************************************\
-* CVectorEx class (Extended vector with additional information)                *
+* CVectorEx class (Extended std::vector with additional information)                *
 \******************************************************************************/
 class CExtendedVecData
 {
@@ -384,7 +384,7 @@ public:
 	int			iSymbolID;
 
 	/* This flag indicates that the symbol ID has changed */
-	_BOOLEAN	bSymbolIDHasChanged;
+	bool	bSymbolIDHasChanged;
 
 	/* The channel estimation needs information about timing corrections,
 	   because it is using information from the symbol memory */
@@ -433,7 +433,7 @@ public:
 #ifdef _DEBUG_
 		if ((iPos < 0) || (iPos > iRow - 1))
 		{
-			DebugError("Matrix: Writing vector out of bounds", "Row size",
+			DebugError("Matrix: Writing std::vector out of bounds", "Row size",
 				iRow, "New parameter", iPos);
 		}
 #endif		
@@ -450,7 +450,7 @@ public:
 	inline CVector<TData> operator[](const int iPos) const {
 		if ((iPos < 0) || (iPos > iRow - 1))
 		{
-			DebugError("Matrix: Reading vector out of bounds", "Row size",
+			DebugError("Matrix: Reading std::vector out of bounds", "Row size",
 				iRow, "New parameter", iPos);
 		}
 		return ppData[iPos];}

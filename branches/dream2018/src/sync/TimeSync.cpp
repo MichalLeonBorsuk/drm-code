@@ -62,7 +62,7 @@ void CTimeSync::ProcessDataInternal(CParameter& Parameters)
 	/* In case the time domain frequency offset estimation method is activated,
 	   the hilbert filtering of input signal must always be applied */
 #ifndef USE_FRQOFFS_TRACK_GUARDCORR
-	if ((bTimingAcqu == TRUE) || (bRobModAcqu == TRUE))
+	if ((bTimingAcqu) || (bRobModAcqu))
 #endif
 	{
 		/* ---------------------------------------------------------------------
@@ -153,7 +153,7 @@ void CTimeSync::ProcessDataInternal(CParameter& Parameters)
 #endif
 
 
-		if ((bTimingAcqu == TRUE) || (bRobModAcqu == TRUE))
+		if ((bTimingAcqu) || (bRobModAcqu))
 		{
 			/* Guard-interval correlation ----------------------------------- */
 			/* Set position pointer back for this block */
@@ -243,7 +243,7 @@ void CTimeSync::ProcessDataInternal(CParameter& Parameters)
 
 					/* Energy of guard intervall calculation and detection of
 					   peak is only needed if timing aquisition is true */
-					if (bTimingAcqu == TRUE)
+					if (bTimingAcqu)
 					{
 						/* Start timing detection not until initialization phase
 						   is finished */
@@ -329,7 +329,7 @@ void CTimeSync::ProcessDataInternal(CParameter& Parameters)
 
 
 			/* Robustness mode detection ------------------------------------ */
-			if (bRobModAcqu == TRUE)
+			if (bRobModAcqu)
 			{
 				/* Start robustness mode detection not until the buffer is
 				   filled */
@@ -377,12 +377,12 @@ void CTimeSync::ProcessDataInternal(CParameter& Parameters)
 					if ((rMaxValRMCorr / rSecHighPeak) > THRESHOLD_RELI_MEASURE)
 					{
 						/* Reset aquisition flag for robustness mode detection */
-						bRobModAcqu = FALSE;
+						bRobModAcqu = false;
 
 						/* Set wave mode */
 						Parameters.Lock(); 
 						if (Parameters.
-							SetWaveMode(GetRModeFromInd(iDetectedRModeInd)) == TRUE)
+							SetWaveMode(GetRModeFromInd(iDetectedRModeInd)))
 						{
 							/* Reset output cyclic-buffer because wave mode has
 							   changed and the data written in the buffer is not
@@ -396,7 +396,7 @@ void CTimeSync::ProcessDataInternal(CParameter& Parameters)
 		}
 	}
 
-	if (bTimingAcqu == TRUE)
+	if (bTimingAcqu)
 	{
 		/* Use all measured FFT-window start points for determining the "real"
 		   one */	
@@ -424,7 +424,7 @@ void CTimeSync::ProcessDataInternal(CParameter& Parameters)
 
 				/* Acquisition was successful, reset init flag (just in case it
 				   was not reset by the non-linear correction unit */
-				bInitTimingAcqu = FALSE;
+				bInitTimingAcqu = false;
 			}
 			else
 			{
@@ -442,10 +442,10 @@ void CTimeSync::ProcessDataInternal(CParameter& Parameters)
 				{
 					/* If this is the first correction after an initialization
 					   was done, reset flag and do not show red light */
-					if (bInitTimingAcqu == TRUE)
+					if (bInitTimingAcqu)
 					{
 						/* Reset flag */
-						bInitTimingAcqu = FALSE;
+						bInitTimingAcqu = false;
 
 						/* Right after initialization, the first estimate is
 						   used for correction */
@@ -471,7 +471,7 @@ void CTimeSync::ProcessDataInternal(CParameter& Parameters)
 				{
 					/* GUI message that timing is yet ok (yellow light). Do not
 					   show any light if init was done right before this */
-					if (bInitTimingAcqu == FALSE)
+					if (bInitTimingAcqu == false)
 					{
 						Parameters.Lock(); 
 						Parameters.ReceiveStatus.TSync.SetStatus(DATA_ERROR);
@@ -495,9 +495,9 @@ fflush(pFile);
 	{
 		Parameters.Lock(); 
 		/* Detect situation when acquisition was deactivated right now */
-		if (bAcqWasActive == TRUE)
+		if (bAcqWasActive)
 		{
-			bAcqWasActive = FALSE;
+			bAcqWasActive = false;
 
 			/* Reset also the tracking value since the tracking could not get
 			   right parameters since the timing was not yet correct */
@@ -544,7 +544,7 @@ fflush(pFile);
 
 	/* If synchronized DRM input stream is used, overwrite the detected
 	   timing */
-	if (bSyncInput == TRUE)
+	if (bSyncInput)
 	{
 		/* Set fixed timing position */
 		iStartIndex = iSymbolBlockSize;
@@ -573,7 +573,7 @@ fflush(pFile);
 	iInputBlockSize = iSymbolBlockSize - iIntDiffToCenter;
 
 	/* In acquisition mode, correct start index */
-	if (bTimingAcqu == TRUE)
+	if (bTimingAcqu)
 		rStartIndex += (CReal) iIntDiffToCenter;
 
 
@@ -709,12 +709,12 @@ void CTimeSync::InitInternal(CParameter& Parameters)
 	iCenterOfBuf = iSymbolBlockSize;
 
 	/* Init rStartIndex only if acquisition was activated */
-	if (bTimingAcqu == TRUE)
+	if (bTimingAcqu)
 		rStartIndex = (CReal) iCenterOfBuf;
 
 	/* Some inits */
 	iAveCorr = 0;
-	bInitTimingAcqu = TRUE; /* Flag to show that init was done */
+	bInitTimingAcqu = true; /* Flag to show that init was done */
 
 	/* Set correction counter so that a non-linear correction is performed right
 	   at the beginning */
@@ -853,8 +853,8 @@ void CTimeSync::StartAcquisition()
 // moved to / from the "InitInternal()" function
 
 	/* The regular acquisition flags */
-	bTimingAcqu = TRUE;
-	bRobModAcqu = TRUE;
+	bTimingAcqu = true;
+	bRobModAcqu = true;
 
 	/* Set the init flag so that the "rStartIndex" can be initialized with the
 	   center of the buffer and other important settings can be done */
@@ -862,7 +862,7 @@ void CTimeSync::StartAcquisition()
 	
 	/* This second flag is to determine the moment when the acquisition just
 	   finished. In this case, the tracking value must be reset */
-	bAcqWasActive = TRUE;
+	bAcqWasActive = true;
 
 	iCorrCounter = NUM_SYM_BEFORE_RESET;
 
@@ -897,8 +897,8 @@ void CTimeSync::SetFilterTaps(CReal rNewOffsetNorm)
 
 CTimeSync::CTimeSync() : iSampleRate(0), iGrdcrrDecFact(0),
 	iNumTapsHilbFilt(0), fHilLPProt(nullptr),
-	iTimeSyncPos(0), bSyncInput(FALSE), bTimingAcqu(FALSE),
-	bRobModAcqu(FALSE), bAcqWasActive(FALSE), rLambdaCoAv((CReal) 1.0),
+	iTimeSyncPos(0), bSyncInput(false), bTimingAcqu(false),
+	bRobModAcqu(false), bAcqWasActive(false), rLambdaCoAv((CReal) 1.0),
 	iLengthIntermCRes(NUM_ROBUSTNESS_MODES),
 	iPosInIntermCResBuf(NUM_ROBUSTNESS_MODES),
 	iLengthOverlap(NUM_ROBUSTNESS_MODES), iLenUsefPart(NUM_ROBUSTNESS_MODES),

@@ -34,7 +34,7 @@ void
 CDataEncoder::GeneratePacket(CVector < _BINARY > &vecbiPacket)
 {
 	int i;
-	_BOOLEAN bLastFlag;
+	bool bLastFlag;
 
 	/* Init size for whole packet, not only body */
 	vecbiPacket.Init(iTotalPacketSize);
@@ -54,12 +54,12 @@ CDataEncoder::GeneratePacket(CVector < _BINARY > &vecbiPacket)
 	if (iRemainSize > iPacketLen)
 	{
 		vecbiPacket.Enqueue((uint32_t) 0, 1);
-		bLastFlag = FALSE;
+		bLastFlag = false;
 	}
 	else
 	{
 		vecbiPacket.Enqueue((uint32_t) 1, 1);
-		bLastFlag = TRUE;
+		bLastFlag = true;
 	}
 
 	/* Packet Id */
@@ -115,7 +115,7 @@ CDataEncoder::GeneratePacket(CVector < _BINARY > &vecbiPacket)
 	}
 
 	/* If this was the last packet, get data for next data unit */
-	if (bLastFlag == TRUE)
+	if (bLastFlag)
 	{
 		/* Generate new data unit */
 		MOTSlideShowEncoder.GetDataUnit(vecbiCurDataUnit);

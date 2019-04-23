@@ -30,7 +30,7 @@ typedef struct faacEncConfiguration
     /* library version */
     char *name;
 
-    /* copyright string */
+    /* copyright std::string */
     char *copyright;
 
     /* MPEG version, 2 or 4 */

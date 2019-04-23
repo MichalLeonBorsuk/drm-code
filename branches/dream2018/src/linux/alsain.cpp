@@ -105,7 +105,7 @@ bool CSoundIn::Init(int iSampleRate, int iNewBufferSize, bool bNewBlocking)
     RecThread.SoundBuf.unlock();
 
     /* Check if device must be opened or reinitialized */
-    if (bChangDev == true)
+    if (bChangDev)
     {
 
         Init_HW( );
@@ -129,7 +129,7 @@ bool CSoundIn::Read(CVector< _SAMPLE >& psData)
     CVectorEx<_SAMPLE>* p;
 
     /* Check if device must be opened or reinitialized */
-    if (bChangDev == true)
+    if (bChangDev)
     {
         /* Reinit sound interface */
         Init(iSampleRate, iBufferSize, bBlockingRec);

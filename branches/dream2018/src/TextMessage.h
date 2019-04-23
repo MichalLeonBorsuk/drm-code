@@ -57,7 +57,7 @@ public:
         return vvbiSegment[iI];
     }
 
-    void				SetText(const string& strMessage, const _BINARY biToggleBit);
+    void				SetText(const std::string& strMessage, const _BINARY biToggleBit);
     inline int			GetNumSeg() const {
         return iNumSeg;
     }
@@ -78,12 +78,12 @@ public:
     virtual ~CTextMessageEncoder() {}
 
     void Encode(CVector<_BINARY>& pData);
-    void SetMessage(const string& strMessage);
+    void SetMessage(const std::string& strMessage);
     void ClearAllText();
 
 protected:
     CTextMessage	CurTextMessage;
-    CVector<string>	vecstrText;
+    CVector<std::string>	vecstrText;
     int				iSegCnt;
     int				iByteCnt;
     int				iNumMess;
@@ -96,11 +96,11 @@ protected:
 class CTextMessSegment
 {
 public:
-    CTextMessSegment() : byData(BYTES_PER_SEG_TEXT_MESS), bIsOK(FALSE),
+    CTextMessSegment() : byData(BYTES_PER_SEG_TEXT_MESS), bIsOK(false),
             iNumBytes(0) {}
 
     CVector<_BYTE>	byData;
-    _BOOLEAN		bIsOK;
+    bool		bIsOK;
     int				iNumBytes;
 };
 
@@ -111,7 +111,7 @@ public:
     virtual ~CTextMessageDecoder() {}
 
     void Decode(CVector<_BINARY>& pData);
-    void Init(string* pstrNewPText);
+    void Init(std::string* pstrNewPText);
 
 protected:
     void ReadHeader();
@@ -123,7 +123,7 @@ protected:
 
     bool		decodeSpecial;
 
-    string*		pstrText;
+    std::string*		pstrText;
 
     _BINARY		biCommandFlag;
 

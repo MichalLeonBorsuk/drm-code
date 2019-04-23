@@ -38,7 +38,7 @@ public:
 	CWaveFile() : pFile(nullptr), iBytesWritten(0) {}
 	virtual ~CWaveFile() {if (pFile != nullptr) Close();}
 
-	void Open(const string strFileName, const int iSampleRate)
+	void Open(const std::string strFileName, const int iSampleRate)
 	{
 		if (pFile != nullptr)
 			Close();

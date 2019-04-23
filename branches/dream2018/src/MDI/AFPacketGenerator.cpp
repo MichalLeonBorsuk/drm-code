@@ -41,7 +41,7 @@
 #include "../util/LogPrint.h"
 // CAFPacketGenerator
 
-CVector<_BYTE> CAFPacketGenerator::GenAFPacket(const _BOOLEAN bUseAFCRC, CTagPacketGenerator& TagPacketGenerator)
+CVector<_BYTE> CAFPacketGenerator::GenAFPacket(const bool bUseAFCRC, CTagPacketGenerator& TagPacketGenerator)
 {
 /*
 	The AF layer encapsulates a single TAG Packet. Mandatory TAG items:
@@ -84,7 +84,7 @@ CVector<_BYTE> CAFPacketGenerator::GenAFPacket(const _BOOLEAN bUseAFCRC, CTagPac
 	   a field combining the CF, MAJ and MIN fields */
 	/* CF: CRC Flag, 0 if the CRC field is not used (CRC value shall be
 	   0000_[16]) or 1 if the CRC field contains a valid CRC (1 bit long) */
-	if (bUseAFCRC == TRUE)
+	if (bUseAFCRC)
 		vecbiAFPkt.Enqueue((uint32_t) 1, 1);
 	else
 		vecbiAFPkt.Enqueue((uint32_t) 0, 1);
@@ -109,7 +109,7 @@ CVector<_BYTE> CAFPacketGenerator::GenAFPacket(const _BOOLEAN bUseAFCRC, CTagPac
 
 	/* CRC: CRC calculated as described in annex A if the CF field is 1,
 	   otherwise 0000_[16] */
-	if (bUseAFCRC == TRUE)
+	if (bUseAFCRC)
 	{
 		CCRC CRCObject;
 

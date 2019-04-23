@@ -39,21 +39,21 @@ public:
 	class CDCPProtocol
 	{
      public:
-      string protocol;
+      std::string protocol;
       int major;
       int minor;
 	};
 	CTagItemDecoderProTy(){}
-	virtual string GetTagName(void);
+	virtual std::string GetTagName(void);
 	virtual void DecodeTag(CVector<_BINARY>& vecbiTag, const int iLenDataBits);
-	vector<CDCPProtocol> protocols;
+	std::vector<CDCPProtocol> protocols;
 };
 
 class CTagItemDecoderLoFrCnt : public CTagItemDecoder   
 {
 public:
 	CTagItemDecoderLoFrCnt(){}
-	virtual string GetTagName(void);
+	virtual std::string GetTagName(void);
 	virtual void DecodeTag(CVector<_BINARY>& vecbiTag, const int iLenDataBits);
 	uint32_t dlfc;
 };
@@ -62,7 +62,7 @@ class CTagItemDecoderFAC : public CTagItemDecoder
 {
 public:
 	CTagItemDecoderFAC(){}
-	virtual string GetTagName(void);
+	virtual std::string GetTagName(void);
 	virtual void DecodeTag(CVector<_BINARY>& vecbiTag, const int iLenDataBits);
 	CVector<_BINARY> vecbidata;
 };
@@ -71,7 +71,7 @@ class CTagItemDecoderSDC : public CTagItemDecoder
 {
 public:
 	CTagItemDecoderSDC(){}
-	virtual string GetTagName(void);
+	virtual std::string GetTagName(void);
 	virtual void DecodeTag(CVector<_BINARY>& vecbiTag, const int iLenDataBits);
 	CVector<_BINARY> vecbidata;
 };
@@ -80,7 +80,7 @@ class CTagItemDecoderRobMod : public CTagItemDecoder
 {
 public:
 	CTagItemDecoderRobMod(){}
-	virtual string GetTagName(void);
+	virtual std::string GetTagName(void);
 	virtual void DecodeTag(CVector<_BINARY>& vecbiTag, const int iLenDataBits);
 	CVector<_BINARY> vecbidata;
 	ERobMode	eRobMode;
@@ -91,7 +91,7 @@ class CTagItemDecoderStr : public CTagItemDecoder
 public:
 	CTagItemDecoderStr() : vecbidata(),iStreamNumber(0) {}
 	virtual void DecodeTag(CVector<_BINARY>& vecbiTag, const int iLenDataBits);
-	virtual string GetTagName(void);
+	virtual std::string GetTagName(void);
 	CVector<_BINARY> vecbidata;
 	int iStreamNumber;
 };
@@ -100,7 +100,7 @@ class CTagItemDecoderSDCChanInf : public CTagItemDecoderRSI
 {
 public:
     CTagItemDecoderSDCChanInf(CParameter* pP) : CTagItemDecoderRSI(pP, "sdci") {}
-	virtual string GetTagName(void);
+	virtual std::string GetTagName(void);
 	virtual void DecodeTag(CVector<_BINARY>& vecbiTag, const int iLenDataBits);
 	CVector<_BINARY> vecbidata;
 };
@@ -109,16 +109,16 @@ class CTagItemDecoderInfo : public CTagItemDecoder
 {
 public:
 	CTagItemDecoderInfo(){}
-	virtual string GetTagName(void);
+	virtual std::string GetTagName(void);
 	virtual void DecodeTag(CVector<_BINARY>& vecbiTag, const int iLenDataBits);
-	string strInfo;
+	std::string strInfo;
 };
 
 class CTagItemDecoderRxDemodMode : public CTagItemDecoder
 {
 public:
 		CTagItemDecoderRxDemodMode() : eMode(RM_DRM){}
-		virtual string GetTagName(void);
+		virtual std::string GetTagName(void);
 		virtual void DecodeTag(CVector<_BINARY>& vecbiTag, const int iLenDataBits);
 		ERecMode eMode;
 };
@@ -128,7 +128,7 @@ class CTagItemDecoderAMAudio : public CTagItemDecoder
 public:
 		CTagItemDecoderAMAudio() : vecbidata() {}
 		virtual void DecodeTag(CVector<_BINARY>& vecbiTag, const int iLenDataBits);
-		virtual string GetTagName(void);
+		virtual std::string GetTagName(void);
 		CVector<_BINARY> vecbidata;
 		CAudioParam AudioParams;
 };

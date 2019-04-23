@@ -36,8 +36,8 @@ class CTagItemGeneratorCfre : public CTagItemGenerator /* cfre tag */
 public:
 	void GenTag(int iNewFreqkHz);
 protected:
-	string GetTagName(void);
-	string GetProfiles(void) { return ""; }
+	std::string GetTagName(void);
+	std::string GetProfiles(void) { return ""; }
 };
 
 class CTagItemGeneratorCdmo : public CTagItemGenerator /* cdmo tag */
@@ -45,8 +45,8 @@ class CTagItemGeneratorCdmo : public CTagItemGenerator /* cdmo tag */
 public:
 	void GenTag(const ERecMode eMode);
 protected:
-	string GetTagName(void);
-	string GetProfiles(void) { return ""; }
+	std::string GetTagName(void);
+	std::string GetProfiles(void) { return ""; }
 };
 
 #endif

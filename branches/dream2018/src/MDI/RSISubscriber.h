@@ -49,7 +49,7 @@ public:
 	/* leave it set to nullptr if you want incoming commands to be ignored */
 	void SetReceiver(CDRMReceiver *pReceiver);
 
-	virtual _BOOLEAN SetOrigin(const string&){return FALSE;} // only relevant for network subscribers
+	virtual bool SetOrigin(const std::string&){return false;} // only relevant for network subscribers
 
 	/* Set the profile for this subscriber - could be different for different subscribers */
 	void SetProfile(const char c);
@@ -60,11 +60,11 @@ public:
 	/* Generate and send a packet */
 	void TransmitPacket(CTagPacketGenerator& Generator);
 
-	void SetAFPktCRC(const _BOOLEAN bNAFPktCRC) {bUseAFCRC = bNAFPktCRC;}
+	void SetAFPktCRC(const bool bNAFPktCRC) {bUseAFCRC = bNAFPktCRC;}
 
 
 	/* from CPacketSink interface */
-	virtual void SendPacket(const vector<_BYTE>& vecbydata, uint32_t addr=0, uint16_t port=0);
+	virtual void SendPacket(const std::vector<_BYTE>& vecbydata, uint32_t addr=0, uint16_t port=0);
 
 	/* from CPacketSource, but we really want it for RSCI control */
 	virtual void poll()=0;
@@ -72,14 +72,14 @@ public:
 protected:
 	CPacketSink *pPacketSink;
 	char cProfile;
-	_BOOLEAN bNeedPft;
+	bool bNeedPft;
     size_t fragment_size;
 	CTagPacketDecoderRSCIControl TagPacketDecoderRSCIControl;
 private:
 	CDRMReceiver *pDRMReceiver;
 	CAFPacketGenerator AFPacketGenerator;
 
-	_BOOLEAN bUseAFCRC;
+	bool bUseAFCRC;
 	uint16_t sequence_counter;
 };
 
@@ -90,19 +90,17 @@ public:
 	CRSISubscriberSocket(CPacketSink *pSink = nullptr);
 	virtual ~CRSISubscriberSocket();
 
-	_BOOLEAN SetOrigin(const string& str);
-	_BOOLEAN GetOrigin(string& addr);
-	_BOOLEAN SetDestination(const string& str);
-	_BOOLEAN GetDestination(string& addr);
+	bool SetOrigin(const std::string& str);
+	bool GetOrigin(std::string& addr);
+	bool SetDestination(const std::string& str);
+	bool GetDestination(std::string& addr);
 	void SetPacketSink(CPacketSink *pSink) { (void)pSink; }
 	void ResetPacketSink() {}
 	void poll();
 
 private:
 	CPacketSocket* pSocket;
-	string strDestination;
-	uint32_t uIf, uAddr;
-	uint16_t uPort;
+	std::string strDestination;
 };
 
 
@@ -111,13 +109,13 @@ class CRSISubscriberFile : public CRSISubscriber
 public:
 	CRSISubscriberFile();
 
-	_BOOLEAN SetDestination(const string& strFName);
+	bool SetDestination(const std::string& strFName);
 	void StartRecording();
 	void StopRecording();
 	void poll() {} // Do Nothing
 
-	_BOOLEAN GetDestination(string& addr);
-	_BOOLEAN GetOrigin(string& addr) { (void)addr; return false; }
+	bool GetDestination(std::string& addr);
+	bool GetOrigin(std::string& addr) { (void)addr; return false; }
 	void SetPacketSink(CPacketSink *pSink) { (void)pSink; }
 	void ResetPacketSink() {}
 private:

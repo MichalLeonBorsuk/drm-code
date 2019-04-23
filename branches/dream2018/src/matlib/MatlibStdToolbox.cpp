@@ -291,7 +291,7 @@ if (row == iSize)
    Matlib internal calculations */
 CComplex _integral(MATLIB_CALLBACK_QAUD f, const CReal a, const CReal b,
 				   const CReal errorBound, CReal& integralBound,
-				   _BOOLEAN& integralError, const CReal ru)
+				   bool& integralError, const CReal ru)
 {
 /*
 	The following code (inclusive the actual Quad() function) is based on a
@@ -410,7 +410,7 @@ CComplex _integral(MATLIB_CALLBACK_QAUD f, const CReal a, const CReal b,
 					if (left >= right)
 					{
 						/* The error bound specified is too small! */
-						integralError = TRUE;
+						integralError = true;
 						return _MAXREAL; /* NaN */
 					}
 
@@ -457,7 +457,7 @@ CComplex Quad(MATLIB_CALLBACK_QAUD f, const CReal a, const CReal b,
 	ru *= 2;
 
 	CReal integralBound = errorBound;
-	_BOOLEAN integralError = FALSE;
+	bool integralError = false;
 
 	/* Compute */
 	return _integral(f, a, b, errorBound, integralBound, integralError, ru);
@@ -666,7 +666,7 @@ CMatlibVector<CReal> FftFilt(const CMatlibVector<CComplex>& rvH,
 CFftPlans::CFftPlans(const int iFftSize) :
 	RFFTPlForw(nullptr), RFFTPlBackw(nullptr), pFftwRealIn(nullptr), pFftwRealOut(nullptr),
 	FFTPlForw(nullptr), FFTPlBackw(nullptr), pFftwComplexIn(nullptr), pFftwComplexOut(nullptr),
-	bInitialized(FALSE), bFixedSizeInit(FALSE), fftw_n(0)
+	bInitialized(false), bFixedSizeInit(false), fftw_n(0)
 {
 	/* Static initialization of CMutex not working on Mac OS X */
     if (!_mutex) _mutex = new CMutex();
@@ -685,8 +685,8 @@ CFftPlans::~CFftPlans()
 void CFftPlans::Init(const int iFSi, EFFTPlan eFFTPlan)
 {
 	/* Init some flags */
-	_BOOLEAN bNeedPlanInit = FALSE;
-	_BOOLEAN bSizeChanged = FALSE;
+	bool bNeedPlanInit = false;
+	bool bSizeChanged = false;
 
 	/* If Init(const int iFSi) as been previously called
 	   then the fft size can't be changed here
@@ -735,17 +735,17 @@ void CFftPlans::Init(const int iFSi)
 {
 	/* The bFixedSizeInit flag isn't really needed,
 	   it only keep the original Init() behaviour */
-	bFixedSizeInit = TRUE;
+	bFixedSizeInit = true;
 	InitInternal(iFSi);
 }
 
-_BOOLEAN CFftPlans::InitInternal(const int iFSi)
+bool CFftPlans::InitInternal(const int iFSi)
 {
 	if (bInitialized)
 	{
 		/* No change, so return */
 		if (fftw_n == iFSi)
-			return FALSE; /* The fft size is the same */
+			return false; /* The fft size is the same */
 
 		/* Delete old plans and intermediate buffers */
 		Clean();
@@ -759,8 +759,8 @@ _BOOLEAN CFftPlans::InitInternal(const int iFSi)
 	pFftwComplexOut = new fftw_complex[iFSi];
 
 	fftw_n = iFSi;
-	bInitialized = TRUE;
-	return TRUE; /* The fft size has changed */
+	bInitialized = true;
+	return true; /* The fft size has changed */
 }
 
 void CFftPlans::Clean()
@@ -792,7 +792,7 @@ void CFftPlans::Clean()
 
 		fftw_n = 0;
 
-		bInitialized = FALSE;
+		bInitialized = false;
 	}
 }
 

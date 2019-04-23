@@ -42,13 +42,13 @@ public:
 	virtual void ResetPacketSink(void);
 
 	// Send packet to the socket
-	virtual void SendPacket(const vector<_BYTE>& vecbydata, uint32_t addr=0, uint16_t port=0);
+	virtual void SendPacket(const std::vector<_BYTE>& vecbydata, uint32_t addr=0, uint16_t port=0);
 
 	virtual void poll();
 
-	_BOOLEAN SetDestination(const string&);
-	_BOOLEAN SetOrigin(const string&);
-	_BOOLEAN GetDestination(string&);
+	bool SetDestination(const std::string&);
+	bool SetOrigin(const std::string&);
+	bool GetDestination(std::string&);
 };
 
 #endif

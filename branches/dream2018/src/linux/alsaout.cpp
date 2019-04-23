@@ -107,7 +107,7 @@ bool CSoundOut::Init(int iSampleRate, int iNewBufferSize, bool bNewBlocking)
     PlayThread.SoundBuf.unlock();
 
     /* Check if device must be opened or reinitialized */
-    if (bChangDev == true)
+    if (bChangDev)
     {
 
         Init_HW( );
@@ -130,7 +130,7 @@ bool CSoundOut::Init(int iSampleRate, int iNewBufferSize, bool bNewBlocking)
 bool CSoundOut::Write(CVector< _SAMPLE >& psData)
 {
     /* Check if device must be opened or reinitialized */
-    if (bChangDev == true)
+    if (bChangDev)
     {
         /* Reinit sound interface */
         Init(iSampleRate, iBufferSize, bBlockingPlay);

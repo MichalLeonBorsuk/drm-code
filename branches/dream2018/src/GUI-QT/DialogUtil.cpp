@@ -447,7 +447,7 @@ void InitSMeter(QWidget* parent, QwtThermo* sMeter)
 #endif
     sMeter->setAlarmLevel(S_METER_THERMO_ALARM);
     sMeter->setAlarmLevel(-12.5);
-    sMeter->setAlarmEnabled(TRUE);
+    sMeter->setAlarmEnabled(true);
     sMeter->setValue(S_METER_THERMO_MIN);
 #if QWT_VERSION < 0x060000
     (void)parent;

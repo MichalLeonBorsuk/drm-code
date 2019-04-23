@@ -48,14 +48,14 @@ public:
     CSoundIn();
     virtual ~CSoundIn() {}
 
-    virtual void Enumerate(vector<string>&, vector<string>&);
-    virtual void SetDev(string sNewDevice);
-    virtual string GetDev();
+    virtual void Enumerate(std::vector<string>&, std::vector<string>&);
+    virtual void SetDev(std::string sNewDevice);
+    virtual std::string GetDev();
 
     bool Init(int iSampleRate, int iNewBufferSize, bool bNewBlocking = true);
     bool Read(CVector<short>& psData);
     void Close();
-	virtual string		GetVersion() { return "alsa audio input"; }
+	virtual std::string		GetVersion() { return "alsa audio input"; }
 
 protected:
     void Init_HW();
@@ -78,7 +78,7 @@ protected:
     short int *tmprecbuf;
     bool    bBlockingRec;
     bool bChangDev;
-    string sCurrentDevice;
+    std::string sCurrentDevice;
     int iSampleRate;
     snd_pcm_t *handle;
 };

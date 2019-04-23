@@ -74,7 +74,7 @@ public:
 
     void GetInputPSD(CVector<_REAL>& vecrData, CVector<_REAL>& vecrScale);
 
-    /* Interfaces to internal parameters/vectors used for the plot */
+    /* Interfaces to internal parameters/std::vectors used for the plot */
     void GetFreqSamOffsHist(CVector<_REAL>& vecrFreqOffs,
                             CVector<_REAL>& vecrSamOffs, CVector<_REAL>& vecrScale,
                             _REAL& rFreqAquVal);

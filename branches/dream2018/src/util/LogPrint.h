@@ -100,9 +100,9 @@ private:
 class CPrintfLogPrinter : public CChainingLogPrinter
 {
 public:
-	virtual void LogStatusSpecific(char *string);
-	virtual void LogWarningSpecific(char *string);
-	virtual void LogErrorSpecific(char *string);
+    virtual void LogStatusSpecific(char *string);
+    virtual void LogWarningSpecific(char *string);
+    virtual void LogErrorSpecific(char *string);
 
 	static void Instantiate();
 protected:
@@ -115,9 +115,9 @@ private:
 class CNullLogPrinter : public CLogPrinter
 {
 public:
-	virtual void LogStatus(char *string);
-	virtual void LogWarning(char *string);
-	virtual void LogError(char *string);
+    virtual void LogStatus(char *string);
+    virtual void LogWarning(char *string);
+    virtual void LogError(char *string);
 };
 
 

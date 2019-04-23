@@ -79,7 +79,7 @@ CParameter::CParameter():
     eAcquiState(AS_NO_SIGNAL),
     iNumAudioFrames(0),
     vecbiAudioFrameStatus(0),
-    bMeasurePSD(FALSE), bMeasurePSDAlways(FALSE),
+    bMeasurePSD(false), bMeasurePSDAlways(false),
     vecrPSD(0),
     matcReceivedPilotValues(),
     RawSimDa(),
@@ -110,7 +110,7 @@ CParameter::CParameter():
     vecrRdelIntervals(0),
     bMeasureDoppler(0),
     rRdop(0.0),
-    bMeasureInterference(FALSE),
+    bMeasureInterference(false),
     rIntFreq(0.0),
     rINR(0.0),
     rICR(0.0),
@@ -129,7 +129,7 @@ CParameter::CParameter():
     iNewSigUpscaleRatio(0),
     rSysSimSNRdB(0.0),
     iFrequency(0),
-    bValidSignalStrength(FALSE),
+    bValidSignalStrength(false),
     rSigStr(0.0),
     rIFSigStr(0.0),
     iCurSelAudioService(0),
@@ -395,8 +395,8 @@ void CParameter::ResetServicesStreams()
             Service[i].AudioParam.eAudioCoding = CAudioParam::AC_NONE;
             Service[i].AudioParam.eSBRFlag = CAudioParam::SB_NOT_USED;
             Service[i].AudioParam.eAudioSamplRate = CAudioParam::AS_24KHZ;
-            Service[i].AudioParam.bTextflag = FALSE;
-            Service[i].AudioParam.bEnhanceFlag = FALSE;
+            Service[i].AudioParam.bTextflag = false;
+            Service[i].AudioParam.bEnhanceFlag = false;
             Service[i].AudioParam.eAudioMode = CAudioParam::AM_MONO;
             Service[i].AudioParam.eSurround = CAudioParam::MS_NONE;
             Service[i].AudioParam.xHE_AAC_config.clear();
@@ -436,8 +436,8 @@ void CParameter::ResetServicesStreams()
         Service[0].AudioParam.eAudioCoding = CAudioParam::AC_AAC;
         Service[0].AudioParam.eSBRFlag = CAudioParam::SB_NOT_USED;
         Service[0].AudioParam.eAudioSamplRate = CAudioParam::AS_24KHZ;
-        Service[0].AudioParam.bTextflag = FALSE;
-        Service[0].AudioParam.bEnhanceFlag = FALSE;
+        Service[0].AudioParam.bTextflag = false;
+        Service[0].AudioParam.bEnhanceFlag = false;
         Service[0].AudioParam.eAudioMode = CAudioParam::AM_MONO; // ? FM could be stereo
         Service[0].AudioParam.eSurround = CAudioParam::MS_NONE;
         Service[0].AudioParam.xHE_AAC_config.clear();
@@ -466,7 +466,7 @@ void CParameter::ResetServicesStreams()
     iUTCMin = 0;
     iUTCOff = 0;
     iUTCSense = 0;
-    bValidUTCOffsetAndSense = FALSE;
+    bValidUTCOffsetAndSense = false;
 }
 
 void CParameter::GetActiveServices(set<int>& actServ)
@@ -504,7 +504,7 @@ void CParameter::GetActiveStreams(set<int>& actStr)
     }
 }
 
-_REAL CParameter::GetBitRateKbps(const int iShortID, const _BOOLEAN bAudData) const
+_REAL CParameter::GetBitRateKbps(const int iShortID, const bool bAudData) const
 {
     /* Init lengths to zero in case the stream is not yet assigned */
     int iLen = 0;
@@ -514,7 +514,7 @@ _REAL CParameter::GetBitRateKbps(const int iShortID, const _BOOLEAN bAudData) co
     {
         /* Check if we want to get the data stream connected to an audio
            stream */
-        if (bAudData == TRUE)
+        if (bAudData)
         {
             iLen = GetStreamLen( Service[iShortID].DataParam.iStreamID);
         }
@@ -575,7 +575,7 @@ void CParameter::InitCellMapTable(const ERobMode eNewWaveMode,
     CellMappingTable.MakeTable(eRobustnessMode, eSpectOccup, iSigSampleRate);
 }
 
-_BOOLEAN CParameter::SetWaveMode(const ERobMode eNewWaveMode)
+bool CParameter::SetWaveMode(const ERobMode eNewWaveMode)
 {
     /* First check if spectrum occupancy and robustness mode pair is defined */
     if ((
@@ -603,10 +603,10 @@ _BOOLEAN CParameter::SetWaveMode(const ERobMode eNewWaveMode)
         if (pDRMRec) pDRMRec->InitsForWaveMode();
 
         /* Signal that parameter has changed */
-        return TRUE;
+        return true;
     }
     else
-        return FALSE;
+        return false;
 }
 
 void CParameter::SetSpectrumOccup(ESpecOcc eNewSpecOcc)
@@ -717,9 +717,9 @@ void CParameter::SetNumDataDecoderBits(const int iNewNumDataDecoderBits)
 }
 
 void CParameter::SetMSCProtLev(const CMSCProtLev NewMSCPrLe,
-                               const _BOOLEAN bWithHierarch)
+                               const bool bWithHierarch)
 {
-    _BOOLEAN bParamersHaveChanged = FALSE;
+    bool bParamersHaveChanged = false;
 
     if ((NewMSCPrLe.iPartA != MSCPrLe.iPartA) ||
             (NewMSCPrLe.iPartB != MSCPrLe.iPartB))
@@ -727,22 +727,22 @@ void CParameter::SetMSCProtLev(const CMSCProtLev NewMSCPrLe,
         MSCPrLe.iPartA = NewMSCPrLe.iPartA;
         MSCPrLe.iPartB = NewMSCPrLe.iPartB;
 
-        bParamersHaveChanged = TRUE;
+        bParamersHaveChanged = true;
     }
 
     /* Apply changes only if parameters have changed */
-    if (bWithHierarch == TRUE)
+    if (bWithHierarch)
     {
         if (NewMSCPrLe.iHierarch != MSCPrLe.iHierarch)
         {
             MSCPrLe.iHierarch = NewMSCPrLe.iHierarch;
 
-            bParamersHaveChanged = TRUE;
+            bParamersHaveChanged = true;
         }
     }
 
     /* In case parameters have changed, set init flags */
-    if (bParamersHaveChanged == TRUE)
+    if (bParamersHaveChanged)
         if (pDRMRec) pDRMRec->InitsForMSC();
 }
 
@@ -1353,7 +1353,7 @@ string COtherService::ServiceID() const
 }
 
 /* See ETSI ES 201 980 v2.1.1 Annex O */
-_BOOLEAN
+bool
 CAltFreqSched::IsActive(const time_t ltime)
 {
     int iScheduleStart;

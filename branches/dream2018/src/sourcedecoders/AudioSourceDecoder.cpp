@@ -45,8 +45,8 @@
 /* Implementation *************************************************************/
 
 CAudioSourceDecoder::CAudioSourceDecoder()
-    :	bWriteToFile(FALSE), TextMessage(FALSE),
-      bUseReverbEffect(TRUE), codec(nullptr)
+    :	bWriteToFile(false), TextMessage(false),
+      bUseReverbEffect(true), codec(nullptr)
 {
     /* Initialize Audio Codec List */
     CAudioCodec::InitCodecList();
@@ -78,7 +78,7 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
     Parameters.Unlock();
 
     /* Check if something went wrong in the initialization routine */
-    if (DoNotProcessData == TRUE)
+    if (DoNotProcessData)
     {
         return;
     }
@@ -97,7 +97,7 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
 
     /* Audio data header parsing ********************************************* */
     /* Check if audio shall not be decoded */
-    if (DoNotProcessAudDecoder == TRUE)
+    if (DoNotProcessAudDecoder)
     {
         return;
     }
@@ -115,10 +115,10 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
     //cerr << "audio superframe with " << pAudioSuperFrame->getNumFrames() << " frames" << endl;
     for (size_t j = 0; j < pAudioSuperFrame->getNumFrames(); j++)
     {
-        _BOOLEAN bCodecUpdated = FALSE;
+        bool bCodecUpdated = false;
         bool bCurBlockFaulty = false; // just for Opus or any other codec with FEC
 
-        if (bGoodValues == TRUE)
+        if (bGoodValues)
         {
             CAudioCodec::EDecError eDecError;
             vector<uint8_t> audio_frame;
@@ -152,7 +152,7 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
             /* Call decoder update */
             if (!bCodecUpdated)
             {
-                bCodecUpdated = TRUE;
+                bCodecUpdated = true;
                 Parameters.Lock();
                 int iCurSelAudioServ = Parameters.GetCurSelAudioService();
                 codec->DecUpdate(Parameters.Service[iCurSelAudioServ].AudioParam);
@@ -166,7 +166,7 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
         else
         {
             /* DRM super-frame header was wrong, set flag to "bad block" */
-            bCurBlockOK = FALSE;
+            bCurBlockOK = false;
             /* OPH: update audio status vector for RSCI */
             Parameters.Lock();
             Parameters.vecbiAudioFrameStatus.Add(1);
@@ -246,8 +246,8 @@ CAudioSourceDecoder::InitInternal(CParameter & Parameters)
        size is set in the processing routine. We must set it here in case
        of an error in the initialization, this part in the processing
        routine is not being called */
-    DoNotProcessAudDecoder = FALSE;
-    DoNotProcessData = FALSE;
+    DoNotProcessAudDecoder = false;
+    DoNotProcessData = false;
     iOutputBlockSize = 0;
 
     /* Set audiodecoder to empty string - means "unknown" and "can't decode" to GUI */
@@ -261,7 +261,7 @@ CAudioSourceDecoder::InitInternal(CParameter & Parameters)
         iNumCorDecAudio = 0;
 
         /* Init "audio was ok" flag */
-        bAudioWasOK = TRUE;
+        bAudioWasOK = true;
 
          /* Get number of total input bits for this module */
          iInputBlockSize = Parameters.iNumAudioDecoderBits;
@@ -290,7 +290,7 @@ CAudioSourceDecoder::InitInternal(CParameter & Parameters)
         /* Init text message application ------------------------------------ */
         if (AudioParam.bTextflag)
         {
-            bTextMessageUsed = TRUE;
+            bTextMessageUsed = true;
 
             /* Get a pointer to the string */
             TextMessage.Init(&AudioParam.strTextMessage);
@@ -301,7 +301,7 @@ CAudioSourceDecoder::InitInternal(CParameter & Parameters)
             iTotalFrameSize -= NUM_BYTES_TEXT_MESS_IN_AUD_STR;
         }
         else {
-            bTextMessageUsed = FALSE;
+            bTextMessageUsed = false;
         }
         if(eAudioCoding==CAudioParam::AC_xHE_AAC) {
             XHEAACSuperFrame* p = new XHEAACSuperFrame();
@@ -395,16 +395,16 @@ CAudioSourceDecoder::InitInternal(CParameter & Parameters)
         {
         case ET_ALL:
             /* An init error occurred, do not process data in this module */
-            DoNotProcessData = TRUE;
+            DoNotProcessData = true;
             break;
 
         case ET_AUDDECODER:
             /* Audio part should not be decoded, set flag */
-            DoNotProcessAudDecoder = TRUE;
+            DoNotProcessAudDecoder = true;
             break;
 
         default:
-            DoNotProcessData = TRUE;
+            DoNotProcessData = true;
         }
 
         /* In all cases set output size to zero */

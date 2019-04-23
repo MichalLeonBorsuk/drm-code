@@ -1,6 +1,8 @@
 #include "speexresampler.h"
 #include <cstring>
 #include <iostream>
+using namespace std;
+
 #define RESAMPLING_QUALITY 6 /* 0-10 : 0=fast/bad 10=slow/good */
 
 SpeexResampler::SpeexResampler():resampler(nullptr), vecfInput(), vecfOutput(), iInputBuffered(0)

@@ -382,7 +382,7 @@ void FDRMDialog::SetStatus(CMultColorLED* LED, ETypeRxStatus state)
 
 void FDRMDialog::UpdateDRM_GUI()
 {
-    _BOOLEAN bMultimediaServiceAvailable;
+    bool bMultimediaServiceAvailable;
     CParameter& Parameters = *rx.GetParameters();
 
     //if (isVisible() == false)
@@ -506,7 +506,7 @@ void FDRMDialog::OnTimer()
 void FDRMDialog::showTextMessage(const QString& textMessage)
 {
     /* Activate text window */
-    TextTextMessage->setEnabled(TRUE);
+    TextTextMessage->setEnabled(true);
 
     QString formattedMessage = "";
     for (int i = 0; i < (int)textMessage.length(); i++)
@@ -626,8 +626,8 @@ QString FDRMDialog::serviceSelector(CParameter& Parameters, int i)
     Parameters.Lock();
 
     CService service = Parameters.Service[i];
-    const _REAL rAudioBitRate = Parameters.GetBitRateKbps(i, FALSE);
-    const _REAL rDataBitRate = Parameters.GetBitRateKbps(i, TRUE);
+    const _REAL rAudioBitRate = Parameters.GetBitRateKbps(i, false);
+    const _REAL rDataBitRate = Parameters.GetBitRateKbps(i, true);
 
     /* detect if AFS mux information is available TODO - align to service */
     bool bAFS = ((i==0) && (
@@ -710,19 +710,19 @@ QString FDRMDialog::serviceSelector(CParameter& Parameters, int i)
         switch (i)
         {
         case 0:
-            PushButtonService1->setEnabled(TRUE);
+            PushButtonService1->setEnabled(true);
             break;
 
         case 1:
-            PushButtonService2->setEnabled(TRUE);
+            PushButtonService2->setEnabled(true);
             break;
 
         case 2:
-            PushButtonService3->setEnabled(TRUE);
+            PushButtonService3->setEnabled(true);
             break;
 
         case 3:
-            PushButtonService4->setEnabled(TRUE);
+            PushButtonService4->setEnabled(true);
             break;
         }
     }
@@ -802,7 +802,7 @@ void FDRMDialog::UpdateDisplay()
         pButtonGroup->button(iCurSelAudioServ)->setChecked(true);
 
         /* If we have text messages */
-        if (audioService.AudioParam.bTextflag == TRUE)
+        if (audioService.AudioParam.bTextflag)
         {
             // Text message of current selected audio service (UTF-8 decoding)
             QString TextMessage(QString::fromUtf8(audioService.AudioParam.strTextMessage.c_str()));
@@ -811,7 +811,7 @@ void FDRMDialog::UpdateDisplay()
         else
         {
             /* Deactivate text window */
-            TextTextMessage->setEnabled(FALSE);
+            TextTextMessage->setEnabled(false);
 
             /* Clear Text */
             TextTextMessage->setText("");
@@ -824,7 +824,7 @@ void FDRMDialog::UpdateDisplay()
 
             Parameters.Lock();
             _REAL rPartABLenRat = Parameters.PartABLenRatio(iCurSelAudioServ);
-            _REAL rBitRate = Parameters.GetBitRateKbps(iCurSelAudioServ, FALSE);
+            _REAL rBitRate = Parameters.GetBitRateKbps(iCurSelAudioServ, false);
             Parameters.Unlock();
 
             /* Bit-rate */
@@ -862,15 +862,15 @@ void FDRMDialog::ClearDisplay()
 {
     /* No signal is currently received ---------------------------------- */
     /* Disable service buttons and associated labels */
-    pButtonGroup->setExclusive(FALSE);
+    pButtonGroup->setExclusive(false);
     for(size_t i=0; i<serviceLabels.size(); i++)
     {
         QPushButton* button = (QPushButton*)pButtonGroup->button(i);
-        if (button && button->isEnabled()) button->setEnabled(FALSE);
-        if (button && button->isChecked()) button->setChecked(FALSE);
+        if (button && button->isEnabled()) button->setEnabled(false);
+        if (button && button->isChecked()) button->setChecked(false);
         serviceLabels[i]->setText("");
     }
-    pButtonGroup->setExclusive(TRUE);
+    pButtonGroup->setExclusive(true);
 
     /* Main text labels */
     LabelBitrate->setText("");
@@ -882,7 +882,7 @@ void FDRMDialog::ClearDisplay()
     LabelServiceID->setText("");
 
     /* Hide text message label */
-    TextTextMessage->setEnabled(FALSE);
+    TextTextMessage->setEnabled(false);
     TextTextMessage->setText("");
 
     LabelServiceLabel->setText(tr("Scanning..."));

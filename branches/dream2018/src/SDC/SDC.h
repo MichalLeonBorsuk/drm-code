@@ -59,7 +59,7 @@ protected:
     void CommitFlush();
     void CommitLeave();
 
-    _BOOLEAN CanTransmitCurrentTime(CParameter& Parameter);
+    bool CanTransmitCurrentTime(CParameter& Parameter);
 
     void DataEntityType0(CVector<_BINARY>& vecbiData, CParameter& Parameter);
     void DataEntityType1(CVector<_BINARY>& vecbiData, int ServiceID,
@@ -97,28 +97,28 @@ public:
     }
 
 protected:
-    _BOOLEAN DataEntityType0(CVector<_BINARY>* pbiData, const int iLengthOfBody,
-                             CParameter& Parameter, const _BOOLEAN bVersion);
-    _BOOLEAN DataEntityType1(CVector<_BINARY>* pbiData, const int iLengthOfBody,
+    bool DataEntityType0(CVector<_BINARY>* pbiData, const int iLengthOfBody,
+                             CParameter& Parameter, const bool bVersion);
+    bool DataEntityType1(CVector<_BINARY>* pbiData, const int iLengthOfBody,
                              CParameter& Parameter);
 // ...
-    _BOOLEAN DataEntityType3(CVector<_BINARY>* pbiData, const int iLengthOfBody,
-                             CParameter& Parameter, const _BOOLEAN bVersion);
-    _BOOLEAN DataEntityType4(CVector<_BINARY>* pbiData, const int iLengthOfBody,
-                             CParameter& Parameter, const _BOOLEAN bVersion);
-    _BOOLEAN DataEntityType5(CVector<_BINARY>* pbiData, const int iLengthOfBody,
-                             CParameter& Parameter, const _BOOLEAN bVersion);
+    bool DataEntityType3(CVector<_BINARY>* pbiData, const int iLengthOfBody,
+                             CParameter& Parameter, const bool bVersion);
+    bool DataEntityType4(CVector<_BINARY>* pbiData, const int iLengthOfBody,
+                             CParameter& Parameter, const bool bVersion);
+    bool DataEntityType5(CVector<_BINARY>* pbiData, const int iLengthOfBody,
+                             CParameter& Parameter, const bool bVersion);
 // ...
-    _BOOLEAN DataEntityType7(CVector<_BINARY>* pbiData, const int iLengthOfBody,
-                             CParameter& Parameter, const _BOOLEAN bVersion);
-    _BOOLEAN DataEntityType8(CVector<_BINARY>* pbiData, const int iLengthOfBody,
+    bool DataEntityType7(CVector<_BINARY>* pbiData, const int iLengthOfBody,
+                             CParameter& Parameter, const bool bVersion);
+    bool DataEntityType8(CVector<_BINARY>* pbiData, const int iLengthOfBody,
                              CParameter& Parameter);
-    _BOOLEAN DataEntityType9(CVector<_BINARY>* pbiData, const int iLengthOfBody,
-                             CParameter& Parameter, const _BOOLEAN bVersion);
+    bool DataEntityType9(CVector<_BINARY>* pbiData, const int iLengthOfBody,
+                             CParameter& Parameter, const bool bVersion);
 // ...
-    _BOOLEAN DataEntityType11(CVector<_BINARY>* pbiData, const int iLengthOfBody,
-                              CParameter& Parameter, const _BOOLEAN bVersion);
-    _BOOLEAN DataEntityType12(CVector<_BINARY>* pbiData, const int iLengthOfBody,
+    bool DataEntityType11(CVector<_BINARY>* pbiData, const int iLengthOfBody,
+                              CParameter& Parameter, const bool bVersion);
+    bool DataEntityType12(CVector<_BINARY>* pbiData, const int iLengthOfBody,
                               CParameter& Parameter);
 
     CCRC		CRCObject;
