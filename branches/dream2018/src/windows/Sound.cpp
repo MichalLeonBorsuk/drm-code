@@ -30,8 +30,9 @@
 #include <iostream>
 #include <codecvt>
 #include <locale>
+using namespace std;
 
-static std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> conv;
+static wstring_convert<codecvt_utf8_utf16<wchar_t>> conv;
 
 static UINT FindDevice(const vector<string>& vecstrDevices, const string& names)
 {

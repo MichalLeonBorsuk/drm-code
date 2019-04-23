@@ -48,14 +48,14 @@ public:
     CSoundIn();
     virtual ~CSoundIn() {}
 
-    virtual void Enumerate(std::vector<string>&, std::vector<string>&);
+    virtual void Enumerate(std::vector<std::string>&, std::vector<std::string>&);
     virtual void SetDev(std::string sNewDevice);
     virtual std::string GetDev();
 
     bool Init(int iSampleRate, int iNewBufferSize, bool bNewBlocking = true);
     bool Read(CVector<short>& psData);
     void Close();
-	virtual std::string		GetVersion() { return "alsa audio input"; }
+    virtual std::string		GetVersion() { return "alsa audio input"; }
 
 protected:
     void Init_HW();

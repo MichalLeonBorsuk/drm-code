@@ -41,6 +41,7 @@
 #include <signal.h>
 #include <cstdio>
 #include "ConsoleIO.h"
+using namespace std;
 
 
 /* defines ANSI escape code */

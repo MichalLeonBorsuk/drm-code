@@ -35,6 +35,7 @@
 # include <unistd.h>
 # include <sys/stat.h>
 # include "shmsoundin.h"
+using namespace std;
 
 CShmSoundIn::CShmSoundIn():ringBuffer(NULL),
         shmid(-1),shm(NULL),shm_path(),name("shm input"),shmChannels(1),wantedChannels(2)

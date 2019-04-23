@@ -25,6 +25,7 @@
 \******************************************************************************/
 #include "alsacommon.h"
 #include <alsa/asoundlib.h>
+using namespace std;
 
 string checkName(vector<string> names, string sCurrentDevice)
 {
