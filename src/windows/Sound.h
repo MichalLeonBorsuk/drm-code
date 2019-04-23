@@ -59,18 +59,18 @@ virtual ~CSoundIn();
 
 virtual bool	Init(int iSampleRate, int iNewBufferSize, bool bNewBlocking);
 virtual bool	Read(CVector<short>& psData);
-virtual void		Enumerate(std::vector<string>& names, std::vector<string>& descriptions);
-virtual std::string		GetDev();
+virtual void		Enumerate(std::vector<std::string>& names, std::vector<std::string>& descriptions);
+virtual std::string	GetDev();
 virtual void		SetDev(std::string sNewDev);
 virtual void		Close();
-virtual std::string		GetVersion() { return ""; };
+virtual std::string	GetVersion() { return ""; };
 
 protected:
 void		OpenDevice();
 void		PrepareBuffer(int iBufNum);
 void		AddBuffer();
 
-std::vector<string>	vecstrDevices;
+std::vector<std::string>	vecstrDevices;
 std::string			sCurDev;
 WAVEFORMATEX	sWaveFormatEx;
 bool		bChangDev;
@@ -96,7 +96,7 @@ virtual ~CSoundOut();
 
 virtual bool	Init(int iSampleRate, int iNewBufferSize, bool bNewBlocking);
 virtual bool	Write(CVector<short>& psData);
-virtual void		Enumerate(std::vector<string>& names, std::vector<string>& descriptions);
+virtual void		Enumerate(std::vector<std::string>& names, std::vector<std::string>& descriptions);
 virtual std::string		GetDev();
 virtual void		SetDev(std::string sNewDev);
 virtual void		Close();
@@ -108,7 +108,7 @@ void		PrepareBuffer(int iBufNum);
 void		AddBuffer(int iBufNum);
 void		GetDoneBuffer(int& iCntPrepBuf, int& iIndexDoneBuf);
 
-std::vector<string>	vecstrDevices;
+std::vector<std::string>	vecstrDevices;
 std::string			sCurDev;
 WAVEFORMATEX	sWaveFormatEx;
 bool		bChangDev;

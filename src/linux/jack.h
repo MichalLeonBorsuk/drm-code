@@ -58,7 +58,7 @@ class CJackPorts
 {
 public:
     CJackPorts():devices(),ports() {}
-    std::vector<string> devices;
+    std::vector<std::string> devices;
     void load(jack_client_t * client, unsigned long flags);
     pair< std::string, std::string>get_ports(int dev);
 protected:
@@ -75,7 +75,7 @@ public:
 
     virtual void		Init(int iNewBufferSize, bool bNewBlocking = true);
     virtual bool	Read(CVector<short>& psData);
-    virtual void		Enumerate(std::vector<string>&);
+    virtual void		Enumerate(std::vector<std::string>&);
     virtual int			GetDev();
     virtual void		SetDev(int iNewDev);
     virtual void		Close();
@@ -99,7 +99,7 @@ public:
 
     virtual void		Init(int iNewBufferSize, bool bNewBlocking = true);
     virtual bool	Write(CVector<short>& psData);
-    virtual void		Enumerate(std::vector<string>&);
+    virtual void		Enumerate(std::vector<std::string>&);
     virtual int			GetDev();
     virtual void		SetDev(int iNewDev);
     virtual void		Close();

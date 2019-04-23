@@ -37,7 +37,7 @@ class CShmSoundIn: public CSoundInInterface
 public:
     CShmSoundIn();
     virtual 			~CShmSoundIn();
-    virtual void		Enumerate(std::vector<string>& choices);
+    virtual void		Enumerate(std::vector<std::string>& choices);
     virtual void		SetDev(int);
     virtual int			GetDev();
 
