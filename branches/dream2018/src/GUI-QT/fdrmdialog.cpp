@@ -461,22 +461,7 @@ void FDRMDialog::OnScheduleTimer()
 
 void FDRMDialog::OnTimer()
 {
-    ERecMode eNewReceiverMode = rx.GetReceiverMode();
-    switch(eNewReceiverMode)
-    {
-    case RM_DRM:
-        UpdateDRM_GUI();
-        break;
-    case RM_AM:
-        ChangeGUIModeToAM();
-        break;
-    case RM_FM:
-        ChangeGUIModeToFM();
-        break;
-    case RM_NONE: // wait until working thread starts operating
-        break;
-    }
-
+    // TODO move this to the CRx or lower
     // do this here so GUI has initialised before we might pop up a message box
     if(pScheduler!=nullptr)
         return;
@@ -1129,6 +1114,7 @@ void FDRMDialog::eventClose(QCloseEvent* ce)
 
 void FDRMDialog::OnWorkingThreadFinished()
 {
+    cerr << "FDRMDialog::OnWorkingThreadFinished" << endl;
     close();
 }
 
