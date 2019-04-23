@@ -694,7 +694,7 @@ void CReceiveData::ProcessDataInternal(CParameter& Parameters)
                 iPhase = (iPhase + 1) & 3;
                 _REAL rValue = vecsSoundBuffer[2 * i]     * /*COS*/SineTable[iPhase + 1] -
                                vecsSoundBuffer[2 * i + 1] * /*SIN*/SineTable[iPhase];
-                (*pvecOutputData)[i] = sample2real(rValue);
+                (*pvecOutputData)[i] = rValue;
             }
             break;
 
@@ -704,7 +704,7 @@ void CReceiveData::ProcessDataInternal(CParameter& Parameters)
                 iPhase = (iPhase + 1) & 3;
                 _REAL rValue = vecsSoundBuffer[2 * i + 1] * /*COS*/SineTable[iPhase + 1] -
                                vecsSoundBuffer[2 * i]     * /*SIN*/SineTable[iPhase];
-                (*pvecOutputData)[i] = sample2real(rValue);
+                (*pvecOutputData)[i] = rValue;
             }
             break;
         }

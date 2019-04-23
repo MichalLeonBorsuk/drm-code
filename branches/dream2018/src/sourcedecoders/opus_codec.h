@@ -161,7 +161,7 @@ public:
     virtual void EncClose();
 	virtual void EncSetBitrate(int iBitRate);
 	virtual void EncUpdate(CAudioParam& AudioParam);
-    virtual string fileName(const CParameter& Parameters) const { return "";}
+    virtual string fileName(const CParameter&) const { return "";}
 protected:
 	opus_decoder *hOpusDecoder;
 	opus_encoder *hOpusEncoder;
