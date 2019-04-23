@@ -15,8 +15,8 @@ public:
     void Reset();
 private:
     SpeexResamplerState*	resampler;
-    vector<float>			vecfInput;
-    vector<float>			vecfOutput;
+    std::vector<float>			vecfInput;
+    std::vector<float>			vecfOutput;
     size_t					iInputBuffered;
 
     size_t GetFreeInputSize() const;

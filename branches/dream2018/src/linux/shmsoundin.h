@@ -37,16 +37,16 @@ class CShmSoundIn: public CSoundInInterface
 public:
     CShmSoundIn();
     virtual 			~CShmSoundIn();
-    virtual void		Enumerate(vector<string>& choices);
+    virtual void		Enumerate(std::vector<string>& choices);
     virtual void		SetDev(int);
     virtual int			GetDev();
 
-    virtual void		Init(int iNewBufferSize, _BOOLEAN bNewBlocking = TRUE);
+    virtual void		Init(int iNewBufferSize, bool bNewBlocking = true);
     virtual void		Close();
-	virtual string		GetVersion() { return "linux shared memory audio input"; }
-    virtual _BOOLEAN	Read(CVector<short>& psData);
+	virtual std::string		GetVersion() { return "linux shared memory audio input"; }
+    virtual bool	Read(CVector<short>& psData);
 
-    void				SetShmPath(const string& p) {
+    void				SetShmPath(const std::string& p) {
         shm_path = p;
     }
     void				SetShmChannels(int n) {
@@ -55,7 +55,7 @@ public:
     void				SetWantedChannels(int n) {
         wantedChannels = n;
     }
-    void				SetName(const string& n) {
+    void				SetName(const std::string& n) {
         name = n;
     }
 
@@ -64,8 +64,8 @@ protected:
     PaUtilShmRingBuffer *ringBuffer;
     int		shmid;
     void*	shm;
-    string	shm_path;
-    string	name;
+    std::string	shm_path;
+    std::string	name;
     int		shmChannels;
     int		wantedChannels;
 };

@@ -70,15 +70,15 @@ protected:
 	QTimer				Timer;
 	QTimer				TimerClose;
 
-	_BOOLEAN		bSysEvalDlgWasVis;
-	_BOOLEAN		bMultMedDlgWasVis;
-	_BOOLEAN		bLiveSchedDlgWasVis;
-	_BOOLEAN		bStationsDlgWasVis;
-	_BOOLEAN		bEPGDlgWasVis;
+	bool		bSysEvalDlgWasVis;
+	bool		bMultMedDlgWasVis;
+	bool		bLiveSchedDlgWasVis;
+	bool		bStationsDlgWasVis;
+	bool		bEPGDlgWasVis;
 	ERecMode		eReceiverMode;
 
 	void SetStatus(CMultColorLED* LED, ETypeRxStatus state);
-	virtual void	eventClose(QCloseEvent* ce);
+    virtual void	eventClose(QCloseEvent*);
 	virtual void	eventShow(QShowEvent* pEvent);
 	virtual void	eventHide(QHideEvent* pEvent);
 	virtual void	eventUpdate();

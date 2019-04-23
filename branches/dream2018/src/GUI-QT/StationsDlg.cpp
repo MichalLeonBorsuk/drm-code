@@ -53,7 +53,7 @@ rx(rx),
 #endif
 greenCube(":/icons/greenCube.png"), redCube(":/icons/redCube.png"),
 orangeCube(":/icons/orangeCube.png"), pinkCube(":/icons/pinkCube.png"),
-bReInitOnFrequencyChange(FALSE)
+bReInitOnFrequencyChange(false)
 {
 	setupUi(this);
 #if QWT_VERSION < 0x060100
@@ -603,7 +603,7 @@ int StationsDlg::currentSortColumn()
 		return iSortColumnanalog;
 }
 
-void StationsDlg::SetSortAscending(_BOOLEAN b)
+void StationsDlg::SetSortAscending(bool b)
 {
 	if (schedule.GetSchedMode() == CSchedule::SM_DRM)
 		bCurrentSortAscendingdrm = b;
@@ -611,7 +611,7 @@ void StationsDlg::SetSortAscending(_BOOLEAN b)
 		bCurrentSortAscendinganalog = b;
 }
 
-_BOOLEAN StationsDlg::GetSortAscending()
+bool StationsDlg::GetSortAscending()
 {
 	if (schedule.GetSchedMode() == CSchedule::SM_DRM)
 		return bCurrentSortAscendingdrm;
@@ -729,8 +729,8 @@ void StationsDlg::OnSMeterMenu()
 
 void StationsDlg::EnableSMeter()
 {
-	TextLabelSMeter->setEnabled(TRUE);
-	ProgrSigStrength->setEnabled(TRUE);
+	TextLabelSMeter->setEnabled(true);
+	ProgrSigStrength->setEnabled(true);
 	TextLabelSMeter->show();
 	ProgrSigStrength->show();
 	emit subscribeRig();
@@ -799,7 +799,7 @@ void StationsDlg::AddWhatsThisHelp()
 	ProgrSigStrength->setWhatsThis(strSMeter);
 }
 
-_BOOLEAN StationsDlg::showAll()
+bool StationsDlg::showAll()
 {
 	return actionShowAllStations->isChecked();
 }

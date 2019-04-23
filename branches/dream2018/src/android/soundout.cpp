@@ -59,18 +59,18 @@ int COpenSLESOut::GetSampleRate()
     return 48000;
 }
 
-_BOOLEAN COpenSLESOut::Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking)
+bool COpenSLESOut::Init(int iNewSampleRate, int iNewBufferSize, bool bNewBlocking)
 {
     (void)iNewSampleRate;
     (void)iNewBufferSize;
     (void)bNewBlocking;
-    return TRUE;
+    return true;
 }
 
-_BOOLEAN COpenSLESOut::Write(CVector<short>& psData)
+bool COpenSLESOut::Write(CVector<short>& psData)
 {
     (void)psData;
-    return TRUE;
+    return true;
 }
 
 void COpenSLESOut::Close()

@@ -28,6 +28,7 @@
 
 #include "Reassemble.h"
 #include <iostream>
+using namespace std;
 
 CReassemblerN::CReassemblerN (const CReassemblerN & r):iLastSegmentNum (r.iLastSegmentNum),
 		iLastSegmentSize (r.iLastSegmentSize),
@@ -55,7 +56,7 @@ CReassemblerN & CReassemblerN::operator= (const CReassemblerN & r)
 }
 
 void
-CReassemblerN::AddSegment (vector<_BYTE> &vecDataIn, int iSegNum, _BOOLEAN bLast)
+CReassemblerN::AddSegment (vector<_BYTE> &vecDataIn, int iSegNum, bool bLast)
 {
 	if (bLast)
 	{
@@ -87,7 +88,7 @@ CReassemblerN::AddSegment (vector<_BYTE> &vecDataIn, int iSegNum, _BOOLEAN bLast
 	else
 	{
 		iSegmentSize = vecDataIn.size();
-		if (Tracker.HaveSegment (iSegNum) == FALSE)
+		if (Tracker.HaveSegment (iSegNum) == false)
 		{
             copyin(vecDataIn, size_t(iSegNum));
 		}

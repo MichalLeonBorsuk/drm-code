@@ -39,12 +39,12 @@ public:
 
     CAudioParam(): strTextMessage(), iStreamID(STREAM_ID_NOT_USED),
             eAudioCoding(AC_NONE), eSBRFlag(SB_NOT_USED), eAudioSamplRate(AS_24KHZ),
-            bTextflag(FALSE), bEnhanceFlag(FALSE), eSurround(MS_NONE), eAudioMode(AM_MONO),
+            bTextflag(false), bEnhanceFlag(false), eSurround(MS_NONE), eAudioMode(AM_MONO),
             xHE_AAC_config(),
             eOPUSBandwidth(OB_FB), eOPUSSubCod(OS_SILK), eOPUSChan(OC_STEREO),
             eOPUSSignal(OG_MUSIC), eOPUSApplication(OA_AUDIO),
-            bOPUSForwardErrorCorrection(FALSE), bOPUSRequestReset(FALSE),
-            bParamChanged(FALSE)
+            bOPUSForwardErrorCorrection(false), bOPUSRequestReset(false),
+            bParamChanged(false)
     {
     }
 
@@ -100,22 +100,22 @@ public:
     void EnqueueType9(CVector<_BINARY>& biData) const;
 
     /* Text-message */
-    string strTextMessage;	/* Max length is (8 * 16 Bytes) */
+    std::string strTextMessage;	/* Max length is (8 * 16 Bytes) */
 
     int iStreamID;			/* Stream Id of the stream which carries the audio service */
 
     EAudCod eAudioCoding;	/* This field indicated the source coding system */
     ESBRFlag eSBRFlag;		/* SBR flag */
     EAudSamRat eAudioSamplRate;	/* Audio sampling rate */
-    _BOOLEAN bTextflag;		/* Indicates whether a text message is present or not */
-    _BOOLEAN bEnhanceFlag;	/* Enhancement flag */
+    bool bTextflag;		/* Indicates whether a text message is present or not */
+    bool bEnhanceFlag;	/* Enhancement flag */
     ESurround eSurround;    /* MPEG Surround */
 
     /* For AAC: Mono, P-Stereo, Stereo --------------------------------- */
     EAudioMode eAudioMode;	/* Audio mode */
 
     /* for xHE-AAC ------------------------------------------------------ */
-    vector<_BYTE> xHE_AAC_config;
+    std::vector<_BYTE> xHE_AAC_config;
 
     /* For OPUS --------------------------------------------------------- */
     EOPUSBandwidth eOPUSBandwidth; /* Audio bandwidth */
@@ -123,8 +123,8 @@ public:
     EOPUSChan eOPUSChan;	/* Audio channels */
     EOPUSSignal eOPUSSignal; /* Encoder signal type */
     EOPUSApplication eOPUSApplication; /* Encoder intended application */
-    _BOOLEAN bOPUSForwardErrorCorrection; /* Encoder Forward Error Correction enabled */
-    _BOOLEAN bOPUSRequestReset; /* Request encoder reset */
+    bool bOPUSForwardErrorCorrection; /* Encoder Forward Error Correction enabled */
+    bool bOPUSRequestReset; /* Request encoder reset */
 
     /* CAudioParam has changed */
     bool bParamChanged;

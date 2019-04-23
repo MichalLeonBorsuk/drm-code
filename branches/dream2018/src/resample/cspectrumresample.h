@@ -9,7 +9,7 @@ public:
     CSpectrumResample();
     virtual ~CSpectrumResample();
 
-    void Resample(CVector<_REAL>* prInput, CVector<_REAL>** pprOutput, int iNewOutputBlockSize, _BOOLEAN bResample);
+    void Resample(CVector<_REAL>* prInput, CVector<_REAL>** pprOutput, int iNewOutputBlockSize, bool bResample);
 
 protected:
     CVector<_REAL>			vecrIntBuff;

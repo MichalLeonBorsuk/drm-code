@@ -99,7 +99,7 @@ CPacketSocketQT::parseDest(const string & strNewAddr)
     return QString(strNewAddr.c_str()).split(":", QString::KeepEmptyParts);
 }
 
-_BOOLEAN
+bool
 CPacketSocketQT::SetDestination(const string & strNewAddr)
 {
     /* syntax
@@ -109,7 +109,7 @@ CPacketSocketQT::SetDestination(const string & strNewAddr)
        prefix with "t" for tcp
      */
     int ttl = 127;
-    _BOOLEAN bAddressOK = TRUE;
+    bool bAddressOK = true;
     QHostAddress AddrInterface;
     QStringList parts = parseDest(strNewAddr);
     QString first = parts[0].toLower();
@@ -136,7 +136,7 @@ CPacketSocketQT::SetDestination(const string & strNewAddr)
         iHostPortOut = parts[2].toUInt();
         break;
     default:
-        bAddressOK = FALSE;
+        bAddressOK = false;
     }
     if(udp)
     {
@@ -145,13 +145,13 @@ CPacketSocketQT::SetDestination(const string & strNewAddr)
 # if QT_VERSION < 0x040800
         const SOCKET s = udpSocket->socketDescriptor();
         if(setsockopt(s, IPPROTO_IP, IP_TTL, (char*)&ttl, sizeof(ttl))==SOCKET_ERROR)
-            bAddressOK = FALSE;
+            bAddressOK = false;
         uint32_t mc_if = htonl(AddrInterface.toIPv4Address());
         if(mc_if != 0)
         {
             if(setsockopt(s, IPPROTO_IP, IP_MULTICAST_IF,
                           (char *) &mc_if, sizeof(mc_if)) == SOCKET_ERROR)
-                bAddressOK = FALSE;
+                bAddressOK = false;
         }
 # else
         udpSocket->setSocketOption(QAbstractSocket::MulticastTtlOption, ttl);
@@ -169,17 +169,17 @@ CPacketSocketQT::SetDestination(const string & strNewAddr)
     return bAddressOK;
 }
 
-_BOOLEAN
+bool
 CPacketSocketQT::GetDestination(string & str)
 {
     stringstream s;
     s << HostAddrOut.toString().toLatin1().constData() << ":" << iHostPortOut;
     str = s.str();
-    return TRUE;
+    return true;
 }
 
 
-_BOOLEAN
+bool
 CPacketSocketQT::SetOrigin(const string & strNewAddr)
 {
     /* syntax (unwanted fields can be empty, e.g. <source ip>::<group ip>:<port>
@@ -195,7 +195,7 @@ CPacketSocketQT::SetOrigin(const string & strNewAddr)
         udp = false;
         if(tcpSocket == NULL)
             tcpSocket = new QTcpSocket();
-        return TRUE;
+        return true;
     }
 
     if(udpSocket == NULL)
@@ -238,10 +238,10 @@ CPacketSocketQT::SetOrigin(const string & strNewAddr)
     {
         return doSetSource(AddrGroup, AddrInterface, iPort, AddrSource);
     }
-    return FALSE;
+    return false;
 }
 
-_BOOLEAN CPacketSocketQT::doSetSource(QHostAddress AddrGroup, QHostAddress AddrInterface, int iPort, QHostAddress AddrSource)
+bool CPacketSocketQT::doSetSource(QHostAddress AddrGroup, QHostAddress AddrInterface, int iPort, QHostAddress AddrSource)
 {
     if(udp)
     {
@@ -288,7 +288,7 @@ _BOOLEAN CPacketSocketQT::doSetSource(QHostAddress AddrGroup, QHostAddress AddrI
             udpSocket->bind(AddrGroup, iPort);
         }
     }
-    return TRUE;
+    return true;
 }
 
 QNetworkInterface

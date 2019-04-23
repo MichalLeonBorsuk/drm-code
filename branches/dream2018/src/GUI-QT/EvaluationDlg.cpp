@@ -121,13 +121,13 @@ systemevalDlg::systemevalDlg(CRx& nrx, CSettings& Settings,
        initialization for the chart and chart selector */
     if (rx.inputIsRSCI())
     {
-        SliderNoOfIterations->setEnabled(FALSE);
+        SliderNoOfIterations->setEnabled(false);
 
-        ButtonGroupChanEstFreqInt->setEnabled(FALSE);
-        ButtonGroupChanEstTimeInt->setEnabled(FALSE);
-        ButtonGroupTimeSyncTrack->setEnabled(FALSE);
-        CheckBoxFlipSpec->setEnabled(FALSE);
-        GroupBoxInterfRej->setEnabled(FALSE);
+        ButtonGroupChanEstFreqInt->setEnabled(false);
+        ButtonGroupChanEstTimeInt->setEnabled(false);
+        ButtonGroupTimeSyncTrack->setEnabled(false);
+        CheckBoxFlipSpec->setEnabled(false);
+        GroupBoxInterfRej->setEnabled(false);
 
         /* Only audio spectrum makes sence for MDI in */
         eCurCharType = CDRMPlot::AUDIO_SPECTRUM;
@@ -219,12 +219,12 @@ void systemevalDlg::UpdateControls()
     {
     case TLINEAR:
         if (!RadioButtonTiLinear->isChecked())
-            RadioButtonTiLinear->setChecked(TRUE);
+            RadioButtonTiLinear->setChecked(true);
         break;
 
     case TWIENER:
         if (!RadioButtonTiWiener->isChecked())
-            RadioButtonTiWiener->setChecked(TRUE);
+            RadioButtonTiWiener->setChecked(true);
         break;
     }
 
@@ -232,17 +232,17 @@ void systemevalDlg::UpdateControls()
     {
     case FLINEAR:
         if (!RadioButtonFreqLinear->isChecked())
-            RadioButtonFreqLinear->setChecked(TRUE);
+            RadioButtonFreqLinear->setChecked(true);
         break;
 
     case FDFTFILTER:
         if (!RadioButtonFreqDFT->isChecked())
-            RadioButtonFreqDFT->setChecked(TRUE);
+            RadioButtonFreqDFT->setChecked(true);
         break;
 
     case FWIENER:
         if (!RadioButtonFreqWiener->isChecked())
-            RadioButtonFreqWiener->setChecked(TRUE);
+            RadioButtonFreqWiener->setChecked(true);
         break;
     }
 
@@ -250,12 +250,12 @@ void systemevalDlg::UpdateControls()
     {
     case TSFIRSTPEAK:
         if (!RadioButtonTiSyncFirstPeak->isChecked())
-            RadioButtonTiSyncFirstPeak->setChecked(TRUE);
+            RadioButtonTiSyncFirstPeak->setChecked(true);
         break;
 
     case TSENERGY:
         if (!RadioButtonTiSyncEnergy->isChecked())
-            RadioButtonTiSyncEnergy->setChecked(TRUE);
+            RadioButtonTiSyncEnergy->setChecked(true);
         break;
     }
 
@@ -916,7 +916,7 @@ void systemevalDlg::OnCheckSaveAudioWAV()
     	This code is copied in AnalogDemDlg.cpp. If you do changes here, you should
     	apply the changes in the other file, too
     */
-    if (CheckBoxSaveAudioWave->isChecked() == TRUE)
+    if (CheckBoxSaveAudioWave->isChecked())
     {
         /* Show "save file" dialog */
         QString strFileName =
@@ -931,7 +931,7 @@ void systemevalDlg::OnCheckSaveAudioWAV()
         else
         {
             /* User hit the cancel button, uncheck the button */
-            CheckBoxSaveAudioWave->setChecked(FALSE);
+            CheckBoxSaveAudioWave->setChecked(false);
         }
     }
     else

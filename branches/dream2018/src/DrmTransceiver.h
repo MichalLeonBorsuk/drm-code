@@ -51,8 +51,8 @@ public:
     virtual CSettings*				GetSettings() = 0;
     virtual void					SetSettings(CSettings* pNewSettings) = 0;
     virtual CParameter*				GetParameters() = 0;
-    virtual _BOOLEAN				IsReceiver() const = 0;
-    virtual _BOOLEAN				IsTransmitter() const = 0;
+    virtual bool				IsReceiver() const = 0;
+    virtual bool				IsTransmitter() const = 0;
 
 };
 

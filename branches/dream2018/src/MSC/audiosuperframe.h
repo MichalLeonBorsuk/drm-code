@@ -13,7 +13,7 @@ public:
     virtual unsigned getSuperFrameDurationMilliseconds()=0;
     virtual void getFrame(std::vector<uint8_t>& , uint8_t& crc, unsigned i)=0;
 protected:
-    vector<vector<uint8_t>> audioFrame;
+    std::vector<std::vector<uint8_t>> audioFrame;
 };
 
 #endif // AUDIOSUPERFRAME_H

@@ -34,6 +34,8 @@
 #include "../util/CRC.h"
 #include <iostream>
 
+using namespace std;
+
 CPft::CPft(int isrc, int idst):
 iSource(isrc),
 iDest(idst),
@@ -92,7 +94,7 @@ bool CPft::DecodePFTPacket(const vector < _BYTE > &vecIn,
 	int i;
 	for (i = 0; i < iHeaderLen - 2; i++)
 		CRCObject.AddByte(vecIn[i]);
-	const _BOOLEAN
+	const bool
 		bCRCOk = CRCObject.CheckCRC(iHCRC);
 	if (!bCRCOk)
 	{

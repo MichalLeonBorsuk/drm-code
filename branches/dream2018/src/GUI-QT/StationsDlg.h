@@ -66,14 +66,14 @@ protected:
 	void			AddWhatsThisHelp();
 	void			EnableSMeter();
 	void			DisableSMeter();
-	_BOOLEAN		showAll();
-	_BOOLEAN		GetSortAscending();
-	void			SetSortAscending(_BOOLEAN b);
+	bool		showAll();
+	bool		GetSortAscending();
+	void			SetSortAscending(bool b);
 	void			ColumnParamFromStr(const QString& strColumnParam);
 	void			ColumnParamToStr(QString& strColumnParam);
 	int				currentSortColumn();
-	_BOOLEAN		bCurrentSortAscendingdrm;
-	_BOOLEAN		bCurrentSortAscendinganalog;
+	bool		bCurrentSortAscendingdrm;
+	bool		bCurrentSortAscendinganalog;
 	int				iSortColumndrm;
 	int				iSortColumnanalog;
 	QString			strColumnParamdrm;
@@ -94,7 +94,7 @@ protected:
 	QActionGroup*	showGroup;
 	QNetworkAccessManager *manager;
 	QTimer			Timer;
-	_BOOLEAN		bReInitOnFrequencyChange;
+	bool		bReInitOnFrequencyChange;
 
 	QMutex			ListItemsMutex;
 

@@ -374,7 +374,7 @@ void CFACTransmit::Init(CParameter& Parameter)
 /******************************************************************************\
 * CFACReceive																   *
 \******************************************************************************/
-_BOOLEAN CFACReceive::FACParam(CVector<_BINARY>* pbiFACData,
+bool CFACReceive::FACParam(CVector<_BINARY>* pbiFACData,
                                CParameter& Parameter)
 {
     /*
@@ -395,7 +395,7 @@ _BOOLEAN CFACReceive::FACParam(CVector<_BINARY>* pbiFACData,
         CRCObject.AddByte((_BYTE) (*pbiFACData).Separate(SIZEOF__BYTE));
 
     bool permissive = Parameter.lenient_RSCI;
-    if (permissive || CRCObject.CheckCRC((*pbiFACData).Separate(8)) == TRUE)
+    if (permissive || CRCObject.CheckCRC((*pbiFACData).Separate(8)))
     {
         /* CRC-check successful, extract data from FAC-stream */
         /* Reset separation function */
@@ -564,12 +564,12 @@ _BOOLEAN CFACReceive::FACParam(CVector<_BINARY>* pbiFACData,
         /* Do not use Rfa */
         (*pbiFACData).Separate(7);
 
-        /* CRC is ok, return TRUE */
-        return TRUE;
+        /* CRC is ok, return true */
+        return true;
     }
     else
     {
-        /* Data is corrupted, do not use it. Return failure as FALSE */
-        return FALSE;
+        /* Data is corrupted, do not use it. Return failure as false */
+        return false;
     }
 }

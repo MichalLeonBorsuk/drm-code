@@ -42,6 +42,7 @@
 #ifdef __ANDROID_API__
 #include "../android/platform_util.h"
 #endif
+using namespace std;
 
 /* Implementation *************************************************************/
 
@@ -130,7 +131,7 @@ void CSchedule::ReadINIFile(FILE* pFile)
 	const int	iMaxLenName = 256;
 	char	cName[iMaxLenName], *r;
 	int		iFileStat, n;
-	_BOOLEAN	bReadOK = TRUE;
+	bool	bReadOK = true;
 
 	r = fgets(cName, iMaxLenName, pFile); /* [DRMSchedule] */
 	do
@@ -143,7 +144,7 @@ void CSchedule::ReadINIFile(FILE* pFile)
 			&iStartTime, &iStopTime);
 
 		if (iFileStat != 2)
-			bReadOK = FALSE;
+			bReadOK = false;
 		else
 		{
 			StationsItem.SetStartTime(iStartTime);
@@ -169,7 +170,7 @@ void CSchedule::ReadINIFile(FILE* pFile)
 		/* Frequency */
 		iFileStat = fscanf(pFile, "Frequency=%d\n", &StationsItem.iFreq);
 		if (iFileStat != 1)
-			bReadOK = FALSE;
+			bReadOK = false;
 
 		/* Target */
 		iFileStat = fscanf(pFile, "Target=%255[^\n|^\r]\n", cName);
@@ -216,7 +217,7 @@ void CSchedule::ReadINIFile(FILE* pFile)
 		iFileStat = fscanf(pFile, "\n");
 
 		/* Check for error before applying data */
-		if (bReadOK == TRUE)
+		if (bReadOK)
 		{
 			/* Set "days flag string" and generate strings for displaying active
 			days */
@@ -227,7 +228,7 @@ void CSchedule::ReadINIFile(FILE* pFile)
 
 			UpdateStringListForFilter(StationsItem);
 		}
-	} while (!((iFileStat == EOF) || (bReadOK == FALSE)));
+	} while (!((iFileStat == EOF) || (bReadOK == false)));
 
 	(void)r; (void)n;
 }
@@ -461,12 +462,12 @@ bool CSchedule::CheckFilter(const int iPos)
 
 Station::EState CStationsItem::stateAt(time_t ltime, int previewSeconds) const
 {
-	if (activeAt(ltime) == TRUE)
+	if (activeAt(ltime))
 	{
 		time_t dt = ltime+NUM_SECONDS_SOON_INACTIVE;
 
 		/* Check if the station soon will be inactive */
-		if (activeAt(dt) == TRUE)
+		if (activeAt(dt))
 			return Station::IS_ACTIVE;
 		else
 			return Station::IS_SOON_INACTIVE;
@@ -475,7 +476,7 @@ Station::EState CStationsItem::stateAt(time_t ltime, int previewSeconds) const
 	{
 		for(time_t dt = ltime; dt < ltime + previewSeconds; dt += 60)
 		{
-			if (activeAt(dt) == TRUE)
+			if (activeAt(dt))
 			{
 				return Station::IS_PREVIEW;
 			}
@@ -488,7 +489,7 @@ Station::EState CStationsItem::stateAt(time_t ltime, int previewSeconds) const
 extern time_t timegm(struct tm *tm); // defined in Scheduler.cpp
 #endif
 
-_BOOLEAN CStationsItem::activeAt(time_t wantedTime) const
+bool CStationsItem::activeAt(time_t wantedTime) const
 {
 	struct tm ptm = *gmtime (&wantedTime);
 	ptm.tm_hour = 0;
@@ -520,7 +521,7 @@ _BOOLEAN CStationsItem::activeAt(time_t wantedTime) const
 	{
 		if((broadcastStart <= wantedTime) && (wantedTime < broadcastStop))
 		{
-			return TRUE;
+			return true;
 		}
 		else
 		{
@@ -534,12 +535,12 @@ _BOOLEAN CStationsItem::activeAt(time_t wantedTime) const
 				broadcastStop -= 86400l;
 				if((broadcastStart <= wantedTime) && (wantedTime < broadcastStop))
 				{
-					return TRUE;
+					return true;
 				}
 			}
 		}
 	}
-	return FALSE;
+	return false;
 }
 
 void CStationsItem::SetDaysFlagString(const QString& strNewDaysFlags)

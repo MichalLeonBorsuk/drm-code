@@ -35,9 +35,9 @@ ETypeRxStatus Reverb::apply(bool bCurBlockOK, bool bCurBlockFaulty, CVector<_REA
     }
 
     ETypeRxStatus status = DATA_ERROR;
-    if (bCurBlockOK == FALSE)
+    if (bCurBlockOK == false)
     {
-        if (bAudioWasOK == TRUE)
+        if (bAudioWasOK)
         {
             /* Post message to show that CRC was wrong (yellow light) */
             status = DATA_ERROR;
@@ -67,7 +67,7 @@ ETypeRxStatus Reverb::apply(bool bCurBlockOK, bool bCurBlockFaulty, CVector<_REA
             }
 
             /* Set flag to show that audio block was bad */
-            bAudioWasOK = FALSE;
+            bAudioWasOK = false;
         }
         else
         {
@@ -101,7 +101,7 @@ ETypeRxStatus Reverb::apply(bool bCurBlockOK, bool bCurBlockFaulty, CVector<_REA
             status = RX_OK;
         }
 
-        if (bAudioWasOK == FALSE)
+        if (bAudioWasOK == false)
         {
             if (okToReverb)
             {
@@ -135,7 +135,7 @@ ETypeRxStatus Reverb::apply(bool bCurBlockOK, bool bCurBlockFaulty, CVector<_REA
             }
 
             /* Reset flag */
-            bAudioWasOK = TRUE;
+            bAudioWasOK = true;
         }
     }
 

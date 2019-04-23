@@ -365,7 +365,7 @@ CConsoleIO::Update()
 					cprintf(" %s %.2f kbps", audio ? "Audio" : "Data", rBitRate);
 				if (audio && service.DataParam.iStreamID != STREAM_ID_NOT_USED)
 				{
-					_REAL rBitRate = Parameters.GetBitRateKbps(i, TRUE);
+					_REAL rBitRate = Parameters.GetBitRateKbps(i, true);
 					cprintf(" + Data %.2f kbps", rBitRate);
 				}
 				cprintf(NL);

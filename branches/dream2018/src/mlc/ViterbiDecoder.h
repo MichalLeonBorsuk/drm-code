@@ -81,7 +81,7 @@
 
 
 /* In case of MAP decoder, all metrics must be stored for the entire input
-   vector since we need them for the forward and backward direction */
+   std::vector since we need them for the forward and backward direction */
 #ifdef USE_MAX_LOG_MAP
 # define METRICSET(a)		matrMetricSet[a]
 #else
@@ -104,7 +104,7 @@ public:
               int iPunctPatPartA, int iPunctPatPartB, int iLevel);
 
 protected:
-    /* Two trellis data vectors are needed for current and old state */
+    /* Two trellis data std::vectors are needed for current and old state */
     _VITMETRTYPE			vecTrelMetric1[MC_NUM_STATES];
     _VITMETRTYPE			vecTrelMetric2[MC_NUM_STATES];
 

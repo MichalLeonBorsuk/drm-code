@@ -45,8 +45,8 @@ void CTimeSyncTrack::Process(CParameter& Parameters,
 	CReal		rCurEnergy;
 	CReal		rWinEnergy;
 	CReal		rMaxWinEnergy;
-	_BOOLEAN	bDelayFound = FALSE;
-	_BOOLEAN	bPDSResultFound;
+	bool	bDelayFound = false;
+	bool	bPDSResultFound;
 
 	/* Rotate the averaged PDP to follow the time shifts -------------------- */
 	/* Update timing correction history (shift register) */
@@ -126,7 +126,7 @@ void CTimeSyncTrack::Process(CParameter& Parameters,
 		for (i = 0; i < iNumIntpFreqPil - 1; i++)
 		{
 			/* We are only interested in the first peak */
-			if (bDelayFound == FALSE)
+			if (bDelayFound == false)
 			{
 				if ((vecrAvPoDeSpRot[i] > vecrAvPoDeSpRot[i + 1]) &&
 					(vecrAvPoDeSpRot[i] > rPeakBound))
@@ -135,7 +135,7 @@ void CTimeSyncTrack::Process(CParameter& Parameters,
 					iFirstPathDelay = i;
 
 					/* Set the flag */
-					bDelayFound = TRUE;
+					bDelayFound = true;
 				}
 			}
 		}
@@ -165,14 +165,14 @@ void CTimeSyncTrack::Process(CParameter& Parameters,
 		}
 
 		/* We always have a valid measurement, set flag */
-		bDelayFound = TRUE;
+		bDelayFound = true;
 		break;
 	}
 
 
 	/* Only apply timing correction if search was successful and tracking is
 	   activated */
-	if ((bDelayFound == TRUE) && (bTiSyncTracking == TRUE))
+	if ((bDelayFound) && (bTiSyncTracking))
 	{
 		CReal rPropGain = 0.0; /* quiet compiler */
 		/* Consider the rotation introduced for earlier peaks in path delay.
@@ -219,7 +219,7 @@ void CTimeSyncTrack::Process(CParameter& Parameters,
 
 		/* In case of sample rate offset acquisition phase, use faster timing
 		   corrections */
-		if (bSamRaOffsAcqu == TRUE)
+		if (bSamRaOffsAcqu)
 			rPropGain *= 2;
 
 		/* Apply proportional control and fix result to sample grid */
@@ -300,10 +300,10 @@ void CTimeSyncTrack::Process(CParameter& Parameters,
 	else
 	{
 		/* Apply the result from acquisition only once */
-		if (bSamRaOffsAcqu == TRUE)
+		if (bSamRaOffsAcqu)
 		{
 			/* End of acquisition phase */
-			bSamRaOffsAcqu = FALSE;
+			bSamRaOffsAcqu = false;
 
 			/* Set sample rate offset to initial estimate. We consider the
 			   initialization phase of channel estimation by "iSymDelay" */
@@ -360,17 +360,17 @@ void CTimeSyncTrack::Process(CParameter& Parameters,
 	/* From left to the right -> search for end of PDS */
 	rEstPDSEnd = (CReal) (iNumIntpFreqPil - 1);
 	rCurEnergy = (CReal) 0.0;
-	bPDSResultFound = FALSE;
+	bPDSResultFound = false;
 	for (i = 0; i < iNumIntpFreqPil; i++)
 	{
-		if (bPDSResultFound == FALSE)
+		if (bPDSResultFound == false)
 		{
 			if (rCurEnergy > rSigEnergyBound)
 			{
 				/* Delay index */
 				rEstPDSEnd = (CReal) i;
 
-				bPDSResultFound = TRUE;
+				bPDSResultFound = true;
 			}
 
 			/* Accumulate signal energy, subtract noise on each sample */
@@ -381,17 +381,17 @@ void CTimeSyncTrack::Process(CParameter& Parameters,
 	/* From right to the left -> search for beginning of PDS */
 	rEstPDSBegin = (CReal) 0.0;
 	rCurEnergy = (CReal) 0.0;
-	bPDSResultFound = FALSE;
+	bPDSResultFound = false;
 	for (i = iNumIntpFreqPil - 1; i >= 0; i--)
 	{
-		if (bPDSResultFound == FALSE)
+		if (bPDSResultFound == false)
 		{
 			if (rCurEnergy > rSigEnergyBound)
 			{
 				/* Delay index */
 				rEstPDSBegin = (CReal) i;
 
-				bPDSResultFound = TRUE;
+				bPDSResultFound = true;
 			}
 
 			/* Accumulate signal energy, subtract noise on each sample */

@@ -39,14 +39,14 @@ public:
     CPaCommon(bool);
     virtual 		~CPaCommon();
 
-    virtual void	Enumerate(std::vector<std::string>& names, std::vector<std::string>& descriptions);
+    virtual void	Enumerate(std::vector<string>& names, std::vector<string>& descriptions);
     virtual void	SetDev(std::string sNewDevice);
     virtual std::string	GetDev();
 
-    _BOOLEAN		Init(int iSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking);
+    bool		Init(int iSampleRate, int iNewBufferSize, bool bNewBlocking);
     void			ReInit();
-    _BOOLEAN		Read(CVector<short>& psData);
-    _BOOLEAN		Write(CVector<short>& psData);
+    bool		Read(CVector<short>& psData);
+    bool		Write(CVector<short>& psData);
     void			Close();
 
     PaUtilRingBuffer ringBuffer;
@@ -55,9 +55,9 @@ public:
 protected:
 
     PaStream *stream;
-    vector<string> names;
-    vector<PaDeviceIndex> devices;
-    string dev;
+    std::vector<string> names;
+    std::vector<PaDeviceIndex> devices;
+    std::string dev;
     bool is_capture,blocking,device_changed,xrun;
     int framesPerBuffer;
     int iBufferSize;
@@ -72,7 +72,7 @@ class CPaIn: public CSoundInInterface
 public:
     CPaIn();
     virtual 			~CPaIn();
-    virtual void	Enumerate(std::vector<std::string>& names, std::vector<std::string>& descriptions)
+    virtual void	Enumerate(std::vector<string>& names, std::vector<string>& descriptions)
     {
         hw.Enumerate(names, descriptions);
     }
@@ -89,9 +89,9 @@ public:
         return Pa_GetVersionInfo()->versionText;
     }
 
-    virtual _BOOLEAN	Init(int iSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking);
+    virtual bool	Init(int iSampleRate, int iNewBufferSize, bool bNewBlocking);
     virtual void		Close();
-    virtual _BOOLEAN	Read(CVector<short>& psData);
+    virtual bool	Read(CVector<short>& psData);
 
 protected:
 
@@ -103,7 +103,7 @@ class CPaOut: public CSoundOutInterface
 public:
     CPaOut();
     virtual 			~CPaOut();
-    virtual void	Enumerate(std::vector<std::string>& names, std::vector<std::string>& descriptions)
+    virtual void	Enumerate(std::vector<string>& names, std::vector<string>& descriptions)
     {
         hw.Enumerate(names, descriptions);
     }
@@ -119,9 +119,9 @@ public:
     {
         return Pa_GetVersionInfo()->versionText;
     }
-    virtual _BOOLEAN	Init(int iSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking);
+    virtual bool	Init(int iSampleRate, int iNewBufferSize, bool bNewBlocking);
     virtual void		Close();
-    virtual _BOOLEAN	Write(CVector<short>& psData);
+    virtual bool	Write(CVector<short>& psData);
 
 protected:
 

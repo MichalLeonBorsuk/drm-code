@@ -77,7 +77,7 @@ CMatlibVector<CReal>	Sinc(const CMatlibVector<CReal>& fvI)
 
 
 /* My own functions --------------------------------------------------------- */
-/* Dominant eigenvector */
+/* Dominant eigenstd::vector */
 CMatlibVector<CReal>	DomEig(const CMatlibMatrix<CReal>& rmI, const CReal rEpsilon = 1e-5);
 
 /* Linear regression */

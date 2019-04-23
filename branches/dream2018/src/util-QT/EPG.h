@@ -49,7 +49,7 @@ class EPG
 
     void loadChannels (const QString & fileName);
     void saveChannels (const QString & fileName);
-    void addChannel (const string& label, uint32_t sid);
+    void addChannel (const std::string& label, uint32_t sid);
     void parseDoc (const QDomDocument &);
 
     class CProg
@@ -67,7 +67,7 @@ class EPG
 		QString name, description;
 		QString crid;
 		uint32_t shortId;
-		vector<QString> mainGenre, secondaryGenre, otherGenre;
+		std::vector<QString> mainGenre, secondaryGenre, otherGenre;
     };
 
     QMap < time_t, CProg > progs;

@@ -50,7 +50,7 @@ CShmSoundIn::~CShmSoundIn()
  * 2 samples per frame
  */
 void
-CShmSoundIn::Init(int iNewBufferSize, _BOOLEAN bNewBlocking)
+CShmSoundIn::Init(int iNewBufferSize, bool bNewBlocking)
 {
     // TODO decide if we should use the parameters
     (void)iNewBufferSize;
@@ -95,11 +95,11 @@ CShmSoundIn::GetDev()
     return 0;
 }
 
-_BOOLEAN
+bool
 CShmSoundIn::Read(CVector<short>& psData)
 {
     if (ringBuffer==NULL)
-        return FALSE;
+        return false;
 
     size_t frames;
     if (wantedChannels==2)
@@ -145,7 +145,7 @@ CShmSoundIn::Read(CVector<short>& psData)
         }
     }
 
-    return TRUE;
+    return true;
 }
 
 void

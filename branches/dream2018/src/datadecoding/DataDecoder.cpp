@@ -32,7 +32,7 @@
 #include "Experiment.h"
 #include <iostream>
 
-CDataDecoder::CDataDecoder ():iServPacketID (0), DoNotProcessData (TRUE),
+CDataDecoder::CDataDecoder ():iServPacketID (0), DoNotProcessData (true),
 	Journaline(*new CJournaline()),
 	Experiment(*new CExperiment()),
 	iOldJournalineServiceID (0)
@@ -61,7 +61,7 @@ CDataDecoder::ProcessDataInternal(CParameter & Parameters)
 	CCRC CRCObject;
 
 	/* Check if something went wrong in the initialization routine */
-	if (DoNotProcessData == TRUE)
+	if (DoNotProcessData)
 		return;
 
 	/* CRC check for all packets -------------------------------------------- */
@@ -83,7 +83,7 @@ CDataDecoder::ProcessDataInternal(CParameter & Parameters)
 		/* Store result in vector and show CRC in multimedia window */
 		uint16_t crc = pvecInputData->Separate(16);
 		int iShortID = Parameters.GetCurSelDataService();
-		if (CRCObject.CheckCRC(crc) == TRUE)
+		if (CRCObject.CheckCRC(crc))
 		{
 			veciCRCOk[j] = 1;	/* CRC ok */
 			Parameters.DataComponentStatus[iShortID].SetStatus(RX_OK);
@@ -124,7 +124,7 @@ CDataDecoder::ProcessDataInternal(CParameter & Parameters)
 			/* Continuity index: this 3-bit field shall increment by one
 			   modulo-8 for each packet with this packet Id */
 			if ((iContInd[iPacketID] + 1) % 8 != iNewContInd)
-				DataUnit[iPacketID].bOK = FALSE;
+				DataUnit[iPacketID].bOK = false;
 
 			/* Store continuity index */
 			iContInd[iPacketID] = iNewContInd;
@@ -134,14 +134,14 @@ CDataDecoder::ProcessDataInternal(CParameter & Parameters)
 			if (biFirstFlag == 1)
 			{
 				DataUnit[iPacketID].Reset();
-				DataUnit[iPacketID].bOK = TRUE;
+				DataUnit[iPacketID].bOK = true;
 			}
 
 			/* If all packets are received correctely, data unit is ready */
 			if (biLastFlag == 1)
 			{
-				if (DataUnit[iPacketID].bOK == TRUE)
-					DataUnit[iPacketID].bReady = TRUE;
+				if (DataUnit[iPacketID].bOK)
+					DataUnit[iPacketID].bReady = true;
 			}
 
 			/* Data field --------------------------------------------------- */
@@ -157,8 +157,8 @@ CDataDecoder::ProcessDataInternal(CParameter & Parameters)
 				if (iNewPacketDataSize > iMaxPacketDataSize)
 				{
 					/* Error, reset flags */
-					DataUnit[iPacketID].bOK = FALSE;
-					DataUnit[iPacketID].bReady = FALSE;
+					DataUnit[iPacketID].bOK = false;
+					DataUnit[iPacketID].bReady = false;
 
 					/* Set values to read complete packet size */
                     iNewPacketDataSize = iMaxPacketDataSize; // TODO check the semantics here iNewPacketDataSize;
@@ -183,7 +183,7 @@ CDataDecoder::ProcessDataInternal(CParameter & Parameters)
 					(biLastFlag == 1) && (iNewPacketDataSize == 0))
 				{
 					/* Packet with no useful data, reset flag */
-					DataUnit[iPacketID].bReady = FALSE;
+					DataUnit[iPacketID].bReady = false;
 				}
 			}
 			else
@@ -209,7 +209,7 @@ CDataDecoder::ProcessDataInternal(CParameter & Parameters)
 				(*pvecInputData).Separate(SIZEOF__BYTE);
 
 			/* Use data unit ------------------------------------------------ */
-			if (DataUnit[iPacketID].bReady == TRUE)
+			if (DataUnit[iPacketID].bReady)
 			{
 				/* Decode all IDs regardless whether activated or not
 				   (iPacketID == or != iServPacketID) */
@@ -285,7 +285,7 @@ void
 CDataDecoder::DecodeEPG(const CParameter & Parameters)
 {
 	/* Application Decoding - must run all the time and in background */
-	if ((DoNotProcessData == FALSE)
+	if ((DoNotProcessData == false)
 		&& (iEPGPacketID >= 0)
 		&& MOTObject[iEPGPacketID].NewObjectAvailable())
 	{
@@ -342,7 +342,7 @@ CDataDecoder::InitInternal(CParameter & Parameters)
 	int iCurSelDataServ;
 
 	/* Init error flag */
-	DoNotProcessData = FALSE;
+	DoNotProcessData = false;
 
 	/* Get current selected data service */
 	iCurSelDataServ = Parameters.GetCurSelDataService();
@@ -381,7 +381,7 @@ CDataDecoder::InitInternal(CParameter & Parameters)
 			(iTotalPacketSize > iTotalNumInputBytes))
 		{
 			/* Set error flag */
-			DoNotProcessData = TRUE;
+			DoNotProcessData = true;
 		}
 		else
 		{
@@ -428,7 +428,7 @@ CDataDecoder::InitInternal(CParameter & Parameters)
 		}
 	}
 	else
-		DoNotProcessData = TRUE;
+		DoNotProcessData = true;
 
 	/* Set input block size */
 	iInputBlockSize = iTotalNumInputBits;
@@ -451,22 +451,22 @@ CDataDecoder::InitInternal(CParameter & Parameters)
 	}
 }
 
-_BOOLEAN
+bool
 	CDataDecoder::GetMOTObject(CMOTObject & NewObj,
 							   const EAppType eAppTypeReq)
 {
-	_BOOLEAN bReturn = FALSE;
+	bool bReturn = false;
 
 	/* Lock resources */
 	Lock();
 
 	/* Check if data service is current MOT application */
-	if ((DoNotProcessData == FALSE)
+	if ((DoNotProcessData == false)
 		&& (eAppType[iServPacketID] == eAppTypeReq)
 		&& MOTObject[iServPacketID].NewObjectAvailable())
 	{
 		MOTObject[iServPacketID].GetNextObject(NewObj);
-		bReturn = TRUE;
+		bReturn = true;
 	}
 	/* Release resources */
 	Unlock();
@@ -474,21 +474,21 @@ _BOOLEAN
 	return bReturn;
 }
 
-_BOOLEAN
+bool
 	CDataDecoder::GetMOTDirectory(CMOTDirectory & MOTDirectoryOut,
 								  const EAppType eAppTypeReq)
 {
-	_BOOLEAN bReturn = FALSE;
+	bool bReturn = false;
 
 	/* Lock resources */
 	Lock();
 
 	/* Check if data service is current MOT application */
-	if ((DoNotProcessData == FALSE)
+	if ((DoNotProcessData == false)
 		&& (eAppType[iServPacketID] == eAppTypeReq))
 	{
 		MOTObject[iServPacketID].GetDirectory(MOTDirectoryOut);
-		bReturn = TRUE;
+		bReturn = true;
 	}
 	/* Release resources */
 	Unlock();
@@ -503,7 +503,7 @@ CDataDecoder::GetNews(const int iObjID, CNews & News)
 	Lock();
 
 	/* Check if data service is Journaline application */
-	if ((DoNotProcessData == FALSE)
+	if ((DoNotProcessData == false)
 		&& (eAppType[iServPacketID] == AT_JOURNALINE))
 	{
 		Journaline.GetNews(iObjID, News);

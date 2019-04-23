@@ -128,38 +128,38 @@ void GeneralSettingsDlg::OnCheckBoxUseGPS()
 
 void GeneralSettingsDlg::ButtonOkClicked()
 {
-    _BOOLEAN bOK = TRUE;
-    _BOOLEAN bAllEmpty = TRUE;
-    _BOOLEAN bAllCompiled = FALSE;
+    bool bOK = true;
+    bool bAllEmpty = true;
+    bool bAllCompiled = false;
 
     /* Check the values and close the dialog */
 
-    if (ValidInput(EdtLatitudeDegrees) == FALSE)
+    if (ValidInput(EdtLatitudeDegrees) == false)
     {
-        bOK = FALSE;
+        bOK = false;
         QMessageBox::information(this, "Dream",
                                  tr("Latitude value must be in the range 0 to 90")
                                  ,QMessageBox::Ok);
     }
-    else if (ValidInput(EdtLongitudeDegrees) == FALSE)
+    else if (ValidInput(EdtLongitudeDegrees) == false)
     {
-        bOK = FALSE;
+        bOK = false;
 
         QMessageBox::information(this, "Dream",
                                  tr("Longitude value must be in the range 0 to 180")
                                  ,QMessageBox::Ok);
     }
-    else if (ValidInput(EdtLongitudeMinutes) == FALSE
-             || ValidInput(EdtLatitudeMinutes) == FALSE)
+    else if (ValidInput(EdtLongitudeMinutes) == false
+             || ValidInput(EdtLatitudeMinutes) == false)
     {
-        bOK = FALSE;
+        bOK = false;
 
         QMessageBox::information(this, "Dream",
                                  tr("Minutes value must be in the range 0 to 59")
                                  ,QMessageBox::Ok);
     }
 
-    if (bOK == TRUE)
+    if (bOK)
     {
         /* Check if all coordinates are empty */
 
@@ -182,7 +182,7 @@ void GeneralSettingsDlg::ButtonOkClicked()
 
         if (!bAllEmpty && !bAllCompiled)
         {
-            bOK = FALSE;
+            bOK = false;
 
             QMessageBox::information(this, "Dream",
                                      tr("Compile all fields on receiver coordinates")
@@ -190,7 +190,7 @@ void GeneralSettingsDlg::ButtonOkClicked()
         }
     }
 
-    if (bOK == TRUE)
+    if (bOK)
     {
         /* save current settings */
 
@@ -233,7 +233,7 @@ void GeneralSettingsDlg::ButtonOkClicked()
     }
 }
 
-_BOOLEAN GeneralSettingsDlg::ValidInput(const QLineEdit* le)
+bool GeneralSettingsDlg::ValidInput(const QLineEdit* le)
 {
     QString sText;
 
@@ -242,7 +242,7 @@ _BOOLEAN GeneralSettingsDlg::ValidInput(const QLineEdit* le)
     sText = le->text();
 
     if (sText == "")
-        return TRUE;
+        return true;
     else
     {
         int iPosCursor = 0;
@@ -255,22 +255,22 @@ QString GeneralSettingsDlg::ExtractDigits(const QString strStr, const int iStart
 {
     QString sVal;
     QChar ch;
-    _BOOLEAN bStop;
+    bool bStop;
 
     /* Extract the first iDigits from position iStart */
 
     sVal = "";
-    bStop = FALSE;
+    bStop = false;
 
     for (int i = iStart - 1 ; i <= iStart + iDigits - 1; i++)
     {
-        if (bStop == FALSE)
+        if (bStop == false)
         {
             ch = strStr.at(i);
-            if (ch.isDigit() == TRUE)
+            if (ch.isDigit())
                 sVal = sVal + ch;
             else
-                bStop = TRUE;
+                bStop = true;
         }
     }
     return sVal;

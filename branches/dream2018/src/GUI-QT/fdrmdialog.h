@@ -87,7 +87,7 @@ protected:
     CRx&                rx;
     bool                done;
     QTimer				Timer;
-    vector<QLabel*>		serviceLabels;
+    std::vector<QLabel*>		serviceLabels;
 
     CLogging*			pLogging;
     systemevalDlg*		pSysEvalDlg;

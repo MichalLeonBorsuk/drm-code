@@ -94,18 +94,18 @@ int COpenSLESIn::GetSampleRate()
     return 48000;
 }
 
-_BOOLEAN COpenSLESIn::Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking)
+bool COpenSLESIn::Init(int iNewSampleRate, int iNewBufferSize, bool bNewBlocking)
 {
     (void)iNewSampleRate;
     (void)iNewBufferSize;
     (void)bNewBlocking;
-    return FALSE;
+    return false;
 }
 
-_BOOLEAN COpenSLESIn::Read(CVector<short>& psData)
+bool COpenSLESIn::Read(CVector<short>& psData)
 {
     (void)psData;
-    return FALSE;
+    return false;
 }
 
 void COpenSLESIn::Close()
@@ -239,14 +239,14 @@ next_record_buffer_index = 0;
 SLresult result;
 
 const SLInterfaceID engine_ids[] = {SL_IID_AUDIOIODEVICECAPABILITIES};
-const SLboolean engine_req[] = {SL_BOOLEAN_FALSE};
+const SLboolean engine_req[] = {SLbool_false};
 // create engine
 SLObjectItf engineObject = nullptr;
 result = slCreateEngine(&engineObject, 0, nullptr, 1, engine_ids, engine_req);
 assert(SL_RESULT_SUCCESS == result);
 
 // realize the engine
-result = (*engineObject)->Realize(engineObject, SL_BOOLEAN_FALSE);
+result = (*engineObject)->Realize(engineObject, SLbool_false);
 assert(SL_RESULT_SUCCESS == result);
 
 // get the engine interface, which is needed in order to create other
@@ -284,13 +284,13 @@ SLDataSink rec_audioSnk = {&rec_loc_bq, &rec_format_pcm};
 // create audio recorder
 // (requires the RECORD_AUDIO permission)
 const SLInterfaceID rec_id[] = {SL_IID_ANDROIDSIMPLEBUFFERQUEUE};
-const SLboolean rec_req[] = {SL_BOOLEAN_TRUE};
+const SLboolean rec_req[] = {SLbool_true};
 result = (*engineEngine)->CreateAudioRecorder(engineEngine,
 &recorderObject, &rec_audioSrc, &rec_audioSnk, 1, rec_id, rec_req);
 assert(SL_RESULT_SUCCESS == result);
 
 // realize the audio recorder
-result = (*recorderObject)->Realize(recorderObject, SL_BOOLEAN_FALSE);
+result = (*recorderObject)->Realize(recorderObject, SLbool_false);
 std::cerr << "result: " << result << " : " << SLESErrorToString(result) <<
 std::endl;
 assert(SL_RESULT_SUCCESS == result);
@@ -482,7 +482,7 @@ next_record_buffer_index = 0;
 SLresult result;
 
 const SLInterfaceID engine_ids[] = {SL_IID_AUDIOIODEVICECAPABILITIES};
-const SLboolean engine_req[] = {SL_BOOLEAN_FALSE};
+const SLboolean engine_req[] = {SLbool_false};
 // create engine
 SLObjectItf engineObject = nullptr;
 result = slCreateEngine(&engineObject, 0, nullptr, 1, engine_ids,
@@ -490,7 +490,7 @@ engine_req);
 assert(SL_RESULT_SUCCESS == result);
 
 // realize the engine
-result = (*engineObject)->Realize(engineObject, SL_BOOLEAN_FALSE);
+result = (*engineObject)->Realize(engineObject, SLbool_false);
 assert(SL_RESULT_SUCCESS == result);
 
 // get the engine interface, which is needed in order to create other
@@ -528,13 +528,13 @@ SLDataSink rec_audioSnk = {&rec_loc_bq, &rec_format_pcm};
 // create audio recorder
 // (requires the RECORD_AUDIO permission)
 const SLInterfaceID rec_id[] = {SL_IID_ANDROIDSIMPLEBUFFERQUEUE};
-const SLboolean rec_req[] = {SL_BOOLEAN_TRUE};
+const SLboolean rec_req[] = {SLbool_true};
 result = (*engineEngine)->CreateAudioRecorder(engineEngine,
 &recorderObject, &rec_audioSrc, &rec_audioSnk, 1, rec_id, rec_req);
 assert(SL_RESULT_SUCCESS == result);
 
 // realize the audio recorder
-result = (*recorderObject)->Realize(recorderObject, SL_BOOLEAN_FALSE);
+result = (*recorderObject)->Realize(recorderObject, SLbool_false);
 std::cerr << "result: " << result << " : " << SLESErrorToString(result) <<
 std::endl;
 assert(SL_RESULT_SUCCESS == result);
@@ -701,7 +701,7 @@ next_record_buffer_index = 0;
 SLresult result;
 
 const SLInterfaceID engine_ids[] = {SL_IID_AUDIOIODEVICECAPABILITIES};
-const SLboolean engine_req[] = {SL_BOOLEAN_FALSE};
+const SLboolean engine_req[] = {SLbool_false};
 // create engine
 SLObjectItf engineObject = nullptr;
 result = slCreateEngine(&engineObject, 0, nullptr, 1, engine_ids,
@@ -709,7 +709,7 @@ engine_req);
 assert(SL_RESULT_SUCCESS == result);
 
 // realize the engine
-result = (*engineObject)->Realize(engineObject, SL_BOOLEAN_FALSE);
+result = (*engineObject)->Realize(engineObject, SLbool_false);
 assert(SL_RESULT_SUCCESS == result);
 
 // get the engine interface, which is needed in order to create other
@@ -747,13 +747,13 @@ SLDataSink rec_audioSnk = {&rec_loc_bq, &rec_format_pcm};
 // create audio recorder
 // (requires the RECORD_AUDIO permission)
 const SLInterfaceID rec_id[] = {SL_IID_ANDROIDSIMPLEBUFFERQUEUE};
-const SLboolean rec_req[] = {SL_BOOLEAN_TRUE};
+const SLboolean rec_req[] = {SLbool_true};
 result = (*engineEngine)->CreateAudioRecorder(engineEngine,
 &recorderObject, &rec_audioSrc, &rec_audioSnk, 1, rec_id, rec_req);
 assert(SL_RESULT_SUCCESS == result);
 
 // realize the audio recorder
-result = (*recorderObject)->Realize(recorderObject, SL_BOOLEAN_FALSE);
+result = (*recorderObject)->Realize(recorderObject, SLbool_false);
 std::cerr << "result: " << result << " : " << SLESErrorToString(result) <<
 std::endl;
 assert(SL_RESULT_SUCCESS == result);
@@ -1129,7 +1129,7 @@ next_record_buffer_index = 0;
 SLresult result;
 
 const SLInterfaceID engine_ids[] = {SL_IID_AUDIOIODEVICECAPABILITIES};
-const SLboolean engine_req[] = {SL_BOOLEAN_FALSE};
+const SLboolean engine_req[] = {SLbool_false};
 // create engine
 SLObjectItf engineObject = nullptr;
 result = slCreateEngine(&engineObject, 0, nullptr, 1, engine_ids,
@@ -1137,7 +1137,7 @@ engine_req);
 assert(SL_RESULT_SUCCESS == result);
 
 // realize the engine
-result = (*engineObject)->Realize(engineObject, SL_BOOLEAN_FALSE);
+result = (*engineObject)->Realize(engineObject, SLbool_false);
 assert(SL_RESULT_SUCCESS == result);
 
 // get the engine interface, which is needed in order to create other
@@ -1175,13 +1175,13 @@ SLDataSink rec_audioSnk = {&rec_loc_bq, &rec_format_pcm};
 // create audio recorder
 // (requires the RECORD_AUDIO permission)
 const SLInterfaceID rec_id[] = {SL_IID_ANDROIDSIMPLEBUFFERQUEUE};
-const SLboolean rec_req[] = {SL_BOOLEAN_TRUE};
+const SLboolean rec_req[] = {SLbool_true};
 result = (*engineEngine)->CreateAudioRecorder(engineEngine,
 &recorderObject, &rec_audioSrc, &rec_audioSnk, 1, rec_id, rec_req);
 assert(SL_RESULT_SUCCESS == result);
 
 // realize the audio recorder
-result = (*recorderObject)->Realize(recorderObject, SL_BOOLEAN_FALSE);
+result = (*recorderObject)->Realize(recorderObject, SLbool_false);
 std::cerr << "result: " << result << " : " << SLESErrorToString(result) <<
 std::endl;
 assert(SL_RESULT_SUCCESS == result);

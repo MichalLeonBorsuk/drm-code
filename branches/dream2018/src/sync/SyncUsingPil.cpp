@@ -39,9 +39,9 @@ void CSyncUsingPil::ProcessDataInternal(CParameter& Parameters)
 	/**************************************************************************\
 	* Frame synchronization detection										   *
 	\**************************************************************************/
-	_BOOLEAN bSymbolIDHasChanged = FALSE;
+	bool bSymbolIDHasChanged = false;
 
-	if ((bSyncInput == FALSE) && (bAquisition == TRUE))
+	if ((bSyncInput == false) && (bAquisition))
 	{
 		/* DRM frame synchronization based on time pilots ------------------- */
 		/* Calculate correlation of received cells with pilot pairs */
@@ -80,10 +80,10 @@ void CSyncUsingPil::ProcessDataInternal(CParameter& Parameters)
 			}
 
 			/* For initial frame synchronization, use maximum directly */
-			if (bInitFrameSync == TRUE)
+			if (bInitFrameSync)
 			{
 				/* Reset init flag */
-				bInitFrameSync = FALSE;
+				bInitFrameSync = false;
 
 				/* Set symbol ID index according to received data */
 				iSymbCntFraSy = iNumSymPerFrame - iMaxIndex - 1;
@@ -97,15 +97,15 @@ void CSyncUsingPil::ProcessDataInternal(CParameter& Parameters)
 					if (iSymbCntFraSy == iNumSymPerFrame - iMiddleOfInterval - 1)
 					{
 						/* Reset flags */
-						bBadFrameSync = FALSE;
-						bFrameSyncWasOK = TRUE;
+						bBadFrameSync = false;
+						bFrameSyncWasOK = true;
 
 						/* Post Message for GUI (Good frame sync) */
 						Parameters.ReceiveStatus.FSync.SetStatus(RX_OK);
 					}
 					else
 					{
-						if (bBadFrameSync == TRUE)
+						if (bBadFrameSync)
 						{
 							/* Reset symbol ID index according to received
 							   data */
@@ -113,10 +113,10 @@ void CSyncUsingPil::ProcessDataInternal(CParameter& Parameters)
 								iNumSymPerFrame - iMiddleOfInterval - 1;
 
 							/* Inform that symbol ID has changed */
-							bSymbolIDHasChanged = TRUE;
+							bSymbolIDHasChanged = true;
 
 							/* Reset flag */
-							bBadFrameSync = FALSE;
+							bBadFrameSync = false;
 
 							Parameters.ReceiveStatus.FSync.SetStatus(CRC_ERROR);
 						}
@@ -128,9 +128,9 @@ void CSyncUsingPil::ProcessDataInternal(CParameter& Parameters)
 							   detection gets false results. If the next time
 							   the frame sync is still unequal to the
 							   measurement, then correct it */
-							bBadFrameSync = TRUE;
+							bBadFrameSync = true;
 
-							if (bFrameSyncWasOK == TRUE)
+							if (bFrameSyncWasOK)
 							{
 								/* Post Message that frame sync was wrong but
 								   was not yet corrected (yellow light) */
@@ -141,7 +141,7 @@ void CSyncUsingPil::ProcessDataInternal(CParameter& Parameters)
 						}
 
 						/* Set flag for bad sync */
-						bFrameSyncWasOK = FALSE;
+						bFrameSyncWasOK = false;
 					}
 				}
 			}
@@ -167,7 +167,7 @@ void CSyncUsingPil::ProcessDataInternal(CParameter& Parameters)
 	/**************************************************************************\
 	* Using Frequency pilot information										   *
 	\**************************************************************************/
-	if ((bSyncInput == FALSE) && (bTrackPil == TRUE))
+	if ((bSyncInput == false) && (bTrackPil))
 	{
 		CComplex cFreqOffEstVecSym = CComplex((CReal) 0.0, (CReal) 0.0);
 
@@ -280,14 +280,14 @@ fflush(pFile);
 
 	/* If synchronized DRM input stream is used, overwrite the detected
 	   frequency offest estimate by "0", because we know this value */
-	if (bSyncInput == TRUE)
+	if (bSyncInput)
 		Parameters.rFreqOffsetTrack = (CReal) 0.0;
 
 	/* Do not ship data before first frame synchronization was done. The flag
-	   "bAquisition" must not be set to FALSE since in that case we would run
+	   "bAquisition" must not be set to false since in that case we would run
 	   into an infinite loop since we would not ever ship any data. But since
 	   the flag is set after this module, we should be fine with that. */
-	if ((bInitFrameSync == TRUE) && (bSyncInput == FALSE))
+	if ((bInitFrameSync) && (bSyncInput == false))
 		iOutputBlockSize = 0;
 	else
 	{
@@ -440,12 +440,12 @@ void CSyncUsingPil::StartAcquisition()
 	/* Reset correlation history */
 	vecrCorrHistory.Reset(-_MAXREAL);
 
-	bAquisition = TRUE;
+	bAquisition = true;
 
 	/* After an initialization the frame sync must be adjusted */
-	bBadFrameSync = TRUE;
-	bInitFrameSync = TRUE; /* Set flag to show that (re)-init was done */
-	bFrameSyncWasOK = FALSE;
+	bBadFrameSync = true;
+	bInitFrameSync = true; /* Set flag to show that (re)-init was done */
+	bFrameSyncWasOK = false;
 
 	/* Initialize count for filling the history buffer */
 	iInitCntFraSy = iNumSymPerFrame;

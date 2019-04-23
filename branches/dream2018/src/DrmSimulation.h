@@ -59,8 +59,8 @@ public:
             iNumErrors(0), iCounter(0), strFileName("SimTime.dat"), tiStartTime(0) {}
     virtual ~CGenSimData() {}
 
-    void SetSimTime(int iNewTi, string strNewFileName);
-    void SetNumErrors(int iNewNE, string strNewFileName);
+    void SetSimTime(int iNewTi, std::string strNewFileName);
+    void SetNumErrors(int iNewNE, std::string strNewFileName);
 
 protected:
     enum ECntType {CT_TIME, CT_ERRORS};
@@ -69,7 +69,7 @@ protected:
     int			iNumErrors;
     int			iCounter;
     int			iMinNumBlocks;
-    string		strFileName;
+    std::string		strFileName;
     time_t		tiStartTime;
 
     virtual void InitInternal(CParameter& TransmParam);
@@ -106,7 +106,7 @@ public:
 protected:
     void Run();
     void Init();
-    string SimFileName(CParameter& Param, string strAddInf, _BOOLEAN bWithSNR);
+    std::string SimFileName(CParameter& Param, std::string strAddInf, bool bWithSNR);
 
     int iSimTime;
     int iSimNumErrors;

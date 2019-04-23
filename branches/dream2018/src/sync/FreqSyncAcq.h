@@ -74,24 +74,24 @@ class CFreqSyncAcq : public CReceiverModul<_REAL, _COMPLEX>
 public:
 	CFreqSyncAcq() : 
 		veciTableFreqPilots(3), /* 3 frequency pilots */
-		bAquisition(FALSE), bSyncInput(FALSE),
+		bAquisition(false), bSyncInput(false),
 		rCenterFreq(0), rWinSize(0),
-		bUseRecFilter(FALSE)
+		bUseRecFilter(false)
 		{}
 	virtual ~CFreqSyncAcq() {}
 
 	void SetSearchWindow(_REAL rNewCenterFreq, _REAL rNewWinSize);
 
 	void StartAcquisition();
-	void StopAcquisition() {bAquisition = FALSE;}
-	_BOOLEAN GetAcquisition() {return bAquisition;}
+	void StopAcquisition() {bAquisition = false;}
+	bool GetAcquisition() {return bAquisition;}
 
-	void SetRecFilter(const _BOOLEAN bNewF) {bUseRecFilter = bNewF;}
-	_BOOLEAN GetRecFilter() {return bUseRecFilter;}
-	_BOOLEAN GetUnlockedFrameBoundary() {return iFreeSymbolCounter==0;}
+	void SetRecFilter(const bool bNewF) {bUseRecFilter = bNewF;}
+	bool GetRecFilter() {return bUseRecFilter;}
+	bool GetUnlockedFrameBoundary() {return iFreeSymbolCounter==0;}
 
 	/* To set the module up for synchronized DRM input data stream */
-	void SetSyncInput(_BOOLEAN bNewS) {bSyncInput = bNewS;}
+	void SetSyncInput(bool bNewS) {bSyncInput = bNewS;}
 
 protected:
 	CVector<int>				veciTableFreqPilots;
@@ -108,12 +108,12 @@ protected:
 
 	int							iFFTSize;
 
-	_BOOLEAN					bAquisition;
+	bool					bAquisition;
 
 	int							iAquisitionCounter;
 	int							iAverageCounter;
 
-	_BOOLEAN					bSyncInput;
+	bool					bSyncInput;
 
 	_REAL						rCenterFreq;
 	_REAL						rWinSize;
@@ -133,7 +133,7 @@ protected:
 	_REAL						rInternIFNorm;
 
 	CDRMBandpassFilt			BPFilter;
-	_BOOLEAN					bUseRecFilter;
+	bool					bUseRecFilter;
 
 	/* OPH: counter to count symbols within a frame in order to generate */
 	/* RSCI output even when unlocked */

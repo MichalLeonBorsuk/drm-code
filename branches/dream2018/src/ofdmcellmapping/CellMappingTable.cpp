@@ -371,12 +371,12 @@ void CCellMappingTable::MakeTable(
 				/* Gain calculation and applying of complex value ----------- */
 				/* Test, if current carrier-index is one of the "boosted pilots"
 				   position */
-				_BOOLEAN bIsBoostedPilot = FALSE;
+				bool bIsBoostedPilot = false;
 				for (i = 0; i < NUM_BOOSTED_SCAT_PILOTS; i++)
 				{
 					/* In case of match set flag */
 					if (ScatPilots.piGainTable[i] == iCar)
-						bIsBoostedPilot = TRUE;
+						bIsBoostedPilot = true;
 				}
 
 				/* Boosted pilot: Gain = 2, Regular pilot: Gain = sqrt(2) */
@@ -442,7 +442,7 @@ void CCellMappingTable::MakeTable(
 
 				/* Set complex value for this pilot */
 				/* Test for "special case" defined in drm-standard */
-				_BOOLEAN bIsFreqPilSpeciCase = FALSE;
+				bool bIsFreqPilSpeciCase = false;
 				if (eNewRobustnessMode == RM_ROBUSTNESS_MODE_D)
 				{
 					/* For robustness mode D, carriers 7 and 21 (Means: first
@@ -451,7 +451,7 @@ void CCellMappingTable::MakeTable(
 					{
 						/* Test for odd values of "s" (iSym) */
 						if ((iFrameSym % 2) == 1)
-							bIsFreqPilSpeciCase = TRUE;
+							bIsFreqPilSpeciCase = true;
 					}
 				}
 

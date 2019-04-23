@@ -39,25 +39,25 @@ public:
     virtual ~CReceptLog()
     {
     }
-    void Start(const string & filename);
+    void Start(const std::string & filename);
     void Stop();
     void Update();
     bool restartNeeded();
 
-    void SetRxlEnabled(const _BOOLEAN b) {
+    void SetRxlEnabled(const bool b) {
         bRxlEnabled = b;
     }
-    _BOOLEAN GetRxlEnabled() {
+    bool GetRxlEnabled() {
         return bRxlEnabled;
     }
 
-    void SetPositionEnabled(const _BOOLEAN b) {
+    void SetPositionEnabled(const bool b) {
         bPositionEnabled = b;
     }
-    _BOOLEAN GetPositionEnabled() {
+    bool GetPositionEnabled() {
         return bPositionEnabled;
     }
-    _BOOLEAN GetLoggingActivated() {
+    bool GetLoggingActivated() {
         return bLogActivated;
     }
 
@@ -75,18 +75,18 @@ protected:
     virtual void writeHeader() = 0;
     virtual void writeTrailer() = 0;
     char GetRobModeStr();
-    void asDM(string& pos, double d, char n, char p) const;
+    void asDM(std::string& pos, double d, char n, char p) const;
 
 
-    string strdate(time_t);
-    string strtime(time_t);
+    std::string strdate(time_t);
+    std::string strtime(time_t);
 
     CParameter & Parameters;
     ofstream File;
-    _BOOLEAN bLogActivated;
-    _BOOLEAN bLogEnabled;
-    _BOOLEAN bRxlEnabled;
-    _BOOLEAN bPositionEnabled;
+    bool bLogActivated;
+    bool bLogEnabled;
+    bool bRxlEnabled;
+    bool bPositionEnabled;
     int iSecDelLogStart;
     int iFrequency;
     double latitude,longitude;

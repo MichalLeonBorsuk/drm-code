@@ -338,7 +338,7 @@ void opusEncSetParam(opus_encoder *enc,
 
 	if (AudioParam.bOPUSRequestReset)
 	{
-		AudioParam.bOPUSRequestReset = FALSE;
+		AudioParam.bOPUSRequestReset = false;
 
 		/* Signal */
 		switch (AudioParam.eOPUSSignal)
@@ -619,7 +619,7 @@ OpusCodec::Decode(const vector<uint8_t>& audio_frame, uint8_t aac_crc_bits, CVec
     int iLenDecOutPerChan;
     //========= END TODO
 
-    if (!(eDecError == CAudioCodec::DECODER_ERROR_CRC && bUseReverbEffect == FALSE) && eDecError != CAudioCodec::DECODER_ERROR_OK)
+    if (!(eDecError == CAudioCodec::DECODER_ERROR_CRC && bUseReverbEffect == false) && eDecError != CAudioCodec::DECODER_ERROR_OK)
     {
         //cerr << "Opus decode error" << endl;
         bCurBlockOK = false;	/* Set error flag */

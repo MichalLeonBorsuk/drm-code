@@ -445,10 +445,10 @@ void CDRMSimulation::SimScript()
         /* Define which synchronization algorithms we want to use */
         /* In case of bit error simulations, a synchronized DRM data stream is
            used. Set corresponding modules to synchronized mode */
-        InputResample.SetSyncInput(TRUE);
-        FreqSyncAcq.SetSyncInput(TRUE);
-        SyncUsingPil.SetSyncInput(TRUE);
-        TimeSync.SetSyncInput(TRUE);
+        InputResample.SetSyncInput(true);
+        FreqSyncAcq.SetSyncInput(true);
+        SyncUsingPil.SetSyncInput(true);
+        TimeSync.SetSyncInput(true);
 
 
         if (Parameters.iDRMChannelNum < 3)
@@ -507,12 +507,12 @@ void CDRMSimulation::SimScript()
         if (iSimTime != 0)
         {
             GenSimData.SetSimTime(iSimTime,
-                                  SimFileName(Parameters, strSpecialRemark, TRUE));
+                                  SimFileName(Parameters, strSpecialRemark, true));
         }
         else
         {
             GenSimData.SetNumErrors(iSimNumErrors,
-                                    SimFileName(Parameters, strSpecialRemark, TRUE));
+                                    SimFileName(Parameters, strSpecialRemark, true));
         }
 
         /* Set file name for simulation results output (in case of MSE, plot
@@ -577,7 +577,7 @@ void CDRMSimulation::SimScript()
 }
 
 string CDRMSimulation::SimFileName(CParameter& SaveParam, string strAddInf,
-                                   _BOOLEAN bWithSNR)
+                                   bool bWithSNR)
 {
     /*
     	File naming convention:
@@ -773,7 +773,7 @@ string CDRMSimulation::SimFileName(CParameter& SaveParam, string strAddInf,
 
 
     /* SNR range (optional) ------------------------------------------------- */
-    if (bWithSNR == TRUE)
+    if (bWithSNR)
     {
         strFileName += "SNR";
         sprintf(chNumTmpLong, "%.1f-", rStartSNR);

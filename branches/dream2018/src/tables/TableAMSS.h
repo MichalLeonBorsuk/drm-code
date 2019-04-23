@@ -36,7 +36,7 @@
 /* Definitions ****************************************************************/
 #define LEN_TABLE_AMSS_CARRIER_MODE		8
 
-const string strTableAMSSCarrierMode[LEN_TABLE_AMSS_CARRIER_MODE] =
+const std::string strTableAMSSCarrierMode[LEN_TABLE_AMSS_CARRIER_MODE] =
 {
     "No Carrier Control",	// 0 0 0
     "reserved",				// 0 0 1

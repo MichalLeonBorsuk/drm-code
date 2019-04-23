@@ -71,15 +71,15 @@ class CLiveScheduleItem
 {
 public:
 	CLiveScheduleItem() : strFreq(""), strTarget(""), iServiceID(SERV_ID_NOT_USED),
-	strSystem(""), bInsideTargetArea(FALSE) {}
+	strSystem(""), bInsideTargetArea(false) {}
 
-	_BOOLEAN IsActive(const time_t ltime);
+	bool IsActive(const time_t ltime);
 
-	string		strFreq;
-	string		strTarget;
+	std::string		strFreq;
+	std::string		strTarget;
 	uint32_t	iServiceID;
-	string		strSystem;
-	_BOOLEAN	bInsideTargetArea;
+	std::string		strSystem;
+	bool	bInsideTargetArea;
 	CAltFreqSched Schedule;
 };
 
@@ -102,8 +102,8 @@ public:
 	void LoadServiceDefinition(const CServiceDefinition& service,
 			const CAltFreqSign& AltFreqSign, const uint32_t iServiceID=SERV_ID_NOT_USED);
 
-	void DecodeTargets(const vector<CAltFreqRegion> vecAltFreqRegions,
-		string& strRegions , _BOOLEAN& bIntoTargetArea);
+	void DecodeTargets(const std::vector<CAltFreqRegion> vecAltFreqRegions,
+		std::string& strRegions , bool& bIntoTargetArea);
 
 	void SetSecondsPreview(int iSec) {iSecondsPreview = iSec;}
 	int GetSecondsPreview() {return iSecondsPreview;}
@@ -111,9 +111,9 @@ public:
     virtual void SetReceiverCoordinates(double latitude, double longitude);
 
 protected:
-	_BOOLEAN IsActive(const int iPos, const time_t ltime);
+	bool IsActive(const int iPos, const time_t ltime);
 
-	vector<CLiveScheduleItem>	StationsTable;
+	std::vector<CLiveScheduleItem>	StationsTable;
 
 	/* Minutes for stations preview in seconds if zero then no active */
 	int			iSecondsPreview;
@@ -154,7 +154,7 @@ protected:
 	void			SaveSettings();
 	void			LoadSchedule();
 	int				iCurrentSortColumn;
-	_BOOLEAN		bCurrentSortAscending;
+	bool		bCurrentSortAscending;
 	void			SetStationsView();
 	void			AddWhatsThisHelp();
 	void			SetUTCTimeLabel();
@@ -177,7 +177,7 @@ protected:
 	QSignalMapper*	showMapper;
 	QActionGroup*	showGroup;
 
-	vector<MyListLiveViewItem*>	vecpListItems;
+	std::vector<MyListLiveViewItem*>	vecpListItems;
 	QMutex			ListItemsMutex;
 	QString			strCurrentSavePath;
 	int				iColStationID;

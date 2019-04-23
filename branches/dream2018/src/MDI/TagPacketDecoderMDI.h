@@ -53,7 +53,7 @@ public:
 	CTagItemDecoderFAC			TagItemDecoderFAC;
 	CTagItemDecoderSDC			TagItemDecoderSDC;
 	CTagItemDecoderRobMod		TagItemDecoderRobMod;
-	vector<CTagItemDecoderStr>	TagItemDecoderStr;
+	std::vector<CTagItemDecoderStr>	TagItemDecoderStr;
 	CTagItemDecoderSDCChanInf	TagItemDecoderSDCChanInf;
 	CTagItemDecoderInfo			TagItemDecoderInfo;
 	CTagItemDecoderRxDemodMode	TagItemDecoderRxDemodMode;

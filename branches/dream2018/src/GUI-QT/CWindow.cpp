@@ -36,6 +36,7 @@
 # include <QTimer>
 #endif
 #include <QWhatsThis>
+using namespace std;
 
 /* Implementation *************************************************************/
 
@@ -52,7 +53,7 @@ CEventFilter::~CEventFilter()
 
 bool CEventFilter::isValid(const QEvent* event)
 {
-	bool bValid = FALSE;
+	bool bValid = false;
 	QEvent::Type eEventType = event->type();
 	switch (eEventType)
 	{

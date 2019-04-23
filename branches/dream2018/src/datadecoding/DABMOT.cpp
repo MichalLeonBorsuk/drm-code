@@ -303,31 +303,31 @@ CMOTDABEnc::PartitionUnits(CVector < _BINARY > &vecbiSource,
 
 void
 CMOTDABEnc::GenMOTObj(CVector < _BINARY > &vecbiData,
-					  CVector < _BINARY > &vecbiSeg, const _BOOLEAN bHeader,
+					  CVector < _BINARY > &vecbiSeg, const bool bHeader,
 					  const int iSegNum, const int iTranspID,
-					  const _BOOLEAN bLastSeg)
+					  const bool bLastSeg)
 {
 	int i;
 	CCRC CRCObject;
 
 	/* Standard settings for this implementation */
-	const _BOOLEAN bCRCUsed = TRUE;	/* CRC */
-	const _BOOLEAN bSegFieldUsed = TRUE;	/* segment field */
-	const _BOOLEAN bUsAccFieldUsed = TRUE;	/* user access field */
-	const _BOOLEAN bTransIDFieldUsed = TRUE;	/* transport ID field */
+	const bool bCRCUsed = true;	/* CRC */
+	const bool bSegFieldUsed = true;	/* segment field */
+	const bool bUsAccFieldUsed = true;	/* user access field */
+	const bool bTransIDFieldUsed = true;	/* transport ID field */
 
 /* Total length of object in bits */
 	int iTotLenMOTObj = 16 /* group header */ ;
-	if (bSegFieldUsed == TRUE)
+	if (bSegFieldUsed)
 		iTotLenMOTObj += 16;
-	if (bUsAccFieldUsed == TRUE)
+	if (bUsAccFieldUsed)
 	{
 		iTotLenMOTObj += 8;
-		if (bTransIDFieldUsed == TRUE)
+		if (bTransIDFieldUsed)
 			iTotLenMOTObj += 16;
 	}
 	iTotLenMOTObj += vecbiSeg.Size();
-	if (bCRCUsed == TRUE)
+	if (bCRCUsed)
 		iTotLenMOTObj += 16;
 
 	/* Init data vector */
@@ -341,21 +341,21 @@ CMOTDABEnc::GenMOTObj(CVector < _BINARY > &vecbiData,
 
 	/* CRC flag: this 1-bit flag shall indicate whether there is a CRC at the
 	   end of the MSC data group */
-	if (bCRCUsed == TRUE)
+	if (bCRCUsed)
 		vecbiData.Enqueue((uint32_t) 1, 1);
 	else
 		vecbiData.Enqueue((uint32_t) 0, 1);
 
 	/* Segment flag: this 1-bit flag shall indicate whether the segment field is
 	   present, or not */
-	if (bSegFieldUsed == TRUE)
+	if (bSegFieldUsed)
 		vecbiData.Enqueue((uint32_t) 1, 1);
 	else
 		vecbiData.Enqueue((uint32_t) 0, 1);
 
 	/* User access flag: this 1-bit flag shall indicate whether the user access
 	   field is present, or not. We always use this field -> 1 */
-	if (bUsAccFieldUsed == TRUE)
+	if (bUsAccFieldUsed)
 		vecbiData.Enqueue((uint32_t) 1, 1);
 	else
 		vecbiData.Enqueue((uint32_t) 0, 1);
@@ -364,7 +364,7 @@ CMOTDABEnc::GenMOTObj(CVector < _BINARY > &vecbiData,
 	   in the data group data field. Data group types:
 	   3: MOT header information
 	   4: MOT data */
-	if (bHeader == TRUE)
+	if (bHeader)
 		vecbiData.Enqueue((uint32_t) 3, 4);
 	else
 		vecbiData.Enqueue((uint32_t) 4, 4);
@@ -373,7 +373,7 @@ CMOTDABEnc::GenMOTObj(CVector < _BINARY > &vecbiData,
 	   incremented each time a MSC data group of a particular type, with a
 	   content different from that of the immediately preceding data group of
 	   the same type, is transmitted */
-	if (bHeader == TRUE)
+	if (bHeader)
 	{
 		vecbiData.Enqueue((uint32_t) iContIndexHeader, 4);
 
@@ -408,11 +408,11 @@ CMOTDABEnc::GenMOTObj(CVector < _BINARY > &vecbiData,
 
 	/* Session header ------------------------------------------------------- */
 	/* Segment field */
-	if (bSegFieldUsed == TRUE)
+	if (bSegFieldUsed)
 	{
 		/* Last: this 1-bit flag shall indicate whether the segment number field
 		   is the last or whether there are more to be transmitted */
-		if (bLastSeg == TRUE)
+		if (bLastSeg)
 			vecbiData.Enqueue((uint32_t) 1, 1);
 		else
 			vecbiData.Enqueue((uint32_t) 0, 1);
@@ -425,7 +425,7 @@ CMOTDABEnc::GenMOTObj(CVector < _BINARY > &vecbiData,
 	}
 
 	/* User access field */
-	if (bUsAccFieldUsed == TRUE)
+	if (bUsAccFieldUsed)
 	{
 		/* Rfa (Reserved for future addition): this 3-bit field shall be
 		   reserved for future additions */
@@ -433,7 +433,7 @@ CMOTDABEnc::GenMOTObj(CVector < _BINARY > &vecbiData,
 
 		/* Transport Id flag: this 1-bit flag shall indicate whether the
 		   Transport Id field is present, or not */
-		if (bTransIDFieldUsed == TRUE)
+		if (bTransIDFieldUsed)
 			vecbiData.Enqueue((uint32_t) 1, 1);
 		else
 			vecbiData.Enqueue((uint32_t) 0, 1);
@@ -442,7 +442,7 @@ CMOTDABEnc::GenMOTObj(CVector < _BINARY > &vecbiData,
 		   number (in the range 0 to 15), shall indicate the length n in bytes
 		   of the Transport Id and End user address fields.
 		   We do not use end user address field, only transport ID -> 2 */
-		if (bTransIDFieldUsed == TRUE)
+		if (bTransIDFieldUsed)
 			vecbiData.Enqueue((uint32_t) 2, 4);
 		else
 			vecbiData.Enqueue((uint32_t) 0, 4);
@@ -451,7 +451,7 @@ CMOTDABEnc::GenMOTObj(CVector < _BINARY > &vecbiData,
 		   one data object (file and header information) from a stream of such
 		   objects, It may be used to indicate the object to which the
 		   information carried in the data group belongs or relates */
-		if (bTransIDFieldUsed == TRUE)
+		if (bTransIDFieldUsed)
 			vecbiData.Enqueue((uint32_t) iTranspID, 16);
 	}
 
@@ -468,7 +468,7 @@ CMOTDABEnc::GenMOTObj(CVector < _BINARY > &vecbiData,
 	   At the beginning of each CRC word calculation, all shift register stage
 	   contents shall be initialized to "1". The CRC word shall be complemented
 	   (1's complement) prior to transmission */
-	if (bCRCUsed == TRUE)
+	if (bCRCUsed)
 	{
 		/* Reset bit access */
 		vecbiData.ResetBitAccess();
@@ -486,25 +486,25 @@ CMOTDABEnc::GenMOTObj(CVector < _BINARY > &vecbiData,
 	}
 }
 
-_BOOLEAN
+bool
 CMOTDABEnc::GetDataGroup(CVector < _BINARY > &vecbiNewData)
 {
-	_BOOLEAN bLastSegment;
+	bool bLastSegment;
 
 	/* Init return value. Is overwritten in case the object is ready */
-	_BOOLEAN bObjectDone = FALSE;
+	bool bObjectDone = false;
 
-	if (bCurSegHeader == TRUE)
+	if (bCurSegHeader)
 	{
 		/* Check if this is last segment */
 		if (iSegmCntHeader == MOTObjSegments.vvbiHeader.Size() - 1)
-			bLastSegment = TRUE;
+			bLastSegment = true;
 		else
-			bLastSegment = FALSE;
+			bLastSegment = false;
 
 		/* Generate MOT object for header */
 		GenMOTObj(vecbiNewData, MOTObjSegments.vvbiHeader[iSegmCntHeader],
-				  TRUE, iSegmCntHeader, iTransportID, bLastSegment);
+				  true, iSegmCntHeader, iTransportID, bLastSegment);
 
 		iSegmCntHeader++;
 		if (iSegmCntHeader == MOTObjSegments.vvbiHeader.Size())
@@ -513,7 +513,7 @@ CMOTDABEnc::GetDataGroup(CVector < _BINARY > &vecbiNewData)
 			iSegmCntBody = 0;
 
 			/* Header is ready, transmit body now */
-			bCurSegHeader = FALSE;
+			bCurSegHeader = false;
 		}
 	}
 	else
@@ -523,13 +523,13 @@ CMOTDABEnc::GetDataGroup(CVector < _BINARY > &vecbiNewData)
 		{
 			/* Check if this is last segment */
 			if (iSegmCntBody == MOTObjSegments.vvbiBody.Size() - 1)
-				bLastSegment = TRUE;
+				bLastSegment = true;
 			else
-				bLastSegment = FALSE;
+				bLastSegment = false;
 
 			/* Generate MOT object for Body */
 			GenMOTObj(vecbiNewData,
-					  MOTObjSegments.vvbiBody[iSegmCntBody], FALSE,
+					  MOTObjSegments.vvbiBody[iSegmCntBody], false,
 					  iSegmCntBody, iTransportID, bLastSegment);
 
 			iSegmCntBody++;
@@ -541,11 +541,11 @@ CMOTDABEnc::GetDataGroup(CVector < _BINARY > &vecbiNewData)
 			iSegmCntHeader = 0;
 
 			/* Body is ready, transmit header from next object */
-			bCurSegHeader = TRUE;
+			bCurSegHeader = true;
 			iTransportID++;
 
 			/* Signal that old object is done */
-			bObjectDone = TRUE;
+			bObjectDone = true;
 		}
 	}
 
@@ -579,7 +579,7 @@ CMOTDABEnc::Reset()
 	iSegmCntBody = 0;
 
 	/* Init flag which shows what is currently generated, header or body */
-	bCurSegHeader = TRUE;		/* Start with header */
+	bCurSegHeader = true;		/* Start with header */
 
 	/* Add a "null object" so that at least one valid object can be processed */
 	CMOTObject NullObject;
@@ -596,7 +596,7 @@ MOTDirectory(), MOTCarousel(), qiNewObjects()
 	assert(qiNewObjects.empty());
 }
 
-_BOOLEAN
+bool
 CMOTDABDec::NewObjectAvailable()
 {
 	return !qiNewObjects.empty();
@@ -638,10 +638,10 @@ CMOTDABDec::DeliverIfReady(TTransportID TransportID)
 	CMOTObject & o = MOTCarousel[TransportID];
 	if ((!o.bComplete) && o.bHasHeader && o.Body.Ready())
 	{
-		o.bComplete = TRUE;
+		o.bComplete = true;
 		if (o.Body.IsZipped())
 		{
-			if (o.Body.uncompress() == FALSE)
+			if (o.Body.uncompress() == false)
 				/* Can't unzip so change the filename */
 				o.strName = string(o.strName.c_str()) + ".gz";
 		}
@@ -666,7 +666,7 @@ CMOTDABDec::AddDataUnit(CVector < _BINARY > &vecbiNewData)
 {
 	int iLenGroupDataField;
 	CCRC CRCObject;
-	_BOOLEAN bCRCOk;
+	bool bCRCOk;
 	int iSegmentNum;
 	_BINARY biLastFlag;
 	_BINARY biTransportIDFlag = 0;
@@ -768,7 +768,7 @@ CMOTDABDec::AddDataUnit(CVector < _BINARY > &vecbiNewData)
 	/* MSC data group data field -------------------------------------------- */
 	/* If CRC is not used enter if-block, if CRC flag is used, it must be ok to
 	   enter the if-block */
-	if ((biCRCFlag == 0) || ((biCRCFlag == 1) && (bCRCOk == TRUE)))
+	if ((biCRCFlag == 0) || ((biCRCFlag == 1) && (bCRCOk)))
 	{
 		/* Segmentation header ---------------------------------------------- */
 		/* Repetition count (not used) */
@@ -838,7 +838,7 @@ CMOTDABDec::AddDataUnit(CVector < _BINARY > &vecbiNewData)
 					o = MOTCarousel.find(TransportID);
 				}
 				/* is this an old object we have completed? */
-				if (o->second.bComplete == FALSE)
+				if (o->second.bComplete == false)
 				{
 					o->second.Body.AddSegment(vecbiNewData, iSegmentSize,
 											  iSegmentNum, biLastFlag);
@@ -936,9 +936,9 @@ CMOTDABDec::AddDataUnit(CVector < _BINARY > &vecbiNewData)
 
 						/* Compression Flag - must be 1 */
 
-						const _BOOLEAN bCompressionFlag =
+						const bool bCompressionFlag =
 							MOTDirComprEntity.vecData.
-							Separate(1) ? TRUE : FALSE;
+							Separate(1) ? true : false;
 
 						/* rfu */
 						MOTDirComprEntity.vecData.Separate(1);
@@ -1191,7 +1191,7 @@ CReassembler::copyin(CVector < _BYTE > &vecDataIn, size_t iSegNum,
 
 void
 CReassembler::AddSegment(CVector < _BYTE > &vecDataIn,
-						 int iSegSize, int iSegNum, _BOOLEAN bLast)
+						 int iSegSize, int iSegNum, bool bLast)
 {
 	if (bLast)
 	{
@@ -1222,7 +1222,7 @@ CReassembler::AddSegment(CVector < _BYTE > &vecDataIn,
 	else
 	{
 		iSegmentSize = iSegSize;
-		if (Tracker.HaveSegment(iSegNum) == FALSE)
+		if (Tracker.HaveSegment(iSegNum) == false)
 		{
 			copyin(vecDataIn, iSegNum, iSegSize);
 		}
@@ -1230,7 +1230,7 @@ CReassembler::AddSegment(CVector < _BYTE > &vecDataIn,
 	Tracker.AddSegment(iSegNum);	/* tracking the last segment makes the Ready work! */
 
 	if ((iLastSegmentSize != -1)	/* we have the last segment */
-		&& (bReady == FALSE)	/* we haven't already completed reassembly */
+		&& (bReady == false)	/* we haven't already completed reassembly */
 		&& Tracker.Ready()		/* there are no gaps */
 		)
 	{
@@ -1239,7 +1239,7 @@ CReassembler::AddSegment(CVector < _BYTE > &vecDataIn,
 			/* we have everything, but the last segment came first */
 			copylast();
 		}
-		bReady = TRUE;
+		bReady = true;
 	}
 	//qDebug("AddSegment %d last %d ready %d\n", iSegNum, bLast?1:0, bReady?1:0);
 }
@@ -1302,9 +1302,9 @@ void
 CMOTDirectory::Reset ()
 {
     CMOTObjectBase::Reset ();
-    bSortedHeaderInformation = FALSE;
+    bSortedHeaderInformation = false;
     DirectoryIndex.clear ();
-    bCompressionFlag = FALSE;
+    bCompressionFlag = false;
     iCarouselPeriod = -1;
     iNumberOfObjects = 0;
     iSegmentSize = 0;
@@ -1317,7 +1317,7 @@ CMOTDirectory::AddHeader(CVector < _BINARY > &vecbiHeader)
 	int iDirectorySize;
 
 	/* compression flag - must be zero */
-	bCompressionFlag = vecbiHeader.Separate(1) ? TRUE : FALSE;
+	bCompressionFlag = vecbiHeader.Separate(1) ? true : false;
 
 	/* rfu */
 	vecbiHeader.Separate(1);
@@ -1358,14 +1358,14 @@ CMOTDirectory::AddHeader(CVector < _BINARY > &vecbiHeader)
 		switch (bParamId)
 		{
 		case 0:				/* SortedHeaderInformation */
-			bSortedHeaderInformation = TRUE;
+			bSortedHeaderInformation = true;
 			break;
 		case 1:				/* DefaultPermitOutdatedVersions */
 			iTmp = (int) vecbiHeader.Separate(iDataFieldLen * SIZEOF__BYTE);
 			if (iTmp == 0)
-				bPermitOutdatedVersions = FALSE;
+				bPermitOutdatedVersions = false;
 			else
-				bPermitOutdatedVersions = TRUE;
+				bPermitOutdatedVersions = true;
 			break;
 		case 9:				/* DefaultExpiration */
 			if (iDataFieldLen == 1)
@@ -1394,7 +1394,7 @@ CMOTDirectory::AddHeader(CVector < _BINARY > &vecbiHeader)
 	}
 }
 
-_BOOLEAN
+bool
 CReassembler::IsZipped() const
 {
 /*
@@ -1404,12 +1404,12 @@ CReassembler::IsZipped() const
 	http://www.ietf.org/rfc/rfc1952.txt
 */
 	if(vecData.Size()<3)
-		return FALSE;
+		return false;
 	/* Check for gzip header [31, 139, 8] */
 	if ((vecData[0] == 31) && (vecData[1] == 139) && (vecData[2] == 8))
-		return TRUE;
+		return true;
 	else
-		return FALSE;
+		return false;
 }
 
 unsigned int
@@ -1435,7 +1435,7 @@ CReassembler::gzGetOriginalSize() const
 		(byHeader[3] << 24);
 }
 
-_BOOLEAN
+bool
 CReassembler::uncompress()
 {
 #ifdef HAVE_LIBZ
@@ -1451,7 +1451,7 @@ CReassembler::uncompress()
 		z_stream stream;
 		memset(&stream, 0, sizeof(stream));
 		if ((zerr = inflateInit2(&stream, -MAX_WBITS)) != Z_OK)
-			return FALSE;
+			return false;
 
 		/* skip past minimal gzip header */
 		stream.next_in = &vecData[10];
@@ -1464,21 +1464,21 @@ CReassembler::uncompress()
 		dest_len = vecbRawDataOut.Size() - stream.avail_out;
 
 		if (zerr != Z_OK && zerr != Z_STREAM_END)
-			return FALSE;
+			return false;
 
 		inflateEnd(&stream);
 
 		if (zerr != Z_OK && zerr != Z_STREAM_END)
-			return FALSE;
+			return false;
 
 		vecData.Init(dest_len);
 		vecData = vecbRawDataOut;
-		return TRUE;
+		return true;
 	}
 	else
 	{
 		vecData.Init(0);
-		return FALSE;
+		return false;
 	}
 #else
 #	ifdef HAVE_LIBFREEIMAGE
@@ -1501,21 +1501,21 @@ CReassembler::uncompress()
 			/* Copy data */
 			vecData.Init(zerr);
 			vecData = vecbRawDataOut;
-			return TRUE;
+			return true;
 		}
 		else
 		{
 			vecData.Init(0);
-			return FALSE;
+			return false;
 		}
 	}
 	else
 	{
 		vecData.Init(0);
-		return FALSE;
+		return false;
 	}
 #	else
-	return FALSE;
+	return false;
 #	endif
 #endif
 }
@@ -1556,9 +1556,9 @@ CMOTObject::AddHeader(CVector < _BINARY > &vecbiHeader)
 		case 1:				/* PermitOutdatedVersions */
 			iTmp = (int) vecbiHeader.Separate(iDataFieldLen * SIZEOF__BYTE);
 			if (iTmp == 0)
-				bPermitOutdatedVersions = FALSE;
+				bPermitOutdatedVersions = false;
 			else
-				bPermitOutdatedVersions = TRUE;
+				bPermitOutdatedVersions = true;
 			break;
 		case 5:				/* TriggerTime - OBSOLETE */
 			/* not decoded - skip */
@@ -1665,7 +1665,7 @@ CMOTObject::AddHeader(CVector < _BINARY > &vecbiHeader)
 		strFormat = video[iContentSubType];
 		break;
 	}
-	bHasHeader = TRUE;
+	bHasHeader = true;
 }
 
 void

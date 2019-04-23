@@ -44,7 +44,7 @@ AACCodecParams::AACCodecParams(CSettings& Settings, CParameter& Parameters,
 	int iShortID, QWidget* parent)
 	:
 	QDialog(parent), Settings(Settings), Parameters(Parameters),
-	iShortID(iShortID), bWasVisible(FALSE), bLastPositionValid(FALSE)
+	iShortID(iShortID), bWasVisible(false), bLastPositionValid(false)
 {
 	setAttribute(Qt::WA_QuitOnClose, false);
 	setupUi(this);
@@ -65,23 +65,25 @@ AACCodecParams::AACCodecParams(CSettings& Settings, CParameter& Parameters,
     switch (Parameters.Service[iShortID].AudioParam.eAudioMode)
 	{
     case CAudioParam::AM_MONO:
-		RadioButtonChannelsMono->setChecked(TRUE);
+		RadioButtonChannelsMono->setChecked(true);
 		break;
     case CAudioParam::AM_STEREO:
-		RadioButtonChannelsStereo->setChecked(TRUE);
+		RadioButtonChannelsStereo->setChecked(true);
 		break;
     case CAudioParam::AM_P_STEREO:
-        RadioButtonChannelsParametricStereo->setChecked(TRUE);
+        RadioButtonChannelsParametricStereo->setChecked(true);
         break;
+    case CAudioParam::AM_RESERVED:
+        ;
     }
     /* Sample Rate */
     switch (Parameters.Service[iShortID].AudioParam.eAudioSamplRate)
 	{
     case CAudioParam::AS_12KHZ:
-        RadioButton12kHz->setChecked(TRUE);
+        RadioButton12kHz->setChecked(true);
 		break;
     case CAudioParam::AS_24KHZ:
-        RadioButton24kHz->setChecked(TRUE);
+        RadioButton24kHz->setChecked(true);
 		break;
 	}
     /* options */
@@ -131,7 +133,7 @@ void AACCodecParams::OnButtonGroupChannels(int iID)
 {
     Parameters.Lock();
     Parameters.Service[iShortID].AudioParam.eAudioMode = static_cast<CAudioParam::EAudioMode>(iID);
-	Parameters.Service[iShortID].AudioParam.bParamChanged = TRUE;
+	Parameters.Service[iShortID].AudioParam.bParamChanged = true;
 	Parameters.Unlock();
 }
 
@@ -139,7 +141,7 @@ void AACCodecParams::OnButtonGroupSampleRate(int iID)
 {
 	Parameters.Lock();
     Parameters.Service[iShortID].AudioParam.eAudioSamplRate =  static_cast<CAudioParam::EAudSamRat>(iID);
-	Parameters.Service[iShortID].AudioParam.bParamChanged = TRUE;
+	Parameters.Service[iShortID].AudioParam.bParamChanged = true;
 	Parameters.Unlock();
 }
 
@@ -147,7 +149,7 @@ void AACCodecParams::OnCheckBoxSBR(bool checked)
 {
 	Parameters.Lock();
     Parameters.Service[iShortID].AudioParam.eSBRFlag = checked?CAudioParam::SB_USED:CAudioParam::SB_NOT_USED;
-	Parameters.Service[iShortID].AudioParam.bParamChanged = TRUE;
+	Parameters.Service[iShortID].AudioParam.bParamChanged = true;
 	Parameters.Unlock();
 }
 
@@ -185,7 +187,7 @@ void AACCodecParams::GetDialogPosition(void)
 	{
 		iLastXPosition = WinGeom.x();
 		iLastYPosition = WinGeom.y();
-		bLastPositionValid = TRUE;
+		bLastPositionValid = true;
 	}
 }
 

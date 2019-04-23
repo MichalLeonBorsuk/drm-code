@@ -58,7 +58,7 @@
 /* power gain of the Hamming window */
 #define PSD_WINDOW_GAIN 0.39638
 
-/* Length of vector for input spectrum. We use approx. 0.2 sec
+/* Length of std::vector for input spectrum. We use approx. 0.2 sec
    of sampled data for spectrum calculation, this is 2^13 = 8192 to
    make the FFT work more efficient. Make sure that this number is not smaller
    than the symbol lenght in 48 khz domain of longest mode (which is mode A/B:
@@ -97,17 +97,17 @@ public:
         return eOutputFormat;
     }
 
-    void SetAmplifiedOutput(_BOOLEAN bEnable) {
+    void SetAmplifiedOutput(bool bEnable) {
         bAmplified = bEnable;
     }
-    _BOOLEAN GetAmplifiedOutput() {
+    bool GetAmplifiedOutput() {
         return bAmplified;
     }
 
-    void SetHighQualityIQ(_BOOLEAN bEnable) {
+    void SetHighQualityIQ(bool bEnable) {
         bHighQualityIQ = bEnable;
     }
-    _BOOLEAN GetHighQualityIQ() {
+    bool GetHighQualityIQ() {
         return bHighQualityIQ;
     }
 
@@ -116,20 +116,20 @@ public:
         rDefCarOffset = rNewCarOffset;
     }
 
-    void SetSoundInterface(string);
-    string GetSoundInterface() { return soundDevice; }
-    void Enumerate(std::vector<std::string>& names, std::vector<std::string>& descriptions);
+    void SetSoundInterface(std::string);
+    std::string GetSoundInterface() { return soundDevice; }
+    void Enumerate(std::vector<string>& names, std::vector<string>& descriptions);
     void Stop();
 #ifdef QT_MULTIMEDIA_LIB
-	string GetSoundInterfaceVersion() { return "QtMultimedia"; }
+	std::string GetSoundInterfaceVersion() { return "QtMultimedia"; }
 #else
-	string GetSoundInterfaceVersion() { return pSound->GetVersion(); }
+	std::string GetSoundInterfaceVersion() { return pSound->GetVersion(); }
 #endif
 
-    void SetWriteToFile(const string strNFN)
+    void SetWriteToFile(const std::string strNFN)
     {
         strOutFileName = strNFN;
-        bUseSoundcard = FALSE;
+        bUseSoundcard = false;
     }
 
     void FlushData();
@@ -140,7 +140,7 @@ protected:
     QIODevice*              pIODevice;
 #endif
     CSoundOutInterface*	pSound;
-    string              soundDevice;
+    std::string              soundDevice;
     CVector<short>		vecsDataOut;
     int					iBlockCnt;
     int					iNumBlocks;
@@ -153,12 +153,12 @@ protected:
 
     int					iBigBlockSize;
 
-    string				strOutFileName;
-    _BOOLEAN			bUseSoundcard;
+    std::string				strOutFileName;
+    bool			bUseSoundcard;
     int					iSampleRate;
 
-    _BOOLEAN			bAmplified;
-    _BOOLEAN			bHighQualityIQ;
+    bool			bAmplified;
+    bool			bHighQualityIQ;
     CVector<_REAL>		vecrReHist;
 
     void HilbertFilt(_COMPLEX& vecData);
@@ -176,11 +176,11 @@ public:
 #endif
         pSound(nullptr),
         vecrInpData(INPUT_DATA_VECTOR_SIZE, (_REAL) 0.0),
-            bFippedSpectrum(FALSE), eInChanSelection(CS_MIX_CHAN), iPhase(0)
+            bFippedSpectrum(false), eInChanSelection(CS_MIX_CHAN), iPhase(0)
     {}
     virtual ~CReceiveData();
 
-    _REAL ConvertFrequency(_REAL rFrequency, _BOOLEAN bInvert=FALSE) const;
+    _REAL ConvertFrequency(_REAL rFrequency, bool bInvert=false) const;
 
     void GetInputSpec(CVector<_REAL>& vecrData, CVector<_REAL>& vecrScale);
     void GetInputPSD(CVector<_REAL>& vecrData, CVector<_REAL>& vecrScale,
@@ -188,10 +188,10 @@ public:
                      const int iNumAvBlocksPSD = NUM_AV_BLOCKS_PSD,
                      const int iPSDOverlap = 0);
 
-    void SetFlippedSpectrum(const _BOOLEAN bNewF) {
+    void SetFlippedSpectrum(const bool bNewF) {
         bFippedSpectrum = bNewF;
     }
-    _BOOLEAN GetFlippedSpectrum() {
+    bool GetFlippedSpectrum() {
         return bFippedSpectrum;
     }
 
@@ -201,14 +201,14 @@ public:
         mutexInpData.Unlock();
     }
 
-    void SetSoundInterface(string);
-    string GetSoundInterface() { return soundDevice; }
-    void Enumerate(std::vector<std::string>& names, std::vector<std::string>& descriptions);
+    void SetSoundInterface(std::string);
+    std::string GetSoundInterface() { return soundDevice; }
+    void Enumerate(std::vector<string>& names, std::vector<string>& descriptions);
     void Stop();
 #ifdef QT_MULTIMEDIA_LIB
-	string GetSoundInterfaceVersion() { return "QtMultimedia"; }
+	std::string GetSoundInterfaceVersion() { return "QtMultimedia"; }
 #else
-	string GetSoundInterfaceVersion() { return pSound->GetVersion(); }
+	std::string GetSoundInterfaceVersion() { return pSound->GetVersion(); }
 #endif
     void SetInChanSel(const EInChanSel eNS) {
         eInChanSelection = eNS;
@@ -226,7 +226,7 @@ protected:
 #endif
     CSoundInInterface*		pSound;
     CVector<_SAMPLE>		vecsSoundBuffer;
-    string                  soundDevice;
+    std::string                  soundDevice;
 
     /* Access to vecrInpData buffer must be done 
        inside mutexInpData mutex */
@@ -234,10 +234,10 @@ protected:
     CMutex                  mutexInpData;
 
     int					iSampleRate;
-    _BOOLEAN			bFippedSpectrum;
+    bool			bFippedSpectrum;
 
     int					iUpscaleRatio;
-    vector<float>		vecf_B, vecf_YL, vecf_YR, vecf_ZL, vecf_ZR;
+    std::vector<float>		vecf_B, vecf_YL, vecf_YR, vecf_ZL, vecf_ZR;
 
     EInChanSel			eInChanSelection;
 
@@ -268,7 +268,7 @@ protected:
     int FreqToBin(_REAL rFreq);
     _REAL CalcTotalPower(CVector<_REAL> &vecrData, int iStartBin, int iEndBin);
 
-    void InterpFIR_2X(const int channels, _SAMPLE* X, vector<float>& Z, vector<float>& Y, vector<float>& B);
+    void InterpFIR_2X(const int channels, _SAMPLE* X, std::vector<float>& Z, std::vector<float>& Y, std::vector<float>& B);
 };
 
 

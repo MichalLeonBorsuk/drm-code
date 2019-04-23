@@ -81,7 +81,7 @@ void CReadData::InitInternal(CParameter& Parameters)
                               (_REAL) 0.4 /* 400 ms */ * 2 /* stereo */);
 
     /* Init sound interface and intermediate buffer */
-    if(pSound) pSound->Init(iSampleRate, iOutputBlockSize, FALSE);
+    if(pSound) pSound->Init(iSampleRate, iOutputBlockSize, false);
     vecsSoundBuffer.Init(iOutputBlockSize);
 
     /* Init level meter */
@@ -295,7 +295,7 @@ void CWriteData::ProcessDataInternal(CParameter& Parameters)
         break;
     }
 
-    if (bMuteAudio == TRUE)
+    if (bMuteAudio)
     {
         /* Clear both channels if muted */
         for (i = 0; i < iInputBlockSize; i++)
@@ -328,24 +328,24 @@ void CWriteData::ProcessDataInternal(CParameter& Parameters)
         }
     }
 #else
-    const _BOOLEAN bBad = pSound->Write(vecsTmpAudData);
+    const bool bBad = pSound->Write(vecsTmpAudData);
 #endif
     Parameters.Lock();
     Parameters.ReceiveStatus.InterfaceO.SetStatus(bBad ? DATA_ERROR : RX_OK); /* Yellow light */
     Parameters.Unlock();
 
     /* Write data as wave in file */
-    if (bDoWriteWaveFile == TRUE)
+    if (bDoWriteWaveFile)
     {
         /* Write audio data to file only if it is not zero */
-        _BOOLEAN bDoNotWrite = TRUE;
+        bool bDoNotWrite = true;
         for (i = 0; i < iInputBlockSize; i++)
         {
             if ((*pvecInputData)[i] != 0)
-                bDoNotWrite = FALSE;
+                bDoNotWrite = false;
         }
 
-        if (bDoNotWrite == FALSE)
+        if (bDoNotWrite == false)
         {
             for (i = 0; i < iInputBlockSize; i += 2)
             {
@@ -378,7 +378,7 @@ void CWriteData::InitInternal(CParameter& Parameters)
     iNumBlocksAvAudioSpec = int(ceil(_REAL(iAudSampleRate * TIME_AV_AUDIO_SPECT_MS) / 1000.0 / _REAL(iNumSmpls4AudioSprectrum)));
 
     /* Inits for audio spectrum plotting */
-    vecsOutputData.Init((int) iNumBlocksAvAudioSpec * iNumSmpls4AudioSprectrum * 2 /* stereo */, 0); /* Init with zeros */
+    vecsOutputData.Init(iNumBlocksAvAudioSpec * iNumSmpls4AudioSprectrum * 2 /* stereo */, 0); /* Init with zeros */
     FftPlan.Init(iNumSmpls4AudioSprectrum);
     veccFFTInput.Init(iNumSmpls4AudioSprectrum);
     veccFFTOutput.Init(iNumSmpls4AudioSprectrum);
@@ -386,8 +386,7 @@ void CWriteData::InitInternal(CParameter& Parameters)
 
     /* An audio frame always corresponds to 400 ms.
        We use always stereo blocks */
-    const int iAudFrameSize = (int) ((_REAL) iAudSampleRate *
-                                     (_REAL) 0.4 /* 400 ms */);
+    const int iAudFrameSize = int(_REAL(iAudSampleRate) * 0.4 /* 400 ms */);
 
     /* Check if blocking behaviour of sound interface shall be changed */
     if (bNewSoundBlocking != bSoundBlocking)
@@ -412,8 +411,8 @@ CWriteData::CWriteData() :
     pIODevice(nullptr),
     #endif
     pSound(nullptr), /* Sound interface */
-    bMuteAudio(FALSE), bDoWriteWaveFile(FALSE),
-    bSoundBlocking(FALSE), bNewSoundBlocking(FALSE),
+    bMuteAudio(false), bDoWriteWaveFile(false),
+    bSoundBlocking(false), bNewSoundBlocking(false),
     eOutChanSel(CS_BOTH_BOTH), rMixNormConst(MIX_OUT_CHAN_NORM_CONST),
     iAudSampleRate(0), iNumSmpls4AudioSprectrum(0), iNumBlocksAvAudioSpec(0),
     iMaxAudioFrequency(MAX_SPEC_AUDIO_FREQUENCY)
@@ -424,10 +423,10 @@ CWriteData::CWriteData() :
 void CWriteData::StartWriteWaveFile(const string& strFileName)
 {
     /* No Lock(), Unlock() needed here */
-    if (bDoWriteWaveFile == FALSE)
+    if (bDoWriteWaveFile == false)
     {
         WaveFileAudio.Open(strFileName, iAudSampleRate);
-        bDoWriteWaveFile = TRUE;
+        bDoWriteWaveFile = true;
     }
 }
 
@@ -436,7 +435,7 @@ void CWriteData::StopWriteWaveFile()
     Lock();
 
     WaveFileAudio.Close();
-    bDoWriteWaveFile = FALSE;
+    bDoWriteWaveFile = false;
 
     Unlock();
 }
@@ -540,7 +539,7 @@ void CGenerateFACData::InitInternal(CParameter& TransmParam)
 void CUtilizeFACData::ProcessDataInternal(CParameter& Parameters)
 {
     /* Do not use received FAC data in case of simulation */
-    if (bSyncInput == FALSE)
+    if (bSyncInput == false)
     {
         bCRCOk = FACReceive.FACParam(pvecInputData, Parameters);
         /* Set FAC status for RSCI, log file & GUI */
@@ -550,7 +549,7 @@ void CUtilizeFACData::ProcessDataInternal(CParameter& Parameters)
             Parameters.ReceiveStatus.FAC.SetStatus(CRC_ERROR);
     }
 
-    if ((bSyncInput == TRUE) || (bCRCOk == FALSE))
+    if ((bSyncInput) || (bCRCOk == false))
     {
         /* If FAC CRC check failed we should increase the frame-counter
            manually. If only FAC data was corrupted, the others can still
@@ -572,7 +571,7 @@ void CUtilizeFACData::InitInternal(CParameter& Parameters)
     Parameters.iFrameIDReceiv = NUM_FRAMES_IN_SUPERFRAME - 1;
 
     /* Reset flag */
-    bCRCOk = FALSE;
+    bCRCOk = false;
 
     /* Define block-size for input */
     iInputBlockSize = NUM_FAC_BITS_PER_BLOCK;
@@ -597,7 +596,7 @@ void CGenerateSDCData::InitInternal(CParameter& TransmParam)
 /* Receiver */
 void CUtilizeSDCData::ProcessDataInternal(CParameter& Parameters)
 {
-    //    _BOOLEAN bSDCOK = FALSE;
+    //    bool bSDCOK = false;
 
     /* Decode SDC block and return CRC status */
     CSDCReceive::ERetStatus eStatus = SDCReceive.SDCParam(pvecInputData, Parameters);
@@ -607,7 +606,7 @@ void CUtilizeSDCData::ProcessDataInternal(CParameter& Parameters)
     {
     case CSDCReceive::SR_OK:
         Parameters.ReceiveStatus.SDC.SetStatus(RX_OK);
-        //        bSDCOK = TRUE;
+        //        bSDCOK = true;
         break;
 
     case CSDCReceive::SR_BAD_CRC:
@@ -619,7 +618,7 @@ void CUtilizeSDCData::ProcessDataInternal(CParameter& Parameters)
            speed up the DRM signal acqisition. But quite often it is the
            case that the parameters are not correct. In this case do not
            show a red light if SDC CRC was not ok */
-        if (bFirstBlock == FALSE)
+        if (bFirstBlock == false)
             Parameters.ReceiveStatus.SDC.SetStatus(CRC_ERROR);
         break;
 
@@ -631,13 +630,13 @@ void CUtilizeSDCData::ProcessDataInternal(CParameter& Parameters)
     Parameters.Unlock();
 
     /* Reset "first block" flag */
-    bFirstBlock = FALSE;
+    bFirstBlock = false;
 }
 
 void CUtilizeSDCData::InitInternal(CParameter& Parameters)
 {
     /* Init "first block" flag */
-    bFirstBlock = TRUE;
+    bFirstBlock = true;
 
     /* Define block-size for input */
     iInputBlockSize = Parameters.iNumSDCBitsPerSFrame;
@@ -646,7 +645,7 @@ void CUtilizeSDCData::InitInternal(CParameter& Parameters)
 
 /* CWriteIQFile : module for writing an IQ or IF file */
 
-CWriteIQFile::CWriteIQFile() : pFile(0), iFrequency(0), bIsRecording(FALSE), bChangeReceived(FALSE)
+CWriteIQFile::CWriteIQFile() : pFile(0), iFrequency(0), bIsRecording(false), bChangeReceived(false)
 {
 }
 
@@ -658,8 +657,8 @@ CWriteIQFile::~CWriteIQFile()
 
 void CWriteIQFile::StartRecording(CParameter&)
 {
-    bIsRecording = TRUE;
-    bChangeReceived = TRUE;
+    bIsRecording = true;
+    bChangeReceived = true;
 }
 
 void CWriteIQFile::OpenFile(CParameter& Parameters)
@@ -686,8 +685,8 @@ void CWriteIQFile::OpenFile(CParameter& Parameters)
 
 void CWriteIQFile::StopRecording()
 {
-    bIsRecording = FALSE;
-    bChangeReceived = TRUE;
+    bIsRecording = false;
+    bChangeReceived = true;
 }
 
 void CWriteIQFile::NewFrequency(CParameter &)
@@ -764,7 +763,7 @@ void CWriteIQFile::ProcessDataInternal(CParameter& Parameters)
 
     if (bChangeReceived) // file is open but we want to start a new one
     {
-        bChangeReceived = FALSE;
+        bChangeReceived = false;
         if (pFile != nullptr)
         {
             fclose(pFile);

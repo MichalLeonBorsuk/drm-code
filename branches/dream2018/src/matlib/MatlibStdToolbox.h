@@ -57,9 +57,9 @@ public:
 
 protected:
 	void			Clean();
-	_BOOLEAN		InitInternal(const int iFSi);
-	_BOOLEAN		bInitialized;
-	_BOOLEAN		bFixedSizeInit;
+	bool		InitInternal(const int iFSi);
+	bool		bInitialized;
+	bool		bFixedSizeInit;
 	int				fftw_n;
 };
 

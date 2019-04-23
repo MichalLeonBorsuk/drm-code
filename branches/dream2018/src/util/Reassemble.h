@@ -47,46 +47,46 @@ public:
 		return vecbHaveSegment.size ();
 	}
 
-	_BOOLEAN Ready ()
+	bool Ready ()
 	{
 		if (vecbHaveSegment.size () == 0)
-			return FALSE;
+			return false;
 		for (size_t i = 0; i < vecbHaveSegment.size (); i++)
 		{
-			if (vecbHaveSegment[i] == FALSE)
+			if (vecbHaveSegment[i] == false)
 			{
-				return FALSE;
+				return false;
 			}
 		}
-		return TRUE;
+		return true;
 	}
 
 	void AddSegment (int iSegNum)
 	{
 		if ((iSegNum + 1) > int (vecbHaveSegment.size ()))
-            vecbHaveSegment.resize (unsigned(iSegNum) + 1, FALSE);
-        vecbHaveSegment[unsigned(iSegNum)] = TRUE;
+            vecbHaveSegment.resize (unsigned(iSegNum) + 1, false);
+        vecbHaveSegment[unsigned(iSegNum)] = true;
 	}
 
-	_BOOLEAN HaveSegment (int iSegNum)
+	bool HaveSegment (int iSegNum)
 	{
 		if (iSegNum < int (vecbHaveSegment.size ()))
             return vecbHaveSegment[unsigned(iSegNum)];
-		return FALSE;
+		return false;
 	}
 
 protected:
-	vector < _BOOLEAN > vecbHaveSegment;
+	std::vector < bool > vecbHaveSegment;
 };
 
-/* The base class reassembles chunks of byte vectors into one big vector.
+/* The base class reassembles chunks of byte std::vectors into one big std::vector.
  * It assumes that all chunks except the last chunk are the same size.
  * Usage:
  *
  * CReassemblerN o;
  * o.AddSegment (veco, iSegSize, 1);
  * o.AddSegment (veco, iSegSize, 3);
- * o.AddSegment (veco, iSegSize, 7, TRUE); // last segment, ie there are 8 segments, 0..7
+ * o.AddSegment (veco, iSegSize, 7, true); // last segment, ie there are 8 segments, 0..7
  * o.AddSegment (veco, iSegSize, 2);
  * o.AddSegment (veco, iSegSize, 4);
  * o.AddSegment (veco, iSegSize, 6);
@@ -126,22 +126,22 @@ public:
 		bReady = false;
 	}
 
-	_BOOLEAN Ready ()
+	bool Ready ()
 	{
 		return bReady;
 	}
 
-	void AddSegment (vector<_BYTE> &vecDataIn, int iSegNum, _BOOLEAN bLast);
+	void AddSegment (std::vector<_BYTE> &vecDataIn, int iSegNum, bool bLast);
 
-	vector<_BYTE> vecData;
+	std::vector<_BYTE> vecData;
 
 protected:
 
-    virtual void copyin(vector<_BYTE> &vecDataIn, size_t iSegNum);
-    virtual void cachelast(vector<_BYTE> &vecDataIn, size_t iSegSize);
+    virtual void copyin(std::vector<_BYTE> &vecDataIn, size_t iSegNum);
+    virtual void cachelast(std::vector<_BYTE> &vecDataIn, size_t iSegSize);
     virtual void copylast();
 
-	vector<_BYTE> vecLastSegment;
+	std::vector<_BYTE> vecLastSegment;
     int iLastSegmentNum;
     int iLastSegmentSize;
 	size_t iSegmentSize;
