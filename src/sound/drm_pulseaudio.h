@@ -97,6 +97,7 @@ public:
 	void			Enumerate(vector<string>& names, vector<string>& descriptions) {CSoundPulse::Enumerate(names, descriptions);};
 	string			GetDev() {return CSoundPulse::GetDev();};
 	void			SetDev(string sNewDevice) {CSoundPulse::SetDev(sNewDevice);};
+	string			GetVersion() { return pa_get_library_version(); }
 
 	_BOOLEAN		Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking);
 	_BOOLEAN		Read(CVector<_SAMPLE>& psData);
@@ -137,6 +138,7 @@ public:
 	void			Enumerate(vector<string>& names, vector<string>& descriptions) {CSoundPulse::Enumerate(names, descriptions);};
     string			GetDev() {return CSoundPulse::GetDev();}
     void			SetDev(string sNewDevice) {CSoundPulse::SetDev(sNewDevice);}
+	string			GetVersion() { return pa_get_library_version(); }
 
 	_BOOLEAN		Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking);
 	_BOOLEAN		Write(CVector<_SAMPLE>& psData);
