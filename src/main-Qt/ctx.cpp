@@ -43,7 +43,7 @@ CTx::run()
     {
         qDebug("%s", strError.c_str());
     }
-    qDebug("Working thread complete");
+    qDebug("Transmitter working thread complete");
 }
 
 void CTx::LoadSettings()

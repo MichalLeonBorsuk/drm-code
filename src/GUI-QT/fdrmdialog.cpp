@@ -59,6 +59,7 @@ FDRMDialog::FDRMDialog(CTRx* pRx, CSettings& Settings, QWidget* parent)
     :
     CWindow(parent, Settings, "DRM"),
     rx(*reinterpret_cast<CRx*>(pRx)),
+    done(false),
     serviceLabels(4), pLogging(nullptr),
     pSysTray(nullptr), pCurrentWindow(this),
     iMultimediaServiceBit(0),
@@ -384,8 +385,8 @@ void FDRMDialog::UpdateDRM_GUI()
     _BOOLEAN bMultimediaServiceAvailable;
     CParameter& Parameters = *rx.GetParameters();
 
-    if (isVisible() == false)
-        ChangeGUIModeToDRM();
+    //if (isVisible() == false)
+    //    ChangeGUIModeToDRM();
 
     Parameters.Lock();
 
@@ -461,7 +462,8 @@ void FDRMDialog::OnScheduleTimer()
 
 void FDRMDialog::OnTimer()
 {
-    // TODO move this to the CRx or lower
+    UpdateDRM_GUI(); // TODO move this to signal driven
+
     // do this here so GUI has initialised before we might pop up a message box
     if(pScheduler!=nullptr)
         return;
@@ -1091,6 +1093,10 @@ void FDRMDialog::eventClose(QCloseEvent* ce)
      * when the window closes
      */
 
+    if(done) {
+        ce->accept();
+    }
+    else {
         /* Request that the working thread stops */
         rx.Stop();
 
@@ -1104,17 +1110,19 @@ void FDRMDialog::eventClose(QCloseEvent* ce)
         AboutDlg.close();
         pAnalogDemDlg->close();
         pFMDlg->close();
-
-        // now wait for the working thread finished signal
-        if(rx.isFinished())
+        // we might have already had the signal by now
+        if(done) {
             ce->accept();
-        else
+        }
+        else {
             ce->ignore();
+        }
+    }
 }
 
 void FDRMDialog::OnWorkingThreadFinished()
 {
-    cerr << "FDRMDialog::OnWorkingThreadFinished" << endl;
+    done = true;
     close();
 }
 
