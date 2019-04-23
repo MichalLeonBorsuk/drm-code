@@ -97,6 +97,11 @@ void CRx::SaveSettings()
     rx.SaveSettings();
 }
 
+void CRx::SetInputDevice(QString s)
+{
+    SetInputDevice(s.toStdString());
+}
+
 void CRx::SetInputDevice(string s)
 {
     rx.SetInputDevice(s);
@@ -104,6 +109,11 @@ void CRx::SetInputDevice(string s)
     QString id = QString::fromStdString(rx.GetInputDevice());
     emit InputDeviceChanged(id);
     emit soundFileChanged(id); // TODO only send if it is a file!!!
+}
+
+void CRx::SetOutputDevice(QString s)
+{
+    SetOutputDevice(s.toStdString());
 }
 
 void CRx::SetOutputDevice(string s)

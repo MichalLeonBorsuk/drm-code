@@ -67,20 +67,22 @@ public:
     virtual int GetFrequency() override;
     virtual void EnumerateInputs(std::vector<std::string>& names, std::vector<std::string>& descriptions) override;
     virtual void EnumerateOutputs(std::vector<std::string>& names, std::vector<std::string>& descriptions) override;
-    virtual CSettings*				GetSettings() override;
-    virtual CParameter*				GetParameters() override;
+    virtual CSettings* GetSettings() override;
+    virtual CParameter*	GetParameters() override;
 
 public slots:
     virtual void LoadSettings() override;
     virtual void SaveSettings() override;
     virtual void SetInputDevice(string) override;
     virtual void SetOutputDevice(string) override;
+    virtual void SetInputDevice(QString);
+    virtual void SetOutputDevice(QString);
     virtual void Start();
     virtual void Stop();
     virtual void Restart();
-    virtual void					SetSettings(CSettings* pNewSettings) override;
-    virtual _BOOLEAN				IsReceiver() const override { return true;}
-    virtual _BOOLEAN				IsTransmitter() const override { return false;}
+    virtual void SetSettings(CSettings* pNewSettings) override;
+    virtual _BOOLEAN IsReceiver() const override { return true;}
+    virtual _BOOLEAN IsTransmitter() const override { return false;}
     virtual void StartWriteWaveFile(string);
     virtual void StopWriteWaveFile();
     virtual void SetTimeInterpolationAlgorithm(ETypeIntTime);
