@@ -791,18 +791,18 @@ extern "C" {
   * @{
   */
 
-/** Converts an opus error code into a human readable string.
+/** Converts an opus error code into a human readable std::string.
   *
   * @param[in] error <tt>int</tt>: Error number
-  * @returns Error string
+  * @returns Error std::string
   */
 /*OPUS_EXPORT const char *opus_strerror(int error);*/
 
-/** Gets the libopus version string.
+/** Gets the libopus version std::string.
   *
-  * @returns Version string
+  * @returns Version std::string
   */
-/*OPUS_EXPORT const char *opus_get_version_string(void);*/
+/*OPUS_EXPORT const char *opus_get_version_std::string(void);*/
 /**@}*/
 
 #ifdef __cplusplus

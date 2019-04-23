@@ -59,7 +59,7 @@ class CEPGDecoder
     CEPGDecoder ():doc()
     {
     }
-    void decode (const vector<_BYTE>&);
+    void decode (const std::vector<_BYTE>&);
 
     QDomDocument doc;
 

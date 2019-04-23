@@ -28,6 +28,7 @@
 
 #include "MDIInBuffer.h"
 #include <iostream>
+using namespace std;
 
 /* write the received packet to the buffer, if the previous one was not read yet
  * it will be lost, but we need new data in preference to old and we should be

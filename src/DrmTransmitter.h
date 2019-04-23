@@ -74,16 +74,16 @@ public:
     _REAL GetCarOffset() {
         return rDefCarOffset;
     }
-    void GetInputDevice(string& s) { s = indev; }
-    void GetOutputDevice(string& s) { s = outdev; }
-    void EnumerateInputs(std::vector<std::string>& names, std::vector<std::string>& descriptions);
-    void EnumerateOutputs(std::vector<std::string>& names, std::vector<std::string>& descriptions);
-    void SetInputDevice(string);
-    void SetOutputDevice(string);
+    void GetInputDevice(std::string& s) { s = indev; }
+    void GetOutputDevice(std::string& s) { s = outdev; }
+    void EnumerateInputs(std::vector<string>& names, std::vector<string>& descriptions);
+    void EnumerateOutputs(std::vector<string>& names, std::vector<string>& descriptions);
+    void SetInputDevice(std::string);
+    void SetOutputDevice(std::string);
     void doSetInputDevice();
     void doSetOutputDevice();
-    virtual _BOOLEAN				IsReceiver() const { return false; }
-    virtual _BOOLEAN				IsTransmitter() const { return true; }
+    virtual bool				IsReceiver() const { return false; }
+    virtual bool				IsTransmitter() const { return true; }
     virtual CSettings*				GetSettings() ;
     virtual void					SetSettings(CSettings* pNewSettings) { pSettings = pNewSettings; }
     virtual CParameter*				GetParameters() {return &Parameters; }
@@ -91,11 +91,11 @@ public:
     void Close() {ReadData.Stop(); TransmitData.Stop(); }
 
 protected:
-    _BOOLEAN CanSoftStopExit();
+    bool CanSoftStopExit();
     void InitSoftStop() { iSoftStopSymbolCount=0; }
 
-    string indev;
-    string outdev;
+    std::string indev;
+    std::string outdev;
     /* Buffers */
     CSingleBuffer<_SAMPLE>	DataBuf;
     CSingleBuffer<_BINARY>	AudSrcBuf;
@@ -126,7 +126,7 @@ protected:
     CTransmitData			TransmitData;
 
     _REAL					rDefCarOffset;
-    _BOOLEAN				bUseUEP;
+    bool				bUseUEP;
     int						iSoftStopSymbolCount;
     CParameter&             Parameters;
     CSettings*              pSettings;

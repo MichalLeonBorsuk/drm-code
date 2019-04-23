@@ -45,7 +45,7 @@ CLogging::CLogging(CParameter& Parameters) :
 void CLogging::LoadSettings(CSettings& Settings)
 {
     /* log file flag for storing signal strength in long log */
-    _BOOLEAN logrxl = Settings.Get("Logfile", "enablerxl", FALSE);
+    bool logrxl = Settings.Get("Logfile", "enablerxl", false);
     shortLog.SetRxlEnabled(logrxl);
     longLog.SetRxlEnabled(logrxl);
 

@@ -30,7 +30,6 @@
 #define GLOBALDEFINITIONS_H
 
 #include <complex>
-using namespace std; /* Because of the library: "complex" */
 #include <string>
 #include <cstdio>
 #include <limits>
@@ -65,13 +64,6 @@ using namespace std; /* Because of the library: "complex" */
 # endif
 #else
 # define qDebug(...) do {} while (0)
-#endif
-
-#ifndef TRUE
-# define TRUE 1
-#endif
-#ifndef FALSE
-# define FALSE 0
 #endif
 
 /* Choose algorithms -------------------------------------------------------- */
@@ -109,10 +101,9 @@ using namespace std; /* Because of the library: "complex" */
 
 /* Define the application specific data-types ------------------------------- */
 typedef	double							_REAL;
-typedef	complex<_REAL>					_COMPLEX;
+typedef	std::complex<_REAL>				_COMPLEX;
 typedef short							_SAMPLE;
 typedef unsigned char					_BYTE;
-typedef bool							_BOOLEAN;
 
 // bool seems not to work with linux TODO: Fix Me!
 typedef unsigned char/*bool*/			_BINARY;
@@ -276,7 +267,7 @@ public:
     void WakeOne() {
         WaitCond.wakeOne();
     }
-    _BOOLEAN Wait(CMutex* mutex, unsigned long time) {
+    bool Wait(CMutex* mutex, unsigned long time) {
         return WaitCond.wait(&mutex->Mutex, time);
     }
 protected:
@@ -297,7 +288,7 @@ class CWaitCondition
 {
 public:
     void WakeOne() {}
-    _BOOLEAN Wait(CMutex*, unsigned long) {return TRUE;}
+    bool Wait(CMutex*, unsigned long) {return true;}
 };
 
 #endif
@@ -305,8 +296,8 @@ public:
 class CGenErr
 {
 public:
-    CGenErr(string strNE) : strError(strNE) {}
-    string strError;
+    CGenErr(std::string strNE) : strError(strNE) {}
+    std::string strError;
 };
 
 

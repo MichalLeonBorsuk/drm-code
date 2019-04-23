@@ -38,6 +38,7 @@
 #include <cstring>
 #include <string.h>
 
+using namespace std;
 
 CAudioFileIn::CAudioFileIn(): CSoundInInterface(), eFmt(fmt_other),
     pFileReceiver(nullptr), iSampleRate(0), iRequestedSampleRate(0), iBufferSize(0),
@@ -168,8 +169,8 @@ CAudioFileIn::SetFileName(const string& strFileName)
     else                                    iRequestedSampleRate = 192000;
 }
 
-_BOOLEAN
-CAudioFileIn::Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking)
+bool
+CAudioFileIn::Init(int iNewSampleRate, int iNewBufferSize, bool bNewBlocking)
 {
 	//qDebug("CAudioFileIn::Init() iNewSampleRate=%i iNewBufferSize=%i bNewBlocking=%i", iNewSampleRate, iNewBufferSize, bNewBlocking);
 
@@ -185,14 +186,14 @@ CAudioFileIn::Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking
     }
 
     if (pFileReceiver == nullptr)
-        return TRUE;
+        return true;
 
-    _BOOLEAN bChanged = FALSE;
+    bool bChanged = false;
 
 	if (iSampleRate != iNewSampleRate)
     {
         iSampleRate = iNewSampleRate;
-        bChanged = TRUE;
+        bChanged = true;
     }
 
     if (iBufferSize != iNewBufferSize || bChanged)
@@ -234,17 +235,17 @@ CAudioFileIn::Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking
     return bChanged;
 }
 
-_BOOLEAN
+bool
 CAudioFileIn::Read(CVector<short>& psData)
 {
     if (pacer)
         pacer->wait();
 
     if (pFileReceiver == nullptr)
-        return TRUE;
+        return true;
 
     if(psData.Size() < iBufferSize)
-        return TRUE;
+        return true;
 
     const int iFrames = ResampleObjL ? ResampleObjL->GetFreeInputSize() : iBufferSize/2;
     int i;
@@ -257,22 +258,22 @@ CAudioFileIn::Read(CVector<short>& psData)
             if (fscanf(pFileReceiver, "%e\n", &tIn) == EOF)
             {
                 /* If end-of-file is reached, stop simulation */
-                return FALSE;
+                return false;
             }
             psData[2*i] = (short)tIn;
             psData[2*i+1] = (short)tIn;
         }
-        return FALSE;
+        return false;
     }
 
-    _BOOLEAN bError = FALSE;
+    bool bError = false;
     int iRemainingFrame = iFrames;
     int iReadFrame = 0;
 #ifdef HAVE_LIBSNDFILE
     while (iRemainingFrame > 0)
     {
         if (pFileReceiver == nullptr) // file was closed in a different thread. TODO make this not possible
-            return TRUE;
+            return true;
         sf_count_t c = sf_readf_short((SNDFILE*)pFileReceiver, &buffer[iReadFrame * iFileChannels], iRemainingFrame);
 	    if (c != sf_count_t(iRemainingFrame))
 	    {
@@ -280,7 +281,7 @@ CAudioFileIn::Read(CVector<short>& psData)
             if (sf_error((SNDFILE*)pFileReceiver) || sf_seek((SNDFILE*)pFileReceiver, 0, SEEK_SET) == -1)
             {
                 memset(&buffer[iReadFrame * iFileChannels], 0, iRemainingFrame * iFileChannels);
-                bError = TRUE;
+                bError = true;
                 break;
             }
 	    }
@@ -291,7 +292,7 @@ CAudioFileIn::Read(CVector<short>& psData)
     while (iRemainingFrame > 0)
     {
         if (pFileReceiver == nullptr) // file was closed in a different thread. TODO make this not possible
-            return TRUE;
+            return true;
         size_t c = fread(&buffer[iReadFrame * iFileChannels], sizeof(short), size_t(iRemainingFrame), pFileReceiver);
         if (c != size_t(iRemainingFrame))
         {
@@ -299,7 +300,7 @@ CAudioFileIn::Read(CVector<short>& psData)
             if (ferror(pFileReceiver) || fseek(pFileReceiver, 0, SEEK_SET) == -1)
             {
                 memset(&buffer[iReadFrame * iFileChannels], 0, iRemainingFrame * iFileChannels);
-                bError = TRUE;
+                bError = true;
                 break;
             }
         }

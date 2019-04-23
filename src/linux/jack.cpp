@@ -277,7 +277,7 @@ void CJackCommon::terminate()
     client = NULL;
 }
 
-CSoundInJack::CSoundInJack():iBufferSize(0), bBlocking(TRUE), capture_data(), dev(-1),ports()
+CSoundInJack::CSoundInJack():iBufferSize(0), bBlocking(true), capture_data(), dev(-1),ports()
 {
     if (data.client==NULL)
         data.initialise();
@@ -314,7 +314,7 @@ CSoundInJack::CSoundInJack():iBufferSize(0), bBlocking(TRUE), capture_data(), de
 }
 
 CSoundInJack::CSoundInJack(const CSoundInJack & e):
-        iBufferSize(e.iBufferSize), bBlocking(e.bBlocking), device_changed(TRUE),
+        iBufferSize(e.iBufferSize), bBlocking(e.bBlocking), device_changed(true),
         capture_data(e.capture_data), dev(e.dev), ports(e.ports)
 {
 }
@@ -372,7 +372,7 @@ CSoundInJack::SetDev(int iNewDevice)
 }
 
 void
-CSoundInJack::Init(int iNewBufferSize, _BOOLEAN bNewBlocking)
+CSoundInJack::Init(int iNewBufferSize, bool bNewBlocking)
 {
     if (device_changed == false)
         return;
@@ -404,7 +404,7 @@ CSoundInJack::Init(int iNewBufferSize, _BOOLEAN bNewBlocking)
     device_changed = false;
 }
 
-_BOOLEAN
+bool
 CSoundInJack::Read(CVector<short>& psData)
 {
     if (device_changed)
@@ -443,9 +443,9 @@ CSoundInJack::Read(CVector<short>& psData)
     {
         capture_data.underruns++;
         cerr << "jack read " << n << " wanted " << bytes << endl;
-        return TRUE;
+        return true;
     }
-    return FALSE;
+    return false;
 }
 
 void
@@ -456,7 +456,7 @@ CSoundInJack::Close()
     device_changed = true;
 }
 
-CSoundOutJack::CSoundOutJack():iBufferSize(0), bBlocking(TRUE), device_changed(TRUE),
+CSoundOutJack::CSoundOutJack():iBufferSize(0), bBlocking(true), device_changed(true),
         play_data(), dev(-1), ports()
 {
     if (data.client==NULL)
@@ -545,7 +545,7 @@ CSoundOutJack::SetDev(int iNewDevice)
 }
 
 void
-CSoundOutJack::Init(int iNewBufferSize, _BOOLEAN bNewBlocking)
+CSoundOutJack::Init(int iNewBufferSize, bool bNewBlocking)
 {
     if (device_changed == false)
         return;
@@ -575,7 +575,7 @@ CSoundOutJack::Init(int iNewBufferSize, _BOOLEAN bNewBlocking)
     device_changed = false;
 }
 
-_BOOLEAN
+bool
 CSoundOutJack::Write(CVector<short>& psData)
 {
     if (device_changed)
@@ -585,9 +585,9 @@ CSoundOutJack::Write(CVector<short>& psData)
     if (jack_ringbuffer_write (play_data.buff, (char *) &psData[0], bytes) < bytes)
     {
         play_data.overruns++;
-        return TRUE;
+        return true;
     }
-    return FALSE;
+    return false;
 }
 
 void

@@ -271,27 +271,27 @@ void AnalogDemDlg::UpdateControls()
 	{
     case DT_AM:
 		if (!RadioButtonDemAM->isChecked())
-			RadioButtonDemAM->setChecked(TRUE);
+			RadioButtonDemAM->setChecked(true);
 		break;
 
     case DT_LSB:
 		if (!RadioButtonDemLSB->isChecked())
-			RadioButtonDemLSB->setChecked(TRUE);
+			RadioButtonDemLSB->setChecked(true);
 		break;
 
     case DT_USB:
 		if (!RadioButtonDemUSB->isChecked())
-			RadioButtonDemUSB->setChecked(TRUE);
+			RadioButtonDemUSB->setChecked(true);
 		break;
 
     case DT_CW:
 		if (!RadioButtonDemCW->isChecked())
-			RadioButtonDemCW->setChecked(TRUE);
+			RadioButtonDemCW->setChecked(true);
 		break;
 
     case DT_FM:
 		if (!RadioButtonDemFM->isChecked())
-			RadioButtonDemFM->setChecked(TRUE);
+			RadioButtonDemFM->setChecked(true);
 		break;
 	}
 
@@ -300,22 +300,22 @@ void AnalogDemDlg::UpdateControls()
 	{
     case AT_NO_AGC:
 		if (!RadioButtonAGCOff->isChecked())
-			RadioButtonAGCOff->setChecked(TRUE);
+			RadioButtonAGCOff->setChecked(true);
 		break;
 
     case AT_SLOW:
 		if (!RadioButtonAGCSlow->isChecked())
-			RadioButtonAGCSlow->setChecked(TRUE);
+			RadioButtonAGCSlow->setChecked(true);
 		break;
 
     case AT_MEDIUM:
 		if (!RadioButtonAGCMed->isChecked())
-			RadioButtonAGCMed->setChecked(TRUE);
+			RadioButtonAGCMed->setChecked(true);
 		break;
 
     case AT_FAST:
 		if (!RadioButtonAGCFast->isChecked())
-			RadioButtonAGCFast->setChecked(TRUE);
+			RadioButtonAGCFast->setChecked(true);
 		break;
 	}
 
@@ -324,27 +324,27 @@ void AnalogDemDlg::UpdateControls()
 	{
     case NR_OFF:
 		if (!RadioButtonNoiRedOff->isChecked())
-			RadioButtonNoiRedOff->setChecked(TRUE);
+			RadioButtonNoiRedOff->setChecked(true);
 		break;
 
     case NR_LOW:
 		if (!RadioButtonNoiRedLow->isChecked())
-			RadioButtonNoiRedLow->setChecked(TRUE);
+			RadioButtonNoiRedLow->setChecked(true);
 		break;
 
     case NR_MEDIUM:
 		if (!RadioButtonNoiRedMed->isChecked())
-			RadioButtonNoiRedMed->setChecked(TRUE);
+			RadioButtonNoiRedMed->setChecked(true);
 		break;
 
     case NR_HIGH:
 		if (!RadioButtonNoiRedHigh->isChecked())
-			RadioButtonNoiRedHigh->setChecked(TRUE);
+			RadioButtonNoiRedHigh->setChecked(true);
 		break;
 
     case NR_SPEEX:
 		if (!RadioButtonNoiRedSpeex->isChecked())
-			RadioButtonNoiRedSpeex->setChecked(TRUE);
+			RadioButtonNoiRedSpeex->setChecked(true);
 		break;
 	}
 
@@ -411,7 +411,7 @@ void AnalogDemDlg::OnTimerPLLPhaseDial()
 {
 	CReal rCurPLLPhase;
 
-    if (rx.GetAMPLLPhase(rCurPLLPhase) == TRUE)
+    if (rx.GetAMPLLPhase(rCurPLLPhase))
 	{
 		/* Set current PLL phase (convert radiant in degree) */
 		PhaseDial->setValue(rCurPLLPhase * (CReal) 360.0 / (2 * crPi));
@@ -557,7 +557,7 @@ void AnalogDemDlg::OnCheckSaveAudioWAV()
 	This code is copied in systemevalDlg.cpp. If you do changes here, you should
 	apply the changes in the other file, too
 */
-	if (CheckBoxSaveAudioWave->isChecked() == TRUE)
+	if (CheckBoxSaveAudioWave->isChecked())
 	{
 		/* Show "save file" dialog */
 		QString strFileName =
@@ -570,7 +570,7 @@ void AnalogDemDlg::OnCheckSaveAudioWAV()
 		else
 		{
 			/* User hit the cancel button, uncheck the button */
-			CheckBoxSaveAudioWave->setChecked(FALSE);
+			CheckBoxSaveAudioWave->setChecked(false);
 		}
 	}
 	else
@@ -610,7 +610,7 @@ void AnalogDemDlg::on_ButtonFreqOffset_clicked(bool)
 		LabelFreqOffset->text(), prev_freq, -1e6, 1e6, 2, &ok);
 	if (ok)
 	{
-        const _REAL conv_freq =rx.ConvertFrequency(new_freq, TRUE);
+        const _REAL conv_freq =rx.ConvertFrequency(new_freq, true);
         const double dVal = conv_freq / (rx.GetParameters()->GetSigSampleRate() / 2);
 		OnChartxAxisValSet(dVal);
 	}
@@ -812,7 +812,7 @@ CAMSSDlg::CAMSSDlg(CRx& NDRMR, CSettings& Settings, QWidget* parent) :
 	TextAMSSAMCarrierMode->setText("");
 	TextAMSSInfo->setText("");
 
-	ListBoxAMSSAFSList->setEnabled(FALSE);
+	ListBoxAMSSAFSList->setEnabled(false);
 
 
 	/* Connect controls ----------------------------------------------------- */
@@ -912,7 +912,7 @@ void CAMSSDlg::OnTimer()
 		ListBoxAMSSAFSList->insertItem(10, val);
 
 		ListBoxAMSSAFSList->clear();
-		ListBoxAMSSAFSList->setEnabled(TRUE);
+		ListBoxAMSSAFSList->setEnabled(true);
 
 		QString freqEntry;
 
@@ -1066,7 +1066,7 @@ void CAMSSDlg::OnTimer()
 	else
 	{
 		ListBoxAMSSAFSList->clear();
-		ListBoxAMSSAFSList->setEnabled(FALSE);
+		ListBoxAMSSAFSList->setEnabled(false);
 	}
 
 	TextAMSSServiceID->setText("");
@@ -1113,7 +1113,7 @@ void CAMSSDlg::OnTimerPLLPhaseDial()
 {
 	CReal rCurPLLPhase;
 
-    if (rx.GetAMSSPLLPhase(rCurPLLPhase) == TRUE)
+    if (rx.GetAMSSPLLPhase(rCurPLLPhase))
 	{
 		/* Set current PLL phase (convert radiant in degree) */
 		PhaseDialAMSS->setValue(rCurPLLPhase * (CReal) 360.0 / (2 * crPi));

@@ -51,17 +51,17 @@ void CPacketSocketNull::poll()
 {
 }
 
-_BOOLEAN CPacketSocketNull::SetOrigin(const string&)
+bool CPacketSocketNull::SetOrigin(const string&)
 {
-	return FALSE;
+	return false;
 }
 
-_BOOLEAN CPacketSocketNull::SetDestination(const string&)
+bool CPacketSocketNull::SetDestination(const string&)
 {
-	return FALSE;
+	return false;
 }
 
-_BOOLEAN CPacketSocketNull::GetDestination(string&)
+bool CPacketSocketNull::GetDestination(string&)
 {
-	return FALSE;
+	return false;
 }

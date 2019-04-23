@@ -85,7 +85,7 @@ public:
         rNoiseEst(0.0), rSignalEst(0.0),
         rNoiseEstWMMAcc(0.0), rSignalEstWMMAcc(0.0), rNoiseEstWMFAcc(0.0),
         rSignalEstWMFAcc(0.0), rNoiseEstMERAcc(0.0),iCountMERAcc(0),
-        bInterfConsid(FALSE) {}
+        bInterfConsid(false) {}
 
     virtual ~CChannelEstimation() {}
 
@@ -122,10 +122,10 @@ public:
         return TypeIntTime;
     }
 
-    void SetIntCons(const _BOOLEAN bNewIntCons) {
+    void SetIntCons(const bool bNewIntCons) {
         bInterfConsid = bNewIntCons;
     }
-    _BOOLEAN GetIntCons() {
+    bool GetIntCons() {
         return bInterfConsid;
     }
 
@@ -216,7 +216,7 @@ protected:
     _REAL					rNoiseEstMERAcc;
     int						iCountMERAcc;
 
-    _BOOLEAN				bInterfConsid;
+    bool				bInterfConsid;
 
     /* Needed for GetDelay() */
     _REAL					rLenPDSEst;
@@ -229,7 +229,7 @@ protected:
     int						iSNREstIniSigAvCnt;
     int						iSNREstIniNoiseAvCnt;
     int						iSNREstInitCnt;
-    _BOOLEAN				bSNRInitPhase;
+    bool				bSNRInitPhase;
     _REAL CalAndBoundSNR(const _REAL rSignalEst, const _REAL rNoiseEst);
 
     /* OPH: RSCI interference tag calculation */

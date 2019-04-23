@@ -27,7 +27,7 @@
 \******************************************************************************/
 
 #include "TextMessage.h"
-
+using namespace std;
 
 /* Implementation *************************************************************/
 /******************************************************************************\
@@ -260,7 +260,7 @@ void CTextMessage::SetText(const string& strMessage, const _BINARY biToggleBit)
 void CTextMessageDecoder::Decode(CVector<_BINARY>& pData)
 {
     int			i, j;
-    _BOOLEAN	bBeginningFound;
+    bool	bBeginningFound;
 
     /* Reset binary vector function. Always four bytes of data */
     pData.ResetBitAccess();
@@ -268,11 +268,11 @@ void CTextMessageDecoder::Decode(CVector<_BINARY>& pData)
     /* Identify the beginning of a segment, all four bytes are 0xFF, otherwise
        store total new buffer in internal intermediate buffer. This buffer is
        read, when a beginning was found */
-    bBeginningFound = TRUE;
+    bBeginningFound = true;
     for (i = 0; i < NUM_BYTES_TEXT_MESS_IN_AUD_STR; i++)
     {
         if (pData.Separate(SIZEOF__BYTE) != 0xFF)
-            bBeginningFound = FALSE;
+            bBeginningFound = false;
     }
 
     if (bBeginningFound)
@@ -291,7 +291,7 @@ void CTextMessageDecoder::Decode(CVector<_BINARY>& pData)
         for (i = 0; i < byLengthBody + 2 /* Header */; i++)
             CRCObject.AddByte(_BYTE(biStreamBuffer.Separate(SIZEOF__BYTE)));
 
-        if (CRCObject.CheckCRC(biStreamBuffer.Separate(16)) == TRUE)
+        if (CRCObject.CheckCRC(biStreamBuffer.Separate(16)))
         {
             if (biCommandFlag == 1)
             {
@@ -320,25 +320,25 @@ void CTextMessageDecoder::Decode(CVector<_BINARY>& pData)
                 /* First, check if segment was already OK and if new data has
                    the same content or not. If the content is different, a new
                    message is being send, clear all other segments */
-                if (Segment[bySegmentID].bIsOK == TRUE)
+                if (Segment[bySegmentID].bIsOK)
                 {
                     /* Reset bit access and skip header bits to go directly to
                        the body bytes */
                     biStreamBuffer.ResetBitAccess();
                     biStreamBuffer.Separate(16);
 
-                    _BOOLEAN bIsSame = TRUE;
+                    bool bIsSame = true;
                     for (i = 0; i < byLengthBody; i++)
                     {
                         if (Segment[bySegmentID].byData[i] !=
                                 biStreamBuffer.Separate(SIZEOF__BYTE))
                         {
-                            bIsSame = FALSE;
+                            bIsSame = false;
                         }
                     }
 
                     /* If a new message is sent, clear all old segments */
-                    if (bIsSame == FALSE)
+                    if (bIsSame == false)
                         ResetSegments();
                 }
 
@@ -356,7 +356,7 @@ void CTextMessageDecoder::Decode(CVector<_BINARY>& pData)
 
                 /* Set length of this segment and OK flag */
                 Segment[bySegmentID].iNumBytes = byLengthBody;
-                Segment[bySegmentID].bIsOK = TRUE;
+                Segment[bySegmentID].bIsOK = true;
 
                 /* Check length of text message */
                 if (biLastFlag == 1)
@@ -458,14 +458,14 @@ void CTextMessageDecoder::SetText()
     {
 #ifndef _DEBUG_
         /* Check, if all segments are ready */
-        _BOOLEAN bTextMessageReady = TRUE;
+        bool bTextMessageReady = true;
         for (i = 0; i < iNumSegments; i++)
         {
-            if (Segment[i].bIsOK == FALSE)
-                bTextMessageReady = FALSE;
+            if (Segment[i].bIsOK == false)
+                bTextMessageReady = false;
         }
 
-        if (bTextMessageReady == TRUE)
+        if (bTextMessageReady)
 #endif
         {
             /* Clear text */
@@ -473,7 +473,7 @@ void CTextMessageDecoder::SetText()
 
             for (i = 0; i < MAX_NUM_SEG_TEXT_MESSAGE; i++)
             {
-                if (Segment[i].bIsOK == TRUE)
+                if (Segment[i].bIsOK)
                 {
                     for (int j = 0; j < Segment[i].iNumBytes; j++)
                     {
@@ -533,7 +533,7 @@ void CTextMessageDecoder::ClearText()
 void CTextMessageDecoder::ResetSegments()
 {
     //for (int i = 0; i < MAX_NUM_SEG_TEXT_MESSAGE; i++)
-    //    Segment[i].bIsOK = FALSE;
+    //    Segment[i].bIsOK = false;
     for(CTextMessSegment segment: Segment) segment.bIsOK = false;
 
     iNumSegments = 0;

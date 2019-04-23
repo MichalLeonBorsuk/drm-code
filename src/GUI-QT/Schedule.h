@@ -46,7 +46,7 @@
 #endif
 
 /* Name for DRM and AM schedule file. If you change something here, make sure
-   that you also change the strings and help texts!  */
+   that you also change the std::strings and help texts!  */
 #define DRMSCHEDULE_INI_FILE_NAME		"DRMSchedule.ini"
 #define AMSCHEDULE_INI_FILE_NAME		"AMSchedule.ini"
 #define AMSCHEDULE_CSV_FILE_NAME		"AMSchedule.csv"
@@ -101,7 +101,7 @@ public:
 		rPower((_REAL) 0.0) { }
 
 	Station::EState stateAt(time_t, int) const;
-	_BOOLEAN activeAt(time_t) const;
+	bool activeAt(time_t) const;
 	int StartTime() const {return iStartHour * 100 + iStartMinute;}
 	int StopTime() const{return iStopHour * 100 + iStopMinute;}
 	void SetStartTime(const int iStartTime)
@@ -170,7 +170,7 @@ public:
 protected:
 	void			SetAnalogUrl();
 
-	vector<CStationsItem>	StationsTable;
+	std::vector<CStationsItem>	StationsTable;
 	ESchedMode		eSchedMode;
 
 	/* Minutes for stations preview in seconds if zero then only show active */

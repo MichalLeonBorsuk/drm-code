@@ -1,6 +1,8 @@
 #include "audioparam.h"
 #include <iostream>
 
+using namespace std;
+
 CAudioParam::~CAudioParam()
 {
 }
@@ -22,7 +24,7 @@ bool CAudioParam::setFromType9Bits(CVector<_BINARY>& biData, unsigned numBytes)
 
     /* Audio sampling rate */
 
-    /* Init bAudioSamplingRateValue7 flag to FALSE */
+    /* Init bAudioSamplingRateValue7 flag to false */
     bool bAudioSamplingRateValue7 = false;
 
     unsigned asr = biData.Separate(3);
@@ -61,7 +63,7 @@ bool CAudioParam::setFromType9Bits(CVector<_BINARY>& biData, unsigned numBytes)
         case 7: /* 111 */
             eAudioSamplRate = CAudioParam::AS_48KHZ;
         default: /* reserved */
-            bError = TRUE;
+            bError = true;
             break;
         }
     }
@@ -80,7 +82,7 @@ bool CAudioParam::setFromType9Bits(CVector<_BINARY>& biData, unsigned numBytes)
         case 7: /* 111 */
             bAudioSamplingRateValue7 = true;
         default: /* reserved */
-            bError = TRUE;
+            bError = true;
             break;
         }
     }

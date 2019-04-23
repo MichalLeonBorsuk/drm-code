@@ -52,15 +52,15 @@ public:
     virtual ~CAudioCodec();
 	/* Decoder */
 	enum EDecError { DECODER_ERROR_OK, DECODER_ERROR_CRC, DECODER_ERROR_CORRUPTED, DECODER_ERROR_UNKNOWN };
-	virtual string DecGetVersion() = 0;
+	virtual std::string DecGetVersion() = 0;
 	virtual bool CanDecode(CAudioParam::EAudCod eAudioCoding) = 0;
     virtual bool DecOpen(const CAudioParam& AudioParam, int& iAudioSampleRate) = 0;
-    virtual EDecError Decode(const vector<uint8_t>& audio_frame, uint8_t aac_crc_bits, CVector<_REAL>& left,  CVector<_REAL>& right) = 0;
+    virtual EDecError Decode(const std::vector<uint8_t>& audio_frame, uint8_t aac_crc_bits, CVector<_REAL>& left,  CVector<_REAL>& right) = 0;
     virtual void DecClose() = 0;
 	virtual void DecUpdate(CAudioParam& AudioParam) = 0;
     virtual void Init(const CAudioParam& AudioParam, int iInputBlockSize);
     /* Encoder */
-	virtual string EncGetVersion() = 0;
+	virtual std::string EncGetVersion() = 0;
 	virtual bool CanEncode(CAudioParam::EAudCod eAudioCoding) = 0;
     virtual bool EncOpen(const CAudioParam& AudioParam, unsigned long& lNumSampEncIn, unsigned long& lMaxBytesEncOut) = 0;
     virtual int Encode(CVector<_SAMPLE>& vecsEncInData, unsigned long lNumSampEncIn, CVector<uint8_t>& vecsEncOutData, unsigned long lMaxBytesEncOut) = 0;
@@ -74,10 +74,10 @@ public:
 	static CAudioCodec* GetEncoder(CAudioParam::EAudCod eAudioCoding, bool bCanReturnNullPtr=false);
     virtual void openFile(const CParameter& Parameters);
     virtual void closeFile();
-    virtual void writeFile(const vector<uint8_t>& audio_frame);
-    virtual string fileName(const CParameter& Parameters) const = 0;
+    virtual void writeFile(const std::vector<uint8_t>& audio_frame);
+    virtual std::string fileName(const CParameter& Parameters) const = 0;
 private:
-	static vector<CAudioCodec*> CodecList;
+	static std::vector<CAudioCodec*> CodecList;
 	static int RefCount;
     FILE *pFile;
 };

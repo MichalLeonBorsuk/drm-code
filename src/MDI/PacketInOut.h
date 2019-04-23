@@ -47,9 +47,9 @@ class CPacketSink
 {
 public:
 	virtual ~CPacketSink() {}
-	virtual void SendPacket(const vector<_BYTE>& vecbydata, uint32_t addr=0, uint16_t port=0) = 0;
-	virtual _BOOLEAN SetDestination(const string& str) = 0;
-	virtual _BOOLEAN GetDestination(string& str) = 0;
+	virtual void SendPacket(const std::vector<_BYTE>& vecbydata, uint32_t addr=0, uint16_t port=0) = 0;
+	virtual bool SetDestination(const std::string& str) = 0;
+	virtual bool GetDestination(std::string& str) = 0;
 };
 
 
@@ -63,8 +63,8 @@ public:
 	virtual void SetPacketSink(CPacketSink *pSink) = 0;
 	// Stop sending packets to the sink
 	virtual void ResetPacketSink() = 0;
-	virtual _BOOLEAN SetOrigin(const string& str) = 0;
-	virtual _BOOLEAN GetOrigin(string& str) = 0;
+	virtual bool SetOrigin(const std::string& str) = 0;
+	virtual bool GetOrigin(std::string& str) = 0;
 	virtual void poll() = 0;
 };
 

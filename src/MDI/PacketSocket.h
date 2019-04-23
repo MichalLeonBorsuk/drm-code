@@ -57,13 +57,13 @@ public:
 	virtual void ResetPacketSink(void);
 
 	// Send packet to the socket
-	void SendPacket(const vector<_BYTE>& vecbydata, uint32_t addr=0, uint16_t port=0);
+	void SendPacket(const std::vector<_BYTE>& vecbydata, uint32_t addr=0, uint16_t port=0);
 
-	virtual bool SetDestination(const string& str);
-	virtual bool SetOrigin(const string& str);
+	virtual bool SetDestination(const std::string& str);
+	virtual bool SetOrigin(const std::string& str);
 
-	virtual bool GetDestination(string& str);
-	virtual bool GetOrigin(string& str);
+	virtual bool GetDestination(std::string& str);
+	virtual bool GetOrigin(std::string& str);
 
 	void poll();
 
@@ -71,14 +71,14 @@ private:
 	void pollStream();
 	void pollDatagram();
 
-	vector<string> parseDest(const string & strNewAddr);
+    std::vector<std::string> parseDest(const std::string & strNewAddr);
 	CPacketSink *pPacketSink;
 
 	sockaddr_in sourceAddr, destAddr;
 	sockaddr_in HostAddrOut;
-	vector<_BYTE>	writeBuf;
+	std::vector<_BYTE>	writeBuf;
 	bool udp;
 	SOCKET s;
-	string origin, dest;
+	std::string origin, dest;
 };
 #endif

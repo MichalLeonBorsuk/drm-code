@@ -71,14 +71,14 @@ public:
     _REAL GetLevelMeter() {
         return SignalLevelMeter.Level();
     }
-    void SetSoundInterface(string);
-    string GetSoundInterface() { return soundDevice; }
-    void Enumerate(std::vector<std::string>& names, std::vector<std::string>& descriptions);
+    void SetSoundInterface(std::string);
+    std::string GetSoundInterface() { return soundDevice; }
+    void Enumerate(std::vector<string>& names, std::vector<string>& descriptions);
     void Stop();
 #ifdef QT_MULTIMEDIA_LIB
-	string GetSoundInterfaceVersion() { return "QtMultimedia"; }
+	std::string GetSoundInterfaceVersion() { return "QtMultimedia"; }
 #else
-	string GetSoundInterfaceVersion() { return pSound->GetVersion(); }
+	std::string GetSoundInterfaceVersion() { return pSound->GetVersion(); }
 #endif
 
 protected:
@@ -86,7 +86,7 @@ protected:
     QIODevice*          pIODevice;
 #endif
     CSoundInInterface*  pSound;
-    string              soundDevice;
+    std::string              soundDevice;
     CVector<_SAMPLE>	vecsSoundBuffer;
     CSignalLevelMeter	SignalLevelMeter;
     int					iSampleRate;
@@ -101,20 +101,20 @@ public:
     CWriteData();
     virtual ~CWriteData() {}
 
-    void StartWriteWaveFile(const string& strFileName);
-    _BOOLEAN GetIsWriteWaveFile() {
+    void StartWriteWaveFile(const std::string& strFileName);
+    bool GetIsWriteWaveFile() {
         return bDoWriteWaveFile;
     }
     void StopWriteWaveFile();
 
-    void MuteAudio(_BOOLEAN bNewMA) {
+    void MuteAudio(bool bNewMA) {
         bMuteAudio = bNewMA;
     }
-    _BOOLEAN GetMuteAudio() {
+    bool GetMuteAudio() {
         return bMuteAudio;
     }
 
-    void SetSoundBlocking(const _BOOLEAN bNewBl)
+    void SetSoundBlocking(const bool bNewBl)
     {
         bNewSoundBlocking = bNewBl;
         SetInitFlag();
@@ -128,14 +128,14 @@ public:
     EOutChanSel GetOutChanSel() {
         return eOutChanSel;
     }
-    void SetSoundInterface(string);
-    string GetSoundInterface() { return soundDevice; }
-    void Enumerate(std::vector<std::string>& names, std::vector<std::string>& descriptions);
+    void SetSoundInterface(std::string);
+    std::string GetSoundInterface() { return soundDevice; }
+    void Enumerate(std::vector<string>& names, std::vector<string>& descriptions);
     void Stop();
 #ifdef QT_MULTIMEDIA_LIB
-	string GetSoundInterfaceVersion() { return "QtMultimedia"; }
+	std::string GetSoundInterfaceVersion() { return "QtMultimedia"; }
 #else
-	string GetSoundInterfaceVersion() { return pSound->GetVersion(); }
+	std::string GetSoundInterfaceVersion() { return pSound->GetVersion(); }
 #endif
 
 protected:
@@ -143,12 +143,12 @@ protected:
     QIODevice*              pIODevice;
 #endif
     CSoundOutInterface*		pSound;
-    string                  soundDevice;
-    _BOOLEAN				bMuteAudio;
+    std::string                  soundDevice;
+    bool				bMuteAudio;
     CWaveFile				WaveFileAudio;
-    _BOOLEAN				bDoWriteWaveFile;
-    _BOOLEAN				bSoundBlocking;
-    _BOOLEAN				bNewSoundBlocking;
+    bool				bDoWriteWaveFile;
+    bool				bSoundBlocking;
+    bool				bNewSoundBlocking;
     CVector<_SAMPLE>		vecsTmpAudData;
     EOutChanSel				eOutChanSel;
     _REAL					rMixNormConst;
@@ -186,22 +186,22 @@ class CUtilizeFACData : public CReceiverModul<_BINARY, _BINARY>
 {
 public:
     CUtilizeFACData() :
-            bSyncInput(FALSE), bCRCOk(FALSE) {}
+            bSyncInput(false), bCRCOk(false) {}
     virtual ~CUtilizeFACData() {}
 
     /* To set the module up for synchronized DRM input data stream */
-    void SetSyncInput(_BOOLEAN bNewS) {
+    void SetSyncInput(bool bNewS) {
         bSyncInput = bNewS;
     }
 
-    _BOOLEAN GetCRCOk() const {
+    bool GetCRCOk() const {
         return bCRCOk;
     }
 
 protected:
     CFACReceive FACReceive;
-    _BOOLEAN	bSyncInput;
-    _BOOLEAN	bCRCOk;
+    bool	bSyncInput;
+    bool	bCRCOk;
 
     virtual void InitInternal(CParameter& Parameters);
     virtual void ProcessDataInternal(CParameter& Parameters);
@@ -234,7 +234,7 @@ public:
 
 protected:
     CSDCReceive SDCReceive;
-    _BOOLEAN	bFirstBlock;
+    bool	bFirstBlock;
 
     virtual void InitInternal(CParameter& Parameters);
     virtual void ProcessDataInternal(CParameter& Parameters);
@@ -292,7 +292,7 @@ public:
 
     void NewFrequency(CParameter &Parameters);
 
-	_BOOLEAN IsRecording() {return bIsRecording;}
+	bool IsRecording() {return bIsRecording;}
 
 protected:
     FILE *					pFile;
@@ -316,8 +316,8 @@ protected:
     CMixer						Mixer;
 
     int							iFrequency; // For use in generating filename
-    _BOOLEAN					bIsRecording;
-    _BOOLEAN					bChangeReceived;
+    bool					bIsRecording;
+    bool					bChangeReceived;
 
 };
 

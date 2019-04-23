@@ -53,7 +53,7 @@ LiveScheduleDlg::ExtractTime(const CAltFreqSched& schedule)
     int iStartHours = iTimeStart / 60;
 
     /* Stop time */
-    _BOOLEAN bAllWeek24Hours = FALSE;
+    bool bAllWeek24Hours = false;
     const int iTimeStop = iTimeStart + iDuration;
 
     int iStopMinutes = iTimeStop % 60;
@@ -65,7 +65,7 @@ LiveScheduleDlg::ExtractTime(const CAltFreqSched& schedule)
 
         if (iDays == 7)
             /* All the week */
-            bAllWeek24Hours = TRUE;
+            bAllWeek24Hours = true;
         else
         {
             /* Add information about days duration */
@@ -75,7 +75,7 @@ LiveScheduleDlg::ExtractTime(const CAltFreqSched& schedule)
         }
     }
 
-    if (bAllWeek24Hours == TRUE)
+    if (bAllWeek24Hours)
         sResult = "24 hours, 7 days a week";
     else
     {
@@ -147,14 +147,14 @@ CDRMLiveSchedule::SetReceiverCoordinates(double latitude, double longitude)
 void
 CDRMLiveSchedule::DecodeTargets(const vector < CAltFreqRegion >
                                 vecRegions, string & strRegions,
-                                _BOOLEAN & bIntoTargetArea)
+                                bool & bIntoTargetArea)
 {
     int iCIRAF;
     int iReceiverLatitude = int (dReceiverLatitude);
     int iReceiverLongitude = int (dReceiverLongitude);
     stringstream ssRegions;
 
-    bIntoTargetArea = FALSE;
+    bIntoTargetArea = false;
 
     for(size_t i = 0; i < vecRegions.size(); i++)
     {
@@ -211,14 +211,14 @@ CDRMLiveSchedule::DecodeTargets(const vector < CAltFreqRegion >
         }
         /* check if receiver coordinates are inside target area
          * TODO check if inside CIRAF zones */
-        _BOOLEAN bLongitudeOK = ((iReceiverLongitude >= iLongitude)
+        bool bLongitudeOK = ((iReceiverLongitude >= iLongitude)
                                  && (iReceiverLongitude <=
                                      (iLongitude + iLongitudeEx)))
                                 || (((iLongitude + iLongitudeEx) >= 180)
                                     && (iReceiverLongitude <=
                                         (iLongitude + iLongitudeEx - 360)));
 
-        _BOOLEAN bLatitudeOK = ((iReceiverLatitude >= iLatitude)
+        bool bLatitudeOK = ((iReceiverLatitude >= iLatitude)
                                 && (iReceiverLatitude <=
                                     (iLatitude + iLatitudeEx)));
 
@@ -232,7 +232,7 @@ CDRMLiveSchedule::LoadServiceDefinition(const CServiceDefinition& service,
                                         const CAltFreqSign& AltFreqSign, const uint32_t iServiceID)
 {
     string strRegions = "";
-    _BOOLEAN bIntoTargetArea = FALSE;
+    bool bIntoTargetArea = false;
 
     /* Region */
     if (service.iRegionID != 0)
@@ -660,9 +660,9 @@ LiveScheduleDlg::SetStationsView()
 
     const int iNumStations = DRMSchedule.GetStationNumber();
 
-    _BOOLEAN bListHastChanged = FALSE;
+    bool bListHastChanged = false;
 
-    _BOOLEAN bHaveOtherServiceIDs = FALSE;
+    bool bHaveOtherServiceIDs = false;
 
     /* Add new item for each station in list view */
     for (int i = 0; i < iNumStations; i++)
@@ -679,7 +679,7 @@ LiveScheduleDlg::SetStationsView()
 
                 if(item.iServiceID != SERV_ID_NOT_USED)
                 {
-                    bHaveOtherServiceIDs = TRUE;
+                    bHaveOtherServiceIDs = true;
 
                     Parameters.Lock();
                     map <uint32_t,CServiceInformation>::const_iterator
@@ -704,11 +704,11 @@ LiveScheduleDlg::SetStationsView()
                                                          );
 
                 /* Set flag for sorting the list */
-                bListHastChanged = TRUE;
+                bListHastChanged = true;
             }
 
             /* If receiver coordinates are within the target area add a little green cube */
-            if (DRMSchedule.GetItem(i).bInsideTargetArea == TRUE)
+            if (DRMSchedule.GetItem(i).bInsideTargetArea)
                 vecpListItems[i]->setIcon(COL_TARGET, smallGreenCube);
 
             /* Check, if station is currently transmitting. If yes, set
@@ -746,7 +746,7 @@ LiveScheduleDlg::SetStationsView()
                 vecpListItems[i] = nullptr;
 
                 /* Set flag for sorting the list */
-                bListHastChanged = TRUE;
+                bListHastChanged = true;
             }
         }
     }
@@ -774,7 +774,7 @@ LiveScheduleDlg::OnHeaderClicked(int c)
     if (iCurrentSortColumn == c)
         bCurrentSortAscending = !bCurrentSortAscending;
     else
-        bCurrentSortAscending = TRUE;
+        bCurrentSortAscending = true;
 
     iCurrentSortColumn = c;
 }
@@ -916,10 +916,10 @@ CDRMLiveSchedule::StationState CDRMLiveSchedule::CheckState(const int iPos)
     ltime;
     time(&ltime);
 
-    if (IsActive(iPos, ltime) == TRUE)
+    if (IsActive(iPos, ltime))
     {
         /* Check if the station soon will be inactive */
-        if (IsActive(iPos, ltime + NUM_SECONDS_SOON_INACTIVE) == TRUE)
+        if (IsActive(iPos, ltime + NUM_SECONDS_SOON_INACTIVE))
             return IS_ACTIVE;
         else
             return IS_SOON_INACTIVE;
@@ -929,7 +929,7 @@ CDRMLiveSchedule::StationState CDRMLiveSchedule::CheckState(const int iPos)
         /* Station is not active, check preview condition */
         if (iSecondsPreview > 0)
         {
-            if (IsActive(iPos, ltime + iSecondsPreview) == TRUE)
+            if (IsActive(iPos, ltime + iSecondsPreview))
                 return IS_PREVIEW;
             else
                 return IS_INACTIVE;
@@ -939,13 +939,13 @@ CDRMLiveSchedule::StationState CDRMLiveSchedule::CheckState(const int iPos)
     }
 }
 
-_BOOLEAN
+bool
 CDRMLiveSchedule::IsActive(const int iPos, const time_t ltime)
 {
     return StationsTable[iPos].IsActive(ltime);
 }
 
-_BOOLEAN
+bool
 CLiveScheduleItem::IsActive(const time_t ltime)
 {
     return Schedule.IsActive(ltime);

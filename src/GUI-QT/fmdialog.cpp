@@ -228,16 +228,16 @@ void FMDialog::UpdateDisplay()
 	    Parameters.Service[iCurSelAudioServ].eAudDataFlag == CService::SF_DATA)
 	{
 		int i = 0;
-		_BOOLEAN bStop = FALSE;
+		bool bStop = false;
 
-		while ((bStop == FALSE) && (i < MAX_NUM_SERVICES))
+		while ((bStop == false) && (i < MAX_NUM_SERVICES))
 		{
 			if (Parameters.Service[i].IsActive() &&
 			    Parameters.Service[i].AudioParam.iStreamID != STREAM_ID_NOT_USED &&
 			    Parameters.Service[i].eAudDataFlag == CService::SF_AUDIO)
 			{
 				iCurSelAudioServ = i;
-				bStop = TRUE;
+				bStop = true;
 			}
 			else
 				i++;
@@ -256,7 +256,7 @@ void FMDialog::UpdateDisplay()
 */
 		/* Bit-rate */
 		QString strBitrate = QString().setNum(Parameters.
-			GetBitRateKbps(iCurSelAudioServ, FALSE), 'f', 2) +
+			GetBitRateKbps(iCurSelAudioServ, false), 'f', 2) +
 			tr(" kbps");
 
 		/* Equal or unequal error protection */
@@ -434,7 +434,7 @@ void FMDialog::OnMenuSetDisplayColor()
 	}
 }
 
-void FMDialog::eventClose(QCloseEvent* ce)
+void FMDialog::eventClose(QCloseEvent*)
 {
 	if (!TimerClose.isActive())
 	{
@@ -465,10 +465,10 @@ QString FMDialog::GetCodecString(const int iServiceID)
 			Service[iServiceID].AudioParam.eAudioSamplRate;
 
 		/* Audio coding */
-		switch (Parameters.Service[iServiceID].
-			AudioParam.eAudioCoding)
+		switch (Parameters.Service[iServiceID].AudioParam.eAudioCoding)
 		{
-		case CAudioParam::AC_NONE:
+        case CAudioParam::AC_RESERVED:
+        case CAudioParam::AC_NONE:
 			break;
 
 		case CAudioParam::AC_AAC:
@@ -586,6 +586,8 @@ QString FMDialog::GetTypeString(const int iServiceID)
             case CAudioParam::AM_STEREO:
                 strReturn = "Stereo";
                 break;
+            case CAudioParam::AM_RESERVED:
+                ;
             }
         }
 	}

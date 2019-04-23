@@ -8,7 +8,7 @@
 CPacer::CPacer(uint64_t ns)
 {
     FILETIME ft;
-    hTimer = CreateWaitableTimer(nullptr, TRUE, TEXT("CPacerTimer"));
+    hTimer = CreateWaitableTimer(nullptr, true, TEXT("CPacerTimer"));
     if (hTimer==nullptr)
     {
         throw "Create Timer failed ";

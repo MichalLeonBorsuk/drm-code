@@ -54,6 +54,8 @@ typedef int SOCKET;
 # include <pcap.h>
 #endif
 
+using namespace std;
+
 const size_t iMaxPacketSize = 4096;
 const size_t iAFHeaderLen = 10;
 const size_t iAFCRCLen = 2;
@@ -95,7 +97,7 @@ void CPacketSourceFile::poll()
     }
 }
 
-_BOOLEAN
+bool
 CPacketSourceFile::SetOrigin(const string& origin)
 {
     string str = origin;

@@ -91,7 +91,7 @@ const _REAL rTableQAM4[2][2] = {
 */
 inline CComplex MinDist4QAM(const CComplex cI)
 {
-    /* Return vector pointing to nearest signal point of this constellation.
+    /* Return std::vector pointing to nearest signal point of this constellation.
        2 possible constellation points for real and imaginary axis */
     return CComplex(
                /* Real axis minimum distance */
@@ -102,7 +102,7 @@ inline CComplex MinDist4QAM(const CComplex cI)
 
 inline CComplex MinDist16QAM(const CComplex cI)
 {
-    /* Return vector pointing to nearest signal point of this constellation.
+    /* Return std::vector pointing to nearest signal point of this constellation.
        4 possible constellation points for real and imaginary axis */
     return CComplex(
                /* Real axis minimum distance */
@@ -115,7 +115,7 @@ inline CComplex MinDist16QAM(const CComplex cI)
 
 inline CComplex MinDist64QAM(const CComplex cI)
 {
-    /* Return vector pointing to nearest signal point of this constellation.
+    /* Return std::vector pointing to nearest signal point of this constellation.
        8 possible constellation points for real and imaginary axis */
     return CComplex(
                /* Real axis minimum distance */

@@ -109,12 +109,12 @@ public:
 class CTagItemDecoderRCI : public CTagItemDecoder
 {
 public:
-	CTagItemDecoderRCI(const string& s) : pDRMReceiver(nullptr),tag(s) {}
+	CTagItemDecoderRCI(const std::string& s) : pDRMReceiver(nullptr),tag(s) {}
 	void SetReceiver(CDRMReceiver *pReceiver) {pDRMReceiver = pReceiver;}
-	virtual string GetTagName() { return tag; }
+	virtual std::string GetTagName() { return tag; }
 protected:
 	CDRMReceiver *pDRMReceiver;
-	string tag;
+	std::string tag;
 };
 
 class CTagItemDecoderCact : public CTagItemDecoderRCI

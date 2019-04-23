@@ -50,22 +50,22 @@ CTagItemGeneratorWithProfiles::CTagItemGeneratorWithProfiles()
 {
 }
 
-_BOOLEAN
+bool
 CTagItemGeneratorWithProfiles::IsInProfile(char cProfile)
 {
 	string strProfiles = GetProfiles();
 
 	for (size_t i = 0; i < strProfiles.length(); i++)
 		if (strProfiles[i] == char (toupper(cProfile)))
-			return TRUE;
+			return true;
 
-	return FALSE;
+	return false;
 }
 
-_BOOLEAN
+bool
 CTagItemGenerator::IsInProfile(char)
 {
-	return TRUE;
+	return true;
 }
 
 /* Default implementation: unless otherwise specified, tag will be in all RSCI profiles, but not MDI */
@@ -172,7 +172,7 @@ CTagItemGeneratorLoFrCnt::GetProfiles()
 void
 CTagItemGeneratorFAC::GenTag(CParameter & Parameter, CSingleBuffer < _BINARY > &FACData)
 {
-	if (Parameter.ReceiveStatus.FAC.GetStatus() == FALSE)
+	if (Parameter.ReceiveStatus.FAC.GetStatus() == false)
 	{
 		/* Empty tag if FAC is invalid */
 		PrepareTag(0);
@@ -208,7 +208,7 @@ CTagItemGeneratorFAC::GetProfiles()
 void
 CTagItemGeneratorSDC::GenTag(CParameter & Parameter, CSingleBuffer < _BINARY > &SDCData)
 {
-	if (Parameter.ReceiveStatus.SDC.GetStatus() == FALSE)
+	if (Parameter.ReceiveStatus.SDC.GetStatus() == false)
 	{
 		PrepareTag(0);
 		SDCData.Clear();
@@ -453,11 +453,11 @@ CTagItemGeneratorStr::GetTagName()
 }
 
 void
-CTagItemGeneratorMERFormat::GenTag(_BOOLEAN bIsValid, _REAL rMER)
+CTagItemGeneratorMERFormat::GenTag(bool bIsValid, _REAL rMER)
 {
 	/* Common routine for rmer, rwmf, rwmm tags (all have the same format) */
 	/* If no MER value is available, set tag length to zero */
-	if (bIsValid == FALSE)
+	if (bIsValid == false)
 	{
 		/* Length: 0 byte */
 		PrepareTag(0);
@@ -528,10 +528,10 @@ CTagItemGeneratorRDOP::GetProfiles()
 }
 
 void
-CTagItemGeneratorRDEL::GenTag(_BOOLEAN bIsValid, const CRealVector & vecrThresholds, const CRealVector & vecrIntervals)
+CTagItemGeneratorRDEL::GenTag(bool bIsValid, const CRealVector & vecrThresholds, const CRealVector & vecrIntervals)
 {
 	/* If no value is available, set tag length to zero */
-	if (bIsValid == FALSE)
+	if (bIsValid == false)
 	{
 		/* Length: 0 byte */
 		PrepareTag(0);
@@ -615,12 +615,12 @@ CTagItemGeneratorRAFS::GetProfiles()
 }
 
 void
-CTagItemGeneratorRINT::GenTag(_BOOLEAN bIsValid, CReal rIntFreq, CReal rINR, CReal rICR)
+CTagItemGeneratorRINT::GenTag(bool bIsValid, CReal rIntFreq, CReal rINR, CReal rICR)
 {
 
 	/* Use Bint (BBC proprietary tag name) until tag is accepted by SE group */
 	/* If no value is available, set tag length to zero */
-	if (bIsValid == FALSE)
+	if (bIsValid == false)
 	{
 		/* Length: 0 byte */
 		PrepareTag(0);
@@ -662,11 +662,11 @@ CTagItemGeneratorRINT::GetProfiles()
 }
 
 void
-CTagItemGeneratorRNIP::GenTag(_BOOLEAN bIsValid, CReal rIntFreq, CReal rISR)
+CTagItemGeneratorRNIP::GenTag(bool bIsValid, CReal rIntFreq, CReal rISR)
 {
 
 	/* If no value is available, set tag length to zero */
-	if (bIsValid == FALSE)
+	if (bIsValid == false)
 	{
 		/* Length: 0 byte */
 		PrepareTag(0);
@@ -698,9 +698,9 @@ CTagItemGeneratorRNIP::GetProfiles()
 }
 
 void
-CTagItemGeneratorSignalStrength::GenTag(_BOOLEAN bIsValid, _REAL rSigStrength)
+CTagItemGeneratorSignalStrength::GenTag(bool bIsValid, _REAL rSigStrength)
 {
-	if (bIsValid == FALSE)
+	if (bIsValid == false)
 	{
 		PrepareTag(0);
 	}
@@ -812,9 +812,9 @@ CTagItemGeneratorRxDemodMode::GetProfiles()
 }
 
 void
-CTagItemGeneratorRxFrequency::GenTag(_BOOLEAN bIsValid, int iFrequency)	// Frequency in kHz
+CTagItemGeneratorRxFrequency::GenTag(bool bIsValid, int iFrequency)	// Frequency in kHz
 {
-	if (bIsValid == FALSE)
+	if (bIsValid == false)
 	{
 		PrepareTag(0);
 	}
@@ -838,10 +838,10 @@ CTagItemGeneratorRxFrequency::GetProfiles()
 }
 
 void
-CTagItemGeneratorRxActivated::GenTag(_BOOLEAN bActivated)
+CTagItemGeneratorRxActivated::GenTag(bool bActivated)
 {
 	PrepareTag(SIZEOF__BYTE);
-	Enqueue(bActivated == TRUE ? '0' : '1', SIZEOF__BYTE);
+	Enqueue(bActivated ? '0' : '1', SIZEOF__BYTE);
 }
 
 string
@@ -857,9 +857,9 @@ CTagItemGeneratorRxActivated::GetProfiles()
 }
 
 void
-CTagItemGeneratorRxBandwidth::GenTag(_BOOLEAN bIsValid, _REAL rBandwidth)
+CTagItemGeneratorRxBandwidth::GenTag(bool bIsValid, _REAL rBandwidth)
 {
-	if (bIsValid == FALSE)
+	if (bIsValid == false)
 	{
 		PrepareTag(0);
 	}
@@ -883,9 +883,9 @@ CTagItemGeneratorRxBandwidth::GetProfiles()
 }
 
 void
-CTagItemGeneratorRxService::GenTag(_BOOLEAN bIsValid, int iService)
+CTagItemGeneratorRxService::GenTag(bool bIsValid, int iService)
 {
-	if (bIsValid == FALSE)
+	if (bIsValid == false)
 	{
 		PrepareTag(0);
 	}
@@ -999,9 +999,9 @@ CTagItemGenerator::Enqueue(uint32_t iInformation, int iNumOfBits)
 
 //andrewm - 2006-12-08
 void
-CTagItemGeneratorGPS::GenTag(_BOOLEAN bIsValid, gps_data_t& gps_data)	// Long/Lat in degrees
+CTagItemGeneratorGPS::GenTag(bool bIsValid, gps_data_t& gps_data)	// Long/Lat in degrees
 {
-	if (bIsValid == FALSE)
+	if (bIsValid == false)
 	{
 		PrepareTag(0);
 	}

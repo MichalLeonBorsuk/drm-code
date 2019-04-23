@@ -99,12 +99,12 @@ uint32_t CCRC::GetCRC()
 	return iStateShiftReg & (iBitOutPosMask - 1);
 }
 
-_BOOLEAN CCRC::CheckCRC(const uint32_t iCRC)
+bool CCRC::CheckCRC(const uint32_t iCRC)
 {
 	if (iCRC == GetCRC())
-		return TRUE;
+		return true;
 	else
-		return FALSE;
+		return false;
 }
 
 CCRC::CCRC()

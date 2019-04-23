@@ -28,6 +28,8 @@
 
 #include "TableFAC.h"
 
+using namespace std;
+
 /* Definitions ****************************************************************/
 /* ETSI ES201980V2.1.1: page 115, 7.5.3: ...FAC shall use 4-QAM mapping. A
    fixed code rate shall be applied...R_all=0.6...

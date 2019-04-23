@@ -77,7 +77,7 @@ void CJournaline::ResetOpenJournalineDecoder()
 		extended_header_len, this);
 }
 
-void CJournaline::AddFile(const string filename)
+void CJournaline::AddFile(const std::string filename)
 {
 	FILE *f = fopen(filename.c_str(), "rb");
 	bool err=false;

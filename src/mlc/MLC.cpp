@@ -201,7 +201,7 @@ void CMLCDecoder::ProcessDataInternal(CParameter&)
 {
     int			i, j, k;
     int			iElementCounter;
-    _BOOLEAN	bIteration;
+    bool	bIteration;
 
     /* Save input signal for signal constellation. We cannot use the copy
        operator of vector because the input vector is not of the same size as
@@ -232,9 +232,9 @@ void CMLCDecoder::ProcessDataInternal(CParameter&)
         {
             /* Metric ------------------------------------------------------- */
             if (k > 0)
-                bIteration = TRUE;
+                bIteration = true;
             else
-                bIteration = FALSE;
+                bIteration = false;
 
             MLCMetric.CalculateMetric(pvecInputData, vecMetric,
                                       vecSubsetDef[0], vecSubsetDef[1], vecSubsetDef[2],

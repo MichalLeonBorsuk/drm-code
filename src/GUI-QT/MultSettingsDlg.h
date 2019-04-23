@@ -53,7 +53,7 @@ public:
 	virtual ~MultSettingsDlg();
 
 protected:
-	void ClearCache(QString sPath, QString sFilter, _BOOLEAN bDeleteDirs=FALSE);
+	void ClearCache(QString sPath, QString sFilter, bool bDeleteDirs=false);
 
 	virtual void	showEvent(QShowEvent* pEvent);
 	virtual void	hideEvent(QHideEvent* pEvent);

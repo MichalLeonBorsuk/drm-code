@@ -37,7 +37,7 @@
 
 RigDlg::RigDlg(CRig& nrig, QWidget* parent) :
     QDialog(parent),
-    rig(nrig), rigmap(), bComboBoxPortMutex(FALSE)
+    rig(nrig), rigmap(), bComboBoxPortMutex(false)
 {
     setAttribute(Qt::WA_QuitOnClose, false);
     setupUi(this);
@@ -94,7 +94,7 @@ RigDlg::~RigDlg()
 void RigDlg::showEvent(QShowEvent*)
 {
 	/* Port selection */
-	bComboBoxPortMutex = TRUE;
+	bComboBoxPortMutex = true;
 	map<string,string> ports;
 	rig.GetPortList(ports);
 	comboBoxPort->clear();
@@ -115,7 +115,7 @@ void RigDlg::showEvent(QShowEvent*)
 		comboBoxPort->addItem(prev_port.c_str(), prev_port.c_str());
 		comboBoxPort->setCurrentIndex(comboBoxPort->findText(prev_port.c_str()));
 	}
-	bComboBoxPortMutex = FALSE;
+	bComboBoxPortMutex = false;
 
 	/* Rig model selection */
     prev_rig_model = rig.GetHamlibModelID();
@@ -191,7 +191,7 @@ RigDlg::on_buttonBox_rejected()
 void
 RigDlg::on_comboBoxPort_editTextChanged(const QString&)
 {
-	if (bComboBoxPortMutex == FALSE)
+	if (bComboBoxPortMutex == false)
 		rig.SetComPort(getComboBoxComPort().toStdString());
 }
 

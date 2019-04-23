@@ -47,11 +47,11 @@ public:
 	void GetRigList(map<rig_model_t,CHamlib::SDrRigCaps>& r) { Hamlib.GetRigList(r); }
 	rig_model_t GetHamlibModelID() { return Hamlib.GetHamlibModelID(); }
 	void SetHamlibModelID(rig_model_t r) { Hamlib.SetHamlibModelID(r); }
-	void SetEnableModRigSettings(_BOOLEAN b) { Hamlib.SetEnableModRigSettings(b); }
-	void GetPortList(map<string,string>& ports) { Hamlib.GetPortList(ports); }
-	string GetComPort() { return Hamlib.GetComPort(); }
-	void SetComPort(const string& s) { Hamlib.SetComPort(s); }
-	_BOOLEAN GetEnableModRigSettings() { return Hamlib.GetEnableModRigSettings(); }
+	void SetEnableModRigSettings(bool b) { Hamlib.SetEnableModRigSettings(b); }
+	void GetPortList(map<std::string,std::string>& ports) { Hamlib.GetPortList(ports); }
+	std::string GetComPort() { return Hamlib.GetComPort(); }
+	void SetComPort(const std::string& s) { Hamlib.SetComPort(s); }
+	bool GetEnableModRigSettings() { return Hamlib.GetEnableModRigSettings(); }
 	CHamlib::ESMeterState GetSMeter(_REAL& r) { return Hamlib.GetSMeter(r); }
 	CHamlib* GetRig() { return &Hamlib; }
 

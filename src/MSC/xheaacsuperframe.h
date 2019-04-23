@@ -18,8 +18,8 @@ private:
     unsigned numChannels;
     unsigned superFrameSize;
     deque<uint8_t> payload;
-    vector<unsigned> frameSize;
-    vector<unsigned> borders;
+    std::vector<unsigned> frameSize;
+    std::vector<unsigned> borders;
 };
 
 #endif // XHEAACSUPERFRAME_H

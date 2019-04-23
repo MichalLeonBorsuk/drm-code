@@ -60,7 +60,7 @@ void CMLCMetric::CalculateMetric(CVector<CEquSig>* pcInSymb,
                                  CVector<_DECISION>& vecSubsetDef4,
                                  CVector<_DECISION>& vecSubsetDef5,
                                  CVector<_DECISION>& vecSubsetDef6,
-                                 int iLevel, _BOOLEAN bIteration)
+                                 int iLevel, bool bIteration)
 {
     int i, k;
     int iTabInd0;
@@ -106,7 +106,7 @@ void CMLCMetric::CalculateMetric(CVector<CEquSig>* pcInSymb,
         case 0:
             for (i = 0, k = 0; i < iInputBlockSize; i++, k += 2)
             {
-                if (bIteration == TRUE)
+                if (bIteration)
                 {
                     /* Real part -------------------------------------------- */
 #ifdef USE_MAX_LOG_MAP
@@ -275,7 +275,7 @@ void CMLCMetric::CalculateMetric(CVector<CEquSig>* pcInSymb,
         case 0:
             for (i = 0, k = 0; i < iInputBlockSize; i++, k += 2)
             {
-                if (bIteration == TRUE)
+                if (bIteration)
                 {
                     /* Real part -------------------------------------------- */
 #ifdef USE_MAX_LOG_MAP
@@ -395,7 +395,7 @@ void CMLCMetric::CalculateMetric(CVector<CEquSig>* pcInSymb,
         case 1:
             for (i = 0, k = 0; i < iInputBlockSize; i++, k += 2)
             {
-                if (bIteration == TRUE)
+                if (bIteration)
                 {
                     /* Real part -------------------------------------------- */
 #ifdef USE_MAX_LOG_MAP
@@ -636,7 +636,7 @@ void CMLCMetric::CalculateMetric(CVector<CEquSig>* pcInSymb,
         case 0:
             for (i = 0, k = 0; i < iInputBlockSize; i++, k += 2)
             {
-                if (bIteration == TRUE)
+                if (bIteration)
                 {
                     /* Real part -------------------------------------------- */
                     /* Lowest bit defined by "vecSubsetDef3" next bit defined
@@ -714,7 +714,7 @@ void CMLCMetric::CalculateMetric(CVector<CEquSig>* pcInSymb,
         case 1:
             for (i = 0, k = 0; i < iInputBlockSize; i++, k += 2)
             {
-                if (bIteration == TRUE)
+                if (bIteration)
                 {
                     /* Real part -------------------------------------------- */
                     /* Lowest bit defined by "vecSubsetDef3",highest defined
@@ -839,7 +839,7 @@ void CMLCMetric::CalculateMetric(CVector<CEquSig>* pcInSymb,
         case 0:
             for (i = 0; i < iInputBlockSize; i++)
             {
-                if (bIteration == TRUE)
+                if (bIteration)
                 {
                     /* Real part -------------------------------------------- */
                     /* Lowest bit defined by "vecSubsetDef5" next bit defined
@@ -879,7 +879,7 @@ void CMLCMetric::CalculateMetric(CVector<CEquSig>* pcInSymb,
         case 1:
             for (i = 0; i < iInputBlockSize; i++)
             {
-                if (bIteration == TRUE)
+                if (bIteration)
                 {
                     /* Imaginary part --------------------------------------- */
                     /* Lowest bit defined by "vecSubsetDef6" next bit defined
@@ -920,7 +920,7 @@ void CMLCMetric::CalculateMetric(CVector<CEquSig>* pcInSymb,
         case 2:
             for (i = 0; i < iInputBlockSize; i++)
             {
-                if (bIteration == TRUE)
+                if (bIteration)
                 {
                     /* Real part -------------------------------------------- */
                     /* Lowest bit defined by "vecSubsetDef5",highest defined
@@ -963,7 +963,7 @@ void CMLCMetric::CalculateMetric(CVector<CEquSig>* pcInSymb,
         case 3:
             for (i = 0; i < iInputBlockSize; i++)
             {
-                if (bIteration == TRUE)
+                if (bIteration)
                 {
                     /* Imaginary part --------------------------------------- */
                     /* Lowest bit defined by "vecSubsetDef6",highest defined

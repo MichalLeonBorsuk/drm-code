@@ -39,13 +39,13 @@
 
 TransmDialog::TransmDialog(CTx& ntx, QWidget* parent)
 	:
-    CWindow(parent, *tx.GetSettings(), "Transmit"),
+    CWindow(parent, *ntx.GetSettings(), "Transmit"),
     tx(ntx),
 	vecstrTextMessage(1) /* 1 for new text */,
     pAACCodecDlg(nullptr),pOpusCodecDlg(nullptr), pSysTray(nullptr),
-	pActionStartStop(nullptr), bIsStarted(FALSE),
+	pActionStartStop(nullptr), bIsStarted(false),
 	iIDCurrentText(0), iServiceDescr(0),
-	bCloseRequested(FALSE), iButtonCodecState(0)
+	bCloseRequested(false), iButtonCodecState(0)
 {
 	setupUi(this);
 #if QWT_VERSION < 0x060100
@@ -95,19 +95,19 @@ TransmDialog::TransmDialog(CTx& ntx, QWidget* parent)
     switch (tx.GetIQOutput())
 	{
 	case CTransmitData::OF_REAL_VAL:
-		RadioButtonOutReal->setChecked(TRUE);
+		RadioButtonOutReal->setChecked(true);
 		break;
 
 	case CTransmitData::OF_IQ_POS:
-		RadioButtonOutIQPos->setChecked(TRUE);
+		RadioButtonOutIQPos->setChecked(true);
 		break;
 
 	case CTransmitData::OF_IQ_NEG:
-		RadioButtonOutIQNeg->setChecked(TRUE);
+		RadioButtonOutIQNeg->setChecked(true);
 		break;
 
 	case CTransmitData::OF_EP:
-		RadioButtonOutEP->setChecked(TRUE);
+		RadioButtonOutEP->setChecked(true);
 		break;
 	}
 
@@ -126,47 +126,50 @@ TransmDialog::TransmDialog(CTx& ntx, QWidget* parent)
 	switch (Parameters.eTransmitCurrentTime)
 	{
 	case CParameter::CT_OFF:
-		RadioButtonCurTimeOff->setChecked(TRUE);
+		RadioButtonCurTimeOff->setChecked(true);
 		break;
 
 	case CParameter::CT_LOCAL:
-		RadioButtonCurTimeLocal->setChecked(TRUE);
+		RadioButtonCurTimeLocal->setChecked(true);
 		break;
 
 	case CParameter::CT_UTC:
-		RadioButtonCurTimeUTC->setChecked(TRUE);
+		RadioButtonCurTimeUTC->setChecked(true);
 		break;
 
 	case CParameter::CT_UTC_OFFSET:
-		RadioButtonCurTimeUTCOffset->setChecked(TRUE);
+		RadioButtonCurTimeUTCOffset->setChecked(true);
 	}
 
 	/* Robustness mode */
 	switch (Parameters.GetWaveMode())
 	{
 	case RM_ROBUSTNESS_MODE_A:
-		RadioButtonRMA->setChecked(TRUE);
+		RadioButtonRMA->setChecked(true);
 		break;
 
 	case RM_ROBUSTNESS_MODE_B:
-		RadioButtonRMB->setChecked(TRUE);
+		RadioButtonRMB->setChecked(true);
 		break;
 
 	case RM_ROBUSTNESS_MODE_C:
-		RadioButtonBandwidth45->setEnabled(FALSE);
-		RadioButtonBandwidth5->setEnabled(FALSE);
-		RadioButtonBandwidth9->setEnabled(FALSE);
-		RadioButtonBandwidth18->setEnabled(FALSE);
-		RadioButtonRMC->setChecked(TRUE);
+		RadioButtonBandwidth45->setEnabled(false);
+		RadioButtonBandwidth5->setEnabled(false);
+		RadioButtonBandwidth9->setEnabled(false);
+		RadioButtonBandwidth18->setEnabled(false);
+		RadioButtonRMC->setChecked(true);
 		break;
 
 	case RM_ROBUSTNESS_MODE_D:
-		RadioButtonBandwidth45->setEnabled(FALSE);
-		RadioButtonBandwidth5->setEnabled(FALSE);
-		RadioButtonBandwidth9->setEnabled(FALSE);
-		RadioButtonBandwidth18->setEnabled(FALSE);
-		RadioButtonRMD->setChecked(TRUE);
+		RadioButtonBandwidth45->setEnabled(false);
+		RadioButtonBandwidth5->setEnabled(false);
+		RadioButtonBandwidth9->setEnabled(false);
+		RadioButtonBandwidth18->setEnabled(false);
+		RadioButtonRMD->setChecked(true);
 		break;
+
+    case RM_ROBUSTNESS_MODE_E:
+        break;
 
 	case RM_NO_MODE_DETECTED:
 		break;
@@ -176,27 +179,27 @@ TransmDialog::TransmDialog(CTx& ntx, QWidget* parent)
 	switch (Parameters.GetSpectrumOccup())
 	{
 	case SO_0:
-		RadioButtonBandwidth45->setChecked(TRUE);
+		RadioButtonBandwidth45->setChecked(true);
 		break;
 
 	case SO_1:
-		RadioButtonBandwidth5->setChecked(TRUE);
+		RadioButtonBandwidth5->setChecked(true);
 		break;
 
 	case SO_2:
-		RadioButtonBandwidth9->setChecked(TRUE);
+		RadioButtonBandwidth9->setChecked(true);
 		break;
 
 	case SO_3:
-		RadioButtonBandwidth10->setChecked(TRUE);
+		RadioButtonBandwidth10->setChecked(true);
 		break;
 
 	case SO_4:
-		RadioButtonBandwidth18->setChecked(TRUE);
+		RadioButtonBandwidth18->setChecked(true);
 		break;
 
 	case SO_5:
-		RadioButtonBandwidth20->setChecked(TRUE);
+		RadioButtonBandwidth20->setChecked(true);
 		break;
 	}
 
@@ -299,27 +302,27 @@ TransmDialog::TransmDialog(CTx& ntx, QWidget* parent)
 	OnButtonClearAllFileNames();
 
 	/* Disable other three services */
-	TabWidgetServices->setTabEnabled(1, FALSE);
-	TabWidgetServices->setTabEnabled(2, FALSE);
-	TabWidgetServices->setTabEnabled(3, FALSE);
-	CheckBoxEnableService->setChecked(TRUE);
-	CheckBoxEnableService->setEnabled(FALSE);
+	TabWidgetServices->setTabEnabled(1, false);
+	TabWidgetServices->setTabEnabled(2, false);
+	TabWidgetServices->setTabEnabled(3, false);
+	CheckBoxEnableService->setChecked(true);
+	CheckBoxEnableService->setEnabled(false);
 
 	/* Setup audio codec check boxes */
 	switch (Service.AudioParam.eAudioCoding)
 	{
 	case CAudioParam::AC_AAC:
-		RadioButtonAAC->setChecked(TRUE);
-        ShowButtonCodec(FALSE, 1);
+		RadioButtonAAC->setChecked(true);
+        ShowButtonCodec(false, 1);
 		break;
 
 	case CAudioParam::AC_OPUS:
-		RadioButtonOPUS->setChecked(TRUE);
-		ShowButtonCodec(TRUE, 1);
+		RadioButtonOPUS->setChecked(true);
+		ShowButtonCodec(true, 1);
 		break;
 
 	default:
-        ShowButtonCodec(FALSE, 1);
+        ShowButtonCodec(false, 1);
 		break;
 	}
     if (!tx.CanEncode(CAudioParam::AC_AAC)) {
@@ -354,8 +357,8 @@ TransmDialog::TransmDialog(CTx& ntx, QWidget* parent)
 
 	/* Add example text message at startup ---------------------------------- */
 	/* Activate text message */
-	EnableTextMessage(TRUE);
-	CheckBoxEnableTextMessage->setChecked(TRUE);
+	EnableTextMessage(true);
+	CheckBoxEnableTextMessage->setChecked(true);
 
 	/* Add example text in internal container */
 	vecstrTextMessage.Add(
@@ -369,7 +372,7 @@ TransmDialog::TransmDialog(CTx& ntx, QWidget* parent)
 	OnComboBoxTextMessageActivated(1);
 
 	/* Now make sure that the text message flag is activated in global struct */
-	Service.AudioParam.bTextflag = TRUE;
+	Service.AudioParam.bTextflag = true;
 
 
 	/* Enable all controls */
@@ -377,8 +380,8 @@ TransmDialog::TransmDialog(CTx& ntx, QWidget* parent)
 
 
 	/* Set check box remove path */
-	CheckBoxRemovePath->setChecked(TRUE);
-	OnToggleCheckBoxRemovePath(TRUE);
+	CheckBoxRemovePath->setChecked(true);
+	OnToggleCheckBoxRemovePath(true);
 
 
 	/* Set Menu ***************************************************************/
@@ -484,8 +487,8 @@ TransmDialog::~TransmDialog()
 
 void TransmDialog::eventClose(QCloseEvent* ce)
 {
-	bCloseRequested = TRUE;
-	if (bIsStarted == TRUE)
+	bCloseRequested = true;
+	if (bIsStarted)
 	{
 		OnButtonStartStop();
 		ce->ignore();
@@ -494,7 +497,7 @@ void TransmDialog::eventClose(QCloseEvent* ce)
 		CSysTray::Destroy(&pSysTray);
 
 		/* Stop transmitter */
-		if (bIsStarted == TRUE)
+		if (bIsStarted)
             tx.Stop();
 
 		/* Restore the service description, may
@@ -536,12 +539,12 @@ void TransmDialog::OnSysTrayActivated(QSystemTrayIcon::ActivationReason reason)
 void TransmDialog::OnTimer()
 {
 	/* Set value for input level meter (only in "start" mode) */
-	if (bIsStarted == TRUE)
+	if (bIsStarted)
 	{
 		ProgrInputLevel->setValue(tx.GetLevelMeter());
 
 		string strCPictureName;
-		_REAL rCPercent;
+        _REAL rCPercent = 0.0;
 
 		/* Activate progress bar for slide show pictures only if current state
 		   can be queried and if data service is active
@@ -549,8 +552,8 @@ void TransmDialog::OnTimer()
         if (tx.GetTransmissionStatus(strCPictureName, rCPercent) && CheckBoxEnableData->isChecked())
 		{
 			/* Enable controls */
-			ProgressBarCurPict->setEnabled(TRUE);
-			TextLabelCurPict->setEnabled(TRUE);
+			ProgressBarCurPict->setEnabled(true);
+			TextLabelCurPict->setEnabled(true);
 
 			/* We want to file name, not the complete path -> "QFileInfo" */
 			QFileInfo FileInfo(strCPictureName.c_str());
@@ -562,8 +565,8 @@ void TransmDialog::OnTimer()
 		else
 		{
 			/* Disable controls */
-			ProgressBarCurPict->setEnabled(FALSE);
-			TextLabelCurPict->setEnabled(FALSE);
+			ProgressBarCurPict->setEnabled(false);
+			TextLabelCurPict->setEnabled(false);
 		}
 	}
 }
@@ -581,7 +584,7 @@ void TransmDialog::OnTimerStop()
         return;
     }
 
-    bIsStarted = FALSE;
+    bIsStarted = false;
 
     if (bCloseRequested)
     {
@@ -602,7 +605,7 @@ void TransmDialog::OnButtonStartStop()
 {
 	if (!TimerStop.isActive())
 	{
-		if (bIsStarted == TRUE)
+		if (bIsStarted)
 		{
 			ButtonStartStop->setText(tr("Stopping..."));
 			if (pActionStartStop)
@@ -658,7 +661,7 @@ void TransmDialog::OnButtonStartStop()
 
 			DisableAllControlsForSet();
 
-			bIsStarted = TRUE;
+			bIsStarted = true;
 		}
 	}
 }
@@ -678,33 +681,33 @@ void TransmDialog::OnToggleCheckBoxEnableTextMessage(bool bState)
 	EnableTextMessage(bState);
 }
 
-void TransmDialog::EnableTextMessage(const _BOOLEAN bFlag)
+void TransmDialog::EnableTextMessage(const bool bFlag)
 {
     CParameter& Parameters = *tx.GetParameters();
 
 	Parameters.Lock();
 
-	if (bFlag == TRUE)
+	if (bFlag)
 	{
 		/* Enable text message controls */
-		ComboBoxTextMessage->setEnabled(TRUE);
-		MultiLineEditTextMessage->setEnabled(TRUE);
-		PushButtonAddText->setEnabled(TRUE);
-		PushButtonClearAllText->setEnabled(TRUE);
+		ComboBoxTextMessage->setEnabled(true);
+		MultiLineEditTextMessage->setEnabled(true);
+		PushButtonAddText->setEnabled(true);
+		PushButtonClearAllText->setEnabled(true);
 
 		/* Set text message flag in global struct */
-		Parameters.Service[0].AudioParam.bTextflag = TRUE;
+		Parameters.Service[0].AudioParam.bTextflag = true;
 	}
 	else
 	{
 		/* Disable text message controls */
-		ComboBoxTextMessage->setEnabled(FALSE);
-		MultiLineEditTextMessage->setEnabled(FALSE);
-		PushButtonAddText->setEnabled(FALSE);
-		PushButtonClearAllText->setEnabled(FALSE);
+		ComboBoxTextMessage->setEnabled(false);
+		MultiLineEditTextMessage->setEnabled(false);
+		PushButtonAddText->setEnabled(false);
+		PushButtonClearAllText->setEnabled(false);
 
 		/* Set text message flag in global struct */
-		Parameters.Service[0].AudioParam.bTextflag = FALSE;
+		Parameters.Service[0].AudioParam.bTextflag = false;
 	}
 
 	Parameters.Unlock();
@@ -717,27 +720,27 @@ void TransmDialog::OnToggleCheckBoxEnableAudio(bool bState)
 	if (bState)
 	{
 		/* Set audio enable check box */
-		CheckBoxEnableData->setChecked(FALSE);
-		EnableData(FALSE);
-		ShowButtonCodec(TRUE, 2);
+		CheckBoxEnableData->setChecked(false);
+		EnableData(false);
+		ShowButtonCodec(true, 2);
 	}
 	else
 	{
 		/* Set audio enable check box */
-		CheckBoxEnableData->setChecked(TRUE);
-		EnableData(TRUE);
-        ShowButtonCodec(TRUE, 2);
+		CheckBoxEnableData->setChecked(true);
+		EnableData(true);
+        ShowButtonCodec(true, 2);
 	}
 }
 
-void TransmDialog::EnableAudio(const _BOOLEAN bFlag)
+void TransmDialog::EnableAudio(const bool bFlag)
 {
-	if (bFlag == TRUE)
+	if (bFlag)
 	{
 		/* Enable audio controls */
-		GroupBoxCodec->setEnabled(TRUE);
-		GroupBoxTextMessage->setEnabled(TRUE);
-		ComboBoxProgramType->setEnabled(TRUE);
+		GroupBoxCodec->setEnabled(true);
+		GroupBoxTextMessage->setEnabled(true);
+		ComboBoxProgramType->setEnabled(true);
 
         CParameter& Parameters = *tx.GetParameters();
 
@@ -761,9 +764,9 @@ void TransmDialog::EnableAudio(const _BOOLEAN bFlag)
 	else
 	{
 		/* Disable audio controls */
-		GroupBoxCodec->setEnabled(FALSE);
-		GroupBoxTextMessage->setEnabled(FALSE);
-		ComboBoxProgramType->setEnabled(FALSE);
+		GroupBoxCodec->setEnabled(false);
+		GroupBoxTextMessage->setEnabled(false);
+		ComboBoxProgramType->setEnabled(false);
 	}
 }
 
@@ -774,18 +777,18 @@ void TransmDialog::OnToggleCheckBoxEnableData(bool bState)
 	if (bState)
 	{
 		/* Set audio enable check box */
-		CheckBoxEnableAudio->setChecked(FALSE);
-		EnableAudio(FALSE);
+		CheckBoxEnableAudio->setChecked(false);
+		EnableAudio(false);
 	}
 	else
 	{
 		/* Set audio enable check box */
-		CheckBoxEnableAudio->setChecked(TRUE);
-		EnableAudio(TRUE);
+		CheckBoxEnableAudio->setChecked(true);
+		EnableAudio(true);
 	}
 }
 
-void TransmDialog::EnableData(const _BOOLEAN bFlag)
+void TransmDialog::EnableData(const bool bFlag)
 {
 	/* Enable/Disable data controls */
 	CheckBoxRemovePath->setEnabled(bFlag);
@@ -793,7 +796,7 @@ void TransmDialog::EnableData(const _BOOLEAN bFlag)
 	PushButtonClearAllFileNames->setEnabled(bFlag);
 	PushButtonAddFile->setEnabled(bFlag);
 
-	if (bFlag == TRUE)
+	if (bFlag)
 	{
         CParameter& Parameters = *tx.GetParameters();
 
@@ -822,9 +825,9 @@ void TransmDialog::EnableData(const _BOOLEAN bFlag)
 	}
 }
 
-_BOOLEAN TransmDialog::GetMessageText(const int iID)
+bool TransmDialog::GetMessageText(const int iID)
 {
-	_BOOLEAN bTextIsNotEmpty = TRUE;
+	bool bTextIsNotEmpty = true;
 
 	/* Check if text control is not empty */
 	if (!MultiLineEditTextMessage->toPlainText().isEmpty())
@@ -846,7 +849,7 @@ _BOOLEAN TransmDialog::GetMessageText(const int iID)
 
 	}
 	else
-		bTextIsNotEmpty = FALSE;
+		bTextIsNotEmpty = false;
 	return bTextIsNotEmpty;
 }
 
@@ -855,7 +858,7 @@ void TransmDialog::OnPushButtonAddText()
 	if (iIDCurrentText == 0)
 	{
 		/* Add new message */
-		if (GetMessageText(vecstrTextMessage.Size()) == TRUE)
+		if (GetMessageText(vecstrTextMessage.Size()))
 		{
 			/* If text was not empty, add new text in combo box */
 			const int iNewID = vecstrTextMessage.Size() - 1;
@@ -1142,38 +1145,38 @@ void TransmDialog::OnRadioRobustnessMode(int iID)
 	{
 	case 0:
 		/* All bandwidth modes are possible */
-		RadioButtonBandwidth45->setEnabled(TRUE);
-		RadioButtonBandwidth5->setEnabled(TRUE);
-		RadioButtonBandwidth9->setEnabled(TRUE);
-		RadioButtonBandwidth18->setEnabled(TRUE);
+		RadioButtonBandwidth45->setEnabled(true);
+		RadioButtonBandwidth5->setEnabled(true);
+		RadioButtonBandwidth9->setEnabled(true);
+		RadioButtonBandwidth18->setEnabled(true);
 		/* Set new robustness mode */
 		eNewRobMode = RM_ROBUSTNESS_MODE_A;
 		break;
 
 	case 1:
 		/* All bandwidth modes are possible */
-		RadioButtonBandwidth45->setEnabled(TRUE);
-		RadioButtonBandwidth5->setEnabled(TRUE);
-		RadioButtonBandwidth9->setEnabled(TRUE);
-		RadioButtonBandwidth18->setEnabled(TRUE);
+		RadioButtonBandwidth45->setEnabled(true);
+		RadioButtonBandwidth5->setEnabled(true);
+		RadioButtonBandwidth9->setEnabled(true);
+		RadioButtonBandwidth18->setEnabled(true);
 		/* Set new robustness mode */
 		eNewRobMode = RM_ROBUSTNESS_MODE_B;
 		break;
 
 	case 2:
 		/* Only 10 and 20 kHz possible in robustness mode C */
-		RadioButtonBandwidth45->setEnabled(FALSE);
-		RadioButtonBandwidth5->setEnabled(FALSE);
-		RadioButtonBandwidth9->setEnabled(FALSE);
-		RadioButtonBandwidth18->setEnabled(FALSE);
+		RadioButtonBandwidth45->setEnabled(false);
+		RadioButtonBandwidth5->setEnabled(false);
+		RadioButtonBandwidth9->setEnabled(false);
+		RadioButtonBandwidth18->setEnabled(false);
 		/* Set check on the nearest bandwidth if "out of range" */
 		if (eCurSpecOcc == SO_0 || eCurSpecOcc == SO_1 ||
 			eCurSpecOcc == SO_2 || eCurSpecOcc == SO_4)
 		{
 			if (eCurSpecOcc == SO_4)
-				RadioButtonBandwidth20->setChecked(TRUE);
+				RadioButtonBandwidth20->setChecked(true);
 			else
-				RadioButtonBandwidth10->setChecked(TRUE);
+				RadioButtonBandwidth10->setChecked(true);
 			OnRadioBandwidth(ButtonGroupBandwidth->checkedId());
 		}
 		/* Set new robustness mode */
@@ -1182,18 +1185,18 @@ void TransmDialog::OnRadioRobustnessMode(int iID)
 
 	case 3:
 		/* Only 10 and 20 kHz possible in robustness mode D */
-		RadioButtonBandwidth45->setEnabled(FALSE);
-		RadioButtonBandwidth5->setEnabled(FALSE);
-		RadioButtonBandwidth9->setEnabled(FALSE);
-		RadioButtonBandwidth18->setEnabled(FALSE);
+		RadioButtonBandwidth45->setEnabled(false);
+		RadioButtonBandwidth5->setEnabled(false);
+		RadioButtonBandwidth9->setEnabled(false);
+		RadioButtonBandwidth18->setEnabled(false);
 		/* Set check on the nearest bandwidth if "out of range" */
 		if (eCurSpecOcc == SO_0 || eCurSpecOcc == SO_1 ||
 			eCurSpecOcc == SO_2 || eCurSpecOcc == SO_4)
 		{
 			if (eCurSpecOcc == SO_4)
-				RadioButtonBandwidth20->setChecked(TRUE);
+				RadioButtonBandwidth20->setChecked(true);
 			else
-				RadioButtonBandwidth10->setChecked(TRUE);
+				RadioButtonBandwidth10->setChecked(true);
 			OnRadioBandwidth(ButtonGroupBandwidth->checkedId());
 		}
 		/* Set new robustness mode */
@@ -1327,12 +1330,12 @@ void TransmDialog::OnRadioCodec(int iID)
 	{
 	case 0:
 		eNewAudioCoding = CAudioParam::AC_AAC;
-        ShowButtonCodec(FALSE, 1);
+        ShowButtonCodec(false, 1);
 		break;
 
 	case 1:
 		eNewAudioCoding = CAudioParam::AC_OPUS;
-		ShowButtonCodec(TRUE, 1);
+		ShowButtonCodec(true, 1);
 		break;
 	}
 
@@ -1348,18 +1351,18 @@ void TransmDialog::OnRadioCodec(int iID)
 
 void TransmDialog::DisableAllControlsForSet()
 {
-	TabWidgetEnableTabs(TabWidgetParam, FALSE);
-	TabWidgetEnableTabs(TabWidgetServices, FALSE);
+	TabWidgetEnableTabs(TabWidgetParam, false);
+	TabWidgetEnableTabs(TabWidgetServices, false);
 
-	GroupInput->setEnabled(TRUE); /* For run-mode */
+	GroupInput->setEnabled(true); /* For run-mode */
 }
 
 void TransmDialog::EnableAllControlsForSet()
 {
-	TabWidgetEnableTabs(TabWidgetParam, TRUE);
-	TabWidgetEnableTabs(TabWidgetServices, TRUE);
+	TabWidgetEnableTabs(TabWidgetParam, true);
+	TabWidgetEnableTabs(TabWidgetServices, true);
 
-	GroupInput->setEnabled(FALSE); /* For run-mode */
+	GroupInput->setEnabled(false); /* For run-mode */
 
 	/* Reset status bars */
 	ProgrInputLevel->setValue(RET_VAL_LOG_0);
@@ -1373,9 +1376,9 @@ void TransmDialog::TabWidgetEnableTabs(QTabWidget *tabWidget, bool enable)
 		tabWidget->widget(i)->setEnabled(enable);
 }
 
-void TransmDialog::ShowButtonCodec(_BOOLEAN bShow, int iKey)
+void TransmDialog::ShowButtonCodec(bool bShow, int iKey)
 {
-	_BOOLEAN bLastShow = iButtonCodecState == 0;
+	bool bLastShow = iButtonCodecState == 0;
 	if (bShow)
 		iButtonCodecState &= ~iKey;
 	else

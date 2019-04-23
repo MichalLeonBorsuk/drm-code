@@ -111,7 +111,7 @@ _REAL CTimeWiener::Estimate(CVectorEx<_COMPLEX>* pvecInputData,
 				/* Build vector for filtering. Make sure that pilot cells and
 				   DD-data cells are at the correct place */
 				CComplex cNewPilot;
-				if (vecvecPilIdx[iCurrFiltPhase][j].bIsPilot == TRUE)
+				if (vecvecPilIdx[iCurrFiltPhase][j].bIsPilot)
 				{
 					cNewPilot = matcChanAtPilPos[iPilIdx][iPiHiIdx];
 					iPilIdx++;
@@ -212,7 +212,7 @@ _REAL CTimeWiener::Estimate(CVectorEx<_COMPLEX>* pvecInputData,
 
 
 	/* Update sigma estimation ---------------------------------------------- */
-	if (bTracking == TRUE)
+	if (bTracking)
 	{
 		/* Update filter coefficients once in one DRM frame */
 		if (iUpCntWienFilt > 0)
@@ -451,7 +451,7 @@ int CTimeWiener::Init(CParameter& Parameters)
 		}
 
 		/* Reset flag to inhibit parameter adaptation */
-		bTracking = FALSE;
+		bTracking = false;
 	}
 
 	/* Calculate initialization wiener filter taps and init MMSE */
@@ -583,14 +583,14 @@ CReal CTimeWiener::TimeOptimalFiltDD(CRealVector& vecrTaps, const int iTimeInt,
 		{
 			/* Use only real pilots */
 			if (i % iTimeInt == 0)
-				vecvecPilIdx[iFiltPhase].Add(CDDPilIdx(i, TRUE));
+				vecvecPilIdx[iFiltPhase].Add(CDDPilIdx(i, true));
 		}
 		else
 		{
 			if (i % iTimeInt == 0) /* Pilot or data cell? */
-				vecvecPilIdx[iFiltPhase].Add(CDDPilIdx(i, TRUE));
+				vecvecPilIdx[iFiltPhase].Add(CDDPilIdx(i, true));
 			else
-				vecvecPilIdx[iFiltPhase].Add(CDDPilIdx(i, FALSE));
+				vecvecPilIdx[iFiltPhase].Add(CDDPilIdx(i, false));
 		}
 	}
 
@@ -627,7 +627,7 @@ CReal CTimeWiener::TimeOptimalFiltDD(CRealVector& vecrTaps, const int iTimeInt,
 			/* Add SNR (dependent on pilot or DD cell) */
 			if (i == j)
 			{
-				if (vecvecPilIdx[iFiltPhase][j].bIsPilot == TRUE)
+				if (vecvecPilIdx[iFiltPhase][j].bIsPilot)
 					matcRpp[i][j] += (CReal) 1.0 / rNewSNR;
 				else
 				{

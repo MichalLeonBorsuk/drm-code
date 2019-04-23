@@ -42,7 +42,7 @@ public:
 	void Reset(const int iNewDegree);
 	void AddByte(const _BYTE byNewInput);
 	void AddBit(const _BINARY biNewInput);
-	_BOOLEAN CheckCRC(const uint32_t iCRC);
+	bool CheckCRC(const uint32_t iCRC);
 	uint32_t GetCRC();
 
 protected:

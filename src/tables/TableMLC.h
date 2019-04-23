@@ -494,7 +494,7 @@ const int iCodRateCombFDC4SM = {
 
 /* Interleaver sequence ----------------------------------------------------- */
 /* The different coding modes in DRM use bit-interleavers in certain paths. We
-   define the following vectors to store the position and type of the
+   define the following std::vectors to store the position and type of the
    interleaver as described in the DRM-standard
 
    Interleaver modules have to be initialized in the way:

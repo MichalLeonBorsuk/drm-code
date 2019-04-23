@@ -63,6 +63,8 @@ inline int inet_aton(const char*s, void * a) {
 # define INVALID_SOCKET				(-1)
 #endif
 
+using namespace std;
+
 CPacketSocketNative::CPacketSocketNative():
         pPacketSink(nullptr), HostAddrOut(),
         writeBuf(),udp(true),
@@ -138,7 +140,7 @@ CPacketSocketNative::SetDestination(const string & strNewAddr)
        prefix with "t" for tcp
      */
     int ttl = 127;
-    bool bAddressOK = TRUE;
+    bool bAddressOK = true;
     in_addr AddrInterface;
     AddrInterface.s_addr = htonl(INADDR_ANY);
     vector<string> parts = parseDest(strNewAddr);
@@ -169,7 +171,7 @@ CPacketSocketNative::SetDestination(const string & strNewAddr)
         HostAddrOut.sin_port = ntohs(atol(parts[2].c_str()));
         break;
     default:
-        bAddressOK = FALSE;
+        bAddressOK = false;
     }
     if (udp)
     {
@@ -177,13 +179,13 @@ CPacketSocketNative::SetDestination(const string & strNewAddr)
             s = socket(AF_INET, SOCK_DGRAM, 0);
 
         if (setsockopt(s, IPPROTO_IP, IP_TTL, (char*)&ttl, sizeof(ttl))==SOCKET_ERROR)
-            bAddressOK = FALSE;
+            bAddressOK = false;
         if (AddrInterface.s_addr != htonl(INADDR_ANY))
         {
             if (setsockopt(s, IPPROTO_IP, IP_MULTICAST_IF,
                            (char *) &AddrInterface, sizeof(AddrInterface)) == SOCKET_ERROR)
             {
-                bAddressOK = FALSE;
+                bAddressOK = false;
             }
         }
     }
@@ -205,7 +207,7 @@ CPacketSocketNative::GetDestination(string & str)
     s << inet_ntop(AF_INET, &HostAddrOut.sin_addr.s_addr, buf, sizeof(buf)) << ":" << ntohs(HostAddrOut.sin_port);
     str = s.str();
     (void)buf; // MSVC2008 warning C4101: 'buf' : unreferenced local variable
-    return TRUE;
+    return true;
 }
 
 bool
@@ -218,7 +220,7 @@ CPacketSocketNative::GetOrigin(string& str)
 	(void)buf;
     s << inet_ntop(AF_INET, &sourceAddr.sin_addr.s_addr, buf, sizeof(buf)) << ":" << ntohs(sourceAddr.sin_port);
     str = s.str();
-    return TRUE;
+    return true;
 }
 
 bool
@@ -237,7 +239,7 @@ CPacketSocketNative::SetOrigin(const string & strNewAddr)
         udp = false;
         if (s == INVALID_SOCKET)
             s = socket(AF_INET, SOCK_STREAM, 0);
-        return TRUE;
+        return true;
     }
 
     if (s == INVALID_SOCKET)
@@ -350,7 +352,7 @@ CPacketSocketNative::SetOrigin(const string & strNewAddr)
 #else
     fcntl(s, F_SETFL, O_NONBLOCK);  // set to non-blocking
 #endif
-    return TRUE;
+    return true;
 }
 
 void

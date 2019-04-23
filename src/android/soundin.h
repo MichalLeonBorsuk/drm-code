@@ -10,17 +10,17 @@ public:
     COpenSLESIn();
     virtual ~COpenSLESIn();
 
-    virtual void		Enumerate(vector<string>&, vector<string>&);
-    virtual void		SetDev(string sNewDevice);
-    virtual string		GetDev();
+    virtual void		Enumerate(std::vector<string>&, std::vector<string>&);
+    virtual void		SetDev(std::string sNewDevice);
+    virtual std::string		GetDev();
     virtual int			GetSampleRate();
 
-    virtual _BOOLEAN	Init(int iNewSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking);
-    virtual _BOOLEAN 	Read(CVector<short>& psData);
+    virtual bool	Init(int iNewSampleRate, int iNewBufferSize, bool bNewBlocking);
+    virtual bool 	Read(CVector<short>& psData);
     virtual void 		Close();
 
 protected:
-    string currentDevice;
+    std::string currentDevice;
 };
 
 #endif // SOUNDIN_H

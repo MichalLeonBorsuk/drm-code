@@ -152,9 +152,9 @@ protected:
 class CFreqOffsAcq
 {
 public:
-    CFreqOffsAcq() : bAcquisition(FALSE), rCurNormFreqOffset((CReal) 0.0) {}
+    CFreqOffsAcq() : bAcquisition(false), rCurNormFreqOffset((CReal) 0.0) {}
     void Init(const int iNewBlockSize);
-    _BOOLEAN Run(const CVector<_REAL>& vecrInpData);
+    bool Run(const CVector<_REAL>& vecrInpData);
 
     void Start(const CReal rNewNormCenter);
     CReal GetCurResult() {
@@ -172,7 +172,7 @@ protected:
     CRealVector				vecrPSD;
     int						iSearchWinStart;
     int						iSearchWinEnd;
-    _BOOLEAN				bAcquisition;
+    bool				bAcquisition;
 
     CReal					rNormCenter;
     CReal					rCurNormFreqOffset;
@@ -260,18 +260,18 @@ public:
 
     void SetAcqFreq(const CReal rNewNormCenter);
 
-    void EnableAutoFreqAcq(const _BOOLEAN bNewEn)
+    void EnableAutoFreqAcq(const bool bNewEn)
     {
         bAutoFreqAcquIsEnabled = bNewEn;
     }
-    _BOOLEAN AutoFreqAcqEnabled() {
+    bool AutoFreqAcqEnabled() {
         return bAutoFreqAcquIsEnabled;
     }
 
-    void EnablePLL(const _BOOLEAN bNewEn) {
+    void EnablePLL(const bool bNewEn) {
         bPLLIsEnabled = bNewEn;
     }
-    _BOOLEAN PLLEnabled() {
+    bool PLLEnabled() {
         return bPLLIsEnabled;
     }
 
@@ -300,11 +300,11 @@ public:
         return iNoiRedLevel;
     }
 
-    _BOOLEAN haveSpeex() {
+    bool haveSpeex() {
 #ifdef HAVE_SPEEX
-        return TRUE;
+        return true;
 #else
-        return FALSE;
+        return false;
 #endif
     }
 
@@ -314,13 +314,13 @@ public:
         rBW = rBPNormBW;
     }
 
-    _BOOLEAN GetPLLPhase(CReal& rPhaseOut);
+    bool GetPLLPhase(CReal& rPhaseOut);
     CReal GetCurMixFreqOffs() const
     {
         return rNormCurMixFreqOffs * iSigSampleRate;
     }
 
-    _BOOLEAN GetFrameBoundary() {
+    bool GetFrameBoundary() {
         return iFreeSymbolCounter==0;
     }
 
@@ -355,8 +355,8 @@ protected:
 
     int							iSymbolBlockSize;
 
-    _BOOLEAN					bPLLIsEnabled;
-    _BOOLEAN					bAutoFreqAcquIsEnabled;
+    bool					bPLLIsEnabled;
+    bool					bAutoFreqAcquIsEnabled;
 
     EDemodType					eDemodType;
 

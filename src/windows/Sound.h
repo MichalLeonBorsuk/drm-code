@@ -57,28 +57,28 @@ class CSoundIn : public CSoundInInterface
     CSoundIn();
 virtual ~CSoundIn();
 
-virtual _BOOLEAN	Init(int iSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking);
-virtual _BOOLEAN	Read(CVector<short>& psData);
-virtual void		Enumerate(vector<string>& names, vector<string>& descriptions);
-virtual string		GetDev();
-virtual void		SetDev(string sNewDev);
+virtual bool	Init(int iSampleRate, int iNewBufferSize, bool bNewBlocking);
+virtual bool	Read(CVector<short>& psData);
+virtual void		Enumerate(std::vector<string>& names, std::vector<string>& descriptions);
+virtual std::string		GetDev();
+virtual void		SetDev(std::string sNewDev);
 virtual void		Close();
-virtual string		GetVersion() { return ""; };
+virtual std::string		GetVersion() { return ""; };
 
 protected:
 void		OpenDevice();
 void		PrepareBuffer(int iBufNum);
 void		AddBuffer();
 
-vector<string>	vecstrDevices;
-string			sCurDev;
+std::vector<string>	vecstrDevices;
+std::string			sCurDev;
 WAVEFORMATEX	sWaveFormatEx;
-_BOOLEAN		bChangDev;
+bool		bChangDev;
 HANDLE			m_WaveEvent;
 int			iSampleRate;
 int			iBufferSize;
 int			iWhichBuffer;
-_BOOLEAN		bBlocking;
+bool		bBlocking;
 
 /* Wave in */
 WAVEINCAPS		m_WaveInDevCaps;
@@ -94,13 +94,13 @@ class CSoundOut : public CSoundOutInterface
     CSoundOut();
 virtual ~CSoundOut();
 
-virtual _BOOLEAN	Init(int iSampleRate, int iNewBufferSize, _BOOLEAN bNewBlocking);
-virtual _BOOLEAN	Write(CVector<short>& psData);
-virtual void		Enumerate(vector<string>& names, vector<string>& descriptions);
-virtual string		GetDev();
-virtual void		SetDev(string sNewDev);
+virtual bool	Init(int iSampleRate, int iNewBufferSize, bool bNewBlocking);
+virtual bool	Write(CVector<short>& psData);
+virtual void		Enumerate(std::vector<string>& names, std::vector<string>& descriptions);
+virtual std::string		GetDev();
+virtual void		SetDev(std::string sNewDev);
 virtual void		Close();
-virtual string		GetVersion() { return ""; };
+virtual std::string		GetVersion() { return ""; };
 
 protected:
 void		OpenDevice();
@@ -108,15 +108,15 @@ void		PrepareBuffer(int iBufNum);
 void		AddBuffer(int iBufNum);
 void		GetDoneBuffer(int& iCntPrepBuf, int& iIndexDoneBuf);
 
-vector<string>	vecstrDevices;
-string			sCurDev;
+std::vector<string>	vecstrDevices;
+std::string			sCurDev;
 WAVEFORMATEX	sWaveFormatEx;
-_BOOLEAN		bChangDev;
+bool		bChangDev;
 HANDLE			m_WaveEvent;
 int			iSampleRate;
 int			iBufferSize;
 int			iWhichBuffer;
-_BOOLEAN		bBlocking;
+bool		bBlocking;
 
 /* Wave out */
 WAVEOUTCAPS		m_WaveOutDevCaps;
