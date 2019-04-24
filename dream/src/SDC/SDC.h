@@ -1,17 +1,17 @@
 /******************************************************************************\
  * Technische Universitaet Darmstadt, Institut fuer Nachrichtentechnik
- * Copyright (c) 2001-2014
+ * Copyright (c) 2001-2005
  *
  * Author(s):
- *  Volker Fischer, Andrew Murphy, David Flamand
+ *	Volker Fischer, Andrew Murphy, David Flamand
  *
  * Description:
- *  See SDC.cpp
+ *	See SDC.cpp
  *
- * 11/30/2001-2014 David Flamand, added transmit data entity type 8
+ * 11/30/2012 David Flamand, added transmit data entity type 8
  *
  * 11/21/2005 Andrew Murphy, BBC Research & Development, 2005
- *  - AMSS data entity groups (no AFS index), added eSDCType, data type 11
+ *	- AMSS data entity groups (no AFS index), added eSDCType, data type 11
  *
  ******************************************************************************
  *
@@ -31,8 +31,8 @@
  *
 \******************************************************************************/
 
-#if !defined(SDC_H__3B0BA660_CA63SDBOJKEWROBNER89NE877A0D312__INCLUDED_)
-#define SDC_H__3B0BA660_CA63SDBOJKEWROBNER89NE877A0D312__INCLUDED_
+#ifndef SDC_H
+#define SDC_H
 
 #include "../GlobalDefinitions.h"
 #include "../Parameter.h"
@@ -42,7 +42,7 @@
 
 /* Definitions ****************************************************************/
 /* Number of bits of header of SDC block */
-#define NUM_BITS_HEADER_SDC         12
+#define NUM_BITS_HEADER_SDC			12
 
 
 /* Classes ********************************************************************/
@@ -50,7 +50,7 @@ class CSDCTransmit
 {
 public:
     CSDCTransmit() {}
-    virtual ~CSDCTransmit() {}
+    virtual ~CSDCTransmit();
 
     void SDCParam(CVector<_BINARY>* pbiData, CParameter& Parameter);
 
@@ -89,7 +89,7 @@ public:
     enum ERetStatus {SR_OK, SR_BAD_CRC, SR_BAD_DATA};
     enum ESDCType {SDC_DRM, SDC_AMSS};
     CSDCReceive() : eSDCType(SDC_DRM) {}
-    virtual ~CSDCReceive() {}
+    virtual ~CSDCReceive();
 
     ERetStatus SDCParam(CVector<_BINARY>* pbiData, CParameter& Parameter);
     void SetSDCType(ESDCType sdcType) {
@@ -121,9 +121,9 @@ protected:
     bool DataEntityType12(CVector<_BINARY>* pbiData, const int iLengthOfBody,
                               CParameter& Parameter);
 
-    CCRC        CRCObject;
-    ESDCType    eSDCType;
+    CCRC		CRCObject;
+    ESDCType	eSDCType;
 };
 
 
-#endif // !defined(SDC_H__3B0BA660_CA63SDBOJKEWROBNER89NE877A0D312__INCLUDED_)
+#endif // SDC_H

@@ -1,12 +1,12 @@
 /******************************************************************************\
  * Technische Universitaet Darmstadt, Institut fuer Nachrichtentechnik
- * Copyright (c) 2001-2014
+ * Copyright (c) 2001
  *
  * Author(s):
- *  Volker Fischer
+ *	Volker Fischer
  *
  * Description:
- *  See TimeWiener.cpp
+ *	See TimeWiener.cpp
  *
  ******************************************************************************
  *
@@ -42,14 +42,13 @@
 
 /* Definitions ****************************************************************/
 /* Number of taps we want to use for sigma estimation */
-#define NUM_TAPS_USED4SIGMA_EST         3
+#define NUM_TAPS_USED4SIGMA_EST			3
 
 /* Lengths of wiener filter for wiener filtering in time direction */
-#define LEN_WIENER_FILT_TIME_RMA        5
-#define LEN_WIENER_FILT_TIME_RMB        7
-#define LEN_WIENER_FILT_TIME_RMC        9
-#define LEN_WIENER_FILT_TIME_RMD        9
-#define LEN_WIENER_FILT_TIME_RME        9 // TODO MODE E
+#define LEN_WIENER_FILT_TIME_RMA		5
+#define LEN_WIENER_FILT_TIME_RMB		7
+#define LEN_WIENER_FILT_TIME_RMC		9
+#define LEN_WIENER_FILT_TIME_RMD		9
 
 /* Maximum values for doppler for a specific robustness mode.
    Parameters found by looking at resulting filter coefficients. The values
@@ -57,20 +56,19 @@
    interpolated by the pilot frequency grid. Since we have a Gaussian
    power spectral density, the power is never exactely zero. Therefore we
    determine the point where the PDS has fallen below a 50 dB limit */
-#define MAX_SIGMA_RMA                   ((_REAL) 1.6 /* Hz */ / 2)
-#define MAX_SIGMA_RMB                   ((_REAL) 2.7 /* Hz */ / 2)
-#define MAX_SIGMA_RMC                   ((_REAL) 5.7 /* Hz */ / 2)
-#define MAX_SIGMA_RMD                   ((_REAL) 4.5 /* Hz */ / 2)
-#define MAX_SIGMA_RME                   ((_REAL) 0.0 /* Hz */ / 2) // TODO MODE E
+#define MAX_SIGMA_RMA					((_REAL) 1.6 /* Hz */ / 2)
+#define MAX_SIGMA_RMB					((_REAL) 2.7 /* Hz */ / 2)
+#define MAX_SIGMA_RMC					((_REAL) 5.7 /* Hz */ / 2)
+#define MAX_SIGMA_RMD					((_REAL) 4.5 /* Hz */ / 2)
 
 /* Define a lower bound for the doppler */
-#define LOW_BOUND_SIGMA                 ((_REAL) 0.1 /* Hz */ / 2)
+#define LOW_BOUND_SIGMA					((_REAL) 0.1 /* Hz */ / 2)
 
 /* Initial value for SNR */
-#define INIT_VALUE_SNR_WIEN_TIME_DB     ((_REAL) 25.0) /* dB */
+#define INIT_VALUE_SNR_WIEN_TIME_DB		((_REAL) 25.0) /* dB */
 
 /* Time constant for IIR averaging of time correlation estimation */
-#define TICONST_TI_CORREL_EST           ((CReal) 60.0) /* sec */
+#define TICONST_TI_CORREL_EST			((CReal) 60.0) /* sec */
 
 /* Overestimation factor for sigma estimation.
    We overestimate the sigma since the channel estimation result is much worse
@@ -79,103 +77,97 @@
    all paths, it can happen that a path with a small gain but a high doppler
    does not contribute enough on the global sigma estimation. Therefore the
    overestimation */
-#define SIGMA_OVERESTIMATION_FACT       ((_REAL) 3.0)
+#define SIGMA_OVERESTIMATION_FACT		((_REAL) 3.0)
 
 
 /* Classes ********************************************************************/
 class CTimeWiener : public CChanEstTime
 {
 public:
-    CTimeWiener() : bTracking(false) {}
-    virtual ~CTimeWiener() {}
+	CTimeWiener() : bTracking(false) {}
+	virtual ~CTimeWiener() {}
 
-    virtual int Init(CParameter& Parameters);
-    virtual _REAL Estimate(CVectorEx<_COMPLEX>* pvecInputData,
-                           CComplexVector& veccOutputData,
-                           CVector<int>& veciMapTab,
-                           CVector<_COMPLEX>& veccPilotCells, _REAL rSNR);
+	virtual int Init(CParameter& Parameters);
+	virtual _REAL Estimate(CVectorEx<_COMPLEX>* pvecInputData,
+						   CComplexVector& veccOutputData,
+						   CVector<int>& veciMapTab,
+						   CVector<_COMPLEX>& veccPilotCells, _REAL rSNR);
 
-    _REAL GetSigma() {
-        return rSigma * 2;
-    }
+	_REAL GetSigma() {return rSigma * 2;}
 
-    void StartTracking() {
-        bTracking = true;
-    }
-    void StopTracking() {
-        bTracking = false;
-    }
-
+	void StartTracking() {bTracking = true;}
+	void StopTracking() {bTracking = false;}
+	
 protected:
-    CReal TimeOptimalFilter(CRealVector& vecrTaps, const int iTimeInt,
-                            const int iDiff, const CReal rNewSNR,
-                            const CReal rNewSigma, const CReal rTs,
-                            const int iLength);
-    void GenFiltPhaseTable(const CMatrix<int>& matiMapTab, const int iNumCarrier,
-                           const int iNumSymPerFrame,
-                           const int iScatPilTimeInt);
-    _REAL UpdateFilterCoef(const _REAL rNewSNR, const _REAL rNewSigma);
-    CReal ModLinRegr(const CComplexVector& veccCorrEst);
+	CReal TimeOptimalFilter(CRealVector& vecrTaps, const int iTimeInt,
+							const int iDiff, const CReal rNewSNR,
+							const CReal rNewSigma, const CReal rTs,
+							const int iLength);
+	void GenFiltPhaseTable(const CMatrix<int>& matiMapTab, const int iNumCarrier,
+						   const int iNumSymPerFrame,
+						   const int iScatPilTimeInt);
+	_REAL UpdateFilterCoef(const _REAL rNewSNR, const _REAL rNewSigma);
+	CReal ModLinRegr(const CComplexVector& veccCorrEst);
 
 
 #ifdef USE_DD_WIENER_FILT_TIME
-    /* Decision directed Wiener */
-    class CDDPilIdx
-    {
-    public:
-        CDDPilIdx() : iIdx(0), bIsPilot(false) {}
-        CDDPilIdx(int iNI, bool bNP) : iIdx(iNI), bIsPilot(bNP) {}
-        int         iIdx;
-        bool    bIsPilot;
-    };
+	/* Decision directed Wiener */
+	class CDDPilIdx
+	{
+	public:
+		CDDPilIdx() : iIdx(0), bIsPilot(false) {}
+		CDDPilIdx(int iNI, bool bNP) : iIdx(iNI), bIsPilot(bNP) {}
+		int			iIdx;
+		bool	bIsPilot;
+	};
 
-    CReal TimeOptimalFiltDD(CRealVector& vecrTaps, const int iTimeInt,
-                            const int iDiff, const CReal rNewSNR,
-                            const CReal rNewSigma, const CReal rTs,
-                            const int iLength, const int iFiltPhase);
+	CReal TimeOptimalFiltDD(CRealVector& vecrTaps, const int iTimeInt,
+							const int iDiff, const CReal rNewSNR,
+							const CReal rNewSigma, const CReal rTs,
+							const int iLength, const int iFiltPhase);
 
-    CMatrix<_COMPLEX>               matcChanAtDataPos;
-    int                             iLenDDHist;
-    CParameter::ECodScheme          eMSCQAMMode, eSDCQAMMode;
-    CVector<CVector<CDDPilIdx> >    vecvecPilIdx;
-    CVector<CFIFO<CComplex> >       matcRecSigHist;
-    CVector<CFIFO<int> >            matiMapTabHist;
+	CMatrix<_COMPLEX>				matcChanAtDataPos;
+	int								iLenDDHist;
+	CParameter::ECodScheme			eMSCQAMMode, eSDCQAMMode;
+	CVector<CVector<CDDPilIdx> >	vecvecPilIdx;
+	CVector<CFIFO<CComplex> >		matcRecSigHist;
+	CVector<CFIFO<int> >			matiMapTabHist;
 #endif
 
 
-    CMatrix<int>        matiFiltPhaseTable;
+	CMatrix<int>		matiFiltPhaseTable;
 
-    int                 iNumCarrier;
+	int					iNumCarrier;
 
-    int                 iLengthWiener;
-    int                 iNumFiltPhasTi;
-    CRealMatrix         matrFiltTime;
+	int					iLengthWiener;
+	int					iNumFiltPhasTi;
+	CRealMatrix			matrFiltTime;
+	
+	CMatrix<_COMPLEX>	matcChanAtPilPos;
 
-    CMatrix<_COMPLEX>   matcChanAtPilPos;
+	CComplexVector		veccTiCorrEst;
+	CReal				rLamTiCorrAv;
 
-    CComplexVector      veccTiCorrEst;
-    CReal               rLamTiCorrAv;
+	int					iScatPilFreqInt; /* Frequency interpolation */
+	int					iScatPilTimeInt; /* Time interpolation */
+	int					iNumSymPerFrame;
 
-    int                 iScatPilFreqInt; /* Frequency interpolation */
-    int                 iScatPilTimeInt; /* Time interpolation */
-    int                 iNumSymPerFrame;
+	int					iLenHistBuff;
 
-    int                 iLenHistBuff;
+	CShiftRegister<int>	vecTiCorrHist;
+	int					iLenTiCorrHist;
+	int					iNumTapsSigEst;
+	int					iUpCntWienFilt;
 
-    CShiftRegister<int> vecTiCorrHist;
-    int                 iLenTiCorrHist;
-    int                 iNumTapsSigEst;
-    int                 iUpCntWienFilt;
+	_REAL				rTs;
+	_REAL				rSigma;
+	_REAL				rSigmaMax;
 
-    _REAL               rTs;
-    _REAL               rSigma;
-    _REAL               rSigmaMax;
+	_REAL				rMMSE;
+	_REAL				rAvSNR;
+	int					iAvSNRCnt;
 
-    _REAL               rMMSE;
-    _REAL               rAvSNR;
-    int                 iAvSNRCnt;
-
-    bool            bTracking;
+	bool			bTracking;
 };
 
 

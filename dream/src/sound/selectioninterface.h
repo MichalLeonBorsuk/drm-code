@@ -1,12 +1,12 @@
 /******************************************************************************\
  * British Broadcasting Corporation
- * Copyright (c) 2001-2014, 2001-2014
+ * Copyright (c) 2007
  *
  * Author(s):
- *  Julian Cable, David Flamand
+ *	Julian Cable
  *
  * Decription:
- *  sound interfaces
+ * sound interfaces
  *
  ******************************************************************************
  *
@@ -26,54 +26,18 @@
  *
 \******************************************************************************/
 
-#ifndef _SELECTIONINTERFACE_H
-#define _SELECTIONINTERFACE_H
+#ifndef SELECTIONINTERFACE_H
+#define SELECTIONINTERFACE_H
 
-#include "../GlobalDefinitions.h"
 #include <vector>
-#include <map>
 #include <string>
-
-#define DEFAULT_DEVICE_NAME ""
-
-typedef struct {
-    string          name; /* unique name that identify the device */
-    string          desc; /* optional device description, set to empty string when not used */
-    map<int,bool>   samplerates; /* supported sample rates by the device */
-} deviceprop;
-
-// TODO update sound interface backend that use old api, remove old Enumerate(names, descs) and make this class pure virtual
 
 class CSelectionInterface
 {
 public:
-    virtual             ~CSelectionInterface() {}
-    /* new/updated interface should reimplement that one */
-    virtual void        Enumerate(vector<deviceprop>& devs, const int* desiredsamplerates)
-    {
-        vector<string> names;
-        vector<string> descriptions;
-        Enumerate(names, descriptions);
-        deviceprop dp;
-        for (const int* dsr=desiredsamplerates; *dsr; dsr++)
-            dp.samplerates[abs(*dsr)] = true;
-        devs.clear();
-        for (size_t i=0; i<names.size(); i++)
-        {
-            dp.name = names.at(i);
-            dp.desc = i<descriptions.size() ? descriptions.at(i) : "";
-            devs.push_back(dp);
-        }
-    };
-    virtual string      GetDev()=0;
-    virtual void        SetDev(string sNewDev)=0;
-protected:
-    /* for backward compatibility */
-    virtual void        Enumerate(vector<string>& names, vector<string>& descriptions)
-    {
-        (void)names;
-        (void)descriptions;
-    }
+    virtual 			~CSelectionInterface();
+    virtual void		Enumerate(std::vector<std::string>& names, std::vector<std::string>& descriptions)=0;
+    virtual std::string		GetDev()=0;
+    virtual void		SetDev(std::string sNewDev)=0;
 };
-
 #endif

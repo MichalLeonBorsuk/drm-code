@@ -1,8 +1,8 @@
 /******************************************************************************\
- * British Broadcasting Corporation * Copyright (c) 2001-2014
+ * British Broadcasting Corporation * Copyright (c) 2007
  *
  * Author(s):
- *  Julian Cable, Andrea Russo
+ *	Julian Cable, Andrea Russo
  *
  * Description:
  * Settings for the receiver
@@ -32,7 +32,6 @@
 #include "RigDlg.h"
 #include "DialogUtil.h"
 #include <QTreeWidgetItem>
-#include "ThemeCustomizer.h"
 
 /* Implementation *************************************************************/
 
@@ -40,36 +39,38 @@ RigDlg::RigDlg(CRig& nrig, QWidget* parent) :
     QDialog(parent),
     rig(nrig), rigmap(), bComboBoxPortMutex(false)
 {
-    map<rig_model_t,CHamlib::SDrRigCaps> r;
-    rig.GetRigList(r);
-
     setAttribute(Qt::WA_QuitOnClose, false);
-    ui->setupUi(this);
+    setupUi(this);
+#if QWT_VERSION < 0x060100
+    sMeter->setScalePosition(QwtThermo::TopScale);
+#else
+    sMeter->setScalePosition(QwtThermo::TrailingScale);
+#endif
 
-    sMeter = SMeter::createSMeter();
-    ui->sMeterLayout->addWidget(sMeter->widget());
+    map<rig_model_t,CHamlib::SDrRigCaps> r;
 
-    ui->modified->setEnabled(false);
+    rig.GetRigList(r);
+    modified->setEnabled(false);
     //rigTypes->setColumnCount(2);
-    ui->rigTypes->setSortingEnabled(false);
-    QTreeWidgetItem* none = new QTreeWidgetItem(ui->rigTypes);
-    none->setText(0, "None");
-    none->setData(0, Qt::UserRole, RIG_MODEL_NONE);
+    rigTypes->setSortingEnabled(false);
+    QTreeWidgetItem* none = new QTreeWidgetItem(rigTypes);
+	none->setText(0, "None");
+	none->setData(0, Qt::UserRole, RIG_MODEL_NONE);
     for(map<rig_model_t,CHamlib::SDrRigCaps>::const_iterator i=r.begin(); i!=r.end(); i++)
     {
-        rig_model_t model_num = i->first;
+		rig_model_t model_num = i->first;
         CHamlib::SDrRigCaps rc =  i->second;
         QTreeWidgetItem* mfr, *model;
         if(rc.strManufacturer=="" || rc.strModelName=="")
         {
             continue;
         }
-        QList<QTreeWidgetItem *> l = ui->rigTypes->findItems(rc.strManufacturer.c_str(), Qt::MatchFixedString);
+        QList<QTreeWidgetItem *> l = rigTypes->findItems(rc.strManufacturer.c_str(), Qt::MatchFixedString);
         if(l.size()==0)
         {
-            mfr = new QTreeWidgetItem(ui->rigTypes);
+            mfr = new QTreeWidgetItem(rigTypes);
             mfr->setText(0,rc.strManufacturer.c_str());
-            mfr->setFlags(mfr->flags() & ~Qt::ItemIsSelectable);
+			mfr->setFlags(mfr->flags() & ~Qt::ItemIsSelectable);
         }
         else
         {
@@ -77,15 +78,13 @@ RigDlg::RigDlg(CRig& nrig, QWidget* parent) :
         }
         model = new QTreeWidgetItem(mfr);
         model->setText(0,rc.strModelName.c_str());
-        model->setData(0, Qt::UserRole, model_num);
-        rigmap[model_num] = rc.strModelName;
+		model->setData(0, Qt::UserRole, model_num);
+		rigmap[model_num] = rc.strModelName;
     }
-    ui->rigTypes->setSortingEnabled(false);
-    ui->rigTypes->sortItems(9, Qt::AscendingOrder);
+    rigTypes->setSortingEnabled(false);
+    rigTypes->sortItems(9, Qt::AscendingOrder);
 
-    // TODO InitSMeter(this, sMeter);
-
-    APPLY_CUSTOM_THEME();
+   	InitSMeter(this, sMeter);
 }
 
 RigDlg::~RigDlg()
@@ -94,35 +93,35 @@ RigDlg::~RigDlg()
 
 void RigDlg::showEvent(QShowEvent*)
 {
-    /* Port selection */
-    bComboBoxPortMutex = true;
-    map<string,string> ports;
-    rig.GetPortList(ports);
-    ui->comboBoxPort->clear();
-    prev_port = rig.GetComPort();
-    int index = -1;
-    for (map<string,string>::const_iterator i=ports.begin(); i!=ports.end(); i++)
-    {
-        ui->comboBoxPort->addItem(i->first.c_str(), i->second.c_str());
-        if (i->second.compare(prev_port) == 0)
-            index = ui->comboBoxPort->count() - 1; /* index is zero based */
-    }
-    if (index != -1)
-    {
-        ui->comboBoxPort->setCurrentIndex(index);
-    }
-    else
-    {   /* Add the port to the list if not found */
-        ui->comboBoxPort->addItem(prev_port.c_str(), prev_port.c_str());
-        ui->comboBoxPort->setCurrentIndex(ui->comboBoxPort->findText(prev_port.c_str()));
-    }
-    bComboBoxPortMutex = false;
+	/* Port selection */
+	bComboBoxPortMutex = true;
+	map<string,string> ports;
+	rig.GetPortList(ports);
+	comboBoxPort->clear();
+	prev_port = rig.GetComPort();
+	int index = -1;
+	for (map<string,string>::const_iterator i=ports.begin(); i!=ports.end(); i++)
+	{
+		comboBoxPort->addItem(i->first.c_str(), i->second.c_str());
+		if (i->second.compare(prev_port) == 0)
+			index = comboBoxPort->count() - 1; /* index is zero based */
+	}
+	if (index != -1)
+	{
+		comboBoxPort->setCurrentIndex(index);
+	}
+	else
+	{	/* Add the port to the list if not found */
+		comboBoxPort->addItem(prev_port.c_str(), prev_port.c_str());
+		comboBoxPort->setCurrentIndex(comboBoxPort->findText(prev_port.c_str()));
+	}
+	bComboBoxPortMutex = false;
 
-    /* Rig model selection */
+	/* Rig model selection */
     prev_rig_model = rig.GetHamlibModelID();
     if (prev_rig_model == RIG_MODEL_NONE)
     {
-        ui->rigTypes->setCurrentItem(ui->rigTypes->topLevelItem(0)); /* None */
+        rigTypes->setCurrentItem(rigTypes->topLevelItem(0)); /* None */
     }
     else
     {
@@ -130,86 +129,86 @@ void RigDlg::showEvent(QShowEvent*)
         if(m!=rigmap.end())
         {
             QString name(m->second.c_str());
-            QList<QTreeWidgetItem *> l = ui->rigTypes->findItems(name, Qt::MatchExactly | Qt::MatchRecursive);
+            QList<QTreeWidgetItem *> l = rigTypes->findItems(name, Qt::MatchExactly | Qt::MatchRecursive);
             if(l.size()>0) {
-                ui->rigTypes->setCurrentItem(l.front());
-                ui->selectedRigType->setText(name);
+                rigTypes->setCurrentItem(l.front());
+                selectedRigType->setText(name);
             }
         }
     }
 
-    connect(&rig, SIGNAL(sigstr(double)), this, SLOT(onSigstr(double)));
+	connect(&rig, SIGNAL(sigstr(double)), this, SLOT(onSigstr(double)));
 }
 
 void RigDlg::hideEvent(QHideEvent*)
 {
-    disconnect(&rig, SIGNAL(sigstr(double)), this, SLOT(onSigstr(double)));
+	disconnect(&rig, SIGNAL(sigstr(double)), this, SLOT(onSigstr(double)));
 }
 
 void
 RigDlg::on_rigTypes_itemSelectionChanged()
 {
-    QList<QTreeWidgetItem*> l = ui->rigTypes->selectedItems();
-    if(l.count()==1) {
-        const QTreeWidgetItem* item = l.first();
-        ui->selectedRigType->setText(item->text(0));
-        rig.SetHamlibModelID(item->data(0, Qt::UserRole).toInt());
-    }
+	QList<QTreeWidgetItem*> l = rigTypes->selectedItems();
+	if(l.count()==1) {
+		const QTreeWidgetItem* item = l.first();
+		selectedRigType->setText(item->text(0));
+		rig.SetHamlibModelID(item->data(0, Qt::UserRole).toInt());
+	}
 }
 
 void
 RigDlg::on_modified_stateChanged(int state)
 {
-    rig.SetEnableModRigSettings(state?false:true);
+	rig.SetEnableModRigSettings(state?false:true);
 }
 
 void
 RigDlg::on_testRig_clicked()
 {
-    rig.SetComPort(ui->comboBoxPort->itemData(ui->comboBoxPort->currentIndex()).toString().toStdString());
-    rig.SetHamlibModelID(ui->rigTypes->currentItem()->data(0, Qt::UserRole).toInt());
-    rig.subscribe();
+	rig.SetComPort(comboBoxPort->itemData(comboBoxPort->currentIndex()).toString().toStdString());
+	rig.SetHamlibModelID(rigTypes->currentItem()->data(0, Qt::UserRole).toInt());
+	rig.subscribe();
 }
 
 void
 RigDlg::on_buttonBox_accepted()
 {
-    rig.SetComPort(getComboBoxComPort().toStdString());
-    rig.SetHamlibModelID(ui->rigTypes->currentItem()->data(0, Qt::UserRole).toInt());
-    rig.unsubscribe();
-    close();
+	rig.SetComPort(getComboBoxComPort().toStdString());
+	rig.SetHamlibModelID(rigTypes->currentItem()->data(0, Qt::UserRole).toInt());
+	rig.unsubscribe();
+	close();
 }
 
 void
 RigDlg::on_buttonBox_rejected()
 {
-    rig.SetComPort(prev_port);
-    rig.SetHamlibModelID(prev_rig_model);
-    rig.unsubscribe();
-    close();
+	rig.SetComPort(prev_port);
+	rig.SetHamlibModelID(prev_rig_model);
+	rig.unsubscribe();
+	close();
 }
 
 void
 RigDlg::on_comboBoxPort_editTextChanged(const QString&)
 {
-    if (bComboBoxPortMutex == false)
-        rig.SetComPort(getComboBoxComPort().toStdString());
+	if (bComboBoxPortMutex == false)
+		rig.SetComPort(getComboBoxComPort().toStdString());
 }
 
 QString
 RigDlg::getComboBoxComPort()
 {
-    QString strPort;
-    const int index = ui->comboBoxPort->currentIndex();
-    if (ui->comboBoxPort->currentText().compare(ui->comboBoxPort->itemText(index)))
-        strPort = ui->comboBoxPort->currentText();
-    else
-        strPort = ui->comboBoxPort->itemData(index).toString();
-    return strPort;
+	QString strPort;
+	const int index = comboBoxPort->currentIndex();
+	if (comboBoxPort->currentText().compare(comboBoxPort->itemText(index)))
+		strPort = comboBoxPort->currentText();
+	else
+		strPort = comboBoxPort->itemData(index).toString();
+	return strPort;
 }
 
 void
 RigDlg::onSigstr(double r)
 {
-    sMeter->setLevel(r);
+	sMeter->setValue(r);
 }

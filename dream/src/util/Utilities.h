@@ -1,16 +1,16 @@
 /******************************************************************************\
  * Technische Universitaet Darmstadt, Institut fuer Nachrichtentechnik
- * Copyright (c) 2001-2014
+ * Copyright (c) 2004
  *
  * Author(s):
- *  Volker Fischer
+ *	Volker Fischer
  *
  * Description:
- *  Implements:
- *  - Signal level meter
- *  - Bandpass filter
- *  - Modified Julian Date
- *  - Reverberation effect
+ *	Implements:
+ *	- Signal level meter
+ *	- Bandpass filter
+ *	- Modified Julian Date
+ *	- Reverberation effect
  *
  ******************************************************************************
  *
@@ -33,10 +33,10 @@
 #if !defined(UTILITIES_H__3B0BA660_CA63_4344_B3452345D31912__INCLUDED_)
 #define UTILITIES_H__3B0BA660_CA63_4344_B3452345D31912__INCLUDED_
 
-#include "../enumerations.h"
+#include "../GlobalDefinitions.h"
 #include "Settings.h"
 #include "Vector.h"
-#include "../matlib/Matlib.h"
+#include "../matlib/MatlibStdToolbox.h"
 #include <map>
 #include <iostream>
 
@@ -46,24 +46,24 @@
 
 
 /* Definitions ****************************************************************/
-#define METER_FLY_BACK                  15
+#define	METER_FLY_BACK					15
 
 /* Classes ********************************************************************/
 /* Thread safe counter ------------------------------------------------------ */
 class CCounter
 {
 public:
-    CCounter() : count(0) {}
-    ~CCounter() {}
-    unsigned int operator++();
-    unsigned int operator++(int);
-    unsigned int operator--();
-    unsigned int operator--(int);
-    operator unsigned int();
-    unsigned int operator=(unsigned int value);
+	CCounter() : count(0) {}
+	~CCounter() {}
+	unsigned int operator++();
+	unsigned int operator++(int);
+	unsigned int operator--();
+	unsigned int operator--(int);
+	operator unsigned int();
+	unsigned int operator=(unsigned int value);
 private:
-    CMutex mutex;
-    unsigned int count;
+	CMutex mutex;
+	unsigned int count;
 };
 
 
@@ -71,19 +71,17 @@ private:
 class CSignalLevelMeter
 {
 public:
-    CSignalLevelMeter() : rCurLevel((_REAL) 0.0) {}
-    virtual ~CSignalLevelMeter() {}
+	CSignalLevelMeter() : rCurLevel((_REAL) 0.0) {}
+	virtual ~CSignalLevelMeter() {}
 
-    void Init(_REAL rStartVal) {
-        rCurLevel = Abs(rStartVal);
-    }
-    void Update(const _REAL rVal);
-    void Update(const CVector<_REAL> vecrVal);
-    void Update(const CVector<_SAMPLE> vecsVal);
-    _REAL Level();
+	void Init(_REAL rStartVal) {rCurLevel = Abs(rStartVal);}
+	void Update(const _REAL rVal);
+	void Update(const CVector<_REAL> vecrVal);
+	void Update(const CVector<_SAMPLE> vecsVal);
+	_REAL Level();
 
 protected:
-    _REAL rCurLevel;
+	_REAL rCurLevel;
 };
 
 
@@ -91,23 +89,23 @@ protected:
 class CDRMBandpassFilt
 {
 public:
-    enum EFiltType {FT_TRANSMITTER, FT_RECEIVER};
+	enum EFiltType {FT_TRANSMITTER, FT_RECEIVER};
 
-    void Init(int iSampleRate, int iNewBlockSize, _REAL rOffsetHz,
-              ESpecOcc eSpecOcc, EFiltType eNFiTy, bool drmplus);
-    void Process(CVector<_COMPLEX>& veccData);
+	void Init(int iSampleRate, int iNewBlockSize, _REAL rOffsetHz,
+		ESpecOcc eSpecOcc, EFiltType eNFiTy);
+	void Process(CVector<_COMPLEX>& veccData);
 
 protected:
-    int             iBlockSize;
+	int				iBlockSize;
 
-    CComplexVector  cvecDataTmp;
+	CComplexVector	cvecDataTmp;
 
-    CRealVector     rvecZReal; /* State memory real part */
-    CRealVector     rvecZImag; /* State memory imaginary part */
-    CRealVector     rvecDataReal;
-    CRealVector     rvecDataImag;
-    CFftPlans       FftPlanBP;
-    CComplexVector  cvecB;
+	CRealVector		rvecZReal; /* State memory real part */
+	CRealVector		rvecZImag; /* State memory imaginary part */
+	CRealVector		rvecDataReal;
+	CRealVector		rvecDataImag;
+	CFftPlans		FftPlanBP;
+	CComplexVector	cvecB;
 };
 
 
@@ -115,84 +113,52 @@ protected:
 class CModJulDate
 {
 public:
-    CModJulDate() : iYear(0), iDay(0), iMonth(0), iModJulDate(0) {}
-    CModJulDate(const uint32_t iModJulDate) {
-        Set(iModJulDate);
-    }
-    CModJulDate(const uint32_t iYear, const uint32_t iMonth, const uint32_t iDay)
-    {
-        Get(iYear, iMonth, iDay);
-    }
+	CModJulDate() : iYear(0), iDay(0), iMonth(0), iModJulDate(0) {}
+	CModJulDate(const uint32_t iModJulDate) {Set(iModJulDate);}
+	CModJulDate(const uint32_t iYear, const uint32_t iMonth, const uint32_t iDay)
+		{Get(iYear, iMonth, iDay);}
 
-    void Set(const uint32_t iModJulDate);
-    void Get(const uint32_t iYear, const uint32_t iMonth, const uint32_t iDay);
+	void Set(const uint32_t iModJulDate);
+	void Get(const uint32_t iYear, const uint32_t iMonth, const uint32_t iDay);
 
-    int GetYear() {
-        return iYear;
-    }
-    int GetDay() {
-        return iDay;
-    }
-    int GetMonth() {
-        return iMonth;
-    }
-    int GetModJulDate() {
-        return iModJulDate;
-    }
+	int GetYear() {return iYear;}
+	int GetDay() {return iDay;}
+	int GetMonth() {return iMonth;}
+	int GetModJulDate() {return iModJulDate;}
 
 protected:
-    int iYear, iDay, iMonth, iModJulDate;
-};
-
-
-/* Audio Reverbration ------------------------------------------------------- */
-class CAudioReverb
-{
-public:
-    CAudioReverb() {}
-    void Init(CReal rT60, int iSampleRate);
-    void Clear();
-    CReal ProcessSample(const CReal rLInput, const CReal rRInput);
-
-protected:
-    void setT60(const CReal rT60, int iSampleRate);
-    bool isPrime(const int number);
-
-    CFIFO<int>  allpassDelays_[3];
-    CFIFO<int>  combDelays_[4];
-    CReal       allpassCoefficient_;
-    CReal       combCoefficient_[4];
+	int iYear, iDay, iMonth, iModJulDate;
 };
 
 inline int Complement2toInt(const unsigned int iSize, CVector<_BINARY>* pbiData)
 {
-    int iVal = 0;
-    const int iVecSize = iSize - 1;
+	int iVal = 0;
+	const int iVecSize = iSize - 1;
 
-    _BINARY bSign = (_BINARY)(*pbiData).Separate(1);
+	_BINARY bSign = (_BINARY)(*pbiData).Separate(1);
 
-    if (bSign == 0)
-        iVal = (int) (*pbiData).Separate(iVecSize);
-    else
-    {
-        int k;
+	if (bSign == 0)
+		iVal = (int) (*pbiData).Separate(iVecSize);
+	else
+	{
+		int k;
 
-        unsigned int iPowerOf2 = 1;
+		unsigned int iPowerOf2 = 1;
 
-        iPowerOf2 <<= (iVecSize - 1); /* power(2,iVecSize-1) */
+		iPowerOf2 <<= (iVecSize - 1); /* power(2,iVecSize-1) */
 
-        for (k = iVecSize - 1; k >= 0; k--)
-        {
-            if ((*pbiData).Separate(1) == 0)
-                iVal = iVal + iPowerOf2;
+		for (k = iVecSize - 1; k >= 0; k--)
+		{
+			if ((*pbiData).Separate(1) == 0)
+				iVal = iVal + iPowerOf2;
 
-            iPowerOf2 >>= 1; /* divide for 2 */
-        }
+			iPowerOf2 >>= 1; /* divide for 2 */
+		}
 
-        iVal = -1 * (iVal + 1);
-    }
+		iVal = -1 * (iVal + 1);
+	}
 
-    return iVal;
+	return iVal;
 }
 
 #endif // !defined(UTILITIES_H__3B0BA660_CA63_4344_B3452345D31912__INCLUDED_)

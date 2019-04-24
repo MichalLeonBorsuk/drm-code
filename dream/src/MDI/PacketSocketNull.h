@@ -1,9 +1,9 @@
 /******************************************************************************\
  * Technische Universitaet Darmstadt, Institut fuer Nachrichtentechnik
- * Copyright (c) 2001-2014
+ * Copyright (c) 2004
  *
  * Author(s):
- *  Volker Fischer, Oliver Haffenden
+ *	Volker Fischer, Oliver Haffenden
  *
  * Description: Null implementation of CPacketSocket. See PacketSocketNull.cpp
  *
@@ -36,19 +36,19 @@ class CPacketSocketNull : public CPacketSocket
 
 public:
 
-    // Set the sink which will receive the packets
-    virtual void SetPacketSink(CPacketSink *pSink);
-    // Stop sending packets to the sink
-    virtual void ResetPacketSink(void);
+	// Set the sink which will receive the packets
+	virtual void SetPacketSink(CPacketSink *pSink);
+	// Stop sending packets to the sink
+	virtual void ResetPacketSink(void);
 
-    // Send packet to the socket
-    virtual void SendPacket(const vector<_BYTE>& vecbydata, uint32_t addr=0, uint16_t port=0);
+	// Send packet to the socket
+	virtual void SendPacket(const std::vector<_BYTE>& vecbydata, uint32_t addr=0, uint16_t port=0);
 
-    virtual void poll();
+	virtual void poll();
 
-    _BOOLEAN SetDestination(const string&);
-    _BOOLEAN SetOrigin(const string&);
-    _BOOLEAN GetDestination(string&);
+	bool SetDestination(const std::string&);
+	bool SetOrigin(const std::string&);
+	bool GetDestination(std::string&);
 };
 
 #endif

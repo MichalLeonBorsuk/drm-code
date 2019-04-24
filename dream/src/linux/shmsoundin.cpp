@@ -1,9 +1,9 @@
 /******************************************************************************\
  * British Broadcasting Corporation
- * Copyright (c) 2001-2014
+ * Copyright (c) 2007
  *
  * Author(s):
- *  Julian Cable
+ *	Julian Cable
  *
  * Decription:
  * Sound in interface using POSIX shared memory
@@ -35,9 +35,10 @@
 # include <unistd.h>
 # include <sys/stat.h>
 # include "shmsoundin.h"
+using namespace std;
 
 CShmSoundIn::CShmSoundIn():ringBuffer(NULL),
-    shmid(-1),shm(NULL),shm_path(),name("shm input"),shmChannels(1),wantedChannels(2)
+        shmid(-1),shm(NULL),shm_path(),name("shm input"),shmChannels(1),wantedChannels(2)
 {
 }
 
@@ -50,7 +51,7 @@ CShmSoundIn::~CShmSoundIn()
  * 2 samples per frame
  */
 void
-CShmSoundIn::Init(int iNewBufferSize, _BOOLEAN bNewBlocking)
+CShmSoundIn::Init(int iNewBufferSize, bool bNewBlocking)
 {
     // TODO decide if we should use the parameters
     (void)iNewBufferSize;
@@ -95,11 +96,11 @@ CShmSoundIn::GetDev()
     return 0;
 }
 
-_BOOLEAN
+bool
 CShmSoundIn::Read(CVector<short>& psData)
 {
     if (ringBuffer==NULL)
-        return FALSE;
+        return false;
 
     size_t frames;
     if (wantedChannels==2)
@@ -145,7 +146,7 @@ CShmSoundIn::Read(CVector<short>& psData)
         }
     }
 
-    return TRUE;
+    return true;
 }
 
 void

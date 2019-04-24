@@ -1,12 +1,12 @@
 /******************************************************************************\
  * Technische Universitaet Darmstadt, Institut fuer Nachrichtentechnik
- * Copyright (c) 2001-2014
+ * Copyright (c) 2004
  *
  * Author(s):
- *  Volker Fischer, Oliver Haffenden
+ *	Volker Fischer, Oliver Haffenden
  *
  * Description:
- *  Implementation of CPacketSocket interface that wraps up a QSocket. See PacketSocketQT.cpp.
+ *	Implementation of CPacketSocket interface that wraps up a QSocket. See PacketSocketQT.cpp.
  *
  ******************************************************************************
  *
@@ -44,47 +44,47 @@
    rate of DRM is approx. 80 kbps. One MDI packet must be sent each DRM frame
    which is every 400 ms -> 0.4 * 80000 / 8 = 4000 bytes. Allocating more than
    double of this size should be ok for all possible cases */
-#define MAX_SIZE_BYTES_NETW_BUF     10000
+#define MAX_SIZE_BYTES_NETW_BUF		10000
 
 #include "../MDI/PacketInOut.h"
 
 class CPacketSocketQT :
-    public CPacketSocket
+	public CPacketSocket
 {
 public:
-    CPacketSocketQT();
-    virtual ~CPacketSocketQT();
-    // Set the sink which will receive the packets
-    virtual void SetPacketSink(CPacketSink *pSink);
-    // Stop sending packets to the sink
-    virtual void ResetPacketSink(void);
+	CPacketSocketQT();
+	virtual ~CPacketSocketQT();
+	// Set the sink which will receive the packets
+	virtual void SetPacketSink(CPacketSink *pSink);
+	// Stop sending packets to the sink
+	virtual void ResetPacketSink(void);
 
-    // Send packet to the socket
-    void SendPacket(const vector<_BYTE>& vecbydata, uint32_t addr=0, uint16_t port=0);
+	// Send packet to the socket
+	void SendPacket(const std::vector<_BYTE>& vecbydata, uint32_t addr=0, uint16_t port=0);
 
-    virtual _BOOLEAN SetDestination(const string& str);
-    virtual _BOOLEAN SetOrigin(const string& str);
+	virtual bool SetDestination(const std::string& str);
+	virtual bool SetOrigin(const std::string& str);
 
-    virtual _BOOLEAN GetDestination(string& str);
+	virtual bool GetDestination(std::string& str);
 
-    void poll();
+	void poll();
 
 private:
-    void pollStream();
-    void pollDatagram();
+	void pollStream();
+	void pollDatagram();
 
-    QStringList parseDest(const string & strNewAddr);
-    _BOOLEAN doSetSource(QHostAddress, QHostAddress, int, QHostAddress);
-    QNetworkInterface GetInterface(QHostAddress AddrInterface);
-    CPacketSink *pPacketSink;
+	QStringList parseDest(const std::string & strNewAddr);
+	bool doSetSource(QHostAddress, QHostAddress, int, QHostAddress);
+	QNetworkInterface GetInterface(QHostAddress AddrInterface);
+	CPacketSink *pPacketSink;
 
-    uint32_t    sourceAddr;
-    QHostAddress    HostAddrOut;
-    int     iHostPortOut;
-    vector<_BYTE>   writeBuf;
-    bool udp;
+	uint32_t	sourceAddr;
+	QHostAddress	HostAddrOut;
+	int		iHostPortOut;
+	std::vector<_BYTE>	writeBuf;
+	bool udp;
 
-    QUdpSocket* udpSocket;
-    QTcpSocket* tcpSocket;
+	QUdpSocket* udpSocket;
+	QTcpSocket* tcpSocket;
 };
 #endif

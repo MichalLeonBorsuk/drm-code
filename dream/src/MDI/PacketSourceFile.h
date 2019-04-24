@@ -1,12 +1,12 @@
 /******************************************************************************\
  * British Broadcasting Corporation
- * Copyright (c) 2001-2014
+ * Copyright (c) 2007
  *
  * Author(s):
- *  Juian Cable
+ *	Juian Cable
  *
  * Description:
- *  Implementation of a CPacketSource that reads from a file
+ *	Implementation of a CPacketSource that reads from a file
  *
  ******************************************************************************
  *
@@ -39,33 +39,30 @@ class CPacer;
 class CPacketSourceFile : public CPacketSource
 {
 public:
-    CPacketSourceFile();
-    ~CPacketSourceFile();
-    // Set the sink which will receive the packets
-    void SetPacketSink(CPacketSink *pSink);
-    // Stop sending packets to the sink
-    void ResetPacketSink(void);
-    bool SetOrigin(const string& str);
-    bool GetOrigin(string& str) {
-        (void)str;
-        return false;
-    }
-    void poll();
+	CPacketSourceFile();
+	~CPacketSourceFile();
+	// Set the sink which will receive the packets
+	void SetPacketSink(CPacketSink *pSink);
+	// Stop sending packets to the sink
+	void ResetPacketSink(void);
+	bool SetOrigin(const std::string& str);
+	bool GetOrigin(std::string& str) { (void)str; return false; }
+	void poll();
 
 private:
 
-    int readRawAF(vector<_BYTE>& vecbydata, int& interval);
-    void readRawPFT(vector<_BYTE>& vecbydata, int& interval);
-    void readFF(vector<_BYTE>& vecbydata, int& interval);
+    int readRawAF(std::vector<_BYTE>& vecbydata, int& interval);
+    void readRawPFT(std::vector<_BYTE>& vecbydata, int& interval);
+    void readFF(std::vector<_BYTE>& vecbydata, int& interval);
 
-    void readPcap(vector<_BYTE>& vecbydata, int& interval);
-    void readTagPacketHeader(string& tag, uint32_t& len);
+    void readPcap(std::vector<_BYTE>& vecbydata, int& interval);
+    void readTagPacketHeader(std::string& tag, uint32_t& len);
 
-    CPacketSink     *pPacketSink;
-    uint64_t        last_packet_time;
-    CPacer*     pacer;
-    void*       pF;
-    int         wanted_dest_port;
+    CPacketSink		*pPacketSink;
+    uint64_t		last_packet_time;
+    CPacer*		pacer;
+    void*		pF;
+    int 		wanted_dest_port;
     enum {pcap,ff,af,pf}    eFileType;
 };
 

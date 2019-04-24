@@ -1,6 +1,6 @@
 /******************************************************************************\
 * Technische Universitaet Darmstadt, Institut fuer Nachrichtentechnik
-* Copyright (c) 2001-2001-2014
+* Copyright (c) 2001-2007
 *
 * Author(s):
 * Volker Fischer, Andrew Murphy, Andrea Russo
@@ -39,7 +39,7 @@ public:
     virtual ~CReceptLog()
     {
     }
-    void Start(const string & filename);
+    void Start(const std::string & filename);
     void Stop();
     void Update();
     bool restartNeeded();
@@ -75,11 +75,11 @@ protected:
     virtual void writeHeader() = 0;
     virtual void writeTrailer() = 0;
     char GetRobModeStr();
-    void asDM(string& pos, double d, char n, char p) const;
+    void asDM(std::string& pos, double d, char n, char p) const;
 
 
-    string strdate(time_t);
-    string strtime(time_t);
+    std::string strdate(time_t);
+    std::string strtime(time_t);
 
     CParameter & Parameters;
     ofstream File;

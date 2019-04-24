@@ -1,12 +1,12 @@
 /******************************************************************************\
  * Technische Universitaet Darmstadt, Institut fuer Nachrichtentechnik
- * Copyright (c) 2001-2014
+ * Copyright (c) 2001
  *
  * Author(s):
- *  Volker Fischer, Cesco (HB9TLK)
+ *	Volker Fischer, Cesco (HB9TLK)
  *
  * Description:
- *  Transmit and receive data
+ *	Transmit and receive data
  *
  ******************************************************************************
  *
@@ -29,6 +29,16 @@
 #include "DRMSignalIO.h"
 #include "UpsampleFilter.h"
 #include <iostream>
+#ifdef QT_MULTIMEDIA_LIB
+# include <QBuffer>
+# include <QAudioOutput>
+# include <QAudioInput>
+# include <QSet>
+#endif
+#include "sound/sound.h"
+#include "sound/audiofilein.h"
+#include "util/FileTyper.h"
+#include "matlib/MatlibSigProToolbox.h"
 
 
 const static int SineTable[] = { 0, 1, 0, -1, 0 };
@@ -38,6 +48,80 @@ const static int SineTable[] = { 0, 1, 0, -1, 0 };
 /******************************************************************************\
 * Transmitter                                                                  *
 \******************************************************************************/
+CTransmitData::CTransmitData() : pFileTransmitter(nullptr),
+#ifdef QT_MULTIMEDIA_LIB
+    pIODevice(nullptr),
+#endif
+    pSound(nullptr),
+    eOutputFormat(OF_REAL_VAL), rDefCarOffset((_REAL) VIRTUAL_INTERMED_FREQ),
+    strOutFileName("test/TransmittedData.txt"), bUseSoundcard(true),
+    bAmplified(false), bHighQualityIQ(false)
+{
+
+}
+
+void CTransmitData::Stop()
+{
+#ifdef QT_MULTIMEDIA_LIB
+    if(pIODevice!=nullptr) pIODevice->close();
+#endif
+    if(pSound!=nullptr) pSound->Close();
+}
+
+void CTransmitData::Enumerate(std::vector<std::string>& names, std::vector<std::string>& descriptions)
+{
+#ifdef QT_MULTIMEDIA_LIB
+    QSet<QString> s;
+    foreach(const QAudioDeviceInfo& di, QAudioDeviceInfo::availableDevices(QAudio::AudioOutput))
+    {
+        s.insert(di.deviceName());
+    }
+    names.clear(); descriptions.clear();
+    foreach(const QString n, s) {
+        names.push_back(n.toStdString());
+        descriptions.push_back("");
+    }
+#else
+    if(pSound==nullptr) pSound = new CSoundOut;
+    pSound->Enumerate(names, descriptions);
+#endif
+}
+
+void CTransmitData::SetSoundInterface(string device)
+{
+    soundDevice = device;
+#ifdef QT_MULTIMEDIA_LIB
+    QAudioFormat format;
+    if(iSampleRate==0) iSampleRate = 48000; // TODO get initialisation order right
+    format.setSampleRate(iSampleRate);
+    format.setSampleSize(16);
+    format.setSampleType(QAudioFormat::SignedInt);
+    format.setChannelCount(2); // TODO
+    format.setByteOrder(QAudioFormat::LittleEndian);
+    format.setCodec("audio/pcm");
+    foreach(const QAudioDeviceInfo& di, QAudioDeviceInfo::availableDevices(QAudio::AudioOutput))
+    {
+        if(device == di.deviceName().toStdString()) {
+            QAudioFormat nearestFormat = di.nearestFormat(format);
+            QAudioOutput* pAudioOutput = new QAudioOutput(di, nearestFormat);
+            pAudioOutput->setBufferSize(1000000);
+            pIODevice = pAudioOutput->start();
+            if(pAudioOutput->error()!=QAudio::NoError)
+            {
+                qDebug("Can't open audio output");
+            }
+        }
+    }
+#else
+    if(pSound != nullptr) {
+        delete pSound;
+        pSound = nullptr;
+    }
+    pSound = new CSoundOut();
+    pSound->SetDev(device);
+#endif
+}
+
 void CTransmitData::ProcessDataInternal(CParameter&)
 {
     int i;
@@ -120,7 +204,19 @@ void CTransmitData::FlushData()
     if (bUseSoundcard)
     {
         /* Write data to sound card. Must be a blocking function */
+
+#ifdef QT_MULTIMEDIA_LIB
+        bool bBad = true;
+        if(pIODevice)
+        {
+            qint64 n = 2*vecsDataOut.Size();
+            int m = pIODevice->write((char*)&vecsDataOut[0], n);
+            if(m==n)
+                bBad = false;
+        }
+#else
         pSound->Write(vecsDataOut);
+#endif
     }
     else
     {
@@ -147,12 +243,12 @@ void CTransmitData::FlushData()
 void CTransmitData::InitInternal(CParameter& Parameters)
 {
     /*
-        float*  pCurFilt;
-        int     iNumTapsTransmFilt;
-        CReal   rNormCurFreqOffset;
+    	float*	pCurFilt;
+    	int		iNumTapsTransmFilt;
+    	CReal	rNormCurFreqOffset;
     */
     /* Get signal sample rate */
-    const int iSampleRate = Parameters.GetSigSampleRate();
+    iSampleRate = Parameters.GetSigSampleRate();
     /* Define symbol block-size */
     const int iSymbolBlockSize = Parameters.CellMappingTable.iSymbolBlockSize;
 
@@ -169,7 +265,7 @@ void CTransmitData::InitInternal(CParameter& Parameters)
 
     vecsDataOut.Init(iBigBlockSize);
 
-    if (pFileTransmitter != NULL)
+    if (pFileTransmitter != nullptr)
     {
         fclose(pFileTransmitter);
     }
@@ -177,7 +273,7 @@ void CTransmitData::InitInternal(CParameter& Parameters)
     if (bUseSoundcard)
     {
         /* Init sound interface */
-        pSound->Init(iSampleRate, iBigBlockSize, true);
+        if(pSound!=nullptr) pSound->Init(iSampleRate, iBigBlockSize, true);
     }
     else
     {
@@ -190,14 +286,13 @@ void CTransmitData::InitInternal(CParameter& Parameters)
 #endif
 
         /* Check for error */
-        if (pFileTransmitter == NULL)
+        if (pFileTransmitter == nullptr)
             throw CGenErr("The file " + strOutFileName + " cannot be created.");
     }
 
 
     /* Init bandpass filter object */
-    BPFilter.Init(iSampleRate, iSymbolBlockSize, rDefCarOffset, eSpecOcc,
-                  CDRMBandpassFilt::FT_TRANSMITTER, Parameters.GetWaveMode()==RM_ROBUSTNESS_MODE_E);
+    BPFilter.Init(iSampleRate, iSymbolBlockSize, rDefCarOffset, eSpecOcc, CDRMBandpassFilt::FT_TRANSMITTER);
 
     /* All robustness modes and spectrum occupancies should have the same output
        power. Calculate the normaization factor based on the average power of
@@ -215,7 +310,7 @@ void CTransmitData::InitInternal(CParameter& Parameters)
 CTransmitData::~CTransmitData()
 {
     /* Close file */
-    if (pFileTransmitter != NULL)
+    if (pFileTransmitter != nullptr)
         fclose(pFileTransmitter);
 }
 
@@ -247,6 +342,98 @@ inline _REAL sample2real(_SAMPLE s) {
     return _REAL(s);
 }
 
+void CReceiveData::Stop()
+{
+#ifdef QT_MULTIMEDIA_LIB
+    if(pIODevice!=nullptr) pIODevice->close();
+#endif
+    if(pSound!=nullptr) pSound->Close();
+}
+
+void CReceiveData::Enumerate(std::vector<std::string>& names, std::vector<std::string>& descriptions)
+{
+#ifdef QT_MULTIMEDIA_LIB
+    QSet<QString> s;
+    foreach(const QAudioDeviceInfo& di, QAudioDeviceInfo::availableDevices(QAudio::AudioInput))
+    {
+        s.insert(di.deviceName());
+    }
+    names.clear(); descriptions.clear();
+    foreach(const QString n, s) {
+        names.push_back(n.toStdString());
+        descriptions.push_back("");
+    }
+#else
+    if(pSound==nullptr) pSound = new CSoundIn;
+    pSound->Enumerate(names, descriptions);
+#endif
+}
+
+void
+CReceiveData::SetSoundInterface(string device)
+{
+    soundDevice = device;
+    if(pSound != nullptr) {
+        pSound->Close();
+        delete pSound;
+        pSound = nullptr;
+    }
+    if(FileTyper::resolve(device) != FileTyper::unrecognised) {
+        CAudioFileIn* pAudioFileIn = new CAudioFileIn();
+        pAudioFileIn->SetFileName(device);
+        int sr = pAudioFileIn->GetSampleRate();
+        if(iSampleRate!=sr) {
+            // TODO
+            cerr << "file sample rate is " << sr << endl;
+            iSampleRate = sr;
+        }
+        pSound = pAudioFileIn;
+#ifdef QT_MULTIMEDIA_LIB
+        if(pIODevice!=nullptr) {
+            pIODevice->close();
+            pIODevice = nullptr;
+        }
+#endif
+    }
+    else {
+#ifdef QT_MULTIMEDIA_LIB
+        QAudioFormat format;
+        if(iSampleRate==0) iSampleRate = 48000; // TODO get order of initialisation correct
+        format.setSampleRate(iSampleRate);
+        format.setSampleSize(16);
+        format.setSampleType(QAudioFormat::SignedInt);
+        format.setChannelCount(2); // TODO
+        format.setByteOrder(QAudioFormat::LittleEndian);
+        format.setCodec("audio/pcm");
+        foreach(const QAudioDeviceInfo& di, QAudioDeviceInfo::availableDevices(QAudio::AudioInput))
+        {
+            if(device == di.deviceName().toStdString()) {
+                QAudioFormat nearestFormat = di.nearestFormat(format);
+                QAudioInput* pAudioInput = new QAudioInput(di, nearestFormat);
+                pIODevice = pAudioInput->start();
+                if(pAudioInput->error()==QAudio::NoError)
+                {
+                    if(pIODevice->open(QIODevice::ReadOnly)) {
+                        qDebug("audio input open");
+                    }
+                    else {
+                        qDebug("audio input open failed");
+                    }
+                }
+                else
+                {
+                    qDebug("Can't open audio input");
+                }
+                break;
+            }
+        }
+#else
+        pSound = new CSoundIn();
+        pSound->SetDev(device);
+#endif
+    }
+}
+
 void CReceiveData::ProcessDataInternal(CParameter& Parameters)
 {
     int i;
@@ -270,15 +457,30 @@ void CReceiveData::ProcessDataInternal(CParameter& Parameters)
     /* Get data from sound interface. The read function must be a
        blocking function! */
     bool bBad = true;
-    bool bError = false;
-    if (pSound)
+
+#ifdef QT_MULTIMEDIA_LIB
+    if(pIODevice)
+    {
+        qint64 n = 2*vecsSoundBuffer.Size();
+        qint64 m = pIODevice->read(reinterpret_cast<char*>(&vecsSoundBuffer[0]), n);
+        if(m==n)
+            bBad = false;
+    }
+    else if (pSound != nullptr) { // for audio files
         bBad = pSound->Read(vecsSoundBuffer);
-    else
-        bError = true;
+    }
+#else
+    if (pSound != nullptr)
+    {
+        bBad = pSound->Read(vecsSoundBuffer);
+    }
+#endif
+
     Parameters.Lock();
-    Parameters.ReceiveStatus.InterfaceI.SetStatus(bBad || bError ? CRC_ERROR : RX_OK); /* Red light */
+    Parameters.ReceiveStatus.InterfaceI.SetStatus(bBad ? CRC_ERROR : RX_OK); /* Red light */
     Parameters.Unlock();
-    if (bError)
+
+    if(bBad)
         return;
 
     /* Upscale if ratio greater than one */
@@ -294,19 +496,19 @@ void CReceiveData::ProcessDataInternal(CParameter& Parameters)
         {
         case CS_LEFT_CHAN:
             for (i = 0; i < iOutputBlockSize; i++)
-                (*pvecOutputData)[i] = vecf_YL[i];
+                (*pvecOutputData)[i] = _REAL(vecf_YL[unsigned(i)]);
             break;
 
         case CS_RIGHT_CHAN:
             for (i = 0; i < iOutputBlockSize; i++)
-                (*pvecOutputData)[i] = vecf_YR[i];
+                (*pvecOutputData)[i] = _REAL(vecf_YR[unsigned(i)]);
             break;
 
         case CS_MIX_CHAN:
             for (i = 0; i < iOutputBlockSize; i++)
             {
                 /* Mix left and right channel together */
-                (*pvecOutputData)[i] = (vecf_YL[i] + vecf_YR[i]) / 2;
+                (*pvecOutputData)[i] = _REAL(vecf_YL[unsigned(i)] + vecf_YR[unsigned(i)]) / 2.0;
             }
             break;
 
@@ -314,7 +516,7 @@ void CReceiveData::ProcessDataInternal(CParameter& Parameters)
             for (i = 0; i < iOutputBlockSize; i++)
             {
                 /* Subtract right channel from left */
-                (*pvecOutputData)[i] = (vecf_YL[i] - vecf_YR[i]) / 2;
+                (*pvecOutputData)[i] = (vecf_YL[unsigned(i)] - vecf_YR[unsigned(i)]) / 2;
             }
             break;
 
@@ -323,7 +525,7 @@ void CReceiveData::ProcessDataInternal(CParameter& Parameters)
             for (i = 0; i < iOutputBlockSize; i++)
             {
                 (*pvecOutputData)[i] =
-                    HilbertFilt(vecf_YL[i], vecf_YR[i]);
+                    HilbertFilt(vecf_YL[unsigned(i)], vecf_YR[unsigned(i)]);
             }
             break;
 
@@ -331,7 +533,7 @@ void CReceiveData::ProcessDataInternal(CParameter& Parameters)
             for (i = 0; i < iOutputBlockSize; i++)
             {
                 (*pvecOutputData)[i] =
-                    HilbertFilt(vecf_YR[i], vecf_YL[i]);
+                    HilbertFilt(vecf_YR[unsigned(i)], vecf_YL[unsigned(i)]);
             }
             break;
 
@@ -340,7 +542,7 @@ void CReceiveData::ProcessDataInternal(CParameter& Parameters)
             {
                 /* Shift signal to vitual intermediate frequency before applying
                    the Hilbert filtering */
-                _COMPLEX cCurSig = _COMPLEX(vecf_YL[i], vecf_YR[i]);
+                _COMPLEX cCurSig = _COMPLEX(vecf_YL[unsigned(i)], vecf_YR[unsigned(i)]);
 
                 cCurSig *= cCurExp;
 
@@ -358,7 +560,7 @@ void CReceiveData::ProcessDataInternal(CParameter& Parameters)
             {
                 /* Shift signal to vitual intermediate frequency before applying
                    the Hilbert filtering */
-                _COMPLEX cCurSig = _COMPLEX(vecf_YR[i], vecf_YL[i]);
+                _COMPLEX cCurSig = _COMPLEX(vecf_YR[unsigned(i)], vecf_YL[unsigned(i)]);
 
                 cCurSig *= cCurExp;
 
@@ -492,7 +694,7 @@ void CReceiveData::ProcessDataInternal(CParameter& Parameters)
                 iPhase = (iPhase + 1) & 3;
                 _REAL rValue = vecsSoundBuffer[2 * i]     * /*COS*/SineTable[iPhase + 1] -
                                vecsSoundBuffer[2 * i + 1] * /*SIN*/SineTable[iPhase];
-                (*pvecOutputData)[i] = sample2real(rValue);
+                (*pvecOutputData)[i] = rValue;
             }
             break;
 
@@ -502,7 +704,7 @@ void CReceiveData::ProcessDataInternal(CParameter& Parameters)
                 iPhase = (iPhase + 1) & 3;
                 _REAL rValue = vecsSoundBuffer[2 * i + 1] * /*COS*/SineTable[iPhase + 1] -
                                vecsSoundBuffer[2 * i]     * /*SIN*/SineTable[iPhase];
-                (*pvecOutputData)[i] = sample2real(rValue);
+                (*pvecOutputData)[i] = rValue;
             }
             break;
         }
@@ -537,11 +739,16 @@ void CReceiveData::ProcessDataInternal(CParameter& Parameters)
 void CReceiveData::InitInternal(CParameter& Parameters)
 {
     /* Init sound interface. Set it to one symbol. The sound card interface
-           has to taken care about the buffering data of a whole MSC block.
-           Use stereo input (* 2) */
+    	   has to taken care about the buffering data of a whole MSC block.
+    	   Use stereo input (* 2) */
 
-    if (pSound == NULL)
+#ifdef QT_MULTIMEDIA_LIB
+    if (pSound == nullptr && pIODevice == nullptr)
         return;
+#else
+    if (pSound == nullptr)
+        return;
+#endif
 
     Parameters.Lock();
     /* We define iOutputBlockSize as half the iSymbolBlockSize because
@@ -557,13 +764,12 @@ void CReceiveData::InitInternal(CParameter& Parameters)
     Parameters.Unlock();
 
     const int iOutputBlockAlignment = iOutputBlockSize & 3;
-    if (iOutputBlockAlignment)
+    if (iOutputBlockAlignment) {
         fprintf(stderr, "CReceiveData::InitInternal(): iOutputBlockAlignment = %i\n", iOutputBlockAlignment);
-
-    vif = Parameters.GetWaveMode()==RM_ROBUSTNESS_MODE_E?VIRTUAL_INTERMED_FREQ_DRMPLUS:VIRTUAL_INTERMED_FREQ_DRM30;
+    }
 
     try {
-        const bool bChanged = pSound->Init(iSampleRate / iUpscaleRatio, iOutputBlockSize * 2 / iUpscaleRatio, true);
+        const bool bChanged = (pSound==nullptr)?true:pSound->Init(iSampleRate / iUpscaleRatio, iOutputBlockSize * 2 / iUpscaleRatio, true);
 
         /* Clear input data buffer on change samplerate change */
         if (bChanged)
@@ -574,17 +780,17 @@ void CReceiveData::InitInternal(CParameter& Parameters)
         {
             const int taps = (NUM_TAPS_UPSAMPLE_FILT + 3) & ~3;
             vecf_B.resize(taps, 0.0f);
-            for (int i = 0; i < NUM_TAPS_UPSAMPLE_FILT; i++)
-                vecf_B[i] = dUpsampleFilt[i] * iUpscaleRatio;
+            for (unsigned i = 0; i < NUM_TAPS_UPSAMPLE_FILT; i++)
+                vecf_B[i] = float(dUpsampleFilt[i] * iUpscaleRatio);
             if (bChanged)
             {
                 vecf_ZL.resize(0);
                 vecf_ZR.resize(0);
             }
-            vecf_ZL.resize((iOutputBlockSize + taps) / 2, 0.0f);
-            vecf_ZR.resize((iOutputBlockSize + taps) / 2, 0.0f);
-            vecf_YL.resize(iOutputBlockSize);
-            vecf_YR.resize(iOutputBlockSize);
+            vecf_ZL.resize(unsigned(iOutputBlockSize + taps) / 2, 0.0f);
+            vecf_ZR.resize(unsigned(iOutputBlockSize + taps) / 2, 0.0f);
+            vecf_YL.resize(unsigned(iOutputBlockSize));
+            vecf_YR.resize(unsigned(iOutputBlockSize));
         }
         else
         {
@@ -605,16 +811,16 @@ void CReceiveData::InitInternal(CParameter& Parameters)
            to keep the history intact */
         if (vecrReHist.Size() != NUM_TAPS_IQ_INPUT_FILT || bChanged)
         {
-            vecrReHist.Init(NUM_TAPS_IQ_INPUT_FILT, (_REAL) 0.0);
-            vecrImHist.Init(NUM_TAPS_IQ_INPUT_FILT, (_REAL) 0.0);
+            vecrReHist.Init(NUM_TAPS_IQ_INPUT_FILT, 0.0);
+            vecrImHist.Init(NUM_TAPS_IQ_INPUT_FILT, 0.0);
         }
 
         /* Start with phase null (can be arbitrarily chosen) */
-        cCurExp = (_REAL) 1.0;
+        cCurExp = 1.0;
 
         /* Set rotation vector to mix signal from zero frequency to virtual
            intermediate frequency */
-        const double rNormCurFreqOffsetIQ = 2.0 * crPi * vif / double(iSampleRate);
+        const _REAL rNormCurFreqOffsetIQ = 2.0 * crPi * _REAL(VIRTUAL_INTERMED_FREQ / iSampleRate);
 
         cExpStep = _COMPLEX(cos(rNormCurFreqOffsetIQ), sin(rNormCurFreqOffsetIQ));
 
@@ -625,24 +831,23 @@ void CReceiveData::InitInternal(CParameter& Parameters)
     }
     catch (CGenErr GenErr)
     {
-        pSound = NULL;
+        pSound = nullptr;
     }
     catch (string strError)
     {
-        pSound = NULL;
+        pSound = nullptr;
     }
 }
 
 _REAL CReceiveData::HilbertFilt(const _REAL rRe, const _REAL rIm)
 {
     /*
-        Hilbert filter for I / Q input data. This code is based on code written
-        by Cesco (HB9TLK)
+    	Hilbert filter for I / Q input data. This code is based on code written
+    	by Cesco (HB9TLK)
     */
-    int i;
 
     /* Move old data */
-    for (i = 0; i < NUM_TAPS_IQ_INPUT_FILT - 1; i++)
+    for (int i = 0; i < NUM_TAPS_IQ_INPUT_FILT - 1; i++)
     {
         vecrReHist[i] = vecrReHist[i + 1];
         vecrImHist[i] = vecrImHist[i + 1];
@@ -652,9 +857,9 @@ _REAL CReceiveData::HilbertFilt(const _REAL rRe, const _REAL rIm)
     vecrImHist[NUM_TAPS_IQ_INPUT_FILT - 1] = rIm;
 
     /* Filter */
-    _REAL rSum = (_REAL) 0.0;
-    for (i = 1; i < NUM_TAPS_IQ_INPUT_FILT; i += 2)
-        rSum += fHilFiltIQ[i] * vecrImHist[i];
+    _REAL rSum = 0.0;
+    for (unsigned i = 1; i < NUM_TAPS_IQ_INPUT_FILT; i += 2)
+        rSum += _REAL(fHilFiltIQ[i]) * vecrImHist[int(i)];
 
     return (rSum + vecrReHist[IQ_INP_HIL_FILT_DELAY]) / 2;
 }
@@ -666,9 +871,9 @@ void CReceiveData::InterpFIR_2X(const int channels, _SAMPLE* X, vector<float>& Z
         input data mode, convert I/Q input to full bandwidth, code by David Flamand
     */
     int i, j;
-    const int B_len = B.size();
-    const int Z_len = Z.size();
-    const int Y_len = Y.size();
+    const int B_len = int(B.size());
+    const int Z_len = int(Z.size());
+    const int Y_len = int(Y.size());
     const int Y_len_2 = Y_len / 2;
     float *B_beg_ptr = &B[0];
     float *Z_beg_ptr = &Z[0];
@@ -721,12 +926,12 @@ _REAL CReceiveData::ConvertFrequency(_REAL rFrequency, bool bInvert) const
 {
     const int iInvert = bInvert ? -1 : 1;
 
-    if (eInChanSelection == CReceiveData::CS_IQ_POS_SPLIT ||
-            eInChanSelection == CReceiveData::CS_IQ_NEG_SPLIT)
+    if (eInChanSelection == CS_IQ_POS_SPLIT ||
+            eInChanSelection == CS_IQ_NEG_SPLIT)
         rFrequency -= iSampleRate / 4 * iInvert;
-    else if (eInChanSelection == CReceiveData::CS_IQ_POS_ZERO ||
-             eInChanSelection == CReceiveData::CS_IQ_NEG_ZERO)
-        rFrequency -= vif * iInvert;
+    else if (eInChanSelection == CS_IQ_POS_ZERO ||
+             eInChanSelection == CS_IQ_NEG_ZERO)
+        rFrequency -= VIRTUAL_INTERMED_FREQ * iInvert;
 
     return rFrequency;
 }
@@ -740,32 +945,31 @@ void CReceiveData::GetInputSpec(CVector<_REAL>& vecrData,
     const int iLenSpecWithNyFreq = NUM_SMPLS_4_INPUT_SPECTRUM / 2 + 1;
 
     /* Init input and output vectors */
-    vecrData.Init(iLenSpecWithNyFreq, (_REAL) 0.0);
-    vecrScale.Init(iLenSpecWithNyFreq, (_REAL) 0.0);
+    vecrData.Init(iLenSpecWithNyFreq, 0.0);
+    vecrScale.Init(iLenSpecWithNyFreq, 0.0);
 
     /* Init the constants for scale and normalization */
     const bool bNegativeFreq =
-        eInChanSelection == CReceiveData::CS_IQ_POS_SPLIT ||
-        eInChanSelection == CReceiveData::CS_IQ_NEG_SPLIT;
+        eInChanSelection == CS_IQ_POS_SPLIT ||
+        eInChanSelection == CS_IQ_NEG_SPLIT;
 
     const bool bOffsetFreq =
-        eInChanSelection == CReceiveData::CS_IQ_POS_ZERO ||
-        eInChanSelection == CReceiveData::CS_IQ_NEG_ZERO;
+        eInChanSelection == CS_IQ_POS_ZERO ||
+        eInChanSelection == CS_IQ_NEG_ZERO;
 
     const int iOffsetScale =
         bNegativeFreq ? iLenSpecWithNyFreq / 2 :
-        (bOffsetFreq ? iLenSpecWithNyFreq * vif
+        (bOffsetFreq ? iLenSpecWithNyFreq * VIRTUAL_INTERMED_FREQ
          / (iSampleRate / 2) : 0);
 
-    const _REAL rFactorScale =
-        (_REAL) iSampleRate / iLenSpecWithNyFreq / 2000;
+    const _REAL rFactorScale = _REAL(iSampleRate / iLenSpecWithNyFreq / 2000);
 
     /* The calibration factor was determined experimentaly,
        give 0 dB for a full scale sine wave input (0 dBFS) */
     const _REAL rDataCalibrationFactor = 18.49;
 
     const _REAL rNormData = rDataCalibrationFactor /
-                            ((_REAL) _MAXSHORT * _MAXSHORT *
+                            (_REAL(_MAXSHORT * _MAXSHORT) *
                              NUM_SMPLS_4_INPUT_SPECTRUM *
                              NUM_SMPLS_4_INPUT_SPECTRUM);
 
@@ -788,11 +992,11 @@ void CReceiveData::GetInputSpec(CVector<_REAL>& vecrData,
         const _REAL rNormSqMag = vecrSqMagSpect[i] * rNormData;
 
         if (rNormSqMag > 0)
-            vecrData[i] = (_REAL) 10.0 * log10(rNormSqMag);
+            vecrData[i] = 10.0 * log10(rNormSqMag);
         else
             vecrData[i] = RET_VAL_LOG_0;
 
-        vecrScale[i] = (_REAL) (i - iOffsetScale) * rFactorScale;
+        vecrScale[i] = _REAL(i - iOffsetScale) * rFactorScale;
     }
 
 }
@@ -816,32 +1020,31 @@ void CReceiveData::CalculatePSD(CVector<_REAL>& vecrData,
     const int iLenSpecWithNyFreq = iLenPSDAvEachBlock / 2 + 1;
 
     /* Init input and output vectors */
-    vecrData.Init(iLenSpecWithNyFreq, (_REAL) 0.0);
-    vecrScale.Init(iLenSpecWithNyFreq, (_REAL) 0.0);
+    vecrData.Init(iLenSpecWithNyFreq, 0.0);
+    vecrScale.Init(iLenSpecWithNyFreq, 0.0);
 
     /* Init the constants for scale and normalization */
     const bool bNegativeFreq =
-        eInChanSelection == CReceiveData::CS_IQ_POS_SPLIT ||
-        eInChanSelection == CReceiveData::CS_IQ_NEG_SPLIT;
+        eInChanSelection == CS_IQ_POS_SPLIT ||
+        eInChanSelection == CS_IQ_NEG_SPLIT;
 
     const bool bOffsetFreq =
-        eInChanSelection == CReceiveData::CS_IQ_POS_ZERO ||
-        eInChanSelection == CReceiveData::CS_IQ_NEG_ZERO;
+        eInChanSelection == CS_IQ_POS_ZERO ||
+        eInChanSelection == CS_IQ_NEG_ZERO;
 
     const int iOffsetScale =
         bNegativeFreq ? iLenSpecWithNyFreq / 2 :
-        (bOffsetFreq ? iLenSpecWithNyFreq * vif
+        (bOffsetFreq ? iLenSpecWithNyFreq * VIRTUAL_INTERMED_FREQ
          / (iSampleRate / 2) : 0);
 
-    const _REAL rFactorScale =
-        (_REAL) iSampleRate / iLenSpecWithNyFreq / 2000;
+    const _REAL rFactorScale = _REAL(iSampleRate / iLenSpecWithNyFreq / 2000);
 
-    const _REAL rNormData = (_REAL) _MAXSHORT * _MAXSHORT *
+    const _REAL rNormData = _REAL( _MAXSHORT * _MAXSHORT *
                             iLenPSDAvEachBlock * iLenPSDAvEachBlock *
-                            iNumAvBlocksPSD * _REAL(PSD_WINDOW_GAIN);
+                            iNumAvBlocksPSD * _REAL(PSD_WINDOW_GAIN));
 
     /* Init intermediate vectors */
-    CRealVector vecrAvSqMagSpect(iLenSpecWithNyFreq, (CReal) 0.0);
+    CRealVector vecrAvSqMagSpect(iLenSpecWithNyFreq, 0.0);
     CRealVector vecrFFTInput(iLenPSDAvEachBlock);
 
     /* Init Hamming window */
@@ -872,11 +1075,11 @@ void CReceiveData::CalculatePSD(CVector<_REAL>& vecrData,
         const _REAL rNormSqMag = vecrAvSqMagSpect[i] / rNormData;
 
         if (rNormSqMag > 0)
-            vecrData[i] = (_REAL) 10.0 * log10(rNormSqMag);
+            vecrData[i] = 10.0 * log10(rNormSqMag);
         else
             vecrData[i] = RET_VAL_LOG_0;
 
-        vecrScale[i] = (_REAL) (i - iOffsetScale) * rFactorScale;
+        vecrScale[i] = _REAL(i - iOffsetScale) * rFactorScale;
     }
 }
 
@@ -888,8 +1091,8 @@ void CReceiveData::PutPSD(CParameter &Parameters)
 {
     int i, j;
 
-    CVector<_REAL>      vecrData;
-    CVector<_REAL>      vecrScale;
+    CVector<_REAL>		vecrData;
+    CVector<_REAL>		vecrScale;
 
     CalculatePSD(vecrData, vecrScale, LEN_PSD_AV_EACH_BLOCK_RSI, NUM_AV_BLOCKS_PSD_RSI, PSD_OVERLAP_RSI);
 
@@ -919,7 +1122,7 @@ void CReceiveData::PutPSD(CParameter &Parameters)
     int iStartIndex = iStartBin - (LEN_PSD_AV_EACH_BLOCK_RSI/4) + (iVecSize-1)/2;
 
     /* Fill with zeros to start with */
-    Parameters.vecrPSD.Init(iVecSize, (_REAL) 0.0);
+    Parameters.vecrPSD.Init(iVecSize, 0.0);
 
     for (i=iStartIndex, j=iStartBin; j<=iEndBin; i++,j++)
         Parameters.vecrPSD[i] = vecrData[j];

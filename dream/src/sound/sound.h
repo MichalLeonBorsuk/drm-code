@@ -1,9 +1,9 @@
 /******************************************************************************\
  * British Broadcasting Corporation
- * Copyright (c) 2001-2014
+ * Copyright (c) 2007
  *
  * Author(s):
- *  Julian Cable
+ *	Julian Cable
  *
  * Decription:
  * sound interface selection
@@ -29,19 +29,14 @@
 #ifndef _SOUND_H
 #define _SOUND_H
 
-#if defined(WIN32) && !defined(USE_PORTAUDIO) && !defined(USE_JACK) && !defined(USE_QTAUDIO)
+#if defined(WIN32) && !defined(USE_PORTAUDIO) && !defined(USE_JACK) && !defined(QT_MULTIMEDIA_LIB)
 /* mmsystem sound interface */
 # include "../windows/Sound.h"
 #else
 
-# ifdef USE_OSS
-#  include "../linux/soundin.h"
-#  include "../linux/soundout.h"
-# endif
-
 # ifdef USE_ALSA
-#  include "../linux/soundin.h"
-#  include "../linux/soundout.h"
+#  include "../linux/alsain.h"
+#  include "../linux/alsaout.h"
 # endif
 
 # ifdef USE_JACK
@@ -69,13 +64,7 @@ typedef COpenSLESIn CSoundIn;
 typedef COpenSLESOut CSoundOut;
 # endif
 
-# ifdef USE_QTAUDIO
-#  include "qtaudio.h"
-typedef CSoundInQT CSoundIn;
-typedef CSoundOutQT CSoundOut;
-# endif
-
-# if !defined(USE_OSS) && !defined(USE_ALSA) && !defined(USE_JACK) && !defined(USE_PULSEAUDIO) && !defined(USE_PORTAUDIO) && !defined(USE_OPENSL) && !defined(USE_QTAUDIO)
+# if defined(QT_MULTIMEDIA_LIB) || (!defined(USE_OSS) && !defined(USE_ALSA) && !defined(USE_JACK) && !defined(USE_PULSEAUDIO) && !defined(USE_PORTAUDIO) && !defined(USE_OPENSL))
 #  include "soundnull.h"
 typedef CSoundInNull CSoundIn;
 typedef CSoundOutNull CSoundOut;

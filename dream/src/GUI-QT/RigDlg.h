@@ -1,9 +1,9 @@
 /******************************************************************************\
  * Technische Universitaet Darmstadt, Institut fuer Nachrichtentechnik
- * Copyright (c) 2001-2014
+ * Copyright (c) 2006
  *
  * Author(s):
- *  Julian Cable, Andrea Russo
+ *	Julian Cable, Andrea Russo
  *
  * Description:
  *
@@ -36,42 +36,37 @@
 #include <set>
 #include <map>
 
-namespace Ui {
-class RigDlg;
-}
+/* Definitions ****************************************************************/
 
-class SMeter;
+/* Classes ********************************************************************/
 
-class RigDlg : public QDialog
+class RigDlg : public QDialog, public Ui_RigDlg
 {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
     RigDlg(CRig&, QWidget* parent = 0);
     virtual ~RigDlg();
 
 protected:
-    void        showEvent(QShowEvent* pEvent);
-    void        hideEvent(QHideEvent* pEvent);
-    QString     getComboBoxComPort();
+    void		showEvent(QShowEvent* pEvent);
+    void		hideEvent(QHideEvent* pEvent);
+    QString		getComboBoxComPort();
 
-    Ui::RigDlg* ui;
-
-    CRig&       rig;
-    rig_model_t     prev_rig_model;
-    string      prev_port;
-    map<rig_model_t,string> rigmap;
-    bool    bComboBoxPortMutex;
-    SMeter*     sMeter;
+    CRig&		rig;
+    rig_model_t		prev_rig_model;
+    std::string		prev_port;
+    map<rig_model_t,std::string> rigmap;
+    bool	bComboBoxPortMutex;
 
 public slots:
-    void        on_rigTypes_itemSelectionChanged();
-    void        on_modified_stateChanged(int);
-    void        on_testRig_clicked();
-    void        on_buttonBox_accepted();
-    void        on_buttonBox_rejected();
-    void        on_comboBoxPort_editTextChanged(const QString &);
-    void        onSigstr(double);
+    void		on_rigTypes_itemSelectionChanged(); 
+    void		on_modified_stateChanged(int);
+    void		on_testRig_clicked();
+    void		on_buttonBox_accepted();
+    void		on_buttonBox_rejected();
+    void		on_comboBoxPort_editTextChanged(const QString &);
+    void		onSigstr(double);
 };
 
 #endif

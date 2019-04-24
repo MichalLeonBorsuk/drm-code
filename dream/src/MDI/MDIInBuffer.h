@@ -1,12 +1,12 @@
 /******************************************************************************\
  * Technische Universitaet Darmstadt, Institut fuer Nachrichtentechnik
- * Copyright (c) 2001-2014
+ * Copyright (c) 2004
  *
  * Author(s):
- *  Volker Fischer, Oliver Haffenden
+ *	Volker Fischer, Oliver Haffenden
  *
  * Description:
- *  see MDIInBuffer.cpp
+ *	see MDIInBuffer.cpp
  *
  ******************************************************************************
  *
@@ -36,16 +36,16 @@
 class CMDIInBuffer
 {
 public:
-    CMDIInBuffer() : buffer() ,guard(),blocker()
-    {}
+	CMDIInBuffer() : buffer() ,guard(),blocker()
+	{}
 
-    void Put(const vector<_BYTE>& data);
-    void Get(vector<_BYTE>& data);
+	void Put(const std::vector<_BYTE>& data);
+	void Get(std::vector<_BYTE>& data);
 
 protected:
-    queue< vector<_BYTE> > buffer;
-    CMutex guard;
-    CWaitCondition blocker;
+    std::queue< std::vector<_BYTE> > buffer;
+	CMutex guard;
+	CWaitCondition blocker;
 };
 
 #endif

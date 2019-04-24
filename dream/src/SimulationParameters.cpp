@@ -1,12 +1,12 @@
 /******************************************************************************\
  * Technische Universitaet Darmstadt, Institut fuer Nachrichtentechnik
- * Copyright (c) 2001-2014
+ * Copyright (c) 2001
  *
  * Author(s):
- *  Volker Fischer
+ *	Volker Fischer
  *
  * Description:
- *  DRM simulation script
+ *	DRM simulation script
  *
  ******************************************************************************
  *
@@ -36,18 +36,339 @@
 # endif
 #endif
 
+
+/* Simulation --------------------------------------------------------------- */
+void CGenSimData::ProcessDataInternal(CParameter& TransmParam)
+{
+    int			i;
+    uint32_t	iTempShiftRegister1;
+    _BINARY		biPRBSbit;
+    uint32_t	iShiftRegister;
+    FILE*		pFileCurPos;
+    time_t		tiElTi;
+    long int	lReTi;
+    _REAL		rReDays;
+
+    /* Get elapsed time since this run was started (seconds) */
+    tiElTi = time(nullptr) - tiStartTime;
+
+    /* Stop simulation if stop condition is true */
+    iCounter++;
+    switch (eCntType)
+    {
+    case CT_TIME:
+        try
+    {
+        /* Estimate remaining time */
+        lReTi = (long int) (((_REAL) iNumSimBlocks - iCounter) /
+                            iCounter * tiElTi);
+
+        /* Store current counter position in file */
+        pFileCurPos = fopen(strFileName.c_str(), "w");
+        if (pFileCurPos != nullptr)
+        {
+            fprintf(pFileCurPos,
+                    "%d / %d (%ld min elapsed, estimated time remaining: %ld min)",
+                    iCounter, iNumSimBlocks,
+                    (long int)tiElTi / 60, lReTi / 60);
+
+            /* Write current paramter value */
+            _REAL rCurParamVal;
+            switch (TransmParam.eSimType)
+            {
+            case CParameter::ST_SYNC_PARAM:
+                rCurParamVal = TransmParam.rSyncTestParam;
+                break;
+
+            case CParameter::ST_SINR:
+                rCurParamVal = TransmParam.rSINR;
+                break;
+
+            default:
+                rCurParamVal = TransmParam.rBitErrRate;
+                break;
+            }
+            fprintf(pFileCurPos, "\n%e %e",
+                    TransmParam.GetNominalSNRdB(), rCurParamVal);
+
+            fclose(pFileCurPos);
+        }
+    }
+
+        catch (...)
+    {
+        /* Catch all file errors to avoid stopping the simulation */
+    }
+
+        if (iCounter == iNumSimBlocks)
+        {
+            //TransmParam.eRunState = CParameter::STOP_REQUESTED; TODO
+            iCounter = 0;
+        }
+        break;
+
+    case CT_ERRORS:
+        try
+    {
+        if (iCounter >= iMinNumBlocks)
+        {
+            /* Estimate remaining time */
+            lReTi = (long int)
+                    (((_REAL) iNumErrors - TransmParam.iNumBitErrors) /
+                     TransmParam.iNumBitErrors * tiElTi);
+
+            /* Estimated remaining days ( x / (60 * 60 * 24) ) */
+            rReDays = (_REAL) lReTi / 86400;
+
+            /* Store current counter position in file */
+            pFileCurPos = fopen(strFileName.c_str(), "w");
+            if (pFileCurPos != nullptr)
+            {
+                fprintf(pFileCurPos,
+                        "%d / %d (%ld min elapsed, estimated time remaining: %ld min [%.1f days])",
+                        TransmParam.iNumBitErrors, iNumErrors, (long int)tiElTi / 60,
+                        lReTi / 60, rReDays);
+
+                /* Add current value of BER */
+                fprintf(pFileCurPos, "\n%e %e", TransmParam.
+                        GetNominalSNRdB(), TransmParam.rBitErrRate);
+                fclose(pFileCurPos);
+            }
+        }
+        else
+        {
+            /* Estimate remaining time */
+            lReTi = (long int)
+                    (((_REAL) iMinNumBlocks - iCounter) / iCounter * tiElTi);
+
+            /* Store current counter position in file */
+            pFileCurPos = fopen(strFileName.c_str(), "w");
+            if (pFileCurPos != nullptr)
+            {
+                fprintf(pFileCurPos,
+                        "%d / %d (%ld min elapsed, estimated minimum"
+                        " time remaining: %ld min)\n",
+                        iCounter, iMinNumBlocks, (long int)tiElTi / 60, lReTi / 60);
+
+                lReTi = (long int)
+                        (((_REAL) iNumErrors - TransmParam.iNumBitErrors) /
+                         TransmParam.iNumBitErrors * tiElTi);
+                fprintf(pFileCurPos,
+                        "%d / %d (%ld min elapsed, estimated time remaining: %ld min)",
+                        TransmParam.iNumBitErrors, iNumErrors, (long int)tiElTi / 60,
+                        lReTi / 60);
+
+                /* Add current value of BER */
+                fprintf(pFileCurPos, "\n%e %e", TransmParam.
+                        GetNominalSNRdB(), TransmParam.rBitErrRate);
+                fclose(pFileCurPos);
+            }
+        }
+    }
+
+        catch (...)
+    {
+        /* Catch all file errors to avoid stopping the simulation */
+    }
+
+        if (TransmParam.iNumBitErrors >= iNumErrors)
+        {
+            /* A minimum simulation time must be elapsed */
+            if (iCounter >= iMinNumBlocks)
+            {
+                // TODO TransmParam.eRunState = CParameter::STOP_REQUESTED;
+                iCounter = 0;
+            }
+        }
+        break;
+    }
+
+    /* Generate a pseudo-noise test-signal (PRBS) */
+    /* Init shift register with an arbitrary number (Must be known at the
+       receiver AND transmitter!) */
+    iShiftRegister = (uint32_t) (time(nullptr) + rand());
+    TransmParam.RawSimDa.Add(iShiftRegister);
+
+    for (i = 0; i < iOutputBlockSize; i++)
+    {
+        /* Calculate new PRBS bit */
+        iTempShiftRegister1 = iShiftRegister;
+
+        /* P(X) = X^9 + X^5 + 1,
+           in this implementation we have to shift n-1! */
+        biPRBSbit = _BINARY(((iTempShiftRegister1 >> 4) & 1) ^
+                            ((iTempShiftRegister1 >> 8) & 1));
+
+        /* Shift bits in shift register and add new bit */
+        iShiftRegister <<= 1;
+        iShiftRegister |= (biPRBSbit & 1);
+
+        /* Use PRBS output */
+        (*pvecOutputData)[i] = biPRBSbit;
+    }
+}
+
+void CGenSimData::InitInternal(CParameter& TransmParam)
+{
+    /* Define output block size */
+    iOutputBlockSize = TransmParam.iNumDecodedBitsMSC;
+
+    /* Minimum simulation time depends on the selected channel */
+    switch (TransmParam.iDRMChannelNum)
+    {
+    case 1:
+        /* AWGN: No fading */
+        iMinNumBlocks = (int) ((_REAL) 2000.0 / (_REAL) 0.4);
+        break;
+
+    case 2:
+        /* Rice with delay: 0.1 Hz */
+        iMinNumBlocks = (int) ((_REAL) 5000.0 / (_REAL) 0.4);
+        break;
+
+    case 3:
+        /* US Consortium: slowest 0.1 Hz */
+        iMinNumBlocks = (int) ((_REAL) 15000.0 / (_REAL) 0.4);
+        break;
+
+    case 4:
+        /* CCIR Poor: 1 Hz */
+        iMinNumBlocks = (int) ((_REAL) 4000.0 / (_REAL) 0.4);
+        break;
+
+    case 5:
+        /* Channel no 5: 2 Hz -> 30 sec */
+        iMinNumBlocks = (int) ((_REAL) 3000.0 / (_REAL) 0.4);
+        break;
+
+    case 6:
+        /* Channel no 6: same as case "2" */
+        iMinNumBlocks = (int) ((_REAL) 2000.0 / (_REAL) 0.4);
+        break;
+
+    default:
+        /* My own channels */
+        iMinNumBlocks = (int) ((_REAL) 2000.0 / (_REAL) 0.4);
+        break;
+    }
+
+    /* Prepare shift register used for storing the start values of the PRBS
+       shift register */
+    TransmParam.RawSimDa.Reset();
+
+    /* Init start time */
+    tiStartTime = time(nullptr);
+}
+
+void CGenSimData::SetSimTime(int iNewTi, string strNewFileName)
+{
+    /* One MSC frame is 400 ms long */
+    iNumSimBlocks = (int) ((_REAL) iNewTi /* sec */ / (_REAL) 0.4);
+
+    /* Set simulation count type */
+    eCntType = CT_TIME;
+
+    /* Reset counter */
+    iCounter = 0;
+
+    /* Set file name */
+    strFileName = string(SIM_OUT_FILES_PATH) +
+            strNewFileName + "__SIMTIME" + string(".dat");
+}
+
+void CGenSimData::SetNumErrors(int iNewNE, string strNewFileName)
+{
+    iNumErrors = iNewNE;
+
+    /* Set simulation count type */
+    eCntType = CT_ERRORS;
+
+    /* Reset counter, because we also use it at the beginning of a run */
+    iCounter = 0;
+
+    /* Set file name */
+    strFileName = string(SIM_OUT_FILES_PATH) +
+            strNewFileName + "__SIMTIME" + string(".dat");
+}
+
+void CEvaSimData::ProcessDataInternal(CParameter& Parameters)
+{
+    uint32_t	iTempShiftRegister1;
+    _BINARY		biPRBSbit;
+    uint32_t	iShiftRegister;
+    int			iNumBitErrors;
+    int			i;
+
+    /* -------------------------------------------------------------------------
+       Generate a pseudo-noise test-signal (PRBS) for comparison with
+       received signal */
+    /* Init shift register with an arbitrary number (Must be known at the
+       receiver AND transmitter!) */
+    iShiftRegister = Parameters.RawSimDa.Get();
+
+    iNumBitErrors = 0;
+
+    for (i = 0; i < iInputBlockSize; i++)
+    {
+        /* Calculate new PRBS bit */
+        iTempShiftRegister1 = iShiftRegister;
+
+        /* P(X) = X^9 + X^5 + 1,
+           in this implementation we have to shift n-1! */
+        biPRBSbit = _BINARY(((iTempShiftRegister1 >> 4) & 1) ^
+                            ((iTempShiftRegister1 >> 8) & 1));
+
+        /* Shift bits in shift register and add new bit */
+        iShiftRegister <<= 1;
+        iShiftRegister |= (biPRBSbit & 1);
+
+        /* Count bit errors */
+        if (biPRBSbit != (*pvecInputData)[i])
+            iNumBitErrors++;
+    }
+
+    /* Save bit error rate, debar initialization blocks */
+    if (iIniCnt > 0)
+        iIniCnt--;
+    else
+    {
+        rAccBitErrRate += (_REAL) iNumBitErrors / iInputBlockSize;
+        iNumAccBitErrRate++;
+
+        Parameters.rBitErrRate = rAccBitErrRate / iNumAccBitErrRate;
+        Parameters.iNumBitErrors += iNumBitErrors;
+    }
+}
+
+void CEvaSimData::InitInternal(CParameter& Parameters)
+{
+    /* Reset bit error rate parameters */
+    rAccBitErrRate = (_REAL) 0.0;
+    iNumAccBitErrRate = 0;
+
+    /* Number of blocks at the beginning we do not want to use */
+    iIniCnt = 10;
+
+    /* Init global parameters */
+    Parameters.rBitErrRate = (_REAL) 0.0;
+    Parameters.iNumBitErrors = 0;
+
+    /* Define block-size for input */
+    iInputBlockSize = Parameters.iNumDecodedBitsMSC;
+}
+
 /* Implementation *************************************************************/
 void CDRMSimulation::SimScript()
 {
-    int                                 i;
-    int                                 iNumItMLC;
-    _REAL                               rSNRCnt;
-    FILE*                               pFileSimRes;
-    CVector<_REAL>                      vecrMSE;
-    string                              strSimFile;
-    string                              strSpecialRemark;
-    CChannelEstimation::ETypeIntFreq    eChanEstFreqIntType;
-    CChannelEstimation::ETypeIntTime    eChanEstTimIntType;
+    int									i;
+    int									iNumItMLC;
+    _REAL								rSNRCnt;
+    FILE*								pFileSimRes;
+    CVector<_REAL>						vecrMSE;
+    string								strSimFile;
+    string								strSpecialRemark;
+    ETypeIntFreq                        eChanEstFreqIntType;
+    ETypeIntTime                    	eChanEstTimIntType;
 
 
     /**************************************************************************\
@@ -59,10 +380,10 @@ void CDRMSimulation::SimScript()
        certain type, just cut and past it at the end of the list
        There are  different types of simulations available:
        ST_BITERROR: BER simulation using actual channel estimation algorithms
-            (either Wiener, linear or DFT method, can be set by
-            eChanEstFreqIntType and eChanEstTimIntType)
+    		(either Wiener, linear or DFT method, can be set by
+    		eChanEstFreqIntType and eChanEstTimIntType)
        ST_SYNC_PARAM: testing synchronization units (requires modifications in
-            the actual synchronization code to make it work)
+    		the actual synchronization code to make it work)
        ST_MSECHANEST: MSE versus carrier for channel estimation algorithms
        ST_BER_IDEALCHAN: BER assuming ideal channel estimation
 
@@ -105,7 +426,7 @@ void CDRMSimulation::SimScript()
            is not the simulation time)
            iSimNumErrors: number of bit errors */
         iSimTime = 100;
-//      iSimNumErrors = 100000;
+//		iSimNumErrors = 100000;
 
 
         /* Number of iterations for MLC */
@@ -117,8 +438,8 @@ void CDRMSimulation::SimScript()
 
 
         /* Choose the type of channel estimation algorithms used for simlation */
-        eChanEstFreqIntType = CChannelEstimation::FWIENER;//FDFTFILTER;//FLINEAR;
-        eChanEstTimIntType = CChannelEstimation::TWIENER;//TLINEAR;
+        eChanEstFreqIntType = FWIENER;//FDFTFILTER;//FLINEAR;
+        eChanEstTimIntType = TWIENER;//TLINEAR;
 
 
         /* Define which synchronization algorithms we want to use */
@@ -133,18 +454,18 @@ void CDRMSimulation::SimScript()
         if (Parameters.iDRMChannelNum < 3)
         {
             Parameters.InitCellMapTable(RM_ROBUSTNESS_MODE_A, SO_2);
-            Parameters.eSymbolInterlMode = SI_SHORT;
+            Parameters.eSymbolInterlMode = CParameter::SI_SHORT;
         }
         else if ((Parameters.iDRMChannelNum == 8) || (Parameters.iDRMChannelNum == 10))
         {
             /* Special setting for channel 8 */
             Parameters.InitCellMapTable(RM_ROBUSTNESS_MODE_B, SO_0);
-            Parameters.eSymbolInterlMode = SI_LONG;
+            Parameters.eSymbolInterlMode = CParameter::SI_LONG;
         }
         else
         {
             Parameters.InitCellMapTable(RM_ROBUSTNESS_MODE_B, SO_3);
-            Parameters.eSymbolInterlMode = SI_LONG;
+            Parameters.eSymbolInterlMode = CParameter::SI_LONG;
         }
 
 
@@ -168,8 +489,7 @@ void CDRMSimulation::SimScript()
 #else
 # ifdef HAVE_UNISTD_H
         /* re-nice the process to highest possible value -> 19 */
-        int n = nice(19);
-        (void)n;
+        int n = nice(19); (void)n;
 
         /* Try to get hostname */
         char chHostName[255];
@@ -205,7 +525,7 @@ void CDRMSimulation::SimScript()
         pFileSimRes = fopen(strSimFile.c_str(), "w");
 
         /* If opening of file was not successful, exit simulation */
-        if (pFileSimRes == NULL)
+        if (pFileSimRes == nullptr)
             exit(1);
 
         /* Show name as console output */
@@ -260,20 +580,20 @@ string CDRMSimulation::SimFileName(CParameter& SaveParam, string strAddInf,
                                    bool bWithSNR)
 {
     /*
-        File naming convention:
-        BER: Bit error rate simulation
-        MSE: MSE for channel estimation
-        BERIDEAL: Bit error rate simulation with ideal channel estimation
-        SYNC: Simulation for a synchronization paramter (usually variance)
+    	File naming convention:
+    	BER: Bit error rate simulation
+    	MSE: MSE for channel estimation
+    	BERIDEAL: Bit error rate simulation with ideal channel estimation
+    	SYNC: Simulation for a synchronization paramter (usually variance)
 
-        B3: Robustness mode and spectrum occupancy
-        CH5: Channel number
-        It: Number of iterations in MLC decoder
-        PL: Protection level of channel code
-        "64SM": Modulation
-        "T50": Length of simulation
+    	B3: Robustness mode and spectrum occupancy
+    	CH5: Channel number
+    	It: Number of iterations in MLC decoder
+    	PL: Protection level of channel code
+    	"64SM": Modulation
+    	"T50": Length of simulation
 
-        example: BERIDEAL_CH8_B0_It1_PL1_64SM_T50_MyRemark
+    	example: BERIDEAL_CH8_B0_It1_PL1_64SM_T50_MyRemark
     */
     char chNumTmpLong[256];
     string strFileName = "";
@@ -327,9 +647,6 @@ string CDRMSimulation::SimFileName(CParameter& SaveParam, string strAddInf,
     case RM_ROBUSTNESS_MODE_D:
         strFileName += "D";
         break;
-    case RM_ROBUSTNESS_MODE_E:
-        strFileName += "E";
-        break;
     case RM_NO_MODE_DETECTED:
         break;
     }
@@ -352,6 +669,7 @@ string CDRMSimulation::SimFileName(CParameter& SaveParam, string strAddInf,
         break;
     case SO_5:
         strFileName += "5_";
+        break;
     }
 
 
@@ -360,29 +678,29 @@ string CDRMSimulation::SimFileName(CParameter& SaveParam, string strAddInf,
     if (SaveParam.eSimType == CParameter::ST_BITERROR)
     {
         /* Time direction */
-        switch (ChannelEstimation.GetTimeInt())
+        switch (ChannelEstimation.GetTimeInterpolationAlgorithm())
         {
-        case CChannelEstimation::TLINEAR:
+        case TLINEAR:
             strFileName += "Tl";
             break;
 
-        case CChannelEstimation::TWIENER:
+        case TWIENER:
             strFileName += "Tw";
             break;
         }
 
         /* Frequency direction */
-        switch (ChannelEstimation.GetFreqInt())
+        switch (ChannelEstimation.GetFrequencyInterpolationAlgorithm())
         {
-        case CChannelEstimation::FLINEAR:
+        case FLINEAR:
             strFileName += "Fl_";
             break;
 
-        case CChannelEstimation::FDFTFILTER:
+        case FDFTFILTER:
             strFileName += "Fd_";
             break;
 
-        case CChannelEstimation::FWIENER:
+        case FWIENER:
             strFileName += "Fw_";
             break;
         }

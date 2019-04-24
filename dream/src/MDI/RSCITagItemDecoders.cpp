@@ -1,20 +1,20 @@
 /******************************************************************************\
  * Technische Universitaet Darmstadt, Institut fuer Nachrichtentechnik
- * Copyright (c) 2001-2014
+ * Copyright (c) 2004
  *
  * Author(s):
- *  Volker Fischer, Julian Cable, Oliver Haffenden
+ *	Volker Fischer, Julian Cable, Oliver Haffenden
  *
  * Description:
- *  Implements Digital Radio Mondiale (DRM) Multiplex Distribution Interface
- *  (MDI), Receiver Status and Control Interface (RSCI)
+ *	Implements Digital Radio Mondiale (DRM) Multiplex Distribution Interface
+ *	(MDI), Receiver Status and Control Interface (RSCI)
  *  and Distribution and Communications Protocol (DCP) as described in
- *  ETSI TS 102 820,  ETSI TS 102 349 and ETSI TS 102 821 respectively.
+ *	ETSI TS 102 820,  ETSI TS 102 349 and ETSI TS 102 821 respectively.
  *
  *  This module derives, from the CTagItemDecoder base class, tag item decoders specialised to decode each of the tag
  *  items defined in the control part of RSCI.
  *  Decoded commands are generally sent straight to the CDRMReceiver object which
- *  they hold a pointer to.
+ *	they hold a pointer to.
  *
  ******************************************************************************
  *
@@ -64,28 +64,16 @@ void CTagItemDecoderRsta::DecodeTag(CVector<_BINARY>& vecbiTag, const int iLen)
 {
     if (iLen != 32)
         return;
-    uint8_t sync = (uint8_t)vecbiTag.Separate(8);
-    uint8_t fac = (uint8_t)vecbiTag.Separate(8);
-    uint8_t sdc = (uint8_t)vecbiTag.Separate(8);
-    uint8_t audio = (uint8_t)vecbiTag.Separate(8);
-    if(sync==0)
-        pParameter->ReceiveStatus.TSync.SetStatus(RX_OK);
-    else
-        pParameter->ReceiveStatus.TSync.SetStatus(CRC_ERROR);
-    if(fac==0)
-        pParameter->ReceiveStatus.FAC.SetStatus(RX_OK);
-    else
-        pParameter->ReceiveStatus.FAC.SetStatus(CRC_ERROR);
-    if(sdc==0)
-        pParameter->ReceiveStatus.SDC.SetStatus(RX_OK);
-    else
-        pParameter->ReceiveStatus.SDC.SetStatus(CRC_ERROR);
+    uint8_t sync = uint8_t(vecbiTag.Separate(8));
+    uint8_t fac = uint8_t(vecbiTag.Separate(8));
+    uint8_t sdc = uint8_t(vecbiTag.Separate(8));
+    uint8_t audio = uint8_t(vecbiTag.Separate(8));
+    pParameter->ReceiveStatus.TSync.SetStatus((sync==0)?RX_OK:CRC_ERROR);
+    pParameter->ReceiveStatus.FAC.SetStatus((fac==0)?RX_OK:CRC_ERROR);
+    pParameter->ReceiveStatus.SDC.SetStatus((sdc==0)?RX_OK:CRC_ERROR);
 
-    int iShortID = pParameter->GetCurSelAudioService();
-    if(audio==0)
-        pParameter->AudioComponentStatus[iShortID].SetStatus(RX_OK);
-    else
-        pParameter->AudioComponentStatus[iShortID].SetStatus(CRC_ERROR);
+    unsigned iShortID = unsigned(pParameter->GetCurSelAudioService());
+    pParameter->AudioComponentStatus[iShortID].SetStatus((audio==0)?RX_OK:CRC_ERROR);
 }
 
 void CTagItemDecoderRwmf::DecodeTag(CVector<_BINARY>& vecbiTag, const int iLen)
@@ -221,9 +209,9 @@ void CTagItemDecoderRgps::DecodeTag(CVector<_BINARY>& vecbiTag, const int iLen)
     if(uiLatitudeMinutes != 0xff)
     {
         gps_data.fix.latitude = double(iLatitudeDegrees)
-                                + (double(uiLatitudeMinutes) + double(uiLatitudeMinuteFractions)/65536.0)/60.0;
+                   + (double(uiLatitudeMinutes) + double(uiLatitudeMinuteFractions)/65536.0)/60.0;
         gps_data.fix.longitude = double(iLongitudeDegrees)
-                                 + (double(uiLongitudeMinutes) + double(uiLongitudeMinuteFractions)/65536.0)/60.0;
+                    + (double(uiLongitudeMinutes) + double(uiLongitudeMinuteFractions)/65536.0)/60.0;
         gps_data.set |= LATLON_SET;
     }
 
@@ -295,7 +283,7 @@ void CTagItemDecoderCact::DecodeTag(CVector<_BINARY>& vecbiTag, const int iLen)
 
     const int iNewState = vecbiTag.Separate(8) - '0';
 
-    if (pDRMReceiver == NULL)
+    if (pDRMReceiver == nullptr)
         return;
 
     // TODO pDRMReceiver->SetState(iNewState);
@@ -308,7 +296,7 @@ void CTagItemDecoderCfre::DecodeTag(CVector<_BINARY>& vecbiTag, const int iLen)
     if (iLen != 32)
         return;
 
-    if (pDRMReceiver == NULL)
+    if (pDRMReceiver == nullptr)
         return;
 
     const int iNewFrequency = vecbiTag.Separate(32);
@@ -325,48 +313,15 @@ void CTagItemDecoderCdmo::DecodeTag(CVector<_BINARY>& vecbiTag, const int iLen)
     for (int i = 0; i < iLen / SIZEOF__BYTE; i++)
         s += (_BYTE) vecbiTag.Separate(SIZEOF__BYTE);
 
-    if (pDRMReceiver == NULL)
+    if (pDRMReceiver == nullptr)
         return;
-/*
- * 6.4.2.1 Receiver demodulation type (rdmo)
- */
+
     if(s == "drm_")
-    {
         pDRMReceiver->SetReceiverMode(RM_DRM);
-    }
-    if(s == "drm+")
-    {
-        pDRMReceiver->SetReceiverMode(RM_DRM);
-        pDRMReceiver->GetParameters()->SetWaveMode(RM_ROBUSTNESS_MODE_E);
-    }
     if(s == "am__")
-    {
         pDRMReceiver->SetReceiverMode(RM_AM);
-    }
-    if(s == "usb_")
-    {
-        pDRMReceiver->SetReceiverMode(RM_AM);
-    }
-    if(s == "lsb_")
-    {
-        pDRMReceiver->SetReceiverMode(RM_AM);
-    }
-    if(s == "sam_")
-    {
-        pDRMReceiver->SetReceiverMode(RM_AM);
-    }
-    if(s == "fm__") // backward compatibility with older Dream versions
-    {
+    if(s == "fm__")
         pDRMReceiver->SetReceiverMode(RM_FM);
-    }
-    if(s == "nbfm")
-    {
-        pDRMReceiver->SetReceiverMode(RM_FM);
-    }
-    if(s == "wbfm")
-    {
-        pDRMReceiver->SetReceiverMode(RM_FM);
-    }
 }
 
 void CTagItemDecoderCrec::DecodeTag(CVector<_BINARY>& vecbiTag, const int iLen)
@@ -380,7 +335,7 @@ void CTagItemDecoderCrec::DecodeTag(CVector<_BINARY>& vecbiTag, const int iLen)
     char c3 = (char) vecbiTag.Separate(SIZEOF__BYTE);
     char c4 = (char) vecbiTag.Separate(SIZEOF__BYTE);
 
-    if (pDRMReceiver == NULL)
+    if (pDRMReceiver == nullptr)
         return;
 
     if(s == "st")
@@ -395,7 +350,7 @@ void CTagItemDecoderCpro::DecodeTag(CVector<_BINARY>& vecbiTag, const int iLen)
         return;
 
     char c = char(vecbiTag.Separate(SIZEOF__BYTE));
-    if (pRSISubscriber != NULL)
+    if (pRSISubscriber != nullptr)
         pRSISubscriber->SetProfile(c);
 }
 /* TODO: other control tag items */

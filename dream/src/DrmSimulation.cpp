@@ -1,12 +1,12 @@
 /******************************************************************************\
  * Technische Universitaet Darmstadt, Institut fuer Nachrichtentechnik
- * Copyright (c) 2001-2014
+ * Copyright (c) 2001
  *
  * Author(s):
- *  Volker Fischer
+ *	Volker Fischer
  *
  * Description:
- *  DRM-simulation
+ *	DRM-simulation
  *
  ******************************************************************************
  *
@@ -32,21 +32,21 @@
 /* Implementation *************************************************************/
 
 CDRMSimulation::CDRMSimulation() : iSimTime(0), iSimNumErrors(0),
-    rStartSNR(0.0), rEndSNR(0.0), rStepSNR(0.0),
-    Parameters(),
-    DataBuf(), MLCEncBuf(), IntlBuf(), GenFACDataBuf(), FACMapBuf(), GenSDCDataBuf(),
-    SDCMapBuf(), CarMapBuf(), OFDMModBuf(), OFDMDemodBufChan2(), ChanEstInBufSim(),
-    ChanEstOutBufChan(),
-    RecDataBuf(), ChanResInBuf(), InpResBuf(), FreqSyncAcqBuf(), TimeSyncBuf(),
-    OFDMDemodBuf(), SyncUsingPilBuf(), ChanEstBuf(),
-    MSCCarDemapBuf(), FACCarDemapBuf(), SDCCarDemapBuf(), DeintlBuf(),
-    FACDecBuf(), SDCDecBuf(), MSCMLCDecBuf(), GenSimData(),
-    MSCMLCEncoder(), SymbInterleaver(), GenerateFACData(), FACMLCEncoder(),
-    GenerateSDCData(), SDCMLCEncoder(), OFDMCellMapping(), OFDMModulation(),
-    DRMChannel(), InputResample(), FreqSyncAcq(), TimeSync(), OFDMDemodulation(),
-    SyncUsingPil(), ChannelEstimation(), OFDMCellDemapping(), FACMLCDecoder(), UtilizeFACData(),
-    SDCMLCDecoder(), UtilizeSDCData(), SymbDeinterleaver(), MSCMLCDecoder(), EvaSimData(),
-    OFDMDemodSimulation(), IdealChanEst(), DataConvChanResam()
+        rStartSNR(0.0), rEndSNR(0.0), rStepSNR(0.0),
+        Parameters(),
+        DataBuf(), MLCEncBuf(), IntlBuf(), GenFACDataBuf(), FACMapBuf(), GenSDCDataBuf(),
+        SDCMapBuf(), CarMapBuf(), OFDMModBuf(), OFDMDemodBufChan2(), ChanEstInBufSim(),
+        ChanEstOutBufChan(),
+        RecDataBuf(), ChanResInBuf(), InpResBuf(), FreqSyncAcqBuf(), TimeSyncBuf(),
+        OFDMDemodBuf(), SyncUsingPilBuf(), ChanEstBuf(),
+        MSCCarDemapBuf(), FACCarDemapBuf(), SDCCarDemapBuf(), DeintlBuf(),
+        FACDecBuf(), SDCDecBuf(), MSCMLCDecBuf(), GenSimData(),
+        MSCMLCEncoder(), SymbInterleaver(), GenerateFACData(), FACMLCEncoder(),
+        GenerateSDCData(), SDCMLCEncoder(), OFDMCellMapping(), OFDMModulation(),
+        DRMChannel(), InputResample(), FreqSyncAcq(), TimeSync(), OFDMDemodulation(),
+        SyncUsingPil(), ChannelEstimation(), OFDMCellDemapping(), FACMLCDecoder(), UtilizeFACData(),
+        SDCMLCDecoder(), UtilizeSDCData(), SymbDeinterleaver(), MSCMLCDecoder(), EvaSimData(),
+        OFDMDemodSimulation(), IdealChanEst(), DataConvChanResam()
 {
     /* Set all parameters to meaningful value for startup state. If we want to
        make a simulation we just have to specify the important values */
@@ -85,7 +85,7 @@ CDRMSimulation::CDRMSimulation() : iSimTime(0), iSimNumErrors(0),
 
     /* Initialize synchronization parameters */
     Parameters.rResampleOffset = (_REAL) 0.0;
-    Parameters.rFreqOffsetAcqui = (_REAL) VIRTUAL_INTERMED_FREQ_DRM30 / Parameters.GetSigSampleRate();
+    Parameters.rFreqOffsetAcqui = (_REAL) VIRTUAL_INTERMED_FREQ / Parameters.GetSigSampleRate();
     Parameters.rFreqOffsetTrack = (_REAL) 0.0;
     Parameters.iTimingOffsTrack = 0;
 
@@ -95,7 +95,7 @@ CDRMSimulation::CDRMSimulation() : iSimTime(0), iSimNumErrors(0),
     Parameters.MSCPrLe.iPartB = 1;
     Parameters.MSCPrLe.iHierarch = 0;
 
-    Parameters.eSymbolInterlMode = SI_SHORT;
+    Parameters.eSymbolInterlMode = CParameter::SI_SHORT;
     Parameters.eMSCCodingScheme = CS_3_SM;
     Parameters.eSDCCodingScheme = CS_2_SM;
 
@@ -116,12 +116,12 @@ void CDRMSimulation::Run()
     Init();
 
     /* Set run flag */
-    Parameters.eRunState = CParameter::RUNNING;
+    // TODO Parameters.eRunState = CParameter::RUNNING;
 
-    while (Parameters.eRunState == CParameter::RUNNING)
+    while (true) // TODO Parameters.eRunState == CParameter::RUNNING)
     {
         /**********************************************************************\
-        * Transmitter                                                          *
+        * Transmitter														   *
         \**********************************************************************/
         /* MSC -------------------------------------------------------------- */
         /* Read the source signal */
@@ -154,14 +154,14 @@ void CDRMSimulation::Run()
 
 
         /**********************************************************************\
-        * Channel                                                              *
+        * Channel    														   *
         \**********************************************************************/
         DRMChannel.TransferData(Parameters, OFDMModBuf, RecDataBuf);
 
 
 
         /**********************************************************************\
-        * Receiver                                                             *
+        * Receiver    														   *
         \**********************************************************************/
         switch (Parameters.eSimType)
         {

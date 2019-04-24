@@ -1,12 +1,12 @@
 /******************************************************************************\
  * Technische Universitaet Darmstadt, Institut fuer Nachrichtentechnik
- * Copyright (c) 2001-2014
+ * Copyright (c) 2001
  *
  * Author(s):
- *  Volker Fischer
+ *	Volker Fischer
  *
  * Description:
- *  See DRMSignalIO.cpp
+ *	See DRMSignalIO.cpp
  *
  ******************************************************************************
  *
@@ -30,6 +30,12 @@
 #define DRMSIGNALIO_H__3B0BA660_CA63_4344_B_23E7A0D31912__INCLUDED_
 
 #include "sound/soundinterface.h"
+#ifdef QT_MULTIMEDIA_LIB
+#include <QAudioInput>
+#include <QIODevice>
+#else
+  class QIODevice;
+#endif
 #include "Parameter.h"
 #include "matlib/Matlib.h"
 #include "IQInputFilter.h"
@@ -41,18 +47,18 @@
 /* Definitions ****************************************************************/
 /* Number of FFT blocks used for averaging. See next definition
    ("NUM_SMPLS_4_INPUT_SPECTRUM") for how to set the parameters */
-#define NUM_AV_BLOCKS_PSD           16
-#define LEN_PSD_AV_EACH_BLOCK       512
+#define NUM_AV_BLOCKS_PSD			16
+#define LEN_PSD_AV_EACH_BLOCK		512
 
 /* same but for the rpsd tag */
-#define NUM_AV_BLOCKS_PSD_RSI   150
-#define LEN_PSD_AV_EACH_BLOCK_RSI       256
-#define PSD_OVERLAP_RSI 128
+#define NUM_AV_BLOCKS_PSD_RSI	150
+#define LEN_PSD_AV_EACH_BLOCK_RSI		256
+#define PSD_OVERLAP_RSI	128
 
 /* power gain of the Hamming window */
 #define PSD_WINDOW_GAIN 0.39638
 
-/* Length of vector for input spectrum. We use approx. 0.2 sec
+/* Length of std::vector for input spectrum. We use approx. 0.2 sec
    of sampled data for spectrum calculation, this is 2^13 = 8192 to
    make the FFT work more efficient. Make sure that this number is not smaller
    than the symbol lenght in 48 khz domain of longest mode (which is mode A/B:
@@ -80,10 +86,8 @@ public:
                      OF_IQ_NEG /* I / Q */, OF_EP /* envelope / phase */
                     };
 
-    CTransmitData(CSoundOutInterface* pNS) : pFileTransmitter(NULL), pSound(pNS),
-        eOutputFormat(OF_REAL_VAL), rDefCarOffset((_REAL) VIRTUAL_INTERMED_FREQ_DRM30),
-        strOutFileName("test/TransmittedData.txt"), bUseSoundcard(true),
-        bAmplified(false), bHighQualityIQ(false) {}
+    CTransmitData();
+
     virtual ~CTransmitData();
 
     void SetIQOutput(const EOutFormat eFormat) {
@@ -112,7 +116,17 @@ public:
         rDefCarOffset = rNewCarOffset;
     }
 
-    void SetWriteToFile(const string strNFN)
+    void SetSoundInterface(std::string);
+    std::string GetSoundInterface() { return soundDevice; }
+    void Enumerate(std::vector<string>& names, std::vector<string>& descriptions);
+    void Stop();
+#ifdef QT_MULTIMEDIA_LIB
+	std::string GetSoundInterfaceVersion() { return "QtMultimedia"; }
+#else
+	std::string GetSoundInterfaceVersion() { return pSound->GetVersion(); }
+#endif
+
+    void SetWriteToFile(const std::string strNFN)
     {
         strOutFileName = strNFN;
         bUseSoundcard = false;
@@ -121,26 +135,31 @@ public:
     void FlushData();
 
 protected:
-    FILE*               pFileTransmitter;
-    CSoundOutInterface* pSound;
-    CVector<short>      vecsDataOut;
-    int                 iBlockCnt;
-    int                 iNumBlocks;
-    EOutFormat          eOutputFormat;
+    FILE*				pFileTransmitter;
+#ifdef QT_MULTIMEDIA_LIB
+    QIODevice*              pIODevice;
+#endif
+    CSoundOutInterface*	pSound;
+    std::string              soundDevice;
+    CVector<short>		vecsDataOut;
+    int					iBlockCnt;
+    int					iNumBlocks;
+    EOutFormat			eOutputFormat;
 
-    CDRMBandpassFilt    BPFilter;
-    CReal               rDefCarOffset;
+    CDRMBandpassFilt	BPFilter;
+    CReal				rDefCarOffset;
 
-    CReal               rNormFactor;
+    CReal				rNormFactor;
 
-    int                 iBigBlockSize;
+    int					iBigBlockSize;
 
-    string              strOutFileName;
-    bool            bUseSoundcard;
+    std::string				strOutFileName;
+    bool			bUseSoundcard;
+    int					iSampleRate;
 
-    bool            bAmplified;
-    bool            bHighQualityIQ;
-    CVector<_REAL>      vecrReHist;
+    bool			bAmplified;
+    bool			bHighQualityIQ;
+    CVector<_REAL>		vecrReHist;
 
     void HilbertFilt(_COMPLEX& vecData);
 
@@ -151,13 +170,13 @@ protected:
 class CReceiveData : public CReceiverModul<_REAL, _REAL>
 {
 public:
-    enum EInChanSel {CS_LEFT_CHAN, CS_RIGHT_CHAN, CS_MIX_CHAN, CS_SUB_CHAN, CS_IQ_POS,
-                     CS_IQ_NEG, CS_IQ_POS_ZERO, CS_IQ_NEG_ZERO, CS_IQ_POS_SPLIT, CS_IQ_NEG_SPLIT
-                    };
-
     CReceiveData() :
-        pSound(NULL), vecrInpData(INPUT_DATA_VECTOR_SIZE, (_REAL) 0.0),
-        bFippedSpectrum(false), eInChanSelection(CS_MIX_CHAN), iPhase(0)
+#ifdef QT_MULTIMEDIA_LIB
+        pIODevice(nullptr),
+#endif
+        pSound(nullptr),
+        vecrInpData(INPUT_DATA_VECTOR_SIZE, (_REAL) 0.0),
+            bFippedSpectrum(false), eInChanSelection(CS_MIX_CHAN), iPhase(0)
     {}
     virtual ~CReceiveData();
 
@@ -182,9 +201,15 @@ public:
         mutexInpData.Unlock();
     }
 
-    void SetSoundInterface(CSoundInInterface* pS) {
-        pSound = pS;
-    }
+    void SetSoundInterface(std::string);
+    std::string GetSoundInterface() { return soundDevice; }
+    void Enumerate(std::vector<string>& names, std::vector<string>& descriptions);
+    void Stop();
+#ifdef QT_MULTIMEDIA_LIB
+	std::string GetSoundInterfaceVersion() { return "QtMultimedia"; }
+#else
+	std::string GetSoundInterfaceVersion() { return pSound->GetVersion(); }
+#endif
     void SetInChanSel(const EInChanSel eNS) {
         eInChanSelection = eNS;
     }
@@ -193,36 +218,40 @@ public:
     }
 
 protected:
-    CSignalLevelMeter       SignalLevelMeter;
+    CSignalLevelMeter		SignalLevelMeter;
 
-    CSoundInInterface*      pSound;
-    CVector<_SAMPLE>        vecsSoundBuffer;
+#ifdef QT_MULTIMEDIA_LIB
+    QAudioInput*            pAudioInput;
+    QIODevice*              pIODevice;
+#endif
+    CSoundInInterface*		pSound;
+    CVector<_SAMPLE>		vecsSoundBuffer;
+    std::string                  soundDevice;
 
-    /* Access to vecrInpData buffer must be done
+    /* Access to vecrInpData buffer must be done 
        inside mutexInpData mutex */
-    CShiftRegister<_REAL>   vecrInpData;
+    CShiftRegister<_REAL>	vecrInpData;
     CMutex                  mutexInpData;
 
-    int                 iSampleRate;
-    bool            bFippedSpectrum;
+    int					iSampleRate;
+    bool			bFippedSpectrum;
 
-    int                 iUpscaleRatio;
-    vector<float>       vecf_B, vecf_YL, vecf_YR, vecf_ZL, vecf_ZR;
+    int					iUpscaleRatio;
+    std::vector<float>		vecf_B, vecf_YL, vecf_YR, vecf_ZL, vecf_ZR;
 
-    EInChanSel          eInChanSelection;
+    EInChanSel			eInChanSelection;
 
-    CVector<_REAL>      vecrReHist;
-    CVector<_REAL>      vecrImHist;
-    _COMPLEX            cCurExp;
-    _COMPLEX            cExpStep;
-    int                 iPhase;
+    CVector<_REAL>		vecrReHist;
+    CVector<_REAL>		vecrImHist;
+    _COMPLEX			cCurExp;
+    _COMPLEX			cExpStep;
+    int					iPhase;
 
     _REAL HilbertFilt(const _REAL rRe, const _REAL rIm);
 
     /* OPH: counter to count symbols within a frame in order to generate */
     /* RSCI output */
-    unsigned int                iFreeSymbolCounter;
-    double                      vif;
+    int							iFreeSymbolCounter;
 
     virtual void InitInternal(CParameter& Parameters);
     virtual void ProcessDataInternal(CParameter& Parameters);
@@ -239,7 +268,7 @@ protected:
     int FreqToBin(_REAL rFreq);
     _REAL CalcTotalPower(CVector<_REAL> &vecrData, int iStartBin, int iEndBin);
 
-    void InterpFIR_2X(const int channels, _SAMPLE* X, vector<float>& Z, vector<float>& Y, vector<float>& B);
+    void InterpFIR_2X(const int channels, _SAMPLE* X, std::vector<float>& Z, std::vector<float>& Y, std::vector<float>& B);
 };
 
 

@@ -1,9 +1,9 @@
 /******************************************************************************\
  * British Broadcasting Corporation
- * Copyright (c) 2001-2014
+ * Copyright (c) 2009
  *
  * Author(s):
- *   Julian Cable
+ *	 Julian Cable
  *
  * Description: Journaline Specialisation of TextBrowser
  *

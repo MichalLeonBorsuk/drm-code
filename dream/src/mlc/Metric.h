@@ -1,9 +1,9 @@
 /******************************************************************************\
  * Technische Universitaet Darmstadt, Institut fuer Nachrichtentechnik
- * Copyright (c) 2001-2014
+ * Copyright (c) 2001
  *
  * Author(s):
- *  Volker Fischer
+ *	Volker Fischer
  *
  * Description:
  *
@@ -224,8 +224,8 @@ protected:
     }
 
 
-    int                     iInputBlockSize;
-    ECodScheme  eMapType;
+    int						iInputBlockSize;
+    ECodScheme	eMapType;
 };
 
 

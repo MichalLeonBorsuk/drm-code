@@ -1,12 +1,12 @@
 /******************************************************************************\
  * Technische Universitaet Darmstadt, Institut fuer Nachrichtentechnik
- * Copyright (c) 2001-2014
+ * Copyright (c) 2007
  *
  * Author(s):
- *  Volker Fischer, Oliver Haffenden, Julian Cable
+ *	Volker Fischer, Oliver Haffenden, Julian Cable
  *
  * Description:
- *  see RCITagItems.cpp
+ *	see RCITagItems.cpp
  *
  ******************************************************************************
  *
@@ -34,23 +34,19 @@
 class CTagItemGeneratorCfre : public CTagItemGenerator /* cfre tag */
 {
 public:
-    void GenTag(int iNewFreqkHz);
+	void GenTag(int iNewFreqkHz);
 protected:
-    string GetTagName(void);
-    string GetProfiles(void) {
-        return "";
-    }
+	std::string GetTagName(void);
+	std::string GetProfiles(void) { return ""; }
 };
 
 class CTagItemGeneratorCdmo : public CTagItemGenerator /* cdmo tag */
 {
 public:
-    void GenTag(const ERecMode eMode);
+	void GenTag(const ERecMode eMode);
 protected:
-    string GetTagName(void);
-    string GetProfiles(void) {
-        return "";
-    }
+	std::string GetTagName(void);
+	std::string GetProfiles(void) { return ""; }
 };
 
 #endif

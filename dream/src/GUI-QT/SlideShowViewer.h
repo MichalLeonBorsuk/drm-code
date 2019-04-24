@@ -1,9 +1,9 @@
 /******************************************************************************\
  * British Broadcasting Corporation
- * Copyright (c) 2001-2014
+ * Copyright (c) 2009
  *
  * Author(s):
- *   Julian Cable, David Flamand
+ *	 Julian Cable, David Flamand
  *
  * Description: MOT Slide Show Viewer
  *
@@ -31,33 +31,36 @@
 
 #include "ui_SlideShowViewer.h"
 #include "CWindow.h"
-#include "../DrmReceiver.h"
+#include "../main-Qt/crx.h"
+#include "../datadecoding/DABMOT.h"
 
 class SlideShowViewer : public CWindow, public Ui_SlideShowViewer
 {
     Q_OBJECT
 
 public:
-    SlideShowViewer(CSettings&, QWidget* parent = 0);
+    SlideShowViewer(CRx&, CSettings&, QWidget* parent = 0);
     virtual ~SlideShowViewer();
-public slots:
-    void setStatus(int, ETypeRxStatus);
-    void setServiceInformation(int, CService);
 
 protected:
     virtual void            eventShow(QShowEvent*);
     virtual void            eventHide(QHideEvent*);
     void                    SetImage(int);
     void                    UpdateButtons();
+    void                    ClearMOTCache(CMOTDABDec *motdec);
+    void                    GetServiceParams(uint32_t* iServiceID, bool* bServiceValid, QString* strLabel, ETypeRxStatus* eStatus=nullptr, int* shortID=nullptr, int* iPacketID=nullptr);
+    void                    UpdateWindowTitle(const uint32_t iServiceID, const bool bServiceValid, QString strLabel);
     QTimer                  Timer;
     QString                 strCurrentSavePath;
-    vector<QPixmap>         vecImages;
-    vector<QString>         vecImageNames;
+    CRx&                    rx;
+    std::vector<QPixmap>    vecImages;
+    std::vector<QString>    vecImageNames;
     int                     iCurImagePos;
     bool                    bClearMOTCache;
-    CService                service;
-    int                     short_id;
-    CDataDecoder*           decoder;
+    uint32_t                iLastServiceID;
+    uint32_t                iCurrentDataServiceID;
+    bool                    bLastServiceValid;
+    QString                 strLastLabel;
 
 public slots:
     void OnTimer();

@@ -1,12 +1,12 @@
 /******************************************************************************\
  * British Broadcasting Corporation
- * Copyright (c) 2001-2014
+ * Copyright (c) 2007
  *
  * Author(s):
- *  Oliver Haffenden
+ *	Oliver Haffenden
  *
  * Description:
- *
+ *	
  *  This defines a concrete subclass of CPacketSink that writes to a file
  *  For the moment this will be a raw file but FF could be added as a decorator
  *  The writing can be stopped and started - if it is not currently writing,
@@ -38,61 +38,58 @@
 class CPacketSinkFile : public CPacketSink
 {
 public:
-    CPacketSinkFile();
-    virtual ~CPacketSinkFile() {}
+	CPacketSinkFile();
+	virtual ~CPacketSinkFile() {}
 
-    virtual void SendPacket(const vector<_BYTE>& vecbydata, uint32_t addr=0, uint16_t port=0);
+	virtual void SendPacket(const std::vector<_BYTE>& vecbydata, uint32_t addr=0, uint16_t port=0);
 
-    virtual bool SetDestination(const string& strFName);
-    virtual bool GetDestination(string& strFName) {
-        strFName = strFileName;
-        return true;
-    }
-    void StartRecording();
-    void StopRecording();
+	virtual bool SetDestination(const std::string& strFName);
+	virtual bool GetDestination(std::string& strFName) { strFName = strFileName; return true; }
+	void StartRecording();
+	void StopRecording();
 
 protected:
-    virtual void open()=0;
-    virtual void close()=0;
-    virtual void write(const vector<_BYTE>& vecbydata)=0;
+	virtual void open()=0;
+	virtual void close()=0;
+	virtual void write(const std::vector<_BYTE>& vecbydata)=0;
 
-    FILE *pFile;
-    bool bIsRecording;
-    bool bChangeReceived;
-    string strFileName;
+	FILE *pFile;
+	bool bIsRecording;
+	bool bChangeReceived;
+	std::string strFileName;
 };
 
 class CPacketSinkRawFile : public CPacketSinkFile
 {
 public:
-    CPacketSinkRawFile();
-    virtual ~CPacketSinkRawFile();
+	CPacketSinkRawFile();
+	virtual ~CPacketSinkRawFile();
 protected:
-    virtual void open();
-    virtual void close();
-    virtual void write(const vector<_BYTE>& vecbydata);
+	virtual void open();
+	virtual void close();
+	virtual void write(const std::vector<_BYTE>& vecbydata);
 };
 
 class CPacketSinkFileFraming : public CPacketSinkFile
 {
 public:
-    CPacketSinkFileFraming();
-    virtual ~CPacketSinkFileFraming();
+	CPacketSinkFileFraming();
+	virtual ~CPacketSinkFileFraming();
 protected:
-    virtual void open();
-    virtual void close();
-    virtual void write(const vector<_BYTE>& vecbydata);
+	virtual void open();
+	virtual void close();
+	virtual void write(const std::vector<_BYTE>& vecbydata);
 };
 
 class CPacketSinkPcapFile : public CPacketSinkFile
 {
 public:
-    CPacketSinkPcapFile();
-    virtual ~CPacketSinkPcapFile();
+	CPacketSinkPcapFile();
+	virtual ~CPacketSinkPcapFile();
 protected:
-    virtual void open();
-    virtual void close();
-    virtual void write(const vector<_BYTE>& vecbydata);
+	virtual void open();
+	virtual void close();
+	virtual void write(const std::vector<_BYTE>& vecbydata);
 };
 
 #endif

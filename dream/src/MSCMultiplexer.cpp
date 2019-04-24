@@ -1,12 +1,12 @@
 /******************************************************************************\
  * Technische Universitaet Darmstadt, Institut fuer Nachrichtentechnik
- * Copyright (c) 2001-2014
+ * Copyright (c) 2001
  *
  * Author(s):
- *  Volker Fischer
+ *	Volker Fischer
  *
  * Description:
- *  MSC audio/data demultiplexer
+ *	MSC audio/data demultiplexer
  *
  *
  * - (6.2.3.1) Multiplex frames (DRM standard):
@@ -89,7 +89,7 @@ void CMSCDemultiplexer::ExtractData(CVectorEx<_BINARY>& vecIn,
 CMSCDemultiplexer::SStreamPos CMSCDemultiplexer::GetStreamPos(CParameter& Param,
         const int iStreamID)
 {
-    CMSCDemultiplexer::SStreamPos   StPos;
+    CMSCDemultiplexer::SStreamPos	StPos;
 
     /* Init positions with zeros (needed if an error occurs) */
     StPos.iOffsetLow = 0;
@@ -102,7 +102,7 @@ CMSCDemultiplexer::SStreamPos CMSCDemultiplexer::GetStreamPos(CParameter& Param,
         /* Length of higher and lower protected part of audio stream (number
            of bits) */
         StPos.iLenHigh = Param.Stream[iStreamID].iLenPartA * SIZEOF__BYTE;
-        StPos.iLenLow = Param.Stream[iStreamID].iLenPartB * SIZEOF__BYTE;
+        StPos.iLenLow = Param.Stream[iStreamID].iLenPartB *	SIZEOF__BYTE;
 
 
         /* Byte-offset of higher and lower protected part of audio stream --- */

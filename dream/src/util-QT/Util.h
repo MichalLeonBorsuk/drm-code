@@ -1,9 +1,9 @@
 /******************************************************************************\
  * Technische Universitaet Darmstadt, Institut fuer Nachrichtentechnik
- * Copyright (c) 2001-2014
+ * Copyright (c) 2001-2006
  *
  * Author(s):
- *  Volker Fischer, Andrea Russo, David Flamand
+ *	Volker Fischer, Andrea Russo, David Flamand
  *
  * Description:
  *
@@ -30,14 +30,8 @@
 #define __UTIL_QT_UTIL_H
 
 #include <QString>
-#ifdef QT_GUI_LIB
-# include "../GUI-QT/MultColorLED.h"
-# include <QTreeWidget>
-#endif
-#include "../Parameter.h"
 
 class CDRMTransceiver;
-class CService;
 
 QString VerifyFilename(QString filename);
 
@@ -47,22 +41,8 @@ QString UrlEncodePath(QString url);
 
 bool IsUrlDirectory(QString url);
 
-QString& Linkify(QString& text, QString linkColor=QString());
+QString& Linkify(QString& text);
 
 void CreateDirectories(const QString& strFilename);
-
-void RestartTransceiver(CDRMTransceiver *DRMTransceiver);
-
-QString GetCodecString(const CService&);
-QString GetTypeString(const CService&);
-QString GetDataTypeString(const CService&);
-
-QString getAMScheduleUrl();
-
-#ifdef QT_GUI_LIB
-void SetStatus(CMultColorLED*, ETypeRxStatus);
-void ColumnParamFromStr(QTreeWidget* treeWidget, const QString& strColumnParam);
-void ColumnParamToStr(QTreeWidget* treeWidget, QString& strColumnParam);
-#endif
 
 #endif // __UTIL_QT_UTIL_H

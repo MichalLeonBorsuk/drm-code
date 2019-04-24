@@ -1,12 +1,12 @@
 /******************************************************************************\
  * British Broadcasting Corporation
- * Copyright (c) 2001-2014
+ * Copyright (c) 2007
  *
  * Author(s):
- *  Volker Fischer, Oliver Haffenden
+ *	Volker Fischer, Oliver Haffenden
  *
  * Description:
- *  see AFPacketGenerator.cpp
+ *	see AFPacketGenerator.cpp
  *
  ******************************************************************************
  *
@@ -39,13 +39,13 @@ class CTagPacketGenerator;
 class CAFPacketGenerator
 {
 public:
-    CAFPacketGenerator() : iSeqNumber(0) {}
+	CAFPacketGenerator() : iSeqNumber(0) {}
 
-    CVector<_BYTE> GenAFPacket(const bool bUseAFCRC, CTagPacketGenerator& TagPacketGenerator);
+	CVector<_BYTE> GenAFPacket(const bool bUseAFCRC, CTagPacketGenerator& TagPacketGenerator);
 
 private:
-    CVector<_BYTE> PackBytes(CVector<_BINARY> &vecbiPacket);
-    int                         iSeqNumber;
+	CVector<_BYTE> PackBytes(CVector<_BINARY> &vecbiPacket);
+	int							iSeqNumber;
 };
 
 #endif

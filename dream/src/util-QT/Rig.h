@@ -1,9 +1,9 @@
 /******************************************************************************\
  * Technische Universitaet Darmstadt, Institut fuer Nachrichtentechnik
- * Copyright (c) 2001-2014
+ * Copyright (c) 2001-2006
  *
  * Author(s):
- *  Volker Fischer, Andrea Russo
+ *	Volker Fischer, Andrea Russo
  *
  * Description:
  *
@@ -30,68 +30,45 @@
 #define __RIG_H
 
 #include "../Parameter.h"
-#include "../util/Settings.h"
-#ifdef HAVE_LIBHAMLIB
-# include "../util/Hamlib.h"
-#endif
+#include "../util/Hamlib.h"
 #include <QObject>
 #include <QTimer>
 
-class CRig : public QObject
+class CRig :
+	public QObject
 {
-    Q_OBJECT
+	Q_OBJECT
 public:
-    static void SetFrequencyCallback(void* sfCallbackParam, int iNewFreqkHz);
-    CRig(CSettings* pSettings, CParameter* pParameters);
-    ~CRig();
-    void SetFrequency(int);
+	CRig(CParameter* np);
+	void LoadSettings(CSettings&);
+	void SaveSettings(CSettings&);
+	void SetFrequency(int);
 #ifdef HAVE_LIBHAMLIB
-    void GetRigList(map<rig_model_t,CHamlib::SDrRigCaps>& r) {
-        Hamlib.GetRigList(r);
-    }
-    rig_model_t GetHamlibModelID() {
-        return Hamlib.GetHamlibModelID();
-    }
-    void SetHamlibModelID(rig_model_t r) {
-        Hamlib.SetHamlibModelID(r);
-    }
-    void SetEnableModRigSettings(bool b) {
-        Hamlib.SetEnableModRigSettings(b);
-    }
-    void GetPortList(map<string,string>& ports) {
-        Hamlib.GetPortList(ports);
-    }
-    string GetComPort() {
-        return Hamlib.GetComPort();
-    }
-    void SetComPort(const string& s) {
-        Hamlib.SetComPort(s);
-    }
-    bool GetEnableModRigSettings() {
-        return Hamlib.GetEnableModRigSettings();
-    }
-    CHamlib::ESMeterState GetSMeter(_REAL& r) {
-        return Hamlib.GetSMeter(r);
-    }
-    CHamlib* GetRig() {
-        return &Hamlib;
-    }
+	void GetRigList(map<rig_model_t,CHamlib::SDrRigCaps>& r) { Hamlib.GetRigList(r); }
+	rig_model_t GetHamlibModelID() { return Hamlib.GetHamlibModelID(); }
+	void SetHamlibModelID(rig_model_t r) { Hamlib.SetHamlibModelID(r); }
+	void SetEnableModRigSettings(bool b) { Hamlib.SetEnableModRigSettings(b); }
+	void GetPortList(map<std::string,std::string>& ports) { Hamlib.GetPortList(ports); }
+	std::string GetComPort() { return Hamlib.GetComPort(); }
+	void SetComPort(const std::string& s) { Hamlib.SetComPort(s); }
+	bool GetEnableModRigSettings() { return Hamlib.GetEnableModRigSettings(); }
+	CHamlib::ESMeterState GetSMeter(_REAL& r) { return Hamlib.GetSMeter(r); }
+	CHamlib* GetRig() { return &Hamlib; }
 
 protected:
-    CHamlib Hamlib;
-    QTimer timer;
+	CHamlib Hamlib;
+	QTimer* timer;
 #endif
 protected:
-    CSettings* pSettings;
-    CParameter* pParameters;
-    int subscribers;
+	int subscribers;
+	CParameter* pParameters;
 
 signals:
     void sigstr(double);
 public slots:
-    void subscribe();
-    void unsubscribe();
-    void onTimer();
+	void subscribe();
+	void unsubscribe();
+	void onTimer();
 };
 
 #endif

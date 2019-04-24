@@ -1,9 +1,9 @@
 /******************************************************************************\
  * British Broadcasting Corporation
- * Copyright (c) 2001-2014
+ * Copyright (c) 2009
  *
  * Author(s):
- *   Julian Cable
+ *	 Julian Cable
  *
  * Description: Journaline Viewer
  *
@@ -31,7 +31,7 @@
 
 #include "ui_JLViewer.h"
 #include "CWindow.h"
-#include "../Parameter.h"
+#include "../main-Qt/crx.h"
 #include <QTextDocument>
 #include <string>
 
@@ -40,24 +40,25 @@ class JLViewer : public CWindow, public Ui_JLViewer
     Q_OBJECT
 
 public:
-    JLViewer(CSettings&, QWidget* parent = 0);
-    ~JLViewer();
-public slots:
-    void setStatus(int, ETypeRxStatus);
-    void setDecoder(CDataDecoder* dec);
-    void setServiceInformation(const CService&, uint32_t);
+    JLViewer(CRx&, CSettings&, QWidget* parent = 0);
+    virtual ~JLViewer();
 
 protected:
     virtual void eventShow(QShowEvent*);
     virtual void eventHide(QHideEvent*);
-    QTextDocument document;
-    QString       strCurrentSavePath;
+    QTimer Timer;
+    QTextDocument           document;
+//    QString               strCurrentSavePath;
+    CRx&                    rx;
+    bool                    decoderSet;
 
-private slots:
-    void on_actionSave_triggered();
-    void on_actionSave_All_triggered();
-    void on_actionClear_All_triggered();
-    void on_actionSet_Font_triggered();
+public slots:
+    void OnTimer();
+    void OnButtonStepBack();
+    void OnSave();
+    void OnSaveAll();
+    void OnClearAll();
+    void OnSetFont();
 };
 
 #endif

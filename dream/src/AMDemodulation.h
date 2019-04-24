@@ -1,12 +1,12 @@
 /******************************************************************************\
  * Technische Universitaet Darmstadt, Institut fuer Nachrichtentechnik
- * Copyright (c) 2001-2014
+ * Copyright (c) 2001
  *
  * Author(s):
- *  Volker Fischer
+ *	Volker Fischer
  *
  * Description:
- *  See AMDemodulation.cpp
+ *	See AMDemodulation.cpp
  *
  ******************************************************************************
  *
@@ -32,8 +32,8 @@
 #include "Parameter.h"
 #include "util/Modul.h"
 #include "util/Vector.h"
-#include "matlib/Matlib.h"
-#include "resample/Resample.h"
+#include "matlib/MatlibSigProToolbox.h"
+#include "resample/caudioresample.h"
 #ifdef HAVE_SPEEX
 # include <speex/speex_preprocess.h>
 #endif
@@ -42,53 +42,53 @@
 /* Definitions ****************************************************************/
 /* Set value for desired amplitude for AM signal, controlled by the AGC. Maximum
    value is the range for short variables (16 bit) -> 32768 */
-#define DES_AV_AMPL_AM_SIGNAL               ((CReal) 8000.0)
+#define DES_AV_AMPL_AM_SIGNAL				((CReal) 8000.0)
 
 /* Lower bound for estimated average amplitude. That is needed, since we
    devide by this estimate so it must not be zero */
-#define LOWER_BOUND_AMP_LEVEL               ((CReal) 10.0)
+#define LOWER_BOUND_AMP_LEVEL				((CReal) 10.0)
 
 /* Amplitude correction factor for demodulation */
-#define AM_AMPL_CORR_FACTOR                 ((CReal) 5.0)
+#define AM_AMPL_CORR_FACTOR					((CReal) 5.0)
 
 /* Lambda for IIR filter for DC-filter */
-#define DC_IIR_FILTER_LAMBDA                ((CReal) 0.999)
+#define DC_IIR_FILTER_LAMBDA				((CReal) 0.999)
 
 /* Margin at the DC frequency in case of SSB demodulation */
-#define SSB_DC_MARGIN_HZ                    ((CReal) 100.0) /* Hz */
+#define SSB_DC_MARGIN_HZ					((CReal) 100.0) /* Hz */
 
 /* Frequency offset for CW demodulation */
-#define FREQ_OFFS_CW_DEMOD                  ((CReal) 1000.0) /* Hz */
+#define FREQ_OFFS_CW_DEMOD					((CReal) 1000.0) /* Hz */
 
 
 /* Parameters for frequency offset estimation algorithm --------------------- */
 /* Set the number of blocks used for carrier frequency acquisition */
-#define NUM_BLOCKS_CARR_ACQUISITION         20
+#define NUM_BLOCKS_CARR_ACQUISITION			20
 
 /* Percentage of aquisition search window half size relative to the useful
    spectrum bandwidth */
-#define PERC_SEARCH_WIN_HALF_SIZE           ((CReal) 5.0 /* % */ / 100)
+#define PERC_SEARCH_WIN_HALF_SIZE			((CReal) 5.0 /* % */ / 100)
 
 
 /* Parameters for noise reduction algorithm --------------------------------- */
 /* Length of minimum statistic estimation history */
-#define MIN_STAT_HIST_LENGTH_SEC            ((CReal) 1.5) /* sec */
+#define MIN_STAT_HIST_LENGTH_SEC			((CReal) 1.5) /* sec */
 
 /* Minimum statistic weightning factors. With this value the degree of noise
    reduction can be adjusted. We use three settings here */
-#define MIN_STAT_WEIGHT_FACTOR_LOW          ((CReal) 0.4)
-#define MIN_STAT_WEIGHT_FACTOR_MED          ((CReal) 1.0)
-#define MIN_STAT_WEIGHT_FACTOR_HIGH         ((CReal) 2.0)
+#define MIN_STAT_WEIGHT_FACTOR_LOW			((CReal) 0.4)
+#define MIN_STAT_WEIGHT_FACTOR_MED			((CReal) 1.0)
+#define MIN_STAT_WEIGHT_FACTOR_HIGH			((CReal) 2.0)
 
 /* Time constant for IIR averaging of PSD estimation */
-#define TICONST_PSD_EST_SIG_NOISE_RED       ((CReal) 1.0) /* sec */
+#define TICONST_PSD_EST_SIG_NOISE_RED		((CReal) 1.0) /* sec */
 
 
 /* Parameters for PLL ------------------------------------------------------- */
-#define PLL_LOOP_GAIN                       ((CReal) 0.0000001)
+#define PLL_LOOP_GAIN						((CReal) 0.0000001)
 
 /* Lambda for IIR filter for loop filter */
-#define PLL_LOOP_FILTER_LAMBDA              ((CReal) 0.99)
+#define PLL_LOOP_FILTER_LAMBDA				((CReal) 0.99)
 
 
 /* Classes ********************************************************************/
@@ -98,8 +98,8 @@ class CNoiseReduction
 public:
     CNoiseReduction() : eNoiRedDegree(NR_MEDIUM)
 #ifdef HAVE_SPEEX
-        , preprocess_state(NULL), speex_data(NULL)
-        , supression_level(0), sample_rate(0)
+    , preprocess_state(nullptr), speex_data(nullptr)
+    , supression_level(0), sample_rate(0)
 #endif
     {}
     virtual ~CNoiseReduction();
@@ -116,34 +116,34 @@ protected:
     CRealVector OptimalFilter(const CComplexVector& vecrSigFreq,
                               const CRealVector& vecrSqMagSigFreq, const CRealVector& vecrNoisePSD);
 
-    int             iBlockLen;
-    int             iHalfBlockLen;
-    int             iBlockLenLong;
-    int             iFreqBlLen;
-    int             iMinStatHistLen;
-    CReal           rLamPSD;
-    CRealMatrix     matrMinimumStatHist;
-    CComplexVector  veccSigFreq;
-    CRealVector     vecrSqMagSigFreq;
-    CRealVector     vecrSigPSD;
-    CRealVector     vecrNoisePSD;
-    CFftPlans       FftPlan;
-    CComplexVector  veccOptFilt;
-    CRealVector     vecrOldSignal;
-    CRealVector     vecrVeryOldSignal;
-    CRealVector     vecrLongSignal;
-    CRealVector     vecrOldOutSignal;
-    CRealVector     vecrOutSig1;
-    CRealVector     vecrTriangWin;
-    CRealVector     vecrOptFiltTime;
-    CRealVector     vecrFiltResult;
+    int				iBlockLen;
+    int				iHalfBlockLen;
+    int				iBlockLenLong;
+    int				iFreqBlLen;
+    int				iMinStatHistLen;
+    CReal			rLamPSD;
+    CRealMatrix		matrMinimumStatHist;
+    CComplexVector	veccSigFreq;
+    CRealVector		vecrSqMagSigFreq;
+    CRealVector		vecrSigPSD;
+    CRealVector		vecrNoisePSD;
+    CFftPlans		FftPlan;
+    CComplexVector	veccOptFilt;
+    CRealVector		vecrOldSignal;
+    CRealVector		vecrVeryOldSignal;
+    CRealVector		vecrLongSignal;
+    CRealVector		vecrOldOutSignal;
+    CRealVector		vecrOutSig1;
+    CRealVector		vecrTriangWin;
+    CRealVector		vecrOptFiltTime;
+    CRealVector		vecrFiltResult;
 
-    ENoiRedDegree   eNoiRedDegree;
+    ENoiRedDegree	eNoiRedDegree;
 #ifdef HAVE_SPEEX
     SpeexPreprocessState *preprocess_state;
-    spx_int16_t*    speex_data;
-    spx_int32_t     supression_level;
-    int             sample_rate;
+    spx_int16_t*	speex_data;
+    spx_int32_t		supression_level;
+    int				sample_rate;
 #endif
 };
 
@@ -162,20 +162,20 @@ public:
     }
 
 protected:
-    int                     iBlockSize;
-    CFftPlans               FftPlanAcq;
-    CRealVector             vecrFFTInput;
-    int                     iTotalBufferSize;
-    int                     iHalfBuffer;
-    int                     iAquisitionCounter;
-    CShiftRegister<_REAL>   vecrFFTHistory;
-    CRealVector             vecrPSD;
-    int                     iSearchWinStart;
-    int                     iSearchWinEnd;
-    bool                bAcquisition;
+    int						iBlockSize;
+    CFftPlans				FftPlanAcq;
+    CRealVector				vecrFFTInput;
+    int						iTotalBufferSize;
+    int						iHalfBuffer;
+    int						iAquisitionCounter;
+    CShiftRegister<_REAL>	vecrFFTHistory;
+    CRealVector				vecrPSD;
+    int						iSearchWinStart;
+    int						iSearchWinEnd;
+    bool				bAcquisition;
 
-    CReal                   rNormCenter;
-    CReal                   rCurNormFreqOffset;
+    CReal					rNormCenter;
+    CReal					rCurNormFreqOffset;
 };
 
 
@@ -183,23 +183,22 @@ protected:
 class CAGC
 {
 public:
-    enum EType {AT_NO_AGC, AT_SLOW, AT_MEDIUM, AT_FAST};
 
     CAGC() : eType(AT_MEDIUM) {}
     void Init(int iSampleRate, int iNewBlockSize);
     void Process(CRealVector& vecrIn /* in/out */);
 
-    void SetType(const EType eNewType);
-    EType GetType() {
+    void SetType(const EAmAgcType eNewType);
+    EAmAgcType GetType() {
         return eType;
     }
 
 protected:
-    int     iSampleRate;
-    int     iBlockSize;
-    EType   eType;
-    CReal   rAttack, rDecay;
-    CReal   rAvAmplEst;
+    int		iSampleRate;
+    int		iBlockSize;
+    EAmAgcType	eType;
+    CReal	rAttack, rDecay;
+    CReal	rAvAmplEst;
 };
 
 
@@ -214,8 +213,8 @@ public:
     void SetMixFreq(const CReal rNewNormMixFreq);
 
 protected:
-    int         iBlockSize;
-    CComplex    cCurExp, cExpStep;
+    int			iBlockSize;
+    CComplex	cCurExp, cExpStep;
 };
 
 
@@ -237,19 +236,19 @@ public:
     }
 
 protected:
-    CMixer          Mixer;
-    int             iBlockSize;
-    CRealVector     rvecRealTmp;
-    CRealVector     rvecImagTmp;
-    CComplexVector  cvecLow;
-    CReal           rNormCurFreqOffset;
-    CReal           rNormCurFreqOffsetAdd;
-    CReal           rCurPhase;
+    CMixer			Mixer;
+    int				iBlockSize;
+    CRealVector		rvecRealTmp;
+    CRealVector		rvecImagTmp;
+    CComplexVector	cvecLow;
+    CReal			rNormCurFreqOffset;
+    CReal			rNormCurFreqOffsetAdd;
+    CReal			rCurPhase;
 
-    CRealVector     rvecZReal;
-    CRealVector     rvecZImag;
-    CRealVector     rvecA;
-    CRealVector     rvecB;
+    CRealVector		rvecZReal;
+    CRealVector		rvecZImag;
+    CRealVector		rvecA;
+    CRealVector		rvecB;
 };
 
 /* AM demodulation module --------------------------------------------------- */
@@ -258,9 +257,6 @@ class CAMDemodulation : public CReceiverModul<_REAL, _SAMPLE>
 public:
     CAMDemodulation();
     virtual ~CAMDemodulation() {}
-
-    enum EDemodType {DT_AM, DT_LSB, DT_USB, DT_CW, DT_FM};
-    enum ENoiRedType {NR_OFF, NR_LOW, NR_MEDIUM, NR_HIGH, NR_SPEEX};
 
     void SetAcqFreq(const CReal rNewNormCenter);
 
@@ -289,8 +285,8 @@ public:
         return (int) (rBPNormBW * iSigSampleRate);
     }
 
-    void SetAGCType(const CAGC::EType eNewType);
-    CAGC::EType GetAGCType() {
+    void SetAGCType(const EAmAgcType eNewType);
+    EAmAgcType GetAGCType() {
         return AGC.GetType();
     }
 
@@ -334,59 +330,59 @@ protected:
                      const EDemodType eDemodType);
     void SetNormCurMixFreqOffs(const CReal rNewNormCurMixFreqOffs);
 
-    CComplexVector              cvecBReal;
-    CComplexVector              cvecBImag;
-    CRealVector                 rvecZReal;
-    CRealVector                 rvecZImag;
-    CComplexVector              cvecBAMAfterDem;
-    CRealVector                 rvecZAMAfterDem;
+    CComplexVector				cvecBReal;
+    CComplexVector				cvecBImag;
+    CRealVector					rvecZReal;
+    CRealVector					rvecZImag;
+    CComplexVector				cvecBAMAfterDem;
+    CRealVector					rvecZAMAfterDem;
 
-    CRealVector                 rvecInpTmp;
-    CComplexVector              cvecHilbert;
-    int                         iHilFiltBlLen;
-    CFftPlans                   FftPlansHilFilt;
+    CRealVector					rvecInpTmp;
+    CComplexVector				cvecHilbert;
+    int							iHilFiltBlLen;
+    CFftPlans					FftPlansHilFilt;
 
-    CReal                       rBPNormBW;
-    CReal                       rNormCurMixFreqOffs;
-    CReal                       rBPNormCentOffsTot;
+    CReal						rBPNormBW;
+    CReal						rNormCurMixFreqOffs;
+    CReal						rBPNormCentOffsTot;
 
-    CRealVector                 rvecZAM;
-    CRealVector                 rvecADC;
-    CRealVector                 rvecBDC;
-    CRealVector                 rvecZFM;
-    CRealVector                 rvecAFM;
-    CRealVector                 rvecBFM;
+    CRealVector					rvecZAM;
+    CRealVector					rvecADC;
+    CRealVector					rvecBDC;
+    CRealVector					rvecZFM;
+    CRealVector					rvecAFM;
+    CRealVector					rvecBFM;
 
-    int                         iSymbolBlockSize;
+    int							iSymbolBlockSize;
 
-    bool                    bPLLIsEnabled;
-    bool                    bAutoFreqAcquIsEnabled;
+    bool					bPLLIsEnabled;
+    bool					bAutoFreqAcquIsEnabled;
 
-    EDemodType                  eDemodType;
+    EDemodType					eDemodType;
 
-    CComplex                    cOldVal;
+    CComplex					cOldVal;
 
-    CVector<_REAL>              vecTempResBufIn;
-    CVector<_REAL>              vecTempResBufOut;
+    CVector<_REAL>				vecTempResBufIn;
+    CVector<_REAL>				vecTempResBufOut;
 
-    ENoiRedType                 eNoiRedType;
-    int                         iNoiRedLevel;
+    ENoiRedType					eNoiRedType;
+    int							iNoiRedLevel;
 
     /* Objects */
-    CPLL                        PLL;
-    CMixer                      Mixer;
-    CFreqOffsAcq                FreqOffsAcq;
-    CAGC                        AGC;
-    CNoiseReduction             NoiseReduction;
-    CAudioResample              ResampleObj;
+    CPLL						PLL;
+    CMixer						Mixer;
+    CFreqOffsAcq				FreqOffsAcq;
+    CAGC						AGC;
+    CNoiseReduction				NoiseReduction;
+    CAudioResample				ResampleObj;
 
     /* OPH: counter to count symbols within a frame in order to generate */
     /* RSCI output */
-    unsigned int                iFreeSymbolCounter;
-    int                         iAudSampleRate;
-    int                         iSigSampleRate;
-    int                         iBandwidth;
-    int                         iResOutBlockSize;
+    int							iFreeSymbolCounter;
+    int							iAudSampleRate;
+    int							iSigSampleRate;
+    int							iBandwidth;
+    int							iResOutBlockSize;
 
 
     virtual void InitInternal(CParameter& Parameters);

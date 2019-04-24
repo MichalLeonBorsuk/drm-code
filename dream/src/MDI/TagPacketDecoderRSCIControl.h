@@ -1,12 +1,12 @@
 /******************************************************************************\
  * Technische Universitaet Darmstadt, Institut fuer Nachrichtentechnik
- * Copyright (c) 2001-2014
+ * Copyright (c) 2004
  *
  * Author(s):
- *  Volker Fischer, Oliver Haffenden
+ *	Volker Fischer, Oliver Haffenden
  *
  * Description:
- *  see TagPacketDecoderRSCIControl.cpp
+ *	see TagPacketDecoderRSCIControl.cpp
  *
  ******************************************************************************
  *
@@ -38,25 +38,25 @@ class CRSISubscriber;
 class CTagPacketDecoderRSCIControl : public CTagPacketDecoder
 {
 public:
-    // constructor: adds all of the decoders in the vocabulary to the list
-    CTagPacketDecoderRSCIControl(void);
+	// constructor: adds all of the decoders in the vocabulary to the list
+	CTagPacketDecoderRSCIControl(void);
 
-    // Sets the object's pointer to the receiver which it will send commands to.
-    // This MUST be called soon after construction.
-    void SetReceiver(CDRMReceiver *pReceiver);
-    void SetSubscriber(CRSISubscriber *pSubscriber);
+	// Sets the object's pointer to the receiver which it will send commands to.
+	// This MUST be called soon after construction.
+	void SetReceiver(CDRMReceiver *pReceiver);
+	void SetSubscriber(CRSISubscriber *pSubscriber);
 
 private:
-    // Decoders send settings to the receiver
-    CDRMReceiver * pDRMReceiver;
+	// Decoders send settings to the receiver
+	CDRMReceiver * pDRMReceiver;
 
-    // Decoders for each of the tag items in the vocabulary
-    CTagItemDecoderCact         TagItemDecoderCact;
-    CTagItemDecoderCfre         TagItemDecoderCfre;
-    CTagItemDecoderCdmo         TagItemDecoderCdmo;
-    CTagItemDecoderCrec         TagItemDecoderCrec;
-    CTagItemDecoderCpro         TagItemDecoderCpro;
-    // TODO other RSCI control tag items
+	// Decoders for each of the tag items in the vocabulary
+	CTagItemDecoderCact			TagItemDecoderCact;
+	CTagItemDecoderCfre			TagItemDecoderCfre;
+	CTagItemDecoderCdmo			TagItemDecoderCdmo;
+	CTagItemDecoderCrec			TagItemDecoderCrec;
+	CTagItemDecoderCpro			TagItemDecoderCpro;
+	// TODO other RSCI control tag items
 };
 
 #endif

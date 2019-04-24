@@ -3,10 +3,10 @@
  * Copyright (c) 2005
  *
  * Author(s):
- *  Andrew Murphy
+ *	Andrew Murphy
  *
  * Description:
- *  See AMSSDemodulation.cpp
+ *	See AMSSDemodulation.cpp
  *
  ******************************************************************************
  *
@@ -35,23 +35,23 @@
 #include "matlib/Matlib.h"
 #include "resample/Resample.h"
 
-#define AMSS_PLL_LOOP_GAIN                      ((CReal) 0.00015)
-#define AMSS_PLL_LOOP_FILTER_LAMBDA             ((CReal) 0.99)
+#define AMSS_PLL_LOOP_GAIN						((CReal) 0.00015)
+#define AMSS_PLL_LOOP_FILTER_LAMBDA				((CReal) 0.99)
 
-#define AMSS_FILTER_LAMBDA                      ((CReal) 0.9876)
+#define AMSS_FILTER_LAMBDA						((CReal) 0.9876)
 
-#define AMSS_IF_FILTER_BW                       ((CReal) 300.0)
+#define AMSS_IF_FILTER_BW						((CReal) 300.0)
 
-#define AMSS_RESAMPLER_LOOP_GAIN                ((CReal) 0.00001)
-#define AMSS_RECURSIVE_FILTER_GAIN              ((CReal) 0.05)
-#define AMSS_12kHz_SAMPLES_PER_BIT              256
-#define AMSS_BLOCK_SIZE_BITS                    47
-#define AMSS_GP_SIZE_BITS                       12
-#define AMSS_OFFSET_SIZE_BITS                   11
-#define MAX_BLOCK_FAIL_COUNT_BEFORE_SYNC_LOSS   10
-#define MAX_DATA_ENTITY_GROUP_SEGMENTS          16
-#define DATA_ENTITY_GROUP_SEGMENT_SIZE_BITS     32
-#define AMSS_MAX_DATA_ENTITY_GROUP_LENGTH       (MAX_DATA_ENTITY_GROUP_SEGMENTS * DATA_ENTITY_GROUP_SEGMENT_SIZE_BITS)
+#define AMSS_RESAMPLER_LOOP_GAIN				((CReal) 0.00001)
+#define	AMSS_RECURSIVE_FILTER_GAIN				((CReal) 0.05)
+#define	AMSS_12kHz_SAMPLES_PER_BIT				256
+#define AMSS_BLOCK_SIZE_BITS					47
+#define	AMSS_GP_SIZE_BITS						12
+#define AMSS_OFFSET_SIZE_BITS					11
+#define MAX_BLOCK_FAIL_COUNT_BEFORE_SYNC_LOSS	10
+#define	MAX_DATA_ENTITY_GROUP_SEGMENTS			16
+#define DATA_ENTITY_GROUP_SEGMENT_SIZE_BITS		32
+#define AMSS_MAX_DATA_ENTITY_GROUP_LENGTH		(MAX_DATA_ENTITY_GROUP_SEGMENTS * DATA_ENTITY_GROUP_SEGMENT_SIZE_BITS)
 
 /* Phase lock loop ---------------------------------------------------------- */
 class CAMSSPLL
@@ -71,17 +71,17 @@ public:
     }
 
 protected:
-    CMixer          Mixer;
-    int             iBlockSize;
-    CRealVector     rvecPhaseTmp;
-    CComplexVector  cvecLow;
-    CReal           rNormCurFreqOffset;
-    CReal           rNormCurFreqOffsetAdd;
-    CReal           rCurPhase;
+    CMixer			Mixer;
+    int				iBlockSize;
+    CRealVector		rvecPhaseTmp;
+    CComplexVector	cvecLow;
+    CReal			rNormCurFreqOffset;
+    CReal			rNormCurFreqOffsetAdd;
+    CReal			rCurPhase;
 
-    CRealVector     rvecZPhase;
-    CRealVector     rvecA;
-    CRealVector     rvecB;
+    CRealVector		rvecZPhase;
+    CRealVector		rvecA;
+    CRealVector		rvecB;
 
     CReal rPreviousPhaseSample;
     CReal rPhaseOffset;
@@ -104,13 +104,13 @@ public:
 
 
 protected:
-    int             iBlockSize;
-    CRealVector     vecrStore;
+    int				iBlockSize;
+    CRealVector		vecrStore;
 
-    CReal           rOut;
-    CReal           rPeakVal;
-    int             iPeakPos;
-    int             iCurPos;
+    CReal			rOut;
+    CReal			rPeakVal;
+    int				iPeakPos;
+    int				iCurPos;
 
 };
 
@@ -131,39 +131,39 @@ protected:
     virtual void InitInternal(CParameter& Parameters);
     virtual void ProcessDataInternal(CParameter& Parameters);
 
-    int         iSymbolBlockSize;
+    int			iSymbolBlockSize;
 
     void SetBPFilter(const CReal rNewBPNormBW, const CReal rNewNormFreqOffset);
     void SetNormCurMixFreqOffs(const CReal rNewNormCurMixFreqOffs);
 
-    CComplexVector              cvecBReal;
-    CComplexVector              cvecBImag;
-    CRealVector                 rvecZReal;
-    CRealVector                 rvecZImag;
+    CComplexVector				cvecBReal;
+    CComplexVector				cvecBImag;
+    CRealVector					rvecZReal;
+    CRealVector					rvecZImag;
 
-    CRealVector                 rvecInpTmp;
-    CRealVector                 rvecPhase;
-    CComplexVector              cvecHilbert;
-    int                         iHilFiltBlLen;
-    CFftPlans                   FftPlansHilFilt;
+    CRealVector					rvecInpTmp;
+    CRealVector					rvecPhase;
+    CComplexVector				cvecHilbert;
+    int							iHilFiltBlLen;
+    CFftPlans					FftPlansHilFilt;
 
-    CReal                       rBPNormBW;
-    CReal                       rNormCurMixFreqOffs;
-    CReal                       rBPNormCentOffsTot;
+    CReal						rBPNormBW;
+    CReal						rNormCurMixFreqOffs;
+    CReal						rBPNormCentOffsTot;
 
-    CReal                       rPreviousPhaseSample;
-    CReal                       rPhaseOffset;
-    CReal                       rPhaseDiff;
+    CReal						rPreviousPhaseSample;
+    CReal						rPhaseOffset;
+    CReal						rPhaseDiff;
 
 
-    CRealVector     rvecZPhase;
-    CRealVector     rvecA;
-    CRealVector     rvecB;
+    CRealVector		rvecZPhase;
+    CRealVector		rvecA;
+    CRealVector		rvecB;
 
     /* Objects */
-    CAMSSPLL                    AMSSPLL;
-    CFreqOffsAcq                FreqOffsAcq;
-    //CAGC                      AGC;
+    CAMSSPLL					AMSSPLL;
+    CFreqOffsAcq				FreqOffsAcq;
+    //CAGC						AGC;
 };
 
 
@@ -183,20 +183,20 @@ protected:
     virtual void InitInternal(CParameter& Parameters);
     virtual void ProcessDataInternal(CParameter& Parameters);
 
-    int                 iSymbolBlockSize;
+    int					iSymbolBlockSize;
 
-    CRealVector         rvecDiffStore;
-    int                 iDiffStorePos;
-    int                 iDiffInSamplePos;
+    CRealVector			rvecDiffStore;
+    int					iDiffStorePos;
+    int					iDiffInSamplePos;
 
-    CRealVector         rvecInpTmp;
-    CRealVector         rvecInpTmpAbs;
+    CRealVector			rvecInpTmp;
+    CRealVector			rvecInpTmpAbs;
 
-    int                 iBitSyncSampleCount;
-    int                 iBitSyncSliceOffset;
+    int					iBitSyncSampleCount;
+    int					iBitSyncSliceOffset;
 
     /* Objects */
-    CRecursiveFilter    RecursiveFilter;
+    CRecursiveFilter	RecursiveFilter;
 };
 
 
@@ -215,10 +215,6 @@ public:
         delete[] cDataEntityGroupStatus;
         delete[] cCurrentBlockBits;
     }
-
-    /* AMSS status */
-    enum EAMSSBlockLockStat { NO_SYNC, RE_SYNC, DEF_SYNC, DEF_SYNC_BUT_DATA_CHANGED, POSSIBLE_LOSS_OF_SYNC };
-
 
     EAMSSBlockLockStat GetLockStatus() const {
         return eAMSSBlockLockStatus;
@@ -245,52 +241,52 @@ protected:
     virtual void InitInternal(CParameter& Parameters);
     virtual void ProcessDataInternal(CParameter& Parameters);
 
-    EAMSSBlockLockStat  eAMSSBlockLockStatus;
+    EAMSSBlockLockStat	eAMSSBlockLockStatus;
 
-    int             iPercentageDataEntityGroupComplete;
-    char*           cDataEntityGroupStatus;
-    int             iCurrentBlock;
-    char*           cCurrentBlockBits;
+    int				iPercentageDataEntityGroupComplete;
+    char*			cDataEntityGroupStatus;
+    int				iCurrentBlock;
+    char*			cCurrentBlockBits;
 
-    int             iTotalDataEntityGroupSegments;
-    CVector<int>    blDataEntityGroupSegmentsReceived;
+    int				iTotalDataEntityGroupSegments;
+    CVector<int>	blDataEntityGroupSegmentsReceived;
 
-    int             DecodeBlock(CVector<_BINARY>& bBits, CParameter& Parameters);
-    void            DecodeBlock1(CVector<_BINARY>& bBits, CParameter& Parameters);
-    void            DecodeBlock2(CVector<_BINARY>& bBits);
+    int				DecodeBlock(CVector<_BINARY>& bBits, CParameter& Parameters);
+    void			DecodeBlock1(CVector<_BINARY>& bBits, CParameter& Parameters);
+    void			DecodeBlock2(CVector<_BINARY>& bBits);
 
-    void            ApplyOffsetWord(CVector<_BINARY>& bBlockBits, CVector<_BINARY>& offset);
-    bool        CheckCRC(CVector<_BINARY>& bBits);
+    void			ApplyOffsetWord(CVector<_BINARY>& bBlockBits, CVector<_BINARY>& offset);
+    bool		CheckCRC(CVector<_BINARY>& bBits);
 
-    void            ResetStatus(CParameter& ReveiverParam);
+    void			ResetStatus(CParameter& ReveiverParam);
 
-    CVector<_BINARY>    bAMSSBits;
-    int                 iIntakeBufferPos;
+    CVector<_BINARY>	bAMSSBits;
+    int					iIntakeBufferPos;
 
-    CVector<_BINARY>    bBitsBlock1;
-    CVector<_BINARY>    bBitsBlock2;
+    CVector<_BINARY>	bBitsBlock1;
+    CVector<_BINARY>	bBitsBlock2;
 
-    CVector<_BINARY>    bOffsetBlock1;
-    CVector<_BINARY>    bOffsetBlock2;
+    CVector<_BINARY>	bOffsetBlock1;
+    CVector<_BINARY>	bOffsetBlock2;
 
-    CVector<_BINARY>    bGP;
+    CVector<_BINARY>	bGP;
 
-    CVector<_BINARY>    bBlock1Store;
-    CVector<_BINARY>    bBlock2Store;
+    CVector<_BINARY>	bBlock1Store;
+    CVector<_BINARY>	bBlock2Store;
 
-    bool            blStoredBlock2Valid;
-    bool            bVersionFlag;
+    bool			blStoredBlock2Valid;
+    bool			bVersionFlag;
 
-    bool            blFirstEverBlock1;
+    bool			blFirstEverBlock1;
 
-    CVector<_BINARY>    bDataEntityGroup;
+    CVector<_BINARY>	bDataEntityGroup;
 
-    int                 iBitsSinceLastBlock1Pass;
-    int                 iBitsSinceLastBlock2Pass;
-    int                 iBlock1FailCount;
-    int                 iBlock2FailCount;
+    int					iBitsSinceLastBlock1Pass;
+    int					iBitsSinceLastBlock2Pass;
+    int					iBlock1FailCount;
+    int					iBlock2FailCount;
 
-    bool            blBlock1DataValid;
+    bool			blBlock1DataValid;
 };
 
 

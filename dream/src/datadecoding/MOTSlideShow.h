@@ -1,9 +1,9 @@
 /******************************************************************************\
  * Technische Universitaet Darmstadt, Institut fuer Nachrichtentechnik
- * Copyright (c) 2001-2014
+ * Copyright (c) 2001
  *
  * Author(s):
- *  Volker Fischer
+ *	Volker Fischer
  *
  * Description:
  *
@@ -37,7 +37,7 @@
 /* Encoder ------------------------------------------------------------------ */
 class CMOTSlideShowEncoder
 {
-public:
+  public:
     CMOTSlideShowEncoder (): vecPicFileNames(0), bRemovePath(false)
     {
     }
@@ -49,29 +49,25 @@ public:
 
     void GetDataUnit (CVector < _BINARY > &vecbiNewData);
 
-    void AddFileName(const string & strFileName, const string & strFormat);
-    void ClearAllFileNames() {
-        vecPicFileNames.Init(0);
-    }
-    void SetPathRemoval(bool bNewRemovePath) {
-        bRemovePath=bNewRemovePath;
-    }
-    bool GetTransStat(string & strCurPict, _REAL & rCurPerc) const;
+    void AddFileName(const std::string & strFileName, const std::string & strFormat);
+    void ClearAllFileNames() {vecPicFileNames.Init(0);}
+    void SetPathRemoval(bool bNewRemovePath) {bRemovePath=bNewRemovePath;}
+    bool GetTransStat(std::string & strCurPict, _REAL & rCurPerc) const;
 
-protected:
+  protected:
     struct SPicDescr
     {
-        string strName, strFormat;
+	std::string strName, strFormat;
     };
     void AddNextPicture ();
-    string TransformFilename(const string strFileName);
+    std::string TransformFilename(const std::string strFileName);
 
     CMOTDABEnc MOTDAB;
 
     CVector < SPicDescr > vecPicFileNames;
     int iPictureCnt;
 
-    string strCurObjName;
+    std::string strCurObjName;
 
     bool bRemovePath;
 };

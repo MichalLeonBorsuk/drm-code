@@ -1,12 +1,12 @@
 /******************************************************************************\
  * Technische Universitaet Darmstadt, Institut fuer Nachrichtentechnik
- * Copyright (c) 2001-2014
+ * Copyright (c) 2001
  *
  * Author(s):
- *  Volker Fischer
+ *	Volker Fischer
  *
  * Description:
- *  Multi-level-channel (de)coder (MLC)
+ *	Multi-level-channel (de)coder (MLC)
  *
  ******************************************************************************
  *
@@ -35,6 +35,7 @@
 \******************************************************************************/
 void CMLCEncoder::ProcessDataInternal(CParameter&)
 {
+    int	i, j;
     int iElementCounter;
 
     /* Energy dispersal ----------------------------------------------------- */
@@ -49,10 +50,10 @@ void CMLCEncoder::ProcessDataInternal(CParameter&)
     {
         /* Standard departitioning */
         /* Protection level A */
-        for (int j = 0; j < iLevels; j++)
+        for (j = 0; j < iLevels; j++)
         {
             /* Bits */
-            for (int i = 0; i < iM[j][0]; i++)
+            for (i = 0; i < iM[j][0]; i++)
             {
                 vecEncInBuffer[j][i] =
                     BitToSoft((*pvecInputData)[iElementCounter]);
@@ -62,10 +63,10 @@ void CMLCEncoder::ProcessDataInternal(CParameter&)
         }
 
         /* Protection level B */
-        for (int j = 0; j < iLevels; j++)
+        for (j = 0; j < iLevels; j++)
         {
             /* Bits */
-            for (int i = 0; i < iM[j][1]; i++)
+            for (i = 0; i < iM[j][1]; i++)
             {
                 vecEncInBuffer[j][iM[j][0] + i] =
                     BitToSoft((*pvecInputData)[iElementCounter]);
@@ -80,7 +81,7 @@ void CMLCEncoder::ProcessDataInternal(CParameter&)
            hierarchical bits at the beginning, then append the rest */
         /* Hierarchical frame (always "iM[0][1]"). "iM[0][0]" is always "0" in
            this case */
-        for (int i = 0; i < iM[0][1]; i++)
+        for (i = 0; i < iM[0][1]; i++)
         {
             vecEncInBuffer[0][i] =
                 BitToSoft((*pvecInputData)[iElementCounter]);
@@ -90,10 +91,10 @@ void CMLCEncoder::ProcessDataInternal(CParameter&)
 
 
         /* Protection level A (higher protected part) */
-        for (int j = 1; j < iLevels; j++)
+        for (j = 1; j < iLevels; j++)
         {
             /* Bits */
-            for (int i = 0; i < iM[j][0]; i++)
+            for (i = 0; i < iM[j][0]; i++)
             {
                 vecEncInBuffer[j][i] =
                     BitToSoft((*pvecInputData)[iElementCounter]);
@@ -103,10 +104,10 @@ void CMLCEncoder::ProcessDataInternal(CParameter&)
         }
 
         /* Protection level B  (lower protected part) */
-        for (int j = 1; j < iLevels; j++)
+        for (j = 1; j < iLevels; j++)
         {
             /* Bits */
-            for (int i = 0; i < iM[j][1]; i++)
+            for (i = 0; i < iM[j][1]; i++)
             {
                 vecEncInBuffer[j][iM[j][0] + i] =
                     BitToSoft((*pvecInputData)[iElementCounter]);
@@ -118,12 +119,12 @@ void CMLCEncoder::ProcessDataInternal(CParameter&)
 
 
     /* Convolutional encoder ------------------------------------------------ */
-    for (int j = 0; j < iLevels; j++)
+    for (j = 0; j < iLevels; j++)
         ConvEncoder[j].Encode(vecEncInBuffer[j], vecEncOutBuffer[j]);
 
 
     /* Bit interleaver ------------------------------------------------------ */
-    for (int j = 0; j < iLevels; j++)
+    for (j = 0; j < iLevels; j++)
         if (piInterlSequ[j] != -1)
             BitInterleaver[piInterlSequ[j]].Interleave(vecEncOutBuffer[j]);
 
@@ -139,7 +140,8 @@ void CMLCEncoder::ProcessDataInternal(CParameter&)
 
 void CMLCEncoder::InitInternal(CParameter& TransmParam)
 {
-    int iNumInBits;
+    int i;
+    int	iNumInBits;
 
     TransmParam.Lock();
     CalculateParam(TransmParam, eChannelType);
@@ -153,7 +155,7 @@ void CMLCEncoder::InitInternal(CParameter& TransmParam)
     EnergyDisp.Init(iNumInBits, iL[2]);
 
     /* Encoder */
-    for (int i = 0; i < iLevels; i++)
+    for (i = 0; i < iLevels; i++)
         ConvEncoder[i].Init(eCodingScheme, eChannelType, iN[0], iN[1],
                             iM[i][0], iM[i][1], iCodeRate[i][0], iCodeRate[i][1], i);
 
@@ -176,7 +178,7 @@ void CMLCEncoder::InitInternal(CParameter& TransmParam)
 
 
     /* Allocate memory for internal bit-buffers ----------------------------- */
-    for (int i = 0; i < iLevels; i++)
+    for (i = 0; i < iLevels; i++)
     {
         /* Buffers for each encoder on all different levels */
         /* Add bits from higher protected and lower protected part */
@@ -197,13 +199,14 @@ void CMLCEncoder::InitInternal(CParameter& TransmParam)
 \******************************************************************************/
 void CMLCDecoder::ProcessDataInternal(CParameter&)
 {
-    int         iElementCounter;
-    bool    bIteration;
+    int			i, j, k;
+    int			iElementCounter;
+    bool	bIteration;
 
     /* Save input signal for signal constellation. We cannot use the copy
        operator of vector because the input vector is not of the same size as
        our intermediate buffer, therefore the "for"-loop */
-    for (int i = 0; i < iInputBlockSize; i++)
+    for (i = 0; i < iInputBlockSize; i++)
         vecSigSpacBuf[i] = (*pvecInputData)[i].cSig;
 
 
@@ -212,7 +215,7 @@ void CMLCDecoder::ProcessDataInternal(CParameter&)
 // TEST
     static FILE* pFile = fopen("test/constellation.dat", "w");
     if (eChannelType == CParameter::CT_MSC) {
-        for (int i = 0; i < iInputBlockSize; i++)
+        for (i = 0; i < iInputBlockSize; i++)
             fprintf(pFile, "%e %e\n", vecSigSpacBuf[i].real(), vecSigSpacBuf[i].imag());
         fflush(pFile);
     }
@@ -223,9 +226,9 @@ void CMLCDecoder::ProcessDataInternal(CParameter&)
 
 
     /* Iteration loop */
-    for (int k = 0; k < iNumIterations + 1; k++)
+    for (k = 0; k < iNumIterations + 1; k++)
     {
-        for (int j = 0; j < iLevels; j++)
+        for (j = 0; j < iLevels; j++)
         {
             /* Metric ------------------------------------------------------- */
             if (k > 0)
@@ -276,10 +279,10 @@ void CMLCDecoder::ProcessDataInternal(CParameter&)
     {
         /* Standard departitioning */
         /* Protection level A (higher protected part) */
-        for (int j = 0; j < iLevels; j++)
+        for (j = 0; j < iLevels; j++)
         {
             /* Bits */
-            for (int i = 0; i < iM[j][0]; i++)
+            for (i = 0; i < iM[j][0]; i++)
             {
                 (*pvecOutputData)[iElementCounter] =
                     ExtractBit(vecDecOutBits[j][i]);
@@ -289,10 +292,10 @@ void CMLCDecoder::ProcessDataInternal(CParameter&)
         }
 
         /* Protection level B (lower protected part) */
-        for (int j = 0; j < iLevels; j++)
+        for (j = 0; j < iLevels; j++)
         {
             /* Bits */
-            for (int i = 0; i < iM[j][1]; i++)
+            for (i = 0; i < iM[j][1]; i++)
             {
                 (*pvecOutputData)[iElementCounter] =
                     ExtractBit(vecDecOutBits[j][iM[j][0] + i]);
@@ -307,7 +310,7 @@ void CMLCDecoder::ProcessDataInternal(CParameter&)
            hierarchical bits at the beginning, then append the rest */
         /* Hierarchical frame (always "iM[0][1]"). "iM[0][0]" is always "0" in
            this case */
-        for (int i = 0; i < iM[0][1]; i++)
+        for (i = 0; i < iM[0][1]; i++)
         {
             (*pvecOutputData)[iElementCounter] =
                 ExtractBit(vecDecOutBits[0][i]);
@@ -316,10 +319,10 @@ void CMLCDecoder::ProcessDataInternal(CParameter&)
         }
 
         /* Protection level A (higher protected part) */
-        for (int j = 1; j < iLevels; j++)
+        for (j = 1; j < iLevels; j++)
         {
             /* Bits */
-            for (int i = 0; i < iM[j][0]; i++)
+            for (i = 0; i < iM[j][0]; i++)
             {
                 (*pvecOutputData)[iElementCounter] =
                     ExtractBit(vecDecOutBits[j][i]);
@@ -329,10 +332,10 @@ void CMLCDecoder::ProcessDataInternal(CParameter&)
         }
 
         /* Protection level B (lower protected part) */
-        for (int j = 1; j < iLevels; j++)
+        for (j = 1; j < iLevels; j++)
         {
             /* Bits */
-            for (int i = 0; i < iM[j][1]; i++)
+            for (i = 0; i < iM[j][1]; i++)
             {
                 (*pvecOutputData)[iElementCounter] =
                     ExtractBit(vecDecOutBits[j][iM[j][0] + i]);
@@ -350,6 +353,9 @@ void CMLCDecoder::ProcessDataInternal(CParameter&)
 
 void CMLCDecoder::InitInternal(CParameter& Parameters)
 {
+    int i;
+
+
     /* First, calculate all necessary parameters for decoding process */
     Parameters.Lock();
     CalculateParam(Parameters, eChannelType);
@@ -380,12 +386,12 @@ void CMLCDecoder::InitInternal(CParameter& Parameters)
     EnergyDisp.Init(iNumOutBits, iL[2]);
 
     /* Viterby decoder */
-    for (int i = 0; i < iLevels; i++)
+    for (i = 0; i < iLevels; i++)
         ViterbiDecoder[i].Init(eCodingScheme, eChannelType, iN[0], iN[1],
                                iM[i][0], iM[i][1], iCodeRate[i][0], iCodeRate[i][1], i);
 
     /* Encoder */
-    for (int i = 0; i < iLevels; i++)
+    for (i = 0; i < iLevels; i++)
         ConvEncoder[i].Init(eCodingScheme, eChannelType, iN[0], iN[1],
                             iM[i][0], iM[i][1], iCodeRate[i][0], iCodeRate[i][1], i);
 
@@ -415,11 +421,11 @@ void CMLCDecoder::InitInternal(CParameter& Parameters)
     vecMetric.Init(iNumEncBits);
 
     /* Decoder output buffers for all levels. Have different length */
-    for (int i = 0; i < iLevels; i++)
+    for (i = 0; i < iLevels; i++)
         vecDecOutBits[i].Init(iM[i][0] + iM[i][1]);
 
     /* Buffers for subset definition (always number of encoded bits long) */
-    for (int i = 0; i < MC_MAX_NUM_LEVELS; i++)
+    for (i = 0; i < MC_MAX_NUM_LEVELS; i++)
         vecSubsetDef[i].Init(iNumEncBits);
 
     /* Init buffer for signal space */
@@ -457,19 +463,17 @@ void CMLCDecoder::GetVectorSpace(CVector<_COMPLEX>& veccData)
 \******************************************************************************/
 void CMLC::CalculateParam(CParameter& Parameter, int iNewChannelType)
 {
+    int i;
     int iMSCDataLenPartA;
 
     switch (iNewChannelType)
     {
-    /* FAC ********************************************************************/
+        /* FAC ********************************************************************/
     case CT_FAC:
         eCodingScheme = CS_1_SM;
-        if(Parameter.GetWaveMode() == RM_ROBUSTNESS_MODE_E)
-            iN_mux = NUM_FAC_CELLS_DRMPLUS;
-        else
-            iN_mux = NUM_FAC_CELLS_DRM30;
+        iN_mux = NUM_FAC_CELLS;
 
-        iNumEncBits = iN_mux * 2;
+        iNumEncBits = NUM_FAC_CELLS * 2;
 
         iLevels = 1;
 
@@ -491,7 +495,7 @@ void CMLC::CalculateParam(CParameter& Parameter, int iNewChannelType)
 
         /* iM: Number of bits each level ------------------------------------ */
         iM[0][0] = 0;
-        iM[0][1] = Parameter.iNumFACBitsPerBlock;
+        iM[0][1] = NUM_FAC_BITS_PER_BLOCK;
 
 
         /* iL: Number of bits each protection level ------------------------- */
@@ -506,7 +510,7 @@ void CMLC::CalculateParam(CParameter& Parameter, int iNewChannelType)
         break;
 
 
-    /* SDC ********************************************************************/
+        /* SDC ********************************************************************/
     case CT_SDC:
         eCodingScheme = Parameter.eSDCCodingScheme;
         iN_mux = Parameter.CellMappingTable.iNumSDCCellsPerSFrame;
@@ -558,7 +562,7 @@ void CMLC::CalculateParam(CParameter& Parameter, int iNewChannelType)
             iLevels = 2;
 
             /* Code rates for prot.-Level A and B for each level */
-            for (int i = 0; i < 2; i++)
+            for (i = 0; i < 2; i++)
             {
                 /* Protection Level A */
                 iCodeRate[i][0] = 0;
@@ -578,7 +582,7 @@ void CMLC::CalculateParam(CParameter& Parameter, int iNewChannelType)
 
             /* iM: Number of bits each level -------------------------------- */
             /* M_p,2 = RX_p * floor((N_2 - 6) / RY_p) */
-            for (int i = 0; i < 2; i++)
+            for (i = 0; i < 2; i++)
             {
                 iM[i][0] = 0;
 
@@ -609,7 +613,7 @@ void CMLC::CalculateParam(CParameter& Parameter, int iNewChannelType)
         break;
 
 
-    /* MSC ********************************************************************/
+        /* MSC ********************************************************************/
     case CT_MSC:
         eCodingScheme = Parameter.eMSCCodingScheme;
         iN_mux = Parameter.CellMappingTable.iNumUsefMSCCellsPerFrame;
@@ -626,7 +630,7 @@ void CMLC::CalculateParam(CParameter& Parameter, int iNewChannelType)
             iLevels = 2;
 
             /* Code rates for prot.-Level A and B for each level */
-            for (int i = 0; i < 2; i++)
+            for (i = 0; i < 2; i++)
             {
                 /* Protection Level A */
                 iCodeRate[i][0] =
@@ -651,14 +655,14 @@ void CMLC::CalculateParam(CParameter& Parameter, int iNewChannelType)
                                (
                                    /* R_0 */
                                    (_REAL) iPuncturingPatterns[iCodRateCombMSC16SM[
-                                               Parameter.MSCPrLe.iPartA][0]][0] /
+                                                                   Parameter.MSCPrLe.iPartA][0]][0] /
                                    iPuncturingPatterns[iCodRateCombMSC16SM[
-                                               Parameter.MSCPrLe.iPartA][0]][1] +
+                                                           Parameter.MSCPrLe.iPartA][0]][1] +
                                    /* R_1 */
                                    (_REAL) iPuncturingPatterns[iCodRateCombMSC16SM[
-                                               Parameter.MSCPrLe.iPartA][1]][0] /
+                                                                   Parameter.MSCPrLe.iPartA][1]][0] /
                                    iPuncturingPatterns[iCodRateCombMSC16SM[
-                                               Parameter.MSCPrLe.iPartA][1]][1]))) *
+                                                           Parameter.MSCPrLe.iPartA][1]][1]))) *
                     /* RY_Icm */
                     iCodRateCombMSC16SM[Parameter.MSCPrLe.iPartA][2];
 
@@ -671,14 +675,14 @@ void CMLC::CalculateParam(CParameter& Parameter, int iNewChannelType)
 
 
             /* iM: Number of bits each level -------------------------------- */
-            for (int i = 0; i < 2; i++)
+            for (i = 0; i < 2; i++)
             {
                 /* M_p,1 = 2 * N_1 * R_p */
                 iM[i][0] = (int) (2 * iN[0] *
                                   (_REAL) iPuncturingPatterns[iCodRateCombMSC16SM[
-                                              Parameter.MSCPrLe.iPartA][i]][0] /
+                                                                  Parameter.MSCPrLe.iPartA][i]][0] /
                                   iPuncturingPatterns[iCodRateCombMSC16SM[
-                                          Parameter.MSCPrLe.iPartA][i]][1]);
+                                                          Parameter.MSCPrLe.iPartA][i]][1]);
 
                 /* M_p,2 = RX_p * floor((2 * N_2 - 12) / RY_p) */
                 iM[i][1] =
@@ -705,7 +709,7 @@ void CMLC::CalculateParam(CParameter& Parameter, int iNewChannelType)
             iLevels = 3;
 
             /* Code rates for prot.-Level A and B for each level */
-            for (int i = 0; i < 3; i++)
+            for (i = 0; i < 3; i++)
             {
                 /* Protection Level A */
                 iCodeRate[i][0] =
@@ -730,19 +734,19 @@ void CMLC::CalculateParam(CParameter& Parameter, int iNewChannelType)
                                (
                                    /* R_0 */
                                    (_REAL) iPuncturingPatterns[iCodRateCombMSC64SM[
-                                               Parameter.MSCPrLe.iPartA][0]][0] /
+                                                                   Parameter.MSCPrLe.iPartA][0]][0] /
                                    iPuncturingPatterns[iCodRateCombMSC64SM[
-                                               Parameter.MSCPrLe.iPartA][0]][1] +
+                                                           Parameter.MSCPrLe.iPartA][0]][1] +
                                    /* R_1 */
                                    (_REAL) iPuncturingPatterns[iCodRateCombMSC64SM[
-                                               Parameter.MSCPrLe.iPartA][1]][0] /
+                                                                   Parameter.MSCPrLe.iPartA][1]][0] /
                                    iPuncturingPatterns[iCodRateCombMSC64SM[
-                                               Parameter.MSCPrLe.iPartA][1]][1] +
+                                                           Parameter.MSCPrLe.iPartA][1]][1] +
                                    /* R_2 */
                                    (_REAL) iPuncturingPatterns[iCodRateCombMSC64SM[
-                                               Parameter.MSCPrLe.iPartA][2]][0] /
+                                                                   Parameter.MSCPrLe.iPartA][2]][0] /
                                    iPuncturingPatterns[iCodRateCombMSC64SM[
-                                               Parameter.MSCPrLe.iPartA][2]][1]))) *
+                                                           Parameter.MSCPrLe.iPartA][2]][1]))) *
                     /* RY_Icm */
                     iCodRateCombMSC64SM[Parameter.MSCPrLe.iPartA][3];
 
@@ -755,14 +759,14 @@ void CMLC::CalculateParam(CParameter& Parameter, int iNewChannelType)
 
 
             /* iM: Number of bits each level -------------------------------- */
-            for (int i = 0; i < 3; i++)
+            for (i = 0; i < 3; i++)
             {
                 /* M_p,1 = 2 * N_1 * R_p */
                 iM[i][0] = (int) (2 * iN[0] *
                                   (_REAL) iPuncturingPatterns[iCodRateCombMSC64SM[
-                                              Parameter.MSCPrLe.iPartA][i]][0] /
+                                                                  Parameter.MSCPrLe.iPartA][i]][0] /
                                   iPuncturingPatterns[iCodRateCombMSC64SM[
-                                          Parameter.MSCPrLe.iPartA][i]][1]);
+                                                          Parameter.MSCPrLe.iPartA][i]][1]);
 
                 /* M_p,2 = RX_p * floor((2 * N_2 - 12) / RY_p) */
                 iM[i][1] =
@@ -794,7 +798,7 @@ void CMLC::CalculateParam(CParameter& Parameter, int iNewChannelType)
             iCodeRate[0][1] =
                 iCodRateCombMSC64HMsym[Parameter.MSCPrLe.iHierarch][0];
 
-            for (int i = 1; i < 3; i++)
+            for (i = 1; i < 3; i++)
             {
                 /* Protection Level A */
                 iCodeRate[i][0] =
@@ -819,14 +823,14 @@ void CMLC::CalculateParam(CParameter& Parameter, int iNewChannelType)
                                (
                                    /* R_1 */
                                    (_REAL) iPuncturingPatterns[iCodRateCombMSC64HMsym[
-                                               Parameter.MSCPrLe.iPartA][1]][0] /
+                                                                   Parameter.MSCPrLe.iPartA][1]][0] /
                                    iPuncturingPatterns[iCodRateCombMSC64HMsym[
-                                               Parameter.MSCPrLe.iPartA][1]][1] +
+                                                           Parameter.MSCPrLe.iPartA][1]][1] +
                                    /* R_2 */
                                    (_REAL) iPuncturingPatterns[iCodRateCombMSC64HMsym[
-                                               Parameter.MSCPrLe.iPartA][2]][0] /
+                                                                   Parameter.MSCPrLe.iPartA][2]][0] /
                                    iPuncturingPatterns[iCodRateCombMSC64HMsym[
-                                               Parameter.MSCPrLe.iPartA][2]][1]))) *
+                                                           Parameter.MSCPrLe.iPartA][2]][1]))) *
                     /* RY_Icm */
                     iCodRateCombMSC64HMsym[Parameter.MSCPrLe.iPartA][3];
 
@@ -851,14 +855,14 @@ void CMLC::CalculateParam(CParameter& Parameter, int iNewChannelType)
                        iPuncturingPatterns[iCodRateCombMSC64HMsym[
                                                Parameter.MSCPrLe.iHierarch][0]][1]);
 
-            for (int i = 1; i < 3; i++)
+            for (i = 1; i < 3; i++)
             {
                 /* M_p,1 = 2 * N_1 * R_p */
                 iM[i][0] = (int) (2 * iN[0] *
                                   (_REAL) iPuncturingPatterns[iCodRateCombMSC64HMsym[
-                                              Parameter.MSCPrLe.iPartA][i]][0] /
+                                                                  Parameter.MSCPrLe.iPartA][i]][0] /
                                   iPuncturingPatterns[iCodRateCombMSC64HMsym[
-                                          Parameter.MSCPrLe.iPartA][i]][1]);
+                                                          Parameter.MSCPrLe.iPartA][i]][1]);
 
                 /* M_p,2 = RX_p * floor((2 * N_2 - 12) / RY_p) */
                 iM[i][1] =
@@ -890,7 +894,7 @@ void CMLC::CalculateParam(CParameter& Parameter, int iNewChannelType)
             iCodeRate[0][1] =
                 iCodRateCombMSC64HMmix[Parameter.MSCPrLe.iHierarch][0];
 
-            for (int i = 1; i < 6; i++)
+            for (i = 1; i < 6; i++)
             {
                 /* Protection Level A */
                 iCodeRate[i][0] =
@@ -915,29 +919,29 @@ void CMLC::CalculateParam(CParameter& Parameter, int iNewChannelType)
                                    (
                                        /* R_1 */
                                        (_REAL) iPuncturingPatterns[iCodRateCombMSC64HMmix[
-                                                   Parameter.MSCPrLe.iPartA][1]][0] /
+                                                                       Parameter.MSCPrLe.iPartA][1]][0] /
                                        iPuncturingPatterns[iCodRateCombMSC64HMmix[
-                                                   Parameter.MSCPrLe.iPartA][1]][1] +
+                                                               Parameter.MSCPrLe.iPartA][1]][1] +
                                        /* R_2 */
                                        (_REAL) iPuncturingPatterns[iCodRateCombMSC64HMmix[
-                                                   Parameter.MSCPrLe.iPartA][2]][0] /
+                                                                       Parameter.MSCPrLe.iPartA][2]][0] /
                                        iPuncturingPatterns[iCodRateCombMSC64HMmix[
-                                                   Parameter.MSCPrLe.iPartA][2]][1] +
+                                                               Parameter.MSCPrLe.iPartA][2]][1] +
                                        /* R_3 */
                                        (_REAL) iPuncturingPatterns[iCodRateCombMSC64HMmix[
-                                                   Parameter.MSCPrLe.iPartA][3]][0] /
+                                                                       Parameter.MSCPrLe.iPartA][3]][0] /
                                        iPuncturingPatterns[iCodRateCombMSC64HMmix[
-                                                   Parameter.MSCPrLe.iPartA][3]][1] +
+                                                               Parameter.MSCPrLe.iPartA][3]][1] +
                                        /* R_4 */
                                        (_REAL) iPuncturingPatterns[iCodRateCombMSC64HMmix[
-                                                   Parameter.MSCPrLe.iPartA][4]][0] /
+                                                                       Parameter.MSCPrLe.iPartA][4]][0] /
                                        iPuncturingPatterns[iCodRateCombMSC64HMmix[
-                                                   Parameter.MSCPrLe.iPartA][4]][1] +
+                                                               Parameter.MSCPrLe.iPartA][4]][1] +
                                        /* R_5 */
                                        (_REAL) iPuncturingPatterns[iCodRateCombMSC64HMmix[
-                                                   Parameter.MSCPrLe.iPartA][5]][0] /
+                                                                       Parameter.MSCPrLe.iPartA][5]][0] /
                                        iPuncturingPatterns[iCodRateCombMSC64HMmix[
-                                                   Parameter.MSCPrLe.iPartA][5]][1]))) *
+                                                               Parameter.MSCPrLe.iPartA][5]][1]))) *
                     /* RY_Icm */
                     iCodRateCombMSC64HMmix[Parameter.MSCPrLe.iPartA][6];
 
@@ -963,14 +967,14 @@ void CMLC::CalculateParam(CParameter& Parameter, int iNewChannelType)
                        iPuncturingPatterns[iCodRateCombMSC64HMmix[
                                                Parameter.MSCPrLe.iHierarch][0]][1]);
 
-            for (int i = 1; i < 6; i++)
+            for (i = 1; i < 6; i++)
             {
                 /* M_p,1Re;Im = 2 * N_1 * R_pRe;Im */
                 iM[i][0] = (int) (iN[0] *
                                   (_REAL) iPuncturingPatterns[iCodRateCombMSC64HMmix[
-                                              Parameter.MSCPrLe.iPartA][i]][0] /
+                                                                  Parameter.MSCPrLe.iPartA][i]][0] /
                                   iPuncturingPatterns[iCodRateCombMSC64HMmix[
-                                          Parameter.MSCPrLe.iPartA][i]][1]);
+                                                          Parameter.MSCPrLe.iPartA][i]][1]);
 
                 /* M_p,2Re;Im =
                    RX_pRe;Im * floor((2 * N_2 - 12) / RY_pRe;Im) */

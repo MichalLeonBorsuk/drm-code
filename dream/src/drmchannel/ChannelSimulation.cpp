@@ -1,12 +1,12 @@
 /******************************************************************************\
  * Technische Universitaet Darmstadt, Institut fuer Nachrichtentechnik
- * Copyright (c) 2001-2014
+ * Copyright (c) 2001
  *
  * Author(s):
- *  Volker Fischer, Alexander Kurpiers
+ *	Volker Fischer, Alexander Kurpiers
  *
  * Description:
- *  DRM channel simulation
+ *	DRM channel simulation
  *
  ******************************************************************************
  *
@@ -32,8 +32,8 @@
 /* Implementation *************************************************************/
 void CDRMChannel::ProcessDataInternal(CParameter&)
 {
-    int         i, j;
-    _COMPLEX    cCurTapSamp;
+    int			i, j;
+    _COMPLEX	cCurTapSamp;
 
     /* Save old values from the end of the vector */
     for (i = 0; i < iMaxDelay; i++)
@@ -51,7 +51,7 @@ void CDRMChannel::ProcessDataInternal(CParameter&)
     {
         cCurTapSamp = tap[0].Update() * cCurExp[0];
 
-        veccOutput[i] = veccHistory[i + iMaxDelay /* - 0 */] * cCurTapSamp;
+        veccOutput[i] =	veccHistory[i + iMaxDelay /* - 0 */] * cCurTapSamp;
 
         /* Rotate exp-pointer one step further by complex multiplication with
            precalculated rotation vector cExpStep. This saves us from
@@ -112,11 +112,11 @@ void CDRMChannel::InitInternal(CParameter& Parameters)
         iNumTaps = 1;
 
         tap[0].Init(
-            /* Sample Rate */   iSampleRate,
-            /* Delay: */    (_REAL) 0.0,
-            /* Gain: */     (_REAL) 1.0,
-            /* Fshift: */   (_REAL) 0.0,
-            /* Fd: */       (_REAL) 0.0);
+		/* Sample Rate */	iSampleRate,
+		/* Delay: */	(_REAL) 0.0,
+                /* Gain: */		(_REAL) 1.0,
+                /* Fshift: */	(_REAL) 0.0,
+                /* Fd: */		(_REAL) 0.0);
         break;
 
     case 2:
@@ -124,18 +124,18 @@ void CDRMChannel::InitInternal(CParameter& Parameters)
         iNumTaps = 2;
 
         tap[0].Init(
-            /* Sample Rate */   iSampleRate,
-            /* Delay: */    (_REAL) 0.0,
-            /* Gain: */        (_REAL) 1.0,
-            /* Fshift: */  (_REAL) 0.0,
-            /* Fd: */      (_REAL) 0.0);
+		/* Sample Rate */	iSampleRate,
+/* Delay: */	(_REAL) 0.0,
+                                 /* Gain: */		(_REAL) 1.0,
+                                 /* Fshift: */	(_REAL) 0.0,
+                                 /* Fd: */		(_REAL) 0.0);
 
         tap[1].Init(
-            /* Sample Rate */   iSampleRate,
-            /* Delay: */    (_REAL) 1.0,
-            /* Gain: */        (_REAL) 0.5,
-            /* Fshift: */  (_REAL) 0.0,
-            /* Fd: */      (_REAL) 0.1);
+		/* Sample Rate */	iSampleRate,
+	/* Delay: */	(_REAL) 1.0,
+                                 /* Gain: */		(_REAL) 0.5,
+                                 /* Fshift: */	(_REAL) 0.0,
+                                 /* Fd: */		(_REAL) 0.1);
         break;
 
     case 3:
@@ -143,32 +143,32 @@ void CDRMChannel::InitInternal(CParameter& Parameters)
         iNumTaps = 4;
 
         tap[0].Init(
-            /* Sample Rate */   iSampleRate,
-            /* Delay: */    (_REAL) 0.0,
-            /* Gain: */        (_REAL) 1.0,
-            /* Fshift: */  (_REAL) 0.1,
-            /* Fd: */      (_REAL) 0.1);
+		/* Sample Rate */	iSampleRate,
+/* Delay: */	(_REAL) 0.0,
+                                 /* Gain: */		(_REAL) 1.0,
+                                 /* Fshift: */	(_REAL) 0.1,
+                                 /* Fd: */		(_REAL) 0.1);
 
         tap[1].Init(
-            /* Sample Rate */   iSampleRate,
-            /* Delay: */    (_REAL) 0.7,
-            /* Gain: */        (_REAL) 0.7,
-            /* Fshift: */  (_REAL) 0.2,
-            /* Fd: */      (_REAL) 0.5);
+		/* Sample Rate */	iSampleRate,
+/* Delay: */	(_REAL) 0.7,
+                                 /* Gain: */		(_REAL) 0.7,
+                                 /* Fshift: */	(_REAL) 0.2,
+                                 /* Fd: */		(_REAL) 0.5);
 
         tap[2].Init(
-            /* Sample Rate */   iSampleRate,
-            /* Delay: */    (_REAL) 1.5,
-            /* Gain: */        (_REAL) 0.5,
-            /* Fshift: */  (_REAL) 0.5,
-            /* Fd: */      (_REAL) 1.0);
+		/* Sample Rate */	iSampleRate,
+/* Delay: */	(_REAL) 1.5,
+                                 /* Gain: */		(_REAL) 0.5,
+                                 /* Fshift: */	(_REAL) 0.5,
+                                 /* Fd: */		(_REAL) 1.0);
 
         tap[3].Init(
-            /* Sample Rate */   iSampleRate,
-            /* Delay: */    (_REAL) 2.2,
-            /* Gain: */        (_REAL) 0.25,
-            /* Fshift: */  (_REAL) 1.0,
-            /* Fd: */      (_REAL) 2.0);
+		/* Sample Rate */	iSampleRate,
+/* Delay: */	(_REAL) 2.2,
+                                 /* Gain: */		(_REAL) 0.25,
+                                 /* Fshift: */	(_REAL) 1.0,
+                                 /* Fd: */		(_REAL) 2.0);
         break;
 
     case 4:
@@ -176,18 +176,18 @@ void CDRMChannel::InitInternal(CParameter& Parameters)
         iNumTaps = 2;
 
         tap[0].Init(
-            /* Sample Rate */   iSampleRate,
-            /* Delay: */    (_REAL) 0.0,
-            /* Gain: */        (_REAL) 1.0,
-            /* Fshift: */  (_REAL) 0.0,
-            /* Fd: */      (_REAL) 1.0);
+		/* Sample Rate */	iSampleRate,
+	/* Delay: */	(_REAL) 0.0,
+                                 /* Gain: */		(_REAL) 1.0,
+                                 /* Fshift: */	(_REAL) 0.0,
+                                 /* Fd: */		(_REAL) 1.0);
 
         tap[1].Init(
-            /* Sample Rate */   iSampleRate,
-            /* Delay: */    (_REAL) 2.0,
-            /* Gain: */        (_REAL) 1.0,
-            /* Fshift: */  (_REAL) 0.0,
-            /* Fd: */      (_REAL) 1.0);
+		/* Sample Rate */	iSampleRate,
+	/* Delay: */	(_REAL) 2.0,
+                                 /* Gain: */		(_REAL) 1.0,
+                                 /* Fshift: */	(_REAL) 0.0,
+                                 /* Fd: */		(_REAL) 1.0);
         break;
 
     case 5:
@@ -195,18 +195,18 @@ void CDRMChannel::InitInternal(CParameter& Parameters)
         iNumTaps = 2;
 
         tap[0].Init(
-            /* Sample Rate */   iSampleRate,
-            /* Delay: */    (_REAL) 0.0,
-            /* Gain: */        (_REAL) 1.0,
-            /* Fshift: */  (_REAL) 0.0,
-            /* Fd: */      (_REAL) 2.0);
+		/* Sample Rate */	iSampleRate,
+	/* Delay: */	(_REAL) 0.0,
+                                 /* Gain: */		(_REAL) 1.0,
+                                 /* Fshift: */	(_REAL) 0.0,
+                                 /* Fd: */		(_REAL) 2.0);
 
         tap[1].Init(
-            /* Sample Rate */   iSampleRate,
-            /* Delay: */    (_REAL) 4.0,
-            /* Gain: */        (_REAL) 1.0,
-            /* Fshift: */  (_REAL) 0.0,
-            /* Fd: */      (_REAL) 2.0);
+		/* Sample Rate */	iSampleRate,
+	/* Delay: */	(_REAL) 4.0,
+                                 /* Gain: */		(_REAL) 1.0,
+                                 /* Fshift: */	(_REAL) 0.0,
+                                 /* Fd: */		(_REAL) 2.0);
         break;
 
     case 6:
@@ -214,67 +214,67 @@ void CDRMChannel::InitInternal(CParameter& Parameters)
         iNumTaps = 4;
 
         tap[0].Init(
-            /* Sample Rate */   iSampleRate,
-            /* Delay: */    (_REAL) 0.0,
-            /* Gain: */        (_REAL) 0.5,
-            /* Fshift: */  (_REAL) 0.0,
-            /* Fd: */      (_REAL) 0.1);
+		/* Sample Rate */	iSampleRate,
+	/* Delay: */	(_REAL) 0.0,
+                                 /* Gain: */		(_REAL) 0.5,
+                                 /* Fshift: */	(_REAL) 0.0,
+                                 /* Fd: */		(_REAL) 0.1);
 
         tap[1].Init(
-            /* Sample Rate */   iSampleRate,
-            /* Delay: */    (_REAL) 2.0,
-            /* Gain: */        (_REAL) 1.0,
-            /* Fshift: */  (_REAL) 1.2,
-            /* Fd: */      (_REAL) 2.4);
+		/* Sample Rate */	iSampleRate,
+	/* Delay: */	(_REAL) 2.0,
+                                 /* Gain: */		(_REAL) 1.0,
+                                 /* Fshift: */	(_REAL) 1.2,
+                                 /* Fd: */		(_REAL) 2.4);
 
         tap[2].Init(
-            /* Sample Rate */   iSampleRate,
-            /* Delay: */    (_REAL) 4.0,
-            /* Gain: */        (_REAL) 0.25,
-            /* Fshift: */  (_REAL) 2.4,
-            /* Fd: */      (_REAL) 4.8);
+		/* Sample Rate */	iSampleRate,
+	/* Delay: */	(_REAL) 4.0,
+                                 /* Gain: */		(_REAL) 0.25,
+                                 /* Fshift: */	(_REAL) 2.4,
+                                 /* Fd: */		(_REAL) 4.8);
 
         tap[3].Init(
-            /* Sample Rate */   iSampleRate,
-            /* Delay: */    (_REAL) 6.0,
-            /* Gain: */        (_REAL) 0.0625,
-            /* Fshift: */  (_REAL) 3.6,
-            /* Fd: */      (_REAL) 7.2);
+		/* Sample Rate */	iSampleRate,
+	/* Delay: */	(_REAL) 6.0,
+                                 /* Gain: */		(_REAL) 0.0625,
+                                 /* Fshift: */	(_REAL) 3.6,
+                                 /* Fd: */		(_REAL) 7.2);
         break;
 
 
-    /* My own test channels, NOT DEFINED IN THE DRM STANDARD! --------------- */
+        /* My own test channels, NOT DEFINED IN THE DRM STANDARD! --------------- */
     case 7:
         /* Channel without fading and doppler shift */
         iNumTaps = 4;
 
         tap[0].Init(
-            /* Sample Rate */   iSampleRate,
-            /* Delay: */    (_REAL) 0.0,
-            /* Gain: */        (_REAL) 1.0,
-            /* Fshift: */  (_REAL) 0.0,
-            /* Fd: */      (_REAL) 0.0);
+		/* Sample Rate */	iSampleRate,
+	/* Delay: */	(_REAL) 0.0,
+                                 /* Gain: */		(_REAL) 1.0,
+                                 /* Fshift: */	(_REAL) 0.0,
+                                 /* Fd: */		(_REAL) 0.0);
 
         tap[1].Init(
-            /* Sample Rate */   iSampleRate,
-            /* Delay: */    (_REAL) 0.7,
-            /* Gain: */        (_REAL) 0.7,
-            /* Fshift: */  (_REAL) 0.0,
-            /* Fd: */      (_REAL) 0.0);
+		/* Sample Rate */	iSampleRate,
+	/* Delay: */	(_REAL) 0.7,
+                                 /* Gain: */		(_REAL) 0.7,
+                                 /* Fshift: */	(_REAL) 0.0,
+                                 /* Fd: */		(_REAL) 0.0);
 
         tap[2].Init(
-            /* Sample Rate */   iSampleRate,
-            /* Delay: */    (_REAL) 1.5,
-            /* Gain: */        (_REAL) 0.5,
-            /* Fshift: */  (_REAL) 0.0,
-            /* Fd: */      (_REAL) 0.0);
+		/* Sample Rate */	iSampleRate,
+	/* Delay: */	(_REAL) 1.5,
+                                 /* Gain: */		(_REAL) 0.5,
+                                 /* Fshift: */	(_REAL) 0.0,
+                                 /* Fd: */		(_REAL) 0.0);
 
         tap[3].Init(
-            /* Sample Rate */   iSampleRate,
-            /* Delay: */    (_REAL) 2.2,
-            /* Gain: */        (_REAL) 0.25,
-            /* Fshift: */  (_REAL) 0.0,
-            /* Fd: */      (_REAL) 0.0);
+		/* Sample Rate */	iSampleRate,
+	/* Delay: */	(_REAL) 2.2,
+                                 /* Gain: */		(_REAL) 0.25,
+                                 /* Fshift: */	(_REAL) 0.0,
+                                 /* Fd: */		(_REAL) 0.0);
         break;
 
     case 8:
@@ -282,11 +282,11 @@ void CDRMChannel::InitInternal(CParameter& Parameters)
         iNumTaps = 1;
 
         tap[0].Init(
-            /* Sample Rate */   iSampleRate,
-            /* Delay: */    (_REAL) 0.0,
-            /* Gain: */        (_REAL) 1.0,
-            /* Fshift: */  (_REAL) 0.0,
-            /* Fd: */      (_REAL) Parameters.iSpecChDoppler);
+		/* Sample Rate */	iSampleRate,
+	/* Delay: */	(_REAL) 0.0,
+                                 /* Gain: */		(_REAL) 1.0,
+                                 /* Fshift: */	(_REAL) 0.0,
+                                 /* Fd: */		(_REAL) Parameters.iSpecChDoppler);
         break;
 
     case 9:
@@ -294,18 +294,18 @@ void CDRMChannel::InitInternal(CParameter& Parameters)
         iNumTaps = 2;
 
         tap[0].Init(
-            /* Sample Rate */   iSampleRate,
-            /* Delay: */    (_REAL) 0.0,
-            /* Gain: */        (_REAL) 1.0,
-            /* Fshift: */  (_REAL) 0.0,
-            /* Fd: */      (_REAL) 1.0);
+		/* Sample Rate */	iSampleRate,
+	/* Delay: */	(_REAL) 0.0,
+                                 /* Gain: */		(_REAL) 1.0,
+                                 /* Fshift: */	(_REAL) 0.0,
+                                 /* Fd: */		(_REAL) 1.0);
 
         tap[1].Init(
-            /* Sample Rate */   iSampleRate,
-            /* Delay: */    (_REAL) 0.7,
-            /* Gain: */        (_REAL) 1.0,
-            /* Fshift: */  (_REAL) 0.0,
-            /* Fd: */      (_REAL) 1.0);
+		/* Sample Rate */	iSampleRate,
+	/* Delay: */	(_REAL) 0.7,
+                                 /* Gain: */		(_REAL) 1.0,
+                                 /* Fshift: */	(_REAL) 0.0,
+                                 /* Fd: */		(_REAL) 1.0);
         break;
 
     case 10:
@@ -313,11 +313,11 @@ void CDRMChannel::InitInternal(CParameter& Parameters)
         iNumTaps = 1;
 
         tap[0].Init(
-            /* Sample Rate */   iSampleRate,
-            /* Delay: */    (_REAL) 0.0,
-            /* Gain: */        (_REAL) 1.0,
-            /* Fshift: */  (_REAL) Parameters.iSpecChDoppler,
-            /* Fd: */      (_REAL) 0.0);
+		/* Sample Rate */	iSampleRate,
+	/* Delay: */	(_REAL) 0.0,
+                                 /* Gain: */		(_REAL) 1.0,
+                                 /* Fshift: */	(_REAL) Parameters.iSpecChDoppler,
+                                 /* Fd: */		(_REAL) 0.0);
         break;
 
     case 11:
@@ -325,18 +325,18 @@ void CDRMChannel::InitInternal(CParameter& Parameters)
         iNumTaps = 2;
 
         tap[0].Init(
-            /* Sample Rate */   iSampleRate,
-            /* Delay: */    (_REAL) 0.0,
-            /* Gain: */        (_REAL) 1.0,
-            /* Fshift: */  (_REAL) 0.0,
-            /* Fd: */      (_REAL) Parameters.iSpecChDoppler);
+		/* Sample Rate */	iSampleRate,
+	/* Delay: */	(_REAL) 0.0,
+                                 /* Gain: */		(_REAL) 1.0,
+                                 /* Fshift: */	(_REAL) 0.0,
+                                 /* Fd: */		(_REAL) Parameters.iSpecChDoppler);
 
         tap[1].Init(
-            /* Sample Rate */   iSampleRate,
-            /* Delay: */    (_REAL) 4.0,
-            /* Gain: */        (_REAL) 1.0,
-            /* Fshift: */  (_REAL) 0.0,
-            /* Fd: */      (_REAL) Parameters.iSpecChDoppler);
+		/* Sample Rate */	iSampleRate,
+	/* Delay: */	(_REAL) 4.0,
+                                 /* Gain: */		(_REAL) 1.0,
+                                 /* Fshift: */	(_REAL) 0.0,
+                                 /* Fd: */		(_REAL) Parameters.iSpecChDoppler);
         break;
 
     case 12:
@@ -345,11 +345,11 @@ void CDRMChannel::InitInternal(CParameter& Parameters)
         iNumTaps = 1;
 
         tap[0].Init(
-            /* Sample Rate */   iSampleRate,
-            /* Delay: */    (_REAL) 0.0,
-            /* Gain: */        (_REAL) 1.0,
-            /* Fshift: */  (_REAL) 0.0,
-            /* Fd: */      (_REAL) Parameters.iSpecChDoppler);
+		/* Sample Rate */	iSampleRate,
+	/* Delay: */	(_REAL) 0.0,
+                                 /* Gain: */		(_REAL) 1.0,
+                                 /* Fshift: */	(_REAL) 0.0,
+                                 /* Fd: */		(_REAL) Parameters.iSpecChDoppler);
         break;
     }
 
@@ -407,7 +407,7 @@ void CDRMChannel::InitInternal(CParameter& Parameters)
 
 
     /* Set seed of random noise generator */
-    srand((unsigned) time(NULL));
+    srand((unsigned) time(nullptr));
 
     /* Define block-sizes for input and output */
     iInputBlockSize = Parameters.CellMappingTable.iSymbolBlockSize;
@@ -418,8 +418,8 @@ void CDRMChannel::InitInternal(CParameter& Parameters)
 void CTapgain::Init(int iNewSampleRate, _REAL rNewDelay, _REAL rNewGain, _REAL rNewFshift,
                     _REAL rNewFd)
 {
-    _REAL   s;
-    int     k;
+    _REAL	s;
+    int		k;
 
     /* Set internal parameters (convert units and normalize values) */
 
@@ -505,8 +505,8 @@ void CTapgain::Init(int iNewSampleRate, _REAL rNewDelay, _REAL rNewGain, _REAL r
 
 _COMPLEX CTapgain::Update()
 {
-    int         k;
-    _COMPLEX    out;
+    int			k;
+    _COMPLEX	out;
 
     /* If tap is not fading, just return gain */
     if (fd == (_REAL) 0.0)

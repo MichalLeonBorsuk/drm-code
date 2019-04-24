@@ -1,9 +1,9 @@
 /******************************************************************************\
  * Technische Universitaet Darmstadt, Institut fuer Nachrichtentechnik
- * Copyright (c) 2001-2014
+ * Copyright (c) 2001
  *
  * Author(s):
- *  Volker Fischer
+ *	Volker Fischer
  *
  * Description:
  *
@@ -43,24 +43,24 @@ public:
     CConvEncoder() {}
     virtual ~CConvEncoder() {}
 
-    int     Encode(CVector<_DECISION>& vecInputData,
-                   CVector<_DECISION>& vecOutputData);
+    int		Encode(CVector<_DECISION>& vecInputData,
+                CVector<_DECISION>& vecOutputData);
 
-    void    Init(ECodScheme eNewCodingScheme, EChanType eNewChannelType,
-                 int iN1, int iN2, int iNewNumInBitsPartA,
-                 int iNewNumInBitsPartB, int iPunctPatPartA, int iPunctPatPartB,
-                 int iLevel);
+    void	Init(ECodScheme eNewCodingScheme, EChanType eNewChannelType,
+              int iN1, int iN2, int iNewNumInBitsPartA,
+              int iNewNumInBitsPartB, int iPunctPatPartA, int iPunctPatPartB,
+              int iLevel);
 
 protected:
-    int                     iNumInBits;
-    int                     iNumInBitsWithMemory;
+    int						iNumInBits;
+    int						iNumInBitsWithMemory;
 
-    CVector<int>            veciTablePuncPat;
+    CVector<int>			veciTablePuncPat;
 
-    EChanType   eChannelType;
+    EChanType	eChannelType;
 
 #ifdef USE_MAX_LOG_MAP
-    CShiftRegister<_DECISION>   vecStateMem;
+    CShiftRegister<_DECISION>	vecStateMem;
     _DECISION SoftConvolution(const _BYTE byNewStateShiftReg,
                               CShiftRegister<_DECISION>& vecStateMem,
                               const int iGenPolyn);

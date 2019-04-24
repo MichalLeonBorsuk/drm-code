@@ -1,12 +1,12 @@
 /******************************************************************************\
  * British Broadcasting Corporation
- * Copyright (c) 2001-2014
+ * Copyright (c) 2006
  *
  * Author(s):
- *  Julian Cable
+ *	Julian Cable
  *
  * Description:
- *  ETSI DAB/DRM Electronic Programme Guide utilities
+ *	ETSI DAB/DRM Electronic Programme Guide utilities
  *
  *
  ******************************************************************************
@@ -38,33 +38,36 @@
 
 class EPG
 {
-public:
-    EPG (CParameter&, const string&);
+  public:
+    EPG (CParameter&);
     virtual ~ EPG ()
     {
+	saveChannels (servicesFilename);
     }
-    /* assignment operator to help MSVC8 */
-    EPG& operator=(const EPG&);
+	/* assignment operator to help MSVC8 */
+	EPG& operator=(const EPG&);
 
-    void addChannel (const string& label, uint32_t sid);
+    void loadChannels (const QString & fileName);
+    void saveChannels (const QString & fileName);
+    void addChannel (const std::string& label, uint32_t sid);
     void parseDoc (const QDomDocument &);
 
     class CProg
     {
-    public:
+      public:
 
-        CProg(): time(0), actualTime(0), duration(0), actualDuration(0),
-            name(""), description(""),
-            crid(""), shortId(0), mainGenre(), secondaryGenre(), otherGenre()
-        {}
+	  CProg(): time(0), actualTime(0), duration(0), actualDuration(0),
+                name(""), description(""),
+			  crid(""), shortId(0), mainGenre(), secondaryGenre(), otherGenre()
+		{}
         void augment(const CProg&);
 
-        time_t time, actualTime;
-        int duration, actualDuration;
-        QString name, description;
-        QString crid;
-        uint32_t shortId;
-        vector<QString> mainGenre, secondaryGenre, otherGenre;
+		time_t time, actualTime;
+		int duration, actualDuration;
+		QString name, description;
+		QString crid;
+		uint32_t shortId;
+		std::vector<QString> mainGenre, secondaryGenre, otherGenre;
     };
 
     QMap < time_t, CProg > progs;
@@ -73,10 +76,7 @@ public:
     CParameter& Parameters;
     QMap < QString, time_t > filesLoaded;
 private:
-    static const struct gl {
-        const char *genre;
-        const char* desc;
-    } genre_list[];
+    static const struct gl { const char *genre; const char* desc; } genre_list[];
     time_t parseTime(const QString & time);
     int parseDuration (const QString & duration);
 };

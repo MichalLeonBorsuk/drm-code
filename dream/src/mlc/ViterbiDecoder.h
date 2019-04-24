@@ -1,9 +1,9 @@
 /******************************************************************************\
  * Technische Universitaet Darmstadt, Institut fuer Nachrichtentechnik
- * Copyright (c) 2001-2014
+ * Copyright (c) 2001
  *
  * Author(s):
- *  Volker Fischer
+ *	Volker Fischer
  *
  * Description:
  *
@@ -59,11 +59,11 @@
 
 /* Data type for Viterbi metric */
 #ifdef USE_SIMD
-# define _VITMETRTYPE               unsigned char
-# define _DECISIONTYPE              unsigned char
+# define _VITMETRTYPE				unsigned char
+# define _DECISIONTYPE				unsigned char
 #else
-# define _VITMETRTYPE               float
-# define _DECISIONTYPE              _BINARY
+# define _VITMETRTYPE				float
+# define _DECISIONTYPE				_BINARY
 #endif
 
 /* We initialize each new block of data all branches-metrics with the following
@@ -74,18 +74,18 @@
    variable since in the Viterbi-routine we add something to this value and
    in that case we would force an overrun! */
 #ifdef USE_SIMD
-# define MC_METRIC_INIT_VALUE       ((_VITMETRTYPE) 60)
+# define MC_METRIC_INIT_VALUE		((_VITMETRTYPE) 60)
 #else
-# define MC_METRIC_INIT_VALUE       ((_VITMETRTYPE) 1e10)
+# define MC_METRIC_INIT_VALUE		((_VITMETRTYPE) 1e10)
 #endif
 
 
 /* In case of MAP decoder, all metrics must be stored for the entire input
-   vector since we need them for the forward and backward direction */
+   std::vector since we need them for the forward and backward direction */
 #ifdef USE_MAX_LOG_MAP
-# define METRICSET(a)       matrMetricSet[a]
+# define METRICSET(a)		matrMetricSet[a]
 #else
-# define METRICSET(a)       vecrMetricSet
+# define METRICSET(a)		vecrMetricSet
 #endif
 
 
@@ -96,36 +96,36 @@ public:
     CViterbiDecoder();
     virtual ~CViterbiDecoder() {}
 
-    _REAL   Decode(CVector<CDistance>& vecNewDistance,
-                   CVector<_DECISION>& vecOutputBits);
-    void    Init(ECodScheme eNewCodingScheme,
-                 EChanType eNewChannelType, int iN1, int iN2,
-                 int iNewNumOutBitsPartA, int iNewNumOutBitsPartB,
-                 int iPunctPatPartA, int iPunctPatPartB, int iLevel);
+    _REAL	Decode(CVector<CDistance>& vecNewDistance,
+                 CVector<_DECISION>& vecOutputBits);
+    void	Init(ECodScheme eNewCodingScheme,
+              EChanType eNewChannelType, int iN1, int iN2,
+              int iNewNumOutBitsPartA, int iNewNumOutBitsPartB,
+              int iPunctPatPartA, int iPunctPatPartB, int iLevel);
 
 protected:
-    /* Two trellis data vectors are needed for current and old state */
-    _VITMETRTYPE            vecTrelMetric1[MC_NUM_STATES];
-    _VITMETRTYPE            vecTrelMetric2[MC_NUM_STATES];
+    /* Two trellis data std::vectors are needed for current and old state */
+    _VITMETRTYPE			vecTrelMetric1[MC_NUM_STATES];
+    _VITMETRTYPE			vecTrelMetric2[MC_NUM_STATES];
 
 #ifdef USE_MAX_LOG_MAP
-    CMatrix<_REAL>          matrAlpha;
-    CMatrix<_REAL>          matrMetricSet;
+    CMatrix<_REAL>			matrAlpha;
+    CMatrix<_REAL>			matrMetricSet;
 #else
-    _REAL                   vecrMetricSet[MC_NUM_OUTPUT_COMBINATIONS];
+    _REAL					vecrMetricSet[MC_NUM_OUTPUT_COMBINATIONS];
 #endif
 
-    CVector<int>            veciTablePuncPat;
+    CVector<int>			veciTablePuncPat;
 
-    int                     iNumOutBits;
-    int                     iNumOutBitsWithMemory;
+    int						iNumOutBits;
+    int						iNumOutBitsWithMemory;
 
-    CMatrix<_DECISIONTYPE>  matdecDecisions;
+    CMatrix<_DECISIONTYPE>	matdecDecisions;
 
 #ifdef USE_SIMD
     /* Fields for storing the reodered metrics for MMX trellis */
-    _VITMETRTYPE            chMet1[MC_NUM_STATES / 2];
-    _VITMETRTYPE            chMet2[MC_NUM_STATES / 2];
+    _VITMETRTYPE			chMet1[MC_NUM_STATES / 2];
+    _VITMETRTYPE			chMet2[MC_NUM_STATES / 2];
 
 #ifdef USE_MMX
     void TrellisUpdateMMX(
@@ -137,7 +137,7 @@ protected:
             const _VITMETRTYPE* pCurTrelMetric, const _VITMETRTYPE* pOldTrelMetric,
             const _VITMETRTYPE* pchMet1, const _VITMETRTYPE* pchMet2);
 #endif
-};
+    };
 
 
 #endif // !defined(VITERBI_DECODER_H__3B0BA660_CA63_4344_BB2B_23E7A0D31912__INCLUDED_)

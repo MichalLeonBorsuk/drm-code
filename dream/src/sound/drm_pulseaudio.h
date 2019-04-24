@@ -1,9 +1,9 @@
 /******************************************************************************\
  *
- * Copyright (c) 2001-2014-2001-2014
+ * Copyright (c) 2012-2013
  *
  * Author(s):
- *  David Flamand
+ *	David Flamand
  *
  * Decription:
  *  PulseAudio sound interface with clock drift adjustment (optional)
@@ -52,21 +52,21 @@
 class CSoundOutPulse;
 typedef struct pa_stream_notify_cb_userdata_t
 {
-    CSoundOutPulse*     SoundOutPulse;
-    bool            bOverflow;
+	CSoundOutPulse*		SoundOutPulse;
+	bool			bOverflow;
 } pa_stream_notify_cb_userdata_t;
 
 typedef struct pa_common
 {
-    bool        bClockDriftComp;
-    int             sample_rate_offset;
+	bool		bClockDriftComp;
+	int				sample_rate_offset;
 } pa_common;
 
 typedef struct pa_object
 {
-    pa_mainloop     *pa_m;
-    pa_context      *pa_c;
-    int             ref_count;
+	pa_mainloop		*pa_m;
+	pa_context		*pa_c;
+	int				ref_count;
 } pa_object;
 
 
@@ -75,131 +75,110 @@ typedef struct pa_object
 class CSoundPulse
 {
 public:
-    CSoundPulse(bool bPlayback);
-    virtual ~CSoundPulse() {}
-    void            Enumerate(vector<string>& names, vector<string>& descriptions);
-    void            SetDev(string sNewDevice);
-    string          GetDev();
+	CSoundPulse(bool bPlayback);
+    virtual ~CSoundPulse();
+	void			Enumerate(std::vector<std::string>& names, std::vector<std::string>& descriptions);
+	void			SetDev(std::string sNewDevice);
+	std::string			GetDev();
 protected:
-    bool        IsDefaultDevice();
-    bool        bPlayback;
-    bool        bChangDev;
-    string          sCurrentDevice;
+	bool		bPlayback;
+	std::string			sCurrentDevice;
 #ifdef ENABLE_STDIN_STDOUT
-    bool        IsStdinStdout();
-    bool        bStdinStdout;
-    bool        bMono;
+	bool		IsStdinStdout();
+	bool		bStdinStdout;
 #endif
 };
 
 class CSoundInPulse : public CSoundPulse, public CSoundInInterface
 {
 public:
-    CSoundInPulse();
-    virtual ~CSoundInPulse() {}
-    void            Enumerate(vector<string>& names, vector<string>& descriptions) {
-        CSoundPulse::Enumerate(names, descriptions);
-    };
-    string          GetDev() {
-        return CSoundPulse::GetDev();
-    };
-    void            SetDev(string sNewDevice) {
-        CSoundPulse::SetDev(sNewDevice);
-    };
+	CSoundInPulse();
+    virtual ~CSoundInPulse();
+	void			Enumerate(std::vector<std::string>& names, std::vector<std::string>& descriptions) {CSoundPulse::Enumerate(names, descriptions);};
+	std::string			GetDev() {return CSoundPulse::GetDev();};
+	void			SetDev(std::string sNewDevice) {CSoundPulse::SetDev(sNewDevice);};
+	std::string			GetVersion() { return pa_get_library_version(); }
 
-    bool        Init(int iNewSampleRate, int iNewBufferSize, bool bNewBlocking);
-    bool        Read(CVector<_SAMPLE>& psData);
-    void            Close();
+	bool		Init(int iNewSampleRate, int iNewBufferSize, bool bNewBlocking);
+	bool		Read(CVector<_SAMPLE>& psData);
+	void			Close();
 #ifdef CLOCK_DRIFT_ADJ_ENABLED
-    void            SetCommonParamPtr(pa_common *cp_ptr) {
-        cp = cp_ptr;
-    }
+	void			SetCommonParamPtr(pa_common *cp_ptr) { cp = cp_ptr; }
 #endif
 
 protected:
-    void            Init_HW();
-    int             Read_HW(void *recbuf, int size);
-    void            Close_HW();
-    void            SetBufferSize_HW();
+	void			Init_HW();
+	int				Read_HW(void *recbuf, int size);
+	void			Close_HW();
+	void			SetBufferSize_HW();
 
-    int             iSampleRate;
-    int             iBufferSize;
-    long            lTimeToWait;
-    bool        bBlockingRec;
+	int				iSampleRate;
+	int				iBufferSize;
+    unsigned        timeToWait;
+	bool		bBlockingRec;
 
-    bool        bBufferingError;
+	bool		bBufferingError;
 
-    pa_stream       *pa_s;
-    size_t          remaining_nbytes;
-    const char      *remaining_data;
+	pa_stream		*pa_s;
+	size_t			remaining_nbytes;
+	const char		*remaining_data;
 
 #ifdef CLOCK_DRIFT_ADJ_ENABLED
-    int             record_sample_rate;
-    bool        bClockDriftComp;
-    pa_common       *cp;
+	int				record_sample_rate;
+	bool		bClockDriftComp;
+	pa_common		*cp;
 #endif
 };
 
 class CSoundOutPulse : public CSoundPulse, public CSoundOutInterface
 {
 public:
-    CSoundOutPulse();
-    virtual ~CSoundOutPulse() {}
-    void            Enumerate(vector<string>& names, vector<string>& descriptions) {
-        CSoundPulse::Enumerate(names, descriptions);
-    };
-    string          GetDev() {
-        return CSoundPulse::GetDev();
-    };
-    void            SetDev(string sNewDevice) {
-        CSoundPulse::SetDev(sNewDevice);
-    };
+	CSoundOutPulse();
+    virtual ~CSoundOutPulse();
+	void			Enumerate(std::vector<std::string>& names, std::vector<std::string>& descriptions) {CSoundPulse::Enumerate(names, descriptions);};
+    std::string			GetDev() {return CSoundPulse::GetDev();}
+    void			SetDev(std::string sNewDevice) {CSoundPulse::SetDev(sNewDevice);}
+	std::string			GetVersion() { return pa_get_library_version(); }
 
-    bool        Init(int iNewSampleRate, int iNewBufferSize, bool bNewBlocking);
-    bool        Write(CVector<_SAMPLE>& psData);
-    void            Close();
+	bool		Init(int iNewSampleRate, int iNewBufferSize, bool bNewBlocking);
+	bool		Write(CVector<_SAMPLE>& psData);
+	void			Close();
 #ifdef CLOCK_DRIFT_ADJ_ENABLED
-    pa_common *     GetCommonParamPtr() {
-        return &cp;
-    }
-    void            EnableClockDriftAdj(bool bEnable) {
-        bNewClockDriftComp = bEnable;
-    }
-    bool        IsClockDriftAdjEnabled() {
-        return bNewClockDriftComp;
-    }
+	pa_common *		GetCommonParamPtr() { return &cp; }
+	void			EnableClockDriftAdj(bool bEnable) { bNewClockDriftComp = bEnable; }
+	bool		IsClockDriftAdjEnabled() { return bNewClockDriftComp; }
 #endif
 
-    bool        bPrebuffer;
-    bool        bSeek;
-    bool        bBufferingError;
-    bool        bMuteError;
+	bool		bPrebuffer;
+	bool		bSeek;
+	bool		bBufferingError;
+	bool		bMuteError;
 
 protected:
-    void            Init_HW();
-    int             Write_HW(void *playbuf, int size);
-    void            Close_HW();
+	void			Init_HW();
+	int				Write_HW(void *playbuf, int size);
+	void			Close_HW();
 
-    int             iSampleRate;
-    int             iBufferSize;
-    long            lTimeToWait;
-    bool        bBlockingPlay;
+	int				iSampleRate;
+	int				iBufferSize;
+    unsigned		timeToWait;
+	bool		bBlockingPlay;
 
-    pa_stream       *pa_s;
-    pa_stream_notify_cb_userdata_t pa_stream_notify_cb_userdata_underflow;
-    pa_stream_notify_cb_userdata_t pa_stream_notify_cb_userdata_overflow;
+	pa_stream		*pa_s;
+	pa_stream_notify_cb_userdata_t pa_stream_notify_cb_userdata_underflow;
+	pa_stream_notify_cb_userdata_t pa_stream_notify_cb_userdata_overflow;
 
 #ifdef CLOCK_DRIFT_ADJ_ENABLED
-    int             iMaxSampleRateOffset;
-    CReal           playback_usec_smoothed;
-    int             target_latency;
-    int             filter_stabilized;
-    int             wait_prebuffer;
-    CMatlibVector<CReal> B, A, X, Z;
-    bool        bNewClockDriftComp;
-    pa_common       cp;
-    int             playback_usec; // DEBUG
-    int             clock; // DEBUG
+	int				iMaxSampleRateOffset;
+	CReal			playback_usec_smoothed;
+	int				target_latency;
+	int				filter_stabilized;
+	int				wait_prebuffer;
+	CMatlibVector<CReal> B, A, X, Z;
+	bool		bNewClockDriftComp;
+	pa_common		cp;
+	int				playback_usec; // DEBUG
+	int				clock; // DEBUG
 #endif
 };
 

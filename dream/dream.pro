@@ -1,11 +1,16 @@
-#QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.8
 TEMPLATE = app
-CONFIG += warn_on debug
+CONFIG += warn_on
 TARGET = dream
 OBJECTS_DIR = obj
 DEFINES += EXECUTABLE_NAME=$$TARGET
-LIBS += -L$$OUT_PWD/lib
-INCLUDEPATH += $$OUT_PWD/include
+LIBS += -L$$PWD/lib
+INCLUDEPATH += $$PWD/include
+contains(QT_VERSION, ^4\\..*) {
+    VERSION_MESSAGE = Qt 4
+}
+contains(QT_VERSION, ^5\\..*) {
+    VERSION_MESSAGE = Qt 5
+}
 CONFIG(debug, debug|release) {
     DEBUG_MESSAGE = debug
 }
@@ -14,64 +19,122 @@ else {
 }
 console {
     QT -= core gui
-    CONFIG -= qt
     UI_MESSAGE = console mode
     VERSION_MESSAGE = No Qt
+    SOURCES += src/main.cpp
+    HEADERS += src/linux/ConsoleIO.h
+    SOURCES += src/linux/ConsoleIO.cpp
+    LIBS += -lpthread
+    message("with terminal user interface")
 }
 qtconsole {
     QT -= gui
-    QT += xml
-    CONFIG += qt
+    QT += xml network
     UI_MESSAGE = console mode
+    SOURCES += src/main-Qt/main.cpp
+    HEADERS += src/linux/ConsoleIO.h
+    SOURCES += src/linux/ConsoleIO.cpp
+    message("with terminal user interface")
 }
-qt {
-  HEADERS += \
-    src/GUI-QT/Logging.h \
-    src/util-QT/epgdec.h \
-    src/util-QT/EPG.h \
-    src/util-QT/Util.h
-  SOURCES += \
-    src/GUI-QT/Logging.cpp \
-    src/util-QT/EPG.cpp \
-    src/util-QT/epgdec.cpp \
-    src/util-QT/Util.cpp
-}
-!console:!qtconsole {
-    CONFIG += gui
-}
-gui {
+contains(QT,gui) {
+    UI_MESSAGE = GUI mode
     RESOURCES = src/GUI-QT/res/icons.qrc
-    QT += network xml widgets webenginewidgets
-    CONFIG += qt
+    QT += network xml widgets
     INCLUDEPATH += src/GUI-QT
     VPATH += src/GUI-QT
-    win32:RC_FILE = windows/dream.rc
+    win32 {
+        RC_FILE = windows/dream.rc
+        RC_INCLUDEPATH = $$PWD/src/GUI-QT/res
+    }
     macx:RC_FILE = src/GUI-QT/res/macicons.icns
+    CONFIG += qwt
     UI_DIR = ui
     MOC_DIR = moc
-    UI_MESSAGE = GUI mode
-    !qcustomplot:CONFIG += qwt
+    contains(QT,webenginewidgets) {
+        FORMS += BWSViewer.ui
+        HEADERS += src/GUI-QT/BWSViewer.h
+        SOURCES += src/GUI-QT/BWSViewer.cpp
+        message('with BWS')
+    }
+    FORMS += \
+        AboutDlgbase.ui \
+        AMMainWindow.ui \
+        AMSSDlgbase.ui \
+        AACCodecParams.ui \
+        OpusCodecParams.ui \
+        DRMMainWindow.ui \
+        EPGDlgbase.ui \
+        FMMainWindow.ui \
+        GeneralSettingsDlgbase.ui \
+        JLViewer.ui \
+        LiveScheduleWindow.ui \
+        MultSettingsDlgbase.ui \
+        SlideShowViewer.ui \
+        StationsDlgbase.ui \
+        systemevalDlgbase.ui \
+        TransmDlgbase.ui
+    HEADERS += \
+        src/GUI-QT/AnalogDemDlg.h \
+        src/GUI-QT/CWindow.h \
+        src/GUI-QT/DialogUtil.h \
+        src/GUI-QT/DRMPlot.h \
+        src/GUI-QT/EPGDlg.h \
+        src/GUI-QT/EvaluationDlg.h \
+        src/GUI-QT/fdrmdialog.h \
+        src/GUI-QT/fmdialog.h \
+        src/GUI-QT/GeneralSettingsDlg.h \
+        src/GUI-QT/jlbrowser.h \
+        src/GUI-QT/JLViewer.h \
+        src/GUI-QT/LiveScheduleDlg.h \
+        src/GUI-QT/MultColorLED.h \
+        src/GUI-QT/MultSettingsDlg.h \
+        src/GUI-QT/Schedule.h \
+        src/GUI-QT/SlideShowViewer.h \
+        src/GUI-QT/SoundCardSelMenu.h \
+        src/GUI-QT/StationsDlg.h \
+        src/GUI-QT/OpusCodecParams.h \
+        src/GUI-QT/AACCodecParams.h \
+        src/GUI-QT/TransmDlg.h
+    SOURCES += \
+        src/GUI-QT/AnalogDemDlg.cpp \
+        src/GUI-QT/CWindow.cpp \
+        src/GUI-QT/DialogUtil.cpp \
+        src/GUI-QT/DRMPlot.cpp \
+        src/GUI-QT/EPGDlg.cpp \
+        src/GUI-QT/EvaluationDlg.cpp \
+        src/GUI-QT/fdrmdialog.cpp \
+        src/GUI-QT/fmdialog.cpp \
+        src/GUI-QT/GeneralSettingsDlg.cpp \
+        src/GUI-QT/jlbrowser.cpp \
+        src/GUI-QT/JLViewer.cpp \
+        src/GUI-QT/LiveScheduleDlg.cpp \
+        src/GUI-QT/MultColorLED.cpp \
+        src/GUI-QT/MultSettingsDlg.cpp \
+        src/GUI-QT/Schedule.cpp \
+        src/GUI-QT/SlideShowViewer.cpp \
+        src/GUI-QT/SoundCardSelMenu.cpp \
+        src/GUI-QT/StationsDlg.cpp \
+        src/GUI-QT/OpusCodecParams.cpp \
+        src/GUI-QT/AACCodecParams.cpp \
+        src/GUI-QT/TransmDlg.cpp \
+        src/GUI-QT/main.cpp
 }
 message($$VERSION_MESSAGE $$DEBUG_MESSAGE $$UI_MESSAGE)
-qt:multimedia {
-    CONFIG += qtaudio sound
-}
 unix:!cross_compile {
     UNAME = $$system(uname -s)
     message(building on $$UNAME)
 }
 macx {
+    !console:QT += multimedia webenginewidgets
+    CONFIG += sound
     QT_CONFIG -= no-pkg-config
     PKG_CONFIG = /usr/local/bin/pkg-config
     INCLUDEPATH += /usr/local/include
     LIBS += -L/usr/local/lib
     QMAKE_LFLAGS += -F/usr/local/lib
-    LIBS += -framework CoreFoundation -framework CoreServices
+    LIBS += -framework CoreFoundation -framework CoreServices -lpcap
     LIBS += -framework CoreAudio -framework AudioToolbox -framework AudioUnit
-    CONFIG += pcap
-    packagesExist(libpulse) {
-        CONFIG += pulseaudio sound
-    }
+    DEFINES += HAVE_LIBPCAP
     packagesExist(sndfile) {
         CONFIG += sndfile
     }
@@ -81,19 +144,25 @@ macx {
     packagesExist(speex) {
         CONFIG += libspeexdsp
     }
+    packagesExist(libgps) {
+        CONFIG += gps
+    }
+    packagesExist(fdk-aac) {
+        CONFIG += fdk-aac
+    }
 }
 linux-* {
-    LIBS += -ldl -lrt
+  LIBS += -ldl -lrt
+  contains(QT,multimedia) {
+	CONFIG += sound
+  }
 }
 android {
-    ANDROID_PACKAGE_SOURCE_DIR=$$PWD/android
-    SOURCES += src/android/platform_util.cpp
-    HEADERS += src/android/platform_util.h
-    QT -= webenginewidgets
-    QT += svg
-    #CONFIG += openSL sound
-    CONFIG += qtaudio sound
-    CONFIG += crosscompile
+    CONFIG += sound fdk-aac
+    SOURCES += src/android/platform_util.cpp src/android/soundin.cpp src/android/soundout.cpp
+    HEADERS += src/android/platform_util.h src/android/soundin.h src/android/soundout.h
+    QT -= webkitwidgets
+    QT += svg multimedia
 }
 unix {
     target.path = /usr/bin
@@ -102,26 +171,25 @@ unix {
     INSTALLS += documentation
     INSTALLS += target
     CONFIG += link_pkgconfig
-    tui:console {
-      CONFIG += consoleio
-    }
-    LIBS += -lz -lfftw3
+    LIBS += -lfftw3 -lz
     SOURCES += src/linux/Pacer.cpp
     DEFINES += HAVE_DLFCN_H \
-               HAVE_MEMORY_H \
-               HAVE_STDINT_H \
-               HAVE_STDLIB_H
+           HAVE_MEMORY_H \
+           HAVE_STDINT_H \
+           HAVE_STDLIB_H
     DEFINES += HAVE_STRINGS_H \
-               HAVE_STRING_H \
-               STDC_HEADERS
+           HAVE_STRING_H \
+           STDC_HEADERS
     DEFINES += HAVE_INTTYPES_H \
-               HAVE_STDINT_H \
-               HAVE_SYS_STAT_H \
-               HAVE_SYS_TYPES_H \
-               HAVE_UNISTD_H
+           HAVE_STDINT_H \
+           HAVE_SYS_STAT_H \
+           HAVE_SYS_TYPES_H \
+           HAVE_UNISTD_H
     DEFINES += HAVE_LIBZ
 }
 unix:!cross_compile {
+    DEFINES += HAVE_LIBPCAP
+    LIBS += -lpcap
     !sound {
          # check for pulseaudio before portaudio
          exists(/usr/include/pulse/pulseaudio.h) | \
@@ -137,6 +205,7 @@ unix:!cross_compile {
            }
         }
     }
+    qt5|contains(QT_VERSION, ^4\\.8.*) {
       packagesExist(sndfile) {
         CONFIG += sndfile
       }
@@ -146,106 +215,123 @@ unix:!cross_compile {
       packagesExist(libgps) {
         CONFIG += gps
       }
-      packagesExist(pcap) {
-        CONFIG += pcap
-      }
       packagesExist(opus) {
         CONFIG += opus
       }
       packagesExist(speexdsp) {
         CONFIG += speexdsp
       }
-    exists(/usr/include/pcap.h) | \
-    exists(/usr/local/include/pcap.h) {
-       CONFIG += pcap
     }
+    else {
+      exists(/usr/include/sndfile.h) | \
+      exists(/usr/local/include/sndfile.h) {
+        CONFIG += sndfile
+      }
+      exists(/usr/include/hamlib/rig.h) | \
+      exists(/usr/local/include/hamlib/rig.h) {
+          CONFIG += hamlib
+      }
+      exists(/usr/include/gps.h) | \
+      exists(/usr/local/include/gps.h) {
+        CONFIG += gps
+      }
+      exists(/usr/include/opus/opus.h) | \
+      exists(/usr/local/include/opus/opus.h) {
+       CONFIG += opus
+      }
+      exists(/usr/include/speex/speex_preprocess.h) | \
+      exists(/usr/local/include/speex/speex_preprocess.h) {
+       CONFIG += speexdsp
+      }
+    }
+}
+contains(QMAKE_CC, i686-w64-mingw32.static-gcc) {
+  CONFIG += mxe
 }
 win32 {
-    LIBS += -lfftw3-3
-    OTHER_FILES += windows/dream.iss windows/dream.rc
-    !sound {
-        exists($$OUT_PWD/include/portaudio.h) {
-          CONFIG += portaudio sound
-        }
-        else {
-          CONFIG += mmsystem sound
-        }
+  CONFIG += fdk-aac
+  LIBS += -lwpcap -lpacket -lmincore
+  DEFINES += HAVE_SETUPAPI HAVE_LIBZ _CRT_SECURE_NO_WARNINGS HAVE_LIBZ HAVE_LIBPCAP
+  SOURCES += src/windows/Pacer.cpp src/windows/platform_util.cpp
+  HEADERS += src/windows/platform_util.h
+  LIBS += -lsetupapi
+  contains(QT,multimedia) {
+	CONFIG += sound
+  }
+  else {
+    HEADERS += src/windows/Sound.h
+    SOURCES += src/windows/Sound.cpp
+    LIBS += -lwinmm
+    message("with mmsystem")
+	CONFIG += sound
+  }
+  win32-g++ {
+	DEFINES += HAVE_STDINT_H
+	LIBS += -lz -lfftw3
+  }
+  else {
+	DEFINES += NOMINMAX
+	QMAKE_LFLAGS_RELEASE += /NODEFAULTLIB:libcmt.lib
+	QMAKE_LFLAGS_DEBUG += /NODEFAULTLIB:libcmtd.lib
+	QMAKE_LFLAGS_DEBUG += /NODEFAULTLIB:libcmt.lib
+	LIBS += -lzlib -llibfftw3-3
+  }
+  mxe {
+    message('MXE')
+    !minimal:CONFIG += sndfile hamlib opus
+    minimal {
+        HEADERS += src/windows/Sound.h
+        SOURCES += src/windows/Sound.cpp
+        LIBS += -lwinmm
     }
-    LIBS += -lsetupapi -lwsock32 -lws2_32 -lzdll -ladvapi32 -luser32
-    DEFINES += HAVE_SETUPAPI \
-    HAVE_LIBZ _CRT_SECURE_NO_WARNINGS
-    DEFINES -= UNICODE
-    SOURCES += src/windows/Pacer.cpp src/windows/platform_util.cpp
-    HEADERS += src/windows/platform_util.h
-    msvc* {
-        TEMPLATE = vcapp
-        DEFINES += NOMINMAX
-        QMAKE_CXXFLAGS += /wd"4996" /wd"4521"
-        QMAKE_LFLAGS_RELEASE += /NODEFAULTLIB:libcmt.lib
-        QMAKE_LFLAGS_DEBUG += /NODEFAULTLIB:libcmtd.lib
-        LIB += zdll.lib
-    }
-    g++ {
-         DEFINES += HAVE_STDINT_H
-         LIBS += -lz
-    }
-}
-win32|crosscompile {
-    exists($$OUT_PWD/include/speex/speex_preprocess.h) {
+    CONFIG += speexdsp sound
+    !console:QT += multimedia
+  }
+  else {
+    exists($$PWD/include/speex/speex_preprocess.h) {
       CONFIG += speexdsp
     }
-    exists($$OUT_PWD/include/hamlib/rig.h) {
+    exists($$PWD/include/hamlib/rig.h) {
       CONFIG += hamlib
     }
-    exists($$OUT_PWD/include/pcap.h) {
-      CONFIG += pcap
-    }
-    exists($$OUT_PWD/include/sndfile.h) {
+    exists($$PWD/include/sndfile.h) {
         CONFIG += sndfile
     }
-    exists($$OUT_PWD/include/opus/opus.h) {
+    exists($$PWD/include/opus/opus.h) {
         CONFIG += opus
     }
-}
-!crosscompile {
-  exists(/usr/include/neaacdec.h) {
-    CONFIG += faad2
   }
 }
-exists($$OUT_PWD/include/neaacdec.h) {
-    CONFIG += faad2
-}
-faad2 {
-     DEFINES += HAVE_LIBFAAD \
-     USE_FAAD2_LIBRARY
-     LIBS += -lfaad_drm
-     message("with FAAD2")
-}
-exists($$OUT_PWD/include/faac.h) {
-     DEFINES += HAVE_LIBFAAC \
-     USE_FAAC_LIBRARY
-     LIBS += -lfaac_drm
-     message("with FAAC")
+fdk-aac {
+     DEFINES += HAVE_LIBFDK_AAC
+     LIBS += -lfdk-aac
+     HEADERS += src/sourcedecoders/fdk_aac_codec.h
+     SOURCES += src/sourcedecoders/fdk_aac_codec.cpp
+     message("with fdk-aac")
 }
 opus {
-     DEFINES += HAVE_LIBOPUS \
-     USE_OPUS_LIBRARY
-     unix:LIBS += -lopus
-     win32:LIBS += libopus.lib
+    DEFINES += HAVE_LIBOPUS USE_OPUS_LIBRARY
+    unix:LIBS += -lopus
+    win32 {
+        CONFIG(debug, debug|release) {
+            LIBS += -lopusd
+        }
+        CONFIG(release, debug|release) {
+            LIBS += -lopus
+        }
+    }
      message("with opus")
 }
 sndfile {
      DEFINES += HAVE_LIBSNDFILE
      unix:LIBS += -lsndfile
-     win32-msvc*:LIBS += libsndfile-1.lib
-     win32-g++:LIBS += -lsndfile-1
-     android:LIBS += -lvorbis -lvorbisenc -lvorbisfile -lFLAC -logg
+     win32:mxe:LIBS += -lsndfile -lvorbisenc -lvorbis -lFLAC -logg -lm
+     win32:!mxe:LIBS += -llibsndfile-1
      message("with libsndfile")
 }
 speexdsp {
      DEFINES += HAVE_SPEEX
-     unix:LIBS += -lspeexdsp
-     win32:LIBS += libspeexdsp.lib
+     LIBS += -lspeexdsp
      message("with libspeexdsp")
 }
 gps {
@@ -253,101 +339,75 @@ gps {
      unix:LIBS += -lgps
      message("with gps")
 }
-pcap {
-     DEFINES += HAVE_LIBPCAP
-     unix:LIBS += -lpcap
-     win32-msvc*:LIBS += wpcap.lib packet.lib
-     win32-g++:LIBS += -lwpcap -lpacket
-     message("with pcap")
-}
 hamlib {
      DEFINES += HAVE_LIBHAMLIB
      macx:LIBS += -framework IOKit
      unix:LIBS += -lhamlib
-     win32:LIBS += libhamlib-2.lib
+     win32 {
+       msvc* {
+         LIBS += -llibhamlib-2
+       }
+       else {
+         LIBS += -lhamlib -lusb-1.0
+       }
+     }
      HEADERS += src/util/Hamlib.h
      SOURCES += src/util/Hamlib.cpp
-     qt {
+     contains(QT,core) {
        HEADERS += src/util-QT/Rig.h
        SOURCES += src/util-QT/Rig.cpp
      }
-     gui {
+     contains(QT,gui) {
          HEADERS += src/GUI-QT/RigDlg.h
          SOURCES += src/GUI-QT/RigDlg.cpp
          FORMS += RigDlg.ui
      }
      message("with hamlib")
 }
-qcustomplot {
-    message("with QCustomPlot")
-    QT += printsupport
-    DEFINES += WITH_QCUSTOMPLOT
-    LIBS += -lqcustomplot
-    HEADERS += src/GUI-QT/amspectrumplot.h src/GUI-QT/cdrmplotqcp.h src/GUI-QT/qcplevelmeter.h src/GUI-QT/qcpsmeter.h
-    SOURCES += src/GUI-QT/amspectrumplot.cpp src/GUI-QT/cdrmplotqcp.cpp src/GUI-QT/qcplevelmeter.cpp src/GUI-QT/qcpsmeter.cpp
-}
 qwt {
     message("with Qwt")
-    #DEFINES += QWT_NO_SVG
-    HEADERS += src/GUI-QT/cdrmplotqwt.h src/GUI-QT/qwtlevelmeter.h src/GUI-QT/qwtsmeter.h
-    SOURCES += src/GUI-QT/cdrmplotqwt.cpp src/GUI-QT/qwtlevelmeter.cpp src/GUI-QT/qwtsmeter.cpp
     QT += svg
-    exists("$$OUT_PWD/include/qwt/qwt.h") {
-        INCLUDEPATH += $$OUT_PWD/include/qwt
-        LIBS += -L$$OUT_PWD/lib
-        LIBS += -lqwt
+    macx {
+        INCLUDEPATH += /Library/Frameworks/qwt.framework/Headers
+        LIBS += -framework qwt
     }
-    else {
-        macx {
-            LIBS += -framework qwt
-            INCLUDEPATH += /usr/local/lib/qwt.framework/Headers
-        }
-        win32:CONFIG(debug, debug|release) {
-            # win debug
+    win32 {
+        INCLUDEPATH += $$PWD/include/qwt
+        CONFIG(debug, debug|release) {
             LIBS += -lqwtd
         }
-        win32:CONFIG(release) {
+        CONFIG(release, debug|release) {
             LIBS += -lqwt
         }
-        unix!macx {
-            # unix | win release
-            LIBS += -lqwt-qt5
+    }
+    unix!macx {
+        # unix | win release
+        LIBS += -lqwt-qt5
+    }
+    !crosscompile {
+        exists(/usr/include/qwt/qwt.h) {
+            INCLUDEPATH += /usr/include/qwt
         }
-        !crosscompile {
-            exists(/usr/include/qwt/qwt.h) {
-                INCLUDEPATH += /usr/include/qwt
-            }
-            exists(/usr/local/include/qwt/qwt.h) {
-                INCLUDEPATH += /usr/local/include/qwt
-            }
+        exists(/usr/local/include/qwt/qwt.h) {
+            INCLUDEPATH += /usr/local/include/qwt
         }
     }
 }
 alsa {
     DEFINES += USE_ALSA
-    HEADERS += src/linux/soundsrc.h \
-               src/linux/soundin.h \
-               src/linux/soundout.h
-    SOURCES += src/linux/alsa.cpp \
-               src/linux/soundsrc.cpp
+    HEADERS += src/linux/alsain.h src/linux/alsaout.h src/linux/alsacommon.h
+    SOURCES += src/linux/alsain.cpp src/linux/alsaout.cpp src/linux/alsacommon.cpp
+    LIBS += -lasound
     message("with alsa")
-}
-mmsystem {
-    HEADERS += src/windows/Sound.h
-    SOURCES += src/windows/Sound.cpp
-    LIBS += -lwinmm
-    message("with mmsystem")
 }
 portaudio {
     DEFINES += USE_PORTAUDIO
     HEADERS += src/sound/pa_ringbuffer.h \
-               src/sound/drm_portaudio.h
+    src/sound/drm_portaudio.h
     SOURCES += src/sound/drm_portaudio.cpp \
-               src/sound/pa_ringbuffer.c
+    src/sound/pa_ringbuffer.c
     LIBS += -lportaudio
-    unix {
-        PKGCONFIG += portaudio-2.0
-    }
+    unix:PKGCONFIG += portaudio-2.0
     message("with portaudio")
 }
 pulseaudio {
@@ -355,39 +415,18 @@ pulseaudio {
     HEADERS += src/sound/drm_pulseaudio.h
     SOURCES += src/sound/drm_pulseaudio.cpp
     unix {
-        PKGCONFIG += libpulse
         macx {
             INCLUDEPATH += /usr/local/Cellar/pulseaudio/12.2/include
             LIBS += -L/usr/local/Cellar/pulseaudio/12.2/lib -lpulse
+        }
+        else {
+            PKGCONFIG += libpulse
         }
     }
     else {
         LIBS += -lpulse
     }
     message("with pulseaudio")
-}
-openSL {
-    DEFINES += USE_OPENSL
-    HEADERS += src/android/soundin.h \
-               src/android/soundout.h
-    SOURCES += src/android/soundin.cpp \
-               src/android/soundout.cpp
-    LIBS += -lOpenSLES
-    message("with openSL")
-}
-qtaudio {
-    DEFINES += USE_QTAUDIO
-    HEADERS += src/sound/qtaudio.h
-    SOURCES += src/sound/qtaudio.cpp
-    QT += multimedia
-    message("with Qt audio")
-}
-consoleio {
-    DEFINES += USE_CONSOLEIO
-    HEADERS += src/linux/ConsoleIO.h
-    SOURCES += src/linux/ConsoleIO.cpp
-    LIBS += -lpthread
-    message("with terminal user interface")
 }
 HEADERS += \
     src/AMDemodulation.h \
@@ -469,6 +508,7 @@ HEADERS += \
     src/resample/Resample.h \
     src/Scheduler.h \
     src/SDC/SDC.h \
+    src/SDC/audioparam.h \
     src/ServiceInformation.h \
     src/sound/audiofilein.h \
     src/sound/selectioninterface.h \
@@ -508,8 +548,16 @@ HEADERS += \
     src/util/Utilities.h \
     src/util/Vector.h \
     src/Version.h \
-    src/enumerations.h
-
+    src/MSC/logicalframe.h \
+    src/MSC/audiosuperframe.h \
+    src/MSC/aacsuperframe.h \
+    src/MSC/xheaacsuperframe.h \
+    src/MSC/frameborderdescription.h \
+    src/resample/speexresampler.h \
+    src/resample/cspectrumresample.h \
+    src/resample/caudioresample.h \
+    src/sourcedecoders/reverb.h \
+    src/sourcedecoders/caudioreverb.h
 SOURCES += \
     src/AMDemodulation.cpp \
     src/AMSSDemodulation.cpp \
@@ -539,7 +587,6 @@ SOURCES += \
     src/DrmSimulation.cpp \
     src/DrmTransmitter.cpp \
     src/FAC/FAC.cpp \
-    src/GUI-QT/main.cpp \
     src/InputResample.cpp \
     src/interleaver/BlockInterleaver.cpp \
     src/interleaver/SymbolInterleaver.cpp \
@@ -585,6 +632,7 @@ SOURCES += \
     src/Scheduler.cpp \
     src/SDC/SDCReceive.cpp \
     src/SDC/SDCTransmit.cpp \
+    src/SDC/audioparam.cpp \
     src/ServiceInformation.cpp \
     src/SimulationParameters.cpp \
     src/sound/audiofilein.cpp \
@@ -602,7 +650,6 @@ SOURCES += \
     src/tables/TableCarMap.cpp \
     src/tables/TableFAC.cpp \
     src/tables/TableStations.cpp \
-    src/tables/TableDRMGlobal.cpp \
     src/TextMessage.cpp \
     src/util/CRC.cpp \
     src/util/FileTyper.cpp \
@@ -611,141 +658,129 @@ SOURCES += \
     src/util/Settings.cpp \
     src/util/Utilities.cpp \
     src/Version.cpp \
-    src/util/vector.cpp
+    src/sound/soundnull.cpp \
+    src/DrmTransceiver.cpp \
+    src/sound/soundinterface.cpp \
+    src/sound/selectioninterface.cpp \
+    src/MSC/logicalframe.cpp \
+    src/MSC/audiosuperframe.cpp \
+    src/MSC/aacsuperframe.cpp \
+    src/MSC/xheaacsuperframe.cpp \
+    src/MSC/frameborderdescription.cpp \
+    src/resample/speexresampler.cpp \
+    src/resample/cspectrumresample.cpp \
+    src/resample/caudioresample.cpp \
+    src/sourcedecoders/reverb.cpp \
+    src/sourcedecoders/caudioreverb.cpp
 
-gui {
-    contains(QT, webenginewidgets)|contains(QT,webkit) {
-        FORMS += BWSViewer.ui bwsviewerwidget.ui
-        HEADERS += src/GUI-QT/BWSViewer.h src/GUI-QT/bwsviewerwidget.h
-        SOURCES += src/GUI-QT/BWSViewer.cpp src/GUI-QT/bwsviewerwidget.cpp
-        DEFINES += HAVE_QTWEBKIT
-    }
-!console {
-    HEADERS += src/util-QT/cpos.h
-    SOURCES += src/util-QT/cpos.cpp
+contains(QT,core) {
+    HEADERS += \
+        src/GUI-QT/Logging.h \
+        src/util-QT/epgdec.h \
+        src/util-QT/EPG.h \
+        src/util-QT/Util.h \
+        src/main-Qt/ctrx.h \
+        src/main-Qt/crx.h \
+        src/main-Qt/ctx.h
+
+    SOURCES += \
+        src/GUI-QT/Logging.cpp \
+        src/util-QT/EPG.cpp \
+        src/util-QT/epgdec.cpp \
+        src/util-QT/Util.cpp \
+        src/main-Qt/ctrx.cpp \
+        src/main-Qt/crx.cpp \
+        src/main-Qt/ctx.cpp
 }
-FORMS += \
-    AboutDlgbase.ui \
-    AMMainWindow.ui \
-    AMSSDlgbase.ui \
-    CodecParams.ui \
-    DRMMainWindow.ui \
-    EPGDlgbase.ui \
-    GeneralSettingsDlgbase.ui \
-    JLViewer.ui \
-    LiveScheduleWindow.ui \
-    MultSettingsDlgbase.ui \
-    SlideShowViewer.ui \
-    StationsDlgbase.ui \
-    systemevalDlgbase.ui \
-    TransmDlgbase.ui \
-    serviceselector.ui \
-    channelwidget.ui \
-    audiodetailwidget.ui \
-    drmoptions.ui \
-    drmdisplay.ui \
-    drmdetail.ui \
-    liveschedulewidget.ui \
-    journalineviewer.ui \
-    slideshowwidget.ui \
-    stationswidget.ui \
-    gpswidget.ui \
-    amwidget.ui \
-    streamwidget.ui \
-    openrscidialog.ui
-
-HEADERS += \
-    src/GUI-QT/AnalogDemDlg.h \
-    src/GUI-QT/CodecParams.h \
-    src/GUI-QT/CWindow.h \
-    src/GUI-QT/DialogUtil.h \
-    src/GUI-QT/DRMPlot.h \
-    src/GUI-QT/EPGDlg.h \
-    src/GUI-QT/EvaluationDlg.h \
-    src/GUI-QT/fdrmdialog.h \
-    src/GUI-QT/GeneralSettingsDlg.h \
-    src/GUI-QT/GingaViewer.h \
-    src/GUI-QT/jlbrowser.h \
-    src/GUI-QT/JLViewer.h \
-    src/GUI-QT/LiveScheduleDlg.h \
-    src/GUI-QT/MultColorLED.h \
-    src/GUI-QT/MultSettingsDlg.h \
-    src/GUI-QT/Schedule.h \
-    src/GUI-QT/SlideShowViewer.h \
-    src/GUI-QT/SoundCardSelMenu.h \
-    src/GUI-QT/StationsDlg.h \
-    src/GUI-QT/TransmDlg.h \
-    src/GUI-QT/waterfallwidget.h \
-    src/GUI-QT/serviceselector.h \
-    src/GUI-QT/dreamtabwidget.h \
-    src/GUI-QT/channelwidget.h \
-    src/GUI-QT/audiodetailwidget.h \
-    src/GUI-QT/drmoptions.h \
-    src/GUI-QT/drmdisplay.h \
-    src/GUI-QT/drmdetail.h \
-    src/GUI-QT/journalineviewer.h \
-    src/GUI-QT/slideshowwidget.h \
-    src/GUI-QT/engineeringtabwidget.h \
-    src/GUI-QT/receivercontroller.h \
-    src/GUI-QT/stationswidget.h \
-    src/GUI-QT/gpswidget.h \
-    src/GUI-QT/afswidget.h \
-    src/util-QT/scheduleloader.h \
-    src/GUI-QT/amwidget.h \
-    src/GUI-QT/streamwidget.h \
-    src/GUI-QT/ThemeCustomizer.h \
-    src/GUI-QT/openrscidialog.h \
-    src/GUI-QT/chartdialog.h
-
-SOURCES += \
-    src/GUI-QT/AnalogDemDlg.cpp \
-    src/GUI-QT/CodecParams.cpp \
-    src/GUI-QT/CWindow.cpp \
-    src/GUI-QT/DialogUtil.cpp \
-    src/GUI-QT/DRMPlot.cpp \
-    src/GUI-QT/EPGDlg.cpp \
-    src/GUI-QT/EvaluationDlg.cpp \
-    src/GUI-QT/fdrmdialog.cpp \
-    src/GUI-QT/GeneralSettingsDlg.cpp \
-    src/GUI-QT/GingaViewer.cpp \
-    src/GUI-QT/jlbrowser.cpp \
-    src/GUI-QT/JLViewer.cpp \
-    src/GUI-QT/LiveScheduleDlg.cpp \
-    src/GUI-QT/MultColorLED.cpp \
-    src/GUI-QT/MultSettingsDlg.cpp \
-    src/GUI-QT/Schedule.cpp \
-    src/GUI-QT/SlideShowViewer.cpp \
-    src/GUI-QT/SoundCardSelMenu.cpp \
-    src/GUI-QT/StationsDlg.cpp \
-    src/GUI-QT/TransmDlg.cpp \
-    src/GUI-QT/waterfallwidget.cpp \
-    src/GUI-QT/serviceselector.cpp \
-    src/GUI-QT/dreamtabwidget.cpp \
-    src/GUI-QT/channelwidget.cpp \
-    src/GUI-QT/audiodetailwidget.cpp \
-    src/GUI-QT/drmoptions.cpp \
-    src/GUI-QT/drmdisplay.cpp \
-    src/GUI-QT/drmdetail.cpp \
-    src/GUI-QT/journalineviewer.cpp \
-    src/GUI-QT/slideshowwidget.cpp \
-    src/GUI-QT/engineeringtabwidget.cpp \
-    src/GUI-QT/receivercontroller.cpp \
-    src/util-QT/scheduleloader.cpp \
-    src/GUI-QT/stationswidget.cpp \
-    src/GUI-QT/gpswidget.cpp \
-    src/GUI-QT/afswidget.cpp \
-    src/GUI-QT/amwidget.cpp \
-    src/GUI-QT/streamwidget.cpp \
-    src/GUI-QT/ThemeCustomizer.cpp \
-    src/GUI-QT/openrscidialog.cpp \
-    src/GUI-QT/chartdialog.cpp
+!sound {
+    error("no usable audio interface found - install pulseaudio or portaudio dev package")
 }
-
-!isEmpty(QT):message(with Qt components: $$QT)
-!sound:error("no usable audio interface found - install pulseaudio or portaudio dev package")
 
 OTHER_FILES += \
-    android/AndroidManifest.xml
+    android/AndroidManifest.xml \
+    android/res/layout/splash.xml \
+    android/res/values/libs.xml \
+    android/res/values/strings.xml \
+    android/res/values-de/strings.xml \
+    android/res/values-el/strings.xml \
+    android/res/values-es/strings.xml \
+    android/res/values-et/strings.xml \
+    android/res/values-fa/strings.xml \
+    android/res/values-fr/strings.xml \
+    android/res/values-id/strings.xml \
+    android/res/values-it/strings.xml \
+    android/res/values-ja/strings.xml \
+    android/res/values-ms/strings.xml \
+    android/res/values-nb/strings.xml \
+    android/res/values-nl/strings.xml \
+    android/res/values-pl/strings.xml \
+    android/res/values-pt-rBR/strings.xml \
+    android/res/values-ro/strings.xml \
+    android/res/values-rs/strings.xml \
+    android/res/values-ru/strings.xml \
+    android/res/values-zh-rCN/strings.xml \
+    android/res/values-zh-rTW/strings.xml \
+    android/src/org/kde/necessitas/ministro/IMinistro.aidl \
+    android/src/org/kde/necessitas/ministro/IMinistroCallback.aidl \
+    android/src/org/qtproject/qt5/android/bindings/QtActivity.java \
+    android/src/org/qtproject/qt5/android/bindings/QtApplication.java \
+    android/version.xml \
+    android/AndroidManifest.xml \
+    android/res/layout/splash.xml \
+    android/res/values/libs.xml \
+    android/res/values/strings.xml \
+    android/res/values-de/strings.xml \
+    android/res/values-el/strings.xml \
+    android/res/values-es/strings.xml \
+    android/res/values-et/strings.xml \
+    android/res/values-fa/strings.xml \
+    android/res/values-fr/strings.xml \
+    android/res/values-id/strings.xml \
+    android/res/values-it/strings.xml \
+    android/res/values-ja/strings.xml \
+    android/res/values-ms/strings.xml \
+    android/res/values-nb/strings.xml \
+    android/res/values-nl/strings.xml \
+    android/res/values-pl/strings.xml \
+    android/res/values-pt-rBR/strings.xml \
+    android/res/values-ro/strings.xml \
+    android/res/values-rs/strings.xml \
+    android/res/values-ru/strings.xml \
+    android/res/values-zh-rCN/strings.xml \
+    android/res/values-zh-rTW/strings.xml \
+    android/src/org/kde/necessitas/ministro/IMinistro.aidl \
+    android/src/org/kde/necessitas/ministro/IMinistroCallback.aidl \
+    android/src/org/qtproject/qt5/android/bindings/QtActivity.java \
+    android/src/org/qtproject/qt5/android/bindings/QtApplication.java \
+    android/version.xml \
+    android/src/org/kde/necessitas/ministro/IMinistro.aidl \
+    android/src/org/kde/necessitas/ministro/IMinistroCallback.aidl \
+    android/src/org/qtproject/qt5/android/bindings/QtActivity.java \
+    android/src/org/qtproject/qt5/android/bindings/QtApplication.java \
+    android/version.xml \
+    android/res/values-es/strings.xml \
+    android/res/values-id/strings.xml \
+    android/res/values-ja/strings.xml \
+    android/res/values-nl/strings.xml \
+    android/res/values-rs/strings.xml \
+    android/res/values-de/strings.xml \
+    android/res/values-pt-rBR/strings.xml \
+    android/res/values-et/strings.xml \
+    android/res/layout/splash.xml \
+    android/res/values-it/strings.xml \
+    android/res/values-nb/strings.xml \
+    android/res/values-ro/strings.xml \
+    android/res/values-zh-rCN/strings.xml \
+    android/res/values-zh-rTW/strings.xml \
+    android/res/values-ru/strings.xml \
+    android/res/values-fa/strings.xml \
+    android/res/values-fr/strings.xml \
+    android/res/values-ms/strings.xml \
+    android/res/values-el/strings.xml \
+    android/res/values/libs.xml \
+    android/res/values/strings.xml \
+    android/res/values-pl/strings.xml \
+    android/AndroidManifest.xml \
+    windows/dream.iss
 
-FORMS += \
-    src/GUI-QT/chartdialog.ui
+message('Qt modules $$QT')

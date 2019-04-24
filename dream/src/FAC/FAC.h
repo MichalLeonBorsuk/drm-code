@@ -1,12 +1,12 @@
 /******************************************************************************\
  * Technische Universitaet Darmstadt, Institut fuer Nachrichtentechnik
- * Copyright (c) 2001-2014
+ * Copyright (c) 2001
  *
  * Author(s):
- *  Volker Fischer
+ *	Volker Fischer
  *
  * Description:
- *  See FAC.cpp
+ *	See FAC.cpp
  *
  ******************************************************************************
  *
@@ -49,9 +49,9 @@ public:
 
 protected:
     CCRC CRCObject;
-    vector<int> FACRepetition; /* See 6.3.6 */
-    size_t      FACNumRep;
-    size_t      FACRepetitionCounter;
+    std::vector<int>	FACRepetition; /* See 6.3.6 */
+    size_t		FACNumRep;
+    size_t		FACRepetitionCounter;
 };
 
 class CFACReceive
@@ -60,12 +60,10 @@ public:
     CFACReceive() {}
     virtual ~CFACReceive() {}
 
-    /* "pbiFACData" contains 72 or 120 bits */
+    /* "pbiFACData" contains 72 bits */
     bool FACParam(CVector<_BINARY>* pbiFACData, CParameter& Parameter);
 
 protected:
-    void ChannelParam(CVector<_BINARY>* pbiFACData, CParameter& Parameter);
-    void ServiceParam(CVector<_BINARY>* pbiFACData, CParameter& Parameter);
     CCRC CRCObject;
 };
 

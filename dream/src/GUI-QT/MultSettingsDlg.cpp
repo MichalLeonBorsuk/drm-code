@@ -1,9 +1,9 @@
 /******************************************************************************\
  * Technische Universitaet Darmstadt, Institut fuer Nachrichtentechnik
- * Copyright (c) 2001-2014
+ * Copyright (c) 2006
  *
  * Author(s):
- *  Andrea Russo
+ *	Andrea Russo
  *
  * Description:
  *
@@ -31,38 +31,35 @@
 #include <QHideEvent>
 #include <QLabel>
 #include <QToolTip>
-#include "ThemeCustomizer.h"
 
 /* Implementation *************************************************************/
 
 MultSettingsDlg::MultSettingsDlg(CParameter& NP, CSettings& NSettings,
-                                 QWidget* parent) :
-    QDialog(parent), Parameters(NP), Settings(NSettings)
+	QWidget* parent) :
+	QDialog(parent), Parameters(NP), Settings(NSettings)
 {
-    setAttribute(Qt::WA_QuitOnClose, false);
-    setupUi(this);
+	setAttribute(Qt::WA_QuitOnClose, false);
+	setupUi(this);
 
-    /* Set help text for the controls */
-    AddWhatsThisHelp();
+	/* Set help text for the controls */
+	AddWhatsThisHelp();
 
-    // TODO
-    CheckBoxAddRefresh->hide();
-    EdtSecRefresh->hide();
+	// TODO
+	CheckBoxAddRefresh->hide();
+	EdtSecRefresh->hide();
 
-    /* Connect buttons */
+	/* Connect buttons */
 
-    connect(PushButtonChooseDir, SIGNAL(clicked()),
-            this, SLOT(OnbuttonChooseDir()));
+	connect(PushButtonChooseDir, SIGNAL(clicked()),
+		this, SLOT(OnbuttonChooseDir()));
 
-    connect(buttonClearCacheMOT, SIGNAL(clicked()),
-            this, SLOT(OnbuttonClearCacheMOT()));
+	connect(buttonClearCacheMOT, SIGNAL(clicked()),
+		this, SLOT(OnbuttonClearCacheMOT()));
 
-    connect(buttonClearCacheEPG, SIGNAL(clicked()),
-            this, SLOT(OnbuttonClearCacheEPG()));
+	connect(buttonClearCacheEPG, SIGNAL(clicked()),
+		this, SLOT(OnbuttonClearCacheEPG()));
 
-    EdtSecRefresh->setValidator(new QIntValidator(MIN_MOT_BWS_REFRESH_TIME, MAX_MOT_BWS_REFRESH_TIME, EdtSecRefresh));
-
-    APPLY_CUSTOM_THEME();
+	EdtSecRefresh->setValidator(new QIntValidator(MIN_MOT_BWS_REFRESH_TIME, MAX_MOT_BWS_REFRESH_TIME, EdtSecRefresh));
 }
 
 MultSettingsDlg::~MultSettingsDlg()
@@ -78,92 +75,91 @@ void MultSettingsDlg::showEvent(QShowEvent*)
     SetDataDirectoryControls();
 }
 
-void MultSettingsDlg::ClearCache(string subdir, QString sFilter = "", bool bDeleteDirs)
+void MultSettingsDlg::ClearCache(QString sPath, QString sFilter = "", bool bDeleteDirs)
 {
-    /* Delete files into sPath directory with scan recursive */
-    string p = Settings.Get("Receiver", "datafilesdirectory", string(DEFAULT_DATA_FILES_DIRECTORY));
+	/* Delete files into sPath directory with scan recursive */
 
-    QDir dir(QString::fromUtf8((p+PATH_SEPARATOR+subdir).c_str()));
-    ClearCache(dir, sFilter, bDeleteDirs);
-}
+	QDir dir(sPath);
 
-void MultSettingsDlg::ClearCache(QDir dir, QString sFilter = "", bool bDeleteDirs)
-{
-    /* Check if the directory exists */
-    if (dir.exists())
-    {
-        dir.setFilter(QDir::Files | QDir::Dirs | QDir::NoSymLinks);
+	/* Check if the directory exists */
+	if (dir.exists())
+	{
+		dir.setFilter(QDir::Files | QDir::Dirs | QDir::NoSymLinks);
 
-        /* Eventually apply the filter */
-        if (sFilter != "")
-            dir.setNameFilters(QStringList(sFilter));
+		/* Eventually apply the filter */
+		if (sFilter != "")
+			dir.setNameFilters(QStringList(sFilter));
 
-        dir.setSorting( QDir::DirsFirst );
-        const QList<QFileInfo> list = dir.entryInfoList();
-        for(QList<QFileInfo>::const_iterator fi = list.begin(); fi!=list.end(); fi++)
-        {
+		dir.setSorting( QDir::DirsFirst );
+		const QList<QFileInfo> list = dir.entryInfoList();
+		for(QList<QFileInfo>::const_iterator fi = list.begin(); fi!=list.end(); fi++)
+		{
 
-            /* for each file/dir */
-            /* if directory...=> scan recursive */
-            if (fi->isDir())
-            {
-                if(fi->fileName()!="." && fi->fileName()!="..")
-                {
-                    ClearCache(QDir(fi->filePath()), sFilter, bDeleteDirs);
+			/* for each file/dir */
+			/* if directory...=> scan recursive */
+			if (fi->isDir())
+			{
+				if(fi->fileName()!="." && fi->fileName()!="..")
+				{
+					ClearCache(fi->filePath(), sFilter, bDeleteDirs);
 
-                    /* Eventually delete the directory */
-                    if (bDeleteDirs)
-                        dir.rmdir(fi->fileName());
-                }
-            }
-            else
-            {
-                /* Is a file so remove it */
-                dir.remove(fi->fileName());
-            }
-        }
-    }
+					/* Eventually delete the directory */
+					if (bDeleteDirs)
+						dir.rmdir(fi->fileName());
+				}
+			}
+			else
+			{
+				/* Is a file so remove it */
+				dir.remove(fi->fileName());
+			}
+		}
+	}
 }
 
 void MultSettingsDlg::OnbuttonChooseDir()
 {
-    QString strFilename = QFileDialog::getExistingDirectory(this, TextLabelDir->text());
-    /* Check if user not hit the cancel button */
-    if (!strFilename.isEmpty())
-    {
-        strFilename.replace(QRegExp("/"), PATH_SEPARATOR);
-        Settings.Put("Receiver", "datafilesdirectory",
-                     string(strFilename.toUtf8().constData())
-                    );
-        SetDataDirectoryControls();
-    }
+	QString strFilename = QFileDialog::getExistingDirectory(this, TextLabelDir->text());
+	/* Check if user not hit the cancel button */
+	if (!strFilename.isEmpty())
+	{
+#ifdef _WIN32
+		strFilename.replace(QRegExp("/"), "\\");
+#endif
+		Parameters.SetDataDirectory(string(strFilename.toUtf8().constData()));
+		SetDataDirectoryControls();
+	}
 }
 
 void MultSettingsDlg::OnbuttonClearCacheMOT()
 {
-    ClearCache("MOT", "", true);
+	/* Delete all files and directories in the MOT directory */
+	ClearCache(QString::fromUtf8(Parameters.GetDataDirectory("MOT").c_str()), "", true);
 }
 
 void MultSettingsDlg::OnbuttonClearCacheEPG()
 {
-    /* Delete all EPG files */
-    ClearCache("EPG", "*.EHA;*.EHB");
+	/* Delete all EPG files */
+	ClearCache(QString::fromUtf8(Parameters.GetDataDirectory("EPG").c_str()), "*.EHA;*.EHB");
 }
 
 void MultSettingsDlg::SetDataDirectoryControls()
 {
-    QString sep(PATH_SEPARATOR);
-    /* Delete files into sPath directory with scan recursive */
-    string p = Settings.Get("Receiver", "datafilesdirectory", string(DEFAULT_DATA_FILES_DIRECTORY));
-    QString strFilename = QString::fromUtf8(p.c_str());
-    strFilename.replace(QRegExp("/"), sep);
-    if (!strFilename.isEmpty() && strFilename.at(strFilename.length()-1) == QChar(sep[0]))
-        strFilename.remove(strFilename.length()-1, 1);
-    TextLabelDir->setToolTip(strFilename);
-    TextLabelDir->setText(strFilename);
+	QString strFilename(QString::fromUtf8(Parameters.GetDataDirectory().c_str()));
+#undef PATH_SEP
+#ifdef _WIN32
+	strFilename.replace(QRegExp("/"), "\\");
+# define PATH_SEP '\\'
+#else
+# define PATH_SEP '/'
+#endif
+	if (!strFilename.isEmpty() && strFilename.at(strFilename.length()-1) == QChar(PATH_SEP))
+		strFilename.remove(strFilename.length()-1, 1);
+	TextLabelDir->setToolTip(strFilename);
+	TextLabelDir->setText(strFilename);
 }
 
 void MultSettingsDlg::AddWhatsThisHelp()
 {
-    //TODO
+	//TODO
 }

@@ -1,12 +1,12 @@
 /******************************************************************************\
  * BBC World Service
- * Copyright (c) 2001-2014
+ * Copyright (c) 2006
  *
  * Author(s):
- *  Julian Cable
+ *	Julian Cable
  *
  * Description:
- *  See Reassemble.cpp
+ *	See Reassemble.cpp
  *
  ******************************************************************************
  *
@@ -35,51 +35,51 @@ class CSegmentTrackerN
 {
 public:
 
-    CSegmentTrackerN():vecbHaveSegment() { }
+	CSegmentTrackerN():vecbHaveSegment() { }
 
-    void Reset ()
-    {
-        vecbHaveSegment.clear ();
-    }
+	void Reset ()
+	{
+		vecbHaveSegment.clear ();
+	}
 
-    size_t size ()
-    {
-        return vecbHaveSegment.size ();
-    }
+	size_t size ()
+	{
+		return vecbHaveSegment.size ();
+	}
 
-    bool Ready ()
-    {
-        if (vecbHaveSegment.size () == 0)
-            return false;
-        for (size_t i = 0; i < vecbHaveSegment.size (); i++)
-        {
-            if (vecbHaveSegment[i] == false)
-            {
-                return false;
-            }
-        }
-        return true;
-    }
+	bool Ready ()
+	{
+		if (vecbHaveSegment.size () == 0)
+			return false;
+		for (size_t i = 0; i < vecbHaveSegment.size (); i++)
+		{
+			if (vecbHaveSegment[i] == false)
+			{
+				return false;
+			}
+		}
+		return true;
+	}
 
-    void AddSegment (int iSegNum)
-    {
-        if ((iSegNum + 1) > int (vecbHaveSegment.size ()))
+	void AddSegment (int iSegNum)
+	{
+		if ((iSegNum + 1) > int (vecbHaveSegment.size ()))
             vecbHaveSegment.resize (unsigned(iSegNum) + 1, false);
         vecbHaveSegment[unsigned(iSegNum)] = true;
-    }
+	}
 
-    bool HaveSegment (int iSegNum)
-    {
-        if (iSegNum < int (vecbHaveSegment.size ()))
+	bool HaveSegment (int iSegNum)
+	{
+		if (iSegNum < int (vecbHaveSegment.size ()))
             return vecbHaveSegment[unsigned(iSegNum)];
-        return false;
-    }
+		return false;
+	}
 
 protected:
-    vector < bool > vecbHaveSegment;
+	std::vector < bool > vecbHaveSegment;
 };
 
-/* The base class reassembles chunks of byte vectors into one big vector.
+/* The base class reassembles chunks of byte std::vectors into one big std::vector.
  * It assumes that all chunks except the last chunk are the same size.
  * Usage:
  *
@@ -101,98 +101,52 @@ class CReassemblerN
 {
 public:
 
-    CReassemblerN(): vecData(), vecLastSegment(),
-        iLastSegmentNum(-1), iLastSegmentSize(-1), iSegmentSize(0),
-        Tracker(), bReady(false)
-    {
-    }
+	CReassemblerN(): vecData(), vecLastSegment(),
+		iLastSegmentNum(-1), iLastSegmentSize(-1), iSegmentSize(0),
+		Tracker(), bReady(false)
+	{
+	}
 
-    CReassemblerN (const CReassemblerN & r);
+	CReassemblerN (const CReassemblerN & r);
 
-    virtual ~CReassemblerN ()
-    {
-    }
+	virtual ~CReassemblerN ()
+	{
+	}
 
-    CReassemblerN & operator= (const CReassemblerN & r);
+	CReassemblerN & operator= (const CReassemblerN & r);
 
-    void Reset ()
-    {
-        vecData.resize (0);
-        vecLastSegment.resize (0);
-        iLastSegmentNum = -1;
-        iLastSegmentSize = -1;
-        iSegmentSize = 0;
-        Tracker.Reset ();
-        bReady = false;
-    }
+	void Reset ()
+	{
+		vecData.resize (0);
+		vecLastSegment.resize (0);
+		iLastSegmentNum = -1;
+		iLastSegmentSize = -1;
+		iSegmentSize = 0;
+		Tracker.Reset ();
+		bReady = false;
+	}
 
-    bool Ready ()
-    {
-        return bReady;
-    }
+	bool Ready ()
+	{
+		return bReady;
+	}
 
-    void AddSegment (vector<_BYTE> &vecDataIn, int iSegNum, bool bLast);
+	void AddSegment (std::vector<_BYTE> &vecDataIn, int iSegNum, bool bLast);
 
-    vector<_BYTE> vecData;
+	std::vector<_BYTE> vecData;
 
 protected:
 
-    virtual void copyin (vector<_BYTE> &vecDataIn, size_t iSegNum);
-    virtual void cachelast (vector<_BYTE> &vecDataIn, size_t iSegSize);
-    virtual void copylast ();
+    virtual void copyin(std::vector<_BYTE> &vecDataIn, size_t iSegNum);
+    virtual void cachelast(std::vector<_BYTE> &vecDataIn, size_t iSegSize);
+    virtual void copylast();
 
-    vector<_BYTE> vecLastSegment;
+	std::vector<_BYTE> vecLastSegment;
     int iLastSegmentNum;
     int iLastSegmentSize;
-    size_t iSegmentSize;
-    CSegmentTrackerN Tracker;
-    bool bReady;
-};
-
-/* CBitReassemblerN uses the Dream CVector class to take a vector of bytes, each holding one bit.
- * It reassembles the segments into another vector, either of bits or of bytes by packing.
- * Packing reduces the amount of storage needed and prepares the output vector to be used in
- * applications expecting vectors of bytes, such as zlib.
- *
- * The major difference to the base class is that the input vector may have a header in front
- * of the data. This will be ignored as long as the bitaccess pointer in the CVector is correctly
- * positioned.
- */
-
-class CBitReassemblerN:public CReassemblerN
-{
-public:
-
-    CBitReassemblerN():CReassemblerN(),bPack(false)
-    {
-    }
-
-    CBitReassemblerN(const CBitReassemblerN& r):CReassemblerN(r),bPack(r.bPack)
-    {
-    }
-
-    inline CBitReassemblerN & operator= (const CBitReassemblerN & r)
-    {
-        CReassemblerN(*this) = r;
-        bPack = r.bPack;
-        return *this;
-    }
-
-protected:
-
-    virtual void copyBitsin (CVector < _BYTE > &vecDataIn, size_t iSegNum);
-    virtual void cachelastBits (CVector < _BYTE > &vecDataIn, size_t iSegSize);
-    virtual void copylast ();
-
-    bool bPack;
-};
-
-class CByteReassemblerN:public CBitReassemblerN
-{
-public:
-
-    CByteReassemblerN();
-
+	size_t iSegmentSize;
+	CSegmentTrackerN Tracker;
+	bool bReady;
 };
 
 #endif

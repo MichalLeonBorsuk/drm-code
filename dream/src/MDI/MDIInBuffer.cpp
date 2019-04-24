@@ -1,12 +1,12 @@
 /******************************************************************************\
  * Technische Universitaet Darmstadt, Institut fuer Nachrichtentechnik
- * Copyright (c) 2001-2014
+ * Copyright (c) 2004
  *
  * Author(s):
- *  Volker Fischer, Oliver Haffenden
+ *	Volker Fischer, Oliver Haffenden
  *
  * Description:
- *  simple blocking buffer
+ *	simple blocking buffer
  *
  ******************************************************************************
  *
@@ -28,6 +28,7 @@
 
 #include "MDIInBuffer.h"
 #include <iostream>
+using namespace std;
 
 /* write the received packet to the buffer, if the previous one was not read yet
  * it will be lost, but we need new data in preference to old and we should be
@@ -36,10 +37,10 @@
 void
 CMDIInBuffer::Put(const vector<_BYTE>& data)
 {
-    guard.Lock();
-    buffer.push(data);
-    blocker.WakeOne();
-    guard.Unlock();
+	guard.Lock();
+	buffer.push(data);
+	blocker.WakeOne();
+	guard.Unlock();
 }
 
 /* get the buffer contents, but if it takes more than a second, return an empty buffer
@@ -49,28 +50,28 @@ CMDIInBuffer::Put(const vector<_BYTE>& data)
 void
 CMDIInBuffer::Get(vector<_BYTE>& data)
 {
-    guard.Lock();
-    if(buffer.empty())
-    {
-        if(blocker.Wait(&guard, 1000))
-        {
-            if(buffer.empty())
-                data.clear();
-            else
-            {
-                data = buffer.front();
-                buffer.pop();
-            }
-        }
-        else
-        {
-            data.clear();
-        }
-    }
-    else
-    {
-        data = buffer.front();
-        buffer.pop();
-    }
-    guard.Unlock();
+	guard.Lock();
+	if(buffer.empty())
+	{
+		if(blocker.Wait(&guard, 1000))
+		{
+			if(buffer.empty())
+				data.clear();
+			else
+			{
+				data = buffer.front();
+				buffer.pop();
+			}
+		}
+		else
+		{
+			data.clear();
+		}
+	}
+	else
+	{
+		data = buffer.front();
+		buffer.pop();
+	}
+	guard.Unlock();
 }

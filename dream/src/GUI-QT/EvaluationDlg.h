@@ -1,9 +1,9 @@
 /******************************************************************************\
  * Technische Universitaet Darmstadt, Institut fuer Nachrichtentechnik
- * Copyright (c) 2001-2014
+ * Copyright (c) 2001
  *
  * Author(s):
- *  Volker Fischer
+ *	Volker Fischer
  *
  * Description:
  *
@@ -26,17 +26,17 @@
  *
 \******************************************************************************/
 
-#ifndef __eVALUATIONDLG_H
-#define __eVALUATIONDLG_H
+#ifndef __EVALUATIONDLG_H
+#define __EVALUATIONDLG_H
 
 #include "ui_systemevalDlgbase.h"
 #include "CWindow.h"
+#include "DRMPlot.h"
+#include "DialogUtil.h"
 #include "MultColorLED.h"
 #include "../GlobalDefinitions.h"
 #include "../util/Vector.h"
-#include "../DrmReceiver.h"
-#include "DRMPlot.h"
-#include "chartdialog.h"
+#include "../main-Qt/crx.h"
 
 /* Definitions ****************************************************************/
 /* Define this macro if you prefer the QT-type of displaying date and time */
@@ -44,87 +44,65 @@
 
 
 /* Classes ********************************************************************/
-class ReceiverController;
-struct Reception;
-struct ChannelConfiguration;
-class DRMDetail;
 
-class systemevalDlg : public CWindow
+class systemevalDlg : public CWindow, public Ui_SystemEvaluationWindow
 {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
-    systemevalDlg(ReceiverController*, CSettings&, QWidget* parent = nullptr);
-    virtual ~systemevalDlg();
-    void            connectController(ReceiverController*);
-    void enableLogging(bool enable)
-    {
-        ui->CheckBoxWriteLog->setChecked(enable);
-    }
+    systemevalDlg(CRx&, CSettings&, QWidget* parent = 0);
+	virtual ~systemevalDlg();
+
+	void SetStatus(CMultColorLED*, ETypeRxStatus);
 
 protected:
-    Ui::SystemEvaluationWindow* ui;
-    ReceiverController* controller;
-    CParameter&     Parameters;
-    DRMDetail*      detail;
+    CRx&            rx;
 
-    CDRMPlot*       MainPlot;
+	QTimer			Timer;
+	CDRMPlot*		MainPlot;
 
-    virtual void    eventShow(QShowEvent* pEvent);
-    virtual void    eventHide(QHideEvent* pEvent);
-    void            UpdateGPS(CParameter&);
-    void            setControls(CSettings& s);
-    void            AddWhatsThisHelp();
-    ChartDialog*    OpenChartWin(ECharType eNewType);
-    QString         ECharTypeToPlotName(ECharType eCharType);
-    ECharType       PlotNameToECharType(const QString &plotName);
-    void            selectChart(ECharType eCharType);
+	virtual void	eventShow(QShowEvent* pEvent);
+	virtual void	eventHide(QHideEvent* pEvent);
+	void			UpdateGPS(CParameter&);
+	void			UpdateControls();
+	void			AddWhatsThisHelp();
+	CDRMPlot*		OpenChartWin(CDRMPlot::ECharType eNewType);
+	QTreeWidgetItem* FindItemByECharType(CDRMPlot::ECharType eCharType);
+	std::string			ECharTypeToPlotName(CDRMPlot::ECharType eCharType);
+	CDRMPlot::ECharType PlotNameToECharType(const std::string& PlotName);
 
-    QString         GetRobModeStr(ERobMode);
-    QString         GetSpecOccStr(ESpecOcc v);
+	QString			GetRobModeStr();
+	QString			GetSpecOccStr();
 
-    QMenu*          pTreeWidgetContextMenu;
-    ECharType       eCurCharType, eNewCharType;
-    int             iPlotStyle;
-    vector<ChartDialog*>    vecpDRMPlots;
+	QMenu*			pTreeWidgetContextMenu;
+	CDRMPlot::ECharType eCurCharType, eNewCharType;
+	int				iPlotStyle;
+	std::vector<CDRMPlot*>	vecpDRMPlots;
 
 public slots:
-    void OnRadioTimeLinear();
-    void OnRadioTimeWiener();
-    void OnRadioFrequencyLinear();
-    void OnRadioFrequencyDft();
-    void OnRadioFrequencyWiener();
-    void OnRadioTiSyncFirstPeak();
-    void OnRadioTiSyncEnergy();
-    void OnSliderIterChange(int value);
-    void OnCheckFlipSpectrum();
-    void OnCheckBoxMuteAudio();
-    void OnCheckBoxReverb();
-    void OnCheckWriteLog(int);
-    void OnCheckSaveAudioWAV();
-    void OnCheckRecFilter();
-    void OnCheckModiMetric();
-    void OnListSelChanged(QTreeWidgetItem*, QTreeWidgetItem*);
-    void OnTreeWidgetContMenu(bool);
-    void OnCustomContextMenuRequested(const QPoint&);
-    void OnDataAvailable();
-    void UpdatePlotStyle(int);
-    void onReception(Reception& r);
-    void onChannel(ChannelConfiguration& c);
+	void OnTimer();
+	void OnRadioTimeLinear();
+	void OnRadioTimeWiener();
+	void OnRadioFrequencyLinear();
+	void OnRadioFrequencyDft();
+	void OnRadioFrequencyWiener();
+	void OnRadioTiSyncFirstPeak();
+	void OnRadioTiSyncEnergy();
+	void OnSliderIterChange(int value);
+	void OnCheckFlipSpectrum();
+	void OnCheckBoxMuteAudio();
+	void OnCheckBoxReverb();
+	void OnCheckWriteLog(int);
+	void OnCheckSaveAudioWAV();
+	void OnCheckRecFilter();
+	void OnCheckModiMetric();
+	void OnListSelChanged(QTreeWidgetItem*, QTreeWidgetItem*);
+	void OnTreeWidgetContMenu(bool);
+	void OnCustomContextMenuRequested(const QPoint&);
+	void UpdatePlotStyle(int);
 signals:
-    void startLogging();
-    void stopLogging();
-    void saveAudio(const string&);
-    void setTimeInt(int);
-    void setFreqInt(int);
-    void setTiSyncTracType(int);
-    void setNumMSCMLCIterations(int);
-    void setFlippedSpectrum(bool);
-    void setReverbEffect(bool);
-    void setRecFilter(bool);
-    void setIntCons(bool);
-    void muteAudio(bool);
-    void dataAvailable(ReceiverController* rc);
+	void startLogging();
+	void stopLogging();
 };
 
 #endif

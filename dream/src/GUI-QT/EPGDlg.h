@@ -1,12 +1,12 @@
 /******************************************************************************\
  * British Broadcasting Corporation
- * Copyright (c) 2001-2014
+ * Copyright (c) 2006
  *
  * Author(s):
- *  Julian Cable
+ *	Julian Cable
  *
  * Description:
- *  ETSI DAB/DRM Electronic Programme Guide Viewer
+ *	ETSI DAB/DRM Electronic Programme Guide Viewer
  *
  *
  ******************************************************************************
@@ -32,39 +32,47 @@
 
 #include "ui_EPGDlgbase.h"
 #include "CWindow.h"
-#include <../Parameter.h>
+#include "../main-Qt/crx.h"
+#include "../util-QT/EPG.h"
+#include <QWidget>
+#include <QDateTime>
+#include <QPushButton>
+#include <QSpinBox>
+#include <QComboBox>
+#include <QStringList>
+#include <QMessageBox>
+#include <QLabel>
 #include <QTimer>
+#include <QPixmap>
+#include <QTreeWidget>
 #include <map>
 
 
 /* Definitions ****************************************************************/
-#define COL_NAME    1
+#define COL_NAME	1
 
 /* Define the timer interval of updating */
-#define GUI_TIMER_EPG_UPDATE        1000 /* ms (1 second) */
+#define GUI_TIMER_EPG_UPDATE		1000 /* ms (1 second) */
 
 /* list view columns */
-#define COL_START       0
-#define COL_NAME        1
-#define COL_GENRE       2
-#define COL_DESCRIPTION 3
-#define COL_DURATION    4
+#define COL_START		0
+#define COL_NAME		1
+#define	COL_GENRE		2
+#define	COL_DESCRIPTION	3
+#define COL_DURATION	4
 
 
 /* Classes ********************************************************************/
 
-class EPG;
-class QDomDocument;
-
-class EPGDlg : public CWindow
+class EPGDlg : public CWindow, public Ui_CEPGDlgbase
 {
     Q_OBJECT
 
 public:
-    EPGDlg(CSettings&, QWidget* parent = 0);
+    EPGDlg(CRx&, CSettings&, QWidget* parent = 0);
     virtual ~EPGDlg();
-    void setServiceInformation(const CServiceInformation&, uint32_t);
-    void setDecoder(EPG*);
+
+    void select();
 
 protected:
     virtual void eventShow(QShowEvent*);
@@ -72,26 +80,25 @@ protected:
     void setActive(QTreeWidgetItem*);
     bool isActive(QTreeWidgetItem*);
 
-    QString getFileName(const QDate& date, uint32_t sid, bool bAdvanced);
-    QString getFileName_etsi(const QDate& date, uint32_t sid, bool bAdvanced);
-    QDomDocument* getFile (const QString&);
-    QDomDocument* getFile (const QDate& date, uint32_t sid, bool bAdvanced);
-    void select();
+    virtual QString getFileName(const QDate& date, uint32_t sid, bool bAdvanced);
+    virtual QString getFileName_etsi(const QDate& date, uint32_t sid, bool bAdvanced);
+    virtual QDomDocument* getFile (const QString&);
+    virtual QDomDocument* getFile (const QDate& date, uint32_t sid, bool bAdvanced);
 
-    Ui::CEPGDlgbase       *ui;
-    EPG*                  pEpg;
-    QTimer                Timer;
-    QIcon                 greenCube;
-    QTreeWidgetItem*      next;
-    QDateTime             drmTime;
+    bool    do_updates;
+    EPG     epg;
+    CRx&    rx;
+    QTimer	Timer;
+    map<QString,uint32_t> sids;
+    QIcon		greenCube;
+    QTreeWidgetItem*	next;
 
 signals:
     void NowNext(QString);
 
-private slots:
+public slots:
     void on_channel_activated(const QString&);
     void on_dateEdit_dateChanged(const QDate&);
-    void on_DRMTimeChanged(QDateTime);
     void OnTimer();
 };
 

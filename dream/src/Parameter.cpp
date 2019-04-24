@@ -1,12 +1,12 @@
 /******************************************************************************\
  * Technische Universitaet Darmstadt, Institut fuer Nachrichtentechnik
- * Copyright (c) 2001-2014
+ * Copyright (c) 2007
  *
  * Author(s):
- *  Volker Fischer, Andrew Murphy
+ *	Volker Fischer, Andrew Murphy
  *
  * Description:
- *  DRM Parameters
+ *	DRM Parameters
  *
  ******************************************************************************
  *
@@ -32,10 +32,20 @@
 #include <limits>
 #include <sstream>
 #include <iomanip>
+//#include "util/LogPrint.h"
+
+#ifdef _WIN32
+# define PATH_SEPARATOR "\\"
+# define PATH_SEPARATORS "/\\"
+#else
+# define PATH_SEPARATOR "/"
+# define PATH_SEPARATORS "/"
+#endif
+#define DEFAULT_DATA_FILES_DIRECTORY "data" PATH_SEPARATOR
 
 /* Implementation *************************************************************/
 CParameter::CParameter():
-    pDRMRec(NULL),
+    pDRMRec(nullptr),
     eSymbolInterlMode(),
     eMSCCodingScheme(),
     eSDCCodingScheme(),
@@ -44,14 +54,14 @@ CParameter::CParameter():
     iAMSSCarrierMode(0),
     sReceiverID("                "),
     sSerialNumber(),
+    sDataFilesDirectory(DEFAULT_DATA_FILES_DIRECTORY),
     eTransmitCurrentTime(CT_OFF),
-    MSCPrLe(),bSDCCodeRateOneQuarter(false),
+    MSCPrLe(),
     Stream(MAX_NUM_STREAMS), Service(MAX_NUM_SERVICES),
-    AudioComponentStatus(MAX_NUM_SERVICES),DataComponentStatus(MAX_NUM_SERVICES),
+	AudioComponentStatus(MAX_NUM_SERVICES),DataComponentStatus(MAX_NUM_SERVICES),
     iNumBitsHierarchFrameTotal(0),
     iNumDecodedBitsMSC(0),
     iNumSDCBitsPerSFrame(0),
-    iNumFACBitsPerBlock(NUM_FAC_BITS_PER_BLOCK_DRM30), // assume DRM30
     iNumAudioDecoderBits(0),
     iNumDataDecoderBits(0),
     iYear(0),
@@ -107,13 +117,12 @@ CParameter::CParameter():
     rMaxPSDwrtSig(0.0),
     rMaxPSDFreq(0.0),
     rSigStrengthCorrection(0.0),
-    eRunState(STOPPED),
     CellMappingTable(),
     audioencoder(""),audiodecoder(""),
     use_gpsd(0), restart_gpsd(false),
     gps_host("localhost"), gps_port("2497"),
-    iAudSampleRate(DEFAULT_AUDIO_SAMPLE_RATE),
-    iSigSampleRate(DEFAULT_SIGNAL_SAMPLE_RATE),
+    iAudSampleRate(DEFAULT_SOUNDCRD_SAMPLE_RATE),
+    iSigSampleRate(DEFAULT_SOUNDCRD_SAMPLE_RATE),
     iSigUpscaleRatio(1),
     iNewAudSampleRate(0),
     iNewSigSampleRate(0),
@@ -154,14 +163,14 @@ CParameter::CParameter(const CParameter& p):
     iAMSSCarrierMode(p.iAMSSCarrierMode),
     sReceiverID(p.sReceiverID),
     sSerialNumber(p.sSerialNumber),
+    sDataFilesDirectory(p.sDataFilesDirectory),
     eTransmitCurrentTime(p.eTransmitCurrentTime),
-    MSCPrLe(p.MSCPrLe),bSDCCodeRateOneQuarter(p.bSDCCodeRateOneQuarter),
+    MSCPrLe(p.MSCPrLe),
     Stream(p.Stream), Service(p.Service),
-    AudioComponentStatus(p.AudioComponentStatus),DataComponentStatus(p.DataComponentStatus),
-    iNumBitsHierarchFrameTotal(p.iNumBitsHierarchFrameTotal),
+	AudioComponentStatus(p.AudioComponentStatus),DataComponentStatus(p.DataComponentStatus),
+	iNumBitsHierarchFrameTotal(p.iNumBitsHierarchFrameTotal),
     iNumDecodedBitsMSC(p.iNumDecodedBitsMSC),
     iNumSDCBitsPerSFrame(p.iNumSDCBitsPerSFrame),
-    iNumFACBitsPerBlock(p.iNumFACBitsPerBlock),
     iNumAudioDecoderBits(p.iNumAudioDecoderBits),
     iNumDataDecoderBits(p.iNumDataDecoderBits),
     iYear(p.iYear),
@@ -191,7 +200,7 @@ CParameter::CParameter(const CParameter& p):
     iDRMChannelNum(p.iDRMChannelNum),
     iSpecChDoppler(p.iSpecChDoppler),
     rBitErrRate(p.rBitErrRate),
-    rSyncTestParam  (p.rSyncTestParam),
+    rSyncTestParam	(p.rSyncTestParam),
     rSINR(p.rSINR),
     iNumBitErrors(p.iNumBitErrors),
     iChanEstDelay(p.iChanEstDelay),
@@ -221,7 +230,6 @@ CParameter::CParameter(const CParameter& p):
     rMaxPSDwrtSig(p.rMaxPSDwrtSig),
     rMaxPSDFreq(p.rMaxPSDFreq),
     rSigStrengthCorrection(p.rSigStrengthCorrection),
-    eRunState(p.eRunState),
     CellMappingTable(), // jfbc CCellMappingTable uses a CMatrix :(
     audioencoder(p.audioencoder),audiodecoder(p.audiodecoder),
     use_gpsd(p.use_gpsd),restart_gpsd(p.restart_gpsd),
@@ -244,7 +252,7 @@ CParameter::CParameter(const CParameter& p):
     LastAudioService(p.LastAudioService),
     LastDataService(p.LastDataService)
 //, Mutex() // jfbc: I don't think this state should be copied
-    ,lenient_RSCI(p.lenient_RSCI)
+  ,lenient_RSCI(p.lenient_RSCI)
 {
     CellMappingTable.MakeTable(eRobustnessMode, eSpectOccup, iSigSampleRate);
     matcReceivedPilotValues = p.matcReceivedPilotValues; // TODO
@@ -263,17 +271,16 @@ CParameter& CParameter::operator=(const CParameter& p)
     iAMSSCarrierMode = p.iAMSSCarrierMode;
     sReceiverID = p.sReceiverID;
     sSerialNumber = p.sSerialNumber;
+    sDataFilesDirectory = p.sDataFilesDirectory;
     eTransmitCurrentTime = p.eTransmitCurrentTime;
     MSCPrLe = p.MSCPrLe;
-    bSDCCodeRateOneQuarter = p.bSDCCodeRateOneQuarter;
     Stream = p.Stream;
     Service = p.Service;
-    AudioComponentStatus = p.AudioComponentStatus;
-    DataComponentStatus = p.DataComponentStatus;
+	AudioComponentStatus = p.AudioComponentStatus;
+	DataComponentStatus = p.DataComponentStatus;
     iNumBitsHierarchFrameTotal = p.iNumBitsHierarchFrameTotal;
     iNumDecodedBitsMSC = p.iNumDecodedBitsMSC;
     iNumSDCBitsPerSFrame = p.iNumSDCBitsPerSFrame;
-    iNumFACBitsPerBlock = p.iNumFACBitsPerBlock;
     iNumAudioDecoderBits = p.iNumAudioDecoderBits;
     iNumDataDecoderBits = p.iNumDataDecoderBits;
     iYear = p.iYear;
@@ -300,7 +307,7 @@ CParameter& CParameter::operator=(const CParameter& p)
     iDRMChannelNum = p.iDRMChannelNum;
     iSpecChDoppler = p.iSpecChDoppler;
     rBitErrRate = p.rBitErrRate;
-    rSyncTestParam   = p.rSyncTestParam;
+    rSyncTestParam	 = p.rSyncTestParam;
     rSINR = p.rSINR;
     iNumBitErrors = p.iNumBitErrors;
     iChanEstDelay = p.iChanEstDelay;
@@ -330,7 +337,6 @@ CParameter& CParameter::operator=(const CParameter& p)
     rMaxPSDwrtSig = p.rMaxPSDwrtSig;
     rMaxPSDFreq = p.rMaxPSDFreq;
     rSigStrengthCorrection = p.rSigStrengthCorrection;
-    eRunState = p.eRunState;
     CellMappingTable.MakeTable(eRobustnessMode, eSpectOccup, iSigSampleRate); // don't copy CMatrix
     audiodecoder =  p.audiodecoder;
     audioencoder =  p.audioencoder;
@@ -361,7 +367,7 @@ CParameter& CParameter::operator=(const CParameter& p)
 
 void CParameter::SetReceiver(CDRMReceiver* pDRMReceiver)
 {
-    pDRMRec = pDRMReceiver;
+	pDRMRec = pDRMReceiver;
     if (pDRMRec)
         eReceiverMode = pDRMRec->GetReceiverMode();
 }
@@ -392,10 +398,8 @@ void CParameter::ResetServicesStreams()
             Service[i].AudioParam.bTextflag = false;
             Service[i].AudioParam.bEnhanceFlag = false;
             Service[i].AudioParam.eAudioMode = CAudioParam::AM_MONO;
-            Service[i].AudioParam.iCELPIndex = 0;
-            Service[i].AudioParam.bCELPCRC = false;
-            Service[i].AudioParam.eHVXCRate = CAudioParam::HR_2_KBIT;
-            Service[i].AudioParam.bHVXCCRC = false;
+            Service[i].AudioParam.eSurround = CAudioParam::MS_NONE;
+            Service[i].AudioParam.xHE_AAC_config.clear();
 
             Service[i].DataParam.iStreamID = STREAM_ID_NOT_USED;
             Service[i].DataParam.ePacketModInd = CDataParam::PM_PACKET_MODE;
@@ -413,8 +417,8 @@ void CParameter::ResetServicesStreams()
             Service[i].eAudDataFlag = CService::SF_AUDIO;
             Service[i].iServiceDescr = 0;
             Service[i].strLabel = "";
-            AudioComponentStatus[i].SetStatus(NOT_PRESENT);
-            DataComponentStatus[i].SetStatus(NOT_PRESENT);
+			AudioComponentStatus[i].SetStatus(NOT_PRESENT);
+			DataComponentStatus[i].SetStatus(NOT_PRESENT);
         }
 
         for (i = 0; i < MAX_NUM_STREAMS; i++)
@@ -435,10 +439,8 @@ void CParameter::ResetServicesStreams()
         Service[0].AudioParam.bTextflag = false;
         Service[0].AudioParam.bEnhanceFlag = false;
         Service[0].AudioParam.eAudioMode = CAudioParam::AM_MONO; // ? FM could be stereo
-        Service[0].AudioParam.iCELPIndex = 0;
-        Service[0].AudioParam.bCELPCRC = false;
-        Service[0].AudioParam.eHVXCRate = CAudioParam::HR_2_KBIT;
-        Service[0].AudioParam.bHVXCCRC = false;
+        Service[0].AudioParam.eSurround = CAudioParam::MS_NONE;
+        Service[0].AudioParam.xHE_AAC_config.clear();
 
         Service[0].iServiceID = SERV_ID_NOT_USED;
         Service[0].eCAIndication = CService::CA_NOT_USED;
@@ -587,12 +589,8 @@ bool CParameter::SetWaveMode(const ERobMode eNewWaveMode)
         /* Set spectrum occupance to a valid parameter */
         eSpectOccup = SO_3;
     }
-    if (eNewWaveMode == RM_ROBUSTNESS_MODE_E)
-    {
-        eSpectOccup = SO_0;
-    }
 
-    /* Apply changes only if new parameter differs from old one */
+    /* Apply changes only if new paramter differs from old one */
     if (eRobustnessMode != eNewWaveMode)
     {
         /* Set new value */
@@ -624,11 +622,6 @@ void CParameter::SetSpectrumOccup(ESpecOcc eNewSpecOcc)
     {
         /* Set spectrum occupance to a valid parameter */
         eNewSpecOcc = SO_3;
-    }
-    if (eRobustnessMode == RM_ROBUSTNESS_MODE_E)
-    {
-        /* Set spectrum occupance to a valid parameter */
-        eNewSpecOcc = SO_0;
     }
 
     /* Apply changes only if new paramter differs from old one */
@@ -912,7 +905,7 @@ void CParameter::SetServiceID(const int iShortID, const uint32_t iNewServiceID)
 
 
         /* If the receiver has lost the sync automatically restore
-            last current service selected */
+        	last current service selected */
 
         if ((iShortID > 0) && (iNewServiceID > 0))
         {
@@ -941,6 +934,41 @@ void CParameter::SetServiceID(const int iShortID, const uint32_t iNewServiceID)
     }
 }
 
+/* Append child directory to data files directory,
+   always terminated by '/' or '\' */
+string CParameter::GetDataDirectory(const char* pcChildDirectory) const
+{
+    string sDirectory(sDataFilesDirectory);
+    size_t p = sDirectory.find_last_of(PATH_SEPARATORS);
+    if (sDirectory != "" && (p == string::npos || p != (sDirectory.size()-1)))
+        sDirectory += PATH_SEPARATOR;
+    if (pcChildDirectory != nullptr)
+    {
+        sDirectory += pcChildDirectory;
+        size_t p = sDirectory.find_last_of(PATH_SEPARATORS);
+        if (sDirectory != "" && (p == string::npos || p != (sDirectory.size()-1)))
+            sDirectory += PATH_SEPARATOR;
+    }
+    if (sDirectory == "")
+        sDirectory = DEFAULT_DATA_FILES_DIRECTORY;
+    return sDirectory;
+}
+
+/* Set new data files directory, terminated by '/' or '\' if not */
+void CParameter::SetDataDirectory(string sNewDataFilesDirectory)
+{
+    if (sNewDataFilesDirectory == "")
+        sNewDataFilesDirectory = DEFAULT_DATA_FILES_DIRECTORY;
+    else
+    {
+        size_t p = sNewDataFilesDirectory.find_last_of(PATH_SEPARATORS);
+        if (p == string::npos || p != (sNewDataFilesDirectory.size()-1))
+            sNewDataFilesDirectory += PATH_SEPARATOR;
+    }
+    sDataFilesDirectory = sNewDataFilesDirectory;
+}
+
+
 /* Implementaions for simulation -------------------------------------------- */
 void CRawSimData::Add(uint32_t iNewSRS)
 {
@@ -965,14 +993,14 @@ uint32_t CRawSimData::Get()
 _REAL CParameter::GetSysSNRdBPilPos() const
 {
     /*
-        Get system SNR in dB for the pilot positions. Since the average power of
-        the pilots is higher than the data cells, the SNR is also higher at these
-        positions compared to the total SNR of the DRM signal.
+    	Get system SNR in dB for the pilot positions. Since the average power of
+    	the pilots is higher than the data cells, the SNR is also higher at these
+    	positions compared to the total SNR of the DRM signal.
     */
     return (_REAL) 10.0 * log10(pow((_REAL) 10.0, rSysSimSNRdB / 10) /
                                 CellMappingTable.rAvPowPerSymbol *
-                                CellMappingTable.rAvScatPilPow *
-                                (_REAL) CellMappingTable.iNumCarrier);
+				CellMappingTable.rAvScatPilPow *
+				(_REAL) CellMappingTable.iNumCarrier);
 }
 
 void
@@ -1295,30 +1323,30 @@ string COtherService::ServiceID() const
     {
     case 0:
     case 1:
-        ss << "ID:" << hex << setw(6) << iServiceID;
-        break;
+    	ss << "ID:" << hex << setw(6) << iServiceID;
+    	break;
 
     case 3:
     case 6:
-        ss << "ECC+PI:" << hex << setw(6) << iServiceID;
-        break;
+    	ss << "ECC+PI:" << hex << setw(6) << iServiceID;
+    	break;
     case 4:
     case 7:
-        ss << "PI:" << hex << setw(4) << iServiceID;
-        break;
+    	ss << "PI:" << hex << setw(4) << iServiceID;
+    	break;
     case 9:
-        ss << "ECC+aud:" << hex << setw(6) << iServiceID;
-        break;
+    	ss << "ECC+aud:" << hex << setw(6) << iServiceID;
+    	break;
     case 10:
-        ss << "AUDIO:" << hex << setw(4) << iServiceID;
-        break;
+    	ss << "AUDIO:" << hex << setw(4) << iServiceID;
+    	break;
     case 11:
-        ss << "DATA:" << hex << setw(8) << iServiceID;
-        break;
-        break;
+    	ss << "DATA:" << hex << setw(8) << iServiceID;
+    	break;
+    	break;
 
     default:
-        break;
+    	break;
     }
     */
     return ss.str();

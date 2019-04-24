@@ -1,12 +1,12 @@
 /******************************************************************************\
  * Technische Universitaet Darmstadt, Institut fuer Nachrichtentechnik
- * Copyright (c) 2001-2014
+ * Copyright (c) 2001
  *
  * Author(s):
- *  Alexander Kurpiers, Volker Fischer
+ *	Alexander Kurpiers, Volker Fischer
  *
  * Description:
- *  See ChannelSimulation.cpp
+ *	See ChannelSimulation.cpp
  *
  ******************************************************************************
  *
@@ -35,9 +35,9 @@
 
 
 /* Definitions ****************************************************************/
-#define FIRLENGTH                   24
+#define FIRLENGTH					24
 
-#define fsqr(a)                     ((a) * (a))
+#define fsqr(a)						((a) * (a))
 
 
 /* Classes ********************************************************************/
@@ -64,49 +64,49 @@ public:
 
 
 protected:
-    _REAL       taps[FIRLENGTH * 8]; /* FIR filter coefficients */
-    int         over_cnt;       /* Counter for oversampling */
-    int         phase;          /* Phase for polyphase oversampling */
-    int         interpol;       /* interpolation factor for linear interpolation*/
-    int         polyinterpol;   /* interpolation factor for polyphase interpolation */
-    int         fir_index;      /* index to FIR buffer */
-    _REAL       fir_buff[FIRLENGTH][2]; /* FIR buffer */
-    _REAL       lastI, lastQ;   /* last FIR output, needed for interpolation */
-    _REAL       nextI, nextQ;   /* next FIR output */
+    _REAL		taps[FIRLENGTH * 8]; /* FIR filter coefficients */
+    int			over_cnt;		/* Counter for oversampling */
+    int			phase;			/* Phase for polyphase oversampling */
+    int			interpol;		/* interpolation factor for linear interpolation*/
+    int			polyinterpol;	/* interpolation factor for polyphase interpolation */
+    int			fir_index;		/* index to FIR buffer */
+    _REAL		fir_buff[FIRLENGTH][2]; /* FIR buffer */
+    _REAL		lastI, lastQ;	/* last FIR output, needed for interpolation */
+    _REAL		nextI, nextQ;	/* next FIR output */
 
-    _REAL fd;                   /* Fading rate */
-    _REAL fshift;               /* Doppler shift */
-    _REAL gain;                 /* Tap-gain */
-    int delay;                  /* Path delay */
-    int samplerate;             /* Sound Card Sample Rate */
+    _REAL fd;					/* Fading rate */
+    _REAL fshift;				/* Doppler shift */
+    _REAL gain;					/* Tap-gain */
+    int delay;					/* Path delay */
+    int samplerate;				/* Sound Card Sample Rate */
 
-    int     DelMs2Sam(const _REAL rDelay) const;
-    _REAL   NormShift(const _REAL rShift) const;
-    void    gausstp(_REAL taps[], _REAL& s, int& over) const;
+    int		DelMs2Sam(const _REAL rDelay) const;
+    _REAL	NormShift(const _REAL rShift) const;
+    void	gausstp(_REAL taps[], _REAL& s, int& over) const;
 };
 
 class CDRMChannel :
-/* The third template argument "_COMPLEX" is not used since this module
-   has only one input and one output buffer */
-    public CSimulationModul<_COMPLEX, CChanSimDataMod, _COMPLEX>, CChannelSim
+            /* The third template argument "_COMPLEX" is not used since this module
+               has only one input and one output buffer */
+            public CSimulationModul<_COMPLEX, CChanSimDataMod, _COMPLEX>, CChannelSim
 {
 public:
     CDRMChannel() {}
     virtual ~CDRMChannel() {}
 
 protected:
-    CTapgain            tap[4];
-    _COMPLEX            cCurExp[4];
-    _COMPLEX            cExpStep[4];
+    CTapgain			tap[4];
+    _COMPLEX			cCurExp[4];
+    _COMPLEX			cExpStep[4];
 
-    int                 iSampleRate;
-    int                 iNumTaps;
-    CVector<_COMPLEX>   veccHistory;
-    int                 iMaxDelay;
-    int                 iLenHist;
-    CVector<_COMPLEX>   veccOutput;
-    _REAL               rGainCorr;
-    _REAL               rNoisepwrFactor;
+    int					iSampleRate;
+    int					iNumTaps;
+    CVector<_COMPLEX>	veccHistory;
+    int					iMaxDelay;
+    int					iLenHist;
+    CVector<_COMPLEX>	veccOutput;
+    _REAL				rGainCorr;
+    _REAL				rNoisepwrFactor;
 
     void InitTapgain(CTapgain& tapg);
 

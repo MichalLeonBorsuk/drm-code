@@ -8,21 +8,22 @@
 CPacer::CPacer(uint64_t ns)
 {
     FILETIME ft;
-    hTimer = CreateWaitableTimer(NULL, true, TEXT("CPacerTimer"));
-    if (hTimer==NULL)
+    hTimer = CreateWaitableTimer(nullptr, true, TEXT("CPacerTimer"));
+    if (hTimer==nullptr)
     {
         throw "Create Timer failed ";
     }
     GetSystemTimeAsFileTime(&ft);
     interval = ns/100;
-    timekeeper = *(uint64_t*)&ft;
-    timekeeper += interval;
-    LARGE_INTEGER liDueTime;
-    liDueTime.QuadPart = timekeeper;
-    if (!SetWaitableTimer(hTimer, &liDueTime, 0, NULL, NULL, 0))
+    LARGE_INTEGER dueTime;
+    dueTime.LowPart = ft.dwLowDateTime;
+    dueTime.HighPart = ft.dwHighDateTime;
+    dueTime.QuadPart += interval;;
+    if (!SetWaitableTimer(hTimer, &dueTime, 0, nullptr, nullptr, 0))
     {
         throw "Set Timer failed ";
     }
+    timekeeper = (uint64_t)dueTime.QuadPart;
 }
 
 CPacer::~CPacer()
@@ -50,7 +51,7 @@ void CPacer::wait()
     timekeeper += interval;
     LARGE_INTEGER liDueTime;
     liDueTime.QuadPart = timekeeper;
-    if (!SetWaitableTimer(hTimer, &liDueTime, 0, NULL, NULL, 0))
+    if (!SetWaitableTimer(hTimer, &liDueTime, 0, nullptr, nullptr, 0))
     {
         throw "Set Timer failed ";
     }

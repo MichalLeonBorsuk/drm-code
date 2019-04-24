@@ -1,12 +1,12 @@
 /******************************************************************************\
  * Technische Universitaet Darmstadt, Institut fuer Nachrichtentechnik
- * Copyright (c) 2001-2014
+ * Copyright (c) 2001
  *
  * Author(s):
- *  Volker Fischer
+ *	Volker Fischer
  *
  * Description:
- *  Tables for FAC
+ *	Tables for FAC
  *
  ******************************************************************************
  *
@@ -28,21 +28,14 @@
 
 #include "TableFAC.h"
 
+using namespace std;
+
 /* Definitions ****************************************************************/
-/* ETSI ES201980 V4.1.1: page 89, 7.2:
- * ...FAC shall use 4-QAM mapping. A
+/* ETSI ES201980V2.1.1: page 115, 7.5.3: ...FAC shall use 4-QAM mapping. A
    fixed code rate shall be applied...R_all=0.6...
    6 tailbits are used for the encoder to get in zero state ->
-   65 [number of cells] * 2 [4-QAM] * 0.6 [code-rate] - 6 [tailbits] = 72
-
-The number of bits
-L
-FAC
-per FAC block equals 72 bits in robustness modes A, B, C and D and 116 bits in robustness
-mode E.
-
-*/
-const int iTableNumOfFACbitsPerBlock[] = {72,72,72,72,116}; // A=0 ... E=4
+   65 [number of cells] * 2 [4-QAM] * 0.6 [code-rate] - 6 [tailbits] = 72 */
+#define NUM_FAC_BITS_PER_BLOCK			72
 
 /* iTableNumOfServices[a][b]
    a: Number of audio services
@@ -58,7 +51,7 @@ const int iTableNumOfServices[5][5] = {
 };
 
 /* Language code */
-#define LEN_TABLE_LANGUAGE_CODE         16
+#define LEN_TABLE_LANGUAGE_CODE			16
 
 const string strTableLanguageCode[LEN_TABLE_LANGUAGE_CODE] = {
     "No language specified",
@@ -80,8 +73,8 @@ const string strTableLanguageCode[LEN_TABLE_LANGUAGE_CODE] = {
 };
 
 /* Programme Type codes */
-#define LEN_TABLE_PROG_TYPE_CODE_TOT    32
-#define LEN_TABLE_PROG_TYPE_CODE        30
+#define LEN_TABLE_PROG_TYPE_CODE_TOT	32
+#define LEN_TABLE_PROG_TYPE_CODE		30
 
 const string strTableProgTypCod[LEN_TABLE_PROG_TYPE_CODE_TOT] = {
     "No programme type",
@@ -175,7 +168,7 @@ const struct elCountry TableCountryCode[LEN_TABLE_COUNTRY_CODE] = {
     {"cd", "Congo"},
     {"ck", "Cook Islands"},
     {"cr", "Costa Rica"},
-    {"ci", "Côte d'Ivoire"},
+    {"ci", "C?te d'Ivoire"},
     {"hr", "Croatia"},
     {"cu", "Cuba"},
     {"cy", "Cyprus"},
@@ -564,7 +557,7 @@ const struct elLanguage TableISOLanguageCode[LEN_TABLE_ISO_LANGUAGE_CODE] = {
     {"grn", "Guarani"},
     {"gsw", "Alemani; Swiss German"},
     {"guj", "Gujarati"},
-    {"gwi", "Gwich´in"},
+    {"gwi", "Gwich'in"},
     {"hai", "Haida"},
     {"hat", "Haitian; Haitian Creole"},
     {"hau", "Hausa"},
@@ -713,7 +706,7 @@ const struct elLanguage TableISOLanguageCode[LEN_TABLE_ISO_LANGUAGE_CODE] = {
     {"nic", "Niger-Kordofanian (Other)"},
     {"niu", "Niuean"},
     {"nno", "Norwegian Nynorsk"},
-    {"nob", "Norwegian Bokmĺl"},
+    {"nob", "Norwegian Bokmål"},
     {"nog", "Nogai"},
     {"non", "Norse, Old"},
     {"nor", "Norwegian"},

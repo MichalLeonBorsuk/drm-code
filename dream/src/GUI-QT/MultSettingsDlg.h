@@ -1,9 +1,9 @@
 /******************************************************************************\
  * Technische Universitaet Darmstadt, Institut fuer Nachrichtentechnik
- * Copyright (c) 2001-2014
+ * Copyright (c) 2006
  *
  * Author(s):
- *  Andrea Russo
+ *	Andrea Russo
  *
  * Description:
  *
@@ -46,29 +46,28 @@
 
 class MultSettingsDlg : public QDialog, public Ui_CMultSettingsDlgBase
 {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
-    MultSettingsDlg(CParameter&, CSettings&, QWidget* parent = 0);
-    virtual ~MultSettingsDlg();
+	MultSettingsDlg(CParameter&, CSettings&, QWidget* parent = 0);
+	virtual ~MultSettingsDlg();
 
 protected:
-    void ClearCache(string sPath, QString sFilter, bool bDeleteDirs=false);
-    void ClearCache(QDir dir, QString sFilter, bool bDeleteDirs=false);
+	void ClearCache(QString sPath, QString sFilter, bool bDeleteDirs=false);
 
-    virtual void    showEvent(QShowEvent* pEvent);
-    virtual void    hideEvent(QHideEvent* pEvent);
+	virtual void	showEvent(QShowEvent* pEvent);
+	virtual void	hideEvent(QHideEvent* pEvent);
 
-    void            SetDataDirectoryControls();
-    void            AddWhatsThisHelp();
+	void			SetDataDirectoryControls();
+	void			AddWhatsThisHelp();
 
-    CParameter&     Parameters;
-    CSettings&      Settings;
+	CParameter&		Parameters;
+	CSettings&		Settings;
 
 public slots:
-    void OnbuttonChooseDir();
-    void OnbuttonClearCacheMOT();
-    void OnbuttonClearCacheEPG();
+	void OnbuttonChooseDir();
+	void OnbuttonClearCacheMOT();
+	void OnbuttonClearCacheEPG();
 };
 
 #endif

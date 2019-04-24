@@ -32,11 +32,11 @@ void COpenSLESOut::Enumerate(vector<string>& names, vector<string>& descriptions
     numOutputs = MAX_NUMBER_OUTPUT_DEVICES;
     res = (*AudioIODeviceCapabilitiesItf)->GetAvailableAudioOutputs( AudioIODeviceCapabilitiesItf, &numOutputs, OutputDeviceIDs);
     /* Search for phone earpiece output and phone speaker device */
-    for (SLint32 i=0; i<numOutputs; i++)
+    for (SLint32 i=0;i<numOutputs; i++)
     {
         SLAudioOutputDescriptor AudioOutputDescriptor;
         res = (*AudioIODeviceCapabilitiesItf)->QueryAudioOutputCapabilities(
-                  AudioIODeviceCapabilitiesItf, OutputDeviceIDs[i], &AudioOutputDescriptor
+                    AudioIODeviceCapabilitiesItf, OutputDeviceIDs[i], &AudioOutputDescriptor
               );
         //CheckErr(res);
         names.push_back((char*)AudioOutputDescriptor.pDeviceName);

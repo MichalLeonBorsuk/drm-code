@@ -1,9 +1,9 @@
 /******************************************************************************\
  * Technische Universitaet Darmstadt, Institut fuer Nachrichtentechnik
- * Copyright (c) 2001-2014
+ * Copyright (c) 2001
  *
  * Author(s):
- *  Volker Fischer
+ *	Volker Fischer
  *
  * Description:
  *
@@ -56,7 +56,7 @@ void CLogging::LoadSettings(CSettings& Settings)
 
     bool enabled = Settings.Get("Logfile", "enablelog", false);
     if(enabled)
-        state = starting;
+	state = starting;
     iLogDelay = Settings.Get("Logfile", "delay", 0);
     SaveSettings(Settings);
 }
@@ -79,8 +79,7 @@ void CLogging::OnTimerLogFile()
 {
     if (shortLog.restartNeeded())
     {
-        stop();
-        start();
+        stop(); start();
     }
     else
     {
@@ -98,8 +97,8 @@ void CLogging::OnTimerLogFileStart()
 {
     iLogCount = 0;
     state = on;
-    /* stop this timer! */
-    TimerLogFileStart.stop();
+	/* stop this timer! */
+	TimerLogFileStart.stop();
     /* Start logging (if not already done) */
     TimerLogFile.start(1000); /* Every second */
     /* Open log files */

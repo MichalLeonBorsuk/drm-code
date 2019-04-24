@@ -1,12 +1,12 @@
 /******************************************************************************\
  * Technische Universitaet Darmstadt, Institut fuer Nachrichtentechnik
- * Copyright (c) 2001-2014
+ * Copyright (c) 2004
  *
  * Author(s):
- *  Volker Fischer, Oliver Haffenden
+ *	Volker Fischer, Oliver Haffenden
  *
  * Description:
- *  see TagPacketGenerator.cpp
+ *	see TagPacketGenerator.cpp
  *
  ******************************************************************************
  *
@@ -42,31 +42,29 @@
 class CTagPacketGenerator
 {
 public:
-    CTagPacketGenerator();
-    virtual ~CTagPacketGenerator() {}
-    void Reset() {
-        vecTagItemGenerators.clear();
-    }
-    void AddTagItem(CTagItemGenerator *pGenerator);
-    virtual void PutTagPacketData(CVector<_BINARY> &vecbiDestination); // Call this to write the tag packet (i.e. all the tag items) to the vector
-    virtual int GetTagPacketLength();
-    virtual void SetProfile(const char /*cProfile*/) {}
+	CTagPacketGenerator(); 
+	virtual ~CTagPacketGenerator(){}
+	void Reset() {vecTagItemGenerators.clear();}
+	void AddTagItem(CTagItemGenerator *pGenerator);
+	virtual void PutTagPacketData(CVector<_BINARY> &vecbiDestination); // Call this to write the tag packet (i.e. all the tag items) to the std::vector
+	virtual int GetTagPacketLength();
+	virtual void SetProfile(const char /*cProfile*/) {}
 protected:
-    vector<CTagItemGenerator *> vecTagItemGenerators;
+	std::vector<CTagItemGenerator *> vecTagItemGenerators;
 };
 
 
 class CTagPacketGeneratorWithProfiles : public CTagPacketGenerator
 {
 public:
-    CTagPacketGeneratorWithProfiles(const char cProfile = '\0');
-    virtual ~CTagPacketGeneratorWithProfiles() {}
-    /* The following functions are overridden to check the profile for each tag item */
-    virtual void PutTagPacketData(CVector<_BINARY> &vecbiDestination); // Call this to write the tag packet (i.e. all the tag items) to the vector
-    virtual int GetTagPacketLength(void);
-    virtual void SetProfile(const char cProfile);
+	CTagPacketGeneratorWithProfiles(const char cProfile = '\0');
+	virtual ~CTagPacketGeneratorWithProfiles(){}
+	/* The following functions are overridden to check the profile for each tag item */
+	virtual void PutTagPacketData(CVector<_BINARY> &vecbiDestination); // Call this to write the tag packet (i.e. all the tag items) to the std::vector
+	virtual int GetTagPacketLength(void);
+	virtual void SetProfile(const char cProfile);
 private:
-    char cProfile;
+	char cProfile;
 };
 
 #endif
