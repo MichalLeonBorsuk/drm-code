@@ -125,7 +125,7 @@ unix:!cross_compile {
     message(building on $$UNAME)
 }
 macx {
-    !console:QT += multimedia
+    !console:QT += multimedia webenginewidgets
     CONFIG += sound
     QT_CONFIG -= no-pkg-config
     PKG_CONFIG = /usr/local/bin/pkg-config
@@ -134,7 +134,6 @@ macx {
     QMAKE_LFLAGS += -F/usr/local/lib
     LIBS += -framework CoreFoundation -framework CoreServices -lpcap
     LIBS += -framework CoreAudio -framework AudioToolbox -framework AudioUnit
-    CONFIG += fdk-aac
     DEFINES += HAVE_LIBPCAP
     packagesExist(sndfile) {
         CONFIG += sndfile
@@ -144,6 +143,12 @@ macx {
     }
     packagesExist(speex) {
         CONFIG += libspeexdsp
+    }
+    packagesExist(libgps) {
+        CONFIG += gps
+    }
+    packagesExist(fdk-aac) {
+        CONFIG += fdk-aac
     }
 }
 linux-* {
