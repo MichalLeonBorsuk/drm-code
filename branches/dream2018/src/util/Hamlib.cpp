@@ -43,6 +43,7 @@
 #include <IOKit/IOKitLib.h>
 #include <IOKit/serial/IOSerialKeys.h>
 #endif
+using namespace std;
 
 /*
 	This code is based on patches and example code from Tomi Manninen and
