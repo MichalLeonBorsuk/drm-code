@@ -33,6 +33,7 @@
 #include <vector>
 #include <iostream>
 #include "drm_pulseaudio.h"
+using namespace std;
 
 #ifndef PA_STREAM_ADJUST_LATENCY
 # define PA_STREAM_ADJUST_LATENCY 0
