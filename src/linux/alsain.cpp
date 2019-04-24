@@ -115,7 +115,7 @@ bool CSoundIn::Init(int iSampleRate, int iNewBufferSize, bool bNewBlocking)
         bChangDev = false;
     }
 
-    if ( RecThread.isRunning() == false ) {
+    if ( RecThread.running() == false ) {
         RecThread.SoundBuf.lock();
         RecThread.SoundBuf.Init( SOUNDBUFLEN );
         RecThread.SoundBuf.unlock();
@@ -167,7 +167,7 @@ void CSoundIn::Close()
 
     // stop the recording threads
 
-    if (RecThread.isRunning() ) {
+    if (RecThread.running() ) {
         RecThread.SoundBuf.keep_running = false;
         // wait 1sec max. for the threads to terminate
         RecThread.wait(1000);
