@@ -49,7 +49,7 @@ public:
 	virtual std::string EncGetVersion();
 	virtual bool CanEncode(CAudioParam::EAudCod eAudioCoding);
     virtual bool EncOpen(const CAudioParam& AudioParam, unsigned long& lNumSampEncIn, unsigned long& lMaxBytesEncOut);
-    virtual int Encode(CVector<_SAMPLE>& vecsEncInData, unsigned long lNumSampEncIn, CVector<uint8_t>& vecsEncOutData, unsigned long lMaxBytesEncOut);
+    virtual int Encode(CVector<_SAMPLE>&, unsigned long, CVector<uint8_t>&, unsigned long);
     virtual void EncClose();
 	virtual void EncSetBitrate(int iBitRate);
 	virtual void EncUpdate(CAudioParam& AudioParam);

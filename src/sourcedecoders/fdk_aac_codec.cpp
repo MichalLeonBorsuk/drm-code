@@ -544,7 +544,7 @@ FdkAacCodec::EncOpen(const CAudioParam& AudioParam, unsigned long& lNumSampEncIn
 }
 
 int
-FdkAacCodec::Encode(CVector<_SAMPLE>& vecsEncInData, unsigned long lNumSampEncIn, CVector<uint8_t>& vecsEncOutData, unsigned long lMaxBytesEncOut)
+FdkAacCodec::Encode(CVector<_SAMPLE>&, unsigned long, CVector<uint8_t>&, unsigned long)
 {
     int bytesEncoded = 0;
     if (hEncoder != nullptr) {
