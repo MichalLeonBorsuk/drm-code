@@ -22,19 +22,23 @@ console {
     UI_MESSAGE = console mode
     VERSION_MESSAGE = No Qt
     SOURCES += src/main.cpp
-    HEADERS += src/linux/ConsoleIO.h
-    SOURCES += src/linux/ConsoleIO.cpp
-    LIBS += -lpthread
-    message("with terminal user interface")
+	unix:!cross_compile {
+		HEADERS += src/linux/ConsoleIO.h
+		SOURCES += src/linux/ConsoleIO.cpp
+		LIBS += -lpthread
+		message("with terminal user interface")
+	}
 }
 qtconsole {
     QT -= gui
     QT += xml network
     UI_MESSAGE = console mode
     SOURCES += src/main-Qt/main.cpp
-    HEADERS += src/linux/ConsoleIO.h
-    SOURCES += src/linux/ConsoleIO.cpp
-    message("with terminal user interface")
+	unix:!cross_compile {
+		HEADERS += src/linux/ConsoleIO.h
+		SOURCES += src/linux/ConsoleIO.cpp
+		message("with terminal user interface")
+	}
 }
 contains(QT,gui) {
     UI_MESSAGE = GUI mode
