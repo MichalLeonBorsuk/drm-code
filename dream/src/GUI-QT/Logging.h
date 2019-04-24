@@ -1,9 +1,9 @@
 /******************************************************************************\
  * British Broadcasting Corporation
- * Copyright (c) 2001-2014
+ * Copyright (c) 2012
  *
  * Author(s):
- *  Volker Fischer, Julian Cable
+ *	Volker Fischer, Julian Cable
  *
  * Description:
  *
@@ -40,35 +40,33 @@ class CSettings;
 
 class CLogging: public QObject
 {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
-    CLogging(CParameter&);
-    virtual ~CLogging() {}
-    void LoadSettings(CSettings&);
-    void SaveSettings(CSettings&);
-    bool enabled() {
-        return state!=off;
-    }
+	CLogging(CParameter&);
+	virtual ~CLogging() {}
+	void LoadSettings(CSettings&);
+	void SaveSettings(CSettings&);
+	bool enabled() { return state!=off; }
 
 protected:
-    QTimer          TimerLogFile;
-    QTimer          TimerLogFileStart;
+	QTimer			TimerLogFile;
+	QTimer			TimerLogFileStart;
 
-    CShortLog       shortLog;
-    CLongLog        longLog;
-    int         iLogDelay;
-    int         iLogCount;
-    enum {off,starting,on}  state;
+	CShortLog		shortLog;
+	CLongLog		longLog;
+	int			iLogDelay;
+	int			iLogCount;
+	enum {off,starting,on}  state;
 
 signals:
-    void subscribeRig();
-    void unsubscribeRig();
+	void subscribeRig();
+	void unsubscribeRig();
 public slots:
-    void start();
-    void stop();
-    void OnTimerLogFile();
-    void OnTimerLogFileStart();
+	void start();
+	void stop();
+	void OnTimerLogFile();
+	void OnTimerLogFileStart();
 };
 
 #endif

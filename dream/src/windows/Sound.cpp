@@ -1,9 +1,9 @@
 /******************************************************************************\
  * Technische Universitaet Darmstadt, Institut fuer Nachrichtentechnik
- * Copyright (c) 2001-2014
+ * Copyright (c) 2001
  *
  * Author(s):
- *  Volker Fischer
+ *	Volker Fischer
  *
  * Description:
  * Sound card interface for Windows operating systems
@@ -28,20 +28,24 @@
 
 #include "Sound.h"
 #include <iostream>
+#include <codecvt>
+#include <locale>
+using namespace std;
 
+static wstring_convert<codecvt_utf8_utf16<wchar_t>> conv;
 
 static UINT FindDevice(const vector<string>& vecstrDevices, const string& names)
 {
-    UINT uDeviceID = WAVE_MAPPER;
-    for (UINT i = 0; i < UINT(vecstrDevices.size()); i++)
-    {
-        if (vecstrDevices[i] == names)
-        {
-            uDeviceID = i - 1; /* the first device is always the WAVE_MAPPER (defined as ((UINT)-1)) */
-            break;
-        }
-    }
-    return uDeviceID;
+	UINT uDeviceID = WAVE_MAPPER;
+	for (UINT i = 0; i < UINT(vecstrDevices.size()); i++)
+	{
+		if (vecstrDevices[i] == names)
+		{
+			uDeviceID = i - 1; /* the first device is always the WAVE_MAPPER (defined as ((UINT)-1)) */
+			break;
+		}
+	}
+	return uDeviceID;
 }
 
 
@@ -67,13 +71,14 @@ CSoundIn::CSoundIn():CSoundInInterface(),m_WaveIn(NULL)
         psSoundcardBuffer[i] = NULL;
     }
 
-    /* Default device WAVE_MAPPER */
-    vecstrDevices.push_back("");
+	/* Default device WAVE_MAPPER */
+	vecstrDevices.push_back("");
 
-    /* Get info about the devices and store the names */
+	/* Get info about the devices and store the names */
     for (i = 0; i < iNumDevs; i++)
-        if (!waveInGetDevCaps(i, &m_WaveInDevCaps, sizeof(WAVEINCAPS)))
-            vecstrDevices.push_back(m_WaveInDevCaps.szPname);
+		if (!waveInGetDevCaps(i, &m_WaveInDevCaps, sizeof(WAVEINCAPS))) {
+			vecstrDevices.push_back(conv.to_bytes(m_WaveInDevCaps.szPname));
+		}
 
     /* We use an event controlled wave-in structure */
     /* Create events */
@@ -102,8 +107,8 @@ CSoundIn::~CSoundIn()
 
 bool CSoundIn::Read(CVector<short>& psData)
 {
-    int         i;
-    bool    bError;
+    int			i;
+    bool	bError;
 
     /* Check if device must be opened or reinitialized */
     if (bChangDev)
@@ -184,11 +189,11 @@ bool CSoundIn::Init(int iNewSampleRate, int iNewBufferSize, bool bNewBlocking)
 {
     bool bChanged = false;
 
-    /* Set internal parameter */
+	/* Set internal parameter */
     iBufferSize = iNewBufferSize;
     bBlocking = bNewBlocking;
 
-    /* Check if device must be opened or reinitialized */
+	/* Check if device must be opened or reinitialized */
     if (bChangDev || iSampleRate != iNewSampleRate)
     {
         iSampleRate = iNewSampleRate;
@@ -232,7 +237,7 @@ bool CSoundIn::Init(int iNewSampleRate, int iNewBufferSize, bool bNewBlocking)
            get errors! */
         ResetEvent(m_WaveEvent);
 
-        /* Notify that sound capturing can start now */
+	    /* Notify that sound capturing can start now */
         waveInStart(m_WaveIn);
 
         bChanged = true;
@@ -254,7 +259,7 @@ void CSoundIn::OpenDevice()
                                     sWaveFormatEx.nSamplesPerSec;
     sWaveFormatEx.cbSize = 0;
 
-    /* Open wave-input and set call-back mechanism to event handle */
+	/* Open wave-input and set call-back mechanism to event handle */
     if (m_WaveIn != NULL)
     {
         waveInReset(m_WaveIn);
@@ -262,10 +267,15 @@ void CSoundIn::OpenDevice()
     }
 
     /* Get device ID */
-    UINT mmdev = FindDevice(vecstrDevices, sCurDev);
+	UINT mmdev = FindDevice(vecstrDevices, sCurDev);
 
+#if defined(_MSC_VER) && (_MSC_VER < 1400)
+    MMRESULT result = waveInOpen(&m_WaveIn, mmdev, &sWaveFormatEx,
+                                 (DWORD) m_WaveEvent, 0, CALLBACK_EVENT);
+#else
     MMRESULT result = waveInOpen(&m_WaveIn, mmdev, &sWaveFormatEx,
                                  (DWORD_PTR) m_WaveEvent, 0, CALLBACK_EVENT);
+#endif
     if (result != MMSYSERR_NOERROR)
         throw CGenErr("Sound Interface Start, waveInOpen() failed. This error "
                       "usually occurs if another application blocks the sound in.");
@@ -284,18 +294,18 @@ void CSoundIn::SetDev(string sNewDev)
 void CSoundIn::Enumerate(vector<string>& names, vector<string>& descriptions)
 {
     names = vecstrDevices;
-    descriptions.clear();
+	descriptions.resize(names.size(), "");
 }
 
-string  CSoundIn::GetDev()
+string	CSoundIn::GetDev()
 {
     return sCurDev;
 }
 
 void CSoundIn::Close()
 {
-    int         i;
-    MMRESULT    result;
+    int			i;
+    MMRESULT	result;
 
     /* Reset audio driver */
     if (m_WaveIn != NULL)
@@ -328,7 +338,7 @@ void CSoundIn::Close()
             throw CGenErr("Sound Interface, waveInClose() failed.");
 
         m_WaveIn = NULL;
-    }
+	}
 
     /* Set flag to open devices the next time it is initialized */
     bChangDev = true;
@@ -353,13 +363,14 @@ CSoundOut::CSoundOut():CSoundOutInterface(),m_WaveOut(NULL)
         psPlaybackBuffer[i] = NULL;
     }
 
-    /* Default device WAVE_MAPPER */
-    vecstrDevices.push_back("");
+	/* Default device WAVE_MAPPER */
+	vecstrDevices.push_back("");
 
-    /* Get info about the devices and store the names */
+	/* Get info about the devices and store the names */
     for (i = 0; i < iNumDevs; i++)
-        if (!waveOutGetDevCaps(i, &m_WaveOutDevCaps, sizeof(WAVEOUTCAPS)))
-            vecstrDevices.push_back(m_WaveOutDevCaps.szPname);
+		if (!waveOutGetDevCaps(i, &m_WaveOutDevCaps, sizeof(WAVEOUTCAPS))) {
+			vecstrDevices.push_back(conv.to_bytes(m_WaveOutDevCaps.szPname));
+		}
 
     /* We use an event controlled wave-out structure */
     /* Create events */
@@ -391,10 +402,10 @@ CSoundOut::~CSoundOut()
 
 bool CSoundOut::Write(CVector<short>& psData)
 {
-    int         i, j;
-    int         iCntPrepBuf;
-    int         iIndexDoneBuf;
-    bool    bError=false;
+    int			i, j;
+    int			iCntPrepBuf;
+    int			iIndexDoneBuf;
+    bool	bError=false;
 
     /* Check if device must be opened or reinitialized */
     if (bChangDev)
@@ -429,7 +440,7 @@ bool CSoundOut::Write(CVector<short>& psData)
             /* All buffers are filled, dump new block ----------------------- */
 // It would be better to kill half of the buffer blocks to set the start
 // back to the middle: TODO
-            cerr << "sound out buffers full" << endl;
+cerr << "sound out buffers full" << endl;
             return true; /* An error occurred */
         }
     }
@@ -452,7 +463,7 @@ bool CSoundOut::Write(CVector<short>& psData)
         /* Set index for done buffer */
         iIndexDoneBuf = NUM_SOUND_BUFFERS_OUT / 2;
 
-        cerr << "sound out buffers empty" << endl;
+cerr << "sound out buffers empty" << endl;
         bError = true;
     }
     else
@@ -510,7 +521,7 @@ bool CSoundOut::Init(int iNewSampleRate, int iNewBufferSize, bool bNewBlocking)
 {
     bool bChanged = false;
 
-    /* Set internal parameters */
+	/* Set internal parameters */
     iBufferSize = iNewBufferSize;
     bBlocking = bNewBlocking;
 
@@ -576,10 +587,15 @@ void CSoundOut::OpenDevice()
     }
 
     /* Get device ID */
-    UINT mmdev = FindDevice(vecstrDevices, sCurDev);
+	UINT mmdev = FindDevice(vecstrDevices, sCurDev);
 
+#if defined(_MSC_VER) && (_MSC_VER < 1400)
+    MMRESULT result = waveOutOpen(&m_WaveOut, mmdev, &sWaveFormatEx,
+                                  (DWORD) m_WaveEvent, 0, CALLBACK_EVENT);
+#else
     MMRESULT result = waveOutOpen(&m_WaveOut, mmdev, &sWaveFormatEx,
                                   (DWORD_PTR) m_WaveEvent, 0, CALLBACK_EVENT);
+#endif
     if (result != MMSYSERR_NOERROR)
         throw CGenErr("Sound Interface Start, waveOutOpen() failed.");
 }
@@ -587,7 +603,7 @@ void CSoundOut::OpenDevice()
 void CSoundOut::Enumerate(vector<string>& names, vector<string>& descriptions)
 {
     names = vecstrDevices;
-    descriptions.clear();
+	descriptions.resize(names.size(), "");
 }
 
 string CSoundOut::GetDev()
@@ -608,8 +624,8 @@ void CSoundOut::SetDev(string sNewDev)
 
 void CSoundOut::Close()
 {
-    int         i;
-    MMRESULT    result;
+    int			i;
+    MMRESULT	result;
 
     /* Reset audio driver */
     if (m_WaveOut != NULL)
@@ -642,7 +658,7 @@ void CSoundOut::Close()
             throw CGenErr("Sound Interface, waveOutClose() failed.");
 
         m_WaveOut = NULL;
-    }
+	}
 
     /* Set flag to open devices the next time it is initialized */
     bChangDev = true;

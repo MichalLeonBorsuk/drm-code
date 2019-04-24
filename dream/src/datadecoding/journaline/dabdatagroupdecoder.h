@@ -1,50 +1,50 @@
-/*
+/* 
  *
  * This file is part of the 'NewsService Journaline(R) Decoder'
- *
- * Copyright (c) 2003, 2001-2014 by Fraunhofer IIS, Erlangen, Germany
- *
+ * 
+ * Copyright (c) 2003, 2004 by Fraunhofer IIS, Erlangen, Germany
+ * 
  * --------------------------------------------------------------------
- *
+ * 
  * For NON-COMMERCIAL USE,
  * the 'NewsService Journaline(R) Decoder' is free software;
  * you can redistribute it and/or modify it under the terms of
  * the GNU General Public License as published by the
  * Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- *
+ * 
  * The 'NewsService Journaline(R) Decoder' is distributed in the hope
  * that it will be useful, but WITHOUT ANY WARRANTY;
  * without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU General Public License
  * along with the 'NewsService Journaline(R) Decoder';
  * if not, write to the Free Software Foundation, Inc.,
  * 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- *
- *
+ * 
+ * 
  * If you use this software in a project with user interaction, please
  * provide the following text to the user in an appropriate place:
  * "Features NewsService Journaline(R) decoder technology by
  * Fraunhofer IIS, Erlangen, Germany.
  * For more information visit http://www.iis.fhg.de/dab"
- *
+ * 
  * --------------------------------------------------------------------
- *
+ * 
  * To use the 'NewsService Journaline(R) Decoder' software for
  * COMMERCIAL purposes, please contact Fraunhofer IIS for a
  * commercial license (see below for contact information)!
- *
+ * 
  * --------------------------------------------------------------------
- *
+ * 
  * Contact:
  *   Fraunhofer IIS, Department 'Broadcast Applications'
  *   Am Wolfsmantel 33, 91058 Erlangen, Germany
  *   http://www.iis.fraunhofer.de/dab
  *   mailto:bc-info@iis.fraunhofer.de
- *
+ * 
  */
 
 #ifndef __DAB_DATAGROUP_DECODER__
@@ -55,19 +55,19 @@
  *
  * @file dabdatagroupdecoder.h
  *
- *          techidee GmbH
+ * 			techidee GmbH
  *
  * Project:   NewsBox
  *
  * Author:    Thomas Fruehwald
  *
- * Compiler:    gcc
+ * Compiler:	gcc
  *
  * Module:    DAB data group decoder
  *
  * Creation date:  2003-08-02
  *
- * Last modified:  2001-2014-02-25 (rbr)
+ * Last modified:  2004-02-25 (rbr)
  *
  * This decoder will accept DAB data groups, check their validity and
  * pass on the valid (Journaline) data groups.
@@ -89,7 +89,7 @@
  *
  * @attention
  * The DAB data group decoder is not thread safe.
- *
+ * 
  */
 #ifdef __cplusplus
 extern "C" {
@@ -104,14 +104,14 @@ typedef const void*  DAB_DATAGROUP_DECODER_t;
 */
 typedef struct
 {
-    unsigned char  extension_flag;    /*!< extension flag (1 bit) */
-    unsigned char  crc_flag;          /*!< CRC flag (1 bit) */
-    unsigned char  segment_flag;      /*!< segment flag (1 bit) */
-    unsigned char  user_access_flag;  /*!< user access flag (1 bit) */
-    unsigned char  datagroup_type;    /*!< data group type (4 bit) */
-    unsigned char  continuity_index;  /*!< continuity index (4 bit) */
-    unsigned char  repetition_index;  /*!< repitition index (4 bit) */
-    unsigned short extension_field;   /*!< extension field (16 bit), only
+  unsigned char  extension_flag;    /*!< extension flag (1 bit) */
+  unsigned char  crc_flag;          /*!< CRC flag (1 bit) */
+  unsigned char  segment_flag;      /*!< segment flag (1 bit) */
+  unsigned char  user_access_flag;  /*!< user access flag (1 bit) */
+  unsigned char  datagroup_type;    /*!< data group type (4 bit) */
+  unsigned char  continuity_index;  /*!< continuity index (4 bit) */
+  unsigned char  repetition_index;  /*!< repitition index (4 bit) */
+  unsigned short extension_field;   /*!< extension field (16 bit), only
                                          present when extension flag is 1 */
 } DAB_DATAGROUP_DECODER_msc_datagroup_header_t;
 
@@ -138,12 +138,12 @@ typedef struct
  *   user specified data pointer (as specified in createDec)
  */
 typedef void(DAB_DATAGROUP_DECODER_data)
-(
+  (  
     const DAB_DATAGROUP_DECODER_msc_datagroup_header_t *header,
     const unsigned long len,
     const unsigned char *buf,
     void *arg
-);
+  );
 
 
 
@@ -163,9 +163,9 @@ typedef void(DAB_DATAGROUP_DECODER_data)
  * @return DAB data group decoder instance
  */
 DAB_DATAGROUP_DECODER_t DAB_DATAGROUP_DECODER_createDec(
-    DAB_DATAGROUP_DECODER_data *data,
-    void  *arg
-);
+  DAB_DATAGROUP_DECODER_data *data,
+  void  *arg
+  );  
 
 
 /*!
@@ -186,10 +186,10 @@ void DAB_DATAGROUP_DECODER_deleteDec(const DAB_DATAGROUP_DECODER_t decoder);
 
 /*!
  * @brief Put data into DAB data group decoder
- *
+ * 
  * The input for the DAB data group decoder consists of
  * complete DAB data groups.
- *
+ * 
  * A CRC check is done if the CRC flag is set in the
  * data group header.
  *
@@ -205,10 +205,10 @@ void DAB_DATAGROUP_DECODER_deleteDec(const DAB_DATAGROUP_DECODER_t decoder);
  * @retval 1  on success
  */
 unsigned long DAB_DATAGROUP_DECODER_putData(
-    const DAB_DATAGROUP_DECODER_t  decoder,
-    const unsigned long  len,
-    const unsigned char *buf
-);
+  const DAB_DATAGROUP_DECODER_t  decoder,
+  const unsigned long  len,
+  const unsigned char *buf
+  );
 
 
 #ifdef __cplusplus

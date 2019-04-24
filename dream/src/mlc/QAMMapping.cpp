@@ -1,9 +1,9 @@
 /******************************************************************************\
  * Technische Universitaet Darmstadt, Institut fuer Nachrichtentechnik
- * Copyright (c) 2001-2014
+ * Copyright (c) 2001
  *
  * Author(s):
- *  Volker Fischer
+ *	Volker Fischer
  *
  * Description:
  *
@@ -39,8 +39,8 @@ void CQAMMapping::Map(CVector<_DECISION>& vecInputData1,
                       CVector<_COMPLEX>* pcOutputData)
 {
     /*
-        We always use "& 1" when we combine binary values with logical operators
-        for safety reasons.
+    	We always use "& 1" when we combine binary values with logical operators
+    	for safety reasons.
     */
     int i;
     int iIndexReal;

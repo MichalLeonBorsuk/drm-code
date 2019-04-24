@@ -1,12 +1,12 @@
 /******************************************************************************\
  * Technische Universitaet Darmstadt, Institut fuer Nachrichtentechnik
- * Copyright (c) 2001-2014
+ * Copyright (c) 2001
  *
  * Author(s):
- *  Volker Fischer
+ *	Volker Fischer
  *
  * Description:
- *  Tables for FAC
+ *	Tables for FAC
  *
  ******************************************************************************
  *
@@ -37,9 +37,7 @@
    fixed code rate shall be applied...R_all=0.6...
    6 tailbits are used for the encoder to get in zero state ->
    65 [number of cells] * 2 [4-QAM] * 0.6 [code-rate] - 6 [tailbits] = 72 */
-#define NUM_FAC_BITS_PER_BLOCK_DRM30    72
-#define NUM_FAC_BITS_PER_BLOCK_DRMPLUS 120
-extern const int iTableNumOfFACbitsPerBlock[];
+#define NUM_FAC_BITS_PER_BLOCK			72
 
 /* iTableNumOfServices[a][b]
    a: Number of audio services
@@ -48,55 +46,55 @@ extern const int iTableNumOfFACbitsPerBlock[];
 extern const int iTableNumOfServices[5][5];
 
 /* Language code */
-#define LEN_TABLE_LANGUAGE_CODE         16
+#define LEN_TABLE_LANGUAGE_CODE			16
 
-extern const string strTableLanguageCode[LEN_TABLE_LANGUAGE_CODE];
+extern const std::string strTableLanguageCode[LEN_TABLE_LANGUAGE_CODE];
 
 /* Programme Type codes */
-#define LEN_TABLE_PROG_TYPE_CODE_TOT    32
-#define LEN_TABLE_PROG_TYPE_CODE        30
+#define LEN_TABLE_PROG_TYPE_CODE_TOT	32
+#define LEN_TABLE_PROG_TYPE_CODE		30
 
-extern const string strTableProgTypCod[LEN_TABLE_PROG_TYPE_CODE_TOT];
+extern const std::string strTableProgTypCod[LEN_TABLE_PROG_TYPE_CODE_TOT];
 
 /* Country code table according to ISO 3166 */
 
-#define LEN_TABLE_COUNTRY_CODE          244
+#define LEN_TABLE_COUNTRY_CODE			244
 
-#define LEN_COUNTRY_CODE                2
-#define MAX_LEN_DESC_COUNTRY_CODE       44
+#define LEN_COUNTRY_CODE				2
+#define MAX_LEN_DESC_COUNTRY_CODE		44
 
 struct elCountry {
-    char    strcode [LEN_COUNTRY_CODE+1];
-    char    strDesc [MAX_LEN_DESC_COUNTRY_CODE+1];
+    char	strcode [LEN_COUNTRY_CODE+1];
+    char	strDesc [MAX_LEN_DESC_COUNTRY_CODE+1];
 };
 
 extern const struct elCountry TableCountryCode[LEN_TABLE_COUNTRY_CODE];
 
 /* Get country name from ISO 3166 A2 */
 
-string GetISOCountryName(const string strA2);
+std::string GetISOCountryName(const std::string strA2);
 
 /* Language code table according to ISO/IEC 639-2 */
 
-#define LEN_TABLE_ISO_LANGUAGE_CODE         505
+#define LEN_TABLE_ISO_LANGUAGE_CODE			505
 
-#define LEN_ISO_LANGUAGE_CODE               3
-#define MAX_LEN_DESC_ISO_LANGUAGE_CODE      44
+#define LEN_ISO_LANGUAGE_CODE				3
+#define MAX_LEN_DESC_ISO_LANGUAGE_CODE		44
 
 struct elLanguage {
-    char    strISOCode [LEN_ISO_LANGUAGE_CODE+1];
-    char    strDesc [MAX_LEN_DESC_ISO_LANGUAGE_CODE+1];
+    char	strISOCode [LEN_ISO_LANGUAGE_CODE+1];
+    char	strDesc [MAX_LEN_DESC_ISO_LANGUAGE_CODE+1];
 };
 
 extern const struct elLanguage TableISOLanguageCode[LEN_TABLE_ISO_LANGUAGE_CODE];
 
 /* Get language name from ISO 3166 */
 
-string GetISOLanguageName(const string strA3);
+std::string GetISOLanguageName(const std::string strA3);
 
 /* CIRAF zones */
-#define LEN_TABLE_CIRAF_ZONES           86
+#define LEN_TABLE_CIRAF_ZONES			86
 
-extern const string strTableCIRAFzones[LEN_TABLE_CIRAF_ZONES];
+extern const std::string strTableCIRAFzones[LEN_TABLE_CIRAF_ZONES];
 
 #endif // !defined(TABLE_FAC_H__3B0_CA63_4344_BGDEB2B_23E7912__INCLUDED_)

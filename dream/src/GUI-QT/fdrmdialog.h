@@ -1,9 +1,9 @@
 /******************************************************************************\
  * Technische Universitaet Darmstadt, Institut fuer Nachrichtentechnik
- * Copyright (c) 2001-2014
+ * Copyright (c) 2001
  *
  * Author(s):
- *  Volker Fischer, Andrea Russo
+ *	Volker Fischer, Andrea Russo
  *
  * Description:
  *
@@ -29,151 +29,144 @@
 #ifndef _FDRMDIALOG_H_
 #define _FDRMDIALOG_H_
 
+#include <QLabel>
+#include <QPushButton>
+#include <QTimer>
+#include <QString>
+#include <QMenuBar>
+#include <QLayout>
+#include <QPalette>
+#include <QColorDialog>
+#include <QActionGroup>
+#include <QSignalMapper>
+#include <QDialog>
+#include <QMenu>
+#include <QShowEvent>
+#include <QHideEvent>
+#include <QCloseEvent>
+#include <qwt_thermo.h>
+#include "ui_DRMMainWindow.h"
 
 #include "CWindow.h"
-#include <QTimer>
-#include <QSystemTrayIcon>
-#include <../DrmReceiver.h>
-#include "receivercontroller.h"
+#include "EvaluationDlg.h"
+#include "SoundCardSelMenu.h"
 #include "DialogUtil.h"
+#include "StationsDlg.h"
+#include "LiveScheduleDlg.h"
+#include "EPGDlg.h"
+#include "fmdialog.h"
+#include "AnalogDemDlg.h"
+#include "MultSettingsDlg.h"
+#include "GeneralSettingsDlg.h"
+#include "MultColorLED.h"
+#include "Logging.h"
+#include "../main-Qt/crx.h"
+#include "../DrmReceiver.h"
+#include "../util/Vector.h"
+#include "../datadecoding/DataDecoder.h"
 
 /* Classes ********************************************************************/
-class CDRMReceiver;
-class CLogging;
-class EPGDlg;
-class MultSettingsDlg;
-class CMultColorLED;
-class CSoundCardSelMenu;
-class CAboutDlg;
-class ServiceSelector;
-class StationsDlg;
-class LiveScheduleDlg;
-class AnalogDemDlg;
-class systemevalDlg;
-class GeneralSettingsDlg;
-class CSysTray;
-class CFileMenu;
 class BWSViewer;
-class GingaViewer;
 class JLViewer;
 class SlideShowViewer;
 class CScheduler;
-class DreamTabWidget;
-class EngineeringTabWidget;
 
-namespace Ui {
-class DRMMainWindow;
-}
-
-class FDRMDialog : public CWindow
+class FDRMDialog : public CWindow, public Ui_DRMMainWindow
 {
     Q_OBJECT
 
 public:
+    FDRMDialog(CTRx*, CSettings&,
 #ifdef HAVE_LIBHAMLIB
-    explicit FDRMDialog(CDRMReceiver&, CSettings&, CRig&, QWidget* parent = 0);
-#else
-    explicit FDRMDialog(CDRMReceiver&, CSettings&, QWidget* parent = 0);
+               CRig&,
 #endif
-    ~FDRMDialog();
+               QWidget* parent = 0);
+    virtual ~FDRMDialog();
 
-    ReceiverController* getController() {
-        return controller;
-    }
+protected:
+    CRx&                rx;
+    bool                done;
+    QTimer				Timer;
+    std::vector<QLabel*>		serviceLabels;
 
-private:
-    Ui::DRMMainWindow*  ui;
-    CDRMReceiver&       DRMReceiver;
-    ReceiverController* controller;
-    QTimer              TimerClose;
-
-    CLogging*           pLogging;
-    systemevalDlg*      pSysEvalDlg;
-    BWSViewer*          pBWSDlg;
-    GingaViewer*        pGingaDlg;
-    JLViewer*           pJLDlg;
-    SlideShowViewer*    pSlideShowDlg;
-    StationsDlg*        pStationsDlg;
-    LiveScheduleDlg*    pLiveScheduleDlg;
-    EPGDlg*             pEPGDlg;
-    AnalogDemDlg*       pAnalogDemDlg;
+    CLogging*			pLogging;
+    systemevalDlg*		pSysEvalDlg;
+    BWSViewer*			pBWSDlg;
+    JLViewer*			pJLDlg;
+    SlideShowViewer*	pSlideShowDlg;
+    MultSettingsDlg*	pMultSettingsDlg;
+    StationsDlg*		pStationsDlg;
+    LiveScheduleDlg*	pLiveScheduleDlg;
+    EPGDlg*				pEPGDlg;
+    AnalogDemDlg*		pAnalogDemDlg;
+    FMDialog*			pFMDlg;
     GeneralSettingsDlg* pGeneralSettingsDlg;
-    MultSettingsDlg*    pMultSettingsDlg;
+    QMenuBar*			pMenu;
+    QButtonGroup*		pButtonGroup;
+    QMenu*				pReceiverModeMenu;
+    QMenu*				pSettingsMenu;
+    QMenu*				pPlotStyleMenu;
     CSysTray*           pSysTray;
-    CFileMenu*          pFileMenu;
-    CSoundCardSelMenu*  pSoundCardMenu;
-    CAboutDlg*          pAboutDlg;
+    CWindow*            pCurrentWindow;
+    CFileMenu*			pFileMenu;
+    CSoundCardSelMenu*	pSoundCardMenu;
+    CAboutDlg		    AboutDlg;
+    int			        iMultimediaServiceBit;
+    int			        iLastMultimediaServiceSelected;
     QString             SysTrayTitle;
     QString             SysTrayMessage;
-    QTimer              TimerSysTray;
-    CScheduler*         pScheduler;
-    QTimer*             pScheduleTimer;
-    int                 iCurrentFrequency;
-    ServiceSelector*    pServiceSelector;
-    DreamTabWidget*     pServiceTabs;
-    EngineeringTabWidget* pEngineeringTabs;
-    QWidget*            pMultimediaWindow;
-    QString             baseWindowTitle;
-    LevelMeter*         inputLevel;
+    QTimer				TimerSysTray;
+    CScheduler* 	    pScheduler;
+    QTimer*		        pScheduleTimer;
 
+    void SetStatus(CMultColorLED* LED, ETypeRxStatus state);
     virtual void        eventClose(QCloseEvent* ce);
     virtual void        eventHide(QHideEvent* pEvent);
     virtual void        eventShow(QShowEvent* pEvent);
     virtual void        eventUpdate();
-    void        AddWhatsThisHelp();
-    void        UpdateWindowTitle();
+    void		AddWhatsThisHelp();
+    void		UpdateDRM_GUI();
+    void		UpdateDisplay();
+    void		ClearDisplay();
+    void		UpdateWindowTitle(QString);
 
-    void        SetDisplayColor(const QColor newColor);
+    void		SetDisplayColor(const QColor newColor);
 
-    QString formatTextMessage(const QString&) const;
+    QString	GetCodecString(const CService&);
+    QString	GetTypeString(const CService&);
+    QString serviceSelector(CParameter&, int);
+    void showTextMessage(const QString&);
+    void showServiceInfo(const CService&);
+    void startLogging();
+    void stopLogging();
     void SysTrayCreate();
     void SysTrayStart();
     void SysTrayStop(const QString&);
     void SysTrayToolTip(const QString&, const QString&);
-    void setBars(int);
-    void connectController();
-    void setupWindowMode();
-    void changeRecMode(int, bool);
+	void setBars(int);
 
-private slots:
+public slots:
+    void OnTimer();
     void OnScheduleTimer();
     void OnSysTrayTimer();
-    void OnTimerClose();
+    void OnSelectAudioService(int);
     void OnSelectDataService(int);
+    void OnViewMultimediaDlg();
     void OnMenuSetDisplayColor();
-    void OnMenuMessageStyle(int);
-    void OnMenuPlotStyle(int);
-    void OnSwitchToAM();
-    void OnSwitchToDRM();
+    void OnNewAcquisition();
+    void OnSwitchMode(int);
     void OnSwitchToFM();
+    void OnSwitchToAM();
+    void OnHelpAbout() {AboutDlg.show();}
+    void OnSoundFileChanged(QString);
     void OnWhatsThis();
-    void OnHelpAbout();
-    void tune();
-    void OnSoundFileChanged(CDRMReceiver::ESFStatus);
     void OnSysTrayActivated(QSystemTrayIcon::ActivationReason);
-    void initialiseSchedule();
-    void on_actionGeneralSettings_triggered();
-    void on_actionMultimediaSettings_triggered();
-    void on_NewDataService(int);
-    void onUserEnteredPosition(double, double);
-    void onUseGPSd(const QString&);
-    //void on_action_Multimedia_Dialog_triggered();
-    void on_actionSingle_Window_Mode_triggered(bool);
-    void on_actionEngineering_Mode_triggered(bool);
-    void OnTextMessageChanged(int, const QString&);
-    void OnMSCChanged(ETypeRxStatus);
-    void OnSDCChanged(ETypeRxStatus);
-    void OnFACChanged(ETypeRxStatus);
-    void OnInputSignalLevelChanged(double);
-    void OnModeChanged(int);
-    void OnServiceChanged(int, const CService&);
-    void OnSignalLost();
-    void OnFrequencyChanged(int);
-    void OnChannelReceptionChanged(Reception&);
-
+    void OnWorkingThreadFinished();
+    void ChangeGUIModeToDRM();
+    void ChangeGUIModeToAM();
+    void ChangeGUIModeToFM();
 signals:
     void plotStyleChanged(int);
-    void frequencyChanged(int);
 };
 
 #endif // _FDRMDIALOG_H_

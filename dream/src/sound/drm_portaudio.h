@@ -1,9 +1,9 @@
 /******************************************************************************\
  * British Broadcasting Corporation
- * Copyright (c) 2001-2014
+ * Copyright (c) 2007
  *
  * Author(s):
- *  Julian Cable
+ *	Julian Cable
  *
  * Decription:
  * PortAudio sound interface
@@ -37,17 +37,17 @@ class CPaCommon: public CSelectionInterface
 {
 public:
     CPaCommon(bool);
-    virtual         ~CPaCommon();
+    virtual 		~CPaCommon();
 
-    virtual void    Enumerate(vector<string>& choices, vector<string>& descriptions);
-    virtual void    SetDev(string sNewDevice);
-    virtual string  GetDev();
+    virtual void	Enumerate(std::vector<string>& names, std::vector<string>& descriptions);
+    virtual void	SetDev(std::string sNewDevice);
+    virtual std::string	GetDev();
 
-    bool        Init(int iSampleRate, int iNewBufferSize, bool bNewBlocking);
-    void            ReInit();
-    bool        Read(CVector<short>& psData);
-    bool        Write(CVector<short>& psData);
-    void            Close();
+    bool		Init(int iSampleRate, int iNewBufferSize, bool bNewBlocking);
+    void			ReInit();
+    bool		Read(CVector<short>& psData);
+    bool		Write(CVector<short>& psData);
+    void			Close();
 
     PaUtilRingBuffer ringBuffer;
     int xruns;
@@ -55,9 +55,9 @@ public:
 protected:
 
     PaStream *stream;
-    vector<string> names;
-    vector<PaDeviceIndex> devices;
-    string dev;
+    std::vector<string> names;
+    std::vector<PaDeviceIndex> devices;
+    std::string dev;
     bool is_capture,blocking,device_changed,xrun;
     int framesPerBuffer;
     int iBufferSize;
@@ -71,20 +71,27 @@ class CPaIn: public CSoundInInterface
 {
 public:
     CPaIn();
-    virtual             ~CPaIn();
-    virtual void        Enumerate(vector<string>& choices, vector<string>& descriptions) {
-        hw.Enumerate(choices, descriptions);
+    virtual 			~CPaIn();
+    virtual void	Enumerate(std::vector<string>& names, std::vector<string>& descriptions)
+    {
+        hw.Enumerate(names, descriptions);
     }
-    virtual void        SetDev(string sNewDevice) {
+    virtual void	SetDev(std::string sNewDevice)
+    {
         hw.SetDev(sNewDevice);
     }
-    virtual string      GetDev() {
+    virtual std::string	GetDev()
+    {
         return hw.GetDev();
     }
+    virtual std::string	GetVersion()
+    {
+        return Pa_GetVersionInfo()->versionText;
+    }
 
-    virtual bool    Init(int iSampleRate, int iNewBufferSize, bool bNewBlocking);
-    virtual void        Close();
-    virtual bool    Read(CVector<short>& psData);
+    virtual bool	Init(int iSampleRate, int iNewBufferSize, bool bNewBlocking);
+    virtual void		Close();
+    virtual bool	Read(CVector<short>& psData);
 
 protected:
 
@@ -95,20 +102,26 @@ class CPaOut: public CSoundOutInterface
 {
 public:
     CPaOut();
-    virtual             ~CPaOut();
-    virtual void        Enumerate(vector<string>& choices, vector<string>& descriptions) {
-        hw.Enumerate(choices, descriptions);
+    virtual 			~CPaOut();
+    virtual void	Enumerate(std::vector<string>& names, std::vector<string>& descriptions)
+    {
+        hw.Enumerate(names, descriptions);
     }
-    virtual void        SetDev(string sNewDevice) {
+    virtual void	SetDev(std::string sNewDevice)
+    {
         hw.SetDev(sNewDevice);
     }
-    virtual string      GetDev() {
+    virtual std::string	GetDev()
+    {
         return hw.GetDev();
     }
-
-    virtual bool    Init(int iSampleRate, int iNewBufferSize, bool bNewBlocking);
-    virtual void        Close();
-    virtual bool    Write(CVector<short>& psData);
+    virtual std::string	GetVersion()
+    {
+        return Pa_GetVersionInfo()->versionText;
+    }
+    virtual bool	Init(int iSampleRate, int iNewBufferSize, bool bNewBlocking);
+    virtual void		Close();
+    virtual bool	Write(CVector<short>& psData);
 
 protected:
 

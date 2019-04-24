@@ -1,6 +1,6 @@
 /******************************************************************************\
  *
- * Copyright (c) 2001-2014
+ * Copyright (c) 2013
  *
  * Author(s):
  *  David Flamand
@@ -30,6 +30,18 @@
 #include "null_codec.h"
 #include "aac_codec.h"
 #include "opus_codec.h"
+#ifdef HAVE_LIBFDK_AAC
+# include "fdk_aac_codec.h"
+#endif
+
+CAudioCodec::CAudioCodec():pFile(nullptr)
+{
+
+}
+
+CAudioCodec::~CAudioCodec() {
+
+}
 
 vector<CAudioCodec*>
 CAudioCodec::CodecList;
@@ -40,52 +52,91 @@ CAudioCodec::RefCount = 0;
 void
 CAudioCodec::InitCodecList()
 {
-    if (CodecList.size() == 0)
-    {
-        /* Null codec, MUST be the first */
-        CodecList.push_back(new NullCodec);
+	if (CodecList.size() == 0)
+	{
+		/* Null codec, MUST be the first */
+		CodecList.push_back(new NullCodec);
 
-        /* AAC */
+		/* AAC */
+#ifdef HAVE_LIBFDK_AAC
+        CodecList.push_back(new FdkAacCodec);
+#endif
         CodecList.push_back(new AacCodec);
 
-        /* Opus */
-        CodecList.push_back(new OpusCodec);
-    }
-    RefCount ++;
+		/* Opus */
+		CodecList.push_back(new OpusCodec);
+	}
+	RefCount ++;
 }
 
 void
 CAudioCodec::UnrefCodecList()
 {
-    RefCount --;
-    if (!RefCount)
-    {
-        while (CodecList.size() != 0)
-        {
-            delete CodecList.back();
-            CodecList.pop_back();
-        }
-    }
+	RefCount --;
+	if (!RefCount)
+	{
+		while (CodecList.size() != 0)
+		{
+			delete CodecList.back();
+			CodecList.pop_back();
+		}
+	}
 }
 
 CAudioCodec*
 CAudioCodec::GetDecoder(CAudioParam::EAudCod eAudioCoding, bool bCanReturnNullPtr)
 {
-    const int size = CodecList.size();
-    for (int i = 1; i < size; i++)
-        if (CodecList[i]->CanDecode(eAudioCoding))
-            return CodecList[i];
-    /* Fallback to null codec */
-    return bCanReturnNullPtr ? NULL : CodecList[0]; // ie the null codec
+    const int size = int(CodecList.size());
+	for (int i = 1; i < size; i++)
+        if (CodecList[unsigned(i)]->CanDecode(eAudioCoding))
+            return CodecList[unsigned(i)];
+	/* Fallback to null codec */
+    return bCanReturnNullPtr ? nullptr : CodecList[0]; // ie the null codec
 }
 
 CAudioCodec*
 CAudioCodec::GetEncoder(CAudioParam::EAudCod eAudioCoding, bool bCanReturnNullPtr)
 {
-    const int size = CodecList.size();
-    for (int i = 1; i < size; i++)
-        if (CodecList[i]->CanEncode(eAudioCoding))
-            return CodecList[i];
-    /* Fallback to null codec */
-    return bCanReturnNullPtr ? NULL : CodecList[0]; // ie the null codec
+	const int size = CodecList.size();
+	for (int i = 1; i < size; i++)
+		if (CodecList[i]->CanEncode(eAudioCoding))
+			return CodecList[i];
+	/* Fallback to null codec */
+    return bCanReturnNullPtr ? nullptr : CodecList[0]; // ie the null codec
+}
+
+void
+CAudioCodec::Init(const CAudioParam&, int)
+{
+}
+
+void
+CAudioCodec::openFile(const CParameter& Parameters)
+{
+    if(pFile != nullptr) {
+        fclose(pFile);
+        pFile = nullptr;
+    }
+    string fn = fileName(Parameters);
+    pFile = fopen(fn.c_str(), "wb");
+}
+
+void
+CAudioCodec::writeFile(const vector<uint8_t>& audio_frame)
+{
+    if (pFile!=nullptr)
+    {
+        size_t iNewFrL = size_t(audio_frame.size()) + 1;
+        fwrite(&iNewFrL, size_t(4), size_t(1), pFile);	// frame length
+        fwrite(&audio_frame[0], 1, iNewFrL, pFile);	// data
+        fflush(pFile);
+    }
+}
+
+void
+CAudioCodec::closeFile() {
+    if(pFile != nullptr) {
+        fclose(pFile);
+        pFile = nullptr;
+    }
 }

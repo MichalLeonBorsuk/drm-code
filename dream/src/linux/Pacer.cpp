@@ -2,7 +2,7 @@
 #include "../util/Pacer.h"
 
 #include <sys/time.h>
-#include <signal.h>
+#include <csignal>
 #include <unistd.h>
 #include <cstdio>
 #include <iostream>
@@ -14,7 +14,7 @@ CPacer::CPacer(uint64_t ns)
     int r = clock_gettime(CLOCK_REALTIME, &now);
 #else
     timeval t;
-    int r = gettimeofday(&t, NULL);
+    int r = gettimeofday(&t, nullptr);
     now.tv_sec = t.tv_sec;
     now.tv_nsec = 1000*t.tv_usec;
 #endif
@@ -37,7 +37,7 @@ void CPacer::wait()
         timespec delay;
         delay.tv_sec = delay_ns / 1000000000ULL;
         delay.tv_nsec = delay_ns % 1000000000ULL;
-        nanosleep(&delay, NULL);
+        nanosleep(&delay, nullptr);
     }
     timekeeper += interval;
 }
@@ -49,7 +49,7 @@ uint64_t CPacer::nstogo()
     (void)clock_gettime(CLOCK_REALTIME, &now);
 #else
     timeval t;
-    (void)gettimeofday(&t, NULL);
+    (void)gettimeofday(&t, nullptr);
     now.tv_sec = t.tv_sec;
     now.tv_nsec = 1000*t.tv_usec;
 #endif

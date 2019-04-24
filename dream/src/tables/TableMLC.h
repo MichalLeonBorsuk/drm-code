@@ -1,12 +1,12 @@
 /******************************************************************************\
  * Technische Universitaet Darmstadt, Institut fuer Nachrichtentechnik
- * Copyright (c) 2001-2014
+ * Copyright (c) 2001
  *
  * Author(s):
- *  Volker Fischer
+ *	Volker Fischer
  *
  * Description:
- *  Tables for MLC
+ *	Tables for MLC
  *
  ******************************************************************************
  *
@@ -34,42 +34,42 @@
 
 /* Definitions ****************************************************************/
 /* Default number of iterations at application startup */
-#define MC_NUM_ITERATIONS               1
+#define MC_NUM_ITERATIONS				1
 
 /* Generator polynomials used for channel coding (octal form, defined by
    a leading "0"!). We must bit-reverse the octal-forms given in the standard
    since we shift bits from right to the left! */
 /* In this implementation we shift bits from right to left, therefore the order
    of the code-words are: [..., b_(0, i), b_(1, i), b(2, i), b(3, i), ...] */
-#define MC_NUM_OUTPUT_BITS_PER_STEP     4   /* MC: Multi-level Coder */
+#define MC_NUM_OUTPUT_BITS_PER_STEP		4	/* MC: Multi-level Coder */
 const _BYTE byGeneratorMatrix[MC_NUM_OUTPUT_BITS_PER_STEP] = {
-    0155,   /* (133) x_{0, i} */
-    0117,   /* (171) x_{1, i} */
-    0123,   /* (145) x_{2, i} */
-    0155    /* (133) x_{3, i} */
+    0155,	/* (133) x_{0, i} */
+    0117,	/* (171) x_{1, i} */
+    0123,	/* (145) x_{2, i} */
+    0155	/* (133) x_{3, i} */
 };
 
-#define MC_CONSTRAINT_LENGTH            7
+#define MC_CONSTRAINT_LENGTH			7
 
 /* Since we have a periodical structure in the trellis it
    is enough to build one step. 2^(MC_CONSTRAINT_LENGTH - 1) states have
    to be considered. ("- 1": since one bit is the transition to the next
    state) */
-#define MC_NUM_STATES                   (1 << (MC_CONSTRAINT_LENGTH - 1))
-#define MC_NUM_OUTPUT_COMBINATIONS      (1 << MC_NUM_OUTPUT_BITS_PER_STEP)
+#define MC_NUM_STATES					(1 << (MC_CONSTRAINT_LENGTH - 1))
+#define MC_NUM_OUTPUT_COMBINATIONS		(1 << MC_NUM_OUTPUT_BITS_PER_STEP)
 
 /* Maximum number of levels (Its in case of HMmix) */
-#define MC_MAX_NUM_LEVELS               6
+#define MC_MAX_NUM_LEVELS				6
 
 
 /* Puncturing --------------------------------------------------------------- */
 /* Only these types of patterns are used in DRM */
-#define PP_TYPE_0000                    0 /* not used, dummy */
-#define PP_TYPE_1111                    1
-#define PP_TYPE_0111                    2
-#define PP_TYPE_0011                    3
-#define PP_TYPE_0001                    4
-#define PP_TYPE_0101                    5
+#define PP_TYPE_0000					0 /* not used, dummy */
+#define PP_TYPE_1111					1
+#define PP_TYPE_0111					2
+#define PP_TYPE_0011					3
+#define PP_TYPE_0001					4
+#define PP_TYPE_0101					5
 
 /* {a, b, c ...}: a = Number of groups, b = Number of "1"s, c = Patterns */
 const uint32_t iPuncturingPatterns[13][10] = {
@@ -79,7 +79,7 @@ const uint32_t iPuncturingPatterns[13][10] = {
     B2: 1
     B3: 1
     */
-    {   1, 4,
+    {1, 4,
         PP_TYPE_1111,
         PP_TYPE_0000,
         PP_TYPE_0000,
@@ -87,8 +87,7 @@ const uint32_t iPuncturingPatterns[13][10] = {
         PP_TYPE_0000,
         PP_TYPE_0000,
         PP_TYPE_0000,
-        PP_TYPE_0000
-    },
+        PP_TYPE_0000},
 
     /*
     B0: 1 1 1
@@ -96,16 +95,15 @@ const uint32_t iPuncturingPatterns[13][10] = {
     B2: 1 1 1
     B3: 1 0 0
     */
-    {   3, 10,
-        PP_TYPE_1111,
-        PP_TYPE_0111,
-        PP_TYPE_0111,
-        PP_TYPE_0000,
-        PP_TYPE_0000,
-        PP_TYPE_0000,
-        PP_TYPE_0000,
-        PP_TYPE_0000
-    },
+    {3, 10,
+     PP_TYPE_1111,
+     PP_TYPE_0111,
+     PP_TYPE_0111,
+     PP_TYPE_0000,
+     PP_TYPE_0000,
+     PP_TYPE_0000,
+     PP_TYPE_0000,
+     PP_TYPE_0000},
 
     /*
     B0: 1
@@ -113,16 +111,15 @@ const uint32_t iPuncturingPatterns[13][10] = {
     B2: 1
     B3: 0
     */
-    {   1, 3,
-        PP_TYPE_0111,
-        PP_TYPE_0000,
-        PP_TYPE_0000,
-        PP_TYPE_0000,
-        PP_TYPE_0000,
-        PP_TYPE_0000,
-        PP_TYPE_0000,
-        PP_TYPE_0000
-    },
+    {1, 3,
+     PP_TYPE_0111,
+     PP_TYPE_0000,
+     PP_TYPE_0000,
+     PP_TYPE_0000,
+     PP_TYPE_0000,
+     PP_TYPE_0000,
+     PP_TYPE_0000,
+     PP_TYPE_0000},
 
     /*
     B0: 1 1 1 1
@@ -130,16 +127,15 @@ const uint32_t iPuncturingPatterns[13][10] = {
     B2: 1 1 1 0
     B3: 0 0 0 0
     */
-    {   4, 11,
-        PP_TYPE_0111,
-        PP_TYPE_0111,
-        PP_TYPE_0111,
-        PP_TYPE_0011,
-        PP_TYPE_0000,
-        PP_TYPE_0000,
-        PP_TYPE_0000,
-        PP_TYPE_0000
-    },
+    {4, 11,
+     PP_TYPE_0111,
+     PP_TYPE_0111,
+     PP_TYPE_0111,
+     PP_TYPE_0011,
+     PP_TYPE_0000,
+     PP_TYPE_0000,
+     PP_TYPE_0000,
+     PP_TYPE_0000},
 
     /*
     B0: 1
@@ -147,16 +143,15 @@ const uint32_t iPuncturingPatterns[13][10] = {
     B2: 0
     B3: 0
     */
-    {   1, 2,
-        PP_TYPE_0011,
-        PP_TYPE_0000,
-        PP_TYPE_0000,
-        PP_TYPE_0000,
-        PP_TYPE_0000,
-        PP_TYPE_0000,
-        PP_TYPE_0000,
-        PP_TYPE_0000
-    },
+    {1, 2,
+     PP_TYPE_0011,
+     PP_TYPE_0000,
+     PP_TYPE_0000,
+     PP_TYPE_0000,
+     PP_TYPE_0000,
+     PP_TYPE_0000,
+     PP_TYPE_0000,
+     PP_TYPE_0000},
 
     /*
     B0: 1 1 1 1
@@ -164,16 +159,15 @@ const uint32_t iPuncturingPatterns[13][10] = {
     B2: 0 1 0 0
     B3: 0 0 0 0
     */
-    {   4, 7,
-        PP_TYPE_0011,
-        PP_TYPE_0101,
-        PP_TYPE_0011,
-        PP_TYPE_0001,
-        PP_TYPE_0000,
-        PP_TYPE_0000,
-        PP_TYPE_0000,
-        PP_TYPE_0000
-    },
+    {4, 7,
+     PP_TYPE_0011,
+     PP_TYPE_0101,
+     PP_TYPE_0011,
+     PP_TYPE_0001,
+     PP_TYPE_0000,
+     PP_TYPE_0000,
+     PP_TYPE_0000,
+     PP_TYPE_0000},
 
     /*
     B0: 1 1 1
@@ -181,16 +175,15 @@ const uint32_t iPuncturingPatterns[13][10] = {
     B2: 0 0 0
     B3: 0 0 0
     */
-    {   3, 5,
-        PP_TYPE_0011,
-        PP_TYPE_0001,
-        PP_TYPE_0011,
-        PP_TYPE_0000,
-        PP_TYPE_0000,
-        PP_TYPE_0000,
-        PP_TYPE_0000,
-        PP_TYPE_0000
-    },
+    {3, 5,
+     PP_TYPE_0011,
+     PP_TYPE_0001,
+     PP_TYPE_0011,
+     PP_TYPE_0000,
+     PP_TYPE_0000,
+     PP_TYPE_0000,
+     PP_TYPE_0000,
+     PP_TYPE_0000},
 
     /*
     B0: 1 1
@@ -198,16 +191,15 @@ const uint32_t iPuncturingPatterns[13][10] = {
     B2: 0 0
     B3: 0 0
     */
-    {   2, 3,
-        PP_TYPE_0011,
-        PP_TYPE_0001,
-        PP_TYPE_0000,
-        PP_TYPE_0000,
-        PP_TYPE_0000,
-        PP_TYPE_0000,
-        PP_TYPE_0000,
-        PP_TYPE_0000
-    },
+    {2, 3,
+     PP_TYPE_0011,
+     PP_TYPE_0001,
+     PP_TYPE_0000,
+     PP_TYPE_0000,
+     PP_TYPE_0000,
+     PP_TYPE_0000,
+     PP_TYPE_0000,
+     PP_TYPE_0000},
 
     /*
     B0: 1 1 1 1 1 1 1 1
@@ -215,16 +207,15 @@ const uint32_t iPuncturingPatterns[13][10] = {
     B2: 0 0 0 0 0 0 0 0
     B3: 0 0 0 0 0 0 0 0
     */
-    {   8, 11,
-        PP_TYPE_0011,
-        PP_TYPE_0001,
-        PP_TYPE_0001,
-        PP_TYPE_0011,
-        PP_TYPE_0001,
-        PP_TYPE_0001,
-        PP_TYPE_0011,
-        PP_TYPE_0001
-    },
+    {8, 11,
+     PP_TYPE_0011,
+     PP_TYPE_0001,
+     PP_TYPE_0001,
+     PP_TYPE_0011,
+     PP_TYPE_0001,
+     PP_TYPE_0001,
+     PP_TYPE_0011,
+     PP_TYPE_0001},
 
     /*
     B0: 1 1 1
@@ -232,16 +223,15 @@ const uint32_t iPuncturingPatterns[13][10] = {
     B2: 0 0 0
     B3: 0 0 0
     */
-    {   3, 4,
-        PP_TYPE_0011,
-        PP_TYPE_0001,
-        PP_TYPE_0001,
-        PP_TYPE_0000,
-        PP_TYPE_0000,
-        PP_TYPE_0000,
-        PP_TYPE_0000,
-        PP_TYPE_0000
-    },
+    {3, 4,
+     PP_TYPE_0011,
+     PP_TYPE_0001,
+     PP_TYPE_0001,
+     PP_TYPE_0000,
+     PP_TYPE_0000,
+     PP_TYPE_0000,
+     PP_TYPE_0000,
+     PP_TYPE_0000},
 
     /*
     B0: 1 1 1 1
@@ -249,16 +239,15 @@ const uint32_t iPuncturingPatterns[13][10] = {
     B2: 0 0 0 0
     B3: 0 0 0 0
     */
-    {   4, 5,
-        PP_TYPE_0011,
-        PP_TYPE_0001,
-        PP_TYPE_0001,
-        PP_TYPE_0001,
-        PP_TYPE_0000,
-        PP_TYPE_0000,
-        PP_TYPE_0000,
-        PP_TYPE_0000
-    },
+    {4, 5,
+     PP_TYPE_0011,
+     PP_TYPE_0001,
+     PP_TYPE_0001,
+     PP_TYPE_0001,
+     PP_TYPE_0000,
+     PP_TYPE_0000,
+     PP_TYPE_0000,
+     PP_TYPE_0000},
 
     /*
     B0: 1 1 1 1 1 1 1
@@ -266,16 +255,15 @@ const uint32_t iPuncturingPatterns[13][10] = {
     B2: 0 0 0 0 0 0 0
     B3: 0 0 0 0 0 0 0
     */
-    {   7, 8,
-        PP_TYPE_0011,
-        PP_TYPE_0001,
-        PP_TYPE_0001,
-        PP_TYPE_0001,
-        PP_TYPE_0001,
-        PP_TYPE_0001,
-        PP_TYPE_0001,
-        PP_TYPE_0000
-    },
+    {7, 8,
+     PP_TYPE_0011,
+     PP_TYPE_0001,
+     PP_TYPE_0001,
+     PP_TYPE_0001,
+     PP_TYPE_0001,
+     PP_TYPE_0001,
+     PP_TYPE_0001,
+     PP_TYPE_0000},
 
     /*
     B0: 1 1 1 1 1 1 1 1
@@ -283,20 +271,19 @@ const uint32_t iPuncturingPatterns[13][10] = {
     B2: 0 0 0 0 0 0 0 0
     B3: 0 0 0 0 0 0 0 0
     */
-    {   8, 9,
-        PP_TYPE_0011,
-        PP_TYPE_0001,
-        PP_TYPE_0001,
-        PP_TYPE_0001,
-        PP_TYPE_0001,
-        PP_TYPE_0001,
-        PP_TYPE_0001,
-        PP_TYPE_0001
-    }
+    {8, 9,
+     PP_TYPE_0011,
+     PP_TYPE_0001,
+     PP_TYPE_0001,
+     PP_TYPE_0001,
+     PP_TYPE_0001,
+     PP_TYPE_0001,
+     PP_TYPE_0001,
+     PP_TYPE_0001}
 };
 
 /* Puncturing patterns for tailbits */
-#define LENGTH_TAIL_BIT_PAT             6
+#define LENGTH_TAIL_BIT_PAT				6
 const uint32_t iPunctPatTailbits[12][LENGTH_TAIL_BIT_PAT] = {
     /*
     B0: 1 1 1 1 1 1
@@ -304,13 +291,12 @@ const uint32_t iPunctPatTailbits[12][LENGTH_TAIL_BIT_PAT] = {
     B2: 0 0 0 0 0 0
     B3: 0 0 0 0 0 0
     */
-    {   PP_TYPE_0011,
+    {PP_TYPE_0011,
         PP_TYPE_0011,
         PP_TYPE_0011,
         PP_TYPE_0011,
         PP_TYPE_0011,
-        PP_TYPE_0011
-    },
+        PP_TYPE_0011},
 
     /*
     B0: 1 1 1 1 1 1
@@ -318,13 +304,12 @@ const uint32_t iPunctPatTailbits[12][LENGTH_TAIL_BIT_PAT] = {
     B2: 1 0 0 0 0 0
     B3: 0 0 0 0 0 0
     */
-    {   PP_TYPE_0111,
-        PP_TYPE_0011,
-        PP_TYPE_0011,
-        PP_TYPE_0011,
-        PP_TYPE_0011,
-        PP_TYPE_0011
-    },
+    {PP_TYPE_0111,
+     PP_TYPE_0011,
+     PP_TYPE_0011,
+     PP_TYPE_0011,
+     PP_TYPE_0011,
+     PP_TYPE_0011},
 
     /*
     B0: 1 1 1 1 1 1
@@ -332,13 +317,12 @@ const uint32_t iPunctPatTailbits[12][LENGTH_TAIL_BIT_PAT] = {
     B2: 1 0 0 1 0 0
     B3: 0 0 0 0 0 0
     */
-    {   PP_TYPE_0111,
-        PP_TYPE_0011,
-        PP_TYPE_0011,
-        PP_TYPE_0111,
-        PP_TYPE_0011,
-        PP_TYPE_0011
-    },
+    {PP_TYPE_0111,
+     PP_TYPE_0011,
+     PP_TYPE_0011,
+     PP_TYPE_0111,
+     PP_TYPE_0011,
+     PP_TYPE_0011},
 
     /*
     B0: 1 1 1 1 1 1
@@ -346,13 +330,12 @@ const uint32_t iPunctPatTailbits[12][LENGTH_TAIL_BIT_PAT] = {
     B2: 1 1 0 1 0 0
     B3: 0 0 0 0 0 0
     */
-    {   PP_TYPE_0111,
-        PP_TYPE_0111,
-        PP_TYPE_0011,
-        PP_TYPE_0111,
-        PP_TYPE_0011,
-        PP_TYPE_0011
-    },
+    {PP_TYPE_0111,
+     PP_TYPE_0111,
+     PP_TYPE_0011,
+     PP_TYPE_0111,
+     PP_TYPE_0011,
+     PP_TYPE_0011},
 
     /*
     B0: 1 1 1 1 1 1
@@ -360,13 +343,12 @@ const uint32_t iPunctPatTailbits[12][LENGTH_TAIL_BIT_PAT] = {
     B2: 1 1 0 1 1 0
     B3: 0 0 0 0 0 0
     */
-    {   PP_TYPE_0111,
-        PP_TYPE_0111,
-        PP_TYPE_0011,
-        PP_TYPE_0111,
-        PP_TYPE_0111,
-        PP_TYPE_0011
-    },
+    {PP_TYPE_0111,
+     PP_TYPE_0111,
+     PP_TYPE_0011,
+     PP_TYPE_0111,
+     PP_TYPE_0111,
+     PP_TYPE_0011},
 
     /*
     B0: 1 1 1 1 1 1
@@ -374,13 +356,12 @@ const uint32_t iPunctPatTailbits[12][LENGTH_TAIL_BIT_PAT] = {
     B2: 1 1 1 1 1 0
     B3: 0 0 0 0 0 0
     */
-    {   PP_TYPE_0111,
-        PP_TYPE_0111,
-        PP_TYPE_0111,
-        PP_TYPE_0111,
-        PP_TYPE_0111,
-        PP_TYPE_0011
-    },
+    {PP_TYPE_0111,
+     PP_TYPE_0111,
+     PP_TYPE_0111,
+     PP_TYPE_0111,
+     PP_TYPE_0111,
+     PP_TYPE_0011},
 
     /*
     B0: 1 1 1 1 1 1
@@ -388,13 +369,12 @@ const uint32_t iPunctPatTailbits[12][LENGTH_TAIL_BIT_PAT] = {
     B2: 1 1 1 1 1 1
     B3: 0 0 0 0 0 0
     */
-    {   PP_TYPE_0111,
-        PP_TYPE_0111,
-        PP_TYPE_0111,
-        PP_TYPE_0111,
-        PP_TYPE_0111,
-        PP_TYPE_0111
-    },
+    {PP_TYPE_0111,
+     PP_TYPE_0111,
+     PP_TYPE_0111,
+     PP_TYPE_0111,
+     PP_TYPE_0111,
+     PP_TYPE_0111},
 
     /*
     B0: 1 1 1 1 1 1
@@ -402,13 +382,12 @@ const uint32_t iPunctPatTailbits[12][LENGTH_TAIL_BIT_PAT] = {
     B2: 1 1 1 1 1 1
     B3: 1 0 0 0 0 0
     */
-    {   PP_TYPE_1111,
-        PP_TYPE_0111,
-        PP_TYPE_0111,
-        PP_TYPE_0111,
-        PP_TYPE_0111,
-        PP_TYPE_0111
-    },
+    {PP_TYPE_1111,
+     PP_TYPE_0111,
+     PP_TYPE_0111,
+     PP_TYPE_0111,
+     PP_TYPE_0111,
+     PP_TYPE_0111},
 
     /*
     B0: 1 1 1 1 1 1
@@ -416,13 +395,12 @@ const uint32_t iPunctPatTailbits[12][LENGTH_TAIL_BIT_PAT] = {
     B2: 1 1 1 1 1 1
     B3: 1 0 0 1 0 0
     */
-    {   PP_TYPE_1111,
-        PP_TYPE_0111,
-        PP_TYPE_0111,
-        PP_TYPE_1111,
-        PP_TYPE_0111,
-        PP_TYPE_0111
-    },
+    {PP_TYPE_1111,
+     PP_TYPE_0111,
+     PP_TYPE_0111,
+     PP_TYPE_1111,
+     PP_TYPE_0111,
+     PP_TYPE_0111},
 
     /*
     B0: 1 1 1 1 1 1
@@ -430,13 +408,12 @@ const uint32_t iPunctPatTailbits[12][LENGTH_TAIL_BIT_PAT] = {
     B2: 1 1 1 1 1 1
     B3: 1 1 0 1 0 0
     */
-    {   PP_TYPE_1111,
-        PP_TYPE_1111,
-        PP_TYPE_0111,
-        PP_TYPE_1111,
-        PP_TYPE_0111,
-        PP_TYPE_0111
-    },
+    {PP_TYPE_1111,
+     PP_TYPE_1111,
+     PP_TYPE_0111,
+     PP_TYPE_1111,
+     PP_TYPE_0111,
+     PP_TYPE_0111},
 
     /*
     B0: 1 1 1 1 1 1
@@ -444,13 +421,12 @@ const uint32_t iPunctPatTailbits[12][LENGTH_TAIL_BIT_PAT] = {
     B2: 1 1 1 1 1 1
     B3: 1 1 0 1 0 1
     */
-    {   PP_TYPE_1111,
-        PP_TYPE_1111,
-        PP_TYPE_0111,
-        PP_TYPE_1111,
-        PP_TYPE_0111,
-        PP_TYPE_1111
-    },
+    {PP_TYPE_1111,
+     PP_TYPE_1111,
+     PP_TYPE_0111,
+     PP_TYPE_1111,
+     PP_TYPE_0111,
+     PP_TYPE_1111},
 
     /*
     B0: 1 1 1 1 1 1
@@ -458,13 +434,12 @@ const uint32_t iPunctPatTailbits[12][LENGTH_TAIL_BIT_PAT] = {
     B2: 1 1 1 1 1 1
     B3: 1 1 1 1 0 1
     */
-    {   PP_TYPE_1111,
-        PP_TYPE_1111,
-        PP_TYPE_1111,
-        PP_TYPE_1111,
-        PP_TYPE_0111,
-        PP_TYPE_1111
-    },
+    {PP_TYPE_1111,
+     PP_TYPE_1111,
+     PP_TYPE_1111,
+     PP_TYPE_1111,
+     PP_TYPE_0111,
+     PP_TYPE_1111},
 };
 
 
@@ -519,7 +494,7 @@ const int iCodRateCombFDC4SM = {
 
 /* Interleaver sequence ----------------------------------------------------- */
 /* The different coding modes in DRM use bit-interleavers in certain paths. We
-   define the following vectors to store the position and type of the
+   define the following std::vectors to store the position and type of the
    interleaver as described in the DRM-standard
 
    Interleaver modules have to be initialized in the way:

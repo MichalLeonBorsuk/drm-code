@@ -1,9 +1,9 @@
 /******************************************************************************\
  * British Broadcasting Corporation
- * Copyright (c) 2001-2014
+ * Copyright (c) 2007
  *
  * Author(s):
- *  Julian Cable
+ *	Julian Cable
  *
  * Decription:
  * Winradio G313 sound interface
@@ -36,37 +36,38 @@ class CShmSoundIn: public CSoundInInterface
 {
 public:
     CShmSoundIn();
-    virtual             ~CShmSoundIn();
-    virtual void        Enumerate(vector<string>& choices);
-    virtual void        SetDev(int);
-    virtual int         GetDev();
+    virtual 			~CShmSoundIn();
+    virtual void		Enumerate(std::vector<std::string>& choices);
+    virtual void		SetDev(int);
+    virtual int			GetDev();
 
-    virtual void        Init(int iNewBufferSize, _BOOLEAN bNewBlocking = TRUE);
-    virtual void        Close();
-    virtual _BOOLEAN    Read(CVector<short>& psData);
+    virtual void		Init(int iNewBufferSize, bool bNewBlocking = true);
+    virtual void		Close();
+	virtual std::string		GetVersion() { return "linux shared memory audio input"; }
+    virtual bool	Read(CVector<short>& psData);
 
-    void                SetShmPath(const string& p) {
+    void				SetShmPath(const std::string& p) {
         shm_path = p;
     }
-    void                SetShmChannels(int n) {
+    void				SetShmChannels(int n) {
         shmChannels = n;
     }
-    void                SetWantedChannels(int n) {
+    void				SetWantedChannels(int n) {
         wantedChannels = n;
     }
-    void                SetName(const string& n) {
+    void				SetName(const std::string& n) {
         name = n;
     }
 
 protected:
 
     PaUtilShmRingBuffer *ringBuffer;
-    int     shmid;
-    void*   shm;
-    string  shm_path;
-    string  name;
-    int     shmChannels;
-    int     wantedChannels;
+    int		shmid;
+    void*	shm;
+    std::string	shm_path;
+    std::string	name;
+    int		shmChannels;
+    int		wantedChannels;
 };
 
 #endif

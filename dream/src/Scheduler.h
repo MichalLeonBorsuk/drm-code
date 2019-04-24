@@ -1,6 +1,6 @@
 /******************************************************************************\
  * British Broadcasting Corporation
- * Copyright (c) 2001-2014
+ * Copyright (c) 2012
  *
  * Author(s):
  *      Julian Cable
@@ -39,25 +39,22 @@ using namespace std;
 class CScheduler
 {
 public:
-    struct SEvent {
-        time_t time;
-        int frequency;
-    };
-    CScheduler(bool test=false):schedule(),events(),iniFile(),testMode(test) {}
-    bool LoadSchedule(const string& filename);
-    bool empty() const;
-    SEvent front(); // get next event
-    SEvent pop(); // remove first event from queue
+	struct SEvent { time_t time; int frequency; };
+	CScheduler(bool test=false):schedule(),events(),iniFile(),testMode(test){}
+	bool LoadSchedule(const std::string& filename);
+	bool empty() const;
+	SEvent front(); // get next event 
+	SEvent pop(); // remove first event from queue
 private:
-    map<time_t,int> schedule; // map seconds from start of day to schedule event, frequency or -1 for off
-    queue<SEvent> events;
-    CIniFile iniFile;
-    bool testMode;
-    void fill();
-    void before();
-    int parse(string);
-    string format(time_t);
-    string format(const struct tm&);
+	map<time_t,int> schedule; // map seconds from start of day to schedule event, frequency or -1 for off
+	queue<SEvent> events;
+	CIniFile iniFile;
+	bool testMode;
+	void fill();
+	void before();
+	int parse(std::string);
+	std::string format(time_t);
+	std::string format(const struct tm&);
 };
 
 #if 0

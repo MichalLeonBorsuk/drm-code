@@ -3,7 +3,7 @@
  * Copyright (c) 2010
  *
  * Author(s):
- *  Julian Cable
+ *	Julian Cable
  *
  * Description:
  *
@@ -27,45 +27,46 @@
 
 #include "Experiment.h"
 #include <iostream>
+using namespace std;
 
-CExperiment::CExperiment() : dgdec(NULL)
+CExperiment::CExperiment() : dgdec(nullptr)
 {
-    /* Create decoder instance. Pass the pointer to this object. This is needed
-       for the call-back functions! */
-    dgdec = DAB_DATAGROUP_DECODER_createDec(dg_cb, this);
+	/* Create decoder instance. Pass the pointer to this object. This is needed
+	   for the call-back functions! */
+	dgdec = DAB_DATAGROUP_DECODER_createDec(dg_cb, this);
 }
 
 CExperiment::~CExperiment()
 {
-    /* Delete decoder instances */
-    if (dgdec != NULL)
-        DAB_DATAGROUP_DECODER_deleteDec(dgdec);
+	/* Delete decoder instances */
+	if (dgdec != nullptr)
+		DAB_DATAGROUP_DECODER_deleteDec(dgdec);
 }
 
 void CExperiment::AddDataUnit(CVector<_BINARY>& vecbiNewData)
 {
-    const int iSizeBytes = vecbiNewData.Size() / SIZEOF__BYTE;
+	const int iSizeBytes = vecbiNewData.Size() / SIZEOF__BYTE;
 
-    if (iSizeBytes > 0)
-    {
-        /* Bits to byte conversion */
-        CVector<_BYTE> vecbyData(iSizeBytes);
-        vecbiNewData.ResetBitAccess();
+	if (iSizeBytes > 0)
+	{
+		/* Bits to byte conversion */
+		CVector<_BYTE> vecbyData(iSizeBytes);
+		vecbiNewData.ResetBitAccess();
 
-        for (int i = 0; i < iSizeBytes; i++)
-            vecbyData[i] = (_BYTE) vecbiNewData.Separate(SIZEOF__BYTE);
+		for (int i = 0; i < iSizeBytes; i++)
+			vecbyData[i] = (_BYTE) vecbiNewData.Separate(SIZEOF__BYTE);
 
-        /* Add new data unit to Journaline decoder library */
-        DAB_DATAGROUP_DECODER_putData(dgdec, iSizeBytes, &vecbyData[0]);
-    }
+		/* Add new data unit to Journaline decoder library */
+		DAB_DATAGROUP_DECODER_putData(dgdec, iSizeBytes, &vecbyData[0]);
+	}
 }
 
 void CExperiment::dg_cb(const DAB_DATAGROUP_DECODER_msc_datagroup_header_t*,
-                        const unsigned long len, const unsigned char* buf, void* data)
+		const unsigned long len, const unsigned char* buf, void* data)
 {
-    cerr << "experimental dab data group length " << len << " bytes" << endl;
-    CExperiment* This = reinterpret_cast<CExperiment*>(data);
-    cerr << (char*)buf;
-    // TODO
-    (void)This;
+	cerr << "experimental dab data group length " << len << " bytes" << endl;
+	CExperiment* This = reinterpret_cast<CExperiment*>(data);
+	cerr << (char*)buf;
+	// TODO
+	(void)This;
 }

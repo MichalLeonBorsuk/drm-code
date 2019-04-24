@@ -1,9 +1,9 @@
 /******************************************************************************\
  * British Broadcasting Corporation
- * Copyright (c) 2001-2014
+ * Copyright (c) 2009
  *
  * Author(s):
- *   Julian Cable
+ *	 Julian Cable
  *
  * Description: Journaline Viewer
  *
@@ -28,47 +28,75 @@
 
 #include "JLViewer.h"
 #include "jlbrowser.h"
-#include <../datadecoding/DataDecoder.h>
-#include <../util-QT/Util.h>
+#include "../datadecoding/DataDecoder.h"
 #include <QFontDialog>
-#include "ThemeCustomizer.h"
 
-JLViewer::JLViewer(CSettings& Settings, QWidget* parent):
-    CWindow(parent, Settings, "Journaline")
+JLViewer::JLViewer(CRx& nrx, CSettings& Settings, QWidget* parent):
+    CWindow(parent, Settings, "Journaline"),
+    rx(nrx), decoderSet(false)
 {
     setupUi(this);
 
-    string p = Settings.Get(
-                   "Receiver", "datafilesdirectory", string(DEFAULT_DATA_FILES_DIRECTORY));
-
-    strCurrentSavePath = QString::fromUtf8((p+PATH_SEPARATOR+"Journaline").c_str());
-
     connect(buttonOk, SIGNAL(clicked()), this, SLOT(close()));
-    connect(actionClose, SIGNAL(triggered()), SLOT(close()));
-    connect(ButtonStepBack, SIGNAL(clicked()), textBrowser, SLOT(backward()));
-    connect(textBrowser, SIGNAL(backwardAvailable(bool)), ButtonStepBack, SLOT(setEnabled(bool)));
-
     textBrowser->setDocument(&document);
+
+    connect(actionClear_All, SIGNAL(triggered()), SLOT(OnClearAll()));
+    connect(actionSave, SIGNAL(triggered()), SLOT(OnSave()));
+    connect(actionSave_All, SIGNAL(triggered()), SLOT(OnSaveAll()));
+    connect(actionClose, SIGNAL(triggered()), SLOT(close()));
+    connect(actionSet_Font, SIGNAL(triggered()), SLOT(OnSetFont()));
 
     /* Update time for color LED */
     LEDStatus->SetUpdateTime(1000);
 
-    on_actionClear_All_triggered();
+    /* Connect controls */
+    connect(ButtonStepBack, SIGNAL(clicked()), this, SLOT(OnButtonStepBack()));
+    connect(textBrowser, SIGNAL(backwardAvailable(bool)), ButtonStepBack, SLOT(setEnabled(bool)));
+    connect(&Timer, SIGNAL(timeout()), this, SLOT(OnTimer()));
 
-    APPLY_CUSTOM_THEME();
+    OnClearAll();
 }
 
 JLViewer::~JLViewer()
 {
 }
 
-void JLViewer::setDecoder(CDataDecoder* dec)
+void JLViewer::eventShow(QShowEvent*)
 {
-    textBrowser->setDecoder(dec);
-}
+//    strCurrentSavePath = QString::fromUtf8(Parameters.GetDataDirectory("Journaline").c_str());
 
-void JLViewer::setServiceInformation(const CService& service, uint32_t iAudioServiceID)
-{
+    /* Store the default font */
+    QFont fontDefault = textBrowser->font();
+
+    /* Retrieve the font setting saved into the .ini file */
+    const QString strFontFamily = getSetting("fontfamily", QString());
+    if (strFontFamily != "")
+    {
+        QFont fontTextBrowser = QFont(strFontFamily,
+                                      getSetting("fontpointsize", 0),
+                                      getSetting("fontweight", 0),
+                                      getSetting("fontitalic", false));
+        textBrowser->setFont(fontTextBrowser);
+    }
+
+    CParameter& Parameters = *rx.GetParameters();
+    Parameters.Lock();
+    const int iCurSelAudioServ = Parameters.GetCurSelAudioService();
+    const uint32_t iAudioServiceID = Parameters.Service[iCurSelAudioServ].iServiceID;
+
+    /* Get current data service */
+    int shortID = Parameters.GetCurSelDataService();
+    CService service = Parameters.Service[shortID];
+    Parameters.Unlock();
+
+    CDataDecoder* dec = rx.GetDataDecoder();
+    if(dec)
+    {
+        textBrowser->setDecoder(dec);
+        decoderSet = true;
+    }
+    textBrowser->setSource(QUrl("0"));
+
     /* Add the service description into the dialog caption */
     QString strTitle = tr("Journaline");
 
@@ -76,6 +104,7 @@ void JLViewer::setServiceInformation(const CService& service, uint32_t iAudioSer
     {
         /* Do UTF-8 to QString (UNICODE) conversion with the label strings */
         QString strLabel = QString().fromUtf8(service.strLabel.c_str()).trimmed();
+
 
         /* Service ID (plot number in hexadecimal format) */
         QString strServiceID = "";
@@ -95,39 +124,19 @@ void JLViewer::setServiceInformation(const CService& service, uint32_t iAudioSer
             strTitle += " [" + strLabel + strServiceID + "]";
     }
     setWindowTitle(strTitle);
-}
 
-void JLViewer::setStatus(int, ETypeRxStatus status)
-{
-    SetStatus(LEDStatus, status);
+    /* Update window */
+    OnTimer();
 
-    if(textBrowser->changed())
-    {
-        textBrowser->reload();
-    }
-}
-
-void JLViewer::eventShow(QShowEvent*)
-{
-    /* Store the default font */
-    QFont fontDefault = textBrowser->font();
-
-    /* Retrieve the font setting saved into the .ini file */
-    const QString strFontFamily = getSetting("fontfamily", QString());
-    if (strFontFamily != "")
-    {
-        QFont fontTextBrowser = QFont(strFontFamily,
-                                      getSetting("fontpointsize", 0),
-                                      getSetting("fontweight", 0),
-                                      getSetting("fontitalic", false));
-        textBrowser->setFont(fontTextBrowser);
-    }
-
-    textBrowser->setSource(QUrl("0"));
+    /* Activate real-time timer when window is shown */
+    Timer.start(GUI_CONTROL_UPDATE_TIME);
 }
 
 void JLViewer::eventHide(QHideEvent*)
 {
+    /* Deactivate real-time timer so that it does not get new pictures */
+    Timer.stop();
+
     /* Store current textBrowser font */
     QFont fontTextBrowser = textBrowser->currentFont();
     putSetting("fontfamily", fontTextBrowser.family());
@@ -136,15 +145,66 @@ void JLViewer::eventHide(QHideEvent*)
     putSetting("fontitalic", fontTextBrowser.italic());
 }
 
-void JLViewer::on_actionSave_triggered()
+void JLViewer::OnTimer()
+{
+    CParameter& Parameters = *rx.GetParameters();
+    Parameters.Lock();
+
+    /* Get current data service */
+    int shortID = Parameters.GetCurSelDataService();
+    CService service = Parameters.Service[shortID];
+    ETypeRxStatus status = Parameters.DataComponentStatus[shortID].GetStatus();
+    Parameters.Unlock();
+
+    if(!decoderSet)
+    {
+        CDataDecoder* dec = rx.GetDataDecoder();
+        if(dec)
+        {
+            textBrowser->setDecoder(dec);
+            decoderSet = true;
+        }
+    }
+
+    switch(status)
+    {
+    case NOT_PRESENT:
+        LEDStatus->Reset();
+        break;
+
+    case CRC_ERROR:
+        LEDStatus->SetLight(CMultColorLED::RL_RED);
+        break;
+
+    case DATA_ERROR:
+        LEDStatus->SetLight(CMultColorLED::RL_YELLOW);
+        break;
+
+    case RX_OK:
+        LEDStatus->SetLight(CMultColorLED::RL_GREEN);
+        break;
+    }
+
+    if(textBrowser->changed())
+    {
+        textBrowser->reload();
+    }
+}
+
+void JLViewer::OnButtonStepBack()
+{
+    textBrowser->backward();
+}
+
+void JLViewer::OnSave()
 {
 }
 
-void JLViewer::on_actionSave_All_triggered()
+void JLViewer::OnSaveAll()
 {
 }
 
-void JLViewer::on_actionClear_All_triggered()
+void JLViewer::OnClearAll()
 {
     actionClear_All->setEnabled(false);
     actionSave->setEnabled(false);
@@ -155,7 +215,7 @@ void JLViewer::on_actionClear_All_triggered()
     // TODO - clear JL object cache ?
 }
 
-void JLViewer::on_actionSet_Font_triggered()
+void JLViewer::OnSetFont()
 {
     bool bok;
 

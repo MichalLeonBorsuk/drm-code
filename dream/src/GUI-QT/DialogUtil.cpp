@@ -1,10 +1,10 @@
 /******************************************************************************\
  * Technische Universitaet Darmstadt, Institut fuer Nachrichtentechnik
  * British Broadcasting Corporation
- * Copyright (c) 2001-2001-2014
+ * Copyright (c) 2001-2013
  *
  * Author(s):
- *  Volker Fischer, Julian Cable
+ *	Volker Fischer, Julian Cable
  *
  * Description:
  *
@@ -44,41 +44,15 @@
 #ifdef HAVE_LIBHAMLIB
 # include "../util-QT/Rig.h"
 #endif
-#ifdef WITH_QCUSTOMPLOT
-# include "qcplevelmeter.h"
-# include "qcpsmeter.h"
-#else
-# include "qwtlevelmeter.h"
-# include "qwtsmeter.h"
-#endif
 
-/* to extract the library version */
-#ifdef USE_ALSA
-# include <alsa/version.h>
-#endif
-#ifdef USE_OSS
-# include <sys/soundcard.h>
-#endif
-#ifdef USE_PORTAUDIO
-# include <portaudio.h>
-#endif
-#ifdef USE_PULSEAUDIO
-# include <pulse/version.h>
-#endif
 #ifdef HAVE_LIBSNDFILE
 # include <sndfile.h>
 #endif
 #ifdef HAVE_LIBPCAP
 # include <pcap.h>
 #endif
-#ifdef HAVE_LIBFREEIMAGE
-# include <FreeImage.h>
-#endif
-#ifdef WITH_QCUSTOMPLOT
-# include <qcustomplot.h>
-#else
+#ifdef QT_GUI_LIB
 # include <qwt_global.h>
-# include <qwt_thermo.h>
 #endif
 #ifdef USE_OPUS_LIBRARY
 # include "../sourcedecoders/opus_codec.h"
@@ -88,6 +62,19 @@
 #else
 # include "../sourcedecoders/neaacdec_dll.h"
 #endif
+#ifdef HAVE_LIBFDK_AAC
+# include "../sourcedecoders/fdk_aac_codec.h"
+#endif
+#ifdef USE_ALSA
+# include <alsa/version.h>
+#endif
+#ifdef USE_PORTAUDIO
+#endif
+#ifdef USE_PULSEAUDIO
+# include <pulse/pulseaudio.h>
+#endif
+#ifdef USE_JACK
+#endif
 /* fftw 3.3.2 doesn't export the symbol fftw_version
  * for windows in libfftw3-3.def
  * You can add it regenerate the lib file and it's supposed to work,
@@ -95,7 +82,6 @@
 #ifndef _WIN32
 # include <fftw3.h>
 #endif
-#include "ThemeCustomizer.h"
 
 QString VersionString(QWidget* parent)
 {
@@ -104,21 +90,21 @@ QString VersionString(QWidget* parent)
         "<center><b>" + parent->tr("Dream, Version ");
     if (dream_version_patch == 0)
         strVersionText += QString("%1.%2%3")
-                          .arg(dream_version_major)
-                          .arg(dream_version_minor)
-                          .arg(dream_version_build);
+            .arg(dream_version_major)
+            .arg(dream_version_minor)
+            .arg(dream_version_build);
     else
         strVersionText += QString("%1.%2.%3%4")
-                          .arg(dream_version_major)
-                          .arg(dream_version_minor)
-                          .arg(dream_version_patch)
-                          .arg(dream_version_build);
+            .arg(dream_version_major)
+            .arg(dream_version_minor)
+            .arg(dream_version_patch)
+            .arg(dream_version_build);
     strVersionText +=
         "</b><br> " + parent->tr("Open-Source Software Implementation of "
                                  "a DRM-Receiver") +
         "<br>";
     strVersionText += parent->tr("Under the GNU General Public License (GPL)") +
-                      "</center>";
+        "</center>";
     return strVersionText;
 #ifdef _MSC_VER /* MSVC 2008 */
     parent; // warning C4100: 'parent' : unreferenced formal parameter
@@ -133,9 +119,12 @@ CAboutDlg::CAboutDlg(QWidget* parent):
     setupUi(this);
 #ifdef HAVE_LIBSNDFILE
     char  sfversion [128] ;
-    sf_command (NULL, SFC_GET_LIB_VERSION, sfversion, sizeof (sfversion)) ;
+    sf_command (nullptr, SFC_GET_LIB_VERSION, sfversion, sizeof (sfversion)) ;
 #endif
-    QString strCredits =
+#ifdef HAVE_LIBFDK_AAC
+    FdkAacCodec fdk;
+#endif
+    QString strCredits = 
         "<p>" /* General description of Dream software */
         "<big><b>Dream</b> " + tr("is a software implementation of a Digital "
                                   "Radio Mondiale (DRM) receiver. With Dream, DRM broadcasts can be received "
@@ -169,21 +158,12 @@ CAboutDlg::CAboutDlg(QWidget* parent):
 #else
         "<li><b>FFTW</b> <i>http://www.fftw.org</i></li>"
 #endif
-#if USE_FAAD2_LIBRARY
-        "<li><b>FAAD2</b> (" + QString(FAAD2_VERSION) + ") <i>AAC/HE-AAC/HE-AACv2/DRM decoder "
-        "(c) Ahead Software, www.nero.com (http://faac.sf.net)</i></li>"
-#endif
-#ifdef USE_FAAC_LIBRARY
-        "<li><b>FAAC</b> <i>http://faac.sourceforge.net</i></li>"
-#endif
 #ifdef QT_CORE_LIB
         "<li><b>Qt</b> (" + QString(QT_VERSION_STR) + ") <i>http://qt-project.org</i></li>"
 #endif
-#ifdef QWT_VERSION
-        "<li><b>QWT</b> (" + QString(QWT_VERSION_STR) + ") <i>http://qwt.sf.net</i></li>"
-#endif
-#ifdef WITH_QCUSTOMPLOT
-        "<li><b>QCustomPlot</b> <i>http://www.qcustomplot.com</i></li>"
+#ifdef QT_GUI_LIB
+        "<li><b>QWT</b> (" + QString(QWT_VERSION_STR) + ") <i>Dream is based in part on the work of the Qwt "
+        "project (http://qwt.sf.net).</i></li>"
 #endif
 #ifdef HAVE_LIBHAMLIB
         "<li><b>Hamlib</b> (" + QString(hamlib_version) + ") <i>http://hamlib.sourceforge.net</i></li>"
@@ -191,11 +171,6 @@ CAboutDlg::CAboutDlg(QWidget* parent):
         "<li><b>FhG IIS Journaline Decoder</b> <i>Features NewsService "
         "Journaline(R) decoder technology by Fraunhofer IIS, Erlangen, "
         "Germany. For more information visit http://www.iis.fraunhofer.de/en/bf/db/pro.html</i></li>"
-#ifdef HAVE_LIBFREEIMAGE
-        "<li><b>FreeImage</b> (" + QString(FreeImage_GetVersion()) + ") <i>This software uses the FreeImage open source "
-        "image library. See http://freeimage.sourceforge.net for details. "
-        "FreeImage is used under the GNU GPL.</i></li>"
-#endif
 #ifdef HAVE_LIBPCAP
         "<li><b>LIBPCAP</b> (" + QString(pcap_lib_version()) + ") <i>http://www.tcpdump.org/ "
         "This product includes software developed by the Computer Systems "
@@ -207,9 +182,20 @@ CAboutDlg::CAboutDlg(QWidget* parent):
 #ifdef HAVE_SPEEX
         "<li><b>LIBSPEEX</b> <i>http://www.speex.org</i></li>"
 #endif
-#ifdef USE_OSS
-        "<li><b>OSS</b> (" + QString("Open Sound System version %1").arg(SOUND_VERSION, 0, 16) + ")</li>"
+#ifdef HAVE_LIBFDK_AAC
+		"<li><b>fdk-aac decoder</b> (" + fdk.DecGetVersion().c_str() + ") <i>https://www.iis.fraunhofer.de/en/ff/amm/impl.html</i></li>"
 #endif
+#if USE_FAAD2_LIBRARY
+		"<li><b>FAAD2</b> (" + QString(FAAD2_VERSION) + ") <i>AAC/HE-AAC/HE-AACv2/DRM decoder "
+		"(c) Ahead Software, www.nero.com (http://faac.sf.net)</i></li>"
+#endif
+#ifdef USE_FAAC_LIBRARY
+		"<li><b>FAAC</b> <i>http://faac.sourceforge.net</i></li>"
+#endif
+#ifdef USE_OPUS_LIBRARY
+		"<li><b>" + QString(OPUS_DESCRIPTION) + "</b> (" + QString(opusGetVersion()) + ") <i>" + QString(OPUS_WEBSITE_LINK) + "</i></li>"
+#endif
+		"<p>The audio and signal device drivers in use are as follows:</p>"
 #ifdef USE_ALSA
         "<li><b>ALSA</b> (" + QString(SND_LIB_VERSION_STR) + ") <i>http://www.alsa-project.org</i></li>"
 #endif
@@ -222,14 +208,18 @@ CAboutDlg::CAboutDlg(QWidget* parent):
 #ifdef USE_JACK
         "<li><b>libjack</b> (The Jack Audio Connection Kit) <i>http://www.jackaudio.org</i></li>"
 #endif
-#ifdef USE_OPUS_LIBRARY
-        "<li><b>" + QString(OPUS_DESCRIPTION) + "</b> (" + QString(opusGetVersion()) + ") <i>" + QString(OPUS_WEBSITE_LINK) + "</i></li>"
+#ifdef QT_MULTIMEDIA_LIB
+		"<li><b>Qt Multimedia</b>(" + QString(QT_VERSION_STR) + ") <i>http://qt-project.org</i></li>"
+#else
+# ifdef WIN32
+		"<li><b>Windows Waveform Audio</b>(WinMM) <i>https://docs.microsoft.com</i></li>"
+# endif
 #endif
         "</ul><br><br><hr/><br><br>"
         "<center><b>HISTORY</b></center><br>"
         "The Dream software development was started at <i>Darmstadt University "
         "of Technology</i> at the Institute of Communication Technology by <i>Volker "
-        "Fischer</i> and <i>Alexander Kurpiers</i> in 2001-2014. "
+        "Fischer</i> and <i>Alexander Kurpiers</i> in 2001-2005. "
         "The core digital signal processing and most of the GUI were the "
         "result of this development.<br>In 2005, <i>Andrew Murphy</i> of the <i>British "
         "Broadcasting Corporation</i> added code for an "
@@ -302,9 +292,7 @@ CAboutDlg::CAboutDlg(QWidget* parent):
     TextLabelAuthorNames->setText("Volker Fischer, Alexander Kurpiers, Andrea Russo\nJulian Cable, Andrew Murphy, Oliver Haffenden, David Flamand");
 
     /* Set copyright year in about dialog */
-    TextLabelCopyright->setText("Copyright (C) 2001 - 2001-2014");
-
-    APPLY_CUSTOM_THEME();
+    TextLabelCopyright->setText("Copyright (C) 2001 - 2013");
 }
 
 /* Help Usage --------------------------------------------------------------- */
@@ -325,37 +313,41 @@ CHelpUsage::CHelpUsage(const char* usage, const char* argv0, QWidget* parent)
 /* System Tray -------------------------------------------------------------- */
 
 CSysTray::CSysTray(QWidget* parent, const char* callbackIcon, const char* callbackTimer, const char* icon)
-    : parent(parent), pTimer(NULL), pContextMenu(NULL)
+    : pTimer(nullptr), pContextMenu(nullptr)
 {
     pSystemTrayIcon = new QSystemTrayIcon(QIcon(icon), parent);
-    if (callbackIcon != NULL)
+    if (callbackIcon != nullptr)
         parent->connect(pSystemTrayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)), parent, callbackIcon);
-    if (callbackTimer != NULL)
-    {
-        pTimer = new QTimer(pSystemTrayIcon);
+    if (callbackTimer != nullptr)
+	{
+		pTimer = new QTimer();
         parent->connect(pTimer, SIGNAL(timeout()), parent, callbackTimer);
-    }
+	}
     pSystemTrayIcon->show();
 }
 
 CSysTray::~CSysTray()
 {
-    if (pSystemTrayIcon != NULL)
+	if (pTimer != nullptr)
+		delete pTimer;
+    if (pSystemTrayIcon != nullptr)
         delete pSystemTrayIcon;
+    if (pContextMenu != nullptr)
+        delete pContextMenu;
 }
 
 void CSysTray::CreateContextMenu()
 {
-    if (pContextMenu == NULL)
+    if (pContextMenu == nullptr)
     {
-        pContextMenu = new QMenu(parent);
+        pContextMenu = new QMenu();
         pSystemTrayIcon->setContextMenu(pContextMenu);
     }
 }
 
 CSysTray* CSysTray::Create(QWidget* parent, const char* callbackIcon, const char* callbackTimer, const char* icon)
 {
-    CSysTray* pSysTray = NULL;
+    CSysTray* pSysTray = nullptr;
     if (QSystemTrayIcon::isSystemTrayAvailable())
         pSysTray = new CSysTray(parent, callbackIcon, callbackTimer, icon);
     return pSysTray;
@@ -363,46 +355,46 @@ CSysTray* CSysTray::Create(QWidget* parent, const char* callbackIcon, const char
 
 void CSysTray::Destroy(CSysTray** pSysTray)
 {
-    if (*pSysTray != NULL)
+    if (*pSysTray != nullptr)
     {
         delete *pSysTray;
-        *pSysTray = NULL;
+        *pSysTray = nullptr;
     }
 }
 
 void CSysTray::Start(CSysTray* pSysTray)
 {
-    if (pSysTray == NULL) return;
-    if (pSysTray->pTimer != NULL)
+    if (pSysTray == nullptr) return;
+    if (pSysTray->pTimer != nullptr)
         pSysTray->pTimer->start(GUI_CONTROL_UPDATE_TIME);
 }
 
 void CSysTray::Stop(CSysTray* pSysTray, const QString& Message)
 {
-    if (pSysTray == NULL) return;
-    if (pSysTray->pTimer != NULL)
+    if (pSysTray == nullptr) return;
+	if (pSysTray->pTimer != nullptr)
         pSysTray->pTimer->stop();
     SetToolTip(pSysTray, QString(), Message);
 }
 
 QAction* CSysTray::AddAction(CSysTray* pSysTray, const QString& text, const QObject* receiver, const char* member)
 {
-    if (pSysTray == NULL) return NULL;
+    if (pSysTray == nullptr) return nullptr;
     pSysTray->CreateContextMenu();
     return pSysTray->pContextMenu->addAction(text, receiver, member);
 }
 
 QAction* CSysTray::AddSeparator(CSysTray* pSysTray)
 {
-    if (pSysTray == NULL) return NULL;
+    if (pSysTray == nullptr) return nullptr;
     pSysTray->CreateContextMenu();
     return pSysTray->pContextMenu->addSeparator();
 }
 
 void CSysTray::SetToolTip(CSysTray* pSysTray, const QString& Title, const QString& Message)
 {
-    if (pSysTray != NULL &&
-            (pSysTray->Title != Title || pSysTray->Message != Message))
+    if (pSysTray != nullptr &&
+        (pSysTray->Title != Title || pSysTray->Message != Message))
     {
         pSysTray->Title = Title;
         pSysTray->Message = Message;
@@ -442,20 +434,30 @@ void CSysTray::SetToolTip(CSysTray* pSysTray, const QString& Title, const QStrin
     }
 }
 
-LevelMeter* LevelMeter::createLevelMeter(QWidget* parent)
-{
-#ifdef QWT_VERSION
-    return new QwtLevelMeter(parent);
-#else
-    return new QCPLevelMeter(parent);
-#endif
-}
+/* -------------------------------------------------------------------------- */
 
-SMeter* SMeter::createSMeter(QWidget* parent)
+void InitSMeter(QWidget* parent, QwtThermo* sMeter)
 {
-#ifdef QWT_VERSION
-    return new QwtSMeter(parent);
+#if QWT_VERSION < 0x060100
+    sMeter->setRange(S_METER_THERMO_MIN, S_METER_THERMO_MAX);
+    sMeter->setScale(S_METER_THERMO_MIN, S_METER_THERMO_MAX, 10.0);
 #else
-    return new QCPSMeter(parent);
+    sMeter->setScale(S_METER_THERMO_MIN, S_METER_THERMO_MAX);
+    sMeter->setScaleStepSize(10.0);
+#endif
+    sMeter->setAlarmLevel(S_METER_THERMO_ALARM);
+    sMeter->setAlarmLevel(-12.5);
+    sMeter->setAlarmEnabled(true);
+    sMeter->setValue(S_METER_THERMO_MIN);
+#if QWT_VERSION < 0x060000
+    (void)parent;
+    sMeter->setAlarmColor(QColor(255, 0, 0));
+    sMeter->setFillColor(QColor(0, 190, 0));
+#else
+    QPalette newPalette = parent->palette();
+    newPalette.setColor(QPalette::Base, newPalette.color(QPalette::Window));
+    newPalette.setColor(QPalette::ButtonText, QColor(0, 190, 0));
+    newPalette.setColor(QPalette::Highlight,  QColor(255, 0, 0));
+    sMeter->setPalette(newPalette);
 #endif
 }

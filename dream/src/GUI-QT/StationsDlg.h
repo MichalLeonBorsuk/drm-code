@@ -1,9 +1,9 @@
 /******************************************************************************\
  * Technische Universitaet Darmstadt, Institut fuer Nachrichtentechnik
- * Copyright (c) 2001-2014
+ * Copyright (c) 2001
  *
  * Author(s):
- *  Volker Fischer
+ *	Volker Fischer
  *
  * Description:
  *
@@ -29,114 +29,94 @@
 #define __StationsDlg_H
 
 #include <QSignalMapper>
+#include <QNetworkAccessManager>
 #include <QTimer>
 #include "ui_StationsDlgbase.h"
 
 #include "DialogUtil.h"
 #include "CWindow.h"
+#include "../main-Qt/crx.h"
 #include "Schedule.h"
-#include "../util-QT/scheduleloader.h"
 
 /* Definitions ****************************************************************/
 
-class RigDlg;
-
-namespace Ui {
-class StationsDlgbase;
-}
-
-class StationsDlg : public CWindow
+class StationsDlg : public CWindow, public Ui_StationsDlgbase
 {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
 #ifdef HAVE_LIBHAMLIB
-    StationsDlg(CSettings&, CRig&, QMap<QWidget*,QString>&);
+    StationsDlg(CRx&, CSettings&, CRig&, QMap<QWidget*,QString>&);
 #else
-    StationsDlg(CSettings&, QMap<QWidget*,QString>&);
+    StationsDlg(CRx&, CSettings&, QMap<QWidget*,QString>&);
 #endif
-    virtual ~StationsDlg();
-public slots:
-    void SetFrequency(int);
-    void OnSwitchMode(int);
-    ERecMode mode() {
-        return eRecMode;
-    }
+	virtual ~StationsDlg();
 
-private:
-#ifdef HAVE_LIBHAMLIB
-    CRig&           Rig;
-    RigDlg          *pRigDlg;
-#endif
-    Ui::StationsDlgbase* ui;
 protected:
-    struct Params {
-        bool        bCurrentSortAscending;
-        int         iSortColumn;
-        QString     strColumnParam;
-        QString     targetFilter;
-        QString     languageFilter;
-        QString     countryFilter;
-        QString     url;
-        QString     filename;
-    };
+	virtual void	eventClose(QCloseEvent* pEvent);
+	virtual void	eventHide(QHideEvent* pEvent);
+	virtual void	eventShow(QShowEvent* pEvent);
+	void			LoadSettings();
+	void			SaveSettings();
+    void			LoadSchedule();
+    void			LoadScheduleView();
+    void			UpdateTransmissionStatus();
+    void			LoadFilters();
+	void			SetFrequencyFromGUI(int);
+	void			AddWhatsThisHelp();
+	void			EnableSMeter();
+	void			DisableSMeter();
+	bool		showAll();
+	bool		GetSortAscending();
+	void			SetSortAscending(bool b);
+	void			ColumnParamFromStr(const QString& strColumnParam);
+	void			ColumnParamToStr(QString& strColumnParam);
+	int				currentSortColumn();
+	bool		bCurrentSortAscendingdrm;
+	bool		bCurrentSortAscendinganalog;
+	int				iSortColumndrm;
+	int				iSortColumnanalog;
+	QString			strColumnParamdrm;
+	QString			strColumnParamanalog;
 
-    virtual void    eventClose(QCloseEvent* pEvent);
-    virtual void    eventHide(QHideEvent* pEvent);
-    virtual void    eventShow(QShowEvent* pEvent);
-    void            LoadSettings();
-    void            SaveSettings();
-    void            LoadSchedule();
-    void            LoadScheduleView();
-    void            UpdateTransmissionStatus();
-    void            AddWhatsThisHelp();
-    void            EnableSMeter();
-    void            DisableSMeter();
-    bool            showAll();
-    bool            GetSortAscending();
-    void            SetSortAscending(bool);
-    int             currentSortColumn();
-    Params          params[RM_NONE+1];
+    CRx&            rx;
+#ifdef HAVE_LIBHAMLIB
+	CRig&			Rig;
+#endif
+	CSchedule		schedule;
+	QIcon			greenCube;
+	QIcon			redCube;
+	QIcon			orangeCube;
+	QIcon			pinkCube;
+	QSignalMapper*	previewMapper;
+	QActionGroup*	previewGroup;
+	QSignalMapper*	showMapper;
+	QActionGroup*	showGroup;
+	QNetworkAccessManager *manager;
+	QTimer			Timer;
+	bool		bReInitOnFrequencyChange;
 
-    CSchedule       schedule;
-    ScheduleLoader  scheduleLoader;
-    QIcon           greenCube;
-    QIcon           redCube;
-    QIcon           orangeCube;
-    QIcon           pinkCube;
-    QSignalMapper*  previewMapper;
-    QActionGroup*   previewGroup;
-    QSignalMapper*  showMapper;
-    QActionGroup*   showGroup;
-    QTimer          Timer;
+	QMutex			ListItemsMutex;
 
-    QMutex          ListItemsMutex;
-
-    QString         okMessage, badMessage;
-    ERecMode        eRecMode;
-    SMeter*         inputLevel;
+	QString			okMessage, badMessage;
 
 signals:
-    void subscribeRig();
-    void unsubscribeRig();
-    void frequencyChanged(int);
-
-private slots:
-    void setFine(bool on);
-    void OnSigStr(double);
-    void OnTimer();
-    void OnUpdate();
-    void OnFileReady();
-    void OnShowStationsMenu(int iID);
-    void OnShowPreviewMenu(int iID);
-    void OnFreqCntNewValue(double dVal);
-    void OnHeaderClicked(int c);
-    void on_actionGetUpdate_triggered();
-    void on_ListViewStations_itemSelectionChanged();
-    void on_ComboBoxFilterTarget_activated(const QString&);
-    void on_ComboBoxFilterCountry_activated(const QString&);
-    void on_ComboBoxFilterLanguage_activated(const QString&);
-    void on_actionEnable_S_Meter_triggered();
-    void on_actionChooseRig_triggered();
+	void subscribeRig();
+	void unsubscribeRig();
+public slots:
+	void OnSigStr(double);
+	void OnTimer();
+	void OnSMeterMenu(int iID);
+	void OnSMeterMenu();
+	void OnUrlFinished(QNetworkReply*);
+	void OnShowStationsMenu(int iID);
+	void OnShowPreviewMenu(int iID);
+	void OnFreqCntNewValue(double dVal);
+	void OnHeaderClicked(int c);
+	void on_actionGetUpdate_triggered();
+	void on_ListViewStations_itemSelectionChanged();
+	void on_ComboBoxFilterTarget_activated(const QString&);
+	void on_ComboBoxFilterCountry_activated(const QString&);
+	void on_ComboBoxFilterLanguage_activated(const QString&);
 };
 #endif

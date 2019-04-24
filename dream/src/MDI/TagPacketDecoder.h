@@ -1,12 +1,12 @@
 /******************************************************************************\
  * Technische Universitaet Darmstadt, Institut fuer Nachrichtentechnik
- * Copyright (c) 2001-2014
+ * Copyright (c) 2004
  *
  * Author(s):
- *  Volker Fischer, Oliver Haffenden
+ *	Volker Fischer, Oliver Haffenden
  *
  * Description:
- *  see TagPacketDecoder.cpp
+ *	see TagPacketDecoder.cpp
  *
  ******************************************************************************
  *
@@ -39,26 +39,26 @@ class CTagItemDecoder;
 class CTagPacketDecoder
 {
 public:
-    CTagPacketDecoder();
-    enum Error { E_OK, E_CRC, E_VERSION, E_LENGTH, E_SYNC, E_PROTO };
-    // This should be in its own class
-    virtual Error DecodeAFPacket(CVectorEx<_BINARY>& vecbiAFPkt);
+	CTagPacketDecoder();
+	enum Error { E_OK, E_CRC, E_VERSION, E_LENGTH, E_SYNC, E_PROTO };
+	// This should be in its own class
+	virtual Error DecodeAFPacket(CVectorEx<_BINARY>& vecbiAFPkt);
 
-    // Decode all the tags in the tag packet. To do things before or after the decoding,
-    // override this and call the base class function to do the decoding
-    virtual void DecodeTagPackets(CVectorEx<_BINARY>& vecbiPkt, int iPayloadLen);
-    virtual ~CTagPacketDecoder() {}
+	// Decode all the tags in the tag packet. To do things before or after the decoding,
+	// override this and call the base class function to do the decoding
+	virtual void DecodeTagPackets(CVectorEx<_BINARY>& vecbiPkt, int iPayloadLen);
+	virtual ~CTagPacketDecoder() {}
 
 protected:
-    // Go through all the tag item decoders to find one that matches the current tag name.
-    int DecodeTag(CVector<_BINARY>& vecbiTag);
+	// Go through all the tag item decoders to find one that matches the current tag name.
+	int DecodeTag(CVector<_BINARY>& vecbiTag);
 
-    void AddTagItemDecoder(CTagItemDecoder *pTagItemDecoder);
+	void AddTagItemDecoder(CTagItemDecoder *pTagItemDecoder);
 
-    void InitTagItemDecoders(void);
+	void InitTagItemDecoders(void);
 private:
-    CVector<CTagItemDecoder *> vecpTagItemDecoders;
-    uint16_t iSeqNumber;
+	CVector<CTagItemDecoder *> vecpTagItemDecoders;
+	uint16_t iSeqNumber;
 };
 
 #endif

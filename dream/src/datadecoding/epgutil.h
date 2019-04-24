@@ -1,12 +1,12 @@
 /******************************************************************************\
  * British Broadcasting Corporation
- * Copyright (c) 2001-2014
+ * Copyright (c) 2006
  *
  * Author(s):
- *  Julian Cable
+ *	Julian Cable
  *
  * Description:
- *  ETSI DAB/DRM Electronic Programme Guide utilities
+ *	ETSI DAB/DRM Electronic Programme Guide utilities
  *
  *
  ******************************************************************************
@@ -32,16 +32,16 @@
 
 #include "DABMOT.h"
 
-void mkdirs (const string & path);
+void mkdirs (const std::string & path);
 
-string epgFilename (const CDateAndTime & date,
-                    uint32_t sid, int type, bool advanced);
-string epgFilename_etsi (const CDateAndTime & date,
-                         uint32_t sid, int type, bool advanced);
-string epgFilename_dab (const CDateAndTime & date,
-                        uint32_t sid, int type, bool advanced);
+std::string epgFilename (const CDateAndTime & date,
+		    uint32_t sid, int type, bool advanced);
+std::string epgFilename_etsi (const CDateAndTime & date,
+		    uint32_t sid, int type, bool advanced);
+std::string epgFilename_dab (const CDateAndTime & date,
+		    uint32_t sid, int type, bool advanced);
 
-string epgFilename2 (const CDateAndTime & date,
-                     uint32_t sid, int type, bool advanced);
+std::string epgFilename2 (const CDateAndTime & date,
+		    uint32_t sid, int type, bool advanced);
 
 #endif

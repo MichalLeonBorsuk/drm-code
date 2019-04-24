@@ -1,9 +1,9 @@
 /******************************************************************************\
  * Technische Universitaet Darmstadt, Institut fuer Nachrichtentechnik
- * Copyright (c) 2001-2014
+ * Copyright (c) 2001-2005
  *
  * Author(s):
- *  Volker Fischer
+ *	Volker Fischer
  *
  * Description:
  *
@@ -28,25 +28,14 @@
 
 #include "Rig.h"
 
-
-void CRig::SetFrequencyCallback(void* sfCallbackParam, int iNewFreqkHz)
-{
-    ((CRig*)sfCallbackParam)->SetFrequency(iNewFreqkHz);
-}
-
-CRig::CRig(CSettings* pSettings, CParameter* pParameters) :
-    pSettings(pSettings), pParameters(pParameters), subscribers(0)
-{
+CRig::CRig(CParameter* np):
 #ifdef HAVE_LIBHAMLIB
-    connect(&timer, SIGNAL(timeout()), this, SLOT(onTimer()));
-    Hamlib.LoadSettings(*pSettings);
+    Hamlib(), timer(new QTimer()),
 #endif
-}
-
-CRig::~CRig()
+    subscribers(0),pParameters(np)
 {
 #ifdef HAVE_LIBHAMLIB
-    Hamlib.SaveSettings(*pSettings);
+    connect(timer, SIGNAL(timeout()), this, SLOT(onTimer()));
 #endif
 }
 
@@ -61,11 +50,11 @@ void CRig::subscribe()
 #endif
     subscribers++;
     if(subscribers>0)
-    {
+	{
 #ifdef HAVE_LIBHAMLIB
-        timer.start(1000);
+        timer->start(1000);
 #endif
-    }
+	}
 }
 
 void CRig::unsubscribe()
@@ -85,7 +74,7 @@ void CRig::unsubscribe()
     if(subscribers<=0)
     {
 #ifdef HAVE_LIBHAMLIB
-        timer.stop();
+        timer->stop();
         emit sigstr(-1000.0);
 #endif
     }
@@ -105,6 +94,24 @@ void CRig::onTimer()
     }
     else
         emit sigstr(-1000.0);
+#endif
+}
+
+void CRig::LoadSettings(CSettings& s)
+{
+#ifdef HAVE_LIBHAMLIB
+    Hamlib.LoadSettings(s);
+#else
+    (void)s;
+#endif
+}
+
+void CRig::SaveSettings(CSettings& s)
+{
+#ifdef HAVE_LIBHAMLIB
+    Hamlib.SaveSettings(s);
+#else
+    (void)s;
 #endif
 }
 

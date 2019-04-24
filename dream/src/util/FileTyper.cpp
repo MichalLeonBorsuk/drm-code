@@ -1,8 +1,8 @@
 /******************************************************************************\
- * Copyright (c) 2001-2014
+ * Copyright (c) 2013
  *
  * Author(s):
- *  Julian Cable
+ *	Julian Cable
  *
  * Description:
  *
@@ -77,14 +77,14 @@ FileTyper::type FileTyper::resolve(const string& str)
     if (f)
     {
         char c[5];
-        size_t r = fread(&c, 1, 4, f);
-        (void)r;
+        size_t r = fread(&c, 1, 4, f); (void)r;
         fclose(f);
         c[4]='\0';
         if(strcmp(c, "fio_")==0) return file_framing;
+        if(strcmp(c, "RIFF")==0) return pcm;
         c[2]='\0';
         if(strcmp(c, "AF")==0) return raw_af;
         if(strcmp(c, "PF")==0) return raw_pft;
     }
-    return pcm;
+    return unrecognised;
 }

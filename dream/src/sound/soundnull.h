@@ -1,12 +1,12 @@
 /******************************************************************************\
  * British Broadcasting Corporation
- * Copyright (c) 2001-2014
+ * Copyright (c) 2007
  *
  * Author(s):
- *  Julian Cable
+ *	Julian Cable
  *
  * Description:
- *  dummy sound classes
+ *	dummy sound classes
  *
  ******************************************************************************
  *
@@ -26,8 +26,8 @@
  *
 \******************************************************************************/
 
-#ifndef _SOUNDNULL_H
-#define _SOUNDNULL_H
+#ifndef SOUNDNULL_H
+#define SOUNDNULL_H
 
 #include "soundinterface.h"
 
@@ -36,50 +36,54 @@ class CSoundInNull : public CSoundInInterface
 {
 public:
     CSoundInNull() {}
-    virtual ~CSoundInNull() {}
-    virtual bool    Init(int, int, bool) {
+    virtual ~CSoundInNull();
+    virtual bool	Init(int, int, bool) {
         return true;
     }
-    virtual bool    Read(CVector<short>&) {
+    virtual bool	Read(CVector<short>&) {
         return false;
     }
-    virtual void        Enumerate(vector<string>&choices, vector<string>&) {
+    virtual void		Enumerate(std::vector<std::string>&choices, std::vector<std::string>&) {
         choices.push_back("(File or Network)");
     }
-    virtual string      GetDev() {
+    virtual std::string		GetDev() {
         return sDev;
     }
-    virtual void        SetDev(string sNewDev) {
+    virtual void		SetDev(std::string sNewDev) {
         sDev = sNewDev;
     }
-    virtual void        Close() {}
+    virtual void		Close() {}
+	virtual std::string		GetVersion() { return "no audio interface"; }
 private:
-    string sDev;
+    std::string sDev;
 };
 
 class CSoundOutNull : public CSoundOutInterface
 {
 public:
     CSoundOutNull() {}
-    virtual ~CSoundOutNull() {}
-    virtual bool    Init(int, int, bool) {
+    virtual ~CSoundOutNull();
+    virtual bool	Init(int, int, bool) {
         return true;
     }
-    virtual bool    Write(CVector<short>&) {
+    virtual bool	Write(CVector<short>&) {
         return false;
     }
-    virtual void        Enumerate(vector<string>& choices, vector<string>&) {
+
+    virtual void		Enumerate(std::vector<std::string>& choices, std::vector<std::string>&){
         choices.push_back("(None)");
     }
-    virtual string      GetDev() {
+
+    virtual std::string		GetDev() {
         return sDev;
     }
-    virtual void        SetDev(string sNewDev) {
+    virtual void		SetDev(std::string sNewDev) {
         sDev = sNewDev;
     }
-    virtual void        Close() {}
+    virtual void		Close() {}
+	virtual std::string		GetVersion() { return "no audio interface"; }
 private:
-    string sDev;
+    std::string sDev;
 };
 
 #endif

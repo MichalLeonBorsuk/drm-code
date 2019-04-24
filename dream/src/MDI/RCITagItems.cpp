@@ -1,22 +1,22 @@
 /******************************************************************************\
  * Technische Universitaet Darmstadt, Institut fuer Nachrichtentechnik
- * Copyright (c) 2001-2014
+ * Copyright (c) 2007
  *
  * Author(s):
- *  Volker Fischer, Julian Cable, Oliver Haffenden
+ *	Volker Fischer, Julian Cable, Oliver Haffenden
  *
  * Description:
- *  Implements Digital Radio Mondiale (DRM)
- *  (RCI), Receiver Status and Control Interface (RSCI)
+ *	Implements Digital Radio Mondiale (DRM)
+ *	(RCI), Receiver Status and Control Interface (RSCI)
  *  and Distribution and Communications Protocol (DCP) as described in
- *  ETSI TS 102 349 and ETSI TS 102 821 respectively.
+ *	ETSI TS 102 349 and ETSI TS 102 821 respectively.
  *
  *  This module derives, from the CTagItemGenerator base class, tag item generators
  *  specialised to generate each of the tag items defined in RCI and RSCI.
  *  .
  *  An intermediate derived class, CTagItemGeneratorWithProfiles, is used as the
  *  base class for all these tag item generators. This takes care of the common
- *  task of checking whether a given tag is in a particular profile.
+ *	task of checking whether a given tag is in a particular profile.
  *  The profiles for each tag are defined by the GetProfiles() member function.
  *
  ******************************************************************************
@@ -41,50 +41,46 @@
 
 void CTagItemGeneratorCfre::GenTag(int iNewFreqkHz)
 {
-    /* Length: 4 bytes = 32 bits */
-    PrepareTag(32);
+	/* Length: 4 bytes = 32 bits */
+	PrepareTag(32);
 
-    /* RF Frequency */
-    Enqueue(1000*iNewFreqkHz, 32);
+	/* RF Frequency */
+	Enqueue(1000*iNewFreqkHz, 32);
 
 }
 
-string CTagItemGeneratorCfre::GetTagName(void) {
-    return "cfre";
-}
+string CTagItemGeneratorCfre::GetTagName(void) {return "cfre";}
 
 void CTagItemGeneratorCdmo::GenTag(const ERecMode eMode) // cdmo
 {
-    PrepareTag(4*SIZEOF__BYTE);
-    switch (eMode)
-    {
-    case RM_DRM:
-        Enqueue((uint32_t) 'd', SIZEOF__BYTE);
-        Enqueue((uint32_t) 'r', SIZEOF__BYTE);
-        Enqueue((uint32_t) 'm', SIZEOF__BYTE);
-        Enqueue((uint32_t) '_', SIZEOF__BYTE);
-        break;
-    case RM_FM:
-        Enqueue((uint32_t) 'f', SIZEOF__BYTE);
-        Enqueue((uint32_t) 'm', SIZEOF__BYTE);
-        Enqueue((uint32_t) '_', SIZEOF__BYTE);
-        Enqueue((uint32_t) '_', SIZEOF__BYTE);
-        break;
-    case RM_AM:
-        Enqueue((uint32_t) 'a', SIZEOF__BYTE);
-        Enqueue((uint32_t) 'm', SIZEOF__BYTE);
-        Enqueue((uint32_t) '_', SIZEOF__BYTE);
-        Enqueue((uint32_t) '_', SIZEOF__BYTE);
-        break;
-    default:
-        Enqueue((uint32_t) ' ', SIZEOF__BYTE);
-        Enqueue((uint32_t) ' ', SIZEOF__BYTE);
-        Enqueue((uint32_t) ' ', SIZEOF__BYTE);
-        Enqueue((uint32_t) ' ', SIZEOF__BYTE);
-        break;
-    }
+	PrepareTag(4*SIZEOF__BYTE);
+	switch (eMode)
+	{
+	case RM_DRM:
+		Enqueue((uint32_t) 'd', SIZEOF__BYTE);
+		Enqueue((uint32_t) 'r', SIZEOF__BYTE);
+		Enqueue((uint32_t) 'm', SIZEOF__BYTE);
+		Enqueue((uint32_t) '_', SIZEOF__BYTE);
+		break;
+	case RM_FM:
+		Enqueue((uint32_t) 'f', SIZEOF__BYTE);
+		Enqueue((uint32_t) 'm', SIZEOF__BYTE);
+		Enqueue((uint32_t) '_', SIZEOF__BYTE);
+		Enqueue((uint32_t) '_', SIZEOF__BYTE);
+		break;
+	case RM_AM:
+		Enqueue((uint32_t) 'a', SIZEOF__BYTE);
+		Enqueue((uint32_t) 'm', SIZEOF__BYTE);
+		Enqueue((uint32_t) '_', SIZEOF__BYTE);
+		Enqueue((uint32_t) '_', SIZEOF__BYTE);
+		break;
+	default:
+		Enqueue((uint32_t) ' ', SIZEOF__BYTE);
+		Enqueue((uint32_t) ' ', SIZEOF__BYTE);
+		Enqueue((uint32_t) ' ', SIZEOF__BYTE);
+		Enqueue((uint32_t) ' ', SIZEOF__BYTE);
+		break;
+	}
 }
 
-string CTagItemGeneratorCdmo::GetTagName(void) {
-    return "cdmo";
-}
+string CTagItemGeneratorCdmo::GetTagName(void) {return "cdmo";}

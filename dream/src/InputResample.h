@@ -1,12 +1,12 @@
 /******************************************************************************\
  * Technische Universitaet Darmstadt, Institut fuer Nachrichtentechnik
- * Copyright (c) 2001-2014
+ * Copyright (c) 2001
  *
  * Author(s):
- *  Volker Fischer
+ *	Volker Fischer
  *
  * Description:
- *  See InputResample.cpp
+ *	See InputResample.cpp
  *
  ******************************************************************************
  *
@@ -35,7 +35,7 @@
 
 
 /* Definitions ****************************************************************/
-#define MAX_RESAMPLE_OFFSET         200 /* Hz */
+#define MAX_RESAMPLE_OFFSET			200 /* Hz */
 
 
 /* Classes ********************************************************************/
@@ -51,8 +51,8 @@ public:
     }
 
 protected:
-    CResample   ResampleObj;
-    bool    bSyncInput;
+    CResample	ResampleObj;
+    bool	bSyncInput;
 
     virtual void InitInternal(CParameter& Parameters);
     virtual void ProcessDataInternal(CParameter& Parameters);

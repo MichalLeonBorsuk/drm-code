@@ -1,15 +1,15 @@
 /******************************************************************************\
  * Technische Universitaet Darmstadt, Institut fuer Nachrichtentechnik
- * Copyright (c) 2001-2014
+ * Copyright (c) 2001-2005
  *
  * Author(s):
- *  Volker Fischer, Andrew Murphy
+ *	Volker Fischer, Andrew Murphy
  *
  * Description:
- *  See AnalogDemDlg.cpp
+ *	See AnalogDemDlg.cpp
  *
  * 11/21/2005 Andrew Murphy, BBC Research & Development, 2005
- *  - Additional widgets for displaying AMSS information
+ *	- Additional widgets for displaying AMSS information
  *
  ******************************************************************************
  *
@@ -34,131 +34,103 @@
 #include "ui_AMSSDlgbase.h"
 #include "CWindow.h"
 #include "SoundCardSelMenu.h"
+#include "DRMPlot.h"
 #include "../GlobalDefinitions.h"
-#include "../DrmReceiver.h"
+#include "../main-Qt/crx.h"
 #include "../tables/TableAMSS.h"
 #include <QTimer>
 #include <QDialog>
 #include <QButtonGroup>
-# include "DRMPlot.h"
+
 
 /* Definitions ****************************************************************/
 /* Update time of PLL phase dial control */
-#define PLL_PHASE_DIAL_UPDATE_TIME              100
+#define PLL_PHASE_DIAL_UPDATE_TIME				100
 
-namespace Ui {
-class CAMSSDlgBase;
-class AMMainWindow;
-}
 
 /* Classes ********************************************************************/
 
-class PhaseGauge : public QWidget
-{
-    Q_OBJECT
-
-public:
-    PhaseGauge(QWidget* parent = 0):QWidget(parent),angle(0.0) {}
-    void setValue(double d) {
-        angle = d;
-        update();
-    }
-    void paintEvent(QPaintEvent *);
-private:
-    double angle;
-};
-
-class ReceiverController;
 
 /* AMSS dialog -------------------------------------------------------------- */
-class CAMSSDlg : public CWindow
+class CAMSSDlg : public CWindow, public Ui_CAMSSDlgBase
 {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
-    CAMSSDlg(CDRMReceiver&, CSettings&, QWidget* parent = 0);
+    CAMSSDlg(CRx&, CSettings&, QWidget* parent = 0);
 
 protected:
-    Ui::CAMSSDlgBase* ui;
-    CDRMReceiver&   DRMReceiver;
+    CRx&            rx;
 
-    QTimer          Timer;
-    QTimer          TimerPLLPhaseDial;
-    PhaseGauge*     phaseGauge;
-
-    void            AddWhatsThisHelp();
-    virtual void    eventShow(QShowEvent*);
-    virtual void    eventHide(QHideEvent*);
+	QTimer			Timer;
+	QTimer			TimerPLLPhaseDial;
+	void			AddWhatsThisHelp();
+	virtual void	eventShow(QShowEvent*);
+	virtual void	eventHide(QHideEvent*);
 
 public slots:
-    void OnTimer();
-    void OnTimerPLLPhaseDial();
+	void OnTimer();
+	void OnTimerPLLPhaseDial();
 };
 
 
 /* Analog demodulation dialog ----------------------------------------------- */
-class AnalogDemDlg : public CWindow
+class AnalogDemDlg : public CWindow, public Ui_AMMainWindow
 {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
-    AnalogDemDlg(ReceiverController*, CSettings&, CFileMenu*, CSoundCardSelMenu*,
-                 QWidget* parent = 0);
+    AnalogDemDlg(CRx&, CSettings&, CFileMenu*, CSoundCardSelMenu*,
+	QWidget* parent = 0);
 
 protected:
-    Ui::AMMainWindow*   ui;
-    ReceiverController* controller;
-    QTimer              TimerPLLPhaseDial;
-    QTimer              TimerClose;
-    CAMSSDlg            AMSSDlg;
-    CFileMenu*          pFileMenu;
-    CSoundCardSelMenu*  pSoundCardMenu;
-    PhaseGauge*         phaseGauge;
-    int                 subSampleCount;
-    CDRMPlot*           MainPlot;
+    CRx&        		rx;
 
-    void UpdateControls();
-    void UpdateSliderBandwidth();
-    void AddWhatsThisHelp();
-    void initPhaseDial();
-    virtual void eventClose(QCloseEvent* pEvent);
-    virtual void eventShow(QShowEvent* pEvent);
-    virtual void eventHide(QHideEvent* pEvent);
-    virtual void eventUpdate();
+	QTimer				Timer;
+	QTimer				TimerPLLPhaseDial;
+	QTimer				TimerClose;
+	CAMSSDlg			AMSSDlg;
+    CDRMPlot*			MainPlot;
+	CFileMenu*			pFileMenu;
+	CSoundCardSelMenu*	pSoundCardMenu;
+
+	void UpdateControls();
+	void UpdateSliderBandwidth();
+	void AddWhatsThisHelp();
+	virtual void eventClose(QCloseEvent* pEvent);
+	virtual void eventShow(QShowEvent* pEvent);
+	virtual void eventHide(QHideEvent* pEvent);
+	virtual void eventUpdate();
 
 public slots:
-    void UpdatePlotStyle(int);
-    void OnSampleRateChanged();
-    void OnSoundFileChanged(CDRMReceiver::ESFStatus);
-    void OnTimer();
-    void OnTimerPLLPhaseDial();
-    void OnTimerClose();
-    void OnPlotClicked(double dVal);
-    void OnSwitchToDRM();
-    void OnSwitchToFM();
-    void OnHelpAbout() {
-        emit About();
-    }
-    void OnWhatsThis();
-    void on_CheckBoxMuteAudio_clicked(bool);
-    void on_CheckBoxSaveAudioWave_clicked(bool);
-    void on_CheckBoxAutoFreqAcq_clicked(bool);
-    void on_CheckBoxPLL_clicked(bool);
-    void on_checkBoxWaterfall_toggled(bool);
-    void on_ButtonFreqOffset_clicked(bool);
-    void on_ButtonBandWidth_clicked(bool);
-    void on_SpinBoxNoiRedLevel_valueChanged(int);
-    void on_SliderBandwidth_valueChanged(int);
-    void on_ButtonGroupDemodulation_buttonClicked(int);
-    void on_ButtonGroupAGC_buttonClicked(int);
-    void on_ButtonGroupNoiseReduction_buttonClicked(int);
-    void on_new_data();
+	void UpdatePlotStyle(int);
+    void OnSampleRateChanged(int);
+    void OnSoundFileChanged(QString);
+	void OnTimer();
+	void OnTimerPLLPhaseDial();
+	void OnTimerClose();
+	void OnRadioDemodulation(int iID);
+	void OnRadioAGC(int iID);
+	void OnCheckBoxMuteAudio();
+	void OnCheckSaveAudioWAV();
+	void OnCheckAutoFreqAcq();
+	void OnCheckPLL();
+	void OnChartxAxisValSet(double dVal);
+	void OnSliderBWChange(int value);
+	void OnRadioNoiRed(int iID);
+	void OnButtonWaterfall();
+	void on_ButtonFreqOffset_clicked(bool);
+	void on_SpinBoxNoiRedLevel_valueChanged(int value);
+	void OnSwitchToDRM();
+	void OnSwitchToFM();
+	void OnHelpAbout() {emit About();}
+	void OnWhatsThis();
 
 signals:
-    void SwitchMode(int);
-    void NewAMAcquisition();
-    void ViewStationsDlg();
-    void ViewLiveScheduleDlg();
-    void Closed();
-    void About();
+	void SwitchMode(int);
+	void NewAMAcquisition();
+	void ViewStationsDlg();
+	void ViewLiveScheduleDlg();
+	void Closed();
+	void About();
 };

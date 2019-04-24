@@ -1,9 +1,9 @@
 /******************************************************************************\
  * Technische Universitaet Darmstadt, Institut fuer Nachrichtentechnik
- * Copyright (c) 2001-2014
+ * Copyright (c) 2006
  *
  * Author(s):
- *  Andrea Russo
+ *	Andrea Russo
  *
  * Description:
  *
@@ -34,12 +34,12 @@
 #include <QCheckBox>
 #include <QShowEvent>
 #include <QHideEvent>
-#include "ThemeCustomizer.h"
 
 /* Implementation *************************************************************/
 
-GeneralSettingsDlg::GeneralSettingsDlg(CSettings& NSettings, QWidget* parent) :
-    QDialog(parent),Settings(NSettings)
+GeneralSettingsDlg::GeneralSettingsDlg(CParameter& NParam, CSettings& NSettings,
+    QWidget* parent) :
+    QDialog(parent), Parameters(NParam), Settings(NSettings)
 {
     setAttribute(Qt::WA_QuitOnClose, false);
     setupUi(this);
@@ -51,17 +51,23 @@ GeneralSettingsDlg::GeneralSettingsDlg(CSettings& NSettings, QWidget* parent) :
     EdtLatitudeMinutes->setValidator(new QIntValidator(0, 59, EdtLatitudeMinutes));
     EdtLongitudeMinutes->setValidator(new QIntValidator(0, 59, EdtLongitudeMinutes));
 
+    /* Connections */
+
+    connect(buttonOk, SIGNAL(clicked()), SLOT(ButtonOkClicked()) );
+
+    connect(EdtLatitudeNS, SIGNAL(textChanged( const QString &)), this
+            , SLOT(CheckSN(const QString&)));
+
+    connect(EdtLongitudeEW, SIGNAL(textChanged( const QString &)), this
+            , SLOT(CheckEW(const QString&)));
+
+    connect(CheckBoxUseGPS, SIGNAL(clicked()), SLOT(OnCheckBoxUseGPS()) );
+
     /* Set help text for the controls */
     AddWhatsThisHelp();
-
-    APPLY_CUSTOM_THEME();
 }
 
 GeneralSettingsDlg::~GeneralSettingsDlg()
-{
-}
-
-void GeneralSettingsDlg::showEvent(QShowEvent*)
 {
 }
 
@@ -69,94 +75,58 @@ void GeneralSettingsDlg::hideEvent(QHideEvent*)
 {
 }
 
-void GeneralSettingsDlg::onGPSd(const QString& s, bool checked)
+void GeneralSettingsDlg::showEvent(QShowEvent*)
 {
-    if(s!="")
-    {
-        QStringList l = s.split(":");
-        LineEditGPSHost->setText(l[0]);
-        LineEditGPSPort->setText(l[1]);
-        CheckBoxUseGPS->setChecked(checked);
-    }
-    else
-    {
-        LineEditGPSHost->setText("");
-        LineEditGPSPort->setText("");
-        CheckBoxUseGPS->setChecked(false);
-    }
+    /* Clear all fields */
+    EdtLongitudeDegrees->setText("");
+    EdtLongitudeMinutes->setText("");
+    EdtLongitudeEW->setText("");
+    EdtLatitudeDegrees->setText("");
+    EdtLatitudeMinutes->setText("");
+    EdtLatitudeNS->setText("");
+
+    LineEditGPSHost->setText(QString(Settings.Get("GPS", "host", string("localhost")).c_str()));
+    LineEditGPSPort->setText(Settings.Get("GPS", "port", string("2947")).c_str());
+    CheckBoxUseGPS->setChecked(Settings.Get("GPS", "usegpsd", false));
+
+    /* Extract the receiver coordinates  */
+    ExtractReceiverCoordinates();
 }
 
-void GeneralSettingsDlg::onPosition(double latitude, double longitude)
+void GeneralSettingsDlg::CheckSN(const QString& NewText)
 {
-    QString sVal;
+    /* Only S or N char are accepted */
 
-    /* Extract latitude values */
+    const QString sVal = NewText.toUpper();
 
-    if(latitude<0.0)
-    {
-        latitude = -latitude;
-        EdtLatitudeNS->setText("S");
-    }
+    if (sVal != "S" && sVal != "N" && sVal != "")
+        EdtLatitudeNS->setText("");
     else
-    {
-        EdtLatitudeNS->setText("N");
-    }
-
-    int degrees = int(latitude);
-    int minutes = int(((floor((latitude - degrees) * 1000000) / 1000000) + 0.00005) * 60.0);
-
-    /* Extract degrees */
-
-    /* Latitude degrees max 2 digits */
-    sVal = QString("%1").arg(degrees);
-
-    EdtLatitudeDegrees->setText(sVal);
-
-
-    sVal = QString("%1").arg(minutes);
-
-    EdtLatitudeMinutes->setText(sVal);
-
-    /* Extract longitude values */
-
-    if(longitude<0.0)
-    {
-        longitude = -longitude;
-        EdtLongitudeEW->setText("W");
-    }
-    else if(longitude>180.0)
-    {
-        longitude = 360.0-longitude;
-        EdtLongitudeEW->setText("E");
-    }
-    else
-    {
-        EdtLongitudeEW->setText("E");
-    }
-
-    /* Extract degrees */
-
-    degrees = int(longitude);
-    minutes = int(((floor((longitude - degrees) * 1000000) / 1000000) + 0.00005) * 60.0);
-
-    /* Longitude degrees max 3 digits */
-    sVal = QString("%1").arg(degrees);
-
-    EdtLongitudeDegrees->setText(sVal);
-
-    /* Extract minutes */
-    sVal = QString("%1").arg(minutes);
-
-    EdtLongitudeMinutes->setText(sVal);
+        EdtLatitudeNS->setText(sVal);
 }
 
-void GeneralSettingsDlg::on_CheckBoxUseGPS_stateChanged(int s)
+void GeneralSettingsDlg::CheckEW(const QString& NewText)
 {
-    if(s==0)
-        emit useGPSd("");
+    /* Only E or W char are accepted */
+
+    const QString sVal = NewText.toUpper();
+
+    if (sVal != "E" && sVal != "W" && sVal != "")
+        EdtLongitudeEW->setText("");
+    else
+        EdtLongitudeEW->setText(sVal);
 }
 
-void GeneralSettingsDlg::on_buttonOk_clicked()
+void GeneralSettingsDlg::OnCheckBoxUseGPS()
+{
+    bool bUseGPS = CheckBoxUseGPS->isChecked();
+    Parameters.Lock();
+    Parameters.use_gpsd=bUseGPS;
+    Parameters.restart_gpsd=bUseGPS;
+    Parameters.Unlock();
+}
+
+void GeneralSettingsDlg::ButtonOkClicked()
 {
     bool bOK = true;
     bool bAllEmpty = true;
@@ -224,6 +194,8 @@ void GeneralSettingsDlg::on_buttonOk_clicked()
     {
         /* save current settings */
 
+        Parameters.Lock();
+
         if (!bAllEmpty)
         {
             double latitude, longitude;
@@ -236,42 +208,29 @@ void GeneralSettingsDlg::on_buttonOk_clicked()
             if(EdtLongitudeEW->text()[0]=='W' || EdtLongitudeEW->text()[0]=='w')
                 longitude = - longitude;
 
-            emit position(latitude, longitude);
-        }
+            Parameters.gps_data.set |= LATLON_SET;
+            Parameters.gps_data.fix.latitude = latitude;
+            Parameters.gps_data.fix.longitude = longitude;
 
-        if(CheckBoxUseGPS->isChecked())
-        {
-            emit useGPSd(LineEditGPSHost->text()+":"+LineEditGPSPort->text());
         }
         else
-            emit useGPSd("");
+        {
+            Parameters.gps_data.set &= ~LATLON_SET;
+        }
+
+        string host = LineEditGPSHost->text().toUtf8().constData();
+        if(Parameters.gps_host != host)
+            Parameters.restart_gpsd = true;
+        Parameters.gps_host=host;
+        string port = LineEditGPSPort->text().toUtf8().constData();
+        if(Parameters.gps_port != port)
+            Parameters.restart_gpsd = true;
+        Parameters.gps_port=port;
+
+        Parameters.Unlock();
 
         accept(); /* If the values are valid close the dialog */
     }
-}
-
-void GeneralSettingsDlg::on_EdtLatitudeNS_textChanged(const QString& NewText)
-{
-    /* Only S or N char are accepted */
-
-    const QString sVal = NewText.toUpper();
-
-    if (sVal != "S" && sVal != "N" && sVal != "")
-        EdtLatitudeNS->setText("");
-    else
-        EdtLatitudeNS->setText(sVal);
-}
-
-void GeneralSettingsDlg::on_EdtLongitudeEW_textChanged(const QString& NewText)
-{
-    /* Only E or W char are accepted */
-
-    const QString sVal = NewText.toUpper();
-
-    if (sVal != "E" && sVal != "W" && sVal != "")
-        EdtLongitudeEW->setText("");
-    else
-        EdtLongitudeEW->setText(sVal);
 }
 
 bool GeneralSettingsDlg::ValidInput(const QLineEdit* le)
@@ -315,6 +274,78 @@ QString GeneralSettingsDlg::ExtractDigits(const QString strStr, const int iStart
         }
     }
     return sVal;
+}
+
+void GeneralSettingsDlg::ExtractReceiverCoordinates()
+{
+    QString sVal, sDir;
+    double latitude, longitude;
+
+    Parameters.Lock();
+    latitude = Parameters.gps_data.fix.latitude;
+    longitude = Parameters.gps_data.fix.longitude;
+
+    /* Extract latitude values */
+
+    if(latitude<0.0)
+    {
+        latitude = -latitude;
+        EdtLatitudeNS->setText("S");
+    }
+    else
+    {
+        EdtLatitudeNS->setText("N");
+    }
+
+    int degrees = int(latitude);
+    int minutes = int(((floor((latitude - degrees) * 1000000) / 1000000) + 0.00005) * 60.0);
+
+    /* Extract degrees */
+
+    /* Latitude degrees max 2 digits */
+    sVal = QString("%1").arg(degrees);
+
+    EdtLatitudeDegrees->setText(sVal);
+
+
+    sVal = QString("%1").arg(minutes);
+
+    EdtLatitudeMinutes->setText(sVal);
+
+    /* Extract longitude values */
+
+    if(longitude<0.0)
+    {
+        longitude = -longitude;
+        EdtLongitudeEW->setText("W");
+    }
+    else if(longitude>180.0)
+    {
+        longitude = 360.0-longitude;
+        EdtLongitudeEW->setText("E");
+    }
+    else
+    {
+        EdtLongitudeEW->setText("E");
+    }
+
+    /* Extract degrees */
+
+    degrees = int(longitude);
+    minutes = int(((floor((longitude - degrees) * 1000000) / 1000000) + 0.00005) * 60.0);
+
+    /* Longitude degrees max 3 digits */
+    sVal = QString("%1").arg(degrees);
+
+    EdtLongitudeDegrees->setText(sVal);
+
+    /* Extract minutes */
+    sVal = QString("%1").arg(minutes);
+
+    EdtLongitudeMinutes->setText(sVal);
+
+    Parameters.Unlock();
+
 }
 
 void GeneralSettingsDlg::AddWhatsThisHelp()

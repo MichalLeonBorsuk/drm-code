@@ -1,12 +1,12 @@
 /******************************************************************************\
  * British Broadcasting Corporation
- * Copyright (c) 2001-2014
+ * Copyright (c) 2007
  *
  * Author(s):
- *  Julian Cable
+ *	Julian Cable
  *
  * Description:
- *  Jack sound classes
+ *	Jack sound classes
  *
  ******************************************************************************
  *
@@ -33,7 +33,7 @@
 
 #ifdef _WIN32
 # include <windows.h>
-typedef HANDLE pthread_t;
+	typedef HANDLE pthread_t;
 #endif
 #include <jack/jack.h>
 #include <jack/ringbuffer.h>
@@ -51,18 +51,18 @@ struct instance_data_t
     jack_ringbuffer_t* buff;
     int underruns;
     int overruns;
-    string peer_left, peer_right;
+    std::string peer_left, peer_right;
 };
 
 class CJackPorts
 {
 public:
     CJackPorts():devices(),ports() {}
-    vector<string> devices;
+    std::vector<std::string> devices;
     void load(jack_client_t * client, unsigned long flags);
-    pair< string, string>get_ports(int dev);
+    pair< std::string, std::string>get_ports(int dev);
 protected:
-    map<string, pair< string, string> > ports;
+    map<std::string, pair< std::string, std::string> > ports;
 };
 
 class CSoundInJack : public CSoundInInterface
@@ -73,16 +73,17 @@ public:
     CSoundInJack(const CSoundInJack& e);
     CSoundInJack& operator=(const CSoundInJack& e);
 
-    virtual void        Init(int iNewBufferSize, _BOOLEAN bNewBlocking = TRUE);
-    virtual _BOOLEAN    Read(CVector<short>& psData);
-    virtual void        Enumerate(vector<string>&);
-    virtual int         GetDev();
-    virtual void        SetDev(int iNewDev);
-    virtual void        Close();
+    virtual void		Init(int iNewBufferSize, bool bNewBlocking = true);
+    virtual bool	Read(CVector<short>& psData);
+    virtual void		Enumerate(std::vector<std::string>&);
+    virtual int			GetDev();
+    virtual void		SetDev(int iNewDev);
+    virtual void		Close();
+	virtual std::string		GetVersion() { return "JACK audio input"; }
 protected:
     int iBufferSize;
-    _BOOLEAN bBlocking;
-    _BOOLEAN device_changed;
+    bool bBlocking;
+    bool device_changed;
     instance_data_t capture_data;
     int dev;
     CJackPorts ports;
@@ -96,16 +97,17 @@ public:
     CSoundOutJack(const CSoundOutJack& e);
     CSoundOutJack& operator=(const CSoundOutJack& e);
 
-    virtual void        Init(int iNewBufferSize, _BOOLEAN bNewBlocking = TRUE);
-    virtual _BOOLEAN    Write(CVector<short>& psData);
-    virtual void        Enumerate(vector<string>&);
-    virtual int         GetDev();
-    virtual void        SetDev(int iNewDev);
-    virtual void        Close();
+    virtual void		Init(int iNewBufferSize, bool bNewBlocking = true);
+    virtual bool	Write(CVector<short>& psData);
+    virtual void		Enumerate(std::vector<std::string>&);
+    virtual int			GetDev();
+    virtual void		SetDev(int iNewDev);
+    virtual void		Close();
+	virtual std::string		GetVersion() { return "JACK audio output"; }
 protected:
     int iBufferSize;
-    _BOOLEAN bBlocking;
-    _BOOLEAN device_changed;
+    bool bBlocking;
+    bool device_changed;
     instance_data_t play_data;
     int dev;
     CJackPorts ports;

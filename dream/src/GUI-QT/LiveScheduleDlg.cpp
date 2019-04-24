@@ -3,7 +3,7 @@
  * Copyright (c) 2005
  *
  * Author(s):
- *  Andrea Russo
+ *	Andrea Russo
  *
  * Description:
  *
@@ -34,9 +34,6 @@
 #include <QHideEvent>
 #include <QShowEvent>
 #include "../util-QT/Util.h"
-#include "ThemeCustomizer.h"
-
-#define UTF8_DEGREE_SIGN "\xc2\xb0"
 
 /* Implementation *************************************************************/
 
@@ -192,7 +189,7 @@ CDRMLiveSchedule::DecodeTargets(const vector < CAltFreqRegion >
 
             int iLatitudeMed = (iLatitude + (iLatitudeEx / 2));
 
-            ssRegions << "latitude " << abs(iLatitudeMed) << UTF8_DEGREE_SIGN " ";
+            ssRegions << "latitude " << abs(iLatitudeMed) << "\xb0 ";
 
             if (iLatitudeMed < 0)
                 ssRegions << 'S';
@@ -204,7 +201,7 @@ CDRMLiveSchedule::DecodeTargets(const vector < CAltFreqRegion >
             if (iLongitudeMed >= 180)
                 iLongitudeMed = iLongitudeMed - 360;
 
-            ssRegions << " longitude " << abs(iLongitudeMed) << UTF8_DEGREE_SIGN " ";
+            ssRegions << " longitude " << abs(iLongitudeMed) << "\xb0 ";
 
             if (iLongitudeMed < 0)
                 ssRegions << 'W';
@@ -299,7 +296,7 @@ CDRMLiveSchedule::LoadServiceDefinition(const CServiceDefinition& service,
 }
 
 void
-CDRMLiveSchedule::LoadAFSInformation(const CAltFreqSign& AltFreqSign)
+CDRMLiveSchedule::LoadAFSInformations(const CAltFreqSign& AltFreqSign)
 {
     size_t i;
 
@@ -330,14 +327,14 @@ CDRMLiveSchedule::LoadAFSInformation(const CAltFreqSign& AltFreqSign)
     }
 }
 
-LiveScheduleDlg::LiveScheduleDlg(CSettings& Settings,
+LiveScheduleDlg::LiveScheduleDlg(CRx& nrx, CSettings& Settings,
                                  QMap<QWidget*,QString>& parents):
     CWindow(parents, Settings, "Live Schedule"),
+    rx(nrx),
     smallGreenCube(":/icons/smallGreenCube.png"),
     greenCube(":/icons/greenCube.png"), redCube(":/icons/redCube.png"),
     orangeCube(":/icons/orangeCube.png"), pinkCube(":/icons/pinkCube.png"),
-    vecpListItems(), iColStationID(1), iWidthColStationID(0), bDisableFrequencyChange(false),
-    serviceInformation()
+    vecpListItems(), iColStationID(1), iWidthColStationID(0)
 {
     setupUi(this);
 
@@ -349,7 +346,6 @@ LiveScheduleDlg::LiveScheduleDlg(CSettings& Settings,
 
     /* Clear list box for file names and set up columns */
     ListViewStations->clear();
-    ListViewStations->setSortingEnabled(true);
 
     connect(actionSave,  SIGNAL(triggered()), this, SLOT(OnSave()));
 
@@ -378,7 +374,6 @@ LiveScheduleDlg::LiveScheduleDlg(CSettings& Settings,
     connect(action15minutes, SIGNAL(triggered()), previewMapper, SLOT(map()));
     connect(action30minutes, SIGNAL(triggered()), previewMapper, SLOT(map()));
     connect(previewMapper, SIGNAL(mapped(int)), this, SLOT(OnShowPreviewMenu(int)));
-    connect(ListViewStations->header(), SIGNAL(sectionClicked(int)), this, SLOT(OnHeaderClicked(int)));
 
     connect(buttonOk,  SIGNAL(clicked()), this, SLOT(close()));
     //connect(actionGetUpdate, SIGNAL(triggered()), this, SLOT(OnGetUpdate()));
@@ -392,68 +387,25 @@ LiveScheduleDlg::LiveScheduleDlg(CSettings& Settings,
 
     /* Init UTC time shown with a label control */
     OnTimerUTCLabel();
-
-    APPLY_CUSTOM_THEME();
 }
 
 LiveScheduleDlg::~LiveScheduleDlg()
 {
 }
 
-void LiveScheduleDlg::setLocation(double lat, double lng)
-{
-    DRMSchedule.SetReceiverCoordinates(lat, lng);
-}
-
-void LiveScheduleDlg::setAFS(const CAltFreqSign& altFreqSign)
-{
-    DRMSchedule.LoadAFSInformation(altFreqSign);
-}
-
-void LiveScheduleDlg::setServiceInformation(const CServiceInformation& si)
-{
-    serviceInformation = si;
-}
-
-void LiveScheduleDlg::setService(int, const CService& service)
-{
-    if(service.IsActive())
-    {
-        strStationName = QString::fromUtf8(service.strLabel.c_str());
-    }
-}
-
-void LiveScheduleDlg::setFrequency(int f)
-{
-    if (f > 30000)
-        labelFrequency->setText(QString::number((double)f / 1000) + tr(" MHz"));
-    else
-        labelFrequency->setText(QString::number(f) + tr(" kHz"));
-}
-
 void
 LiveScheduleDlg::LoadSettings()
 {
-    // save path
-
-    string sDataFilesDirectory = Settings.Get(
-                                     "Receiver", "datafilesdirectory", string(DEFAULT_DATA_FILES_DIRECTORY));
-    strCurrentSavePath = QString::fromUtf8(sDataFilesDirectory.c_str());
-
-    /* and make sure it exists */
-    CreateDirectories(strCurrentSavePath);
-
     /* Set sorting behaviour of the list */
     iCurrentSortColumn = getSetting("sortcolumn", 0);
     bCurrentSortAscending = getSetting("sortascending", true);
     ListViewStations->sortItems(iCurrentSortColumn, bCurrentSortAscending?Qt::AscendingOrder:Qt::DescendingOrder);
 
-    /* Set column order and size settings */
-    QString strColumnParam = getSetting("columnparam", QString());
-    ColumnParamFromStr(ListViewStations, strColumnParam);
+    /* Retrieve the setting saved into the .ini file */
+    strCurrentSavePath = QString::fromUtf8(rx.GetParameters()->GetDataDirectory("AFS").c_str());
 
-    /* Get station id column width */
-    iWidthColStationID = ListViewStations->columnWidth(iColStationID);
+    /* and make sure it exists */
+	CreateDirectories(strCurrentSavePath);
 
     /* Set stations in list view which are active right now */
     bool bShowAll = getSetting("showall", false);
@@ -494,14 +446,6 @@ LiveScheduleDlg::SaveSettings()
     putSetting("sortcolumn", iCurrentSortColumn);
     putSetting("sortascending", bCurrentSortAscending);
 
-    /* Restore station id column width */
-    ListViewStations->setColumnWidth(iColStationID, iWidthColStationID);
-
-    /* Store column order and size settings */
-    QString strColumnParam;
-    ColumnParamToStr(ListViewStations, strColumnParam);
-    putSetting("columnparam", strColumnParam);
-
     /* Store preview settings */
     putSetting("showall", showAll());
 }
@@ -515,18 +459,18 @@ LiveScheduleDlg::OnCheckFreeze()
     else
     {
         OnTimerList();
-        TimerList.start(GUI_TIMER_LIST_VIEW_UPDATE);    /* Stations list */
+        TimerList.start(GUI_TIMER_LIST_VIEW_UPDATE);	/* Stations list */
     }
 }
 
 int LiveScheduleDlg::currentSortColumn()
 {
-    return ListViewStations->sortColumn();
+	return ListViewStations->sortColumn();
 }
 
 bool LiveScheduleDlg::showAll()
 {
-    return actionShowAllStations->isChecked();
+	return actionShowAllStations->isChecked();
 }
 
 void
@@ -563,6 +507,17 @@ LiveScheduleDlg::OnShowPreviewMenu(int iID)
 void
 LiveScheduleDlg::OnTimerList()
 {
+    CParameter& Parameters = *rx.GetParameters();
+
+    Parameters.Lock();
+    /* Get current receiver latitude and longitude if defined */
+    if (Parameters.gps_data.set&LATLON_SET)
+    {
+        DRMSchedule.SetReceiverCoordinates(
+		Parameters.gps_data.fix.latitude, Parameters.gps_data.fix.longitude);
+    }
+    Parameters.Unlock();
+
     /* Update schedule and list view */
     LoadSchedule();
 }
@@ -591,7 +546,7 @@ MyListLiveViewItem::key(int column, bool ascending) const
         if (!ascending)
             d = 100000.0;
 
-        const QString sFreq = QString().setNum(long((fFreq - d) * 10000.0)).rightJustified(20, '0');
+	const QString sFreq = QString().setNum(long((fFreq - d) * 10000.0)).rightJustified(20, '0');
         return text(column).toLower() + "|" + sFreq;
     }
 }
@@ -599,42 +554,33 @@ MyListLiveViewItem::key(int column, bool ascending) const
 void
 LiveScheduleDlg::LoadSchedule()
 {
-    bDisableFrequencyChange = true;
-
     /* Lock mutex for modifying the vecpListItems */
     ListItemsMutex.lock();
 
-    /* Get selected item */
-    CLiveScheduleItem liveScheduleItem;
-    QList<QTreeWidgetItem *> items =  ListViewStations->selectedItems();
-    if (items.size() == 1)
-        liveScheduleItem = ((MyListLiveViewItem*)items[0])->liveScheduleItem;
-
-    /* Prevent itemSelectionChanged() when an item is deleted */
-    ListViewStations->setCurrentIndex(QModelIndex());
-
     /* save the state of the station id column in case we want it later */
-    int width = ListViewStations->columnWidth(iColStationID);
-    if (width)
-        iWidthColStationID = width;
+    iWidthColStationID = ListViewStations->columnWidth(iColStationID);
 
     /* Delete all old list view items (it is important that the vector
        "vecpListItems" was initialized to 0 at creation of the global object
        otherwise this may cause an segmentation fault) */
     for (size_t i = 0; i < vecpListItems.size(); i++)
     {
-        if (vecpListItems[i] != NULL)
+        if (vecpListItems[i] != nullptr)
             delete vecpListItems[i];
     }
     vecpListItems.clear();
 
+    CParameter& Parameters = *rx.GetParameters();
+    Parameters.Lock();
+    DRMSchedule.LoadAFSInformations(Parameters.AltFreqSign);
+    Parameters.Unlock();
+
     /* Init vector for storing the pointer to the list view items */
     const int iNumStations = DRMSchedule.GetStationNumber();
 
-    vecpListItems.resize(iNumStations, NULL);
+    vecpListItems.resize(iNumStations, nullptr);
 
     actionSave->setEnabled(iNumStations > 0);
-
     /* Unlock BEFORE calling the stations view update because in this function
        the mutex is locked, too! */
     ListItemsMutex.unlock();
@@ -642,27 +588,30 @@ LiveScheduleDlg::LoadSchedule()
     /* Update list view */
     SetStationsView();
 
-    /* Restore selected item */
-    for (int i=0; i<ListViewStations->topLevelItemCount(); ++i)
-    {
-        MyListLiveViewItem *item = (MyListLiveViewItem*)ListViewStations->topLevelItem(i);
-        if (item->liveScheduleItem == liveScheduleItem) {
-            item->setSelected(true);
-            break;
-        }
-    }
-
-    bDisableFrequencyChange = false;
-
     QString strTitle = tr("Live Schedule");
 
     if (iNumStations > 0)
     {
-        if (strStationName != "")
-            strTitle += " [" + strStationName.trimmed() + "]";
+        Parameters.Lock();
+        /* Get current service */
+        const int iCurSelAudioServ =
+            Parameters.GetCurSelAudioService();
+
+        if (Parameters.Service[iCurSelAudioServ].IsActive())
+        {
+            /* Do UTF-8 to string conversion with the label strings */
+            QString strStationName = QString().fromUtf8(
+				Parameters.Service[iCurSelAudioServ].strLabel.c_str()
+				);
+
+            /* add station name on the title of the dialog */
+            if (strStationName != "")
+                strTitle += " [" + strStationName.trimmed() + "]";
+        }
+        Parameters.Unlock();
     }
 
-    setWindowTitle(strTitle);
+	setWindowTitle(strTitle);
 }
 
 void
@@ -692,13 +641,21 @@ LiveScheduleDlg::eventShow(QShowEvent*)
         OnTimerList();
 
         /* Activate real-time timer when window is shown */
-        TimerList.start(GUI_TIMER_LIST_VIEW_UPDATE);    /* Stations list */
+        TimerList.start(GUI_TIMER_LIST_VIEW_UPDATE);	/* Stations list */
     }
 }
 
 void
 LiveScheduleDlg::SetStationsView()
 {
+    /* Set lock because of list view items. These items could be changed
+       by another thread */
+    CParameter& Parameters = *rx.GetParameters();
+    Parameters.Lock();
+    int sNo = Parameters.GetCurSelAudioService();
+    string thisServiceLabel = Parameters.Service[sNo].strLabel;
+    Parameters.Unlock();
+
     ListItemsMutex.lock();
 
     const int iNumStations = DRMSchedule.GetStationNumber();
@@ -714,35 +671,37 @@ LiveScheduleDlg::SetStationsView()
                 (DRMSchedule.CheckState(i) == CDRMLiveSchedule::IS_INACTIVE)))
         {
             /* Only insert item if it is not already in the list */
-            if (vecpListItems[i] == NULL)
+            if (vecpListItems[i] == nullptr)
             {
                 /* Generate new list item with all necessary column entries */
                 const CLiveScheduleItem& item = DRMSchedule.GetItem(i);
-                QString name;
+                QString name = "";
 
                 if(item.iServiceID != SERV_ID_NOT_USED)
                 {
                     bHaveOtherServiceIDs = true;
 
-                    map <uint32_t,set<string> >::const_iterator
-                    si = serviceInformation.find(item.iServiceID);
-                    if(si != serviceInformation.end())
-                        name = QString::fromUtf8(si->second.begin()->c_str());
+                    Parameters.Lock();
+                    map <uint32_t,CServiceInformation>::const_iterator
+                    si = Parameters.ServiceInformation.find(item.iServiceID);
+                    if(si != Parameters.ServiceInformation.end())
+                        name = QString::fromUtf8(si->second.label.begin()->c_str());
                     else
                     {
                         ulong sid = item.iServiceID;
                         name = QString("(%1)").arg(sid, 0, 16);
                     }
+                    Parameters.Unlock();
                 }
 
                 vecpListItems[i] = new MyListLiveViewItem(ListViewStations,
-                        item /* CLiveScheduleItem item */ ,
-                        QString::fromUtf8(item.strFreq.c_str()) /* freq. */ ,
+                        QString(item.strFreq.c_str()) /* freq. */ ,
                         name /* station name or id or blank */ ,
-                        QString::fromUtf8(item.strSystem.c_str()) /* system */ ,
+                        QString(item.strSystem.c_str()) /* system */ ,
                         ExtractTime(item.Schedule) /* time */,
-                        QString::fromUtf8(item.strTarget.c_str()) /* target */ ,
-                        ExtractDaysFlagString(item.Schedule.iDayCode) /* Show list of days */ );
+                        QString(item.strTarget.c_str()) /* target */ ,
+                        ExtractDaysFlagString(item.Schedule.iDayCode) /* Show list of days */
+                                                         );
 
                 /* Set flag for sorting the list */
                 bListHastChanged = true;
@@ -776,7 +735,7 @@ LiveScheduleDlg::SetStationsView()
         else
         {
             /* Delete this item since it is not used anymore */
-            if (vecpListItems[i] != NULL)
+            if (vecpListItems[i] != nullptr)
             {
                 /* If one deletes a menu item in QT list view, it is
                    automaticall removed from the list and the list gets
@@ -784,7 +743,7 @@ LiveScheduleDlg::SetStationsView()
                 delete vecpListItems[i];
 
                 /* Reset pointer so we can distinguish if it is used or not */
-                vecpListItems[i] = NULL;
+                vecpListItems[i] = nullptr;
 
                 /* Set flag for sorting the list */
                 bListHastChanged = true;
@@ -792,7 +751,15 @@ LiveScheduleDlg::SetStationsView()
         }
     }
 
-    ListViewStations->setColumnWidth(iColStationID, bHaveOtherServiceIDs ? iWidthColStationID : 0);
+
+    if(bHaveOtherServiceIDs)
+    {
+        ListViewStations->setColumnWidth(iColStationID, iWidthColStationID);
+    }
+    else
+    {
+        ListViewStations->setColumnWidth(iColStationID, 0);
+    }
 
     /* Sort the list if items have changed */
     if(bListHastChanged)
@@ -812,22 +779,6 @@ LiveScheduleDlg::OnHeaderClicked(int c)
     iCurrentSortColumn = c;
 }
 
-void
-LiveScheduleDlg::on_ListViewStations_itemSelectionChanged()
-{
-    if (!bDisableFrequencyChange)
-    {
-        QList<QTreeWidgetItem*> items(ListViewStations->selectedItems());
-        if (items.size() == 1)
-        {
-            double dFreq = QString(items.first()->text(0)).toDouble();
-            if (!items.first()->text(2).compare("FM"))
-                dFreq *= 1000;
-            emit frequencyChanged((int)floor(dFreq));
-        }
-    }
-}
-
 QString
 ColValue(const QString strValue)
 {
@@ -842,25 +793,38 @@ LiveScheduleDlg::OnSave()
 {
     QString strFilename;
     QString strSchedule = "";
+    QString strValue = "";
+
+    CParameter& Parameters = *rx.GetParameters();
+
+    Parameters.Lock();
+
+    const int iCurSelAudioServ =
+        Parameters.GetCurSelAudioService();
+    /* Do UTF-8 to QString (UNICODE) conversion with the station name strings */
+    QString strStationName =
+        QString().fromUtf8(Parameters.Service[iCurSelAudioServ].strLabel.c_str());
+
+    Parameters.Unlock();
 
     /* Lock mutex for use the vecpListItems */
     ListItemsMutex.lock();
 
     /* Force the sort for all items */
-    ListViewStations->sortItems(iCurrentSortColumn, bCurrentSortAscending?Qt::AscendingOrder:Qt::DescendingOrder);
+	ListViewStations->sortItems(iCurrentSortColumn, bCurrentSortAscending?Qt::AscendingOrder:Qt::DescendingOrder);
 
     /* Extract values from the list */
 
-    for(int i=0; i<ListViewStations->topLevelItemCount(); i++)
-    {
-        QTreeWidgetItem* myItem = ListViewStations->topLevelItem(i);
-        strSchedule += "<tr>" "<td align=\"right\">" + myItem->text(COL_FREQ) + "</td>" /* freq */
-                       "<td>" + ColValue(myItem->text(1)) + "</td>" /* system */
-                       "<td>" + ColValue(myItem->text(2)) + "</td>" /* time */
-                       "<td>" + ColValue(myItem->text(3)) + "</td>" /* target */
-                       "<td>" + ColValue(myItem->text(4)) + "</td>" /* days */
+	for(int i=0; i<ListViewStations->topLevelItemCount(); i++)
+	{
+		QTreeWidgetItem* myItem = ListViewStations->topLevelItem(i);
+        strSchedule += "<tr>" "<td align=\"right\">" + myItem->text(COL_FREQ) + "</td>"	/* freq */
+                       "<td>" + ColValue(myItem->text(1)) + "</td>"	/* system */
+                       "<td>" + ColValue(myItem->text(2)) + "</td>"	/* time */
+                       "<td>" + ColValue(myItem->text(3)) + "</td>"	/* target */
+                       "<td>" + ColValue(myItem->text(4)) + "</td>"	/* days */
                        "</tr>\n";
-    }
+	}
 
     ListItemsMutex.unlock();
 
@@ -902,9 +866,9 @@ LiveScheduleDlg::OnSave()
             if (FileObj.open(QIODevice::WriteOnly))
             {
                 QTextStream TextStream(&FileObj);
-                TextStream << strText;  /* Actual writing */
+                TextStream << strText;	/* Actual writing */
                 FileObj.close();
-                strCurrentSavePath = QFileInfo(strFilename).path() + PATH_SEPARATOR;
+                strCurrentSavePath = QFileInfo(strFilename).path() + "/";
             }
         }
     }
@@ -914,33 +878,33 @@ void
 LiveScheduleDlg::AddWhatsThisHelp()
 {
     /* Stations List */
-    QString strView =
-        tr("<b>Live Schedule List:</b> In the live schedule list "
-           "it's possible to view AFS (Alternative Frequency Signalling) "
-           "information transmitted with the current DRM or AMSS signal.</b>"
-           "It is possible to limit the view to active stations by changing a "
-           "setting in the 'view' menu.<br>"
-           "The color of the cube on the left of the "
-           "frequency shows the current status of the transmission.<br>"
-           "A green box shows that the transmission takes place right now "
-           "a red cube it is shown that the transmission is offline, "
-           "a pink cube shown that the transmission soon will be offline.<br>"
-           "If the stations preview is active an orange box shows the stations "
-           "that will be active.<br>"
-           "A little green cube on the left of the target column shows that the receiver"
-           " coordinates (latitude and longitude) stored into Dream settings are within"
-           " the target area of this transmission.<br>"
-           "The list can be sorted by clicking on the headline of the column.");
+	QString strView =
+                     tr("<b>Live Schedule List:</b> In the live schedule list "
+                        "it's possible to view AFS (Alternative Frequency Signalling) "
+                        "information transmitted with the current DRM or AMSS signal.</b>"
+                        "It is possible to limit the view to active stations by changing a "
+                        "setting in the 'view' menu.<br>"
+                        "The color of the cube on the left of the "
+                        "frequency shows the current status of the transmission.<br>"
+                        "A green box shows that the transmission takes place right now "
+                        "a red cube it is shown that the transmission is offline, "
+                        "a pink cube shown that the transmission soon will be offline.<br>"
+                        "If the stations preview is active an orange box shows the stations "
+                        "that will be active.<br>"
+                        "A little green cube on the left of the target column shows that the receiver"
+                        " coordinates (latitude and longitude) stored into Dream settings are within"
+                        " the target area of this transmission.<br>"
+                        "The list can be sorted by clicking on the headline of the column.");
 
     /* UTC time label */
-    QString strTime =
-        tr("<b>UTC Time:</b> Shows the current Coordinated "
-           "Universal Time (UTC) which is also known as Greenwich Mean Time "
-           "(GMT).");
+	QString strTime =
+                     tr("<b>UTC Time:</b> Shows the current Coordinated "
+                        "Universal Time (UTC) which is also known as Greenwich Mean Time "
+                        "(GMT).");
 
     /* Check box freeze */
-    QString strFreeze = tr("<b>Freeze:</b> If this check box is selected the live schedule is frozen.");
-    ListViewStations->setWhatsThis(strView);
+	QString strFreeze = tr("<b>Freeze:</b> If this check box is selected the live schedule is frozen.");
+	ListViewStations->setWhatsThis(strView);
     TextLabelUTCTime->setWhatsThis(strTime);
     CheckBoxFreeze->setWhatsThis(strFreeze);
 }
@@ -986,16 +950,3 @@ CLiveScheduleItem::IsActive(const time_t ltime)
 {
     return Schedule.IsActive(ltime);
 }
-
-bool
-CLiveScheduleItem::operator==(const CLiveScheduleItem& item)
-{
-    return
-        strFreq == item.strFreq &&
-        strTarget == item.strTarget &&
-        iServiceID == item.iServiceID &&
-        strSystem == item.strSystem &&
-        bInsideTargetArea == item.bInsideTargetArea &&
-        Schedule == item.Schedule;
-}
-

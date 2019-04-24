@@ -1,13 +1,13 @@
 /******************************************************************************\
  * Technische Universitaet Darmstadt, Institut fuer Nachrichtentechnik
- * Copyright (c) 2001-2014
+ * Copyright (c) 2004
  *
  * Author(s):
- *  Volker Fischer
+ *	Volker Fischer
  *
  * Description:
- *  Implements:
- *  - Hamlib interface
+ *	Implements:
+ *	- Hamlib interface
  *
  ******************************************************************************
  *
@@ -37,105 +37,101 @@
 class CHamlib
 {
 public:
-    enum ESMeterState {SS_VALID, SS_NOTVALID, SS_TIMEOUT};
+	enum ESMeterState {SS_VALID, SS_NOTVALID, SS_TIMEOUT};
 
-    CHamlib();
-    virtual ~CHamlib();
+	CHamlib();
+	virtual ~CHamlib();
 
-    struct SDrRigCaps
-    {
-        SDrRigCaps() : strManufacturer(""), strModelName(""),
-            eRigStatus(RIG_STATUS_ALPHA),bIsSpecRig(false) {}
-        SDrRigCaps(const string& strNMan, const string& strNModN, rig_status_e eNSt, bool bNsp) :
-            strManufacturer(strNMan), strModelName(strNModN), eRigStatus(eNSt),
-            bIsSpecRig(bNsp)
-        {}
-        SDrRigCaps(const SDrRigCaps& nSDRC) :
-            strManufacturer(nSDRC.strManufacturer),
-            strModelName(nSDRC.strModelName),
-            eRigStatus(nSDRC.eRigStatus), bIsSpecRig(nSDRC.bIsSpecRig) {}
+	struct SDrRigCaps
+	{
+		SDrRigCaps() : strManufacturer(""), strModelName(""),
+			eRigStatus(RIG_STATUS_ALPHA),bIsSpecRig(false) {}
+		SDrRigCaps(const std::string& strNMan, const std::string& strNModN, rig_status_e eNSt, bool bNsp) :
+			strManufacturer(strNMan), strModelName(strNModN), eRigStatus(eNSt),
+			bIsSpecRig(bNsp)
+			{}
+		SDrRigCaps(const SDrRigCaps& nSDRC) :
+			strManufacturer(nSDRC.strManufacturer),
+			strModelName(nSDRC.strModelName),
+			eRigStatus(nSDRC.eRigStatus), bIsSpecRig(nSDRC.bIsSpecRig) {}
 
-        inline SDrRigCaps& operator=(const SDrRigCaps& cNew)
-        {
-            strManufacturer = cNew.strManufacturer;
-            strModelName = cNew.strModelName;
-            eRigStatus = cNew.eRigStatus;
-            bIsSpecRig = cNew.bIsSpecRig;
-            return *this;
-        }
+		inline SDrRigCaps& operator=(const SDrRigCaps& cNew)
+		{
+			strManufacturer = cNew.strManufacturer;
+			strModelName = cNew.strModelName;
+			eRigStatus = cNew.eRigStatus;
+			bIsSpecRig = cNew.bIsSpecRig;
+			return *this;
+		}
 
-        string          strManufacturer;
-        string          strModelName;
-        rig_status_e    eRigStatus;
-        bool        bIsSpecRig;
-    };
+		std::string			strManufacturer;
+		std::string			strModelName;
+		rig_status_e	eRigStatus;
+		bool		bIsSpecRig;
+	};
 
-    bool        SetFrequency(const int iFreqkHz);
-    ESMeterState    GetSMeter(_REAL& rCurSigStr);
+	bool		SetFrequency(const int iFreqkHz);
+	ESMeterState	GetSMeter(_REAL& rCurSigStr);
 
-    /* backend selection */
-    void            GetRigList(map<rig_model_t,SDrRigCaps>&);
-    void            SetHamlibModelID(const rig_model_t model);
-    rig_model_t     GetHamlibModelID() const {
-        return iHamlibModelID;
-    }
+	/* backend selection */
+	void			GetRigList(std::map<rig_model_t,SDrRigCaps>&);
+	void			SetHamlibModelID(const rig_model_t model);
+	rig_model_t		GetHamlibModelID() const {return iHamlibModelID;}
 
-    /* com port selection */
-    void            GetPortList(map<string,string>&);
-    void            SetComPort(const string&);
-    string          GetComPort() const;
+	/* com port selection */
+	void			GetPortList(std::map<std::string,std::string>&);
+	void			SetComPort(const std::string&);
+	std::string		GetComPort() const;
 
-    void            SetEnableModRigSettings(const bool bNSM);
-    bool        GetEnableModRigSettings() const {
-        return bModRigSettings;
-    }
-    string          GetInfo() const;
+	void			SetEnableModRigSettings(const bool bNSM);
+	bool			GetEnableModRigSettings() const {return bModRigSettings;}
+	std::string		GetInfo() const;
 
-    void            RigSpecialParameters(rig_model_t id, const string& sSet, int iFrOff, const string& sModSet);
-    void            ConfigureRig(const string & strSet);
-    void            LoadSettings(CSettings& s);
-    void            SaveSettings(CSettings& s);
+	void			RigSpecialParameters(rig_model_t id, const std::string& sSet, int iFrOff, const std::string& sModSet);
+	void			ConfigureRig(const std::string & strSet);
+	void			LoadSettings(CSettings& s);
+	void			SaveSettings(CSettings& s);
 
 protected:
-    class CSpecDRMRig
-    {
-    public:
-        CSpecDRMRig() : strDRMSetMod(""), strDRMSetNoMod(""), iFreqOffs(0) {}
-        CSpecDRMRig(const CSpecDRMRig& nSpec) :
-            strDRMSetMod(nSpec.strDRMSetMod),
-            strDRMSetNoMod(nSpec.strDRMSetNoMod), iFreqOffs(nSpec.iFreqOffs) {}
-        CSpecDRMRig(string sSet, int iNFrOff, string sModSet) :
-            strDRMSetMod(sModSet), strDRMSetNoMod(sSet), iFreqOffs(iNFrOff) {}
+	class CSpecDRMRig
+	{
+	public:
+		CSpecDRMRig() : strDRMSetMod(""), strDRMSetNoMod(""), iFreqOffs(0) {}
+		CSpecDRMRig(const CSpecDRMRig& nSpec) :
+			strDRMSetMod(nSpec.strDRMSetMod),
+			strDRMSetNoMod(nSpec.strDRMSetNoMod), iFreqOffs(nSpec.iFreqOffs) {}
+		CSpecDRMRig(std::string sSet, int iNFrOff, std::string sModSet) :
+			strDRMSetMod(sModSet), strDRMSetNoMod(sSet), iFreqOffs(iNFrOff) {}
 
-        string      strDRMSetMod; /* Special DRM settings (modified) */
-        string      strDRMSetNoMod; /* Special DRM settings (not mod.) */
-        int         iFreqOffs; /* Frequency offset */
-    };
+		std::string		strDRMSetMod; /* Special DRM settings (modified) */
+		std::string		strDRMSetNoMod; /* Special DRM settings (not mod.) */
+		int			iFreqOffs; /* Frequency offset */
+	};
 
-    map<rig_model_t,CSpecDRMRig>    SpecDRMRigs;
-    map<rig_model_t,SDrRigCaps>     CapsHamlibModels;
+	std::map<rig_model_t,CSpecDRMRig>	SpecDRMRigs;
+	std::map<rig_model_t,SDrRigCaps>		CapsHamlibModels;
 
-    void EnableSMeter(const bool bStatus);
+	void EnableSMeter(const bool bStatus);
 
-    static int          PrintHamlibModelList(const struct rig_caps* caps, void* data);
-    void                SetRigModes();
-    void                SetRigLevels();
-    void                SetRigFuncs();
-    void                SetRigParams();
-    void                SetRigConfig();
+	static int			PrintHamlibModelList(const struct rig_caps* caps, void* data);
+	void				SetRigModes();
+	void				SetRigLevels();
+	void				SetRigFuncs();
+	void				SetRigParams();
+	void				SetRigConfig();
 
-    RIG*                pRig;
-    bool            bSMeterIsSupported;
-    bool            bModRigSettings;
-    rig_model_t         iHamlibModelID;
-    string              strHamlibConf;
-    string              strSettings;
-    int                 iFreqOffset;
-    map<string,string> modes;
-    map<string,string> levels;
-    map<string,string> functions;
-    map<string,string> parameters;
-    map<string,string> config;
+	RIG*				pRig;
+	bool				bSMeterIsSupported;
+	bool				bModRigSettings;
+	rig_model_t			iHamlibModelID;
+	std::string			strHamlibConf;
+	std::string			strSettings;
+	int					iFreqOffset;
+	std::map<std::string,std::string> modes;
+	std::map<std::string,std::string> levels;
+	std::map<std::string,std::string> functions;
+	std::map<std::string,std::string> parameters;
+	std::map<std::string,std::string> config;
 
 };
 

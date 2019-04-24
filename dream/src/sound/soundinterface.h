@@ -1,9 +1,9 @@
 /******************************************************************************\
  * British Broadcasting Corporation
- * Copyright (c) 2001-2014
+ * Copyright (c) 2007
  *
  * Author(s):
- *  Julian Cable
+ *	Julian Cable
  *
  * Decription:
  * sound interfaces
@@ -26,8 +26,8 @@
  *
 \******************************************************************************/
 
-#ifndef _SOUNDINTERFACE_H
-#define _SOUNDINTERFACE_H
+#ifndef SOUNDINTERFACE_H
+#define SOUNDINTERFACE_H
 
 #include "selectioninterface.h"
 #include "../util/Vector.h"
@@ -35,24 +35,26 @@
 class CSoundInInterface : public CSelectionInterface
 {
 public:
-    virtual         ~CSoundInInterface() {}
+    virtual 		~CSoundInInterface()=0;
 
     /* sound card interface - used by ReadData */
     virtual bool Init(int iSampleRate, int iNewBufferSize, bool bNewBlocking)=0;
     virtual bool Read(CVector<short>& psData)=0;
     virtual void     Close()=0;
+	virtual std::string	GetVersion() = 0;
 
 };
 
 class CSoundOutInterface : public CSelectionInterface
 {
 public:
-    virtual         ~CSoundOutInterface() {}
+    virtual 		~CSoundOutInterface()=0;
 
     /* sound card interface - used by WriteData */
     virtual bool Init(int iSampleRate, int iNewBufferSize, bool bNewBlocking)=0;
     virtual bool Write(CVector<short>& psData)=0;
     virtual void     Close()=0;
+	virtual std::string	GetVersion() = 0;
 };
 
 #endif

@@ -1,12 +1,12 @@
 /******************************************************************************\
  * Technische Universitaet Darmstadt, Institut fuer Nachrichtentechnik
- * Copyright (c) 2001-2014
+ * Copyright (c) 2001
  *
  * Author(s):
- *  Volker Fischer
+ *	Volker Fischer
  *
  * Description:
- *  Tables for QAM mapping (Mapping is already normalized)
+ *	Tables for QAM mapping (Mapping is already normalized)
  *
  ******************************************************************************
  *
@@ -29,7 +29,7 @@
 #if !defined(QAM_MAPPING_H__3B0_CA63_4344_BB2B_23E7912__INCLUDED_)
 #define QAM_MAPPING_H__3B0_CA63_4344_BB2B_23E7912__INCLUDED_
 
-#include "../matlib/Matlib.h"
+#include "../matlib/MatlibStdToolbox.h"
 #include "../GlobalDefinitions.h"
 
 
@@ -85,13 +85,13 @@ const _REAL rTableQAM4[2][2] = {
 
 /* Global functions ***********************************************************/
 /*
-    ----------------------------------------------------------------------------
-    Implementation of distance to nearest constellation point (symbol) for all
-    QAM types
+	----------------------------------------------------------------------------
+	Implementation of distance to nearest constellation point (symbol) for all
+	QAM types
 */
 inline CComplex MinDist4QAM(const CComplex cI)
 {
-    /* Return vector pointing to nearest signal point of this constellation.
+    /* Return std::vector pointing to nearest signal point of this constellation.
        2 possible constellation points for real and imaginary axis */
     return CComplex(
                /* Real axis minimum distance */
@@ -102,7 +102,7 @@ inline CComplex MinDist4QAM(const CComplex cI)
 
 inline CComplex MinDist16QAM(const CComplex cI)
 {
-    /* Return vector pointing to nearest signal point of this constellation.
+    /* Return std::vector pointing to nearest signal point of this constellation.
        4 possible constellation points for real and imaginary axis */
     return CComplex(
                /* Real axis minimum distance */
@@ -115,7 +115,7 @@ inline CComplex MinDist16QAM(const CComplex cI)
 
 inline CComplex MinDist64QAM(const CComplex cI)
 {
-    /* Return vector pointing to nearest signal point of this constellation.
+    /* Return std::vector pointing to nearest signal point of this constellation.
        8 possible constellation points for real and imaginary axis */
     return CComplex(
                /* Real axis minimum distance */
@@ -132,8 +132,8 @@ inline CComplex MinDist64QAM(const CComplex cI)
 
 
 /*
-    ----------------------------------------------------------------------------
-    Implementation of hard decision for all QAM types
+	----------------------------------------------------------------------------
+	Implementation of hard decision for all QAM types
 */
 inline CComplex Dec4QAM(const CComplex cI)
 {

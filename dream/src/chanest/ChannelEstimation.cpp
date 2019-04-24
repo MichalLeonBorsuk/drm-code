@@ -1,12 +1,12 @@
 /******************************************************************************\
  * Technische Universitaet Darmstadt, Institut fuer Nachrichtentechnik
- * Copyright (c) 2001-2014
+ * Copyright (c) 2001-2006
  *
  * Author(s):
- *  Volker Fischer
+ *	Volker Fischer
  *
  * Description:
- *  Channel estimation and equalization
+ *	Channel estimation and equalization
  *
  ******************************************************************************
  *
@@ -28,14 +28,16 @@
 
 #include "ChannelEstimation.h"
 #include <limits>
+#include "../matlib/MatlibSigProToolbox.h"
 
 
 /* Implementation *************************************************************/
 void CChannelEstimation::ProcessDataInternal(CParameter& Parameters)
 {
-    int     iModSymNum;
-    _REAL   rCurSNREst;
-    _REAL   rOffsPDSEst;
+    int		i, j, k;
+    int		iModSymNum;
+    _REAL	rCurSNREst;
+    _REAL	rOffsPDSEst;
 
     /* Check if symbol ID index has changed by the synchronization unit. If it
        has changed, reinit this module */
@@ -49,14 +51,14 @@ void CChannelEstimation::ProcessDataInternal(CParameter& Parameters)
 
 // TODO: use CFIFO class for "matcHistory"!
     /* Move data in history-buffer (from iLenHistBuff - 1 towards 0) */
-    for (int j = 0; j < iLenHistBuff - 1; j++)
+    for (j = 0; j < iLenHistBuff - 1; j++)
     {
-        for (int i = 0; i < iNumCarrier; i++)
+        for (i = 0; i < iNumCarrier; i++)
             matcHistory[j][i] = matcHistory[j + 1][i];
     }
 
     /* Write new symbol in memory */
-    for (int i = 0; i < iNumCarrier; i++)
+    for (i = 0; i < iNumCarrier; i++)
         matcHistory[iLenHistBuff - 1][i] = (*pvecInputData)[i];
 
     const int iSymbolCounter = (*pvecInputData).GetExData().iSymbolID;
@@ -138,31 +140,31 @@ void CChannelEstimation::ProcessDataInternal(CParameter& Parameters)
     {
     case FLINEAR:
         /**********************************************************************\
-         * Linear interpolation                                               *
+         * Linear interpolation												  *
         \**********************************************************************/
         /* Set first pilot position */
         veccChanEst[0] = veccPilots[0];
 
-        for (int j = 0, k = 1; j < iNumCarrier - gcs.f;
-                j += gcs.f, k++)
+        for (j = 0, k = 1; j < iNumCarrier - iScatPilFreqInt;
+                j += iScatPilFreqInt, k++)
         {
             /* Set values at second time pilot position in cluster */
-            veccChanEst[j + gcs.f] = veccPilots[k];
+            veccChanEst[j + iScatPilFreqInt] = veccPilots[k];
 
             /* Interpolation cluster */
-            for (int i = 1; i < gcs.f; i++)
+            for (i = 1; i < iScatPilFreqInt; i++)
             {
                 /* E.g.: c(x) = (c_4 - c_0) / 4 * x + c_0 */
                 veccChanEst[j + i] =
-                    (veccChanEst[j + gcs.f] - veccChanEst[j]) /
-                    (_REAL) (gcs.f) * (_REAL) i + veccChanEst[j];
+                    (veccChanEst[j + iScatPilFreqInt] - veccChanEst[j]) /
+                    (_REAL) (iScatPilFreqInt) * (_REAL) i + veccChanEst[j];
             }
         }
         break;
 
     case FDFTFILTER:
         /**********************************************************************\
-         * DFT based algorithm                                                *
+         * DFT based algorithm												  *
         \**********************************************************************/
         /* Special case with robustness mode D: pilots in all carriers!
            so no processing is required, the channel estimation is
@@ -175,7 +177,7 @@ void CChannelEstimation::ProcessDataInternal(CParameter& Parameters)
         /* ---------------------------------------------------------------------
            Put all pilots at the beginning of the vector. The "real" length of
            the input vector is longer than the number of pilots, but we
-           calculate the FFT only over "iNumCarrier / gcs.f + 1"
+           calculate the FFT only over "iNumCarrier / iScatPilFreqInt + 1"
            values (this is the number of pilot positions) */
         /* Weighting pilots with window */
         veccPilots *= vecrDFTWindow;
@@ -207,7 +209,7 @@ void CChannelEstimation::ProcessDataInternal(CParameter& Parameters)
 
     case FWIENER:
         /**********************************************************************\
-         * Wiener filter                                                       *
+         * Wiener filter													   *
         \**********************************************************************/
         /* Wiener filter update --------------------------------------------- */
         /* Do not update filter in case of simulation */
@@ -223,7 +225,7 @@ void CChannelEstimation::ProcessDataInternal(CParameter& Parameters)
         /* FIR filter of the pilots with filter taps. We need to filter the
            pilot positions as well to improve the SNR estimation (which
            follows this procedure) */
-        for (int j = 0; j < iNumCarrier; j++)
+        for (j = 0; j < iNumCarrier; j++)
         {
 // TODO: Do only calculate channel estimation for data cells, not for pilot
 // cells (exeption: if we want to use SNR estimation based on pilots, we also
@@ -231,7 +233,7 @@ void CChannelEstimation::ProcessDataInternal(CParameter& Parameters)
             /* Convolution */
             veccChanEst[j] = _COMPLEX((_REAL) 0.0, (_REAL) 0.0);
 
-            for (int i = 0; i < iLengthWiener; i++)
+            for (i = 0; i < iLengthWiener; i++)
             {
                 veccChanEst[j] +=
                     matcFiltFreq[j][i] * veccPilots[veciPilOffTab[j] + i];
@@ -247,7 +249,7 @@ void CChannelEstimation::ProcessDataInternal(CParameter& Parameters)
 
     /* Write to output vector. Take oldest symbol of history for output. Also,
        ship the channel state at a certain cell */
-    for (int i = 0; i < iNumCarrier; i++)
+    for (i = 0; i < iNumCarrier; i++)
     {
         (*pvecOutputData)[i].cSig = matcHistory[0][i] / veccChanEst[i];
 
@@ -282,7 +284,7 @@ void CChannelEstimation::ProcessDataInternal(CParameter& Parameters)
     case SNR_PIL:
         /* Use estimated channel and compare it to the received pilots. This
            estimation works only if the channel estimation was successful */
-        for (int i = 0; i < iNumCarrier; i++)
+        for (i = 0; i < iNumCarrier; i++)
         {
             /* Identify pilot positions. Use MODIFIED "iSymbolID" (See lines
                above) */
@@ -312,7 +314,7 @@ void CChannelEstimation::ProcessDataInternal(CParameter& Parameters)
                 /* Average the SNR with a two sided recursion. Apply correction
                    factor, too */
                 IIR1TwoSided(rSNREstimate, rCurSNREst / rSNRTotToPilCorrFact,
-                             rLamSNREstFast,    rLamSNREstSlow);
+                             rLamSNREstFast,	rLamSNREstSlow);
             }
         }
         break;
@@ -322,7 +324,7 @@ void CChannelEstimation::ProcessDataInternal(CParameter& Parameters)
         /* SNR estimation with initialization */
         if (iSNREstInitCnt > 0)
         {
-            for (int i = 0; i < iNumCarrier; i++)
+            for (i = 0; i < iNumCarrier; i++)
             {
                 /* Only use the last frame of the initialization phase for
                    initial SNR estimation to debar initialization phase of
@@ -375,7 +377,7 @@ void CChannelEstimation::ProcessDataInternal(CParameter& Parameters)
             vecrNoiseEstFACSym[iModSymNum] = 0.0;
             vecrSignalEstFACSym[iModSymNum] = 0.0;
 
-            for (int i = 0; i < iNumCarrier; i++)
+            for (i = 0; i < iNumCarrier; i++)
             {
                 /* Only use FAC cells for this SNR estimation method */
                 if (_IsFAC(Parameters.CellMappingTable.matiMapTab[iModSymNum][i]))
@@ -411,7 +413,7 @@ void CChannelEstimation::ProcessDataInternal(CParameter& Parameters)
     }
 
     /* OPH: WMER, WMM and WMF estimation ------------------------------------ */
-    for (int i = 0; i < iNumCarrier; i++)
+    for (i = 0; i < iNumCarrier; i++)
     {
         /* Use MSC cells for this SNR estimation method */
         if (_IsMSC(Parameters.CellMappingTable.matiMapTab[iModSymNum][i]))
@@ -500,7 +502,7 @@ void CChannelEstimation::ProcessDataInternal(CParameter& Parameters)
         }
 
         /* Return delay in ms */
-        _REAL rDelayScale = _REAL(iFFTSizeN) / _REAL(iSampleRate * iNumIntpFreqPil * gcs.f) * 1000.0;
+        _REAL rDelayScale = _REAL(iFFTSizeN) / _REAL(iSampleRate * iNumIntpFreqPil * iScatPilFreqInt) * 1000.0;
         Parameters.rMinDelay = rMinDelay * rDelayScale;
         Parameters.rMaxDelay = rMaxDelay * rDelayScale;
 
@@ -552,7 +554,7 @@ void CChannelEstimation::ProcessDataInternal(CParameter& Parameters)
     /* Interferer consideration --------------------------------------------- */
     if (bInterfConsid)
     {
-        for (int i = 0; i < iNumCarrier; i++)
+        for (i = 0; i < iNumCarrier; i++)
         {
             /* Weight the channel estimates with the SNR estimate of the current
                carrier to consider the higher noise variance caused by
@@ -597,14 +599,15 @@ void CChannelEstimation::CalculateRint(CParameter& Parameters)
 
     /* Interferer frequency */
     Parameters.rIntFreq = ((_REAL) iMaxIntCarrier + Parameters.CellMappingTable.iCarrierKmin) /
-                          Parameters.CellMappingTable.iFFTSizeN * iSampleRate;
+                             Parameters.CellMappingTable.iFFTSizeN * iSampleRate;
 }
 
 void CChannelEstimation::InitInternal(CParameter& Parameters)
 {
     Parameters.Lock();
     /* Get parameters from global struct */
-    gcs = Parameters.CellMappingTable.gcs;
+    iScatPilTimeInt = Parameters.CellMappingTable.iScatPilTimeInt;
+    iScatPilFreqInt = Parameters.CellMappingTable.iScatPilFreqInt;
     iNumIntpFreqPil = Parameters.CellMappingTable.iNumIntpFreqPil;
     iNumCarrier = Parameters.CellMappingTable.iNumCarrier;
     iFFTSizeN = Parameters.CellMappingTable.iFFTSizeN;
@@ -612,7 +615,8 @@ void CChannelEstimation::InitInternal(CParameter& Parameters)
     iSampleRate = Parameters.GetSigSampleRate();
 
     /* Length of guard-interval with respect to FFT-size! */
-    rGuardSizeFFT = _REAL(iNumCarrier) * Parameters.CellMappingTable.RatioTgTu.val();
+    rGuardSizeFFT = (_REAL) iNumCarrier *
+                    Parameters.CellMappingTable.RatioTgTu.iEnum / Parameters.CellMappingTable.RatioTgTu.iDenom;
 
     /* If robustness mode D is active, get DC position. This position cannot
        be "0" since in mode D no 5 kHz mode is defined (see DRM-standard).
@@ -632,7 +636,7 @@ void CChannelEstimation::InitInternal(CParameter& Parameters)
 
     /* FFT must be longer than "iNumCarrier" because of zero padding effect (
        not in robustness mode D! -> "iLongLenFreq = iNumCarrier") */
-    iLongLenFreq = iNumCarrier + gcs.f - 1;
+    iLongLenFreq = iNumCarrier + iScatPilFreqInt - 1;
 
     /* Init vector for received data at pilot positions */
     veccPilots.Init(iNumIntpFreqPil);
@@ -686,7 +690,7 @@ void CChannelEstimation::InitInternal(CParameter& Parameters)
 
     const int iOvlSamOneSideShort =
         (int) Ceil(rWinExpFact * iNumIntpFreqPil / 2);
-    const int iOvlSamOneSideLong = iOvlSamOneSideShort * gcs.f;
+    const int iOvlSamOneSideLong = iOvlSamOneSideShort * iScatPilFreqInt;
 
     const int iExpWinLenShort = iNumIntpFreqPil + 2 * iOvlSamOneSideShort;
     const int iExpWinLenLong = iNumCarrier + 2 * iOvlSamOneSideLong;
@@ -820,10 +824,6 @@ void CChannelEstimation::InitInternal(CParameter& Parameters)
         iLengthWiener = LEN_WIENER_FILT_FREQ_RMD;
         break;
 
-    case RM_ROBUSTNESS_MODE_E:
-        iLengthWiener = LEN_WIENER_FILT_FREQ_RME;
-        break;
-
     default:
         break;
     }
@@ -841,7 +841,7 @@ void CChannelEstimation::InitInternal(CParameter& Parameters)
     veciPilOffTab.Init(iNumCarrier);
 
     /* Number of different wiener filters */
-    iNumWienerFilt = (iLengthWiener - 1) * gcs.f + 1;
+    iNumWienerFilt = (iLengthWiener - 1) * iScatPilFreqInt + 1;
 
     /* Allocate temporary matlib vector for filter coefficients */
     matcWienerFilter.Init(iNumWienerFilt, iLengthWiener);
@@ -874,7 +874,7 @@ void CChannelEstimation::InitInternal(CParameter& Parameters)
 
 
     /* inits for RSCI pilot store */
-    matcRSIPilotStore.Init(iNumSymPerFrame / gcs.t, iNumCarrier/gcs.f + 1,
+    matcRSIPilotStore.Init(iNumSymPerFrame / iScatPilTimeInt, iNumCarrier/iScatPilFreqInt + 1,
                            _COMPLEX(_REAL(0.0),_REAL(0.0)));
     iTimeDiffAccuRSI = 0;
 
@@ -888,17 +888,18 @@ CComplexVector CChannelEstimation::FreqOptimalFilter(int iFreqInt, int iDiff,
         int iLength)
 {
     /*
-        We assume that the power delay spread is a rectangle function in the time
-        domain (sinc-function in the frequency domain). Length and position of this
-        window are adapted according to the current estimated PDS.
+    	We assume that the power delay spread is a rectangle function in the time
+    	domain (sinc-function in the frequency domain). Length and position of this
+    	window are adapted according to the current estimated PDS.
     */
-    CRealVector     vecrRpp(iLength);
-    CRealVector     vecrRhp(iLength);
-    CRealVector     vecrH(iLength);
-    CComplexVector  veccH(iLength);
+    int				i;
+    CRealVector		vecrRpp(iLength);
+    CRealVector		vecrRhp(iLength);
+    CRealVector		vecrH(iLength);
+    CComplexVector	veccH(iLength);
 
     /* Calculation of R_hp, this is the SHIFTED correlation function */
-    for (int i = 0; i < iLength; i++)
+    for (i = 0; i < iLength; i++)
     {
         const int iCurPos = i * iFreqInt - iDiff;
 
@@ -906,7 +907,7 @@ CComplexVector CChannelEstimation::FreqOptimalFilter(int iFreqInt, int iDiff,
     }
 
     /* Calculation of R_pp */
-    for (int i = 0; i < iLength; i++)
+    for (i = 0; i < iLength; i++)
     {
         const int iCurPos = i * iFreqInt;
 
@@ -923,7 +924,7 @@ CComplexVector CChannelEstimation::FreqOptimalFilter(int iFreqInt, int iDiff,
        function in the time domain to the correct position (determined by
        the "rRatPDSOffs") by multiplying in the frequency domain
        with exp(j w T) */
-    for (int i = 0; i < iLength; i++)
+    for (i = 0; i < iLength; i++)
     {
         const int iCurPos = i * iFreqInt - iDiff;
 
@@ -939,13 +940,14 @@ CComplexVector CChannelEstimation::FreqOptimalFilter(int iFreqInt, int iDiff,
 void CChannelEstimation::UpdateWienerFiltCoef(CReal rNewSNR, CReal rRatPDSLen,
         CReal rRatPDSOffs)
 {
-    int iDiff;
-    int iCurPil;
+    int	j, i;
+    int	iDiff;
+    int	iCurPil;
 
     /* Calculate all possible wiener filters */
-    for (int j = 0; j < iNumWienerFilt; j++)
+    for (j = 0; j < iNumWienerFilt; j++)
     {
-        matcWienerFilter[j] = FreqOptimalFilter(gcs.f, j, rNewSNR,
+        matcWienerFilter[j] = FreqOptimalFilter(iScatPilFreqInt, j, rNewSNR,
                                                 rRatPDSLen, rRatPDSOffs, iLengthWiener);
     }
 
@@ -953,9 +955,9 @@ void CChannelEstimation::UpdateWienerFiltCoef(CReal rNewSNR, CReal rRatPDSLen,
 #if 0
     /* Save filter coefficients */
     static FILE* pFile = fopen("test/wienerfreq.dat", "w");
-    for (int j = 0; j < iNumWienerFilt; j++)
+    for (j = 0; j < iNumWienerFilt; j++)
     {
-        for (int i = 0; i < iLengthWiener; i++)
+        for (i = 0; i < iLengthWiener; i++)
         {
             fprintf(pFile, "%e %e\n", Real(matcWienerFilter[j][i]),
                     Imag(matcWienerFilter[j][i]));
@@ -966,11 +968,11 @@ void CChannelEstimation::UpdateWienerFiltCoef(CReal rNewSNR, CReal rRatPDSLen,
 
 
     /* Set matrix with filter taps, one filter for each carrier */
-    for (int j = 0; j < iNumCarrier; j++)
+    for (j = 0; j < iNumCarrier; j++)
     {
         /* We define the current pilot position as the last pilot which the
            index "j" has passed */
-        iCurPil = (int) (j / gcs.f);
+        iCurPil = (int) (j / iScatPilFreqInt);
 
         /* Consider special cases at the edges of the DRM spectrum */
         if (iCurPil < iPilOffset)
@@ -1009,10 +1011,10 @@ void CChannelEstimation::UpdateWienerFiltCoef(CReal rNewSNR, CReal rRatPDSLen,
 
         /* Difference between the position of the first pilot (for filtering)
            and the position of the observed carrier */
-        iDiff = j - veciPilOffTab[j] * gcs.f;
+        iDiff = j - veciPilOffTab[j] * iScatPilFreqInt;
 
         /* Copy correct filter in matrix */
-        for (int i = 0; i < iLengthWiener; i++)
+        for (i = 0; i < iLengthWiener; i++)
             matcFiltFreq[j][i] = matcWienerFilter[iDiff][i];
     }
 }
@@ -1109,7 +1111,7 @@ _REAL CChannelEstimation::GetDelay() const
 {
     /* Delay in ms */
     return rLenPDSEst * iFFTSizeN /
-           (iSampleRate * iNumIntpFreqPil * gcs.f) * 1000;
+           (iSampleRate * iNumIntpFreqPil * iScatPilFreqInt) * 1000;
 }
 
 _REAL CChannelEstimation::GetMinDelay()
@@ -1129,7 +1131,7 @@ _REAL CChannelEstimation::GetMinDelay()
 
     /* Return delay in ms */
     return rMinDelay * iFFTSizeN /
-           (iSampleRate * iNumIntpFreqPil * gcs.f) * 1000;
+           (iSampleRate * iNumIntpFreqPil * iScatPilFreqInt) * 1000;
 }
 #endif
 
@@ -1204,6 +1206,8 @@ void CChannelEstimation::GetTransferFunction(CVector<_REAL>& vecrData,
 void CChannelEstimation::GetSNRProfile(CVector<_REAL>& vecrData,
                                        CVector<_REAL>& vecrScale)
 {
+    int i;
+
     /* Init output vectors */
     vecrData.Init(iNumCarrier, (_REAL) 0.0);
     vecrScale.Init(iNumCarrier, (_REAL) 0.0);
@@ -1218,7 +1222,7 @@ void CChannelEstimation::GetSNRProfile(CVector<_REAL>& vecrData,
         /* We want to suppress the carriers on which no SNR measurement can be
            performed (DC carrier, frequency pilots carriers) */
         int iNewNumCar = 0;
-        for (int i = 0; i < iNumCarrier; i++)
+        for (i = 0; i < iNumCarrier; i++)
         {
             if (vecrSigEstMSC[i] != (_REAL) 0.0)
                 iNewNumCar++;
@@ -1231,7 +1235,7 @@ void CChannelEstimation::GetSNRProfile(CVector<_REAL>& vecrData,
         /* Copy data in output vector and set scale
            (carrier index as x-scale) */
         int iCurOutIndx = 0;
-        for (int i = 0; i < iNumCarrier; i++)
+        for (i = 0; i < iNumCarrier; i++)
         {
             /* Suppress carriers where no SNR measurement is possible */
             if (vecrSigEstMSC[i] != (_REAL) 0.0)
@@ -1277,12 +1281,12 @@ void CChannelEstimation::GetAvPoDeSp(CVector<_REAL>& vecrData,
 }
 
 void CChannelEstimation::UpdateRSIPilotStore(CParameter& Parameters, CVectorEx<_COMPLEX>* pvecInputData,
-        CVector<int>& veciMapTab, CVector<_COMPLEX>& veccPilotCells, const unsigned int iSymbolCounter)
+        CVector<int>& veciMapTab, CVector<_COMPLEX>& veccPilotCells, const int iSymbolCounter)
 {
-    int         i;
-    int         iPiHiIdx;
-    //int           iTimeDiffNew;
-    _COMPLEX    cNewPilot;
+    int			i;
+    int			iPiHiIdx;
+    //int			iTimeDiffNew;
+    _COMPLEX	cNewPilot;
 
     /* Clear time diff accumulator at start of the frame */
     if (iSymbolCounter == 0)
@@ -1297,24 +1301,27 @@ void CChannelEstimation::UpdateRSIPilotStore(CParameter& Parameters, CVectorEx<_
 
 
     /* calculate the spacing between scattered pilots in a given symbol */
-    //int gcs.m = gcs.f * gcs.t;
+    int iScatPilFreqSpacing = iScatPilFreqInt * iScatPilTimeInt;
 
     /* Data is stored in the array with one row per pilot repetition, and in freq order in each row */
     /* Each row has one element per pilot-bearing carrier */
     /* This avoids having a jagged array with different lengths in different rows */
-    int iRow = iSymbolCounter / gcs.t;
+    int iRow = iSymbolCounter / Parameters.CellMappingTable.iScatPilTimeInt;
+
+    int iScatPilFreqInt = Parameters.CellMappingTable.iScatPilFreqInt;
+
 
     /* Find the first pilot */
     int iFirstPilotCarrier = 0;
 
     while (!_IsScatPil(veciMapTab[iFirstPilotCarrier]) )
-        iFirstPilotCarrier += gcs.f;
+        iFirstPilotCarrier += iScatPilFreqInt;
 
 
     /* Fill in the matrix for channel estimates at the pilot positions -------- */
     /* Step by the pilot spacing in a given symbol */
-    for (i = iFirstPilotCarrier, iPiHiIdx = iFirstPilotCarrier/gcs.f;
-            i < iNumCarrier; i += gcs.m, iPiHiIdx+=gcs.t)
+    for (i = iFirstPilotCarrier, iPiHiIdx = iFirstPilotCarrier/iScatPilFreqInt;
+            i < iNumCarrier; i += iScatPilFreqSpacing, iPiHiIdx+=iScatPilTimeInt)
     {
         /* Identify and calculate transfer function at the pilot positions */
         if (_IsScatPil(veciMapTab[i])) /* This will almost always be true */
@@ -1325,7 +1332,7 @@ void CChannelEstimation::UpdateRSIPilotStore(CParameter& Parameters, CVectorEx<_
 
             /* We need to correct pilots due to timing corrections */
             /* Calculate timing difference: use the one you want to correct (the current one = 0) - the reference one */
-            cNewPilot = pTimeInt->Rotate(cNewPilot, i, -iTimeDiffAccuRSI);
+            cNewPilot =	pTimeInt->Rotate(cNewPilot, i, -iTimeDiffAccuRSI);
 
         }
         else /* it must be the DC carrier in mode D. Set to complex zero */
@@ -1341,17 +1348,17 @@ void CChannelEstimation::UpdateRSIPilotStore(CParameter& Parameters, CVectorEx<_
     if (iSymbolCounter == Parameters.CellMappingTable.iNumSymPerFrame - 1)
     {
         /* copy into CParam object */
-        Parameters.matcReceivedPilotValues.Init(iNumSymPerFrame / gcs.t, iNumCarrier/gcs.f + 1,
-                                                _COMPLEX(_REAL(0.0),_REAL(0.0)));
+        Parameters.matcReceivedPilotValues.Init(iNumSymPerFrame / iScatPilTimeInt, iNumCarrier/iScatPilFreqInt + 1,
+                _COMPLEX(_REAL(0.0),_REAL(0.0)));
         Parameters.matcReceivedPilotValues = matcRSIPilotStore;
         /* copy it a row at a time (vector provides an assignment operator)
-        for (i=0; i<iNumSymPerFrame / gcs.t; i++)
-            Parameters.matcReceivedPilotValues[i] = matcRSIPilotStore[i];
+        for (i=0; i<iNumSymPerFrame / iScatPilTimeInt; i++)
+        	Parameters.matcReceivedPilotValues[i] = matcRSIPilotStore[i];
         */
 
 
         /* clear the local copy */
-        matcRSIPilotStore.Init(iNumSymPerFrame / gcs.t, iNumCarrier/gcs.f + 1,
+        matcRSIPilotStore.Init(iNumSymPerFrame / iScatPilTimeInt, iNumCarrier/iScatPilFreqInt + 1,
                                _COMPLEX(_REAL(0.0),_REAL(0.0)));
 
     }

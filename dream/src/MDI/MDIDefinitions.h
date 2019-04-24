@@ -1,12 +1,12 @@
 /******************************************************************************\
  * Technische Universitaet Darmstadt, Institut fuer Nachrichtentechnik
- * Copyright (c) 2001-2014
+ * Copyright (c) 2004
  *
  * Author(s):
- *  Volker Fischer, Oliver Haffenden
+ *	Volker Fischer, Oliver Haffenden
  *
  * Description:
- *  Definitions used by the other MDI classes
+ *	Definitions used by the other MDI classes
  *
  ******************************************************************************
  *
@@ -37,27 +37,27 @@
 
 /* Definitions ****************************************************************/
 /* Major revision: Currently 0000_[16] */
-#define MDI_MAJOR_REVISION          0
+#define MDI_MAJOR_REVISION			0
 
 /* Minor revision: Currently 0000_[16] */
-#define MDI_MINOR_REVISION          0
+#define MDI_MINOR_REVISION			0
 
 /* Major revision: Currently 0003_[16] */
-#define RSCI_MAJOR_REVISION         3
+#define RSCI_MAJOR_REVISION			3
 
 /* Minor revision: Currently 0000_[16] */
-#define RSCI_MINOR_REVISION         0
+#define RSCI_MINOR_REVISION			0
 
 /* Major revision of the AF protocol in use: Currently 01_[16] */
-#define AF_MAJOR_REVISION           1
+#define AF_MAJOR_REVISION			1
 
 /* Minor revision of the AF protocol in use: Currently 00_[16] */
-#define AF_MINOR_REVISION           0
+#define AF_MINOR_REVISION			0
 
 /* MDI input */
 
 /* Length of the MDI in buffer */
-#define MDI_IN_BUF_LEN              4
+#define MDI_IN_BUF_LEN				4
 
 
 

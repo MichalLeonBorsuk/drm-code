@@ -1,12 +1,12 @@
 /******************************************************************************\
  * Technische Universitaet Darmstadt, Institut fuer Nachrichtentechnik
- * Copyright (c) 2001-2014
+ * Copyright (c) 2004
  *
  * Author(s):
- *  Volker Fischer, Oliver Haffenden
+ *	Volker Fischer, Oliver Haffenden
  *
  * Description:
- *  Pure abstract base class for a tag item decoder. The client (CTagPacketDecoder) should read the name and length,
+ *	Pure abstract base class for a tag item decoder. The client (CTagPacketDecoder) should read the name and length,
  *  and check the name against the name returned by GetTagName(). If it matches, the rest of the
  *  tag body should be passed to DecodeTag().
  *  Specialised derived classes should be constructed with any pointers they need to act upon the
@@ -43,31 +43,25 @@
 class CTagItemDecoder
 {
 public:
-    // Decode the tag item body. The name and length should already have been consumed by the
-    // caller (CTagPacketDecoder).
-    virtual void DecodeTag(CVector<_BINARY>& vecbiTag, const int iLenDataBits) = 0;
+	// Decode the tag item body. The name and length should already have been consumed by the
+	// caller (CTagPacketDecoder).
+	virtual void DecodeTag(CVector<_BINARY>& vecbiTag, const int iLenDataBits) = 0;
 
-    // This function must return the name of the tag item that this decoder decodes.
-    virtual string GetTagName(void) = 0;
-    virtual ~CTagItemDecoder() {}
+	// This function must return the name of the tag item that this decoder decodes.
+	virtual std::string GetTagName(void) = 0;
+	virtual ~CTagItemDecoder() {}
 
-    CTagItemDecoder() : bIsReady(false) {};
-    // initialise any internal state variables. TODO: Make this pure to force implementer to think?
-    virtual void Init(void) {
-        bIsReady = false;
-    }
+	CTagItemDecoder() : bIsReady(false) {};
+	// initialise any internal state variables. TODO: Make this pure to force implementer to think?
+	virtual void Init(void) {bIsReady = false;}
 
-    virtual bool IsReady(void) {
-        return bIsReady;
-    }
+	virtual bool IsReady(void) {return bIsReady;}
 
 protected:
-    void SetReady(bool bReady) {
-        bIsReady = bReady;
-    }
+	void SetReady(bool bReady) {bIsReady = bReady;}
 
 private:
-    bool bIsReady;
+	bool bIsReady;
 
 };
 
@@ -75,18 +69,14 @@ private:
 class CTagItemDecoderRSI : public CTagItemDecoder
 {
 public:
-    CTagItemDecoderRSI(CParameter* pP, const string& s) : pParameter(pP), tag(s) {}
-    void SetParameterPtr(CParameter *pP) {
-        pParameter = pP;
-    }
-    virtual string GetTagName() {
-        return tag;
-    }
+    CTagItemDecoderRSI(CParameter* pP, const std::string& s) : pParameter(pP), tag(s) {}
+    void SetParameterPtr(CParameter *pP) {pParameter = pP;}
+    virtual std::string GetTagName() { return tag; }
 protected:
 
     _REAL decodeDb(CVector<_BINARY>& vecbiTag);
     CParameter *pParameter;
-    string tag;
+    std::string tag;
 };
 
 #endif

@@ -1,12 +1,12 @@
 /******************************************************************************\
  * Technische Universitaet Darmstadt, Institut fuer Nachrichtentechnik
- * Copyright (c) 2001-2014
+ * Copyright (c) 2001
  *
  * Author(s):
- *  Volker Fischer
+ *	Volker Fischer
  *
  * Description:
- *  Tables for carrier mapping
+ *	Tables for carrier mapping
  *
  ******************************************************************************
  *
@@ -29,8 +29,7 @@
 #include "TableCarMap.h"
 
 /* FAC positions. The two numbers are {symbol no, carrier no} */
-// ES 201 980 V4.1.1 Table 62
-const int iTableFACRobModA[NUM_FAC_CELLS_DRM30][2] = {
+const int iTableFACRobModA[NUM_FAC_CELLS][2] = {
     {2, 26}, {2, 46}, {2, 66}, {2, 86},
     {3, 10}, {3, 30}, {3, 50}, {3, 70}, {3, 90},
     {4, 14}, {4, 22}, {4, 34}, {4, 62}, {4, 74}, {4, 94},
@@ -45,8 +44,7 @@ const int iTableFACRobModA[NUM_FAC_CELLS_DRM30][2] = {
     {13, 38}, {13, 58}, {13, 78}
 };
 
-// ES 201 980 V4.1.1 Table 63
-const int iTableFACRobModB[NUM_FAC_CELLS_DRM30][2] = {
+const int iTableFACRobModB[NUM_FAC_CELLS][2] = {
     {2, 13}, {2, 25}, {2, 43}, {2, 55}, {2, 67},
     {3, 15}, {3, 27}, {3, 45}, {3, 57}, {3, 69},
     {4, 17}, {4, 29}, {4, 47}, {4, 59}, {4, 71},
@@ -61,8 +59,7 @@ const int iTableFACRobModB[NUM_FAC_CELLS_DRM30][2] = {
     {13, 23}, {13, 35}, {13, 47}, {13, 65}, {13, 77},
 };
 
-// ES 201 980 V4.1.1 Table 64
-const int iTableFACRobModC[NUM_FAC_CELLS_DRM30][2] = {
+const int iTableFACRobModC[NUM_FAC_CELLS][2] = {
     {3, 9}, {3, 21}, {3, 45}, {3, 57},
     {4, 23}, {4, 35}, {4, 47},
     {5, 13}, {5, 25}, {5, 37}, {5, 49},
@@ -81,8 +78,7 @@ const int iTableFACRobModC[NUM_FAC_CELLS_DRM30][2] = {
     {18, 15}, {18, 27}, {18, 39}, {18, 51}
 };
 
-// ES 201 980 V4.1.1 Table 65
-const int iTableFACRobModD[NUM_FAC_CELLS_DRM30][2] = {
+const int iTableFACRobModD[NUM_FAC_CELLS][2] = {
     {3, 9}, {3, 18}, {3, 27},
     {4, 10}, {4, 19},
     {5, 11}, {5, 20}, {5, 29},
@@ -105,34 +101,9 @@ const int iTableFACRobModD[NUM_FAC_CELLS_DRM30][2] = {
     {22, 10}, {22, 19}, {22, 37}
 };
 
-// ES 201 980 V4.1.1 Table 66
-const int iTableFACRobModE[NUM_FAC_CELLS_DRMPLUS][2] = {
-    {5, -78}, {5, -62}, {5, -46}, {5, -30}, {5, -14}, {5, 2}, {5, 18}, {5, 34}, {5, 50}, {5, 66}, {5, 82},
-    {6, -90}, {6, -74}, {6, -58}, {6, -42}, {6, -26}, {6, -10}, {6, 6}, {6, 22}, {6, 38}, {6, 54}, {6, 70}, {6, 86},
-    {7, -86}, {7, -70}, {7, -54}, {7, -38}, {7, -22}, {7, -6}, {7, 10}, {7, 26}, {7, 42}, {7, 58}, {7, 74}, {7, 90},
-    {8, -82}, {8, -66}, {8, -50}, {8, -34}, {8, -18}, {8, -2}, {8, 14}, {8, 30}, {8, 46}, {8, 62}, {8, 78},
-    {9, -78}, {9, -62}, {9, -46}, {9, -30}, {9, -14}, {9, 2}, {9, 18}, {9, 34}, {9, 50}, {9, 66}, {9, 82},
-    {10, -90}, {10, -74}, {10, -58}, {10, -42}, {10, -26}, {10, -10}, {10, 6}, {10, 22}, {10, 38}, {10, 54}, {10, 70}, {10, 86},
-    {11, -86}, {11, -70}, {11, -54}, {11, -38}, {11, -22}, {11, -6}, {11, 10}, {11, 26}, {11, 42}, {11, 58}, {11, 74}, {11, 90},
-    {12, -82}, {12, -66}, {12, -50}, {12, -34}, {12, -18}, {12, -2}, {12, 14}, {12, 30}, {12, 46}, {12, 62}, {12, 78},
-    {13, -78}, {13, -62}, {13, -46}, {13, -30}, {13, -14}, {13, 2}, {13, 18}, {13, 34}, {13, 50}, {13, 66}, {13, 82},
-    {14, -90}, {14, -74}, {14, -58}, {14, -42}, {14, -26}, {14, -10}, {14, 6}, {14, 22}, {14, 38}, {14, 54}, {14, 70}, {14, 86},
-    {15, -86}, {15, -70}, {15, -54}, {15, -38}, {15, -22}, {15, -6}, {15, 10}, {15, 26}, {15, 42}, {15, 58}, {15, 74}, {15, 90},
-    {16, -82}, {16, -66}, {16, -50}, {16, -34}, {16, -18}, {16, -2}, {16, 14}, {16, 30}, {16, 46}, {16, 62}, {16, 78},
-    {17, -78}, {17, -62}, {17, -46}, {17, -30}, {17, -14}, {17, 2}, {17, 18}, {17, 34}, {17, 50}, {17, 66}, {17, 82},
-    {18, -90}, {18, -74}, {18, -58}, {18, -42}, {18, -26}, {18, -10}, {18, 6}, {18, 22}, {18, 38}, {18, 54}, {18, 70}, {18, 86},
-    {19, -86}, {19, -70}, {19, -54}, {19, -38}, {19, -22}, {19, -6}, {19, 10}, {19, 26}, {19, 42}, {19, 58}, {19, 74}, {19, 90},
-    {20, -82}, {20, -66}, {20, -50}, {20, -34}, {20, -18}, {20, -2}, {20, 14}, {20, 30}, {20, 46}, {20, 62}, {20, 78},
-    {21, -78}, {21, -62}, {21, -46}, {21, -30}, {21, -14}, {21, 2}, {21, 18}, {21, 34}, {21, 50}, {21, 66}, {21, 82},
-    {22, -90}, {22, -74}, {22, -58}, {22, -42}, {22, -26}, {22, -10}, {22, 6}, {22, 22}, {22, 38}, {22, 54}, {22, 70}, {22, 86},
-    {23, -86}, {23, -70}, {23, -54}, {23, -38}, {23, -22}, {23, -6}, {23, 10}, {23, 26}, {23, 42}, {23, 58}, {23, 74}, {23, 90},
-    {24, -82}, {24, -66}, {24, -50}, {24, -34}, {24, -18}, {24, -2}, {24, 14}, {24, 30}, {24, 46}, {24, 62}, {24, 78},
-    {25, -78}, {25, -62}, {25, -46}, {25, -30}, {25, -14}, {25, 2}, {25, 18}, {25, 34}, {25, 50}, {25, 66}, {25, 82},
-    {26, -90}, {26, -74}, {26, -58}
-};
 
-/* Frequency References (pilots) ES 201 980 V4.1.1 Table 52 ***********************************************************/
-#define NUM_FREQ_PILOTS         3
+/* Frequency pilots ***********************************************************/
+#define NUM_FREQ_PILOTS			3
 const int iTableFreqPilRobModA[NUM_FREQ_PILOTS][2] = {
     {18, 205},
     {54, 836},
@@ -152,7 +123,7 @@ const int iTableFreqPilRobModC[NUM_FREQ_PILOTS][2] = {
 };
 
 const int iTableFreqPilRobModD[NUM_FREQ_PILOTS][2] = {
-    {7, 788},
+    {7,	788},
     {21, 1014},
     {28, 332}
 };
@@ -160,8 +131,7 @@ const int iTableFreqPilRobModD[NUM_FREQ_PILOTS][2] = {
 
 /* Time pilots ****************************************************************/
 /* The two numbers are: {carrier no, phase} (Phases are normalized to 1024) */
-
-// ES 201 980 V4.1.1 Table 53
+#define RMA_NUM_TIME_PIL	21
 const int iTableTimePilRobModA[RMA_NUM_TIME_PIL][2] = {
     {17, 973},
     {18, 205},
@@ -186,7 +156,7 @@ const int iTableTimePilRobModA[RMA_NUM_TIME_PIL][2] = {
     {73, 727}
 };
 
-// ES 201 980 V4.1.1 Table 54
+#define RMB_NUM_TIME_PIL	19
 const int iTableTimePilRobModB[RMB_NUM_TIME_PIL][2] = {
     {14, 304},
     {16, 331},
@@ -209,7 +179,7 @@ const int iTableTimePilRobModB[RMB_NUM_TIME_PIL][2] = {
     {68, 428}
 };
 
-// ES 201 980 V4.1.1 Table 55
+#define RMC_NUM_TIME_PIL	19
 const int iTableTimePilRobModC[RMC_NUM_TIME_PIL][2] = {
     {8, 722},
     {10, 466},
@@ -232,7 +202,7 @@ const int iTableTimePilRobModC[RMC_NUM_TIME_PIL][2] = {
     {46, 754}
 };
 
-// ES 201 980 V4.1.1 Table 56
+#define RMD_NUM_TIME_PIL	21
 const int iTableTimePilRobModD[RMD_NUM_TIME_PIL][2] = {
     {5, 636},
     {6, 124},
@@ -257,52 +227,22 @@ const int iTableTimePilRobModD[RMD_NUM_TIME_PIL][2] = {
     {32, 452}
 };
 
-// ES 201 980 V4.1.1 Table 57
-const int iTableTimePilRobModE[RME_NUM_TIME_PIL][2] = {
-    {-80, 219},
-    {-79, 475},
-    {-77, 987},
-    {-53, 652},
-    {-52, 652},
-    {-51, 140},
-    {-32, 819},
-    {-31, 819},
-    {12, 907},
-    {13, 907},
-    {14, 651},
-    {21, 903},
-    {22, 391},
-    {23, 903},
-    {40, 203},
-    {41, 203},
-    {42, 203},
-    {67, 797},
-    {68, 29},
-    {79, 508},
-    {80, 508}
-};
 
 /* Scattered pilots ***********************************************************/
 /* Definitions for the positions of scattered pilots */
-// ES 201 980 V4.1.1 TABLE 58
-#if 0
-const int iTableGainCellSubset[4][5] = {
-    { 2, 1, 1, 1,  2},
-    { 4, 2, 2, 1,  4},
-    { 5, 3, 2, 3,  4},
-    {20, 6, 4, 3, 16}
-};
-#else
-const GainCellSubset gainCellSubsets[5]= {
-    {2, 4, 5, 20},
-    {1, 2, 3,  6},
-    {1, 2, 2,  4},
-    {1, 1, 3,  3},
-    {2, 4, 4, 16}
-};
-#endif
+#define RMA_SCAT_PIL_FREQ_INT	4
+#define RMA_SCAT_PIL_TIME_INT	5
+
+#define RMB_SCAT_PIL_FREQ_INT	2
+#define RMB_SCAT_PIL_TIME_INT	3
+
+#define RMC_SCAT_PIL_FREQ_INT	2
+#define RMC_SCAT_PIL_TIME_INT	2
+
+#define RMD_SCAT_PIL_FREQ_INT	1
+#define RMD_SCAT_PIL_TIME_INT	3
+
 /* Phase definitions of scattered pilots ------------------------------------ */
-// ES 201 980 V4.1.1 TABLE 60
 const int iTableScatPilConstRobModA[3] = {4, 5, 2};
 
 const int iTableScatPilConstRobModB[3] = {2, 3, 1};
@@ -311,11 +251,8 @@ const int iTableScatPilConstRobModC[3] = {2, 2, 1};
 
 const int iTableScatPilConstRobModD[3] = {1, 3, 1};
 
-const int iTableScatPilConstRobModE[3] = {4, 4, 2};
-
-// ES 201 980 V4.1.1 8.4.4.3.2
-#define SIZE_ROW_WZ_ROB_MOD_A   5
-#define SIZE_COL_WZ_ROB_MOD_A   3
+#define SIZE_ROW_WZ_ROB_MOD_A	5
+#define SIZE_COL_WZ_ROB_MOD_A	3
 const int iScatPilWRobModA[SIZE_ROW_WZ_ROB_MOD_A][SIZE_COL_WZ_ROB_MOD_A] = {
     {228, 341, 455},
     {455, 569, 683},
@@ -330,15 +267,10 @@ const int iScatPilZRobModA[SIZE_ROW_WZ_ROB_MOD_A][SIZE_COL_WZ_ROB_MOD_A] = {
     {129, 129,  39},
     {33,   32, 111}
 };
-const int iScatPilQRobModA[SIZE_ROW_WZ_ROB_MOD_A][SIZE_COL_WZ_ROB_MOD_A] = {
-    {36, 36, 36},
-    {36, 36, 36},
-    {36, 36, 36},
-    {36, 36, 36},
-    {36, 36, 36}
-};
+const int iScatPilQRobModA = 36;
 
-// ES 201 980 V4.1.1 8.4.4.3.3
+#define SIZE_ROW_WZ_ROB_MOD_B	3
+#define SIZE_COL_WZ_ROB_MOD_B	5
 const int iScatPilWRobModB[SIZE_ROW_WZ_ROB_MOD_B][SIZE_COL_WZ_ROB_MOD_B] = {
     {512,   0, 512,   0, 512},
     {0,   512,   0, 512,   0},
@@ -349,13 +281,10 @@ const int iScatPilZRobModB[SIZE_ROW_WZ_ROB_MOD_B][SIZE_COL_WZ_ROB_MOD_B] = {
     {168, 255, 161, 106, 118},
     {25,  232, 132, 233,  38}
 };
-const int iScatPilQRobModB[SIZE_ROW_WZ_ROB_MOD_B][SIZE_COL_WZ_ROB_MOD_B] = {
-    {12, 12, 12, 12, 12},
-    {12, 12, 12, 12, 12},
-    {12, 12, 12, 12, 12}
-};
+const int iScatPilQRobModB = 12;
 
-// ES 201 980 V4.1.1 8.4.4.3.4
+#define SIZE_ROW_WZ_ROB_MOD_C	2
+#define SIZE_COL_WZ_ROB_MOD_C	10
 const int iScatPilWRobModC[SIZE_ROW_WZ_ROB_MOD_C][SIZE_COL_WZ_ROB_MOD_C] = {
     {465, 372, 279, 186,  93,   0, 931, 838, 745, 652},
     {931, 838, 745, 652, 559, 465, 372, 279, 186,  93}
@@ -364,54 +293,24 @@ const int iScatPilZRobModC[SIZE_ROW_WZ_ROB_MOD_C][SIZE_COL_WZ_ROB_MOD_C] = {
     {0,    76, 29,  76,   9, 190, 161, 248,  33, 108},
     {179, 178, 83, 253, 127, 105, 101, 198, 250, 145}
 };
-const int iScatPilQRobModC[SIZE_ROW_WZ_ROB_MOD_C][SIZE_COL_WZ_ROB_MOD_C] = {
-    {12, 12, 12, 12, 12, 12, 12, 12, 12, 12},
-    {12, 12, 12, 12, 12, 12, 12, 12, 12, 12}
-};
+const int iScatPilQRobModC = 12;
 
-// ES 201 980 V4.1.1 8.4.4.3.5
+#define SIZE_ROW_WZ_ROB_MOD_D	3
+#define SIZE_COL_WZ_ROB_MOD_D	8
 const int iScatPilWRobModD[SIZE_ROW_WZ_ROB_MOD_D][SIZE_COL_WZ_ROB_MOD_D] = {
     {366, 439, 512, 585, 658, 731, 805, 878},
     {731, 805, 878, 951,   0,  73, 146, 219},
     {73,  146, 219, 293, 366, 439, 512, 585}
 };
-
 const int iScatPilZRobModD[SIZE_ROW_WZ_ROB_MOD_D][SIZE_COL_WZ_ROB_MOD_D] = {
     {0,   240,  17,  60, 220,  38, 151, 101},
     {110,   7,  78,  82, 175, 150, 106,  25},
     {165,   7, 252, 124, 253, 177, 197, 142}
 };
-const int iScatPilQRobModD[SIZE_ROW_WZ_ROB_MOD_D][SIZE_COL_WZ_ROB_MOD_D] = {
-    {14, 14, 14, 14, 14, 14, 14, 14},
-    {14, 14, 14, 14, 14, 14, 14, 14},
-    {14, 14, 14, 14, 14, 14, 14, 14}
-};
-
-// ES 201 980 V4.1.1 8.4.4.3.6
-const int ModeEW1024[SIZE_ROW_WZQ_ROB_MOD_E][SIZE_COL_WZQ_ROB_MOD_E] = {
-    {39, 118, 197, 276, 354, 433, 39, 118, 197, 276},
-    {37, 183, 402, 37, 183, 402, 37, 183, 402, 37},
-    {110, 329, 475, 110, 329, 475, 110, 329, 475, 110},
-    {79, 158, 236, 315, 394, 473, 79, 158, 236, 315}
-};
-
-const int ModeEZ256[SIZE_ROW_WZQ_ROB_MOD_E][SIZE_COL_WZQ_ROB_MOD_E] = {
-    {473, 394, 315, 236, 158, 79, 0, 0, 0, 0},
-    {183, 914, 402, 37, 475, 841, 768, 768, 987, 183},
-    {549, 622, 475, 110, 37, 622, 256, 768, 329, 549},
-    {79, 158, 236, 315, 394, 473, 158, 315, 473, 630}
-};
-
-const int ModeEQ1024[SIZE_ROW_WZQ_ROB_MOD_E][SIZE_COL_WZQ_ROB_MOD_E] = {
-    {329, 489, 894, 419, 607, 519, 1020, 942, 817, 939},
-    {824, 1023, 74, 319, 225, 207, 348, 422, 395, 92},
-    {959, 379, 7, 738, 500, 920, 440, 727, 263, 733},
-    {907, 946, 924, 91, 189, 133, 910, 804, 1022, 433}
-};
+const int iScatPilQRobModD = 14;
 
 /* Gain definitions of scattered pilots ------------------------------------- */
-// ES 201 980 V4.1.1 Table 59
-
+#define NUM_BOOSTED_SCAT_PILOTS		4
 const int iScatPilGainRobModA[6][NUM_BOOSTED_SCAT_PILOTS] = {
     {2, 6, 98, 102},
     {2, 6, 110, 114},
@@ -448,14 +347,6 @@ const int iScatPilGainRobModD[6][NUM_BOOSTED_SCAT_PILOTS] = {
     {-43, -42, 134, 135}
 };
 
-const int iScatPilGainRobModE[6][NUM_BOOSTED_SCAT_PILOTS] = {
-    {-106, -102, 102, 106},
-    {0, 0, 0, 0},
-    {0, 0, 0, 0},
-    {0, 0, 0, 0},
-    {0, 0, 0, 0},
-    {0, 0, 0, 0}
-};
 
 /* Dummy cells for the MSC ****************************************************/
 /* Already normalized */
@@ -471,21 +362,20 @@ const _COMPLEX cDummyCells16QAM[2] = {
 
 
 /* Spectrum occupancy, carrier numbers for each mode **************************/
-// ES 201 980 V4.1.1 Table 49
-const int iTableCarrierKmin[6][5] = {
-    {   2,    1,   0,   0, -106},
-    {   2,    1,   0,   0,    0},
-    {-102,  -91,   0,   0,    0},
-    {-114, -103, -69, -44,    0},
-    { -98,  -87,   0,   0,    0},
-    {-110,  -99, -67, -43,    0}
+const int iTableCarrierKmin[6][4] = {
+    {2, 1, 0, 0},
+    {2, 1, 0, 0},
+    {-102, -91, 0, 0},
+    {-114, -103, -69, -44},
+    {-98, -87, 0, 0},
+    {-110, -99, -67, -43}
 };
 
-const int iTableCarrierKmax[6][5] = {
-    {102,  91,   0,   0, 106},
-    {114, 103,   0,   0,   0},
-    {102,  91,   0,   0,   0},
-    {114, 103,  69,  44,   0},
-    {314, 279,   0,   0,   0},
-    {350, 311, 213, 135,   0}
+const int iTableCarrierKmax[6][4] = {
+    {102, 91, 0, 0},
+    {114, 103, 0, 0},
+    {102, 91, 0, 0},
+    {114, 103, 69, 44},
+    {314, 279, 0, 0},
+    {350, 311, 213, 135}
 };

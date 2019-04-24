@@ -1,12 +1,12 @@
 /******************************************************************************\
  * Technische Universitaet Darmstadt, Institut fuer Nachrichtentechnik
- * Copyright (c) 2001-2014
+ * Copyright (c) 2001-2006
  *
  * Author(s):
- *  Andrea Russo, Julian Cable
+ *	Andrea Russo, Julian Cable
  *
  * Description:
- *  Dream program version number
+ *	Dream program version number
  *
  ******************************************************************************
  *

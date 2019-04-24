@@ -3,10 +3,10 @@
  * Copyright (c) 2005
  *
  * Author(s):
- *  Andrew Murphy
+ *	Andrew Murphy
  *
  * Description:
- *  Implementation of an AMSS demodulator
+ *	Implementation of an AMSS demodulator
  *
  *
  ******************************************************************************
@@ -284,8 +284,8 @@ void CAMSSExtractBits::InitInternal(CParameter& Parameters)
     RecursiveFilter.Init(iSymbolBlockSize/4);
 
     /* Init temporary vector for filter input and output */
-    rvecInpTmp.Init(iSymbolBlockSize/4);    // stores 12kHz samples (not 48)
-    rvecInpTmpAbs.Init(iSymbolBlockSize/4); // stores 12kHz samples (not 48)
+    rvecInpTmp.Init(iSymbolBlockSize/4);	// stores 12kHz samples (not 48)
+    rvecInpTmpAbs.Init(iSymbolBlockSize/4);	// stores 12kHz samples (not 48)
 
     rvecDiffStore.Init(AMSS_12kHz_SAMPLES_PER_BIT/2);
 
@@ -296,7 +296,7 @@ void CAMSSDecode::InitInternal(CParameter& Parameters)
 {
     iInputBlockSize = 2;
 
-    iMaxOutputBlockSize = AMSS_MAX_DATA_ENTITY_GROUP_LENGTH;        // max length of SDC carried as one data entity group
+    iMaxOutputBlockSize = AMSS_MAX_DATA_ENTITY_GROUP_LENGTH;		// max length of SDC carried as one data entity group
 
     bAMSSBits.Init(AMSS_BLOCK_SIZE_BITS);
     iIntakeBufferPos = 0;
@@ -401,12 +401,12 @@ void CAMSSDecode::ProcessDataInternal(CParameter& Parameters)
 
 void CAMSSDecode::DecodeBlock1(CVector<_BINARY>& bBits, CParameter& Parameters)
 {
-    bool    bLocalVersionFlag;
-    int         i;
+    bool	bLocalVersionFlag;
+    int			i;
 
-    uint32_t    iServiceID;
-    int         iAMSSCarrierMode;
-    int         iLanguage;
+    uint32_t	iServiceID;
+    int			iAMSSCarrierMode;
+    int			iLanguage;
 
     bBits.ResetBitAccess();
 
@@ -431,9 +431,9 @@ void CAMSSDecode::DecodeBlock1(CVector<_BINARY>& bBits, CParameter& Parameters)
     Parameters.Service[0].iLanguage = iLanguage;
     Parameters.Service[0].iServiceID = iServiceID;
 
-    if ( (bVersionFlag != bLocalVersionFlag) || blFirstEverBlock1)  // discard entire current data entity group
+    if ( (bVersionFlag != bLocalVersionFlag) || blFirstEverBlock1)	// discard entire current data entity group
     {
-        if (!blFirstEverBlock1)     // give benefit of doubt to any block 2 already received unless outside the total num we expect
+        if (!blFirstEverBlock1)		// give benefit of doubt to any block 2 already received unless outside the total num we expect
             blDataEntityGroupSegmentsReceived.Reset(0);
         else
         {
@@ -589,14 +589,14 @@ int CAMSSDecode::DecodeBlock(CVector<_BINARY>& bBits, CParameter& Parameters)
         }
         if (bBlock2Test)
         {
-            if (iBitsSinceLastBlock2Pass >= (AMSS_BLOCK_SIZE_BITS*2))   // probably a block 2
+            if (iBitsSinceLastBlock2Pass >= (AMSS_BLOCK_SIZE_BITS*2))	// probably a block 2
             {
                 DecodeBlock2(bBits);
                 eAMSSBlockLockStatus = RE_SYNC;
                 iBlock2FailCount = 0;
             }
             else
-                eAMSSBlockLockStatus = RE_SYNC;     // stay put in this state
+                eAMSSBlockLockStatus = RE_SYNC;		// stay put in this state
 
             iBitsSinceLastBlock2Pass = 0;
         }
@@ -615,7 +615,7 @@ int CAMSSDecode::DecodeBlock(CVector<_BINARY>& bBits, CParameter& Parameters)
 
         if (bBlock1Test)
         {
-            if (iBitsSinceLastBlock1Pass >= (AMSS_BLOCK_SIZE_BITS*2))   // definitely a block 1
+            if (iBitsSinceLastBlock1Pass >= (AMSS_BLOCK_SIZE_BITS*2))	// definitely a block 1
             {
                 if (bBlock1Store == bBits)
                 {
@@ -637,7 +637,7 @@ int CAMSSDecode::DecodeBlock(CVector<_BINARY>& bBits, CParameter& Parameters)
         }
         if (bBlock2Test)
         {
-            if (iBitsSinceLastBlock2Pass >= (AMSS_BLOCK_SIZE_BITS*2))   // probably a block 2
+            if (iBitsSinceLastBlock2Pass >= (AMSS_BLOCK_SIZE_BITS*2))	// probably a block 2
             {
                 DecodeBlock2(bBits);
 
@@ -664,9 +664,9 @@ int CAMSSDecode::DecodeBlock(CVector<_BINARY>& bBits, CParameter& Parameters)
 
         if (bBlock1Test)
         {
-            if (iBitsSinceLastBlock1Pass >= (AMSS_BLOCK_SIZE_BITS*2))   // definitely a block 1
+            if (iBitsSinceLastBlock1Pass >= (AMSS_BLOCK_SIZE_BITS*2))	// definitely a block 1
             {
-                if (bBlock1Store == bBits)      // data has definitely changed - go to def sync
+                if (bBlock1Store == bBits)		// data has definitely changed - go to def sync
                 {
                     eAMSSBlockLockStatus = DEF_SYNC;
                     DecodeBlock1(bBits, Parameters);
@@ -693,7 +693,7 @@ int CAMSSDecode::DecodeBlock(CVector<_BINARY>& bBits, CParameter& Parameters)
         }
         if (bBlock2Test)
         {
-            if (iBitsSinceLastBlock2Pass >= (AMSS_BLOCK_SIZE_BITS*2))   // probably a block 2
+            if (iBitsSinceLastBlock2Pass >= (AMSS_BLOCK_SIZE_BITS*2))	// probably a block 2
             {
                 DecodeBlock2(bBits);
 
@@ -727,7 +727,7 @@ int CAMSSDecode::DecodeBlock(CVector<_BINARY>& bBits, CParameter& Parameters)
             // definitely a block 1
             if (iBitsSinceLastBlock1Pass >= (AMSS_BLOCK_SIZE_BITS*2))
             {
-                if (bBlock1Store == bBits)      // data has definitely changed - go to def sync
+                if (bBlock1Store == bBits)		// data has definitely changed - go to def sync
                 {
                     eAMSSBlockLockStatus = DEF_SYNC;
                 }
@@ -753,7 +753,7 @@ int CAMSSDecode::DecodeBlock(CVector<_BINARY>& bBits, CParameter& Parameters)
 
         if (bBlock2Test)
         {
-            if (iBitsSinceLastBlock2Pass >= (AMSS_BLOCK_SIZE_BITS*2))   // probably a block 2
+            if (iBitsSinceLastBlock2Pass >= (AMSS_BLOCK_SIZE_BITS*2))	// probably a block 2
             {
                 DecodeBlock2(bBits);
 
@@ -830,7 +830,7 @@ bool CAMSSDecode::CheckCRC(CVector<_BINARY>& bBits)
 void CAMSSDecode::ApplyOffsetWord(CVector<_BINARY>& bBlockBits, CVector<_BINARY>& bOffset)
 {
     for (unsigned short i=0; i < bOffset.Size(); i++)
-        bBlockBits[(AMSS_BLOCK_SIZE_BITS-bOffset.Size())+i] ^= bOffset[i];      // XOR with offset work
+        bBlockBits[(AMSS_BLOCK_SIZE_BITS-bOffset.Size())+i] ^= bOffset[i];		// XOR with offset work
 }
 
 void CRecursiveFilter::Process(CRealVector& vecrIn)

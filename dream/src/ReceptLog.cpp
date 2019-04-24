@@ -1,12 +1,12 @@
 /******************************************************************************\
  * Technische Universitaet Darmstadt, Institut fuer Nachrichtentechnik
- * Copyright (c) 2001-2014
+ * Copyright (c) 2007
  *
  * Author(s):
- *  Volker Fischer, Andrew Murphy, Julian Cable
+ *	Volker Fischer, Andrew Murphy, Julian Cable
  *
  * Description:
- *  see ReceptLog.h
+ *	see ReceptLog.h
  *
  ******************************************************************************
  *
@@ -30,6 +30,7 @@
 #include "ReceptLog.h"
 #include <iomanip>
 #include <iostream>
+#include "matlib/MatlibStdToolbox.h"
 
 /* implementation --------------------------------------------- */
 
@@ -111,10 +112,6 @@ CReceptLog::GetRobModeStr()
 
     case RM_ROBUSTNESS_MODE_D:
         chRobMode = 'D';
-        break;
-
-    case RM_ROBUSTNESS_MODE_E:
-        chRobMode = 'E';
         break;
 
     case RM_NO_MODE_DETECTED:
@@ -397,7 +394,7 @@ CLongLog::writeParameters()
             iCurMSCSc = 3;
             break;
 
-        case CS_1_SM:           /* TODO */
+        case CS_1_SM:			/* TODO */
             break;
         }
     }
@@ -480,7 +477,7 @@ string CReceptLog::strdate(time_t t)
     struct tm * today;
     stringstream s;
 
-    today = gmtime(&t);     /* Always UTC */
+    today = gmtime(&t);		/* Always UTC */
 
     s << setfill('0')
       << setw(4) << today->tm_year + 1900 << "-"
@@ -493,7 +490,7 @@ string CReceptLog::strtime(time_t t)
     struct tm * today;
     stringstream s;
 
-    today = gmtime(&t);     /* Always UTC */
+    today = gmtime(&t);		/* Always UTC */
 
     s << setfill('0')
       << setw(2) << today->tm_hour << ":" << setw(2) << today-> tm_min << ":" << setw(2) << today->tm_sec;

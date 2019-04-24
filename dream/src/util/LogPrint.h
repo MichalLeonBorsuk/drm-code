@@ -1,9 +1,9 @@
 /******************************************************************************\
  *
- * Copyright (c) 2001-2014
+ * Copyright (c) 2006
  *
  * Author(s):
- *  Oliver Haffenden
+ *	Oliver Haffenden
  *
  * Description:
 //This is a temporary implementation of the new log-printing
@@ -42,59 +42,59 @@ class CChainingLogPrinter;
 class CLogPrinter
 {
 public:
-    CLogPrinter() {}
-    virtual ~CLogPrinter() {}
+	CLogPrinter() {}
+	virtual ~CLogPrinter() {}
 
-    virtual void LogStatus(char *s) = 0;
-    virtual void LogWarning(char *s) = 0;
-    virtual void LogError(char *s) = 0;
+	virtual void LogStatus(char *s) = 0;
+	virtual void LogWarning(char *s) = 0;
+	virtual void LogError(char *s) = 0;
 
 
-    static CLogPrinter *GetInstance(void);
+	static CLogPrinter *GetInstance(void);
 
 protected:
-    static void AddInstance(CChainingLogPrinter *pInstance);
-    static CLogPrinter * GetNullInstance(void);
+	static void AddInstance(CChainingLogPrinter *pInstance);
+	static CLogPrinter * GetNullInstance(void);
 
 private:
-    static CLogPrinter *mpFirstInstance;
-    static CLogPrinter *mpNullPrinter;
+	static CLogPrinter *mpFirstInstance;
+	static CLogPrinter *mpNullPrinter;
 };
 
 
 class CChainingLogPrinter : public CLogPrinter
 {
-    friend class CLogPrinter;
+	friend class CLogPrinter;
 public:
-    virtual void LogStatus(char *s);
-    virtual void LogWarning(char *s);
-    virtual void LogError(char *s);
+	virtual void LogStatus(char *s);
+	virtual void LogWarning(char *s);
+	virtual void LogError(char *s);
 
-    virtual void LogStatusSpecific(char *s) = 0;
-    virtual void LogWarningSpecific(char *s) = 0;
-    virtual void LogErrorSpecific(char *s) = 0;
+	virtual void LogStatusSpecific(char *s) = 0;
+	virtual void LogWarningSpecific(char *s) = 0;
+	virtual void LogErrorSpecific(char *s) = 0;
 
 protected:
-    void SetNextInstance(CLogPrinter *pInstance);
-    CChainingLogPrinter();
+	void SetNextInstance(CLogPrinter *pInstance);
+	CChainingLogPrinter();
 
 private:
-    CLogPrinter *mpNextInstance;
+	CLogPrinter *mpNextInstance;
 };
 
 class CFileLogPrinter : public CChainingLogPrinter
 {
 public:
-    virtual void LogStatusSpecific(char *s);
-    virtual void LogWarningSpecific(char *s);
-    virtual void LogErrorSpecific(char *s);
+	virtual void LogStatusSpecific(char *s);
+	virtual void LogWarningSpecific(char *s);
+	virtual void LogErrorSpecific(char *s);
 
-    static void Instantiate();
+	static void Instantiate();
 protected:
-    CFileLogPrinter();
+	CFileLogPrinter();
 private:
-    FILE *mpLogFile;
-    static CFileLogPrinter *mpInstance;
+	FILE *mpLogFile;
+	static CFileLogPrinter *mpInstance;
 };
 
 class CPrintfLogPrinter : public CChainingLogPrinter
@@ -104,12 +104,12 @@ public:
     virtual void LogWarningSpecific(char *string);
     virtual void LogErrorSpecific(char *string);
 
-    static void Instantiate();
+	static void Instantiate();
 protected:
-    CPrintfLogPrinter();
+	CPrintfLogPrinter();
 
 private:
-    static CPrintfLogPrinter *mpInstance;
+	static CPrintfLogPrinter *mpInstance;
 };
 
 class CNullLogPrinter : public CLogPrinter

@@ -1,12 +1,12 @@
 /******************************************************************************\
  * Technische Universitaet Darmstadt, Institut fuer Nachrichtentechnik
- * Copyright (c) 2001-2014
+ * Copyright (c) 2001-2005
  *
  * Author(s):
- *  Volker Fischer
+ *	Volker Fischer
  *
  * Description:
- *  Implementation of an analog AM demodulation
+ *	Implementation of an analog AM demodulation
  *
  *
  ******************************************************************************
@@ -158,7 +158,7 @@ void CAMDemodulation::ProcessDataInternal(CParameter& Parameters)
     /* Write mono signal in both channels (left and right) */
     for (i = 0; i < iResOutBlockSize; i++)
         (*pvecOutputData)[2 * i] = (*pvecOutputData)[2 * i + 1] =
-                                       Real2Sample(vecTempResBufOut[i]);
+            Real2Sample(vecTempResBufOut[i]);
 }
 
 void CAMDemodulation::InitInternal(CParameter& Parameters)
@@ -262,7 +262,7 @@ void CAMDemodulation::InitInternal(CParameter& Parameters)
 
     /* Init audio resampler */
     ResampleObj.Init(iSymbolBlockSize,
-                     (_REAL) iAudSampleRate / iSigSampleRate);
+        (_REAL) iAudSampleRate / iSigSampleRate);
     vecTempResBufIn.Init(iSymbolBlockSize, (_REAL) 0.0);
     vecTempResBufOut.Init(iResOutBlockSize, (_REAL) 0.0);
 
@@ -413,7 +413,7 @@ void CAMDemodulation::SetFilterBW(const int iNewBW)
     Unlock();
 }
 
-void CAMDemodulation::SetAGCType(const CAGC::EType eNewType)
+void CAMDemodulation::SetAGCType(const EAmAgcType eNewType)
 {
     /* Lock resources */
     Lock();
@@ -620,7 +620,7 @@ void CAGC::Init(int iNewSampleRate, int iNewBlockSize)
     rAvAmplEst = DES_AV_AMPL_AM_SIGNAL / AM_AMPL_CORR_FACTOR;
 }
 
-void CAGC::SetType(const EType eNewType)
+void CAGC::SetType(const EAmAgcType eNewType)
 {
     /* Set internal parameter */
     eType = eNewType;
@@ -756,16 +756,16 @@ void CFreqOffsAcq::Start(const CReal rNewNormCenter)
 * Noise reduction                                                              *
 \******************************************************************************/
 /*
-    The original Dream noise reduction algorithm is based on optimal filters, whereas the
-    PDS of the noise is estimated with a minimum statistic.
-    We use an overlap and add method to avoid clicks caused by fast changing
-    optimal filters between successive blocks.
+	The original Dream noise reduction algorithm is based on optimal filters, whereas the
+	PDS of the noise is estimated with a minimum statistic.
+	We use an overlap and add method to avoid clicks caused by fast changing
+	optimal filters between successive blocks.
 
-    [Ref] A. Engel: "Transformationsbasierte Systeme zur einkanaligen
-        Stoerunterdrueckung bei Sprachsignalen", PhD Thesis, Christian-
-        Albrechts-Universitaet zu Kiel, 1998
+	[Ref] A. Engel: "Transformationsbasierte Systeme zur einkanaligen
+		Stoerunterdrueckung bei Sprachsignalen", PhD Thesis, Christian-
+		Albrechts-Universitaet zu Kiel, 1998
 
-    Robert Turnbull added the capability to use the one from the SPEEX codec
+	Robert Turnbull added the capability to use the one from the SPEEX codec
 */
 
 CNoiseReduction::~CNoiseReduction()
@@ -813,7 +813,7 @@ void CNoiseReduction::Process(CRealVector& vecrIn)
         {
             speex_data[i] = (spx_int16_t)vectorData[i];
         }
-        speex_preprocess(preprocess_state, speex_data, NULL);
+        speex_preprocess(preprocess_state, speex_data, nullptr);
         for (i=0; i<vectorSz; i++)
         {
             vectorData[i] = (CReal)speex_data[i];
@@ -903,7 +903,7 @@ void CNoiseReduction::UpdateNoiseEst(CRealVector& vecrNoisePSD,
                                      const ENoiRedDegree eNoiRedDegree)
 {
     /*
-        Implements a mimium statistic proposed by R. Martin
+    	Implements a mimium statistic proposed by R. Martin
     */
     /* Set weighting factor for minimum statistic */
     CReal rWeiFact = MIN_STAT_WEIGHT_FACTOR_MED;

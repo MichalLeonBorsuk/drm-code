@@ -1,9 +1,9 @@
 /******************************************************************************\
  * British Broadcasting Corporation
- * Copyright (c) 2001-2014, 2001-2014, 2001-2014
+ * Copyright (c) 2007, 2012, 2013
  *
  * Author(s):
- *  Julian Cable, David Flamand
+ *	Julian Cable, David Flamand
  *
  * Decription:
  *  Read a file at the correct rate
@@ -31,7 +31,7 @@
 
 #include "soundinterface.h"
 #include "../util/Pacer.h"
-#include "../resample/Resample.h"
+#include "../resample/caudioresample.h"
 
 /* Classes ********************************************************************/
 class CAudioFileIn : public CSoundInInterface
@@ -40,39 +40,34 @@ public:
     CAudioFileIn();
     virtual ~CAudioFileIn();
 
-    virtual void        Enumerate(vector<string>&, vector<string>&) {}
-    virtual void        SetDev(string sNewDevice) {
-        sCurrentDevice = sNewDevice;
-    }
-    virtual string      GetDev() {
-        return sCurrentDevice;
-    }
-    virtual void        SetFileName(const string& strFileName);
-    virtual int         GetSampleRate() {
-        return iRequestedSampleRate;
-    };
+    virtual void		Enumerate(std::vector<std::string>&, std::vector<std::string>&) {}
+    virtual void		SetDev(std::string sNewDevice) {sCurrentDevice = sNewDevice;}
+    virtual std::string		GetDev() {return sCurrentDevice;}
+    virtual void		SetFileName(const std::string& strFileName);
+    virtual int			GetSampleRate() {return iRequestedSampleRate;}
 
-    virtual bool    Init(int iNewSampleRate, int iNewBufferSize, bool bNewBlocking);
-    virtual bool    Read(CVector<short>& psData);
-    virtual void        Close();
+    virtual bool	Init(int iNewSampleRate, int iNewBufferSize, bool bNewBlocking);
+    virtual bool 	Read(CVector<short>& psData);
+    virtual void 		Close();
+	virtual std::string GetVersion() { return "Dream Audio File Reader"; }
 
 protected:
-    string              strInFileName;
-    CVector<_REAL>      vecTempResBufIn;
-    CVector<_REAL>      vecTempResBufOut;
+    std::string				strInFileName;
+    CVector<_REAL>		vecTempResBufIn;
+    CVector<_REAL>		vecTempResBufOut;
     enum { fmt_txt, fmt_raw_mono, fmt_raw_stereo, fmt_other } eFmt;
-    FILE*               pFileReceiver;
-    int                 iSampleRate;
-    int                 iRequestedSampleRate;
-    int                 iBufferSize;
-    int                 iFileSampleRate;
-    int                 iFileChannels;
-    CPacer*             pacer;
-    CAudioResample*     ResampleObjL;
-    CAudioResample*     ResampleObjR;
-    short*              buffer;
-    int                 iOutBlockSize;
-    string              sCurrentDevice;
+    FILE*				pFileReceiver;
+    int					iSampleRate;
+    int					iRequestedSampleRate;
+    int					iBufferSize;
+    int					iFileSampleRate;
+    int					iFileChannels;
+    CPacer*				pacer;
+    CAudioResample*		ResampleObjL;
+    CAudioResample*		ResampleObjR;
+    short*				buffer;
+    int					iOutBlockSize;
+    std::string				sCurrentDevice;
 };
 
 #endif

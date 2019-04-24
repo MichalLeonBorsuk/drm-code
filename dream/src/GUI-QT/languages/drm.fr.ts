@@ -333,8 +333,8 @@ Julian Cable, Andrew Murphy, Oliver Haffenden</source>
 Julian Cable, Andrew Murphy, Oliver Haffenden</translation>
     </message>
     <message>
-        <source>Copyright (C) 2001 - 2001-2014</source>
-        <translation>Copyright (C) 2001 - 2001-2014</translation>
+        <source>Copyright (C) 2001 - 2007</source>
+        <translation>Copyright (C) 2001 - 2007</translation>
     </message>
     <message>
         <source>TextViewCredits</source>
@@ -2376,8 +2376,8 @@ Institute for Communication Technology</translation>
         <translation>Lat: 53.123°   Long: 00.456°</translation>
     </message>
     <message>
-        <source>24/01/2001-2014 15:14.33 UTC</source>
-        <translation>24/01/2001-2014 15:14.33 UTC</translation>
+        <source>24/01/2007 15:14.33 UTC</source>
+        <translation>24/01/2007 15:14.33 UTC</translation>
     </message>
     <message encoding="UTF-8">
         <source>10.0 m/s  151°</source>

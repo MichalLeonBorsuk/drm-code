@@ -1,12 +1,12 @@
 /******************************************************************************\
  * Technische Universitaet Darmstadt, Institut fuer Nachrichtentechnik
- * Copyright (c) 2001-2014
+ * Copyright (c) 2004
  *
  * Author(s):
- *  Volker Fischer, Oliver Haffenden
+ *	Volker Fischer, Oliver Haffenden
  *
  * Description:
- *  This defines some pure abstract base classes. A CPacketSink is anything that can receive a
+ *	This defines some pure abstract base classes. A CPacketSink is anything that can receive a
  *  packet, while a CPacketSource is anything that can produce packets.
  *  It's intended to be used for DCP packets although it could be used for IPIO as well.
  *
@@ -46,10 +46,10 @@
 class CPacketSink
 {
 public:
-    virtual ~CPacketSink() {}
-    virtual void SendPacket(const vector<_BYTE>& vecbydata, uint32_t addr=0, uint16_t port=0) = 0;
-    virtual bool SetDestination(const string& str) = 0;
-    virtual bool GetDestination(string& str) = 0;
+	virtual ~CPacketSink() {}
+	virtual void SendPacket(const std::vector<_BYTE>& vecbydata, uint32_t addr=0, uint16_t port=0) = 0;
+	virtual bool SetDestination(const std::string& str) = 0;
+	virtual bool GetDestination(std::string& str) = 0;
 };
 
 
@@ -58,14 +58,14 @@ public:
 class CPacketSource
 {
 public:
-    virtual ~CPacketSource() {}
-    // Set the sink which will receive the packets
-    virtual void SetPacketSink(CPacketSink *pSink) = 0;
-    // Stop sending packets to the sink
-    virtual void ResetPacketSink() = 0;
-    virtual bool SetOrigin(const string& str) = 0;
-    virtual bool GetOrigin(string& str) = 0;
-    virtual void poll() = 0;
+	virtual ~CPacketSource() {}
+	// Set the sink which will receive the packets
+	virtual void SetPacketSink(CPacketSink *pSink) = 0;
+	// Stop sending packets to the sink
+	virtual void ResetPacketSink() = 0;
+	virtual bool SetOrigin(const std::string& str) = 0;
+	virtual bool GetOrigin(std::string& str) = 0;
+	virtual void poll() = 0;
 };
 
 

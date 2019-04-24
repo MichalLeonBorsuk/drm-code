@@ -1,12 +1,12 @@
 /******************************************************************************\
  * Technische Universitaet Darmstadt, Institut fuer Nachrichtentechnik
- * Copyright (c) 2001-2014
+ * Copyright (c) 2001
  *
  * Author(s):
- *  Volker Fischer
+ *	Volker Fischer
  *
  * Description:
- *  See ChannelEstimation.cpp
+ *	See ChannelEstimation.cpp
  *
  ******************************************************************************
  *
@@ -41,40 +41,39 @@
 
 
 /* Definitions ****************************************************************/
-#define LEN_WIENER_FILT_FREQ_RMA        6
-#define LEN_WIENER_FILT_FREQ_RMB        11
-#define LEN_WIENER_FILT_FREQ_RMC        11
-#define LEN_WIENER_FILT_FREQ_RMD        13
-#define LEN_WIENER_FILT_FREQ_RME        0 // TODO MODE E
+#define LEN_WIENER_FILT_FREQ_RMA		6
+#define LEN_WIENER_FILT_FREQ_RMB		11
+#define LEN_WIENER_FILT_FREQ_RMC		11
+#define LEN_WIENER_FILT_FREQ_RMD		13
 
 /* Time constant for IIR averaging of fast signal power estimation */
-#define TICONST_SNREST_FAST             ((CReal) 30.0) /* sec */
+#define TICONST_SNREST_FAST				((CReal) 30.0) /* sec */
 
 /* Time constant for IIR averaging of slow signal power estimation */
-#define TICONST_SNREST_SLOW             ((CReal) 100.0) /* sec */
+#define TICONST_SNREST_SLOW				((CReal) 100.0) /* sec */
 
 /* Time constant for IIR averaging of MSC signal / noise power estimation */
-#define TICONST_SNREST_MSC              ((CReal) 1.0) /* sec */
+#define TICONST_SNREST_MSC				((CReal) 1.0) /* sec */
 
 /* Initial value for SNR */
-#define INIT_VALUE_SNR_WIEN_FREQ_DB     ((_REAL) 30.0) /* dB */
+#define INIT_VALUE_SNR_WIEN_FREQ_DB		((_REAL) 30.0) /* dB */
 
 /* SNR estimation initial SNR value */
-#define INIT_VALUE_SNR_ESTIM_DB         ((_REAL) 20.0) /* dB */
+#define INIT_VALUE_SNR_ESTIM_DB			((_REAL) 20.0) /* dB */
 
 /* Wrap around bound for calculation of group delay. It is wraped by the 2 pi
    periodicity of the angle() function */
-#define WRAP_AROUND_BOUND_GRP_DLY       ((_REAL) 4.0)
+#define WRAP_AROUND_BOUND_GRP_DLY		((_REAL) 4.0)
 
 /* Set length of history for delay values for minimum search. Since the
    delay estimation is optimized for channel estimation performance and
    therefore the delay is usually estimated as too long, it is better for the
    log file to use the minimum value in a certain time period for a good
    estimate of the true delay */
-#define LEN_HIST_DELAY_LOG_FILE_S       ((CReal) 1.0) /* sec */
+#define LEN_HIST_DELAY_LOG_FILE_S		((CReal) 1.0) /* sec */
 
 /* max frame len for FAC SNR estimates for each symbol of frame */
-#define MAX_NUM_SYM_PER_FRAME           RMD_NUM_SYM_PER_FRAME
+#define MAX_NUM_SYM_PER_FRAME			RMD_NUM_SYM_PER_FRAME
 
 /* Classes ********************************************************************/
 class CChannelEstimation : public CReceiverModul<_COMPLEX, CEquSig>
@@ -90,12 +89,8 @@ public:
 
     virtual ~CChannelEstimation() {}
 
-    enum ETypeIntFreq {FLINEAR, FDFTFILTER, FWIENER};
-    enum ETypeIntTime {TLINEAR, TWIENER};
-    enum ETypeSNREst {SNR_FAC, SNR_PIL};
-
     void GetTransferFunction(CVector<_REAL>& vecrData,
-                             CVector<_REAL>& vecrGrpDly,    CVector<_REAL>& vecrScale);
+                             CVector<_REAL>& vecrGrpDly,	CVector<_REAL>& vecrScale);
     void GetAvPoDeSp(CVector<_REAL>& vecrData, CVector<_REAL>& vecrScale,
                      _REAL& rLowerBound, _REAL& rHigherBound,
                      _REAL& rStartGuard, _REAL& rEndGuard, _REAL& rPDSBegin,
@@ -116,14 +111,14 @@ public:
     void SetFreqInt(ETypeIntFreq eNewTy) {
         TypeIntFreq = eNewTy;
     }
-    ETypeIntFreq GetFreqInt() {
+    ETypeIntFreq GetFrequencyInterpolationAlgorithm() {
         return TypeIntFreq;
     }
     void SetTimeInt(ETypeIntTime eNewTy) {
         TypeIntTime = eNewTy;
         SetInitFlag();
     }
-    ETypeIntTime GetTimeInt() const {
+    ETypeIntTime GetTimeInterpolationAlgorithm() const {
         return TypeIntTime;
     }
 
@@ -151,97 +146,98 @@ public:
 
 protected:
     enum EDFTWinType {DFT_WIN_RECT, DFT_WIN_HAMM, DFT_WIN_HANN};
-    EDFTWinType             eDFTWindowingMethod;
+    EDFTWinType				eDFTWindowingMethod;
 
-    int                 iSampleRate;
-    int                 iNumSymPerFrame;
+    int					iSampleRate;
+    int					iNumSymPerFrame;
 
-    CChanEstTime*           pTimeInt;
+    CChanEstTime*			pTimeInt;
 
-    CTimeLinear             TimeLinear;
-    CTimeWiener             TimeWiener;
+    CTimeLinear				TimeLinear;
+    CTimeWiener				TimeWiener;
 
-    CTimeSyncTrack          TimeSyncTrack;
+    CTimeSyncTrack			TimeSyncTrack;
 
-    ETypeIntFreq            TypeIntFreq;
-    ETypeIntTime            TypeIntTime;
-    ETypeSNREst             TypeSNREst;
+    ETypeIntFreq			TypeIntFreq;
+    ETypeIntTime			TypeIntTime;
+    ETypeSNREst				TypeSNREst;
 
-    int                     iNumCarrier;
+    int						iNumCarrier;
 
-    CMatrix<_COMPLEX>       matcHistory;
+    CMatrix<_COMPLEX>		matcHistory;
 
-    int                     iLenHistBuff;
+    int						iLenHistBuff;
 
-    GainCellSubset          gcs;
+    int						iScatPilFreqInt; /* Frequency interpolation */
+    int						iScatPilTimeInt; /* Time interpolation */
 
-    CComplexVector          veccChanEst;
-    CRealVector             vecrSqMagChanEst;
+    CComplexVector			veccChanEst;
+    CRealVector				vecrSqMagChanEst;
 
-    int                     iFFTSizeN;
+    int						iFFTSizeN;
 
-    CReal                   rGuardSizeFFT;
+    CReal					rGuardSizeFFT;
 
-    CRealVector             vecrDFTWindow;
-    CRealVector             vecrDFTwindowInv;
+    CRealVector				vecrDFTWindow;
+    CRealVector				vecrDFTwindowInv;
 
-    int                     iLongLenFreq;
-    CComplexVector          veccPilots;
-    CComplexVector          veccIntPil;
-    CFftPlans               FftPlanShort;
-    CFftPlans               FftPlanLong;
+    int						iLongLenFreq;
+    CComplexVector			veccPilots;
+    CComplexVector			veccIntPil;
+    CFftPlans				FftPlanShort;
+    CFftPlans				FftPlanLong;
 
-    int                     iNumIntpFreqPil;
+    int						iNumIntpFreqPil;
 
-    CReal                   rLamSNREstFast;
-    CReal                   rLamSNREstSlow;
-    CReal                   rLamMSCSNREst;
+    CReal					rLamSNREstFast;
+    CReal					rLamSNREstSlow;
+    CReal					rLamMSCSNREst;
 
-    _REAL                   rNoiseEst;
-    _REAL                   rNoiseEstMSCMER;
-    _REAL                   rSignalEst;
-    CVector<_REAL>          vecrNoiseEstMSC;
-    CVector<_REAL>          vecrSigEstMSC;
-    _REAL                   rSNREstimate;
-    _REAL                   rNoiseEstSum;
-    _REAL                   rSignalEstSum;
-    CRealVector             vecrNoiseEstFACSym;
-    CRealVector             vecrSignalEstFACSym;
-    _REAL                   rSNRChanEstCorrFact;
-    _REAL                   rSNRFACSigCorrFact;
-    _REAL                   rSNRTotToPilCorrFact;
-    _REAL                   rSNRSysToNomBWCorrFact;
+    _REAL					rNoiseEst;
+    _REAL					rNoiseEstMSCMER;
+    _REAL					rSignalEst;
+    CVector<_REAL>			vecrNoiseEstMSC;
+    CVector<_REAL>			vecrSigEstMSC;
+    _REAL					rSNREstimate;
+    _REAL					rNoiseEstSum;
+    _REAL					rSignalEstSum;
+    CRealVector				vecrNoiseEstFACSym;
+    CRealVector				vecrSignalEstFACSym;
+    _REAL					rSNRChanEstCorrFact;
+    _REAL					rSNRFACSigCorrFact;
+    _REAL					rSNRTotToPilCorrFact;
+    _REAL					rSNRSysToNomBWCorrFact;
 
     /* OPH: Accumulators for calculating the RSCI MER, WMF, and WMM (these are averages, not filtered values) */
-    _REAL                   rNoiseEstWMMAcc;
-    _REAL                   rSignalEstWMMAcc;
-    _REAL                   rNoiseEstWMFAcc;
-    _REAL                   rSignalEstWMFAcc;
-    _REAL                   rNoiseEstMERAcc;
-    int                     iCountMERAcc;
+    _REAL					rNoiseEstWMMAcc;
+    _REAL					rSignalEstWMMAcc;
+    _REAL					rNoiseEstWMFAcc;
+    _REAL					rSignalEstWMFAcc;
+    _REAL					rNoiseEstMERAcc;
+    int						iCountMERAcc;
 
-    bool                bInterfConsid;
+    bool				bInterfConsid;
 
     /* Needed for GetDelay() */
-    _REAL                   rLenPDSEst;
-    CShiftRegister<CReal>   vecrDelayHist;
-    int                     iLenDelayHist;
+    _REAL					rLenPDSEst;
+    CShiftRegister<CReal>	vecrDelayHist;
+    int						iLenDelayHist;
 
-    int                     iStartZeroPadding;
+    int						iStartZeroPadding;
 
-    int                     iInitCnt;
-    int                     iSNREstIniSigAvCnt;
-    int                     iSNREstIniNoiseAvCnt;
-    int                     iSNREstInitCnt;
-    bool                bSNRInitPhase;
+    int						iInitCnt;
+    int						iSNREstIniSigAvCnt;
+    int						iSNREstIniNoiseAvCnt;
+    int						iSNREstInitCnt;
+    bool				bSNRInitPhase;
     _REAL CalAndBoundSNR(const _REAL rSignalEst, const _REAL rNoiseEst);
 
     /* OPH: RSCI interference tag calculation */
     void CalculateRint(CParameter& Parameters);
     void UpdateRSIPilotStore(CParameter& Parameters, CVectorEx<_COMPLEX>* pvecInputData,
-                             CVector<int>& veciMapTab, CVector<_COMPLEX>& veccPilotCells, const unsigned int iSymbolCounter);
+                             CVector<int>& veciMapTab, CVector<_COMPLEX>& veccPilotCells, const int iSymbolCounter);
 
-    CMatrix<_COMPLEX>   matcRSIPilotStore;
+    CMatrix<_COMPLEX>	matcRSIPilotStore;
     int iTimeDiffAccuRSI; /* Accumulator for time differences for RSI pilot output */
 
     /* Wiener interpolation in frequency direction */
@@ -251,17 +247,17 @@ protected:
     CComplexVector FreqOptimalFilter(int iFreqInt, int iDiff, CReal rSNR,
                                      CReal rRatPDSLen, CReal rRatPDSOffs,
                                      int iLength);
-    CMatrix<_COMPLEX>       matcFiltFreq;
-    int                     iLengthWiener;
-    CVector<int>            veciPilOffTab;
+    CMatrix<_COMPLEX>		matcFiltFreq;
+    int						iLengthWiener;
+    CVector<int>			veciPilOffTab;
 
-    int                     iDCPos;
-    int                     iPilOffset;
-    int                     iNumWienerFilt;
-    CComplexMatrix          matcWienerFilter;
+    int						iDCPos;
+    int						iPilOffset;
+    int						iNumWienerFilt;
+    CComplexMatrix			matcWienerFilter;
 
 #ifdef USE_DD_WIENER_FILT_TIME
-    int                     iCurrentFrameID;
+    int						iCurrentFrameID;
 #endif
 
     virtual void InitInternal(CParameter& Parameters);

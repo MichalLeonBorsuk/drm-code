@@ -1,12 +1,12 @@
 /******************************************************************************\
  * Technische Universitaet Darmstadt, Institut fuer Nachrichtentechnik
- * Copyright (c) 2001-2014
+ * Copyright (c) 2007
  *
  * Author(s):
- *  Volker Fischer, Oliver Haffenden, Andrew Murphy
+ *	Volker Fischer, Oliver Haffenden, Andrew Murphy
  *
  * Description:
- *  see MDITagItems.cpp
+ *	see MDITagItems.cpp
  *
  ******************************************************************************
  *
@@ -38,335 +38,328 @@
 class CTagItemGenerator
 {
 public:
-    void PutTagItemData(CVector<_BINARY> &vecbiDestination); // Call this to write the binary data (header + payload) to the vector
-    int GetTotalLength() {
-        return vecbiTagData.Size();
-    }; // returns the length in bits
-    void Reset(); // Resets bit vector to zero length (i.e. no header)
-    void GenEmptyTag(); // Generates valid tag item with zero payload length
-    virtual ~CTagItemGenerator() {}
-    virtual bool IsInProfile(char cProfile);
+	void PutTagItemData(CVector<_BINARY> &vecbiDestination); // Call this to write the binary data (header + payload) to the std::vector
+    int GetTotalLength() { return vecbiTagData.Size();} // returns the length in bits
+	void Reset(); // Resets bit std::vector to zero length (i.e. no header)
+	void GenEmptyTag(); // Generates valid tag item with zero payload length
+	virtual ~CTagItemGenerator() {}
+	virtual bool IsInProfile(char cProfile);
 
 protected:
-    virtual string GetTagName() = 0; // Return the tag name
-    virtual string GetProfiles() = 0;
+	virtual std::string GetTagName() = 0; // Return the tag name
+	virtual std::string GetProfiles() = 0;
 
-    // Prepare vector and make the header
-    void PrepareTag(int iLenDataBits);
+	// Prepare std::vector and make the header
+	void PrepareTag(int iLenDataBits);
 
-    void Enqueue(uint32_t iInformation, int iNumOfBits);
-    void Enqueue(const string &s);
+	void Enqueue(uint32_t iInformation, int iNumOfBits);
 
 private:
-    CVector<_BINARY> vecbiTagData; // Stores the generated data
+	CVector<_BINARY> vecbiTagData; // Stores the generated data
 };
 
 /* Base class for tag items for applications with different profiles */
 class CTagItemGeneratorWithProfiles : public CTagItemGenerator
 {
 public:
-    CTagItemGeneratorWithProfiles();
-    virtual bool IsInProfile(char cProfile);
+	CTagItemGeneratorWithProfiles();
+	virtual bool IsInProfile(char cProfile);
 protected:
-    virtual string GetTagName() =0;
+	virtual std::string GetTagName() =0;
 //private:
-    virtual string GetProfiles()=0; // Return a string containing the set of profiles for this tag
+	virtual std::string GetProfiles()=0; // Return a std::string containing the set of profiles for this tag
 };
 
 class CTagItemGeneratorProTyMDI : public CTagItemGeneratorWithProfiles /* *ptr tag for MDI */
 {
 public:
-    void GenTag();
+	void GenTag();
 protected:
-    virtual string GetTagName();
-    virtual string GetProfiles(); // Return a string containing the set of profiles for this tag
+	virtual std::string GetTagName();
+	virtual std::string GetProfiles(); // Return a std::string containing the set of profiles for this tag
 };
 
 class CTagItemGeneratorProTyRSCI : public CTagItemGeneratorWithProfiles /* *ptr tag for RSCI */
 {
 public:
-    void GenTag();
+	void GenTag();
 protected:
-    virtual string GetTagName();
-    virtual string GetProfiles(); // Return a string containing the set of profiles for this tag
+	virtual std::string GetTagName();
+	virtual std::string GetProfiles(); // Return a std::string containing the set of profiles for this tag
 };
 
 class CTagItemGeneratorLoFrCnt : public CTagItemGeneratorWithProfiles /* dlfc tag */
 {
 public:
-    CTagItemGeneratorLoFrCnt();
-    void GenTag();
+	CTagItemGeneratorLoFrCnt();
+	void GenTag();
 protected:
-    virtual string GetTagName();
-    virtual string GetProfiles(); // Return a string containing the set of profiles for this tag
-    int iLogFraCnt;
+	virtual std::string GetTagName();
+	virtual std::string GetProfiles(); // Return a std::string containing the set of profiles for this tag
+	int iLogFraCnt;
 };
 
 class CTagItemGeneratorFAC : public CTagItemGeneratorWithProfiles /* fac_ tag */
 {
 public:
-    void GenTag(CParameter& Parameter, CSingleBuffer<_BINARY>& FACData);
+	void GenTag(CParameter& Parameter, CSingleBuffer<_BINARY>& FACData);
 protected:
-    virtual string GetTagName();
-    virtual string GetProfiles(); // Return a string containing the set of profiles for this tag
+	virtual std::string GetTagName();
+	virtual std::string GetProfiles(); // Return a std::string containing the set of profiles for this tag
 };
 
 class CTagItemGeneratorSDC : public CTagItemGeneratorWithProfiles /* sdc_ tag */
 {
 public:
-    void GenTag(CParameter& Parameter, CSingleBuffer<_BINARY>& FACData);
+	void GenTag(CParameter& Parameter, CSingleBuffer<_BINARY>& FACData);
 protected:
-    virtual string GetTagName();
-    virtual string GetProfiles(); // Return a string containing the set of profiles for this tag
+	virtual std::string GetTagName();
+	virtual std::string GetProfiles(); // Return a std::string containing the set of profiles for this tag
 };
 
 class CTagItemGeneratorSDCChanInf : public CTagItemGeneratorWithProfiles /* sdci tag */
 {
 public:
-    void GenTag(CParameter& Parameter);
+	void GenTag(CParameter& Parameter);
 protected:
-    virtual string GetTagName();
-    virtual string GetProfiles(); // Return a string containing the set of profiles for this tag
+	virtual std::string GetTagName();
+	virtual std::string GetProfiles(); // Return a std::string containing the set of profiles for this tag
 };
 
 class CTagItemGeneratorRobMod : public CTagItemGeneratorWithProfiles /* robm tag */
 {
 public:
-    void GenTag(ERobMode eCurRobMode);
+	void GenTag(ERobMode eCurRobMode);
 protected:
-    virtual string GetTagName();
-    virtual string GetProfiles(); // Return a string containing the set of profiles for this tag
+	virtual std::string GetTagName();
+	virtual std::string GetProfiles(); // Return a std::string containing the set of profiles for this tag
 };
 
 class CTagItemGeneratorRINF : public CTagItemGeneratorWithProfiles /* info tag */
 {
 public:
-    void GenTag(string strUTF8Text);
+	void GenTag(std::string strUTF8Text);
 protected:
-    virtual string GetTagName();
-    virtual string GetProfiles(); // Return a string containing the set of profiles for this tag
+	virtual std::string GetTagName();
+	virtual std::string GetProfiles(); // Return a std::string containing the set of profiles for this tag
 };
 
 class CTagItemGeneratorStr : public CTagItemGeneratorWithProfiles /* strx tag */
 {
 public:
-    CTagItemGeneratorStr();
-    void SetStreamNumber(int iStrNum);
-    void GenTag(CParameter& Parameter, CSingleBuffer<_BINARY>& FACData);
+	CTagItemGeneratorStr();
+	void SetStreamNumber(int iStrNum);
+	void GenTag(CParameter& Parameter, CSingleBuffer<_BINARY>& FACData);
 protected:
-    virtual string GetTagName();
-    virtual string GetProfiles(); // Return a string containing the set of profiles for this tag
-    int iStreamNumber;
+	virtual std::string GetTagName();
+	virtual std::string GetProfiles(); // Return a std::string containing the set of profiles for this tag
+	int iStreamNumber;
 };
 
 /* all MER tags have the same format, only the name is different */
 class CTagItemGeneratorMERFormat : public CTagItemGeneratorWithProfiles
 {
 public:
-    void GenTag(bool bIsValid, _REAL rMER);
+	void GenTag(bool bIsValid, _REAL rMER);
 protected:
-    virtual string GetTagName() {
-        return "";
-    }
-    virtual string GetProfiles() {
-        return "";   // Return a string containing the set of profiles for this tag
-    }
+	virtual std::string GetTagName() {return "";}
+	virtual std::string GetProfiles() {return "";} // Return a std::string containing the set of profiles for this tag
 };
 
 class CTagItemGeneratorRWMF : public CTagItemGeneratorMERFormat /* RWMF tag */
 {
 protected:
-    virtual string GetTagName();
-    virtual string GetProfiles(); // Return a string containing the set of profiles for this tag
+	virtual std::string GetTagName();
+	virtual std::string GetProfiles(); // Return a std::string containing the set of profiles for this tag
 };
 
 class CTagItemGeneratorRWMM : public CTagItemGeneratorMERFormat /* RWMM tag */
 {
 protected:
-    virtual string GetTagName();
-    virtual string GetProfiles(); // Return a string containing the set of profiles for this tag
+	virtual std::string GetTagName();
+	virtual std::string GetProfiles(); // Return a std::string containing the set of profiles for this tag
 };
 
 class CTagItemGeneratorRMER : public CTagItemGeneratorMERFormat /* RMER tag */
 {
 protected:
-    virtual string GetTagName();
-    virtual string GetProfiles(); // Return a string containing the set of profiles for this tag
+	virtual std::string GetTagName();
+	virtual std::string GetProfiles(); // Return a std::string containing the set of profiles for this tag
 };
 
 class CTagItemGeneratorRDOP : public CTagItemGeneratorMERFormat /* RDOP tag */
 {
 protected:
-    virtual string GetTagName();
-    virtual string GetProfiles(); // Return a string containing the set of profiles for this tag
+	virtual std::string GetTagName();
+	virtual std::string GetProfiles(); // Return a std::string containing the set of profiles for this tag
 };
 
 class CTagItemGeneratorRDEL : public CTagItemGeneratorWithProfiles /* RDEL tag */
 {
 public:
-    void GenTag(bool bIsValid, const CRealVector &vecrThresholds, const CRealVector &vecrIntervals);
+	void GenTag(bool bIsValid, const CRealVector &vecrThresholds, const CRealVector &vecrIntervals);
 protected:
-    virtual string GetTagName();
-    virtual string GetProfiles(); // Return a string containing the set of profiles for this tag
+	virtual std::string GetTagName();
+	virtual std::string GetProfiles(); // Return a std::string containing the set of profiles for this tag
 };
 
 class CTagItemGeneratorRAFS : public CTagItemGeneratorWithProfiles /* RAFS tag */
 {
 public:
-    void GenTag(CParameter& Parameter);
+	void GenTag(CParameter& Parameter);
 protected:
-    virtual string GetTagName();
-    virtual string GetProfiles(); // Return a string containing the set of profiles for this tag
+	virtual std::string GetTagName();
+	virtual std::string GetProfiles(); // Return a std::string containing the set of profiles for this tag
 };
 
 class CTagItemGeneratorRINT : public CTagItemGeneratorWithProfiles /* rnic tag */
 {
 public:
-    void GenTag(bool bIsValid, CReal rIntFreq, CReal rINR, CReal rICR);
+	void GenTag(bool bIsValid, CReal rIntFreq, CReal rINR, CReal rICR);
 protected:
-    virtual string GetTagName();
-    virtual string GetProfiles(); // Return a string containing the set of profiles for this tag
+	virtual std::string GetTagName();
+	virtual std::string GetProfiles(); // Return a std::string containing the set of profiles for this tag
 };
 
 class CTagItemGeneratorRNIP : public CTagItemGeneratorWithProfiles /* rnic tag */
 {
 public:
-    void GenTag(bool bIsValid, CReal rIntFreq, CReal rISR);
+	void GenTag(bool bIsValid, CReal rIntFreq, CReal rISR);
 protected:
-    virtual string GetTagName();
-    virtual string GetProfiles(); // Return a string containing the set of profiles for this tag
+	virtual std::string GetTagName();
+	virtual std::string GetProfiles(); // Return a std::string containing the set of profiles for this tag
 };
 
 class CTagItemGeneratorSignalStrength : public CTagItemGeneratorWithProfiles /* rdbv tag */
 {
 public:
-    void GenTag(bool bIsValid, _REAL rSigStrength);
+	void GenTag(bool bIsValid, _REAL rSigStrength);
 protected:
-    virtual string GetTagName();
-    virtual string GetProfiles(); // Return a string containing the set of profiles for this tag
+	virtual std::string GetTagName();
+	virtual std::string GetProfiles(); // Return a std::string containing the set of profiles for this tag
 };
 
 class CTagItemGeneratorReceiverStatus : public CTagItemGeneratorWithProfiles /* rsta tag */
 {
 public:
-    void GenTag(CParameter& Parameter);
+	void GenTag(CParameter& Parameter);
 protected:
-    virtual string GetTagName();
-    virtual string GetProfiles(); // Return a string containing the set of profiles for this tag
+	virtual std::string GetTagName();
+	virtual std::string GetProfiles(); // Return a std::string containing the set of profiles for this tag
 };
 
 class CTagItemGeneratorProfile : public CTagItemGeneratorWithProfiles /* rpro */
 {
 public:
-    void GenTag(char cProfile);
+	void GenTag(char cProfile);
 protected:
-    virtual string GetTagName();
-    virtual string GetProfiles(); // Return a string containing the set of profiles for this tag
+	virtual std::string GetTagName();
+	virtual std::string GetProfiles(); // Return a std::string containing the set of profiles for this tag
 };
 
 class CTagItemGeneratorRxDemodMode : public CTagItemGeneratorWithProfiles /* rdmo */
 {
 public:
-    void GenTag(ERecMode eMode, ERobMode eRM); /* ERecMode defined in DRMReceiver.h but can't include it! */
+	void GenTag(ERecMode eMode); /* ERecMode defined in DRMReceiver.h but can't include it! */
 protected:
-    virtual string GetTagName();
-    virtual string GetProfiles(); // Return a string containing the set of profiles for this tag
+	virtual std::string GetTagName();
+	virtual std::string GetProfiles(); // Return a std::string containing the set of profiles for this tag
 };
 
 class CTagItemGeneratorRxFrequency : public CTagItemGeneratorWithProfiles /* rfre */
 {
 public:
-    void GenTag(bool bIsValid, int iFrequency);
+	void GenTag(bool bIsValid, int iFrequency);
 protected:
-    virtual string GetTagName();
-    virtual string GetProfiles(); // Return a string containing the set of profiles for this tag
+	virtual std::string GetTagName();
+	virtual std::string GetProfiles(); // Return a std::string containing the set of profiles for this tag
 };
 
 class CTagItemGeneratorRxActivated : public CTagItemGeneratorWithProfiles /* ract */
 {
 public:
-    void GenTag(bool bActivated);
+	void GenTag(bool bActivated);
 protected:
-    virtual string GetTagName();
-    virtual string GetProfiles(); // Return a string containing the set of profiles for this tag
+	virtual std::string GetTagName();
+	virtual std::string GetProfiles(); // Return a std::string containing the set of profiles for this tag
 };
 
 class CTagItemGeneratorRxBandwidth : public CTagItemGeneratorWithProfiles /* rbw_ */
 {
 public:
-    void GenTag(bool bIsValid, _REAL rBandwidth);
+	void GenTag(bool bIsValid, _REAL rBandwidth);
 protected:
-    virtual string GetTagName();
-    virtual string GetProfiles(); // Return a string containing the set of profiles for this tag
+	virtual std::string GetTagName();
+	virtual std::string GetProfiles(); // Return a std::string containing the set of profiles for this tag
 };
 
 class CTagItemGeneratorRxService : public CTagItemGeneratorWithProfiles /* rser */
 {
 public:
-    void GenTag(bool bIsValid, int iService);
+	void GenTag(bool bIsValid, int iService);
 protected:
-    virtual string GetTagName();
-    virtual string GetProfiles(); // Return a string containing the set of profiles for this tag
+	virtual std::string GetTagName();
+	virtual std::string GetProfiles(); // Return a std::string containing the set of profiles for this tag
 };
 
 class CTagItemGeneratorRBP : public CTagItemGeneratorWithProfiles /*rbp0 etc  */
 {
 public:
-    CTagItemGeneratorRBP();
-    void SetStreamNumber(int iStrNum);
-    void GenTag(); // Not yet implemented
+	CTagItemGeneratorRBP();
+	void SetStreamNumber(int iStrNum);
+	void GenTag(); // Not yet implemented
 protected:
-    virtual string GetTagName();
-    virtual string GetProfiles(); // Return a string containing the set of profiles for this tag
-    int iStreamNumber;
+	virtual std::string GetTagName();
+	virtual std::string GetProfiles(); // Return a std::string containing the set of profiles for this tag
+	int iStreamNumber;
 };
 
-//andrewm - 7/11/2001-2014
+//andrewm - 7/11/2006
 class CTagItemGeneratorGPS : public CTagItemGeneratorWithProfiles /* rgps */
 {
 public:
-    void GenTag(bool bIsValid, gps_data_t& GPSData);
+	void GenTag(bool bIsValid, gps_data_t& GPSData);
 protected:
-    virtual string GetTagName();
-    virtual string GetProfiles(); // Return a string containing the set of profiles for this tag
+	virtual std::string GetTagName();
+	virtual std::string GetProfiles(); // Return a std::string containing the set of profiles for this tag
 };
 
-// oliver 17/1/2001-2014
+// oliver 17/1/2007
 class CTagItemGeneratorPowerSpectralDensity : public CTagItemGeneratorWithProfiles /* rpsd */
 {
 public:
-    void GenTag(CParameter& Parameter);
+	void GenTag(CParameter& Parameter);
 protected:
-    virtual string GetTagName();
-    virtual string GetProfiles(); // Return a string containing the set of profiles for this tag
+	virtual std::string GetTagName();
+	virtual std::string GetProfiles(); // Return a std::string containing the set of profiles for this tag
 };
 
 class CTagItemGeneratorPowerImpulseResponse : public CTagItemGeneratorWithProfiles /* rpir */
 {
 public:
-    void GenTag(CParameter& Parameter);
+	void GenTag(CParameter& Parameter);
 protected:
-    virtual string GetTagName();
-    virtual string GetProfiles(); // Return a string containing the set of profiles for this tag
+	virtual std::string GetTagName();
+	virtual std::string GetProfiles(); // Return a std::string containing the set of profiles for this tag
 };
 
 class CTagItemGeneratorPilots : public CTagItemGeneratorWithProfiles /* rpil */
 {
 public:
-    void GenTag(CParameter& Parameter);
+	void GenTag(CParameter& Parameter);
 protected:
-    virtual string GetTagName();
-    virtual string GetProfiles(); // Return a string containing the set of profiles for this tag
+	virtual std::string GetTagName();
+	virtual std::string GetProfiles(); // Return a std::string containing the set of profiles for this tag
 };
 
 class CTagItemGeneratorAMAudio : public CTagItemGeneratorWithProfiles /* rama */
 {
 public:
-    void GenTag(CParameter& Parameter, CSingleBuffer<_BINARY>& AudioData
-               );
+		void GenTag(CParameter& Parameter, CSingleBuffer<_BINARY>& AudioData
+);
 protected:
-    virtual string GetTagName(void);
-    virtual string GetProfiles(void); // Return a string containing the set of profiles for this tag
+		virtual std::string GetTagName(void);
+		virtual std::string GetProfiles(void); // Return a std::string containing the set of profiles for this tag
 };
 
 #endif

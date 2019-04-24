@@ -14,15 +14,15 @@
 class CPacer
 {
 public:
-    CPacer(uint64_t ns);
-    ~CPacer();
-    uint64_t nstogo();
-    void wait();
+	CPacer(uint64_t ns);
+	~CPacer();
+	uint64_t nstogo();
+	void wait();
 protected:
-    uint64_t timekeeper;
-    uint64_t interval;
+	uint64_t timekeeper;
+	uint64_t interval;
 #ifdef _WIN32
-    HANDLE hTimer;
+	HANDLE hTimer;
 #endif
 };
 #endif

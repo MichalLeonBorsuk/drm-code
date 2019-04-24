@@ -1,12 +1,12 @@
 /******************************************************************************\
  * Technische Universitaet Darmstadt, Institut fuer Nachrichtentechnik
- * Copyright (c) 2001-2014
+ * Copyright (c) 2004
  *
  * Author(s):
- *  Volker Fischer, Oliver Haffenden
+ *	Volker Fischer, Oliver Haffenden
  *
  * Description:
- *  see RSCITagItemDecoders.cpp
+ *	see RSCITagItemDecoders.cpp
  *
  ******************************************************************************
  *
@@ -37,71 +37,71 @@ class CRSISubscriber;
 class CTagItemDecoderRdbv : public CTagItemDecoderRSI
 {
 public:
-    CTagItemDecoderRdbv(CParameter* pP) : CTagItemDecoderRSI(pP, "rdbv") {}
-    virtual void DecodeTag(CVector<_BINARY>& vecbiTag, const int iLenDataBits);
+	CTagItemDecoderRdbv(CParameter* pP) : CTagItemDecoderRSI(pP, "rdbv") {}
+	virtual void DecodeTag(CVector<_BINARY>& vecbiTag, const int iLenDataBits);
 };
 
 class CTagItemDecoderRsta : public CTagItemDecoderRSI
 {
 public:
-    CTagItemDecoderRsta(CParameter* pP) : CTagItemDecoderRSI(pP, "rsta") {}
-    virtual void DecodeTag(CVector<_BINARY>& vecbiTag, const int iLenDataBits);
+	CTagItemDecoderRsta(CParameter* pP) : CTagItemDecoderRSI(pP, "rsta") {}
+	virtual void DecodeTag(CVector<_BINARY>& vecbiTag, const int iLenDataBits);
 };
 
 class CTagItemDecoderRwmf : public CTagItemDecoderRSI
 {
 public:
-    CTagItemDecoderRwmf(CParameter* pP) : CTagItemDecoderRSI(pP, "rwmf") {}
-    virtual void DecodeTag(CVector<_BINARY>& vecbiTag, const int iLenDataBits);
+	CTagItemDecoderRwmf(CParameter* pP) : CTagItemDecoderRSI(pP, "rwmf") {}
+	virtual void DecodeTag(CVector<_BINARY>& vecbiTag, const int iLenDataBits);
 };
 
 class CTagItemDecoderRwmm : public CTagItemDecoderRSI
 {
 public:
-    CTagItemDecoderRwmm(CParameter* pP) : CTagItemDecoderRSI(pP, "rwmm") {}
-    virtual void DecodeTag(CVector<_BINARY>& vecbiTag, const int iLenDataBits);
+	CTagItemDecoderRwmm(CParameter* pP) : CTagItemDecoderRSI(pP, "rwmm") {}
+	virtual void DecodeTag(CVector<_BINARY>& vecbiTag, const int iLenDataBits);
 };
 
 class CTagItemDecoderRmer : public CTagItemDecoderRSI
 {
 public:
-    CTagItemDecoderRmer(CParameter* pP) : CTagItemDecoderRSI(pP, "rmer") {}
-    virtual void DecodeTag(CVector<_BINARY>& vecbiTag, const int iLenDataBits);
+	CTagItemDecoderRmer(CParameter* pP) : CTagItemDecoderRSI(pP, "rmer") {}
+	virtual void DecodeTag(CVector<_BINARY>& vecbiTag, const int iLenDataBits);
 };
 
 class CTagItemDecoderRdel : public CTagItemDecoderRSI
 {
 public:
-    CTagItemDecoderRdel(CParameter* pP) : CTagItemDecoderRSI(pP, "rdel") {}
-    virtual void DecodeTag(CVector<_BINARY>& vecbiTag, const int iLenDataBits);
+	CTagItemDecoderRdel(CParameter* pP) : CTagItemDecoderRSI(pP, "rdel") {}
+	virtual void DecodeTag(CVector<_BINARY>& vecbiTag, const int iLenDataBits);
 };
 
 class CTagItemDecoderRdop : public CTagItemDecoderRSI
 {
 public:
-    CTagItemDecoderRdop(CParameter* pP) : CTagItemDecoderRSI(pP, "rdop") {}
-    virtual void DecodeTag(CVector<_BINARY>& vecbiTag, const int iLenDataBits);
+	CTagItemDecoderRdop(CParameter* pP) : CTagItemDecoderRSI(pP, "rdop") {}
+	virtual void DecodeTag(CVector<_BINARY>& vecbiTag, const int iLenDataBits);
 };
 
 class CTagItemDecoderRpsd : public CTagItemDecoderRSI
 {
 public:
-    CTagItemDecoderRpsd(CParameter* pP) : CTagItemDecoderRSI(pP, "rpsd") {}
-    virtual void DecodeTag(CVector<_BINARY>& vecbiTag, const int iLenDataBits);
+	CTagItemDecoderRpsd(CParameter* pP) : CTagItemDecoderRSI(pP, "rpsd") {}
+	virtual void DecodeTag(CVector<_BINARY>& vecbiTag, const int iLenDataBits);
 };
 
 class CTagItemDecoderRpir : public CTagItemDecoderRSI
 {
 public:
-    CTagItemDecoderRpir(CParameter* pP) : CTagItemDecoderRSI(pP, "rpir") {}
-    virtual void DecodeTag(CVector<_BINARY>& vecbiTag, const int iLenDataBits);
+	CTagItemDecoderRpir(CParameter* pP) : CTagItemDecoderRSI(pP, "rpir") {}
+	virtual void DecodeTag(CVector<_BINARY>& vecbiTag, const int iLenDataBits);
 };
 
 class CTagItemDecoderRgps : public CTagItemDecoderRSI
 {
 public:
-    CTagItemDecoderRgps(CParameter* pP) : CTagItemDecoderRSI(pP, "rgps") {}
-    virtual void DecodeTag(CVector<_BINARY>& vecbiTag, const int iLenDataBits);
+	CTagItemDecoderRgps(CParameter* pP) : CTagItemDecoderRSI(pP, "rgps") {}
+	virtual void DecodeTag(CVector<_BINARY>& vecbiTag, const int iLenDataBits);
 };
 
 // RSCI control
@@ -109,56 +109,50 @@ public:
 class CTagItemDecoderRCI : public CTagItemDecoder
 {
 public:
-    CTagItemDecoderRCI(const string& s) : pDRMReceiver(NULL),tag(s) {}
-    void SetReceiver(CDRMReceiver *pReceiver) {
-        pDRMReceiver = pReceiver;
-    }
-    virtual string GetTagName() {
-        return tag;
-    }
+	CTagItemDecoderRCI(const std::string& s) : pDRMReceiver(nullptr),tag(s) {}
+	void SetReceiver(CDRMReceiver *pReceiver) {pDRMReceiver = pReceiver;}
+	virtual std::string GetTagName() { return tag; }
 protected:
-    CDRMReceiver *pDRMReceiver;
-    string tag;
+	CDRMReceiver *pDRMReceiver;
+	std::string tag;
 };
 
 class CTagItemDecoderCact : public CTagItemDecoderRCI
 {
 public:
-    CTagItemDecoderCact() : CTagItemDecoderRCI("cact") {}
-    virtual void DecodeTag(CVector<_BINARY>& vecbiTag, const int iLenDataBits);
+	CTagItemDecoderCact() : CTagItemDecoderRCI("cact") {}
+	virtual void DecodeTag(CVector<_BINARY>& vecbiTag, const int iLenDataBits);
 };
 
 class CTagItemDecoderCfre : public CTagItemDecoderRCI
 {
 public:
-    CTagItemDecoderCfre() : CTagItemDecoderRCI("cfre") {}
-    virtual void DecodeTag(CVector<_BINARY>& vecbiTag, const int iLenDataBits);
+	CTagItemDecoderCfre() : CTagItemDecoderRCI("cfre") {}
+	virtual void DecodeTag(CVector<_BINARY>& vecbiTag, const int iLenDataBits);
 };
 
 class CTagItemDecoderCdmo : public CTagItemDecoderRCI
 {
 public:
-    CTagItemDecoderCdmo() : CTagItemDecoderRCI("cdmo") {}
-    virtual void DecodeTag(CVector<_BINARY>& vecbiTag, const int iLenDataBits);
+	CTagItemDecoderCdmo() : CTagItemDecoderRCI("cdmo") {}
+	virtual void DecodeTag(CVector<_BINARY>& vecbiTag, const int iLenDataBits);
 };
 
 class CTagItemDecoderCrec : public CTagItemDecoderRCI
 {
 public:
-    CTagItemDecoderCrec() : CTagItemDecoderRCI("crec") {}
-    virtual void DecodeTag(CVector<_BINARY>& vecbiTag, const int iLenDataBits);
+	CTagItemDecoderCrec() : CTagItemDecoderRCI("crec") {}
+	virtual void DecodeTag(CVector<_BINARY>& vecbiTag, const int iLenDataBits);
 };
 
 class CTagItemDecoderCpro : public CTagItemDecoderRCI
 {
 public:
-    CTagItemDecoderCpro() : CTagItemDecoderRCI("crec"), pRSISubscriber(NULL) {}
-    virtual void DecodeTag(CVector<_BINARY>& vecbiTag, const int iLenDataBits);
-    void SetSubscriber(CRSISubscriber *pSubscriber) {
-        pRSISubscriber = pSubscriber;
-    }
+	CTagItemDecoderCpro() : CTagItemDecoderRCI("crec"), pRSISubscriber(nullptr) {}
+	virtual void DecodeTag(CVector<_BINARY>& vecbiTag, const int iLenDataBits);
+	void SetSubscriber(CRSISubscriber *pSubscriber) {pRSISubscriber = pSubscriber;}
 private:
-    CRSISubscriber* pRSISubscriber;
+	CRSISubscriber* pRSISubscriber;
 };
 
 #endif

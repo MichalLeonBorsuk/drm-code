@@ -1,9 +1,9 @@
 /******************************************************************************\
  * British Broadcasting Corporation
- * Copyright (c) 2001-2014
+ * Copyright (c) 2009
  *
  * Author(s):
- *   Julian Cable, David Flamand
+ *	 Julian Cable, David Flamand
  *
  * Description: SlideShow Viewer
  *
@@ -31,19 +31,19 @@
 #include "../datadecoding/DABMOT.h"
 #include "../datadecoding/DataDecoder.h"
 #include <QFileDialog>
-#include "ThemeCustomizer.h"
 
-SlideShowViewer::SlideShowViewer(CSettings& Settings, QWidget* parent):
+SlideShowViewer::SlideShowViewer(CRx& nrx, CSettings& Settings, QWidget* parent):
     CWindow(parent, Settings, "SlideShow"),
-    vecImages(), vecImageNames(), iCurImagePos(-1),
-    bClearMOTCache(false),decoder(NULL)
+    rx(nrx), vecImages(), vecImageNames(), iCurImagePos(-1),
+    bClearMOTCache(false), iLastServiceID(0), bLastServiceValid(false)
 {
     setupUi(this);
 
-    string p = Settings.Get(
-                   "Receiver", "datafilesdirectory", string(DEFAULT_DATA_FILES_DIRECTORY));
-
-    strCurrentSavePath = QString::fromUtf8((p+PATH_SEPARATOR+"MOT").c_str());
+    /* Get MOT save path */
+    CParameter& Parameters = *rx.GetParameters();
+    Parameters.Lock();
+    strCurrentSavePath = QString::fromUtf8(Parameters.GetDataDirectory("MOT").c_str());
+    Parameters.Unlock();
 
     /* Update time for color LED */
     LEDStatus->SetUpdateTime(1000);
@@ -61,8 +61,6 @@ SlideShowViewer::SlideShowViewer(CSettings& Settings, QWidget* parent):
     connect(&Timer, SIGNAL(timeout()), this, SLOT(OnTimer()));
 
     OnClearAll();
-
-    APPLY_CUSTOM_THEME();
 }
 
 SlideShowViewer::~SlideShowViewer()
@@ -71,30 +69,67 @@ SlideShowViewer::~SlideShowViewer()
 
 void SlideShowViewer::OnTimer()
 {
-    if(decoder==NULL)
+    /* Get current service parameters */
+    uint32_t iServiceID; bool bServiceValid; QString strLabel; ETypeRxStatus eStatus;
+    int shortID; int iPacketID;
+    GetServiceParams(&iServiceID, &bServiceValid, &strLabel, &eStatus, &shortID, &iPacketID);
+
+    /* Update the window title if something have changed */
+    if (iLastServiceID != iServiceID || bLastServiceValid != bServiceValid || strLastLabel != strLabel)
+        UpdateWindowTitle(iServiceID, bServiceValid, strLabel);
+
+    switch(eStatus)
+    {
+    case NOT_PRESENT:
+        LEDStatus->Reset(); /* GREY */
+        break;
+
+    case CRC_ERROR:
+        LEDStatus->SetLight(CMultColorLED::RL_RED);
+        break;
+
+    case DATA_ERROR:
+        LEDStatus->SetLight(CMultColorLED::RL_YELLOW);
+        break;
+
+    case RX_OK:
+        LEDStatus->SetLight(CMultColorLED::RL_GREEN);
+        break;
+    }
+
+    CDataDecoder* DataDecoder = rx.GetDataDecoder();
+    if (DataDecoder == nullptr)
+    {
+        qDebug("can't get data decoder from rx");
         return;
+    }
+
+    CMOTDABDec* motdec = DataDecoder->getApplication(iPacketID);
+    if (motdec == nullptr)
+    {
+        qDebug("can't get MOT decoder for short id %d, packetId %d", shortID, iPacketID);
+        return;
+    }
 
     if (bClearMOTCache)
     {
         bClearMOTCache = false;
-        CMOTObject  NewObj;
-        while (decoder->GetMOTObject(NewObj, CDataDecoder::AT_MOTSLIDESHOW))
-        {
-        }
+        ClearMOTCache(motdec);
     }
 
-    CMOTObject NewObj;
-
-    /* Poll the data decoder module for new object */
-    if (decoder->GetMOTObject(NewObj, CDataDecoder::AT_MOTSLIDESHOW))
+    /* Poll the data decoder module for new picture */
+    if(motdec->NewObjectAvailable())
     {
+        CMOTObject	NewObj;
+        motdec->GetNextObject(NewObj);
+
         /* Store received picture */
         int iCurNumPict = vecImageNames.size();
         CVector<_BYTE>& imagedata = NewObj.Body.vecData;
 
         /* Load picture in QT format */
         QPixmap pic;
-        if (pic.loadFromData(&imagedata[0], unsigned(imagedata.Size())))
+        if (pic.loadFromData(&imagedata[0], imagedata.size()))
         {
             /* Set new picture in source factory */
             vecImages.push_back(pic);
@@ -137,14 +172,14 @@ void SlideShowViewer::OnSave()
 
     QString strFilename = strCurrentSavePath + VerifyFilename(vecImageNames[iCurImagePos]);
     strFilename = QFileDialog::getSaveFileName(this,
-                  tr("Save File"), strFilename, tr("Images (*.png *.jpg)"));
+        tr("Save File"), strFilename, tr("Images (*.png *.jpg)"));
 
     /* Check if user not hit the cancel button */
     if (!strFilename.isEmpty())
     {
         vecImages[iCurImagePos].save(strFilename);
 
-        strCurrentSavePath = QFileInfo(strFilename).path() + PATH_SEPARATOR;
+        strCurrentSavePath = QFileInfo(strFilename).path() + "/";
     }
 }
 
@@ -154,12 +189,12 @@ void SlideShowViewer::OnSaveAll()
     CreateDirectories(strCurrentSavePath);
 
     QString strDirectory = QFileDialog::getExistingDirectory(this,
-                           tr("Open Directory"), strCurrentSavePath);
+        tr("Open Directory"), strCurrentSavePath);
 
     /* Check if user not hit the cancel button */
     if (!strDirectory.isEmpty())
     {
-        strCurrentSavePath = strDirectory + PATH_SEPARATOR;
+        strCurrentSavePath = strDirectory + "/";
 
         for(size_t i=0; i<vecImages.size(); i++)
             vecImages[i].save(strCurrentSavePath + VerifyFilename(vecImageNames[i]));
@@ -178,6 +213,11 @@ void SlideShowViewer::OnClearAll()
 
 void SlideShowViewer::eventShow(QShowEvent*)
 {
+    /* Update window title */
+    uint32_t iServiceID; bool bServiceValid; QString strLabel;
+    GetServiceParams(&iServiceID, &bServiceValid, &strLabel);
+    UpdateWindowTitle(iServiceID, bServiceValid, strLabel);
+
     /* Update window */
     OnTimer();
 
@@ -257,7 +297,7 @@ void SlideShowViewer::UpdateButtons()
     for (int i = 0; i < (strTotImages.length() - strNumImage.length()); i++)
         strSep += " ";
 
-    LabelCurPicNum->setText(strSep + strNumImage + PATH_SEPARATOR + strTotImages);
+    LabelCurPicNum->setText(strSep + strNumImage + "/" + strTotImages);
 
     /* If no picture was received, show the following text */
     if (iCurImagePos < 0)
@@ -268,32 +308,68 @@ void SlideShowViewer::UpdateButtons()
     }
 }
 
-void SlideShowViewer::setStatus(int i, ETypeRxStatus s)
+void SlideShowViewer::ClearMOTCache(CMOTDABDec *motdec)
 {
-    if(i==short_id)
-        SetStatus(LEDStatus, s);
+    /* Remove all object from cache */
+    CMOTObject	NewObj;
+    while (motdec->NewObjectAvailable())
+        motdec->GetNextObject(NewObj);
 }
 
-void SlideShowViewer::setServiceInformation(int i, CService s)
+void SlideShowViewer::GetServiceParams(uint32_t* iServiceID, bool* bServiceValid, QString* strLabel, ETypeRxStatus* eStatus, int* shortID, int* iPacketID)
 {
-    short_id = i;
-    service = s;
-    decoder = service.DataParam.pDecoder;
+    CParameter& Parameters = *rx.GetParameters();
+    Parameters.Lock();
+
+        /* Get current audio service */
+        const int iCurSelAudioServ = Parameters.GetCurSelAudioService();
+        const uint32_t iAudioServiceID = Parameters.Service[iCurSelAudioServ].iServiceID;
+
+        /* Get current data service */
+        const int iCurSelDataServ = Parameters.GetCurSelDataService();
+        const CService service = Parameters.Service[iCurSelDataServ];
+
+        if (eStatus)
+            *eStatus = Parameters.DataComponentStatus[iCurSelDataServ].GetStatus();
+        if (iPacketID)
+            *iPacketID = Parameters.GetDataParam(iCurSelDataServ).iPacketID;
+    Parameters.Unlock();
+
+    if (iServiceID)
+        *iServiceID = service.iServiceID != iAudioServiceID ? service.iServiceID : 0;
+    if (bServiceValid)
+        *bServiceValid = service.IsActive() && service.eAudDataFlag == CService::SF_DATA;
+    /* Do UTF-8 to QString (UNICODE) conversion with the label strings */
+    if (strLabel)
+        *strLabel = QString().fromUtf8(service.strLabel.c_str()).trimmed();
+    if (shortID)
+        *shortID = iCurSelDataServ;
+}
+
+void SlideShowViewer::UpdateWindowTitle(const uint32_t iServiceID, const bool bServiceValid, QString strLabel)
+{
     QString strTitle("MOT Slide Show");
-    QString strServiceID;
-    QString strLabel = QString::fromUtf8(service.strLabel.c_str());
-    if (service.iServiceID != 0)
+    iLastServiceID = iServiceID;
+    bLastServiceValid = bServiceValid;
+    strLastLabel = strLabel;
+    if (bServiceValid)
     {
-        if (strLabel != "")
-            strLabel += " - ";
+        QString strServiceID;
 
-        /* Service ID (plot number in hexadecimal format) */
-        strServiceID = "ID:" +
-                       QString().setNum(service.iServiceID, 16).toUpper();
+        if (iServiceID != 0)
+        {
+            if (strLabel != "")
+                strLabel += " - ";
+
+            /* Service ID (plot number in hexadecimal format) */
+            strServiceID = "ID:" +
+                           QString().setNum(iServiceID, 16).toUpper();
+        }
+
+        /* Add the description on the title of the dialog */
+        if (strLabel != "" || strServiceID != "")
+            strTitle += " [" + strLabel + strServiceID + "]";
     }
-
-    /* Add the description on the title of the dialog */
-    if (strLabel != "" || strServiceID != "")
-        strTitle += " [" + strLabel + strServiceID + "]";
     setWindowTitle(strTitle);
 }
+

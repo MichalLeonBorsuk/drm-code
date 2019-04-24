@@ -9,44 +9,26 @@ static const char* SLESErrorToString(SLresult result)
 {
     switch (result)
     {
-    case SL_RESULT_SUCCESS:
-        return "SUCCESS";
-    case SL_RESULT_PRECONDITIONS_VIOLATED:
-        return
-            "SL_RESULT_PRECONDITIONS_VIOLATED";
-    case SL_RESULT_PARAMETER_INVALID:
-        return "SL_RESULT_PARAMETER_INVALID";
-    case SL_RESULT_MEMORY_FAILURE:
-        return "SL_RESULT_MEMORY_FAILURE";
-    case SL_RESULT_RESOURCE_ERROR:
-        return "SL_RESULT_RESOURCE_ERROR";
-    case SL_RESULT_RESOURCE_LOST:
-        return "SL_RESULT_RESOURCE_LOST";
-    case SL_RESULT_IO_ERROR:
-        return "SL_RESULT_IO_ERROR";
-    case SL_RESULT_BUFFER_INSUFFICIENT:
-        return "SL_RESULT_BUFFER_INSUFFICIENT";
-    case SL_RESULT_CONTENT_CORRUPTED:
-        return "SL_RESULT_CONTENT_CORRUPTED";
-    case SL_RESULT_CONTENT_UNSUPPORTED:
-        return "SL_RESULT_CONTENT_UNSUPPORTED";
-    case SL_RESULT_CONTENT_NOT_FOUND:
-        return "SL_RESULT_CONTENT_NOT_FOUND";
-    case SL_RESULT_PERMISSION_DENIED:
-        return "SL_RESULT_PERMISSION_DENIED";
-    case SL_RESULT_FEATURE_UNSUPPORTED:
-        return
-            "SL_RESULT_FEATURE_UNSUPPORTED";
-    case SL_RESULT_INTERNAL_ERROR:
-        return "SL_RESULT_INTERNAL_ERROR";
-    case SL_RESULT_UNKNOWN_ERROR:
-        return "SL_RESULT_UNKNOWN_ERROR";
-    case SL_RESULT_OPERATION_ABORTED:
-        return "SL_RESULT_OPERATION_ABORTED";
-    case SL_RESULT_CONTROL_LOST:
-        return "SL_RESULT_CONTROL_LOST";
-    default:
-        return "Unknown";
+    case SL_RESULT_SUCCESS: return "SUCCESS";
+    case SL_RESULT_PRECONDITIONS_VIOLATED: return
+    "SL_RESULT_PRECONDITIONS_VIOLATED";
+    case SL_RESULT_PARAMETER_INVALID: return "SL_RESULT_PARAMETER_INVALID";
+    case SL_RESULT_MEMORY_FAILURE: return "SL_RESULT_MEMORY_FAILURE";
+    case SL_RESULT_RESOURCE_ERROR: return "SL_RESULT_RESOURCE_ERROR";
+    case SL_RESULT_RESOURCE_LOST: return "SL_RESULT_RESOURCE_LOST";
+    case SL_RESULT_IO_ERROR: return "SL_RESULT_IO_ERROR";
+    case SL_RESULT_BUFFER_INSUFFICIENT: return "SL_RESULT_BUFFER_INSUFFICIENT";
+    case SL_RESULT_CONTENT_CORRUPTED: return "SL_RESULT_CONTENT_CORRUPTED";
+    case SL_RESULT_CONTENT_UNSUPPORTED: return "SL_RESULT_CONTENT_UNSUPPORTED";
+    case SL_RESULT_CONTENT_NOT_FOUND: return "SL_RESULT_CONTENT_NOT_FOUND";
+    case SL_RESULT_PERMISSION_DENIED: return "SL_RESULT_PERMISSION_DENIED";
+    case SL_RESULT_FEATURE_UNSUPPORTED: return
+    "SL_RESULT_FEATURE_UNSUPPORTED";
+    case SL_RESULT_INTERNAL_ERROR: return "SL_RESULT_INTERNAL_ERROR";
+    case SL_RESULT_UNKNOWN_ERROR: return "SL_RESULT_UNKNOWN_ERROR";
+    case SL_RESULT_OPERATION_ABORTED: return "SL_RESULT_OPERATION_ABORTED";
+    case SL_RESULT_CONTROL_LOST: return "SL_RESULT_CONTROL_LOST";
+    default: return "Unknown";
     }
 }
 
@@ -83,11 +65,11 @@ void COpenSLESIn::Enumerate(vector<string>& names, vector<string>& descriptions)
         qDebug(em.c_str());
         return;
     }
-    for (SLint32 i=0; i<numInputs; i++)
+    for (SLint32 i=0;i<numInputs; i++)
     {
         SLAudioInputDescriptor AudioInputDescriptor;
         res = (*AudioIODeviceCapabilitiesItf)->QueryAudioInputCapabilities(
-                  AudioIODeviceCapabilitiesItf, InputDeviceIDs[i], &AudioInputDescriptor
+                    AudioIODeviceCapabilitiesItf, InputDeviceIDs[i], &AudioInputDescriptor
               );
         //CheckErr(res);
         names.push_back((char*)AudioInputDescriptor.deviceName);
@@ -257,14 +239,14 @@ next_record_buffer_index = 0;
 SLresult result;
 
 const SLInterfaceID engine_ids[] = {SL_IID_AUDIOIODEVICECAPABILITIES};
-const SLboolean engine_req[] = {SLbool_FALSE};
+const SLboolean engine_req[] = {SLbool_false};
 // create engine
-SLObjectItf engineObject = NULL;
-result = slCreateEngine(&engineObject, 0, NULL, 1, engine_ids, engine_req);
+SLObjectItf engineObject = nullptr;
+result = slCreateEngine(&engineObject, 0, nullptr, 1, engine_ids, engine_req);
 assert(SL_RESULT_SUCCESS == result);
 
 // realize the engine
-result = (*engineObject)->Realize(engineObject, SLbool_FALSE);
+result = (*engineObject)->Realize(engineObject, SLbool_false);
 assert(SL_RESULT_SUCCESS == result);
 
 // get the engine interface, which is needed in order to create other
@@ -275,7 +257,7 @@ result = (*engineObject)->GetInterface(engineObject, SL_IID_ENGINE,
 assert(SL_RESULT_SUCCESS == result);
 
 // recorder interfaces
-SLObjectItf recorderObject = NULL;
+SLObjectItf recorderObject = nullptr;
 SLRecordItf recorderRecord;
 SLAndroidSimpleBufferQueueItf recorderBufferQueue;
 SLDataFormat_PCM rec_format_pcm =
@@ -291,8 +273,8 @@ SL_DATAFORMAT_PCM // Format type
 
 // configure audio source
 SLDataLocator_IODevice rec_loc_dev = {SL_DATALOCATOR_IODEVICE,
-SL_IODEVICE_AUDIOINPUT, SL_DEFAULTDEVICEID_AUDIOINPUT, NULL};
-SLDataSource rec_audioSrc = {&rec_loc_dev, NULL};
+SL_IODEVICE_AUDIOINPUT, SL_DEFAULTDEVICEID_AUDIOINPUT, nullptr};
+SLDataSource rec_audioSrc = {&rec_loc_dev, nullptr};
 
 // configure audio sink
 SLDataLocator_AndroidSimpleBufferQueue rec_loc_bq =
@@ -302,13 +284,13 @@ SLDataSink rec_audioSnk = {&rec_loc_bq, &rec_format_pcm};
 // create audio recorder
 // (requires the RECORD_AUDIO permission)
 const SLInterfaceID rec_id[] = {SL_IID_ANDROIDSIMPLEBUFFERQUEUE};
-const SLboolean rec_req[] = {SLbool_TRUE};
+const SLboolean rec_req[] = {SLbool_true};
 result = (*engineEngine)->CreateAudioRecorder(engineEngine,
 &recorderObject, &rec_audioSrc, &rec_audioSnk, 1, rec_id, rec_req);
 assert(SL_RESULT_SUCCESS == result);
 
 // realize the audio recorder
-result = (*recorderObject)->Realize(recorderObject, SLbool_FALSE);
+result = (*recorderObject)->Realize(recorderObject, SLbool_false);
 std::cerr << "result: " << result << " : " << SLESErrorToString(result) <<
 std::endl;
 assert(SL_RESULT_SUCCESS == result);
@@ -325,7 +307,7 @@ assert(SL_RESULT_SUCCESS == result);
 
 // register callback on the buffer queue
 result = (*recorderBufferQueue)->RegisterCallback(recorderBufferQueue,
-bqRecorderCallback, NULL);
+bqRecorderCallback, nullptr);
 assert(SL_RESULT_SUCCESS == result);
 // in case already recording, stop recording and clear buffer queue
 result = (*recorderRecord)->SetRecordState(recorderRecord,
@@ -500,15 +482,15 @@ next_record_buffer_index = 0;
 SLresult result;
 
 const SLInterfaceID engine_ids[] = {SL_IID_AUDIOIODEVICECAPABILITIES};
-const SLboolean engine_req[] = {SLbool_FALSE};
+const SLboolean engine_req[] = {SLbool_false};
 // create engine
-SLObjectItf engineObject = NULL;
-result = slCreateEngine(&engineObject, 0, NULL, 1, engine_ids,
+SLObjectItf engineObject = nullptr;
+result = slCreateEngine(&engineObject, 0, nullptr, 1, engine_ids,
 engine_req);
 assert(SL_RESULT_SUCCESS == result);
 
 // realize the engine
-result = (*engineObject)->Realize(engineObject, SLbool_FALSE);
+result = (*engineObject)->Realize(engineObject, SLbool_false);
 assert(SL_RESULT_SUCCESS == result);
 
 // get the engine interface, which is needed in order to create other
@@ -519,7 +501,7 @@ result = (*engineObject)->GetInterface(engineObject, SL_IID_ENGINE,
 assert(SL_RESULT_SUCCESS == result);
 
 // recorder interfaces
-SLObjectItf recorderObject = NULL;
+SLObjectItf recorderObject = nullptr;
 SLRecordItf recorderRecord;
 SLAndroidSimpleBufferQueueItf recorderBufferQueue;
 SLDataFormat_PCM rec_format_pcm =
@@ -535,8 +517,8 @@ SL_DATAFORMAT_PCM // Format type
 
 // configure audio source
 SLDataLocator_IODevice rec_loc_dev = {SL_DATALOCATOR_IODEVICE,
-SL_IODEVICE_AUDIOINPUT, SL_DEFAULTDEVICEID_AUDIOINPUT, NULL};
-SLDataSource rec_audioSrc = {&rec_loc_dev, NULL};
+SL_IODEVICE_AUDIOINPUT, SL_DEFAULTDEVICEID_AUDIOINPUT, nullptr};
+SLDataSource rec_audioSrc = {&rec_loc_dev, nullptr};
 
 // configure audio sink
 SLDataLocator_AndroidSimpleBufferQueue rec_loc_bq =
@@ -546,13 +528,13 @@ SLDataSink rec_audioSnk = {&rec_loc_bq, &rec_format_pcm};
 // create audio recorder
 // (requires the RECORD_AUDIO permission)
 const SLInterfaceID rec_id[] = {SL_IID_ANDROIDSIMPLEBUFFERQUEUE};
-const SLboolean rec_req[] = {SLbool_TRUE};
+const SLboolean rec_req[] = {SLbool_true};
 result = (*engineEngine)->CreateAudioRecorder(engineEngine,
 &recorderObject, &rec_audioSrc, &rec_audioSnk, 1, rec_id, rec_req);
 assert(SL_RESULT_SUCCESS == result);
 
 // realize the audio recorder
-result = (*recorderObject)->Realize(recorderObject, SLbool_FALSE);
+result = (*recorderObject)->Realize(recorderObject, SLbool_false);
 std::cerr << "result: " << result << " : " << SLESErrorToString(result) <<
 std::endl;
 assert(SL_RESULT_SUCCESS == result);
@@ -569,7 +551,7 @@ assert(SL_RESULT_SUCCESS == result);
 
 // register callback on the buffer queue
 result = (*recorderBufferQueue)->RegisterCallback(recorderBufferQueue,
-bqRecorderCallback, NULL);
+bqRecorderCallback, nullptr);
 assert(SL_RESULT_SUCCESS == result);
 // in case already recording, stop recording and clear buffer queue
 result = (*recorderRecord)->SetRecordState(recorderRecord,
@@ -719,15 +701,15 @@ next_record_buffer_index = 0;
 SLresult result;
 
 const SLInterfaceID engine_ids[] = {SL_IID_AUDIOIODEVICECAPABILITIES};
-const SLboolean engine_req[] = {SLbool_FALSE};
+const SLboolean engine_req[] = {SLbool_false};
 // create engine
-SLObjectItf engineObject = NULL;
-result = slCreateEngine(&engineObject, 0, NULL, 1, engine_ids,
+SLObjectItf engineObject = nullptr;
+result = slCreateEngine(&engineObject, 0, nullptr, 1, engine_ids,
 engine_req);
 assert(SL_RESULT_SUCCESS == result);
 
 // realize the engine
-result = (*engineObject)->Realize(engineObject, SLbool_FALSE);
+result = (*engineObject)->Realize(engineObject, SLbool_false);
 assert(SL_RESULT_SUCCESS == result);
 
 // get the engine interface, which is needed in order to create other
@@ -738,7 +720,7 @@ result = (*engineObject)->GetInterface(engineObject, SL_IID_ENGINE,
 assert(SL_RESULT_SUCCESS == result);
 
 // recorder interfaces
-SLObjectItf recorderObject = NULL;
+SLObjectItf recorderObject = nullptr;
 SLRecordItf recorderRecord;
 SLAndroidSimpleBufferQueueItf recorderBufferQueue;
 SLDataFormat_PCM rec_format_pcm =
@@ -754,8 +736,8 @@ SL_DATAFORMAT_PCM // Format type
 
 // configure audio source
 SLDataLocator_IODevice rec_loc_dev = {SL_DATALOCATOR_IODEVICE,
-SL_IODEVICE_AUDIOINPUT, SL_DEFAULTDEVICEID_AUDIOINPUT, NULL};
-SLDataSource rec_audioSrc = {&rec_loc_dev, NULL};
+SL_IODEVICE_AUDIOINPUT, SL_DEFAULTDEVICEID_AUDIOINPUT, nullptr};
+SLDataSource rec_audioSrc = {&rec_loc_dev, nullptr};
 
 // configure audio sink
 SLDataLocator_AndroidSimpleBufferQueue rec_loc_bq =
@@ -765,13 +747,13 @@ SLDataSink rec_audioSnk = {&rec_loc_bq, &rec_format_pcm};
 // create audio recorder
 // (requires the RECORD_AUDIO permission)
 const SLInterfaceID rec_id[] = {SL_IID_ANDROIDSIMPLEBUFFERQUEUE};
-const SLboolean rec_req[] = {SLbool_TRUE};
+const SLboolean rec_req[] = {SLbool_true};
 result = (*engineEngine)->CreateAudioRecorder(engineEngine,
 &recorderObject, &rec_audioSrc, &rec_audioSnk, 1, rec_id, rec_req);
 assert(SL_RESULT_SUCCESS == result);
 
 // realize the audio recorder
-result = (*recorderObject)->Realize(recorderObject, SLbool_FALSE);
+result = (*recorderObject)->Realize(recorderObject, SLbool_false);
 std::cerr << "result: " << result << " : " << SLESErrorToString(result) <<
 std::endl;
 assert(SL_RESULT_SUCCESS == result);
@@ -788,7 +770,7 @@ assert(SL_RESULT_SUCCESS == result);
 
 // register callback on the buffer queue
 result = (*recorderBufferQueue)->RegisterCallback(recorderBufferQueue,
-bqRecorderCallback, NULL);
+bqRecorderCallback, nullptr);
 assert(SL_RESULT_SUCCESS == result);
 // in case already recording, stop recording and clear buffer queue
 result = (*recorderRecord)->SetRecordState(recorderRecord,
@@ -1147,15 +1129,15 @@ next_record_buffer_index = 0;
 SLresult result;
 
 const SLInterfaceID engine_ids[] = {SL_IID_AUDIOIODEVICECAPABILITIES};
-const SLboolean engine_req[] = {SLbool_FALSE};
+const SLboolean engine_req[] = {SLbool_false};
 // create engine
-SLObjectItf engineObject = NULL;
-result = slCreateEngine(&engineObject, 0, NULL, 1, engine_ids,
+SLObjectItf engineObject = nullptr;
+result = slCreateEngine(&engineObject, 0, nullptr, 1, engine_ids,
 engine_req);
 assert(SL_RESULT_SUCCESS == result);
 
 // realize the engine
-result = (*engineObject)->Realize(engineObject, SLbool_FALSE);
+result = (*engineObject)->Realize(engineObject, SLbool_false);
 assert(SL_RESULT_SUCCESS == result);
 
 // get the engine interface, which is needed in order to create other
@@ -1166,7 +1148,7 @@ result = (*engineObject)->GetInterface(engineObject, SL_IID_ENGINE,
 assert(SL_RESULT_SUCCESS == result);
 
 // recorder interfaces
-SLObjectItf recorderObject = NULL;
+SLObjectItf recorderObject = nullptr;
 SLRecordItf recorderRecord;
 SLAndroidSimpleBufferQueueItf recorderBufferQueue;
 SLDataFormat_PCM rec_format_pcm =
@@ -1182,8 +1164,8 @@ SL_DATAFORMAT_PCM // Format type
 
 // configure audio source
 SLDataLocator_IODevice rec_loc_dev = {SL_DATALOCATOR_IODEVICE,
-SL_IODEVICE_AUDIOINPUT, SL_DEFAULTDEVICEID_AUDIOINPUT, NULL};
-SLDataSource rec_audioSrc = {&rec_loc_dev, NULL};
+SL_IODEVICE_AUDIOINPUT, SL_DEFAULTDEVICEID_AUDIOINPUT, nullptr};
+SLDataSource rec_audioSrc = {&rec_loc_dev, nullptr};
 
 // configure audio sink
 SLDataLocator_AndroidSimpleBufferQueue rec_loc_bq =
@@ -1193,13 +1175,13 @@ SLDataSink rec_audioSnk = {&rec_loc_bq, &rec_format_pcm};
 // create audio recorder
 // (requires the RECORD_AUDIO permission)
 const SLInterfaceID rec_id[] = {SL_IID_ANDROIDSIMPLEBUFFERQUEUE};
-const SLboolean rec_req[] = {SLbool_TRUE};
+const SLboolean rec_req[] = {SLbool_true};
 result = (*engineEngine)->CreateAudioRecorder(engineEngine,
 &recorderObject, &rec_audioSrc, &rec_audioSnk, 1, rec_id, rec_req);
 assert(SL_RESULT_SUCCESS == result);
 
 // realize the audio recorder
-result = (*recorderObject)->Realize(recorderObject, SLbool_FALSE);
+result = (*recorderObject)->Realize(recorderObject, SLbool_false);
 std::cerr << "result: " << result << " : " << SLESErrorToString(result) <<
 std::endl;
 assert(SL_RESULT_SUCCESS == result);
@@ -1216,7 +1198,7 @@ assert(SL_RESULT_SUCCESS == result);
 
 // register callback on the buffer queue
 result = (*recorderBufferQueue)->RegisterCallback(recorderBufferQueue,
-bqRecorderCallback, NULL);
+bqRecorderCallback, nullptr);
 assert(SL_RESULT_SUCCESS == result);
 // in case already recording, stop recording and clear buffer queue
 result = (*recorderRecord)->SetRecordState(recorderRecord,

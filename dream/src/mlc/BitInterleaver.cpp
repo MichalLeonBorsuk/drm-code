@@ -1,9 +1,9 @@
 /******************************************************************************\
  * Technische Universitaet Darmstadt, Institut fuer Nachrichtentechnik
- * Copyright (c) 2001-2014
+ * Copyright (c) 2001
  *
  * Author(s):
- *  Volker Fischer
+ *	Volker Fischer
  *
  * Description:
  *
@@ -34,7 +34,7 @@
 
 /* Implementation *************************************************************/
 /******************************************************************************\
-* Bit interleaver                                                              *
+* Bit interleaver															   *
 \******************************************************************************/
 void CBitInterleaver::Interleave(CVector<_DECISION>& InputData)
 {
@@ -90,7 +90,7 @@ void CBitInterleaver::Init(int iNewx_in1, int iNewx_in2, int it_0)
 
 
 /******************************************************************************\
-* Bit deinterleaver                                                            *
+* Bit deinterleaver															   *
 \******************************************************************************/
 void CBitDeinterleaver::Deinterleave(CVector<CDistance>& vecInput)
 {

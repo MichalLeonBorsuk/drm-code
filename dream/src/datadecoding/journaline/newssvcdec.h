@@ -1,50 +1,50 @@
-/*
+/* 
  *
  * This file is part of the 'NewsService Journaline(R) Decoder'
- *
- * Copyright (c) 2003, 2001-2014 by Fraunhofer IIS, Erlangen, Germany
- *
+ * 
+ * Copyright (c) 2003, 2004 by Fraunhofer IIS, Erlangen, Germany
+ * 
  * --------------------------------------------------------------------
- *
+ * 
  * For NON-COMMERCIAL USE,
  * the 'NewsService Journaline(R) Decoder' is free software;
  * you can redistribute it and/or modify it under the terms of
  * the GNU General Public License as published by the
  * Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- *
+ * 
  * The 'NewsService Journaline(R) Decoder' is distributed in the hope
  * that it will be useful, but WITHOUT ANY WARRANTY;
  * without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU General Public License
  * along with the 'NewsService Journaline(R) Decoder';
  * if not, write to the Free Software Foundation, Inc.,
  * 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- *
- *
+ * 
+ * 
  * If you use this software in a project with user interaction, please
  * provide the following text to the user in an appropriate place:
  * "Features NewsService Journaline(R) decoder technology by
  * Fraunhofer IIS, Erlangen, Germany.
  * For more information visit http://www.iis.fhg.de/dab"
- *
+ * 
  * --------------------------------------------------------------------
- *
+ * 
  * To use the 'NewsService Journaline(R) Decoder' software for
  * COMMERCIAL purposes, please contact Fraunhofer IIS for a
  * commercial license (see below for contact information)!
- *
+ * 
  * --------------------------------------------------------------------
- *
+ * 
  * Contact:
  *   Fraunhofer IIS, Department 'Broadcast Applications'
  *   Am Wolfsmantel 33, 91058 Erlangen, Germany
  *   http://www.iis.fraunhofer.de/dab
  *   mailto:bc-info@iis.fraunhofer.de
- *
+ * 
  */
 
 #ifndef __NEWS_SVC_DEC__
@@ -67,7 +67,7 @@
  *
  * Creation date:  2003-08-02
  *
- * Last modified:  2001-2014-02-16 (rbr)
+ * Last modified:  2004-02-16 (rbr)
  *
  * The Journaline(R) news service decoder will accept
  * Journaline(R) objects conforming to the
@@ -99,18 +99,18 @@ typedef const void* NEWS_SVC_DEC_decoder_t;
 /*! @brief object availability status type */
 typedef enum
 {
-    NEWS_SVC_DEC_OBJ_NOT_YET_AVAILABLE, /*!< object is not yet available */
-    NEWS_SVC_DEC_OBJ_REMOVED,           /*!< object has been removed because
+  NEWS_SVC_DEC_OBJ_NOT_YET_AVAILABLE, /*!< object is not yet available */
+  NEWS_SVC_DEC_OBJ_REMOVED,           /*!< object has been removed because
                                            of memory restrictions */
-    NEWS_SVC_DEC_OBJ_RECEIVED,       /*!< object has been received */
-    NEWS_SVC_DEC_OBJ_UPDATED         /*!< update of already received object */
+  NEWS_SVC_DEC_OBJ_RECEIVED,       /*!< object has been received */
+  NEWS_SVC_DEC_OBJ_UPDATED         /*!< update of already received object */
 } NEWS_SVC_DEC_obj_availability_status_t;
 
 /*! @brief object availability type */
 typedef struct
 {
-    unsigned short object_id;                      /*!< NML object id */
-    NEWS_SVC_DEC_obj_availability_status_t status; /*!< current availability
+  unsigned short object_id;                      /*!< NML object id */
+  NEWS_SVC_DEC_obj_availability_status_t status; /*!< current availability
                                                       status */
 } NEWS_SVC_DEC_obj_availability_t;
 
@@ -133,7 +133,7 @@ typedef void(NEWS_SVC_DEC_cb)(
     unsigned long number_of_elements,
     NEWS_SVC_DEC_obj_availability_t *chg_list,
     void *arg
-);
+    );
 
 
 
@@ -178,10 +178,10 @@ typedef void(NEWS_SVC_DEC_cb)(
 NEWS_SVC_DEC_decoder_t NEWS_SVC_DEC_createDec(
     NEWS_SVC_DEC_cb update,
     unsigned long max_memory,
-    unsigned long *max_objects,
+    unsigned long *max_objects, 
     unsigned long extended_header_len,
     void  *arg
-);
+    );  
 
 /*!
  * @brief Delete a news service decoder instance
@@ -191,13 +191,13 @@ NEWS_SVC_DEC_decoder_t NEWS_SVC_DEC_createDec(
  * @param decoder
  *   news service decoder instance
  *   (as obtained by NEWS_SVC_DEC_createDec)
- *
+ *   
  * @retval 0 on failure
  * @retval 1 on success
  */
 void NEWS_SVC_DEC_deleteDec(
     NEWS_SVC_DEC_decoder_t decoder
-);
+    );
 
 
 /*******************************************
@@ -206,7 +206,7 @@ void NEWS_SVC_DEC_deleteDec(
 
 /*!
  * @brief Get a news object by id
- *
+ * 
  * The object with id object_id will be written to nml
  * and len will be set to its actual length in bytes (at most 4092).
  *
@@ -217,9 +217,9 @@ void NEWS_SVC_DEC_deleteDec(
  * @param extended_header_len (out)
  *   length in bytes of extended header field of this news service
  *   (as signalled in SDC)
- * @param len (out)
+ * @param len (out) 
  *   length in bytes of NML object
- * @param nml (out)
+ * @param nml (out) 
  *   the complete NML object (including NML header)
  *
  * @retval 0  on failure
@@ -230,7 +230,7 @@ int NEWS_SVC_DEC_get_news_object(
     unsigned long *extended_header_len,
     unsigned long *len,
     unsigned char *nml
-);
+    );
 
 
 /*!
@@ -254,7 +254,7 @@ int NEWS_SVC_DEC_get_object_availability(
     NEWS_SVC_DEC_decoder_t decoder,
     unsigned long number_of_elements,
     NEWS_SVC_DEC_obj_availability_t *query_list
-);
+    );
 
 
 /*******************************************
@@ -263,9 +263,9 @@ int NEWS_SVC_DEC_get_object_availability(
 
 /*!
  * @brief Put data into news decoder
- *
+ * 
  * The input for the news decoder consists of one complete Journaline(R) object.
- *
+ *  
  * @param decoder
  *   news service decoder instance (as obtained by NEWS_SVC_DEC_createDec)
  * @param len
@@ -279,7 +279,7 @@ unsigned long NEWS_SVC_DEC_putData(
     NEWS_SVC_DEC_decoder_t  decoder,
     const unsigned long  len,
     const unsigned char *buf
-);
+    );
 
 
 /*******************************************
@@ -314,14 +314,14 @@ int NEWS_SVC_DEC_watch_objects(
     NEWS_SVC_DEC_decoder_t decoder,
     unsigned long number_of_elements,
     NEWS_SVC_DEC_obj_availability_t *watch_list
-);
+    );
 
 /*!
  * @brief Set ids of objects to be kept in cache
  *
  * Tell the memory management that the listed elements
  * should be kept in memory (if possible).
- *
+ * 
  * Candidates for keeping in memory are (in order of importance):
  *   -# currently viewed object
  *   -# parents of currently viewed object
@@ -343,7 +343,7 @@ int NEWS_SVC_DEC_keep_in_cache(
     NEWS_SVC_DEC_decoder_t decoder,
     unsigned long number_of_elements,
     unsigned short *object_ids
-);
+    );
 
 #ifdef __cplusplus
 }

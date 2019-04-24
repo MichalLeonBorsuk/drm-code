@@ -1,9 +1,9 @@
 /******************************************************************************\
  * Technische Universitaet Darmstadt, Institut fuer Nachrichtentechnik
- * Copyright (c) 2001-2014
+ * Copyright (c) 2004
  *
  * Author(s):
- *  Volker Fischer, Julian Cable, Oliver Haffenden
+ *	Volker Fischer, Julian Cable, Oliver Haffenden
  *
  * Description:
  *
@@ -51,17 +51,17 @@ void CPacketSocketNull::poll()
 {
 }
 
-_BOOLEAN CPacketSocketNull::SetOrigin(const string&)
+bool CPacketSocketNull::SetOrigin(const string&)
 {
-    return FALSE;
+	return false;
 }
 
-_BOOLEAN CPacketSocketNull::SetDestination(const string&)
+bool CPacketSocketNull::SetDestination(const string&)
 {
-    return FALSE;
+	return false;
 }
 
-_BOOLEAN CPacketSocketNull::GetDestination(string&)
+bool CPacketSocketNull::GetDestination(string&)
 {
-    return FALSE;
+	return false;
 }

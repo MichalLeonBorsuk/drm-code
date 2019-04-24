@@ -1,12 +1,12 @@
 /******************************************************************************\
 * British Broadcasting Corporation
-* Copyright (c) 2001-2014
+* Copyright (c) 2007
 *
 * Author(s):
-*   Julian Cable
+*	Julian Cable
 *
 * Description:
-*   Jack sound classes
+*	Jack sound classes
 *
 ******************************************************************************
 *
@@ -35,8 +35,8 @@
 using namespace std;
 
 instance_data_t::instance_data_t():num_channels(2),
-    left(NULL), right(NULL), buff(NULL), underruns(0), overruns(0),
-    peer_left(),peer_right()
+        left(NULL), right(NULL), buff(NULL), underruns(0), overruns(0),
+        peer_left(),peer_right()
 {
     buff =
         jack_ringbuffer_create(
@@ -277,7 +277,7 @@ void CJackCommon::terminate()
     client = NULL;
 }
 
-CSoundInJack::CSoundInJack():iBufferSize(0), bBlocking(TRUE), capture_data(), dev(-1),ports()
+CSoundInJack::CSoundInJack():iBufferSize(0), bBlocking(true), capture_data(), dev(-1),ports()
 {
     if (data.client==NULL)
         data.initialise();
@@ -314,8 +314,8 @@ CSoundInJack::CSoundInJack():iBufferSize(0), bBlocking(TRUE), capture_data(), de
 }
 
 CSoundInJack::CSoundInJack(const CSoundInJack & e):
-    iBufferSize(e.iBufferSize), bBlocking(e.bBlocking), device_changed(TRUE),
-    capture_data(e.capture_data), dev(e.dev), ports(e.ports)
+        iBufferSize(e.iBufferSize), bBlocking(e.bBlocking), device_changed(true),
+        capture_data(e.capture_data), dev(e.dev), ports(e.ports)
 {
 }
 
@@ -372,7 +372,7 @@ CSoundInJack::SetDev(int iNewDevice)
 }
 
 void
-CSoundInJack::Init(int iNewBufferSize, _BOOLEAN bNewBlocking)
+CSoundInJack::Init(int iNewBufferSize, bool bNewBlocking)
 {
     if (device_changed == false)
         return;
@@ -404,7 +404,7 @@ CSoundInJack::Init(int iNewBufferSize, _BOOLEAN bNewBlocking)
     device_changed = false;
 }
 
-_BOOLEAN
+bool
 CSoundInJack::Read(CVector<short>& psData)
 {
     if (device_changed)
@@ -434,8 +434,8 @@ CSoundInJack::Read(CVector<short>& psData)
     short smax=-32767, smin=32767;
     for(int i=0; i<iBufferSize; i++)
     {
-        if(smax<buffer[i]) smax = buffer[i];
-        if(smin>buffer[i]) smin = buffer[i];
+    	if(smax<buffer[i]) smax = buffer[i];
+    	if(smin>buffer[i]) smin = buffer[i];
     }
     cout << iBufferSize << " " << setw(8) << smin << " " << setw(8) << smax << endl;
     */
@@ -443,9 +443,9 @@ CSoundInJack::Read(CVector<short>& psData)
     {
         capture_data.underruns++;
         cerr << "jack read " << n << " wanted " << bytes << endl;
-        return TRUE;
+        return true;
     }
-    return FALSE;
+    return false;
 }
 
 void
@@ -456,8 +456,8 @@ CSoundInJack::Close()
     device_changed = true;
 }
 
-CSoundOutJack::CSoundOutJack():iBufferSize(0), bBlocking(TRUE), device_changed(TRUE),
-    play_data(), dev(-1), ports()
+CSoundOutJack::CSoundOutJack():iBufferSize(0), bBlocking(true), device_changed(true),
+        play_data(), dev(-1), ports()
 {
     if (data.client==NULL)
         data.initialise();
@@ -507,7 +507,7 @@ CSoundOutJack::~CSoundOutJack()
 }
 
 CSoundOutJack::CSoundOutJack(const CSoundOutJack & e):
-    iBufferSize(e.iBufferSize), bBlocking(e.bBlocking),dev(e.dev)
+        iBufferSize(e.iBufferSize), bBlocking(e.bBlocking),dev(e.dev)
 {
 }
 
@@ -545,7 +545,7 @@ CSoundOutJack::SetDev(int iNewDevice)
 }
 
 void
-CSoundOutJack::Init(int iNewBufferSize, _BOOLEAN bNewBlocking)
+CSoundOutJack::Init(int iNewBufferSize, bool bNewBlocking)
 {
     if (device_changed == false)
         return;
@@ -575,7 +575,7 @@ CSoundOutJack::Init(int iNewBufferSize, _BOOLEAN bNewBlocking)
     device_changed = false;
 }
 
-_BOOLEAN
+bool
 CSoundOutJack::Write(CVector<short>& psData)
 {
     if (device_changed)
@@ -585,9 +585,9 @@ CSoundOutJack::Write(CVector<short>& psData)
     if (jack_ringbuffer_write (play_data.buff, (char *) &psData[0], bytes) < bytes)
     {
         play_data.overruns++;
-        return TRUE;
+        return true;
     }
-    return FALSE;
+    return false;
 }
 
 void

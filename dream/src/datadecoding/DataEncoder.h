@@ -1,12 +1,12 @@
 /******************************************************************************\
  * Technische Universitaet Darmstadt, Institut fuer Nachrichtentechnik
- * Copyright (c) 2001-2014
+ * Copyright (c) 2001
  *
  * Author(s):
- *  Volker Fischer
+ *	Volker Fischer
  *
  * Description:
- *  See DataDecoder.cpp
+ *	See DataDecoder.cpp
  *
  ******************************************************************************
  *
@@ -39,7 +39,7 @@
 
 class CDataEncoder
 {
-public:
+  public:
     CDataEncoder ()
     {
     }
@@ -52,10 +52,10 @@ public:
 
     CMOTSlideShowEncoder *GetSliShowEnc ()
     {
-        return &MOTSlideShowEncoder;
+	return &MOTSlideShowEncoder;
     }
 
-protected:
+  protected:
     CMOTSlideShowEncoder MOTSlideShowEncoder;
     CVector < _BINARY > vecbiCurDataUnit;
 

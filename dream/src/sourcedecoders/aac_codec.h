@@ -1,6 +1,6 @@
 /******************************************************************************\
  *
- * Copyright (c) 2001-2014
+ * Copyright (c) 2013
  *
  * Author(s):
  *  David Flamand
@@ -26,8 +26,8 @@
  *
 \******************************************************************************/
 
-#ifndef _AAC_CODEC_H_
-#define _AAC_CODEC_H_
+#ifndef AAC_CODEC_H_
+#define AAC_CODEC_H_
 
 #include "AudioCodec.h"
 #ifdef USE_FAAD2_LIBRARY
@@ -44,26 +44,27 @@
 class AacCodec : public CAudioCodec
 {
 public:
-    AacCodec();
-    virtual ~AacCodec();
-    /* Decoder */
-    virtual string DecGetVersion();
-    virtual bool CanDecode(CAudioParam::EAudCod eAudioCoding);
-    virtual bool DecOpen(CAudioParam& AudioParam, int *iAudioSampleRate, int *iLenDecOutPerChan);
-    virtual _SAMPLE* Decode(CVector<uint8_t>& vecbyPrepAudioFrame, int *iChannels, CAudioCodec::EDecError *eDecError);
+	AacCodec();
+	virtual ~AacCodec();
+	/* Decoder */
+	virtual std::string DecGetVersion();
+	virtual bool CanDecode(CAudioParam::EAudCod eAudioCoding);
+    virtual bool DecOpen(const CAudioParam& AudioParam, int& iAudioSampleRate);
+    virtual EDecError Decode(const std::vector<uint8_t>& audio_frame, uint8_t aac_crc_bits, CVector<_REAL>& left,  CVector<_REAL>& right);
     virtual void DecClose();
-    virtual void DecUpdate(CAudioParam& AudioParam);
+	virtual void DecUpdate(CAudioParam& AudioParam);
     /* Encoder */
-    virtual string EncGetVersion();
-    virtual bool CanEncode(CAudioParam::EAudCod eAudioCoding);
-    virtual bool EncOpen(int iSampleRate, int iChannels, unsigned long *lNumSampEncIn, unsigned long *lMaxBytesEncOut);
+	virtual std::string EncGetVersion();
+	virtual bool CanEncode(CAudioParam::EAudCod eAudioCoding);
+    virtual bool EncOpen(const CAudioParam& AudioParam, unsigned long& lNumSampEncIn, unsigned long& lMaxBytesEncOut);
     virtual int Encode(CVector<_SAMPLE>& vecsEncInData, unsigned long lNumSampEncIn, CVector<uint8_t>& vecsEncOutData, unsigned long lMaxBytesEncOut);
     virtual void EncClose();
-    virtual void EncSetBitrate(int iBitRate);
-    virtual void EncUpdate(CAudioParam& AudioParam);
+	virtual void EncSetBitrate(int iBitRate);
+	virtual void EncUpdate(CAudioParam& AudioParam);
 protected:
-    NeAACDecHandle hFaadDecoder;
-    faacEncHandle hFaacEncoder;
+	NeAACDecHandle hFaadDecoder;
+	faacEncHandle hFaacEncoder;
+    std::string fileName(const CParameter& Parameters) const;
 };
 
-#endif // _AAC_CODEC_H_
+#endif // AAC_CODEC_H_

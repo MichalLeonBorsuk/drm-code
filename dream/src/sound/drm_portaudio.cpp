@@ -1,9 +1,9 @@
 /******************************************************************************\
  * British Broadcasting Corporation
- * Copyright (c) 2001-2014
+ * Copyright (c) 2007
  *
  * Author(s):
- *  Julian Cable
+ *	Julian Cable
  *
  * Decription:
  * PortAudio sound interface
@@ -42,8 +42,8 @@ captureCallback(const void *inputBuffer, void *outputBuffer,
 {
     /* Cast data passed through stream to our structure. */
     CPaCommon *This = (CPaCommon *) userData;
-    (void) outputBuffer;        /* Prevent unused variable warning. */
-    long bytes = framesPerBuffer*2*sizeof(short);
+    (void) outputBuffer;		/* Prevent unused variable warning. */
+    long bytes = long(framesPerBuffer*2*sizeof(short));
     long avail = PaUtil_GetRingBufferWriteAvailable(&This->ringBuffer);
     PaUtil_WriteRingBuffer(&This->ringBuffer, inputBuffer, (avail<bytes)?avail:bytes);
     if (statusFlags&paInputOverflow)
@@ -58,7 +58,7 @@ playbackCallback(const void *inputBuffer, void *outputBuffer,
                  PaStreamCallbackFlags statusFlags, void *userData)
 {
     CPaCommon *This = (CPaCommon *) userData;
-    (void) inputBuffer;         /* Prevent unused variable warning. */
+    (void) inputBuffer;			/* Prevent unused variable warning. */
     long bytes = framesPerBuffer*2*sizeof(short);
     long avail = PaUtil_GetRingBufferReadAvailable(&This->ringBuffer);
     PaUtil_ReadRingBuffer(&This->ringBuffer, outputBuffer, (avail<bytes)?avail:bytes);
@@ -69,10 +69,10 @@ playbackCallback(const void *inputBuffer, void *outputBuffer,
 
 int CPaCommon::pa_count = 0;
 
-CPaCommon::CPaCommon(bool cap):ringBuffer(),xruns(0),stream(NULL),
-    names(), devices(),
-    is_capture(cap), blocking(true), device_changed(true), xrun(false),
-    framesPerBuffer(0), ringBufferData(NULL)
+CPaCommon::CPaCommon(bool cap):ringBuffer(),xruns(0),stream(nullptr),
+        names(), devices(),
+        is_capture(cap), blocking(true), device_changed(true), xrun(false),
+        framesPerBuffer(0), ringBufferData(nullptr)
 {
     if (pa_count == 0)
     {
@@ -109,8 +109,8 @@ CPaCommon::Enumerate(vector < string > &choices, vector < string > &descriptions
 
     names.clear();
     descriptions.clear();
-    names.push_back(""); /* default device */
-    descriptions.push_back("");
+	names.push_back(""); /* default device */
+	descriptions.push_back("");
 
     int numDevices = Pa_GetDeviceCount();
     if (numDevices < 0)
@@ -206,13 +206,13 @@ CPaCommon::ReInit()
 
     memset(&pParameters, 0, sizeof(pParameters));
     pParameters.channelCount = 2;
-    pParameters.hostApiSpecificStreamInfo = NULL;
+    pParameters.hostApiSpecificStreamInfo = nullptr;
     pParameters.sampleFormat = paInt16;
 
     int idev = -1;
     for (int i = 0; i < int(names.size()); i++)
     {
-        if (names[i] == dev)
+        if (names[unsigned(i)] == dev)
         {
             idev = i;
             break;
@@ -228,8 +228,8 @@ CPaCommon::ReInit()
     }
     else
     {
-        cout << "opening " << names[idev] << endl;
-        pParameters.device = devices[idev];
+        cout << "opening " << names[unsigned(idev)] << endl;
+        pParameters.device = devices[unsigned(idev)];
     }
 
     if (pParameters.device == paNoDevice)
@@ -250,36 +250,36 @@ CPaCommon::ReInit()
     }
 
     /* See the specific host's API docs for info on using this field */
-    pParameters.hostApiSpecificStreamInfo = NULL;
+    pParameters.hostApiSpecificStreamInfo = nullptr;
 
     /* flags that can be used to define dither, clip settings and more */
     if (is_capture)
     {
-        err = Pa_OpenStream(&stream, &pParameters, NULL, samplerate,
+        err = Pa_OpenStream(&stream, &pParameters, nullptr, samplerate,
                             framesPerBuffer, paNoFlag, captureCallback,
-                            (void *) this);
+                            this);
 
         if (err != paNoError) {
             //throw string("PortAudio error: ") + Pa_GetErrorText(err);
-        }
+		}
         err = Pa_StartStream(stream);
         if (err != paNoError) {
             //throw string("PortAudio error: ") + Pa_GetErrorText(err);
-        }
+		}
     }
     else
     {
-        err = Pa_OpenStream(&stream, NULL, &pParameters, samplerate,
+        err = Pa_OpenStream(&stream, nullptr, &pParameters, samplerate,
                             framesPerBuffer, paNoFlag, playbackCallback,
                             (void *) this);
         if (err != paNoError) {
             //throw string("PortAudio error: ") + Pa_GetErrorText(err);
-        }
+		}
     }
 
     unsigned long n = 2;
     while (n < minRingBufferSize)
-        n <<= 2;                /* smallest power of 2 >= requested */
+        n <<= 2;				/* smallest power of 2 >= requested */
 
     if (ringBufferData)
         delete[] ringBufferData;
@@ -307,7 +307,7 @@ CPaCommon::Close()
             cout << "PortAudio error: " << Pa_GetErrorText(err) << endl;
         }
 
-        stream = NULL;
+        stream = nullptr;
         device_changed = true;
     }
 }
@@ -318,7 +318,7 @@ CPaCommon::Read(CVector < short >&psData)
     if (device_changed)
         ReInit();
 
-    if (stream==NULL)
+    if (stream==nullptr)
         return true;
 
     size_t bytes = psData.Size() * sizeof(short);
@@ -344,14 +344,14 @@ CPaCommon::Write(CVector < short >&psData)
     if (device_changed)
         ReInit();
 
-    if (stream==NULL)
+    if (stream==nullptr)
         return true;
 
     size_t bytes = psData.Size() * sizeof(short);
 
     //cout << "Write: got " << bytes << " can put " << PaUtil_GetRingBufferWriteAvailable(&ringBuffer) << endl;
     if (PaUtil_GetRingBufferWriteAvailable(&ringBuffer) < int(bytes))
-        return false;           /* TODO use newer data in preference to draining old */
+        return false;			/* TODO use newer data in preference to draining old */
 
     PaUtil_WriteRingBuffer(&ringBuffer, &psData[0], bytes);
     if (Pa_IsStreamStopped( stream ))
@@ -359,7 +359,7 @@ CPaCommon::Write(CVector < short >&psData)
         int err = Pa_StartStream(stream);
         if (err != paNoError) {
             //throw string("PortAudio error: ") + Pa_GetErrorText(err);
-        }
+		}
     }
     if (xruns==0)
         return false;
