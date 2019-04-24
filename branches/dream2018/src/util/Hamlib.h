@@ -74,18 +74,18 @@ public:
 	ESMeterState	GetSMeter(_REAL& rCurSigStr);
 
 	/* backend selection */
-	void			GetRigList(map<rig_model_t,SDrRigCaps>&);
+	void			GetRigList(std::map<rig_model_t,SDrRigCaps>&);
 	void			SetHamlibModelID(const rig_model_t model);
 	rig_model_t		GetHamlibModelID() const {return iHamlibModelID;}
 
 	/* com port selection */
-	void			GetPortList(map<std::string,std::string>&);
+	void			GetPortList(std::map<std::string,std::string>&);
 	void			SetComPort(const std::string&);
-	std::string			GetComPort() const;
+	std::string		GetComPort() const;
 
 	void			SetEnableModRigSettings(const bool bNSM);
-	bool		GetEnableModRigSettings() const {return bModRigSettings;}
-	std::string			GetInfo() const;
+	bool			GetEnableModRigSettings() const {return bModRigSettings;}
+	std::string		GetInfo() const;
 
 	void			RigSpecialParameters(rig_model_t id, const std::string& sSet, int iFrOff, const std::string& sModSet);
 	void			ConfigureRig(const std::string & strSet);
@@ -108,8 +108,8 @@ protected:
 		int			iFreqOffs; /* Frequency offset */
 	};
 
-	map<rig_model_t,CSpecDRMRig>	SpecDRMRigs;
-	map<rig_model_t,SDrRigCaps>		CapsHamlibModels;
+	std::map<rig_model_t,CSpecDRMRig>	SpecDRMRigs;
+	std::map<rig_model_t,SDrRigCaps>		CapsHamlibModels;
 
 	void EnableSMeter(const bool bStatus);
 
@@ -121,17 +121,17 @@ protected:
 	void				SetRigConfig();
 
 	RIG*				pRig;
-	bool			bSMeterIsSupported;
-	bool			bModRigSettings;
+	bool				bSMeterIsSupported;
+	bool				bModRigSettings;
 	rig_model_t			iHamlibModelID;
-	std::string				strHamlibConf;
-	std::string				strSettings;
+	std::string			strHamlibConf;
+	std::string			strSettings;
 	int					iFreqOffset;
-	map<std::string,std::string> modes;
-	map<std::string,std::string> levels;
-	map<std::string,std::string> functions;
-	map<std::string,std::string> parameters;
-	map<std::string,std::string> config;
+	std::map<std::string,std::string> modes;
+	std::map<std::string,std::string> levels;
+	std::map<std::string,std::string> functions;
+	std::map<std::string,std::string> parameters;
+	std::map<std::string,std::string> config;
 
 };
 
