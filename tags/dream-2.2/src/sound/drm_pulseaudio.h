@@ -77,7 +77,7 @@ class CSoundPulse
 public:
 	CSoundPulse(bool bPlayback);
     virtual ~CSoundPulse();
-	void			Enumerate(std::vector<string>& names, std::vector<string>& descriptions);
+	void			Enumerate(std::vector<std::string>& names, std::vector<std::string>& descriptions);
 	void			SetDev(std::string sNewDevice);
 	std::string			GetDev();
 protected:
@@ -94,7 +94,7 @@ class CSoundInPulse : public CSoundPulse, public CSoundInInterface
 public:
 	CSoundInPulse();
     virtual ~CSoundInPulse();
-	void			Enumerate(std::vector<string>& names, std::vector<string>& descriptions) {CSoundPulse::Enumerate(names, descriptions);};
+	void			Enumerate(std::vector<std::string>& names, std::vector<std::string>& descriptions) {CSoundPulse::Enumerate(names, descriptions);};
 	std::string			GetDev() {return CSoundPulse::GetDev();};
 	void			SetDev(std::string sNewDevice) {CSoundPulse::SetDev(sNewDevice);};
 	std::string			GetVersion() { return pa_get_library_version(); }
@@ -135,7 +135,7 @@ class CSoundOutPulse : public CSoundPulse, public CSoundOutInterface
 public:
 	CSoundOutPulse();
     virtual ~CSoundOutPulse();
-	void			Enumerate(std::vector<string>& names, std::vector<string>& descriptions) {CSoundPulse::Enumerate(names, descriptions);};
+	void			Enumerate(std::vector<std::string>& names, std::vector<std::string>& descriptions) {CSoundPulse::Enumerate(names, descriptions);};
     std::string			GetDev() {return CSoundPulse::GetDev();}
     void			SetDev(std::string sNewDevice) {CSoundPulse::SetDev(sNewDevice);}
 	std::string			GetVersion() { return pa_get_library_version(); }
