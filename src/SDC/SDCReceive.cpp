@@ -837,64 +837,49 @@ bool CSDCReceive::DataEntityType8(CVector<_BINARY>* pbiData,
                                       CParameter& Parameter)
 {
     /* Check length -> must be 3 or 4 bytes */
-    if (iLengthOfBody < 3)
-        return false;
+    if (iLengthOfBody < 3) return false;
 
-    if (iLengthOfBody > 4)
-        return false;
-
-	if (iLengthOfBody == 3)
-    {
-    /* Decode date */
-    CModJulDate ModJulDate((*pbiData).Separate(17));
+    if (iLengthOfBody > 4) return false;
 
     Parameter.Lock();
+
+    /* Decode date */
+    CModJulDate ModJulDate((*pbiData).Separate(17));
     Parameter.iDay = ModJulDate.GetDay();
     Parameter.iMonth = ModJulDate.GetMonth();
     Parameter.iYear = ModJulDate.GetYear();
 
     /* UTC (hours and minutes) */
-    Parameter.iUTCHour = (*pbiData).Separate(5);
-    Parameter.iUTCMin = (*pbiData).Separate(6);
+    Parameter.iUTCHour = int((*pbiData).Separate(5));
+    Parameter.iUTCMin = int((*pbiData).Separate(6));
 
-    Parameter.bValidUTCOffsetAndSense = false;
-    }
-
-    if (iLengthOfBody == 4)
+    if (iLengthOfBody == 3)
     {
-    /* Decode date */
-    CModJulDate ModJulDate((*pbiData).Separate(17));
-
-    Parameter.Lock();
-    Parameter.iDay = ModJulDate.GetDay();
-    Parameter.iMonth = ModJulDate.GetMonth();
-    Parameter.iYear = ModJulDate.GetYear();
-
-    /* UTC (hours and minutes) */
-    Parameter.iUTCHour = (*pbiData).Separate(5);
-    Parameter.iUTCMin = (*pbiData).Separate(6);
-
-    /* rfu */
-    const int rfu = (*pbiData).Separate(2);
-
-    /* UTC Sense */
-    Parameter.iUTCSense = (*pbiData).Separate(1); 
-
-    /* UTC Offset (local time offset) */
-    Parameter.iUTCOff = ((*pbiData).Separate(5));
-
-    Parameter.bValidUTCOffsetAndSense = true;
-
-    if (rfu)
-    {
-        /* rfu is set, reset all */
-        Parameter.iDay = 0;
-        Parameter.iMonth = 0;
-        Parameter.iYear = 0;
-        Parameter.iUTCSense = 0; 
-        Parameter.iUTCOff = 0;
         Parameter.bValidUTCOffsetAndSense = false;
     }
+    else
+    {            
+        /* rfu */
+        const int rfu = int((*pbiData).Separate(2));
+
+        /* UTC Sense */
+        Parameter.iUTCSense = int((*pbiData).Separate(1));
+
+        /* UTC Offset (local time offset) */
+        Parameter.iUTCOff = int(((*pbiData).Separate(5)));
+
+        Parameter.bValidUTCOffsetAndSense = true;
+
+        if (rfu)
+        {
+            /* rfu is set, reset all */
+            Parameter.iDay = 0;
+            Parameter.iMonth = 0;
+            Parameter.iYear = 0;
+            Parameter.iUTCSense = 0;
+            Parameter.iUTCOff = 0;
+            Parameter.bValidUTCOffsetAndSense = false;
+        }
     }
 	
     Parameter.Unlock();

@@ -76,7 +76,7 @@ public:
     void start() {}
     void wait(int) {}
     void msleep(int) {}
-    bool running() {
+    bool isRunning() {
         return true;
     }
 };

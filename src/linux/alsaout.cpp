@@ -117,7 +117,7 @@ bool CSoundOut::Init(int iSampleRate, int iNewBufferSize, bool bNewBlocking)
         bChangDev = false;
     }
 
-    if ( PlayThread.running() == false ) {
+    if ( PlayThread.isRunning() == false ) {
         PlayThread.SoundBuf.lock();
         PlayThread.SoundBuf.Init( SOUNDBUFLEN );
         PlayThread.SoundBuf.unlock();
@@ -176,7 +176,7 @@ void CSoundOut::Close()
     qDebug("stopplay");
 
     // stop the playback thread
-    if (PlayThread.running() ) {
+    if (PlayThread.isRunning() ) {
         PlayThread.SoundBuf.keep_running = false;
         PlayThread.wait(1000);
     }
