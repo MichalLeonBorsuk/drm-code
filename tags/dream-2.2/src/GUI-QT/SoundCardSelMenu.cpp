@@ -224,6 +224,7 @@ void CSoundCardSelMenu::UpdateDeviceMenu(QMenu* menu, const vector<string>& name
     QActionGroup* group = nullptr;
     for (int i = 0; i < int(names.size()); i++)
     {
+qDebug("enum %s", names[i].c_str());
         QString name(QString::fromStdString(names[i]));
         QString desc(QString::fromStdString(descriptions[i]));
         if(name.size()==0) name = tr("[default]");
