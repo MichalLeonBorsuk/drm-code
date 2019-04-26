@@ -1,3 +1,83 @@
+2.2
+ - support for modern compilers
+ - support for fdk-aac v2 for HE-AACv2
+2.1
+ - Tickets #170, #183, #184, #155, #177, #178
+ - added 2X upsampler
+ - added console terminal user interface
+ - added manual carrier freq input, bw slider now update only the bw marker for AM mode
+ - added some Android capability
+ - added speex noise reduction to am demod gui and some code cleanup
+ - added speexdsp resampler
+ - added support for Opus codec
+ - added system tray icon 
+ - improved OSX and BSD compatibility
+ - improved station activity settings.
+ - improvements to RSCI.
+ - make RSCI work in console mode, removing all Qt dependencies.
+ - optimized I/Q split input mode
+ - proper handling of frequencies for analog demod
+ - set the default mlc iteration to one
+ - transmitter now correctly transmits audio in console mode
+1.17
+ - Add support for running a schedule. Not finished - needs to turn logging off during idle schedule periodsZ
+ - GUI changes
+ -   added RSCI file menu options
+ -   added "Open Sound File" in menu
+ -   Broadcast Website viewer enhancements
+ -   Slideshow viewer enhancements
+ -   Stations Dialog enhancements
+ -     stations can be sorted by online/offline
+ -     add a message box if the schedule file can't be found.
+ -   AM Main Window Enhancements
+ -     fixed bandwidth slide bar not updating on sample rate change.
+ -   Evaluation Dialog now updates on logging change
+ - Command line enhancements
+ -  fileio fixes
+ -  add test command line parameter
+ -  add reverb command line parameter
+ -  add samplerate command line parameter
+ -  add command line parameter for schedule file.
+ - FAAC/FAAD2 can now be detected and loaded at runtime
+ - FAAC is now checked if it was buit with DRM support
+ - Support for multiple sample rates
+ - added 2 new I/Q input mode.
+ - added L-R input signal mode, useful for differential signal
+ - added resampler to audio file in
+ - added sample rate selection in sound card menu
+ - changed TimeSync filter data to const, reformated the filter code
+ - added console profile with no dependency to qt
+ - pulseaudio: added reporting of recording overrun error, support for stdin/stdout sound device
+ - Transmitter enhancements - transmit current time, added high quality I/Q output, added +14dB amplified output
+ - Windows mmsystem sound updates, simplified process priority
+1.16
+  - Full support of Qt4 and Qwt 5/6
+  - Default use of fftw3
+  - Better looking logo and icons
+  - PulseAudio sound interface (linux)
+  - Various bug fixes, code cleanups and user interface changes
+  - Transmitter Enhancements
+    - configuration stored in Dream.ini
+    - ability to transmit the current time
+    - fix for restart bug
+    - provide a clean spectrum when stopping
+    - fix for problems with MOT slide show
+    - stop MOT Slide Show encoding the full path of files
+  - Receiver Enhancements
+    - fix pcap reading
+  ` - prevent crash when EPG item has no duration
+    - prevent crash with HVXC encoded service
+    - fix direct frequency input
+    - fix support for DRM Logger
+    - add missing SDC information to MOT service display
+    - additional receiver state stored in Dream.ini
+    - better frequency resolution and dynamic range of audio spectrum plot
+    - support of links in text messages (qt4 only)
+    - added display of UTC offset on received time in system evaluation dialogue
+
+1.15
+  - moved from CVS to subversion
+
 1.14
   - allows building with Qt4
 

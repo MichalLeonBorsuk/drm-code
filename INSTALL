@@ -1,14 +1,11 @@
 Installation Instructions for the Dream Software
 ------------------------------------------------
 
-This version of Dream can be built using any of the following:
+This version of Dream has been tested with the following compilers
 
 * Windows
 
- * Microsoft Visual Studio 6.0
- * Microsoft Visual Studio Express 2008
- * MinGW + Dev-C++
- * MinGW + Code::Blocks
+ * Microsoft Visual Studio 17.0
  
 * Linux
 
