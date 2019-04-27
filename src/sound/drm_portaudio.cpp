@@ -29,6 +29,7 @@
 #include "drm_portaudio.h"
 #include <iostream>
 #include <cstring>
+using namespace std;
 
 /* This routine will be called by the PortAudio engine when audio is needed.
  * It may called at interrupt level on some machines so don't do anything
@@ -130,7 +131,9 @@ CPaCommon::Enumerate(vector < string > &choices, vector < string > &descriptions
                 if (info)
                     api = string(info->name)+":";
             }
+            cerr<< api+deviceInfo->name << endl;
             names.push_back(api+deviceInfo->name);
+	descriptions.push_back("");
             devices.push_back(i);
         }
     }
