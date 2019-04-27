@@ -39,7 +39,7 @@ public:
     CPaCommon(bool);
     virtual 		~CPaCommon();
 
-    virtual void	Enumerate(std::vector<string>& names, std::vector<string>& descriptions);
+    virtual void	Enumerate(std::vector<std::string>& names, std::vector<std::string>& descriptions);
     virtual void	SetDev(std::string sNewDevice);
     virtual std::string	GetDev();
 
@@ -55,7 +55,7 @@ public:
 protected:
 
     PaStream *stream;
-    std::vector<string> names;
+    std::vector<std::string> names;
     std::vector<PaDeviceIndex> devices;
     std::string dev;
     bool is_capture,blocking,device_changed,xrun;
@@ -72,7 +72,7 @@ class CPaIn: public CSoundInInterface
 public:
     CPaIn();
     virtual 			~CPaIn();
-    virtual void	Enumerate(std::vector<string>& names, std::vector<string>& descriptions)
+    virtual void	Enumerate(std::vector<std::string>& names, std::vector<std::string>& descriptions)
     {
         hw.Enumerate(names, descriptions);
     }
@@ -103,7 +103,7 @@ class CPaOut: public CSoundOutInterface
 public:
     CPaOut();
     virtual 			~CPaOut();
-    virtual void	Enumerate(std::vector<string>& names, std::vector<string>& descriptions)
+    virtual void	Enumerate(std::vector<std::string>& names, std::vector<std::string>& descriptions)
     {
         hw.Enumerate(names, descriptions);
     }

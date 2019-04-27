@@ -145,6 +145,7 @@ static int pa_o_sync(pa_object *pa_obj, pa_operation *pa_o)
     DEBUG_MSG("pa_o_sync failed, error %i\n", error);
     return error;
 }
+
 static int pa_s_sync(pa_object *pa_obj, pa_stream *pa_s, int error)
 {
     int retval;
@@ -253,10 +254,10 @@ static void pa_stream_notify_cb(pa_stream *, void *userdata)
         SoundOutPulse->bPrebuffer = true;
 }
 
-static void pa_stream_success_cb(pa_stream *, int /*success*/, void */*userdata*/)
+static void pa_stream_success_cb(pa_stream *s, int success, void *userdata)
 {
-//	if (userdata)
-//		DEBUG_MSG("pa_stream_success_cb(%s) = %i\n", (char*)userdata, success);
+	if (userdata)
+		DEBUG_MSG("pa_stream_success_cb(%s) = %i\n", (char*)userdata, success);
 }
 
 static int pa_stream_get_latency(pa_object *pa_obj, pa_stream *pa_s, int sample_rate, uint64_t *usec)
@@ -340,7 +341,7 @@ void CSoundInPulse::Init_HW()
                          &ss,								// Our sample format.
                          nullptr								// Use default channel map
                         );
-    if (!pa_s)
+    if (pa_s == nullptr)
     {
         DEBUG_MSG("CSoundInPulse::Init_HW pa_stream_new failed\n");
         return;
@@ -476,7 +477,6 @@ void CSoundInPulse::SetBufferSize_HW()
     pa_attr.prebuf    = uint32_t(-1); 							// Playback only: pre-buffering.
     pa_attr.minreq    = uint32_t(-1);								// Playback only: minimum request.
     pa_attr.fragsize  = uint32_t(iBufferSize*BYTES_PER_SAMPLE);	// Recording only: fragment size.
-    // TODO Fix crash here
     if (pa_o_sync(&pa_obj, pa_stream_set_buffer_attr(pa_s, &pa_attr, pa_stream_success_cb, nullptr)) != PA_OK)
         DEBUG_MSG("CSoundInPulse::SetBufferSize_HW() error\n");
 #endif
@@ -821,6 +821,10 @@ bool CSoundInPulse::Init(int iNewSampleRate, int iNewBufferSize, bool bNewBlocki
         {
             /* Save buffer size */
             iBufferSize = iNewBufferSize;
+
+	    if(pa_s == nullptr) {
+        	Init_HW();
+	    }
 
             /* Set buffer size */
             SetBufferSize_HW();
