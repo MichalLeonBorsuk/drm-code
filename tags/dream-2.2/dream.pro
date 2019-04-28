@@ -371,7 +371,7 @@ hamlib {
 }
 qwt {
     message("with Qwt")
-    QT += svg
+    QT += svg concurrent
     macx {
         INCLUDEPATH += /Library/Frameworks/qwt.framework/Headers
         LIBS += -framework qwt
