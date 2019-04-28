@@ -30,11 +30,10 @@
 \******************************************************************************/
 
 #include "DRMPlot.h"
-#include "../DRMSignalIO.h"
 #include "../PlotManager.h"
 #include <cmath>
 #include <algorithm>
-
+#include "../matlib/MatlibSigProToolbox.h"
 
 /* Implementation *************************************************************/
 CDRMPlot::CDRMPlot(QWidget* parent, QwtPlot* SuppliedPlot) :
@@ -203,7 +202,7 @@ void CDRMPlot::OnTimerChart() // TODO make sure timer stopped when receiver not 
 	bool bAudioDecoder = !Parameters.audiodecoder.empty();
 	iAudSampleRate = Parameters.GetAudSampleRate();
 	iSigSampleRate = Parameters.GetSigSampleRate();
-    int iChanMode = (int)pDRMRec->GetInChanSel();
+    int iChanMode = pDRMRec->GetInChanSel();
 	Parameters.Unlock();
 
 	/* Needed to detect sample rate change */
@@ -254,7 +253,7 @@ void CDRMPlot::OnTimerChart() // TODO make sure timer stopped when receiver not 
 		SetData(vecrData, vecrData2, vecrScale);
 		break;
 
-	case POWER_SPEC_DENSITY:
+    case POWER_SPEC_DENSITY: // "Shifted PSD" - works for file input, displaced on sound card input
 		/* Get data from module */
         pDRMRec->GetPowDenSpec(vecrData, vecrScale);
 
@@ -263,7 +262,7 @@ void CDRMPlot::OnTimerChart() // TODO make sure timer stopped when receiver not 
 		SetData(vecrData, vecrScale);
 		break;
 
-	case SNR_SPECTRUM:
+    case SNR_SPECTRUM: // "SNR Spectrum"
 		/* Get data from module */
 		PlotManager.GetSNRProfile(vecrData, vecrScale);
 
@@ -273,7 +272,7 @@ void CDRMPlot::OnTimerChart() // TODO make sure timer stopped when receiver not 
 		SetData(vecrData, vecrScale);
 		break;
 
-	case INPUTSPECTRUM_NO_AV:
+    case INPUTSPECTRUM_NO_AV: // "Input Spectrum" - broken
 		/* Get data from module */
         pDRMRec->GetInputSpec(vecrData, vecrScale);
 
@@ -283,7 +282,7 @@ void CDRMPlot::OnTimerChart() // TODO make sure timer stopped when receiver not 
 		SetData(vecrData, vecrScale);
 		break;
 
-	case INP_SPEC_WATERF:
+    case INP_SPEC_WATERF: // "Waterfall"
 		/* Get data from module */
         pDRMRec->GetInputSpec(vecrData, vecrScale);
 
@@ -292,7 +291,7 @@ void CDRMPlot::OnTimerChart() // TODO make sure timer stopped when receiver not 
 		SetInpSpecWaterf(vecrData, vecrScale);
 		break;
 
-	case INPUT_SIG_PSD:
+    case INPUT_SIG_PSD: // "Input PSD" - broken
 		/* Get data from module */
 		PlotManager.GetInputPSD(vecrData, vecrScale);
 
@@ -1034,7 +1033,7 @@ void CDRMPlot::SetupPSD()
 		MAX_VAL_SHIF_PSD_Y_AXIS_DB);
 
 	double dX[2], dY[2];
-	dX[0] = dX[1] = (_REAL) VIRTUAL_INTERMED_FREQ / 1000;
+    dX[0] = dX[1] = VIRTUAL_INTERMED_FREQ / 1000.0;
 
 	/* Take the min-max values from scale to get vertical line */
 	dY[0] = MIN_VAL_SHIF_PSD_Y_AXIS_DB;

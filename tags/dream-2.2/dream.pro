@@ -441,6 +441,8 @@ HEADERS += \
     src/chanest/IdealChannelEstimation.h \
     src/chanest/TimeLinear.h \
     src/chanest/TimeWiener.h \
+    src/creceivedata.h \
+    src/ctransmitdata.h \
     src/datadecoding/DABMOT.h \
     src/datadecoding/DataDecoder.h \
     src/datadecoding/DataEncoder.h \
@@ -461,7 +463,6 @@ HEADERS += \
     src/DataIO.h \
     src/drmchannel/ChannelSimulation.h \
     src/DrmReceiver.h \
-    src/DRMSignalIO.h \
     src/DrmSimulation.h \
     src/DrmTransceiver.h \
     src/DrmTransmitter.h \
@@ -571,6 +572,8 @@ SOURCES += \
     src/chanest/IdealChannelEstimation.cpp \
     src/chanest/TimeLinear.cpp \
     src/chanest/TimeWiener.cpp \
+    src/creceivedata.cpp \
+    src/ctransmitdata.cpp \
     src/datadecoding/DABMOT.cpp \
     src/datadecoding/DataDecoder.cpp \
     src/datadecoding/DataEncoder.cpp \
@@ -588,7 +591,6 @@ SOURCES += \
     src/DataIO.cpp \
     src/drmchannel/ChannelSimulation.cpp \
     src/DrmReceiver.cpp \
-    src/DRMSignalIO.cpp \
     src/DrmSimulation.cpp \
     src/DrmTransmitter.cpp \
     src/FAC/FAC.cpp \

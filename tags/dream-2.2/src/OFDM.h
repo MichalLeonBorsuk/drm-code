@@ -43,7 +43,7 @@
 class COFDMModulation : public CTransmitterModul<_COMPLEX, _COMPLEX>
 {
 public:
-    COFDMModulation() : rDefCarOffset((_REAL) VIRTUAL_INTERMED_FREQ) {}
+    COFDMModulation() : rDefCarOffset(VIRTUAL_INTERMED_FREQ) {}
     virtual ~COFDMModulation() {}
 
     void SetCarOffset(const _REAL rNewCarOffset)
