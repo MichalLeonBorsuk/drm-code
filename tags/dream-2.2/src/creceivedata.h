@@ -4,7 +4,7 @@
 #include "util/Modul.h"
 #include "sound/soundinterface.h"
 #include "util/Utilities.h"
-#include "inputpsd.h"
+#include "spectrumanalyser.h"
 #ifdef QT_MULTIMEDIA_LIB
 # include <QAudioInput>
 # include <QIODevice>
@@ -17,7 +17,7 @@
   /* Length of vector for input spectrum. We use approx. 0.2 sec
      of sampled data for spectrum calculation, this is 2^13 = 8192 to
      make the FFT work more efficient. Make sure that this number is not smaller
-     than the symbol lenght in 48 khz domain of longest mode (which is mode A/B:
+     than the symbol length in 48 kHz domain of longest mode (which is mode A/B:
      1280) */
 #define NUM_SMPLS_4_INPUT_SPECTRUM (NUM_AV_BLOCKS_PSD * LEN_PSD_AV_EACH_BLOCK)
 
@@ -111,7 +111,7 @@ protected:
     _COMPLEX			cCurExp;
     _COMPLEX			cExpStep;
     int					iPhase;
-    InputPSD            inputPSD;
+    SpectrumAnalyser            spectrumAnalyser;
 
     _REAL HilbertFilt(const _REAL rRe, const _REAL rIm);
 
@@ -123,6 +123,7 @@ protected:
     virtual void ProcessDataInternal(CParameter& Parameters);
 
     void InterpFIR_2X(const int channels, _SAMPLE* X, std::vector<float>& Z, std::vector<float>& Y, std::vector<float>& B);
+    void emitRSCIData(CParameter& Parameters);
 };
 
 

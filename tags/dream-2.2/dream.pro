@@ -469,7 +469,6 @@ HEADERS += \
     src/FAC/FAC.h \
     src/GlobalDefinitions.h \
     src/InputResample.h \
-    src/inputpsd.h \
     src/interleaver/BlockInterleaver.h \
     src/interleaver/SymbolInterleaver.h \
     src/IQInputFilter.h \
@@ -528,6 +527,7 @@ HEADERS += \
     src/sourcedecoders/AudioSourceEncoder.h \
     src/sourcedecoders/null_codec.h \
     src/sourcedecoders/opus_codec.h \
+    src/spectrumanalyser.h \
     src/sync/FreqSyncAcq.h \
     src/sync/SyncUsingPil.h \
     src/sync/TimeSyncFilter.h \
@@ -596,7 +596,6 @@ SOURCES += \
     src/DrmTransmitter.cpp \
     src/FAC/FAC.cpp \
     src/InputResample.cpp \
-    src/inputpsd.cpp \
     src/interleaver/BlockInterleaver.cpp \
     src/interleaver/SymbolInterleaver.cpp \
     src/IQInputFilter.cpp \
@@ -651,6 +650,7 @@ SOURCES += \
     src/sourcedecoders/AudioSourceEncoder.cpp \
     src/sourcedecoders/null_codec.cpp \
     src/sourcedecoders/opus_codec.cpp \
+    src/spectrumanalyser.cpp \
     src/sync/FreqSyncAcq.cpp \
     src/sync/SyncUsingPil.cpp \
     src/sync/TimeSync.cpp \

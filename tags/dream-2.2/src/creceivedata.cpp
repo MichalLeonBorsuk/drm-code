@@ -12,6 +12,7 @@
 using namespace std;
 
 const static int SineTable[] = { 0, 1, 0, -1, 0 };
+const static _REAL PSDWindowGain = 0.39638; /* power gain of the Hamming window */
 
 //inline _REAL sample2real(_SAMPLE s) { return _REAL(s)/32768.0; }
 inline _REAL sample2real(_SAMPLE s) {
@@ -24,7 +25,7 @@ CReceiveData::CReceiveData() :
 #endif
     pSound(nullptr),
     vecrInpData(INPUT_DATA_VECTOR_SIZE, 0.0),
-    bFippedSpectrum(false), eInChanSelection(CS_MIX_CHAN), iPhase(0),inputPSD()
+    bFippedSpectrum(false), eInChanSelection(CS_MIX_CHAN), iPhase(0),spectrumAnalyser()
 {}
 
 CReceiveData::~CReceiveData()
@@ -136,15 +137,8 @@ void CReceiveData::ProcessDataInternal(CParameter& Parameters)
         iFreeSymbolCounter = 0;
         /* calculate the PSD once per frame for the RSI output */
         if (Parameters.bMeasurePSD) {
-            /* Init the constants for scale and normalization */
-            inputPSD.setNegativeFrequency(eInChanSelection == CS_IQ_POS_SPLIT || eInChanSelection == CS_IQ_NEG_SPLIT);
-            inputPSD.setOffsetFrequency((eInChanSelection == CS_IQ_POS_ZERO) || (eInChanSelection == CS_IQ_NEG_ZERO));
-            mutexInpData.Lock();
-            inputPSD.CalculateLinearPSD(vecrInpData, LEN_PSD_AV_EACH_BLOCK_RSI, NUM_AV_BLOCKS_PSD_RSI, PSD_OVERLAP_RSI);
-            mutexInpData.Unlock();
-            inputPSD.PutPSD(Parameters);
+            emitRSCIData(Parameters);
         }
-
     }
     Parameters.Unlock();
 
@@ -625,65 +619,18 @@ _REAL CReceiveData::ConvertFrequency(_REAL rFrequency, bool bInvert) const
     return rFrequency;
 }
 
-void CReceiveData::GetInputSpec(CVector<_REAL>& vecrData,
-                                CVector<_REAL>& vecrScale)
+void CReceiveData::GetInputSpec(CVector<_REAL>& vecrData, CVector<_REAL>& vecrScale)
 {
-    int i;
-
-    /* Length of spectrum vector including Nyquist frequency */
-    const int iLenSpecWithNyFreq = NUM_SMPLS_4_INPUT_SPECTRUM / 2 + 1;
-
-    /* Init input and output vectors */
-    vecrData.Init(iLenSpecWithNyFreq, 0.0);
-    vecrScale.Init(iLenSpecWithNyFreq, 0.0);
-
-    /* Init the constants for scale and normalization */
-    const bool bNegativeFreq =
-        eInChanSelection == CS_IQ_POS_SPLIT ||
-        eInChanSelection == CS_IQ_NEG_SPLIT;
-
-    const bool bOffsetFreq =
-        eInChanSelection == CS_IQ_POS_ZERO ||
-        eInChanSelection == CS_IQ_NEG_ZERO;
-
-    const int iOffsetScale = bNegativeFreq ? (iLenSpecWithNyFreq / 2) : (bOffsetFreq ? (iLenSpecWithNyFreq * int(VIRTUAL_INTERMED_FREQ) / (iSampleRate / 2)) : 0);
-
-    const _REAL rFactorScale = _REAL(iSampleRate / iLenSpecWithNyFreq / 2000);
-
-    /* The calibration factor was determined experimentaly,
-       give 0 dB for a full scale sine wave input (0 dBFS) */
-    const _REAL rDataCalibrationFactor = 18.49;
-
-    const _REAL rNormData = rDataCalibrationFactor /
-                            (_REAL(_MAXSHORT * _MAXSHORT) *
-                             NUM_SMPLS_4_INPUT_SPECTRUM *
-                             NUM_SMPLS_4_INPUT_SPECTRUM);
-
-    /* Copy data from shift register in Matlib vector */
-    CRealVector vecrFFTInput(NUM_SMPLS_4_INPUT_SPECTRUM);
+    spectrumAnalyser.setNegativeFrequency(eInChanSelection == CS_IQ_POS_SPLIT || eInChanSelection == CS_IQ_NEG_SPLIT);
+    spectrumAnalyser.setOffsetFrequency((eInChanSelection == CS_IQ_POS_ZERO) || (eInChanSelection == CS_IQ_NEG_ZERO));
     mutexInpData.Lock();
-    for (i = 0; i < NUM_SMPLS_4_INPUT_SPECTRUM; i++)
-        vecrFFTInput[i] = vecrInpData[i];
+    spectrumAnalyser.CalculateSpectrum(vecrInpData, NUM_SMPLS_4_INPUT_SPECTRUM);
     mutexInpData.Unlock();
+    /* The calibration factor of 18.49 was determined experimentaly,
+       give 0 dB for a full scale sine wave input (0 dBFS) */
 
-    /* Get squared magnitude of spectrum */
-    CRealVector vecrSqMagSpect(iLenSpecWithNyFreq);
-    CFftPlans FftPlans;
-    vecrSqMagSpect = SqMag(rfft(vecrFFTInput * Hann(NUM_SMPLS_4_INPUT_SPECTRUM), FftPlans));
-
-    /* Log power spectrum data */
-    for (i = 0; i < iLenSpecWithNyFreq; i++)
-    {
-        const _REAL rNormSqMag = vecrSqMagSpect[i] * rNormData;
-
-        if (rNormSqMag > 0)
-            vecrData[i] = 10.0 * log10(rNormSqMag);
-        else
-            vecrData[i] = RET_VAL_LOG_0;
-
-        vecrScale[i] = _REAL(i - iOffsetScale) * rFactorScale;
-    }
-
+    const _REAL rNormData = pow(_REAL(_MAXSHORT) * _REAL(NUM_SMPLS_4_INPUT_SPECTRUM),2) / 18.49;
+    spectrumAnalyser.PSD2LogPSD(rNormData, vecrData, vecrScale);
 }
 
 void CReceiveData::GetInputPSD(CVector<_REAL>& vecrData, CVector<_REAL>& vecrScale,
@@ -691,11 +638,66 @@ void CReceiveData::GetInputPSD(CVector<_REAL>& vecrData, CVector<_REAL>& vecrSca
                  const int iNumAvBlocksPSD,
                  const int iPSDOverlap)
 {
-    inputPSD.setNegativeFrequency(eInChanSelection == CS_IQ_POS_SPLIT || eInChanSelection == CS_IQ_NEG_SPLIT);
-    inputPSD.setOffsetFrequency((eInChanSelection == CS_IQ_POS_ZERO) || (eInChanSelection == CS_IQ_NEG_ZERO));
+    spectrumAnalyser.setNegativeFrequency(eInChanSelection == CS_IQ_POS_SPLIT || eInChanSelection == CS_IQ_NEG_SPLIT);
+    spectrumAnalyser.setOffsetFrequency((eInChanSelection == CS_IQ_POS_ZERO) || (eInChanSelection == CS_IQ_NEG_ZERO));
     mutexInpData.Lock();
-    inputPSD.CalculateLinearPSD(vecrInpData, iLenPSDAvEachBlock, iNumAvBlocksPSD, iPSDOverlap);
+    spectrumAnalyser.CalculateLinearPSD(vecrInpData, iLenPSDAvEachBlock, iNumAvBlocksPSD, iPSDOverlap);
     mutexInpData.Unlock();
-    inputPSD.PSD2LogPSD(iLenPSDAvEachBlock, iNumAvBlocksPSD, vecrData, vecrScale);
+
+    const _REAL rNormData =  pow(_REAL(_MAXSHORT) * _REAL(iLenPSDAvEachBlock), 2) * _REAL(iNumAvBlocksPSD) * PSDWindowGain;
+
+    spectrumAnalyser.PSD2LogPSD(rNormData, vecrData, vecrScale);
+}
+
+void CReceiveData::emitRSCIData(CParameter& Parameters)
+{
+    /* Init the constants for scale and normalization */
+    spectrumAnalyser.setNegativeFrequency(eInChanSelection == CS_IQ_POS_SPLIT || eInChanSelection == CS_IQ_NEG_SPLIT);
+    spectrumAnalyser.setOffsetFrequency((eInChanSelection == CS_IQ_POS_ZERO) || (eInChanSelection == CS_IQ_NEG_ZERO));
+    mutexInpData.Lock();
+    spectrumAnalyser.CalculateLinearPSD(vecrInpData, LEN_PSD_AV_EACH_BLOCK_RSI, NUM_AV_BLOCKS_PSD_RSI, PSD_OVERLAP_RSI);
+    mutexInpData.Unlock();
+
+
+    const _REAL rNormData =  pow(_REAL(_MAXSHORT) * _REAL(LEN_PSD_AV_EACH_BLOCK_RSI), 2) * _REAL(NUM_AV_BLOCKS_PSD_RSI) * PSDWindowGain;
+
+    CVector<_REAL>		vecrData;
+    CVector<_REAL>		vecrScale;
+    spectrumAnalyser.PSD2LogPSD(rNormData, vecrData, vecrScale);
+
+    /* Data required for rpsd tag */
+    /* extract the values from -8kHz to +8kHz/18kHz relative to 12kHz, i.e. 4kHz to 20kHz */
+    /*const int startBin = 4000.0 * LEN_PSD_AV_EACH_BLOCK_RSI /iSampleRate;
+    const int endBin = 20000.0 * LEN_PSD_AV_EACH_BLOCK_RSI /iSampleRate;*/
+    /* The above calculation doesn't round in the way FhG expect. Probably better to specify directly */
+
+    /* For 20k mode, we need -8/+18, which is more than the Nyquist rate of 24kHz. */
+    /* Assume nominal freq = 7kHz (i.e. 2k to 22k) and pad with zeroes (roughly 1kHz each side) */
+
+    int iStartBin = 22;
+    int iEndBin = 106;
+    int iVecSize = iEndBin - iStartBin + 1; //85
+
+    //_REAL rIFCentreFrequency = Parameters.FrontEndParameters.rIFCentreFreq;
+
+    ESpecOcc eSpecOcc = Parameters.GetSpectrumOccup();
+    if (eSpecOcc == SO_4 || eSpecOcc == SO_5)
+    {
+        iStartBin = 0;
+        iEndBin = 127;
+        iVecSize = 139;
+    }
+    /* Line up the the middle of the vector with the quarter-Nyquist bin of FFT */
+    int iStartIndex = iStartBin - (LEN_PSD_AV_EACH_BLOCK_RSI/4) + (iVecSize-1)/2;
+
+    /* Fill with zeros to start with */
+    Parameters.vecrPSD.Init(iVecSize, 0.0);
+
+    for (int i=iStartIndex, j=iStartBin; j<=iEndBin; i++,j++)
+        Parameters.vecrPSD[i] = vecrData[j];
+
+    spectrumAnalyser.CalculateSigStrengthCorrection(Parameters, vecrData);
+
+    spectrumAnalyser.CalculatePSDInterferenceTag(Parameters, vecrData);
 }
 
