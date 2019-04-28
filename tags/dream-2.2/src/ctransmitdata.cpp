@@ -4,6 +4,8 @@
 #ifdef QT_MULTIMEDIA_LIB
 # include <QSet>
 # include <QAudioOutput>
+#else
+# include "sound/sound.h"
 #endif
 using namespace std;
 
