@@ -35,7 +35,7 @@
 #include "util/Buffer.h"
 #include "DataIO.h"
 #include "OFDM.h"
-#include "DRMSignalIO.h"
+#include "ctransmitdata.h"
 #include "MSCMultiplexer.h"
 #include "InputResample.h"
 #include "mlc/MLC.h"

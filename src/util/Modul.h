@@ -32,9 +32,9 @@
 
 #include "Buffer.h"
 #include "Vector.h"
-#include "../Parameter.h"
 #include <iostream>
 
+class CParameter;
 
 /* Classes ********************************************************************/
 /* CModul ------------------------------------------------------------------- */

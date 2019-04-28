@@ -26,7 +26,6 @@
  *
 \******************************************************************************/
 #include "../Parameter.h"
-#include "../DRMSignalIO.h"
 #include "../DataIO.h"
 #include "../DrmReceiver.h"
 #include "../DrmTransmitter.h"
@@ -132,7 +131,7 @@ CSoundCardSelMenu::CSoundCardSelMenu(CTRx& ntrx,
         connect(this, SIGNAL(soundInDeviceChanged(QString)), &trx, SLOT(SetInputDevice(QString)));
         connect(this, SIGNAL(soundSampleRateChanged(int)), &trx, SLOT(onSoundSampleRateChanged(int)));
         connect(this, SIGNAL(soundInDeviceChanged(QString)), &trx, SLOT(SetInputDevice(QString)));
-        connect(this, SIGNAL(soundInChannelChanged(EInChanSel)), &trx, SLOT(onSoundInChannelChanged(EInChanSel)));
+        connect(this, SIGNAL(soundInChannelChanged(int)), &trx, SLOT(onSoundInChannelChanged(int)));
         connect(this, SIGNAL(soundOutChannelChanged(EOutChanSel)), &trx, SLOT(onSoundOutChannelChanged(EOutChanSel)));
         connect(this, SIGNAL(soundSignalUpscaleChanged(int)), &trx, SLOT(SetSoundSignalUpscale(int)));
 
@@ -182,7 +181,7 @@ void CSoundCardSelMenu::OnSoundOutDevice(QAction* action)
 
 void CSoundCardSelMenu::OnSoundInChannel(QAction* action)
 {
-    emit soundInChannelChanged(EInChanSel(action->data().toInt()));
+    emit soundInChannelChanged(action->data().toInt());
 }
 
 void CSoundCardSelMenu::OnSoundOutChannel(QAction* action)

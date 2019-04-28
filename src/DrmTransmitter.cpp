@@ -229,7 +229,7 @@ CDRMTransmitter::~CDRMTransmitter()
 
 CDRMTransmitter::CDRMTransmitter(CSettings* nPsettings) : CDRMTransceiver(),
         ReadData(), TransmitData(),
-        rDefCarOffset((_REAL) VIRTUAL_INTERMED_FREQ),
+        rDefCarOffset(VIRTUAL_INTERMED_FREQ),
         // UEP only works with Dream receiver, FIXME! -> disabled for now
         bUseUEP(false), Parameters(*(new CParameter())), pSettings(nPsettings)
 {
@@ -341,7 +341,7 @@ CDRMTransmitter::CDRMTransmitter(CSettings* nPsettings) : CDRMTransceiver(),
     Parameters.eSDCCodingScheme = CS_2_SM;
 
     /* Set desired intermedia frequency (IF) in Hertz */
-    SetCarOffset(_REAL(VIRTUAL_INTERMED_FREQ)); /* Default: "VIRTUAL_INTERMED_FREQ" */
+    SetCarOffset(VIRTUAL_INTERMED_FREQ); /* Default: "VIRTUAL_INTERMED_FREQ" */
 
     if (bUseUEP)
     {

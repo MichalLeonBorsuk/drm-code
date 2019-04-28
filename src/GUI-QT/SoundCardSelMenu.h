@@ -92,7 +92,7 @@ signals:
     void soundSampleRateChanged(int);
     void soundInDeviceChanged(QString);
     void soundOutDeviceChanged(QString);
-    void soundInChannelChanged(EInChanSel);
+    void soundInChannelChanged(int);
     void soundOutChannelChanged(EOutChanSel);
     void soundSignalUpscaleChanged(int);
 };

@@ -31,7 +31,7 @@ public:
     virtual bool GetAMPLLPhase(_REAL&);
 
     virtual ERecMode GetReceiverMode();
-    virtual EInChanSel GetInChanSel();
+    virtual int GetInChanSel();
     virtual int GetMSCMLInitNumIterations();
     virtual CPlotManager* GetPlotManager();
     _REAL ConvertFrequency(_REAL rFrequency, bool bInvert=false) const;
@@ -104,7 +104,7 @@ public slots:
     virtual void SetAMDemodAcq(_REAL);
     virtual void EnableAMPLL(bool);
     virtual void EnableAutoFrequenctAcquisition(bool);
-    virtual void onSoundInChannelChanged(EInChanSel);
+    virtual void onSoundInChannelChanged(int);
     virtual void onSoundOutChannelChanged(EOutChanSel);
     virtual void onSoundSampleRateChanged(int);
     virtual void SetSoundSignalUpscale(int) override;

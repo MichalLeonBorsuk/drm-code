@@ -218,8 +218,7 @@ void CCellMappingTable::MakeTable(
 	iSymbolBlockSize = iFFTSizeN + iGuardSize;
 
 	/* Calculate the index of the DC carrier in the shifted spectrum */
-	iIndexDCFreq = (int) ((_REAL) VIRTUAL_INTERMED_FREQ *
-		iFFTSizeN / iSampleRate);
+    iIndexDCFreq = int(VIRTUAL_INTERMED_FREQ * iFFTSizeN / iSampleRate);
 
 	/* Index of minimum useful carrier (shifted) */
 	iShiftedKmin = iIndexDCFreq + iCarrierKmin;

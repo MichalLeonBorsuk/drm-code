@@ -280,8 +280,8 @@ CPlotManager::GetInputPSD(CVector<_REAL>& vecrData, CVector<_REAL>& vecrScale)
 
         // starting frequency and frequency step as defined in TS 102 349
         // plot expects the scale values in kHz
-        _REAL f = _REAL(-7.875) + VIRTUAL_INTERMED_FREQ/_REAL(1000.0);
-        const _REAL fstep =_REAL(0.1875);
+        _REAL f = -7.875 + VIRTUAL_INTERMED_FREQ / 1000.0;
+        const _REAL fstep = 0.1875;
 
         for (int i=0; i<iVectorLen; i++)
         {
