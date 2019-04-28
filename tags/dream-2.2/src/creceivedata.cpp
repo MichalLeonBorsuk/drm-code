@@ -2,6 +2,8 @@
 #include "Parameter.h"
 #ifdef QT_MULTIMEDIA_LIB
 # include <QSet>
+#else
+# include "sound/sound.h"
 #endif
 #include "sound/audiofilein.h"
 #include "util/FileTyper.h"
