@@ -1,20 +1,35 @@
-#include "inputpsd.h"
+#include "spectrumanalyser.h"
 #include "creceivedata.h"
 #include "Parameter.h"
 #include "matlib/MatlibSigProToolbox.h"
 
-/* power gain of the Hamming window */
-#define PSD_WINDOW_GAIN 0.39638
 #define RNIP_SEARCH_RANGE_NARROW 5100.0
 #define RNIP_SEARCH_RANGE_WIDE 15100.0
 #define RNIP_EXCLUDE_BINS 2 // either side of the peak
 
-InputPSD::InputPSD():iSampleRate(48000),bNegativeFreq(false),bOffsetFreq(false),vecrAvSqMagSpect()
+SpectrumAnalyser::SpectrumAnalyser():iSampleRate(48000),bNegativeFreq(false),bOffsetFreq(false),vecrSqMagSpect()
 {
 
 }
 
-void InputPSD::CalculateLinearPSD(const CShiftRegister<_REAL>& vecrInpData,
+void SpectrumAnalyser::CalculateSpectrum(const CShiftRegister<_REAL>& vecrInpData, int n)
+{
+    /* Length of spectrum vector including Nyquist frequency */
+    const int iLenSpecWithNyFreq = n / 2 + 1;
+
+    /* Copy data from shift register to Matlib vector */
+    CRealVector vecrFFTInput(n);
+    for (int i = 0; i < n; i++) {
+        vecrFFTInput[i] = vecrInpData[i];
+    }
+
+    /* Get squared magnitude of spectrum */
+    vecrSqMagSpect.Init(iLenSpecWithNyFreq);
+    CFftPlans FftPlans;
+    vecrSqMagSpect = SqMag(rfft(vecrFFTInput * Hann(n), FftPlans));
+}
+
+void SpectrumAnalyser::CalculateLinearPSD(const CShiftRegister<_REAL>& vecrInpData,
                                  int iLenPSDAvEachBlock, int iNumAvBlocksPSD,
                                 int iPSDOverlap)
 {
@@ -28,10 +43,11 @@ void InputPSD::CalculateLinearPSD(const CShiftRegister<_REAL>& vecrInpData,
     CRealVector vecrHammWin(Hamming(iLenPSDAvEachBlock));
 
     /* Init instance vector */
-    vecrAvSqMagSpect.Init(iLenSpecWithNyFreq, 0.0);
+    vecrSqMagSpect.Init(iLenSpecWithNyFreq, 0.0);
 
     /* Calculate FFT of each small block and average results (estimation of PSD of input signal) */
     CFftPlans FftPlans;
+
     for (int i = 0; i < iNumAvBlocksPSD; i++)
     {
         /* Copy data from shift register in Matlib vector */
@@ -43,30 +59,26 @@ void InputPSD::CalculateLinearPSD(const CShiftRegister<_REAL>& vecrInpData,
         vecrFFTInput *= vecrHammWin;
 
         /* Calculate squared magnitude of spectrum and average results */
-        vecrAvSqMagSpect += SqMag(rfft(vecrFFTInput, FftPlans));
+        vecrSqMagSpect += SqMag(rfft(vecrFFTInput, FftPlans));
     }
 }
 
-void InputPSD::PSD2LogPSD(int iLenPSDAvEachBlock, int iNumAvBlocksPSD,
-                                 CVector<_REAL>& vecrData, CVector<_REAL>& vecrScale)
+void SpectrumAnalyser::PSD2LogPSD(_REAL rNormData, CVector<_REAL>& vecrData, CVector<_REAL>& vecrScale)
 {
-    const int iLenSpec = vecrAvSqMagSpect.GetSize();
+    const int iLenSpec = vecrSqMagSpect.GetSize();
+
+    const int iOffsetScale = bNegativeFreq ? (iLenSpec / 2) : (bOffsetFreq ? (iLenSpec * int(VIRTUAL_INTERMED_FREQ) / (iSampleRate / 2)) : 0);
+
+    const _REAL rFactorScale = _REAL(iSampleRate) / _REAL(iLenSpec) / 2000.0;
+
     /* Init output vectors */
     vecrData.Init(iLenSpec, 0.0);
     vecrScale.Init(iLenSpec, 0.0);
 
-    const int iOffsetScale = bNegativeFreq ? (iLenSpec / 2) : (bOffsetFreq ? (iLenSpec * int(VIRTUAL_INTERMED_FREQ) / (iSampleRate / 2)) : 0);
-
-    const _REAL rFactorScale = _REAL(iSampleRate / iLenSpec / 2000);
-
-    const _REAL rNormData = _REAL( _MAXSHORT * _MAXSHORT *
-                            iLenPSDAvEachBlock * iLenPSDAvEachBlock *
-                            iNumAvBlocksPSD * _REAL(PSD_WINDOW_GAIN));
-
     /* Log power spectrum data */
     for (int i = 0; i <iLenSpec; i++)
     {
-        const _REAL rNormSqMag = vecrAvSqMagSpect[i] / rNormData;
+        const _REAL rNormSqMag = vecrSqMagSpect[i] / rNormData;
 
         if (rNormSqMag > 0)
             vecrData[i] = 10.0 * log10(rNormSqMag);
@@ -77,11 +89,10 @@ void InputPSD::PSD2LogPSD(int iLenPSDAvEachBlock, int iNumAvBlocksPSD,
     }
 }
 
-
 /*
  * This function is called in a context where the Parameters structure is Locked.
  */
-void InputPSD::CalculateSigStrengthCorrection(CParameter &Parameters, CVector<_REAL> &vecrPSD)
+void SpectrumAnalyser::CalculateSigStrengthCorrection(CParameter &Parameters, CVector<_REAL> &vecrPSD)
 {
 
     _REAL rCorrection = _REAL(0.0);
@@ -143,7 +154,7 @@ void InputPSD::CalculateSigStrengthCorrection(CParameter &Parameters, CVector<_R
 /*
  * This function is called in a context where the Parameters structure is Locked.
  */
-void InputPSD::CalculatePSDInterferenceTag(CParameter &Parameters, CVector<_REAL> &vecrPSD)
+void SpectrumAnalyser::CalculatePSDInterferenceTag(CParameter &Parameters, CVector<_REAL> &vecrPSD)
 {
 
     /* Interference tag (rnip) */
@@ -197,61 +208,12 @@ void InputPSD::CalculatePSDInterferenceTag(CParameter &Parameters, CVector<_REAL
 
 }
 
-/* Calculate PSD and put it into the CParameter class.
- * The data will be used by the rsi output.
- * This function is called in a context where the Parameters structure is Locked.
- */
-void InputPSD::PutPSD(CParameter &Parameters)
-{
-
-    CVector<_REAL>		vecrData;
-    CVector<_REAL>		vecrScale;
-
-    PSD2LogPSD(LEN_PSD_AV_EACH_BLOCK_RSI, NUM_AV_BLOCKS_PSD_RSI, vecrData, vecrScale);
-
-    /* Data required for rpsd tag */
-    /* extract the values from -8kHz to +8kHz/18kHz relative to 12kHz, i.e. 4kHz to 20kHz */
-    /*const int startBin = 4000.0 * LEN_PSD_AV_EACH_BLOCK_RSI /iSampleRate;
-    const int endBin = 20000.0 * LEN_PSD_AV_EACH_BLOCK_RSI /iSampleRate;*/
-    /* The above calculation doesn't round in the way FhG expect. Probably better to specify directly */
-
-    /* For 20k mode, we need -8/+18, which is more than the Nyquist rate of 24kHz. */
-    /* Assume nominal freq = 7kHz (i.e. 2k to 22k) and pad with zeroes (roughly 1kHz each side) */
-
-    int iStartBin = 22;
-    int iEndBin = 106;
-    int iVecSize = iEndBin - iStartBin + 1; //85
-
-    //_REAL rIFCentreFrequency = Parameters.FrontEndParameters.rIFCentreFreq;
-
-    ESpecOcc eSpecOcc = Parameters.GetSpectrumOccup();
-    if (eSpecOcc == SO_4 || eSpecOcc == SO_5)
-    {
-        iStartBin = 0;
-        iEndBin = 127;
-        iVecSize = 139;
-    }
-    /* Line up the the middle of the vector with the quarter-Nyquist bin of FFT */
-    int iStartIndex = iStartBin - (LEN_PSD_AV_EACH_BLOCK_RSI/4) + (iVecSize-1)/2;
-
-    /* Fill with zeros to start with */
-    Parameters.vecrPSD.Init(iVecSize, 0.0);
-
-    for (int i=iStartIndex, j=iStartBin; j<=iEndBin; i++,j++)
-        Parameters.vecrPSD[i] = vecrData[j];
-
-    CalculateSigStrengthCorrection(Parameters, vecrData);
-
-    CalculatePSDInterferenceTag(Parameters, vecrData);
-
-}
-
-int InputPSD::FreqToBin(_REAL rFreq)
+int SpectrumAnalyser::FreqToBin(_REAL rFreq)
 {
     return int(rFreq/iSampleRate * LEN_PSD_AV_EACH_BLOCK_RSI);
 }
 
-_REAL InputPSD::CalcTotalPower(CVector<_REAL> &vecrData, int iStartBin, int iEndBin)
+_REAL SpectrumAnalyser::CalcTotalPower(CVector<_REAL> &vecrData, int iStartBin, int iEndBin)
 {
     if (iStartBin < 0) iStartBin = 0;
     if (iEndBin > LEN_PSD_AV_EACH_BLOCK_RSI/2)
