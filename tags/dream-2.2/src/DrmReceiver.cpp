@@ -157,36 +157,36 @@ CDRMReceiver::SetAMFilterBW(int value)
 void
 CDRMReceiver::SetInputDevice(string s)
 {
-	ReceiveData.Stop();
-	ReceiveData.ClearInputData();
-	/* Get a fresh CUpstreamDI interface */
-	if (pUpstreamRSCI->GetInEnabled())
-	{
-		delete pUpstreamRSCI;
-		pUpstreamRSCI = new CUpstreamDI();
-	}
+    ReceiveData.Stop();
+    ReceiveData.ClearInputData();
+    /* Get a fresh CUpstreamDI interface */
+    if (pUpstreamRSCI->GetInEnabled())
+    {
+        delete pUpstreamRSCI;
+        pUpstreamRSCI = new CUpstreamDI();
+    }
     string device = s;
-	FileTyper::type t = FileTyper::resolve(device);
-	if (t == FileTyper::unrecognised) {
-		vector<string> names;
-		vector<string> descriptions;
-		ReceiveData.Enumerate(names, descriptions);
-		if (names.size() > 0) {
-			if (device == "") {
-				device = names[0];
-				t = FileTyper::pcm;
-			}
-			else {
+    FileTyper::type t = FileTyper::resolve(device);
+    if (t == FileTyper::unrecognised) {
+        vector<string> names;
+        vector<string> descriptions;
+        ReceiveData.Enumerate(names, descriptions);
+        if (names.size() > 0) {
+            if (device == "") {
+                device = names[0];
+                t = FileTyper::pcm;
+            }
+            else {
                 for (unsigned i = 0; i<names.size(); i++) {
-					if (device == names[i]) {
-						device = names[i];
-						t = FileTyper::pcm;
-						break;
-					}
-				}
-			}
-		}
-	}
+                    if (device == names[i]) {
+                        device = names[i];
+                        t = FileTyper::pcm;
+                        break;
+                    }
+                }
+            }
+        }
+    }
     switch(t) {
     case FileTyper::pcm:
         /* SetSyncInput to false, can be modified by pUpstreamRSCI */
@@ -338,7 +338,7 @@ CDRMReceiver::UtilizeDRM(bool& bEnoughData)
         DetectAcquiFAC();
     }
 #if 0
-        saveSDCtoFile();
+    saveSDCtoFile();
 #endif
 
     if (UtilizeSDCData.WriteData(Parameters, SDCUseBuf))
@@ -368,9 +368,9 @@ CDRMReceiver::UtilizeDRM(bool& bEnoughData)
         }
     }
     if( (iDataStreamID == STREAM_ID_NOT_USED)
-       &&
-         (iAudioStreamID == STREAM_ID_NOT_USED)
-    ) // try and decode stream 0 as audio anyway
+            &&
+            (iAudioStreamID == STREAM_ID_NOT_USED)
+      ) // try and decode stream 0 as audio anyway
     {
         if (AudioSourceDecoder.ProcessData(Parameters,
                                            MSCUseBuf[0],
@@ -1306,8 +1306,8 @@ CDRMReceiver::InitsForDataParam()
     int d = Parameters.GetCurSelDataService();
     iDataStreamID = Parameters.GetDataParam(d).iStreamID;
     Parameters.SetNumDataDecoderBits(Parameters.
-                                          GetStreamLen(iDataStreamID) *
-                                          SIZEOF__BYTE);
+                                     GetStreamLen(iDataStreamID) *
+                                     SIZEOF__BYTE);
     DataDecoder.SetInitFlag();
 }
 
@@ -1332,24 +1332,24 @@ void CDRMReceiver::SetFrequency(int iNewFreqkHz)
 # endif
 #endif
 #if 0
-	{
-		FCD_MODE_ENUM fme;
-		unsigned int uFreq, rFreq;
-		int lnbOffset = 6;
-		double d = (double) (iNewFreqkHz-lnbOffset);
+    {
+        FCD_MODE_ENUM fme;
+        unsigned int uFreq, rFreq;
+        int lnbOffset = 6;
+        double d = (double) (iNewFreqkHz-lnbOffset);
 
-		//d *= 1.0 + n/1000000.0;
-		uFreq = (unsigned int) d;
+        //d *= 1.0 + n/1000000.0;
+        uFreq = (unsigned int) d;
 
-		fme = fcdAppSetFreq(uFreq, &rFreq);
+        fme = fcdAppSetFreq(uFreq, &rFreq);
 
-		if ((fme != FCD_MODE_APP) || (uFreq != rFreq))
-		{
-			stringstream ss;
-			ss << "Error in" << __FUNCTION__ << "set:" << uFreq << "read:" << rFreq;
-			qDebug(ss.str().c_str()); 
-		}
-	}
+        if ((fme != FCD_MODE_APP) || (uFreq != rFreq))
+        {
+            stringstream ss;
+            ss << "Error in" << __FUNCTION__ << "set:" << uFreq << "read:" << rFreq;
+            qDebug(ss.str().c_str());
+        }
+    }
 #endif
     if (downstreamRSCI.GetOutEnabled())
         downstreamRSCI.NewFrequency(Parameters);
@@ -1424,7 +1424,7 @@ CDRMReceiver::LoadSettings()
 
     /* Data files directory */
     string sDataFilesDirectory = s.Get(
-        "Receiver", "datafilesdirectory", Parameters.GetDataDirectory());
+                                     "Receiver", "datafilesdirectory", Parameters.GetDataDirectory());
     Parameters.SetDataDirectory(sDataFilesDirectory);
     s.Put("Receiver", "datafilesdirectory", Parameters.GetDataDirectory());
 
@@ -1529,34 +1529,34 @@ CDRMReceiver::LoadSettings()
         pUpstreamRSCI->SetDestination(str);
 
     /* downstream RSCI */
-	string rsiout = s.Get("command", "rsiout", string(""));
-	string rciin = s.Get("command", "rciin", string(""));
-	if(rsiout != "" || rciin != "")
-	{
-		istringstream cc(rciin);
-		vector<string> rci;
-		while(cc >> str)
-		{
-			rci.push_back(str);
-		}
-		istringstream ss(rsiout);
-		size_t n=0;
-		while(ss >> str)
-		{
-			char profile = str[0];
-			string dest = str.substr(2);
-			if(rci.size()>n)
-			{
-				downstreamRSCI.AddSubscriber(dest, profile, rci[n]);
-				n++;
-			}
-			else
-			{
-				downstreamRSCI.AddSubscriber(dest, profile);
-			}
-		}
-		for(;n<rci.size(); n++)
-			downstreamRSCI.AddSubscriber("", ' ', rci[n]);
+    string rsiout = s.Get("command", "rsiout", string(""));
+    string rciin = s.Get("command", "rciin", string(""));
+    if(rsiout != "" || rciin != "")
+    {
+        istringstream cc(rciin);
+        vector<string> rci;
+        while(cc >> str)
+        {
+            rci.push_back(str);
+        }
+        istringstream ss(rsiout);
+        size_t n=0;
+        while(ss >> str)
+        {
+            char profile = str[0];
+            string dest = str.substr(2);
+            if(rci.size()>n)
+            {
+                downstreamRSCI.AddSubscriber(dest, profile, rci[n]);
+                n++;
+            }
+            else
+            {
+                downstreamRSCI.AddSubscriber(dest, profile);
+            }
+        }
+        for(; n<rci.size(); n++)
+            downstreamRSCI.AddSubscriber("", ' ', rci[n]);
     }
     /* RSCI File Recording */
     str = s.Get("command", "rsirecordprofile");
@@ -1706,7 +1706,8 @@ CDRMReceiver::SaveSettings()
 
     /* Sound In device - don't save files, only devices */
     string indev = ReceiveData.GetSoundInterface();
-    if(indev.find(".") == string::npos) {
+    FileTyper::type t = FileTyper::resolve(indev);
+    if (t == FileTyper::unrecognised) {
         s.Put("Receiver", "snddevin", indev);
     }
 
@@ -1768,8 +1769,8 @@ CDRMReceiver::SaveSettings()
 
     /* GPS */
     if(Parameters.gps_data.set & LATLON_SET) {
-	s.Put("GPS", "latitude", Parameters.gps_data.fix.latitude);
-	s.Put("GPS", "longitude", Parameters.gps_data.fix.longitude);
+        s.Put("GPS", "latitude", Parameters.gps_data.fix.latitude);
+        s.Put("GPS", "longitude", Parameters.gps_data.fix.longitude);
     }
     s.Put("GPS", "usegpsd", Parameters.use_gpsd);
     s.Put("GPS", "host", Parameters.gps_host);
