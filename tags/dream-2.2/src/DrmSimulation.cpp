@@ -84,9 +84,9 @@ CDRMSimulation::CDRMSimulation() : iSimTime(0), iSimNumErrors(0),
     Parameters.iFrameIDReceiv = 0;
 
     /* Initialize synchronization parameters */
-    Parameters.rResampleOffset = (_REAL) 0.0;
-    Parameters.rFreqOffsetAcqui = (_REAL) VIRTUAL_INTERMED_FREQ / Parameters.GetSigSampleRate();
-    Parameters.rFreqOffsetTrack = (_REAL) 0.0;
+    Parameters.rResampleOffset = 0.0;
+    Parameters.rFreqOffsetAcqui = VIRTUAL_INTERMED_FREQ / Parameters.GetSigSampleRate();
+    Parameters.rFreqOffsetTrack = 0.0;
     Parameters.iTimingOffsTrack = 0;
 
     Parameters.InitCellMapTable(RM_ROBUSTNESS_MODE_B, SO_3);

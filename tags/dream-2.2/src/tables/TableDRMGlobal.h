@@ -38,7 +38,7 @@
    i.e. the frequency pilots which have to be continuous. Our IF must be a
    multiple of 1500 Hz and must also be chosen so that the largest mode (20 kHz)
    must fit into the range of the FFT-size. Therefore 6000 Hz was chosen */
-#define VIRTUAL_INTERMED_FREQ			6000	// Hz
+#define VIRTUAL_INTERMED_FREQ			6000.0	// Hz
 
 /* Default sample rate MUST be set to a safe value of 48000,
    for testing purpose it must be a multiple of 750 */

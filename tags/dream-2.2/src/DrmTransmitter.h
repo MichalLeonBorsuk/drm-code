@@ -37,7 +37,7 @@
 #include "interleaver/SymbolInterleaver.h"
 #include "ofdmcellmapping/OFDMCellMapping.h"
 #include "OFDM.h"
-#include "DRMSignalIO.h"
+#include "ctransmitdata.h"
 #include "sourcedecoders/AudioSourceEncoder.h"
 #include "sound/soundinterface.h"
 #include "DrmTransceiver.h"

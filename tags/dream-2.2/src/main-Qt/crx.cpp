@@ -190,9 +190,9 @@ ERecMode CRx::GetReceiverMode()
     return rx.GetReceiverMode();
 }
 
-EInChanSel CRx::GetInChanSel()
+int CRx::GetInChanSel()
 {
-    return rx.GetReceiveData()->GetInChanSel();
+    return int(rx.GetReceiveData()->GetInChanSel());
 }
 
 int CRx::GetMSCMLInitNumIterations()
@@ -487,10 +487,10 @@ void CRx::EnableAutoFrequenctAcquisition(bool b)
     rx.GetAMDemod()->EnableAutoFreqAcq(b);
 }
 
-void CRx::onSoundInChannelChanged(EInChanSel e)
+void CRx::onSoundInChannelChanged(int e)
 {
-    rx.GetReceiveData()->SetInChanSel(e);
-    emit InputChannelChanged(int(e));
+    rx.GetReceiveData()->SetInChanSel(EInChanSel(e));
+    emit InputChannelChanged(e);
 }
 
 void CRx::onSoundOutChannelChanged(EOutChanSel e)

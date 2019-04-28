@@ -41,7 +41,7 @@
 #include "util/Utilities.h"
 #include "DataIO.h"
 #include "OFDM.h"
-#include "DRMSignalIO.h"
+#include "creceivedata.h"
 #include "MSCMultiplexer.h"
 #include "InputResample.h"
 #include "datadecoding/DataDecoder.h"
