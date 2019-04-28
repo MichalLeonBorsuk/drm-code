@@ -11,17 +11,24 @@
 
 using namespace std;
 
-/* power gain of the Hamming window */
-#define PSD_WINDOW_GAIN 0.39638
 const static int SineTable[] = { 0, 1, 0, -1, 0 };
-
-#define RNIP_SEARCH_RANGE_NARROW 5100.0
-#define RNIP_SEARCH_RANGE_WIDE 15100.0
-#define RNIP_EXCLUDE_BINS 2 // either side of the peak
 
 //inline _REAL sample2real(_SAMPLE s) { return _REAL(s)/32768.0; }
 inline _REAL sample2real(_SAMPLE s) {
     return _REAL(s);
+}
+
+CReceiveData::CReceiveData() :
+#ifdef QT_MULTIMEDIA_LIB
+    pIODevice(nullptr),
+#endif
+    pSound(nullptr),
+    vecrInpData(INPUT_DATA_VECTOR_SIZE, 0.0),
+    bFippedSpectrum(false), eInChanSelection(CS_MIX_CHAN), iPhase(0),inputPSD()
+{}
+
+CReceiveData::~CReceiveData()
+{
 }
 
 void CReceiveData::Stop()
@@ -128,9 +135,15 @@ void CReceiveData::ProcessDataInternal(CParameter& Parameters)
     {
         iFreeSymbolCounter = 0;
         /* calculate the PSD once per frame for the RSI output */
-
-        if (Parameters.bMeasurePSD)
-            PutPSD(Parameters);
+        if (Parameters.bMeasurePSD) {
+            /* Init the constants for scale and normalization */
+            inputPSD.setNegativeFrequency(eInChanSelection == CS_IQ_POS_SPLIT || eInChanSelection == CS_IQ_NEG_SPLIT);
+            inputPSD.setOffsetFrequency((eInChanSelection == CS_IQ_POS_ZERO) || (eInChanSelection == CS_IQ_NEG_ZERO));
+            mutexInpData.Lock();
+            inputPSD.CalculateLinearPSD(vecrInpData, LEN_PSD_AV_EACH_BLOCK_RSI, NUM_AV_BLOCKS_PSD_RSI, PSD_OVERLAP_RSI);
+            mutexInpData.Unlock();
+            inputPSD.PutPSD(Parameters);
+        }
 
     }
     Parameters.Unlock();
@@ -594,10 +607,6 @@ void CReceiveData::InterpFIR_2X(const int channels, _SAMPLE* X, vector<float>& Z
     }
 }
 
-CReceiveData::~CReceiveData()
-{
-}
-
 /*
     Convert Real to I/Q frequency when bInvert is false
     Convert I/Q to Real frequency when bInvert is true
@@ -660,8 +669,7 @@ void CReceiveData::GetInputSpec(CVector<_REAL>& vecrData,
     /* Get squared magnitude of spectrum */
     CRealVector vecrSqMagSpect(iLenSpecWithNyFreq);
     CFftPlans FftPlans;
-    vecrSqMagSpect =
-        SqMag(rfft(vecrFFTInput * Hann(NUM_SMPLS_4_INPUT_SPECTRUM), FftPlans));
+    vecrSqMagSpect = SqMag(rfft(vecrFFTInput * Hann(NUM_SMPLS_4_INPUT_SPECTRUM), FftPlans));
 
     /* Log power spectrum data */
     for (i = 0; i < iLenSpecWithNyFreq; i++)
@@ -678,271 +686,16 @@ void CReceiveData::GetInputSpec(CVector<_REAL>& vecrData,
 
 }
 
-void CReceiveData::GetInputPSD(CVector<_REAL>& vecrData,
-                               CVector<_REAL>& vecrScale,
-                               const int iLenPSDAvEachBlock,
-                               const int iNumAvBlocksPSD,
-                               const int iPSDOverlap)
+void CReceiveData::GetInputPSD(CVector<_REAL>& vecrData, CVector<_REAL>& vecrScale,
+                 const int iLenPSDAvEachBlock,
+                 const int iNumAvBlocksPSD,
+                 const int iPSDOverlap)
 {
-    CalculatePSD(vecrData, vecrScale, iLenPSDAvEachBlock,iNumAvBlocksPSD,iPSDOverlap);
-}
-
-void CReceiveData::CalculatePSD(CVector<_REAL>& vecrData,
-                                CVector<_REAL>& vecrScale,
-                                const int iLenPSDAvEachBlock,
-                                const int iNumAvBlocksPSD,
-                                const int iPSDOverlap)
-{
-    /* Length of spectrum vector including Nyquist frequency */
-    const int iLenSpecWithNyFreq = iLenPSDAvEachBlock / 2 + 1;
-
-    /* Init input and output vectors */
-    vecrData.Init(iLenSpecWithNyFreq, 0.0);
-    vecrScale.Init(iLenSpecWithNyFreq, 0.0);
-
-    /* Init the constants for scale and normalization */
-    const bool bNegativeFreq =
-        eInChanSelection == CS_IQ_POS_SPLIT ||
-        eInChanSelection == CS_IQ_NEG_SPLIT;
-
-    const bool bOffsetFreq = (eInChanSelection == CS_IQ_POS_ZERO) || (eInChanSelection == CS_IQ_NEG_ZERO);
-
-    const int iOffsetScale = bNegativeFreq ? (iLenSpecWithNyFreq / 2) : (bOffsetFreq ? (iLenSpecWithNyFreq * int(VIRTUAL_INTERMED_FREQ) / (iSampleRate / 2)) : 0);
-
-    const _REAL rFactorScale = _REAL(iSampleRate / iLenSpecWithNyFreq / 2000);
-
-    const _REAL rNormData = _REAL( _MAXSHORT * _MAXSHORT *
-                            iLenPSDAvEachBlock * iLenPSDAvEachBlock *
-                            iNumAvBlocksPSD * _REAL(PSD_WINDOW_GAIN));
-
-    /* Init intermediate vectors */
-    CRealVector vecrAvSqMagSpect(iLenSpecWithNyFreq, 0.0);
-    CRealVector vecrFFTInput(iLenPSDAvEachBlock);
-
-    /* Init Hamming window */
-    CRealVector vecrHammWin(Hamming(iLenPSDAvEachBlock));
-
-    /* Calculate FFT of each small block and average results (estimation
-       of PSD of input signal) */
-    CFftPlans FftPlans;
-    int i;
+    inputPSD.setNegativeFrequency(eInChanSelection == CS_IQ_POS_SPLIT || eInChanSelection == CS_IQ_NEG_SPLIT);
+    inputPSD.setOffsetFrequency((eInChanSelection == CS_IQ_POS_ZERO) || (eInChanSelection == CS_IQ_NEG_ZERO));
     mutexInpData.Lock();
-    for (i = 0; i < iNumAvBlocksPSD; i++)
-    {
-        /* Copy data from shift register in Matlib vector */
-        for (int j = 0; j < iLenPSDAvEachBlock; j++)
-            vecrFFTInput[j] = vecrInpData[j + i * (iLenPSDAvEachBlock - iPSDOverlap)];
-
-        /* Apply Hamming window */
-        vecrFFTInput *= vecrHammWin;
-
-        /* Calculate squared magnitude of spectrum and average results */
-        vecrAvSqMagSpect += SqMag(rfft(vecrFFTInput, FftPlans));
-    }
+    inputPSD.CalculateLinearPSD(vecrInpData, iLenPSDAvEachBlock, iNumAvBlocksPSD, iPSDOverlap);
     mutexInpData.Unlock();
-
-    /* Log power spectrum data */
-    for (i = 0; i <iLenSpecWithNyFreq; i++)
-    {
-        const _REAL rNormSqMag = vecrAvSqMagSpect[i] / rNormData;
-
-        if (rNormSqMag > 0)
-            vecrData[i] = 10.0 * log10(rNormSqMag);
-        else
-            vecrData[i] = RET_VAL_LOG_0;
-
-        vecrScale[i] = _REAL(i - iOffsetScale) * rFactorScale;
-    }
+    inputPSD.PSD2LogPSD(iLenPSDAvEachBlock, iNumAvBlocksPSD, vecrData, vecrScale);
 }
 
-/* Calculate PSD and put it into the CParameter class.
- * The data will be used by the rsi output.
- * This function is called in a context where the Parameters structure is Locked.
- */
-void CReceiveData::PutPSD(CParameter &Parameters)
-{
-    int i, j;
-
-    CVector<_REAL>		vecrData;
-    CVector<_REAL>		vecrScale;
-
-    CalculatePSD(vecrData, vecrScale, LEN_PSD_AV_EACH_BLOCK_RSI, NUM_AV_BLOCKS_PSD_RSI, PSD_OVERLAP_RSI);
-
-    /* Data required for rpsd tag */
-    /* extract the values from -8kHz to +8kHz/18kHz relative to 12kHz, i.e. 4kHz to 20kHz */
-    /*const int startBin = 4000.0 * LEN_PSD_AV_EACH_BLOCK_RSI /iSampleRate;
-    const int endBin = 20000.0 * LEN_PSD_AV_EACH_BLOCK_RSI /iSampleRate;*/
-    /* The above calculation doesn't round in the way FhG expect. Probably better to specify directly */
-
-    /* For 20k mode, we need -8/+18, which is more than the Nyquist rate of 24kHz. */
-    /* Assume nominal freq = 7kHz (i.e. 2k to 22k) and pad with zeroes (roughly 1kHz each side) */
-
-    int iStartBin = 22;
-    int iEndBin = 106;
-    int iVecSize = iEndBin - iStartBin + 1; //85
-
-    //_REAL rIFCentreFrequency = Parameters.FrontEndParameters.rIFCentreFreq;
-
-    ESpecOcc eSpecOcc = Parameters.GetSpectrumOccup();
-    if (eSpecOcc == SO_4 || eSpecOcc == SO_5)
-    {
-        iStartBin = 0;
-        iEndBin = 127;
-        iVecSize = 139;
-    }
-    /* Line up the the middle of the vector with the quarter-Nyquist bin of FFT */
-    int iStartIndex = iStartBin - (LEN_PSD_AV_EACH_BLOCK_RSI/4) + (iVecSize-1)/2;
-
-    /* Fill with zeros to start with */
-    Parameters.vecrPSD.Init(iVecSize, 0.0);
-
-    for (i=iStartIndex, j=iStartBin; j<=iEndBin; i++,j++)
-        Parameters.vecrPSD[i] = vecrData[j];
-
-    CalculateSigStrengthCorrection(Parameters, vecrData);
-
-    CalculatePSDInterferenceTag(Parameters, vecrData);
-
-}
-
-/*
- * This function is called in a context where the Parameters structure is Locked.
- */
-void CReceiveData::CalculateSigStrengthCorrection(CParameter &Parameters, CVector<_REAL> &vecrPSD)
-{
-
-    _REAL rCorrection = _REAL(0.0);
-
-    /* Calculate signal power in measurement bandwidth */
-
-    _REAL rFreqKmin, rFreqKmax;
-
-    _REAL rIFCentreFrequency = Parameters.FrontEndParameters.rIFCentreFreq;
-
-    if (Parameters.GetAcquiState() == AS_WITH_SIGNAL &&
-            Parameters.FrontEndParameters.bAutoMeasurementBandwidth)
-    {
-        // Receiver is locked, so measure in the current DRM signal bandwidth Kmin to Kmax
-        _REAL rDCFrequency = Parameters.GetDCFrequency();
-        rFreqKmin = rDCFrequency + _REAL(Parameters.CellMappingTable.iCarrierKmin)/Parameters.CellMappingTable.iFFTSizeN * iSampleRate;
-        rFreqKmax = rDCFrequency + _REAL(Parameters.CellMappingTable.iCarrierKmax)/Parameters.CellMappingTable.iFFTSizeN * iSampleRate;
-    }
-    else
-    {
-        // Receiver unlocked, or measurement is requested in fixed bandwidth
-        _REAL rMeasBandwidth = Parameters.FrontEndParameters.rDefaultMeasurementBandwidth;
-        rFreqKmin = rIFCentreFrequency - rMeasBandwidth/_REAL(2.0);
-        rFreqKmax = rIFCentreFrequency + rMeasBandwidth/_REAL(2.0);
-    }
-
-    _REAL rSigPower = CalcTotalPower(vecrPSD, FreqToBin(rFreqKmin), FreqToBin(rFreqKmax));
-
-    if (Parameters.FrontEndParameters.eSMeterCorrectionType == CFrontEndParameters::S_METER_CORRECTION_TYPE_AGC_ONLY)
-    {
-        /* Write it to the receiver params to help with calculating the signal strength */
-        rCorrection += _REAL(10.0) * log10(rSigPower);
-    }
-    else if (Parameters.FrontEndParameters.eSMeterCorrectionType == CFrontEndParameters::S_METER_CORRECTION_TYPE_AGC_RSSI)
-    {
-        _REAL rSMeterBandwidth = Parameters.FrontEndParameters.rSMeterBandwidth;
-
-        _REAL rFreqSMeterMin = _REAL(rIFCentreFrequency - rSMeterBandwidth / _REAL(2.0));
-        _REAL rFreqSMeterMax = _REAL(rIFCentreFrequency + rSMeterBandwidth / _REAL(2.0));
-
-        _REAL rPowerInSMeterBW = CalcTotalPower(vecrPSD, FreqToBin(rFreqSMeterMin), FreqToBin(rFreqSMeterMax));
-
-        /* Write it to the receiver params to help with calculating the signal strength */
-
-        rCorrection += _REAL(10.0) * log10(rSigPower/rPowerInSMeterBW);
-    }
-
-    /* Add on the calibration factor for the current mode */
-    if (Parameters.GetReceiverMode() == RM_DRM)
-        rCorrection += Parameters.FrontEndParameters.rCalFactorDRM;
-    else if (Parameters.GetReceiverMode() == RM_AM)
-        rCorrection += Parameters.FrontEndParameters.rCalFactorAM;
-
-    Parameters.rSigStrengthCorrection = rCorrection;
-
-    return;
-}
-
-/*
- * This function is called in a context where the Parameters structure is Locked.
- */
-void CReceiveData::CalculatePSDInterferenceTag(CParameter &Parameters, CVector<_REAL> &vecrPSD)
-{
-
-    /* Interference tag (rnip) */
-
-    // Calculate search range: defined as +/-5.1kHz except if locked and in 20k
-    _REAL rIFCentreFrequency = Parameters.FrontEndParameters.rIFCentreFreq;
-
-    _REAL rFreqSearchMin = rIFCentreFrequency - _REAL(RNIP_SEARCH_RANGE_NARROW);
-    _REAL rFreqSearchMax = rIFCentreFrequency + _REAL(RNIP_SEARCH_RANGE_NARROW);
-
-    ESpecOcc eSpecOcc = Parameters.GetSpectrumOccup();
-
-    if (Parameters.GetAcquiState() == AS_WITH_SIGNAL &&
-            (eSpecOcc == SO_4 || eSpecOcc == SO_5) )
-    {
-        rFreqSearchMax = rIFCentreFrequency + _REAL(RNIP_SEARCH_RANGE_WIDE);
-    }
-    int iSearchStartBin = FreqToBin(rFreqSearchMin);
-    int iSearchEndBin = FreqToBin(rFreqSearchMax);
-
-    if (iSearchStartBin < 0) iSearchStartBin = 0;
-    if (iSearchEndBin > LEN_PSD_AV_EACH_BLOCK_RSI/2)
-        iSearchEndBin = LEN_PSD_AV_EACH_BLOCK_RSI/2;
-
-    _REAL rMaxPSD = _REAL(-1000.0);
-    int iMaxPSDBin = 0;
-
-    for (int i=iSearchStartBin; i<=iSearchEndBin; i++)
-    {
-        _REAL rPSD = _REAL(2.0) * pow(_REAL(10.0), vecrPSD[i]/_REAL(10.0));
-        if (rPSD > rMaxPSD)
-        {
-            rMaxPSD = rPSD;
-            iMaxPSDBin = i;
-        }
-    }
-
-    // For total signal power, exclude the biggest one and e.g. 2 either side
-    int iExcludeStartBin = iMaxPSDBin - RNIP_EXCLUDE_BINS;
-    int iExcludeEndBin = iMaxPSDBin + RNIP_EXCLUDE_BINS;
-
-    // Calculate power. TotalPower() function will deal with start>end correctly
-    _REAL rSigPowerExcludingInterferer = CalcTotalPower(vecrPSD, iSearchStartBin, iExcludeStartBin-1) +
-                                         CalcTotalPower(vecrPSD, iExcludeEndBin+1, iSearchEndBin);
-
-    /* interferer level wrt signal power */
-    Parameters.rMaxPSDwrtSig = _REAL(10.0) * log10(rMaxPSD / rSigPowerExcludingInterferer);
-
-    /* interferer frequency */
-    Parameters.rMaxPSDFreq = _REAL(iMaxPSDBin) * _REAL(iSampleRate) / _REAL(LEN_PSD_AV_EACH_BLOCK_RSI) - rIFCentreFrequency;
-
-}
-
-
-int CReceiveData::FreqToBin(_REAL rFreq)
-{
-    return int(rFreq/iSampleRate * LEN_PSD_AV_EACH_BLOCK_RSI);
-}
-
-_REAL CReceiveData::CalcTotalPower(CVector<_REAL> &vecrData, int iStartBin, int iEndBin)
-{
-    if (iStartBin < 0) iStartBin = 0;
-    if (iEndBin > LEN_PSD_AV_EACH_BLOCK_RSI/2)
-        iEndBin = LEN_PSD_AV_EACH_BLOCK_RSI/2;
-
-    _REAL rSigPower = _REAL(0.0);
-    for (int i=iStartBin; i<=iEndBin; i++)
-    {
-        _REAL rPSD = pow(_REAL(10.0), vecrData[i]/_REAL(10.0));
-        // The factor of 2 below is needed because half of the power is in the negative frequencies
-        rSigPower += rPSD * _REAL(2.0);
-    }
-
-    return rSigPower;
-}

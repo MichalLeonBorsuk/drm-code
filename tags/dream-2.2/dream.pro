@@ -469,6 +469,7 @@ HEADERS += \
     src/FAC/FAC.h \
     src/GlobalDefinitions.h \
     src/InputResample.h \
+    src/inputpsd.h \
     src/interleaver/BlockInterleaver.h \
     src/interleaver/SymbolInterleaver.h \
     src/IQInputFilter.h \
@@ -595,6 +596,7 @@ SOURCES += \
     src/DrmTransmitter.cpp \
     src/FAC/FAC.cpp \
     src/InputResample.cpp \
+    src/inputpsd.cpp \
     src/interleaver/BlockInterleaver.cpp \
     src/interleaver/SymbolInterleaver.cpp \
     src/IQInputFilter.cpp \
