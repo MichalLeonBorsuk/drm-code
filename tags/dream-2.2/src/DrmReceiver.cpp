@@ -170,16 +170,16 @@ CDRMReceiver::SetInputDevice(string s)
     if (t == FileTyper::unrecognised) {
         vector<string> names;
         vector<string> descriptions;
-        ReceiveData.Enumerate(names, descriptions);
+	string def;
+        ReceiveData.Enumerate(names, descriptions, def);
         if (names.size() > 0) {
             if (device == "") {
-                device = names[0];
+                device = def;
                 t = FileTyper::pcm;
             }
             else {
                 for (unsigned i = 0; i<names.size(); i++) {
                     if (device == names[i]) {
-                        device = names[i];
                         t = FileTyper::pcm;
                         break;
                     }
@@ -211,14 +211,14 @@ CDRMReceiver::SetOutputDevice(string device)
     WriteData.Init(Parameters);
 }
 
-void CDRMReceiver::EnumerateInputs(vector<string>& names, vector<string>& descriptions)
+void CDRMReceiver::EnumerateInputs(vector<string>& names, vector<string>& descriptions, string& defaultInput)
 {
-    ReceiveData.Enumerate(names, descriptions);
+    ReceiveData.Enumerate(names, descriptions, defaultInput);
 }
 
-void CDRMReceiver::EnumerateOutputs(vector<string>& names, vector<string>& descriptions)
+void CDRMReceiver::EnumerateOutputs(vector<string>& names, vector<string>& descriptions, string& defaultOutput)
 {
-    WriteData.Enumerate(names, descriptions);
+    WriteData.Enumerate(names, descriptions, defaultOutput);
 }
 
 void
@@ -1456,10 +1456,7 @@ CDRMReceiver::LoadSettings()
             str = s.Get("Receiver", "snddevin", string());
             if(str == "") {
                 vector<string> vn,vd;
-                EnumerateInputs(vn, vd);
-                if(vn.size()>0) {
-                    str = vn[0];
-                }
+                EnumerateInputs(vn, vd, str);
             }
         }
     }
@@ -1517,10 +1514,7 @@ CDRMReceiver::LoadSettings()
     str = s.Get("Receiver", "snddevout", string());
     if(str == "") {
         vector<string> vn,vd;
-        EnumerateOutputs(vn, vd);
-        if(vn.size()>0) {
-            str = vn[0];
-        }
+        EnumerateOutputs(vn, vd, str);
     }
     SetOutputDevice(str);
 

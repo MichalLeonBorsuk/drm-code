@@ -138,14 +138,14 @@ bool CDRMTransmitter::CanSoftStopExit()
     return false; /* Signal to continue the normal operation */
 }
 
-void CDRMTransmitter::EnumerateInputs(std::vector<std::string>& names, std::vector<std::string>& descriptions)
+void CDRMTransmitter::EnumerateInputs(vector<string>& names, vector<string>& descriptions, string& defaultInput)
 {
-    ReadData.Enumerate(names, descriptions);
+    ReadData.Enumerate(names, descriptions, defaultInput);
 }
 
-void CDRMTransmitter::EnumerateOutputs(std::vector<std::string>& names, std::vector<std::string>& descriptions)
+void CDRMTransmitter::EnumerateOutputs(vector<string>& names, vector<string>& descriptions, string& defaultOutput)
 {
-    TransmitData.Enumerate(names, descriptions);
+    TransmitData.Enumerate(names, descriptions, defaultOutput);
 }
 
 void CDRMTransmitter::doSetInputDevice()

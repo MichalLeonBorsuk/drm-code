@@ -1,3 +1,31 @@
+/******************************************************************************\
+ * BBC and Technische Universitaet Darmstadt, Institut fuer Nachrichtentechnik
+ * Copyright (c) 2001-2019
+ *
+ * Author(s):
+ * Volker Fischer, Julian Cable
+ *
+ * Description:
+ *
+ *
+ ******************************************************************************
+ *
+ * This program is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License as published by the Free Software
+ * Foundation; either version 2 of the License, or (at your option) any later
+ * version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, write to the Free Software Foundation, Inc.,
+ * 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+\******************************************************************************/
+
 #include "ctransmitdata.h"
 #include "Parameter.h"
 #include "IQInputFilter.h"
@@ -29,22 +57,32 @@ void CTransmitData::Stop()
     if(pSound!=nullptr) pSound->Close();
 }
 
-void CTransmitData::Enumerate(vector<string>& names, vector<string>& descriptions)
+void CTransmitData::Enumerate(vector<string>& names, vector<string>& descriptions, string& defaultOutput)
 {
 #ifdef QT_MULTIMEDIA_LIB
     QSet<QString> s;
+    QString def = QAudioDeviceInfo::defaultOutputDevice().deviceName();
+    defaultOutput = def.toStdString();
+cerr << "default output device is " << defaultOutput << endl;
     foreach(const QAudioDeviceInfo& di, QAudioDeviceInfo::availableDevices(QAudio::AudioOutput))
     {
         s.insert(di.deviceName());
     }
     names.clear(); descriptions.clear();
     foreach(const QString n, s) {
+cerr << "have output device " << n.toStdString() << endl;
         names.push_back(n.toStdString());
-        descriptions.push_back("");
+        if(n == def) {
+            descriptions.push_back("default");
+        }
+        else {
+            descriptions.push_back("");
+        }
     }
 #else
     if(pSound==nullptr) pSound = new CSoundOut;
     pSound->Enumerate(names, descriptions);
+    defaultOutput = ""; // TODO
 #endif
 }
 
@@ -175,6 +213,9 @@ void CTransmitData::FlushData()
             if(m==n)
                 bBad = false;
         }
+	if(bBad) {
+		cerr << "problem writing to sound card" << endl;
+	}
 #else
         pSound->Write(vecsDataOut);
 #endif

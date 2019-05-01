@@ -123,14 +123,14 @@ void CRx::SetOutputDevice(string s)
     emit OutputDeviceChanged(QString::fromStdString(rx.GetOutputDevice()));
 }
 
-void CRx::EnumerateInputs(std::vector<std::string>& names, std::vector<std::string>& descriptions)
+void CRx::EnumerateInputs(vector<string>& names, vector<string>& descriptions, string& defaultInput)
 {
-    rx.EnumerateInputs(names, descriptions);
+    rx.EnumerateInputs(names, descriptions, defaultInput);
 }
 
-void CRx::EnumerateOutputs(std::vector<std::string>& names, std::vector<std::string>& descriptions)
+void CRx::EnumerateOutputs(vector<string>& names, vector<string>& descriptions, string& defaultOutput)
 {
-    rx.EnumerateOutputs(names, descriptions);
+    rx.EnumerateOutputs(names, descriptions, defaultOutput);
 }
 
 void CRx::Start()
