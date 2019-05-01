@@ -148,10 +148,10 @@ public:
     {
         return WriteData.GetSoundInterface();
     }
-    virtual void            EnumerateInputs(std::vector<string>& names, std::vector<string>& descriptions) override;
-    virtual void            EnumerateOutputs(std::vector<string>& names, std::vector<string>& descriptions) override;
-    virtual void            SetInputDevice(std::string) override;
-    virtual void			SetOutputDevice(std::string) override;
+    virtual void EnumerateInputs(std::vector<string>& names, std::vector<string>& descriptions, std::string& defaultInput) override;
+    virtual void EnumerateOutputs(std::vector<string>& names, std::vector<string>& descriptions, std::string& defaultOutput) override;
+    virtual void SetInputDevice(std::string) override;
+    virtual void SetOutputDevice(std::string) override;
 
     virtual CSettings*GetSettings()  override{
         return pSettings;

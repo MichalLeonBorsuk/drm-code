@@ -76,14 +76,14 @@ void CTx::GetOutputDevice(string& s)
     tx.GetOutputDevice(s);
 }
 
-void CTx::EnumerateInputs(std::vector<std::string>& names, std::vector<std::string>& descriptions)
+void CTx::EnumerateInputs(vector<string>& names, vector<string>& descriptions, string& defaultInput)
 {
-    tx.EnumerateInputs(names, descriptions);
+    tx.EnumerateInputs(names, descriptions, defaultInput);
 }
 
-void CTx::EnumerateOutputs(std::vector<std::string>& names, std::vector<std::string>& descriptions)
+void CTx::EnumerateOutputs(vector<string>& names, vector<string>& descriptions, string& defaultOutput)
 {
-    tx.EnumerateOutputs(names, descriptions);
+    tx.EnumerateOutputs(names, descriptions, defaultOutput);
 }
 
 void CTx::Restart()

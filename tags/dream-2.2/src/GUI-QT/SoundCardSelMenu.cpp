@@ -203,7 +203,9 @@ void CSoundCardSelMenu::OnSoundInDeviceChanged(QString s)
 {
     vector<string> names;
     vector<string> descriptions;
-    trx.EnumerateInputs(names, descriptions);
+    string def;
+    trx.EnumerateInputs(names, descriptions, def);
+    cerr << "input device changed in trx " << s.toStdString() << " soundcard default is " << def << endl;
     UpdateDeviceMenu(menuInputDev, names, descriptions, s.toStdString());
 }
 
@@ -212,8 +214,9 @@ void CSoundCardSelMenu::OnSoundOutDeviceChanged(QString s)
     cerr << "CSoundCardSelMenu::OnSoundOutDeviceChanged " << s.toStdString() << endl;
     vector<string> names;
     vector<string> descriptions;
-    trx.EnumerateOutputs(names, descriptions);
-    qDebug("output device changed in trx %s", s.toStdString().c_str());
+    string def;
+    trx.EnumerateOutputs(names, descriptions, def);
+    cerr << "output device changed in trx " << s.toStdString() << " soundcard default is " << def << endl;
     UpdateDeviceMenu(menuOutputDev, names, descriptions, s.toStdString());
 }
 
@@ -221,12 +224,15 @@ void CSoundCardSelMenu::UpdateDeviceMenu(QMenu* menu, const vector<string>& name
 {
     menu->clear();
     QActionGroup* group = nullptr;
+    cerr << "UpdateDeviceMenu " << menu->title().toStdString() << " selected (" << selected << ")" << endl;
     for (int i = 0; i < int(names.size()); i++)
     {
-qDebug("enum %s", names[i].c_str());
+      cerr << "enum " << names[i] << " desc " <<  descriptions[i] << endl;
         QString name(QString::fromStdString(names[i]));
         QString desc(QString::fromStdString(descriptions[i]));
-        if(name.size()==0) name = tr("[default]");
+        if(name.size()==0) {
+		name = tr("[default]");
+	}
         QString t = name;
         if(desc.size()>0) t += " [" + desc + "]";
         QAction* m = menu->addAction(t);
@@ -328,7 +334,6 @@ void CSoundCardSelMenu::OnSoundUpscaleRatioChanged(int upscaleRatio)
 
 void CSoundCardSelMenu::OnSoundFileChanged(QString filename)
 {
-    qDebug("CSoundCardSelMenu::OnSoundFileChanged %p", QThread::currentThreadId());
     if(filename == "") {
         menuSigInput->setEnabled(true);
         menuInputDev->setEnabled(true);

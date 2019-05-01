@@ -3,7 +3,7 @@
  * Copyright (c) 2001-2006
  *
  * Author(s):
- *	Volker Fischer
+ * Volker Fischer
  *
  * Description:
  *
@@ -38,7 +38,7 @@
 
 /* Implementation *************************************************************/
 /******************************************************************************\
-* MSC data																	   *
+* MSC data    *
 \******************************************************************************/
 /* Transmitter -------------------------------------------------------------- */
 void CReadData::ProcessDataInternal(CParameter&)
@@ -96,22 +96,26 @@ void CReadData::Stop()
     if(pSound!=nullptr) pSound->Close();
 }
 
-void CReadData::Enumerate(std::vector<std::string>& names, std::vector<std::string>& descriptions)
+void CReadData::Enumerate(std::vector<std::string>& names, std::vector<std::string>& descriptions, string& defaultInput)
 {
 #ifdef QT_MULTIMEDIA_LIB
-	QSet<QString> s;
-	foreach(const QAudioDeviceInfo& di, QAudioDeviceInfo::availableDevices(QAudio::AudioInput))
-	{
-		s.insert(di.deviceName());
-	}
-	names.clear(); descriptions.clear();
-	foreach(const QString n, s) {
-		names.push_back(n.toStdString());
-		descriptions.push_back("");
-	}
+    QString def = QAudioDeviceInfo::defaultInputDevice().deviceName();
+    defaultInput = def.toStdString();
+    QSet<QString> s;
+    foreach(const QAudioDeviceInfo& di, QAudioDeviceInfo::availableDevices(QAudio::AudioInput))
+    {
+        s.insert(di.deviceName());
+    }
+    names.clear();
+    descriptions.clear();
+    foreach(const QString n, s) {
+        names.push_back(n.toStdString());
+        descriptions.push_back("");
+    }
 #else
     if(pSound==nullptr) pSound = new CSoundIn;
     pSound->Enumerate(names, descriptions);
+    defaultInput = ""; // TODO
 #endif
 }
 
@@ -171,22 +175,26 @@ void CWriteData::Stop()
     if(pSound!=nullptr) pSound->Close();
 }
 
-void CWriteData::Enumerate(std::vector<std::string>& names, std::vector<std::string>& descriptions)
+void CWriteData::Enumerate(std::vector<std::string>& names, std::vector<std::string>& descriptions, string& defaultOutput)
 {
 #ifdef QT_MULTIMEDIA_LIB
-	QSet<QString> s;
-	foreach(const QAudioDeviceInfo& di, QAudioDeviceInfo::availableDevices(QAudio::AudioOutput))
-	{
-		s.insert(di.deviceName());
-	}
-	names.clear(); descriptions.clear();
-	foreach(const QString n, s) {
-		names.push_back(n.toStdString());
-		descriptions.push_back("");
-	}
+    QString def = QAudioDeviceInfo::defaultOutputDevice().deviceName();
+    defaultOutput = def.toStdString();
+    QSet<QString> s;
+    foreach(const QAudioDeviceInfo& di, QAudioDeviceInfo::availableDevices(QAudio::AudioOutput))
+    {
+        s.insert(di.deviceName());
+    }
+    names.clear();
+    descriptions.clear();
+    foreach(const QString n, s) {
+        names.push_back(n.toStdString());
+        descriptions.push_back("");
+    }
 #else
     if(pSound==nullptr) pSound = new CSoundOut;
     pSound->Enumerate(names, descriptions);
+    defaultOutput = ""; // TODO
 #endif
 }
 
@@ -273,7 +281,7 @@ void CWriteData::ProcessDataInternal(CParameter& Parameters)
             const _REAL rRightChan = (*pvecInputData)[2 * i + 1];
 
             vecsTmpAudData[2 * i] =
-                    Real2Sample((rLeftChan + rRightChan) * rMixNormConst);
+                Real2Sample((rLeftChan + rRightChan) * rMixNormConst);
 
             vecsTmpAudData[2 * i + 1] = 0; /* mute */
         }
@@ -290,7 +298,7 @@ void CWriteData::ProcessDataInternal(CParameter& Parameters)
 
             vecsTmpAudData[2 * i] = 0; /* mute */
             vecsTmpAudData[2 * i + 1] =
-                    Real2Sample((rLeftChan + rRightChan) * rMixNormConst);
+                Real2Sample((rLeftChan + rRightChan) * rMixNormConst);
         }
         break;
     }
@@ -407,9 +415,9 @@ void CWriteData::InitInternal(CParameter& Parameters)
 }
 
 CWriteData::CWriteData() :
-    #ifdef QT_MULTIMEDIA_LIB
+#ifdef QT_MULTIMEDIA_LIB
     pIODevice(nullptr),
-    #endif
+#endif
     pSound(nullptr), /* Sound interface */
     bMuteAudio(false), bDoWriteWaveFile(false),
     bSoundBlocking(false), bNewSoundBlocking(false),
@@ -494,8 +502,8 @@ void CWriteData::GetAudioSpec(CVector<_REAL>& vecrData,
 
     /* Calculate norm constant and scale factor */
     const _REAL rNormData = (_REAL) iNumSmpls4AudioSprectrum *
-            iNumSmpls4AudioSprectrum * _MAXSHORT * _MAXSHORT *
-            iNumBlocksAvAudioSpec;
+                            iNumSmpls4AudioSprectrum * _MAXSHORT * _MAXSHORT *
+                            iNumBlocksAvAudioSpec;
 
     /* Define scale factor for audio data */
     const _REAL rFactorScale = _REAL(iMaxAudioFrequency) / iLenPowSpec / 1000;
@@ -519,7 +527,7 @@ void CWriteData::GetAudioSpec(CVector<_REAL>& vecrData,
 
 
 /******************************************************************************\
-* FAC data																	   *
+* FAC data    *
 \******************************************************************************/
 /* Transmitter */
 void CGenerateFACData::ProcessDataInternal(CParameter& TransmParam)
@@ -579,7 +587,7 @@ void CUtilizeFACData::InitInternal(CParameter& Parameters)
 
 
 /******************************************************************************\
-* SDC data																	   *
+* SDC data                                                                    *
 \******************************************************************************/
 /* Transmitter */
 void CGenerateSDCData::ProcessDataInternal(CParameter& TransmParam)
@@ -745,10 +753,10 @@ void CWriteIQFile::InitInternal(CParameter& Parameters)
     for (int i = 0; i < iHilFiltBlLen; i++)
     {
         rvecBReal[i] = vecrFilter[i] *
-                Cos((CReal) 2.0 * crPi * rBPNormCentOffset * i - rStartPhase);
+                       Cos((CReal) 2.0 * crPi * rBPNormCentOffset * i - rStartPhase);
 
         rvecBImag[i] = vecrFilter[i] *
-                Sin((CReal) 2.0 * crPi * rBPNormCentOffset * i - rStartPhase);
+                       Sin((CReal) 2.0 * crPi * rBPNormCentOffset * i - rStartPhase);
     }
 
     /* Transformation in frequency domain for fft filter */
@@ -809,8 +817,8 @@ void CWriteIQFile::ProcessDataInternal(CParameter& Parameters)
 
     /* Cut out a spectrum part of desired bandwidth */
     cvecHilbert = CComplexVector(
-                FftFilt(cvecBReal, rvecInpTmp, rvecZReal, FftPlansHilFilt),
-                FftFilt(cvecBImag, rvecInpTmp, rvecZImag, FftPlansHilFilt));
+                      FftFilt(cvecBReal, rvecInpTmp, rvecZReal, FftPlansHilFilt),
+                      FftFilt(cvecBImag, rvecInpTmp, rvecZImag, FftPlansHilFilt));
 
     /* Mix it down to zero frequency */
     Mixer.SetMixFreq(CReal(0.25));
