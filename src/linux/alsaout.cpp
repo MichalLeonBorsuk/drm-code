@@ -50,9 +50,9 @@ CSoundOut::CSoundOut():
     PlayThread.pSoundOut = this;
 }
 
-void CSoundOut::Enumerate(vector<string>& choices, vector<string>& descriptions)
+void CSoundOut::Enumerate(vector<string>& choices, vector<string>& descriptions, string& defaultOutput)
 {
-    enumerate(choices, descriptions, SND_PCM_STREAM_PLAYBACK);
+    enumerate(choices, descriptions, defaultOutput, SND_PCM_STREAM_PLAYBACK);
 }
 
 void CSoundOut::CPlayThread::run()
@@ -206,9 +206,10 @@ void CSoundOut::Init_HW()
 {
     vector<string> names;
     vector<string> descriptions;
-    Enumerate(names, descriptions);
+    string def;
+    Enumerate(names, descriptions, def);
     sCurrentDevice = checkName(names, sCurrentDevice);
-    if(sCurrentDevice == "") return;
+    if(sCurrentDevice == "") sCurrentDevice = def;
     handle = Init_hw(FRAGSIZE * NUM_OUT_CHANNELS/2, iSampleRate, sCurrentDevice, SND_PCM_STREAM_PLAYBACK);
 }
 

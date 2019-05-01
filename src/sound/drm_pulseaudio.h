@@ -77,15 +77,15 @@ class CSoundPulse
 public:
 	CSoundPulse(bool bPlayback);
     virtual ~CSoundPulse();
-	void			Enumerate(std::vector<std::string>& names, std::vector<std::string>& descriptions);
-	void			SetDev(std::string sNewDevice);
-	std::string			GetDev();
+    void        Enumerate(std::vector<std::string>& names, std::vector<std::string>& descriptions, std::string& defaultDevice);
+    void        SetDev(std::string sNewDevice);
+    std::string GetDev();
 protected:
 	bool		bPlayback;
-	std::string			sCurrentDevice;
+    std::string sCurrentDevice;
 #ifdef ENABLE_STDIN_STDOUT
-	bool		IsStdinStdout();
-	bool		bStdinStdout;
+    bool        IsStdinStdout();
+    bool        bStdinStdout;
 #endif
 };
 
@@ -94,16 +94,16 @@ class CSoundInPulse : public CSoundPulse, public CSoundInInterface
 public:
 	CSoundInPulse();
     virtual ~CSoundInPulse();
-	void			Enumerate(std::vector<std::string>& names, std::vector<std::string>& descriptions) {CSoundPulse::Enumerate(names, descriptions);};
-	std::string			GetDev() {return CSoundPulse::GetDev();};
-	void			SetDev(std::string sNewDevice) {CSoundPulse::SetDev(sNewDevice);};
-	std::string			GetVersion() { return pa_get_library_version(); }
+    void        Enumerate(std::vector<std::string>& names, std::vector<std::string>& descriptions, std::string& defaultDevice) {CSoundPulse::Enumerate(names, descriptions, defaultDevice);}
+    std::string	GetDev() {return CSoundPulse::GetDev();}
+    void        SetDev(std::string sNewDevice) {CSoundPulse::SetDev(sNewDevice);}
+    std::string GetVersion() { return pa_get_library_version(); }
 
-	bool		Init(int iNewSampleRate, int iNewBufferSize, bool bNewBlocking);
-	bool		Read(CVector<_SAMPLE>& psData);
-	void			Close();
+    bool        Init(int iNewSampleRate, int iNewBufferSize, bool bNewBlocking);
+    bool        Read(CVector<_SAMPLE>& psData);
+    void        Close();
 #ifdef CLOCK_DRIFT_ADJ_ENABLED
-	void			SetCommonParamPtr(pa_common *cp_ptr) { cp = cp_ptr; }
+    void        SetCommonParamPtr(pa_common *cp_ptr) { cp = cp_ptr; }
 #endif
 
 protected:
@@ -135,14 +135,15 @@ class CSoundOutPulse : public CSoundPulse, public CSoundOutInterface
 public:
 	CSoundOutPulse();
     virtual ~CSoundOutPulse();
-	void			Enumerate(std::vector<std::string>& names, std::vector<std::string>& descriptions) {CSoundPulse::Enumerate(names, descriptions);};
-    std::string			GetDev() {return CSoundPulse::GetDev();}
-    void			SetDev(std::string sNewDevice) {CSoundPulse::SetDev(sNewDevice);}
-	std::string			GetVersion() { return pa_get_library_version(); }
+    void        Enumerate(std::vector<std::string>& names, std::vector<std::string>& descriptions, std::string& defaultDevice)
+        {CSoundPulse::Enumerate(names, descriptions, defaultDevice);}
+    std::string GetDev() {return CSoundPulse::GetDev();}
+    void        SetDev(std::string sNewDevice) {CSoundPulse::SetDev(sNewDevice);}
+    std::string GetVersion() { return pa_get_library_version(); }
 
-	bool		Init(int iNewSampleRate, int iNewBufferSize, bool bNewBlocking);
-	bool		Write(CVector<_SAMPLE>& psData);
-	void			Close();
+    bool        Init(int iNewSampleRate, int iNewBufferSize, bool bNewBlocking);
+    bool        Write(CVector<_SAMPLE>& psData);
+    void        Close();
 #ifdef CLOCK_DRIFT_ADJ_ENABLED
 	pa_common *		GetCommonParamPtr() { return &cp; }
 	void			EnableClockDriftAdj(bool bEnable) { bNewClockDriftComp = bEnable; }

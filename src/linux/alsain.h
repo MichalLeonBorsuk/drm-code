@@ -48,7 +48,7 @@ public:
     CSoundIn();
     virtual ~CSoundIn() {}
 
-    virtual void Enumerate(std::vector<std::string>&, std::vector<std::string>&);
+    virtual void Enumerate(std::vector<std::string>&, std::vector<std::string>&, std::string&);
     virtual void SetDev(std::string sNewDevice);
     virtual std::string GetDev();
 
