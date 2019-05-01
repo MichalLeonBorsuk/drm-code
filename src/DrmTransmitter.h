@@ -76,8 +76,8 @@ public:
     }
     void GetInputDevice(std::string& s) { s = indev; }
     void GetOutputDevice(std::string& s) { s = outdev; }
-    void EnumerateInputs(std::vector<string>& names, std::vector<string>& descriptions);
-    void EnumerateOutputs(std::vector<string>& names, std::vector<string>& descriptions);
+    void EnumerateInputs(std::vector<string>& names, std::vector<string>& descriptions, std::string& defaultInput);
+    void EnumerateOutputs(std::vector<string>& names, std::vector<string>& descriptions, std::string& defaultOutput);
     void SetInputDevice(std::string);
     void SetOutputDevice(std::string);
     void doSetInputDevice();

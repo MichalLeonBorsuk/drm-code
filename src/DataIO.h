@@ -3,13 +3,13 @@
  * Copyright (c) 2001-2005
  *
  * Author(s):
- *	Volker Fischer, Andrew Murphy
+ * Volker Fischer, Andrew Murphy
  *
  * Description:
- *	See Data.cpp
+ * See Data.cpp
  *
  * 11/21/2005 Andrew Murphy, BBC Research & Development, 2005
- *	- Addition GetSDCReceive(), Added CSplit class
+ * - Addition GetSDCReceive(), Added CSplit class
  *
  ******************************************************************************
  *
@@ -48,16 +48,16 @@
 /* Definitions ****************************************************************/
 
 /* In case of random-noise, define number of blocks */
-#define DEFAULT_NUM_SIM_BLOCKS		50
+#define DEFAULT_NUM_SIM_BLOCKS 50
 
 /* Time span used for averaging the audio spectrum. Shall be higher than the
    400 ms DRM audio block */
-#define TIME_AV_AUDIO_SPECT_MS		500 /* ms */
+#define TIME_AV_AUDIO_SPECT_MS 500 /* ms */
 
 /* Normalization constant for two mixed signals. If this constant is 2, no
    overrun of the "short" variable can happen but signal has quite much lower
    power -> compromise */
-#define MIX_OUT_CHAN_NORM_CONST		((_REAL) 1.0 / sqrt((_REAL) 2.0))
+#define MIX_OUT_CHAN_NORM_CONST ((_REAL) 1.0 / sqrt((_REAL) 2.0))
 
 
 /* Classes ********************************************************************/
@@ -72,13 +72,19 @@ public:
         return SignalLevelMeter.Level();
     }
     void SetSoundInterface(std::string);
-    std::string GetSoundInterface() { return soundDevice; }
-    void Enumerate(std::vector<string>& names, std::vector<string>& descriptions);
+    std::string GetSoundInterface() {
+        return soundDevice;
+    }
+    void Enumerate(std::vector<string>& names, std::vector<string>& descriptions, std::string& defaultInput);
     void Stop();
 #ifdef QT_MULTIMEDIA_LIB
-	std::string GetSoundInterfaceVersion() { return "QtMultimedia"; }
+    std::string GetSoundInterfaceVersion() {
+        return "QtMultimedia";
+    }
 #else
-	std::string GetSoundInterfaceVersion() { return pSound->GetVersion(); }
+    std::string GetSoundInterfaceVersion() {
+        return pSound->GetVersion();
+    }
 #endif
 
 protected:
@@ -87,9 +93,9 @@ protected:
 #endif
     CSoundInInterface*  pSound;
     std::string              soundDevice;
-    CVector<_SAMPLE>	vecsSoundBuffer;
-    CSignalLevelMeter	SignalLevelMeter;
-    int					iSampleRate;
+    CVector<_SAMPLE> vecsSoundBuffer;
+    CSignalLevelMeter SignalLevelMeter;
+    int iSampleRate;
 
     virtual void InitInternal(CParameter& TransmParam);
     virtual void ProcessDataInternal(CParameter& TransmParam);
@@ -129,36 +135,42 @@ public:
         return eOutChanSel;
     }
     void SetSoundInterface(std::string);
-    std::string GetSoundInterface() { return soundDevice; }
-    void Enumerate(std::vector<string>& names, std::vector<string>& descriptions);
+    std::string GetSoundInterface() {
+        return soundDevice;
+    }
+    void Enumerate(std::vector<string>& names, std::vector<string>& descriptions, std::string& defaultOutput);
     void Stop();
 #ifdef QT_MULTIMEDIA_LIB
-	std::string GetSoundInterfaceVersion() { return "QtMultimedia"; }
+    std::string GetSoundInterfaceVersion() {
+        return "QtMultimedia";
+    }
 #else
-	std::string GetSoundInterfaceVersion() { return pSound->GetVersion(); }
+    std::string GetSoundInterfaceVersion() {
+        return pSound->GetVersion();
+    }
 #endif
 
 protected:
 #ifdef QT_MULTIMEDIA_LIB
     QIODevice*              pIODevice;
 #endif
-    CSoundOutInterface*		pSound;
+    CSoundOutInterface* pSound;
     std::string                  soundDevice;
-    bool				bMuteAudio;
-    CWaveFile				WaveFileAudio;
-    bool				bDoWriteWaveFile;
-    bool				bSoundBlocking;
-    bool				bNewSoundBlocking;
-    CVector<_SAMPLE>		vecsTmpAudData;
-    EOutChanSel				eOutChanSel;
-    _REAL					rMixNormConst;
+    bool bMuteAudio;
+    CWaveFile WaveFileAudio;
+    bool bDoWriteWaveFile;
+    bool bSoundBlocking;
+    bool bNewSoundBlocking;
+    CVector<_SAMPLE> vecsTmpAudData;
+    EOutChanSel eOutChanSel;
+    _REAL rMixNormConst;
 
-    CShiftRegister<_SAMPLE>	vecsOutputData;
-    CFftPlans				FftPlan;
-    CComplexVector			veccFFTInput;
-    CComplexVector			veccFFTOutput;
-    CRealVector				vecrAudioWindowFunction;
-    int						iAudSampleRate;
+    CShiftRegister<_SAMPLE> vecsOutputData;
+    CFftPlans FftPlan;
+    CComplexVector veccFFTInput;
+    CComplexVector veccFFTOutput;
+    CRealVector vecrAudioWindowFunction;
+    int iAudSampleRate;
     int                     iNumSmpls4AudioSprectrum;
     int                     iNumBlocksAvAudioSpec;
     int                     iMaxAudioFrequency;
@@ -186,7 +198,7 @@ class CUtilizeFACData : public CReceiverModul<_BINARY, _BINARY>
 {
 public:
     CUtilizeFACData() :
-            bSyncInput(false), bCRCOk(false) {}
+        bSyncInput(false), bCRCOk(false) {}
     virtual ~CUtilizeFACData() {}
 
     /* To set the module up for synchronized DRM input data stream */
@@ -200,8 +212,8 @@ public:
 
 protected:
     CFACReceive FACReceive;
-    bool	bSyncInput;
-    bool	bCRCOk;
+    bool bSyncInput;
+    bool bCRCOk;
 
     virtual void InitInternal(CParameter& Parameters);
     virtual void ProcessDataInternal(CParameter& Parameters);
@@ -234,7 +246,7 @@ public:
 
 protected:
     CSDCReceive SDCReceive;
-    bool	bFirstBlock;
+    bool bFirstBlock;
 
     virtual void InitInternal(CParameter& Parameters);
     virtual void ProcessDataInternal(CParameter& Parameters);
@@ -292,32 +304,34 @@ public:
 
     void NewFrequency(CParameter &Parameters);
 
-	bool IsRecording() {return bIsRecording;}
+    bool IsRecording() {
+        return bIsRecording;
+    }
 
 protected:
-    FILE *					pFile;
-    CVector<_SAMPLE>		vecsTmpAudData;
+    FILE * pFile;
+    CVector<_SAMPLE> vecsTmpAudData;
 
     virtual void InitInternal(CParameter& Parameters);
     virtual void ProcessDataInternal(CParameter& Parameters);
-    void		 OpenFile(CParameter& Parameters);
+    void  OpenFile(CParameter& Parameters);
 
     /* For doing the IF to IQ conversion (stolen from AM demod) */
-    CRealVector					rvecInpTmp;
-    CComplexVector				cvecHilbert;
-    int							iHilFiltBlLen;
-    CFftPlans					FftPlansHilFilt;
+    CRealVector rvecInpTmp;
+    CComplexVector cvecHilbert;
+    int iHilFiltBlLen;
+    CFftPlans FftPlansHilFilt;
 
-    CComplexVector				cvecBReal;
-    CComplexVector				cvecBImag;
-    CRealVector					rvecZReal;
-    CRealVector					rvecZImag;
+    CComplexVector cvecBReal;
+    CComplexVector cvecBImag;
+    CRealVector rvecZReal;
+    CRealVector rvecZImag;
 
-    CMixer						Mixer;
+    CMixer Mixer;
 
-    int							iFrequency; // For use in generating filename
-    bool					bIsRecording;
-    bool					bChangeReceived;
+    int iFrequency; // For use in generating filename
+    bool bIsRecording;
+    bool bChangeReceived;
 
 };
 
