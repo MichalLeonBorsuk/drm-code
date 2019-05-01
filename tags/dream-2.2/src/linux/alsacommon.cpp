@@ -197,9 +197,9 @@ void close_hw(snd_pcm_t* handle)
         snd_pcm_close( handle );
 }
 
-void enumerate(vector<string>& choices, vector<string>& descriptions, snd_pcm_stream_t direction)
+void enumerate(vector<string>& names, vector<string>& descriptions, string& defaultDevice, snd_pcm_stream_t direction)
 {
-    choices.resize(0);
+    names.resize(0);
     descriptions.resize(0);
 
     char **hints;
@@ -217,14 +217,28 @@ void enumerate(vector<string>& choices, vector<string>& descriptions, snd_pcm_st
         const char *d = (direction==SND_PCM_STREAM_PLAYBACK)?"Output":"Input";
 	if(ioid==NULL) {
             descriptions.push_back(desc);
-            choices.push_back(name);
+            names.push_back(name);
 	}
 	else if (0 == strcmp(d, ioid)) {
             descriptions.push_back(desc);
-            choices.push_back(name);
+            names.push_back(name);
 	}
         n++;
     }
 
     snd_device_name_free_hint((void**)hints);
+
+    if(descriptions.size()==0) {
+        return;
+    }
+
+    // set default as device with shortest description
+    defaultDevice = names[0];
+    string d = descriptions[0];
+    for(size_t i=1; i<descriptions.size(); i++) {
+        if(d.length()>descriptions[i].length()) {
+            d = descriptions[i];
+            defaultDevice = names[i];
+        }
+    }
 }

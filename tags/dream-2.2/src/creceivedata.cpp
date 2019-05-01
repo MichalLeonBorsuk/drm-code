@@ -94,9 +94,9 @@ cerr << "have input device " << n.toStdString() << endl;
     }
 #else
     if(pSound==nullptr) pSound = new CSoundIn;
-    pSound->Enumerate(names, descriptions);
-    defaultInput = ""; // TODO
+    pSound->Enumerate(names, descriptions, defaultInput);
 #endif
+    cout << "default input is " << defaultInput << endl;
 }
 
 void

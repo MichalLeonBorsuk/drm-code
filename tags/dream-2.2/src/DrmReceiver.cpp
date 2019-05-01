@@ -170,15 +170,16 @@ CDRMReceiver::SetInputDevice(string s)
     if (t == FileTyper::unrecognised) {
         vector<string> names;
         vector<string> descriptions;
-	string def;
+        string def;
         ReceiveData.Enumerate(names, descriptions, def);
         if (names.size() > 0) {
-            if (device == "") {
+            if (device == "" || device == "default") {
                 device = def;
                 t = FileTyper::pcm;
             }
             else {
                 for (unsigned i = 0; i<names.size(); i++) {
+                    cerr << names[i] << endl;
                     if (device == names[i]) {
                         t = FileTyper::pcm;
                         break;

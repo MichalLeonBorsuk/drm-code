@@ -257,7 +257,7 @@ static void pa_stream_notify_cb(pa_stream *, void *userdata)
 static void pa_stream_success_cb(pa_stream *s, int success, void *userdata)
 {
 	if (userdata)
-		DEBUG_MSG("pa_stream_success_cb(%s) = %i\n", (char*)userdata, success);
+        DEBUG_MSG("pa_stream_success_cb(%s) = %i\n", reinterpret_cast<char*>(userdata), success);
 }
 
 static int pa_stream_get_latency(pa_object *pa_obj, pa_stream *pa_s, int sample_rate, uint64_t *usec)
@@ -713,7 +713,7 @@ CSoundPulse::~CSoundPulse()
     cerr << "~CSoundPulse" << endl;
 }
 
-void CSoundPulse::Enumerate(vector<string>& names, vector<string>& descriptions)
+void CSoundPulse::Enumerate(vector<string>& names, vector<string>& descriptions, string &defaultDevice)
 {
     pa_object pa_obj = { /*.pa_m=*/nullptr, /*.pa_c=*/nullptr, /*.ref_count=*/0 };
     pa_operation *pa_o;
@@ -739,6 +739,20 @@ void CSoundPulse::Enumerate(vector<string>& names, vector<string>& descriptions)
         DEBUG_MSG("CSoundPulse::Enumerate(): pa_context_get_(sink/source)_info_list failed\n");
 
     pa_free(&pa_obj);
+
+    if(descriptions.size()==0) {
+        return;
+    }
+
+    // set default as device with shortest description
+    defaultDevice = names[0];
+    string d = descriptions[0];
+    for(size_t i=1; i<descriptions.size(); i++) {
+        if(d.length()>descriptions[i].length()) {
+            d = descriptions[i];
+            defaultDevice = names[i];
+        }
+    }
 }
 
 void CSoundPulse::SetDev(string sNewDevice)
@@ -773,6 +787,7 @@ CSoundInPulse::CSoundInPulse(): CSoundPulse(false),
     , record_sample_rate(0), bClockDriftComp(false), cp(nullptr)
 #endif
 {
+    cerr << "construct CSoundInPulse" << endl;
 }
 
 CSoundInPulse::~CSoundInPulse()
