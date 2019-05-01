@@ -47,9 +47,9 @@ CSoundIn::CSoundIn():
     RecThread.pSoundIn = this;
 }
 
-void CSoundIn::Enumerate(vector<string>& choices, vector<string>& descriptions)
+void CSoundIn::Enumerate(vector<string>& choices, vector<string>& descriptions, string& defaultInput)
 {
-    enumerate(choices, descriptions, SND_PCM_STREAM_CAPTURE);
+    enumerate(choices, descriptions, defaultInput, SND_PCM_STREAM_CAPTURE);
 }
 
 void
@@ -208,12 +208,12 @@ void CSoundIn::Init_HW() {
 
     vector<string> names;
     vector<string> descriptions;
-    Enumerate(names, descriptions);
+    string def;
+    Enumerate(names, descriptions, def);
     /* Default ? */
     if (sCurrentDevice == "")
     {
-        int n = int(names.size())-1;
-	sCurrentDevice = names[n];
+        sCurrentDevice = def;
     }
     /* might be invalid due to command line parameter or USB device unplugged */
     bool found = false;

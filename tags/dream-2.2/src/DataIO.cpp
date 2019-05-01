@@ -114,9 +114,9 @@ void CReadData::Enumerate(std::vector<std::string>& names, std::vector<std::stri
     }
 #else
     if(pSound==nullptr) pSound = new CSoundIn;
-    pSound->Enumerate(names, descriptions);
-    defaultInput = ""; // TODO
+    pSound->Enumerate(names, descriptions, defaultInput);
 #endif
+    cout << "default input is " << defaultInput << endl;
 }
 
 void
@@ -193,9 +193,9 @@ void CWriteData::Enumerate(std::vector<std::string>& names, std::vector<std::str
     }
 #else
     if(pSound==nullptr) pSound = new CSoundOut;
-    pSound->Enumerate(names, descriptions);
-    defaultOutput = ""; // TODO
+    pSound->Enumerate(names, descriptions, defaultOutput);
 #endif
+    cout << "default output is " << defaultOutput << endl;
 }
 
 void

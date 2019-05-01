@@ -40,9 +40,9 @@ public:
     CAudioFileIn();
     virtual ~CAudioFileIn();
 
-    virtual void		Enumerate(std::vector<std::string>&, std::vector<std::string>&) {}
+    virtual void		Enumerate(std::vector<std::string>&, std::vector<std::string>&, std::string&) {}
     virtual void		SetDev(std::string sNewDevice) {sCurrentDevice = sNewDevice;}
-    virtual std::string		GetDev() {return sCurrentDevice;}
+    virtual std::string GetDev() {return sCurrentDevice;}
     virtual void		SetFileName(const std::string& strFileName);
     virtual int			GetSampleRate() {return iRequestedSampleRate;}
 
