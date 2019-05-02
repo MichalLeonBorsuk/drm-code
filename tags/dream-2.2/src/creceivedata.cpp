@@ -76,14 +76,12 @@ void CReceiveData::Enumerate(vector<string>& names, vector<string>& descriptions
     QSet<QString> s;
     QString def = QAudioDeviceInfo::defaultInputDevice().deviceName();
     defaultInput = def.toStdString();
-cerr << "default input device is " << defaultInput << endl;
     foreach(const QAudioDeviceInfo& di, QAudioDeviceInfo::availableDevices(QAudio::AudioInput))
     {
         s.insert(di.deviceName());
     }
     names.clear(); descriptions.clear();
     foreach(const QString n, s) {
-cerr << "have input device " << n.toStdString() << endl;
         names.push_back(n.toStdString());
         if(n == def) {
             descriptions.push_back("default");
@@ -96,7 +94,6 @@ cerr << "have input device " << n.toStdString() << endl;
     if(pSound==nullptr) pSound = new CSoundIn;
     pSound->Enumerate(names, descriptions, defaultInput);
 #endif
-    cout << "default input is " << defaultInput << endl;
 }
 
 void
@@ -140,6 +137,7 @@ CReceiveData::SetSoundInterface(string device)
             if(device == di.deviceName().toStdString()) {
                 QAudioFormat nearestFormat = di.nearestFormat(format);
                 QAudioInput* pAudioInput = new QAudioInput(di, nearestFormat);
+                pAudioInput->setBufferSize(2560); // mjf - 02May19 - added buffer size for uniformity
                 pIODevice = pAudioInput->start();
                 if(pAudioInput->error()==QAudio::NoError)
                 {
@@ -191,9 +189,11 @@ void CReceiveData::ProcessDataInternal(CParameter& Parameters)
     if(pIODevice)
     {
         qint64 n = 2*vecsSoundBuffer.Size();
-        qint64 m = pIODevice->read(reinterpret_cast<char*>(&vecsSoundBuffer[0]), n);
-        if(m==n)
-            bBad = false;
+        qint64 m = 0; // mjf - 02May19 - wait until requested buffer is filled or fails
+        while ((m != n) || (m == -1)) {
+            m = pIODevice->read(reinterpret_cast<char*>(&vecsSoundBuffer[0]), n);
+        }
+        bBad = (m==-1); // mjf - 01May19 - make bBad only if read() fails
     }
     else if (pSound != nullptr) { // for audio files
         bBad = pSound->Read(vecsSoundBuffer);
