@@ -129,7 +129,7 @@ unix:!cross_compile {
     message(building on $$UNAME)
 }
 macx {
-    !console:QT += multimedia webenginewidgets
+    #!console:QT += multimedia webenginewidgets
     CONFIG += sound
     QT_CONFIG -= no-pkg-config
     PKG_CONFIG = /usr/local/bin/pkg-config
@@ -286,7 +286,7 @@ win32 {
         LIBS += -lwinmm
     }
     CONFIG += speexdsp sound
-    !console:QT += multimedia
+    #!console:QT += multimedia
   }
   else {
     exists($$PWD/include/speex/speex_preprocess.h) {
