@@ -291,10 +291,20 @@ void CSoundIn::SetDev(string sNewDev)
     }
 }
 
-void CSoundIn::Enumerate(vector<string>& names, vector<string>& descriptions)
+void CSoundIn::Enumerate(vector<string>& names, vector<string>& descriptions, string& defaultInput)
 {
     names = vecstrDevices;
-	descriptions.resize(names.size(), "");
+    descriptions.resize(names.size(), "");
+    if(names.size()==0) {
+        return;
+    }
+    // set default as device with shortest name
+    defaultInput = names[0];
+    for(size_t i=1; i<names.size(); i++) {
+        if(defaultInput.length()>names[i].length()) {
+            defaultInput = names[i];
+        }
+    }
 }
 
 string	CSoundIn::GetDev()
@@ -600,10 +610,20 @@ void CSoundOut::OpenDevice()
         throw CGenErr("Sound Interface Start, waveOutOpen() failed.");
 }
 
-void CSoundOut::Enumerate(vector<string>& names, vector<string>& descriptions)
+void CSoundOut::Enumerate(vector<string>& names, vector<string>& descriptions, string& defaultOutput)
 {
     names = vecstrDevices;
-	descriptions.resize(names.size(), "");
+    descriptions.resize(names.size(), "");
+    if(names.size()==0) {
+        return;
+    }
+    // set default as device with shortest name
+    defaultOutput = names[0];
+    for(size_t i=1; i<names.size(); i++) {
+        if(defaultOutput.length()>names[i].length()) {
+            defaultOutput = names[i];
+        }
+    }
 }
 
 string CSoundOut::GetDev()
