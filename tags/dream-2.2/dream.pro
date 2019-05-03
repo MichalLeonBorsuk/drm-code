@@ -129,8 +129,13 @@ unix:!cross_compile {
     message(building on $$UNAME)
 }
 macx {
-    #!console:QT += multimedia webenginewidgets
-    CONFIG += sound
+    contains(QT, core) {
+        QT += webenginewidgets
+        !sound {
+            QT += multimedia
+            CONFIG += sound
+        }
+    }
     QT_CONFIG -= no-pkg-config
     PKG_CONFIG = /usr/local/bin/pkg-config
     INCLUDEPATH += /usr/local/include
