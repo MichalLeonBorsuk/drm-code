@@ -190,7 +190,7 @@ void CReceiveData::ProcessDataInternal(CParameter& Parameters)
     {
         qint64 n = 2*vecsSoundBuffer.Size();
         qint64 m = 0; // mjf - 02May19 - wait until requested buffer is filled or fails
-        while ((m != n) || (m == -1)) {
+        while ((m != n) && (m != -1)) {
             m = pIODevice->read(reinterpret_cast<char*>(&vecsSoundBuffer[0]), n);
         }
         bBad = (m==-1); // mjf - 01May19 - make bBad only if read() fails
