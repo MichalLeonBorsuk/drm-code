@@ -120,6 +120,11 @@ CReceiveData::SetSoundInterface(string device)
             pIODevice->close();
             pIODevice = nullptr;
         }
+        if(pAudioInput != nullptr) {
+            pAudioInput->stop();
+            delete pAudioInput;
+            pAudioInput = nullptr;
+        }
 #endif
     }
     else {
@@ -136,24 +141,12 @@ CReceiveData::SetSoundInterface(string device)
         {
             if(device == di.deviceName().toStdString()) {
                 QAudioFormat nearestFormat = di.nearestFormat(format);
-                QAudioInput* pAudioInput = new QAudioInput(di, nearestFormat);
-                pAudioInput->setBufferSize(2560); // mjf - 02May19 - added buffer size for uniformity
-                pIODevice = pAudioInput->start();
-                if(pAudioInput->error()==QAudio::NoError)
-                {
-                    if(pIODevice->open(QIODevice::ReadOnly)) {
-                        qDebug("audio input open");
-                    }
-                    else {
-                        qDebug("audio input open failed");
-                    }
-                }
-                else
-                {
-                    qDebug("Can't open audio input");
-                }
+                pAudioInput = new QAudioInput(di, nearestFormat);
                 break;
             }
+        }
+        if(pAudioInput == nullptr) {
+            qDebug("can't find audio input %s", device.c_str());
         }
 #else
         pSound = new CSoundIn();
@@ -470,7 +463,7 @@ void CReceiveData::InitInternal(CParameter& Parameters)
            Use stereo input (* 2) */
 
 #ifdef QT_MULTIMEDIA_LIB
-    if (pSound == nullptr && pIODevice == nullptr)
+    if (pSound == nullptr && pAudioInput == nullptr)
         return;
 #else
     if (pSound == nullptr)
@@ -496,8 +489,39 @@ void CReceiveData::InitInternal(CParameter& Parameters)
     }
 
     try {
-        const bool bChanged = (pSound==nullptr)?true:pSound->Init(iSampleRate / iUpscaleRatio, iOutputBlockSize * 2 / iUpscaleRatio, true);
 
+
+        bool bChanged = false;
+        int wantedBufferSize = iOutputBlockSize * 2 / iUpscaleRatio; // samples
+
+#ifdef QT_MULTIMEDIA_LIB
+
+        if(pSound) { // must be sound card
+            bChanged = (pSound==nullptr)?true:pSound->Init(iSampleRate / iUpscaleRatio, wantedBufferSize, true);
+        }
+        else {
+            pAudioInput->setBufferSize(2*wantedBufferSize); // bytes * expected frame imput size
+            pIODevice = pAudioInput->start();
+            cerr << "sound card buffer size requested " << 2*wantedBufferSize << " actual " << pAudioInput->bufferSize() << endl;
+            if(pAudioInput->error()==QAudio::NoError)
+            {
+                if(pIODevice->open(QIODevice::ReadOnly)) {
+                    qDebug("audio input open");
+                }
+                else {
+                    qDebug("audio input open failed");
+                }
+            }
+            else
+            {
+                qDebug("Can't open audio input");
+            }
+            bChanged = true; // TODO
+        }
+
+#else
+        bChanged = (pSound==nullptr)?true:pSound->Init(iSampleRate / iUpscaleRatio, wantedBufferSize, true);
+#endif
         /* Clear input data buffer on change samplerate change */
         if (bChanged)
             ClearInputData();

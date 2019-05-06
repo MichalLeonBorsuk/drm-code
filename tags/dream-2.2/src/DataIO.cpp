@@ -224,6 +224,11 @@ CWriteData::SetSoundInterface(string device)
     format.setChannelCount(2); // TODO
     format.setByteOrder(QAudioFormat::LittleEndian);
     format.setCodec("audio/pcm");
+    if(pAudioOutput != nullptr && pAudioOutput->state() == QAudio::ActiveState) {
+        pAudioOutput->stop();
+        delete pAudioOutput;
+        pAudioOutput = nullptr;
+    }
     foreach(const QAudioDeviceInfo& di, QAudioDeviceInfo::availableDevices(QAudio::AudioOutput))
     {
         if(device == di.deviceName().toStdString()) {
