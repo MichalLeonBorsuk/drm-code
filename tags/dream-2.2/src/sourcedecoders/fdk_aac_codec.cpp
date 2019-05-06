@@ -187,18 +187,52 @@ static void logNumbers(const CStreamInfo& info) {
         cerr << " channel 1 type " << int(info.pChannelType[1]) << " index " << int(info.pChannelIndices[1]);
 }
 
+/*      FROM AACCodec:
+    In case of SBR, AAC sample rate is half the total sample rate. Length of output is doubled if SBR is used
+    if (AudioParam.eSBRFlag == CAudioParam::SB_USED)
+    {
+        iAudioSampleRate = iAACSampleRate * 2;
+    }
+    else
+    {
+        iAudioSampleRate = iAACSampleRate;
+    }
+*/
+
 bool
 FdkAacCodec::DecOpen(const CAudioParam& AudioParam, int& iAudioSampleRate)
 {
-    unsigned int type9Size;
+    unsigned type9Size;
     UCHAR *t9;
     hDecoder = aacDecoder_Open (TRANSPORT_TYPE::TT_DRM, 3);
 
-    if(hDecoder == nullptr)
+    // provide a default value for iAudioSampleRate in case we can't do better. TODO xHEAAC
+    int iDefaultSampleRate;
+    switch (AudioParam.eAudioSamplRate)
+    {
+    case CAudioParam::AS_12KHZ:
+        iDefaultSampleRate = 12000;
+        break;
+
+    case CAudioParam::AS_24KHZ:
+        iDefaultSampleRate = 24000;
+        break;
+    default:
+        iDefaultSampleRate = 12000;
+        break;
+    }
+    if (AudioParam.eSBRFlag == CAudioParam::SB_USED)
+    {
+        iDefaultSampleRate = iDefaultSampleRate * 2;
+    }
+
+    if(hDecoder == nullptr) {
+        iAudioSampleRate = iDefaultSampleRate;
         return false;
+    }
 
     vector<uint8_t> type9 = AudioParam.getType9Bytes();
-    type9Size = type9.size();
+    type9Size = unsigned(type9.size());
     t9 = &type9[0];
 
     //cerr << "type9 " << hex; for(size_t i=0; i<type9Size; i++) cerr << int(type9[i]) << " "; cerr << dec << endl;
@@ -207,7 +241,7 @@ FdkAacCodec::DecOpen(const CAudioParam& AudioParam, int& iAudioSampleRate)
         CStreamInfo *pinfo = aacDecoder_GetStreamInfo(hDecoder);
         if (pinfo==nullptr) {
             cerr << "DecOpen No stream info" << endl;
-            iAudioSampleRate = 48000;
+            iAudioSampleRate = iDefaultSampleRate;
             return true;// TODO
         }
         cerr << "DecOpen";
@@ -217,6 +251,10 @@ FdkAacCodec::DecOpen(const CAudioParam& AudioParam, int& iAudioSampleRate)
         cerr << endl;
         iAudioSampleRate = pinfo->extSamplingRate;
 
+        if(iAudioSampleRate == 0) {
+            iAudioSampleRate = iDefaultSampleRate; // get from AudioParam if codec couldn't get it
+        }
+
         if(pinfo->aot == AUDIO_OBJECT_TYPE::AOT_USAC) bUsac = true;
 #ifdef HAVE_USAC
         else if(pinfo->aot == AUDIO_OBJECT_TYPE::AOT_DRM_USAC) bUsac = true;
@@ -225,7 +263,7 @@ FdkAacCodec::DecOpen(const CAudioParam& AudioParam, int& iAudioSampleRate)
 
         return true;
     }
-    iAudioSampleRate = 48000;
+    iAudioSampleRate = iDefaultSampleRate;  // get from AudioParam if codec couldn't get it
     return true; // TODO
  }
 
@@ -237,7 +275,7 @@ CAudioCodec::EDecError FdkAacCodec::Decode(const vector<uint8_t>& audio_frame, u
     UINT bufferSize;
     if(bUsac) {
         pData = const_cast<uint8_t*>(&audio_frame[0]);
-        bufferSize = audio_frame.size();
+        bufferSize = UINT(audio_frame.size());
     }
     else {
         data.resize(audio_frame.size()+1);
@@ -247,7 +285,7 @@ CAudioCodec::EDecError FdkAacCodec::Decode(const vector<uint8_t>& audio_frame, u
             data[i + 1] = audio_frame[i];
 
         pData = &data[0];
-        bufferSize = data.size();
+        bufferSize = UINT(data.size());
     }
     UINT bytesValid = bufferSize;
 
@@ -292,14 +330,14 @@ CAudioCodec::EDecError FdkAacCodec::Decode(const vector<uint8_t>& audio_frame, u
         //return CAudioCodec::DECODER_ERROR_UNKNOWN;
     }
 
-    size_t output_size = pinfo->frameSize * pinfo->numChannels;
+    size_t output_size = unsigned(pinfo->frameSize * pinfo->numChannels);
     if(sizeof (decode_buf) < sizeof(int16_t)*output_size) {
         cerr << "can't fit output into decoder buffer" << endl;
         return CAudioCodec::DECODER_ERROR_UNKNOWN;
     }
 
     memset(decode_buf, 0, sizeof(int16_t)*output_size);
-    err = aacDecoder_DecodeFrame(hDecoder, decode_buf, output_size, 0);
+    err = aacDecoder_DecodeFrame(hDecoder, decode_buf, int(output_size), 0);
 
     if(err == AAC_DEC_OK) {
         double d = 0.0;
@@ -567,7 +605,7 @@ FdkAacCodec::EncSetBitrate(int iBitRate)
 {
     if (hEncoder != nullptr)
 	{
-        aacEncoder_SetParam(hEncoder, AACENC_BITRATE, iBitRate);
+        aacEncoder_SetParam(hEncoder, AACENC_BITRATE, UINT(iBitRate));
     }
 }
 
@@ -583,19 +621,17 @@ FdkAacCodec::fileName(const CParameter& Parameters) const
     stringstream ss;
     ss << "aac_";
 
+    const CAudioParam& audioParam = Parameters.Service[unsigned(Parameters.GetCurSelAudioService())].AudioParam;
+
 //    Parameters.Lock(); // TODO CAudioSourceDecoder::InitInternal() already have the lock
-    if (Parameters.
-            Service[Parameters.GetCurSelAudioService()].AudioParam.
-            eAudioSamplRate == CAudioParam::AS_12KHZ)
+    if (audioParam.eAudioSamplRate == CAudioParam::AS_12KHZ)
     {
         ss << "12kHz_";
     }
     else
         ss << "24kHz_";
 
-    switch (Parameters.
-            Service[Parameters.GetCurSelAudioService()].
-            AudioParam.eAudioMode)
+    switch (audioParam.eAudioMode)
     {
     case CAudioParam::AM_MONO:
         ss << "mono";
@@ -611,9 +647,7 @@ FdkAacCodec::fileName(const CParameter& Parameters) const
     case CAudioParam::AM_RESERVED:;
     }
 
-    if (Parameters.
-            Service[Parameters.GetCurSelAudioService()].AudioParam.
-            eSBRFlag == CAudioParam::SB_USED)
+    if (audioParam.eSBRFlag == CAudioParam::SB_USED)
     {
         ss << "_sbr";
     }
