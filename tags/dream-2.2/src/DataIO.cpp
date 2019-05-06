@@ -50,7 +50,7 @@ void CReadData::ProcessDataInternal(CParameter&)
         if(pIODevice)
         {
             qint64 n = 2*vecsSoundBuffer.Size();
-            pIODevice->read((char*)&vecsSoundBuffer[0], n);
+            pIODevice->read(reinterpret_cast<char*>(&vecsSoundBuffer[0]), n);
         }
         else
             return;
@@ -167,10 +167,24 @@ CReadData::SetSoundInterface(string device)
 
 
 /* Receiver ----------------------------------------------------------------- */
+CWriteData::CWriteData() :
+#ifdef QT_MULTIMEDIA_LIB
+    pAudioOutput(nullptr), pIODevice(nullptr),
+#endif
+    pSound(nullptr), /* Sound interface */
+    bMuteAudio(false), bDoWriteWaveFile(false),
+    bSoundBlocking(false), bNewSoundBlocking(false),
+    eOutChanSel(CS_BOTH_BOTH), rMixNormConst(MIX_OUT_CHAN_NORM_CONST),
+    iAudSampleRate(0), iNumSmpls4AudioSprectrum(0), iNumBlocksAvAudioSpec(0),
+    iMaxAudioFrequency(MAX_SPEC_AUDIO_FREQUENCY)
+{
+    /* Constructor */
+}
+
 void CWriteData::Stop()
 {
 #ifdef QT_MULTIMEDIA_LIB
-    if(pIODevice!=nullptr) pIODevice->close();
+    if(pAudioOutput!=nullptr) pIODevice->close();
 #endif
     if(pSound!=nullptr) pSound->Close();
 }
@@ -195,7 +209,6 @@ void CWriteData::Enumerate(std::vector<std::string>& names, std::vector<std::str
     if(pSound==nullptr) pSound = new CSoundOut;
     pSound->Enumerate(names, descriptions, defaultOutput);
 #endif
-    cout << "default output is " << defaultOutput << endl;
 }
 
 void
@@ -215,17 +228,12 @@ CWriteData::SetSoundInterface(string device)
     {
         if(device == di.deviceName().toStdString()) {
             QAudioFormat nearestFormat = di.nearestFormat(format);
-            QAudioOutput* pAudioOutput = new QAudioOutput(di, nearestFormat);
-            pAudioOutput->setBufferSize(1000000);
-            // TODO QIODevice needs to be declared in working thread
-            pIODevice = pAudioOutput->start();
-            fprintf(stderr, "buffer size %d\n", pAudioOutput->bufferSize());
-            fprintf(stderr, "period size %d\n", pAudioOutput->periodSize());
-            if(pAudioOutput->error()!=QAudio::NoError)
-            {
-                qDebug("Can't open audio output");
-            }
+            pAudioOutput = new QAudioOutput(di, nearestFormat);
+            break;
         }
+    }
+    if(pAudioOutput == nullptr) {
+        qDebug("Can't find audio output %s", device.c_str());
     }
 #else
     if(pSound != nullptr) {
@@ -316,24 +324,21 @@ void CWriteData::ProcessDataInternal(CParameter& Parameters)
     bool bBad = true;
     if(pIODevice)
     {
-        qint64 l = 2*vecsTmpAudData.Size();
+        int n = 2*vecsTmpAudData.Size(); // bytes to write 2 = sizeof(_SAMPLE)
         char* buf = reinterpret_cast<char*>(&vecsTmpAudData[0]);
-        int n = int(l);
-        int m = 0;
-        int b = n / 10;
-        while(n>b) {
-            int w = pIODevice->write(buf, b);
+        while(n>0) {
+            int bytesToWrite = pAudioOutput->bytesFree();
+            if(bytesToWrite == 0) {
+                pIODevice->waitForBytesWritten(-1);
+            }
+            if(n < bytesToWrite) {
+                bytesToWrite = n;
+            }
+            qint64 w = pIODevice->write(buf, bytesToWrite);
+            n -= w;
             buf += w;
-            b = w; // only write as much next time as it accepted this time
-            n -= b;
-            pIODevice->waitForBytesWritten(-1);
         }
-        if(n>0) {
-            m += pIODevice->write(buf, n);
-        }
-        if(n==0) {
-            bBad = false;
-        }
+        bBad = false;
     }
 #else
     const bool bBad = pSound->Write(vecsTmpAudData);
@@ -401,7 +406,20 @@ void CWriteData::InitInternal(CParameter& Parameters)
         bSoundBlocking = bNewSoundBlocking;
 
     /* Init sound interface with blocking or non-blocking behaviour */
-    if(pSound!=nullptr) pSound->Init(iAudSampleRate, iAudFrameSize * 2 /* stereo */, bSoundBlocking);
+#ifdef QT_MULTIMEDIA_LIB
+    if(pAudioOutput != nullptr) {
+
+        pAudioOutput->setBufferSize(2 * 2 * 2 * iAudFrameSize); // room for two frames * bytes per sample * stereo
+        pIODevice = pAudioOutput->start();
+        cerr << "buffer size " << pAudioOutput->bufferSize() << endl;
+        cerr << "period size " << pAudioOutput->periodSize() << endl;
+        if(pAudioOutput->error()!=QAudio::NoError)
+        {
+            qDebug("Can't open audio output");
+        }
+    }
+#endif
+    if(pSound!=nullptr) pSound->Init(iAudSampleRate, iAudFrameSize * 2 /* stereo */, bSoundBlocking); // might be a sound file
 
     /* Init intermediate buffer needed for different channel selections */
     vecsTmpAudData.Init(iAudFrameSize * 2 /* stereo */);
@@ -412,20 +430,6 @@ void CWriteData::InitInternal(CParameter& Parameters)
 
     /* Define block-size for input (stereo input) */
     iInputBlockSize = iAudFrameSize * 2 /* stereo */;
-}
-
-CWriteData::CWriteData() :
-#ifdef QT_MULTIMEDIA_LIB
-    pIODevice(nullptr),
-#endif
-    pSound(nullptr), /* Sound interface */
-    bMuteAudio(false), bDoWriteWaveFile(false),
-    bSoundBlocking(false), bNewSoundBlocking(false),
-    eOutChanSel(CS_BOTH_BOTH), rMixNormConst(MIX_OUT_CHAN_NORM_CONST),
-    iAudSampleRate(0), iNumSmpls4AudioSprectrum(0), iNumBlocksAvAudioSpec(0),
-    iMaxAudioFrequency(MAX_SPEC_AUDIO_FREQUENCY)
-{
-    /* Constructor */
 }
 
 void CWriteData::StartWriteWaveFile(const string& strFileName)
@@ -514,11 +518,11 @@ void CWriteData::GetAudioSpec(CVector<_REAL>& vecrData,
         const _REAL rNormPowSpec = veccAvSpectrum[i] / rNormData;
 
         if (rNormPowSpec > 0)
-            vecrData[i] = (_REAL) 10.0 * log10(rNormPowSpec);
+            vecrData[i] = 10.0 * log10(rNormPowSpec);
         else
             vecrData[i] = RET_VAL_LOG_0;
 
-        vecrScale[i] = (_REAL) i * rFactorScale;
+        vecrScale[i] = _REAL(i) * rFactorScale;
     }
 
     /* Release resources */
