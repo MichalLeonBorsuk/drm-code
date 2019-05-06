@@ -333,6 +333,7 @@ CAudioSourceDecoder::InitInternal(CParameter & Parameters)
         /* Init decoder */
         codec->DecOpen(AudioParam, inputSampleRate);
         cerr << "DecOpen sample rate " << inputSampleRate << endl;
+        if (inputSampleRate == 0) inputSampleRate = 12000; //mjf - 05May19 - stops this from dying in Mode C TODO
 
         int iLenDecOutPerChan = 0; // no need to use the one from the codec
         int numFrames = pAudioSuperFrame->getNumFrames();
