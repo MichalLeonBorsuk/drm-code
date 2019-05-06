@@ -162,6 +162,9 @@ macx {
 }
 linux-* {
   LIBS += -ldl -lrt
+  contains(QT,multimedia) {
+        CONFIG += sound
+  }
 }
 android {
     CONFIG += sound fdk-aac
