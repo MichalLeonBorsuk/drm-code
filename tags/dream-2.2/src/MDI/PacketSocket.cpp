@@ -45,7 +45,7 @@ if I run it with the command:
 
 #ifdef _WIN32
 /* Always include winsock2.h before windows.h */
-# include <Ws2tcpip.h>
+# include <ws2tcpip.h>
 # include <windows.h>
 inline int inet_aton(const char*s, void * a) {
     ((in_addr*)a)->s_addr = inet_addr(s);
