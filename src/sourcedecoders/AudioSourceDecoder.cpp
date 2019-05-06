@@ -113,7 +113,7 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
     iOutputBlockSize = 0;
     int iResOutBlockSize = 0;
     //cerr << "audio superframe with " << pAudioSuperFrame->getNumFrames() << " frames" << endl;
-    for (size_t j = 0; j < pAudioSuperFrame->getNumFrames(); j++)
+    for (unsigned j = 0; j < pAudioSuperFrame->getNumFrames(); j++)
     {
         bool bCodecUpdated = false;
         bool bCurBlockFaulty = false; // just for Opus or any other codec with FEC
@@ -155,7 +155,7 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
                 bCodecUpdated = true;
                 Parameters.Lock();
                 int iCurSelAudioServ = Parameters.GetCurSelAudioService();
-                codec->DecUpdate(Parameters.Service[iCurSelAudioServ].AudioParam);
+                codec->DecUpdate(Parameters.Service[unsigned(iCurSelAudioServ)].AudioParam);
                 Parameters.Unlock();
             }
             /* OPH: add frame status to vector for RSCI */
@@ -196,7 +196,7 @@ CAudioSourceDecoder::ProcessDataInternal(CParameter & Parameters)
         Parameters.Lock();
         Parameters.ReceiveStatus.SLAudio.SetStatus(status);
         Parameters.ReceiveStatus.LLAudio.SetStatus(status);
-        Parameters.AudioComponentStatus[Parameters.GetCurSelAudioService()].SetStatus(status);
+        Parameters.AudioComponentStatus[unsigned(Parameters.GetCurSelAudioService())].SetStatus(status);
         Parameters.Unlock();
 
         /* Conversion from _REAL to _SAMPLE with special function */
@@ -231,17 +231,6 @@ CAudioSourceDecoder::InitInternal(CParameter & Parameters)
     /* Close previous decoder instance if any */
     CloseDecoder();
 
-    /*
-        Since we use the exception mechanism in this init routine, the sequence of
-        the individual initializations is very important!
-        Requirement for text message is "stream is used" and "audio service".
-        Requirement for AAC decoding are the requirements above plus "audio coding
-        is AAC"
-    */
-    int iCurAudioStreamID;
-    int iMaxLenResamplerOutput;
-    int iCurSelServ;
-
     /* Init error flags and output block size parameter. The output block
        size is set in the processing routine. We must set it here in case
        of an error in the initialization, this part in the processing
@@ -267,33 +256,29 @@ CAudioSourceDecoder::InitInternal(CParameter & Parameters)
          iInputBlockSize = Parameters.iNumAudioDecoderBits;
 
         /* Get current selected audio service */
-        iCurSelServ = Parameters.GetCurSelAudioService();
-
-        /* Get current selected audio param */
-        CAudioParam& AudioParam(Parameters.Service[iCurSelServ].AudioParam);
+        CService& service = Parameters.Service[unsigned(Parameters.GetCurSelAudioService())];
 
         /* Get current audio coding */
-        eAudioCoding = AudioParam.eAudioCoding;
+        eAudioCoding = service.AudioParam.eAudioCoding;
 
-        /* Current audio stream ID */
-        iCurAudioStreamID = AudioParam.iStreamID;
-
-        /* The requirement for this module is that the stream is used and the
-           service is an audio service. Check it here */
-        if ((Parameters.Service[iCurSelServ].eAudDataFlag != CService::SF_AUDIO) || (iCurAudioStreamID == STREAM_ID_NOT_USED))
+        /* The requirement for this module is that the stream is used and the service is an audio service. Check it here */
+        if ((service.eAudDataFlag != CService::SF_AUDIO) || (service.AudioParam.iStreamID == STREAM_ID_NOT_USED))
         {
             throw CInitErr(ET_ALL);
         }
 
-        int iTotalFrameSize = Parameters.Stream[iCurAudioStreamID].iLenPartA+Parameters.Stream[iCurAudioStreamID].iLenPartB;
+        /* Current audio stream ID */
+        unsigned curAudioStreamID =  unsigned(service.AudioParam.iStreamID);
+
+        int iTotalFrameSize = Parameters.Stream[curAudioStreamID].iLenPartA+Parameters.Stream[curAudioStreamID].iLenPartB;
 
         /* Init text message application ------------------------------------ */
-        if (AudioParam.bTextflag)
+        if (service.AudioParam.bTextflag)
         {
             bTextMessageUsed = true;
 
             /* Get a pointer to the string */
-            TextMessage.Init(&AudioParam.strTextMessage);
+            TextMessage.Init(&service.AudioParam.strTextMessage);
 
             /* Init vector for text message bytes */
             vecbiTextMessBuf.Init(SIZEOF__BYTE * NUM_BYTES_TEXT_MESS_IN_AUD_STR);
@@ -306,12 +291,12 @@ CAudioSourceDecoder::InitInternal(CParameter & Parameters)
         if(eAudioCoding==CAudioParam::AC_xHE_AAC) {
             XHEAACSuperFrame* p = new XHEAACSuperFrame();
             // part B should be enough as xHE-AAC MUST be EEP but its easier to just add them
-            p->init(AudioParam, iTotalFrameSize);
+            p->init(service.AudioParam, unsigned(iTotalFrameSize));
             pAudioSuperFrame = p;
         }
         else {
             AACSuperFrame *p = new AACSuperFrame();
-            p->init(AudioParam,  Parameters.GetWaveMode(), Parameters.Stream[iCurAudioStreamID].iLenPartA, Parameters.Stream[iCurAudioStreamID].iLenPartB);
+            p->init(service.AudioParam,  Parameters.GetWaveMode(), unsigned(Parameters.Stream[curAudioStreamID].iLenPartA), unsigned(Parameters.Stream[curAudioStreamID].iLenPartB));
             pAudioSuperFrame = p;
         }
         /* Get decoder instance */
@@ -328,21 +313,24 @@ CAudioSourceDecoder::InitInternal(CParameter & Parameters)
             codec->closeFile();
         }
 
-        codec->Init(AudioParam, iInputBlockSize);
+        codec->Init(service.AudioParam, iInputBlockSize);
 
         /* Init decoder */
-        codec->DecOpen(AudioParam, inputSampleRate);
-        cerr << "DecOpen sample rate " << inputSampleRate << endl;
-        if (inputSampleRate == 0) inputSampleRate = 12000; //mjf - 05May19 - stops this from dying in Mode C TODO
+        codec->DecOpen(service.AudioParam, inputSampleRate);
+        if (inputSampleRate == 0) {
+            cerr << "DecOpen sample rate was zero - this should not happen" << endl;
+            throw CInitErr(ET_AUDDECODER);
+            //inputSampleRate = 12000; //mjf - 05May19 - stops this from dying in Mode C TODO
+        }
 
         int iLenDecOutPerChan = 0; // no need to use the one from the codec
-        int numFrames = pAudioSuperFrame->getNumFrames();
+        unsigned numFrames = unsigned(pAudioSuperFrame->getNumFrames());
         if(numFrames==0) {
             // xHE-AAC - can't tell yet!
         }
         else {
-            int samplesPerChannelPerSuperFrame = pAudioSuperFrame->getSuperFrameDurationMilliseconds() * inputSampleRate / 1000;
-            iLenDecOutPerChan = samplesPerChannelPerSuperFrame / numFrames;
+            int samplesPerChannelPerSuperFrame = int(pAudioSuperFrame->getSuperFrameDurationMilliseconds()) * inputSampleRate / 1000;
+            iLenDecOutPerChan = samplesPerChannelPerSuperFrame / int(numFrames);
         }
 
         /* set string for GUI */
@@ -356,7 +344,7 @@ CAudioSourceDecoder::InitInternal(CParameter & Parameters)
 
         /* Since we do not do Mode E or correct for sample rate offsets here (yet), we do not
            have to consider larger buffers. An audio frame always corresponds to 400 ms */
-        iMaxLenResamplerOutput = int(_REAL(outputSampleRate) * 0.4 /* 400ms */  * 2 /* for stereo */ );
+        int iMaxLenResamplerOutput = int(_REAL(outputSampleRate) * 0.4 /* 400ms */  * 2 /* for stereo */ );
 
         if(inputSampleRate != outputSampleRate) {
             _REAL rRatio = _REAL(outputSampleRate) / _REAL(inputSampleRate);
