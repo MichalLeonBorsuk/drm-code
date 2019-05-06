@@ -43,8 +43,9 @@ public:
     virtual bool	Read(CVector<short>&) {
         return false;
     }
-    virtual void Enumerate(std::vector<std::string>&choices, std::vector<std::string>&, std::string&) {
+    virtual void Enumerate(std::vector<std::string>&choices, std::vector<std::string>& desc, std::string&) {
         choices.push_back("(File or Network)");
+        desc.push_back("default");
     }
     virtual std::string		GetDev() {
         return sDev;
@@ -70,8 +71,9 @@ public:
         return false;
     }
 
-    virtual void		Enumerate(std::vector<std::string>& choices, std::vector<std::string>&, std::string&){
+    virtual void		Enumerate(std::vector<std::string>& choices, std::vector<std::string>& desc, std::string&){
         choices.push_back("(None)");
+        desc.push_back("");
     }
 
     virtual std::string		GetDev() {
