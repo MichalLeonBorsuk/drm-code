@@ -1,9 +1,9 @@
 /******************************************************************************\
- * Technische Universitaet Darmstadt, Institut fuer Nachrichtentechnik
- * Copyright (c) 2001-2006
+ * Technische Universitaet Darmstadt, Institut fuer Nachrichtentechnik & BBC
+ * Copyright (c) 2001-2019
  *
  * Author(s):
- * Volker Fischer
+ * Volker Fischer, Julian Cable, Mark J Fine
  *
  * Description:
  *
@@ -38,7 +38,7 @@
 
 /* Implementation *************************************************************/
 /******************************************************************************\
-* MSC data    *
+* MSC data                                                                    *
 \******************************************************************************/
 /* Transmitter -------------------------------------------------------------- */
 void CReadData::ProcessDataInternal(CParameter&)
@@ -527,7 +527,7 @@ void CWriteData::GetAudioSpec(CVector<_REAL>& vecrData,
 
 
 /******************************************************************************\
-* FAC data    *
+* FAC data                                                                    *
 \******************************************************************************/
 /* Transmitter */
 void CGenerateFACData::ProcessDataInternal(CParameter& TransmParam)
