@@ -391,9 +391,6 @@ CAudioSourceDecoder::InitInternal(CParameter & Parameters)
             /* Audio part should not be decoded, set flag */
             DoNotProcessAudDecoder = true;
             break;
-
-        default:
-            DoNotProcessData = true;
         }
 
         /* In all cases set output size to zero */
