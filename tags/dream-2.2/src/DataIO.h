@@ -35,6 +35,7 @@
 #include "sound/soundinterface.h"
 #ifdef QT_MULTIMEDIA_LIB
 #include <QIODevice>
+#include <QAudioOutput>
 #endif
 #include "Parameter.h"
 #include "util/Modul.h"
@@ -152,7 +153,8 @@ public:
 
 protected:
 #ifdef QT_MULTIMEDIA_LIB
-    QIODevice*              pIODevice;
+    QAudioOutput* pAudioOutput;
+    QIODevice* pIODevice;
 #endif
     CSoundOutInterface* pSound;
     std::string                  soundDevice;
