@@ -1,9 +1,9 @@
 /******************************************************************************\
- * Technische Universitaet Darmstadt, Institut fuer Nachrichtentechnik
- * Copyright (c) 2001-2006
+ * Technische Universitaet Darmstadt, Institut fuer Nachrichtentechnik & BBC
+ * Copyright (c) 2001-2019
  *
  * Author(s):
- * Volker Fischer
+ * Volker Fischer, Julian Cable, Mark J Fine
  *
  * Description:
  *
@@ -38,7 +38,7 @@
 
 /* Implementation *************************************************************/
 /******************************************************************************\
-* MSC data    *
+* MSC data                                                                    *
 \******************************************************************************/
 /* Transmitter -------------------------------------------------------------- */
 void CReadData::ProcessDataInternal(CParameter&)
@@ -116,7 +116,6 @@ void CReadData::Enumerate(std::vector<std::string>& names, std::vector<std::stri
     if(pSound==nullptr) pSound = new CSoundIn;
     pSound->Enumerate(names, descriptions, defaultInput);
 #endif
-    cout << "default input is " << defaultInput << endl;
 }
 
 void
@@ -195,7 +194,6 @@ void CWriteData::Enumerate(std::vector<std::string>& names, std::vector<std::str
     if(pSound==nullptr) pSound = new CSoundOut;
     pSound->Enumerate(names, descriptions, defaultOutput);
 #endif
-    cout << "default output is " << defaultOutput << endl;
 }
 
 void
@@ -316,12 +314,14 @@ void CWriteData::ProcessDataInternal(CParameter& Parameters)
     bool bBad = true;
     if(pIODevice)
     {
-        qint64 l = 2*vecsTmpAudData.Size();
+        qint64 n = 2*vecsTmpAudData.Size();
+        qint64 m = 0; //mjf - 03May19 - use full precision for write result
+        /*
         char* buf = reinterpret_cast<char*>(&vecsTmpAudData[0]);
         int n = int(l);
         int m = 0;
         int b = n / 10;
-        while(n>b) {
+        while(n > b) {
             int w = pIODevice->write(buf, b);
             buf += w;
             b = w; // only write as much next time as it accepted this time
@@ -332,8 +332,14 @@ void CWriteData::ProcessDataInternal(CParameter& Parameters)
             m += pIODevice->write(buf, n);
         }
         if(n==0) {
-            bBad = false;
+           bBad = false;
         }
+        */
+        //while ((m != n) && (m != -1)) { //mjf - 03May19 - wait until requested buffer is fully written or fails
+        while (m == 0) { //mjf - 03May19 - wait until requested buffer is fully written or fails
+            m = pIODevice->write(reinterpret_cast<char*>(&vecsTmpAudData[0]), n);
+        }
+        bBad = (m==-1); //mjf - 03May19 - make bBad only if write() fails
     }
 #else
     const bool bBad = pSound->Write(vecsTmpAudData);
@@ -527,7 +533,7 @@ void CWriteData::GetAudioSpec(CVector<_REAL>& vecrData,
 
 
 /******************************************************************************\
-* FAC data    *
+* FAC data                                                                    *
 \******************************************************************************/
 /* Transmitter */
 void CGenerateFACData::ProcessDataInternal(CParameter& TransmParam)
