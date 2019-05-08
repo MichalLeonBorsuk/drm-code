@@ -30,6 +30,7 @@
 #include "Parameter.h"
 #ifdef QT_MULTIMEDIA_LIB
 # include <QSet>
+# include <QThread>
 #else
 # include "sound/sound.h"
 #endif
@@ -65,9 +66,20 @@ CReceiveData::~CReceiveData()
 void CReceiveData::Stop()
 {
 #ifdef QT_MULTIMEDIA_LIB
-    if(pIODevice!=nullptr) pIODevice->close();
+    if(pIODevice!=nullptr) {
+        pIODevice->close();
+        pIODevice = nullptr;
+    }
+    if(pAudioInput != nullptr) {
+        pAudioInput->stop();
+        delete pAudioInput;
+        pAudioInput = nullptr;
+    }
 #endif
-    if(pSound!=nullptr) pSound->Close();
+    if(pSound!=nullptr) {
+        pSound->Close();
+        pSound = nullptr;
+    }
 }
 
 void CReceiveData::Enumerate(vector<string>& names, vector<string>& descriptions, string& defaultInput)
@@ -176,22 +188,32 @@ void CReceiveData::ProcessDataInternal(CParameter& Parameters)
 
     /* Get data from sound interface. The read function must be a
        blocking function! */
-    bool bBad = true;
 
 #ifdef QT_MULTIMEDIA_LIB
+    bool bBad = false;
     if(pIODevice)
     {
         qint64 n = 2*vecsSoundBuffer.Size();
-        qint64 m = 0; // mjf - 02May19 - wait until requested buffer is filled or fails
-        while ((m != n) && (m != -1)) {
-            m = pIODevice->read(reinterpret_cast<char*>(&vecsSoundBuffer[0]), n);
-        }
-        bBad = (m==-1); // mjf - 01May19 - make bBad only if read() fails
+        char *p = reinterpret_cast<char*>(&vecsSoundBuffer[0]);
+        do {
+            qint64 r = pIODevice->read(p, n);
+            if(r>0) {
+                p += r;
+                n -= r;
+            }
+            else {
+                QThread::msleep(100);
+            }
+        } while (n>0);
     }
     else if (pSound != nullptr) { // for audio files
         bBad = pSound->Read(vecsSoundBuffer);
     }
+    else {
+      bBad = true;
+    }
 #else
+    bool bBad = true;
     if (pSound != nullptr)
     {
         bBad = pSound->Read(vecsSoundBuffer);
@@ -495,8 +517,7 @@ void CReceiveData::InitInternal(CParameter& Parameters)
         int wantedBufferSize = iOutputBlockSize * 2 / iUpscaleRatio; // samples
 
 #ifdef QT_MULTIMEDIA_LIB
-
-        if(pSound) { // must be sound card
+        if(pSound) { // must be sound file
             bChanged = (pSound==nullptr)?true:pSound->Init(iSampleRate / iUpscaleRatio, wantedBufferSize, true);
         }
         else {
