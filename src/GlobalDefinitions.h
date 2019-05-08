@@ -51,7 +51,7 @@
 # undef NOMINMAX
 # define NOMINMAX 1
 
-# define DLL_EXPORT 1
+//# define DLL_EXPORT 1
 //# undef DLL_EXPORT 1
 
 #endif /* _WIN32 */
