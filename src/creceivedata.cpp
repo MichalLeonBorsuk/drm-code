@@ -31,6 +31,8 @@
 #ifdef QT_MULTIMEDIA_LIB
 # include <QSet>
 # include <QThread>
+# include <QTimer>
+# include <QEventLoop>
 #else
 # include "sound/sound.h"
 #endif
@@ -193,6 +195,29 @@ void CReceiveData::ProcessDataInternal(CParameter& Parameters)
     bool bBad = false;
     if(pIODevice)
     {
+#if 0
+
+        QTimer timer;
+        timer.setSingleShot(true);
+        QEventLoop loop;
+        QObject::connect(pIODevice,  SIGNAL(readyRead()), &loop, SLOT(quit()) );
+        QObject::connect(&timer, SIGNAL(timeout()), &loop, SLOT(quit()));
+        timer.start(1000);
+        loop.exec();
+
+        if(timer.isActive()) {
+            //qDebug("data from sound card");
+            qint64 n = 2*vecsSoundBuffer.Size();
+            qint64 r = pIODevice->read(reinterpret_cast<char*>(&vecsSoundBuffer[0]), n);
+            if(r!=n) {
+                cerr << "short read" << endl;
+            }
+        }
+        else {
+            qDebug("timeout");
+        }
+
+#else
         qint64 n = 2*vecsSoundBuffer.Size();
         char *p = reinterpret_cast<char*>(&vecsSoundBuffer[0]);
         do {
@@ -205,6 +230,7 @@ void CReceiveData::ProcessDataInternal(CParameter& Parameters)
                 QThread::msleep(100);
             }
         } while (n>0);
+#endif
     }
     else if (pSound != nullptr) { // for audio files
         bBad = pSound->Read(vecsSoundBuffer);
