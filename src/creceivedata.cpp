@@ -524,16 +524,7 @@ void CReceiveData::InitInternal(CParameter& Parameters)
             pAudioInput->setBufferSize(2*wantedBufferSize); // bytes * expected frame imput size
             pIODevice = pAudioInput->start();
             cerr << "sound card buffer size requested " << 2*wantedBufferSize << " actual " << pAudioInput->bufferSize() << endl;
-            if(pAudioInput->error()==QAudio::NoError)
-            {
-                if(pIODevice->open(QIODevice::ReadOnly)) {
-                    qDebug("audio input open");
-                }
-                else {
-                    qDebug("audio input open failed");
-                }
-            }
-            else
+            if(pAudioInput->error()!=QAudio::NoError)
             {
                 qDebug("Can't open audio input");
             }
