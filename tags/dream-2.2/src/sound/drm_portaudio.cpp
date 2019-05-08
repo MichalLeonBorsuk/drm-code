@@ -71,9 +71,9 @@ playbackCallback(const void *inputBuffer, void *outputBuffer,
 int CPaCommon::pa_count = 0;
 
 CPaCommon::CPaCommon(bool cap):ringBuffer(),xruns(0),stream(nullptr),
-        names(), devices(),
-        is_capture(cap), blocking(true), device_changed(true), xrun(false),
-        framesPerBuffer(0), ringBufferData(nullptr)
+    names(), devices(),
+    is_capture(cap), blocking(true), device_changed(true), xrun(false),
+    framesPerBuffer(0), ringBufferData(nullptr)
 {
     if (pa_count == 0)
     {
@@ -85,7 +85,8 @@ CPaCommon::CPaCommon(bool cap):ringBuffer(),xruns(0),stream(nullptr),
     pa_count++;
     vector < string > choices;
     vector < string > descriptions;
-    Enumerate(choices, descriptions);
+    string def;
+    Enumerate(choices, descriptions, def);
 }
 
 CPaCommon::~CPaCommon()
@@ -104,15 +105,12 @@ CPaCommon::~CPaCommon()
 }
 
 void
-CPaCommon::Enumerate(vector < string > &choices, vector < string > &descriptions)
+CPaCommon::Enumerate(vector < string > &choices, vector < string > &descriptions, string& defaultDevice)
 {
     vector < string > tmp;
 
     names.clear();
     descriptions.clear();
-	names.push_back(""); /* default device */
-	descriptions.push_back("");
-
     int numDevices = Pa_GetDeviceCount();
     if (numDevices < 0)
         throw string("PortAudio error: ") + Pa_GetErrorText(numDevices);
@@ -133,7 +131,7 @@ CPaCommon::Enumerate(vector < string > &choices, vector < string > &descriptions
             }
             cerr<< api+deviceInfo->name << endl;
             names.push_back(api+deviceInfo->name);
-	descriptions.push_back("");
+            descriptions.push_back("");
             devices.push_back(i);
         }
     }
@@ -264,11 +262,11 @@ CPaCommon::ReInit()
 
         if (err != paNoError) {
             //throw string("PortAudio error: ") + Pa_GetErrorText(err);
-		}
+        }
         err = Pa_StartStream(stream);
         if (err != paNoError) {
             //throw string("PortAudio error: ") + Pa_GetErrorText(err);
-		}
+        }
     }
     else
     {
@@ -277,7 +275,7 @@ CPaCommon::ReInit()
                             (void *) this);
         if (err != paNoError) {
             //throw string("PortAudio error: ") + Pa_GetErrorText(err);
-		}
+        }
     }
 
     unsigned long n = 2;
@@ -362,7 +360,7 @@ CPaCommon::Write(CVector < short >&psData)
         int err = Pa_StartStream(stream);
         if (err != paNoError) {
             //throw string("PortAudio error: ") + Pa_GetErrorText(err);
-		}
+        }
     }
     if (xruns==0)
         return false;
