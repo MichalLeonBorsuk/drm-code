@@ -124,9 +124,16 @@ contains(QT,gui) {
         src/GUI-QT/main.cpp
 }
 message($$VERSION_MESSAGE $$DEBUG_MESSAGE $$UI_MESSAGE)
-unix:!cross_compile {
+unix {
+  cross_compile {
     UNAME = $$system(uname -s)
     message(building on $$UNAME)
+    message(building for $$QMAKESPEC)
+  }
+  else {
+    UNAME = $$system(uname -s)
+    message(building on $$UNAME for this platform)
+  }
 }
 macx {
     contains(QT, core) {
@@ -162,9 +169,6 @@ macx {
 }
 linux-* {
   LIBS += -ldl -lrt
-  contains(QT,multimedia) {
-        CONFIG += sound
-  }
 }
 android {
     CONFIG += sound fdk-aac
@@ -254,8 +258,12 @@ unix:!cross_compile {
       }
     }
 }
-contains(QMAKE_CC, i686-w64-mingw32.static-gcc) {
+win32:cross_compile {
+  message(win32 cross compile)
   CONFIG += mxe
+  target.path = $$absolute_path(../..)/usr/$$replace(QMAKE_CC,-gcc,)/bin
+  INSTALLS += target
+  message($$target.path)
 }
 win32 {
   CONFIG += fdk-aac
