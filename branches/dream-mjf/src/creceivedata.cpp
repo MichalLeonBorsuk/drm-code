@@ -136,13 +136,13 @@ CReceiveData::SetSoundInterface(string device)
         {
             if(device == di.deviceName().toStdString()) {
                 QAudioFormat nearestFormat = di.nearestFormat(format);
-                QAudioInput* pAudioInput = new QAudioInput(di, nearestFormat);
-                pAudioInput->setBufferSize(2560); // mjf - 02May19 - added buffer size for uniformity
+                pAudioInput = new QAudioInput(di, nearestFormat);
+                //pAudioInput->setBufferSize(2560); //mjf - 02May19 - added buffer size for uniformity
                 pIODevice = pAudioInput->start();
                 if(pAudioInput->error()==QAudio::NoError)
                 {
                     if(pIODevice->open(QIODevice::ReadOnly)) {
-                        qDebug("audio input open");
+                    qDebug("audio input open");
                     }
                     else {
                         qDebug("audio input open failed");
@@ -192,16 +192,13 @@ void CReceiveData::ProcessDataInternal(CParameter& Parameters)
         qint64 m = 0;
         CVector<_SAMPLE> tmpBuffer;
         tmpBuffer.Init(int(n));
-        //while ((m != n) && (m != -1)) { //mjf - 02May19 - wait until requested buffer is filled or fails
         while ((m > -1) && (m < n)) { //mjf - 04May19 - wait until device buffer has enough data or fails
             m = pIODevice->peek(reinterpret_cast<char*>(&tmpBuffer[0]), n);
         }
         if (m >= n) {
             m = pIODevice->read(reinterpret_cast<char*>(&vecsSoundBuffer[0]), n);
         }
-        //if(m==n)
-        //    bBad = false;
-        bBad = (m==-1); // mjf - 01May19 - make bBad only if read() fails
+        bBad = (m==-1); //mjf - 01May19 - make bBad only if read() fails
     }
     else if (pSound != nullptr) { // for audio files
         bBad = pSound->Read(vecsSoundBuffer);
