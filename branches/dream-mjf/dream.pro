@@ -374,7 +374,8 @@ qwt {
     message("with Qwt")
     QT += svg concurrent
     macx {
-        INCLUDEPATH += /Library/Frameworks/qwt.framework/Headers
+#        INCLUDEPATH += /Library/Frameworks/qwt.framework/Headers
+        INCLUDEPATH += /usr/local/lib/qwt.framework/Headers
         LIBS += -framework qwt
     }
     win32 {
