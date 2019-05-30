@@ -214,7 +214,8 @@ CWriteData::SetSoundInterface(string device)
         if(device == di.deviceName().toStdString()) {
             QAudioFormat nearestFormat = di.nearestFormat(format);
             QAudioOutput* pAudioOutput = new QAudioOutput(di, nearestFormat);
-            pAudioOutput->setBufferSize(1000000);
+            //pAudioOutput->setBufferSize(1000000);
+            pAudioOutput->setBufferSize(100000);
             // TODO QIODevice needs to be declared in working thread
             pIODevice = pAudioOutput->start();
             fprintf(stderr, "buffer size %d\n", pAudioOutput->bufferSize());
@@ -314,15 +315,18 @@ void CWriteData::ProcessDataInternal(CParameter& Parameters)
     bool bBad = true;
     if(pIODevice)
     {
-        qint64 n = 2*vecsTmpAudData.Size();
-        qint64 m = 0; //mjf - 03May19 - use full precision for write result
+        qint64 l = 2*vecsTmpAudData.Size();
+        qint64 w = 0; //mjf - 03May19 - use full precision for write result
+
         /*
         char* buf = reinterpret_cast<char*>(&vecsTmpAudData[0]);
         int n = int(l);
-        int m = 0;
+        //int m = 0;
+        m = 0;
         int b = n / 10;
         while(n > b) {
-            int w = pIODevice->write(buf, b);
+            //int w = pIODevice->write(buf, b);
+            w = pIODevice->write(buf, b);
             buf += w;
             b = w; // only write as much next time as it accepted this time
             n -= b;
@@ -335,11 +339,12 @@ void CWriteData::ProcessDataInternal(CParameter& Parameters)
            bBad = false;
         }
         */
-        //while ((m != n) && (m != -1)) { //mjf - 03May19 - wait until requested buffer is fully written or fails
-        while (m == 0) { //mjf - 03May19 - wait until requested buffer is fully written or fails
-            m = pIODevice->write(reinterpret_cast<char*>(&vecsTmpAudData[0]), n);
+
+        //while ((w != l) && (w != -1)) { //mjf - 03May19 - wait until requested buffer is fully written or fails
+        while (w == 0) { //mjf - 03May19 - wait until requested buffer is fully written or fails
+            w = pIODevice->write(reinterpret_cast<char*>(&vecsTmpAudData[0]),l);
         }
-        bBad = (m==-1); //mjf - 03May19 - make bBad only if write() fails
+        bBad = (w==-1); //mjf - 03May19 - make bBad only if write() fails
     }
 #else
     const bool bBad = pSound->Write(vecsTmpAudData);
