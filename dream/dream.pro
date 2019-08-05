@@ -1,10 +1,15 @@
 TEMPLATE = app
-CONFIG += warn_on
+CONFIG += warn_on c++11
 TARGET = dream
 OBJECTS_DIR = obj
 DEFINES += EXECUTABLE_NAME=$$TARGET
 LIBS += -L$$PWD/lib
 INCLUDEPATH += $$PWD/include
+INCLUDEPATH += /usr/include/qwt
+
+# LMB
+#LIBS += -lqwt-qt5
+
 contains(QT_VERSION, ^4\\..*) {
     VERSION_MESSAGE = Qt 4
 }
@@ -154,7 +159,7 @@ macx {
 linux-* {
   LIBS += -ldl -lrt
   contains(QT,multimedia) {
-	CONFIG += sound
+    CONFIG += sound
   }
 }
 android {
@@ -256,25 +261,25 @@ win32 {
   HEADERS += src/windows/platform_util.h
   LIBS += -lsetupapi
   contains(QT,multimedia) {
-	CONFIG += sound
+    CONFIG += sound
   }
   else {
     HEADERS += src/windows/Sound.h
     SOURCES += src/windows/Sound.cpp
     LIBS += -lwinmm
     message("with mmsystem")
-	CONFIG += sound
+    CONFIG += sound
   }
   win32-g++ {
-	DEFINES += HAVE_STDINT_H
-	LIBS += -lz -lfftw3
+    DEFINES += HAVE_STDINT_H
+    LIBS += -lz -lfftw3
   }
   else {
-	DEFINES += NOMINMAX
-	QMAKE_LFLAGS_RELEASE += /NODEFAULTLIB:libcmt.lib
-	QMAKE_LFLAGS_DEBUG += /NODEFAULTLIB:libcmtd.lib
-	QMAKE_LFLAGS_DEBUG += /NODEFAULTLIB:libcmt.lib
-	LIBS += -lzlib -llibfftw3-3
+    DEFINES += NOMINMAX
+    QMAKE_LFLAGS_RELEASE += /NODEFAULTLIB:libcmt.lib
+    QMAKE_LFLAGS_DEBUG += /NODEFAULTLIB:libcmtd.lib
+    QMAKE_LFLAGS_DEBUG += /NODEFAULTLIB:libcmt.lib
+    LIBS += -lzlib -llibfftw3-3
   }
   mxe {
     message('MXE')
@@ -380,7 +385,7 @@ qwt {
             LIBS += -lqwt
         }
     }
-    unix!macx {
+    unix:!macx {
         # unix | win release
         LIBS += -lqwt-qt5
     }
@@ -403,9 +408,9 @@ alsa {
 portaudio {
     DEFINES += USE_PORTAUDIO
     HEADERS += src/sound/pa_ringbuffer.h \
-    src/sound/drm_portaudio.h
+                src/sound/drm_portaudio.h
     SOURCES += src/sound/drm_portaudio.cpp \
-    src/sound/pa_ringbuffer.c
+                src/sound/pa_ringbuffer.c
     LIBS += -lportaudio
     unix:PKGCONFIG += portaudio-2.0
     message("with portaudio")
